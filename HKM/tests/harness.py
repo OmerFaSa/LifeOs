@@ -17,6 +17,11 @@ try:
     _web.VARSAYILAN_TASIYICI = _ag_kapali
 except ImportError:                                  # pragma: no cover
     pass
+try:
+    from core import ollama as _ollama
+    _ollama.VARSAYILAN_GETIR = _ag_kapali
+except ImportError:                                  # pragma: no cover
+    pass
 
 
 def suite(name):

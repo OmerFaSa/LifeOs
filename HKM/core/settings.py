@@ -28,7 +28,7 @@ import json
 import os
 import re
 
-from core import adlar, aktif, bildirim, butce, channels, media, models, schedule, thresholds, web
+from core import adlar, aktif, bildirim, butce, channels, media, models, ollama, schedule, thresholds, web
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -102,6 +102,8 @@ def read(cfg):
     out["bildirim"] = bildirim.settings(cfg)
     # Aktif kip (core/aktif.py): sistemin kendi turlari.
     out["aktif"] = aktif.settings(cfg)
+    # Ollama (core/ollama.py): bulunca kendiliginden baglansin mi.
+    out["ollama"] = ollama.settings(cfg)
     return out
 
 
@@ -112,7 +114,7 @@ def validate(patch):
         return False, ["gövde bir nesne olmalı"]
     for k in patch:
         if k not in ("thresholds", "channels", "schedule", "models",
-                     "budget", "media", "web", "king", "bildirim", "aktif"):
+                     "budget", "media", "web", "king", "bildirim", "aktif", "ollama"):
             hata.append("bilinmeyen alan: %s" % k)
 
     # King'in onay kapisi (core/king.py teklif_gerekli): yalniz DUSUK sinif
@@ -132,6 +134,11 @@ def validate(patch):
         ok_a, hata_a = aktif.validate(patch["aktif"])
         if not ok_a:
             hata.extend(hata_a)
+
+    if patch.get("ollama") is not None:
+        ok_o, hata_o = ollama.validate(patch["ollama"])
+        if not ok_o:
+            hata.extend(hata_o)
 
     if patch.get("bildirim") is not None:
         ok_n, hata_n = bildirim.validate(patch["bildirim"])
@@ -263,6 +270,8 @@ def apply(cfg, patch):
         yeni.setdefault("bildirim", {}).update(patch["bildirim"])
     if patch.get("aktif") is not None:
         yeni.setdefault("aktif", {}).update(patch["aktif"])
+    if patch.get("ollama") is not None:
+        yeni.setdefault("ollama", {}).update(patch["ollama"])
     yeni["local_token"] = cfg.get("local_token")
     return yeni
 

@@ -3013,6 +3013,72 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       b.addEventListener('click', function(){ yerYaz(b.dataset.yer); }); });
     $('yerel-kaydet').addEventListener('click', function(){ yerYaz(null); });
     $('yerel-sina').addEventListener('click', yerelSina);
+    ollamaYukle();
+  }
+
+  /* OLLAMA (core/ollama.py). HKM bilgisayardaki Ollama'yı kendisi bulur:
+     açılışta ve beş dakikada bir bakar, hiç yerel model yazılmamışsa
+     önerilenle kendiliğinden bağlar ve «Geri al» bırakır. Kart yalnız
+     çizer: durum, öneri ve modeller sunucunun taramasından gelir. */
+  function ollamaCiz(d, mesaj){
+    var k = $('ollama-karti');
+    if(!k) return;
+    var t = d.tarama || {}, b = d.bag || null, ayar = d.ayar || {};
+    var h = '<div class="tag">Ollama · bu bilgisayardaki model</div>'
+      + '<p class="ollama__durum ollama__durum--' + esc(t.durum || '') + '"><b>' + esc(d.durum_ad || '') + '</b> · '
+      + esc(t.metin || '') + '</p>';
+    if((t.modeller || []).length){
+      h += '<ul class="ollama__liste">';
+      t.modeller.forEach(function(m){
+        var rol = [];
+        if((t.bagli || {}).ekonomik === m.ad) rol.push('Ekonomik');
+        if((t.bagli || {}).standart === m.ad) rol.push('Standart');
+        h += '<li><b>' + esc(m.ad) + '</b><span class="muted">'
+          + esc([m.parametre ? m.parametre + ' parametre' : '', m.boyut_gb != null ? m.boyut_gb + ' GB' : '']
+            .filter(Boolean).join(' · ')) + '</span>'
+          + (rol.length ? '<span class="ollama__rol">' + esc(rol.join(', ')) + '</span>' : '') + '</li>';
+      });
+      h += '</ul>';
+    }
+    h += '<div class="row">';
+    if(t.durum === 'bulundu' || t.durum === 'eksik')
+      h += '<button class="primary" id="ollama-bagla">Önerilenle bağla</button>';
+    h += '<button id="ollama-tara">Şimdi tara</button>';
+    if(b && !b.geri_alindi) h += '<button id="ollama-geri">Geri al</button>';
+    h += '</div>';
+    if(b && !b.geri_alindi){
+      h += '<p class="muted ollama__not">' + (b.kendiliginden ? 'Kendiliğinden bağlandı' : 'Bağlandı')
+        + ' · ' + esc(String(b.at || '').replace('T', ' ').slice(0, 16))
+        + ' · çalışma yeri ' + esc(YER_ADI[b.yer] || b.yer || '') + '.</p>';
+    }
+    h += '<label class="ollama__ayar"><input type="checkbox" id="ollama-kendi"' + (ayar.kendiligi ? ' checked' : '')
+      + '> Bulunca kendiliğinden bağla (hiç yerel model yazılmamışsa; elle seçimine dokunmaz)</label>'
+      + '<p class="muted ollama__not" id="ollama-not" role="status">' + esc(mesaj || '') + '</p>';
+    k.innerHTML = h;
+    if($('ollama-bagla')) $('ollama-bagla').addEventListener('click', function(){ ollamaIste('/api/ollama/bagla'); });
+    if($('ollama-geri')) $('ollama-geri').addEventListener('click', function(){ ollamaIste('/api/ollama/geri'); });
+    $('ollama-tara').addEventListener('click', function(){ $('ollama-not').textContent = 'Taranıyor…'; ollamaYukle(); });
+    $('ollama-kendi').addEventListener('change', ollamaKendi);
+  }
+  async function ollamaYukle(mesaj){
+    var r = await api('/api/ollama');
+    if(r.status === 200) ollamaCiz(r.body, mesaj);
+    else if($('ollama-karti')) $('ollama-karti').innerHTML = sakinHata('Ollama durumu alınamadı.', r.status);
+  }
+  async function ollamaIste(yol){
+    $('ollama-not').textContent = 'Kaydediliyor…';
+    var r = await api(yol, { method:'POST', body:'{}' });
+    var m = (r.body && (r.body.note || (r.body.errors || []).join(' · '))) || String(r.status);
+    /* Model ayarı değişti: çalışma yeri ve sınıf kutuları da yeniden çizilir. */
+    if(r.status === 200){ await paketCiz(); ollamaYukle(m); return; }
+    if(r.body && r.body.durum) ollamaCiz(r.body.durum, m); else $('ollama-not').textContent = m;
+  }
+  async function ollamaKendi(){
+    var acik = $('ollama-kendi').checked;
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify({ ollama:{ kendiligi:acik } }) });
+    $('ollama-not').textContent = r.status === 200
+      ? (acik ? 'Bulunca kendiliğinden bağlanacak.' : 'Kendiliğinden bağlanmayacak; «Önerilenle bağla» ile bağlarsın.')
+      : 'Kaydedilmedi — ' + r.status;
   }
 
   /* NEREDE ÇALIŞSIN. Yerel: her şey bilgisayarında, bulut hiç kullanılmaz,
@@ -3025,7 +3091,8 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     bulut:'Her şey bulutta; kurulum yok, her çağrı ücretli.' };
   function yerKismi(o){
     var yer = o.yer || 'bulut', yl = o.yerel || {};
-    var h = '<div class="tag">Nerede çalışsın</div><div class="row">';
+    var h = '<div id="ollama-karti" class="ollama"><div class="tag">Ollama</div><p class="muted">Bakılıyor…</p></div>'
+      + '<div class="tag">Nerede çalışsın</div><div class="row">';
     ['yerel', 'hibrit', 'bulut'].forEach(function(y){
       h += '<button data-yer="' + y + '"' + (y === yer ? ' class="primary" aria-pressed="true"' : '')
         + '>' + YER_ADI[y] + '</button>';
@@ -7395,6 +7462,18 @@ button.gorevli.on:hover{ background:var(--fg); }
 .aktif__bas{ margin:16px 0 0; font-size:13px; font-weight:600; color:var(--dim); }
 .aktif__liste li{ padding:4px 0; font-size:14px; line-height:1.45; }
 .aktif__liste--eksik li{ color:var(--warn); }
+.ollama{ margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--line); }
+.ollama__durum{ margin:6px 0 0; font-size:14px; line-height:1.45; }
+.ollama__durum--bagli b{ color:var(--ok); }
+.ollama__durum--kapali b, .ollama__durum--eksik b, .ollama__durum--bos b{ color:var(--warn); }
+.ollama__liste{ list-style:none; margin:8px 0; padding:0; }
+.ollama__liste li{ display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; padding:6px 0; border-bottom:1px solid var(--line); font-size:14px; }
+.ollama__liste li b{ font-weight:600; overflow-wrap:anywhere; }
+.ollama__rol{ margin-left:auto; font-size:12px; font-weight:600; color:var(--ok); }
+.ollama__ayar{ display:flex; align-items:center; gap:8px; margin-top:12px; font-size:13px; min-height:24px; }
+.ollama__ayar input{ width:20px; height:20px; flex:none; }
+.ollama__not{ margin:8px 0 0; font-size:12px; }
+.ollama__not:empty{ display:none; }
 .aktif__yap li{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .aktif__yap button{ flex:none; min-height:32px; }
 .aktif__bekleyen{ margin:12px 0 0; font-size:14px; }

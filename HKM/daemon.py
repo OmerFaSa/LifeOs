@@ -80,6 +80,9 @@ Ucnoktalar:
     GET  /api/health                token istemez
     GET  /api/aktif                 aktif kip: acik mi, son tur, kisa gecmis (core/aktif.py)
     POST /api/aktif/tara            aktif kip: simdi bir tur (kapaliyken de calisir; module yazmaz)
+    GET  /api/ollama                Ollama'yi simdi tarar: durum, modeller, oneri, son baglama (core/ollama.py)
+    POST /api/ollama/bagla          {ekonomik?, standart?} bos ise oneri; yalniz Ollama'da olan model
+    POST /api/ollama/geri           son baglamayi geri alir (bir daha kendiliginden baglanmaz)
     POST /api/aktif/baslat          aktif kip: turun «yapilabilir» isi {id} -> King (kullanici yolu, modul hkm)
     GET  /api/merkez/hafta|gunluk|gecmis  katalog 120 haftalik ozet, 126 Merkez gunlugu, 119 oneri gecmisi (yalniz okur)
     GET  /                          tek dosyalik yerel yuz (token istemez;
@@ -106,7 +109,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core import motor, tarife  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
-                  intents, kanal, king, manager, media, memory, merkez, models, motto, outbox, patron,
+                  intents, kanal, king, manager, media, memory, merkez, models, motto, ollama, outbox, patron,
                   profil, saat, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
                   urunler, weekly, web, yedek, yoklama)
@@ -1126,6 +1129,11 @@ class Handler(BaseHTTPRequestHandler):
             # Motor servisinin durumu: sunucu motordan haberdardir (adres,
             # ayni makine mi, gecikme, modeller). Para harcamaz.
             return self._send(200, motor.dugum_durumu(self.server.config, con=self.con))
+        if u.path == "/api/ollama":
+            # Ayarlar acilinca TAZE tarama: kullanici simdiyi gorur.
+            t = ollama.tara(self.server.config)
+            self.server.ollama_son = t
+            return self._send(200, _ollama_durum(self.server, t))
         if u.path == "/api/models/paketler":
             # Butce paketleri (A · A+ · S · S+): onizleme, hicbir sey yazmaz.
             # Aylik tahmin defterdeki OLCUMDEN hesaplanir.
@@ -1702,6 +1710,25 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 body = {}
             return self._send(200, self._say(body))
+        if u.path == "/api/ollama/bagla":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = _nesne(ham)
+            except ValueError:
+                body = {}
+            t = ollama.tara(self.server.config)
+            secim, neden = ollama.secim_denetle(t, {k: str(body.get(k) or "").strip()
+                                                    for k in models.YEREL_SINIFLAR if body.get(k)})
+            if neden:
+                return self._send(409, {"ok": False, "note": neden,
+                                        "durum": _ollama_durum(self.server, t)})
+            r = _ollama_bagla(self.server, secim)
+            return self._send(200 if r["ok"] else 422, r)
+        if u.path == "/api/ollama/geri":
+            r = _ollama_geri(self.server)
+            return self._send(200 if r["ok"] else 409, r)
         if u.path == "/api/aktif/baslat":
             ham, hata = self._read_body()
             if hata:
@@ -1749,6 +1776,75 @@ class Handler(BaseHTTPRequestHandler):
         return self._send(res["status"], res)
 
 
+def _ayar_yaz(srv, yeni):
+    settings.write(yeni, getattr(srv, "config_path", None))
+    srv.config = yeni
+    srv.thresholds = thresholds.from_config(yeni)
+
+
+def _ollama_durum(srv, t):
+    return {"tarama": t, "durum_ad": ollama.DURUM_AD.get(t.get("durum"), ""),
+            "ayar": ollama.settings(srv.config), "bag": srv.config.get("ollama_bag")}
+
+
+def _ollama_bagla(srv, secim, kendiliginden=False):
+    """Secimi ayara yazar; geri al icin onceki hali saklar (AGENTS §1.9)."""
+    cfg = srv.config
+    y = ollama.yama(cfg, secim)
+    ok, hatalar = settings.validate(y)
+    if not ok:
+        return {"ok": False, "errors": hatalar}
+    yeni = settings.apply(cfg, y)
+    yeni["ollama_bag"] = {"at": datetime.datetime.now().isoformat(timespec="seconds"),
+                          "kendiliginden": bool(kendiliginden), "secim": secim,
+                          "yer": y["models"]["yer"], "onceki": ollama.onceki(cfg)}
+    _ayar_yaz(srv, yeni)
+    t = ollama.tara(yeni)
+    srv.ollama_son = t
+    return {"ok": True, "note": "Ollama bağlandı: %s." % ollama._oneri_yaz(secim),
+            "durum": _ollama_durum(srv, t), "config": settings.read(yeni)}
+
+
+def _ollama_geri(srv):
+    b = srv.config.get("ollama_bag") or {}
+    if not b or b.get("geri_alindi"):
+        return {"ok": False, "note": "Geri alınacak bir Ollama bağlantısı yok."}
+    on = b.get("onceki") or {}
+    y = {"models": {"yer": on.get("yer") or "", "yerel": on.get("yerel") or {}}}
+    ok, hatalar = settings.validate(y)
+    if not ok:
+        return {"ok": False, "errors": hatalar}
+    yeni = settings.apply(srv.config, y)
+    yeni["ollama_bag"] = dict(b, geri_alindi=True,
+                              geri_at=datetime.datetime.now().isoformat(timespec="seconds"))
+    _ayar_yaz(srv, yeni)
+    t = ollama.tara(yeni)
+    srv.ollama_son = t
+    return {"ok": True, "note": "Geri alındı; önceki model ayarı döndü. Bir daha "
+                                "kendiliğinden bağlanmaz.",
+            "durum": _ollama_durum(srv, t), "config": settings.read(yeni)}
+
+
+OLLAMA_ARALIK_SN = 300
+
+
+def _ollama_tik(srv, simdi=None):
+    """Acilista ve bes dakikada bir: Ollama'ya bak; kural 4 izin veriyorsa
+    kendiliginden bagla. Firlatmaz."""
+    simdi = time.monotonic() if simdi is None else simdi
+    if simdi - getattr(srv, "ollama_t", -1e9) < OLLAMA_ARALIK_SN:
+        return None
+    srv.ollama_t = simdi
+    try:
+        t = ollama.tara(srv.config)
+        srv.ollama_son = t
+        secim = ollama.kendiliginden(srv.config, t)
+        return _ollama_bagla(srv, secim, kendiliginden=True) if secim else None
+    except Exception as e:                      # noqa: BLE001
+        sys.stderr.write("[hkm] ollama taramasi: %s\n" % e)
+        return None
+
+
 def _ritim(srv, aralik=60):
     """Dakikalik tik — zamanlanmis isler ve giden kutusu.
 
@@ -1774,6 +1870,8 @@ def _ritim(srv, aralik=60):
             king.bekci(con, srv.config)
             # Aktif kip: kayit, yeni gun ya da nabiz geldiyse bir tur (kapaliysa hic).
             aktif.tick(con, srv.config, th=srv.thresholds)
+            # Ollama: acilista ve bes dakikada bir; bulunca kendiliginden baglar.
+            _ollama_tik(srv)
         except Exception as e:                  # noqa: BLE001
             sys.stderr.write("[hkm] ritim hatasi: %s\n" % e)
         # Kayit gelince (uyan) beklemeden; yoksa dakikada bir.
