@@ -69,7 +69,10 @@ html.king-acik.king-cubuk{ scrollbar-gutter:stable; }
   transition-timing-function:cubic-bezier(.4,0,.2,1); }
 
 .king__akis{ display:flex; flex-direction:column; gap:10px; overflow-y:auto; overscroll-behavior:contain; min-height:0; padding:2px 2px 0;
-  -webkit-overflow-scrolling:touch; overflow-anchor:none; }
+  -webkit-overflow-scrolling:touch; overflow-anchor:none;
+  /* Yana kayma yok: kopyala düğmesi 2 px taşıyordu; dokunmatikte çapraz
+     kaydırma takılıyordu (2026-10-18). */
+  overflow-x:hidden; touch-action:pan-y; }
 .king__balon{ display:flex; align-items:flex-start; gap:10px; max-width:100%; }
 .king__balon p{ margin:0; font-size:15px; line-height:1.45; color:var(--text); }
 .king__balon ul{ margin:6px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:3px; }
@@ -352,3 +355,84 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .cikarim__duzelt[open]{ display:grid; gap:8px; }
 .cikarim__duzelt .input{ width:100%; }
 .cikarim__duzelt .btn{ justify-self:start; }
+
+/* ======================================================================
+   SOHBET PENCERESİ (king.js söz 26; kullanıcı, 2026-10-18: «GPT arayüzü
+   gibi; odak penceresi kalsın ama dört beş katı büyüsün, tam ekran
+   olmasın»). Büyük King ortada, perdenin üstünde: solda geçmiş ve araçlar,
+   sağda sohbet. Yükseklik SABİT: cevap geldikçe pencere büyüyüp
+   titremez, yalnız sohbet kayar. Küçük King (.is-mini) dokunulmaz.
+   ====================================================================== */
+.king:not(.is-mini) .king__kutu{ top:50%; bottom:auto; width:min(1180px, calc(100vw - 64px));
+  height:min(860px, calc(100dvh - 64px)); max-height:none; display:grid; grid-template-columns:248px minmax(0, 1fr);
+  gap:0; padding:0; overflow:hidden; transform:translate(-50%, calc(-50% + 16px)) scale(.98); }
+.king:not(.is-mini).is-acik .king__kutu{ transform:translate(-50%, -50%); }
+.king:not(.is-mini).is-kapaniyor .king__kutu{ transform:translate(-50%, calc(-50% + 10px)) scale(.985); }
+.king:not(.is-mini) .king__ana{ display:flex; flex-direction:column; gap:12px; min-width:0; min-height:0; padding:14px 18px 14px; }
+.king:not(.is-mini) .king__akis{ flex:1; padding:8px 4px 4px; }
+.king:not(.is-mini) .king__akis > *, .king:not(.is-mini) .king__cipler, .king:not(.is-mini) .king__yaz,
+.king:not(.is-mini) .king__paylasim{ width:100%; max-width:780px; margin-inline:auto; }
+.king:not(.is-mini) .king__balon--sen{ align-self:flex-end; max-width:min(80%, 620px); margin-inline:auto 0; }
+.king:not(.is-mini) .king__akis > .king__balon--sen{ width:auto; }
+.king:not(.is-mini) .king__girdi{ min-height:52px; border-radius:26px; font-size:15.5px; }
+
+.king__yan{ display:none; }
+.king:not(.is-mini) .king__yan{ display:flex; flex-direction:column; gap:6px; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+  padding:14px 10px; border-right:1px solid var(--line, rgba(0,0,0,.08));
+  background:color-mix(in oklab, var(--surface-2) 55%, transparent); }
+.king__yeni{ display:flex; align-items:center; gap:8px; min-height:40px; padding:0 12px; border:1px solid var(--line, rgba(0,0,0,.1));
+  border-radius:12px; background:var(--surface); color:var(--text); font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+.king__yeni svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.king__yan-ad{ margin:14px 8px 2px; font-size:12px; font-weight:600; color:var(--text-2); }
+.king__yan-bos{ margin:0 8px; font-size:12.5px; line-height:1.45; color:var(--text-2); }
+.king__gecmis{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+.king__gecmis-is{ display:grid; gap:1px; width:100%; min-height:44px; padding:6px 10px; border:0; border-radius:10px; background:transparent;
+  color:var(--text); font:inherit; text-align:left; cursor:pointer; }
+.king__gecmis-is span{ font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.king__gecmis-is small{ font-size:11.5px; color:var(--text-2); }
+.king__gecmis-is:hover, .king__arac:hover{ background:var(--surface-2); }
+.king__gecmis-is.is-acik{ background:var(--surface); box-shadow:0 0 0 1px var(--line, rgba(0,0,0,.08)); }
+.king__araclar{ display:flex; flex-direction:column; gap:2px; }
+.king__arac{ min-height:36px; padding:0 10px; border:0; border-radius:10px; background:transparent; color:var(--text);
+  font:inherit; font-size:13.5px; text-align:left; cursor:pointer; }
+.king__yeni:focus-visible, .king__gecmis-is:focus-visible, .king__arac:focus-visible{ outline:2px solid var(--primary); outline-offset:1px; }
+/* Geniş ekranda araçlar kenarda: başlıktaki kopyaları gizlenir. */
+.king__yan-dugme{ display:none; }
+.king:not(.is-mini) .king__bas{ padding-left:0; }
+@media (min-width:1024px){
+  .king:not(.is-mini) .king__ekran, .king:not(.is-mini) .king__sayfa, .king:not(.is-mini) .king__sohbet{ display:none; }
+}
+/* Tablet ve telefon: kenar çubuğu başlıktaki düğmeyle, pencerenin içinde açılır. */
+@media (max-width:1023px){
+  .king:not(.is-mini) .king__kutu{ width:calc(100vw - 32px); grid-template-columns:minmax(0, 1fr); }
+  .king:not(.is-mini) .king__yan{ position:absolute; z-index:2; left:0; top:0; bottom:0; width:min(280px, 82%);
+    transform:translateX(-102%); transition:transform .28s cubic-bezier(.32,.72,0,1); background:var(--surface);
+    box-shadow:8px 0 32px -16px rgba(20,24,40,.35); }
+  .king:not(.is-mini) .king__kutu:has(.king__yan-dugme[aria-expanded="true"]) .king__yan{ transform:none; }
+  .king:not(.is-mini) .king__yan-dugme{ display:grid; }
+}
+@media (max-width:679px){
+  .king:not(.is-mini) .king__kutu{ top:calc(env(safe-area-inset-top, 0px) + 12px); bottom:calc(84px + env(safe-area-inset-bottom, 0px));
+    height:auto; width:calc(100vw - 20px); border-radius:24px; transform:translate(-50%, 16px) scale(.98); }
+  .king:not(.is-mini).is-acik .king__kutu{ transform:translate(-50%, 0); }
+  .king:not(.is-mini).is-kapaniyor .king__kutu{ transform:translate(-50%, 10px) scale(.985); }
+  .king:not(.is-mini) .king__ana{ padding:12px 12px 12px; }
+}
+@media (prefers-reduced-motion:reduce){ .king:not(.is-mini) .king__yan{ transition:none; } }
+
+/* Ofis sohbetinin geçmişi (brand/ortak/gecmis.js). Sade liste: başlık,
+   zaman; sağda sil (iki dokunuş). */
+.gecmis{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+.gecmis__satir{ display:flex; align-items:center; gap:4px; }
+.gecmis__ac{ flex:1; min-width:0; display:grid; gap:1px; min-height:44px; padding:6px 10px; border:0; border-radius:10px;
+  background:transparent; color:var(--text); font:inherit; text-align:left; cursor:pointer; }
+.gecmis__ac:hover{ background:var(--surface-2); }
+.gecmis__ad{ font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gecmis__zaman{ font-size:11.5px; color:var(--text-2); }
+.gecmis__sil{ flex:none; min-width:32px; min-height:32px; display:grid; place-items:center; padding:0 6px; border:0; border-radius:999px;
+  background:transparent; color:var(--text-2); font:inherit; font-size:12px; cursor:pointer; }
+.gecmis__sil svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.gecmis__sil:hover{ background:var(--surface-2); color:var(--text); }
+.gecmis__sil.is-onay{ color:var(--danger, #e5484d); font-weight:600; }
+.gecmis__ac:focus-visible, .gecmis__sil:focus-visible{ outline:2px solid var(--primary); outline-offset:1px; }
+.gecmis__bos{ margin:0; font-size:13px; line-height:1.45; color:var(--text-2); }

@@ -189,7 +189,17 @@
       beş boyut yargısız dille kişilik alanına «senin sözün» olarak yazılır;
       yeniden yapılırsa eskisinin yerine geçer. Yazdığın her mesaj üslup
       sayacını artırır (yalnız sayı, metin saklanmaz); King üslubunu
-      çıkarım olarak sorar, onaylarsan model istemine girer. */
+      çıkarım olarak sorar, onaylarsan model istemine girer.
+  26. SOHBET PENCERESİ (depo sahibi, 2026-10-18: «GPT arayüzü gibi; geçmiş
+      konuşmaları görelim, türlü türlü araç ekleyelim; odak penceresi kalsın
+      ama dört beş katı büyüsün, tam ekran olmasın»). Büyük King ortada,
+      perdenin üstünde büyük bir odak penceresidir. Solda kenar çubuğu:
+      «Yeni sohbet» (açık sohbet sessizce geçmişe yazılır), «Geçmiş» (bu
+      cihazdaki sohbetler; dokununca o sohbet açılır ve oradan sürer) ve
+      «Araçlar» (ARACLAR kataloğu: her araç bir data-king eylemidir; yenisi
+      kataloğa bir satır eklenerek gelir). Önceki günün sohbeti açılışta
+      kendiliğinden geçmişe geçer, kaybolmaz. Tablet ve telefonda kenar
+      çubuğu başlıktaki düğmeyle açılır. Küçük King (söz 9) değişmez. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -322,6 +332,8 @@ window.LIFEOS.KING = (function(){
   let cipler = null;         // null = hazır cevaplar; ya da [{ ad, is }]
   let bekleyen = null;       // veri önizlemesi
   let bekleyenGit = null;    // «açayım mı?» diye sorulan sayfa (söz 8)
+  let yanAcik = false;       // söz 26: dar ekranda kenar çubuğu açık mı
+  let aktifKayit = null;     // söz 26: geçmişten açılan sohbetin kimliği
   let bekleyenIlet = null;   // { modul, metin } öteki modüle iletilecek satır (söz 10)
   let mini = false;          // küçük kutu (söz 9)
   let bekleyenFoto = null;   // söz 11
@@ -337,7 +349,7 @@ window.LIFEOS.KING = (function(){
   let paylasim = null;       // söz 16: { kare() → { mime, data }, bitir() }
   const TASIMA = 'lifeos.king';   // söz 18; animasyon.js TASINAN listesinde
   const CEVAP = 'lifeos.king.cevap';   // söz 19: 'oto' | 'ses' | 'yazi'; TASINAN'da
-  const GUNLUK_EN_COK = 120, GORUNEN = 6, ARSIV_EN_COK = 30;
+  const GUNLUK_EN_COK = 120, ARSIV_EN_COK = 30;
   let menu = null;            // söz 19: null | 'menu' | 'kayitlar' | { id }
   let silOnay = null;         // söz 19: silinmek üzere seçilen kayıt
   let silinen = null;         // söz 19: temizlenen sohbet («Geri getir»)
@@ -1080,12 +1092,87 @@ window.LIFEOS.KING = (function(){
   }
   const YER = () => 'bu cihazda, ' + (MODUL_AD[ayar && ayar.modul] || 'bu modül') + ' içinde';
 
+  /* Söz 26: açık sohbeti sessizce geçmişe yazar (aynı kimlik güncellenir). */
+  function sessizArsivle(mesajlar, zaman){
+    if(!ayar) return null;
+    const l = mesajlar || sohbetMesajlari();
+    if(!l.some(m => m.kim === 'sen')) return null;
+    const d = zaman ? new Date(zaman) : ortam.simdi();
+    const id = aktifKayit || ('k' + d.getTime());
+    const kayit = { id, zaman:d.toISOString(), modul:ayar.modul, mesajlar:l };
+    arsivYaz([kayit].concat(arsivOku().filter(k => k.id !== id)));
+    return kayit;
+  }
+  function kayitBasligi(k){
+    const ilk = (k.mesajlar || []).find(m => m.kim === 'sen');
+    const t = String(ilk ? ilk.metin : 'Sohbet').replace(/\s+/g, ' ').trim();
+    return t.length > 44 ? t.slice(0, 43) + '…' : t;
+  }
+  function yeniSohbet(){
+    sessizArsivle();
+    akis = []; aktifKayit = null; silinen = null; menu = null; yanAcik = false;
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; bekleyenTanisma = null; sonGeriAl = null; cipler = null;
+    ortam.depo.sil(depoAnahtar());
+    ciz(true);
+    return true;
+  }
+  function kayitAc(id){
+    const k = kayitBul(id);
+    if(!k) return false;
+    if(aktifKayit !== id) sessizArsivle();
+    akis = k.mesajlar.map(m => ({ kim:m.kim === 'sen' ? 'sen' : 'king', metin:String(m.metin || ''),
+      satirlar:Array.isArray(m.satirlar) ? m.satirlar : null }));
+    aktifKayit = id; menu = null; yanAcik = false; cipler = null;
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenTanisma = null;
+    sakla();
+    ciz(true);
+    return true;
+  }
+  /* Önceki günün sohbeti geçmişe geçer (söz 26); bugünkü olduğu gibi kalır. */
+  function dunuArsivle(){
+    const v = ortam.depo.oku(depoAnahtar());
+    if(!v || v.gun === bugunISO() || !Array.isArray(v.akis)) return;
+    const l = v.akis.filter(m => m && m.metin).map(m => ({ kim:m.kim === 'sen' ? 'sen' : 'king', metin:String(m.metin),
+      satirlar:Array.isArray(m.satirlar) ? m.satirlar.map(String) : null }));
+    const once = aktifKayit; aktifKayit = null;
+    sessizArsivle(l, String(v.gun) + 'T23:59:00');
+    aktifKayit = once;
+    ortam.depo.sil(depoAnahtar());
+  }
+  /* Araçlar kataloğu (söz 26). Her satır: data-king eylemi, ad, ipucu, ne
+     zaman görüneceği. Yeni araç = yeni satır; eylemi tıklama yönlendiricisi
+     zaten tanıyorsa başka bir şey gerekmez. */
+  const ARACLAR = [
+    { is:'ekran', ad:'Bu sayfayı göster', ip:'King bulunduğun LifeOS sayfasını okur', kosul:() => true },
+    { is:'paylas', ad:'Ekranımı paylaş', ip:'Bir ekran, pencere ya da sekme seç; sorduğunda King o anki ekranı görür', kosul:() => !paylasim },
+    { is:'paylasim-bitir', ad:'Paylaşımı durdur', ip:'Ekran paylaşımını bitirir', kosul:() => !!paylasim },
+    { is:'foto-sec', ad:'Fotoğraf gönder', ip:'Fotoğraf seç; Ctrl+V ile yapıştırmak da olur', kosul:() => true },
+    { is:'sohbet', ad:'Sesli sohbet', ip:'King konuşunca yeniden dinler; «tamam» de, biter', kosul:() => ortam.tanima() },
+    { is:'kisi', ad:'Beni nasıl tanıyorsun', ip:'Hafızadaki kayıtlar; her biri görünür ve silinir', kosul:() => !!(hafiza() && KISI()) },
+    { is:'sohbet-kaydet', ad:'Sohbeti dosyaya kaydet', ip:'Bu sohbeti geçmişe ve indirilebilir dosyaya yazar', kosul:() => akis.some(m => m.kim === 'sen') },
+    { is:'menu', ad:'Ayarlar', ip:'Cevap biçimi, kayıtlar, temizle', kosul:() => true },
+  ];
+  function yanHtml(){
+    const gecmis = arsivOku();
+    return '<button type="button" class="king__yeni" data-king="yeni-sohbet">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Yeni sohbet</button>'
+      + '<p class="king__yan-ad">Geçmiş</p>'
+      + (gecmis.length ? '<ul class="king__gecmis">' + gecmis.map(k => '<li><button type="button" class="king__gecmis-is'
+          + (k.id === aktifKayit ? ' is-acik' : '') + '" data-king="kayit-ac:' + kac(k.id) + '"' + (k.id === aktifKayit ? ' aria-current="true"' : '') + '>'
+          + '<span>' + kac(kayitBasligi(k)) + '</span><small>' + kac(tarihYaz(k.zaman)) + '</small></button></li>').join('') + '</ul>'
+        : '<p class="king__yan-bos">Henüz geçmiş sohbet yok. «Yeni sohbet» dediğinde ya da gün değiştiğinde açık sohbet buraya geçer.</p>')
+      + '<p class="king__yan-ad">Araçlar</p><div class="king__araclar">'
+      + ARACLAR.filter(a => { try{ return a.kosul(); }catch(e){ return false; } }).map(a => '<button type="button" class="king__arac" data-king="' + a.is
+        + '" title="' + kac(a.ip) + '">' + kac(a.ad) + '</button>').join('') + '</div>';
+  }
+
   function sohbetiKaydet(){
     if(!ayar) return null;
     const mesajlar = sohbetMesajlari();
     if(!mesajlar.some(m => m.kim === 'sen')){ soyle('Kaydedilecek bir sohbet yok; önce bir şey yaz ya da söyle.'); return null; }
     const d = ortam.simdi();
-    const kayit = { id:'k' + d.getTime(), zaman:d.toISOString(), modul:ayar.modul, mesajlar };
+    const kayit = { id:aktifKayit || ('k' + d.getTime()), zaman:d.toISOString(), modul:ayar.modul, mesajlar };
+    aktifKayit = kayit.id;
     arsivYaz([kayit].concat(arsivOku().filter(k => k.id !== kayit.id)));
     cipler = [{ is:'kayitlar', ad:'Kayıtları gör' }, { is:'indir:' + kayit.id, ad:'Dosya olarak indir' }];
     soyle('Sohbeti kaydettim: ' + YER() + '. Hiçbir sunucuya gitmedi.');
@@ -1394,11 +1481,11 @@ window.LIFEOS.KING = (function(){
       }
       neden = r.neden;
     }
-    return yerel(y, neden);
+    return yerel(y, neden, metin);
   }
 
   /* Yerel King (HKM yoksa ya da cevap veremediyse; sayfa ve kayıt hep burada). */
-  function yerel(y, neden){
+  function yerel(y, neden, metin){
     if(y.tur === 'notlar'){
       kapat();
       /* Defter (NOT-PLANI) kuruluysa o; değilse eski Notlarım paneli. */
@@ -1433,6 +1520,9 @@ window.LIFEOS.KING = (function(){
         { metin:y.onizleme.metin, liste:(y.onizleme.parcalar || []).length > 1 ? y.onizleme.parcalar.map(x => x.metin) : null,
           ipucu:y.gelecek ? 'Henüz yapmadıysan, yaptıktan sonra da söyleyebilirsin.' : (y.onizleme.ipucu || '') },
         s.soru);
+    }else if(SELAM.test(String(metin || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim())){
+      /* Selam selamla karşılanır (2026-10-18: «MERHABA»ya «anlayamadım» denmesin). */
+      soyle(selam());
     }else{
       const on = neden === 'yok' ? 'King’in modeli şu an kapalı. '
         : neden === 'baglanti' ? 'Merkeze (HKM) şu an ulaşılamadı. ' : '';
@@ -1585,8 +1675,11 @@ window.LIFEOS.KING = (function(){
 
   function govde(){
     if(mini) return miniGovde();
-    const satirlar = akis.length ? akis.slice(-GORUNEN) : [{ kim:'king', metin:selam(), yeni:true }];
-    const bas = '<div class="king__bas">' + KURE + '<b>King</b>'
+    const satirlar = akis.length ? akis.slice(-GUNLUK_EN_COK) : [{ kim:'king', metin:selam(), yeni:true }];
+    const bas = '<div class="king__bas">'
+      + '<button type="button" class="king__kapat king__yan-dugme" data-king="yan" aria-expanded="' + (yanAcik ? 'true' : 'false')
+      + '" aria-label="Geçmiş ve araçlar" title="Geçmiş ve araçlar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>'
+      + KURE + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + '</span>'
       + '<span class="king__durum" title="' + (baglanti() ? 'Sorular Merkez’deki King’e (yapay zekâ) gider'
         : gorselZincir().length ? 'Merkez bağlı değil; sorulara yerel kurallarla, ekran ve fotoğrafa görüntü okuyan modelle cevap verir'
@@ -1611,6 +1704,7 @@ window.LIFEOS.KING = (function(){
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>';
     const panel = menuHtml();
     const ilkSira = akis.length - satirlar.length;
+    const yan = '<aside class="king__yan" aria-label="Geçmiş ve araçlar">' + yanHtml() + '</aside><div class="king__ana">';
     const balonlar = satirlar.map((m, i) => m.kim === 'sen'
       ? (m.foto ? '<div class="king__balon king__balon--sen king__balon--foto"><img class="king__foto" src="' + kac(m.foto) + '" alt="Gönderdiğin fotoğraf"/></div>'
         : '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p></div>')
@@ -1643,7 +1737,7 @@ window.LIFEOS.KING = (function(){
         + '" title="Konuşarak sor · tanımayı tarayıcı yapar"><svg viewBox="0 0 24 24" aria-hidden="true">'
         + '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>'
       : '';
-    return bas + (paylasim ? '<div class="king__paylasim" role="status"><i class="king__canli" aria-hidden="true"></i>Ekran paylaşılıyor · sorduğunda görürüm'
+    return yan + bas + (paylasim ? '<div class="king__paylasim" role="status"><i class="king__canli" aria-hidden="true"></i>Ekran paylaşılıyor · sorduğunda görürüm'
       + '<button type="button" class="king__paylasim-dur" data-king="paylasim-bitir">Durdur</button></div>' : '')
       + (panel ? '<div class="king__akis king__akis--panel">' + panel + '</div>'
         : '<div class="king__akis" aria-live="polite">' + balonlar + '</div>'
@@ -1655,7 +1749,7 @@ window.LIFEOS.KING = (function(){
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2h6.8L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></label>' + mik
       + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>'
-      + '<p class="king__ipucu" aria-hidden="true">' + (ortam.tanima() ? 'Mikrofona dokun ve konuş · ' : '') + 'Enter gönderir · Esc kapatır</p>';
+      + '<p class="king__ipucu" aria-hidden="true">' + (ortam.tanima() ? 'Mikrofona dokun ve konuş · ' : '') + 'Enter gönderir · Esc kapatır</p></div>';
   }
 
   function ciz(odak){
@@ -1688,6 +1782,7 @@ window.LIFEOS.KING = (function(){
     if(acik){ if(mini && !(o && o.mini)) buyut(); const g = document.querySelector('.king__girdi'); if(g) try{ g.focus(); }catch(e){} return; }
     acik = true;
     mini = !!(o && o.mini);
+    dunuArsivle();
     akis = (o && Array.isArray(o.onceki) && o.onceki.length)
       ? o.onceki.filter(m => m && m.metin).map(m => ({ kim:m.kim === 'sen' ? 'sen' : 'king', metin:String(m.metin) }))
       : geriGetir();
@@ -1791,6 +1886,8 @@ window.LIFEOS.KING = (function(){
       if(t.closest('[data-king-ac]')){ e.preventDefault(); e.stopPropagation(); ac(); return; }
       /* Söz 9: perde ve dışarısı KAPATMAZ, küçültür; küçükken sayfa serbest. */
       if(t.closest('.king-perde')){ e.preventDefault(); e.stopPropagation(); kucult(); return; }
+      /* Dar ekranda açık kenar çubuğu: sohbete dokununca kapanır (söz 26). */
+      if(yanAcik && t.closest('.king__ana') && !t.closest('[data-king="yan"]')){ yanAcik = false; ciz(false); return; }
       const k = t.closest('[data-king]');
       if(!k){ if(acik && !mini) kucult(); return; }
       if(konusuyor > 0 && t.closest('.king__kure')){ sus(); return; }
@@ -1845,6 +1942,10 @@ window.LIFEOS.KING = (function(){
         if(is === 'yetki-hepsi'){ const Y = yetkiKatalog(); const n = Y && Y.anla('hepsini onayla'); if(n && n.tur === 'eylem') yetkiUygula(n); return; }
         if(is === 'menu'){ menuAc('menu'); return; }
         if(is === 'kayitlar'){ menuAc('kayitlar'); return; }
+        if(is === 'yeni-sohbet'){ yeniSohbet(); return; }
+        if(is === 'yan'){ yanAcik = !yanAcik; ciz(false); return; }
+        if(/^kayit-ac:/.test(is)){ kayitAc(is.slice(9)); return; }
+        if(is === 'foto-sec'){ const f = document.querySelector('[data-king-dosya]'); if(f) f.click(); return; }
         if(is === 'sohbet-kaydet'){ menu = null; sohbetiKaydet(); return; }
         if(is === 'temizle'){ menu = null; sohbetiTemizle(); return; }
         if(is === 'geri-getir'){ sohbetiGeriGetir(); return; }
@@ -1954,6 +2055,7 @@ window.LIFEOS.KING = (function(){
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
+    yanAcik = false; aktifKayit = null;
     ortam.depo.sil(CIKARIM_KARAR); ortam.depo.sil(SORMA);
     envanter = null; ortam.depo.sil(USLUP);
     ortam.depo.sil(TANISMA);
@@ -1971,6 +2073,7 @@ window.LIFEOS.KING = (function(){
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
     CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
+    yeniSohbet, kayitAc, ARACLAR, aktifKayit:() => aktifKayit,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
   };

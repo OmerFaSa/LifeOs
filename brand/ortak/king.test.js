@@ -487,6 +487,7 @@
       expect(k.akis().some(m => /çıkarım/i.test(m.metin || '') || m.son === 'Sence doğru mu?')).toBe(false);
       expect(!!document.querySelector('[data-king^="cikarim:"]')).toBe(false);
       await k.isle('MERHABA');
+      expect(/anlayamadım/.test(k.akis().slice(-1)[0].metin)).toBe(false);   // selam selamla karşılanır
       expect(H.etkin()).toHaveLength(0);
       expect(k.akis().some(m => /senin cümlenle not ettim/.test(m.metin || ''))).toBe(false);
       expect(k.cikarimAdaylari().length > 0).toBe(true);           // karar Onaylar'da bekliyor
@@ -732,13 +733,54 @@
       expect(k.kayitSil(kayit.id)).toBe(true);
       expect(k.kayitlar()).toHaveLength(0);
     }));
-    it('ekranda son altı mesaj; günün tamamı saklanır', () => sahneyle(async () => {
+    /* Söz 26 (2026-10-18): büyük pencere GPT gibi; sohbetin tamamı görünür. */
+    it('büyük pencerede sohbetin tamamı görünür; kenarda geçmiş ve araçlar', () => sahneyle(async () => {
       const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
       const { k } = sahne({ veri });
       k.ac();
       for(let i = 0; i < 6; i++) await k.isle('uyku ' + (i + 5));
-      expect(k.akis().length > 6).toBe(true);
-      expect(document.querySelectorAll('.king__akis .king__balon').length).toBe(6);
+      expect(document.querySelectorAll('.king__akis .king__balon').length).toBe(k.akis().length);
+      expect(!!document.querySelector('.king__yan [data-king="yeni-sohbet"]')).toBe(true);
+      const araclar = Array.from(document.querySelectorAll('.king__araclar [data-king]')).map(b => b.getAttribute('data-king'));
+      expect(araclar.indexOf('ekran') >= 0 && araclar.indexOf('menu') >= 0).toBe(true);
+      expect(k.ARACLAR.every(a => a.is && a.ad && typeof a.kosul === 'function')).toBe(true);
+      /* küçük King kenar çubuğu çizmez */
+      k.kucult();
+      expect(!!document.querySelector('.king__yan')).toBe(false);
+    }));
+    it('Yeni sohbet: açık sohbet geçmişe geçer; geçmişten açılan sohbet oradan sürer, kopya olmaz', () => sahneyle(async () => {
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      k.ac();
+      await k.isle('uyku 7');
+      document.querySelector('[data-king="yeni-sohbet"]').click();
+      expect(k.akis()).toHaveLength(0);
+      expect(k.kayitlar()).toHaveLength(1);
+      const id = k.kayitlar()[0].id;
+      const gecmis = document.querySelector('[data-king="kayit-ac:' + id + '"]');
+      expect(gecmis.textContent).toContain('uyku 7');
+      /* boş sohbette Yeni sohbet geçmişe boş kayıt yazmaz */
+      k.yeniSohbet();
+      expect(k.kayitlar()).toHaveLength(1);
+      /* aç, sürdür, yeniden yeni sohbet: aynı kayıt güncellenir */
+      k.kayitAc(id);
+      expect(k.aktifKayit()).toBe(id);
+      expect(k.akis().some(m => m.metin === 'uyku 7')).toBe(true);
+      await k.isle('uyku 8');
+      k.yeniSohbet();
+      expect(k.kayitlar()).toHaveLength(1);
+      expect(k.kayitlar()[0].mesajlar.some(m => m.metin === 'uyku 8')).toBe(true);
+    }));
+    it('önceki günün sohbeti açılışta geçmişe geçer, kaybolmaz', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.kur({ modul:'spi', git:() => {}, ozet:() => [] });
+      localStorage.setItem('king.sohbet.spi', JSON.stringify({ gun:'2026-10-04', akis:[{ kim:'sen', metin:'dünkü soru' }, { kim:'king', metin:'dünkü cevap' }] }));
+      k.ac();
+      expect(k.akis().some(m => m.metin === 'dünkü soru')).toBe(false);
+      const l = k.kayitlar();
+      expect(l).toHaveLength(1);
+      expect(l[0].mesajlar.map(m => m.metin)).toEqual(['dünkü soru', 'dünkü cevap']);
+      expect(l[0].zaman.slice(0, 10)).toBe('2026-10-04');
     }));
 
     /* Söz 16–17: «ekran paylaşmaktan kastım PC, telefon ya da başka bir ekran». */

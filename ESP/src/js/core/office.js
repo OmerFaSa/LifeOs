@@ -678,6 +678,12 @@ ESP.Office = (function(){
     return res;
   }
 
+  /* Geçmişten açılan sohbet (brand/ortak/gecmis.js) açık konuşma olur. */
+  async function setChat(agentId, messages){
+    S.officeChats[agentId] = (messages || []).slice(-40);
+    await ESP.Store.set('chats/' + agentId, { agentId, messages:S.officeChats[agentId] });
+  }
+
   async function clearChat(agentId){
     S.officeChats[agentId] = [];
     await ESP.Store.set('chats/' + agentId, { agentId, messages:[] });
@@ -996,6 +1002,6 @@ ESP.Office = (function(){
     writingBrief, patronBrief,
     ruleText, systemPrompt, validate, ask, historyFor, HAFIZA_TUR,
     notes, handoffs, handoffsFor, agendaCandidates, dailyBriefing, runMeeting,
-    send, clearChat, load,
+    send, clearChat, setChat, load,
   };
 })();

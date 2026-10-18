@@ -301,6 +301,8 @@ DOSYALAR = {
     "kisi.test.js":    "tests",
     "cikarim.js":      "js/core",
     "cikarim.test.js": "tests",
+    "gecmis.js":       "js/core",
+    "gecmis.test.js":  "tests",
     "envanter.js":     "js/core",
     "envanter.test.js": "tests",
     "defter.js":       "js/core",

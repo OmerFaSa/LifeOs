@@ -51,6 +51,10 @@ ESP.Screens.team = (function(){
       </div>`;
   }
 
+  /* Geçmiş sohbetler (GPT gibi, 2026-10-18): «Yeni sohbet» açık konuşmayı
+     geçmişe yazar; geçmişten açılan sohbet oradan sürer (brand/ortak/gecmis.js).
+     gecmisAktif: ajan başına geçmişten açılan kaydın kimliği. */
+  const gecmisAktif = {};
   function render(){
     const a = agent();
     const brf = ESP.Office.brief(a.id);
@@ -108,8 +112,8 @@ ESP.Screens.team = (function(){
         K.Entry({
           label:'Konuşma',
           meta:mesajlar.length + ' mesaj',
-          action:when(mesajlar.length, () => K.Button({ label:'Geçmişi temizle', size:'sm',
-            act:'clear-chat' })),
+          action:when(mesajlar.length, () => K.Button({ label:'Yeni sohbet', size:'sm',
+            act:'sohbet-yeni' })),
           wide:true,
           body:html`
             <div class="chat">
@@ -126,6 +130,13 @@ ESP.Screens.team = (function(){
               ${K.Button({ label:'Gönder', tone:'primary', act:'send-chat' })}
             </div>`,
         }),
+
+        ...((window.LIFEOS || {}).GECMIS ? [K.Entry({
+          label:'Geçmiş sohbetler',
+          meta:window.LIFEOS.GECMIS.liste('esp', a.id).length + ' sohbet',
+          wide:true,
+          body:raw(window.LIFEOS.GECMIS.listeHtml('esp', a.id, { ac:'gecmis-ac', sil:'gecmis-sil' })),
+        })] : []),
 
         K.Entry({
           label:'Özet', hint:'brief',
@@ -173,6 +184,29 @@ ESP.Screens.team = (function(){
       ESP.App.render();
     },
 
+    /* Geçmiş sohbetler (brand/ortak/gecmis.js; 2026-10-18, «GPT gibi»). */
+    async 'sohbet-yeni'(){
+      const G = (window.LIFEOS || {}).GECMIS, id = agent().id;
+      if(G) G.arsivle('esp', id, (S.officeChats[agent().id] || []), gecmisAktif[id]);
+      gecmisAktif[id] = null;
+      await ESP.Office.clearChat(id);
+      ESP.App.render();
+    },
+    async 'gecmis-ac'(el){
+      const G = (window.LIFEOS || {}).GECMIS, id = agent().id;
+      if(!G) return;
+      G.arsivle('esp', id, (S.officeChats[agent().id] || []), gecmisAktif[id]);
+      const k = G.al('esp', id, el.dataset.id);
+      if(!k) return;
+      await ESP.Office.setChat(id, k.mesajlar);
+      gecmisAktif[id] = k.id;
+      ESP.App.render();
+    },
+    'gecmis-sil'(el){
+      const G = (window.LIFEOS || {}).GECMIS;
+      if(G) G.sil('esp', agent().id, el.dataset.id);
+      ESP.App.render();
+    },
     async 'clear-chat'(){
       await ESP.Office.clearChat(agent().id);
       ESP.App.render();

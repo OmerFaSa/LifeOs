@@ -178,6 +178,19 @@ SP.Screens.team = (function(){
     });
   }
 
+  /* Geçmiş sohbetler (GPT gibi, 2026-10-18): «Yeni sohbet» açık konuşmayı
+     geçmişe yazar; geçmişten açılan sohbet oradan sürer (brand/ortak/gecmis.js).
+     gecmisAktif: ajan başına geçmişten açılan kaydın kimliği. */
+  const gecmisAktif = {};
+  function gecmisKarti(){
+    const G = (window.LIFEOS || {}).GECMIS;
+    if(!G) return null;
+    const a = current();
+    return K.Card({ title:'Geçmiş sohbetler', sub:a.name,
+      body:raw(G.listeHtml('spi', a.id, { ac:'gecmis-ac', sil:'gecmis-sil' })),
+      foot:K.Button({ label:'Yeni sohbet', size:'sm', act:'sohbet-yeni' }) });
+  }
+
   function scopeCard(){
     const a = current();
     return K.Card({
@@ -190,7 +203,6 @@ SP.Screens.team = (function(){
         ] })}
         ${K.Notice({ tone:'info', class:'mt-10', title:'Modele ne gider?',
           body:SP.PRIVACY.model })}`,
-      foot:K.Button({ label:'Sohbeti temizle', size:'sm', act:'clear-chat' }),
     });
   }
 
@@ -230,7 +242,7 @@ SP.Screens.team = (function(){
   async function render(){
     return String(html`
       <div class="mb-8">${tabsCard()}</div>
-      ${K.Ledger(() => [voiceCard(), chatCard(), scopeCard(), suggestCard(), briefCard()]
+      ${K.Ledger(() => [voiceCard(), chatCard(), gecmisKarti(), scopeCard(), suggestCard(), briefCard()]
         .filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'no-model', 'privacy']))}</div>`);
   }
@@ -499,6 +511,29 @@ SP.Screens.team = (function(){
       S.ui.officeAgent = hedef;
       SP.App.render();
       if(soru) await send(soru);
+    },
+    /* Geçmiş sohbetler (brand/ortak/gecmis.js; 2026-10-18, «GPT gibi»). */
+    async 'sohbet-yeni'(){
+      const G = (window.LIFEOS || {}).GECMIS, id = current().id;
+      if(G) G.arsivle('spi', id, (S.officeChats[current().id] || []), gecmisAktif[id]);
+      gecmisAktif[id] = null;
+      await SP.Office.clearChat(id);
+      SP.App.render();
+    },
+    async 'gecmis-ac'(el){
+      const G = (window.LIFEOS || {}).GECMIS, id = current().id;
+      if(!G) return;
+      G.arsivle('spi', id, (S.officeChats[current().id] || []), gecmisAktif[id]);
+      const k = G.al('spi', id, el.dataset.id);
+      if(!k) return;
+      await SP.Office.setChat(id, k.mesajlar);
+      gecmisAktif[id] = k.id;
+      SP.App.render();
+    },
+    'gecmis-sil'(el){
+      const G = (window.LIFEOS || {}).GECMIS;
+      if(G) G.sil('spi', current().id, el.dataset.id);
+      SP.App.render();
     },
     async 'clear-chat'(){
       await SP.Office.clearChat(current().id);

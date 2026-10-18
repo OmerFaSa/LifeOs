@@ -1244,6 +1244,13 @@ R.Office = (function(){
     return list;
   }
 
+  /* Geçmişten açılan sohbet (brand/ortak/gecmis.js) açık konuşma olur. */
+  async function setChat(agentId, messages){
+    S.officeChats = S.officeChats || {};
+    S.officeChats[agentId] = (messages || []).slice(-CHAT_MAX);
+    await R.Store.set('office/chat-' + agentId, { messages:S.officeChats[agentId] });
+  }
+
   async function clearChat(agentId){
     S.officeChats = S.officeChats || {};
     S.officeChats[agentId] = [];
@@ -2045,7 +2052,7 @@ R.Office = (function(){
     validate, validateCards, generateCards, noteContext, parseJson,
     numbersIn, numberFidelity, scopeBreaches, supportedNumbers,
     /* sohbet */
-    ask, briefing, chatOf, pushChat, clearChat, chatKind, chatPayload,
+    ask, briefing, chatOf, pushChat, clearChat, setChat, chatKind, chatPayload,
     /* toplanti — turlu canli oturum */
     agenda, agendaCandidates, openMeeting, nextTurn, userTurn, closeMeeting, speakerAt, roundDef,
     /* tartisma */

@@ -957,6 +957,12 @@ SP.Office = (function(){
     return res;
   }
 
+  /* Geçmişten açılan sohbet (brand/ortak/gecmis.js) açık konuşma olur. */
+  async function setChat(agentId, messages){
+    SP.S.officeChats[agentId] = (messages || []).slice();
+    await SP.Store.set('chats/' + agentId, { agentId, messages:SP.S.officeChats[agentId] });
+  }
+
   async function clearChat(agentId){
     SP.S.officeChats[agentId] = [];
     await SP.Store.set('chats/' + agentId, { agentId, messages:[] });
@@ -984,6 +990,6 @@ SP.Office = (function(){
     brief, labBrief, nutriBrief, moveBrief, moneyBrief, patronBrief,
     ruleText, systemPrompt, validate, ask, historyFor, HAFIZA_TUR,
     notes, handoffs, handoffsFor, agendaCandidates, dailyBriefing, runMeeting,
-    send, clearChat, load,
+    send, clearChat, setChat, load,
   };
 })();

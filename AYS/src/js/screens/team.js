@@ -15,6 +15,17 @@ R.Screens.team = (function(){
 
   let busy = false;
   let controller = null;
+  /* Geçmiş sohbetler (GPT gibi, 2026-10-18): «Yeni sohbet» açık konuşmayı
+     geçmişe yazar; geçmişten açılan sohbet oradan sürer (brand/ortak/gecmis.js).
+     gecmisAktif: ajan başına geçmişten açılan kaydın kimliği. */
+  const gecmisAktif = {};
+  function gecmisKarti(agent){
+    const G = (window.LIFEOS || {}).GECMIS;
+    if(!G) return null;
+    return K.Card({ title:'Geçmiş sohbetler', sub:agent.name,
+      actions:K.Button({ label:'Yeni sohbet', icon:'plus', size:'sm', act:'sohbet-yeni' }),
+      body:raw(G.listeHtml('ays', agent.id, { ac:'gecmis-ac', sil:'gecmis-sil' })) });
+  }
 
   function current(){
     const id = S.ui.officeAgent;
@@ -274,7 +285,7 @@ R.Screens.team = (function(){
                 <b class="desk__name">${agent.name}</b>
                 <span class="desk__role">${agent.role} — ${agent.desk}</span>
               </div>
-              ${when(msgs.length, () => K.Button({ label:'Temizle', size:'sm', tone:'ghost', act:'team-clear' }))}
+              ${when(msgs.length, () => K.Button({ label:'Yeni sohbet', size:'sm', tone:'ghost', act:'sohbet-yeni' }))}
             </div>
             <p class="small muted mt-8">${agent.scope}</p>
             <div class="mt-10">${deskStrip(agent)}</div>`,
@@ -313,6 +324,7 @@ R.Screens.team = (function(){
            yetenegin dugmesini gostermek, basip bir sey olmamasindan
            kotudur. */
         voiceCard(),
+        gecmisKarti(agent),
         K.Card({
           hint:'not-masasindaki-rapor', title:'Masasındaki rapor',           actions:K.Button({ label:'Özet iste', icon:'refresh', size:'sm', act:'team-brief' }),
           body:html`
@@ -460,6 +472,29 @@ R.Screens.team = (function(){
     },
     async 'team-suggest'(el){ await run('ask', el.dataset.q); },
     async 'team-brief'(){ await run('brief'); },
+    /* Geçmiş sohbetler (brand/ortak/gecmis.js; 2026-10-18, «GPT gibi»). */
+    async 'sohbet-yeni'(){
+      const G = (window.LIFEOS || {}).GECMIS, id = current().id;
+      if(G) G.arsivle('ays', id, O.chatOf(current().id), gecmisAktif[id]);
+      gecmisAktif[id] = null;
+      await O.clearChat(id);
+      R.App.render();
+    },
+    async 'gecmis-ac'(el){
+      const G = (window.LIFEOS || {}).GECMIS, id = current().id;
+      if(!G) return;
+      G.arsivle('ays', id, O.chatOf(current().id), gecmisAktif[id]);
+      const k = G.al('ays', id, el.dataset.id);
+      if(!k) return;
+      await O.setChat(id, k.mesajlar);
+      gecmisAktif[id] = k.id;
+      R.App.render();
+    },
+    'gecmis-sil'(el){
+      const G = (window.LIFEOS || {}).GECMIS;
+      if(G) G.sil('ays', current().id, el.dataset.id);
+      R.App.render();
+    },
     async 'team-clear'(){
       const agent = current();
       UI.confirmSheet('Sohbeti temizle',
