@@ -17564,7 +17564,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'d0a9c657', at:'2026-10-18 22:51', dirty:true };
+R.BUILD = { id:'408ae182', at:'2026-10-18 22:56', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -36184,13 +36184,7 @@ window.LIFEOS.KING = (function(){
     {
       /* Kose hapi (2026-10-19, «alan kaplamasin»): ses secimi tek dugme (dokundukca
          sirayla degisir), Sustur ve Kapat yalniz simge. */
-      const t = sesTercihi();
       return '<div class="king__dinle-hap" role="group" aria-label="Sesli okuma">'
-        + '<button type="button" class="king__hap" data-king="ses-sonraki" title="' + kac('Ses: ' + SES_IP[t] + '. Değiştirmek için dokun.') + '">'
-        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18V6L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6"/></svg>'
-        + SES_AD[t] + '</button>'
-        + '<button type="button" class="king__hap" data-king="hiz-sonraki" title="Okuma hızı; değiştirmek için dokun">'
-        + String(hiz()).replace('.', ',') + '×</button>'
         + '<button type="button" class="king__hap king__hap--simge" data-king="sus" aria-label="Sustur" title="Sustur">'
         + '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/></svg></button>'
         + '<button type="button" class="king__hap king__hap--simge" data-king="kip:yaz" aria-label="Kapat" title="Kapat">'
@@ -36370,6 +36364,12 @@ window.LIFEOS.KING = (function(){
         + sec('oto', 'Otomatik', 'Konuşarak sorduğuna sesli, yazarak sorduğuna yazılı cevap')
         + sec('ses', 'Sesli', 'Yazsan da cevabı sesli okur; yazı da görünür')
         + sec('yazi', 'Yazılı', 'Konuşsan da cevap yalnız yazılı gelir') + '</div></div>'
+        + '<div class="king__menu-satir"><span class="king__menu-ad">Ses</span><div class="king__secici" role="radiogroup" aria-label="Ses">'
+        + SES_TERCIH.map(v => '<button type="button" class="king__secim' + (sesTercihi() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
+          + (sesTercihi() === v ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('') + '</div></div>'
+        + '<div class="king__menu-satir"><span class="king__menu-ad">Hız</span><div class="king__secici" role="radiogroup" aria-label="Okuma hızı">'
+        + HIZLAR.map(v => '<button type="button" class="king__secim' + (hiz() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
+          + (hiz() === v ? 'true' : 'false') + '" data-king="hiz:' + v + '">' + String(v).replace('.', ',') + '×</button>').join('') + '</div></div>'
         + (hafiza() && KISI() ? '<button type="button" class="king__menu-is" data-king="kisi">Beni nasıl tanıyorsun<span class="king__menu-say">'
           + kisiKayitlari().length + '</span></button>' : '')
         + (sormaListesi().length ? '<div class="king__menu-satir"><span class="king__menu-ad">Sormadan ekler: ' + kac(sormaListesi().join(', '))
@@ -37094,6 +37094,7 @@ window.LIFEOS.KING = (function(){
         if(is === 'geri-getir'){ sohbetiGeriGetir(); return; }
         if(/^cevap:/.test(is)){ cevapSec(is.slice(6)); return; }
         if(/^ses:/.test(is)){ sesTercihSec(is.slice(4)); return; }
+        if(/^hiz:/.test(is)){ const v = Number(is.slice(4)); if(HIZLAR.indexOf(v) >= 0) ortam.depo.yaz(HIZ, v); ciz(false); return; }
         if(is === 'hiz-sonraki'){ ortam.depo.yaz(HIZ, HIZLAR[(HIZLAR.indexOf(hiz()) + 1) % HIZLAR.length]); ciz(false); return; }
         if(is === 'ses-sonraki'){ sesTercihSec(SES_TERCIH[(SES_TERCIH.indexOf(sesTercihi()) + 1) % SES_TERCIH.length]); return; }
         if(/^kayit:/.test(is)){ menu = { id:is.slice(6) }; silOnay = null; ciz(false); return; }
