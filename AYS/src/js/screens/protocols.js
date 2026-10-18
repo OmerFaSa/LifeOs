@@ -75,7 +75,7 @@ R.Screens.protocols = (function(){
 
   function minimumDayCard(){
     const md = R.ROUTINES.minimumDay;
-    const cells = [[md.minutes, 'dakika'], [md.paragraphs, 'paragraf'], [C.dueCards().length, 'due kart']];
+    const cells = [[md.minutes, 'dakika'], [md.paragraphs, 'paragraf'], [C.dueCards().length, 'vadeli kart']];
     return K.Card({
       title:'Minimum gün standardı', hint:'minimum-day',       body:html`
         <div class="minday">${map(cells, c => html`

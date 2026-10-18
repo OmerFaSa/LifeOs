@@ -195,6 +195,22 @@
         expect(b.body.indexOf('?') > 0).toBeTruthy();
       });
     });
+
+    /* Analiz denetimi (Bulgu 14): ayrışan çiftin başlığı toUpperCase() ile
+       «DIKSIYON DAKIKASI» diye bozulmaz; Türkçe tümce düzeninde («Diksiyon dakikası»)
+       gösterilir. */
+    it('analiz ekranında ayrışan çift başlığı bozuk büyük harf (DIKSIYON) üretmez', async () => {
+      resetState();
+      await withTodayAsync(BUGUN, async () => {
+        oturum(40, 'diction', 200);
+        oturum(10, 'diction', 600);
+        S.recordings.push({ id:'r1', date:gunOnce(40), words:500, errors:50 });
+        S.recordings.push({ id:'r2', date:gunOnce(10), words:500, errors:50 });
+        const out = String(ESP.Screens.analytics.render());
+        expect(out.indexOf('Diksiyon dakikası') >= 0).toBe(true);
+        expect(out.indexOf('DIKSIYON') < 0).toBe(true);
+      });
+    });
   });
 })();
 

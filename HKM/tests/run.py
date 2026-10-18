@@ -5,6 +5,13 @@ import os
 import time
 import sys
 
+for _akis in (sys.stdout, sys.stderr):
+    if hasattr(_akis, "reconfigure"):
+        try:
+            _akis.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tests import (harness, test_aktif, test_seviye, test_motor, test_bam, test_baslat, test_bildirim, test_butce, test_channels,  # noqa: E402
@@ -43,6 +50,16 @@ def _dilim_muhafizi(mod):
         time.tzset()
 
 
+def _yazdir(metin="", akis=None):
+    hedef = akis if akis is not None else sys.stdout
+    satir = str(metin) + "\n"
+    try:
+        hedef.write(satir)
+    except UnicodeEncodeError:
+        kodlama = getattr(hedef, "encoding", None) or "utf-8"
+        hedef.write(satir.encode(kodlama, errors="replace").decode(kodlama, errors="replace"))
+
+
 def main():
     for mod in (test_vps, test_sync, test_precedence, test_twin,
                 test_cross, test_impact, test_dil, test_intents,
@@ -70,16 +87,16 @@ def main():
     for s, name, err in harness.RESULTS:
         if s != suite:
             suite = s
-            print("\n  " + s)
+            _yazdir("\n  " + s)
         if err:
             fails += 1
-            print("    x %s\n        %s" % (name, err))
+            _yazdir("    x %s\n        %s" % (name, err))
         else:
-            print("    . %s" % name)
+            _yazdir("    . %s" % name)
 
     total = len(harness.RESULTS)
-    print("\n%d/%d test gecti%s" % (total - fails, total,
-                                    "" if not fails else " — %d BASARISIZ" % fails))
+    _yazdir("\n%d/%d test gecti%s" % (total - fails, total,
+                                      "" if not fails else " — %d BASARISIZ" % fails))
     return 1 if fails else 0
 
 

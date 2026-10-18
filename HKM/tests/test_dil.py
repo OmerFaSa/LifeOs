@@ -224,3 +224,17 @@ def run():
         finally:
             dil.IFADE_KANCASI = eski
     test("model kancasi opsiyonel ve zararsiz", t_model_hook_is_optional_and_safe)
+
+    def t_cp1254_stream_does_not_crash_runner():
+        """Analiz denetimi (Bulgu 18): Windows CP1254 konsolunda '→' iceren
+        test adi basilirken UnicodeEncodeError firlatilmaz."""
+        import io
+        from tests import run as test_runner
+        buf = io.BytesIO()
+        akis = io.TextIOWrapper(buf, encoding="cp1254", errors="strict")
+        test_runner._yazdir("    . tam kosu: plan → teklif → bildirim", akis=akis)
+        akis.flush()
+        ok(len(buf.getvalue()) > 0)
+    test("cp1254 konsolda ok isareti test kosucusunu dusurmez",
+         t_cp1254_stream_does_not_crash_runner)
+

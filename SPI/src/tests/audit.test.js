@@ -74,6 +74,20 @@
         expect(f.note.indexOf('sıfır sayılmaz') > 0).toBeTruthy();
       });
     });
+
+    /* Analiz denetimi (Bulgu 13): tek yemek tekrarında ham foodId
+       (kuru-fasulye-etli) yerine gıdanın Türkçe adı (Etli Kuru Fasulye) yazar. */
+    it('tek gıda tekrarında ham foodId değil Türkçe gıda adı yazar', () => {
+      resetState();
+      withToday('2026-09-10', () => {
+        pushMeal('2026-09-09', 'ogle', [['kuru-fasulye-etli', 200], ['yumurta', 100]]);
+        pushMeal('2026-09-08', 'ogle', [['kuru-fasulye-etli', 200], ['elma', 100]]);
+        pushMeal('2026-09-07', 'ogle', [['kuru-fasulye-etli', 200], ['muz', 100], ['ekmek-tam-bugday', 50]]);
+        const f = bulgu('meals', 'meal-monotony');
+        expect(!!f).toBeTruthy();
+        expect(f.items[0].label).toBe('Etli kuru fasulye');
+      });
+    });
   });
 
   describe('denetim · hareket', () => {

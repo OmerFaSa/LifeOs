@@ -290,9 +290,10 @@ R.Analytics = (function(){
            konudur ve bu SIRALAMADA dogru bir varsayimdir) ama satir
            `cert:'missing'` tasir; ekran bunu TOPLAMA KATMADAN once
            gorebilsin. */
-        const dokunuldu = st.state === 'closed' || practice.accuracy != null;
+        const acc = practice.accuracy != null ? practice.accuracy : (st.second != null ? st.second : st.first);
+        const dokunuldu = (st.state && st.state !== 'not_started') || acc != null;
         const earned = st.state === 'closed' ? potential
-          : practice.accuracy != null ? U.round(potential * practice.accuracy / 100, 2)
+          : acc != null ? U.round(potential * acc / 100, 2)
           : 0;
         out.push({
           subjectId:sub.id, subjectName:sub.name, topicId:t.id, topicName:t.name,

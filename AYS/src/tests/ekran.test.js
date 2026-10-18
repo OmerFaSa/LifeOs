@@ -181,6 +181,15 @@
       expect(/<li><b>\d+\./.test(out)).toBe(false);
       expect(out.indexOf('<details class="meetplan') >= 0).toBe(true);
     });
+
+    /* Analiz denetimi (Bulgu 14): Protokoller ekranında «due kart» yerine
+       Türkçe «vadeli kart» yazar. */
+    it('Protokoller: minimum gün standardında «due kart» yerine «vadeli kart» yazar', async () => {
+      resetState();
+      const out = String(await R.Screens.protocols.render());
+      expect(out.indexOf('>vadeli kart<') >= 0).toBe(true);
+      expect(out.indexOf('>due kart<') < 0).toBe(true);
+    });
   });
 
   /* Kullanıcı kararı (2026-09-24): yıllık tatil sınırı değiştirilebilir.
