@@ -581,5 +581,41 @@
       expect(P.markaSuresi(kok)).toBe(3000);
       expect(P.markaSuresi()).toBe(3000);   // sayfanın kendisi
     });
+
+    /* Kullanıcı (2026-10-18): «AYS'ye geçtiğimde hâlâ ikon geliyor, merhaba
+       yazmıyor». Windows'ta animasyon kapalı: tarayıcı «azalt» der. Tek dosya
+       sürümünde (LifeOS.exe, dist) betikler sayfanın sonundadır; perdenin
+       satır içi betiği animasyon.js'ten ÖNCE çalışıp tarayıcının cevabını
+       görüyor ve perdeyi kaldırıyordu. Karar LifeOS'un kendi ayarıdır. */
+    it('perde LifeOS animasyon ayarına uyar: tarayıcı «azalt» derken Tam ise kalır, Az ise kalkar', async () => {
+      const r = await fetch('../index.html');
+      const h = await r.text();
+      const bas = h.indexOf('<div id="marka-perde"'), son = h.indexOf('<!-- SEVIYE:perde-bit -->');
+      expect(bas > 0 && son > bas).toBe(true);
+      const parca = h.slice(bas, son).replace(/<script src="[^"]*"><\/script>/g, '');
+      let once = null;
+      try{ once = localStorage.getItem('lifeos.hareket'); }catch(e){}
+      const dene = async kip => {
+        const f = document.createElement('iframe');
+        f.style.display = 'none';
+        document.body.appendChild(f);
+        try{ localStorage.setItem('lifeos.hareket', kip); }catch(e){}
+        const d = f.contentWindow.document;
+        d.open();
+        d.write('<script>window.matchMedia = function(q){ return { matches:/reduce/.test(q), media:q, addListener:function(){}, removeListener:function(){} }; };<\/script>' + parca);
+        d.close();
+        await new Promise(x => setTimeout(x, 40));
+        const kaldi = !!d.getElementById('marka-perde');
+        f.remove();
+        return kaldi;
+      };
+      try{
+        expect(await dene('tam')).toBe(true);
+        expect(await dene('az')).toBe(false);
+        expect(await dene('sistem')).toBe(false);
+      }finally{
+        try{ if(once == null) localStorage.removeItem('lifeos.hareket'); else localStorage.setItem('lifeos.hareket', once); }catch(e){}
+      }
+    });
   });
 })();

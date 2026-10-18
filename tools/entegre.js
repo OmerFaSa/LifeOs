@@ -69,7 +69,8 @@ function portDolu(port){
 
 async function waitForServer(url, tries){
   for(let i = 0; i < (tries || 60); i++){
-    try{ await fetch(url); return true; }catch(e){ await wait(200); }
+    /* Gövde OKUNUR: okunmamış gövdeyle bağlantı kapanınca Node 24'ün fetch'i (undici) iç doğrulamada çöküyordu (2026-10-18, AYS index.html büyüyünce). */
+    try{ const r = await fetch(url); await r.arrayBuffer(); return true; }catch(e){ await wait(200); }
   }
   return false;
 }

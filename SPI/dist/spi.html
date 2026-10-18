@@ -13925,10 +13925,20 @@ body.is-dragging .rota{ outline:2px dashed var(--spi); outline-offset:6px; borde
 (function(){
   var el = document.getElementById('marka-perde');
   if(!el) return;
-  /* Hareket azaltma tercihinde marka girisi HIC gorunmez: videonun
-     tasidigi bilgi yok, tercihe kurban edilecek bir sey de yok. */
+  /* Hareket azaltma tercihinde marka girisi HIC gorunmez. Karar LifeOS'un
+     KENDI Animasyonlar ayaridir (brand/ortak/animasyon.js: depo, sonra cerez,
+     yoksa Tam), tarayicinin «azalt» cevabi degil: Windows'ta animasyon
+     kapaliyken tarayici hep «azalt» der. Tek dosya surumunde (dist) betikler
+     sayfanin sonundadir; burasi animasyon.js'ten ONCE calisir ve tarayicinin
+     cevabini goruyordu — LifeOS.exe'de perde hic acilmiyordu (2026-10-18,
+     kullanici: «AYS'ye gectigimde hala ikon geliyor, merhaba yazmiyor»). */
   try{
-    if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches){
+    var kip = null;
+    try{ kip = localStorage.getItem('lifeos.hareket'); }catch(e){}
+    if(!/^(tam|az|sistem)$/.test(kip || '')){ var cm = /(?:^|;\s*)lifeos_hareket=(tam|az|sistem)/.exec(document.cookie || ''); kip = cm ? cm[1] : null; }
+    if(!kip){ var wd = false; try{ wd = !!navigator.webdriver; }catch(e){} kip = wd ? 'sistem' : 'tam'; }
+    var az = kip === 'az' || (kip === 'sistem' && window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if(az){
       if(el.parentNode) el.parentNode.removeChild(el);
       return;
     }
@@ -15713,7 +15723,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'88bc1a8d', at:'2026-10-18 01:17', dirty:true };
+SP.BUILD = { id:'501eb71e', at:'2026-10-18 09:32', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.

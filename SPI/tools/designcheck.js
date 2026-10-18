@@ -49,7 +49,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 
 async function waitForServer(url){
   for(let i = 0; i < 60; i++){
-    try{ await fetch(url); return; }catch(e){ await wait(200); }
+    /* Gövde OKUNUR: okunmamış gövdeyle bağlantı kapanınca Node 24'ün fetch'i (undici) iç doğrulamada çöküyordu (2026-10-18, AYS index.html büyüyünce). */
+    try{ const r = await fetch(url); await r.arrayBuffer(); return; }catch(e){ await wait(200); }
   }
   throw new Error('sunucu açılmadı: ' + url);
 }
