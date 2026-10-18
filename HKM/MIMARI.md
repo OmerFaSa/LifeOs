@@ -1688,3 +1688,30 @@ yazılır. Model konuşmadan kendiliğinden hafıza oluşturamaz. `hafızam` etk
 kayıtları listeler, `#<kimlik> unut` kaydı geri çağrılmayacak duruma getirir.
 Kayıtlar King, AYS, SPİ ve ESP kapsamlarıyla ayrılır; süresi dolan kayıt model
 bağlamına girmez.
+
+## Aktif kip — `core/aktif.py` (2026-10-18)
+
+Kullanıcı: «sistemi aktifleştirme, başlatma dediğimiz bir şey olsun; veri
+girilip girilmediği o an fark edilsin, analiz gerekiyorsa ben söylemeden
+yapsın». Kapalıyken HKM yalnız sorulunca çalışır: brifing yüz açılınca
+kurulur, öneri ancak o zaman Onaylar'a düşer. Bugün ekranındaki «Sistem»
+kartında **Sistemi başlat** denince (`aktif.enabled`) HKM kendi turunu atar.
+
+- **Tetik olaydır:** yeni kayıt (`/api/sync/*` ritmi `uyan` ile hemen
+  uyandırır), yeni gün, `aralik_dk` (30) dolunca nabız, «Şimdi tara».
+- **Tur:** üç modülün nabzı (ölçüldü / veri yok, sıfır değil) → brifing
+  (`manager.brief`; öneri Onaylar'a taşınır) → eksikler (dünün eksik
+  ölçümü `core/eksik.py` kuralıyla; akşam 20:00'den sonra sessiz kalan
+  kullanılan modül) → senden bekleyenler (öneri, modül teklifi, King
+  onayı, BAM hatası).
+- **Sınır:** model çağırmaz, para harcamaz, modüle yazmaz (§1.1, §1.4);
+  değişiklik yalnız öneri olarak gider. Düşen adım turu durdurmaz.
+  Turlar `aktif_tur`'da (son 500; türetilmiş, yedeğe girmez).
+- Uçlar: `GET /api/aktif`, `POST /api/aktif/tara`; ayar `/api/config`
+  `{aktif:{enabled, aralik_dk}}`. Test: `tests/test_aktif.py`.
+
+**Meydan kaldırıldı (2026-10-18, kullanıcı: «çok işlevsiz bir bölüm»):**
+`core/meydan.py`, `web/meydan.html`, `/meydan` ve `/api/meydan*` uçları,
+yüzdeki düğme ve `tools/perf.py` ölçümleri kalktı. `meydan_*` tabloları
+kullanıcının izi (not, deste) olduğu için şemada ve yedekte durur;
+`tests/test_meydan.py` artık kaldırıldığını sınar.

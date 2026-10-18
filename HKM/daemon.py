@@ -78,11 +78,9 @@ Ucnoktalar:
     GET  /api/king/teklifler/<modul> modulun onay bekleyen teklifleri (teklif karti)
     POST /api/king/emir/<id>/devam|dur  parca parca uretimde ara onaya cevap
     GET  /api/health                token istemez
-    GET  /meydan                    Meydan: sistemin kendi akisi (token istemez; veri /api/meydan'dan)
+    GET  /api/aktif                 aktif kip: acik mi, son tur, kisa gecmis (core/aktif.py)
+    POST /api/aktif/tara            aktif kip: simdi bir tur (kapaliyken de calisir; module yazmaz)
     GET  /api/merkez/hafta|gunluk|gecmis  katalog 120 haftalik ozet, 126 Merkez gunlugu, 119 oneri gecmisi (yalniz okur)
-    GET  /api/meydan                gunun akisi (date, kapsam, duzey, hesap, q); GET /api/meydan/deste, /kaydedilenler
-    POST /api/meydan/isaret|cevap|deste|not|yanit   Meydan'in KENDI tablolari; module yazmaz (yanita cevabi sohbet verir)
-    POST /api/meydan/deste/<id>/puan|geri|cikar, /api/meydan/not/<id>/sil
     GET  /                          tek dosyalik yerel yuz (token istemez;
                                     jetonu kullanici girer, veri yine korumali)
 
@@ -105,9 +103,9 @@ from urllib.parse import parse_qs, unquote, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import motor, tarife  # noqa: E402
-from core import (ai, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
+from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
-                  intents, kanal, king, manager, media, memory, merkez, meydan, models, motto, outbox, patron,
+                  intents, kanal, king, manager, media, memory, merkez, models, motto, outbox, patron,
                   profil, saat, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
                   urunler, weekly, web, yedek, yoklama)
@@ -490,26 +488,6 @@ class Handler(BaseHTTPRequestHandler):
         given = head[7:] if head.startswith("Bearer ") else ""
         return sync_engine.check_token(given, self.server.config.get("local_token"))
 
-    # --- Meydan (core/meydan.py) ------------------------------------------
-    # Akis her istekte olaylardan yeniden turer; yazma uclari yalniz
-    # Meydan'in KENDI tablolarina yazar (deste, isaret, not). Hicbiri bir
-    # module yazmaz; oneri karari Onaylar'in ucundan (/api/decision) gecer.
-    def _meydan_get(self, u, q):
-        simdi = saat.simdi()
-        gun = (q.get("date") or [saat.bugun()])[0]
-        if not _gun_mu(gun):
-            return self._send(400, {"error": "date yyyy-aa-gg olmali"})
-        if u.path == "/api/meydan":
-            return self._send(200, meydan.akis(
-                self.con, gun, kapsam=(q.get("kapsam") or ["hepsi"])[0],
-                duzey=(q.get("duzey") or ["dengeli"])[0], now=simdi,
-                hesap=(q.get("hesap") or [None])[0], q=(q.get("q") or [None])[0]))
-        if u.path == "/api/meydan/deste":
-            return self._send(200, meydan.deste(self.con, now=simdi))
-        if u.path == "/api/meydan/kaydedilenler":
-            return self._send(200, meydan.kaydedilenler(self.con, now=simdi))
-        return self._send(404, {"error": "yok"})
-
     # --- Merkez kayitlari (core/merkez.py: katalog 119, 120, 126) ----------
     # Uc salt-okur gorunum; hicbiri bir tabloya yazmaz.
     def _merkez_get(self, u, q, date):
@@ -525,77 +503,6 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "n bir sayi olmali"})
             return self._send(200, merkez.oneri_gecmisi(self.con, n))
         return self._send(404, {"error": "yok"})
-
-    def _meydan_post(self, u):
-        ham, hata = self._read_body()
-        if hata:
-            return self._send(413, {"error": hata})
-        try:
-            b = _nesne(ham) if ham else {}
-        except ValueError:
-            return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
-        simdi = saat.simdi()
-        parca = u.path.strip("/").split("/")          # api meydan <uc> [id] [eylem]
-        uc = parca[2] if len(parca) > 2 else ""
-        if uc == "isaret" and len(parca) == 3:
-            gun = str(b.get("gun") or saat.bugun())
-            if not _gun_mu(gun):
-                return self._send(400, {"error": "gun yyyy-aa-gg olmali"})
-            r = meydan.isaretle(self.con, gun, str(b.get("gonderi") or ""), b.get("tur"),
-                                bool(b.get("acik")), now=simdi)
-        elif uc == "cevap" and len(parca) == 3:
-            r = meydan.cevapla(self.con, b.get("gonderi"), b.get("no"), b.get("secim"), now=simdi)
-        elif uc == "deste" and len(parca) == 3:
-            r = (meydan.desteye_ekle(self.con, b.get("gonderi"), now=simdi) if b.get("gonderi")
-                 else meydan.kart_yap(self.con, b.get("on"), b.get("arka"), b.get("modul"), now=simdi))
-        elif uc in ("deste", "not") and len(parca) == 5:
-            try:
-                kid = int(parca[3])
-            except ValueError:
-                return self._send(400, {"error": "kimlik sayi olmali"})
-            eylem = parca[4]
-            if uc == "deste" and eylem == "puan":
-                r = meydan.puanla(self.con, kid, b.get("derece"), now=simdi)
-            elif uc == "deste" and eylem == "geri":
-                r = meydan.geri_al(self.con, kid, now=simdi)
-            elif uc == "deste" and eylem == "cikar":
-                r = meydan.karti_cikar(self.con, kid, now=simdi)
-            elif uc == "not" and eylem == "sil":
-                r = meydan.not_sil(self.con, kid)
-            else:
-                return self._send(404, {"error": "yok"})
-        elif uc == "not" and len(parca) == 3:
-            r = meydan.not_yaz(self.con, b.get("metin"), b.get("modul"), now=simdi)
-        elif uc == "yanit" and len(parca) == 3:
-            # Yanit Danisma'ya gider: cevabi gorevli verir (core/sohbet.py),
-            # sayisini kural motoru. Model kapaliysa bu da soylenir; yanit
-            # kaybolmaz. meydan.py modeli cagirmaz, burasi cagirir.
-            gun = str(b.get("gun") or saat.bugun())
-            if not _gun_mu(gun):
-                return self._send(400, {"error": "gun yyyy-aa-gg olmali"})
-            gid = str(b.get("gonderi") or "")
-            h = meydan.yanit_hazirla(self.con, gun, gid, b.get("metin"), now=simdi)
-            if not h.get("ok"):
-                return self._send(h.get("status") or 422, h)
-            rol = sohbet.GOREVLILER[h["gorevli"]]["role"]
-            if not ai.hazir_mi(self.server.config, rol)["ok"]:
-                # Model yoksa komut tahmini cevap degildir: gonderinin kendi
-                # verisinden kural cevabi.
-                c = {"mode": "kural", "text": meydan.kural_yanit(h["gonderi"])}
-            else:
-                try:
-                    c = sohbet.konus(self.con, self.server.config, h["soru"], gun,
-                                     gorevli=h["gorevli"], th=self.server.thresholds,
-                                     gecmis=[{"role": "user", "content": "Meydan'daki gönderini açtım."},
-                                             {"role": "assistant", "content": h["baglam"]}])
-                except Exception as e:          # noqa: BLE001 — yanit kaybolmaz
-                    sys.stderr.write("[hkm] meydan yanit: %r\n" % (e,))
-                    c = {"mode": "yok", "text": None}
-            r = meydan.yanit_ekle(self.con, gid, h["gorevli"], c.get("text") or c.get("note"),
-                                  c.get("mode"), now=simdi)
-        else:
-            return self._send(404, {"error": "yok"})
-        return self._send(200 if r.get("ok") else (r.get("status") or 422), r)
 
     def log_message(self, fmt, *args):
         sys.stderr.write("[hkm] " + (fmt % args) + "\n")
@@ -774,15 +681,14 @@ class Handler(BaseHTTPRequestHandler):
         return self._send(200, {"token": self.server.config.get("local_token"),
                                 "note": "Bu jeton yalnız bu cihazda saklanır."})
 
-    def _send_page(self, ad="index.html"):
+    def _send_page(self):
         """Yerel yuz — tek dosya, sifir bagimlilik.
 
         Sayfanin KENDISI jeton istemez cunku icinde veri yoktur: butun
         veri /api/* uzerinden gelir ve orasi bearer ister. Kullanici jetonu
-        sayfaya girer, sayfa da kendi tarayicisinda saklar. Meydan
-        (`web/meydan.html`) ayri bir sayfadir ve ayni jetonu okur; ad
-        sabit iki degerden gelir, istekten gelmez."""
-        yol = os.path.join(ROOT, "web", ad if ad in ("index.html", "meydan.html") else "index.html")
+        sayfaya girer, sayfa da kendi tarayicisinda saklar. Ad sabittir,
+        istekten gelmez (Meydan sayfasi 2026-10-18'de kaldirildi)."""
+        yol = os.path.join(ROOT, "web", "index.html")
         if not os.path.exists(yol):
             return self._send(404, {"error": "yuz kurulu degil"})
         with open(yol, "rb") as f:
@@ -911,8 +817,6 @@ class Handler(BaseHTTPRequestHandler):
         u = urlparse(self.path)
         if u.path in ("/", "/index.html"):
             return self._send_page()
-        if u.path in ("/meydan", "/meydan.html"):
-            return self._send_page("meydan.html")
         if u.path.startswith("/img/seviye/") or u.path.startswith("/img/marka/"):
             return self._send_seviye(u.path)
         if u.path.startswith("/brand/"):
@@ -923,10 +827,10 @@ class Handler(BaseHTTPRequestHandler):
             """Meta'nin kurulum dogrulamasi. Bearer TASIYAMAZ (istegi Meta
             yollar), bu yuzden tek kapi dogrulama jetonudur: yanlis jetonda
             hicbir sey yansitilmaz."""
-            meydan = channels.verify_challenge(self.server.config, parse_qs(u.query))
-            if meydan is None:
+            cevap = channels.verify_challenge(self.server.config, parse_qs(u.query))
+            if cevap is None:
                 return self._send(403, {"error": "dogrulama basarisiz"})
-            body = str(meydan).encode("utf-8")
+            body = str(cevap).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
@@ -939,8 +843,8 @@ class Handler(BaseHTTPRequestHandler):
         date = (q.get("date") or [datetime.date.today().isoformat()])[0]
         if not _gun_mu(date):
             return self._send(400, {"error": "date yyyy-aa-gg olmali"})
-        if u.path == "/api/meydan" or u.path.startswith("/api/meydan/"):
-            return self._meydan_get(u, q)
+        if u.path == "/api/aktif":
+            return self._send(200, aktif.durum(self.con, self.server.config))
         if u.path.startswith("/api/merkez/"):
             return self._merkez_get(u, q, date)
         if u.path == "/api/briefing":
@@ -1291,8 +1195,6 @@ class Handler(BaseHTTPRequestHandler):
 
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
-        if u.path.startswith("/api/meydan/"):
-            return self._meydan_post(u)
         if u.path in ("/api/conversation/temizle", "/api/conversation/geri",
                       "/api/conversation/arsiv-sil"):
             ham, hata = self._read_body()
@@ -1799,6 +1701,10 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 body = {}
             return self._send(200, self._say(body))
+        if u.path == "/api/aktif/tara":
+            g = aktif.tur(self.con, self.server.config, "elle", th=self.server.thresholds)
+            return self._send(200, {"ok": True, "tur": g,
+                                    "durum": aktif.durum(self.con, self.server.config)})
         if u.path.startswith("/api/decision/"):
             parca = u.path.strip("/").split("/")
             if len(parca) != 4 or parca[3] not in ("accept", "decline"):
@@ -1826,6 +1732,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, {"error": "govdedeki module yol ile uyusmuyor"})
         body["module"] = yol_modul
         res = sync_engine.ingest(self.con, body, th=self.server.thresholds)
+        # Aktif kip: kayit geldi, ritim beklemeden uyansin («o an»).
+        if res.get("status") == 202 and getattr(self.server, "uyan", None):
+            self.server.uyan.set()
         return self._send(res["status"], res)
 
 
@@ -1852,9 +1761,17 @@ def _ritim(srv, aralik=60):
             depo.bakim(con)
             # King'in guncellik turu: arada bir, tikte en cok bir kayit.
             king.bekci(con, srv.config)
+            # Aktif kip: kayit, yeni gun ya da nabiz geldiyse bir tur (kapaliysa hic).
+            aktif.tick(con, srv.config, th=srv.thresholds)
         except Exception as e:                  # noqa: BLE001
             sys.stderr.write("[hkm] ritim hatasi: %s\n" % e)
-        srv.dur.wait(aralik)
+        # Kayit gelince (uyan) beklemeden; yoksa dakikada bir.
+        uyan = getattr(srv, "uyan", None)
+        if uyan is None:
+            srv.dur.wait(aralik)
+        else:
+            uyan.wait(aralik)
+            uyan.clear()
 
 
 
@@ -1909,6 +1826,7 @@ def main():
     _c.close()
     srv.thresholds = thresholds.load()
     srv.dur = threading.Event()
+    srv.uyan = threading.Event()
     ritim = threading.Thread(target=_ritim, args=(srv,), daemon=True)
     ritim.start()
     # Yoklama AYRI bir is parcaciginda: Telegram bizi 25 saniye bekletir ve

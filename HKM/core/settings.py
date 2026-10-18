@@ -28,7 +28,7 @@ import json
 import os
 import re
 
-from core import adlar, bildirim, butce, channels, media, models, schedule, thresholds, web
+from core import adlar, aktif, bildirim, butce, channels, media, models, schedule, thresholds, web
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -100,6 +100,8 @@ def read(cfg):
     out["king"] = {"sormadan_dusuk": bool(((cfg or {}).get("king") or {}).get("sormadan_dusuk"))}
     # Sessiz saat, gunluk sinir, teklif omru (core/bildirim.py).
     out["bildirim"] = bildirim.settings(cfg)
+    # Aktif kip (core/aktif.py): sistemin kendi turlari.
+    out["aktif"] = aktif.settings(cfg)
     return out
 
 
@@ -110,7 +112,7 @@ def validate(patch):
         return False, ["gövde bir nesne olmalı"]
     for k in patch:
         if k not in ("thresholds", "channels", "schedule", "models",
-                     "budget", "media", "web", "king", "bildirim"):
+                     "budget", "media", "web", "king", "bildirim", "aktif"):
             hata.append("bilinmeyen alan: %s" % k)
 
     # King'in onay kapisi (core/king.py teklif_gerekli): yalniz DUSUK sinif
@@ -125,6 +127,11 @@ def validate(patch):
                     hata.append("bilinmeyen King ayarı: %s" % ad)
                 elif not isinstance(deger, bool):
                     hata.append("king.sormadan_dusuk true ya da false olmalı")
+
+    if patch.get("aktif") is not None:
+        ok_a, hata_a = aktif.validate(patch["aktif"])
+        if not ok_a:
+            hata.extend(hata_a)
 
     if patch.get("bildirim") is not None:
         ok_n, hata_n = bildirim.validate(patch["bildirim"])
@@ -254,6 +261,8 @@ def apply(cfg, patch):
         yeni.setdefault("king", {}).update(patch["king"])
     if patch.get("bildirim") is not None:
         yeni.setdefault("bildirim", {}).update(patch["bildirim"])
+    if patch.get("aktif") is not None:
+        yeni.setdefault("aktif", {}).update(patch["aktif"])
     yeni["local_token"] = cfg.get("local_token")
     return yeni
 

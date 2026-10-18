@@ -403,7 +403,7 @@ def t_sade_yuz():
     # Ayrac (2026-10-02 gece): kenarin bolum listesi sirayla gelir, secilen nokta buyuyerek konar.
     for s in ("@keyframes hkm-ayrac-gir", "@keyframes hkm-nokta", ".bolumcubugu a.on::before{ animation:hkm-nokta"):
         ok(s in sade, s)
-    ok(m.index('<style id="hkm-sade">') < m.index("<!-- MEYDAN (kullan"), "sade blok Meydan blogundan once")
+    ok(m.index('<style id="hkm-sade">') < m.index("</body>"), "sade blok govdenin sonundan once")
 
 def t_giris_karti():
     """Giris karti (kullanici, 2026-10-03: «HKM giris sifresi yazan yeri
@@ -447,7 +447,7 @@ def t_cam_kabuk():
     # kartin icindeki kart golge almaz.
     for s in ("--kart-golge:0 1px 2px rgba(20,24,40,.03)", ".card :is(.card, .serit__kutu){ --kart-golge:0 0 #0000; }"):
         ok(s in cam, s)
-    ok(m.index('<style id="hkm-sade">') < m.index("<!-- MEYDAN (kullan"), "sade blok Meydan blogundan once")
+    ok(m.index('<style id="hkm-sade">') < m.index("</body>"), "sade blok govdenin sonundan once")
 
 
 def t_zemin_tek_aile():
@@ -626,7 +626,7 @@ def t_telefon_ve_tablet_kabugu():
               '.gez a:is([data-yol="hedefler"], [data-yol="sistemler"], [data-yol="ayarlar"]){ display:none; }',
               ".ust--menu .modul-pencere{ display:block;", ".ust--menu .modulsec{ display:none; }", ".ust--menu #ust-araclar{ display:flex;",
               '.ust--menu .gez a:is([data-yol="hedefler"], [data-yol="sistemler"], [data-yol="ayarlar"]){ display:flex;',
-              ".bolumcubugu{ position:fixed;", "env(safe-area-inset-bottom", "html .meydan-ac > span:last-child{ display:none; }",
+              ".bolumcubugu{ position:fixed;", "env(safe-area-inset-bottom",
               "body:has(#giris:not([hidden])) .ust{ display:none; }"):
         ok(s in tel, s)
     for yol in ("bugun", "teklifler", "hedefler", "sistemler", "ofis", "sohbet", "ayarlar"):
@@ -646,7 +646,7 @@ def t_telefon_ve_tablet_kabugu():
     for s in ("ust.classList.toggle('ust--menu', v)", "aria-expanded", "e.key === 'Escape'",
               "addEventListener('hashchange'", "#gez a[href], .modul[href], #bolumcubugu a[href]"):
         ok(s in b, s)
-    ok(m.index('<style id="hkm-kabuk">') < m.index("<!-- MEYDAN (kullan"), "blok Meydan blogundan once")
+    ok(m.index('<style id="hkm-kabuk">') < m.index("</body>"), "blok govdenin sonundan once")
     d = (KOK / "HKM" / "tools" / "yuz.js").read_text(encoding="utf-8")
     ok("const menuAc = async" in d and "#gez-menu" in d, "yuz.js telefonda Menu'den gezer")
 

@@ -1,5 +1,9 @@
 # Meydan — tasarım ve mantık (v3 önerisi)
 
+> **KALDIRILDI (2026-10-18, kullanıcı: «sosyal medya bölümünü sil, çok işlevsiz»).**
+> Kod, sayfa ve uçlar HKM'den çıktı; `meydan_*` tabloları kullanıcının izi olarak
+> şemada ve yedekte durur. Aşağısı tarihçedir.
+
 > **Durum (2026-09-25): M1 + M2 HKM'de.** Kullanıcı kararı: «bu sistemi HKM'ye
 > ekler misin», «HKM'nin içinde olacak». Kod `HKM/core/meydan.py`, uçlar
 > `/api/meydan*`, sayfa `HKM/web/meydan.html`. HKM yüzünde sekme DEĞİL: köşedeki

@@ -921,6 +921,10 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
 
       <div class="serit" id="serit"></div>
       <div id="onay"></div>
+      <!-- AKTIF KIP (kullanıcı, 2026-10-18: «sistemi aktifleştirme, başlatma
+           dediğimiz bir şey olsun»; core/aktif.py). Tek düğme: başlatınca HKM
+           kendi turunu atar. Kart hiçbir sayı hesaplamaz; /api/aktif'i çizer. -->
+      <div class="card aktif" id="aktif" aria-live="polite"></div>
 
       <div class="iki">
         <div>
@@ -5420,6 +5424,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     ozetCiz(b.body);
     seritCiz(b.body);
     onayCiz(b.body);
+    aktifYukle();
     /* Konsey kartlari «modeli var mi» diye de yazar; bu bilgi
        /api/agents'tadir. Once cizip sonra doldurmak, alt patronun bagli
        oldugu halde «model yok» gorunmesi demekti. */
@@ -5431,6 +5436,81 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     var c = await api('/api/cross?date=' + t);
     if(c.status === 200) caprazCiz(c.body);
     await konusmaYukle();
+  }
+
+  /* AKTIF KIP (core/aktif.py). Kart yalniz cizer: nabiz, yapilan, eksik ve
+     bekleyen sayilari sunucunun turundan gelir. Dugme ayar yamasidir
+     (/api/config aktif.enabled); «Şimdi tara» kapaliyken de bir tur atar. */
+  function aktifSaat(iso){ return iso ? String(iso).slice(11, 16) : ''; }
+  function aktifCiz(d){
+    var k = $('aktif');
+    if(!k) return;
+    var son = d.son, acik = !!d.acik;
+    var h = '<div class="kart-bas"><span class="tag">Sistem</span>'
+      + '<span class="aktif__durum' + (acik ? ' aktif__durum--acik' : '') + '">'
+      + (acik ? 'Aktif' + (son ? ' · son kontrol ' + esc(aktifSaat(son.at)) : '') : 'Kapalı') + '</span></div>';
+    if(!acik && !son){
+      h += '<p class="muted aktif__not">Başlatınca HKM kendi turunu atar: kayıt gelir gelmez üç modülü kontrol eder, '
+        + 'brifingi kurar, öneriyi Onaylar’a bırakır ve eksikleri yazar. Hiçbir modüle yazmaz, model çağırmaz.</p>';
+    }
+    if(son){
+      h += '<ul class="aktif__nabiz">';
+      (son.nabiz || []).forEach(function(n){
+        h += '<li><i class="nokta nokta--' + esc(n.modul) + '" aria-hidden="true"></i><b>' + esc(n.ad) + '</b>'
+          + '<span class="' + (n.bugun ? '' : 'muted') + '">' + esc(n.metin) + '</span></li>';
+      });
+      h += '</ul>';
+      if((son.yapilan || []).length){
+        h += '<p class="aktif__bas">Yaptıkları</p><ul class="aktif__liste">';
+        son.yapilan.forEach(function(y){ h += '<li>' + esc(y) + '</li>'; });
+        h += '</ul>';
+      }
+      if((son.eksik || []).length){
+        h += '<p class="aktif__bas">Eksikler</p><ul class="aktif__liste aktif__liste--eksik">';
+        son.eksik.forEach(function(e){ h += '<li>' + esc(e.metin) + '</li>'; });
+        h += '</ul>';
+      }
+      var b = son.bekleyen || {}, parca = [];
+      if(b.oneri) parca.push('Onaylar’da ' + b.oneri + ' öneri');
+      if(b.teklif) parca.push('modüllerde ' + b.teklif + ' teklif');
+      if(b.king) parca.push('King’de ' + b.king + ' onay');
+      if(b.bam_hata) parca.push('BAM’da ' + b.bam_hata + ' hatalı iş');
+      if(parca.length) h += '<p class="aktif__bekleyen">Senden bekleyen: ' + esc(parca.join(' · ')) + '.</p>';
+      if((son.hata || []).length) h += '<p class="muted aktif__not">Bu turda çalışmayan adım: ' + esc(son.hata.join(', ')) + '.</p>';
+      h += '<p class="muted aktif__not">' + esc(son.neden_ad || '') + ' · ' + esc(aktifSaat(son.at)) + '</p>';
+    }
+    h += '<div class="aktif__eylem">'
+      + '<button type="button" class="' + (acik ? '' : 'primary') + '" id="aktif-ac" aria-pressed="' + acik + '">'
+      + (acik ? 'Durdur' : 'Sistemi başlat') + '</button>'
+      + '<button type="button" id="aktif-tara">Şimdi tara</button></div>'
+      + '<p class="muted aktif__not" id="aktif-not" role="status"></p>';
+    k.innerHTML = h;
+    $('aktif-ac').addEventListener('click', function(){ aktifAyarla(!acik); });
+    $('aktif-tara').addEventListener('click', aktifTara);
+  }
+  async function aktifYukle(){
+    var r = await api('/api/aktif');
+    if(r.status === 200) aktifCiz(r.body);
+    else if($('aktif')) $('aktif').innerHTML = sakinHata('Sistemin durumu alınamadı.', r.status);
+  }
+  async function aktifAyarla(acik){
+    var not = $('aktif-not');
+    if(not) not.textContent = acik ? 'Başlatılıyor…' : 'Durduruluyor…';
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify({ aktif:{ enabled:!!acik } }) });
+    if(r.status !== 200){
+      if(not) not.textContent = 'Kaydedilemedi — ' + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+      return;
+    }
+    /* Baslatinca ilk tur hemen: dakikalik ritmi beklemeden ne gordugunu soyler. */
+    if(acik){ await aktifTara(); return; }
+    await aktifYukle();
+  }
+  async function aktifTara(){
+    var not = $('aktif-not');
+    if(not) not.textContent = 'Taranıyor…';
+    var r = await api('/api/aktif/tara', { method:'POST', body:'{}' });
+    if(r.status === 200) aktifCiz(r.body.durum);
+    else if(not) not.textContent = 'Taranamadı — ' + r.status;
   }
 
   async function yukleSohbet(){
@@ -6889,15 +6969,11 @@ html[data-tema="koyu"]{ --kart-golge:0 1px 1px rgba(0,0,0,.22), 0 14px 34px -20p
   .bolumcubugu a:hover{ border:0; color:var(--fg); }
   .bolumcubugu a.on{ background:var(--hap); color:var(--fg); font-weight:600; box-shadow:var(--hap-golge); }
 
-  /* İçerik: üstte güvenli alan (bölüm seçici varsa onun boyu), altta bant ve Meydan. */
+  /* İçerik: üstte güvenli alan (bölüm seçici varsa onun boyu), altta bant. */
   .wrap{ padding:calc(env(safe-area-inset-top, 0px) + 12px) 16px calc(var(--hkm-bant) + env(safe-area-inset-bottom, 0px) + 96px); }
   body:has(#bolumcubugu:not([hidden])) .wrap{ padding-top:calc(env(safe-area-inset-top, 0px) + 60px); }
   .wrap:has(> #giris:not([hidden])){ padding-bottom:24px; }
 
-  /* Meydan: bandın üstünde, modüllerin «+» düğmesi gibi yalnız simge. */
-  html .meydan-ac{ right:16px; bottom:calc(var(--hkm-bant) + env(safe-area-inset-bottom, 0px) + 14px); padding:6px; border-radius:18px; }
-  html .meydan-ac > span:last-child{ display:none; }
-  html.hkm-menu-acik .meydan-ac{ opacity:0; pointer-events:none; }
 }
 
 @media (min-width:680px) and (max-width:1023px){
@@ -7275,135 +7351,22 @@ button.gorevli.on:hover{ background:var(--fg); }
 })();
 </script>
 
-<!-- MEYDAN (kullanıcı kararı 2026-09-25: «direkt karşımıza bir mini uygulama gibi
-     açılsın»; core/meydan.py, web/meydan.html). Sekme değil: ortada açılan
-     pencere, telefonda alttan tam ekran. Bu blok KENDİ İÇİNDE KAPALIDIR: yüzün
-     yönlendiricisine, çekmecelerine ve CSS'ine dokunmaz, adları «meydan-» ile
-     başlar; silinirse yüz Meydan öncesiyle aynıdır. Veri /api/meydan'dan gelir,
-     jeton yüzünkidir; blok hiçbir sayı hesaplamaz. Düğme yalnız giriş yapılmışken
-     görünür. -->
-<style>
-.meydan-ac{ position:fixed; z-index:40; right:24px; bottom:calc(env(safe-area-inset-bottom,0px) + 24px);
-  display:flex; align-items:center; gap:10px; min-height:0; padding:7px 16px 7px 7px; border:0; border-radius:18px;
-  background:var(--yuzey); color:var(--fg); box-shadow:0 10px 30px rgba(17,19,24,.16), 0 2px 6px rgba(17,19,24,.08), 0 0 0 1px var(--line);
-  font:600 14px/1.1 'Inter', ui-sans-serif, system-ui, sans-serif; text-align:left; cursor:pointer;
-  transition:transform .16s ease, box-shadow .16s ease; }
-.meydan-ac:hover{ transform:translateY(-2px); border-color:transparent;
-  box-shadow:0 16px 36px rgba(17,19,24,.2), 0 2px 6px rgba(17,19,24,.08), 0 0 0 1px var(--line); }
-.meydan-ac:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
-.meydan-ac small{ display:block; margin-top:2px; font-size:12px; font-weight:500; color:var(--dim); }
-.meydan-simge{ position:relative; width:38px; height:38px; flex:none; border-radius:12px; display:grid; grid-template-columns:1fr 1fr;
-  gap:3px; padding:9px; background:linear-gradient(145deg, #1B1C22, #2E3039); box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
-.meydan-simge i{ border-radius:2px; }
-.meydan-simge i:nth-child(1){ background:#4F86FF; } .meydan-simge i:nth-child(2){ background:#2EC4A9; border-radius:50%; }
-.meydan-simge i:nth-child(3){ background:#F2A93B; transform:rotate(45deg) scale(.82); } .meydan-simge i:nth-child(4){ background:#9A86FF; border-radius:50%; }
-.meydan-rozet{ position:absolute; top:-6px; right:-6px; min-width:20px; height:20px; padding:0 6px; border-radius:10px;
-  background:var(--accent); color:var(--on-accent); font:700 11px/20px ui-sans-serif, system-ui, sans-serif; text-align:center;
-  box-shadow:0 0 0 2px var(--yuzey); }
-@media (max-width:1023px){ .meydan-ac{ right:16px; bottom:calc(env(safe-area-inset-bottom,0px) + 16px); } .meydan-ac small{ display:none; } }
-.meydan-perde{ position:fixed; inset:0; z-index:58; background:rgba(9,9,11,.46); opacity:0;
-  -webkit-backdrop-filter:blur(8px) saturate(120%); backdrop-filter:blur(8px) saturate(120%); transition:opacity .24s ease; }
-.meydan-perde.acik{ opacity:1; }
-.meydan-pencere{ position:fixed; z-index:59; left:50%; top:50%; width:min(440px, calc(100vw - 32px)); height:min(880px, calc(100vh - 48px));
-  border-radius:28px; overflow:hidden; background:var(--bg); opacity:0; transform:translate(-50%, -47%) scale(.94);
-  box-shadow:0 40px 120px rgba(0,0,0,.38), 0 0 0 1px rgba(255,255,255,.06);
-  transition:transform .32s cubic-bezier(.2,.9,.25,1.05), opacity .22s ease; }
-.meydan-pencere.acik{ opacity:1; transform:translate(-50%, -50%) scale(1); }
-.meydan-cerceve{ display:block; width:100%; height:100%; border:0; background:var(--bg); }
-/* Bilgisayarda genis pencere: Meydan uc sutuna acilir (menu ve hesaplar ·
-   akis · ozet). Dar ekranda telefon oraninda kalir. */
-/* Tablet (641–1023): telefon boyunda pencere yerine geniş bir sayfa; akış
-   parmakla okunacak genişlikte, alt sekmeler yerinde. */
-@media (min-width:641px) and (max-width:1023px){
-  .meydan-pencere{ width:min(720px, calc(100vw - 48px)); height:min(1040px, calc(100vh - 48px)); }
-}
-@media (min-width:1024px){
-  .meydan-pencere{ width:min(1280px, calc(100vw - 64px)); height:min(920px, calc(100vh - 48px)); border-radius:24px; }
-}
-@media (max-width:640px){
-  .meydan-pencere{ left:0; top:auto; bottom:0; width:100%; height:calc(100% - env(safe-area-inset-top,0px) - 10px);
-    border-radius:24px 24px 0 0; opacity:1; transform:translateY(100%); transition:transform .34s cubic-bezier(.2,.9,.25,1); }
-  .meydan-pencere.acik{ transform:none; }
-}
-@media (prefers-reduced-motion: reduce){ .meydan-ac, .meydan-perde, .meydan-pencere{ transition:none; } }
+<style id="hkm-aktif">
+/* Aktif kip karti (core/aktif.py). Sade: efekt yok, renk yalniz durum hapinda. */
+.aktif .kart-bas{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.aktif__durum{ font-size:13px; font-weight:600; color:var(--dim); }
+.aktif__durum--acik{ color:var(--ok); }
+.aktif__nabiz, .aktif__liste{ list-style:none; margin:8px 0 0; padding:0; }
+.aktif__nabiz li{ display:flex; align-items:baseline; gap:8px; padding:8px 0; border-bottom:1px solid var(--line); font-size:14px; }
+.aktif__nabiz li b{ min-width:40px; font-weight:600; }
+.aktif__nabiz .nokta{ flex:none; align-self:center; }
+.aktif__bas{ margin:16px 0 0; font-size:13px; font-weight:600; color:var(--dim); }
+.aktif__liste li{ padding:4px 0; font-size:14px; line-height:1.45; }
+.aktif__liste--eksik li{ color:var(--warn); }
+.aktif__bekleyen{ margin:12px 0 0; font-size:14px; }
+.aktif__eylem{ display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.aktif__not{ margin:8px 0 0; font-size:13px; }
+.aktif__not:empty{ display:none; }
 </style>
-<button type="button" class="meydan-ac" id="meydan-ac" hidden aria-controls="meydan-pencere" aria-expanded="false" aria-label="Meydan’ı aç">
-  <span class="meydan-simge" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="meydan-rozet" id="meydan-rozet" hidden></span></span>
-  <span>Meydan<small id="meydan-alt">Dört sistemin akışı</small></span>
-</button>
-<div class="meydan-perde" id="meydan-perde" hidden></div>
-<section class="meydan-pencere" id="meydan-pencere" role="dialog" aria-modal="true" aria-label="Meydan" hidden>
-  <iframe class="meydan-cerceve" id="meydan-cerceve" title="Meydan"></iframe>
-</section>
-<script>
-(function(){
-  'use strict';
-  var TOKEN_KEY = 'hkm.token';
-  function $(id){ return document.getElementById(id); }
-  var ac_ = $('meydan-ac'), pencere = $('meydan-pencere'), perde = $('meydan-perde'), cer = $('meydan-cerceve'),
-      rozet = $('meydan-rozet'), alt = $('meydan-alt');
-  var acik = false, sonOdak = null, zaman = null;
-  function mesaj(veri){ try{ if(cer.contentWindow) cer.contentWindow.postMessage(veri, location.origin); }catch(e){} }
-  function temaGonder(){ mesaj({ meydan:'tema', tema:document.documentElement.getAttribute('data-tema') || '' }); }
-  function sayiYaz(n){
-    rozet.textContent = n; rozet.hidden = !n;
-    alt.textContent = n ? n + ' kart tekrar bekliyor' : 'Dört sistemin akışı';
-    ac_.setAttribute('aria-label', n ? 'Meydan’ı aç, ' + n + ' kart tekrar bekliyor' : 'Meydan’ı aç');
-  }
-  function ac(){
-    if(acik) return;
-    acik = true; clearTimeout(zaman); sonOdak = document.activeElement;
-    if(!cer.getAttribute('src')) cer.setAttribute('src', '/meydan?uygulama=1');
-    else { temaGonder(); mesaj({ meydan:'yenile' }); }
-    perde.hidden = false; pencere.hidden = false;
-    void pencere.offsetWidth;                   /* gecis baslangici cizilsin */
-    pencere.classList.add('acik'); perde.classList.add('acik');
-    ac_.setAttribute('aria-expanded', 'true');
-    document.documentElement.style.overflow = 'hidden';
-    setTimeout(function(){ try{ cer.focus(); }catch(e){} }, 80);
-  }
-  function kapat(){
-    if(!acik) return;
-    acik = false;
-    pencere.classList.remove('acik'); perde.classList.remove('acik');
-    ac_.setAttribute('aria-expanded', 'false');
-    mesaj({ meydan:'kapandi' });                 /* calan muzik durur */
-    document.documentElement.style.overflow = '';
-    zaman = setTimeout(function(){ if(!acik){ pencere.hidden = true; perde.hidden = true; } }, 340);
-    if(sonOdak && sonOdak.focus) sonOdak.focus();
-    sayiYukle();
-  }
-  async function sayiYukle(){
-    var token = null;
-    try{ token = localStorage.getItem(TOKEN_KEY); }catch(e){}
-    if(!token) return;
-    try{
-      var r = await fetch('/api/meydan/deste', { headers:{ 'Authorization':'Bearer ' + token } });
-      if(r.ok){ var g = await r.json(); sayiYaz((g.ozet || {}).vadeli || 0); }
-    }catch(e){}
-  }
-  ac_.addEventListener('click', ac);
-  perde.addEventListener('click', kapat);
-  cer.addEventListener('load', temaGonder);
-  document.addEventListener('keydown', function(e){ if(acik && e.key === 'Escape') kapat(); });
-  /* Cercevedeki Meydan kapatmayi ve tekrar sayisini soyler; yalniz ayni
-     kaynaktan ve yalniz bu cerceveden gelen ileti dinlenir. */
-  window.addEventListener('message', function(e){
-    if(e.origin !== location.origin || e.source !== cer.contentWindow || !e.data) return;
-    if(e.data.meydan === 'kapat') kapat();
-    if(e.data.meydan === 'tekrar' && typeof e.data.vadeli === 'number') sayiYaz(e.data.vadeli);
-  });
-  /* Dugme yuzun cekmeceleriyle birlikte gorunur: giris ekraninda yoktur. */
-  var gez = $('gez');
-  function gorunurluk(){
-    var once = ac_.hidden;
-    ac_.hidden = !gez || gez.hidden;
-    if(once && !ac_.hidden) sayiYukle();
-  }
-  if(gez && window.MutationObserver) new MutationObserver(gorunurluk).observe(gez, { attributes:true, attributeFilter:['hidden'] });
-  gorunurluk();
-})();
-</script>
-
 </body>
 </html>

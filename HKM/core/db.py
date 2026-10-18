@@ -525,7 +525,9 @@ CREATE TABLE IF NOT EXISTS motto_tags (
 );
 CREATE INDEX IF NOT EXISTS ix_motto_tag ON motto_tags(tag);
 
-/* MEYDAN (core/meydan.py): HKM'nin KENDI durumu. Gonderiler ambardaki
+/* MEYDAN (kaldirildi 2026-10-18; kullanici: «islevsiz bir bolum»). Tablolar
+   kullanicinin izidir (not, deste); yuz kalkti ama iz silinmez, yedege girer.
+   Eskiden: HKM'nin KENDI durumu. Gonderiler ambardaki
    olaylardan her istekte yeniden turer ve SAKLANMAZ; saklanan yalniz
    kullanicinin izidir: tekrar destesi, isaretler (Faydali, Kaydet, sinav
    cevabi) ve «Sen» notlari. Hicbiri bir module yazilmaz; deste ESP'nin
@@ -589,6 +591,18 @@ CREATE TABLE IF NOT EXISTS meydan_hikaye (
   neden       TEXT NOT NULL,                     -- onemli | ritim
   created_at  TEXT NOT NULL,
   PRIMARY KEY (hesap, gun)
+);
+
+-- AKTIF KIP (core/aktif.py): sistemin kendi turlari. Her tur ne yaptigini,
+-- neden basladigini, ne buldugunu ve neyin eksik oldugunu yazar. Turetilmistir
+-- (kaynak raw_events ve oneriler): yedege girmez, son 500 tur tutulur.
+CREATE TABLE IF NOT EXISTS aktif_tur (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  at          TEXT NOT NULL,
+  gun         TEXT NOT NULL,
+  neden       TEXT NOT NULL,                     -- baslangic | yeni_gun | yeni_kayit | nabiz | elle
+  son_olay    INTEGER NOT NULL DEFAULT 0,        -- turun gordugu en son raw_events.id
+  govde       TEXT NOT NULL                      -- JSON: nabiz, yapilan, eksik, bekleyen
 );
 """
 
