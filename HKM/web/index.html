@@ -3036,6 +3036,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '<p class="ollama__durum ollama__durum--' + (p.bulundu ? 'bagli' : 'eksik') + '"><b>Piper</b> · ' + esc(p.metin || '') + '</p>'
       + '<label style="display:block;font-size:12px;margin:6px 0">Piper klasörü (boşsa kendisi arar) '
       + '<input id="ses-piper" placeholder="' + esc((p.aranan || [])[1] || '') + '" value="' + esc(a.piper_yol || '') + '"></label>'
+      + '<p class="ollama__durum" id="dinle-durum"><b>Ses algılama</b> · bakılıyor…</p>'
       + '<div class="row"><button id="ses-kaydet">Kaydet</button>'
       + '<button id="ses-dene-gemini"' + (g.hazir ? '' : ' disabled') + '>Gemini’yi dinle</button>'
       + '<button id="ses-dene-piper"' + (p.bulundu ? '' : ' disabled') + '>Piper’ı dinle</button></div>'
@@ -3047,7 +3048,18 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   }
   async function sesYukle(mesaj){
     var r = await api('/api/ses/durum');
-    if(r.status === 200) sesCiz(r.body, mesaj);
+    if(r.status === 200){
+      sesCiz(r.body, mesaj);
+      /* Ses algilama (core/dinle.py): Whisper varsa o, yoksa yapay zeka (Gemini). */
+      var d = await api('/api/dinle/durum'), el = $('dinle-durum');
+      if(el && d.status === 200){
+        var w = d.body.whisper || {};
+        el.className = 'ollama__durum ollama__durum--' + (w.bulundu ? 'bagli' : 'eksik');
+        el.innerHTML = '<b>Ses algılama</b> · ' + (w.bulundu ? esc(w.metin) + ' Ses bu bilgisayardan çıkmaz.'
+          : (d.body.gemini && d.body.gemini.hazir ? 'Şu an yapay zekâ (Gemini) yazıya döküyor; ses Google’a gider. '
+            : 'Şu an tarayıcının tanıması kullanılıyor. ') + esc(d.body.tavsiye || ''));
+      }
+    }
     else if($('ses-karti')) $('ses-karti').innerHTML = sakinHata('Ses durumu alınamadı.', r.status);
   }
   async function sesKaydet(){

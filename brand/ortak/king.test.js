@@ -797,7 +797,7 @@
       expect(k.kip()).toBe('yaz');
       await k.kipSec('dinle');
       expect(k.kip()).toBe('dinle');
-      expect(!!document.querySelector('.king__kip-panel--dinle')).toBe(true);
+      expect(!!document.querySelector('.king__kip-panel--dinle')).toBe(false);   // 2026-10-19: Dinle kutusuz; ses ve hız ··· menüsünde
       await k.isle('bugünün özeti');
       expect(okunan.length > 0).toBe(true);                                   // yazdın, sesli okudu
       await k.kipSec('ekran');

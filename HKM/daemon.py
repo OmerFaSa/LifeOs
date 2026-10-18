@@ -86,6 +86,8 @@ Ucnoktalar:
     GET  /api/ses/durum             King'in sesi: Gemini hazir mi, Piper bulundu mu (ses uretmez, para harcamaz)
     POST /api/ses                   {metin, tercih: oto|gemini|piper} -> audio/wav; uretilemezse 503 + notlar
                                     (modul King'i o zaman cihazin kendi sesine duser; core/ses.py)
+    GET  /api/dinle/durum           ses algilama: Whisper var mi, Gemini hazir mi (core/dinle.py)
+    POST /api/dinle                 {wav: base64 16 kHz WAV} -> {ok, metin, motor}; olmazsa 503 + notlar
     POST /api/aktif/baslat          aktif kip: turun «yapilabilir» isi {id} -> King (kullanici yolu, modul hkm)
     GET  /api/merkez/hafta|gunluk|gecmis  katalog 120 haftalik ozet, 126 Merkez gunlugu, 119 oneri gecmisi (yalniz okur)
     GET  /                          tek dosyalik yerel yuz (token istemez;
@@ -113,7 +115,7 @@ from core import motor, tarife  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, models, motto, ollama, outbox, patron,
-                  ses,
+                  ses, dinle,
                   profil, saat, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
                   urunler, weekly, web, yedek, yoklama)
@@ -1145,6 +1147,8 @@ class Handler(BaseHTTPRequestHandler):
             # Motor servisinin durumu: sunucu motordan haberdardir (adres,
             # ayni makine mi, gecikme, modeller). Para harcamaz.
             return self._send(200, motor.dugum_durumu(self.server.config, con=self.con))
+        if u.path == "/api/dinle/durum":
+            return self._send(200, dinle.durum(self.con, self.server.config))
         if u.path == "/api/ses/durum":
             return self._send(200, ses.durum(self.con, self.server.config))
         if u.path == "/api/ollama":
@@ -1728,6 +1732,18 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 body = {}
             return self._send(200, self._say(body))
+        if u.path == "/api/dinle":
+            self._body_limit = 8 * 1024 * 1024
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = _nesne(ham)
+                wav = base64.b64decode(str(body.get("wav") or ""))
+            except ValueError:
+                wav = b""
+            r = dinle.yaziya(self.con, self.server.config, wav)
+            return self._send(200 if r["ok"] else 503, r)
         if u.path == "/api/ses":
             ham, hata = self._read_body()
             if hata:
