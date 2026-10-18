@@ -29,6 +29,8 @@ try:
         raise OSError("test: piper calistirilmaz")
     _ses.VARSAYILAN_POST = lambda url, *a, **k: _ag_kapali(url)
     _ses.VARSAYILAN_CALISTIR = _piper_yok
+    from core import dinle as _dinle
+    _dinle.VARSAYILAN_CALISTIR = _piper_yok
 except ImportError:                                  # pragma: no cover
     pass
 
