@@ -566,6 +566,13 @@ ESP.App = (function(){
         console.error('Ekran hatası (' + sc.id + '):', err);
         body = errorPanel(err);
       }
+      /* Konu anlatımı (2026-10-18, kullanıcı: «bölümlerin içine her alanın
+         kendisiyle alakalı anlatım»): Çalışma'daki alan bölümünün sonunda o
+         alanın kartı (screens/rehber.js); okuyucu Kütüphanem › Anlatımlar. */
+      try{
+        const v = viewOf(S.route);
+        if(v && v.disc && ESP.Screens.rehber) body += ESP.Screens.rehber.alanKarti(v.disc);
+      }catch(err){ console.error('Konu anlatımı kartı çizilemedi:', err); }
 
       /* v4 iskeleti (belgeler/ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
          sayfa başı · bölüm çubuğu · ekran · sayfa sonu; telefonda alt bant

@@ -309,6 +309,9 @@ DOSYALAR = {
     "karsilama.js":    "js/core",
     "karsilama.css":   "css",
     "karsilama.test.js": "tests",
+    "rehber.js":       "js/core",
+    "rehber.css":      "css",
+    "rehber.test.js":  "tests",
     # PUSULA — Kolay LifeOS planinin iki sayisi (KOLAY-PLANI §1, Faz 0, 2026-10-16).
     "pusula.js":       "js/core",
     "pusula.css":      "css",

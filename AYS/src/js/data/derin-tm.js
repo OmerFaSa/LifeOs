@@ -903,7 +903,7 @@ Object.assign(R.KONU_DERIN, {
         sec:['600', '625', '650', '675', '700'], dogru:'D',
         ipucu:'Grafiğin eğimi km başına harcanan yakıttır: (54 − 30) / 300.',
         cozum:['300 km’de 24 litre ⇒ km başına 0,08 litre.', '54 / 0,08 = 675 km.'] },
-      { seviye:'orta', soru:'Grafikte bir kırtasiyenin beş günlük defter satışları verilmiştir. Bu beş günde günde ortalama kaç defter satılmıştır?',
+      { seviye:'orta', soru:'Grafikte bir kırtasiyenin beş günlük defter satışları verilmiştir. Bu beş günde günlük ortalama kaç defter satılmıştır?',
         sekil:{ w:300, h:182, alt:'Sütun grafiği: pazartesi 30, salı 45, çarşamba 25, perşembe 40, cuma 60 defter.',
           o:[['e', 40, 150, 290, 14, '', 'Adet'], ['t', 32, 150, '0', 'ke'],
             ['r', 55, 90, 30, 60, 'g'], ['r', 100, 60, 30, 90, 'g'], ['r', 145, 100, 30, 50, 'g'], ['r', 190, 70, 30, 80, 'g'], ['r', 235, 30, 30, 120, 'g'],

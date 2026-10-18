@@ -54,6 +54,10 @@ SP.App = (function(){
     ]},
     { id:'kutuphane', label:CEK('kutuphane'), views:[
       { route:'notlar', label:'Notlar' },
+      /* Anlatımlar (2026-10-18, kullanıcı: «SPİ'ye anlatım yükle»): Öğren çekmecesi
+         değil — öğrenme işlevsel alanlara dağıtılmıştır (ogren.test «dağıtık») ve
+         Kolay LifeOS çekmeceyi azaltır. Okuyucu brand/ortak/rehber.js. */
+      { route:'rehber', label:'Anlatımlar' },
       { route:'kutuphane', label:'Bilgi ve ürünler' },
     ]},
     /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de

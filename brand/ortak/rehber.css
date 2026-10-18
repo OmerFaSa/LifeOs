@@ -1,0 +1,60 @@
+/* REHBER — konu anlatımları (brand/ortak/rehber.js).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/rehber.css`; `tools/ortak.py --yay` ile üç
+   arayüzün `src/css/` klasörüne birebir kopyalanır.
+   ==================================================================
+   AYS'nin anlatım sayfasıyla aynı ritim: okunaklı satır (≈ 68 harf),
+   numaralı başlıklar, sakin örnek kutusu, «Dikkat» satırı. */
+
+.rehber{ max-width:760px; margin:0 auto; color:var(--text); }
+
+/* ---------- liste ---------- */
+.rehber__ozet{ margin:0 0 18px; font-size:13px; color:var(--text-3); }
+.rehber__alan + .rehber__alan{ margin-top:24px; }
+.rehber__alan-ad{ margin:0 0 8px; font-size:13px; font-weight:600; letter-spacing:.01em; color:var(--text-2); }
+.rehber__konular{ list-style:none; margin:0; padding:0; border-radius:16px; background:var(--surface);
+  box-shadow:var(--kart-golge, 0 1px 2px rgba(20,24,40,.04)); overflow:hidden; }
+.rehber__konular li + li{ border-top:1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+.rehber__satir{ width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:52px;
+  padding:12px 18px; border:0; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer;
+  transition:background var(--dur, .16s) var(--ease, ease); }
+.rehber__satir:hover{ background:color-mix(in oklab, var(--surface-2) 70%, transparent); }
+.rehber__satir-ad{ font-size:15px; font-weight:550; }
+.rehber__satir-yan{ display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--text-3); white-space:nowrap; }
+.rehber__okundu{ font-style:normal; color:var(--primary); font-weight:700; }
+
+/* ---------- konu ---------- */
+.rehber__konu{ padding:4px 0 8px; }
+.rehber__ust{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; margin:0 0 14px; font-size:12.5px; color:var(--text-3); }
+.rehber__geri{ min-height:32px; padding:0 12px; border:0; border-radius:999px; background:var(--surface-2); color:var(--text);
+  font:inherit; font-size:13px; font-weight:550; cursor:pointer; }
+.rehber__ad{ margin:0 0 10px; font-size:clamp(24px, 3vw, 30px); font-weight:700; letter-spacing:-.02em; line-height:1.15; }
+.rehber__giris{ margin:0 0 18px; font-size:16.5px; line-height:1.6; color:var(--text-2); }
+.rehber__kazanim, .rehber__akilda{ margin:0 0 24px; padding:14px 18px; border-radius:14px; background:var(--surface-2); }
+.rehber__kazanim > p, .rehber__akilda > p{ margin:0 0 6px; font-size:12.5px; font-weight:600; color:var(--text-2); }
+.rehber__kazanim ul, .rehber__akilda ul{ margin:0; padding-left:20px; line-height:1.6; font-size:14.5px; }
+.rehber__bolum{ margin:0 0 26px; }
+.rehber__baslik{ display:flex; align-items:baseline; gap:10px; margin:0 0 8px; font-size:18px; font-weight:650; letter-spacing:-.01em; }
+.rehber__no{ flex:none; font-size:13px; font-weight:700; color:var(--primary); font-variant-numeric:tabular-nums; }
+.rehber__bolum p{ margin:0 0 10px; font-size:15.5px; line-height:1.65; }
+.rehber__madde{ margin:0 0 12px; padding-left:20px; font-size:15px; line-height:1.6; }
+.rehber__madde li + li{ margin-top:4px; }
+.rehber__formul{ margin:4px 0 12px; padding:12px 16px; border-radius:12px; background:var(--surface-2);
+  font-size:14.5px; line-height:1.7; font-variant-numeric:tabular-nums; }
+.rehber__ornek{ margin:6px 0 12px; padding:14px 16px; border-radius:14px; border:1px solid color-mix(in oklab, var(--border) 80%, transparent); }
+.rehber__ornek-etiket{ margin:0 0 4px !important; font-size:12px !important; font-weight:600; color:var(--text-3); }
+.rehber__ornek summary{ cursor:pointer; font-size:13.5px; font-weight:600; color:var(--text); }
+.rehber__ornek ol{ margin:8px 0 0; padding-left:20px; font-size:14.5px; line-height:1.6; }
+.rehber__dikkat{ font-size:14px !important; color:var(--text-2); }
+.rehber__dikkat b{ color:var(--danger, #c0392b); font-weight:650; }
+.rehber__kaynak{ margin:0 0 8px; font-size:12.5px; color:var(--text-3); }
+.rehber__sinir{ margin:0 0 18px; font-size:12.5px; color:var(--text-3); }
+.rehber__ayak{ display:flex; flex-wrap:wrap; gap:8px; padding-top:14px; border-top:1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+/* ---------- alan kartı (ESP Çalışma bölümlerinin sonunda) ---------- */
+.rehber-alan{ margin-top:24px; }
+.rehber-alan__ad{ margin:0 0 8px; font-size:13px; font-weight:600; color:var(--text-2); }
+@media (max-width:679px){
+  .rehber__giris{ font-size:15.5px; }
+  .rehber__bolum p{ font-size:15px; }
+}
