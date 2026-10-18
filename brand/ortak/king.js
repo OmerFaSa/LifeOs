@@ -2403,6 +2403,7 @@ window.LIFEOS.KING = (function(){
     envanter = null; ortam.depo.sil(USLUP);
     ortam.depo.sil(TANISMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
+    if(dinleyen){ try{ dinleyen.onend = dinleyen.onerror = null; dinleyen.abort(); }catch(e){ /* durmus */ } }
     sesli = false; dinleyen = null; konusuyor = 0; sesNo++; calan = null; sonMotor = '';
   }
 
