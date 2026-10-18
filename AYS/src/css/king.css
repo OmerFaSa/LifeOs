@@ -46,8 +46,13 @@ html.king-acik.king-cubuk{ scrollbar-gutter:stable; }
   mask:linear-gradient(to bottom, #000, transparent) top / 100% var(--k) no-repeat,
     linear-gradient(to top, #000, transparent) bottom / 100% var(--k) no-repeat,
     linear-gradient(to right, #000, transparent) left / var(--k) 100% no-repeat,
-    linear-gradient(to left, #000, transparent) right / var(--k) 100% no-repeat;
-  animation:king-don 9s linear infinite; }
+    linear-gradient(to left, #000, transparent) right / var(--k) 100% no-repeat; }
+/* Işık yalnız gerçek olayda döner (dinlerken, konuşurken). Durmadan dönen tam
+   ekran katman her karede yeniden boyanıyor, üstündeki buzlu baloncuk da her
+   karede yeniden bulanıklaşıyordu: sohbet kaydırılırken takılma ve titreme
+   (kullanıcı, 2026-10-18). Durgunken renkler yerinde, hareket yok. */
+.king.is-dinliyor .king-isik::before, .king.is-dinliyor .king-isik::after,
+.king.is-konusuyor .king-isik::before, .king.is-konusuyor .king-isik::after{ animation:king-don 3.2s linear infinite; }
 .king-isik::before{ --k:10px; opacity:.7; }
 .king-isik::after{ --k:72px; opacity:.32; }
 @keyframes king-don{ to{ --king-aci:360deg; } }
@@ -66,7 +71,8 @@ html.king-acik.king-cubuk{ scrollbar-gutter:stable; }
 .king.is-kapaniyor .king__kutu{ opacity:0; transform:translate(-50%, 10px) scale(.985); transition-duration:.34s;
   transition-timing-function:cubic-bezier(.4,0,.2,1); }
 
-.king__akis{ display:flex; flex-direction:column; gap:10px; overflow-y:auto; overscroll-behavior:contain; min-height:0; padding:2px 2px 0; }
+.king__akis{ display:flex; flex-direction:column; gap:10px; overflow-y:auto; overscroll-behavior:contain; min-height:0; padding:2px 2px 0;
+  -webkit-overflow-scrolling:touch; overflow-anchor:none; }
 .king__balon{ display:flex; align-items:flex-start; gap:10px; max-width:100%; }
 .king__balon p{ margin:0; font-size:15px; line-height:1.45; color:var(--text); }
 .king__balon ul{ margin:6px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:3px; }
@@ -129,10 +135,11 @@ html.king-acik.king-cubuk{ scrollbar-gutter:stable; }
 .king__kapat svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
 .king__kapat:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 
-/* Cevap belirir: bulanıktan netleşir, satırlar sırayla. */
-@keyframes king-belir{ from{ opacity:0; filter:blur(6px); transform:translateY(4px); } }
+/* Cevap sakin belirir (2026-10-18): yalnız saydamlık ve 4 piksel; ses ve
+   bulanıklık yok. Satırlar kısa arayla. */
+@keyframes king-belir{ from{ opacity:0; transform:translateY(4px); } }
 .king__balon--king.is-yeni p, .king__balon--king.is-yeni li, .king__balon--king.is-yeni .king__onizle{
-  animation:king-belir .56s cubic-bezier(.32,.72,0,1) both; }
+  animation:king-belir .32s cubic-bezier(.32,.72,0,1) both; }
 .king__balon--king.is-yeni li:nth-child(1){ animation-delay:.08s; }
 .king__balon--king.is-yeni li:nth-child(2){ animation-delay:.16s; }
 .king__balon--king.is-yeni li:nth-child(n+3){ animation-delay:.24s; }
@@ -190,8 +197,6 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__mik.is-acik{ color:#fff; background:var(--danger, #e5484d); animation:king-mik 1.4s ease-in-out infinite; }
 @keyframes king-mik{ 50%{ box-shadow:0 0 0 6px color-mix(in srgb, var(--danger, #e5484d) 22%, transparent); } }
 .king.is-dinliyor .king-isik, .king.is-konusuyor .king-isik{ animation:king-nabiz 1.6s ease-in-out infinite; }
-.king.is-dinliyor .king-isik::before, .king.is-dinliyor .king-isik::after,
-.king.is-konusuyor .king-isik::before, .king.is-konusuyor .king-isik::after{ animation-duration:3.2s; }
 @keyframes king-nabiz{ 0%, 100%{ opacity:.75; } 50%{ opacity:1; filter:saturate(1.35) brightness(1.08); } }
 .king.is-dinliyor .king__bas .king__kure, .king.is-konusuyor .king__bas .king__kure{ animation-duration:1.1s; }
 
@@ -303,8 +308,7 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__kayit ul{ margin:4px 0 0; padding-left:18px; font-size:13px; }
 .king__cip--tehlike{ color:var(--danger, #e5484d); }
 
-/* Söz 21: yazarak gelir — yazarken imleç; balonun köşesinde Kopyala. */
-.king .is-yaziyor{ cursor:pointer; }
+/* Balonun köşesinde Kopyala. */
 .king__balon--king{ position:relative; }
 .king__kopyala{ position:absolute; right:-6px; bottom:-6px; width:26px; height:26px; display:grid; place-items:center;
   padding:0; border:0; border-radius:999px; background:var(--surface); color:var(--text-2); cursor:pointer;
@@ -339,3 +343,15 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
   font:inherit; font-size:11px; font-weight:600; cursor:pointer; }
 .king__izin-dugme.is-acik{ background:color-mix(in oklab, var(--primary) 18%, var(--surface)); color:var(--text); }
 .king__izin-dugme:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+/* Çıkarım kartı (söz 23): Onaylar çekmecesinde, sohbette değil. */
+.cikarimlar{ display:grid; gap:12px; margin-top:12px; }
+.cikarim{ padding:12px 14px; border-radius:16px; background:var(--surface-2); }
+.cikarim__soru{ margin:0; font-size:15px; line-height:1.45; color:var(--text); }
+.cikarim__kanit{ margin:4px 0 0; font-size:13px; color:var(--text-2); }
+.cikarim__eylem{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.cikarim__duzelt{ margin-top:8px; }
+.cikarim__duzelt summary{ cursor:pointer; font-size:13px; color:var(--text-2); min-height:24px; display:inline-flex; align-items:center; }
+.cikarim__duzelt[open]{ display:grid; gap:8px; }
+.cikarim__duzelt .input{ width:100%; }
+.cikarim__duzelt .btn{ justify-self:start; }

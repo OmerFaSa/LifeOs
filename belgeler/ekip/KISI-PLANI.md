@@ -122,6 +122,11 @@ onu besleyen öğrenme yolları, King'in onu kullanması ve senin onu görmen.
   King söz 23: günde en çok bir soru (çıkarım varsa o, yoksa tanışma),
   «beni yorumla» ile hemen; Doğru → onayınla hafıza, Kısmen/serbest cevap →
   senin cümlen, Yanlış → bir daha sorulmaz.
+- 2026-10-18: **çıkarım sohbetten Onaylar'a taşındı.** Depo sahibi: «sohbet arasında
+  olmasın, Onaylar denilen yerde olsun»; açılıştaki soru, ardından yazılan «MERHABA»yı
+  düzeltme sayıp hafızaya yazıyordu. Adaylar üç modülün Onaylar çekmecesinde kart
+  (`KING.cikarimKarti`, `cikarimOnayla`): Doğru, Yanlış, kendi cümlenle düzelt. Tanışma
+  sorusu sohbette kalır ama selam ve soru cevap sayılmaz.
 - 2026-10-17: depo sahibi «çıkarımlar o kadar sıkı tutulmasın; her şeyden
   çıkarım» → eşikler düştü, yeni kaynaklar (44ee56ab); «artık bana sorma / sor»
   tercihi King söz 24.

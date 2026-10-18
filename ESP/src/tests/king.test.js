@@ -33,7 +33,6 @@
       hashSil:() => { giden.push('hash-silindi'); },
       adres:m => ({ ays:'http://127.0.0.1:4173/', spi:'http://127.0.0.1:4183/', esp:'http://127.0.0.1:4193/' })[m],
       simdi:() => new Date(2026, 9, 5, 9, 0),
-      yazmaEtkin:() => !!o.yazma,               // söz 21: yazma efekti yalnız kendi testinde
     }, o.fetch ? { fetch:o.fetch } : {});
     k.kur({ modul:o.modul || 'spi', git:(r, ek) => gidilen.push([r, ek || {}]),
       ozet:o.ozet || (() => ['Toparlanma iyi.', 'Uyku 7 sa · 2 öğün']), veri:o.veri, hkm:o.hkm });
@@ -476,83 +475,98 @@
       if(window.LIFEOS.ANIMASYON) expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(k.SORMA) >= 0).toBe(true);
     }));
 
-    /* Söz 23 (2026-10-17): çıkarım sohbetle sorulur; doğruysa kaydedilir. */
+    /* Söz 23 (2026-10-18): çıkarım sohbette sorulmaz, Onaylar'da karar verilir.
+       Hata: açılışta «Senin üzerine bir çıkarım yaptım … Sence doğru mu?»
+       sohbete düşüyordu; ardından yazılan «MERHABA» düzeltme sayılıp «Anladım,
+       senin cümlenle not ettim» diye hafızaya yazılıyordu. */
     const ESP_VERI = () => ({ esp:{ disiplin:{ gun:12, dakika:{ philo:500, lang:100 }, adlar:{ philo:'Felsefe' } } } });
-    it('çıkarım: «Doğru» onayla hafızaya; aynı çıkarım bir daha sorulmaz', () => sahneyle(async () => {
+    it('çıkarım sohbete girmez; «MERHABA» hafızaya yazılmaz', () => sahneyle(async () => {
       if(!window.LIFEOS.CIKARIM || !window.LIFEOS.Hafiza) return;
       const { k } = sahne();
       k._ortam.kisiSunucu = async () => null;
       const H = hafizali(k, { cikarimVeri:ESP_VERI });
+      expect(k.cikarimAdaylari().length > 0).toBe(true);
       k.ac();
-      expect(k.cikarimVar()).toBe(true);
-      expect(k.akis()[0].metin).toContain('Felsefe');
-      expect(k.akis()[0].son).toBe('Sence doğru mu?');
-      document.querySelector('[data-king="cikarim:dogru"]').click();
-      await new Promise(r => setTimeout(r, 0));
+      expect(k.akis().some(m => /çıkarım/i.test(m.metin || '') || m.son === 'Sence doğru mu?')).toBe(false);
+      expect(!!document.querySelector('[data-king^="cikarim:"]')).toBe(false);
+      await k.isle('MERHABA');
+      expect(H.etkin()).toHaveLength(0);
+      expect(k.akis().some(m => /senin cümlenle not ettim/.test(m.metin || ''))).toBe(false);
+      expect(k.cikarimAdaylari().length > 0).toBe(true);           // karar Onaylar'da bekliyor
+    }));
+    it('çıkarım Onaylar kartında: Doğru kaydeder, Geri al geri getirir; Yanlış bir daha sormaz', () => sahneyle(async () => {
+      if(!window.LIFEOS.CIKARIM || !window.LIFEOS.Hafiza) return;
+      const { k } = sahne();
+      k._ortam.kisiSunucu = async () => null;
+      const H = hafizali(k, { cikarimVeri:ESP_VERI });
+      const kart = k.cikarimKarti(3);
+      expect(kart).toContain('Felsefe');
+      expect(kart).toContain('data-act="cikarim-karar"');
+      expect(kart).toContain('data-karar="dogru"');
+      expect(kart).toContain('data-karar="yanlis"');
+      const id = 'esp-disiplin:philo';
+      const r = await k.cikarimOnayla(id, 'dogru');
+      expect(r.ok).toBe(true);
       const kay = H.etkin();
       expect([kay.length, kay[0].alan, kay[0].katman, kay[0].kaynak]).toEqual([1, 'gelisim', 'sohbet', 'kullanici']);
-      expect(kay[0].metin).toContain('onayladı');
-      expect(k.cikarimAdaylari().some(a => a.id === 'esp-disiplin:philo')).toBe(false);
+      expect(k.cikarimAdaylari().some(a => a.id === id)).toBe(false);
+      await r.geriAl();
+      expect(H.etkin()).toHaveLength(0);
+      expect(k.cikarimAdaylari().some(a => a.id === id)).toBe(true);
+      const y = await k.cikarimOnayla(id, 'yanlis');
+      expect(y.ok).toBe(true);
+      expect(H.etkin()).toHaveLength(0);
+      expect(k.cikarimKarti(3)).toBe('');
+      expect((await k.cikarimOnayla(id, 'dogru')).ok).toBe(false);   // artık aday değil
     }));
-    it('çıkarım: «Yanlış» bir daha sormaz; serbest cevap düzeltme olarak senin sözün', () => sahneyle(async () => {
+    it('çıkarımı kendi cümlenle düzeltmek senin sözün olur; boş cümle yazılmaz', () => sahneyle(async () => {
       if(!window.LIFEOS.CIKARIM || !window.LIFEOS.Hafiza) return;
       const { k } = sahne();
       k._ortam.kisiSunucu = async () => null;
       const H = hafizali(k, { cikarimVeri:ESP_VERI });
-      k.ac({ mini:true });
-      await k.isle('beni yorumla');
-      expect(k.cikarimVar()).toBe(true);
-      await k.isle('hayır');
+      const id = 'esp-disiplin:philo';
+      expect((await k.cikarimOnayla(id, 'kismen', '   ')).ok).toBe(false);
       expect(H.etkin()).toHaveLength(0);
-      expect(k.cikarimAdaylari()).toHaveLength(0);
-      await k.isle('beni yorumla');
-      expect(k.akis().slice(-1)[0].metin).toContain('yeni bir çıkarımım yok');
-      /* düzeltme */
-      k._ortam.depo.sil('lifeos.king.cikarim');
-      await k.isle('beni yorumla');
-      await k.isle('felsefe değil, tarih seviyorum');
+      const r = await k.cikarimOnayla(id, 'kismen', 'felsefe değil, tarih seviyorum');
+      expect(r.ok).toBe(true);
       const kay = H.etkin();
-      expect([kay.length, kay[0].katman, kay[0].alan]).toEqual([1, 'soz', 'gelisim']);
+      expect([kay.length, kay[0].katman, kay[0].alan, kay[0].metin]).toEqual([1, 'soz', 'gelisim', 'felsefe değil, tarih seviyorum']);
+      expect((await k.cikarimOnayla(id, 'bilinmez')).ok).toBe(false);
+    }));
+    it('«beni yorumla» çıkarımı sormaz, Onaylar’ı söyler', () => sahneyle(async () => {
+      if(!window.LIFEOS.CIKARIM || !window.LIFEOS.Hafiza) return;
+      const { k } = sahne();
+      k._ortam.kisiSunucu = async () => null;
+      hafizali(k, { cikarimVeri:ESP_VERI });
+      k.ac({ mini:true });
+      const r = await k.isle('beni yorumla');
+      expect(r.tur).toBe('cikarim-onaylar');
+      expect(k.akis().slice(-1)[0].metin).toContain('Onaylar');
+      await k.isle('evet');
+      expect(k.cikarimAdaylari().length > 0).toBe(true);
     }));
 
-    /* Söz 21 (2026-10-17): «King yazarken tıkı tıkı, açıp kapatabildiğimiz yazı yazma». */
-    it('yeni cevap harf harf yazılır, seyrek tıklar; dokununca biter; kapatılınca tek seferde', () => sahneyle(async () => {
+    /* Söz 21 (2026-10-18): «tıkı tıkı seslerle yazma işi amatörce». Cevap tek
+       seferde gelir, ses çalmaz; menüde yazma anahtarı yok. */
+    it('cevap tek seferde gelir, ses çalmaz; yazma anahtarı yok', () => sahneyle(async () => {
       const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
-      const { k } = sahne({ veri, yazma:true });
-      const kareler = [];
-      let tik = 0;
-      Object.assign(k._ortam, { kare:fn => { kareler.push(fn); }, tikla:() => { tik++; return true; } });
-      k.ac();
-      await k.isle('uyku 7');
-      const balon = () => Array.from(document.querySelectorAll('.king__balon--king')).pop();
-      expect(k.yaziyorMu()).toBe(true);
-      expect(balon().textContent.trim()).toBe('');
-      const tam = k.akis().slice(-1)[0].metin;
-      expect(balon().querySelector('.is-yaziyor').getAttribute('aria-label')).toContain(tam);
-      /* zaman ilerler: yarısı yazılır, tık sayısı karakterden çok az */
-      let z = 0;
-      const ilerle = ms => { z += ms; const l = kareler.splice(0); l.forEach(f => f(z)); };
-      ilerle(0); ilerle(400);
-      const yarim = balon().textContent.trim().length;
-      expect(yarim > 0 && yarim < tam.length).toBe(true);
-      for(let i = 0; i < 200 && k.yaziyorMu(); i++) ilerle(16);
-      expect(k.yaziyorMu()).toBe(false);
-      expect(balon().textContent).toContain(tam);
-      expect(tik > 0 && tik < balon().textContent.trim().length / 2).toBe(true);
-      /* dokununca biter */
-      await k.isle('uyku 8');
-      ilerle(0);
-      balon().querySelector('.is-yaziyor').click();
-      expect(k.yaziyorMu()).toBe(false);
-      expect(balon().textContent).toContain(k.akis().slice(-1)[0].metin);
-      /* kapalıyken tek seferde; ses ayrı kapanır */
-      k.yazmaSec('ses', false);
-      expect(k.yazmaAyar()).toEqual({ yaz:true, ses:false });
-      k.yazmaSec('yaz', false);
-      await k.isle('uyku 9');
-      expect(k.yaziyorMu()).toBe(false);
-      expect(balon().textContent).toContain(k.akis().slice(-1)[0].metin);
-      if(window.LIFEOS.ANIMASYON) expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(k.YAZMA) >= 0).toBe(true);
+      const { k } = sahne({ veri });
+      const eskiC = window.AudioContext;
+      let ses = 0;
+      window.AudioContext = function(){ ses++; };
+      try{
+        k.ac();
+        await k.isle('uyku 7');
+        const balon = Array.from(document.querySelectorAll('.king__balon--king')).pop();
+        expect(balon.textContent).toContain(k.akis().slice(-1)[0].metin);
+        expect(!!document.querySelector('.is-yaziyor')).toBe(false);
+        expect(ses).toBe(0);
+        expect(k.yazmaSec).toBe(undefined);
+        expect(k._ortam.tikla).toBe(undefined);
+        k.menuAc('menu');
+        expect(!!document.querySelector('[data-king^="yazma:"]')).toBe(false);
+      }finally{ window.AudioContext = eskiC; }
+      if(window.LIFEOS.ANIMASYON) expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf('lifeos.king.yazma') < 0).toBe(true);
     }));
     it('boş kutuda ↑ son yazdığını geri getirir', () => sahneyle(async () => {
       const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };

@@ -371,6 +371,7 @@ SP.Screens.onaylar = (function(){
     let n = (S.ui.kingTeklifler || []).length + (S.ui.hkmIntents || []).length
       + (S.ui.hkmDoubts || []).length;
     try{ if(SP.Proposals) n += SP.Proposals.pending().length; }catch(e){ console.error(e); }
+    n += cikarimSayisi();
     return n;
   }
 
@@ -423,7 +424,30 @@ SP.Screens.onaylar = (function(){
 
   /* Seçici yalnız bekleyen varken (boş Onaylar tek eylemdir, 010); «Son
      kararlar» grupların altında hep görünür (119). */
+  /* ÇIKARIMLAR (King söz 23; kullanıcı, 2026-10-18: «çıkarım sohbet arasında
+     olmasın, Onaylar denilen yerde olsun»). King'in senin hakkındaki
+     tahminleri burada kart olarak durur; kararı sen verirsin. Kart
+     brand/ortak/king.js'ten (cikarimKarti), karar cikarimOnayla'dan. */
+  function cikarimSayisi(){
+    try{ const Kg = (window.LIFEOS || {}).KING; return Kg && Kg.cikarimAdaylari ? Math.min(3, Kg.cikarimAdaylari().length) : 0; }
+    catch(e){ return 0; }
+  }
+  function cikarimKutusu(){
+    const Kg = (window.LIFEOS || {}).KING;
+    let h = '';
+    try{ h = Kg && Kg.cikarimKarti ? Kg.cikarimKarti(3) : ''; }catch(e){ console.error(e); }
+    if(!h) return '';
+    return String(K.Kutu({ ad:'Çıkarımlar', yuva:String(cikarimSayisi()), govde:html`
+      <p class="small muted">King’in senin hakkındaki tahminleri. Doğruysa kaydedilir; yanlışsa bir daha sorulmaz.</p>${raw(h)}` }));
+  }
+
   async function render(){
+    const ana = String(await onayRender());
+    const ck = cikarimKutusu();
+    return ck ? String(html`<div data-oz="cikarim">${raw(ck)}</div><div class="mt-16">${raw(ana)}</div>`) : ana;
+  }
+
+  async function onayRender(){
     const l = onaySatirlari();
     const gecmis = sonKararlar();
     if(!l.length){
@@ -447,6 +471,20 @@ SP.Screens.onaylar = (function(){
   /* ---------- eylemler ---------- */
   const handle = {
     'onay-tur'(el){ S.ui.onayTur = el.dataset.value; SP.App.render(); },
+    /* Çıkarım kararı: Doğru / Yanlış / kendi cümlenle düzelt. */
+    async 'cikarim-karar'(el){
+      const Kg = (window.LIFEOS || {}).KING;
+      if(!Kg || !Kg.cikarimOnayla) return;
+      const id = el.dataset.id, karar = el.dataset.karar;
+      let metin = '';
+      if(karar === 'kismen'){
+        const g = Array.from(document.querySelectorAll('[data-cikarim-metin]')).find(x => x.getAttribute('data-cikarim-metin') === id);
+        metin = g ? g.value : '';
+      }
+      const r = await Kg.cikarimOnayla(id, karar, metin);
+      SP.UI.toast(r.metin, r.geriAl ? { undo:async () => { await r.geriAl(); SP.App.render(); } } : undefined);
+      if(r.ok) SP.App.render();
+    },
     /* King'in teklifi (brand/ortak/kingteklif.js): onay ve iptal HKM'nin
        tek kapısına gider; cevabı HKM kurar. */
     async 'king-onayla'(el){

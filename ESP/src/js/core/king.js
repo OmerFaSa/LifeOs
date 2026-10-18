@@ -143,18 +143,11 @@
       «evet» büyük eylemi uygulamaz. Hesap işi yapılmaz, söylenir. Sayfanın
       yeniden yüklenmesi gereken eylemden sonra King aynı sayfada küçük
       kutu olarak yeniden açılır.
-  21. YAZARAK GELİR (depo sahibi, 2026-10-17: «King yazarken tıkı tıkı, çok
-      olmayan, açıp kapatabildiğimiz yazı yazma olsun; tüm metni tek seferde
-      yazmasın»). Yeni cevap harf harf belirir: kısa cevap yavaş, uzun
-      cevap hızlı (toplam en çok ~2,2 sn). Yazarken çok hafif, seyrek bir
-      tık (en çok 14 kez/sn) çalar. «Daha fazla» menüsünde ikisi ayrı ayrı
-      açılıp kapanır (modüller arasında taşınır). Balona dokunmak ya da
-      yeni bir şey yazmak yazmayı bitirir. Görünüm › Animasyonlar «Az»da
-      yazma yok, metin tek seferde. Ekran okuyucu metnin tamamını alır
-      (aria-label), harf harf değil.
-      Ek: King'in her cevabında «Kopyala» düğmesi (balonun köşesinde);
-      boş kutuda ↑ son yazdığını geri getirir (düzeltip yeniden gönder);
-      King konuşurken küreye dokunmak susturur.
+  21. CEVAP SAKİN BELİRİR (depo sahibi, 2026-10-18: «tıkı tıkı seslerle
+      yazma işi amatörce kalmış»; 2026-10-17'deki harf harf yazma ve tık
+      sesi kalktı). Yeni cevap tek seferde gelir, satırları hafifçe
+      belirir (yalnız saydamlık ve 4 piksellik kayma; ses yok, bulanıklık
+      yok). Görünüm › Animasyonlar «Az»da belirme de yok.
   22. SENİ TANIR (depo sahibi, 2026-10-17, belgeler/ekip/KISI-PLANI.md:
       «King her şeyi öğrenecek»). Kişi modeli hafızanın kendisidir (kisi.js):
         · AÇIK BEYAN kendiliğinden yazılır («Balığı sevmem», «hobim satranç»;
@@ -170,16 +163,17 @@
           «hafızam» ve «benim hakkımda ne biliyorsun» paneli açar).
         · Görüntü okuyan modele kişi özeti gider (depo sahibinin kararı:
           hassas alanlar dahil); teşhis ve yargı yasak istemde yazılı.
-  23. ÇIKARIM SORAR (depo sahibi, 2026-10-17: «okuduğum kitaptan, müzikten,
-      dersten, yemekten, sağlığımdan çıkarım yapsın; birazcık sohbet ederek
-      ‹senin üzerine böyle bir çıkarım yaptım, sence doğru mu?› desin;
-      doğruysa sistem kaydetsin»). Kurallar cikarim.js'te, veri modülden
-      (`ayar.cikarimVeri`). King günde en çok bir soru sorar (çıkarım varsa
-      o, yoksa tanışma); «beni yorumla» dersen hemen. Cevap:
-        Doğru   → senin onayınla hafızaya («sohbetten», kaynak sen)
-        Kısmen  → «nasıl düzelteyim?»; senin cümlen «senin sözün» olur
+  23. ÇIKARIM ONAYLAR'DA (depo sahibi, 2026-10-17: «çıkarım yapsın,
+      doğruysa sistem kaydetsin»; 2026-10-18: «sohbet arasında olmasın,
+      Onaylar denilen yerde olsun; ‹doğru mu› gibisinden kabul edilsin»).
+      Kurallar cikarim.js'te, veri modülden (`ayar.cikarimVeri`). King
+      sohbette çıkarım SORMAZ: adaylar modülün Onaylar çekmecesinde kart
+      olarak durur (`cikarimKarti`, `cikarimOnayla`). Karar:
+        Doğru   → senin onayınla hafızaya (kaynak sen)
+        Düzelt  → kendi cümlen «senin sözün» olur
         Yanlış  → bir daha sorulmaz
-      Serbest cevap («felsefe değil, tarih») düzeltme sayılır.
+      «Beni yorumla» dersen King Onaylar'da kaç çıkarımın beklediğini
+      söyler. Sohbetteki hiçbir mesaj çıkarım cevabı sayılmaz.
   24. SORMA / SOR (depo sahibi, 2026-10-17: «AYS'de şu verileri alırken artık
       bana sorma, SPİ'de sor gibi tercihler»). Kendi yazdığın veriyi King
       «ekleyeyim mi?» diye sorar; «SPİ'de uyku için artık sorma», «AYS'de
@@ -266,31 +260,6 @@ window.LIFEOS.KING = (function(){
     yenile:() => { try{ location.reload(); }catch(e){ /* yok */ } },
     /* Söz 22: öbür modüllerin kişi kayıtları (sunucu sözü 24); yoksa null. */
     kisiSunucu:async () => (L.HESAP && typeof L.HESAP.kisi === 'function' ? L.HESAP.kisi() : null),
-    /* Söz 21: yazma efekti etkin mi (testte kapatılır) ve kare zamanlayıcı. */
-    yazmaEtkin:() => !(L.hareketAz && L.hareketAz()),
-    kare:fn => (typeof requestAnimationFrame === 'function' ? requestAnimationFrame(fn) : setTimeout(() => fn(Date.now()), 16)),
-    /* Söz 21: yazma tıkı — kendi küçük ses bağlamı; çok kısa, çok kısık. */
-    tikla:(() => {
-      let c = null;
-      return () => {
-        try{
-          const C = window.AudioContext || window.webkitAudioContext;
-          if(!C) return false;
-          if(!c) c = new C();
-          if(c.state === 'suspended' && c.resume) c.resume();
-          const t = c.currentTime;
-          const o = c.createOscillator(), g = c.createGain();
-          o.type = 'triangle';
-          o.frequency.setValueAtTime(1700 + Math.random() * 500, t);
-          g.gain.setValueAtTime(0.0001, t);
-          g.gain.exponentialRampToValueAtTime(0.018, t + 0.003);
-          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
-          o.connect(g); g.connect(c.destination);
-          o.start(t); o.stop(t + 0.04);
-          return true;
-        }catch(e){ return false; }
-      };
-    })(),
     hash:() => (typeof location !== 'undefined' ? location.hash : ''),
     hashSil:() => { try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){ /* eski tarayıcı */ } },
     adres:k => (L.KABUK && L.KABUK.adres ? L.KABUK.adres(k) : null),
@@ -373,15 +342,11 @@ window.LIFEOS.KING = (function(){
   let silOnay = null;         // söz 19: silinmek üzere seçilen kayıt
   let silinen = null;         // söz 19: temizlenen sohbet («Geri getir»)
   let bekleyenYetki = null;   // söz 20: onay bekleyen orta/büyük eylem
-  const YAZMA = 'lifeos.king.yazma';   // söz 21: { yaz, ses }; TASINAN'da
-  let yazici = null;          // söz 21: süren yazma { bitir() }
   let bekleyenTanisma = null; // söz 22: { alan, soru }
   let disKisi = [];           // söz 22: öbür modüllerin kişi kayıtları [{ modul, kayitlar }]
   let kisiYeni = { alan:'sevgi', metin:'' };   // söz 22: paneldeki ekleme formu
   const TANISMA = 'lifeos.king.tanisma';
   const CIKARIM_KARAR = 'lifeos.king.cikarim';   // söz 23: { id:'dogru'|'kismen'|'yanlis' }
-  let bekleyenCikarim = null;  // söz 23: soru sorulmuş aday
-  let bekleyenDuzeltme = null; // söz 23: «Kısmen» sonrası düzeltme bekleniyor
   const SORMA = 'lifeos.king.sorma';
   const USLUP = 'lifeos.king.uslup';           // söz 25: üslup sayacı
   let envanter = null;                          // söz 25: { i, cevaplar }           // söz 24: { ays:{ '*':true, uyku:false }, spi:{…} }
@@ -1040,125 +1005,54 @@ window.LIFEOS.KING = (function(){
     if(us) v = Object.assign({}, v, { uslup:us });
     return C.uret(v, ortam.depo.oku(CIKARIM_KARAR) || {});
   }
-  function cikarimBalonu(a){
-    bekleyenCikarim = a;
-    cipler = [{ is:'cikarim:dogru', ad:'Doğru' }, { is:'cikarim:kismen', ad:'Kısmen' }, { is:'cikarim:yanlis', ad:'Yanlış' }];
-    return { metin:'Senin üzerine bir çıkarım yaptım. ' + a.soru, satirlar:['Dayanağı: ' + a.kanit], son:'Sence doğru mu?' };
-  }
-  /* Açılışta (günde bir): akışa doğrudan konur. */
-  function cikarimHazirla(){
-    if(akis.length || ortam.depo.oku(TANISMA) === bugunISO()) return false;
-    const a = cikarimAdaylari()[0];
-    if(!a) return false;
-    ortam.depo.yaz(TANISMA, bugunISO());
-    const b = cikarimBalonu(a);
-    akis.push({ kim:'king', metin:b.metin, satirlar:b.satirlar, son:b.son });
-    return true;
+  /* Onaylar kartı: modülün Onaylar çekmecesi çizer, düğmeler `cikarim-karar`
+     (data-id, data-karar) ile cikarimOnayla'ya gelir. Metin koddan; kaçışlı. */
+  function cikarimKarti(en){
+    const l = cikarimAdaylari().slice(0, en || 3);
+    if(!l.length) return '';
+    return '<div class="cikarimlar" data-cikarimlar>'
+      + l.map(a => '<div class="cikarim" data-cikarim="' + kac(a.id) + '">'
+        + '<p class="cikarim__soru">' + kac(a.soru) + '</p>'
+        + '<p class="cikarim__kanit">Dayanağı: ' + kac(a.kanit) + '</p>'
+        + '<div class="cikarim__eylem">'
+        + '<button type="button" class="btn btn--sm btn--primary" data-act="cikarim-karar" data-id="' + kac(a.id) + '" data-karar="dogru"><span class="btn__label">Doğru, kaydet</span></button>'
+        + '<button type="button" class="btn btn--sm" data-act="cikarim-karar" data-id="' + kac(a.id) + '" data-karar="yanlis"><span class="btn__label">Yanlış, bir daha sorma</span></button>'
+        + '</div>'
+        + '<details class="cikarim__duzelt"><summary>Kendi cümlemle düzelt</summary>'
+        + '<input type="text" class="input" maxlength="240" aria-label="Kendi cümlen" data-cikarim-metin="' + kac(a.id) + '" placeholder="Örneğin: felsefe değil, tarih seviyorum">'
+        + '<button type="button" class="btn btn--sm" data-act="cikarim-karar" data-id="' + kac(a.id) + '" data-karar="kismen"><span class="btn__label">Cümlemi kaydet</span></button>'
+        + '</details></div>').join('')
+      + '</div>';
   }
   function cikarimKararYaz(id, durum){
     const k = ortam.depo.oku(CIKARIM_KARAR) || {};
     k[id] = durum;
     ortam.depo.yaz(CIKARIM_KARAR, k);
   }
-  async function cikarimKarar(durum){
-    const a = bekleyenCikarim, H = hafiza();
-    bekleyenCikarim = null; cipler = null;
-    if(!a) return;
-    cikarimKararYaz(a.id, durum);
-    if(durum === 'dogru' && H){
-      const r = await H.ekle(a.kayit, { katman:'sohbet', kaynak:'kullanici', alan:a.alan });
-      if(r && r.ok){ sonGeriAl = async () => { await H.unut(r.kayit.id); }; cipler = [{ is:'geri-al', ad:'Geri al' }]; }
-      soyle('Güzel, not ettim. Seni biraz daha iyi tanıyorum.');
-      return;
-    }
-    if(durum === 'kismen'){
-      bekleyenDuzeltme = a;
-      soyle('Nasıl düzelteyim? Kendi cümlenle yaz, öyle not edeyim.');
-      return;
-    }
-    soyle('Tamam, bu çıkarımı bıraktım; bir daha sormayacağım.');
+  /* Doner: { ok, metin, geriAl? }. Aday artık yoksa (karar verilmiş, veri
+     değişmiş) hiçbir şey yazılmaz. */
+  async function cikarimOnayla(id, durum, metin){
+    const a = cikarimAdaylari().find(x => x.id === id), H = hafiza();
+    if(!a || ['dogru', 'yanlis', 'kismen'].indexOf(durum) < 0) return { ok:false, metin:'Bu çıkarım artık geçerli değil.' };
+    if(durum === 'yanlis'){ cikarimKararYaz(id, 'yanlis'); return { ok:true, metin:'Bıraktım; bu çıkarımı bir daha sormayacağım.' }; }
+    const m = durum === 'kismen' ? String(metin || '').replace(/\s+/g, ' ').trim() : a.kayit;
+    if(!m) return { ok:false, metin:'Önce kendi cümleni yaz.' };
+    if(!H) return { ok:false, metin:'Hafıza bu cihazda kapalı.' };
+    const r = await H.ekle(m, durum === 'kismen' ? { katman:'soz', kaynak:'kullanici', alan:a.alan }
+      : { katman:'sohbet', kaynak:'kullanici', alan:a.alan });
+    if(!(r && r.ok)) return { ok:false, metin:(r && r.why) || 'Kaydedemedim.' };
+    cikarimKararYaz(id, durum);
+    return { ok:true, metin:durum === 'kismen' ? 'Senin cümlenle kaydettim.' : 'Kaydettim; seni biraz daha iyi tanıyorum.',
+      geriAl:async () => { await H.unut(r.kayit.id); const k = ortam.depo.oku(CIKARIM_KARAR) || {}; delete k[id]; ortam.depo.yaz(CIKARIM_KARAR, k); } };
   }
-  async function cikarimDuzelt(a, metin){
-    const H = hafiza();
-    bekleyenDuzeltme = null; bekleyenCikarim = null; cipler = null;
-    cikarimKararYaz(a.id, 'kismen');
-    const m = String(metin || '').replace(/\s+/g, ' ').trim();
-    if(!H || !m){ soyle('Tamam.'); return; }
-    const r = await H.ekle(m, { katman:'soz', kaynak:'kullanici', alan:a.alan });
-    if(r && r.ok){ sonGeriAl = async () => { await H.unut(r.kayit.id); }; cipler = [{ is:'geri-al', ad:'Geri al' }]; }
-    soyle(r && r.ok ? 'Anladım, senin cümlenle not ettim.' : (r && r.why) || 'Not edemedim.');
-  }
-  const YORUMLA = /^(beni (yorumla|analiz et|tanı|oku)|benim hakkımda (bir )?(çıkarım|yorum) yap|hakkımda ne düşünüyorsun|beni nasıl görüyorsun|beni ne kadar tanıyorsun)/;
-
-  /* ---------- söz 21: yazarak gelir ---------- */
-  function yazmaAyar(){
-    const v = ortam.depo.oku(YAZMA) || {};
-    return { yaz:v.yaz !== false, ses:v.ses !== false };
-  }
-  function yazmaSec(alan, deger){
-    if(alan !== 'yaz' && alan !== 'ses') return false;
-    const a = yazmaAyar();
-    a[alan] = !!deger;
-    if(a.yaz && a.ses) ortam.depo.sil(YAZMA); else ortam.depo.yaz(YAZMA, a);
-    ciz(false);
+  /* Bir soruya cevap gibi mi? Selam, hal hatır, soru ve tek harf değil. */
+  const SELAM = /^(merhaba|merhabalar|selam|selamlar|sa|slm|mrb|hey|hi|hello|naber|nbr|nasılsın|nasilsin|ne haber|günaydın|gunaydin|iyi (akşamlar|aksamlar|geceler|günler|gunler|sabahlar)|hayırlı (sabahlar|günler)|king)[\s!.,?]*$/;
+  function cevapGibi(metin){
+    const t = String(metin || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
+    if(t.length < 2 || SELAM.test(t) || /\?\s*$/.test(t)) return false;
     return true;
   }
-  function yazmayiBitir(){ if(yazici){ const y = yazici; yazici = null; y.bitir(); } }
-  /* Balonun metin düğümleri boşaltılır, sırayla geri yazılır. Hız metnin
-     boyuna göre: 30 karakter ~0,9 sn, 600 karakter ~2,2 sn. */
-  function yazdir(el){
-    yazmayiBitir();
-    if(!el || !ortam.yazmaEtkin() || !yazmaAyar().yaz) return null;
-    const dugumler = [];
-    const gez = n => {
-      n.childNodes.forEach(c => {
-        if(c.nodeType === 3){ if(c.nodeValue.trim()) dugumler.push({ n:c, tam:c.nodeValue }); }
-        else if(c.nodeType === 1 && !c.matches('button, .king__kopyala')) gez(c);
-      });
-    };
-    gez(el);
-    const toplam = dugumler.reduce((a, d) => a + d.tam.length, 0);
-    if(!toplam) return null;
-    el.setAttribute('aria-label', dugumler.map(d => d.tam).join(' '));
-    el.classList.add('is-yaziyor');
-    dugumler.forEach(d => { d.n.nodeValue = ''; });
-    const sure = Math.max(700, Math.min(2200, 600 + toplam * 9));
-    const ses = yazmaAyar().ses;
-    let bas = null, yazilan = 0, sonTik = 0, bitti = false;
-    function koy(n){
-      let kalan = n;
-      dugumler.forEach(d => {
-        const k = Math.max(0, Math.min(d.tam.length, kalan));
-        d.n.nodeValue = d.tam.slice(0, k);
-        kalan -= d.tam.length;
-      });
-    }
-    function bitir(){
-      if(bitti) return;
-      bitti = true;
-      koy(toplam);
-      el.classList.remove('is-yaziyor');
-      el.removeAttribute('aria-label');
-      if(yazici === y) yazici = null;
-    }
-    function adim(z){
-      if(bitti) return;
-      if(bas == null) bas = z;
-      const n = Math.min(toplam, Math.ceil(toplam * Math.min(1, (z - bas) / sure)));
-      if(n > yazilan){
-        /* Tık seyrek: en az 70 ms arayla ve yalnız harf eklenince. */
-        if(ses && z - sonTik > 70 && /\S/.test(dugumler.map(d => d.tam).join('').slice(yazilan, n))){ ortam.tikla(); sonTik = z; }
-        yazilan = n;
-        koy(n);
-      }
-      if(n >= toplam){ bitir(); return; }
-      ortam.kare(adim);
-    }
-    const y = { bitir };
-    yazici = y;
-    ortam.kare(adim);
-    return y;
-  }
+  const YORUMLA = /^(beni (yorumla|analiz et|tanı|oku)|benim hakkımda (bir )?(çıkarım|yorum) yap|hakkımda ne düşünüyorsun|beni nasıl görüyorsun|beni ne kadar tanıyorsun)/;
 
   function cevapBicimi(){ const v = ortam.depo.oku(CEVAP); return v === 'ses' || v === 'yazi' ? v : 'oto'; }
   function cevapSec(v){
@@ -1264,14 +1158,6 @@ window.LIFEOS.KING = (function(){
         + sec('oto', 'Otomatik', 'Konuşarak sorduğuna sesli, yazarak sorduğuna yazılı cevap')
         + sec('ses', 'Sesli', 'Yazsan da cevabı sesli okur; yazı da görünür')
         + sec('yazi', 'Yazılı', 'Konuşsan da cevap yalnız yazılı gelir') + '</div></div>'
-        + (() => {
-          const y = yazmaAyar();
-          const anahtar = (alan, ad, acik, ip) => '<button type="button" class="king__menu-is king__menu-anahtar" role="switch" aria-checked="'
-            + (acik ? 'true' : 'false') + '" data-king="yazma:' + alan + ':' + (acik ? '0' : '1') + '" title="' + ip + '">' + ad
-            + '<span class="king__anahtar' + (acik ? ' is-acik' : '') + '" aria-hidden="true"><i></i></span></button>';
-          return anahtar('yaz', 'Yazarak göster', y.yaz, 'Cevap harf harf belirir; kapalıyken tek seferde')
-            + (y.yaz ? anahtar('ses', 'Yazma sesi', y.ses, 'Yazarken çok hafif, seyrek tık') : '');
-        })()
         + (hafiza() && KISI() ? '<button type="button" class="king__menu-is" data-king="kisi">Beni nasıl tanıyorsun<span class="king__menu-say">'
           + kisiKayitlari().length + '</span></button>' : '')
         + (sormaListesi().length ? '<div class="king__menu-satir"><span class="king__menu-ad">Sormadan ekler: ' + kac(sormaListesi().join(', '))
@@ -1392,7 +1278,7 @@ window.LIFEOS.KING = (function(){
     }
     if(ENV_BASLA.test(t0) && hafiza() && ENV()){
       akis.push({ kim:'sen', metin:String(metin).trim() });
-      bekleyenTanisma = null; bekleyenCikarim = null; cipler = null;
+      bekleyenTanisma = null; cipler = null;
       envanterBasla();
       ciz(false);
       return { tur:'envanter' };
@@ -1415,38 +1301,12 @@ window.LIFEOS.KING = (function(){
       soyle(r ? r.text : 'Anlayamadım.');
       return { tur:'hafiza' };
     }
-    /* Söz 23: çıkarım cevabı ve düzeltme. */
-    if(bekleyenDuzeltme){
-      const y0 = yorumla(metin);
-      if(!(y0.tur === 'veri' || (y0.tur === 'git' && y0.kaynak === 'komut'))){
-        akis.push({ kim:'sen', metin:String(metin).trim() });
-        await cikarimDuzelt(bekleyenDuzeltme, metin);
-        return { tur:'cikarim-duzelt' };
-      }
-      bekleyenDuzeltme = null;
-    }
-    if(bekleyenCikarim){
-      const karar = L.CIKARIM ? L.CIKARIM.cevapOku(metin) : null;
-      const y0 = yorumla(metin);
-      if(karar){
-        akis.push({ kim:'sen', metin:String(metin).trim() });
-        await cikarimKarar(karar);
-        return { tur:'cikarim', karar };
-      }
-      if(!(y0.tur === 'veri' || (y0.tur === 'git' && y0.kaynak === 'komut'))){
-        akis.push({ kim:'sen', metin:String(metin).trim() });
-        await cikarimDuzelt(bekleyenCikarim, metin);
-        return { tur:'cikarim-duzelt' };
-      }
-      bekleyenCikarim = null;
-    }
     if(YORUMLA.test(t0) && hafiza() && L.CIKARIM){
       akis.push({ kim:'sen', metin:String(metin).trim() });
       bekleyenTanisma = null; cipler = null;
-      const a = cikarimAdaylari()[0];
-      if(a){ const b = cikarimBalonu(a); soyle(b.metin, b.satirlar, null, b.son); return { tur:'cikarim-soru' }; }
-      bekleyenTanisma = null;
-      soyle('Şimdilik sana sorabileceğim yeni bir çıkarımım yok; kayıtların arttıkça olacak. «Beni nasıl tanıyorsun»da bildiklerimi görebilirsin.');
+      const n = cikarimAdaylari().length;
+      if(n){ soyle('Çıkarımlarımı sohbette sormuyorum; Onaylar’da duruyorlar. Şu an ' + n + ' tanesi kararını bekliyor.'); return { tur:'cikarim-onaylar', n }; }
+      soyle('Şimdilik yeni bir çıkarımım yok; kayıtların arttıkça Onaylar’a bırakacağım. «Beni nasıl tanıyorsun»da bildiklerimi görebilirsin.');
       return { tur:'cikarim-yok' };
     }
     /* Söz 22: tanışma sorusunun cevabı (komut ya da veri değilse). */
@@ -1454,11 +1314,15 @@ window.LIFEOS.KING = (function(){
       const y0 = yorumla(metin);
       /* Cevap içinde sayfa sözü geçebilir («kitap okumak»): yalnız veri
          cümlesi ve açık «aç» komutu cevap sayılmaz. */
-      if(!(y0.tur === 'veri' || (y0.tur === 'git' && y0.kaynak === 'komut'))){
+      /* Selam, soru ya da tek kelimelik laf cevap DEĞİLDİR (2026-10-18:
+         «MERHABA» «senin cümlenle not ettim» diye hafızaya yazılıyordu).
+         Soru sessizce bırakılır, mesaj sohbet olarak akar. */
+      if(cevapGibi(metin) && !(y0.tur === 'veri' || (y0.tur === 'git' && y0.kaynak === 'komut'))){
         akis.push({ kim:'sen', metin:String(metin).trim() });
         await tanismaCevapla(metin);
         return { tur:'tanisma' };
       }
+      cipler = null;
       bekleyenTanisma = null;
     }
     /* Söz 20: sistem içindeki değişiklik kataloğa (yetki.js). */
@@ -1799,18 +1663,19 @@ window.LIFEOS.KING = (function(){
     const k = document.querySelector('[data-king]');
     if(!k) return;
     const kutu = k.querySelector('.king__kutu');
-    yazmayiBitir();
-    const yeniVar = akis.some(m => m.yeni && m.kim === 'king' && !m.bekliyor);
+    /* Kaydırma yeri korunur (2026-10-18, «yukarı aşağı kaydırmada sıkışıyor,
+       titriyor»): her çizim listeyi en alta atıyordu; yukarıda okurken gelen
+       bir durum çizimi seni aşağı çekiyordu. Altta ya da yeni mesaj varsa
+       alta, değilse kaldığın yerde. */
+    const eski = kutu.querySelector('.king__akis');
+    const yeniVar = akis.some(m => m.yeni);
+    const altta = !eski || eski.scrollHeight - eski.scrollTop - eski.clientHeight < 48;
+    const yer = eski ? eski.scrollTop : 0;
     kutu.innerHTML = govde();
     const g = kutu.querySelector('.king__girdi');
     const akisEl = kutu.querySelector('.king__akis');
-    if(akisEl) akisEl.scrollTop = akisEl.scrollHeight;
+    if(akisEl) akisEl.scrollTop = (altta || yeniVar) ? akisEl.scrollHeight : yer;
     akis.forEach(m => { m.yeni = false; });
-    /* Söz 21: yeni cevap harf harf. */
-    if(yeniVar && !menu){
-      const hedef = mini ? kutu.querySelector('.king__mini-son:not(.is-bekliyor)') : Array.from(kutu.querySelectorAll('.king__balon--king.is-yeni')).pop();
-      if(hedef) yazdir(hedef.firstElementChild && !mini ? hedef.firstElementChild : hedef);
-    }
     durum();
     if(odak !== false && g && !(mini && odak !== true) && !(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu())){
       try{ g.focus({ preventScroll:true }); }catch(e){ /* odak yok */ }
@@ -1828,7 +1693,7 @@ window.LIFEOS.KING = (function(){
       : geriGetir();
     cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; sesli = false;
     if(o && o.mesaj) akis.push({ kim:'king', metin:o.mesaj });
-    else if(!mini) cikarimHazirla() || tanismaHazirla();   // söz 22–23: günde en çok bir soru
+    else if(!mini) tanismaHazirla();   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
     const el = document.createElement('div');
     el.className = 'king';
     el.setAttribute('data-king', '');
@@ -1928,7 +1793,6 @@ window.LIFEOS.KING = (function(){
       if(t.closest('.king-perde')){ e.preventDefault(); e.stopPropagation(); kucult(); return; }
       const k = t.closest('[data-king]');
       if(!k){ if(acik && !mini) kucult(); return; }
-      if(yazici && t.closest('.is-yaziyor')){ yazmayiBitir(); return; }
       if(konusuyor > 0 && t.closest('.king__kure')){ sus(); return; }
       const h = t.closest('[data-king-hazir]');
       if(h){ hazirSec(Number(h.getAttribute('data-king-hazir'))); return; }
@@ -1957,12 +1821,6 @@ window.LIFEOS.KING = (function(){
               setTimeout(() => { c.classList.remove('is-kopyalandi'); c.setAttribute('aria-label', 'Cevabı kopyala'); }, 1400);
             });
           }
-          return;
-        }
-        if(/^cikarim:(dogru|kismen|yanlis)$/.test(is)){
-          const d = is.slice(8);
-          akis.push({ kim:'sen', metin:{ dogru:'Doğru', kismen:'Kısmen', yanlis:'Yanlış' }[d] });
-          cikarimKarar(d);
           return;
         }
         if(/^env:[1-5]$/.test(is) && envanter){ akis.push({ kim:'sen', metin:is.slice(4) }); envanterIlerle(Number(is.slice(4))); return; }
@@ -2032,7 +1890,6 @@ window.LIFEOS.KING = (function(){
       if(g) g.value = '';
       sesli = false;            // yazıyla sorulana yazıyla
       sus();
-      yazmayiBitir();
       isle(m);
     });
     /* Telefonda «+»ya basılı tutmak: King. */
@@ -2097,10 +1954,9 @@ window.LIFEOS.KING = (function(){
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
-    bekleyenCikarim = null; bekleyenDuzeltme = null; ortam.depo.sil(CIKARIM_KARAR); ortam.depo.sil(SORMA);
+    ortam.depo.sil(CIKARIM_KARAR); ortam.depo.sil(SORMA);
     envanter = null; ortam.depo.sil(USLUP);
     ortam.depo.sil(TANISMA);
-    yazmayiBitir(); ortam.depo.sil(YAZMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     sesli = false; dinleyen = null; konusuyor = 0;
   }
@@ -2110,10 +1966,9 @@ window.LIFEOS.KING = (function(){
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,
     paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM, TASIMA,
     kisiKayitlari, kisiOzeti, disKisiTazele, tanismaVar:() => !!bekleyenTanisma,
-    cikarimAdaylari, cikarimVar:() => !!bekleyenCikarim, SORMA, sormaKomutu, sormaMi, sormaListesi,
+    cikarimAdaylari, cikarimKarti, cikarimOnayla, SORMA, sormaKomutu, sormaMi, sormaListesi,
     USLUP, envanterVar:() => !!envanter,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
-    YAZMA, yazmaAyar, yazmaSec, yazdir, yazmayiBitir, yaziyorMu:() => !!yazici,
     CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
