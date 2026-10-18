@@ -353,13 +353,14 @@ window.LIFEOS.KING = (function(){
     soz:m => new window.SpeechSynthesisUtterance(m),
     /* Söz 28: sunucunun WAV'ını çalar. Döner: 'bitti' | 'olmadi' (çalınamadı:
        tarayıcı izin vermedi ya da dosya bozuk). `tut` durdurucuyu alır. */
-    oynat:(blob, tut) => new Promise(ok => {
+    oynat:(blob, tut, h) => new Promise(ok => {
       if(typeof Audio !== 'function' || typeof URL === 'undefined') return ok('olmadi');
       let u = null, bitti = false, basladi = false;
       const son = s => { if(bitti) return; bitti = true; try{ URL.revokeObjectURL(u); }catch(e){} ok(s); };
       try{
         u = URL.createObjectURL(blob);
         const a = new Audio(u);
+        a.playbackRate = h || 1;
         a.onplaying = () => { basladi = true; };
         a.onended = () => son('bitti');
         a.onerror = () => son(basladi ? 'bitti' : 'olmadi');
@@ -405,7 +406,10 @@ window.LIFEOS.KING = (function(){
   const SES_IP = { oto:'İnternet varsa Gemini, yoksa bilgisayardaki Piper, o da yoksa cihazın sesi',
     gemini:'Gemini’nin Türkçe sesi; metin Google’a gider', piper:'Bilgisayardaki Piper; metin bilgisayardan çıkmaz',
     cihaz:'Yalnız bu cihazın kendi sesi' };
-  const SES_PARCA = 420;               // sunucudan istenen bir parçanın en çok harfi
+  const SES_PARCA = 420;
+  const HIZ = 'lifeos.king.hiz';       // okuma hizi; TASINAN'da
+  const HIZLAR = [1, 1.15, 1.3, 1.5, 1.75];
+  function hiz(){ const v = Number(ortam.depo.oku(HIZ)); return HIZLAR.indexOf(v) >= 0 ? v : 1; }               // sunucudan istenen bir parçanın en çok harfi
   const GUNLUK_EN_COK = 120, ARSIV_EN_COK = 30;
   let menu = null;            // söz 19: null | 'menu' | 'kayitlar' | { id }
   let silOnay = null;         // söz 19: silinmek üzere seçilen kayıt
@@ -876,7 +880,7 @@ window.LIFEOS.KING = (function(){
       const r = await sonraki;
       if(no !== sesNo) return true;
       sonraki = r && i + 1 < parcalar.length ? sesGetir(k, parcalar[i + 1]) : null;
-      const s = r ? await ortam.oynat(r.blob, c => { calan = c; }) : 'olmadi';
+      const s = r ? await ortam.oynat(r.blob, c => { calan = c; }, hiz()) : 'olmadi';
       calan = null;
       if(no !== sesNo) return true;
       if(s !== 'bitti'){
@@ -914,7 +918,7 @@ window.LIFEOS.KING = (function(){
       const u = ortam.soz(p);
       u.lang = 'tr-TR';
       if(ses) u.voice = ses;
-      u.rate = 1.03;
+      u.rate = 1.03 * hiz();
       u.onend = u.onerror = () => { konusuyor = Math.max(0, konusuyor - 1); durum(); if(!konusuyor) sohbetDevam(); };
       try{ sz.speak(u); }catch(e){ konusuyor = 0; }
     });
@@ -1359,6 +1363,8 @@ window.LIFEOS.KING = (function(){
         + '<button type="button" class="king__hap" data-king="ses-sonraki" title="' + kac('Ses: ' + SES_IP[t] + '. Değiştirmek için dokun.') + '">'
         + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18V6L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6"/></svg>'
         + SES_AD[t] + '</button>'
+        + '<button type="button" class="king__hap" data-king="hiz-sonraki" title="Okuma hızı; değiştirmek için dokun">'
+        + String(hiz()).replace('.', ',') + '×</button>'
         + '<button type="button" class="king__hap king__hap--simge" data-king="sus" aria-label="Sustur" title="Sustur">'
         + '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/></svg></button>'
         + '<button type="button" class="king__hap king__hap--simge" data-king="kip:yaz" aria-label="Kapat" title="Kapat">'
@@ -2262,6 +2268,7 @@ window.LIFEOS.KING = (function(){
         if(is === 'geri-getir'){ sohbetiGeriGetir(); return; }
         if(/^cevap:/.test(is)){ cevapSec(is.slice(6)); return; }
         if(/^ses:/.test(is)){ sesTercihSec(is.slice(4)); return; }
+        if(is === 'hiz-sonraki'){ ortam.depo.yaz(HIZ, HIZLAR[(HIZLAR.indexOf(hiz()) + 1) % HIZLAR.length]); ciz(false); return; }
         if(is === 'ses-sonraki'){ sesTercihSec(SES_TERCIH[(SES_TERCIH.indexOf(sesTercihi()) + 1) % SES_TERCIH.length]); return; }
         if(/^kayit:/.test(is)){ menu = { id:is.slice(6) }; silOnay = null; ciz(false); return; }
         if(/^indir:/.test(is)){ kayitIndir(is.slice(6)); return; }

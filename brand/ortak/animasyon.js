@@ -235,7 +235,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
