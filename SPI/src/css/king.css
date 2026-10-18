@@ -200,7 +200,13 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
   background:transparent; color:var(--text-2); font:inherit; font-size:12px; font-weight:600; cursor:pointer; }
 .king__ses-sec-dug.is-secili{ background:var(--text); border-color:var(--text); color:var(--surface); }
 .king__ses-sec-dug:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
-.king__ses-not{ display:block; margin-top:4px; font-size:11.5px; color:var(--text-2); }
+.king__ses-not{ margin-left:6px; font-size:11.5px; color:var(--text-3, var(--text-2)); }
+.king__ses-not:empty{ display:none; }
+/* Dinle paneli tek ince satir (2026-10-19, «goz yoruyor»): baslik ve aciklama yok. */
+.king__kip-panel--dinle{ padding:6px 8px 6px 12px; gap:4px; background:transparent; box-shadow:none; border:0; }
+.king__kip-panel--dinle .king__ses-sec{ flex:1; margin:0; }
+.king__kip-panel--dinle .king__cip{ min-height:28px; padding:0 10px; font-size:12px; background:transparent; }
+.king__ses-sec-dug{ border-color:transparent; }
 
 /* Ses (king.js söz 7): mikrofon düğmesi; dinlerken ve konuşurken kenar
    ışığı nabız gibi atar, küre hızlanır. Hareket azaltılmışsa yalnız renk. */

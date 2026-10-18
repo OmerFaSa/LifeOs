@@ -1326,7 +1326,7 @@ window.LIFEOS.KING = (function(){
     return '<div class="king__ses-sec" role="radiogroup" aria-label="King’in sesi"><span class="king__ses-ad">Ses</span>'
       + SES_TERCIH.map(v => '<button type="button" role="radio" class="king__ses-sec-dug' + (v === t ? ' is-secili' : '')
         + '" aria-checked="' + (v === t ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('')
-      + '</div><span class="king__ses-not">' + kac(not + son) + '</span>';
+      + '<span class="king__ses-not" title="' + kac(not) + '">' + kac(son.trim()) + '</span></div>';
   }
   /* Kip paneli: Dinle, Konuş ve Ekran için yazı alanının üstünde tek şerit. */
   function kipPanel(){
@@ -1343,7 +1343,7 @@ window.LIFEOS.KING = (function(){
       + '<span>Bitirmek için «tamam» de ya da Bitir’e dokun.</span>' + sesSecHtml() + '</div>'
       + '<button type="button" class="king__cip" data-king="kip:yaz">Bitir</button></div>';
     if(k === 'dinle') return '<div class="king__kip-panel king__kip-panel--dinle" role="status">'
-      + '<div class="king__kip-metin"><b>King cevapları sesli okuyor</b><span>Sen yazmaya devam et; konuşman gerekmez.</span>' + sesSecHtml() + '</div>'
+      + sesSecHtml()
       + '<button type="button" class="king__cip" data-king="sus">Sustur</button>'
       + '<button type="button" class="king__cip" data-king="kip:yaz">Kapat</button></div>';
     return '';

@@ -12792,7 +12792,13 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
   background:transparent; color:var(--text-2); font:inherit; font-size:12px; font-weight:600; cursor:pointer; }
 .king__ses-sec-dug.is-secili{ background:var(--text); border-color:var(--text); color:var(--surface); }
 .king__ses-sec-dug:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
-.king__ses-not{ display:block; margin-top:4px; font-size:11.5px; color:var(--text-2); }
+.king__ses-not{ margin-left:6px; font-size:11.5px; color:var(--text-3, var(--text-2)); }
+.king__ses-not:empty{ display:none; }
+/* Dinle paneli tek ince satir (2026-10-19, «goz yoruyor»): baslik ve aciklama yok. */
+.king__kip-panel--dinle{ padding:6px 8px 6px 12px; gap:4px; background:transparent; box-shadow:none; border:0; }
+.king__kip-panel--dinle .king__ses-sec{ flex:1; margin:0; }
+.king__kip-panel--dinle .king__cip{ min-height:28px; padding:0 10px; font-size:12px; background:transparent; }
+.king__ses-sec-dug{ border-color:transparent; }
 
 /* Ses (king.js söz 7): mikrofon düğmesi; dinlerken ve konuşurken kenar
    ışığı nabız gibi atar, küre hızlanır. Hareket azaltılmışsa yalnız renk. */
@@ -16271,7 +16277,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'eee8b139', at:'2026-10-18 22:28', dirty:true };
+SP.BUILD = { id:'191cb375', at:'2026-10-18 22:41', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -34862,7 +34868,7 @@ window.LIFEOS.KING = (function(){
     return '<div class="king__ses-sec" role="radiogroup" aria-label="King’in sesi"><span class="king__ses-ad">Ses</span>'
       + SES_TERCIH.map(v => '<button type="button" role="radio" class="king__ses-sec-dug' + (v === t ? ' is-secili' : '')
         + '" aria-checked="' + (v === t ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('')
-      + '</div><span class="king__ses-not">' + kac(not + son) + '</span>';
+      + '<span class="king__ses-not" title="' + kac(not) + '">' + kac(son.trim()) + '</span></div>';
   }
   /* Kip paneli: Dinle, Konuş ve Ekran için yazı alanının üstünde tek şerit. */
   function kipPanel(){
@@ -34879,7 +34885,7 @@ window.LIFEOS.KING = (function(){
       + '<span>Bitirmek için «tamam» de ya da Bitir’e dokun.</span>' + sesSecHtml() + '</div>'
       + '<button type="button" class="king__cip" data-king="kip:yaz">Bitir</button></div>';
     if(k === 'dinle') return '<div class="king__kip-panel king__kip-panel--dinle" role="status">'
-      + '<div class="king__kip-metin"><b>King cevapları sesli okuyor</b><span>Sen yazmaya devam et; konuşman gerekmez.</span>' + sesSecHtml() + '</div>'
+      + sesSecHtml()
       + '<button type="button" class="king__cip" data-king="sus">Sustur</button>'
       + '<button type="button" class="king__cip" data-king="kip:yaz">Kapat</button></div>';
     return '';
