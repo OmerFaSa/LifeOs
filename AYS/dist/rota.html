@@ -16080,7 +16080,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -17564,7 +17564,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'94cc986e', at:'2026-10-18 23:17', dirty:true };
+R.BUILD = { id:'260d29e2', at:'2026-10-18 23:29', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -35265,6 +35265,13 @@ window.LIFEOS.KING = (function(){
     gemini:'Gemini’nin Türkçe sesi; metin Google’a gider', piper:'Bilgisayardaki Piper; metin bilgisayardan çıkmaz',
     cihaz:'Yalnız bu cihazın kendi sesi' };
   const SES_PARCA = 420;
+  const ALGILA = 'lifeos.king.algila';   // soz 29: 'oto' | 'whisper' | 'ai' | 'tarayici'; TASINAN'da
+  const ALGILA_TERCIH = ['oto', 'whisper', 'ai', 'tarayici'];
+  const ALGILA_AD = { oto:'Otomatik', whisper:'Whisper', ai:'Yapay zekâ', tarayici:'Uygulama' };
+  const ALGILA_IP = { oto:'Bu bilgisayarda Whisper varsa o, yoksa yapay zekâ',
+    whisper:'Yalnız Whisper: ücretsiz, ses bilgisayardan çıkmaz', ai:'Yalnız yapay zekâ (Gemini): ses Google’a gider',
+    tarayici:'Uygulamanın (tarayıcının) kendi tanıması' };
+  function algila(){ const v = ortam.depo.oku(ALGILA); return ALGILA_TERCIH.indexOf(v) > 0 ? v : 'oto'; }
   const HIZ = 'lifeos.king.hiz';       // okuma hizi; TASINAN'da
   const HIZLAR = [1, 1.15, 1.3, 1.5, 1.75];
   function hiz(){ const v = Number(ortam.depo.oku(HIZ)); return HIZLAR.indexOf(v) >= 0 ? v : 1; }               // sunucudan istenen bir parçanın en çok harfi
@@ -35785,7 +35792,7 @@ window.LIFEOS.KING = (function(){
 
   function dinle(){
     if(dinleyen){ try{ dinleyen.stop(); }catch(e){ /* kapalı */ } return; }
-    const hk = !hkmDinlemez && ortam.kayitAc ? baglanti() : null;
+    const hk = !hkmDinlemez && ortam.kayitAc && algila() !== 'tarayici' ? baglanti() : null;
     if(hk){ kayitDinle(hk); return; }
     const T = ortam.tanima();
     if(!T) return;
@@ -35861,7 +35868,7 @@ window.LIFEOS.KING = (function(){
     try{
       const f = ortam.fetch;
       const res = await f(k.url + '/api/dinle', { method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token }, body:JSON.stringify({ wav }) });
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token }, body:JSON.stringify({ wav, tercih:algila() }) });
       let g = null;
       try{ g = await res.json(); }catch(e){ g = null; }
       if(res.status === 200 && g && typeof g.metin === 'string') return g.metin;
@@ -36465,6 +36472,9 @@ window.LIFEOS.KING = (function(){
         + '<div class="king__menu-satir"><span class="king__menu-ad">Ses</span><div class="king__secici" role="radiogroup" aria-label="Ses">'
         + SES_TERCIH.map(v => '<button type="button" class="king__secim' + (sesTercihi() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (sesTercihi() === v ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('') + '</div></div>'
+        + '<div class="king__menu-satir"><span class="king__menu-ad">Algılama</span><div class="king__secici" role="radiogroup" aria-label="Ses algılama">'
+        + ALGILA_TERCIH.map(v => '<button type="button" class="king__secim' + (algila() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
+          + (algila() === v ? 'true' : 'false') + '" data-king="algila:' + v + '" title="' + kac(ALGILA_IP[v]) + '">' + ALGILA_AD[v] + '</button>').join('') + '</div></div>'
         + '<div class="king__menu-satir"><span class="king__menu-ad">Hız</span><div class="king__secici" role="radiogroup" aria-label="Okuma hızı">'
         + HIZLAR.map(v => '<button type="button" class="king__secim' + (hiz() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (hiz() === v ? 'true' : 'false') + '" data-king="hiz:' + v + '">' + String(v).replace('.', ',') + '×</button>').join('') + '</div></div>'
@@ -37192,6 +37202,7 @@ window.LIFEOS.KING = (function(){
         if(is === 'geri-getir'){ sohbetiGeriGetir(); return; }
         if(/^cevap:/.test(is)){ cevapSec(is.slice(6)); return; }
         if(/^ses:/.test(is)){ sesTercihSec(is.slice(4)); return; }
+        if(/^algila:/.test(is)){ const v = is.slice(7); if(ALGILA_TERCIH.indexOf(v) >= 0){ if(v === 'oto') ortam.depo.sil(ALGILA); else ortam.depo.yaz(ALGILA, v); hkmDinlemez = false; } ciz(false); return; }
         if(/^hiz:/.test(is)){ const v = Number(is.slice(4)); if(HIZLAR.indexOf(v) >= 0) ortam.depo.yaz(HIZ, v); ciz(false); return; }
         if(is === 'hiz-sonraki'){ ortam.depo.yaz(HIZ, HIZLAR[(HIZLAR.indexOf(hiz()) + 1) % HIZLAR.length]); ciz(false); return; }
         if(is === 'ses-sonraki'){ sesTercihSec(SES_TERCIH[(SES_TERCIH.indexOf(sesTercihi()) + 1) % SES_TERCIH.length]); return; }
@@ -104135,10 +104146,10 @@ R.Screens.progress = (function(){
     const history = C.completionHistory(8).map(h => h.value);
 
     const timeDrift = (function(){
-      const withTime = C.fullExams('TYT').slice(-3).filter(e => (e.tests || []).length && e.tests.every(t => t.minutes != null));
+      const withTime = C.fullExams('TYT').slice(-3).filter(e => e.tests.some(t => t.minutes != null));
       if(!withTime.length) return null;
       const last = withTime[withTime.length-1];
-      return U.sum(last.tests.map(t => Number(t.minutes) || 0)) - (last.duration || 165);
+      return U.sum(last.tests.map(t => t.minutes || 0)) - (last.duration || 165);
     })();
 
     return [
@@ -104147,7 +104158,7 @@ R.Screens.progress = (function(){
         tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' },
       { key:'questionRate', num:qr && qr.pct != null ? qr.pct : null, birim:'%', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
         progress:qr ? qr.pct : null, target:90,
-        tone:!qr || qr.pct == null ? null : qr.pct >= 90 ? 'ok' : qr.pct >= 70 ? 'warn' : 'danger' },
+        tone:qr && qr.pct >= 90 ? 'ok' : qr && qr.pct >= 70 ? 'warn' : null },
       { key:'topicClosure', num:closure.pct, birim:'%', value:'%'+closure.pct, tone:closure.pct >= 55 ? 'ok' : 'warn',
         progress:closure.pct, target:55,
         note:closure.closed+' / '+closure.total+' konu' },
@@ -104671,8 +104682,8 @@ R.Screens.analytics = (function(){
               K.Stat({ label:'İlk tahmin', value:U.fmtNum(first.rank), note:U.fmtShort(first.date) }),
               K.Stat({ label:'Son tahmin', value:U.fmtNum(last.rank), note:U.fmtShort(last.date),
                 tone:last.rank <= target ? 'ok' : null }),
-              K.Stat({ label:'Değişim', value:moved === 0 ? '0' : (moved > 0 ? '−' : '+')+U.fmtNum(Math.abs(moved)),
-                note:moved > 0 ? 'sıra iyileşti' : moved < 0 ? 'sıra geriledi' : 'sıra değişmedi',
+              K.Stat({ label:'Değişim', value:(moved > 0 ? '−' : '+')+U.fmtNum(Math.abs(moved)),
+                note:moved > 0 ? 'sıra iyileşti' : 'sıra geriledi',
                 tone:moved > 0 ? 'ok' : moved < 0 ? 'warn' : null }),
             ])}` }),
 

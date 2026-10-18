@@ -1742,7 +1742,7 @@ class Handler(BaseHTTPRequestHandler):
                 wav = base64.b64decode(str(body.get("wav") or ""))
             except ValueError:
                 wav = b""
-            r = dinle.yaziya(self.con, self.server.config, wav)
+            r = dinle.yaziya(self.con, self.server.config, wav, tercih=str(body.get("tercih") or "oto"))
             return self._send(200 if r["ok"] else 503, r)
         if u.path == "/api/ses":
             ham, hata = self._read_body()

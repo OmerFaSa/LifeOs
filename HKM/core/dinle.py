@@ -135,12 +135,13 @@ def gemini(con, cfg, wav, post=None):
     return _temiz(" ".join(p.get("text", "") for p in parca)), ""
 
 
-def yaziya(con, cfg, wav, post=None, calistir=None, bul=None):
-    """{ok, metin?, motor?, notlar}. Sira kural 1."""
+def yaziya(con, cfg, wav, post=None, calistir=None, bul=None, tercih="oto"):
+    """{ok, metin?, motor?, notlar}. Sira kural 1; tercih: oto | whisper | ai."""
     if not wav or len(wav) > EN_COK_BAYT or wav[:4] != b"RIFF":
         return {"ok": False, "notlar": ["Ses kaydı geçersiz ya da çok uzun."]}
     notlar = []
-    for motor in ("whisper", "gemini"):
+    sira = {"whisper": ("whisper",), "ai": ("gemini",)}.get(tercih, ("whisper", "gemini"))
+    for motor in sira:
         metin, neden = whisper(wav, calistir, bul) if motor == "whisper" else gemini(con, cfg, wav, post)
         if metin is not None:
             return {"ok": True, "metin": metin, "motor": motor, "notlar": notlar}

@@ -436,6 +436,13 @@ window.LIFEOS.KING = (function(){
     gemini:'Gemini’nin Türkçe sesi; metin Google’a gider', piper:'Bilgisayardaki Piper; metin bilgisayardan çıkmaz',
     cihaz:'Yalnız bu cihazın kendi sesi' };
   const SES_PARCA = 420;
+  const ALGILA = 'lifeos.king.algila';   // soz 29: 'oto' | 'whisper' | 'ai' | 'tarayici'; TASINAN'da
+  const ALGILA_TERCIH = ['oto', 'whisper', 'ai', 'tarayici'];
+  const ALGILA_AD = { oto:'Otomatik', whisper:'Whisper', ai:'Yapay zekâ', tarayici:'Uygulama' };
+  const ALGILA_IP = { oto:'Bu bilgisayarda Whisper varsa o, yoksa yapay zekâ',
+    whisper:'Yalnız Whisper: ücretsiz, ses bilgisayardan çıkmaz', ai:'Yalnız yapay zekâ (Gemini): ses Google’a gider',
+    tarayici:'Uygulamanın (tarayıcının) kendi tanıması' };
+  function algila(){ const v = ortam.depo.oku(ALGILA); return ALGILA_TERCIH.indexOf(v) > 0 ? v : 'oto'; }
   const HIZ = 'lifeos.king.hiz';       // okuma hizi; TASINAN'da
   const HIZLAR = [1, 1.15, 1.3, 1.5, 1.75];
   function hiz(){ const v = Number(ortam.depo.oku(HIZ)); return HIZLAR.indexOf(v) >= 0 ? v : 1; }               // sunucudan istenen bir parçanın en çok harfi
@@ -956,7 +963,7 @@ window.LIFEOS.KING = (function(){
 
   function dinle(){
     if(dinleyen){ try{ dinleyen.stop(); }catch(e){ /* kapalı */ } return; }
-    const hk = !hkmDinlemez && ortam.kayitAc ? baglanti() : null;
+    const hk = !hkmDinlemez && ortam.kayitAc && algila() !== 'tarayici' ? baglanti() : null;
     if(hk){ kayitDinle(hk); return; }
     const T = ortam.tanima();
     if(!T) return;
@@ -1032,7 +1039,7 @@ window.LIFEOS.KING = (function(){
     try{
       const f = ortam.fetch;
       const res = await f(k.url + '/api/dinle', { method:'POST',
-        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token }, body:JSON.stringify({ wav }) });
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token }, body:JSON.stringify({ wav, tercih:algila() }) });
       let g = null;
       try{ g = await res.json(); }catch(e){ g = null; }
       if(res.status === 200 && g && typeof g.metin === 'string') return g.metin;
@@ -1636,6 +1643,9 @@ window.LIFEOS.KING = (function(){
         + '<div class="king__menu-satir"><span class="king__menu-ad">Ses</span><div class="king__secici" role="radiogroup" aria-label="Ses">'
         + SES_TERCIH.map(v => '<button type="button" class="king__secim' + (sesTercihi() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (sesTercihi() === v ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('') + '</div></div>'
+        + '<div class="king__menu-satir"><span class="king__menu-ad">Algılama</span><div class="king__secici" role="radiogroup" aria-label="Ses algılama">'
+        + ALGILA_TERCIH.map(v => '<button type="button" class="king__secim' + (algila() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
+          + (algila() === v ? 'true' : 'false') + '" data-king="algila:' + v + '" title="' + kac(ALGILA_IP[v]) + '">' + ALGILA_AD[v] + '</button>').join('') + '</div></div>'
         + '<div class="king__menu-satir"><span class="king__menu-ad">Hız</span><div class="king__secici" role="radiogroup" aria-label="Okuma hızı">'
         + HIZLAR.map(v => '<button type="button" class="king__secim' + (hiz() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (hiz() === v ? 'true' : 'false') + '" data-king="hiz:' + v + '">' + String(v).replace('.', ',') + '×</button>').join('') + '</div></div>'
@@ -2363,6 +2373,7 @@ window.LIFEOS.KING = (function(){
         if(is === 'geri-getir'){ sohbetiGeriGetir(); return; }
         if(/^cevap:/.test(is)){ cevapSec(is.slice(6)); return; }
         if(/^ses:/.test(is)){ sesTercihSec(is.slice(4)); return; }
+        if(/^algila:/.test(is)){ const v = is.slice(7); if(ALGILA_TERCIH.indexOf(v) >= 0){ if(v === 'oto') ortam.depo.sil(ALGILA); else ortam.depo.yaz(ALGILA, v); hkmDinlemez = false; } ciz(false); return; }
         if(/^hiz:/.test(is)){ const v = Number(is.slice(4)); if(HIZLAR.indexOf(v) >= 0) ortam.depo.yaz(HIZ, v); ciz(false); return; }
         if(is === 'hiz-sonraki'){ ortam.depo.yaz(HIZ, HIZLAR[(HIZLAR.indexOf(hiz()) + 1) % HIZLAR.length]); ciz(false); return; }
         if(is === 'ses-sonraki'){ sesTercihSec(SES_TERCIH[(SES_TERCIH.indexOf(sesTercihi()) + 1) % SES_TERCIH.length]); return; }
