@@ -14310,9 +14310,11 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__ses-sec-dug:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 .king__ses-not{ margin-left:6px; font-size:11.5px; color:var(--text-3, var(--text-2)); }
 .king__ses-not:empty{ display:none; }
-/* Dinle: sagda kucuk hap (2026-10-19, «alan kaplamasin»). */
-.king__kip-panel--dinle{ display:inline-flex; align-self:flex-end; width:auto; margin-left:auto; padding:2px; gap:0;
-  background:var(--surface-2); border:0; box-shadow:none; border-radius:999px; }
+/* Dinle: baslikta, kiplerin hemen solunda kucuk ses dugmeleri; kutu yok (2026-10-19). */
+.king__dinle-hap{ display:inline-flex; align-items:center; gap:0; margin-left:auto; }
+.king__dinle-hap + .king__kipler{ margin-left:4px; }
+/* Kipler en saga: kucult dugmesindeki ikinci «auto» onlari ortaya itiyordu. */
+.king:not(.is-mini) .king__bas .king__kucult{ margin-left:2px; }
 .king__hap{ display:inline-flex; align-items:center; gap:4px; min-height:28px; min-width:28px; padding:0 10px 0 8px; border:0;
   border-radius:999px; background:transparent; color:var(--text-2); font:inherit; font-size:12px; font-weight:600; cursor:pointer; }
 .king__hap--simge{ justify-content:center; padding:0; }
@@ -17562,7 +17564,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'b85579d0', at:'2026-10-18 22:44', dirty:true };
+R.BUILD = { id:'6be1c9c9', at:'2026-10-18 22:46', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -36169,11 +36171,17 @@ window.LIFEOS.KING = (function(){
       + '<div class="king__kip-metin"><b class="king__ses-durum"><span class="d-dinliyor">Dinliyorum…</span><span class="d-konusuyor">King konuşuyor…</span><span class="d-sira">Sıra sende; konuşabilirsin</span></b>'
       + '<span>Bitirmek için «tamam» de ya da Bitir’e dokun.</span>' + sesSecHtml() + '</div>'
       + '<button type="button" class="king__cip" data-king="kip:yaz">Bitir</button></div>';
-    if(k === 'dinle'){
+    if(k === 'dinle') return '';
+    return '';
+  }
+  /* Dinle: baslikta, kiplerin solunda kucuk ses dugmeleri (2026-10-19, «kutu yerine sag ustte»). */
+  function dinleHap(){
+    if(kip() !== 'dinle') return '';
+    {
       /* Kose hapi (2026-10-19, «alan kaplamasin»): ses secimi tek dugme (dokundukca
          sirayla degisir), Sustur ve Kapat yalniz simge. */
       const t = sesTercihi();
-      return '<div class="king__kip-panel king__kip-panel--dinle" role="status">'
+      return '<div class="king__dinle-hap" role="group" aria-label="Sesli okuma">'
         + '<button type="button" class="king__hap" data-king="ses-sonraki" title="' + kac('Ses: ' + SES_IP[t] + '. Değiştirmek için dokun.') + '">'
         + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18V6L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6"/></svg>'
         + SES_AD[t] + '</button>'
@@ -36798,7 +36806,7 @@ window.LIFEOS.KING = (function(){
         : gorselZincir().length ? 'Merkez bağlı değil; sorulara yerel kurallarla, ekran ve fotoğrafa görüntü okuyan modelle cevap verir'
         : 'Merkez bağlı değil: King yerel kurallarla cevaplar') + '">'
       + (baglanti() ? 'yapay zekâ' : gorselZincir().length ? 'görüntü açık' : 'yerel') + '</span>'
-      + kipHtml()
+      + dinleHap() + kipHtml()
       + '<button type="button" class="king__kapat king__menu-dugme' + (menu ? ' is-acik' : '') + '" data-king="menu" aria-expanded="' + (menu ? 'true' : 'false')
       + '" aria-label="Ayarlar" title="Ayarlar: cevap biçimi, sohbeti kaydet, kayıtlar, temizle">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg></button>'

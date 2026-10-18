@@ -1345,11 +1345,17 @@ window.LIFEOS.KING = (function(){
       + '<div class="king__kip-metin"><b class="king__ses-durum"><span class="d-dinliyor">Dinliyorum…</span><span class="d-konusuyor">King konuşuyor…</span><span class="d-sira">Sıra sende; konuşabilirsin</span></b>'
       + '<span>Bitirmek için «tamam» de ya da Bitir’e dokun.</span>' + sesSecHtml() + '</div>'
       + '<button type="button" class="king__cip" data-king="kip:yaz">Bitir</button></div>';
-    if(k === 'dinle'){
+    if(k === 'dinle') return '';
+    return '';
+  }
+  /* Dinle: baslikta, kiplerin solunda kucuk ses dugmeleri (2026-10-19, «kutu yerine sag ustte»). */
+  function dinleHap(){
+    if(kip() !== 'dinle') return '';
+    {
       /* Kose hapi (2026-10-19, «alan kaplamasin»): ses secimi tek dugme (dokundukca
          sirayla degisir), Sustur ve Kapat yalniz simge. */
       const t = sesTercihi();
-      return '<div class="king__kip-panel king__kip-panel--dinle" role="status">'
+      return '<div class="king__dinle-hap" role="group" aria-label="Sesli okuma">'
         + '<button type="button" class="king__hap" data-king="ses-sonraki" title="' + kac('Ses: ' + SES_IP[t] + '. Değiştirmek için dokun.') + '">'
         + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18V6L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6"/></svg>'
         + SES_AD[t] + '</button>'
@@ -1974,7 +1980,7 @@ window.LIFEOS.KING = (function(){
         : gorselZincir().length ? 'Merkez bağlı değil; sorulara yerel kurallarla, ekran ve fotoğrafa görüntü okuyan modelle cevap verir'
         : 'Merkez bağlı değil: King yerel kurallarla cevaplar') + '">'
       + (baglanti() ? 'yapay zekâ' : gorselZincir().length ? 'görüntü açık' : 'yerel') + '</span>'
-      + kipHtml()
+      + dinleHap() + kipHtml()
       + '<button type="button" class="king__kapat king__menu-dugme' + (menu ? ' is-acik' : '') + '" data-king="menu" aria-expanded="' + (menu ? 'true' : 'false')
       + '" aria-label="Ayarlar" title="Ayarlar: cevap biçimi, sohbeti kaydet, kayıtlar, temizle">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg></button>'
