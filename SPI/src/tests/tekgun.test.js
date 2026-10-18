@@ -91,6 +91,31 @@
       }finally{ k.remove(); }
     }));
 
+    /* Kullanıcı (2026-10-18): «SPİ'nin giriş sayfasında sözcükte anlam,
+       bölünebilme kuralı ne alaka? SPİ ile alakalı şeyler olsun; ESP'de de
+       aynı». Bugün yalnız o modülün işini gösterir; öteki modülün bloğu
+       (AYS konusu, SPİ hatırlatması) Bugün'e girmez. Yayın sürer (Siri,
+       Merkez), ekran sürmez. */
+    it('Bugün öteki modülün işini göstermez (2026-10-18)', async () => {
+      let kurduk = false;
+      const eskiGet = T()._ortam.tekGun, eskiGiris = T()._ortam.girisVar;
+      const yabanci = ['Sözcükte anlam', 'Bölünebilme kuralları', 'Su hatırlatması', 'Gitar'];
+      const bugun = new Date(), gun = bugun.getFullYear() + '-' + String(bugun.getMonth() + 1).padStart(2, '0') + '-' + String(bugun.getDate()).padStart(2, '0');
+      const yay = (modul, ad) => ({ modul, gun, bayat:false, icerik:JSON.stringify({ s:1, bloklar:[{ ad, durum:'bekliyor' }] }) });
+      T()._ortam.girisVar = () => true;
+      T()._ortam.tekGun = async () => ({ tarih:gun, moduller:[yay('ays', yabanci[0]), yay('ays', yabanci[1]), yay('spi', yabanci[2]), yay('esp', yabanci[3])] });
+      try{
+        const kendi = { R:'ays', SP:'spi', ESP:'esp' }[window.R ? 'R' : window.SP ? 'SP' : 'ESP'];
+        kurduk = !T().kuruluMu();
+        if(kurduk) T().kur({ modul:kendi, git:() => {}, bloklar:() => [] });
+        await T().tazele();
+        const h = String(await NS.Screens.today.render());
+        expect(h.indexOf('data-tekgun') < 0).toBe(true);
+        const oteki = { ays:[0, 1], spi:[2], esp:[3] };
+        Object.keys(oteki).filter(m => m !== kendi).forEach(m => oteki[m].forEach(i => expect(h.indexOf(yabanci[i]) < 0).toBe(true)));
+      }finally{ T()._ortam.tekGun = eskiGet; T()._ortam.girisVar = eskiGiris; if(kurduk) T()._sifirla(); }
+    });
+
     it('yayın parçası bugünün JSON planı; bilinmeyen alan ve bozuk saat düşer', () => sahne(() => {
       T().kur({ modul:'spi', bloklar:() => [{ ad:'Su', saat:'25:99', durum:'garip', gizli:'ilaç adı' }] });
       const p = T().parca();

@@ -1393,10 +1393,19 @@ window.LIFEOS.HESAP = (function(){
   const sade = t => String(t == null ? '' : t).replace(/\s+/g, ' ').trim();
   /* Vitrin maddesi → [ust, metin, kesinlik]. `sayi` HTML'dir (LIFEOS.SAYI),
      ust/cumle/vurgu düz metin (vitrin kaçışlar). Eksik sayı yazılmaz (sıfır değil). */
+  /* Sayı HTML'inden yalnız GÖRÜNEN parçalar: değer, birim, aralık. Ekran
+     okuyucu eki ve köken kartı («Hesaplandı Formül …») özete girmez
+     (2026-10-18: seçim sayfasında formül metni yazıyordu). */
+  function gorunenSayi(h){
+    h = String(h || '');
+    const parca = ad => { const r = new RegExp('<span class="' + ad + '"[^>]*>([\\s\\S]*?)</span>').exec(h); return r ? duzMetin(r[1]) : ''; };
+    if(h.indexOf('sayi__d') < 0) return duzMetin(h);
+    return [parca('sayi__d'), parca('sayi__b'), parca('sayi__ar')].filter(Boolean).join(' ');
+  }
   function ozetSatiri(m){
     if(!m) return null;
     const k = (String(m.sayi || '').match(/sayi--(measured|computed|estimated|missing)/) || [])[1] || null;
-    const sayi = m.sayi && k !== 'missing' ? duzMetin(m.sayi) : '';
+    const sayi = m.sayi && k !== 'missing' ? gorunenSayi(m.sayi) : '';
     const metin = ([sayi, sade(m.cumle)].filter(Boolean).join(' ') || sade(m.vurgu)).slice(0, OZET_UZUN);
     const ust = sade(m.ust).slice(0, 32);
     if(!ust || !metin || k === 'missing') return null;

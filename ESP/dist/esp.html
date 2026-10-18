@@ -16521,7 +16521,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'e9725507', at:'2026-10-18 12:01', dirty:true };
+ESP.BUILD = { id:'cf344d6a', at:'2026-10-18 13:09', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -27788,10 +27788,19 @@ window.LIFEOS.HESAP = (function(){
   const sade = t => String(t == null ? '' : t).replace(/\s+/g, ' ').trim();
   /* Vitrin maddesi → [ust, metin, kesinlik]. `sayi` HTML'dir (LIFEOS.SAYI),
      ust/cumle/vurgu düz metin (vitrin kaçışlar). Eksik sayı yazılmaz (sıfır değil). */
+  /* Sayı HTML'inden yalnız GÖRÜNEN parçalar: değer, birim, aralık. Ekran
+     okuyucu eki ve köken kartı («Hesaplandı Formül …») özete girmez
+     (2026-10-18: seçim sayfasında formül metni yazıyordu). */
+  function gorunenSayi(h){
+    h = String(h || '');
+    const parca = ad => { const r = new RegExp('<span class="' + ad + '"[^>]*>([\\s\\S]*?)</span>').exec(h); return r ? duzMetin(r[1]) : ''; };
+    if(h.indexOf('sayi__d') < 0) return duzMetin(h);
+    return [parca('sayi__d'), parca('sayi__b'), parca('sayi__ar')].filter(Boolean).join(' ');
+  }
   function ozetSatiri(m){
     if(!m) return null;
     const k = (String(m.sayi || '').match(/sayi--(measured|computed|estimated|missing)/) || [])[1] || null;
-    const sayi = m.sayi && k !== 'missing' ? duzMetin(m.sayi) : '';
+    const sayi = m.sayi && k !== 'missing' ? gorunenSayi(m.sayi) : '';
     const metin = ([sayi, sade(m.cumle)].filter(Boolean).join(' ') || sade(m.vurgu)).slice(0, OZET_UZUN);
     const ust = sade(m.ust).slice(0, 32);
     if(!ust || !metin || k === 'missing') return null;
@@ -30701,6 +30710,11 @@ window.LIFEOS.KISAYOL = (function(){
         iş bile gelmediyse kart ÇİZİLMEZ (gizli yer tutucu): yalnız kendi
         işlerini gösteren kart, modülün kendi Bugün kartının tekrarı olurdu
         (AYS «Günün akışı»). Veri gelince kart kendiliğinden belirir.
+     4b. BUGÜN YALNIZ KENDİ MODÜLÜNÜ GÖSTERİR (kullanıcı, 2026-10-18: «SPİ'nin
+        giriş sayfasında sözcükte anlam, bölünebilme kuralı ne alaka? SPİ ile
+        alakalı şeyler olsun»). Kart üç modülün Bugün'ünden kalktı; modül
+        bugününü yine yayınlar (parca: Siri, Merkez). kartHtml Merkez gibi
+        bütün günü gösteren bir yer için durur; tekgun.test bunu sınar.
      5. ADRES KATALOGDAN. Öteki modülün bloğuna dokunmak o modülü
         `#king=<rota>` ile açar; rota King'in sayfa kataloğunda yoksa
         modülün Bugün'ü açılır (king.js söz 5).
@@ -76997,7 +77011,6 @@ ESP.Screens.today = (function(){
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu() ? window.LIFEOS.GIRIS.kutuHtml() : '')}
           ${raw(sikSerit())}
-          ${raw(window.LIFEOS && window.LIFEOS.TEKGUN ? window.LIFEOS.TEKGUN.kartHtml() : '')}
           ${nextCard()}
           ${raw(soruKartHtml())}
           ${K.Ledger(() => [(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu()) ? null : quickForm(),

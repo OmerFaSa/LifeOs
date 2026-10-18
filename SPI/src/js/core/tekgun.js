@@ -28,6 +28,11 @@
         iş bile gelmediyse kart ÇİZİLMEZ (gizli yer tutucu): yalnız kendi
         işlerini gösteren kart, modülün kendi Bugün kartının tekrarı olurdu
         (AYS «Günün akışı»). Veri gelince kart kendiliğinden belirir.
+     4b. BUGÜN YALNIZ KENDİ MODÜLÜNÜ GÖSTERİR (kullanıcı, 2026-10-18: «SPİ'nin
+        giriş sayfasında sözcükte anlam, bölünebilme kuralı ne alaka? SPİ ile
+        alakalı şeyler olsun»). Kart üç modülün Bugün'ünden kalktı; modül
+        bugününü yine yayınlar (parca: Siri, Merkez). kartHtml Merkez gibi
+        bütün günü gösteren bir yer için durur; tekgun.test bunu sınar.
      5. ADRES KATALOGDAN. Öteki modülün bloğuna dokunmak o modülü
         `#king=<rota>` ile açar; rota King'in sayfa kataloğunda yoksa
         modülün Bugün'ü açılır (king.js söz 5).

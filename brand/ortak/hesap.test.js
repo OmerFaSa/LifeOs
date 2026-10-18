@@ -1063,6 +1063,22 @@
       expect(h.ozetOku('ays')).toBeNull();
     }));
 
+    /* 2026-10-18: seçim sayfasında «0 gün , hesaplandı Hesaplandı Formül
+       minimum günün tutulduğu ardışık gün Girdile…» yazıyordu: gerçek sayı
+       HTML'inin gizli parçaları (ekran okuyucu eki, köken kartı) düz metne
+       giriyordu. Özete yalnız görünen değer, birim ve aralık girer. */
+    it('özet: gerçek sayıdan yalnız görünen değer ve birim; köken kartı ve gizli ek girmez', () => sahneyle(async () => {
+      const c = cihazKur(sunucuKur(), { uygulama:true });
+      const h = girisSahne(c);
+      const S = window.LIFEOS.SAYI;
+      h.ozetYaz('ays', 'ays-bugun', [
+        { ust:'Seri', sayi:S.html({ deger:0, birim:'gün', kesinlik:'computed', formul:'minimum günün tutulduğu ardışık gün', girdiler:['blok'] }), cumle:'minimum gün.' },
+        { ust:'Sınav', sayi:S.html({ deger:244, birim:'gün', kesinlik:'computed', formul:'TYT tarihi − bugün' }) },
+      ]);
+      const m = h.ozetOku('ays').satirlar.map(s => s.m);
+      expect(m).toEqual(['0 gün minimum gün.', '244 gün']);
+    }));
+
     it('özet: kartta etiketiyle ve zamanıyla çizilir; yedi günden eskisi gösterilmez; bozuk çerez yok sayılır', () => sahneyle(async () => {
       const c = cihazKur(sunucuKur(), { uygulama:true });
       const h = girisSahne(c);
