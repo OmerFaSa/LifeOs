@@ -15605,6 +15605,89 @@ html:not([data-zemin="yumusak"]) .zemin-isik{ display:none; }
 .osohbet-gonder:disabled{ opacity:.35; cursor:default; }
 .osohbet-gonder:focus-visible{ outline:2px solid var(--text-3); outline-offset:2px; }
 .osohbet-gonder svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+/* ======================================================================
+   PENCERE (depo sahibi, 2026-10-19: «King'teki sohbet arayüzüyle aynı
+   olsun ama King'teki kadar premium olmasın»). King'in büyük penceresinin
+   yerleşimi, sayfanın içinde: solda «Yeni sohbet» ve geçmiş, sağda başlık
+   şeridi, ortalanmış akış, altta yuvarlak yazma kutusu. Yükseklik sabit:
+   cevap geldikçe pencere büyüyüp titremez, yalnız akış kayar. King'den
+   ayrılan: küre yerine 7 px nokta, perde ve ışık yok, buzlu cam yok, gölge
+   yok, odakta renkli halka yok (yalnız çizgi koyulaşır).
+   ====================================================================== */
+.opencere{ position:relative; display:grid; grid-template-columns:248px minmax(0, 1fr); width:100%;
+  height:min(760px, calc(100dvh - 190px)); min-height:460px; overflow:hidden;
+  border:1px solid var(--border); border-radius:24px; background:var(--surface); }
+.opencere__yan{ display:flex; flex-direction:column; gap:6px; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+  padding:14px 10px; border-right:1px solid var(--border); background:var(--surface-2); }
+.opencere__yeni{ display:flex; align-items:center; gap:8px; min-height:40px; padding:0 12px; border:1px solid var(--border);
+  border-radius:12px; background:var(--surface); color:var(--text); font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+.opencere__yeni svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.opencere__yeni:hover{ border-color:var(--border-strong); }
+.opencere__yan-ad{ margin:14px 8px 2px; font-size:12px; font-weight:600; color:var(--text-3); }
+.opencere__yan .gecmis__bos{ margin:0 8px; font-size:12.5px; color:var(--text-3); }
+.opencere__yeni:focus-visible, .opencere__yan-dugme:focus-visible, .opencere__hazir:focus-visible{ outline:2px solid var(--text-3); outline-offset:1px; }
+
+.opencere__ana{ display:flex; flex-direction:column; gap:12px; min-width:0; min-height:0; padding:14px 18px; }
+.opencere__bas{ display:flex; align-items:center; gap:10px; min-height:40px; }
+.opencere__yan-dugme{ display:none; flex:none; width:32px; height:32px; place-items:center; padding:0; border:0; border-radius:50%;
+  background:none; color:var(--text-2); cursor:pointer; }
+.opencere__yan-dugme:hover{ background:var(--surface-2); color:var(--text); }
+.opencere__yan-dugme svg{ width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round; }
+.opencere__nokta{ flex:none; width:7px; height:7px; border-radius:50%; background:var(--primary); }
+.opencere__ad{ font-size:14.5px; font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.opencere__rol{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12.5px; color:var(--text-3); }
+.opencere__durum{ margin-left:auto; flex:none; padding:2px 9px; border-radius:999px; background:var(--surface-2);
+  font-size:11.5px; font-weight:600; color:var(--text-2); white-space:nowrap; }
+
+/* Akış: King gibi ortada en çok 780 px; ajanın cevabı düz yazı, adı
+   başlıkta olduğundan satırda tekrarlanmaz. */
+.opencere__akis{ flex:1; min-height:0; max-height:none; padding:8px 4px 4px; gap:14px; touch-action:pan-y; }
+.opencere__akis > *, .opencere .osohbet-yaz, .opencere .team-mention{ width:100%; max-width:780px; margin-inline:auto; }
+.opencere__akis > .msg{ max-width:780px; }
+.opencere__akis > .msg--me{ width:auto; max-width:min(80%, 620px); margin-inline:auto 0; }
+@supports (margin-inline:max(0px, 1px)){
+  .opencere__akis > .msg--me{ margin-right:max(0px, calc((100% - 780px) / 2)); }
+}
+.opencere .msg__who{ display:none; }
+.opencere .msg--agent .msg__body{ font-size:15.5px; line-height:1.5; letter-spacing:-.005em; padding:2px 4px 0; }
+.opencere .msg--me .msg__body{ font-size:14.5px; padding:8px 13px; }
+.opencere .osohbet__alt{ padding-left:4px; }
+
+/* Boş sohbet: ortada nokta, ad, cümle ve hazır sorular (King'deki küre ve
+   selamın sadesi). */
+.opencere__bos{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  min-height:100%; padding:24px 8px; text-align:center; }
+.opencere__bos-nokta{ width:10px; height:10px; border-radius:50%; background:var(--primary); }
+.opencere__bos-ad{ margin:4px 0 0; font-size:24px; line-height:1.2; font-weight:650; letter-spacing:-.02em; color:var(--text); }
+.opencere__bos-alt{ margin:0; max-width:440px; font-size:14px; line-height:1.5; color:var(--text-2); }
+.opencere__hazirlar{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:12px; max-width:620px; }
+.opencere__hazir{ min-height:38px; padding:0 14px; border:1px solid var(--border); border-radius:999px; background:var(--surface);
+  color:var(--text); font:inherit; font-size:13px; font-weight:500; cursor:pointer; }
+.opencere__hazir:hover{ background:var(--surface-2); }
+
+/* Yazma kutusu: King'in yuvarlak alanı, düz gri; odakta yalnız çizgi. */
+.opencere .osohbet-yaz{ flex:none; gap:6px; padding:6px 6px 6px 18px; min-height:52px; align-items:center;
+  border:1px solid transparent; border-radius:26px; background:var(--surface-2); }
+.opencere .osohbet-yaz:focus-within{ border-color:var(--border-strong); background:var(--surface); }
+.opencere .osohbet-gonder{ width:40px; height:40px; }
+.opencere .osohbet-yaz:has(.osohbet-girdi:placeholder-shown) .osohbet-gonder{ opacity:.35; }
+
+/* Tablet ve telefon: kenar çubuğu başlıktaki düğmeyle pencerenin içinde açılır. */
+@media (max-width:1023px){
+  .opencere{ grid-template-columns:minmax(0, 1fr); }
+  .opencere__yan{ position:absolute; z-index:2; left:0; top:0; bottom:0; width:min(280px, 82%); transform:translateX(-102%);
+    transition:transform .28s cubic-bezier(.32,.72,0,1); background:var(--surface); border-right:1px solid var(--border); }
+  .opencere:has([data-osohbet-yan][aria-expanded="true"]) .opencere__yan{ transform:none; }
+  .opencere__yan-dugme{ display:grid; }
+}
+@media (max-width:679px){
+  .opencere{ height:calc(100dvh - 210px); min-height:420px; border-radius:20px; }
+  .opencere__ana{ padding:10px 10px 10px; }
+  .opencere__rol{ display:none; }
+  .opencere__bos-ad{ font-size:21px; }
+}
+@media (prefers-reduced-motion:reduce){ .opencere__yan{ transition:none; } }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -17455,7 +17538,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'80224d87', at:'2026-10-18 21:55', dirty:true };
+R.BUILD = { id:'82bc346b', at:'2026-10-18 22:22', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -32972,9 +33055,75 @@ LIFEOS.OFISSOHBET = (function(){
       + SVG_KOPYA + '</button>';
   }
 
+  const SVG_YAN = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg>';
+  const SVG_ARTI = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+
+  /* PENCERE (depo sahibi, 2026-10-19: «ofis kısmının King'teki sohbet
+     arayüzüyle aynı olması, ama King'teki kadar premium olmasın»). King'in
+     büyük penceresinin yerleşimi: solda «Yeni sohbet» ve geçmiş, sağda
+     başlık şeridi, ortalanmış akış, boşken ortada ad + cümle + hazır
+     sorular, altta yuvarlak yazma kutusu. Küre, kenar ışığı, perde, buzlu
+     cam, renkli odak halkası YOK; yerinde küçük nokta ve düz çizgi.
+     o: { anahtar, ad, rol, durum, durumNot, yeniAct, gecmisHtml,
+          mesajlarHtml (modülün kaçırılmış işaretlemesi; boşsa boş ekran),
+          bos:{ alt, cipler:[{ ad, act, data:{} }] }, ekHtml (akışın sonu),
+          ustHtml (yazma alanının üstü), girdiHtml, mikHtml, gonderAct, gonderAd, kapali } */
+  function bosHtml(o){
+    o = o || {};
+    const cip = c => '<button type="button" class="opencere__hazir" data-act="' + kac(c.act) + '"'
+      + Object.keys(c.data || {}).map(k => ' ' + kac(k) + '="' + kac(c.data[k]) + '"').join('') + '>' + kac(c.ad) + '</button>';
+    return '<div class="opencere__bos">'
+      + '<span class="opencere__bos-nokta" aria-hidden="true"></span>'
+      + '<h2 class="opencere__bos-ad">' + kac(o.ad || '') + '</h2>'
+      + (o.bos && o.bos.alt ? '<p class="opencere__bos-alt">' + kac(o.bos.alt) + '</p>' : '')
+      + (o.bos && o.bos.cipler && o.bos.cipler.length ? '<div class="opencere__hazirlar" role="group" aria-label="Hazır sorular">'
+        + o.bos.cipler.map(cip).join('') + '</div>' : '') + '</div>';
+  }
+
+  /* akisHtml verilirse akış kutusunu modül kendisi çizer (yerinde tazelemek
+     için); kutu .chat.osohbet.opencere__akis[data-osohbet] olmalı. */
+  function pencereHtml(o){
+    o = o || {};
+    const bos = !String(o.mesajlarHtml || '').trim();
+    return '<section class="opencere" data-osohbet-pencere="' + kac(o.anahtar || '') + '" aria-label="' + kac((o.ad || '') + ' ile sohbet') + '">'
+      + '<aside class="opencere__yan" aria-label="Sohbet geçmişi">'
+      + '<button type="button" class="opencere__yeni" data-act="' + kac(o.yeniAct || 'sohbet-yeni') + '">' + SVG_ARTI + 'Yeni sohbet</button>'
+      + '<p class="opencere__yan-ad">Geçmiş sohbetler</p>' + (o.gecmisHtml || '') + '</aside>'
+      + '<div class="opencere__ana">'
+      + '<div class="opencere__bas">'
+      + '<button type="button" class="opencere__yan-dugme" data-osohbet-yan aria-expanded="false" aria-label="Sohbet geçmişi" title="Sohbet geçmişi">' + SVG_YAN + '</button>'
+      + '<span class="opencere__nokta" aria-hidden="true"></span><b class="opencere__ad">' + kac(o.ad || '') + '</b>'
+      + (o.rol ? '<span class="opencere__rol">' + kac(o.rol) + '</span>' : '')
+      + (o.durum ? '<span class="opencere__durum"' + (o.durumNot ? ' title="' + kac(o.durumNot) + '"' : '') + '>' + kac(o.durum) + '</span>' : '')
+      + '</div>'
+      + (o.akisHtml != null ? o.akisHtml
+        : '<div class="chat osohbet opencere__akis" data-osohbet="' + kac(o.anahtar || '') + '" aria-live="polite">'
+          + (bos ? bosHtml(o) : o.mesajlarHtml) + (o.ekHtml || '') + '</div>')
+      + (o.ustHtml || '')
+      + '<div class="osohbet-yaz" data-osohbet-yaz>' + (o.girdiHtml || '') + (o.mikHtml || '')
+      + gonderHtml({ act:o.gonderAct, ad:o.gonderAd, kapali:o.kapali }) + '</div>'
+      + '</div></section>';
+  }
+
   function bagla(){
     if(bagli || typeof document === 'undefined') return;
     bagli = true;
+    /* Dar ekranda kenar çubuğu başlıktaki düğmeyle açılır; sohbete
+       dokununca kapanır (King söz 26). Yeniden çizim kapalı başlatır. */
+    document.addEventListener('click', e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      const d = t.closest('[data-osohbet-yan]');
+      if(d){
+        e.preventDefault();
+        d.setAttribute('aria-expanded', d.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+        return;
+      }
+      const ana = t.closest('.opencere__ana');
+      const p = ana && ana.closest('[data-osohbet-pencere]');
+      const acik = p && p.querySelector('[data-osohbet-yan][aria-expanded="true"]');
+      if(acik) acik.setAttribute('aria-expanded', 'false');
+    });
     document.addEventListener('keydown', e => {
       const g = e.target && e.target.matches && e.target.matches('[data-osohbet-girdi]') ? e.target : null;
       if(!g) return;
@@ -33025,7 +33174,7 @@ LIFEOS.OFISSOHBET = (function(){
     else bagla();
   }
 
-  return { gonderMi, alttaMi, karar, isle, tara, buyut, sonSoru, kopyaMetni, gonderHtml, kopyaHtml, bagla,
+  return { gonderMi, alttaMi, karar, isle, tara, buyut, sonSoru, kopyaMetni, gonderHtml, kopyaHtml, bosHtml, pencereHtml, bagla,
     _durum:k => durumlar[k] || null,
     _sifirla:() => { durumlar = {}; gorulen = typeof WeakSet === 'function' ? new WeakSet() : null; } };
 })();
@@ -108724,13 +108873,6 @@ R.Screens.team = (function(){
      geçmişe yazar; geçmişten açılan sohbet oradan sürer (brand/ortak/gecmis.js).
      gecmisAktif: ajan başına geçmişten açılan kaydın kimliği. */
   const gecmisAktif = {};
-  function gecmisKarti(agent){
-    const G = (window.LIFEOS || {}).GECMIS;
-    if(!G) return null;
-    return K.Card({ title:'Geçmiş sohbetler', sub:agent.name,
-      actions:K.Button({ label:'Yeni sohbet', icon:'plus', size:'sm', act:'sohbet-yeni' }),
-      body:raw(G.listeHtml('ays', agent.id, { ac:'gecmis-ac', sil:'gecmis-sil' })) });
-  }
 
   function current(){
     const id = S.ui.officeAgent;
@@ -108985,7 +109127,30 @@ R.Screens.team = (function(){
     const msgs = O.chatOf(agent.id);
     const ruleMode = O.mode() !== 'llm';
 
+    /* King'in sohbet penceresiyle aynı yerleşim, sade (ofissohbet.js
+       pencereHtml, 2026-10-19): solda Yeni sohbet ve geçmiş, başlıkta ajan
+       ve kaynak, boşken ortada hazır sorular. Model kapalı şeridi başlıktaki
+       «hazır kurallar» etiketine geçti. */
+    const G = (window.LIFEOS || {}).GECMIS;
+    const pencere = OS() ? raw(OS().pencereHtml({
+      anahtar:'ays:' + agent.id, ad:agent.name, rol:agent.role + ' — ' + agent.desk,
+      durum:ruleMode ? 'hazır kurallar' : 'yapay zekâ',
+      durumNot:ruleMode ? 'Model bağlı değil: ajan verine bakıp yanıtlıyor ama cümleler kural motorundan geliyor.'
+        : 'Cümleleri bağlı model kuruyor; sayılar yine kural motorundan.',
+      gecmisHtml:G ? G.listeHtml('ays', agent.id, { ac:'gecmis-ac', sil:'gecmis-sil' }) : '',
+      mesajlarHtml:msgs.length ? String(map(msgs, m => Bubble(agent, m))) : '',
+      bos:{ alt:agent.name + ' masasındaki raporu okudu. ' + agent.scope,
+        cipler:agent.ask.map(q => ({ ad:q, act:'team-suggest', data:{ 'data-q':q } })) },
+      ekHtml:'<div id="chat-pending" data-osohbet-bekle></div>',
+      ustHtml:'<div id="team-mention" class="team-mention"></div>',
+      girdiHtml:String(K.Textarea({ id:'team-input', rows:1, class:'osohbet-girdi',
+        aria:agent.name + '’a soru yaz', placeholder:agent.name + '’a sor…', data:{ 'data-osohbet-girdi':'1' } })),
+      gonderAct:'team-send', gonderAd:'Sor',
+    })) : '';
+
     return String(K.Grid([
+      K.Span(12, K.Stack([picker(), pencere])),
+
       K.Span(8, K.Stack([
         K.Card({
           body:html`
@@ -108995,47 +109160,10 @@ R.Screens.team = (function(){
                 <b class="desk__name">${agent.name}</b>
                 <span class="desk__role">${agent.role} — ${agent.desk}</span>
               </div>
-              ${when(msgs.length, () => K.Button({ label:'Yeni sohbet', size:'sm', tone:'ghost', act:'sohbet-yeni' }))}
             </div>
             <p class="small muted mt-8">${agent.scope}</p>
             <div class="mt-10">${deskStrip(agent)}</div>`,
         }),
-
-        picker(),
-
-        /* Model kapalıyken Masalar'daki tek satırlık gri şerit (139); iki
-           cümlelik uyarı kutusu sohbetin önünde duruyordu (2026-10-07). */
-        when(ruleMode, () => (window.LIFEOS || {}).SOZLUK
-          ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:false }))
-          : K.Notice({ tone:'info', title:'Model bağlı değil.',
-              body:'Ajan yine de verine bakıp yanıtlıyor ama cümleleri kural motorundan geliyor.' })),
-
-        html`<div class="chat osohbet" id="chat-log" data-osohbet="${'ays:' + agent.id}">
-          ${msgs.length
-            ? map(msgs, m => Bubble(agent, m))
-            : html`<div class="chat__empty">${raw(UI.icon('guide'))}
-                <p>${agent.name} masasındaki raporu okudu. Sor ya da özet iste.</p></div>`}
-          <div id="chat-pending" data-osohbet-bekle></div>
-        </div>`,
-
-        K.Row(map(agent.ask, q => K.Chip({ label:q, act:'team-suggest', data:{ 'data-q':q } })), { wrap:true }),
-
-        html`<div id="team-mention" class="team-mention"></div>
-        <div class="osohbet-yaz" data-osohbet-yaz>
-          ${K.Textarea({ id:'team-input', rows:1, class:'osohbet-girdi',
-            aria:agent.name + '’a soru yaz',
-            placeholder:agent.name + '’a sor…', data:{ 'data-osohbet-girdi':'1' } })}
-          ${OS() ? raw(OS().gonderHtml({ act:'team-send', ad:'Sor' }))
-            : K.Button({ label:'Sor', icon:'zap', tone:'primary', act:'team-send' })}
-        </div>`,
-      ])),
-
-      K.Span(4, K.Stack([
-        /* Ses tanima yoksa voiceCard() null doner: olmayan bir
-           yetenegin dugmesini gostermek, basip bir sey olmamasindan
-           kotudur. */
-        voiceCard(),
-        gecmisKarti(agent),
         K.Card({
           hint:'not-masasindaki-rapor', title:'Masasındaki rapor',           actions:K.Button({ label:'Özet iste', icon:'refresh', size:'sm', act:'team-brief' }),
           body:html`
@@ -109048,6 +109176,13 @@ R.Screens.team = (function(){
               ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.veriCipleriHtml(agent.reads))
                 : html`<span class="tiny dim">${agent.reads.length} veri kaynağı</span>`}</div>`,
         }),
+      ])),
+
+      K.Span(4, K.Stack([
+        /* Ses tanima yoksa voiceCard() null doner: olmayan bir
+           yetenegin dugmesini gostermek, basip bir sey olmamasindan
+           kotudur. */
+        voiceCard(),
         K.Card({
           hint:'not-ekipteki-digerleri', title:'Ekipteki diğerleri',           body:html`<div class="stack-xs">${map(R.AGENTS.filter(a => a.id !== agent.id), a => html`
             <button class="agentrow" data-act="team-agent" data-value="${a.id}">

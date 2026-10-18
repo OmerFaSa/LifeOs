@@ -113,6 +113,39 @@
       m.remove();
     });
 
+    it('pencere King düzeninde: yan çubukta Yeni sohbet ve geçmiş, başlık, akış, yazma kutusu; King süsü yok', () => {
+      const h = O().pencereHtml({ anahtar:'deneme:p', ad:'Patron', rol:'Baş danışman', durum:'hazır kurallar',
+        gecmisHtml:'<ul class="gecmis"></ul>', mesajlarHtml:'', bos:{ alt:'Raporu okudum.', cipler:[{ ad:'Bu hafta ne?', act:'x-sor', data:{ 'data-q':'Bu hafta ne?' } }] },
+        girdiHtml:'<textarea data-osohbet-girdi></textarea>', gonderAct:'x-gonder' });
+      const d = document.createElement('div');
+      d.innerHTML = h;
+      const p = d.querySelector('[data-osohbet-pencere]');
+      expect(!!p.querySelector('.opencere__yan [data-act="sohbet-yeni"]')).toBe(true);
+      expect(!!p.querySelector('.opencere__yan .gecmis')).toBe(true);
+      expect(p.querySelector('.opencere__bas .opencere__ad').textContent).toBe('Patron');
+      expect(p.querySelector('.opencere__durum').textContent).toBe('hazır kurallar');
+      expect(p.querySelector('[data-osohbet]').getAttribute('data-osohbet')).toBe('deneme:p');
+      expect(p.querySelector('.opencere__bos-ad').textContent).toBe('Patron');               // boşken ortada ad
+      expect(p.querySelector('.opencere__hazir').getAttribute('data-q')).toBe('Bu hafta ne?');
+      expect(!!p.querySelector('[data-osohbet-yaz] [data-osohbet-gonder][data-act="x-gonder"]')).toBe(true);
+      expect(/king/i.test(h)).toBe(false);
+      const dolu = O().pencereHtml({ anahtar:'deneme:p', ad:'Patron', mesajlarHtml:'<div class="msg msg--me"></div>', bos:{ alt:'x' } });
+      expect(dolu.indexOf('opencere__bos') < 0).toBe(true);                                 // mesaj varsa boş ekran yok
+      expect(O().pencereHtml({ ad:'<b>' }).indexOf('<b>') < 0).toBe(true);                   // ad kaçırılır
+    });
+
+    it('dar ekranda yan çubuk düğmesi açar; sohbete dokununca kapanır', () => {
+      const d = document.createElement('div');
+      d.innerHTML = O().pencereHtml({ anahtar:'deneme:q', ad:'Patron' });
+      document.body.appendChild(d);
+      const b = d.querySelector('[data-osohbet-yan]');
+      b.click();
+      expect(b.getAttribute('aria-expanded')).toBe('true');
+      d.querySelector('.opencere__akis').click();
+      expect(b.getAttribute('aria-expanded')).toBe('false');
+      d.remove();
+    });
+
     it('sade görünüş: ofis sohbeti biçiminde King süsü (bulanık cam, gradyan, sonsuz animasyon) yok', () => {
       const kurallar = [];
       Array.from(document.styleSheets).forEach(ss => {

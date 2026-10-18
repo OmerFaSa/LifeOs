@@ -152,9 +152,75 @@ LIFEOS.OFISSOHBET = (function(){
       + SVG_KOPYA + '</button>';
   }
 
+  const SVG_YAN = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg>';
+  const SVG_ARTI = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+
+  /* PENCERE (depo sahibi, 2026-10-19: «ofis kısmının King'teki sohbet
+     arayüzüyle aynı olması, ama King'teki kadar premium olmasın»). King'in
+     büyük penceresinin yerleşimi: solda «Yeni sohbet» ve geçmiş, sağda
+     başlık şeridi, ortalanmış akış, boşken ortada ad + cümle + hazır
+     sorular, altta yuvarlak yazma kutusu. Küre, kenar ışığı, perde, buzlu
+     cam, renkli odak halkası YOK; yerinde küçük nokta ve düz çizgi.
+     o: { anahtar, ad, rol, durum, durumNot, yeniAct, gecmisHtml,
+          mesajlarHtml (modülün kaçırılmış işaretlemesi; boşsa boş ekran),
+          bos:{ alt, cipler:[{ ad, act, data:{} }] }, ekHtml (akışın sonu),
+          ustHtml (yazma alanının üstü), girdiHtml, mikHtml, gonderAct, gonderAd, kapali } */
+  function bosHtml(o){
+    o = o || {};
+    const cip = c => '<button type="button" class="opencere__hazir" data-act="' + kac(c.act) + '"'
+      + Object.keys(c.data || {}).map(k => ' ' + kac(k) + '="' + kac(c.data[k]) + '"').join('') + '>' + kac(c.ad) + '</button>';
+    return '<div class="opencere__bos">'
+      + '<span class="opencere__bos-nokta" aria-hidden="true"></span>'
+      + '<h2 class="opencere__bos-ad">' + kac(o.ad || '') + '</h2>'
+      + (o.bos && o.bos.alt ? '<p class="opencere__bos-alt">' + kac(o.bos.alt) + '</p>' : '')
+      + (o.bos && o.bos.cipler && o.bos.cipler.length ? '<div class="opencere__hazirlar" role="group" aria-label="Hazır sorular">'
+        + o.bos.cipler.map(cip).join('') + '</div>' : '') + '</div>';
+  }
+
+  /* akisHtml verilirse akış kutusunu modül kendisi çizer (yerinde tazelemek
+     için); kutu .chat.osohbet.opencere__akis[data-osohbet] olmalı. */
+  function pencereHtml(o){
+    o = o || {};
+    const bos = !String(o.mesajlarHtml || '').trim();
+    return '<section class="opencere" data-osohbet-pencere="' + kac(o.anahtar || '') + '" aria-label="' + kac((o.ad || '') + ' ile sohbet') + '">'
+      + '<aside class="opencere__yan" aria-label="Sohbet geçmişi">'
+      + '<button type="button" class="opencere__yeni" data-act="' + kac(o.yeniAct || 'sohbet-yeni') + '">' + SVG_ARTI + 'Yeni sohbet</button>'
+      + '<p class="opencere__yan-ad">Geçmiş sohbetler</p>' + (o.gecmisHtml || '') + '</aside>'
+      + '<div class="opencere__ana">'
+      + '<div class="opencere__bas">'
+      + '<button type="button" class="opencere__yan-dugme" data-osohbet-yan aria-expanded="false" aria-label="Sohbet geçmişi" title="Sohbet geçmişi">' + SVG_YAN + '</button>'
+      + '<span class="opencere__nokta" aria-hidden="true"></span><b class="opencere__ad">' + kac(o.ad || '') + '</b>'
+      + (o.rol ? '<span class="opencere__rol">' + kac(o.rol) + '</span>' : '')
+      + (o.durum ? '<span class="opencere__durum"' + (o.durumNot ? ' title="' + kac(o.durumNot) + '"' : '') + '>' + kac(o.durum) + '</span>' : '')
+      + '</div>'
+      + (o.akisHtml != null ? o.akisHtml
+        : '<div class="chat osohbet opencere__akis" data-osohbet="' + kac(o.anahtar || '') + '" aria-live="polite">'
+          + (bos ? bosHtml(o) : o.mesajlarHtml) + (o.ekHtml || '') + '</div>')
+      + (o.ustHtml || '')
+      + '<div class="osohbet-yaz" data-osohbet-yaz>' + (o.girdiHtml || '') + (o.mikHtml || '')
+      + gonderHtml({ act:o.gonderAct, ad:o.gonderAd, kapali:o.kapali }) + '</div>'
+      + '</div></section>';
+  }
+
   function bagla(){
     if(bagli || typeof document === 'undefined') return;
     bagli = true;
+    /* Dar ekranda kenar çubuğu başlıktaki düğmeyle açılır; sohbete
+       dokununca kapanır (King söz 26). Yeniden çizim kapalı başlatır. */
+    document.addEventListener('click', e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      const d = t.closest('[data-osohbet-yan]');
+      if(d){
+        e.preventDefault();
+        d.setAttribute('aria-expanded', d.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+        return;
+      }
+      const ana = t.closest('.opencere__ana');
+      const p = ana && ana.closest('[data-osohbet-pencere]');
+      const acik = p && p.querySelector('[data-osohbet-yan][aria-expanded="true"]');
+      if(acik) acik.setAttribute('aria-expanded', 'false');
+    });
     document.addEventListener('keydown', e => {
       const g = e.target && e.target.matches && e.target.matches('[data-osohbet-girdi]') ? e.target : null;
       if(!g) return;
@@ -205,7 +271,7 @@ LIFEOS.OFISSOHBET = (function(){
     else bagla();
   }
 
-  return { gonderMi, alttaMi, karar, isle, tara, buyut, sonSoru, kopyaMetni, gonderHtml, kopyaHtml, bagla,
+  return { gonderMi, alttaMi, karar, isle, tara, buyut, sonSoru, kopyaMetni, gonderHtml, kopyaHtml, bosHtml, pencereHtml, bagla,
     _durum:k => durumlar[k] || null,
     _sifirla:() => { durumlar = {}; gorulen = typeof WeakSet === 'function' ? new WeakSet() : null; } };
 })();

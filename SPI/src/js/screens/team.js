@@ -132,12 +132,14 @@ SP.Screens.team = (function(){
   const OS = () => (window.LIFEOS || {}).OFISSOHBET;
   function chatBody(a){
     const msgs = S.officeChats[a.id] || [];
+    const bos = !msgs.length && !busy && OS();
     return html`
-        <div class="chat osohbet" data-osohbet="${'spi:' + a.id}">
-          <div class="msg msg--agent">
-            <div class="msg__who"><b>${a.name}</b><span>${a.role}</span></div>
+        <div class="chat osohbet opencere__akis" data-osohbet="${'spi:' + a.id}" aria-live="polite">
+          ${when(bos, () => raw(OS().bosHtml({ ad:a.name, bos:{ alt:a.opening,
+            cipler:sorular(a).map(q => ({ ad:q, act:'quick-ask', data:{ 'data-q':q } })) } })))}
+          ${when(!bos && !msgs.length, () => html`<div class="msg msg--agent">
             <div class="msg__body"><p>${a.opening}</p></div>
-          </div>
+          </div>`)}
           ${map(msgs, m => html`
             <div class="${cls('msg', m.role === 'user' ? 'msg--me' : 'msg--agent')}">
               ${when(m.role !== 'user', () => html`<div class="msg__who"><b>${a.name}</b></div>`)}
@@ -166,22 +168,25 @@ SP.Screens.team = (function(){
         </div>`;
   }
 
-  function chatCard(){
+  /* King'in sohbet penceresiyle aynı yerleşim, sade (ofissohbet.js
+     pencereHtml, 2026-10-19): solda Yeni sohbet ve geçmiş, başlıkta uzman
+     ve kaynak, altta yuvarlak yazma kutusu. */
+  function pencere(){
     const a = current();
-    return K.Card({
-      title:a.name, sub:a.role,
-      badge:SP.Office.ready(a.id) ? K.Badge({ label:'model açık', tone:'info' })
-        : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false }),
-      /* Yazma alanı sohbetin ALTINDA (King gibi). `foot` defter kipinde
-         satırın sağ üstüne eylem olarak düşüyordu (2026-10-19). */
-      body:html`${chatBody(a)}${raw(mentionYeri())}
-        <div class="osohbet-yaz mt-10" data-osohbet-yaz>
-          ${K.Textarea({ id:'chat-text', rows:1, class:'osohbet-girdi', placeholder:'Sor ya da verini söyle…',
-            aria:'Soru ya da veri (örneğin: uyku 7 saat ve 45 dakika yürüdüm)', data:{ 'data-osohbet-girdi':'1' } })}
-          ${K.Mic({ target:'chat-text' })}
-          ${OS() ? raw(OS().gonderHtml({ act:'send-chat', kapali:busy }))
-            : K.Button({ label:'Gönder', tone:'primary', act:'send-chat', disabled:busy })}
-        </div>`,
+    const G = (window.LIFEOS || {}).GECMIS;
+    const hazir = SP.Office.ready(a.id);
+    return OS().pencereHtml({
+      anahtar:'spi:' + a.id, ad:a.name, rol:a.role,
+      durum:hazir ? 'yapay zekâ' : 'hazır kurallar',
+      durumNot:hazir ? 'Cümleleri bağlı model kuruyor; sayılar yine kural motorundan.'
+        : 'Model bağlı değil: cevaplar hazır kurallardan gelir.',
+      gecmisHtml:G ? G.listeHtml('spi', a.id, { ac:'gecmis-ac', sil:'gecmis-sil' }) : '',
+      akisHtml:String(chatBody(a)),
+      ustHtml:mentionYeri(),
+      girdiHtml:String(K.Textarea({ id:'chat-text', rows:1, class:'osohbet-girdi', placeholder:'Sor ya da verini söyle…',
+        aria:'Soru ya da veri (örneğin: uyku 7 saat ve 45 dakika yürüdüm)', data:{ 'data-osohbet-girdi':'1' } })),
+      mikHtml:String(K.Mic({ target:'chat-text' })),
+      gonderAct:'send-chat', kapali:busy,
     });
   }
 
@@ -189,14 +194,6 @@ SP.Screens.team = (function(){
      geçmişe yazar; geçmişten açılan sohbet oradan sürer (brand/ortak/gecmis.js).
      gecmisAktif: ajan başına geçmişten açılan kaydın kimliği. */
   const gecmisAktif = {};
-  function gecmisKarti(){
-    const G = (window.LIFEOS || {}).GECMIS;
-    if(!G) return null;
-    const a = current();
-    return K.Card({ title:'Geçmiş sohbetler', sub:a.name,
-      body:raw(G.listeHtml('spi', a.id, { ac:'gecmis-ac', sil:'gecmis-sil' })),
-      foot:K.Button({ label:'Yeni sohbet', size:'sm', act:'sohbet-yeni' }) });
-  }
 
   function scopeCard(){
     const a = current();
@@ -225,9 +222,8 @@ SP.Screens.team = (function(){
     });
   }
 
-  function suggestCard(){
-    const a = current();
-    const qs = ({
+  function sorular(a){
+    return ({
       patron:['Bu hafta neye odaklanmalıyım?', 'Çelişki varsa hangisi öncelikli?',
         'Bütçe ile sağlık hedefi çakışıyor mu?'],
       lab:['Hangi ölçümüm en çok dikkat istiyor?', 'Eğilimi kötüye giden bir değer var mı?',
@@ -239,6 +235,10 @@ SP.Screens.team = (function(){
       money:['Nereden tasarruf edebilirim?', 'Sepetim besin ihtiyacımı karşılıyor mu?',
         'Toplu alım yapmalı mıyım?'],
     })[a.id] || [];
+  }
+
+  function suggestCard(){
+    const qs = sorular(current());
     return K.Card({
       title:'Sorabileceklerin',
       body:html`<div class="stack-xs">${map(qs, q => K.Button({ label:q, size:'sm', block:true,
@@ -249,18 +249,19 @@ SP.Screens.team = (function(){
   async function render(){
     return String(html`
       <div class="mb-8">${tabsCard()}</div>
-      ${K.Ledger(() => [voiceCard(), chatCard(), gecmisKarti(), scopeCard(), suggestCard(), briefCard()]
-        .filter(Boolean))}
+      ${when(OS(), () => raw(pencere()))}
+      <div class="mt-16">${K.Ledger(() => [voiceCard(), scopeCard(), suggestCard(), briefCard()]
+        .filter(Boolean))}</div>
       <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'no-model', 'privacy']))}</div>`);
   }
 
   /* Sohbet balonlarini yerinde tazeler. Tam cizim mikrofonu kopardigi
      icin sesli turda tam cizim kullanilamaz. */
   function sohbetTazele(){
-    const kap = document.querySelector('.chat');
+    const kap = document.querySelector('.chat[data-osohbet]');
     if(!kap){ SP.App.render(); return; }
     kap.outerHTML = String(chatBody(current()));
-    const yeni = document.querySelector('.chat');
+    const yeni = document.querySelector('.chat[data-osohbet]');
     if(yeni) yeni.scrollTop = yeni.scrollHeight;
   }
 

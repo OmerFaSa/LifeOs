@@ -19,13 +19,6 @@ R.Screens.team = (function(){
      geçmişe yazar; geçmişten açılan sohbet oradan sürer (brand/ortak/gecmis.js).
      gecmisAktif: ajan başına geçmişten açılan kaydın kimliği. */
   const gecmisAktif = {};
-  function gecmisKarti(agent){
-    const G = (window.LIFEOS || {}).GECMIS;
-    if(!G) return null;
-    return K.Card({ title:'Geçmiş sohbetler', sub:agent.name,
-      actions:K.Button({ label:'Yeni sohbet', icon:'plus', size:'sm', act:'sohbet-yeni' }),
-      body:raw(G.listeHtml('ays', agent.id, { ac:'gecmis-ac', sil:'gecmis-sil' })) });
-  }
 
   function current(){
     const id = S.ui.officeAgent;
@@ -280,7 +273,30 @@ R.Screens.team = (function(){
     const msgs = O.chatOf(agent.id);
     const ruleMode = O.mode() !== 'llm';
 
+    /* King'in sohbet penceresiyle aynı yerleşim, sade (ofissohbet.js
+       pencereHtml, 2026-10-19): solda Yeni sohbet ve geçmiş, başlıkta ajan
+       ve kaynak, boşken ortada hazır sorular. Model kapalı şeridi başlıktaki
+       «hazır kurallar» etiketine geçti. */
+    const G = (window.LIFEOS || {}).GECMIS;
+    const pencere = OS() ? raw(OS().pencereHtml({
+      anahtar:'ays:' + agent.id, ad:agent.name, rol:agent.role + ' — ' + agent.desk,
+      durum:ruleMode ? 'hazır kurallar' : 'yapay zekâ',
+      durumNot:ruleMode ? 'Model bağlı değil: ajan verine bakıp yanıtlıyor ama cümleler kural motorundan geliyor.'
+        : 'Cümleleri bağlı model kuruyor; sayılar yine kural motorundan.',
+      gecmisHtml:G ? G.listeHtml('ays', agent.id, { ac:'gecmis-ac', sil:'gecmis-sil' }) : '',
+      mesajlarHtml:msgs.length ? String(map(msgs, m => Bubble(agent, m))) : '',
+      bos:{ alt:agent.name + ' masasındaki raporu okudu. ' + agent.scope,
+        cipler:agent.ask.map(q => ({ ad:q, act:'team-suggest', data:{ 'data-q':q } })) },
+      ekHtml:'<div id="chat-pending" data-osohbet-bekle></div>',
+      ustHtml:'<div id="team-mention" class="team-mention"></div>',
+      girdiHtml:String(K.Textarea({ id:'team-input', rows:1, class:'osohbet-girdi',
+        aria:agent.name + '’a soru yaz', placeholder:agent.name + '’a sor…', data:{ 'data-osohbet-girdi':'1' } })),
+      gonderAct:'team-send', gonderAd:'Sor',
+    })) : '';
+
     return String(K.Grid([
+      K.Span(12, K.Stack([picker(), pencere])),
+
       K.Span(8, K.Stack([
         K.Card({
           body:html`
@@ -290,47 +306,10 @@ R.Screens.team = (function(){
                 <b class="desk__name">${agent.name}</b>
                 <span class="desk__role">${agent.role} — ${agent.desk}</span>
               </div>
-              ${when(msgs.length, () => K.Button({ label:'Yeni sohbet', size:'sm', tone:'ghost', act:'sohbet-yeni' }))}
             </div>
             <p class="small muted mt-8">${agent.scope}</p>
             <div class="mt-10">${deskStrip(agent)}</div>`,
         }),
-
-        picker(),
-
-        /* Model kapalıyken Masalar'daki tek satırlık gri şerit (139); iki
-           cümlelik uyarı kutusu sohbetin önünde duruyordu (2026-10-07). */
-        when(ruleMode, () => (window.LIFEOS || {}).SOZLUK
-          ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:false }))
-          : K.Notice({ tone:'info', title:'Model bağlı değil.',
-              body:'Ajan yine de verine bakıp yanıtlıyor ama cümleleri kural motorundan geliyor.' })),
-
-        html`<div class="chat osohbet" id="chat-log" data-osohbet="${'ays:' + agent.id}">
-          ${msgs.length
-            ? map(msgs, m => Bubble(agent, m))
-            : html`<div class="chat__empty">${raw(UI.icon('guide'))}
-                <p>${agent.name} masasındaki raporu okudu. Sor ya da özet iste.</p></div>`}
-          <div id="chat-pending" data-osohbet-bekle></div>
-        </div>`,
-
-        K.Row(map(agent.ask, q => K.Chip({ label:q, act:'team-suggest', data:{ 'data-q':q } })), { wrap:true }),
-
-        html`<div id="team-mention" class="team-mention"></div>
-        <div class="osohbet-yaz" data-osohbet-yaz>
-          ${K.Textarea({ id:'team-input', rows:1, class:'osohbet-girdi',
-            aria:agent.name + '’a soru yaz',
-            placeholder:agent.name + '’a sor…', data:{ 'data-osohbet-girdi':'1' } })}
-          ${OS() ? raw(OS().gonderHtml({ act:'team-send', ad:'Sor' }))
-            : K.Button({ label:'Sor', icon:'zap', tone:'primary', act:'team-send' })}
-        </div>`,
-      ])),
-
-      K.Span(4, K.Stack([
-        /* Ses tanima yoksa voiceCard() null doner: olmayan bir
-           yetenegin dugmesini gostermek, basip bir sey olmamasindan
-           kotudur. */
-        voiceCard(),
-        gecmisKarti(agent),
         K.Card({
           hint:'not-masasindaki-rapor', title:'Masasındaki rapor',           actions:K.Button({ label:'Özet iste', icon:'refresh', size:'sm', act:'team-brief' }),
           body:html`
@@ -343,6 +322,13 @@ R.Screens.team = (function(){
               ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.veriCipleriHtml(agent.reads))
                 : html`<span class="tiny dim">${agent.reads.length} veri kaynağı</span>`}</div>`,
         }),
+      ])),
+
+      K.Span(4, K.Stack([
+        /* Ses tanima yoksa voiceCard() null doner: olmayan bir
+           yetenegin dugmesini gostermek, basip bir sey olmamasindan
+           kotudur. */
+        voiceCard(),
         K.Card({
           hint:'not-ekipteki-digerleri', title:'Ekipteki diğerleri',           body:html`<div class="stack-xs">${map(R.AGENTS.filter(a => a.id !== agent.id), a => html`
             <button class="agentrow" data-act="team-agent" data-value="${a.id}">

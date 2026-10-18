@@ -70,3 +70,86 @@
 .osohbet-gonder:disabled{ opacity:.35; cursor:default; }
 .osohbet-gonder:focus-visible{ outline:2px solid var(--text-3); outline-offset:2px; }
 .osohbet-gonder svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+/* ======================================================================
+   PENCERE (depo sahibi, 2026-10-19: «King'teki sohbet arayüzüyle aynı
+   olsun ama King'teki kadar premium olmasın»). King'in büyük penceresinin
+   yerleşimi, sayfanın içinde: solda «Yeni sohbet» ve geçmiş, sağda başlık
+   şeridi, ortalanmış akış, altta yuvarlak yazma kutusu. Yükseklik sabit:
+   cevap geldikçe pencere büyüyüp titremez, yalnız akış kayar. King'den
+   ayrılan: küre yerine 7 px nokta, perde ve ışık yok, buzlu cam yok, gölge
+   yok, odakta renkli halka yok (yalnız çizgi koyulaşır).
+   ====================================================================== */
+.opencere{ position:relative; display:grid; grid-template-columns:248px minmax(0, 1fr); width:100%;
+  height:min(760px, calc(100dvh - 190px)); min-height:460px; overflow:hidden;
+  border:1px solid var(--border); border-radius:24px; background:var(--surface); }
+.opencere__yan{ display:flex; flex-direction:column; gap:6px; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+  padding:14px 10px; border-right:1px solid var(--border); background:var(--surface-2); }
+.opencere__yeni{ display:flex; align-items:center; gap:8px; min-height:40px; padding:0 12px; border:1px solid var(--border);
+  border-radius:12px; background:var(--surface); color:var(--text); font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+.opencere__yeni svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.opencere__yeni:hover{ border-color:var(--border-strong); }
+.opencere__yan-ad{ margin:14px 8px 2px; font-size:12px; font-weight:600; color:var(--text-3); }
+.opencere__yan .gecmis__bos{ margin:0 8px; font-size:12.5px; color:var(--text-3); }
+.opencere__yeni:focus-visible, .opencere__yan-dugme:focus-visible, .opencere__hazir:focus-visible{ outline:2px solid var(--text-3); outline-offset:1px; }
+
+.opencere__ana{ display:flex; flex-direction:column; gap:12px; min-width:0; min-height:0; padding:14px 18px; }
+.opencere__bas{ display:flex; align-items:center; gap:10px; min-height:40px; }
+.opencere__yan-dugme{ display:none; flex:none; width:32px; height:32px; place-items:center; padding:0; border:0; border-radius:50%;
+  background:none; color:var(--text-2); cursor:pointer; }
+.opencere__yan-dugme:hover{ background:var(--surface-2); color:var(--text); }
+.opencere__yan-dugme svg{ width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round; }
+.opencere__nokta{ flex:none; width:7px; height:7px; border-radius:50%; background:var(--primary); }
+.opencere__ad{ font-size:14.5px; font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.opencere__rol{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12.5px; color:var(--text-3); }
+.opencere__durum{ margin-left:auto; flex:none; padding:2px 9px; border-radius:999px; background:var(--surface-2);
+  font-size:11.5px; font-weight:600; color:var(--text-2); white-space:nowrap; }
+
+/* Akış: King gibi ortada en çok 780 px; ajanın cevabı düz yazı, adı
+   başlıkta olduğundan satırda tekrarlanmaz. */
+.opencere__akis{ flex:1; min-height:0; max-height:none; padding:8px 4px 4px; gap:14px; touch-action:pan-y; }
+.opencere__akis > *, .opencere .osohbet-yaz, .opencere .team-mention{ width:100%; max-width:780px; margin-inline:auto; }
+.opencere__akis > .msg{ max-width:780px; }
+.opencere__akis > .msg--me{ width:auto; max-width:min(80%, 620px); margin-inline:auto 0; }
+@supports (margin-inline:max(0px, 1px)){
+  .opencere__akis > .msg--me{ margin-right:max(0px, calc((100% - 780px) / 2)); }
+}
+.opencere .msg__who{ display:none; }
+.opencere .msg--agent .msg__body{ font-size:15.5px; line-height:1.5; letter-spacing:-.005em; padding:2px 4px 0; }
+.opencere .msg--me .msg__body{ font-size:14.5px; padding:8px 13px; }
+.opencere .osohbet__alt{ padding-left:4px; }
+
+/* Boş sohbet: ortada nokta, ad, cümle ve hazır sorular (King'deki küre ve
+   selamın sadesi). */
+.opencere__bos{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  min-height:100%; padding:24px 8px; text-align:center; }
+.opencere__bos-nokta{ width:10px; height:10px; border-radius:50%; background:var(--primary); }
+.opencere__bos-ad{ margin:4px 0 0; font-size:24px; line-height:1.2; font-weight:650; letter-spacing:-.02em; color:var(--text); }
+.opencere__bos-alt{ margin:0; max-width:440px; font-size:14px; line-height:1.5; color:var(--text-2); }
+.opencere__hazirlar{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:12px; max-width:620px; }
+.opencere__hazir{ min-height:38px; padding:0 14px; border:1px solid var(--border); border-radius:999px; background:var(--surface);
+  color:var(--text); font:inherit; font-size:13px; font-weight:500; cursor:pointer; }
+.opencere__hazir:hover{ background:var(--surface-2); }
+
+/* Yazma kutusu: King'in yuvarlak alanı, düz gri; odakta yalnız çizgi. */
+.opencere .osohbet-yaz{ flex:none; gap:6px; padding:6px 6px 6px 18px; min-height:52px; align-items:center;
+  border:1px solid transparent; border-radius:26px; background:var(--surface-2); }
+.opencere .osohbet-yaz:focus-within{ border-color:var(--border-strong); background:var(--surface); }
+.opencere .osohbet-gonder{ width:40px; height:40px; }
+.opencere .osohbet-yaz:has(.osohbet-girdi:placeholder-shown) .osohbet-gonder{ opacity:.35; }
+
+/* Tablet ve telefon: kenar çubuğu başlıktaki düğmeyle pencerenin içinde açılır. */
+@media (max-width:1023px){
+  .opencere{ grid-template-columns:minmax(0, 1fr); }
+  .opencere__yan{ position:absolute; z-index:2; left:0; top:0; bottom:0; width:min(280px, 82%); transform:translateX(-102%);
+    transition:transform .28s cubic-bezier(.32,.72,0,1); background:var(--surface); border-right:1px solid var(--border); }
+  .opencere:has([data-osohbet-yan][aria-expanded="true"]) .opencere__yan{ transform:none; }
+  .opencere__yan-dugme{ display:grid; }
+}
+@media (max-width:679px){
+  .opencere{ height:calc(100dvh - 210px); min-height:420px; border-radius:20px; }
+  .opencere__ana{ padding:10px 10px 10px; }
+  .opencere__rol{ display:none; }
+  .opencere__bos-ad{ font-size:21px; }
+}
+@media (prefers-reduced-motion:reduce){ .opencere__yan{ transition:none; } }
