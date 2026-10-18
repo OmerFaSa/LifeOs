@@ -568,4 +568,42 @@ describe('P3 · Grafik ekleri (032 036 040)', () => {
   });
 });
 
+/* METRİK KARTI (kullanıcı, 2026-10-18: «Analiz kısmı bir tık daha
+   profesyonel»): büyük asıl sayı, eğilim, doluluk; eksenli çizgi. */
+describe('Metrik kartı', () => {
+  const gun = i => '2026-10-' + String(i + 1).padStart(2, '0');
+  const seri28 = degerler => degerler.map((d, i) => ({ tarih:gun(i), deger:d }));
+  it('ortalama yalnız kayıtlı günlerden; eksik gün sıfır sayılmaz; doluluk yazılır', () => {
+    const s = seri28([null, null, 7, 8, null, 6, 9].concat(Array(21).fill(null)));
+    const h = G().metrikHtml(s, { etiket:'Uyku', birim:'saat', ondalik:1 });
+    expect(h).toContain('class="metrik__sayi">7,5<');              // (7+8+6+9)/4
+    expect(h).toContain('4/28 gün veri');
+    expect(h).toContain('hesaplandı');
+    expect(h).toContain('grafik__ort');                            // kesikli ortalama
+    expect(h).toContain('grafik__son');                            // son değer noktası
+  });
+  it('kayıt yoksa sayı «—», ortalama çizgisi yok; boş grafik ve cümle «veri yok» der', () => {
+    const h = G().metrikHtml(seri28(Array(28).fill(null)), { etiket:'Günlük pratik', birim:'dk' });
+    expect(h).toContain('metrik--bos');
+    expect(h).toContain('class="metrik__sayi">—<');
+    expect(h).toContain('0/28 gün veri');
+    expect(h).toContain('grafik--bos');                            // 027: boş grafik
+    expect(h.indexOf('grafik__ort') < 0).toBeTruthy();
+    expect(h).toContain('data-oz="034"');
+  });
+  it('eksen etiketleri grafiğin kendi ölçeğidir; ilk ve son tarih yazılır', () => {
+    const s = seri28([30, 45, 60].concat(Array(25).fill(null)));
+    const h = G().metrikHtml(s, { etiket:'Günlük pratik', birim:'dk', ondalik:0 });
+    const k = sahne(h);
+    try{
+      const y = Array.from(k.querySelectorAll('.metrik__y span')).map(x => x.textContent);
+      expect(y).toEqual(['60 dk', '30 dk']);
+      const x = Array.from(k.querySelectorAll('.metrik__x span')).map(e => e.textContent);
+      expect(x[0]).toBe('1 Ekim');
+      expect(x[x.length - 1]).toBe('28 Ekim');
+      expect(k.querySelector('svg').getAttribute('viewBox')).toBe('0 0 560 140');
+    }finally{ k.remove(); }
+  });
+});
+
 })();

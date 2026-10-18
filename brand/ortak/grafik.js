@@ -228,12 +228,81 @@ window.LIFEOS = window.LIFEOS || {};
           + '" cy="' + yuvarla(y(q.deger)) + '" r="3" data-tarih="' + q.tarih + '"/>';
       }));
     }
+    /* Metrik kartı (2026-10-18): kesikli ortalama ve son değerin noktası.
+       Nokta, sıfır boylu yuvarlak uçlu çizgidir (oran korunmaz, daire elipse
+       dönerdi). Ortalamayı çağıran verir (yalnız kayıtlı günlerden). */
+    if(sayiMi(o.ortalama)){
+      const yo = yuvarla(y(o.ortalama));
+      govde += '<line class="grafik__ort" x1="0" y1="' + yo + '" x2="' + gen + '" y2="' + yo + '"/>';
+    }
+    if(o.sonNokta){
+      const sonPar = p.parcalar[p.parcalar.length - 1];
+      const q = sonPar && sonPar[sonPar.length - 1];
+      if(q) govde += '<path class="grafik__son" d="M' + yuvarla(x(q.i)) + ' ' + yuvarla(y(q.deger)) + 'h0" data-tarih="' + q.tarih + '"/>';
+    }
     const oort = ovs.length ? ovs.reduce((a2, v) => a2 + v, 0) / ovs.length : null;
     const etiketler = ozet + (bant ? ', ' + disarida + ' gün hedef bandının dışında' : '')
       + (oort != null ? ', geçen dönem ortalaması ' + bicim(oort, 1) + ' (gölgede)' : '')
       + (o.cumle ? '. ' + cumle(s, o) : '');
     return '<svg class="grafik' + (bant ? ' grafik--bantli' : '') + '" data-oz="027" viewBox="0 0 ' + gen + ' ' + yuk + '"'
       + ' preserveAspectRatio="none" role="img" aria-label="' + kac(etiketler) + '">' + govde + '</svg>';
+  }
+
+  /* ------------------------------------------------- metrik kartı
+
+     Kullanıcı (2026-10-18: «Analiz kısmı bir tık daha profesyonel»). Eksensiz
+     çizgi okunmuyordu: asıl sayı alttaki cümlede kayboluyordu. Kart:
+       · büyük asıl sayı — kayıtlı günlerin ORTALAMASI (hesaplandı); eksik
+         gün sıfır sayılmaz (§1.2);
+       · eğilim (egilimHtml) ve doluluk («21/28 gün veri»);
+       · eksenli çizgi: y'de grafiğin KENDİ ölçeğinin üstü ve altı, x'te
+         ilk–orta–son tarih, kesikli ortalama, son değerin noktası;
+       · altında kural cümlesi (cumleHtml).
+     Kayıt yoksa sayı da çizgi de yok; «kayıt yok» der.
+       o = { etiket, birim, ondalik, yon, bant, gen, yuk } */
+  function metrikHtml(s, o){
+    o = o || {};
+    s = s || [];
+    const etiket = o.etiket || 'Ölçüm', birim = o.birim || '', od = o.ondalik == null ? 1 : o.ondalik;
+    const vs = s.filter(p => sayiMi(p.deger)).map(p => p.deger);
+    const n = s.length;
+    /* Veri yokken de kart çizilir (vitrin 027 · 034 · 037): sayı yerine «—»,
+       boş grafik ve kural cümlesi «veri yok» der; sıfır yazılmaz. */
+    if(!vs.length){
+      return '<div class="metrik metrik--bos"><div class="metrik__bas">'
+        + '<div class="metrik__asil"><span class="metrik__sayi">—</span></div>'
+        + '<div class="metrik__yan"><span>veri yok</span><span class="metrik__cipler">'
+        + egilimHtml(s.map(x => x.deger), { yon:o.yon || 'artis-iyi', birim })
+        + '<span class="metrik__cip">0/' + n + ' gün veri</span></span></div></div>'
+        + cizgiSvg(s, { gen:o.gen || 560, yuk:o.yuk || 140, etiket, birim })
+        + cumleHtml(s, { etiket, birim, ondalik:od }) + '</div>';
+    }
+    const ort = vs.reduce((a, v) => a + v, 0) / vs.length;
+    const bant = Array.isArray(o.bant) && sayiMi(o.bant[0]) && sayiMi(o.bant[1]) ? o.bant : null;
+    const olc = bant ? vs.concat(bant) : vs;
+    let min = Math.min.apply(null, olc), max = Math.max.apply(null, olc);
+    if(max === min){ max = max + 1; min = min - 1; }
+    const gen = o.gen || 560, yuk = o.yuk || 140;
+    const svg = cizgiSvg(s, { gen, yuk, min, max, pay:o.pay == null ? 6 : o.pay, etiket, birim, bant, ortalama:ort, sonNokta:true });
+    const b = v => kac(bicim(v, od)) + (birim ? ' ' + kac(birim) : '');
+    const orta = s[Math.floor((n - 1) / 2)];
+    const xler = n > 2 ? [s[0], orta, s[n - 1]] : [s[0], s[n - 1]];
+    return '<div class="metrik">'
+      + '<div class="metrik__bas">'
+      +   '<div class="metrik__asil"><span class="metrik__sayi">' + kac(bicim(ort, od)) + '</span>'
+      +     (birim ? '<span class="metrik__birim">' + kac(birim) + '</span>' : '') + '</div>'
+      +   '<div class="metrik__yan"><span>ortalama · hesaplandı</span>'
+      +     '<span class="metrik__cipler">' + egilimHtml(s.map(x => x.deger), { yon:o.yon || 'artis-iyi', birim })
+      +     '<span class="metrik__cip">' + vs.length + '/' + n + ' gün veri</span></span></div>'
+      + '</div>'
+      + '<div class="metrik__grafik">'
+      +   '<div class="metrik__y" aria-hidden="true"><span>' + b(max) + '</span><span>' + b(min) + '</span></div>'
+      +   '<div class="metrik__cizim">' + svg
+      +     '<div class="metrik__x" aria-hidden="true">' + xler.map(x => '<span>' + kac(tarihMetni(x.tarih, true)) + '</span>').join('') + '</div>'
+      +   '</div>'
+      + '</div>'
+      + cumleHtml(s, { etiket, birim, ondalik:od })
+      + '</div>';
   }
 
   /* --------------------------------------------- 035 aralık çubuğu */
@@ -844,6 +913,7 @@ window.LIFEOS = window.LIFEOS || {};
     seri:seri,
     parcalar:parcalar,
     cizgiSvg:cizgiSvg,
+    metrikHtml:metrikHtml,
     sigdir:sigdir,
     aralik:aralik,
     aralikHtml:aralikHtml,

@@ -548,9 +548,8 @@ ESP.Screens.analytics = (function(){
     return html`<div class="analizbasi">
       ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'esp', ad:'ESP', gunler:kayitli }], { gun:7 })) })}
       ${K.Kutu({ ad:'Günlük pratik', yuva:'son 28 gün', govde:html`
-        <div class="sira-bas">${raw(G.egilimHtml(son.map(x => x.deger), { yon:'artis-iyi', birim:'dk' }))}</div>
-        ${raw(G.cizgiSvg(son, { gen:560, yuk:120, etiket:'Günlük pratik', birim:'dk' }))}
-        ${raw(G.cumleHtml(son, { etiket:'Günlük pratik', birim:'dk', ondalik:0 }))}` })}
+        ${/* Metrik kartı (2026-10-18): ortalama, eğilim, doluluk ve eksenli çizgi. */''}
+        ${raw(G.metrikHtml(son, { etiket:'Günlük pratik', birim:'dk', ondalik:0, yon:'artis-iyi' }))}` })}
     </div>`;
   }
 

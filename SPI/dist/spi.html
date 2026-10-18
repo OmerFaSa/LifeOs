@@ -7071,6 +7071,29 @@ body.is-dragging .drop.is-over{
 .onay-satir__ad{ font-size:15px; font-weight:600; line-height:1.35; min-width:0; }
 .onay-satir__ust{ margin:2px 0 0; font-size:12.5px; color:var(--text-3); }
 
+/* ---------- Metrik kartı (2026-10-18, «Analiz bir tık daha profesyonel») ----------
+   Büyük asıl sayı ve yanında küçük kesinlik ve doluluk; altında eksenli çizgi:
+   solda grafiğin kendi ölçeğinin üstü ve altı, altta ilk–orta–son tarih,
+   kesikli ortalama, son değerin noktası. Rakamlar serif değil. */
+.metrik{ display:flex; flex-direction:column; gap:16px; }
+.metrik__bas{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 18px; }
+.metrik__asil{ display:flex; align-items:baseline; gap:6px; }
+.metrik__sayi{ font-size:clamp(34px, 4vw, 44px); font-weight:650; letter-spacing:-.025em; line-height:1; color:var(--text); font-variant-numeric:tabular-nums; }
+.metrik__birim{ font-size:15px; font-weight:550; color:var(--text-2); }
+.metrik__yan{ display:flex; flex-direction:column; gap:6px; padding-bottom:3px; font-size:12.5px; color:var(--text-3); }
+.metrik__cipler{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; }
+.metrik__cip{ font-size:12.5px; color:var(--text-2); }
+.metrik__grafik{ display:grid; grid-template-columns:auto 1fr; column-gap:12px; }
+.metrik__y{ display:flex; flex-direction:column; justify-content:space-between; padding:2px 0 26px; text-align:right;
+  font-size:11.5px; color:var(--text-3); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.metrik__cizim{ min-width:0; border-left:1px solid color-mix(in oklab, var(--border) 80%, transparent); }
+.metrik__x{ display:flex; justify-content:space-between; padding:6px 2px 0; font-size:11.5px; color:var(--text-3);
+  border-top:1px solid color-mix(in oklab, var(--border) 80%, transparent); }
+.grafik__ort{ stroke:var(--text-3); stroke-width:1; stroke-dasharray:4 4; vector-effect:non-scaling-stroke; opacity:.8; }
+.grafik__son{ fill:none; stroke:currentColor; stroke-width:9; stroke-linecap:round; vector-effect:non-scaling-stroke; }
+.metrik--bos{ padding:8px 0; }
+.metrik__bos{ margin:0; font-size:14px; color:var(--text-2); }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -15690,7 +15713,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'501e38e2', at:'2026-10-18 00:20', dirty:true };
+SP.BUILD = { id:'88bc1a8d', at:'2026-10-18 01:17', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -16610,12 +16633,81 @@ window.LIFEOS = window.LIFEOS || {};
           + '" cy="' + yuvarla(y(q.deger)) + '" r="3" data-tarih="' + q.tarih + '"/>';
       }));
     }
+    /* Metrik kartı (2026-10-18): kesikli ortalama ve son değerin noktası.
+       Nokta, sıfır boylu yuvarlak uçlu çizgidir (oran korunmaz, daire elipse
+       dönerdi). Ortalamayı çağıran verir (yalnız kayıtlı günlerden). */
+    if(sayiMi(o.ortalama)){
+      const yo = yuvarla(y(o.ortalama));
+      govde += '<line class="grafik__ort" x1="0" y1="' + yo + '" x2="' + gen + '" y2="' + yo + '"/>';
+    }
+    if(o.sonNokta){
+      const sonPar = p.parcalar[p.parcalar.length - 1];
+      const q = sonPar && sonPar[sonPar.length - 1];
+      if(q) govde += '<path class="grafik__son" d="M' + yuvarla(x(q.i)) + ' ' + yuvarla(y(q.deger)) + 'h0" data-tarih="' + q.tarih + '"/>';
+    }
     const oort = ovs.length ? ovs.reduce((a2, v) => a2 + v, 0) / ovs.length : null;
     const etiketler = ozet + (bant ? ', ' + disarida + ' gün hedef bandının dışında' : '')
       + (oort != null ? ', geçen dönem ortalaması ' + bicim(oort, 1) + ' (gölgede)' : '')
       + (o.cumle ? '. ' + cumle(s, o) : '');
     return '<svg class="grafik' + (bant ? ' grafik--bantli' : '') + '" data-oz="027" viewBox="0 0 ' + gen + ' ' + yuk + '"'
       + ' preserveAspectRatio="none" role="img" aria-label="' + kac(etiketler) + '">' + govde + '</svg>';
+  }
+
+  /* ------------------------------------------------- metrik kartı
+
+     Kullanıcı (2026-10-18: «Analiz kısmı bir tık daha profesyonel»). Eksensiz
+     çizgi okunmuyordu: asıl sayı alttaki cümlede kayboluyordu. Kart:
+       · büyük asıl sayı — kayıtlı günlerin ORTALAMASI (hesaplandı); eksik
+         gün sıfır sayılmaz (§1.2);
+       · eğilim (egilimHtml) ve doluluk («21/28 gün veri»);
+       · eksenli çizgi: y'de grafiğin KENDİ ölçeğinin üstü ve altı, x'te
+         ilk–orta–son tarih, kesikli ortalama, son değerin noktası;
+       · altında kural cümlesi (cumleHtml).
+     Kayıt yoksa sayı da çizgi de yok; «kayıt yok» der.
+       o = { etiket, birim, ondalik, yon, bant, gen, yuk } */
+  function metrikHtml(s, o){
+    o = o || {};
+    s = s || [];
+    const etiket = o.etiket || 'Ölçüm', birim = o.birim || '', od = o.ondalik == null ? 1 : o.ondalik;
+    const vs = s.filter(p => sayiMi(p.deger)).map(p => p.deger);
+    const n = s.length;
+    /* Veri yokken de kart çizilir (vitrin 027 · 034 · 037): sayı yerine «—»,
+       boş grafik ve kural cümlesi «veri yok» der; sıfır yazılmaz. */
+    if(!vs.length){
+      return '<div class="metrik metrik--bos"><div class="metrik__bas">'
+        + '<div class="metrik__asil"><span class="metrik__sayi">—</span></div>'
+        + '<div class="metrik__yan"><span>veri yok</span><span class="metrik__cipler">'
+        + egilimHtml(s.map(x => x.deger), { yon:o.yon || 'artis-iyi', birim })
+        + '<span class="metrik__cip">0/' + n + ' gün veri</span></span></div></div>'
+        + cizgiSvg(s, { gen:o.gen || 560, yuk:o.yuk || 140, etiket, birim })
+        + cumleHtml(s, { etiket, birim, ondalik:od }) + '</div>';
+    }
+    const ort = vs.reduce((a, v) => a + v, 0) / vs.length;
+    const bant = Array.isArray(o.bant) && sayiMi(o.bant[0]) && sayiMi(o.bant[1]) ? o.bant : null;
+    const olc = bant ? vs.concat(bant) : vs;
+    let min = Math.min.apply(null, olc), max = Math.max.apply(null, olc);
+    if(max === min){ max = max + 1; min = min - 1; }
+    const gen = o.gen || 560, yuk = o.yuk || 140;
+    const svg = cizgiSvg(s, { gen, yuk, min, max, pay:o.pay == null ? 6 : o.pay, etiket, birim, bant, ortalama:ort, sonNokta:true });
+    const b = v => kac(bicim(v, od)) + (birim ? ' ' + kac(birim) : '');
+    const orta = s[Math.floor((n - 1) / 2)];
+    const xler = n > 2 ? [s[0], orta, s[n - 1]] : [s[0], s[n - 1]];
+    return '<div class="metrik">'
+      + '<div class="metrik__bas">'
+      +   '<div class="metrik__asil"><span class="metrik__sayi">' + kac(bicim(ort, od)) + '</span>'
+      +     (birim ? '<span class="metrik__birim">' + kac(birim) + '</span>' : '') + '</div>'
+      +   '<div class="metrik__yan"><span>ortalama · hesaplandı</span>'
+      +     '<span class="metrik__cipler">' + egilimHtml(s.map(x => x.deger), { yon:o.yon || 'artis-iyi', birim })
+      +     '<span class="metrik__cip">' + vs.length + '/' + n + ' gün veri</span></span></div>'
+      + '</div>'
+      + '<div class="metrik__grafik">'
+      +   '<div class="metrik__y" aria-hidden="true"><span>' + b(max) + '</span><span>' + b(min) + '</span></div>'
+      +   '<div class="metrik__cizim">' + svg
+      +     '<div class="metrik__x" aria-hidden="true">' + xler.map(x => '<span>' + kac(tarihMetni(x.tarih, true)) + '</span>').join('') + '</div>'
+      +   '</div>'
+      + '</div>'
+      + cumleHtml(s, { etiket, birim, ondalik:od })
+      + '</div>';
   }
 
   /* --------------------------------------------- 035 aralık çubuğu */
@@ -17226,6 +17318,7 @@ window.LIFEOS = window.LIFEOS || {};
     seri:seri,
     parcalar:parcalar,
     cizgiSvg:cizgiSvg,
+    metrikHtml:metrikHtml,
     sigdir:sigdir,
     aralik:aralik,
     aralikHtml:aralikHtml,
@@ -78779,9 +78872,8 @@ SP.Screens.analytics = (function(){
     return K.Grid([K.Span(12, html`<div class="analizbasi">
       ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'spi', ad:'SPİ', gunler:olcumlu }], { gun:7 })) })}
       ${K.Kutu({ ad:'Uyku', yuva:'son 28 gün', govde:html`
-        <div class="sira-bas">${raw(G.egilimHtml(son.map(x => x.deger), { yon:'artis-iyi', birim:'saat' }))}</div>
-        ${cizgi(bant ? { bant } : {})}
-        ${raw(G.cumleHtml(son, { etiket:'Uyku', birim:'saat' }))}
+        ${/* Metrik kartı (2026-10-18): ortalama, eğilim, doluluk ve eksenli çizgi. */''}
+        ${raw(G.metrikHtml(son, { etiket:'Uyku', birim:'saat', ondalik:1, yon:'artis-iyi', bant }))}
         <details class="hiz-ac"><summary>Geçen dönemle karşılaştır</summary>${cizgi({ onceki:once, bant })}</details>
         <details class="hiz-ac"><summary>Dağılım</summary>${raw(G.dagilimSvg({ degerler:son.map(x => x.deger), birim:'saat', etiket:'Uyku' }))}</details>
         ${raw(uykuDuzeniHtml(gunler(14)))}` })}

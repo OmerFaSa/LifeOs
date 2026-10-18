@@ -526,9 +526,8 @@ SP.Screens.analytics = (function(){
     return K.Grid([K.Span(12, html`<div class="analizbasi">
       ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'spi', ad:'SPİ', gunler:olcumlu }], { gun:7 })) })}
       ${K.Kutu({ ad:'Uyku', yuva:'son 28 gün', govde:html`
-        <div class="sira-bas">${raw(G.egilimHtml(son.map(x => x.deger), { yon:'artis-iyi', birim:'saat' }))}</div>
-        ${cizgi(bant ? { bant } : {})}
-        ${raw(G.cumleHtml(son, { etiket:'Uyku', birim:'saat' }))}
+        ${/* Metrik kartı (2026-10-18): ortalama, eğilim, doluluk ve eksenli çizgi. */''}
+        ${raw(G.metrikHtml(son, { etiket:'Uyku', birim:'saat', ondalik:1, yon:'artis-iyi', bant }))}
         <details class="hiz-ac"><summary>Geçen dönemle karşılaştır</summary>${cizgi({ onceki:once, bant })}</details>
         <details class="hiz-ac"><summary>Dağılım</summary>${raw(G.dagilimSvg({ degerler:son.map(x => x.deger), birim:'saat', etiket:'Uyku' }))}</details>
         ${raw(uykuDuzeniHtml(gunler(14)))}` })}
