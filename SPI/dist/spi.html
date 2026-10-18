@@ -12987,16 +12987,9 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__gecmis-is small{ font-size:11.5px; color:var(--text-2); }
 .king__gecmis-is:hover, .king__arac:hover{ background:var(--surface-2); }
 .king__gecmis-is.is-acik{ background:var(--surface); box-shadow:0 0 0 1px var(--line, rgba(0,0,0,.08)); }
-.king__araclar{ display:flex; flex-direction:column; gap:2px; }
-.king__arac{ min-height:36px; padding:0 10px; border:0; border-radius:10px; background:transparent; color:var(--text);
-  font:inherit; font-size:13.5px; text-align:left; cursor:pointer; }
 .king__yeni:focus-visible, .king__gecmis-is:focus-visible, .king__arac:focus-visible{ outline:2px solid var(--primary); outline-offset:1px; }
-/* Geniş ekranda araçlar kenarda: başlıktaki kopyaları gizlenir. */
 .king__yan-dugme{ display:none; }
 .king:not(.is-mini) .king__bas{ padding-left:0; }
-@media (min-width:1024px){
-  .king:not(.is-mini) .king__ekran, .king:not(.is-mini) .king__sayfa, .king:not(.is-mini) .king__sohbet{ display:none; }
-}
 /* Tablet ve telefon: kenar çubuğu başlıktaki düğmeyle, pencerenin içinde açılır. */
 @media (max-width:1023px){
   .king:not(.is-mini) .king__kutu{ width:calc(100vw - 32px); grid-template-columns:minmax(0, 1fr); }
@@ -13031,6 +13024,119 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .gecmis__sil.is-onay{ color:var(--danger, #e5484d); font-weight:600; }
 .gecmis__ac:focus-visible, .gecmis__sil:focus-visible{ outline:2px solid var(--primary); outline-offset:1px; }
 .gecmis__bos{ margin:0; font-size:13px; line-height:1.45; color:var(--text-2); }
+
+/* ======================================================================
+   KİPLER, BOŞ SOHBET, «+» MENÜSÜ, KLASÖRLER (king.js söz 27; kullanıcı,
+   2026-10-18: «sadeleştir, profesyonelleştir; yalnız sesli duyayım,
+   beraber konuşalım ya da ekran paylaşayım; solda yalnız sohbet geçmişi,
+   klasörlenebilsin»). Renk yalnız seçili kipte ve canlı noktada.
+   ====================================================================== */
+.king:not(.is-mini) .king__bas{ gap:10px; min-height:40px; }
+.king__kipler{ display:inline-flex; gap:2px; margin-left:auto; padding:3px; border-radius:999px; background:var(--surface-2); }
+.king__kip{ display:inline-flex; align-items:center; gap:6px; min-height:30px; padding:0 12px; border:0; border-radius:999px;
+  background:transparent; color:var(--text-2); font:inherit; font-size:13px; font-weight:550; cursor:pointer;
+  transition:background .2s ease, color .2s ease, box-shadow .2s ease; }
+.king__kip svg{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+.king__kip:hover{ color:var(--text); }
+.king__kip.is-secili{ background:var(--surface); color:var(--text); box-shadow:0 1px 2px rgba(20,24,40,.12), 0 0 0 1px var(--line, rgba(0,0,0,.06)); }
+.king__kip:focus-visible{ outline:2px solid var(--primary); outline-offset:1px; }
+.king:not(.is-mini) .king__menu-dugme{ margin-left:auto; }
+.king:not(.is-mini) .king__kipler ~ .king__menu-dugme{ margin-left:4px; }
+
+/* Boş sohbet: ortada küre, selam, hazır cevaplar. */
+.king__bos{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center;
+  padding:24px 8px; min-height:100%; }
+.king__bos-kure, .king__ses-kure{ display:grid; place-items:center; flex:none; }
+.king__bos-kure .king__kure, .king__ses-kure .king__kure{ display:block; }
+.king__bos-kure .king__kure{ width:52px; height:52px; margin:0; }
+.king__bos-selam{ margin:6px 0 0; font-size:26px; line-height:1.2; font-weight:650; letter-spacing:-.02em; color:var(--text); }
+.king__bos-alt{ margin:0; max-width:420px; font-size:14px; line-height:1.5; color:var(--text-2); }
+.king__hazirlar{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:14px; max-width:620px; }
+.king__hazir{ min-height:38px; padding:0 14px; background:var(--surface); box-shadow:0 0 0 1px var(--line, rgba(0,0,0,.08)); }
+
+/* Kip paneli: yazı alanının üstünde tek şerit. */
+.king__kip-panel{ display:flex; align-items:center; gap:12px; width:100%; max-width:780px; margin-inline:auto; padding:10px 12px;
+  border-radius:18px; background:var(--surface-2); }
+.king__kip-metin{ flex:1; min-width:0; display:grid; gap:2px; }
+.king__kip-metin b{ display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--text); }
+.king__kip-metin > span{ font-size:12.5px; color:var(--text-2); }
+.king__kip-eylem{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.king__ses-kure .king__kure{ width:40px; height:40px; margin:0; }
+.king__ses-durum span{ display:none; }
+.king .king__ses-durum .d-sira{ display:inline; }
+.king.is-dinliyor .king__ses-durum .d-sira, .king.is-konusuyor .king__ses-durum .d-sira{ display:none; }
+.king.is-dinliyor .king__ses-durum .d-dinliyor{ display:inline; }
+.king.is-konusuyor:not(.is-dinliyor) .king__ses-durum .d-konusuyor{ display:inline; }
+.king.is-dinliyor .king__ses-kure .king__kure, .king.is-konusuyor .king__ses-kure .king__kure{ animation-duration:1.1s; }
+.king__kip-panel--ekran{ align-items:stretch; }
+.king__ekran-onizle{ flex:none; width:168px; aspect-ratio:16 / 10; border-radius:12px; overflow:hidden; background:#000; }
+.king__ekran-video{ display:block; width:100%; height:100%; object-fit:contain; }
+@media (max-width:679px){
+  .king__kip span{ display:none; }
+  .king__kip{ padding:0 9px; }
+  /* Telefonda başlık tek satıra sığar: modül ve durum etiketi ile Küçült gizlenir
+     (King yine bulunduğun modülde; küçültmek için perdeye dokunmak yeter). */
+  .king:not(.is-mini) .king__bas{ gap:6px; }
+  .king:not(.is-mini) .king__bas .king__yer, .king:not(.is-mini) .king__bas .king__durum,
+  .king:not(.is-mini) .king__bas .king__kucult{ display:none; }
+  .king__ekran-onizle{ width:112px; }
+  .king__bos-selam{ font-size:22px; }
+}
+
+/* «+» menüsü: araçlar yazı alanında. */
+.king__arti-yer{ position:relative; flex:none; }
+.king__arti{ width:40px; height:40px; display:grid; place-items:center; padding:0; border:0; border-radius:50%;
+  background:var(--surface-2); color:var(--text); cursor:pointer; transition:transform .2s ease, background .2s ease; }
+.king__arti svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.king__arti.is-acik{ transform:rotate(45deg); }
+.king__arti:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.king__arac-menu{ position:absolute; z-index:3; left:0; bottom:calc(100% + 8px); width:min(300px, calc(100vw - 48px)); display:grid; gap:2px;
+  padding:6px; border-radius:16px; background:var(--surface); box-shadow:0 0 0 1px var(--line, rgba(0,0,0,.08)), 0 16px 40px -12px rgba(20,24,40,.35); }
+.king__arac{ display:grid; gap:1px; min-height:44px; padding:6px 10px; border:0; border-radius:10px; background:transparent; color:var(--text);
+  font:inherit; text-align:left; cursor:pointer; }
+.king__arac b{ font-size:13.5px; font-weight:600; }
+.king__arac small{ font-size:12px; color:var(--text-2); }
+.king__arac:hover{ background:var(--surface-2); }
+.king__arac:focus-visible{ outline:2px solid var(--primary); outline-offset:-2px; }
+
+/* Sol çubuk: arama, klasörler, sohbetler. */
+.king__ara{ width:100%; min-height:36px; padding:0 12px; border:1px solid var(--line, rgba(0,0,0,.1)); border-radius:10px;
+  background:var(--surface); color:var(--text); font:inherit; font-size:13px; }
+.king__ara:focus{ outline:2px solid var(--primary); outline-offset:-1px; }
+.king__yan > .king__ara{ margin-top:6px; }
+.king__yan-bas{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; }
+.king__yan-bas .king__yan-ad{ margin:0 8px; }
+.king__klasor-form{ display:flex; gap:6px; }
+.king__klasor{ margin:0; }
+.king__klasor summary{ display:flex; align-items:center; gap:8px; min-height:36px; padding:0 4px 0 10px; border-radius:10px; cursor:pointer;
+  list-style:none; font-size:13.5px; font-weight:600; color:var(--text); }
+.king__klasor summary::-webkit-details-marker{ display:none; }
+.king__klasor summary:hover{ background:var(--surface-2); }
+.king__klasor summary > svg{ width:16px; height:16px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round; color:var(--text-2); }
+.king__klasor summary span{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.king__klasor summary small{ font-size:11.5px; font-weight:500; color:var(--text-2); }
+.king__klasor .king__gecmis{ padding-left:12px; }
+.king__klasor .king__yan-bos{ margin:2px 8px 6px 20px; }
+.king__gecmis-satir{ position:relative; display:flex; flex-wrap:wrap; align-items:center; }
+.king__gecmis-satir > .king__gecmis-is{ flex:1; min-width:0; }
+/* Satır düğmeleri yer kaplamaz: üzerine gelince satırın sağında belirir;
+   dokunmatikte yalnız açık sohbetin satırında (ve onay ya da taşıma sırasında). */
+.king__gecmis-eylem{ position:absolute; right:4px; top:8px; display:none; gap:2px; padding:2px; border-radius:10px;
+  background:var(--surface); box-shadow:0 0 0 1px var(--line, rgba(0,0,0,.08)); }
+.king__gecmis-satir:hover .king__gecmis-eylem, .king__gecmis-satir:focus-within .king__gecmis-eylem,
+.king__gecmis-eylem:has(.is-onay){ display:flex; }
+@media (hover:none){
+  .king__gecmis-satir:has(.king__gecmis-is.is-acik) .king__gecmis-eylem{ display:flex; }
+  .king__gecmis-satir:has(.king__gecmis-is.is-acik) .king__gecmis-is{ padding-right:132px; }
+}
+.king__gecmis-ufak{ min-width:28px; height:28px; display:grid; place-items:center; padding:0 6px; border:0; border-radius:8px;
+  background:transparent; color:var(--text-2); font:inherit; font-size:12px; cursor:pointer; }
+.king__gecmis-ufak svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.king__gecmis-ufak:hover{ background:var(--surface-2); color:var(--text); }
+.king__gecmis-ufak.is-onay{ color:var(--danger, #e5484d); font-weight:650; }
+.king__gecmis-ufak:focus-visible{ outline:2px solid var(--primary); outline-offset:1px; opacity:1; }
+.king__tasi{ flex-basis:100%; display:flex; flex-wrap:wrap; gap:6px; padding:4px 8px 8px; }
+.king__gecmis-ufak.is-sabit{ color:var(--text); }
 
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -15992,7 +16098,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'18244356', at:'2026-10-18 16:25', dirty:true };
+SP.BUILD = { id:'ee6ea6d5', at:'2026-10-18 18:48', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -33171,7 +33277,21 @@ window.LIFEOS.SORUKART = (function(){
       «Araçlar» (ARACLAR kataloğu: her araç bir data-king eylemidir; yenisi
       kataloğa bir satır eklenerek gelir). Önceki günün sohbeti açılışta
       kendiliğinden geçmişe geçer, kaybolmaz. Tablet ve telefonda kenar
-      çubuğu başlıktaki düğmeyle açılır. Küçük King (söz 9) değişmez. */
+      çubuğu başlıktaki düğmeyle açılır. Küçük King (söz 9) değişmez.
+  27. KİPLER VE KLASÖRLER (depo sahibi, 2026-10-18: «sadeleştir,
+      profesyonelleştir; King'i yalnız sesli duyabileyim, beraber
+      konuşabileyim ya da ekran paylaşayım; solda yalnız sohbet geçmişi
+      olsun, klasörleyebilelim»). Pencerenin üstünde dört kip:
+        Yaz    yazarak; cevap yazılı (ayarlardaki cevap biçimi geçerli)
+        Dinle  sen yazarsın, King her cevabı sesli okur
+        Konuş  sesli sohbet: King konuşunca yeniden dinler (söz 13)
+        Ekran  ekran paylaşımı: canlı önizleme, «Ne görüyorsun?», Durdur
+      Kipler birbirini kapatır; yalnız cihazın desteklediği kip görünür.
+      Sol çubukta yalnız sohbetler: arama, klasörler (oluştur, taşı,
+      sil; klasör silinince sohbetler silinmez, «Sohbetler»e döner).
+      Araçlar yazı alanındaki «+» menüsündedir (ARACLAR kataloğu).
+      Sohbet yeniden adlandırılır (boş ad ilk soruya döner) ve sabitlenir;
+      sabitlenenler en üstte «Sabitlenenler»dedir. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -33276,6 +33396,7 @@ window.LIFEOS.KING = (function(){
       const iz = akis.getVideoTracks()[0];
       if(iz) iz.addEventListener('ended', () => bitince());
       return {
+        video:v,
         kare:() => kareCiz(v, v.videoWidth, v.videoHeight),
         bitir:() => { try{ akis.getTracks().forEach(t => t.stop()); }catch(e){ /* durmuş */ } v.srcObject = null; },
       };
@@ -33306,6 +33427,10 @@ window.LIFEOS.KING = (function(){
   let bekleyenGit = null;    // «açayım mı?» diye sorulan sayfa (söz 8)
   let yanAcik = false;       // söz 26: dar ekranda kenar çubuğu açık mı
   let aktifKayit = null;     // söz 26: geçmişten açılan sohbetin kimliği
+  let aracAcik = false;      // söz 27: «+» menüsü açık mı
+  let klasorYeni = false;    // söz 27: yeni klasör adı soruluyor mu
+  let tasinan = null;        // söz 27: klasöre taşınacak sohbetin kimliği
+  let adlandirilan = null;   // söz 27: yeniden adlandırılan sohbetin kimliği
   let bekleyenIlet = null;   // { modul, metin } öteki modüle iletilecek satır (söz 10)
   let mini = false;          // küçük kutu (söz 9)
   let bekleyenFoto = null;   // söz 11
@@ -34071,11 +34196,14 @@ window.LIFEOS.KING = (function(){
     if(!l.some(m => m.kim === 'sen')) return null;
     const d = zaman ? new Date(zaman) : ortam.simdi();
     const id = aktifKayit || ('k' + d.getTime());
-    const kayit = { id, zaman:d.toISOString(), modul:ayar.modul, mesajlar:l };
+    const eski = arsivOku().find(k => k.id === id);
+    const kayit = { id, zaman:d.toISOString(), modul:ayar.modul, mesajlar:l, klasor:(eski && eski.klasor) || null,
+      ad:(eski && eski.ad) || null, sabit:!!(eski && eski.sabit) };
     arsivYaz([kayit].concat(arsivOku().filter(k => k.id !== id)));
     return kayit;
   }
   function kayitBasligi(k){
+    if(k && typeof k.ad === 'string' && k.ad.trim()) return k.ad.trim().slice(0, 44);
     const ilk = (k.mesajlar || []).find(m => m.kim === 'sen');
     const t = String(ilk ? ilk.metin : 'Sohbet').replace(/\s+/g, ' ').trim();
     return t.length > 44 ? t.slice(0, 43) + '…' : t;
@@ -34111,31 +34239,162 @@ window.LIFEOS.KING = (function(){
     aktifKayit = once;
     ortam.depo.sil(depoAnahtar());
   }
-  /* Araçlar kataloğu (söz 26). Her satır: data-king eylemi, ad, ipucu, ne
-     zaman görüneceği. Yeni araç = yeni satır; eylemi tıklama yönlendiricisi
-     zaten tanıyorsa başka bir şey gerekmez. */
+  /* Araçlar kataloğu (söz 26–27): yazı alanındaki «+» menüsü. Her satır:
+     data-king eylemi, ad, ipucu, ne zaman görüneceği. Yeni araç = yeni
+     satır; eylemi tıklama yönlendiricisi zaten tanıyorsa başka şey gerekmez.
+     Ses ve ekran araç değil KİPTİR (KIPLER). */
   const ARACLAR = [
+    { is:'foto-sec', ad:'Fotoğraf ekle', ip:'Fotoğraf seç; Ctrl+V ile yapıştırmak da olur', kosul:() => true },
     { is:'ekran', ad:'Bu sayfayı göster', ip:'King bulunduğun LifeOS sayfasını okur', kosul:() => true },
-    { is:'paylas', ad:'Ekranımı paylaş', ip:'Bir ekran, pencere ya da sekme seç; sorduğunda King o anki ekranı görür', kosul:() => !paylasim },
-    { is:'paylasim-bitir', ad:'Paylaşımı durdur', ip:'Ekran paylaşımını bitirir', kosul:() => !!paylasim },
-    { is:'foto-sec', ad:'Fotoğraf gönder', ip:'Fotoğraf seç; Ctrl+V ile yapıştırmak da olur', kosul:() => true },
-    { is:'sohbet', ad:'Sesli sohbet', ip:'King konuşunca yeniden dinler; «tamam» de, biter', kosul:() => ortam.tanima() },
     { is:'kisi', ad:'Beni nasıl tanıyorsun', ip:'Hafızadaki kayıtlar; her biri görünür ve silinir', kosul:() => !!(hafiza() && KISI()) },
     { is:'sohbet-kaydet', ad:'Sohbeti dosyaya kaydet', ip:'Bu sohbeti geçmişe ve indirilebilir dosyaya yazar', kosul:() => akis.some(m => m.kim === 'sen') },
     { is:'menu', ad:'Ayarlar', ip:'Cevap biçimi, kayıtlar, temizle', kosul:() => true },
   ];
+  /* Kipler (söz 27). kosul: cihaz destekliyor mu. */
+  const KIPLER = [
+    { id:'yaz', ad:'Yaz', ip:'Yazarak konuş; cevap yazılı gelir', kosul:() => true },
+    { id:'dinle', ad:'Dinle', ip:'Sen yaz, King her cevabı sesli okusun', kosul:() => !!ortam.sentez() },
+    { id:'konus', ad:'Konuş', ip:'Sesli sohbet: King konuşunca yeniden dinler', kosul:() => !!ortam.tanima() },
+    { id:'ekran', ad:'Ekran', ip:'Ekranını paylaş; sorduğunda King o anki ekranı görür', kosul:() => ortam.ekranDestek() },
+  ];
+  function kip(){ return paylasim ? 'ekran' : sesliSohbet ? 'konus' : cevapBicimi() === 'ses' ? 'dinle' : 'yaz'; }
+  async function kipSec(id){
+    if(!KIPLER.some(x => x.id === id && x.kosul())) return false;
+    const once = kip();
+    if(id === once) return true;
+    if(once === 'ekran' && paylasim){ const p = paylasim; paylasim = null; try{ p.bitir(); }catch(e){ /* durmuş */ } }
+    if(once === 'konus' && sesliSohbet){ sesliSohbet = false; if(dinleyen){ try{ dinleyen.stop(); }catch(e){ /* kapalı */ } } }
+    if(id === 'dinle'){ ortam.depo.yaz(CEVAP, 'ses'); ciz(false); return true; }
+    if(cevapBicimi() === 'ses') ortam.depo.sil(CEVAP);
+    if(id === 'yaz'){ sus(); ciz(false); return true; }
+    if(id === 'konus') return sesliSohbetAc();
+    if(id === 'ekran') return paylasimBaslat();
+    return false;
+  }
+  function kipHtml(){
+    const l = KIPLER.filter(x => { try{ return x.kosul(); }catch(e){ return false; } });
+    if(l.length < 2) return '';
+    const k = kip();
+    return '<div class="king__kipler" role="radiogroup" aria-label="Konuşma biçimi">' + l.map(x => '<button type="button" role="radio" class="king__kip'
+      + (x.id === k ? ' is-secili' : '') + '" aria-checked="' + (x.id === k ? 'true' : 'false') + '" data-king="kip:' + x.id + '" title="' + kac(x.ip) + '">'
+      + KIP_SVG[x.id] + '<span>' + x.ad + '</span></button>').join('') + '</div>';
+  }
+  const KIP_SVG = {
+    yaz:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
+    dinle:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3.5" y="13.5" width="4" height="6" rx="1.5"/><rect x="16.5" y="13.5" width="4" height="6" rx="1.5"/></svg>',
+    konus:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg>',
+    ekran:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="11.5" rx="2"/><path d="M9 20h6M12 16.5V20"/></svg>',
+  };
+  /* Kip paneli: Dinle, Konuş ve Ekran için yazı alanının üstünde tek şerit. */
+  function kipPanel(){
+    const k = kip();
+    if(k === 'ekran') return '<div class="king__paylasim king__kip-panel king__kip-panel--ekran" role="status">'
+      + '<div class="king__ekran-onizle" data-king-onizle aria-label="Paylaşılan ekranın önizlemesi"></div>'
+      + '<div class="king__kip-metin"><b><i class="king__canli" aria-hidden="true"></i>Ekranın paylaşılıyor</b>'
+      + '<span>Görüntü yalnız sorduğunda yapay zekâya gider, saklanmaz.</span>'
+      + '<div class="king__kip-eylem"><button type="button" class="king__cip king__cip--ana" data-king="ekran-sor">Ekranda ne görüyorsun?</button>'
+      + '<button type="button" class="king__cip" data-king="paylasim-bitir">Durdur</button></div></div></div>';
+    if(k === 'konus') return '<div class="king__kip-panel king__kip-panel--konus" role="status">'
+      + '<span class="king__ses-kure" aria-hidden="true">' + KURE + '</span>'
+      + '<div class="king__kip-metin"><b class="king__ses-durum"><span class="d-dinliyor">Dinliyorum…</span><span class="d-konusuyor">King konuşuyor…</span><span class="d-sira">Sıra sende; konuşabilirsin</span></b>'
+      + '<span>Bitirmek için «tamam» de ya da Bitir’e dokun.</span></div>'
+      + '<button type="button" class="king__cip" data-king="kip:yaz">Bitir</button></div>';
+    if(k === 'dinle') return '<div class="king__kip-panel king__kip-panel--dinle" role="status">'
+      + '<div class="king__kip-metin"><b>King cevapları sesli okuyor</b><span>Sen yazmaya devam et; konuşman gerekmez.</span></div>'
+      + '<button type="button" class="king__cip" data-king="sus">Sustur</button>'
+      + '<button type="button" class="king__cip" data-king="kip:yaz">Kapat</button></div>';
+    return '';
+  }
+
+  /* Klasörler (söz 27): bu cihazda, modül başına. */
+  const klasorAnahtar = () => 'king.klasor.' + ((ayar && ayar.modul) || 'x');
+  function klasorler(){ const v = ortam.depo.oku(klasorAnahtar()); return Array.isArray(v) ? v.filter(k => k && k.id && k.ad) : []; }
+  function klasorEkle(ad){
+    const a = String(ad || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+    if(!a) return null;
+    const k = { id:'f' + ortam.simdi().getTime().toString(36) + klasorler().length, ad:a };
+    ortam.depo.yaz(klasorAnahtar(), klasorler().concat([k]).slice(0, 20));
+    return k;
+  }
+  function klasorSil(id){
+    ortam.depo.yaz(klasorAnahtar(), klasorler().filter(k => k.id !== id));
+    arsivYaz(arsivOku().map(k => k.klasor === id ? Object.assign({}, k, { klasor:null }) : k));
+  }
+  function kayitTasi(kayitId, klasorId){
+    if(klasorId && !klasorler().some(k => k.id === klasorId)) return false;
+    if(!kayitBul(kayitId)) return false;
+    arsivYaz(arsivOku().map(k => k.id === kayitId ? Object.assign({}, k, { klasor:klasorId || null }) : k));
+    return true;
+  }
+  function kayitAdlandir(id, ad){
+    if(!kayitBul(id)) return false;
+    const a = String(ad || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+    arsivYaz(arsivOku().map(k => k.id === id ? Object.assign({}, k, { ad:a || null }) : k));
+    return true;
+  }
+  function kayitSabitle(id){
+    const k = kayitBul(id);
+    if(!k) return false;
+    arsivYaz(arsivOku().map(x => x.id === id ? Object.assign({}, x, { sabit:!x.sabit }) : x));
+    return !k.sabit;
+  }
+  function gecmisSatir(k){
+    const ac = k.id === aktifKayit;
+    const kls = klasorler();
+    if(adlandirilan === k.id) return '<li class="king__gecmis-satir"><form class="king__klasor-form" data-king-adlandir="' + kac(k.id) + '">'
+      + '<input class="king__ara" type="text" maxlength="60" value="' + kac(kayitBasligi(k)) + '" aria-label="Sohbetin adı" data-king-ad/>'
+      + '<button type="submit" class="king__cip king__cip--ana">Kaydet</button></form></li>';
+    return '<li class="king__gecmis-satir" data-king-ara="' + kac(kayitBasligi(k).toLocaleLowerCase('tr')) + '">'
+      + '<button type="button" class="king__gecmis-is' + (ac ? ' is-acik' : '') + '" data-king="kayit-ac:' + kac(k.id) + '"' + (ac ? ' aria-current="true"' : '') + '>'
+      + '<span>' + kac(kayitBasligi(k)) + '</span><small>' + kac(tarihYaz(k.zaman)) + '</small></button>'
+      + '<span class="king__gecmis-eylem">'
+      + '<button type="button" class="king__gecmis-ufak' + (k.sabit ? ' is-sabit' : '') + '" data-king="sabitle:' + kac(k.id) + '" aria-pressed="' + (k.sabit ? 'true' : 'false')
+      + '" aria-label="' + (k.sabit ? 'Sabitlemeyi kaldır' : 'Sabitle') + '" title="' + (k.sabit ? 'Sabitlemeyi kaldır' : 'Sabitle') + '">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6l-1 5 3 3v2H7v-2l3-3zM12 14v6"/></svg></button>'
+      + '<button type="button" class="king__gecmis-ufak" data-king="adlandir:' + kac(k.id) + '" aria-label="Yeniden adlandır" title="Yeniden adlandır">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button>'
+      + (kls.length ? '<button type="button" class="king__gecmis-ufak" data-king="tasi:' + kac(k.id) + '" aria-label="Klasöre taşı" title="Klasöre taşı">'
+        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg></button>' : '')
+      + '<button type="button" class="king__gecmis-ufak' + (silOnay === k.id ? ' is-onay' : '') + '" data-king="gecmis-sil:' + kac(k.id) + '" aria-label="'
+      + (silOnay === k.id ? 'Silinsin mi? Bir daha dokun' : 'Sohbeti sil') + '" title="' + (silOnay === k.id ? 'Silinsin mi?' : 'Sil') + '">'
+      + (silOnay === k.id ? 'Sil?' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>') + '</button></span>'
+      + (tasinan === k.id ? '<div class="king__tasi" role="group" aria-label="Taşınacak klasör">'
+        + kls.map(f => '<button type="button" class="king__cip' + (k.klasor === f.id ? ' king__cip--ana' : '') + '" data-king="tasi-yap:' + kac(k.id) + ':' + kac(f.id) + '">' + kac(f.ad) + '</button>').join('')
+        + (k.klasor ? '<button type="button" class="king__cip" data-king="tasi-yap:' + kac(k.id) + ':">Klasörden çıkar</button>' : '') + '</div>' : '')
+      + '</li>';
+  }
   function yanHtml(){
-    const gecmis = arsivOku();
+    const gecmis = arsivOku(), kls = klasorler();
+    const var_ = id => kls.some(f => f.id === id);
+    const sabit = gecmis.filter(k => k.sabit);
+    const serbest = gecmis.filter(k => !k.sabit && (!k.klasor || !var_(k.klasor)));
     return '<button type="button" class="king__yeni" data-king="yeni-sohbet">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Yeni sohbet</button>'
-      + '<p class="king__yan-ad">Geçmiş</p>'
-      + (gecmis.length ? '<ul class="king__gecmis">' + gecmis.map(k => '<li><button type="button" class="king__gecmis-is'
-          + (k.id === aktifKayit ? ' is-acik' : '') + '" data-king="kayit-ac:' + kac(k.id) + '"' + (k.id === aktifKayit ? ' aria-current="true"' : '') + '>'
-          + '<span>' + kac(kayitBasligi(k)) + '</span><small>' + kac(tarihYaz(k.zaman)) + '</small></button></li>').join('') + '</ul>'
-        : '<p class="king__yan-bos">Henüz geçmiş sohbet yok. «Yeni sohbet» dediğinde ya da gün değiştiğinde açık sohbet buraya geçer.</p>')
-      + '<p class="king__yan-ad">Araçlar</p><div class="king__araclar">'
-      + ARACLAR.filter(a => { try{ return a.kosul(); }catch(e){ return false; } }).map(a => '<button type="button" class="king__arac" data-king="' + a.is
-        + '" title="' + kac(a.ip) + '">' + kac(a.ad) + '</button>').join('') + '</div>';
+      + (gecmis.length > 3 ? '<input class="king__ara" type="search" data-king-ara-girdi placeholder="Sohbetlerde ara" aria-label="Sohbetlerde ara" autocomplete="off"/>' : '')
+      + (sabit.length ? '<p class="king__yan-ad">Sabitlenenler</p><ul class="king__gecmis">' + sabit.map(gecmisSatir).join('') + '</ul>' : '')
+      + '<div class="king__yan-bas"><p class="king__yan-ad">Klasörler</p>'
+      + '<button type="button" class="king__gecmis-ufak" data-king="klasor-yeni" aria-label="Yeni klasör" title="Yeni klasör">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v10M7 12h10"/></svg></button></div>'
+      + (klasorYeni ? '<form class="king__klasor-form" data-king-klasor><input class="king__ara" type="text" maxlength="40" placeholder="Klasör adı" aria-label="Klasör adı" data-king-klasor-ad/>'
+        + '<button type="submit" class="king__cip king__cip--ana">Ekle</button></form>' : '')
+      + (kls.length ? kls.map(f => {
+          const ic = gecmis.filter(k => k.klasor === f.id && !k.sabit);
+          return '<details class="king__klasor" open><summary><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>'
+            + '<span>' + kac(f.ad) + '</span><small>' + ic.length + '</small>'
+            + '<button type="button" class="king__gecmis-ufak" data-king="klasor-sil:' + kac(f.id) + '" aria-label="Klasörü kaldır (sohbetler silinmez)" title="Klasörü kaldır; sohbetler silinmez">'
+            + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></summary>'
+            + (ic.length ? '<ul class="king__gecmis">' + ic.map(gecmisSatir).join('') + '</ul>' : '<p class="king__yan-bos">Boş. Bir sohbetin klasör düğmesiyle buraya taşı.</p>')
+            + '</details>';
+        }).join('') : (klasorYeni ? '' : '<p class="king__yan-bos">Sohbetlerini konulara ayırmak için klasör ekle.</p>'))
+      + '<p class="king__yan-ad">Sohbetler</p>'
+      + (serbest.length ? '<ul class="king__gecmis">' + serbest.map(gecmisSatir).join('') + '</ul>'
+        : '<p class="king__yan-bos">' + (gecmis.length ? 'Hepsi klasörlerde.' : 'Henüz geçmiş sohbet yok. «Yeni sohbet» dediğinde ya da gün değiştiğinde açık sohbet buraya geçer.') + '</p>');
+  }
+  function aracMenu(){
+    if(!aracAcik) return '';
+    return '<div class="king__arac-menu" role="menu" aria-label="Araçlar">'
+      + ARACLAR.filter(a => { try{ return a.kosul(); }catch(e){ return false; } }).map(a => '<button type="button" role="menuitem" class="king__arac" data-king="' + a.is
+        + '"><b>' + kac(a.ad) + '</b><small>' + kac(a.ip) + '</small></button>').join('') + '</div>';
   }
 
   function sohbetiKaydet(){
@@ -34184,6 +34443,7 @@ window.LIFEOS.KING = (function(){
     if(silOnay !== id){ silOnay = id; ciz(false); return false; }
     silOnay = null;
     arsivYaz(arsivOku().filter(k => k.id !== id));
+    if(aktifKayit === id) aktifKayit = null;
     if(menu && menu.id === id) menu = 'kayitlar';
     ciz(false);
     return true;
@@ -34647,28 +34907,21 @@ window.LIFEOS.KING = (function(){
 
   function govde(){
     if(mini) return miniGovde();
-    const satirlar = akis.length ? akis.slice(-GUNLUK_EN_COK) : [{ kim:'king', metin:selam(), yeni:true }];
+    const satirlar = akis.slice(-GUNLUK_EN_COK);
+    /* Sade başlık (söz 27): kenar düğmesi, King, modül, durum; sağda yalnız
+       daha fazla, küçült, kapat. Ses ve ekran kip seçicide. */
     const bas = '<div class="king__bas">'
       + '<button type="button" class="king__kapat king__yan-dugme" data-king="yan" aria-expanded="' + (yanAcik ? 'true' : 'false')
-      + '" aria-label="Geçmiş ve araçlar" title="Geçmiş ve araçlar"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>'
+      + '" aria-label="Sohbet geçmişi" title="Sohbet geçmişi"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>'
       + KURE + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + '</span>'
       + '<span class="king__durum" title="' + (baglanti() ? 'Sorular Merkez’deki King’e (yapay zekâ) gider'
         : gorselZincir().length ? 'Merkez bağlı değil; sorulara yerel kurallarla, ekran ve fotoğrafa görüntü okuyan modelle cevap verir'
         : 'Merkez bağlı değil: King yerel kurallarla cevaplar') + '">'
       + (baglanti() ? 'yapay zekâ' : gorselZincir().length ? 'görüntü açık' : 'yerel') + '</span>'
-      + '<button type="button" class="king__kapat king__ekran' + (paylasim ? ' is-acik' : '') + '" data-king="' + (paylasim ? 'paylasim-bitir' : 'paylas')
-      + '" aria-pressed="' + (paylasim ? 'true' : 'false') + '" aria-label="' + (paylasim ? 'Ekran paylaşımını durdur' : 'Ekranımı paylaş')
-      + '" title="' + (paylasim ? 'Ekran paylaşımını durdur' : 'Ekranımı paylaş: bir ekran, pencere ya da sekme seç; sorduğunda King o anki ekranı görür') + '">'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="11.5" rx="2"/><path d="M9 20h6M12 16.5V20M12 13.5V8M9.5 10.5L12 8l2.5 2.5"/></svg></button>'
-      + '<button type="button" class="king__kapat king__sayfa" data-king="ekran" aria-label="Bu sayfayı göster" title="Bu sayfayı göster: King bulunduğun LifeOS sayfasını okur'
-      + (baglanti() ? '; sayfadaki yazılar Merkez’deki King’e gider' : '') + '">'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg></button>'
-      + (ortam.tanima() ? '<button type="button" class="king__kapat king__sohbet' + (sesliSohbet ? ' is-acik' : '') + '" data-king="sohbet" aria-pressed="'
-        + (sesliSohbet ? 'true' : 'false') + '" aria-label="Sesli sohbet" title="Sesli sohbet: King konuşunca yeniden dinler; «tamam» de, biter">'
-        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></button>' : '')
+      + kipHtml()
       + '<button type="button" class="king__kapat king__menu-dugme' + (menu ? ' is-acik' : '') + '" data-king="menu" aria-expanded="' + (menu ? 'true' : 'false')
-      + '" aria-label="Daha fazla" title="Daha fazla: cevap biçimi, sohbeti kaydet, kayıtlar, temizle">'
+      + '" aria-label="Ayarlar" title="Ayarlar: cevap biçimi, sohbeti kaydet, kayıtlar, temizle">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg></button>'
       + '<button type="button" class="king__kapat king__kucult" data-king="kucult" aria-label="Küçült" title="Küçült: sayfayı kullanırken açık kalır">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 5l-6 6M14 11h-3V8M5 19l6-6M10 13h3v3"/></svg></button>'
@@ -34676,7 +34929,16 @@ window.LIFEOS.KING = (function(){
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>';
     const panel = menuHtml();
     const ilkSira = akis.length - satirlar.length;
-    const yan = '<aside class="king__yan" aria-label="Geçmiş ve araçlar">' + yanHtml() + '</aside><div class="king__ana">';
+    const yan = '<aside class="king__yan" aria-label="Sohbet geçmişi">' + yanHtml() + '</aside><div class="king__ana">';
+    /* Boş sohbet (söz 27): ortada küre, selam ve hazır cevaplar. */
+    const hazirlar = HAZIR.map((h, i) => ({ h, i })).sort((a, b) => (a.h.ozet - b.h.ozet)
+          || ((b.h.modul === (ayar && ayar.modul)) - (a.h.modul === (ayar && ayar.modul))) || a.i - b.i)
+          .map(({ h, i }) => '<button type="button" class="king__cip king__hazir" data-king-hazir="' + i + '">'
+          + NOKTA(h.ozet ? (ayar && ayar.modul) : h.modul) + kac(h.ad) + '</button>').join('');
+    const bos = '<div class="king__bos"><span class="king__bos-kure" aria-hidden="true">' + KURE + '</span>'
+      + '<h2 class="king__bos-selam">' + kac(selam()) + '</h2>'
+      + '<p class="king__bos-alt">Yaz, konuş ya da ekranını göster. Kaydetmeden önce her zaman sorarım.</p>'
+      + '<div class="king__hazirlar" role="group" aria-label="Hazır cevaplar">' + hazirlar + '</div></div>';
     const balonlar = satirlar.map((m, i) => m.kim === 'sen'
       ? (m.foto ? '<div class="king__balon king__balon--sen king__balon--foto"><img class="king__foto" src="' + kac(m.foto) + '" alt="Gönderdiğin fotoğraf"/></div>'
         : '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p></div>')
@@ -34697,31 +34959,28 @@ window.LIFEOS.KING = (function(){
     const cip = cipler
       ? cipler.map(c => '<button type="button" class="king__cip' + (c.is === 'kaydet' || c.is === 'ilet' || /^foto:0$/.test(c.is) || (c.is === 'foto-yorum' && !/foto:0/.test(JSON.stringify(cipler))) ? ' king__cip--ana' : '')
           + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('')
-      /* Profesyonel (2026-10-16): hazır cevaplar yalnız boş sohbette; konuşma
-         başlayınca gürültü olmasın. */
-      : akis.length ? '' : HAZIR.map((h, i) => ({ h, i })).sort((a, b) => (a.h.ozet - b.h.ozet)
-          || ((b.h.modul === (ayar && ayar.modul)) - (a.h.modul === (ayar && ayar.modul))) || a.i - b.i)
-          .map(({ h, i }) => '<button type="button" class="king__cip" data-king-hazir="' + i + '">'
-          + NOKTA(h.ozet ? (ayar && ayar.modul) : h.modul) + kac(h.ad) + '</button>').join('');
+      /* Hazır cevaplar yalnız boş sohbette, ortada (bos). */
+      : '';
     const mik = ortam.tanima()
       ? '<button type="button" class="king__mik' + (dinleyen ? ' is-acik' : '') + '" data-king="dinle" aria-pressed="'
         + (dinleyen ? 'true' : 'false') + '" aria-label="' + (dinleyen ? 'Dinlemeyi bitir' : 'Konuşarak sor')
         + '" title="Konuşarak sor · tanımayı tarayıcı yapar"><svg viewBox="0 0 24 24" aria-hidden="true">'
         + '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>'
       : '';
-    return yan + bas + (paylasim ? '<div class="king__paylasim" role="status"><i class="king__canli" aria-hidden="true"></i>Ekran paylaşılıyor · sorduğunda görürüm'
-      + '<button type="button" class="king__paylasim-dur" data-king="paylasim-bitir">Durdur</button></div>' : '')
+    return yan + bas
       + (panel ? '<div class="king__akis king__akis--panel">' + panel + '</div>'
-        : '<div class="king__akis" aria-live="polite">' + balonlar + '</div>'
-        + '<div class="king__cipler" role="group" aria-label="Hazır cevaplar">' + cip + '</div>')
+        : '<div class="king__akis" aria-live="polite">' + (akis.length ? balonlar : bos) + '</div>'
+        + (cip ? '<div class="king__cipler" role="group" aria-label="Hazır cevaplar">' + cip + '</div>' : ''))
+      + kipPanel()
       + '<form class="king__yaz" data-king-form data-ayar-disi>'
-      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : 'King\'e yaz ya da konuş…') + '" autocomplete="off" enterkeyhint="send"/>'
-      + '<label class="king__foto-dugme" title="Fotoğraf gönder (Ctrl+V ile yapıştır, sürükleyip bırak da olur)" aria-label="Fotoğraf gönder">'
+      + '<div class="king__arti-yer"><button type="button" class="king__arti' + (aracAcik ? ' is-acik' : '') + '" data-king="arac" aria-expanded="' + (aracAcik ? 'true' : 'false')
+      + '" aria-label="Araçlar" title="Araçlar: fotoğraf, sayfayı göster, hafıza, kaydet">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>' + aracMenu() + '</div>'
       + '<input type="file" accept="image/*" data-king-dosya class="sr-only"/>'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2h6.8L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></label>' + mik
+      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : kip() === 'ekran' ? 'Ekran hakkında sor…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
+      + mik
       + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
-      + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>'
-      + '<p class="king__ipucu" aria-hidden="true">' + (ortam.tanima() ? 'Mikrofona dokun ve konuş · ' : '') + 'Enter gönderir · Esc kapatır</p></div>';
+      + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form></div>';
   }
 
   function ciz(odak){
@@ -34741,6 +35000,13 @@ window.LIFEOS.KING = (function(){
     const g = kutu.querySelector('.king__girdi');
     const akisEl = kutu.querySelector('.king__akis');
     if(akisEl) akisEl.scrollTop = (altta || yeniVar) ? akisEl.scrollHeight : yer;
+    /* Söz 27: paylaşılan ekranın canlı önizlemesi (aynı video öğesi taşınır). */
+    const onz = kutu.querySelector('[data-king-onizle]');
+    if(onz && paylasim && paylasim.video && paylasim.video.nodeType === 1){
+      paylasim.video.className = 'king__ekran-video';
+      paylasim.video.setAttribute('aria-hidden', 'true');
+      onz.appendChild(paylasim.video);
+    }
     akis.forEach(m => { m.yeni = false; });
     durum();
     if(odak !== false && g && !(mini && odak !== true) && !(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu())){
@@ -34868,6 +35134,7 @@ window.LIFEOS.KING = (function(){
       const c = t.closest('[data-king]:not(.king)');
       if(c){
         const is = c.getAttribute('data-king');
+        if(aracAcik && is !== 'arac') aracAcik = false;          // söz 27: menüden seçince kapanır
         if(is === 'kapat'){ sesli = false; kapat(); return; }
         if(is === 'dinle'){ dinle(); return; }
         if(is === 'kucult'){ kucult(); return; }
@@ -34915,6 +35182,17 @@ window.LIFEOS.KING = (function(){
         if(is === 'menu'){ menuAc('menu'); return; }
         if(is === 'kayitlar'){ menuAc('kayitlar'); return; }
         if(is === 'yeni-sohbet'){ yeniSohbet(); return; }
+        if(/^kip:(yaz|dinle|konus|ekran)$/.test(is)){ aracAcik = false; kipSec(is.slice(4)).then(() => ciz(false)); return; }
+        if(is === 'arac'){ aracAcik = !aracAcik; ciz(false); return; }
+        if(is === 'sus'){ sus(); return; }
+        if(is === 'ekran-sor'){ isle('Ekranda ne görüyorsun? Kısaca söyle.'); return; }
+        if(is === 'klasor-yeni'){ klasorYeni = !klasorYeni; ciz(false); const g = document.querySelector('[data-king-klasor-ad]'); if(g) try{ g.focus(); }catch(e){} return; }
+        if(/^klasor-sil:/.test(is)){ klasorSil(is.slice(11)); ciz(false); return; }
+        if(/^gecmis-sil:/.test(is)){ kayitSil(is.slice(11)); return; }
+        if(/^sabitle:/.test(is)){ kayitSabitle(is.slice(8)); ciz(false); return; }
+        if(/^adlandir:/.test(is)){ adlandirilan = is.slice(9); ciz(false); const g = document.querySelector('[data-king-ad]'); if(g) try{ g.focus(); g.select(); }catch(e){} return; }
+        if(/^tasi:/.test(is)){ tasinan = tasinan === is.slice(5) ? null : is.slice(5); ciz(false); return; }
+        if(/^tasi-yap:/.test(is)){ const p = is.slice(9).split(':'); kayitTasi(p[0], p[1] || null); tasinan = null; ciz(false); return; }
         if(is === 'yan'){ yanAcik = !yanAcik; ciz(false); return; }
         if(/^kayit-ac:/.test(is)){ kayitAc(is.slice(9)); return; }
         if(is === 'foto-sec'){ const f = document.querySelector('[data-king-dosya]'); if(f) f.click(); return; }
@@ -34954,6 +35232,28 @@ window.LIFEOS.KING = (function(){
       const f = Array.from((e.dataTransfer && e.dataTransfer.files) || []).find(x => /^image\//.test(x.type));
       if(f){ e.preventDefault(); fotoAl(f); }
     }, true);
+    /* Söz 27: yeni klasör formu ve geçmişte arama. */
+    document.addEventListener('submit', e => {
+      const f = e.target && e.target.closest ? e.target.closest('[data-king-klasor]') : null;
+      if(!f) return;
+      e.preventDefault();
+      const g = f.querySelector('[data-king-klasor-ad]');
+      if(klasorEkle(g ? g.value : '')){ klasorYeni = false; ciz(false); }
+    });
+    document.addEventListener('submit', e => {
+      const f = e.target && e.target.closest ? e.target.closest('[data-king-adlandir]') : null;
+      if(!f) return;
+      e.preventDefault();
+      const g = f.querySelector('[data-king-ad]');
+      kayitAdlandir(f.getAttribute('data-king-adlandir'), g ? g.value : '');
+      adlandirilan = null; ciz(false);
+    });
+    document.addEventListener('input', e => {
+      const g = e.target && e.target.matches && e.target.matches('[data-king-ara-girdi]') ? e.target : null;
+      if(!g) return;
+      const q = g.value.toLocaleLowerCase('tr').trim();
+      document.querySelectorAll('[data-king] [data-king-ara]').forEach(li => { li.hidden = !!q && li.getAttribute('data-king-ara').indexOf(q) < 0; });
+    });
     document.addEventListener('submit', e => {
       const f = e.target && e.target.closest ? e.target.closest('[data-king-form]') : null;
       if(!f) return;
@@ -35027,7 +35327,8 @@ window.LIFEOS.KING = (function(){
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
-    yanAcik = false; aktifKayit = null;
+    yanAcik = false; aktifKayit = null; aracAcik = false; klasorYeni = false; tasinan = null; adlandirilan = null;
+    if(ayar) ortam.depo.sil(klasorAnahtar());
     ortam.depo.sil(CIKARIM_KARAR); ortam.depo.sil(SORMA);
     envanter = null; ortam.depo.sil(USLUP);
     ortam.depo.sil(TANISMA);
@@ -35046,6 +35347,7 @@ window.LIFEOS.KING = (function(){
     CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     yeniSohbet, kayitAc, ARACLAR, aktifKayit:() => aktifKayit,
+    KIPLER, kip, kipSec, klasorler, klasorEkle, klasorSil, kayitTasi, kayitAdlandir, kayitSabitle,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
   };

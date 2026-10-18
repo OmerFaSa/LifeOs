@@ -744,8 +744,14 @@
       for(let i = 0; i < 6; i++) await k.isle('uyku ' + (i + 5));
       expect(document.querySelectorAll('.king__akis .king__balon').length).toBe(k.akis().length);
       expect(!!document.querySelector('.king__yan [data-king="yeni-sohbet"]')).toBe(true);
-      const araclar = Array.from(document.querySelectorAll('.king__araclar [data-king]')).map(b => b.getAttribute('data-king'));
+      /* Söz 27: araçlar yazı alanındaki «+» menüsünde; solda yalnız sohbetler. */
+      expect(!!document.querySelector('.king__yan .king__arac')).toBe(false);
+      document.querySelector('[data-king="arac"]').click();
+      const araclar = Array.from(document.querySelectorAll('.king__arac-menu [data-king]')).map(b => b.getAttribute('data-king'));
       expect(araclar.indexOf('ekran') >= 0 && araclar.indexOf('menu') >= 0).toBe(true);
+      document.querySelector('.king__arac-menu [data-king="menu"]').click();
+      expect(!!document.querySelector('.king__arac-menu')).toBe(false);          // seçince kapanır
+      k.menuAc('menu');
       expect(k.ARACLAR.every(a => a.is && a.ad && typeof a.kosul === 'function')).toBe(true);
       /* küçük King kenar çubuğu çizmez */
       k.kucult();
@@ -773,6 +779,92 @@
       k.yeniSohbet();
       expect(k.kayitlar()).toHaveLength(1);
       expect(k.kayitlar()[0].mesajlar.some(m => m.metin === 'uyku 8')).toBe(true);
+    }));
+    /* Söz 27 (2026-10-18): Yaz · Dinle · Konuş · Ekran; birbirini kapatır. */
+    it('kipler: Dinle cevabı sesli okur, Konuş sesli sohbeti açar, Ekran önizlemeli paylaşır; biri ötekini kapatır', () => sahneyle(async () => {
+      const okunan = [];
+      const { k } = sahne();
+      k.kur({ modul:'spi', git:() => {}, ozet:() => [], model:() => ({ visionChain:() => [{ provider:'gemini', model:'g' }] }) });
+      let bitti = 0;
+      const video = document.createElement('video');
+      Object.assign(k._ortam, {
+        sentez:() => ({ cancel(){}, getVoices:() => [], speak:u => { okunan.push(u.text); if(u.onend) u.onend(); } }),
+        soz:t => ({ text:t }),
+        tanima:() => function(){ this.start = () => {}; this.stop = () => {}; },
+        ekranDestek:() => true,
+        ekranBaslat:async () => ({ video, kare:() => ({ mime:'image/jpeg', data:'QUJD' }), bitir:() => { bitti++; } }),
+      });
+      k.ac();
+      expect(k.KIPLER.map(x => x.id)).toEqual(['yaz', 'dinle', 'konus', 'ekran']);
+      expect(document.querySelectorAll('[data-king^="kip:"]').length).toBe(4);
+      expect(k.kip()).toBe('yaz');
+      await k.kipSec('dinle');
+      expect(k.kip()).toBe('dinle');
+      expect(!!document.querySelector('.king__kip-panel--dinle')).toBe(true);
+      await k.isle('bugünün özeti');
+      expect(okunan.length > 0).toBe(true);                                   // yazdın, sesli okudu
+      await k.kipSec('ekran');
+      expect([k.kip(), k.cevapBicimi()]).toEqual(['ekran', 'oto']);           // Dinle kapandı
+      expect(document.querySelector('[data-king-onizle] video')).toBe(video);  // canlı önizleme
+      expect(!!document.querySelector('[data-king="ekran-sor"]')).toBe(true);
+      await k.kipSec('konus');
+      expect([k.kip(), k.sesliSohbetMi(), bitti]).toEqual(['konus', true, 1]); // ekran durdu
+      expect(!!document.querySelector('.king__kip-panel--konus')).toBe(true);
+      await k.kipSec('yaz');
+      expect([k.kip(), k.sesliSohbetMi()]).toEqual(['yaz', false]);
+      /* desteklenmeyen kip görünmez ve seçilmez */
+      Object.assign(k._ortam, { ekranDestek:() => false });
+      k.menuAc(null);
+      expect(!!document.querySelector('[data-king="kip:ekran"]')).toBe(false);
+      expect(await k.kipSec('ekran')).toBe(false);
+    }));
+    it('klasörler: oluştur, sohbeti taşı, klasör silinince sohbet silinmez', () => sahneyle(async () => {
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      k.ac();
+      await k.isle('uyku 7');
+      k.yeniSohbet();
+      const id = k.kayitlar()[0].id;
+      expect(k.klasorEkle('   ')).toBe(null);
+      const f = k.klasorEkle('Sağlık');
+      expect(k.klasorler().map(x => x.ad)).toEqual(['Sağlık']);
+      expect(k.kayitTasi(id, 'yok')).toBe(false);
+      expect(k.kayitTasi(id, f.id)).toBe(true);
+      k.menuAc(null);
+      const klasor = document.querySelector('.king__klasor');
+      expect(klasor.textContent).toContain('Sağlık');
+      expect(!!klasor.querySelector('[data-king="kayit-ac:' + id + '"]')).toBe(true);
+      /* aç, sürdür, yeni sohbet: klasörü korunur */
+      k.kayitAc(id);
+      await k.isle('uyku 8');
+      k.yeniSohbet();
+      expect(k.kayitlar()[0].klasor).toBe(f.id);
+      k.klasorSil(f.id);
+      expect(k.klasorler()).toHaveLength(0);
+      expect([k.kayitlar().length, k.kayitlar()[0].klasor]).toEqual([1, null]);
+    }));
+    it('sohbet yeniden adlandırılır ve sabitlenir; ikisi de sohbet sürünce korunur', () => sahneyle(async () => {
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      k.ac();
+      await k.isle('uyku 7');
+      k.yeniSohbet();
+      const id = k.kayitlar()[0].id;
+      expect(k.kayitAdlandir(id, '  Uyku düzenim  ')).toBe(true);
+      expect(k.kayitSabitle(id)).toBe(true);
+      k.menuAc(null);
+      const yan = document.querySelector('.king__yan').textContent;
+      expect(yan).toContain('Sabitlenenler');
+      expect(yan).toContain('Uyku düzenim');
+      k.kayitAc(id);
+      await k.isle('uyku 8');
+      k.yeniSohbet();
+      expect([k.kayitlar()[0].ad, k.kayitlar()[0].sabit]).toEqual(['Uyku düzenim', true]);
+      k.kayitAdlandir(id, '');                                   // boş ad: ilk soruya döner
+      expect(k.kayitSabitle(id)).toBe(false);
+      k.menuAc(null);
+      expect(document.querySelector('[data-king="kayit-ac:' + id + '"]').textContent).toContain('uyku 7');
+      expect(document.querySelector('.king__yan').textContent.indexOf('Sabitlenenler') < 0).toBe(true);
     }));
     it('önceki günün sohbeti açılışta geçmişe geçer, kaybolmaz', () => sahneyle(async () => {
       const { k } = sahne();
