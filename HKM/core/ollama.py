@@ -24,7 +24,13 @@
       baglanmaz (elle «Bagla» yine calisir).
    5. CALISMA YERI. Bulut seciliyse ve bulut anahtari (OpenRouter) varsa
       «hibrit», yoksa «yerel» olur; yerel/hibrit secimine dokunulmaz.
-      Guclu ve Uzman sinif her zaman buluttadir (core/models.py)."""
+      Guclu ve Uzman sinif her zaman buluttadir (core/models.py).
+
+   «Bagli» yalniz model listesinin okunabildigini soyler; sohbetin gercekten
+   calistigini soylemez (kullanici, 2026-10-19: «ayarlarda bagli gorunuyor
+   ama mesaj uretilmiyor»). Bu yuzden kart, yerel modelin defterdeki SON
+   GERCEK sohbet cagrisini da yazar (son_cagri): ne zaman, cevap geldi mi,
+   gelmediyse neden — adiyla."""
 import datetime
 import json
 import re
@@ -155,6 +161,42 @@ def tara(cfg, getir=None):
             "Bağlı model Ollama’da yok: %s. Silinmiş ya da adı değişmiş olabilir; "
             "önerilenle yeniden bağlayabilirsin (%s)." % (", ".join(eksik), _oneri_yaz(out["oneri"]))))
     return dict(out, durum="bagli", metin="Ollama bağlı: %s." % _oneri_yaz(bagli))
+
+
+def _cagri_nedeni(not_):
+    """Defterdeki ham hata notu -> kullanicinin anlayacagi cumle."""
+    n = str(not_ or "")
+    k = n.lower()
+    if "10061" in k or "refused" in k or "reddetti" in k:
+        return "Ollama bağlantıyı reddetti; o an kapalıydı ya da yeniden başlıyordu."
+    if "timed out" in k or "timeout" in k or "zaman" in k:
+        return "Ollama zamanında cevap vermedi; model belleğe yükleniyor olabilir, yeniden dene."
+    if "404" in k or "not found" in k:
+        return "Model Ollama’da bulunamadı; adı değişmiş ya da silinmiş olabilir."
+    if "11001" in k or "getaddrinfo" in k or "unreachable" in k or "10065" in k:
+        return "Ollama’nın adresine ulaşılamadı; Ayarlar’daki motor adresine bak."
+    return "Çağrı başarısız: %s" % (n[:140] or "neden yazılmamış")
+
+
+def son_cagri(con):
+    """Yerel modelin defterdeki SON sohbet cagrisi ya da None. Hicbir sey
+    cagirmaz; usage tablosunu okur. Doner: at, saat, model, ok, metin."""
+    if con is None:
+        return None
+    try:
+        r = con.execute("SELECT created_at, model, ok, note FROM usage WHERE provider = 'yerel' "
+                        "ORDER BY id DESC LIMIT 1").fetchone()
+    except Exception:                           # noqa: BLE001 — defter yoksa durum yok
+        return None
+    if not r:
+        return None
+    at = str(r[0] or "")
+    saat = at.replace("T", " ")[:16]
+    if r[2]:
+        metin = "Son sohbet çağrısı %s: cevap geldi (%s)." % (saat, r[1])
+    else:
+        metin = "Son sohbet çağrısı %s: cevap gelmedi. %s" % (saat, _cagri_nedeni(r[3]))
+    return {"at": at, "saat": saat, "model": r[1], "ok": bool(r[2]), "metin": metin}
 
 
 def _oneri_yaz(o):

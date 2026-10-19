@@ -178,6 +178,9 @@ def aday_ayikla(metin):
     ham = str(metin or "")
     adaylar = [m.strip() for m in ADAY_ETIKET.findall(ham) if m.strip()]
     temiz = ADAY_ETIKET.sub("", ham)
+    # Etiketin ardindaki nokta («yok. [[…]].») cumlenin sonunda yalniz kalir:
+    # «yok. .» degil «yok.» (sahada, 2026-10-19). «...» ellipsine dokunulmaz.
+    temiz = __import__("re").sub(r"([.!?\u2026])[ \t]+[.!?](?=\s|$)", r"\1", temiz)
     temiz = "\n".join(sat.rstrip() for sat in temiz.splitlines()).strip()
     return temiz, adaylar
 

@@ -23,7 +23,15 @@
    6. ONBELLEK: ayni motor + ses + metin ikinci kez uretilmez (bellekte,
       en cok ONBELLEK_EN_COK parca). Ayni cevabi yeniden dinlemek bedava.
    7. HATA FIRLATMAZ: her yol (wav, motor, not) doner; not neden olmadigini
-      adiyla soyler."""
+      adiyla soyler.
+   8. KOTA DOLUNCA BEKLER (kullanici, 2026-10-19: «ses durduk yere Piper'a,
+      cihaza geciyor»). Gemini 429 (kota) ya da 503 (yogun) donerse bir sure
+      HIC denenmez: once BEKLE_ILK saniye, ust uste geldikce iki katina,
+      en cok BEKLE_EN_COK; Google bekleme suresini soylerse (Retry-After,
+      retryDelay) o kullanilir. Beklerken istek gitmez, deftere yazilmaz;
+      «oto» dogrudan Piper'a gecer ve not nedenini soyler. Her parca icin
+      yeniden Gemini denemek sesi parca parca Gemini/Piper arasinda
+      gidip getiriyordu."""
 import base64
 import collections
 import glob
@@ -34,6 +42,7 @@ import shutil
 import subprocess
 import tempfile
 import threading
+import time
 import urllib.error
 import urllib.request
 import wave
@@ -58,6 +67,12 @@ FIYAT = {"giris": 0.5, "cikis": 10.0}
 ONBELLEK_EN_COK = 64
 _ONBELLEK = collections.OrderedDict()
 _KILIT = threading.Lock()
+# Kural 8: kota beklemesi (bellekte; HKM yeniden baslayinca sifirlanir).
+BEKLE_ILK = 60
+BEKLE_EN_COK = 1800
+BEKLE_KODLARI = (429, 503)
+_BEKLE = {"bitis": 0.0, "sure": 0}
+SAAT = time.monotonic               # testler sahte saat koyar
 
 
 def settings(cfg):
@@ -125,6 +140,49 @@ def _post(url, baslik, govde, timeout):
 VARSAYILAN_POST = _post
 
 
+def _bekleme_suresi(e):
+    """Google'in soyledigi bekleme (sn) ya da None: Retry-After basligi,
+    yoksa govdedeki RetryInfo.retryDelay («37s»)."""
+    try:
+        b = (getattr(e, "headers", None) or {}).get("Retry-After")
+        if b and str(b).strip().isdigit():
+            return int(str(b).strip())
+    except Exception:                           # noqa: BLE001
+        pass
+    try:
+        g = json.loads(e.read().decode("utf-8", "replace") or "{}")
+        for d in ((g.get("error") or {}).get("details") or []):
+            r = str((d or {}).get("retryDelay") or "").strip()
+            if r.endswith("s"):
+                return int(float(r[:-1]) + 0.999)
+    except Exception:                           # noqa: BLE001
+        pass
+    return None
+
+
+def _bekle_kur(e):
+    """429/503 sonrasi bekleme: ilk BEKLE_ILK, ust uste iki kati, tavan BEKLE_EN_COK."""
+    with _KILIT:
+        onceki = _BEKLE["sure"]
+        sure = min(BEKLE_EN_COK, onceki * 2) if onceki else BEKLE_ILK
+        g = _bekleme_suresi(e)
+        if g:
+            sure = min(BEKLE_EN_COK, max(sure, g))
+        _BEKLE["sure"] = sure
+        _BEKLE["bitis"] = SAAT() + sure
+        return sure
+
+
+def gemini_bekliyor():
+    """Kalan bekleme (tam saniye); beklemiyorsa 0."""
+    kalan = _BEKLE["bitis"] - SAAT()
+    return int(kalan + 0.999) if kalan > 0 else 0
+
+
+def _sure_yaz(sn):
+    return "%d sn" % sn if sn < 90 else "%d dk" % ((sn + 59) // 60)
+
+
 def gemini_hazir(con, cfg):
     """(ok, not). Para harcanmadan once: anahtar ve butce."""
     if not models.key_value(cfg, "google"):
@@ -140,6 +198,9 @@ def gemini(con, cfg, metin, post=None):
     ok, neden = gemini_hazir(con, cfg)
     if not ok:
         return None, neden
+    kalan = gemini_bekliyor()
+    if kalan:
+        return None, ("Gemini kotası dolu; yaklaşık %s sonra yeniden denenecek." % _sure_yaz(kalan))
     ses = settings(cfg)["gemini_ses"]
     url = "%s/%s:generateContent" % (models.PROVIDERS["google"]["base"], GEMINI_MODEL)
     govde = {"contents": [{"parts": [{"text": metin}]}],
@@ -153,6 +214,10 @@ def gemini(con, cfg, metin, post=None):
         kod = getattr(e, "code", None)
         butce.record(con, role="ses", task="tts", provider="google", model=GEMINI_MODEL,
                      ok=False, note="ses: %s" % (kod or type(e).__name__))
+        if kod in BEKLE_KODLARI:
+            sure = _bekle_kur(e)
+            return None, ("Gemini %s; %s boyunca denenmeyecek." % (
+                "kotası doldu" if kod == 429 else "şu an yoğun", _sure_yaz(sure)))
         return None, ("Gemini sesine ulaşılamadı (%s)." % (
             "HTTP %s" % kod if kod else "internet yok ya da yanıt gelmedi"))
     parca = ((((y.get("candidates") or [{}])[0].get("content") or {}).get("parts")) or [{}])[0]
@@ -166,6 +231,9 @@ def gemini(con, cfg, metin, post=None):
         return None, "Gemini ses döndürmedi."
     butce.record(con, role="ses", task="tts", provider="google", model=GEMINI_MODEL,
                  in_tok=gir, out_tok=cik, usd=usd, note="ses: %s; tahmini-fiyat" % ses)
+    with _KILIT:
+        _BEKLE["sure"] = 0
+        _BEKLE["bitis"] = 0.0
     try:
         pcm = base64.b64decode(veri["data"])
     except ValueError:
@@ -305,7 +373,10 @@ def seslendir(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None)
 def durum(con, cfg):
     """Ayarlar karti: iki motorun hazirligi. Para harcamaz, ses uretmez."""
     g_ok, g_not = gemini_hazir(con, cfg)
+    kalan = gemini_bekliyor()
+    if g_ok and kalan:
+        g_ok, g_not = False, "Gemini kotası dolu; yaklaşık %s sonra yeniden denenecek." % _sure_yaz(kalan)
     return {"ayar": settings(cfg), "sesler": list(GEMINI_SESLER), "tercihler": list(TERCIHLER),
             "gemini": {"hazir": g_ok, "not": g_not or "Gemini sesi hazır (internet gerekir).",
-                       "model": GEMINI_MODEL},
+                       "model": GEMINI_MODEL, "bekliyor": kalan},
             "piper": piper_bul(cfg)}

@@ -17,13 +17,18 @@
         bulunca baglar ve onceki hali saklar; geri al eski ayari dondurur
         ve bir daha kendiliginden baglamaz.
      7. Uclar bearer ister; Ollama'da olmayan model baglanmaz (409); ayar
-        dogrulanir."""
+        dogrulanir.
+     8. Son cagri: kart yerel modelin defterdeki SON gercek sohbet cagrisini
+        yazar; hata notu adiyla cumleye doner (reddetti, zaman asimi, 404);
+        bulut cagrilari karismaz; defter bossa None."""
 import os
 import tempfile
 import types
 import urllib.error
 
-from core import models, ollama, settings
+import datetime
+
+from core import butce, db, models, ollama, settings
 from tests.harness import eq, no, ok, suite, test
 
 GB = 1000 ** 3
@@ -47,6 +52,29 @@ def _sahte(cevap):
 
 def run():
     suite("ollama")
+
+    def t_son_cagri():
+        con = db.connect(":memory:")
+        eq(ollama.son_cagri(con), None)
+        eq(ollama.son_cagri(None), None)
+        t0 = datetime.datetime(2026, 10, 19, 9, 49, 27)
+        butce.record(con, role="king", task="sohbet", provider="yerel", model="gemma3:4b", ok=False,
+                     note="URLError: <urlopen error [WinError 10061] Hedef makine etkin olarak "
+                          "reddettiğinden bağlantı kurulamadı>", now=t0)
+        r = ollama.son_cagri(con)
+        eq((r["ok"], r["saat"], r["model"]), (False, "2026-10-19 09:49", "gemma3:4b"))
+        ok("reddetti" in r["metin"] and "cevap gelmedi" in r["metin"], r["metin"])
+        # Bulut cagrisi yerelin durumunu degistirmez.
+        butce.record(con, role="ses", task="tts", provider="google", model="x", ok=True,
+                     now=t0 + datetime.timedelta(minutes=1))
+        eq(ollama.son_cagri(con)["ok"], False)
+        butce.record(con, role="king", task="sohbet", provider="yerel", model="gemma3:4b", ok=True,
+                     note="seviye=alt", now=t0 + datetime.timedelta(minutes=2))
+        r = ollama.son_cagri(con)
+        eq((r["ok"], r["metin"]), (True, "Son sohbet çağrısı 2026-10-19 09:51: cevap geldi (gemma3:4b)."))
+        for ham, beklenen in (("timed out", "zamanında"), ("HTTP 404 model not found", "bulunamadı"),
+                              ("[Errno 11001] getaddrinfo failed", "adresine"), ("garip", "garip")):
+            ok(beklenen in ollama._cagri_nedeni(ham), (ham, ollama._cagri_nedeni(ham)))
 
     def t_kapali_bos():
         t = ollama.tara({}, getir=_kapali)
@@ -146,6 +174,7 @@ def run():
     test("çalışma yeri: bulut → yerel/hibrit, yamalar doğrulanır", t_yer)
     test("ayar okunur ve doğrulanır", t_ayar)
     test("ritim: tarar, bağlar, geri al, bir daha bağlamaz", t_ritim)
+    test("son sohbet çağrısı defterden okunur; neden adıyla söylenir", t_son_cagri)
 
 
 def run_daemon():
@@ -159,6 +188,7 @@ def run_daemon():
             eq(s.call("/api/ollama", token=None)[0], 401)
             st, d = s.call("/api/ollama")
             eq((st, d["tarama"]["durum"], d["durum_ad"]), (200, "kapali", "Ollama bulunamadı"))
+            ok("son_cagri" in d, sorted(d))
             ollama.VARSAYILAN_GETIR = _sahte(TAGS)
             st, r = s.call("/api/ollama/bagla", body={"ekonomik": "yok:1b"})
             eq((st, r["ok"]), (409, False))

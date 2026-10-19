@@ -107,7 +107,7 @@ import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import parse_qs, unquote, urlparse
+from urllib.parse import parse_qs, quote, unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -354,14 +354,17 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _send_ses(self, wav, motor):
-        """King'in sesi: WAV ve hangi motorun urettigi (modul kartta yazar)."""
+    def _send_ses(self, wav, motor, notlar=None):
+        """King'in sesi: WAV, hangi motorun urettigi ve (sira ilerlediyse)
+        oncekinin neden olmadigi. Not yuzde kodludur: baslik Latin-1 tasir."""
         self.send_response(200)
         self.send_header("Content-Type", "audio/wav")
         self.send_header("Content-Length", str(len(wav)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Ses-Motor", motor)
-        self.send_header("Access-Control-Expose-Headers", "X-Ses-Motor")
+        if notlar:
+            self.send_header("X-Ses-Not", quote(" ".join(notlar)[:600]))
+        self.send_header("Access-Control-Expose-Headers", "X-Ses-Motor, X-Ses-Not")
         self._cors()
         self.end_headers()
         self.wfile.write(wav)
@@ -1155,7 +1158,7 @@ class Handler(BaseHTTPRequestHandler):
             # Ayarlar acilinca TAZE tarama: kullanici simdiyi gorur.
             t = ollama.tara(self.server.config)
             self.server.ollama_son = t
-            return self._send(200, _ollama_durum(self.server, t))
+            return self._send(200, _ollama_durum(self.server, t, self.con))
         if u.path == "/api/models/paketler":
             # Butce paketleri (A · A+ · S · S+): onizleme, hicbir sey yazmaz.
             # Aylik tahmin defterdeki OLCUMDEN hesaplanir.
@@ -1756,7 +1759,7 @@ class Handler(BaseHTTPRequestHandler):
                               str(body.get("tercih") or "oto"))
             if not r["ok"]:
                 return self._send(503, {"ok": False, "notlar": r["notlar"]})
-            return self._send_ses(r["wav"], r["motor"])
+            return self._send_ses(r["wav"], r["motor"], r.get("notlar"))
         if u.path == "/api/ollama/bagla":
             ham, hata = self._read_body()
             if hata:
@@ -1829,9 +1832,10 @@ def _ayar_yaz(srv, yeni):
     srv.thresholds = thresholds.from_config(yeni)
 
 
-def _ollama_durum(srv, t):
+def _ollama_durum(srv, t, con=None):
     return {"tarama": t, "durum_ad": ollama.DURUM_AD.get(t.get("durum"), ""),
-            "ayar": ollama.settings(srv.config), "bag": srv.config.get("ollama_bag")}
+            "ayar": ollama.settings(srv.config), "bag": srv.config.get("ollama_bag"),
+            "son_cagri": ollama.son_cagri(con)}
 
 
 def _ollama_bagla(srv, secim, kendiliginden=False):

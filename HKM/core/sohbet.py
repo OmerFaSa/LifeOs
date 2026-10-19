@@ -182,7 +182,8 @@ def _kisa_baglam(con, date, gorevli, b, veri):
     geciyor, capraz ve seri satirlari iki kez giriyordu; 1B-4B modeller
     her soruya «bu brifing bir şey ölçmüyor» diye cevap veriyordu
     (sahada, 2026-09-27). Burada: veri gelmeyenler TEK satir, olcum
-    satirlari (seri, capraz, modul hukmu, oneri) aynen ve bir kez."""
+    satirlari (seri, capraz, modul hukmu, oneri) aynen ve bir kez. Hukmu
+    INCOMPLETE ve bulgusuz modul de «veri gelmeyen»dir (2026-10-19)."""
     satir = ["Tarih: %s" % date]
     alan = ALAN.get(gorevli)
     sessiz, olcum = [], []
@@ -192,6 +193,11 @@ def _kisa_baglam(con, date, gorevli, b, veri):
         k = l["kind"]
         if k == "vp" and l.get("silent") and not l.get("vp"):
             sessiz += [MODUL_ETIKET.get(m, m) for m in l["silent"] if not alan or m == alan]
+        elif k == "vp" and l.get("verdict") == "INCOMPLETE" and not l.get("findings") and l.get("vp"):
+            # Hukmu olmayan modul olcum degildir (sahada, 2026-10-19: kisa baglam
+            # yalniz uc «hüküm verecek veri yok» satiriydi ve 4B model selama
+            # bile onu tekrarliyordu): «veri gelmeyen» satirinda toplanir.
+            sessiz.append(MODUL_ETIKET.get(l["vp"], l["vp"]))
         elif k == "vp" or k in ("streak", "cross"):
             olcum.append("- " + l["text"])
             veri.add(l.get("vp") or ("capraz" if k in ("cross", "streak") else "genel"))
@@ -520,6 +526,28 @@ HAFIZA_ADAYI_KURALI = (
     "kaydedilmez. Sağlık bilgisi, senin yorumun ve tahminin aday olmaz; emin değilsen ekleme.")
 
 
+# Aday kapisi (sahada, 2026-10-19): kucuk model selama, soruya ve «tavsiye
+# ver»e bile aday koyuyordu. Aday YALNIZ kullanicinin kendisi hakkinda
+# soyledigi cumleden dogar; bunu model degil kod soyler. Soru ve istek
+# cumlesi gecmez; birinci tekil sahis («ben», «-ım», «-ırım», «-mam»,
+# «-yorum») olmayan cumle gecmez. Kacirilan aday yalniz bir oneridir;
+# kullanici «hatırla …» ile yine yazdirabilir.
+ADAY_SORU = re.compile(r"\?|(?:^|\s)(?:ne|neden|niye|niçin|nasıl|hangi|kaç|kim|nerede|nereye|"
+                       r"m[ıiuü](?:s[ıiuü]n(?:[ıiuü]z)?|y[ıiuü][mz]|d[ıiuü]r)?)(?=$|\s|[.,!])")
+ADAY_ISTEK = re.compile(r"(?:^|\s)(?:ver|göster|söyle|anlat|yap|yaz|aç|sor|bul|öner|getir|hazırla|"
+                        r"listele|çıkar|hatırlat|bak|oku|kur|planla|başlat|kapat)(?:\s+bana)?\s*[.!]*\s*$")
+ADAY_BEN = re.compile(r"(?:^|\s)(?:ben|benim)(?=$|\s|[.,!])"
+                      r"|\w(?:[ıiuü]m|y[ıiuü]m|[ıiuüae]r[ıi]m|m[ae]m|yorum|d[ıiuü]m|t[ıiuü]m)(?=$|\s|[.,!])")
+
+
+def aday_kapisi(metin):
+    """Kullanicinin mesaji hafiza adayi dogurabilir mi (kod karari)."""
+    t = " ".join(str(metin or "").replace("İ", "i").replace("I", "ı").lower().split())
+    if not t or ADAY_SORU.search(t) or ADAY_ISTEK.search(t):
+        return False
+    return bool(ADAY_BEN.search(t))
+
+
 def _yedek_metin(r, yedek):
     """Model konusamadiginda donecek SOHBET cevabi.
 
@@ -828,7 +856,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     # kullaniciya gitmez, aday kullanici onaylayana dek baglama girmez.
     govde, oneriler = memory.aday_ayikla(r["text"])
     yeni_aday = []
-    for o in oneriler[:1]:
+    for o in (oneriler[:1] if aday_kapisi(metin) else []):
         a = memory.aday_ekle(con, o, user=user, scope="all")
         if a["ok"]:
             yeni_aday.append(a)

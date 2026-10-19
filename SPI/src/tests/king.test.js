@@ -1272,7 +1272,7 @@
         const c = typeof cevap === 'function' ? cevap(govde) : cevap;
         if(c instanceof Error) throw c;
         return { status:c.status, blob:async () => ({ metin:govde.metin }),
-          headers:{ get:h => h === 'X-Ses-Motor' ? c.motor || '' : null }, json:async () => ({}) };
+          headers:{ get:h => h === 'X-Ses-Motor' ? c.motor || '' : h === 'X-Ses-Not' ? c.not || null : null }, json:async () => ({}) };
       };
       const { k } = sahne({ hkm, fetch });
       let durdur = null;
@@ -1339,6 +1339,50 @@
       s.k.seslendir(metin);
       await bitsin(); await bitsin();
       expect(s.calinan).toEqual(p);
+    }));
+
+    /* Ses kilidi (2026-10-19, «ses durduk yere Gemini'ye, Piper'a, cihaza
+       geçiyor»): Otomatik her parçada sırayı baştan denemez. */
+    const uzun = () => 'Bu uzunca bir cümledir ve ses için parçalanmalıdır. '.repeat(20).trim();
+    it('ses kilidi: ilk parçayı okuyan motor kalan parçaları da okur', () => sahneyle(async () => {
+      const s = sesSahnesi(g => ({ status:200, motor:g.tercih === 'oto' ? 'piper' : g.tercih }));
+      const p = s.k.sesParcalari(uzun());
+      s.k.seslendir(uzun());
+      await bitsin(); await bitsin();
+      expect(s.calinan).toEqual(p);
+      expect(s.istekler.map(x => x.govde.tercih)).toEqual(['oto'].concat(p.slice(1).map(() => 'piper')));
+      expect(s.okunan.length).toBe(0);
+      expect(s.k.sonMotor()).toBe('piper');
+    }));
+
+    it('ses kilidi: kilitli motor ortada vermezse parça tercihle bir kez daha istenir', () => sahneyle(async () => {
+      let gemini = 0;
+      const s = sesSahnesi(g => {
+        if(g.tercih === 'gemini') return ++gemini === 1 ? { status:200, motor:'gemini' } : { status:503 };
+        return gemini ? { status:200, motor:'piper', not:encodeURIComponent('Gemini kotası doldu; 60 sn boyunca denenmeyecek.') }
+          : { status:200, motor:'gemini' };
+      });
+      const p = s.k.sesParcalari(uzun());
+      s.k.seslendir(uzun());
+      await bitsin(); await bitsin(); await bitsin();
+      expect(s.calinan).toEqual(p);
+      expect(s.okunan.length).toBe(0);
+      /* oto (1. parça, Gemini okur) · gemini (2. parça, kilit) · gemini (3. parça, 503) · oto (3. parça yeniden) */
+      expect(s.istekler.slice(0, 4).map(x => x.govde.tercih)).toEqual(['oto', 'gemini', 'gemini', 'oto']);
+      expect(s.k.sonMotor()).toBe('piper');
+      expect(s.k.sonNot()).toBe('Gemini kotası doldu; 60 sn boyunca denenmeyecek.');
+    }));
+
+    it('ses kilidi: yeniden istek de olmazsa kalan cihazın sesiyle okunur, not temizlenir', () => sahneyle(async () => {
+      let n = 0;
+      const s = sesSahnesi(() => ++n === 1 ? { status:200, motor:'gemini', not:'' } : { status:503 });
+      const p = s.k.sesParcalari(uzun());
+      s.k.seslendir(uzun());
+      await bitsin(); await bitsin(); await bitsin();
+      expect(s.calinan).toEqual([p[0]]);
+      expect(s.okunan.join(' ').replace(/\s+/g, ' ')).toBe(p.slice(1).join(' ').replace(/\s+/g, ' '));
+      expect(s.k.sonMotor()).toBe('cihaz');
+      expect(s.k.sonNot()).toBe('');
     }));
 
     it('Sustur çalan sesi keser', () => sahneyle(async () => {

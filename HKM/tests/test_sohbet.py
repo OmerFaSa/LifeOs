@@ -170,6 +170,44 @@ def run():
         ok("sorulmadıkça" in bos, bos)
     test("kisa baglam sikisik: veri yoksa tek satir, olcum bir kez", t_short_context_is_compact)
 
+    def t_short_context_incomplete_is_silent():
+        """HATA (sahada, 2026-10-19): moduller veri gonderdi ama alanlar bos
+        geldi; uc modulun hukmu INCOMPLETE («hüküm verecek veri yok») oldu ve
+        bu satirlar olcum gibi girdi. Kisa baglam YALNIZ bu uc satirdi; 4B
+        model «Merhaba King, bugün nasılsın?»a «ESP modülü için hüküm verecek
+        veri yok.» diye cevap verdi. Hukmu olmayan modul satiri olcum degildir:
+        «veri gelmeyen» tek satirda toplanir."""
+        from core import db as _db, manager as _m
+        satirlar = [
+            {"kind": "vp", "text": "SPİ: hüküm verecek veri yok.", "vp": "bio", "verdict": "INCOMPLETE", "findings": 0},
+            {"kind": "vp", "text": "AYS: hüküm verecek veri yok.", "vp": "academic", "verdict": "INCOMPLETE", "findings": 0},
+            {"kind": "vp", "text": "ESP: hüküm verecek veri yok.", "vp": "intellect", "verdict": "INCOMPLETE", "findings": 0},
+            {"kind": "proposal", "text": "Bugün için bir öneri yok.", "rank": None},
+        ]
+        eski = _m.brief
+        _m.brief = lambda con, date, th=None: {"lines": list(satirlar), "council": {}, "decision": None}
+        try:
+            con = _db.connect(":memory:")
+            k = sohbet.baglam(con, "2026-10-19", "king", kisa=True)
+            no("hüküm verecek" in k, k)
+            ok("Hiçbir modülden ölçüm yok (SPİ, AYS, ESP)" in k and "sorulmadıkça" in k, k)
+            eq(len(k.splitlines()), 2)
+            # Hukmu olan modul olcum olarak kalir; hukumsuzler «veri gelmeyen» satirinda.
+            satirlar[1] = {"kind": "vp", "text": "AYS: dikkat — deneme neti düştü.", "vp": "academic",
+                           "verdict": "WATCH", "findings": 1}
+            k = sohbet.baglam(con, "2026-10-19", "king", kisa=True)
+            ok("- AYS: dikkat — deneme neti düştü." in k, k)
+            ok("veri gelmeyen modüller (ölçülmedi): SPİ, ESP." in k, k)
+            no("hüküm verecek" in k, k)
+            # Bulgusu olan INCOMPLETE (surup giden denetim) olcum olarak kalir.
+            satirlar[0] = dict(satirlar[0], findings=2, text="SPİ: hüküm verecek veri yok; 2 bulgu.")
+            ok("SPİ: hüküm verecek veri yok; 2 bulgu." in sohbet.baglam(con, "2026-10-19", "king", kisa=True))
+            # Tam baglam (buyuk model) degismez.
+            ok("ESP: hüküm verecek veri yok." in sohbet.baglam(con, "2026-10-19", "king"))
+        finally:
+            _m.brief = eski
+    test("kisa baglam: hükmü olmayan modül ölçüm gibi girmez", t_short_context_incomplete_is_silent)
+
     def t_model_answers_free_sentence():
         con = _con()
         tasiyici = _cevap("Uyku ölçümün bugün düşük görünüyor; istersen "
@@ -205,6 +243,29 @@ def run():
         eq(r2["text"], "Tamam.")
         eq(len(memory.adaylar(con)), 1)
     test("hafiza adayi: model yalniz aday birakir, etiket kullaniciya gitmez", t_hafiza_adayi_sohbette)
+
+    def t_hafiza_adayi_kapisi():
+        """HATA (sahada, 2026-10-19): 4B model selama, soruya ve «tavsiye
+        ver»e bile [[HAFIZA ADAYI]] koyuyordu («Her şeyin kontrol altında
+        olması güzel.»); her cevabin sonuna «Hafıza adayı: … aday 2 kaydet»
+        ekleniyordu ve etiket silinince «yok. .» kaliyordu. Aday YALNIZ
+        kullanicinin kendisi hakkinda soyledigi cumleden dogar: soru ve
+        istek cumlesi kapidan gecmez (kural motoru, model degil)."""
+        from core import memory
+        for m in ("Merhaba King, bugün nasılsın?", "Bana uyku hakkında kısa bir tavsiye ver.",
+                  "Uykum nasıl?", "durum ne", "hafta planımı göster", "selam"):
+            no(sohbet.aday_kapisi(m), m)
+        for m in ("ben sabahları daha verimliyim", "Sabahları çalışırım.", "Kahve sevmem",
+                  "Akşamları kitap okumayı seviyorum", "Benim adım Deniz", "Hafta sonları çalışmam"):
+            ok(sohbet.aday_kapisi(m), m)
+        con = _con()
+        t = _cevap("Merhaba! Ben iyiyim, teşekkür ederim. [[HAFIZA ADAYI: Her şeyin kontrol altında olması güzel.]].")
+        r = sohbet.konus(con, _cfg(), "Merhaba King, bugün nasılsın?", BUGUN, transport=t)
+        eq(r["text"], "Merhaba! Ben iyiyim, teşekkür ederim.")
+        eq(memory.adaylar(con), [])
+        eq(memory.aday_ayikla("Bu ölçülmedi. [[HAFIZA ADAYI: x]].")[0], "Bu ölçülmedi.")
+        eq(memory.aday_ayikla("Tamam... [[HAFIZA ADAYI: x]]")[0], "Tamam...")
+    test("hafiza adayi: soru ve istek cumlesi kapidan gecmez; artik nokta kalmaz", t_hafiza_adayi_kapisi)
 
     def t_gizlilik_kaydi():
         # Fikir 55: her cagrida modele HANGI veri turunun gittigi yazilir;

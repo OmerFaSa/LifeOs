@@ -3206,6 +3206,10 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     var h = '<div class="tag">Ollama · bu bilgisayardaki model</div>'
       + '<p class="ollama__durum ollama__durum--' + esc(t.durum || '') + '"><b>' + esc(d.durum_ad || '') + '</b> · '
       + esc(t.metin || '') + '</p>';
+    /* «Bağlı» yalnız listeyi okur; sohbetin çalışıp çalışmadığını son gerçek çağrı söyler. */
+    var sc = d.son_cagri;
+    if(sc) h += '<p class="ollama__durum ollama__durum--' + (sc.ok ? 'bagli' : 'eksik') + '" data-ollama-son><b>Son sohbet</b> · '
+      + esc(sc.metin || '') + '</p>';
     if((t.modeller || []).length){
       h += '<ul class="ollama__liste">';
       t.modeller.forEach(function(m){

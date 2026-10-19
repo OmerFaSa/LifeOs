@@ -12,7 +12,11 @@
      4. Ayni metin ikinci kez uretilmez (onbellek).
      5. Bos metin ses istemez; metin sinirlanir.
      6. Ayar dogrulanir; uclar bearer ister, uretilemezse 503 + notlar,
-        uretilirse audio/wav ve motor basligi."""
+        uretilirse audio/wav ve motor basligi; sira ilerlediyse neden basligi.
+     7. Kota beklemesi (kural 8): 429/503 sonrasi Gemini bir sure hic
+        denenmez ve deftere yazilmaz; «oto» Piper'a gecer; bekleme ust uste
+        iki katina cikar, tavanda durur, Google'in suresine uyar; basarili
+        cagri sifirlar."""
 import base64
 import io
 import json
@@ -65,9 +69,32 @@ def _gemini_acik(fn):
     return sar
 
 
+class _Http(Exception):
+    """urllib.error.HTTPError gibi: code, headers, read()."""
+    def __init__(self, code, govde=b"", headers=None):
+        super().__init__("HTTP %d" % code)
+        self.code, self._g, self.headers = code, govde, headers or {}
+
+    def read(self):
+        return self._g
+
+
+class _Saat:
+    def __init__(self):
+        self.t = 1000.0
+
+    def __call__(self):
+        return self.t
+
+
+def _bekleme_sifir():
+    ses._BEKLE.update({"bitis": 0.0, "sure": 0})
+
+
 def run():
     suite("ses")
     ses._ONBELLEK.clear()
+    _bekleme_sifir()
 
     def t_wav():
         w = ses.wav(PCM, 24000)
@@ -182,6 +209,64 @@ def run():
         d = ses.durum(_con(), {})
         eq((d["gemini"]["hazir"], len(d["sesler"]), d["tercihler"]), (False, 30, ["oto", "gemini", "piper", "cihaz"]))
 
+    @_gemini_acik
+    def t_bekleme():
+        eski = ses.SAAT
+        saat = _Saat()
+        ses.SAAT = saat
+        _bekleme_sifir()
+        ses._ONBELLEK.clear()
+        try:
+            con = _con()
+            d = _piper_dizini()
+            cfg = {"ses": {"piper_yol": d}}
+            bul = ses.piper_bul(cfg, ara=lambda x: None)
+            piper_ok = lambda e, s_, m, t: RIFF                   # noqa: E731
+            kayit = []
+            r = ses.seslendir(con, cfg, "Bir", post=_sahte_post(_Http(429), kayit), calistir=piper_ok, bul=bul)
+            eq((r["ok"], r["motor"], len(kayit)), (True, "piper", 1))
+            ok("kotası doldu" in r["notlar"][0] and "60 sn" in r["notlar"][0], r["notlar"])
+            eq(ses.gemini_bekliyor(), 60)
+            # Beklerken Gemini'ye istek gitmez, deftere yazilmaz; oto dogrudan Piper.
+            n0 = con.execute("SELECT COUNT(*) FROM usage").fetchone()[0]
+            r = ses.seslendir(con, cfg, "İki", post=_sahte_post(GEMINI_CEVAP, kayit), calistir=piper_ok, bul=bul)
+            eq((r["motor"], len(kayit)), ("piper", 1))
+            ok("yeniden denenecek" in r["notlar"][0], r["notlar"])
+            eq(con.execute("SELECT COUNT(*) FROM usage").fetchone()[0], n0)
+            r = ses.seslendir(con, cfg, "Üç", "gemini", post=_sahte_post(GEMINI_CEVAP, kayit), calistir=piper_ok, bul=bul)
+            eq((r["ok"], len(kayit)), (False, 1))
+            no(ses.durum(con, cfg)["gemini"]["hazir"], "beklerken hazir degil")
+            eq(ses.durum(con, cfg)["gemini"]["bekliyor"], 60)
+            # Sure dolunca yeniden denenir; ust uste ikinci 429 iki kati.
+            saat.t += 61
+            r = ses.seslendir(con, cfg, "Dört", post=_sahte_post(_Http(503), kayit), calistir=piper_ok, bul=bul)
+            eq((r["motor"], len(kayit), ses.gemini_bekliyor()), ("piper", 2, 120))
+            ok("yoğun" in r["notlar"][0] and "2 dk" in r["notlar"][0], r["notlar"])
+            for _ in range(8):
+                saat.t += ses.BEKLE_EN_COK + 1
+                ses.gemini(con, cfg, "x", post=_sahte_post(_Http(429)))
+            eq(ses.gemini_bekliyor(), ses.BEKLE_EN_COK)
+            # Basarili cagri sifirlar; sonraki 429 yine BEKLE_ILK'ten baslar.
+            saat.t += ses.BEKLE_EN_COK + 1
+            w, n = ses.gemini(con, cfg, "Beş", post=_sahte_post(GEMINI_CEVAP))
+            eq((w[:4], ses._BEKLE["sure"], ses.gemini_bekliyor()), (b"RIFF", 0, 0))
+            # Google'in soyledigi sure: Retry-After ya da retryDelay.
+            ses.gemini(con, cfg, "Altı", post=_sahte_post(_Http(429, headers={"Retry-After": "300"})))
+            eq(ses.gemini_bekliyor(), 300)
+            _bekleme_sifir()
+            govde = json.dumps({"error": {"code": 429, "details": [
+                {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "97.2s"}]}}).encode()
+            ses.gemini(con, cfg, "Yedi", post=_sahte_post(_Http(429, govde)))
+            eq(ses.gemini_bekliyor(), 98)
+            # Baska hata (400, internet yok) beklemeye sokmaz.
+            _bekleme_sifir()
+            ses.gemini(con, cfg, "Sekiz", post=_sahte_post(_Http(400)))
+            ses.gemini(con, cfg, "Dokuz", post=_sahte_post(OSError("ag yok")))
+            eq(ses.gemini_bekliyor(), 0)
+        finally:
+            ses.SAAT = eski
+            _bekleme_sifir()
+
     test("WAV ve örnekleme hızı", t_wav)
     test("Gemini anahtarsız çağrılmaz, deftere bir şey yazılmaz", t_gemini_kapi)
     test("Gemini: ses adı, deftere yazılır, internet yoksa söylenir", t_gemini)
@@ -190,6 +275,7 @@ def run():
     test("sıra: Gemini, Piper, yok; tercih yalnız kendini dener", t_sira)
     test("aynı metin ikinci kez üretilmez; metin sınırlı", t_onbellek)
     test("ayar doğrulanır; durum ses üretmez", t_ayar)
+    test("kota dolunca Gemini bir süre denenmez; bekleme büyür, sıfırlanır", t_bekleme)
 
 
 def run_daemon():
@@ -221,10 +307,22 @@ def run_daemon():
                 with urllib.request.urlopen(req, timeout=10) as y:
                     eq((y.status, y.headers["Content-Type"], y.headers["X-Ses-Motor"], y.read()[:4]),
                        (200, "audio/wav", "piper", b"RIFF"))
+                    eq(y.headers.get("X-Ses-Not"), None)
+                # Oto: Gemini anahtarsiz -> Piper; neden basliga yuzde kodlu yazilir.
+                ses._ONBELLEK.clear()
+                req2 = urllib.request.Request(s.url("/api/ses"), method="POST",
+                                              data=json.dumps({"metin": "Selam", "tercih": "oto"}).encode())
+                req2.add_header("Authorization", "Bearer " + TOKEN)
+                req2.add_header("Content-Type", "application/json")
+                with urllib.request.urlopen(req2, timeout=10) as y:
+                    from urllib.parse import unquote
+                    eq(y.headers["X-Ses-Motor"], "piper")
+                    ok("anahtar" in unquote(y.headers["X-Ses-Not"]), y.headers["X-Ses-Not"])
+                    ok("X-Ses-Not" in y.headers["Access-Control-Expose-Headers"], y.headers["Access-Control-Expose-Headers"])
             finally:
                 ses.VARSAYILAN_CALISTIR = eski
             eq(s.call("/api/config", body={"ses": {"gemini_ses": "Yok"}})[0], 422)
         finally:
             s.close()
 
-    test("uçlar bearer ister; 503 + notlar; WAV ve motor başlığı", t_uclar)
+    test("uçlar bearer ister; 503 + notlar; WAV, motor ve neden başlığı", t_uclar)

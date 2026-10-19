@@ -16284,7 +16284,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'367c359a', at:'2026-10-19 06:03', dirty:true };
+SP.BUILD = { id:'1edf6c48', at:'2026-10-19 07:24', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -33773,7 +33773,14 @@ window.LIFEOS.SORUKART = (function(){
       Gemini seçiliyken (Otomatik dahil) okunacak cevabın METNİ Google'a
       gider; bu söz 7'nin «metin hiçbir şirkete gitmez» sözünü o seçim için
       değiştirir ve panel bunu söyler. Uzun cevap parça parça istenir;
-      biri çalarken sonraki hazırlanır. Sustur her şeyi keser. */
+      biri çalarken sonraki hazırlanır. Sustur her şeyi keser.
+      SES KİLİDİ (depo sahibi, 2026-10-19: «ses durduk yere Gemini'ye,
+      Piper'a, cihaza geçiyor»): bir cevabın ilk parçasını hangi motor
+      okuduysa sonraki parçalar O motordan istenir; Otomatik her parçada
+      sırayı baştan denemez. O motor cevabın ortasında bir kez daha
+      vermezse parça seçili tercihle bir kez daha istenir, o da olmazsa
+      kalan cihazın sesiyle okunur. HKM motorun neden değiştiğini
+      söylerse («Gemini kotası doldu») panel «Son okuyan»ın yanında yazar. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -34043,6 +34050,7 @@ window.LIFEOS.KING = (function(){
   let sesNo = 0;             // söz 28: her yeni okuma eskisini geçersiz kılar
   let calan = null;          // çalan sunucu sesi ({ dur })
   let sonMotor = '';         // son okumayı kim yaptı: gemini | piper | cihaz
+  let sonNot = '';           // söz 28: HKM'nin «neden bu motor» notu (X-Ses-Not)
 
   function kareCiz(kaynak, g, y){
     if(!g || !y) throw new Error('Ekran görüntüsü henüz hazır değil');
@@ -34465,7 +34473,7 @@ window.LIFEOS.KING = (function(){
       return l;
     }, []);
   }
-  async function sesGetir(k, metin){
+  async function sesGetir(k, metin, tercih){
     const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
     const t = ctrl ? setTimeout(() => ctrl.abort(), 30000) : null;
     try{
@@ -34473,12 +34481,14 @@ window.LIFEOS.KING = (function(){
       const res = await f(k.url + '/api/ses', {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
-        body:JSON.stringify({ metin, tercih:sesTercihi() }),
+        body:JSON.stringify({ metin, tercih:tercih || sesTercihi() }),
         signal:ctrl ? ctrl.signal : undefined,
       });
       if(res.status !== 200 || typeof res.blob !== 'function') return null;
-      const motor = (res.headers && res.headers.get && res.headers.get('X-Ses-Motor')) || '';
-      return { blob:await res.blob(), motor };
+      const baslik = h => (res.headers && res.headers.get && res.headers.get(h)) || '';
+      let not = baslik('X-Ses-Not');
+      try{ not = decodeURIComponent(not); }catch(e){ /* düz kalır */ }
+      return { blob:await res.blob(), motor:baslik('X-Ses-Motor'), not };
     }catch(e){
       return null;
     }finally{
@@ -34488,11 +34498,21 @@ window.LIFEOS.KING = (function(){
   /* Doner: true (okundu ya da kesildi) | false (ilk parça bile gelmedi: cihaza düş). */
   async function sunucuSesi(k, metin, no){
     const parcalar = sesParcalari(metin);
-    let sonraki = sesGetir(k, parcalar[0]);
+    const tercih = sesTercihi();
+    let kilit = '';            // ses kilidi: ilk parçayı okuyan motor
+    let sonraki = sesGetir(k, parcalar[0], tercih);
     for(let i = 0; i < parcalar.length; i++){
-      const r = await sonraki;
+      let r = await sonraki;
       if(no !== sesNo) return true;
-      sonraki = r && i + 1 < parcalar.length ? sesGetir(k, parcalar[i + 1]) : null;
+      if(!r && i > 0 && kilit && kilit !== tercih){
+        r = await sesGetir(k, parcalar[i], tercih);
+        if(no !== sesNo) return true;
+      }
+      if(r && r.motor){
+        if(r.motor !== kilit || r.not) sonNot = r.not || '';
+        kilit = r.motor;
+      }
+      sonraki = r && i + 1 < parcalar.length ? sesGetir(k, parcalar[i + 1], kilit || tercih) : null;
       const s = r ? await ortam.oynat(r.blob, c => { calan = c; }, hiz()) : 'olmadi';
       calan = null;
       if(no !== sesNo) return true;
@@ -34523,6 +34543,7 @@ window.LIFEOS.KING = (function(){
     const sz = ortam.sentez();
     if(!sz || !metin){ konusuyor = 0; durum(); return; }
     try{ sz.cancel(); }catch(e){ /* yok */ }
+    if(sonMotor !== 'cihaz') sonNot = '';
     sonMotor = 'cihaz';
     const ses = sesSec(sz.getVoices ? sz.getVoices() : []);
     const parcalar = parcala(metin);
@@ -35062,7 +35083,7 @@ window.LIFEOS.KING = (function(){
     const t = sesTercihi();
     const not = t === 'piper' ? 'Metin bilgisayardan çıkmaz.' : t === 'cihaz' ? 'Cihazın kendi sesi.'
       : 'İnternet varken okunacak metin Google’a gider.';
-    const son = sonMotor ? ' Son okuyan: ' + (SES_AD[sonMotor] || sonMotor) + '.' : '';
+    const son = sonMotor ? ' Son okuyan: ' + (SES_AD[sonMotor] || sonMotor) + '.' + (sonNot ? ' ' + sonNot : '') : '';
     return '<div class="king__ses-sec" role="radiogroup" aria-label="King’in sesi"><span class="king__ses-ad">Ses</span>'
       + SES_TERCIH.map(v => '<button type="button" role="radio" class="king__ses-sec-dug' + (v === t ? ' is-secili' : '')
         + '" aria-checked="' + (v === t ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('')
@@ -36164,7 +36185,7 @@ window.LIFEOS.KING = (function(){
     if(mikDeniyor){ try{ mikDeniyor.iptal(); }catch(e){ /* durmus */ } mikDeniyor = null; }
     mikListe = []; mikNot = ''; hkmDinlemez = false;
     if(dinleyen){ try{ dinleyen.onend = dinleyen.onerror = null; dinleyen.abort(); }catch(e){ /* durmus */ } }
-    sesli = false; dinleyen = null; konusuyor = 0; sesNo++; calan = null; sonMotor = '';
+    sesli = false; dinleyen = null; konusuyor = 0; sesNo++; calan = null; sonMotor = ''; sonNot = '';
   }
 
   return {
@@ -36175,7 +36196,7 @@ window.LIFEOS.KING = (function(){
     cikarimAdaylari, cikarimKarti, cikarimOnayla, SORMA, sormaKomutu, sormaMi, sormaListesi,
     USLUP, envanterVar:() => !!envanter,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
-    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor,
+    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor, sonNot:() => sonNot,
     MIK, mikSecili, mikSec, mikTazele, mikDene, algila,
     sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
