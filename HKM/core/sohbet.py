@@ -96,14 +96,50 @@ Bugünün ölçümleri:
 # da yazilir; yoksa «sistemi görüyor musun» sorusu havada kalir. Gorev
 # tanimi («günün tek cümlesini taşır») KONMAZ: 4B model onu her cevaba
 # «Günün tek cümlesi: …» diye ekliyordu.
-SISTEM_KISA = """Adın %(ad)s. LifeOS'un merkezi HKM'de (Hayat Kontrol Merkezi) görevlisin; kullanıcıyla kısa ve doğal Türkçe sohbet ediyorsun.
-LifeOS'ta üç modül var: AYS (sınav hazırlığı), SPİ (sağlık: uyku, beslenme, hareket), ESP (kişisel gelişim). Onların günlük özetini aşağıdaki listeden görürsün; listede olmayanı bilemezsin.
-Kesin kurallar: ÖLÇÜM UYDURMA — ölçülen bir şeyden sayı söyleyeceksen aşağıdaki
-listede geçmeli, yoksa ölçülmediğini söyle. Emir kipi kullanma. En fazla 3 cümle,
-Türkçe; kullanıcıya «sen» diye hitap et. Bir şey uygulayamazsın; değişiklik isteğini teklif olarak bırakacağını söyle.
+# SAMIMI SOHBET (kullanici, 2026-10-19: «neden sohbet edemiyorum kanka;
+# sadece sisteme odakli olmasin, sohbet de edebileyim»). Kucuk model her
+# cevabi olcume baglayip «bu ölçülmedi» diyordu. Kimlik yine ilk cumlede;
+# olcum kurali ayni, tirnakli kalip yok (model aynen tekrarliyordu).
+KISA_KIMLIK = """Adın %(ad)s. LifeOS'un merkezi HKM'de (Hayat Kontrol Merkezi) görevlisin; aynı zamanda kullanıcının samimi bir sohbet arkadaşısın: sıcak, doğal ve rahat konuşursun, kullanıcı samimi konuşursa sen de samimi olursun.
+Her konuda sohbet edebilirsin: günün nasıl geçtiği, hobiler, merak edilen bir bilgi, espri, dertleşmek. Kendin hakkında uydurma: bir yapay zekâ asistanısın; uyumaz, yemez, yorulmazsın ve sistemde kendiliğinden bir şey yapmış gibi anlatmazsın. Her cevabı sisteme bağlamak zorunda değilsin; LifeOS'tan (AYS sınav hazırlığı, SPİ sağlık, ESP kişisel gelişim) yalnız konu oraya gelirse söz et.
+Kurallar: Ölçülen bir şeyden (uyku, net, öğün gibi) sayı söyleyeceksen aşağıdaki listede geçmeli; listede yoksa ölçülmediğini kısaca söyle, sayı uydurma. Emir kipi kullanma. Doğal ve kısa yaz (çoğunlukla bir üç cümle); kullanıcıya «sen» diye hitap et. Bir şey uygulayamazsın; değişiklik isteğini teklif olarak bırakacağını söyle."""
+
+SISTEM_KISA = KISA_KIMLIK + """
 
 Bugünün ölçümleri:
 %(baglam)s"""
+
+# Serbest sohbette (mesaj sisteme degmiyor) olcum listesi HIC gitmez:
+# bos liste bile «bugün ölçüm yok» cumlesini selama ekletiyordu.
+SISTEM_SERBEST = KISA_KIMLIK + """
+
+%(baglam)s"""
+
+# Mesaj sisteme ya da olculere degiyor mu (kod karari; kucuk modelde
+# olcum listesinin gidip gitmeyecegini bu secer).
+SISTEM_KONUSU = re.compile(
+    r"(uyku|uyu|net\b|deneme|soru|tekrar|plan|program|hedef|ölçü|ölçtü|durum|özet|brifing|kalori|öğün|"
+    r"yemek|yedim|beslen|antrenman|spor|egzersiz|kilo|tahlil|sağlık|nabız|ders|sınav|yks|tyt|ayt|kitap|"
+    r"okuma|okudum|dil\b|müzik|felsefe|diksiyon|disiplin|\bays\b|\bspi\b|\bspı\b|\bspİ\b|\besp\b|"
+    r"\bhkm\b|lifeos|modül|sistem|istatistik|rakam|veri|haftam|bu hafta|geçen hafta|bütçe|harcama|alışkanlık|"
+    r"çalış|ilerle|gelişim|rapor|analiz|öner|tavsiye)", re.I)
+
+
+def sistem_konusu(metin):
+    """Mesaj sisteme/olcumlere degiyor mu (kod karari)."""
+    return bool(SISTEM_KONUSU.search(str(metin or "")))
+
+
+# Gecmisteki yanki cevaplari (sahada, 2026-10-19): ««bu ölçülmedi».» gibi
+# kisa tekrarlar her turda modele geri gidiyor, kucuk model kendi eski
+# cevabini kopyaliyordu. Kisa ve yalniz bu kaliptan olusan King cevabi
+# gecmise girmez; kullanicinin mesaji kalir.
+YANKI = re.compile(r"(bu ölçülmedi|hüküm verecek veri yok|ölçüm yok|ölçüm yapılmadı)", re.I)
+
+
+def yanki_mi(metin):
+    t = str(metin or "").strip()
+    return len(t) <= 90 and bool(YANKI.search(t))
 
 HAFIZA_ADAYI_KISA = ("\n\nKullanıcı kendisi hakkında kalıcı bir tercih söylediyse cevabın sonuna "
                      "[[HAFIZA ADAYI: <kısa cümle>]] ekleyebilirsin; sağlık bilgisi aday olmaz.")
@@ -119,10 +155,10 @@ BAGLAM_SINIRI = {
 }
 
 
-def sistem_metni(gorevli, bg, kisa=False):
+def sistem_metni(gorevli, bg, kisa=False, serbest=False):
     g = GOREVLILER[gorevli]
     if kisa:
-        return SISTEM_KISA % {"ad": g["ad"], "baglam": bg}
+        return (SISTEM_SERBEST if serbest else SISTEM_KISA) % {"ad": g["ad"], "baglam": bg}
     return SISTEM_METNI % {"ad": g["ad"], "is": g["is"], "konum": KONUM[gorevli],
                            "baglam": bg}
 
@@ -885,6 +921,10 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     kisa = bool(sinir and sinir["kisa"]) or yerel_model
     bg = baglam(con, date, gorevli, th=th, veri=veri, kisa=kisa)
     uzun = uzun_istek(metin)
+    # Kucuk modelde serbest sohbet: olcum listesi gitmez (yalniz tarih).
+    serbest = kisa and not uzun and not sistem_konusu(metin)
+    if serbest:
+        bg = "Tarih: %s" % date
     if uzun or LIFEOS_SOZ.search(str(metin or "")):
         bg += "\n" + LIFEOS_BILGI
     if sinir:
@@ -897,9 +937,9 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         bg += ("\nKullanıcı hakkında hatırlananlar (etiketiyle; «tahmin» kesin "
                "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
                "sen yazamazsın):\n" + hb)
-    sistem = (sistem_metni(gorevli, bg, kisa=kisa) + (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
+    sistem = (sistem_metni(gorevli, bg, kisa=kisa, serbest=serbest) + (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
               + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else ""))
-    onceki = list(gecmis or [])
+    onceki = [m for m in (gecmis or []) if not (m.get("role") == "assistant" and yanki_mi(m.get("content")))]
     if sinir:
         onceki = onceki[-sinir["gecmis"]:] if sinir["gecmis"] else []
     mesajlar = onceki + [{"role": "user", "content": metin}]

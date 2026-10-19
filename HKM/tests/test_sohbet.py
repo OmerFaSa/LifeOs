@@ -132,7 +132,7 @@ def run():
         «Benim adım Sen HKM.» diyordu ve modulleri bilmiyordu."""
         s = sohbet.sistem_metni("king", "- (liste)", kisa=True)
         ok(s.startswith("Adın King."), s[:60])
-        for parca in ("AYS", "SPİ", "ESP", "Hayat Kontrol Merkezi", "ÖLÇÜM UYDURMA", "- (liste)"):
+        for parca in ("AYS", "SPİ", "ESP", "Hayat Kontrol Merkezi", "sayı uydurma", "- (liste)"):
             ok(parca in s, parca)
     test("kisa sistem metni kimligi ve modulleri tasir", t_short_prompt_carries_identity)
 
@@ -350,6 +350,35 @@ def run():
         # Kisa sistem metni tirnakli «bu ölçülmedi» ifadesini tasimaz (model aynen tekrarliyordu).
         no("«bu ölçülmedi»" in sohbet.sistem_metni("king", "-", kisa=True), "tirnakli ifade")
     test("uzun istek: cümle sınırı kalkar, pay ve bekleme büyür; LifeOS tanımı bağlamda", t_uzun_istek)
+
+    def t_samimi_sohbet():
+        """Sahada (2026-10-19): «Nasılsın kanka?»ya hep ««bu ölçülmedi».» geldi.
+        Kucuk modelde serbest sohbete olcum listesi gitmez; gecmisteki yanki
+        cevaplari modele geri gitmez; talimat samimi sohbeti soyler."""
+        from core import db as _db
+        cfg = models.apply({"local_token": "x"}, {"yer": "yerel", "yerel": {"ekonomik": "gemma3:4b"}, "keys": {"yerel": "yerel"},
+                                                  "assignments": {"king": {"provider": "yerel", "model": "gemma3:4b"}}})
+        gecmis = [{"role": "user", "content": "Nasılsın kanka?"}, {"role": "assistant", "content": "«bu ölçülmedi»."},
+                  {"role": "user", "content": "Merhaba"}, {"role": "assistant", "content": "Merhaba! Nasılsın?"}]
+        t = _cevap("İyiyim kanka, sen nasılsın?")
+        r = sohbet.konus(_db.connect(":memory:"), cfg, "Nasıl gidiyor günün kanka?", BUGUN, transport=t, gecmis=gecmis)
+        eq(r["text"], "İyiyim kanka, sen nasılsın?")
+        no("Bugünün ölçümleri" in t.gorulen["sistem"] or "ölçüm yok" in t.gorulen["sistem"], t.gorulen["sistem"][-400:])
+        ok("sohbet arkadaşısın" in t.gorulen["sistem"], t.gorulen["sistem"][:300])
+        icerik = [m["content"] for m in t.gorulen["mesajlar"]]
+        no("«bu ölçülmedi»." in icerik, icerik)
+        ok("Nasılsın kanka?" in icerik and "Merhaba! Nasılsın?" in icerik, icerik)
+        # Sisteme degen mesaj olcum listesini gorur.
+        t2 = _cevap("Bu ölçülmedi.")
+        sohbet.konus(_db.connect(":memory:"), cfg, "Uykum nasıl?", BUGUN, transport=t2)
+        ok("Bugünün ölçümleri" in t2.gorulen["sistem"], t2.gorulen["sistem"][-300:])
+        for m in ("Nasılsın kanka?", "Bana kendinden bahset", "Bugün hava çok güzel"):
+            no(sohbet.sistem_konusu(m), m)
+        for m in ("Uykum nasıl?", "bu hafta kaç deneme çözdüm", "AYS'de durum ne"):
+            ok(sohbet.sistem_konusu(m), m)
+        ok(sohbet.yanki_mi("«bu ölçülmedi».") and sohbet.yanki_mi("SPİ modülü için hüküm verecek veri yok."))
+        no(sohbet.yanki_mi("İyiyim, teşekkürler!"))
+    test("samimi sohbet: serbest mesaja ölçüm listesi gitmez; yankı cevapları geçmişe girmez", t_samimi_sohbet)
 
     def t_derinlik_ucu():
         from tests.test_daemon import _Server
