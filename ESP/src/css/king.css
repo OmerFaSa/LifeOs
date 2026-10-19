@@ -592,3 +592,17 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__gecmis-ufak:focus-visible{ outline:2px solid var(--primary); outline-offset:1px; opacity:1; }
 .king__tasi{ flex-basis:100%; display:flex; flex-wrap:wrap; gap:6px; padding:4px 8px 8px; }
 .king__gecmis-ufak.is-sabit{ color:var(--text); }
+
+/* Söz 31: düşünme derinliği — yazı alanında küçük düğme, yukarı açılan menü.
+   Otomatikken sönük; bir derinlik seçiliyse adı koyu yazılır. */
+.king__derin-yer{ position:relative; flex:none; }
+.king__derin{ display:inline-flex; align-items:center; gap:5px; min-height:32px; padding:0 10px 0 8px; border:0; border-radius:999px;
+  background:transparent; color:var(--text-2); font:inherit; font-size:12.5px; font-weight:600; cursor:pointer;
+  transition:background .2s ease, color .2s ease; }
+.king__derin svg{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; }
+.king__derin:hover, .king__derin.is-acik{ background:var(--surface-2); color:var(--text); }
+.king__derin.is-secili{ color:var(--text); }
+.king__derin:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.king__derin-menu{ left:auto; right:0; width:min(260px, calc(100vw - 48px)); }
+.king__arac.is-secili{ background:var(--surface-2); }
+@media (max-width:679px){ .king__derin span{ display:none; } .king__derin{ padding:0 8px; } }

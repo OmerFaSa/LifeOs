@@ -60,6 +60,17 @@ def run():
         eq(temiz, "Tamam, not ettim.")
         eq(ad, ["Pazar günleri çalışmıyor."])
         eq(memory.aday_ayikla("Etiket yok."), ("Etiket yok.", []))
+        # Kucuk model etiketi tek parantezle kapatabilir ya da hic kapatmaz
+        # (sahada, 2026-10-19); etiket yine metne SIZMAZ.
+        eq(memory.aday_ayikla("İyi gelebilir. [[HAFIZA ADAYI: Her ikisi de iyi gelir.]"),
+           ("İyi gelebilir.", ["Her ikisi de iyi gelir."]))
+        # Model etiket TAKLIDI yapabilir («[[ÖLÇÜM UYDURMA: …]]»); aday degildir,
+        # metne de gitmez (sahada, 2026-10-19).
+        eq(memory.aday_ayikla("Güzel bir seçim olurdu. [[ÖLÇÜM UYDURMA: YÜRÜŞÜK]]"),
+           ("Güzel bir seçim olurdu.", []))
+        eq(memory.aday_ayikla("Dizi [1] ve [2] kalır."), ("Dizi [1] ve [2] kalır.", []))
+        eq(memory.aday_ayikla("Tamam. [[HAFIZA ADAYI: Sabah çalışır.\nBaşka satır."),
+           ("Tamam. \nBaşka satır.".replace(" \n", "\n"), ["Sabah çalışır."]))
         # Komutla: listele, kaydet, sil.
         con = db.connect(":memory:")
         r = memory.aday_ekle(con, "Pazar günleri çalışmıyor.")

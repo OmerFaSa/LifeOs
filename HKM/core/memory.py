@@ -166,7 +166,10 @@ LISTE = ("hafızam", "hafizam", "neyi hatırlıyorsun", "neyi hatirliyorsun",
 
 MAX_ADAY = 20             # bekleyen aday tavani
 MAX_ADAY_METIN = 200
-ADAY_ETIKET = __import__("re").compile(r"\[\[\s*HAFIZA ADAYI\s*:\s*(.+?)\s*\]\]", __import__("re").I)
+# Kucuk model etiketi tek parantezle kapatabilir ya da satir sonunda acik
+# birakabilir (sahada, 2026-10-19); etiket yine metne sizmaz.
+ADAY_ETIKET = __import__("re").compile(r"\[\[\s*HAFIZA ADAYI\s*:\s*([^\]\n]+?)\s*(?:\]{1,2}|(?=\n)|$)",
+                                       __import__("re").I)
 SAGLIK = ("ilaç", "ilac", "doz", "tahlil", "teşhis", "teshis", "hastalı", "hastali", "tansiyon",
           "reçete", "recete", "depresyon", "kilo", "şeker has", "seker has", "ağrı", "agri", "ameliyat")
 
@@ -178,6 +181,10 @@ def aday_ayikla(metin):
     ham = str(metin or "")
     adaylar = [m.strip() for m in ADAY_ETIKET.findall(ham) if m.strip()]
     temiz = ADAY_ETIKET.sub("", ham)
+    # Kalan cift koseli etiketler modelin TAKLIDIDIR («[[ÖLÇÜM UYDURMA: …]]»;
+    # sahada, 2026-10-19): kullaniciya gitmez. Motorun «[[YUKSELT]]» isareti
+    # buraya gelmeden ai.py/motor.py'de islenir.
+    temiz = __import__("re").sub(r"[ \t]*\[\[[^\[\]\n]{1,120}\]\]?", "", temiz)
     # Etiketin ardindaki nokta («yok. [[…]].») cumlenin sonunda yalniz kalir:
     # «yok. .» degil «yok.» (sahada, 2026-10-19). «...» ellipsine dokunulmaz.
     temiz = __import__("re").sub(r"([.!?\u2026])[ \t]+[.!?](?=\s|$)", r"\1", temiz)

@@ -267,6 +267,78 @@ def run():
         eq(memory.aday_ayikla("Tamam... [[HAFIZA ADAYI: x]]")[0], "Tamam...")
     test("hafiza adayi: soru ve istek cumlesi kapidan gecmez; artik nokta kalmaz", t_hafiza_adayi_kapisi)
 
+    def t_derinlik():
+        """Kullanici, 2026-10-19: «King ne kadar dusunecek secilebilsin».
+        Derinlik secilmisse seviyeyi o belirler (neden: kullanicinin secimi);
+        secilmemisse ya da gecersizse kod siniflar. Talimat sisteme eklenir."""
+        t = _cevap("Tamam.")
+        r = sohbet.konus(_con(), _cfg(), "bugün hava güzel", BUGUN, transport=t, derinlik="derin")
+        eq((r["mode"], r["motor"]["seviye"], r["motor"]["derinlik"]), ("model", "ust", "derin"))
+        eq(r["motor"]["neden"], "kullanıcının seçimi: Derin")
+        ok("Bu cevap DERİN" in t.gorulen["sistem"] and "10 cümle" in t.gorulen["sistem"], t.gorulen["sistem"][-300:])
+        t2 = _cevap("Tamam.")
+        r = sohbet.konus(_con(), _cfg(), "kitap mı film mi, hangisi daha iyi", BUGUN, transport=t2, derinlik="hizli")
+        eq((r["motor"]["seviye"], r["motor"]["neden"]), ("alt", "kullanıcının seçimi: Hızlı"))
+        ok("Bu cevap HIZLI" in t2.gorulen["sistem"], t2.gorulen["sistem"][-200:])
+        t3 = _cevap("Tamam.")
+        r = sohbet.konus(_con(), _cfg(), "bugün hava güzel", BUGUN, transport=t3, derinlik="dengeli")
+        eq((r["motor"]["seviye"], r["motor"]["derinlik"]), ("orta", "dengeli"))
+        no("Bu cevap" in t3.gorulen["sistem"], "dengeli talimat eklemez")
+        for d in (None, "uzman", ""):
+            t4 = _cevap("Tamam.")
+            r = sohbet.konus(_con(), _cfg(), "kitap mı film mi, hangisi daha iyi", BUGUN, transport=t4, derinlik=d)
+            eq((r["motor"]["seviye"], r["motor"]["derinlik"]), ("ust", "oto"))
+            ok(r["motor"]["neden"].startswith("karar/yol haritası"), r["motor"]["neden"])
+            no("Bu cevap" in t4.gorulen["sistem"], d)
+        eq([sohbet.derinlik_of(x) for x in ("hizli", "dengeli", "derin", "oto", None, 3)],
+           ["hizli", "dengeli", "derin", None, None, None])
+    test("derinlik: kullanici secerse seviye ondan; gecersizse kod siniflar", t_derinlik)
+
+    def t_yerel_model_sikisik_baglam():
+        """HATA (sahada, 2026-10-19): «Derin» secilince seviye ust oldu ve
+        gemma3:4b'ye TAM baglam gitti (kapsam, kor nokta satirlari); model
+        cevaba «Bu resim 46 metriğe dayanıyor…» diye basladi. Yerel (kucuk)
+        modele her seviyede SIKISIK baglam gider; seviye yine gecmisin ve
+        hafizanin genisligini belirler."""
+        from core import db as _db
+        con = _db.connect(":memory:")
+        cfg = {"local_token": "x"}
+        cfg = models.apply(cfg, {"yer": "yerel", "yerel": {"ekonomik": "gemma3:4b"}, "keys": {"yerel": "yerel"},
+                                 "assignments": {"king": {"provider": "yerel", "model": "gemma3:4b"}}})
+        t = _cevap("Tamam.")
+        r = sohbet.konus(con, cfg, "bugün hava güzel", BUGUN, transport=t, derinlik="derin")
+        eq((r["mode"], r["motor"]["seviye"]), ("model", "ust"))
+        no("brifing" in t.gorulen["sistem"] or "metriğe dayanıyor" in t.gorulen["sistem"], t.gorulen["sistem"][:600])
+        ok("Adın King." in t.gorulen["sistem"], t.gorulen["sistem"][:200])     # kisa sistem metni
+        ok("Bu cevap DERİN" in t.gorulen["sistem"])
+        # Bulut modeli (google) TAM baglami gorur: degismedi.
+        t2 = _cevap("Tamam.")
+        sohbet.konus(_db.connect(":memory:"), _cfg(), "bugün hava güzel", BUGUN, transport=t2, derinlik="derin")
+        ok("brifing" in t2.gorulen["sistem"], t2.gorulen["sistem"][:600])
+    test("yerel model her derinlikte sıkışık bağlam görür", t_yerel_model_sikisik_baglam)
+
+    def t_derinlik_ucu():
+        from tests.test_daemon import _Server
+        gorulen = []
+        eski = sohbet.konus
+
+        def sahte(con, cfg, metin, gun, **kw):
+            gorulen.append(kw.get("derinlik"))
+            return {"ok": True, "mode": "model", "text": "Tamam.", "agent": "king"}
+        sohbet.konus = sahte
+        s = _Server()
+        try:
+            for d in ("derin", "hizli", "uydurma", None):
+                govde = {"text": "merhaba", "agent": "king", "date": BUGUN}
+                if d is not None:
+                    govde["derinlik"] = d
+                eq(s.call("/api/chat", body=govde)[0], 200)
+            eq(gorulen, ["derin", "hizli", None, None])
+        finally:
+            sohbet.konus = eski
+            s.close()
+    test("uç: /api/chat derinliği iletir; geçersizi otomatiğe çevirir", t_derinlik_ucu)
+
     def t_gizlilik_kaydi():
         # Fikir 55: her cagrida modele HANGI veri turunun gittigi yazilir;
         # gizlilik panosu saglik ozetinin gidip gitmedigini durustce soyler.

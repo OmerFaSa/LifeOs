@@ -611,9 +611,35 @@ def _ilk_duyuru(con, anahtar):
     return cur.rowcount == 1
 
 
+# Dusunme derinligi (kullanici, 2026-10-19: «King ne kadar dusunecek
+# secilebilsin: hizli cevaplasin, derin dusunsun»). Seviyeyi normalde KOD
+# secer (core/seviye.py); kullanici bir derinlik sectiyse o kazanir ve
+# neden olarak «kullanıcının seçimi» yazilir. Paket merdiveni varsa
+# seviye modeli, eforu ve cevap payini secer (core/motor.py); elle
+# atanmis tek model varsa model degismez — derinlik baglamin genisligini
+# ve cevabin bicimini degistirir. Olcum uydurma kurali her derinlikte ayni.
+DERINLIKLER = {"hizli": seviye.ALT, "dengeli": seviye.ORTA, "derin": seviye.UST}
+DERINLIK_AD = {"hizli": "Hızlı", "dengeli": "Dengeli", "derin": "Derin"}
+DERINLIK_TALIMAT = {
+    "hizli": ("\n\nBu cevap HIZLI: bir iki kısa cümleyle cevap ver; gerekçe ve "
+              "ayrıntı ekleme."),
+    "derin": ("\n\nBu cevap DERİN: önce elindeki ölçümleri ve kullanıcının durumunu "
+              "tart, seçenekleri kısaca karşılaştır, sonra gerekçesiyle net bir öneri "
+              "yaz. Bu cevapta sınır 10 cümledir; gerekirse kısa maddeler kullan. "
+              "Ölçüm uydurma kuralı aynen geçerlidir."),
+}
+
+
+def derinlik_of(v):
+    """Gecerli derinlik ya da None («otomatik»)."""
+    return v if v in DERINLIKLER else None
+
+
 def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
-          user="ben", transport=None, kayit=True, kanal="local", hedef=None):
+          user="ben", transport=None, kayit=True, kanal="local", hedef=None,
+          derinlik=None):
     """Bir mesaja cevap. Once komut, sonra model, sonra durust bir «yok».
+    `derinlik`: hizli | dengeli | derin | None (seviyeyi kod secer).
 
     Doner: {"mode": komut|model|yok, "text": ..., ...}
     """
@@ -794,6 +820,9 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     # Mesajin NITELIGI modeli secer (core/seviye.py): duz sohbet alt,
     # oneri/analiz orta, karar/yol haritasi ust. Paket yoksa etkisizdir.
     sv = seviye.sinifla(metin)
+    derinlik = derinlik_of(derinlik)
+    if derinlik:
+        sv = {"seviye": DERINLIKLER[derinlik], "neden": "kullanıcının seçimi: %s" % DERINLIK_AD[derinlik]}
     hazir = ai.hazir_mi(cfg, rol, seviye=sv["seviye"])
     if not hazir["ok"]:
         # 4 — MODEL YOKSA SISTEM CALISIR. «Yapay zeka yok» ile «sistem
@@ -810,7 +839,13 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
 
     veri = {"mesaj"}
     sinir = BAGLAM_SINIRI.get(sv["seviye"]) if models.etkin_paket(cfg) else None
-    bg = baglam(con, date, gorevli, th=th, veri=veri, kisa=bool(sinir and sinir["kisa"]))
+    # Yerel (kucuk) model her seviyede SIKISIK baglam gorur (sahada,
+    # 2026-10-19: «Derin»de gemma3:4b'ye tam baglam gitti, cevaba «Bu resim
+    # 46 metriğe dayanıyor…» diye basladi). Seviye yine gecmis ve hafiza
+    # genisligini belirler; tam baglam bulut modelleri icindir.
+    yerel_model = ((hazir.get("assignment") or {}).get("provider") == "yerel")
+    kisa = bool(sinir and sinir["kisa"]) or yerel_model
+    bg = baglam(con, date, gorevli, th=th, veri=veri, kisa=kisa)
     if sinir:
         hb = memory.context(con, user=user, scope=gorevli, limit=sinir["hafiza"],
                             ilgili=metin if sinir["ilgili"] else None, sozler=sinir["sozler"])
@@ -821,8 +856,8 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         bg += ("\nKullanıcı hakkında hatırlananlar (etiketiyle; «tahmin» kesin "
                "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
                "sen yazamazsın):\n" + hb)
-    kisa = bool(sinir and sinir["kisa"])
-    sistem = sistem_metni(gorevli, bg, kisa=kisa) + (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
+    sistem = (sistem_metni(gorevli, bg, kisa=kisa) + (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
+              + DERINLIK_TALIMAT.get(derinlik, ""))
     onceki = list(gecmis or [])
     if sinir:
         onceki = onceki[-sinir["gecmis"]:] if sinir["gecmis"] else []
@@ -830,7 +865,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
 
     r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
                user=user, transport=transport, veri=veri, seviye=sv["seviye"])
-    motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"],
+    motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"], derinlik=derinlik or "oto",
                        baglam={"gecmis": len(onceki), "hafiza": len(hb.splitlines()) if hb else 0,
                                "sistem_harf": len(sistem)})
     if not r["ok"]:

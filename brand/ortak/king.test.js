@@ -1256,6 +1256,75 @@
       k.kapat();
     })));
   });
+  /* Söz 31 (depo sahibi, 2026-10-19): «King ne kadar düşünecek seçilebilsin». */
+  describe('King — düşünme derinliği (söz 31)', () => {
+    function derinSahnesi(bagli){
+      const istekler = [];
+      const hkm = () => ({ settings:() => ({ enabled:!!bagli, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+      const fetch = async (url, o) => {
+        istekler.push({ url, govde:JSON.parse(o.body) });
+        return { status:200, json:async () => ({ ok:true, text:'Tamam, düşündüm.', mode:'model' }), headers:{ get:() => null } };
+      };
+      const { k } = sahne({ hkm, fetch });
+      return { k, istekler };
+    }
+    it('Merkez bağlı değilken düğme yok; bağlıyken «Otomatik» görünür', () => sahneyle(async () => {
+      const a = derinSahnesi(false);
+      a.k.ac();
+      expect(!!document.querySelector('[data-king="derin"]')).toBe(false);
+      a.k.kapat();
+      const b = derinSahnesi(true);
+      b.k.ac();
+      const d = document.querySelector('[data-king="derin"]');
+      expect(d.textContent).toBe('Otomatik');
+      expect(d.getAttribute('aria-expanded')).toBe('false');
+    }));
+    it('düğme menüyü açar; seçilen derinlik cihazda kalır ve düğmede yazar', () => sahneyle(async () => {
+      const { k } = derinSahnesi(true);
+      try{
+        k.ac();
+        document.querySelector('[data-king="derin"]').click();
+        const ogeler = [...document.querySelectorAll('.king__derin-menu [data-king^="derinlik:"]')];
+        expect(ogeler.map(x => x.querySelector('b').textContent)).toEqual(['Otomatik', 'Hızlı', 'Dengeli', 'Derin']);
+        expect(document.querySelector('[data-king="derin"]').getAttribute('aria-expanded')).toBe('true');
+        document.querySelector('.king__derin-menu [data-king="derinlik:derin"]').click();
+        expect(k.derinlik()).toBe('derin');
+        expect(k._ortam.depo.oku(k.DERIN)).toBe('derin');
+        expect(!!document.querySelector('.king__derin-menu')).toBe(false);
+        expect(document.querySelector('[data-king="derin"]').textContent).toBe('Derin');
+        expect(k.derinlikSec('uzman')).toBe(false);
+        k.derinlikSec('oto');
+        expect(k._ortam.depo.oku(k.DERIN)).toBe(null);
+      }finally{ k.derinlikSec('oto'); }
+    }));
+    it('HKM’ye derinlik gider; Otomatik’te alan hiç gönderilmez', () => sahneyle(async () => {
+      const { k, istekler } = derinSahnesi(true);
+      try{
+        k.ac();
+        await k.isle('felsefede özgür irade hakkında ne düşünüyorsun');
+        const ilk = istekler.filter(x => x.url.endsWith('/api/chat'));
+        expect(ilk.length).toBe(1);
+        expect('derinlik' in ilk[0].govde).toBe(false);
+        k.derinlikSec('hizli');
+        await k.isle('peki stoacılar ne der');
+        const son = istekler.filter(x => x.url.endsWith('/api/chat')).pop();
+        expect(son.govde.derinlik).toBe('hizli');
+      }finally{ k.derinlikSec('oto'); }
+    }));
+    it('··· menüsünde «Düşünme» satırı aynı seçimi yapar', () => sahneyle(async () => {
+      const { k } = derinSahnesi(true);
+      try{
+        k.ac();
+        k.menuAc('menu');
+        const r = [...document.querySelectorAll('.king__secici [data-king^="derinlik:"]')];
+        expect(r.map(x => x.textContent)).toEqual(['Otomatik', 'Hızlı', 'Dengeli', 'Derin']);
+        expect(r[0].getAttribute('aria-checked')).toBe('true');
+        document.querySelector('.king__secici [data-king="derinlik:dengeli"]').click();
+        expect(k.derinlik()).toBe('dengeli');
+        expect(document.querySelector('.king__secici [data-king="derinlik:dengeli"]').getAttribute('aria-checked')).toBe('true');
+      }finally{ k.derinlikSec('oto'); }
+    }));
+  });
   /* Söz 30 (depo sahibi, 2026-10-19): «Konuş'taki kutucuk rahatsız ediyor,
      Dinle'deki gibi minimal olsun; kenar çubuğu sola küçülebilsin». */
   describe('King — profesyonel (söz 30)', () => {

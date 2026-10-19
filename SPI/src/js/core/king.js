@@ -243,7 +243,20 @@
       çubuğu geniş ekranda da başlıktaki düğmeyle kapanır; tercih cihazda
       durur (lifeos.king.yan). Dar ekranda eskisi gibi pencerenin içinde
       açılır. Küre katmanlıdır (king.css): derinlik, parlama ve yavaş dönen
-      iç akış; dinlerken ve konuşurken hızlanır, hareket azaltılmışsa durur. */
+      iç akış; dinlerken ve konuşurken hızlanır, hareket azaltılmışsa durur.
+  31. DÜŞÜNME DERİNLİĞİ (depo sahibi, 2026-10-19: «King ne kadar düşünecek
+      seçilebilsin: hızlı cevaplasın, derin düşünsün»). Yazı alanındaki
+      küçük düğme ve ··· menüsündeki «Düşünme» satırı:
+        Otomatik  mesaja göre HKM seçer (varsayılan)
+        Hızlı     kısa ve çabuk cevap (seviye alt)
+        Dengeli   öneri ve yorum (seviye orta)
+        Derin     seçenekleri tartar, gerekçeli öneri (seviye üst)
+      Seçim cihazda durur (lifeos.king.derinlik; TASINAN'da) ve HKM'ye
+      «derinlik» olarak gider (HKM/core/sohbet.py). Paket merdiveni varsa
+      seviye modeli ve eforu seçer; elle atanmış tek modelde model
+      değişmez, bağlamın genişliği ve cevabın biçimi değişir. Derin daha
+      uzun sürebilir: bekleme süresi iki katıdır. Düğme yalnız Merkez
+      (yapay zekâ) bağlıyken görünür; yerel King model kullanmaz. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -502,6 +515,20 @@ window.LIFEOS.KING = (function(){
     try{ mikListe = (await ortam.mikrofonlar()) || []; }catch(e){ mikListe = []; }
     if(acik && menu === 'menu') ciz(false);
     return mikListe;
+  }
+  const DERIN = 'lifeos.king.derinlik';   // söz 31: 'oto' | 'hizli' | 'dengeli' | 'derin'; TASINAN'da
+  const DERIN_TERCIH = ['oto', 'hizli', 'dengeli', 'derin'];
+  const DERIN_AD = { oto:'Otomatik', hizli:'Hızlı', dengeli:'Dengeli', derin:'Derin' };
+  const DERIN_IP = { oto:'Mesaja göre King seçer', hizli:'Kısa ve çabuk cevap',
+    dengeli:'Öneri ve yorum, orta uzunlukta', derin:'Seçenekleri tartar, gerekçeli öneri; biraz daha uzun sürer' };
+  let derinAcik = false;                 // söz 31: yazı alanındaki derinlik menüsü açık mı
+  function derinlik(){ const v = ortam.depo.oku(DERIN); return DERIN_TERCIH.indexOf(v) > 0 ? v : 'oto'; }
+  function derinlikSec(v){
+    if(DERIN_TERCIH.indexOf(v) < 0) return false;
+    if(v === 'oto') ortam.depo.sil(DERIN); else ortam.depo.yaz(DERIN, v);
+    derinAcik = false;
+    ciz(false);
+    return true;
   }
   const HIZ = 'lifeos.king.hiz';       // okuma hizi; TASINAN'da
   const HIZLAR = [1, 1.15, 1.3, 1.5, 1.75];
@@ -832,14 +859,18 @@ window.LIFEOS.KING = (function(){
     const k = baglanti();
     if(!k) return { ok:false, neden:'baglanti' };
     const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
-    const t = ctrl ? setTimeout(() => ctrl.abort(), MERKEZ_ZAMAN_ASIMI) : null;
+    const d = derinlik();
+    /* Söz 31: Derin daha uzun sürebilir; bekleme iki katı. */
+    const t = ctrl ? setTimeout(() => ctrl.abort(), MERKEZ_ZAMAN_ASIMI * (d === 'derin' ? 2 : 1)) : null;
     try{
       /* fetch bir nesnenin yöntemi olarak çağrılamaz («Illegal invocation»). */
       const f = ortam.fetch;
+      const govde = { text:String(metin).trim(), agent:'king', date:bugunISO() };
+      if(d !== 'oto') govde.derinlik = d;
       const res = await f(k.url + '/api/chat', {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
-        body:JSON.stringify({ text:String(metin).trim(), agent:'king', date:bugunISO() }),
+        body:JSON.stringify(govde),
         signal:ctrl ? ctrl.signal : undefined,
       });
       let g = null;
@@ -1673,6 +1704,21 @@ window.LIFEOS.KING = (function(){
       + (serbest.length ? '<ul class="king__gecmis">' + serbest.map(gecmisSatir).join('') + '</ul>'
         : '<p class="king__yan-bos">' + (gecmis.length ? 'Hepsi klasörlerde.' : 'Henüz geçmiş sohbet yok. «Yeni sohbet» dediğinde ya da gün değiştiğinde açık sohbet buraya geçer.') + '</p>');
   }
+  /* Söz 31: yazı alanında düşünme derinliği (yalnız Merkez bağlıyken). */
+  function derinHtml(){
+    if(!baglanti()) return '';
+    const d = derinlik();
+    return '<div class="king__derin-yer"><button type="button" class="king__derin' + (derinAcik ? ' is-acik' : '') + (d !== 'oto' ? ' is-secili' : '')
+      + '" data-king="derin" aria-haspopup="menu" aria-expanded="' + (derinAcik ? 'true' : 'false')
+      + '" aria-label="Düşünme: ' + DERIN_AD[d] + '" title="Düşünme: ' + kac(DERIN_IP[d]) + '">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2M12 19v2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M3 12h2M19 12h2M5.6 18.4L7 17M17 7l1.4-1.4"/><circle cx="12" cy="12" r="3.5"/></svg>'
+      + '<span>' + DERIN_AD[d] + '</span></button>'
+      + (derinAcik ? '<div class="king__arac-menu king__derin-menu" role="menu" aria-label="Düşünme derinliği">'
+        + DERIN_TERCIH.map(v => '<button type="button" role="menuitemradio" aria-checked="' + (v === d ? 'true' : 'false')
+          + '" class="king__arac' + (v === d ? ' is-secili' : '') + '" data-king="derinlik:' + v + '"><b>' + DERIN_AD[v] + '</b><small>'
+          + kac(DERIN_IP[v]) + '</small></button>').join('') + '</div>' : '')
+      + '</div>';
+  }
   function aracMenu(){
     if(!aracAcik) return '';
     return '<div class="king__arac-menu" role="menu" aria-label="Araçlar">'
@@ -1766,6 +1812,9 @@ window.LIFEOS.KING = (function(){
         + sec('oto', 'Otomatik', 'Konuşarak sorduğuna sesli, yazarak sorduğuna yazılı cevap')
         + sec('ses', 'Sesli', 'Yazsan da cevabı sesli okur; yazı da görünür')
         + sec('yazi', 'Yazılı', 'Konuşsan da cevap yalnız yazılı gelir') + '</div></div>'
+        + '<div class="king__menu-satir"><span class="king__menu-ad">Düşünme</span><div class="king__secici" role="radiogroup" aria-label="Düşünme derinliği">'
+        + DERIN_TERCIH.map(v => '<button type="button" class="king__secim' + (derinlik() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
+          + (derinlik() === v ? 'true' : 'false') + '" data-king="derinlik:' + v + '" title="' + kac(DERIN_IP[v]) + '">' + DERIN_AD[v] + '</button>').join('') + '</div></div>'
         + '<div class="king__menu-satir"><span class="king__menu-ad">Ses</span><div class="king__secici" role="radiogroup" aria-label="Ses">'
         + SES_TERCIH.map(v => '<button type="button" class="king__secim' + (sesTercihi() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (sesTercihi() === v ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('') + '</div></div>'
@@ -2286,7 +2335,7 @@ window.LIFEOS.KING = (function(){
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>' + aracMenu() + '</div>'
       + '<input type="file" accept="image/*" data-king-dosya class="sr-only"/>'
       + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : kip() === 'ekran' ? 'Ekran hakkında sor…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
-      + mik
+      + derinHtml() + mik
       + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form></div>';
   }
@@ -2446,6 +2495,9 @@ window.LIFEOS.KING = (function(){
       if(c){
         const is = c.getAttribute('data-king');
         if(aracAcik && is !== 'arac') aracAcik = false;          // söz 27: menüden seçince kapanır
+        if(derinAcik && is !== 'derin') derinAcik = false;       // söz 31: aynı kural
+        if(is === 'derin'){ derinAcik = !derinAcik; aracAcik = false; ciz(false); return; }
+        if(/^derinlik:(oto|hizli|dengeli|derin)$/.test(is)){ derinlikSec(is.slice(9)); return; }
         if(is === 'kapat'){ sesli = false; kapat(); return; }
         if(is === 'dinle'){ dinle(); return; }
         if(is === 'kucult'){ kucult(); return; }
@@ -2646,7 +2698,7 @@ window.LIFEOS.KING = (function(){
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP); ortam.depo.sil(ALGILA); ortam.depo.sil(MIK);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
-    yanAcik = false; aktifKayit = null; aracAcik = false; klasorYeni = false; tasinan = null; adlandirilan = null;
+    yanAcik = false; aktifKayit = null; aracAcik = false; derinAcik = false; klasorYeni = false; tasinan = null; adlandirilan = null;
     if(ayar) ortam.depo.sil(klasorAnahtar());
     ortam.depo.sil(CIKARIM_KARAR); ortam.depo.sil(SORMA);
     envanter = null; ortam.depo.sil(USLUP);
@@ -2666,7 +2718,7 @@ window.LIFEOS.KING = (function(){
     cikarimAdaylari, cikarimKarti, cikarimOnayla, SORMA, sormaKomutu, sormaMi, sormaListesi,
     USLUP, envanterVar:() => !!envanter,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
-    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor, sonNot:() => sonNot, YAN, yanDar, yanDarSec,
+    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor, sonNot:() => sonNot, YAN, yanDar, yanDarSec, DERIN, derinlik, derinlikSec,
     MIK, mikSecili, mikSec, mikTazele, mikDene, algila,
     sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,

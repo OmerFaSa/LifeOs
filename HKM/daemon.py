@@ -40,7 +40,7 @@ Ucnoktalar:
     GET  /api/cross?date=&days=     capraz bulgular: uc ambar yan yana
     GET  /api/series?date=&days=&module=  metrik metrik zaman serisi
     POST /api/message               Buyuk Patron'a kisa komut (yerel kanal)
-    POST /api/chat                  sohbet: once komut, sonra model
+    POST /api/chat                  sohbet: once komut, sonra model; {text, agent, date, derinlik?: hizli|dengeli|derin}
     POST /api/chat/tani             sohbet zincirini dener, nerede koptugunu soyler
     GET  /api/agents                gorevliler ve her birinin hazir olup olmadigi
     GET  /api/conversation          son konusma kayitlari
@@ -1708,9 +1708,11 @@ class Handler(BaseHTTPRequestHandler):
                         for m in onceki if m["role"] in ("user", "manager")]
             # Kayit sorumlulugu TEK yerde: core/sohbet.py. Burasi da
             # yazsaydi ayni cumle akista iki kez gorunurdu.
+            # Dusunme derinligi (hizli|dengeli|derin); gecersizse «otomatik».
             r = sohbet.konus(self.con, self.server.config, metin, gun,
                              gorevli=gorevli, gecmis=mesajlar,
-                             th=self.server.thresholds)
+                             th=self.server.thresholds,
+                             derinlik=sohbet.derinlik_of((govde or {}).get("derinlik")))
             return self._send(200, r)
         if u.path == "/api/message":
             ham, hata = self._read_body()
