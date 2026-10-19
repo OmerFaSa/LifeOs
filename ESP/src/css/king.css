@@ -213,7 +213,7 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 
 /* Dinle: baslikta, kiplerin hemen solunda kucuk ses dugmeleri; kutu yok (2026-10-19). */
 .king__dinle-hap{ display:inline-flex; align-items:center; gap:0; margin-left:auto; }
-.king__dinle-hap + .king__kipler{ margin-left:4px; }
+.king__dinle-hap + .king__kip-yer{ margin-left:4px; }
 /* Kipler en saga: kucult dugmesindeki ikinci «auto» onlari ortaya itiyordu. */
 .king:not(.is-mini) .king__bas .king__kucult{ margin-left:2px; }
 .king__hap{ display:inline-flex; align-items:center; gap:4px; min-height:28px; min-width:28px; padding:0 10px 0 8px; border:0;
@@ -508,16 +508,28 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
    klasörlenebilsin»). Renk yalnız seçili kipte ve canlı noktada.
    ====================================================================== */
 .king:not(.is-mini) .king__bas{ gap:10px; min-height:40px; }
-.king__kipler{ display:inline-flex; gap:2px; margin-left:auto; padding:3px; border-radius:999px; background:var(--surface-2); }
-.king__kip{ display:inline-flex; align-items:center; gap:6px; min-height:30px; padding:0 12px; border:0; border-radius:999px;
-  background:transparent; color:var(--text-2); font:inherit; font-size:13px; font-weight:550; cursor:pointer;
-  transition:background .2s ease, color .2s ease, box-shadow .2s ease; }
-.king__kip svg{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
-.king__kip:hover{ color:var(--text); }
-.king__kip.is-secili{ background:var(--surface); color:var(--text); box-shadow:0 1px 2px rgba(20,24,40,.12), 0 0 0 1px var(--line, rgba(0,0,0,.06)); }
-.king__kip:focus-visible{ outline:2px solid var(--primary); outline-offset:1px; }
+/* Kip seçici (2026-10-19): başlıkta tek hap, dokununca açılır menü. Yaz
+   dışındaki kipte hap hafif renk alır: King'in sesli ya da ekranda olduğu
+   bir bakışta görünür. */
+.king__kip-yer{ position:relative; flex:none; margin-left:auto; }
+.king__kip-dugme{ display:inline-flex; align-items:center; gap:6px; min-height:32px; padding:0 8px 0 11px; border:0; border-radius:999px;
+  background:var(--surface-2); color:var(--text); font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+  box-shadow:inset 0 0 0 1px var(--line); transition:background .2s ease, box-shadow .2s ease; }
+.king__kip-dugme svg, .king__kip-sec > svg{ width:15px; height:15px; flex:none; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+.king__kip-dugme .king__kip-ok{ width:14px; height:14px; color:var(--text-2); transition:transform .2s ease; }
+.king__kip-dugme.is-acik .king__kip-ok{ transform:rotate(180deg); }
+.king__kip-dugme:hover, .king__kip-dugme.is-acik{ background:color-mix(in oklab, var(--surface-2) 80%, var(--text) 8%); }
+.king__kip-dugme.is-canli{ background:color-mix(in oklab, var(--primary) 16%, var(--surface-2)); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent); }
+.king__kip-dugme:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+/* Ortak menü (.king__arac-menu) dosyada sonra gelir; yer ve satır düzeni burada daha belirgin. */
+.king__kip-yer .king__kip-menu{ left:auto; right:0; top:calc(100% + 8px); bottom:auto; width:min(300px, calc(100vw - 40px)); }
+.king__kip-menu .king__kip-sec{ display:flex; align-items:center; gap:10px; }
+.king__kip-sec > span{ flex:1; min-width:0; display:grid; gap:1px; }
+.king__kip-sec > svg{ color:var(--text-2); }
+.king__kip-sec.is-secili > svg:first-child{ color:var(--text); }
+.king__kip-sec .king__kip-tik{ width:16px; height:16px; color:var(--primary); stroke-width:2.2; }
 .king:not(.is-mini) .king__menu-dugme{ margin-left:auto; }
-.king:not(.is-mini) .king__kipler ~ .king__menu-dugme{ margin-left:4px; }
+.king:not(.is-mini) .king__kip-yer ~ .king__menu-dugme{ margin-left:4px; }
 
 /* Boş sohbet: ortada küre, selam, hazır cevaplar. */
 .king__bos{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center;
@@ -565,8 +577,6 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__ekran-onizle{ flex:none; width:168px; aspect-ratio:16 / 10; border-radius:12px; overflow:hidden; background:#000; }
 .king__ekran-video{ display:block; width:100%; height:100%; object-fit:contain; }
 @media (max-width:679px){
-  .king__kip span{ display:none; }
-  .king__kip{ padding:0 9px; }
   /* Telefonda başlık tek satıra sığar: modül ve durum etiketi ile Küçült gizlenir
      (King yine bulunduğun modülde; küçültmek için perdeye dokunmak yeter). */
   .king:not(.is-mini) .king__bas{ gap:6px; }

@@ -793,7 +793,14 @@
       });
       k.ac();
       expect(k.KIPLER.map(x => x.id)).toEqual(['yaz', 'dinle', 'konus', 'ekran']);
-      expect(document.querySelectorAll('[data-king^="kip:"]').length).toBe(4);
+      /* Kipler açılır menüde: kapalıyken yalnız seçili kipin hapı görünür. */
+      expect([document.querySelectorAll('[data-king^="kip:"]').length, document.querySelector('[data-king="kipler"]').textContent]).toEqual([0, 'Yaz']);
+      document.querySelector('[data-king="kipler"]').click();
+      expect(document.querySelectorAll('.king__kip-menu [data-king^="kip:"]').length).toBe(4);
+      document.querySelector('[data-king="kip:dinle"]').click();
+      await new Promise(r => setTimeout(r, 0));
+      expect([k.kip(), !!document.querySelector('.king__kip-menu'), document.querySelector('[data-king="kipler"]').textContent]).toEqual(['dinle', false, 'Dinle']);
+      await k.kipSec('yaz');
       expect(k.kip()).toBe('yaz');
       await k.kipSec('dinle');
       expect(k.kip()).toBe('dinle');
@@ -812,7 +819,8 @@
       /* desteklenmeyen kip görünmez ve seçilmez */
       Object.assign(k._ortam, { ekranDestek:() => false });
       k.menuAc(null);
-      expect(!!document.querySelector('[data-king="kip:ekran"]')).toBe(false);
+      document.querySelector('[data-king="kipler"]').click();
+      expect([!!document.querySelector('.king__kip-menu'), !!document.querySelector('[data-king="kip:ekran"]')]).toEqual([true, false]);
       expect(await k.kipSec('ekran')).toBe(false);
     }));
     it('klasörler: oluştur, sohbeti taşı, klasör silinince sohbet silinmez', () => sahneyle(async () => {

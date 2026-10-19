@@ -622,6 +622,7 @@ window.LIFEOS.KING = (function(){
   const DERIN_IP = { oto:'Mesaja göre King seçer', hizli:'Kısa ve çabuk cevap',
     dengeli:'Öneri ve yorum, orta uzunlukta', derin:'Seçenekleri tartar, gerekçeli öneri; biraz daha uzun sürer' };
   let derinAcik = false;                 // söz 31: yazı alanındaki derinlik menüsü açık mı
+  let kipAcik = false;                   // başlıktaki kip menüsü açık mı (2026-10-19)
   function derinlik(){ const v = ortam.depo.oku(DERIN); return DERIN_TERCIH.indexOf(v) > 0 ? v : 'oto'; }
   function derinlikSec(v){
     if(DERIN_TERCIH.indexOf(v) < 0) return false;
@@ -1744,13 +1745,22 @@ window.LIFEOS.KING = (function(){
     if(id === 'ekran') return paylasimBaslat();
     return false;
   }
+  /* Kip seçici açılır menü (2026-10-19, kullanıcı: «Dinle, Konuş ekranı da
+     güzel bir yere; açılır kısım olsun»): başlıkta seçili kipin tek hapı;
+     dokununca kipler açıklamalarıyla açılır. Derinlik menüsünün kalıbı. */
   function kipHtml(){
     const l = KIPLER.filter(x => { try{ return x.kosul(); }catch(e){ return false; } });
     if(l.length < 2) return '';
-    const k = kip();
-    return '<div class="king__kipler" role="radiogroup" aria-label="Konuşma biçimi">' + l.map(x => '<button type="button" role="radio" class="king__kip'
-      + (x.id === k ? ' is-secili' : '') + '" aria-checked="' + (x.id === k ? 'true' : 'false') + '" data-king="kip:' + x.id + '" title="' + kac(x.ip) + '">'
-      + KIP_SVG[x.id] + '<span>' + x.ad + '</span></button>').join('') + '</div>';
+    const k = kip(), su = l.find(x => x.id === k) || l[0];
+    return '<div class="king__kip-yer"><button type="button" class="king__kip-dugme' + (kipAcik ? ' is-acik' : '') + (k !== 'yaz' ? ' is-canli' : '')
+      + '" data-king="kipler" aria-haspopup="menu" aria-expanded="' + (kipAcik ? 'true' : 'false')
+      + '" aria-label="Konuşma biçimi: ' + su.ad + '" title="' + kac(su.ip) + '">' + KIP_SVG[su.id] + '<span>' + su.ad + '</span>'
+      + '<svg class="king__kip-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>'
+      + (kipAcik ? '<div class="king__arac-menu king__kip-menu" role="menu" aria-label="Konuşma biçimi">' + l.map(x => '<button type="button" role="menuitemradio" class="king__arac king__kip-sec'
+          + (x.id === k ? ' is-secili' : '') + '" aria-checked="' + (x.id === k ? 'true' : 'false') + '" data-king="kip:' + x.id + '">'
+          + KIP_SVG[x.id] + '<span><b>' + x.ad + '</b><small>' + kac(x.ip) + '</small></span>'
+          + (x.id === k ? '<svg class="king__kip-tik" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' : '') + '</button>').join('') + '</div>' : '')
+      + '</div>';
   }
   const KIP_SVG = {
     yaz:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
@@ -3375,7 +3385,9 @@ window.LIFEOS.KING = (function(){
         const is = c.getAttribute('data-king');
         if(aracAcik && is !== 'arac') aracAcik = false;          // söz 27: menüden seçince kapanır
         if(derinAcik && is !== 'derin') derinAcik = false;       // söz 31: aynı kural
+        if(kipAcik && is !== 'kipler') kipAcik = false;           // kip menüsü de aynı kural
         if(is === 'derin'){ derinAcik = !derinAcik; aracAcik = false; ciz(false); return; }
+        if(is === 'kipler'){ kipAcik = !kipAcik; aracAcik = false; derinAcik = false; ciz(false); return; }
         if(/^oner-metin:/.test(is)){ isle(is.slice(11)); return; }
         if(/^bul-sec:\d+:\d+$/.test(is)){ const p = is.split(':'), m = akis[Number(p[1])], o = m && m.bulunan && m.bulunan.ogeler[Number(p[2])];
           if(o && o.durum === 'bekliyor'){ o.secili = !o.secili; ciz(false); } return; }
@@ -3595,7 +3607,7 @@ window.LIFEOS.KING = (function(){
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP); ortam.depo.sil(ALGILA); ortam.depo.sil(MIK);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
-    yanAcik = false; aktifKayit = null; aracAcik = false; derinAcik = false; klasorYeni = false; tasinan = null; adlandirilan = null;
+    yanAcik = false; aktifKayit = null; aracAcik = false; derinAcik = false; kipAcik = false; klasorYeni = false; tasinan = null; adlandirilan = null;
     if(ayar) ortam.depo.sil(klasorAnahtar());
     ortam.depo.sil(CIKARIM_KARAR); ortam.depo.sil(SORMA);
     envanter = null; ortam.depo.sil(USLUP);
