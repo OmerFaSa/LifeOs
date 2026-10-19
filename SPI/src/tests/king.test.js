@@ -1061,7 +1061,8 @@
       expect(!!el.querySelector('.king-isik')).toBe(true);
       expect(el.querySelector('[role="dialog"]').getAttribute('aria-label')).toBe('King ile konuş');
       expect(el.textContent).toContain('Ne yapıyoruz?');
-      expect(el.querySelectorAll('[data-king-hazir]').length).toBe(5);
+      /* Karşılamada özet görünüyorsa «Bugünün özeti» düğmesi tekrar edilmez. */
+      expect(el.querySelectorAll('[data-king-hazir]').length).toBe(el.querySelector('.king__bos-ozet') ? 4 : 5);
       tus('Escape');
       expect(k.acikMi()).toBe(false);
       /* Odak: arka plan perdesi; dokununca kapanır, sayfaya tıklama geçmez. */
@@ -1543,17 +1544,20 @@
         expect(k.odak()).toBe(null);
       }finally{ temizle(k); }
     }));
-    it('günün açılışı: ilk açılışta selam ve kartlar, aynı gün ikinci kez yok', () => sahneyle(async () => {
+    it('karşılama: boş sohbette selam, kartlar ve özet; sohbete yazılmaz, ilk mesajla gider', () => sahneyle(async () => {
       const { k } = sahne();
       k.kur({ modul:'ays', git:() => {}, ozet:() => ['Bugün plan var.'], kartlar:{ istatistik:() => [{ ad:'Çözülen soru', deger:12, etiket:'ölçüldü', seri:[3, null, 5] }] } });
-      k._ortam.depo.sil('lifeos.king.acilis.ays');
-      k.ac();
-      const m = k.akis()[0];
-      expect([m.kim, m.kartlar.length, m.satirlar[0]]).toEqual(['king', 1, 'Bugün plan var.']);
-      expect(document.querySelector('.king__kart-cizgi path').getAttribute('d')).toBe('M0.0 22.0M100.0 2.0');
-      k.kapat(); k.yeniSohbet(); k.ac();
-      expect(k.akis().some(x => x.kartlar)).toBe(false);
-      k._ortam.depo.sil('lifeos.king.acilis.ays');
+      try{
+        k.ac();
+        expect(k.akis().some(x => x.kartlar)).toBe(false);
+        expect([document.querySelectorAll('.king__bos .king__kart').length, document.querySelector('.king__bos-ozet li').textContent])
+          .toEqual([1, 'Bugün plan var.']);
+        expect(document.querySelector('.king__kart-cizgi path').getAttribute('d')).toBe('M0.0 22.0M100.0 2.0');
+        /* Özet zaten görünürken «Bugünün özeti» hazır cevabı tekrar edilmez. */
+        expect([...document.querySelectorAll('.king__hazir')].some(b => /Bugünün özeti/.test(b.textContent))).toBe(false);
+        await k.isle('merhaba');
+        expect([document.querySelector('.king__bos'), document.querySelector('.king__bos-veri')]).toEqual([null, null]);
+      }finally{ temizle(k); }
     }));
     it('haftalık değerlendirme HKM’nin «hafta» raporunu getirir', () => sahneyle(async () => {
       const istekler = [];
@@ -1761,7 +1765,7 @@
       expect(!!document.querySelector('.king__kip-panel--konus')).toBe(false);
     }));
 
-    it('kenar çubuğu geniş ekranda başlıktaki düğmeyle kapanır; tercih cihazda kalır', () => sahneyle(async () => {
+    it('kenar çubuğu geniş ekranda kendi içindeki düğmeyle kapanır, kenarda çıkıntı kalır; tercih cihazda kalır', () => sahneyle(async () => {
       const { k } = sahne();
       Object.assign(k._ortam, { genis:() => true });
       try{
@@ -1773,6 +1777,9 @@
         dug().click();
         expect([k.yanDar(), kok().classList.contains('is-yan-dar'), dug().getAttribute('aria-expanded')]).toEqual([true, true, 'false']);
         expect(k._ortam.depo.oku(k.YAN)).toBe('dar');
+        /* Düğme başlıkta değil: biri çubukta, biri kenardaki çıkıntı. */
+        expect([document.querySelector('.king__bas [data-king="yan"]'), document.querySelectorAll('.king__yan [data-king="yan"], .king__cikinti').length])
+          .toEqual([null, 2]);
         /* Kapatıp yeniden açınca kapalı kalır. */
         k.kapat();
         k.ac();

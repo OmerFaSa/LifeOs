@@ -550,6 +550,17 @@ window.LIFEOS.KING = (function(){
     if(ortam.genis()) yanDarSec(!yanDar());
     else{ yanAcik = !yanAcik; ciz(false); }
   }
+  /* Kenar çubuğunun düğmesi çubuğun İÇİNDE (2026-10-19, kullanıcı: «King'in
+     yanında olmasın; kapatılınca orada bir çıkıntı kalsın»): açıkken
+     «Yeni sohbet»in yanında kapat, kapalıyken pencerenin sol kenarında
+     ince bir çıkıntı açar. İkisi aynı işi yapar, aynı durumu söyler. */
+  function yanDugmeHtml(sinif){
+    const gorunur = ortam.genis() ? !yanDar() : yanAcik;
+    const ad = gorunur ? 'Kenar çubuğunu kapat' : 'Sohbet geçmişini aç';
+    const yol = sinif === 'king__cikinti' ? '<path d="M10 7l5 5-5 5"/>' : '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/>';
+    return '<button type="button" class="' + sinif + '" data-king="yan" aria-expanded="' + (gorunur ? 'true' : 'false')
+      + '" aria-label="' + ad + '" title="' + ad + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + yol + '</svg></button>';
+  }
   let aktifKayit = null;     // söz 26: geçmişten açılan sohbetin kimliği
   let aracAcik = false;      // söz 27: «+» menüsü açık mı
   let klasorYeni = false;    // söz 27: yeni klasör adı soruluyor mu
@@ -1841,8 +1852,8 @@ window.LIFEOS.KING = (function(){
     const var_ = id => kls.some(f => f.id === id);
     const sabit = gecmis.filter(k => k.sabit);
     const serbest = gecmis.filter(k => !k.sabit && (!k.klasor || !var_(k.klasor)));
-    return '<button type="button" class="king__yeni" data-king="yeni-sohbet">'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Yeni sohbet</button>'
+    return '<div class="king__yan-ust"><button type="button" class="king__yeni" data-king="yeni-sohbet">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Yeni sohbet</button>' + yanDugmeHtml('king__yan-kapa') + '</div>'
       + (gecmis.length > 3 ? '<input class="king__ara" type="search" data-king-ara-girdi placeholder="Sohbetlerde ara" aria-label="Sohbetlerde ara" autocomplete="off"/>' : '')
       + (sabit.length ? '<p class="king__yan-ad">Sabitlenenler</p><ul class="king__gecmis">' + sabit.map(gecmisSatir).join('') + '</ul>' : '')
       + '<div class="king__yan-bas"><p class="king__yan-ad">Klasörler</p>'
@@ -2604,24 +2615,21 @@ window.LIFEOS.KING = (function(){
     kesici = null;
     if(k && k !== 'aciliyor') try{ k.bitir(); }catch(e){ /* kapalı */ }
   }
-  /* Günün açılışı: günün ilk açılışında selam, özet ve modülün kartları. */
-  const ACILIS = () => 'lifeos.king.acilis.' + ((ayar && ayar.modul) || 'x');
-  function acilisHazirla(){
-    if(!ayar || ayar.acilis === false || !ayar.kartlar || typeof ayar.kartlar.istatistik !== 'function') return;
-    const gun = bugunISO();
-    if(ortam.depo.oku(ACILIS()) === gun || akis.length) return;
+  /* Karşılama (2026-10-19, kullanıcı: «GPT'deki gibi; veriler karşılamada,
+     sohbete başlayınca kaybolsun, yalnız sohbet kalsın»): boş sohbette
+     selamın altında modülün kartları ve özeti. Sohbete yazılmaz; ilk
+     mesajla ekrandan gider. Her çizimde taze okunur (kodun sayısı). */
+  function karsilama(){
+    if(!ayar || ayar.acilis === false) return { kartlar:[], satirlar:[] };
     let l = [];
-    try{ l = (ayar.kartlar.istatistik() || []).filter(x => x && x.ad).map(kartTemiz).slice(0, 4); }catch(e){ l = []; }
-    ortam.depo.yaz(ACILIS(), gun);
+    if(ayar.kartlar && typeof ayar.kartlar.istatistik === 'function'){
+      try{ l = (ayar.kartlar.istatistik() || []).filter(x => x && x.ad).map(kartTemiz).slice(0, 4); }catch(e){ l = []; }
+    }
     const ek = [];
     if(haftaHedefi()) ek.push('Haftanın hedefi: ' + haftaHedefi());
     const dv = deneyOku();
     if(dv){ const h = deneyHesap(dv); ek.push(h.gecen >= dv.gun ? 'Deneyin bitti: «deney sonucu» de.' : 'Deney: «' + dv.kural + '» · ' + (h.gecen + 1) + '/' + dv.gun + ' gün'); }
-    const m = { kim:'king', metin:selam() + ' Bugünün kısa özeti:', satirlar:ek.concat(ozetSatirlari()).slice(0, 4), yeni:true };
-    if(l.length) m.kartlar = l;
-    akis.push(m);
-    cipler = (ortam.simdi().getDay() === 0 ? [{ ad:'Haftalık gözden geçirme', is:'oner-metin:haftalık gözden geçirme' }] : []).concat(oneriListesi(false)).slice(0, 4);
-    sakla();
+    return { kartlar:l, satirlar:ek.concat(ozetSatirlari()).slice(0, 4) };
   }
   function cizgi(seri){
     if(!Array.isArray(seri)) return '';
@@ -3123,12 +3131,9 @@ window.LIFEOS.KING = (function(){
   function govde(){
     if(mini) return miniGovde();
     const satirlar = akis.slice(-GUNLUK_EN_COK);
-    /* Sade başlık (söz 27): kenar düğmesi, King, modül, durum; sağda yalnız
-       daha fazla, küçült, kapat. Ses ve ekran kip seçicide. */
+    /* Sade başlık (söz 27): King, modül, durum; sağda yalnız daha fazla,
+       küçült, kapat. Ses ve ekran kip seçicide; kenar düğmesi çubukta. */
     const bas = '<div class="king__bas">'
-      + '<button type="button" class="king__kapat king__yan-dugme" data-king="yan" aria-expanded="'
-      + ((ortam.genis() ? !yanDar() : yanAcik) ? 'true' : 'false')
-      + '" aria-label="Sohbet geçmişi" title="' + (ortam.genis() && !yanDar() ? 'Kenar çubuğunu kapat' : 'Sohbet geçmişi') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>'
       + KURE + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + '</span>'
       + '<span class="king__durum" title="' + (baglanti() ? 'Sorular Merkez’deki King’e (yapay zekâ) gider'
@@ -3145,15 +3150,24 @@ window.LIFEOS.KING = (function(){
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>';
     const panel = menuHtml();
     const ilkSira = akis.length - satirlar.length;
-    const yan = '<aside class="king__yan" aria-label="Sohbet geçmişi">' + yanHtml() + '</aside><div class="king__ana">';
-    /* Boş sohbet (söz 27): ortada küre, selam ve hazır cevaplar. */
-    const hazirlar = HAZIR.map((h, i) => ({ h, i })).sort((a, b) => (a.h.ozet - b.h.ozet)
+    const yan = '<aside class="king__yan" aria-label="Sohbet geçmişi">' + yanHtml() + '</aside>'
+      + yanDugmeHtml('king__cikinti') + '<div class="king__ana">';
+    /* Boş sohbet = karşılama (söz 27; 2026-10-19 GPT gibi): ortada küre,
+       selam, modülün kartları ve özeti, hazır cevaplar. İlk mesajla gider. */
+    const kars = akis.length || panel ? { kartlar:[], satirlar:[] } : karsilama();
+    const oneriler = (ortam.simdi().getDay() === 0 ? [{ ad:'Haftalık gözden geçirme', is:'oner-metin:haftalık gözden geçirme' }] : [])
+      .concat(oneriListesi(false).filter(o => !(kars.kartlar.length && /istatistiklerim$/.test(o.is)))).slice(0, 2);
+    const hazirlar = oneriler.map(o => '<button type="button" class="king__cip king__hazir" data-king="' + o.is + '">' + kac(o.ad) + '</button>').join('')
+      + HAZIR.map((h, i) => ({ h, i })).filter(({ h }) => !(h.ozet && kars.satirlar.length)).sort((a, b) => (a.h.ozet - b.h.ozet)
           || ((b.h.modul === (ayar && ayar.modul)) - (a.h.modul === (ayar && ayar.modul))) || a.i - b.i)
           .map(({ h, i }) => '<button type="button" class="king__cip king__hazir" data-king-hazir="' + i + '">'
           + NOKTA(h.ozet ? (ayar && ayar.modul) : h.modul) + kac(h.ad) + '</button>').join('');
     const bos = '<div class="king__bos"><span class="king__bos-kure" aria-hidden="true">' + KURE + '</span>'
       + '<h2 class="king__bos-selam">' + kac(selam()) + '</h2>'
-      + '<p class="king__bos-alt">Yaz, konuş ya da ekranını göster. Kaydetmeden önce her zaman sorarım.</p>'
+      + (kars.kartlar.length || kars.satirlar.length
+        ? (kars.kartlar.length ? '<div class="king__bos-veri">' + kartlarHtml(kars) + '</div>' : '')
+          + (kars.satirlar.length ? '<ul class="king__bos-ozet">' + kars.satirlar.map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : '')
+        : '<p class="king__bos-alt">Yaz, konuş ya da ekranını göster. Kaydetmeden önce her zaman sorarım.</p>')
       + '<div class="king__hazirlar" role="group" aria-label="Hazır cevaplar">' + hazirlar + '</div></div>';
     const balonlar = satirlar.map((m, i) => m.kim === 'sen'
       ? (m.foto ? '<div class="king__balon king__balon--sen king__balon--foto"><img class="king__foto" src="' + kac(m.foto) + '" alt="Gönderdiğin fotoğraf"/></div>'
@@ -3186,8 +3200,10 @@ window.LIFEOS.KING = (function(){
       : '';
     return yan + bas
       + (panel ? '<div class="king__akis king__akis--panel">' + panel + '</div>'
-        : '<div class="king__akis" aria-live="polite">' + (akis.length ? balonlar : bos) + '</div>'
-        + (cip ? '<div class="king__cipler" role="group" aria-label="Hazır cevaplar">' + cip + '</div>' : ''))
+        /* Hazır cevaplar son cevabın hemen altında, küçük (2026-10-19,
+           kullanıcı: «çok aşağıda; daha minimalist bir yere»). */
+        : '<div class="king__akis" aria-live="polite">' + (akis.length ? balonlar : bos)
+        + (cip ? '<div class="king__cipler king__cipler--akis" role="group" aria-label="Hazır cevaplar">' + cip + '</div>' : '') + '</div>')
       + kipPanel()
       + '<form class="king__yaz" data-king-form data-ayar-disi>'
       + '<div class="king__arti-yer"><button type="button" class="king__arti' + (aracAcik ? ' is-acik' : '') + '" data-king="arac" aria-expanded="' + (aracAcik ? 'true' : 'false')
@@ -3245,7 +3261,7 @@ window.LIFEOS.KING = (function(){
       : geriGetir();
     cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; sesli = false;
     if(o && o.mesaj) akis.push({ kim:'king', metin:o.mesaj });
-    else if(!mini){ bekleyenleriSun(); acilisHazirla(); tanismaHazirla(); kutuyuSun(); }   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
+    else if(!mini){ bekleyenleriSun(); tanismaHazirla(); kutuyuSun(); }   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
     const el = document.createElement('div');
     el.className = 'king';
     el.setAttribute('data-king', '');

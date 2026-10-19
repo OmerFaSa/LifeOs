@@ -1766,7 +1766,9 @@ R.App = (function(){
           /* Özet: bugünün cümlesi, tekrar borcu ve Öğren'de sıradaki adım —
              hepsi kodun sayısı (King yalnız okur). */
           ozet:() => {
-            const s = [R.Screens.today.headline()];
+            /* Plan yoksa headline() sayfa adı «Bugün»e düşer; özete o değil cümle girer. */
+            const t = R.Screens.today, h = t.sesli ? t.sesli() : t.headline();
+            const s = h && h !== 'Bugün' ? [h] : [];
             try{
               const vade = R.Calc.dueCards(R.U.todayISO()).length;
               s.push(vade ? vade + ' tekrar kartının bugün sırası geldi' : 'Bugün sırası gelen tekrar kartı yok');
