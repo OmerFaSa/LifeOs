@@ -1354,4 +1354,71 @@
       if(birak) birak('bitti');
     }));
   });
+
+  describe('King — ses algılama ve mikrofon ayarı (söz 29)', () => {
+    const bekle = () => new Promise(ok => setTimeout(ok, 0));
+    async function bitsin(){ for(let i = 0; i < 12; i++) await bekle(); }
+
+    it('Ayarlar menüsünde mikrofon seçilir, kayıt seçili mikrofonla açılır ve Mikrofonu dene sonucu gösterir', () => sahneyle(async () => {
+      const istekler = [], acilanCihazlar = [];
+      let konustuMu = true, _sessiz = null;
+      const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+      const fetch = async (url, o) => {
+        const govde = JSON.parse(o.body);
+        istekler.push({ url, govde });
+        return { status:200, json:async () => ({ ok:true, metin:'Deneme bir iki', motor:'whisper' }) };
+      };
+      const { k } = sahne({ hkm, fetch });
+      Object.assign(k._ortam, {
+        mikrofonlar:async () => [
+          { id:'default', ad:'Varsayılan' },
+          { id:'mik-usb', ad:'USB Stüdyo Mikrofonu' },
+          { id:'mik-bt', ad:'Kulaklık Mikrofonu' },
+        ],
+        kayitAc:async (sessiz, cihazId) => {
+          acilanCihazlar.push(cihazId || '');
+          _sessiz = sessiz;
+          return {
+            bitir:() => ({ pcm:new Float32Array(1600), hz:16000, konustu:konustuMu, seviye:konustuMu ? 42 : 0 }),
+          };
+        },
+      });
+      k.ac();
+      k.menuAc('menu');
+      await bitsin();
+      const sec = document.querySelector('[data-king-mik]');
+      expect(!!sec).toBe(true);
+      expect(sec.querySelectorAll('option').length).toBe(3);
+      expect(k.mikSecili()).toBe('');
+      k.mikSec('mik-usb');
+      expect(k.mikSecili()).toBe('mik-usb');
+
+      /* Algılama tercihi: Whisper seçilir ve /api/dinle'ye gider. */
+      document.querySelector('[data-king="algila:whisper"]').click();
+      expect(document.querySelector('[data-king="algila:whisper"]').getAttribute('aria-checked')).toBe('true');
+
+      /* Mikrofonu dene: seçili mikrofonla açılır, sessizlikte biter ve sonucu yazar. */
+      document.querySelector('[data-king="mik-dene"]').click();
+      await bitsin();
+      expect(acilanCihazlar).toEqual(['mik-usb']);
+      _sessiz();
+      await bitsin();
+      expect(istekler.length).toBe(1);
+      expect(istekler[0].url).toBe('http://127.0.0.1:4200/api/dinle');
+      expect(istekler[0].govde.tercih).toBe('whisper');
+      const notEl = document.querySelector('[data-king-mik-not]');
+      expect(!!notEl).toBe(true);
+      expect(/Deneme bir iki/.test(notEl.textContent)).toBe(true);
+
+      /* Ses duyulmazsa uyarı verir, sunucuya gitmez. */
+      konustuMu = false;
+      document.querySelector('[data-king="mik-dene"]').click();
+      await bitsin();
+      _sessiz();
+      await bitsin();
+      expect(istekler.length).toBe(1);
+      expect(/duyulmadı/i.test(document.querySelector('[data-king-mik-not]').textContent)).toBe(true);
+    }));
+  });
 })();
+

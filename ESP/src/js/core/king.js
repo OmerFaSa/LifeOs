@@ -352,9 +352,19 @@ window.LIFEOS.KING = (function(){
       ? window.speechSynthesis : null,
     soz:m => new window.SpeechSynthesisUtterance(m),
     /* Söz 29: mikrofonu kaydeder; sessizlikte `sessiz` çağrılır. Mikrofon yoksa null. */
+    mikrofonlar:async () => {
+      if(typeof navigator === 'undefined' || !navigator.mediaDevices || typeof navigator.mediaDevices.enumerateDevices !== 'function') return [];
+      try{
+        const l = await navigator.mediaDevices.enumerateDevices();
+        return (l || []).filter(d => d && d.kind === 'audioinput' && d.deviceId)
+          .map((d, i) => ({ id:d.deviceId, ad:String(d.label || '').trim() || ('Mikrofon ' + (i + 1)) }));
+      }catch(e){ return []; }
+    },
     kayitAc:(typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia
-      && typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) ? async sessiz => {
-      const akis = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } });
+      && typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) ? async (sessiz, cihazId) => {
+      const sesKisit = { echoCancellation:true, noiseSuppression:true };
+      if(cihazId) sesKisit.deviceId = { ideal:cihazId };
+      const akis = await navigator.mediaDevices.getUserMedia({ audio:sesKisit });
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const kaynak = ctx.createMediaStreamSource(akis);
       const isle = ctx.createScriptProcessor(4096, 1, 1);
@@ -446,6 +456,24 @@ window.LIFEOS.KING = (function(){
     whisper:'Yalnız Whisper: ücretsiz, ses bilgisayardan çıkmaz', ai:'Yalnız yapay zekâ (Gemini): ses Google’a gider',
     tarayici:'Uygulamanın (tarayıcının) kendi tanıması' };
   function algila(){ const v = ortam.depo.oku(ALGILA); return ALGILA_TERCIH.indexOf(v) > 0 ? v : 'oto'; }
+  const MIK = 'lifeos.king.mik';         // soz 29: secili mikrofon (deviceId); TASINAN'da
+  let mikListe = [];                     // [{ id, ad }]
+  let mikDeniyor = null;                 // { dur:fn, iptal:fn } | null
+  let mikNot = '';                       // son mikrofon denemesi sonucu
+  function mikSecili(){ const v = ortam.depo.oku(MIK); return typeof v === 'string' ? v : ''; }
+  function mikSec(id){
+    const v = String(id || '').trim();
+    if(!v) ortam.depo.sil(MIK); else ortam.depo.yaz(MIK, v);
+    mikNot = '';
+    ciz(false);
+    return true;
+  }
+  async function mikTazele(){
+    if(typeof ortam.mikrofonlar !== 'function') return [];
+    try{ mikListe = (await ortam.mikrofonlar()) || []; }catch(e){ mikListe = []; }
+    if(acik && menu === 'menu') ciz(false);
+    return mikListe;
+  }
   const HIZ = 'lifeos.king.hiz';       // okuma hizi; TASINAN'da
   const HIZLAR = [1, 1.15, 1.3, 1.5, 1.75];
   function hiz(){ const v = Number(ortam.depo.oku(HIZ)); return HIZLAR.indexOf(v) >= 0 ? v : 1; }               // sunucudan istenen bir parçanın en çok harfi
@@ -1074,8 +1102,64 @@ window.LIFEOS.KING = (function(){
     };
     dinleyen = { stop:sonlandir, abort:() => { bitti = true; if(kayit) try{ kayit.bitir(); }catch(e){} dinleyen = null; durum(); } };
     durum();
-    try{ kayit = await ortam.kayitAc(() => { sonlandir(); }); }
+    try{ kayit = await ortam.kayitAc(() => { sonlandir(); }, mikSecili()); }
     catch(e){ bitti = true; dinleyen = null; durum(); tanindi('', 'not-allowed'); return; }
+    if(bitti && kayit) try{ kayit.bitir(); }catch(e){ /* durmus */ }
+  }
+  async function mikDene(){
+    if(mikDeniyor){ const d = mikDeniyor; mikDeniyor = null; d.dur(); return; }
+    if(!ortam.kayitAc){
+      mikNot = 'Bu tarayıcıda doğrudan mikrofon kaydı desteklenmiyor.';
+      ciz(false);
+      return;
+    }
+    sus();
+    let kayit = null, bitti = false, sayac = null;
+    const sonlandir = async () => {
+      if(bitti) return;
+      bitti = true;
+      if(sayac) clearTimeout(sayac);
+      mikDeniyor = null;
+      const r = kayit ? kayit.bitir() : null;
+      if(!r || !r.konustu){
+        mikNot = 'Ses duyulmadı — mikrofona konuşup tekrar dene ya da başka bir mikrofon seç.';
+        ciz(false);
+        return;
+      }
+      const hk = algila() !== 'tarayici' ? baglanti() : null;
+      if(hk){
+        mikNot = 'Ses alındı · yazıya dökülüyor…';
+        ciz(false);
+        const t = await yaziyaDok(hk, wavYap(r.pcm, r.hz));
+        mikNot = t ? 'Mikrofon çalışıyor · «' + t + '»'
+          : t === '' ? 'Mikrofon ses aldı, ancak konuşma seçilemedi.'
+          : 'Mikrofon ses aldı, ancak HKM yazıya dökemedi.';
+      }else{
+        mikNot = 'Mikrofon çalışıyor · ses alındı.';
+      }
+      ciz(false);
+    };
+    const iptal = () => {
+      if(bitti) return;
+      bitti = true;
+      if(sayac) clearTimeout(sayac);
+      mikDeniyor = null;
+      if(kayit) try{ kayit.bitir(); }catch(e){ /* durmus */ }
+    };
+    mikDeniyor = { dur:sonlandir, iptal };
+    mikNot = 'Dinliyorum… bir cümle söyle (durunca ya da Bitir’e basınca biter).';
+    ciz(false);
+    try{
+      kayit = await ortam.kayitAc(() => { sonlandir(); }, mikSecili());
+      mikTazele();
+      sayac = ortam.zamanla(() => { sonlandir(); }, 5000);
+    }catch(e){
+      bitti = true;
+      if(sayac) clearTimeout(sayac);
+      mikDeniyor = null;
+      mikNot = 'Mikrofon açılamadı — tarayıcı iznini ya da seçili mikrofonu kontrol et.';
+      ciz(false);
+    }
     if(bitti && kayit) try{ kayit.bitir(); }catch(e){ /* durmus */ }
   }
 
@@ -1631,11 +1715,17 @@ window.LIFEOS.KING = (function(){
     soyle('Sohbet geri geldi.');
     return true;
   }
-  function menuAc(v){ menu = menu && v === 'menu' && menu === 'menu' ? null : v; silOnay = null; ciz(false); }
+  function menuAc(v){
+    menu = menu && v === 'menu' && menu === 'menu' ? null : v;
+    silOnay = null;
+    if(menu === 'menu') mikTazele();
+    ciz(false);
+  }
 
   function menuHtml(){
     if(menu === 'menu'){
-      const b = cevapBicimi(), n = arsivOku().length;
+      const b = cevapBicimi(), n = arsivOku().length, mk = mikSecili();
+      const mikler = mikListe.filter(d => d && d.id && d.id !== 'default');
       const sec = (v, ad, ip) => '<button type="button" class="king__secim' + (b === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
         + (b === v ? 'true' : 'false') + '" data-king="cevap:' + v + '" title="' + ip + '">' + ad + '</button>';
       return '<div class="king__menu" role="group" aria-label="Sohbet ayarları">'
@@ -1649,6 +1739,14 @@ window.LIFEOS.KING = (function(){
         + '<div class="king__menu-satir"><span class="king__menu-ad">Algılama</span><div class="king__secici" role="radiogroup" aria-label="Ses algılama">'
         + ALGILA_TERCIH.map(v => '<button type="button" class="king__secim' + (algila() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (algila() === v ? 'true' : 'false') + '" data-king="algila:' + v + '" title="' + kac(ALGILA_IP[v]) + '">' + ALGILA_AD[v] + '</button>').join('') + '</div></div>'
+        + '<div class="king__menu-satir"><span class="king__menu-ad">Mikrofon</span><div class="king__kisi-ekle">'
+        + '<select data-king-mik aria-label="Mikrofon">'
+        + '<option value="">Varsayılan mikrofon</option>'
+        + mikler.map(d => '<option value="' + kac(d.id) + '"' + (mk === d.id ? ' selected' : '') + '>' + kac(d.ad) + '</option>').join('')
+        + (mk && !mikler.some(d => d.id === mk) ? '<option value="' + kac(mk) + '" selected>Seçili mikrofon</option>' : '')
+        + '</select>'
+        + '<button type="button" class="king__geri" data-king="mik-dene">' + (mikDeniyor ? 'Bitir' : 'Mikrofonu dene') + '</button></div></div>'
+        + (mikNot ? '<p class="king__menu-not" data-king-mik-not role="status">' + kac(mikNot) + '</p>' : '')
         + '<div class="king__menu-satir"><span class="king__menu-ad">Hız</span><div class="king__secici" role="radiogroup" aria-label="Okuma hızı">'
         + HIZLAR.map(v => '<button type="button" class="king__secim' + (hiz() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (hiz() === v ? 'true' : 'false') + '" data-king="hiz:' + v + '">' + String(v).replace('.', ',') + '×</button>').join('') + '</div></div>'
@@ -2257,9 +2355,10 @@ window.LIFEOS.KING = (function(){
     if(!acik || typeof document === 'undefined') return;
     acik = false;
     mini = false;
-    sesliSohbet = false; bekleyenFoto = null; menu = null; silOnay = null;
+    sesliSohbet = false; bekleyenFoto = null; menu = null; silOnay = null; mikNot = '';
     ortam.depo.sil(TASIMA);
     if(paylasim){ const p = paylasim; paylasim = null; try{ p.bitir(); }catch(e){ /* durmuş */ } }
+    if(mikDeniyor){ const d = mikDeniyor; mikDeniyor = null; try{ d.iptal(); }catch(e){ /* durmuş */ } }
     if(dinleyen){ try{ dinleyen.abort ? dinleyen.abort() : dinleyen.stop(); }catch(e){ /* kapalı */ } dinleyen = null; }
     /* Sayfaya giderken söylenen cümle yarıda kesilmesin; elle kapatınca susar. */
     if(!sesli) sus();
@@ -2377,6 +2476,7 @@ window.LIFEOS.KING = (function(){
         if(/^cevap:/.test(is)){ cevapSec(is.slice(6)); return; }
         if(/^ses:/.test(is)){ sesTercihSec(is.slice(4)); return; }
         if(/^algila:/.test(is)){ const v = is.slice(7); if(ALGILA_TERCIH.indexOf(v) >= 0){ if(v === 'oto') ortam.depo.sil(ALGILA); else ortam.depo.yaz(ALGILA, v); hkmDinlemez = false; } ciz(false); return; }
+        if(is === 'mik-dene'){ mikDene(); return; }
         if(/^hiz:/.test(is)){ const v = Number(is.slice(4)); if(HIZLAR.indexOf(v) >= 0) ortam.depo.yaz(HIZ, v); ciz(false); return; }
         if(is === 'hiz-sonraki'){ ortam.depo.yaz(HIZ, HIZLAR[(HIZLAR.indexOf(hiz()) + 1) % HIZLAR.length]); ciz(false); return; }
         if(is === 'ses-sonraki'){ sesTercihSec(SES_TERCIH[(SES_TERCIH.indexOf(sesTercihi()) + 1) % SES_TERCIH.length]); return; }
@@ -2390,8 +2490,10 @@ window.LIFEOS.KING = (function(){
         else if(is === 'vazgec') vazgec();
       }
     }, true);
-    /* Söz 11: fotoğraf — düğme, yapıştır, sürükle-bırak. */
+    /* Söz 11: fotoğraf — düğme, yapıştır, sürükle-bırak; söz 29: mikrofon seçimi. */
     document.addEventListener('change', e => {
+      const m = e.target && e.target.matches && e.target.matches('[data-king-mik]') ? e.target : null;
+      if(m){ mikSec(m.value); return; }
       const d = e.target && e.target.matches && e.target.matches('[data-king-dosya]') ? e.target : null;
       if(!d) return;
       const f = d.files && d.files[0];
@@ -2505,7 +2607,7 @@ window.LIFEOS.KING = (function(){
     if(ayar) ortam.depo.sil(depoAnahtar());
     ortam.depo.sil(TASIMA);
     if(ayar) ortam.depo.sil(arsivAnahtar());
-    ortam.depo.sil(CEVAP);
+    ortam.depo.sil(CEVAP); ortam.depo.sil(ALGILA); ortam.depo.sil(MIK);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
     yanAcik = false; aktifKayit = null; aracAcik = false; klasorYeni = false; tasinan = null; adlandirilan = null;
     if(ayar) ortam.depo.sil(klasorAnahtar());
@@ -2513,6 +2615,8 @@ window.LIFEOS.KING = (function(){
     envanter = null; ortam.depo.sil(USLUP);
     ortam.depo.sil(TANISMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
+    if(mikDeniyor){ try{ mikDeniyor.iptal(); }catch(e){ /* durmus */ } mikDeniyor = null; }
+    mikListe = []; mikNot = ''; hkmDinlemez = false;
     if(dinleyen){ try{ dinleyen.onend = dinleyen.onerror = null; dinleyen.abort(); }catch(e){ /* durmus */ } }
     sesli = false; dinleyen = null; konusuyor = 0; sesNo++; calan = null; sonMotor = '';
   }
@@ -2525,7 +2629,9 @@ window.LIFEOS.KING = (function(){
     cikarimAdaylari, cikarimKarti, cikarimOnayla, SORMA, sormaKomutu, sormaMi, sormaListesi,
     USLUP, envanterVar:() => !!envanter,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
-    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
+    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor,
+    MIK, mikSecili, mikSec, mikTazele, mikDene, algila,
+    sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     yeniSohbet, kayitAc, ARACLAR, aktifKayit:() => aktifKayit,
     KIPLER, kip, kipSec, klasorler, klasorEkle, klasorSil, kayitTasi, kayitAdlandir, kayitSabitle,

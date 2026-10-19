@@ -3037,14 +3037,118 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '<label style="display:block;font-size:12px;margin:6px 0">Piper klasörü (boşsa kendisi arar) '
       + '<input id="ses-piper" placeholder="' + esc((p.aranan || [])[1] || '') + '" value="' + esc(a.piper_yol || '') + '"></label>'
       + '<p class="ollama__durum" id="dinle-durum"><b>Ses algılama</b> · bakılıyor…</p>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">Mikrofon '
+      + '<select id="ses-mik"><option value="">Varsayılan mikrofon</option></select></label>'
       + '<div class="row"><button id="ses-kaydet">Kaydet</button>'
       + '<button id="ses-dene-gemini"' + (g.hazir ? '' : ' disabled') + '>Gemini’yi dinle</button>'
-      + '<button id="ses-dene-piper"' + (p.bulundu ? '' : ' disabled') + '>Piper’ı dinle</button></div>'
+      + '<button id="ses-dene-piper"' + (p.bulundu ? '' : ' disabled') + '>Piper’ı dinle</button>'
+      + '<button id="ses-dene-mik">Mikrofonu dene</button></div>'
       + '<p class="muted ollama__not" id="ses-not" role="status">' + esc(mesaj || '') + '</p>';
     k.innerHTML = h;
     $('ses-kaydet').addEventListener('click', sesKaydet);
     $('ses-dene-gemini').addEventListener('click', function(){ sesDene('gemini'); });
     $('ses-dene-piper').addEventListener('click', function(){ sesDene('piper'); });
+    $('ses-dene-mik').addEventListener('click', sesMikDene);
+    $('ses-mik').addEventListener('change', function(){
+      var v = ($('ses-mik').value || '').trim();
+      try{ if(v) localStorage.setItem('lifeos.king.mik', JSON.stringify(v)); else localStorage.removeItem('lifeos.king.mik'); }catch(e){}
+    });
+    sesMikListe();
+  }
+  function sesMikSecili(){
+    try{ var v = JSON.parse(localStorage.getItem('lifeos.king.mik') || 'null'); return typeof v === 'string' ? v : ''; }catch(e){ return ''; }
+  }
+  async function sesMikListe(){
+    var sel = $('ses-mik');
+    if(!sel || !navigator.mediaDevices || typeof navigator.mediaDevices.enumerateDevices !== 'function') return;
+    try{
+      var l = await navigator.mediaDevices.enumerateDevices();
+      var sec = sesMikSecili();
+      var mikler = (l || []).filter(function(d){ return d && d.kind === 'audioinput' && d.deviceId && d.deviceId !== 'default'; });
+      sel.innerHTML = '<option value="">Varsayılan mikrofon</option>' + mikler.map(function(d, i){
+        var ad = String(d.label || '').trim() || ('Mikrofon ' + (i + 1));
+        return '<option value="' + esc(d.deviceId) + '"' + (sec === d.deviceId ? ' selected' : '') + '>' + esc(ad) + '</option>';
+      }).join('');
+    }catch(e){}
+  }
+  var _sesMikKayit = null;
+  function _sesWavYap(pcm, hz){
+    var ORAN = 16000, n = Math.max(0, Math.floor(pcm.length * ORAN / hz));
+    var v = new DataView(new ArrayBuffer(44 + n * 2));
+    var yaz = function(o, m){ for(var i = 0; i < m.length; i++) v.setUint8(o + i, m.charCodeAt(i)); };
+    yaz(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); yaz(8, 'WAVEfmt '); v.setUint32(16, 16, true);
+    v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, ORAN, true); v.setUint32(28, ORAN * 2, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true); yaz(36, 'data'); v.setUint32(40, n * 2, true);
+    for(var i = 0; i < n; i++){
+      var x = Math.max(-1, Math.min(1, pcm[Math.min(pcm.length - 1, Math.floor(i * hz / ORAN))] || 0));
+      v.setInt16(44 + i * 2, x < 0 ? x * 0x8000 : x * 0x7fff, true);
+    }
+    var b = new Uint8Array(v.buffer), ikili = '';
+    for(var j = 0; j < b.length; j += 0x8000) ikili += String.fromCharCode.apply(null, b.subarray(j, j + 0x8000));
+    return btoa(ikili);
+  }
+  async function sesMikDene(){
+    if(_sesMikKayit){ var d = _sesMikKayit; _sesMikKayit = null; d(); return; }
+    var not = $('ses-not'), dug = $('ses-dene-mik');
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !(window.AudioContext || window.webkitAudioContext)){
+      if(not) not.textContent = 'Bu tarayıcıda mikrofon kaydı desteklenmiyor.';
+      return;
+    }
+    var sec = ($('ses-mik') && $('ses-mik').value) || sesMikSecili();
+    var sesKisit = { echoCancellation:true, noiseSuppression:true };
+    if(sec) sesKisit.deviceId = { ideal:sec };
+    if(not) not.textContent = 'Dinliyorum… bir cümle söyle (durunca ya da Bitir’e basınca biter).';
+    if(dug) dug.textContent = 'Bitir';
+    try{
+      var akis = await navigator.mediaDevices.getUserMedia({ audio:sesKisit });
+      sesMikListe();
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var kaynak = ctx.createMediaStreamSource(akis);
+      var isle = ctx.createScriptProcessor(4096, 1, 1);
+      var parca = [], konustu = false, sessizN = 0, toplam = 0, bitti = false, sayac = null;
+      var bitir = async function(){
+        if(bitti) return;
+        bitti = true;
+        _sesMikKayit = null;
+        if(sayac) clearTimeout(sayac);
+        if(dug) dug.textContent = 'Mikrofonu dene';
+        try{ isle.disconnect(); kaynak.disconnect(); }catch(e){}
+        try{ akis.getTracks().forEach(function(t){ t.stop(); }); }catch(e){}
+        var hz = ctx.sampleRate;
+        try{ ctx.close(); }catch(e){}
+        if(!konustu){
+          if(not) not.textContent = 'Ses duyulmadı — mikrofona konuşup tekrar dene ya da başka bir mikrofon seç.';
+          return;
+        }
+        var pcm = new Float32Array(toplam), o = 0;
+        parca.forEach(function(p){ pcm.set(p, o); o += p.length; });
+        if(not) not.textContent = 'Ses alındı · yazıya dökülüyor…';
+        var r = await api('/api/dinle', { method:'POST', body:JSON.stringify({ wav:_sesWavYap(pcm, hz) }) });
+        if(r.status === 200 && r.body && r.body.ok){
+          var mAd = r.body.motor === 'whisper' ? 'Whisper' : 'Gemini';
+          if(not) not.textContent = 'Mikrofon çalışıyor (' + mAd + '): «' + (r.body.metin || 'ses alındı, söz seçilemedi') + '»';
+        }else{
+          if(not) not.textContent = 'Mikrofon ses aldı, ancak yazıya dökülemedi.';
+        }
+      };
+      _sesMikKayit = bitir;
+      isle.onaudioprocess = function(e){
+        var d = e.inputBuffer.getChannelData(0);
+        parca.push(new Float32Array(d));
+        toplam += d.length;
+        var t = 0;
+        for(var i = 0; i < d.length; i++) t += d[i] * d[i];
+        if(Math.sqrt(t / d.length) > 0.02){ konustu = true; sessizN = 0; } else if(konustu) sessizN += d.length;
+        var hz = ctx.sampleRate;
+        if(!bitti && ((konustu && sessizN > hz * 1.4) || toplam > hz * 10 || (!konustu && toplam > hz * 5))) bitir();
+      };
+      kaynak.connect(isle); isle.connect(ctx.destination);
+      sayac = setTimeout(bitir, 5000);
+    }catch(e){
+      _sesMikKayit = null;
+      if(dug) dug.textContent = 'Mikrofonu dene';
+      if(not) not.textContent = 'Mikrofon açılamadı — tarayıcı iznini ya da seçili mikrofonu kontrol et.';
+    }
   }
   async function sesYukle(mesaj){
     var r = await api('/api/ses/durum');
