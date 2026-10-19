@@ -63,6 +63,21 @@
       expect(await O().sec('yok', 'yok')).toBeNull();
     });
 
+    it('King soru kartı: konuya göre seçer, cevaplanmamış ilk soru; cevabı Öğren yazar (king.js söz 32)', async () => {
+      resetState();
+      const s = TM(), t = s.topics.find(x => x.id === 'tm-05');
+      await sahteIcerik(t.id, async () => {
+        const q = O().kingSoru(t.name.toLocaleLowerCase('tr') + ' hakkında');
+        expect([q.id, q.soru, q.sec.length, q.not]).toEqual([s.id + '|' + t.id + '|0', 'Birinci soru?', 5, '']);
+        const r = await O().kingCevapla(q.id, 'C');
+        expect([r.dogru, r.cozum, r.not]).toEqual(['B', ['Çözüm bir.'], '']);
+        expect(O().cevaplar(s.id, t.id)[0].h).toBe('C');                     // ölçüm Öğren'in kaydında
+        expect(O().kingSoru(t.name).id).toBe(s.id + '|' + t.id + '|1');       // sıradaki
+        expect((await O().kingCevapla(q.id, 'B')).not).toContain('ilk cevabın');
+        expect(O().kingSoru('olmayan bir konu adı xyz')).toBe(null);
+      });
+    });
+
     it('ilk cevap kalır; çözüme bakmak ölçüm değil; baştan çöz siler; durum ve yol değişmez', async () => {
       resetState();
       const s = TM(), t = s.topics.find(x => x.id === 'tm-05');

@@ -603,3 +603,35 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__derin-menu{ left:auto; right:0; width:min(260px, calc(100vw - 48px)); }
 .king__arac.is-secili{ background:var(--surface-2); }
 @media (max-width:679px){ .king__derin span{ display:none; } .king__derin{ padding:0 8px; } }
+
+/* Söz 32: kartlar. İstatistik: küçük kart ızgarası (ad, değer, etiket).
+   Soru: kök, şık düğmeleri, sonuç ve çözüm. Renk yalnız sonuçta. */
+.king__balon--king p{ white-space:pre-line; }
+.king__kartlar{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:8px; margin-top:10px; }
+.king__kart{ display:grid; gap:2px; padding:10px 12px; border-radius:14px; background:var(--surface-2);
+  box-shadow:0 0 0 1px var(--line, rgba(0,0,0,.06)); }
+.king__kart-ad{ font-size:12px; font-weight:600; color:var(--text-2); }
+.king__kart-deger{ font-size:22px; line-height:1.15; font-weight:650; letter-spacing:-.01em; color:var(--text); font-variant-numeric:tabular-nums; }
+.king__kart-deger small{ font-size:12.5px; font-weight:600; color:var(--text-2); }
+.king__kart-etiket{ justify-self:start; margin-top:2px; padding:1px 7px; border-radius:999px; font-size:11px; font-weight:600;
+  background:color-mix(in oklab, var(--ok, #2f9e44) 14%, transparent); color:var(--text); }
+.king__kart-etiket.is-tahmin{ background:color-mix(in oklab, var(--warn, #e8a64a) 18%, transparent); }
+.king__kart-etiket.is-yok{ background:transparent; box-shadow:inset 0 0 0 1px var(--line, rgba(0,0,0,.12)); color:var(--text-2); }
+.king__kart-alt{ font-size:11.5px; color:var(--text-2); }
+.king__soru{ display:grid; gap:8px; margin-top:10px; padding:12px; border-radius:16px; background:var(--surface-2);
+  box-shadow:0 0 0 1px var(--line, rgba(0,0,0,.06)); }
+.king__soru-metin{ font-size:15px; line-height:1.5; white-space:pre-line; }
+.king__soru-sec{ display:grid; gap:6px; }
+.king__soru-sik{ display:flex; align-items:flex-start; gap:10px; min-height:40px; padding:8px 12px; border:0; border-radius:12px;
+  background:var(--surface); color:var(--text); font:inherit; font-size:14px; text-align:left; cursor:pointer;
+  box-shadow:0 0 0 1px var(--line, rgba(0,0,0,.08)); transition:background .2s ease; }
+.king__soru-sik b{ flex:none; font-weight:650; color:var(--text-2); }
+.king__soru-sik:hover:not([disabled]){ background:color-mix(in oklab, var(--surface) 80%, var(--text) 6%); }
+.king__soru-sik:focus-visible{ outline:2px solid var(--primary); outline-offset:1px; }
+.king__soru-sik[disabled]{ cursor:default; }
+.king__soru-sik.is-dogru{ box-shadow:0 0 0 2px var(--ok, #2f9e44); }
+.king__soru-sik.is-yanlis{ box-shadow:0 0 0 2px var(--danger, #e5484d); }
+.king__soru-sonuc{ font-size:14px; font-weight:600; }
+.king__soru-cozum{ margin:0; padding-left:18px; display:grid; gap:3px; }
+.king__soru-cozum li{ font-size:13.5px; color:var(--text-2); }
+.king__soru-kaynak{ font-size:11.5px; color:var(--text-2); }

@@ -1841,6 +1841,29 @@ ESP.App = (function(){
             return { esp:{ disiplin:{ gun, dakika, adlar }, muzikGun,
               kitaplar:(S.books || []).map(b => ({ author:b.author, startedAt:b.startedAt, finishedAt:b.finishedAt })) } };
           },
+          /* King'in kartları (king.js söz 32): son 30 gün, ESP'nin kendi hesabı. */
+          kartlar:{
+            istatistik:() => {
+              const dakika = {};
+              let gun = 0;
+              for(let i = 0; i < 30; i++){
+                const ss = M.sessionsOf(U.iso(U.addDays(U.today(), -i))).filter(s => s.minutes > 0);
+                if(ss.length) gun++;
+                ss.forEach(s => { dakika[s.disc] = (dakika[s.disc] || 0) + s.minutes; });
+              }
+              const top = Object.keys(dakika).reduce((a, k) => a + dakika[k], 0);
+              const enCok = Object.keys(dakika).sort((a, b) => dakika[b] - dakika[a])[0];
+              const sinir = U.iso(U.addDays(U.today(), -29));
+              const biten = (S.books || []).filter(b => b.finishedAt && String(b.finishedAt).slice(0, 10) >= sinir).length;
+              return [
+                { ad:'Çalışılan gün · 30 gün', deger:gun || null, birim:'/ 30', etiket:'ölçüldü' },
+                { ad:'Toplam süre · 30 gün', deger:top || null, birim:'dk', etiket:'ölçüldü' },
+                { ad:'En çok çalışılan alan', deger:enCok ? (ESP.DISCIPLINE_BY_ID[enCok] || {}).label || enCok : null, etiket:'hesaplandı',
+                  alt:enCok ? dakika[enCok] + ' dk' : '' },
+                { ad:'Biten kitap · 30 gün', deger:biten || null, etiket:'ölçüldü' },
+              ];
+            },
+          },
           ozet:() => [ESP.Screens.today.headline()] });
       }
       /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı

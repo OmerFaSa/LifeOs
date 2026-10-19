@@ -1646,6 +1646,29 @@ SP.App = (function(){
             try{ const t = SP.Tahmin && SP.Tahmin.durum(); if(t && t.ok) model = { iyi:t.iyi, onem:t.onem, n:t.n, kazanc:t.kazanc }; }catch(e){ model = null; }
             return { spi:{ yatis, yemekKat:kat, katAd, antrenman30:ant, uyku, hisUyku, kahveGun, model } };
           },
+          /* King'in kartları (king.js söz 32): son 30 gün, SPİ'nin kendi hesabı. */
+          kartlar:{
+            istatistik:() => {
+              const uyku = [];
+              let ant = 0, kahve = 0, ogun = 0;
+              for(let i = 0; i < 30; i++){
+                const d = SP.U.iso(SP.U.addDays(SP.U.today(), -i));
+                const v = SP.S.vitals[d];
+                if(v && v.sleep != null && isFinite(Number(v.sleep))) uyku.push(Number(v.sleep));
+                const ml = SP.Model.mealsOf(d) || [];
+                ogun += ml.length;
+                if(ml.some(m => (m.items || []).some(it => /kahve|espresso|latte|americano|filtre/i.test(it.foodId)))) kahve++;
+                ant += SP.Model.workoutsOf(d).length;
+              }
+              const ort = uyku.length ? Math.round(uyku.reduce((a, b) => a + b, 0) / uyku.length * 10) / 10 : null;
+              return [
+                { ad:'Ortalama uyku · 30 gün', deger:ort, birim:'sa', etiket:'hesaplandı', alt:uyku.length ? uyku.length + ' gecenin ortalaması' : '' },
+                { ad:'Uyku kaydı olan gece', deger:uyku.length || null, birim:'/ 30', etiket:'ölçüldü' },
+                { ad:'Antrenman · 30 gün', deger:ant || null, etiket:'ölçüldü' },
+                { ad:'Kayıtlı öğün · 30 gün', deger:ogun || null, etiket:'ölçüldü', alt:kahve ? kahve + ' gün kahve' : '' },
+              ];
+            },
+          },
           /* King'e gelen fotoğraf (king.js söz 11): Fotoğraftan öğün akışına. */
           foto:[{ ad:'Öğün olarak oku', is:async f => {
             go('meals');

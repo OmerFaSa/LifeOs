@@ -1675,6 +1675,25 @@ R.App = (function(){
                 return { id:s.id, ad:s.name, solved:p.solved || 0, correct:p.correct || 0 }; }),
               hatalar, denemeNet:R.Calc.fullExams('TYT').map(M.examNet) } };
           },
+          /* King'in kartları (king.js söz 32): sayıyı AYS'nin kendi hesabı
+             üretir, King yalnız gösterir; soru Öğren bankasından, cevabı Öğren yazar. */
+          kartlar:{
+            istatistik:() => {
+              let solved = 0, correct = 0;
+              (R.SUBJECTS || []).forEach(s => { const p = R.Calc.topicPractice(s.id, null, 45); solved += p.solved || 0; correct += p.correct || 0; });
+              const netler = R.Calc.fullExams('TYT').map(M.examNet).filter(n => n != null && isFinite(n));
+              return [
+                { ad:'Çözülen soru · 45 gün', deger:solved || null, etiket:'ölçüldü' },
+                { ad:'Doğru oranı · 45 gün', deger:solved ? Math.round(correct * 100 / solved) : null, birim:'%', etiket:'hesaplandı',
+                  alt:solved ? correct + ' / ' + solved : '' },
+                { ad:'Bugün sırası gelen tekrar', deger:R.Calc.dueCards(R.U.todayISO()).length, birim:'kart', etiket:'hesaplandı' },
+                { ad:'Son TYT deneme neti', deger:netler.length ? U.round(netler[netler.length - 1], 2) : null, etiket:'ölçüldü',
+                  alt:netler.length ? netler.length + ' deneme' : '' },
+              ];
+            },
+            soru:konu => R.Ogren.kingSoru(konu),
+            cevapla:(id, harf) => R.Ogren.kingCevapla(id, harf),
+          },
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
           foto:[{ ad:'Soruyu çöz', is:async f => {
             go('solve');

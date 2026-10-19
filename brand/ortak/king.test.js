@@ -1256,6 +1256,76 @@
       k.kapat();
     })));
   });
+  /* Söz 32 (depo sahibi, 2026-10-19): istatistik kartları ve soru kartları. */
+  describe('King — kartlar (söz 32)', () => {
+    const bekle = () => new Promise(ok => setTimeout(ok, 0));
+    function kartSahnesi(kartlar){
+      const { k } = sahne();
+      k.kur({ modul:'ays', git:() => {}, ozet:() => [], kartlar });
+      k.ac();
+      return k;
+    }
+    it('tetik kuraldır: istatistik ve soru; konu dolgudan ayıklanır', () => sahneyle(async () => {
+      const { k } = sahne();
+      expect(k.kartNiyeti('istatistiklerimi göster')).toEqual({ tur:'istatistik' });
+      expect(k.kartNiyeti('bana soru sor')).toEqual({ tur:'soru', konu:'' });
+      expect(k.kartNiyeti('türev hakkında bana bir soru sor')).toEqual({ tur:'soru', konu:'türev' });
+      expect(k.kartNiyeti('bugün nasılsın')).toBe(null);
+    }));
+    it('istatistik: modülün kartları ızgarada; değeri olmayan «—» ve «veri yok», sıfır yazılmaz', () => sahneyle(async () => {
+      const k = kartSahnesi({ istatistik:() => [
+        { ad:'Çözülen soru', deger:120, etiket:'ölçüldü' },
+        { ad:'Doğru oranı', deger:64, birim:'%', etiket:'hesaplandı', alt:'77 / 120' },
+        { ad:'Deneme neti', deger:null, etiket:'ölçüldü' },
+      ] });
+      const r = await k.isle('istatistiklerim');
+      expect(r).toEqual({ tur:'kart-istatistik', kartlar:3 });
+      const kartlar = [...document.querySelectorAll('.king__kart')];
+      expect(kartlar.length).toBe(3);
+      expect(kartlar[1].querySelector('.king__kart-deger').textContent).toBe('64 %');
+      expect(kartlar[1].querySelector('.king__kart-etiket').textContent).toBe('hesaplandı');
+      expect(kartlar[2].querySelector('.king__kart-deger').textContent).toBe('—');
+      expect(kartlar[2].querySelector('.king__kart-etiket').textContent).toBe('veri yok');
+    }));
+    it('soru: bankadan gelir, şıklar düğme; cevabı modül yazar, doğru şık ve çözüm görünür', () => sahneyle(async () => {
+      const cevaplar = [];
+      const k = kartSahnesi({
+        soru:async konu => ({ id:'tm|tm-05|0', konu:'Türev', soru:'2x’in türevi?', sec:['0', '1', '2', 'x', '2x'], kaynak:'AYS · Öğren', sorgu:konu }),
+        cevapla:async (id, h) => { cevaplar.push([id, h]); return { dogru:'C', cozum:['(2x)′ = 2'] }; },
+      });
+      const r = await k.isle('türev hakkında soru sor');
+      expect(r.tur).toBe('kart-soru');
+      const siklar = [...document.querySelectorAll('.king__soru-sik')];
+      expect(siklar.map(b => b.querySelector('b').textContent)).toEqual(['A', 'B', 'C', 'D', 'E']);
+      siklar[3].click();
+      for(let i = 0; i < 6; i++) await bekle();
+      expect(cevaplar).toEqual([['tm|tm-05|0', 'D']]);
+      expect(document.querySelector('.king__soru-sik.is-dogru').querySelector('b').textContent).toBe('C');
+      expect(document.querySelector('.king__soru-sik.is-yanlis').querySelector('b').textContent).toBe('D');
+      expect(document.querySelector('.king__soru-sonuc').textContent).toBe('Doğru cevap C.');
+      expect(document.querySelector('.king__soru-cozum li').textContent).toBe('(2x)′ = 2');
+      expect([...document.querySelectorAll('.king__soru-sik')].every(b => b.disabled)).toBe(true);
+      expect(!!document.querySelector('[data-king^="soru-yeni:"]')).toBe(true);
+      /* ikinci tık yeni cevap yazmaz */
+      const n = k.akis().findIndex(m => m.soru);
+      expect(await k.soruCevapla(n, 'C')).toBe(null);
+      expect(cevaplar.length).toBe(1);
+    }));
+    it('bankası olmayan modül söyler; bulunamayan konu söylenir', () => sahneyle(async () => {
+      const k = kartSahnesi({ istatistik:() => [] });
+      await k.isle('bana soru sor');
+      expect(k.akis().pop().metin).toBe('Soru bankası AYS’de; AYS’yi açıp «bana soru sor» diyebilirsin.');
+      await k.isle('istatistiklerim');
+      expect(k.akis().pop().metin).toBe('AYS için gösterilecek istatistik kartı yok.');
+      const k2 = kartSahnesi({ soru:async () => null, cevapla:async () => null });
+      await k2.isle('kuantum hakkında soru sor');
+      expect(k2.akis().pop().metin).toBe('«kuantum» için soru bulamadım; başka bir konu dener misin?');
+    }));
+    it('uzun cevapta **kalın** ve madde işaretleri biçimlenir; HTML kaçırılır', () => sahneyle(async () => {
+      const { k } = sahne();
+      expect(k.bicimli('**Başlık**\n* bir\n- iki\n## Alt\n<b>x</b>')).toBe('<b>Başlık</b>\n• bir\n• iki\nAlt\n&lt;b&gt;x&lt;/b&gt;');
+    }));
+  });
   /* Söz 31 (depo sahibi, 2026-10-19): «King ne kadar düşünecek seçilebilsin». */
   describe('King — düşünme derinliği (söz 31)', () => {
     function derinSahnesi(bagli){

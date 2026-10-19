@@ -331,7 +331,44 @@ R.Ogren = (function(){
     return err;
   }
 
-  return { HARFLER, SEVIYE, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
+  /* King'in soru kartı (brand/ortak/king.js söz 32): bankadan soru seçer.
+     Konu metni verilmişse adı eşleşen konu, yoksa son açılan konu; o
+     konuda cevaplanmamış ilk soru. Hepsi cevaplanmışsa ilk soru gelir ve
+     cevabın ölçüme yazılmayacağı söylenir (söz 3: ilk cevap kalır). */
+  function kingSoru(konuMetni){
+    const t = String(konuMetni || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
+    const adaylar = konular().filter(x => sorular(x.topic.id).length);
+    if(!adaylar.length) return null;
+    const ad = x => String(x.topic.name || '').toLocaleLowerCase('tr');
+    let x = null;
+    if(t){
+      x = adaylar.find(k => t.includes(ad(k)) || ad(k).includes(t))
+        || adaylar.find(k => t.split(' ').some(w => w.length > 4 && !/^(konu|soru|hakkında|ilgili|konusunda)/.test(w) && ad(k).includes(w)));
+      if(!x) return null;
+    }else{
+      const s = sonAcilan();
+      x = (s && adaylar.find(k => k.topic.id === s.topic.id)) || adaylar[0];
+    }
+    const l = sorular(x.topic.id), c = cevaplar(x.subject.id, x.topic.id);
+    let i = l.findIndex((q, k) => q && !c[k]);
+    const hepsi = i < 0;
+    if(hepsi) i = 0;
+    const q = l[i];
+    return { id:x.subject.id + '|' + x.topic.id + '|' + i, konu:x.topic.name,
+      soru:duzMetin(q.soru) + (ekMetni(q) ? ' ' + ekMetni(q) : ''), sec:(q.sec || []).map(m => duzMetin(m)),
+      kaynak:'AYS · Öğren · ' + x.subject.name + ' (elle yazıldı, doğrulanmadı)',
+      not:hepsi ? 'Bu konudaki soruların hepsini cevapladın; bu cevap ölçüme yazılmaz.' : '' };
+  }
+  /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). */
+  async function kingCevapla(id, harf){
+    const p = String(id || '').split('|'), i = Number(p[2]);
+    const q = sorular(p[1])[i];
+    if(!q) return null;
+    const r = await cevapla(p[0], p[1], i, harf, false, 0);
+    return { dogru:q.dogru, cozum:[].concat(q.cozum || []).map(duzMetin),
+      not:r && r.neden === 'kilitli' ? 'Bu soruyu daha önce cevaplamıştın; ilk cevabın ölçüm olarak kaldı.' : '' };
+  }
+  return { HARFLER, SEVIYE, kingSoru, kingCevapla, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
     derin, tabanSorular, seviye, gecerli, ekMetni, soru,
     anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle,
     kavramlar, akilliNot, kaynaklar, stratejiler };
