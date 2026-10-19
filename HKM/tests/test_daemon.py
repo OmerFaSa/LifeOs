@@ -321,18 +321,42 @@ def _run():
                     "Content-Type": "application/json",
                     "Origin": "http://127.0.0.1:%d" % port})
                 return kod, json.loads(r or "{}")
-            for port in (4173, 4183, 4193):
+            # LifeOS kapilari pencere istemez (asagida); pencere kurali
+            # baska yerel portlarda sinanir.
+            for port in (5173, 5183, 5193):
                 kod, r = al(port)
                 eq(kod, 200)
                 eq(r["token"], TOKEN)
             # Ayni koken ikinci kez alamaz.
-            eq(al(4183)[0], 403)
+            eq(al(5183)[0], 403)
             kod, d = S.call("/api/pair/status")
             eq(d["taken"], 3)
             # Yeni pencere sayaci sifirlar.
             S.call("/api/pair/open", body={})
-            eq(al(4183)[0], 200)
+            eq(al(5183)[0], 200)
         test("tek pencere uc modulu de baglar", t_pair_one_window_links_all_modules)
+
+        def t_pair_lifeos_ports_need_no_window():
+            """Merkez de bir moduldur, anahtar sorulmaz (2026-10-20):
+            LifeOS'un kendi kapilari jetonu pencere acilmadan ve her
+            seferinde alir. Baska yerel port ve yerel olmayan koken almaz."""
+            S.srv.rate = {}
+            S.srv.pair = {"until": 0.0, "taken": set()}   # onceki testin penceresi kapanir
+
+            def al(koken):
+                kod, r = S.ham("/api/pair", b"{}", {
+                    "Content-Type": "application/json", "Origin": koken})
+                return kod, json.loads(r or "{}")
+            for port in daemon.LIFEOS_PORTS:
+                for _ in range(2):
+                    kod, r = al("http://127.0.0.1:%d" % port)
+                    eq(kod, 200)
+                    eq(r["token"], TOKEN)
+            eq(al("http://localhost:4200")[0], 200)
+            eq(al("http://127.0.0.1:5999")[0], 403)
+            eq(al("http://evil.example.com:4200")[0], 403)
+            eq(al("https://4200.example.com")[0], 403)
+        test("LifeOS kapilari jetonu penceresiz alir", t_pair_lifeos_ports_need_no_window)
 
         def t_pair_window_has_origin_cap():
             """Koken basina tek kullanim SINIRSIZ degildir: bir pencere en

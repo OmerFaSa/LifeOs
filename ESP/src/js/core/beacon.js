@@ -350,7 +350,7 @@ ESP.Beacon = (function(){
         note:(govde && govde.note) || 'Eşleme penceresi kapalı. HKM yüzünde '
            + '«Cihazları bağla» dedikten sonra iki dakika içinde dene.' };
     }
-    const son = await save({ url:adres, token:govde.token, enabled:true });
+    const son = await save({ url:adres, token:govde.token, enabled:true, lastStatus:null });
     if(son.baskaProfil) return { ok:false, note:LIFEOS.HkmBag.not(son.baskaProfil) };
     return { ok:true, note:'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.' };
   }
@@ -362,6 +362,19 @@ ESP.Beacon = (function(){
      bir kez gönder, sonucu üst pencereye bildir. Kural değişmez: işaret
      yine kullanıcının bastığı bir düğmeyle açılır; pencere bearer ister
      ve tek kullanımlıktır. Mesaj jeton TAŞIMAZ; yalnız yerel kökene gider. */
+  /* KENDİLİĞİNDEN BAĞLANMA (2026-10-20, kullanıcı: «Merkez'e anahtarla
+     girilmesin, her türlü girilebilsin»): jeton yoksa ya da HKM onu
+     reddettiyse (401) açılışta bir kez eşlenir. HKM, LifeOS'un kendi
+     kapılarına (4173/4183/4193/4200) jetonu penceresiz verir; başka
+     kapıda pencere kapalıysa sessizce hiçbir şey olmaz. Örnek profil ve
+     başka profile ait bağ dokunulmaz. */
+  async function kendiBaglan(){
+    const a = settings();
+    if(a.ornek || a.baskaProfil) return { ok:false, reason:'atlandi' };
+    if(a.token && a.lastStatus !== 401) return { ok:true, reason:'var' };
+    return pair(a.url || VARSAYILAN.url);
+  }
+
   function bagCagrisiMi(){
     try{ return window.location.hash === '#hkm-bagla' && window.parent !== window; }
     catch(e){ return false; }
@@ -1002,7 +1015,7 @@ ESP.Beacon = (function(){
   /* Ayar ekranı «Varsayılana dön» için okur (T5, 182); kopya verilir. */
   const varsayilan = () => Object.assign({}, VARSAYILAN);
 
-  return { varsayilan, bagCagrisiMi, hkmBagla, load, save, settings, collect, payload, preview, contract, metric,
+  return { varsayilan, bagCagrisiMi, hkmBagla, kendiBaglan, load, save, settings, collect, payload, preview, contract, metric,
     MODULE, profil:profilim, urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
     intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE, desteOf, kayitOku,
     kartOnizle, kartGeriAl,

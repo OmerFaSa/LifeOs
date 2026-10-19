@@ -128,6 +128,12 @@ CONFIG_PATH = os.path.join(ROOT, "config.json")
 PAIR_SECONDS = 120
 PAIR_MIN_SECONDS = 15        # pencere bundan kisa da olamaz, uzun da
 PAIR_MAX_ORIGINS = 4         # yuz + AYS + SPI + ESP; fazlasina verilmez
+# LifeOS'un kendi kapilari (brand/ortak/kabuk.js adres(), yuzdeki KAPI):
+# Merkez de bir moduldur, anahtar sorulmaz (2026-10-20, kullanici: «merkeze
+# anahtar ile girilmesin, her turlu girilebilsin»). Bu kapilardan gelen
+# YEREL koken jetonu pencere beklemeden alir; baska bir yerel port
+# (gelistirme sunucusu, baska bir uygulama) eskisi gibi pencere ister.
+LIFEOS_PORTS = (4173, 4183, 4193, 4200)
 
 # --------------------------------------------------------------- sinirlar
 #
@@ -706,6 +712,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(403, {"error": "yalniz yerel koken"})
         if not self._rate_ok("pair", limit=20):
             return self._send(429, {"error": "cok fazla esleme denemesi"})
+        if origin and _koken_portu(origin) in LIFEOS_PORTS:
+            return self._send(200, {"token": self.server.config.get("local_token"),
+                                    "note": "Bu jeton yalnız bu cihazda saklanır."})
         durum = self._pair_state()
         # Origin'siz istek (tarayici disi, ayni makine) tek bir koken sayilir.
         koken = origin.lower() or "-"

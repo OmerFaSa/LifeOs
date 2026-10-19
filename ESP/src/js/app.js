@@ -1722,6 +1722,9 @@ ESP.App = (function(){
       /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;
          ekran çizilmez (core/beacon.js hkmBagla). */
       if(ESP.Beacon && ESP.Beacon.bagCagrisiMi()){ await ESP.Beacon.hkmBagla(); return; }
+      /* Merkez'e anahtarsız bağlan (core/beacon.js kendiBaglan); açılışı bekletmez.
+         Yalnız LifeOS kapısında: HKM jetonu penceresiz yalnız oraya verir. */
+      if(ESP.Beacon && ESP.Beacon.kendiBaglan && [4173, 4183, 4193].indexOf(Number(location.port)) >= 0) ESP.Beacon.kendiBaglan().catch(() => {});
       /* 172: örnek profilde örnek kayıtlar belleğe yazılır (core/ornekveri.js). */
       if(ornekAcik() && ESP.OrnekVeri){
         try{ ESP.OrnekVeri.doldur(); }catch(e){ console.error(e); }

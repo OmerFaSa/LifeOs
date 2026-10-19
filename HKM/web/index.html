@@ -4834,7 +4834,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
 
   async function yukleHedefler(){
     var r = await api('/api/hedefler');
-    if(r.status === 401){ girisGoster('Anahtar kabul edilmedi.'); return; }
+    if(r.status === 401){ anahtarYenile('Anahtar kabul edilmedi.'); return; }
     if(r.status !== 200){
       $('hedef-butce').innerHTML = sakinHata('Hedefler alınamadı.', r.status);
       return;
@@ -5696,7 +5696,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     $('gun-selam').textContent = selam();
     $('gun-tarih').textContent = tarihYaz(t);
     var b = await api('/api/briefing?date=' + t);
-    if(b.status === 401){ girisGoster('Anahtar kabul edilmedi.'); return; }
+    if(b.status === 401){ anahtarYenile('Anahtar kabul edilmedi.'); return; }
     if(b.status !== 200){
       $('brifing').innerHTML = sakinHata('Bugünün özeti alınamadı.', b.status);
       return;
@@ -6427,7 +6427,20 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   $('tarih').value = bugun();
   temaUygula(temaOku());
 
-  /* Acilista jeton yoksa: ACIK PENCERE VARSA al, yoksa sor.
+  /* Eski jeton reddedildi (401): sessizce yenisini al; alınamazsa giriş.
+     Merkez anahtar sormaz (2026-10-20): LifeOS kapısındaki yüz jetonu
+     HKM'den doğrudan alır (daemon.py LIFEOS_PORTS). */
+  var yenilendi = false;         // sayfa başına bir kez: döngü olmaz
+  async function anahtarYenile(not){
+    if(yenilendi){ girisGoster(not); return; }
+    yenilendi = true;
+    try{ localStorage.removeItem(TOKEN_KEY); }catch(e){}
+    token = null;
+    if(await jetonuPencereden_al()) bagla(); else girisGoster(not);
+  }
+
+  /* Acilista jeton yoksa: LifeOS kapisindaysa HKM verir; degilse ACIK
+     PENCERE VARSA al, yoksa sor.
 
      `baslat.py` (tek tik) yuzu acmadan once daemon'da kisa bir esleme
      penceresi acar. Jetonu adres cubuguna koymak bir sirri tarayici

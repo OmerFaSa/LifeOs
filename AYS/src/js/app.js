@@ -1594,6 +1594,9 @@ R.App = (function(){
       /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;
          ekran çizilmez (core/beacon.js hkmBagla). */
       if(R.Beacon && R.Beacon.bagCagrisiMi()){ await R.Beacon.hkmBagla(); return; }
+      /* Merkez'e anahtarsız bağlan (core/beacon.js kendiBaglan); açılışı bekletmez.
+         Yalnız LifeOS kapısında: HKM jetonu penceresiz yalnız oraya verir. */
+      if(R.Beacon && R.Beacon.kendiBaglan && [4173, 4183, 4193].indexOf(Number(location.port)) >= 0) R.Beacon.kendiBaglan().catch(() => {});
       /* 172: örnek profilde örnek kayıtlar belleğe yazılır (core/ornekveri.js). */
       if(ornekAcik() && R.OrnekVeri){
         try{ R.OrnekVeri.doldur(); }catch(e){ console.error(e); }

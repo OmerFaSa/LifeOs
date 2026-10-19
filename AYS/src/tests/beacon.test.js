@@ -318,6 +318,25 @@
         expect(r.note.indexOf('ulaşılamadı') >= 0).toBe(true);
       } finally { window.fetch = eski; }
     });
+
+    /* 2026-10-20: Merkez'e anahtarsız bağlanma. */
+    it('kendiliğinden bağlanma: jeton yoksa ya da reddedildiyse eşler, geçerliyse dokunmaz', async () => {
+      resetState();
+      await B().save({ enabled:false, token:'' });
+      const eski = window.fetch;
+      let cagri = 0;
+      window.fetch = function(){ cagri++;
+        return Promise.resolve({ status:200, json:function(){ return Promise.resolve({ token:'jeton-oto' }); } }); };
+      try{
+        expect((await B().kendiBaglan()).ok).toBe(true);
+        expect([cagri, B().settings().token, B().settings().enabled]).toEqual([1, 'jeton-oto', true]);
+        expect((await B().kendiBaglan()).reason).toBe('var');      // geçerli jeton: istek yok
+        expect(cagri).toBe(1);
+        await B().save({ lastStatus:401 });                         // HKM eski jetonu reddetti
+        await B().kendiBaglan();
+        expect([cagri, B().settings().lastStatus]).toEqual([2, null]);
+      } finally { window.fetch = eski; }
+    });
   });
 
 
