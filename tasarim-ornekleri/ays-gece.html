@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AYS · Bugün</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+:root{
+  --bg:#09090B;--s1:#111215;--s2:#16181C;--s3:#1D2025;
+  --l1:rgba(255,255,255,.065);--l2:rgba(255,255,255,.11);
+  --ink:#EDEEF0;--ink2:#A3A6AD;--ink3:#6E727B;--ink4:#3F434B;
+  --ays:#4F86FF;--spi:#2EC4A9;--esp:#F2A93B;--mer:#9A86FF;
+  --iyi:#4ADE80;--kotu:#F87171;
+  --sans:"Instrument Sans",system-ui,sans-serif;
+  --serif:"Instrument Serif",Georgia,serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+html{background:var(--bg)}
+body{min-height:100vh;background:radial-gradient(1100px 520px at 18% -8%,rgba(79,134,255,.09),transparent 62%),var(--bg);color:var(--ink);font:13px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--ays);outline-offset:2px;border-radius:8px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.serif{font-family:var(--serif);font-weight:400}
+svg.i{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.g{animation:gel .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0s)}
+@keyframes gel{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* ust cubuk */
+.ust{height:52px;display:flex;align-items:center;gap:22px;padding:0 24px;border-bottom:1px solid var(--l1);background:rgba(9,9,11,.7);backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
+.marka{display:flex;align-items:center;gap:10px;flex:none}
+.isr{display:grid;grid-template-columns:repeat(2,8px);gap:2px}
+.isr i{width:8px;height:8px;border-radius:2.5px;background:var(--ink4)}
+.isr i:first-child{background:var(--ays);box-shadow:0 0 10px rgba(79,134,255,.6)}
+.marka .yol{color:var(--ink3)}
+.marka .yol+span{color:var(--ink4)}
+.marka b{font-weight:600;display:flex;align-items:center;gap:4px}
+.marka b svg{width:12px;height:12px;color:var(--ink3)}
+.nav{display:flex;gap:4px;height:100%;min-width:0}
+.nav a{position:relative;display:flex;align-items:center;padding:0 10px;color:var(--ink3);font-weight:500;white-space:nowrap;flex:none}
+.nav a:hover{color:var(--ink2)}
+.nav a.on{color:var(--ink)}
+.nav a.on::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;border-radius:2px 2px 0 0;background:var(--ays)}
+.sag{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none}
+.ara{height:30px;display:flex;align-items:center;gap:8px;padding:0 8px 0 10px;border:1px solid var(--l1);border-radius:8px;background:var(--s1);color:var(--ink3);width:210px}
+.ara kbd{margin-left:auto;font:500 10px var(--mono);padding:2px 5px;border-radius:4px;background:var(--s3);color:var(--ink2)}
+.ik{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--ink2);position:relative}
+.ik:hover{background:var(--s2)}
+.ik i{position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:var(--kotu);box-shadow:0 0 0 2px var(--bg)}
+.rk{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px 0 4px;border:1px solid var(--l1);border-radius:999px;background:var(--s1);white-space:nowrap;font-weight:500}
+.rk .hl{width:22px;height:22px;border-radius:50%;background:conic-gradient(#E9A86A 0 41.9%,var(--s3) 0);display:grid;place-items:center}
+.rk .hl i{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#F0B57A,#A8652B 80%);box-shadow:0 0 0 2px var(--s1)}
+.rk small{font:500 11px var(--mono);color:var(--ink3)}
+.av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#2A2E36,#1A1D22);border:1px solid var(--l2);display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--ink2)}
+
+.sayfa{max-width:1360px;margin:0 auto;padding:28px 32px 20px}
+
+/* sayfa basi */
+.bas{display:flex;align-items:flex-end;gap:16px;margin-bottom:20px}
+.ustyazi{font:500 11px var(--mono);letter-spacing:.08em;color:var(--ink3)}
+.bas h1{font:400 44px/1 var(--serif);letter-spacing:-.01em;margin-top:8px}
+.bas p{color:var(--ink2);margin-top:8px}
+.bas p b{color:var(--ink);font-weight:500}
+.bas .eyl{margin-left:auto;display:flex;align-items:center;gap:8px}
+.cip{height:32px;display:inline-flex;align-items:center;gap:7px;padding:0 12px;border-radius:8px;border:1px solid var(--l1);background:var(--s1);color:var(--ink2);white-space:nowrap}
+.cip b{color:var(--ink);font-weight:600}
+.cip svg{width:14px;height:14px;color:var(--ink2)}
+.seg{display:flex;padding:2px;border-radius:9px;border:1px solid var(--l1);background:var(--s1)}
+.seg span{height:26px;padding:0 12px;border-radius:7px;display:flex;align-items:center;color:var(--ink3);font-weight:500}
+.seg span.on{background:var(--s3);color:var(--ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.btn{height:32px;padding:0 13px;border-radius:8px;display:inline-flex;align-items:center;gap:7px;font-weight:600;white-space:nowrap;transition:transform .15s,filter .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn.beyaz{background:var(--ink);color:#0B0C0E}
+.btn.mavi{background:var(--ays);color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.08) inset,0 6px 20px -6px rgba(79,134,255,.7)}
+.btn.mor{background:var(--mer);color:#12101F}
+.btn.hayal{border:1px solid var(--l2);color:var(--ink2)}
+.btn.hayal:hover{color:var(--ink);background:var(--s2)}
+.btn kbd{font:500 10px var(--mono);padding:1px 5px;border-radius:4px;background:rgba(255,255,255,.18)}
+.btn svg{width:13px;height:13px}
+
+/* kart */
+.k{position:relative;background:linear-gradient(180deg,var(--s1),#0E0F12);border:1px solid var(--l1);border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+.kb{display:flex;align-items:center;gap:8px;color:var(--ink2);font-weight:500}
+.kb .s{margin-left:auto}
+.et{display:inline-flex;align-items:center;gap:6px;font:500 10px var(--mono);letter-spacing:.07em;color:var(--ink3);white-space:nowrap}
+.et::before{content:"";width:7px;height:7px;border-radius:50%;box-sizing:border-box}
+.et.o::before{background:var(--ink2)}
+.et.h::before{border:1.5px solid var(--ink2);background:linear-gradient(90deg,var(--ink2) 50%,transparent 50%)}
+.et.t::before{border:1.5px dashed var(--ink2)}
+.et.y::before{display:none}
+.mod{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 8px;border-radius:6px;font:500 11px var(--mono);letter-spacing:.06em;background:color-mix(in oklab,var(--c) 14%,transparent);color:var(--c)}
+.mod::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c)}
+.c-ays{--c:var(--ays)}.c-spi{--c:var(--spi)}.c-esp{--c:var(--esp)}.c-mer{--c:var(--mer)}
+
+/* ust sira */
+.ust-sira{display:grid;grid-template-columns:1fr 400px;gap:14px}
+.hero{overflow:hidden;padding:20px 22px 20px}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(620px 260px at 88% -30%,rgba(79,134,255,.24),transparent 62%);pointer-events:none}
+.hero::after{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(79,134,255,.6),transparent)}
+.hero>*{position:relative}
+.hero .ust-s{display:flex;align-items:center;gap:10px}
+.hero .ust-s .s{margin-left:auto;color:var(--ink3);font-size:11px}
+.hero .orta{display:flex;align-items:flex-end;gap:16px;margin-top:14px}
+.hero h2{font:400 64px/1 var(--serif);letter-spacing:-.015em}
+.hero .alt{color:var(--ink2);margin-top:10px;display:flex;gap:10px;align-items:center}
+.hero .alt .nokta{width:3px;height:3px;border-radius:50%;background:var(--ink4)}
+.hero .alt .kalan{color:var(--ays);font:500 12px var(--mono)}
+.hero .d{margin-left:auto;display:flex;gap:8px}
+.adim{display:grid;grid-template-columns:10fr 50fr 10fr;gap:6px;margin-top:22px}
+.adim>div>i{display:block;height:4px;border-radius:2px;background:var(--s3)}
+.adim>div:first-child>i{background:linear-gradient(90deg,var(--ays),rgba(79,134,255,.45))}
+.adim b{display:block;font-weight:500;margin-top:10px;white-space:nowrap}
+.adim span{font:400 11px var(--mono);color:var(--ink3);white-space:nowrap}
+
+.sinav{padding:18px 20px 20px;display:flex;flex-direction:column}
+.buyuk{display:flex;align-items:baseline;gap:8px;margin-top:10px}
+.buyuk b{font:400 64px/1 var(--serif);letter-spacing:-.02em}
+.buyuk b.tah{text-decoration:underline dashed var(--ink4) 2px;text-underline-offset:8px}
+.buyuk small{color:var(--ink2);font-size:14px}
+.sinav p{color:var(--ink3);margin-top:12px}
+.hafta{margin-top:auto;padding-top:16px}
+.hafta .u{display:flex;justify-content:space-between;color:var(--ink3);font-size:11px}
+.hafta .u b{color:var(--ink);font-weight:500}
+.cizgi{display:flex;gap:3px;margin-top:8px;height:20px}
+.cizgi i{flex:1;border-radius:2px;background:var(--s3)}
+.cizgi i.b{background:var(--ink3)}
+.cizgi i.n{background:var(--ays);box-shadow:0 0 10px rgba(79,134,255,.7)}
+
+/* akis: modul serit */
+.akis{margin-top:14px;padding:16px 20px 18px}
+.akis .kb{margin-bottom:12px}
+.akis .kb .s{display:flex;align-items:center;gap:14px;color:var(--ink3);font-size:12px}
+.akis .kb .s span{display:inline-flex;align-items:center;gap:6px}
+.akis .kb .s i{width:14px;height:8px;border-radius:2px}
+.kay{overflow-x:auto;scrollbar-width:none}
+.tl{display:grid;grid-template-columns:84px 1fr;min-width:820px}
+.etk{padding-top:24px;position:sticky;left:0;z-index:3;background:#101114;box-shadow:12px 0 12px -8px #101114}
+.etk div{height:40px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--l1);color:var(--ink2);font:500 11px var(--mono);letter-spacing:.05em}
+.etk div::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.etk div small{color:var(--ink4);font-size:10px;letter-spacing:0}
+.etk div.bu{color:var(--ink)}
+.iz{position:relative}
+.eks{height:24px;position:relative}
+.eks span{position:absolute;top:2px;transform:translateX(-50%);font:400 10px var(--mono);color:var(--ink3)}
+.ser{height:40px;position:relative;border-top:1px solid var(--l1)}
+.ser.bu{background:linear-gradient(90deg,rgba(79,134,255,.05),rgba(79,134,255,.02))}
+.sa{position:absolute;top:24px;bottom:0;width:1px;background:rgba(255,255,255,.035)}
+.gecmis{position:absolute;left:0;top:24px;bottom:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.018) 0 6px,transparent 6px 12px);border-right:0;pointer-events:none}
+.it{position:absolute;top:10px;height:20px;left:var(--x);width:var(--w);min-width:8px}
+.it>i{position:absolute;inset:0;border-radius:5px;background:var(--c)}
+.it>span{position:absolute;top:50%;left:calc(100% + 8px);transform:translateY(-50%);white-space:nowrap;font-weight:500;display:flex;align-items:center;gap:7px}
+.it>span em{font:400 11px var(--mono);color:var(--ink3);font-style:normal}
+.it.sol>span{left:auto;right:calc(100% + 8px)}
+.it.bitti>i{background:color-mix(in oklab,var(--c) 32%,#16181C)}
+.it.bitti>span{color:var(--ink3)}
+.it.bitti>span svg{width:12px;height:12px;color:var(--iyi)}
+.it.plan>i{background:color-mix(in oklab,var(--c) 16%,transparent);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--c) 70%,transparent)}
+.it.sira>i{background:var(--c);animation:parla 2.4s ease-in-out infinite}
+@keyframes parla{0%,100%{box-shadow:0 0 0 3px color-mix(in oklab,var(--c) 18%,transparent),0 0 14px color-mix(in oklab,var(--c) 35%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in oklab,var(--c) 12%,transparent),0 0 24px color-mix(in oklab,var(--c) 55%,transparent)}}
+.it.surer>i{background:linear-gradient(90deg,color-mix(in oklab,var(--c) 16%,transparent),transparent);box-shadow:inset 1px 0 0 color-mix(in oklab,var(--c) 70%,transparent);border-radius:5px 0 0 5px}
+.an{position:absolute;top:0;bottom:0;width:0;border-left:1px solid rgba(237,238,240,.75)}
+.an span{position:absolute;top:0;left:0;transform:translateX(-50%);font:500 10px var(--mono);padding:2px 6px;border-radius:5px;background:var(--ink);color:#0B0C0E}
+.an::after{content:"";position:absolute;bottom:-3px;left:-3.5px;width:6px;height:6px;border-radius:50%;background:var(--ink)}
+
+/* alt sira */
+.alt-sira{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}
+.alt-sira .k{padding:16px 18px 18px;display:flex;flex-direction:column;min-height:200px}
+.deger{display:flex;align-items:baseline;gap:6px;margin-top:10px}
+.deger b{font:400 44px/1 var(--serif);letter-spacing:-.02em}
+.deger small{color:var(--ink2)}
+.deger .fark{margin-left:6px;font:500 11px var(--mono);padding:2px 6px;border-radius:5px}
+.fark.art{color:var(--iyi);background:rgba(74,222,128,.1)}
+.fark.eks{color:var(--kotu);background:rgba(248,113,113,.1)}
+.spark{margin-top:auto;width:100%;height:auto;display:block}
+.cubuk{margin-top:auto;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:58px}
+.cubuk i{border-radius:3px 3px 1px 1px;background:var(--s3)}
+.cubuk i:last-child{background:var(--ays)}
+.gunler{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:6px;font:400 10px var(--mono);color:var(--ink3);text-align:center}
+.sayac{margin-top:14px;display:flex;flex-direction:column;gap:16px}
+.sayac .u{display:flex;justify-content:space-between;font-weight:500}
+.sayac .u span{font:500 12px var(--mono);color:var(--ink2)}
+.sayac .u span b{color:var(--ink);font-weight:500}
+.tik{display:flex;gap:3px;margin-top:8px;height:14px}
+.tik i{flex:1;border-radius:2px;background:var(--s3)}
+.tik i.d{background:var(--ays)}
+.sayac-alt{margin-top:auto;padding-top:14px;display:flex;justify-content:space-between;color:var(--ink3);font-size:12px}
+.sayac-alt b{color:var(--ink);font-weight:500}
+.merkez{background:linear-gradient(180deg,rgba(154,134,255,.12),rgba(154,134,255,.035));border-color:rgba(154,134,255,.24)}
+.merkez::after{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(154,134,255,.7),transparent)}
+.merkez .kb{color:var(--mer)}
+.merkez .kb svg{width:14px;height:14px}
+.merkez h4{font-size:15px;font-weight:600;margin-top:12px;letter-spacing:-.005em}
+.olcer{margin-top:14px}
+.olcer .u{display:flex;justify-content:space-between;color:var(--ink2);font-size:12px}
+.olcer .u b{font:500 12px var(--mono);color:var(--ink)}
+.olcer .bar{position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.07);margin-top:7px}
+.olcer .bar>i{position:absolute;left:0;top:0;bottom:0;width:68%;border-radius:3px;background:linear-gradient(90deg,rgba(154,134,255,.5),var(--mer))}
+.olcer .bar>em{position:absolute;left:20%;top:-4px;bottom:-4px;width:2px;border-radius:1px;background:var(--ink)}
+.olcer .esik{position:relative;height:16px;font:400 10px var(--mono);color:var(--ink3)}
+.olcer .esik span{position:absolute;left:20%;top:4px;transform:translateX(-50%);white-space:nowrap}
+.merkez .d{margin-top:auto;display:flex;align-items:center;gap:8px;padding-top:12px}
+.merkez .d small{margin-left:auto;color:var(--ink3);font-size:11px}
+
+/* alt bilgi */
+.dip{display:flex;align-items:center;gap:18px;margin-top:18px;color:var(--ink3);font-size:11px}
+.dip .et{letter-spacing:.04em}
+.dip .bag{margin-left:auto;display:flex;align-items:center;gap:7px;font-family:var(--mono)}
+.dip .bag i{width:6px;height:6px;border-radius:50%;background:var(--iyi);box-shadow:0 0 8px var(--iyi)}
+
+@media (max-width:1180px){
+  .ust-sira{grid-template-columns:1fr}
+  .alt-sira{grid-template-columns:repeat(2,1fr)}
+  .ara{width:auto}.ara .yz,.ara kbd{display:none}
+  .nav{overflow-x:auto;scrollbar-width:none;flex:1}
+}
+@media (max-width:720px){
+  .ust{padding:0 14px;gap:12px}
+  .marka .yol,.marka .yol+span,.rk small,.av,.ik{display:none}
+  .sayfa{padding:22px 16px 18px}
+  .bas{flex-wrap:wrap}
+  .bas h1{font-size:38px}
+  .bas .eyl{margin-left:0;flex-wrap:wrap}
+  .hero h2{font-size:52px}
+  .hero .orta{flex-wrap:wrap}
+  .hero .d{margin-left:0}
+  .hero .alt{flex-wrap:wrap}
+  .hero .alt .son{display:none}
+  .hero .alt .kalan{width:100%}
+  .adim{grid-template-columns:1fr}
+  .adim b{margin-top:6px}
+  .alt-sira{grid-template-columns:1fr}
+  .akis{padding:16px 14px}
+  .akis .kb .s{display:none}
+  .dip{flex-wrap:wrap;gap:10px 16px}
+  .dip .bag{margin-left:0}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="ara" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></symbol>
+  <symbol id="zil" viewBox="0 0 16 16"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3zM6.5 14h3"/></symbol>
+  <symbol id="arti" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
+  <symbol id="oyn" viewBox="0 0 16 16"><path d="M5 3v10l8-5z" fill="currentColor"/></symbol>
+  <symbol id="tik" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></symbol>
+  <symbol id="asagi" viewBox="0 0 16 16"><path d="M4.5 6.5L8 10l3.5-3.5"/></symbol>
+  <symbol id="alev" viewBox="0 0 16 16"><path d="M8 14c2.8 0 4.5-1.8 4.5-4.4C12.5 6 8.5 4.5 8.5 1.8 6.5 3 5 5 5.5 7.2 4.4 6.8 3.5 8 3.5 9.6 3.5 12.2 5.2 14 8 14z"/></symbol>
+  <symbol id="yildiz" viewBox="0 0 16 16"><path d="M8 2l1.4 4.1L13.5 7.5 9.4 8.9 8 13l-1.4-4.1L2.5 7.5l4.1-1.4z"/></symbol>
+</svg>
+
+<header class="ust">
+  <div class="marka">
+    <span class="isr" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="yol">LifeOS</span><span>/</span>
+    <b>AYS<svg class="i"><use href="#asagi"/></svg></b>
+  </div>
+  <nav class="nav" aria-label="Bölümler">
+    <a href="#" class="on" aria-current="page">Bugün</a>
+    <a href="#">Program</a>
+    <a href="#">Soru çöz</a>
+    <a href="#">Denemeler</a>
+    <a href="#">Tekrar</a>
+    <a href="#">Ofis</a>
+  </nav>
+  <div class="sag">
+    <span class="ara"><svg class="i"><use href="#ara"/></svg><span class="yz">Ara</span><kbd>⌘K</kbd></span>
+    <button class="ik" aria-label="Bildirimler"><svg class="i"><use href="#zil"/></svg><i></i></button>
+    <span class="rk" title="Bronz 1.1 · 180 / 430 XP"><span class="hl"><i></i></span>Bronz 1.1<small>180/430</small></span>
+    <span class="av">Ö</span>
+  </div>
+</header>
+
+<main class="sayfa">
+  <div class="bas g">
+    <div>
+      <div class="ustyazi">PERŞEMBE · 24 EYLÜL · HAFTA 2/40</div>
+      <h1>Bugün</h1>
+      <p>7 işin <b>3’ü bitti</b> · sıradaki AYS bloğu <b>20:30</b>’da</p>
+    </div>
+    <div class="eyl">
+      <span class="cip"><svg class="i"><use href="#alev"/></svg><b class="mono">11</b> gün seri</span>
+      <div class="seg"><span class="on">Gün</span><span>Hafta</span></div>
+      <button class="btn beyaz"><svg class="i"><use href="#arti"/></svg>Soru ekle</button>
+    </div>
+  </div>
+
+  <div class="ust-sira">
+    <section class="k hero g" style="--d:.05s">
+      <div class="ust-s"><span class="mod c-ays">AYS</span><span class="et">SIRADAKİ BLOK</span><span class="s mono">20:30 – 21:40</span></div>
+      <div class="orta">
+        <div>
+          <h2>Paragraf</h2>
+          <div class="alt">Akşam bloğu<span class="nokta"></span>30 soru<span class="nokta"></span>70 dk<span class="nokta son"></span><span class="kalan">6 sa 20 dk sonra</span></div>
+        </div>
+        <div class="d"><button class="btn hayal">Ertele</button><button class="btn mavi"><svg class="i"><use href="#oyn"/></svg>Başla<kbd>↵</kbd></button></div>
+      </div>
+      <div class="adim">
+        <div><i></i><b>Isınma</b><span>6 soru · 10 dk</span></div>
+        <div><i></i><b>Ana set</b><span>24 soru · 50 dk</span></div>
+        <div><i></i><b>Analiz</b><span>10 dk</span></div>
+      </div>
+    </section>
+
+    <section class="k sinav g" style="--d:.1s">
+      <div class="kb">Sınava kalan<span class="s et t">TAHMİN</span></div>
+      <div class="buyuk"><b class="tah">268</b><small>gün</small></div>
+      <p>Tarih açıklanınca kesinleşir.</p>
+      <div class="hafta">
+        <div class="u"><span>Hazırlık</span><span><b class="mono">2</b> / 40 hafta</span></div>
+        <div class="cizgi" aria-hidden="true"><i class="b"></i><i class="n"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="k akis g" style="--d:.15s">
+    <div class="kb">Günün akışı<span class="mono" style="color:var(--ink3);font-size:12px">3 / 7</span>
+      <span class="s"><span><i style="background:color-mix(in oklab,var(--ink2) 32%,#16181C)"></i>bitti</span><span><i style="box-shadow:inset 0 0 0 1px var(--ink2)"></i>planlı</span><span><i style="background:var(--ink)"></i>sıradaki</span></span>
+    </div>
+    <div class="kay">
+      <div class="tl">
+        <div class="etk">
+          <div class="c-ays bu">AYS <small>2</small></div>
+          <div class="c-spi">SPİ <small>3</small></div>
+          <div class="c-esp">ESP <small>2</small></div>
+        </div>
+        <div class="iz">
+          <div class="eks"><span style="left:5.88%">08</span><span style="left:17.65%">10</span><span style="left:29.41%">12</span><span style="left:52.94%">16</span><span style="left:64.71%">18</span><span style="left:76.47%">20</span><span style="left:88.24%">22</span></div>
+          <i class="sa" style="left:5.88%"></i><i class="sa" style="left:17.65%"></i><i class="sa" style="left:29.41%"></i><i class="sa" style="left:41.18%"></i><i class="sa" style="left:52.94%"></i><i class="sa" style="left:64.71%"></i><i class="sa" style="left:76.47%"></i><i class="sa" style="left:88.24%"></i>
+          <div class="gecmis" style="width:42.16%"></div>
+
+          <div class="ser c-ays bu">
+            <div class="it bitti" style="--x:14.71%;--w:5.88%"><i></i><span><em>09:30</em>TYT Matematik · 18/24<svg class="i"><use href="#tik"/></svg></span></div>
+            <div class="it sira" style="--x:79.41%;--w:6.86%"><i></i><span><em>20:30</em>Paragraf</span></div>
+          </div>
+          <div class="ser c-spi">
+            <div class="it bitti" style="--x:9.8%;--w:.98%"><i></i><span><em>08:40</em>Sabah ölçümü<svg class="i"><use href="#tik"/></svg></span></div>
+            <div class="it plan" style="--x:61.76%;--w:4.41%"><i></i><span><em>17:30</em>Antrenman</span></div>
+            <div class="it surer sol" style="--x:94.12%;--w:5.88%"><i></i><span><em>23:00</em>Uyku</span></div>
+          </div>
+          <div class="ser c-esp">
+            <div class="it bitti" style="--x:5.88%;--w:2.94%"><i></i><span><em>08:00</em>Tarih · yüzyıl eşlemesi<svg class="i"><use href="#tik"/></svg></span></div>
+            <div class="it plan" style="--x:44.12%;--w:2.94%"><i></i><span><em>14:30</em>Yabancı Dil</span></div>
+          </div>
+
+          <div class="an" style="left:42.16%"><span>14:10</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="alt-sira">
+    <section class="k g" style="--d:.2s">
+      <div class="kb">Son deneme<span class="s et o">ÖLÇÜLDÜ</span></div>
+      <div class="deger"><b>82</b><small>net</small><span class="fark art">+3</span></div>
+      <svg class="spark" viewBox="0 0 280 72" aria-hidden="true">
+        <defs><linearGradient id="alan" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4F86FF" stop-opacity=".32"/><stop offset="1" stop-color="#4F86FF" stop-opacity="0"/></linearGradient></defs>
+        <path d="M6 51.6L59.6 42.2L113.2 45.3L166.8 32.9L220.4 23.6L274 14.2V72H6Z" fill="url(#alan)"/>
+        <path d="M6 51.6L59.6 42.2L113.2 45.3L166.8 32.9L220.4 23.6L274 14.2" fill="none" stroke="#4F86FF" stroke-width="1.8" stroke-linejoin="round"/>
+        <circle cx="274" cy="14.2" r="6" fill="#4F86FF" opacity=".25"/><circle cx="274" cy="14.2" r="3" fill="#EDEEF0"/>
+      </svg>
+    </section>
+
+    <section class="k g" style="--d:.25s">
+      <div class="kb">Tekrar kuyruğu<span class="s et h">HESAPLANDI</span></div>
+      <div class="deger"><b>432</b><small>kart</small><span class="fark eks">+41</span></div>
+      <div class="cubuk" aria-hidden="true"><i style="height:49%"></i><i style="height:58%"></i><i style="height:67%"></i><i style="height:74%"></i><i style="height:83%"></i><i style="height:91%"></i><i style="height:100%"></i></div>
+      <div class="gunler"><span>Cu</span><span>Ct</span><span>Pz</span><span>Pt</span><span>Sa</span><span>Ça</span><span style="color:var(--ink)">Pe</span></div>
+    </section>
+
+    <section class="k g" style="--d:.3s">
+      <div class="kb">Günlük sayaç<span class="s mono" style="font-size:11px;color:var(--ink3)">hedef 18</span></div>
+      <div class="sayac">
+        <div><div class="u">Paragraf<span><b>15</b> / 18</span></div><div class="tik" aria-hidden="true"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i></i><i></i><i></i></div></div>
+        <div><div class="u">Problem<span><b>16</b> / 18</span></div><div class="tik" aria-hidden="true"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i></i><i></i></div></div>
+      </div>
+      <div class="sayac-alt"><span>Kalan</span><span><b class="mono">5</b> soru</span></div>
+    </section>
+
+    <section class="k merkez g" style="--d:.35s">
+      <div class="kb"><svg class="i"><use href="#yildiz"/></svg>Merkez önerisi<span class="s et">KÜÇÜK</span></div>
+      <h4>Akşam bloğu tekrara ayrılsın</h4>
+      <div class="olcer">
+        <div class="u">Tekrar borcu<b>%34</b></div>
+        <div class="bar"><i></i><em></em></div>
+        <div class="esik"><span>eşik %10</span></div>
+      </div>
+      <div class="d"><button class="btn mor">Uygula</button><button class="btn hayal">Geç</button><small>geri alınır</small></div>
+    </section>
+  </div>
+
+  <footer class="dip g" style="--d:.4s">
+    <span class="et o">ölçüldü</span><span class="et h">hesaplandı</span><span class="et t">tahmin</span><span class="et y">— veri yok</span>
+    <span class="bag"><i></i>Merkez bağlı · 14:08</span>
+  </footer>
+</main>
+<script>
+// dar ekranda serit simdiye kaydirilir
+const k=document.querySelector(".kay"),a=document.querySelector(".an");
+if(k.scrollWidth>k.clientWidth)k.scrollLeft=a.getBoundingClientRect().left-k.getBoundingClientRect().left-120;
+</script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>18 · Sistem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F6F8; --yuzey:#FFFFFF; --ink:#0D1117; --ink2:#4A5261; --ink3:#838C9B; --cizgi:#E5E7EB; --cizgi2:#EEF0F3;
+  --golge:0 1px 2px rgba(13,17,23,.04),0 8px 24px -12px rgba(13,17,23,.12);
+  --sinav:#2F6FEB; --saglik:#0E9888; --gelisim:#D98309; --merkez:#7A5CF0;
+  --iyi:#1F8A5B; --uyari:#B26A00; --kotu:#C23A3A;
+  --birincil:#0D1117; --birincil-ust:#FFFFFF;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C0E12; --yuzey:#14171D; --ink:#ECEEF2; --ink2:#A3AAB6; --ink3:#6C7483; --cizgi:#232730; --cizgi2:#1B1F26;
+    --golge:0 1px 0 rgba(255,255,255,.03),0 12px 32px -16px rgba(0,0,0,.6);
+    --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; --iyi:#4CC38A; --uyari:#E2A34A; --kotu:#F07A7A;
+    --birincil:#ECEEF2; --birincil-ust:#0C0E12; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C0E12; --yuzey:#14171D; --ink:#ECEEF2; --ink2:#A3AAB6; --ink3:#6C7483; --cizgi:#232730; --cizgi2:#1B1F26;
+  --golge:0 1px 0 rgba(255,255,255,.03),0 12px 32px -16px rgba(0,0,0,.6);
+  --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; --iyi:#4CC38A; --uyari:#E2A34A; --kotu:#F07A7A;
+  --birincil:#ECEEF2; --birincil-ust:#0C0E12; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased;padding-inline:28px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--sinav);outline-offset:2px;border-radius:8px}
+.kap{max-width:1040px;margin:0 auto;padding-block:36px 80px}
+.bas{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.bas h1{margin:0;font-size:44px;font-weight:600;letter-spacing:-.035em;line-height:1}
+.bas p{margin:10px 0 0;color:var(--ink3);max-width:52ch}
+.tema{height:36px;padding:0 14px;border-radius:999px;background:var(--yuzey);box-shadow:var(--golge);font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:8px}
+
+section{margin-top:64px}
+section>h2{font:500 13px var(--mono);color:var(--ink3);margin:0 0 16px;letter-spacing:.02em;text-transform:uppercase}
+.ilke{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:12px;counter-reset:i}
+.ilke li{background:var(--yuzey);border-radius:16px;padding:18px;box-shadow:var(--golge);counter-increment:i;display:flex;flex-direction:column;gap:10px}
+.ilke li::before{content:counter(i);font:500 12px var(--mono);color:var(--ink3)}
+.ilke b{font-weight:600;font-size:16px;letter-spacing:-.01em;line-height:1.3}
+.ilke span{font-size:13px;color:var(--ink3)}
+
+.renkler{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.renk{border-radius:16px;overflow:hidden;background:var(--yuzey);box-shadow:var(--golge);text-align:left}
+.renk .ornek{height:84px;background:var(--r);display:flex;align-items:flex-end;padding:12px;color:#fff;font-weight:600}
+.renk .bilgi{padding:12px;display:flex;justify-content:space-between;gap:8px;font:12px var(--mono);color:var(--ink3)}
+.renk .bilgi b{font:600 13px var(--sans);color:var(--ink)}
+.notr{display:grid;grid-template-columns:repeat(9,1fr);gap:8px;margin-top:12px}
+.notr button{display:flex;flex-direction:column;gap:6px;font:11px var(--mono);color:var(--ink3);text-align:left}
+.notr i{height:44px;border-radius:10px;background:var(--r);box-shadow:inset 0 0 0 1px var(--cizgi)}
+
+.tip{background:var(--yuzey);border-radius:20px;box-shadow:var(--golge);padding:8px 24px}
+.tip div{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--cizgi2)}
+.tip div:last-child{border:0}
+.tip code{font:12px var(--mono);color:var(--ink3)}
+
+.aralik{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.aralik div{display:flex;flex-direction:column;align-items:center;gap:8px;font:12px var(--mono);color:var(--ink3)}
+.aralik i{display:block;width:var(--s);height:var(--s);border-radius:3px;background:color-mix(in oklab,var(--sinav) 30%,transparent);box-shadow:inset 0 0 0 1px var(--sinav)}
+
+.iki{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pano{background:var(--yuzey);border-radius:20px;box-shadow:var(--golge);padding:22px}
+.pano h3{margin:0 0 14px;font-size:14px;font-weight:600}
+.pm{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;vertical-align:middle;color:var(--ink3)}
+.pm.o{background:currentColor}.pm.h{background:linear-gradient(90deg,currentColor 50%,transparent 50%);box-shadow:inset 0 0 0 1.2px currentColor}.pm.t{box-shadow:inset 0 0 0 1.4px currentColor}
+.kes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kes div{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:12px;background:var(--bg)}
+.kes b{font-size:24px;font-weight:600;letter-spacing:-.02em}
+.kes span{font-size:12px;color:var(--ink3)}
+.bilesen{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{height:44px;padding:0 20px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+.btn-1{background:var(--birincil);color:var(--birincil-ust)}
+.btn-2{background:var(--cizgi2);color:var(--ink)}
+.btn-3{color:var(--ink2)}
+.btn-m{background:var(--merkez);color:#fff}
+.cip{height:30px;padding:0 12px;border-radius:999px;background:var(--bg);font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.cip i{width:7px;height:7px;border-radius:50%;background:var(--r)}
+.durum{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px}
+.durum.kotu{color:var(--kotu);background:color-mix(in oklab,var(--kotu) 10%,transparent)}
+.durum.iyi{color:var(--iyi);background:color-mix(in oklab,var(--iyi) 10%,transparent)}
+.durum.uyari{color:var(--uyari);background:color-mix(in oklab,var(--uyari) 12%,transparent)}
+.satir{display:grid;grid-template-columns:1fr auto;gap:2px 16px;align-items:center;padding:14px 0;border-top:1px solid var(--cizgi)}
+.satir .ad{font-weight:600;font-size:17px}
+.satir .alt{font-size:13px;color:var(--ink3)}
+.satir .d{grid-row:1/3;grid-column:2;text-align:right;min-width:110px}
+.satir .d b{font-size:22px;font-weight:600}
+.satir .d small{color:var(--ink3);margin-left:2px}
+.cubuk{display:block;height:4px;border-radius:2px;background:var(--cizgi);margin-top:8px;overflow:hidden}
+.cubuk i{display:block;height:100%;width:var(--p);background:var(--r)}
+
+.seviye{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sv{background:var(--yuzey);border-radius:20px;box-shadow:var(--golge);padding:20px;display:flex;flex-direction:column;gap:12px}
+.sv .u{display:flex;justify-content:space-between;align-items:center}
+.sv .u b{font-size:16px;font-weight:600}
+.sv .u span{font:12px var(--mono);color:var(--ink3)}
+.sv p{margin:0;font-size:13px;color:var(--ink3)}
+.maket{border-radius:14px;background:var(--bg);padding:14px;display:flex;flex-direction:column;gap:10px;font-size:14px;margin-top:auto}
+.tost{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--birincil);color:var(--birincil-ust);border-radius:12px;padding:10px 10px 10px 14px}
+.tost button{font-weight:600;padding:5px 10px;border-radius:8px;background:color-mix(in oklab,var(--birincil-ust) 14%,transparent)}
+.maket .fark{display:flex;flex-direction:column;gap:6px;font:12px var(--mono);color:var(--ink2)}
+.maket .fark span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--r);margin-right:8px;transform:translateY(-1px)}
+.maket .onay{display:flex;gap:6px}
+.maket .onay button{flex:1;height:38px;border-radius:10px;font-weight:600;font-size:13px}
+.maket .onay .e{background:var(--birincil);color:var(--birincil-ust)}
+.maket .onay .h{background:var(--yuzey)}
+.nokta{display:flex;align-items:center;gap:8px;font:12px var(--mono);color:var(--ink3)}
+.nokta i{width:10px;height:10px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--merkez)}
+
+.oncesonra{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.os{border-radius:20px;padding:22px;background:var(--yuzey);box-shadow:var(--golge)}
+.os .k{font:12px var(--mono);color:var(--ink3);display:flex;justify-content:space-between}
+.os.once p{color:var(--ink2);font-size:15px;line-height:1.6;margin:12px 0 0}
+.os.sonra .buyuk{font-size:40px;font-weight:600;letter-spacing:-.03em;margin-top:10px;line-height:1}
+.os.sonra .buyuk small{font-size:16px;color:var(--ink3);margin-left:4px;font-weight:500}
+.os.sonra .s{margin-top:10px;font-size:15px;color:var(--ink2)}
+.os.sonra .s b{color:var(--ink)}
+.kopya{position:fixed;left:50%;bottom:24px;transform:translate(-50%,12px);opacity:0;transition:.2s;background:var(--birincil);color:var(--birincil-ust);border-radius:10px;padding:8px 14px;font-size:13px;pointer-events:none}
+.kopya.acik{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:900px){
+  .ilke{grid-template-columns:1fr 1fr}
+  .renkler{grid-template-columns:1fr 1fr}
+  .notr{grid-template-columns:repeat(5,1fr)}
+  .iki,.seviye,.oncesonra{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  body{padding-inline:16px}
+  .bas h1{font-size:36px}
+  .ilke{grid-template-columns:1fr}
+  .kes{grid-template-columns:1fr 1fr}
+  .tip div{grid-template-columns:1fr;gap:4px}
+  .notr{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="kap">
+  <header class="bas">
+    <div><h1>Tasarım sistemi</h1><p>01 Sessiz yönünün kuralları. Dört sistem aynı dili konuşur; her modülün tek rengi vardır.</p></div>
+    <button class="tema" id="tema">Temayı değiştir</button>
+  </header>
+
+  <section aria-label="İlkeler">
+    <h2>İlkeler</h2>
+    <ol class="ilke">
+      <li><b>Bir ekran, bir soru.</b><span>Bugün ne yapacağım?</span></li>
+      <li><b>Sayı cümleden önce gelir.</b><span>Açıklama dokununca açılır.</span></li>
+      <li><b>Tek seviye gezinme.</b><span>Çekmece içinde çekmece yok.</span></li>
+      <li><b>Modülün tek rengi var.</b><span>Renk başka anlam taşımaz.</span></li>
+      <li><b>Eksik veri boşluktur.</b><span>Sıfır değildir; her sayı işaretlidir.</span></li>
+    </ol>
+  </section>
+
+  <section aria-label="Renk">
+    <h2>Renk</h2>
+    <div class="renkler">
+      <button class="renk" style="--r:var(--sinav)" data-hex="#2F6FEB / #4F86F2"><div class="ornek">Sınav</div><div class="bilgi"><b>AYS</b>#2F6FEB</div></button>
+      <button class="renk" style="--r:var(--saglik)" data-hex="#0E9888 / #1A9E8B"><div class="ornek">Sağlık</div><div class="bilgi"><b>SPİ</b>#0E9888</div></button>
+      <button class="renk" style="--r:var(--gelisim)" data-hex="#D98309 / #C0832A"><div class="ornek">Gelişim</div><div class="bilgi"><b>ESP</b>#D98309</div></button>
+      <button class="renk" style="--r:var(--merkez)" data-hex="#7A5CF0 / #8A72EE"><div class="ornek">Merkez</div><div class="bilgi"><b>HKM</b>#7A5CF0</div></button>
+    </div>
+    <div class="notr">
+      <button style="--r:var(--bg)" data-hex="#F5F6F8"><i></i>zemin</button>
+      <button style="--r:var(--yuzey)" data-hex="#FFFFFF"><i></i>yüzey</button>
+      <button style="--r:var(--ink)" data-hex="#0D1117"><i></i>mürekkep</button>
+      <button style="--r:var(--ink2)" data-hex="#4A5261"><i></i>ikincil</button>
+      <button style="--r:var(--ink3)" data-hex="#838C9B"><i></i>üçüncül</button>
+      <button style="--r:var(--cizgi)" data-hex="#E5E7EB"><i></i>çizgi</button>
+      <button style="--r:var(--iyi)" data-hex="#1F8A5B"><i></i>iyi</button>
+      <button style="--r:var(--uyari)" data-hex="#B26A00"><i></i>uyarı</button>
+      <button style="--r:var(--kotu)" data-hex="#C23A3A"><i></i>kötü</button>
+    </div>
+  </section>
+
+  <section aria-label="Tipografi">
+    <h2>Tipografi · Geist</h2>
+    <div class="tip">
+      <div><code>Gösterge 72/600</code><span style="font-size:56px;font-weight:600;letter-spacing:-.05em;line-height:1">268</span></div>
+      <div><code>Başlık 44/600</code><span style="font-size:34px;font-weight:600;letter-spacing:-.035em;line-height:1.1">4 iş kaldı.</span></div>
+      <div><code>Kart 26/600</code><span style="font-size:24px;font-weight:600;letter-spacing:-.025em">Kelime tekrarı</span></div>
+      <div><code>Gövde 15/400</code><span>Sıradaki iş 14:30'da başlıyor.</span></div>
+      <div><code>Etiket 13/500</code><span style="font-size:13px;font-weight:500;color:var(--ink3)">Bugün</span></div>
+      <div><code>Veri · mono 13</code><span style="font:13px var(--mono);color:var(--ink3)">14:30 — 15:00 · 30 dk</span></div>
+    </div>
+  </section>
+
+  <section aria-label="Aralık">
+    <h2>Aralık · 4'ün katları</h2>
+    <div class="aralik">
+      <div style="--s:4px"><i></i>4</div><div style="--s:8px"><i></i>8</div><div style="--s:12px"><i></i>12</div><div style="--s:16px"><i></i>16</div>
+      <div style="--s:24px"><i></i>24</div><div style="--s:32px"><i></i>32</div><div style="--s:48px"><i></i>48</div><div style="--s:64px"><i></i>64</div>
+    </div>
+  </section>
+
+  <section aria-label="Kesinlik ve bileşenler">
+    <h2>Kesinlik · bileşenler</h2>
+    <div class="iki">
+      <div class="pano">
+        <h3>Her sayının kaynağı</h3>
+        <div class="kes">
+          <div><b>7,0<i class="pm o"></i></b><span>ölçüldü</span></div>
+          <div><b>72<i class="pm h"></i></b><span>hesaplandı</span></div>
+          <div><b>268<i class="pm t"></i></b><span>tahmin</span></div>
+          <div><b style="color:var(--ink3)">—</b><span>veri yok</span></div>
+        </div>
+      </div>
+      <div class="pano">
+        <h3>Düğme · çip · durum</h3>
+        <div class="bilesen">
+          <button class="btn btn-1">Başla</button><button class="btn btn-2">Sonraya al</button><button class="btn btn-3">Geç</button><button class="btn btn-m">Uygula</button>
+        </div>
+        <div class="bilesen" style="margin-top:12px">
+          <span class="cip" style="--r:var(--sinav)"><i></i>Sınav</span><span class="cip" style="--r:var(--saglik)"><i></i>Sağlık</span>
+          <span class="durum kotu">↓ Referans altı</span><span class="durum uyari">↑ Hedef üstü</span><span class="durum iyi">✓ Hedefte</span>
+        </div>
+      </div>
+    </div>
+    <div class="pano" style="margin-top:12px">
+      <h3>Modül satırı</h3>
+      <div class="satir" style="--r:var(--sinav)"><span class="ad">Sınav</span><span class="alt">Sınava 268 gün<i class="pm t"></i> · seri 11</span><span class="d"><b>1</b><small>/ 2 blok</small><span class="cubuk"><i style="--p:50%"></i></span></span></div>
+      <div class="satir" style="--r:var(--saglik)"><span class="ad">Sağlık</span><span class="alt">Toparlanma 72<i class="pm h"></i> · uyku 7,0 sa<i class="pm o"></i></span><span class="d"><b>2</b><small>/ 4 asgari</small><span class="cubuk"><i style="--p:50%"></i></span></span></div>
+    </div>
+  </section>
+
+  <section aria-label="Aksiyon seviyeleri">
+    <h2>Aksiyon seviyeleri</h2>
+    <div class="seviye">
+      <div class="sv" style="--r:var(--sinav)">
+        <div class="u"><b>Küçük</b><span>tek gün</span></div>
+        <p>Sormadan uygulanır. Geri al ekranda kalır.</p>
+        <div class="maket"><span>Akşam bloğu tekrara ayrıldı</span><div class="tost"><span>Uygulandı</span><button>Geri al</button></div></div>
+      </div>
+      <div class="sv" style="--r:var(--gelisim)">
+        <div class="u"><b>Orta</b><span>bir hafta</span></div>
+        <p>Önizleme ve tek onay.</p>
+        <div class="maket"><b>Bu hafta ara haftası</b><div class="fark"><span>4 blok boşalır</span><span>tekrar sürer</span></div><div class="onay"><button class="e">Onayla</button><button class="h">Vazgeç</button></div></div>
+      </div>
+      <div class="sv" style="--r:var(--merkez)">
+        <div class="u"><b>Büyük</b><span>plan baştan</span></div>
+        <p>Ayrıntılı önizleme, onay ve geri dönüş noktası.</p>
+        <div class="maket"><b>Planı baştan kur</b><div class="fark"><span>40 hafta yeniden dağılır</span><span>kayıtlar korunur</span></div><div class="nokta"><i></i>geri dönüş noktası · 24 Eyl 14:10</div><div class="onay"><button class="e">Önizlemeyi aç</button></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Metin kuralı">
+    <h2>Metin kuralı · aynı bilgi</h2>
+    <div class="oncesonra">
+      <div class="os once"><div class="k"><span>Bugün</span><span>21 kelime</span></div><p>Toparlanma iyi. Planlanan yükü olduğu gibi uygula. Asgari gün için kalan: vücut ağırlığının kilogramı başına 1,2 gram protein, 2 litre su.</p></div>
+      <div class="os sonra"><div class="k"><span>Önerilen</span><span>9 kelime</span></div><div class="buyuk">72<small>toparlanma</small></div><div class="s">Kalan: <b>protein 38 g</b> · <b>su 1,2 L</b></div></div>
+    </div>
+  </section>
+</div>
+<div class="kopya" id="kopya" role="status" aria-live="polite">Kopyalandı</div>
+<script>
+(function(){
+  var kok = document.documentElement;
+  document.getElementById('tema').addEventListener('click', function(){
+    var koyu = kok.dataset.theme ? kok.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    kok.dataset.theme = koyu ? 'light' : 'dark';
+  });
+  var k = document.getElementById('kopya'), z;
+  document.querySelectorAll('[data-hex]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var hex = b.dataset.hex;
+      function goster(m){ k.textContent = m; k.classList.add('acik'); clearTimeout(z); z = setTimeout(function(){ k.classList.remove('acik'); }, 1600); }
+      try{ navigator.clipboard.writeText(hex).then(function(){ goster('Kopyalandı · ' + hex); }, function(){ goster(hex); }); }catch(e){ goster(hex); }
+    });
+  });
+})();
+</script>
+</body>
+</html>

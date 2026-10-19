@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>10 · Komut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E7ECF4; --z1:#D9E3F4; --z2:#EFE4F1; --pencere:rgba(255,255,255,.82); --kat:#FFFFFF;
+  --ink:#12151B; --ink2:#4E5563; --ink3:#8A91A0; --cizgi:rgba(18,21,27,.07); --secim:rgba(18,21,27,.055);
+  --sinav:#2F6FEB; --saglik:#0E9888; --gelisim:#D98309; --merkez:#7A5CF0;
+  --sans:"Albert Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ --bg:#0B0C10; --z1:#131A2A; --z2:#1D1426; --pencere:rgba(22,24,31,.82); --kat:#1B1E26;
+    --ink:#EEF0F4; --ink2:#A9AFBB; --ink3:#6E7584; --cizgi:rgba(255,255,255,.07); --secim:rgba(255,255,255,.06);
+    --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#0B0C10; --z1:#131A2A; --z2:#1D1426; --pencere:rgba(22,24,31,.82); --kat:#1B1E26;
+  --ink:#EEF0F4; --ink2:#A9AFBB; --ink3:#6E7584; --cizgi:rgba(255,255,255,.07); --secim:rgba(255,255,255,.06);
+  --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(900px 600px at 20% 10%,var(--z1),transparent 70%),radial-gradient(800px 600px at 90% 90%,var(--z2),transparent 70%),var(--bg);
+  background-color:var(--bg);color:var(--ink);font:15px/1.4 var(--sans);-webkit-font-smoothing:antialiased;padding-inline:24px;min-height:100vh}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+kbd{font:500 11px var(--mono);color:var(--ink3);background:var(--secim);border-radius:5px;padding:2px 6px;min-width:20px;text-align:center;display:inline-block}
+.kap{max-width:720px;margin:0 auto;padding-block:12vh 48px}
+.ust{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;color:var(--ink3);font-size:13px;padding-inline:6px}
+.ust b{color:var(--ink);font-weight:600}
+
+.pencere{background:var(--pencere);backdrop-filter:blur(28px) saturate(1.4);-webkit-backdrop-filter:blur(28px) saturate(1.4);border-radius:20px;
+  box-shadow:0 0 0 1px var(--cizgi),0 30px 80px -30px rgba(10,14,30,.35);overflow:hidden}
+.girdi{display:flex;align-items:center;gap:14px;padding:0 20px;height:68px;border-bottom:1px solid var(--cizgi)}
+.girdi svg{color:var(--ink3);flex:none}
+.girdi input{flex:1;min-width:0;height:100%;border:0;background:none;outline:none;font:500 20px var(--sans);color:var(--ink)}
+.girdi input::placeholder{color:var(--ink3)}
+.liste{max-height:min(460px,60vh);overflow:auto;padding:8px}
+.grup{font:500 12px var(--sans);color:var(--ink3);padding:10px 12px 6px}
+.oge{display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center;width:100%;height:48px;padding:0 12px;border-radius:12px}
+.oge[aria-selected="true"]{background:var(--secim)}
+.simge{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:color-mix(in oklab,var(--r) 14%,transparent);color:var(--r)}
+.simge i{width:8px;height:8px;border-radius:50%;background:var(--r)}
+.oge .ad{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oge .ad small{color:var(--ink3);font-weight:400;margin-left:8px;font-size:14px}
+.oge .sag{display:flex;gap:8px;align-items:center;font:12px var(--mono);color:var(--ink3)}
+
+.anladim{margin:8px;border-radius:14px;background:var(--kat);box-shadow:0 0 0 1px var(--cizgi);padding:16px}
+.anladim .k{font:500 12px var(--sans);color:var(--ink3);display:flex;justify-content:space-between}
+.anladim .k em{font-style:normal;font-family:var(--mono);color:var(--r)}
+.anladim h3{margin:8px 0 12px;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.alanlar{display:flex;flex-wrap:wrap;gap:8px}
+.alanlar span{height:28px;padding:0 10px;border-radius:8px;background:var(--secim);font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.alanlar span b{font-weight:600}
+.alanlar span i{width:7px;height:7px;border-radius:50%;background:var(--r)}
+.anladim .d{display:flex;gap:8px;margin-top:14px}
+.anladim .d button{height:36px;padding:0 14px;border-radius:10px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:8px}
+.anladim .d .evet{background:var(--ink);color:var(--kat)}
+.anladim .d .evet kbd{background:transparent;color:inherit;opacity:.6;padding:0}
+.anladim .d .hayir{background:var(--secim)}
+.anladim.soru h3{color:var(--ink2)}
+.secenek{display:flex;flex-wrap:wrap;gap:8px}
+.secenek button{height:32px;padding:0 12px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--cizgi);font-size:13px;font-weight:500}
+.secenek button:hover{background:var(--secim)}
+
+.alt{display:flex;justify-content:space-between;align-items:center;height:44px;padding:0 16px;border-top:1px solid var(--cizgi);font-size:12px;color:var(--ink3);gap:12px}
+.alt .tuslar{display:flex;gap:14px;align-items:center}
+.alt .tuslar span{display:inline-flex;gap:6px;align-items:center}
+.alt .dort{display:flex;gap:3px}
+.alt .dort i{width:6px;height:6px;border-radius:2px}
+
+.ozet{display:flex;justify-content:center;gap:28px;margin-top:22px;font-size:13px;color:var(--ink2);flex-wrap:wrap}
+.ozet span{display:inline-flex;align-items:center;gap:8px}
+.ozet i{width:7px;height:7px;border-radius:50%;background:var(--r)}
+.ozet b{color:var(--ink);font-weight:600}
+
+@media (max-width:560px){
+  body{padding-inline:12px}
+  .kap{padding-top:32px}
+  .girdi{height:60px;padding:0 16px}
+  .girdi input{font-size:17px}
+  .oge .ad small{display:none}
+  .alt .tuslar span:nth-child(3){display:none}
+}
+</style>
+</head>
+<body>
+<div class="kap">
+  <div class="ust"><span><b>LifeOS</b> · Perşembe 24 Eylül</span><span>14:10</span></div>
+  <div class="pencere" role="dialog" aria-label="Komut">
+    <label class="girdi">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input id="girdi" type="text" autocomplete="off" spellcheck="false" aria-label="Ne yapmak istersin" placeholder="Ne yapmak istersin?">
+      <kbd>⌘K</kbd>
+    </label>
+    <div id="anla"></div>
+    <div class="liste" id="liste" role="listbox"></div>
+    <div class="alt">
+      <span class="tuslar"><span><kbd>↑</kbd><kbd>↓</kbd> gez</span><span><kbd>↵</kbd> seç</span><span><kbd>esc</kbd> temizle</span></span>
+      <span class="dort" aria-hidden="true"><i style="background:var(--sinav)"></i><i style="background:var(--saglik)"></i><i style="background:var(--gelisim)"></i><i style="background:var(--merkez)"></i></span>
+    </div>
+  </div>
+  <div class="ozet">
+    <span style="--r:var(--sinav)"><i></i>Sınav <b>1/2</b></span>
+    <span style="--r:var(--saglik)"><i></i>Sağlık <b>2/4</b></span>
+    <span style="--r:var(--gelisim)"><i></i>Gelişim <b>20/50</b></span>
+  </div>
+</div>
+<script>
+(function(){
+  var O = [
+    { g:'Öneri', r:'merkez', ad:'Akşam bloğu tekrara ayrılsın', k:'tekrar borcu %34', s:'Uygula' },
+    { g:'Sıradaki', r:'gelisim', ad:'Yabancı Dil', k:'14:30 · 30 dk', s:'Başla' },
+    { g:'Hızlı kayıt', r:'sinav', ad:'Soru ekle', k:'Sınav', t:'S' },
+    { g:'Hızlı kayıt', r:'saglik', ad:'Uyku gir', k:'Sağlık', t:'U' },
+    { g:'Hızlı kayıt', r:'gelisim', ad:'Oturum ekle', k:'Gelişim', t:'O' },
+    { g:'Hızlı kayıt', r:'saglik', ad:'Tahlil gir', k:'Sağlık', t:'T' },
+    { g:'Git', r:'sinav', ad:'Sınav', k:'268 gün · 1/2 blok', s:'→' },
+    { g:'Git', r:'saglik', ad:'Sağlık', k:'toparlanma 72', s:'→' },
+    { g:'Git', r:'gelisim', ad:'Gelişim', k:'20/50 dk', s:'→' },
+    { g:'Dikkat', r:'merkez', ad:'Yedek al', k:'hiç alınmadı', s:'→' },
+    { g:'Dikkat', r:'sinav', ad:'Denemeleri analiz et', k:'11 bekliyor', s:'→' }
+  ];
+  var ORNEK = ['45 dk gitar', 'bu hafta ara', '24 soru 18 doğru', 'dün 6 saat uyudum', 'diksiyon istemiyorum'];
+  var inp = document.getElementById('girdi'), liste = document.getElementById('liste'), anla = document.getElementById('anla');
+  var sec = 0, gor = O;
+  var tr = function(s){ return s.toLocaleLowerCase('tr'); };
+
+  /* Kural tabanli ayristirma: tanidigi kalibi alanlara boler, tanimadigini SORAR. */
+  function coz(q){
+    var s = tr(q).trim(), m;
+    if(!s) return null;
+    if((m = s.match(/^(\d+)\s*(dk|dakika)\s+(gitar|piyano|müzik|kelime|okuma|yazı|felsefe|tarih|diksiyon)/))){
+      var dis = { gitar:'Müzik', piyano:'Müzik', 'müzik':'Müzik', kelime:'Yabancı Dil', okuma:'Okuma', 'yazı':'Yazı', felsefe:'Felsefe', tarih:'Tarih', diksiyon:'Diksiyon' }[m[3]];
+      return { r:'gelisim', seviye:'küçük', h:m[1] + ' dakika ' + dis.toLocaleLowerCase('tr') + ' oturumu', a:[['Gelişim',1],['Disiplin',dis],['Süre',m[1] + ' dk'],['Kaynak','ölçüldü']], e:'Kaydet' };
+    }
+    if((m = s.match(/^(\d+)\s*soru\s+(\d+)\s*doğru/))){
+      if(+m[2] > +m[1]) return { soru:true, h:'Doğru sayısı soru sayısından büyük olamaz.', sec:['' + m[1] + ' soru ' + m[1] + ' doğru', m[2] + ' soru ' + m[1] + ' doğru'] };
+      return { r:'sinav', seviye:'küçük', h:m[1] + ' soru, ' + m[2] + ' doğru', a:[['Sınav',1],['Soru',m[1]],['Doğru',m[2]],['Ders','sorulacak']], e:'Kaydet' };
+    }
+    if(/bu hafta ara/.test(s)) return { r:'sinav', seviye:'orta', h:'Bu hafta ara haftası olsun', a:[['Sınav',1],['Tarih','24–27 Eylül'],['Etki','4 blok boşalır'],['Geri dönüş','var']], e:'Önizle' };
+    if((m = s.match(/(\d+)\s*saat\s+uyu/))) return { r:'saglik', seviye:'küçük', h:'Dün gece ' + m[1] + ' saat uyku', a:[['Sağlık',1],['Uyku',m[1] + ',0 sa'],['Tarih','23 Eylül'],['Kaynak','ölçüldü']], e:'Kaydet' };
+    if(/istemiyorum|kapat/.test(s)) return { r:'gelisim', seviye:'orta', h:'Diksiyon bölümü kapansın', a:[['Gelişim',1],['Bölüm','Diksiyon'],['Veri','silinmez'],['Geri açma','Ayarlar']], e:'Önizle' };
+    if(s.length > 3 && !O.some(function(o){ return tr(o.ad).indexOf(s) >= 0 || tr(o.k).indexOf(s) >= 0; }))
+      return { soru:true, h:'Bunu anlayamadım. Şunlardan biri mi?', sec:['45 dk gitar', '24 soru 18 doğru', 'bu hafta ara'] };
+    return null;
+  }
+  function anlaCiz(q){
+    var c = coz(q);
+    if(!c){ anla.innerHTML = ''; return; }
+    if(c.soru){
+      anla.innerHTML = '<div class="anladim soru"><div class="k"><span>Tahmin etmiyorum</span></div><h3>' + c.h + '</h3><div class="secenek">' +
+        c.sec.map(function(x){ return '<button data-dene="' + x + '">' + x + '</button>'; }).join('') + '</div></div>';
+      return;
+    }
+    anla.innerHTML = '<div class="anladim" style="--r:var(--' + c.r + ')"><div class="k"><span>Anladığım</span><em>' + c.seviye + ' aksiyon</em></div><h3>' + c.h + '</h3>' +
+      '<div class="alanlar">' + c.a.map(function(x){ return x[1] === 1 ? '<span><i></i><b>' + x[0] + '</b></span>' : '<span>' + x[0] + ' <b>' + x[1] + '</b></span>'; }).join('') + '</div>' +
+      '<div class="d"><button class="evet">' + c.e + ' <kbd>↵</kbd></button><button class="hayir">Düzelt</button></div></div>';
+  }
+  function listeCiz(q){
+    var s = tr(q || '');
+    gor = O.filter(function(o){ return !s || tr(o.ad).indexOf(s) >= 0 || tr(o.k).indexOf(s) >= 0 || tr(o.g).indexOf(s) >= 0; });
+    if(coz(q)) gor = gor.slice(0, 3);
+    sec = Math.min(sec, Math.max(0, gor.length - 1));
+    var h = '', son = '';
+    gor.forEach(function(o, i){
+      if(o.g !== son){ h += '<div class="grup">' + o.g + '</div>'; son = o.g; }
+      h += '<button class="oge" role="option" data-i="' + i + '" aria-selected="' + (i === sec) + '" style="--r:var(--' + o.r + ')">' +
+        '<span class="simge"><i></i></span><span class="ad">' + o.ad + '<small>' + o.k + '</small></span>' +
+        '<span class="sag">' + (o.t ? '<kbd>' + o.t + '</kbd>' : o.s) + '</span></button>';
+    });
+    liste.innerHTML = h;
+  }
+  inp.addEventListener('input', function(){ sec = 0; anlaCiz(inp.value); listeCiz(inp.value); });
+  inp.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowDown'){ sec = Math.min(gor.length - 1, sec + 1); listeCiz(inp.value); e.preventDefault(); }
+    if(e.key === 'ArrowUp'){ sec = Math.max(0, sec - 1); listeCiz(inp.value); e.preventDefault(); }
+    if(e.key === 'Escape'){ inp.value = ''; anlaCiz(''); listeCiz(''); }
+  });
+  anla.addEventListener('click', function(e){
+    var b = e.target.closest('[data-dene]'); if(!b) return;
+    inp.value = b.dataset.dene; anlaCiz(inp.value); listeCiz(inp.value); inp.focus();
+  });
+  liste.addEventListener('mousemove', function(e){
+    var b = e.target.closest('.oge'); if(!b || +b.dataset.i === sec) return; sec = +b.dataset.i; listeCiz(inp.value);
+  });
+  // yer tutucu ornekleri doner
+  var j = 0;
+  setInterval(function(){ if(!inp.value){ inp.placeholder = 'Ne yapmak istersin?  örn. «' + ORNEK[j++ % ORNEK.length] + '»'; } }, 2600);
+  // acilista bir ornek dolu gelir: arac ne yaptigini gostersin
+  inp.value = '45 dk gitar'; anlaCiz(inp.value); listeCiz('');
+})();
+</script>
+</body>
+</html>

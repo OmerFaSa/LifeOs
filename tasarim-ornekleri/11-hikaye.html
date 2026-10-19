@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>11 · Hikâye</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* Tek dunya: gece sahnesi, ortada dikey hikaye karesi. */
+:root{
+  --bg:#0A0A0E; --ink:#FFFFFF; --ink2:rgba(255,255,255,.78); --ink3:rgba(255,255,255,.55);
+  --sans:"Red Hat Display",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 var(--sans);-webkit-font-smoothing:antialiased;display:grid;place-items:center;overflow:hidden;padding-inline:16px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:12px}
+
+.sahne{position:relative;display:flex;align-items:center;gap:28px;height:min(86vh,780px)}
+.hayalet{height:78%;aspect-ratio:9/16;border-radius:22px;opacity:.28;filter:blur(1px) saturate(.8);overflow:hidden;position:relative;flex:none}
+.hayalet .kare{position:absolute;inset:0}
+.cerceve{position:relative;height:100%;aspect-ratio:9/16;max-width:calc(100vw - 32px);border-radius:28px;overflow:hidden;box-shadow:0 40px 100px -40px rgba(0,0,0,.9);flex:none;user-select:none;touch-action:manipulation}
+.kare{position:absolute;inset:0;padding:64px 28px 32px;display:flex;flex-direction:column;opacity:0;transition:opacity .4s;background:var(--zemin)}
+.kare.acik{opacity:1}
+.kare::before{content:"";position:absolute;width:120%;aspect-ratio:1;border-radius:50%;left:-10%;top:-30%;background:radial-gradient(closest-side,var(--isik),transparent);opacity:.55;animation:suz 9s ease-in-out infinite alternate}
+@keyframes suz{to{transform:translate(12%,18%) scale(1.1)}}
+.kare>*{position:relative}
+.bolum{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--ink2)}
+.bolum i{width:8px;height:8px;border-radius:50%;background:#fff}
+.buyuk{margin-top:auto;font-size:132px;font-weight:900;letter-spacing:-.06em;line-height:.85}
+.buyuk small{display:block;font-size:22px;font-weight:600;letter-spacing:-.01em;margin-top:14px;color:var(--ink2)}
+.baslik{margin-top:auto;font-size:52px;font-weight:800;letter-spacing:-.035em;line-height:1;text-wrap:balance}
+.satirlar{list-style:none;margin:24px 0 0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:17px;color:var(--ink2)}
+.satirlar b{color:#fff;font-weight:700}
+.eylem{margin-top:28px;display:flex;gap:10px}
+.eylem button{flex:1;height:54px;border-radius:16px;background:#fff;color:#111;font-weight:800;font-size:16px}
+.eylem button.ikincil{flex:0 0 auto;padding:0 22px;background:rgba(255,255,255,.16);color:#fff}
+
+.cubuk{position:absolute;left:12px;right:12px;top:12px;display:flex;gap:4px;z-index:3}
+.cubuk span{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden}
+.cubuk span i{display:block;height:100%;width:0;background:#fff}
+.cubuk span.bitti i{width:100%}
+.kimlik{position:absolute;left:16px;right:16px;top:26px;display:flex;align-items:center;gap:10px;z-index:3;font-size:13px;font-weight:600}
+.kimlik .m{display:grid;grid-template-columns:repeat(2,5px);gap:2px}
+.kimlik .m b{width:5px;height:5px;border-radius:1.5px;background:#fff;display:block;opacity:.9}
+.kimlik span{color:var(--ink3);font-weight:500}
+.kimlik .dur{margin-left:auto;width:28px;height:28px;display:grid;place-items:center;border-radius:50%}
+.dokun{position:absolute;top:60px;bottom:140px;width:40%;z-index:2}
+.dokun.sol{left:0}.dokun.sag{right:0}
+.ipucu{position:fixed;bottom:18px;left:0;right:0;text-align:center;font-size:12px;color:rgba(255,255,255,.4)}
+.pm{display:inline-block;width:10px;height:10px;border-radius:50%;margin-left:8px;vertical-align:.6em;color:rgba(255,255,255,.7)}
+.pm.o{background:currentColor}.pm.h{background:linear-gradient(90deg,currentColor 50%,transparent 50%);box-shadow:inset 0 0 0 1.5px currentColor}.pm.t{box-shadow:inset 0 0 0 2px currentColor}
+.pm.k{width:7px;height:7px;vertical-align:middle;margin-left:4px}
+
+@media (max-width:900px){ .hayalet{display:none} }
+@media (max-width:520px){
+  body{padding:0}
+  .sahne{height:100%;width:100%}
+  .cerceve{height:100%;width:100%;aspect-ratio:auto;max-width:none;border-radius:0}
+  .buyuk{font-size:112px}
+  .baslik{font-size:44px}
+  .ipucu{display:none}
+}
+@media (prefers-reduced-motion:reduce){ .kare::before{animation:none} .kare{transition:none} }
+</style>
+</head>
+<body>
+<div class="sahne">
+  <div class="hayalet" id="h-onceki" aria-hidden="true"></div>
+  <div class="cerceve" id="cerceve" aria-roledescription="hikâye" aria-label="Günün özeti">
+    <div class="cubuk" id="cubuk"></div>
+    <div class="kimlik"><span class="m" aria-hidden="true"><b></b><b></b><b></b><b></b></span>LifeOS <span>· Per 24 Eyl</span>
+      <button class="dur" id="dur" aria-label="Duraklat"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="2" y="1" width="3" height="10" rx="1" fill="#fff"/><rect x="7" y="1" width="3" height="10" rx="1" fill="#fff"/></svg></button>
+    </div>
+    <div id="kareler"></div>
+    <button class="dokun sol" id="sol" aria-label="Önceki"></button>
+    <button class="dokun sag" id="sag" aria-label="Sonraki"></button>
+  </div>
+  <div class="hayalet" id="h-sonraki" aria-hidden="true"></div>
+</div>
+<p class="ipucu">sağa dokun · sonraki &nbsp; ← → &nbsp; basılı tut · dur</p>
+<script>
+(function(){
+  var K = [
+    { z:'linear-gradient(165deg,#1B1E2B,#0E0F16)', i:'#4F5BD5', b:'Bugün', h:'<div class="baslik">Dört iş kaldı. Sıradaki yarım saat sonra.</div><ul class="satirlar"><li><b>3 iş</b> bitti, <b>4</b> kaldı</li><li>Yedek hiç alınmadı</li></ul><div class="eylem"><button>Günü aç</button></div>' },
+    { z:'linear-gradient(165deg,#2F6FEB,#1537A0)', i:'#8DB2FF', b:'Sınav', h:'<div class="buyuk">268<i class="pm t" title="tahmin"></i><small>gün kaldı · TYT</small></div><ul class="satirlar"><li>Blok <b>1/2</b> · 24 soru, <b>18 doğru</b></li><li>Son net <b>82</b><i class="pm h k" title="hesaplandı"></i> · seri <b>11 gün</b></li></ul><div class="eylem"><button>Paragraf · 20:30</button></div>' },
+    { z:'linear-gradient(165deg,#0FA08D,#07564D)', i:'#6FF0D6', b:'Sağlık', h:'<div class="buyuk">72<i class="pm h" title="hesaplandı"></i><small>toparlanma · plan uygun</small></div><ul class="satirlar"><li>Uyku <b>7,0 sa</b><i class="pm o k" title="ölçüldü"></i> · asgari <b>2/4</b></li><li>Kalori <b>—</b> veri yok</li></ul><div class="eylem"><button>Ölçüm gir</button></div>' },
+    { z:'linear-gradient(165deg,#EE9A1C,#A45708)', i:'#FFD48A', b:'Gelişim', h:'<div class="buyuk">20<small>/ 50 dakika · reçete</small></div><ul class="satirlar"><li>Sıradaki <b>Yabancı Dil</b> · 14:30</li><li>Retansiyon <b>%50</b><i class="pm h k" title="hesaplandı"></i> · taban %60</li></ul><div class="eylem"><button>Başla</button></div>' },
+    { z:'linear-gradient(165deg,#7A5CF0,#3B25A8)', i:'#C3B4FF', b:'Merkez önerisi', h:'<div class="baslik">Akşam bloğu tekrara ayrılsın.</div><ul class="satirlar"><li>Tekrar borcu <b>%34</b> · eşik %10</li><li>Tek günlük · geri alınabilir</li></ul><div class="eylem"><button>Uygula</button><button class="ikincil">Geç</button></div>' }
+  ];
+  var SURE = 5200, i = 0, bas = 0, dur = false, kalan = SURE;
+  var kaps = document.getElementById('kareler'), cubuk = document.getElementById('cubuk');
+  kaps.innerHTML = K.map(function(k, j){ return '<section class="kare" style="--zemin:' + k.z + ';--isik:' + k.i + '" aria-hidden="true"><div class="bolum"><i></i>' + k.b + '</div>' + k.h + '</section>'; }).join('');
+  cubuk.innerHTML = K.map(function(){ return '<span><i></i></span>'; }).join('');
+  var kareler = kaps.children, seg = cubuk.children;
+  var az = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function hayalet(el, j){
+    if(j < 0 || j >= K.length){ el.style.visibility = 'hidden'; return; }
+    el.style.visibility = 'visible';
+    el.innerHTML = '<section class="kare acik" style="--zemin:' + K[j].z + ';--isik:' + K[j].i + ';padding:40px 18px 20px">' + '<div class="bolum"><i></i>' + K[j].b + '</div></section>';
+  }
+  function git(j){
+    i = Math.max(0, Math.min(K.length - 1, j));
+    for(var x = 0; x < K.length; x++){
+      kareler[x].classList.toggle('acik', x === i); kareler[x].setAttribute('aria-hidden', x !== i);
+      seg[x].className = x < i ? 'bitti' : ''; seg[x].firstChild.style.width = x < i ? '100%' : '0';
+    }
+    hayalet(document.getElementById('h-onceki'), i - 1);
+    hayalet(document.getElementById('h-sonraki'), i + 1);
+    kalan = SURE; bas = performance.now();
+  }
+  function kare(now){
+    if(!dur && !az){
+      var gecen = SURE - kalan + (now - bas);
+      var p = Math.min(1, gecen / SURE);
+      seg[i].firstChild.style.width = (p * 100) + '%';
+      if(p >= 1){ if(i < K.length - 1) git(i + 1); else { dur = true; } }
+    }
+    requestAnimationFrame(kare);
+  }
+  function durdur(){ if(dur) return; dur = true; kalan -= performance.now() - bas; }
+  function surdur(){ if(!dur) return; dur = false; bas = performance.now(); }
+  document.getElementById('sag').onclick = function(){ git(i + 1); };
+  document.getElementById('sol').onclick = function(){ git(i - 1); };
+  document.getElementById('dur').onclick = function(){ dur ? surdur() : durdur(); };
+  var cer = document.getElementById('cerceve');
+  cer.addEventListener('pointerdown', function(e){ if(e.target.closest('.eylem')) return; durdur(); });
+  cer.addEventListener('pointerup', surdur);
+  document.addEventListener('keydown', function(e){ if(e.key === 'ArrowRight') git(i + 1); if(e.key === 'ArrowLeft') git(i - 1); });
+  git(0);
+  if(az) seg[0].firstChild.style.width = '100%';
+  requestAnimationFrame(kare);
+})();
+</script>
+</body>
+</html>
