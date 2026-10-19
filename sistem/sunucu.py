@@ -558,18 +558,27 @@ html.giris-hazir:not(.hesap-kapi-acik) :is(.kart__ust, .kart__ozet, .kart__alt){
   });
   var hkm = document.querySelector('.kart[data-hkm]');
   var hkmDugme = hkm.querySelector('.dugme');
-  function hkmCiz(acik){
+  function hkmCiz(acik, eski){
     yak(hkm, acik);
-    hkmDugme.textContent = acik ? 'Aç' : 'Başlat';
+    hkmDugme.textContent = acik ? (eski ? 'Yeniden başlat' : 'Aç') : 'Başlat';
     hkmDugme.disabled = false;
+    hkm.dataset.eski = eski ? '1' : '';
+    var not = hkm.querySelector('.hkm-eski');
+    if(eski && !not){ not = document.createElement('small'); not.className = 'hkm-eski'; not.textContent = 'HKM eski sürümle çalışıyor; yeni kod için yeniden başlat.'; hkm.appendChild(not); }
+    if(!eski && not) not.remove();
   }
-  fetch('/api/durum').then(function(r){ return r.json(); }).then(function(d){ hkmCiz(!!d.hkm); }).catch(function(){ hkmCiz(false); });
+  fetch('/api/durum').then(function(r){ return r.json(); }).then(function(d){ hkmCiz(!!d.hkm, !!d.hkm_eski); }).catch(function(){ hkmCiz(false); });
   hkm.addEventListener('click', function(e){
     e.preventDefault();
     if(hkmDugme.disabled) return;
     /* Sekme tiklamayla ayni anda acilir (acilir pencere engeline takilmaz);
        HKM hazir olunca adrese gider. Eslesme penceresi acildigi icin
        anahtar sorulmaz. */
+    if(hkm.dataset.eski === '1'){
+      hkmDugme.disabled = true; hkmDugme.textContent = 'Yeniden başlatılıyor…';
+      post('/api/hkm/yeniden').then(function(){ hkmCiz(true, false); }).catch(function(){ hkmCiz(true, true); });
+      return;
+    }
     var sekme = window.open('', '_blank');
     hkmDugme.disabled = true; hkmDugme.textContent = 'Açılıyor…';
     post('/api/hkm').then(function(s){
@@ -681,6 +690,43 @@ def hkm_ac(calistir=subprocess.run):
     return {"ok": False, "mesaj": "HKM açılamadı. Ayrıntı: HKM klasöründeki günlük."}
 
 
+def hkm_kod_zamani():
+    """HKM'nin Python dosyalarinin en yeni degisme zamani (epoch)."""
+    en = 0.0
+    for klasor in (os.path.join(KOK, "HKM"), os.path.join(KOK, "HKM", "core")):
+        try:
+            for ad in os.listdir(klasor):
+                if ad.endswith(".py"):
+                    en = max(en, os.path.getmtime(os.path.join(klasor, ad)))
+        except OSError:
+            pass
+    return en
+
+
+def hkm_eski(timeout=1.0):
+    """Calisan HKM, dosyalardaki koddan eski mi? HKM /api/health «baslangic»
+    (surecin acilis zamani) dondurur; bilinmiyorsa None (eski sayilmaz)."""
+    try:
+        with urllib.request.urlopen("http://%s:%d/api/health" % (HOST, HKM_PORT), timeout=timeout) as r:
+            b = json.loads(r.read().decode("utf-8") or "{}").get("baslangic")
+    except Exception:
+        return None
+    return bool(isinstance(b, (int, float)) and hkm_kod_zamani() > b + 2)
+
+
+def hkm_yeniden(calistir=subprocess.run):
+    """HKM'yi durdurup KENDI baslaticisiyla yeniden acar (yeni kod yuklensin)."""
+    betik = os.path.join(KOK, "HKM", "baslat.py")
+    if not os.path.exists(betik):
+        return {"ok": False, "mesaj": "HKM klasörü bulunamadı."}
+    try:
+        calistir([sys.executable, betik, "--dur"], cwd=os.path.dirname(betik), capture_output=True, timeout=60,
+                 env=dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1", PYTHONDONTWRITEBYTECODE="1"))
+    except Exception:
+        pass
+    return hkm_ac(calistir)
+
+
 def yeniden_baslat_zamanla(popen=subprocess.Popen, isletim=None):
     """Sistemi (bu sunucu dahil) yeniden baslatir. Is AYRI bir surece
     verilir: bu surec kendini kapatamaz. Windows'ta `start` araciligiyla
@@ -759,12 +805,14 @@ class Giris(SimpleHTTPRequestHandler):
         yol = self.path.split("?", 1)[0]
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
-        if yol not in ("/api/guncelle", "/api/hkm", "/api/yeniden"):
+        if yol not in ("/api/guncelle", "/api/hkm", "/api/hkm/yeniden", "/api/yeniden"):
             return self.send_error(404)
         if not guncelleme_izinli(self.headers):
             return self._json(403, {"durum": "engel", "mesaj": "İzin yok."})
         if yol == "/api/hkm":
             return self._json(200, hkm_ac())
+        if yol == "/api/hkm/yeniden":
+            return self._json(200, hkm_yeniden())
         if yol == "/api/yeniden":
             yeniden_baslat_zamanla()
             return self._json(200, {"ok": True})
@@ -772,6 +820,10 @@ class Giris(SimpleHTTPRequestHandler):
             # yedekle=1 yalniz kutudaki «Yedekle ve güncelle» dugmesinden gelir.
             sonuc = guncelle.uygula(yedekle="yedekle=1" in self.path)
             _GUNCEL.update(zaman=0.0, veri=None)
+        # HKM'nin kodu degistiyse ve HKM aciksa yeni kodla yeniden acilir (arka planda).
+        if sonuc.get("durum") == "guncellendi" and sonuc.get("hkm_degisti") and hkm_ayakta():
+            threading.Thread(target=hkm_yeniden, daemon=True).start()
+            sonuc["mesaj"] = (sonuc.get("mesaj") or "") + " HKM yeni sürümle yeniden başlatılıyor."
         return self._json(200, sonuc)
 
     def do_GET(self):
@@ -783,7 +835,8 @@ class Giris(SimpleHTTPRequestHandler):
         if yol == "/api/guncelleme":
             return self._json(200, guncelleme_durumu(taze="taze=1" in self.path))
         if yol == "/api/durum":
-            return self._json(200, {"hkm": hkm_ayakta()})
+            ayakta = hkm_ayakta()
+            return self._json(200, {"hkm": ayakta, "hkm_eski": bool(ayakta and hkm_eski())})
         if yol.startswith("/logo/"):
             return self._logo(yol[len("/logo/"):])
         if yol.startswith("/marka/"):
@@ -844,6 +897,15 @@ class KuyrukluSunucu(ThreadingHTTPServer):
     gecikince kuyruk tasar; Windows tasani REDDEDER ve sayfa bir betigi hic
     yuklemez — uygulama yarim acilir. tools/kuyruk_test.py sinar."""
     request_queue_size = 128
+
+    def handle_error(self, request, client_address):
+        """Tarayici sayfayi kapatip baglantiyi kestiyse (WinError 10053/10054,
+        BrokenPipe) bu bir hata degildir; gunluge 30 satirlik yigin dusmesin
+        (lifeos-sunucu.log, 2026-10-19). Baska her hata eskisi gibi yazilir."""
+        import sys as _sys
+        if isinstance(_sys.exc_info()[1], (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)):
+            return
+        super().handle_error(request, client_address)
 
 
 def _sunucu_kur(klasor, port):

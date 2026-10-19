@@ -88,7 +88,9 @@ ESP.Parse = (function(){
     const ham = String(text || '').trim();
     if(!ham) return { rows:[], unmatched:[] };
 
-    const parcalar = ham.split(AYRAC).map(p => p.trim()).filter(Boolean);
+    /* Tek kaynak: brand/ortak/giris.js bol() (2026-10-19); yoksa yerel kural. */
+    const G = window.LIFEOS && window.LIFEOS.GIRIS;
+    const parcalar = G && typeof G.bol === 'function' ? G.bol(ham) : ham.split(AYRAC).map(p => p.trim()).filter(Boolean);
     const rows = [], unmatched = [];
 
     parcalar.forEach(parca => {

@@ -24,6 +24,14 @@ try:
 except ImportError:                                  # pragma: no cover
     pass
 try:
+    from core import kasa as _kasa
+    _BELLEK_KASA = {}
+    _kasa.ARKA = {"yaz": lambda h, d: _BELLEK_KASA.__setitem__(h, d) or True,
+                  "oku": lambda h: _BELLEK_KASA.get(h), "sil": lambda h: _BELLEK_KASA.pop(h, None) is not None}
+    _kasa.destek = lambda: True
+except ImportError:                                  # pragma: no cover
+    pass
+try:
     from core import ses as _ses
 
     def _piper_yok(*a, **k):

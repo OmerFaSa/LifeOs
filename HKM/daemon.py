@@ -111,7 +111,7 @@ from urllib.parse import parse_qs, quote, unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import motor, tarife  # noqa: E402
+from core import kutu, motor, tarife  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, models, motto, ollama, outbox, patron,
@@ -865,7 +865,9 @@ class Handler(BaseHTTPRequestHandler):
         if u.path.startswith("/brand/"):
             return self._send_brand(u.path[len("/brand/"):])
         if u.path == "/api/health":
-            return self._send(200, {"ok": True, "service": "hkm"})
+            # «baslangic»: surecin acilis zamani; panel kodun daha yeni olup
+            # olmadigina bakar (eski surumle calisan HKM uyarisi).
+            return self._send(200, {"ok": True, "service": "hkm", "baslangic": BASLANGIC})
         if u.path == "/api/wa/webhook":
             """Meta'nin kurulum dogrulamasi. Bearer TASIYAMAZ (istegi Meta
             yollar), bu yuzden tek kapi dogrulama jetonudur: yanlis jetonda
@@ -1172,6 +1174,15 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, dinle.durum(self.con, self.server.config))
         if u.path == "/api/ses/durum":
             return self._send(200, ses.durum(self.con, self.server.config))
+        if u.path == "/api/kasa":
+            from core import kasa
+            return self._send(200, kasa.durum(self.server.config))
+        if u.path == "/api/kutu":
+            # Moduller arasi kayit kutusu (core/kutu.py): istenen modulun kayitlari verilir ve silinir.
+            m = (q.get("modul") or [""])[0]
+            if m not in kutu.MODULLER:
+                return self._send(400, {"error": "modul ays, spi ya da esp olmali"})
+            return self._send(200, {"kayitlar": kutu.al(self.server, m)})
         if u.path == "/api/ollama":
             # Ayarlar acilinca TAZE tarama: kullanici simdiyi gorur.
             t = ollama.tara(self.server.config)
@@ -1790,6 +1801,28 @@ class Handler(BaseHTTPRequestHandler):
             if not r["ok"]:
                 return self._send(503, {"ok": False, "notlar": r["notlar"]})
             return self._send_ses(r["wav"], r["motor"], r.get("notlar"))
+        if u.path in ("/api/kasa/tasi", "/api/kasa/geri"):
+            from core import kasa
+            if u.path.endswith("tasi"):
+                yeni, n, hata = kasa.tasi(self.server.config)
+                if hata:
+                    return self._send(409, {"ok": False, "note": hata})
+                okunamayan = []
+            else:
+                yeni, n, okunamayan = kasa.geri(self.server.config)
+            if n:
+                _ayar_yaz(self.server, yeni)
+            return self._send(200, {"ok": True, "n": n, "okunamayan": okunamayan, "durum": kasa.durum(self.server.config)})
+        if u.path == "/api/kutu":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = _nesne(ham)
+            except ValueError:
+                body = {}
+            r = kutu.ekle(self.server, body.get("modul"), body.get("metin"), body.get("kaynak"))
+            return self._send(200 if r["ok"] else 400, r)
         if u.path == "/api/ollama/bagla":
             ham, hata = self._read_body()
             if hata:
@@ -1909,6 +1942,7 @@ def _ollama_geri(srv):
 OLLAMA_ARALIK_SN = 300
 
 
+BASLANGIC = time.time()
 _BASLANGIC_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?")
 
 
@@ -2050,12 +2084,31 @@ def main():
                         "acik (%s)" % zaman.get("morning") if zaman.get("enabled")
                         else "kapali"))
     try:
-        srv.serve_forever()
+        _surekli_hizmet(srv)
     except KeyboardInterrupt:
         pass
     finally:
         srv.dur.set()
     return 0
+
+
+def _surekli_hizmet(srv, bekle=time.sleep, en_cok=None):
+    """serve_forever'i gecici ag hatasinda yeniden baslatir. Sahada
+    (daemon.log, 2026-09-29) Windows'un «yeterli arabellek alani yok»
+    (WinError 10055) hatasi select() icinden firladi ve HKM tamamen kapandi;
+    moduller Merkez'i kaybetti, kimse yeniden acmadi. Ag hatasi (OSError)
+    yazilir, kisa beklenir, sunucu surer. `en_cok`: testler icin tur siniri."""
+    tur = 0
+    while True:
+        try:
+            srv.serve_forever()
+            return
+        except OSError as e:
+            tur += 1
+            sys.stderr.write("[hkm] ag hatasi, sunucu surduruluyor (%d): %s\n" % (tur, e))
+            if en_cok is not None and tur >= en_cok:
+                return
+            bekle(min(5, tur))
 
 
 if __name__ == "__main__":

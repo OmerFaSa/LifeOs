@@ -49,6 +49,12 @@
 
 import re
 import sys
+# Windows konsolu (cp1254) «✓» yazamayip cokuyordu (2026-10-19): cikti UTF-8.
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (ValueError, OSError):
+        pass
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parent.parent

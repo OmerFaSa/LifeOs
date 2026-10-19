@@ -115,11 +115,43 @@ def _sse_birlestir(satirlar, akis):
             "usage": usage or {}}
 
 
-def _akis_istek(url, baslik, govde, timeout, akis):
+def _gemini_birlestir(satirlar, akis):
+    """Gemini akisi («data: {candidates, usageMetadata}» satirlari) -> tek cevap."""
+    metin, usage, bitis = [], {}, None
+    for ham in satirlar:
+        s = (ham.decode("utf-8", "replace") if isinstance(ham, bytes) else str(ham)).strip()
+        if not s.startswith("data:"):
+            continue
+        try:
+            y = json.loads(s[5:].strip())
+        except ValueError:
+            continue
+        if y.get("usageMetadata"):
+            usage = y["usageMetadata"]
+        aday = (y.get("candidates") or [{}])[0]
+        for p in ((aday.get("content") or {}).get("parts") or []):
+            d = p.get("text")
+            if d:
+                metin.append(d)
+                try:
+                    akis(d)
+                except Exception:               # noqa: BLE001
+                    pass
+        if aday.get("finishReason"):
+            bitis = aday["finishReason"]
+    try:
+        akis(None)
+    except Exception:                           # noqa: BLE001
+        pass
+    return {"candidates": [{"content": {"parts": [{"text": "".join(metin)}]}, "finishReason": bitis}],
+            "usageMetadata": usage}
+
+
+def _akis_istek(url, baslik, govde, timeout, akis, birlestir=None):
     r = urllib.request.Request(url, data=json.dumps(govde).encode("utf-8"),
                                headers=baslik, method="POST")
     with urllib.request.urlopen(r, timeout=timeout) as y:      # noqa: S310
-        return _sse_birlestir(y, akis)
+        return (birlestir or _sse_birlestir)(y, akis)
 
 
 def _istek(url, baslik, govde, timeout=ZAMAN_ASIMI):
@@ -318,8 +350,13 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
                  "generationConfig": {"maxOutputTokens": jeton}}
         if sistem:
             govde["systemInstruction"] = {"parts": [{"text": sistem}]}
-        y = _istek(url, {"Content-Type": "application/json",
-                         "x-goog-api-key": anahtar or ""}, govde, timeout)
+        baslik_g = {"Content-Type": "application/json", "x-goog-api-key": anahtar or ""}
+        if callable(ayar.get("akis")):
+            # Akan cevap: streamGenerateContent (SSE); kullanim son parcada.
+            y = _akis_istek(url.replace(":generateContent", ":streamGenerateContent?alt=sse"), baslik_g, govde,
+                            timeout, ayar["akis"], _gemini_birlestir)
+        else:
+            y = _istek(url, baslik_g, govde, timeout)
         aday = (y.get("candidates") or [{}])[0]
         parca = [p.get("text", "") for p in
                  ((aday.get("content") or {}).get("parts") or [])]

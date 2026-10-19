@@ -317,13 +317,14 @@ def key_value(cfg, provider, key_id=None):
     key_id verilmisse O anahtar; yoksa saglayicinin ILK anahtari.
     key_id verilmis ama artik yoksa None doner — silinmis bir anahtarin
     yerine baskasininkini koymak, baskasinin hesabindan para harcamaktir."""
+    from core import kasa                     # «kasa:…» gondermesi kimlik kasasindan okunur
     liste = key_list(cfg, provider)
     if key_id:
         for e in liste:
             if e["id"] == key_id:
-                return e["key"]
+                return kasa.oku(e["key"])
         return None
-    return liste[0]["key"] if liste else None
+    return kasa.oku(liste[0]["key"]) if liste else None
 
 
 def key_owner(cfg, provider, key_id=None):

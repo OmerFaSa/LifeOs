@@ -317,7 +317,26 @@ window.LIFEOS.GIRIS = (function(){
 
   function _sifirla(){ ayar = null; bekleyen = null; mesaj = null; dinleyen = null; sonGeriAl = null; }
 
-  return { kur, kaynak, onizle, kutuHtml, gonder, kaydet, geriAl, metinOf, geriAlOf, kuruluMu:() => !!ayar,
+  /* ORTAK CÜMLE BÖLÜCÜ (2026-10-19, mimari denetim: bölme kuralı AYS, ESP,
+     SPİ ve King'de ayrı ayrı yazılmıştı ve ayrıştı; AYS'de «32'si doğru»
+     kayboluyordu). Tek kaynak burası:
+       · cümle sonu (. ! ? …) yalnız ardından boşluk ya da son gelirse
+         («7.5 saat» tek parça), satır sonu ve «;»;
+       · bağlaç: ve, ayrıca, bir de, sonra, artı;
+       · virgül, ardından RAKAM GELMİYORSA («7,5 saat» tek parça);
+       · doğru/yanlış/boş/net ile başlayan parça öncekine bağlanır
+         («40 soru çözdüm, 32'si doğru», «…, 4 yanlışım var»). */
+  const BOL_AYRAC = /[.!?…]+(?=\s|$)|\n+|;|\s+(?:ve|ayrıca|bir de|sonra|artı)\s+|,(?!\d)/gi;
+  const BOL_DEVAM = /^(?:\d+\s*(?:'?[sy]?[iıuü]\s*)?(?:tane\s*)?(?:doğru|dogru|yanlış|yanlis|boş|bos|net)|(?:doğru|yanlış|boş)\S*\s+\d+)/i;
+  function bol(metin){
+    const out = [];
+    String(metin || '').split(BOL_AYRAC).map(x => String(x || '').trim()).filter(x => x.length > 2).forEach(x => {
+      if(out.length && BOL_DEVAM.test(x)) out[out.length - 1] += ', ' + x; else out.push(x);
+    });
+    return out;
+  }
+
+  return { kur, kaynak, onizle, kutuHtml, gonder, kaydet, geriAl, metinOf, geriAlOf, kuruluMu:() => !!ayar, bol, BOL_AYRAC,
     durum:() => ({ bekleyen:bekleyen ? bekleyen.p.metin : null, mesaj:mesaj ? mesaj.metin : null }),
     _ortam:ortam, _sifirla };
 })();

@@ -3015,6 +3015,35 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     $('yerel-sina').addEventListener('click', yerelSina);
     ollamaYukle();
     sesYukle();
+    kasaYukle();
+  }
+  /* KASA (core/kasa.py): sağlayıcı anahtarları config.json yerine Windows
+     Kimlik Yöneticisi'nde. Taşıma doğrulanmadan anahtar silinmez; geri alınır. */
+  async function kasaYukle(mesaj){
+    var k = $('kasa-karti');
+    if(!k) return;
+    var r = await api('/api/kasa');
+    if(r.status !== 200){ k.innerHTML = sakinHata('Kasa durumu alınamadı.', r.status); return; }
+    var d = r.body || {};
+    var h = '<div class="tag">Anahtar kasası</div>';
+    if(!d.destek) h += '<p class="muted ollama__not">Bu bilgisayarda kimlik kasası yok (yalnız Windows); anahtarlar config.json’da kalır.</p>';
+    else{
+      h += '<p class="ollama__durum ollama__durum--' + (d.toplam && d.kasada >= d.toplam ? 'bagli' : 'eksik') + '"><b>'
+        + (d.kasada ? d.kasada + ' anahtar kasada' : 'Anahtarlar düz metin') + '</b> · ' + esc(String(d.toplam || 0)) + ' anahtar kayıtlı.</p>'
+        + '<div class="row"><button class="primary" id="kasa-tasi"' + (d.toplam > d.kasada ? '' : ' disabled') + '>Windows kasasına taşı</button>'
+        + '<button id="kasa-geri"' + (d.kasada ? '' : ' disabled') + '>Kasadan geri al</button></div>';
+    }
+    h += '<p class="muted ollama__not" id="kasa-not" role="status">' + esc(mesaj || '') + '</p>';
+    k.innerHTML = h;
+    if($('kasa-tasi')) $('kasa-tasi').addEventListener('click', function(){ kasaIste('/api/kasa/tasi'); });
+    if($('kasa-geri')) $('kasa-geri').addEventListener('click', function(){ kasaIste('/api/kasa/geri'); });
+  }
+  async function kasaIste(yol){
+    $('kasa-not').textContent = 'İşleniyor…';
+    var r = await api(yol, { method:'POST', body:'{}' });
+    var b = r.body || {};
+    kasaYukle(r.status === 200 ? (b.n + ' anahtar ' + (/tasi$/.test(yol) ? 'kasaya taşındı.' : 'geri alındı.')
+      + (b.okunamayan && b.okunamayan.length ? ' Okunamayan: ' + b.okunamayan.join(', ') + '.' : '')) : (b.note || 'Yapılamadı.'));
   }
 
   /* KING'IN SESI (core/ses.py, king.js söz 28). İnternet varken Gemini'nin
@@ -3276,6 +3305,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     var yer = o.yer || 'bulut', yl = o.yerel || {};
     var h = '<div id="ollama-karti" class="ollama"><div class="tag">Ollama</div><p class="muted">Bakılıyor…</p></div>'
       + '<div id="ses-karti" class="ollama"><div class="tag">King’in sesi</div><p class="muted">Bakılıyor…</p></div>'
+      + '<div id="kasa-karti" class="ollama"><div class="tag">Anahtar kasası</div><p class="muted">Bakılıyor…</p></div>'
       + '<div class="tag">Nerede çalışsın</div><div class="row">';
     ['yerel', 'hibrit', 'bulut'].forEach(function(y){
       h += '<button data-yer="' + y + '"' + (y === yer ? ' class="primary" aria-pressed="true"' : '')

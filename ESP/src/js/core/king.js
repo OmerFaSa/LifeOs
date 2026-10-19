@@ -2085,7 +2085,9 @@ window.LIFEOS.KING = (function(){
      («elma ve armut yedim» bölünmez, «40 soru çözdüm ve 30 dk koştum» bölünür). */
   function parcalaGunluk(metin){
     const out = [];
-    String(metin || '').split(/[.!?;\n]+/).forEach(cumle => {
+    /* Cümle sınırları ortak bölücünün kuralıyla (giris.js); bağlaçta bölme ve
+       «kayıt değilse sağla birleştir» kuralı King'in. */
+    String(metin || '').split(/[.!?…]+(?=\s|$)|\n+|;/).forEach(cumle => {
       const ham = cumle.split(/(,\s*(?:(?:ve sonra|sonra da|sonra|ardından|ayrıca|bir de|ve)\s+)?|\s+(?:ve sonra|sonra da|sonra|ardından|ayrıca|bir de|ve)\s+)/i);
       let tampon = '';
       for(let i = 0; i < ham.length; i += 2){
@@ -2190,6 +2192,8 @@ window.LIFEOS.KING = (function(){
         }else if(oturum){
           await L.HESAP.gelenBirak(o.modul, o.kaynak);
           o.durum = 'iletildi';
+        }else if(await kutuyaBirak(o.modul, o.kaynak)){
+          o.durum = 'sirada';                  // HKM kutusunda; o modülde King açılınca sorulur
         }else{
           ortam.depo.yaz(BEKLEYEN_KAYIT, bekleyenKayitlar().concat([{ modul:o.modul, metin:o.kaynak, route:o.route, at:bugunISO() }]).slice(-40));
           o.durum = 'sirada';
@@ -2211,10 +2215,35 @@ window.LIFEOS.KING = (function(){
     if(git.length){ cipler = git.map(mod => ({ ad:MODUL_AD[mod] + '’yi aç', is:'bul-git:' + mod + ':' + gidilecek[mod] })); ciz(false); }
     return sayac;
   }
+  /* Mimari denetim (2026-10-19): oturum yoksa öbür modülün kaydı HKM'nin
+     kutusuna (core/kutu.py) bırakılır; HKM satırı anlamaz, yalnız taşır. */
+  async function kutuyaBirak(modul, metin){
+    const k = baglanti();
+    if(!k) return false;
+    try{
+      const res = await ortam.fetch(k.url + '/api/kutu', { method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        body:JSON.stringify({ modul, metin, kaynak:ayar && ayar.modul }) });
+      return res.status === 200;
+    }catch(e){ return false; }
+  }
+  async function kutudanAl(){
+    const k = baglanti();
+    if(!k || !ayar) return [];
+    try{
+      const res = await ortam.fetch(k.url + '/api/kutu?modul=' + ayar.modul, { headers:{ 'Authorization':'Bearer ' + k.token } });
+      const g = res.status === 200 ? await res.json() : null;
+      return g && Array.isArray(g.kayitlar) ? g.kayitlar.filter(x => x && x.metin) : [];
+    }catch(e){ return []; }
+  }
+  async function kutuyuSun(){
+    const l = await kutudanAl();
+    if(l.length && acik && !mini){ bekleyenleriSun(l); ciz(false); }
+  }
   /* Öbür modülde anlatılıp buraya ait olan kayıtlar: bu modülün ayrıştırıcısıyla yeniden önizlenir. */
-  function bekleyenleriSun(){
+  function bekleyenleriSun(ek){
     if(!ayar || mini) return false;
-    const tum = bekleyenKayitlar(), bura = tum.filter(x => x.modul === ayar.modul);
+    const tum = bekleyenKayitlar(), bura = tum.filter(x => x.modul === ayar.modul).concat(Array.isArray(ek) ? ek : []);
     if(!bura.length) return false;
     ortam.depo.yaz(BEKLEYEN_KAYIT, tum.filter(x => x.modul !== ayar.modul));
     const veri = veriKapisi();
@@ -3219,7 +3248,7 @@ window.LIFEOS.KING = (function(){
       : geriGetir();
     cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; sesli = false;
     if(o && o.mesaj) akis.push({ kim:'king', metin:o.mesaj });
-    else if(!mini){ bekleyenleriSun(); acilisHazirla(); tanismaHazirla(); }   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
+    else if(!mini){ bekleyenleriSun(); acilisHazirla(); tanismaHazirla(); kutuyuSun(); }   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
     const el = document.createElement('div');
     el.className = 'king';
     el.setAttribute('data-king', '');

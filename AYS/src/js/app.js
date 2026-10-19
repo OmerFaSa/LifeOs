@@ -1699,8 +1699,9 @@ R.App = (function(){
               for(let i = 0; i < 45; i++){
                 const day = S.days[U.iso(U.addDays(U.today(), -i))];
                 (day && day.blocks || []).forEach(b => {
-                  if(!b.actualQ || !b.startedAt) return;
-                  const t = typeof b.startedAt === 'number' ? new Date(b.startedAt) : (/T\d\d:/.test(String(b.startedAt)) ? new Date(b.startedAt) : null);
+                  const zaman = b.startedAt && (typeof b.startedAt === 'number' || /T\d\d:/.test(String(b.startedAt))) ? b.startedAt : b.kayitAt;
+                  if(!b.actualQ || !zaman) return;
+                  const t = new Date(zaman);
                   if(!t || isNaN(t)) return;
                   const k = Math.floor(t.getHours() / 3) * 3;
                   const x = dilim[k] = dilim[k] || { q:0, d:0 };
@@ -1712,7 +1713,7 @@ R.App = (function(){
               return [
                 { ad:'Çözülen soru · 45 gün', deger:solved || null, etiket:'ölçüldü' },
                 { ad:'En verimli saat dilimi', deger:enIyi != null ? saatAd(enIyi) : null, etiket:'hesaplandı',
-                  alt:enIyi != null ? '%' + Math.round(dilim[enIyi].d * 100 / dilim[enIyi].q) + ' doğru · ' + dilim[enIyi].q + ' soru' : 'Blokları sayaçla başlatınca ölçülür' },
+                  alt:enIyi != null ? '%' + Math.round(dilim[enIyi].d * 100 / dilim[enIyi].q) + ' doğru · ' + dilim[enIyi].q + ' soru' : 'Saati bilinen 20 soru birikince ölçülür' },
                 { ad:'Doğru oranı · 45 gün', deger:solved ? Math.round(correct * 100 / solved) : null, birim:'%', etiket:'hesaplandı',
                   alt:solved ? correct + ' / ' + solved : '' },
                 { ad:'Bugün sırası gelen tekrar', deger:R.Calc.dueCards(R.U.todayISO()).length, birim:'kart', etiket:'hesaplandı' },

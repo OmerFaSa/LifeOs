@@ -252,9 +252,12 @@ def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None, yedekle=False):
     _, degisen = _git(["diff", "--name-only", eski.strip(), "HEAD"], kok, calistir)
     degisen = [s for s in degisen.splitlines() if s.strip()]
     yeniden = any(s.endswith(".py") for s in degisen)
+    # HKM'nin kodu degistiyse calisan HKM sureci eski kodla kalir (sahada,
+    # 2026-10-19: guncellendi ama HKM 40 dakika eski surumle cevap verdi).
+    hkm = any(s.startswith("HKM/") and s.endswith(".py") for s in degisen)
     artiklari_temizle(kok)
     return dict(d, durum="guncellendi", degisen=len(degisen),
-                yeniden_baslat=yeniden, yedek_dal=yedek_dal,
+                yeniden_baslat=yeniden, hkm_degisti=hkm, yedek_dal=yedek_dal,
                 mesaj="%d yenilik indirildi." % d["geride"]
                       + (" Bu klasöre özgü %d kayıt «%s» dalında saklı."
                          % (d["ileride"], yedek_dal) if yedek_dal else "")

@@ -27,6 +27,7 @@ def _g(d, *args):
 
 
 def _yaz(d, ad, metin):
+    os.makedirs(os.path.dirname(os.path.join(d, ad)), exist_ok=True)
     with open(os.path.join(d, ad), "w", encoding="utf-8") as f:
         f.write(metin)
 
@@ -87,9 +88,12 @@ def run():
             s = guncelle.uygula(r.kul)
             eq(s["durum"], "guncellendi")
             eq(_oku(r.kul, "OKU.md"), "iki\n")
-            eq(s["yeniden_baslat"], False)
+            eq((s["yeniden_baslat"], s["hkm_degisti"]), (False, False))
             r.yeni("sunucu.py", "print(1)\n", "sunucu")
-            eq(guncelle.uygula(r.kul)["yeniden_baslat"], True)  # .py degisti
+            s2 = guncelle.uygula(r.kul)
+            eq((s2["yeniden_baslat"], s2["hkm_degisti"]), (True, False))  # .py degisti, HKM degil
+            r.yeni("HKM/core/x.py", "print(2)\n", "hkm")
+            eq(guncelle.uygula(r.kul)["hkm_degisti"], True)
     test("yenilik varsa ileri sarar; .py degisirse yeniden baslat der", t_ileri_sarar)
 
     def t_kirli():

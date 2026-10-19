@@ -416,6 +416,12 @@ def run():
                                "data: [DONE]"], parca.append)
         eq((parca, y["choices"][0]["message"]["content"], y["choices"][0]["finish_reason"], y["usage"]["completion_tokens"]),
            (["Mer", "haba.", None], "Merhaba.", "stop", 2))
+        g = []
+        z = ai._gemini_birlestir(['data: {"candidates":[{"content":{"parts":[{"text":"Sel"}]}}]}',
+                                  'data: {"candidates":[{"content":{"parts":[{"text":"am."}]},"finishReason":"STOP"}],'
+                                  '"usageMetadata":{"promptTokenCount":3,"candidatesTokenCount":2}}'], g.append)
+        eq((g, z["candidates"][0]["content"]["parts"][0]["text"], z["usageMetadata"]["candidatesTokenCount"]),
+           (["Sel", "am.", None], "Selam.", 2))
         # konus akisi tasiyiciya ulastirir; son cevap tam denetimle doner.
         def tasiyici(provider, anahtar, model, sistem, mesajlar, ayar=None):
             for p in ("Selam! ", "Nasılsın?"):

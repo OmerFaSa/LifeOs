@@ -582,6 +582,8 @@ R.Proposals = (function(){
           durum:ctx.blok && ctx.blok.status === 'pending' ? 'pending' : null };
         if(ctx.blok){
           ctx.blok.actualQ = (Number(ctx.blok.actualQ) || 0) + ctx.n;
+          /* Kaydın saati (2026-10-19): «en verimli saat» kartı sayaçsız bloklarda da ölçsün. */
+          ctx.blok.kayitAt = new Date().toISOString();
           if(ctx.dogru != null) ctx.blok.correctQ = (Number(ctx.blok.correctQ) || 0) + ctx.dogru;
           if(ctx.blok.status === 'pending') ctx.blok.status = 'done';
         }else{

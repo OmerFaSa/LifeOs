@@ -20,6 +20,14 @@
     return { yazilan, eski };
   }
 
+  describe('Giriş — ortak cümle bölücü', () => {
+    it('cümle, bağlaç ve virgülde böler; sayı içindeki nokta/virgül ve doğru/yanlış devamı tek parça', () => {
+      const G = window.LIFEOS.GIRIS;
+      expect(G.bol("7,5 saat uyudum ve 40 soru çözdüm, 32'si doğru. Akşam 7.5 km koştum; 20 dk gitar"))
+        .toEqual(['7,5 saat uyudum', "40 soru çözdüm, 32'si doğru", 'Akşam 7.5 km koştum', '20 dk gitar']);
+      expect(G.bol('türevden 20 soru çözdüm, 4 yanlışım var')).toEqual(['türevden 20 soru çözdüm, 4 yanlışım var']);
+    });
+  });
   describe('Giriş — tek satır kapısı', () => {
     it('önizler, «Kaydet» denmeden yazmaz; Kaydet ile yazar ve sonucu söyler', async () => {
       const { yazilan } = sahteKur();

@@ -200,6 +200,9 @@ R.Entry = (function(){
      doğru/yanlış/boş ile başlayan parça öncekine bağlanır (2026-10-19). */
   const DEVAM_RE = /^(?:\d+\s*(?:'?[sy]?[iıuü]\s*)?(?:tane\s*)?(?:doğru|dogru|yanlış|yanlis|boş|bos|net)|(?:doğru|yanlış|boş)\w*\s+\d+)/i;
   function yanCumleler(text){
+    /* Tek kaynak: brand/ortak/giris.js bol(); yoksa (test, eski kabuk) aynı kural burada. */
+    const G = window.LIFEOS && window.LIFEOS.GIRIS;
+    if(G && typeof G.bol === 'function') return G.bol(text);
     const out = [];
     String(text || '').split(AYRAC).map(x => String(x || '').trim()).filter(x => x.length > 2).forEach(x => {
       if(out.length && DEVAM_RE.test(x)) out[out.length - 1] += ', ' + x; else out.push(x);

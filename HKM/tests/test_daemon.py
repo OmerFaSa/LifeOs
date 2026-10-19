@@ -122,6 +122,23 @@ class _Server(object):
         self.srv.server_close()
 
 
+def _t_surekli_hizmet():
+    """WinError 10055 gibi gecici ag hatasi HKM'yi kapatmaz (daemon._surekli_hizmet)."""
+    import daemon
+    from tests.harness import eq
+
+    class S:
+        n = 0
+
+        def serve_forever(self):
+            S.n += 1
+            if S.n < 3:
+                raise OSError(10055, "arabellek yok")
+    beklenen = []
+    daemon._surekli_hizmet(S(), bekle=beklenen.append)
+    eq((S.n, beklenen), (3, [1, 2]))
+
+
 def run():
     # Sabit tarihli senaryolar o gunu «bugun» diye yasar: yalniz bugunun
     # brifingi karar yazar (HATALAR D-3).
@@ -132,6 +149,7 @@ def run():
 
 def _run():
     suite("daemon")
+    test("geçici ağ hatası (WinError 10055) HKM sunucusunu kapatmaz", _t_surekli_hizmet)
     S = _Server()
     try:
         def t_health_needs_no_token():

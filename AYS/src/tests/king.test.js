@@ -1313,6 +1313,34 @@
         expect(l[0].metin).toBe('Türev · 20 soru, 16 doğru');
       }finally{ window.LIFEOS.DEFTER = eski; }
     }));
+    it('oturum yokken öbür modülün kaydı HKM kutusuna gider; o modülde King kutudan alıp onaya sunar', () => sahneyle(async () => {
+      const giden = [];
+      let kutu = [];
+      const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+      const fetch = async (url, o) => {
+        if(url.endsWith('/api/kutu')){ const b = JSON.parse(o.body); giden.push(b); kutu.push({ modul:b.modul, metin:b.metin }); return { status:200, json:async () => ({ ok:true }) }; }
+        if(/\/api\/kutu\?modul=/.test(url)){ const m = url.split('=').pop(); const l = kutu.filter(x => x.modul === m); kutu = kutu.filter(x => x.modul !== m); return { status:200, json:async () => ({ kayitlar:l }) }; }
+        return { status:200, json:async () => ({ ok:true, text:'Güzel bir gün.', mode:'model' }) };
+      };
+      const { k } = sahne({ hkm, fetch, veri:{ onizle:t => /uyudum/.test(t) ? { metin:'Uyku', kaydet:async () => {} } : null } });
+      try{
+        k._ortam.depo.sil(k.BEKLEYEN_KAYIT);
+        k.ac();
+        await k.isle('7 saat uyudum, 40 soru matematik çözdüm');
+        document.querySelector('[data-king^="bul-kaydet:"]').click();
+        for(let i = 0; i < 12; i++) await new Promise(ok => setTimeout(ok, 0));
+        expect(giden).toEqual([{ modul:'ays', metin:'40 soru matematik çözdüm', kaynak:'spi' }]);
+        expect(k._ortam.depo.oku(k.BEKLEYEN_KAYIT) || []).toEqual([]);
+        const ays = [];
+        k.kapat();
+        k.kur({ modul:'ays', git:() => {}, ozet:() => [], acilis:false, hkm, veri:{ onizle:t => /soru/.test(t) ? { metin:'40 soru', kaydet:async () => { ays.push(t); } } : null } });
+        k.yeniSohbet();
+        k.ac();
+        for(let i = 0; i < 12; i++) await new Promise(ok => setTimeout(ok, 0));
+        expect(document.querySelector('.king__bulunan-oge b').textContent).toBe('40 soru');
+        expect(kutu).toEqual([]);
+      }finally{ k._ortam.depo.sil(k.BEKLEYEN_KAYIT); }
+    }));
     it('işaret kaldırılan kaydedilmez; vazgeç hiçbirini yazmaz', () => sahneyle(async () => {
       const kayit = [];
       const { k } = sahne({ veri:{ onizle:t => /uyudum|yedim/.test(t) ? { metin:t, kaydet:async () => { kayit.push(t); } } : null } });
@@ -1477,7 +1505,7 @@
       try{
         k.ac();
         await k.isle('felsefede özgür irade hakkında ne düşünüyorsun');
-        expect(yollar).toEqual(['/api/chat/akis', '/api/chat']);
+        expect(yollar.filter(y => !y.startsWith('/api/kutu'))).toEqual(['/api/chat/akis', '/api/chat']);   // kutu sorgusu açılışta (mimari 3)
         expect(k.akis().pop().metin).toBe('Tamam.');
       }finally{ temizle(k); }
     }));
