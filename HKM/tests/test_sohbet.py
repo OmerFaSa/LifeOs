@@ -378,6 +378,19 @@ def run():
             ok(sohbet.sistem_konusu(m), m)
         ok(sohbet.yanki_mi("«bu ölçülmedi».") and sohbet.yanki_mi("SPİ modülü için hüküm verecek veri yok."))
         no(sohbet.yanki_mi("İyiyim, teşekkürler!"))
+        # Uzun cevabin basindaki kalip: serbest sohbette cevaptan, her zaman gecmisten silinir.
+        eq(sohbet.kalipsiz("«bu ölçülmedi». Mükemmel bir gün geçirdiğine sevindim!"), "Mükemmel bir gün geçirdiğine sevindim!")
+        eq(sohbet.kalipsiz("Bu ölçülmedi."), "")
+        t3 = _cevap("«bu ölçülmedi». Video yaratmak eğlenceli bir fikir!")
+        g3 = [{"role": "user", "content": "selam"},
+              {"role": "assistant", "content": "«bu ölçülmedi». Bugün LifeOS olarak sistemin sağlığına odaklanıyorum. Senin günün nasıl?"}]
+        r3 = sohbet.konus(_db.connect(":memory:"), cfg, "Hayatın nasıl gidiyor", BUGUN, transport=t3, gecmis=g3)
+        eq(r3["text"], "Video yaratmak eğlenceli bir fikir!")
+        no(any("ölçülmedi" in m["content"] for m in t3.gorulen["mesajlar"]), t3.gorulen["mesajlar"])
+        # Olcum soruldugunda cevap dokunulmaz.
+        t4 = _cevap("Bu ölçülmedi.")
+        r4 = sohbet.konus(_db.connect(":memory:"), cfg, "Uykum nasıl?", BUGUN, transport=t4)
+        eq(r4["text"], "Bu ölçülmedi.")
     test("samimi sohbet: serbest mesaja ölçüm listesi gitmez; yankı cevapları geçmişe girmez", t_samimi_sohbet)
 
     def t_derinlik_ucu():

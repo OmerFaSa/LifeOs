@@ -141,6 +141,17 @@ def yanki_mi(metin):
     t = str(metin or "").strip()
     return len(t) <= 90 and bool(YANKI.search(t))
 
+
+# Kalip cumle (sahada, 2026-10-19: uzun cevaplarin BASINA ««bu ölçülmedi».»
+# ekleniyordu ve gecmisten kopyalaniyordu). Olcum sorulmamissa cevaptan,
+# her durumda gecmisten silinir; geriye bir sey kalmazsa cevap korunur.
+KALIP = re.compile(r"[«\"']?\s*bu ölçülmedi\s*[»\"']?\s*[.!]?\s*", re.I)
+
+
+def kalipsiz(metin):
+    t = KALIP.sub("", str(metin or "")).strip()
+    return t[:1].upper() + t[1:] if t else ""
+
 HAFIZA_ADAYI_KISA = ("\n\nKullanıcı kendisi hakkında kalıcı bir tercih söylediyse cevabın sonuna "
                      "[[HAFIZA ADAYI: <kısa cümle>]] ekleyebilirsin; sağlık bilgisi aday olmaz.")
 
@@ -939,7 +950,9 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                "sen yazamazsın):\n" + hb)
     sistem = (sistem_metni(gorevli, bg, kisa=kisa, serbest=serbest) + (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
               + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else ""))
-    onceki = [m for m in (gecmis or []) if not (m.get("role") == "assistant" and yanki_mi(m.get("content")))]
+    onceki = [m if m.get("role") != "assistant" else dict(m, content=kalipsiz(m.get("content")))
+              for m in (gecmis or []) if not (m.get("role") == "assistant" and yanki_mi(m.get("content")))]
+    onceki = [m for m in onceki if m.get("content")]
     if sinir:
         onceki = onceki[-sinir["gecmis"]:] if sinir["gecmis"] else []
     mesajlar = onceki + [{"role": "user", "content": metin}]
@@ -972,6 +985,8 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     # Hafiza adayi (core/memory.py): model yalniz ADAY birakir; etiket
     # kullaniciya gitmez, aday kullanici onaylayana dek baglama girmez.
     govde, oneriler = memory.aday_ayikla(r["text"])
+    if not sistem_konusu(metin):
+        govde = kalipsiz(govde) or govde
     yeni_aday = []
     for o in (oneriler[:1] if aday_kapisi(metin) else []):
         a = memory.aday_ekle(con, o, user=user, scope="all")
