@@ -338,6 +338,7 @@ R.Palette = (function(){
     const notlar = [];
     if(r.sorular.length) notlar.push('Sormam gereken: ' + r.sorular.map(s => s.soru).join(' '));
     if(r.anlasilmayan.length) notlar.push('Kaydedilmeyecek: «' + r.anlasilmayan.join('», «') + '»');
+    if(r.oneriler.some(o => o.bosVarsayim)) notlar.push('Boş soru söylenmediği için doğru = çözülen − yanlış sayıldı');
     /* tur: King'in sohbet karşılığı (king.js söz 8). */
     const tur = r.oneriler.every(o => o.action === 'uyku-yaz') ? 'uyku' : 'calisma';
     return {

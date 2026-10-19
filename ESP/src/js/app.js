@@ -1803,7 +1803,15 @@ ESP.App = (function(){
         window.LIFEOS.YETKI.kur({ modul:'esp',
           /* King'in eylem kapısı (yetki.js söz 8): toplantıyı Toplantı ekranının
              kendi düğmesi başlatır; model çağrıları yapılır, bu yüzden orta seviye. */
-          eylemler:[{ id:'toplanti', seviye:'orta', ad:'Toplantı başlat',
+          eylemler:[{ id:'kitap-ekle', seviye:'kucuk', ad:'Kitap ekle',
+            anla:t => { const m = t.match(/kitap(?:lığa|lara)? ekle\s*:?\s*(.+)$|(.+?)\s+kitabını (?:ekle|okumaya başladım)/); const ad = m ? String(m[1] || m[2] || '').trim() : '';
+              return ad.length >= 2 && ad.length <= 120 ? { ad } : null; },
+            onizle:p => ({ metin:'Kütüphaneye «' + p.ad + '» eklenecek.' }),
+            uygula:async p => {
+              const b = await ESP.Model.saveBook(ESP.Model.newBook({ title:p.ad.replace(/(^|\s)\S/g, x => x.toLocaleUpperCase('tr')), author:'' }));
+              render();
+              return { metin:'«' + b.title + '» kütüphaneye eklendi.', geriAl:async () => { await ESP.Model.deleteBook(b.id); render(); } };
+            } }, { id:'toplanti', seviye:'orta', ad:'Toplantı başlat',
             anla:t => /toplant/.test(t) && /(başlat|başla|aç|yap|topla|kur)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
             onizle:() => ({ metin:'Ofiste toplantı başlayacak: uzmanlar sırayla konuşur, bunun için yapay zekâ çağrıları yapılır.' }),
             uygula:async () => {
@@ -1924,7 +1932,9 @@ ESP.App = (function(){
                 : 'Bugünün oturumu olarak yazılır.',
               async kaydet(){
                 const gun = U.todayISO(), ids = [];
-                for(const r of res.rows){ const s = await ESP.Model.addSession(gun, { disc:r.disc, minutes:r.minutes, count:r.count, note:'' }); if(s && s.id) ids.push(s.id); }
+                /* Ayrıntı ve duygu oturumun notuna (2026-10-19: «akustik çalıştım, şu parçayı; memnunum»). */
+                const not = String(t || '').replace(/\s+/g, ' ').trim().slice(0, 240);
+                for(const r of res.rows){ const s = await ESP.Model.addSession(gun, { disc:r.disc, minutes:r.minutes, count:r.count, note:res.rows.length === 1 ? not : (r.note || '') }); if(s && s.id) ids.push(s.id); }
                 /* Geri alma (giris.js söz 8): yalnız bu cümlenin oturumları. */
                 const geriAl = async () => { for(const id of ids) await ESP.Model.deleteSession(gun, id); render(); };
                 if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();

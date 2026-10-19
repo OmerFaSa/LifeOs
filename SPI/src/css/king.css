@@ -680,3 +680,20 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__sira-govde span{ font-size:12.5px; color:var(--text-2); }
 .king__sira .king__cip{ flex:none; background:transparent; box-shadow:inset 0 0 0 1px var(--line, rgba(0,0,0,.12)); }
 @media (max-width:679px){ .king__sira{ flex-wrap:wrap; } .king__sira .king__cip{ margin-left:38px; } }
+
+/* Söz 35: sohbetten bulunan kayıtlar — işaret kutulu liste, tek onay. */
+.king__bulunan{ margin-top:10px; padding:6px; border-radius:16px; background:var(--surface-2); box-shadow:0 0 0 1px var(--line, rgba(0,0,0,.06)); }
+.king__bulunan-liste{ list-style:none; margin:0; padding:0; display:grid; gap:2px; }
+.king__bulunan-oge{ display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:12px; }
+.king__bulunan-oge.is-vazgecildi, .king__bulunan-oge.is-eski{ opacity:.55; }
+.king__bulunan-sec{ flex:none; width:24px; height:24px; display:grid; place-items:center; padding:0; border:0; border-radius:7px; cursor:pointer;
+  background:var(--surface); box-shadow:inset 0 0 0 1.5px var(--line, rgba(0,0,0,.2)); color:transparent; }
+.king__bulunan-sec svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+.king__bulunan-sec[aria-checked="true"], .king__bulunan-sec.is-bitti{ background:var(--text); box-shadow:none; color:var(--surface); }
+.king__bulunan-oge.is-vazgecildi .king__bulunan-sec.is-bitti, .king__bulunan-oge.is-hata .king__bulunan-sec.is-bitti{ background:transparent; color:var(--text-2); box-shadow:inset 0 0 0 1.5px var(--line, rgba(0,0,0,.2)); }
+.king__bulunan-sec:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.king__bulunan-govde{ flex:1; min-width:0; display:grid; gap:1px; }
+.king__bulunan-govde b{ font-size:14px; font-weight:600; color:var(--text); }
+.king__bulunan-govde small{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-2); }
+.king__bulunan-eylem{ display:flex; flex-wrap:wrap; gap:6px; padding:8px 6px 4px; }
+.king__bulunan-eylem .king__cip[disabled]{ opacity:.5; cursor:default; }

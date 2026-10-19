@@ -180,6 +180,28 @@ LIFEOS.YETKI = (function(){
         return { metin:n + ' öneri onaylandı' + (dusen.length ? ', ' + dusen.length + ' tanesi uygulanamadı.' : '.'), satirlar:dusen };
       },
     },
+    /* Tek öneri (2026-10-19, depo sahibi: «sistemde bir şeyleri kullanıcı
+       gibi onaylayabilsin»): «1. öneriyi onayla», «ikinci öneriyi geç»,
+       «uyku önerisini onayla». Sıra numarası ya da önerinin adındaki sözcük. */
+    {
+      id:'onay-tek', seviye:'orta', ad:'Öneriyi onayla',
+      anla:t => ayar.onaylar ? tekOneri(t, /(?<![a-zçğıöşü])(?:onayla|kabul et|uygula)(?![a-zçğıöşü])/) : null,
+      onizle:p => ({ metin:'«' + p.metin + '» onaylanacak; modülün kendi kodundan geçer.' }),
+      async uygula(p){
+        let r = null;
+        try{ r = await ayar.onaylar.onayla(p.id); }catch(e){ r = { ok:false, why:(e && e.message) || 'hata' }; }
+        return r && r.ok ? { metin:'«' + p.metin + '» onaylandı.' } : { ok:false, metin:'Uygulanamadı' + (r && r.why ? ': ' + r.why : '.') };
+      },
+    },
+    {
+      id:'red-tek', seviye:'kucuk', ad:'Öneriyi geç',
+      anla:t => ayar.onaylar && ayar.onaylar.reddet ? tekOneri(t, /(?<![a-zçğıöşü])(?:reddet|geç)(?![a-zçğıöşü])/) : null,
+      onizle:p => ({ metin:'«' + p.metin + '» geçilecek; uygulanmaz.' }),
+      async uygula(p){
+        try{ await ayar.onaylar.reddet(p.id); }catch(e){ return { ok:false, metin:'Geçilemedi.' }; }
+        return { metin:'«' + p.metin + '» geçildi.' };
+      },
+    },
     {
       id:'red-hepsi', seviye:'orta', ad:'Bekleyenleri geç',
       anla:t => ayar.onaylar && ayar.onaylar.reddet && /(hepsini|tümünü|bekleyen(?:ler)?(?:i)?|önerileri|teklifleri) (reddet|geç)(?![a-zçğıöşü])/.test(t) ? {} : null,
@@ -253,6 +275,22 @@ LIFEOS.YETKI = (function(){
   function tarihYaz(iso){
     const d = new Date(iso);
     return isNaN(d) ? '' : iki(d.getDate()) + '.' + iki(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + iki(d.getHours()) + ':' + iki(d.getMinutes());
+  }
+  const SIRA = { 'ilk':1, 'birinci':1, 'ikinci':2, 'üçüncü':3, 'dördüncü':4, 'beşinci':5, 'son':-1 };
+  function tekOneri(t, fiil){
+    if(!fiil.test(t) || /(hepsini|tümünü|bütün|bekleyenleri|önerileri|teklifleri)/.test(t)) return null;
+    if(!/öneri|teklif/.test(t)) return null;
+    const l = bekleyenler();
+    if(!l.length) return null;
+    const m = t.match(/(\d+)\s*\.?\s*(?:öneri|teklif)/) || t.match(/(ilk|birinci|ikinci|üçüncü|dördüncü|beşinci|son)\s+(?:öneri|teklif)/);
+    if(m){
+      const n = /^\d+$/.test(m[1]) ? Number(m[1]) : SIRA[m[1]];
+      const x = n === -1 ? l[l.length - 1] : l[n - 1];
+      return x ? { id:x.id, metin:x.metin } : null;
+    }
+    const kelimeler = t.replace(/(öneri|teklif)\w*/g, ' ').split(/\s+/).filter(w => w.length >= 4 && !fiil.test(w));
+    const bulunan = l.filter(x => kelimeler.some(w => kucult(x.metin).indexOf(w.slice(0, Math.max(4, w.length - 3))) >= 0));
+    return bulunan.length === 1 ? { id:bulunan[0].id, metin:bulunan[0].metin } : null;
   }
   function bekleyenler(){
     try{ return ((ayar && ayar.onaylar && ayar.onaylar.bekleyen()) || []).filter(x => x && x.id != null).map(x => ({ id:x.id, metin:String(x.metin || 'Öneri') })); }

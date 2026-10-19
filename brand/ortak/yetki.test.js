@@ -87,6 +87,23 @@
         expect(y.anla('müzik çalıyor')).toBe(null);
       }finally{ y._sifirla(); }
     });
+    it('tek öneri: sıra numarası ya da adındaki sözcükle onaylanır ya da geçilir', async () => {
+      const y = Y();
+      const onay = [], red = [];
+      y.kur({ modul:'spi', onaylar:{ bekleyen:() => [{ id:'p1', metin:'Uyku hedefi 8 saat' }, { id:'p2', metin:'Haftalık yürüyüş 150 dk' }],
+        onayla:async id => { onay.push(id); return { ok:true }; }, reddet:async id => { red.push(id); return { ok:true }; } } });
+      try{
+        const a = y.anla('2. öneriyi onayla');
+        expect([a.id, a.seviye, a.param.id]).toEqual(['onay-tek', 'orta', 'p2']);
+        expect((await y.uygula(a)).metin).toBe('«Haftalık yürüyüş 150 dk» onaylandı.');
+        expect(y.anla('uyku önerisini onayla').param.id).toBe('p1');
+        const r = y.anla('ilk öneriyi geç');
+        expect([r.id, r.param.id]).toEqual(['red-tek', 'p1']);
+        await y.uygula(r);
+        expect([onay, red]).toEqual([['p2'], ['p1']]);
+        expect(y.anla('bekleyenleri onayla').id).toBe('onay-hepsi');
+      }finally{ y._sifirla(); }
+    });
   });
 
   describe('Yetki — uygulama', () => {

@@ -15,6 +15,14 @@
 
     it('sayının içindeki virgül ayraç değildir', () => {
       expect(R.Entry.yanCumleler('7,5 saat uyudum')).toHaveLength(1);
+      /* 2026-10-19: doğru/yanlış/boş ile başlayan parça öncekine bağlanır. */
+      expect(R.Entry.yanCumleler("matematikten 40 soru çözdüm, 32'si doğru ve 20 paragraf yaptım"))
+        .toEqual(["matematikten 40 soru çözdüm, 32'si doğru", '20 paragraf yaptım']);
+      const y = R.Entry.parseOne('türevden 20 soru çözdüm, 4 yanlışım var');
+      expect([y.count, y.correct, y.bosVarsayim]).toEqual([20, 16, true]);
+      const b = R.Entry.parseOne('20 soru çözdüm 4 yanlış 2 boş');
+      expect([b.correct, b.bosVarsayim]).toEqual([14, false]);
+      expect(R.Entry.parseOne('10 soru çözdüm 12 yanlış').correct).toBe(null);
     });
   });
 

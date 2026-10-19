@@ -110,6 +110,12 @@ R.Entry = (function(){
     return s ? sayi(s[1]) : null;
   }
   const DOGRU_RE    = /(\d+)\s*(?:'?[sy]i\s*)?(?:tane\s*)?(?:doğru|dogru|net)/i;
+  /* «4 yanlış», «4 yanlışım var», «2 boş» (2026-10-19, depo sahibi: «konudan
+     şu kadar sorum, şu kadar yanlışım var»). Doğru söylenmemişse doğru =
+     çözülen − yanlış − boş; boş söylenmemişse yok sayılır ve önizleme bunu
+     AÇIKÇA yazar (bosVarsayim) — kullanıcı onaylamadan yazılmaz. */
+  const YANLIS_RE   = /(\d+)\s*(?:'?[sy]?[iıuü]\s*)?(?:tane\s*)?(?:yanlış|yanlis)/i;
+  const BOS_RE      = /(\d+)\s*(?:'?[sy]?[iıuü]\s*)?(?:tane\s*)?(?:boş|bos)(?![a-zçğıöşü])/i;
   const DAKIKA_RE   = /(\d+(?:[.,]\d+)?)\s*(dakika|dk|saat|sa)\b/i;
 
   function parseUyku(text){
@@ -144,14 +150,20 @@ R.Entry = (function(){
 
     const d = String(text).match(DOGRU_RE);
     let dogru = d ? sayi(d[1]) : null;
+    let bosVarsayim = false;
+    if(dogru == null){
+      const y = String(text).match(YANLIS_RE), b = String(text).match(BOS_RE);
+      const yanlis = y ? sayi(y[1]) : null, bos = b ? sayi(b[1]) : null;
+      if(yanlis != null){ dogru = n - yanlis - (bos || 0); bosVarsayim = bos == null; }
+    }
     /* Doğru sayısı çözülenden çok olamaz: yanlış okunmuştur. */
-    if(dogru != null && (dogru < 0 || dogru > n)) dogru = null;
+    if(dogru != null && (dogru < 0 || dogru > n)){ dogru = null; bosVarsayim = false; }
 
     const subject = dersBul(text);
     const konu = konuBul(text, subject);
     return {
       kind:'soru', count:Math.round(n),
-      correct:dogru == null ? null : Math.round(dogru),
+      correct:dogru == null ? null : Math.round(dogru), bosVarsayim,
       subject:subject || (konu ? konu.s : null),
       topic:konu ? konu.t : null,
     };
@@ -184,11 +196,15 @@ R.Entry = (function(){
 
   const AYRAC = /\s+(?:ve|ayrıca|bir de|sonra|artı)\s+|[;]|,(?!\d)/gi;
 
+  /* «40 soru çözdüm, 32'si doğru», «…, 4 yanlışım var» bir olgudur: sayı +
+     doğru/yanlış/boş ile başlayan parça öncekine bağlanır (2026-10-19). */
+  const DEVAM_RE = /^(?:\d+\s*(?:'?[sy]?[iıuü]\s*)?(?:tane\s*)?(?:doğru|dogru|yanlış|yanlis|boş|bos|net)|(?:doğru|yanlış|boş)\w*\s+\d+)/i;
   function yanCumleler(text){
-    return String(text || '')
-      .split(AYRAC)
-      .map(x => String(x || '').trim())
-      .filter(x => x.length > 2);
+    const out = [];
+    String(text || '').split(AYRAC).map(x => String(x || '').trim()).filter(x => x.length > 2).forEach(x => {
+      if(out.length && DEVAM_RE.test(x)) out[out.length - 1] += ', ' + x; else out.push(x);
+    });
+    return out;
   }
 
   /* Çözülen her yan cümle için bir katalog eylemi. */
@@ -199,7 +215,7 @@ R.Entry = (function(){
     if(p.kind === 'problem')  return { action:'problem-yaz', params:{ count:p.count, date } };
     if(p.kind === 'sure')     return { action:'sure-yaz',
       params:{ minutes:p.minutes, subjectId:p.subject.id, date } };
-    if(p.kind === 'soru')     return { action:'soru-yaz',
+    if(p.kind === 'soru')     return { action:'soru-yaz', bosVarsayim:!!p.bosVarsayim,
       params:{ count:p.count, correct:p.correct,
         subjectId:p.subject ? p.subject.id : null,
         topicId:p.topic ? p.topic.id : null, date } };

@@ -1256,6 +1256,76 @@
       k.kapat();
     })));
   });
+  /* Söz 35 (depo sahibi, 2026-10-19): «günümü anlatacağım, aradan bulup kaydetsin». */
+  describe('King — sohbetten kayıt (söz 35)', () => {
+    const bekle = () => new Promise(ok => setTimeout(ok, 0));
+    async function bitsin(){ for(let i = 0; i < 12; i++) await bekle(); }
+    it('anlatım bölünür; «elma ve armut yedim» bölünmez, kayıtlar bağlaçta ayrılır', () => sahneyle(async () => {
+      const { k } = sahne();
+      expect(k.parcalaGunluk('Bugün 7 saat uyudum, sonra 40 soru çözdüm ve akşam 30 dk koştum. Elma ve armut yedim.'))
+        .toEqual(['Bugün 7 saat uyudum', '40 soru çözdüm', 'akşam 30 dk koştum', 'Elma ve armut yedim']);
+    }));
+    it('bulunanlar tek kartta; onay olmadan yazılmaz; bu modülünki kaydedilir, öbürü o modülde onaya sunulur', () => sahneyle(async () => {
+      const kayit = [];
+      const { k } = sahne({ veri:{ onizle:t => /uyudum/.test(t) ? { metin:'Uyku · 7 sa', kaydet:async () => { kayit.push('uyku'); } } : null } });
+      try{
+        k._ortam.depo.sil(k.BEKLEYEN_KAYIT);
+        k.ac();
+        const r = await k.isle('Bugün 7 saat uyudum, sonra 40 soru matematik çözdüm. Akşam yarın koşacağım.');
+        expect(r).toEqual({ tur:'bulunan', n:2 });
+        expect(kayit).toEqual([]);                                             // onaysız yazılmaz
+        const ogeler = [...document.querySelectorAll('.king__bulunan-oge')];
+        expect(ogeler.map(x => x.querySelector('b').textContent)).toEqual(['Uyku · 7 sa', '40 soru matematik çözdüm']);
+        document.querySelector('[data-king^="bul-kaydet:"]').click();
+        await bitsin();
+        expect(kayit).toEqual(['uyku']);
+        expect(k._ortam.depo.oku(k.BEKLEYEN_KAYIT).map(x => [x.modul, x.metin])).toEqual([['ays', '40 soru matematik çözdüm']]);
+        expect(k.akis().pop().metin).toBe('1 kayıt kaydedildi, 1 kayıt o modül açılınca onayına sunulacak.');
+        expect(!!document.querySelector('[data-king^="bul-git:ays:"]')).toBe(true);
+        /* AYS'de King açılınca AYS'nin ayrıştırıcısıyla yeniden önizlenir. */
+        const ays = [];
+        k.kapat();
+        k.kur({ modul:'ays', git:() => {}, ozet:() => [], acilis:false, veri:{ onizle:t => /soru/.test(t) ? { metin:'Matematik · 40 soru', kaydet:async () => { ays.push(t); } } : null } });
+        k.yeniSohbet();
+        k.ac();
+        expect(document.querySelector('.king__bulunan-oge b').textContent).toBe('Matematik · 40 soru');
+        expect(k._ortam.depo.oku(k.BEKLEYEN_KAYIT)).toEqual([]);
+        document.querySelector('[data-king^="bul-kaydet:"]').click();
+        await bitsin();
+        expect(ays).toEqual(['40 soru matematik çözdüm']);
+      }finally{ k._ortam.depo.sil(k.BEKLEYEN_KAYIT); }
+    }));
+    it('«…, 4 yanlışım var» kayıtta kalır; duygu günlüğe girer ve işaretli gelir', () => sahneyle(async () => {
+      const { k } = sahne();
+      expect(k.parcalaGunluk('Türevden 20 soru çözdüm, 4 yanlışım var. 30 dk akustik gitar çalıştım, çalışmaktan memnunum'))
+        .toEqual(['Türevden 20 soru çözdüm, 4 yanlışım var', '30 dk akustik gitar çalıştım', 'çalışmaktan memnunum']);
+      const eski = window.LIFEOS.DEFTER;
+      window.LIFEOS.DEFTER = { kuruluMu:() => true, yukle:async () => [], yeni:async () => ({}), ac:() => true };
+      try{
+        const b = sahne({ veri:{ onizle:t => /soru/.test(t) ? { metin:'Türev · 20 soru, 16 doğru', kaydet:async () => {} } : null } });
+        const l = b.k.sohbettenBul('Türevden 20 soru çözdüm, 4 yanlışım var. Bugün de 30 dk koştum, çok memnunum');
+        expect(l.map(o => o.modul)).toEqual(['spi', 'defter']);
+        const d = l.find(o => o.modul === 'defter');
+        expect([!!d, d && d.secili, /duygularını/.test(d && d.metin)]).toEqual([true, true, true]);
+        expect(l[0].metin).toBe('Türev · 20 soru, 16 doğru');
+      }finally{ window.LIFEOS.DEFTER = eski; }
+    }));
+    it('işaret kaldırılan kaydedilmez; vazgeç hiçbirini yazmaz', () => sahneyle(async () => {
+      const kayit = [];
+      const { k } = sahne({ veri:{ onizle:t => /uyudum|yedim/.test(t) ? { metin:t, kaydet:async () => { kayit.push(t); } } : null } });
+      k.ac();
+      await k.isle('7 saat uyudum, iki yumurta yedim');
+      document.querySelector('[data-king^="bul-sec:"]').click();               // ilkini kaldır
+      document.querySelector('[data-king^="bul-kaydet:"]').click();
+      await bitsin();
+      expect(kayit).toEqual(['iki yumurta yedim']);
+      await k.isle('8 saat uyudum, üç yumurta yedim');
+      [...document.querySelectorAll('[data-king^="bul-vazgec:"]')].pop().click();
+      await bitsin();
+      expect(kayit.length).toBe(1);
+      expect(k.akis().pop().metin).toBe('Tamam, hiçbirini kaydetmedim.');
+    }));
+  });
   /* Söz 34 (depo sahibi, 2026-10-19): işe yarayan fikirler. */
   describe('King — işe yarayan fikirler (söz 34)', () => {
     const bekle = () => new Promise(ok => setTimeout(ok, 0));
