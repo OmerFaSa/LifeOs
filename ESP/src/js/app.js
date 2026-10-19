@@ -1899,6 +1899,11 @@ ESP.App = (function(){
                 kaynak:'ESP · senin dil kartların', not:'Bu cevap kartın tekrar takvimine yazılmaz.' };
             },
             cevapla:(id, harf) => ({ dogru:String(id).split('|').pop(), cozum:[], not:'' }),
+            /* Söz 34: deney ölçüsü (günlük çalışma dakikası; ESP'nin kaydı). */
+            olcu:{
+              liste:[{ id:'sure', ad:'Çalışma süresi', birim:'dk' }],
+              deger:(id, iso) => { const ss = M.sessionsOf(iso).filter(s => s.minutes > 0); return ss.length ? ss.reduce((a, s) => a + s.minutes, 0) : null; },
+            },
           },
           ozet:() => [ESP.Screens.today.headline()] });
       }

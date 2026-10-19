@@ -1686,6 +1686,25 @@ SP.App = (function(){
                 { ad:'Kayıtlı öğün · 30 gün', deger:ogun || null, etiket:'ölçüldü', alt:kahve ? kahve + ' gün kahve' : '' },
               ];
             },
+            /* Söz 34: yük (uyku son 7 gece / önceki 7 gece) ve deney ölçüleri; değerler SPİ'nin kaydı. */
+            yuk:() => {
+              const ort = (bas) => { const l = [];
+                for(let i = bas; i < bas + 7; i++){ const v = SP.S.vitals[SP.U.iso(SP.U.addDays(SP.U.today(), -i))];
+                  if(v && v.sleep != null && isFinite(Number(v.sleep))) l.push(Number(v.sleep)); }
+                return l.length >= 3 ? Math.round(l.reduce((a, b) => a + b, 0) / l.length * 10) / 10 : null; };
+              const a = ort(0), o = ort(7);
+              return { kartlar:[{ ad:'Uyku · son 7 gece', deger:a, birim:'sa', etiket:'hesaplandı', alt:o != null ? 'önceki 7 gece: ' + o + ' sa' : '' }],
+                sinyal:a != null && o != null && a < o - 0.7 ? 'Uykun son 7 gecede ortalama ' + String(Math.round((o - a) * 10) / 10).replace('.', ',') + ' saat azaldı.' : '' };
+            },
+            olcu:{
+              liste:[{ id:'uyku', ad:'Uyku', birim:'sa' }, { id:'his', ad:'Günün hissi', birim:'/5' }, { id:'yatis', ad:'Yatış saati', birim:'' }],
+              deger:(id, iso) => {
+                const v = SP.S.vitals[iso];
+                if(!v) return null;
+                const x = id === 'uyku' ? v.sleep : id === 'his' ? v.soreness : v.yatis;
+                return x != null && isFinite(Number(x)) ? Number(x) : null;
+              },
+            },
           },
           /* King'e gelen fotoğraf (king.js söz 11): Fotoğraftan öğün akışına. */
           foto:[{ ad:'Öğün olarak oku', is:async f => {

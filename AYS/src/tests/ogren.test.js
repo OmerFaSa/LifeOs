@@ -69,13 +69,37 @@
       await sahteIcerik(t.id, async () => {
         const q = O().kingSoru(t.name.toLocaleLowerCase('tr') + ' hakkında');
         expect([q.id, q.soru, q.sec.length, q.not]).toEqual([s.id + '|' + t.id + '|0', 'Birinci soru?', 5, '']);
+        try{ localStorage.removeItem(O().TEKRAR); }catch(e){ /* yok */ }
         const r = await O().kingCevapla(q.id, 'C');
-        expect([r.dogru, r.cozum, r.not]).toEqual(['B', ['Çözüm bir.'], '']);
+        expect([r.dogru, r.cozum, r.not]).toEqual(['B', ['Çözüm bir.'], 'Yarın bu soruyu yeniden soracağım.']);
         expect(O().cevaplar(s.id, t.id)[0].h).toBe('C');                     // ölçüm Öğren'in kaydında
         expect(O().kingSoru(t.name).id).toBe(s.id + '|' + t.id + '|1');       // sıradaki
-        expect((await O().kingCevapla(q.id, 'B')).not).toContain('ilk cevabın');
+        /* Tekrar: doğru → 3 gün, sonra 7 gün, sonra takvimden çıkar; ilk cevap değişmez. */
+        expect((await O().kingCevapla(q.id, 'B')).not).toBe('3 gün sonra bir kez daha soracağım.');
+        expect((await O().kingCevapla(q.id, 'B')).not).toBe('7 gün sonra bir kez daha soracağım.');
+        expect((await O().kingCevapla(q.id, 'B')).not).toBe('Tekrarları tamamladın; bu soru artık sorulmayacak.');
+        expect(O().cevaplar(s.id, t.id)[0].h).toBe('C');
+        /* Vadesi gelen tekrar konusuz soruda önce gelir. */
+        const tk = {}; tk[q.id] = { n:0, sonraki:'2000-01-01' };
+        localStorage.setItem(O().TEKRAR, JSON.stringify(tk));
+        const tq = O().kingSoru('');
+        expect([tq.id, /^Tekrar \(1\. tur\)/.test(tq.not)]).toEqual([q.id, true]);
+        localStorage.removeItem(O().TEKRAR);
         expect(O().kingSoru('olmayan bir konu adı xyz')).toBe(null);
       });
+    });
+
+    it('puan önceliği: sıklık × hata; verisi olmayan konu girmez (king.js söz 34)', async () => {
+      resetState();
+      const s = TM(), a = s.topics.find(x => x.freq === 'high'), b = s.topics.find(x => x.freq === 'low') || s.topics.find(x => x.freq === 'mid');
+      expect(O().oncelikler(5)).toEqual([]);
+      R.S.errors.push({ id:'e1', topicId:b.id }, { id:'e2', topicId:b.id }, { id:'e3', topicId:a.id });
+      const l = O().oncelikler(5);
+      const ust = (a.freq === 'high' ? 3 : 2) * 1, alt = ({ high:3, mid:2, low:1 })[b.freq] * 2;
+      expect(l.length).toBe(2);
+      expect(l[0].topicId).toBe(ust >= alt ? a.id : b.id);
+      expect(/deneme yanlışı/.test(l[0].neden)).toBe(true);
+      R.S.errors.length = 0;
     });
 
     it('ilk cevap kalır; çözüme bakmak ölçüm değil; baştan çöz siler; durum ve yol değişmez', async () => {

@@ -1694,8 +1694,25 @@ R.App = (function(){
               let solved = 0, correct = 0;
               (R.SUBJECTS || []).forEach(s => { const p = R.Calc.topicPractice(s.id, null, 45); solved += p.solved || 0; correct += p.correct || 0; });
               const netler = R.Calc.fullExams('TYT').map(M.examNet).filter(n => n != null && isFinite(n));
+              /* Söz 34: en verimli saat dilimi — yalnız saati kayıtlı bloklardan (sayaçla başlatılan). */
+              const dilim = {};
+              for(let i = 0; i < 45; i++){
+                const day = S.days[U.iso(U.addDays(U.today(), -i))];
+                (day && day.blocks || []).forEach(b => {
+                  if(!b.actualQ || !b.startedAt) return;
+                  const t = typeof b.startedAt === 'number' ? new Date(b.startedAt) : (/T\d\d:/.test(String(b.startedAt)) ? new Date(b.startedAt) : null);
+                  if(!t || isNaN(t)) return;
+                  const k = Math.floor(t.getHours() / 3) * 3;
+                  const x = dilim[k] = dilim[k] || { q:0, d:0 };
+                  x.q += b.actualQ; x.d += b.correctQ || 0;
+                });
+              }
+              const enIyi = Object.keys(dilim).filter(k => dilim[k].q >= 20).sort((a, b) => dilim[b].d / dilim[b].q - dilim[a].d / dilim[a].q)[0];
+              const saatAd = k => String(k).padStart(2, '0') + '–' + String(Number(k) + 3).padStart(2, '0');
               return [
                 { ad:'Çözülen soru · 45 gün', deger:solved || null, etiket:'ölçüldü' },
+                { ad:'En verimli saat dilimi', deger:enIyi != null ? saatAd(enIyi) : null, etiket:'hesaplandı',
+                  alt:enIyi != null ? '%' + Math.round(dilim[enIyi].d * 100 / dilim[enIyi].q) + ' doğru · ' + dilim[enIyi].q + ' soru' : 'Blokları sayaçla başlatınca ölçülür' },
                 { ad:'Doğru oranı · 45 gün', deger:solved ? Math.round(correct * 100 / solved) : null, birim:'%', etiket:'hesaplandı',
                   alt:solved ? correct + ' / ' + solved : '' },
                 { ad:'Bugün sırası gelen tekrar', deger:R.Calc.dueCards(R.U.todayISO()).length, birim:'kart', etiket:'hesaplandı' },
@@ -1705,6 +1722,36 @@ R.App = (function(){
             },
             soru:konu => R.Ogren.kingSoru(konu),
             cevapla:(id, harf) => R.Ogren.kingCevapla(id, harf),
+            /* Söz 34: puan önceliği (Öğren'in hesabı) ve konuyu Öğren'de açmak. */
+            oncelik:() => R.Ogren.oncelikler(5),
+            oncelikAc:async o => { if(o && o.topicId){ await R.Ogren.sec(o.subjectId, o.topicId); go('ogren'); } },
+            /* Söz 34: yük (son 7 gün / önceki 7 gün) ve deney ölçüleri; günlük değerler AYS'nin kaydı. */
+            yuk:() => {
+              const gun = (bas, n) => { let dk = 0, q = 0, d = 0, var_ = false;
+                for(let i = bas; i < bas + n; i++){ const day = S.days[U.iso(U.addDays(U.today(), -i))];
+                  (day && day.blocks || []).forEach(b => { if(b.actualMin){ dk += b.actualMin; var_ = true; } if(b.actualQ){ q += b.actualQ; d += b.correctQ || 0; } }); }
+                return { dk, oran:q ? Math.round(d * 100 / q) : null, var_ }; };
+              const a = gun(0, 7), o = gun(7, 7);
+              const kart = [
+                { ad:'Çalışma · son 7 gün', deger:a.var_ ? a.dk : null, birim:'dk', etiket:'ölçüldü', alt:o.var_ ? 'önceki 7 gün: ' + o.dk + ' dk' : '' },
+                { ad:'Doğruluk · son 7 gün', deger:a.oran, birim:'%', etiket:'hesaplandı', alt:o.oran != null ? 'önceki 7 gün: %' + o.oran : '' },
+              ];
+              let sinyal = '';
+              if(a.var_ && o.var_ && a.dk > o.dk * 1.3 && a.oran != null && o.oran != null && a.oran < o.oran - 5)
+                sinyal = 'Son 7 günde çalışma arttı ama doğruluk düştü; bir hafif gün düşünebilirsin.';
+              return { kartlar:kart, sinyal };
+            },
+            olcu:{
+              liste:[{ id:'dogruluk', ad:'Doğruluk', birim:'%' }, { id:'sure', ad:'Çalışma süresi', birim:'dk' }],
+              deger:(id, iso) => {
+                const day = S.days[iso];
+                if(!day) return null;
+                let q = 0, d = 0, dk = 0;
+                (day.blocks || []).forEach(b => { q += b.actualQ || 0; d += b.correctQ || 0; dk += b.actualMin || 0; });
+                if(id === 'dogruluk') return q ? Math.round(d * 100 / q) : null;
+                return dk || null;
+              },
+            },
           },
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
           foto:[{ ad:'Soruyu çöz', is:async f => {

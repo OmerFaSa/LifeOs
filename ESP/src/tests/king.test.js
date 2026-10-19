@@ -1259,6 +1259,105 @@
       k.kapat();
     })));
   });
+  /* Söz 34 (depo sahibi, 2026-10-19): işe yarayan fikirler. */
+  describe('King — işe yarayan fikirler (söz 34)', () => {
+    const bekle = () => new Promise(ok => setTimeout(ok, 0));
+    async function bitsin(){ for(let i = 0; i < 12; i++) await bekle(); }
+    function defterli(notlar){
+      const yazilan = [];
+      const eski = window.LIFEOS.DEFTER;
+      window.LIFEOS.DEFTER = { kuruluMu:() => true, yukle:async () => notlar || [], yeni:async (b, g, t) => { yazilan.push({ b, g, t }); return {}; }, ac:() => true };
+      return { yazilan, birak:() => { window.LIFEOS.DEFTER = eski; } };
+    }
+    it('«neye çalışayım» modülün öncelik listesini sıralı kart olarak gösterir; satırdan Öğren açılır', () => sahneyle(async () => {
+      const acilan = [];
+      const { k } = sahne();
+      k.kur({ modul:'ays', git:() => {}, ozet:() => [], acilis:false, kartlar:{
+        oncelik:() => [{ ad:'Problemler', ders:'TYT Matematik', neden:'4 deneme yanlışı · sık çıkar', puan:12, topicId:'tm-20' }, { ad:'Paragraf', ders:'TYT Türkçe', neden:'%55 doğru', puan:6 }],
+        oncelikAc:o => acilan.push(o.topicId) } });
+      k.ac();
+      expect((await k.isle('neye çalışayım')).tur).toBe('oncelik');
+      const satir = [...document.querySelectorAll('.king__sira')];
+      expect(satir.map(x => x.querySelector('b').textContent)).toEqual(['Problemler', 'Paragraf']);
+      satir[0].querySelector('[data-king^="sira-ac:"]').click();
+      await bitsin();
+      expect(acilan).toEqual(['tm-20']);
+    }));
+    it('not arama: Merkez yokken notları listeler; varsa yalnız notlarla cevaplar ve kaynağı yazar', () => sahneyle(async () => {
+      const d = defterli([{ id:'n1', baslik:'Türev kuralları', govde:'Çarpım kuralı: (fg)′ = f′g + fg′.' }, { id:'n2', baslik:'Alışveriş', govde:'süt' }]);
+      try{
+        const a = sahne();
+        a.k.ac();
+        await a.k.isle('notlarımda türev');
+        const m = a.k.akis().pop();
+        expect([m.metin, m.satirlar.length, /Türev kuralları/.test(m.satirlar[0])]).toEqual(['Notlarında bunları buldum:', 1, true]);
+        a.k.kapat();
+        const istekler = [];
+        const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+        const fetch = async (url, o) => { istekler.push(JSON.parse(o.body).text); return { status:200, json:async () => ({ ok:true, text:'Çarpım kuralı f′g + fg′.', mode:'model' }) }; };
+        const b = sahne({ hkm, fetch });
+        b.k.ac();
+        await b.k.isle('türev hakkında ne not almıştım');
+        expect(/YALNIZ bu notlara dayanarak/.test(istekler[0]) && /Türev kuralları/.test(istekler[0]) && !/Alışveriş/.test(istekler[0])).toBe(true);
+        const c = b.k.akis().pop();
+        expect([c.metin, c.satirlar]).toEqual(['Çarpım kuralı f′g + fg′.', ['Kaynak: Türev kuralları']]);
+      }finally{ d.birak(); }
+    }));
+    it('haftalık gözden geçirme: üç soru, Defter’e not, hedef açılışta', () => sahneyle(async () => {
+      const d = defterli([]);
+      const { k } = sahne();
+      try{
+        k.ac();
+        await k.isle('haftalık gözden geçirme');
+        expect(/^Bu hafta ne iyi gitti\?/.test(k.akis().pop().metin)).toBe(true);
+        await k.isle('Denemeler iyiydi');
+        expect(k.akis().pop().metin).toBe('Ne zorladı?');
+        await k.isle('Uyku');
+        await k.isle('Her gün 22:30 yat');
+        expect(/Haftanın hedefi: «Her gün 22:30 yat»/.test(k.akis().pop().metin)).toBe(true);
+        expect(/^Haftalık gözden geçirme · /.test(d.yazilan[0].b)).toBe(true);
+        expect(d.yazilan[0].g).toContain('## Ne zorladı?\nUyku');
+        expect(k.haftaHedefi()).toBe('Her gün 22:30 yat');
+      }finally{ d.birak(); k._ortam.depo.sil(k.HEDEF); }
+    }));
+    it('günlük: anlattığın ve hissin Defter’e yazılır', () => sahneyle(async () => {
+      const d = defterli([]);
+      const { k } = sahne();
+      try{
+        k.ac();
+        await k.isle('günlük yazalım');
+        await k.isle('Bugün uzun bir gündü ama denemem iyi geçti.');
+        document.querySelector('[data-king="gunluk-his:4"]').click();
+        await bitsin();
+        expect(d.yazilan[0].g).toBe('Bugün uzun bir gündü ama denemem iyi geçti.\n\nHis: 4/5 (benim beyanım)');
+        expect(k.akis().pop().metin).toBe('Günlüğe yazdım (Defter). Hissin: 4/5.');
+      }finally{ d.birak(); }
+    }));
+    it('yük: modülün kartları ve sinyali; deney: ölçü seçilir, süre sonunda kodla karşılaştırılır', () => sahneyle(async () => {
+      const { k } = sahne();
+      const degerler = {};
+      for(let i = -14; i < 0; i++) degerler['2026-10-' + String(5 + i + 14 - 14).padStart(2, '0')] = 6;
+      k.kur({ modul:'spi', git:() => {}, ozet:() => [], acilis:false, kartlar:{
+        yuk:() => ({ kartlar:[{ ad:'Uyku · son 7 gece', deger:6.1, birim:'sa', etiket:'hesaplandı' }], sinyal:'Uykun son 7 gecede ortalama 1 saat azaldı.' }),
+        olcu:{ liste:[{ id:'uyku', ad:'Uyku', birim:'sa' }], deger:(id, iso) => iso < '2026-10-05' ? 6 : 7.5 } } });
+      try{
+        k._ortam.depo.sil(k.DENEY());
+        k.ac();
+        await k.isle('yük durumum');
+        const y = k.akis().pop();
+        expect([y.metin, y.kartlar.length, y.bulgu]).toEqual(['Uykun son 7 gecede ortalama 1 saat azaldı.', 1, true]);
+        await k.isle('deney başlat 23:00’te yatacağım');
+        document.querySelector('[data-king="deney-olcu:uyku"]').click();
+        expect(k.deneyOku().olcu).toBe('uyku');
+        const v = k.deneyOku(); v.baslangic = '2026-09-21'; k._ortam.depo.yaz(k.DENEY(), v);     // 14 gün geçti (sahne: 2026-10-05)
+        await k.isle('deney sonucu');
+        const r = k.akis().pop();
+        expect(/^Deney bitti/.test(r.metin)).toBe(true);
+        expect(r.kartlar.map(x => x.deger)).toEqual(['6', '6', '0']);
+        expect(k.deneyOku()).toBe(null);
+      }finally{ k._ortam.depo.sil(k.DENEY()); }
+    }));
+  });
   /* Söz 33 (depo sahibi, 2026-10-19): «hepsini King'e getir». */
   describe('King — genel geliştirme (söz 33)', () => {
     const bekle = () => new Promise(ok => setTimeout(ok, 0));

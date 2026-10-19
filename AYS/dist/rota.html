@@ -14776,6 +14776,19 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 @media (prefers-reduced-motion:reduce){ .king__balon.is-akiyor p::after{ animation:none; } }
 @media (max-width:679px){ .king:not(.is-mini) .king__bas .king__odak b{ font-size:12px; } }
 
+/* Söz 34: sıralı liste kartı (puan önceliği): numara, konu, ders, neden, düğme. */
+.king__sirali{ list-style:none; margin:10px 0 0; padding:0; display:grid; gap:6px; }
+.king__sira{ display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px; background:var(--surface-2);
+  box-shadow:0 0 0 1px var(--line, rgba(0,0,0,.06)); }
+.king__sira-no{ flex:none; width:26px; height:26px; display:grid; place-items:center; border-radius:50%;
+  background:var(--text); color:var(--surface); font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums; }
+.king__sira-govde{ flex:1; min-width:0; display:grid; gap:1px; }
+.king__sira-govde b{ font-size:14.5px; font-weight:650; color:var(--text); }
+.king__sira-govde small{ font-size:11.5px; font-weight:600; color:var(--text-2); }
+.king__sira-govde span{ font-size:12.5px; color:var(--text-2); }
+.king__sira .king__cip{ flex:none; background:transparent; box-shadow:inset 0 0 0 1px var(--line, rgba(0,0,0,.12)); }
+@media (max-width:679px){ .king__sira{ flex-wrap:wrap; } .king__sira .king__cip{ margin-left:38px; } }
+
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/giris.css içine yazılır; burası bir sonraki
@@ -17660,7 +17673,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'f19ced80', at:'2026-10-19 13:43', dirty:true };
+R.BUILD = { id:'fca4cb3a', at:'2026-10-19 15:43', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -35234,7 +35247,27 @@ window.LIFEOS.SORUKART = (function(){
         Kart grafiği    kartta `seri` varsa son günlerin küçük çizgisi; eksik
                         gün boşluk kalır (sıfır çizilmez).
         Eylem kapısı    modüller YETKİ kataloğuna kendi küçük/orta eylemlerini
-                        ekler (toplantı başlatmak gibi; yetki.js söz 8). */
+                        ekler (toplantı başlatmak gibi; yetki.js söz 8).
+  34. İŞE YARAYAN FİKİRLER (depo sahibi, 2026-10-19). Hepsinde sayıyı modülün
+      kodu üretir; King gösterir, model yalnız anlatır:
+        Puan önceliği   «neye çalışayım» → modülün öncelik listesi (AYS:
+                        çıkma sıklığı × hata), sıra ve neden; satırdan Öğren.
+        Not arama       «notlarımda türev», «… not almıştım» → Defter'de
+                        arar; Merkez bağlıysa yalnız o notlara dayanarak
+                        cevaplar ve kaynağı yazar; değilse notları listeler.
+        Tekrar soruları «bana soru sor» önce vadesi gelen tekrarı sorar
+                        (yanlış yaptığın soru 1, 3, 7 gün sonra; AYS).
+        Haftalık ritüel «haftalık gözden geçirme»: rapor, üç soru (ne iyi
+                        gitti, ne zorladı, haftanın tek hedefi); cevaplar
+                        Defter'e not olur, hedef her sabah açılışta görünür.
+        Yük             «yük durumum» → modülün son 7 gün / önceki 7 gün
+                        kartları ve kuralı tutan sinyal (teşhis yok).
+        Günlük          «günlük yazalım» → anlattığın Defter'e günlük olur;
+                        günün hissini (1–5) SEN verirsin, nota yazılır.
+        Kişisel deney   «deney başlat <kural>» → ölçüyü seç; süre sonunda
+                        önceki ve deney dönemi ortalaması kodla karşılaştırılır;
+                        az veriyle «yetersiz» denir; neden-sonuç iddiası yok.
+        Verimli saat    AYS kartı: saati kayıtlı bloklardan en iyi dilim. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -36975,6 +37008,212 @@ window.LIFEOS.KING = (function(){
       ek && ek.soru ? [ek.soru.soru] : []).join('. ').replace(/\.\.+/g, '.').replace(/([!?])\./g, '$1'));
   }
 
+  /* ---------- söz 34: öncelik, notlar, ritüel, yük, günlük, deney ---------- */
+  const D = () => (L.DEFTER && L.DEFTER.kuruluMu && L.DEFTER.kuruluMu()) ? L.DEFTER : null;
+  const ONCELIK_RE = /(neye çalışayım|ne çalışayım|neye çalışmalıyım|öncelikli konu|hangi konuya çalış|puan getir|en çok puan)/;
+  async function oncelikIsle(metin){
+    akis.push({ kim:'sen', metin:String(metin).trim() }); cipler = null;
+    const K = ayar && ayar.kartlar;
+    if(!K || typeof K.oncelik !== 'function'){ soyle('Öncelik listesi AYS’de; AYS’de «neye çalışayım» diyebilirsin.'); return { tur:'oncelik-yok' }; }
+    let l = [];
+    try{ l = (await K.oncelik()) || []; }catch(e){ l = []; }
+    l = l.filter(x => x && x.ad).slice(0, 5);
+    if(!l.length){ soyle('Henüz öncelik çıkaracak veri yok: deneme yanlışı ya da çözülmüş soru kaydı gerekiyor.'); return { tur:'oncelik-bos' }; }
+    soyle('Şu konular en çok puan kurtarır (sınavda çıkma sıklığı × senin hatan; AYS’nin hesabı):', null, null, null,
+      { sirali:l.map(x => ({ ad:String(x.ad), ust:String(x.ders || ''), alt:String(x.neden || ''), puan:x.puan, ham:x })) });
+    return { tur:'oncelik', n:l.length };
+  }
+  function siraliHtml(m, n){
+    if(!m.sirali || !m.sirali.length) return '';
+    const acilir = !!(ayar && ayar.kartlar && typeof ayar.kartlar.oncelikAc === 'function');
+    return '<ol class="king__sirali">' + m.sirali.map((x, i) => '<li class="king__sira">'
+      + '<span class="king__sira-no">' + (i + 1) + '</span>'
+      + '<div class="king__sira-govde"><b>' + kac(x.ad) + '</b>' + (x.ust ? '<small>' + kac(x.ust) + '</small>' : '')
+      + (x.alt ? '<span>' + kac(x.alt) + '</span>' : '') + '</div>'
+      + (acilir ? '<button type="button" class="king__cip" data-king="sira-ac:' + n + ':' + i + '">Öğren’de aç</button>' : '')
+      + '</li>').join('') + '</ol>';
+  }
+  /* Not arama: Defter'in kendi deposu; puan = sorgu sözcüklerinin geçişi. */
+  const NOT_RE = /(notlarım(?:da|ı|dan)? (?:ara|bul|bak|göre)|notlarımda|notlarımdan|not almıştım|not aldığım|notlarıma göre|notumda|notlarımı (?:ara|özetle))/;
+  const NOT_DOLGU = /(^|\s)(notlarım(?:da|ı|dan|a)?|notumda|not|almıştım|aldığım|göre|ara|bul|bak|özetle|ne|neler|nedir|hakkında|ile|ilgili|bana|benim|bir|şey|geçen|hafta|söyle|mısın|misin|var|mı|mi|daha|önce|yazmıştım)(?=\s|$)/g;
+  function notPuanla(liste, kelimeler){
+    const k = s => String(s || '').toLocaleLowerCase('tr');
+    return (liste || []).map(n => {
+      const b = k(n.baslik), g = k(n.govde);
+      const puan = kelimeler.reduce((p, w) => p + (b.indexOf(w) >= 0 ? 3 : 0) + (g.indexOf(w) >= 0 ? 1 : 0), 0);
+      return { n, puan };
+    }).filter(x => x.puan > 0).sort((a, b) => b.puan - a.puan).slice(0, 3).map(x => x.n);
+  }
+  function parcaOf(govde, kelimeler, en){
+    const g = String(govde || '').replace(/\s+/g, ' ');
+    const kg = g.toLocaleLowerCase('tr');
+    let i = kelimeler.reduce((m, w) => { const j = kg.indexOf(w); return j >= 0 && (m < 0 || j < m) ? j : m; }, -1);
+    if(i < 0) i = 0;
+    const bas = Math.max(0, i - 80);
+    return (bas ? '…' : '') + g.slice(bas, bas + (en || 600)) + (g.length > bas + (en || 600) ? '…' : '');
+  }
+  async function notAra(metin, t0){
+    akis.push({ kim:'sen', metin:String(metin).trim() }); cipler = null;
+    const Df = D();
+    if(!Df){ soyle('Defter bu modülde kurulu değil; notlarına buradan bakamam.'); return { tur:'not-yok' }; }
+    const kelimeler = t0.replace(/[.,!?;:«»"']/g, ' ').replace(NOT_DOLGU, ' ').replace(NOT_DOLGU, ' ').split(/\s+/).filter(w => w.length >= 3);
+    let liste = [];
+    try{ liste = (await Df.yukle()) || []; }catch(e){ liste = []; }
+    const bulunan = kelimeler.length ? notPuanla(liste, kelimeler) : [];
+    if(!bulunan.length){ soyle(kelimeler.length ? '«' + kelimeler.join(' ') + '» geçen bir not bulamadım.' : 'Notlarında neyi arayayım? Örneğin «notlarımda türev».'); return { tur:'not-bos' }; }
+    const kaynak = bulunan.map(n => 'Kaynak: ' + (n.baslik || 'Başlıksız not'));
+    cipler = [{ ad:'Defteri aç', is:'defter-ac' }];
+    if(!baglanti()){
+      soyle('Notlarında bunları buldum:', bulunan.map(n => (n.baslik || 'Başlıksız not') + ' — ' + parcaOf(n.govde, kelimeler, 140)));
+      return { tur:'not-liste', n:bulunan.length };
+    }
+    const bek = { kim:'king', bekliyor:true, metin:'' };
+    akis.push(bek); ciz(false);
+    const istem = 'Kullanıcının kendi notlarından parçalar aşağıda. YALNIZ bu notlara dayanarak cevap ver; notlarda olmayanı «notlarında yok» de, uydurma.\n\n'
+      + bulunan.map((n, i) => '[' + (i + 1) + '] ' + (n.baslik || 'Başlıksız not') + ': ' + parcaOf(n.govde, kelimeler, 600)).join('\n\n')
+      + '\n\nSoru: ' + String(metin).trim();
+    const r = await merkezeSor(istem, bek);
+    akis = akis.filter(m => m !== bek);
+    if(r.ok) soyle(r.text, kaynak, null, null, r.akti ? { yeni:false } : null);
+    else soyle('Merkez cevap vermedi; bulduğum notlar:', bulunan.map(n => (n.baslik || 'Başlıksız not') + ' — ' + parcaOf(n.govde, kelimeler, 140)));
+    cipler = [{ ad:'Defteri aç', is:'defter-ac' }];
+    ciz(false);
+    return { tur:'not-cevap', n:bulunan.length };
+  }
+  /* Haftalık ritüel: rapor + üç soru; cevaplar Defter'e, hedef açılışa. */
+  const RITIM_RE = /(haftalık gözden geçirme|haftayı gözden geçir|haftalık ritüel|hafta sonu değerlendirmesi)/;
+  const RITIM_SORU = ['Bu hafta ne iyi gitti?', 'Ne zorladı?', 'Gelecek haftanın tek hedefi ne olsun?'];
+  const HEDEF = 'lifeos.king.hafta-hedef';
+  let ritim = null;
+  function haftaBasi(){
+    const d = new Date(ortam.simdi().getTime());
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function haftaHedefi(){ const v = ortam.depo.oku(HEDEF); return v && v.metin && v.hafta >= haftaBasi() ? String(v.metin) : ''; }
+  async function ritimBaslat(metin){
+    ritim = { cevaplar:[] };
+    await merkezKomut(metin, 'hafta', 'Haftalık rapor');
+    soyle(RITIM_SORU[0] + ' (Üç kısa soru; «vazgeç» dersen bırakırım.)');
+    return { tur:'ritim' };
+  }
+  async function ritimIsle(metin){
+    akis.push({ kim:'sen', metin:String(metin).trim() }); cipler = null;
+    if(/^(vazgeç|bırak|iptal|sonra)/.test(kucuk(metin))){ ritim = null; soyle('Tamam, gözden geçirmeyi bıraktım.'); return { tur:'ritim-dur' }; }
+    ritim.cevaplar.push(String(metin).trim());
+    if(ritim.cevaplar.length < RITIM_SORU.length){ soyle(RITIM_SORU[ritim.cevaplar.length]); return { tur:'ritim' }; }
+    const c = ritim.cevaplar;
+    ritim = null;
+    const hedef = c[2].slice(0, 200);
+    ortam.depo.yaz(HEDEF, { hafta:nextHafta(), metin:hedef });      // pazar: gelecek hafta; öteki günler: bu hafta
+    let notOldu = false;
+    const Df = D();
+    if(Df){
+      try{ await Df.yeni('Haftalık gözden geçirme · ' + bugunISO(), RITIM_SORU.map((q, i) => '## ' + q + '\n' + c[i]).join('\n\n'), 'not'); notOldu = true; }catch(e){ notOldu = false; }
+    }
+    soyle('Kaydettim' + (notOldu ? ' (Defter’e not oldu)' : '') + '. Haftanın hedefi: «' + hedef + '». Her sabah açılışta hatırlatacağım.');
+    return { tur:'ritim-bitti' };
+  }
+  function nextHafta(){
+    const d = new Date(ortam.simdi().getTime());
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + (d.getDay() === 0 ? 7 : 0));
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  /* Yük: modülün son 7 gün / önceki 7 gün kartları ve sinyali. */
+  const YUK_RE = /(yük durumu|yüküm|yük göstergesi|çok mu yükleniyorum|tükeniyor muyum|yoruldum mu)/;
+  function yukIsle(metin){
+    akis.push({ kim:'sen', metin:String(metin).trim() }); cipler = null;
+    const K = ayar && ayar.kartlar;
+    let y = null;
+    try{ y = K && typeof K.yuk === 'function' ? K.yuk() : null; }catch(e){ y = null; }
+    if(!y || !Array.isArray(y.kartlar) || !y.kartlar.length){ soyle('Bu modülde yük göstergesi yok; AYS ve SPİ’de var.'); return { tur:'yuk-yok' }; }
+    const l = y.kartlar.filter(x => x && x.ad).map(kartTemiz);
+    soyle(y.sinyal || 'Son 7 gün, önceki 7 güne göre belirgin bir yük artışı görünmüyor.', null, null, null, { kartlar:l, bulgu:!!y.sinyal });
+    return { tur:'yuk', sinyal:!!y.sinyal };
+  }
+  /* Günlük: anlattığın Defter'e; his (1–5) senin beyanın. */
+  const GUNLUK_RE = /(günlük yazalım|günlüğe yaz|akşam günlüğü|günlük tutalım|bugünü anlatayım)/;
+  let gunlukBekle = false, gunlukMetin = '';
+  async function gunlukIsle(metin){
+    akis.push({ kim:'sen', metin:String(metin).trim() });
+    const t = kucuk(metin);
+    if(/^(vazgeç|bırak|iptal)/.test(t)){ gunlukBekle = false; gunlukMetin = ''; cipler = null; soyle('Tamam, günlüğü bıraktım.'); return { tur:'gunluk-dur' }; }
+    if(!gunlukMetin){
+      gunlukMetin = String(metin).trim();
+      cipler = [1, 2, 3, 4, 5].map(n => ({ ad:String(n), is:'gunluk-his:' + n })).concat([{ ad:'Geç', is:'gunluk-his:0' }]);
+      soyle('Not aldım. Bugünkü hissin 1 ile 5 arasında kaç? (5 çok iyi; istersen geç.)');
+      return { tur:'gunluk-his' };
+    }
+    return gunlukBitir(/^[1-5]$/.test(t) ? Number(t) : 0);
+  }
+  async function gunlukBitir(his){
+    const metin = gunlukMetin;
+    gunlukBekle = false; gunlukMetin = ''; cipler = null;
+    let ok = false;
+    const Df = D();
+    if(Df && metin){
+      try{ await Df.yeni('Günlük · ' + bugunISO(), metin + (his ? '\n\nHis: ' + his + '/5 (benim beyanım)' : ''), 'not'); ok = true; }catch(e){ ok = false; }
+    }
+    soyle(ok ? 'Günlüğe yazdım (Defter).' + (his ? ' Hissin: ' + his + '/5.' : '') : 'Günlüğü kaydedemedim.');
+    return { tur:'gunluk-bitti', his };
+  }
+  /* Kişisel deney: önceki dönem ile deney dönemi, modülün günlük ölçüsüyle. */
+  const DENEY = () => 'lifeos.king.deney.' + ((ayar && ayar.modul) || 'x');
+  const DENEY_RE = /deney başlat(?:alım)?\s*:?\s*(.*)$/;
+  const DENEY_DURUM_RE = /(deney(?:im)? (?:durumu|nasıl gidiyor|sonucu|bitti mi)|deneyi bitir)/;
+  const DENEY_GUN = 14, DENEY_EN_AZ = 5;
+  let deneyTaslak = null;
+  function deneyOku(){ const v = ortam.depo.oku(DENEY()); return v && v.baslangic && v.olcu ? v : null; }
+  function gunISO(d){ return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function gunKaydir(iso, n){ const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return gunISO(d); }
+  function deneyBaslat(metin, kural){
+    akis.push({ kim:'sen', metin:String(metin).trim() }); cipler = null;
+    const O = ayar && ayar.kartlar && ayar.kartlar.olcu;
+    if(!O || !Array.isArray(O.liste) || !O.liste.length){ soyle('Bu modülde deney için ölçü yok.'); return { tur:'deney-yok' }; }
+    if(deneyOku()){ soyle('Süren bir deney var; önce «deneyi bitir» de.'); return { tur:'deney-var' }; }
+    deneyTaslak = { kural:String(kural || '').trim().slice(0, 160) || 'kendi kuralın' };
+    cipler = O.liste.map(o => ({ ad:o.ad, is:'deney-olcu:' + o.id }));
+    soyle('Deney: «' + deneyTaslak.kural + '». ' + DENEY_GUN + ' gün süreceğim. Neyle ölçelim?');
+    return { tur:'deney-olcu' };
+  }
+  function deneyOlcuSec(id){
+    const O = ayar && ayar.kartlar && ayar.kartlar.olcu;
+    const o = O && O.liste.find(x => x.id === id);
+    if(!o || !deneyTaslak) return false;
+    const v = { kural:deneyTaslak.kural, olcu:o.id, olcuAd:o.ad, birim:o.birim || '', baslangic:bugunISO(), gun:DENEY_GUN };
+    deneyTaslak = null; cipler = null;
+    ortam.depo.yaz(DENEY(), v);
+    soyle('Başladı: ' + v.gun + ' gün «' + v.kural + '», ölçü ' + v.olcuAd + '. Sonunda önceki ' + v.gun + ' günle karşılaştıracağım.');
+    return true;
+  }
+  function deneyHesap(v){
+    const O = ayar && ayar.kartlar && ayar.kartlar.olcu;
+    const ortala = (bas, n) => { const l = [];
+      for(let i = 0; i < n; i++){ let x = null; try{ x = O.deger(v.olcu, gunKaydir(bas, i)); }catch(e){ x = null; }
+        if(typeof x === 'number' && isFinite(x)) l.push(x); }
+      return { n:l.length, ort:l.length ? Math.round(l.reduce((a, b) => a + b, 0) / l.length * 10) / 10 : null }; };
+    const gecen = Math.max(0, Math.round((new Date(bugunISO() + 'T12:00:00') - new Date(v.baslangic + 'T12:00:00')) / 864e5));
+    return { once:ortala(gunKaydir(v.baslangic, -v.gun), v.gun), sira:ortala(v.baslangic, Math.min(v.gun, gecen + 1)), gecen };
+  }
+  function deneyDurum(metin){
+    akis.push({ kim:'sen', metin:String(metin).trim() }); cipler = null;
+    const v = deneyOku();
+    if(!v){ soyle('Süren bir deney yok. «deney başlat 23:00’te yatacağım» gibi başlatabilirsin.'); return { tur:'deney-yok' }; }
+    const h = deneyHesap(v), bitir = /bitir/.test(kucuk(metin)) || h.gecen >= v.gun;
+    const fark = h.once.ort != null && h.sira.ort != null ? Math.round((h.sira.ort - h.once.ort) * 10) / 10 : null;
+    const yeter = h.once.n >= DENEY_EN_AZ && h.sira.n >= DENEY_EN_AZ;
+    const kart = [
+      { ad:'Önce · ' + v.olcuAd, deger:h.once.ort, birim:v.birim, etiket:'hesaplandı', alt:h.once.n + ' gün veri' },
+      { ad:'Deney · ' + v.olcuAd, deger:h.sira.ort, birim:v.birim, etiket:'hesaplandı', alt:h.sira.n + ' gün veri' },
+      { ad:'Fark', deger:fark != null ? (fark > 0 ? '+' : '') + fark : null, birim:v.birim, etiket:'hesaplandı' },
+    ].map(kartTemiz);
+    if(bitir) ortam.depo.sil(DENEY());
+    soyle((bitir ? 'Deney bitti' : 'Deney sürüyor (' + Math.min(h.gecen + 1, v.gun) + '/' + v.gun + ' gün)') + ': «' + v.kural + '». '
+      + (yeter ? 'Bu bir gözlem; tek kişilik deney neden-sonuç kanıtı değildir.' : 'Karşılaştırma için veri yetersiz (her dönemde en az ' + DENEY_EN_AZ + ' gün gerekir).'),
+      null, null, null, { kartlar:kart, bulgu:true });
+    return { tur:bitir ? 'deney-bitti' : 'deney-durum', yeter };
+  }
+
   /* ---------- söz 33: öneriler, ayar komutları, odak, Merkez komutları ---------- */
   function oneriListesi(cevapSonrasi){
     const l = [];
@@ -36982,6 +37221,7 @@ window.LIFEOS.KING = (function(){
     const K = ayar && ayar.kartlar;
     if(K && typeof K.istatistik === 'function') l.push(['Kartları göster', 'istatistiklerim']);
     if(K && typeof K.soru === 'function') l.push(['Bana soru sor', 'bana soru sor']);
+    if(!cevapSonrasi && K && typeof K.oncelik === 'function') l.unshift(['Neye çalışayım?', 'neye çalışayım']);
     return l.slice(0, 4).map(x => ({ ad:x[0], is:'oner-metin:' + x[1] }));
   }
   const TARZ = 'lifeos.king.tarz';      // 'samimi' | 'resmi' | 'kisa'; TASINAN'da
@@ -37125,10 +37365,14 @@ window.LIFEOS.KING = (function(){
     let l = [];
     try{ l = (ayar.kartlar.istatistik() || []).filter(x => x && x.ad).map(kartTemiz).slice(0, 4); }catch(e){ l = []; }
     ortam.depo.yaz(ACILIS(), gun);
-    const m = { kim:'king', metin:selam() + ' Bugünün kısa özeti:', satirlar:ozetSatirlari().slice(0, 3), yeni:true };
+    const ek = [];
+    if(haftaHedefi()) ek.push('Haftanın hedefi: ' + haftaHedefi());
+    const dv = deneyOku();
+    if(dv){ const h = deneyHesap(dv); ek.push(h.gecen >= dv.gun ? 'Deneyin bitti: «deney sonucu» de.' : 'Deney: «' + dv.kural + '» · ' + (h.gecen + 1) + '/' + dv.gun + ' gün'); }
+    const m = { kim:'king', metin:selam() + ' Bugünün kısa özeti:', satirlar:ek.concat(ozetSatirlari()).slice(0, 4), yeni:true };
     if(l.length) m.kartlar = l;
     akis.push(m);
-    cipler = (ortam.simdi().getDay() === 0 ? [{ ad:'Haftalık değerlendirme', is:'oner-metin:haftalık değerlendirme' }] : []).concat(oneriListesi(false));
+    cipler = (ortam.simdi().getDay() === 0 ? [{ ad:'Haftalık gözden geçirme', is:'oner-metin:haftalık gözden geçirme' }] : []).concat(oneriListesi(false)).slice(0, 4);
     sakla();
   }
   function cizgi(seri){
@@ -37240,6 +37484,8 @@ window.LIFEOS.KING = (function(){
     /* Söz 8: bekleyen soruya yazıyla cevap («evet», «hayır»). */
     const t0 = kucuk(metin);
     if(!akis.some(m => m.kim === 'sen')) sohbetBasYaz();     // söz 33: yeni sohbet ya da yeni gün
+    if(ritim) return ritimIsle(metin);                        // söz 34: haftalık gözden geçirme sürüyor
+    if(gunlukBekle) return gunlukIsle(metin);                 // söz 34: günlük metni bekleniyor
     /* Söz 20: büyük eylem yalnız açık onayla. */
     if(bekleyenYetki && /^onayl[ıi]yorum[.!]?$/.test(t0)){
       akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -37301,6 +37547,18 @@ window.LIFEOS.KING = (function(){
     }
     if(HAFTA_RE.test(t0)) return merkezKomut(metin, 'hafta', 'Haftalık değerlendirme');
     if(CAPRAZ_RE.test(t0)) return merkezKomut(metin, 'capraz', 'Modüller arası bulgular');
+    /* Söz 34 */
+    if(ONCELIK_RE.test(t0)) return oncelikIsle(metin);
+    if(RITIM_RE.test(t0)) return ritimBaslat(metin);
+    if(YUK_RE.test(t0)) return yukIsle(metin);
+    if(GUNLUK_RE.test(t0)){ akis.push({ kim:'sen', metin:String(metin).trim() }); cipler = null; gunlukBekle = true;
+      soyle(D() ? 'Anlat, dinliyorum. Bitince gönder; Defter’e günlük olarak yazacağım. Vazgeçersen «vazgeç» de.' : 'Defter bu modülde kurulu değil; günlüğü buraya yazamam.');
+      if(!D()) gunlukBekle = false;
+      return { tur:'gunluk' }; }
+    if(DENEY_DURUM_RE.test(t0)) return deneyDurum(metin);
+    const DB = t0.match(DENEY_RE);
+    if(DB) return deneyBaslat(metin, DB[1]);
+    if(NOT_RE.test(t0)) return notAra(metin, t0);
     /* Söz 24: «… artık sorma / sor». */
     const SK = sormaKomutu(metin);
     if(SK && !veriGibi(metin)){
@@ -37648,7 +37906,7 @@ window.LIFEOS.KING = (function(){
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
       : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '"><div><p>' + bicimli(m.metin) + '</p>'
-        + kartlarHtml(m) + soruHtml(m, ilkSira + i)
+        + kartlarHtml(m) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
             + (m.onizleme.liste ? '<ul class="king__liste">' + m.onizleme.liste.map(x => '<li><b>' + kac(x) + '</b></li>').join('') + '</ul>'
@@ -37844,6 +38102,11 @@ window.LIFEOS.KING = (function(){
         if(derinAcik && is !== 'derin') derinAcik = false;       // söz 31: aynı kural
         if(is === 'derin'){ derinAcik = !derinAcik; aracAcik = false; ciz(false); return; }
         if(/^oner-metin:/.test(is)){ isle(is.slice(11)); return; }
+        if(/^sira-ac:\d+:\d+$/.test(is)){ const p = is.split(':'), m = akis[Number(p[1])], x = m && m.sirali && m.sirali[Number(p[2])];
+          if(x && ayar.kartlar && ayar.kartlar.oncelikAc){ kucult(); Promise.resolve(ayar.kartlar.oncelikAc(x.ham || x)).catch(() => {}); } return; }
+        if(is === 'defter-ac'){ const Df = D(); if(Df){ kucult(); try{ Df.ac(); }catch(e){ /* açılamadı */ } } return; }
+        if(/^gunluk-his:[0-5]$/.test(is)){ if(gunlukBekle && gunlukMetin) gunlukBitir(Number(is.slice(11))); return; }
+        if(/^deney-olcu:/.test(is)){ deneyOlcuSec(is.slice(11)); return; }
         if(/^tarz:(samimi|resmi|kisa)$/.test(is)){ tarzSec(is.slice(5)); return; }
         if(is === 'odak-dur'){ odakDur(); return; }
         if(/^odak-kaydet:\d+:/.test(is)){ const p = is.split(':'); cipler = null; isle(p[1] + ' dk ' + (decodeURIComponent(p.slice(2).join(':')) || 'çalıştım')); return; }
@@ -38058,7 +38321,7 @@ window.LIFEOS.KING = (function(){
     ortam.depo.sil(TANISMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     if(mikDeniyor){ try{ mikDeniyor.iptal(); }catch(e){ /* durmus */ } mikDeniyor = null; }
-    mikListe = []; mikNot = ''; hkmDinlemezBitis = 0; dinleHata = 0; dinleNot = ''; kesiciKapat(); odakTemizle();
+    mikListe = []; mikNot = ''; hkmDinlemezBitis = 0; dinleHata = 0; dinleNot = ''; kesiciKapat(); odakTemizle(); ritim = null; gunlukBekle = false; gunlukMetin = ''; deneyTaslak = null;
     if(dinleyen){ try{ dinleyen.onend = dinleyen.onerror = null; dinleyen.abort(); }catch(e){ /* durmus */ } }
     sesli = false; dinleyen = null; konusuyor = 0; sesNo++; calan = null; sonMotor = ''; sonNot = '';
   }
@@ -38071,7 +38334,7 @@ window.LIFEOS.KING = (function(){
     cikarimAdaylari, cikarimKarti, cikarimOnayla, SORMA, sormaKomutu, sormaMi, sormaListesi,
     USLUP, envanterVar:() => !!envanter,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
-    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor, sonNot:() => sonNot, YAN, yanDar, yanDarSec, DERIN, derinlik, derinlikSec, kartNiyeti, soruCevapla, bicimli, tarz, tarzSec, TARZ, odak, ODAK, sohbetBas, BAS, ayarKomutu, oneriListesi, cizgi,
+    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor, sonNot:() => sonNot, YAN, yanDar, yanDarSec, DERIN, derinlik, derinlikSec, kartNiyeti, soruCevapla, bicimli, tarz, tarzSec, TARZ, odak, ODAK, sohbetBas, BAS, ayarKomutu, oneriListesi, cizgi, haftaHedefi, HEDEF, DENEY, deneyOku, notPuanla,
     MIK, mikSecili, mikSec, mikTazele, mikDene, algila,
     sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
@@ -75300,44 +75563,113 @@ R.Ogren = (function(){
     return err;
   }
 
-  /* King'in soru kartı (brand/ortak/king.js söz 32): bankadan soru seçer.
-     Konu metni verilmişse adı eşleşen konu, yoksa son açılan konu; o
-     konuda cevaplanmamış ilk soru. Hepsi cevaplanmışsa ilk soru gelir ve
-     cevabın ölçüme yazılmayacağı söylenir (söz 3: ilk cevap kalır). */
+  /* PUAN ÖNCELİĞİ (2026-10-19, depo sahibi: «gerçekten işimize yarayacak
+     fikirler»; king.js söz 34). Hangi konu çalışılırsa en çok puan
+     kurtarır: konunun sınavda çıkma sıklığı (yazarın değerlendirmesi:
+     yüksek 3, orta 2, düşük 1) × kayıp (deneme yanlışları + son 45 günün
+     pratik yanlışlarının dörtte biri). Sayıyı KOD üretir («hesaplandı»);
+     net kazancı uydurulmaz, yalnız sıra ve nedeni söylenir. Hata ya da
+     pratik verisi olmayan konu listeye girmez. */
+  const SIKLIK = { high:3, mid:2, low:1 };
+  const SIKLIK_AD = { high:'sık çıkar', mid:'orta sıklıkta çıkar', low:'seyrek çıkar' };
+  function oncelikler(n){
+    const hata = {};
+    ((R.S && R.S.errors) || []).forEach(e => { if(e && e.topicId) hata[e.topicId] = (hata[e.topicId] || 0) + 1; });
+    return konular().map(x => {
+      const p = R.Calc && R.Calc.topicPractice ? R.Calc.topicPractice(x.subject.id, x.topic.id, 45) : { solved:0, correct:0 };
+      const y = hata[x.topic.id] || 0, cozulen = p.solved || 0, dogru = p.correct || 0;
+      const w = SIKLIK[x.topic.freq] || 1;
+      return { x, y, cozulen, dogru, w, puan:w * (y + (cozulen - dogru) / 4) };
+    }).filter(o => o.puan > 0).sort((a, b) => b.puan - a.puan || b.w - a.w).slice(0, n || 5).map(o => ({
+      subjectId:o.x.subject.id, topicId:o.x.topic.id, ad:o.x.topic.name, ders:o.x.subject.name,
+      puan:Math.round(o.puan * 10) / 10,
+      neden:[o.y ? o.y + ' deneme yanlışı' : '', o.cozulen ? '%' + Math.round(o.dogru * 100 / o.cozulen) + ' doğru (' + o.cozulen + ' soru)' : '',
+        SIKLIK_AD[o.x.topic.freq] || ''].filter(Boolean).join(' · '),
+    }));
+  }
+
+  /* King'in soru kartı (king.js söz 32 ve 34): bankadan soru seçer.
+     Konu verilmişse adı eşleşen konunun cevaplanmamış ilk sorusu. Verilmemişse
+     sıra: (1) vadesi gelen tekrar (yanlış yaptığın soru 1, 3, 7 gün sonra),
+     (2) öncelikli konuların cevaplanmamış sorusu, (3) son açılan konu. Tekrar
+     turu ölçüm değildir (söz 3: ilk cevap kalır); tekrar takvimi bu cihazda. */
+  const TEKRAR = 'ays.king.tekrar', TEKRAR_ARALIK = [1, 3, 7];
+  function tekrarlar(){ try{ const v = JSON.parse(localStorage.getItem(TEKRAR) || '{}'); return v && typeof v === 'object' ? v : {}; }catch(e){ return {}; } }
+  function tekrarYaz(v){ try{ localStorage.setItem(TEKRAR, JSON.stringify(v)); }catch(e){ /* yer yok */ } }
+  function gunEkle(n){ return R.U.iso(R.U.addDays(R.U.today(), n)); }
+  function soruNesnesi(x, i, not){
+    const q = sorular(x.topic.id)[i];
+    if(!q) return null;
+    return { id:x.subject.id + '|' + x.topic.id + '|' + i, konu:x.topic.name,
+      soru:duzMetin(q.soru) + (ekMetni(q) ? ' ' + ekMetni(q) : ''), sec:(q.sec || []).map(m => duzMetin(m)),
+      kaynak:'AYS · Öğren · ' + x.subject.name + ' (elle yazıldı, doğrulanmadı)', not:not || '' };
+  }
+  function ilkCevapsiz(x, yalnizCevapsiz){
+    const l = sorular(x.topic.id), c = cevaplar(x.subject.id, x.topic.id);
+    const i = l.findIndex((q, k) => q && !c[k]);
+    if(i >= 0) return soruNesnesi(x, i, '');
+    return yalnizCevapsiz ? null : soruNesnesi(x, 0, 'Bu konudaki soruların hepsini cevapladın; bu cevap ölçüme yazılmaz.');
+  }
   function kingSoru(konuMetni){
     const t = String(konuMetni || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
     const adaylar = konular().filter(x => sorular(x.topic.id).length);
     if(!adaylar.length) return null;
     const ad = x => String(x.topic.name || '').toLocaleLowerCase('tr');
-    let x = null;
     if(t){
-      x = adaylar.find(k => t.includes(ad(k)) || ad(k).includes(t))
+      const x = adaylar.find(k => t.includes(ad(k)) || ad(k).includes(t))
         || adaylar.find(k => t.split(' ').some(w => w.length > 4 && !/^(konu|soru|hakkında|ilgili|konusunda)/.test(w) && ad(k).includes(w)));
-      if(!x) return null;
-    }else{
-      const s = sonAcilan();
-      x = (s && adaylar.find(k => k.topic.id === s.topic.id)) || adaylar[0];
+      return x ? ilkCevapsiz(x) : null;
     }
-    const l = sorular(x.topic.id), c = cevaplar(x.subject.id, x.topic.id);
-    let i = l.findIndex((q, k) => q && !c[k]);
-    const hepsi = i < 0;
-    if(hepsi) i = 0;
-    const q = l[i];
-    return { id:x.subject.id + '|' + x.topic.id + '|' + i, konu:x.topic.name,
-      soru:duzMetin(q.soru) + (ekMetni(q) ? ' ' + ekMetni(q) : ''), sec:(q.sec || []).map(m => duzMetin(m)),
-      kaynak:'AYS · Öğren · ' + x.subject.name + ' (elle yazıldı, doğrulanmadı)',
-      not:hepsi ? 'Bu konudaki soruların hepsini cevapladın; bu cevap ölçüme yazılmaz.' : '' };
+    const tk = tekrarlar(), bugun = R.U.todayISO();
+    /* Öğren'de yanlış verilmiş ama takvime girmemiş eski cevaplar da vadesi gelmiş sayılır. */
+    adaylar.forEach(x => {
+      const c = cevaplar(x.subject.id, x.topic.id);
+      Object.keys(c).forEach(k => {
+        const id = x.subject.id + '|' + x.topic.id + '|' + k;
+        if(c[k] && c[k].d === false && !tk[id] && String(c[k].at || '').slice(0, 10) < bugun) tk[id] = { n:0, sonraki:bugun, eski:true };
+      });
+    });
+    const vade = Object.keys(tk).filter(k => tk[k] && String(tk[k].sonraki) <= bugun)
+      .sort((a, b) => String(tk[a].sonraki).localeCompare(String(tk[b].sonraki)));
+    for(const k of vade){
+      const p = k.split('|');
+      const x = adaylar.find(a => a.subject.id === p[0] && a.topic.id === p[1]);
+      const s = x ? soruNesnesi(x, Number(p[2]), 'Tekrar (' + (tk[k].n + 1) + '. tur): ilk cevabın ölçümde kaldı; bu tur hafızan için.') : null;
+      if(s) return s;
+    }
+    for(const o of oncelikler(10)){
+      const x = adaylar.find(a => a.topic.id === o.topicId);
+      const s = x ? ilkCevapsiz(x, true) : null;
+      if(s){ s.not = 'Öncelikli konundan: ' + o.neden + '.'; return s; }
+    }
+    const son = sonAcilan();
+    return ilkCevapsiz((son && adaylar.find(k => k.topic.id === son.topic.id)) || adaylar[0]);
   }
-  /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). */
+  /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). Yanlışsa
+     soru yarın yeniden gelir; tekrarda doğruysa 3 ve 7 gün sonra; üç doğru
+     turdan sonra takvimden çıkar. */
   async function kingCevapla(id, harf){
     const p = String(id || '').split('|'), i = Number(p[2]);
     const q = sorular(p[1])[i];
     if(!q) return null;
     const r = await cevapla(p[0], p[1], i, harf, false, 0);
-    return { dogru:q.dogru, cozum:[].concat(q.cozum || []).map(duzMetin),
-      not:r && r.neden === 'kilitli' ? 'Bu soruyu daha önce cevaplamıştın; ilk cevabın ölçüm olarak kaldı.' : '' };
+    const isabet = String(harf || '').toUpperCase() === q.dogru;
+    const tk = tekrarlar(), kayit = tk[id];
+    let not = '';
+    if(!isabet){
+      tk[id] = { n:0, sonraki:gunEkle(1) };
+      not = 'Yarın bu soruyu yeniden soracağım.';
+    }else if(kayit){
+      const n = kayit.n + 1;
+      if(n >= TEKRAR_ARALIK.length){ delete tk[id]; not = 'Tekrarları tamamladın; bu soru artık sorulmayacak.'; }
+      else{ tk[id] = { n, sonraki:gunEkle(TEKRAR_ARALIK[n]) }; not = TEKRAR_ARALIK[n] + ' gün sonra bir kez daha soracağım.'; }
+    }else if(r && r.neden === 'kilitli'){
+      not = 'Bu soruyu daha önce cevaplamıştın; ilk cevabın ölçüm olarak kaldı.';
+    }
+    tekrarYaz(tk);
+    return { dogru:q.dogru, cozum:[].concat(q.cozum || []).map(duzMetin), not };
   }
-  return { HARFLER, SEVIYE, kingSoru, kingCevapla, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
+  return { HARFLER, SEVIYE, kingSoru, kingCevapla, oncelikler, TEKRAR, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
     derin, tabanSorular, seviye, gecerli, ekMetni, soru,
     anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle,
     kavramlar, akilliNot, kaynaklar, stratejiler };
@@ -113691,8 +114023,25 @@ R.App = (function(){
               let solved = 0, correct = 0;
               (R.SUBJECTS || []).forEach(s => { const p = R.Calc.topicPractice(s.id, null, 45); solved += p.solved || 0; correct += p.correct || 0; });
               const netler = R.Calc.fullExams('TYT').map(M.examNet).filter(n => n != null && isFinite(n));
+              /* Söz 34: en verimli saat dilimi — yalnız saati kayıtlı bloklardan (sayaçla başlatılan). */
+              const dilim = {};
+              for(let i = 0; i < 45; i++){
+                const day = S.days[U.iso(U.addDays(U.today(), -i))];
+                (day && day.blocks || []).forEach(b => {
+                  if(!b.actualQ || !b.startedAt) return;
+                  const t = typeof b.startedAt === 'number' ? new Date(b.startedAt) : (/T\d\d:/.test(String(b.startedAt)) ? new Date(b.startedAt) : null);
+                  if(!t || isNaN(t)) return;
+                  const k = Math.floor(t.getHours() / 3) * 3;
+                  const x = dilim[k] = dilim[k] || { q:0, d:0 };
+                  x.q += b.actualQ; x.d += b.correctQ || 0;
+                });
+              }
+              const enIyi = Object.keys(dilim).filter(k => dilim[k].q >= 20).sort((a, b) => dilim[b].d / dilim[b].q - dilim[a].d / dilim[a].q)[0];
+              const saatAd = k => String(k).padStart(2, '0') + '–' + String(Number(k) + 3).padStart(2, '0');
               return [
                 { ad:'Çözülen soru · 45 gün', deger:solved || null, etiket:'ölçüldü' },
+                { ad:'En verimli saat dilimi', deger:enIyi != null ? saatAd(enIyi) : null, etiket:'hesaplandı',
+                  alt:enIyi != null ? '%' + Math.round(dilim[enIyi].d * 100 / dilim[enIyi].q) + ' doğru · ' + dilim[enIyi].q + ' soru' : 'Blokları sayaçla başlatınca ölçülür' },
                 { ad:'Doğru oranı · 45 gün', deger:solved ? Math.round(correct * 100 / solved) : null, birim:'%', etiket:'hesaplandı',
                   alt:solved ? correct + ' / ' + solved : '' },
                 { ad:'Bugün sırası gelen tekrar', deger:R.Calc.dueCards(R.U.todayISO()).length, birim:'kart', etiket:'hesaplandı' },
@@ -113702,6 +114051,36 @@ R.App = (function(){
             },
             soru:konu => R.Ogren.kingSoru(konu),
             cevapla:(id, harf) => R.Ogren.kingCevapla(id, harf),
+            /* Söz 34: puan önceliği (Öğren'in hesabı) ve konuyu Öğren'de açmak. */
+            oncelik:() => R.Ogren.oncelikler(5),
+            oncelikAc:async o => { if(o && o.topicId){ await R.Ogren.sec(o.subjectId, o.topicId); go('ogren'); } },
+            /* Söz 34: yük (son 7 gün / önceki 7 gün) ve deney ölçüleri; günlük değerler AYS'nin kaydı. */
+            yuk:() => {
+              const gun = (bas, n) => { let dk = 0, q = 0, d = 0, var_ = false;
+                for(let i = bas; i < bas + n; i++){ const day = S.days[U.iso(U.addDays(U.today(), -i))];
+                  (day && day.blocks || []).forEach(b => { if(b.actualMin){ dk += b.actualMin; var_ = true; } if(b.actualQ){ q += b.actualQ; d += b.correctQ || 0; } }); }
+                return { dk, oran:q ? Math.round(d * 100 / q) : null, var_ }; };
+              const a = gun(0, 7), o = gun(7, 7);
+              const kart = [
+                { ad:'Çalışma · son 7 gün', deger:a.var_ ? a.dk : null, birim:'dk', etiket:'ölçüldü', alt:o.var_ ? 'önceki 7 gün: ' + o.dk + ' dk' : '' },
+                { ad:'Doğruluk · son 7 gün', deger:a.oran, birim:'%', etiket:'hesaplandı', alt:o.oran != null ? 'önceki 7 gün: %' + o.oran : '' },
+              ];
+              let sinyal = '';
+              if(a.var_ && o.var_ && a.dk > o.dk * 1.3 && a.oran != null && o.oran != null && a.oran < o.oran - 5)
+                sinyal = 'Son 7 günde çalışma arttı ama doğruluk düştü; bir hafif gün düşünebilirsin.';
+              return { kartlar:kart, sinyal };
+            },
+            olcu:{
+              liste:[{ id:'dogruluk', ad:'Doğruluk', birim:'%' }, { id:'sure', ad:'Çalışma süresi', birim:'dk' }],
+              deger:(id, iso) => {
+                const day = S.days[iso];
+                if(!day) return null;
+                let q = 0, d = 0, dk = 0;
+                (day.blocks || []).forEach(b => { q += b.actualQ || 0; d += b.correctQ || 0; dk += b.actualMin || 0; });
+                if(id === 'dogruluk') return q ? Math.round(d * 100 / q) : null;
+                return dk || null;
+              },
+            },
           },
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
           foto:[{ ad:'Soruyu çöz', is:async f => {

@@ -331,44 +331,113 @@ R.Ogren = (function(){
     return err;
   }
 
-  /* King'in soru kartı (brand/ortak/king.js söz 32): bankadan soru seçer.
-     Konu metni verilmişse adı eşleşen konu, yoksa son açılan konu; o
-     konuda cevaplanmamış ilk soru. Hepsi cevaplanmışsa ilk soru gelir ve
-     cevabın ölçüme yazılmayacağı söylenir (söz 3: ilk cevap kalır). */
+  /* PUAN ÖNCELİĞİ (2026-10-19, depo sahibi: «gerçekten işimize yarayacak
+     fikirler»; king.js söz 34). Hangi konu çalışılırsa en çok puan
+     kurtarır: konunun sınavda çıkma sıklığı (yazarın değerlendirmesi:
+     yüksek 3, orta 2, düşük 1) × kayıp (deneme yanlışları + son 45 günün
+     pratik yanlışlarının dörtte biri). Sayıyı KOD üretir («hesaplandı»);
+     net kazancı uydurulmaz, yalnız sıra ve nedeni söylenir. Hata ya da
+     pratik verisi olmayan konu listeye girmez. */
+  const SIKLIK = { high:3, mid:2, low:1 };
+  const SIKLIK_AD = { high:'sık çıkar', mid:'orta sıklıkta çıkar', low:'seyrek çıkar' };
+  function oncelikler(n){
+    const hata = {};
+    ((R.S && R.S.errors) || []).forEach(e => { if(e && e.topicId) hata[e.topicId] = (hata[e.topicId] || 0) + 1; });
+    return konular().map(x => {
+      const p = R.Calc && R.Calc.topicPractice ? R.Calc.topicPractice(x.subject.id, x.topic.id, 45) : { solved:0, correct:0 };
+      const y = hata[x.topic.id] || 0, cozulen = p.solved || 0, dogru = p.correct || 0;
+      const w = SIKLIK[x.topic.freq] || 1;
+      return { x, y, cozulen, dogru, w, puan:w * (y + (cozulen - dogru) / 4) };
+    }).filter(o => o.puan > 0).sort((a, b) => b.puan - a.puan || b.w - a.w).slice(0, n || 5).map(o => ({
+      subjectId:o.x.subject.id, topicId:o.x.topic.id, ad:o.x.topic.name, ders:o.x.subject.name,
+      puan:Math.round(o.puan * 10) / 10,
+      neden:[o.y ? o.y + ' deneme yanlışı' : '', o.cozulen ? '%' + Math.round(o.dogru * 100 / o.cozulen) + ' doğru (' + o.cozulen + ' soru)' : '',
+        SIKLIK_AD[o.x.topic.freq] || ''].filter(Boolean).join(' · '),
+    }));
+  }
+
+  /* King'in soru kartı (king.js söz 32 ve 34): bankadan soru seçer.
+     Konu verilmişse adı eşleşen konunun cevaplanmamış ilk sorusu. Verilmemişse
+     sıra: (1) vadesi gelen tekrar (yanlış yaptığın soru 1, 3, 7 gün sonra),
+     (2) öncelikli konuların cevaplanmamış sorusu, (3) son açılan konu. Tekrar
+     turu ölçüm değildir (söz 3: ilk cevap kalır); tekrar takvimi bu cihazda. */
+  const TEKRAR = 'ays.king.tekrar', TEKRAR_ARALIK = [1, 3, 7];
+  function tekrarlar(){ try{ const v = JSON.parse(localStorage.getItem(TEKRAR) || '{}'); return v && typeof v === 'object' ? v : {}; }catch(e){ return {}; } }
+  function tekrarYaz(v){ try{ localStorage.setItem(TEKRAR, JSON.stringify(v)); }catch(e){ /* yer yok */ } }
+  function gunEkle(n){ return R.U.iso(R.U.addDays(R.U.today(), n)); }
+  function soruNesnesi(x, i, not){
+    const q = sorular(x.topic.id)[i];
+    if(!q) return null;
+    return { id:x.subject.id + '|' + x.topic.id + '|' + i, konu:x.topic.name,
+      soru:duzMetin(q.soru) + (ekMetni(q) ? ' ' + ekMetni(q) : ''), sec:(q.sec || []).map(m => duzMetin(m)),
+      kaynak:'AYS · Öğren · ' + x.subject.name + ' (elle yazıldı, doğrulanmadı)', not:not || '' };
+  }
+  function ilkCevapsiz(x, yalnizCevapsiz){
+    const l = sorular(x.topic.id), c = cevaplar(x.subject.id, x.topic.id);
+    const i = l.findIndex((q, k) => q && !c[k]);
+    if(i >= 0) return soruNesnesi(x, i, '');
+    return yalnizCevapsiz ? null : soruNesnesi(x, 0, 'Bu konudaki soruların hepsini cevapladın; bu cevap ölçüme yazılmaz.');
+  }
   function kingSoru(konuMetni){
     const t = String(konuMetni || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
     const adaylar = konular().filter(x => sorular(x.topic.id).length);
     if(!adaylar.length) return null;
     const ad = x => String(x.topic.name || '').toLocaleLowerCase('tr');
-    let x = null;
     if(t){
-      x = adaylar.find(k => t.includes(ad(k)) || ad(k).includes(t))
+      const x = adaylar.find(k => t.includes(ad(k)) || ad(k).includes(t))
         || adaylar.find(k => t.split(' ').some(w => w.length > 4 && !/^(konu|soru|hakkında|ilgili|konusunda)/.test(w) && ad(k).includes(w)));
-      if(!x) return null;
-    }else{
-      const s = sonAcilan();
-      x = (s && adaylar.find(k => k.topic.id === s.topic.id)) || adaylar[0];
+      return x ? ilkCevapsiz(x) : null;
     }
-    const l = sorular(x.topic.id), c = cevaplar(x.subject.id, x.topic.id);
-    let i = l.findIndex((q, k) => q && !c[k]);
-    const hepsi = i < 0;
-    if(hepsi) i = 0;
-    const q = l[i];
-    return { id:x.subject.id + '|' + x.topic.id + '|' + i, konu:x.topic.name,
-      soru:duzMetin(q.soru) + (ekMetni(q) ? ' ' + ekMetni(q) : ''), sec:(q.sec || []).map(m => duzMetin(m)),
-      kaynak:'AYS · Öğren · ' + x.subject.name + ' (elle yazıldı, doğrulanmadı)',
-      not:hepsi ? 'Bu konudaki soruların hepsini cevapladın; bu cevap ölçüme yazılmaz.' : '' };
+    const tk = tekrarlar(), bugun = R.U.todayISO();
+    /* Öğren'de yanlış verilmiş ama takvime girmemiş eski cevaplar da vadesi gelmiş sayılır. */
+    adaylar.forEach(x => {
+      const c = cevaplar(x.subject.id, x.topic.id);
+      Object.keys(c).forEach(k => {
+        const id = x.subject.id + '|' + x.topic.id + '|' + k;
+        if(c[k] && c[k].d === false && !tk[id] && String(c[k].at || '').slice(0, 10) < bugun) tk[id] = { n:0, sonraki:bugun, eski:true };
+      });
+    });
+    const vade = Object.keys(tk).filter(k => tk[k] && String(tk[k].sonraki) <= bugun)
+      .sort((a, b) => String(tk[a].sonraki).localeCompare(String(tk[b].sonraki)));
+    for(const k of vade){
+      const p = k.split('|');
+      const x = adaylar.find(a => a.subject.id === p[0] && a.topic.id === p[1]);
+      const s = x ? soruNesnesi(x, Number(p[2]), 'Tekrar (' + (tk[k].n + 1) + '. tur): ilk cevabın ölçümde kaldı; bu tur hafızan için.') : null;
+      if(s) return s;
+    }
+    for(const o of oncelikler(10)){
+      const x = adaylar.find(a => a.topic.id === o.topicId);
+      const s = x ? ilkCevapsiz(x, true) : null;
+      if(s){ s.not = 'Öncelikli konundan: ' + o.neden + '.'; return s; }
+    }
+    const son = sonAcilan();
+    return ilkCevapsiz((son && adaylar.find(k => k.topic.id === son.topic.id)) || adaylar[0]);
   }
-  /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). */
+  /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). Yanlışsa
+     soru yarın yeniden gelir; tekrarda doğruysa 3 ve 7 gün sonra; üç doğru
+     turdan sonra takvimden çıkar. */
   async function kingCevapla(id, harf){
     const p = String(id || '').split('|'), i = Number(p[2]);
     const q = sorular(p[1])[i];
     if(!q) return null;
     const r = await cevapla(p[0], p[1], i, harf, false, 0);
-    return { dogru:q.dogru, cozum:[].concat(q.cozum || []).map(duzMetin),
-      not:r && r.neden === 'kilitli' ? 'Bu soruyu daha önce cevaplamıştın; ilk cevabın ölçüm olarak kaldı.' : '' };
+    const isabet = String(harf || '').toUpperCase() === q.dogru;
+    const tk = tekrarlar(), kayit = tk[id];
+    let not = '';
+    if(!isabet){
+      tk[id] = { n:0, sonraki:gunEkle(1) };
+      not = 'Yarın bu soruyu yeniden soracağım.';
+    }else if(kayit){
+      const n = kayit.n + 1;
+      if(n >= TEKRAR_ARALIK.length){ delete tk[id]; not = 'Tekrarları tamamladın; bu soru artık sorulmayacak.'; }
+      else{ tk[id] = { n, sonraki:gunEkle(TEKRAR_ARALIK[n]) }; not = TEKRAR_ARALIK[n] + ' gün sonra bir kez daha soracağım.'; }
+    }else if(r && r.neden === 'kilitli'){
+      not = 'Bu soruyu daha önce cevaplamıştın; ilk cevabın ölçüm olarak kaldı.';
+    }
+    tekrarYaz(tk);
+    return { dogru:q.dogru, cozum:[].concat(q.cozum || []).map(duzMetin), not };
   }
-  return { HARFLER, SEVIYE, kingSoru, kingCevapla, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
+  return { HARFLER, SEVIYE, kingSoru, kingCevapla, oncelikler, TEKRAR, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
     derin, tabanSorular, seviye, gecerli, ekMetni, soru,
     anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle,
     kavramlar, akilliNot, kaynaklar, stratejiler };
