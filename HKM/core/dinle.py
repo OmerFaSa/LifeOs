@@ -16,10 +16,16 @@
       bilinen klasorlerde whisper-cli.exe ve ggml-*.bin arar (core/ses.py
       Piper gibi).
    3. GEMINI butce kapisindan gecer, her cagri deftere yazilir.
-   4. METIN DEGISTIRILMEZ: ne duyulduysa o; bos ses bos metindir.
+   4. METIN DEGISTIRILMEZ: ne duyulduysa o; bos ses bos metindir. Konusma
+      OLMAYAN sey metin degildir (sahada, 2026-10-19: Whisper sessizlikte
+      «(Müzik çalıyor)», «(KAPI TIKTIK)» uyduruyordu, King «Müziği açtım»
+      dedi): Whisper -sns ile calisir; «(...)», «[...]», «*...*», «♪»
+      altyazi etiketleri ve Whisper'in bilinen sessizlik uydurmalari
+      silinir. Geriye bir sey kalmazsa bos metindir.
    5. FIRLATMAZ: (metin, motor, notlar)."""
 import base64
 import glob
+import re
 import os
 import shutil
 import subprocess
@@ -84,7 +90,7 @@ def _calistir(exe, model, wav, timeout):
         f.write(wav)
     try:
         bayrak = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-        r = subprocess.run([exe, "-m", model, "-f", yol, "-l", "tr", "-nt", "-np"],
+        r = subprocess.run([exe, "-m", model, "-f", yol, "-l", "tr", "-nt", "-np", "-sns"],
                            capture_output=True, timeout=timeout, check=True, creationflags=bayrak)
         return r.stdout.decode("utf-8", "replace")
     finally:
@@ -97,8 +103,19 @@ def _calistir(exe, model, wav, timeout):
 VARSAYILAN_CALISTIR = _calistir
 
 
+ETIKET = re.compile(r"\([^()\n]{0,60}\)|\[[^\[\]\n]{0,60}\]|\*[^*\n]{0,60}\*|[♪♫]+")
+# Whisper'in Turkce sessizlik uydurmalari (altyazi sonu kaliplari); yalniz
+# metnin TAMAMI buysa silinir.
+UYDURMA = re.compile(r"^(?:altyazı(?:\s+m\.?\s*k\.?)?|izlediğiniz için teşekkür(?:ler| ederim| ederiz)|"
+                     r"abone olmayı unutmayın|beğenmeyi ve abone olmayı unutmayın|"
+                     r"bir sonraki videoda görüşmek üzere|altyazılar? .{0,40} tarafından)[.!]*$", re.I)
+
+
 def _temiz(metin):
-    return " ".join(str(metin or "").split()).strip().strip("«»\"'")
+    t = " ".join(ETIKET.sub(" ", str(metin or "")).split()).strip().strip("«»\"'").strip()
+    if UYDURMA.match(t.replace("İ", "i").lower()) or not re.search(r"\w", t):
+        return ""
+    return t
 
 
 def whisper(wav, calistir=None, bul=None):

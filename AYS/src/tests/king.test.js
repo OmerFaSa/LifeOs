@@ -1626,6 +1626,48 @@
       expect(istekler.length).toBe(1);
       expect(/duyulmadı/i.test(document.querySelector('[data-king-mik-not]').textContent)).toBe(true);
     }));
+
+    /* Sahada (2026-10-19): tek bir 503 «Whisper yok» dedirtip HKM'yi bırakıyordu;
+       ardından tarayıcı tanıması her seferinde hata verip «Ses tanınamadı» yığılıyordu. */
+    it('tek 503 HKM’yi bırakmaz, neden yazılır; ikincide geçici olarak tarayıcıya geçer', () => sahneyle(async () => {
+      let sessiz = null;
+      const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+      const fetch = async () => ({ status:503, json:async () => ({ ok:false, notlar:['Whisper yazıya dökemedi (TimeoutExpired).'] }) });
+      const { k } = sahne({ hkm, fetch });
+      const tanimaAcildi = [];
+      Object.assign(k._ortam, {
+        sentez:() => null,
+        kayitAc:async s => { sessiz = s; return { bitir:() => ({ pcm:new Float32Array(1600), hz:16000, konustu:true }) }; },
+        tanima:() => function(){ tanimaAcildi.push(1); this.start = () => {}; this.stop = () => {}; },
+      });
+      k.ac();
+      k.dinle(); await bitsin(); sessiz(); await bitsin();
+      const son = () => k.akis().filter(m => m.kim === 'king').pop().metin;
+      expect(son()).toBe('Ses yazıya dökülemedi (Whisper yazıya dökemedi (TimeoutExpired)); yazarak da sorabilirsin.');
+      k.dinle(); await bitsin(); sessiz(); await bitsin();
+      expect(/^HKM sesi yazıya dökemedi/.test(son())).toBe(true);
+      expect(tanimaAcildi.length).toBe(0);
+      k.dinle(); await bitsin();
+      expect(tanimaAcildi.length).toBe(1);                       // şimdi tarayıcı
+    }));
+
+    it('sesli sohbette tanıma hatası döngüyü tek mesajla durdurur', () => sahneyle(async () => {
+      const { k } = sahne();
+      let r = null;
+      Object.assign(k._ortam, {
+        sentez:() => null, kayitAc:null,
+        tanima:() => function(){ r = this; this.start = () => {}; this.stop = () => {}; },
+      });
+      k.ac();
+      await k.kipSec('konus');
+      k.dinle();
+      r.onerror({ error:'network' }); r.onend();
+      await bitsin();
+      const hatalar = k.akis().filter(m => m.kim === 'king' && /Ses tanınamadı/.test(m.metin));
+      expect(hatalar.length).toBe(1);
+      expect(hatalar[0].metin).toBe('Ses tanınamadı; sesli sohbeti durdurdum. Yazarak devam edebilirsin.');
+      expect(k.sesliSohbetMi()).toBe(false);
+    }));
   });
 })();
 

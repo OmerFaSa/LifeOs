@@ -475,9 +475,21 @@ DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
             "sunulamaz. Buyurgan kip kullanma.")
 
 
+def _genis(ayar, jeton, sure):
+    """Basamak ayarini uzun cevap icin genisletir; daraltmaz."""
+    if not jeton and not sure:
+        return ayar
+    a = dict(ayar or {})
+    if jeton:
+        a["jeton"] = max(int(a.get("jeton") or EN_COK_JETON), int(jeton))
+    if sure:
+        a["sure"] = max(int(a.get("sure") or ZAMAN_ASIMI), int(sure))
+    return a
+
+
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         transport=None, now=None, duzeltme=True, denetim="olcum", veri=None,
-        gorseller=None, medya=None, seviye=None):
+        gorseller=None, medya=None, seviye=None, jeton=None, sure=None):
     """Bir kademe adina model cagirir — MERDIVENLE (core/motor.py).
 
     Paket seciliyse basamaklar ucuzdan pahaliya denenir; bir basamak
@@ -485,7 +497,9 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
     bir ust sinifa cikilir. Butce engelinde cikilmaz. Paket yoksa ya da
     kademenin kendi atamasi varsa tek basamak: eski davranis.
 
-    `seviye`: sohbette mesajin seviyesi (core/seviye.py): alt/orta/ust."""
+    `seviye`: sohbette mesajin seviyesi (core/seviye.py): alt/orta/ust.
+    `jeton`, `sure`: kullanici acikca uzun metin istediyse (core/sohbet.py
+    uzun_istek) cevap payi en az bu kadar, bekleme en az bu kadar olur."""
     from core import motor
     plan = motor.merdiven(con, cfg, role, seviye=seviye)
     if not plan["ok"]:
@@ -503,7 +517,7 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                      sistem=sistem + (motor.YUKSELT_KURALI if ust_var else ""),
                      user=user, transport=transport, now=now, duzeltme=duzeltme,
                      denetim=denetim, veri=veri, gorseller=gorseller, medya=medya,
-                     ayar=b["ayar"], escalated=i > 0, not_ek=not_ek)
+                     ayar=_genis(b["ayar"], jeton, sure), escalated=i > 0, not_ek=not_ek)
         r["motor"] = {"paket": plan.get("paket"), "seviye": plan.get("seviye"),
                       "sinif": b["sinif"], "basamak": i, "yukseldi": i > 0,
                       "ekonomi": plan.get("ekonomi")}

@@ -317,6 +317,40 @@ def run():
         ok("brifing" in t2.gorulen["sistem"], t2.gorulen["sistem"][:600])
     test("yerel model her derinlikte sıkışık bağlam görür", t_yerel_model_sikisik_baglam)
 
+    def t_uzun_istek():
+        """Sahada (2026-10-19): «çok uzun bir metin yaz» dendi; kucuk modelin
+        «en fazla 3 cümle» kurali yuzunden King reddetti. Kod uzun istegi
+        tanir: talimat cumle sinirini kaldirir, cevap payi ve bekleme buyur;
+        LifeOS sorulursa kendi tanimi baglama girer (adresler denetimden gecer)."""
+        for m in ("Bana çok uzun bir metin yazar mısın?", "Tamam odaklanmadan yüzeysel uzun bir metin yaz.",
+                  "LifeOS'u ayrıntılı anlat", "kapsamlı bir rapor hazırla"):
+            ok(sohbet.uzun_istek(m), m)
+        for m in ("uzun süre uyudum", "bugün hava güzel", "yaz tatili ne zaman", "uzun vadeli hedefim var"):
+            no(sohbet.uzun_istek(m), m)
+        gorulen = {}
+        eski = ai.ask
+
+        def sahte(con, cfg, role, task, mesajlar, **kw):
+            gorulen.update(kw)
+            return {"ok": True, "text": "AYS 4173 adresinde çalışır.", "model": "m", "usd": 0, "seconds": 0, "motor": {}}
+        ai.ask = sahte
+        try:
+            r = sohbet.konus(_con(), _cfg(), "Bana bu sistemin mimarisini anlatan çok uzun bir metin yaz", BUGUN)
+            eq((r["mode"], r["motor"]["uzun"], gorulen["jeton"], gorulen["sure"]), ("model", True, sohbet.UZUN_JETON, sohbet.UZUN_SURE))
+            ok("cümle sınırı" in gorulen["sistem"] and "4173" in gorulen["baglam"], gorulen["sistem"][-300:])
+            sohbet.konus(_con(), _cfg(), "bugün hava güzel", BUGUN)
+            eq((gorulen["jeton"], gorulen["sure"]), (None, None))
+            no("cümle sınırı" in gorulen["sistem"] or "LifeOS hakkında" in gorulen["baglam"], "kisa istek")
+        finally:
+            ai.ask = eski
+        # ai._genis genisletir, daraltmaz.
+        eq(ai._genis({"jeton": 5000}, 2500, None), {"jeton": 5000})
+        eq(ai._genis({}, 2500, 150), {"jeton": 2500, "sure": 150})
+        eq(ai._genis({"a": 1}, None, None), {"a": 1})
+        # Kisa sistem metni tirnakli «bu ölçülmedi» ifadesini tasimaz (model aynen tekrarliyordu).
+        no("«bu ölçülmedi»" in sohbet.sistem_metni("king", "-", kisa=True), "tirnakli ifade")
+    test("uzun istek: cümle sınırı kalkar, pay ve bekleme büyür; LifeOS tanımı bağlamda", t_uzun_istek)
+
     def t_derinlik_ucu():
         from tests.test_daemon import _Server
         gorulen = []

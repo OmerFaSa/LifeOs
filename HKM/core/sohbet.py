@@ -99,7 +99,7 @@ Bugünün ölçümleri:
 SISTEM_KISA = """Adın %(ad)s. LifeOS'un merkezi HKM'de (Hayat Kontrol Merkezi) görevlisin; kullanıcıyla kısa ve doğal Türkçe sohbet ediyorsun.
 LifeOS'ta üç modül var: AYS (sınav hazırlığı), SPİ (sağlık: uyku, beslenme, hareket), ESP (kişisel gelişim). Onların günlük özetini aşağıdaki listeden görürsün; listede olmayanı bilemezsin.
 Kesin kurallar: ÖLÇÜM UYDURMA — ölçülen bir şeyden sayı söyleyeceksen aşağıdaki
-listede geçmeli, yoksa «bu ölçülmedi» de. Emir kipi kullanma. En fazla 3 cümle,
+listede geçmeli, yoksa ölçülmediğini söyle. Emir kipi kullanma. En fazla 3 cümle,
 Türkçe; kullanıcıya «sen» diye hitap et. Bir şey uygulayamazsın; değişiklik isteğini teklif olarak bırakacağını söyle.
 
 Bugünün ölçümleri:
@@ -211,7 +211,7 @@ def _kisa_baglam(con, date, gorevli, b, veri):
                 olcum.append("- %s (%s): %s, %d bulgu" % (u["title"], u["module_label"],
                                                          u["verdict_text"], u["findings"]))
     if sessiz and not olcum:
-        satir.append("- Hiçbir modülden ölçüm yok (%s). Ölçüm sorulursa «bu ölçülmedi» de; "
+        satir.append("- Hiçbir modülden ölçüm yok (%s). Ölçüm sorulursa ölçülmediğini söyle; "
                      "sorulmadıkça bundan söz etme." % ", ".join(sessiz))
     elif sessiz:
         satir.append("- Bugün veri gelmeyen modüller (ölçülmedi): %s." % ", ".join(sessiz))
@@ -630,6 +630,44 @@ DERINLIK_TALIMAT = {
 }
 
 
+# Uzun metin istegi (sahada, 2026-10-19: «çok uzun bir metin yaz» dendi,
+# kucuk modelin «en fazla 3 cümle» kurali yuzunden King reddetti). KOD
+# tanir: uzunluk sozcugu VE yazma istegi ayni mesajda. O cevapta cumle
+# siniri kalkar, cevap payi ve bekleme buyur.
+UZUN_SOZ = re.compile(r"(uzun|uzunca|detaylı|ayrıntılı|kapsamlı|derinlemesine)", re.I)
+UZUN_YAZ = re.compile(r"(yaz|anlat|açıkla|metin|cevap|bilgi|makale|rapor|özetle)", re.I)
+UZUN_JETON = 2500
+UZUN_SURE = 150
+UZUN_TALIMAT = ("\n\nKullanıcı UZUN ve ayrıntılı bir metin istedi. Bu cevapta cümle sınırı "
+                "yoktur: başlıklar ve paragraflarla konuyu ayrıntılı anlat. Bilmediğin ayrıntıyı "
+                "uydurma; ölçülmemiş bir sayıyı ölçüm gibi yazma.")
+# LifeOS'un kendisi sorulunca modele kendi belgesinden kisa tanim gider
+# (README, AGENTS): model sistemi uydurmaz; icindeki sayilar (adresler)
+# baglamda oldugu icin sayi denetiminden gecer.
+LIFEOS_SOZ = re.compile(r"(lifeos|sistem|mimari|modüller|\bhkm\b)", re.I)
+LIFEOS_BILGI = (
+    "LifeOS hakkında (kendi belgesinden): LifeOS tek bir kişinin gündelik hayatını yöneten bir "
+    "sistemler bütünüdür. Üç bağımsız uygulama vardır: AYS (Akademik Yol Sistemi: sınav hazırlığı, "
+    "plan, konu öğrenme, deneme, tekrar; adres 4173), SPİ (Sağlık Performans İzleyicisi: uyku, "
+    "beslenme, hareket, tahlil, sağlık bütçesi; 4183) ve ESP (Entelektüel Seviye Planlayıcı: dil, "
+    "felsefe, müzik, diksiyon, okuma, yazı, tarih; 4193). HKM (Hayat Kontrol Merkezi; 4200) üçünün "
+    "yanında duran isteğe bağlı bir Python servisidir: günün özeti, modüller arası bulgular ve "
+    "sohbet; King onun baş görevlisidir. Kontrol paneli 4180'dedir. Üç uygulama tarayıcıda çalışan, "
+    "hiçbir dış kütüphane kullanmayan tek sayfa uygulamalarıdır; HKM yalnız Python'un standart "
+    "kütüphanesini kullanır. Her sistem kendi verisini tutar ve diğerlerini bozamaz; HKM kapalıyken "
+    "üçü aynen çalışır. Temel kural: sayıyı ve kararı kod (kural motoru) üretir, yapay zekâ yalnız "
+    "açıklar. Veri kullanıcının kendi bilgisayarında durur; telefon ve tablet aynı hesapla o "
+    "bilgisayardaki sunucuya eşitlenir. Eksik veri sıfır sayılmaz: her sayı ölçüldü, tahmin, "
+    "hesaplandı ya da veri yok etiketi taşır. Değişikliklerin küçük, orta ve büyük seviyeleri vardır; "
+    "büyük değişiklik önizleme ve onay ister.")
+
+
+def uzun_istek(metin):
+    """Kullanici acikca uzun/ayrintili bir metin mi istiyor (kod karari)."""
+    t = str(metin or "")
+    return bool(UZUN_SOZ.search(t) and UZUN_YAZ.search(t))
+
+
 def derinlik_of(v):
     """Gecerli derinlik ya da None («otomatik»)."""
     return v if v in DERINLIKLER else None
@@ -846,6 +884,9 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     yerel_model = ((hazir.get("assignment") or {}).get("provider") == "yerel")
     kisa = bool(sinir and sinir["kisa"]) or yerel_model
     bg = baglam(con, date, gorevli, th=th, veri=veri, kisa=kisa)
+    uzun = uzun_istek(metin)
+    if uzun or LIFEOS_SOZ.search(str(metin or "")):
+        bg += "\n" + LIFEOS_BILGI
     if sinir:
         hb = memory.context(con, user=user, scope=gorevli, limit=sinir["hafiza"],
                             ilgili=metin if sinir["ilgili"] else None, sozler=sinir["sozler"])
@@ -857,15 +898,16 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
                "sen yazamazsın):\n" + hb)
     sistem = (sistem_metni(gorevli, bg, kisa=kisa) + (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
-              + DERINLIK_TALIMAT.get(derinlik, ""))
+              + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else ""))
     onceki = list(gecmis or [])
     if sinir:
         onceki = onceki[-sinir["gecmis"]:] if sinir["gecmis"] else []
     mesajlar = onceki + [{"role": "user", "content": metin}]
 
     r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
-               user=user, transport=transport, veri=veri, seviye=sv["seviye"])
-    motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"], derinlik=derinlik or "oto",
+               user=user, transport=transport, veri=veri, seviye=sv["seviye"],
+               jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None)
+    motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"], derinlik=derinlik or "oto", uzun=uzun,
                        baglam={"gecmis": len(onceki), "hafiza": len(hb.splitlines()) if hb else 0,
                                "sistem_harf": len(sistem)})
     if not r["ok"]:

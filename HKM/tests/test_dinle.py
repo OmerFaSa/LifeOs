@@ -16,8 +16,23 @@ def _bul():
             "model": os.path.join(d, "ggml-small.bin"), "aranan": [d], "metin": ""}
 
 
+def _t_whisper_uydurma():
+    """Sahada (2026-10-19): Whisper sessizlikte «(Müzik çalıyor)», «(KAPI
+    TIKTIK)» yazdi; King «Müziği açtım» dedi. Etiket metin degildir."""
+    from core import dinle as d
+    for ham in ("(Müzik çalıyor)", "(KAPI TIKTIK)", "[Müzik]", "♪♪", "*alkış*", "(Gerilim müziği)",
+                "Altyazı M.K.", "İzlediğiniz için teşekkürler.", "  ", "..."):
+        if d._temiz(ham) != "":
+            raise AssertionError("bos olmali: %r -> %r" % (ham, d._temiz(ham)))
+    for ham, beklenen in (("(Müzik) Merhaba King", "Merhaba King"), ("Teşekkürler.", "Teşekkürler."),
+                          ("«Nasılsın?»", "Nasılsın?"), ("Bugün [gürültü] uyku 7 saat", "Bugün uyku 7 saat")):
+        if d._temiz(ham) != beklenen:
+            raise AssertionError("%r -> %r, beklenen %r" % (ham, d._temiz(ham), beklenen))
+
+
 def run():
     suite("dinle")
+    test("Whisper altyazı etiketleri ve sessizlik uydurmaları metin değildir", _t_whisper_uydurma)
 
     def t_sira():
         con = db.connect(":memory:")

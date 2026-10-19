@@ -16319,7 +16319,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'6c3db5a7', at:'2026-10-19 08:17', dirty:true };
+SP.BUILD = { id:'13f4b043', at:'2026-10-19 08:40', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -34026,6 +34026,9 @@ window.LIFEOS.KING = (function(){
   };
   /* HKM'deki King'in modelli cevabı yerel modelde saniyeler sürebilir. */
   const MERKEZ_ZAMAN_ASIMI = 60000;
+  /* Uzun metin isteği (HKM/core/sohbet.py uzun_istek ile aynı kural): bekleme üç katı. */
+  const UZUN_ISTEK = /(uzun|uzunca|detaylı|ayrıntılı|kapsamlı|derinlemesine)/i;
+  const UZUN_YAZ = /(yaz|anlat|açıkla|metin|cevap|bilgi|makale|rapor|özetle)/i;
 
   let ayar = null;           // { modul, git(route, ek), ozet(), veri:{ onizle(metin) }, hkm() → Beacon }
   let acik = false;
@@ -34442,7 +34445,8 @@ window.LIFEOS.KING = (function(){
     const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
     const d = derinlik();
     /* Söz 31: Derin daha uzun sürebilir; bekleme iki katı. */
-    const t = ctrl ? setTimeout(() => ctrl.abort(), MERKEZ_ZAMAN_ASIMI * (d === 'derin' ? 2 : 1)) : null;
+    const uzun = UZUN_ISTEK.test(metin) && UZUN_YAZ.test(metin);
+    const t = ctrl ? setTimeout(() => ctrl.abort(), MERKEZ_ZAMAN_ASIMI * (uzun ? 3 : d === 'derin' ? 2 : 1)) : null;
     try{
       /* fetch bir nesnenin yöntemi olarak çağrılamaz («Illegal invocation»). */
       const f = ortam.fetch;
@@ -34649,7 +34653,7 @@ window.LIFEOS.KING = (function(){
 
   function dinle(){
     if(dinleyen){ try{ dinleyen.stop(); }catch(e){ /* kapalı */ } return; }
-    const hk = !hkmDinlemez && ortam.kayitAc && algila() !== 'tarayici' ? baglanti() : null;
+    const hk = !hkmDinlemez() && ortam.kayitAc && algila() !== 'tarayici' ? baglanti() : null;
     if(hk){ kayitDinle(hk); return; }
     const T = ortam.tanima();
     if(!T) return;
@@ -34696,6 +34700,10 @@ window.LIFEOS.KING = (function(){
         sesliSohbet = false;
         soyle('Mikrofon izni verilmedi. Tarayıcının adres çubuğundan izin verebilir ya da yazabilirsin.');
       }else if(hata && hata !== 'aborted'){
+        /* Sesli sohbette gerçek hata döngüyü DURDURUR (sahada, 2026-10-19:
+           masaüstünde tarayıcı tanıması her seferinde hata veriyor, King
+           yeniden dinliyor ve «Ses tanınamadı» üst üste yığılıyordu). */
+        if(sesliSohbet){ sesliSohbet = false; sessizSay = 0; soyle('Ses tanınamadı; sesli sohbeti durdurdum. Yazarak devam edebilirsin.'); return; }
         soyle(hata === 'no-speech' ? 'Bir şey duyamadım. Yeniden dener misin?' : 'Ses tanınamadı; yazarak da sorabilirsin.');
       }
   }
@@ -34703,8 +34711,15 @@ window.LIFEOS.KING = (function(){
   /* Söz 29 (2026-10-19): HKM bağlıysa konuşma kaydedilir ve HKM yazıya döker:
      bu PC'de Whisper varsa o (ücretsiz, ses çıkmaz), yoksa Gemini. HKM ikisini
      de bulamazsa bir kez söylenir ve sonraki dinlemeler tarayıcının tanımasıyla
-     yapılır. Kayıt sessizlikte (1,4 sn) kendiliğinden biter. */
-  let hkmDinlemez = false;
+     yapılır. Kayıt sessizlikte (1,4 sn) kendiliğinden biter.
+     Tek bir 503 küsmeye yetmez (2026-10-19: Whisper kurulu olduğu halde bir
+     hata «Whisper yok» dedirtip HKM'yi kalıcı bırakıyordu): art arda iki
+     başarısızlıkta 5 dakika tarayıcıya geçilir; mesaj HKM'nin nedenini yazar. */
+  let hkmDinlemezBitis = 0;     // bu ana kadar tarayıcının tanıması (0: HKM)
+  const hkmDinlemez = () => hkmDinlemezBitis > ortam.simdi().getTime();
+  let dinleHata = 0;            // art arda 503 sayısı
+  let dinleNot = '';            // HKM'nin son «neden yazıya dökülemedi» notu
+  const DINLE_ARA = 5 * 60 * 1000;
   function wavYap(pcm, hz){
     const ORAN = 16000, n = Math.max(0, Math.floor(pcm.length * ORAN / hz));
     const v = new DataView(new ArrayBuffer(44 + n * 2));
@@ -34728,8 +34743,13 @@ window.LIFEOS.KING = (function(){
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token }, body:JSON.stringify({ wav, tercih:algila() }) });
       let g = null;
       try{ g = await res.json(); }catch(e){ g = null; }
-      if(res.status === 200 && g && typeof g.metin === 'string') return g.metin;
-      if(res.status === 503) hkmDinlemez = true;
+      if(res.status === 200 && g && typeof g.metin === 'string'){ dinleHata = 0; dinleNot = ''; return g.metin; }
+      if(res.status === 503){
+        dinleNot = g && Array.isArray(g.notlar) ? g.notlar.filter(Boolean).join(' ') : '';
+        if(++dinleHata >= 2){
+          hkmDinlemezBitis = ortam.simdi().getTime() + DINLE_ARA; dinleHata = 0;
+        }
+      }
       return null;
     }catch(e){ return null; }
   }
@@ -34749,8 +34769,9 @@ window.LIFEOS.KING = (function(){
       const t = await yaziyaDok(k, wavYap(r.pcm, r.hz));
       if(g) g.placeholder = eski;
       if(t === null){
-        soyle(hkmDinlemez ? 'Bu bilgisayarda Whisper yok, Gemini de hazır değil; bundan sonra tarayıcının tanımasını deneyeceğim.'
-          : 'Ses yazıya dökülemedi; yazarak da sorabilirsin.');
+        const neden = dinleNot ? ' (' + dinleNot.replace(/[.\s]+$/, '') + ')' : '';
+        soyle(hkmDinlemez() ? 'HKM sesi yazıya dökemedi' + neden + '; birkaç dakika tarayıcının tanımasını deneyeceğim.'
+          : 'Ses yazıya dökülemedi' + neden + '; yazarak da sorabilirsin.');
         return;
       }
       tanindi(t, t ? '' : 'no-speech');
@@ -36145,7 +36166,7 @@ window.LIFEOS.KING = (function(){
         if(is === 'geri-getir'){ sohbetiGeriGetir(); return; }
         if(/^cevap:/.test(is)){ cevapSec(is.slice(6)); return; }
         if(/^ses:/.test(is)){ sesTercihSec(is.slice(4)); return; }
-        if(/^algila:/.test(is)){ const v = is.slice(7); if(ALGILA_TERCIH.indexOf(v) >= 0){ if(v === 'oto') ortam.depo.sil(ALGILA); else ortam.depo.yaz(ALGILA, v); hkmDinlemez = false; } ciz(false); return; }
+        if(/^algila:/.test(is)){ const v = is.slice(7); if(ALGILA_TERCIH.indexOf(v) >= 0){ if(v === 'oto') ortam.depo.sil(ALGILA); else ortam.depo.yaz(ALGILA, v); hkmDinlemezBitis = 0; } ciz(false); return; }
         if(is === 'mik-dene'){ mikDene(); return; }
         if(/^hiz:/.test(is)){ const v = Number(is.slice(4)); if(HIZLAR.indexOf(v) >= 0) ortam.depo.yaz(HIZ, v); ciz(false); return; }
         if(is === 'hiz-sonraki'){ ortam.depo.yaz(HIZ, HIZLAR[(HIZLAR.indexOf(hiz()) + 1) % HIZLAR.length]); ciz(false); return; }
@@ -36286,7 +36307,7 @@ window.LIFEOS.KING = (function(){
     ortam.depo.sil(TANISMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     if(mikDeniyor){ try{ mikDeniyor.iptal(); }catch(e){ /* durmus */ } mikDeniyor = null; }
-    mikListe = []; mikNot = ''; hkmDinlemez = false;
+    mikListe = []; mikNot = ''; hkmDinlemezBitis = 0; dinleHata = 0; dinleNot = '';
     if(dinleyen){ try{ dinleyen.onend = dinleyen.onerror = null; dinleyen.abort(); }catch(e){ /* durmus */ } }
     sesli = false; dinleyen = null; konusuyor = 0; sesNo++; calan = null; sonMotor = ''; sonNot = '';
   }
