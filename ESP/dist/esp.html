@@ -14099,6 +14099,35 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__soru-cozum li{ font-size:13.5px; color:var(--text-2); }
 .king__soru-kaynak{ font-size:11.5px; color:var(--text-2); }
 
+/* Söz 33: profesyonel cilâ. Yazı alanı tek kutu (artı, girdi, düşünme,
+   mikrofon, gönder bir arada); akan cevapta imleç; öneri düğmeleri ince
+   çerçeveli; bulgu balonunda sol çizgi; odak sayacı başlıkta hap; kart
+   grafiği. */
+.king:not(.is-mini) .king__yaz{ gap:4px; padding:6px; border-radius:28px; background:var(--surface-2);
+  box-shadow:0 0 0 1px var(--line, rgba(0,0,0,.08)), 0 8px 24px -16px rgba(20,24,40,.35); transition:box-shadow .2s ease; }
+.king:not(.is-mini) .king__yaz:focus-within{ box-shadow:0 0 0 1.5px color-mix(in oklab, var(--primary) 70%, transparent), 0 8px 24px -16px rgba(20,24,40,.35); }
+.king:not(.is-mini) .king__yaz .king__girdi{ min-height:44px; background:transparent; border-color:transparent; padding:0 8px; }
+.king:not(.is-mini) .king__yaz .king__girdi:focus{ background:transparent; border-color:transparent; }
+.king:not(.is-mini) .king__yaz .king__arti{ background:transparent; }
+.king:not(.is-mini) .king__yaz .king__arti:hover{ background:var(--surface); }
+.king:not(.is-mini) .king__akis{ gap:14px; }
+.king__balon--king p{ text-wrap:pretty; }
+.king__balon.is-akiyor p::after{ content:''; display:inline-block; width:.5em; height:1.05em; margin-left:2px; vertical-align:-.15em;
+  border-radius:2px; background:currentColor; opacity:.55; animation:king-imlec 1s steps(2, start) infinite; }
+@keyframes king-imlec{ to{ visibility:hidden; } }
+.king__cipler .king__cip{ background:transparent; box-shadow:inset 0 0 0 1px var(--line, rgba(0,0,0,.12)); color:var(--text); }
+.king__cipler .king__cip:hover{ background:var(--surface-2); }
+.king__cipler .king__cip--ana{ background:var(--text); color:var(--surface); box-shadow:none; }
+.king__balon--bulgu > div{ padding:4px 12px; border-left:2px solid color-mix(in oklab, var(--primary) 60%, transparent); }
+.king__odak{ display:inline-flex; align-items:center; gap:4px; height:28px; padding:0 2px 0 9px; border-radius:999px;
+  background:color-mix(in oklab, var(--primary) 12%, var(--surface-2)); font-size:12.5px; font-variant-numeric:tabular-nums; color:var(--text); }
+.king__odak > svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.king__odak b{ font-weight:650; }
+.king__kart-cizgi{ display:block; width:100%; height:24px; margin-top:4px; overflow:visible; }
+.king__kart-cizgi path{ fill:none; stroke:var(--primary); stroke-width:1.6; vector-effect:non-scaling-stroke; stroke-linecap:round; stroke-linejoin:round; }
+@media (prefers-reduced-motion:reduce){ .king__balon.is-akiyor p::after{ animation:none; } }
+@media (max-width:679px){ .king:not(.is-mini) .king__bas .king__odak b{ font-size:12px; } }
+
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/giris.css içine yazılır; burası bir sonraki
@@ -15496,7 +15525,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -16980,7 +17009,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'e2fd0f0a', at:'2026-10-19 09:06', dirty:true };
+ESP.BUILD = { id:'f19ced80', at:'2026-10-19 13:43', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -31429,6 +31458,12 @@ window.LIFEOS.TEKGUN = (function(){
       Yazılamazsa (yer yok) sıfırlama yapılmaz.
    6. OLUMSUZ İSTEK EYLEM DEĞİLDİR. «verileri sıfırlama», «temayı
       değiştirme» hiçbir şey yapmaz (LIFEOS.Olumsuz, eylemEngeli).
+   8. MODÜLÜN KENDİ EYLEMLERİ (2026-10-19, depo sahibi: «King neredeyse
+      her şeyi yapsın, toplantı başlatsın»). Modül kur'da `eylemler` verir:
+      aynı biçimde (id, seviye, ad, anla, onizle, uygula); yalnız küçük ve
+      orta seviye kabul edilir (büyük eylem dönüş noktası ister, katalogda
+      kalır). Eylemi yine modülün kendi kodu uygular; kimliği katalogdakiyle
+      çakışan eylem alınmaz.
    7. BAŞKA MODÜLÜN İŞİ ORADA YAPILIR. «SPİ'yi sıfırla» AYS'de istenirse
       AYS bunu yapmaz; King o modüle geçmeyi önerir (kayıtlar ayrı
       kökende, ayrı depoda). */
@@ -31532,7 +31567,8 @@ LIFEOS.YETKI = (function(){
       anla:t => {
         if(!L.SES || !/müzi[kğ]|radyo|şarkı/.test(t)) return null;
         if(/durdur|kapat|kes|sustur/.test(t)) return { v:'dur' };
-        if(/aç|çal|başlat/.test(t)) return { v:'cal' };
+        /* «(Müzik çalıyor)» bir durumdur, istek değil (Whisper uydurması, 2026-10-19). */
+        if(/aç|çal(?!ıyor|dı|ıyordu)|başlat/.test(t)) return { v:'cal' };
         return null;
       },
       onizle:p => ({ metin:p.v === 'dur' ? 'Müzik duracak.' : 'Müzik çalacak.' }),
@@ -31627,6 +31663,15 @@ LIFEOS.YETKI = (function(){
     },
   ];
 
+  /* Söz 8: modülün kendi eylemleri (küçük ve orta; kimliği çakışmayan). */
+  function ekEylemler(){
+    const l = ayar && Array.isArray(ayar.eylemler) ? ayar.eylemler : [];
+    return l.filter(e => e && typeof e.id === 'string' && (e.seviye === 'kucuk' || e.seviye === 'orta')
+      && typeof e.anla === 'function' && typeof e.onizle === 'function' && typeof e.uygula === 'function'
+      && !EYLEMLER.some(x => x.id === e.id));
+  }
+  function hepsi(){ return EYLEMLER.concat(ekEylemler()); }
+
   function iki(n){ return (n < 10 ? '0' : '') + n; }
   function tarihYaz(iso){
     const d = new Date(iso);
@@ -31660,7 +31705,7 @@ LIFEOS.YETKI = (function(){
     const t = kucult(metin);
     if(!t) return null;
     if(HESAP_RE.test(t)) return { tur:'hesap', metin:'Hesabına (parola, iki adım, cihazlar, yönetici, e-posta) dokunamam; onu yalnız sen Hesap sayfasından değiştirirsin.' };
-    for(const e of EYLEMLER){
+    for(const e of hepsi()){
       let p = null;
       try{ p = e.anla(t); }catch(err){ p = null; }
       if(!p) continue;
@@ -31683,7 +31728,7 @@ LIFEOS.YETKI = (function(){
 
   async function uygula(niyet){
     if(!ayar || !niyet || niyet.tur !== 'eylem') return { ok:false, metin:'Uygulanacak bir şey yok.' };
-    const e = EYLEMLER.find(x => x.id === niyet.id);
+    const e = hepsi().find(x => x.id === niyet.id);
     if(!e) return { ok:false, metin:'Bu iş katalogda yok.' };
     try{
       const r = await e.uygula(niyet.param);
@@ -31694,7 +31739,7 @@ LIFEOS.YETKI = (function(){
   }
 
   function katalog(){
-    return EYLEMLER.filter(e => e.seviye).map(e => ({ id:e.id, ad:e.ad, seviye:e.seviye }));
+    return hepsi().filter(e => e.seviye).map(e => ({ id:e.id, ad:e.ad, seviye:e.seviye }));
   }
 
   function _sifirla(){ ayar = null; }
@@ -34513,7 +34558,32 @@ window.LIFEOS.SORUKART = (function(){
       (kartlar.cevapla; Öğren söz 3: ilk cevap ölçümdür). Ardından doğru şık
       ve çözüm görünür, «Bir soru daha» kalır. Bankası olmayan modül bunu
       söyler. Uzun cevapta **kalın** ve madde işaretleri biçimlenir, satır
-      sonları korunur. */
+      sonları korunur.
+  33. GENEL GELİŞTİRME (depo sahibi, 2026-10-19: «hepsini King'e getir,
+      arayüzü profesyonelleştir; King neredeyse her şeyi yapsın»):
+        Akan cevap      yazı HKM'den cümle cümle akar (/api/chat/akis);
+                        her cümle denetimden geçmişse görünür, sonda tam
+                        cevap yerine geçer. Eski HKM'de /api/chat'e düşer.
+        Sohbet başı     her sohbet kendi geçmişini taşır (baslangic); kalıcı
+                        hafıza (onaylanan bilgiler) etkilenmez.
+        Öneri düğmeleri Merkez'in cevabının altında: Detaylandır, Kısalt,
+                        Kartları göster, Bana soru sor (koddan).
+        Günün açılışı   günün ilk açılışında selam, özet ve modülün kartları
+                        (sesli okunmaz); pazar «Haftalık değerlendirme».
+        Merkez komutu   «haftalık değerlendirme» → HKM'nin «hafta» raporu,
+                        «çapraz bulgu» → «capraz»; sayıları kural motoru yazar.
+        Odak sayacı     «25 dakika matematik çalışalım», «pomodoro»; başlıkta
+                        kalan süre; bitince haber ve «Kaydet» (modülün kendi
+                        girişine gider, onaysız yazılmaz). TASINAN'da.
+        Tarz            ··· menüsünde Samimi · Resmi · Kısa (lifeos.king.tarz).
+        Ayar komutu     «sesi Piper yap», «derin düşün», «hızlı cevap ver»,
+                        «cevapları sesli oku», «resmi konuş», «daha hızlı oku».
+        Araya girme     Konuş kipinde King konuşurken sen konuşursan susar ve
+                        seni dinler (mikrofon eşiği yüksek; yankı engelleme açık).
+        Kart grafiği    kartta `seri` varsa son günlerin küçük çizgisi; eksik
+                        gün boşluk kalır (sıfır çizilmez).
+        Eylem kapısı    modüller YETKİ kataloğuna kendi küçük/orta eylemlerini
+                        ekler (toplantı başlatmak gibi; yetki.js söz 8). */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -34634,6 +34704,8 @@ window.LIFEOS.KING = (function(){
       img.src = url;
     }),
     fetch:(u, o) => fetch(u, o),
+    /* Söz 33: odak bitince sistem bildirimi (izin verilmişse). */
+    bildir:(baslik, metin) => { try{ if(typeof Notification !== 'undefined' && Notification.permission === 'granted') new Notification(baslik, { body:metin }); }catch(e){ /* yok */ } },
     /* Ses (söz 7). Testler sahte tanıma ve sentez koyar. */
     tanima:() => (typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition)) || null,
     sentez:() => (typeof window !== 'undefined' && window.speechSynthesis && typeof window.SpeechSynthesisUtterance === 'function')
@@ -34649,7 +34721,10 @@ window.LIFEOS.KING = (function(){
       }catch(e){ return []; }
     },
     kayitAc:(typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia
-      && typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) ? async (sessiz, cihazId) => {
+      && typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) ? async (sessiz, cihazId, basla, esik) => {
+      /* Söz 33: `basla` sürekli konuşma (0,25 sn) başlayınca bir kez çağrılır; `esik` RMS eşiği. */
+      const ESIK = typeof esik === 'number' ? esik : 0.02;
+      let konusmaN = 0, basladi = false;
       const sesKisit = { echoCancellation:true, noiseSuppression:true };
       if(cihazId) sesKisit.deviceId = { ideal:cihazId };
       const akis = await navigator.mediaDevices.getUserMedia({ audio:sesKisit });
@@ -34664,8 +34739,9 @@ window.LIFEOS.KING = (function(){
         toplam += d.length;
         let t = 0;
         for(let i = 0; i < d.length; i++) t += d[i] * d[i];
-        if(Math.sqrt(t / d.length) > 0.02){ konustu = true; sessizN = 0; } else if(konustu) sessizN += d.length;
+        if(Math.sqrt(t / d.length) > ESIK){ konustu = true; sessizN = 0; konusmaN += d.length; } else { konusmaN = 0; if(konustu) sessizN += d.length; }
         const hz = ctx.sampleRate;
+        if(basla && !basladi && konusmaN > hz * 0.25){ basladi = true; try{ basla(); }catch(e){ /* dinleyen yok */ } }
         if(!bitti && ((konustu && sessizN > hz * 1.4) || toplam > hz * 60 || (!konustu && toplam > hz * 8))) sessiz();
       };
       kaynak.connect(isle); isle.connect(ctx.destination);
@@ -35060,6 +35136,7 @@ window.LIFEOS.KING = (function(){
 
   /* ---------- söz 13: sesli sohbet ---------- */
   function sohbetDevam(){
+    kesiciKapat();
     if(!sesliSohbet || !acik || dinleyen || konusuyor || akis.some(m => m.bekliyor)) return;
     dinle();
   }
@@ -35115,7 +35192,42 @@ window.LIFEOS.KING = (function(){
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
   /* Doner: { ok:true, text, mode } ya da { ok:false, neden:'baglanti'|'yok' }. */
-  async function merkezeSor(metin){
+  /* Söz 33: akan cevap. HKM satır satır NDJSON yollar: önce denetlenmiş
+     cümleler («parca»), sonda tam cevap («son»). */
+  async function akisOku(res, parca){
+    const r = res.body.getReader();
+    const dec = typeof TextDecoder === 'function' ? new TextDecoder() : null;
+    let tampon = '', sonuc = null;
+    const satir = s => {
+      s = s.trim();
+      if(!s) return;
+      let o = null;
+      try{ o = JSON.parse(s); }catch(e){ return; }
+      if(o && o.t === 'parca' && typeof o.metin === 'string') parca(o.metin);
+      else if(o && o.t === 'son') sonuc = o;
+    };
+    for(;;){
+      const { value, done } = await r.read();
+      if(done) break;
+      tampon += typeof value === 'string' ? value : (dec ? dec.decode(value, { stream:true }) : String(value));
+      let i;
+      while((i = tampon.indexOf('\n')) >= 0){ satir(tampon.slice(0, i)); tampon = tampon.slice(i + 1); }
+    }
+    satir(tampon);
+    return sonuc;
+  }
+  /* Söz 33: bu sohbetin başlangıcı (yerel saat). HKM ondan önceki satırları
+     modele göndermez; kalıcı hafıza bundan etkilenmez. */
+  const BAS = () => 'lifeos.king.bas.' + ((ayar && ayar.modul) || 'x');
+  function yerelISO(d){
+    const p = n => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+  function sohbetBas(){ const v = ortam.depo.oku(BAS()); return typeof v === 'string' ? v : ''; }
+  function sohbetBasYaz(){ ortam.depo.yaz(BAS(), yerelISO(ortam.simdi())); }
+  /* Doner: { ok:true, text, mode, akti } ya da { ok:false, neden:'baglanti'|'yok' }.
+     `bek` verilirse cevap akarak istenir ve o balona yazılır. */
+  async function merkezeSor(metin, bek){
     const k = baglanti();
     if(!k) return { ok:false, neden:'baglanti' };
     const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
@@ -35128,16 +35240,30 @@ window.LIFEOS.KING = (function(){
       const f = ortam.fetch;
       const govde = { text:String(metin).trim(), agent:'king', date:bugunISO() };
       if(d !== 'oto') govde.derinlik = d;
-      const res = await f(k.url + '/api/chat', {
+      if(tarz() !== 'samimi') govde.uslup = tarz();
+      if(sohbetBas()) govde.baslangic = sohbetBas();
+      const istek = yol => f(k.url + yol, {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
         body:JSON.stringify(govde),
         signal:ctrl ? ctrl.signal : undefined,
       });
-      let g = null;
-      try{ g = await res.json(); }catch(e){ g = null; }
+      let res = await istek(bek ? '/api/chat/akis' : '/api/chat');
+      if(bek && (res.status === 404 || res.status === 405)) res = await istek('/api/chat');   // eski HKM
+      const tur = res.headers && res.headers.get ? String(res.headers.get('Content-Type') || '') : '';
+      let g = null, akti = false;
+      if(res.status === 200 && /ndjson/.test(tur) && res.body && typeof res.body.getReader === 'function'){
+        g = await akisOku(res, p => {
+          if(!bek) return;
+          akti = true;
+          bek.bekliyor = false; bek.akiyor = true; bek.metin += p;
+          ciz(false);
+        });
+      }else{
+        try{ g = await res.json(); }catch(e){ g = null; }
+      }
       if(res.status === 200 && g && g.ok !== false && typeof g.text === 'string' && g.text.trim()){
-        return { ok:true, text:g.text.trim(), mode:g.mode || '' };
+        return { ok:true, text:g.text.trim(), mode:g.mode || '', akti };
       }
       return { ok:false, neden:res.status === 200 ? 'yok' : 'baglanti' };
     }catch(e){
@@ -35220,6 +35346,7 @@ window.LIFEOS.KING = (function(){
   }
   function sus(){
     sesNo++;
+    kesiciKapat();
     if(calan){ const c = calan; calan = null; try{ c.dur(); }catch(e){ /* durmuş */ } }
     const sz = ortam.sentez();
     if(sz) try{ sz.cancel(); }catch(e){ /* yok */ }
@@ -35304,6 +35431,7 @@ window.LIFEOS.KING = (function(){
     if(!k || !ortam.oynat){ cihazSesi(metin); return; }
     konusuyor = 1;
     durum();
+    kesiciAc();
     sunucuSesi(k, metin, no).then(ok => { if(!ok && no === sesNo) cihazSesi(metin); },
       () => { if(no === sesNo) cihazSesi(metin); });
   }
@@ -35325,6 +35453,7 @@ window.LIFEOS.KING = (function(){
       try{ sz.speak(u); }catch(e){ konusuyor = 0; }
     });
     durum();
+    kesiciAc();
   }
 
   function dinle(){
@@ -35791,6 +35920,7 @@ window.LIFEOS.KING = (function(){
     akis = []; aktifKayit = null; silinen = null; menu = null; yanAcik = false;
     bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; bekleyenTanisma = null; sonGeriAl = null; cipler = null;
     ortam.depo.sil(depoAnahtar());
+    sohbetBasYaz();                             // söz 33: HKM eski satırları göndermez
     ciz(true);
     return true;
   }
@@ -35799,7 +35929,8 @@ window.LIFEOS.KING = (function(){
     if(!k) return false;
     if(aktifKayit !== id) sessizArsivle();
     akis = k.mesajlar.map(m => ({ kim:m.kim === 'sen' ? 'sen' : 'king', metin:String(m.metin || ''),
-      satirlar:Array.isArray(m.satirlar) ? m.satirlar : null }));
+      satirlar:Array.isArray(m.satirlar) ? m.satirlar : null, kartlar:Array.isArray(m.kartlar) ? m.kartlar : undefined }));
+    ortam.depo.sil(BAS());
     aktifKayit = id; menu = null; yanAcik = false; cipler = null;
     bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenTanisma = null;
     sakla();
@@ -36093,6 +36224,9 @@ window.LIFEOS.KING = (function(){
         + '<div class="king__menu-satir"><span class="king__menu-ad">Düşünme</span><div class="king__secici" role="radiogroup" aria-label="Düşünme derinliği">'
         + DERIN_TERCIH.map(v => '<button type="button" class="king__secim' + (derinlik() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (derinlik() === v ? 'true' : 'false') + '" data-king="derinlik:' + v + '" title="' + kac(DERIN_IP[v]) + '">' + DERIN_AD[v] + '</button>').join('') + '</div></div>'
+        + '<div class="king__menu-satir"><span class="king__menu-ad">Tarz</span><div class="king__secici" role="radiogroup" aria-label="Konuşma tarzı">'
+        + TARZLAR.map(v => '<button type="button" class="king__secim' + (tarz() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
+          + (tarz() === v ? 'true' : 'false') + '" data-king="tarz:' + v + '">' + TARZ_AD[v] + '</button>').join('') + '</div></div>'
         + '<div class="king__menu-satir"><span class="king__menu-ad">Ses</span><div class="king__secici" role="radiogroup" aria-label="Ses">'
         + SES_TERCIH.map(v => '<button type="button" class="king__secim' + (sesTercihi() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (sesTercihi() === v ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('') + '</div></div>'
@@ -36190,6 +36324,176 @@ window.LIFEOS.KING = (function(){
       ek && ek.soru ? [ek.soru.soru] : []).join('. ').replace(/\.\.+/g, '.').replace(/([!?])\./g, '$1'));
   }
 
+  /* ---------- söz 33: öneriler, ayar komutları, odak, Merkez komutları ---------- */
+  function oneriListesi(cevapSonrasi){
+    const l = [];
+    if(cevapSonrasi){ l.push(['Detaylandır', 'Bunu biraz daha detaylandırır mısın?']); l.push(['Kısalt', 'Bunu daha kısa anlatır mısın?']); }
+    const K = ayar && ayar.kartlar;
+    if(K && typeof K.istatistik === 'function') l.push(['Kartları göster', 'istatistiklerim']);
+    if(K && typeof K.soru === 'function') l.push(['Bana soru sor', 'bana soru sor']);
+    return l.slice(0, 4).map(x => ({ ad:x[0], is:'oner-metin:' + x[1] }));
+  }
+  const TARZ = 'lifeos.king.tarz';      // 'samimi' | 'resmi' | 'kisa'; TASINAN'da
+  const TARZLAR = ['samimi', 'resmi', 'kisa'];
+  const TARZ_AD = { samimi:'Samimi', resmi:'Resmi', kisa:'Kısa' };
+  function tarz(){ const v = ortam.depo.oku(TARZ); return TARZLAR.indexOf(v) > 0 ? v : 'samimi'; }
+  function tarzSec(v){
+    if(TARZLAR.indexOf(v) < 0) return false;
+    if(v === 'samimi') ortam.depo.sil(TARZ); else ortam.depo.yaz(TARZ, v);
+    ciz(false);
+    return true;
+  }
+  /* «sesi Piper yap», «derin düşün»…: King'in kendi tercihleri (küçük, tekrar söyleyince değişir). */
+  function ayarKomutu(t){
+    const m = t.match(/(?:sesi|ses olarak)\s+(piper|gemini|cihaz|otomatik)|(piper|gemini|cihaz|otomatik)\s+ses(?:i|ine|le)\s*(?:geç|yap|kullan|olsun|oku)/);
+    if(m){ const v = { piper:'piper', gemini:'gemini', cihaz:'cihaz', otomatik:'oto' }[m[1] || m[2]]; sesTercihSec(v); return 'Sesi ' + SES_AD[v] + ' yaptım.'; }
+    if(/derin(?:lemesine)? düşün/.test(t)){ derinlikSec('derin'); return 'Bundan sonra derin düşüneceğim; cevaplar biraz uzun sürebilir.'; }
+    if(/hızlı (?:cevap ver|cevapla|düşün)/.test(t)){ derinlikSec('hizli'); return 'Bundan sonra hızlı cevaplayacağım.'; }
+    if(/dengeli düşün/.test(t)){ derinlikSec('dengeli'); return 'Bundan sonra dengeli düşüneceğim.'; }
+    if(/düşünmeyi otomatik/.test(t)){ derinlikSec('oto'); return 'Düşünme derinliğini mesaja göre ben seçeceğim.'; }
+    if(/(?:cevapları|cevabı) sesli (?:oku|ver)|sesli cevap ver/.test(t)){ cevapSec('ses'); return 'Cevapları sesli okuyacağım.'; }
+    if(/(?:cevapları|cevabı) yazılı ver|yazılı cevap ver|sesli okumayı kapat/.test(t)){ cevapSec('yazi'); return 'Cevapları yalnız yazılı vereceğim.'; }
+    if(/resmi konuş/.test(t)){ tarzSec('resmi'); return 'Bundan sonra resmi konuşacağım.'; }
+    if(/samimi konuş/.test(t)){ tarzSec('samimi'); return 'Tamam, samimi konuşuruz.'; }
+    if(/(?:kısa ve öz|kısa) konuş/.test(t)){ tarzSec('kisa'); return 'Bundan sonra kısa ve öz konuşacağım.'; }
+    if(/daha (hızlı|yavaş) oku/.test(t)){
+      const i = HIZLAR.indexOf(hiz()), j = /hızlı/.test(t) ? Math.min(HIZLAR.length - 1, i + 1) : Math.max(0, i - 1);
+      ortam.depo.yaz(HIZ, HIZLAR[j]);
+      return 'Okuma hızı ' + String(HIZLAR[j]).replace('.', ',') + ' kat.';
+    }
+    return null;
+  }
+  const ODAK = 'lifeos.king.odak';      // { bitis, dk, konu }; TASINAN'da
+  const ODAK_RE = /(?:(\d{1,3})\s*(?:dk|dakika)(?:lık)?\s*(.*?)\s*(?:çalışalım|çalışayım|odaklanalım|odaklanayım)(?![a-zçğıöşü]))|pomodoro|odak (?:modu|sayacı|zamanlayıcı)(?:nı|sı)? ?(?:başlat|aç)/;
+  let odakSaat = null, odakAralik = null;
+  function odak(){ const v = ortam.depo.oku(ODAK); return v && v.bitis ? v : null; }
+  function odakBaslat(dk, konu){
+    ortam.depo.yaz(ODAK, { bitis:ortam.simdi().getTime() + dk * 60000, dk, konu:konu || '' });
+    odakKur();
+    ciz(false);
+  }
+  function odakTemizle(){
+    if(odakSaat) try{ clearTimeout(odakSaat); }catch(e){ /* yok */ }
+    if(odakAralik) try{ clearInterval(odakAralik); }catch(e){ /* yok */ }
+    odakSaat = null; odakAralik = null;
+  }
+  function odakKur(){
+    odakTemizle();
+    const v = odak();
+    if(!v) return;
+    const kalan = v.bitis - ortam.simdi().getTime();
+    if(kalan <= 0){ odakBitti(); return; }
+    odakSaat = ortam.zamanla(odakBitti, kalan);
+    if(odak() && typeof document !== 'undefined' && typeof setInterval === 'function'){
+      odakAralik = setInterval(() => {
+        const el = document.querySelector('[data-odak-kalan]');
+        const o = odak();
+        if(el && o) el.textContent = odakYaz(o.bitis - ortam.simdi().getTime());
+      }, 1000);
+    }
+  }
+  function odakYaz(ms){
+    const s = Math.max(0, Math.round(ms / 1000));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+  function odakBitti(){
+    const v = odak();
+    odakTemizle();
+    if(!v) return;
+    ortam.depo.sil(ODAK);
+    if(ortam.bildir) ortam.bildir('King', 'Odak süresi doldu: ' + v.dk + ' dakika.');
+    soyle('Süre doldu: ' + v.dk + ' dakika' + (v.konu ? ' ' + v.konu : '') + ' tamam. Kaydedeyim mi?');
+    cipler = [{ ad:'Kaydet', is:'odak-kaydet:' + v.dk + ':' + encodeURIComponent(v.konu || '') }, { ad:'Gerek yok', is:'vazgec' }];
+    ciz(false);
+  }
+  function odakDur(){
+    const v = odak();
+    odakTemizle();
+    ortam.depo.sil(ODAK);
+    soyle(v ? 'Odak sayacını durdurdum.' : 'Çalışan bir odak sayacı yok.');
+  }
+  function odakHtml(){
+    const v = odak();
+    if(!v) return '';
+    return '<span class="king__odak" role="timer" aria-label="Odak sayacı">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7.5"/><path d="M12 9v4l2.5 2M9.5 3h5"/></svg>'
+      + '<b data-odak-kalan>' + odakYaz(v.bitis - ortam.simdi().getTime()) + '</b>'
+      + '<button type="button" class="king__hap king__hap--simge" data-king="odak-dur" aria-label="Odak sayacını durdur" title="Durdur">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></span>';
+  }
+  const HAFTA_RE = /(haftalık değerlendirme|haftam nasıl|haftayı değerlendir|bu haftayı özetle)/;
+  const CAPRAZ_RE = /(çapraz bulgu|modüller arası|neyi etkiliyor|bağlantıları göster|ilişkileri göster)/;
+  async function merkezKomut(metin, komut, baslik){
+    akis.push({ kim:'sen', metin:String(metin).trim() });
+    cipler = null;
+    const K = ayar && ayar.kartlar;
+    let l = [];
+    if(komut === 'hafta' && K && typeof K.istatistik === 'function'){
+      try{ l = (K.istatistik() || []).filter(x => x && x.ad).map(kartTemiz).slice(0, 4); }catch(e){ l = []; }
+    }
+    const ek = l.length ? { kartlar:l } : {};
+    if(!baglanti()){
+      soyle(baslik + ' için Merkez (HKM) bağlı olmalı.' + (l.length ? ' Modülün kendi kartları:' : ''), null, null, null, ek);
+      return { tur:'merkez-yok' };
+    }
+    const bek = { kim:'king', bekliyor:true, metin:'' };
+    akis.push(bek);
+    ciz(false);
+    const r = await merkezeSor(komut);
+    akis = akis.filter(m => m !== bek);
+    soyle(r.ok ? r.text : baslik + ' alınamadı; Merkez cevap vermedi.', null, null, null, Object.assign({ bulgu:true }, ek));
+    return { tur:'merkez-komut', komut };
+  }
+  /* Söz 33: Konuş kipinde araya girme. King konuşurken mikrofon yüksek
+     eşikle dinlenir; konuşma başlarsa King susar ve seni dinler. */
+  let kesici = null;
+  async function kesiciAc(){
+    if(kesici || !sesliSohbet || !ortam.kayitAc || konusuyor <= 0) return;
+    const no = sesNo;
+    kesici = 'aciliyor';
+    try{
+      const k = await ortam.kayitAc(() => {}, mikSecili(), () => {
+        if(no !== sesNo) return;
+        kesiciKapat(); sus(); sohbetDevam();
+      }, 0.06);
+      if(kesici !== 'aciliyor' || no !== sesNo){ try{ k.bitir(); }catch(e){ /* kapalı */ } if(kesici === 'aciliyor') kesici = null; return; }
+      kesici = k;
+    }catch(e){ kesici = null; }
+  }
+  function kesiciKapat(){
+    const k = kesici;
+    kesici = null;
+    if(k && k !== 'aciliyor') try{ k.bitir(); }catch(e){ /* kapalı */ }
+  }
+  /* Günün açılışı: günün ilk açılışında selam, özet ve modülün kartları. */
+  const ACILIS = () => 'lifeos.king.acilis.' + ((ayar && ayar.modul) || 'x');
+  function acilisHazirla(){
+    if(!ayar || ayar.acilis === false || !ayar.kartlar || typeof ayar.kartlar.istatistik !== 'function') return;
+    const gun = bugunISO();
+    if(ortam.depo.oku(ACILIS()) === gun || akis.length) return;
+    let l = [];
+    try{ l = (ayar.kartlar.istatistik() || []).filter(x => x && x.ad).map(kartTemiz).slice(0, 4); }catch(e){ l = []; }
+    ortam.depo.yaz(ACILIS(), gun);
+    const m = { kim:'king', metin:selam() + ' Bugünün kısa özeti:', satirlar:ozetSatirlari().slice(0, 3), yeni:true };
+    if(l.length) m.kartlar = l;
+    akis.push(m);
+    cipler = (ortam.simdi().getDay() === 0 ? [{ ad:'Haftalık değerlendirme', is:'oner-metin:haftalık değerlendirme' }] : []).concat(oneriListesi(false));
+    sakla();
+  }
+  function cizgi(seri){
+    if(!Array.isArray(seri)) return '';
+    const n = seri.filter(v => v != null);
+    if(n.length < 2) return '';
+    const en = Math.max.apply(null, n), az = Math.min.apply(null, n), a = (en - az) || 1, dx = 100 / (seri.length - 1);
+    let d = '', bagli = false;
+    seri.forEach((v, i) => {
+      if(v == null){ bagli = false; return; }
+      d += (bagli ? 'L' : 'M') + (i * dx).toFixed(1) + ' ' + (22 - (v - az) / a * 20).toFixed(1);
+      bagli = true;
+    });
+    return '<svg class="king__kart-cizgi" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"><path d="' + d + '"/></svg>';
+  }
+
   /* ---------- söz 32: kartlar ---------- */
   const KART_ISTAT = /(istatistik|rakamlar[ıi]m|sayılar[ıi]m|verilerimi göster|kartlar[ıi]? göster|durum kartlar)/;
   const KART_SORU = /(soru sor|soru ver|soru getir|soru çek|soru çöz(elim|eyim)|beni test et|test et beni|bir soru daha)/;
@@ -36204,8 +36508,10 @@ window.LIFEOS.KING = (function(){
   }
   function kartTemiz(x){
     const deger = x.deger == null || x.deger === '' || (typeof x.deger === 'number' && !isFinite(x.deger)) ? null : String(x.deger);
+    const seri = Array.isArray(x.seri) ? x.seri.slice(-14).map(v => (typeof v === 'number' && isFinite(v)) ? v : null) : null;
     return { ad:String(x.ad), deger, birim:x.birim ? String(x.birim) : '',
-      etiket:deger == null ? 'veri yok' : (ETIKETLER.indexOf(x.etiket) >= 0 ? x.etiket : 'hesaplandı'), alt:x.alt ? String(x.alt) : '' };
+      etiket:deger == null ? 'veri yok' : (ETIKETLER.indexOf(x.etiket) >= 0 ? x.etiket : 'hesaplandı'), alt:x.alt ? String(x.alt) : '',
+      seri:seri && seri.some(v => v != null) ? seri : null };
   }
   async function kartIsle(n, metin){
     akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -36255,7 +36561,7 @@ window.LIFEOS.KING = (function(){
       + '<span class="king__kart-ad">' + kac(x.ad) + '</span>'
       + '<b class="king__kart-deger">' + (x.deger == null ? '—' : kac(x.deger) + (x.birim ? '<small> ' + kac(x.birim) + '</small>' : '')) + '</b>'
       + '<span class="king__kart-etiket' + (x.etiket === 'veri yok' ? ' is-yok' : x.etiket === 'tahmin' ? ' is-tahmin' : '') + '">' + kac(x.etiket) + '</span>'
-      + (x.alt ? '<small class="king__kart-alt">' + kac(x.alt) + '</small>' : '') + '</div>').join('') + '</div>';
+      + (x.alt ? '<small class="king__kart-alt">' + kac(x.alt) + '</small>' : '') + cizgi(x.seri) + '</div>').join('') + '</div>';
   }
   function soruHtml(m, n){
     if(!m.soru) return '';
@@ -36282,6 +36588,7 @@ window.LIFEOS.KING = (function(){
   async function isle(metin){
     /* Söz 8: bekleyen soruya yazıyla cevap («evet», «hayır»). */
     const t0 = kucuk(metin);
+    if(!akis.some(m => m.kim === 'sen')) sohbetBasYaz();     // söz 33: yeni sohbet ya da yeni gün
     /* Söz 20: büyük eylem yalnız açık onayla. */
     if(bekleyenYetki && /^onayl[ıi]yorum[.!]?$/.test(t0)){
       akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -36329,6 +36636,20 @@ window.LIFEOS.KING = (function(){
     /* Söz 32: kartlar (istatistik, soru); «sorma» komutundan önce. */
     const KN = kartNiyeti(t0);
     if(KN) return kartIsle(KN, metin);
+    /* Söz 33: King'in kendi ayarları, odak sayacı, Merkez komutları. */
+    const AK = ayarKomutu(t0);
+    if(AK){ akis.push({ kim:'sen', metin:String(metin).trim() }); cipler = null; soyle(AK); return { tur:'ayar' }; }
+    if(/(odağı bitir|odak sayacını durdur|sayacı durdur)/.test(t0)){ akis.push({ kim:'sen', metin:String(metin).trim() }); odakDur(); return { tur:'odak-dur' }; }
+    const OD = t0.match(ODAK_RE);
+    if(OD){
+      akis.push({ kim:'sen', metin:String(metin).trim() }); cipler = null;
+      const dk = Math.max(1, Math.min(180, Number(OD[1]) || 25)), konu = String(OD[2] || '').trim();
+      odakBaslat(dk, konu);
+      soyle(dk + ' dakikalık odak başladı' + (konu ? ' (' + konu + ')' : '') + '. Süre dolunca haber vereceğim; «sayacı durdur» dersen dururum.');
+      return { tur:'odak', dk };
+    }
+    if(HAFTA_RE.test(t0)) return merkezKomut(metin, 'hafta', 'Haftalık değerlendirme');
+    if(CAPRAZ_RE.test(t0)) return merkezKomut(metin, 'capraz', 'Modüller arası bulgular');
     /* Söz 24: «… artık sorma / sor». */
     const SK = sormaKomutu(metin);
     if(SK && !veriGibi(metin)){
@@ -36432,10 +36753,12 @@ window.LIFEOS.KING = (function(){
       const bek = { kim:'king', bekliyor:true, metin:'' };
       akis.push(bek);
       ciz(false);
-      const r = await merkezeSor(metin);
+      const r = await merkezeSor(metin, bek);
       akis = akis.filter(m => m !== bek);
       if(r.ok){
-        soyle(r.text);
+        soyle(r.text, null, null, null, r.akti ? { yeni:false } : null);
+        cipler = oneriListesi(true);                        // söz 33
+        ciz(false);
         return { tur:'merkez', mode:r.mode };
       }
       neden = r.neden;
@@ -36647,7 +36970,7 @@ window.LIFEOS.KING = (function(){
         : gorselZincir().length ? 'Merkez bağlı değil; sorulara yerel kurallarla, ekran ve fotoğrafa görüntü okuyan modelle cevap verir'
         : 'Merkez bağlı değil: King yerel kurallarla cevaplar') + '">'
       + (baglanti() ? 'yapay zekâ' : gorselZincir().length ? 'görüntü açık' : 'yerel') + '</span>'
-      + dinleHap() + kipHtml()
+      + odakHtml() + dinleHap() + kipHtml()
       + '<button type="button" class="king__kapat king__menu-dugme' + (menu ? ' is-acik' : '') + '" data-king="menu" aria-expanded="' + (menu ? 'true' : 'false')
       + '" aria-label="Ayarlar" title="Ayarlar: cevap biçimi, sohbeti kaydet, kayıtlar, temizle">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg></button>'
@@ -36673,7 +36996,7 @@ window.LIFEOS.KING = (function(){
       : m.bekliyor
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
-      : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + '"><div><p>' + bicimli(m.metin) + '</p>'
+      : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '"><div><p>' + bicimli(m.metin) + '</p>'
         + kartlarHtml(m) + soruHtml(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
@@ -36757,7 +37080,7 @@ window.LIFEOS.KING = (function(){
       : geriGetir();
     cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; sesli = false;
     if(o && o.mesaj) akis.push({ kim:'king', metin:o.mesaj });
-    else if(!mini) tanismaHazirla();   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
+    else if(!mini){ acilisHazirla(); tanismaHazirla(); }   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
     const el = document.createElement('div');
     el.className = 'king';
     el.setAttribute('data-king', '');
@@ -36869,6 +37192,10 @@ window.LIFEOS.KING = (function(){
         if(aracAcik && is !== 'arac') aracAcik = false;          // söz 27: menüden seçince kapanır
         if(derinAcik && is !== 'derin') derinAcik = false;       // söz 31: aynı kural
         if(is === 'derin'){ derinAcik = !derinAcik; aracAcik = false; ciz(false); return; }
+        if(/^oner-metin:/.test(is)){ isle(is.slice(11)); return; }
+        if(/^tarz:(samimi|resmi|kisa)$/.test(is)){ tarzSec(is.slice(5)); return; }
+        if(is === 'odak-dur'){ odakDur(); return; }
+        if(/^odak-kaydet:\d+:/.test(is)){ const p = is.split(':'); cipler = null; isle(p[1] + ' dk ' + (decodeURIComponent(p.slice(2).join(':')) || 'çalıştım')); return; }
         if(/^soru-cevap:\d+:[A-E]$/.test(is)){ const p = is.split(':'); soruCevapla(Number(p[1]), p[2]); return; }
         if(/^soru-yeni:\d+$/.test(is)){ const m = akis[Number(is.slice(10))]; isle('bana bir soru daha sor' + (m && m.soru && m.soru.sorgu ? ' ' + m.soru.sorgu : '')); return; }
         if(/^derinlik:(oto|hizli|dengeli|derin)$/.test(is)){ derinlikSec(is.slice(9)); return; }
@@ -37033,6 +37360,7 @@ window.LIFEOS.KING = (function(){
      modülden King'le gelindiyse (#king=rota[:sekme]) oraya gidilir. */
   function kur(o){
     ayar = Object.assign({ modul:'spi' }, o || {});
+    if(typeof window !== 'undefined') setTimeout(() => { try{ if(odak()) odakKur(); }catch(e){ /* yok */ } }, 0);
     bagla();
     disKisi = [];
     if(hafiza()) disKisiTazele();              // söz 22: öbür modüllerde öğrenilen
@@ -37079,7 +37407,7 @@ window.LIFEOS.KING = (function(){
     ortam.depo.sil(TANISMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     if(mikDeniyor){ try{ mikDeniyor.iptal(); }catch(e){ /* durmus */ } mikDeniyor = null; }
-    mikListe = []; mikNot = ''; hkmDinlemezBitis = 0; dinleHata = 0; dinleNot = '';
+    mikListe = []; mikNot = ''; hkmDinlemezBitis = 0; dinleHata = 0; dinleNot = ''; kesiciKapat(); odakTemizle();
     if(dinleyen){ try{ dinleyen.onend = dinleyen.onerror = null; dinleyen.abort(); }catch(e){ /* durmus */ } }
     sesli = false; dinleyen = null; konusuyor = 0; sesNo++; calan = null; sonMotor = ''; sonNot = '';
   }
@@ -37092,7 +37420,7 @@ window.LIFEOS.KING = (function(){
     cikarimAdaylari, cikarimKarti, cikarimOnayla, SORMA, sormaKomutu, sormaMi, sormaListesi,
     USLUP, envanterVar:() => !!envanter,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
-    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor, sonNot:() => sonNot, YAN, yanDar, yanDarSec, DERIN, derinlik, derinlikSec, kartNiyeti, soruCevapla, bicimli,
+    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor, sonNot:() => sonNot, YAN, yanDar, yanDarSec, DERIN, derinlik, derinlikSec, kartNiyeti, soruCevapla, bicimli, tarz, tarzSec, TARZ, odak, ODAK, sohbetBas, BAS, ayarKomutu, oneriListesi, cizgi,
     MIK, mikSecili, mikSec, mikTazele, mikDene, algila,
     sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
@@ -89643,6 +89971,18 @@ ESP.App = (function(){
       if(window.LIFEOS && window.LIFEOS.YETKI){
         const teklifler = () => (S.ui.hkmIntents || []).filter(n => ESP.Beacon.canApply(n));
         window.LIFEOS.YETKI.kur({ modul:'esp',
+          /* King'in eylem kapısı (yetki.js söz 8): toplantıyı Toplantı ekranının
+             kendi düğmesi başlatır; model çağrıları yapılır, bu yüzden orta seviye. */
+          eylemler:[{ id:'toplanti', seviye:'orta', ad:'Toplantı başlat',
+            anla:t => /toplant/.test(t) && /(başlat|başla|aç|yap|topla|kur)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
+            onizle:() => ({ metin:'Ofiste toplantı başlayacak: uzmanlar sırayla konuşur, bunun için yapay zekâ çağrıları yapılır.' }),
+            uygula:async () => {
+              go('meeting');
+              await new Promise(r => setTimeout(r, 120));
+              await ESP.Screens.meeting.handle['run-meeting']();
+              return { metin:'Toplantıyı başlattım; Toplantı ekranındasın.' };
+            } }],
+
           tema:{ oku:() => (S.profile && S.profile.theme) || 'system', yaz:async v => { await M.saveProfile({ theme:v }); applyTheme(); refreshAppearance(); render(); } },
           onaylar:{
             bekleyen:() => teklifler().map(n => ({ id:String(n.id), metin:n.note || n.kind })),
@@ -89694,17 +90034,41 @@ ESP.App = (function(){
                 ss.forEach(s => { dakika[s.disc] = (dakika[s.disc] || 0) + s.minutes; });
               }
               const top = Object.keys(dakika).reduce((a, k) => a + dakika[k], 0);
+              /* Son 7 gün dakika (eskiden yeniye); oturumu olmayan gün boşluk kalır. */
+              const seri = [];
+              for(let i = 6; i >= 0; i--){
+                const ss = M.sessionsOf(U.iso(U.addDays(U.today(), -i))).filter(s => s.minutes > 0);
+                seri.push(ss.length ? ss.reduce((a, s) => a + s.minutes, 0) : null);
+              }
               const enCok = Object.keys(dakika).sort((a, b) => dakika[b] - dakika[a])[0];
               const sinir = U.iso(U.addDays(U.today(), -29));
               const biten = (S.books || []).filter(b => b.finishedAt && String(b.finishedAt).slice(0, 10) >= sinir).length;
               return [
                 { ad:'Çalışılan gün · 30 gün', deger:gun || null, birim:'/ 30', etiket:'ölçüldü' },
-                { ad:'Toplam süre · 30 gün', deger:top || null, birim:'dk', etiket:'ölçüldü' },
+                { ad:'Toplam süre · 30 gün', deger:top || null, birim:'dk', etiket:'ölçüldü', seri },
                 { ad:'En çok çalışılan alan', deger:enCok ? (ESP.DISCIPLINE_BY_ID[enCok] || {}).label || enCok : null, etiket:'hesaplandı',
                   alt:enCok ? dakika[enCok] + ' dk' : '' },
                 { ad:'Biten kitap · 30 gün', deger:biten || null, etiket:'ölçüldü' },
               ];
             },
+            /* Kelime soru kartı: senin dil kartlarından (ön yüz → doğru arka yüz,
+               üç çeldirici başka kartlardan). Cevap tekrar takvimine yazılmaz. */
+            soru:() => {
+              const l = (S.cards || []).filter(c => String(c.front || '').trim() && String(c.back || '').trim());
+              if(l.length < 4) return null;
+              const q = l[Math.floor(Math.random() * l.length)], dogruMetin = String(q.back).trim();
+              const cel = [];
+              l.slice().sort(() => Math.random() - 0.5).forEach(c => {
+                const b = String(c.back).trim();
+                if(cel.length < 3 && b !== dogruMetin && cel.indexOf(b) < 0) cel.push(b);
+              });
+              if(cel.length < 3) return null;
+              const sec = cel.concat([dogruMetin]).sort(() => Math.random() - 0.5);
+              const dogru = 'ABCDE'[sec.indexOf(dogruMetin)];
+              return { id:String(q.id || q.front) + '|' + dogru, konu:'Kelime kartı', soru:'«' + String(q.front).trim() + '» ne demek?', sec,
+                kaynak:'ESP · senin dil kartların', not:'Bu cevap kartın tekrar takvimine yazılmaz.' };
+            },
+            cevapla:(id, harf) => ({ dogru:String(id).split('|').pop(), cozum:[], not:'' }),
           },
           ozet:() => [ESP.Screens.today.headline()] });
       }

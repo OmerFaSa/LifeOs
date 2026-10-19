@@ -1651,6 +1651,18 @@ R.App = (function(){
          modülün kendi kodu uygular. Hesap dışarıda. */
       if(window.LIFEOS && window.LIFEOS.YETKI){
         window.LIFEOS.YETKI.kur({ modul:'ays',
+          /* King'in eylem kapısı (yetki.js söz 8): toplantıyı Toplantı ekranının
+             kendi düğmesi başlatır; model çağrıları yapılır, bu yüzden orta seviye. */
+          eylemler:[{ id:'toplanti', seviye:'orta', ad:'Toplantı başlat',
+            anla:t => /toplant/.test(t) && /(başlat|başla|aç|yap|topla|kur)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
+            onizle:() => ({ metin:'Ofiste toplantı başlayacak: uzmanlar sırayla konuşur, bunun için yapay zekâ çağrıları yapılır.' }),
+            uygula:async () => {
+              go('meeting');
+              await new Promise(r => setTimeout(r, 120));
+              await R.Screens.meeting.handle['meet-start']();
+              return { metin:'Toplantıyı başlattım; Toplantı ekranındasın.' };
+            } }],
+
           tema:{ oku:() => S.profile.theme || 'system', yaz:async v => { S.profile.theme = v; await M.saveProfile(); applyTheme(); render(); } },
           onaylar:{
             bekleyen:() => R.Proposals.pending().map(p => ({ id:p.id,

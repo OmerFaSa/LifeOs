@@ -354,6 +354,24 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _akis_baslat(self):
+        """Akan cevap: uzunluk yok, baglanti sonda kapanir (King satir satir okur)."""
+        self.send_response(200)
+        self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self._cors()
+        self.send_header("Connection", "close")
+        self.end_headers()
+        self.close_connection = True
+
+    def _akis_yaz(self, nesne):
+        try:
+            self.wfile.write((json.dumps(nesne, ensure_ascii=False) + "\n").encode("utf-8"))
+            self.wfile.flush()
+            return True
+        except OSError:
+            return False
+
     def _send_ses(self, wav, motor, notlar=None):
         """King'in sesi: WAV, hangi motorun urettigi ve (sira ilerlediyse)
         oncekinin neden olmadigi. Not yuzde kodludur: baslik Latin-1 tasir."""
@@ -1681,7 +1699,7 @@ class Handler(BaseHTTPRequestHandler):
                 (govde or {}).get("date") or datetime.date.today().isoformat(),
                 gorevli=gorevli,
                 th=self.server.thresholds))
-        if u.path == "/api/chat":
+        if u.path in ("/api/chat", "/api/chat/akis"):
             # Sohbet: once komut, sonra model, sonra durust bir «yok».
             ham, hata = self._read_body()
             if hata:
@@ -1702,17 +1720,27 @@ class Handler(BaseHTTPRequestHandler):
             # Gecmis AMBARDAN gelir, istemciden degil: istemcinin
             # gonderdigi bir gecmis, modele istedigini soyletmenin en
             # kisa yoludur.
-            onceki = patron.history(self.con, limit=12, agent=gorevli)
-            mesajlar = [{"role": ("user" if m["role"] == "user"
-                                  else "assistant"), "content": m["text"]}
-                        for m in onceki if m["role"] in ("user", "manager")]
+            mesajlar = _sohbet_gecmisi(self.con, gorevli, (govde or {}).get("baslangic"))
             # Kayit sorumlulugu TEK yerde: core/sohbet.py. Burasi da
             # yazsaydi ayni cumle akista iki kez gorunurdu.
             # Dusunme derinligi (hizli|dengeli|derin); gecersizse «otomatik».
+            ek = {"derinlik": sohbet.derinlik_of((govde or {}).get("derinlik")),
+                  "uslup": sohbet.uslup_of((govde or {}).get("uslup"))}
+            if u.path == "/api/chat/akis":
+                # Akan cevap: NDJSON satirlari; once denetlenmis cumleler, sonda tam cevap.
+                self._akis_baslat()
+                yazilabilir = [True]
+
+                def yay(parca):
+                    if yazilabilir[0]:
+                        yazilabilir[0] = self._akis_yaz({"t": "parca", "metin": parca})
+                r = sohbet.konus(self.con, self.server.config, metin, gun, gorevli=gorevli,
+                                 gecmis=mesajlar, th=self.server.thresholds, akis=yay, **ek)
+                self._akis_yaz(dict(r, t="son"))
+                return None
             r = sohbet.konus(self.con, self.server.config, metin, gun,
                              gorevli=gorevli, gecmis=mesajlar,
-                             th=self.server.thresholds,
-                             derinlik=sohbet.derinlik_of((govde or {}).get("derinlik")))
+                             th=self.server.thresholds, **ek)
             return self._send(200, r)
         if u.path == "/api/message":
             ham, hata = self._read_body()
@@ -1881,6 +1909,21 @@ def _ollama_geri(srv):
 OLLAMA_ARALIK_SN = 300
 
 
+_BASLANGIC_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?")
+
+
+def _sohbet_gecmisi(con, gorevli, baslangic=None):
+    """Modele giden gecmis AMBARDAN gelir (istemciden degil). King yeni bir
+    sohbet actiysa `baslangic` (yerel ISO zaman) verir: ondan onceki satirlar
+    gitmez (kullanici, 2026-10-19: «yeni sohbet gercekten sifirlansin»).
+    Kalici hafiza (onaylanan bilgiler) bundan etkilenmez; o ayri gider."""
+    onceki = patron.history(con, limit=40 if baslangic else 12, agent=gorevli)
+    if isinstance(baslangic, str) and _BASLANGIC_RE.match(baslangic):
+        onceki = [m for m in onceki if str(m.get("created_at") or "") >= baslangic[:19]][-12:]
+    return [{"role": ("user" if m["role"] == "user" else "assistant"), "content": m["text"]}
+            for m in onceki if m["role"] in ("user", "manager")]
+
+
 def _ollama_tik(srv, simdi=None):
     """Acilista ve bes dakikada bir: Ollama'ya bak; kural 4 izin veriyorsa
     kendiliginden bagla. Firlatmaz."""
@@ -1892,7 +1935,12 @@ def _ollama_tik(srv, simdi=None):
         t = ollama.tara(srv.config)
         srv.ollama_son = t
         secim = ollama.kendiliginden(srv.config, t)
-        return _ollama_bagla(srv, secim, kendiliginden=True) if secim else None
+        if secim:
+            return _ollama_bagla(srv, secim, kendiliginden=True)
+        # Kural 6: bagli model bellekte kalsin (ilk cevap beklemesin).
+        if simdi - getattr(srv, "ollama_isit_t", -1e9) >= ollama.ISIT_ARALIK and ollama.isit(srv.config, t):
+            srv.ollama_isit_t = simdi
+        return None
     except Exception as e:                      # noqa: BLE001
         sys.stderr.write("[hkm] ollama taramasi: %s\n" % e)
         return None

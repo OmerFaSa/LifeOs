@@ -79,6 +79,49 @@ def _zaman_asimi_mi(e):
         getattr(e, "reason", None), (TimeoutError, socket.timeout))
 
 
+def _sse_birlestir(satirlar, akis):
+    """Akan cevap (OpenAI bicimi, «data: {...}» satirlari) -> tek cevap.
+    Her metin parcasi `akis(parca)` ile disari verilir; sonda `akis(None)`.
+    Doner: _istek'in dondurdugu bicim (choices, usage)."""
+    metin, usage, bitis = [], None, None
+    for ham in satirlar:
+        s = (ham.decode("utf-8", "replace") if isinstance(ham, bytes) else str(ham)).strip()
+        if not s.startswith("data:"):
+            continue
+        veri = s[5:].strip()
+        if veri == "[DONE]":
+            break
+        try:
+            y = json.loads(veri)
+        except ValueError:
+            continue
+        if y.get("usage"):
+            usage = y["usage"]
+        for c in y.get("choices") or []:
+            d = (c.get("delta") or {}).get("content")
+            if d:
+                metin.append(d)
+                try:
+                    akis(d)
+                except Exception:               # noqa: BLE001 — ekran kopsa da cevap tamamlanir
+                    pass
+            if c.get("finish_reason"):
+                bitis = c["finish_reason"]
+    try:
+        akis(None)
+    except Exception:                           # noqa: BLE001
+        pass
+    return {"choices": [{"message": {"content": "".join(metin)}, "finish_reason": bitis}],
+            "usage": usage or {}}
+
+
+def _akis_istek(url, baslik, govde, timeout, akis):
+    r = urllib.request.Request(url, data=json.dumps(govde).encode("utf-8"),
+                               headers=baslik, method="POST")
+    with urllib.request.urlopen(r, timeout=timeout) as y:      # noqa: S310
+        return _sse_birlestir(y, akis)
+
+
 def _istek(url, baslik, govde, timeout=ZAMAN_ASIMI):
     r = urllib.request.Request(url, data=json.dumps(govde).encode("utf-8"),
                                headers=baslik, method="POST")
@@ -221,7 +264,13 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
                     and govde["messages"][0].get("role") == "system":
                 govde["messages"][0]["content"] = [{"type": "text", "text": sistem,
                                                     "cache_control": {"type": "ephemeral"}}]
-        y = _istek(url, baslik, govde, timeout)
+        if callable(ayar.get("akis")):
+            # Akan cevap (King'de yazi akarak gelir); kullanim son parcada.
+            govde["stream"] = True
+            govde["stream_options"] = {"include_usage": True}
+            y = _akis_istek(url, baslik, govde, timeout, ayar["akis"])
+        else:
+            y = _istek(url, baslik, govde, timeout)
         secim = (y.get("choices") or [{}])[0]
         metin = (secim.get("message") or {}).get("content") or ""
         k = y.get("usage") or {}
@@ -475,11 +524,14 @@ DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
             "sunulamaz. Buyurgan kip kullanma.")
 
 
-def _genis(ayar, jeton, sure):
-    """Basamak ayarini uzun cevap icin genisletir; daraltmaz."""
-    if not jeton and not sure:
+def _genis(ayar, jeton, sure, akis=None):
+    """Basamak ayarini uzun cevap icin genisletir; daraltmaz. `akis`
+    verilmisse cevap akarak istenir (yalniz OpenAI bicimli saglayicilar)."""
+    if not jeton and not sure and not akis:
         return ayar
     a = dict(ayar or {})
+    if akis:
+        a["akis"] = akis
     if jeton:
         a["jeton"] = max(int(a.get("jeton") or EN_COK_JETON), int(jeton))
     if sure:
@@ -489,7 +541,7 @@ def _genis(ayar, jeton, sure):
 
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         transport=None, now=None, duzeltme=True, denetim="olcum", veri=None,
-        gorseller=None, medya=None, seviye=None, jeton=None, sure=None):
+        gorseller=None, medya=None, seviye=None, jeton=None, sure=None, akis=None):
     """Bir kademe adina model cagirir — MERDIVENLE (core/motor.py).
 
     Paket seciliyse basamaklar ucuzdan pahaliya denenir; bir basamak
@@ -517,7 +569,7 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                      sistem=sistem + (motor.YUKSELT_KURALI if ust_var else ""),
                      user=user, transport=transport, now=now, duzeltme=duzeltme,
                      denetim=denetim, veri=veri, gorseller=gorseller, medya=medya,
-                     ayar=_genis(b["ayar"], jeton, sure), escalated=i > 0, not_ek=not_ek)
+                     ayar=_genis(b["ayar"], jeton, sure, akis), escalated=i > 0, not_ek=not_ek)
         r["motor"] = {"paket": plan.get("paket"), "seviye": plan.get("seviye"),
                       "sinif": b["sinif"], "basamak": i, "yukseldi": i > 0,
                       "ekonomi": plan.get("ekonomi")}

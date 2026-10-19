@@ -20,6 +20,7 @@ except ImportError:                                  # pragma: no cover
 try:
     from core import ollama as _ollama
     _ollama.VARSAYILAN_GETIR = _ag_kapali
+    _ollama.VARSAYILAN_GONDER = _ag_kapali
 except ImportError:                                  # pragma: no cover
     pass
 try:

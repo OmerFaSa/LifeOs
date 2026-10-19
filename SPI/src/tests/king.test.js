@@ -1166,7 +1166,7 @@
       const { k, giden, gidilen } = bagliSahne(m);
       await k.isle('Bugün neden yorgunum?');
       expect(m.istekler.length).toBe(1);
-      expect(m.istekler[0].url).toBe('http://127.0.0.1:4200/api/chat');
+      expect(m.istekler[0].url).toBe('http://127.0.0.1:4200/api/chat/akis');
       expect(m.istekler[0].o.headers.Authorization).toBe('Bearer jeton');
       expect(m.istekler[0].govde.agent).toBe('king');
       expect(m.istekler[0].govde.text).toBe('Bugün neden yorgunum?');
@@ -1259,12 +1259,146 @@
       k.kapat();
     })));
   });
+  /* Söz 33 (depo sahibi, 2026-10-19): «hepsini King'e getir». */
+  describe('King — genel geliştirme (söz 33)', () => {
+    const bekle = () => new Promise(ok => setTimeout(ok, 0));
+    async function bitsin(){ for(let i = 0; i < 15; i++) await bekle(); }
+    const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+    function akanCevap(satirlar){
+      let i = 0;
+      return { status:200, headers:{ get:h => /content-type/i.test(h) ? 'application/x-ndjson' : null },
+        body:{ getReader:() => ({ read:async () => i < satirlar.length ? { value:satirlar[i++], done:false } : { done:true } }) } };
+    }
+    function temizle(k){ [k.TARZ, k.ODAK, k.BAS()].forEach(x => k._ortam.depo.sil(x)); k.derinlikSec('oto'); k.sesTercihSec('oto'); }
+    it('cevap akarak gelir; sonda tam cevap yerine geçer; sohbet başı ve tarz HKM’ye gider', () => sahneyle(async () => {
+      const istekler = [];
+      let akarkenGoruldu = false;
+      const fetch = async (url, o) => {
+        istekler.push({ url, govde:JSON.parse(o.body) });
+        return akanCevap(['{"t":"parca","metin":"Merhaba "}\n{"t":"parca","metin":"dostum. "}\n',
+          '{"t":"son","ok":true,"mode":"model","text":"Merhaba dostum."}\n']);
+      };
+      const { k } = sahne({ hkm, fetch });
+      try{
+        k.tarzSec('resmi');
+        k.ac();
+        const gozcu = new MutationObserver(() => { if(document.querySelector('.king__balon.is-akiyor')) akarkenGoruldu = true; });
+        gozcu.observe(document.body, { subtree:true, childList:true });
+        const r = await k.isle('felsefede özgür irade hakkında ne düşünüyorsun');
+        gozcu.disconnect();
+        expect(r.tur).toBe('merkez');
+        expect(istekler[0].url).toBe('http://127.0.0.1:4200/api/chat/akis');
+        expect(istekler[0].govde.uslup).toBe('resmi');
+        expect(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(istekler[0].govde.baslangic)).toBe(true);
+        expect(akarkenGoruldu).toBe(true);
+        const sonM = k.akis().filter(m => m.kim === 'king').pop();
+        expect([sonM.metin, !!sonM.akiyor]).toEqual(['Merhaba dostum.', false]);
+        const oneri = [...document.querySelectorAll('[data-king^="oner-metin:"]')].map(b => b.textContent);
+        expect(oneri.slice(0, 2)).toEqual(['Detaylandır', 'Kısalt']);
+      }finally{ temizle(k); }
+    }));
+    it('eski HKM (404) için /api/chat’e düşer', () => sahneyle(async () => {
+      const yollar = [];
+      const fetch = async url => {
+        yollar.push(url.replace('http://127.0.0.1:4200', ''));
+        if(url.endsWith('/akis')) return { status:404, json:async () => ({}) };
+        return { status:200, json:async () => ({ ok:true, text:'Tamam.', mode:'model' }) };
+      };
+      const { k } = sahne({ hkm, fetch });
+      try{
+        k.ac();
+        await k.isle('felsefede özgür irade hakkında ne düşünüyorsun');
+        expect(yollar).toEqual(['/api/chat/akis', '/api/chat']);
+        expect(k.akis().pop().metin).toBe('Tamam.');
+      }finally{ temizle(k); }
+    }));
+    it('yeni sohbet sohbet başını yeniler', () => sahneyle(async () => {
+      const { k } = sahne();
+      try{
+        k._ortam.depo.sil(k.BAS());
+        k.ac();
+        k.yeniSohbet();
+        expect(/^\d{4}-\d{2}-\d{2}T/.test(k.sohbetBas())).toBe(true);
+      }finally{ temizle(k); }
+    }));
+    it('ayar komutları King’in tercihini değiştirir', () => sahneyle(async () => {
+      const { k } = sahne();
+      try{
+        k.ac();
+        await k.isle('derin düşün');
+        expect(k.derinlik()).toBe('derin');
+        await k.isle('sesi piper yap');
+        expect([k.sesTercihi(), k.akis().pop().metin]).toEqual(['piper', 'Sesi Piper yaptım.']);
+        await k.isle('resmi konuş');
+        expect(k.tarz()).toBe('resmi');
+        expect(k.ayarKomutu('bugün hava nasıl')).toBe(null);
+      }finally{ temizle(k); }
+    }));
+    it('odak sayacı başlar, bitince haber verir ve «Kaydet» modülün girişine gider', () => sahneyle(async () => {
+      const { k } = sahne();
+      try{
+        k.ac();
+        await k.isle('25 dakika matematik çalışalım');            // sahnede zamanlayıcı anında çalışır
+        const l = k.akis().filter(m => m.kim === 'king').map(m => m.metin);
+        expect(l.some(x => /^25 dakikalık odak başladı \(matematik\)/.test(x))).toBe(true);
+        expect(l.some(x => /^Süre doldu: 25 dakika matematik tamam/.test(x))).toBe(true);
+        expect(document.querySelector('[data-king^="odak-kaydet:"]').getAttribute('data-king')).toBe('odak-kaydet:25:matematik');
+        expect(k.odak()).toBe(null);
+      }finally{ temizle(k); }
+    }));
+    it('günün açılışı: ilk açılışta selam ve kartlar, aynı gün ikinci kez yok', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.kur({ modul:'ays', git:() => {}, ozet:() => ['Bugün plan var.'], kartlar:{ istatistik:() => [{ ad:'Çözülen soru', deger:12, etiket:'ölçüldü', seri:[3, null, 5] }] } });
+      k._ortam.depo.sil('lifeos.king.acilis.ays');
+      k.ac();
+      const m = k.akis()[0];
+      expect([m.kim, m.kartlar.length, m.satirlar[0]]).toEqual(['king', 1, 'Bugün plan var.']);
+      expect(document.querySelector('.king__kart-cizgi path').getAttribute('d')).toBe('M0.0 22.0M100.0 2.0');
+      k.kapat(); k.yeniSohbet(); k.ac();
+      expect(k.akis().some(x => x.kartlar)).toBe(false);
+      k._ortam.depo.sil('lifeos.king.acilis.ays');
+    }));
+    it('haftalık değerlendirme HKM’nin «hafta» raporunu getirir', () => sahneyle(async () => {
+      const istekler = [];
+      const fetch = async (url, o) => { istekler.push(JSON.parse(o.body).text); return { status:200, json:async () => ({ ok:true, text:'Hafta: AYS 3 gün.', mode:'komut' }) }; };
+      const { k } = sahne({ hkm, fetch });
+      try{
+        k.ac();
+        await k.isle('haftalık değerlendirme');
+        expect(istekler).toEqual(['hafta']);
+        const m = k.akis().pop();
+        expect([m.metin, m.bulgu]).toEqual(['Hafta: AYS 3 gün.', true]);
+      }finally{ temizle(k); }
+    }));
+    it('Konuş kipinde King konuşurken sen konuşursan susar ve dinler', () => sahneyle(async () => {
+      const acilan = [];
+      const fetch = async () => ({ status:200, blob:async () => ({}), headers:{ get:() => 'gemini' }, json:async () => ({}) });
+      const { k } = sahne({ hkm, fetch });
+      Object.assign(k._ortam, {
+        oynat:() => new Promise(() => {}),                      // King konuşmayı sürdürür
+        tanima:() => function(){ this.start = () => {}; this.stop = () => {}; },
+        kayitAc:async (sessiz, cihaz, basla, esik) => { acilan.push({ basla, esik }); return { bitir:() => ({ pcm:new Float32Array(10), hz:16000, konustu:false }) }; },
+      });
+      try{
+        k.ac();
+        await k.kipSec('konus');
+        k.seslendir('Uzun bir cevap okuyorum.');
+        await bitsin();
+        const kes = acilan.filter(x => x.esik === 0.06).pop();
+        expect(!!kes).toBe(true);
+        kes.basla();
+        await bitsin();
+        expect(acilan.length >= 2).toBe(true);                   // ikinci kayıt: seni dinliyor
+        expect(document.querySelector('.king').classList.contains('is-konusuyor')).toBe(false);
+      }finally{ temizle(k); }
+    }));
+  });
   /* Söz 32 (depo sahibi, 2026-10-19): istatistik kartları ve soru kartları. */
   describe('King — kartlar (söz 32)', () => {
     const bekle = () => new Promise(ok => setTimeout(ok, 0));
     function kartSahnesi(kartlar){
       const { k } = sahne();
-      k.kur({ modul:'ays', git:() => {}, ozet:() => [], kartlar });
+      k.kur({ modul:'ays', git:() => {}, ozet:() => [], kartlar, acilis:false });
       k.ac();
       return k;
     }
@@ -1375,12 +1509,12 @@
       try{
         k.ac();
         await k.isle('felsefede özgür irade hakkında ne düşünüyorsun');
-        const ilk = istekler.filter(x => x.url.endsWith('/api/chat'));
+        const ilk = istekler.filter(x => x.url.includes('/api/chat'));
         expect(ilk.length).toBe(1);
         expect('derinlik' in ilk[0].govde).toBe(false);
         k.derinlikSec('hizli');
         await k.isle('peki stoacılar ne der');
-        const son = istekler.filter(x => x.url.endsWith('/api/chat')).pop();
+        const son = istekler.filter(x => x.url.includes('/api/chat')).pop();
         expect(son.govde.derinlik).toBe('hizli');
       }finally{ k.derinlikSec('oto'); }
     }));

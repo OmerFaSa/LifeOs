@@ -131,7 +131,7 @@ def run():
         ok(settings.validate(y)[0], settings.validate(y))
 
     def t_ayar():
-        eq(settings.read({})["ollama"], {"kendiligi": True})
+        eq(settings.read({})["ollama"], {"kendiligi": True, "sicak": True})
         ok(settings.validate({"ollama": {"kendiligi": False}})[0])
         no(settings.validate({"ollama": {"kendiligi": "evet"}})[0], "bool olmayan")
         no(settings.validate({"ollama": {"model": "x"}})[0], "bilinmeyen alan")
@@ -175,6 +175,19 @@ def run():
     test("ayar okunur ve doğrulanır", t_ayar)
     test("ritim: tarar, bağlar, geri al, bir daha bağlamaz", t_ritim)
     test("son sohbet çağrısı defterden okunur; neden adıyla söylenir", t_son_cagri)
+
+    def t_isit():
+        cfg = {"models": {"yer": "yerel", "yerel": {"ekonomik": "gemma3:4b"}}}
+        giden = []
+        gonder = lambda url, govde, t: giden.append((url, govde)) or True      # noqa: E731
+        eq(ollama.isit(cfg, {"durum": "bagli"}, gonder), "gemma3:4b")
+        eq(giden, [("http://127.0.0.1:11434/api/generate", {"model": "gemma3:4b", "keep_alive": "30m"})])
+        eq(ollama.isit(cfg, {"durum": "kapali"}, gonder), None)
+        eq(ollama.isit(dict(cfg, ollama={"sicak": False}), {"durum": "bagli"}, gonder), None)
+        eq(ollama.isit({}, {"durum": "bagli"}, gonder), None)
+        eq(ollama.isit(cfg, {"durum": "bagli"}, lambda *a: (_ for _ in ()).throw(OSError("x"))), None)
+        eq(len(giden), 1)
+    test("sıcak tutma: bağlı model bellekte tutulur; kapalıysa ya da ayar kapalıysa gitmez", t_isit)
 
 
 def run_daemon():

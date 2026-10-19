@@ -35,6 +35,12 @@
       Yazılamazsa (yer yok) sıfırlama yapılmaz.
    6. OLUMSUZ İSTEK EYLEM DEĞİLDİR. «verileri sıfırlama», «temayı
       değiştirme» hiçbir şey yapmaz (LIFEOS.Olumsuz, eylemEngeli).
+   8. MODÜLÜN KENDİ EYLEMLERİ (2026-10-19, depo sahibi: «King neredeyse
+      her şeyi yapsın, toplantı başlatsın»). Modül kur'da `eylemler` verir:
+      aynı biçimde (id, seviye, ad, anla, onizle, uygula); yalnız küçük ve
+      orta seviye kabul edilir (büyük eylem dönüş noktası ister, katalogda
+      kalır). Eylemi yine modülün kendi kodu uygular; kimliği katalogdakiyle
+      çakışan eylem alınmaz.
    7. BAŞKA MODÜLÜN İŞİ ORADA YAPILIR. «SPİ'yi sıfırla» AYS'de istenirse
       AYS bunu yapmaz; King o modüle geçmeyi önerir (kayıtlar ayrı
       kökende, ayrı depoda). */
@@ -138,7 +144,8 @@ LIFEOS.YETKI = (function(){
       anla:t => {
         if(!L.SES || !/müzi[kğ]|radyo|şarkı/.test(t)) return null;
         if(/durdur|kapat|kes|sustur/.test(t)) return { v:'dur' };
-        if(/aç|çal|başlat/.test(t)) return { v:'cal' };
+        /* «(Müzik çalıyor)» bir durumdur, istek değil (Whisper uydurması, 2026-10-19). */
+        if(/aç|çal(?!ıyor|dı|ıyordu)|başlat/.test(t)) return { v:'cal' };
         return null;
       },
       onizle:p => ({ metin:p.v === 'dur' ? 'Müzik duracak.' : 'Müzik çalacak.' }),
@@ -233,6 +240,15 @@ LIFEOS.YETKI = (function(){
     },
   ];
 
+  /* Söz 8: modülün kendi eylemleri (küçük ve orta; kimliği çakışmayan). */
+  function ekEylemler(){
+    const l = ayar && Array.isArray(ayar.eylemler) ? ayar.eylemler : [];
+    return l.filter(e => e && typeof e.id === 'string' && (e.seviye === 'kucuk' || e.seviye === 'orta')
+      && typeof e.anla === 'function' && typeof e.onizle === 'function' && typeof e.uygula === 'function'
+      && !EYLEMLER.some(x => x.id === e.id));
+  }
+  function hepsi(){ return EYLEMLER.concat(ekEylemler()); }
+
   function iki(n){ return (n < 10 ? '0' : '') + n; }
   function tarihYaz(iso){
     const d = new Date(iso);
@@ -266,7 +282,7 @@ LIFEOS.YETKI = (function(){
     const t = kucult(metin);
     if(!t) return null;
     if(HESAP_RE.test(t)) return { tur:'hesap', metin:'Hesabına (parola, iki adım, cihazlar, yönetici, e-posta) dokunamam; onu yalnız sen Hesap sayfasından değiştirirsin.' };
-    for(const e of EYLEMLER){
+    for(const e of hepsi()){
       let p = null;
       try{ p = e.anla(t); }catch(err){ p = null; }
       if(!p) continue;
@@ -289,7 +305,7 @@ LIFEOS.YETKI = (function(){
 
   async function uygula(niyet){
     if(!ayar || !niyet || niyet.tur !== 'eylem') return { ok:false, metin:'Uygulanacak bir şey yok.' };
-    const e = EYLEMLER.find(x => x.id === niyet.id);
+    const e = hepsi().find(x => x.id === niyet.id);
     if(!e) return { ok:false, metin:'Bu iş katalogda yok.' };
     try{
       const r = await e.uygula(niyet.param);
@@ -300,7 +316,7 @@ LIFEOS.YETKI = (function(){
   }
 
   function katalog(){
-    return EYLEMLER.filter(e => e.seviye).map(e => ({ id:e.id, ad:e.ad, seviye:e.seviye }));
+    return hepsi().filter(e => e.seviye).map(e => ({ id:e.id, ad:e.ad, seviye:e.seviye }));
   }
 
   function _sifirla(){ ayar = null; }

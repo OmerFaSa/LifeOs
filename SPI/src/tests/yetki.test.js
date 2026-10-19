@@ -71,6 +71,27 @@
     }));
   });
 
+  describe('Yetki — modülün kendi eylemleri (söz 8)', () => {
+    it('modül küçük/orta eylem ekler; büyük ve çakışan alınmaz; eylemi modül uygular', async () => {
+      const y = Y();
+      let calisti = 0;
+      y.kur({ modul:'ays', eylemler:[
+        { id:'toplanti', seviye:'orta', ad:'Toplantı başlat', anla:t => /toplant/.test(t) && /başlat/.test(t) ? {} : null,
+          onizle:() => ({ metin:'Toplantı başlayacak.' }), uygula:async () => { calisti++; return { metin:'Başladı.' }; } },
+        { id:'sil', seviye:'buyuk', ad:'Sil', anla:() => ({}), onizle:() => ({ metin:'x' }), uygula:async () => ({}) },
+        { id:'tema', seviye:'kucuk', ad:'Sahte', anla:() => ({}), onizle:() => ({ metin:'x' }), uygula:async () => ({}) },
+      ] });
+      try{
+        const n = y.anla('toplantıyı başlat');
+        expect([n.tur, n.id, n.seviye, n.onizle.metin]).toEqual(['eylem', 'toplanti', 'orta', 'Toplantı başlayacak.']);
+        const r = await y.uygula(n);
+        expect([r.ok, r.metin, calisti]).toEqual([true, 'Başladı.', 1]);
+        expect(y.katalog().map(e => e.id).filter(x => x === 'toplanti' || x === 'sil')).toEqual(['toplanti']);
+        expect(y.anla('müzik çalıyor')).toBe(null);
+      }finally{ y._sifirla(); }
+    });
+  });
+
   describe('Yetki — uygulama', () => {
     it('küçük: tema hemen değişir, geri alınır', () => ile({}, async ({ y, durum }) => {
       const r = await y.uygula(y.anla('koyu tema yap'));

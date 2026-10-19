@@ -1610,6 +1610,18 @@ SP.App = (function(){
          modülün kendi kodu uygular. Hesap dışarıda. */
       if(window.LIFEOS && window.LIFEOS.YETKI){
         window.LIFEOS.YETKI.kur({ modul:'spi',
+          /* King'in eylem kapısı (yetki.js söz 8): toplantıyı Toplantı ekranının
+             kendi düğmesi başlatır; model çağrıları yapılır, bu yüzden orta seviye. */
+          eylemler:[{ id:'toplanti', seviye:'orta', ad:'Toplantı başlat',
+            anla:t => /toplant/.test(t) && /(başlat|başla|aç|yap|topla|kur)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
+            onizle:() => ({ metin:'Ofiste toplantı başlayacak: uzmanlar sırayla konuşur, bunun için yapay zekâ çağrıları yapılır.' }),
+            uygula:async () => {
+              go('meeting');
+              await new Promise(r => setTimeout(r, 120));
+              await SP.Screens.meeting.handle['run-meeting']();
+              return { metin:'Toplantıyı başlattım; Toplantı ekranındasın.' };
+            } }],
+
           tema:{ oku:() => (S.profile && S.profile.theme) || 'system', yaz:async v => { await M.saveProfile({ theme:v }); applyTheme(); refreshAppearance(); render(); } },
           onaylar:{
             bekleyen:() => SP.Proposals.pending().map(p => ({ id:p.id,
@@ -1661,8 +1673,14 @@ SP.App = (function(){
                 ant += SP.Model.workoutsOf(d).length;
               }
               const ort = uyku.length ? Math.round(uyku.reduce((a, b) => a + b, 0) / uyku.length * 10) / 10 : null;
+              /* Son 7 gece (eskiden yeniye); kaydı olmayan gece boşluk kalır. */
+              const seri = [];
+              for(let i = 6; i >= 0; i--){
+                const v = SP.S.vitals[SP.U.iso(SP.U.addDays(SP.U.today(), -i))];
+                seri.push(v && v.sleep != null && isFinite(Number(v.sleep)) ? Number(v.sleep) : null);
+              }
               return [
-                { ad:'Ortalama uyku · 30 gün', deger:ort, birim:'sa', etiket:'hesaplandı', alt:uyku.length ? uyku.length + ' gecenin ortalaması' : '' },
+                { ad:'Ortalama uyku · 30 gün', deger:ort, birim:'sa', etiket:'hesaplandı', alt:uyku.length ? uyku.length + ' gecenin ortalaması' : '', seri },
                 { ad:'Uyku kaydı olan gece', deger:uyku.length || null, birim:'/ 30', etiket:'ölçüldü' },
                 { ad:'Antrenman · 30 gün', deger:ant || null, etiket:'ölçüldü' },
                 { ad:'Kayıtlı öğün · 30 gün', deger:ogun || null, etiket:'ölçüldü', alt:kahve ? kahve + ' gün kahve' : '' },

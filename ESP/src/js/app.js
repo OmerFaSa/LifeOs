@@ -1801,6 +1801,18 @@ ESP.App = (function(){
       if(window.LIFEOS && window.LIFEOS.YETKI){
         const teklifler = () => (S.ui.hkmIntents || []).filter(n => ESP.Beacon.canApply(n));
         window.LIFEOS.YETKI.kur({ modul:'esp',
+          /* King'in eylem kapısı (yetki.js söz 8): toplantıyı Toplantı ekranının
+             kendi düğmesi başlatır; model çağrıları yapılır, bu yüzden orta seviye. */
+          eylemler:[{ id:'toplanti', seviye:'orta', ad:'Toplantı başlat',
+            anla:t => /toplant/.test(t) && /(başlat|başla|aç|yap|topla|kur)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
+            onizle:() => ({ metin:'Ofiste toplantı başlayacak: uzmanlar sırayla konuşur, bunun için yapay zekâ çağrıları yapılır.' }),
+            uygula:async () => {
+              go('meeting');
+              await new Promise(r => setTimeout(r, 120));
+              await ESP.Screens.meeting.handle['run-meeting']();
+              return { metin:'Toplantıyı başlattım; Toplantı ekranındasın.' };
+            } }],
+
           tema:{ oku:() => (S.profile && S.profile.theme) || 'system', yaz:async v => { await M.saveProfile({ theme:v }); applyTheme(); refreshAppearance(); render(); } },
           onaylar:{
             bekleyen:() => teklifler().map(n => ({ id:String(n.id), metin:n.note || n.kind })),
@@ -1852,17 +1864,41 @@ ESP.App = (function(){
                 ss.forEach(s => { dakika[s.disc] = (dakika[s.disc] || 0) + s.minutes; });
               }
               const top = Object.keys(dakika).reduce((a, k) => a + dakika[k], 0);
+              /* Son 7 gün dakika (eskiden yeniye); oturumu olmayan gün boşluk kalır. */
+              const seri = [];
+              for(let i = 6; i >= 0; i--){
+                const ss = M.sessionsOf(U.iso(U.addDays(U.today(), -i))).filter(s => s.minutes > 0);
+                seri.push(ss.length ? ss.reduce((a, s) => a + s.minutes, 0) : null);
+              }
               const enCok = Object.keys(dakika).sort((a, b) => dakika[b] - dakika[a])[0];
               const sinir = U.iso(U.addDays(U.today(), -29));
               const biten = (S.books || []).filter(b => b.finishedAt && String(b.finishedAt).slice(0, 10) >= sinir).length;
               return [
                 { ad:'Çalışılan gün · 30 gün', deger:gun || null, birim:'/ 30', etiket:'ölçüldü' },
-                { ad:'Toplam süre · 30 gün', deger:top || null, birim:'dk', etiket:'ölçüldü' },
+                { ad:'Toplam süre · 30 gün', deger:top || null, birim:'dk', etiket:'ölçüldü', seri },
                 { ad:'En çok çalışılan alan', deger:enCok ? (ESP.DISCIPLINE_BY_ID[enCok] || {}).label || enCok : null, etiket:'hesaplandı',
                   alt:enCok ? dakika[enCok] + ' dk' : '' },
                 { ad:'Biten kitap · 30 gün', deger:biten || null, etiket:'ölçüldü' },
               ];
             },
+            /* Kelime soru kartı: senin dil kartlarından (ön yüz → doğru arka yüz,
+               üç çeldirici başka kartlardan). Cevap tekrar takvimine yazılmaz. */
+            soru:() => {
+              const l = (S.cards || []).filter(c => String(c.front || '').trim() && String(c.back || '').trim());
+              if(l.length < 4) return null;
+              const q = l[Math.floor(Math.random() * l.length)], dogruMetin = String(q.back).trim();
+              const cel = [];
+              l.slice().sort(() => Math.random() - 0.5).forEach(c => {
+                const b = String(c.back).trim();
+                if(cel.length < 3 && b !== dogruMetin && cel.indexOf(b) < 0) cel.push(b);
+              });
+              if(cel.length < 3) return null;
+              const sec = cel.concat([dogruMetin]).sort(() => Math.random() - 0.5);
+              const dogru = 'ABCDE'[sec.indexOf(dogruMetin)];
+              return { id:String(q.id || q.front) + '|' + dogru, konu:'Kelime kartı', soru:'«' + String(q.front).trim() + '» ne demek?', sec,
+                kaynak:'ESP · senin dil kartların', not:'Bu cevap kartın tekrar takvimine yazılmaz.' };
+            },
+            cevapla:(id, harf) => ({ dogru:String(id).split('|').pop(), cozum:[], not:'' }),
           },
           ozet:() => [ESP.Screens.today.headline()] });
       }

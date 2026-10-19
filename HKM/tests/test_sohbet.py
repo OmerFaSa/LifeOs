@@ -393,6 +393,89 @@ def run():
         eq(r4["text"], "Bu ölçülmedi.")
     test("samimi sohbet: serbest mesaja ölçüm listesi gitmez; yankı cevapları geçmişe girmez", t_samimi_sohbet)
 
+    def t_akis():
+        """Akan cevap: cumleler denetlenerek akar; etiket ve kalip akmaz;
+        dayanaksiz sayili cumleyle akis durur; SSE birlestirilir."""
+        giden = []
+        a = sohbet.CumleAkisi(giden.append, "Tarih: 2026-10-19", serbest=True)
+        for p in ["İyiyim", " kanka, sen", " nasılsın? «bu ölçülmedi». Bugün", " hava 7.5 derece.\n\nYarın",
+                  " görüşürüz. [[HAFIZA ADAYI: x]]"]:
+            a(p)
+        a(None)
+        eq("".join(giden), "İyiyim kanka, sen nasılsın? Bugün hava 7.5 derece.\n\nYarın görüşürüz. ")
+        g2 = []
+        b = sohbet.CumleAkisi(g2.append, "Tarih: 2026-10-19")
+        for p in ["Merhaba. Uyku ortalaman 9.2 saat. ", "Devam ediyoruz."]:
+            b(p)
+        b(None)
+        eq(g2, ["Merhaba. "])                                   # sayili olcum cumlesinde durdu
+        parca = []
+        y = ai._sse_birlestir([b'data: {"choices":[{"delta":{"content":"Mer"}}]}', b"",
+                               'data: {"choices":[{"delta":{"content":"haba."},"finish_reason":"stop"}]}',
+                               'data: {"choices":[],"usage":{"prompt_tokens":5,"completion_tokens":2}}',
+                               "data: [DONE]"], parca.append)
+        eq((parca, y["choices"][0]["message"]["content"], y["choices"][0]["finish_reason"], y["usage"]["completion_tokens"]),
+           (["Mer", "haba.", None], "Merhaba.", "stop", 2))
+        # konus akisi tasiyiciya ulastirir; son cevap tam denetimle doner.
+        def tasiyici(provider, anahtar, model, sistem, mesajlar, ayar=None):
+            for p in ("Selam! ", "Nasılsın?"):
+                ayar["akis"](p)
+            ayar["akis"](None)
+            return "Selam! Nasılsın?", 10, 4
+        g3 = []
+        r = sohbet.konus(_con(), _cfg(), "bugün hava güzel", BUGUN, transport=tasiyici, akis=g3.append, uslup="resmi")
+        eq((r["text"], "".join(g3)), ("Selam! Nasılsın?", "Selam! Nasılsın? "))
+        eq([sohbet.uslup_of(x) for x in ("resmi", "kisa", "samimi", "x", None)], ["resmi", "kisa", "samimi", None, None])
+    test("akan cevap: cümleler denetlenerek akar; etiket ve kalıp akmaz; SSE birleşir", t_akis)
+
+    def t_sohbet_basi_ve_akis_ucu():
+        from tests.test_daemon import _Server
+        import daemon
+        from core import patron as _p
+        s = _Server()
+        try:
+            con = s.srv.con if hasattr(s.srv, "con") else None
+            gorulen = []
+            eski = sohbet.konus
+
+            def sahte(con_, cfg, metin, gun, **kw):
+                gorulen.append((kw.get("gecmis"), kw.get("uslup")))
+                if kw.get("akis"):
+                    kw["akis"]("Merhaba ")
+                    kw["akis"]("dostum. ")
+                return {"ok": True, "mode": "model", "text": "Merhaba dostum.", "agent": "king"}
+            sohbet.konus = sahte
+            try:
+                st, r = s.call("/api/chat", body={"text": "selam", "agent": "king", "date": BUGUN, "uslup": "kisa",
+                                                  "baslangic": "2999-01-01T00:00:00"})
+                eq((st, gorulen[-1][0], gorulen[-1][1]), (200, [], "kisa"))      # yeni sohbet: eski satir gitmez
+                import json as _j
+                import urllib.request
+                from tests.test_daemon import TOKEN
+                req = urllib.request.Request(s.url("/api/chat/akis"), method="POST",
+                                             data=_j.dumps({"text": "selam", "agent": "king", "date": BUGUN}).encode())
+                req.add_header("Authorization", "Bearer " + TOKEN)
+                req.add_header("Content-Type", "application/json")
+                with urllib.request.urlopen(req, timeout=10) as y:
+                    satirlar = [_j.loads(x) for x in y.read().decode("utf-8").splitlines() if x.strip()]
+                eq([x["t"] for x in satirlar], ["parca", "parca", "son"])
+                eq(("".join(x["metin"] for x in satirlar if x["t"] == "parca"), satirlar[-1]["text"]),
+                   ("Merhaba dostum. ", "Merhaba dostum."))
+                eq(s.call("/api/chat/akis", token=None, body={"text": "x"})[0], 401)
+            finally:
+                sohbet.konus = eski
+        finally:
+            s.close()
+        # _sohbet_gecmisi: baslangictan oncekiler duser.
+        from core import db as _db
+        c = _db.connect(":memory:")
+        c.execute("INSERT INTO conversations(channel, role, text, created_at, agent) VALUES ('local','user','eski','2026-10-19T09:00:00','king')")
+        c.execute("INSERT INTO conversations(channel, role, text, created_at, agent) VALUES ('local','user','yeni','2026-10-19T12:00:00','king')")
+        eq([m["content"] for m in daemon._sohbet_gecmisi(c, "king", "2026-10-19T11:00:00")], ["yeni"])
+        eq([m["content"] for m in daemon._sohbet_gecmisi(c, "king")], ["eski", "yeni"])
+        eq([m["content"] for m in daemon._sohbet_gecmisi(c, "king", "bozuk")], ["eski", "yeni"])
+    test("uç: yeni sohbet eski satırları göndermez; /api/chat/akis satır satır akar", t_sohbet_basi_ve_akis_ucu)
+
     def t_derinlik_ucu():
         from tests.test_daemon import _Server
         gorulen = []

@@ -25,6 +25,11 @@
    5. CALISMA YERI. Bulut seciliyse ve bulut anahtari (OpenRouter) varsa
       «hibrit», yoksa «yerel» olur; yerel/hibrit secimine dokunulmaz.
       Guclu ve Uzman sinif her zaman buluttadir (core/models.py).
+   6. SICAK TUTMA (kullanici, 2026-10-19: King'in ilk cevabi yavas
+      basliyordu). Bagli ekonomik model ISIT_ARALIK'ta bir Ollama'ya
+      «bellekte kalsin» denir (/api/generate, istem bos: model yuklenir,
+      metin uretilmez, para ve jeton harcanmaz). `ollama.sicak` false ise
+      yapilmaz.
 
    «Bagli» yalniz model listesinin okunabildigini soyler; sohbetin gercekten
    calistigini soylemez (kullanici, 2026-10-19: «ayarlarda bagli gorunuyor
@@ -38,8 +43,10 @@ import urllib.request
 
 from core import models
 
-VARSAYILAN = {"kendiligi": True}
-ALANLAR = {"kendiligi": bool}
+VARSAYILAN = {"kendiligi": True, "sicak": True}
+ALANLAR = {"kendiligi": bool, "sicak": bool}
+ISIT_ARALIK = 20 * 60
+ISIT_SURE = "30m"
 EKONOMIK_UST = 9.0       # milyar parametre
 STANDART_UST = 40.0
 ZAMAN_ASIMI = 3
@@ -197,6 +204,33 @@ def son_cagri(con):
     else:
         metin = "Son sohbet çağrısı %s: cevap gelmedi. %s" % (saat, _cagri_nedeni(r[3]))
     return {"at": at, "saat": saat, "model": r[1], "ok": bool(r[2]), "metin": metin}
+
+
+def _gonder(url, govde, timeout):
+    istek = urllib.request.Request(url, data=json.dumps(govde).encode("utf-8"),
+                                   headers={"Content-Type": "application/json"}, method="POST")
+    with urllib.request.urlopen(istek, timeout=timeout) as y:      # noqa: S310 — yerel motor
+        y.read()
+    return True
+
+
+# Testler AGA CIKMAZ (tests/harness.py).
+VARSAYILAN_GONDER = _gonder
+
+
+def isit(cfg, tarama, gonder=None):
+    """Kural 6: bagli ekonomik modeli bellekte tutar. Doner: model adi ya da None."""
+    if not settings(cfg)["sicak"] or (tarama or {}).get("durum") != "bagli":
+        return None
+    model = (models.yerel_of(cfg) or {}).get("ekonomik")
+    if not model:
+        return None
+    try:
+        (gonder or VARSAYILAN_GONDER)(models.yerel_kok(cfg) + "/api/generate",
+                                      {"model": model, "keep_alive": ISIT_SURE}, 120)
+    except Exception:                           # noqa: BLE001 — kapali motor bir durumdur
+        return None
+    return model
 
 
 def _oneri_yaz(o):

@@ -709,6 +709,71 @@ LIFEOS_BILGI = (
     "büyük değişiklik önizleme ve onay ister.")
 
 
+# Konusma tarzi (King ··· menusu): samimi varsayilandir, talimat eklemez.
+USLUPLAR = ("samimi", "resmi", "kisa")
+USLUP_TALIMAT = {
+    "resmi": "\n\nBu konuşmada resmi ve saygılı bir dil kullan; kullanıcıya «siz» diye hitap et.",
+    "kisa": "\n\nBu konuşmada çok kısa ve öz cevap ver: bir iki cümle.",
+}
+
+
+def uslup_of(v):
+    return v if v in USLUPLAR else None
+
+
+# AKAN CEVAP (King'de yazi akarak gelir). Model parcalari CUMLEYE
+# toplanir; her cumle olcum (uydurma sayi) ve buyurgan kip denetiminden
+# GECERSE disari verilir. Gecmeyen cumle ekrana hic cikmaz ve akis orada
+# durur; cevabin son hali (tam denetimle) her zaman ayrica gelir ve
+# ekrandakinin yerine gecer. Hafiza etiketi ve kalip cumle akista da silinir.
+CUMLE_SONU = re.compile(r"[.!?\u2026]+[\"'»)]*\s+|\n+")
+
+
+class CumleAkisi:
+    def __init__(self, yay, baglam, serbest=False):
+        self.yay, self.baglam, self.serbest = yay, baglam, serbest
+        self.tampon, self.kapali, self.durdu = "", False, False
+
+    def __call__(self, parca):
+        if self.kapali:
+            return
+        if parca is None:
+            self._bosalt(son=True)
+            self.kapali = True
+            return
+        self.tampon += str(parca)
+        self._bosalt()
+
+    def _bosalt(self, son=False):
+        while self.tampon:
+            m = CUMLE_SONU.search(self.tampon)
+            if m:
+                cumle, self.tampon = self.tampon[:m.end()], self.tampon[m.end():]
+            elif son:
+                cumle, self.tampon = self.tampon, ""
+            else:
+                return
+            self._cumle(cumle)
+
+    def _cumle(self, cumle):
+        if self.durdu:
+            return
+        ara = cumle[len(cumle.rstrip()):]
+        t, _ = memory.aday_ayikla(cumle.rstrip())
+        t = re.sub(r"^\s*\]+\s*", "", t)
+        if self.serbest:
+            t = kalipsiz(t)
+        if not t.strip():
+            return
+        if manager.imperatives(t) or ai.uydurma_sayilar(t, self.baglam):
+            self.durdu = True
+            return
+        try:
+            self.yay(t + (ara or " "))
+        except Exception:                       # noqa: BLE001
+            self.durdu = True
+
+
 def uzun_istek(metin):
     """Kullanici acikca uzun/ayrintili bir metin mi istiyor (kod karari)."""
     t = str(metin or "")
@@ -722,7 +787,7 @@ def derinlik_of(v):
 
 def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
           user="ben", transport=None, kayit=True, kanal="local", hedef=None,
-          derinlik=None):
+          derinlik=None, uslup=None, akis=None):
     """Bir mesaja cevap. Once komut, sonra model, sonra durust bir «yok».
     `derinlik`: hizli | dengeli | derin | None (seviyeyi kod secer).
 
@@ -949,7 +1014,8 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
                "sen yazamazsın):\n" + hb)
     sistem = (sistem_metni(gorevli, bg, kisa=kisa, serbest=serbest) + (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
-              + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else ""))
+              + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else "")
+              + USLUP_TALIMAT.get(uslup_of(uslup), ""))
     onceki = [m if m.get("role") != "assistant" else dict(m, content=kalipsiz(m.get("content")))
               for m in (gecmis or []) if not (m.get("role") == "assistant" and yanki_mi(m.get("content")))]
     onceki = [m for m in onceki if m.get("content")]
@@ -959,7 +1025,8 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
 
     r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
                user=user, transport=transport, veri=veri, seviye=sv["seviye"],
-               jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None)
+               jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None,
+               akis=CumleAkisi(akis, bg, serbest) if akis else None)
     motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"], derinlik=derinlik or "oto", uzun=uzun,
                        baglam={"gecmis": len(onceki), "hafiza": len(hb.splitlines()) if hb else 0,
                                "sistem_harf": len(sistem)})
