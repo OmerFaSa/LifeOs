@@ -234,7 +234,16 @@
       sırayı baştan denemez. O motor cevabın ortasında bir kez daha
       vermezse parça seçili tercihle bir kez daha istenir, o da olmazsa
       kalan cihazın sesiyle okunur. HKM motorun neden değiştiğini
-      söylerse («Gemini kotası doldu») panel «Son okuyan»ın yanında yazar. */
+      söylerse («Gemini kotası doldu») panel «Son okuyan»ın yanında yazar.
+  30. DAHA PROFESYONEL (depo sahibi, 2026-10-19: «Konuş'ta aşağıda çıkan
+      kutucuk rahatsız ediyor, Dinle'deki gibi minimal olsun; kenar çubuğu
+      sola doğru küçülebilsin; King'in logosu daha profesyonel olsun»).
+      Konuş kutusuz: yazı alanının üstünde ince bir şerit (küçük küre,
+      durum, kapat). Ses seçimi ve «Son okuyan» ··· menüsündedir. Kenar
+      çubuğu geniş ekranda da başlıktaki düğmeyle kapanır; tercih cihazda
+      durur (lifeos.king.yan). Dar ekranda eskisi gibi pencerenin içinde
+      açılır. Küre katmanlıdır (king.css): derinlik, parlama ve yavaş dönen
+      iç akış; dinlerken ve konuşurken hızlanır, hareket azaltılmışsa durur. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -299,6 +308,8 @@ window.LIFEOS.KING = (function(){
   ];
 
   const ortam = {
+    /* Söz 30: kenar çubuğu geniş ekranda yerinde kapanır, darda üstte açılır. */
+    genis:() => !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width:1023px)').matches),
     git:url => { window.location.href = url; },
     zamanla:(fn, ms) => setTimeout(fn, ms),
     simdi:() => new Date(),
@@ -429,6 +440,17 @@ window.LIFEOS.KING = (function(){
   let bekleyen = null;       // veri önizlemesi
   let bekleyenGit = null;    // «açayım mı?» diye sorulan sayfa (söz 8)
   let yanAcik = false;       // söz 26: dar ekranda kenar çubuğu açık mı
+  const YAN = 'lifeos.king.yan';   // söz 30: geniş ekranda kenar çubuğu kapalı mı ('dar')
+  function yanDar(){ return ortam.depo.oku(YAN) === 'dar'; }
+  function yanDarSec(dar){
+    if(dar) ortam.depo.yaz(YAN, 'dar'); else ortam.depo.sil(YAN);
+    ciz(false);
+    return yanDar();
+  }
+  function yanDugme(){
+    if(ortam.genis()) yanDarSec(!yanDar());
+    else{ yanAcik = !yanAcik; ciz(false); }
+  }
   let aktifKayit = null;     // söz 26: geçmişten açılan sohbetin kimliği
   let aracAcik = false;      // söz 27: «+» menüsü açık mı
   let klasorYeni = false;    // söz 27: yeni klasör adı soruluyor mu
@@ -1532,17 +1554,6 @@ window.LIFEOS.KING = (function(){
     konus:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg>',
     ekran:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="11.5" rx="2"/><path d="M9 20h6M12 16.5V20"/></svg>',
   };
-  /* Söz 28: sesin seçimi (Dinle ve Konuş panelinde). */
-  function sesSecHtml(){
-    const t = sesTercihi();
-    const not = t === 'piper' ? 'Metin bilgisayardan çıkmaz.' : t === 'cihaz' ? 'Cihazın kendi sesi.'
-      : 'İnternet varken okunacak metin Google’a gider.';
-    const son = sonMotor ? ' Son okuyan: ' + (SES_AD[sonMotor] || sonMotor) + '.' + (sonNot ? ' ' + sonNot : '') : '';
-    return '<div class="king__ses-sec" role="radiogroup" aria-label="King’in sesi"><span class="king__ses-ad">Ses</span>'
-      + SES_TERCIH.map(v => '<button type="button" role="radio" class="king__ses-sec-dug' + (v === t ? ' is-secili' : '')
-        + '" aria-checked="' + (v === t ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('')
-      + '<span class="king__ses-not" title="' + kac(not) + '">' + kac(son.trim()) + '</span></div>';
-  }
   /* Kip paneli: Dinle, Konuş ve Ekran için yazı alanının üstünde tek şerit. */
   function kipPanel(){
     const k = kip();
@@ -1552,11 +1563,12 @@ window.LIFEOS.KING = (function(){
       + '<span>Görüntü yalnız sorduğunda yapay zekâya gider, saklanmaz.</span>'
       + '<div class="king__kip-eylem"><button type="button" class="king__cip king__cip--ana" data-king="ekran-sor">Ekranda ne görüyorsun?</button>'
       + '<button type="button" class="king__cip" data-king="paylasim-bitir">Durdur</button></div></div></div>';
+    /* Söz 30: Konuş kutusuz; ince şerit. Ses seçimi ··· menüsünde. */
     if(k === 'konus') return '<div class="king__kip-panel king__kip-panel--konus" role="status">'
       + '<span class="king__ses-kure" aria-hidden="true">' + KURE + '</span>'
-      + '<div class="king__kip-metin"><b class="king__ses-durum"><span class="d-dinliyor">Dinliyorum…</span><span class="d-konusuyor">King konuşuyor…</span><span class="d-sira">Sıra sende; konuşabilirsin</span></b>'
-      + '<span>Bitirmek için «tamam» de ya da Bitir’e dokun.</span>' + sesSecHtml() + '</div>'
-      + '<button type="button" class="king__cip" data-king="kip:yaz">Bitir</button></div>';
+      + '<b class="king__ses-durum"><span class="d-dinliyor">Dinliyorum…</span><span class="d-konusuyor">King konuşuyor…</span><span class="d-sira">Sıra sende</span></b>'
+      + '<button type="button" class="king__hap king__hap--simge" data-king="kip:yaz" aria-label="Sesli sohbeti bitir" title="Bitir (ya da «tamam» de)">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>';
     if(k === 'dinle') return '';
     return '';
   }
@@ -1757,6 +1769,7 @@ window.LIFEOS.KING = (function(){
         + '<div class="king__menu-satir"><span class="king__menu-ad">Ses</span><div class="king__secici" role="radiogroup" aria-label="Ses">'
         + SES_TERCIH.map(v => '<button type="button" class="king__secim' + (sesTercihi() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (sesTercihi() === v ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('') + '</div></div>'
+        + (sonMotor ? '<p class="king__menu-not" data-king-son-ses>Son okuyan: ' + kac(SES_AD[sonMotor] || sonMotor) + '.' + (sonNot ? ' ' + kac(sonNot) : '') + '</p>' : '')
         + '<div class="king__menu-satir"><span class="king__menu-ad">Algılama</span><div class="king__secici" role="radiogroup" aria-label="Ses algılama">'
         + ALGILA_TERCIH.map(v => '<button type="button" class="king__secim' + (algila() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (algila() === v ? 'true' : 'false') + '" data-king="algila:' + v + '" title="' + kac(ALGILA_IP[v]) + '">' + ALGILA_AD[v] + '</button>').join('') + '</div></div>'
@@ -2205,8 +2218,9 @@ window.LIFEOS.KING = (function(){
     /* Sade başlık (söz 27): kenar düğmesi, King, modül, durum; sağda yalnız
        daha fazla, küçült, kapat. Ses ve ekran kip seçicide. */
     const bas = '<div class="king__bas">'
-      + '<button type="button" class="king__kapat king__yan-dugme" data-king="yan" aria-expanded="' + (yanAcik ? 'true' : 'false')
-      + '" aria-label="Sohbet geçmişi" title="Sohbet geçmişi"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>'
+      + '<button type="button" class="king__kapat king__yan-dugme" data-king="yan" aria-expanded="'
+      + ((ortam.genis() ? !yanDar() : yanAcik) ? 'true' : 'false')
+      + '" aria-label="Sohbet geçmişi" title="' + (ortam.genis() && !yanDar() ? 'Kenar çubuğunu kapat' : 'Sohbet geçmişi') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>'
       + KURE + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + '</span>'
       + '<span class="king__durum" title="' + (baglanti() ? 'Sorular Merkez’deki King’e (yapay zekâ) gider'
@@ -2291,6 +2305,8 @@ window.LIFEOS.KING = (function(){
     const altta = !eski || eski.scrollHeight - eski.scrollTop - eski.clientHeight < 48;
     const yer = eski ? eski.scrollTop : 0;
     kutu.innerHTML = govde();
+    k.classList.toggle('is-yan-acik', !mini && yanAcik);
+    k.classList.toggle('is-yan-dar', !mini && yanDar());
     const g = kutu.querySelector('.king__girdi');
     const akisEl = kutu.querySelector('.king__akis');
     if(akisEl) akisEl.scrollTop = (altta || yeniVar) ? akisEl.scrollHeight : yer;
@@ -2488,7 +2504,7 @@ window.LIFEOS.KING = (function(){
         if(/^adlandir:/.test(is)){ adlandirilan = is.slice(9); ciz(false); const g = document.querySelector('[data-king-ad]'); if(g) try{ g.focus(); g.select(); }catch(e){} return; }
         if(/^tasi:/.test(is)){ tasinan = tasinan === is.slice(5) ? null : is.slice(5); ciz(false); return; }
         if(/^tasi-yap:/.test(is)){ const p = is.slice(9).split(':'); kayitTasi(p[0], p[1] || null); tasinan = null; ciz(false); return; }
-        if(is === 'yan'){ yanAcik = !yanAcik; ciz(false); return; }
+        if(is === 'yan'){ yanDugme(); return; }
         if(/^kayit-ac:/.test(is)){ kayitAc(is.slice(9)); return; }
         if(is === 'foto-sec'){ const f = document.querySelector('[data-king-dosya]'); if(f) f.click(); return; }
         if(is === 'sohbet-kaydet'){ menu = null; sohbetiKaydet(); return; }
@@ -2650,7 +2666,7 @@ window.LIFEOS.KING = (function(){
     cikarimAdaylari, cikarimKarti, cikarimOnayla, SORMA, sormaKomutu, sormaMi, sormaListesi,
     USLUP, envanterVar:() => !!envanter,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
-    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor, sonNot:() => sonNot,
+    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor, sonNot:() => sonNot, YAN, yanDar, yanDarSec,
     MIK, mikSecili, mikSec, mikTazele, mikDene, algila,
     sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,

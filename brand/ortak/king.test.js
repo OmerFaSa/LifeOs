@@ -1256,6 +1256,100 @@
       k.kapat();
     })));
   });
+  /* Söz 30 (depo sahibi, 2026-10-19): «Konuş'taki kutucuk rahatsız ediyor,
+     Dinle'deki gibi minimal olsun; kenar çubuğu sola küçülebilsin». */
+  describe('King — profesyonel (söz 30)', () => {
+    function konusSahnesi(){
+      const { k } = sahne();
+      Object.assign(k._ortam, {
+        sentez:() => ({ cancel(){}, getVoices:() => [], speak:u => { if(u.onend) u.onend(); } }),
+        soz:t => ({ text:t }),
+        tanima:() => function(){ this.start = () => {}; this.stop = () => {}; },
+        kayitAc:null,
+      });
+      return k;
+    }
+    it('Konuş kutusuz: ince şerit (küre, durum, kapat); ses seçimi ve ipucu yazısı yok', () => sahneyle(async () => {
+      const k = konusSahnesi();
+      k.ac();
+      await k.kipSec('konus');
+      const p = document.querySelector('.king__kip-panel--konus');
+      expect(!!p).toBe(true);
+      expect(!!p.querySelector('.king__kure')).toBe(true);
+      expect(!!p.querySelector('.king__ses-durum')).toBe(true);
+      expect(p.querySelectorAll('button').length).toBe(1);
+      expect(p.querySelector('button').getAttribute('data-king')).toBe('kip:yaz');
+      expect(p.querySelector('button').getAttribute('aria-label')).toBe('Sesli sohbeti bitir');
+      expect(!!p.querySelector('[data-king^="ses:"]')).toBe(false);
+      expect(p.textContent.includes('Bitirmek için')).toBe(false);
+      p.querySelector('button').click();
+      await new Promise(ok => setTimeout(ok, 0));
+      expect(k.kip()).toBe('yaz');
+      expect(!!document.querySelector('.king__kip-panel--konus')).toBe(false);
+    }));
+
+    it('kenar çubuğu geniş ekranda başlıktaki düğmeyle kapanır; tercih cihazda kalır', () => sahneyle(async () => {
+      const { k } = sahne();
+      Object.assign(k._ortam, { genis:() => true });
+      try{
+        k.yanDarSec(false);
+        k.ac();
+        const kok = () => document.querySelector('.king');
+        const dug = () => document.querySelector('[data-king="yan"]');
+        expect([k.yanDar(), kok().classList.contains('is-yan-dar'), dug().getAttribute('aria-expanded')]).toEqual([false, false, 'true']);
+        dug().click();
+        expect([k.yanDar(), kok().classList.contains('is-yan-dar'), dug().getAttribute('aria-expanded')]).toEqual([true, true, 'false']);
+        expect(k._ortam.depo.oku(k.YAN)).toBe('dar');
+        /* Kapatıp yeniden açınca kapalı kalır. */
+        k.kapat();
+        k.ac();
+        expect(kok().classList.contains('is-yan-dar')).toBe(true);
+        dug().click();
+        expect([k.yanDar(), kok().classList.contains('is-yan-dar')]).toEqual([false, false]);
+        expect(k._ortam.depo.oku(k.YAN)).toBe(null);
+      }finally{ k.yanDarSec(false); }
+    }));
+
+    it('dar ekranda düğme kenar çubuğunu pencerenin içinde açar; geniş ekran tercihine dokunmaz', () => sahneyle(async () => {
+      const { k } = sahne();
+      Object.assign(k._ortam, { genis:() => false });
+      try{
+        k.yanDarSec(false);
+        k.ac();
+        const kok = () => document.querySelector('.king');
+        document.querySelector('[data-king="yan"]').click();
+        expect([kok().classList.contains('is-yan-acik'), document.querySelector('[data-king="yan"]').getAttribute('aria-expanded'), k.yanDar()])
+          .toEqual([true, 'true', false]);
+        document.querySelector('[data-king="yan"]').click();
+        expect(kok().classList.contains('is-yan-acik')).toBe(false);
+      }finally{ k.yanDarSec(false); }
+    }));
+
+    it('··· menüsü son okuyanı ve nedenini yazar; okuma yoksa satır yok', () => sahneyle(async () => {
+      const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+      const fetch = async (url, o) => ({ status:200, blob:async () => ({}), json:async () => ({}),
+        headers:{ get:h => h === 'X-Ses-Motor' ? 'piper' : h === 'X-Ses-Not' ? encodeURIComponent('Gemini kotası doldu; 60 sn boyunca denenmeyecek.') : null } });
+      const { k } = sahne({ hkm, fetch });
+      Object.assign(k._ortam, { oynat:async () => 'bitti' });
+      k.ac();
+      k.menuAc('menu');
+      expect(!!document.querySelector('[data-king-son-ses]')).toBe(false);
+      k.menuAc(null);
+      k.seslendir('Merhaba.');
+      for(let i = 0; i < 12; i++) await new Promise(ok => setTimeout(ok, 0));
+      k.menuAc('menu');
+      expect(document.querySelector('[data-king-son-ses]').textContent)
+        .toBe('Son okuyan: Piper. Gemini kotası doldu; 60 sn boyunca denenmeyecek.');
+    }));
+
+    it('küre katmanlı: iç akış döner, hareket azaltılmışsa durur (king.css)', async () => {
+      const css = await (await fetch('../css/king.css')).text();
+      expect(/\.king__kure::before\{[^}]*animation:king-akis/.test(css)).toBe(true);
+      expect(/\.king__kure::after\{/.test(css)).toBe(true);
+      expect(/prefers-reduced-motion:reduce\)\{[^@]*\.king__kure::before[^{]*\{ animation:none/.test(css)).toBe(true);
+      expect(css.includes('king__ses-sec')).toBe(false);
+    });
+  });
   /* Söz 28 (depo sahibi, 2026-10-19): HKM bağlıysa ses HKM'den gelir (Gemini,
      yoksa Piper); gelmezse cihazın sesi. Seçim cihazda; «Cihaz» HKM'ye ses
      isteği yollamaz; Sustur çalanı keser. */
