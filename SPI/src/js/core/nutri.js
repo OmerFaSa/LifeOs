@@ -30,16 +30,81 @@ SP.Nutri = (function(){
     return Math.round(p.sex === 'female' ? base - 161 : base + 5);
   }
 
+  /* Eski «hareket düzeyi» çarpanı. Kullanıcı (2026-10-20): «hareket verisi
+     girilmeden 2600 kcal söylüyor; tahmin yapılmasın, ihtiyaç günden güne
+     değişsin». Çarpan artık HİÇBİR hedefe girmez; yalnız eski profilde
+     kalmış değeri okuyan ekranlar için durur. */
   function activityFactor(profile){
     const p = profile || SP.S.profile;
     const lvl = SP.ACTIVITY_LEVELS.find(a => a.id === (p && p.activity));
-    return lvl ? lvl.factor : 1.4;
+    return lvl ? lvl.factor : null;
   }
 
-  function tdee(profile){
+  /* GÜNÜN HAREKET ENERJİSİ — yalnız o gün GİRİLEN seanslardan.
+     Net enerji (MET − 1) × kg × saat: dinlenik 1 MET zaten BMR'nin içinde,
+     ikinci kez sayılmaz (Compendium MET'i popülasyon referansıdır).
+     Türü bilinmeyen seans hesaba girmez ve bu SÖYLENİR; dakikası yazılmamış
+     seans «0» sayılmaz, eksik olarak listelenir. */
+  function metOfItem(it){
+    if(!it) return null;
+    if(Number(it.met) > 0) return Number(it.met);
+    const ex = SP.EX_BY_ID && SP.EX_BY_ID[it.exId];
+    return ex && Number(ex.met) > 0 ? Number(ex.met) : null;
+  }
+  function moveEnergy(dateISO, profile){
+    const p = profile || SP.S.profile || {};
+    const d = dateISO || U.todayISO();
+    const kg = Number(p.weightKg) || null;
+    const list = SP.Model && SP.Model.workoutsOf ? SP.Model.workoutsOf(d) : [];
+    const out = { date:d, seanslar:[], kcal:0, dakika:0, eksik:[], kayitVar:list.length > 0 };
+    if(!kg){ out.kcal = null; out.neden = 'Profilde kilo yok'; return out; }
+    list.forEach(w => {
+      const items = (w.items || []).filter(Boolean);
+      const dkToplam = Number(w.minutes) > 0 ? Number(w.minutes) : null;
+      const ad = w.name || (items[0] && SP.EX_BY_ID && SP.EX_BY_ID[items[0].exId] ? SP.EX_BY_ID[items[0].exId].name : 'Seans');
+      let kcal = 0, dk = 0, bilinmeyen = false;
+      const dkli = items.filter(it => Number(it.minutes) > 0);
+      if(dkli.length){
+        dkli.forEach(it => {
+          const met = metOfItem(it);
+          if(met == null){ bilinmeyen = true; return; }
+          kcal += Math.max(0, met - 1) * kg * Number(it.minutes) / 60;
+          dk += Number(it.minutes);
+        });
+      }else if(dkToplam){
+        const metler = items.map(metOfItem).filter(m => m != null);
+        if(!metler.length) bilinmeyen = true;
+        else {
+          const met = metler.reduce((a, b) => a + b, 0) / metler.length;
+          kcal = Math.max(0, met - 1) * kg * dkToplam / 60;
+          dk = dkToplam;
+        }
+      }
+      if(!dk){ out.eksik.push(ad + (bilinmeyen ? ': türü bilinmiyor' : ': süresi yazılmamış')); return; }
+      out.seanslar.push({ id:w.id, ad, dakika:dk, kcal:Math.round(kcal) });
+      out.kcal += kcal; out.dakika += dk;
+    });
+    out.kcal = Math.round(out.kcal);
+    return out;
+  }
+
+  /* GÜNLÜK İHTİYAÇ = BMR (hesaplandı) + o günün hareket enerjisi (hesaplandı).
+     Hareket girilmemiş gün yalnız BMR'dir; aktiviteden tahmin YAPILMAZ.
+     Yürüyüş günü, dinlenme günü, antrenman günü kendi sayısını alır. */
+  function dayNeed(dateISO, profile){
     const b = bmr(profile);
     if(b == null) return null;
-    return Math.round(b * activityFactor(profile));
+    const h = moveEnergy(dateISO, profile);
+    const hk = h.kcal || 0;
+    return { date:h.date, bmr:b, hareket:hk, toplam:Math.round(b + hk), etiket:'hesaplandı', seanslar:h.seanslar,
+      eksik:h.eksik, dakika:h.dakika, hareketYok:!h.seanslar.length };
+  }
+
+  /* Geriye uyum: eski çağıranlar «günlük ihtiyaç»ı bu adla ister. Artık
+     bugünün (ya da verilen günün) GİRİLEN veriyle ihtiyacıdır. */
+  function tdee(profile, dateISO){
+    const n = dayNeed(dateISO, profile);
+    return n ? n.toplam : null;
   }
 
   /* ------------------------------------------------------------- hedefler */
@@ -163,14 +228,17 @@ SP.Nutri = (function(){
 
   /* Gunun tam hedefi: enerji, makrolar ve laboratuvara gore duzeltilmis
      mikro besinler. Profil eksikse hesap yapilmaz — tahmin uretilmez. */
-  function targets(profile){
+  /* `dateISO`: hangi günün hedefi (varsayılan bugün). Enerji o günün
+     girilen hareketine göre değişir (dayNeed); makrolar ondan türer. */
+  function targets(profile, dateISO){
     const p = profile || SP.S.profile;
-    const energy = tdee(p);
+    const need = p ? dayNeed(dateISO, p) : null;
+    const energy = need ? need.toplam : null;
     const adj = labAdjust(p);
 
     const out = {
       ok:energy != null,
-      bmr:bmr(p), tdee:energy, adjustments:adj,
+      bmr:bmr(p), tdee:energy, need, adjustments:adj,
       missing:[],
     };
     if(!p || !p.weightKg) out.missing.push('kilo');
@@ -183,12 +251,19 @@ SP.Nutri = (function(){
     out.kcal = Math.round(energy * (1 + goal.deficit));
     /* Uygulanmış bir plan enerji hedefini kendisi koyar (core/plan.js):
        tempo kişinin kendi hedefinden gelir, sabit yüzdeden değil. Plan
-       geri alınınca alan silinir ve hedef yeniden kurala döner. */
+       geri alınınca alan silinir ve hedef yeniden kurala döner. Yeni
+       planlar günlük FARK yazar (ihtiyaç günden güne değişir); eski
+       planların sabit kcal'i olduğu gibi okunur. */
     const kh = p.kcalHedef;
-    if(kh && isFinite(Number(kh.kcal)) && Number(kh.kcal) > 0){
+    if(kh && isFinite(Number(kh.fark)) && kh.fark !== null){
+      out.kcal = Math.round(energy + Number(kh.fark));
+      out.kcalKaynak = 'plan';
+    }else if(kh && isFinite(Number(kh.kcal)) && Number(kh.kcal) > 0){
       out.kcal = Math.round(Number(kh.kcal));
       out.kcalKaynak = 'plan';
     }
+    /* Enerji hedefi bazal metabolizmanın altına inmez (plan.js ile aynı kural). */
+    if(out.bmr != null && out.kcal < out.bmr){ out.kcal = out.bmr; out.bmrTaban = true; }
 
     /* protein: g/kg araligi, hedefe gore */
     const pr = SP.MACRO_RULES.protein.byGoal[goal.id] || SP.MACRO_RULES.protein.byGoal.health;
@@ -536,7 +611,7 @@ SP.Nutri = (function(){
 
   return {
     MICROS, LAB_LINKS, ABSORB_BASE,
-    bmr, tdee, activityFactor, baseRda, labAdjust, targets,
+    bmr, tdee, dayNeed, moveEnergy, activityFactor, baseRda, labAdjust, targets,
     contribution, portionGrams, absorbMeal, dayTotals, windowAverage,
     gaps, sourcesFor, per100Of, householdSplit,
   };

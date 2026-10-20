@@ -59,7 +59,8 @@
       const p = r.plan;
       expect([p.hafta, p.tempo, p.yon, p.hedefKilo]).toEqual([13, 0.31, 'azalt', 80]);
       expect(p.goal).toEqual({ once:'health', sonra:'cut' });
-      expect(p.enerji.kcal).toBe(Math.round(SP.Nutri.tdee(kisi(84)) - 0.31 * 7700 / 7));
+      expect(p.enerji.fark).toBe(Math.round(-0.31 * 7700 / 7));
+      expect(p.enerji.kcal).toBe(Math.max(SP.Nutri.bmr(kisi(84)), Math.round(SP.Nutri.tdee(kisi(84)) + p.enerji.fark)));
       expect(p.enerji.etiket).toBe('tahmin');
       expect(p.kontrol[0]).toEqual({ hafta:1, tarih:'2026-09-30', beklenen:83.7 });
       expect(p.kontrol.length).toBe(13);
@@ -68,7 +69,7 @@
       expect(p.protein).toEqual({ min:t.protein.min, max:t.protein.max });
     });
 
-    it('enerji bazal metabolizmanın altına inmez; tempo yavaşlar ve söylenir', () => {
+    it('enerji bazal metabolizmanın altına inmez ve bu söylenir', () => {
       resetState();
       Object.assign(SP.S.profile, { sex:'female', heightCm:160, weightKg:60, activity:'sedentary' });
       pushVitals(BUGUN, { weight:60 });
@@ -76,7 +77,7 @@
       const p = PL().kur(h, BUGUN).plan;
       expect(p.enerji.taban).toBe(true);
       expect(p.enerji.kcal).toBe(SP.Nutri.bmr(kisi(60)));
-      expect(p.tempo < 0.8).toBe(true);
+      expect(p.enerji.fark < 0).toBe(true);
       expect(p.uyarilar[0]).toContain('bazal metabolizma');
     });
 
@@ -133,7 +134,7 @@
         expect(r.ok).toBe(true);
         const p = PL().aktif(h.id);
         expect(SP.S.profile.goal).toBe('cut');
-        expect(SP.Nutri.targets().kcal).toBe(p.enerji.kcal);
+        expect(SP.Nutri.targets().kcal).toBe(Math.max(SP.Nutri.bmr(), SP.Nutri.tdee() + p.enerji.fark));
         expect(SP.Nutri.targets().kcalKaynak).toBe('plan');
         const u = PL().uygulamaOf(h.id);
         expect([u.level, u.status]).toEqual(['buyuk', 'applied']);

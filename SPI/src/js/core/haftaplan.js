@@ -5,17 +5,30 @@
    Seçimi: beslenme, hareket, uyku, su ve alışkanlık + kendi adlandırdığı
    serbest plan.
 
+   Kullanıcı (2026-10-20, gerçek kullanımdan):
+     · «günün saati, ya da sabah / öğle / akşam seçilebilsin» → hareket
+       günü ve her madde bir ZAMAN taşır: { dilim, saat } (ikisi de isteğe
+       bağlı; saat yazılırsa dilimin önüne geçer).
+     · «beslenme planında kendi öğünlerim» → öğünler core/ogun.js'ten.
+     · «uyku esnek olsun, öğlen 30 dakikalık kısa uyku da» → uyku planı üç
+       kipte (her gün aynı · hafta içi/sonu · gün gün) ve planlı kısa uykular.
+     · «aynı gün iki kez yürüyüş girilince sistem eksik kalıyor» → madde
+       SAYILIDIR (hedef: günde kaç kez) ve bir kayda BAĞLANABİLİR (yürüyüş,
+       koşu, seans, öğün, kısa uyku): bağlı madde kayıttan sayılır.
+
    Sözler:
      1. PLAN TERCİHTİR, ÖLÇÜM DEĞİL. Kullanıcı yazar; kod hiçbir sayıyı
         önermez (SPİ doz önermez, teşhis koymaz — AGENTS §1.5). Tür kapalı
-        katalogdur; bozuk değer (saat, dakika, su) yazılmaz.
+        katalogdur; bozuk değer (saat, dakika, su, hedef) yazılmaz.
      2. UYUM KAYITTAN SAYILIR. Antrenman, uyku, su ve öğün SPİ'nin kendi
         kaydından okunur. Kaydı olmayan gün «yapılmadı» değil «kayıt yok»tur
         (§1.2). Pencere dünden geriye yedi gündür: bugün bitmedi.
      3. UYKU SÜRESİ HESAPLANIR. Yatış–kalkıştan; gece yarısını geçer. Bir
         gece hedefe en çok 30 dakika eksikse «tuttu» sayılır (iş kuralı).
-     4. İŞARET KULLANICININDIR. Alışkanlık ve serbest plan maddeleri günlük
-        işaretle sayılır; ikinci dokunuş kaldırır. İşaret ölçüm yazmaz.
+     4. İŞARET KULLANICININDIR. Bağsız madde kullanıcının işaretiyle sayılır;
+        hedefi 1 olan maddede ikinci dokunuş kaldırır, hedefi büyük olanda
+        sayaç artar (−) ile azalır. İşaret ölçüm yazmaz. Bağlı madde yalnız
+        kayıttan sayılır: işaretle kayıt iki kez sayılmasın.
      5. KAYIT GERİ ALINIR. kaydet() önceki hâli döndürür; «Geri al» onu yazar.
 
    Depo: `haftaplan/<id>`. Yerleşik dört tür tektir; serbest plan çoğalır. */
@@ -26,51 +39,125 @@ SP.HaftaPlan = (function(){
   const STORE = 'haftaplan';
   const GUN_KISA = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
   const GUN_AD = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-  const OGUNLER = [['kahvalti', 'Kahvaltı'], ['ogle', 'Öğle'], ['aksam', 'Akşam'], ['ara', 'Ara öğün']];
   const TURLER = Object.freeze([
     { id:'beslenme', ad:'Beslenme planı', not:'Haftanın öğünleri', tek:true },
     { id:'hareket',  ad:'Hareket planı',  not:'Hangi gün ne kadar', tek:true },
-    { id:'uyku',     ad:'Uyku planı',     not:'Yatış ve kalkış saatin', tek:true },
+    { id:'uyku',     ad:'Uyku planı',     not:'Yatış, kalkış ve kısa uykular', tek:true },
     { id:'su',       ad:'Su ve alışkanlık', not:'Günlük su ve küçük alışkanlıklar', tek:true },
     { id:'serbest',  ad:'Kendi planın',   not:'Adını sen koy', tek:false },
   ]);
   const TUR_BY_ID = {};
   TURLER.forEach(t => { TUR_BY_ID[t.id] = t; });
   const PENCERE = 7, UYKU_PAY = 30;
-  const EN_COK_MADDE = 20, EN_UZUN_METIN = 80;
+  const EN_COK_MADDE = 20, EN_UZUN_METIN = 80, EN_COK_HEDEF = 20;
   const SAAT = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+  /* Günün dilimi. Sıralama için kaba bir an taşır; ekranda yalnız adı yazılır. */
+  const DILIMLER = Object.freeze([
+    { id:'sabah', ad:'Sabah', an:8 * 60 }, { id:'ogle', ad:'Öğle', an:13 * 60 },
+    { id:'aksam', ad:'Akşam', an:19 * 60 }, { id:'gece', ad:'Gece', an:22 * 60 },
+  ]);
+  const DILIM_BY_ID = {};
+  DILIMLER.forEach(d => { DILIM_BY_ID[d.id] = d; });
+
+  /* Uyku planının kipleri. */
+  const UYKU_KIPLERI = Object.freeze([
+    { id:'her',   ad:'Her gün aynı' },
+    { id:'hafta', ad:'Hafta içi ve hafta sonu' },
+    { id:'gun',   ad:'Gün gün' },
+  ]);
+
+  /* Maddenin simgesi — kapalı liste; çizimi ekrandadır (screens/planlar.js). */
+  const SIMGELER = Object.freeze(['yildiz', 'su', 'yuruyus', 'kosu', 'esneme', 'kitap', 'ilac', 'meyve',
+    'sebze', 'gunes', 'uyku', 'nefes', 'dis', 'ekran', 'kahve']);
+
+  /* Maddenin bağlanabileceği kayıtlar: o gün kaç KEZ kayıt var. */
+  const BAGLAR = Object.freeze([
+    { id:'yuruyus', ad:'Yürüyüş kaydı' }, { id:'kosu', ad:'Koşu kaydı' },
+    { id:'bisiklet', ad:'Bisiklet kaydı' }, { id:'yuzme', ad:'Yüzme kaydı' },
+    { id:'hareket', ad:'Her hareket seansı' }, { id:'ogun', ad:'Öğün kaydı' },
+    { id:'kestirme', ad:'Kısa uyku kaydı' },
+  ]);
+  const BAG_BY_ID = {};
+  BAGLAR.forEach(b => { BAG_BY_ID[b.id] = b; });
 
   const U = () => SP.U;
   const S = () => SP.S;
-  const kac = s => String(s == null ? '' : s);
   const binlik = n => Number(n).toLocaleString('tr-TR');
   function gunEkle(iso, n){ return U().iso(U().addDays(U().parse(iso), n)); }
   function gunNo(iso){ return (U().parse(iso).getDay() + 6) % 7; }
   function uid(){ return 'hp' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function bugunISO(){ return U().todayISO(); }
 
+  /* ------------------------------------------------------------ zaman */
+
+  function zamanNorm(z){
+    if(!z) return null;
+    const dilim = DILIM_BY_ID[z.dilim] ? z.dilim : null;
+    const saat = SAAT.test(z.saat || '') ? z.saat : null;
+    return dilim || saat ? { dilim, saat } : null;
+  }
+  function zamanYaz(z){
+    const n = zamanNorm(z);
+    if(!n) return '';
+    return n.saat || DILIM_BY_ID[n.dilim].ad;
+  }
+  /* Sıralama anı (dakika). Zamansız madde günün sonuna düşer. */
+  function zamanAn(z){
+    const n = zamanNorm(z);
+    if(!n) return 24 * 60;
+    if(n.saat) return Number(n.saat.slice(0, 2)) * 60 + Number(n.saat.slice(3, 5));
+    return DILIM_BY_ID[n.dilim].an;
+  }
+
   /* ------------------------------------------------------------ biçim */
+
+  function ogunler(p){
+    const l = SP.Ogun ? SP.Ogun.liste().map(s => [s.id, s.label]) : [['kahvalti', 'Kahvaltı'], ['ogle', 'Öğle'], ['aksam', 'Akşam']];
+    /* Planda yazılı ama listede olmayan eski öğün (ör. «ara») kaybolmaz. */
+    const ek = {};
+    ((p && p.gunler) || []).forEach(g => Object.keys(g || {}).forEach(k => {
+      if(String(g[k] || '').trim() && !l.some(x => x[0] === k)) ek[k] = SP.Ogun ? SP.Ogun.ad(k) : k;
+    }));
+    return l.concat(Object.keys(ek).map(k => [k, ek[k]]));
+  }
 
   function yeni(tur, ad){
     const t = TUR_BY_ID[tur];
     const p = { id:uid(), tur:t ? tur : String(tur || ''), ad:String(ad || (t ? t.ad : '')).slice(0, EN_UZUN_METIN), at:null, guncel:null };
-    if(tur === 'beslenme') p.gunler = GUN_KISA.map(() => ({ kahvalti:'', ogle:'', aksam:'', ara:'' }));
+    if(tur === 'beslenme') p.gunler = GUN_KISA.map(() => ({}));
     if(tur === 'hareket') p.gunler = GUN_KISA.map(() => null);
-    if(tur === 'uyku'){ p.haftaici = { yat:'', kalk:'' }; p.haftasonu = { yat:'', kalk:'' }; }
-    if(tur === 'su'){ p.suMl = null; p.maddeler = []; p.isaret = {}; }
-    if(tur === 'serbest'){ p.maddeler = []; p.isaret = {}; }
+    if(tur === 'uyku'){
+      p.kip = 'hafta';
+      p.her = { yat:'', kalk:'' };
+      p.haftaici = { yat:'', kalk:'' }; p.haftasonu = { yat:'', kalk:'' };
+      p.gunluk = GUN_KISA.map(() => ({ yat:'', kalk:'' }));
+      p.kestirmeler = [];
+    }
+    if(tur === 'su'){ p.suMl = null; p.maddeler = []; p.isaret = {}; p.sayac = {}; }
+    if(tur === 'serbest'){ p.maddeler = []; p.isaret = {}; p.sayac = {}; }
     return p;
   }
+  function yeniMadde(metin){
+    return { id:'m' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), metin:String(metin || ''),
+      gunler:[], zaman:null, simge:null, hedef:1, bag:null };
+  }
+  function yeniKestirme(){
+    return { id:'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 4), ad:'Öğle uykusu', bas:'', dk:null, gunler:[] };
+  }
   function kopya(p){ return JSON.parse(JSON.stringify(p)); }
+
+  function uykuKip(p){ return UYKU_KIPLERI.some(k => k.id === p.kip) ? p.kip : 'hafta'; }
 
   function dogrula(p){
     const h = [];
     if(!p || !TUR_BY_ID[p.tur]) return ['Bilinmeyen plan türü.'];
     const metin = (x, ad) => { if(String(x || '').length > EN_UZUN_METIN) h.push(ad + ' en çok ' + EN_UZUN_METIN + ' harf olur.'); };
+    const zamanDogru = (z, ad) => { if(z && z.saat && !SAAT.test(z.saat)) h.push(ad + ': saat 00:00–23:59 biçiminde olur.'); };
     if(p.tur === 'serbest' && !String(p.ad || '').trim()) h.push('Plana bir ad ver.');
     if(p.tur === 'beslenme'){
       if(!Array.isArray(p.gunler) || p.gunler.length !== 7) h.push('Haftanın yedi günü olmalı.');
-      else p.gunler.forEach(g => OGUNLER.forEach(([k, ad]) => metin(g && g[k], ad)));
+      else p.gunler.forEach(g => Object.keys(g || {}).forEach(k => metin(g[k], 'Öğün')));
     }
     if(p.tur === 'hareket'){
       if(!Array.isArray(p.gunler) || p.gunler.length !== 7) h.push('Haftanın yedi günü olmalı.');
@@ -79,20 +166,41 @@ SP.HaftaPlan = (function(){
         metin(g.ne, 'Hareket');
         if(!String(g.ne || '').trim()) h.push(GUN_AD[i] + ': ne yapacağını yaz.');
         if(!(Number.isFinite(g.dk) && g.dk > 0 && g.dk <= 600)) h.push(GUN_AD[i] + ': süre 1 ile 600 dakika arası olur.');
+        zamanDogru(g.zaman, GUN_AD[i]);
       });
     }
     if(p.tur === 'uyku'){
-      [['haftaici', 'Hafta içi'], ['haftasonu', 'Hafta sonu']].forEach(([k, ad]) => {
-        const x = p[k] || {};
+      const blok = (x, ad) => {
+        x = x || {};
         if(!SAAT.test(x.yat || '') || !SAAT.test(x.kalk || '')) h.push(ad + ': saatler 00:00–23:59 biçiminde olur.');
         else if(uykuDakika(x.yat, x.kalk) == null) h.push(ad + ': yatış ile kalkış aynı olamaz.');
+      };
+      const kip = uykuKip(p);
+      if(kip === 'her') blok(p.her, 'Her gün');
+      if(kip === 'hafta'){ blok(p.haftaici, 'Hafta içi'); blok(p.haftasonu, 'Hafta sonu'); }
+      if(kip === 'gun'){
+        if(!Array.isArray(p.gunluk) || p.gunluk.length !== 7) h.push('Haftanın yedi günü olmalı.');
+        else p.gunluk.forEach((x, i) => blok(x, GUN_AD[i]));
+      }
+      (p.kestirmeler || []).forEach(k => {
+        metin(k.ad, 'Kısa uykunun adı');
+        if(!(Number.isFinite(k.dk) && k.dk > 0 && k.dk <= 240)) h.push((k.ad || 'Kısa uyku') + ': süre 1 ile 240 dakika arası olur.');
+        if(k.bas && !SAAT.test(k.bas)) h.push((k.ad || 'Kısa uyku') + ': saat 00:00–23:59 biçiminde olur.');
       });
     }
     if(p.tur === 'su' && p.suMl != null && !(Number.isFinite(p.suMl) && p.suMl > 0 && p.suMl <= 10000)) h.push('Su hedefi 1 ile 10.000 ml arası olur.');
     if(p.tur === 'su' || p.tur === 'serbest'){
       const l = p.maddeler || [];
       if(l.length > EN_COK_MADDE) h.push('En çok ' + EN_COK_MADDE + ' madde olur.');
-      l.forEach(m => { metin(m && m.metin, 'Madde'); if(!m || !String(m.metin || '').trim()) h.push('Boş madde olmaz.'); });
+      l.forEach(m => {
+        metin(m && m.metin, 'Madde');
+        if(!m || !String(m.metin || '').trim()) { h.push('Boş madde olmaz.'); return; }
+        const hd = m.hedef == null ? 1 : m.hedef;
+        if(!(Number.isInteger(hd) && hd >= 1 && hd <= EN_COK_HEDEF)) h.push(m.metin + ': günde 1 ile ' + EN_COK_HEDEF + ' kez arası olur.');
+        if(m.bag && !BAG_BY_ID[m.bag]) h.push(m.metin + ': bilinmeyen kayıt bağı.');
+        if(m.simge && SIMGELER.indexOf(m.simge) < 0) h.push(m.metin + ': bilinmeyen simge.');
+        zamanDogru(m.zaman, m.metin);
+      });
     }
     return h;
   }
@@ -109,42 +217,102 @@ SP.HaftaPlan = (function(){
     const s = Math.floor(dk / 60), d = dk % 60;
     return (s ? s + ' sa' : '') + (s && d ? ' ' : '') + (d ? d + ' dk' : '');
   }
-  function uykuOf(p, iso){ return gunNo(iso) >= 5 ? p.haftasonu : p.haftaici; }
+  function uykuOf(p, iso){
+    const kip = uykuKip(p), g = gunNo(iso);
+    if(kip === 'her') return p.her;
+    if(kip === 'gun') return (p.gunluk || [])[g];
+    return g >= 5 ? p.haftasonu : p.haftaici;
+  }
+  function bugunKestirmeleri(p, iso){
+    const g = gunNo(iso);
+    return (p.kestirmeler || []).filter(k => !(k.gunler && k.gunler.length) || k.gunler.indexOf(g) >= 0);
+  }
 
-  /* ------------------------------------------------------------ bugün */
+  /* ------------------------------------------------------------ maddeler */
 
   function bugunMaddeleri(p, iso){
     const g = gunNo(iso);
-    return (p.maddeler || []).filter(m => !(m.gunler && m.gunler.length) || m.gunler.indexOf(g) >= 0);
+    return (p.maddeler || []).filter(m => !(m.gunler && m.gunler.length) || m.gunler.indexOf(g) >= 0)
+      .map((m, i) => ({ m, i })).sort((a, b) => zamanAn(a.m.zaman) - zamanAn(b.m.zaman) || a.i - b.i).map(o => o.m);
   }
-  function isaretli(p, iso){ return ((p.isaret || {})[iso] || []).slice(); }
-  function isaretle(p, maddeId, iso){
-    p.isaret = p.isaret || {};
-    const l = p.isaret[iso] || [];
-    p.isaret[iso] = l.indexOf(maddeId) >= 0 ? l.filter(x => x !== maddeId) : l.concat([maddeId]);
-    if(!p.isaret[iso].length) delete p.isaret[iso];
-    /* Yalnız son 60 gün tutulur: işaret bir günlüktür, arşiv değil. */
+  const hedefOf = m => (m && Number.isInteger(m.hedef) && m.hedef >= 1) ? m.hedef : 1;
+
+  /* Bağlı kaydın o günkü sayısı (ölçüldü). */
+  function kayitSay(bag, iso){
+    const w = (S().workouts || []).filter(x => x && x.date === iso);
+    if(bag === 'hareket') return w.length;
+    if(bag === 'ogun') return ((S().meals || {})[iso] || []).length;
+    if(bag === 'kestirme') return SP.Uyku ? SP.Uyku.liste(iso).length : 0;
+    return w.filter(x => (x.items || []).some(it => it && it.exId === bag)).length;
+  }
+  /* Maddenin o günkü sayısı: { n, hedef, tamam, kaynak }. */
+  function sayim(p, m, iso){
+    const hedef = hedefOf(m);
+    let n, kaynak;
+    if(m.bag && BAG_BY_ID[m.bag]){ n = kayitSay(m.bag, iso); kaynak = 'kayit'; }
+    else if(hedef > 1){ n = Number((((p.sayac || {})[iso]) || {})[m.id]) || 0; kaynak = 'isaret'; }
+    else { n = ((p.isaret || {})[iso] || []).indexOf(m.id) >= 0 ? 1 : 0; kaynak = 'isaret'; }
+    return { n, hedef, tamam:n >= hedef, kaynak };
+  }
+  function isaretli(p, iso){
+    return (p.maddeler || []).filter(m => sayim(p, m, iso).tamam).map(m => m.id);
+  }
+  function budama(p, iso){
     const sinir = gunEkle(iso, -60);
-    Object.keys(p.isaret).forEach(k => { if(k < sinir) delete p.isaret[k]; });
+    ['isaret', 'sayac'].forEach(k => Object.keys(p[k] || {}).forEach(d => { if(d < sinir) delete p[k][d]; }));
+  }
+  /* Dokunuş: hedefi 1 olan madde aç/kapa; büyük hedefte +1 (fark −1 azaltır). */
+  function isaretle(p, maddeId, iso, fark){
+    const m = (p.maddeler || []).find(x => x.id === maddeId);
+    if(m && m.bag) return p;                       // bağlı madde yalnız kayıttan (söz 4)
+    if(m && hedefOf(m) > 1){
+      p.sayac = p.sayac || {};
+      const g = p.sayac[iso] || {};
+      const n = Math.max(0, Math.min(99, (Number(g[maddeId]) || 0) + (fark == null ? 1 : fark)));
+      if(n) g[maddeId] = n; else delete g[maddeId];
+      p.sayac[iso] = g;
+      if(!Object.keys(g).length) delete p.sayac[iso];
+    }else{
+      p.isaret = p.isaret || {};
+      const l = p.isaret[iso] || [];
+      p.isaret[iso] = l.indexOf(maddeId) >= 0 ? l.filter(x => x !== maddeId) : l.concat([maddeId]);
+      if(!p.isaret[iso].length) delete p.isaret[iso];
+    }
+    /* Yalnız son 60 gün tutulur: işaret bir günlüktür, arşiv değil. */
+    budama(p, iso);
     return p;
   }
+  /* Bir maddenin son yedi günü (dünden geriye): [{ gun, durum:'tamam'|'eksik'|'yok'|'gun-degil' }]. */
+  function maddeGecmisi(p, m, iso){
+    return pencere(iso || bugunISO()).map(d => {
+      const g = gunNo(d);
+      if(m.gunler && m.gunler.length && m.gunler.indexOf(g) < 0) return { gun:d, durum:'gun-degil' };
+      const s = sayim(p, m, d);
+      return { gun:d, durum:s.tamam ? 'tamam' : s.n > 0 ? 'eksik' : 'yok', n:s.n };
+    });
+  }
+
+  /* ------------------------------------------------------------ bugün */
 
   function bugun(p, iso){
     iso = iso || bugunISO();
     const g = gunNo(iso);
     if(p.tur === 'beslenme'){
       const d = (p.gunler || [])[g] || {};
-      const l = OGUNLER.filter(([k]) => String(d[k] || '').trim()).map(([k, ad]) => ad + ': ' + d[k].trim());
+      const l = ogunler(p).filter(([k]) => String(d[k] || '').trim()).map(([k, ad]) => ad + ': ' + d[k].trim());
       return { metin:l.length ? l.join(' · ') : 'Bugün için öğün yazılmamış', etiket:null };
     }
     if(p.tur === 'hareket'){
       const d = (p.gunler || [])[g];
-      return { metin:d ? d.ne + ' · ' + d.dk + ' dk' : 'Bugün dinlenme günü', etiket:null };
+      const z = d ? zamanYaz(d.zaman) : '';
+      return { metin:d ? d.ne + ' · ' + d.dk + ' dk' + (z ? ' · ' + z : '') : 'Bugün dinlenme günü', etiket:null };
     }
     if(p.tur === 'uyku'){
       const x = uykuOf(p, iso) || {};
       const dk = uykuDakika(x.yat, x.kalk);
-      return { metin:dk == null ? 'Saatler yazılmamış' : x.yat + ' yat · ' + x.kalk + ' kalk (' + sureYaz(dk) + ')', etiket:dk == null ? null : 'hesaplandı' };
+      const k = bugunKestirmeleri(p, iso).map(y => y.ad + (y.bas ? ' ' + y.bas : '') + ' · ' + y.dk + ' dk');
+      const ana = dk == null ? 'Saatler yazılmamış' : x.yat + ' yat · ' + x.kalk + ' kalk (' + sureYaz(dk) + ')';
+      return { metin:ana + (k.length ? ' · ' + k.join(' · ') : ''), etiket:dk == null ? null : 'hesaplandı' };
     }
     if(p.tur === 'su'){
       const v = S().vitals && S().vitals[iso];
@@ -190,18 +358,24 @@ SP.HaftaPlan = (function(){
       return { planli, tuttu, eksik, kayitYok, metin:'Son 7 gün: ' + parca.join(' · '), etiket:planli > kayitYok ? 'ölçüldü' : 'veri yok' };
     }
     if(p.tur === 'uyku'){
-      let kayitli = 0, tuttu = 0;
+      let kayitli = 0, tuttu = 0, kPlanli = 0, kTuttu = 0;
       gunler.forEach(d => {
         const v = S().vitals && S().vitals[d];
-        if(!v || v.sleep == null) return;
         const x = uykuOf(p, d) || {};
         const hedef = uykuDakika(x.yat, x.kalk);
-        if(hedef == null) return;
-        kayitli++;
-        if(Number(v.sleep) * 60 >= hedef - UYKU_PAY) tuttu++;
+        if(v && v.sleep != null && hedef != null){
+          kayitli++;
+          if(Number(v.sleep) * 60 >= hedef - UYKU_PAY) tuttu++;
+        }
+        const kp = bugunKestirmeleri(p, d);
+        if(kp.length){
+          kPlanli += kp.length;
+          kTuttu += Math.min(kp.length, SP.Uyku ? SP.Uyku.liste(d).length : 0);
+        }
       });
-      return kayitli ? { kayitli, tuttu, metin:'Son 7 gün: ' + kayitli + ' gece kayıtlı · ' + tuttu + ' gece hedefte', etiket:'ölçüldü' }
-        : { kayitli, tuttu, metin:'Son 7 günde uyku kaydı yok', etiket:'veri yok' };
+      const kMetin = kPlanli ? ' · kısa uyku ' + kTuttu + ' / ' + kPlanli + ' kayıtlı' : '';
+      return kayitli ? { kayitli, tuttu, kPlanli, kTuttu, metin:'Son 7 gün: ' + kayitli + ' gece kayıtlı · ' + tuttu + ' gece hedefte' + kMetin, etiket:'ölçüldü' }
+        : { kayitli, tuttu, kPlanli, kTuttu, metin:'Son 7 günde uyku kaydı yok' + kMetin, etiket:'veri yok' };
     }
     if(p.tur === 'su'){
       let kayitli = 0, tuttu = 0;
@@ -270,6 +444,10 @@ SP.HaftaPlan = (function(){
     return p;
   }
 
-  return { TURLER, TUR_BY_ID, GUN_KISA, GUN_AD, OGUNLER, STORE, yeni, dogrula, uykuDakika, sureYaz, gunNo,
-    bugun, bugunMaddeleri, isaretle, isaretli, uyum, liste, bul, bulId, yukle, kaydet, geriAl, sil, kopya };
+  /* Eski ad: OGUNLER sabit diziydi; artık kullanıcının öğünleridir. */
+  return { TURLER, TUR_BY_ID, GUN_KISA, GUN_AD, DILIMLER, DILIM_BY_ID, UYKU_KIPLERI, SIMGELER, BAGLAR, BAG_BY_ID, STORE,
+    get OGUNLER(){ return ogunler(null); }, ogunler,
+    yeni, yeniMadde, yeniKestirme, dogrula, uykuDakika, sureYaz, gunNo, uykuOf, uykuKip, bugunKestirmeleri,
+    zamanNorm, zamanYaz, zamanAn, bugun, bugunMaddeleri, isaretle, isaretli, sayim, kayitSay, maddeGecmisi, hedefOf,
+    uyum, liste, bul, bulId, yukle, kaydet, geriAl, sil, kopya };
 })();

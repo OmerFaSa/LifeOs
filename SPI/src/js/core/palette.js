@@ -39,7 +39,7 @@ SP.Palette = (function(){
       hint:'Modül 3', run:() => { SP.App.go('move'); setTimeout(() => {
         const fn = SP.Screens.move.handle['start-session'];
         if(fn) fn({ dataset:{ id:'' } }); }, 120); } });
-    out.push({ id:'act:meeting', kind:'Eylem', label:'Ofis toplantısı başlat',
+    out.push({ id:'act:meeting', kind:'Eylem', label:'Veri incelemesini aç',
       hint:'Ofis', run:() => SP.App.go('meeting') });
     out.push({ id:'act:backup', kind:'Eylem', label:'Yedek indir',
       hint:'Veri', run:() => { SP.S.ui.guideTab = 'veri'; SP.App.go('guide'); } });
@@ -220,7 +220,7 @@ SP.Palette = (function(){
 
   /* Kayittan sonra nereye gidilir — kullanici yazdigini GORMELI. */
   const ROTA = {
-    'vital-yaz':'today', 'ogun-ekle':'meals', 'seans-ekle':'move',
+    'vital-yaz':'today', 'kestirme-ekle':'today', 'ogun-ekle':'meals', 'seans-ekle':'move',
     'olcum-gir':'labs', 'semptom-isaretle':'today', 'bolum-ac-kapa':'guide',
     /* Plan ve programı Bugün › Özet › Hedeflerim gösterir. */
     'plan-uygula':'today', 'program-ekle':'today',

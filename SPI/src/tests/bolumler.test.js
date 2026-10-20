@@ -38,16 +38,19 @@
   describe('T3 SPİ — sekmeler bölüm oldu', () => {
     /* 2026-10-15: Öğrenme ve kanıt katmanı (data/ogrenme.js) «Fizyoloji &
        Kavramlar» bölümünü ekledi; okumalar artık altı. */
-    it('oz-019 Analiz: altı okuma alt alta, sekme yok', async () => {
+    it('oz-019 Analiz: öne çıkan dört okuma alt alta; altısı «Ayrıntılı okumalar» açılınca (2026-10-20)', async () => {
       resetState();
-      const d = await bolumlu('analytics', 'an-tab',
-        ['Çapraz bağlar', 'Haftalık rapor', 'Seriler', 'Fizyoloji ve kavramlar', 'Denetim', 'Dürüstlük']);
-      d.remove();
+      (await bolumlu('analytics', 'an-tab', ['Çapraz bağlar', 'Haftalık rapor', 'Seriler', 'Denetim'])).remove();
+      SP.S.ui.spiAnalizAyrinti = true;
+      try{
+        (await bolumlu('analytics', 'an-tab',
+          ['Çapraz bağlar', 'Haftalık rapor', 'Seriler', 'Fizyoloji ve kavramlar', 'Denetim', 'Dürüstlük'])).remove();
+      }finally{ SP.S.ui.spiAnalizAyrinti = false; }
     });
 
     it('oz-019 Rehber: dört bölüm alt alta, sekme yok', async () => {
       resetState();
-      (await bolumlu('guide', 'guide-tab', ['Kullanım', 'Model', 'Veri', 'Sınırlar'])).remove();
+      (await bolumlu('guide', 'guide-tab', ['Kullanım', 'Ofis', 'Veri', 'Sınırlar'])).remove();
     });
 
     it('oz-019 Sepet: dört bölüm alt alta; kalem sayısı çubukta rozet', async () => {
@@ -135,7 +138,9 @@
 
     it('T2-14 Analiz › Dürüstlük boş sayı yazmaz («asgari çaba dk.» ya da «undefined»)', async () => {
       resetState();
+      SP.S.ui.spiAnalizAyrinti = true;
       const d = yerlestir(await SP.Screens.analytics.render());
+      SP.S.ui.spiAnalizAyrinti = false;
       try{
         const m = d.textContent.replace(/\s+/g, ' ');
         expect(/asgari çaba\s+dk/.test(m)).toBe(false);
@@ -160,6 +165,7 @@
 
     it('oz-019 başka ekrandan gelinen bölüme çizimden sonra kayılır; istek bir kez', async () => {
       resetState();
+      SP.S.ui.spiAnalizAyrinti = true;
       const d = yerlestir(await SP.Screens.analytics.render());
       try{
         SP.S.ui.analyticsTab = 'denetim';
@@ -169,7 +175,7 @@
         try{ SP.Screens.analytics.afterRender(); }finally{ SP.C.bolumeGit = eski; }
         expect(giden).toBe('denetim');
         expect(SP.S.ui.analyticsTab == null).toBe(true);
-      }finally{ d.remove(); }
+      }finally{ d.remove(); SP.S.ui.spiAnalizAyrinti = false; }
     });
   });
 })();

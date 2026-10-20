@@ -24,11 +24,57 @@
       expect(SP.Nutri.tdee()).toBeNull();
     });
 
-    it('günlük ihtiyaç hareket çarpanıyla büyür', () => {
+    it('hareket girilmeyen gün ihtiyaç bazal metabolizmadır; hareket düzeyi çarpanı yoktur', () => {
       resetState();
-      const base = SP.Nutri.tdee();
+      SP.S.workouts = [];
+      expect(SP.Nutri.tdee()).toBe(SP.Nutri.bmr());
       SP.S.profile.activity = 'athlete';
-      expect(SP.Nutri.tdee() > base).toBeTruthy();
+      expect(SP.Nutri.tdee()).toBe(SP.Nutri.bmr());
+      const n = SP.Nutri.dayNeed();
+      expect(n.hareketYok).toBe(true);
+      expect(n.etiket).toBe('hesaplandı');
+    });
+
+    it('girilen hareket net MET ile eklenir; aynı gün iki yürüyüş ikisi de sayılır', () => {
+      resetState();
+      const d = U.todayISO();
+      const yuru = (dk, id) => ({ id, date:d, kind:'cardio', minutes:dk,
+        items:[{ exId:'yuruyus', minutes:dk }] });
+      SP.S.workouts = [yuru(30, 'w1')];
+      const kg = SP.S.profile.weightKg, met = SP.EX_BY_ID.yuruyus.met;
+      const bir = Math.round((met - 1) * kg * 30 / 60);
+      expect(SP.Nutri.dayNeed(d).hareket).toBe(bir);
+      SP.S.workouts.push(yuru(40, 'w2'));
+      const iki = SP.Nutri.dayNeed(d);
+      expect(iki.hareket).toBe(Math.round((met - 1) * kg * 70 / 60));
+      expect(iki.seanslar.length).toBe(2);
+      expect(iki.toplam).toBe(SP.Nutri.bmr() + iki.hareket);
+      /* başka gün etkilenmez */
+      expect(SP.Nutri.dayNeed(U.iso(U.addDays(U.today(), -1))).hareketYok).toBe(true);
+    });
+
+    it('türü ya da süresi bilinmeyen seans «0» sayılmaz, eksik diye söylenir', () => {
+      resetState();
+      const d = U.todayISO();
+      SP.S.workouts = [{ id:'w9', date:d, name:'Bilinmeyen', minutes:30, items:[{ exId:'yok-boyle' }] }];
+      const n = SP.Nutri.dayNeed(d);
+      expect(n.hareketYok).toBe(true);
+      expect(n.eksik[0]).toContain('türü bilinmiyor');
+      expect(n.toplam).toBe(SP.Nutri.bmr());
+    });
+
+    it('hedef bazal metabolizmanın altına inmez; plan farkı günün ihtiyacına eklenir', () => {
+      resetState();
+      SP.S.workouts = [];
+      SP.S.profile.kcalHedef = { fark:-500, kcal:1500 };
+      const t = SP.Nutri.targets();
+      expect(t.kcal).toBe(SP.Nutri.bmr());
+      expect(t.bmrTaban).toBe(true);
+      const d = U.todayISO();
+      SP.S.workouts = [{ id:'w1', date:d, minutes:60, items:[{ exId:'kosu', minutes:60 }] }];
+      const t2 = SP.Nutri.targets(null, d);
+      expect(t2.kcal).toBe(Math.max(t2.bmr, t2.tdee - 500));
+      SP.S.profile.kcalHedef = null;
     });
   });
 
@@ -56,8 +102,10 @@
       expect(SP.Nutri.targets().protein.min > before).toBeTruthy();
     });
 
-    it('kilo verme hedefinde kalori düşer', () => {
+    it('kilo verme hedefinde kalori düşer (hareketli günde; dinlenme günü BMR tabanı)', () => {
       resetState();
+      const d = U.todayISO();
+      SP.S.workouts = [{ id:'w1', date:d, minutes:60, items:[{ exId:'kosu', minutes:60 }] }];
       const before = SP.Nutri.targets().kcal;
       SP.S.profile.goal = 'cut';
       expect(SP.Nutri.targets().kcal < before).toBeTruthy();

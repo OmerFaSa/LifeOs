@@ -17,7 +17,7 @@ window.SP = window.SP || {};
 SP.Dunku = (function(){
   const U = () => SP.U;
   function dun(bugun){ return U().iso(U().addDays(U().parse(bugun), -1)); }
-  function slotAd(id){ const s = (SP.MEAL_SLOTS || []).find(x => x.id === id); return s ? s.label : id; }
+  function slotAd(id){ if(SP.Ogun) return SP.Ogun.ad(id); const s = (SP.MEAL_SLOTS || []).find(x => x.id === id); return s ? s.label : id; }
   function kalemAd(it){
     const f = SP.FOOD_BY_ID && SP.FOOD_BY_ID[it.foodId];
     const g = it.g != null ? it.g : (it.kg != null ? Math.round(it.kg * 1000) : null);

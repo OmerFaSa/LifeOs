@@ -38,9 +38,6 @@ SP.Screens.family = (function(){
           ${K.Field({ label:'Kilo (kg)',
             input:K.Input({ id:'p-weight', type:'number', numeric:true, step:'0.1', min:20, max:250,
               value:p.weightKg || '' }) })}
-          ${K.Field({ label:'Hareket düzeyi',
-            input:K.Select({ id:'p-activity', value:p.activity,
-              options:SP.ACTIVITY_LEVELS.map(a => ({ value:a.id, label:a.label })) }) })}
           ${K.Field({ label:'Hedef',
             input:K.Select({ id:'p-goal', value:p.goal,
               options:SP.GOALS.map(g => ({ value:g.id, label:g.label })) }) })}
@@ -55,16 +52,18 @@ SP.Screens.family = (function(){
   function targetCard(){
     const t = SP.Nutri.targets();
     if(!t.ok) return null;
-    const lvl = SP.ACTIVITY_LEVELS.find(a => a.id === S.profile.activity);
+    const n = t.need;
     return K.Card({
       title:'Hesaplanan hedefler', hint:'macro-target',
       sub:t.goal.label,
       body:html`
         ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
           ['Bazal metabolizma', U.fmtNum(t.bmr) + ' kcal'],
-          ['Hareket çarpanı', '×' + U.fmtNet(SP.Nutri.activityFactor()) + (lvl ? ' — ' + lvl.note : '')],
-          ['Günlük ihtiyaç', U.fmtNum(t.tdee) + ' kcal'],
-          ['Hedef kalori', U.fmtNum(t.kcal) + ' kcal' + (t.goal.deficit ? ' · ' + t.goal.note : '')],
+          ['Bugünkü hareket', n && !n.hareketYok ? '+' + U.fmtNum(n.hareket) + ' kcal · ' + n.dakika + ' dk (hesaplandı)'
+            : 'girilmedi — ihtiyaca eklenmedi'],
+          ['Bugünkü ihtiyaç', U.fmtNum(t.tdee) + ' kcal (hesaplandı)'],
+          ['Hedef kalori', U.fmtNum(t.kcal) + ' kcal' + (t.goal.deficit ? ' · ' + t.goal.note : '')
+            + (t.bmrTaban ? ' · bazal metabolizmanın altına inmez' : '')],
           ['Protein', t.protein.min + '–' + t.protein.max + ' g'],
           ['Yağ', t.fat.min + '–' + t.fat.max + ' g'],
           ['Karbonhidrat', t.carb.min + '–' + t.carb.max + ' g'],
@@ -75,7 +74,10 @@ SP.Screens.family = (function(){
           body:html`<ul class="bullets small mt-4">${map(Object.keys(t.adjustments), k => html`
             <li><b>${SP.NUTRI_BY_ID[k] ? SP.NUTRI_BY_ID[k].name : k}</b> ×${U.fmtNet(t.adjustments[k].mult)}
               — ${t.adjustments[k].why}</li>`)}</ul>` }))}
-        <p class="small muted mt-10">${SP.MACRO_RULES.protein.note}</p>`,
+        <p class="small muted mt-10">Günlük ihtiyaç günden güne değişir: bazal metabolizma artı o gün
+          girdiğin hareketin enerjisi (MET, net). Hareket girmediğin gün ihtiyaç bazal metabolizmadır;
+          hareket düzeyinden tahmin yapılmaz.</p>
+        <p class="small muted mt-6">${SP.MACRO_RULES.protein.note}</p>`,
     });
   }
 
@@ -170,7 +172,6 @@ SP.Screens.family = (function(){
         sex:get('p-sex') || 'male',
         heightCm:numOr(get('p-height')),
         weightKg:numOr(get('p-weight')),
-        activity:get('p-activity') || 'moderate',
         goal:get('p-goal') || 'health',
       });
       /* Kilo profilde tutulur ama gunluk olcum de ayni gun kaydini besler:

@@ -140,19 +140,21 @@ SP.Plan = (function(){
       if(tdee == null || bmr == null){
         enerjiNeden = 'Boy, doğum yılı ya da cinsiyet eksik: enerji hesaplanamadı.';
       }else{
+        /* Günlük ihtiyaç günden güne değişir (BMR + o gün GİRİLEN hareket,
+           SP.Nutri.dayNeed). Plan sabit kcal değil günlük FARK yazar; burada
+           gösterilen kcal bugünün girilen verisiyle hesaplanmış örnektir.
+           Hedef hiçbir gün BMR'nin altına inmez (nutri.targets). */
         const gunluk = tempo * KCAL_KG / 7;
-        let kcal = Math.round(yon === 'azalt' ? tdee - gunluk : tdee + gunluk);
-        let taban = false;
-        if(kcal < bmr){
-          kcal = bmr; taban = true;
-          const ulasilir = yuvarla((tdee - bmr) * 7 / KCAL_KG, 2);
-          uyarilar.push('Enerji bazal metabolizmanın (' + kcalYaz(bmr) + ') altına inmez; bu '
-            + 'tabanla ulaşılabilir tempo haftada ' + sayi(ulasilir, 2) + ' kg. Hedef tarihi '
-            + 'kaymış olabilir.');
-          tempo = ulasilir;
+        const fark = Math.round(yon === 'azalt' ? -gunluk : gunluk);
+        const kcal = Math.max(bmr, Math.round(tdee + fark));
+        const taban = yon === 'azalt' && tdee + fark < bmr;
+        if(taban){
+          uyarilar.push('Enerji bazal metabolizmanın (' + kcalYaz(bmr) + ') altına inmez. Hareket '
+            + 'girmediğin günde hedef bazal metabolizmada kalır; açık o gün girdiğin hareketten '
+            + 'gelir. Hedef tarihi kayabilir.');
         }
-        enerji = { kcal, tdee, bmr, etiket:'tahmin', taban,
-          dayanak:'günlük ihtiyaç (Mifflin-St Jeor × aktivite) ' + (yon === 'azalt' ? '−' : '+')
+        enerji = { kcal, fark, tdee, bmr, etiket:'tahmin', taban,
+          dayanak:'günlük ihtiyaç (Mifflin-St Jeor BMR + o gün girilen hareket) ' + (yon === 'azalt' ? '−' : '+')
             + ' tempo × 7700 kcal/kg ÷ 7; 7700 yaygın bir yaklaşımdır, kaynağı bağlanmadı' };
       }
       goal = { once:onceGoal, sonra:etki.proteinKisitli ? onceGoal : GOAL_OF[yon] };
@@ -201,7 +203,10 @@ SP.Plan = (function(){
       sonra:plan.goal ? goalAdi(plan.goal.sonra) + ': haftada ' + sayi(plan.tempo, 2) + ' kg'
         : 'değişmez — ' + (plan.enerjiNeden || 'hekimle kurulur') });
     rows.push({ alan:'Günlük enerji hedefi', once:simdiki && simdiki.ok ? kcalYaz(simdiki.kcal) : '—',
-      sonra:plan.enerji ? kcalYaz(plan.enerji.kcal) + ' (tahmin)' : 'yazılmaz' });
+      sonra:plan.enerji ? (plan.enerji.fark != null
+        ? 'günlük ihtiyacın ' + (plan.enerji.fark < 0 ? '−' : '+') + kcalYaz(Math.abs(plan.enerji.fark))
+          + ' (bugün ' + kcalYaz(plan.enerji.kcal) + ', tahmin)'
+        : kcalYaz(plan.enerji.kcal) + ' (tahmin)') : 'yazılmaz' });
     rows.push({ alan:'Günlük protein',
       once:simdiki && simdiki.protein ? simdiki.protein.min + '–' + simdiki.protein.max + ' g' : '—',
       sonra:plan.protein ? plan.protein.min + '–' + plan.protein.max + ' g'
@@ -231,7 +236,8 @@ SP.Plan = (function(){
     await kaydet(yeni);
     const patch = {};
     if(plan.goal) patch.goal = plan.goal.sonra;
-    patch.kcalHedef = plan.enerji ? { kcal:plan.enerji.kcal, planId:plan.id, hedefId:plan.hedefId,
+    patch.kcalHedef = plan.enerji ? { kcal:plan.enerji.kcal,
+      fark:plan.enerji.fark != null ? plan.enerji.fark : null, planId:plan.id, hedefId:plan.hedefId,
       etiket:'tahmin' } : null;
     await SP.Model.saveProfile(patch);
     return geri;

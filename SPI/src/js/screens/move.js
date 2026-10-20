@@ -743,8 +743,8 @@ SP.Screens.move = (function(){
       body:String(K.Stack([
         when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
           title:'Model bağlı değil.',
-          body:'Fotoğraftan analiz yapmak için Ayarlar → Rehber → Model bölümünden '
-            + 'görüntü destekleyen bir sağlayıcı seç.' })),
+          body:'Fotoğraftan analiz için HKM › Modeller’de «SPİ · Görsel» (ya da King) için '
+            + 'görüntü okuyan bir model ata.' })),
         K.Drop({ act:'body-photo-file', label:'Boydan vücut fotoğrafı', icon:'camera',
           accept:'image/*', hint:'Fotoğrafı buraya bırak ya da seçmek için tıkla' }),
         html`<div id="body-photo-name" class="small dim">${bodyPhotoFile ? bodyPhotoFile.name : ''}</div>`,

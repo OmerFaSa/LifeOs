@@ -163,7 +163,7 @@ SP.Proposals = (function(){
           alan:x.food.name, once:'—', sonra:U.fmtNum(x.g) + ' g' }));
       },
       async apply(p, ctx){
-        const meal = M.newMeal(p.slot || 'ara');
+        const meal = M.newMeal(p.slot || (SP.Ogun ? SP.Ogun.simdiki() : 'ara1'));
         meal.items = ctx.cozulen.map(x => ({ foodId:x.food.id, g:x.g, cert:x.cert }));
         await M.addMeal(p.date, meal);
         return { date:p.date, mealId:meal.id };
@@ -205,6 +205,27 @@ SP.Proposals = (function(){
       async revert(geri){
         if(M.deleteWorkout) await M.deleteWorkout(geri.workoutId);
       },
+    },
+
+    /* ------------------------------------------------ kısa uyku ekle */
+    'kestirme-ekle':{
+      level:'kucuk',
+      olcum:true,
+      label:'Kısa uyku',
+      alanlar:['dk', 'bas', 'date'],
+      check(p){
+        const h = SP.Uyku.dogrula({ dk:p.dk, bas:p.bas });
+        return h ? fail(h) : pass({ dk:Math.round(Number(p.dk)), bas:p.bas || null });
+      },
+      preview(p, ctx){
+        return [{ alan:'Kısa uyku', once:'—', sonra:ctx.dk + ' dakika' + (ctx.bas ? ' · ' + ctx.bas : '') }];
+      },
+      async apply(p, ctx){
+        const r = await SP.Uyku.ekle(p.date, { dk:ctx.dk, bas:ctx.bas });
+        if(!r.ok) throw new Error(r.why);
+        return { date:p.date, id:r.kayit.id };
+      },
+      async revert(geri){ await SP.Uyku.sil(geri.date, geri.id); },
     },
 
     /* --------------------------------------------------- ölçüm gir */
@@ -418,6 +439,8 @@ SP.Proposals = (function(){
     if(!parsed) return null;
     if(parsed.kind === 'vital') return { action:'vital-yaz',
       params:{ field:parsed.data.field.id, value:parsed.data.value, date } };
+    if(parsed.kind === 'nap') return { action:'kestirme-ekle',
+      params:{ dk:parsed.data.dk, bas:parsed.data.bas || null, date } };
     if(parsed.kind === 'move') return { action:'seans-ekle',
       params:{ minutes:parsed.data.minutes,
         exerciseId:parsed.data.exercise ? parsed.data.exercise.id : null, date } };
@@ -425,7 +448,7 @@ SP.Proposals = (function(){
       params:{ rows:parsed.data.rows.map(r => ({ markerId:r.marker.id, value:r.value })), date } };
     if(parsed.kind === 'meal') return { action:'ogun-ekle',
       params:{ items:parsed.data.items.map(i => ({ foodId:i.food.id, g:i.g, cert:i.cert })),
-        slot:slot || 'ara', date } };
+        slot:slot || (SP.Ogun ? SP.Ogun.simdiki() : 'ara1'), date } };
     return null;
   }
 

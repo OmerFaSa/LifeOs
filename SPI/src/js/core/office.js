@@ -58,8 +58,21 @@ SP.Office = (function(){
     return cfg;
   }
 
+  /* MERKEZ MODELİ (brand/ortak/ofis.js merkezModelKur): model ayarı HKM'de.
+     Bu cihazda eski bir yerel ayar varsa yedek olarak çalışmaya devam eder. */
+  function merkez(){
+    if(!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.merkezModelKur)) return null;
+    SP.MerkezModel = SP.MerkezModel || LIFEOS.Ofis.merkezModelKur({ hkm:() => SP.Beacon });
+    return SP.MerkezModel;
+  }
+  function merkezde(){
+    const MM = merkez();
+    if(!MM || !MM.bagli()) return false;
+    const d = MM.durum();
+    return !d || d.ok || (d.reason !== 'no-model' && d.reason !== 'no-key' && d.reason !== 'no-model-name' && d.reason !== 'key-missing');
+  }
   function ready(agentId){
-    return SP.LLM.ready(cfgFor(agentId));
+    return merkezde() || SP.LLM.ready(cfgFor(agentId));
   }
 
   /* --------------------------------------------------------------- brifing
@@ -344,6 +357,154 @@ SP.Office = (function(){
     return lines.join(' ');
   }
 
+  /* ------------------------------------------------------- sohbet turu
+
+     Kullanıcı (2026-10-20): «Patron LLM gibi değil robot gibi konuşuyor ve
+     sürekli teklif yapıyor; doğal sohbet etsin, teklifi yalnız gerektiğinde
+     yapsın». Sebep: her mesaja — «merhaba»ya bile — aynı rapor ve
+     «Sıradaki hamle» dönüyordu. AYS'nin çözümü (data/agents.js CHAT_KINDS)
+     burada da geçerli: mesaj önce SINIFLANIR, sınıf cevabı belirler.
+
+       selam  kısa selamlaşma, teşekkür, hâl hatır → rapor yok, sayı yok
+       hal    dert yanma («yorgunum», «moralim bozuk») → önce dinler; tek
+              ölçülmüş bağlam cümlesi; öneri YOK (istenmedi)
+       oneri  «ne yapayım», «öner», «tavsiye» → sıradaki hamle (teklif BURADA)
+       konu   «nedir», «nasıl», «anlat» → kavram sorusu; kural motoru
+              konu anlatmaz, dürüstçe söyler ve Anlatımlar'a yollar
+       veri   kullanıcının kendi durumu → yalnız SORULAN alanın özeti
+
+     Sınıflama kural motorundadır: deterministik, test edilir, model yokken
+     de çalışır. Güvenlik (kırmızı bayrak) her sınıfta öne geçer. */
+  const SOHBET = {
+    selam:/^\s*(selam|merhaba|meraba|mrb|slm|sa[,.! ]|sa$|aleyküm|günaydın|iyi akşamlar|iyi geceler|iyi günler|naber|ne haber|nasılsın|napıyorsun|hey|kanka|hocam|müsait misin|orada mısın|teşekkür|sağol|sağ ol|tşk|tsk|eyvallah|görüşürüz|hoşça kal|hoşçakal|tamam|peki|süper|harika|anladım|kimsin|sen kimsin|ne iş yaparsın)/,
+    hal:/(^|[^a-zçğıöşü])(yorgun|yoruldum|halsiz|bitkin|uykusuz|moral|sıkıldım|bunaldım|stres|gergin|kaygı|endişe|keyfim yok|kötü hissed|canım sıkkın|isteğim yok|motivasyon|üşengeç|tembel|bıktım|başım ağrı|ağrıyor)/,
+    oneri:/(ne yapay|ne yapmalı|ne yapsam|ne yapabilir|nasıl yapay|öner|tavsiye|odaklan|sıradaki|ne yiyey|ne yemeliy|ne yesem|antrenman yapay|spor yapay|hangisi öncelik|öncelikli|plan yap)/,
+    konu:/(^|[^a-zçğıöşü])(nedir|ne demek|neye yarar|nasıl çalış|nasıl hesap|anlat|açıkla|farkı ne|ne işe yarar|mantığı)/,
+    selamUzunluk:64,
+  };
+  function sohbetTuru(text){
+    const q = String(text || '').trim().toLocaleLowerCase('tr');
+    if(!q) return 'veri';
+    if(SOHBET.selam.test(q) && q.length <= SOHBET.selamUzunluk && !SOHBET.oneri.test(q) && !alanOf(q) && !SOHBET.hal.test(q)) return 'selam';
+    if(SOHBET.oneri.test(q)) return 'oneri';
+    if(SOHBET.hal.test(q)) return 'hal';
+    if(SOHBET.konu.test(q)) return 'konu';
+    return 'veri';
+  }
+
+  /* Sorulan alan: anahtar kelimeden. Yoksa null (genel durum). */
+  const ALANLAR = [
+    { id:'uyku', re:/(uyku|uyu|kestirme|şekerleme|yatış|kalkış)/ },
+    { id:'beslenme', re:/(kalori|kcal|protein|öğün|yemek|beslen|karbonhidrat|yağ|lif|vitamin|mineral|su iç|su\b)/ },
+    { id:'hareket', re:/(hareket|antrenman|egzersiz|spor|yürü|koş|bisiklet|yüz|toparlan|yük)/ },
+    { id:'tahlil', re:/(tahlil|test|kan|ferritin|kolesterol|ldl|hdl|şeker|glukoz|tiroid|tsh|b12|d vitamini)/ },
+    { id:'butce', re:/(bütçe|para|fiyat|sepet|market|ucuz|pahalı)/ },
+  ];
+  function alanOf(text){
+    const q = String(text || '').toLocaleLowerCase('tr');
+    const a = ALANLAR.find(x => x.re.test(q));
+    return a ? a.id : null;
+  }
+  const ALAN_AJAN = { uyku:'move', beslenme:'nutri', hareket:'move', tahlil:'lab', butce:'money' };
+
+  function adiyla(){
+    const ad = SP.S.profile && SP.S.profile.name ? String(SP.S.profile.name).trim().split(/\s+/)[0] : '';
+    return ad ? ', ' + ad : '';
+  }
+  function gunSelami(){
+    const h = new Date().getHours();
+    return h < 11 ? 'Günaydın' : h < 18 ? 'Merhaba' : 'İyi akşamlar';
+  }
+
+  /* Uykunun ölçülmüş kısa özeti (son gece + kısa uykular). Yoksa null. */
+  function uykuCumlesi(){
+    const d = U.todayISO();
+    const dun = U.iso(U.addDays(U.today(), -1));
+    const g = SP.Uyku ? SP.Uyku.gun(d) : null;
+    const v = SP.S.vitals[d] && SP.S.vitals[d].sleep != null ? SP.S.vitals[d] : SP.S.vitals[dun];
+    if(!v || v.sleep == null) return null;
+    let c = 'Son gece ' + U.fmtNet(v.sleep) + ' saat uyku girmişsin (ölçüldü)';
+    if(g && g.kestirme.length) c += ', bugün ' + g.kestirmeDk + ' dakika kısa uyku da var';
+    return c + '.';
+  }
+
+  /* Alan sorusunun kısa, ölçülmüş cevabı. Sayı ancak brifingdeyse yazılır. */
+  function alanCevabi(alan, b){
+    if(alan === 'uyku'){
+      const u = uykuCumlesi();
+      const yedi = [];
+      for(let i = 1; i <= 7; i++){ const v = SP.S.vitals[U.iso(U.addDays(U.today(), -i))]; if(v && v.sleep != null) yedi.push(Number(v.sleep)); }
+      if(!u && !yedi.length) return 'Henüz uyku girilmemiş. Bu sabah «7 saat uyudum» yazman yeter; kısa uykuyu da «öğlen 30 dakika uyudum» diye girebilirsin.';
+      return [u, yedi.length >= 3 ? 'Son ' + yedi.length + ' gecenin ortalaması ' + U.fmtNet(U.round(U.sum(yedi) / yedi.length, 1)) + ' saat (hesaplandı).' : null]
+        .filter(Boolean).join(' ');
+    }
+    if(alan === 'beslenme'){
+      const t = SP.Nutri.targets();
+      if(!t.ok) return 'Hedefi hesaplamam için profilde ' + t.missing.join(', ') + ' eksik; tahmin etmem.';
+      const tot = SP.Nutri.dayTotals(U.todayISO());
+      const n = t.need;
+      const ihtiyac = 'Bugünkü ihtiyacın ' + U.fmtNum(t.tdee) + ' kcal: bazal metabolizma ' + U.fmtNum(t.bmr)
+        + (n && !n.hareketYok ? ' ve girdiğin hareket ' + U.fmtNum(n.hareket) + ' kcal' : '; hareket girmedin, o yüzden eklenmedi') + '.';
+      return ihtiyac + (tot.empty ? ' Bugün öğün girilmedi.' : ' Şu ana kadar ' + U.fmtNum(Math.round(tot.kcal)) + ' kcal ve '
+        + Math.round(tot.protein) + ' g protein girildi; hedef ' + U.fmtNum(t.kcal) + ' kcal.');
+    }
+    if(alan === 'hareket'){
+      const d = U.todayISO();
+      const dk = U.sum(SP.Model.workoutsOf(d).map(w => Number(w.minutes) || 0));
+      const r = SP.Move.readiness(d);
+      return (dk ? 'Bugün ' + dk + ' dakika hareket girdin (' + SP.Model.workoutsOf(d).length + ' seans).' : 'Bugün hareket girilmedi.')
+        + (r.ok ? ' Toparlanman ' + r.score + '/100, ' + r.band.label.toLocaleLowerCase('tr-TR') + '.' : ' Toparlanma için uyku bekleniyor.');
+    }
+    if(alan === 'tahlil') return ruleText('lab', labBrief());
+    if(alan === 'butce') return ruleText('money', moneyBrief());
+    return null;
+  }
+
+  /* Model yokken sohbetin kural cevabı. Her cevap KISA ve soruya döner. */
+  function sohbetCevabi(agentId, tur, text, b){
+    const a = SP.AGENT_BY_ID[agentId] || SP.AGENT_BY_ID.patron;
+    const bayrak = SP.Model.openFlags().filter(f => !f.ack);
+    const guvenlik = bayrak.length ? ' Bir şeyi atlamayayım: ' + bayrak[0].label + ' için açık bir kırmızı bayrak var; hekime danışmanı öneririm.' : '';
+    const q = String(text || '').toLocaleLowerCase('tr');
+    if(tur === 'selam'){
+      if(/(teşekkür|sağol|sağ ol|tşk|tsk|eyvallah)/.test(q)) return 'Rica ederim' + adiyla() + '. Ne zaman istersen buradayım.';
+      if(/(görüşürüz|hoşça)/.test(q)) return 'Görüşürüz' + adiyla() + '. Kendine iyi bak.';
+      if(/(kimsin|ne iş yaparsın)/.test(q)) return 'Ben ' + a.name + ', ' + a.role.toLocaleLowerCase('tr-TR') + '. '
+        + (agentId === 'patron' ? 'Uyku, beslenme, hareket, tahlil ve bütçe masalarının söylediklerini birleştiririm; sayıları kural motoru hesaplar, ben anlatırım.'
+          : 'Kendi alanımdaki kayıtlarına bakarım; sayıları kural motoru hesaplar.');
+      if(/(nasılsın|naber|ne haber)/.test(q)) return 'İyiyim, sağ ol' + adiyla() + '. Sen nasılsın, bugün nasıl geçiyor?' + guvenlik;
+      if(/^(tamam|peki|süper|harika|anladım)/.test(q)) return 'Tamam. Başka bir şey sormak istersen buradayım.';
+      return gunSelami() + adiyla() + '. Bugün nasılsın? Uykundan, öğünlerinden ya da aklındaki bir sorudan konuşabiliriz.' + guvenlik;
+    }
+    if(tur === 'hal'){
+      const ek = /(yorgun|yoruldum|halsiz|bitkin|uykusuz)/.test(q) ? uykuCumlesi() : null;
+      const dinle = /(moral|sıkıldım|bunaldım|stres|gergin|kaygı|endişe|canım sıkkın|keyfim yok|bıktım)/.test(q)
+        ? 'Bunu duyduğuma üzüldüm; böyle günler oluyor.' : 'Anlıyorum, böyle hissetmen önemli bir bilgi.';
+      return [dinle, ek, 'İstersen neyin zorladığını biraz anlat; ya da «ne yapayım» de, kayıtlarına bakıp birlikte düşünelim.']
+        .filter(Boolean).join(' ') + guvenlik;
+    }
+    if(tur === 'konu'){
+      return 'Bunu kendi cümlelerimle anlatmam için bir dil modeli bağlı olmalı; kural motoru kavram anlatmaz, uydurmam da. '
+        + 'Kütüphanem › Anlatımlar’da kalori, protein ve uyku gibi konular adım adım anlatılıyor.' + guvenlik;
+    }
+    if(tur === 'oneri'){
+      const n = (b && b.next) || SP.Calc.nextAction();
+      if(!n || n.calm) return 'Şu an öne çıkan bir iş yok: bayrak yok, ölçüm güncel. Bugünü olduğu gibi sürdürmen yeterli.';
+      const kucuk = s => String(s || '').charAt(0).toLocaleLowerCase('tr-TR') + String(s || '').slice(1);
+      const neden = kucuk(n.title).replace(/[.]$/, '') + '; ' + kucuk(n.why);
+      return n.action ? 'Önerim şu: ' + n.action + ' Çünkü ' + neden : 'Şu an öne çıkan: ' + n.title + '. ' + n.why;
+    }
+    /* veri: sorulan alan; alan yoksa uzmanın kendi özeti (Patron'da
+       «sıradaki hamle» olmadan, yalnız durum). */
+    const alan = alanOf(text);
+    const c = alan ? alanCevabi(alan, b) : null;
+    if(c) return c + guvenlik;
+    if(agentId !== 'patron') return ruleText(agentId, b);
+    const d = b || patronBrief();
+    return [d.headline, 'Asgari gün bugün ' + d.minimum.done + '/' + d.minimum.total + '.',
+      'Neye bakmamı istersin: uyku, beslenme, hareket, tahlil ya da bütçe?'].join(' ') + guvenlik;
+  }
+
   /* Metindeki sayilari cikarir (bkz. R.Office.numbersIn, AYS ile ayni
      bicim). Turkce yazimi tanir: "19,50" ondalik, "1.500" binlik, "%78" yuzde. */
   function numbersIn(text){
@@ -469,7 +630,12 @@ SP.Office = (function(){
         SP.CLINICAL.disclaimer,
         'Bilmediğin bir şey sorulursa "bu benim alanımda değil" ya da "bu veri girilmemiş" de.',
       ],
-      uslup:'Türkçe yaz. Kısa cümle kur. En fazla 4 cümle.',
+      uslup:'Türkçe yaz; bir insanla sohbet eder gibi, sıcak ve doğal konuş. Kısa cümle kur, en fazla 4 cümle. '
+        + 'Rapor dökme: yalnız sorulan şeye cevap ver. Her cevapta öneri, plan ya da «sıradaki hamle» sunma; '
+        + 'öneriyi yalnız kullanıcı ne yapacağını sorarsa ya da güvenlik (kırmızı bayrak) gerektirirse yap. '
+        + (e.tur === 'hal' ? 'Kullanıcı nasıl hissettiğini anlatıyor: önce dinle ve anla, öneri sıralama; istersen tek bir soru sor. '
+          : e.tur === 'oneri' ? 'Kullanıcı ne yapacağını soruyor: brifingdeki sıradaki işi gerekçesiyle tek öneri olarak söyle. '
+          : e.tur === 'konu' ? 'Kullanıcı bir kavram soruyor: kısaca anlat; kendi durumuna dair sayı yazma. ' : ''),
       /* Hafiza ETIKETIYLE gelir (LIFEOS.Hafiza.baglam); bos ise bolum yok. */
       hafiza:SP.Hafizam ? SP.Hafizam.baglam({ ajan:'spi' }) : '',
       brifing:JSON.stringify(b),
@@ -506,20 +672,35 @@ SP.Office = (function(){
   async function ask(agentId, question, opts){
     const o = opts || {};
     const b = o.brief || brief(agentId);
-    const fallback = { text:ruleText(agentId, b), source:'rules', brief:b };
+    /* Sohbette (Danışma) mesaj önce sınıflanır; toplantı ve brifing gibi
+       görev çağrıları eski yoldan gider (o.sohbet yok). */
+    const tur = o.sohbet ? sohbetTuru(question) : null;
+    const fallback = { text:tur ? sohbetCevabi(agentId, tur, question, b) : ruleText(agentId, b), source:'rules', brief:b, tur };
 
     const cfg = cfgFor(agentId);
-    if(!SP.LLM.ready(cfg)) return fallback;
+    const yerel = SP.LLM.ready(cfg);
+    const MM = merkezde() ? merkez() : null;
+    if(!MM && !yerel) return fallback;
 
     /* Gecmis acikca kapatilabilir: toplantida her ajan gundeme TEK
        basina cevap verir, sohbet gecmisi oraya karismaz. */
     const gecmis = o.history === false ? [] : historyFor(agentId, o.history);
-    const selam = !!(question && window.LIFEOS && LIFEOS.Ofis.selamMi && LIFEOS.Ofis.selamMi(question));
+    const selam = tur ? tur === 'selam'
+      : !!(question && window.LIFEOS && LIFEOS.Ofis.selamMi && LIFEOS.Ofis.selamMi(question));
+    const mesajlar = gecmis.concat([{ role:'user', text:question || 'Durumu özetle.' }]);
 
     try{
-      const res = await SP.LLM.chat(cfg, {
-        system:systemPrompt(agentId, b, { selam, model:cfg.model }),
-        messages:gecmis.concat([{ role:'user', text:question || 'Durumu özetle.' }]),
+      let res = null;
+      /* Önce HKM'nin modeli (tek ayar yeri). Düşerse ve bu cihazda eski
+         bir yerel ayar varsa o denenir; yoksa kural cümlesi. */
+      if(MM){
+        const r = await MM.sor({ sistem:systemPrompt(agentId, b, { selam, tur }), mesajlar, baglam:selam ? '' : JSON.stringify(b) });
+        if(r && r.ok && r.text) res = { text:r.text, model:(r.model || '') + ' · Merkez' };
+        else if(!yerel) return Object.assign({}, fallback, { note:'Merkez modeli cevap vermedi: ' + ((r && r.note) || 'sebep bilinmiyor') });
+      }
+      if(!res) res = await SP.LLM.chat(cfg, {
+        system:systemPrompt(agentId, b, { selam, model:cfg.model, tur }),
+        messages:mesajlar,
         temperature:settings().temperature,
         maxTokens:o.maxTokens || 600,
       });
@@ -529,7 +710,7 @@ SP.Office = (function(){
           note:'Model istemi geri yazdı; kural motorunun cümlesi gösterildi.' };
       }
       /* Model adindaki rakam («gemma3:4b») uydurma sayi degildir. */
-      const havuzEk = { model:String(cfg.model || '') };
+      const havuzEk = { model:String(res.model || cfg.model || '') };
       const check = validate(res.text, { agentId, brief:selam ? havuzEk : Object.assign({}, b, havuzEk) });
       if(!check.ok){
         return { text:fallback.text, source:'rules', brief:b,
@@ -537,7 +718,7 @@ SP.Office = (function(){
       }
       /* Istemdeki tavan («En fazla 4 cümle») kodda da uygulanir. */
       const kisa = SP.LLM.capSentences ? SP.LLM.capSentences(res.text, o.sentences || CUMLE_TAVANI) : res.text.trim();
-      return { text:kisa, source:'model', brief:b, model:cfg.model };
+      return { text:kisa, source:'model', brief:b, model:res.model || cfg.model, tur };
     }catch(e){
       return Object.assign({}, fallback, {
         error:SP.LLM.errorText ? SP.LLM.errorText(e) : String(e && e.message || e) });
@@ -945,12 +1126,13 @@ SP.Office = (function(){
   /* ----------------------------------------------------------------- sohbet */
 
   async function send(agentId, text){
+    /* Not: sohbet turu (selam/hal/oneri/konu/veri) ask içinde belirlenir. */
     const list = SP.S.officeChats[agentId] || (SP.S.officeChats[agentId] = []);
     /* Gecmis, soru listeye YAZILMADAN once alinir. Sonra alinsaydi soru
        hem gecmiste hem son mesajda yer alir, modele iki kez giderdi. */
     const gecmis = historyFor(agentId);
     list.push({ role:'user', text, at:new Date().toISOString() });
-    const res = await ask(agentId, text, { history:gecmis.length ? gecmis : false });
+    const res = await ask(agentId, text, { history:gecmis.length ? gecmis : false, sohbet:true });
     list.push({ role:'agent', text:res.text, source:res.source, at:new Date().toISOString(),
       blocked:res.blocked || null, error:res.error || null });
     await SP.Store.set('chats/' + agentId, { agentId, messages:list });
@@ -982,6 +1164,8 @@ SP.Office = (function(){
     ((await SP.Store.list('briefings')) || []).forEach(row => {
       SP.S.officeBriefings[row.date || row.id] = row;
     });
+    /* Merkez modelinin durumu arkada sorulur; açılış beklemez. */
+    { const MM = merkez(); if(MM && MM.bagli()) MM.tazele().catch(() => null); }
     return SP.S.office;
   }
 
@@ -990,6 +1174,6 @@ SP.Office = (function(){
     brief, labBrief, nutriBrief, moveBrief, moneyBrief, patronBrief,
     ruleText, systemPrompt, validate, ask, historyFor, HAFIZA_TUR,
     notes, handoffs, handoffsFor, agendaCandidates, dailyBriefing, runMeeting,
-    send, clearChat, setChat, load,
+    send, clearChat, setChat, load, sohbetTuru, sohbetCevabi, alanOf, merkez, merkezde,
   };
 })();

@@ -25,7 +25,7 @@ SP.Screens.today = (function(){
 
   /* Girilecek alanlar tek yerde tanimlanir; form da, kaydetme de bunu okur. */
   const FIELDS = [
-    { id:'sleep',    label:'Uyku (saat)',        step:'0.5', min:0,  max:16,  marker:'sleep' },
+    { id:'sleep',    label:'Gece uykusu (saat)',        step:'0.5', min:0,  max:16,  marker:'sleep' },
     { id:'rhr',      label:'İstirahat nabzı',    step:'1',   min:30, max:140, marker:'rhr' },
     { id:'hrv',      label:'HRV (ms)',           step:'1',   min:5,  max:250, marker:'hrv' },
     { id:'sbp',      label:'Büyük tansiyon',     step:'1',   min:60, max:250, marker:'sbp' },
@@ -200,6 +200,7 @@ SP.Screens.today = (function(){
           input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
             min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
         }))}</div>
+        ${KestirmeSatiri(d, true)}
         ${K.Field({ label:'Bugün nasıl hissediyorsun?',
           hint:'cihazın göremediği tek girdi',
           input:K.Segmented({ act:'set-soreness', value:v.soreness == null ? '' : String(v.soreness),
@@ -824,11 +825,48 @@ SP.Screens.today = (function(){
           input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
             min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
         }))}</div>
+        ${KestirmeSatiri(d, false)}
         <div id="suphe-yuva" aria-live="polite"></div>
         <div class="row wrap gap-8 mt-8">
           ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}
           ${K.Button({ label:'Bütün alanlar', tone:'ghost', act:'day-tab', data:{ 'data-tab':'giris' } })}
         </div>` });
+  }
+
+  /* KISA UYKULAR (core/uyku.js): gece uykusundan ayrı, birden çok.
+     Bugün'ün düğme bütçesi (14, bugun.test) aşılmasın diye Bugün'de satır
+     yalnız girilmiş kısa uyku varsa çizilir; ekleme «Ne yaptın?»
+     kutusundan («öğlen 30 dk uyudum») ya da «Bütün alanlar»dan. */
+  /* Toparlanma hesaplanamayan günün başlığı. Hareket ya da öğün girilmiş
+     günü «veri girilmedi» diye yazmak yanlıştı (70 dk yürüyüş girilmişti). */
+  function bosBaslik(d){
+    const v = M.vitalsOf(d);
+    const var_ = M.workoutsOf(d).length || M.mealsOf(d).length
+      || (v && ['water', 'weight', 'rhr', 'hrv', 'soreness'].some(k => v[k] != null));
+    return var_ ? 'Uyku girilince toparlanma hesaplanır.' : 'Bugünün verisi henüz girilmedi.';
+  }
+
+  function KestirmeSatiri(d, ekle){
+    if(!SP.Uyku) return '';
+    const g = SP.Uyku.gun(d);
+    if(!ekle && !g.kestirme.length) return '';
+    return html`<div class="kestirme" aria-label="Kısa uykular">
+      <span class="kestirme__ad">Kısa uyku</span>
+      ${g.kestirme.length ? map(g.kestirme, k => html`<span class="kestirme__oge">${k.bas ? k.bas + ' · ' : ''}${k.dk} dk
+        <button type="button" class="kestirme__sil" data-act="kestirme-sil" data-id="${k.id}" aria-label="${k.dk} dakikalık kısa uykuyu sil">×</button></span>`)
+        : html`<span class="tiny muted">girilmedi</span>`}
+      ${when(ekle, () => K.Button({ label:'Ekle', icon:'plus', size:'sm', tone:'ghost', act:'kestirme-ac' }))}
+      ${when(g.toplamDk != null && g.kestirme.length, () => html`<span class="tiny muted">Günün toplamı ${SP.Uyku.sureYaz(g.toplamDk)} (hesaplandı)</span>`)}
+    </div>`;
+  }
+  function kestirmeSheet(hata){
+    UI.sheet({ title:'Kısa uyku', subtitle:'Gece uykusuna eklenmez; ayrı sayılır',
+      body:String(html`<div class="grid-form">
+        ${K.Field({ label:'Süre (dakika)', input:K.Input({ id:'kz-dk', type:'number', numeric:true, min:1, max:240, placeholder:'30' }) })}
+        ${K.Field({ label:'Başlangıç', hint:'isteğe bağlı', input:K.Input({ id:'kz-bas', type:'time' }) })}
+      </div>${when(hata, () => html`<p class="small" role="alert">${hata}</p>`)}`),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'kestirme-kaydet' })}`) });
   }
 
   /* Sade Bugün (2026-10-16): öğün de «Ne yaptın?» kutusundan girilir
@@ -1348,6 +1386,24 @@ SP.Screens.today = (function(){
       await M.saveVitals(shownDate(), { soreness:Number(el.dataset.value) });
       SP.App.render();
     },
+    'kestirme-ac'(){ kestirmeSheet(null); },
+    async 'kestirme-kaydet'(){
+      const dk = (document.getElementById('kz-dk') || {}).value || '';
+      const bas = (document.getElementById('kz-bas') || {}).value || null;
+      const d = shownDate();
+      const r = await SP.Uyku.ekle(d, { dk:Number(String(dk).replace(',', '.')), bas });
+      if(!r.ok){ kestirmeSheet(r.why); return; }
+      UI.closeSheet();
+      UI.toast('Kısa uyku kaydedildi', { undo:async () => { await SP.Uyku.sil(d, r.kayit.id); SP.App.render(); } });
+      SP.App.render();
+    },
+    async 'kestirme-sil'(el){
+      const d = shownDate();
+      const eski = await SP.Uyku.sil(d, el.dataset.id);
+      if(!eski) return;
+      UI.toast('Kısa uyku silindi', { undo:async () => { await SP.Uyku.ekle(d, eski); SP.App.render(); } });
+      SP.App.render();
+    },
     async 'save-vitals'(){
       /* YALNIZ DEĞİŞTİRİLEN ALAN YAZILIR (hesap.js, 2026-10-05). Form
          çizildikten sonra öteki cihazdan gelen değer modelde tazelenir,
@@ -1454,7 +1510,7 @@ SP.Screens.today = (function(){
     sesli(simdi){
       const now = simdi || new Date();
       const r = SP.Move.readiness(SP.U.todayISO());
-      let c = !r.ok ? 'Bugünün verisi henüz girilmedi.'
+      let c = !r.ok ? bosBaslik(SP.U.todayISO())
         : (SP.Calc.minimumDay().complete ? 'Bugün tamam, toparlanma ' : 'Toparlanma ')
           + r.band.label.toLocaleLowerCase('tr-TR') + '.';
       const h = SP.Hatirlat ? SP.Hatirlat.bugun(now).find(x => x.durum === 'sonra') : null;
@@ -1464,7 +1520,7 @@ SP.Screens.today = (function(){
     headline(){
       const d = shownDate();
       const r = SP.Move.readiness(d);
-      if(!r.ok) return 'Bugünün verisi henüz girilmedi.';
+      if(!r.ok) return bosBaslik(d);
       const m = SP.Calc.minimumDay();
       if(m.complete) return 'Bugün tamam — toparlanma '
         + r.band.label.toLocaleLowerCase('tr-TR') + '.';

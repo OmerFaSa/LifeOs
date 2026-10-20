@@ -36,7 +36,7 @@ SP.Hazir = (function(){
   function ogunler(){ return Array.isArray(P().hazirOgunler) ? P().hazirOgunler.filter(x => x && x.id && Array.isArray(x.items)) : []; }
   function antrenmanlar(){ return Array.isArray(P().hazirAntrenmanlar) ? P().hazirAntrenmanlar.filter(x => x && x.id && x.kayit) : []; }
 
-  function slotAd(id){ const s = (SP.MEAL_SLOTS || []).find(x => x.id === id); return s ? s.label : id; }
+  function slotAd(id){ if(SP.Ogun) return SP.Ogun.ad(id); const s = (SP.MEAL_SLOTS || []).find(x => x.id === id); return s ? s.label : id; }
   function kalemAd(it){
     const f = SP.FOOD_BY_ID && SP.FOOD_BY_ID[it.foodId];
     return (f ? f.name : it.foodId) + (Number(it.g) > 0 ? ' ' + it.g + ' g' : '');

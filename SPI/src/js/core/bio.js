@@ -169,7 +169,8 @@ SP.Bio = (function(){
     const goodDir = b.dir === 'low' ? 'down' : b.dir === 'high' ? 'up' : null;
     const st = statusOf(markerId, trend.last, profile);
     const word = trend.dir === 'up' ? 'yükseliyor' : 'düşüyor';
-    const amount = '90 günde %' + Math.abs(trend.pct);
+    /* Türkçe ondalık virgüldür: «%5,4», «%5.4» değil. */
+    const amount = '90 günde %' + String(Math.abs(trend.pct)).replace('.', ',');
 
     if(goodDir === null){
       /* Bandin ortasi iyi olan olcumler: hedefe yaklasiyorsa iyi, uzaklasiyorsa kotu. */

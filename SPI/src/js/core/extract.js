@@ -70,8 +70,13 @@ SP.Extract = (function(){
     return { mime:m[1], data:m[2] };
   }
 
+  /* Görüntü okuma da HKM'nin modeliyle (HKM › Modeller › «SPİ · Görsel»,
+     atama yoksa King'den miras). Bu cihazda eski bir yerel ayar varsa yedek. */
+  function merkez(){ return SP.Office && SP.Office.merkez ? SP.Office.merkez() : null; }
   function modelReady(){
     try{
+      const MM = merkez();
+      if(MM && MM.gorselHazir()) return true;
       const s = SP.Office.settings();
       return SP.LLM.ready({ provider:s.provider, model:s.model });
     }catch(e){ return false; }
@@ -81,6 +86,12 @@ SP.Extract = (function(){
 
      Disari cikan TEK nokta. Arindirma buraya takilacak. */
   async function send(req){
+    const MM = merkez();
+    if(MM && MM.gorselHazir() && (req.messages || []).some(m => m && m.images && m.images.length)){
+      const r = await MM.sor({ yetenek:'gorsel', sistem:req.system || '', mesajlar:req.messages });
+      if(r && r.ok && r.text) return { text:r.text, model:r.model, provider:'merkez' };
+      throw Object.assign(new Error((r && r.note) || 'Merkez modeli görüntüyü okuyamadı.'), { code:'merkez' });
+    }
     const s = SP.Office.settings();
     return SP.LLM.chat(Object.assign({
       provider:s.provider,
@@ -135,8 +146,8 @@ SP.Extract = (function(){
       return empty('Bu dosya türü okunamıyor. PDF, görüntü ya da metin dosyası ver.');
     }
     if(!modelReady()){
-      return empty('Görüntü ve PDF okumak için Ayarlar → Rehber → Model bölümünden '
-        + 'bir model bağlaman gerekiyor. Rapor metnini yapıştırarak modelsiz de girebilirsin.');
+      return empty('Görüntü ve PDF okumak için HKM › Modeller’de «SPİ · Görsel» (ya da King) için '
+        + 'bir model atanmalı. Rapor metnini yapıştırarak modelsiz de girebilirsin.');
     }
     if(isPdf(file)){
       return empty('PDF doğrudan okunamıyor. Raporun ekran görüntüsünü ver ya da '
@@ -318,7 +329,7 @@ SP.Extract = (function(){
     }
     if(!modelReady()){
       return { ok:false,
-        note:'Fotoğraftan beden analizi için Ayarlar → Rehber → Model bölümünden görüntü destekleyen bir model bağlaman gerekiyor.' };
+        note:'Fotoğraftan beden analizi için HKM › Modeller’de «SPİ · Görsel» (ya da King) için görüntü okuyan bir model atanmalı.' };
     }
 
     const parts = splitDataUrl(await readDataUrl(file));

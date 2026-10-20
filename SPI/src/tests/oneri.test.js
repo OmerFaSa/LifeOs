@@ -538,7 +538,7 @@
 
     it('her önerinin bir hedef ekranı vardır', () => {
       /* Kullanıcı yazdığını GÖRMELİ: kayıttan sonra bir yere gidilir. */
-      const rota = { 'vital-yaz':'today', 'ogun-ekle':'meals', 'seans-ekle':'move',
+      const rota = { 'vital-yaz':'today', 'kestirme-ekle':'today', 'ogun-ekle':'meals', 'seans-ekle':'move',
         'olcum-gir':'labs', 'semptom-isaretle':'today', 'bolum-ac-kapa':'guide',
         'plan-uygula':'today', 'program-ekle':'today' };
       SP.Proposals.katalogIdleri().forEach(id => {

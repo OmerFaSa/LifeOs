@@ -98,7 +98,7 @@ SP.S = {
     markerOpen:null,       // acik biyobelirtec ayrintisi
     mealDate:null,         // gorunen gun (null = bugun)
     mealTab:'gunluk',      // gunluk | oneri | deger
-    mealSlot:'kahvalti',
+    mealSlot:null,         // null = şimdiki saate göre (core/ogun.js)
     foodQuery:'',
     foodCat:'all',
     foodPage:1,
@@ -901,6 +901,8 @@ SP.Model = (function(){
     S.profile = (await SP.Store.get('profile')) || defaultProfile();
     S.profile.id = activeProfileId();
     S.prefs = Object.assign(defaultPrefs(), await SP.Store.get('prefs'));
+    /* Kullanıcının öğün adları ve saatleri (core/ogun.js). */
+    if(SP.Ogun) SP.Ogun.yay();
 
     S.labs = ((await SP.Store.list('labs')) || []).map(normLab)
       .sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);

@@ -128,7 +128,7 @@ SP.REHBER_KONULAR = [
         ornek:{ soru:'30 g karbonhidrat, 20 g protein ve 10 g yağ içeren bir öğün yaklaşık kaç kcal’dir?',
           cozum:['Karbonhidrat: 30 × 4 = 120 kcal.', 'Protein: 20 × 4 = 80 kcal.', 'Yağ: 10 × 9 = 90 kcal.', 'Toplam 120 + 80 + 90 = 290 kcal.'] } },
       { baslik:'Harcama: bazal ve toplam', metin:'Vücudun dinlenirken yaşamak için harcadığı enerjiye **bazal metabolizma** denir ve günlük harcamanın en büyük kısmıdır. Üzerine günlük hareket, egzersiz ve sindirim eklenince **günlük toplam harcama** çıkar. Bazal metabolizmayı tahmin etmek için Mifflin–St Jeor denklemi yaygın kullanılır.',
-        formul:['Erkek: 10 × kilo(kg) + 6,25 × boy(cm) − 5 × yaş + 5', 'Kadın: 10 × kilo(kg) + 6,25 × boy(cm) − 5 × yaş − 161', 'Günlük toplam ≈ bazal × aktivite katsayısı (yaklaşık 1,2 hareketsiz … 1,7 çok hareketli)'],
+        formul:['Erkek: 10 × kilo(kg) + 6,25 × boy(cm) − 5 × yaş + 5', 'Kadın: 10 × kilo(kg) + 6,25 × boy(cm) − 5 × yaş − 161', 'SPİ’de günlük ihtiyaç = bazal + o gün girilen hareketin enerjisi ((MET − 1) × kilo × saat); hareket girilmeyen gün bazal kadardır'],
         ornek:{ soru:'80 kg, 180 cm, 30 yaşında bir erkeğin bazal metabolizması bu denklemle yaklaşık kaçtır?',
           cozum:['10 × 80 = 800', '6,25 × 180 = 1125', '5 × 30 = 150', '800 + 1125 − 150 + 5 = 1780 kcal (tahmin).'] },
         dikkat:'Bu denklemler bir ortalama verir; aynı boy ve kilodaki iki kişinin gerçek harcaması yüzlerce kcal farklı olabilir. SPİ bu yüzden tahmini «tahmin» etiketiyle gösterir.' },

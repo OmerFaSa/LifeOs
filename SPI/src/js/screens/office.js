@@ -274,7 +274,7 @@ SP.Screens.office = (function(){
             <div class="tiny dim">${a.detail}</div></div>
           ${P.avatar(a.owner, 'sm')}
         </div>`)}</div>`,
-      foot:K.Button({ label:'Toplantıyı başlat', size:'sm', tone:'primary',
+      foot:K.Button({ label:'İncelemeyi aç', size:'sm', tone:'primary',
         act:'go', data:{ 'data-route':'meeting' } }),
     });
   }
@@ -443,7 +443,7 @@ SP.Screens.office = (function(){
         + (open ? ' · ' + open + ' karar takipte' : '');
     },
     actions(){
-      return String(K.Button({ label:'Toplantı', size:'sm', icon:'users', class:'btn--screen',
+      return String(K.Button({ label:'İnceleme', size:'sm', icon:'users', class:'btn--screen',
         act:'go', data:{ 'data-route':'meeting' } }));
     },
     render, handle,

@@ -2544,3 +2544,181 @@ body.is-dragging .drop.is-over{
 .hp-hareket .field:last-child{ flex:0 0 110px; }
 .hp-hata{ color:var(--danger); margin-top:12px; }
 @media (max-width:520px){ .hp-satir{ grid-template-columns:32px 1fr; } .hp-satir > .btn{ grid-column:2; justify-self:start; margin-top:8px; } }
+
+
+/* ---------- Planlar: alışkanlık karoları, takip penceresi (2026-10-20) ----------
+   Kullanıcı: «küçük alışkanlıklar daha güzel görünsün; sistemle uyumlu küçük
+   ikonlar, daha geniş bir pencerede takip». Karo: simge, ad, zaman, n / hedef.
+   Kayda bağlı karo kesik çerçevelidir (dokunulmaz, kayıttan sayılır). */
+.hp-satir__dug{ display:flex; flex-direction:column; gap:6px; align-items:flex-end; align-self:center; }
+.hp-karolar{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.hp-karo{ display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:4px 12px 4px 4px; border:1px solid var(--border);
+  border-radius:999px; background:var(--surface); color:var(--text); font:inherit; font-size:13px; cursor:pointer;
+  transition:background var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.hp-karo:hover{ border-color:color-mix(in oklab, var(--primary) 45%, var(--border)); }
+.hp-karo__simge{ width:28px; height:28px; flex:0 0 28px; display:grid; place-items:center; border-radius:999px;
+  background:var(--surface-2); color:var(--primary); }
+.hp-karo__simge svg, .hp-takip__simge svg, .hp-simge-sec svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8;
+  stroke-linecap:round; stroke-linejoin:round; }
+.hp-karo__ad{ font-weight:600; }
+.hp-karo__zaman{ color:var(--text-3); font-size:12px; }
+.hp-karo__sayi{ color:var(--text-2); font-size:12px; font-variant-numeric:tabular-nums; }
+.hp-karo.is-on{ background:color-mix(in oklab, var(--primary) 14%, var(--surface)); border-color:color-mix(in oklab, var(--primary) 50%, var(--border)); }
+.hp-karo.is-on .hp-karo__simge{ background:var(--primary); color:var(--primary-ink, #fff); }
+.hp-karo.is-yari .hp-karo__simge{ background:color-mix(in oklab, var(--primary) 22%, var(--surface-2)); }
+.hp-karo.is-bagli{ border-style:dashed; cursor:default; }
+
+.hp-takip{ display:flex; flex-direction:column; gap:14px; }
+.hp-takip__su{ display:flex; align-items:center; gap:14px; padding:14px; border-radius:var(--r-md); background:var(--surface-2); }
+.hp-takip__su small{ display:block; color:var(--text-3); font-size:12.5px; margin-top:2px; }
+.hp-takip__cubuk{ display:block; height:6px; margin-top:8px; border-radius:999px; background:color-mix(in oklab, var(--border) 80%, transparent); overflow:hidden; }
+.hp-takip__cubuk i{ display:block; height:100%; border-radius:inherit; background:var(--primary); }
+.hp-takip__izgara{ display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
+.hp-takip__kart{ display:grid; grid-template-columns:48px 1fr; grid-template-rows:auto auto; gap:6px 12px; padding:14px;
+  border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface); }
+.hp-takip__kart.is-on{ border-color:color-mix(in oklab, var(--primary) 45%, var(--border)); }
+.hp-takip__simge{ --oran:0deg; width:48px; height:48px; display:grid; place-items:center; border-radius:999px; color:var(--primary);
+  background:radial-gradient(closest-side, var(--surface) 78%, transparent 80%),
+    conic-gradient(var(--primary) var(--oran), color-mix(in oklab, var(--border) 85%, transparent) 0); }
+.hp-takip__simge svg{ width:20px; height:20px; }
+.hp-takip__su .hp-takip__simge{ background:var(--surface); }
+.hp-takip__metin{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.hp-takip__metin b{ font-size:15px; }
+.hp-takip__metin small{ color:var(--text-3); font-size:12.5px; }
+.hp-takip__gecmis{ display:flex; gap:5px; margin-top:6px; }
+.hp-nokta{ width:10px; height:10px; border-radius:999px; border:1.5px solid var(--text-3); display:inline-block; }
+.hp-nokta--tamam{ background:var(--primary); border-color:var(--primary); }
+.hp-nokta--eksik{ background:linear-gradient(90deg, var(--primary) 50%, transparent 50%); border-color:var(--primary); }
+.hp-nokta--gun-degil{ border-style:dotted; opacity:.45; }
+.hp-takip__sayac{ grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; gap:8px; padding-top:6px;
+  border-top:1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+.hp-takip__sayac .num{ font-variant-numeric:tabular-nums; color:var(--text-2); }
+.hp-takip__sayac .num b{ font-size:20px; color:var(--text); }
+
+.hp-zaman{ display:flex; gap:6px; }
+.hp-zaman .select{ min-width:110px; }
+.hp-madde-kart{ display:flex; flex-direction:column; gap:10px; padding:12px; border:1px solid var(--border); border-radius:var(--r-md); }
+.hp-madde-ayar{ display:flex; flex-wrap:wrap; gap:10px; }
+.hp-madde-ayar .field{ flex:1 1 150px; }
+.hp-simgeler{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.hp-simge-sec{ width:34px; height:34px; display:grid; place-items:center; border-radius:10px; border:1px solid var(--border);
+  background:none; color:var(--text-2); cursor:pointer; }
+.hp-simge-sec.is-on{ border-color:var(--primary); color:var(--primary); background:color-mix(in oklab, var(--primary) 12%, transparent); }
+.hp-simge-ac summary{ cursor:pointer; color:var(--text-3); }
+.hp-uyku-gunler{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:12px; }
+
+/* Bugün › Günün ölçümü › kısa uyku (core/uyku.js) */
+.kestirme{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; font-size:13px; }
+.kestirme__ad{ color:var(--text-2); font-weight:600; }
+.kestirme__oge{ display:inline-flex; align-items:center; gap:4px; padding:2px 4px 2px 10px; border-radius:999px; background:var(--surface-2); }
+.kestirme__sil{ border:0; background:none; color:var(--text-3); cursor:pointer; min-width:24px; min-height:24px; font-size:15px; }
+.ogun-satir > .input:first-child{ flex:1 1 160px; }
+.ogun-satir > .input[type="time"]{ flex:0 0 120px; }
+@media (max-width:520px){ .hp-satir__dug{ grid-column:2; flex-direction:row; align-items:center; margin-top:8px; } .hp-takip__izgara{ grid-template-columns:1fr; } }
+
+
+/* ---------- Ofis › İnceleme (2026-10-20) ----------
+   Kayıttan sayılar, gündem çubukları, iki grup karşılaştırması (fikir),
+   belirgin bağlar, plan uyumu ve tek karar. Grafik: yatay çubuklar; renk
+   yalnız iki grubu ayırır (yön bildirmez). */
+.inc{ display:flex; flex-direction:column; gap:16px; }
+.inc-iki{ display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; align-items:start; }
+.inc-sayilar{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; }
+.inc-sayi{ display:flex; flex-direction:column; gap:2px; padding:12px; border-radius:var(--r-md); background:var(--surface-2); }
+.inc-sayi__ad{ font-size:12.5px; color:var(--text-3); }
+.inc-sayi__deger{ font-size:24px; font-weight:650; font-variant-numeric:tabular-nums; }
+.inc-sayi__deger small{ font-size:13px; font-weight:500; color:var(--text-3); margin-left:3px; }
+.inc-sayi__not{ font-size:11.5px; color:var(--text-3); }
+.inc-gundem{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.inc-gundem li{ position:relative; display:flex; gap:12px; align-items:flex-start; padding:10px 0 10px 14px; }
+.inc-gundem li + li{ border-top:1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+.inc-gundem__cubuk{ position:absolute; left:0; top:12px; bottom:12px; width:4px; border-radius:999px;
+  background:linear-gradient(to top, var(--primary) var(--oran), color-mix(in oklab, var(--border) 80%, transparent) var(--oran)); }
+.inc-gundem b{ display:block; font-size:14.5px; }
+.inc-gundem span{ display:block; font-size:13px; color:var(--text-2); }
+.inc-gundem small{ display:block; font-size:12px; color:var(--text-3); margin-top:2px; }
+.inc-fikirler{ display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:14px; }
+.inc-fikir{ display:flex; flex-direction:column; gap:8px; padding:14px; border:1px solid var(--border); border-radius:var(--r-md); }
+.inc-fikir__baslik{ font-size:14.5px; }
+.inc-fikir__bar{ display:grid; grid-template-columns:minmax(120px, 1.2fr) 2fr auto auto; gap:8px; align-items:center; font-size:12.5px; }
+.inc-fikir__bar span{ color:var(--text-2); }
+.inc-fikir__bar i{ height:10px; border-radius:999px; background:var(--primary); min-width:4px; }
+.inc-fikir__bar i.is-b{ background:color-mix(in oklab, var(--text-3) 55%, transparent); }
+.inc-fikir__bar b{ font-variant-numeric:tabular-nums; white-space:nowrap; }
+.inc-fikir__bar small{ color:var(--text-3); white-space:nowrap; }
+.inc-bulgular, .inc-planlar{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.inc-bulgular li, .inc-planlar li{ display:flex; flex-direction:column; gap:2px; font-size:13px; }
+.inc-bulgular li span, .inc-planlar li span{ color:var(--text-2); }
+.inc-bulgular li.is-warn b::before{ content:'▲ '; color:var(--warn, var(--text-2)); }
+.inc-etiket{ font-size:11px; color:var(--text-3); font-weight:400; }
+.inc-etiket::before{ content:'· '; }
+.inc-karar p{ margin:0 0 6px; }
+.inc-ozet{ padding:12px; border-radius:var(--r-md); background:var(--surface-2); }
+.inc-ozet p{ margin:6px 0 0; }
+@media (max-width:520px){ .inc-fikir__bar{ grid-template-columns:1fr auto auto; } .inc-fikir__bar i{ grid-column:1 / -1; grid-row:2; } }
+
+
+/* ---------- Ofis › İnceleme (2026-10-20) ----------
+   Kayıttan sayılar, gündem çubukları, iki grup karşılaştırması (fikir),
+   belirgin bağlar, plan uyumu ve tek karar. Grafik: yatay çubuklar; renk
+   yalnız iki grubu ayırır (yön bildirmez). */
+.inc{ display:flex; flex-direction:column; gap:16px; }
+.inc-iki{ display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; align-items:start; }
+.inc-sayilar{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; }
+.inc-sayi{ display:flex; flex-direction:column; gap:2px; padding:12px; border-radius:var(--r-md); background:var(--surface-2); }
+.inc-sayi__ad{ font-size:12.5px; color:var(--text-3); }
+.inc-sayi__deger{ font-size:24px; font-weight:650; font-variant-numeric:tabular-nums; }
+.inc-sayi__deger small{ font-size:13px; font-weight:500; color:var(--text-3); margin-left:3px; }
+.inc-sayi__not{ font-size:11.5px; color:var(--text-3); }
+.inc-gundem{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.inc-gundem li{ position:relative; display:flex; gap:12px; align-items:flex-start; padding:10px 0 10px 14px; }
+.inc-gundem li + li{ border-top:1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+.inc-gundem__cubuk{ position:absolute; left:0; top:12px; bottom:12px; width:4px; border-radius:999px;
+  background:linear-gradient(to top, var(--primary) var(--oran), color-mix(in oklab, var(--border) 80%, transparent) var(--oran)); }
+.inc-gundem b{ display:block; font-size:14.5px; }
+.inc-gundem span{ display:block; font-size:13px; color:var(--text-2); }
+.inc-gundem small{ display:block; font-size:12px; color:var(--text-3); margin-top:2px; }
+.inc-fikirler{ display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:14px; }
+.inc-fikir{ display:flex; flex-direction:column; gap:8px; padding:14px; border:1px solid var(--border); border-radius:var(--r-md); }
+.inc-fikir__baslik{ font-size:14.5px; }
+.inc-fikir__bar{ display:grid; grid-template-columns:minmax(120px, 1.2fr) 2fr auto auto; gap:8px; align-items:center; font-size:12.5px; }
+.inc-fikir__bar span{ color:var(--text-2); }
+.inc-fikir__bar i{ height:10px; border-radius:999px; background:var(--primary); min-width:4px; }
+.inc-fikir__bar i.is-b{ background:color-mix(in oklab, var(--text-3) 55%, transparent); }
+.inc-fikir__bar b{ font-variant-numeric:tabular-nums; white-space:nowrap; }
+.inc-fikir__bar small{ color:var(--text-3); white-space:nowrap; }
+.inc-bulgular, .inc-planlar{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.inc-bulgular li, .inc-planlar li{ display:flex; flex-direction:column; gap:2px; font-size:13px; }
+.inc-bulgular li span, .inc-planlar li span{ color:var(--text-2); }
+.inc-etiket{ font-size:11px; color:var(--text-3); font-weight:400; }
+.inc-etiket::before{ content:'· '; }
+.inc-karar p{ margin:0 0 6px; }
+.inc-ozet{ padding:12px; border-radius:var(--r-md); background:var(--surface-2); }
+.inc-ozet p{ margin:6px 0 0; }
+@media (max-width:520px){ .inc-fikir__bar{ grid-template-columns:1fr auto auto; } .inc-fikir__bar i{ grid-column:1 / -1; grid-row:2; } }
+
+
+/* ---------- Analiz › Bu hafta (2026-10-20) ----------
+   Dört özet karo (mini sütunlu), bugünün enerji dengesi, altta kategoriler.
+   Renk yalnız ölçümleri ayırır; yön bildirmez. */
+.ozet-izgara{ display:grid; grid-template-columns:repeat(auto-fit, minmax(165px, 1fr)); gap:12px; }
+.ozet-kare{ --renk:var(--primary); display:flex; flex-direction:column; gap:6px; padding:14px; text-align:left; font:inherit; color:var(--text);
+  border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface); cursor:pointer; transition:border-color .15s ease; }
+.ozet-kare:hover{ border-color:color-mix(in oklab, var(--renk) 55%, var(--border)); }
+.ozet-kare__ad{ font-size:12.5px; color:var(--text-2); font-weight:600; }
+.ozet-kare__deger{ font-size:26px; font-weight:650; font-variant-numeric:tabular-nums; }
+.ozet-kare__deger small{ font-size:12.5px; font-weight:500; color:var(--text-3); }
+.ozet-kare__sutun{ width:100%; height:30px; }
+.ozet-kare__bos{ fill:var(--text-3); opacity:.5; }
+.ozet-kare__not{ font-size:11.5px; color:var(--text-3); }
+.enerji-satir{ display:grid; grid-template-columns:70px 1fr auto; grid-template-rows:auto auto; gap:2px 12px; align-items:center; padding:6px 0; }
+.enerji-satir > span:first-child{ font-size:13px; color:var(--text-2); }
+.enerji-satir__iz{ height:12px; border-radius:999px; background:var(--surface-2); overflow:hidden; }
+.enerji-satir__iz i{ display:block; height:100%; border-radius:inherit; }
+.enerji-satir__iz i.is-ihtiyac{ background:color-mix(in oklab, var(--text-3) 70%, transparent); }
+.enerji-satir__iz i.is-hedef{ background:var(--primary); }
+.enerji-satir__iz i.is-alinan{ background:var(--esp); }
+.enerji-satir b{ font-variant-numeric:tabular-nums; font-size:13.5px; }
+.enerji-satir small{ grid-column:2 / -1; font-size:11.5px; color:var(--text-3); }
+.analiz-ara-baslik{ margin:28px 2px 10px; font-size:15px; font-weight:650; color:var(--text-2); }
+.analiz-ayrinti{ display:flex; justify-content:center; margin:16px 0 4px; }

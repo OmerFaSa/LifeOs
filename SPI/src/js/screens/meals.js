@@ -16,16 +16,10 @@ SP.Screens.meals = (function(){
 
   function shownDate(){ return S.ui.mealDate || U.todayISO(); }
 
-  /* Saate gore makul ogun secimi — kullaniciya sormadan dogru tahmin. */
-  function guessSlot(){
-    const h = new Date().getHours();
-    if(h < 10) return 'kahvalti';
-    if(h < 12) return 'ara1';
-    if(h < 15) return 'ogle';
-    if(h < 18) return 'ara2';
-    if(h < 22) return 'aksam';
-    return 'gece';
-  }
+  /* Saate gore ogun secimi: once kullanicinin kendi ogun saatleri
+     (core/ogun.js), saat yoksa gunun saatine gore yerlesik sira. */
+  function guessSlot(){ return SP.Ogun ? SP.Ogun.simdiki() : 'kahvalti'; }
+  const acikSlotlar = () => SP.MEAL_SLOTS.filter(s => !s.gizli);
 
   /* ---------------------------------------------------------- giris */
 
@@ -73,8 +67,9 @@ SP.Screens.meals = (function(){
         ${K.Button({ label:'Fotoğraftan', icon:'camera', act:'open-photo' })}`,
       body:html`
         <div class="quick">
-          ${K.Select({ id:'meal-slot', value:S.ui.mealSlot, aria:'Öğün yuvası',
-            options:SP.MEAL_SLOTS.map(s => ({ value:s.id, label:s.label })), change:'pick-slot' })}
+          ${K.Select({ id:'meal-slot', value:S.ui.mealSlot || guessSlot(), aria:'Öğün',
+            options:acikSlotlar().map(s => ({ value:s.id, label:s.label + (s.saat ? ' · ' + s.saat : '') })), change:'pick-slot' })}
+          ${K.IconButton({ icon:'gear', size:'sm', plain:true, aria:'Öğünlerimi düzenle', act:'ogun-duzen' })}
           ${K.Mic({ target:'meal-text' })}
           ${K.Input({ id:'meal-text', placeholder:'1 tabak etli kuru fasulye, 2 dilim ekmek, 1 bardak ayran',
             aria:'Öğün metni', value:S.ui.mealDraftText || '' })}
@@ -107,8 +102,8 @@ SP.Screens.meals = (function(){
       body:String(K.Stack([
         when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
           title:'Model bağlı değil.',
-          body:'Fotoğraftan öğün okumak için Ayarlar → Rehber → Model bölümünden '
-            + 'görüntü destekleyen bir sağlayıcı seç. Öğünü tek satır yazarak '
+          body:'Fotoğraftan öğün okumak için HKM › Modeller’de «SPİ · Görsel» (ya da King) için '
+            + 'görüntü okuyan bir model ata. Öğünü tek satır yazarak '
             + 'modelsiz de girebilirsin.' })),
         K.Drop({ act:'meal-photo', label:'Yemek fotoğrafı', icon:'camera', kamera:{},
           accept:'image/*', hint:'Fotoğrafı buraya bırak ya da seçmek için tıkla' }),
@@ -163,6 +158,33 @@ SP.Screens.meals = (function(){
 
   let photoRes = null;
 
+  /* ---------------------------------------------------------- öğünlerim */
+
+  function ogunSheet(){
+    const t = S.ui.ogunTaslak;
+    if(!t) return;
+    UI.sheet({ title:'Öğünlerim', subtitle:'Adını ve saatini sen koy; eski kayıtlar yeni adla görünür',
+      body:String(html`<div class="stack-sm" data-ogun-kok>
+        ${map(t.liste, (x, i) => html`<div class="row gap-8 ogun-satir">
+          ${K.Input({ value:x.label, placeholder:'Gün başlangıcı', aria:'Öğün ' + (i + 1) + ' adı', data:{ 'data-ogun-ad':String(i) } })}
+          ${K.Input({ type:'time', value:x.saat || '', aria:'Öğün ' + (i + 1) + ' saati', data:{ 'data-ogun-saat':String(i) } })}
+          ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'ogun-sil', data:{ 'data-i':String(i) } })}
+        </div>`)}
+        <p>${K.Button({ label:'Öğün ekle', icon:'plus', size:'sm', tone:'ghost', act:'ogun-ekle' })}</p>
+        <p class="tiny muted">Saat yazarsan öğün girerken o saate en yakın öğün kendiliğinden seçilir. Silinen öğünün
+          eski kayıtları adını korur.</p>
+        ${when(t.hata, () => html`<p class="small" role="alert">${t.hata}</p>`)}
+      </div>`),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'ogun-kaydet' })}`), noFocus:true });
+  }
+  function ogunOku(){
+    const t = S.ui.ogunTaslak, kok = document.querySelector('[data-ogun-kok]');
+    if(!t || !kok) return;
+    kok.querySelectorAll('[data-ogun-ad]').forEach(el => { const x = t.liste[Number(el.getAttribute('data-ogun-ad'))]; if(x) x.label = el.value.trim(); });
+    kok.querySelectorAll('[data-ogun-saat]').forEach(el => { const x = t.liste[Number(el.getAttribute('data-ogun-saat'))]; if(x) x.saat = el.value || null; });
+  }
+
   /* ---------------------------------------------------------- ogunler */
 
   function mealCard(meal){
@@ -172,10 +194,10 @@ SP.Screens.meals = (function(){
       <div class="mealcard">
         <div class="mealcard__head">
           ${raw(UI.icon(slot ? slot.icon : 'meal'))}
-          <span class="mealcard__slot">${slot ? slot.label : meal.slot}</span>
+          <span class="mealcard__slot">${SP.Ogun ? SP.Ogun.ad(meal.slot) : (slot ? slot.label : meal.slot)}</span>
           <span class="mealcard__kcal num">${(meal.items || []).some(it => Number(it.g) > 0) ? Math.round(a.raw.kcal) + ' kcal' : '— kcal'}</span>
           ${raw(String(SP.FotoUI.kutu({ sahip:'ogun:' + meal.id, sinif:'foto-kutu--sm',
-            ad:(slot ? slot.label : meal.slot) + ' · ' + U.fmtShort(shownDate()) })))}
+            ad:(SP.Ogun ? SP.Ogun.ad(meal.slot) : (slot ? slot.label : meal.slot)) + ' · ' + U.fmtShort(shownDate()) })))}
           ${when(SP.Hazir && (meal.items || []).length, () => K.IconButton({ icon:'bookmark', size:'sm', plain:true,
             aria:'Hazır öğün yap', act:'hazir-ogun-sakla', data:{ 'data-id':meal.id } }))}
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Öğünü sil',
@@ -252,7 +274,7 @@ SP.Screens.meals = (function(){
     const og = M.mealsOf(d).filter(m => m.at && U.iso(new Date(m.at)) === d).map(m => {
       const t = new Date(m.at);
       const sl = SP.MEAL_SLOTS.find(x => x.id === m.slot);
-      return { saat:t.getHours() + t.getMinutes() / 60, ad:(sl ? sl.label : m.slot) + ' · ' + U.pad2(t.getHours()) + ':' + U.pad2(t.getMinutes()),
+      return { saat:t.getHours() + t.getMinutes() / 60, ad:(SP.Ogun ? SP.Ogun.ad(m.slot) : (sl ? sl.label : m.slot)) + ' · ' + U.pad2(t.getHours()) + ':' + U.pad2(t.getMinutes()),
         kucuk:/^ara/.test(m.slot) };
     });
     const n = new Date();
@@ -296,7 +318,7 @@ SP.Screens.meals = (function(){
         icerik:SP.Hazir.ogunOzet(h), on:bugun.indexOf(anahtar(h.items)) >= 0, data:{ 'data-id':h.id } })) }) : '';
     const sikHtml = sik.length && !duzen ? VT().ogunSablonlari({ act:'sablon-ekle', baslik:'sık öğünler · son 30 gün', sablonlar:sik.map(x => {
       const sl = SP.MEAL_SLOTS.find(y => y.id === x.slot);
-      return { ad:sl ? sl.label : x.slot, icerik:x.ids.map(id => SP.FOOD_BY_ID[id].name.toLocaleLowerCase('tr-TR')).join(' · '),
+      return { ad:SP.Ogun ? SP.Ogun.ad(x.slot) : (sl ? sl.label : x.slot), icerik:x.ids.map(id => SP.FOOD_BY_ID[id].name.toLocaleLowerCase('tr-TR')).join(' · '),
         on:bugun.indexOf(x.anahtar) >= 0, data:{ 'data-date':x.ornek.date, 'data-id':x.ornek.id } };
     }) }) : '';
     return vkutu('Hazır öğünler', '', ust + liste + sikHtml);
@@ -317,7 +339,7 @@ SP.Screens.meals = (function(){
 
   function targetCard(){
     const d = shownDate();
-    const t = SP.Nutri.targets();
+    const t = SP.Nutri.targets(null, d);
     const tot = SP.Nutri.dayTotals(d);
 
     if(!t.ok){
@@ -331,7 +353,8 @@ SP.Screens.meals = (function(){
 
     return K.Card({
       title:'Günlük hedef', hint:'macro-target',
-      sub:t.goal.label + ' · ' + U.fmtNum(t.tdee) + ' kcal ihtiyaç',
+      sub:t.goal.label + ' · ' + U.fmtNum(t.tdee) + ' kcal ihtiyaç'
+        + (t.need && t.need.hareketYok ? ' (hareket girilmedi)' : ''),
       badge:K.Badge({ label:U.fmtNum(t.kcal) + ' kcal', tone:'info' }),
       body:html`
         <div class="nutgrid">
@@ -636,8 +659,8 @@ SP.Screens.meals = (function(){
   /* Bazal metabolizma → hareket → hedef. Her adım ayrı yazılır ki
      çıkan sayının nereden geldiği tartışılabilir olsun. */
   function energyCard(){
-    const tg = SP.Nutri.targets();
-    const p = S.profile || {};
+    const d = shownDate();
+    const tg = SP.Nutri.targets(null, d);
     if(!tg.ok){
       return K.Card({ title:'Günlük enerji',
         body:K.Notice({ tone:'warn', title:'Hesaplanamıyor.',
@@ -646,16 +669,14 @@ SP.Screens.meals = (function(){
         foot:K.Button({ label:'Profili tamamla', size:'sm',
           act:'go', data:{ 'data-route':'family' } }) });
     }
-    /* Gosterilen carpan, HESAPTA kullanilan carpanin ta kendisidir.
-       Profilde hareket duzeyi secilmemisse motor varsayilana duser; kart
-       da o varsayilani yazar, yoksa zincir kendi sayisini yalanlar. */
-    const factor = SP.Nutri.activityFactor(p);
-    const act = SP.ACTIVITY_LEVELS.find(a => a.factor === factor && a.id === p.activity)
-      || SP.ACTIVITY_LEVELS.find(a => a.factor === factor);
-    const guessed = !SP.ACTIVITY_LEVELS.some(a => a.id === p.activity);
+    /* Zincir: bazal metabolizma + o gün GİRİLEN hareket = ihtiyaç → hedef.
+       Hareket düzeyi çarpanı yok (kullanıcı, 2026-10-20): hareket girilmeyen
+       gün ihtiyaç bazal metabolizmadır, tahmin eklenmez. */
+    const n = tg.need;
+    const seans = n.seanslar.map(s => s.ad + ' ' + s.dakika + ' dk · ' + U.fmtNum(s.kcal) + ' kcal').join(' · ');
     return K.Card({
       title:'Günlük enerji', hint:'macro-target',
-      sub:'Bazal metabolizmadan hedefe',
+      sub:U.fmtDate(d) + ' · bazal metabolizma ve girilen hareket',
       badge:K.Badge({ label:tg.goal.label, tone:'info' }),
       body:html`
         <div class="chain">
@@ -664,19 +685,25 @@ SP.Screens.meals = (function(){
             <span class="chain__value num">${U.fmtNum(tg.bmr)}<small>kcal</small></span>
             <span class="chain__note">Mifflin-St Jeor · kilo, boy, yaş ve cinsiyet</span>
           </div>
-          <div class="chain__op">×${U.fmtNet(factor)}</div>
+          <div class="chain__op">+</div>
           <div class="chain__step">
-            <span class="chain__label">Hareketle</span>
+            <span class="chain__label">Girilen hareket</span>
+            <span class="chain__value num">${n.hareketYok ? '—' : U.fmtNum(n.hareket)}<small>kcal</small></span>
+            <span class="chain__note">${n.hareketYok ? 'Bu gün hareket girilmedi; ihtiyaca eklenmedi.'
+              : seans + ' · net MET (hesaplandı)'}${when(n.eksik.length, () => html` <b>Hesaba girmeyen: ${n.eksik.join(', ')}.</b>`)}</span>
+          </div>
+          <div class="chain__op">=</div>
+          <div class="chain__step">
+            <span class="chain__label">İhtiyaç</span>
             <span class="chain__value num">${U.fmtNum(tg.tdee)}<small>kcal</small></span>
-            <span class="chain__note">${act ? act.label : 'varsayılan'}${when(guessed,
-              () => html` <b>(profilde seçilmedi)</b>`)} — ${act ? act.note : ''}</span>
+            <span class="chain__note">hesaplandı · günden güne değişir</span>
           </div>
           <div class="chain__op">${tg.goal.deficit === 0 ? '=' :
             (tg.goal.deficit > 0 ? '+' : '−') + '%' + Math.abs(Math.round(tg.goal.deficit * 100))}</div>
           <div class="chain__step chain__step--end">
             <span class="chain__label">Hedef</span>
             <span class="chain__value num">${U.fmtNum(tg.kcal)}<small>kcal</small></span>
-            <span class="chain__note">${tg.goal.note}</span>
+            <span class="chain__note">${tg.kcalKaynak === 'plan' ? 'Uygulanan planın günlük farkı' : tg.goal.note}${when(tg.bmrTaban, () => ' · bazal metabolizmanın altına inmez')}</span>
           </div>
         </div>
         <div class="cols-3 mt-16">
@@ -1059,6 +1086,21 @@ SP.Screens.meals = (function(){
       if(run) run.disabled = !photoFile || !SP.Extract.modelReady();
     },
     async 'pick-slot'(el){ S.ui.mealSlot = el.value; },
+    /* ÖĞÜNLERİM (core/ogun.js): ad ve saat kullanıcının. */
+    'ogun-duzen'(){ S.ui.ogunTaslak = { liste:SP.Ogun.liste().map(x => Object.assign({}, x)), hata:null }; ogunSheet(); },
+    'ogun-ekle'(){ ogunOku(); const t = S.ui.ogunTaslak; t.liste.push(SP.Ogun.yeni('', null)); ogunSheet(); },
+    'ogun-sil'(el){ ogunOku(); const t = S.ui.ogunTaslak; t.liste.splice(Number(el.dataset.i), 1); ogunSheet(); },
+    async 'ogun-kaydet'(){
+      ogunOku();
+      const t = S.ui.ogunTaslak;
+      const r = await SP.Ogun.kaydet(t.liste);
+      if(!r.ok){ t.hata = r.why; ogunSheet(); return; }
+      S.ui.ogunTaslak = null;
+      if(S.ui.mealSlot && !SP.Ogun.liste().some(x => x.id === S.ui.mealSlot)) S.ui.mealSlot = null;
+      UI.closeSheet();
+      UI.toast('Öğünlerin kaydedildi', { undo:async () => { await SP.Ogun.geriAl(r); UI.toast('Geri alındı'); SP.App.render(); } });
+      SP.App.render();
+    },
     async 'food-query'(el){ S.ui.foodQuery = el.value; S.ui.foodPage = 1; searchSheet(); },
     async 'food-cat'(el){ S.ui.foodCat = el.value; S.ui.foodPage = 1; searchSheet(); },
     async 'barkod-q'(el){ S.ui.barkodQ = el.value; barkodBagSheet(); },

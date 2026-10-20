@@ -129,9 +129,6 @@ SP.Setup = (function(){
           ${K.Field({ label:'Kilo (kg)', hint:'ilk günün ölçümü olarak da kaydedilir',
             input:K.Input({ id:'su-weight', type:'number', numeric:true, step:'0.1',
               min:20, max:250, value:p.weightKg || '', placeholder:'74' }) })}
-          ${K.Field({ label:'Hareket düzeyi', hint:'kalori hedefinin çarpanı',
-            input:K.Select({ id:'su-activity', value:p.activity || 'moderate',
-              options:SP.ACTIVITY_LEVELS.map(a => ({ value:a.id, label:a.label })) }) })}
           ${K.Field({ label:'Hedef', hint:'sonradan değiştirilebilir',
             input:K.Select({ id:'su-goal', value:p.goal || 'health',
               options:SP.GOALS.map(g => ({ value:g.id, label:g.label })) }) })}
@@ -159,7 +156,6 @@ SP.Setup = (function(){
       sex:get('su-sex') || 'male',
       heightCm:numOr(get('su-height')),
       weightKg:numOr(get('su-weight')),
-      activity:get('su-activity') || 'moderate',
       goal:get('su-goal') || 'health',
     };
 

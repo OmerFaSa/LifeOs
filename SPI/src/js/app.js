@@ -50,7 +50,7 @@ SP.App = (function(){
     { id:'ofis', label:CEK('ofis'), views:[
       { route:'office',  label:'Masalar' },
       { route:'team',    label:'Danışma' },
-      { route:'meeting', label:'Toplantı' },
+      { route:'meeting', label:'İnceleme' },
     ]},
     { id:'kutuphane', label:CEK('kutuphane'), views:[
       { route:'notlar', label:'Notlar' },
@@ -475,6 +475,8 @@ SP.App = (function(){
         ${raw(window.LIFEOS.ANIMASYON ? LIFEOS.ANIMASYON.seciciHtml() : '')}
         <div class="appear__label">Zemin</div>
         ${raw(window.LIFEOS.ZEMIN ? LIFEOS.ZEMIN.seciciHtml() : '')}
+        <div class="appear__label">Yüzey · bu modül</div>
+        ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.yuzeySeciciHtml ? LIFEOS.ZEMIN.yuzeySeciciHtml() : '')}
 
         <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
           cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>
@@ -1615,14 +1617,14 @@ SP.App = (function(){
         window.LIFEOS.YETKI.kur({ modul:'spi',
           /* King'in eylem kapısı (yetki.js söz 8): toplantıyı Toplantı ekranının
              kendi düğmesi başlatır; model çağrıları yapılır, bu yüzden orta seviye. */
-          eylemler:[{ id:'toplanti', seviye:'orta', ad:'Toplantı başlat',
-            anla:t => /toplant/.test(t) && /(başlat|başla|aç|yap|topla|kur)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
-            onizle:() => ({ metin:'Ofiste toplantı başlayacak: uzmanlar sırayla konuşur, bunun için yapay zekâ çağrıları yapılır.' }),
+          /* Toplantı İnceleme'ye dönüştü (2026-10-20): model çağrısı yok,
+             ekran kendi verisinden kurulur; bu yüzden küçük seviye. */
+          eylemler:[{ id:'inceleme', seviye:'kucuk', ad:'Veri incelemesini aç',
+            anla:t => /(toplant|incele)/.test(t) && /(başlat|başla|aç|yap|topla|kur|göster)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
+            onizle:() => ({ metin:'Ofis › İnceleme açılacak: haftanın sayıları, kayıttan karşılaştırmalar ve tek karar.' }),
             uygula:async () => {
               go('meeting');
-              await new Promise(r => setTimeout(r, 120));
-              await SP.Screens.meeting.handle['run-meeting']();
-              return { metin:'Toplantıyı başlattım; Toplantı ekranındasın.' };
+              return { metin:'İncelemeyi açtım; Ofis › İnceleme ekranındasın.' };
             } }],
 
           tema:{ oku:() => (S.profile && S.profile.theme) || 'system', yaz:async v => { await M.saveProfile({ theme:v }); applyTheme(); refreshAppearance(); render(); } },
@@ -1750,7 +1752,7 @@ SP.App = (function(){
             }
             const p = SP.Quick && SP.Quick.parse(t);
             /* tur: King'in sohbet karşılığı için (king.js söz 8). */
-            const tur = !p ? '' : p.kind === 'meal' ? 'ogun' : p.kind === 'move' ? 'hareket' : p.kind === 'lab' ? 'tahlil'
+            const tur = !p ? '' : p.kind === 'nap' ? 'uyku' : p.kind === 'meal' ? 'ogun' : p.kind === 'move' ? 'hareket' : p.kind === 'lab' ? 'tahlil'
               : p.data.field.id === 'sleep' ? 'uyku' : p.data.field.id === 'water' ? 'su' : 'olcum';
             return p ? { tur, metin:p.label, ipucu:p.hint, kaydet:async () => {
               /* Geri alma (giris.js söz 8): ne eklendiyse yalnız o kalkar;
@@ -1762,7 +1764,10 @@ SP.App = (function(){
               const r = await SP.Quick.apply(p);
               render();
               let geriAl = null;
-              if(p.kind === 'vital'){
+              if(p.kind === 'nap'){
+                const id = r && r.kayit && r.kayit.id;
+                geriAl = id ? async () => { await SP.Uyku.sil(t, id); render(); } : null;
+              }else if(p.kind === 'vital'){
                 const f = p.data.field.id, eski = once.v[f];
                 geriAl = async () => { const pt = {}; pt[f] = eski == null ? null : eski; await SP.Model.saveVitals(t, pt); render(); };
               }else if(p.kind === 'meal'){
@@ -1816,7 +1821,9 @@ SP.App = (function(){
           const DL = { kahvalti:'sabah', ara1:'sabah', ogle:'ogle', ara2:'ogle', aksam:'aksam', gece:'gece' };
           (SP.S.meals[SP.U.todayISO()] || []).forEach(o => {
             const s = (SP.MEAL_SLOTS || []).find(x => x.id === o.slot);
-            l.push({ id:'ogun-' + o.id, ad:s ? s.label : 'Öğün', dilim:DL[o.slot] || null,
+            const sa = s && s.saat ? Number(s.saat.slice(0, 2)) : null;
+            const dilim = DL[o.slot] || (sa == null ? null : sa < 11 ? 'sabah' : sa < 17 ? 'ogle' : sa < 22 ? 'aksam' : 'gece');
+            l.push({ id:'ogun-' + o.id, ad:SP.Ogun ? SP.Ogun.ad(o.slot) : (s ? s.label : 'Öğün'), dilim,
               alt:(o.items || []).map(it => (SP.FOOD_BY_ID[it.foodId] || {}).name).filter(Boolean).slice(0, 3).join(', '),
               durum:'bitti', rota:'meals' });
           });

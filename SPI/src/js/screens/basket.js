@@ -386,8 +386,8 @@ SP.Screens.basket = (function(){
       body:String(K.Stack([
         when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
           title:'Model bağlı değil.',
-          body:'Fiş okumak için Ayarlar → Rehber → Model bölümünden bir sağlayıcı '
-            + 'seç. Fiyatları Fiyat sayfasından elle de girebilirsin.' })),
+          body:'Fiş okumak için HKM › Modeller’de «SPİ · Görsel» (ya da King) için görüntü okuyan bir model '
+            + 'ata. Fiyatları Fiyat sayfasından elle de girebilirsin.' })),
         K.Drop({ act:'receipt-file', label:'Fiş fotoğrafı ya da metni', kamera:{},
           icon:'file', accept:'image/*,.txt,.csv',
           hint:'Fişi buraya bırak ya da seçmek için tıkla' }),

@@ -147,7 +147,7 @@ SP.Screens.analytics = (function(){
           ${K.Table({ tight:true, headers:['Öğe', { label:'Kapsama', num:true }],
             rows:r.gaps.map(g => [g.nutrient ? g.nutrient.name : g.id, '%' + g.pct]) })}</div>`)}
       </div>`,
-      foot:K.Button({ label:'Ofiste konuş', size:'sm', act:'go', data:{ 'data-route':'meeting' } }),
+      foot:K.Button({ label:'İncelemede gör', size:'sm', act:'go', data:{ 'data-route':'meeting' } }),
     });
   }
 
@@ -504,11 +504,79 @@ SP.Screens.analytics = (function(){
     }
   }
 
+  /* ÖZET (2026-10-20, kullanıcı: «uyku en üstte kalmış, alttaki kategoriye
+     taşınsın; önemli şeyler öne çıksın, önemsiz ya da anlaşılmaz olanlar
+     azaltılsın; grafik ve tablolarla göze hitap etsin»). Üstte dört karo:
+     son 7 günün değeri (kayıttan, etiketiyle), 14 günlük mini sütunlar
+     (girilmemiş gün nokta, sıfır değil). Altında bugünün enerji dengesi:
+     ihtiyaç (BMR + girilen hareket) ve alınan. Uyku ayrıntısı «Kategoriler»
+     bölümünde; denetim ve dürüstlük okumaları «Ayrıntılı okumalar»da. */
+  const gunListesi = n => { const out = []; for(let i = n - 1; i >= 0; i--) out.push(U.iso(U.addDays(U.today(), -i))); return out; };
+  function miniSutun(l, renk){
+    const enBuyuk = Math.max(1e-9, ...l.filter(v => v != null));
+    const w = 6, ara = 3, h = 30;
+    const g = l.map((v, i) => v == null
+      ? '<circle cx="' + (i * (w + ara) + w / 2) + '" cy="' + (h - 1.5) + '" r="1.3" class="ozet-kare__bos"/>'
+      : '<rect x="' + (i * (w + ara)) + '" y="' + (h - Math.max(2, v / enBuyuk * h)).toFixed(1) + '" width="' + w + '" height="' + Math.max(2, v / enBuyuk * h).toFixed(1) + '" rx="2" style="fill:' + renk + '"/>').join('');
+    return '<svg class="ozet-kare__sutun" viewBox="0 0 ' + (l.length * (w + ara) - ara) + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true">' + g + '</svg>';
+  }
+  function ozetKaresi(o){
+    const yedi = o.seri.slice(-7).filter(v => v != null);
+    const deger = yedi.length ? o.ozet(yedi) : null;
+    return html`<button type="button" class="ozet-kare" style="${'--renk:' + o.renk}" data-act="go" data-route="${o.rota}">
+      <span class="ozet-kare__ad">${o.ad}</span>
+      <span class="ozet-kare__deger num">${deger == null ? '—' : deger}<small>${deger == null ? ' veri yok' : ' ' + o.birim}</small></span>
+      ${raw(miniSutun(o.seri, o.renk))}
+      <span class="ozet-kare__not">${yedi.length ? o.not + ' · ' + yedi.length + '/7 gün kayıtlı' : 'Son 7 günde kayıt yok'}</span>
+    </button>`;
+  }
+  function ozetHtml(){
+    const g14 = gunListesi(14);
+    const ort = l => (Math.round(U.sum(l) / l.length * 10) / 10).toLocaleString('tr-TR', { maximumFractionDigits:1 });
+    const uyku = g14.map(t => { const v = S.vitals[t]; return v && v.sleep != null ? Number(v.sleep) : null; });
+    const top = g14.map(t => { const r = SP.Move.readiness(t); return r.ok ? r.score : null; });
+    const hareket = g14.map(t => { const l = SP.Model.workoutsOf(t); return l.length ? U.sum(l.map(w => Number(w.minutes) || 0)) : null; });
+    const tg = SP.Nutri.targets();
+    const protein = g14.map(t => { const d = SP.Nutri.dayTotals(t); return d.empty ? null : Math.round(d.protein); });
+    const kareler = [
+      ozetKaresi({ ad:'Gece uykusu', seri:uyku, birim:'sa', ozet:ort, not:'7 günün ortalaması', renk:'var(--mer)', rota:'today' }),
+      ozetKaresi({ ad:'Toparlanma', seri:top, birim:'/100', ozet:l => String(Math.round(U.sum(l) / l.length)), not:'hesaplandı, ortalama', renk:'var(--spi)', rota:'move' }),
+      ozetKaresi({ ad:'Hareket', seri:hareket, birim:'dk', ozet:l => U.fmtNum(U.sum(l)), not:'7 günün toplamı', renk:'var(--esp)', rota:'move' }),
+      ozetKaresi({ ad:'Protein', seri:protein, birim:'g/gün', ozet:l => String(Math.round(U.sum(l) / l.length)),
+        not:tg.ok ? 'hedef en az ' + tg.protein.min + ' g' : 'hedef için profil eksik', renk:'var(--ays)', rota:'meals' }),
+    ];
+    /* Bugünün enerji dengesi: ihtiyaç hesaplandı, alınan girilen öğünden. */
+    const d = SP.Nutri.dayTotals(U.todayISO());
+    let enerji = '';
+    if(tg.ok){
+      const enCok = Math.max(tg.tdee, tg.kcal, d.empty ? 0 : d.kcal) || 1;
+      const cubuk = (ad, v, cls_, not) => html`<div class="enerji-satir"><span>${ad}</span>
+        <span class="enerji-satir__iz"><i class="${cls_}" style="${'width:' + (v == null ? 0 : Math.round(100 * v / enCok)) + '%'}"></i></span>
+        <b class="num">${v == null ? '—' : U.fmtNum(Math.round(v)) + ' kcal'}</b><small>${not}</small></div>`;
+      enerji = K.Kutu({ ad:'Bugünün enerjisi', yuva:'günden güne değişir', govde:html`
+        ${cubuk('İhtiyaç', tg.tdee, 'is-ihtiyac', tg.need && !tg.need.hareketYok ? 'bazal ' + U.fmtNum(tg.bmr) + ' + hareket ' + U.fmtNum(tg.need.hareket) : 'bazal; hareket girilmedi')}
+        ${cubuk('Hedef', tg.kcal, 'is-hedef', tg.goal ? tg.goal.label.toLocaleLowerCase('tr-TR') : '')}
+        ${cubuk('Alınan', d.empty ? null : d.kcal, 'is-alinan', d.empty ? 'öğün girilmedi · veri yok' : 'girilen öğünlerden')}` });
+    }
+    return html`<div class="ozet-izgara">${kareler}</div>${enerji ? html`<div class="mt-16">${enerji}</div>` : ''}`;
+  }
+
+  /* KATEGORİLER: uyku (eski üst kart) ve vücut ölçümleri burada, altta. */
+  function kategorilerHtml(){
+    return html`<div class="analizbasi">${uykuKutusu()}${kiloKutusu()}</div>`;
+  }
+  function kiloKutusu(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G) return '';
+    const son = gunListesi(28).map(t => { const v = S.vitals[t]; return { tarih:t, deger:v && v.weight != null ? Number(v.weight) : null }; });
+    return K.Kutu({ ad:'Kilo', yuva:'son 28 gün', govde:raw(G.metrikHtml(son, { etiket:'Kilo', birim:'kg', ondalik:1, yon:'notr' })) });
+  }
+
   /* ANALİZ BAŞI (vitrin): 041 veri doluluğu · uyku kartı: 027 kopuk çizgi,
      031 hedef bandı (yalnız profilde hedef yazılıysa; uydurulmaz), 032
      geçen dönem (bir dokunuşla), 036 dağılım, 037 güvenli eğilim, 034
      grafiğin cümlesi. SPİ teşhis koymaz: bant bir hedef, sınır değil. */
-  function analizBasi(){
+  function uykuKutusu(){
     const G = (window.LIFEOS || {}).GRAFIK;
     if(!G) return '';
     const bugun = U.todayISO();
@@ -523,15 +591,13 @@ SP.Screens.analytics = (function(){
     const hedef = S.profile && Number(S.profile.sleepGoal);
     const bant = hedef ? [Math.max(0, hedef - 0.5), hedef + 0.5] : null;
     const cizgi = o => raw(G.cizgiSvg(son, Object.assign({ gen:560, yuk:120, etiket:'Uyku', birim:'saat' }, o)));
-    return K.Grid([K.Span(12, html`<div class="analizbasi">
-      ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'spi', ad:'SPİ', gunler:olcumlu }], { gun:7 })) })}
-      ${K.Kutu({ ad:'Uyku', yuva:'son 28 gün', govde:html`
+    return html`${K.Kutu({ ad:'Uyku', yuva:'son 28 gün', govde:html`
         ${/* Metrik kartı (2026-10-18): ortalama, eğilim, doluluk ve eksenli çizgi. */''}
         ${raw(G.metrikHtml(son, { etiket:'Uyku', birim:'saat', ondalik:1, yon:'artis-iyi', bant }))}
         <details class="hiz-ac"><summary>Geçen dönemle karşılaştır</summary>${cizgi({ onceki:once, bant })}</details>
         <details class="hiz-ac"><summary>Dağılım</summary>${raw(G.dagilimSvg({ degerler:son.map(x => x.deger), birim:'saat', etiket:'Uyku' }))}</details>
-        ${raw(uykuDuzeniHtml(gunler(14)))}` })}
-    </div>`)]);
+        ${raw(uykuDuzeniHtml(gunler(14)))}
+        <details class="hiz-ac"><summary>Veri doluluğu</summary>${raw(G.dolulukHtml([{ modul:'spi', ad:'SPİ', gunler:olcumlu }], { gun:7 }))}</details>` })}`;
   }
 
   /* 083 UYKU DÜZENİ: iki haftanın yatış ve kalkış saati. Saat YALNIZ
@@ -546,9 +612,19 @@ SP.Screens.analytics = (function(){
     return h ? '<details class="hiz-ac"><summary>Yatış ve kalkış saatleri</summary>' + h + '</details>' : '';
   }
 
+  /* Öne çıkan dört okuma görünür (denetim klinik sınırı taşır, AGENTS §1.5);
+     kavram ve dürüstlük okumaları isteyene açılır (anlaşılması emek
+     isteyen, her gün bakılmayan şeyler). */
+  const ONDE = ['capraz', 'hafta', 'seri', 'denetim'];
   async function render(){
-    return String(html`${analizBasi()}${K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}`);
+    const acik = !!S.ui.spiAnalizAyrinti;
+    const bolumler = TABS.filter(t => acik || ONDE.indexOf(t.id) >= 0).map(t => ({ id:t.id, ad:t.label, govde:govde(t) }));
+    return String(html`${K.Kutu({ ad:'Bu hafta', yuva:'kayıttan · son 7 gün', govde:ozetHtml() })}
+      <div class="mt-16">${K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri', bolumler })}</div>
+      <h2 class="analiz-ara-baslik">Kategoriler</h2>
+      ${kategorilerHtml()}
+      <div class="analiz-ayrinti">${K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: kavramlar ve dürüstlük',
+        size:'sm', tone:'ghost', act:'spi-analiz-ayrinti', data:{ 'aria-expanded':acik ? 'true' : 'false' } })}</div>`);
   }
 
   /* Başka ekrandan istenen bölüm (ofis kartının «Çapraz bağ tablosu» gibi)
@@ -556,10 +632,17 @@ SP.Screens.analytics = (function(){
   function afterRender(){
     const t = S.ui.analyticsTab;
     S.ui.analyticsTab = null;
+    /* İstenen bölüm «Ayrıntılı okumalar»daysa önce açılır, sonra kayılır. */
+    if(t && ONDE.indexOf(t) < 0 && !S.ui.spiAnalizAyrinti && TABS.some(x => x.id === t)){
+      S.ui.spiAnalizAyrinti = true;
+      Promise.resolve(SP.App.render()).then(() => K.bolumeGit(t));
+      return;
+    }
     if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
   }
 
   const handle = {
+    async 'spi-analiz-ayrinti'(){ S.ui.spiAnalizAyrinti = !S.ui.spiAnalizAyrinti; SP.App.render(); },
     async 'an-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'an-kavram-tab'(el){ S.ui.anKavramTab = el.dataset.tab; SP.App.render(); },
 

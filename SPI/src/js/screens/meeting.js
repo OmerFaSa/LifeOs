@@ -1,11 +1,13 @@
-/* Toplantı — dört uzman konuşur, Patron kapatır.
+/* Ofis › İnceleme (eski «Toplantı», 2026-10-20).
 
-   Gündem kural motorunun puanlamasından gelir; model gündem seçmez.
-   Her tur ayrı bir çağrıdır ve ekrana geldiği anda basılır, hepsi bitmeyi
-   beklemez: uzun süren bir toplantıda kullanıcı ilerlemeyi görür.
-
-   Kapanışta Patron çelişkiyi SP.PRECEDENCE sırasına göre çözer ve tek bir
-   karar yazar. Kararın kendisi kural motorundan gelir; Patron gerekçelendirir. */
+   Kullanıcı: «Ofis toplantısı yüzeysel ve uydurma; ya kaldır ya da sistemin
+   kendi verisi üzerinde düşünüp fikir ürettiği profesyonel bir yere
+   dönüştür.» Dönüştürüldü (gerekçe core/inceleme.js başında): dört ajanın
+   sırayla konuştuğu tur kalktı; ekran kural motorunun kendi verisinden
+   kurduğu incelemeyi gösterir — haftanın sayıları, gündem, kayıttan
+   karşılaştırmalar (fikir), belirgin bulgular, planların uyumu ve tek karar.
+   Model bağlıysa Patron yalnız bu incelemeyi özetler; sayıyı o üretmez.
+   Eski toplantı tutanakları silinmez, en altta okunur. */
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -15,57 +17,75 @@ SP.Screens.meeting = (function(){
   const { html, raw, when, map, cls } = SP.h;
   const K = SP.C, P = SP.Parts;
 
-  let running = false;
-  let live = null;     /* devam eden toplantının şu ana kadarki turları */
+  let ozetleniyor = false;
 
-  function agendaCard(){
-    const rows = SP.Office.agendaCandidates();
-    const sel = Math.min(S.ui.meetingAgenda, rows.length - 1);
-    return K.Card({
-      title:'Gündem',
-      body:html`<div class="list">${map(rows, (a, i) => html`
-        <button class="${cls('listitem', 'listitem--tap', i === sel && 'is-on')}"
-          data-act="pick-agenda" data-i="${i}">
-          <div class="grow">
-            <b class="small">${a.label}</b>
-            ${K.Badge({ label:String(a.score),
-              tone:a.score >= 65 ? 'danger' : a.score >= 40 ? 'warn' : 'muted' })}
-            <div class="tiny dim">${a.detail}</div>
-            <div class="tiny dim">${a.note}</div>
-          </div>
-          ${P.avatar(a.owner, 'sm')}
-        </button>`)}</div>`,
-      foot:html`${K.Button({ label:running ? 'Toplantı sürüyor…' : 'Toplantıyı başlat',
-        tone:'primary', size:'sm', act:'run-meeting', disabled:running })}
-        <span class="small dim">Dört uzman konuşur, Patron kapatır.</span>`,
-    });
+  const etiketi = e => raw(' <span class="inc-etiket" data-kesinlik="' + e + '">' + e + '</span>');
+
+  function haftaKutusu(r){
+    return K.Kutu({ ad:'Son yedi gün', yuva:'kayıttan',
+      govde:html`<div class="inc-sayilar">${map(r.hafta, s => html`<div class="inc-sayi">
+        <span class="inc-sayi__ad">${s.ad}</span>
+        <span class="inc-sayi__deger num">${s.deger == null ? '—' : SP.Inceleme.sayi(s.deger)}<small>${s.deger == null ? '' : s.birim}</small></span>
+        <span class="inc-sayi__not">${s.deger == null ? 'veri yok' : s.etiket + (s.n ? ' · ' + s.n + ' gün' : '')}</span>
+      </div>`)}</div>` });
   }
 
-  function turnBlock(t, closing, calanMi){
-    const a = SP.AGENT_BY_ID[t.agent];
-    return html`
-      <div class="${cls('meetturn', closing && 'meetturn--closing', calanMi && 'is-calan')}">
-        <div class="meetturn__who">
-          ${P.avatar(t.agent, 'sm')}
-          <b>${t.name}</b>
-          <span class="dim">${a ? a.title : ''}</span>
-          ${P.sourceBadge(t.source)}
-        </div>
-        <div class="meetturn__body">${t.text}</div>
-      </div>`;
+  function gundemKutusu(r){
+    const rows = r.gundem;
+    const enCok = Math.max.apply(null, rows.map(a => a.score).concat([1]));
+    return K.Kutu({ ad:'Gündem', yuva:'kural motorunun sırası',
+      govde:html`<ol class="inc-gundem">${map(rows, a => html`<li>
+        <span class="inc-gundem__cubuk" style="${'--oran:' + Math.round(100 * a.score / enCok) + '%'}" aria-hidden="true"></span>
+        <div class="grow"><b>${a.label}</b><span>${a.detail}</span><small>${a.note}</small></div>
+        ${P.avatar(a.owner, 'sm')}
+      </li>`)}</ol>` });
   }
 
-  function liveCard(){
-    if(!live) return null;
-    return K.Card({
-      title:'Toplantı sürüyor', sub:live.agenda.label,
-      body:html`<div class="meet">
-        ${map(live.turns, t => turnBlock(t, false))}
-        ${when(running, () => html`<div class="meetturn is-live">
-          ${K.Skeleton({ rows:2, label:'Sıradaki konuşuyor',
-            hint:'her ajan yalnız kendi alanından konuşur' })}</div>`)}
-      </div>`,
-    });
+  function fikirKutusu(r){
+    const acik = r.fikirler.filter(f => f.acik), kapali = r.fikirler.filter(f => !f.acik);
+    const satir = f => {
+      const enBuyuk = Math.max(Math.abs(f.a.ort), Math.abs(f.b.ort)) || 1;
+      const bar = (g, cls_) => html`<div class="inc-fikir__bar"><span>${g.ad}</span>
+        <i class="${cls_}" style="${'width:' + Math.round(100 * Math.abs(g.ort) / enBuyuk) + '%'}"></i>
+        <b class="num">${SP.Inceleme.sayi(g.ort, f.birim)} ${f.birim}</b><small>${g.n} gün</small></div>`;
+      return html`<div class="inc-fikir">
+        <b class="inc-fikir__baslik">${f.baslik}${etiketi(f.etiket)}</b>
+        ${bar(f.a, 'is-a')}${bar(f.b, 'is-b')}
+        <p class="tiny muted">${f.not}</p></div>`;
+    };
+    return K.Kutu({ ad:'Verinden çıkan fikirler', yuva:acik.length ? acik.length + ' karşılaştırma' : 'veri birikiyor',
+      govde:html`${acik.length ? html`<div class="inc-fikirler">${map(acik, satir)}</div>`
+          : html`<p class="small muted">Henüz karşılaştırma yapacak kadar kayıt yok. Az veriden fikir üretilmez.</p>`}
+        ${when(kapali.length, () => html`<details class="inc-bekleyen mt-12"><summary class="small">Veri birikince açılacak ${kapali.length} karşılaştırma</summary>
+          <ul class="tiny muted">${map(kapali, f => html`<li><b>${f.baslik}</b>: ${f.neden}</li>`)}</ul></details>`)}` });
+  }
+
+  function bulguKutusu(r){
+    const b = r.bulgular;
+    return K.Kutu({ ad:'Belirgin bağlar', yuva:b.belirgin.length ? b.belirgin.length + ' bulgu' : 'yok',
+      govde:html`${b.belirgin.length ? html`<ul class="inc-bulgular">${map(b.belirgin, f => html`<li class="${'is-' + f.tone}">
+          <b>${f.link.title}</b><span>${f.text}</span></li>`)}</ul>`
+        : html`<p class="small muted">Gün sayısına göre rastlantıdan ayrılan bir bağ yok.</p>`}
+        <p class="tiny muted mt-8">${b.zayif.length} bağ zayıf, ${b.bekleyen.length} bağ için ortak gün yetersiz. Eşik gün sayısına göre büyür (Analiz › Çapraz).</p>` });
+  }
+
+  function planKutusu(r){
+    if(!r.planlar.length) return '';
+    return K.Kutu({ ad:'Planların uyumu', yuva:'son 7 gün',
+      govde:html`<ul class="inc-planlar">${map(r.planlar, p => html`<li><b>${p.ad}</b><span>${p.uyum.metin}${etiketi(p.uyum.etiket)}</span></li>`)}</ul>` });
+  }
+
+  function kararKutusu(r){
+    const k = r.karar;
+    const ozet = S.ui.incelemeOzet && S.ui.incelemeOzet.tarih === r.tarih ? S.ui.incelemeOzet : null;
+    return K.Kutu({ ad:'Tek karar', yuva:'kural motoru', class:'inc-karar',
+      govde:html`${k.calm ? html`<p><b>Öne çıkan iş yok.</b> ${k.why}</p>`
+          : html`<p><b>${k.title}</b></p><p class="small">${k.why}</p>${when(k.action, () => html`<p class="small"><b>Ne yapılır:</b> ${k.action}</p>`)}`}
+        ${when(ozet, () => html`<div class="inc-ozet mt-12"><span class="tiny muted">Patron'un özeti · ${P.sourceBadge(ozet.source)}</span><p>${ozet.text}</p></div>`)}`,
+      ayak:html`${when(!k.calm && k.route, () => K.Button({ label:'Oraya git', size:'sm', tone:'primary', act:'go', data:{ 'data-route':k.route } }))}
+        ${when(!k.calm, () => K.Button({ label:'Kararı takibe al', size:'sm', act:'inceleme-takip' }))}
+        ${when(SP.Office.ready && SP.Office.ready('patron'), () => K.Button({ label:ozetleniyor ? 'Özetleniyor…' : 'Patron özetlesin', size:'sm', tone:'ghost',
+          act:'inceleme-ozet', disabled:ozetleniyor }))}` });
   }
 
   /* ---- tutanagi DINLE -------------------------------------------
@@ -104,6 +124,36 @@ SP.Screens.meeting = (function(){
     }
   }
 
+  /* Eski tutanağın bir turu (yalnız okunur). */
+  function turnBlock(t, closing, calanMi){
+    const a = SP.AGENT_BY_ID[t.agent];
+    return html`
+      <div class="${cls('meetturn', closing && 'meetturn--closing', calanMi && 'is-calan')}">
+        <div class="meetturn__who">
+          ${P.avatar(t.agent, 'sm')}
+          <b>${t.name}</b>
+          <span class="dim">${a ? a.title : ''}</span>
+          ${P.sourceBadge(t.source)}
+        </div>
+        <div class="meetturn__body">${t.text}</div>
+      </div>`;
+  }
+
+  /* Eski tutanağın bir turu (yalnız okunur). */
+  function turnBlock(t, closing, calanMi){
+    const a = SP.AGENT_BY_ID[t.agent];
+    return html`
+      <div class="${cls('meetturn', closing && 'meetturn--closing', calanMi && 'is-calan')}">
+        <div class="meetturn__who">
+          ${P.avatar(t.agent, 'sm')}
+          <b>${t.name}</b>
+          <span class="dim">${a ? a.title : ''}</span>
+          ${P.sourceBadge(t.source)}
+        </div>
+        <div class="meetturn__body">${t.text}</div>
+      </div>`;
+  }
+
   function minutesCard(rec){
     const oyn = oynatmaDurumu(rec.id);
     return K.Card({
@@ -132,11 +182,10 @@ SP.Screens.meeting = (function(){
   function historyCard(){
     const rows = S.officeMeetings;
     if(!rows.length){
-      return K.Card({ title:'Geçmiş toplantılar',
-        body:K.Empty({ text:'Henüz toplantı yapılmadı.' }) });
+      return '';
     }
     return K.Card({
-      title:'Geçmiş toplantılar', sub:rows.length + ' tutanak',
+      title:'Eski toplantı tutanakları', sub:rows.length + ' tutanak',
       body:html`<div class="list">${map(rows.slice(0, 12), m => html`
         <div class="listitem">
           <div class="grow"><b class="small">${m.agenda.label}</b>
@@ -148,41 +197,45 @@ SP.Screens.meeting = (function(){
   }
 
   async function render(){
+    const r = SP.Memo ? SP.Memo.of('inceleme.rapor', () => SP.Inceleme.rapor()) : SP.Inceleme.rapor();
     const open = S.officeMeetings.find(m => m.id === S.ui.meetingOpen);
     return String(html`
-      ${K.Ledger(() => [
-        agendaCard(), liveCard(), open ? minutesCard(open) : null, historyCard(),
-        K.Entry({ label:'Çelişki nasıl çözülür?', hint:'office', meta:'öncelik sırası',
-          note:'Üstteki sıra alttakini her zaman yener. Bu tartışmaya açık değildir; '
-            + 'Patron da buna uyar.',
-          body:K.Table({ tight:true, headers:['Sıra', 'Kural', 'Neden'],
-            rows:SP.PRECEDENCE.map(p => [String(p.rank), html`<b>${p.label}</b>`,
-              html`<span class="small">${p.note}</span>`]) }) }),
-      ])}
+      <div class="inc">
+        ${haftaKutusu(r)}
+        <div class="inc-iki">${kararKutusu(r)}${gundemKutusu(r)}</div>
+        ${fikirKutusu(r)}
+        <div class="inc-iki">${bulguKutusu(r)}${planKutusu(r)}</div>
+        ${when(S.officeMeetings.length, () => html`${open ? minutesCard(open) : ''}${historyCard()}`)}
+      </div>
       <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'decision', 'no-model']))}</div>`);
   }
 
   const handle = {
-    async 'pick-agenda'(el){ S.ui.meetingAgenda = Number(el.dataset.i); SP.App.render(); },
-    async 'run-meeting'(){
-      if(running) return;
-      const rows = SP.Office.agendaCandidates();
-      const pick = rows[Math.min(S.ui.meetingAgenda, rows.length - 1)];
-      running = true;
-      live = { agenda:pick, turns:[] };
+    async 'inceleme-takip'(){
+      const k = SP.Calc.nextAction();
+      if(k.calm) return;
+      await SP.Model.saveDecision({ title:k.title, why:k.why });
+      UI.toast('Karar takibe alındı');
+      SP.App.render();
+    },
+    /* Model yalnız ÖZETLER: brifing incelemenin kendisidir, sayı oradan. */
+    async 'inceleme-ozet'(){
+      if(ozetleniyor) return;
+      ozetleniyor = true;
       SP.App.render();
       try{
-        const rec = await SP.Office.runMeeting(pick.id, turn => {
-          live.turns.push(turn);
-          SP.App.render();
-        });
-        S.ui.meetingOpen = rec.id;
-        UI.toast('Toplantı tamamlandı');
-      }catch(e){
-        UI.toast('Toplantı tamamlanamadı: ' + (e && e.message ? e.message : e));
+        const r = SP.Inceleme.rapor();
+        const b = Object.assign(SP.Office.patronBrief(), { inceleme:{
+          hafta:r.hafta.map(s => ({ ad:s.ad, deger:s.deger, etiket:s.etiket })),
+          fikirler:r.fikirler.filter(f => f.acik).map(f => f.baslik + ': ' + f.metin),
+          bulgular:r.bulgular.belirgin.map(f => f.link.title + ': ' + f.text),
+          karar:r.karar.calm ? null : r.karar.title + ' — ' + r.karar.why } });
+        const res = await SP.Office.ask('patron', 'Bu incelemeyi kullanıcıya üç dört cümlede özetle: önce haftanın durumu, '
+          + 'sonra en anlamlı karşılaştırma, en sonda tek karar. Sayıları yalnız brifingden al; birlikteliği neden gibi sunma.',
+          { brief:b, history:false, maxTokens:500 });
+        S.ui.incelemeOzet = { tarih:r.tarih, text:res.text, source:res.source };
       }finally{
-        running = false;
-        live = null;
+        ozetleniyor = false;
         SP.App.render();
       }
     },
@@ -214,10 +267,8 @@ SP.Screens.meeting = (function(){
     /* Sade (2026-10-16): öncelik tablosu sabit bir kuraldır, her açılışta
        açık durmaz; başlığına dokununca açılır. Gündem ve modelin rolü
        ekranın ⓘ kartında (office, no-model ipuçları). */
-    kucukVarsayilan:['çelişki-nasıl-çözülür'],
-    title:'Toplantı',
+    title:'İnceleme',
     subtitle(){
-      if(running) return 'Toplantı sürüyor…';
       const rows = SP.Office.agendaCandidates();
       return rows.length ? 'Gündem: ' + rows[0].label : 'Gündem yok';
     },

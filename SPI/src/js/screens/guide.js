@@ -15,7 +15,7 @@ SP.Screens.guide = (function(){
 
   const TABS = [
     { id:'kullanim', label:'Kullanım', icon:'guide' },
-    { id:'model',    label:'Model',    icon:'zap' },
+    { id:'model',    label:'Ofis',     icon:'zap' },
     { id:'veri',     label:'Veri',     icon:'layers' },
     { id:'sinir',    label:'Sınırlar', icon:'shield' },
   ];
@@ -66,26 +66,38 @@ SP.Screens.guide = (function(){
 
   /* --------------------------------------------------------------- model */
 
+  /* MODEL MERKEZ'DE (2026-10-20, kullanıcı: «model ayarlarının hepsi HKM'de
+     olmalı; AYS bunu doğru yapıyor»). Bu kart yalnız durumu söyler; seçim,
+     anahtar ve bütçe HKM › Modeller'dedir. Bu cihazda eski bir yerel ayar
+     kaldıysa söylenir ve silinebilir. */
+  function eskiYerelVar(){
+    const s = SP.Office.settings();
+    return (s.provider && s.provider !== 'builtin' && SP.LLM.ready({ provider:s.provider, model:s.model, endpoint:s.endpoint }))
+      || Object.keys(SP.PROVIDERS).some(id => SP.LLM.getKeys(id).length);
+  }
   function modelCard(){
     const s = SP.Office.settings();
-    const provider = SP.PROVIDERS[s.provider];
-    const models = provider ? provider.models : [];
+    const MM = SP.Office.merkez ? SP.Office.merkez() : null;
+    const d = MM ? MM.durum() : null;
+    const bagli = !!(MM && MM.bagli());
+    const hazir = bagli && d && d.ok;
+    const durum = !bagli ? 'HKM bağlı değil. Ofis kural motoruyla çalışıyor; HKM’ye bağlanınca oradaki model kullanılır.'
+      : !d ? 'HKM’ye soruluyor…'
+      : d.ok ? 'Model: ' + (d.model || '—') + (d.provider ? ' (' + d.provider + ')' : '')
+        + (d.inherited ? ' · ' + (d.from === 'king' ? 'King’in ayarından' : 'üst kademeden') + ' geliyor' : ' · SPİ’ye özel atama')
+      : (d.note || 'Merkezde model yok.') + ' Ofis kural motoruyla çalışıyor.';
     return K.Card({
-      title:'Model ayarları', hint:'no-model',
-      sub:'Ofis modelsiz de çalışır',
-      badge:SP.LLM.ready({ provider:s.provider, model:s.model })
-        ? K.Badge({ label:'hazır', tone:'ok' }) : K.Badge({ label:'kapalı', tone:'muted' }),
+      title:'Ofis modeli', hint:'no-model',
+      sub:'Ayar HKM’de · ofis modelsiz de çalışır',
+      badge:hazir ? K.Badge({ label:'Merkez’de hazır', tone:'ok' }) : K.Badge({ label:'kural motoru', tone:'muted' }),
       body:html`
-        ${K.Notice({ tone:'info', body:SP.GROUNDING.noModel + ' ' + SP.GROUNDING.authority })}
-        <div class="grid-form mt-12">
-          ${K.Field({ label:'Sağlayıcı',
-            input:K.Select({ id:'m-provider', value:s.provider, change:'pick-provider',
-              options:Object.keys(SP.PROVIDERS).map(id => ({ value:id, label:SP.PROVIDERS[id].label })) }) })}
-          ${K.Field({ label:'Model',
-            input:K.Select({ id:'m-model', value:s.model,
-              options:models.map(m => ({ value:m.id, label:m.label })) }) })}
-        </div>
-        ${when(provider && provider.note, () => html`<p class="small muted mt-8">${provider.note}</p>`)}
+        <p class="small">${durum}</p>
+        <p class="small muted mt-8">Model, anahtar ve bütçe tek yerde durur: HKM › Modeller › «SPİ · Sohbet»
+          (atama yoksa King’in modeli kullanılır). Bu ekranda model seçilmez.</p>
+        ${when(eskiYerelVar(), () => K.Notice({ tone:'warn', class:'mt-12', title:'Bu cihazda eski bir model ayarı var.',
+          body:html`Merkez’e ulaşılamazsa yedek olarak kullanılır. İstersen sil; anahtar bu tarayıcıdan kalkar.
+            <div class="mt-8">${K.Button({ label:'Eski ayarı sil', size:'sm', tone:'ghost', act:'eski-model-sil' })}</div>` }))}
+        ${K.Notice({ tone:'info', class:'mt-12', body:SP.GROUNDING.noModel + ' ' + SP.GROUNDING.authority })}
         <div class="mt-12">${K.Field({ label:'Küçük kayıtlar sormadan yazılsın mı?',
           hint:'Küçük: tek ölçüm, bir öğün, bir seans. Tahlil değerleri her zaman önce sorulur.',
           input:K.Select({ id:'m-otomatik', value:s.otomatikUygula || 'istek', change:'pick-otomatik',
@@ -98,16 +110,9 @@ SP.Screens.guide = (function(){
           <p class="small muted">Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar.
             Orta ve büyük türler kilitlidir.</p>
           ${raw(window.LIFEOS.ONERI.ayarHtml(SP.Proposals.katalogIdleri().map(id => Object.assign({ id, title:(SP.Proposals.eylem(id) || {}).label }, SP.Proposals.eylem(id))), { mod:s.otomatikUygula || 'istek', turler:s.otomatikTurler || {} }))}</div>`)}
-        ${when(provider && provider.needsKey, () => html`<div class="mt-12">
-          ${K.Field({ label:'API anahtarı', hint:provider.keyHint || '',
-            input:K.Input({ id:'m-key', type:'password',
-              placeholder:SP.LLM.getKeys(provider.id).length
-                ? SP.LLM.maskKeys(provider.id).join(', ') : 'anahtar yapıştır' }) })}
-          <p class="small muted mt-4">Anahtar yalnızca bu tarayıcıda, uygulama verisinden ayrı bir
-            anahtarda durur. Yedeğe girmez, buluta gitmez, modele gönderilmez.</p>
-        </div>`)}`,
-      foot:html`${K.Button({ label:'Kaydet', size:'sm', act:'save-model' })}
-        ${K.Button({ label:'Bağlantıyı dene', size:'sm', act:'test-model' })}`,
+`,
+      foot:html`${when(bagli, () => K.Button({ label:'Durumu tazele', size:'sm', act:'merkez-tazele' }))}
+        ${when(!bagli, () => K.Button({ label:'HKM’ye bağlan', size:'sm', act:'guide-tab', data:{ 'data-tab':'veri' } }))}`,
     });
   }
 
@@ -148,27 +153,6 @@ SP.Screens.guide = (function(){
         </div>
         <p class="tiny dim mt-8">Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın,
           «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.</p>`,
-    });
-  }
-
-  function quotaCard(){
-    const s = SP.Office.settings();
-    const st = SP.Quota.status({ provider:s.provider, model:s.model });
-    if(!st) return null;
-    return K.Card({
-      title:'Kullanım hakkı',
-      body:html`
-        ${when(!st.known, () => K.Notice({ tone:'info',
-          body:'Bu sağlayıcı/model için tanımlı bir kullanım sınırı yok. '
-             + 'Bilinmeyen sınır, sınırsız demek değildir: sistem yalnızca '
-             + 'kendi saydığı çağrıyı bilir.' }))}
-        ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
-          ['Son dakikada', st.lastMinute == null ? '—' : String(st.lastMinute)],
-          ['Bugün kullanılan', String(st.usedToday)],
-          ['Bugün kalan', !st.known ? 'bilinmiyor'
-            : st.remainingToday == null ? 'sınırsız' : String(st.remainingToday)],
-        ] })}`,
-      foot:html`<span class="small dim">Ofis günde bir brifing, toplantı başına beş çağrı harcar.</span>`,
     });
   }
 
@@ -560,7 +544,7 @@ SP.Screens.guide = (function(){
     model:() => html`${K.Ledger(() => [modelCard(), bolumCard(),
       when(window.LIFEOS && window.LIFEOS.KARSILAMA, () => K.Card({ title:'Karşılama', sub:'Girerken seni selamlayan cümle ve altındaki not',
         body:raw(window.LIFEOS.KARSILAMA.ayarHtml('spi')) })),
-      hafizaCard(), quotaCard()].filter(Boolean))}
+      hafizaCard()].filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['no-model', 'grounding', 'privacy']))}</div>`,
     veri:() => html`${K.Ledger(() => [dataCard(), saglikCard(), storageHorizonCard(), storageCard(), hkmCard(),
       when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Card({ title:'Örnek veriyle dene',
@@ -694,24 +678,15 @@ SP.Screens.guide = (function(){
     },
 
     async 'guide-tab'(el){ K.bolumeGit(el.dataset.tab); },
-    async 'save-model'(){
-      const provider = (document.getElementById('m-provider') || {}).value;
-      const model = (document.getElementById('m-model') || {}).value;
-      const key = (document.getElementById('m-key') || {}).value;
-      if(key && key.trim()) SP.LLM.addKey(provider, key.trim());
-      await SP.Office.saveSettings({ provider, model });
-      UI.toast('Kaydedildi');
+    async 'merkez-tazele'(){
+      const MM = SP.Office.merkez ? SP.Office.merkez() : null;
+      if(MM) await MM.tazele();
       SP.App.render();
     },
-    async 'test-model'(){
-      const s = SP.Office.settings();
-      UI.toast('Deneniyor…');
-      try{
-        const res = await SP.LLM.test({ provider:s.provider, model:s.model });
-        UI.toast(res && res.ok !== false ? 'Bağlantı çalışıyor' : 'Bağlantı kurulamadı');
-      }catch(e){
-        UI.toast('Hata: ' + (SP.LLM.errorText ? SP.LLM.errorText(e) : String(e && e.message || e)));
-      }
+    async 'eski-model-sil'(){
+      Object.keys(SP.PROVIDERS).forEach(id => { while(SP.LLM.getKeys(id).length) SP.LLM.removeKeyAt(id, 0); });
+      await SP.Office.saveSettings({ provider:'builtin', model:'default', endpoint:'', perAgent:{} });
+      UI.toast('Eski model ayarı silindi; ofis HKM’nin modelini kullanır.');
       SP.App.render();
     },
     /* 173 yedek kartının düğmesi: aynı dışa aktarma. */
@@ -838,12 +813,6 @@ SP.Screens.guide = (function(){
         : 'Yalnız senin yazdığın küçük kayıtlar sormadan yazılacak');
     },
 
-    async 'pick-provider'(el){
-      const p = SP.PROVIDERS[el.value];
-      const first = p && p.models && p.models[0] ? p.models[0].id : '';
-      await SP.Office.saveSettings({ provider:el.value, model:first });
-      SP.App.render();
-    },
   };
 
   return {
@@ -854,10 +823,8 @@ SP.Screens.guide = (function(){
     kucukVarsayilan:['beş-modül', 'öncelik-sırası', 'eşiklerin-dayanağı', 'veri-mahremiyeti', 'halüsinasyon-engeli'],
     title:'Rehber',
     subtitle(){
-      const s = SP.Office.settings();
-      return SP.LLM.ready({ provider:s.provider, model:s.model })
-        ? 'Model açık · ' + (SP.PROVIDERS[s.provider] || {}).label
-        : 'Model kapalı · kural motoru çalışıyor';
+      const MM = SP.Office.merkez ? SP.Office.merkez() : null;
+      return MM && MM.hazir() ? 'Model Merkez’de açık' : SP.Office.ready('patron') ? 'Model açık' : 'Model kapalı · kural motoru çalışıyor';
     },
     actions(){ return ''; },
     render, afterRender, handle, change,

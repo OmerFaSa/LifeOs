@@ -184,6 +184,7 @@ SP.Test = (function(){
     S.profile = testProfile();
     S.profiles = [];
     S.prefs = SP.Model.defaultPrefs();
+    if(SP.Ogun) SP.Ogun.yay();
     S.labs = []; S.vitals = {}; S.meals = {}; S.workouts = []; S.progress = {};
     S.meds = []; S.foods = []; S.proposals = []; S.proposalKeys = [];
     S.hatirlat = null; S.barkodlar = {}; S.kotuGun = {};

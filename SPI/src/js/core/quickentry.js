@@ -157,6 +157,34 @@ SP.Quick = (function(){
     return { minutes:Math.round(dk), exercise:ex };
   }
 
+  /* ------------------------------------------------------------ kestirme
+
+     «öğlen 30 dakika uyudum», «20 dk şekerleme», «yarım saat kestirdim».
+     Bunlar SERBEST SEANS DEĞİLDİR (eskiden 30 dakikalık antrenman
+     yazılıyordu) ve gece uykusu da değildir (core/uyku.js söz 1).
+     Kısa uyku sözü varsa süre dakika ya da saat olabilir; yalnız «uyudum»
+     varsa süre DAKİKA olmalı («7 saat uyudum» gece uykusudur). */
+  const KESTIRME_RE = /(kestirme|kestird|sekerleme|ogle uykusu|oglen uyu|ogle uyu|kisa uyku|\bnap\b)/;
+  function parseNap(text){
+    const n = U.norm(text);
+    const soz = KESTIRME_RE.test(n);
+    /* Kelime BAŞINDA: «yuruyus» içinde de «uyu» geçer. */
+    if(!soz && !/(^|[^a-z])(uyu|uyku)/.test(n)) return null;
+    let dk = null, birim = null;
+    const m = n.match(/(\d+(?:[.,]\d+)?)\s*(dk|dakika|dakka|sa|saat)\b/);
+    if(m){
+      birim = /^s/.test(m[2]) ? 'saat' : 'dk';
+      const x = sayi(m[1]);
+      dk = x == null ? null : birim === 'saat' ? x * 60 : x;
+    }else if(/yarim saat/.test(n)){ dk = 30; birim = 'saat'; }
+    if(dk == null) return null;
+    if(!soz && birim !== 'dk') return null;
+    if(dk <= 0 || dk > 240) return null;
+    const s = String(text).match(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/);
+    const bas = s ? (s[1].length === 1 ? '0' + s[1] : s[1]) + ':' + s[2] : null;
+    return { dk:Math.round(dk), bas };
+  }
+
   /* ------------------------------------------------------------ tahlil */
 
   function parseLabLine(text){
@@ -193,6 +221,10 @@ SP.Quick = (function(){
   function parseHam(text){
     const t = String(text || '').trim();
     if(t.length < 2) return null;
+
+    const kz = parseNap(t);
+    if(kz) return { kind:'nap', data:kz, label:'Kısa uyku · ' + kz.dk + ' dk' + (kz.bas ? ' (' + kz.bas + ')' : ''),
+      hint:'Uyku' };
 
     const v = parseVital(t);
     if(v) return { kind:'vital', data:v, label:v.field.label + ' ' + U.fmtNum(v.value)
@@ -231,6 +263,11 @@ SP.Quick = (function(){
       return { ok:true, text:parsed.data.field.label + ' kaydedildi', route:'today' };
     }
 
+    if(parsed.kind === 'nap'){
+      const r = await SP.Uyku.ekle(tarih, parsed.data);
+      return r.ok ? { ok:true, text:'Kısa uyku kaydedildi', route:'today', kayit:r.kayit } : { ok:false, text:r.why };
+    }
+
     if(parsed.kind === 'move'){
       const w = SP.Model.newWorkout(tarih);
       w.minutes = parsed.data.minutes;
@@ -256,7 +293,7 @@ SP.Quick = (function(){
     }
 
     if(parsed.kind === 'meal'){
-      const meal = SP.Model.newMeal(o.slot || 'ara');
+      const meal = SP.Model.newMeal(o.slot || (SP.Ogun ? SP.Ogun.simdiki() : 'ara1'));
       /* Ayristirici gram degerini `g` alaninda uretir. Burada `i.grams`
          okunuyordu ve boyle bir alan yok: komut paletinden girilen HER
          ogun gramsiz kaydediliyordu. Sessiz bir kayipti — ogun listede
@@ -270,5 +307,5 @@ SP.Quick = (function(){
     return { ok:false, text:'Anlaşılmadı' };
   }
 
-  return { parse, parseHam, apply, parseVital, parseMove, VITAL_FIELDS };
+  return { parse, parseHam, apply, parseVital, parseMove, parseNap, VITAL_FIELDS };
 })();
