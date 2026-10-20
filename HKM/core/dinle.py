@@ -26,7 +26,13 @@
    6. GPU ONCE (2026-10-20, King 2.0 A). CUDA'li whisper.cpp (yaninda
       ggml-cuda.dll ve cublas64_*.dll) bulunursa en iyi model (large-v3-turbo)
       onunla calisir; olmazsa ya da hata verirse (GPU dolu) CPU'da small ile
-      yeniden denenir. CPU'da turbo yavastir; CPU yolu small'u secer."""
+      yeniden denenir. CPU'da turbo yavastir; CPU yolu small'u secer.
+   7. GEMMA 4 ONCE (2026-10-21, kullanici: «Gemma 4'un ses almasina bak»).
+      Ana yerel model gemma4 (e2b/e4b) ise sesi kendisi anlar; zaten GPU'da
+      durdugu icin ek yuk yoktur. Sahada: ayni Turkce cumle Gemma 4'te
+      0,3-0,6 sn ve kusursuz, Whisper turbo'da 2,2 sn. Uzun kayitta (> 30 sn)
+      Gemma'ya guvenilmez (sahadan raporlar: dongu, eksik kelime): o zaman
+      Whisper. «oto»: Gemma 4 (bagliysa) -> Whisper -> Gemini."""
 import base64
 import glob
 import re
@@ -40,6 +46,10 @@ from core import butce, models, ses
 GEMINI_MODEL = "gemini-2.5-flash"
 EN_COK_BAYT = 4 * 1024 * 1024          # ~2 dakika 16 kHz tek kanal
 WHISPER_ZAMAN = 120
+GEMMA_EN_UZUN_SN = 30
+GEMMA_ZAMAN = 60
+GEMMA_ISTEM = ("Bu ses kaydını Türkçe olarak kelimesi kelimesine yazıya dök. Yalnız söylenen metni yaz; "
+               "açıklama ekleme. Konuşma yoksa hiçbir şey yazma.")
 ISTEM = ("Bu ses kaydını Türkçe olarak kelimesi kelimesine yazıya dök. Yalnız söylenen metni yaz; "
          "açıklama, tırnak ya da başlık ekleme. Konuşma yoksa hiçbir şey yazma.")
 TAVSIYE = ("Whisper bu bilgisayara inerse ses algılama API’siz, ücretsiz ve internetsiz çalışır "
@@ -198,14 +208,55 @@ def gemini(con, cfg, wav, post=None):
     return _temiz(" ".join(p.get("text", "") for p in parca)), ""
 
 
+def gemma_model(cfg):
+    """Sesi anlayan yerel ana model (yalniz Gemma 4) ya da None."""
+    m = str((models.yerel_of(cfg) or {}).get("ekonomik") or "")
+    return m if m.lower().startswith("gemma4") else None
+
+
+def _wav_sn(wav):
+    try:
+        hz = int.from_bytes(wav[24:28], "little")
+        bayt = int.from_bytes(wav[28:32], "little")       # saniyedeki bayt
+        return max(0, len(wav) - 44) / bayt if hz and bayt else 0
+    except (TypeError, ValueError):
+        return 0
+
+
+def gemma(cfg, wav, post=None):
+    m = gemma_model(cfg)
+    if not m:
+        return None, "Gemma 4 yerel model olarak bağlı değil."
+    if _wav_sn(wav) > GEMMA_EN_UZUN_SN:
+        return None, "Kayıt Gemma 4 için uzun; Whisper'a bırakıldı."
+    govde = {"model": m, "max_tokens": 400, "temperature": 0, "reasoning_effort": "none",
+             "messages": [{"role": "user", "content": [
+                 {"type": "text", "text": GEMMA_ISTEM},
+                 {"type": "input_audio", "input_audio": {"data": base64.b64encode(wav).decode("ascii"),
+                                                          "format": "wav"}}]}]}
+    try:
+        y = (post or ses.VARSAYILAN_POST)(models.yerel_uclari(cfg)[0], {"Content-Type": "application/json"},
+                                          govde, GEMMA_ZAMAN)
+        metin = (((y.get("choices") or [{}])[0].get("message") or {}).get("content")) or ""
+    except Exception as e:                      # noqa: BLE001 — kural 5
+        return None, "Gemma 4 sesi yazıya dökemedi (%s)." % type(e).__name__
+    return _temiz(metin), ""
+
+
 def yaziya(con, cfg, wav, post=None, calistir=None, bul=None, tercih="oto"):
-    """{ok, metin?, motor?, notlar}. Sira kural 1; tercih: oto | whisper | ai."""
+    """{ok, metin?, motor?, notlar}. Sira kural 1 ve 7; tercih: oto | gemma | whisper | ai."""
     if not wav or len(wav) > EN_COK_BAYT or wav[:4] != b"RIFF":
         return {"ok": False, "notlar": ["Ses kaydı geçersiz ya da çok uzun."]}
     notlar = []
-    sira = {"whisper": ("whisper",), "ai": ("gemini",)}.get(tercih, ("whisper", "gemini"))
+    oto = (("gemma",) if gemma_model(cfg) else ()) + ("whisper", "gemini")
+    sira = {"gemma": ("gemma", "whisper"), "whisper": ("whisper",), "ai": ("gemini",)}.get(tercih, oto)
     for motor in sira:
-        metin, neden = whisper(wav, calistir, bul) if motor == "whisper" else gemini(con, cfg, wav, post)
+        if motor == "gemma":
+            metin, neden = gemma(cfg, wav, post)
+        elif motor == "whisper":
+            metin, neden = whisper(wav, calistir, bul)
+        else:
+            metin, neden = gemini(con, cfg, wav, post)
         if metin is not None:
             return {"ok": True, "metin": metin, "motor": motor, "notlar": notlar}
         notlar.append(neden)
@@ -215,5 +266,9 @@ def yaziya(con, cfg, wav, post=None, calistir=None, bul=None, tercih="oto"):
 def durum(con, cfg):
     g_ok, g_not = ses.gemini_hazir(con, cfg)
     w = whisper_bul()
+    gm = gemma_model(cfg)
     return {"whisper": w, "gemini": {"hazir": g_ok, "not": g_not or "Gemini hazır (internet gerekir, ücretli)."},
-            "motor": "whisper" if w["bulundu"] else ("gemini" if g_ok else "tarayici"), "tavsiye": TAVSIYE}
+            "gemma": {"hazir": bool(gm), "model": gm or "",
+                      "not": ("%s sesi doğrudan anlar (yerel, ücretsiz)." % gm) if gm else "Gemma 4 bağlı değil."},
+            "motor": "gemma" if gm else ("whisper" if w["bulundu"] else ("gemini" if g_ok else "tarayici")),
+            "tavsiye": TAVSIYE}

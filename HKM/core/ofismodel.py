@@ -26,7 +26,11 @@ MODULLER = ("ays", "spi", "esp")
 # fis, ogun fotografi, tahlil gibi GORUNTU OKUMA isidir: cikti modulun
 # kendi kodunda dogrulanan bir JSON'dur, bu yuzden belge denetiminden gecer
 # (sayi goruntunun kendisinden gelir; «olcum uydurma» denetimi onu dusururdu).
-YETENEKLER = ("sohbet", "gorsel")
+YETENEKLER = ("sohbet", "gorsel", "ekran")
+# «ekran» (2026-10-21, kullanici: «ekran okumayi hizlandiralim»): ekran
+# paylasimindaki kare, GPU'da zaten duran sohbet modeline (gemma4) gider;
+# sahada 0,6 sn. Gorsel uzmana (qwen3-vl) gecis modeli yeniden yukluyordu
+# (12-40 sn). Ince yazi okuma (soru fotografi, fis) «gorsel»de kalir.
 EN_UZUN_SISTEM = 24000
 EN_UZUN_MESAJ = 4000
 EN_COK_MESAJ = 12
@@ -35,6 +39,8 @@ EN_COK_MESAJ = 12
 def rol_of(modul, yetenek="sohbet"):
     m = str(modul or "").lower()
     y = yetenek if yetenek in YETENEKLER else None
+    if y == "ekran":
+        y = "sohbet"
     return "%s.%s" % (m, y) if m in MODULLER and y else None
 
 
@@ -75,10 +81,11 @@ def cevap(con, cfg, govde, transport=None):
         return {"ok": False, "reason": "bos", "note": "Son mesaj kullanıcıdan olmalı."}
     sistem = str(g.get("sistem") or "")[:EN_UZUN_SISTEM]
     baglam = str(g.get("baglam") or "")[:EN_UZUN_SISTEM]
-    gorseller = g.get("gorseller") if yetenek == "gorsel" else None
-    if yetenek == "gorsel" and not gorseller:
+    gorselli = yetenek in ("gorsel", "ekran")
+    gorseller = g.get("gorseller") if gorselli else None
+    if gorselli and not gorseller:
         return {"ok": False, "reason": "gorsel", "note": "Görsel yok."}
     r = ai.ask(con, cfg, rol, "ofis-" + yetenek, mesajlar, baglam=baglam, sistem=sistem,
                transport=transport, gorseller=gorseller,
-               denetim="belge" if yetenek == "gorsel" else "olcum")
+               denetim="belge" if gorselli else "olcum")
     return {k: r.get(k) for k in ("ok", "text", "model", "provider", "reason", "note", "truncated")}

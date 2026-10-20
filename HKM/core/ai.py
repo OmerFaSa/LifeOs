@@ -288,6 +288,11 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
         if provider == "yerel":
             # Arac SECIMI bir karardir, uslup degil: dusuk sicaklikta.
             govde["temperature"] = ARAC_SICAKLIK if araclar else YEREL_SICAKLIK
+            # gemma4 ve qwen3 /v1'de varsayilan olarak DUSUNUR: jeton butcesi
+            # dusunmeye gider, cevap gec ya da bos gelir (King 2.0 A devir
+            # notu; sahada qwen3-vl bos cevap). Efor istenmediyse kapali.
+            if not ayar.get("efor") and str(model).lower().startswith(("gemma4", "qwen3")):
+                govde["reasoning_effort"] = "none"
         if provider == "openrouter":
             if ayar.get("efor"):
                 # Birlesik dusunme ayari; desteklemeyen model yok sayar.

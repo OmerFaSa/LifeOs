@@ -948,7 +948,8 @@
         expect(await k.paylasimBaslat()).toBe(true);
         await k.isle('ekranda ne var?');
         const g = istekler.find(x => /\/api\/ofis\/cevap$/.test(x.url));
-        expect([!!g, g && g.govde.yetenek, g && g.govde.modul, g && g.govde.gorseller[0].data]).toEqual([true, 'gorsel', 'ays', 'QUJD']);
+        /* Ekran karesi «ekran» yeteneğiyle: GPU'da duran sohbet modeli (hızlı); fotoğraf «gorsel»de kalır. */
+        expect([!!g, g && g.govde.yetenek, g && g.govde.modul, g && g.govde.gorseller[0].data]).toEqual([true, 'ekran', 'ays', 'QUJD']);
         expect(k.akis().slice(-1)[0].metin).toBe('Ekranda AYS Bugün sayfası var.');
       }finally{ k.paylasimBitir(); k.kapat(); }
     }));

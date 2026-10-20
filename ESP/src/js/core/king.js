@@ -628,10 +628,13 @@ window.LIFEOS.KING = (function(){
     cihaz:'Yalnız bu cihazın kendi sesi' };
   const SES_PARCA = 420;
   const ALGILA = 'lifeos.king.algila';   // soz 29: 'oto' | 'whisper' | 'ai' | 'tarayici'; TASINAN'da
-  const ALGILA_TERCIH = ['oto', 'whisper', 'ai', 'tarayici'];
-  const ALGILA_AD = { oto:'Otomatik', whisper:'Whisper', ai:'Yapay zekâ', tarayici:'Uygulama' };
-  const ALGILA_IP = { oto:'Bu bilgisayarda Whisper varsa o, yoksa yapay zekâ',
-    whisper:'Yalnız Whisper: ücretsiz, ses bilgisayardan çıkmaz', ai:'Yalnız yapay zekâ (Gemini): ses Google’a gider',
+  /* Gemma 4 (2026-10-21): ana yerel model sesi doğrudan anlar (HKM dinle.py kural 7). «Yapay zekâ» adı Gemini'yi
+     saklıyordu; adı artık ne olduğunu söyler. */
+  const ALGILA_TERCIH = ['oto', 'gemma', 'whisper', 'ai', 'tarayici'];
+  const ALGILA_AD = { oto:'Otomatik', gemma:'Gemma 4', whisper:'Whisper', ai:'Gemini', tarayici:'Uygulama' };
+  const ALGILA_IP = { oto:'Önce bilgisayardaki Gemma 4, uzun kayıtta ya da olmazsa Whisper, en son Gemini',
+    gemma:'Gemma 4 sesi doğrudan anlar: hızlı, ücretsiz, ses bilgisayardan çıkmaz (uzun kayıtta Whisper)',
+    whisper:'Yalnız Whisper: ücretsiz, ses bilgisayardan çıkmaz', ai:'Yalnız Gemini: internet ister, ücretli, ses Google’a gider',
     tarayici:'Uygulamanın (tarayıcının) kendi tanıması' };
   function algila(){ const v = ortam.depo.oku(ALGILA); return ALGILA_TERCIH.indexOf(v) > 0 ? v : 'oto'; }
   const MIK = 'lifeos.king.mik';         // soz 29: secili mikrofon (deviceId); TASINAN'da
@@ -890,7 +893,7 @@ window.LIFEOS.KING = (function(){
   const GORSEL_YOK = 'Görüntüyü yorumlamak için Merkez’e (HKM) bağlı olmam gerekiyor. Merkez açıkken fotoğrafını ve '
     + 'ekranını bilgisayardaki görsel modelle okurum; görüntü internete çıkmaz.';
   const GORSEL_ZAMAN = 120000;   // görsel model ilk istekte belleğe yüklenir
-  async function merkezGorsel(k, soru, resim){
+  async function merkezGorsel(k, soru, resim, yetenek, tekrar){
     const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
     const t = ctrl ? setTimeout(() => ctrl.abort(), GORSEL_ZAMAN) : null;
     try{
@@ -898,11 +901,19 @@ window.LIFEOS.KING = (function(){
       const res = await f(k.url + '/api/ofis/cevap', {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
-        body:JSON.stringify({ modul:ayar.modul, yetenek:'gorsel',
+        body:JSON.stringify({ modul:ayar.modul, yetenek:yetenek || 'gorsel',
           sistem:GORSEL_SISTEM + (kisiOzeti() ? '\n\n' + kisiOzeti() : ''),
           mesajlar:[{ role:'user', text:String(soru || 'Bu görüntüde ne var?') }], gorseller:[resim] }),
         signal:ctrl ? ctrl.signal : undefined,
       });
+      /* Eski jeton (401, sahada 2026-10-21): modül Merkez'e yeniden bağlanır, bir kez daha denenir. */
+      if(res.status === 401 && !tekrar){
+        const b = ayar.hkm ? ayar.hkm() : null;
+        if(b && typeof b.save === 'function' && typeof b.kendiBaglan === 'function'){
+          try{ await b.save({ lastStatus:401 }); const e = await b.kendiBaglan(); const k2 = baglanti();
+            if(e && e.ok && k2) return merkezGorsel(k2, soru, resim, yetenek, true); }catch(e){ /* bağlanamadı */ }
+        }
+      }
       let g = null;
       try{ g = await res.json(); }catch(e){ g = null; }
       if(res.status === 200 && g && g.ok && String(g.text || '').trim()) return { ok:true, text:String(g.text).trim() };
@@ -913,14 +924,14 @@ window.LIFEOS.KING = (function(){
       if(t) clearTimeout(t);
     }
   }
-  async function gorselCevap(soru, resim){
+  async function gorselCevap(soru, resim, yetenek){
     const zincir = gorselZincir();
     const k = baglanti();
     if(!k && !zincir.length){ soyle(GORSEL_YOK); return null; }
     const bek = { kim:'king', bekliyor:true, metin:'' };
     akis.push(bek); ciz(false);
     if(k){
-      const r = await merkezGorsel(k, soru, resim);
+      const r = await merkezGorsel(k, soru, resim, yetenek);
       if(r.ok || !zincir.length){
         akis = akis.filter(m => m !== bek);
         soyle(r.ok ? r.text : 'Görüntüyü yorumlayamadım: ' + r.note);
@@ -977,7 +988,7 @@ window.LIFEOS.KING = (function(){
     const iz = gozIz(kare && kare.data);
     if(iz === gozSonIz){ sonra(); return; }      // ekran değişmemiş: rahatsız etme
     gozSonIz = iz;
-    const r = await merkezGorsel(k, GOZ_SORU, kare);
+    const r = await merkezGorsel(k, GOZ_SORU, kare, 'ekran');
     if(no !== gozNo || !paylasim) return;
     const cevap = r.ok ? String(r.text || '').trim() : '';
     if(cevap && !/^PAS\b/i.test(cevap) && cevap.length <= 320) soyle(cevap);
@@ -3045,7 +3056,7 @@ window.LIFEOS.KING = (function(){
       bekleyen = null; bekleyenGit = null; bekleyenIlet = null; cipler = null;
       let kare = null;
       try{ kare = paylasim.kare(); }catch(e){ soyle('Ekranın karesi alınamadı: ' + ((e && e.message) || 'bilinmeyen hata')); return { tur:'ekran' }; }
-      await gorselCevap(String(metin).trim(), kare);
+      await gorselCevap(String(metin).trim(), kare, 'ekran');
       return { tur:'ekran' };
     }
     akis.push({ kim:'sen', metin:String(metin).trim() });
