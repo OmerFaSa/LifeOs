@@ -1817,6 +1817,9 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 wav = b""
             r = dinle.yaziya(self.con, self.server.config, wav, tercih=str(body.get("tercih") or "oto"))
+            if not r["ok"]:
+                # Neden gunluge de yazilir: 503'un sebebi ekranda kaybolmasin (2026-10-21).
+                self.log_message("dinle basarisiz (%d bayt): %s", len(wav), "; ".join(r.get("notlar") or []))
             return self._send(200 if r["ok"] else 503, r)
         if u.path == "/api/ses":
             ham, hata = self._read_body()

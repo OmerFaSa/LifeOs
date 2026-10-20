@@ -811,8 +811,13 @@
       expect([k.kip(), k.cevapBicimi()]).toEqual(['ekran', 'oto']);           // Dinle kapandı
       expect(document.querySelector('[data-king-onizle] video')).toBe(video);  // canlı önizleme
       expect(!!document.querySelector('[data-king="ekran-sor"]')).toBe(true);
+      /* 2026-10-21: ekran açıkken Konuş ekranı kapatmaz; ikisi birlikte çalışır. */
       await k.kipSec('konus');
-      expect([k.kip(), k.sesliSohbetMi(), bitti]).toEqual(['konus', true, 1]); // ekran durdu
+      expect([k.kip(), k.sesliSohbetMi(), bitti]).toEqual(['ekran', true, 0]);
+      expect(document.querySelector('[data-king="ekran-ses"]').textContent).toBe('Sesli konuşmayı bitir');
+      await k.kipSec('yaz');                                                  // Yaz ikisini de bitirir
+      expect([k.kip(), k.sesliSohbetMi(), bitti]).toEqual(['yaz', false, 1]);
+      await k.kipSec('konus');
       expect(!!document.querySelector('.king__kip-panel--konus')).toBe(true);
       await k.kipSec('yaz');
       expect([k.kip(), k.sesliSohbetMi()]).toEqual(['yaz', false]);

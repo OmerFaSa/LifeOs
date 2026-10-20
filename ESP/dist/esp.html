@@ -17564,7 +17564,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'c23190c0', at:'2026-10-20 22:37', dirty:true };
+ESP.BUILD = { id:'17098db1', at:'2026-10-20 22:57', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -36699,6 +36699,19 @@ window.LIFEOS.KING = (function(){
     + 'okuyamadığın ya da emin olmadığın yeri açıkça söyle. Sağlıkla ilgili görüntülerde teşhis koyma, ilaç ya da doz önerme. '
     + 'Yardımcı olabileceğin sonraki adımı tek cümleyle öner.';
   let paylasim = null;       // söz 16: { kare() → { mime, data }, bitir() }
+  /* GÖZ (2026-10-21, kullanıcı: «ekranımı görürken arada bir görüntü alsın,
+     ekranla ilgili soru sorsun; ama abartmasın»): paylaşım açıkken King ilk
+     kez 3 dakika sonra, sonra en az 6 dakika arayla o anki kareye bakar.
+     Ekran değişmediyse, son bir dakikada sen bir şey yaptıysan ya da King
+     meşgulse bakmaz. Model söyleyecek değerli bir şey bulamazsa «PAS» der
+     ve King susar. Kapatılabilir (lifeos.king.goz = false). */
+  const GOZ = 'lifeos.king.goz';
+  const GOZ_ILK = 3 * 60 * 1000, GOZ_ARA = 6 * 60 * 1000;
+  const GOZ_SORU = 'Kullanıcının ekranına arada bir bakıyorsun; kendisi bir şey sormadı. Ekranda o an yaptığı işle ilgili, '
+    + 'gerçekten işine yarayacak TEK kısa bir soru ya da öneri varsa yalnız onu yaz (en çok iki cümle, samimi, «sen» diye). '
+    + 'Söylenecek değerli bir şey yoksa yalnız PAS yaz. Ekranda görmediğin hiçbir şeyi uydurma.';
+  let gozNo = 0, gozSonEtkilesim = 0, gozSonIz = '', gozVakit = 0;
+  const gozAcik = () => ortam.depo.oku(GOZ) !== false;
   const TASIMA = 'lifeos.king';   // söz 18; animasyon.js TASINAN listesinde
   const CEVAP = 'lifeos.king.cevap';   // söz 19: 'oto' | 'ses' | 'yazi'; TASINAN'da
   const SES = 'lifeos.king.ses';       // söz 28: 'oto' | 'ema' | 'gemini' | 'piper' | 'cihaz'; TASINAN'da
@@ -37039,12 +37052,38 @@ window.LIFEOS.KING = (function(){
       soyle(e && e.name === 'NotAllowedError' ? 'Ekran paylaşımı iptal edildi.' : 'Ekran paylaşılamadı: ' + ((e && e.message) || 'bilinmeyen hata'));
       return false;
     }
-    soyle('Ekranını görüyorum. Ne sorarsan o anki ekranı yorumlarım; görüntü yalnız sorduğunda yapay zekâya gider, saklanmaz.');
+    gozSonIz = '';
+    gozKur(GOZ_ILK);
+    soyle('Ekranını görüyorum. Ne sorarsan o anki ekranı yorumlarım; ' + (gozAcik() ? 'arada bir de kendim bakıp '
+      + 'işine yarayacak bir şey görürsem söylerim.' : 'görüntü yalnız sorduğunda yapay zekâya gider, saklanmaz.'));
     return true;
   }
+  function gozKur(ms){ const no = ++gozNo; gozVakit = ortam.simdi().getTime() + ms; ortam.zamanla(() => { gozBak(no); }, ms); }
+  function gozDurdur(){ gozNo++; }
+  function gozIz(v){ const s = String(v || ''); let h = 0; for(let i = 0; i < s.length; i += 97) h = (h * 31 + s.charCodeAt(i)) | 0; return s.length + ':' + h; }
+  async function gozBak(no){
+    /* Vakti gelmeden çağrıldıysa (anında çalışan zamanlayıcı) hiçbir şey yapılmaz: döngü kendini beslemez. */
+    if(no !== gozNo || !paylasim || !acik || ortam.simdi().getTime() < gozVakit - 1000) return;
+    const sonra = () => { if(no === gozNo && paylasim) gozKur(GOZ_ARA); };
+    const k = baglanti();
+    const mesgul = !!dinleyen || konusuyor > 0 || akis.some(m => m.bekliyor) || ortam.simdi().getTime() - gozSonEtkilesim < 60000;
+    if(!gozAcik() || mesgul || !k){ sonra(); return; }
+    let kare = null;
+    try{ kare = paylasim.kare(); }catch(e){ sonra(); return; }
+    const iz = gozIz(kare && kare.data);
+    if(iz === gozSonIz){ sonra(); return; }      // ekran değişmemiş: rahatsız etme
+    gozSonIz = iz;
+    const r = await merkezGorsel(k, GOZ_SORU, kare);
+    if(no !== gozNo || !paylasim) return;
+    const cevap = r.ok ? String(r.text || '').trim() : '';
+    if(cevap && !/^PAS\b/i.test(cevap) && cevap.length <= 320) soyle(cevap);
+    sonra();
+  }
+  function gozSec(ac){ if(ac) ortam.depo.sil(GOZ); else ortam.depo.yaz(GOZ, false); ciz(false); }
   function paylasimBitir(){
     const p = paylasim;
     paylasim = null;
+    gozDurdur();
     if(p) try{ p.bitir(); }catch(e){ /* durmuş */ }
     if(acik) soyle('Ekran paylaşımını durdurdum.');
   }
@@ -37451,7 +37490,11 @@ window.LIFEOS.KING = (function(){
      hata «Whisper yok» dedirtip HKM'yi kalıcı bırakıyordu): art arda iki
      başarısızlıkta 5 dakika tarayıcıya geçilir; mesaj HKM'nin nedenini yazar. */
   let hkmDinlemezBitis = 0;     // bu ana kadar tarayıcının tanıması (0: HKM)
-  const hkmDinlemez = () => hkmDinlemezBitis > ortam.simdi().getTime();
+  /* Masaüstü uygulamasında (Electron) tarayıcının tanıması Google'a gidemez ve
+     her seferinde düşer (2026-10-21, kullanıcı: «ses yazıya dökülemiyor»).
+     Orada tarayıcıya geçilmez; HKM her seferinde yeniden denenir. */
+  const masaustu = () => typeof navigator !== 'undefined' && /Electron\//.test(navigator.userAgent || '');
+  const hkmDinlemez = () => !masaustu() && hkmDinlemezBitis > ortam.simdi().getTime();
   let dinleHata = 0;            // art arda 503 sayısı
   let dinleNot = '';            // HKM'nin son «neden yazıya dökülemedi» notu
   const DINLE_ARA = 5 * 60 * 1000;
@@ -37474,8 +37517,10 @@ window.LIFEOS.KING = (function(){
   async function yaziyaDok(k, wav){
     try{
       const f = ortam.fetch;
-      const res = await f(k.url + '/api/dinle', { method:'POST',
+      const gonder = () => f(k.url + '/api/dinle', { method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token }, body:JSON.stringify({ wav, tercih:algila() }) });
+      let res = await gonder();
+      if(res.status === 503) res = await gonder();   // Whisper anlık düşebilir (GPU dolu); bir kez daha
       let g = null;
       try{ g = await res.json(); }catch(e){ g = null; }
       if(res.status === 200 && g && typeof g.metin === 'string'){ dinleHata = 0; dinleNot = ''; return g.metin; }
@@ -37506,6 +37551,7 @@ window.LIFEOS.KING = (function(){
       if(t === null){
         const neden = dinleNot ? ' (' + dinleNot.replace(/[.\s]+$/, '') + ')' : '';
         soyle(hkmDinlemez() ? 'HKM sesi yazıya dökemedi' + neden + '; birkaç dakika tarayıcının tanımasını deneyeceğim.'
+          : masaustu() ? 'Ses yazıya dökülemedi' + neden + '. Yeniden konuşabilir ya da yazabilirsin.'
           : 'Ses yazıya dökülemedi' + neden + '; yazarak da sorabilirsin.');
         return;
       }
@@ -37901,8 +37947,15 @@ window.LIFEOS.KING = (function(){
     if(!KIPLER.some(x => x.id === id && x.kosul())) return false;
     const once = kip();
     if(id === once) return true;
-    if(once === 'ekran' && paylasim){ const p = paylasim; paylasim = null; try{ p.bitir(); }catch(e){ /* durmuş */ } }
-    if(once === 'konus' && sesliSohbet){ sesliSohbet = false; if(dinleyen){ try{ dinleyen.stop(); }catch(e){ /* kapalı */ } } }
+    /* Ekran ile Konuş birlikte (2026-10-21, kullanıcı: «ekranımı görürken aynı
+       zamanda konuşabilelim»): biri açıkken öteki seçilirse ilki kapanmaz.
+       Yaz ve Dinle ikisini de bitirir. */
+    const birlikte = (id === 'konus' && !!paylasim) || (id === 'ekran' && sesliSohbet);
+    if(id === 'konus' && sesliSohbet) return true;
+    if(!birlikte){
+      if(paylasim){ const p = paylasim; paylasim = null; gozDurdur(); try{ p.bitir(); }catch(e){ /* durmuş */ } }
+      if(sesliSohbet){ sesliSohbet = false; if(dinleyen){ try{ dinleyen.stop(); }catch(e){ /* kapalı */ } } }
+    }
     if(id === 'dinle'){ ortam.depo.yaz(CEVAP, 'ses'); ciz(false); return true; }
     if(cevapBicimi() === 'ses') ortam.depo.sil(CEVAP);
     if(id === 'yaz'){ sus(); ciz(false); return true; }
@@ -37938,9 +37991,11 @@ window.LIFEOS.KING = (function(){
     const k = kip();
     if(k === 'ekran') return '<div class="king__paylasim king__kip-panel king__kip-panel--ekran" role="status">'
       + '<div class="king__ekran-onizle" data-king-onizle aria-label="Paylaşılan ekranın önizlemesi"></div>'
-      + '<div class="king__kip-metin"><b><i class="king__canli" aria-hidden="true"></i>Ekranın paylaşılıyor</b>'
-      + '<span>Görüntü yalnız sorduğunda yapay zekâya gider, saklanmaz.</span>'
+      + '<div class="king__kip-metin"><b><i class="king__canli" aria-hidden="true"></i>Ekranın paylaşılıyor' + (sesliSohbet ? ' · sesli sohbet açık' : '') + '</b>'
+      + '<span>' + (gozAcik() ? 'Arada bir kendim de bakarım; görüntü saklanmaz, bilgisayardan çıkmaz.' : 'Görüntü yalnız sorduğunda okunur, saklanmaz.') + '</span>'
       + '<div class="king__kip-eylem"><button type="button" class="king__cip king__cip--ana" data-king="ekran-sor">Ekranda ne görüyorsun?</button>'
+      + (ortam.tanima() || ortam.kayitAc ? '<button type="button" class="king__cip" data-king="ekran-ses">' + (sesliSohbet ? 'Sesli konuşmayı bitir' : 'Sesli konuş') + '</button>' : '')
+      + '<button type="button" class="king__cip" data-king="goz:' + (gozAcik() ? '0' : '1') + '" aria-pressed="' + (gozAcik() ? 'true' : 'false') + '">Arada yorum: ' + (gozAcik() ? 'açık' : 'kapalı') + '</button>'
       + '<button type="button" class="king__cip" data-king="paylasim-bitir">Durdur</button></div></div></div>';
     /* Söz 30: Konuş kutusuz; ince şerit. Ses seçimi ··· menüsünde. */
     if(k === 'konus') return '<div class="king__kip-panel king__kip-panel--konus" role="status">'
@@ -38918,6 +38973,7 @@ window.LIFEOS.KING = (function(){
   }
 
   async function isle(metin){
+    gozSonEtkilesim = ortam.simdi().getTime();
     /* Söz 8: bekleyen soruya yazıyla cevap («evet», «hayır»). */
     const t0 = kucuk(metin);
     if(!akis.some(m => m.kim === 'sen')) sohbetBasYaz();     // söz 33: yeni sohbet ya da yeni gün
@@ -39864,6 +39920,8 @@ window.LIFEOS.KING = (function(){
         if(is === 'arac'){ aracAcik = !aracAcik; ciz(false); return; }
         if(is === 'sus'){ sus(); return; }
         if(is === 'ekran-sor'){ isle('Ekranda ne görüyorsun? Kısaca söyle.'); return; }
+        if(is === 'ekran-ses'){ sesliSohbetAc(); ciz(false); return; }
+        if(is === 'goz:0' || is === 'goz:1'){ gozSec(is === 'goz:1'); return; }
         if(is === 'klasor-yeni'){ klasorYeni = !klasorYeni; ciz(false); const g = document.querySelector('[data-king-klasor-ad]'); if(g) try{ g.focus(); }catch(e){} return; }
         if(/^klasor-sil:/.test(is)){ klasorSil(is.slice(11)); ciz(false); return; }
         if(/^gecmis-sil:/.test(is)){ kayitSil(is.slice(11)); return; }
