@@ -896,12 +896,58 @@ ESP.Screens.today = (function(){
       ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
   }
 
+  /* PANO KARTLARI (2026-10-20, kullanıcı onaylı katalog; brand/ortak/pano.js).
+     Kapağın altında: günün dakikası (taban biliniyorsa eşik çubuğu),
+     haftanın dengesi (disiplinlerin süre payı), seri (14 kare), bugünün
+     hatırlatıcıları. Kayıt yoksa kart boş hâliyle çizilir. */
+  function PanoUst(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const t = U.todayISO();
+    const git = (label, route) => ({ label, act:'go', data:{ 'data-route':route } });
+    const rows = M.sessionsOf(t).filter(s => s.minutes != null && s.minutesCert !== 'missing');
+    const toplam = rows.reduce((a, s) => a + s.minutes, 0);
+    const taban = ESP.GunSure ? ESP.GunSure.taban(t).dakika : ((S.profile && S.profile.dailyMinutes) || null);
+    const dakika = rows.length
+      ? P.kart({ tur:'dakika', ad:'Günün dakikası', simge:'saat', yuva:'ölçüldü',
+          govde:P.deger(String(toplam), 'dk', rows.length + ' oturum')
+            + (taban ? P.esik({ deger:toplam, esik:taban, yon:'artis-iyi', etiket:toplam + ' dakika, taban ' + taban + ' dakika' })
+              + P.not('taban ' + taban + ' dk' + (toplam < taban ? ' · ' + (taban - toplam) + ' dk kaldı' : ' · tutuldu')) : '') })
+      : P.kart({ tur:'dakika', ad:'Günün dakikası', simge:'saat', bos:{ cumle:taban ? 'Bugün oturum yok; taban ' + taban + ' dk.' : 'Bugün oturum yok.', dugme:git('Oturum ekle', 'gun') } });
+    const b = ESP.Planner.balance(7);
+    const acik = b.rows.filter(r => r.share != null && r.share > 0).sort((x, y) => y.minutes - x.minutes);
+    const denge = b.cert === 'missing'
+      ? P.kart({ tur:'denge', ad:'Haftanın dengesi', simge:'satir', bos:{ cumle:'Son yedi günde oturum yok.' } })
+      : P.kart({ tur:'denge', ad:'Haftanın dengesi', simge:'satir', yuva:'7 gün · ' + U.fmtMin(b.totalMinutes),
+          govde:P.yigin({ parcalar:acik.slice(0, 4).map(r => ({ ad:r.disc.short || r.disc.label, deger:r.minutes, metin:'%' + Math.round(r.share * 100) }))
+              .concat(acik.length > 4 ? [{ ad:'Diğer', deger:acik.slice(4).reduce((a, r) => a + r.minutes, 0), metin:'%' + Math.round(acik.slice(4).reduce((a, r) => a + r.share, 0) * 100) }] : []) })
+            + (b.untouched.length ? P.not(b.untouched.map(d => d.short || d.label).join(', ') + ' bu hafta açılmadı.') : '') });
+    const gunler = []; for(let i = 13; i >= 0; i--) gunler.push(U.iso(U.addDays(U.parse(t), -i)));
+    const seri = M.streak();
+    const durum = gunler.map(d => {
+      const var_ = M.dayHasEntry(S.days[d]);
+      if(d === t) return var_ ? 'dolu' : 'bugun';
+      if(var_) return 'dolu';
+      return ESP.Seri && ESP.Seri.donmusMu && ESP.Seri.donmusMu(d) ? 'donmus' : 'bos';
+    });
+    const seriKart = P.kart({ tur:'seri', ad:'Seri', simge:'alev', yuva:seri > 0 ? seri + ' gün üst üste' : 'henüz başlamadı',
+      govde:P.kareler({ durumlar:durum, sutun:14, etiket:'Son 14 günün ' + durum.filter(x => x === 'dolu').length + '’inde kayıt var' })
+        + P.not('dolu: kayıt var · çerçeve: bugün') });
+    const h = M.dueReminders(null, t).filter(r => ESP.Mod.isOn(r.disc));
+    const disc = id => { const d = (ESP.Mod.active() || []).find(x => x.id === id); return d ? (d.short || d.label) : ''; };
+    const hatir = h.length
+      ? P.kart({ tur:'hatirlatici', ad:'Hatırlatıcılar', simge:'zil', yuva:'bugün ' + h.length,
+          govde:P.liste({ satirlar:h.slice(0, 4).map(r => ({ sol:r.due < t ? 'gecikti' : 'bugün', ad:r.text || 'Hatırlatıcı', not:disc(r.disc), nokta:r.due < t ? 2 : 0 })) }) })
+      : '';
+    return '<div class="pk-ust">' + P.izgara([dakika, denge, seriKart, hatir]) + '</div>';
+  }
+
   function render(){
     /* Karşılamanın notu: bugünün kural cümlesi (Siri'ye giden aynı cümle). */
     if(window.LIFEOS && window.LIFEOS.KARSILAMA && ESP.Screens.today.sesli) window.LIFEOS.KARSILAMA.notYaz(ESP.Screens.today.sesli(), U.todayISO());
     const O = ESP.Screens.onaylar;
     const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
-    return html`<div class="bugun" data-oz="003">
+    return html`${raw(PanoUst())}<div class="bugun" data-oz="003">
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu() ? window.LIFEOS.GIRIS.kutuHtml() : '')}

@@ -524,8 +524,27 @@ ESP.Screens.studio = (function(){
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta. Stüdyoda iki disiplin
      var; iki tezgâh (koç her masanın reçetesini ayrı yazar) son bölümde,
      öbür ekranlardaki «Tezgâh» gibi (iPhone Faz 2c). */
+  /* PANO KARTLARI (2026-10-20; brand/ortak/pano.js): denemesi olan ilk iki
+     parçanın temposu son sekiz denemede sütunlarda; hedef BPM varsa eşik. */
+  function PanoTempo(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const l = (S.pieces || []).filter(p => (p.attempts || []).length).slice(0, 2);
+    if(!l.length) return '';
+    const kartlar = l.map(p => {
+      const a = p.attempts.slice().sort((x, y) => String(x.date).localeCompare(String(y.date))).slice(-8);
+      const son = a[a.length - 1].bpm;
+      return P.kart({ tur:'tempo', ad:(p.name || 'Parça') + ' · tempo', simge:'nota', yuva:'ölçüldü',
+        govde:P.deger(String(son), 'BPM', p.targetBpm ? 'hedef ' + p.targetBpm + ' BPM' : (p.cleanBpm ? 'temiz eşik ' + p.cleanBpm + ' BPM' : ''))
+          + P.sutun({ degerler:a.map(x => x.bpm), yukseklik:48, etiket:'Son ' + a.length + ' denemenin temposu; sonuncusu ' + son + ' BPM' })
+          + (p.targetBpm ? P.esik({ deger:son, esik:p.targetBpm, yon:'artis-iyi', etiket:son + ' BPM, hedef ' + p.targetBpm }) : '') });
+    });
+    return '<div class="pk-ust">' + P.izgara(kartlar, 'pk-izgara--iki') + '</div>';
+  }
+
   function render(){
     return K.Grid(html`
+      ${K.Span(12, raw(PanoTempo()))}
       ${K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:'Stüdyo bölümleri', tabs:TABS, govde:{
         muzik:musicRows, diksiyon:dictionRows,
         kulak:earRows, ogren:topicRows, ilerleme:progressRows,

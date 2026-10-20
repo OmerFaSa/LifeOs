@@ -596,6 +596,25 @@ ESP.Screens.analytics = (function(){
       <p class="tiny muted mt-10">Sütunlar günlük dakikadır; nokta girilmemiş gündür (sıfır sayılmaz). Önceki 14 günle fark, iki pencerede de
         en az ${ESIK_GUN} kayıtlı gün varsa yazılır. Alt satır, alanın kalite ölçüsüdür (kural motoru).</p>` });
   }
+  /* PANO KARTI (2026-10-20; brand/ortak/pano.js): son 5 haftanın günlük
+     dakikası ısı haritasında; girilmemiş gün kesik kare (sıfır değil). */
+  function isiHaritasi(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const bugun = U.parse(U.todayISO());
+    const pzt = U.addDays(bugun, -((bugun.getDay() + 6) % 7) - 28);
+    const gunler = []; for(let i = 0; i < 35; i++) gunler.push(U.iso(U.addDays(pzt, i)));
+    const bugunISO = U.todayISO();
+    const deger = gunler.map(d => d > bugunISO ? null : M.minutesOf(d));
+    const kayitli = deger.filter(v => v != null).length;
+    const enCok = Math.max(1, ...deger.filter(v => v != null));
+    if(!kayitli) return P.kart({ tur:'isi', ad:'Son 5 hafta', simge:'takvim', bos:{ cumle:'Son beş haftada oturum yok.' } });
+    return P.kart({ tur:'isi', ad:'Son 5 hafta', simge:'takvim', yuva:'günlük dakika · ' + kayitli + ' gün kayıtlı',
+      govde:'<div class="pk-sutun__ad">' + ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map(g => '<span>' + g + '</span>').join('') + '</div>'
+        + P.kareler({ sutun:7, etiket:'Son beş haftanın günlük dakikası; ' + kayitli + ' gün kayıtlı',
+            durumlar:gunler.map((d, i) => d > bugunISO ? 'bos' : deger[i] == null ? 'yok' : deger[i] <= 0 ? 0 : Math.max(1, Math.ceil(deger[i] / enCok * 3))) })
+        + P.not('koyu: çok · açık: az · kesik: kayıt yok') });
+  }
   function dengeCubugu(){
     const b = ESP.Planner.balance(7);
     if(b.cert === 'missing') return K.Kutu({ ad:'Haftanın dengesi', yuva:'son 7 gün', govde:html`<p class="small muted">Son yedi günde kayıt yok.</p>` });
@@ -635,6 +654,7 @@ ESP.Screens.analytics = (function(){
     const acik = !!S.ui.analizAyrinti;
     return K.Grid(html`
       ${K.Span(12, alanKarolari())}
+      ${K.Span(12, raw('<div class="pk-izgara pk-izgara--iki">' + isiHaritasi() + '</div>'))}
       ${K.Span(12, analizBasi())}
       ${K.Span(12, html`<div class="analiz-ayrinti">
         ${K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: radar, seriler, rapor, dürüstlük, rubrik', size:'sm', tone:'ghost',

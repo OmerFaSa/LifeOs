@@ -826,9 +826,34 @@ R.Screens.exams = (function(){
     return raw(V.donen({ id:'ays-deneme', ad:'Gidişat', maddeler:m }));
   }
 
+  /* PANO KARTLARI (2026-10-20; brand/ortak/pano.js): TYT neti son
+     denemelerde sütun (son deneme vurgulu) ve son tam denemenin ders ders
+     doğru oranı (sağda net). Deneme yoksa boş hâl. */
+  function PanoDeneme(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const tr = C.medianTrend('TYT');
+    const tam = (S.exams || []).filter(e => e.family === 'TYT' && e.kind === 'full').sort((a, b) => a.date.localeCompare(b.date));
+    if(!tam.length) return '<div class="pk-ust">' + P.izgara([P.kart({ tur:'net', ad:'TYT neti', simge:'egri',
+      bos:{ cumle:'Henüz tam TYT denemesi yok; net ilk denemeyle çıkar.', dugme:{ label:'Deneme gir', act:'new-exam' } } })], 'pk-izgara--iki') + '</div>';
+    const son = tr.series.slice(-8);
+    const v = x => U.fmtNum ? U.fmtNum(x) : String(x);
+    const netKart = P.kart({ tur:'net', ad:'TYT neti', simge:'egri', yuva:'son ' + son.length + ' deneme',
+      govde:P.deger(v(son[son.length - 1]), 'net', tr.delta != null ? 'son 3 medyanı ' + v(tr.last3) + ' · önceki 3 ile fark ' + (tr.delta >= 0 ? '+' : '−') + v(Math.abs(tr.delta)) : 'fark için en az 6 deneme gerekir')
+        + P.sutun({ degerler:son, yukseklik:56, etiket:'Son ' + son.length + ' TYT denemesinin neti; sonuncusu ' + v(son[son.length - 1]) }) });
+    const e = tam[tam.length - 1];
+    const satir = (e.tests || []).map(t => {
+      const q = (Number(t.correct) || 0) + (Number(t.wrong) || 0) + (t.blank != null ? Number(t.blank) : 0);
+      return { ad:t.name, oran:q ? (Number(t.correct) || 0) / q : null, metin:v(U.round(M.testNet(t), 2)) };
+    });
+    const dersKart = satir.length ? P.kart({ tur:'ders-net', ad:'Son deneme · ders ders', simge:'satir', yuva:U.fmtShort ? U.fmtShort(e.date) : e.date,
+      govde:P.cubuklar({ satirlar:satir }) + P.not('çubuk: doğru oranı · sağda net') }) : '';
+    return '<div class="pk-ust">' + P.izgara([netKart, dersKart], 'pk-izgara--iki') + '</div>';
+  }
+
   async function render(){
     if(R.ExamRun.active()) return String(runView());
-    return String(S.ui.examOpen ? detailView(S.ui.examOpen) : listView());
+    return String(S.ui.examOpen ? detailView(S.ui.examOpen) : PanoDeneme() + listView());
   }
 
   function afterRender(){

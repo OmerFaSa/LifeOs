@@ -1262,9 +1262,34 @@ SP.Screens.move = (function(){
     }
   }
 
+  /* PANO KARTI (2026-10-20; brand/ortak/pano.js): bu haftanın hareketi
+     türe göre yığılmış sütunlarda (kuvvet, kardiyo, mobilite); seansı
+     olmayan gün kesik kutu, sıfır değil. */
+  const TUR_AD = { strength:'Kuvvet', cardio:'Kardiyo', mobility:'Mobilite' };
+  function PanoHareket(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const gunler = []; for(let i = 6; i >= 0; i--) gunler.push(U.iso(U.addDays(U.today(), -i)));
+    const GUN = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+    const turler = ['strength', 'cardio', 'mobility'];
+    const deger = gunler.map(d => {
+      const l = M.workoutsOf(d);
+      if(!l.length) return null;
+      return turler.map(k => l.filter(w => (w.kind || 'strength') === k).reduce((a, w) => a + (Number(w.minutes) || 0), 0));
+    });
+    const top = deger.filter(Boolean).reduce((a, x) => a + x[0] + x[1] + x[2], 0);
+    if(!deger.some(Boolean)) return '<div class="pk-ust">' + P.izgara([P.kart({ tur:'hafta-hareket', ad:'Son 7 gün', simge:'hareket',
+      bos:{ cumle:'Son yedi günde seans yok. İlk seans girilince günlere dağılır.' } })]) + '</div>';
+    const kart = P.kart({ tur:'hafta-hareket', ad:'Son 7 gün', simge:'hareket', yuva:top + ' dk',
+      govde:P.sutun({ degerler:deger, yukseklik:64, gunler:gunler.map(d => GUN[U.parse(d).getDay()]),
+          etiket:'Son yedi günün hareketi; ' + deger.filter(x => x == null).length + ' gün seans yok' })
+        + '<div class="pk-lejant">' + turler.map((k, i) => '<span><i class="pk-sutun__p' + i + '"></i>' + TUR_AD[k] + '</span>').join('') + '</div>' });
+    return '<div class="pk-ust">' + P.izgara([kart], 'pk-izgara--iki') + '</div>';
+  }
+
   async function render(){
     const done = M.workoutsOf(U.todayISO()).length;
-    return String(K.SayfaBolumleri({ act:'move-tab', aria:'Hareket bölümleri',
+    return String(PanoHareket() + K.SayfaBolumleri({ act:'move-tab', aria:'Hareket bölümleri',
       bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t),
         sayi:t.id === 'bugun' && done ? done : null })) }));
   }

@@ -1114,6 +1114,60 @@ SP.Screens.today = (function(){
       ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
   }
 
+  /* PANO KARTLARI (2026-10-20, kullanıcı onaylı katalog; brand/ortak/pano.js).
+     Kapağın altında üç kart: gece uykusu (plan biliniyorsa halka, son yedi
+     gece sütun), toparlanma (yarım gösterge, bant adıyla), seri (14 kare).
+     Kayıt yoksa kart boş hâliyle çizilir; sayı uydurulmaz. */
+  function PanoUst(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const t = U.todayISO();
+    const gunler = n => { const l = []; for(let i = n - 1; i >= 0; i--) l.push(U.iso(U.addDays(U.today(), -i))); return l; };
+    const git = (label, route) => ({ label, act:'go', data:{ 'data-route':route } });
+    const HP = SP.HaftaPlan;
+    /* Gece uykusu */
+    const v = S.vitals[t] || {};
+    const plan = HP ? HP.liste().find(p => p.tur === 'uyku') : null;
+    const uyu = plan ? HP.uykuOf(plan, t) : null;
+    const planDk = uyu ? HP.uykuDakika(uyu.yat, uyu.kalk) : null;
+    const yedi = gunler(7).map(d => { const x = S.vitals[d]; return x && x.sleep != null ? Number(x.sleep) : null; });
+    const sureYaz = dk => HP ? HP.sureYaz(dk) : U.fmtNet(dk / 60) + ' sa';
+    let uyku;
+    if(v.sleep == null){
+      uyku = P.kart({ tur:'uyku', ad:'Gece uykusu', simge:'uyku', bos:{ cumle:'Bu gecenin uykusu girilmedi.', dugme:git('Uyku gir', 'gun') } });
+    }else{
+      const dk = Math.round(Number(v.sleep) * 60);
+      const oran = planDk ? dk / planDk : null;
+      const fark = planDk ? planDk - dk : null;
+      uyku = P.kart({ tur:'uyku', ad:'Gece uykusu', simge:'uyku', yuva:'ölçüldü',
+        govde:'<div class="pk__yan">' + (planDk ? P.halka({ oran, etiket:'Planın yüzde ' + Math.round(oran * 100) + '\'i' }) : '')
+          + P.deger(sureYaz(dk), '', planDk ? 'plan ' + sureYaz(planDk) + (fark > 0 ? ' · ' + sureYaz(fark) + ' eksik' : ' · plan tuttu') : 'uyku planı yok') + '</div>'
+          + P.sutun({ degerler:yedi, yukseklik:32, etiket:'Son yedi gece; ' + yedi.filter(x => x == null).length + ' gece kayıt yok' })
+          + P.not('son 7 gece · kesik kutu: kayıt yok') });
+    }
+    /* Toparlanma */
+    const r = SP.Move.readiness(t);
+    const bantlar = (SP.READINESS_BANDS || []).slice().reverse().map(b => b.label);
+    const topar = r.ok
+      ? P.kart({ tur:'toparlanma', ad:'Toparlanma', simge:'kalp', yuva:'hesaplandı',
+          govde:P.gosterge({ deger:r.score, en:100, bantlar, bant:r.band.label, etiket:'Toparlanma ' + r.score + ' / 100, ' + r.band.label.toLocaleLowerCase('tr-TR') })
+            + P.not(r.band.order || '') })
+      : P.kart({ tur:'toparlanma', ad:'Toparlanma', simge:'kalp', bos:{ cumle:'Uyku girilince hesaplanır.', dugme:git('Uyku gir', 'gun') } });
+    /* Seri: son 14 gün */
+    const seri = SP.Calc.streak();
+    const durum = gunler(14).map(d => {
+      const tamam = SP.Calc.minimumDay(d).complete;
+      if(d === t) return tamam ? 'dolu' : 'bugun';
+      if(tamam) return 'dolu';
+      return SP.Seri && SP.Seri.donmusMu && SP.Seri.donmusMu(d) ? 'donmus' : 'bos';
+    });
+    const tutulan = durum.filter(x => x === 'dolu').length;
+    const seriKart = P.kart({ tur:'seri', ad:'Seri', simge:'alev', yuva:seri > 0 ? seri + ' gün üst üste' : 'henüz başlamadı',
+      govde:P.kareler({ durumlar:durum, sutun:14, etiket:'Son 14 günün ' + tutulan + '\'inde asgari gün tutuldu' })
+        + P.not('dolu: asgari gün tutuldu · çerçeve: bugün') });
+    return '<div class="pk-ust">' + P.izgara([uyku, topar, seriKart]) + '</div>';
+  }
+
   async function render(){
     /* Karşılamanın notu: bugünün kural cümlesi (Siri'ye giden aynı cümle). */
     if(window.LIFEOS && window.LIFEOS.KARSILAMA && SP.Screens.today.sesli) window.LIFEOS.KARSILAMA.notYaz(SP.Screens.today.sesli(), SP.U.todayISO());
@@ -1127,7 +1181,7 @@ SP.Screens.today = (function(){
     /* Onaylar tek çekmecede: burada yalnız en öndeki kart (screens/onaylar.js). */
     const oneri = SP.Screens.onaylar && SP.Screens.onaylar.bekleyen() ? SP.Screens.onaylar.oneriAlani() : '';
 
-    return String(html`<div class="bugun" data-oz="003">
+    return String(html`${raw(PanoUst())}<div class="bugun" data-oz="003">
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '')}

@@ -861,9 +861,41 @@ SP.Screens.meals = (function(){
     }
   }
 
+  /* PANO KARTLARI (2026-10-20; brand/ortak/pano.js): öğünlerim günün
+     çizgisinde (kendi öğün adların ve saatlerin; girilen öğün dolu nokta)
+     ve makrolar tek yığılmış çubukta. Kayıt yoksa boş hâl. */
+  function PanoOgun(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P || !SP.Ogun) return '';
+    const d = shownDate();
+    const ogunler = M.mealsOf(d);
+    const slotlar = SP.Ogun.liste();
+    const dk = s => /^\d{1,2}:\d{2}$/.test(s || '') ? Number(s.split(':')[0]) * 60 + Number(s.split(':')[1]) : null;
+    const saatli = slotlar.every(s => dk(s.saat) != null);
+    const bas = 5 * 60, bit = 23 * 60;
+    const noktalar = slotlar.map((s, i) => ({ ad:s.label, dolu:ogunler.some(m => m.slot === s.id),
+      yer:saatli ? Math.max(0, Math.min(1, (dk(s.saat) - bas) / (bit - bas))) : (slotlar.length > 1 ? i / (slotlar.length - 1) : .5) }));
+    const girilen = noktalar.filter(n => n.dolu).length;
+    const sira = noktalar.find(n => !n.dolu);
+    const sirada = sira ? slotlar[noktalar.indexOf(sira)] : null;
+    const ogunKart = P.kart({ tur:'ogunlerim', ad:'Öğünlerim', simge:'ogun', yuva:girilen + ' / ' + slotlar.length,
+      govde:P.cizgi({ noktalar }) + P.not(sirada ? 'Sıradaki: ' + sirada.label + (sirada.saat ? ' · ' + sirada.saat : '') : 'Bütün öğünler girildi.') });
+    const t = SP.Nutri.dayTotals(d);
+    const tg = SP.Nutri.targets(null, d);
+    const g = x => Math.round(Number(x) || 0);
+    const makro = t.empty
+      ? P.kart({ tur:'makro', ad:'Makrolar', simge:'cubuk', bos:{ cumle:'Öğün girilince protein, karbonhidrat ve yağ burada çizilir.' } })
+      : P.kart({ tur:'makro', ad:'Makrolar', simge:'cubuk', yuva:'girilen öğünlerden',
+          govde:P.yigin({ parcalar:[{ ad:'Protein', deger:g(t.protein), metin:g(t.protein) + ' g' }, { ad:'Karbonhidrat', deger:g(t.carb), metin:g(t.carb) + ' g' },
+            { ad:'Yağ', deger:g(t.fat), metin:g(t.fat) + ' g' }] })
+            + (tg.ok && tg.protein ? P.esik({ deger:g(t.protein), esik:tg.protein.min, etiket:'Protein ' + g(t.protein) + ' gram, hedef en az ' + tg.protein.min, yon:'artis-iyi' })
+              + P.not('protein · hedef en az ' + tg.protein.min + ' g') : '') });
+    return '<div class="pk-ust">' + P.izgara([ogunKart, makro]) + '</div>';
+  }
+
   async function render(){
     const n = M.mealsOf(shownDate()).length;
-    return String(K.SayfaBolumleri({ act:'meal-tab', aria:'Besin bölümleri',
+    return String(PanoOgun() + K.SayfaBolumleri({ act:'meal-tab', aria:'Besin bölümleri',
       bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t),
         sayi:t.id === 'gunluk' && n ? n : null })) }));
   }

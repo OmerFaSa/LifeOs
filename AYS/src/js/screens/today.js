@@ -1363,6 +1363,53 @@ R.Screens.today = (function(){
       ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
   }
 
+  /* PANO KARTLARI (2026-10-20, kullanıcı onaylı katalog; brand/ortak/pano.js).
+     Kapağın altında: günün blokları süreyle orantılı şeritte, sınava kalan
+     gün ve programın geçen haftaları, tekrar borcu eşik çubuğunda, son 14
+     günün minimum günleri karelerde. Kayıt yoksa boş hâl. */
+  function PanoUst(day, dateISO){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P || R.Setup.needed()) return '';
+    const git = (label, route) => ({ label, act:'go', data:{ 'data-route':route } });
+    const bloklar = (day.blocks || []).filter(b => b.slot !== 'Dinlenme');
+    const ad = b => b.subject || b.topic || b.slot;
+    const durum = b => b.status === 'done' ? 'bitti' : b.startedAt ? 'simdi' : 'sira';
+    const bitti = bloklar.filter(b => b.status === 'done').length;
+    const suren = bloklar.find(b => b.startedAt && b.status !== 'done');
+    const sira = bloklar.find(b => b.status === 'pending' && !b.startedAt);
+    const blokKart = bloklar.length
+      ? P.kart({ tur:'bloklar', ad:'Günün blokları', simge:'blok', yuva:bitti + ' / ' + bloklar.length + ' bitti',
+          govde:P.serit({ parcalar:bloklar.map(b => ({ ad:ad(b), sure:Number(b.targetMin) || 1, durum:durum(b) })),
+              etiket:bloklar.length + ' blok: ' + bitti + ' bitti' + (suren ? ', ' + ad(suren) + ' sürüyor' : '') })
+            + P.not(suren ? 'Şimdi: ' + ad(suren) : sira ? 'Sırada: ' + ad(sira) + (sira.targetMin ? ' · ' + sira.targetMin + ' dk' : '') : 'Bugünün blokları kapandı.') })
+      : P.kart({ tur:'bloklar', ad:'Günün blokları', simge:'blok', bos:{ cumle:'Bugün için blok yok.', dugme:git('Plana bak', 'plan') } });
+    const kalan = U.diffDays(dateISO, R.PLAN.examTytISO);
+    const hafta = M.currentWeek(), topHafta = R.PLAN.totalWeeks;
+    const tahmini = !(S.profile && S.profile.examTytISO);
+    const sinavKart = P.kart({ tur:'sinav', ad:'TYT’ye', simge:'takvim', yuva:tahmini ? 'tahmini tarih' : 'hesaplandı',
+      govde:P.deger(String(kalan), 'gün', 'Hafta ' + hafta + ' / ' + topHafta)
+        + P.esik({ deger:hafta, esik:hafta, olcek:topHafta, etiket:'Programın ' + hafta + '. haftası, toplam ' + topHafta })
+        + P.not('programın %' + Math.round(hafta / topHafta * 100) + '’i geçti') });
+    const vadeli = C.dueCards().length;
+    const borc = (S.cards || []).length ? C.cardDebt() : null;
+    const kartKart = borc == null
+      ? P.kart({ tur:'tekrar', ad:'Tekrar kartları', simge:'kart', bos:{ cumle:'Tekrar kartı yok; borç ilk kartla ölçülür.' } })
+      : P.kart({ tur:'tekrar', ad:'Tekrar kartları', simge:'kart', yuva:'hesaplandı', dugme:vadeli ? git('Tekrara git', 'cards') : null,
+          govde:P.deger(String(vadeli), 'vadeli', 'tekrar borcu %' + borc)
+            + P.esik({ deger:borc, esik:10, olcek:Math.max(50, borc), yon:'azalis-iyi', etiket:'Tekrar borcu yüzde ' + borc + ', eşik yüzde 10' })
+            + P.not(borc > 10 ? 'eşik %10 · ' + (borc - 10) + ' puan üstünde' : 'eşik %10 · altında') });
+    const gunler = []; for(let i = 13; i >= 0; i--) gunler.push(U.iso(U.addDays(U.today(), -i)));
+    const seri = C.behaviorStreak();
+    const kareler = gunler.map(d => {
+      const t = C.minimumDayMet(d);
+      return d === dateISO ? (t ? 'dolu' : 'bugun') : t ? 'dolu' : 'bos';
+    });
+    const seriKart = P.kart({ tur:'seri', ad:'Seri', simge:'alev', yuva:seri.streak ? seri.streak + ' gün üst üste' : 'henüz başlamadı',
+      govde:P.kareler({ durumlar:kareler, sutun:14, etiket:'Son 14 günün ' + kareler.filter(x => x === 'dolu').length + '’inde minimum gün tutuldu' })
+        + P.not('dolu: minimum gün tutuldu · çerçeve: bugün') });
+    return '<div class="pk-ust">' + P.izgara([blokKart, sinavKart, kartKart, seriKart]) + '</div>';
+  }
+
   async function render(){
     const dateISO = U.todayISO();
     const n = M.currentWeek();
@@ -1373,7 +1420,7 @@ R.Screens.today = (function(){
     const acil = bugunUyarisi();
     const oneri = R.Screens.onaylar && R.Screens.onaylar.bekleyen() ? R.Screens.onaylar.oneriAlani() : '';
 
-    return html`<div class="bugun" data-oz="003">
+    return html`${raw(PanoUst(day, dateISO))}<div class="bugun" data-oz="003">
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '')}

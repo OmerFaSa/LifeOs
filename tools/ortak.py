@@ -361,6 +361,10 @@ DOSYALAR = {
     # Grafik parcalari: 027 eksik gun, 035 aralik, 037 egilim, 041 doluluk.
     "grafik.js":      "js/core",
     "grafik.test.js": "tests",
+    # Pano kartlari (2026-10-20): gorsel dilin ortak parcalari (AGENTS 1.10).
+    "pano.js":        "js/core",
+    "pano.css":       "css",
+    "pano.test.js":   "tests",
     # Oneri karti ve onay kalibi: 110 111 112 114 116 121 150, 022 sonuc dugmesi.
     "oneri.js":       "js/core",
     # Test dosyasi `oneri.test.js` DEGIL: SPI'nin kendi src/tests/oneri.test.js'i
