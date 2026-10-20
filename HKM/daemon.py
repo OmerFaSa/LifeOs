@@ -1761,6 +1761,12 @@ class Handler(BaseHTTPRequestHandler):
             # Dusunme derinligi (hizli|dengeli|derin); gecersizse «otomatik».
             ek = {"derinlik": sohbet.derinlik_of((govde or {}).get("derinlik")),
                   "uslup": sohbet.uslup_of((govde or {}).get("uslup"))}
+            # King'in arac katalogu (core/arac.py): model yalniz secer; araci
+            # modul calistirir. Ikinci tur okuma sonuclarini tasir.
+            if isinstance((govde or {}).get("araclar"), list):
+                ek["araclar"] = govde["araclar"]
+            if isinstance((govde or {}).get("arac_sonuclari"), list):
+                ek["arac_sonuclari"] = govde["arac_sonuclari"]
             if u.path == "/api/chat/akis":
                 # Akan cevap: NDJSON satirlari; once denetlenmis cumleler, sonda tam cevap.
                 self._akis_baslat()

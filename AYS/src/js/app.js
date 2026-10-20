@@ -1662,6 +1662,7 @@ R.App = (function(){
           /* King'in eylem kapısı (yetki.js söz 8): toplantıyı Toplantı ekranının
              kendi düğmesi başlatır; model çağrıları yapılır, bu yüzden orta seviye. */
           eylemler:[{ id:'toplanti', seviye:'orta', ad:'Toplantı başlat',
+            aciklama:'Ofiste uzmanlar toplantısını başlatır (yapay zekâ çağrıları yapılır).',
             anla:t => /toplant/.test(t) && /(başlat|başla|aç|yap|topla|kur)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
             onizle:() => ({ metin:'Ofiste toplantı başlayacak: uzmanlar sırayla konuşur, bunun için yapay zekâ çağrıları yapılır.' }),
             uygula:async () => {
@@ -1682,6 +1683,10 @@ R.App = (function(){
             sayi:() => Object.keys(R.Store.exportAll().data || {}).length,
             foto:'Bu cihazdaki soru fotoğraflarına dokunulmaz.' } });
       }
+      /* ARAÇ KATALOĞU (brand/ortak/arac.js, King 2.0): AYS'nin okuma araçları
+         ve plan eylemleri (core/kingarac.js); King sohbetten çağırır, yazan
+         araç önizlenir ve yalnız onayla uygulanır. */
+      if(window.LIFEOS && window.LIFEOS.ARAC && R.KingArac) window.LIFEOS.ARAC.kur({ modul:'ays', araclar:() => R.KingArac.liste() });
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route, model:() => R.LLM, hafiza:() => R.Hafizam,

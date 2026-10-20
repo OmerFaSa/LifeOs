@@ -1813,6 +1813,8 @@ ESP.App = (function(){
              dönüştü (2026-10-20): model çağrısı yok, ekran kendi verisinden
              kurulur; bu yüzden küçük seviye. */
           eylemler:[{ id:'kitap-ekle', seviye:'kucuk', ad:'Kitap ekle',
+            aciklama:'Kütüphaneye yeni kitap ekler (okunuyor olarak).',
+            parametreler:{ type:'object', properties:{ ad:{ type:'string', maxLength:120, description:'kitabın adı' } }, required:['ad'] },
             anla:t => { const m = t.match(/kitap(?:lığa|lara)? ekle\s*:?\s*(.+)$|(.+?)\s+kitabını (?:ekle|okumaya başladım)/); const ad = m ? String(m[1] || m[2] || '').trim() : '';
               return ad.length >= 2 && ad.length <= 120 ? { ad } : null; },
             onizle:p => ({ metin:'Kütüphaneye «' + p.ad + '» eklenecek.' }),
@@ -1821,6 +1823,7 @@ ESP.App = (function(){
               render();
               return { metin:'«' + b.title + '» kütüphaneye eklendi.', geriAl:async () => { await ESP.Model.deleteBook(b.id); render(); } };
             } }, { id:'inceleme', seviye:'kucuk', ad:'Veri incelemesini aç',
+            aciklama:'Ofis › İnceleme’yi açar: haftanın sayıları, kayıttan karşılaştırmalar ve tek karar.',
             anla:t => /(toplant|incele)/.test(t) && /(başlat|başla|aç|yap|topla|kur|göster)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
             onizle:() => ({ metin:'Ofis › İnceleme açılacak: haftanın sayıları, kayıttan karşılaştırmalar ve tek karar.' }),
             uygula:async () => {
@@ -1850,6 +1853,9 @@ ESP.App = (function(){
             sayi:() => Object.keys(ESP.Store.exportAll().data || {}).length } });
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
+      /* ARAÇ KATALOĞU (brand/ortak/arac.js, King 2.0): ESP'nin okuma araçları,
+         dil kartı ve kitap bitirme (core/kingarac.js). */
+      if(window.LIFEOS && window.LIFEOS.ARAC && ESP.KingArac) window.LIFEOS.ARAC.kur({ modul:'esp', araclar:() => ESP.KingArac.liste() });
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'esp', ekran:() => S.route, model:() => ESP.LLM, hkm:() => ESP.Beacon, git:route => go(route), hafiza:() => ESP.Hafizam,
           /* King'in çıkarımları için (cikarim.js): son 30 günün disiplin dakikaları, kitaplar, müzik günleri. */

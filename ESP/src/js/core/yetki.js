@@ -41,6 +41,9 @@
       orta seviye kabul edilir (büyük eylem dönüş noktası ister, katalogda
       kalır). Eylemi yine modülün kendi kodu uygular; kimliği katalogdakiyle
       çakışan eylem alınmaz.
+   9. ARAÇ KATALOĞU (2026-10-20, brand/ortak/arac.js). King'in modeli bir
+      eylemi tipli parametreyle seçerse niyet `niyet(id, param)` ile kurulur;
+      önizleme ve onay aynıdır. Büyük eylem bu yoldan kurulmaz.
    7. BAŞKA MODÜLÜN İŞİ ORADA YAPILIR. «SPİ'yi sıfırla» AYS'de istenirse
       AYS bunu yapmaz; King o modüle geçmeyi önerir (kayıtlar ayrı
       kökende, ayrı depoda). */
@@ -357,8 +360,24 @@ LIFEOS.YETKI = (function(){
     return hepsi().filter(e => e.seviye).map(e => ({ id:e.id, ad:e.ad, seviye:e.seviye }));
   }
 
+  /* Söz 9 (2026-10-20, araç kataloğu, brand/ortak/arac.js): cümleden değil
+     tipli parametreden niyet. Yalnız küçük ve orta eylem; büyük eylem
+     (sıfırla, dönüş) modelin seçimiyle kurulmaz, kullanıcı kendi cümlesiyle
+     ister. Modülün eylemi `parametreler` şemasını kendisi verir. */
+  function niyet(id, param){
+    if(!ayar) return null;
+    const e = hepsi().find(x => x.id === id);
+    if(!e || (e.seviye !== 'kucuk' && e.seviye !== 'orta')) return null;
+    const p = param || {};
+    let oz = null;
+    try{ oz = e.onizle(p); }catch(err){ oz = null; }
+    if(!oz || oz.yok) return null;
+    return { tur:'eylem', id:e.id, seviye:e.seviye, seviyeAd:SEVIYE_AD[e.seviye], ad:e.ad, param:p, onizle:oz };
+  }
+  function ekKatalog(){ return ekEylemler().map(e => ({ id:e.id, ad:e.ad, seviye:e.seviye, parametreler:e.parametreler || null, aciklama:e.aciklama || '' })); }
+
   function _sifirla(){ ayar = null; }
 
-  const api = { kur, anla, uygula, katalog, donusNoktasi, DONUS, HESAP_RE, kuruluMu:() => !!ayar, _ortam:ortam, _sifirla };
+  const api = { kur, anla, uygula, katalog, niyet, ekKatalog, bekleyenler, donusNoktasi, DONUS, HESAP_RE, kuruluMu:() => !!ayar, _ortam:ortam, _sifirla };
   return api;
 })();

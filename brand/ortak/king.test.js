@@ -2082,5 +2082,118 @@
       expect(k.sesliSohbetMi()).toBe(false);
     }));
   });
+  /* Söz 36: araç kataloğu (brand/ortak/arac.js). Model yalnız seçer; kod
+     doğrular; okuma çalışır ve sonucu ikinci turda cümleye çevrilir; yazma
+     önizlenir ve yalnız onayla uygulanır. Harita modelsiz cevaplanır. */
+  describe('King — araç kataloğu', () => {
+    const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+    function sira(...cevaplar){
+      const istekler = [];
+      const fetch = async (url, o) => { istekler.push({ url, govde:JSON.parse(o.body) }); const c = cevaplar.shift() || { ok:true, mode:'model', text:'Tamam.' }; return { status:200, json:async () => c }; };
+      return { fetch, istekler };
+    }
+    const calisan = [], uygulanan = [];
+    const UYKU = { ad:'spi_uyku', tur:'oku', aciklama:'Son günlerin uyku saatleri.', es:/uykum nasıl/,
+      parametreler:{ type:'object', properties:{ gun:{ type:'integer', minimum:1, maximum:60 } } },
+      calistir:p => { calisan.push(p); return { sonuc:{ gun:p.gun || 7, ortalama_saat:7.5 }, satirlar:['Ortalama: 7,5 sa'] }; } };
+    const BOLUM = { ad:'spi_bolum_ac_kapa', tur:'yaz', aciklama:'Bölümü gizler.',
+      parametreler:{ type:'object', properties:{ bolum:{ type:'string' }, acik:{ type:'integer', enum:[0, 1] } }, required:['bolum', 'acik'] },
+      onizle:p => ({ metin:'«' + p.bolum + '» ' + (p.acik ? 'açılacak' : 'gizlenecek') + '.' }),
+      uygula:async p => { uygulanan.push(p); return { metin:'Bölüm gizlendi.', geriAl:async () => { uygulanan.pop(); } }; } };
+    function aracSahne(m, o){
+      calisan.length = 0; uygulanan.length = 0;
+      const r = sahne(Object.assign({ hkm, fetch:m && m.fetch }, o || {}));
+      window.LIFEOS.ARAC.kur({ modul:'spi', araclar:[UYKU, BOLUM] });
+      return r;
+    }
+    const temizle = () => { window.LIFEOS.ARAC.kur({ modul:'spi', araclar:[] }); };
+
+    it('okuma: model seçer, modülün kodu çalışır, sonuç ikinci turda cümleye çevrilir', () => sahneyle(async () => {
+      const m = sira({ ok:true, mode:'arac', text:'', cagrilar:[{ ad:'spi_uyku', param:{ gun:7 }, tur:'oku' }] },
+        { ok:true, mode:'model', text:'Son 7 gecede ortalama 7,5 saat uyumuşsun.' });
+      const { k } = aracSahne(m);
+      const r = await k.isle('son günlerde nasıl dinlendim sence');
+      expect(r.tur).toBe('arac-oku');
+      expect(m.istekler[0].govde.araclar.map(a => a.ad)).toContain('spi_uyku');
+      expect(m.istekler[0].govde.araclar.map(a => a.ad)).toContain('sistem_haritasi');
+      expect(calisan).toEqual([{ gun:7 }]);
+      expect(m.istekler[1].govde.arac_sonuclari).toEqual([{ ad:'spi_uyku', param:{ gun:7 }, sonuc:{ gun:7, ortalama_saat:7.5 } }]);
+      const son = k.akis().slice(-1)[0];
+      expect(son.metin).toBe('Son 7 gecede ortalama 7,5 saat uyumuşsun.');
+      expect(son.satirlar).toEqual(['Ortalama: 7,5 sa']);
+      temizle();
+    }));
+
+    it('yazma: önizlenir, onaysız uygulanmaz; «evet»le uygulanır, «Geri al» kalır', () => sahneyle(async () => {
+      const m = sira({ ok:true, mode:'arac', text:'Gizledim!', cagrilar:[{ ad:'spi_bolum_ac_kapa', param:{ bolum:'butce', acik:0 }, tur:'yaz' }] });
+      const { k } = aracSahne(m);
+      const r = await k.isle('şu kısmı artık görmek istemiyorum');
+      expect(r.tur).toBe('arac-yaz');
+      expect(uygulanan).toEqual([]);
+      expect(k.bekleyenYetki().onizle.metin).toBe('«butce» gizlenecek.');
+      /* Modelin «Gizledim!» cümlesi gösterilmez: yapılmamış iş anlatılmaz. */
+      expect(k.akis().some(x => x.metin === 'Gizledim!')).toBe(false);
+      await k.isle('evet');
+      expect(uygulanan).toEqual([{ bolum:'butce', acik:0 }]);
+      expect(k.akis().slice(-1)[0].metin).toBe('Bölüm gizlendi.');
+      await k.geriAlYap();
+      expect(uygulanan).toEqual([]);
+      temizle();
+    }));
+
+    it('bilinmeyen araç ve geçersiz parametre reddedilir; hiçbir şey çalışmaz', () => sahneyle(async () => {
+      const m = sira({ ok:true, mode:'arac', text:'', cagrilar:[{ ad:'hepsini_sil', param:{} }, { ad:'spi_uyku', param:{ gun:999 } },
+        { ad:'spi_bolum_ac_kapa', param:{ bolum:'butce' } }] });
+      const { k } = aracSahne(m);
+      await k.isle('her şeyi uçur gitsin');
+      expect(calisan).toEqual([]);
+      expect(uygulanan).toEqual([]);
+      expect(k.bekleyenYetki()).toBeNull();
+      expect(m.istekler.length).toBe(1);
+      temizle();
+    }));
+
+    it('kayıt: önce kullanıcının cümlesi; modelin cümlesi yalnız sayısı korunmuşsa', () => sahneyle(async () => {
+      let kaydedilen = [];
+      const veri = { onizle:t => { const x = String(t).match(/^uyku (\d+)$/); return x ? { tur:'uyku', metin:'Uyku ' + x[1] + ' sa', kaydet:async () => { kaydedilen.push(Number(x[1])); return 'Kaydedildi.'; } } : null; } };
+      const m = sira({ ok:true, mode:'arac', cagrilar:[{ ad:'kayit_gir', param:{ metin:'uyku 7' } }] },
+        { ok:true, mode:'arac', cagrilar:[{ ad:'kayit_gir', param:{ metin:'uyku 9' } }] });
+      const { k } = aracSahne(m, { veri });
+      await k.isle('dün gece yedi saat kadar uyudum');
+      expect(k.akis().slice(-1)[0].onizleme.metin).toBe('Uyku 7 sa');
+      expect(kaydedilen).toEqual([]);
+      await k.isle('evet');
+      expect(kaydedilen).toEqual([7]);
+      await k.isle('dün gece yedi saat kadar uyudum');
+      expect(k.akis().slice(-1)[0].metin).toContain('senin cümlende geçmeyen bir sayı çıktı');
+      expect(kaydedilen).toEqual([7]);
+      temizle();
+    }));
+
+    it('harita: «bu sistemde neler var» ve «… nasıl yapılır» modelsiz cevaplanır', () => sahneyle(async () => {
+      const m = sira();
+      const { k } = aracSahne(m);
+      const r = await k.isle('bu sistemde neler var?');
+      expect(r.tur).toBe('harita');
+      expect(m.istekler.length).toBe(0);
+      const s = k.akis().slice(-1)[0];
+      expect(s.satirlar[0].indexOf('AYS — Sınav hazırlığı')).toBe(0);
+      expect(s.satirlar.length).toBe(4);
+      await k.isle('deneme nasıl yapılır?');
+      expect(k.akis().slice(-1)[0].satirlar).toContain('Sayfası: Deneme (AYS)');
+      temizle();
+    }));
+
+    it('model yokken «es» taşıyan okuma aracı kuralla çalışır', () => sahneyle(async () => {
+      calisan.length = 0;
+      const { k } = sahne({});
+      window.LIFEOS.ARAC.kur({ modul:'spi', araclar:[UYKU] });
+      const r = await k.isle('uykum nasıl');
+      expect(r.tur).toBe('arac-oku');
+      expect(calisan.length).toBe(1);
+      expect(k.akis().slice(-1)[0].satirlar).toEqual(['Ortalama: 7,5 sa']);
+      temizle();
+    }));
+  });
 })();
 

@@ -25,7 +25,7 @@
 
 import re
 
-from core import (ai, butce, cross, dil, manager, memory, models, motto, patron, program,
+from core import (ai, arac, butce, cross, dil, manager, memory, models, motto, patron, program,
                   seviye, streak, urunler)
 
 # Kademeler: kullanici kiminle konusuyor.
@@ -688,6 +688,32 @@ UZUN_SURE = 150
 UZUN_TALIMAT = ("\n\nKullanıcı UZUN ve ayrıntılı bir metin istedi. Bu cevapta cümle sınırı "
                 "yoktur: başlıklar ve paragraflarla konuyu ayrıntılı anlat. Bilmediğin ayrıntıyı "
                 "uydurma; ölçülmemiş bir sayıyı ölçüm gibi yazma.")
+# ARAC KATALOGU (core/arac.py): istemci araclarini yolladiysa modele yalniz
+# SECIM yaptirilir; araci modul calistirir, yazani kullanici onaylar.
+ARAC_TALIMATI = ("\n\nARAÇLAR. Kullanıcının istediği iş sana verilen araçlardan biriyle yapılıyorsa "
+                 "o aracı çağır. Kullanıcı kendi kayıtlarını ya da bir sayısını soruyorsa (uyku, deneme, "
+                 "çalışma, öğün…) cevap vermeden ÖNCE ilgili okuma aracını çağır: kayıtlar modüldedir, "
+                 "bu bağlamda veri görünmemesi veri olmadığı anlamına gelmez; sayıyı kendin yazma. "
+                 "Kayıt girme, ayar ve plan değişikliği gibi YAZAN araçlar "
+                 "kullanıcıya önizleme olarak gösterilir ve onaylanmadan uygulanmaz; «yaptım» deme. "
+                 "«Bu sistemde ne var, nerede, nasıl yapılır» sorusunda sistem_haritasi aracını çağır. "
+                 "Araç adlarını ve JSON'u kullanıcıya yazma. "
+                 "Uygun araç yoksa olağan cevap ver.")
+# Araci cagirmadan yapilmis (ya da yapilacak) gibi anlatilan is.
+ARAC_IDDIA = re.compile(
+    r"\b(ekledim|ekliyorum|ekleyeyim|kaydettim|kaydediyorum|kaydedeyim|değiştirdim|değiştiriyorum|"
+    r"ayarladım|ayarlıyorum|açtım|açıyorum|kapattım|kapatıyorum|kararttım|karartıyorum|güncelledim|"
+    r"güncelliyorum|sildim|siliyorum|başlattım|başlatıyorum|kontrol ediyorum|kontrol edeyim|"
+    r"bakıyorum|bakayım|hesaplıyorum|hesaplayayım|işledim|işliyorum|not ettim|not ediyorum|"
+    r"kayda ekliyorum|kayda geçiyorum|ekleyeceğim|kaydedeceğim|değiştireceğim|ayarlayacağım|"
+    r"karartacağım|çevirdim|çeviriyorum|aktif ettim|aktif ediyorum|"
+    r"aktif edildi|etkin edildi|kayda eklendi|kaydedildi|ayarın değiştirildi|tema değiştirildi)\b", re.I)
+ARAC_DUZELT = ("\n\nÖnceki cevabında bir işi araç çağırmadan yapmış ya da yapacakmış gibi anlattın; "
+               "sen hiçbir şeyi kendin yapamazsın. Ya uygun aracı ÇAĞIR ya da yapamadığını açıkça söyle.")
+ARAC_YAPILMADI = ("Bunu şu an buradan yapamadım; hiçbir şeyi değiştirmedim. Daha açık söylersen "
+                  "ya da ilgili sayfadan yaparsan olur.")
+
+
 # LifeOS'un kendisi sorulunca modele kendi belgesinden kisa tanim gider
 # (README, AGENTS): model sistemi uydurmaz; icindeki sayilar (adresler)
 # baglamda oldugu icin sayi denetiminden gecer.
@@ -785,18 +811,11 @@ def derinlik_of(v):
     return v if v in DERINLIKLER else None
 
 
-def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
-          user="ben", transport=None, kayit=True, kanal="local", hedef=None,
-          derinlik=None, uslup=None, akis=None):
-    """Bir mesaja cevap. Once komut, sonra model, sonra durust bir «yok».
-    `derinlik`: hizli | dengeli | derin | None (seviyeyi kod secer).
-
-    Doner: {"mode": komut|model|yok, "text": ..., ...}
-    """
-    if gorevli not in GOREVLILER:
-        return {"ok": False, "mode": "yok", "text": None,
-                "note": "Bilinmeyen görevli."}
-
+def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef):
+    """Modelden ONCE gelen kural yolu (komut, teklif, para, giris kapisi,
+    is emri, istek, rapor). Cevap varsa onu, yoksa None doner. Arac
+    sonuclariyla gelen ikinci tur bunu atlar: ayni mesaj ilk turda buradan
+    zaten gecti."""
     hafiza_komutu = memory.command(con, metin, user=user)
     if hafiza_komutu:
         if kayit:
@@ -965,6 +984,31 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                            agent=gorevli, kayit=kayit)
         return {"ok": True, "mode": "komut", "command": r["command"],
                 "text": r["text"], "agent": gorevli}
+    return None
+
+
+def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
+          user="ben", transport=None, kayit=True, kanal="local", hedef=None,
+          derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None):
+    """Bir mesaja cevap. Once komut, sonra model, sonra durust bir «yok».
+    `derinlik`: hizli | dengeli | derin | None (seviyeyi kod secer).
+    `araclar`: istemcinin arac katalogu (core/arac.py); model bir arac
+    secerse cevap mode=arac ve DOGRULANMIS `cagrilar` tasir, araci istemci
+    calistirir. `arac_sonuclari`: ikinci tur — okuma araclarinin kodla
+    uretilmis sonuclari baglama girer, kural yolu atlanir.
+
+    Doner: {"mode": komut|model|arac|yok, "text": ..., ...}
+    """
+    if gorevli not in GOREVLILER:
+        return {"ok": False, "mode": "yok", "text": None,
+                "note": "Bilinmeyen görevli."}
+    katalog = arac.katalog_temizle(araclar)[0] if araclar else []
+    sonuclar = arac.sonuclari_temizle(arac_sonuclari, katalog) if arac_sonuclari is not None else None
+
+    if arac_sonuclari is None:
+        kr = _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef)
+        if kr is not None:
+            return kr
 
     rol = GOREVLILER[gorevli]["role"]
     # Mesajin NITELIGI modeli secer (core/seviye.py): duz sohbet alt,
@@ -977,6 +1021,11 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     if not hazir["ok"]:
         # 4 — MODEL YOKSA SISTEM CALISIR. «Yapay zeka yok» ile «sistem
         # bozuk» ayri seylerdir ve ayri yazilir.
+        if sonuclar is not None:
+            # Ikinci turda kural motorunun tahmini yanlis cevaptir; istemci
+            # kodun urettigi satirlari kendisi gosterir.
+            return {"ok": False, "mode": "yok", "text": None, "agent": gorevli,
+                    "note": hazir["note"]}
         if gorevli == "king":
             r = patron.respond(con, metin, date=date, th=th, channel=kanal,
                                agent=gorevli, kayit=kayit)
@@ -998,9 +1047,17 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     bg = baglam(con, date, gorevli, th=th, veri=veri, kisa=kisa)
     uzun = uzun_istek(metin)
     # Kucuk modelde serbest sohbet: olcum listesi gitmez (yalniz tarih).
-    serbest = kisa and not uzun and not sistem_konusu(metin)
-    if serbest:
+    serbest = kisa and not uzun and not sistem_konusu(metin) and sonuclar is None
+    # Yerel modelde araclarin ilk turu: olcum ozeti gitmez. Kucuk model
+    # baglamdaki «veri gelmedi» satirina guvenip okuma aracini cagirmiyordu
+    # (sahada, gemma4:e2b ve gemma3:4b, 2026-10-20); kayit modulde, arac okur.
+    # Araci cagiran model mi (gemma3 gibi aracsiz modele katalog gitmez, core/arac.py).
+    aracli = bool(katalog) and not arac.aracsiz_mi((hazir.get("assignment") or {}).get("model"))
+    if serbest or (yerel_model and aracli and sonuclar is None):
         bg = "Tarih: %s" % date
+    if sonuclar:
+        veri.add("arac")
+        bg += "\n" + arac.sonuc_baglami(sonuclar)
     if uzun or LIFEOS_SOZ.search(str(metin or "")):
         bg += "\n" + LIFEOS_BILGI
     if sinir:
@@ -1015,7 +1072,8 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                "sen yazamazsın):\n" + hb)
     sistem = (sistem_metni(gorevli, bg, kisa=kisa, serbest=serbest) + (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
               + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else "")
-              + USLUP_TALIMAT.get(uslup_of(uslup), ""))
+              + USLUP_TALIMAT.get(uslup_of(uslup), "")
+              + (arac.SONUC_TALIMATI if sonuclar else ARAC_TALIMATI if aracli and sonuclar is None else ""))
     onceki = [m if m.get("role") != "assistant" else dict(m, content=kalipsiz(m.get("content")))
               for m in (gecmis or []) if not (m.get("role") == "assistant" and yanki_mi(m.get("content")))]
     onceki = [m for m in onceki if m.get("content")]
@@ -1023,13 +1081,50 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         onceki = onceki[-sinir["gecmis"]:] if sinir["gecmis"] else []
     mesajlar = onceki + [{"role": "user", "content": metin}]
 
+    ilk_tur = bool(katalog) and sonuclar is None
     r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
                user=user, transport=transport, veri=veri, seviye=sv["seviye"],
                jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None,
-               akis=CumleAkisi(akis, bg, serbest) if akis else None)
+               akis=CumleAkisi(akis, bg, serbest) if akis and not ilk_tur else None,
+               araclar=katalog if ilk_tur else None)
     motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"], derinlik=derinlik or "oto", uzun=uzun,
                        baglam={"gecmis": len(onceki), "hafiza": len(hb.splitlines()) if hb else 0,
                                "sistem_harf": len(sistem)})
+    if ilk_tur and r.get("ok") and not r.get("cagrilar") and ARAC_IDDIA.search(r.get("text") or ""):
+        # Model araci CAGIRMADAN «ekliyorum, karartiyorum, bakayim» dedi: yapilmamis
+        # isi anlatmak yalandir. Bir kez duzeltme; yine olmazsa kodun cumlesi.
+        r2 = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem + ARAC_DUZELT,
+                    user=user, transport=transport, veri=veri, seviye=sv["seviye"], araclar=katalog)
+        if r2.get("ok") and (r2.get("cagrilar") or not ARAC_IDDIA.search(r2.get("text") or "")):
+            r = r2
+        else:
+            r = dict(r, text=ARAC_YAPILMADI)
+    red = []
+    if r.get("ok") and r.get("cagrilar"):
+        # KAPALI KATALOG (core/arac.py): bilinmeyen arac ve gecersiz
+        # parametre burada duser; araci istemci calistirir.
+        gecerli, red = arac.cagri_dogrula(r["cagrilar"], katalog)
+        if gecerli:
+            if kayit and all(c["tur"] == "yaz" for c in gecerli):
+                # Yazma cagrisinin ikinci turu yok: konusma burada deftere girer.
+                patron.log(con, kanal, "user", metin, agent=gorevli)
+                patron.log(con, kanal, "manager", "(Önizleme hazırlandı, onayını bekliyor: %s)"
+                           % ", ".join(c["ad"] for c in gecerli), agent=gorevli)
+            return {"ok": True, "mode": "arac", "cagrilar": gecerli, "reddedilen": red,
+                    "text": r.get("text") or "", "agent": gorevli, "model": r.get("model"),
+                    "usd": r.get("usd"), "seconds": r.get("seconds"),
+                    "motor": motor_bilgi}
+    if ilk_tur and r.get("ok") and (r.get("cagrilar") or not (r.get("text") or "").strip()):
+        # Model yalniz gecersiz cagri yapti: araclarsiz bir kez daha sorulur,
+        # cevap olagan denetimden gecer. Reddedilen cagrilar cevapta durur.
+        r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem.replace(ARAC_TALIMATI, ""),
+                   user=user, transport=transport, veri=veri, seviye=sv["seviye"],
+                   jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None)
+        if r.get("ok") and ARAC_IDDIA.search(r.get("text") or ""):
+            r = dict(r, text=ARAC_YAPILMADI)
+    if not r["ok"] and sonuclar is not None:
+        return {"ok": False, "mode": "yok", "text": None, "agent": gorevli,
+                "note": r.get("note"), "reason": r.get("reason")}
     if not r["ok"]:
         # Model konusamadiysa kural motoru devrede kalir: sohbet
         # bozulabilir, sistem bozulmaz.
@@ -1086,7 +1181,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             "context_lines": len(bg.splitlines()),
             # Hangi seviye, hangi sinif, neden; butce bandinda ekonomik
             # moddaysa onun notu. Yuz bunu kucuk bir satirda gosterir.
-            "motor": motor_bilgi}
+            "motor": motor_bilgi, "arac_red": red}
 
 def tani(con, cfg, date, gorevli="king", th=None, transport=None):
     """Sohbet zincirini BASTAN SONA dener ve nerede koptugunu soyler.

@@ -333,7 +333,28 @@
       kalır (modül doğru/yanlışı kendisi çözer); duygu cümleleri («memnunum,
       seviniyorum, yoruldum») kayıt değildir ama kaybolmaz: günlük öğesine
       girer ve öğe kendiliğinden işaretli gelir. Sayıya çevrilmez; günün
-      hissini yalnız kullanıcı verir. */
+      hissini yalnız kullanıcı verir.
+  36. HER İŞ SOHBETTEN (depo sahibi, 2026-10-20, King 2.0 B: «kullanıcı
+      modüllere gitmeden King'le konuşarak her şeyi halledebilsin»). King'in
+      ve modülün araçları tek tip bir katalogdadır (brand/ortak/arac.js):
+      ad, açıklama, JSON şemalı parametreler, tür «oku» ya da «yaz».
+        Seçim       Merkez bağlıysa katalog modele gider; model yalnız hangi
+                    aracı hangi parametreyle çağıracağını seçer (HKM/core/
+                    arac.py doğrular, burada bir kez daha doğrulanır;
+                    bilinmeyen araç ve geçersiz parametre reddedilir).
+        Okuma       aracı modülün kodu çalıştırır; sonuç ikinci turda
+                    Merkez'e gider, model yalnız cümleye çevirir ve cevaptaki
+                    sayı sonuca karşı denetlenir. Kendi cevabını yazan araç
+                    (sayfa aç, kart, öncelik) ikinci tur istemez.
+        Yazma       önce önizleme, mevcut onay kartıyla (kayıt için «Evet,
+                    ekle», değişiklik için «Onayla»); onaysız uygulanmaz.
+                    Kayıtta önce kullanıcının KENDİ cümlesi denenir; modelin
+                    cümlesindeki her sayı kullanıcının cümlesinde geçmeli.
+        Harita      «bu sistemde ne var», «… nerede», «… nasıl yapılır»
+                    modelsiz cevaplanır: modüllerin işleri, sayfalar ve bu
+                    modülün araçları (örnek cümlesiyle).
+      Model yokken kural yolları (NIYET, giriş kapısı, yetki) aynen sürer;
+      `es` taşıyan okuma aracı kuralla çağrılır. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -989,7 +1010,7 @@ window.LIFEOS.KING = (function(){
   function sohbetBasYaz(){ ortam.depo.yaz(BAS(), yerelISO(ortam.simdi())); }
   /* Doner: { ok:true, text, mode, akti } ya da { ok:false, neden:'baglanti'|'yok' }.
      `bek` verilirse cevap akarak istenir ve o balona yazılır. */
-  async function merkezeSor(metin, bek){
+  async function merkezeSor(metin, bek, ek){
     const k = baglanti();
     if(!k) return { ok:false, neden:'baglanti' };
     const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
@@ -1004,6 +1025,10 @@ window.LIFEOS.KING = (function(){
       if(d !== 'oto') govde.derinlik = d;
       if(tarz() !== 'samimi') govde.uslup = tarz();
       if(sohbetBas()) govde.baslangic = sohbetBas();
+      /* Söz 36: araç kataloğu yalnız sohbet isteğinde ve ikinci turda gider. */
+      const A = ek && (ek.araclar || ek.arac_sonuclari) ? ARAC() : null;
+      if(A && A.kuruluMu()) govde.araclar = A.modelIcin();
+      if(ek && ek.arac_sonuclari) govde.arac_sonuclari = ek.arac_sonuclari;
       const istek = yol => f(k.url + yol, {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
@@ -1023,6 +1048,9 @@ window.LIFEOS.KING = (function(){
         });
       }else{
         try{ g = await res.json(); }catch(e){ g = null; }
+      }
+      if(res.status === 200 && g && g.ok !== false && g.mode === 'arac' && Array.isArray(g.cagrilar) && g.cagrilar.length){
+        return { ok:true, arac:g.cagrilar, reddedilen:g.reddedilen || [], text:String(g.text || ''), mode:'arac', akti };
       }
       if(res.status === 200 && g && g.ok !== false && typeof g.text === 'string' && g.text.trim()){
         return { ok:true, text:g.text.trim(), mode:g.mode || '', akti };
@@ -2867,6 +2895,8 @@ window.LIFEOS.KING = (function(){
       cipler = null;
       bekleyenTanisma = null;
     }
+    /* Söz 36: «bu sistemde ne var, nerede, nasıl yapılır» — kodun haritası. */
+    if(HARITA_RE.test(t0) && !veriGibi(metin)) return haritaIsle(metin);
     /* Söz 20: sistem içindeki değişiklik kataloğa (yetki.js). */
     const Y = yetkiKatalog();
     const yn = Y && !paylasim ? Y.anla(metin) : null;
@@ -2928,6 +2958,12 @@ window.LIFEOS.KING = (function(){
       bulunanGoster(bulunan, 'Anlattıklarında şunları buldum; seçtiklerini kaydedeyim:');
       if(!baglanti()) return { tur:'bulunan', n:bulunan.length };
     }
+    /* Söz 36: modelsiz okuma — `es` taşıyan okuma aracı kuralla (arac.js söz 4). */
+    const KA = !bulunan && y.tur === 'bilinmiyor' && ARAC() ? ARAC().kuralla(metin) : null;
+    if(KA){
+      const rk = await aracIsle({ arac:[KA] }, metin);
+      if(rk) return rk;
+    }
     /* Söz 6: soru, özet ve anlaşılmayan istek HKM'deki King'e. */
     const merkeze = !!baglanti() && (!!bulunan || y.tur === 'bilinmiyor' || y.tur === 'ozet'
       || (y.tur === 'git' && y.kaynak !== 'komut' && soruMu(metin)));
@@ -2936,8 +2972,15 @@ window.LIFEOS.KING = (function(){
       const bek = { kim:'king', bekliyor:true, metin:'' };
       akis.push(bek);
       ciz(false);
-      const r = await merkezeSor(metin, bek);
+      const r = await merkezeSor(metin, bek, { araclar:!bulunan });
       akis = akis.filter(m => m !== bek);
+      /* Söz 36: model bir araç seçti; kod doğrular, okuma çalışır, yazma onay ister. */
+      if(r.ok && r.arac){
+        const ra = await aracIsle(r, metin);
+        if(ra) return ra;
+        if(r.text){ soyle(r.text); return { tur:'merkez', mode:'arac' }; }
+        return yerel(y, null, metin);
+      }
       if(r.ok){
         soyle(r.text, null, null, null, r.akti ? { yeni:false } : null);
         cipler = oneriListesi(true);                        // söz 33
@@ -3033,11 +3076,12 @@ window.LIFEOS.KING = (function(){
     n = n || bekleyenYetki;
     bekleyenYetki = null; cipler = null;
     const Y = yetkiKatalog();
-    if(!Y || !n) return null;
+    /* Söz 36: modelin seçtiği yazan araç da bu kapıdan uygulanır (arac.js). */
+    if(!n || (!n.arac && !Y) || (n.arac && !ARAC())) return null;
     const bek = { kim:'king', bekliyor:true, metin:'' };
     akis.push(bek);
     ciz(false);
-    const r = await Y.uygula(n);
+    const r = n.arac ? await ARAC().uygula(n) : await Y.uygula(n);
     akis = akis.filter(m => m !== bek);
     if(r.ok && typeof r.geriAl === 'function'){ sonGeriAl = r.geriAl; cipler = [{ is:'geri-al', ad:'Geri al' }]; }
     soyle(r.metin, r.satirlar && r.satirlar.length ? r.satirlar : null);
@@ -3048,6 +3092,229 @@ window.LIFEOS.KING = (function(){
     }
     return r;
   }
+  /* ---------- söz 36: araç kataloğu (arac.js) ---------- */
+  const ARAC = () => (L.ARAC && typeof L.ARAC.liste === 'function') ? L.ARAC : null;
+  const HARITA_RE = /(bu sistemde (?:ne|neler) var|sistemde (?:ne|neler) var|lifeos'?ta (?:ne|neler) var|neler yapabilirsin|ne(?:ler)?i? yapabiliyorsun|neleri yapabilirsin|sistem haritası|(?:^|\s)nasıl yapılır|(?:^|\s)nerede(?:dir)?\s*\??$|nereden (?:girerim|eklerim|yaparım|bakarım|açarım)|nasıl (?:girerim|eklerim|kaydederim|açarım|değiştiririm))/;
+  const HARITA_DOLGU = /(bu sistemde|sistemde|lifeos'?ta|ne var|neler var|neler yapabilirsin|nasıl yapılır|nerede(?:dir)?|nereden|nasıl|girerim|eklerim|yaparım|bakarım|açarım|kaydederim|değiştiririm|king|\?)/g;
+  const YETKI_AYAR = {
+    tema:{ id:'tema', degerler:{ koyu:'dark', acik:'light', sistem:'system' } },
+    animasyon:{ id:'animasyon', degerler:{ tam:'tam', az:'az', sistem:'sistem' } },
+    zemin:{ id:'zemin', degerler:{ sade:'sade', canli:'yumusak' } },
+    muzik:{ id:'muzik', degerler:{ cal:'cal', dur:'dur' } },
+  };
+  const KING_AYAR = {
+    cevap:{ ad:'Cevap biçimi', degerler:['oto', 'ses', 'yazi'], oku:() => cevapBicimi(), yaz:v => cevapSec(v), adlar:{ oto:'Otomatik', ses:'Sesli', yazi:'Yazılı' } },
+    derinlik:{ ad:'Düşünme', degerler:DERIN_TERCIH, oku:() => derinlik(), yaz:v => derinlikSec(v), adlar:DERIN_AD },
+    tarz:{ ad:'Tarz', degerler:TARZLAR, oku:() => tarz(), yaz:v => tarzSec(v), adlar:TARZ_AD },
+    ses:{ ad:'Ses', degerler:SES_TERCIH, oku:() => sesTercihi(), yaz:v => sesTercihSec(v), adlar:SES_AD },
+  };
+  /* Kendi akışını çizen araç (kart, öncelik, not arama…): kullanıcının mesajı
+     zaten sohbette; akış onu yeniden ekler, iki kez görünmesin. */
+  async function akisla(fn){
+    const i = akis.map(m => m.kim).lastIndexOf('sen');
+    const m = i >= 0 ? akis.splice(i, 1)[0] : null;
+    await fn(m ? m.metin : '');
+    return { yerine:true };
+  }
+  function haritaVeri(konu){
+    const A = ARAC();
+    const h = A ? A.harita(SAYFALAR) : { moduller:[], okuma:[], yazma:[] };
+    const k = kucuk(konu || '');
+    if(!k) return h;
+    const s = sayfaBul(k);
+    return Object.assign({}, h, { konu:k, araclar:A ? A.ara(k).map(a => ({ ne:String(a.aciklama).split(/(?<=\.)\s/)[0], ornek:a.ornek || '', tur:a.tur })) : [],
+      sayfa:s ? { ad:s.ad, modul:MODUL_AD[s.modul] } : null });
+  }
+  function haritaCevap(konu){
+    const v = haritaVeri(konu);
+    const ad = MODUL_AD[ayar && ayar.modul] || 'Bu modül';
+    if(v.konu){
+      const l = (v.araclar || []).map(a => a.ne.replace(/[.]$/, '') + (a.ornek ? ' — King’e «' + a.ornek + '» yaz' : ''));
+      if(v.sayfa) l.push('Sayfası: ' + v.sayfa.ad + ' (' + v.sayfa.modul + ')');
+      if(!l.length){
+        const m = v.moduller.find(x => x.alanlar.some(a => kucuk(a).indexOf(v.konu.split(' ')[0].slice(0, 5)) >= 0));
+        return { sonuc:v, cevap:m ? '«' + konu + '» ' + m.ad + '’nin işi; orada King’e sorabilir ya da sayfasından yapabilirsin.'
+          : '«' + konu + '» için bu modülde bir araç ya da sayfa bulamadım.', satirlar:v.moduller.map(x => x.ad + ' — ' + x.is) };
+      }
+      return { sonuc:v, cevap:'«' + konu + '» için:', satirlar:l.slice(0, 6) };
+    }
+    return { sonuc:v, cevap:'LifeOS’ta dört bölüm var; ' + ad + ' içinde King’le ' + v.okuma.length + ' okuma ve ' + v.yazma.length + ' değişiklik işi yapabilirsin.',
+      satirlar:v.moduller.map(x => x.ad + ' — ' + x.is + ': ' + x.alanlar.slice(0, 4).join(', ')
+        + (x.sayfalar.length ? ' · sayfalar: ' + x.sayfalar.join(', ') : '')) };
+  }
+  function haritaIsle(metin){
+    akis.push({ kim:'sen', metin:String(metin).trim() });
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; cipler = null;
+    const konu = kucuk(metin).replace(HARITA_DOLGU, ' ').replace(/\s+/g, ' ').trim();
+    const r = haritaCevap(konu.length >= 3 ? konu : '');
+    soyle(r.cevap, r.satirlar);
+    return { tur:'harita', konu:r.sonuc.konu || '' };
+  }
+  function ortakAraclar(){
+    const rotalar = SAYFALAR.map(s => s.route).filter((v, i, a) => a.indexOf(v) === i);
+    const Y = () => yetkiKatalog();
+    const K = () => (ayar && ayar.kartlar) || {};
+    const sira = { type:'object', properties:{ sira:{ type:'integer', minimum:1, maximum:30, description:'bekleyen listesindeki sıra (1 = ilk)' } }, required:['sira'] };
+    const yetkiNiyet = (id, p) => { const y = Y(); const n = y && y.niyet ? y.niyet(id, p) : null; return n ? { yetki:n } : { hata:'bu değişiklik şu an yapılamıyor' }; };
+    const oneri = p => { const y = Y(); const l = y && y.bekleyenler ? y.bekleyenler() : []; return l[p.sira - 1] || null; };
+    const l = [
+      { ad:'sistem_haritasi', tur:'oku', ornek:'bu sistemde neler var?',
+        aciklama:'LifeOS’ta ne var: hangi iş hangi modülde, hangi sayfada ve King’den nasıl yapılır. «Ne var», «nerede», «nasıl yapılır» sorularında çağır.',
+        parametreler:{ type:'object', properties:{ konu:{ type:'string', maxLength:80, description:'aranan iş (ör. «uyku girmek»); boşsa genel harita' } } },
+        calistir:p => haritaCevap(p.konu || '') },
+      { ad:'sayfa_ac', tur:'oku', ornek:'deneme sayfasını aç',
+        aciklama:'Bir modülün sayfasını açar; veri değiştirmez. Sayfalar: ' + SAYFALAR.map(s => s.modul + '/' + s.route + ' ' + s.ad).join(', ') + '.',
+        parametreler:{ type:'object', properties:{ modul:{ type:'string', enum:['ays', 'spi', 'esp'] }, sayfa:{ type:'string', enum:rotalar } }, required:['modul', 'sayfa'] },
+        calistir:p => {
+          if(!SAYFALAR.some(s => s.modul === p.modul && s.route === p.sayfa)) return { hata:'bu modülde böyle bir sayfa yok' };
+          const h = { modul:p.modul, route:p.sayfa };
+          ortam.zamanla(() => git(h), sesli ? 1100 : 650);
+          return { cevap:eylemCumlesi(h, 'Tamam.') };
+        } },
+      { ad:'kayit_gir', tur:'yaz', ornek:({ ays:'matematikten 40 soru çözdüm', spi:'7 saat uyudum', esp:'45 dk gitar' })[ayar && ayar.modul] || '7 saat uyudum',
+        aciklama:'Kullanıcının YAPTIĞI bir işi (soru, süre, uyku, su, öğün, antrenman, çalışma oturumu, not) bu modülün kendi ayrıştırıcısıyla kayda çevirir; önizleme gösterilir, onayla yazılır. metin: kullanıcının cümlesi, sayıları aynen.',
+        parametreler:{ type:'object', properties:{ metin:{ type:'string', maxLength:300 } }, required:['metin'] },
+        kullanilir:() => !!veriKapisi(),
+        onizle:(p, b) => {
+          const v = veriKapisi();
+          if(!v) return { hata:'bu modülde kayıt kapısı yok' };
+          const asil = String((b && b.metin) || '');
+          /* Gelecek, olumsuz ya da soru cümlesi kayıt değildir; modelin yeniden
+             yazması bunu aşamaz (olumsuz.js, KR-1). */
+          if(asil && kayitDegil(asil)) return { hata:'bu cümle yapılmış bir işi anlatmıyor (gelecek, olumsuz ya da soru)' };
+          /* Önce kullanıcının KENDİ cümlesi; olmazsa modelinki, sayısı korunmuşsa. */
+          for(const m of [asil, p.metin]){
+            if(!m || kayitDegil(m)) continue;
+            if(m !== asil && asil && !ARAC().sayiKorunur(asil, m)) return { hata:'senin cümlende geçmeyen bir sayı çıktı' };
+            let o = null;
+            try{ o = v.onizle(String(m).trim()); }catch(e){ o = null; }
+            if(o && typeof o.kaydet === 'function') return { veri:o };
+          }
+          return { hata:'modül bu cümleyi kayıt olarak anlamadı' };
+        },
+        uygula:() => ({ ok:false, metin:'Kayıt önizlemeden yazılır.' }) },
+      { ad:'bugun_ozeti', tur:'oku', ornek:'bugünün özeti', aciklama:'Bu modülde bugünün özeti (modülün kendi cümleleri).',
+        kullanilir:() => !!(ayar && typeof ayar.ozet === 'function'),
+        calistir:() => { const s = ozetSatirlari(); return { sonuc:{ satirlar:s }, cevap:s.length ? (MODUL_AD[ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', satirlar:s }; } },
+      { ad:'istatistikler', tur:'oku', ornek:'istatistiklerim', aciklama:'Bu modülün istatistik kartları (sayıları modül hesaplar).',
+        kullanilir:() => typeof K().istatistik === 'function', calistir:() => akisla(m => kartIsle({ tur:'istatistik' }, m)) },
+      { ad:'soru_sor', tur:'oku', ornek:'türev hakkında soru sor', aciklama:'Modülün bankasından bir soru kartı getirir.',
+        parametreler:{ type:'object', properties:{ konu:{ type:'string', maxLength:60 } } },
+        kullanilir:() => typeof K().soru === 'function', calistir:p => akisla(m => kartIsle({ tur:'soru', konu:p.konu || '' }, m)) },
+      { ad:'oncelik_listesi', tur:'oku', ornek:'neye çalışayım', aciklama:'Puan getirecek öncelikli konular (modülün hesabı: çıkma sıklığı × hata).',
+        kullanilir:() => typeof K().oncelik === 'function', calistir:() => akisla(m => oncelikIsle(m)) },
+      { ad:'yuk_durumu', tur:'oku', ornek:'yük durumum', aciklama:'Son 7 gün ile önceki 7 günün karşılaştırması ve yük sinyali.',
+        kullanilir:() => typeof K().yuk === 'function', calistir:() => akisla(m => yukIsle(m)) },
+      { ad:'not_ara', tur:'oku', ornek:'notlarımda türev', aciklama:'Defter notlarında arar; bulunan notlara dayanarak cevaplar.',
+        parametreler:{ type:'object', properties:{ sorgu:{ type:'string', maxLength:80 } }, required:['sorgu'] },
+        kullanilir:() => !!D(), calistir:p => akisla(m => notAra(m || p.sorgu, kucuk(p.sorgu))) },
+      { ad:'not_ekle', tur:'yaz', ornek:'deftere not: üslülerde tabanlar aynıysa üsler toplanır', aciklama:'Defter’e yeni bir not yazar.',
+        parametreler:{ type:'object', properties:{ baslik:{ type:'string', maxLength:120 }, metin:{ type:'string', maxLength:2000 } }, required:['metin'] },
+        kullanilir:() => !!D(),
+        onizle:p => ({ metin:'Defter’e not eklenecek' + (p.baslik ? ': «' + p.baslik + '»' : '') + '.', satirlar:[String(p.metin).slice(0, 160)] }),
+        uygula:async p => {
+          const n = await D().yeni(p.baslik || String(p.metin).split(/[.\n]/)[0].slice(0, 60), p.metin, 'not');
+          return { metin:'Defter’e yazdım.', geriAl:n && n.id && D().sil ? async () => { await D().sil(n.id); } : null };
+        } },
+      { ad:'onaylari_listele', tur:'oku', ornek:'bekleyen öneriler', aciklama:'Onaylar’da bekleyen öneriler (sıra numarasıyla).',
+        kullanilir:() => !!(Y() && Y().bekleyenler),
+        calistir:() => { const b = Y().bekleyenler(); return { sonuc:{ bekleyen:b.map((x, i) => ({ sira:i + 1, metin:x.metin })) },
+          cevap:b.length ? b.length + ' öneri onay bekliyor:' : 'Onay bekleyen öneri yok.', satirlar:b.slice(0, 8).map((x, i) => (i + 1) + '. ' + x.metin) }; } },
+      { ad:'oneri_onayla', tur:'yaz', ornek:'ikinci öneriyi onayla', aciklama:'Onaylar’daki bir öneriyi onaylar; modülün kendi kodu uygular.', parametreler:sira,
+        kullanilir:() => !!(Y() && Y().bekleyenler), onizle:p => { const x = oneri(p); return x ? yetkiNiyet('onay-tek', { id:x.id, metin:x.metin }) : { hata:'o sırada öneri yok' }; }, uygula:() => ({ ok:false }) },
+      { ad:'oneri_gec', tur:'yaz', ornek:'ilk öneriyi geç', aciklama:'Onaylar’daki bir öneriyi geçer; uygulanmaz.', parametreler:sira,
+        kullanilir:() => !!(Y() && Y().bekleyenler), onizle:p => { const x = oneri(p); return x ? yetkiNiyet('red-tek', { id:x.id, metin:x.metin }) : { hata:'o sırada öneri yok' }; }, uygula:() => ({ ok:false }) },
+      { ad:'onerilerin_hepsi', tur:'yaz', ornek:'hepsini onayla', aciklama:'Bekleyen bütün önerileri onaylar ya da geçer.',
+        parametreler:{ type:'object', properties:{ karar:{ type:'string', enum:['onayla', 'gec'] } }, required:['karar'] },
+        kullanilir:() => !!(Y() && Y().bekleyenler), onizle:p => yetkiNiyet(p.karar === 'onayla' ? 'onay-hepsi' : 'red-hepsi', {}), uygula:() => ({ ok:false }) },
+      { ad:'ayar_degistir', tur:'yaz', ornek:'koyu temaya geç',
+        aciklama:'LifeOS görünüm ayarı: tema (koyu, acik, sistem), animasyon (tam, az, sistem), zemin (sade, canli), muzik (cal, dur).',
+        parametreler:{ type:'object', properties:{ ayar:{ type:'string', enum:Object.keys(YETKI_AYAR) }, deger:{ type:'string', maxLength:12 } }, required:['ayar', 'deger'] },
+        kullanilir:() => !!Y(),
+        onizle:p => { const a = YETKI_AYAR[p.ayar], v = a && a.degerler[kucuk(p.deger).replace(/ı/g, 'i').replace('açık', 'acik').replace('canlı', 'canli')];
+          return v ? yetkiNiyet(a.id, { v }) : { hata:p.ayar + ' için bu değer yok' }; }, uygula:() => ({ ok:false }) },
+      { ad:'king_ayari', tur:'yaz', ornek:'cevapları sesli oku',
+        aciklama:'King’in kendi tercihi: cevap (oto, ses, yazi), derinlik (oto, hizli, dengeli, derin), tarz (samimi, resmi, kisa), ses (oto, gemini, piper, cihaz).',
+        parametreler:{ type:'object', properties:{ ayar:{ type:'string', enum:Object.keys(KING_AYAR) }, deger:{ type:'string', maxLength:12 } }, required:['ayar', 'deger'] },
+        onizle:p => { const a = KING_AYAR[p.ayar];
+          return a && a.degerler.indexOf(p.deger) >= 0 ? { metin:a.ad + ' «' + (a.adlar[p.deger] || p.deger) + '» olacak (şu an «' + (a.adlar[a.oku()] || a.oku()) + '»).' } : { hata:'bu değer yok' }; },
+        uygula:p => { const a = KING_AYAR[p.ayar], eski = a.oku(); a.yaz(p.deger);
+          return { metin:a.ad + ' artık «' + (a.adlar[p.deger] || p.deger) + '».', geriAl:async () => { a.yaz(eski); } }; } },
+      { ad:'odak_baslat', tur:'oku', ornek:'25 dakika matematik çalışalım', aciklama:'King’in odak sayacını başlatır (kayıt yazmaz; bitince kaydetmeyi sorar).',
+        parametreler:{ type:'object', properties:{ dakika:{ type:'integer', minimum:1, maximum:180 }, konu:{ type:'string', maxLength:60 } }, required:['dakika'] },
+        calistir:p => { odakBaslat(p.dakika, p.konu || ''); return { cevap:p.dakika + ' dakikalık odak başladı' + (p.konu ? ' (' + p.konu + ')' : '') + '. Süre dolunca haber vereceğim.' }; } },
+      { ad:'odak_durdur', tur:'oku', ornek:'sayacı durdur', aciklama:'Çalışan odak sayacını durdurur.',
+        calistir:() => { const v = odak(); odakTemizle(); ortam.depo.sil(ODAK); return { cevap:v ? 'Odak sayacını durdurdum.' : 'Çalışan bir odak sayacı yok.' }; } },
+      { ad:'merkez_raporu', tur:'oku', ornek:'haftalık değerlendirme', aciklama:'Merkez’in raporu: hafta (haftalık değerlendirme) ya da capraz (modüller arası bulgular); sayıları kural motoru yazar.',
+        parametreler:{ type:'object', properties:{ tur:{ type:'string', enum:['hafta', 'capraz'] } }, required:['tur'] },
+        calistir:p => akisla(m => merkezKomut(m, p.tur, p.tur === 'hafta' ? 'Haftalık değerlendirme' : 'Modüller arası bulgular')) },
+    ];
+    /* Modülün yetki eylemleri (toplantı, inceleme, kitap ekle; yetki.js söz 8–9). */
+    const y = Y();
+    (y && y.ekKatalog ? y.ekKatalog() : []).forEach(e => {
+      l.push({ ad:'eylem_' + e.id.replace(/[^a-z0-9]+/g, '_'), tur:'yaz', aciklama:e.aciklama || e.ad + '.', ornek:e.ad.toLocaleLowerCase('tr'),
+        parametreler:e.parametreler || undefined, onizle:p => yetkiNiyet(e.id, p), uygula:() => ({ ok:false }) });
+    });
+    return l;
+  }
+
+  /* Modelin seçimi (HKM'de doğrulanmış) burada YENİDEN doğrulanır ve çalışır. */
+  async function aracIsle(r, metin){
+    const A = ARAC();
+    if(!A) return null;
+    const red = (Array.isArray(r.reddedilen) ? r.reddedilen : []).slice();
+    const sonuclar = [], dogrudan = [];
+    let yazma = null, yerine = false;
+    for(const c of (r.arac || []).slice(0, 3)){
+      const d = A.dogrula(c && c.ad, c && c.param);
+      if(!d.ok){ red.push({ ad:String(c && c.ad || ''), neden:d.hata }); continue; }
+      if(d.arac.tur === 'yaz'){ if(!yazma) yazma = d; continue; }
+      const x = await A.calistir(d.arac.ad, d.param, { metin });
+      if(!x.ok){ red.push({ ad:d.arac.ad, neden:x.hata }); continue; }
+      if(x.yerine) yerine = true;
+      else if(x.cevap) dogrudan.push(x);
+      else sonuclar.push(x);
+    }
+    if(yazma){
+      const o = await A.onizle(yazma.arac.ad, yazma.param, { metin });
+      if(!o.ok){
+        soyle('Bunu yapmak istedim ama olmadı: ' + o.hata + '. Kendi cümlenle yazarsan ya da sayfasından yaparsan olur.');
+        return { tur:'arac-red' };
+      }
+      if(o.onizle.veri){
+        /* Kayıt: yerel veri önizlemesiyle aynı kart (söz 3, 8). */
+        const p = o.onizle.veri;
+        bekleyen = p;
+        cipler = [{ ad:'Evet, ekle', is:'kaydet' }, { ad:'Hayır', is:'vazgec' }];
+        const s = sohbet(p, '', false);
+        soyle(s.selam, null, { metin:p.metin, liste:(p.parcalar || []).length > 1 ? p.parcalar.map(x => x.metin) : null, ipucu:p.ipucu || '' }, s.soru);
+        return { tur:'arac-veri', ad:yazma.arac.ad };
+      }
+      const n = o.onizle.yetki ? o.onizle.yetki : { tur:'eylem', arac:true, ad:o.ad, param:o.param, seviye:o.seviye, onizle:o.onizle };
+      bekleyenYetki = n;
+      cipler = [{ is:'yetki-onay', ad:n.seviye === 'buyuk' ? 'Dönüş noktası al ve uygula' : 'Onayla' }, { is:'vazgec', ad:'Vazgeç' }];
+      soyle(n.onizle.metin, n.onizle.satirlar || null, null,
+        n.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?');
+      return { tur:'arac-yaz', ad:yazma.arac.ad, seviye:n.seviye };
+    }
+    dogrudan.forEach(x => soyle(x.cevap, x.satirlar));
+    if(sonuclar.length){
+      /* İkinci tur: sonucu kod üretti; model yalnız cümleye çevirir (HKM sayıyı denetler). */
+      const bek = { kim:'king', bekliyor:true, metin:'' };
+      akis.push(bek); ciz(false);
+      const r2 = await merkezeSor(metin, bek, { arac_sonuclari:sonuclar.map(x => ({ ad:x.ad, param:x.param, sonuc:x.sonuc })) });
+      akis = akis.filter(m => m !== bek);
+      const satir = [].concat.apply([], sonuclar.map(x => x.satirlar || []));
+      if(r2.ok && !r2.arac) soyle(r2.text, satir.length ? satir : null, null, null, r2.akti ? { yeni:false } : null);
+      else soyle(satir.length ? 'Sistemden okudum:' : 'Sistemden okudum ama Merkez cümleye çeviremedi; ilgili sayfadan bakabilirsin.', satir.length ? satir : null);
+      cipler = oneriListesi(true);
+      ciz(false);
+      return { tur:'arac-oku', n:sonuclar.length };
+    }
+    if(yerine || dogrudan.length) return { tur:'arac-oku', n:dogrudan.length };
+    return null;
+  }
+
   function gitOnayla(){
     const h = bekleyenGit;
     bekleyenGit = null; bekleyenIlet = null; cipler = null;
@@ -3564,6 +3831,8 @@ window.LIFEOS.KING = (function(){
      modülden King'le gelindiyse (#king=rota[:sekme]) oraya gidilir. */
   function kur(o){
     ayar = Object.assign({ modul:'spi' }, o || {});
+    /* Söz 36: King'in kendi araçları kataloğa (her çağrıda güncel kurulur). */
+    if(L.ARAC){ L.ARAC.modulSec(ayar.modul); L.ARAC.ortakKur(ortakAraclar); }
     if(typeof window !== 'undefined') setTimeout(() => { try{ if(odak()) odakKur(); }catch(e){ /* yok */ } }, 0);
     bagla();
     disKisi = [];
@@ -3632,5 +3901,6 @@ window.LIFEOS.KING = (function(){
     KIPLER, kip, kipSec, klasorler, klasorEkle, klasorSil, kayitTasi, kayitAdlandir, kayitSabitle,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
+    aracIsle, ortakAraclar, haritaCevap, HARITA_RE,
   };
 })();

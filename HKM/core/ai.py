@@ -44,7 +44,7 @@ import re
 import urllib.error
 import urllib.request
 
-from core import butce, manager, models
+from core import arac, butce, manager, models
 
 ZAMAN_ASIMI = 60
 # Baska makinedeki motor servisi (cogu zaman islemcide calisan bir model)
@@ -261,6 +261,7 @@ def _google_parcalar(m):
 # 1B boyutta bu, anlamsiz Turkce uretiyordu (sahada, 2026-09-27). Bulut
 # cagrisinda saglayicinin varsayilani kalir.
 YEREL_SICAKLIK = 0.4
+ARAC_SICAKLIK = 0.1
 
 
 def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar=None):
@@ -271,6 +272,9 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
     jeton = int(ayar.get("jeton") or EN_COK_JETON)
     timeout = ayar.get("sure") or timeout
     tanim = models.PROVIDERS[provider]
+    # ARAC KATALOGU (core/arac.py): model yalniz secer; cagrilar ek["cagrilar"]
+    # ile doner ve ust katmanda dogrulanir. Araclar varken cevap akmaz.
+    araclar = ayar.get("araclar") or None
     if provider in ("openrouter", "openai", "yerel"):
         url, baslik, govde = _openai_bicimi(
             ayar.get("adres") or tanim["base"], anahtar or "", model, sistem,
@@ -278,8 +282,12 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
             {"HTTP-Referer": "http://127.0.0.1:4200", "X-Title": "HKM"}
             if provider == "openrouter" else None)
         govde["max_tokens"] = jeton
+        if araclar:
+            govde["tools"] = arac.saglayici_araclari(provider, araclar)
+            govde["tool_choice"] = "auto"
         if provider == "yerel":
-            govde["temperature"] = YEREL_SICAKLIK
+            # Arac SECIMI bir karardir, uslup degil: dusuk sicaklikta.
+            govde["temperature"] = ARAC_SICAKLIK if araclar else YEREL_SICAKLIK
         if provider == "openrouter":
             if ayar.get("efor"):
                 # Birlesik dusunme ayari; desteklemeyen model yok sayar.
@@ -296,7 +304,7 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
                     and govde["messages"][0].get("role") == "system":
                 govde["messages"][0]["content"] = [{"type": "text", "text": sistem,
                                                     "cache_control": {"type": "ephemeral"}}]
-        if callable(ayar.get("akis")):
+        if callable(ayar.get("akis")) and not araclar:
             # Akan cevap (King'de yazi akarak gelir); kullanim son parcada.
             govde["stream"] = True
             govde["stream_options"] = {"include_usage": True}
@@ -309,6 +317,8 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
         ek = {"usd": k.get("cost") if isinstance(k.get("cost"), (int, float)) else None,
               "cached": ((k.get("prompt_tokens_details") or {}).get("cached_tokens") or 0),
               "reasoning": ((k.get("completion_tokens_details") or {}).get("reasoning_tokens") or 0)}
+        if araclar:
+            ek["cagrilar"] = arac.openai_cagrilari(secim.get("message"))
         # Kullanim bilgisi yoksa None: olculmeyen sifir degildir (D-16).
         return (metin, k.get("prompt_tokens"), k.get("completion_tokens"),
                 secim.get("finish_reason") in KESILDI, ek)
@@ -321,6 +331,8 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
             # okunur (kisa onek onbelleklenmez; kazanc defterde olculur).
             govde["system"] = [{"type": "text", "text": sistem,
                                 "cache_control": {"type": "ephemeral"}}]
+        if araclar:
+            govde["tools"] = arac.saglayici_araclari(provider, araclar)
         y = _istek(tanim["base"], {"Content-Type": "application/json",
                                    "x-api-key": anahtar or "",
                                    "anthropic-version": "2023-06-01"},
@@ -334,8 +346,11 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
         gir = k.get("input_tokens")
         if gir is not None:
             gir = gir + okunan + (k.get("cache_creation_input_tokens") or 0)
+        ek = {"usd": None, "cached": okunan, "reasoning": 0}
+        if araclar:
+            ek["cagrilar"] = arac.anthropic_cagrilari(y.get("content"))
         return ("\n".join(parca), gir, k.get("output_tokens"),
-                y.get("stop_reason") in KESILDI, {"usd": None, "cached": okunan, "reasoning": 0})
+                y.get("stop_reason") in KESILDI, ek)
 
     if provider == "google":
         # Ayarlara gorunen ad yazilabiliyor («Gemini 2.5 Flash»); Google kimlik
@@ -350,17 +365,22 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
                  "generationConfig": {"maxOutputTokens": jeton}}
         if sistem:
             govde["systemInstruction"] = {"parts": [{"text": sistem}]}
+        if araclar:
+            govde["tools"] = arac.saglayici_araclari(provider, araclar)
         baslik_g = {"Content-Type": "application/json", "x-goog-api-key": anahtar or ""}
-        if callable(ayar.get("akis")):
+        if callable(ayar.get("akis")) and not araclar:
             # Akan cevap: streamGenerateContent (SSE); kullanim son parcada.
             y = _akis_istek(url.replace(":generateContent", ":streamGenerateContent?alt=sse"), baslik_g, govde,
                             timeout, ayar["akis"], _gemini_birlestir)
         else:
             y = _istek(url, baslik_g, govde, timeout)
         aday = (y.get("candidates") or [{}])[0]
-        parca = [p.get("text", "") for p in
-                 ((aday.get("content") or {}).get("parts") or [])]
+        parcalar = (aday.get("content") or {}).get("parts") or []
+        parca = [p.get("text", "") for p in parcalar if p.get("text")]
         k = y.get("usageMetadata") or {}
+        if araclar:
+            return ("\n".join(parca), k.get("promptTokenCount"), k.get("candidatesTokenCount"),
+                    aday.get("finishReason") in KESILDI, {"cagrilar": arac.google_cagrilari(parcalar)})
         return ("\n".join(parca), k.get("promptTokenCount"),
                 k.get("candidatesTokenCount"),
                 aday.get("finishReason") in KESILDI)
@@ -554,6 +574,11 @@ def _son_cumlede_kes(metin):
     return m[:yer + 1].rstrip()
 
 
+# Motorun «bu model arac cagirmayi desteklemez» cevabi (Ollama: «… does not
+# support tools»). Gorulurse ayni istek bir kez metin protokoluyle gider.
+ARACSIZ_HATA = re.compile(r"does not support tools|tools? (?:is|are) not supported|"
+                          r"tool(?:s| calling)? (?:is )?not supported", re.I)
+
 DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
             "Aynı şeyi tekrar etme. Ölçüm iddia etme; yalnızca sana "
             "verilen ölçümlere dayan. Önerdiğin süre ya da saat "
@@ -561,13 +586,16 @@ DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
             "sunulamaz. Buyurgan kip kullanma.")
 
 
-def _genis(ayar, jeton, sure, akis=None):
+def _genis(ayar, jeton, sure, akis=None, araclar=None):
     """Basamak ayarini uzun cevap icin genisletir; daraltmaz. `akis`
-    verilmisse cevap akarak istenir (yalniz OpenAI bicimli saglayicilar)."""
-    if not jeton and not sure and not akis:
+    verilmisse cevap akarak istenir (yalniz OpenAI bicimli saglayicilar).
+    `araclar` (core/arac.py katalogu) varsa cevap akmaz: cagri butun gelir."""
+    if not jeton and not sure and not akis and not araclar:
         return ayar
     a = dict(ayar or {})
-    if akis:
+    if araclar:
+        a["araclar"] = araclar
+    elif akis:
         a["akis"] = akis
     if jeton:
         a["jeton"] = max(int(a.get("jeton") or EN_COK_JETON), int(jeton))
@@ -578,8 +606,12 @@ def _genis(ayar, jeton, sure, akis=None):
 
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         transport=None, now=None, duzeltme=True, denetim="olcum", veri=None,
-        gorseller=None, medya=None, seviye=None, jeton=None, sure=None, akis=None):
+        gorseller=None, medya=None, seviye=None, jeton=None, sure=None, akis=None,
+        araclar=None):
     """Bir kademe adina model cagirir — MERDIVENLE (core/motor.py).
+
+    `araclar`: core/arac.py'nin temiz katalogu. Verilirse model bir arac
+    secebilir; cevapta `cagrilar` (DOGRULANMAMIS ham secim) doner.
 
     Paket seciliyse basamaklar ucuzdan pahaliya denenir; bir basamak
     ZORLANIRSA (cevap dusuruldu, saglayici hatasi, kesildi, «[[YUKSELT]]»)
@@ -606,7 +638,7 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                      sistem=sistem + (motor.YUKSELT_KURALI if ust_var else ""),
                      user=user, transport=transport, now=now, duzeltme=duzeltme,
                      denetim=denetim, veri=veri, gorseller=gorseller, medya=medya,
-                     ayar=_genis(b["ayar"], jeton, sure, akis), escalated=i > 0, not_ek=not_ek)
+                     ayar=_genis(b["ayar"], jeton, sure, akis, araclar), escalated=i > 0, not_ek=not_ek)
         r["motor"] = {"paket": plan.get("paket"), "seviye": plan.get("seviye"),
                       "sinif": b["sinif"], "basamak": i, "yukseldi": i > 0,
                       "ekonomi": plan.get("ekonomi")}
@@ -659,6 +691,12 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
         if models.adres_denetle(models.yerel_kok(cfg))[2] in ("yerel_ag", "internet"):
             ayar["sure"] = UZAK_ZAMAN_ASIMI
     tavan_jeton = int(ayar.get("jeton") or EN_COK_JETON)
+    # ARAC KATALOGU: araci desteklemeyen modele (gemma3 gibi) arac SUNULMAZ;
+    # olagan sohbet cevabi verir, isi istemcinin kural yolu yapar (core/arac.py).
+    katalog = ayar.get("araclar") or None
+    if katalog and arac.aracsiz_mi(a.get("model")):
+        ayar.pop("araclar", None)
+        katalog = None
 
     anahtar = models.key_value(cfg, a["provider"], a.get("key_id"))
     # Harcama, anahtarin SAHIBININ defterine yazilir: iki kisi ayni
@@ -698,7 +736,9 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
         istem_jeton = (_jeton_tahmini(sistem_metni, *[m.get("content")
                                                        for m in gecmis])
                        + sum(int(x.get("jeton") or GORSEL_JETON)
-                             for m in gecmis for x in (m.get("gorseller") or [])))
+                             for m in gecmis for x in (m.get("gorseller") or []))
+                       + (_jeton_tahmini(json.dumps(ayar["araclar"], ensure_ascii=False))
+                          if ayar.get("araclar") else 0))
         en_kotu = _fiyat(a["provider"], a["model"], istem_jeton, tavan_jeton)
         izin = butce.guard(con, cfg, cost_usd=en_kotu)
         if not izin["ok"]:
@@ -780,11 +820,32 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
                     "note": "Model çağrısı başarısız: %s" % hata}
         return {"ok": True, "raw": metin, "in_tok": gir, "out_tok": cik,
                 "usd": usd, "price_estimated": tahmini,
-                "tokens_estimated": jeton_tahmini, "truncated": kesildi}
+                "tokens_estimated": jeton_tahmini, "truncated": kesildi,
+                "cagrilar": list((ek or {}).get("cagrilar") or [])}
 
     r = _tur(sistem, mesajlar)
+    if not r["ok"] and katalog and ARACSIZ_HATA.search(r.get("note") or ""):
+        # Motor «bu model arac desteklemez» dedi: bir kez aracsiz (olagan sohbet).
+        ayar.pop("araclar", None)
+        katalog = None
+        r = _tur(sistem, mesajlar)
     if not r["ok"]:
         return r
+
+    if katalog:
+        cagri = list(r.get("cagrilar") or [])
+        if cagri:
+            # Secim DOGRULANMADAN doner (core/sohbet.py arac.cagri_dogrula);
+            # yaninda metin varsa o da olagan denetimden gecer, duserse atilir.
+            metin = (r.get("raw") or "").strip()
+            if metin:
+                metin = _temizle(metin, baglam)[0] or ""
+            return {"ok": True, "text": metin, "cagrilar": cagri,
+                    "model": a["model"], "provider": a["provider"], "in_tok": r["in_tok"],
+                    "out_tok": r["out_tok"], "usd": r["usd"],
+                    "price_estimated": r.get("price_estimated", False),
+                    "tokens_estimated": r.get("tokens_estimated", False), "truncated": False,
+                    "seconds": round((datetime.datetime.now() - t0).total_seconds(), 1)}
 
     # KESILME once ele alinir: yarim bir cevabi denetlemek, yarim bir
     # cumleyi «uydurma sayi» diye dusurmeye de yol acabilir.

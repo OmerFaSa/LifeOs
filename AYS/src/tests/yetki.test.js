@@ -152,4 +152,28 @@
       expect(y.donusNoktasi()).toBe(null);
     }));
   });
+  describe('Yetki — tipli niyet (söz 9, araç kataloğu)', () => {
+    it('küçük ve orta eylem parametreden kurulur; büyük eylem bu yoldan kurulmaz', () => ile({}, async ({ y, durum }) => {
+      const n = y.niyet('tema', { v:'dark' });
+      expect(n.tur).toBe('eylem');
+      expect(n.onizle.metin).toBe('Tema koyu olacak.');
+      expect(y.niyet('sifirdan', {})).toBe(null);
+      expect(y.niyet('donus', {})).toBe(null);
+      expect(y.niyet('uydurma', {})).toBe(null);
+      expect(y.bekleyenler().map(x => x.id)).toEqual(['p1', 'p2']);
+      const o = y.niyet('onay-tek', { id:'p2', metin:'Haftalık hedef 600' });
+      expect(o.seviye).toBe('orta');
+      expect(durum.onaylanan).toEqual([]);
+      expect((await y.uygula(o)).ok).toBe(true);
+      expect(durum.onaylanan).toEqual(['p2']);
+    }));
+
+    it('modülün eylemi şemasını kendisi verir (ekKatalog)', () => ile({ ayar:{ eylemler:[{ id:'kitap-ekle', seviye:'kucuk', ad:'Kitap ekle',
+      aciklama:'Kütüphaneye kitap ekler.', parametreler:{ type:'object', properties:{ ad:{ type:'string' } }, required:['ad'] },
+      anla:() => null, onizle:p => ({ metin:'«' + p.ad + '» eklenecek.' }), uygula:async () => ({ metin:'Eklendi.' }) }] } }, async ({ y }) => {
+      expect(y.ekKatalog()).toEqual([{ id:'kitap-ekle', ad:'Kitap ekle', seviye:'kucuk', aciklama:'Kütüphaneye kitap ekler.',
+        parametreler:{ type:'object', properties:{ ad:{ type:'string' } }, required:['ad'] } }]);
+      expect(y.niyet('kitap-ekle', { ad:'Dune' }).onizle.metin).toBe('«Dune» eklenecek.');
+    }));
+  });
 })();

@@ -1623,6 +1623,7 @@ SP.App = (function(){
           /* Toplantı İnceleme'ye dönüştü (2026-10-20): model çağrısı yok,
              ekran kendi verisinden kurulur; bu yüzden küçük seviye. */
           eylemler:[{ id:'inceleme', seviye:'kucuk', ad:'Veri incelemesini aç',
+            aciklama:'Ofis › İnceleme’yi açar: haftanın sayıları, kayıttan karşılaştırmalar ve tek karar.',
             anla:t => /(toplant|incele)/.test(t) && /(başlat|başla|aç|yap|topla|kur|göster)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
             onizle:() => ({ metin:'Ofis › İnceleme açılacak: haftanın sayıları, kayıttan karşılaştırmalar ve tek karar.' }),
             uygula:async () => {
@@ -1643,6 +1644,10 @@ SP.App = (function(){
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. Özet ve veri
          girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */
+      /* ARAÇ KATALOĞU (brand/ortak/arac.js, King 2.0): SPİ'nin okuma araçları
+         ve ölçüm yazmayan eylemi (core/kingarac.js); ölçüm King'in kayıt aracıyla
+         SPİ'nin kendi ayrıştırıcısından girer. */
+      if(window.LIFEOS && window.LIFEOS.ARAC && SP.KingArac) window.LIFEOS.ARAC.kur({ modul:'spi', araclar:() => SP.KingArac.liste() });
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'spi', ekran:() => S.route, model:() => SP.LLM, hafiza:() => SP.Hafizam,
           /* King'in çıkarımları için (cikarim.js): son 30 günün yatış saatleri, yemek kategorileri, antrenman sayısı. */
