@@ -266,5 +266,60 @@
         expect(!!document.querySelector('#defter [data-defter-govde]')).toBe(true);
       }finally{ D().kapat(); el.remove(); }
     }));
+    it('raf klasörlü: kökte klasör karoları ve klasörsüz kayıtlar; klasörde yol çubuğu ve o klasörün kayıtları (2026-10-20)', () => ile(async () => {
+      D().klasorSec(null);
+      D().rafKlasorSec('');
+      const a = await D().yeni('Kökteki', '', 'not', '');
+      const b = await D().yeni('Uyku notu', '', 'not', 'Sağlık/Uyku');
+      await D().yeni('Sağlık notu', '', 'not', 'Sağlık');
+      let h = D().rafHtml();
+      expect(h).toContain('data-defter-raf-git="Sağlık"');
+      expect(h).toContain('2 kayıt');                                       // alt klasör dahil
+      expect(h).toContain('<b>Kökteki</b>');
+      expect(h.indexOf('Uyku notu') < 0).toBeTruthy();                       // klasördeki kökte görünmez
+      D().rafKlasorSec('Sağlık');
+      h = D().rafHtml();
+      expect(h).toContain('defter-raf__yol');
+      expect(h).toContain('data-defter-raf-git="Sağlık/Uyku"');
+      expect(h).toContain('<b>Sağlık notu</b>');
+      expect(h.indexOf('Kökteki') < 0).toBeTruthy();
+      await D().notTasi(a.id, 'Sağlık');
+      expect(D().notlar().find(n => n.id === a.id).klasor).toBe('Sağlık');
+      expect(D().rafHtml()).toContain('<b>Kökteki</b>');
+      await D().notTasi(b.id, '');
+      expect(D().notlar().find(n => n.id === b.id).klasor).toBe('');
+      D().rafKlasorSec('');
+    }));
+    it('raf: klasörde açılan not o klasöre girer; + Klasör ekler ve içine girer; Taşı seçimle taşır', () => ile(async () => {
+      D().klasorSec(null);
+      D().rafKlasorSec('');
+      const n = await D().yeni('Taşınacak', '', 'not', '');
+      const el = document.createElement('div');
+      el.innerHTML = D().rafHtml();
+      document.body.appendChild(el);
+      try{
+        D().rafBagla(el);
+        el.querySelector('[data-defter-raf="klasor-yeni"]').click();
+        await new Promise(r => setTimeout(r, 10));
+        el.querySelector('[data-defter-raf-klasor-ad]').value = 'Dersler';
+        el.querySelector('[data-defter-raf="klasor-kaydet"]').click();
+        await new Promise(r => setTimeout(r, 20));
+        expect(D().rafKlasor()).toBe('Dersler');
+        expect(el.textContent).toContain('Bu klasör boş');
+        el.querySelector('[data-defter-raf="not"]').click();
+        await new Promise(r => setTimeout(r, 20));
+        expect(D().notlar().filter(x => x.klasor === 'Dersler').length).toBe(1);
+        D().kapat();
+        el.querySelector('[data-defter-raf-git=""]').click();
+        await new Promise(r => setTimeout(r, 10));
+        el.querySelector('[data-defter-raf-tasi="' + n.id + '"]').click();
+        await new Promise(r => setTimeout(r, 10));
+        const s = el.querySelector('[data-defter-raf-tasi-sec="' + n.id + '"]');
+        s.value = 'Dersler';
+        s.dispatchEvent(new Event('change', { bubbles:true }));
+        await new Promise(r => setTimeout(r, 20));
+        expect(D().notlar().find(x => x.id === n.id).klasor).toBe('Dersler');
+      }finally{ D().kapat(); el.remove(); D().rafKlasorSec(''); }
+    }));
   });
 })();

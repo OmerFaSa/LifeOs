@@ -215,3 +215,37 @@
 .defter-ag__lejant{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; }
 .defter-ag__lejant i{ display:inline-block; width:9px; height:9px; border-radius:999px; margin-right:4px; }
 @media (max-width:760px){ .defter.is-ag .defter__sol{ display:none; } }
+
+/* ---------- Kütüphanem rafı: klasörler (2026-10-20) ----------
+   Klasör karoları ızgarada sarar (taşma yok); yol çubuğu ve geri; satırın
+   sağında «Taşı» düğmesi; sürüklenen kayıt bırakılacak karoyu vurgular. */
+.defter-raf__eylem--klasor{ background:none; box-shadow:inset 0 0 0 1px var(--border); }
+.defter-raf__yol{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; font-size:13.5px; color:var(--text-3); min-width:0; }
+.defter-raf__yol button{ min-height:30px; padding:0 6px; border:0; border-radius:8px; background:none; color:var(--text-2); font:inherit; cursor:pointer; }
+.defter-raf__yol button:hover{ background:var(--surface-2); color:var(--text); }
+.defter-raf__yol b{ color:var(--text); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; }
+.defter-raf__yol-geri{ display:inline-grid; place-items:center; width:30px; padding:0 !important; }
+.defter-raf__yol-geri svg, .defter-raf__klasor-simge svg, .defter-raf__tasi svg{ width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.defter-raf__klasor-yeni{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.defter-raf__klasor-yeni input{ flex:1 1 180px; min-height:36px; padding:0 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); font:inherit; }
+.defter-raf__klasorler{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; }
+.defter-raf__klasor{ display:grid; grid-template-columns:32px 1fr; grid-template-rows:auto auto; column-gap:10px; align-items:center; min-height:56px; padding:10px 12px;
+  border:1px solid var(--border); border-radius:12px; background:var(--surface); color:inherit; font:inherit; text-align:left; cursor:pointer;
+  transition:border-color var(--dur, .16s) var(--ease, ease), background var(--dur, .16s) var(--ease, ease); }
+.defter-raf__klasor:hover{ border-color:color-mix(in oklab, var(--primary) 45%, var(--border)); }
+.defter-raf__klasor.is-ustunde, .defter-raf__yol button.is-ustunde{ border-color:var(--primary); background:color-mix(in oklab, var(--primary) 10%, var(--surface)); }
+.defter-raf__klasor-simge{ grid-row:1 / 3; width:32px; height:32px; display:grid; place-items:center; border-radius:9px;
+  background:color-mix(in oklab, var(--primary) 12%, var(--surface-2)); color:var(--primary); }
+.defter-raf__klasor b{ font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.defter-raf__klasor small{ grid-column:2; font-size:12px; color:var(--text-3); }
+.defter-raf__satir{ display:flex; align-items:center; gap:4px; }
+.defter-raf__satir .defter-raf__oge{ flex:1; min-width:0; }
+.defter-raf__tasi{ flex:none; display:grid; place-items:center; width:34px; height:34px; border:0; border-radius:9px; background:none; color:var(--text-3); cursor:pointer;
+  opacity:.55; transition:opacity var(--dur, .16s) var(--ease, ease), background var(--dur, .16s) var(--ease, ease); }
+.defter-raf__satir:hover .defter-raf__tasi, .defter-raf__tasi:focus-visible, .defter-raf__tasi.is-acik{ opacity:1; }
+.defter-raf__tasi:hover, .defter-raf__tasi.is-acik{ background:var(--surface-2); color:var(--text); }
+.defter-raf__tasi-sec{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:0 4px 10px 48px; font-size:12.5px; color:var(--text-2); }
+.defter-raf__tasi-sec select{ min-height:32px; max-width:100%; padding:0 8px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text); font:inherit; }
+@media (hover:none){ .defter-raf__tasi{ opacity:1; } }
+@media (max-width:520px){ .defter-raf__klasorler{ grid-template-columns:repeat(2, minmax(0, 1fr)); } .defter-raf__tasi-sec{ padding-left:4px; } }
+@media (prefers-reduced-motion:reduce){ .defter-raf__klasor, .defter-raf__tasi{ transition:none; } }

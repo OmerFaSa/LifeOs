@@ -532,14 +532,14 @@ LIFEOS.DEFTER = (function(){
   }
   /* Belge: başlıklı, bölümlü uzun yazı. Not hızlı ve serbesttir. */
   const BELGE = '## Amaç\n\n## İçerik\n\n## Kaynaklar\n- \n';
-  async function belgeOlustur(baslik){ return yeni(baslik || 'Yeni belge', BELGE, 'belge'); }
+  async function belgeOlustur(baslik, kls){ return yeni(baslik || 'Yeni belge', BELGE, 'belge', kls); }
   /* Her dosya kendi kaydı: ad başlık olur, dosya gömülür (cihazda kalır). */
-  async function dosyalarEkle(dosyalar){
+  async function dosyalarEkle(dosyalar, kls){
     const l = [];
     for(const f of Array.from(dosyalar || [])){
       if(!f) continue;
       const r = await medyaEkle(f, { ad:f.name });
-      l.push(await yeni(String(f.name || 'Dosya').slice(0, 120), r.gomme, 'dosya'));
+      l.push(await yeni(String(f.name || 'Dosya').slice(0, 120), r.gomme, 'dosya', kls));
     }
     return l;
   }
@@ -584,6 +584,7 @@ LIFEOS.DEFTER = (function(){
     baslik:'<path d="M6 5v14M18 5v14M6 12h12"/>', vurgu:'<path d="M4 20h6"/><path d="M9 16l-2-2 9-9 4 4-9 9z"/>',
     alinti:'<path d="M7 7h4v4H8l-1 4M14 7h4v4h-3l-1 4"/>', liste:'<path d="M9 7h11M9 12h11M9 17h11"/><circle cx="5" cy="7" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="5" cy="17" r="1"/>',
     kod:'<path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/>', sablon:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M9 9v11"/>',
+    klasor:'<path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/>',
     yeni:'<path d="M12 5v14M5 12h14"/>', ag:'<circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="12" cy="17" r="2.6"/><path d="M8 8l2.8 7M16.6 7.8l-3.4 7.2M8.2 6.8l7.6-.6"/>', kapat:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>', geri:'<path d="M15 5l-7 7 7 7"/>',
   };
   const svg = k => '<svg viewBox="0 0 24 24" aria-hidden="true">' + S[k] + '</svg>';
@@ -738,24 +739,82 @@ LIFEOS.DEFTER = (function(){
       .map(x => x.replace(/^(#{1,3}\s+|>\s*|[-*]\s+(\[[ x]\]\s+)?|\d+\.\s+)/i, '').replace(/[*=~`]/g, '').trim()).find(Boolean);
     return ilk ? ilk.slice(0, 80) : 'Adsız';
   }
+  /* KLASÖRLÜ RAF (2026-10-20, kullanıcı: «bu kısma da klasörlü bir görüntü
+     getir; klasör içine koyabileyim, çok fazla olduğunda taşmasın»).
+     Raf bir klasörde durur (kökte: klasörsüz kayıtlar). Üstte o seviyenin
+     klasörleri karo olarak (kaç kayıt), altta o klasörün en yeni beş kaydı;
+     fazlası «Tümü» ile Defter'de o klasörde açılır. Yeni not, belge ve dosya
+     rafın durduğu klasöre girer. Kayıt «Taşı» düğmesiyle ya da sürüklenip
+     bir klasör karosuna / yol çubuğuna bırakılarak taşınır. */
+  let rafKlasor = '', rafKlasorYeni = false, rafTasi = null;
+  const ustKlasor = k => k.indexOf('/') < 0 ? '' : k.slice(0, k.lastIndexOf('/'));
+  async function notTasi(id, k){
+    const n = notBul(id);
+    if(!n) return null;
+    n.klasor = klasorAdi(k);
+    return kaydet(n);
+  }
   function rafHtml(){
-    const sirali = notlar.slice().sort((a, b) => String(b.guncel || '').localeCompare(String(a.guncel || '')));
-    const ilk = sirali.slice(0, RAF_EN_COK);
-    const eylem = (is, ikon, ad) => '<button type="button" class="defter-raf__eylem" data-defter-raf="' + is + '">' + svg(ikon) + '<span>' + ad + '</span></button>';
+    if(rafKlasor && klasorler().indexOf(rafKlasor) < 0) rafKlasor = '';
+    const burada = notlar.filter(n => (n.klasor || '') === rafKlasor)
+      .sort((a, b) => String(b.guncel || '').localeCompare(String(a.guncel || '')));
+    const ilk = burada.slice(0, RAF_EN_COK);
+    const altlar = klasorler().filter(k => ustKlasor(k) === rafKlasor);
+    const derin = rafKlasor ? rafKlasor.split('/').length : 0;
+    const eylem = (is, ikon, ad, cls_) => '<button type="button" class="defter-raf__eylem' + (cls_ ? ' ' + cls_ : '') + '" data-defter-raf="' + is + '">' + svg(ikon) + '<span>' + ad + '</span></button>';
+    /* Yol çubuğu: Kütüphanem › Sağlık › Uyku (her parça bırakma hedefi). */
+    let yol = '';
+    if(rafKlasor){
+      const p = rafKlasor.split('/');
+      yol = '<nav class="defter-raf__yol" aria-label="Klasör yolu">'
+        + '<button type="button" class="defter-raf__yol-geri" data-defter-raf-git="' + kac(ustKlasor(rafKlasor)) + '" aria-label="Üst klasöre dön">' + svg('geri') + '</button>'
+        + '<button type="button" data-defter-raf-git="" data-defter-raf-hedef="">Kütüphanem</button>'
+        + p.map((x, i) => {
+          const k = p.slice(0, i + 1).join('/');
+          return '<span aria-hidden="true">›</span>' + (i === p.length - 1
+            ? '<b aria-current="location">' + kac(x) + '</b>'
+            : '<button type="button" data-defter-raf-git="' + kac(k) + '" data-defter-raf-hedef="' + kac(k) + '">' + kac(x) + '</button>');
+        }).join('') + '</nav>';
+    }
+    const yeniKlasor = rafKlasorYeni
+      ? '<div class="defter-raf__klasor-yeni"><input data-defter-raf-klasor-ad placeholder="Klasör adı" aria-label="Yeni klasörün adı" maxlength="40"/>'
+        + '<button type="button" class="defter-raf__eylem" data-defter-raf="klasor-kaydet"><span>Ekle</span></button>'
+        + '<button type="button" class="defter-raf__tumu" data-defter-raf="klasor-vazgec">Vazgeç</button></div>' : '';
+    const karolar = altlar.length ? '<div class="defter-raf__klasorler" role="list" aria-label="Klasörler">' + altlar.map(k => {
+      const n = klasordeki(k).length;
+      return '<button type="button" role="listitem" class="defter-raf__klasor" data-defter-raf-git="' + kac(k) + '" data-defter-raf-hedef="' + kac(k) + '">'
+        + '<span class="defter-raf__klasor-simge" aria-hidden="true">' + svg('klasor') + '</span>'
+        + '<b>' + kac(k.split('/').pop()) + '</b><small>' + (n ? n + ' kayıt' : 'boş') + '</small></button>';
+    }).join('') + '</div>' : '';
+    const hedefler = [''].concat(klasorler());
+    const satir = n => {
+      const t = turBul(n.tur);
+      const tasiyor = rafTasi === n.id;
+      return '<li><div class="defter-raf__satir">'
+        + '<button type="button" class="defter-raf__oge" data-defter-ac="' + kac(n.id) + '" draggable="true">'
+        + '<span class="defter-raf__simge defter-raf__simge--' + t + '" aria-hidden="true">' + svg(TUR_SIMGE[t]) + '</span>'
+        + '<b>' + kac(rafAdi(n)) + '</b>'
+        + '<small>' + TUR_AD[t] + ' · ' + kac(tarihYaz(n.guncel || n.at)) + '</small></button>'
+        + '<button type="button" class="defter-raf__tasi' + (tasiyor ? ' is-acik' : '') + '" data-defter-raf-tasi="' + kac(n.id) + '" aria-expanded="' + (tasiyor ? 'true' : 'false')
+        +   '" title="Klasöre taşı" aria-label="«' + kac(rafAdi(n)) + '» kaydını klasöre taşı">' + svg('klasor') + '</button></div>'
+        + (tasiyor ? '<label class="defter-raf__tasi-sec">Taşınacak yer <select data-defter-raf-tasi-sec="' + kac(n.id) + '">'
+          + hedefler.map(k => '<option value="' + kac(k) + '"' + ((n.klasor || '') === k ? ' selected' : '') + '>' + (k ? kac(k.split('/').join(' › ')) : 'Kütüphanem (klasörsüz)') + '</option>').join('')
+          + '</select></label>' : '')
+        + '</li>';
+    };
+    const bos = !ilk.length && !altlar.length
+      ? (rafKlasor ? '<p class="defter-raf__bos">Bu klasör boş. Burada açtığın not, belge ve dosya bu klasöre girer; başka bir kaydı «Taşı» ile buraya alabilirsin.</p>'
+        : '<p class="defter-raf__bos">Henüz not yok. Yazdıkların, belgelerin ve eklediğin dosyalar burada durur.</p>') : '';
     return '<div class="defter-raf">'
       + '<div class="defter-raf__eylemler" role="group" aria-label="Yeni">'
       +   eylem('not', 'yeni', 'Yeni not') + eylem('belge', 'sablon', 'Yeni belge') + eylem('dosya', 'dosya', 'Dosya ekle')
+      +   (derin < 3 ? eylem('klasor-yeni', 'klasor', rafKlasor ? 'Alt klasör' : 'Klasör', 'defter-raf__eylem--klasor') : '')
       +   '<input type="file" multiple class="sr-only" data-defter-raf-dosya aria-label="Eklenecek dosyalar" tabindex="-1"/>'
       + '</div>'
-      + (ilk.length ? '<ul class="defter-raf__liste">' + ilk.map(n => {
-          const t = turBul(n.tur);
-          return '<li><button type="button" class="defter-raf__oge" data-defter-ac="' + kac(n.id) + '">'
-            + '<span class="defter-raf__simge defter-raf__simge--' + t + '" aria-hidden="true">' + svg(TUR_SIMGE[t]) + '</span>'
-            + '<b>' + kac(rafAdi(n)) + '</b>'
-            + '<small>' + TUR_AD[t] + ' · ' + kac(tarihYaz(n.guncel || n.at)) + '</small></button></li>';
-        }).join('') + '</ul>'
-        : '<p class="defter-raf__bos">Henüz not yok. Yazdıkların, belgelerin ve eklediğin dosyalar burada durur.</p>')
-      + (sirali.length > RAF_EN_COK ? '<button type="button" class="defter-raf__tumu" data-defter-raf="tumu">Tümü (' + sirali.length + ')</button>' : '')
+      + yol + yeniKlasor + karolar
+      + (ilk.length ? '<ul class="defter-raf__liste">' + ilk.map(satir).join('') + '</ul>' : '')
+      + bos
+      + (burada.length > RAF_EN_COK ? '<button type="button" class="defter-raf__tumu" data-defter-raf="tumu">Tümü (' + burada.length + ')</button>' : '')
       + '</div>';
   }
   function rafBagla(el){
@@ -764,24 +823,47 @@ LIFEOS.DEFTER = (function(){
     const tazele = () => { if(document.contains(el)) el.innerHTML = rafHtml(); };
     const kapaninca = () => { if(!document.contains(el)){ document.removeEventListener('lifeos:defter-kapandi', kapaninca); return; } tazele(); };
     document.addEventListener('lifeos:defter-kapandi', kapaninca);
+    const klasorKaydet = async () => {
+      const i = el.querySelector('[data-defter-raf-klasor-ad]');
+      const ad = klasorAdi(String(i ? i.value : '').replace(/\//g, ' '));
+      rafKlasorYeni = false;
+      if(ad){ const k = await klasorEkle(rafKlasor ? rafKlasor + '/' + ad : ad); if(k) rafKlasor = k; }
+      tazele();
+    };
     el.addEventListener('click', async e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
       const ac_ = t.closest('[data-defter-ac]');
       if(ac_){ ac({ id:ac_.getAttribute('data-defter-ac') }); return; }
+      const git = t.closest('[data-defter-raf-git]');
+      if(git){ rafKlasor = klasorAdi(git.getAttribute('data-defter-raf-git')); rafTasi = null; rafKlasorYeni = false; tazele(); return; }
+      const ts = t.closest('[data-defter-raf-tasi]');
+      if(ts){ const id = ts.getAttribute('data-defter-raf-tasi'); rafTasi = rafTasi === id ? null : id; tazele();
+        const s = el.querySelector('[data-defter-raf-tasi-sec]'); if(s) try{ s.focus(); }catch(er){} return; }
       const b = t.closest('[data-defter-raf]');
       if(!b) return;
       const is = b.getAttribute('data-defter-raf');
-      if(is === 'tumu'){ ac(); return; }
+      if(is === 'tumu'){ klasor = rafKlasor; ac(); return; }
       if(is === 'dosya'){ const g = el.querySelector('[data-defter-raf-dosya]'); if(g) g.click(); return; }
-      const n = is === 'belge' ? await belgeOlustur() : await yeni('', '', 'not');
+      if(is === 'klasor-yeni'){ rafKlasorYeni = true; tazele(); const i = el.querySelector('[data-defter-raf-klasor-ad]'); if(i) try{ i.focus(); }catch(er){} return; }
+      if(is === 'klasor-vazgec'){ rafKlasorYeni = false; tazele(); return; }
+      if(is === 'klasor-kaydet'){ await klasorKaydet(); return; }
+      const n = is === 'belge' ? await belgeOlustur('', rafKlasor) : await yeni('', '', 'not', rafKlasor);
       ac({ id:n.id, duzen:true });
     });
+    el.addEventListener('keydown', e => {
+      if(e.target && e.target.matches && e.target.matches('[data-defter-raf-klasor-ad]')){
+        if(e.key === 'Enter'){ e.preventDefault(); klasorKaydet(); }
+        else if(e.key === 'Escape'){ e.preventDefault(); rafKlasorYeni = false; tazele(); }
+      }
+    });
     el.addEventListener('change', async e => {
+      const sec = e.target && e.target.matches && e.target.matches('[data-defter-raf-tasi-sec]') ? e.target : null;
+      if(sec){ await notTasi(sec.getAttribute('data-defter-raf-tasi-sec'), sec.value); rafTasi = null; tazele(); return; }
       const g = e.target && e.target.matches && e.target.matches('[data-defter-raf-dosya]') ? e.target : null;
       if(!g || !g.files || !g.files.length) return;
       try{
-        const l = await dosyalarEkle(g.files);
+        const l = await dosyalarEkle(g.files, rafKlasor);
         tazele();
         if(l.length === 1) ac({ id:l[0].id });
       }catch(er){
@@ -789,6 +871,28 @@ LIFEOS.DEFTER = (function(){
         p.textContent = (er && er.message) || 'Dosya eklenemedi.';
         el.appendChild(p);
       }
+    });
+    /* Sürükle-bırak: kayıt bir klasör karosuna ya da yol çubuğuna bırakılır. */
+    const hedefi = e => e.target && e.target.closest ? e.target.closest('[data-defter-raf-hedef]') : null;
+    el.addEventListener('dragstart', e => {
+      const o = e.target && e.target.closest ? e.target.closest('[data-defter-ac]') : null;
+      if(!o || !e.dataTransfer) return;
+      e.dataTransfer.setData('text/x-defter-not', o.getAttribute('data-defter-ac'));
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    el.addEventListener('dragover', e => {
+      const h = hedefi(e);
+      if(!h || !e.dataTransfer || Array.from(e.dataTransfer.types || []).indexOf('text/x-defter-not') < 0) return;
+      e.preventDefault(); e.dataTransfer.dropEffect = 'move'; h.classList.add('is-ustunde');
+    });
+    el.addEventListener('dragleave', e => { const h = hedefi(e); if(h) h.classList.remove('is-ustunde'); });
+    el.addEventListener('drop', async e => {
+      const h = hedefi(e);
+      const id = e.dataTransfer ? e.dataTransfer.getData('text/x-defter-not') : '';
+      if(!h || !id) return;
+      e.preventDefault();
+      await notTasi(id, h.getAttribute('data-defter-raf-hedef'));
+      tazele();
     });
   }
   async function alanYaz(el){
@@ -1096,5 +1200,6 @@ LIFEOS.DEFTER = (function(){
   return { kur, yukle, ac, kapat, yeni, belgeOlustur, dosyalarEkle, rafHtml, rafBagla, kaydet, sil, md, baglantilar, etiketler, geriBaglantilar, ara, kutuCevir,
     medyaEkle, medya, disaAktarMetni, SABLONLAR, sayim, sar, satirOnek, tuval, notOlustur, yedekNesnesi, yedekYukle, yedekAl, alan, kac, notlar:() => notlar.slice(), sec:id => { secili = id; }, duzenle:v => { duzen = !!v; },
     kuruluMu:() => !!ayar, _ortam:ortam, _sifirla, _db:v => { db = v; },
-    klasorAdi, klasorler, klasordeki, klasorEkle, klasorTasi, klasorSil, bosSil, agVeri, yerlesim, klasorSec:k => { klasor = k; } };
+    klasorAdi, klasorler, klasordeki, klasorEkle, klasorTasi, klasorSil, bosSil, agVeri, yerlesim, klasorSec:k => { klasor = k; },
+    notTasi, rafKlasor:() => rafKlasor, rafKlasorSec:k => { rafKlasor = klasorAdi(k); rafTasi = null; rafKlasorYeni = false; } };
 })();
