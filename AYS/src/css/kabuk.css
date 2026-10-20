@@ -2020,3 +2020,12 @@ html .site--v5 .ledger:not(.ledger .ledger){ row-gap:var(--raf-ara); }
 @media (max-width:679px){
   body:has(.giris) .hizliekle{ display:none; }
 }
+
+/* ---------- Kenar: görsel pano (2026-10-20, «arayüzü daha görsel yap») ----------
+   Simgeler soluk gri kalıyordu. Etkin bölüm modül rengini alır (simge renkli,
+   zemin modül renginin çok hafif tonu); ötekiler bir kademe koyu. */
+.site--v5 .kenar__cekmece{ color:color-mix(in oklab, var(--text) 62%, transparent); }
+.site--v5 .kenar__cekmece:hover{ color:var(--text); }
+.site--v5 .kenar__cekmece.is-on{ color:var(--text); }
+.site--v5 .kenar__cekmece.is-on .kbk-ic{ color:var(--primary); }
+.site--v5 .kenar__cekmece.is-on::before{ background:color-mix(in oklab, var(--primary) 13%, var(--sidebar-active, var(--surface))); }

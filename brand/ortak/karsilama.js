@@ -241,22 +241,71 @@ LIFEOS.KARSILAMA = (function(){
   /* ------------------------------------------------------------ kapak */
 
   const KESINLIK = { measured:'ölçüldü', computed:'hesaplandı', estimated:'tahmin', veri_yok:'veri yok' };
-  /* o: { modul, selam, cumle, sayilar:[{ ad, deger, birim, kesinlik }], eylem:html, ikincil:html } */
+  /* GÖRSEL PANO (kullanıcı, 2026-10-20: «genel sistem arayüzünü daha
+     görselleştirip daha güzel yap»; seçtiği yön: halka göstergeli renkli
+     karolar). Her sayı bir karo: simge, ad, değer. Modül HEDEFİ biliyorsa
+     (`oran`, ör. su 2000 ml eşiğinin ne kadarı) değerin çevresinde halka
+     çizilir; bilmiyorsa halka yok — hedef uydurulmaz. `seri` son günlerin
+     kaydıysa altta küçük sütunlar; girilmemiş gün nokta (sıfır değil). */
+  const SIMGE = {
+    uyku:'<path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10z"/>',
+    su:'<path d="M12 3.5s6 6.4 6 10.8a6 6 0 0 1-12 0C6 9.9 12 3.5 12 3.5z"/>',
+    ogun:'<path d="M7 3v7.5M5 3v5a2 2 0 0 0 4 0V3M7 10.5V21M17.5 3c-2 2-2.5 5-2.5 8h2.5v10"/>',
+    hareket:'<path d="M3 12.5h4l2.5-6 4.5 12 2.5-6H21"/>',
+    oturum:'<path d="M12 4l8.5 4.5L12 13 3.5 8.5z"/><path d="M3.5 13L12 17.5 20.5 13"/>',
+    sure:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    hatirlatici:'<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+    blok:'<rect x="4" y="4" width="7" height="7" rx="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.6"/>',
+    kart:'<rect x="4" y="7" width="12.5" height="13" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v11"/>',
+    seri:'<path d="M12 3c1 3.6 5 5.6 5 10.2a5 5 0 0 1-10 0c0-2.6 1.5-3.9 2.6-5.1.3 1.6 1 2.6 2 3.1C11.6 8.2 12 5.8 12 3z"/>',
+    sinav:'<rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M9 3.5v4M15 3.5v4"/>',
+    nokta:'<circle cx="12" cy="12" r="3.5"/>',
+  };
+  const SIMGE_AD = { 'uyku':'uyku', 'su':'su', 'öğün':'ogun', 'hareket':'hareket', 'oturum':'oturum', 'süre':'sure',
+    'hatırlatıcı':'hatirlatici', 'blok':'blok', 'tekrar kartı':'kart', 'tekrar':'kart', 'seri':'seri', 'sınava':'sinav' };
+  const simgeOf = x => SIMGE[x.simge] ? x.simge : (SIMGE_AD[String(x.ad || '').toLocaleLowerCase('tr-TR')] || 'nokta');
+  const svgS = (ic, cls) => '<svg class="' + cls + '" viewBox="0 0 24 24" aria-hidden="true">' + SIMGE[ic] + '</svg>';
+  function halka(oran){
+    const r = 25, c = 2 * Math.PI * r, o = Math.max(0, Math.min(1, oran));
+    return '<svg class="kapak__halka" viewBox="0 0 60 60" aria-hidden="true"><circle class="kapak__halka-iz" cx="30" cy="30" r="' + r + '"/>'
+      + (o > 0 ? '<circle class="kapak__halka-dolu" cx="30" cy="30" r="' + r + '" stroke-dasharray="' + (c * o).toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 30 30)"/>' : '') + '</svg>';
+  }
+  function sutunlar(l){
+    const v = (l || []).map(x => x == null || !isFinite(Number(x)) ? null : Number(x));
+    if(!v.some(x => x != null)) return '';
+    const en = Math.max(1e-9, ...v.filter(x => x != null)), w = 6, ara = 4, h = 22;
+    return '<svg class="kapak__sutun" viewBox="0 0 ' + (v.length * (w + ara) - ara) + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true">'
+      + v.map((x, i) => x == null
+        ? '<circle cx="' + (i * (w + ara) + w / 2) + '" cy="' + (h - 1.5) + '" r="1.3" class="kapak__sutun-bos"/>'
+        : '<rect x="' + i * (w + ara) + '" y="' + (h - Math.max(2, x / en * h)).toFixed(1) + '" width="' + w + '" height="' + Math.max(2, x / en * h).toFixed(1) + '" rx="2"'
+          + (i === v.length - 1 ? ' class="is-son"' : '') + '/>').join('') + '</svg>';
+  }
+  /* o: { modul, selam, cumle, sayilar:[{ ad, deger, birim, kesinlik, oran?, halka?, seri?, simge?, alt?, git? }], eylem:html, ikincil:html }
+     `halka:true`: hedef biliniyor ama bugün kayıt yok — boş halka (iz) çizilir.
+     `git`: karo o ekrana götüren düğme olur (data-act="go"). */
   function kapakHtml(o){
     o = o || {};
     const sayi = x => {
       const yok = x.deger == null || x.deger === '';
       const kes = yok ? 'veri_yok' : (x.kesinlik || 'computed');
-      return '<div class="kapak__sayi" data-kesinlik="' + kac(kes) + '">'
-        + '<span class="kapak__deger">' + (yok ? '—' : kac(x.deger) + (x.birim ? '<small>' + kac(x.birim) + '</small>' : '')) + '</span>'
-        + '<span class="kapak__ad">' + kac(x.ad) + '<i title="' + kac(KESINLIK[kes] || kes) + '">' + kac(KESINLIK[kes] || '') + '</i></span></div>';
+      const oran = !yok && x.oran != null && isFinite(Number(x.oran)) ? Number(x.oran) : (x.halka ? 0 : null);
+      const deger = '<span class="kapak__deger">' + (yok ? '—' : kac(x.deger) + (x.birim ? '<small>' + kac(x.birim) + '</small>' : '')) + '</span>';
+      const etiket = x.git ? 'button' : 'div';
+      return '<' + etiket + (x.git ? ' type="button" data-act="go" data-route="' + kac(x.git) + '" aria-label="' + kac(x.ad + ': ' + (yok ? 'veri yok' : x.deger + (x.birim ? ' ' + x.birim : ''))) + '"' : '')
+        + ' class="kapak__sayi' + (oran != null ? ' has-halka' : '') + (oran != null && oran >= 1 ? ' is-tamam' : '') + (x.git ? ' is-git' : '') + '" data-kesinlik="' + kac(kes) + '" data-simge="' + simgeOf(x) + '">'
+        + '<div class="kapak__karo-ust">' + svgS(simgeOf(x), 'kapak__simge')
+        + '<span class="kapak__ad">' + kac(x.ad) + '<i title="' + kac(KESINLIK[kes] || kes) + '">' + kac(KESINLIK[kes] || '') + '</i></span></div>'
+        + '<div class="kapak__karo-orta">' + (oran != null ? halka(oran) : '') + deger + '</div>'
+        + (x.alt ? '<span class="kapak__alt">' + kac(x.alt) + '</span>' : '')
+        + sutunlar(x.seri)
+        + '</' + etiket + '>';
     };
     const sayilar = (o.sayilar || []).slice(0, 4);
     return '<section class="kapak kapak--' + kac(o.modul || '') + '" aria-label="Bugün">'
       + '<div class="kapak__ic">'
       + (o.selam ? '<p class="kapak__selam">' + kac(o.selam) + '</p>' : '')
       + '<h1 class="kapak__cumle hero__title" tabindex="-1">' + kac(o.cumle || 'Bugün') + '</h1>'
-      + (sayilar.length ? '<div class="kapak__sayilar">' + sayilar.map(sayi).join('') + '</div>' : '')
+      + (sayilar.length ? '<div class="kapak__sayilar" data-adet="' + sayilar.length + '">' + sayilar.map(sayi).join('') + '</div>' : '')
       + (o.eylem || o.ikincil ? '<div class="kapak__eylem">' + (o.eylem || '') + (o.ikincil || '') + '</div>' : '')
       + '</div>'
       + '<button type="button" class="kapak__asagi" data-kapak-asagi aria-label="Günün ayrıntısına in">'

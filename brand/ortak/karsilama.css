@@ -71,49 +71,58 @@
 /* Kapaklı sayfada levha kapağın altından başlar; başlık kapakta (h1). */
 .site--v5 .sayfa--kapakli{ margin-top:0; }
 
-/* ---------- BUGÜN: kartsız ana sayfa (kullanıcı, 2026-10-18: «Bugün kısmını
-   daha profesyonel yap; altındaki kart sistemi olmasın, bambaşka ama yine
-   ferah, minimalist, sade; sistemden çok kopmasın») ----------
-   Yalnız kapaklı sayfa (Bugün). Levha yok: içerik kapağın devamı olarak
-   zeminde akar. Her alan (Şimdi, Durum, Özet, Öneri) solda sakin bir etiket,
-   sağda içerik olan geniş bir satırdır; aralarında yalnız ince çizgi. Kart
-   zemini, gölgesi, çerçevesi ve köşesi kalkar; düğme, giriş ve haplar aynı
-   kalır. Bileşenlerin HTML'i değişmez: katman yalnız biçimdir. */
+/* ---------- BUGÜN: GÖRSEL PANO (kullanıcı, 2026-10-20: «genel sistem
+   arayüzünü daha görselleştirip daha güzel yap»; seçtiği yön: halka
+   göstergeli renkli karolar, durum ve öneri kartlaşır) ----------
+   2026-10-18'in kartsız düzeninin yerine geçer. Her alan (Şimdi, Durum,
+   Özet, Öneri) yumuşak, hafif buğulu bir karttır: solda sakin etiket,
+   sağda içerik. Kartın içindeki bileşenler düz kalır (kart içinde kart
+   yok); yalnız Durum'un dönen satırları küçük iç karolardır. Bileşenlerin
+   HTML'i değişmez: katman yalnız biçimdir. */
 .site--v5 .sayfa--kapakli::before{ display:none !important; }
 .site--v5 .sayfa--kapakli{ padding-top:0; }
-.sayfa--kapakli .bugun{ display:flex; flex-direction:column; gap:0; }
+.sayfa--kapakli .bugun{ display:flex; flex-direction:column; gap:16px; }
 .sayfa--kapakli .bugun__sol, .sayfa--kapakli .bugun__sag{ display:contents; }
-.sayfa--kapakli .bugun__alan{ display:grid; grid-template-columns:140px minmax(0, 1fr); column-gap:44px; row-gap:0;
-  padding:30px 0; border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent); }
-.sayfa--kapakli .bugun__alan:first-child{ border-top-color:color-mix(in oklab, var(--text) 16%, transparent); }
+.sayfa--kapakli .bugun__alan{ display:grid; grid-template-columns:132px minmax(0, 1fr); column-gap:36px; row-gap:0;
+  padding:26px 28px; border-radius:22px; border:1px solid color-mix(in oklab, var(--text) 7%, transparent);
+  background:color-mix(in oklab, var(--surface) 80%, transparent);
+  box-shadow:0 1px 2px color-mix(in oklab, #000 5%, transparent), 0 18px 40px -26px color-mix(in oklab, #000 35%, transparent);
+  -webkit-backdrop-filter:blur(18px) saturate(1.1); backdrop-filter:blur(18px) saturate(1.1); }
 .sayfa--kapakli .bugun__etiket{ position:static !important; width:auto; height:auto; overflow:visible; clip:auto; clip-path:none; white-space:normal;
-  grid-column:1; grid-row:1 / span 20; align-self:start; margin:4px 0 0; font-size:13px; font-weight:600; letter-spacing:.01em; color:var(--text-3); }
+  grid-column:1; grid-row:1 / span 20; align-self:start; display:flex; align-items:center; gap:8px; margin:3px 0 0;
+  font-size:13px; font-weight:650; letter-spacing:.01em; color:var(--text-2); }
+.sayfa--kapakli .bugun__etiket::before{ content:''; width:8px; height:8px; border-radius:3px; flex:none;
+  background:var(--primary); opacity:.85; }
 .sayfa--kapakli .bugun__alan > :not(.bugun__etiket){ grid-column:2; min-width:0; }
-.sayfa--kapakli .bugun__alan > :not(.bugun__etiket) ~ :not(.bugun__etiket){ margin-top:26px; padding-top:26px;
+.sayfa--kapakli .bugun__alan > :not(.bugun__etiket) ~ :not(.bugun__etiket){ margin-top:22px; padding-top:22px;
   border-top:1px solid color-mix(in oklab, var(--text) 7%, transparent); }
-/* Kart görünümü kalkar. */
+/* Kartın içindeki bileşen kendi kartını çizmez. */
 .sayfa--kapakli .bugun :is(.giris, .tekgun, .sorukart, .donen, .kutu, .kahraman, .kahraman > *, .card, .ledger, .lrow, .okart, .nextup, .notice){
   background:transparent !important; box-shadow:none !important; border-color:transparent !important; border-radius:0 !important;
   -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
 .sayfa--kapakli .bugun :is(.giris, .tekgun, .sorukart, .donen, .kutu, .kahraman > *, .card, .okart, .nextup){
   padding-left:0 !important; padding-right:0 !important; }
 .sayfa--kapakli .bugun :is(.giris, .tekgun, .sorukart, .donen, .kutu, .card, .okart){ padding-top:0 !important; padding-bottom:0 !important; }
-/* Durum: yan yana iki dönen satır, arada ince dikey çizgi. */
-.sayfa--kapakli .bugun__alan > .donen + .donen{ margin-top:0; padding-top:0; border-top:0; }
+/* Durum: dönen satırlar iç karo; yan yana. */
+.sayfa--kapakli .bugun .bugun__alan > .donen{ padding:16px 18px 40px !important; border-radius:16px !important;
+  background:color-mix(in oklab, var(--surface-2) 72%, transparent) !important; border:1px solid color-mix(in oklab, var(--text) 5%, transparent) !important; }
+.sayfa--kapakli .bugun .bugun__alan > .donen .donen__sayi{ font-size:1.25em; }
+.sayfa--kapakli .bugun__alan > .donen + .donen{ margin-top:12px; padding-top:16px; border-top:0; }
 @media (min-width:680px){
-  .sayfa--kapakli .bugun__alan:has(> .donen + .donen){ grid-template-columns:140px minmax(0, 1fr) minmax(0, 1fr); }
+  .sayfa--kapakli .bugun__alan:has(> .donen + .donen){ grid-template-columns:132px minmax(0, 1fr) minmax(0, 1fr); column-gap:14px; }
+  .sayfa--kapakli .bugun__alan:has(> .donen + .donen) > .bugun__etiket{ margin-right:22px; }
   .sayfa--kapakli .bugun__alan > .donen{ grid-column:auto; }
-  .sayfa--kapakli .bugun__alan > .donen + .donen{ padding-left:32px; border-left:1px solid color-mix(in oklab, var(--text) 8%, transparent); }
+  .sayfa--kapakli .bugun__alan > .donen + .donen{ margin-top:0; }
   .sayfa--kapakli .bugun__alan > .donen ~ :not(.donen):not(.bugun__etiket){ grid-column:2 / -1; }
 }
 @media (max-width:679px){
-  .sayfa--kapakli .bugun__alan{ grid-template-columns:minmax(0, 1fr); padding:24px 0; }
+  .sayfa--kapakli .bugun{ gap:12px; }
+  .sayfa--kapakli .bugun__alan{ grid-template-columns:minmax(0, 1fr); padding:20px 18px; border-radius:18px; }
   .sayfa--kapakli .bugun__etiket{ grid-row:auto; margin:0 0 14px; }
   .sayfa--kapakli .bugun__alan > :not(.bugun__etiket){ grid-column:1; }
-  .sayfa--kapakli .bugun__alan > .donen + .donen{ margin-top:22px; padding-top:22px; border-top:1px solid color-mix(in oklab, var(--text) 7%, transparent); }
 }
 /* Ayırıcı çizgi kart kenarının sıfırlanmasından sonra gelir (özgüllük + !important). */
-.sayfa--kapakli .bugun .bugun__alan > :not(.bugun__etiket) ~ :not(.bugun__etiket):not(.donen + .donen){
+.sayfa--kapakli .bugun .bugun__alan > :not(.bugun__etiket) ~ :not(.bugun__etiket):not(.donen){
   border-top:1px solid color-mix(in oklab, var(--text) 7%, transparent) !important; }
 /* Kutunun iç boşlukları da kalkar: içerik etiket sütununa hizalanır. */
 .sayfa--kapakli .bugun :is(.kutu__bas, .kutu__govde, .kutu__ayak){ padding-left:0 !important; padding-right:0 !important; }
@@ -123,8 +132,7 @@
   background:transparent !important; box-shadow:none !important; border-color:transparent !important; padding:0 !important; border-radius:0 !important; }
 .sayfa--kapakli .bugun :is(.ledger, .lrow){ padding-left:0 !important; padding-right:0 !important; }
 .sayfa--kapakli .bugun .lrow + .lrow{ border-top:1px solid color-mix(in oklab, var(--text) 7%, transparent); }
-/* Levha kalkınca zemin --surface-2 olur: alanlar zeminde kaybolmasın. */
-.sayfa--kapakli .bugun .input{ background:var(--surface); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--text) 8%, transparent); }
+.sayfa--kapakli .bugun .input{ background:var(--surface); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--text) 9%, transparent); }
 .sayfa--kapakli .bugun .grid-form .input--num{ text-align:left; }
 /* Bardak sayacı ve sık oturumlar: satır düzeni, sola yaslı. */
 .sayfa--kapakli .bugun .vk .x35 .bd{ justify-content:flex-start !important; }
@@ -141,36 +149,74 @@
 }
 .sayfa--kapakli .bugun .vk .x35 .bd{ margin:0; padding-left:0; padding-right:0; }
 
-/* ---------- KAPAK: iki sütun (kullanıcı, 2026-10-18: «bir tık daha farklı,
-   daha minimalist; üstteki yazının tasarımını ve yerlerini değiştirebilirsin»)
-   Solda selam, cümle ve eylem; sağda sayılar dar bir defter gibi alt alta:
-   adı solda, değeri sağda, aralarında ince çizgi — altındaki kartsız
-   satırlarla aynı dil. Telefonda tek sütun. ---------- */
-.kapak{ min-height:min(60vh, 560px); padding-bottom:64px; }
-.kapak__ic{ display:grid; max-width:none; width:100%; align-items:start; column-gap:clamp(40px, 7vw, 96px);
-  grid-template-columns:minmax(0, 1fr); grid-template-areas:"selam" "cumle" "sayilar" "eylem"; }
-.kapak__selam{ grid-area:selam; margin:0 0 14px; font-size:clamp(20px, 2.4vw, 26px); color:var(--text-3); }
-.kapak .kapak__cumle{ grid-area:cumle; font-size:clamp(30px, 4.2vw, 50px); font-weight:650; letter-spacing:-.03em; line-height:1.04; max-width:16ch; }
-.kapak__eylem{ grid-area:eylem; margin-top:clamp(26px, 4vh, 36px); }
-.kapak__sayilar{ grid-area:sayilar; display:flex; flex-direction:column; flex-wrap:nowrap; gap:0; margin-top:clamp(26px, 4vh, 36px); }
-.kapak__sayi{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:baseline; column-gap:20px; min-width:0;
-  padding:14px 0; border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent); }
-.kapak__sayi:last-child{ border-bottom:1px solid color-mix(in oklab, var(--text) 10%, transparent); }
-.kapak__sayi .kapak__deger{ grid-column:2; grid-row:1; text-align:right; font-size:clamp(24px, 2.4vw, 30px); font-weight:550; }
-.kapak__sayi .kapak__ad{ grid-column:1; grid-row:1; font-size:14px; color:var(--text-2); }
-.kapak__ad i{ margin-top:2px; }
+/* ---------- KAPAK: başlık ve renkli karolar ----------
+   Üstte selam, günün cümlesi ve eylem; altında tam genişlikte karolar.
+   Karonun rengi ölçünün rengidir (uyku çivit, su mavi, öğün turuncu,
+   hareket yeşil…); renk yalnız ayırır, iyi/kötü bildirmez. Halka yalnız
+   modül bir hedef bildiğinde çizilir. */
+.kapak{ min-height:min(62vh, 580px); padding-bottom:64px; }
+.kapak__ic{ display:grid; max-width:none; width:100%; align-items:start;
+  grid-template-columns:minmax(0, 1fr); grid-template-areas:"selam" "cumle" "eylem" "sayilar"; }
+.kapak__selam{ grid-area:selam; margin:0 0 12px; font-size:clamp(20px, 2.4vw, 26px); color:var(--text-3); }
+.kapak .kapak__cumle{ grid-area:cumle; font-size:clamp(30px, 4.2vw, 50px); font-weight:650; letter-spacing:-.03em; line-height:1.04; max-width:20ch; }
+.kapak__eylem{ grid-area:eylem; margin-top:clamp(20px, 3vh, 28px); }
+.kapak__sayilar{ grid-area:sayilar; display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:14px; width:100%; margin-top:clamp(28px, 4.5vh, 44px); }
+.kapak__sayilar[data-adet="3"]{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
+.kapak__sayilar[data-adet="2"]{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+.kapak__sayilar[data-adet="1"]{ grid-template-columns:minmax(0, 320px); }
+.kapak__sayi{ --renk:var(--primary); position:relative; display:flex; flex-direction:column; gap:12px; min-width:0;
+  padding:16px 18px 14px; border-radius:20px; border:1px solid color-mix(in oklab, var(--text) 7%, transparent);
+  background:color-mix(in oklab, var(--surface) 80%, transparent);
+  box-shadow:0 1px 2px color-mix(in oklab, #000 5%, transparent), 0 16px 34px -22px color-mix(in oklab, var(--renk) 55%, transparent);
+  -webkit-backdrop-filter:blur(16px) saturate(1.15); backdrop-filter:blur(16px) saturate(1.15);
+  animation:kapak-karo .7s cubic-bezier(.32,.72,0,1) both; transition:transform .2s ease, box-shadow .2s ease; }
+.kapak__sayi:nth-child(2){ animation-delay:.06s; } .kapak__sayi:nth-child(3){ animation-delay:.12s; } .kapak__sayi:nth-child(4){ animation-delay:.18s; }
+@keyframes kapak-karo{ from{ opacity:0; transform:translateY(8px); } }
+.kapak__sayi.is-git{ font:inherit; color:inherit; text-align:left; cursor:pointer; }
+.kapak__sayi.is-git:hover{ transform:translateY(-2px); border-color:color-mix(in oklab, var(--renk) 35%, transparent); }
+.kapak__sayi.is-git:focus-visible{ outline:2px solid var(--renk); outline-offset:2px; }
+.kapak__sayi[data-simge="uyku"]{ --renk:#7b6cf0; }
+.kapak__sayi[data-simge="su"], .kapak__sayi[data-simge="sure"]{ --renk:#2f9be8; }
+.kapak__sayi[data-simge="ogun"]{ --renk:#ee9433; }
+.kapak__sayi[data-simge="hareket"]{ --renk:#22a874; }
+.kapak__sayi[data-simge="hatirlatici"]{ --renk:#d9a00b; }
+.kapak__sayi[data-simge="kart"]{ --renk:#9563f0; }
+.kapak__sayi[data-simge="seri"]{ --renk:#ee6a3a; }
+.kapak__sayi[data-simge="sinav"]{ --renk:#e2546a; }
+.kapak__karo-ust{ display:flex; align-items:center; gap:10px; min-width:0; }
+.kapak__simge{ flex:none; width:34px; height:34px; padding:8px; box-sizing:border-box; border-radius:11px;
+  background:color-mix(in oklab, var(--renk) 15%, transparent); color:var(--renk);
+  fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+.kapak__sayi .kapak__ad{ min-width:0; font-size:13.5px; font-weight:600; color:var(--text); }
+.kapak__ad i{ display:block; margin-top:1px; font-style:normal; font-size:11px; font-weight:450; color:var(--text-3); }
+.kapak__karo-orta{ display:flex; align-items:center; gap:12px; min-height:56px; }
+.kapak__sayi .kapak__deger{ font-size:clamp(26px, 2.6vw, 32px); font-weight:650; letter-spacing:-.02em; line-height:1; text-align:left; color:var(--text); }
+.kapak__sayi[data-kesinlik="veri_yok"] .kapak__deger{ color:var(--text-3); font-weight:500; }
+.kapak__halka{ flex:none; width:56px; height:56px; }
+.kapak__halka circle{ fill:none; stroke-width:6.5; }
+.kapak__halka-iz{ stroke:color-mix(in oklab, var(--text) 9%, transparent); }
+.kapak__halka-dolu{ stroke:var(--renk); stroke-linecap:round; transition:stroke-dasharray .8s cubic-bezier(.32,.72,0,1); }
+.kapak__alt{ font-size:12px; color:var(--text-2); margin-top:-4px; }
+.kapak__sutun{ width:100%; height:22px; display:block; }
+.kapak__sutun rect{ fill:color-mix(in oklab, var(--renk) 38%, transparent); }
+.kapak__sutun rect.is-son{ fill:var(--renk); }
+.kapak__sutun-bos{ fill:var(--text-3); opacity:.45; }
 .kapak__asagi{ background:transparent; -webkit-backdrop-filter:none; backdrop-filter:none; color:var(--text-3); }
-@media (min-width:900px){
-  .kapak__ic{ grid-template-columns:minmax(0, 1fr) minmax(240px, 300px);
-    grid-template-areas:"selam sayilar" "cumle sayilar" "eylem sayilar"; grid-template-rows:auto auto 1fr; }
-  .kapak__sayilar{ margin-top:6px; }
+@media (max-width:899px){
+  .kapak__sayilar, .kapak__sayilar[data-adet="3"]{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  /* Üç karoda sonuncusu tek kalmasın: satırı boydan boya alır. */
+  .kapak__sayilar[data-adet="3"] .kapak__sayi:last-child{ grid-column:1 / -1; }
 }
 @media (max-width:679px){
-  .kapak__sayilar{ display:flex; width:100%; gap:0; }
-  .kapak__sayi{ padding:12px 0; }
-}
-@media (max-width:679px){
-  .kapak__sayi{ padding:10px 0; }
-  .kapak__sayi .kapak__ad i{ display:inline; margin:0 0 0 6px; }
+  .kapak__sayilar{ gap:10px; }
+  .kapak__sayi{ padding:13px 14px 12px; border-radius:16px; gap:10px; }
+  .kapak__simge{ width:30px; height:30px; padding:7px; border-radius:10px; }
+  .kapak__halka{ width:46px; height:46px; }
+  .kapak__karo-orta{ min-height:46px; gap:10px; }
   .kapak__sayi .kapak__deger{ font-size:24px; }
+}
+@media (prefers-reduced-motion:reduce){
+  .kapak__sayi{ animation:none; transition:none; }
+  .kapak__sayi.is-git:hover{ transform:none; }
+  .kapak__halka-dolu{ transition:none; }
 }

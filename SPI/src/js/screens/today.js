@@ -1085,11 +1085,27 @@ SP.Screens.today = (function(){
     const v = SP.S.vitals[t] || {};
     const ogun = (SP.S.meals[t] || []).length;
     const ws = (SP.S.workouts || []).filter(w => w && w.date === t);
+    /* Görsel pano (2026-10-20): halka yalnız hedef BİLİNİNCE — uyku planındaki
+       bugünün süresi, su için sistemin 2000 ml eşiği (SU_ESIK), öğün için
+       «Öğünlerim»deki öğün sayısı. Hareketin hedefi yok: halka yok, sütun var.
+       Sütunlar son yedi günün kaydı; girilmemiş gün boş (sıfır değil). */
+    const yedi = []; for(let i = 6; i >= 0; i--) yedi.push(SP.U.iso(SP.U.addDays(SP.U.today(), -i)));
+    const HP = SP.HaftaPlan;
+    const uykuPlani = HP ? HP.liste().find(p => p.tur === 'uyku') : null;
+    const uyu = uykuPlani ? HP.uykuOf(uykuPlani, t) : null;
+    const planDk = uyu ? HP.uykuDakika(uyu.yat, uyu.kalk) : null;
+    const slot = SP.Ogun ? SP.Ogun.liste().length : 0;
+    const hareketDk = d => { const l = (SP.S.workouts || []).filter(w => w && w.date === d); return l.length ? l.reduce((a, w) => a + (Number(w.minutes) || 0), 0) : null; };
     const sayilar = [
-      { ad:'Uyku', deger:v.sleep == null ? null : SP.U.fmtNet(v.sleep), birim:'sa', kesinlik:'measured' },
-      { ad:'Su', deger:v.water == null ? null : Number(v.water).toLocaleString('tr-TR'), birim:'ml', kesinlik:'measured' },
-      { ad:'Öğün', deger:ogun || null, kesinlik:'measured' },
-      { ad:'Hareket', deger:ws.length ? ws.reduce((a, w) => a + (Number(w.minutes) || 0), 0) : null, birim:'dk', kesinlik:'measured' },
+      { ad:'Uyku', deger:v.sleep == null ? null : SP.U.fmtNet(v.sleep), birim:'sa', kesinlik:'measured',
+        oran:v.sleep != null && planDk ? Number(v.sleep) * 60 / planDk : null,
+        halka:!!planDk, alt:planDk ? 'plan ' + HP.sureYaz(planDk) : '', git:'gun',
+        seri:yedi.map(d => { const x = SP.S.vitals[d]; return x && x.sleep != null ? Number(x.sleep) : null; }) },
+      { ad:'Su', deger:v.water == null ? null : Number(v.water).toLocaleString('tr-TR'), birim:'ml', kesinlik:'measured',
+        oran:v.water == null ? null : Number(v.water) / SU_ESIK, halka:true, alt:'eşik ' + U.fmtNum(SU_ESIK) + ' ml', git:'gun' },
+      { ad:'Öğün', deger:ogun || null, birim:slot ? '/ ' + slot : '', kesinlik:'measured',
+        oran:ogun && slot ? ogun / slot : null, halka:slot > 0, git:'meals' },
+      { ad:'Hareket', deger:hareketDk(t), birim:'dk', kesinlik:'measured', seri:yedi.map(hareketDk), git:'move' },
     ];
     return KS.kapakHtml({ modul:'spi', selam:KS.acilis('spi').selam, cumle:SP.Screens.today.headline(), sayilar,
       eylem:String(K.Button({ label:'Günü kaydet', tone:'primary', act:'go', data:{ 'data-route':'gun' } })),

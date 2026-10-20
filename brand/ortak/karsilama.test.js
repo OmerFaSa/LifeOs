@@ -120,5 +120,25 @@
       expect(h).toContain('>—<');
       expect(h).toContain('data-kesinlik="veri_yok"');
     });
+    it('görsel pano: halka yalnız hedef bilinince; seri sütun, girilmemiş gün nokta; git düğme olur (2026-10-20)', () => {
+      const h = K().kapakHtml({ modul:'spi', cumle:'x', sayilar:[
+        { ad:'Su', deger:'1.000', birim:'ml', kesinlik:'measured', oran:.5, git:'gun' },
+        { ad:'Hareket', deger:40, birim:'dk', kesinlik:'measured', seri:[10, null, 40] },
+        { ad:'Uyku', deger:null, halka:true },
+        { ad:'Öğün', deger:null } ] });
+      const d = document.createElement('div'); d.innerHTML = h;
+      const k = Array.from(d.querySelectorAll('.kapak__sayi'));
+      expect(k.map(x => x.getAttribute('data-simge'))).toEqual(['su', 'hareket', 'uyku', 'ogun']);
+      expect(!!k[0].querySelector('.kapak__halka-dolu')).toBe(true);           // hedefin yarısı
+      expect(k[0].tagName).toBe('BUTTON');
+      expect(k[0].getAttribute('data-route')).toBe('gun');
+      expect(!!k[1].querySelector('.kapak__halka')).toBe(false);               // hedef yok: halka yok
+      expect(k[1].querySelectorAll('.kapak__sutun rect').length).toBe(2);
+      expect(k[1].querySelectorAll('.kapak__sutun-bos').length).toBe(1);       // girilmemiş gün sıfır değil
+      expect(!!k[2].querySelector('.kapak__halka-iz')).toBe(true);             // hedef var, kayıt yok: boş iz
+      expect(!!k[2].querySelector('.kapak__halka-dolu')).toBe(false);
+      expect(!!k[3].querySelector('.kapak__halka')).toBe(false);
+      expect(d.querySelector('.kapak__sayilar').getAttribute('data-adet')).toBe('4');
+    });
   });
 })();

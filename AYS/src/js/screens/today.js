@@ -1348,7 +1348,8 @@ R.Screens.today = (function(){
     const o = day ? ozetSayilari(day, dateISO) : null;
     const kes = { computed:'computed', estimated:'estimated', measured:'measured' };
     const sayilar = o ? [
-      { ad:'Blok', deger:o.blok.deger, kesinlik:kes[o.blok.kesinlik] },
+      { ad:'Blok', deger:o.blok.deger, kesinlik:kes[o.blok.kesinlik],
+        oran:(() => { const g = o.blok.girdiler || []; const b = g[0] && g[0].deger, n = g[1] && g[1].deger; return n ? b / n : null; })() },
       { ad:'Tekrar kartı', deger:o.kart.deger, kesinlik:kes[o.kart.kesinlik] },
       { ad:'Seri', deger:o.seri.deger, birim:'gün', kesinlik:kes[o.seri.kesinlik] },
       { ad:'Sınava', deger:o.kalan.deger, birim:'gün', kesinlik:kes[o.kalan.kesinlik] },

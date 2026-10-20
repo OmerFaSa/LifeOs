@@ -877,9 +877,15 @@ ESP.Screens.today = (function(){
     const rows = M.sessionsOf(t);
     const h = M.dueReminders(null, t).filter(r => ESP.Mod.isOn(r.disc)).length;
     const n = ESP.Planner.nextAction();
+    /* Görsel pano (2026-10-20): günlük taban (GunSure) biliniyorsa süreye
+       halka; sütunlar son yedi günün kaydı (girilmemiş gün boş). */
+    const taban = ESP.GunSure ? ESP.GunSure.taban(t).dakika : ((S.profile && S.profile.dailyMinutes) || null);
+    const sure = rows.length ? rows.reduce((a, s) => a + (s.minutes || 0), 0) : null;
+    const yedi = []; for(let i = 6; i >= 0; i--) yedi.push(U.iso(U.addDays(U.parse(t), -i)));
     const sayilar = [
-      { ad:'Oturum', deger:rows.length || null, kesinlik:'measured' },
-      { ad:'Süre', deger:rows.length ? rows.reduce((a, s) => a + (s.minutes || 0), 0) : null, birim:'dk', kesinlik:'measured' },
+      { ad:'Oturum', deger:rows.length || null, kesinlik:'measured', seri:yedi.map(d => M.sessionsOf(d).length || null) },
+      { ad:'Süre', deger:sure, birim:'dk', kesinlik:'measured', oran:sure != null && taban ? sure / taban : null, halka:!!taban,
+        alt:taban ? 'taban ' + taban + ' dk' : '', seri:yedi.map(d => M.minutesOf(d)) },
       { ad:'Hatırlatıcı', deger:h, kesinlik:'computed' },
     ];
     return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.headline(), sayilar,
