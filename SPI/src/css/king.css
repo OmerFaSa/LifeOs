@@ -319,6 +319,11 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__menu{ display:flex; flex-direction:column; gap:8px; padding:4px 2px 2px; }
 .king__menu-satir{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:4px 0 8px; }
 .king__menu-ad{ font-size:13px; font-weight:600; color:var(--text-2); }
+/* Ayarlar üç bölümde (2026-10-21, kullanıcı: «ayarlar biraz karışık»): Konuşma, Ses, Sohbet. */
+.king__menu-bolum{ margin:14px 2px 2px; padding-top:12px; border-top:1px solid var(--line); font-size:11.5px; font-weight:700;
+  letter-spacing:.04em; text-transform:uppercase; color:var(--text-3, var(--text-2)); }
+.king__menu-bolum:first-child{ margin-top:2px; padding-top:0; border-top:0; }
+.king__secici{ flex-wrap:wrap; }
 .king__secici{ display:inline-flex; padding:3px; border-radius:999px; background:var(--surface-2); gap:2px; }
 .king__secim{ min-height:30px; padding:0 12px; border:0; border-radius:999px; background:transparent; color:var(--text-2);
   font:inherit; font-size:13px; font-weight:600; cursor:pointer; }

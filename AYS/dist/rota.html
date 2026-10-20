@@ -14612,6 +14612,11 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__menu{ display:flex; flex-direction:column; gap:8px; padding:4px 2px 2px; }
 .king__menu-satir{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:4px 0 8px; }
 .king__menu-ad{ font-size:13px; font-weight:600; color:var(--text-2); }
+/* Ayarlar üç bölümde (2026-10-21, kullanıcı: «ayarlar biraz karışık»): Konuşma, Ses, Sohbet. */
+.king__menu-bolum{ margin:14px 2px 2px; padding-top:12px; border-top:1px solid var(--line); font-size:11.5px; font-weight:700;
+  letter-spacing:.04em; text-transform:uppercase; color:var(--text-3, var(--text-2)); }
+.king__menu-bolum:first-child{ margin-top:2px; padding-top:0; border-top:0; }
+.king__secici{ flex-wrap:wrap; }
 .king__secici{ display:inline-flex; padding:3px; border-radius:999px; background:var(--surface-2); gap:2px; }
 .king__secim{ min-height:30px; padding:0 12px; border:0; border-radius:999px; background:transparent; color:var(--text-2);
   font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
@@ -18109,7 +18114,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'295d5528', at:'2026-10-20 22:27', dirty:true };
+R.BUILD = { id:'c23190c0', at:'2026-10-20 22:37', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -37238,10 +37243,12 @@ window.LIFEOS.KING = (function(){
   let paylasim = null;       // söz 16: { kare() → { mime, data }, bitir() }
   const TASIMA = 'lifeos.king';   // söz 18; animasyon.js TASINAN listesinde
   const CEVAP = 'lifeos.king.cevap';   // söz 19: 'oto' | 'ses' | 'yazi'; TASINAN'da
-  const SES = 'lifeos.king.ses';       // söz 28: 'oto' | 'gemini' | 'piper' | 'cihaz'; TASINAN'da
-  const SES_TERCIH = ['oto', 'gemini', 'piper', 'cihaz'];
-  const SES_AD = { oto:'Otomatik', gemini:'Gemini', piper:'Piper', cihaz:'Cihaz' };
-  const SES_IP = { oto:'İnternet varsa Gemini, yoksa bilgisayardaki Piper, o da yoksa cihazın sesi',
+  const SES = 'lifeos.king.ses';       // söz 28: 'oto' | 'ema' | 'gemini' | 'piper' | 'cihaz'; TASINAN'da
+  /* EMA (2026-10-21): King 2.0 A'nın yerel Türkçe sesi (HKM/core/ses.py «ema»); seçilebilir olmalıydı. */
+  const SES_TERCIH = ['oto', 'ema', 'gemini', 'piper', 'cihaz'];
+  const SES_AD = { oto:'Otomatik', ema:'EMA', gemini:'Gemini', piper:'Piper', cihaz:'Cihaz' };
+  const SES_IP = { oto:'İnternet varsa Gemini, yoksa bilgisayardaki EMA, sonra Piper, en son cihazın sesi',
+    ema:'Bilgisayardaki EMA: doğal Türkçe ses, ücretsiz; metin bilgisayardan çıkmaz',
     gemini:'Gemini’nin Türkçe sesi; metin Google’a gider', piper:'Bilgisayardaki Piper; metin bilgisayardan çıkmaz',
     cihaz:'Yalnız bu cihazın kendi sesi' };
   const SES_PARCA = 420;
@@ -38691,20 +38698,25 @@ window.LIFEOS.KING = (function(){
       const sec = (v, ad, ip) => '<button type="button" class="king__secim' + (b === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
         + (b === v ? 'true' : 'false') + '" data-king="cevap:' + v + '" title="' + ip + '">' + ad + '</button>';
       return '<div class="king__menu" role="group" aria-label="Sohbet ayarları">'
+        + '<h3 class="king__menu-bolum">Konuşma</h3>'
         + '<div class="king__menu-satir"><span class="king__menu-ad">Cevaplar</span><div class="king__secici" role="radiogroup" aria-label="Cevaplar">'
         + sec('oto', 'Otomatik', 'Konuşarak sorduğuna sesli, yazarak sorduğuna yazılı cevap')
         + sec('ses', 'Sesli', 'Yazsan da cevabı sesli okur; yazı da görünür')
         + sec('yazi', 'Yazılı', 'Konuşsan da cevap yalnız yazılı gelir') + '</div></div>'
-        + '<div class="king__menu-satir"><span class="king__menu-ad">Düşünme</span><div class="king__secici" role="radiogroup" aria-label="Düşünme derinliği">'
-        + DERIN_TERCIH.map(v => '<button type="button" class="king__secim' + (derinlik() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
-          + (derinlik() === v ? 'true' : 'false') + '" data-king="derinlik:' + v + '" title="' + kac(DERIN_IP[v]) + '">' + DERIN_AD[v] + '</button>').join('') + '</div></div>'
         + '<div class="king__menu-satir"><span class="king__menu-ad">Tarz</span><div class="king__secici" role="radiogroup" aria-label="Konuşma tarzı">'
         + TARZLAR.map(v => '<button type="button" class="king__secim' + (tarz() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (tarz() === v ? 'true' : 'false') + '" data-king="tarz:' + v + '">' + TARZ_AD[v] + '</button>').join('') + '</div></div>'
+        + '<div class="king__menu-satir"><span class="king__menu-ad">Düşünme</span><div class="king__secici" role="radiogroup" aria-label="Düşünme derinliği">'
+        + DERIN_TERCIH.map(v => '<button type="button" class="king__secim' + (derinlik() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
+          + (derinlik() === v ? 'true' : 'false') + '" data-king="derinlik:' + v + '" title="' + kac(DERIN_IP[v]) + '">' + DERIN_AD[v] + '</button>').join('') + '</div></div>'
+        + '<h3 class="king__menu-bolum">Ses</h3>'
         + '<div class="king__menu-satir"><span class="king__menu-ad">Ses</span><div class="king__secici" role="radiogroup" aria-label="Ses">'
         + SES_TERCIH.map(v => '<button type="button" class="king__secim' + (sesTercihi() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (sesTercihi() === v ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('') + '</div></div>'
         + (sonMotor ? '<p class="king__menu-not" data-king-son-ses>Son okuyan: ' + kac(SES_AD[sonMotor] || sonMotor) + '.' + (sonNot ? ' ' + kac(sonNot) : '') + '</p>' : '')
+        + '<div class="king__menu-satir"><span class="king__menu-ad">Hız</span><div class="king__secici" role="radiogroup" aria-label="Okuma hızı">'
+        + HIZLAR.map(v => '<button type="button" class="king__secim' + (hiz() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
+          + (hiz() === v ? 'true' : 'false') + '" data-king="hiz:' + v + '">' + String(v).replace('.', ',') + '×</button>').join('') + '</div></div>'
         + '<div class="king__menu-satir"><span class="king__menu-ad">Algılama</span><div class="king__secici" role="radiogroup" aria-label="Ses algılama">'
         + ALGILA_TERCIH.map(v => '<button type="button" class="king__secim' + (algila() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
           + (algila() === v ? 'true' : 'false') + '" data-king="algila:' + v + '" title="' + kac(ALGILA_IP[v]) + '">' + ALGILA_AD[v] + '</button>').join('') + '</div></div>'
@@ -38716,9 +38728,7 @@ window.LIFEOS.KING = (function(){
         + '</select>'
         + '<button type="button" class="king__geri" data-king="mik-dene">' + (mikDeniyor ? 'Bitir' : 'Mikrofonu dene') + '</button></div></div>'
         + (mikNot ? '<p class="king__menu-not" data-king-mik-not role="status">' + kac(mikNot) + '</p>' : '')
-        + '<div class="king__menu-satir"><span class="king__menu-ad">Hız</span><div class="king__secici" role="radiogroup" aria-label="Okuma hızı">'
-        + HIZLAR.map(v => '<button type="button" class="king__secim' + (hiz() === v ? ' is-secili' : '') + '" role="radio" aria-checked="'
-          + (hiz() === v ? 'true' : 'false') + '" data-king="hiz:' + v + '">' + String(v).replace('.', ',') + '×</button>').join('') + '</div></div>'
+        + '<h3 class="king__menu-bolum">Sohbet</h3>'
         + (hafiza() && KISI() ? '<button type="button" class="king__menu-is" data-king="kisi">Beni nasıl tanıyorsun<span class="king__menu-say">'
           + kisiKayitlari().length + '</span></button>' : '')
         + (sormaListesi().length ? '<div class="king__menu-satir"><span class="king__menu-ad">Sormadan ekler: ' + kac(sormaListesi().join(', '))
@@ -39208,8 +39218,8 @@ window.LIFEOS.KING = (function(){
   }
   /* «sesi Piper yap», «derin düşün»…: King'in kendi tercihleri (küçük, tekrar söyleyince değişir). */
   function ayarKomutu(t){
-    const m = t.match(/(?:sesi|ses olarak)\s+(piper|gemini|cihaz|otomatik)|(piper|gemini|cihaz|otomatik)\s+ses(?:i|ine|le)\s*(?:geç|yap|kullan|olsun|oku)/);
-    if(m){ const v = { piper:'piper', gemini:'gemini', cihaz:'cihaz', otomatik:'oto' }[m[1] || m[2]]; sesTercihSec(v); return 'Sesi ' + SES_AD[v] + ' yaptım.'; }
+    const m = t.match(/(?:sesi|ses olarak)\s+(ema|piper|gemini|cihaz|otomatik)|(ema|piper|gemini|cihaz|otomatik)\s+ses(?:i|ine|le)\s*(?:geç|yap|kullan|olsun|oku)/);
+    if(m){ const v = { ema:'ema', piper:'piper', gemini:'gemini', cihaz:'cihaz', otomatik:'oto' }[m[1] || m[2]]; sesTercihSec(v); return 'Sesi ' + SES_AD[v] + ' yaptım.'; }
     if(/derin(?:lemesine)? düşün/.test(t)){ derinlikSec('derin'); return 'Bundan sonra derin düşüneceğim; cevaplar biraz uzun sürebilir.'; }
     if(/hızlı (?:cevap ver|cevapla|düşün)/.test(t)){ derinlikSec('hizli'); return 'Bundan sonra hızlı cevaplayacağım.'; }
     if(/dengeli düşün/.test(t)){ derinlikSec('dengeli'); return 'Bundan sonra dengeli düşüneceğim.'; }
