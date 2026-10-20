@@ -804,7 +804,7 @@ window.LIFEOS.KING = (function(){
     if(file.size > FOTO_EN_BUYUK){ soyle('Fotoğraf çok büyük (en çok 15 MB). Daha küçük bir kırpma dener misin?'); return false; }
     akis.push({ kim:'sen', foto:ortam.nesneUrl(file), metin:'(fotoğraf)' });
     const l = fotoIsleri();
-    const gorur = gorselZincir().length > 0;
+    const gorur = gorebilir();
     bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     if(!l.length && !gorur){
       bekleyenFoto = null; cipler = null;
@@ -866,13 +866,52 @@ window.LIFEOS.KING = (function(){
     const M = modelKatmani();
     try{ return M && M.visionChain ? M.visionChain(null) : []; }catch(e){ return []; }
   }
-  const GORSEL_YOK = 'Görüntüyü anlamak için görüntü okuyan bir yapay zekâ gerekiyor. Ayarlar’dan (Ofis › Model) ücretsiz '
-    + 'Google AI Studio (Gemini) bağlarsan ekranını ve fotoğraflarını yorumlayabilirim.';
+  /* GÖRÜNTÜ MERKEZ'DE (2026-10-21, kullanıcı: «hâlâ Gemini istiyor»): model
+     ayarları yalnız HKM'de durur; modülün kendi zinciri boştur. Merkez'e
+     bağlıyken fotoğraf ve ekran karesi HKM'nin modül görsel kademesine
+     (<modül>.gorsel, ör. yerel qwen3-vl) gider: /api/ofis/cevap, yetenek
+     «gorsel». Bağlı değilse modülde eski bir zincir varsa o denenir. */
+  function gorebilir(){ return !!baglanti() || gorselZincir().length > 0; }
+  const GORSEL_YOK = 'Görüntüyü yorumlamak için Merkez’e (HKM) bağlı olmam gerekiyor. Merkez açıkken fotoğrafını ve '
+    + 'ekranını bilgisayardaki görsel modelle okurum; görüntü internete çıkmaz.';
+  const GORSEL_ZAMAN = 120000;   // görsel model ilk istekte belleğe yüklenir
+  async function merkezGorsel(k, soru, resim){
+    const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    const t = ctrl ? setTimeout(() => ctrl.abort(), GORSEL_ZAMAN) : null;
+    try{
+      const f = ortam.fetch;
+      const res = await f(k.url + '/api/ofis/cevap', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        body:JSON.stringify({ modul:ayar.modul, yetenek:'gorsel',
+          sistem:GORSEL_SISTEM + (kisiOzeti() ? '\n\n' + kisiOzeti() : ''),
+          mesajlar:[{ role:'user', text:String(soru || 'Bu görüntüde ne var?') }], gorseller:[resim] }),
+        signal:ctrl ? ctrl.signal : undefined,
+      });
+      let g = null;
+      try{ g = await res.json(); }catch(e){ g = null; }
+      if(res.status === 200 && g && g.ok && String(g.text || '').trim()) return { ok:true, text:String(g.text).trim() };
+      return { ok:false, note:(g && g.note) || 'Merkez görüntüye cevap vermedi.' };
+    }catch(e){
+      return { ok:false, note:e && e.name === 'AbortError' ? 'Görsel model zamanında cevap vermedi.' : 'Merkez’e ulaşılamadı.' };
+    }finally{
+      if(t) clearTimeout(t);
+    }
+  }
   async function gorselCevap(soru, resim){
     const zincir = gorselZincir();
-    if(!zincir.length){ soyle(GORSEL_YOK); return null; }
+    const k = baglanti();
+    if(!k && !zincir.length){ soyle(GORSEL_YOK); return null; }
     const bek = { kim:'king', bekliyor:true, metin:'' };
     akis.push(bek); ciz(false);
+    if(k){
+      const r = await merkezGorsel(k, soru, resim);
+      if(r.ok || !zincir.length){
+        akis = akis.filter(m => m !== bek);
+        soyle(r.ok ? r.text : 'Görüntüyü yorumlayamadım: ' + r.note);
+        return r.ok ? r : null;
+      }
+    }
     try{
       const M = modelKatmani();
       const r = await M.complete(zincir, { system:GORSEL_SISTEM + (kisiOzeti() ? '\n\n' + kisiOzeti() : ''), temperature:0.3, maxTokens:700,
@@ -894,7 +933,7 @@ window.LIFEOS.KING = (function(){
         + 'fotoğraf olarak gönderirsen ne gördüğümü söylerim.');
       return false;
     }
-    if(!gorselZincir().length){ soyle(GORSEL_YOK); return false; }
+    if(!gorebilir()){ soyle(GORSEL_YOK); return false; }
     try{
       paylasim = await ortam.ekranBaslat(() => { if(paylasim){ paylasim = null; soyle('Ekran paylaşımı bitti.'); } });
     }catch(e){

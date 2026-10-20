@@ -925,7 +925,27 @@
       expect(k.akis().slice(-1)[0].metin).toContain('ekran paylaşamıyor');
       Object.assign(k._ortam, { ekranDestek:() => true });
       expect(await k.paylasimBaslat()).toBe(false);
-      expect(k.akis().slice(-1)[0].metin).toContain('görüntü okuyan bir yapay zekâ');
+      expect(k.akis().slice(-1)[0].metin).toContain('Merkez’e (HKM) bağlı');
+    }));
+
+    /* 2026-10-21: model ayarları yalnız Merkez'de; görüntü HKM'nin görsel kademesine gider. */
+    it('Merkez bağlıyken modülde model olmasa da ekran karesi /api/ofis/cevap ile görsel kademeye gider', () => sahneyle(async () => {
+      const istekler = [];
+      const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+      const fetch = async (url, o) => { istekler.push({ url, govde:JSON.parse(o.body) });
+        return { status:200, json:async () => ({ ok:true, text:'Ekranda AYS Bugün sayfası var.' }) }; };
+      const { k } = sahne({ hkm, fetch });
+      k.kur({ modul:'ays', git:() => {}, ozet:() => [], hkm, model:() => ({ visionChain:() => [] }) });
+      Object.assign(k._ortam, { ekranDestek:() => true,
+        ekranBaslat:async () => ({ kare:() => ({ mime:'image/jpeg', data:'QUJD' }), bitir:() => {} }) });
+      try{
+        k.ac();
+        expect(await k.paylasimBaslat()).toBe(true);
+        await k.isle('ekranda ne var?');
+        const g = istekler.find(x => /\/api\/ofis\/cevap$/.test(x.url));
+        expect([!!g, g && g.govde.yetenek, g && g.govde.modul, g && g.govde.gorseller[0].data]).toEqual([true, 'gorsel', 'ays', 'QUJD']);
+        expect(k.akis().slice(-1)[0].metin).toBe('Ekranda AYS Bugün sayfası var.');
+      }finally{ k.paylasimBitir(); k.kapat(); }
     }));
 
     it('fotoğrafı yorumla: görüntü modeli varsa «Ne gördüğünü söyle»; cevap okumadır, kayda yazılmaz', () => sahneyle(async () => {
