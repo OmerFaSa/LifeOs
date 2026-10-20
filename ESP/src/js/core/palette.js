@@ -48,7 +48,7 @@ ESP.Palette = (function(){
         setTimeout(() => { const el = document.getElementById('note-text'); if(el) el.focus(); }, 160); } });
     out.push({ id:'act:draft', kind:'Eylem', label:'Yeni taslak aç',
       hint:'Yazı', run:() => { ESP.S.ui.writeTab = 'taslaklar'; ESP.App.go('writing'); } });
-    out.push({ id:'act:meeting', kind:'Eylem', label:'Ofis toplantısı başlat',
+    out.push({ id:'act:meeting', kind:'Eylem', label:'Ofis incelemesini aç',
       hint:'Ofis', run:() => ESP.App.go('meeting') });
     /* Yeni katmanlarin kisayollari: merdiven, pratik ve tezgah. Komut
        paleti bir ekran listesi degil bir IS listesidir; is eklenince

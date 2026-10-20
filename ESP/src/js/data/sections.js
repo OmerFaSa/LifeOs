@@ -51,7 +51,7 @@ ESP.SECTIONS_ALL = [
       views:[
         { route:'office',  label:'Masalar',  icon:'users' },
         { route:'team',    label:'Danışma',  icon:'zap' },
-        { route:'meeting', label:'Toplantı', icon:'list' },
+        { route:'meeting', label:'İnceleme', icon:'list' },
       ] },
 
     { id:'kutuphane', icon:'book', label:'Kütüphanem', note:'BAM\'ın ürettikleri',

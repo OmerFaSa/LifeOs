@@ -845,8 +845,11 @@ ESP.Screens.today = (function(){
           vurgu:rows.length + ' oturum' + (hedef ? ' · günlük en az ' + hedef + ' dk' : '') + '.', sistem:'esp', dugme:git('Oturumlar', 'gun') }
       : { ust:'Günün dakikası', cumle:'Bugün oturum yok.', vurgu:hedef ? 'Günlük en az ' + hedef + ' dk.' : 'İlk oturumla başlar.', sistem:'esp', dugme:git('Oturum gir', 'gun') });
     const seri = M.streak();
-    bugun.push({ ust:'Seri', sayi:sayi({ deger:seri, birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
-      cumle:'seri.', vurgu:'Asgari gün seriyi sürdürür.', sistem:'esp' });
+    /* Sıfır seri bir sayı değil, henüz başlamamış bir seridir («0 gün, hesaplandı seri» okunuyordu). */
+    bugun.push(seri > 0
+      ? { ust:'Seri', sayi:sayi({ deger:seri, birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
+          cumle:'üst üste.', vurgu:'Asgari gün seriyi sürdürür.', sistem:'esp' }
+      : { ust:'Seri', cumle:'Henüz başlamadı.', vurgu:'Bugün asgari günü tamamlarsan seri başlar.', sistem:'esp' });
 
     const calisma = [];
     const d = ESP.SRS.deckStatus();

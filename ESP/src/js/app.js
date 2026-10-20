@@ -675,6 +675,9 @@ ESP.App = (function(){
        dugme, yeni ekranda hicbir islevi olmadan duruyordu. Kullanici
        icin de ayni sey: tikladiginda hicbir sey olmayan bir dugme. */
     if(UI.isSheetOpen && UI.isSheetOpen()) UI.closeSheet();
+    /* Defter de kapanır (2026-10-20): açık kalınca yeni ekranın üstünde
+       duruyordu; perdesi altındaki ekranı örttüğü için gezinti görünmüyordu. */
+    if(window.LIFEOS && LIFEOS.DEFTER && LIFEOS.DEFTER.kapat) LIFEOS.DEFTER.kapat();
 
     /* Ekranin kendi temizligi. Ayni sebep: gorunmeyen bir ekranin metronomu
        kullanicinin kapatamayacagi bir sestir. Kanca istege baglidir;
@@ -1806,8 +1809,9 @@ ESP.App = (function(){
       if(window.LIFEOS && window.LIFEOS.YETKI){
         const teklifler = () => (S.ui.hkmIntents || []).filter(n => ESP.Beacon.canApply(n));
         window.LIFEOS.YETKI.kur({ modul:'esp',
-          /* King'in eylem kapısı (yetki.js söz 8): toplantıyı Toplantı ekranının
-             kendi düğmesi başlatır; model çağrıları yapılır, bu yüzden orta seviye. */
+          /* King'in eylem kapısı (yetki.js söz 8). Toplantı İnceleme'ye
+             dönüştü (2026-10-20): model çağrısı yok, ekran kendi verisinden
+             kurulur; bu yüzden küçük seviye. */
           eylemler:[{ id:'kitap-ekle', seviye:'kucuk', ad:'Kitap ekle',
             anla:t => { const m = t.match(/kitap(?:lığa|lara)? ekle\s*:?\s*(.+)$|(.+?)\s+kitabını (?:ekle|okumaya başladım)/); const ad = m ? String(m[1] || m[2] || '').trim() : '';
               return ad.length >= 2 && ad.length <= 120 ? { ad } : null; },
@@ -1816,14 +1820,12 @@ ESP.App = (function(){
               const b = await ESP.Model.saveBook(ESP.Model.newBook({ title:p.ad.replace(/(^|\s)\S/g, x => x.toLocaleUpperCase('tr')), author:'' }));
               render();
               return { metin:'«' + b.title + '» kütüphaneye eklendi.', geriAl:async () => { await ESP.Model.deleteBook(b.id); render(); } };
-            } }, { id:'toplanti', seviye:'orta', ad:'Toplantı başlat',
-            anla:t => /toplant/.test(t) && /(başlat|başla|aç|yap|topla|kur)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
-            onizle:() => ({ metin:'Ofiste toplantı başlayacak: uzmanlar sırayla konuşur, bunun için yapay zekâ çağrıları yapılır.' }),
+            } }, { id:'inceleme', seviye:'kucuk', ad:'Veri incelemesini aç',
+            anla:t => /(toplant|incele)/.test(t) && /(başlat|başla|aç|yap|topla|kur|göster)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
+            onizle:() => ({ metin:'Ofis › İnceleme açılacak: haftanın sayıları, kayıttan karşılaştırmalar ve tek karar.' }),
             uygula:async () => {
               go('meeting');
-              await new Promise(r => setTimeout(r, 120));
-              await ESP.Screens.meeting.handle['run-meeting']();
-              return { metin:'Toplantıyı başlattım; Toplantı ekranındasın.' };
+              return { metin:'İncelemeyi açtım; Ofis › İnceleme ekranındasın.' };
             } }],
 
           tema:{ oku:() => (S.profile && S.profile.theme) || 'system', yaz:async v => { await M.saveProfile({ theme:v }); applyTheme(); refreshAppearance(); render(); } },

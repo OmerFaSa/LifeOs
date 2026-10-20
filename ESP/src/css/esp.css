@@ -986,3 +986,43 @@
 .calisma-sahne__klavye kbd{ display:inline-block; min-width:18px; padding:1px 6px; border:1px solid var(--border); border-bottom-width:2px;
   border-radius:6px; font:inherit; font-size:11px; color:var(--text-2); background:var(--surface); }
 @media (max-width:520px){ .calisma-sahne{ min-height:360px; padding:14px 12px; } .calisma-sahne__klavye{ display:none; } }
+
+/* ---------- Ofis › İnceleme (2026-10-20) ----------
+   Kayıttan sayılar, gündem çubukları, iki grup karşılaştırması (fikir),
+   alanlar arası bağlar ve tek karar. Grafik: yatay çubuklar; renk
+   yalnız iki grubu ayırır (yön bildirmez). */
+.inc{ display:flex; flex-direction:column; gap:16px; }
+.inc-iki{ display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; align-items:start; }
+.inc-sayilar{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; }
+.inc-sayi{ display:flex; flex-direction:column; gap:2px; padding:12px; border-radius:var(--r-md); background:var(--surface-2); }
+.inc-sayi__ad{ font-size:12.5px; color:var(--text-3); }
+.inc-sayi__deger{ font-size:24px; font-weight:650; font-variant-numeric:tabular-nums; }
+.inc-sayi__deger small{ font-size:13px; font-weight:500; color:var(--text-3); margin-left:3px; }
+.inc-sayi__not{ font-size:11.5px; color:var(--text-3); }
+.inc-gundem{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.inc-gundem li{ position:relative; display:flex; gap:12px; align-items:flex-start; padding:10px 0 10px 14px; }
+.inc-gundem li + li{ border-top:1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+.inc-gundem__cubuk{ position:absolute; left:0; top:12px; bottom:12px; width:4px; border-radius:999px;
+  background:linear-gradient(to top, var(--primary) var(--oran), color-mix(in oklab, var(--border) 80%, transparent) var(--oran)); }
+.inc-gundem b{ display:block; font-size:14.5px; }
+.inc-gundem span{ display:block; font-size:13px; color:var(--text-2); }
+.inc-gundem small{ display:block; font-size:12px; color:var(--text-3); margin-top:2px; }
+.inc-fikirler{ display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:14px; }
+.inc-fikir{ display:flex; flex-direction:column; gap:8px; padding:14px; border:1px solid var(--border); border-radius:var(--r-md); }
+.inc-fikir__baslik{ font-size:14.5px; }
+.inc-fikir__bar{ display:grid; grid-template-columns:minmax(120px, 1.2fr) 2fr auto auto; gap:8px; align-items:center; font-size:12.5px; }
+.inc-fikir__bar span{ color:var(--text-2); }
+.inc-fikir__bar i{ height:10px; border-radius:999px; background:var(--primary); min-width:4px; }
+.inc-fikir__bar i.is-b{ background:color-mix(in oklab, var(--text-3) 55%, transparent); }
+.inc-fikir__bar b{ font-variant-numeric:tabular-nums; white-space:nowrap; }
+.inc-fikir__bar small{ color:var(--text-3); white-space:nowrap; }
+.inc-bulgular, .inc-planlar{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.inc-bulgular li, .inc-planlar li{ display:flex; flex-direction:column; gap:2px; font-size:13px; }
+.inc-bulgular li span, .inc-planlar li span{ color:var(--text-2); }
+.inc-bulgular li.is-warn b::before{ content:'▲ '; color:var(--warn, var(--text-2)); }
+.inc-etiket{ font-size:11px; color:var(--text-3); font-weight:400; }
+.inc-etiket::before{ content:'· '; }
+.inc-karar p{ margin:0 0 6px; }
+.inc-ozet{ padding:12px; border-radius:var(--r-md); background:var(--surface-2); }
+.inc-ozet p{ margin:6px 0 0; }
+@media (max-width:520px){ .inc-fikir__bar{ grid-template-columns:1fr auto auto; } .inc-fikir__bar i{ grid-column:1 / -1; grid-row:2; } }

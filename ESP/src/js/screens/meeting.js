@@ -1,14 +1,12 @@
-/* Toplantı — gündem seçilir, yedi uzman ve bir koç konuşur, Patron kapatır.
+/* Ofis › İnceleme (eski «Toplantı», 2026-10-20).
 
-   Her tur AYRI bir çağrıdır ve geldiği anda ekrana basılır; hepsinin
-   bitmesi beklenmez. Uzun süren bir toplantıda kullanıcı ilerlemeyi görür.
-
-   Kapanıştaki karar ESP.Planner.nextAction()'dan gelir. Patron onu
-   DEĞİŞTİREMEZ, yalnızca gerekçelendirir — model «bunun yerine şunu yap»
-   derse tutanaktaki eylem yine kural motorununkidir.
-
-   Gündemi de model seçmez: ESP.Office.agendaCandidates() içindeki puanlama
-   seçer. */
+   SPİ'deki kararın aynısı (gerekçe SPI/src/js/core/inceleme.js başında):
+   altı uzmanın sırayla konuştuğu tur kalktı; ekran kural motorunun kendi
+   verisinden kurduğu incelemeyi gösterir — son yedi günün sayıları, gündem,
+   kayıttan karşılaştırmalar (fikir), disiplinler arası bulgular ve tek
+   karar (Planner.nextAction). Model bağlıysa Patron yalnız bu incelemeyi
+   özetler; sayıyı o üretmez. Takipteki kararlar ve eski toplantı
+   tutanakları silinmez, altta durur. */
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
@@ -18,47 +16,87 @@ ESP.Screens.meeting = (function(){
   const { html, raw, when, map } = ESP.h;
   const K = ESP.C;
 
-  /* Devam eden toplantinin turlari burada birikir: gelen her tur hemen
-     cizilir, tutanak sonda kaydedilir. */
-  let canli = null;
+  let ozetleniyor = false;
 
-  function agendaRows(){
-    const adaylar = ESP.Office.agendaCandidates();
-    const secili = S.ui.meetingAgenda || adaylar[0].id;
+  const etiketi = e => raw(' <span class="inc-etiket" data-kesinlik="' + e + '">' + e + '</span>');
+  const sayiYaz = (v, birim) => birim === '%' ? '%' + ESP.Inceleme.sayi(v) : ESP.Inceleme.sayi(v);
 
-    return K.Entry({
-      label:'Gündem',
-      meta:adaylar.length + ' aday',
-      note:'Gündemi model seçmez: puanlama seçer. En yüksek puanlı aday '
-         + 'varsayılan olarak işaretlidir.',
-      body:html`
-        <div class="picks">
-          ${map(adaylar, a => K.PickCard({
-            on:a.id === secili, act:'pick-agenda', data:{ 'data-id':a.id },
-            label:a.label, meta:a.detail || a.lead,
-          }))}
-        </div>
-        <div class="row mt-12">
-          ${K.Button({ label:'Toplantıyı başlat', tone:'primary', act:'run-meeting',
-            disabled:!!canli })}
-          ${when(canli, () => K.Badge({ label:'devam ediyor', tone:'info' }))}
-        </div>`,
-    });
+  function haftaKutusu(r){
+    return K.Kutu({ ad:'Son yedi gün', yuva:'kayıttan',
+      govde:html`<div class="inc-sayilar">${map(r.hafta, s => html`<div class="inc-sayi">
+        <span class="inc-sayi__ad">${s.ad}</span>
+        <span class="inc-sayi__deger num">${s.deger == null ? '—' : sayiYaz(s.deger, s.birim)}<small>${s.deger == null || s.birim === '%' ? '' : s.birim}</small></span>
+        <span class="inc-sayi__not">${s.deger == null ? 'veri yok' : s.etiket + (s.n ? ' · ' + s.n + ' ' + (s.nBirim || 'gün') : '')}</span>
+      </div>`)}</div>` });
   }
 
-  function liveRows(){
-    if(!canli) return [];
-    return [K.Entry({
-      label:'Toplantı',
-      meta:canli.turns.length + '/' + (ESP.Mod.activeAgents().length - 1) + ' tur',
-      note:'Her tur geldiği anda basılır; hepsinin bitmesi beklenmez.',
-      wide:true,
-      body:html`
-        ${map(canli.turns, t => turnRow(t))}
-        ${when(!canli.done, () => K.Skeleton({ rows:2 }))}`,
-    })];
+  function gundemKutusu(r){
+    const rows = r.gundem;
+    if(!rows.length) return K.Kutu({ ad:'Gündem', yuva:'kural motorunun sırası', govde:html`<p class="small muted">Gündeme gelen bir konu yok.</p>` });
+    const enCok = Math.max.apply(null, rows.map(a => a.score).concat([1]));
+    return K.Kutu({ ad:'Gündem', yuva:'kural motorunun sırası',
+      govde:html`<ol class="inc-gundem">${map(rows, a => html`<li>
+        <span class="inc-gundem__cubuk" style="${'--oran:' + Math.round(100 * a.score / enCok) + '%'}" aria-hidden="true"></span>
+        <div class="grow"><b>${a.label}</b><span>${a.detail}</span><small>${a.lead}</small></div>
+      </li>`)}</ol>` });
   }
 
+  function fikirKutusu(r){
+    const acik = r.fikirler.filter(f => f.acik), kapali = r.fikirler.filter(f => !f.acik);
+    const satir = f => {
+      const enBuyuk = Math.max(Math.abs(f.a.ort), Math.abs(f.b.ort)) || 1;
+      const bar = (g, cls_) => html`<div class="inc-fikir__bar"><span>${g.ad}</span>
+        <i class="${cls_}" style="${'width:' + Math.round(100 * Math.abs(g.ort) / enBuyuk) + '%'}"></i>
+        <b class="num">${f.birim === '%' ? sayiYaz(g.ort, '%') : sayiYaz(g.ort) + ' ' + f.birim}</b><small>${g.n} gün</small></div>`;
+      return html`<div class="inc-fikir">
+        <b class="inc-fikir__baslik">${f.baslik}${etiketi(f.etiket)}</b>
+        ${bar(f.a, 'is-a')}${bar(f.b, 'is-b')}
+        <p class="tiny muted">${f.not}</p></div>`;
+    };
+    return K.Kutu({ ad:'Verinden çıkan fikirler', yuva:acik.length ? acik.length + ' karşılaştırma' : 'veri birikiyor',
+      govde:html`${acik.length ? html`<div class="inc-fikirler">${map(acik, satir)}</div>`
+          : html`<p class="small muted">Henüz karşılaştırma yapacak kadar kayıt yok. Az veriden fikir üretilmez.</p>`}
+        ${when(kapali.length, () => html`<details class="inc-bekleyen mt-12"><summary class="small">Veri birikince açılacak ${kapali.length} karşılaştırma</summary>
+          <ul class="tiny muted">${map(kapali, f => html`<li><b>${f.baslik}</b>: ${f.neden}</li>`)}</ul></details>`)}` });
+  }
+
+  function bulguKutusu(r){
+    const b = r.bulgular;
+    return K.Kutu({ ad:'Alanlar arası bağlar', yuva:b.length ? b.length + ' bulgu' : 'yok',
+      govde:b.length ? html`<ul class="inc-bulgular">${map(b, f => html`<li>
+          <b>${f.kimden} → ${f.kime}</b><span>${f.text}</span></li>`)}</ul>`
+        : html`<p class="small muted">Alanlar arasında öne çıkan bir boşluk yok.</p>` });
+  }
+
+  function kararKutusu(r){
+    const k = r.karar;
+    const sakin = k.id === 'none';
+    const ozet = S.ui.incelemeOzet && S.ui.incelemeOzet.tarih === r.tarih ? S.ui.incelemeOzet : null;
+    return K.Kutu({ ad:'Tek karar', yuva:'kural motoru', class:'inc-karar',
+      govde:html`<p><b>${k.title}</b></p><p class="small">${k.detail}</p><p class="small muted">${k.why}</p>
+        ${when(ozet, () => html`<div class="inc-ozet mt-12"><span class="tiny muted">Patron’un özeti · ${ozet.source === 'model' ? 'model' : 'kural motoru'}</span><p>${ozet.text}</p></div>`)}`,
+      ayak:html`${when(!sakin && k.route, () => K.Button({ label:'Oraya git', size:'sm', tone:'primary', act:'go', data:{ 'data-route':k.route } }))}
+        ${when(!sakin, () => K.Button({ label:'Kararı takibe al', size:'sm', act:'inceleme-takip' }))}
+        ${when(ESP.Office.ready && ESP.Office.ready('patron'), () => K.Button({ label:ozetleniyor ? 'Özetleniyor…' : 'Patron özetlesin', size:'sm', tone:'ghost',
+          act:'inceleme-ozet', disabled:ozetleniyor }))}` });
+  }
+
+  function kararlarKutusu(){
+    const acik = M.openDecisions();
+    if(!acik.length) return '';
+    return K.Kutu({ ad:'Takipteki kararlar', yuva:acik.length + ' açık',
+      govde:html`<p class="small muted">Kapatırken ne değiştiğini yaz: kararın ne yaptığını görmek sistemi ilerletir.</p>
+        ${map(acik, d => html`<div class="decision">
+          <p>${d.text}</p>
+          <div class="row wrap mt-8">
+            <span class="tiny dim">${U.fmtShort(d.openedAt.slice(0, 10))} tarihinde açıldı</span>
+            ${K.Input({ id:'dec-' + d.id, placeholder:'Ne değişti? (ölçümle)', size:'sm' })}
+            ${K.Button({ label:'Kapat', size:'sm', act:'close-decision', data:{ 'data-id':d.id } })}
+          </div>
+        </div>`)}` });
+  }
+
+  /* Eski toplantı tutanakları (yalnız okunur). */
   function turnRow(t){
     const a = ESP.AGENT_BY_ID[t.agentId];
     return html`
@@ -69,130 +107,75 @@ ESP.Screens.meeting = (function(){
           <b>${t.name}</b>
           ${K.Badge({ label:t.source === 'model' ? 'model' : 'kural motoru',
             tone:t.source === 'model' ? 'info' : 'muted', icon:false })}
-          ${when(t.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
         </div>
         <p>${t.text}</p>
       </div>`;
   }
 
-  function minutesRows(){
+  function tutanakKutusu(){
     const liste = S.officeMeetings || [];
-    if(!liste.length){
-      return [K.Entry({ label:'Tutanaklar', meta:'yok',
-        body:K.Empty({ text:'Henüz toplantı yapılmadı.' }) })];
-    }
-    return liste.slice(0, 10).map(m => K.Entry({
-      label:'Tutanak',
-      meta:U.fmtDate(ESP.U.gunOf(m.at)) + ' · ' + m.agendaLabel,
-      note:m.decision ? 'Karar: ' + m.decision.title : '',
-      action:K.Button({ label:S.ui.meetingOpen === m.id ? 'Kapat' : 'Aç', size:'sm',
-        act:'toggle-minutes', data:{ 'data-id':m.id } }),
-      wide:true,
-      body:S.ui.meetingOpen === m.id
-        ? html`
+    if(!liste.length) return '';
+    return K.Kutu({ ad:'Eski toplantı tutanakları', yuva:liste.length + ' tutanak',
+      govde:html`<div class="list">${map(liste.slice(0, 10), m => html`
+        <div class="listitem">
+          <div class="grow"><b class="small">${m.agendaLabel}</b>
+            <div class="tiny dim">${U.fmtDate(ESP.U.gunOf(m.at))} · ${m.turns.length} tur${m.decision ? ' · karar: ' + m.decision.title : ''}</div></div>
+          ${K.Button({ label:S.ui.meetingOpen === m.id ? 'Kapat' : 'Aç', size:'sm', act:'toggle-minutes', data:{ 'data-id':m.id } })}
+        </div>
+        ${when(S.ui.meetingOpen === m.id, () => html`<div class="meet mt-8">
           ${map(m.turns, turnRow)}
-          ${when(m.closing, () => html`
-            <div class="meetturn meetturn--close">
-              <div class="meetturn__head"><b>Patron</b>
-                ${K.Badge({ label:m.closing.source === 'model' ? 'model' : 'kural motoru',
-                  tone:m.closing.source === 'model' ? 'info' : 'muted', icon:false })}</div>
-              <p>${m.closing.text}</p>
-            </div>`)}
-          ${when((m.proposals || []).length, () => html`
-            <div class="mt-10">
-              ${K.SectionTitle('Toplantıda masaya gelen teklifler')}
-              <p class="small muted">«Konuştuk ve dağıldık» bir toplantı değildir.
-                Teklifleri model üretmez: kural motoru üretir, toplantı yalnızca
-                o anın fotoğrafını saklar. Onay senin.</p>
-              ${ESP.Parts.proposalList(m.proposals.filter(t =>
-                !(ESP.S.proposals || []).some(x => x.id === t.id && x.state !== 'proposed')),
-                'Bu toplantının bütün teklifleri karara bağlanmış.')}
-            </div>`)}
-          ${when(m.decision, () => html`
-            <div class="row mt-10">
-              ${K.Button({ label:'Kararı takibe al', size:'sm', act:'track-decision',
-                data:{ 'data-id':m.id } })}
-              ${when(m.decision.route, () => K.Button({ label:'Ekranı aç', size:'sm',
-                act:'go', data:{ 'data-route':m.decision.route } }))}
-            </div>`)}`
-        : html`<p class="small muted">${m.turns.length} tur ·
-            ${m.closing ? 'kapanış var' : 'kapanış yok'}</p>`,
-    }));
-  }
-
-  function decisionRows(){
-    const acik = M.openDecisions();
-    if(!acik.length) return [];
-    return [K.Entry({
-      label:'Takipteki kararlar',
-      meta:acik.length + ' açık',
-      note:'Karar vermek değil, kararın ne yaptığını görmek sistemi ilerletir. '
-         + 'Bu yüzden kapatırken sonuç yazılır.',
-      wide:true,
-      body:html`${map(acik, d => html`
-        <div class="decision">
-          <p>${d.text}</p>
-          <div class="row wrap mt-8">
-            <span class="tiny dim">${U.fmtShort(d.openedAt.slice(0, 10))} tarihinde açıldı</span>
-            ${K.Input({ id:'dec-' + d.id, placeholder:'Ne değişti? (ölçümle)', size:'sm' })}
-            ${K.Button({ label:'Kapat', size:'sm', act:'close-decision',
-              data:{ 'data-id':d.id } })}
-          </div>
-        </div>`)}`,
-    })];
+          ${when(m.closing, () => html`<div class="meetturn meetturn--close">
+            <div class="meetturn__head"><b>Patron</b></div><p>${m.closing.text}</p></div>`)}
+        </div>`)}`)}</div>` });
   }
 
   function render(){
-    return K.Grid(html`
-      ${K.Span(12, K.Ledger(() => [
-        agendaRows(),
-        ...liveRows(),
-        ...decisionRows(),
-        ...minutesRows(),
-      ]))}`);
+    const r = ESP.Memo ? ESP.Memo.of('inceleme.rapor', () => ESP.Inceleme.rapor()) : ESP.Inceleme.rapor();
+    return String(html`
+      <div class="inc">
+        ${haftaKutusu(r)}
+        <div class="inc-iki">${kararKutusu(r)}${gundemKutusu(r)}</div>
+        ${fikirKutusu(r)}
+        ${bulguKutusu(r)}
+        ${kararlarKutusu()}
+        ${tutanakKutusu()}
+      </div>`);
   }
 
   const handle = {
-    async 'pick-agenda'(el){ S.ui.meetingAgenda = el.dataset.id; ESP.App.render(); },
-
-    async 'run-meeting'(){
-      if(canli) return;
-      const adaylar = ESP.Office.agendaCandidates();
-      const id = S.ui.meetingAgenda || adaylar[0].id;
-      canli = { turns:[], done:false };
-      ESP.App.render();
-
-      try{
-        const rec = await ESP.Office.runMeeting(id, tur => {
-          canli.turns.push(tur);
-          ESP.App.render();
-        });
-        canli.done = true;
-        S.ui.meetingOpen = rec.id;
-        ESP.UI.toast('Toplantı bitti');
-      }catch(e){
-        console.error(e);
-        ESP.UI.toast('Toplantı tamamlanamadı');
-      }finally{
-        canli = null;
-        ESP.App.render();
-      }
-    },
-
-    async 'toggle-minutes'(el){
-      S.ui.meetingOpen = S.ui.meetingOpen === el.dataset.id ? null : el.dataset.id;
-      ESP.App.render();
-    },
-
-    async 'track-decision'(el){
-      const m = (S.officeMeetings || []).find(x => x.id === el.dataset.id);
-      if(!m || !m.decision) return;
-      await M.saveDecision({ text:m.decision.title, agentId:'patron', source:'meeting' });
+    async 'inceleme-takip'(){
+      const k = ESP.Planner.nextAction();
+      if(k.id === 'none') return;
+      await M.saveDecision({ text:k.title, agentId:'patron', source:'inceleme' });
       ESP.Memo.bitir();
       ESP.UI.toast('Karar takibe alındı');
       ESP.App.render();
     },
-
+    /* Model yalnız ÖZETLER: brifing incelemenin kendisidir, sayı oradan. */
+    async 'inceleme-ozet'(){
+      if(ozetleniyor) return;
+      ozetleniyor = true;
+      ESP.App.render();
+      try{
+        const r = ESP.Inceleme.rapor();
+        const b = Object.assign({}, ESP.Office.patronBrief(), { inceleme:{
+          hafta:r.hafta.map(s => ({ ad:s.ad, deger:s.deger, birim:s.birim, etiket:s.etiket })),
+          fikirler:r.fikirler.filter(f => f.acik).map(f => f.baslik + ': ' + f.metin),
+          bulgular:r.bulgular.map(f => f.text),
+          karar:r.karar.id === 'none' ? null : r.karar.title + ' — ' + r.karar.why } });
+        const res = await ESP.Office.ask('patron', 'Bu incelemeyi kullanıcıya üç dört cümlede özetle: önce haftanın durumu, '
+          + 'sonra en anlamlı karşılaştırma, en sonda tek karar. Sayıları yalnız brifingden al; birlikteliği neden gibi sunma.',
+          { brief:b, history:false, maxTokens:500 });
+        S.ui.incelemeOzet = { tarih:r.tarih, text:res.text, source:res.source };
+      }finally{
+        ozetleniyor = false;
+        ESP.App.render();
+      }
+    },
+    async 'toggle-minutes'(el){
+      S.ui.meetingOpen = S.ui.meetingOpen === el.dataset.id ? null : el.dataset.id;
+      ESP.App.render();
+    },
     async 'close-decision'(el){
       const inp = document.getElementById('dec-' + el.dataset.id);
       const sonuc = inp ? inp.value.trim() : '';
@@ -210,23 +193,27 @@ ESP.Screens.meeting = (function(){
 
   return {
     id:'meeting',
-    title:'Toplantı',
+    title:'İnceleme',
     headline(){
-      const a = ESP.Office.agendaCandidates()[0];
-      return a ? 'Gündem: ' + a.label.toLocaleLowerCase('tr-TR') + '.' : 'Toplantı';
+      const k = ESP.Planner.nextAction();
+      return k.id === 'none' ? 'Bekleyen bir iş yok.' : 'Karar: ' + k.title.toLocaleLowerCase('tr-TR') + '.';
     },
     lede(){
-      return 'Altı uzman sırayla konuşur, Patron kapatır. Kapanıştaki karar '
-           + 'kural motorundan gelir; Patron onu değiştiremez, gerekçelendirir.';
+      return 'Son yedi günün sayıları, kayıttan karşılaştırmalar ve tek karar. '
+           + 'Her sayı kayıttan gelir; az veriden fikir açılmaz.';
     },
     stats(){
+      const r = ESP.Inceleme.rapor();
       return [
-        { value:String((S.officeMeetings || []).length), label:'toplantı' },
+        { value:String(r.fikirler.filter(f => f.acik).length), label:'karşılaştırma' },
         { value:String(M.openDecisions().length), label:'açık karar' },
-        { value:String(ESP.Office.agendaCandidates().length), label:'gündem adayı' },
+        { value:String(r.gundem.length), label:'gündem' },
       ];
     },
-    subtitle(){ return (S.officeMeetings || []).length + ' tutanak'; },
+    subtitle(){
+      const a = ESP.Office.agendaCandidates()[0];
+      return a ? 'Gündem: ' + a.label : 'Gündem yok';
+    },
     actions(){ return ''; },
     render, handle, change,
   };

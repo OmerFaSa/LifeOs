@@ -270,4 +270,38 @@
     });
   });
 
+  describe('Ofis › İnceleme — kayıttan fikir, eşik, tek karar (2026-10-20)', () => {
+    const I = () => ESP.Inceleme;
+    it('eşiğin altında fikir açılmaz ve kaç gün gerektiği söylenir', () => {
+      const r = I().karsilastir({ id:'x', baslik:'Deneme', a:{ ad:'A', l:[1, 2] }, b:{ ad:'B', l:[1, 2, 3, 4] }, birim:'dk' });
+      expect(r.acik).toBe(false);
+      expect(r.eksik).toBe(I().ESIK - 2);
+      expect(r.neden).toContain('en az ' + I().ESIK + ' gün');
+    });
+    it('hafta sonu / hafta içi: yalnız kayıtlı günler, gün sayısıyla; girilmemiş gün sıfır sayılmaz', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        ['2026-10-03', '2026-10-04', '2026-10-10', '2026-10-11'].forEach(d => pushSession(d, 'music', 60));
+        ['2026-10-05', '2026-10-06', '2026-10-07', '2026-10-08'].forEach(d => pushSession(d, 'music', 30));
+        const f = I().fikirler().find(x => x.id === 'hafta-sonu');
+        expect(f.acik).toBe(true);
+        expect(f.metin).toBe('hafta sonu 60 dk (4 gün), hafta içi 30 dk (4 gün); fark +30 dk.');
+        expect(f.not).toContain('neden değil');
+      });
+    });
+    it('kayıt yokken sayı uydurmaz; karar kural motorundandır; ekranda eski tur düğmesi yok', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        const r = I().rapor();
+        expect(r.hafta.find(s => s.ad === 'Toplam süre').etiket).toBe('veri yok');
+        expect(r.fikirler.every(f => !f.acik)).toBe(true);
+        expect(r.karar.id).toBe(ESP.Planner.nextAction().id);
+        const k = dom(ESP.Screens.meeting.render());
+        expect(k.textContent).toContain('Verinden çıkan fikirler');
+        expect(k.textContent).toContain('Tek karar');
+        expect(!!k.querySelector('[data-act="run-meeting"]')).toBe(false);
+      });
+    });
+  });
+
 })();
