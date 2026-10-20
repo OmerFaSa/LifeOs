@@ -939,7 +939,19 @@ ESP.Screens.today = (function(){
       ? P.kart({ tur:'hatirlatici', ad:'Hatırlatıcılar', simge:'zil', yuva:'bugün ' + h.length,
           govde:P.liste({ satirlar:h.slice(0, 4).map(r => ({ sol:r.due < t ? 'gecikti' : 'bugün', ad:r.text || 'Hatırlatıcı', not:disc(r.disc), nokta:r.due < t ? 2 : 0 })) }) })
       : '';
-    return '<div class="pk-ust">' + P.izgara([dakika, denge, seriKart, hatir]) + '</div>';
+    /* Günün alıntısı (yıldız): kitaba bağlı notlardan biri; seçim tarihe
+       bağlı (gün içinde değişmez). Not yoksa kart yok. */
+    const alintilar = (S.notes || []).filter(n => n.bookId && n.text && (S.books || []).some(b => b.id === n.bookId));
+    let alinti = '';
+    if(alintilar.length){
+      const sira = Number(t.replace(/-/g, '')) % alintilar.length;
+      const n = alintilar.slice().sort((a, b) => String(a.id).localeCompare(String(b.id)))[sira];
+      const kb = (S.books || []).find(b => b.id === n.bookId);
+      alinti = P.kart({ tur:'alinti', ad:'Günün alıntısı', yildiz:'senin notundan',
+        govde:'<p class="pk__alinti">' + U.esc(String(n.text).slice(0, 220)) + '</p><p class="pk__kaynak">' + U.esc(kb.title + (kb.author ? ' · ' + kb.author : '')) + '</p>',
+        ayak:P.dugmeHtml({ label:'Kütüphaneye git', act:'go', data:{ 'data-route':'library' } }, 'pk__dugme pk__dugme--ikincil') });
+    }
+    return '<div class="pk-ust">' + P.izgara([alinti, dakika, denge, seriKart, hatir]) + '</div>';
   }
 
   function render(){

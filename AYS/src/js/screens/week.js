@@ -488,7 +488,13 @@ R.Screens.week = (function(){
           govde:P.cubuklar({ satirlar:l.slice(0, 7).map(x => ({ ad:x.ad, oran:x.yapilan / en, plan:x.plan / en, metin:sa(x.yapilan) })) })
             + P.not('çubuk: biten blokların süresi · siyah çizgi: plan') })
       : P.kart({ tur:'ders-dagilimi', ad:'Ders dağılımı', simge:'satir', bos:{ cumle:'Bu hafta henüz biten blok yok; biten her blok dersine eklenir.' } });
-    return P.izgara([kart], 'pk-izgara--iki');
+    /* Haftalık tamamlanma: son 8 haftanın plan tamamlama yüzdesi. */
+    const tam = C.completionHistory(8);
+    const tamKart = tam.some(x => x.value != null) ? P.kart({ tur:'tamamlanma', ad:'Haftalık tamamlanma', simge:'cubuk', yuva:'son ' + tam.length + ' hafta',
+      govde:P.sutun({ degerler:tam.map(x => x.value), yukseklik:56, gunler:tam.map(x => 'H' + x.n),
+          etiket:'Son ' + tam.length + ' haftanın tamamlanması; bu hafta ' + (tam[tam.length - 1].value == null ? 'veri yok' : '%' + tam[tam.length - 1].value) })
+        + P.not('biten blok ÷ geçen blok · yarım blok yarım sayılır') }) : '';
+    return P.izgara([kart, tamKart], 'pk-izgara--iki');
   }
 
   async function render(){

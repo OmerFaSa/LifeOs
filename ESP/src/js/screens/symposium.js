@@ -306,8 +306,25 @@ ESP.Screens.symposium = (function(){
   const GOVDE = { acik:openRows, kapali:closedRows, ekle:addRows, metinler:textRows,
     deneyler:experimentRows, ogren:topicRows };
 
+  /* PANO KARTI (2026-10-20): açık tezler ve kaç gündür dokunulmadıkları;
+     14 gün ve üstü koyu çubuk. */
+  function PanoTez(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const l = ESP.Intellect.openArguments();
+    if(!l.length) return '';
+    const bugun = U.todayISO();
+    const yas = a => { const g = ESP.U.gunOf(a.updatedAt || a.createdAt || ''); return g ? U.diffDays(g, bugun) : null; };
+    const s = l.map(a => ({ a, g:yas(a) })).sort((x, y) => (y.g || 0) - (x.g || 0)).slice(0, 6);
+    return P.izgara([P.kart({ tur:'acik-tezler', ad:'Açık tezler', simge:'kalem', yuva:l.length + ' açık',
+      govde:P.cubuklar({ satirlar:s.map(x => ({ ad:String(x.a.thesis || 'Tez').slice(0, 60), oran:x.g == null ? null : Math.min(1, x.g / 30),
+          renk:x.g != null && x.g >= 14 ? 2 : 0, metin:x.g == null ? '—' : x.g + ' gün' })) })
+        + P.not('son dokunuştan bu yana · 14 gün ve üstü koyu') })], 'pk-izgara--iki');
+  }
+
   function render(){
     return K.Grid(html`
+      ${K.Span(12, raw(PanoTez()))}
       ${K.Span(12, ESP.Parts.bolumler('philo', { act:'philo-tab', aria:'Felsefe bölümleri', tabs:TABS,
         govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null } }))}`);
   }

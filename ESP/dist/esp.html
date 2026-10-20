@@ -7192,6 +7192,19 @@ body.is-dragging .drop.is-over{
 
 @media (prefers-reduced-motion:reduce){ .pk-halka__dolu{ transition:none; } }
 
+/* Yıldız kart: öne çıkan tek şey. Modül renginin çok açık zemini, ince renkli
+   çerçeve, başlıkta yıldız ve küçük «öne çıkan» etiketi. Ekranda bir ya da iki tane. */
+.pk--yildiz{ border-color:color-mix(in oklab, var(--primary) 35%, var(--border)); background:color-mix(in oklab, var(--primary) 6%, var(--surface)); }
+.pk--yildiz .pk__simge{ fill:color-mix(in oklab, var(--primary) 30%, transparent); }
+.pk__yildiz{ flex:none; padding:2px 8px; border-radius:var(--r-pill); background:color-mix(in oklab, var(--primary) 14%, var(--surface));
+  color:var(--primary); font-size:11px; font-weight:600; white-space:nowrap; }
+.pk__alinti{ margin:0; font-size:var(--fs-lg); line-height:1.45; font-weight:500; letter-spacing:-.01em; color:var(--text); }
+.pk__alinti::before{ content:'“'; color:var(--primary); margin-right:2px; }
+.pk__alinti::after{ content:'”'; color:var(--primary); margin-left:2px; }
+.pk__kaynak{ margin:0; font-size:12.5px; color:var(--text-2); }
+.pk-saat__ad{ display:flex; justify-content:space-between; font-size:11px; color:var(--text-3); }
+.pk__soru{ margin:0; font-size:var(--fs-md); line-height:1.5; color:var(--text); }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -17546,7 +17559,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'edd3d49c', at:'2026-10-20 14:46', dirty:true };
+ESP.BUILD = { id:'b8cdcba3', at:'2026-10-20 15:47', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19255,9 +19268,13 @@ LIFEOS.PANO = (function(){
   function kart(o){
     o = o || {};
     const bos = o.bos && !o.govde;
-    return '<section class="pk' + (bos ? ' pk--bos' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
-      + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac(o.ad || '') + '">'
-      + '<header class="pk__bas">' + svg(bos ? 'bos' : o.simge) + '<h3 class="pk__ad">' + kac(o.ad || '') + '</h3>'
+    /* Yıldız kart: öne çıkan tek şey (güzel bir soru, haftanın en iyi gecesi,
+       rekor). Zemin modül renginin çok açık tonu, başlıkta yıldız ve «öne çıkan». */
+    const yildiz = !!o.yildiz && !bos;
+    return '<section class="pk' + (bos ? ' pk--bos' : '') + (yildiz ? ' pk--yildiz' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
+      + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac((yildiz ? 'Öne çıkan: ' : '') + (o.ad || '')) + '">'
+      + '<header class="pk__bas">' + svg(bos ? 'bos' : yildiz ? 'yildiz' : o.simge) + '<h3 class="pk__ad">' + kac(o.ad || '') + '</h3>'
+      + (yildiz ? '<span class="pk__yildiz">' + kac(typeof o.yildiz === 'string' ? o.yildiz : 'öne çıkan') + '</span>' : '')
       + (o.yuva != null && o.yuva !== '' ? '<span class="pk__yuva">' + kac(o.yuva) + '</span>' : '')
       + (o.dugme ? dugmeHtml(o.dugme, 'pk__basdugme') : '') + '</header>'
       + (bos
@@ -81030,7 +81047,19 @@ ESP.Screens.today = (function(){
       ? P.kart({ tur:'hatirlatici', ad:'Hatırlatıcılar', simge:'zil', yuva:'bugün ' + h.length,
           govde:P.liste({ satirlar:h.slice(0, 4).map(r => ({ sol:r.due < t ? 'gecikti' : 'bugün', ad:r.text || 'Hatırlatıcı', not:disc(r.disc), nokta:r.due < t ? 2 : 0 })) }) })
       : '';
-    return '<div class="pk-ust">' + P.izgara([dakika, denge, seriKart, hatir]) + '</div>';
+    /* Günün alıntısı (yıldız): kitaba bağlı notlardan biri; seçim tarihe
+       bağlı (gün içinde değişmez). Not yoksa kart yok. */
+    const alintilar = (S.notes || []).filter(n => n.bookId && n.text && (S.books || []).some(b => b.id === n.bookId));
+    let alinti = '';
+    if(alintilar.length){
+      const sira = Number(t.replace(/-/g, '')) % alintilar.length;
+      const n = alintilar.slice().sort((a, b) => String(a.id).localeCompare(String(b.id)))[sira];
+      const kb = (S.books || []).find(b => b.id === n.bookId);
+      alinti = P.kart({ tur:'alinti', ad:'Günün alıntısı', yildiz:'senin notundan',
+        govde:'<p class="pk__alinti">' + U.esc(String(n.text).slice(0, 220)) + '</p><p class="pk__kaynak">' + U.esc(kb.title + (kb.author ? ' · ' + kb.author : '')) + '</p>',
+        ayak:P.dugmeHtml({ label:'Kütüphaneye git', act:'go', data:{ 'data-route':'library' } }, 'pk__dugme pk__dugme--ikincil') });
+    }
+    return '<div class="pk-ust">' + P.izgara([alinti, dakika, denge, seriKart, hatir]) + '</div>';
   }
 
   function render(){
@@ -82135,11 +82164,33 @@ ESP.Screens.lang = (function(){
       govde:raw(G.yukHtml({ gunler, bugun, birim:'kart', etiket:'Önümüzdeki 7 günün vadesi' })) });
   }
 
+  /* PANO KARTLARI (2026-10-20): kartların kutulara dağılımı ve en çok
+     unutulan beş kart. Deste boşsa kart yok. */
+  function PanoDil(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const dil = aktifDil();
+    const kartlar = M.cardsOf(dil) || [];
+    if(!kartlar.length) return '';
+    const kutu = ESP.SRS.boxCounts(dil);
+    const kutuKart = P.kart({ tur:'kutular', ad:'Kutular', simge:'kart', yuva:kartlar.length + ' kart',
+      govde:P.sutun({ degerler:kutu.map(k => k.count || null), yukseklik:56, gunler:kutu.map(k => k.label || String(k.box)),
+          etiket:kutu.map(k => k.label + ' ' + k.count).join(', ') })
+        + P.not('sağa doğru: daha sağlam öğrenilmiş · kesik: kutu boş') });
+    const zor = kartlar.filter(c => c.lapses > 0).sort((a, b) => b.lapses - a.lapses).slice(0, 5);
+    const zorKart = zor.length
+      ? P.kart({ tur:'zor-kartlar', ad:'En çok unutulanlar', yildiz:'tekrar et',
+          govde:P.liste({ satirlar:zor.map(c => ({ sol:c.lapses + '×', ad:c.front, not:c.back, nokta:0 })) }) + P.not('sol: kaç kez unutuldu') })
+      : '';
+    return P.izgara([kutuKart, zorKart], 'pk-izgara--iki');
+  }
+
   function render(){
     const d = ESP.SRS.deckStatus(aktifDil());
     /* Dil seçici sayfa başında durur (actions): başlığın ve sekmelerin
        arasında tek başına asılı bir kutu ne işe yaradığını söylemiyordu. */
     return K.Grid(html`
+      ${K.Span(12, raw(PanoDil()))}
       ${K.Span(12, gelecekYuk())}
       ${K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:'Dil bölümleri', tabs:TABS,
         govde:GOVDE, sayi:{ calis:d.due || null } }))}`);
@@ -82767,8 +82818,25 @@ ESP.Screens.symposium = (function(){
   const GOVDE = { acik:openRows, kapali:closedRows, ekle:addRows, metinler:textRows,
     deneyler:experimentRows, ogren:topicRows };
 
+  /* PANO KARTI (2026-10-20): açık tezler ve kaç gündür dokunulmadıkları;
+     14 gün ve üstü koyu çubuk. */
+  function PanoTez(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const l = ESP.Intellect.openArguments();
+    if(!l.length) return '';
+    const bugun = U.todayISO();
+    const yas = a => { const g = ESP.U.gunOf(a.updatedAt || a.createdAt || ''); return g ? U.diffDays(g, bugun) : null; };
+    const s = l.map(a => ({ a, g:yas(a) })).sort((x, y) => (y.g || 0) - (x.g || 0)).slice(0, 6);
+    return P.izgara([P.kart({ tur:'acik-tezler', ad:'Açık tezler', simge:'kalem', yuva:l.length + ' açık',
+      govde:P.cubuklar({ satirlar:s.map(x => ({ ad:String(x.a.thesis || 'Tez').slice(0, 60), oran:x.g == null ? null : Math.min(1, x.g / 30),
+          renk:x.g != null && x.g >= 14 ? 2 : 0, metin:x.g == null ? '—' : x.g + ' gün' })) })
+        + P.not('son dokunuştan bu yana · 14 gün ve üstü koyu') })], 'pk-izgara--iki');
+  }
+
   function render(){
     return K.Grid(html`
+      ${K.Span(12, raw(PanoTez()))}
       ${K.Span(12, ESP.Parts.bolumler('philo', { act:'philo-tab', aria:'Felsefe bölümleri', tabs:TABS,
         govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null } }))}`);
   }
@@ -84841,7 +84909,7 @@ ESP.Screens.studio = (function(){
     const P = (window.LIFEOS || {}).PANO;
     if(!P) return '';
     const l = (S.pieces || []).filter(p => (p.attempts || []).length).slice(0, 2);
-    if(!l.length) return '';
+    if(!l.length){ const d = PanoDiksiyon(P); return d ? '<div class="pk-ust">' + P.izgara([d], 'pk-izgara--iki') + '</div>' : ''; }
     const kartlar = l.map(p => {
       const a = p.attempts.slice().sort((x, y) => String(x.date).localeCompare(String(y.date))).slice(-8);
       const son = a[a.length - 1].bpm;
@@ -84850,7 +84918,18 @@ ESP.Screens.studio = (function(){
           + P.sutun({ degerler:a.map(x => x.bpm), yukseklik:48, etiket:'Son ' + a.length + ' denemenin temposu; sonuncusu ' + son + ' BPM' })
           + (p.targetBpm ? P.esik({ deger:son, esik:p.targetBpm, yon:'artis-iyi', etiket:son + ' BPM, hedef ' + p.targetBpm }) : '') });
     });
-    return '<div class="pk-ust">' + P.izgara(kartlar, 'pk-izgara--iki') + '</div>';
+    return '<div class="pk-ust">' + P.izgara(kartlar.concat([PanoDiksiyon(P)]), 'pk-izgara--iki') + '</div>';
+  }
+  /* Diksiyon: kayıtların dakikadaki kelimesi (kelime ve süre ölçüldüyse). */
+  function PanoDiksiyon(P){
+    const l = (S.recordings || []).filter(r => r.words != null && r.seconds > 0 && r.wordsCert !== 'missing' && r.secondsCert !== 'missing')
+      .slice().sort((a, b) => String(a.date).localeCompare(String(b.date))).slice(-8);
+    if(!l.length) return '';
+    const kdk = r => Math.round(r.words / r.seconds * 60);
+    const son = l[l.length - 1];
+    return P.kart({ tur:'diksiyon', ad:'Diksiyon · hız', simge:'nota', yuva:'ölçüldü',
+      govde:P.deger(String(kdk(son)), 'kelime/dk', son.errors != null ? son.errors + ' hata (senin işaretin)' : '')
+        + P.sutun({ degerler:l.map(kdk), yukseklik:48, etiket:'Son ' + l.length + ' kaydın konuşma hızı' }) });
   }
 
   function render(){
@@ -87391,6 +87470,62 @@ ESP.Screens.analytics = (function(){
             durumlar:gunler.map((d, i) => d > bugunISO ? 'bos' : deger[i] == null ? 'yok' : deger[i] <= 0 ? 0 : Math.max(1, Math.ceil(deger[i] / enCok * 3))) })
         + P.not('koyu: çok · açık: az · kesik: kayıt yok') });
   }
+  /* PANO KARTLARI (2026-10-20, ikinci tur): verimli saatler, bu hafta ve
+     geçen hafta, rekorlar, alanların son dokunuşu. Hepsi oturum kaydından. */
+  function panoAnaliz(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const bugun = U.todayISO();
+    const gun = i => U.iso(U.addDays(U.parse(bugun), -i));
+    const oturumlar = [];
+    for(let i = 0; i < 30; i++){ const d = gun(i); M.sessionsOf(d).forEach(s => oturumlar.push(Object.assign({ gun:d }, s))); }
+    const dakikali = oturumlar.filter(s => s.minutes != null && s.minutesCert !== 'missing');
+    /* Verimli saatler: oturumun kaydedildiği saat (at); saat bilinmeyen sayılmaz. */
+    const saat = new Array(24).fill(null);
+    dakikali.forEach(s => { const m = /T(\d{2}):/.exec(s.at || ''); if(!m) return; const h = Number(m[1]); saat[h] = (saat[h] || 0) + s.minutes; });
+    const saatli = saat.filter(v => v != null).length;
+    const enIyi = saat.reduce((m, v, i) => v != null && (m < 0 || v > saat[m]) ? i : m, -1);
+    const saatKart = saatli >= 3
+      ? P.kart({ tur:'saatler', ad:'Verimli saatler', simge:'saat', yuva:'son 30 gün',
+          govde:P.deger(String(enIyi).padStart(2, '0') + ':00', '', 'en çok dakika bu saatte kaydedildi')
+            + P.sutun({ degerler:saat.map(v => v == null ? null : v), yukseklik:48, etiket:'Günün saatlerine göre dakika; en çok ' + enIyi + ':00' })
+            + '<div class="pk-saat__ad"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>'
+            + P.not('saat: oturumun kaydedildiği an · kesik: o saatte kayıt yok') })
+      : P.kart({ tur:'saatler', ad:'Verimli saatler', simge:'saat', bos:{ cumle:'Üç farklı saatte oturum olunca en verimli saatin çizilir.' } });
+    /* Bu hafta / geçen hafta: disiplin başına dakika. */
+    const pencere = (bas, n) => { const o = {}; for(let i = bas; i < bas + n; i++){ M.sessionsOf(gun(i)).forEach(s => { if(s.minutes == null || s.minutesCert === 'missing') return; o[s.disc] = (o[s.disc] || 0) + s.minutes; }); } return o; };
+    const bu = pencere(0, 7), once = pencere(7, 7);
+    const discler = ESP.Mod.active().filter(d => bu[d.id] || once[d.id]);
+    const en = Math.max(1, ...discler.map(d => Math.max(bu[d.id] || 0, once[d.id] || 0)));
+    const ikiHafta = discler.length
+      ? P.kart({ tur:'iki-hafta', ad:'Bu hafta · geçen hafta', simge:'satir', yuva:U.fmtMin(Object.values(bu).reduce((a, b) => a + b, 0)) + ' · ' + U.fmtMin(Object.values(once).reduce((a, b) => a + b, 0)),
+          govde:P.cubuklar({ satirlar:discler.map(d => ({ ad:d.short || d.label, oran:(bu[d.id] || 0) / en, plan:once[d.id] ? once[d.id] / en : null, metin:U.fmtMin(bu[d.id] || 0) })) })
+            + P.not('çubuk: son 7 gün · siyah çizgi: önceki 7 gün') })
+      : '';
+    /* Rekorlar: en uzun gün, en çok oturumlu gün (bütün kayıt). */
+    let enUzun = null, enCok = null;
+    Object.keys(S.days || {}).forEach(d => {
+      const m = M.minutesOf(d), n = M.sessionsOf(d).length;
+      if(m != null && (!enUzun || m > enUzun.m)) enUzun = { d, m };
+      if(n && (!enCok || n > enCok.n)) enCok = { d, n };
+    });
+    const rekor = enUzun
+      ? P.kart({ tur:'rekor', ad:'Rekorların', yildiz:'rekor',
+          govde:P.liste({ satirlar:[{ sol:U.fmtShort ? U.fmtShort(enUzun.d) : enUzun.d, ad:'En uzun gün', not:U.fmtMin(enUzun.m), nokta:0 },
+            { sol:U.fmtShort ? U.fmtShort(enCok.d) : enCok.d, ad:'En çok oturum', not:enCok.n + ' oturum', nokta:1 },
+            { sol:'', ad:'En uzun seri', not:M.streak() + ' gün (şu an)', nokta:2 }] }) })
+      : '';
+    /* Son dokunuş: her açık alanın son oturumundan bu yana geçen gün. */
+    const son = ESP.Mod.active().map(d => {
+      for(let i = 0; i < 90; i++){ if(M.minutesOf(gun(i), d.id) != null) return { d, g:i }; }
+      return { d, g:null };
+    });
+    const dokunus = P.kart({ tur:'son-dokunus', ad:'Son dokunuş', simge:'takvim', yuva:'gün önce',
+      govde:P.cubuklar({ satirlar:son.map(x => ({ ad:x.d.short || x.d.label, oran:x.g == null ? null : Math.min(1, x.g / 14), renk:x.g != null && x.g >= 7 ? 2 : 0,
+        metin:x.g == null ? '90+ gün' : x.g === 0 ? 'bugün' : x.g + ' gün' })) })
+        + P.not('uzun çubuk: uzun süredir açılmadı · 14 gün ve üstü dolu') });
+    return '<div class="pk-izgara">' + [saatKart, ikiHafta, rekor, dokunus].filter(Boolean).join('') + '</div>';
+  }
   function dengeCubugu(){
     const b = ESP.Planner.balance(7);
     if(b.cert === 'missing') return K.Kutu({ ad:'Haftanın dengesi', yuva:'son 7 gün', govde:html`<p class="small muted">Son yedi günde kayıt yok.</p>` });
@@ -87431,6 +87566,7 @@ ESP.Screens.analytics = (function(){
     return K.Grid(html`
       ${K.Span(12, alanKarolari())}
       ${K.Span(12, raw('<div class="pk-izgara pk-izgara--iki">' + isiHaritasi() + '</div>'))}
+      ${K.Span(12, raw(panoAnaliz()))}
       ${K.Span(12, analizBasi())}
       ${K.Span(12, html`<div class="analiz-ayrinti">
         ${K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: radar, seriler, rapor, dürüstlük, rubrik', size:'sm', tone:'ghost',

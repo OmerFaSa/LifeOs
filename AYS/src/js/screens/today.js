@@ -1417,7 +1417,19 @@ R.Screens.today = (function(){
             : P.esik({ deger:yapilanQ || 0, esik:hedefQ, yon:'artis-iyi', etiket:(yapilanQ || 0) + ' soru, hedef ' + hedefQ }))
             + P.not(yapilanQ == null ? 'Blok bitince çözülen soru girilir; girilmeden sıfır sayılmaz.' : yapilanQ >= hedefQ ? 'Günün soru hedefi tamam.' : (hedefQ - yapilanQ) + ' soru kaldı.') })
       : '';
-    return '<div class="pk-ust">' + P.izgara([blokKart, sinavKart, soruKart, kartKart, seriKart]) + '</div>';
+    /* Günün sorusu (yıldız): son yanlış çözülen sorulardan biri, tarihe bağlı
+       seçilir (gün içinde değişmez). Yanlış yoksa kart yok. */
+    const yanlis = R.OgrenTest ? R.OgrenTest.yanlislar() : [];
+    let tekrar = '';
+    if(yanlis.length){
+      const s = yanlis[Number(dateISO.replace(/-/g, '')) % yanlis.length];
+      const metin = String((s.q && s.q.soru) || '').replace(/[*_`#>$\\]/g, '').replace(/\s+/g, ' ').trim();
+      tekrar = P.kart({ tur:'tekrar-sorusu', ad:'Bunu bir daha çöz', yildiz:'günün sorusu',
+        govde:'<p class="pk__soru">' + U.esc(metin.length > 180 ? metin.slice(0, 178) + '…' : metin) + '</p>'
+          + P.not((s.subject && s.subject.name ? s.subject.name + ' · ' : '') + yanlis.length + ' soru tekrar bekliyor'),
+        ayak:P.dugmeHtml({ label:'Soruyu aç', act:'go', data:{ 'data-route':'sorular', 'data-tab':'yanlis' } }, 'pk__dugme') });
+    }
+    return '<div class="pk-ust">' + P.izgara([tekrar, blokKart, sinavKart, soruKart, kartKart, seriKart]) + '</div>';
   }
 
   async function render(){

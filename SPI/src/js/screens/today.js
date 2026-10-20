@@ -1165,7 +1165,29 @@ SP.Screens.today = (function(){
     const seriKart = P.kart({ tur:'seri', ad:'Seri', simge:'alev', yuva:seri > 0 ? seri + ' gün üst üste' : 'henüz başlamadı',
       govde:P.kareler({ durumlar:durum, sutun:14, etiket:'Son 14 günün ' + tutulan + '\'inde asgari gün tutuldu' })
         + P.not('dolu: asgari gün tutuldu · çerçeve: bugün') });
-    return '<div class="pk-ust">' + P.izgara([uyku, topar, seriKart]) + '</div>';
+    /* Haftanın en iyi gecesi (yıldız): son yedi gecenin en uzunu; en az üç
+       gece kayıtlıysa. */
+    const kayitli = gunler(7).map((d, i) => ({ d, v:yedi[i] })).filter(x => x.v != null);
+    let gece = '';
+    if(kayitli.length >= 3){
+      const en = kayitli.reduce((m, x) => x.v > m.v ? x : m, kayitli[0]);
+      const ort = kayitli.reduce((a, x) => a + x.v, 0) / kayitli.length;
+      gece = P.kart({ tur:'en-iyi-gece', ad:'Haftanın en iyi gecesi', yildiz:true,
+        govde:P.deger(sureYaz(Math.round(en.v * 60)), '', (U.fmtShort ? U.fmtShort(en.d) : en.d) + ' · haftanın ortalaması ' + sureYaz(Math.round(ort * 60)))
+          + P.not('o günün akşamını tekrar etmeye değer: neyi farklı yaptın?') });
+    }
+    /* Öne çıkan bulgu (yıldız): İnceleme'nin açılmış ilk karşılaştırması
+       (eşikten geçmiş, gün sayılı); yoksa kart yok. */
+    let bulgu = '';
+    const f = SP.Inceleme ? SP.Inceleme.fikirler().find(x => x.acik) : null;
+    if(f){
+      bulgu = P.kart({ tur:'bulgu', ad:f.baslik, yildiz:'verinden',
+        govde:P.cubuklar({ satirlar:[{ ad:f.a.ad, oran:Math.abs(f.a.ort) / Math.max(Math.abs(f.a.ort), Math.abs(f.b.ort)), metin:SP.Inceleme.sayi(f.a.ort, f.birim) + ' ' + f.birim },
+            { ad:f.b.ad, oran:Math.abs(f.b.ort) / Math.max(Math.abs(f.a.ort), Math.abs(f.b.ort)), metin:SP.Inceleme.sayi(f.b.ort, f.birim) + ' ' + f.birim, renk:'n' }] })
+          + P.not(f.a.n + ' ve ' + f.b.n + ' gün · birliktelik, neden değil'),
+        ayak:P.dugmeHtml({ label:'İncelemeye git', act:'go', data:{ 'data-route':'meeting' } }, 'pk__dugme pk__dugme--ikincil') });
+    }
+    return '<div class="pk-ust">' + P.izgara([uyku, topar, seriKart, gece, bulgu]) + '</div>';
   }
 
   async function render(){

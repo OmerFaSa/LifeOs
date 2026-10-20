@@ -72,9 +72,13 @@ LIFEOS.PANO = (function(){
   function kart(o){
     o = o || {};
     const bos = o.bos && !o.govde;
-    return '<section class="pk' + (bos ? ' pk--bos' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
-      + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac(o.ad || '') + '">'
-      + '<header class="pk__bas">' + svg(bos ? 'bos' : o.simge) + '<h3 class="pk__ad">' + kac(o.ad || '') + '</h3>'
+    /* Yıldız kart: öne çıkan tek şey (güzel bir soru, haftanın en iyi gecesi,
+       rekor). Zemin modül renginin çok açık tonu, başlıkta yıldız ve «öne çıkan». */
+    const yildiz = !!o.yildiz && !bos;
+    return '<section class="pk' + (bos ? ' pk--bos' : '') + (yildiz ? ' pk--yildiz' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
+      + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac((yildiz ? 'Öne çıkan: ' : '') + (o.ad || '')) + '">'
+      + '<header class="pk__bas">' + svg(bos ? 'bos' : yildiz ? 'yildiz' : o.simge) + '<h3 class="pk__ad">' + kac(o.ad || '') + '</h3>'
+      + (yildiz ? '<span class="pk__yildiz">' + kac(typeof o.yildiz === 'string' ? o.yildiz : 'öne çıkan') + '</span>' : '')
       + (o.yuva != null && o.yuva !== '' ? '<span class="pk__yuva">' + kac(o.yuva) + '</span>' : '')
       + (o.dugme ? dugmeHtml(o.dugme, 'pk__basdugme') : '') + '</header>'
       + (bos

@@ -7392,6 +7392,19 @@ body.is-dragging .drop.is-over{
 
 @media (prefers-reduced-motion:reduce){ .pk-halka__dolu{ transition:none; } }
 
+/* Yıldız kart: öne çıkan tek şey. Modül renginin çok açık zemini, ince renkli
+   çerçeve, başlıkta yıldız ve küçük «öne çıkan» etiketi. Ekranda bir ya da iki tane. */
+.pk--yildiz{ border-color:color-mix(in oklab, var(--primary) 35%, var(--border)); background:color-mix(in oklab, var(--primary) 6%, var(--surface)); }
+.pk--yildiz .pk__simge{ fill:color-mix(in oklab, var(--primary) 30%, transparent); }
+.pk__yildiz{ flex:none; padding:2px 8px; border-radius:var(--r-pill); background:color-mix(in oklab, var(--primary) 14%, var(--surface));
+  color:var(--primary); font-size:11px; font-weight:600; white-space:nowrap; }
+.pk__alinti{ margin:0; font-size:var(--fs-lg); line-height:1.45; font-weight:500; letter-spacing:-.01em; color:var(--text); }
+.pk__alinti::before{ content:'“'; color:var(--primary); margin-right:2px; }
+.pk__alinti::after{ content:'”'; color:var(--primary); margin-left:2px; }
+.pk__kaynak{ margin:0; font-size:12.5px; color:var(--text-2); }
+.pk-saat__ad{ display:flex; justify-content:space-between; font-size:11px; color:var(--text-3); }
+.pk__soru{ margin:0; font-size:var(--fs-md); line-height:1.5; color:var(--text); }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -16955,7 +16968,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'edd3d49c', at:'2026-10-20 14:45', dirty:true };
+SP.BUILD = { id:'b8cdcba3', at:'2026-10-20 15:46', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -18664,9 +18677,13 @@ LIFEOS.PANO = (function(){
   function kart(o){
     o = o || {};
     const bos = o.bos && !o.govde;
-    return '<section class="pk' + (bos ? ' pk--bos' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
-      + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac(o.ad || '') + '">'
-      + '<header class="pk__bas">' + svg(bos ? 'bos' : o.simge) + '<h3 class="pk__ad">' + kac(o.ad || '') + '</h3>'
+    /* Yıldız kart: öne çıkan tek şey (güzel bir soru, haftanın en iyi gecesi,
+       rekor). Zemin modül renginin çok açık tonu, başlıkta yıldız ve «öne çıkan». */
+    const yildiz = !!o.yildiz && !bos;
+    return '<section class="pk' + (bos ? ' pk--bos' : '') + (yildiz ? ' pk--yildiz' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
+      + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac((yildiz ? 'Öne çıkan: ' : '') + (o.ad || '')) + '">'
+      + '<header class="pk__bas">' + svg(bos ? 'bos' : yildiz ? 'yildiz' : o.simge) + '<h3 class="pk__ad">' + kac(o.ad || '') + '</h3>'
+      + (yildiz ? '<span class="pk__yildiz">' + kac(typeof o.yildiz === 'string' ? o.yildiz : 'öne çıkan') + '</span>' : '')
       + (o.yuva != null && o.yuva !== '' ? '<span class="pk__yuva">' + kac(o.yuva) + '</span>' : '')
       + (o.dugme ? dugmeHtml(o.dugme, 'pk__basdugme') : '') + '</header>'
       + (bos
@@ -77646,7 +77663,29 @@ SP.Screens.today = (function(){
     const seriKart = P.kart({ tur:'seri', ad:'Seri', simge:'alev', yuva:seri > 0 ? seri + ' gün üst üste' : 'henüz başlamadı',
       govde:P.kareler({ durumlar:durum, sutun:14, etiket:'Son 14 günün ' + tutulan + '\'inde asgari gün tutuldu' })
         + P.not('dolu: asgari gün tutuldu · çerçeve: bugün') });
-    return '<div class="pk-ust">' + P.izgara([uyku, topar, seriKart]) + '</div>';
+    /* Haftanın en iyi gecesi (yıldız): son yedi gecenin en uzunu; en az üç
+       gece kayıtlıysa. */
+    const kayitli = gunler(7).map((d, i) => ({ d, v:yedi[i] })).filter(x => x.v != null);
+    let gece = '';
+    if(kayitli.length >= 3){
+      const en = kayitli.reduce((m, x) => x.v > m.v ? x : m, kayitli[0]);
+      const ort = kayitli.reduce((a, x) => a + x.v, 0) / kayitli.length;
+      gece = P.kart({ tur:'en-iyi-gece', ad:'Haftanın en iyi gecesi', yildiz:true,
+        govde:P.deger(sureYaz(Math.round(en.v * 60)), '', (U.fmtShort ? U.fmtShort(en.d) : en.d) + ' · haftanın ortalaması ' + sureYaz(Math.round(ort * 60)))
+          + P.not('o günün akşamını tekrar etmeye değer: neyi farklı yaptın?') });
+    }
+    /* Öne çıkan bulgu (yıldız): İnceleme'nin açılmış ilk karşılaştırması
+       (eşikten geçmiş, gün sayılı); yoksa kart yok. */
+    let bulgu = '';
+    const f = SP.Inceleme ? SP.Inceleme.fikirler().find(x => x.acik) : null;
+    if(f){
+      bulgu = P.kart({ tur:'bulgu', ad:f.baslik, yildiz:'verinden',
+        govde:P.cubuklar({ satirlar:[{ ad:f.a.ad, oran:Math.abs(f.a.ort) / Math.max(Math.abs(f.a.ort), Math.abs(f.b.ort)), metin:SP.Inceleme.sayi(f.a.ort, f.birim) + ' ' + f.birim },
+            { ad:f.b.ad, oran:Math.abs(f.b.ort) / Math.max(Math.abs(f.a.ort), Math.abs(f.b.ort)), metin:SP.Inceleme.sayi(f.b.ort, f.birim) + ' ' + f.birim, renk:'n' }] })
+          + P.not(f.a.n + ' ve ' + f.b.n + ' gün · birliktelik, neden değil'),
+        ayak:P.dugmeHtml({ label:'İncelemeye git', act:'go', data:{ 'data-route':'meeting' } }, 'pk__dugme pk__dugme--ikincil') });
+    }
+    return '<div class="pk-ust">' + P.izgara([uyku, topar, seriKart, gece, bulgu]) + '</div>';
   }
 
   async function render(){
@@ -81107,7 +81146,28 @@ SP.Screens.meals = (function(){
             { ad:'Yağ', deger:g(t.fat), metin:g(t.fat) + ' g' }] })
             + (tg.ok && tg.protein ? P.esik({ deger:g(t.protein), esik:tg.protein.min, etiket:'Protein ' + g(t.protein) + ' gram, hedef en az ' + tg.protein.min, yon:'artis-iyi' })
               + P.not('protein · hedef en az ' + tg.protein.min + ' g') : '') });
-    return '<div class="pk-ust">' + P.izgara([ogunKart, makro]) + '</div>';
+    /* Su ve protein serileri: son 14 gün (dolu: eşik/hedef tuttu, yarım:
+       girildi ama tutmadı, kesik: kayıt yok). */
+    const on4 = []; for(let i = 13; i >= 0; i--) on4.push(U.iso(U.addDays(U.today(), -i)));
+    const suDurum = on4.map(g => { const v = S.vitals[g]; const ml = v && v.water != null ? Number(v.water) : null; return ml == null ? 'yok' : ml >= 2000 ? 'dolu' : 'yarim'; });
+    const suKart = P.kart({ tur:'su-serisi', ad:'Su · 14 gün', simge:'su', yuva:suDurum.filter(x => x === 'dolu').length + ' gün 2 L',
+      govde:P.kareler({ durumlar:suDurum, sutun:14, etiket:'Son 14 günün ' + suDurum.filter(x => x === 'dolu').length + '’inde 2 litre içildi' })
+        + P.not('dolu: 2 L ve üstü · yarım: girildi · kesik: kayıt yok') });
+    const tgP = tg.ok && tg.protein ? tg.protein.min : null;
+    const prDurum = on4.map(g => { const x = SP.Nutri.dayTotals(g); return x.empty ? 'yok' : tgP && x.protein >= tgP ? 'dolu' : 'yarim'; });
+    const prKart = tgP ? P.kart({ tur:'protein-serisi', ad:'Protein · 14 gün', simge:'cubuk', yuva:prDurum.filter(x => x === 'dolu').length + ' gün hedefte',
+      govde:P.kareler({ durumlar:prDurum, sutun:14, etiket:'Son 14 günün ' + prDurum.filter(x => x === 'dolu').length + '’inde protein hedefi tuttu' })
+        + P.not('dolu: en az ' + tgP + ' g · yarım: öğün var, hedef altında · kesik: öğün yok') }) : '';
+    /* En sık yenenler: son 30 günün öğün kalemleri. */
+    const say = {};
+    for(let i = 0; i < 30; i++){
+      M.mealsOf(U.iso(U.addDays(U.today(), -i))).forEach(m => (m.items || []).forEach(it => { if(it.foodId) say[it.foodId] = (say[it.foodId] || 0) + 1; }));
+    }
+    const sik = Object.keys(say).sort((a, b) => say[b] - say[a]).slice(0, 5);
+    const enSik = say[sik[0]] || 1;
+    const sikKart = sik.length >= 2 ? P.kart({ tur:'sik-yenenler', ad:'En sık yenenler', simge:'ogun', yuva:'son 30 gün',
+      govde:P.cubuklar({ satirlar:sik.map(id => ({ ad:(SP.FOOD_BY_ID[id] || {}).name || id, oran:say[id] / enSik, metin:say[id] + ' kez' })) }) }) : '';
+    return '<div class="pk-ust">' + P.izgara([ogunKart, makro, suKart, prKart, sikKart]) + '</div>';
   }
 
   async function render(){
@@ -83078,12 +83138,24 @@ SP.Screens.move = (function(){
     });
     const top = deger.filter(Boolean).reduce((a, x) => a + x[0] + x[1] + x[2], 0);
     if(!deger.some(Boolean)) return '<div class="pk-ust">' + P.izgara([P.kart({ tur:'hafta-hareket', ad:'Son 7 gün', simge:'hareket',
-      bos:{ cumle:'Son yedi günde seans yok. İlk seans girilince günlere dağılır.' } })]) + '</div>';
+      bos:{ cumle:'Son yedi günde seans yok. İlk seans girilince günlere dağılır.' } }), yukKarti(P)], 'pk-izgara--iki') + '</div>';
     const kart = P.kart({ tur:'hafta-hareket', ad:'Son 7 gün', simge:'hareket', yuva:top + ' dk',
       govde:P.sutun({ degerler:deger, yukseklik:64, gunler:gunler.map(d => GUN[U.parse(d).getDay()]),
           etiket:'Son yedi günün hareketi; ' + deger.filter(x => x == null).length + ' gün seans yok' })
         + '<div class="pk-lejant">' + turler.map((k, i) => '<span><i class="pk-sutun__p' + i + '"></i>' + TUR_AD[k] + '</span>').join('') + '</div>' });
-    return '<div class="pk-ust">' + P.izgara([kart], 'pk-izgara--iki') + '</div>';
+    return '<div class="pk-ust">' + P.izgara([kart, yukKarti(P)], 'pk-izgara--iki') + '</div>';
+  }
+  /* Yük oranı: son hafta / son ay ortalaması (core/move.js acwr); denge
+     aralığı kuraldan (SP.LOAD_RULES.acwr). Geçmiş yetmezse nedeni yazılır. */
+  function yukKarti(P){
+    const a = SP.Move.acwr(U.todayISO());
+    const r = SP.LOAD_RULES.acwr;
+    if(!a.ok) return P.kart({ tur:'yuk-orani', ad:'Yük oranı', simge:'cubuk', bos:{ cumle:a.note || 'Yük oranı için geçmiş yetmiyor.' } });
+    const v = x => String(x).replace('.', ',');
+    return P.kart({ tur:'yuk-orani', ad:'Yük oranı', simge:'cubuk', yuva:'hesaplandı',
+      govde:P.deger(v(a.ratio), '', a.zone === 'ok' ? 'denge aralığında' : a.zone === 'high' ? 'son hafta ağır' : 'son hafta hafif')
+        + P.esik({ deger:a.ratio, esik:r.high, olcek:2, yon:'azalis-iyi', etiket:'Yük oranı ' + v(a.ratio) + ', üst sınır ' + v(r.high) })
+        + P.not('son 7 gün ÷ son ayın ortalaması · denge ' + v(r.low) + '–' + v(r.high)) });
   }
 
   async function render(){
@@ -84756,7 +84828,35 @@ SP.Screens.analytics = (function(){
 
   /* KATEGORİLER: uyku (eski üst kart) ve vücut ölçümleri burada, altta. */
   function kategorilerHtml(){
-    return html`<div class="analizbasi">${uykuKutusu()}${kiloKutusu()}</div>`;
+    return html`<div class="analizbasi">${uykuKutusu()}${kiloKutusu()}</div>${raw(panoKategoriler())}`;
+  }
+  /* PANO KARTLARI (2026-10-20): uyku düzenliliği (son 14 gecenin sapması),
+     dinlenik nabız ve HRV (son 14 gün). Ölçüm yoksa kart yok. */
+  function panoKategoriler(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const g14 = gunListesi(14);
+    const al = k => g14.map(t => { const v = S.vitals[t]; return v && v[k] != null && isFinite(Number(v[k])) ? Number(v[k]) : null; });
+    const uyku = al('sleep'), rhr = al('rhr'), hrv = al('hrv');
+    const kartlar = [];
+    const dolu = uyku.filter(v => v != null);
+    if(dolu.length >= 4){
+      const ort = dolu.reduce((a, b) => a + b, 0) / dolu.length;
+      const sap = Math.sqrt(dolu.reduce((a, b) => a + (b - ort) * (b - ort), 0) / dolu.length);
+      kartlar.push(P.kart({ tur:'uyku-duzen', ad:'Uyku düzenliliği', simge:'uyku', yuva:dolu.length + ' gece',
+        govde:P.deger('±' + U.fmtNet(U.round(sap, 1)), 'sa', 'ortalama ' + U.fmtNet(U.round(ort, 1)) + ' sa · küçük sapma: düzenli')
+          + P.sutun({ degerler:uyku, yukseklik:40, etiket:'Son 14 gecenin uykusu' }) }));
+    }
+    const izKart = (l, ad, birim, not) => {
+      const d = l.filter(v => v != null);
+      if(d.length < 3) return '';
+      return P.kart({ tur:'iz-' + birim, ad, simge:'kalp', yuva:d.length + ' gün · ölçüldü',
+        govde:P.deger(String(Math.round(d[d.length - 1])), birim, not + ' · 14 günün ortalaması ' + Math.round(d.reduce((a, b) => a + b, 0) / d.length))
+          + P.sutun({ degerler:l, yukseklik:40, etiket:ad + ', son 14 gün' }) });
+    };
+    kartlar.push(izKart(rhr, 'Dinlenik nabız', 'atım/dk', 'son ölçüm'), izKart(hrv, 'HRV', 'ms', 'son ölçüm'));
+    const l = kartlar.filter(Boolean);
+    return l.length ? '<div class="mt-16">' + P.izgara(l) + '</div>' : '';
   }
   function kiloKutusu(){
     const G = (window.LIFEOS || {}).GRAFIK;

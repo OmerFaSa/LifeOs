@@ -848,7 +848,17 @@ R.Screens.exams = (function(){
     });
     const dersKart = satir.length ? P.kart({ tur:'ders-net', ad:'Son deneme · ders ders', simge:'satir', yuva:U.fmtShort ? U.fmtShort(e.date) : e.date,
       govde:P.cubuklar({ satirlar:satir }) + P.not('çubuk: doğru oranı · sağda net') }) : '';
-    return '<div class="pk-ust">' + P.izgara([netKart, dersKart], 'pk-izgara--iki') + '</div>';
+    /* Rekor (yıldız): en yüksek TYT neti; analiz borcu: analizi bekleyen deneme. */
+    const enIyi = tam.reduce((m, x) => M.examNet(x) > M.examNet(m) ? x : m, tam[0]);
+    const rekor = P.kart({ tur:'net-rekoru', ad:'En iyi TYT', yildiz:'rekor',
+      govde:P.deger(v(U.round(M.examNet(enIyi), 2)), 'net', (U.fmtShort ? U.fmtShort(enIyi.date) : enIyi.date) + (enIyi.publisher ? ' · ' + enIyi.publisher : ''))
+        + P.not(enIyi === e ? 'Son deneme rekor.' : 'Son denemeyle fark ' + v(U.round(M.examNet(enIyi) - M.examNet(e), 2)) + ' net.') });
+    const borc = C.analysisDebt();
+    const borcKart = borc.length ? P.kart({ tur:'analiz-borcu', ad:'Analiz bekleyen', simge:'satir', yuva:borc.length + ' deneme',
+      govde:P.liste({ satirlar:borc.slice(0, 4).map(x => ({ sol:U.fmtShort ? U.fmtShort(x.date) : x.date, ad:(x.family || '') + ' ' + (x.kind === 'full' ? 'tam' : 'branş'),
+        not:U.diffDays(x.date, U.todayISO()) + ' gün önce', nokta:U.diffDays(x.date, U.todayISO()) >= 3 ? 2 : 0 })) })
+        + P.not('Analiz yanlışları kart ve konuya çevirir; bekleyen deneme ders vermez.') }) : '';
+    return '<div class="pk-ust">' + P.izgara([netKart, rekor, dersKart, borcKart], 'pk-izgara--iki') + '</div>';
   }
 
   async function render(){

@@ -615,6 +615,62 @@ ESP.Screens.analytics = (function(){
             durumlar:gunler.map((d, i) => d > bugunISO ? 'bos' : deger[i] == null ? 'yok' : deger[i] <= 0 ? 0 : Math.max(1, Math.ceil(deger[i] / enCok * 3))) })
         + P.not('koyu: çok · açık: az · kesik: kayıt yok') });
   }
+  /* PANO KARTLARI (2026-10-20, ikinci tur): verimli saatler, bu hafta ve
+     geçen hafta, rekorlar, alanların son dokunuşu. Hepsi oturum kaydından. */
+  function panoAnaliz(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const bugun = U.todayISO();
+    const gun = i => U.iso(U.addDays(U.parse(bugun), -i));
+    const oturumlar = [];
+    for(let i = 0; i < 30; i++){ const d = gun(i); M.sessionsOf(d).forEach(s => oturumlar.push(Object.assign({ gun:d }, s))); }
+    const dakikali = oturumlar.filter(s => s.minutes != null && s.minutesCert !== 'missing');
+    /* Verimli saatler: oturumun kaydedildiği saat (at); saat bilinmeyen sayılmaz. */
+    const saat = new Array(24).fill(null);
+    dakikali.forEach(s => { const m = /T(\d{2}):/.exec(s.at || ''); if(!m) return; const h = Number(m[1]); saat[h] = (saat[h] || 0) + s.minutes; });
+    const saatli = saat.filter(v => v != null).length;
+    const enIyi = saat.reduce((m, v, i) => v != null && (m < 0 || v > saat[m]) ? i : m, -1);
+    const saatKart = saatli >= 3
+      ? P.kart({ tur:'saatler', ad:'Verimli saatler', simge:'saat', yuva:'son 30 gün',
+          govde:P.deger(String(enIyi).padStart(2, '0') + ':00', '', 'en çok dakika bu saatte kaydedildi')
+            + P.sutun({ degerler:saat.map(v => v == null ? null : v), yukseklik:48, etiket:'Günün saatlerine göre dakika; en çok ' + enIyi + ':00' })
+            + '<div class="pk-saat__ad"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>'
+            + P.not('saat: oturumun kaydedildiği an · kesik: o saatte kayıt yok') })
+      : P.kart({ tur:'saatler', ad:'Verimli saatler', simge:'saat', bos:{ cumle:'Üç farklı saatte oturum olunca en verimli saatin çizilir.' } });
+    /* Bu hafta / geçen hafta: disiplin başına dakika. */
+    const pencere = (bas, n) => { const o = {}; for(let i = bas; i < bas + n; i++){ M.sessionsOf(gun(i)).forEach(s => { if(s.minutes == null || s.minutesCert === 'missing') return; o[s.disc] = (o[s.disc] || 0) + s.minutes; }); } return o; };
+    const bu = pencere(0, 7), once = pencere(7, 7);
+    const discler = ESP.Mod.active().filter(d => bu[d.id] || once[d.id]);
+    const en = Math.max(1, ...discler.map(d => Math.max(bu[d.id] || 0, once[d.id] || 0)));
+    const ikiHafta = discler.length
+      ? P.kart({ tur:'iki-hafta', ad:'Bu hafta · geçen hafta', simge:'satir', yuva:U.fmtMin(Object.values(bu).reduce((a, b) => a + b, 0)) + ' · ' + U.fmtMin(Object.values(once).reduce((a, b) => a + b, 0)),
+          govde:P.cubuklar({ satirlar:discler.map(d => ({ ad:d.short || d.label, oran:(bu[d.id] || 0) / en, plan:once[d.id] ? once[d.id] / en : null, metin:U.fmtMin(bu[d.id] || 0) })) })
+            + P.not('çubuk: son 7 gün · siyah çizgi: önceki 7 gün') })
+      : '';
+    /* Rekorlar: en uzun gün, en çok oturumlu gün (bütün kayıt). */
+    let enUzun = null, enCok = null;
+    Object.keys(S.days || {}).forEach(d => {
+      const m = M.minutesOf(d), n = M.sessionsOf(d).length;
+      if(m != null && (!enUzun || m > enUzun.m)) enUzun = { d, m };
+      if(n && (!enCok || n > enCok.n)) enCok = { d, n };
+    });
+    const rekor = enUzun
+      ? P.kart({ tur:'rekor', ad:'Rekorların', yildiz:'rekor',
+          govde:P.liste({ satirlar:[{ sol:U.fmtShort ? U.fmtShort(enUzun.d) : enUzun.d, ad:'En uzun gün', not:U.fmtMin(enUzun.m), nokta:0 },
+            { sol:U.fmtShort ? U.fmtShort(enCok.d) : enCok.d, ad:'En çok oturum', not:enCok.n + ' oturum', nokta:1 },
+            { sol:'', ad:'En uzun seri', not:M.streak() + ' gün (şu an)', nokta:2 }] }) })
+      : '';
+    /* Son dokunuş: her açık alanın son oturumundan bu yana geçen gün. */
+    const son = ESP.Mod.active().map(d => {
+      for(let i = 0; i < 90; i++){ if(M.minutesOf(gun(i), d.id) != null) return { d, g:i }; }
+      return { d, g:null };
+    });
+    const dokunus = P.kart({ tur:'son-dokunus', ad:'Son dokunuş', simge:'takvim', yuva:'gün önce',
+      govde:P.cubuklar({ satirlar:son.map(x => ({ ad:x.d.short || x.d.label, oran:x.g == null ? null : Math.min(1, x.g / 14), renk:x.g != null && x.g >= 7 ? 2 : 0,
+        metin:x.g == null ? '90+ gün' : x.g === 0 ? 'bugün' : x.g + ' gün' })) })
+        + P.not('uzun çubuk: uzun süredir açılmadı · 14 gün ve üstü dolu') });
+    return '<div class="pk-izgara">' + [saatKart, ikiHafta, rekor, dokunus].filter(Boolean).join('') + '</div>';
+  }
   function dengeCubugu(){
     const b = ESP.Planner.balance(7);
     if(b.cert === 'missing') return K.Kutu({ ad:'Haftanın dengesi', yuva:'son 7 gün', govde:html`<p class="small muted">Son yedi günde kayıt yok.</p>` });
@@ -655,6 +711,7 @@ ESP.Screens.analytics = (function(){
     return K.Grid(html`
       ${K.Span(12, alanKarolari())}
       ${K.Span(12, raw('<div class="pk-izgara pk-izgara--iki">' + isiHaritasi() + '</div>'))}
+      ${K.Span(12, raw(panoAnaliz()))}
       ${K.Span(12, analizBasi())}
       ${K.Span(12, html`<div class="analiz-ayrinti">
         ${K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: radar, seriler, rapor, dürüstlük, rubrik', size:'sm', tone:'ghost',

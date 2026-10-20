@@ -7495,6 +7495,19 @@ body.is-dragging .drop.is-over{
 
 @media (prefers-reduced-motion:reduce){ .pk-halka__dolu{ transition:none; } }
 
+/* Yıldız kart: öne çıkan tek şey. Modül renginin çok açık zemini, ince renkli
+   çerçeve, başlıkta yıldız ve küçük «öne çıkan» etiketi. Ekranda bir ya da iki tane. */
+.pk--yildiz{ border-color:color-mix(in oklab, var(--primary) 35%, var(--border)); background:color-mix(in oklab, var(--primary) 6%, var(--surface)); }
+.pk--yildiz .pk__simge{ fill:color-mix(in oklab, var(--primary) 30%, transparent); }
+.pk__yildiz{ flex:none; padding:2px 8px; border-radius:var(--r-pill); background:color-mix(in oklab, var(--primary) 14%, var(--surface));
+  color:var(--primary); font-size:11px; font-weight:600; white-space:nowrap; }
+.pk__alinti{ margin:0; font-size:var(--fs-lg); line-height:1.45; font-weight:500; letter-spacing:-.01em; color:var(--text); }
+.pk__alinti::before{ content:'“'; color:var(--primary); margin-right:2px; }
+.pk__alinti::after{ content:'”'; color:var(--primary); margin-left:2px; }
+.pk__kaynak{ margin:0; font-size:12.5px; color:var(--text-2); }
+.pk-saat__ad{ display:flex; justify-content:space-between; font-size:11px; color:var(--text-3); }
+.pk__soru{ margin:0; font-size:var(--fs-md); line-height:1.5; color:var(--text); }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -18096,7 +18109,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'edd3d49c', at:'2026-10-20 14:45', dirty:true };
+R.BUILD = { id:'b8cdcba3', at:'2026-10-20 15:45', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19805,9 +19818,13 @@ LIFEOS.PANO = (function(){
   function kart(o){
     o = o || {};
     const bos = o.bos && !o.govde;
-    return '<section class="pk' + (bos ? ' pk--bos' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
-      + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac(o.ad || '') + '">'
-      + '<header class="pk__bas">' + svg(bos ? 'bos' : o.simge) + '<h3 class="pk__ad">' + kac(o.ad || '') + '</h3>'
+    /* Yıldız kart: öne çıkan tek şey (güzel bir soru, haftanın en iyi gecesi,
+       rekor). Zemin modül renginin çok açık tonu, başlıkta yıldız ve «öne çıkan». */
+    const yildiz = !!o.yildiz && !bos;
+    return '<section class="pk' + (bos ? ' pk--bos' : '') + (yildiz ? ' pk--yildiz' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
+      + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac((yildiz ? 'Öne çıkan: ' : '') + (o.ad || '')) + '">'
+      + '<header class="pk__bas">' + svg(bos ? 'bos' : yildiz ? 'yildiz' : o.simge) + '<h3 class="pk__ad">' + kac(o.ad || '') + '</h3>'
+      + (yildiz ? '<span class="pk__yildiz">' + kac(typeof o.yildiz === 'string' ? o.yildiz : 'öne çıkan') + '</span>' : '')
       + (o.yuva != null && o.yuva !== '' ? '<span class="pk__yuva">' + kac(o.yuva) + '</span>' : '')
       + (o.dugme ? dugmeHtml(o.dugme, 'pk__basdugme') : '') + '</header>'
       + (bos
@@ -98525,7 +98542,19 @@ R.Screens.today = (function(){
             : P.esik({ deger:yapilanQ || 0, esik:hedefQ, yon:'artis-iyi', etiket:(yapilanQ || 0) + ' soru, hedef ' + hedefQ }))
             + P.not(yapilanQ == null ? 'Blok bitince çözülen soru girilir; girilmeden sıfır sayılmaz.' : yapilanQ >= hedefQ ? 'Günün soru hedefi tamam.' : (hedefQ - yapilanQ) + ' soru kaldı.') })
       : '';
-    return '<div class="pk-ust">' + P.izgara([blokKart, sinavKart, soruKart, kartKart, seriKart]) + '</div>';
+    /* Günün sorusu (yıldız): son yanlış çözülen sorulardan biri, tarihe bağlı
+       seçilir (gün içinde değişmez). Yanlış yoksa kart yok. */
+    const yanlis = R.OgrenTest ? R.OgrenTest.yanlislar() : [];
+    let tekrar = '';
+    if(yanlis.length){
+      const s = yanlis[Number(dateISO.replace(/-/g, '')) % yanlis.length];
+      const metin = String((s.q && s.q.soru) || '').replace(/[*_`#>$\\]/g, '').replace(/\s+/g, ' ').trim();
+      tekrar = P.kart({ tur:'tekrar-sorusu', ad:'Bunu bir daha çöz', yildiz:'günün sorusu',
+        govde:'<p class="pk__soru">' + U.esc(metin.length > 180 ? metin.slice(0, 178) + '…' : metin) + '</p>'
+          + P.not((s.subject && s.subject.name ? s.subject.name + ' · ' : '') + yanlis.length + ' soru tekrar bekliyor'),
+        ayak:P.dugmeHtml({ label:'Soruyu aç', act:'go', data:{ 'data-route':'sorular', 'data-tab':'yanlis' } }, 'pk__dugme') });
+    }
+    return '<div class="pk-ust">' + P.izgara([tekrar, blokKart, sinavKart, soruKart, kartKart, seriKart]) + '</div>';
   }
 
   async function render(){
@@ -99557,7 +99586,13 @@ R.Screens.week = (function(){
           govde:P.cubuklar({ satirlar:l.slice(0, 7).map(x => ({ ad:x.ad, oran:x.yapilan / en, plan:x.plan / en, metin:sa(x.yapilan) })) })
             + P.not('çubuk: biten blokların süresi · siyah çizgi: plan') })
       : P.kart({ tur:'ders-dagilimi', ad:'Ders dağılımı', simge:'satir', bos:{ cumle:'Bu hafta henüz biten blok yok; biten her blok dersine eklenir.' } });
-    return P.izgara([kart], 'pk-izgara--iki');
+    /* Haftalık tamamlanma: son 8 haftanın plan tamamlama yüzdesi. */
+    const tam = C.completionHistory(8);
+    const tamKart = tam.some(x => x.value != null) ? P.kart({ tur:'tamamlanma', ad:'Haftalık tamamlanma', simge:'cubuk', yuva:'son ' + tam.length + ' hafta',
+      govde:P.sutun({ degerler:tam.map(x => x.value), yukseklik:56, gunler:tam.map(x => 'H' + x.n),
+          etiket:'Son ' + tam.length + ' haftanın tamamlanması; bu hafta ' + (tam[tam.length - 1].value == null ? 'veri yok' : '%' + tam[tam.length - 1].value) })
+        + P.not('biten blok ÷ geçen blok · yarım blok yarım sayılır') }) : '';
+    return P.izgara([kart, tamKart], 'pk-izgara--iki');
   }
 
   async function render(){
@@ -100652,7 +100687,17 @@ R.Screens.exams = (function(){
     });
     const dersKart = satir.length ? P.kart({ tur:'ders-net', ad:'Son deneme · ders ders', simge:'satir', yuva:U.fmtShort ? U.fmtShort(e.date) : e.date,
       govde:P.cubuklar({ satirlar:satir }) + P.not('çubuk: doğru oranı · sağda net') }) : '';
-    return '<div class="pk-ust">' + P.izgara([netKart, dersKart], 'pk-izgara--iki') + '</div>';
+    /* Rekor (yıldız): en yüksek TYT neti; analiz borcu: analizi bekleyen deneme. */
+    const enIyi = tam.reduce((m, x) => M.examNet(x) > M.examNet(m) ? x : m, tam[0]);
+    const rekor = P.kart({ tur:'net-rekoru', ad:'En iyi TYT', yildiz:'rekor',
+      govde:P.deger(v(U.round(M.examNet(enIyi), 2)), 'net', (U.fmtShort ? U.fmtShort(enIyi.date) : enIyi.date) + (enIyi.publisher ? ' · ' + enIyi.publisher : ''))
+        + P.not(enIyi === e ? 'Son deneme rekor.' : 'Son denemeyle fark ' + v(U.round(M.examNet(enIyi) - M.examNet(e), 2)) + ' net.') });
+    const borc = C.analysisDebt();
+    const borcKart = borc.length ? P.kart({ tur:'analiz-borcu', ad:'Analiz bekleyen', simge:'satir', yuva:borc.length + ' deneme',
+      govde:P.liste({ satirlar:borc.slice(0, 4).map(x => ({ sol:U.fmtShort ? U.fmtShort(x.date) : x.date, ad:(x.family || '') + ' ' + (x.kind === 'full' ? 'tam' : 'branş'),
+        not:U.diffDays(x.date, U.todayISO()) + ' gün önce', nokta:U.diffDays(x.date, U.todayISO()) >= 3 ? 2 : 0 })) })
+        + P.not('Analiz yanlışları kart ve konuya çevirir; bekleyen deneme ders vermez.') }) : '';
+    return '<div class="pk-ust">' + P.izgara([netKart, rekor, dersKart, borcKart], 'pk-izgara--iki') + '</div>';
   }
 
   async function render(){
@@ -104125,7 +104170,13 @@ R.Screens.subjects = (function(){
           etiket:st.length + ' konudan ' + kapali + ' kapandı, ' + yarim + ' çalışılıyor' })
         + '<div class="pk-lejant"><span><i class="pk-renk0"></i>kapandı <b>' + kapali + '</b></span><span><i class="pk-renk1"></i>çalışılıyor <b>' + yarim
         + '</b></span><span><i class="pk-renkn"></i>başlanmadı <b>' + (st.length - kapali - yarim) + '</b></span></div>' });
-    return P.izgara([kart], 'pk-izgara--iki');
+    /* İkinci kontrol: ilk testi geçen konunun 7 gün sonraki testi. */
+    const bek = C.pendingSecondChecks();
+    const bugun = U.todayISO();
+    const ikinci = bek.length ? P.kart({ tur:'ikinci-kontrol', ad:'İkinci kontrol', simge:'takvim', yuva:bek.length + ' konu',
+      govde:P.liste({ satirlar:bek.slice(0, 5).map(x => ({ sol:x.overdue ? 'vakti geldi' : U.diffDays(bugun, x.dueISO) + ' gün', ad:x.topicName, not:x.subjectName, nokta:x.overdue ? 0 : 'n' })) })
+        + P.not('konu, ikinci test de geçince kapanır') }) : '';
+    return P.izgara([kart, ikinci], 'pk-izgara--iki');
   }
 
   async function render(){

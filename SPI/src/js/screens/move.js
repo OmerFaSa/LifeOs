@@ -1279,12 +1279,24 @@ SP.Screens.move = (function(){
     });
     const top = deger.filter(Boolean).reduce((a, x) => a + x[0] + x[1] + x[2], 0);
     if(!deger.some(Boolean)) return '<div class="pk-ust">' + P.izgara([P.kart({ tur:'hafta-hareket', ad:'Son 7 gün', simge:'hareket',
-      bos:{ cumle:'Son yedi günde seans yok. İlk seans girilince günlere dağılır.' } })]) + '</div>';
+      bos:{ cumle:'Son yedi günde seans yok. İlk seans girilince günlere dağılır.' } }), yukKarti(P)], 'pk-izgara--iki') + '</div>';
     const kart = P.kart({ tur:'hafta-hareket', ad:'Son 7 gün', simge:'hareket', yuva:top + ' dk',
       govde:P.sutun({ degerler:deger, yukseklik:64, gunler:gunler.map(d => GUN[U.parse(d).getDay()]),
           etiket:'Son yedi günün hareketi; ' + deger.filter(x => x == null).length + ' gün seans yok' })
         + '<div class="pk-lejant">' + turler.map((k, i) => '<span><i class="pk-sutun__p' + i + '"></i>' + TUR_AD[k] + '</span>').join('') + '</div>' });
-    return '<div class="pk-ust">' + P.izgara([kart], 'pk-izgara--iki') + '</div>';
+    return '<div class="pk-ust">' + P.izgara([kart, yukKarti(P)], 'pk-izgara--iki') + '</div>';
+  }
+  /* Yük oranı: son hafta / son ay ortalaması (core/move.js acwr); denge
+     aralığı kuraldan (SP.LOAD_RULES.acwr). Geçmiş yetmezse nedeni yazılır. */
+  function yukKarti(P){
+    const a = SP.Move.acwr(U.todayISO());
+    const r = SP.LOAD_RULES.acwr;
+    if(!a.ok) return P.kart({ tur:'yuk-orani', ad:'Yük oranı', simge:'cubuk', bos:{ cumle:a.note || 'Yük oranı için geçmiş yetmiyor.' } });
+    const v = x => String(x).replace('.', ',');
+    return P.kart({ tur:'yuk-orani', ad:'Yük oranı', simge:'cubuk', yuva:'hesaplandı',
+      govde:P.deger(v(a.ratio), '', a.zone === 'ok' ? 'denge aralığında' : a.zone === 'high' ? 'son hafta ağır' : 'son hafta hafif')
+        + P.esik({ deger:a.ratio, esik:r.high, olcek:2, yon:'azalis-iyi', etiket:'Yük oranı ' + v(a.ratio) + ', üst sınır ' + v(r.high) })
+        + P.not('son 7 gün ÷ son ayın ortalaması · denge ' + v(r.low) + '–' + v(r.high)) });
   }
 
   async function render(){

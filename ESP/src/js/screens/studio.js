@@ -530,7 +530,7 @@ ESP.Screens.studio = (function(){
     const P = (window.LIFEOS || {}).PANO;
     if(!P) return '';
     const l = (S.pieces || []).filter(p => (p.attempts || []).length).slice(0, 2);
-    if(!l.length) return '';
+    if(!l.length){ const d = PanoDiksiyon(P); return d ? '<div class="pk-ust">' + P.izgara([d], 'pk-izgara--iki') + '</div>' : ''; }
     const kartlar = l.map(p => {
       const a = p.attempts.slice().sort((x, y) => String(x.date).localeCompare(String(y.date))).slice(-8);
       const son = a[a.length - 1].bpm;
@@ -539,7 +539,18 @@ ESP.Screens.studio = (function(){
           + P.sutun({ degerler:a.map(x => x.bpm), yukseklik:48, etiket:'Son ' + a.length + ' denemenin temposu; sonuncusu ' + son + ' BPM' })
           + (p.targetBpm ? P.esik({ deger:son, esik:p.targetBpm, yon:'artis-iyi', etiket:son + ' BPM, hedef ' + p.targetBpm }) : '') });
     });
-    return '<div class="pk-ust">' + P.izgara(kartlar, 'pk-izgara--iki') + '</div>';
+    return '<div class="pk-ust">' + P.izgara(kartlar.concat([PanoDiksiyon(P)]), 'pk-izgara--iki') + '</div>';
+  }
+  /* Diksiyon: kayıtların dakikadaki kelimesi (kelime ve süre ölçüldüyse). */
+  function PanoDiksiyon(P){
+    const l = (S.recordings || []).filter(r => r.words != null && r.seconds > 0 && r.wordsCert !== 'missing' && r.secondsCert !== 'missing')
+      .slice().sort((a, b) => String(a.date).localeCompare(String(b.date))).slice(-8);
+    if(!l.length) return '';
+    const kdk = r => Math.round(r.words / r.seconds * 60);
+    const son = l[l.length - 1];
+    return P.kart({ tur:'diksiyon', ad:'Diksiyon · hız', simge:'nota', yuva:'ölçüldü',
+      govde:P.deger(String(kdk(son)), 'kelime/dk', son.errors != null ? son.errors + ' hata (senin işaretin)' : '')
+        + P.sutun({ degerler:l.map(kdk), yukseklik:48, etiket:'Son ' + l.length + ' kaydın konuşma hızı' }) });
   }
 
   function render(){

@@ -63,6 +63,14 @@
       expect(dom(P().liste({ satirlar:[{ sol:'08:10', ad:'Kahvaltı', not:'520 kcal', nokta:0 }] })).querySelector('.pk-liste__not').textContent).toBe('520 kcal');
       expect(dom(P().onceSonra({ once:'7 sa', sonra:'7 sa 30 dk' })).querySelector('s').textContent).toBe('7 sa');
     });
+    it('yıldız kart: öne çıkan etiketi ve yıldız simgesi; boş kart yıldız olmaz', () => {
+      let k = dom(P().kart({ ad:'Haftanın en iyi gecesi', yildiz:true, govde:P().deger('8 sa') }));
+      expect(k.querySelector('.pk').classList.contains('pk--yildiz')).toBe(true);
+      expect(k.querySelector('.pk__yildiz').textContent).toBe('öne çıkan');
+      expect(k.querySelector('.pk').getAttribute('aria-label')).toBe('Öne çıkan: Haftanın en iyi gecesi');
+      k = dom(P().kart({ ad:'Rekor', yildiz:'rekor', bos:{ cumle:'yok' } }));
+      expect(!!k.querySelector('.pk--yildiz')).toBe(false);
+    });
     it('hedef kartı: süre çubuğu geçen günün payı; değer yalnız biliniyorsa yazılır', () => {
       const h = { cumle:'5 km koşmak', olusturma:'2026-10-01', son_tarih:'2026-10-31', simdi:null, hedefDeger:5, birim:'km' };
       let k = dom(P().hedefKarti(h, '2026-10-16'));

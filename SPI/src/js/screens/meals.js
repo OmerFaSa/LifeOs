@@ -890,7 +890,28 @@ SP.Screens.meals = (function(){
             { ad:'Yağ', deger:g(t.fat), metin:g(t.fat) + ' g' }] })
             + (tg.ok && tg.protein ? P.esik({ deger:g(t.protein), esik:tg.protein.min, etiket:'Protein ' + g(t.protein) + ' gram, hedef en az ' + tg.protein.min, yon:'artis-iyi' })
               + P.not('protein · hedef en az ' + tg.protein.min + ' g') : '') });
-    return '<div class="pk-ust">' + P.izgara([ogunKart, makro]) + '</div>';
+    /* Su ve protein serileri: son 14 gün (dolu: eşik/hedef tuttu, yarım:
+       girildi ama tutmadı, kesik: kayıt yok). */
+    const on4 = []; for(let i = 13; i >= 0; i--) on4.push(U.iso(U.addDays(U.today(), -i)));
+    const suDurum = on4.map(g => { const v = S.vitals[g]; const ml = v && v.water != null ? Number(v.water) : null; return ml == null ? 'yok' : ml >= 2000 ? 'dolu' : 'yarim'; });
+    const suKart = P.kart({ tur:'su-serisi', ad:'Su · 14 gün', simge:'su', yuva:suDurum.filter(x => x === 'dolu').length + ' gün 2 L',
+      govde:P.kareler({ durumlar:suDurum, sutun:14, etiket:'Son 14 günün ' + suDurum.filter(x => x === 'dolu').length + '’inde 2 litre içildi' })
+        + P.not('dolu: 2 L ve üstü · yarım: girildi · kesik: kayıt yok') });
+    const tgP = tg.ok && tg.protein ? tg.protein.min : null;
+    const prDurum = on4.map(g => { const x = SP.Nutri.dayTotals(g); return x.empty ? 'yok' : tgP && x.protein >= tgP ? 'dolu' : 'yarim'; });
+    const prKart = tgP ? P.kart({ tur:'protein-serisi', ad:'Protein · 14 gün', simge:'cubuk', yuva:prDurum.filter(x => x === 'dolu').length + ' gün hedefte',
+      govde:P.kareler({ durumlar:prDurum, sutun:14, etiket:'Son 14 günün ' + prDurum.filter(x => x === 'dolu').length + '’inde protein hedefi tuttu' })
+        + P.not('dolu: en az ' + tgP + ' g · yarım: öğün var, hedef altında · kesik: öğün yok') }) : '';
+    /* En sık yenenler: son 30 günün öğün kalemleri. */
+    const say = {};
+    for(let i = 0; i < 30; i++){
+      M.mealsOf(U.iso(U.addDays(U.today(), -i))).forEach(m => (m.items || []).forEach(it => { if(it.foodId) say[it.foodId] = (say[it.foodId] || 0) + 1; }));
+    }
+    const sik = Object.keys(say).sort((a, b) => say[b] - say[a]).slice(0, 5);
+    const enSik = say[sik[0]] || 1;
+    const sikKart = sik.length >= 2 ? P.kart({ tur:'sik-yenenler', ad:'En sık yenenler', simge:'ogun', yuva:'son 30 gün',
+      govde:P.cubuklar({ satirlar:sik.map(id => ({ ad:(SP.FOOD_BY_ID[id] || {}).name || id, oran:say[id] / enSik, metin:say[id] + ' kez' })) }) }) : '';
+    return '<div class="pk-ust">' + P.izgara([ogunKart, makro, suKart, prKart, sikKart]) + '</div>';
   }
 
   async function render(){

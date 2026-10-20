@@ -742,11 +742,33 @@ ESP.Screens.lang = (function(){
       govde:raw(G.yukHtml({ gunler, bugun, birim:'kart', etiket:'Önümüzdeki 7 günün vadesi' })) });
   }
 
+  /* PANO KARTLARI (2026-10-20): kartların kutulara dağılımı ve en çok
+     unutulan beş kart. Deste boşsa kart yok. */
+  function PanoDil(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const dil = aktifDil();
+    const kartlar = M.cardsOf(dil) || [];
+    if(!kartlar.length) return '';
+    const kutu = ESP.SRS.boxCounts(dil);
+    const kutuKart = P.kart({ tur:'kutular', ad:'Kutular', simge:'kart', yuva:kartlar.length + ' kart',
+      govde:P.sutun({ degerler:kutu.map(k => k.count || null), yukseklik:56, gunler:kutu.map(k => k.label || String(k.box)),
+          etiket:kutu.map(k => k.label + ' ' + k.count).join(', ') })
+        + P.not('sağa doğru: daha sağlam öğrenilmiş · kesik: kutu boş') });
+    const zor = kartlar.filter(c => c.lapses > 0).sort((a, b) => b.lapses - a.lapses).slice(0, 5);
+    const zorKart = zor.length
+      ? P.kart({ tur:'zor-kartlar', ad:'En çok unutulanlar', yildiz:'tekrar et',
+          govde:P.liste({ satirlar:zor.map(c => ({ sol:c.lapses + '×', ad:c.front, not:c.back, nokta:0 })) }) + P.not('sol: kaç kez unutuldu') })
+      : '';
+    return P.izgara([kutuKart, zorKart], 'pk-izgara--iki');
+  }
+
   function render(){
     const d = ESP.SRS.deckStatus(aktifDil());
     /* Dil seçici sayfa başında durur (actions): başlığın ve sekmelerin
        arasında tek başına asılı bir kutu ne işe yaradığını söylemiyordu. */
     return K.Grid(html`
+      ${K.Span(12, raw(PanoDil()))}
       ${K.Span(12, gelecekYuk())}
       ${K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:'Dil bölümleri', tabs:TABS,
         govde:GOVDE, sayi:{ calis:d.due || null } }))}`);

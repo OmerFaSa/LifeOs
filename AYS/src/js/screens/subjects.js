@@ -432,7 +432,13 @@ R.Screens.subjects = (function(){
           etiket:st.length + ' konudan ' + kapali + ' kapandı, ' + yarim + ' çalışılıyor' })
         + '<div class="pk-lejant"><span><i class="pk-renk0"></i>kapandı <b>' + kapali + '</b></span><span><i class="pk-renk1"></i>çalışılıyor <b>' + yarim
         + '</b></span><span><i class="pk-renkn"></i>başlanmadı <b>' + (st.length - kapali - yarim) + '</b></span></div>' });
-    return P.izgara([kart], 'pk-izgara--iki');
+    /* İkinci kontrol: ilk testi geçen konunun 7 gün sonraki testi. */
+    const bek = C.pendingSecondChecks();
+    const bugun = U.todayISO();
+    const ikinci = bek.length ? P.kart({ tur:'ikinci-kontrol', ad:'İkinci kontrol', simge:'takvim', yuva:bek.length + ' konu',
+      govde:P.liste({ satirlar:bek.slice(0, 5).map(x => ({ sol:x.overdue ? 'vakti geldi' : U.diffDays(bugun, x.dueISO) + ' gün', ad:x.topicName, not:x.subjectName, nokta:x.overdue ? 0 : 'n' })) })
+        + P.not('konu, ikinci test de geçince kapanır') }) : '';
+    return P.izgara([kart, ikinci], 'pk-izgara--iki');
   }
 
   async function render(){

@@ -563,7 +563,35 @@ SP.Screens.analytics = (function(){
 
   /* KATEGORİLER: uyku (eski üst kart) ve vücut ölçümleri burada, altta. */
   function kategorilerHtml(){
-    return html`<div class="analizbasi">${uykuKutusu()}${kiloKutusu()}</div>`;
+    return html`<div class="analizbasi">${uykuKutusu()}${kiloKutusu()}</div>${raw(panoKategoriler())}`;
+  }
+  /* PANO KARTLARI (2026-10-20): uyku düzenliliği (son 14 gecenin sapması),
+     dinlenik nabız ve HRV (son 14 gün). Ölçüm yoksa kart yok. */
+  function panoKategoriler(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const g14 = gunListesi(14);
+    const al = k => g14.map(t => { const v = S.vitals[t]; return v && v[k] != null && isFinite(Number(v[k])) ? Number(v[k]) : null; });
+    const uyku = al('sleep'), rhr = al('rhr'), hrv = al('hrv');
+    const kartlar = [];
+    const dolu = uyku.filter(v => v != null);
+    if(dolu.length >= 4){
+      const ort = dolu.reduce((a, b) => a + b, 0) / dolu.length;
+      const sap = Math.sqrt(dolu.reduce((a, b) => a + (b - ort) * (b - ort), 0) / dolu.length);
+      kartlar.push(P.kart({ tur:'uyku-duzen', ad:'Uyku düzenliliği', simge:'uyku', yuva:dolu.length + ' gece',
+        govde:P.deger('±' + U.fmtNet(U.round(sap, 1)), 'sa', 'ortalama ' + U.fmtNet(U.round(ort, 1)) + ' sa · küçük sapma: düzenli')
+          + P.sutun({ degerler:uyku, yukseklik:40, etiket:'Son 14 gecenin uykusu' }) }));
+    }
+    const izKart = (l, ad, birim, not) => {
+      const d = l.filter(v => v != null);
+      if(d.length < 3) return '';
+      return P.kart({ tur:'iz-' + birim, ad, simge:'kalp', yuva:d.length + ' gün · ölçüldü',
+        govde:P.deger(String(Math.round(d[d.length - 1])), birim, not + ' · 14 günün ortalaması ' + Math.round(d.reduce((a, b) => a + b, 0) / d.length))
+          + P.sutun({ degerler:l, yukseklik:40, etiket:ad + ', son 14 gün' }) });
+    };
+    kartlar.push(izKart(rhr, 'Dinlenik nabız', 'atım/dk', 'son ölçüm'), izKart(hrv, 'HRV', 'ms', 'son ölçüm'));
+    const l = kartlar.filter(Boolean);
+    return l.length ? '<div class="mt-16">' + P.izgara(l) + '</div>' : '';
   }
   function kiloKutusu(){
     const G = (window.LIFEOS || {}).GRAFIK;
