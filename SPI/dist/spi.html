@@ -16968,7 +16968,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'b8cdcba3', at:'2026-10-20 15:46', dirty:true };
+SP.BUILD = { id:'621025c7', at:'2026-10-20 15:53', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -33991,6 +33991,54 @@ LIFEOS.DEFTER = (function(){
       tazele();
     });
   }
+  /* PANO KARTLARI (2026-10-20, üçüncü tur; brand/ortak/pano.js): Kütüphanem'in
+     üstünde haftanın notu (yıldız: son 7 günde güncellenenlerden en çok geri
+     bağlantı alanı), etiketlerin (en sık 6) ve son 14 günde yazılan not
+     sayısı. Not yoksa hiçbir kart çizilmez. */
+  function panoHtml(){
+    const P = (typeof window !== 'undefined' && window.LIFEOS) ? window.LIFEOS.PANO : null;
+    if(!P || !notlar.length) return '';
+    const gun = d => String(d || '').slice(0, 10);
+    const bugun = gun(simdi());
+    const gunOnce = n => { const t = new Date(bugun + 'T12:00:00'); t.setDate(t.getDate() - n); return t.toISOString().slice(0, 10); };
+    const kartlar = [];
+    const yeni = notlar.filter(n => gun(n.guncel || n.at) >= gunOnce(6) && (String(n.baslik || '').trim() || String(n.govde || '').trim()));
+    if(yeni.length){
+      const puan = n => geriBaglantilar(notlar, n.baslik).length * 1000 + String(n.govde || '').length;
+      const n = yeni.slice().sort((a, b) => puan(b) - puan(a))[0];
+      const geri = geriBaglantilar(notlar, n.baslik).length;
+      const ozet = String(n.govde || '').replace(/!\[\[medya:[^\]]+\]\]/g, '').replace(/[#*=~`>\[\]]/g, '').replace(/\s+/g, ' ').trim();
+      kartlar.push(P.kart({ tur:'haftanin-notu', ad:'Haftanın notu', yildiz:geri ? geri + ' bağlantı' : 'bu hafta',
+        govde:'<p class="pk__soru"><b>' + kac(rafAdi(n)) + '</b>' + (ozet && ozet !== rafAdi(n) ? ' — ' + kac(ozet.slice(0, 140)) + (ozet.length > 140 ? '…' : '') : '') + '</p>'
+          + P.not(TUR_AD[turBul(n.tur)] + ' · ' + tarihYaz(n.guncel || n.at)),
+        ayak:'<button type="button" class="pk__dugme pk__dugme--ikincil" data-defter-ac="' + kac(n.id) + '">Notu aç</button>' }));
+    }
+    const say = {};
+    notlar.forEach(n => etiketler(n.govde).forEach(e => { say[e] = (say[e] || 0) + 1; }));
+    const et = Object.keys(say).sort((a, b) => say[b] - say[a] || a.localeCompare(b, 'tr')).slice(0, 6);
+    if(et.length >= 2){
+      kartlar.push(P.kart({ tur:'etiketler', ad:'Etiketlerin', simge:'satir', yuva:Object.keys(say).length + ' etiket',
+        govde:P.cubuklar({ satirlar:et.map(e => ({ ad:'#' + e, oran:say[e] / say[et[0]], metin:say[e] + ' not' })) }) }));
+    }
+    const gunler = []; for(let i = 13; i >= 0; i--) gunler.push(gunOnce(i));
+    const yazilan = gunler.map(g => { const k = notlar.filter(n => gun(n.at) === g).length; return k || null; });
+    if(yazilan.some(Boolean)){
+      kartlar.push(P.kart({ tur:'yazilan-not', ad:'Yazdığın notlar', simge:'kalem', yuva:'14 gün · ' + yazilan.reduce((a, b) => a + (b || 0), 0) + ' not',
+        govde:P.sutun({ degerler:yazilan, yukseklik:40, etiket:'Son 14 günde açılan not sayısı' }) + P.not('kesik: o gün not açılmadı') }));
+    }
+    return kartlar.length ? '<div class="pk-ust">' + P.izgara(kartlar) + '</div>' : '';
+  }
+  /* Panonun «Notu aç» düğmesi ve Defter kapanınca tazelenme. */
+  function panoBagla(el){
+    if(!el || el.__defterPano) return;
+    el.__defterPano = true;
+    el.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-defter-ac]') : null;
+      if(b) ac({ id:b.getAttribute('data-defter-ac') });
+    });
+    const kapaninca = () => { if(!document.contains(el)){ document.removeEventListener('lifeos:defter-kapandi', kapaninca); return; } el.innerHTML = panoHtml(); };
+    document.addEventListener('lifeos:defter-kapandi', kapaninca);
+  }
   async function alanYaz(el){
     const a = await alan(), y = el.querySelector('[data-defter-alan]');
     if(!y) return;
@@ -34297,7 +34345,7 @@ LIFEOS.DEFTER = (function(){
     medyaEkle, medya, disaAktarMetni, SABLONLAR, sayim, sar, satirOnek, tuval, notOlustur, yedekNesnesi, yedekYukle, yedekAl, alan, kac, notlar:() => notlar.slice(), sec:id => { secili = id; }, duzenle:v => { duzen = !!v; },
     kuruluMu:() => !!ayar, _ortam:ortam, _sifirla, _db:v => { db = v; },
     klasorAdi, klasorler, klasordeki, klasorEkle, klasorTasi, klasorSil, bosSil, agVeri, yerlesim, klasorSec:k => { klasor = k; },
-    notTasi, rafKlasor:() => rafKlasor, rafKlasorSec:k => { rafKlasor = klasorAdi(k); rafTasi = null; rafKlasorYeni = false; } };
+    notTasi, panoHtml, panoBagla, rafKlasor:() => rafKlasor, rafKlasorSec:k => { rafKlasor = klasorAdi(k); rafTasi = null; rafKlasorYeni = false; } };
 })();
 
 /* ==== js/core/karsilama.js ==== */
@@ -81167,7 +81215,20 @@ SP.Screens.meals = (function(){
     const enSik = say[sik[0]] || 1;
     const sikKart = sik.length >= 2 ? P.kart({ tur:'sik-yenenler', ad:'En sık yenenler', simge:'ogun', yuva:'son 30 gün',
       govde:P.cubuklar({ satirlar:sik.map(id => ({ ad:(SP.FOOD_BY_ID[id] || {}).name || id, oran:say[id] / enSik, metin:say[id] + ' kez' })) }) }) : '';
-    return '<div class="pk-ust">' + P.izgara([ogunKart, makro, suKart, prKart, sikKart]) + '</div>';
+    /* Öğün saatleri: son 30 günün öğünleri günün saatlerine göre (girilen
+       saat; yoksa kaydın saati). */
+    const saat = new Array(24).fill(null);
+    for(let i = 0; i < 30; i++){
+      M.mealsOf(U.iso(U.addDays(U.today(), -i))).forEach(m => {
+        const s = /^(\d{1,2}):/.exec(m.time || '') || /T(\d{2}):/.exec(m.at || '');
+        if(s){ const h = Number(s[1]); saat[h] = (saat[h] || 0) + 1; }
+      });
+    }
+    const saatKart = saat.filter(v => v != null).length >= 3 ? P.kart({ tur:'ogun-saatleri', ad:'Öğün saatlerin', simge:'saat', yuva:'son 30 gün',
+      govde:P.sutun({ degerler:saat, yukseklik:44, etiket:'Öğünlerin günün saatlerine dağılımı' })
+        + '<div class="pk-saat__ad"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>'
+        + P.not('girilen öğün saati; yoksa kaydın saati') }) : '';
+    return '<div class="pk-ust">' + P.izgara([ogunKart, makro, suKart, prKart, sikKart, saatKart]) + '</div>';
   }
 
   async function render(){
@@ -84855,6 +84916,14 @@ SP.Screens.analytics = (function(){
           + P.sutun({ degerler:l, yukseklik:40, etiket:ad + ', son 14 gün' }) });
     };
     kartlar.push(izKart(rhr, 'Dinlenik nabız', 'atım/dk', 'son ölçüm'), izKart(hrv, 'HRV', 'ms', 'son ölçüm'));
+    /* Kısa uykular: son 14 günün gündüz uykusu dakikası (core/uyku.js). */
+    if(SP.Uyku){
+      const kd = g14.map(t => { const l = SP.Uyku.liste(t); return l.length ? l.reduce((a, k) => a + (Number(k.dk) || 0), 0) : null; });
+      const n = kd.filter(v => v != null).length;
+      if(n) kartlar.push(P.kart({ tur:'kisa-uyku', ad:'Kısa uykular', simge:'uyku', yuva:n + ' gün',
+        govde:P.deger(String(Math.round(kd.filter(v => v != null).reduce((a, b) => a + b, 0) / n)), 'dk', 'kısa uyku olan günlerin ortalaması')
+          + P.sutun({ degerler:kd, yukseklik:40, etiket:'Son 14 günün kısa uykuları; ' + n + ' gün' }) + P.not('kesik: o gün kısa uyku yok') }));
+    }
     const l = kartlar.filter(Boolean);
     return l.length ? '<div class="mt-16">' + P.izgara(l) + '</div>' : '';
   }
@@ -89126,11 +89195,14 @@ SP.Screens.notlar = (function(){
   const hazir = () => !!(D() && D().kuruluMu && D().kuruluMu());
   function render(){
     if(!hazir()) return String(K.Kutu({ ad:'Notlar', govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') }));
-    return String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') }));
+    return '<div data-defter-pano>' + (D().panoHtml ? D().panoHtml() : '') + '</div>'
+      + String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') }));
   }
   function afterRender(){
     const el = document.querySelector('[data-defter-raf-yer]');
     if(el && hazir()) D().rafBagla(el);
+    const pano = document.querySelector('[data-defter-pano]');
+    if(pano && hazir() && D().panoBagla) D().panoBagla(pano);
   }
   return {
     id:'notlar',

@@ -590,6 +590,14 @@ SP.Screens.analytics = (function(){
           + P.sutun({ degerler:l, yukseklik:40, etiket:ad + ', son 14 gün' }) });
     };
     kartlar.push(izKart(rhr, 'Dinlenik nabız', 'atım/dk', 'son ölçüm'), izKart(hrv, 'HRV', 'ms', 'son ölçüm'));
+    /* Kısa uykular: son 14 günün gündüz uykusu dakikası (core/uyku.js). */
+    if(SP.Uyku){
+      const kd = g14.map(t => { const l = SP.Uyku.liste(t); return l.length ? l.reduce((a, k) => a + (Number(k.dk) || 0), 0) : null; });
+      const n = kd.filter(v => v != null).length;
+      if(n) kartlar.push(P.kart({ tur:'kisa-uyku', ad:'Kısa uykular', simge:'uyku', yuva:n + ' gün',
+        govde:P.deger(String(Math.round(kd.filter(v => v != null).reduce((a, b) => a + b, 0) / n)), 'dk', 'kısa uyku olan günlerin ortalaması')
+          + P.sutun({ degerler:kd, yukseklik:40, etiket:'Son 14 günün kısa uykuları; ' + n + ' gün' }) + P.not('kesik: o gün kısa uyku yok') }));
+    }
     const l = kartlar.filter(Boolean);
     return l.length ? '<div class="mt-16">' + P.izgara(l) + '</div>' : '';
   }

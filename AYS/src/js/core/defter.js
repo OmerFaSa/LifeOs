@@ -895,6 +895,54 @@ LIFEOS.DEFTER = (function(){
       tazele();
     });
   }
+  /* PANO KARTLARI (2026-10-20, üçüncü tur; brand/ortak/pano.js): Kütüphanem'in
+     üstünde haftanın notu (yıldız: son 7 günde güncellenenlerden en çok geri
+     bağlantı alanı), etiketlerin (en sık 6) ve son 14 günde yazılan not
+     sayısı. Not yoksa hiçbir kart çizilmez. */
+  function panoHtml(){
+    const P = (typeof window !== 'undefined' && window.LIFEOS) ? window.LIFEOS.PANO : null;
+    if(!P || !notlar.length) return '';
+    const gun = d => String(d || '').slice(0, 10);
+    const bugun = gun(simdi());
+    const gunOnce = n => { const t = new Date(bugun + 'T12:00:00'); t.setDate(t.getDate() - n); return t.toISOString().slice(0, 10); };
+    const kartlar = [];
+    const yeni = notlar.filter(n => gun(n.guncel || n.at) >= gunOnce(6) && (String(n.baslik || '').trim() || String(n.govde || '').trim()));
+    if(yeni.length){
+      const puan = n => geriBaglantilar(notlar, n.baslik).length * 1000 + String(n.govde || '').length;
+      const n = yeni.slice().sort((a, b) => puan(b) - puan(a))[0];
+      const geri = geriBaglantilar(notlar, n.baslik).length;
+      const ozet = String(n.govde || '').replace(/!\[\[medya:[^\]]+\]\]/g, '').replace(/[#*=~`>\[\]]/g, '').replace(/\s+/g, ' ').trim();
+      kartlar.push(P.kart({ tur:'haftanin-notu', ad:'Haftanın notu', yildiz:geri ? geri + ' bağlantı' : 'bu hafta',
+        govde:'<p class="pk__soru"><b>' + kac(rafAdi(n)) + '</b>' + (ozet && ozet !== rafAdi(n) ? ' — ' + kac(ozet.slice(0, 140)) + (ozet.length > 140 ? '…' : '') : '') + '</p>'
+          + P.not(TUR_AD[turBul(n.tur)] + ' · ' + tarihYaz(n.guncel || n.at)),
+        ayak:'<button type="button" class="pk__dugme pk__dugme--ikincil" data-defter-ac="' + kac(n.id) + '">Notu aç</button>' }));
+    }
+    const say = {};
+    notlar.forEach(n => etiketler(n.govde).forEach(e => { say[e] = (say[e] || 0) + 1; }));
+    const et = Object.keys(say).sort((a, b) => say[b] - say[a] || a.localeCompare(b, 'tr')).slice(0, 6);
+    if(et.length >= 2){
+      kartlar.push(P.kart({ tur:'etiketler', ad:'Etiketlerin', simge:'satir', yuva:Object.keys(say).length + ' etiket',
+        govde:P.cubuklar({ satirlar:et.map(e => ({ ad:'#' + e, oran:say[e] / say[et[0]], metin:say[e] + ' not' })) }) }));
+    }
+    const gunler = []; for(let i = 13; i >= 0; i--) gunler.push(gunOnce(i));
+    const yazilan = gunler.map(g => { const k = notlar.filter(n => gun(n.at) === g).length; return k || null; });
+    if(yazilan.some(Boolean)){
+      kartlar.push(P.kart({ tur:'yazilan-not', ad:'Yazdığın notlar', simge:'kalem', yuva:'14 gün · ' + yazilan.reduce((a, b) => a + (b || 0), 0) + ' not',
+        govde:P.sutun({ degerler:yazilan, yukseklik:40, etiket:'Son 14 günde açılan not sayısı' }) + P.not('kesik: o gün not açılmadı') }));
+    }
+    return kartlar.length ? '<div class="pk-ust">' + P.izgara(kartlar) + '</div>' : '';
+  }
+  /* Panonun «Notu aç» düğmesi ve Defter kapanınca tazelenme. */
+  function panoBagla(el){
+    if(!el || el.__defterPano) return;
+    el.__defterPano = true;
+    el.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-defter-ac]') : null;
+      if(b) ac({ id:b.getAttribute('data-defter-ac') });
+    });
+    const kapaninca = () => { if(!document.contains(el)){ document.removeEventListener('lifeos:defter-kapandi', kapaninca); return; } el.innerHTML = panoHtml(); };
+    document.addEventListener('lifeos:defter-kapandi', kapaninca);
+  }
   async function alanYaz(el){
     const a = await alan(), y = el.querySelector('[data-defter-alan]');
     if(!y) return;
@@ -1201,5 +1249,5 @@ LIFEOS.DEFTER = (function(){
     medyaEkle, medya, disaAktarMetni, SABLONLAR, sayim, sar, satirOnek, tuval, notOlustur, yedekNesnesi, yedekYukle, yedekAl, alan, kac, notlar:() => notlar.slice(), sec:id => { secili = id; }, duzenle:v => { duzen = !!v; },
     kuruluMu:() => !!ayar, _ortam:ortam, _sifirla, _db:v => { db = v; },
     klasorAdi, klasorler, klasordeki, klasorEkle, klasorTasi, klasorSil, bosSil, agVeri, yerlesim, klasorSec:k => { klasor = k; },
-    notTasi, rafKlasor:() => rafKlasor, rafKlasorSec:k => { rafKlasor = klasorAdi(k); rafTasi = null; rafKlasorYeni = false; } };
+    notTasi, panoHtml, panoBagla, rafKlasor:() => rafKlasor, rafKlasorSec:k => { rafKlasor = klasorAdi(k); rafTasi = null; rafKlasorYeni = false; } };
 })();

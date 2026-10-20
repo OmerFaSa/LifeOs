@@ -671,8 +671,29 @@ R.Screens.analytics = (function(){
     </div>`)]);
   }
 
+  /* PANO KARTI (2026-10-20, üçüncü tur): son 30 günün bloklarının başladığı
+     saat; başlama saati olmayan blok sayılmaz. */
+  function calismaSaatleri(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const saat = new Array(24).fill(null);
+    for(let i = 0; i < 30; i++){
+      const g = S.days[U.iso(U.addDays(U.today(), -i))];
+      ((g && g.blocks) || []).forEach(b => {
+        const m = /T(\d{2}):/.exec(b.startedAt || '');
+        if(m && (b.status === 'done' || b.status === 'partial')){ const h = Number(m[1]); saat[h] = (saat[h] || 0) + (Number(b.actualMin != null ? b.actualMin : b.targetMin) || 0); }
+      });
+    }
+    if(saat.filter(v => v != null).length < 2) return '';
+    const en = saat.reduce((m, v, i) => v != null && (m < 0 || v > saat[m]) ? i : m, -1);
+    return '<div class="pk-izgara pk-izgara--iki">' + P.kart({ tur:'calisma-saatleri', ad:'Çalışma saatlerin', simge:'saat', yuva:'son 30 gün',
+      govde:P.deger(String(en).padStart(2, '0') + ':00', '', 'en çok dakika bu saatte başlayan bloklarda')
+        + P.sutun({ degerler:saat, yukseklik:48, etiket:'Bitmiş blokların başladığı saatler; en çok ' + en + ':00' })
+        + '<div class="pk-saat__ad"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>' }) + '</div>';
+  }
+
   async function render(){
-    return String(html`${analizBasi()}${K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
+    return String(html`${analizBasi()}${raw(calismaSaatleri())}${K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
       bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) })}`);
   }
 

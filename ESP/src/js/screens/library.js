@@ -469,8 +469,26 @@ ESP.Screens.library = (function(){
   const GOVDE = { notlar:noteRows, matris:matrixRows, kaynaklar:bookRows, yontem:methodRows,
     ogren:topicRows };
 
+  /* PANO KARTI (2026-10-20, üçüncü tur): bu yıl biten kitaplar (yıldız,
+     en az biri bittiyse) ve aylara göre dağılımı. */
+  function PanoOkuma(){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const yil = U.todayISO().slice(0, 4);
+    const biten = (S.books || []).filter(b => b.finishedAt && String(b.finishedAt).slice(0, 4) === yil);
+    if(!biten.length) return '';
+    const ay = new Array(Number(U.todayISO().slice(5, 7))).fill(null);
+    biten.forEach(b => { const i = Number(String(b.finishedAt).slice(5, 7)) - 1; if(i < ay.length) ay[i] = (ay[i] || 0) + 1; });
+    const AY = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+    const son = biten.slice().sort((a, b) => String(b.finishedAt).localeCompare(String(a.finishedAt)))[0];
+    return P.izgara([P.kart({ tur:'biten-kitaplar', ad:yil + '’de biten kitaplar', yildiz:biten.length + ' kitap',
+      govde:P.deger(String(biten.length), 'kitap', 'son biten: ' + son.title)
+        + P.sutun({ degerler:ay, yukseklik:40, gunler:ay.map((x, i) => AY[i]), etiket:yil + ' yılında ' + biten.length + ' kitap bitti' }) })], 'pk-izgara--iki');
+  }
+
   function render(){
     return K.Grid(html`
+      ${K.Span(12, raw(PanoOkuma()))}
       ${K.Span(12, ESP.Parts.bolumler('reading', { act:'read-tab', aria:'Okuma bölümleri', tabs:TABS,
         govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null } }))}`);
   }

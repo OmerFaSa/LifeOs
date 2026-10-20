@@ -154,11 +154,14 @@ SP.Screens.notlar = (function(){
   const hazir = () => !!(D() && D().kuruluMu && D().kuruluMu());
   function render(){
     if(!hazir()) return String(K.Kutu({ ad:'Notlar', govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') }));
-    return String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') }));
+    return '<div data-defter-pano>' + (D().panoHtml ? D().panoHtml() : '') + '</div>'
+      + String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') }));
   }
   function afterRender(){
     const el = document.querySelector('[data-defter-raf-yer]');
     if(el && hazir()) D().rafBagla(el);
+    const pano = document.querySelector('[data-defter-pano]');
+    if(pano && hazir() && D().panoBagla) D().panoBagla(pano);
   }
   return {
     id:'notlar',

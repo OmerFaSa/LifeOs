@@ -266,6 +266,17 @@
         expect(!!document.querySelector('#defter [data-defter-govde]')).toBe(true);
       }finally{ D().kapat(); el.remove(); }
     }));
+    it('pano: not yoksa boş; haftanın notu en çok geri bağlantı alan, etiketler sayılır (2026-10-20)', () => ile(async () => {
+      D().klasorSec(null);
+      expect(D().panoHtml()).toBe('');
+      await D().yeni('Türev', 'kurallar #matematik #ders', 'not', '');
+      await D().yeni('Limit', '[[Türev]] öncesi #matematik', 'not', '');
+      await D().yeni('Okuma', 'liste #ders', 'not', '');
+      const k = document.createElement('div'); k.innerHTML = D().panoHtml();
+      expect(k.querySelector('[data-pano="haftanin-notu"] .pk__soru b').textContent).toBe('Türev');
+      expect(!!k.querySelector('[data-pano="haftanin-notu"] [data-defter-ac]')).toBe(true);
+      expect(k.querySelector('[data-pano="etiketler"]').textContent).toContain('#matematik');
+    }));
     it('raf klasörlü: kökte klasör karoları ve klasörsüz kayıtlar; klasörde yol çubuğu ve o klasörün kayıtları (2026-10-20)', () => ile(async () => {
       D().klasorSec(null);
       D().rafKlasorSec('');

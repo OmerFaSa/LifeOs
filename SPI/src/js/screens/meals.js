@@ -911,7 +911,20 @@ SP.Screens.meals = (function(){
     const enSik = say[sik[0]] || 1;
     const sikKart = sik.length >= 2 ? P.kart({ tur:'sik-yenenler', ad:'En sık yenenler', simge:'ogun', yuva:'son 30 gün',
       govde:P.cubuklar({ satirlar:sik.map(id => ({ ad:(SP.FOOD_BY_ID[id] || {}).name || id, oran:say[id] / enSik, metin:say[id] + ' kez' })) }) }) : '';
-    return '<div class="pk-ust">' + P.izgara([ogunKart, makro, suKart, prKart, sikKart]) + '</div>';
+    /* Öğün saatleri: son 30 günün öğünleri günün saatlerine göre (girilen
+       saat; yoksa kaydın saati). */
+    const saat = new Array(24).fill(null);
+    for(let i = 0; i < 30; i++){
+      M.mealsOf(U.iso(U.addDays(U.today(), -i))).forEach(m => {
+        const s = /^(\d{1,2}):/.exec(m.time || '') || /T(\d{2}):/.exec(m.at || '');
+        if(s){ const h = Number(s[1]); saat[h] = (saat[h] || 0) + 1; }
+      });
+    }
+    const saatKart = saat.filter(v => v != null).length >= 3 ? P.kart({ tur:'ogun-saatleri', ad:'Öğün saatlerin', simge:'saat', yuva:'son 30 gün',
+      govde:P.sutun({ degerler:saat, yukseklik:44, etiket:'Öğünlerin günün saatlerine dağılımı' })
+        + '<div class="pk-saat__ad"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>'
+        + P.not('girilen öğün saati; yoksa kaydın saati') }) : '';
+    return '<div class="pk-ust">' + P.izgara([ogunKart, makro, suKart, prKart, sikKart, saatKart]) + '</div>';
   }
 
   async function render(){
