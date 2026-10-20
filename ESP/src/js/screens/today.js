@@ -373,7 +373,7 @@ ESP.Screens.today = (function(){
     return K.Entry({
       label:'Hedeflerim', meta:l.length ? l.length + ' etkin' : 'yok',
       action:K.Button({ label:'Danışma’da hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
-      body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
+      body:l.length ? html`<div class="stack-sm">${raw((window.LIFEOS && window.LIFEOS.PANO) ? window.LIFEOS.PANO.hedefIzgara(l, U.todayISO()) : '')}${butceSatiri()}${map(l, hedefSatir)}</div>`
         : K.Ayrinti({ etiket:'Örnekler', ozet:'Henüz hedefin yok. Danışma’da tek cümleyle yazabilirsin.',
           govde:html`<p>«Bir yılda gitarda Kalfa’ya gelmek istiyorum», «Bir ayda İngilizcede A2’ye
             gelmek istiyorum» ya da «bu yıl 24 kitap okumak istiyorum» gibi yazabilirsin; vaktine

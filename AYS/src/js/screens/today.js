@@ -509,7 +509,7 @@ R.Screens.today = (function(){
     const l = R.Hedefler.aktifler();
     return c.Card({ title:'Hedeflerim', badge:l.length ? c.Badge({ label:l.length + ' etkin', tone:'info' }) : null,
       actions:c.Button({ label:'Ekip sohbetinde hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
-      body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
+      body:l.length ? html`<div class="stack-sm">${raw((window.LIFEOS && window.LIFEOS.PANO) ? window.LIFEOS.PANO.hedefIzgara(l, U.todayISO()) : '')}${butceSatiri()}${map(l, hedefSatir)}</div>`
         : c.Ayrinti({ etiket:'Başka örnek',
             ozet:'Henüz hedefin yok. Ekip sohbetinde Patron’a «TYT’de 90 nete çıkmak istiyorum» gibi yaz; '
               + 'vaktine ve denemelerine göre olup olmadığını söylerim.',
@@ -1407,7 +1407,17 @@ R.Screens.today = (function(){
     const seriKart = P.kart({ tur:'seri', ad:'Seri', simge:'alev', yuva:seri.streak ? seri.streak + ' gün üst üste' : 'henüz başlamadı',
       govde:P.kareler({ durumlar:kareler, sutun:14, etiket:'Son 14 günün ' + kareler.filter(x => x === 'dolu').length + '’inde minimum gün tutuldu' })
         + P.not('dolu: minimum gün tutuldu · çerçeve: bugün') });
-    return '<div class="pk-ust">' + P.izgara([blokKart, sinavKart, kartKart, seriKart]) + '</div>';
+    /* Soru sayacı: günün bloklarının soru hedefi (plan) ve girilen soru. */
+    const hedefQ = bloklar.reduce((a, b) => a + (Number(b.targetQ) || 0), 0);
+    const yapilanQ = bloklar.some(b => b.actualQ != null) ? bloklar.reduce((a, b) => a + (Number(b.actualQ) || 0), 0) : null;
+    const soruKart = hedefQ
+      ? P.kart({ tur:'soru', ad:'Soru', simge:'tik', yuva:(yapilanQ == null ? '—' : yapilanQ) + ' / ' + hedefQ,
+          govde:(hedefQ <= 60
+            ? P.segment({ hedef:hedefQ, yapilan:yapilanQ, etiket:'Günün sorusu', sutun:Math.min(12, hedefQ) })
+            : P.esik({ deger:yapilanQ || 0, esik:hedefQ, yon:'artis-iyi', etiket:(yapilanQ || 0) + ' soru, hedef ' + hedefQ }))
+            + P.not(yapilanQ == null ? 'Blok bitince çözülen soru girilir; girilmeden sıfır sayılmaz.' : yapilanQ >= hedefQ ? 'Günün soru hedefi tamam.' : (hedefQ - yapilanQ) + ' soru kaldı.') })
+      : '';
+    return '<div class="pk-ust">' + P.izgara([blokKart, sinavKart, soruKart, kartKart, seriKart]) + '</div>';
   }
 
   async function render(){

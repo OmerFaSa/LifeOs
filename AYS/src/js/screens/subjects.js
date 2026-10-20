@@ -417,12 +417,31 @@ R.Screens.subjects = (function(){
       madde('Konu kapanışı', C.overallClosure()), madde('TYT', C.examClosure('TYT')), madde('AYT', C.examClosure('AYT')) ] }));
   }
 
+  /* PANO KARTI (2026-10-20; brand/ortak/pano.js): açık dersin konu
+     haritası. Kapalı konu dolu, öğrenilen/pratik/geçici yarım, başlanmamış
+     açık kare. Konu durumu kaydından (M.topicState). */
+  function KonuHaritasi(subject){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P || !subject || !(subject.topics || []).length) return '';
+    const st = subject.topics.map(t => M.topicState(subject.id, t.id).state);
+    const kapali = st.filter(s => s === 'closed').length;
+    const yarim = st.filter(s => ['learning', 'practicing', 'provisional'].indexOf(s) >= 0).length;
+    const kart = P.kart({ tur:'konu-haritasi', ad:'Konu haritası · ' + subject.name, simge:'harita', yuva:kapali + ' / ' + st.length + ' kapandı',
+      govde:P.kareler({ sutun:Math.min(20, st.length), kucuk:st.length > 40,
+          durumlar:st.map(s => s === 'closed' ? 'dolu' : ['learning', 'practicing', 'provisional'].indexOf(s) >= 0 ? 'yarim' : 'bos'),
+          etiket:st.length + ' konudan ' + kapali + ' kapandı, ' + yarim + ' çalışılıyor' })
+        + '<div class="pk-lejant"><span><i class="pk-renk0"></i>kapandı <b>' + kapali + '</b></span><span><i class="pk-renk1"></i>çalışılıyor <b>' + yarim
+        + '</b></span><span><i class="pk-renkn"></i>başlanmadı <b>' + (st.length - kapali - yarim) + '</b></span></div>' });
+    return P.izgara([kart], 'pk-izgara--iki');
+  }
+
   async function render(){
     const sid = openId();
     const subject = R.SUBJECTS.find(s => s.id === sid);
     const P = subjectPanel(subject);
 
     return String(K.Grid([
+      K.Span(12, raw(KonuHaritasi(subject))),
       K.Span(12, DonenKapanis()),
       pendingCard(C.pendingSecondChecks()),
       K.Span(3, K.Stack([ K.Card({ pad:'sm', title:'Dersler', sub:R.SUBJECTS.length+' ders', body:subjectNav(sid) }) ])),

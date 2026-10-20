@@ -462,6 +462,35 @@ R.Screens.week = (function(){
       + VT().dersIsaretleri({ dersler:harfler.map(h => ({ harf:h, ad:AILE_AD[h] })) }));
   }
 
+  /* PANO KARTI (2026-10-20; brand/ortak/pano.js): haftanın ders dağılımı.
+     Çubuk biten blokların dakikası (ölçüldü), siyah çizgi planlanan dakika.
+     Hiç blok bitmediyse boş hâl. */
+  function DersDagilimi(n){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const ders = {};
+    M.weekDates(n).forEach(d => {
+      const g = S.days[U.iso(d)];
+      ((g && g.blocks) || []).filter(b => b.slot !== 'Dinlenme').forEach(b => {
+        const ad = b.subject || 'Diğer';
+        const x = ders[ad] = ders[ad] || { plan:0, yapilan:0 };
+        x.plan += Number(b.targetMin) || 0;
+        if(b.status === 'done') x.yapilan += Number(b.actualMin != null ? b.actualMin : b.targetMin) || 0;
+      });
+    });
+    const l = Object.keys(ders).map(ad => Object.assign({ ad }, ders[ad])).filter(x => x.plan || x.yapilan).sort((a, b) => b.plan - a.plan);
+    const top = l.reduce((a, x) => a + x.yapilan, 0);
+    if(!l.length) return '';
+    const en = Math.max(1, ...l.map(x => Math.max(x.plan, x.yapilan)));
+    const sa = dk => dk >= 60 ? U.fmtNum(U.round(dk / 60, 1)) + ' sa' : dk + ' dk';
+    const kart = top
+      ? P.kart({ tur:'ders-dagilimi', ad:'Ders dağılımı', simge:'satir', yuva:'bu hafta · ' + sa(top),
+          govde:P.cubuklar({ satirlar:l.slice(0, 7).map(x => ({ ad:x.ad, oran:x.yapilan / en, plan:x.plan / en, metin:sa(x.yapilan) })) })
+            + P.not('çubuk: biten blokların süresi · siyah çizgi: plan') })
+      : P.kart({ tur:'ders-dagilimi', ad:'Ders dağılımı', simge:'satir', bos:{ cumle:'Bu hafta henüz biten blok yok; biten her blok dersine eklenir.' } });
+    return P.izgara([kart], 'pk-izgara--iki');
+  }
+
   async function render(){
     const n = viewN();
     await M.ensureWeek(n);
@@ -476,6 +505,7 @@ R.Screens.week = (function(){
     return String(K.Grid([
       weekNav(n, week, phase),
       cak ? K.Span(12, raw(cak)) : '',
+      K.Span(12, raw(DersDagilimi(n))),
       K.Span(12, html`<div class="weekgrid">${map(M.weekDates(n), DayColumn)}</div>`),
 
       K.Span(6, K.Stack([

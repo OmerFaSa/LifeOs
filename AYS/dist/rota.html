@@ -18096,7 +18096,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'8266cfd5', at:'2026-10-20 14:18', dirty:true };
+R.BUILD = { id:'edd3d49c', at:'2026-10-20 14:45', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19982,7 +19982,40 @@ LIFEOS.PANO = (function(){
     return l.length ? '<div class="pk-izgara' + (cls ? ' ' + kac(cls) : '') + '">' + l.join('') + '</div>' : '';
   }
 
-  return { SIMGE, svg, kart, deger, not, halka, gosterge, segment, esik, sutun, yigin, cubuklar, kareler, isi, cizgi, serit, liste, onceSonra, izgara, dugmeHtml };
+  /* ---------------------------------------------------------- hedef kartları
+     Ortak hedef kaydı (brand/ortak/hedef.js): cümle, oluşturma ve son tarih,
+     varsa şu anki değer (`simdi`) ile hedef değer. Zaman çubuğu geçen günün
+     payıdır (hesaplandı); değer bilinmiyorsa yalnız zaman çizilir. */
+  const GUN = 86400000;
+  const tarihOku = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+  const AY = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  const sayiTr = x => String(Math.round(x * 100) / 100).replace('.', ',');
+  function hedefKarti(h, bugun){
+    const b = tarihOku(h.olusturma), s = tarihOku(h.son_tarih), t = tarihOku(bugun);
+    const ad = String(h.cumle || 'Hedef').replace(/\s+/g, ' ').trim();
+    let govde = '';
+    if(h.simdi && sayiMi(h.simdi.deger) && sayiMi(h.hedefDeger)){
+      govde += deger(sayiTr(h.simdi.deger), h.birim || '', 'hedef ' + sayiTr(h.hedefDeger) + (h.birim ? ' ' + h.birim : ''));
+    }
+    let yuva = '';
+    if(b && s && t && s > b){
+      const top = Math.round((s - b) / GUN), gecen = Math.max(0, Math.min(top, Math.round((t - b) / GUN)));
+      const kalan = Math.round((s - t) / GUN);
+      yuva = kalan >= 0 ? s.getDate() + ' ' + AY[s.getMonth()] + '’e ' + kalan + ' gün' : 'süresi geçti';
+      govde += esik({ deger:gecen, esik:gecen, olcek:top, etiket:'Sürenin ' + top + ' gününden ' + gecen + '’i geçti' })
+        + not('süre · ' + gecen + ' / ' + top + ' gün geçti');
+    }else{
+      govde += not(s ? 'son tarih ' + s.getDate() + ' ' + AY[s.getMonth()] : 'son tarihi yok');
+    }
+    return kart({ tur:'hedef', ad, simge:'hedef', yuva:yuva || (h.durum === 'askida' ? 'askıda' : ''), govde });
+  }
+  function hedefIzgara(liste, bugun){
+    const l = (liste || []).slice(0, 3);
+    return l.length ? izgara(l.map(h => hedefKarti(h, bugun))) : '';
+  }
+
+  return { SIMGE, svg, kart, deger, not, halka, gosterge, segment, esik, sutun, yigin, cubuklar, kareler, isi, cizgi, serit, liste, onceSonra, izgara, dugmeHtml,
+    hedefKarti, hedefIzgara };
 })();
 
 /* ==== js/core/vitrin.js ==== */
@@ -97584,7 +97617,7 @@ R.Screens.today = (function(){
     const l = R.Hedefler.aktifler();
     return c.Card({ title:'Hedeflerim', badge:l.length ? c.Badge({ label:l.length + ' etkin', tone:'info' }) : null,
       actions:c.Button({ label:'Ekip sohbetinde hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
-      body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
+      body:l.length ? html`<div class="stack-sm">${raw((window.LIFEOS && window.LIFEOS.PANO) ? window.LIFEOS.PANO.hedefIzgara(l, U.todayISO()) : '')}${butceSatiri()}${map(l, hedefSatir)}</div>`
         : c.Ayrinti({ etiket:'Başka örnek',
             ozet:'Henüz hedefin yok. Ekip sohbetinde Patron’a «TYT’de 90 nete çıkmak istiyorum» gibi yaz; '
               + 'vaktine ve denemelerine göre olup olmadığını söylerim.',
@@ -98482,7 +98515,17 @@ R.Screens.today = (function(){
     const seriKart = P.kart({ tur:'seri', ad:'Seri', simge:'alev', yuva:seri.streak ? seri.streak + ' gün üst üste' : 'henüz başlamadı',
       govde:P.kareler({ durumlar:kareler, sutun:14, etiket:'Son 14 günün ' + kareler.filter(x => x === 'dolu').length + '’inde minimum gün tutuldu' })
         + P.not('dolu: minimum gün tutuldu · çerçeve: bugün') });
-    return '<div class="pk-ust">' + P.izgara([blokKart, sinavKart, kartKart, seriKart]) + '</div>';
+    /* Soru sayacı: günün bloklarının soru hedefi (plan) ve girilen soru. */
+    const hedefQ = bloklar.reduce((a, b) => a + (Number(b.targetQ) || 0), 0);
+    const yapilanQ = bloklar.some(b => b.actualQ != null) ? bloklar.reduce((a, b) => a + (Number(b.actualQ) || 0), 0) : null;
+    const soruKart = hedefQ
+      ? P.kart({ tur:'soru', ad:'Soru', simge:'tik', yuva:(yapilanQ == null ? '—' : yapilanQ) + ' / ' + hedefQ,
+          govde:(hedefQ <= 60
+            ? P.segment({ hedef:hedefQ, yapilan:yapilanQ, etiket:'Günün sorusu', sutun:Math.min(12, hedefQ) })
+            : P.esik({ deger:yapilanQ || 0, esik:hedefQ, yon:'artis-iyi', etiket:(yapilanQ || 0) + ' soru, hedef ' + hedefQ }))
+            + P.not(yapilanQ == null ? 'Blok bitince çözülen soru girilir; girilmeden sıfır sayılmaz.' : yapilanQ >= hedefQ ? 'Günün soru hedefi tamam.' : (hedefQ - yapilanQ) + ' soru kaldı.') })
+      : '';
+    return '<div class="pk-ust">' + P.izgara([blokKart, sinavKart, soruKart, kartKart, seriKart]) + '</div>';
   }
 
   async function render(){
@@ -99488,6 +99531,35 @@ R.Screens.week = (function(){
       + VT().dersIsaretleri({ dersler:harfler.map(h => ({ harf:h, ad:AILE_AD[h] })) }));
   }
 
+  /* PANO KARTI (2026-10-20; brand/ortak/pano.js): haftanın ders dağılımı.
+     Çubuk biten blokların dakikası (ölçüldü), siyah çizgi planlanan dakika.
+     Hiç blok bitmediyse boş hâl. */
+  function DersDagilimi(n){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P) return '';
+    const ders = {};
+    M.weekDates(n).forEach(d => {
+      const g = S.days[U.iso(d)];
+      ((g && g.blocks) || []).filter(b => b.slot !== 'Dinlenme').forEach(b => {
+        const ad = b.subject || 'Diğer';
+        const x = ders[ad] = ders[ad] || { plan:0, yapilan:0 };
+        x.plan += Number(b.targetMin) || 0;
+        if(b.status === 'done') x.yapilan += Number(b.actualMin != null ? b.actualMin : b.targetMin) || 0;
+      });
+    });
+    const l = Object.keys(ders).map(ad => Object.assign({ ad }, ders[ad])).filter(x => x.plan || x.yapilan).sort((a, b) => b.plan - a.plan);
+    const top = l.reduce((a, x) => a + x.yapilan, 0);
+    if(!l.length) return '';
+    const en = Math.max(1, ...l.map(x => Math.max(x.plan, x.yapilan)));
+    const sa = dk => dk >= 60 ? U.fmtNum(U.round(dk / 60, 1)) + ' sa' : dk + ' dk';
+    const kart = top
+      ? P.kart({ tur:'ders-dagilimi', ad:'Ders dağılımı', simge:'satir', yuva:'bu hafta · ' + sa(top),
+          govde:P.cubuklar({ satirlar:l.slice(0, 7).map(x => ({ ad:x.ad, oran:x.yapilan / en, plan:x.plan / en, metin:sa(x.yapilan) })) })
+            + P.not('çubuk: biten blokların süresi · siyah çizgi: plan') })
+      : P.kart({ tur:'ders-dagilimi', ad:'Ders dağılımı', simge:'satir', bos:{ cumle:'Bu hafta henüz biten blok yok; biten her blok dersine eklenir.' } });
+    return P.izgara([kart], 'pk-izgara--iki');
+  }
+
   async function render(){
     const n = viewN();
     await M.ensureWeek(n);
@@ -99502,6 +99574,7 @@ R.Screens.week = (function(){
     return String(K.Grid([
       weekNav(n, week, phase),
       cak ? K.Span(12, raw(cak)) : '',
+      K.Span(12, raw(DersDagilimi(n))),
       K.Span(12, html`<div class="weekgrid">${map(M.weekDates(n), DayColumn)}</div>`),
 
       K.Span(6, K.Stack([
@@ -104037,12 +104110,31 @@ R.Screens.subjects = (function(){
       madde('Konu kapanışı', C.overallClosure()), madde('TYT', C.examClosure('TYT')), madde('AYT', C.examClosure('AYT')) ] }));
   }
 
+  /* PANO KARTI (2026-10-20; brand/ortak/pano.js): açık dersin konu
+     haritası. Kapalı konu dolu, öğrenilen/pratik/geçici yarım, başlanmamış
+     açık kare. Konu durumu kaydından (M.topicState). */
+  function KonuHaritasi(subject){
+    const P = (window.LIFEOS || {}).PANO;
+    if(!P || !subject || !(subject.topics || []).length) return '';
+    const st = subject.topics.map(t => M.topicState(subject.id, t.id).state);
+    const kapali = st.filter(s => s === 'closed').length;
+    const yarim = st.filter(s => ['learning', 'practicing', 'provisional'].indexOf(s) >= 0).length;
+    const kart = P.kart({ tur:'konu-haritasi', ad:'Konu haritası · ' + subject.name, simge:'harita', yuva:kapali + ' / ' + st.length + ' kapandı',
+      govde:P.kareler({ sutun:Math.min(20, st.length), kucuk:st.length > 40,
+          durumlar:st.map(s => s === 'closed' ? 'dolu' : ['learning', 'practicing', 'provisional'].indexOf(s) >= 0 ? 'yarim' : 'bos'),
+          etiket:st.length + ' konudan ' + kapali + ' kapandı, ' + yarim + ' çalışılıyor' })
+        + '<div class="pk-lejant"><span><i class="pk-renk0"></i>kapandı <b>' + kapali + '</b></span><span><i class="pk-renk1"></i>çalışılıyor <b>' + yarim
+        + '</b></span><span><i class="pk-renkn"></i>başlanmadı <b>' + (st.length - kapali - yarim) + '</b></span></div>' });
+    return P.izgara([kart], 'pk-izgara--iki');
+  }
+
   async function render(){
     const sid = openId();
     const subject = R.SUBJECTS.find(s => s.id === sid);
     const P = subjectPanel(subject);
 
     return String(K.Grid([
+      K.Span(12, raw(KonuHaritasi(subject))),
       K.Span(12, DonenKapanis()),
       pendingCard(C.pendingSecondChecks()),
       K.Span(3, K.Stack([ K.Card({ pad:'sm', title:'Dersler', sub:R.SUBJECTS.length+' ders', body:subjectNav(sid) }) ])),

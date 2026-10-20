@@ -246,5 +246,38 @@ LIFEOS.PANO = (function(){
     return l.length ? '<div class="pk-izgara' + (cls ? ' ' + kac(cls) : '') + '">' + l.join('') + '</div>' : '';
   }
 
-  return { SIMGE, svg, kart, deger, not, halka, gosterge, segment, esik, sutun, yigin, cubuklar, kareler, isi, cizgi, serit, liste, onceSonra, izgara, dugmeHtml };
+  /* ---------------------------------------------------------- hedef kartları
+     Ortak hedef kaydı (brand/ortak/hedef.js): cümle, oluşturma ve son tarih,
+     varsa şu anki değer (`simdi`) ile hedef değer. Zaman çubuğu geçen günün
+     payıdır (hesaplandı); değer bilinmiyorsa yalnız zaman çizilir. */
+  const GUN = 86400000;
+  const tarihOku = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+  const AY = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  const sayiTr = x => String(Math.round(x * 100) / 100).replace('.', ',');
+  function hedefKarti(h, bugun){
+    const b = tarihOku(h.olusturma), s = tarihOku(h.son_tarih), t = tarihOku(bugun);
+    const ad = String(h.cumle || 'Hedef').replace(/\s+/g, ' ').trim();
+    let govde = '';
+    if(h.simdi && sayiMi(h.simdi.deger) && sayiMi(h.hedefDeger)){
+      govde += deger(sayiTr(h.simdi.deger), h.birim || '', 'hedef ' + sayiTr(h.hedefDeger) + (h.birim ? ' ' + h.birim : ''));
+    }
+    let yuva = '';
+    if(b && s && t && s > b){
+      const top = Math.round((s - b) / GUN), gecen = Math.max(0, Math.min(top, Math.round((t - b) / GUN)));
+      const kalan = Math.round((s - t) / GUN);
+      yuva = kalan >= 0 ? s.getDate() + ' ' + AY[s.getMonth()] + '’e ' + kalan + ' gün' : 'süresi geçti';
+      govde += esik({ deger:gecen, esik:gecen, olcek:top, etiket:'Sürenin ' + top + ' gününden ' + gecen + '’i geçti' })
+        + not('süre · ' + gecen + ' / ' + top + ' gün geçti');
+    }else{
+      govde += not(s ? 'son tarih ' + s.getDate() + ' ' + AY[s.getMonth()] : 'son tarihi yok');
+    }
+    return kart({ tur:'hedef', ad, simge:'hedef', yuva:yuva || (h.durum === 'askida' ? 'askıda' : ''), govde });
+  }
+  function hedefIzgara(liste, bugun){
+    const l = (liste || []).slice(0, 3);
+    return l.length ? izgara(l.map(h => hedefKarti(h, bugun))) : '';
+  }
+
+  return { SIMGE, svg, kart, deger, not, halka, gosterge, segment, esik, sutun, yigin, cubuklar, kareler, isi, cizgi, serit, liste, onceSonra, izgara, dugmeHtml,
+    hedefKarti, hedefIzgara };
 })();

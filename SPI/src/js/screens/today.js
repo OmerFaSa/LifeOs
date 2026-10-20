@@ -614,7 +614,7 @@ SP.Screens.today = (function(){
     return K.Entry({
       label:'Hedeflerim', meta:l.length ? l.length + ' etkin' : 'yok',
       action:K.Button({ label:'Danışma’da hedef koy', act:'go', data:{ 'data-route':'team' } }),
-      body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
+      body:l.length ? html`<div class="stack-sm">${raw((window.LIFEOS && window.LIFEOS.PANO) ? window.LIFEOS.PANO.hedefIzgara(l, U.todayISO()) : '')}${butceSatiri()}${map(l, hedefSatir)}</div>`
         : K.Ayrinti({ ozet:'Henüz hedefin yok. Danışma’da bir cümleyle yazabilirsin.',
           etiket:'Örnekler',
           govde:html`<p>«3 ay içinde 3 kilo vermek istiyorum» ya da «VKİ’mi 24’e indirmek

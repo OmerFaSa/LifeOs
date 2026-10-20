@@ -63,5 +63,16 @@
       expect(dom(P().liste({ satirlar:[{ sol:'08:10', ad:'Kahvaltı', not:'520 kcal', nokta:0 }] })).querySelector('.pk-liste__not').textContent).toBe('520 kcal');
       expect(dom(P().onceSonra({ once:'7 sa', sonra:'7 sa 30 dk' })).querySelector('s').textContent).toBe('7 sa');
     });
+    it('hedef kartı: süre çubuğu geçen günün payı; değer yalnız biliniyorsa yazılır', () => {
+      const h = { cumle:'5 km koşmak', olusturma:'2026-10-01', son_tarih:'2026-10-31', simdi:null, hedefDeger:5, birim:'km' };
+      let k = dom(P().hedefKarti(h, '2026-10-16'));
+      expect(k.querySelector('.pk__ad').textContent).toBe('5 km koşmak');
+      expect(k.querySelector('.pk__yuva').textContent).toBe('31 Eki’e 15 gün');
+      expect(k.querySelector('.pk-esik__cizgi').getAttribute('style')).toBe('left:50%');
+      expect(k.querySelector('.pk__sayi')).toBe(null);                       // şu anki değer bilinmiyor
+      k = dom(P().hedefKarti(Object.assign({}, h, { simdi:{ deger:3.5 } }), '2026-10-16'));
+      expect(k.querySelector('.pk__sayi').textContent).toBe('3,5km');
+      expect(P().hedefIzgara([], '2026-10-16')).toBe('');
+    });
   });
 })();
