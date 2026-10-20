@@ -64,8 +64,34 @@ ESP.Office = (function(){
     return cfg;
   }
 
+  /* MERKEZ MODELİ (2026-10-20, kullanıcı: «model ayarlarının hepsi HKM'de
+     olmalı»; brand/ortak/ofis.js merkezModelKur). Model, anahtar ve bütçe
+     HKM › Modeller › «ESP · Sohbet»te (atama yoksa King'den miras). Bu
+     cihazda eski bir yerel ayar kaldıysa yedek olarak çalışır. */
+  function merkez(){
+    if(!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.merkezModelKur)) return null;
+    ESP.MerkezModel = ESP.MerkezModel || LIFEOS.Ofis.merkezModelKur({ hkm:() => ESP.Beacon });
+    return ESP.MerkezModel;
+  }
+  function merkezde(){
+    const MM = merkez();
+    if(!MM || !MM.bagli()) return false;
+    const d = MM.durum();
+    return !d || d.ok || (d.reason !== 'no-model' && d.reason !== 'no-key' && d.reason !== 'no-model-name' && d.reason !== 'key-missing');
+  }
   function ready(agentId){
-    return ESP.LLM.ready(cfgFor(agentId));
+    return merkezde() || ESP.LLM.ready(cfgFor(agentId));
+  }
+  /* Görev çağrısı (özet gibi): önce Merkez, sonra eski yerel ayar. Döner { text, model }. */
+  async function tamamla(agentId, req){
+    const MM = merkezde() ? merkez() : null;
+    if(MM){
+      const r = await MM.sor({ sistem:req.system || '', mesajlar:req.messages || [],
+        baglam:(req.messages || []).map(m => m.text).join('\n') });
+      if(r && r.ok && r.text) return { text:r.text, model:(r.model || '') + ' · Merkez' };
+      if(!ESP.LLM.ready(cfgFor(agentId))) throw Object.assign(new Error((r && r.note) || 'Merkez modeli cevap vermedi.'), { code:'merkez' });
+    }
+    return ESP.LLM.chat(cfgFor(agentId), req);
   }
 
   /* --------------------------------------------------------------- brifing
@@ -607,17 +633,26 @@ ESP.Office = (function(){
     const fallback = { text:ruleText(agentId, b), source:'rules', brief:b };
 
     const cfg = cfgFor(agentId);
-    if(!ESP.LLM.ready(cfg)) return fallback;
+    const yerel = ESP.LLM.ready(cfg);
+    const MM = merkezde() ? merkez() : null;
+    if(!MM && !yerel) return fallback;
 
     /* Gecmis acikca kapatilabilir: toplantida her ajan gundeme TEK basina
        cevap verir, sohbet gecmisi oraya karismaz. */
     const gecmis = o.history === false ? [] : historyFor(agentId, o.history);
     const selam = !!(question && window.LIFEOS && LIFEOS.Ofis.selamMi && LIFEOS.Ofis.selamMi(question));
+    const mesajlar = gecmis.concat([{ role:'user', text:question || 'Durumu özetle.' }]);
 
     try{
-      const res = await ESP.LLM.chat(cfg, {
+      let res = null;
+      if(MM){
+        const r = await MM.sor({ sistem:systemPrompt(agentId, b, { selam }), mesajlar, baglam:selam ? '' : JSON.stringify(b) });
+        if(r && r.ok && r.text) res = { text:r.text, model:(r.model || '') + ' · Merkez' };
+        else if(!yerel) return Object.assign({}, fallback, { note:'Merkez modeli cevap vermedi: ' + ((r && r.note) || 'sebep bilinmiyor') });
+      }
+      if(!res) res = await ESP.LLM.chat(cfg, {
         system:systemPrompt(agentId, b, { selam, model:cfg.model }),
-        messages:gecmis.concat([{ role:'user', text:question || 'Durumu özetle.' }]),
+        messages:mesajlar,
         temperature:settings().temperature,
         maxTokens:o.maxTokens || 600,
       });
@@ -627,7 +662,7 @@ ESP.Office = (function(){
           note:'Model istemi geri yazdı; kural motorunun cümlesi gösterildi.' };
       }
       /* Model adindaki rakam («gemma3:4b») uydurma sayi degildir. */
-      const havuzEk = { model:String(cfg.model || '') };
+      const havuzEk = { model:String(res.model || cfg.model || '') };
       const check = validate(res.text, { agentId, brief:selam ? havuzEk : Object.assign({}, b, havuzEk) });
       if(!check.ok){
         return { text:fallback.text, source:'rules', brief:b,
@@ -635,7 +670,7 @@ ESP.Office = (function(){
       }
       /* Istemdeki tavan («En fazla 3 cümle») kodda da uygulanir. */
       const kisa = ESP.LLM.capSentences ? ESP.LLM.capSentences(res.text, o.sentences || CUMLE_TAVANI) : res.text.trim();
-      return { text:kisa, source:'model', brief:b, model:cfg.model };
+      return { text:kisa, source:'model', brief:b, model:res.model || cfg.model };
     }catch(e){
       return Object.assign({}, fallback, {
         error:ESP.LLM.errorText ? ESP.LLM.errorText(e) : String(e && e.message || e) });
@@ -992,6 +1027,8 @@ ESP.Office = (function(){
     ((await ESP.Store.list('briefings')) || []).forEach(row => {
       S.officeBriefings[row.date || row.id] = row;
     });
+    /* Merkez modelinin durumu arkada sorulur; açılış beklemez. */
+    { const MM = merkez(); if(MM && MM.bagli()) MM.tazele().catch(() => null); }
     return S.office;
   }
 
@@ -1002,6 +1039,6 @@ ESP.Office = (function(){
     writingBrief, patronBrief,
     ruleText, systemPrompt, validate, ask, historyFor, HAFIZA_TUR,
     notes, handoffs, handoffsFor, agendaCandidates, dailyBriefing, runMeeting,
-    send, clearChat, setChat, load,
+    send, clearChat, setChat, load, merkez, merkezde, tamamla,
   };
 })();

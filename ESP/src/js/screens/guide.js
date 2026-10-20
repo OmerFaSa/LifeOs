@@ -16,7 +16,7 @@ ESP.Screens.guide = (function(){
 
   const TABS = [
     { id:'kullanim', label:'Kullanım' },
-    { id:'model',    label:'Model' },
+    { id:'model',    label:'Ofis' },
     { id:'veri',     label:'Veri' },
     { id:'sinirlar', label:'Sınırlar' },
     { id:'kanit',    label:'Dayanak' },
@@ -133,30 +133,33 @@ ESP.Screens.guide = (function(){
     ];
   }
 
-  function modelRows(){
+  /* MODEL MERKEZ'DE (2026-10-20): seçim, anahtar ve bütçe HKM › Modeller'de;
+     bu satır yalnız durumu söyler. Eski yerel ayar kaldıysa silinebilir. */
+  function eskiYerelVar(){
     const s = ESP.Office.settings();
+    return (s.provider && s.provider !== 'builtin' && ESP.LLM.ready(ESP.Office.cfgFor('patron')))
+      || Object.keys(ESP.PROVIDERS || {}).some(id => ESP.LLM.getKeys(id).length);
+  }
+  function modelRows(){
+    const MM = ESP.Office.merkez ? ESP.Office.merkez() : null;
+    const d = MM ? MM.durum() : null;
+    const bagli = !!(MM && MM.bagli());
+    const durum = !bagli ? 'HKM bağlı değil. Ofis kural motoruyla çalışıyor; HKM’ye bağlanınca oradaki model kullanılır.'
+      : !d ? 'HKM’ye soruluyor…'
+      : d.ok ? 'Model: ' + (d.model || '—') + (d.provider ? ' (' + d.provider + ')' : '')
+        + (d.inherited ? ' · ' + (d.from === 'king' ? 'King’in ayarından' : 'üst kademeden') + ' geliyor' : ' · ESP’ye özel atama')
+      : (d.note || 'Merkezde model yok.') + ' Ofis kural motoruyla çalışıyor.';
     return [
       K.Entry({
-        label:'Model sağlayıcı',
-        meta:ESP.Office.ready('patron') ? 'bağlı' : 'bağlı değil',
-        note:'Model kapalıyken ofis kapanmaz. Bu bir yedek plan değil '
-           + 'varsayılan plandır; model bir iyileştirmedir.',
-        body:html`
-          <div class="cols-2">
-            ${K.Field({ label:'Sağlayıcı',
-              input:K.Select({ id:'md-provider', value:s.provider,
-                options:Object.keys(ESP.PROVIDERS || {})
-                  .map(id => ({ value:id, label:ESP.PROVIDERS[id].label })) }) })}
-            ${K.Field({ label:'Model',
-              input:K.Input({ id:'md-model', value:s.model || '' }) })}
-          </div>
-          ${K.Field({ label:'API anahtarı', hint:'yalnızca bu tarayıcıda saklanır',
-            input:K.Input({ id:'md-key', type:'password', placeholder:'sk-…' }) })}
-          ${K.Button({ label:'Kaydet', tone:'primary', act:'save-model', class:'mt-10' })}
-          ${K.Notice({ tone:'info', class:'mt-10',
-            body:'Anahtar uygulama verisinden AYRI bir anahtarda durur: yedeğe girmez, '
-              + 'buluta gitmez, modele gönderilmez. Bir sağlayıcıya birden çok anahtar '
-              + 'verilebilir; kota anahtar başına sayılır.' })}`,
+        label:'Ofis modeli',
+        meta:bagli && d && d.ok ? 'Merkez’de hazır' : 'kural motoru',
+        note:'Model, anahtar ve bütçe tek yerde durur: HKM › Modeller › «ESP · Sohbet» (atama yoksa King’in modeli). '
+           + 'Model kapalıyken ofis kapanmaz; model bir iyileştirmedir.',
+        action:bagli ? K.Button({ label:'Durumu tazele', size:'sm', act:'merkez-tazele' }) : '',
+        body:html`<p class="small">${durum}</p>
+          ${when(eskiYerelVar(), () => K.Notice({ tone:'warn', class:'mt-10', title:'Bu cihazda eski bir model ayarı var.',
+            body:html`Merkez’e ulaşılamazsa yedek olarak kullanılır. İstersen sil; anahtar bu tarayıcıdan kalkar.
+              <div class="mt-8">${K.Button({ label:'Eski ayarı sil', size:'sm', tone:'ghost', act:'eski-model-sil' })}</div>` }))}`,
       }),
 
       K.Entry({
@@ -554,11 +557,15 @@ ESP.Screens.guide = (function(){
       ESP.App.render();
     },
 
-    async 'save-model'(){
-      const p = val('md-provider'), m = val('md-model'), k = val('md-key');
-      await ESP.Office.saveSettings({ provider:p, model:m });
-      if(k && ESP.LLM.setKey) ESP.LLM.setKey(p, k);
-      ESP.UI.toast('Kaydedildi');
+    async 'merkez-tazele'(){
+      const MM = ESP.Office.merkez ? ESP.Office.merkez() : null;
+      if(MM) await MM.tazele();
+      ESP.App.render();
+    },
+    async 'eski-model-sil'(){
+      Object.keys(ESP.PROVIDERS || {}).forEach(id => { while(ESP.LLM.getKeys(id).length) ESP.LLM.removeKeyAt(id, 0); });
+      await ESP.Office.saveSettings({ provider:'builtin', model:'default', endpoint:'', perAgent:{} });
+      ESP.UI.toast('Eski model ayarı silindi; ofis HKM’nin modelini kullanır.');
       ESP.App.render();
     },
 

@@ -424,6 +424,8 @@ ESP.App = (function(){
         ${raw(window.LIFEOS.ANIMASYON ? LIFEOS.ANIMASYON.seciciHtml() : '')}
         <div class="appear__label">Zemin</div>
         ${raw(window.LIFEOS.ZEMIN ? LIFEOS.ZEMIN.seciciHtml() : '')}
+        <div class="appear__label">Yüzey · bu modül</div>
+        ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.yuzeySeciciHtml ? LIFEOS.ZEMIN.yuzeySeciciHtml() : '')}
 
         <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
           cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>

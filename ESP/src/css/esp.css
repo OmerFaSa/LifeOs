@@ -925,3 +925,64 @@
 @media (max-width:520px){
   .topic__detail{ padding-left:0; }
 }
+
+
+/* ---------- Analiz › Alanların (2026-10-20) ----------
+   Disiplin başına karo: simge, son 14 gün, mini sütunlar, fark ve alana
+   özel kalite cümlesi. Renk yalnız alanları ayırır, yön bildirmez. */
+.alan-izgara{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:12px; }
+.alan-kare{ --alan:var(--esp); display:flex; flex-direction:column; gap:8px; padding:14px; text-align:left; font:inherit; color:var(--text);
+  border:1px solid var(--border); border-radius:var(--r-md, 14px); background:var(--surface); cursor:pointer;
+  transition:border-color .15s ease, transform .15s ease; }
+.alan-kare:hover:not([disabled]){ border-color:color-mix(in oklab, var(--alan) 55%, var(--border)); transform:translateY(-1px); }
+.alan-kare[disabled]{ cursor:default; }
+.alan-kare__bas{ display:flex; align-items:center; gap:8px; }
+.alan-kare__bas b{ flex:1; font-size:14.5px; }
+.alan-kare__bas small{ font-size:11.5px; color:var(--text-3); }
+.alan-kare__simge{ width:30px; height:30px; display:grid; place-items:center; border-radius:10px;
+  background:color-mix(in oklab, var(--alan) 16%, transparent); color:var(--alan); }
+.alan-kare__simge svg{ width:16px; height:16px; }
+.alan-kare__deger{ font-size:22px; font-weight:650; font-variant-numeric:tabular-nums; }
+.alan-kare__deger small{ font-size:12px; font-weight:500; color:var(--text-3); }
+.alan-kare__sutun{ width:100%; height:34px; }
+.alan-kare__bos{ fill:var(--text-3); opacity:.5; }
+.alan-kare__alt{ display:flex; flex-direction:column; gap:3px; font-size:12px; color:var(--text-2); }
+.alan-kare__fark.is-art{ color:var(--ok-ink, var(--text)); }
+.alan-kare__fark.is-az{ color:var(--text-2); }
+.alan-kare__kalite{ color:var(--text-3); }
+.denge-cubuk{ display:flex; height:14px; border-radius:999px; overflow:hidden; background:var(--surface-2); }
+.denge-cubuk i{ display:block; height:100%; }
+.denge-cubuk i + i{ box-shadow:inset 2px 0 0 var(--surface); }
+.denge-lejant{ display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:10px; font-size:12.5px; color:var(--text-2); }
+.denge-lejant i{ display:inline-block; width:9px; height:9px; border-radius:999px; margin-right:5px; vertical-align:0; }
+.analiz-ayrinti{ display:flex; justify-content:center; margin:4px 0 8px; }
+
+
+/* ---------- Çalışma sahnesi (2026-10-20) ----------
+   Kart oturumunun alanı: geniş, modül renginin çok hafif bir ışığı ve ince
+   nokta deseni (kâğıt hissi; dosya değil, CSS). Kart büyür; ilerleme
+   çubuğu ve sayaçlar üstte. Okunan yer opak kalır (CAM kuralı). */
+.calisma-sahne{ position:relative; display:flex; flex-direction:column; gap:14px; min-height:420px; padding:18px 20px 16px;
+  border-radius:var(--r-md, 14px); overflow:hidden; isolation:isolate;
+  background:
+    radial-gradient(120% 80% at 50% 0%, color-mix(in oklab, var(--esp) 14%, transparent), transparent 60%),
+    radial-gradient(circle, color-mix(in oklab, var(--text) 9%, transparent) 1px, transparent 1.4px) 0 0 / 18px 18px,
+    var(--surface); }
+.calisma-sahne__ust{ display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; }
+.calisma-sahne__cubuk{ flex:1 1 220px; height:8px; border-radius:999px; background:color-mix(in oklab, var(--border) 80%, transparent); overflow:hidden; }
+.calisma-sahne__cubuk i{ display:block; height:100%; border-radius:inherit; background:var(--esp); transition:width .3s ease; }
+.calisma-sahne__sayac{ font-size:12.5px; color:var(--text-2); font-variant-numeric:tabular-nums; }
+.calisma-sahne__sayac b{ color:var(--text); }
+.calisma-sahne .vk .x40{ height:min(46vh, 320px); }
+.calisma-sahne .vk .x40 .kr{ width:min(560px, 86%); height:min(40vh, 270px); border-radius:20px; }
+.calisma-sahne .vk .x40 .ust-k b{ font-size:clamp(34px, 5vw, 56px); }
+.calisma-sahne .vk .x40 .ust-k .cap{ margin-top:12px; }
+.calisma-sahne .vk .x46{ padding:28px 12px; }
+.calisma-sahne .vk .x46 b{ font-size:clamp(38px, 5.5vw, 60px); }
+.calisma-sahne .vk .x46 p{ font-size:18px; }
+.calisma-sahne .vk .x46 em{ font-size:17px; }
+.calisma-sahne .vk .x41 button{ min-height:60px; }
+.calisma-sahne__klavye{ margin-top:auto; text-align:center; }
+.calisma-sahne__klavye kbd{ display:inline-block; min-width:18px; padding:1px 6px; border:1px solid var(--border); border-bottom-width:2px;
+  border-radius:6px; font:inherit; font-size:11px; color:var(--text-2); background:var(--surface); }
+@media (max-width:520px){ .calisma-sahne{ min-height:360px; padding:14px 12px; } .calisma-sahne__klavye{ display:none; } }

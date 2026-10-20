@@ -566,7 +566,7 @@ ESP.Screens.library = (function(){
       if(!ozetHazir()){ ESP.UI.toast('Model bağlı değil; özet yalnız model açıkken çıkarılır.'); return; }
       ESP.UI.toast('Notların özetleniyor…');
       try{
-        const r = await ESP.LLM.chat(ESP.Office.cfgFor(OZET_AJAN), {
+        const r = await ESP.Office.tamamla(OZET_AJAN, {
           system:'Kullanıcının bir kaynaktan aldığı notları üç maddeye indir. Yalnız notlarda geçen bilgiyi kullan; '
             + 'yorum, dış bilgi ve yeni sayı ekleme. Türkçe, her madde tek cümle. '
             + 'ÇIKTI yalnız JSON: {"maddeler":["…","…","…"]}',

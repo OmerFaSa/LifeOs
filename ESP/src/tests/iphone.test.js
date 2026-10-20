@@ -365,8 +365,10 @@
 
     it('Radar: radar ile disiplin tablosu tek kapta (genişte yan yana, esp.css .radarcift)', async () => {
       resetState();
+      ESP.S.ui.analizAyrinti = true;     // ayrıntılı okumalar açık (2026-10-20)
       const kok = document.createElement('div');
       kok.innerHTML = String(await ESP.Screens.analytics.render());
+      ESP.S.ui.analizAyrinti = false;
       document.body.appendChild(kok);
       try{
         const cift = kok.querySelector('.radarcift');

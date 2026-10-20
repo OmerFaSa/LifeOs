@@ -90,7 +90,9 @@
 
     it('Analiz ekranı rubrik & analiz sekmesi içerir', async () => {
       expect(typeof ESP.Screens.analytics.render).toBe('function');
+      ESP.S.ui.analizAyrinti = true;     // ayrıntılı okumalar «Ayrıntılı okumalar» düğmesiyle açılır
       const htmlAn = String(await ESP.Screens.analytics.render());
+      ESP.S.ui.analizAyrinti = false;
       expect(htmlAn.includes('rubrikler') || htmlAn.includes('Rubrik')).toBeTruthy();
     });
   });

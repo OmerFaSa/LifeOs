@@ -16,6 +16,40 @@
       });
     });
 
+    it('Analiz › Alanların: her açık disiplin bir karo; girilmemiş gün nokta; ayrıntılı okumalar baştan kapalı (2026-10-20)', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        let k = dom(ESP.Screens.analytics.render());
+        expect(k.querySelectorAll('.alan-kare').length).toBe(ESP.Mod.active().length);
+        expect(k.textContent).toContain('veri yok');
+        expect(!!k.querySelector('.radarcift')).toBe(false);
+        pushSession('2026-10-10', 'music', 30);
+        k = dom(ESP.Screens.analytics.render());
+        const muzik = Array.from(k.querySelectorAll('.alan-kare')).find(x => /Müzik/.test(x.textContent));
+        expect(muzik.textContent).toContain('30 dk');
+        expect(muzik.querySelectorAll('rect').length).toBe(1);
+        expect(muzik.querySelectorAll('circle').length).toBe(13);
+        expect(muzik.textContent.indexOf('önceki 14 güne göre') < 0).toBe(true);   // tek günle karşılaştırma yok
+      });
+    });
+
+    it('Çalışma sahnesi: oturumun ilerlemesi ve sayaçları kayıttan; klavye ipucu (2026-10-20)', async () => {
+      resetState();
+      const L = ESP.Screens.lang;
+      if(!L || !ESP.S.cards) return;
+      ESP.S.cards = [{ id:'c1', lang:'en', front:'apple', back:'elma', box:1, ease:2.5, reps:0, lapses:0, due:ESP.U.todayISO() },
+        { id:'c2', lang:'en', front:'pear', back:'armut', box:1, ease:2.5, reps:0, lapses:0, due:ESP.U.todayISO() }];
+      ESP.S.ui.reviewQueue = { ids:['c1', 'c2'], pos:1, shown:false, correct:1, again:0, dagilim:{}, basladi:Date.now() };
+      try{
+        const k = dom(await L.render());
+        const s = k.querySelector('.calisma-sahne');
+        expect(!!s).toBe(true);
+        expect(s.querySelector('[role="progressbar"]').getAttribute('aria-valuenow')).toBe('1');
+        expect(s.textContent.replace(/\s+/g, ' ')).toContain('1 doğru · 0 tekrar · 1 kalan');
+        expect(s.textContent).toContain('Boşluk');
+      }finally{ ESP.S.ui.reviewQueue = null; }
+    });
+
     it('oz-033 Dil: seçili dilin gelecek yükü; kart yoksa çizilmez', async () => {
       await withTodayAsync('2026-10-12', async () => {
         resetState();

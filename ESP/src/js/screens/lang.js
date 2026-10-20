@@ -95,6 +95,26 @@ ESP.Screens.lang = (function(){
 
   const VT = () => (window.LIFEOS || {}).VITRIN;
 
+  /* Klavye: yalnız Dil ekranında, oturum açıkken ve bir alana yazılmıyorken. */
+  if(typeof document !== 'undefined' && !ESP.__dilKlavye){
+    ESP.__dilKlavye = true;
+    document.addEventListener('keydown', e => {
+      const q = S.ui && S.ui.reviewQueue;
+      if(!q || S.route !== 'lang' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target;
+      if(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName || ''))) return;
+      if(document.querySelector('#sheet, .defter, .katman.is-acik')) return;
+      const h = ESP.Screens.lang && ESP.Screens.lang.handle;
+      if(!h) return;
+      if((e.key === ' ' || e.key === 'Enter') && !q.shown){ e.preventDefault(); h['reveal-card'](); return; }
+      const i = Number(e.key);
+      if(q.shown && i >= 1 && i <= ESP.SRS.GRADES.length){
+        e.preventDefault();
+        h['grade-card']({ dataset:{ grade:ESP.SRS.GRADES[i - 1].id } });
+      }
+    });
+  }
+
   function queueStart(){
     const due = ESP.SRS.dueCards().filter(c => c.lang === aktifDil());
     return { ids:due.map(c => c.id), pos:0, shown:false, correct:0, again:0,
@@ -193,8 +213,18 @@ ESP.Screens.lang = (function(){
       action:K.Button({ label:'Oturumu bitir', size:'sm', act:'end-review', data:{ 'data-h-odak-cik':'1' } }),
       wide:true,
       /* Odak kapısı (014, hareket.css): oturum sürerken sayfanın geri kalanı
-         sisle örtülür; Esc «Oturumu bitir»e basar. */
-      body:html`<div data-h-odak>
+         sisle örtülür; Esc «Oturumu bitir»e basar.
+         ÇALIŞMA SAHNESİ (2026-10-20, kullanıcı: «çalışma alanı çok küçük ve
+         arka planı sıkıcı; geniş, ilgi çekici ve işe yarayan bir alan olsun,
+         gereksiz süs olmasın»): geniş sahne, oturumun ilerleme çubuğu ve
+         sayaçları (doğru, tekrar, kalan — oturumun kendi kaydından), büyük
+         kart ve klavye: Boşluk çevirir, 1–4 değerlendirir. */
+      body:html`<div class="calisma-sahne" data-h-odak>
+        <div class="calisma-sahne__ust">
+          <span class="calisma-sahne__cubuk" role="progressbar" aria-label="Oturum ilerlemesi" aria-valuemin="0"
+            aria-valuemax="${q.ids.length}" aria-valuenow="${q.pos}"><i style="${'width:' + Math.round(100 * q.pos / Math.max(1, q.ids.length)) + '%'}"></i></span>
+          <span class="calisma-sahne__sayac num"><b>${q.correct || 0}</b> doğru · <b>${q.again || 0}</b> tekrar · <b>${q.ids.length - q.pos}</b> kalan</span>
+        </div>
         ${VT() ? raw(q.shown
             /* 097 KELİME SAHNESİ: tek kelime, anlamı, örnek cümle. */
             ? VT().kelimeSahnesi({ kelime:kart.front, anlam:kart.back, ornek:kart.context, dil:kart.lang })
@@ -229,6 +259,7 @@ ESP.Screens.lang = (function(){
           <p class="small muted mt-8">Kutu ${kart.box} · kolaylık
             ${U.fmtNum(Math.round(kart.ease * 100) / 100)} · ${kart.reps} tekrar,
             ${kart.lapses} unutma</p>`)}
+        <p class="calisma-sahne__klavye tiny muted"><kbd>Boşluk</kbd> çevir${q.shown ? raw(' · ' + ESP.SRS.GRADES.map((g, i) => '<kbd>' + (i + 1) + '</kbd> ' + U.esc(g.label)).join(' · ')) : ''} · <kbd>Esc</kbd> bitir</p>
       </div>`,
     })];
   }

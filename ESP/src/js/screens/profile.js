@@ -225,11 +225,10 @@ ESP.Screens.profile = (function(){
           meta:ESP.Office.ready('patron') ? 'bağlı' : 'bağlı değil',
           note:'Model bir iyileştirmedir, gereklilik değil: kapalıyken ofis '
              + 'kural motorunun cümlesiyle çalışmaya devam eder.',
-          action:K.Button({ label:'Rehberde ayarla', size:'sm', act:'go',
+          action:K.Button({ label:'Durumu gör', size:'sm', act:'go',
             data:{ 'data-route':'guide' } }),
           body:K.Notice({ tone:'info',
-            body:'API anahtarı yalnızca tarayıcıda, uygulama verisinden ayrı bir '
-              + 'anahtarda durur. Yedeğe girmez, buluta gitmez, modele gönderilmez.' }),
+            body:'Model ayarı HKM’dedir (HKM › Modeller › «ESP · Sohbet»); bu cihazda anahtar tutulmaz.' }),
         }),
 
         K.Entry({

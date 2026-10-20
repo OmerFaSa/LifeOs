@@ -532,6 +532,83 @@ ESP.Screens.analytics = (function(){
   /* Sekme yok (EKIP-PLANI §1.2): okumalar alt alta. */
   const GOVDE = { radar:radarRows, seriler:seriesRows, rapor:reportRows, durust:honestyRows, rubrikler:rubriklerRows };
 
+  /* ALANLARA ÖZEL GÖRÜNÜM (2026-10-20, kullanıcı: «ESP Analiz çok karmaşık;
+     alanlara özel ama göz yormayan, göze hitap eden bir düzen»).
+     Her açık disiplin bir karo: son 14 günün dakikası (ölçüldü), 14 günlük
+     mini sütunlar (girilmemiş gün boşluk, sıfır değil), önceki 14 günle
+     fark — ancak İKİ pencerede de en az 3 kayıtlı gün varsa — ve kural
+     motorunun o alana özel kalite cümlesi (Intellect.ehs kWhy). Altta
+     haftanın dengesi tek yığılmış çubuk. Eski beş okuma «Ayrıntılı
+     okumalar»da, baştan kapalı. */
+  const RENK = ['var(--esp)', 'var(--ays)', 'var(--mer)', 'var(--spi)', 'var(--ok)', 'var(--text-2)',
+    'color-mix(in oklab, var(--ays) 50%, var(--spi))'];
+  /* Alanın simgesi: ui.js'te çizimi OLAN adlardan (olmayan ad «i» çıkıyordu). */
+  const SIMGE = { lang:'cards', philo:'users', history:'map', music:'play', diction:'mic', reading:'book', writing:'edit' };
+  const ESIK_GUN = 3;
+  function discIcon(id){
+    const v = (ESP.SECTIONS_ALL || []).reduce((f, s) => f || (s.views || []).find(x => x.disc === id || (Array.isArray(x.disc) && x.disc.indexOf(id) >= 0)), null);
+    return { icon:SIMGE[id] || 'book', route:v && v.route || null };
+  }
+  function pencereDk(discId, bas, gun){
+    const l = [];
+    for(let i = bas + gun - 1; i >= bas; i--){
+      const d = U.iso(U.addDays(U.parse(U.todayISO()), -i));
+      l.push(M.minutesOf(d, discId));
+    }
+    return l;
+  }
+  function sutunlar(l, renk){
+    const enBuyuk = Math.max(1, ...l.filter(v => v != null));
+    const w = 6, ara = 3, h = 34;
+    const bar = l.map((v, i) => v == null
+      ? '<circle cx="' + (i * (w + ara) + w / 2) + '" cy="' + (h - 1.5) + '" r="1.3" class="alan-kare__bos"/>'
+      : '<rect x="' + (i * (w + ara)) + '" y="' + (h - Math.max(2, v / enBuyuk * h)).toFixed(1) + '" width="' + w + '" height="' + Math.max(2, v / enBuyuk * h).toFixed(1) + '" rx="2" style="fill:' + renk + '"/>').join('');
+    return '<svg class="alan-kare__sutun" viewBox="0 0 ' + (l.length * (w + ara) - ara) + ' ' + h + '" aria-hidden="true" preserveAspectRatio="none">' + bar + '</svg>';
+  }
+  function alanKarolari(){
+    const ehs = ESP.Intellect.ehs(14);
+    const kWhy = {};
+    ehs.rows.forEach(r => { kWhy[r.disc.id] = r.kCert === 'missing' ? null : r.kWhy; });
+    const kartlar = ESP.Mod.active().map((d, i) => {
+      const son = pencereDk(d.id, 0, 14), once = pencereDk(d.id, 14, 14);
+      const sonK = son.filter(v => v != null), onceK = once.filter(v => v != null);
+      const top = sonK.reduce((a, b) => a + b, 0);
+      const renk = RENK[i % RENK.length];
+      const ic = discIcon(d.id);
+      let fark = null;
+      if(sonK.length >= ESIK_GUN && onceK.length >= ESIK_GUN){
+        const a = top / sonK.length, b = onceK.reduce((x, y) => x + y, 0) / onceK.length;
+        fark = { yuzde:b ? Math.round((a - b) / b * 100) : null, a, b };
+      }
+      const sonGun = (() => { for(let k = 0; k < 60; k++){ const t = U.iso(U.addDays(U.parse(U.todayISO()), -k)); if(M.minutesOf(t, d.id) != null) return t; } return null; })();
+      return html`<button type="button" class="alan-kare" style="${'--alan:' + renk}" ${raw(ic.route ? 'data-act="go" data-route="' + ic.route + '"' : 'disabled')}>
+        <span class="alan-kare__bas"><span class="alan-kare__simge">${raw(ESP.UI.icon(ic.icon))}</span><b>${d.short || d.label}</b>
+          <small>${sonGun ? (sonGun === U.todayISO() ? 'bugün' : U.fmtShort ? U.fmtShort(sonGun) : sonGun) : 'kayıt yok'}</small></span>
+        <span class="alan-kare__deger num">${sonK.length ? U.fmtMin(top) : '—'}<small>${sonK.length ? ' · ' + sonK.length + ' gün' : ' veri yok'}</small></span>
+        ${raw(sutunlar(son, renk))}
+        <span class="alan-kare__alt">
+          ${when(fark && fark.yuzde != null, () => html`<span class="${'alan-kare__fark ' + (fark.yuzde > 0 ? 'is-art' : fark.yuzde < 0 ? 'is-az' : '')}">${(fark.yuzde > 0 ? '▲ ' : fark.yuzde < 0 ? '▼ ' : '') + '%' + Math.abs(fark.yuzde)} günlük ortalama, önceki 14 güne göre</span>`)}
+          ${when(kWhy[d.id], () => html`<span class="alan-kare__kalite">${kWhy[d.id]}</span>`)}
+        </span>
+      </button>`;
+    });
+    return K.Kutu({ ad:'Alanların', yuva:'son 14 gün · kayıttan', govde:html`<div class="alan-izgara">${kartlar}</div>
+      <p class="tiny muted mt-10">Sütunlar günlük dakikadır; nokta girilmemiş gündür (sıfır sayılmaz). Önceki 14 günle fark, iki pencerede de
+        en az ${ESIK_GUN} kayıtlı gün varsa yazılır. Alt satır, alanın kalite ölçüsüdür (kural motoru).</p>` });
+  }
+  function dengeCubugu(){
+    const b = ESP.Planner.balance(7);
+    if(b.cert === 'missing') return K.Kutu({ ad:'Haftanın dengesi', yuva:'son 7 gün', govde:html`<p class="small muted">Son yedi günde kayıt yok.</p>` });
+    const act = ESP.Mod.active().map(d => d.id);
+    const satir = b.rows.filter(r => r.share != null && r.share > 0);
+    return K.Kutu({ ad:'Haftanın dengesi', yuva:'son 7 gün · süre payı', govde:html`
+      <div class="denge-cubuk" role="img" aria-label="${satir.map(r => r.disc.label + ' %' + Math.round(r.share * 100)).join(', ')}">
+        ${map(satir, r => html`<i style="${'width:' + (r.share * 100).toFixed(1) + '%;background:' + RENK[Math.max(0, act.indexOf(r.disc.id)) % RENK.length]}" title="${r.disc.label + ' · ' + U.fmtMin(r.minutes)}"></i>`)}
+      </div>
+      <div class="denge-lejant">${map(satir, r => html`<span><i style="${'background:' + RENK[Math.max(0, act.indexOf(r.disc.id)) % RENK.length]}"></i>${r.disc.short || r.disc.label} <b class="num">%${Math.round(r.share * 100)}</b></span>`)}</div>
+      ${when(b.skewed, () => html`<p class="small muted mt-8">Pratik ${b.top.label} tarafına yığılmış; ${b.untouched.map(d => d.label).join(', ')} bu hafta açılmadı. Bu bir bulgudur, hata değil.</p>`)}` });
+  }
+
   /* ANALİZ BAŞI (vitrin): 041 veri doluluğu, günlük dakika çizgisi (027,
      girilmemiş gün boşluk), 037 güvenli eğilim, 034 grafiğin cümlesi. */
   function analizBasi(){
@@ -546,23 +623,30 @@ ESP.Screens.analytics = (function(){
       son.push({ tarih:t, deger:r.length ? r.reduce((a, s) => a + (s.minutes || 0), 0) : null });
     }
     return html`<div class="analizbasi">
-      ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'esp', ad:'ESP', gunler:kayitli }], { gun:7 })) })}
       ${K.Kutu({ ad:'Günlük pratik', yuva:'son 28 gün', govde:html`
         ${/* Metrik kartı (2026-10-18): ortalama, eğilim, doluluk ve eksenli çizgi. */''}
-        ${raw(G.metrikHtml(son, { etiket:'Günlük pratik', birim:'dk', ondalik:0, yon:'artis-iyi' }))}` })}
+        ${raw(G.metrikHtml(son, { etiket:'Günlük pratik', birim:'dk', ondalik:0, yon:'artis-iyi' }))}
+        <details class="hiz-ac"><summary>Veri doluluğu</summary>${raw(G.dolulukHtml([{ modul:'esp', ad:'ESP', gunler:kayitli }], { gun:7 }))}</details>` })}
+      ${dengeCubugu()}
     </div>`;
   }
 
   function render(){
+    const acik = !!S.ui.analizAyrinti;
     return K.Grid(html`
+      ${K.Span(12, alanKarolari())}
       ${K.Span(12, analizBasi())}
-      ${K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:'Analiz bölümleri', tabs:TABS, govde:GOVDE }))}`);
+      ${K.Span(12, html`<div class="analiz-ayrinti">
+        ${K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: radar, seriler, rapor, dürüstlük, rubrik', size:'sm', tone:'ghost',
+          act:'analiz-ayrinti', data:{ 'aria-expanded':acik ? 'true' : 'false' } })}</div>`)}
+      ${when(acik, () => K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:'Analiz bölümleri', tabs:TABS, govde:GOVDE })))}`);
   }
 
-  function afterRender(){ ESP.Parts.bolumIstegi('analyticsTab', TABS[0].id); }
+  function afterRender(){ if(S.ui.analizAyrinti) ESP.Parts.bolumIstegi('analyticsTab', TABS[0].id); }
 
   const handle = {
-    async 'ana-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'analiz-ayrinti'(){ S.ui.analizAyrinti = !S.ui.analizAyrinti; ESP.App.render(); },
+    async 'ana-tab'(el){ S.ui.analizAyrinti = true; K.bolumeGit(el.dataset.tab); },
 
     async 'gen-briefing'(){
       delete S.officeBriefings[U.todayISO()];
