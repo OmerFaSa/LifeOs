@@ -1003,8 +1003,13 @@ SP.Screens.today = (function(){
     const kalan = m.rows.filter(x => !x.ok).map(x => x.label.toLocaleLowerCase('tr-TR'));
     gun.push({ ust:'Asgari gün', sayi:sayi({ deger:m.done + '/' + m.total, kesinlik:'computed', formul:'tutulan madde / madde' }),
       cumle:'tamam.', vurgu:kalan.length ? 'Kalan: ' + kalan.join(', ') + '.' : 'Bugün tamam.', sistem:'spi' });
-    gun.push({ ust:'Seri', sayi:sayi({ deger:SP.Calc.streak(), birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
-      cumle:'seri.', vurgu:'Asgari gün seriyi sürdürür.', sistem:'spi' });
+    /* Seri sıfırken «0 gün, hesaplandı seri» okunuyordu; sıfır seri bir
+       sayı değil, henüz başlamamış bir seridir. */
+    const seri = SP.Calc.streak();
+    gun.push(seri > 0
+      ? { ust:'Seri', sayi:sayi({ deger:seri, birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
+          cumle:'üst üste.', vurgu:'Asgari gün seriyi sürdürür.', sistem:'spi' }
+      : { ust:'Seri', cumle:'Henüz başlamadı.', vurgu:'Bugün asgari günü tamamlarsan seri başlar.', sistem:'spi' });
 
     const saglik = [];
     const r = SP.Move.readiness(shownDate());

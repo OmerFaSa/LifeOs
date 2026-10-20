@@ -708,6 +708,9 @@ R.App = (function(){
        icin sonuc: tikladiginda hicbir sey olmayan bir dugme. (ESP'de duman
        testi bunu "olu dugme" olarak yakaladi.) */
     if(UI.isSheetOpen && UI.isSheetOpen()) UI.closeSheet();
+    /* Defter de kapanır (2026-10-20): açık kalınca yeni ekranın üstünde
+       duruyordu; perdesi altındaki ekranı örttüğü için gezinti görünmüyordu. */
+    if(window.LIFEOS && LIFEOS.DEFTER && LIFEOS.DEFTER.kapat) LIFEOS.DEFTER.kapat();
     K.katmanKapat();
     /* Gizlenmis bolumun adresi (eski bir baglanti, palet gecmisi) Bugun'e
        doner: gizlenen bolum «acilmayan bos ekran» olarak gorunmemeli. */

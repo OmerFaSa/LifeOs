@@ -17853,7 +17853,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'04a09f7f', at:'2026-10-20 08:14', dirty:true };
+R.BUILD = { id:'a3fa372d', at:'2026-10-20 12:13', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -97683,7 +97683,10 @@ R.Screens.today = (function(){
     m.push({ ust:'Sınav', sayi:sayi(z.kalan), cumle:'kaldı.', vurgu:z.kalan.kesinlik === 'estimated' ? 'TYT, tahmini tarih.' : 'TYT.',
       sistem:'ays', dugme:git('Plana bak', 'plan') });
     const seri = C.behaviorStreak();
-    m.push({ ust:'Seri', sayi:sayi(z.seri), cumle:'seri.', vurgu:seri.streak ? 'Minimum gün tutuldu.' : 'Minimum gün başlatır.', sistem:'ays' });
+    /* Sıfır seri bir sayı değil, henüz başlamamış bir seridir («0 gün, hesaplandı seri» okunuyordu). */
+    m.push(seri.streak
+      ? { ust:'Seri', sayi:sayi(z.seri), cumle:'üst üste.', vurgu:'Minimum gün tutuldu.', sistem:'ays' }
+      : { ust:'Seri', cumle:'Henüz başlamadı.', vurgu:'Bugün minimum günü tamamlarsan seri başlar.', sistem:'ays' });
 
     /* İki küçük widget yan yana (iOS gibi): «Bugün» günün kendisi, «Gidişat»
        haftaların toplamı. Her biri kendi başına döner. */
@@ -113894,6 +113897,9 @@ R.App = (function(){
        icin sonuc: tikladiginda hicbir sey olmayan bir dugme. (ESP'de duman
        testi bunu "olu dugme" olarak yakaladi.) */
     if(UI.isSheetOpen && UI.isSheetOpen()) UI.closeSheet();
+    /* Defter de kapanır (2026-10-20): açık kalınca yeni ekranın üstünde
+       duruyordu; perdesi altındaki ekranı örttüğü için gezinti görünmüyordu. */
+    if(window.LIFEOS && LIFEOS.DEFTER && LIFEOS.DEFTER.kapat) LIFEOS.DEFTER.kapat();
     K.katmanKapat();
     /* Gizlenmis bolumun adresi (eski bir baglanti, palet gecmisi) Bugun'e
        doner: gizlenen bolum «acilmayan bos ekran» olarak gorunmemeli. */

@@ -139,21 +139,6 @@ SP.Screens.meeting = (function(){
       </div>`;
   }
 
-  /* Eski tutanağın bir turu (yalnız okunur). */
-  function turnBlock(t, closing, calanMi){
-    const a = SP.AGENT_BY_ID[t.agent];
-    return html`
-      <div class="${cls('meetturn', closing && 'meetturn--closing', calanMi && 'is-calan')}">
-        <div class="meetturn__who">
-          ${P.avatar(t.agent, 'sm')}
-          <b>${t.name}</b>
-          <span class="dim">${a ? a.title : ''}</span>
-          ${P.sourceBadge(t.source)}
-        </div>
-        <div class="meetturn__body">${t.text}</div>
-      </div>`;
-  }
-
   function minutesCard(rec){
     const oyn = oynatmaDurumu(rec.id);
     return K.Card({

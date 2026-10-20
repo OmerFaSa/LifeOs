@@ -1263,7 +1263,10 @@ R.Screens.today = (function(){
     m.push({ ust:'Sınav', sayi:sayi(z.kalan), cumle:'kaldı.', vurgu:z.kalan.kesinlik === 'estimated' ? 'TYT, tahmini tarih.' : 'TYT.',
       sistem:'ays', dugme:git('Plana bak', 'plan') });
     const seri = C.behaviorStreak();
-    m.push({ ust:'Seri', sayi:sayi(z.seri), cumle:'seri.', vurgu:seri.streak ? 'Minimum gün tutuldu.' : 'Minimum gün başlatır.', sistem:'ays' });
+    /* Sıfır seri bir sayı değil, henüz başlamamış bir seridir («0 gün, hesaplandı seri» okunuyordu). */
+    m.push(seri.streak
+      ? { ust:'Seri', sayi:sayi(z.seri), cumle:'üst üste.', vurgu:'Minimum gün tutuldu.', sistem:'ays' }
+      : { ust:'Seri', cumle:'Henüz başlamadı.', vurgu:'Bugün minimum günü tamamlarsan seri başlar.', sistem:'ays' });
 
     /* İki küçük widget yan yana (iOS gibi): «Bugün» günün kendisi, «Gidişat»
        haftaların toplamı. Her biri kendi başına döner. */
