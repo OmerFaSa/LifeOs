@@ -87,15 +87,13 @@
 .sayfa--kapakli .bugun{ display:flex; flex-direction:column; gap:16px; }
 .sayfa--kapakli .bugun__sol, .sayfa--kapakli .bugun__sag{ display:contents; }
 .sayfa--kapakli .bugun__alan{ display:grid; grid-template-columns:132px minmax(0, 1fr); column-gap:36px; row-gap:0;
-  padding:26px 28px; border-radius:22px; border:1px solid color-mix(in oklab, var(--text) 7%, transparent);
-  background:color-mix(in oklab, var(--surface) 80%, transparent);
-  box-shadow:0 1px 2px color-mix(in oklab, #000 5%, transparent), 0 18px 40px -26px color-mix(in oklab, #000 35%, transparent);
-  -webkit-backdrop-filter:blur(18px) saturate(1.1); backdrop-filter:blur(18px) saturate(1.1); }
+  padding:26px 28px; border-radius:18px; border:1px solid color-mix(in oklab, var(--text) 8%, transparent);
+  background:color-mix(in oklab, var(--surface) 88%, transparent); }
 .sayfa--kapakli .bugun__etiket{ position:static !important; width:auto; height:auto; overflow:visible; clip:auto; clip-path:none; white-space:normal;
   grid-column:1; grid-row:1 / span 20; align-self:start; display:flex; align-items:center; gap:8px; margin:3px 0 0;
   font-size:13px; font-weight:650; letter-spacing:.01em; color:var(--text-2); }
-.sayfa--kapakli .bugun__etiket::before{ content:''; width:8px; height:8px; border-radius:3px; flex:none;
-  background:var(--primary); opacity:.85; }
+.sayfa--kapakli .bugun__etiket::before{ content:''; width:6px; height:6px; border-radius:50%; flex:none;
+  background:var(--primary); opacity:.7; }
 .sayfa--kapakli .bugun__alan > :not(.bugun__etiket){ grid-column:2; min-width:0; }
 .sayfa--kapakli .bugun__alan > :not(.bugun__etiket) ~ :not(.bugun__etiket){ margin-top:22px; padding-top:22px;
   border-top:1px solid color-mix(in oklab, var(--text) 7%, transparent); }
@@ -107,8 +105,8 @@
   padding-left:0 !important; padding-right:0 !important; }
 .sayfa--kapakli .bugun :is(.giris, .tekgun, .sorukart, .donen, .kutu, .card, .okart){ padding-top:0 !important; padding-bottom:0 !important; }
 /* Durum: dönen satırlar iç karo; yan yana. */
-.sayfa--kapakli .bugun .bugun__alan > .donen{ padding:16px 18px 40px !important; border-radius:16px !important;
-  background:color-mix(in oklab, var(--surface-2) 72%, transparent) !important; border:1px solid color-mix(in oklab, var(--text) 5%, transparent) !important; }
+.sayfa--kapakli .bugun .bugun__alan > .donen{ padding:14px 16px 38px !important; border-radius:12px !important;
+  background:transparent !important; border:1px solid color-mix(in oklab, var(--text) 8%, transparent) !important; }
 .sayfa--kapakli .bugun .bugun__alan > .donen .donen__sayi{ font-size:1.25em; }
 .sayfa--kapakli .bugun__alan > .donen + .donen{ margin-top:12px; padding-top:16px; border-top:0; }
 @media (min-width:680px){
@@ -167,16 +165,11 @@
 .kapak__sayilar[data-adet="3"]{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
 .kapak__sayilar[data-adet="2"]{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
 .kapak__sayilar[data-adet="1"]{ grid-template-columns:minmax(0, 320px); }
-.kapak__sayi{ --renk:var(--primary); position:relative; display:flex; flex-direction:column; gap:12px; min-width:0;
-  padding:16px 18px 14px; border-radius:20px; border:1px solid color-mix(in oklab, var(--text) 7%, transparent);
-  background:color-mix(in oklab, var(--surface) 80%, transparent);
-  box-shadow:0 1px 2px color-mix(in oklab, #000 5%, transparent), 0 16px 34px -22px color-mix(in oklab, var(--renk) 55%, transparent);
-  -webkit-backdrop-filter:blur(16px) saturate(1.15); backdrop-filter:blur(16px) saturate(1.15);
-  animation:kapak-karo .7s cubic-bezier(.32,.72,0,1) both; transition:transform .2s ease, box-shadow .2s ease; }
-.kapak__sayi:nth-child(2){ animation-delay:.06s; } .kapak__sayi:nth-child(3){ animation-delay:.12s; } .kapak__sayi:nth-child(4){ animation-delay:.18s; }
-@keyframes kapak-karo{ from{ opacity:0; transform:translateY(8px); } }
+.kapak__sayi{ --renk:var(--primary); position:relative; display:flex; flex-direction:column; gap:10px; min-width:0;
+  padding:14px 16px 13px; border-radius:14px; border:1px solid color-mix(in oklab, var(--text) 9%, transparent);
+  background:color-mix(in oklab, var(--surface) 86%, transparent); transition:border-color .2s ease; }
 .kapak__sayi.is-git{ font:inherit; color:inherit; text-align:left; cursor:pointer; }
-.kapak__sayi.is-git:hover{ transform:translateY(-2px); border-color:color-mix(in oklab, var(--renk) 35%, transparent); }
+.kapak__sayi.is-git:hover{ border-color:color-mix(in oklab, var(--text) 22%, transparent); }
 .kapak__sayi.is-git:focus-visible{ outline:2px solid var(--renk); outline-offset:2px; }
 .kapak__sayi[data-simge="uyku"]{ --renk:#7b6cf0; }
 .kapak__sayi[data-simge="su"], .kapak__sayi[data-simge="sure"]{ --renk:#2f9be8; }
@@ -187,21 +180,21 @@
 .kapak__sayi[data-simge="seri"]{ --renk:#ee6a3a; }
 .kapak__sayi[data-simge="sinav"]{ --renk:#e2546a; }
 .kapak__karo-ust{ display:flex; align-items:center; gap:10px; min-width:0; }
-.kapak__simge{ flex:none; width:34px; height:34px; padding:8px; box-sizing:border-box; border-radius:11px;
-  background:color-mix(in oklab, var(--renk) 15%, transparent); color:var(--renk);
-  fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
-.kapak__sayi .kapak__ad{ min-width:0; font-size:13.5px; font-weight:600; color:var(--text); }
+.kapak__simge{ flex:none; width:18px; height:18px; color:var(--renk);
+  fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.kapak__karo-ust{ align-items:flex-start; }
+.kapak__sayi .kapak__ad{ min-width:0; font-size:13px; font-weight:600; color:var(--text-2); }
 .kapak__ad i{ display:block; margin-top:1px; font-style:normal; font-size:11px; font-weight:450; color:var(--text-3); }
-.kapak__karo-orta{ display:flex; align-items:center; gap:12px; min-height:56px; }
-.kapak__sayi .kapak__deger{ font-size:clamp(26px, 2.6vw, 32px); font-weight:650; letter-spacing:-.02em; line-height:1; text-align:left; color:var(--text); }
+.kapak__karo-orta{ display:flex; align-items:center; gap:12px; min-height:48px; }
+.kapak__sayi .kapak__deger{ font-size:clamp(24px, 2.4vw, 30px); font-weight:600; letter-spacing:-.02em; line-height:1; text-align:left; color:var(--text); }
 .kapak__sayi[data-kesinlik="veri_yok"] .kapak__deger{ color:var(--text-3); font-weight:500; }
-.kapak__halka{ flex:none; width:56px; height:56px; }
-.kapak__halka circle{ fill:none; stroke-width:6.5; }
-.kapak__halka-iz{ stroke:color-mix(in oklab, var(--text) 9%, transparent); }
+.kapak__halka{ flex:none; width:44px; height:44px; }
+.kapak__halka circle{ fill:none; stroke-width:5; }
+.kapak__halka-iz{ stroke:color-mix(in oklab, var(--text) 8%, transparent); }
 .kapak__halka-dolu{ stroke:var(--renk); stroke-linecap:round; transition:stroke-dasharray .8s cubic-bezier(.32,.72,0,1); }
 .kapak__alt{ font-size:12px; color:var(--text-2); margin-top:-4px; }
-.kapak__sutun{ width:100%; height:22px; display:block; }
-.kapak__sutun rect{ fill:color-mix(in oklab, var(--renk) 38%, transparent); }
+.kapak__sutun{ width:100%; height:18px; display:block; }
+.kapak__sutun rect{ fill:color-mix(in oklab, var(--text) 14%, transparent); }
 .kapak__sutun rect.is-son{ fill:var(--renk); }
 .kapak__sutun-bos{ fill:var(--text-3); opacity:.45; }
 .kapak__asagi{ background:transparent; -webkit-backdrop-filter:none; backdrop-filter:none; color:var(--text-3); }
@@ -212,14 +205,12 @@
 }
 @media (max-width:679px){
   .kapak__sayilar{ gap:10px; }
-  .kapak__sayi{ padding:13px 14px 12px; border-radius:16px; gap:10px; }
-  .kapak__simge{ width:30px; height:30px; padding:7px; border-radius:10px; }
-  .kapak__halka{ width:46px; height:46px; }
-  .kapak__karo-orta{ min-height:46px; gap:10px; }
+  .kapak__sayi{ padding:12px 13px 11px; border-radius:12px; gap:8px; }
+  .kapak__halka{ width:38px; height:38px; }
+  .kapak__karo-orta{ min-height:40px; gap:10px; }
   .kapak__sayi .kapak__deger{ font-size:24px; }
 }
 @media (prefers-reduced-motion:reduce){
-  .kapak__sayi{ animation:none; transition:none; }
-  .kapak__sayi.is-git:hover{ transform:none; }
+  .kapak__sayi{ transition:none; }
   .kapak__halka-dolu{ transition:none; }
 }

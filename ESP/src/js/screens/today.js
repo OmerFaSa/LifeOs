@@ -838,11 +838,14 @@ ESP.Screens.today = (function(){
     const rows = M.sessionsOf(gun());
     const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
     const hedef = ESP.GunSure ? ESP.GunSure.taban(gun()).dakika : ((S.profile && S.profile.dailyMinutes) || null);
+    const G = (window.LIFEOS || {}).GRAFIK;
 
     const bugun = [];
     bugun.push(rows.length
       ? { ust:'Günün dakikası', sayi:sayi({ deger:toplam, birim:'dk', kesinlik:'measured' }), cumle:'çalışıldı.',
-          vurgu:rows.length + ' oturum' + (hedef ? ' · günlük en az ' + hedef + ' dk' : '') + '.', sistem:'esp', dugme:git('Oturumlar', 'gun') }
+          vurgu:rows.length + ' oturum.', sistem:'esp', dugme:git('Oturumlar', 'gun'),
+          /* Görsel dil: taban biliniyorsa eşik çubuğu cümlenin yerini alır. */
+          gorsel:hedef && G && G.esikCubukHtml ? G.esikCubukHtml({ etiket:'Günün dakikası', deger:toplam, esik:hedef, birim:'dk', yon:'artis-iyi' }) : '' }
       : { ust:'Günün dakikası', cumle:'Bugün oturum yok.', vurgu:hedef ? 'Günlük en az ' + hedef + ' dk.' : 'İlk oturumla başlar.', sistem:'esp', dugme:git('Oturum gir', 'gun') });
     const seri = M.streak();
     /* Sıfır seri bir sayı değil, henüz başlamamış bir seridir («0 gün, hesaplandı seri» okunuyordu). */

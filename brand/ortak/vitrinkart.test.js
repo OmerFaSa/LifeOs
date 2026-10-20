@@ -838,6 +838,17 @@ describe('Dönen widget', () => {
       expect(d.querySelectorAll('[data-donen-git]').length).toBe(3);
     });
   });
+  it('görsel dil: maddenin görseli (tik sayacı) cümlenin altında çizilir; görselsiz madde boş kutu taşımaz (2026-10-20)', () => {
+    const G = window.LIFEOS.GRAFIK;
+    const l = [{ ust:'Asgari gün', sayi:'1/4', cumle:'tamam.', gorsel:G.tikHtml({ etiket:'Asgari gün', hedef:4, yapilan:1 }) }, MAD[1]];
+    icinde(V().donen({ id:'t-donen-g', maddeler:l }), k => {
+      const m = k.querySelectorAll('[data-donen-madde]');
+      expect(m[0].querySelectorAll('.donen__gorsel .tik__k').length).toBe(4);
+      expect(m[0].querySelectorAll('.donen__gorsel .tik__k--dolu').length).toBe(1);
+      expect(m[0].querySelector('.donen__gorsel [role="img"]').getAttribute('aria-label')).toContain('1 / 4');
+      expect(!!m[1].querySelector('.donen__gorsel')).toBe(false);
+    });
+  });
   it('3 saniye geçince sonraki maddeye geçer; yeniden çizimde kaldığı yerden sürer', () => {
     icinde(V().donen({ id:'t-donen-2', maddeler:MAD }), k => {
       const d = k.querySelector('.donen');

@@ -1719,6 +1719,9 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div>'
       + '<p class="donen__cumle">' + (m.sayi ? '<span class="donen__sayi">' + m.sayi + '</span> ' : '')
       + kac(m.cumle || '') + (m.vurgu ? ' <em>' + kac(m.vurgu) + '</em>' : '') + '</p>'
+      /* Görsel dil (AGENTS §1.10): hedefi olan sayı çizilir. `gorsel` güvenilir
+         HTML'dir (GRAFIK.tikHtml / esikCubukHtml çıktısı; kendi aria-label'ı var). */
+      + (m.gorsel ? '<div class="donen__gorsel">' + m.gorsel + '</div>' : '')
       + '</div>';
     const coklu = l.length > 1;
     return '<section class="donen" data-donen="' + kac(id) + '" aria-roledescription="dönen kart" aria-label="' + kac(o.ad || 'Durum') + '">'

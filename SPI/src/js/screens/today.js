@@ -1001,7 +1001,9 @@ SP.Screens.today = (function(){
     }
     const m = SP.Calc.minimumDay();
     const kalan = m.rows.filter(x => !x.ok).map(x => x.label.toLocaleLowerCase('tr-TR'));
+    const G = (window.LIFEOS || {}).GRAFIK;
     gun.push({ ust:'Asgari gün', sayi:sayi({ deger:m.done + '/' + m.total, kesinlik:'computed', formul:'tutulan madde / madde' }),
+      gorsel:G && G.tikHtml ? G.tikHtml({ etiket:'Asgari gün', hedef:m.total, yapilan:m.done }) : '',
       cumle:'tamam.', vurgu:kalan.length ? 'Kalan: ' + kalan.join(', ') + '.' : 'Bugün tamam.', sistem:'spi' });
     /* Seri sıfırken «0 gün, hesaplandı seri» okunuyordu; sıfır seri bir
        sayı değil, henüz başlamamış bir seridir. */

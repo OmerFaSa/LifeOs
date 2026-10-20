@@ -115,6 +115,18 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
      önizleme + onay + geri dönüş noktası.
    Geri alınamayan hiçbir aksiyon küçük sayılamaz. Hangi küçük türlerin
    sormadan uygulanacağını kullanıcı ayarlar; ayar kapalıysa küçük de sorar.
+10. **Görsel dil: sade, profesyonel, az metin.** (Kullanıcı, 2026-10-20:
+   «görselleştirme birçok şeyi minimalleştirebilir; var olanları bu yöne
+   çek, yeni yapılacakları böyle yap.») Bir sayının hedefi varsa cümle
+   yerine çizilir: küçük tam sayı hedef → tik sayacı (`GRAFIK.tikHtml`),
+   eşik → eşik çubuğu (`GRAFIK.esikCubukHtml`), günün oranı → ince halka;
+   gidişat → mini sütun / eğilim (`GRAFIK.egilimHtml`), dağılım → tek
+   yığılmış çubuk. Metin yalnız görselin söyleyemediğini söyler (neden,
+   ne yapılır). Kurallar: renk ölçüyü ayırır, iyi/kötü yalnız yönü
+   bilinen eşikte; gölge, parıltı, süs deseni yok; ince çizgi, bol boşluk,
+   tek vurgu rengi. Görsel veri uydurmaz: hedef yoksa halka/çubuk yok,
+   girilmemiş gün nokta ya da boşluk (sıfır değil), her görselin
+   `aria-label`'ı sayıyı cümleyle söyler.
 
 ## 2. Denetimler — birleştirmeden önce koşar
 

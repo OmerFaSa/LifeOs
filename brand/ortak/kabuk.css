@@ -2025,4 +2025,8 @@ html .site--v5 .ledger:not(.ledger .ledger){ row-gap:var(--raf-ara); }
 .site--v5 .kenar__cekmece:hover{ color:var(--text); }
 .site--v5 .kenar__cekmece.is-on{ color:var(--text); }
 .site--v5 .kenar__cekmece.is-on .kbk-ic{ color:var(--primary); }
-.site--v5 .kenar__cekmece.is-on::before{ background:color-mix(in oklab, var(--primary) 13%, var(--sidebar-active, var(--surface))); }
+.site--v5 .kenar__cekmece.is-on::before{ background:color-mix(in oklab, var(--primary) 7%, var(--sidebar-active, var(--surface))); }
+/* Dönen satırın görseli (tik sayacı, eşik çubuğu): cümlenin altında, ince. */
+.donen__gorsel{ margin-top:10px; max-width:420px; }
+.donen__gorsel .tik, .donen__gorsel .esikcubuk{ margin:0; }
+.donen__gorsel :is(.tik__et, .tik__sayi, .esikcubuk__et){ display:none; }

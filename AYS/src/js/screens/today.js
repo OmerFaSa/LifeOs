@@ -1247,6 +1247,7 @@ R.Screens.today = (function(){
       const borc = C.cardDebt();
       m.push({ ust:'Tekrar borcu', sayi:sayi({ deger:borc, birim:'%', kesinlik:'computed', formul:'geciken kart ÷ vadeli kart' }),
         cumle:'tekrar borcu.', vurgu:borc > 10 ? 'Eşiğin üstünde.' : 'Eşik %10.', sistem:'ays',
+        gorsel:(window.LIFEOS || {}).GRAFIK && borc != null ? window.LIFEOS.GRAFIK.esikCubukHtml({ etiket:'Tekrar borcu', deger:borc, esik:10, olcek:Math.max(50, borc), birim:'%', yon:'azalis-iyi' }) : '',
         dugme:vadeli ? git('Tekrara git', 'cards') : null });
     }else{
       m.push({ ust:'Tekrar borcu', cumle:'Tekrar kartı yok.', vurgu:'Borç ilk kartla ölçülür.', sistem:'ays' });
