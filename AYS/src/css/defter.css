@@ -175,3 +175,46 @@
   font:inherit; font-size:13.5px; font-weight:550; cursor:pointer; }
 .defter-raf__hata{ margin:0; font-size:13px; color:var(--danger, #c0392b); }
 @media (prefers-reduced-motion:reduce){ .defter-raf__eylem, .defter-raf__oge{ transition:none; } .defter-raf__eylem:active{ transform:none; } }
+
+
+/* Klasör ağacı, klasör seçici ve AĞ görünümü (2026-10-20). */
+.defter__klasorler{ display:flex; flex-direction:column; gap:1px; padding:2px 0 6px; border-bottom:1px solid color-mix(in oklab, var(--border) 70%, transparent); margin-bottom:4px; }
+.defter__klasor{ --derin:0; display:flex; align-items:center; gap:8px; width:100%; min-height:30px; padding:4px 10px 4px calc(12px + var(--derin) * 14px);
+  border:0; border-radius:10px; background:transparent; color:var(--text-2); font:inherit; font-size:13px; cursor:pointer; text-align:left; }
+.defter__klasor span{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.defter__klasor span::before{ content:''; display:inline-block; width:12px; height:9px; margin-right:7px; border:1.5px solid currentColor; border-radius:2px 2px 3px 3px; opacity:.6; vertical-align:-1px; }
+.defter__klasor:first-child span::before{ border-radius:3px; }
+.defter__klasor small{ font-size:11px; color:var(--text-3); font-variant-numeric:tabular-nums; }
+.defter__klasor:hover{ background:color-mix(in oklab, var(--surface) 55%, transparent); color:var(--text); }
+.defter__klasor.is-secili{ background:var(--surface); color:var(--text); font-weight:600; }
+.defter__klasor-ekle{ align-self:flex-start; margin:4px 10px 0; }
+.defter__klasor-yeni{ display:flex; gap:6px; padding:4px 8px; }
+.defter__klasor-yeni input{ flex:1; min-width:0; min-height:30px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text); font:inherit; font-size:13px; padding:0 8px; }
+.defter__klasor-is{ display:flex; flex-wrap:wrap; gap:4px 10px; padding:4px 12px 0; }
+.defter__klasor-sec{ display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--text-2); }
+.defter__klasor-sec select{ min-height:28px; max-width:160px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text); font:inherit; font-size:12px; }
+.defter__gorunum{ min-height:36px; }
+.defter__gorunum.is-secili{ background:var(--surface); color:var(--text); }
+
+.defter.is-ag .defter__sag{ display:flex; }
+.defter-ag{ flex:1; min-height:0; display:flex; flex-direction:column; gap:8px; height:100%; }
+.defter-ag__arac{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+.defter-ag__dug{ min-height:30px; padding:0 12px; border:1px solid var(--border); border-radius:999px; background:none; color:var(--text-2); font:inherit; font-size:12.5px; cursor:pointer; }
+.defter-ag__dug.is-secili{ background:var(--text); color:var(--surface); border-color:var(--text); }
+.defter-ag__bosluk{ flex:1; }
+.defter .defter-ag__tuval{ flex:1; min-height:320px; width:100%; height:auto; border-radius:18px; background:var(--surface); box-shadow:var(--kart-golge, 0 1px 2px rgba(0,0,0,.06));
+  cursor:grab; touch-action:none; user-select:none; }
+.defter-ag__tuval.is-surukle{ cursor:grabbing; }
+.defter-ag__kenar{ stroke:color-mix(in oklab, var(--text-3) 55%, transparent); stroke-width:1.4; }
+.defter-ag__kenar.is-etiket{ stroke-dasharray:4 4; opacity:.6; }
+.defter-ag__dugum{ cursor:pointer; outline:none; }
+.defter-ag__dugum circle{ stroke:var(--surface); stroke-width:2; transition:r .15s ease; }
+.defter-ag__dugum text{ font-size:12px; fill:var(--text-2); stroke:none; text-anchor:middle; opacity:0; pointer-events:none; transition:opacity .15s ease; }
+.defter-ag__dugum.is-adli text, .defter-ag__dugum:hover text, .defter-ag__dugum:focus text{ opacity:1; }
+.defter-ag__dugum:hover circle, .defter-ag__dugum:focus circle{ stroke:var(--text); }
+.defter-ag__dugum.is-secili circle{ stroke:var(--text); stroke-width:3; }
+.defter-ag__dugum.is-secili text{ fill:var(--text); font-weight:600; }
+.defter-ag__alt{ display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px 14px; font-size:11.5px; color:var(--text-2); }
+.defter-ag__lejant{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; }
+.defter-ag__lejant i{ display:inline-block; width:9px; height:9px; border-radius:999px; margin-right:4px; }
+@media (max-width:760px){ .defter.is-ag .defter__sol{ display:none; } }

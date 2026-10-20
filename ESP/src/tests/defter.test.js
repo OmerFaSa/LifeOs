@@ -23,6 +23,55 @@
   }
   async function ile(fn){ const s = sahne(); try{ await fn(s); }finally{ s.birak(); } }
 
+  describe('Defter — klasör, ağ, boş not (2026-10-20)', () => {
+    it('klasör adı temizlenir; ağaç üst klasörleri de gösterir; yeni not seçili klasörde açılır', () => ile(async () => {
+      expect(D().klasorAdi('  Sağlık / uyku/ ')).toBe('Sağlık/uyku');
+      D().klasorSec('Sağlık/Uyku');
+      const a = await D().yeni('Uyku notu', 'x');
+      D().klasorSec(null);
+      await D().yeni('Serbest', 'y', 'not', '');
+      expect(a.klasor).toBe('Sağlık/Uyku');
+      expect(D().klasorler()).toEqual(['Sağlık', 'Sağlık/Uyku']);
+      expect(D().klasordeki('Sağlık').map(n => n.baslik)).toEqual(['Uyku notu']);
+      expect(D().klasordeki('').map(n => n.baslik)).toEqual(['Serbest']);
+    }));
+    it('boş klasör kalır; yeniden adlandırma notları taşır; silmek notu silmez', () => ile(async s => {
+      expect(await D().klasorEkle('Okuma')).toBe('Okuma');
+      expect(D().klasorler()).toEqual(['Okuma']);
+      expect(s.depo['defterklasor/liste'].liste).toEqual(['Okuma']);
+      await D().yeni('Kitap', 'z', 'not', 'Okuma');
+      expect(await D().klasorTasi('Okuma', 'Kitaplar')).toBe(1);
+      expect(D().klasordeki('Kitaplar').length).toBe(1);
+      expect(await D().klasorSil('Kitaplar')).toBe(1);
+      expect(D().notlar().length).toBe(1);
+      expect(D().notlar()[0].klasor).toBe('');
+      expect(D().klasorler()).toEqual([]);
+    }));
+    it('başlığı ve metni boş not silinir, dolu not kalır', () => ile(async () => {
+      const b = await D().yeni('', '');
+      const d = await D().yeni('Dolu', '');
+      expect(await D().bosSil(b.id)).toBe(true);
+      expect(await D().bosSil(d.id)).toBe(false);
+      expect(D().notlar().map(n => n.baslik)).toEqual(['Dolu']);
+    }));
+    it('ağ: [[bağlantı]] kenar olur; etiket bağı isteğe bağlı; bağsızları gizle ve çevre süzer; yerleşim tohumludur', () => ile(async () => {
+      const a = await D().yeni('Türev', '[[Limit]] #mat');
+      const b = await D().yeni('Limit', 'temel #mat');
+      const c = await D().yeni('Şiir', 'yalnız');
+      const e = await D().yeni('Uzak', '[[Şiir]]');
+      let v = D().agVeri({ klasor:null });
+      expect(v.dugum.length).toBe(4);
+      expect(v.kenar.map(k => k.tur).sort()).toEqual(['bag', 'bag']);
+      expect(D().agVeri({ klasor:null, etiket:true }).kenar.length).toBe(2);
+      expect(D().agVeri({ klasor:null, cevre:true, merkez:a.id }).dugum.map(d => d.id).sort()).toEqual([a.id, b.id].sort());
+      await D().yeni('Tek', 'bağsız');
+      expect(D().agVeri({ klasor:null, bagsizGizle:true }).dugum.length).toBe(4);
+      const p1 = D().yerlesim(v, 1000, 700), p2 = D().yerlesim(v, 1000, 700);
+      expect(p1[c.id]).toEqual(p2[c.id]);
+      expect(Number.isFinite(p1[e.id].x) && Number.isFinite(p1[e.id].y)).toBe(true);
+    }));
+  });
+
   describe('Defter — biçim ve güvenlik', () => {
     it('metin kaçırılır; javascript: bağlantı olmaz, https olur', () => {
       const h = D().md('<script>alert(1)</script> "x" javascript:alert(1) https://example.com/a?b=1');

@@ -229,4 +229,39 @@
       expect((await a.b.ilet('şunu hallet')).metin).toBe('Araştırmamı mı, üretmemi mi?');
     });
   });
+
+  describe('Ofis — Merkez modeli (2026-10-20: model ayarı HKM’de)', () => {
+    function hkm(acik, yanit){
+      const cagri = [];
+      const b = { MODULE:'spi', urlOk:() => true, settings:() => acik ? { enabled:true, token:'j', url:'http://127.0.0.1:4200' } : { enabled:false } };
+      const mm = O().merkezModelKur({ hkm:() => b, fetch:async (url, opt) => { cagri.push({ url, opt }); return { json:async () => yanit(url, opt) }; } });
+      return { mm, cagri };
+    }
+    it('HKM bağlı değilse sormaz; durum «hkm-yok»', async () => {
+      const { mm, cagri } = hkm(false, () => ({}));
+      expect(mm.bagli()).toBe(false);
+      expect((await mm.tazele()).reason).toBe('hkm-yok');
+      expect(cagri.length).toBe(0);
+    });
+    it('durum iki kademe için sorulur; cevap modül adıyla ve mesajlarla gider, rol istemciden seçilmez', async () => {
+      const { mm, cagri } = hkm(true, url => /durum/.test(url) ? { ok:true, model:'m1' } : { ok:true, text:'Merhaba!', model:'m1' });
+      await mm.tazele();
+      expect(mm.hazir()).toBe(true);
+      expect(mm.gorselHazir()).toBe(true);
+      expect(cagri.map(c => c.url.split('/api/')[1])).toEqual(['ofis/durum?modul=spi', 'ofis/durum?modul=spi&yetenek=gorsel']);
+      const r = await mm.sor({ sistem:'S', mesajlar:[{ role:'user', text:'selam' }], baglam:'{}' });
+      expect(r.text).toBe('Merhaba!');
+      const govde = JSON.parse(cagri[2].opt.body);
+      expect([govde.modul, govde.yetenek, govde.mesajlar[0].text]).toEqual(['spi', 'sohbet', 'selam']);
+      expect(cagri[2].opt.headers.Authorization).toBe('Bearer j');
+    });
+    it('model atanmamışsa durum düşer; görsel istekte görüntü son mesajdan gider', async () => {
+      const { mm, cagri } = hkm(true, (url, opt) => /cevap/.test(url) ? { ok:false, reason:'no-model', note:'Atanmamış.' } : { ok:true });
+      await mm.tazele();
+      await mm.sor({ yetenek:'gorsel', mesajlar:[{ role:'user', text:'oku', images:[{ mime:'image/png', data:'AA==' }] }] });
+      expect(JSON.parse(cagri[2].opt.body).gorseller).toEqual([{ mime:'image/png', data:'AA==' }]);
+      expect(mm.gorselHazir()).toBe(false);
+      expect(mm.hazir()).toBe(true);
+    });
+  });
 })();

@@ -56,7 +56,22 @@
        ekle), en yeni beş kayıt, fazlası «Tümü». Satır Defter'i o kayıtta
        açar; yeni kayıt yazma kipinde açılır. Defter kapanınca raf tazelenir.
      · DOSYA: her dosya kendi kaydını açar; dosya cihazda kalır (söz 1),
-       kaydın adı ve gömmesi eşitlenir. */
+       kaydın adı ve gömmesi eşitlenir.
+
+   Klasör ve ağ (2026-10-20, kullanıcı: «notlar klasörlenebilir ve
+   düzenlenebilir olsun; Obsidian mantığında şematik bir ağda görülebilsin;
+   not sayısı artınca karmaşa olmasın»):
+     · KLASÖR: her kaydın `klasor` alanı («Sağlık», «Sağlık/Uyku»); sol
+       sütunda ağaç (sayılarıyla), seçilen klasör listeyi süzer, yeni not o
+       klasörde açılır. Klasörü silmek notu silmez: notlar klasörsüze geçer.
+       Boş klasör `defterklasor/liste` kaydında durur.
+     · AĞ: notlar düğüm, [[bağlantı]] çizgi (isteğe bağlı ortak #etiket kesik
+       çizgi). Yerleşim kuvvet yöntemiyle, kimlikten türeyen tohumla: aynı
+       notlar her açılışta aynı yerde. Karmaşaya karşı: klasöre göre süz,
+       bağsızları gizle, yalnız seçili notun çevresi (iki adım); ad yalnız
+       çok bağlı düğümde ya da üstüne gelince yazılır; kaydır, yakınlaştır.
+     · BOŞ NOT KALMAZ: başlığı ve metni boş not, başka nota geçince ya da
+       Defter kapanınca silinir (iki «Adsız not» birikiyordu). */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -69,6 +84,9 @@ LIFEOS.DEFTER = (function(){
   let ayar = null;            // { modul, store:{ set, list, remove } }
   let notlar = [];            // [{ id, baslik, govde, at, guncel, sabit }]
   let secili = null, duzen = false, arama = '', kayitZaman = null;
+  /* Klasör süzgeci: null = tüm notlar, '' = klasörsüz, 'Ad' = o klasör ve altı. */
+  let klasor = null, gorunum = 'liste', klasorYeni = false, bosKlasorler = [];
+  const agAyar = { etiket:false, bagsizGizle:false, cevre:false };
 
   const kac = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
   const uid = () => 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -294,7 +312,9 @@ LIFEOS.DEFTER = (function(){
     let rows = [];
     try{ rows = (await ayar.store.list(KOK)) || []; }catch(e){ rows = []; }
     notlar = rows.filter(r => r && r.id).map(r => ({ id:r.id, baslik:String(r.baslik || ''), govde:String(r.govde || ''),
-      at:r.at || simdi(), guncel:r.guncel || r.at || simdi(), sabit:!!r.sabit, tur:turBul(r.tur) }));
+      at:r.at || simdi(), guncel:r.guncel || r.at || simdi(), sabit:!!r.sabit, tur:turBul(r.tur), klasor:klasorAdi(r.klasor) }));
+    try{ const k = (await ayar.store.list('defterklasor')) || []; bosKlasorler = ((k[0] && k[0].liste) || []).map(klasorAdi).filter(Boolean); }
+    catch(e){ bosKlasorler = []; }
     return notlar;
   }
   async function kaydet(n){
@@ -307,8 +327,208 @@ LIFEOS.DEFTER = (function(){
   }
   const TURLER = ['not', 'belge', 'dosya'];
   const turBul = t => TURLER.indexOf(t) >= 0 ? t : 'not';
-  async function yeni(baslik, govde, tur){
-    return kaydet({ id:uid(), baslik:String(baslik || '').slice(0, 120), govde:govde || '', at:simdi(), guncel:simdi(), sabit:false, tur:turBul(tur) });
+  async function yeni(baslik, govde, tur, kls){
+    return kaydet({ id:uid(), baslik:String(baslik || '').slice(0, 120), govde:govde || '', at:simdi(), guncel:simdi(), sabit:false, tur:turBul(tur),
+      klasor:klasorAdi(kls != null ? kls : (klasor || '')) });
+  }
+
+  /* ------------------------------------------------------------- klasör */
+  /* «  Sağlık / uyku/ » → «Sağlık/uyku»; boş parça atılır, en çok 3 kat. */
+  function klasorAdi(k){
+    return String(k || '').split('/').map(x => x.replace(/\s+/g, ' ').trim().slice(0, 40)).filter(Boolean).slice(0, 3).join('/');
+  }
+  /* Bütün klasörler (üst klasörler de), sıralı. */
+  function klasorler(){
+    const s = new Set();
+    notlar.map(n => n.klasor).concat(bosKlasorler).filter(Boolean).forEach(k => {
+      const p = k.split('/');
+      for(let i = 1; i <= p.length; i++) s.add(p.slice(0, i).join('/'));
+    });
+    return Array.from(s).sort((a, b) => a.localeCompare(b, 'tr'));
+  }
+  const icinde = (n, k) => k == null ? true : k === '' ? !n.klasor : (n.klasor === k || (n.klasor || '').indexOf(k + '/') === 0);
+  function klasordeki(k){ return notlar.filter(n => icinde(n, k)); }
+  async function bosKlasorYaz(){
+    if(ayar && ayar.store && ayar.store.set) await ayar.store.set('defterklasor/liste', { id:'liste', liste:bosKlasorler.slice() });
+  }
+  async function klasorEkle(ad){
+    const k = klasorAdi(ad);
+    if(!k) return null;
+    if(klasorler().indexOf(k) < 0){ bosKlasorler.push(k); await bosKlasorYaz(); }
+    return k;
+  }
+  /* Yeniden adlandır: o klasördeki ve altındaki bütün notlar taşınır. */
+  async function klasorTasi(eski, yeniAd){
+    const y = klasorAdi(yeniAd);
+    if(!eski || !y || eski === y) return 0;
+    let n = 0;
+    for(const x of notlar.slice()){
+      if(icinde(x, eski)){ x.klasor = y + x.klasor.slice(eski.length); await kaydet(x); n++; }
+    }
+    bosKlasorler = bosKlasorler.map(b => b === eski || b.indexOf(eski + '/') === 0 ? y + b.slice(eski.length) : b);
+    await bosKlasorYaz();
+    return n;
+  }
+  /* Klasörü sil: notlar SİLİNMEZ, klasörsüze geçer. */
+  async function klasorSil(k){
+    let n = 0;
+    for(const x of notlar.slice()){ if(k && icinde(x, k)){ x.klasor = ''; await kaydet(x); n++; } }
+    bosKlasorler = bosKlasorler.filter(b => b !== k && b.indexOf(k + '/') !== 0);
+    await bosKlasorYaz();
+    return n;
+  }
+  /* Boş not (başlık ve metin boş) kalmaz. */
+  async function bosSil(id){
+    const n = notBul(id);
+    if(n && !String(n.baslik || '').trim() && !String(n.govde || '').trim()){ await sil(n.id); return true; }
+    return false;
+  }
+
+  /* ------------------------------------------------------------- ağ */
+  const hashOf = s => { let h = 2166136261; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
+  /* Düğüm ve kenarlar. Süzgeçler karmaşayı keser (bkz. başlık yorumu). */
+  function agVeri(o){
+    const ay = Object.assign({}, agAyar, o || {});
+    const kls = ay.klasor !== undefined ? ay.klasor : klasor;
+    const l = notlar.filter(n => icinde(n, kls));
+    const byBaslik = new Map();
+    l.forEach(n => { if(n.baslik) byBaslik.set(kucuk(n.baslik), n); });
+    const kenar = [], gor = new Set();
+    const ekle = (a, b, tur) => { if(a === b) return; const k = [a, b].sort().join('|'); if(gor.has(k)) return; gor.add(k); kenar.push({ a, b, tur }); };
+    l.forEach(n => baglantilar(n.govde).forEach(b => { const h = byBaslik.get(kucuk(b)); if(h) ekle(n.id, h.id, 'bag'); }));
+    if(ay.etiket){
+      const etk = new Map();
+      l.forEach(n => etiketler(n.govde).forEach(t => { if(!etk.has(t)) etk.set(t, []); etk.get(t).push(n.id); }));
+      /* Çok kalabalık etiket (12+ not) yumak yapar: zincir olarak bağlanır. */
+      etk.forEach(ids => { if(ids.length > 12){ for(let i = 1; i < ids.length; i++) ekle(ids[i - 1], ids[i], 'etiket'); }
+        else for(let i = 0; i < ids.length; i++) for(let j = i + 1; j < ids.length; j++) ekle(ids[i], ids[j], 'etiket'); });
+    }
+    let dugum = l.map(n => ({ id:n.id, ad:n.baslik || rafAdi(n), klasor:n.klasor || '', derece:0 }));
+    const derece = {};
+    kenar.forEach(e => { derece[e.a] = (derece[e.a] || 0) + 1; derece[e.b] = (derece[e.b] || 0) + 1; });
+    dugum.forEach(d => { d.derece = derece[d.id] || 0; });
+    if(ay.cevre && ay.merkez){
+      const kom = new Map();
+      kenar.forEach(e => { (kom.get(e.a) || kom.set(e.a, []).get(e.a)).push(e.b); (kom.get(e.b) || kom.set(e.b, []).get(e.b)).push(e.a); });
+      const ic = new Set([ay.merkez]); let sinir = [ay.merkez];
+      for(let adim = 0; adim < 2; adim++){ const yeni_ = []; sinir.forEach(x => (kom.get(x) || []).forEach(y => { if(!ic.has(y)){ ic.add(y); yeni_.push(y); } })); sinir = yeni_; }
+      dugum = dugum.filter(d => ic.has(d.id));
+    }
+    if(ay.bagsizGizle) dugum = dugum.filter(d => d.derece > 0 || d.id === ay.merkez);
+    const var_ = new Set(dugum.map(d => d.id));
+    return { dugum, kenar:kenar.filter(e => var_.has(e.a) && var_.has(e.b)) };
+  }
+  /* Kuvvet yerleşimi (Fruchterman–Reingold), tohum kimlikten: aynı veri
+     aynı resmi verir. Aynı klasör hafifçe birbirine çekilir: klasör küme olur. */
+  function yerlesim(v, g, y){
+    const W = g || 1000, H = y || 700, n = v.dugum.length;
+    const p = {};
+    v.dugum.forEach((d, i) => { const a = hashOf(d.id) * Math.PI * 2, r = 0.15 + 0.35 * hashOf(d.id + 'r');
+      p[d.id] = { x:W / 2 + Math.cos(a) * r * W, y:H / 2 + Math.sin(a) * r * H }; });
+    if(n < 2) { if(n === 1) p[v.dugum[0].id] = { x:W / 2, y:H / 2 }; return p; }
+    const k = Math.sqrt((W * H) / n) * 0.45;
+    const tur = n > 300 ? 60 : n > 120 ? 120 : 220;
+    let sicak = W / 8;
+    for(let t = 0; t < tur; t++){
+      const dx = {}, dy = {};
+      v.dugum.forEach(d => { dx[d.id] = 0; dy[d.id] = 0; });
+      for(let i = 0; i < n; i++) for(let j = i + 1; j < n; j++){
+        const a = v.dugum[i].id, b = v.dugum[j].id;
+        let x = p[a].x - p[b].x, yy = p[a].y - p[b].y; let d2 = x * x + yy * yy;
+        if(d2 < 0.01){ x = 0.1; yy = 0.1; d2 = 0.02; }
+        const d = Math.sqrt(d2), f = (k * k) / d;
+        dx[a] += x / d * f; dy[a] += yy / d * f; dx[b] -= x / d * f; dy[b] -= yy / d * f;
+      }
+      v.kenar.forEach(e => {
+        const x = p[e.a].x - p[e.b].x, yy = p[e.a].y - p[e.b].y, d = Math.sqrt(x * x + yy * yy) || 0.1;
+        const f = (d * d) / k * (e.tur === 'etiket' ? 0.4 : 1);
+        dx[e.a] -= x / d * f; dy[e.a] -= yy / d * f; dx[e.b] += x / d * f; dy[e.b] += yy / d * f;
+      });
+      const merkez = {};
+      v.dugum.forEach(d => { const m = merkez[d.klasor] || (merkez[d.klasor] = { x:0, y:0, n:0 }); m.x += p[d.id].x; m.y += p[d.id].y; m.n++; });
+      v.dugum.forEach(d => {
+        const m = merkez[d.klasor];
+        dx[d.id] += (m.x / m.n - p[d.id].x) * 0.08 + (W / 2 - p[d.id].x) * 0.04;
+        dy[d.id] += (m.y / m.n - p[d.id].y) * 0.08 + (H / 2 - p[d.id].y) * 0.04;
+        const b = Math.sqrt(dx[d.id] * dx[d.id] + dy[d.id] * dy[d.id]) || 1;
+        /* Çerçevenin içinde kalır (Fruchterman–Reingold sınırı): bağsız
+           not sonsuza itilmez. */
+        p[d.id].x = Math.min(W - 30, Math.max(30, p[d.id].x + dx[d.id] / b * Math.min(b, sicak)));
+        p[d.id].y = Math.min(H - 30, Math.max(30, p[d.id].y + dy[d.id] / b * Math.min(b, sicak)));
+      });
+      sicak *= 0.97;
+    }
+    return p;
+  }
+  const RENKLER = ['var(--primary)', 'var(--ays)', 'var(--esp)', 'var(--mer)', 'var(--spi)', 'var(--text-2)'];
+  function renkOf(k){
+    if(!k) return 'var(--text-3)';
+    const kok = k.split('/')[0];
+    const l = klasorler().filter(x => x.indexOf('/') < 0);
+    return RENKLER[Math.max(0, l.indexOf(kok)) % RENKLER.length];
+  }
+  function agHtml(){
+    const v = agVeri({ merkez:secili });
+    const dug = (is, ad, acik) => '<button type="button" class="defter-ag__dug' + (acik ? ' is-secili' : '') + '" data-defter-ag="' + is + '" aria-pressed="' + !!acik + '">' + ad + '</button>';
+    const kok = klasorler().filter(x => x.indexOf('/') < 0);
+    return '<div class="defter-ag" data-defter-ag-kok>'
+      + '<div class="defter-ag__arac">'
+      + dug('etiket', 'Etiket bağları', agAyar.etiket) + dug('bagsiz', 'Bağsızları gizle', agAyar.bagsizGizle)
+      + (secili ? dug('cevre', 'Yalnız seçili notun çevresi', agAyar.cevre) : '')
+      + '<span class="defter-ag__bosluk"></span>'
+      + '<button type="button" class="defter__simge" data-defter-ag="kucult" aria-label="Uzaklaştır">−</button>'
+      + '<button type="button" class="defter__simge" data-defter-ag="sigdir" aria-label="Sığdır">⤢</button>'
+      + '<button type="button" class="defter__simge" data-defter-ag="buyut" aria-label="Yakınlaştır">+</button></div>'
+      + (v.dugum.length ? '<svg class="defter-ag__tuval" data-defter-ag-svg role="img" aria-label="' + v.dugum.length + ' not, ' + v.kenar.length + ' bağ"></svg>'
+        : '<p class="defter__bos">Bu görünümde not yok. [[Not adı]] yazarak notları birbirine bağla; bağlar burada çizgi olur.</p>')
+      + '<div class="defter-ag__alt"><span>' + v.dugum.length + ' not · ' + v.kenar.length + ' bağ</span>'
+      + (kok.length ? '<span class="defter-ag__lejant">' + kok.map(k => '<i style="background:' + renkOf(k) + '"></i>' + kac(k)).join('') + '<i style="background:var(--text-3)"></i>Klasörsüz</span>' : '')
+      + '</div></div>';
+  }
+  /* SVG'yi çizer; kaydırma ve yakınlaştırma görüş kutusuyla. */
+  function agCiz(kok){
+    const svgEl = kok.querySelector('[data-defter-ag-svg]');
+    if(!svgEl) return;
+    const v = agVeri({ merkez:secili });
+    /* Çerçeve not sayısıyla büyür: az notta düğümler okunur büyüklükte kalır. */
+    const S = Math.max(420, 170 * Math.sqrt(v.dugum.length));
+    const p = yerlesim(v, S, S * 0.68);
+    const xs = v.dugum.map(d => p[d.id].x), ys = v.dugum.map(d => p[d.id].y);
+    const pay = 60;
+    const kutu = { x:Math.min.apply(null, xs) - pay, y:Math.min.apply(null, ys) - pay };
+    kutu.w = Math.max(200, Math.max.apply(null, xs) - kutu.x + pay); kutu.h = Math.max(160, Math.max.apply(null, ys) - kutu.y + pay);
+    const ilk = Object.assign({}, kutu);
+    const az = v.dugum.length <= 30;
+    const NS = 'http://www.w3.org/2000/svg';
+    let h = '';
+    v.kenar.forEach(e => { h += '<line class="defter-ag__kenar' + (e.tur === 'etiket' ? ' is-etiket' : '') + '" x1="' + p[e.a].x.toFixed(1) + '" y1="' + p[e.a].y.toFixed(1)
+      + '" x2="' + p[e.b].x.toFixed(1) + '" y2="' + p[e.b].y.toFixed(1) + '"/>'; });
+    v.dugum.forEach(d => {
+      const r = 6 + Math.min(10, Math.sqrt(d.derece) * 3);
+      const gorunur = az || d.derece >= 2 || d.id === secili;
+      h += '<g class="defter-ag__dugum' + (d.id === secili ? ' is-secili' : '') + (gorunur ? ' is-adli' : '') + '" data-defter-ac="' + kac(d.id) + '" tabindex="0" role="button" aria-label="' + kac(d.ad) + '">'
+        + '<title>' + kac(d.ad) + (d.klasor ? ' · ' + kac(d.klasor) : '') + ' · ' + d.derece + ' bağ</title>'
+        + '<circle cx="' + p[d.id].x.toFixed(1) + '" cy="' + p[d.id].y.toFixed(1) + '" r="' + r.toFixed(1) + '" style="fill:' + renkOf(d.klasor) + '"/>'
+        + '<text x="' + p[d.id].x.toFixed(1) + '" y="' + (p[d.id].y + r + 13).toFixed(1) + '">' + kac(d.ad.length > 28 ? d.ad.slice(0, 27) + '…' : d.ad) + '</text></g>';
+    });
+    svgEl.setAttribute('xmlns', NS);
+    svgEl.innerHTML = h;
+    const uygula = () => svgEl.setAttribute('viewBox', kutu.x.toFixed(1) + ' ' + kutu.y.toFixed(1) + ' ' + kutu.w.toFixed(1) + ' ' + kutu.h.toFixed(1));
+    uygula();
+    const olcek = (f, cx, cy) => { const nx = cx == null ? kutu.x + kutu.w / 2 : cx, ny = cy == null ? kutu.y + kutu.h / 2 : cy;
+      kutu.x = nx - (nx - kutu.x) * f; kutu.y = ny - (ny - kutu.y) * f; kutu.w *= f; kutu.h *= f; uygula(); };
+    svgEl.__ag = { olcek, sigdir:() => { Object.assign(kutu, ilk); uygula(); } };
+    svgEl.addEventListener('wheel', e => { e.preventDefault(); const r = svgEl.getBoundingClientRect();
+      olcek(e.deltaY > 0 ? 1.12 : 1 / 1.12, kutu.x + (e.clientX - r.left) / r.width * kutu.w, kutu.y + (e.clientY - r.top) / r.height * kutu.h); }, { passive:false });
+    let surukle = null;
+    svgEl.addEventListener('pointerdown', e => { if(e.target.closest('[data-defter-ac]')) return; surukle = { x:e.clientX, y:e.clientY, kx:kutu.x, ky:kutu.y };
+      try{ svgEl.setPointerCapture(e.pointerId); }catch(er){} svgEl.classList.add('is-surukle'); });
+    svgEl.addEventListener('pointermove', e => { if(!surukle) return; const r = svgEl.getBoundingClientRect();
+      kutu.x = surukle.kx - (e.clientX - surukle.x) / r.width * kutu.w; kutu.y = surukle.ky - (e.clientY - surukle.y) / r.height * kutu.h; uygula(); });
+    const birak = () => { surukle = null; svgEl.classList.remove('is-surukle'); };
+    svgEl.addEventListener('pointerup', birak); svgEl.addEventListener('pointercancel', birak);
+    svgEl.addEventListener('keydown', e => { const g = e.target.closest && e.target.closest('[data-defter-ac]');
+      if(g && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); g.dispatchEvent(new MouseEvent('click', { bubbles:true })); } });
   }
   /* Belge: başlıklı, bölümlü uzun yazı. Not hızlı ve serbesttir. */
   const BELGE = '## Amaç\n\n## İçerik\n\n## Kaynaklar\n- \n';
@@ -364,24 +584,53 @@ LIFEOS.DEFTER = (function(){
     baslik:'<path d="M6 5v14M18 5v14M6 12h12"/>', vurgu:'<path d="M4 20h6"/><path d="M9 16l-2-2 9-9 4 4-9 9z"/>',
     alinti:'<path d="M7 7h4v4H8l-1 4M14 7h4v4h-3l-1 4"/>', liste:'<path d="M9 7h11M9 12h11M9 17h11"/><circle cx="5" cy="7" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="5" cy="17" r="1"/>',
     kod:'<path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/>', sablon:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M9 9v11"/>',
-    yeni:'<path d="M12 5v14M5 12h14"/>', kapat:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>', geri:'<path d="M15 5l-7 7 7 7"/>',
+    yeni:'<path d="M12 5v14M5 12h14"/>', ag:'<circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="12" cy="17" r="2.6"/><path d="M8 8l2.8 7M16.6 7.8l-3.4 7.2M8.2 6.8l7.6-.6"/>', kapat:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>', geri:'<path d="M15 5l-7 7 7 7"/>',
   };
   const svg = k => '<svg viewBox="0 0 24 24" aria-hidden="true">' + S[k] + '</svg>';
   const dugme = (is, ikon, ad, ek) => '<button type="button" class="defter__arac" data-defter="' + is + '"' + (ek || '') + ' title="' + ad + '" aria-label="' + ad + '">' + svg(ikon) + '<span>' + ad + '</span></button>';
   const simge = (is, ikon, ad) => '<button type="button" class="defter__simge" data-defter="' + is + '" title="' + ad + '" aria-label="' + ad + '">' + svg(ikon) + '</button>';
   function tarihYaz(iso){ const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('tr-TR', { day:'numeric', month:'short' }); }
 
+  function klasorAgaciHtml(){
+    const l = klasorler();
+    const satir = (k, ad, sayi, derin) => '<button type="button" class="defter__klasor' + (klasor === k ? ' is-secili' : '') + '" data-defter-klasor="'
+      + (k == null ? '*' : kac(k)) + '" style="--derin:' + (derin || 0) + '"><span>' + kac(ad) + '</span><small>' + sayi + '</small></button>';
+    const klasorsuz = notlar.filter(n => !n.klasor).length;
+    let h = '<div class="defter__klasorler" role="group" aria-label="Klasörler">'
+      + satir(null, 'Tüm notlar', notlar.length, 0)
+      + l.map(k => satir(k, k.split('/').pop(), klasordeki(k).length, k.split('/').length - 1)).join('')
+      + (l.length ? satir('', 'Klasörsüz', klasorsuz, 0) : '');
+    h += klasorYeni
+      ? '<div class="defter__klasor-yeni"><input data-defter-klasor-ad placeholder="Klasör adı (Sağlık/Uyku)" aria-label="Yeni klasörün adı" maxlength="80"/>'
+        + '<button type="button" class="defter__metin" data-defter="klasor-kaydet">Ekle</button></div>'
+      : '<button type="button" class="defter__metin defter__klasor-ekle" data-defter="klasor-yeni">+ Klasör</button>';
+    if(klasor){
+      h += '<div class="defter__klasor-is"><button type="button" class="defter__metin" data-defter="klasor-ad">Yeniden adlandır</button>'
+        + '<button type="button" class="defter__metin defter__metin--sil" data-defter="klasor-sil">Klasörü sil</button></div>';
+    }
+    return h + '</div>';
+  }
   function listeHtml(){
-    const l = ara(notlar, arama);
+    const l = ara(notlar, arama).filter(n => arama ? true : icinde(n, klasor));
     const ekran = (window.LIFEOS.NOTUM && window.LIFEOS.NOTUM.kuruluMu && window.LIFEOS.NOTUM.kuruluMu()) ? window.LIFEOS.NOTUM.liste() : [];
     const ozet = g => kac(String(g || '').replace(/!\[\[medya:[^\]]+\]\]/g, '[medya]').replace(/[#*`\[\]]/g, '').trim().slice(0, 70));
-    return (l.length ? l.map(n => '<button type="button" class="defter__oge' + (secili === n.id ? ' is-secili' : '') + '" data-defter-ac="' + n.id + '">'
-        + '<b>' + (n.sabit ? '★ ' : '') + kac(n.baslik || 'Adsız not') + '</b><span>' + ozet(n.govde) + '</span><small>' + tarihYaz(n.guncel) + '</small></button>').join('')
-      : '<p class="defter__bos">' + (arama ? 'Aramaya uyan not yok.' : 'Henüz not yok. «Yeni not» ile başla.') + '</p>')
-      + (ekran.length && !arama ? '<p class="defter__bolum">Ekran notları</p>' + ekran.map(x => '<button type="button" class="defter__oge defter__oge--ekran" data-defter-ekran="'
+    return klasorAgaciHtml() + '<p class="defter__bolum">' + (arama ? 'Arama' : klasor == null ? 'Notlar' : klasor === '' ? 'Klasörsüz' : kac(klasor)) + '</p>'
+      + (l.length ? l.map(n => '<button type="button" class="defter__oge' + (secili === n.id ? ' is-secili' : '') + '" data-defter-ac="' + n.id + '">'
+        + '<b>' + (n.sabit ? '★ ' : '') + kac(n.baslik || 'Adsız not') + '</b><span>' + ozet(n.govde) + '</span><small>' + tarihYaz(n.guncel)
+        + (n.klasor && klasor == null ? ' · ' + kac(n.klasor.split('/').pop()) : '') + '</small></button>').join('')
+      : '<p class="defter__bos">' + (arama ? 'Aramaya uyan not yok.' : klasor != null && notlar.length ? 'Bu klasörde not yok.' : 'Henüz not yok. «Yeni not» ile başla.') + '</p>')
+      + (ekran.length && !arama && klasor == null ? '<p class="defter__bolum">Ekran notları</p>' + ekran.map(x => '<button type="button" class="defter__oge defter__oge--ekran" data-defter-ekran="'
         + kac(x.baglam) + '"><b>' + kac(x.ad || x.baglam) + '</b><span>' + kac((x.metin || '').slice(0, 70)) + '</span><small>' + kac(x.ust || '') + '</small></button>').join('') : '');
   }
+  function klasorSecici(n){
+    const l = klasorler();
+    return '<label class="defter__klasor-sec">Klasör <select data-defter-not-klasor aria-label="Notun klasörü">'
+      + '<option value=""' + (!n.klasor ? ' selected' : '') + '>Klasörsüz</option>'
+      + l.map(k => '<option value="' + kac(k) + '"' + (n.klasor === k ? ' selected' : '') + '>' + kac(k) + '</option>').join('')
+      + '<option value="__yeni">Yeni klasör…</option></select></label>';
+  }
   function duzenleyiciHtml(){
+    if(gorunum === 'ag') return agHtml();
     const n = notBul(secili);
     if(!n) return '<div class="defter__karsila"><p>Bir not seç ya da yeni not başlat.</p>'
       + '<p class="defter__not">Resim, çizim, video, ses ve dosyalar bu cihazda saklanır; notun metni hesabınla öteki cihazlarına da gider.</p></div>';
@@ -411,7 +660,7 @@ LIFEOS.DEFTER = (function(){
       + (geri.length ? '<div class="defter__geriler"><b>Bu nota bağlananlar</b>' + geri.map(g => '<a href="#" data-defter-ac="' + g.id + '">' + kac(g.baslik) + '</a>').join('') + '</div>' : '')
       + '<div class="defter__alt"><span>' + tarihYaz(n.guncel) + ' · ' + say.kelime + ' kelime · ' + say.dakika + ' dk okuma'
       + (etiketler(n.govde).length ? ' · ' + etiketler(n.govde).map(t => '#' + t).join(' ') : '') + '</span>'
-      + '<span class="defter__alt-is"><button type="button" class="defter__metin" data-defter="sabit">' + (n.sabit ? 'Sabitlemeyi kaldır' : 'Sabitle') + '</button>'
+      + '<span class="defter__alt-is">' + klasorSecici(n) + '<button type="button" class="defter__metin" data-defter="sabit">' + (n.sabit ? 'Sabitlemeyi kaldır' : 'Sabitle') + '</button>'
       + '<button type="button" class="defter__metin" data-defter="aktar">Dosya olarak indir</button>'
       + '<button type="button" class="defter__metin defter__metin--sil" data-defter="sil">Sil</button></span></div>';
   }
@@ -420,9 +669,11 @@ LIFEOS.DEFTER = (function(){
     if(!el) return;
     el.querySelector('[data-defter-liste]').innerHTML = listeHtml();
     el.querySelector('[data-defter-sag]').innerHTML = duzenleyiciHtml();
-    el.classList.toggle('is-not', !!secili);
+    el.classList.toggle('is-not', !!secili && gorunum !== 'ag');
+    el.classList.toggle('is-ag', gorunum === 'ag');
     el.querySelector('[data-defter-say]').textContent = notlar.length + ' not';
-    canlandir(el);
+    el.querySelectorAll('[data-defter="gorunum"]').forEach(b => { b.setAttribute('aria-pressed', String(gorunum === 'ag')); b.classList.toggle('is-secili', gorunum === 'ag'); });
+    if(gorunum === 'ag') agCiz(el); else canlandir(el);
   }
   /* Gömülü medyayı IndexedDB'den doldurur. */
   async function canlandir(kok){
@@ -442,12 +693,15 @@ LIFEOS.DEFTER = (function(){
   function ac(o){
     if(typeof document === 'undefined' || !ayar) return false;
     kapat();
+    /* Eskiden kalmış boş notlar açılışta temizlenir (açılan not hariç). */
+    notlar.filter(n => !(o && o.id === n.id) && !String(n.baslik || '').trim() && !String(n.govde || '').trim()).forEach(n => { sil(n.id); });
     const el = document.createElement('div');
     el.id = 'defter';
     el.className = 'defter';
     el.innerHTML = '<div class="defter__perde" data-defter="kapat"></div><div class="defter__kutu" role="dialog" aria-modal="true" aria-label="Defter">'
       + '<div class="defter__bas"><b>Defter</b><span data-defter-say></span>'
       + '<input class="defter__ara" type="search" data-defter-ara placeholder="Ara ya da #etiket" aria-label="Notlarda ara" autocomplete="off"/>'
+      + '<button type="button" class="defter__arac defter__gorunum" data-defter="gorunum" aria-pressed="false" title="Notların ağı">' + svg('ag') + '<span>Ağ</span></button>'
       + '<button type="button" class="defter__yeni" data-defter="yeni" aria-label="Yeni not">' + svg('yeni') + '<span>Yeni not</span></button>'
       + '<button type="button" class="defter__kapat" data-defter="kapat" aria-label="Kapat">' + svg('kapat') + '</button></div>'
       + '<div class="defter__govdeler"><div class="defter__sol"><nav class="defter__liste" data-defter-liste aria-label="Notlar"></nav>'
@@ -467,6 +721,7 @@ LIFEOS.DEFTER = (function(){
   function kapat(){
     const el = document.getElementById('defter');
     if(!el) return;
+    if(secili) bosSil(secili);
     el.remove();
     try{ document.dispatchEvent(new CustomEvent('lifeos:defter-kapandi')); }catch(e){ /* eski tarayıcı */ }
   }
@@ -730,6 +985,7 @@ LIFEOS.DEFTER = (function(){
 
   function bagla(el){
     el.addEventListener('keydown', e => {
+      if(e.key === 'Enter' && e.target.matches && e.target.matches('[data-defter-klasor-ad]')){ e.preventDefault(); const b = el.querySelector('[data-defter="klasor-kaydet"]'); if(b) b.click(); return; }
       if(e.key === 'Escape' && !document.querySelector('.defter-ciz')){ e.preventDefault(); kapat(); return; }
       if(!(e.ctrlKey || e.metaKey) || !e.target.matches('[data-defter-govde]')) return;
       const k = e.key.toLowerCase();
@@ -746,7 +1002,7 @@ LIFEOS.DEFTER = (function(){
       clearTimeout(kayitZaman);
       kayitZaman = setTimeout(() => { kaydet(n); const l = el.querySelector('[data-defter-liste]'); if(l) l.innerHTML = listeHtml(); }, 500);
     });
-    el.addEventListener('change', e => {
+    el.addEventListener('change', async e => {
       const t = e.target;
       if(t.matches('[data-defter-dosya]')){ dosyalariEkle(t.files); t.value = ''; t.removeAttribute('accept'); return; }
       if(t.matches('[data-defter-yedek]')){
@@ -755,6 +1011,12 @@ LIFEOS.DEFTER = (function(){
         f.text().then(m => yedekYukle(JSON.parse(m))).then(r => { ciz(); const y = el.querySelector('[data-defter-alan]'); if(y) y.textContent = r.not + ' not, ' + r.medya + ' medya geri yüklendi; var olanlar ezilmedi.'; })
           .catch(er => { const y = el.querySelector('[data-defter-alan]'); if(y) y.textContent = (er && er.message) || 'Yedek okunamadı.'; });
         return;
+      }
+      if(t.matches('[data-defter-not-klasor]')){
+        const n = notBul(secili); if(!n) return;
+        let v = t.value;
+        if(v === '__yeni'){ const y = window.prompt('Yeni klasörün adı (alt klasör için «Sağlık/Uyku»)', ''); v = y == null ? n.klasor : klasorAdi(y); if(v) await klasorEkle(v); }
+        n.klasor = klasorAdi(v); kaydet(n).then(ciz); return;
       }
       if(t.matches('[data-defter-kutu]')){ const n = notBul(secili); if(n){ n.govde = kutuCevir(n.govde, Number(t.getAttribute('data-defter-kutu'))); kaydet(n).then(ciz); } }
     });
@@ -773,7 +1035,18 @@ LIFEOS.DEFTER = (function(){
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
       const ac_ = t.closest('[data-defter-ac]');
-      if(ac_){ e.preventDefault(); secili = ac_.getAttribute('data-defter-ac'); duzen = false; ciz(); return; }
+      if(ac_){ e.preventDefault(); const id = ac_.getAttribute('data-defter-ac'); if(secili && secili !== id) await bosSil(secili);
+        secili = id; duzen = false; gorunum = 'liste'; ciz(); return; }
+      const kl = t.closest('[data-defter-klasor]');
+      if(kl){ const v = kl.getAttribute('data-defter-klasor'); klasor = v === '*' ? null : v; arama = ''; const a = el.querySelector('[data-defter-ara]'); if(a) a.value = '';
+        ciz(); return; }
+      const agd = t.closest('[data-defter-ag]');
+      if(agd){ const is = agd.getAttribute('data-defter-ag'), s = el.querySelector('[data-defter-ag-svg]');
+        if(is === 'etiket') agAyar.etiket = !agAyar.etiket;
+        else if(is === 'bagsiz') agAyar.bagsizGizle = !agAyar.bagsizGizle;
+        else if(is === 'cevre') agAyar.cevre = !agAyar.cevre;
+        else { if(s && s.__ag){ if(is === 'buyut') s.__ag.olcek(1 / 1.25); else if(is === 'kucult') s.__ag.olcek(1.25); else s.__ag.sigdir(); } return; }
+        ciz(); return; }
       const git = t.closest('[data-defter-git]');
       if(git){ e.preventDefault(); const b = git.getAttribute('data-defter-git'); let n = baslikBul(b); if(!n) n = await yeni(b, ''); secili = n.id; duzen = !n.govde; ciz(); return; }
       const et = t.closest('[data-defter-etiket]');
@@ -792,8 +1065,14 @@ LIFEOS.DEFTER = (function(){
       if(is === 'kapat'){ kapat(); return; }
       if(is === 'yedek-al'){ const r = await yedekAl(); const y = el.querySelector('[data-defter-alan]'); if(y) y.textContent = r.not + ' not ve ' + r.medya + ' medya «' + r.ad + '» dosyasına yedeklendi.'; return; }
       if(is === 'yedek-yukle'){ const f = el.querySelector('[data-defter-yedek]'); if(f) f.click(); return; }
-      if(is === 'yeni'){ const x = await yeni('', ''); secili = x.id; duzen = true; ciz(); const b = el.querySelector('[data-defter-baslik]'); if(b) try{ b.focus(); }catch(er){} return; }
-      if(is === 'liste'){ secili = null; ciz(); return; }
+      if(is === 'gorunum'){ gorunum = gorunum === 'ag' ? 'liste' : 'ag'; ciz(); return; }
+      if(is === 'klasor-yeni'){ klasorYeni = true; ciz(); const i = el.querySelector('[data-defter-klasor-ad]'); if(i) try{ i.focus(); }catch(er){} return; }
+      if(is === 'klasor-kaydet'){ const i = el.querySelector('[data-defter-klasor-ad]'); const k = await klasorEkle(i ? i.value : ''); klasorYeni = false; if(k) klasor = k; ciz(); return; }
+      if(is === 'klasor-ad' && klasor){ const y = window.prompt('Klasörün yeni adı', klasor); if(y != null && klasorAdi(y)){ await klasorTasi(klasor, y); klasor = klasorAdi(y); } ciz(); return; }
+      if(is === 'klasor-sil' && klasor){ if(d.dataset.onay !== '1'){ d.dataset.onay = '1'; d.textContent = 'Emin misin? Notlar klasörsüze geçer'; return; }
+        await klasorSil(klasor); klasor = null; ciz(); return; }
+      if(is === 'yeni'){ if(secili) await bosSil(secili); const x = await yeni('', ''); secili = x.id; duzen = true; gorunum = 'liste'; ciz(); const b = el.querySelector('[data-defter-baslik]'); if(b) try{ b.focus(); }catch(er){} return; }
+      if(is === 'liste'){ if(secili) await bosSil(secili); secili = null; ciz(); return; }
       if(!n) return;
       if(is === 'oku' || is === 'yaz' || is === 'kip'){
         const ta = el.querySelector('[data-defter-govde]'); if(ta){ n.govde = ta.value; await kaydet(n); }
@@ -811,9 +1090,11 @@ LIFEOS.DEFTER = (function(){
   }
 
   function kur(o){ ayar = Object.assign({ modul:'' }, o || {}); db = null; }
-  function _sifirla(){ ayar = null; notlar = []; secili = null; duzen = false; arama = ''; db = null; kapat(); }
+  function _sifirla(){ ayar = null; notlar = []; secili = null; duzen = false; arama = ''; db = null; klasor = null; gorunum = 'liste';
+    klasorYeni = false; bosKlasorler = []; agAyar.etiket = false; agAyar.bagsizGizle = false; agAyar.cevre = false; kapat(); }
 
   return { kur, yukle, ac, kapat, yeni, belgeOlustur, dosyalarEkle, rafHtml, rafBagla, kaydet, sil, md, baglantilar, etiketler, geriBaglantilar, ara, kutuCevir,
     medyaEkle, medya, disaAktarMetni, SABLONLAR, sayim, sar, satirOnek, tuval, notOlustur, yedekNesnesi, yedekYukle, yedekAl, alan, kac, notlar:() => notlar.slice(), sec:id => { secili = id; }, duzenle:v => { duzen = !!v; },
-    kuruluMu:() => !!ayar, _ortam:ortam, _sifirla, _db:v => { db = v; } };
+    kuruluMu:() => !!ayar, _ortam:ortam, _sifirla, _db:v => { db = v; },
+    klasorAdi, klasorler, klasordeki, klasorEkle, klasorTasi, klasorSil, bosSil, agVeri, yerlesim, klasorSec:k => { klasor = k; } };
 })();

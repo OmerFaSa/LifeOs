@@ -114,7 +114,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core import kutu, motor, tarife  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
-                  intents, kanal, king, manager, media, memory, merkez, models, motto, ollama, outbox, patron,
+                  intents, kanal, king, manager, media, memory, merkez, models, motto, ofismodel, ollama, outbox, patron,
                   ses, dinle,
                   profil, saat, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
@@ -1088,6 +1088,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(404, {"error": "bilinmeyen modul"})
             return self._send(200, dict(king.bildirimler(
                 self.con, mod, hepsi=(q.get("hepsi") or ["0"])[0] == "1"), modul=mod))
+        # Modul ofisinin modeli (core/ofismodel.py): hazir mi, hangisi.
+        if u.path == "/api/ofis/durum":
+            return self._send(200, ofismodel.durum(self.server.config, (q.get("modul") or [""])[0],
+                                                   (q.get("yetenek") or ["sohbet"])[0]))
         # Patronlar arasi kanal (core/kanal.py): YALNIZ OKUR.
         if u.path.startswith("/api/kanal/"):
             r = kanal.modul_icin(self.con, u.path.rsplit("/", 1)[-1], date)
@@ -1428,6 +1432,17 @@ class Handler(BaseHTTPRequestHandler):
                           hedef_modul=body.get("hedef_modul") or None,
                           efor=body.get("efor") or None)
             return self._send(200 if r.get("ok") else 422, r)
+        # Modul ofisinin cumlesi HKM'nin modeliyle (core/ofismodel.py). Rol
+        # sunucuda sabittir; HKM hicbir module yazmaz.
+        if u.path == "/api/ofis/cevap":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = _nesne(ham)
+            except ValueError:
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
+            return self._send(200, ofismodel.cevap(self.con, self.server.config, body))
         # Web aramasini King adina DENER: Ayarlar ekranindaki «dene» dugmesi.
         # Rol sunucuda sabittir; istemci rol secemez.
         if u.path == "/api/web/dene":

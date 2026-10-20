@@ -156,7 +156,54 @@ window.LIFEOS = window.LIFEOS || {};
     return v;
   }
 
+  /* YÜZEY (kullanıcı, 2026-10-20: «kart teması bir noktadan sonra boğuyor;
+     kartlara benzeyen ama daha ferah bir iki tema da sun; modüllerde farklı
+     temalar seçilebilsin»). Tercih MODÜL BAŞINA saklanır
+     (`lifeos.yuzey.<modül>`; modül `<html data-modul>`'den), ilk çizimden
+     önce `<html data-yuzey>` konur. Görünüş zemin.css'te:
+       kart   bugünkü kartlar (VARSAYILAN)
+       ferah  kart kutusu yok: bölümler ince çizgi ve boşlukla ayrılır,
+              içerik levhası kalkar
+       serit  hafif tonlu düz yüzey, solda ince modül rengi şerit, gölge yok */
+  const YUZEYLER = Object.freeze(['kart', 'ferah', 'serit']);
+  const YUZEY_AD = { kart:'Kart', ferah:'Ferah', serit:'Şerit' };
+  const YUZEY_IPUCU = { kart:'Bölümler kart içinde', ferah:'Kartsız, bölümler çizgi ve boşlukla ayrılır', serit:'Hafif tonlu düz bölümler, solda ince şerit' };
+  function modulOf(){
+    try{ return (document.documentElement.getAttribute('data-modul') || 'lifeos').toLowerCase(); }catch(e){ return 'lifeos'; }
+  }
+  const yuzeyAnahtar = () => 'lifeos.yuzey.' + modulOf();
+  function yuzeyOku(){
+    let v = null;
+    try{ v = localStorage.getItem(yuzeyAnahtar()); }catch(e){}
+    return YUZEYLER.indexOf(v) >= 0 ? v : 'kart';
+  }
+  let yuzeySimdi = typeof document !== 'undefined' ? yuzeyOku() : 'kart';
+  function yuzeyUygula(){
+    if(typeof document === 'undefined' || !document.documentElement) return;
+    if(yuzeySimdi === 'kart') document.documentElement.removeAttribute('data-yuzey');
+    else document.documentElement.setAttribute('data-yuzey', yuzeySimdi);
+    document.querySelectorAll('[data-yuzey-sec]').forEach(b => {
+      const on = b.getAttribute('data-yuzey-sec') === yuzeySimdi;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  function yuzeyAyarla(k){
+    if(YUZEYLER.indexOf(k) < 0) return false;
+    try{ localStorage.setItem(yuzeyAnahtar(), k); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    yuzeySimdi = k;
+    yuzeyUygula();
+    return true;
+  }
+  function yuzeySeciciHtml(){
+    return '<div class="seg seg--block yuzeysec" role="group" aria-label="Yüzey">'
+      + YUZEYLER.map(k => '<button type="button" class="' + (k === yuzeySimdi ? 'is-on' : '') + '" data-yuzey-sec="' + k + '"'
+        + ' aria-pressed="' + (k === yuzeySimdi ? 'true' : 'false') + '" title="' + YUZEY_IPUCU[k] + '">' + YUZEY_AD[k] + '</button>').join('')
+      + '</div>';
+  }
+
   uygula();
+  yuzeyUygula();
   temaIlk();
   if(typeof document !== 'undefined' && typeof MutationObserver !== 'undefined'){
     /* Tema değişince saat tonu da hemen tazelenir (koyuda yarısı). */
@@ -164,6 +211,8 @@ window.LIFEOS = window.LIFEOS || {};
   }
   if(typeof document !== 'undefined'){
     document.addEventListener('click', e => {
+      const y = e.target && e.target.closest ? e.target.closest('[data-yuzey-sec]') : null;
+      if(y){ e.preventDefault(); yuzeyAyarla(y.getAttribute('data-yuzey-sec')); return; }
       const b = e.target && e.target.closest ? e.target.closest('[data-zemin-sec]') : null;
       if(!b) return;
       e.preventDefault();
@@ -171,7 +220,7 @@ window.LIFEOS = window.LIFEOS || {};
     });
   }
   if(typeof window !== 'undefined' && window.addEventListener){
-    window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); });
+    window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); if(e.key === yuzeyAnahtar()){ yuzeySimdi = yuzeyOku(); yuzeyUygula(); } });
     try{ window.matchMedia('(prefers-reduced-transparency: reduce)').addEventListener('change', uygula); }catch(e){}
     try{ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => saatUygula()); }catch(e){}
   }
@@ -222,7 +271,8 @@ window.LIFEOS = window.LIFEOS || {};
   }
 
   L.ZEMIN = Object.freeze({ ANAHTAR, KIPLER, TEMA, kip, ayarla, yenile, seciciHtml, temaIlk, _temaKaydet,
-    saatTonu, saatUygula, _saatSaglayici, nabiz, gunIlk, GUN_ANAHTAR });
+    saatTonu, saatUygula, _saatSaglayici, nabiz, gunIlk, GUN_ANAHTAR,
+    YUZEYLER, yuzey:() => yuzeySimdi, yuzeyAyarla, yuzeySeciciHtml, yuzeyAnahtar });
   /* Gövde hazır olunca, ilk çizimden biraz sonra: açılış animasyonuyla çakışmasın. */
   if(typeof document !== 'undefined' && typeof setTimeout === 'function'
       && !/\/tests\//.test(String(location.pathname || ''))){   // test sayfasında kendiliğinden oynamaz

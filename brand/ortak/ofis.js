@@ -326,6 +326,66 @@ LIFEOS.Ofis = (function(){
   };
   const OFIS_ADI = { kayit:'Kayıt', arastirma:'Araştırma', planlama:'Planlama', uretim:'Üretim' };
 
+  /* MERKEZ MODELİ (2026-10-20, kullanıcı: «model ayarlarının hepsi HKM'de
+     olmalı»). Modül anahtar tutmaz: ofis ajanının cümlesini HKM kurar
+     (HKM core/ofismodel.py, rol «<modül>.sohbet», atama yoksa King'den
+     miras). HKM kapalıysa ya da model atanmamışsa sebep döner; modül kendi
+     kural cümlesine düşer (AGENTS §1.4: bağımlı değil). Durum önbellekte
+     tutulur: ekran beklemez.
+     `merkezModelKur({ hkm:() => Beacon, fetch? })` → { bagli(), durum(), tazele(), sor(req) } */
+  function merkezModelKur(ortam){
+    let son = null;          // sohbet: { ok, model, provider, note, at }
+    let sonGorsel = null;    // gorsel (görüntü okuma) kademesi
+    function baglanti(){
+      const b = ortam.hkm ? ortam.hkm() : null;
+      const a = b && typeof b.settings === 'function' ? (b.settings() || {}) : {};
+      if(!b || !a.enabled || !a.token || !(b.urlOk ? b.urlOk(a.url) : a.url)) return null;
+      return { b, url:String(a.url).replace(/\/$/, ''), token:a.token };
+    }
+    async function istek(yol, govde, sureMs){
+      const c = baglanti();
+      if(!c) return { ok:false, reason:'hkm-yok', note:'HKM bağlı değil.' };
+      const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
+      if(!f) return { ok:false, reason:'hkm-yok', note:'Bu ortamda ağ isteği yok.' };
+      const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      const zaman = ctrl ? setTimeout(() => ctrl.abort(), sureMs) : null;
+      try{
+        const res = await f(c.url + yol, Object.assign({ headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + c.token },
+          signal:ctrl ? ctrl.signal : undefined }, govde ? { method:'POST', body:JSON.stringify(govde) } : {}));
+        const g = await res.json();
+        return g && typeof g === 'object' ? g : { ok:false, reason:'bozuk', note:'HKM cevabı okunamadı.' };
+      }catch(e){
+        return { ok:false, reason:'hkm-ulasilamadi', note:'HKM’ye ulaşılamadı.' };
+      }finally{ if(zaman) clearTimeout(zaman); }
+    }
+    const modul = () => { const c = baglanti(); return c && c.b.MODULE ? String(c.b.MODULE).toLowerCase() : ''; };
+    async function tazele(){
+      if(!baglanti()){ son = { ok:false, reason:'hkm-yok', note:'HKM bağlı değil.', at:Date.now() }; return son; }
+      const r = await istek('/api/ofis/durum?modul=' + encodeURIComponent(modul()), null, 4000);
+      son = Object.assign({}, r, { at:Date.now() });
+      const g = await istek('/api/ofis/durum?modul=' + encodeURIComponent(modul()) + '&yetenek=gorsel', null, 4000);
+      sonGorsel = Object.assign({}, g, { at:Date.now() });
+      return son;
+    }
+    /* req: { sistem, mesajlar:[{ role, text, images? }], baglam, yetenek?:'sohbet'|'gorsel' }.
+       Görüntü son kullanıcı mesajından alınır ({ mime, data } base64). */
+    async function sor(req){
+      const yetenek = req.yetenek === 'gorsel' ? 'gorsel' : 'sohbet';
+      const ms = req.mesajlar || [];
+      const sonM = ms[ms.length - 1] || {};
+      const r = await istek('/api/ofis/cevap', { modul:modul(), yetenek, sistem:String(req.sistem || ''),
+        mesajlar:ms.map(m => ({ role:m.role, text:m.text })), baglam:String(req.baglam || ''),
+        gorseller:yetenek === 'gorsel' ? (sonM.images || []).map(x => ({ mime:x.mime, data:x.data })) : undefined }, 90000);
+      if(r && r.reason === 'no-model'){
+        const k = { ok:false, reason:'no-model', note:r.note, at:Date.now() };
+        if(yetenek === 'gorsel') sonGorsel = Object.assign({}, sonGorsel || {}, k); else son = Object.assign({}, son || {}, k);
+      }
+      return r;
+    }
+    return { bagli:() => !!baglanti(), durum:() => son, gorselDurum:() => sonGorsel,
+      hazir:() => !!(son && son.ok && baglanti()), gorselHazir:() => !!(sonGorsel && sonGorsel.ok && baglanti()), tazele, sor };
+  }
+
   /* `bamKur({ hkm:() => R.Beacon })` → { ilet(talep) } */
   function bamKur(ortam){
     async function ilet(talep){
@@ -380,5 +440,5 @@ LIFEOS.Ofis = (function(){
     return { ilet };
   }
 
-  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, selamMi, sayiHavuzu, yankiMi, kanalKur, bamIstegi, bamKur, bamMadde };
+  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, selamMi, sayiHavuzu, yankiMi, kanalKur, bamIstegi, bamKur, bamMadde, merkezModelKur };
 })();
