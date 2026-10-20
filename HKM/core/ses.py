@@ -7,11 +7,11 @@
    modul sesi SUNUCUDA uretir; modul King'i ondan WAV ister, alamazsa
    cihazin kendi sesine duser (brand/ortak/king.js soz 28).
 
-   Yedi kural:
+   Dokuz kural:
 
    1. SIRA KODDUR. «oto»: once Gemini (internet + Google anahtari + butce),
-      olmazsa Piper (bu bilgisayarda), olmazsa «yok» — cihaz sesi. «gemini»
-      ve «piper» yalniz kendisini dener.
+      olmazsa EMA, olmazsa Piper (ikisi de bu bilgisayarda), olmazsa «yok» —
+      cihaz sesi. «gemini», «ema» ve «piper» yalniz kendisini dener.
    2. GEMINI UCRETLIDIR ve butce kapisindan gecer (core/butce.py guard);
       her cagri deftere yazilir. Fiyat «tahmin»dir (sabit tablo).
    3. PIPER YERELDIR, UCRETSIZDIR, METIN MAKINEDEN CIKMAZ. HKM onu KURMAZ ve
@@ -31,13 +31,23 @@
       retryDelay) o kullanilir. Beklerken istek gitmez, deftere yazilmaz;
       «oto» dogrudan Piper'a gecer ve not nedenini soyler. Her parca icin
       yeniden Gemini denemek sesi parca parca Gemini/Piper arasinda
-      gidip getiriyordu."""
+      gidip getiriyordu.
+   9. EMA YERELDIR (2026-10-20, King 2.0 A): EMA Lightning, 34 MB Turkce
+      ses, GPU'da. Kendi sanal ortaminda (venv, PyTorch) AYRI bir surec
+      olarak calisir (tools/ema_isci.py); HKM'ye paket girmez. HKM onu
+      KURMAZ ve INDIRMEZ (agirliklar da: HF_HUB_OFFLINE); bulamazsa nerede
+      aradigini soyler. Surec ilk istekte acilir, sicak kalir (ilk ses
+      milisaniyeler), EMA_BOS saniye bos kalirsa kapanir (RAM ve VRAM geri
+      verilir). Uretim akislidir: ema_parcalar() PCM'i parca parca verir;
+      seslendir() parcalari tek WAV'a dizer."""
+import atexit
 import base64
 import collections
 import glob
 import io
 import json
 import os
+import queue
 import shutil
 import subprocess
 import tempfile
@@ -49,7 +59,7 @@ import wave
 
 from core import butce, models
 
-TERCIHLER = ("oto", "gemini", "piper", "cihaz")
+TERCIHLER = ("oto", "gemini", "ema", "piper", "cihaz")
 GEMINI_MODEL = "gemini-2.5-flash-preview-tts"
 # Gemini'nin hazir sesleri (speechConfig.prebuiltVoiceConfig.voiceName).
 GEMINI_SESLER = ("Kore", "Zephyr", "Puck", "Charon", "Fenrir", "Leda", "Orus", "Aoede",
@@ -57,7 +67,7 @@ GEMINI_SESLER = ("Kore", "Zephyr", "Puck", "Charon", "Fenrir", "Leda", "Orus", "
                  "Despina", "Erinome", "Algenib", "Rasalgethi", "Laomedeia", "Achernar",
                  "Alnilam", "Schedar", "Gacrux", "Pulcherrima", "Achird", "Zubenelgenubi",
                  "Vindemiatrix", "Sadachbia", "Sadaltager", "Sulafat")
-VARSAYILAN = {"gemini_ses": "Kore", "piper_yol": ""}
+VARSAYILAN = {"gemini_ses": "Kore", "piper_yol": "", "ema_yol": ""}
 EN_COK = 1500
 GEMINI_ZAMAN = 25
 PIPER_ZAMAN = 40
@@ -81,8 +91,9 @@ def settings(cfg):
     if isinstance(g, dict):
         if g.get("gemini_ses") in GEMINI_SESLER:
             out["gemini_ses"] = g["gemini_ses"]
-        if isinstance(g.get("piper_yol"), str):
-            out["piper_yol"] = g["piper_yol"].strip()
+        for k in ("piper_yol", "ema_yol"):
+            if isinstance(g.get(k), str):
+                out[k] = g[k].strip()
     return out
 
 
@@ -94,9 +105,9 @@ def validate(patch):
         if k == "gemini_ses":
             if v not in GEMINI_SESLER:
                 hata.append("ses.gemini_ses tanımlı bir Gemini sesi olmalı")
-        elif k == "piper_yol":
+        elif k in ("piper_yol", "ema_yol"):
             if not isinstance(v, str) or len(v) > 400:
-                hata.append("ses.piper_yol bir klasör ya da dosya yolu olmalı")
+                hata.append("ses.%s bir klasör ya da dosya yolu olmalı" % k)
         else:
             hata.append("bilinmeyen ses ayarı: %s" % k)
     return (not hata), hata
@@ -332,13 +343,189 @@ def piper(cfg, metin, calistir=None, bul=None):
     return veri, ""
 
 
+# ------------------------------------------------------------------ ema
+
+EMA_HZ = 24000
+EMA_ZAMAN = 90                      # ilk istekte PyTorch ve model yuklenir
+EMA_BOS = 600
+_EMA = {"p": None, "q": None, "py": None, "son": 0.0, "cihaz": None, "acilis_sn": None}
+_EMA_KILIT = threading.Lock()
+
+
+def _ema_adaylar(cfg):
+    yol = settings(cfg)["ema_yol"]
+    kok = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ev = os.path.expanduser("~")
+    yerel = os.environ.get("LOCALAPPDATA") or os.path.join(ev, "AppData", "Local")
+    out = []
+    if yol:
+        out.append(os.path.dirname(os.path.dirname(os.path.dirname(yol)))
+                   if os.path.basename(yol).lower().startswith("python") else yol)
+    return out + [os.path.join(yerel, "Programs", "ema-tts"), os.path.join(kok, "ema-tts"),
+                  os.path.join(yerel, "ema-tts"), os.path.join(ev, "ema-tts")]
+
+
+def ema_bul(cfg):
+    """{bulundu, python, betik, aranan, metin}. Hicbir sey calistirmaz."""
+    aranan = _ema_adaylar(cfg)
+    py = None
+    for d in aranan:
+        for v in (os.path.join(d, "venv"), d):
+            for p in (os.path.join(v, "Scripts", "python.exe"), os.path.join(v, "bin", "python")):
+                if os.path.isfile(p):
+                    py = p
+                    break
+            if py:
+                break
+        if py:
+            break
+    paket = False
+    if py:
+        v = os.path.dirname(os.path.dirname(py))
+        paket = bool(glob.glob(os.path.join(v, "Lib", "site-packages", "ema_lightning"))
+                     + glob.glob(os.path.join(v, "lib", "python3*", "site-packages", "ema_lightning")))
+    betik = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "ema_isci.py")
+    if not py:
+        metin = ("EMA bulunamadı. github.com/canberk7/ema-lightning paketini bir sanal ortama "
+                 "(venv) kur: %s (ya da yolunu buraya yaz)." % os.path.join(aranan[-4], "venv"))
+    elif not paket:
+        metin = "EMA’nın ortamı bulundu ama ema-lightning paketi kurulu değil: %s." % os.path.dirname(os.path.dirname(py))
+    elif not os.path.isfile(betik):
+        metin = "EMA işçisi (tools/ema_isci.py) yok."
+    else:
+        metin = "EMA hazır" + (" (%s)" % _EMA["cihaz"].upper() if _EMA["cihaz"] else "") + "."
+    return {"bulundu": bool(py and paket and os.path.isfile(betik)), "python": py, "betik": betik,
+            "aranan": aranan, "metin": metin, "calisiyor": _ema_canli()}
+
+
+def _ema_canli():
+    p = _EMA["p"]
+    return bool(p is not None and p.poll() is None)
+
+
+def _ema_kapat():
+    p = _EMA["p"]
+    _EMA.update(p=None, q=None, cihaz=None)
+    if p is not None:
+        try:
+            p.kill()
+        except OSError:
+            pass
+
+
+atexit.register(_ema_kapat)
+
+
+def _ema_satir(q, timeout):
+    bitis = time.monotonic() + timeout
+    while True:
+        kalan = bitis - time.monotonic()
+        if kalan <= 0:
+            raise TimeoutError("EMA zamanında cevap vermedi")
+        try:
+            satir = q.get(timeout=kalan)
+        except queue.Empty:
+            raise TimeoutError("EMA zamanında cevap vermedi") from None
+        if satir is None:
+            raise RuntimeError("EMA süreci kapandı")
+        try:
+            return json.loads(satir.decode("utf-8"))
+        except ValueError:
+            continue                            # protokol disi satir
+
+
+def _ema_nobet():
+    """Bos kalan isciyi kapatir (kural 9)."""
+    while _ema_canli():
+        time.sleep(30)
+        with _EMA_KILIT:
+            if _ema_canli() and time.monotonic() - _EMA["son"] > EMA_BOS:
+                _ema_kapat()
+
+
+def _ema_baslat(py, betik, timeout):
+    env = dict(os.environ, HF_HUB_OFFLINE="1", PYTHONIOENCODING="utf-8")
+    p = subprocess.Popen([py, "-I", betik], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                         stderr=subprocess.DEVNULL, env=env,
+                         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    q = queue.Queue()
+
+    def oku():
+        for satir in p.stdout:
+            q.put(satir)
+        q.put(None)
+    threading.Thread(target=oku, daemon=True).start()
+    _EMA.update(p=p, q=q, py=py, son=time.monotonic())
+    ilk = _ema_satir(q, timeout)
+    if not ilk.get("hazir"):
+        _ema_kapat()
+        raise RuntimeError(ilk.get("hata") or "EMA açılmadı")
+    _EMA.update(cihaz=ilk.get("cihaz"), acilis_sn=ilk.get("sn"))
+    threading.Thread(target=_ema_nobet, daemon=True).start()
+
+
+def _ema_akis(py, betik, metin, timeout):
+    """PCM parcalari (16 bit, EMA_HZ). Yarida birakilirsa surec kapatilir:
+    borudaki artik parcalar sonraki istege karismasin."""
+    with _EMA_KILIT:
+        bitti = False
+        try:
+            if not _ema_canli() or _EMA["py"] != py:
+                _ema_kapat()
+                _ema_baslat(py, betik, timeout)
+            p = _EMA["p"]
+            p.stdin.write((json.dumps({"metin": metin, "hz": EMA_HZ}) + "\n").encode("utf-8"))
+            p.stdin.flush()
+            while True:
+                d = _ema_satir(_EMA["q"], timeout)
+                if "pcm" in d:
+                    yield base64.b64decode(d["pcm"])
+                elif d.get("son"):
+                    bitti = True
+                    return
+                else:
+                    raise RuntimeError(d.get("hata") or "EMA boş cevap verdi")
+        finally:
+            _EMA["son"] = time.monotonic()
+            if not bitti:
+                _ema_kapat()
+
+
+# Testler sahte uretici koyar (tests/harness.py: «EMA calistirilmaz»).
+VARSAYILAN_EMA = _ema_akis
+
+
+def ema_parcalar(cfg, metin, calistir=None, bul=None):
+    """Akisli uretim: PCM parcalari (EMA_HZ, 16 bit tek kanal). Bulunamazsa
+    hic parca vermez; hata firlatabilir (cagiran yakalar)."""
+    p = bul or ema_bul(cfg)
+    if not p["bulundu"]:
+        return iter(())
+    return (calistir or VARSAYILAN_EMA)(p["python"], p["betik"], _temiz(metin), EMA_ZAMAN)
+
+
+def ema(cfg, metin, calistir=None, bul=None):
+    """(wav, not)."""
+    p = bul or ema_bul(cfg)
+    if not p["bulundu"]:
+        return None, p["metin"]
+    try:
+        pcm = b"".join(ema_parcalar(cfg, metin, calistir=calistir, bul=p))
+    except Exception as e:                      # noqa: BLE001
+        return None, "EMA sesi üretemedi (%s)." % type(e).__name__
+    if not pcm:
+        return None, "EMA ses döndürmedi."
+    return wav(pcm, EMA_HZ), ""
+
+
 # ---------------------------------------------------------------- giris
 
 def _temiz(metin):
     return " ".join(str(metin or "").split())[:EN_COK]
 
 
-def seslendir(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None):
+def seslendir(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None,
+              ema_calistir=None, ema_bulgu=None):
     """{ok, wav?, motor?, notlar}. Sira kural 1."""
     t = _temiz(metin)
     if not t:
@@ -346,10 +533,11 @@ def seslendir(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None)
     tercih = tercih if tercih in TERCIHLER else "oto"
     if tercih == "cihaz":
         return {"ok": False, "notlar": ["Cihazın kendi sesi seçili."]}
-    sira = {"oto": ("gemini", "piper"), "gemini": ("gemini",), "piper": ("piper",)}[tercih]
+    sira = {"oto": ("gemini", "ema", "piper"), "gemini": ("gemini",), "ema": ("ema",),
+            "piper": ("piper",)}[tercih]
     notlar = []
     for motor in sira:
-        ses = settings(cfg)["gemini_ses"] if motor == "gemini" else "piper"
+        ses = settings(cfg)["gemini_ses"] if motor == "gemini" else motor
         anahtar = (motor, ses, t)
         with _KILIT:
             if anahtar in _ONBELLEK:
@@ -358,6 +546,8 @@ def seslendir(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None)
                         "onbellek": True}
         if motor == "gemini":
             veri, neden = gemini(con, cfg, t, post=post)
+        elif motor == "ema":
+            veri, neden = ema(cfg, t, calistir=ema_calistir, bul=ema_bulgu)
         else:
             veri, neden = piper(cfg, t, calistir=calistir, bul=bul)
         if veri:
@@ -371,7 +561,7 @@ def seslendir(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None)
 
 
 def durum(con, cfg):
-    """Ayarlar karti: iki motorun hazirligi. Para harcamaz, ses uretmez."""
+    """Ayarlar karti: motorlarin hazirligi. Para harcamaz, ses uretmez."""
     g_ok, g_not = gemini_hazir(con, cfg)
     kalan = gemini_bekliyor()
     if g_ok and kalan:
@@ -379,4 +569,4 @@ def durum(con, cfg):
     return {"ayar": settings(cfg), "sesler": list(GEMINI_SESLER), "tercihler": list(TERCIHLER),
             "gemini": {"hazir": g_ok, "not": g_not or "Gemini sesi hazır (internet gerekir).",
                        "model": GEMINI_MODEL, "bekliyor": kalan},
-            "piper": piper_bul(cfg)}
+            "ema": ema_bul(cfg), "piper": piper_bul(cfg)}

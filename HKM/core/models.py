@@ -359,6 +359,11 @@ EFORLAR = ("low", "medium", "high")
 # siniflara yazilir: guclu/uzman is bulutun isidir.
 YERLER = ("yerel", "hibrit", "bulut")
 YEREL_SINIFLAR = ("ekonomik", "standart")
+# Metin sinifi OLMAYAN yerel modeller (2026-10-20, King 2.0 A): «gorsel»
+# fotograftaki yaziyi/soruyu okur (core/motor.py gorsel zinciri), «gomme»
+# anlamsal hafizanin gomme modelidir. Ayni `yerel` bolumunde durur ama
+# metin merdivenine girmez (yerel_of yalniz YEREL_SINIFLAR'i doner).
+YEREL_EK = ("gorsel", "gomme")
 
 
 # MOTOR SERVISI (AI dugumu). Sunucu merkezdir; model ayri, degistirilebilir
@@ -422,6 +427,11 @@ def yer_of(cfg):
 def yerel_of(cfg):
     y = _bolum(cfg).get("yerel")
     return {k: v for k, v in (y or {}).items() if k in YEREL_SINIFLAR and v} if isinstance(y, dict) else {}
+
+
+def yerel_ek_of(cfg):
+    y = _bolum(cfg).get("yerel")
+    return {k: v for k, v in (y or {}).items() if k in YEREL_EK and v} if isinstance(y, dict) else {}
 
 
 def etkin_paket(cfg):
@@ -558,8 +568,9 @@ def validate(patch):
             hata.append("yerel bir nesne olmalı")
         else:
             for sn, ad in yr.items():
-                if sn not in YEREL_SINIFLAR:
-                    hata.append("yerel model yalnız şu sınıflar için yazılır: %s" % ", ".join(YEREL_SINIFLAR))
+                if sn not in YEREL_SINIFLAR + YEREL_EK:
+                    hata.append("yerel model yalnız şu sınıflar için yazılır: %s"
+                                % ", ".join(YEREL_SINIFLAR + YEREL_EK))
                 elif ad is not None and (not isinstance(ad, str) or len(ad) > 120):
                     hata.append("yerel.%s bir model adı olmalı (en çok 120 harf)" % sn)
     if patch.get("paket") not in (None, "") and patch.get("paket") not in PAKET_KIMLIKLERI:

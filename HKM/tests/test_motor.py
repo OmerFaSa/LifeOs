@@ -349,6 +349,31 @@ def run():
         eq([b["atama"]["provider"] for b in h["basamaklar"]], ["openrouter", "openrouter"])
     test("yerel model yoksa soylenir; hibrit bulutla surer", t_local_without_model_says_so)
 
+    def t_local_vision_chain():
+        """King 2.0 A: yerel gorsel model yazilmissa fotograf once onda
+        okunur; hibritte bulut yedekte durur; ek modeller metin
+        merdivenine girmez; yerelde ses yine okunmaz."""
+        ek = {"ekonomik": "gemma4:e2b", "gorsel": "qwen3-vl:4b", "gomme": "qwen3-embedding:0.6b"}
+        ok(models.validate({"yerel": ek})[0], models.validate({"yerel": ek}))
+        no(models.validate({"yerel": {"gorsel": 3}})[0], "model adi metin")
+        y = motor.merdiven(None, _yer_cfg("yerel", yerel=ek), "para.fis")
+        eq((y["ok"], [(b["atama"]["provider"], b["atama"]["model"]) for b in y["basamaklar"]]),
+           (True, [("yerel", "qwen3-vl:4b")]))
+        h = motor.merdiven(None, _yer_cfg("hibrit", yerel=ek), "para.fis")
+        eq(h["basamaklar"][0]["atama"]["model"], "qwen3-vl:4b")
+        eq(h["basamaklar"][0]["bulut_yedek"]["atama"]["provider"], "openrouter")
+        ok(all(b["atama"]["provider"] == "openrouter" for b in h["basamaklar"][1:]), h["basamaklar"])
+        m = motor.merdiven(None, _yer_cfg("yerel", yerel=ek), "seviye.alt")
+        eq([b["atama"]["model"] for b in m["basamaklar"]], ["gemma4:e2b"])
+        eq(models.yerel_of(_yer_cfg("yerel", yerel=ek)), {"ekonomik": "gemma4:e2b"})
+        g = motor.merdiven(None, _yer_cfg("yerel", yerel={"ekonomik": "gemma4:e2b"}), "para.fis")
+        eq(g["ok"], False)
+        ok("görsel model" in g["note"], g["note"])
+        s = motor.merdiven(None, _yer_cfg("yerel", yerel=ek), "medya")
+        eq(s["ok"], False)
+        ok("ses okunmaz" in s["note"], s["note"])
+    test("yerel görsel model fotoğrafı okur; hibritte bulut yedekte", t_local_vision_chain)
+
     def t_hybrid_without_package_uses_local():
         """HATA (2026-09-27, sahada): paket SECILMEMISKEN «Hibrit» ve «Yerel»
         hicbir sey yapmiyordu — merdiven eski tek-atama yoluna dusuyor,

@@ -212,19 +212,31 @@ def merdiven(con, cfg, rol, seviye=None):
     ortak = {"paket": None if ortuk else paket, "seviye": pseviye, "ekonomi": ekonomi, "elle": False,
              "yer": yer, "yer_notu": None}
 
-    def yerel_basamak(s):
+    def yerel_basamak(s, model=None):
         return {"sinif": s, "atama": {
             "role": rol, "from": None, "inherited": False, "provider": "yerel",
-            "provider_label": models.PROVIDERS["yerel"]["label"], "model": yerel[s], "efor": "",
+            "provider_label": models.PROVIDERS["yerel"]["label"], "model": model or yerel[s], "efor": "",
             "key_id": "", "key_label": "", "key_user": models.VARSAYILAN_SAHIP,
             "key_missing": False, "key_set": True, "chain": [rol]},
             # Yerel model efor bilmez; bedeli sifirdir.
             "ayar": {"jeton": jeton}}
 
+    # GORSEL ZINCIR (2026-10-20, King 2.0 A): yerel bir gorsel model
+    # (qwen3-vl:4b gibi) yazilmissa fotograf once onda okunur; hibritte
+    # zorlanirsa ya da yerel motor gec kalirsa bulut merdiveni devralir.
+    yerel_gorsel = models.yerel_ek_of(cfg).get("gorsel") if tur == "gorsel" else None
+
+    def gorsel_basamak():
+        return yerel_basamak(siniflar[0], yerel_gorsel)
+
     if yer == "yerel":
+        if tur == "gorsel" and yerel_gorsel:
+            return dict(ortak, ok=True, basamaklar=[gorsel_basamak()])
         if tur != "metin":
             return dict(ortak, ok=False, reason="no-model", basamaklar=[],
-                        note="Yerel modda görsel ve ses okunmaz; bunlar için hibrit ya da bulut seç.")
+                        note=("Yerel modda ses okunmaz; bunun için hibrit ya da bulut seç." if tur == "ses"
+                              else "Yerel modda görsel için bir yerel görsel model bağla (Ayarlar → Ollama) "
+                                   "ya da hibrit veya bulut seç."))
         if not yerel:
             return dict(ortak, ok=False, reason="no-model", basamaklar=[],
                         note="Yerel modda çalışmak için bir yerel model adı gir (Ayarlar → Yapay zekâ).")
@@ -252,6 +264,11 @@ def merdiven(con, cfg, rol, seviye=None):
             "efor": efor, "jeton": jeton + DUSUNME_PAYI.get(efor, 0)}}
 
     basamaklar = []
+    if yer == "hibrit" and yerel_gorsel:
+        b = gorsel_basamak()
+        if liste:
+            b["bulut_yedek"] = bulut_basamak(siniflar[0])
+        basamaklar.append(b)
     for s in siniflar:
         if yer == "hibrit" and s in yerel:
             b = yerel_basamak(s)

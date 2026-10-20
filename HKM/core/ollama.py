@@ -31,6 +31,13 @@
       metin uretilmez, para ve jeton harcanmaz). `ollama.sicak` false ise
       yapilmaz.
 
+   7. ROLLER (2026-10-20, King 2.0 A). Gorsel uzman model (adinda «-vl»,
+      «vision», «llava»…) metin sinifina onerilmez, «gorsel» olarak onerilir;
+      gomme modeli «gomme» olarak taninir (anlamsal hafiza). Ekonomik sinifta
+      TERCIH listesindeki model (bu donanimda olculen: gemma4:e2b) varsa o
+      onerilir. Baglama bunlari da yazar; bagliyken oneri farkliysa kart
+      «Önerilenle bağla»yi yine gosterir (elle secim yine ezilmez).
+
    «Bagli» yalniz model listesinin okunabildigini soyler; sohbetin gercekten
    calistigini soylemez (kullanici, 2026-10-19: «ayarlarda bagli gorunuyor
    ama mesaj uretilmiyor»). Bu yuzden kart, yerel modelin defterdeki SON
@@ -51,6 +58,12 @@ EKONOMIK_UST = 9.0       # milyar parametre
 STANDART_UST = 40.0
 ZAMAN_ASIMI = 3
 GOMME = re.compile(r"embed|bge|minilm|rerank", re.I)
+GORSEL = re.compile(r"(?:^|[-_/.])vl(?:[-_:.]|$)|vision|llava|moondream|minicpm-v", re.I)
+# Ekonomik sinifta once bunlar (sira onemli); yoksa kural 3.
+EKONOMIK_TERCIH = ("gemma4:e2b",)
+GORSEL_TERCIH = ("qwen3-vl:4b",)
+GOMME_TERCIH = ("qwen3-embedding:0.6b",)
+ROL_ADI = {"ekonomik": "Ekonomik", "standart": "Standart", "gorsel": "Görsel", "gomme": "Gömme"}
 GOMME_AILE = ("bert", "nomic-bert", "xlm-roberta")
 DURUM_AD = {"kapali": "Ollama bulunamadı", "bos": "Model indirilmemiş", "bulundu": "Bulundu",
             "bagli": "Bağlı", "eksik": "Bağlı model yok"}
@@ -109,41 +122,77 @@ def _gomme_mi(m):
     return bool(GOMME.search(str(m.get("name") or ""))) or any(a in GOMME_AILE for a in aileler)
 
 
-def modeller(ham):
-    """Ollama'nin /api/tags cevabi -> sohbet modelleri (gomme elenir)."""
-    out = []
-    for m in (ham or {}).get("models") or []:
-        if not isinstance(m, dict) or not m.get("name") or _gomme_mi(m):
-            continue
-        n, etiket = _milyar(m)
-        boyut = m.get("size")
-        out.append({"ad": str(m["name"])[:120], "milyar": n, "etiket": etiket,
-                    "parametre": (m.get("details") or {}).get("parameter_size") or None,
-                    "boyut_gb": round(boyut / 1e9, 1) if isinstance(boyut, (int, float)) else None})
+def _satir(m):
+    n, etiket = _milyar(m)
+    boyut = m.get("size")
+    return {"ad": str(m["name"])[:120], "milyar": n, "etiket": etiket,
+            "parametre": (m.get("details") or {}).get("parameter_size") or None,
+            "boyut_gb": round(boyut / 1e9, 1) if isinstance(boyut, (int, float)) else None,
+            "gorsel": bool(GORSEL.search(str(m["name"])))}
+
+
+def _sirala(out):
     out.sort(key=lambda x: (x["milyar"] is None, x["milyar"] or 0, x["ad"]))
     return out
 
 
-def oneri(liste):
-    """{ekonomik, standart?}. Liste bossa {}."""
-    bilinen = [m for m in liste if m["milyar"] is not None]
+def modeller(ham):
+    """Ollama'nin /api/tags cevabi -> sohbet modelleri (gomme elenir)."""
+    return _sirala([_satir(m) for m in (ham or {}).get("models") or []
+                    if isinstance(m, dict) and m.get("name") and not _gomme_mi(m)])
+
+
+def gommeler(ham):
+    """Ayni cevaptan yalniz gomme modelleri (kural 7)."""
+    return _sirala([_satir(m) for m in (ham or {}).get("models") or []
+                    if isinstance(m, dict) and m.get("name") and _gomme_mi(m)])
+
+
+def _tercih(liste, tercihler):
+    adlar = {m["ad"] for m in liste}
+    return next((t for t in tercihler if t in adlar), None)
+
+
+def oneri(liste, gomme=()):
+    """{ekonomik, standart?, gorsel?, gomme?}. Liste bossa {} (gomme yine)."""
+    out = {}
+    gorsel = [m for m in liste if m.get("gorsel")]
+    if gorsel:
+        out["gorsel"] = _tercih(gorsel, GORSEL_TERCIH) or gorsel[0]["ad"]
+    if gomme:
+        out["gomme"] = _tercih(gomme, GOMME_TERCIH) or gomme[0]["ad"]
+    # Gorsel uzman metin sinifina onerilmez; baska model yoksa yine o.
+    metin = [m for m in liste if not m.get("gorsel")] or list(liste)
+    if not metin:
+        return out
+    bilinen = [m for m in metin if m["milyar"] is not None]
+    tercih = _tercih(metin, EKONOMIK_TERCIH)
     if not bilinen:
-        return {"ekonomik": liste[0]["ad"]} if liste else {}
+        out["ekonomik"] = tercih or metin[0]["ad"]
+        return out
     kucuk = [m for m in bilinen if m["milyar"] <= EKONOMIK_UST]
-    eko = kucuk[-1] if kucuk else bilinen[0]
-    out = {"ekonomik": eko["ad"]}
+    eko = next((m for m in bilinen if m["ad"] == tercih), None) or (kucuk[-1] if kucuk else bilinen[0])
+    out["ekonomik"] = eko["ad"]
     buyuk = [m for m in bilinen if eko["milyar"] < m["milyar"] <= STANDART_UST]
     if buyuk:
         out["standart"] = buyuk[-1]["ad"]
     return out
 
 
+def _bagli(cfg):
+    return dict(models.yerel_of(cfg), **models.yerel_ek_of(cfg))
+
+
+def _siniflar():
+    return models.YEREL_SINIFLAR + models.YEREL_EK
+
+
 def tara(cfg, getir=None):
     """Ollama'ya bakar. Hicbir sey yazmaz. Doner: durum, metin, modeller,
     oneri, bagli (su an yazili yerel modeller)."""
     kok = models.yerel_kok(cfg)
-    bagli = models.yerel_of(cfg)
-    out = {"adres": kok, "bagli": bagli, "modeller": [], "oneri": {},
+    bagli = _bagli(cfg)
+    out = {"adres": kok, "bagli": bagli, "modeller": [], "gommeler": [], "oneri": {},
            "at": datetime.datetime.now().isoformat(timespec="seconds")}
     try:
         ham = (getir or VARSAYILAN_GETIR)(kok + "/api/tags", ZAMAN_ASIMI)
@@ -153,12 +202,13 @@ def tara(cfg, getir=None):
             "adresinden kurulur; kuruluysa Ollama uygulamasını aç, HKM kendisi bulur." % kok))
     liste = modeller(ham)
     out["modeller"] = liste
+    out["gommeler"] = gommeler(ham)
     if not liste:
         return dict(out, durum="bos", metin=(
             "Ollama çalışıyor ama indirilmiş bir sohbet modeli yok. Bir model indir "
             "(ör. «ollama pull gemma3:4b»); HKM birkaç dakika içinde kendisi görür."))
-    out["oneri"] = oneri(liste)
-    adlar = {m["ad"] for m in liste}
+    out["oneri"] = oneri(liste, out["gommeler"])
+    adlar = {m["ad"] for m in liste + out["gommeler"]}
     if not bagli:
         return dict(out, durum="bulundu", metin=(
             "Ollama bulundu: %d model. Önerilen: %s." % (len(liste), _oneri_yaz(out["oneri"]))))
@@ -167,7 +217,12 @@ def tara(cfg, getir=None):
         return dict(out, durum="eksik", metin=(
             "Bağlı model Ollama’da yok: %s. Silinmiş ya da adı değişmiş olabilir; "
             "önerilenle yeniden bağlayabilirsin (%s)." % (", ".join(eksik), _oneri_yaz(out["oneri"]))))
-    return dict(out, durum="bagli", metin="Ollama bağlı: %s." % _oneri_yaz(bagli))
+    # Kural 7: bagliyken daha iyi bir oneri varsa SOYLENIR, yazilmaz.
+    farkli = {k: v for k, v in out["oneri"].items() if bagli.get(k) != v}
+    metin = "Ollama bağlı: %s." % _oneri_yaz(bagli)
+    if farkli:
+        metin += " Önerilen: %s." % _oneri_yaz(farkli)
+    return dict(out, durum="bagli", metin=metin, oneri_farkli=bool(farkli))
 
 
 def _cagri_nedeni(not_):
@@ -222,7 +277,7 @@ def isit(cfg, tarama, gonder=None):
     """Kural 6: bagli ekonomik modeli bellekte tutar. Doner: model adi ya da None."""
     if not settings(cfg)["sicak"] or (tarama or {}).get("durum") != "bagli":
         return None
-    model = (models.yerel_of(cfg) or {}).get("ekonomik")
+    model = models.yerel_of(cfg).get("ekonomik")
     if not model:
         return None
     try:
@@ -234,8 +289,7 @@ def isit(cfg, tarama, gonder=None):
 
 
 def _oneri_yaz(o):
-    return " · ".join("%s %s" % ({"ekonomik": "Ekonomik", "standart": "Standart"}[k], o[k])
-                      for k in ("ekonomik", "standart") if o.get(k))
+    return " · ".join("%s %s" % (ROL_ADI[k], o[k]) for k in _siniflar() if o.get(k))
 
 
 def yama(cfg, secim):
@@ -244,7 +298,7 @@ def yama(cfg, secim):
     if yer == "bulut":
         yer = "hibrit" if models.key_value(cfg, "openrouter") else "yerel"
     return {"models": {"yer": yer, "yerel": {k: v for k, v in secim.items()
-                                             if k in models.YEREL_SINIFLAR and v}}}
+                                             if k in _siniflar() and v}}}
 
 
 def onceki(cfg):
@@ -259,17 +313,17 @@ def secim_denetle(tarama, secim):
         secim = tarama.get("oneri") or {}
     if not secim.get("ekonomik"):
         return None, "Bağlanacak model yok: önce Ollama’da bir model indir."
-    adlar = {m["ad"] for m in tarama.get("modeller") or []}
-    yok = [v for k, v in secim.items() if k in models.YEREL_SINIFLAR and v and v not in adlar]
+    adlar = {m["ad"] for m in (tarama.get("modeller") or []) + (tarama.get("gommeler") or [])}
+    yok = [v for k, v in secim.items() if k in _siniflar() and v and v not in adlar]
     if yok:
         return None, "Şu model Ollama’da yok: %s." % ", ".join(yok)
-    return {k: v for k, v in secim.items() if k in models.YEREL_SINIFLAR and v}, None
+    return {k: v for k, v in secim.items() if k in _siniflar() and v}, None
 
 
 def kendiliginden(cfg, tarama):
     """Ritim icin: kendiliginden baglanacaksa secim, yoksa None (kural 4)."""
     if not settings(cfg)["kendiligi"] or tarama.get("durum") != "bulundu":
         return None
-    if models.yerel_of(cfg) or ((cfg or {}).get("ollama_bag") or {}).get("geri_alindi"):
+    if _bagli(cfg) or ((cfg or {}).get("ollama_bag") or {}).get("geri_alindi"):
         return None
     return tarama.get("oneri") or None

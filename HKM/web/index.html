@@ -3047,21 +3047,24 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   }
 
   /* KING'IN SESI (core/ses.py, king.js söz 28). İnternet varken Gemini'nin
-     Türkçe sesi, yoksa bu bilgisayardaki Piper; ikisi de yoksa cihazın
-     kendi sesi. Hangisinin kullanılacağını her cihaz King panelinde seçer;
-     burada Gemini'nin hangi sesi ve Piper'ın yeri ayarlanır. */
+     Türkçe sesi, yoksa bu bilgisayardaki EMA (GPU), o da yoksa Piper; hiçbiri
+     yoksa cihazın kendi sesi. Hangisinin kullanılacağını her cihaz King
+     panelinde seçer; burada Gemini'nin sesi, EMA ve Piper'ın yeri ayarlanır. */
   var SES_ORNEK = 'Merhaba, ben King. Bugün nasıl yardımcı olayım?';
   function sesCiz(d, mesaj){
     var k = $('ses-karti');
     if(!k) return;
-    var g = d.gemini || {}, p = d.piper || {}, a = d.ayar || {};
+    var g = d.gemini || {}, p = d.piper || {}, e = d.ema || {}, a = d.ayar || {};
     var h = '<div class="tag">King’in sesi</div>'
-      + '<p class="ollama__not" style="font-size:13px">İnternet varken Gemini, yoksa bu bilgisayardaki Piper okur; '
-      + 'ikisi de yoksa cihazın kendi sesi. Hangisi kullanılsın, her cihazda King’in Dinle ve Konuş panelinden seçilir.</p>'
+      + '<p class="ollama__not" style="font-size:13px">Sıra: Gemini → EMA → Piper → cihaz sesi. '
+      + 'Hangisi kullanılsın, her cihazda King’in Dinle ve Konuş panelinden seçilir.</p>'
       + '<p class="ollama__durum ollama__durum--' + (g.hazir ? 'bagli' : 'eksik') + '"><b>Gemini</b> · ' + esc(g.not || '') + '</p>'
       + '<label style="display:block;font-size:12px;margin:6px 0">Gemini’nin sesi '
       + '<select id="ses-gemini">' + (d.sesler || []).map(function(v){
           return '<option' + (v === a.gemini_ses ? ' selected' : '') + '>' + esc(v) + '</option>'; }).join('') + '</select></label>'
+      + '<p class="ollama__durum ollama__durum--' + (e.bulundu ? 'bagli' : 'eksik') + '"><b>EMA</b> · ' + esc(e.metin || '') + '</p>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">EMA klasörü (boşsa kendisi arar) '
+      + '<input id="ses-ema" placeholder="' + esc((e.aranan || [])[0] || '') + '" value="' + esc(a.ema_yol || '') + '"></label>'
       + '<p class="ollama__durum ollama__durum--' + (p.bulundu ? 'bagli' : 'eksik') + '"><b>Piper</b> · ' + esc(p.metin || '') + '</p>'
       + '<label style="display:block;font-size:12px;margin:6px 0">Piper klasörü (boşsa kendisi arar) '
       + '<input id="ses-piper" placeholder="' + esc((p.aranan || [])[1] || '') + '" value="' + esc(a.piper_yol || '') + '"></label>'
@@ -3070,12 +3073,14 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '<select id="ses-mik"><option value="">Varsayılan mikrofon</option></select></label>'
       + '<div class="row"><button id="ses-kaydet">Kaydet</button>'
       + '<button id="ses-dene-gemini"' + (g.hazir ? '' : ' disabled') + '>Gemini’yi dinle</button>'
+      + '<button id="ses-dene-ema"' + (e.bulundu ? '' : ' disabled') + '>EMA’yı dinle</button>'
       + '<button id="ses-dene-piper"' + (p.bulundu ? '' : ' disabled') + '>Piper’ı dinle</button>'
       + '<button id="ses-dene-mik">Mikrofonu dene</button></div>'
       + '<p class="muted ollama__not" id="ses-not" role="status">' + esc(mesaj || '') + '</p>';
     k.innerHTML = h;
     $('ses-kaydet').addEventListener('click', sesKaydet);
     $('ses-dene-gemini').addEventListener('click', function(){ sesDene('gemini'); });
+    $('ses-dene-ema').addEventListener('click', function(){ sesDene('ema'); });
     $('ses-dene-piper').addEventListener('click', function(){ sesDene('piper'); });
     $('ses-dene-mik').addEventListener('click', sesMikDene);
     $('ses-mik').addEventListener('change', function(){
@@ -3198,7 +3203,8 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   async function sesKaydet(){
     $('ses-not').textContent = 'Kaydediliyor…';
     var r = await api('/api/config', { method:'POST', body:JSON.stringify({ ses:{
-      gemini_ses:$('ses-gemini').value, piper_yol:($('ses-piper').value || '').trim() } }) });
+      gemini_ses:$('ses-gemini').value, piper_yol:($('ses-piper').value || '').trim(),
+      ema_yol:($('ses-ema').value || '').trim() } }) });
     if(r.status === 200) sesYukle('Kaydedildi.');
     else $('ses-not').textContent = 'Kaydedilmedi — ' + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
   }
@@ -3209,6 +3215,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     var k = await api('/api/config', { method:'POST', body:JSON.stringify({ ses:{ gemini_ses:$('ses-gemini').value } }) });
     if(k.status !== 200){ not.textContent = 'Kaydedilmedi — ' + k.status; return; }
     try{
+      var t0 = performance.now();
       var res = await fetch('/api/ses', { method:'POST', headers:{ 'Content-Type':'application/json',
         'Authorization':'Bearer ' + token }, body:JSON.stringify({ metin:SES_ORNEK, tercih:motor }) });
       if(res.status !== 200){
@@ -3220,7 +3227,8 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       var a = new Audio(u);
       a.onended = function(){ URL.revokeObjectURL(u); };
       await a.play();
-      not.textContent = (motor === 'gemini' ? 'Gemini' : 'Piper') + ' okuyor.';
+      not.textContent = ({ gemini:'Gemini', ema:'EMA', piper:'Piper' }[motor] || motor) + ' okuyor · '
+        + ((performance.now() - t0) / 1000).toFixed(1).replace('.', ',') + ' sn’de hazırlandı (ölçüldü).';
     }catch(e){ not.textContent = 'Ses çalınamadı.'; }
   }
 
@@ -3228,6 +3236,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
      açılışta ve beş dakikada bir bakar, hiç yerel model yazılmamışsa
      önerilenle kendiliğinden bağlar ve «Geri al» bırakır. Kart yalnız
      çizer: durum, öneri ve modeller sunucunun taramasından gelir. */
+  var OLLAMA_ROL = { ekonomik:'Ekonomik', standart:'Standart', gorsel:'Görsel', gomme:'Gömme' };
   function ollamaCiz(d, mesaj){
     var k = $('ollama-karti');
     if(!k) return;
@@ -3239,12 +3248,12 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     var sc = d.son_cagri;
     if(sc) h += '<p class="ollama__durum ollama__durum--' + (sc.ok ? 'bagli' : 'eksik') + '" data-ollama-son><b>Son sohbet</b> · '
       + esc(sc.metin || '') + '</p>';
-    if((t.modeller || []).length){
+    var tum = (t.modeller || []).concat(t.gommeler || []);
+    if(tum.length){
       h += '<ul class="ollama__liste">';
-      t.modeller.forEach(function(m){
+      tum.forEach(function(m){
         var rol = [];
-        if((t.bagli || {}).ekonomik === m.ad) rol.push('Ekonomik');
-        if((t.bagli || {}).standart === m.ad) rol.push('Standart');
+        Object.keys(OLLAMA_ROL).forEach(function(k){ if((t.bagli || {})[k] === m.ad) rol.push(OLLAMA_ROL[k]); });
         h += '<li><b>' + esc(m.ad) + '</b><span class="muted">'
           + esc([m.parametre ? m.parametre + ' parametre' : '', m.boyut_gb != null ? m.boyut_gb + ' GB' : '']
             .filter(Boolean).join(' · ')) + '</span>'
@@ -3253,7 +3262,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       h += '</ul>';
     }
     h += '<div class="row">';
-    if(t.durum === 'bulundu' || t.durum === 'eksik')
+    if(t.durum === 'bulundu' || t.durum === 'eksik' || t.oneri_farkli)
       h += '<button class="primary" id="ollama-bagla">Önerilenle bağla</button>';
     h += '<button id="ollama-tara">Şimdi tara</button>';
     if(b && !b.geri_alindi) h += '<button id="ollama-geri">Geri al</button>';
@@ -3326,6 +3335,10 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '<input id="yerel-ekonomik" list="yerel-liste" value="' + esc(yl.ekonomik || '') + '"></label>'
       + '<label style="display:block;font-size:12px;margin:6px 0">Standart sınıf (isteğe bağlı) '
       + '<input id="yerel-standart" list="yerel-liste" value="' + esc(yl.standart || '') + '"></label>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">Görsel model: fotoğraftaki yazıyı okur (isteğe bağlı) '
+      + '<input id="yerel-gorsel" list="yerel-liste" value="' + esc(yl.gorsel || '') + '"></label>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">Gömme modeli: anlamsal hafıza (isteğe bağlı) '
+      + '<input id="yerel-gomme" list="yerel-liste" value="' + esc(yl.gomme || '') + '"></label>'
       + '<div class="row"><button id="yerel-sina" style="font-size:12px">Yerel sunucuyu sına</button>'
       + '<button id="yerel-kaydet" style="font-size:12px">Yerel modelleri kaydet</button></div>'
       + '<p class="muted" id="yerel-not" style="font-size:12px">Güçlü ve Uzman sınıf her zaman buluttadır.</p>'
@@ -3334,7 +3347,8 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   }
   function yerelYama(){
     return { models:{ yerel:{ ekonomik:($('yerel-ekonomik').value || '').trim(),
-      standart:($('yerel-standart').value || '').trim() },
+      standart:($('yerel-standart').value || '').trim(), gorsel:($('yerel-gorsel').value || '').trim(),
+      gomme:($('yerel-gomme').value || '').trim() },
       yerel_adres:($('yerel-adres').value || '').trim() } };
   }
   async function yerYaz(yer){

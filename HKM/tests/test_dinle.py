@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Dinle (core/dinle.py): Whisper varsa o, yoksa Gemini; ikisi de yoksa
-   notlarla «yok». Gecersiz kayit reddedilir; uc bearer ister."""
+   notlarla «yok». Gecersiz kayit reddedilir; uc bearer ister. Kural 6:
+   CUDA'li ikili (ggml-cuda + cublas yaninda) turbo ile once; hata verirse
+   CPU'da small; cublas'siz CUDA paketi CPU sayilir."""
 import os
 import tempfile
 
@@ -30,8 +32,61 @@ def _t_whisper_uydurma():
             raise AssertionError("%r -> %r, beklenen %r" % (ham, d._temiz(ham), beklenen))
 
 
+def _kur(d, *dosyalar):
+    for f in dosyalar:
+        p = os.path.join(d, *f.split("/"))
+        os.makedirs(os.path.dirname(p), exist_ok=True)
+        open(p, "wb").close()
+
+
+def _t_gpu_once():
+    d = tempfile.mkdtemp(prefix="hkm-whisper-")
+    _kur(d, "cuda/Release/whisper-cli.exe", "cuda/Release/ggml-cuda.dll", "cuda/Release/cublas64_12.dll",
+         "Release/whisper-cli.exe", "Release/main.exe", "ggml-small.bin", "ggml-large-v3-turbo-q5_0.bin")
+    eski = dinle._adaylar
+    dinle._adaylar = lambda: [d]
+    try:
+        w = dinle.whisper_bul(ara=lambda x: None)
+        eq([(os.path.relpath(y["exe"], d), os.path.basename(y["model"]), y["cuda"]) for y in w["yollar"]],
+           [(os.path.join("cuda", "Release", "whisper-cli.exe"), "ggml-large-v3-turbo-q5_0.bin", True),
+            (os.path.join("Release", "whisper-cli.exe"), "ggml-small.bin", False)])
+        eq((w["bulundu"], w["cuda"]), (True, True))
+        ok("GPU" in w["metin"] and "ggml-small.bin" in w["metin"], w["metin"])
+        cagri = []
+
+        def calistir(exe, model, wav, t, ng=False):
+            cagri.append((os.path.basename(model), ng))
+            if "turbo" in model:
+                raise OSError("GPU dolu")
+            return "Merhaba"
+        eq(dinle.whisper(WAV, calistir=calistir, bul=w), ("Merhaba", ""))
+        eq(cagri, [("ggml-large-v3-turbo-q5_0.bin", False), ("ggml-small.bin", False)])
+        # cuBLAS yoksa CUDA paketi GPU'yu goremez: CPU sayilir, small secilir.
+        os.remove(os.path.join(d, "cuda", "Release", "cublas64_12.dll"))
+        os.remove(os.path.join(d, "Release", "whisper-cli.exe"))
+        os.remove(os.path.join(d, "Release", "main.exe"))
+        c = dinle.whisper_bul(ara=lambda x: None)
+        eq([(os.path.basename(y["model"]), y["cuda"]) for y in c["yollar"]], [("ggml-small.bin", False)])
+        # Yalniz CUDA'li ikili varsa yedek ayni ikiliyle «-ng» (CPU).
+        _kur(d, "cuda/Release/cublas64_12.dll")
+        g = dinle.whisper_bul(ara=lambda x: None)
+        eq([(y["cuda"], y.get("ng")) for y in g["yollar"]], [(True, None), (False, True)])
+        cagri.clear()
+        dinle.whisper(WAV, calistir=calistir, bul=g)
+        eq(cagri, [("ggml-large-v3-turbo-q5_0.bin", False), ("ggml-small.bin", True)])
+        # Model yoksa ne indirilecegi soylenir.
+        for f in ("ggml-small.bin", "ggml-large-v3-turbo-q5_0.bin"):
+            os.remove(os.path.join(d, f))
+        y = dinle.whisper_bul(ara=lambda x: None)
+        no(y["bulundu"], "model yok")
+        ok("ggml-large-v3-turbo-q5_0.bin" in y["metin"], y["metin"])
+    finally:
+        dinle._adaylar = eski
+
+
 def run():
     suite("dinle")
+    test("GPU önce: CUDA'lı ikili turbo ile, olmazsa CPU'da small", _t_gpu_once)
     test("Whisper altyazı etiketleri ve sessizlik uydurmaları metin değildir", _t_whisper_uydurma)
 
     def t_sira():

@@ -38,6 +38,15 @@ try:
         raise OSError("test: piper calistirilmaz")
     _ses.VARSAYILAN_POST = lambda url, *a, **k: _ag_kapali(url)
     _ses.VARSAYILAN_CALISTIR = _piper_yok
+
+    def _ema_yok(*a, **k):
+        raise OSError("test: EMA calistirilmaz")
+    # Testler bu bilgisayardaki gercek EMA kurulumunu GORMEZ (sira testleri
+    # makineye gore degismesin); EMA testleri kendi klasorunu verir.
+    _ses.VARSAYILAN_EMA = _ema_yok
+    _ema_gercek = _ses._ema_adaylar
+    _ses._ema_adaylar = lambda cfg: ((_ema_gercek(cfg)[:1] if _ses.settings(cfg)["ema_yol"] else [])
+                                     + ["/yok/ema-tts"] * 4)
     from core import dinle as _dinle
     _dinle.VARSAYILAN_CALISTIR = _piper_yok
 except ImportError:                                  # pragma: no cover

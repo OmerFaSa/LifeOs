@@ -22,7 +22,11 @@
       dedi): Whisper -sns ile calisir; «(...)», «[...]», «*...*», «♪»
       altyazi etiketleri ve Whisper'in bilinen sessizlik uydurmalari
       silinir. Geriye bir sey kalmazsa bos metindir.
-   5. FIRLATMAZ: (metin, motor, notlar)."""
+   5. FIRLATMAZ: (metin, motor, notlar).
+   6. GPU ONCE (2026-10-20, King 2.0 A). CUDA'li whisper.cpp (yaninda
+      ggml-cuda.dll ve cublas64_*.dll) bulunursa en iyi model (large-v3-turbo)
+      onunla calisir; olmazsa ya da hata verirse (GPU dolu) CPU'da small ile
+      yeniden denenir. CPU'da turbo yavastir; CPU yolu small'u secer."""
 import base64
 import glob
 import re
@@ -50,47 +54,85 @@ def _adaylar():
             os.path.join(yerel, "whisper"), os.path.join(ev, "whisper")]
 
 
-def whisper_bul(ara=None):
-    """{bulundu, exe, model, aranan, metin}. Hicbir sey calistirmaz."""
-    aranan = _adaylar()
-    exe = None
+# Kural 6: ada gore kaba sira. GPU'da en iyi duyan once; CPU'da hizli olan.
+GPU_SIRA = ("turbo", "large", "medium", "small", "base", "tiny")
+CPU_SIRA = ("small", "base", "medium", "turbo", "large", "tiny")
+
+
+def _cuda_mi(exe):
+    d = os.path.dirname(exe)
+    return os.path.isfile(os.path.join(d, "ggml-cuda.dll")) and bool(glob.glob(os.path.join(d, "cublas64_*.dll")))
+
+
+def _exeler(aranan):
+    """Bulunan whisper-cli'lar (CUDA klasoru once). main.exe yalniz o
+    klasorde whisper-cli yoksa: yeni surumlerde main.exe bir uyari koprusudur."""
+    out = []
     for d in aranan:
-        for ad in ("whisper-cli.exe", "main.exe", "whisper-cli"):
-            for p in (os.path.join(d, ad), os.path.join(d, "Release", ad)):
+        for k in (os.path.join(d, "cuda", "Release"), os.path.join(d, "cuda"), d, os.path.join(d, "Release")):
+            for ad in ("whisper-cli.exe", "whisper-cli", "main.exe"):
+                p = os.path.join(k, ad)
                 if os.path.isfile(p):
-                    exe = p
+                    out.append(p)
                     break
-            if exe:
-                break
-        if exe:
-            break
-    if not exe:
-        exe = (ara or shutil.which)("whisper-cli") or None
-    model = None
-    for d in ([os.path.dirname(exe), os.path.dirname(os.path.dirname(exe))] if exe else []) + aranan:
+    return out
+
+
+def _modeller(dizinler):
+    for d in dizinler:
         l = sorted(glob.glob(os.path.join(d, "ggml-*.bin")) + glob.glob(os.path.join(d, "*", "ggml-*.bin")))
         if l:
-            # Buyuk model daha iyi duyar: small > base > tiny (ada gore kaba sira).
-            sira = ("large", "medium", "small", "base", "tiny")
-            l.sort(key=lambda p: next((i for i, s in enumerate(sira) if s in os.path.basename(p)), 9))
-            model = l[0]
-            break
+            return l
+    return []
+
+
+def _sec(modeller, sira):
+    return sorted(modeller, key=lambda p: next((i for i, s in enumerate(sira) if s in os.path.basename(p)), 9))[0]
+
+
+def whisper_bul(ara=None):
+    """{bulundu, exe, model, cuda, yollar, aranan, metin}. Hicbir sey
+    calistirmaz. `yollar` denenecek sira (kural 6); exe/model ilk yoldur."""
+    aranan = _adaylar()
+    exeler = _exeler(aranan)
+    if not exeler:
+        w = (ara or shutil.which)("whisper-cli")
+        exeler = [w] if w else []
+    gpu = next((e for e in exeler if _cuda_mi(e)), None)
+    cpu = next((e for e in exeler if not _cuda_mi(e)), None)
+    dizinler = []
+    for e in exeler:
+        dizinler += [os.path.dirname(e), os.path.dirname(os.path.dirname(e)),
+                     os.path.dirname(os.path.dirname(os.path.dirname(e)))]
+    modeller = _modeller(dizinler + aranan)
+    yollar = []
+    if modeller and gpu:
+        yollar.append({"exe": gpu, "model": _sec(modeller, GPU_SIRA), "cuda": True})
+    if modeller and (cpu or gpu):
+        # CUDA'li ikili «-ng» ile CPU'da da calisir.
+        yollar.append({"exe": cpu or gpu, "model": _sec(modeller, CPU_SIRA), "cuda": False, "ng": not cpu})
+    ilk = yollar[0] if yollar else {}
+    exe = ilk.get("exe") or (exeler[0] if exeler else None)
     if not exe:
         metin = "Whisper bu bilgisayarda yok. " + TAVSIYE
-    elif not model:
-        metin = "Whisper bulundu ama modeli yok: ggml-small.bin dosyasını %s klasörüne koy." % os.path.dirname(exe)
+    elif not ilk:
+        metin = ("Whisper bulundu ama modeli yok: ggml-large-v3-turbo-q5_0.bin ya da ggml-small.bin "
+                 "dosyasını %s klasörüne koy." % aranan[0])
     else:
-        metin = "Whisper hazır: %s." % os.path.basename(model)
-    return {"bulundu": bool(exe and model), "exe": exe, "model": model, "aranan": aranan, "metin": metin}
+        metin = "Whisper hazır: %s (%s)." % (os.path.basename(ilk["model"]), "GPU" if ilk["cuda"] else "CPU")
+        if len(yollar) > 1:
+            metin += " GPU doluysa %s ile CPU’da." % os.path.basename(yollar[1]["model"])
+    return {"bulundu": bool(ilk), "exe": exe, "model": ilk.get("model"), "cuda": bool(ilk.get("cuda")),
+            "yollar": yollar, "aranan": aranan, "metin": metin}
 
 
-def _calistir(exe, model, wav, timeout):
+def _calistir(exe, model, wav, timeout, ng=False):
     fd, yol = tempfile.mkstemp(suffix=".wav", prefix="hkm-dinle-")
     with os.fdopen(fd, "wb") as f:
         f.write(wav)
     try:
         bayrak = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-        r = subprocess.run([exe, "-m", model, "-f", yol, "-l", "tr", "-nt", "-np", "-sns"],
+        r = subprocess.run([exe, "-m", model, "-f", yol, "-l", "tr", "-nt", "-np", "-sns"] + (["-ng"] if ng else []),
                            capture_output=True, timeout=timeout, check=True, creationflags=bayrak)
         return r.stdout.decode("utf-8", "replace")
     finally:
@@ -122,10 +164,14 @@ def whisper(wav, calistir=None, bul=None):
     w = bul or whisper_bul()
     if not w["bulundu"]:
         return None, w["metin"]
-    try:
-        return _temiz((calistir or VARSAYILAN_CALISTIR)(w["exe"], w["model"], wav, WHISPER_ZAMAN)), ""
-    except Exception as e:                      # noqa: BLE001
-        return None, "Whisper yazıya dökemedi (%s)." % type(e).__name__
+    hata = None
+    for y in w.get("yollar") or [{"exe": w["exe"], "model": w["model"]}]:
+        try:
+            ek = {"ng": True} if y.get("ng") else {}
+            return _temiz((calistir or VARSAYILAN_CALISTIR)(y["exe"], y["model"], wav, WHISPER_ZAMAN, **ek)), ""
+        except Exception as e:                  # noqa: BLE001 — kural 6: sonraki yol
+            hata = e
+    return None, "Whisper yazıya dökemedi (%s)." % type(hata).__name__
 
 
 def gemini(con, cfg, wav, post=None):

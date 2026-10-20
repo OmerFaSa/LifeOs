@@ -20,7 +20,11 @@
         dogrulanir.
      8. Son cagri: kart yerel modelin defterdeki SON gercek sohbet cagrisini
         yazar; hata notu adiyla cumleye doner (reddetti, zaman asimi, 404);
-        bulut cagrilari karismaz; defter bossa None."""
+        bulut cagrilari karismaz; defter bossa None.
+     9. Roller (kural 7): gorsel uzman metin sinifina onerilmez, «gorsel»
+        onerilir; gomme «gomme» olarak taninir ve baglanabilir; ekonomik
+        sinifta TERCIH (gemma4:e2b) kazanir; bagliyken farkli oneri
+        soylenir ama yazilmaz."""
 import os
 import tempfile
 import types
@@ -109,7 +113,8 @@ def run():
     def t_kendiliginden():
         g = _sahte(TAGS)
         t = ollama.tara({}, getir=g)
-        eq(ollama.kendiliginden({}, t), {"ekonomik": "gemma3:4b", "standart": "qwen3:14b"})
+        eq(ollama.kendiliginden({}, t), {"ekonomik": "gemma3:4b", "standart": "qwen3:14b",
+                                         "gomme": "nomic-embed-text:latest"})
         eq(ollama.kendiliginden({"ollama": {"kendiligi": False}}, t), None)
         eq(ollama.kendiliginden({"ollama_bag": {"geri_alindi": True}}, t), None)
         elle = {"models": {"yerel": {"ekonomik": "silindi:2b"}}}
@@ -146,7 +151,8 @@ def run():
         try:
             r = daemon._ollama_tik(srv, simdi=1000.0)
             ok(r and r["ok"], r)
-            eq(srv.config["models"]["yerel"], {"ekonomik": "gemma3:4b", "standart": "qwen3:14b"})
+            eq(srv.config["models"]["yerel"], {"ekonomik": "gemma3:4b", "standart": "qwen3:14b",
+                                               "gomme": "nomic-embed-text:latest"})
             eq(srv.config["models"]["yer"], "yerel")
             b = srv.config["ollama_bag"]
             eq((b["kendiliginden"], b["onceki"]), (True, {"yer": "", "yerel": {}}))
@@ -167,6 +173,45 @@ def run():
         finally:
             ollama.VARSAYILAN_GETIR = eski
 
+    def t_roller():
+        ham = {"models": [
+            {"name": "gemma3:4b", "size": int(3.3 * GB), "details": {"parameter_size": "4.3B"}},
+            {"name": "gemma4:e2b", "size": int(7.2 * GB), "details": {"parameter_size": "5.1B"}},
+            {"name": "qwen3-vl:4b", "size": int(3.3 * GB), "details": {"parameter_size": "4.4B"}},
+            {"name": "qwen3-vl:8b", "size": int(6.1 * GB), "details": {"parameter_size": "8.8B"}},
+            {"name": "qwen3-embedding:0.6b", "size": int(0.6 * GB),
+             "details": {"family": "qwen3", "parameter_size": "595.78M"}},
+        ]}
+        liste = ollama.modeller(ham)
+        eq([m["ad"] for m in liste if m["gorsel"]], ["qwen3-vl:4b", "qwen3-vl:8b"])
+        eq([m["ad"] for m in ollama.gommeler(ham)], ["qwen3-embedding:0.6b"])
+        eq(ollama.oneri(liste, ollama.gommeler(ham)),
+           {"gorsel": "qwen3-vl:4b", "gomme": "qwen3-embedding:0.6b", "ekonomik": "gemma4:e2b"})
+        # Tercih yoksa kural 3; gorsel uzman metin sinifina girmez.
+        yok = [m for m in liste if m["ad"] != "gemma4:e2b"]
+        eq(ollama.oneri(yok)["ekonomik"], "gemma3:4b")
+        eq(ollama.oneri([m for m in liste if m["gorsel"]]),
+           {"gorsel": "qwen3-vl:4b", "ekonomik": "qwen3-vl:8b"})
+        g = _sahte(ham)
+        t = ollama.tara({}, getir=g)
+        secim, hata = ollama.secim_denetle(t, {})
+        eq((hata, secim["gomme"], secim["gorsel"]), (None, "qwen3-embedding:0.6b", "qwen3-vl:4b"))
+        y = ollama.yama({}, secim)
+        ok(settings.validate(y)[0], settings.validate(y))
+        cfg = settings.apply({}, y)
+        eq((models.yerel_of(cfg), models.yerel_ek_of(cfg)),
+           ({"ekonomik": "gemma4:e2b"}, {"gorsel": "qwen3-vl:4b", "gomme": "qwen3-embedding:0.6b"}))
+        eq(ollama.tara(cfg, getir=g)["durum"], "bagli")
+        no(ollama.tara(cfg, getir=g)["oneri_farkli"], "oneri ayni")
+        # Elle gemma3 baglanmis: oneri SOYLENIR, kendiliginden yazilmaz.
+        eski = {"models": {"yer": "yerel", "yerel": {"ekonomik": "gemma3:4b"}}}
+        e = ollama.tara(eski, getir=g)
+        eq((e["durum"], e["oneri_farkli"]), ("bagli", True))
+        ok("Önerilen: Ekonomik gemma4:e2b" in e["metin"] and "Görsel qwen3-vl:4b" in e["metin"], e["metin"])
+        eq(ollama.kendiliginden(eski, e), None)
+        no(ollama.secim_denetle(t, {"gomme": "yok:1b", "ekonomik": "gemma4:e2b"})[0], "olmayan gomme")
+
+    test("roller: görsel ve gömme tanınır, gemma4:e2b ekonomik önerilir", t_roller)
     test("kapalı ve boş motor söylenir, fırlatmaz", t_kapali_bos)
     test("gömme elenir; öneri kodla kurulur", t_oneri)
     test("durum: bulundu, bağlı, eksik", t_durum)
