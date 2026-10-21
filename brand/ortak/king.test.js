@@ -2628,5 +2628,112 @@
       }finally{ k.uyanSec(false); }
     }));
   });
+  describe('King 3.0 — beceriler, sözler ve bekleyen mesajlar (K2)', () => {
+    const bekle = () => new Promise(ok => setTimeout(ok, 0));
+    async function bitsin(){ for(let i = 0; i < 15; i++) await bekle(); }
+    const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+    function k2Sahnesi(ek){
+      const istekler = [];
+      const v = Object.assign({
+        beceriler:[{ id:3, ad:'Her pazartesi 09:00 · deneme', acik:true, tetik:{ tur:'zaman', gunler:[0], saat:'09:00' },
+          eylemler:[{ tur:'mesaj', metin:'Hatırlatma: deneme.' }, { tur:'soru', metin:'Deneme nasıl geçti?', saat:'20:00' }],
+          ozet:'Her pazartesi 09:00 → «Hatırlatma: deneme.»', calisma:2 }],
+        sozler:[{ id:5, metin:'yarın fizik sınavım var', soru:'Fizik sınavın nasıl geçti?', vade_metin:'yarın 20:00', durum:'bekliyor', durum_ad:'Zamanı bekleniyor' }],
+        mesajlar:[], chat:null }, ek || {});
+      const fetch = async (url, o) => {
+        const yol = url.replace('http://127.0.0.1:4200', ''), yontem = (o && o.method) || 'GET';
+        const govde = o && o.body ? JSON.parse(o.body) : null;
+        istekler.push({ yol, yontem, govde });
+        let g = { ok:true };
+        if(yol === '/api/king/beceriler' && yontem === 'GET') g = { beceriler:v.beceriler };
+        else if(yol === '/api/king/sozler' && yontem === 'GET') g = { sozler:v.sozler };
+        else if(/^\/api\/king\/bekleyen\?/.test(yol)){ g = { mesajlar:v.mesajlar }; v.mesajlar = []; }
+        else if(/^\/api\/king\/beceriler\/3\/(ac|kapat)$/.test(yol)) v.beceriler[0].acik = /ac$/.test(yol);
+        else if(yol === '/api/king/beceriler/3/sil') v.beceriler = [];
+        else if(yol === '/api/king/beceriler/3'){ Object.assign(v.beceriler[0], govde.ad ? { ad:govde.ad } : {}, govde.tetik ? { tetik:govde.tetik } : {}); }
+        else if(yol === '/api/king/sozler/5/sil') v.sozler = [];
+        else if(/^\/api\/king\/isler/.test(yol)) g = { isler:[], durum:{ acik:0, metin:'King şu an boşta' } };
+        else if(/^\/api\/chat/.test(yol)) g = v.chat;
+        return { status:200, headers:{ get:() => null }, json:async () => g };
+      };
+      const s = sahne({ hkm, fetch });
+      return Object.assign(s, { istekler, v });
+    }
+    it('panelde beceri açılıp kapanır, düzeltilir, iki dokunuşla silinir; söz silinir', () => sahneyle(async () => {
+      const s = k2Sahnesi();
+      s.k.ac();
+      await s.k.beceriAc();
+      expect(document.querySelector('.king__beceri b').textContent).toBe('Her pazartesi 09:00 · deneme');
+      expect(document.querySelector('.king__beceri small').textContent).toBe('Pzt · 09:00 · 2 kez çalıştı');
+      document.querySelector('[data-king="beceri-kapat:3"]').click();
+      await bitsin();
+      expect(s.v.beceriler[0].acik).toBe(false);
+      expect(document.querySelector('[data-king="beceri-ac:3"]').getAttribute('aria-checked')).toBe('false');
+      document.querySelector('[data-king="beceri-duzelt:3"]').click();
+      const f = document.querySelector('[data-king-beceri-form="3"]');
+      f.querySelector('[name="saat"]').value = '10:30';
+      f.dispatchEvent(new Event('submit', { bubbles:true, cancelable:true }));
+      await bitsin();
+      const duz = s.istekler.find(x => x.yol === '/api/king/beceriler/3' && x.yontem === 'POST');
+      expect(duz.govde).toEqual({ tetik:{ tur:'zaman', gunler:[0], saat:'10:30' } });
+      document.querySelector('[data-king="beceri-sil:3"]').click();
+      expect(s.istekler.some(x => /beceriler\/3\/sil/.test(x.yol))).toBe(false);
+      document.querySelector('[data-king="beceri-sil:3"]').click();
+      await bitsin();
+      expect(document.querySelector('.king__beceri')).toBe(null);
+      expect(document.querySelector('.king__is b').textContent).toBe('yarın fizik sınavım var');
+      document.querySelector('[data-king="soz-sil:5"]').click();
+      await bitsin();
+      expect(s.istekler.some(x => x.yol === '/api/king/sozler/5/sil' && x.yontem === 'POST')).toBe(true);
+    }));
+    it('bekleyen mesaj King açılınca sohbete düşer, eylemi çalışır; alınan bir daha gelmez', () => sahneyle(async () => {
+      const s = k2Sahnesi({ mesajlar:[{ id:12, tur:'beceri', metin:'Ders bitti mi? Mola zamanı.', soru:false,
+        eylemler:[{ tur:'mesaj', metin:'Mola zamanı.' }, { tur:'sayac', dakika:5, ad:'Mola' }] }] });
+      try{
+        s.k.ac();
+        await s.k.isYokla();
+        expect(s.istekler.some(x => x.yol === '/api/king/bekleyen?modul=spi')).toBe(true);
+        expect(s.k.akis().filter(m => m.metin === 'Ders bitti mi? Mola zamanı.').length).toBe(1);
+        /* Sahnede zamanlayıcı anında biter: sayaç açılıp doldu. */
+        expect(s.k.akis().some(m => /^Süre doldu: 5 dakika Mola/.test(m.metin))).toBe(true);
+        await s.k.bekleyenAl();
+        expect(s.k.akis().filter(m => m.metin === 'Ders bitti mi? Mola zamanı.').length).toBe(1);
+      }finally{ s.k._ortam.depo.sil(s.k.ODAK); }
+    }));
+    it('King’in sorusuna ilk cevap yerel kurallara takılmadan Merkez’e gider; kutudaki öneri hemen sunulur', () => sahneyle(async () => {
+      const s = k2Sahnesi({ mesajlar:[{ id:14, tur:'soz', metin:'Fizik sınavın nasıl geçti?', soru:true, eylemler:[{ tur:'soru', metin:'Fizik sınavın nasıl geçti?' }] }],
+        chat:{ ok:true, mode:'model', text:'Tebrikler!', k2_not:'Not aldım.', cevap:{ bekleyen_id:14, kutuya:'spi' } } });
+      s.k.ac();
+      await s.k.bekleyenAl();
+      await s.k.isle('antrenman yapacağım');                    // normalde Hareket sayfasına götürürdü
+      await bitsin();
+      expect(s.istekler.some(x => /^\/api\/chat/.test(x.yol))).toBe(true);
+      expect(s.istekler.some(x => x.yol === '/api/kutu?modul=spi')).toBe(true);
+      expect(s.k.akis().some(m => m.metin === 'Tebrikler!')).toBe(true);
+      /* Yalnız ilk cevap: sonraki mesaj yine yerel kurallardan geçer. */
+      const n = s.istekler.filter(x => /^\/api\/chat/.test(x.yol)).length;
+      await s.k.isle('antrenman yapacağım');
+      expect(s.istekler.filter(x => /^\/api\/chat/.test(x.yol)).length).toBe(n);
+    }));
+    it('cevaptaki söz notu ayrı satırda; «Söz yapma» sözü siler, «Cevap değil» cevabı geri alır', () => sahneyle(async () => {
+      const s = k2Sahnesi({ chat:{ ok:true, mode:'model', text:'Başarılar!\n\nSöz aldım: yarın 20:00 soracağım. İstemezsen «bunu söz yapma» de.',
+        k2_not:'Söz aldım: yarın 20:00 soracağım. İstemezsen «bunu söz yapma» de.', soz:{ id:5 } } });
+      s.k.ac();
+      await s.k.isle('felsefede yarın sınavım var hakkında ne düşünüyorsun');
+      const m = s.k.akis().pop();
+      expect(m.metin).toBe('Başarılar!');
+      expect(document.querySelector('.king__k2').textContent).toContain('Söz aldım');
+      document.querySelector('[data-king^="k2-soz:5:"]').click();
+      await bitsin();
+      expect(s.istekler.some(x => x.yol === '/api/king/sozler/5/sil')).toBe(true);
+      expect(document.querySelector('.king__k2').textContent).toBe('Söz silindi; sormayacağım.');
+      s.v.chat = { ok:true, mode:'model', text:'Güzel.\n\nNot aldım.', k2_not:'Not aldım.', cevap:{ bekleyen_id:12, kutuya:null } };
+      await s.k.isle('felsefede özgür irade hakkında ne düşünüyorsun');
+      expect(s.k.akis().pop().metin).toBe('Güzel.');
+      document.querySelector('[data-king^="k2-cevap:12:"]').click();
+      await bitsin();
+      expect(s.istekler.some(x => x.yol === '/api/king/bekleyen/12/geri' && x.yontem === 'POST')).toBe(true);
+    }));
+  });
 })();
 
