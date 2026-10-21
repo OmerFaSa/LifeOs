@@ -370,7 +370,14 @@
         Yardım      fotoğraf işi ikinci argümanla görüntü okuma ister
                     (`gorsel(soru, yetenek)`: Merkez'in görsel kademesi);
                     iş { metin, satirlar, arac } döndürürse aracın önizlemesi
-                    onay kartıyla gösterilir, yalnız «Onayla» ile yazılır. */
+                    onay kartıyla gösterilir, yalnız «Onayla» ile yazılır.
+  38. ARAŞTIRMA KARTI (2026-10-21, H1: HKM'nin sabit şablonu arastirma.v1).
+      «X'i araştır» cevabı kart olur: Özet (kaynaklı 2–3 cümle; «Dinle» sesli
+      okur), İzle (video, kanal, süre, dil, konunun geçtiği andan açılan
+      link), Oku (site ve kaynağın kendi cümlesi), Sıradaki adım (Defter'e
+      kaynak olarak ekleme; not aracının onay kartıyla). Linkler yeni sekmede
+      (masaüstünde tarayıcıda) açılır; yalnız http(s) link çizilir. Metni ve
+      linkleri HKM'nin kodu kurar; King yalnız çizer. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -1283,7 +1290,8 @@ window.LIFEOS.KING = (function(){
     try{
       /* fetch bir nesnenin yöntemi olarak çağrılamaz («Illegal invocation»). */
       const f = ortam.fetch;
-      const govde = { text:String(metin).trim(), agent:'king', date:bugunISO() };
+      /* Söz 38: modül araştırma profilini seçer (HKM arastir.py; yoksa Origin portu). */
+      const govde = { text:String(metin).trim(), agent:'king', date:bugunISO(), modul:ayar.modul };
       if(d !== 'oto') govde.derinlik = d;
       if(tarz() !== 'samimi') govde.uslup = tarz();
       if(sohbetBas()) govde.baslangic = sohbetBas();
@@ -1315,7 +1323,7 @@ window.LIFEOS.KING = (function(){
         return { ok:true, arac:g.cagrilar, reddedilen:g.reddedilen || [], text:String(g.text || ''), mode:'arac', akti };
       }
       if(res.status === 200 && g && g.ok !== false && typeof g.text === 'string' && g.text.trim()){
-        return { ok:true, text:g.text.trim(), mode:g.mode || '', akti };
+        return { ok:true, text:g.text.trim(), mode:g.mode || '', akti, arastirma:g.mode === 'arastirma' ? arastirmaVeri(g.arastirma) : null };
       }
       return { ok:false, neden:res.status === 200 ? 'yok' : 'baglanti' };
     }catch(e){
@@ -1707,8 +1715,8 @@ window.LIFEOS.KING = (function(){
   const depoAnahtar = () => 'king.sohbet.' + ((ayar && ayar.modul) || 'x');
   function sakla(){
     if(!ayar) return;
-    const l = akis.filter(m => !m.bekliyor).slice(-GUNLUK_EN_COK).map(m => ({ kim:m.kim, metin:m.foto ? '(fotoğraf)' : (m.metin || ''),
-      satirlar:m.satirlar || null, son:m.son || null }));
+    const l = akis.filter(m => !m.bekliyor).slice(-GUNLUK_EN_COK).map(m => Object.assign({ kim:m.kim, metin:m.foto ? '(fotoğraf)' : (m.metin || ''),
+      satirlar:m.satirlar || null, son:m.son || null }, m.arastirma ? { arastirma:m.arastirma } : {}));
     ortam.depo.yaz(depoAnahtar(), { gun:bugunISO(), akis:l });
     tasimaYaz(l);
   }
@@ -2422,7 +2430,7 @@ window.LIFEOS.KING = (function(){
     const sesle = sesleMi();
     if(sesliSohbet && (!ortam.sentez() || !sesle)) ortam.zamanla(sohbetDevam, 600);
     if(sesle) seslendir([metin].concat(satirlar || [], onizleme ? [onizleme.metin] : [], son ? [son] : [],
-      ek && ek.soru ? [ek.soru.soru] : []).join('. ').replace(/\.\.+/g, '.').replace(/([!?])\./g, '$1'));
+      ek && ek.soru ? [ek.soru.soru] : [], ek && ek.arastirma && ek.arastirma.ozet ? [ek.arastirma.ozet] : []).join('. ').replace(/\.\.+/g, '.').replace(/([!?])\./g, '$1'));
   }
 
   /* ---------- söz 35: sohbetten kayıt ---------- */
@@ -3046,6 +3054,54 @@ window.LIFEOS.KING = (function(){
     if(sesleMi()) seslendir(m.soru.cevap.isabet ? 'Doğru.' : 'Doğru cevap ' + m.soru.cevap.dogru + '.');
     return m.soru.cevap;
   }
+  /* ---------- söz 38: araştırma kartı (HKM arastirma.v1) ---------- */
+  /* Sunucunun verisi süzülür: yalnız http(s) link, her bölümde en çok üç. */
+  const LINK_RE = /^https?:\/\/[^\s"'<>]+$/i;
+  function arastirmaVeri(a){
+    if(!a || a.sablon !== 'arastirma.v1') return null;
+    const yazi = (v, n) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, n || 200);
+    const link = v => LINK_RE.test(String(v || '')) ? String(v) : '';
+    const izle = (Array.isArray(a.izle) ? a.izle : []).filter(v => v && link(v.link)).slice(0, 3).map(v => ({ no:Number(v.no) || null,
+      baslik:yazi(v.baslik, 140), link:link(v.link), neden:yazi(v.neden, 200),
+      bilgi:[yazi(v.kanal, 60), yazi(v.sure, 12), v.dil ? yazi(v.dil, 20) + (v.dil_etiket === 'tahmin' ? ' (tahmin)' : '') : '',
+        v.an ? 'başlangıç ' + yazi(v.an, 10) : ''].filter(Boolean).join(' · ') }));
+    const oku = (Array.isArray(a.oku) ? a.oku : []).filter(k => k && link(k.url)).slice(0, 3).map(k => ({ no:Number(k.no) || null,
+      baslik:yazi(k.baslik, 140), link:link(k.url), site:yazi(k.site, 60), neden:yazi(k.neden, 220) }));
+    const oz = a.ozet && typeof a.ozet === 'object' ? yazi(a.ozet.metin, 900) : '';
+    const s = a.sonraki && a.sonraki.hedef ? a.sonraki.hedef : null;
+    const hedef = s && (link(s.link) || link(s.url)) ? { baslik:yazi(s.baslik, 140), link:link(s.link) || link(s.url), kanal:yazi(s.kanal, 60) } : null;
+    if(!oz && !izle.length && !oku.length) return null;
+    return { konu:yazi(a.konu, 80) || 'konu', modul:yazi(a.modul, 8), ozet:oz, izle, oku, hedef };
+  }
+  function arastirmaHtml(m, n){
+    const a = m.arastirma;
+    if(!a) return '';
+    const bag = (x, alt) => '<li class="king__ars-oge"><a class="king__ars-link" href="' + kac(x.link) + '" target="_blank" rel="noopener noreferrer">'
+      + (x.no ? '<span class="king__ars-no">' + x.no + '</span>' : '') + kac(x.baslik) + '</a>'
+      + (alt ? '<small>' + kac(alt) + '</small>' : '') + (x.neden ? '<span>' + kac(x.neden) + '</span>' : '') + '</li>';
+    return '<div class="king__ars" role="group" aria-label="Araştırma: ' + kac(a.konu) + '">'
+      + '<div class="king__ars-bolum"><div class="king__ars-bas"><span class="king__ars-ad">Özet</span>'
+      + (a.ozet ? '<button type="button" class="king__cip" data-king="ars-dinle:' + n + '">Dinle</button>' : '') + '</div>'
+      + '<p>' + kac(a.ozet || 'Kaynaklardan doğrulanmış kısa bir özet çıkaramadım; aşağıdaki kaynaklara bakabilirsin.') + '</p></div>'
+      + (a.izle.length ? '<div class="king__ars-bolum"><span class="king__ars-ad">İzle</span><ul class="king__ars-liste">'
+        + a.izle.map(v => bag(v, v.bilgi)).join('') + '</ul></div>' : '')
+      + (a.oku.length ? '<div class="king__ars-bolum"><span class="king__ars-ad">Oku</span><ul class="king__ars-liste">'
+        + a.oku.map(k => bag(k, k.site)).join('') + '</ul></div>' : '')
+      + (a.hedef && D() ? '<div class="king__ars-bolum king__ars-sonraki"><span class="king__ars-ad">Sıradaki adım</span>'
+        + '<p>«' + kac(a.hedef.baslik) + '» Defter’e kaynak olarak eklenebilir; onaylamadan eklenmez.</p>'
+        + '<button type="button" class="king__cip" data-king="ars-ekle:' + n + '">Defter’e ekle</button></div>' : '')
+      + '</div>';
+  }
+  /* «Defter’e ekle»: King'in not aracı, onay kartıyla (söz 36). */
+  async function arastirmaEkle(n){
+    const a = akis[n] && akis[n].arastirma, A = ARAC();
+    if(!a || !a.hedef || !A) return null;
+    const h = a.hedef;
+    const o = await A.onizle('not_ekle', { baslik:('Kaynak: ' + h.baslik).slice(0, 120),
+      metin:(a.konu + ' için' + (h.kanal ? ' · ' + h.kanal : '') + '\n' + h.link).slice(0, 2000) }, { metin:'' });
+    if(!o.ok){ soyle('Defter’e ekleyemedim: ' + o.hata + '.'); return null; }
+    return aracKart(o);
+  }
   function kartlarHtml(m){
     if(!m.kartlar || !m.kartlar.length) return '';
     return '<div class="king__kartlar" role="list">' + m.kartlar.map(x => '<div class="king__kart" role="listitem">'
@@ -3284,6 +3340,11 @@ window.LIFEOS.KING = (function(){
         if(ra) return ra;
         if(r.text){ soyle(r.text); return { tur:'merkez', mode:'arac' }; }
         return yerel(y, null, metin);
+      }
+      if(r.ok && r.arastirma){
+        /* Söz 38: araştırma kartı; düz metin yalnız kart çizilemezse. */
+        soyle('«' + r.arastirma.konu + '» için internette ve YouTube’da baktım.', null, null, null, { arastirma:r.arastirma });
+        return { tur:'merkez', mode:r.mode };
       }
       if(r.ok){
         soyle(r.text, null, null, null, r.akti ? { yeni:false } : null);
@@ -3773,7 +3834,7 @@ window.LIFEOS.KING = (function(){
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
       : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '"><div><p>' + bicimli(m.metin) + '</p>'
-        + kartlarHtml(m) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i)
+        + kartlarHtml(m) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i) + arastirmaHtml(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
             + (m.onizleme.liste ? '<ul class="king__liste">' + m.onizleme.liste.map(x => '<li><b>' + kac(x) + '</b></li>').join('') + '</ul>'
@@ -4044,6 +4105,8 @@ window.LIFEOS.KING = (function(){
         if(is === 'isler' || is === 'isler-geri'){ aracAcik = true; aracSayfa = is === 'isler' ? 'isler' : null; ciz(false); return; }
         if(/^is-sec:\d+$/.test(is)){ aracSayfa = null; isSec(Number(is.slice(7))); return; }
         if(/^kam-is:\d+$/.test(is)){ kameraIs(Number(is.slice(7))); return; }
+        if(/^ars-dinle:\d+$/.test(is)){ const a = akis[Number(is.slice(10))] && akis[Number(is.slice(10))].arastirma; if(a && a.ozet) seslendir(a.ozet); return; }
+        if(/^ars-ekle:\d+$/.test(is)){ arastirmaEkle(Number(is.slice(9))); return; }
         if(is === 'is-kamera'){ isKamera(); return; }
         if(is === 'sus'){ sus(); return; }
         if(is === 'ekran-sor'){ isle('Ekranda ne görüyorsun? Kısaca söyle.'); return; }
@@ -4235,6 +4298,6 @@ window.LIFEOS.KING = (function(){
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
     aracIsle, ortakAraclar, haritaCevap, HARITA_RE,
-    isSec, kameraIs, fotoHedef:() => fotoHedef, cipler:() => (cipler || []).slice(),
+    isSec, kameraIs, fotoHedef:() => fotoHedef, arastirmaVeri, arastirmaEkle, cipler:() => (cipler || []).slice(),
   };
 })();

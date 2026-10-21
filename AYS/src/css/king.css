@@ -607,6 +607,24 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__arac small{ font-size:12px; color:var(--text-2); }
 .king__arac:hover{ background:var(--surface-2); }
 .king__arac:focus-visible{ outline:2px solid var(--primary); outline-offset:-2px; }
+/* Söz 38: araştırma kartı — Özet, İzle, Oku, Sıradaki adım; ince çizgi, tek vurgu. */
+.king__ars{ display:grid; gap:10px; margin-top:10px; padding:12px 14px; border-radius:14px; background:var(--surface-2); }
+.king__ars-bolum{ display:grid; gap:4px; }
+.king__ars-bolum + .king__ars-bolum{ padding-top:10px; border-top:1px solid var(--line, rgba(0,0,0,.08)); }
+.king__ars-bas{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.king__ars-ad{ font-size:11.5px; font-weight:600; letter-spacing:.02em; color:var(--text-2); }
+.king__ars p{ margin:0; font-size:14px; line-height:1.5; color:var(--text); }
+.king__ars-liste{ list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+.king__ars-oge{ display:grid; gap:1px; min-width:0; }
+.king__ars-link{ display:inline-flex; align-items:baseline; gap:6px; min-height:24px; font-size:14px; font-weight:600; color:var(--primary);
+  text-decoration:none; overflow-wrap:anywhere; }
+.king__ars-link:hover{ text-decoration:underline; }
+.king__ars-link:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; border-radius:4px; }
+.king__ars-no{ flex:none; font-size:11px; font-weight:600; color:var(--text-2); }
+.king__ars-oge small{ font-size:12px; color:var(--text-2); }
+.king__ars-oge span{ font-size:12.5px; color:var(--text-2); }
+.king__ars-sonraki .king__cip{ justify-self:start; }
+
 /* Söz 37: Tüm işler — modüle göre gruplu, kaydırılır. */
 .king__isler{ width:min(340px, calc(100vw - 48px)); max-height:min(460px, 62vh); overflow-y:auto; overscroll-behavior:contain; }
 .king__isler-grup{ display:grid; gap:2px; padding-top:6px; border-top:1px solid var(--line, rgba(0,0,0,.08)); }

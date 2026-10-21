@@ -2346,6 +2346,36 @@
       temizle();
     }));
 
+    /* Söz 38: HKM'nin araştırma şablonu (arastirma.v1) kart olur; link yalnız http(s), yeni sekmede. */
+    it('araştırma kartı: Özet, İzle, Oku; yalnız http(s) link; modül HKM’ye gider; Defter’e ekleme onaylı', () => sahneyle(async () => {
+      const yt = 'https://www.youtube.com/watch?v=abc&t=166s';
+      const m = sira({ ok:true, mode:'arastirma', text:'Özet …', arastirma:{ sablon:'arastirma.v1', modul:'spi', konu:'kuantum dolanıklığı',
+        ozet:{ metin:'Dolanık parçacıklar ortak bir durumu paylaşır.' },
+        izle:[{ no:2, baslik:'Dolanıklık anlatımı', kanal:'Bilim', sure:'12:30', dil:'Türkçe', dil_etiket:'olculdu', an:'2:46', link:yt, neden:'Konunun geçtiği an 2:46' },
+          { no:3, baslik:'Kötü', link:'javascript:alert(1)' }],
+        oku:[{ no:1, baslik:'Kuantum dolanıklığı', site:'tr.wikipedia.org', url:'https://tr.wikipedia.org/wiki/Dolan%C4%B1kl%C4%B1k', neden:'Ansiklopedi: Dolanıklık bir kuantum olgusudur.' }],
+        sonraki:{ metin:'…', hedef:{ tur:'video', baslik:'Dolanıklık anlatımı', link:yt, kanal:'Bilim' } } } });
+      const { k } = aracSahne(m);
+      k.ac();
+      const r = await k.isle('kuantum dolanıklığını araştır');
+      expect([r.tur, r.mode, m.istekler[0].govde.modul]).toEqual(['merkez', 'arastirma', 'spi']);
+      const kart = document.querySelector('.king__ars');
+      expect(Array.from(kart.querySelectorAll('.king__ars-ad')).map(x => x.textContent).slice(0, 3)).toEqual(['Özet', 'İzle', 'Oku']);
+      const linkler = Array.from(kart.querySelectorAll('a.king__ars-link'));
+      expect(linkler.map(a => [a.getAttribute('href'), a.getAttribute('target')])).toEqual([[yt, '_blank'], ['https://tr.wikipedia.org/wiki/Dolan%C4%B1kl%C4%B1k', '_blank']]);
+      expect(kart.textContent).toContain('Bilim · 12:30 · Türkçe · başlangıç 2:46');
+      expect(!!kart.querySelector('[data-king^="ars-dinle:"]')).toBe(true);
+      expect(k.arastirmaVeri({ sablon:'baska' })).toBeNull();
+      const ekle = kart.querySelector('[data-king^="ars-ekle:"]');
+      if(ekle){
+        ekle.click();
+        for(let i = 0; i < 4; i++) await new Promise(x => setTimeout(x, 0));
+        expect(!!document.querySelector('[data-king="yetki-onay"]')).toBe(true);
+        expect(k.akis().slice(-1)[0].metin).toContain('Defter’e not eklenecek');
+      }
+      temizle();
+    }));
+
     it('model yokken «es» taşıyan okuma aracı kuralla çalışır', () => sahneyle(async () => {
       calisan.length = 0;
       const { k } = sahne({});
