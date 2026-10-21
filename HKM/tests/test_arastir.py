@@ -9,8 +9,11 @@ Web Search (core/web.py). Testler AGA CIKMAZ: sahte tasiyici, sahte model.
         ve link o saniyeden acilir.
      4. Kaynaksiz cumle, kaynakta olmayan sayi ve alinti cevaba girmez.
      5. Dongu sinirlidir; son turda arac sunulmaz.
-     6. King'in «video bul» istegi sohbette linkle doner; web kapaliysa eski is emri."""
+     6. King'in «video bul» istegi sohbette linkle doner; web kapaliysa eski is emri.
+     7. Cevap sabit sablondur (Ozet · Izle · Oku · Siradaki adim); modul profili
+        (AYS/ESP/SPİ) sorguyu, suzgeci ve onayli eklemeyi belirler."""
 import json
+import time
 
 from core import arastir, db, models, settings, sohbet, web, youtube
 from tests.harness import eq, no, ok, suite, test
@@ -89,7 +92,8 @@ def _model(*cevaplar):
     sira = list(cevaplar)
 
     def t(provider, anahtar, model, sistem, mesajlar, ayar=None):
-        t.gorulen.append({"sistem": sistem, "araclar": bool((ayar or {}).get("araclar"))})
+        t.gorulen.append({"sistem": sistem, "araclar": bool((ayar or {}).get("araclar")),
+                          "mesaj": (mesajlar or [{}])[-1].get("content")})
         metin, cagri = sira.pop(0) if sira else ("Bilgi yok.", [])
         return metin, 300, 40, False, {"cagrilar": cagri} if (ayar or {}).get("araclar") else {}
     t.gorulen = []
@@ -156,72 +160,131 @@ def run():
         ok("altyazısı yok" in r2["note"])
     test("YouTube: anahtarsiz arama, Turkce altyazi, kavramin ani ve linki", t_youtube)
 
+
     def t_denetle():
         kaynaklar = [{"no": 1, "tur": "web", "baslik": "Zincir kuralı", "ozet": "",
                       "metin": "Kural 1676 yılında Leibniz tarafından kullanıldı."},
                      {"no": 2, "tur": "video", "baslik": "Türev", "kanal": "Hoca", "ozet": "", "metin": "",
-                      "an": {"an": "1:32", "alinti": "zincir kuralına geçelim"}}]
+                      "an": {"an": "1:32", "alinti": "zincir kuralına geçelim"}},
+                     {"no": 3, "tur": "video", "baslik": "Yedikçe zayıfla", "kanal": "X", "ozet": "", "metin": ""}]
         tut, at = arastir.denetle(
             "Zincir kuralını Leibniz 1676'da kullandı [1]. Kural 1700'de bulundu [1]. "
-            "Kaynaksız bir iddia. Konu 1:32'de anlatılıyor [2]. Hoca «zincir kuralına geçelim» diyor [2]. "
-            "Hoca «integral alalım» diyor [2]. Uydurma kaynak [9]. Bakınız https://kotu.org/x [1].", kaynaklar)
+            "Kaynaksız bir iddia. Konu 1:32'de ayrıntılı anlatılıyor [2]. Hoca «zincir kuralına geçelim» diyor [2]. "
+            "Hoca «integral alalım» diyor [2]. Uydurma kaynak [9]. Bakınız https://kotu.org/x [1]. "
+            "VİDEO «Türev» [2]. Bu yiyecek insanı hızla zayıflatır [3]. Kuralı $f(g(x))$ biçiminde yazarız,, [1]",
+            kaynaklar)
         eq([c["metin"] for c in tut], ["Zincir kuralını Leibniz 1676'da kullandı.",
-                                       "Konu 1:32'de anlatılıyor.",
-                                       "Hoca «zincir kuralına geçelim» diyor.", "Bakınız."])
-        eq([a["neden"][:8] for a in at], ["sayı kay", "kaynak g", "alıntı k", "kaynak g"])
+                                       "Konu 1:32'de ayrıntılı anlatılıyor.",
+                                       "Hoca «zincir kuralına geçelim» diyor.",
+                                       "Kuralı f(g(x)) biçiminde yazarız"])
+        eq([a["neden"][:8] for a in at], ["sayı kay", "kaynak g", "alıntı k", "kaynak g", "liste sa",
+                                          "liste sa", "yalnız v"])
         eq(arastir.metin_cagrilari('web_ara{sorgu:<|"|>zincir kuralı<|"|>}', arastir.ARACLAR),
            [{"ad": "web_ara", "param": '{sorgu:"zincir kuralı"}'}])
         eq(arastir.metin_cagrilari("silgec{x:1}", arastir.ARACLAR), [])
-    test("denetim: kaynaksiz cumle, uydurma sayi ve alinti atilir; link kodundur", t_denetle)
+    test("denetim: kaynaksiz cumle, uydurma sayi/alinti, liste satiri ve video basligi atilir", t_denetle)
 
-    def t_tetik():
+    def t_tetik_profil():
         eq(arastir.video_istegi("türev zincir kuralı için video bul"), "türev zincir kuralı")
         eq(arastir.video_istegi("King youtube'da limit konu anlatımı bulur musun"), "limit")
         eq(arastir.video_istegi("dünkü videoyu sevdim"), None)
-    test("video istegi taninir, konu ayiklanir", t_tetik)
+        eq([arastir.yalin(k) for k in ("Suç ve Ceza kitabını", "türev zincir kuralını", "mitokondri hakkında")],
+           ["Suç ve Ceza", "türev zincir kuralı", "mitokondri"])
+        eq(arastir.modul_of("spi", "http://127.0.0.1:4173"), "spi", "acik alan once")
+        eq(arastir.modul_of(None, "http://127.0.0.1:4193"), "esp")
+        eq(arastir.modul_of("x", "http://127.0.0.1:4200"), None)
+        p = arastir.profil
+        eq((p(None, "squat nasıl yapılır")[0], p(None, "squat nasıl yapılır")[2][0]), ("spi", "hareket"))
+        eq(p("spi", "yulaf kahvaltı tarifi")[2][0], "ogun")
+        eq(p("esp", "Suç ve Ceza kitabını araştır")[2][0], "kitap")
+        eq(p("esp", "ingilizce present perfect")[3], "en")
+        eq(p("ays", "türev soru çözümü")[2][0], "soru")
+        eq(p(None, "kuantum dolanıklık")[0], "genel")
+    test("tetik, yalin konu, modul (alan > koken > konu) ve alt kip", t_tetik_profil)
+
+    def t_suzgec():
+        vids = [("vid00000001", "Zincir kuralı 1", "Aynı", "10:00"), ("vid00000002", "Zincir kuralı 2", "Aynı", "9:00"),
+                ("vid00000003", "Zincir kuralı uzun", "Uzun", "3:10:00"),
+                ("vid00000004", "Zincir kuralı kısa", "Kısa", "0:30"), ("vid00000005", "Chain rule", "Yabancı", "8:00")]
+        arama = ("<script>var ytInitialData = %s;</script>" % json.dumps({"c": [
+            {"videoRenderer": {"videoId": i, "title": {"runs": [{"text": t}]}, "ownerText": {"runs": [{"text": k}]},
+                               "lengthText": {"simpleText": s}}} for i, t, k, s in vids]})).encode("utf-8")
+        wiki = {"query": {"search": [{"title": "Zincir kuralı", "snippet": "a"},
+                                     {"title": "Uluslararası Ceza Mahkemesi", "snippet": "zincir kuralı"}]}}
+        ag = _ag(**{"youtube.com/results": (200, "text/html", arama), "list=search": (200, "application/json", wiki)})
+        st = arastir._Durum(db.connect(":memory:"), _cfg(), ag, None, time.monotonic() + 30, max_sure=90 * 60,
+                            terimler=youtube.kokler("zincir kuralı"))
+        eklenen, _ = arastir.video_ara(st, "zincir kuralı")
+        eq([k["id"] for k in eklenen], ["vid00000001", "vid00000005"])
+        eq([k["baslik_uyar"] for k in eklenen], [True, False])
+        eq(sorted(e["neden"][:8] for e in st.elenen), ["aynı kan", "çok kısa", "çok uzun"])
+        bulunan, _ = arastir.web_ara(st, "zincir kuralı")
+        eq([k["baslik"] for k in bulunan], ["Zincir kuralı"], "basligi konuya uymayan web sonucu elenir")
+    test("suzgec: ayni kanal, uzun ve kisa video, ilgisiz web sonucu elenir", t_suzgec)
 
     def t_dongu_web():
         con = db.connect(":memory:")
         m = _model(("", [{"ad": "web_ara", "param": {"sorgu": "zincir kuralı tarihi"}}]),
                    ("Kural 1676 yılında Leibniz tarafından kullanıldı [1]. Kaynaksız uydurma.", []))
-        r = arastir.yap(con, _cfg(), "zincir kuralını araştır", konu="zincir kuralı", transport=m, tasiyici=_ag())
+        r = arastir.yap(con, _cfg(), "zincir kuralını araştır", konu="zincir kuralı", modul="ays",
+                        transport=m, tasiyici=_ag())
         ok(r["ok"])
-        ok(r["text"].startswith("Kural 1676 yılında Leibniz tarafından kullanıldı [1]."))
+        ok(r["text"].startswith("Özet\nKural 1676 yılında Leibniz tarafından kullanıldı [1]."))
         no("uydurma" in r["text"])
-        ok("https://tr.wikipedia.org/wiki/Zincir" in r["text"])
+        eq(r["sablon"]["ozet"]["metin"], "Kural 1676 yılında Leibniz tarafından kullanıldı.", "sesli okunur: atifsiz")
+        eq(r["sablon"]["oku"][0]["url"], "https://tr.wikipedia.org/wiki/Zincir_kural%C4%B1")
         eq(r["adim"], 2)
+        no("araştır" in m.gorulen[0]["mesaj"], "modele ham istek degil ozet gorevi gider")
         m2 = _model(*[("", [{"ad": "web_ara", "param": {"sorgu": "sorgu %d" % i}}]) for i in range(9)])
         r2 = arastir.yap(db.connect(":memory:"), _cfg(), "zincir kuralını araştır", konu="zincir kuralı",
                          transport=m2, tasiyici=_ag())
         eq(len(m2.gorulen), arastir.ADIM, "dongu sinirli")
         no(m2.gorulen[-1]["araclar"], "son turda arac sunulmaz")
-        ok(r2["ok"], "model cevap yazmasa da kaynak listesi gelir")
+        ok(r2["ok"] and r2["sablon"]["ozet"] is None, "model ozet yazmasa da Izle/Oku gelir")
         m3 = _model(*[("", [{"ad": "web_ara", "param": {"sorgu": "ayni"}}]) for _ in range(9)])
         arastir.yap(db.connect(":memory:"), _cfg(), "x araştır", konu="zincir kuralı", transport=m3, tasiyici=_ag())
         eq(len(m3.gorulen), 3, "ayni cagri tekrarlanmaz, arac hakki biter")
-    test("dongu: model arar, kaynakli cevap kalir; adim sinirli", t_dongu_web)
+    test("dongu: model arar, kaynakli ozet kalir; adim sinirli", t_dongu_web)
 
-    def t_dongu_video():
-        m = _model()
+    def t_sablon():
+        m = _model(("Zincir kuralı bileşke fonksiyonların türevini verir [1].", []))
         r = arastir.yap(db.connect(":memory:"), _cfg(), "zincir kuralı için video bul", konu="zincir kuralı",
-                        video=True, transport=m, tasiyici=_ag())
-        ok(r["ok"])
-        eq(m.gorulen, [], "an bulunduysa model cagrilmaz")
-        ok("https://www.youtube.com/watch?v=%s&t=92s" % VID[1] in r["text"])
-        ok("dk. 1:32" in r["text"])
-    test("video: an bulunur, link o saniyeden acilir", t_dongu_video)
+                        video=True, modul="ays", transport=m, tasiyici=_ag())
+        s = r["sablon"]
+        eq((s["sablon"], s["modul"], s["kip"]), ("arastirma.v1", "ays", "konu"))
+        v = s["izle"][0]
+        eq((v["video_id"], v["an"], v["saniye"], v["sure"], v["dil"], v["dil_etiket"]),
+           (VID[1], "1:32", 92, "10:02", "Türkçe", "olculdu"))
+        eq(v["link"], "https://www.youtube.com/watch?v=%s&t=92s" % VID[1])
+        ok(v["neden"].startswith("Konunun geçtiği an 1:32: «"))
+        ok("başlangıç 1:32" in r["text"] and v["link"] in r["text"])
+        eq([x in r["text"] for x in ("Özet\n", "\nİzle\n", "\nOku\n", "\nSıradaki adım\n")], [True] * 4)
+        sn = s["sonraki"]
+        eq((sn["eylem"], sn["onay"], sn["hedef"]["video_id"]), ("ays.ogren.kaynak_ekle", True, VID[1]))
+        ok("Onay vermeden hiçbir şey eklenmez." in r["text"])
+        kip = arastir.PROFIL["spi"]["kipler"][0]
+        eq(arastir.sonraki_sec("spi", arastir.PROFIL["spi"], kip, "squat", s["izle"], s["oku"])["eylem"],
+           "spi.hareket_ekle")
+        k = arastir.PROFIL["esp"]["kipler"][0]
+        eq(arastir.sonraki_sec("esp", arastir.PROFIL["esp"], k, "Suç ve Ceza", [], [])["hedef"],
+           {"tur": "konu", "konu": "Suç ve Ceza"})
+        eq(arastir.sonraki_sec("genel", arastir.PROFIL["genel"], ("konu",), "x", s["izle"], s["oku"]), None)
+    test("sablon: Ozet, Izle (an, sure, olculen dil), Oku, onayli siradaki adim", t_sablon)
 
     def t_sohbet():
         con = db.connect(":memory:")
         orj = web.VARSAYILAN_TASIYICI
         web.VARSAYILAN_TASIYICI = _ag()
         try:
-            r = sohbet.konus(con, _cfg(), "King, zincir kuralı için video bul", BUGUN, transport=_model())
+            r = sohbet.konus(con, _cfg(), "King, zincir kuralı için video bul", BUGUN, transport=_model(),
+                             modul="esp")
             eq(r["mode"], "arastirma")
             ok("&t=92s" in r["text"])
+            eq((r["arastirma"]["sablon"], r["arastirma"]["modul"]), ("arastirma.v1", "esp"))
+            ok(r["arastirma"]["izle"] and r["arastirma"]["kaynaklar"])
             r2 = sohbet.konus(db.connect(":memory:"), _cfg({"acik": False}), "zincir kuralını araştır", BUGUN,
                               transport=_model())
             eq(r2["mode"], "emir", "web kapaliysa eski yol: is emri")
         finally:
             web.VARSAYILAN_TASIYICI = orj
-    test("King: video istegi sohbette linkle doner; web kapaliysa is emri", t_sohbet)
+    test("King: istek sohbette sablonla doner, modul gecer; web kapaliysa is emri", t_sohbet)

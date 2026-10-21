@@ -814,7 +814,7 @@ def derinlik_of(v):
     return v if v in DERINLIKLER else None
 
 
-def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport=None):
+def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport=None, modul=None):
     """Modelden ONCE gelen kural yolu (komut, teklif, para, giris kapisi,
     is emri, istek, rapor). Cevap varsa onu, yoksa None doner. Arac
     sonuclariyla gelen ikinci tur bunu atlar: ayni mesaj ilk turda buradan
@@ -945,15 +945,17 @@ def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, t
     if vk == "" and konu is None:
         konu = ""
     hk = vk or konu
+    # Modulun profili (AYS/ESP/SPİ) sorgulari, video suzgecini ve onayli
+    # «siradaki adim»i belirler; cevap `arastirma` alaninda kart verisidir.
     if hk and len(hk) >= 3 and arastir.hazir_mi(cfg)["ok"]:
-        ar = arastir.yap(con, cfg, metin, konu=hk, video=vk is not None, transport=transport)
+        ar = arastir.yap(con, cfg, metin, konu=hk, video=vk is not None, modul=modul, transport=transport)
         if ar["ok"]:
             if kayit:
                 patron.log(con, kanal, "user", metin, agent=gorevli)
                 patron.log(con, kanal, "manager", ar["text"], agent=gorevli)
             return {"ok": True, "mode": "arastirma", "command": "arastirma", "text": ar["text"],
-                    "agent": gorevli, "arastirma": {k: ar.get(k) for k in (
-                        "kaynaklar", "izler", "atilan", "adim", "saniye", "model_notu")}}
+                    "agent": gorevli, "arastirma": dict(ar["sablon"], **{k: ar.get(k) for k in (
+                        "kaynaklar", "izler", "atilan", "elenen", "adim", "saniye", "model_notu")})}
     if konu is not None:
         govde = arastirmayi_devret(con, cfg, metin, konu, kanal=kanal, hedef=hedef)
         if kayit:
@@ -1008,7 +1010,7 @@ def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, t
 
 def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
           user="ben", transport=None, kayit=True, kanal="local", hedef=None,
-          derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None):
+          derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None):
     """Bir mesaja cevap. Once komut, sonra model, sonra durust bir «yok».
     `derinlik`: hizli | dengeli | derin | None (seviyeyi kod secer).
     `araclar`: istemcinin arac katalogu (core/arac.py); model bir arac
@@ -1025,7 +1027,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     sonuclar = arac.sonuclari_temizle(arac_sonuclari, katalog) if arac_sonuclari is not None else None
 
     if arac_sonuclari is None:
-        kr = _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport)
+        kr = _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport, modul)
         if kr is not None:
             return kr
 

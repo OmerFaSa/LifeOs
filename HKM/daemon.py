@@ -111,7 +111,7 @@ from urllib.parse import parse_qs, quote, unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import kutu, motor, tarife  # noqa: E402
+from core import arastir, kutu, motor, tarife  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, models, motto, ofismodel, ollama, outbox, patron,
@@ -1760,7 +1760,10 @@ class Handler(BaseHTTPRequestHandler):
             # yazsaydi ayni cumle akista iki kez gorunurdu.
             # Dusunme derinligi (hizli|dengeli|derin); gecersizse «otomatik».
             ek = {"derinlik": sohbet.derinlik_of((govde or {}).get("derinlik")),
-                  "uslup": sohbet.uslup_of((govde or {}).get("uslup"))}
+                  "uslup": sohbet.uslup_of((govde or {}).get("uslup")),
+                  # Istegin modulu (hizli arastirma profili): govdedeki «modul»,
+                  # yoksa modul arayuzunun kokeni (4173 AYS, 4183 SPİ, 4193 ESP).
+                  "modul": arastir.modul_of((govde or {}).get("modul"), self.headers.get("Origin"))}
             # King'in arac katalogu (core/arac.py): model yalniz secer; araci
             # modul calistirir. Ikinci tur okuma sonuclarini tasir.
             if isinstance((govde or {}).get("araclar"), list):

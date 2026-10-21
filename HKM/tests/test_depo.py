@@ -195,7 +195,7 @@ def run():
                              "2026-09-23", gorevli="king", transport=_Model(), kayit=False)
             eq(r["mode"], "emir")
             ok("Araştırma Bürosu" in r["text"] and "iş emri #" in r["text"], r["text"])
-            ok(all("wikipedia.org" in u for u in ag.cagri), "yalniz hizli yolun aramasi")
+            ok(all("wikipedia.org" in u or "youtube.com" in u for u in ag.cagri), "yalniz hizli yolun aramasi")
             e = king.emirler(con)[0]
             eq((e["tur"], e["modul"], e["konu"]), ("bam.arastirma", "hkm", "Osmanlı kuruluşunu"))
             r2 = sohbet.konus(con, _cfg_web(), "internette Osmanlı kuruluşunu araştır",

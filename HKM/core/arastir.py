@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """BAM hizli arastirma — sohbetin icinde, SUNUCU tarafinda (H1, 2026-10-21;
 depo sahibi: «YouTube'a gidip arastirma yapabilecek, link getirebilecek,
-kaynak getirebilecek»).
+kaynak getirebilecek»; «belli akilli guzel bir sablonla yapsin»; «dil
+icinde de olsun, SPİ icinde de olsun ve kaliteli olsun»).
 
    King arastirmayi kendisi yapmaz: «X'i arastir», «zincir kurali icin
    video bul» diyen mesaji BAM Arastirma Burosu'nun bu hizli yoluna verir
@@ -9,37 +10,115 @@ kaynak getirebilecek»).
    kalici, depoya giren rapor yine is emriyle yazilir (core/bam.py); bu yol
    sohbet suresinde biten kisa, kaynakli cevaptir.
 
-   Akis:  KOD ilk aramayi yapar (video istendiyse YouTube + altyazida an)
-          -> model kaynaklara bakar; yetmiyorsa ARAC cagirir (web_ara,
-          sayfa_oku, video_ara, video_ici_ara) -> kod calistirir, kaynak
-          listesine ekler -> model kaynakli kisa cevabi yazar -> KOD denetler.
+   Akis:  modul PROFILI secilir (AYS, ESP, SPİ ya da genel; alt kip konudan)
+          -> KOD web'de arar, ilk sayfayi okur, YouTube'da arar, videolari
+          suzer ve altyazida konunun ANINI bulur -> model kaynaklara bakar;
+          yetmiyorsa ARAC cagirir (web_ara, sayfa_oku, video_ara,
+          video_ici_ara) -> 2–3 cumlelik kaynakli ozeti yazar -> KOD denetler
+          ve SABLONU kurar: Ozet · Izle · Oku · Siradaki adim.
 
-   Bes kural:
+   Alti kural:
 
    1. SINIRLI DONGU. En cok ADIM model cagrisi ve SURE saniye; sure dolunca
       eldeki kaynaklarla kapanir. Istemci 60 sn bekler.
-   2. KAYNAKSIZ CUMLE CEVABA GIRMEZ. Her cumle [n] ile bir kaynaga baglanir;
-      baglanmayan cumle kod tarafindan atilir.
+   2. KAYNAKSIZ CUMLE CEVABA GIRMEZ. Ozetin her cumlesi [n] ile bir kaynaga
+      baglanir; baglanmayan cumle kod tarafindan atilir.
    3. SAYI VE ALINTI KODLA DENETLENIR. Cumledeki her sayi ve «...» alintisi
       gosterdigi kaynagin metninde aranir; bulunmazsa cumle atilir.
-   4. LINKI KOD YAZAR. Model adres yazmaz (yazdigi atilir); kaynak listesi
-      ve video anlari (watch?v=ID&t=SANIYEs) koddan gelir.
-   5. MODEL YOKSA DA LISTE VAR. Model cevap yazamazsa ya da her cumlesi
-      duserse kullanici bulunan kaynaklari ve video anlarini yine alir."""
+   4. LINKI VE «NEDEN»I KOD YAZAR. Model adres yazmaz (yazdigi atilir).
+      Izle/Oku satirlarinin gerekcesi kaynagin kendi metninden gelir
+      (altyazidaki an, arama ozeti); model uydurmaz.
+   5. VIDEO SUZULUR. Ayni kanaldan ikinci video, profilin sinirindan uzun
+      ya da bir dakikadan kisa video, basliginda da altyazisinda da konu
+      gecmeyen video elenir. Sure ve dil yazilir; dil altyazidan OLCULUR,
+      altyazi yoksa basliktan «tahmin» diye yazilir.
+   6. YAZMA ONAYLIDIR. «Siradaki adim» yalniz bir ONERIDIR (eylem + hedef);
+      ekleme modulun kendi koduyla, kullanicinin onayiyla olur (AGENTS §1.4)."""
 import re
 import time
 
 from core import ai, arac, kaynakli, web, youtube
 
 ROL = "bam.arastirma"
+SABLON = "arastirma.v1"
 ADIM = 4                # model cagrisi
 SURE = 45               # saniye; istemci 60 sn bekler
 ARAC_BASINA = 2         # bir turda calistirilan en cok arac
-EN_COK_KAYNAK = 12
+EN_COK_KAYNAK = 14
 OKUMA_HARF = 1800       # okunan sayfadan modele giden en cok harf
 WEB_N = 5
-VIDEO_N = 4
-AN_ARANAN = 3           # video isteginde altyazisi taranan ilk video
+VIDEO_N = 8             # aramadan gelen; suzgecten sonra az kalir
+AN_ARANAN = 3           # altyazisi taranan video
+IZLE_N = 3
+OKU_N = 3
+OZET_CUMLE = 3
+EN_KISA_VIDEO = 60      # saniye; daha kisasi (Shorts) elenir
+
+DIL_AD = {"tr": "Türkçe", "en": "İngilizce", "de": "Almanca", "fr": "Fransızca", "es": "İspanyolca",
+          "it": "İtalyanca", "ru": "Rusça", "ar": "Arapça", "ja": "Japonca", "zh": "Çince",
+          "ko": "Korece", "pt": "Portekizce", "nl": "Felemenkçe"}
+# ESP: ogrenilen dil konudan taninir; ikinci video aramasi o dilde yapilir.
+OGRENILEN = (("en", r"ingilizce|english|ingilizcede"), ("de", r"almanca|deutsch"),
+             ("fr", r"fransızca|français|francais"), ("es", r"ispanyolca|español|espanol"),
+             ("it", r"italyanca|italiano"), ("ru", r"rusça"), ("ar", r"arapça"),
+             ("ja", r"japonca"), ("ko", r"korece"))
+DERS_SOZ = {"en": "lesson explained", "de": "Lektion erklärt", "fr": "leçon expliquée",
+            "es": "lección explicada", "it": "lezione spiegata", "ru": "урок", "ar": "درس",
+            "ja": "レッスン", "ko": "강의"}
+
+# MODUL PROFILLERI. `kip`: konudan secilen alt kip (ilk eslesen); her kip
+# kendi video ve web sorgu ekini, video sinirini ve siradaki adimini tasir.
+PROFIL = {
+    "ays": {"ad": "AYS", "max_sure": 90 * 60, "oncelik": (".gov.tr", ".edu.tr", "meb.gov.tr", "osym.gov.tr"),
+            "kipler": (
+                ("cikmis", r"çıkmış|osym|ösym", "çıkmış sorular çözümü", "çıkmış sorular"),
+                ("soru", r"soru çöz|soru çözümü|soru bankası|test çöz", "soru çözümü", "soru çözümü"),
+                ("konu", r"", "konu anlatımı", "")),
+            "sonraki": {"metin": "«%s» videosunu AYS Öğren’e kaynak olarak ekleyeyim mi?",
+                        "eylem": "ays.ogren.kaynak_ekle", "hedef": "video"}},
+    "esp": {"ad": "ESP", "max_sure": 60 * 60, "oncelik": (".edu", ".ac.uk", "britannica.com", "wikipedia.org"),
+            "kipler": (
+                ("kitap", r"kitab|kitap|roman|yazar|öykü|hikâye|hikaye|şiir", "kitap özeti", "kitap özeti"),
+                ("kelime", r"kelime|sözcük|vocabulary|deyim|idiom", "kelimeler", "kelime listesi"),
+                ("telaffuz", r"telaffuz|okunuş|pronunciation|aksan", "telaffuz", "telaffuz"),
+                ("dil", r"dilbilgisi|gramer|grammar|zaman|tense|fiil|edat", "konu anlatımı", "dilbilgisi"),
+                ("konu", r"", "konu anlatımı", "")),
+            "kip_sure": {"kelime": 20 * 60, "telaffuz": 30 * 60},
+            "sonraki": {"metin": "«%s» videosunu ESP kaynaklarına ekleyeyim mi?",
+                        "eylem": "esp.kaynak_ekle", "hedef": "video"},
+            "kip_sonraki": {
+                "kitap": {"metin": "«%s» kitabını ESP kitaplığına ekleyeyim mi?", "eylem": "esp.kitaplik_ekle",
+                          "hedef": "konu"},
+                "kelime": {"metin": "«%s» videosundaki kelimeleri ESP kelime listene alayım mı?",
+                           "eylem": "esp.kelime_ekle", "hedef": "video"}}},
+    "spi": {"ad": "SPİ", "max_sure": 40 * 60,
+            "oncelik": ("saglik.gov.tr", "who.int", "nih.gov", "cdc.gov", "nhs.uk", "mayoclinic.org",
+                        "harvard.edu", ".gov.tr", ".edu.tr", ".gov", ".edu"),
+            "kipler": (
+                ("hareket", r"egzersiz|antrenman|hareket|squat|şınav|plank|deadlift|bench|mekik|esneme|"
+                            r"kardiyo|yoga|pilates|koşu|barfiks|form|ısınma",
+                 "doğru form nasıl yapılır", "nasıl yapılır doğru form"),
+                ("ogun", r"tarif|yemek|öğün|kahvaltı|beslenme|diyet|protein|kalori|salata|smoothie|çorba",
+                 "tarifi", "tarifi besin değeri"),
+                ("saglik", r"", "nedir", "nedir")),
+            "sonraki": {"metin": "«%s» kaynağını SPİ’ye ekleyeyim mi?", "eylem": "spi.kaynak_ekle",
+                        "hedef": "video"},
+            "kip_sonraki": {
+                "hareket": {"metin": "«%s» videosunu SPİ’de hareket listene ekleyeyim mi?",
+                            "eylem": "spi.hareket_ekle", "hedef": "video"},
+                "ogun": {"metin": "«%s» videosundaki tarifi SPİ’de öğün olarak ekleyeyim mi?", "eylem": "spi.ogun_ekle",
+                         "hedef": "video"}}},
+    "genel": {"ad": "Genel", "max_sure": 90 * 60, "oncelik": (),
+              "kipler": (("konu", r"", "konu anlatımı", ""),), "sonraki": None},
+}
+PORT_MODUL = {4173: "ays", 4183: "spi", 4193: "esp"}
+# Modul bilinmiyorsa (HKM paneli, Telegram) konudan tahmin.
+TAHMIN = (("spi", r"egzersiz|antrenman|squat|şınav|plank|tarif|öğün|beslenme|diyet|kalori|protein|uyku|"
+                  r"tansiyon|vitamin|kas|yağ yak"),
+          ("esp", r"ingilizce|almanca|fransızca|ispanyolca|dilbilgisi|gramer|grammar|telaffuz|kelime|kitab|"
+                  r"kitap|roman|yazar|felsefe|okuma"),
+          ("ays", r"türev|integral|limit|tyt|ayt|yks|lgs|kpss|konu anlatımı|fizik|kimya|biyoloji|matematik|"
+                  r"geometri|tarih|coğrafya|soru çöz"))
 
 VIDEO_TETIK = re.compile(
     r"(video(?:su|lar[ıi]?|sunu)?\s+(?:bul|getir|ara|öner|göster|aç|var\s+m[ıi])"
@@ -59,7 +138,7 @@ ARACLAR = [
          "no": {"type": "integer", "description": "kaynak numarası", "minimum": 1, "maximum": 40}},
          "required": ["no"]}},
     {"ad": "video_ara", "tur": "oku",
-     "aciklama": "YouTube'da video arar (Türkçe konu anlatımı önce); videolar kaynak listesine eklenir.",
+     "aciklama": "YouTube'da video arar (Türkçe anlatım önce); videolar kaynak listesine eklenir.",
      "parametreler": {"type": "object", "properties": {
          "sorgu": {"type": "string", "description": "arama sorgusu", "maxLength": 160}},
          "required": ["sorgu"]}},
@@ -71,18 +150,22 @@ ARACLAR = [
          "required": ["no", "kavram"]}},
 ]
 
-SISTEM = """Sen HKM'deki BAM Araştırma Bürosu'nun hızlı araştırmacısısın. Kullanıcının isteğini
-aşağıdaki NUMARALI KAYNAKLARA dayanarak cevaplarsın.
+SISTEM = """Sen HKM'deki BAM Araştırma Bürosu'nun hızlı araştırmacısısın. Kullanıcının isteği için
+aşağıdaki NUMARALI KAYNAKLARA dayanarak kısa bir ÖZET yazarsın.
 
 - Kaynaklar yetmiyorsa araç çağır: web_ara (yeni arama), sayfa_oku (listedeki sayfayı oku),
   video_ara (YouTube), video_ici_ara (videonun hangi dakikada konuyu anlattığını bul).
-- Yetiyorsa araç çağırma; cevabı yaz: en çok 5 kısa cümle, düzgün Türkçe.
+- Yetiyorsa araç çağırma; ÖZETİ yaz: 2 ya da 3 kısa, düz cümle. Sesli okunacak: liste, başlık,
+  madde işareti, emoji yok. Konunun ne olduğunu anlat; videoları ve linkleri SAYMA, onları sistem ekler.
 - HER cümlenin sonuna dayandığı kaynağın numarasını köşeli parantezle yaz: [1] ya da [1][3].
-- Kaynakta olmayan bilgiyi yazma; sayıyı kaynaktan aynen al. Link yazma, linkleri sistem ekler.
-- Video istendiyse hangi videonun hangi dakikada konuyu anlattığını söyle (dakika listede yazar).
+- Kaynakta olmayan bilgiyi yazma; sayıyı kaynaktan aynen al.
 - Teşhis koyma, ilaç ya da doz önerme, sonuç garantisi verme."""
-SON_TUR = "\n\nAraç hakkın bitti; şimdi yalnız eldeki kaynaklarla cevabı yaz."
-VIDEO_ISTEK = "\n\nİSTEK VİDEO: YouTube videosu ve konunun anlatıldığı dakika bekleniyor."
+SON_TUR = "\n\nAraç hakkın bitti; şimdi yalnız eldeki kaynaklarla özeti yaz."
+# Modele kullanicinin ham cumlesi gitmez: «video bul» goren model konuyu
+# degil videolari anlatiyordu. Gorev tektir: konunun ozeti.
+GOREV = "«%s» konusunu kaynaklara dayanarak 2–3 cümleyle özetle: ne olduğunu ve temel noktasını anlat."
+SPI_EK = ("\n\nBu bir SAĞLIK konusu: yalnız güvenilir kaynaktaki bilgiyi yaz; teşhis, tedavi, ilaç ve doz "
+          "yazma. Emin değilsen daha az yaz.")
 
 URL_RE = re.compile(r"\(?\s*https?://\S+\s*\)?")
 ATIF_RE = re.compile(r"\[(\d{1,2}(?:\s*[,;-]\s*\d{1,2})*)\]")
@@ -107,18 +190,50 @@ def video_istegi(metin):
     return re.sub(r"\s+", " ", konu).strip(" .,!?:;'\"«»")
 
 
+KONU_DOLGU = re.compile(r"(?:^|\s)(kitab[ıi]n[ıi]|kitab[ıi]|roman[ıi]n[ıi]|roman[ıi]|videosunu|videosu|"
+                        r"konusunu|konusu|hakkında|ile ilgili)(?=\s|$)", re.I)
+
+
+def yalin(konu):
+    """Arama konusu: «Suç ve Ceza kitabını» -> «Suç ve Ceza», «türev zincir
+    kuralını» -> «türev zincir kuralı» (son kelimenin belirtme eki duser)."""
+    k = re.sub(r"\s+", " ", KONU_DOLGU.sub(" ", str(konu or ""))).strip(" .,!?:;'\"«»")
+    k = re.sub(r"(\w{3,}[ıiuü])n[ıiuü]$", r"\1", k)
+    return k[:160] or str(konu or "").strip()[:160]
+
+
 def hazir_mi(cfg):
     if not web.settings(cfg)["acik"]:
         return {"ok": False, "note": "Web kapalı (Ayarlar › Web)."}
     return ai.hazir_mi(cfg, ROL)
 
 
+def modul_of(deger=None, koken=None):
+    """Istegin modulu: acik alan (ays|spi|esp) once, sonra kokenin portu."""
+    if deger in ("ays", "spi", "esp"):
+        return deger
+    m = re.match(r"^https?://[^/]+:(\d+)$", str(koken or ""))
+    return PORT_MODUL.get(int(m.group(1))) if m else None
+
+
+def profil(modul, konu):
+    """(profil_adi, profil, kip, ogrenilen_dil). Modul yoksa konudan tahmin."""
+    k = youtube._kucuk(konu)
+    if modul not in PROFIL:
+        modul = next((m for m, r in TAHMIN if re.search(r, k)), "genel")
+    p = PROFIL[modul]
+    kip = next(x for x in p["kipler"] if not x[1] or re.search(x[1], k))
+    dil = next((d for d, r in OGRENILEN if re.search(r, k)), None) if modul == "esp" else None
+    return modul, p, kip, dil
+
+
 # ----------------------------------------------------------------- kaynak
 
 class _Durum:
-    def __init__(self, con, cfg, tasiyici, now, bitis):
+    def __init__(self, con, cfg, tasiyici, now, bitis, max_sure=None, terimler=()):
         self.con, self.cfg, self.tasiyici, self.now, self.bitis = con, cfg, tasiyici, now, bitis
-        self.kaynaklar, self.izler = [], []
+        self.max_sure, self.terimler, self.oncelik = max_sure, list(terimler), ()
+        self.kaynaklar, self.izler, self.elenen = [], [], []
 
     def kalan(self):
         return self.bitis - time.monotonic()
@@ -140,15 +255,30 @@ class _Durum:
         return self.kaynaklar[no - 1] if isinstance(no, int) and 1 <= no <= len(self.kaynaklar) else None
 
 
+def _oncelikli(alan, oncelik):
+    return any(alan == o.lstrip(".") or alan.endswith(o if o.startswith(".") else "." + o) or alan == o
+               for o in oncelik)
+
+
 def web_ara(st, sorgu):
     r = web.ara(st.con, st.cfg, ROL, sorgu, n=WEB_N, tasiyici=st.tasiyici, now=st.now)
     st.iz("web’de arandı: «%s» (%d sonuç)" % (sorgu, len(r.get("sonuclar") or [])))
     ozet = {x["url"]: x.get("ozet") or "" for x in r.get("sonuclar") or []}
+    # Modulun guvendigi alanlar once (SPİ: saglik.gov.tr, who.int…); sira icinde kaynakli'nin sirasi.
+    adaylar = sorted(kaynakli.aday_sec(r.get("sonuclar") or []),
+                     key=lambda x: not _oncelikli(x["alan"] or "", st.oncelik))
+    # Alaka: basliginda konunun koklerinin en az yarisi gecmeyen sonuc elenir
+    # (sahada: «Suç ve Ceza» -> «Uluslararası Ceza Mahkemesi»).
+    n = len(st.terimler)
+    esik = n if n <= 2 else (n + 1) // 2
+    uyan = [x for x in adaylar if sum(t in youtube._kucuk(x["baslik"]) for t in st.terimler) >= esik]
+    for x in adaylar:
+        if x not in uyan:
+            st.elenen.append({"baslik": x["baslik"], "neden": "konuyla ilgisiz (web)"})
     eklenen = [st.ekle({"tur": "web", "baslik": x["baslik"], "url": x["url"], "alan": x["alan"] or "",
-                        "ozet": ozet.get(x["url"], ""), "metin": None})
-               for x in kaynakli.aday_sec(r.get("sonuclar") or [])]
+                        "ozet": ozet.get(x["url"], ""), "metin": None}) for x in uyan]
     eklenen = [k for k in eklenen if k]
-    return eklenen, (None if eklenen else (r.get("note") or "Sonuç yok."))
+    return eklenen, (None if eklenen else (r.get("note") or "Konuyla ilgili sonuç yok."))
 
 
 def sayfa_oku(st, k):
@@ -166,30 +296,57 @@ def sayfa_oku(st, k):
     return None
 
 
+def _basligi_uyar(v, terimler):
+    b = youtube._kucuk("%s %s" % (v.get("baslik"), v.get("kanal")))
+    return any(t in b for t in terimler)
+
+
 def video_ara(st, sorgu):
+    """Arar ve SUZER (kural 5): ayni kanal, sinir disi sure. Konuyla ilgisi
+    basliktan ya da altyazidan sinanir; ilgisiz olan secimde elenir."""
     r = youtube.ara(st.con, st.cfg, ROL, sorgu, n=VIDEO_N, tasiyici=st.tasiyici, now=st.now)
-    st.iz("YouTube’da arandı: «%s» (%d video)" % (sorgu, len(r.get("videolar") or [])))
-    eklenen = [st.ekle({"tur": "video", "baslik": v["baslik"], "url": v["url"], "alan": "youtube.com",
-                        "kanal": v.get("kanal") or "", "id": v["id"], "sure": v.get("sure"),
-                        "ozet": "", "metin": None, "an": None})
-               for v in r.get("videolar") or []]
-    eklenen = [k for k in eklenen if k]
-    return eklenen, (None if eklenen else (r.get("note") or "Video bulunamadı."))
+    kanallar = {x.get("kanal") for x in st.kaynaklar if x["tur"] == "video"}
+    eklenen, elenen = [], 0
+    for v in r.get("videolar") or []:
+        neden = None
+        if v.get("kanal") and v["kanal"] in kanallar:
+            neden = "aynı kanal"
+        elif v.get("sure") and v["sure"] > (st.max_sure or 10 ** 9):
+            neden = "çok uzun (%s)" % youtube.sure_yaz(v["sure"])
+        elif v.get("sure") and v["sure"] < EN_KISA_VIDEO:
+            neden = "çok kısa"
+        if neden:
+            elenen += 1
+            st.elenen.append({"baslik": v["baslik"], "neden": neden})
+            continue
+        k = st.ekle({"tur": "video", "baslik": v["baslik"], "url": v["url"], "alan": "youtube.com",
+                     "kanal": v.get("kanal") or "", "id": v["id"], "sure": v.get("sure"),
+                     "ozet": "", "metin": None, "an": None,
+                     "baslik_uyar": _basligi_uyar(v, st.terimler)})
+        if k:
+            kanallar.add(k["kanal"])
+            eklenen.append(k)
+    st.iz("YouTube’da arandı: «%s» (%d video, %d elendi)" % (sorgu, len(eklenen), elenen))
+    return eklenen, (None if eklenen else (r.get("note") or "Uygun video bulunamadı."))
 
 
 def video_ici_ara(st, k, kavram):
     if not k or k["tur"] != "video":
         return "Bu numarada bir video yok."
     t = youtube.transkript(st.con, st.cfg, ROL, k["id"], tasiyici=st.tasiyici, now=st.now)
+    k["altyazi_tarandi"] = True
     if not t.get("ok"):
         k["altyazi_yok"] = t.get("note")
         st.iz("altyazı okunamadı: %s" % k["baslik"][:60])
         return t.get("note")
+    k["dil"], k["otomatik"] = t.get("dil"), t.get("otomatik")
+    if t.get("sure") and not k.get("sure"):
+        k["sure"] = t["sure"]
     a = youtube.an_bul(t["parcalar"], kavram)
     st.iz("altyazıda «%s» arandı: %s" % (kavram, a["an"] if a else "geçmiyor"))
     if not a:
         return "«%s» bu videonun altyazısında geçmiyor." % kavram
-    k["an"] = dict(a, kavram=kavram, link=youtube.link(k["id"], a["saniye"]), otomatik=t.get("otomatik"))
+    k["an"] = dict(a, kavram=kavram, link=youtube.link(k["id"], a["saniye"]))
     k["metin"] = a["alinti"]
     return None
 
@@ -231,15 +388,18 @@ def _kucult(metin, terimler, n=OKUMA_HARF):
 
 
 def kaynak_blogu(st, terimler):
+    """Modele giden numarali liste. Okunacak web metni varsa videolarin
+    altyazisi verilmez: sahada ozet konuyu degil videolari anlatti
+    («Ayse Eser'in videosunda…»). Web yoksa altyazi ozetin dayanagidir."""
+    web_var = any(k["tur"] == "web" and (k.get("metin") or k.get("ozet")) for k in st.kaynaklar)
     satir = []
     for k in st.kaynaklar:
         if k["tur"] == "video":
-            s = "[%d] VİDEO «%s» · %s%s" % (k["no"], k["baslik"], k["kanal"] or "?",
-                                           " · süre %s" % youtube.sure_yaz(k["sure"]) if k.get("sure") else "")
-            if k.get("an"):
+            s = "[%d] VİDEO «%s» · %s" % (k["no"], k["baslik"], k["kanal"] or "?")
+            if web_var:
+                s += " (özette kullanma; videoları sistem listeler)"
+            elif k.get("an"):
                 s += "\n    %s'de geçiyor: «%s»" % (k["an"]["an"], k["an"]["alinti"][:300])
-            elif k.get("altyazi_yok"):
-                s += "\n    (altyazı yok; dakika bilinmiyor)"
         else:
             s = "[%d] %s (%s)" % (k["no"], k["baslik"], k["alan"])
             if k.get("metin"):
@@ -273,9 +433,10 @@ def denetle(cevap, kaynaklar):
     Tutulan her cumle {metin, kaynaklar}; atilan {metin, neden}."""
     harita = {k["no"]: k for k in kaynaklar}
     tutulan, atilan = [], []
-    metin = URL_RE.sub(" ", str(cevap or ""))
+    # Link ve bicim isareti (LaTeX $…$, **kalin**) atilir: ozet sesli okunur.
+    metin = re.sub(r"\$|\*\*|__|`", "", URL_RE.sub(" ", str(cevap or "")))
     for ham in CUMLE_RE.split(metin):
-        c = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s+", "", ham).strip()
+        c = re.sub(r"^\s*(?:[-*•#]+|\d+[.)])\s+", "", ham).strip()
         if len(c) < 3:
             continue
         nlar = []
@@ -284,8 +445,20 @@ def denetle(cevap, kaynaklar):
                 if int(n) in harita and int(n) not in nlar:
                     nlar.append(int(n))
         govde = re.sub(r"\s+([.,!?])", r"\1", ATIF_RE.sub("", c)).strip()
+        govde = re.sub(r"[\s,;:]+([.!?…]*)$", r"\1", govde)          # «edilebilir,,.» -> «edilebilir.»
         if not nlar:
             atilan.append({"metin": govde, "neden": "kaynak gösterilmemiş"})
+            continue
+        # Liste satiri ya da baslik kopyasi ozet degildir (sahada gemma4:e2b
+        # «VİDEO «…» [4].» diye kaynak listesini geri yazdi).
+        if (re.search(r"VİDEO|KAYNAKLAR|OKUNDU:", govde) or len(re.findall(r"\w+", govde)) < 4 or len(nlar) > 3
+                or any(kaynakli._norm(govde).strip(" .«»") == kaynakli._norm(harita[n]["baslik"]) for n in nlar)):
+            atilan.append({"metin": govde, "neden": "liste satırı, özet değil"})
+            continue
+        # Video BASLIGI dayanak degildir (sahada SPİ: «yedikçe zayıfla» başlığından
+        # saglik iddiasi); video ancak altyazidaki aniyla kaynak olur.
+        if all(harita[n]["tur"] == "video" and not harita[n].get("an") for n in nlar):
+            atilan.append({"metin": govde, "neden": "yalnız video başlığına dayanıyor"})
             continue
         dayanak = "\n".join(_dogrulama_metni(harita[n]) for n in nlar)
         eksik = [s for s in ai.SAYI.findall(govde) if not _sayi_var(s.lstrip("-"), dayanak)]
@@ -300,22 +473,17 @@ def denetle(cevap, kaynaklar):
     return tutulan, atilan
 
 
-# ------------------------------------------------------------------ cevap
-
-def _kaynak_satiri(k):
-    if k["tur"] == "video":
-        s = "[%d] ▶ %s · %s" % (k["no"], k["baslik"], k["kanal"] or "YouTube")
-        if k.get("an"):
-            return s + " · dk. %s — %s\n    «%s»%s" % (
-                k["an"]["an"], k["an"]["link"], _kisa(k["an"]["alinti"]),
-                " (otomatik altyazı)" if k["an"].get("otomatik") else "")
-        return s + " — " + k["url"]
-    return "[%d] %s (%s) — %s" % (k["no"], k["baslik"], k["alan"], k["url"])
-
+# ----------------------------------------------------------------- sablon
 
 def _kisa(s, n=160):
     s = re.sub(r"\s+", " ", str(s or "")).strip()
     return s if len(s) <= n else s[:n].rsplit(" ", 1)[0] + "…"
+
+
+def _cumle(c):
+    """Duz cumle, noktali: sesli okunur."""
+    s = c["metin"].rstrip()
+    return s if re.search(r"[.!?…]$", s) else s + "."
 
 
 def _atifli(c):
@@ -324,69 +492,181 @@ def _atifli(c):
     return "%s [%s]%s" % (m.group(1).rstrip(), "][".join(str(n) for n in c["kaynaklar"]), m.group(2) or ".")
 
 
-def metin_kur(tutulan, kaynaklar, video):
-    """Kullaniciya giden metni KOD kurar: denetlenmis cumleler + kaynaklar."""
-    anili = [k for k in kaynaklar if k["tur"] == "video" and k.get("an")]
-    gosterilen = {n for c in tutulan for n in c["kaynaklar"]}
-    if video:
-        # Video isteginin teslimati videodur: ani bulunanlar her durumda listede.
-        gosterilen |= {k["no"] for k in anili[:3]}
-        if not gosterilen:
-            gosterilen = {k["no"] for k in kaynaklar if k["tur"] == "video"}
-    if not gosterilen:
-        # Model cevap yazamadi: okunan sayfalar (yoksa ilk uc kaynak) listelenir.
-        gosterilen = {k["no"] for k in kaynaklar if k.get("metin")} or {k["no"] for k in kaynaklar[:3]}
-    liste = [k for k in kaynaklar if k["no"] in gosterilen]
-    if tutulan:
-        bas = " ".join(_atifli(c) for c in tutulan)
-    elif video and anili:
-        bas = "Türkçe anlatımlar; konunun geçtiği dakikayı altyazıdan buldum, link o andan açılır."
-    elif liste:
-        bas = "Kaynaklardan doğrulanmış bir özet çıkaramadım; bulduğum kaynaklar şunlar:"
+def _dil(k):
+    """(etiket, kaynak): altyazidan OLCULDU; yoksa basliktan TAHMIN; yoksa None."""
+    if k.get("dil"):
+        kod = str(k["dil"]).split("-")[0]
+        return DIL_AD.get(kod, kod), "olculdu"
+    if youtube.turkce_mi(k):
+        return "Türkçe", "tahmin"
+    return None, None
+
+
+def izle_sec(kaynaklar):
+    """Ani bulunan once; sonra basligi konuya uyan (altyazisi taranmamis ya
+    da yok). Basliginda da altyazisinda da konu gecmeyen video gosterilmez."""
+    vids = [k for k in kaynaklar if k["tur"] == "video"]
+    anili = [k for k in vids if k.get("an")]
+    diger = [k for k in vids if not k.get("an") and k.get("baslik_uyar")
+             and not (k.get("altyazi_tarandi") and not k.get("altyazi_yok"))]
+    out = []
+    for k in anili + diger:
+        dil, dil_kaynak = _dil(k)
+        if k.get("an"):
+            # Ek yok: «2:46’ten» gibi saat okunusuna uymayan ek yanlis olurdu.
+            neden = "Konunun geçtiği an %s: «%s»" % (k["an"]["an"], _kisa(k["an"]["alinti"], 120))
+        elif k.get("altyazi_yok"):
+            neden = "Başlığı konuyla örtüşüyor; altyazısı olmadığı için dakika bulunamadı."
+        else:
+            neden = "Başlığı konuyla örtüşüyor; altyazısı taranmadı."
+        out.append({"no": k["no"], "baslik": k["baslik"], "kanal": k["kanal"],
+                    "sure_sn": k.get("sure"), "sure": youtube.sure_yaz(k["sure"]) if k.get("sure") else None,
+                    "dil": dil, "dil_etiket": dil_kaynak, "otomatik_altyazi": k.get("otomatik"),
+                    "an": (k.get("an") or {}).get("an"), "saniye": (k.get("an") or {}).get("saniye"),
+                    "link": (k.get("an") or {}).get("link") or k["url"], "video_id": k["id"], "neden": neden})
+        if len(out) >= IZLE_N:
+            break
+    return out
+
+
+def _ilk_cumle(metin, terimler):
+    """Kaynagin kendi cumlesi: konuyu tasiyan ilk duz cumle. Dipnot («^ a b»),
+    soru ve yarim parca gerekce olmaz; uygun cumle yoksa None."""
+    for c in re.split(r"(?<=[.!?])\s+", re.sub(r"\s+", " ", str(metin or "")).strip()):
+        if (len(c) > 30 and c[0].isalpha() and c[0].isupper() and not c.endswith("?") and "^" not in c
+                and (not terimler or any(t in youtube._kucuk(c) for t in terimler))):
+            return _kisa(c, 170)
+    return None
+
+
+TUR_AD = {"resmi": "Resmî kaynak", "akademik": "Akademik", "ansiklopedi": "Ansiklopedi",
+          "kurum": "Kurum", "diger": "Web"}
+
+
+def oku_sec(kaynaklar, tutulan, terimler):
+    """Ozette atif alan once, sonra okunan, sonra kalan; en cok OKU_N."""
+    atif = [n for c in tutulan for n in c["kaynaklar"]]
+    web_ = [k for k in kaynaklar if k["tur"] == "web"]
+    sira = sorted(web_, key=lambda k: (k["no"] not in atif, not k.get("metin"), k["no"]))
+    out = []
+    for k in sira[:OKU_N]:
+        tur = kaynakli.kaynak_turu(k["alan"])
+        cumle = _ilk_cumle(k.get("metin"), terimler) or _ilk_cumle(k.get("ozet"), terimler)
+        out.append({"no": k["no"], "baslik": k["baslik"], "site": k["alan"], "url": k["url"],
+                    "tur": tur, "okundu": bool(k.get("metin")),
+                    "neden": "%s: %s" % (TUR_AD.get(tur, "Web"), cumle) if cumle else TUR_AD.get(tur, "Web")})
+    return out
+
+
+def sonraki_sec(modul, p, kip, konu, izle, oku):
+    """Onayli ekleme ONERISI; yazmayi modul yapar (kural 6)."""
+    s = (p.get("kip_sonraki") or {}).get(kip[0]) or p.get("sonraki")
+    if not s:
+        return None
+    if s["hedef"] == "konu":
+        ad, hedef = konu, {"tur": "konu", "konu": konu}
+    elif izle:
+        v = izle[0]
+        ad = v["baslik"]
+        hedef = {"tur": "video", "no": v["no"], "baslik": v["baslik"], "kanal": v["kanal"], "link": v["link"],
+                 "video_id": v["video_id"], "saniye": v["saniye"], "sure_sn": v["sure_sn"]}
+    elif oku:
+        ad = oku[0]["baslik"]
+        hedef = {"tur": "kaynak", "no": oku[0]["no"], "baslik": ad, "url": oku[0]["url"]}
     else:
         return None
-    return bas + "\n\nKaynaklar\n" + "\n".join(_kaynak_satiri(k) for k in liste)
+    if s["hedef"] == "video" and hedef["tur"] == "kaynak":
+        metin = "«%s» kaynağını %s’ye eklememi ister misin?" % (_kisa(ad, 70), p["ad"])
+    else:
+        metin = s["metin"] % _kisa(ad, 70)
+    return {"metin": metin, "eylem": s["eylem"], "modul": modul, "onay": True, "kip": kip[0], "hedef": hedef}
 
 
-def yap(con, cfg, metin, konu=None, video=False, transport=None, tasiyici=None, now=None,
+def sablon_kur(konu, modul, p, kip, tutulan, kaynaklar, terimler):
+    """Kart verisi + ayni bilginin duz metni. Metni ve linkleri KOD kurar."""
+    ozet_c = tutulan[:OZET_CUMLE]
+    izle = izle_sec(kaynaklar)
+    oku = oku_sec(kaynaklar, ozet_c, terimler)
+    if not (ozet_c or izle or oku):
+        return None, None
+    sonraki = sonraki_sec(modul, p, kip, konu, izle, oku)
+    veri = {"sablon": SABLON, "modul": modul, "kip": kip[0], "konu": konu,
+            "ozet": {"metin": " ".join(_cumle(c) for c in ozet_c),
+                     "cumleler": [{"metin": _cumle(c), "kaynaklar": c["kaynaklar"]} for c in ozet_c]}
+            if ozet_c else None,
+            "izle": izle, "oku": oku, "sonraki": sonraki}
+    satir = ["Özet", " ".join(_atifli(c) for c in ozet_c) if ozet_c else
+             "Kaynaklardan doğrulanmış kısa bir özet çıkaramadım; aşağıdaki kaynaklara bakabilirsin."]
+    if izle:
+        satir += ["", "İzle"]
+        for v in izle:
+            bilgi = " · ".join(x for x in (
+                v["kanal"], v["sure"], ("%s (tahmin)" % v["dil"]) if v["dil_etiket"] == "tahmin" else v["dil"],
+                ("başlangıç %s" % v["an"]) if v["an"] else None) if x)
+            satir += ["[%d] %s" % (v["no"], v["baslik"]), "    " + bilgi, "    " + v["neden"], "    " + v["link"]]
+    if oku:
+        satir += ["", "Oku"]
+        for k in oku:
+            satir += ["[%d] %s (%s)" % (k["no"], k["baslik"], k["site"]), "    " + k["neden"], "    " + k["url"]]
+    if sonraki:
+        satir += ["", "Sıradaki adım", sonraki["metin"] + " Onay vermeden hiçbir şey eklenmez."]
+    return "\n".join(satir), veri
+
+
+# ------------------------------------------------------------------ yap
+
+def yap(con, cfg, metin, konu=None, video=False, modul=None, transport=None, tasiyici=None, now=None,
         adim=ADIM, sure=SURE):
-    """Hizli arastirma. Doner: {ok, text, kaynaklar, izler, atilan, adim, saniye, note}.
+    """Hizli arastirma. Doner: {ok, text, sablon, kaynaklar, izler, atilan, elenen, adim, saniye, note}.
     ok=False ve kaynak yoksa cagiran eski yola (is emri) doner."""
     t0 = time.monotonic()
-    st = _Durum(con, cfg, tasiyici, now, t0 + sure)
-    konu = (konu or metin or "").strip()[:160]
+    konu = yalin(konu or metin)
+    modul, p, kip, ogrenilen = profil(modul, "%s %s" % (metin or "", konu))   # kip ilk cumleden
     terimler = youtube.kokler(konu)
-    # 1 — ILK ARAMAYI KOD YAPAR: kucuk model bos elle baslamaz.
-    if video:
-        vids, _ = video_ara(st, konu + " konu anlatımı")
-        for k in vids[:AN_ARANAN]:
-            if st.kalan() < 8:
-                break
-            video_ici_ara(st, k, konu)
-    else:
+    st = _Durum(con, cfg, tasiyici, now, t0 + sure,
+                max_sure=(p.get("kip_sure") or {}).get(kip[0]) or p["max_sure"], terimler=terimler)
+    st.oncelik = p["oncelik"]
+    # 1 — ILK ARAMALARI KOD YAPAR: kucuk model bos elle baslamaz.
+    bulunan, _ = web_ara(st, ("%s %s" % (konu, kip[3])).strip())
+    if not bulunan and kip[3]:
+        # Anahtarsiz Vikipedi uzun ekli sorguda bos doner (sahada: «squat
+        # doğru formu nasıl yapılır doğru form» -> 0): yalin konuyla bir kez daha.
         bulunan, _ = web_ara(st, konu)
-        if bulunan:
-            sayfa_oku(st, bulunan[0])
+    if bulunan:
+        sayfa_oku(st, bulunan[0])
+    sorgular = ["%s %s" % (konu, kip[2])]
+    if ogrenilen and ogrenilen in DERS_SOZ:
+        # ogrenilen dilde anlatim: dilin Turkce adi sorgudan duser
+        yabanci = re.sub(dict(OGRENILEN)[ogrenilen], " ", konu, flags=re.I)
+        sorgular.append("%s %s" % (re.sub(r"\s+", " ", yabanci).strip(), DERS_SOZ[ogrenilen]))
+    elif kip[0] == "kitap":
+        sorgular.append("%s yazar söyleşi" % konu)
+    gruplar = []
+    for q in sorgular:
+        if st.kalan() > 10:
+            # Basligi konuya uyan once; ilgisizin ilgisi altyazidan sinanir.
+            gruplar.append(sorted(video_ara(st, q.strip())[0], key=lambda k: not k.get("baslik_uyar")))
+    # Her aramadan aday: ESP'de ogrenilen dildeki anlatim da taranir.
+    adaylar = (gruplar[0][:2] + gruplar[1][:1]) if len(gruplar) > 1 else (gruplar[0] if gruplar else [])
+    adaylar += [k for g in gruplar for k in g if k not in adaylar]
+    for k in adaylar[:AN_ARANAN]:
+        if st.kalan() < 12:
+            break
+        video_ici_ara(st, k, konu)
     if not st.kaynaklar:
-        return {"ok": False, "text": None, "kaynaklar": [], "izler": st.izler,
+        return {"ok": False, "text": None, "sablon": None, "kaynaklar": [], "izler": st.izler,
                 "note": "Web’de kaynak bulunamadı ya da web’e çıkılamadı."}
-    # 2 — DONGU: model arar, okur, yazar; sinir adim ve sure.
+    # 2 — DONGU: model gerekirse arar ve okur, sonra ozeti yazar; sinir adim ve sure.
     katalog = arac.katalog_temizle(ARACLAR)[0]
     cevap, n_adim, model_notu, yapilan = None, 0, None, set()
-    # Video isteginde an bulunduysa teslimat hazirdir ve cevabi KOD kurar:
-    # sahada gemma4:e2b hazir videoyu birakip web'de ayni sorguyu uc kez
-    # aradi, bir baska denemede listeyi bozarak kopyaladi. Model yalniz an
-    # bulunamadiysa arar.
-    if video and any(k.get("an") for k in st.kaynaklar):
-        adim = 0
     while n_adim < adim and st.kalan() > 6:
         n_adim += 1
         son = n_adim == adim or st.kalan() < 15
-        sistem = (SISTEM + (VIDEO_ISTEK if video else "")
+        sistem = (SISTEM + (SPI_EK if modul == "spi" else "")
                   + "\n\n" + kaynak_blogu(st, terimler) + (SON_TUR if son else ""))
-        r = ai.ask(con, cfg, ROL, "arastirma_hizli", [{"role": "user", "content": str(metin)[:600]}],
+        r = ai.ask(con, cfg, ROL, "arastirma_hizli", [{"role": "user", "content": GOREV % konu}],
                    sistem=sistem, transport=transport, now=now, denetim="belge", duzeltme=False,
-                   jeton=700, araclar=None if son else katalog)
+                   jeton=500, araclar=None if son else katalog)
         if not r.get("ok"):
             model_notu = r.get("note")
             break
@@ -408,9 +688,9 @@ def yap(con, cfg, metin, konu=None, video=False, transport=None, tasiyici=None, 
             cevap = r["text"]
             break
     tutulan, atilan = denetle(cevap, st.kaynaklar) if cevap else ([], [])
-    govde = metin_kur(tutulan, st.kaynaklar, video)
-    return {"ok": bool(govde), "text": govde, "kaynaklar": [
+    govde, veri = sablon_kur(konu, modul, p, kip, tutulan, st.kaynaklar, terimler)
+    return {"ok": bool(govde), "text": govde, "sablon": veri, "kaynaklar": [
         {k_: v for k_, v in k.items() if k_ not in ("metin",)} for k in st.kaynaklar],
-        "izler": st.izler, "atilan": atilan, "adim": n_adim, "model_notu": model_notu,
-        "saniye": round(time.monotonic() - t0, 1),
+        "izler": st.izler, "atilan": atilan, "elenen": st.elenen, "adim": n_adim,
+        "model_notu": model_notu, "saniye": round(time.monotonic() - t0, 1),
         "note": None if govde else "Kaynak bulundu ama cevap kurulamadı."}
