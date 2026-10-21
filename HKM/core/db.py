@@ -656,6 +656,64 @@ CREATE TABLE IF NOT EXISTS king_gorevler (
   created_at  TEXT NOT NULL,
   updated_at  TEXT NOT NULL
 );
+
+/* KING'IN BECERILERI VE SOZLERI (core/beceri.py, core/soz.py, K2).
+   Beceri: konusarak ogretilen tetik + eylemler. Soz: sohbette soylenen
+   gelecek plani; vadesi gelince King sorar. Ikisi de hicbir module
+   YAZMAZ: yazan eylem modulde onay kartiyla calisir. */
+CREATE TABLE IF NOT EXISTS king_beceriler (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  ad          TEXT NOT NULL,
+  tetik       TEXT NOT NULL,                      -- JSON: {tur: zaman|soz, ...}
+  eylemler    TEXT NOT NULL DEFAULT '[]',         -- JSON: [{tur: mesaj|soru|sayac|kayit|arac, ...}]
+  acik        INTEGER NOT NULL DEFAULT 1,
+  modul       TEXT,                               -- ogretildigi modul (ays|spi|esp|NULL)
+  kanal       TEXT NOT NULL DEFAULT 'local',
+  hedef       TEXT,                               -- kanalin alicisi (Telegram sohbeti)
+  kaynak      TEXT NOT NULL DEFAULT '',           -- ogreten cumle
+  son         TEXT NOT NULL DEFAULT '{}',         -- JSON: eylem sirasi -> son calistigi gun
+  calisma     INTEGER NOT NULL DEFAULT 0,
+  son_calisma TEXT,
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS king_sozler (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  metin       TEXT NOT NULL,                      -- kullanicinin cumlesi
+  soru        TEXT NOT NULL,                      -- vadede sorulacak cumle
+  vade        TEXT NOT NULL,                      -- YYYY-MM-DDTHH:MM:SS
+  gun         TEXT NOT NULL,                      -- olay ya da bitis gunu
+  son         INTEGER NOT NULL DEFAULT 0,         -- 1: bitis tarihi («-e kadar»)
+  modul       TEXT,
+  kanal       TEXT NOT NULL DEFAULT 'local',
+  hedef       TEXT,
+  durum       TEXT NOT NULL DEFAULT 'bekliyor',   -- bekliyor|soruldu|kapandi|iptal
+  cevap       TEXT,
+  created_at  TEXT NOT NULL,
+  soruldu_at  TEXT,
+  kapandi_at  TEXT,
+  updated_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_king_sozler_durum ON king_sozler(durum, vade);
+
+-- King'in modullere bekleyen mesaji (beceri ya da soz tetiklenince).
+-- Modul King'i acinca alir (GET /api/king/bekleyen); soru ise cevabi yazilir.
+CREATE TABLE IF NOT EXISTS king_bekleyen (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  modul       TEXT,                               -- NULL: ilk acan modul alir
+  kanal       TEXT NOT NULL DEFAULT 'local',
+  tur         TEXT NOT NULL,                      -- beceri|soz
+  kaynak_id   INTEGER NOT NULL,
+  metin       TEXT NOT NULL,
+  soru        INTEGER NOT NULL DEFAULT 0,
+  eylemler    TEXT NOT NULL DEFAULT '[]',         -- JSON: modulde calisacak eylemler
+  created_at  TEXT NOT NULL,
+  alindi_at   TEXT,
+  cevap       TEXT,
+  cevap_at    TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_king_bekleyen_al ON king_bekleyen(alindi_at, id);
 """
 
 
@@ -954,7 +1012,7 @@ BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
                  "inbox_seen", "bam_isler", "bam_kayitlar", "bam_iz",
                  "is_emirleri", "bildirimler", "hedef_ozet", "zaman_butcesi", "para",
                  "meydan_deste", "meydan_isaret", "meydan_not", "meydan_yanit",
-                 "king_isler", "king_gorevler")
+                 "king_isler", "king_gorevler", "king_beceriler", "king_sozler", "king_bekleyen")
 BACKUP_SCHEMA = 4
 
 

@@ -814,7 +814,8 @@ def derinlik_of(v):
     return v if v in DERINLIKLER else None
 
 
-def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport=None, modul=None):
+def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport=None, modul=None,
+                katalog=None):
     """Modelden ONCE gelen kural yolu (komut, teklif, para, giris kapisi,
     is emri, istek, rapor). Cevap varsa onu, yoksa None doner. Arac
     sonuclariyla gelen ikinci tur bunu atlar: ayni mesaj ilk turda buradan
@@ -866,6 +867,19 @@ def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, t
                 patron.log(con, kanal, "manager", tc, agent=gorevli)
             return {"ok": True, "mode": "komut", "command": "teklif", "text": tc,
                     "agent": gorevli}
+
+    # 0a¹ — BECERI VE SOZ (core/beceri.py, core/soz.py, K2): «her pazartesi
+    # bana deneme hatırlat», «'ders bitti' deyince …», «becerilerim», «bunu
+    # söz yapma». Ogretmeyi kod cozer; kod cikaramazsa model yalniz JSON onerir.
+    if gorevli == "king":
+        from core import beceri
+        bc = beceri.sohbet_cevabi(con, cfg, metin, kanal=kanal or "local", hedef=hedef, modul=modul,
+                                  katalog=katalog, transport=transport)
+        if bc:
+            if kayit:
+                patron.log(con, kanal, "user", metin, agent=gorevli)
+                patron.log(con, kanal, "manager", bc["text"], agent=gorevli)
+            return dict(bc, ok=True, mode="beceri", agent=gorevli)
 
     # 0a° — FIS TASLAGI (core/fis.py): «fiş kaydet» / «fiş iptal». Yalniz BU
     # kanalin (ve gonderenin) bekleyen taslagina dokunur.
@@ -1020,9 +1034,58 @@ def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, t
     return None
 
 
+# Soz ve soru cevabi yakalanmayan cevaplar: mesaj zaten bir kayit, teklif,
+# emir ya da komuttur («yarın 2 saat matematik» bir istek teklifidir, söz degil).
+K2_ATLA_MOD = ("emir", "ekip", "beceri", "memory", "arastirma")
+K2_ATLA_KOMUT = ("istek", "kayit", "hafif", "teklif", "para", "fis", "soru", "kapi")
+
+
+def _k2_ek(con, metin, r, kanal, hedef, modul, gorevli):
+    """Cevaba K2 notu: acik bir sorunun cevabi yakalandiysa ya da cumle bir
+    söz ise (core/bekleyen.py, core/soz.py). Not metne eklenir ve `k2_not`
+    alaninda ayrica durur."""
+    if gorevli != "king" or not isinstance(r, dict) or not r.get("ok"):
+        return r
+    if r.get("mode") in K2_ATLA_MOD or r.get("command") in K2_ATLA_KOMUT:
+        return r
+    if r.get("mode") == "arac" and any(c.get("tur") != "yaz" for c in r.get("cagrilar") or []):
+        return r                                # ikinci tur gelecek; yakalama orada
+    from core import bekleyen, soz
+    try:
+        c = bekleyen.cevap_yakala(con, metin, kanal or "local", modul)
+        if c:
+            not_ = "«%s» sorusunun cevabı olarak not aldım" % c["soru"]
+            if c["kutuya"]:
+                not_ += "; içindeki kaydı %s için öneri olarak bıraktım, onaylarsan yazılır" % (
+                    {"ays": "AYS", "spi": "SPİ", "esp": "ESP"}[c["kutuya"]])
+            r = dict(r, cevap=c, k2_not=not_ + ". Değilse «o cevap değil» de.")
+        else:
+            s = soz.yakala(con, metin, modul=modul, kanal=kanal or "local", hedef=hedef)
+            if s:
+                r = dict(r, soz=s["soz"], k2_not=s["not"])
+    except Exception as e:                      # noqa: BLE001 — not, cevabi bozamaz
+        import sys
+        sys.stderr.write("[hkm] soz/cevap yakalama: %s\n" % e)
+        return r
+    if r.get("k2_not"):
+        r["text"] = ((r.get("text") or "").rstrip() + "\n\n" + r["k2_not"]).strip()
+    return r
+
+
 def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
           user="ben", transport=None, kayit=True, kanal="local", hedef=None,
           derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None):
+    """Bir mesaja cevap (bkz. `_konus`); King'in cevabina söz ve soru
+    cevabi notu eklenir (`_k2_ek`)."""
+    r = _konus(con, cfg, metin, date, gorevli=gorevli, gecmis=gecmis, th=th, user=user, transport=transport,
+               kayit=kayit, kanal=kanal, hedef=hedef, derinlik=derinlik, uslup=uslup, akis=akis,
+               araclar=araclar, arac_sonuclari=arac_sonuclari, modul=modul)
+    return _k2_ek(con, metin, r, kanal, hedef, modul, gorevli)
+
+
+def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
+           user="ben", transport=None, kayit=True, kanal="local", hedef=None,
+           derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None):
     """Bir mesaja cevap. Once komut, sonra model, sonra durust bir «yok».
     `derinlik`: hizli | dengeli | derin | None (seviyeyi kod secer).
     `araclar`: istemcinin arac katalogu (core/arac.py); model bir arac
@@ -1039,7 +1102,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     sonuclar = arac.sonuclari_temizle(arac_sonuclari, katalog) if arac_sonuclari is not None else None
 
     if arac_sonuclari is None:
-        kr = _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport, modul)
+        kr = _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport, modul, katalog)
         if kr is not None:
             return kr
 

@@ -77,6 +77,9 @@ Ucnoktalar:
     POST /api/king/emir/<id>/onayla King'in teklifini onaylar (secenek: tam|kucuk)
     GET  /api/king/teklifler/<modul> modulun onay bekleyen teklifleri (teklif karti)
     POST /api/king/emir/<id>/devam|dur  parca parca uretimde ara onaya cevap
+    GET|POST /api/king/beceriler[/<id>[/ac|kapat|sil]]  King'in becerileri (core/beceri.py)
+    GET|POST /api/king/sozler[/<id>[/sil]]   King'in sozleri (core/soz.py)
+    GET  /api/king/bekleyen?modul=  King'in module bekleyen mesajlari (alinan bir daha gelmez)
     GET  /api/health                token istemez
     GET  /api/aktif                 aktif kip: acik mi, son tur, kisa gecmis (core/aktif.py)
     POST /api/aktif/tara            aktif kip: simdi bir tur (kapaliyken de calisir; module yazmaz)
@@ -113,6 +116,7 @@ from urllib.parse import parse_qs, quote, unquote, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import arastir, kutu, motor, tarife  # noqa: E402
+from core import beceri, soz  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, gorev, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, models, motto, ofismodel, ollama, outbox, patron,
@@ -929,6 +933,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, {"error": "date yyyy-aa-gg olmali"})
         # King'in ekibi (core/gorev.py): alt ajanlar, arka plan isleri, gorevler.
         ek = gorev.uc(self.con, self.server.config, "GET", u.path, q)
+        if ek is None:
+            # Beceriler, sozler ve King'in bekleyen mesajlari (core/beceri.py, K2).
+            ek = beceri.uc(self.con, self.server.config, "GET", u.path, q)
         if ek is not None:
             return self._send(*ek)
         if u.path == "/api/aktif":
@@ -1305,7 +1312,7 @@ class Handler(BaseHTTPRequestHandler):
 
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
-        if gorev.bizim_mi(u.path):
+        if gorev.bizim_mi(u.path) or beceri.bizim_mi(u.path):
             ham, hata = self._read_body()
             if hata:
                 return self._send(413, {"error": hata})
@@ -1313,6 +1320,8 @@ class Handler(BaseHTTPRequestHandler):
                 govde = _nesne(ham) or {}
             except ValueError:
                 return self._send(400, {"error": "govde JSON nesnesi olmali"})
+            if beceri.bizim_mi(u.path):
+                return self._send(*beceri.uc(self.con, self.server.config, "POST", u.path, {}, govde))
             return self._send(*gorev.uc(self.con, self.server.config, "POST", u.path, {}, govde))
         if u.path in ("/api/conversation/temizle", "/api/conversation/geri",
                       "/api/conversation/arsiv-sil"):
@@ -2087,6 +2096,9 @@ def _ritim(srv, aralik=60):
             depo.bakim(con)
             # King'in guncellik turu: arada bir, tikte en cok bir kayit.
             king.bekci(con, srv.config)
+            # King'in becerileri ve sozleri (K2): saati gelen eylem, vadesi gelen soru.
+            beceri.tik(con)
+            soz.tik(con)
             # Aktif kip: kayit, yeni gun ya da nabiz geldiyse bir tur (kapaliysa hic).
             aktif.tick(con, srv.config, th=srv.thresholds)
             # Ollama: acilista ve bes dakikada bir; bulunca kendiliginden baglar.
