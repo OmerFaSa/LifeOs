@@ -2680,7 +2680,7 @@ window.LIFEOS.KING = (function(){
   }
   function menuAc(v){
     menu = menu && v === 'menu' && menu === 'menu' ? null : v;
-    silOnay = null;
+    silOnay = null; aracAcik = false; kipAcik = false;
     if(menu && !ortam.genis()) yanAcik = false;   // dar ekranda liste ile çalışma alanı üst üste açılmaz
     if(menu === 'menu'){ mikTazele(); kamTazele(); }
     ciz(false);
