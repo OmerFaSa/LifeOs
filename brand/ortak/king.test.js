@@ -792,7 +792,7 @@
         ekranBaslat:async () => ({ video, kare:() => ({ mime:'image/jpeg', data:'QUJD' }), bitir:() => { bitti++; } }),
       });
       k.ac();
-      expect(k.KIPLER.map(x => x.id)).toEqual(['yaz', 'dinle', 'konus', 'ekran']);
+      expect(k.KIPLER.map(x => x.id)).toEqual(['yaz', 'dinle', 'konus', 'ekran', 'kamera']);
       /* Kipler açılır menüde: kapalıyken yalnız seçili kipin hapı görünür. */
       expect([document.querySelectorAll('[data-king^="kip:"]').length, document.querySelector('[data-king="kipler"]').textContent]).toEqual([0, 'Yaz']);
       document.querySelector('[data-king="kipler"]').click();
@@ -952,6 +952,51 @@
         expect([!!g, g && g.govde.yetenek, g && g.govde.modul, g && g.govde.gorseller[0].data]).toEqual([true, 'ekran', 'ays', 'QUJD']);
         expect(k.akis().slice(-1)[0].metin).toBe('Ekranda AYS Bugün sayfası var.');
       }finally{ k.paylasimBitir(); k.kapat(); }
+    }));
+
+    /* 2026-10-21, kullanıcı: King'in «elleri» — kamera kipi; masadaki kâğıda bakar, yüz yorumu yapmaz. */
+    it('kamera: kamera varsa kip menüsünde; soru tek kareyle hızlı modele, «oku» keskin modele; göz masaya bakar; Ekran kamerayı kapatır', () => sahneyle(async () => {
+      const istekler = [], zaman = [];
+      let cevap = 'Kâğıtta bir türev sorusu var.';
+      const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+      const fetch = async (url, o) => { istekler.push(JSON.parse(o.body)); return { status:200, json:async () => ({ ok:true, text:cevap }) }; };
+      const { k } = sahne({ hkm, fetch });
+      k.kur({ modul:'ays', git:() => {}, ozet:() => [], hkm, model:() => ({ visionChain:() => [] }) });
+      let bitti = 0, cihaz = null;
+      const video = document.createElement('video');
+      Object.assign(k._ortam, { kameraDestek:() => true, ekranDestek:() => true, zamanla:fn => { zaman.push(fn); },
+        tanima:() => function(){ this.start = () => {}; this.stop = () => {}; },
+        kameralar:async () => [{ id:'a', ad:'Dahili' }, { id:'b', ad:'USB' }],
+        kameraBaslat:async (s, id) => { cihaz = id; return { video, kare:() => ({ mime:'image/jpeg', data:'S0FN' }), bitir:() => { bitti++; } }; },
+        ekranBaslat:async () => ({ kare:() => ({ mime:'image/jpeg', data:'RUtS' }), bitir:() => {} }) });
+      try{
+        k.ac();
+        await k.kamTazele();
+        document.querySelector('[data-king="kipler"]').click();
+        expect(!!document.querySelector('.king__kip-menu [data-king="kip:kamera"]')).toBe(true);
+        k.kamSec('b');
+        expect(await k.kipSec('kamera')).toBe(true);
+        expect([k.kip(), cihaz, document.querySelector('[data-king-onizle] video') === video]).toEqual(['kamera', 'b', true]);
+        expect(document.querySelector('[data-king="kamera-sor"]').textContent).toBe('Kamerada ne görüyorsun?');
+        await k.isle('bu soruda neyi bulmam gerekiyor?');
+        await k.isle('şu soruyu oku');
+        expect(istekler.map(g => [g.yetenek, g.gorseller[0].data])).toEqual([['ekran', 'S0FN'], ['gorsel', 'S0FN']]);
+        expect(/yüzü/.test(istekler[0].sistem)).toBe(true);                    // kişiye dair yorum yok
+        /* Göz: vakti gelince masaya bakar; PAS derse susar. */
+        cevap = 'PAS';
+        const once = k.akis().length;
+        k._ortam.simdi = () => new Date(2026, 9, 5, 12, 0);
+        await zaman[zaman.length - 1]();
+        expect([/masasındaki kameraya/.test(istekler[2].mesajlar[0].text), k.akis().length]).toEqual([true, once]);
+        /* Konuş birlikte çalışır; Ekran kamerayı kapatır; Yaz hepsini bitirir. */
+        await k.kipSec('konus');
+        expect([k.kip(), k.sesliSohbetMi(), bitti]).toEqual(['kamera', true, 0]);
+        await k.kipSec('ekran');
+        expect([k.kip(), k.sesliSohbetMi(), bitti]).toEqual(['ekran', true, 1]);
+        await k.kipSec('kamera');
+        await k.kipSec('yaz');
+        expect([k.kip(), k.sesliSohbetMi(), k.paylasimVar()]).toEqual(['yaz', false, false]);
+      }finally{ k.kapat(); }
     }));
 
     it('fotoğrafı yorumla: görüntü modeli varsa «Ne gördüğünü söyle»; cevap okumadır, kayda yazılmaz', () => sahneyle(async () => {
