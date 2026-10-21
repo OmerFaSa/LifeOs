@@ -745,8 +745,8 @@
       expect(!!document.querySelector('.king__yan .king__arac')).toBe(false);
       document.querySelector('[data-king="arac"]').click();
       const araclar = Array.from(document.querySelectorAll('.king__arac-menu [data-king]')).map(b => b.getAttribute('data-king'));
-      expect(araclar.indexOf('ekran') >= 0 && araclar.indexOf('menu') >= 0).toBe(true);
-      document.querySelector('.king__arac-menu [data-king="menu"]').click();
+      expect(araclar.indexOf('ekran') >= 0 && araclar.indexOf('foto-sec') >= 0 && araclar.indexOf('pdf-sec') >= 0).toBe(true);
+      document.querySelector('.king__arac-menu [data-king="ekran"]').click();
       expect(!!document.querySelector('.king__arac-menu')).toBe(false);          // seçince kapanır
       k.menuAc('menu');
       expect(k.ARACLAR.every(a => a.is && a.ad && typeof a.kosul === 'function')).toBe(true);
@@ -841,6 +841,7 @@
       expect(k.kayitTasi(id, 'yok')).toBe(false);
       expect(k.kayitTasi(id, f.id)).toBe(true);
       k.menuAc(null);
+      k.bolumSec('kutuphane');
       const klasor = document.querySelector('.king__klasor');
       expect(klasor.textContent).toContain('Sağlık');
       expect(!!klasor.querySelector('[data-king="kayit-ac:' + id + '"]')).toBe(true);
@@ -1089,6 +1090,7 @@
         await k.ekranGoster();
         const son = k.akis().slice(-1)[0];
         expect(son.satirlar.indexOf('Su') >= 0).toBe(true);
+        k.menuAc('menu');
         expect(document.querySelector('[data-king] .king__durum').textContent).toBe('yerel');
       }finally{ kutu.remove(); }
     }));
@@ -1828,34 +1830,34 @@
       const { k } = sahne({ hkm, fetch });
       return { k, istekler };
     }
-    it('Merkez bağlı değilken düğme yok; bağlıyken «Otomatik» görünür', () => sahneyle(async () => {
-      const a = derinSahnesi(false);
-      a.k.ac();
-      expect(!!document.querySelector('[data-king="derin"]')).toBe(false);
-      a.k.kapat();
-      const b = derinSahnesi(true);
-      b.k.ac();
-      const d = document.querySelector('[data-king="derin"]');
-      expect(d.textContent).toBe('Otomatik');
-      expect(d.getAttribute('aria-expanded')).toBe('false');
-    }));
-    it('düğme menüyü açar; seçilen derinlik cihazda kalır ve düğmede yazar', () => sahneyle(async () => {
+    /* G (2026-10-21): Düşünme yazı alanında değil, Ayarlar › Konuşma'da. */
+    it('Düşünme ayarlarda; yazı alanında düğme yok; seçim cihazda kalır', () => sahneyle(async () => {
       const { k } = derinSahnesi(true);
       try{
         k.ac();
-        document.querySelector('[data-king="derin"]').click();
-        const ogeler = [...document.querySelectorAll('.king__derin-menu [data-king^="derinlik:"]')];
-        expect(ogeler.map(x => x.querySelector('b').textContent)).toEqual(['Otomatik', 'Hızlı', 'Dengeli', 'Derin']);
-        expect(document.querySelector('[data-king="derin"]').getAttribute('aria-expanded')).toBe('true');
-        document.querySelector('.king__derin-menu [data-king="derinlik:derin"]').click();
-        expect(k.derinlik()).toBe('derin');
-        expect(k._ortam.depo.oku(k.DERIN)).toBe('derin');
-        expect(!!document.querySelector('.king__derin-menu')).toBe(false);
-        expect(document.querySelector('[data-king="derin"]').textContent).toBe('Derin');
+        expect(!!document.querySelector('[data-king="derin"]')).toBe(false);
+        k.menuAc('menu');
+        document.querySelector('.king__secici [data-king="derinlik:derin"]').click();
+        expect([k.derinlik(), k._ortam.depo.oku(k.DERIN)]).toEqual(['derin', 'derin']);
+        expect(document.querySelector('.king__secici [data-king="derinlik:derin"]').getAttribute('aria-checked')).toBe('true');
         expect(k.derinlikSec('uzman')).toBe(false);
         k.derinlikSec('oto');
         expect(k._ortam.depo.oku(k.DERIN)).toBe(null);
       }finally{ k.derinlikSec('oto'); }
+    }));
+    it('G: ray bölümleri listeyi değiştirir; çalışma alanı sohbetin yanında açılır; «Neden?» kaynağı söyler', () => sahneyle(async () => {
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      k.ac();
+      expect(document.querySelectorAll('.king__ray [data-king^="bolum:"]').length).toBe(4);
+      k.bolumSec('kutuphane');
+      expect(document.querySelector('.king__yan').getAttribute('aria-label')).toBe('Kütüphane');
+      document.querySelector('.king__ray [data-king="menu"]').click();
+      expect([k.menuDurum(), !!document.querySelector('.king__alan'), !!document.querySelector('.king__akis')]).toEqual(['menu', true, true]);
+      document.querySelector('[data-king="alan-kapat"]').click();
+      expect(k.menuDurum()).toBe(null);
+      await k.isle('uyku 7');
+      expect(document.querySelector('[data-king-neden]').textContent).toContain('onaylamadan');
     }));
     it('HKM’ye derinlik gider; Otomatik’te alan hiç gönderilmez', () => sahneyle(async () => {
       const { k, istekler } = derinSahnesi(true);
@@ -2497,7 +2499,7 @@
       s.k.ac();
       await s.k.isYokla();
       const rozet = document.querySelector('.king__is-rozet');
-      expect(rozet.textContent).toBe('King şu an 1 iş yapıyor');
+      expect([rozet.textContent, rozet.getAttribute('aria-label')]).toEqual(['1 iş', 'King şu an 1 iş yapıyor. İşleri göster']);
       rozet.click();
       await bitsin();
       expect(s.k.menuDurum()).toBe('ekip');
