@@ -86,6 +86,7 @@ Ucnoktalar:
     GET  /api/ses/durum             King'in sesi: Gemini hazir mi, Piper bulundu mu (ses uretmez, para harcamaz)
     POST /api/ses                   {metin, tercih: oto|gemini|piper} -> audio/wav; uretilemezse 503 + notlar
                                     (modul King'i o zaman cihazin kendi sesine duser; core/ses.py)
+    POST /api/ses/akis              ayni govde -> akan 16 bit tek kanal PCM (X-Ses-Hz); EMA ilk parcayla baslar
     GET  /api/dinle/durum           ses algilama: Whisper var mi, Gemini hazir mi (core/dinle.py)
     POST /api/dinle                 {wav: base64 16 kHz WAV} -> {ok, metin, motor}; olmazsa 503 + notlar
     POST /api/aktif/baslat          aktif kip: turun «yapilabilir» isi {id} -> King (kullanici yolu, modul hkm)
@@ -392,6 +393,35 @@ class Handler(BaseHTTPRequestHandler):
         self._cors()
         self.end_headers()
         self.wfile.write(wav)
+
+    def _send_ses_akis(self, r):
+        """K3: akan ses. Uzunluk yok, baglanti sonda kapanir; parca gelir gelmez
+        yazilir. King dinlemeyi keserse (baglanti koptu) kalan parcalar bos yere
+        okunur: EMA sureci sicak kalir, sonraki cumle yeniden yuklenmez."""
+        self.send_response(200)
+        self.send_header("Content-Type", "application/octet-stream")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Ses-Motor", r["motor"])
+        self.send_header("X-Ses-Hz", str(r["hz"]))
+        if r.get("notlar"):
+            self.send_header("X-Ses-Not", quote(" ".join(r["notlar"])[:600]))
+        self.send_header("Access-Control-Expose-Headers", "X-Ses-Motor, X-Ses-Not, X-Ses-Hz")
+        self._cors()
+        self.send_header("Connection", "close")
+        self.end_headers()
+        self.close_connection = True
+        kopuk = False
+        try:
+            for p in r["parcalar"]:
+                if kopuk:
+                    continue
+                try:
+                    self.wfile.write(p)
+                    self.wfile.flush()
+                except OSError:
+                    kopuk = True
+        except Exception as e:                  # noqa: BLE001
+            self.log_message("ses akisi yarida kaldi: %s", type(e).__name__)
 
     def _cors(self):
         origin = cors_origin(self.headers, self.server.config)
@@ -1837,7 +1867,7 @@ class Handler(BaseHTTPRequestHandler):
                 # Neden gunluge de yazilir: 503'un sebebi ekranda kaybolmasin (2026-10-21).
                 self.log_message("dinle basarisiz (%d bayt): %s", len(wav), "; ".join(r.get("notlar") or []))
             return self._send(200 if r["ok"] else 503, r)
-        if u.path == "/api/ses":
+        if u.path in ("/api/ses", "/api/ses/akis"):
             ham, hata = self._read_body()
             if hata:
                 return self._send(413, {"error": hata})
@@ -1845,6 +1875,11 @@ class Handler(BaseHTTPRequestHandler):
                 body = _nesne(ham)
             except ValueError:
                 body = {}
+            if u.path == "/api/ses/akis":
+                r = ses.akis(self.con, self.server.config, body.get("metin"), str(body.get("tercih") or "oto"))
+                if not r["ok"]:
+                    return self._send(503, {"ok": False, "notlar": r["notlar"]})
+                return self._send_ses_akis(r)
             r = ses.seslendir(self.con, self.server.config, body.get("metin"),
                               str(body.get("tercih") or "oto"))
             if not r["ok"]:

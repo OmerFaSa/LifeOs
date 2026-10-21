@@ -1943,6 +1943,7 @@
         sentez:() => ({ getVoices:() => [], cancel(){}, speak:u => { okunan.push(u.metin); if(u.onend) u.onend(); } }),
         soz:m => ({ metin:m }),
         oynat:async (blob, tut) => { calinan.push(blob.metin); tut({ dur:() => { durdur = 'durdu'; } }); return 'bitti'; },
+        pcmCal:null,                                            // akışlı yol ayrı sınanır (K3)
       });
       return { k, istekler, calinan, okunan, durdu:() => durdur };
     }
@@ -2398,6 +2399,236 @@
       expect(calisan.length).toBe(1);
       expect(k.akis().slice(-1)[0].satirlar).toEqual(['Ortalama: 7,5 sa']);
       temizle();
+    }));
+  });
+  /* King 3.0 K1 (ekran) ve K3 (doğal konuşma), 2026-10-21. */
+  describe('King 3.0 — ekip, işler ve görevler (K1)', () => {
+    const bekle = () => new Promise(ok => setTimeout(ok, 0));
+    async function bitsin(){ for(let i = 0; i < 15; i++) await bekle(); }
+    const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+    const IS = (id, durum, ek) => Object.assign({ id, ajan:'zihin', tur:'devir', baslik:'B1 kaynakları', durum,
+      durum_ad:{ bekliyor:'Sırada', calisiyor:'Çalışıyor', bitti:'Bitti', hata:'Hata', iptal:'İptal' }[durum], ilerleme:40, adim:'Rapor yazıyor', sonuc:null }, ek || {});
+    const GOREV = { id:3, hedef:'B1', modul:'esp', modul_ad:'ESP', ajan:'zihin', ajan_ad:'Zihin', gun_sayisi:2, gunluk_dk:60,
+      durum:'taslak', durum_ad:'Taslak', ilerleme:{ bitti:1, kapali:1, toplam:3, yuzde:33 }, teklif_sayisi:2,
+      gunler:[{ gun:'2026-10-21', gun_ad:'Çar 21 Eki', adimlar:[1, 2] }, { gun:'2026-10-22', gun_ad:'Per 22 Eki', adimlar:[3] }],
+      adimlar:[
+        { no:1, tur:'analiz', baslik:'Durum analizi', ajan:'zihin', ajan_ad:'Zihin', durum:'bitti', durum_ad:'Bitti', ilerleme:100 },
+        { no:2, tur:'arastirma', baslik:'Kaynak araştırması', ajan:'arastirmaci', ajan_ad:'Araştırmacı', durum:'calisiyor', durum_ad:'Çalışıyor', ilerleme:50 },
+        { no:3, tur:'calisma', baslik:'Kelime listesi', ajan:'zihin', ajan_ad:'Zihin', durum:'bekliyor', durum_ad:'Bekliyor', ilerleme:0 }] };
+    function ekipSahnesi(){
+      const istekler = [];
+      const v = { isler:[IS(7, 'calisiyor')], gorevler:[GOREV] };
+      const fetch = async (url, o) => {
+        istekler.push({ url, yontem:(o && o.method) || 'GET' });
+        const durum = { acik:v.isler.filter(i => i.durum === 'calisiyor' || i.durum === 'bekliyor').length };
+        durum.metin = durum.acik ? 'King şu an ' + durum.acik + ' iş yapıyor' : 'King şu an boşta';
+        let g = { ok:true };
+        if(/\/api\/king\/isler/.test(url)) g = { isler:v.isler, durum };
+        else if(/\/api\/king\/gorevler/.test(url)) g = { gorevler:v.gorevler, durum };
+        else if(/\/gorev\/3\/onayla$/.test(url)){ v.gorevler = [Object.assign({}, GOREV, { durum:'suruyor', durum_ad:'Sürüyor' })]; g = { ok:true }; }
+        else if(/\/is\/7\/iptal$/.test(url)){ v.isler = [IS(7, 'iptal')]; g = { ok:true }; }
+        return { status:200, json:async () => g };
+      };
+      const s = sahne({ hkm, fetch });
+      return Object.assign(s, { istekler, v });
+    }
+    it('rozet yalnız açık iş varken çizilir; tıklanınca iş listesi ve görev panosu açılır', () => sahneyle(async () => {
+      const s = ekipSahnesi();
+      s.k.ac();
+      await s.k.isYokla();
+      const rozet = document.querySelector('.king__is-rozet');
+      expect(rozet.textContent).toBe('King şu an 1 iş yapıyor');
+      rozet.click();
+      await bitsin();
+      expect(s.k.menuDurum()).toBe('ekip');
+      const pano = document.querySelector('.king__gorev');
+      expect(pano.querySelector('.king__gorev-bas b').textContent).toBe('B1');
+      expect(pano.querySelector('.king__cubuk').getAttribute('aria-label')).toBe('1/3 adım bitti');
+      expect(pano.querySelectorAll('.king__adim-nokta.is-bitti').length >= 1).toBe(true);
+      /* Açık gün adlarıyla; sahibi alt ajan yazılır. */
+      expect(pano.querySelector('.king__gun.is-simdi .king__adimlar').textContent).toContain('Araştırmacı');
+      expect(pano.textContent).toContain('2 plan teklifi ESP’nin Onaylar ekranında');
+      expect(document.querySelector('.king__is b').textContent).toBe('B1 kaynakları');
+      /* Başlat: onaysız başlamaz; düğmeyle POST …/onayla. */
+      document.querySelector('[data-king="gorev-onayla:3"]').click();
+      await bitsin();
+      expect(s.istekler.some(x => x.yontem === 'POST' && /\/api\/king\/gorev\/3\/onayla$/.test(x.url))).toBe(true);
+      expect(document.querySelector('.king__gorev').textContent).toContain('Sürüyor');
+      /* İptal iki dokunuş ister. */
+      document.querySelector('[data-king="gorev-iptal:3"]').click();
+      expect(s.istekler.some(x => /gorev\/3\/iptal/.test(x.url))).toBe(false);
+      expect(document.querySelector('[data-king="gorev-iptal:3"]').textContent).toBe('Emin misin? İptal et');
+      /* İşi iptal etmek: rozet kalkar; iptal edilen iş haber edilmez. */
+      const once = s.k.akis().length;
+      document.querySelector('[data-king="is-iptal:7"]').click();
+      await bitsin();
+      expect(document.querySelector('.king__is-rozet')).toBe(null);
+      expect(s.k.akis().length).toBe(once);
+    }));
+    it('iş bitince rapor sohbete düşer, kaynaklar tıklanır; King kapalıyken yoklama yok', () => sahneyle(async () => {
+      const s = ekipSahnesi();
+      s.k.ac();
+      await s.k.isYokla();
+      s.v.isler = [IS(7, 'bitti', { sonuc:{ ad:'Zihin', ozet:'Üç kaynak buldum.', kaynaklar:[{ baslik:'BBC Learning', url:'https://www.bbc.co.uk/learningenglish' }] } })];
+      await s.k.isYokla();
+      const m = s.k.akis().pop();
+      expect(m.metin.split('\n')[0]).toBe('Zihin raporu (iş #7): Üç kaynak buldum.');
+      const a = document.querySelector('.king__balon--king a');
+      expect([a.getAttribute('href'), a.getAttribute('target')]).toEqual(['https://www.bbc.co.uk/learningenglish', '_blank']);
+      expect(document.querySelector('.king__is-rozet')).toBe(null);
+      await s.k.isYokla();
+      expect(s.k.akis().filter(x => /raporu \(iş #7\)/.test(x.metin)).length).toBe(1);   // bir kez
+      expect(s.k.isZamanli()).toBe(true);
+      s.k.kapat();
+      expect(s.k.isZamanli()).toBe(false);
+      const n = s.istekler.length;
+      await s.k.isYokla();
+      expect(s.istekler.length).toBe(n);
+    }));
+  });
+
+  describe('King 3.0 — doğal konuşma (K3)', () => {
+    const bekle = () => new Promise(ok => setTimeout(ok, 0));
+    async function bitsin(){ for(let i = 0; i < 20; i++) await bekle(); }
+    const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+    const akanSes = (motor, hz) => ({ status:200, body:{ getReader:() => ({ read:async () => ({ done:true }), cancel:() => {} }), cancel:() => {} },
+      headers:{ get:h => h === 'X-Ses-Hz' ? String(hz) : h === 'X-Ses-Motor' ? motor : null }, json:async () => ({}) });
+    it('ses akarak çalınır (/api/ses/akis); eski HKM 404 verirse bir kez /api/ses’e düşer ve hatırlar', () => sahneyle(async () => {
+      const yollar = [], calinan = [];
+      let eski = false;
+      const fetch = async (url, o) => {
+        yollar.push(url.replace('http://127.0.0.1:4200', ''));
+        if(/\/api\/ses\/akis$/.test(url)) return eski ? { status:404, json:async () => ({}) } : akanSes('ema', 24000);
+        return { status:200, blob:async () => ({ metin:JSON.parse(o.body).metin }), headers:{ get:h => h === 'X-Ses-Motor' ? 'piper' : null }, json:async () => ({}) };
+      };
+      const { k } = sahne({ hkm, fetch });
+      Object.assign(k._ortam, {
+        sentez:() => null,
+        pcmCal:async (res, hz) => { calinan.push(['akis', hz]); return 'bitti'; },
+        oynat:async blob => { calinan.push(['wav', blob.metin]); return 'bitti'; },
+      });
+      try{
+        k.seslendir('Merhaba.');
+        await bitsin();
+        expect([yollar, calinan, k.sonMotor()]).toEqual([['/api/ses/akis'], [['akis', 24000]], 'ema']);
+        eski = true; yollar.length = 0; calinan.length = 0;
+        k.seslendir('Selam.');
+        await bitsin();
+        k.seslendir('Yine.');
+        await bitsin();
+        expect(yollar).toEqual(['/api/ses/akis', '/api/ses', '/api/ses']);
+        expect(calinan).toEqual([['wav', 'Selam.'], ['wav', 'Yine.']]);
+      }finally{ k.sesTercihSec('oto'); }
+    }));
+    it('sesli sohbette ilk cümle cevap bitmeden okunur; baş tekrar okunmaz', () => sahneyle(async () => {
+      const okunan = [];
+      let i = 0, erken = null;
+      const satirlar = ['{"t":"parca","metin":"Bugün üç blok var. "}\n', '{"t":"parca","metin":"İlki matematik."}\n',
+        '{"t":"son","ok":true,"mode":"model","text":"Bugün üç blok var. İlki matematik."}\n'];
+      const fetch = async (url, o) => {
+        if(/\/api\/ses/.test(url)) return { status:200, blob:async () => ({ metin:JSON.parse(o.body).metin }), headers:{ get:() => null }, json:async () => ({}) };
+        return { status:200, headers:{ get:h => /content-type/i.test(h) ? 'application/x-ndjson' : null },
+          body:{ getReader:() => ({ read:async () => {
+            /* İkinci parça gelmeden ilk cümle okunmaya başlamış olmalı. */
+            if(i === 1){ await bekle(); await bekle(); erken = okunan.slice(); }
+            return i < satirlar.length ? { value:satirlar[i++], done:false } : { done:true };
+          } }) } };
+      };
+      const { k } = sahne({ hkm, fetch });
+      Object.assign(k._ortam, { sentez:() => null, pcmCal:null, kayitAc:null,
+        oynat:async blob => { okunan.push(blob.metin.trim()); return 'bitti'; } });
+      try{
+        k.ac();
+        k.cevapSec('ses');
+        await k.isle('felsefede özgür irade hakkında ne düşünüyorsun');
+        await bitsin();
+        expect(erken).toEqual(['Bugün üç blok var.']);
+        expect(okunan).toEqual(['Bugün üç blok var.', 'İlki matematik.']);
+      }finally{ k.cevapSec('oto'); }
+    }));
+    it('araya girme: King konuşurken konuşursan aynı kayıt devralınır, yeni mikrofon açılmaz, söz yazıya dökülür', () => sahneyle(async () => {
+      const acilan = [], dinle = [];
+      let sessizFn = null;
+      const fetch = async (url, o) => {
+        if(/\/api\/dinle$/.test(url)){ dinle.push(JSON.parse(o.body)); return { status:200, json:async () => ({ ok:true, metin:'dur bir saniye' }) }; }
+        if(/\/api\/ses/.test(url)) return { status:200, blob:async () => ({}), headers:{ get:() => null }, json:async () => ({}) };
+        return { status:200, json:async () => ({ ok:true, text:'Tamam.', mode:'model' }) };
+      };
+      const { k } = sahne({ hkm, fetch });
+      Object.assign(k._ortam, {
+        sentez:() => ({ getVoices:() => [], cancel(){}, speak(){} }), pcmCal:null,
+        oynat:() => new Promise(() => {}),
+        tanima:() => null,
+        kayitAc:async (sessiz, cihaz, basla, esik) => {
+          const x = { basla, esik, devral:(s2, e2) => { sessizFn = s2; x.devralindi = e2; },
+            bitir:() => ({ pcm:new Float32Array(1600), hz:16000, konustu:true }) };
+          acilan.push(x);
+          return x;
+        },
+      });
+      k.ac();
+      await k.kipSec('konus');
+      k.seslendir('Uzun bir cevap okuyorum.');
+      await bitsin();
+      const kes = acilan.filter(x => x.esik === 0.06).pop();
+      kes.basla();
+      await bitsin();
+      expect(acilan.length).toBe(acilan.indexOf(kes) + 1);             // yeni kayıt açılmadı
+      expect(kes.devralindi).toBe(0.02);                               // normal eşikle dinliyor
+      expect(document.querySelector('[data-king]').classList.contains('is-konusuyor')).toBe(false);
+      expect(document.querySelector('[data-king]').classList.contains('is-dinliyor')).toBe(true);
+      sessizFn();
+      await bitsin();
+      expect(dinle.length).toBe(1);
+      expect(k.akis().some(m => m.kim === 'sen' && m.metin === 'dur bir saniye')).toBe(true);
+    }));
+    it('«King» uyanma: varsayılan kapalı; yalnız «King» ile başlayan parça uyandırır, yerel modelle yazıya dökülür', () => sahneyle(async () => {
+      const dinle = [], acilan = [];
+      let cevap = 'Merhaba nasılsın';
+      const fetch = async (url, o) => {
+        if(/\/api\/dinle$/.test(url)){ dinle.push(JSON.parse(o.body).tercih); return { status:200, json:async () => ({ ok:true, metin:cevap }) }; }
+        if(/\/api\/ses/.test(url)) return { status:503, json:async () => ({}) };
+        return { status:200, json:async () => ({ ok:true, text:'Bugün iki blok var.', mode:'model' }) };
+      };
+      const { k } = sahne({ hkm, fetch });
+      Object.assign(k._ortam, { sentez:() => null, kayitAc:null, gizli:() => false,
+        uyanikAc:async () => { const u = { kapali:false, bitir:() => { u.kapali = true; } }; acilan.push(u); return u; } });
+      try{
+        expect(k.uyanCumlesi('King.')).toBe('');
+        expect(k.uyanCumlesi('Hey King, bugün ne var?')).toBe('bugün ne var?');
+        expect(k.uyanCumlesi('King bugün ne var')).toBe('bugün ne var');
+        expect(k.uyanCumlesi('Bugün king size yatak aldım')).toBe(null);
+        expect(k.uyanCumlesi(null)).toBe(null);
+        await k.uyanKontrol();
+        expect([k.uyanAcikMi(), acilan.length]).toEqual([false, 0]);   // varsayılan kapalı: mikrofon açılmaz
+        k.uyanSec(true);
+        await bitsin();
+        expect(k.uyanikMi()).toBe(true);
+        await k.uyanParca(new Float32Array(8000), 16000);
+        expect([dinle, k.acikMi()]).toEqual([['gemma'], false]);        // «King» yok: uyanmaz, Gemini'ye gitmez
+        cevap = 'King, bugün ne var?';
+        await k.uyanParca(new Float32Array(8000), 16000);               // bekleme süresi: hemen ikinci deneme yok
+        expect(dinle.length).toBe(1);
+        k._ortam.simdi = () => new Date(2026, 9, 5, 9, 5);
+        await k.uyanParca(new Float32Array(8000), 16000);
+        await bitsin();
+        expect([k.acikMi(), k.sesliSohbetMi(), k.uyanTurMu()]).toEqual([true, true, true]);
+        expect(k.akis().some(m => m.kim === 'sen' && m.metin === 'bugün ne var?')).toBe(true);
+        expect(acilan[0].kapali).toBe(true);                             // sesli konuşmada uyanma dinleyicisi kapanır
+        k.uyanSec(false);
+        expect(k.uyanikMi()).toBe(false);
+      }finally{ k.uyanSec(false); }
+    }));
+    it('uyanma yalnız bu bilgisayardaki Merkez’le çalışır', () => sahneyle(async () => {
+      let acildi = 0;
+      const uzak = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://192.168.1.5:4200' }), urlOk:() => true });
+      const { k } = sahne({ hkm:uzak, fetch:async () => ({ status:200, json:async () => ({}) }) });
+      Object.assign(k._ortam, { gizli:() => false, uyanikAc:async () => { acildi++; return { bitir:() => {} }; } });
+      try{
+        k.uyanSec(true);
+        await bitsin();
+        expect(acildi).toBe(0);
+      }finally{ k.uyanSec(false); }
     }));
   });
 })();

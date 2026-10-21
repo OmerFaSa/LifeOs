@@ -379,6 +379,35 @@ def run():
     test("sıra: Gemini olmazsa EMA, o da olmazsa Piper; parçalar tek WAV", t_ema_sira)
     test("EMA borusu: parçalar sırayla, süreç sıcak, hatada kapanır", t_ema_boru)
 
+    def t_akis():
+        con = _con()
+        ses._ONBELLEK.clear()
+        cfg = {"ses": {"ema_yol": _ema_dizini()}}
+        adim = []
+
+        def ema_yavas(py, betik, metin, t):
+            adim.append("ilk")
+            yield b"\x01\x00" * 4
+            adim.append("ikinci")
+            yield b"\x02\x00" * 2
+        r = ses.akis(con, cfg, "Merhaba", "ema", ema_calistir=ema_yavas)
+        eq((r["ok"], r["motor"], r["hz"], adim), (True, "ema", ses.EMA_HZ, ["ilk"]))   # ilk parcayla doner
+        eq(list(r["parcalar"]), [b"\x01\x00" * 4, b"\x02\x00" * 2])
+        eq(adim, ["ilk", "ikinci"])
+        r = ses.akis(con, cfg, "Merhaba", "ema", ema_calistir=lambda *a: iter(()))
+        eq((r["onbellek"], b"".join(r["parcalar"])), (True, b"\x01\x00" * 4 + b"\x02\x00" * 2))   # sonuna kadar okunan onbellekte
+        r = ses.akis(con, cfg, "Yok", "ema", ema_calistir=lambda *a: iter(()))
+        eq(r["ok"], False)
+        ok("ses döndürmedi" in r["notlar"][0], r["notlar"])
+        # Piper tek parca; WAV basligi soyulur, hizi basliktan.
+        cfg2 = {"ses": {"piper_yol": _piper_dizini()}}
+        r = ses.akis(con, cfg2, "İki", "piper", calistir=lambda e, sd, m, t: RIFF, bul=ses.piper_bul(cfg2, ara=lambda x: None))
+        eq((r["ok"], r["motor"], r["hz"], len(b"".join(r["parcalar"]))), (True, "piper", 22050, 200))
+        eq(ses.akis(con, cfg, "x", "cihaz")["ok"], False)
+        eq(ses.akis(con, cfg, "  ", "ema")["ok"], False)
+
+    test("akışlı ses: EMA ilk parçayla döner, bütünü önbelleğe; Piper tek parça", t_akis)
+
 
 def run_daemon():
     from tests.test_daemon import _Server
@@ -428,3 +457,33 @@ def run_daemon():
             s.close()
 
     test("uçlar bearer ister; 503 + notlar; WAV, motor ve neden başlığı", t_uclar)
+
+    def t_akis_ucu():
+        s = _Server()
+        ses._ONBELLEK.clear()
+        eski = ses.VARSAYILAN_EMA
+        try:
+            eq(s.call("/api/ses/akis", token=None, body={"metin": "x"})[0], 401)
+            st, r = s.call("/api/ses/akis", body={"metin": "Merhaba", "tercih": "ema"})
+            eq((st, r["ok"]), (503, False))
+            s.srv.config["ses"] = {"ema_yol": _ema_dizini()}
+
+            def ema_ok(py, betik, metin, t):
+                yield b"\x01\x00" * 3
+                yield b"\x02\x00" * 3
+            ses.VARSAYILAN_EMA = ema_ok
+            import urllib.request
+            from tests.test_daemon import TOKEN
+            req = urllib.request.Request(s.url("/api/ses/akis"), method="POST",
+                                         data=json.dumps({"metin": "Merhaba", "tercih": "ema"}).encode())
+            req.add_header("Authorization", "Bearer " + TOKEN)
+            req.add_header("Content-Type", "application/json")
+            with urllib.request.urlopen(req, timeout=10) as y:
+                eq((y.status, y.headers["X-Ses-Motor"], y.headers["X-Ses-Hz"]), (200, "ema", str(ses.EMA_HZ)))
+                ok("X-Ses-Hz" in y.headers["Access-Control-Expose-Headers"], y.headers["Access-Control-Expose-Headers"])
+                eq(y.read(), b"\x01\x00" * 3 + b"\x02\x00" * 3)
+        finally:
+            ses.VARSAYILAN_EMA = eski
+            s.close()
+
+    test("akış ucu bearer ister; 503 + notlar; PCM, motor ve örnekleme hızı başlığı", t_akis_ucu)

@@ -560,6 +560,76 @@ def seslendir(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None,
     return {"ok": False, "notlar": notlar}
 
 
+def _wav_pcm(veri):
+    """(hz, pcm) ya da None: yalniz 16 bit tek kanal WAV parcalanir."""
+    try:
+        with wave.open(io.BytesIO(veri)) as w:
+            if w.getsampwidth() != 2 or w.getnchannels() != 1:
+                return None
+            return w.getframerate(), w.readframes(w.getnframes())
+    except (wave.Error, EOFError):
+        return None
+
+
+def _biriktir(anahtar, ilk, kalan):
+    """EMA parcalarini aynen verir; sona kadar okununca butunu onbellege yazar."""
+    tum = [ilk]
+    yield ilk
+    for p in kalan:
+        tum.append(p)
+        yield p
+    with _KILIT:
+        _ONBELLEK[anahtar] = wav(b"".join(tum), EMA_HZ)
+        while len(_ONBELLEK) > ONBELLEK_EN_COK:
+            _ONBELLEK.popitem(last=False)
+
+
+def akis(con, cfg, metin, tercih="oto", post=None, calistir=None, bul=None,
+         ema_calistir=None, ema_bulgu=None):
+    """King 3.0 K3: akisli ses. {ok, motor, hz, parcalar, notlar}; parcalar 16 bit
+    tek kanal PCM. Sira seslendir ile ayni (kural 1). EMA ilk parcasi gelir gelmez
+    doner: ilk kelime butun cumle uretilmeden calinir. Oteki motorlar tek parca."""
+    t = _temiz(metin)
+    if not t:
+        return {"ok": False, "notlar": ["Okunacak metin yok."]}
+    tercih = tercih if tercih in TERCIHLER else "oto"
+    if tercih == "cihaz":
+        return {"ok": False, "notlar": ["Cihazın kendi sesi seçili."]}
+    sira = {"oto": ("gemini", "ema", "piper"), "gemini": ("gemini",), "ema": ("ema",),
+            "piper": ("piper",)}[tercih]
+    notlar = []
+    for motor in sira:
+        if motor != "ema":
+            r = seslendir(con, cfg, t, motor, post=post, calistir=calistir, bul=bul)
+            pcm = _wav_pcm(r["wav"]) if r["ok"] else None
+            if pcm:
+                return {"ok": True, "motor": motor, "hz": pcm[0], "parcalar": iter([pcm[1]]), "notlar": notlar}
+            notlar.extend(r["notlar"] if not r["ok"] else ["%s sesi akışa uygun değil." % motor.capitalize()])
+            continue
+        anahtar = ("ema", "ema", t)
+        with _KILIT:
+            hazir = _ONBELLEK.get(anahtar)
+        if hazir:
+            pcm = _wav_pcm(hazir)
+            return {"ok": True, "motor": "ema", "hz": pcm[0], "parcalar": iter([pcm[1]]), "notlar": notlar,
+                    "onbellek": True}
+        p = ema_bulgu or ema_bul(cfg)
+        if not p["bulundu"]:
+            notlar.append(p["metin"])
+            continue
+        try:
+            g = iter(ema_parcalar(cfg, t, calistir=ema_calistir, bul=p))
+            ilk = next(g, None)
+        except Exception as e:                  # noqa: BLE001
+            notlar.append("EMA sesi üretemedi (%s)." % type(e).__name__)
+            continue
+        if not ilk:
+            notlar.append("EMA ses döndürmedi.")
+            continue
+        return {"ok": True, "motor": "ema", "hz": EMA_HZ, "parcalar": _biriktir(anahtar, ilk, g), "notlar": notlar}
+    return {"ok": False, "notlar": notlar}
+
+
 def durum(con, cfg):
     """Ayarlar karti: motorlarin hazirligi. Para harcamaz, ses uretmez."""
     g_ok, g_not = gemini_hazir(con, cfg)
