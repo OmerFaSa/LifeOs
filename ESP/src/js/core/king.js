@@ -449,6 +449,7 @@ window.LIFEOS.KING = (function(){
     genis:() => !(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width:1023px)').matches),
     git:url => { window.location.href = url; },
     zamanla:(fn, ms) => setTimeout(fn, ms),
+    zamanIptal:id => clearTimeout(id),
     simdi:() => new Date(),
     yenile:() => { try{ location.reload(); }catch(e){ /* yok */ } },
     /* Söz 22: öbür modüllerin kişi kayıtları (sunucu sözü 24); yoksa null. */
@@ -733,6 +734,9 @@ window.LIFEOS.KING = (function(){
     + 'okuyamadığın ya da emin olmadığın yeri açıkça söyle. Sağlıkla ilgili görüntülerde teşhis koyma, ilaç ya da doz önerme. '
     + 'Yardımcı olabileceğin sonraki adımı tek cümleyle öner.';
   let paylasim = null;       // söz 16: { tur:'ekran'|'kamera', kare() → { mime, data }, bitir() }
+  /* Her açılış ve kapanış bir öncekini geçersiz kılar: izin beklenirken King
+     kapanırsa ya da kipe iki kez basılırsa gelen akış sahipsiz kalmaz, durur. */
+  let paylasimNo = 0;
   /* Kamera (2026-10-21): görüntü çoğu zaman masa, kâğıt, kitap; kişiye dair yorum yok. */
   const KAMERA_NOT = '\n\nGörüntü kullanıcının kamerasından geliyor (çoğu zaman masası, kâğıdı ya da kitabı). Kişinin yüzü, '
     + 'görünüşü, kıyafeti ya da duygusu hakkında yorum yapma; yalnız sorulan şeye ve masadaki işe odaklan.';
@@ -858,11 +862,19 @@ window.LIFEOS.KING = (function(){
     v.muted = true; v.playsInline = true; v.srcObject = akis;
     try{ await v.play(); }catch(e){ /* kare yine alınabilir */ }
     const iz = akis.getVideoTracks()[0];
-    if(iz) iz.addEventListener('ended', () => bitince());
+    const bitti = () => bitince();
+    if(iz) iz.addEventListener('ended', bitti);
     return {
       video:v,
       kare:() => kareCiz(v, v.videoWidth, v.videoHeight),
-      bitir:() => { try{ akis.getTracks().forEach(t => t.stop()); }catch(e){ /* durmuş */ } v.srcObject = null; },
+      /* Kamera ışığı (2026-10-21, kullanıcı: «kapattıktan sonra hâlâ yanıyor»): her iz durur, video bırakılır. */
+      bitir:() => {
+        if(iz) try{ iz.removeEventListener('ended', bitti); }catch(e){ /* yok */ }
+        try{ akis.getTracks().forEach(t => t.stop()); }catch(e){ /* durmuş */ }
+        try{ v.pause(); }catch(e){ /* durmuş */ }
+        v.srcObject = null;
+        try{ v.remove(); }catch(e){ /* DOM'da değil */ }
+      },
     };
   }
   function kareCiz(kaynak, g, y){
@@ -1207,11 +1219,14 @@ window.LIFEOS.KING = (function(){
       return false;
     }
     if(!gorebilir()){ soyle(GORSEL_YOK); return false; }
+    const no = ++paylasimNo;
     try{
       const p = await ortam.ekranBaslat(() => { if(paylasim && paylasim === p){ paylasimKapat(); soyle('Ekran paylaşımı bitti.'); } });
+      if(no !== paylasimNo || !acik){ try{ p.bitir(); }catch(e){ /* durmuş */ } return false; }   // bu arada kapandı
       p.tur = 'ekran';
       paylasim = p;
     }catch(e){
+      if(no !== paylasimNo) return false;
       paylasim = null;
       soyle(e && e.name === 'NotAllowedError' ? 'Ekran paylaşımı iptal edildi.' : 'Ekran paylaşılamadı: ' + ((e && e.message) || 'bilinmeyen hata'));
       return false;
@@ -1228,11 +1243,14 @@ window.LIFEOS.KING = (function(){
     if(!ortam.kameraDestek()){ soyle('Bu cihazda kameraya ulaşılamıyor.'); return false; }
     /* Söz 37: modülün fotoğraf işi varsa (barkod cihazda okunur) Merkez'siz de açılır. */
     if(!gorebilir() && !fotoIsleri().length){ soyle(GORSEL_YOK); return false; }
+    const no = ++paylasimNo;
     try{
       const p = await ortam.kameraBaslat(() => { if(paylasim && paylasim === p){ paylasimKapat(); soyle('Kamera kapandı.'); } }, kamSecili());
+      if(no !== paylasimNo || !acik){ try{ p.bitir(); }catch(e){ /* durmuş */ } return false; }   // bu arada kapandı
       p.tur = 'kamera';
       paylasim = p;
     }catch(e){
+      if(no !== paylasimNo) return false;
       paylasim = null;
       const ad = e && e.name;
       soyle(ad === 'NotAllowedError' ? 'Kameraya izin verilmedi.' : ad === 'NotFoundError' || ad === 'OverconstrainedError'
@@ -1247,8 +1265,16 @@ window.LIFEOS.KING = (function(){
       + 'takıldığın bir yer görürsem yardım teklif ederim.' : 'görüntü yalnız sorduğunda okunur.') + ' Görüntü saklanmaz, bilgisayardan çıkmaz.');
     return true;
   }
-  function gozKur(ms){ const no = ++gozNo; gozVakit = ortam.simdi().getTime() + ms; ortam.zamanla(() => { gozBak(no); }, ms); }
-  function gozDurdur(){ gozNo++; }
+  let gozZaman = null;
+  function gozKur(ms){
+    gozDurdur();
+    const no = gozNo; gozVakit = ortam.simdi().getTime() + ms;
+    gozZaman = ortam.zamanla(() => { gozZaman = null; gozBak(no); }, ms);
+  }
+  function gozDurdur(){
+    gozNo++;
+    if(gozZaman != null){ try{ ortam.zamanIptal(gozZaman); }catch(e){ /* yok */ } gozZaman = null; }
+  }
   function gozIz(v){ const s = String(v || ''); let h = 0; for(let i = 0; i < s.length; i += 97) h = (h * 31 + s.charCodeAt(i)) | 0; return s.length + ':' + h; }
   async function gozBak(no){
     /* Vakti gelmeden çağrıldıysa (anında çalışan zamanlayıcı) hiçbir şey yapılmaz: döngü kendini beslemez. */
@@ -1272,6 +1298,7 @@ window.LIFEOS.KING = (function(){
   function paylasimKapat(){
     const p = paylasim;
     paylasim = null;
+    paylasimNo++;                                // bekleyen açılış da geçersiz
     gozDurdur();
     if(p) try{ p.bitir(); }catch(e){ /* durmuş */ }
     return p;
@@ -2203,6 +2230,7 @@ window.LIFEOS.KING = (function(){
   async function kipSec(id){
     if(!KIPLER.some(x => x.id === id && x.kosul())) return false;
     const once = kip();
+    if(id === 'yaz' || id === 'dinle') paylasimNo++;   // izni beklenen ekran ya da kamera da açılmaz
     if(id === once) return true;
     /* Ekran ile Konuş birlikte (2026-10-21, kullanıcı: «ekranımı görürken aynı
        zamanda konuşabilelim»): biri açıkken öteki seçilirse ilki kapanmaz.
@@ -4175,6 +4203,7 @@ window.LIFEOS.KING = (function(){
   function kucult(){
     if(!acik || mini || typeof document === 'undefined') return;
     mini = true;
+    paylasimKapat();                             // küçük kutu kamerayı ve ekranı tutmaz
     const el = document.querySelector('[data-king]');
     if(el) el.classList.add('is-mini');
     document.documentElement.classList.remove('king-acik');
@@ -4218,9 +4247,18 @@ window.LIFEOS.KING = (function(){
   /* ------------------------------------------------------- olaylar */
 
   let bagli = false, sonCtrl = 0, baskaTus = false, basili = null;
+  /* Sayfa gizlenince kamera durur; ekran paylaşımı sürer (paylaşılan pencereye
+     geçmek sayfayı gizler, işin kendisi budur). Sayfa kapanınca ikisi de durur. */
+  function gorunurluk(){
+    if(!kameraMi() || !ortam.gizli()) return;
+    paylasimKapat();
+    if(acik) ciz(false);
+  }
   function bagla(){
     if(bagli || typeof document === 'undefined') return;
     bagli = true;
+    document.addEventListener('visibilitychange', gorunurluk);
+    if(typeof window !== 'undefined') window.addEventListener('pagehide', () => { paylasimKapat(); });
     document.addEventListener('keydown', e => {
       /* Söz 21 ek: boş kutuda ↑ son mesajı geri getirir. */
       if(e.key === 'ArrowUp' && acik && e.target && e.target.matches && e.target.matches('.king__girdi') && !e.target.value){
@@ -4959,6 +4997,7 @@ window.LIFEOS.KING = (function(){
   }
 
   function _sifirla(){
+    paylasimKapat();
     if(typeof document !== 'undefined'){
       const el = document.querySelector('[data-king]');
       if(el) el.remove();
@@ -5008,7 +5047,7 @@ window.LIFEOS.KING = (function(){
     yeniSohbet, kayitAc, ARACLAR, aktifKayit:() => aktifKayit,
     KIPLER, kip, kipSec, klasorler, klasorEkle, klasorSil, kayitTasi, kayitAdlandir, kayitSabitle,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
-    SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
+    SAYFALAR, HAZIR, _ortam:ortam, _sifirla, _videoKaynak:videoKaynak, _gorunurluk:gorunurluk,
     aracIsle, ortakAraclar, haritaCevap, HARITA_RE,
     isSec, kameraIs, fotoHedef:() => fotoHedef, arastirmaVeri, arastirmaEkle, cipler:() => (cipler || []).slice(),
   };

@@ -999,6 +999,69 @@
       }finally{ k.kapat(); }
     }));
 
+    /* 2026-10-21, kullanıcı: «kamerayı kapattıktan sonra hâlâ kameranın ışığı yanıyor». */
+    it('kamera akışı her kapanışta durur: küçült, kapat, gizlen; çift açılış ve izin beklerken kapanış akış bırakmaz', () => sahneyle(async () => {
+      const hkm = () => ({ settings:() => ({ enabled:true, token:'j', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+      const { k } = sahne({ hkm });
+      k.kur({ modul:'ays', git:() => {}, ozet:() => [], hkm, model:() => ({ visionChain:() => [] }) });
+      const acilan = [], iptal = [];
+      let bekle = null, gizli = false;
+      const kaynak = () => { const p = { duran:0, kare:() => ({ mime:'image/jpeg', data:'S0FN' }), bitir:() => { p.duran++; } }; acilan.push(p); return p; };
+      Object.assign(k._ortam, { kameraDestek:() => true, ekranDestek:() => true, gizli:() => gizli,
+        kameralar:async () => [{ id:'a', ad:'Dahili' }],
+        zamanla:() => 'z' + acilan.length, zamanIptal:id => { iptal.push(id); },
+        kameraBaslat:() => bekle ? bekle.then(kaynak) : Promise.resolve(kaynak()),
+        ekranBaslat:async () => kaynak() });
+      const acik = () => acilan.filter(p => !p.duran).length;
+      try{
+        /* Küçültünce kamera durur, göz zamanlayıcısı bırakılır. */
+        k.ac(); await k.kamTazele();
+        expect(await k.kipSec('kamera')).toBe(true);
+        k.kucult();
+        expect([k.paylasimVar(), acik(), iptal.length > 0]).toEqual([false, 0, true]);
+        /* Kapatınca durur. */
+        k.buyut(); await k.kipSec('kamera');
+        k.kapat();
+        expect([k.paylasimVar(), acik()]).toEqual([false, 0]);
+        /* Sayfa gizlenince kamera durur; ekran paylaşımı sürer. */
+        k.ac(); await k.kamTazele(); await k.kipSec('kamera');
+        gizli = true; k._gorunurluk();
+        expect([k.paylasimVar(), acik()]).toEqual([false, 0]);
+        gizli = false; await k.kipSec('ekran');
+        gizli = true; k._gorunurluk();
+        expect(k.paylasimVar()).toBe(true);
+        gizli = false; await k.kipSec('yaz');
+        /* İki kez basılınca tek akış kalır. */
+        let ac1; bekle = new Promise(ok => { ac1 = ok; });
+        const a = k.kameraAc(), b = k.kameraAc();
+        ac1(); await a; await b;
+        expect([k.kip(), acik()]).toEqual(['kamera', 1]);
+        await k.kipSec('yaz');
+        /* İzin beklenirken King kapanırsa ya da Yaz seçilirse gelen akış durur. */
+        let ac2; bekle = new Promise(ok => { ac2 = ok; });
+        const c = k.kameraAc();
+        k.kapat(); ac2(); await c;
+        k.ac(); await k.kamTazele();
+        let ac3; bekle = new Promise(ok => { ac3 = ok; });
+        const d = k.kameraAc();
+        await k.kipSec('yaz'); ac3(); await d;
+        expect([k.paylasimVar(), acik()]).toEqual([false, 0]);
+      }finally{ k.kapat(); }
+    }));
+
+    it('video kaynağı kapanınca her iz durur, önizleme bırakılır', () => sahneyle(async () => {
+      const c = document.createElement('canvas');
+      if(typeof c.captureStream !== 'function') return;          // tarayıcı akış üretemiyorsa sınanamaz
+      const g = c.getContext('2d'), boya = () => { g.fillStyle = '#' + Math.floor(Math.random() * 4096).toString(16).padStart(3, '0'); g.fillRect(0, 0, 8, 8); };
+      boya();
+      const akis = c.captureStream(10), iz = akis.getVideoTracks()[0], zt = setInterval(boya, 40);
+      let bitti = 0, p;
+      try{ p = await K()._videoKaynak(akis, () => { bitti++; }); }finally{ clearInterval(zt); }
+      document.body.appendChild(p.video);
+      p.bitir();
+      expect([iz.readyState, p.video.srcObject, p.video.isConnected, bitti]).toEqual(['ended', null, false, 0]);
+    }));
+
     it('fotoğrafı yorumla: görüntü modeli varsa «Ne gördüğünü söyle»; cevap okumadır, kayda yazılmaz', () => sahneyle(async () => {
       const sm = sahteModel('Bir tabak kuru fasulye ve pilav görüyorum.');
       const { k } = sahne();
