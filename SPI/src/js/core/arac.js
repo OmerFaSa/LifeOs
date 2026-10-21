@@ -66,6 +66,44 @@ window.LIFEOS.ARAC = (function(){
       'araştırma ve program işleri', 'para kaydı', 'bildirim ve Telegram'] },
   ];
 
+  /* Söz 6: tek alan. tur «foto» (kamera ya da fotoğraf; modülün ayar.foto
+     girdisiyle aynı id) ya da «cumle» (örnek cümle). */
+  const ISLER = [
+    { modul:'ays', id:'soru', tur:'foto', route:'solve', ad:'Soruyu çöz', ne:'soru fotoğrafı ya da kamera; Soru çöz’e konur' },
+    { modul:'ays', tur:'cumle', ad:'Soru ve süre kaydı', ornek:'matematikten 40 soru çözdüm' },
+    { modul:'ays', tur:'cumle', ad:'Planı değiştir', ornek:'bu hafta ara ver' },
+    { modul:'ays', tur:'cumle', ad:'Neye çalışayım', ornek:'neye çalışayım' },
+    { modul:'ays', tur:'cumle', ad:'Denemelerim', ornek:'son denemelerim nasıl' },
+    { modul:'spi', id:'barkod', tur:'foto', route:'meals', ad:'Barkodu oku', ne:'kamera ya da fotoğraf; ürünün besin değeri, öğün önerisi' },
+    { modul:'spi', id:'ogun', tur:'foto', route:'meals', ad:'Öğün olarak oku', ne:'tabağın fotoğrafı; Fotoğraftan öğün açılır' },
+    { modul:'spi', tur:'cumle', ad:'Ölçüm ve öğün kaydı', ornek:'7 saat uyudum, 2 yumurta yedim' },
+    { modul:'spi', tur:'cumle', ad:'Besin değeri', ornek:'yulafın besin değeri' },
+    { modul:'spi', tur:'cumle', ad:'Uyku ortalaması', ornek:'son bir haftada uykum nasıl' },
+    { modul:'spi', tur:'cumle', ad:'Tahliller', ornek:'son tahlillerim' },
+    { modul:'esp', id:'sayfa', tur:'foto', route:'library', ad:'Kitap sayfasını oku', ne:'kamera ya da fotoğraf; alıntı ve kelime kartı' },
+    { modul:'esp', tur:'cumle', ad:'Çalışma oturumu', ornek:'45 dk gitar' },
+    { modul:'esp', tur:'cumle', ad:'Kelime kartı', ornek:'serendipity kelimesini kart yap: güzel bir tesadüf' },
+    { modul:'esp', tur:'cumle', ad:'Alıntı kaydet', ornek:'alıntı: Bir insanın değeri, sevdiği şeylerin değeridir' },
+    { modul:'esp', tur:'cumle', ad:'Kitabı bitir', ornek:'kitabı bitirdim' },
+    { modul:'king', tur:'cumle', ad:'Odak sayacı', ornek:'25 dakika matematik çalışalım' },
+    { modul:'king', tur:'cumle', ad:'Bekleyen öneriler', ornek:'bekleyen öneriler' },
+    { modul:'king', tur:'cumle', ad:'Deftere not', ornek:'deftere not: ' },
+    { modul:'king', tur:'cumle', ad:'Görünüm', ornek:'koyu temaya geç' },
+    { modul:'king', tur:'cumle', ad:'Haftalık değerlendirme', ornek:'haftalık değerlendirme' },
+  ];
+  const GRUP_AD = { ays:'AYS · sınav', spi:'SPİ · sağlık', esp:'ESP · gelişim', king:'King · her modülde' };
+  /* Modüle göre gruplu liste; bulunulan modül önce, King'in ortak işleri sonda. */
+  function isler(){
+    const sira = [modul].concat(['ays', 'spi', 'esp']).filter((m, i, a) => m && a.indexOf(m) === i && m !== 'king').concat(['king']);
+    return sira.map(m => ({ modul:m, ad:GRUP_AD[m] || m, burada:m === modul || m === 'king',
+      isler:ISLER.map((x, i) => Object.assign({ i }, x)).filter(x => x.modul === m) })).filter(g => g.isler.length);
+  }
+  function isAra(metin){
+    const k = kucuk(metin).replace(/[.,!?;:«»"']/g, ' ').split(/\s+/).filter(w => w.length >= 3).map(w => w.slice(0, Math.max(4, w.length - 3)));
+    if(!k.length) return [];
+    return ISLER.filter(x => { const t = kucuk(x.ad + ' ' + (x.ne || '') + ' ' + (x.ornek || '')); return k.some(w => t.indexOf(w) >= 0); });
+  }
+
   let modul = null;
   let modulAraclar = [];
   let ortak = [];
@@ -245,6 +283,7 @@ window.LIFEOS.ARAC = (function(){
         sayfalar:s.filter(x => x.modul === h.modul).map(x => x.ad) })),
       okuma:l.filter(a => a.tur === 'oku').map(a => ({ ad:a.ad, ne:String(a.aciklama).split(/(?<=\.)\s/)[0], ornek:a.ornek || '' })),
       yazma:l.filter(a => a.tur === 'yaz').map(a => ({ ad:a.ad, ne:String(a.aciklama).split(/(?<=\.)\s/)[0], ornek:a.ornek || '' })),
+      isler:isler(),
     };
   }
 
@@ -279,6 +318,6 @@ window.LIFEOS.ARAC = (function(){
   function _sifirla(){ modul = null; modulAraclar = []; ortak = []; }
 
   const api = { kur, ortakKur, modulSec, liste, bul, dogrula, paramDogrula, modelIcin, calistir, onizle, uygula,
-    kuralla, ara, harita, sayilar, sayiKorunur, HARITA, MODUL_AD, kuruluMu:() => liste().length > 0, _sifirla };
+    kuralla, ara, harita, isler, isAra, ISLER, GRUP_AD, sayilar, sayiKorunur, HARITA, MODUL_AD, kuruluMu:() => liste().length > 0, _sifirla };
   return api;
 })();

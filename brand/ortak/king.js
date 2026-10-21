@@ -354,7 +354,23 @@
                     modelsiz cevaplanır: modüllerin işleri, sayfalar ve bu
                     modülün araçları (örnek cümlesiyle).
       Model yokken kural yolları (NIYET, giriş kapısı, yetki) aynen sürer;
-      `es` taşıyan okuma aracı kuralla çağrılır. */
+      `es` taşıyan okuma aracı kuralla çağrılır.
+  37. HER ŞEY KING'DE (depo sahibi, 2026-10-21, King 3.0 K5: «SPİ veya o
+      şeylerin içindeki şeyleri de King yapabilsin; barkod okumak gibi …
+      hepsi tek bir alanda toplansın»).
+        Tek alan    «+ › Tüm işler» üç modülün King'le yapılan işlerini modüle
+                    göre gösterir (arac.js ISLER); harita da aynı listeyi
+                    modüle göre söyler. Başka modülün işi seçilirse King o
+                    modüle geçer ve iş orada açılır; cümle işinde örnek
+                    yazı alanına konur, gönderilmez.
+        Kamera      modülün fotoğraf işleri (`ayar.foto`: SPİ barkod ve
+                    öğün, AYS soru, ESP kitap sayfası) kamera kipinde tek
+                    düğmeyle o anki kareyle çalışır; kare dosya olur ve aynı
+                    akışa girer. Kare saklanmaz.
+        Yardım      fotoğraf işi ikinci argümanla görüntü okuma ister
+                    (`gorsel(soru, yetenek)`: Merkez'in görsel kademesi);
+                    iş { metin, satirlar, arac } döndürürse aracın önizlemesi
+                    onay kartıyla gösterilir, yalnız «Onayla» ile yazılır. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -594,6 +610,9 @@ window.LIFEOS.KING = (function(){
   let bekleyenIlet = null;   // { modul, metin } öteki modüle iletilecek satır (söz 10)
   let mini = false;          // küçük kutu (söz 9)
   let bekleyenFoto = null;   // söz 11
+  let fotoHedef = null;      // söz 37: «Tüm işler»den seçilen fotoğraf işinin sırası
+  let aracSayfa = null;      // söz 37: «+» menüsünde «Tüm işler» açık mı
+  let doldurulacak = '';     // söz 37: bir sonraki çizimde yazı alanına konacak örnek
   let sonGeriAl = null;      // söz 14
   let sesliSohbet = false;   // söz 13
   let sessizSay = 0;
@@ -863,6 +882,8 @@ window.LIFEOS.KING = (function(){
     if(file.size > FOTO_EN_BUYUK){ soyle('Fotoğraf çok büyük (en çok 15 MB). Daha küçük bir kırpma dener misin?'); return false; }
     akis.push({ kim:'sen', foto:ortam.nesneUrl(file), metin:'(fotoğraf)' });
     const l = fotoIsleri();
+    /* Söz 37: iş önceden seçildiyse («Tüm işler») doğrudan o işe. */
+    if(fotoHedef != null && l[fotoHedef]){ fotoIsle(fotoHedef, file); return true; }
     const gorur = gorebilir();
     bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     if(!l.length && !gorur){
@@ -877,15 +898,89 @@ window.LIFEOS.KING = (function(){
     soyle('Fotoğrafı aldım; bu cihazda kalıyor. Ne yapalım?');
     return true;
   }
-  async function fotoIsle(i){
-    const x = fotoIsleri()[i], f = bekleyenFoto;
-    bekleyenFoto = null; cipler = null;
+  /* Söz 37: işe görüntü okuma yardımı gider (Merkez'in görsel modeli); iş
+     metin döndürürse söylenir (sayfa açtı), { metin, satirlar, arac }
+     döndürürse aracın önizlemesi onay kartıyla gösterilir. */
+  async function fotoIsle(i, dosya){
+    const x = fotoIsleri()[i], f = dosya || bekleyenFoto;
+    bekleyenFoto = null; cipler = null; fotoHedef = null;
     if(!x || !f) return;
-    kucult();
+    const bek = { kim:'king', bekliyor:true, metin:'' };
+    akis.push(bek); ciz(false);
+    let r = null;
+    try{ r = await x.is(f, { gorsel:(soru, yetenek) => gorselOku(f, soru, yetenek), kamera:!!dosya }); }
+    catch(e){ akis = akis.filter(m => m !== bek); soyle('Fotoğraf işlenemedi: ' + ((e && e.message) || 'bilinmeyen hata')); return; }
+    akis = akis.filter(m => m !== bek);
+    if(!r || typeof r !== 'object'){ kucult(); soyle((r && String(r)) || 'Tamam, fotoğrafı yerine koydum.'); return; }
+    const on = String(r.metin || '').trim();
+    if(r.arac && ARAC()){
+      const o = await ARAC().onizle(r.arac.ad, r.arac.param, { metin:'' });
+      if(o.ok){ aracKart(o, on, r.satirlar); return; }
+      soyle((on ? on + ' ' : '') + String(o.hata || 'Önizlenemedi').replace(/^./, c => c.toLocaleUpperCase('tr-TR')).replace(/[.]?$/, '.'), r.satirlar || null);
+      return;
+    }
+    soyle(on || 'Tamam.', r.satirlar || null);
+  }
+  /* Görüntü okuma (sessiz): Merkez'in görsel kademesi, yoksa modülün zinciri. */
+  async function gorselOku(f, soru, yetenek){
+    let resim;
+    try{ resim = await ortam.dosyaKare(f); }catch(e){ return { ok:false, note:'görüntü okunamadı' }; }
+    const k = baglanti(), z = gorselZincir();
+    if(k){ const r = await merkezGorsel(k, soru, resim, yetenek || 'gorsel'); if(r.ok || !z.length) return r; }
+    if(!z.length) return { ok:false, note:'Merkez bağlı değil' };
     try{
-      const r = await x.is(f);
-      soyle((r && String(r)) || 'Tamam, fotoğrafı yerine koydum.');
-    }catch(e){ soyle('Fotoğraf işlenemedi: ' + ((e && e.message) || 'bilinmeyen hata')); }
+      const r = await modelKatmani().complete(z, { system:GORSEL_SISTEM, temperature:0.1, maxTokens:900, messages:[{ role:'user', text:String(soru), images:[resim] }] });
+      const t = String((r && r.text) || '').trim();
+      return t ? { ok:true, text:t } : { ok:false, note:'model boş döndü' };
+    }catch(e){ return { ok:false, note:'model yanıt vermedi' }; }
+  }
+  /* Söz 37: kamera kipinde fotoğraf işi tek düğmeyle — o anki kare dosya olur. */
+  function kareDosya(k, ad){
+    const b = atob(String(k.data || ''));
+    const u = new Uint8Array(b.length);
+    for(let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+    return new File([u], (ad || 'kare') + '.jpg', { type:k.mime || 'image/jpeg' });
+  }
+  async function kameraIs(i){
+    const x = fotoIsleri()[i];
+    if(!x || !kameraMi()) return null;
+    let kare;
+    try{ kare = paylasim.kare(); }catch(e){ soyle('Kameranın karesi alınamadı: ' + ((e && e.message) || 'bilinmeyen hata')); return null; }
+    akis.push({ kim:'sen', metin:'(kameradan) ' + x.ad });
+    return fotoIsle(i, kareDosya(kare, x.id));
+  }
+  /* «Tüm işler»den foto işi seçildi: kamerayla ya da fotoğrafla. */
+  function fotoIsBaslat(x){
+    const i = fotoIsleri().findIndex(f => f.id === x.id);
+    if(i < 0){ soyle(x.ad + ' şu an bu sayfada yapılamıyor.'); return; }
+    fotoHedef = i; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
+    if(kameraMi()){ cipler = [{ ad:x.ad, is:'kam-is:' + i }, { ad:'Vazgeç', is:'vazgec' }]; soyle(x.ad + ': kamerayı tut, hazır olunca düğmeye dokun.'); return; }
+    cipler = (ortam.kameraDestek() ? [{ ad:'Kamerayla', is:'is-kamera' }] : []).concat([{ ad:'Fotoğraf seç', is:'foto-sec' }, { ad:'Vazgeç', is:'vazgec' }]);
+    soyle(x.ad + (x.ne ? ' (' + x.ne + ')' : '') + '. Kamerayla mı, fotoğrafla mı?');
+  }
+  async function isKamera(){
+    const i = fotoHedef, x = fotoIsleri()[i];
+    cipler = null;
+    if(!x) return;
+    if(!kameraMi()) await kameraAc();
+    if(!kameraMi()) return;
+    fotoHedef = i;
+    cipler = [{ ad:x.ad, is:'kam-is:' + i }, { ad:'Vazgeç', is:'vazgec' }];
+    soyle('Kamera açık. ' + x.ad + ' için hazır olunca düğmeye dokun.');
+  }
+  /* Söz 37: «Tüm işler»den bir iş. Başka modülün işi o modülde açılır. */
+  function isSec(n){
+    const A = ARAC(), x = A && A.ISLER ? A.ISLER[n] : null;
+    if(!x || !ayar) return false;
+    if(x.modul !== 'king' && x.modul !== ayar.modul){
+      soyle(x.ad + ' ' + MODUL_AD[x.modul] + '’nin işi; oraya geçiyorum.');
+      ortam.zamanla(() => git({ modul:x.modul, route:x.route || 'today', ek:{ is:n } }), 650);
+      return true;
+    }
+    if(x.tur === 'foto'){ fotoIsBaslat(x); return true; }
+    doldurulacak = String(x.ornek || '');
+    ciz(true);
+    return true;
   }
 
   /* ---------- söz 12: ekranı göster ---------- */
@@ -1021,7 +1116,8 @@ window.LIFEOS.KING = (function(){
     if(kameraMi()){ paylasimBitir(); return false; }
     if(paylasim) paylasimKapat();
     if(!ortam.kameraDestek()){ soyle('Bu cihazda kameraya ulaşılamıyor.'); return false; }
-    if(!gorebilir()){ soyle(GORSEL_YOK); return false; }
+    /* Söz 37: modülün fotoğraf işi varsa (barkod cihazda okunur) Merkez'siz de açılır. */
+    if(!gorebilir() && !fotoIsleri().length){ soyle(GORSEL_YOK); return false; }
     try{
       const p = await ortam.kameraBaslat(() => { if(paylasim && paylasim === p){ paylasimKapat(); soyle('Kamera kapandı.'); } }, kamSecili());
       p.tur = 'kamera';
@@ -1253,7 +1349,7 @@ window.LIFEOS.KING = (function(){
     }
     const A = L && L.ANIMASYON;
     if(acik && A && typeof A.tasimaEkle === 'function'){
-      tasimaYaz(null, { route:h.route, sekme:(h.ek && h.ek.sekme) || null });
+      tasimaYaz(null, Object.assign({ route:h.route, sekme:(h.ek && h.ek.sekme) || null }, h.ek && h.ek.is != null ? { is:h.ek.is } : {}));
       ortam.git(A.tasimaEkle(url));
       return true;
     }
@@ -1916,6 +2012,7 @@ window.LIFEOS.KING = (function(){
      satır; eylemi tıklama yönlendiricisi zaten tanıyorsa başka şey gerekmez.
      Ses ve ekran araç değil KİPTİR (KIPLER). */
   const ARACLAR = [
+    { is:'isler', ad:'Tüm işler', ip:'AYS, SPİ ve ESP’de King’le yapılanlar; barkod, kamera, kayıt', kosul:() => !!(ARAC() && ARAC().isler) },
     { is:'foto-sec', ad:'Fotoğraf ekle', ip:'Fotoğraf seç; Ctrl+V ile yapıştırmak da olur', kosul:() => true },
     { is:'ekran', ad:'Bu sayfayı göster', ip:'King bulunduğun LifeOS sayfasını okur', kosul:() => true },
     { is:'kisi', ad:'Beni nasıl tanıyorsun', ip:'Hafızadaki kayıtlar; her biri görünür ve silinir', kosul:() => !!(hafiza() && KISI()) },
@@ -1984,7 +2081,9 @@ window.LIFEOS.KING = (function(){
       + '<div class="king__ekran-onizle" data-king-onizle aria-label="' + (k === 'kamera' ? 'Kameranın önizlemesi' : 'Paylaşılan ekranın önizlemesi') + '"></div>'
       + '<div class="king__kip-metin"><b><i class="king__canli" aria-hidden="true"></i>' + (k === 'kamera' ? 'Kameran açık' : 'Ekranın paylaşılıyor') + (sesliSohbet ? ' · sesli sohbet açık' : '') + '</b>'
       + '<span>' + (gozAcik() ? 'Arada bir kendim de bakarım; görüntü saklanmaz, bilgisayardan çıkmaz.' : 'Görüntü yalnız sorduğunda okunur, saklanmaz.') + '</span>'
-      + '<div class="king__kip-eylem"><button type="button" class="king__cip king__cip--ana" data-king="' + k + '-sor">' + (k === 'kamera' ? 'Kamerada' : 'Ekranda') + ' ne görüyorsun?</button>'
+      + '<div class="king__kip-eylem"><button type="button" class="king__cip' + (k === 'kamera' && fotoHedef != null ? '' : ' king__cip--ana') + '" data-king="' + k + '-sor">' + (k === 'kamera' ? 'Kamerada' : 'Ekranda') + ' ne görüyorsun?</button>'
+      /* Söz 37: modülün fotoğraf işleri kameranın o anki karesiyle (barkod, öğün, soru, sayfa). */
+      + (k === 'kamera' ? fotoIsleri().map((x, i) => '<button type="button" class="king__cip' + (fotoHedef === i ? ' king__cip--ana' : '') + '" data-king="kam-is:' + i + '">' + kac(x.ad) + '</button>').join('') : '')
       + (ortam.tanima() || ortam.kayitAc ? '<button type="button" class="king__cip" data-king="ekran-ses">' + (sesliSohbet ? 'Sesli konuşmayı bitir' : 'Sesli konuş') + '</button>' : '')
       + '<button type="button" class="king__cip" data-king="goz:' + (gozAcik() ? '0' : '1') + '" aria-pressed="' + (gozAcik() ? 'true' : 'false') + '">Arada yorum: ' + (gozAcik() ? 'açık' : 'kapalı') + '</button>'
       + '<button type="button" class="king__cip" data-king="paylasim-bitir">Durdur</button></div></div></div>';
@@ -2115,6 +2214,15 @@ window.LIFEOS.KING = (function(){
   }
   function aracMenu(){
     if(!aracAcik) return '';
+    const A = ARAC();
+    /* Söz 37: Tüm işler — üç modülün King'le yapılan işleri, modüle göre. */
+    if(aracSayfa === 'isler' && A && A.isler) return '<div class="king__arac-menu king__isler" role="menu" aria-label="Tüm işler">'
+      + '<button type="button" role="menuitem" class="king__arac king__isler-geri" data-king="isler-geri"><b>‹ Tüm işler</b></button>'
+      + A.isler().map(g => '<div class="king__isler-grup" role="group" aria-label="' + kac(g.ad) + '"><span class="king__isler-ad">' + kac(g.ad)
+        + (g.burada ? '' : ' · oraya geçer') + '</span>'
+        + g.isler.map(x => '<button type="button" role="menuitem" class="king__arac" data-king="is-sec:' + x.i + '"><b>' + kac(x.ad) + '</b><small>'
+          + kac(x.tur === 'foto' ? 'Kamera ya da fotoğraf: ' + x.ne : '«' + String(x.ornek || '').trim() + '»') + '</small></button>').join('') + '</div>').join('')
+      + '</div>';
     return '<div class="king__arac-menu" role="menu" aria-label="Araçlar">'
       + ARACLAR.filter(a => { try{ return a.kosul(); }catch(e){ return false; } }).map(a => '<button type="button" role="menuitem" class="king__arac" data-king="' + a.is
         + '"><b>' + kac(a.ad) + '</b><small>' + kac(a.ip) + '</small></button>').join('') + '</div>';
@@ -3257,9 +3365,9 @@ window.LIFEOS.KING = (function(){
 
   function vazgec(){
     const git0 = !!bekleyenGit;
-    const foto0 = !!bekleyenFoto;
+    const foto0 = !!bekleyenFoto || fotoHedef != null;
     const yetki0 = !!bekleyenYetki;
-    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; bekleyenYetki = null; cipler = null;
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; bekleyenYetki = null; cipler = null; fotoHedef = null;
     soyle(yetki0 ? 'Tamam, hiçbir şeyi değiştirmedim.' : git0 || foto0 ? 'Tamam, buradayım.' : 'Tamam, eklemedim.');
   }
 
@@ -3319,13 +3427,17 @@ window.LIFEOS.KING = (function(){
     if(!k) return h;
     const s = sayfaBul(k);
     return Object.assign({}, h, { konu:k, araclar:A ? A.ara(k).map(a => ({ ne:String(a.aciklama).split(/(?<=\.)\s/)[0], ornek:a.ornek || '', tur:a.tur })) : [],
-      sayfa:s ? { ad:s.ad, modul:MODUL_AD[s.modul] } : null });
+      isler:A && A.isAra ? A.isAra(k) : [], sayfa:s ? { ad:s.ad, modul:MODUL_AD[s.modul] } : null });
   }
+  /* Söz 37: işin nasıl yapıldığı tek satırda. */
+  const isSatiri = x => x.ad + (x.modul !== 'king' && x.modul !== (ayar && ayar.modul) ? ' (' + MODUL_AD[x.modul] + ')' : '')
+    + (x.tur === 'foto' ? ' — kamera ya da fotoğraf: + › Tüm işler' : ' — King’e «' + String(x.ornek || '').trim() + '» yaz');
   function haritaCevap(konu){
     const v = haritaVeri(konu);
     const ad = MODUL_AD[ayar && ayar.modul] || 'Bu modül';
     if(v.konu){
-      const l = (v.araclar || []).map(a => a.ne.replace(/[.]$/, '') + (a.ornek ? ' — King’e «' + a.ornek + '» yaz' : ''));
+      const l = (v.isler || []).slice(0, 3).map(isSatiri)
+        .concat((v.araclar || []).map(a => a.ne.replace(/[.]$/, '') + (a.ornek ? ' — King’e «' + a.ornek + '» yaz' : '')));
       if(v.sayfa) l.push('Sayfası: ' + v.sayfa.ad + ' (' + v.sayfa.modul + ')');
       if(!l.length){
         const m = v.moduller.find(x => x.alanlar.some(a => kucuk(a).indexOf(v.konu.split(' ')[0].slice(0, 5)) >= 0));
@@ -3334,9 +3446,15 @@ window.LIFEOS.KING = (function(){
       }
       return { sonuc:v, cevap:'«' + konu + '» için:', satirlar:l.slice(0, 6) };
     }
-    return { sonuc:v, cevap:'LifeOS’ta dört bölüm var; ' + ad + ' içinde King’le ' + v.okuma.length + ' okuma ve ' + v.yazma.length + ' değişiklik işi yapabilirsin.',
-      satirlar:v.moduller.map(x => x.ad + ' — ' + x.is + ': ' + x.alanlar.slice(0, 4).join(', ')
-        + (x.sayfalar.length ? ' · sayfalar: ' + x.sayfalar.join(', ') : '')) };
+    /* Söz 37: her modülün King'le yapılan işleri, modüle göre (bulunulan önce). */
+    const isler = v.isler || [];
+    const grup = m => (isler.find(g => g.modul === m) || { isler:[] }).isler.map(x => x.ad + (x.tur === 'foto' ? ' (kamera)' : '')).join(', ');
+    const ortak = grup('king');
+    return { sonuc:v, cevap:'LifeOS’ta dört bölüm var; ' + ad + ' içinde King’le ' + v.okuma.length + ' okuma ve ' + v.yazma.length
+      + ' değişiklik işi yapabilirsin. Hepsi + › Tüm işler’de, modüle göre:',
+      satirlar:v.moduller.map(x => { const m = Object.keys(MODUL_AD).find(k => MODUL_AD[k] === x.ad), g = m ? grup(m) : '';
+        return x.ad + ' — ' + x.is + ': ' + (g ? 'King’le ' + g : x.alanlar.slice(0, 4).join(', ')) + (x.sayfalar.length ? ' · sayfalar: ' + x.sayfalar.join(', ') : ''); })
+        .concat(ortak ? ['King — her modülde: ' + ortak] : []) };
   }
   function haritaIsle(metin){
     akis.push({ kim:'sen', metin:String(metin).trim() });
@@ -3454,6 +3572,26 @@ window.LIFEOS.KING = (function(){
     return l;
   }
 
+  /* Yazan aracın önizlemesi onay kartı olur (model seçimi ve söz 37'nin fotoğraf işi aynı kart). */
+  function aracKart(o, onMetin, ekSatir){
+    if(o.onizle.veri){
+      /* Kayıt: yerel veri önizlemesiyle aynı kart (söz 3, 8). */
+      const p = o.onizle.veri;
+      bekleyen = p;
+      cipler = [{ ad:'Evet, ekle', is:'kaydet' }, { ad:'Hayır', is:'vazgec' }];
+      const s = sohbet(p, '', false);
+      soyle(s.selam, null, { metin:p.metin, liste:(p.parcalar || []).length > 1 ? p.parcalar.map(x => x.metin) : null, ipucu:p.ipucu || '' }, s.soru);
+      return { tur:'arac-veri', ad:o.ad };
+    }
+    const n = o.onizle.yetki ? o.onizle.yetki : { tur:'eylem', arac:true, ad:o.ad, param:o.param, seviye:o.seviye, onizle:o.onizle };
+    bekleyenYetki = n;
+    cipler = [{ is:'yetki-onay', ad:n.seviye === 'buyuk' ? 'Dönüş noktası al ve uygula' : 'Onayla' }, { is:'vazgec', ad:'Vazgeç' }];
+    const satir = (n.onizle.satirlar || []).concat(Array.isArray(ekSatir) ? ekSatir : []);
+    soyle((onMetin ? onMetin + ' ' : '') + n.onizle.metin, satir.length ? satir : null, null,
+      n.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?');
+    return { tur:'arac-yaz', ad:o.ad, seviye:n.seviye };
+  }
+
   /* Modelin seçimi (HKM'de doğrulanmış) burada YENİDEN doğrulanır ve çalışır. */
   async function aracIsle(r, metin){
     const A = ARAC();
@@ -3477,21 +3615,7 @@ window.LIFEOS.KING = (function(){
         soyle('Bunu yapmak istedim ama olmadı: ' + o.hata + '. Kendi cümlenle yazarsan ya da sayfasından yaparsan olur.');
         return { tur:'arac-red' };
       }
-      if(o.onizle.veri){
-        /* Kayıt: yerel veri önizlemesiyle aynı kart (söz 3, 8). */
-        const p = o.onizle.veri;
-        bekleyen = p;
-        cipler = [{ ad:'Evet, ekle', is:'kaydet' }, { ad:'Hayır', is:'vazgec' }];
-        const s = sohbet(p, '', false);
-        soyle(s.selam, null, { metin:p.metin, liste:(p.parcalar || []).length > 1 ? p.parcalar.map(x => x.metin) : null, ipucu:p.ipucu || '' }, s.soru);
-        return { tur:'arac-veri', ad:yazma.arac.ad };
-      }
-      const n = o.onizle.yetki ? o.onizle.yetki : { tur:'eylem', arac:true, ad:o.ad, param:o.param, seviye:o.seviye, onizle:o.onizle };
-      bekleyenYetki = n;
-      cipler = [{ is:'yetki-onay', ad:n.seviye === 'buyuk' ? 'Dönüş noktası al ve uygula' : 'Onayla' }, { is:'vazgec', ad:'Vazgeç' }];
-      soyle(n.onizle.metin, n.onizle.satirlar || null, null,
-        n.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?');
-      return { tur:'arac-yaz', ad:yazma.arac.ad, seviye:n.seviye };
+      return aracKart(o);
     }
     dogrudan.forEach(x => soyle(x.cevap, x.satirlar));
     if(sonuclar.length){
@@ -3706,6 +3830,7 @@ window.LIFEOS.KING = (function(){
     k.classList.toggle('is-yan-acik', !mini && yanAcik);
     k.classList.toggle('is-yan-dar', !mini && yanDar());
     const g = kutu.querySelector('.king__girdi');
+    if(g && doldurulacak){ g.value = doldurulacak; doldurulacak = ''; }   // söz 37: işin örnek cümlesi
     const akisEl = kutu.querySelector('.king__akis');
     if(akisEl) akisEl.scrollTop = (altta || yeniVar) ? akisEl.scrollHeight : yer;
     /* Söz 27: paylaşılan ekranın canlı önizlemesi (aynı video öğesi taşınır). */
@@ -3915,7 +4040,11 @@ window.LIFEOS.KING = (function(){
         if(is === 'kayitlar'){ menuAc('kayitlar'); return; }
         if(is === 'yeni-sohbet'){ yeniSohbet(); return; }
         if(/^kip:(yaz|dinle|konus|ekran|kamera)$/.test(is)){ aracAcik = false; kipSec(is.slice(4)).then(() => ciz(false)); return; }
-        if(is === 'arac'){ aracAcik = !aracAcik; ciz(false); return; }
+        if(is === 'arac'){ aracAcik = !aracAcik; aracSayfa = null; ciz(false); return; }
+        if(is === 'isler' || is === 'isler-geri'){ aracAcik = true; aracSayfa = is === 'isler' ? 'isler' : null; ciz(false); return; }
+        if(/^is-sec:\d+$/.test(is)){ aracSayfa = null; isSec(Number(is.slice(7))); return; }
+        if(/^kam-is:\d+$/.test(is)){ kameraIs(Number(is.slice(7))); return; }
+        if(is === 'is-kamera'){ isKamera(); return; }
         if(is === 'sus'){ sus(); return; }
         if(is === 'ekran-sor'){ isle('Ekranda ne görüyorsun? Kısaca söyle.'); return; }
         if(is === 'kamera-sor'){ isle('Kamerada ne görüyorsun? Kısaca söyle.'); return; }
@@ -4048,13 +4177,16 @@ window.LIFEOS.KING = (function(){
     let hedef = null;
     const m = String(ortam.hash() || '').match(/^#king=([a-z]+)(?::([a-z]+))?$/);
     if(m){ ortam.hashSil(); hedef = { route:m[1], sekme:m[2] || null }; }
-    else if(tasindi && ts.git && typeof ts.git.route === 'string') hedef = { route:ts.git.route, sekme:ts.git.sekme || null };
+    else if(tasindi && ts.git && typeof ts.git.route === 'string') hedef = { route:ts.git.route, sekme:ts.git.sekme || null, is:ts.git.is };
     if(hedef && gecerliRota(ayar.modul, hedef.route)){
       ortam.zamanla(() => {
         try{ ayar.git(hedef.route, hedef.sekme ? { sekme:hedef.sekme } : {}); }catch(e){ console.error('King:', e); }
         /* Söz 9: King'le gelindi; burada küçük kutu olarak açık kalır. */
         const s = SAYFALAR.find(x => x.modul === ayar.modul && x.route === hedef.route);
-        ac({ mini:true, onceki, mesaj:'Buradayım. ' + (s ? s.ad + ' açık; ' : '') + 'yaptığını yaz, kaydedeyim.' });
+        /* Söz 37: «Tüm işler»den seçilen iş burada açılır. */
+        const isVar = Number.isInteger(hedef.is) && ARAC() && ARAC().ISLER[hedef.is] && ARAC().ISLER[hedef.is].modul === ayar.modul;
+        ac({ mini:!isVar, onceki, mesaj:isVar ? MODUL_AD[ayar.modul] + '’ye geçtik.' : 'Buradayım. ' + (s ? s.ad + ' açık; ' : '') + 'yaptığını yaz, kaydedeyim.' });
+        if(isVar) isSec(hedef.is);
       }, 60);
       return;
     }
@@ -4079,7 +4211,7 @@ window.LIFEOS.KING = (function(){
     ortam.depo.sil(CIKARIM_KARAR); ortam.depo.sil(SORMA);
     envanter = null; ortam.depo.sil(USLUP);
     ortam.depo.sil(TANISMA);
-    ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
+    ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; fotoHedef = null; aracSayfa = null; doldurulacak = ''; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     if(mikDeniyor){ try{ mikDeniyor.iptal(); }catch(e){ /* durmus */ } mikDeniyor = null; }
     mikListe = []; mikNot = ''; hkmDinlemezBitis = 0; dinleHata = 0; dinleNot = ''; kesiciKapat(); odakTemizle(); ritim = null; gunlukBekle = false; gunlukMetin = ''; deneyTaslak = null;
     if(dinleyen){ try{ dinleyen.onend = dinleyen.onerror = null; dinleyen.abort(); }catch(e){ /* durmus */ } }
@@ -4103,5 +4235,6 @@ window.LIFEOS.KING = (function(){
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
     aracIsle, ortakAraclar, haritaCevap, HARITA_RE,
+    isSec, kameraIs, fotoHedef:() => fotoHedef, cipler:() => (cipler || []).slice(),
   };
 })();

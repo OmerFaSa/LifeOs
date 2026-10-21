@@ -2249,9 +2249,97 @@
       expect(m.istekler.length).toBe(0);
       const s = k.akis().slice(-1)[0];
       expect(s.satirlar[0].indexOf('AYS — Sınav hazırlığı')).toBe(0);
-      expect(s.satirlar.length).toBe(4);
+      /* Söz 37: her modülün King'le yapılan işleri modüle göre; King'in ortak işleri ayrı satır. */
+      expect(s.satirlar.length).toBe(5);
+      expect(s.satirlar[1]).toContain('King’le Barkodu oku (kamera)');
+      expect(s.satirlar[4].indexOf('King — her modülde: Odak sayacı')).toBe(0);
+      await k.isle('barkod okutma nasıl yapılır?');
+      expect(k.akis().slice(-1)[0].satirlar[0]).toBe('Barkodu oku — kamera ya da fotoğraf: + › Tüm işler');
       await k.isle('deneme nasıl yapılır?');
       expect(k.akis().slice(-1)[0].satirlar).toContain('Sayfası: Deneme (AYS)');
+      temizle();
+    }));
+
+    /* Söz 37 (King 3.0 K5): «SPİ'nin içindeki şeyleri de King yapabilsin; barkod
+       okumak gibi … hepsi tek bir alanda toplansın». */
+    const BARKOD = { ad:'spi_barkod_ogun', tur:'yaz', aciklama:'Barkodlu ürünü öğüne ekler.',
+      parametreler:{ type:'object', properties:{ kod:{ type:'string', maxLength:20 } }, required:['kod'] },
+      onizle:p => ({ metin:'«Yulaf» öğüne eklenecek: 40 g.', satirlar:['Kaynak: Open Food Facts · doğrulanmadı'] }),
+      uygula:async p => { uygulanan.push(p); return { metin:'«Yulaf» öğüne eklendi.' }; } };
+    it('fotoğraf işi: görüntü okuma yardımı Merkez’e gider; işin önerisi onay kartıyla, onaysız yazılmaz', () => sahneyle(async () => {
+      const m = sira({ ok:true, text:'Barkod: 4006381333931' });
+      const { k } = aracSahne(m);
+      window.LIFEOS.ARAC.kur({ modul:'spi', araclar:[BARKOD] });
+      const okunan = [];
+      k.kur({ modul:'spi', git:() => {}, ozet:() => [], hkm, foto:[{ id:'barkod', ad:'Barkodu oku', is:async (f, y) => {
+        const r = await y.gorsel('rakamları yaz', 'gorsel'); okunan.push(r.text);
+        return { metin:'Barkod 4006381333931.', arac:{ ad:'spi_barkod_ogun', param:{ kod:'4006381333931' } } }; } }] });
+      Object.assign(k._ortam, { nesneUrl:() => 'blob:sahte', dosyaKare:async () => ({ mime:'image/jpeg', data:'QQ==' }) });
+      k.ac();
+      k.fotoAl(new File([new Uint8Array([1])], 'b.jpg', { type:'image/jpeg' }));
+      document.querySelector('[data-king="foto:0"]').click();
+      for(let i = 0; i < 6; i++) await new Promise(r => setTimeout(r, 0));
+      expect(okunan).toEqual(['Barkod: 4006381333931']);
+      expect([m.istekler[0].url.slice(-15), m.istekler[0].govde.yetenek]).toEqual(['/api/ofis/cevap', 'gorsel']);
+      const s = k.akis().slice(-1)[0];
+      expect(s.metin).toContain('Barkod 4006381333931. «Yulaf» öğüne eklenecek');
+      expect(uygulanan.length).toBe(0);
+      document.querySelector('[data-king="yetki-onay"]').click();
+      for(let i = 0; i < 4; i++) await new Promise(r => setTimeout(r, 0));
+      expect(uygulanan).toEqual([{ kod:'4006381333931' }]);
+      temizle();
+    }));
+
+    it('kamera kipi: modülün fotoğraf işleri tek düğmeyle o anki kareyle çalışır', () => sahneyle(async () => {
+      const { k } = aracSahne(null);
+      const gelen = [];
+      k.kur({ modul:'spi', git:() => {}, ozet:() => [], foto:[{ id:'barkod', ad:'Barkodu oku', is:async (f, y) => { gelen.push([f.name, f.type, f.size, y.kamera]); return 'Okundu.'; } },
+        { id:'ogun', ad:'Öğün olarak oku', is:async () => 'Öğün.' }] });
+      Object.assign(k._ortam, { kameraDestek:() => true, kameralar:async () => [{ id:'a', ad:'Dahili' }],
+        kameraBaslat:async () => ({ video:document.createElement('video'), kare:() => ({ mime:'image/jpeg', data:'S0FN' }), bitir:() => {} }) });
+      k.ac();
+      await k.kamTazele();
+      await k.kipSec('kamera');
+      const dugme = Array.from(document.querySelectorAll('.king__kip-eylem [data-king^="kam-is:"]')).map(b => b.textContent);
+      expect(dugme).toEqual(['Barkodu oku', 'Öğün olarak oku']);
+      document.querySelector('[data-king="kam-is:0"]').click();
+      for(let i = 0; i < 4; i++) await new Promise(r => setTimeout(r, 0));
+      expect(gelen).toEqual([['barkod.jpg', 'image/jpeg', 3, true]]);
+      expect(k.akis().filter(x => x.kim === 'sen').slice(-1)[0].metin).toBe('(kameradan) Barkodu oku');
+      k.kipSec('yaz');
+      temizle();
+    }));
+
+    it('Tüm işler: üç modülün işleri modüle göre; başka modülün işi orada açılır, örnek cümle yazı alanına konur', () => sahneyle(async () => {
+      const { k, giden } = aracSahne(null);
+      const gelen = [];
+      k.kur({ modul:'spi', git:() => {}, ozet:() => [], foto:[{ id:'barkod', ad:'Barkodu oku', is:async f => { gelen.push(f.name); return 'Okundu.'; } }] });
+      Object.assign(k._ortam, { nesneUrl:() => 'blob:sahte', kameraDestek:() => false });
+      k.ac();
+      document.querySelector('[data-king="arac"]').click();
+      document.querySelector('.king__arac-menu [data-king="isler"]').click();
+      const gruplar = Array.from(document.querySelectorAll('.king__isler-ad')).map(x => x.textContent);
+      expect(gruplar).toEqual(['SPİ · sağlık', 'AYS · sınav · oraya geçer', 'ESP · gelişim · oraya geçer', 'King · her modülde']);
+      const A = window.LIFEOS.ARAC;
+      /* SPİ'nin fotoğraf işi burada: kamera yoksa yalnız «Fotoğraf seç»; seçilen fotoğraf doğrudan o işe. */
+      document.querySelector('[data-king="is-sec:' + A.ISLER.findIndex(x => x.id === 'barkod') + '"]').click();
+      expect(k.cipler().map(c => c.is)).toEqual(['foto-sec', 'vazgec']);
+      k.fotoAl(new File([new Uint8Array([1])], 'urun.jpg', { type:'image/jpeg' }));
+      for(let i = 0; i < 4; i++) await new Promise(r => setTimeout(r, 0));
+      expect(gelen).toEqual(['urun.jpg']);
+      k.buyut();                                   // iş sayfa açtı, King küçüldü
+      /* cümle işi: örnek yazı alanına konur, gönderilmez */
+      document.querySelector('[data-king="arac"]').click();
+      document.querySelector('[data-king="isler"]').click();
+      document.querySelector('[data-king="is-sec:' + A.ISLER.findIndex(x => x.ad === 'Besin değeri') + '"]').click();
+      expect(document.querySelector('.king__girdi').value).toBe('yulafın besin değeri');
+      /* ESP'nin işi: ESP'ye geçilir, iş orada açılır */
+      document.querySelector('[data-king="arac"]').click();
+      document.querySelector('[data-king="isler"]').click();
+      const n = A.ISLER.findIndex(x => x.id === 'sayfa');
+      document.querySelector('[data-king="is-sec:' + n + '"]').click();
+      expect(giden.slice(-1)[0].indexOf('http://127.0.0.1:4193/')).toBe(0);
+      expect(k.akis().slice(-1)[0].metin).toBe('Kitap sayfasını oku ESP’nin işi; oraya geçiyorum.');
       temizle();
     }));
 

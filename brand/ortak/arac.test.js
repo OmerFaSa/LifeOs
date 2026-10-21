@@ -105,6 +105,18 @@
       expect(a.ara('deneme kayıtlarımı nereden görürüm').map(x => x.ad)).toEqual(['ays_denemeler']);
     }));
 
+    /* Söz 6 (King 3.0 K5): tek alan — üç modülün işleri modüle göre, bulunulan önce. */
+    it('işler modüle göre gruplanır; fotoğraf işleri modüllerin foto kimlikleriyle aynı', () => sahneyle(async () => {
+      const a = sahne([DENEME]);
+      expect(a.isler().map(g => g.modul)).toEqual(['ays', 'spi', 'esp', 'king']);
+      a.kur({ modul:'esp', araclar:[] });
+      expect(a.isler().map(g => [g.modul, g.burada])).toEqual([['esp', true], ['ays', false], ['spi', false], ['king', true]]);
+      expect(a.ISLER.filter(x => x.tur === 'foto').map(x => x.modul + ':' + x.id)).toEqual(['ays:soru', 'spi:barkod', 'spi:ogun', 'esp:sayfa']);
+      expect(a.ISLER.every(x => x.tur === 'foto' ? x.id && x.route && x.ne : x.ornek)).toBe(true);
+      expect(a.isAra('barkod okutma').map(x => x.id)).toEqual(['barkod']);
+      expect(a.harita([]).isler.length).toBe(4);
+    }));
+
     it('modelin cümlesindeki sayı kullanıcının cümlesinde geçmeli (rakam ya da yazı)', () => {
       const a = A();
       expect(a.sayilar('kırk beş dakika, 7,5 saat, iki yüz yirmi ml')).toEqual([7.5, 45, 220]);

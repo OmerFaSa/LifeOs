@@ -47,5 +47,27 @@
         expect(g.sonuc.toplam_dakika).toBeNull();
       }finally{ ESP.S.books = eski; A()._sifirla(); }
     });
+
+    /* King 3.0 K5: kitap sayfası fotoğrafı ya da kamera karesi görsel modelle
+       okunur; alıntı yalnız onayla, okunan kitaba bağlı not olarak yazılır. */
+    it('sayfa okuma ve alıntı: model yoksa söylenir; okunan kitaba bağlanır, onayla yazılır, geri alınır', async () => {
+      kur();
+      const eski = ESP.S.books;
+      ESP.S.books = [{ id:'b1', title:'Suç ve Ceza', author:'Dostoyevski', startedAt:'2026-10-01', finishedAt:null },
+        { id:'b2', title:'Budala', author:'', startedAt:null, finishedAt:null }];
+      try{
+        expect(typeof await ESP.KingArac.sayfaOku(null, {})).toBe('string');
+        const r = await ESP.KingArac.sayfaOku(null, { gorsel:async (soru, y) => ({ ok:true, text:'Acı çekmek de bir yetenektir.  \nİkinci satır.' }) });
+        expect(r.arac).toEqual({ ad:'esp_alinti_ekle', param:{ metin:'Acı çekmek de bir yetenektir.\nİkinci satır.', kitap:'Suç ve Ceza' } });
+        const o = await A().onizle(r.arac.ad, r.arac.param, { metin:'' });
+        expect(o.onizle.metin).toBe('«Suç ve Ceza» için alıntı kaydedilecek.');
+        const n0 = ESP.S.notes.length;
+        const u = await A().uygula({ arac:true, ad:r.arac.ad, param:r.arac.param });
+        expect([ESP.S.notes.length, ESP.S.notes[0].bookId]).toEqual([n0 + 1, 'b1']);
+        await u.geriAl();
+        expect(ESP.S.notes.length).toBe(n0);
+        expect((await A().onizle('esp_alinti_ekle', { metin:'x y', kitap:'olmayan kitap' })).ok).toBe(false);
+      }finally{ ESP.S.books = eski; A()._sifirla(); }
+    });
   });
 })();

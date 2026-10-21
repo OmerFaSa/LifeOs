@@ -9,7 +9,15 @@
    ayrıştırıcısından girer (ESP.Parse.parseSession). Kitap eklemek yetki
    kataloğundaki modül eylemidir (app.js, `eylem_kitap_ekle`). Burada dil
    kartı eklemek ve kitabı bitirmek durur; ikisi de önizlenir, onayla
-   yazılır, «Geri al» kalır. */
+   yazılır, «Geri al» kalır.
+
+   Alıntı ve kitap sayfası (King 3.0 K5, 2026-10-21): `esp_alinti_ekle`
+   kitaba bağlı bir not yazar (Kütüphane'nin alıntı kartı onu gösterir).
+   King'e gelen sayfa fotoğrafı ya da kamera karesi (`sayfaOku`, app.js
+   `foto`) Merkez'in ince yazı okuyan görsel modeliyle metne çevrilir; metin
+   «görsel model okudu, doğrulanmadı» diye gösterilir ve yalnız onayla
+   alıntı olarak kaydolur. Kelime kartı kullanıcının seçtiği kelimeyle
+   (`esp_kart_ekle`) girer; model kelime seçmez. */
 
 window.ESP = window.ESP || {};
 
@@ -69,6 +77,25 @@ ESP.KingArac = (function(){
     return l.length === 1 ? l[0] : null;
   }
 
+  /* Kitap: adı verildiyse o; verilmediyse okunmakta olan TEK kitap. */
+  function alintiKitabi(ad){
+    if(ad) return kitapBul(ad);
+    const l = (S().books || []).filter(b => M().bookStatus && (M().bookStatus(b) || {}).id === 'okunuyor');
+    return l.length === 1 ? l[0] : null;
+  }
+  const SAYFA_SORU = 'Bu bir kitap sayfası. Sayfadaki metni satır satır, aynen yaz; düzeltme, özet ve yorum ekleme. Okunamayan yere […] koy.';
+  async function sayfaOku(f, y){
+    if(!y || typeof y.gorsel !== 'function') return 'Sayfayı okumak için Merkez’in görsel modeli gerekiyor; Merkez açıkken yeniden dene.';
+    let r = null;
+    try{ r = await y.gorsel(SAYFA_SORU, 'gorsel'); }catch(e){ r = null; }
+    const metin = r && r.ok ? String(r.text || '').replace(/[ \t]+\n/g, '\n').trim() : '';
+    if(!metin || metin.length < 8) return 'Sayfadan okunabilir bir metin çıkmadı' + (r && r.note ? ' (' + r.note + ')' : '') + '; daha yakından ve düz çek.';
+    const b = alintiKitabi('');
+    return { metin:'Sayfadan okudum (görsel model, doğrulanmadı).',
+      satirlar:['Bir kelimeyi karta eklemek için «… kelimesini kart yap: anlamı» yaz.'],
+      arac:{ ad:'esp_alinti_ekle', param:Object.assign({ metin:metin.slice(0, 1000) }, b ? { kitap:b.title } : {}) } };
+  }
+
   function liste(){
     return [
       { ad:'esp_gun', tur:'oku', aciklama:'Bir günün ESP çalışma oturumları (alan ve dakika).', ornek:'bugün ne çalıştım',
@@ -91,6 +118,21 @@ ESP.KingArac = (function(){
           render();
           return { metin:'Kartı ekledim.', geriAl:c && c.id ? async () => { await M().deleteCard(c.id); render(); } : null };
         } },
+      { ad:'esp_alinti_ekle', tur:'yaz', ozetAd:'Alıntı kaydet', ornek:'alıntı: Bir insanın değeri, sevdiği şeylerin değeridir',
+        aciklama:'Bir kitaptan alıntıyı ya da kitap notunu kaydeder; kitap verilmezse okunmakta olan tek kitaba bağlanır.',
+        parametreler:{ type:'object', properties:{ metin:{ type:'string', maxLength:1000, description:'alıntının metni, aynen' },
+          kitap:{ type:'string', maxLength:120, description:'kitabın adı ya da adının bir parçası' } }, required:['metin'] },
+        onizle:p => {
+          const b = alintiKitabi(p.kitap);
+          if(p.kitap && !b) return { hata:'kütüphanede «' + p.kitap + '» adıyla tek bir kitap bulamadım' };
+          return { metin:(b ? '«' + b.title + '» için alıntı' : 'Kitaba bağlanmamış not') + ' kaydedilecek.', satirlar:[String(p.metin).slice(0, 280) + (p.metin.length > 280 ? '…' : '')] };
+        },
+        uygula:async p => {
+          const b = alintiKitabi(p.kitap);
+          const n = await M().saveNote(M().newNote({ text:p.metin, bookId:b ? b.id : null }));
+          render();
+          return { metin:b ? '«' + b.title + '» için alıntıyı kaydettim.' : 'Notu kaydettim.', geriAl:n && n.id ? async () => { await M().deleteNote(n.id); render(); } : null };
+        } },
       { ad:'esp_kitap_bitir', tur:'yaz', ozetAd:'Kitabı bitir', ornek:'Suç ve Ceza’yı bitirdim',
         aciklama:'Kütüphanedeki bir kitabı bugün bitmiş olarak işaretler.',
         parametreler:{ type:'object', properties:{ kitap:{ type:'string', maxLength:120, description:'kitabın adı ya da adının bir parçası' } }, required:['kitap'] },
@@ -108,5 +150,5 @@ ESP.KingArac = (function(){
     ];
   }
 
-  return { liste };
+  return { liste, sayfaOku };
 })();

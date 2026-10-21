@@ -1719,8 +1719,14 @@ SP.App = (function(){
               },
             },
           },
-          /* King'e gelen fotoğraf (king.js söz 11): Fotoğraftan öğün akışına. */
-          foto:[{ ad:'Öğün olarak oku', is:async f => {
+          /* King'e gelen fotoğraf ve kamera karesi (king.js söz 11, 37):
+             barkod (cihazın okuyucusu, yoksa Merkez'in görsel modeli; kontrol
+             hanesi denetlenir) → onaylı öğün önerisi; ya da Fotoğraftan öğün. */
+          foto:[{ id:'barkod', ad:'Barkodu oku', is:async (f, y) => {
+            const r = await SP.Barkod.oku(f, y && y.gorsel);
+            if(!r.ok) return r.why;
+            return { arac:{ ad:'spi_barkod_ogun', param:{ kod:r.kod } }, metin:'Barkod ' + r.kod + '.' };
+          } }, { id:'ogun', ad:'Öğün olarak oku', is:async f => {
             go('meals');
             await new Promise(r => setTimeout(r, 80));
             const ok = SP.Screens.meals.fotoKoy ? SP.Screens.meals.fotoKoy(f) : false;

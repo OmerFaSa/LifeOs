@@ -52,6 +52,32 @@ kullanıcı yazar ─► kural yolu (NIYET, giriş kapısı, yetki.js, kartlar, 
 | merkez_raporu | oku | haftalık değerlendirme, çapraz bulgular (HKM'nin kural motoru) |
 | eylem_* | yaz | modülün yetki eylemleri: toplantı (AYS), inceleme (SPİ, ESP), kitap ekle (ESP) |
 
+## Tek alan: «+ › Tüm işler» (King 3.0 K5 — 2026-10-21)
+
+Depo sahibi: «SPİ veya o şeylerin içindeki şeyleri de King yapabilsin; barkod
+okumak gibi … hepsi tek bir alanda toplansın».
+
+- `brand/ortak/arac.js` `ISLER`: üç modülün King'le yapılan işlerinin tek
+  listesi. King'in «+ › Tüm işler» paneli ve sistem haritası onu modüle göre
+  gruplar (bulunulan modül önce, King'in ortak işleri sonda).
+- İş türü «foto»: modülün `ayar.foto` girdisi (aynı `id`). Fotoğrafla (düğme,
+  Ctrl+V, sürükle-bırak) ya da **kamera kipinde tek düğmeyle** o anki kareyle
+  çalışır. İş ikinci argümanla görüntü okuma ister (`gorsel(soru, yetenek)`:
+  Merkez'in görsel kademesi); `{ metin, satirlar, arac }` döndürürse aracın
+  önizlemesi onay kartıyla gösterilir, yalnız «Onayla» ile yazılır.
+- İş türü «cumle»: örnek cümle yazı alanına konur, gönderilmez.
+- Başka modülün işi seçilirse King o modüle geçer ve iş orada açılır.
+
+| Modül | Fotoğraf ve kamera işi | Ne olur |
+|---|---|---|
+| SPİ | Barkodu oku | Cihazın BarcodeDetector'ı, yoksa görsel model numarayı okur; kontrol hanesi tutmayan okuma reddedilir. Önce kişisel barkod defteri, yoksa Open Food Facts (ücretsiz, anahtarsız, «Open Food Facts · doğrulanmadı»). Öğün önerisi onay kartıyla. |
+| SPİ | Öğün olarak oku | Fotoğraftan öğün penceresi (mevcut akış) |
+| AYS | Soruyu çöz | Soru çöz'e konur (mevcut akış) |
+| ESP | Kitap sayfasını oku | Görsel model (ince yazı, qwen3-vl) metni okur; okunmakta olan kitaba alıntı olarak onayla kaydolur |
+
+Kamera, modülün fotoğraf işi varsa Merkez kapalıyken de açılır (barkod cihazda
+okunur); görüntü yorumu yine Merkez ister.
+
 ## Modüllerin araçları
 
 **AYS** (`AYS/src/js/core/kingarac.js`)
@@ -69,6 +95,12 @@ kullanıcı yazar ─► kural yolu (NIYET, giriş kapısı, yetki.js, kartlar, 
 **SPİ** (`SPI/src/js/core/kingarac.js`)
 - Okuma: günün kaydı, uyku (ortalamayı kod hesaplar), antrenmanlar,
   tahliller (değer ve referans; yorum ve teşhis yok).
+- Barkod ve besin (K5): `spi_besin` (tablodaki gıdanın 100 g değeri ve ev
+  ölçüleri), `spi_barkod` (defter → Open Food Facts, kaynak etiketiyle; yoksa
+  «veri yok»), `spi_barkod_ogun` (yaz: ürünü öğüne ekler; gram kullanıcının
+  cümlesinde geçmeli ya da etiketteki porsiyondur «tahmin»; ikisi de yoksa
+  yalnız gıda tabloya girer ve barkod bağlanır; «Geri al» öğünü ve yeni gıdayı
+  siler).
 - Yazma: bölüm aç/gizle (öneri kuyruğu, onayla).
 - Kayıt: uyku, su, kilo, nabız, HRV, his, öğün, hazır öğün ve antrenman,
   hareket, kısa uyku, tahlil satırı (SP.Quick, SP.Hazir).
@@ -76,7 +108,9 @@ kullanıcı yazar ─► kural yolu (NIYET, giriş kapısı, yetki.js, kartlar, 
 **ESP** (`ESP/src/js/core/kingarac.js`)
 - Okuma: günün oturumları, son günlerin alan alan dakikası, kitaplar, dil
   kartları, yazı taslakları.
-- Yazma: dil kartı ekle, kitabı bitir, kitap ekle (yetki eylemi).
+- Yazma: dil kartı ekle, kitabı bitir, kitap ekle (yetki eylemi), alıntı
+  kaydet (`esp_alinti_ekle`, K5: kitaba bağlı not; kitap verilmezse okunmakta
+  olan tek kitap).
 - Kayıt: çalışma oturumu («45 dk gitar, 20 dakika kelime»).
 
 ## King'den yapılamayanlar (gerekçesiyle)
@@ -87,9 +121,10 @@ kullanıcı yazar ─► kural yolu (NIYET, giriş kapısı, yetki.js, kartlar, 
 | Sıfırdan başlatma, dönüş noktasına dönme | Büyük eylem; modelin seçimiyle kurulmaz. Kullanıcı kendi cümlesiyle ister («AYS'yi sıfırla»), kural yolu ve «Onaylıyorum» |
 | Hedef planını uygulamak, SPİ planı/programı | Katalogda `modelYok`: Hedeflerim'den |
 | Tipli ölçüm eylemleri (soru-yaz, vital-yaz, öğün, seans, kısa uyku, tahlil, şikâyet) | Sayıyı model üretmesin: ölçüm yalnız `kayit_gir` ile kullanıcının cümlesinden |
-| Fotoğraf, kamera, barkod, dosya/PDF, ses kaydı | Cihazın ve kullanıcının eli gerekir; King fotoğrafı modülün akışına teslim eder (king.js söz 11), okuma ve onay ekranda |
+| Dosya/PDF, ses kaydı (tahlil PDF'i, sesli not) | Dosya seçimi modülün ekranında; King fotoğraf ve kamerayı alır (söz 11, 37), PDF'i almaz |
+| Kamerayla egzersiz tekrar sayma | İleri aşama (poz tahmini gerekir); şimdilik kapsam dışı |
 | Canlı oturumlar: deneme çalıştırma, GPS rota, canlı antrenman, metronom, telaffuz ve konuşma pratiği | Gerçek zamanlı ekran işi; King sayfayı açar |
-| Çok alanlı formlar: deneme ayrıntısı, yanlış kök nedeni, konu ölçümleri, ilaç, tarif ve besin, bütçe ve fiyat, hafta imza/revizyon, haftalık planlar, hatırlatmalar, kitap notları ve kavram bağları, felsefe argümanları, tarih olayları, yazı düzenleme | Henüz tipli araç yok; sırası gelen aday. Sayfası `sayfa_ac` ile açılır |
+| Çok alanlı formlar: deneme ayrıntısı, yanlış kök nedeni, konu ölçümleri, ilaç, tarif, bütçe ve fiyat, hafta imza/revizyon, haftalık planlar, hatırlatmalar, kavram bağları, felsefe argümanları, tarih olayları, yazı düzenleme | Henüz tipli araç yok; sırası gelen aday. Sayfası `sayfa_ac` ile açılır (besin değeri ve kitap alıntısı K5'te geldi) |
 | Yedek, içe/dışa aktarma, profil değiştirme, Merkez eşleştirme, model ve anahtar ayarları | Dosya seçimi ve gizli anahtar; anahtar King'e verilmez |
 | Bildirim izni | Tarayıcı izni yalnız kullanıcıdan |
 
@@ -97,6 +132,11 @@ kullanıcı yazar ─► kural yolu (NIYET, giriş kapısı, yetki.js, kartlar, 
 
 - `brand/ortak/arac.test.js`, `king.test.js` (araç kataloğu), `yetki.test.js`
   (tipli niyet), her modülde `tests/kingarac.test.js`.
+- K5: `king.test.js` (fotoğraf işi + görsel yardım + onay kartı, kamera kipinde
+  tek düğme, Tüm işler ve modüller arası geçiş, harita), `arac.test.js`
+  (gruplama), SPİ `barkod.test.js` (model okuması, Open Food Facts) ve
+  `kingarac.test.js` (barkoddan öğün, geri al), ESP `kingarac.test.js` (sayfa
+  ve alıntı).
 - `HKM/tests/test_arac.py`: katalog, doğrulama, sağlayıcı biçimleri, araçsız
   model, «yaptım» iddiası, iki tur, uç.
 - Canlı deneme (2026-10-20, Ollama, gemma4:e2b): «son bir haftada kaç saat

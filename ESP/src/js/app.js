@@ -1858,6 +1858,9 @@ ESP.App = (function(){
       if(window.LIFEOS && window.LIFEOS.ARAC && ESP.KingArac) window.LIFEOS.ARAC.kur({ modul:'esp', araclar:() => ESP.KingArac.liste() });
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'esp', ekran:() => S.route, model:() => ESP.LLM, hkm:() => ESP.Beacon, git:route => go(route), hafiza:() => ESP.Hafizam,
+          /* King'e gelen fotoğraf ve kamera karesi (king.js söz 11, 37): kitap
+             sayfası Merkez'in görsel modeliyle okunur, alıntı onaylı kaydolur. */
+          foto:[{ id:'sayfa', ad:'Kitap sayfasını oku', is:(f, y) => ESP.KingArac.sayfaOku(f, y) }],
           /* King'in çıkarımları için (cikarim.js): son 30 günün disiplin dakikaları, kitaplar, müzik günleri. */
           cikarimVeri:() => {
             const dakika = {};

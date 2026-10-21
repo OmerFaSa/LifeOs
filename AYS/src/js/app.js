@@ -1768,7 +1768,7 @@ R.App = (function(){
             },
           },
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
-          foto:[{ ad:'Soruyu çöz', is:async f => {
+          foto:[{ id:'soru', ad:'Soruyu çöz', is:async f => {
             go('solve');
             await new Promise(r => setTimeout(r, 80));
             const ok = R.Screens.solve.fotoKoy ? await R.Screens.solve.fotoKoy(f) : false;
