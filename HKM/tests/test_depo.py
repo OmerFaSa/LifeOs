@@ -14,6 +14,7 @@
         kayda `guncellik_gun` dolmadan donmez; degisen kayit icin emir acar.
      6. Depo denetimi kodla surumleri baglar, hicbir kaydi silmez."""
 import json
+import urllib.error
 import urllib.parse
 
 from core import bam, butce, db, depo, king, sohbet, web
@@ -179,7 +180,14 @@ def run():
     test("web kapaliyken guncel denmez, denetlenemedi denir", t_web_kapali)
 
     def t_king_arastirmaz():
-        con, ag = db.connect(":memory:"), _Ag()
+        # H1 (2026-10-21): sohbetteki istegi once BAM'in hizli yolu dener
+        # (core/arastir.py, test_arastir). Web'e ulasilamazsa eski yol: emir.
+        con = db.connect(":memory:")
+
+        def ag(url, *a, **k):
+            ag.cagri.append(url)
+            raise urllib.error.URLError("ag yok")
+        ag.cagri = []
         eski = web.VARSAYILAN_TASIYICI
         web.VARSAYILAN_TASIYICI = ag
         try:
@@ -187,7 +195,7 @@ def run():
                              "2026-09-23", gorevli="king", transport=_Model(), kayit=False)
             eq(r["mode"], "emir")
             ok("Araştırma Bürosu" in r["text"] and "iş emri #" in r["text"], r["text"])
-            eq(ag.cagri, [], "King sohbette web'e cikmaz")
+            ok(all("wikipedia.org" in u for u in ag.cagri), "yalniz hizli yolun aramasi")
             e = king.emirler(con)[0]
             eq((e["tur"], e["modul"], e["konu"]), ("bam.arastirma", "hkm", "Osmanlı kuruluşunu"))
             r2 = sohbet.konus(con, _cfg_web(), "internette Osmanlı kuruluşunu araştır",
@@ -198,16 +206,17 @@ def run():
             r3 = sohbet.konus(con, _cfg_web(), "araştır", "2026-09-23", gorevli="king",
                               transport=_Model(), kayit=False)
             ok("Neyi araştırmamı" in r3["text"])
+            del ag.cagri[:]
             r4 = sohbet.konus(con, _cfg_web(), "Osmanlı kuruluşunu araştır", "2026-09-23",
                               gorevli="bio", transport=_Model(), kayit=False)
             no(r4.get("mode") == "emir", "alt patron emir acmaz")
             r5 = sohbet.konus(con, _cfg_web(), "Araştırma Bürosu ne iş yapar?", "2026-09-23",
                               gorevli="king", transport=_Model(), kayit=False)
             no(r5.get("mode") == "emir", "buronun adi arastirma istegi degildir")
-            eq(ag.cagri, [])
+            eq(ag.cagri, [], "alt patron ve buronun adi web'e cikmaz")
         finally:
             web.VARSAYILAN_TASIYICI = eski
-    test("King arastirmaz: istek buroya emir olur, King web'e cikmaz", t_king_arastirmaz)
+    test("King arastirmaz: hizli yol olmazsa istek buroya emir olur", t_king_arastirmaz)
 
     def t_coklu_is():
         """Fikir 43: tek cumlede birden cok is. Her is AYRI emir olur ve

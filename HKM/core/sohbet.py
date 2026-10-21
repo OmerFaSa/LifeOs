@@ -25,7 +25,7 @@
 
 import re
 
-from core import (ai, arac, butce, cross, dil, manager, memory, models, motto, patron, program,
+from core import (ai, arac, arastir, butce, cross, dil, manager, memory, models, motto, patron, program,
                   seviye, streak, urunler)
 
 # Kademeler: kullanici kiminle konusuyor.
@@ -307,6 +307,9 @@ YEDEK_METIN = {
 # ve kayit varsa guncel mi diye kaynaklarini acar; yoksa ya da degistiyse
 # Arastirma Burosu'nun ajanlari web'de arastirir. Tetik KURALDIR; model
 # «arastirayim mi» diye karar vermez. Cevap metnini KOD yazar.
+# H1 (2026-10-21, depo sahibi: «YouTube'a gidip link, kaynak getirebilsin»):
+# emirden ONCE Buro'nun hizli yolu denenir (core/arastir.py); kaynakli kisa
+# cevap linkleriyle sohbette doner. Arastiran yine King degil, BAM'dir.
 ARASTIR_TETIK = re.compile(
     r"(araştır(?:\s|$|[.,!?:;]|sana|ır mısın|abilir misin|ıp|ın\b|mak|manı|masını)"
     r"|araştırma(?:sı)? yap|internet(?:te|ten)\s+(?:ara|bak)|web'?(?:de|den)\s+(?:ara|bak)"
@@ -811,7 +814,7 @@ def derinlik_of(v):
     return v if v in DERINLIKLER else None
 
 
-def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef):
+def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport=None):
     """Modelden ONCE gelen kural yolu (komut, teklif, para, giris kapisi,
     is emri, istek, rapor). Cevap varsa onu, yoksa None doner. Arac
     sonuclariyla gelen ikinci tur bunu atlar: ayni mesaj ilk turda buradan
@@ -935,6 +938,22 @@ def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef):
             patron.log(con, kanal, "manager", govde, agent=gorevli)
         return {"ok": True, "mode": "emir", "command": "urun", "text": govde, "agent": gorevli}
     konu = arastirma_konusu(metin) if gorevli == "king" else None
+    # HIZLI ARASTIRMA (core/arastir.py, H1): «X'i arastir», «Y icin video bul»
+    # BAM'in hizli yoluna gider ve cevap linkleriyle SOHBETTE doner. Web
+    # kapali, model yok ya da hic kaynak bulunamadiysa eski yol: is emri.
+    vk = arastir.video_istegi(metin) if gorevli == "king" else None
+    if vk == "" and konu is None:
+        konu = ""
+    hk = vk or konu
+    if hk and len(hk) >= 3 and arastir.hazir_mi(cfg)["ok"]:
+        ar = arastir.yap(con, cfg, metin, konu=hk, video=vk is not None, transport=transport)
+        if ar["ok"]:
+            if kayit:
+                patron.log(con, kanal, "user", metin, agent=gorevli)
+                patron.log(con, kanal, "manager", ar["text"], agent=gorevli)
+            return {"ok": True, "mode": "arastirma", "command": "arastirma", "text": ar["text"],
+                    "agent": gorevli, "arastirma": {k: ar.get(k) for k in (
+                        "kaynaklar", "izler", "atilan", "adim", "saniye", "model_notu")}}
     if konu is not None:
         govde = arastirmayi_devret(con, cfg, metin, konu, kanal=kanal, hedef=hedef)
         if kayit:
@@ -1006,7 +1025,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     sonuclar = arac.sonuclari_temizle(arac_sonuclari, katalog) if arac_sonuclari is not None else None
 
     if arac_sonuclari is None:
-        kr = _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef)
+        kr = _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport)
         if kr is not None:
             return kr
 

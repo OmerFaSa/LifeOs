@@ -13,7 +13,10 @@
       bilgiye ihtiyac duyarsa King'e is emri yazar.
    2. SAGLAYICIDAN BAGIMSIZ. Anahtarsiz Vikipedi hazir gelir; Brave,
       Tavily, Google Programmable Search ve kendi SearXNG sunucun anahtar
-      ya da adres girilince acilir. Sira kullanicinindir.
+      ya da adres girilince acilir. Sira kullanicinindir. Ollama Web Search
+      (ucretsiz Ollama hesabinin anahtari) anahtar girilince KENDILIGINDEN
+      ilk siraya gecer; anahtar yoksa sessizce atlanir. YouTube Data API
+      anahtari yalniz video aramasini (core/youtube.py) degistirir.
    3. GETIRME GUVENLIDIR. Yalniz http/https; yalniz GENEL internet adresi
       (bu makine, yerel ag, link-local ve ayrilmis adresler YASAK — HKM
       yerelde calisir ve bir sayfa adresi onu yerel servislere
@@ -49,6 +52,14 @@ SAGLAYICILAR = {
                    "kayit": "https://programmablesearchengine.google.com/"},
     "searxng": {"ad": "SearXNG (kendi sunucun)", "anahtar": False,
                 "not": "Kendi çalıştırdığın SearXNG adresi; JSON biçimi açık olmalı."},
+    "ollama": {"ad": "Ollama Web Search", "anahtar": True, "kayit": "https://ollama.com/settings/keys",
+               "not": "Ücretsiz Ollama hesabıyla ollama.com › Settings › API Keys’ten alınır. "
+                      "Girilince ilk sıraya geçer; sayfa okumada da yedek olur."},
+    # tur=video: web aramasi sirasina girmez; anahtar yalniz core/youtube.py icindir.
+    "youtube": {"ad": "YouTube Data API", "anahtar": True, "tur": "video",
+                "kayit": "https://console.cloud.google.com/apis/library/youtube.googleapis.com",
+                "not": "İsteğe bağlı. Anahtar yoksa video araması YouTube’un kendi arama "
+                       "sayfasından yapılır."},
 }
 # guncellik_gun: King'in guncellik turu kac gunde bir ayni kayda bakar
 # (core/king.py bekci). 0 -> tur kapali; arastirma istegindeki denetim yine calisir.
@@ -115,10 +126,10 @@ def validate(patch):
         elif k == "acik" and not isinstance(v, bool):
             hata.append("web.acik bir bool olmalı")
         elif k == "saglayicilar" and (not isinstance(v, list)
-                                      or any(x not in SAGLAYICILAR for x in v)
+                                      or any(x not in ARAYICI for x in v)
                                       or len(set(v)) != len(v)):
             hata.append("web.saglayicilar yalnız tanımlı sağlayıcılardan oluşmalı: %s"
-                        % ", ".join(SAGLAYICILAR))
+                        % ", ".join(ARAYICI))
         elif k == "anahtarlar" and (not isinstance(v, dict)
                                     or any(a not in SAGLAYICILAR or not SAGLAYICILAR[a]["anahtar"]
                                            or not isinstance(s, str) or len(s) > 300
@@ -157,6 +168,20 @@ def apply(cfg, patch):
             yeni[k] = v
     out = dict(cfg)
     out["web"] = yeni
+    return out
+
+
+def anahtar_of(cfg, ad):
+    return str((settings(cfg).get("anahtarlar") or {}).get(ad) or "")
+
+
+def sira(cfg):
+    """Aramanin gercek sirasi: kullanicinin listesi; Ollama anahtari girilmis
+    ama listede yoksa EN ONE (anahtar girmek niyettir). Video saglayicisi girmez."""
+    a = settings(cfg)
+    out = [x for x in a["saglayicilar"] if x in ARAYICI]
+    if anahtar_of(cfg, "ollama") and "ollama" not in out:
+        out.insert(0, "ollama")
     return out
 
 
@@ -294,7 +319,7 @@ def durum(con, cfg, now=None):
     n = con.execute("SELECT COUNT(*) FROM web_onbellek").fetchone()[0]
     return {"acik": bool(a["acik"]), "saglayicilar": [
         {"id": x, "ad": SAGLAYICILAR[x]["ad"], "hazir": hazir_mi(cfg, x)["ok"],
-         "not": hazir_mi(cfg, x).get("note")} for x in a["saglayicilar"]],
+         "not": hazir_mi(cfg, x).get("note")} for x in sira(cfg)],
         "bugun": {"cagri": s["cagri"], "kacinilan": s["kacinilan"],
                   "sinir": a["gunluk_sinir"], "etiket": "olculdu"},
         "onbellek": n}
@@ -456,8 +481,28 @@ def _searxng(cfg, sorgu, n, tasiyici):
             for x in (d.get("results") or [])[:n]]
 
 
+def _ollama(cfg, sorgu, n, tasiyici):
+    d = _json(tasiyici, "https://ollama.com/api/web_search",
+              {"Content-Type": "application/json",
+               "Authorization": "Bearer " + anahtar_of(cfg, "ollama")},
+              json.dumps({"query": sorgu, "max_results": n}).encode("utf-8"))
+    return [{"baslik": _temiz(x.get("title")), "url": x.get("url"),
+             "ozet": _temiz(x.get("content"))} for x in d.get("results") or []]
+
+
+def _ollama_getir(cfg, url, tasiyici):
+    """Ollama web_fetch: sayfayi Ollama okur (JS ile cizilen sayfa da).
+    Yalniz dogrudan okuma yetmeyince ve anahtar varsa denenir."""
+    d = _json(tasiyici, "https://ollama.com/api/web_fetch",
+              {"Content-Type": "application/json",
+               "Authorization": "Bearer " + anahtar_of(cfg, "ollama")},
+              json.dumps({"url": url}).encode("utf-8"))
+    return {"baslik": _temiz(d.get("title"), 300), "metin": str(d.get("content") or "")[:MAX_METIN],
+            "dil": None, "yayin": None, "aciklama": "", "son_url": url}
+
+
 ARAYICI = {"wikipedia": _wikipedia, "brave": _brave, "tavily": _tavily,
-           "google_cse": _google, "searxng": _searxng}
+           "google_cse": _google, "searxng": _searxng, "ollama": _ollama}
 
 
 def ara(con, cfg, rol, sorgu, n=5, tasiyici=None, now=None):
@@ -472,13 +517,13 @@ def ara(con, cfg, rol, sorgu, n=5, tasiyici=None, now=None):
     if neden:
         return {"ok": False, "sonuclar": [], "note": neden}
     n = max(1, min(int(n or 5), 10))
-    ak = _anahtar("ara", s.lower(), n, a["saglayicilar"], a["dil"])
+    ak = _anahtar("ara", s.lower(), n, sira(cfg), a["dil"])
     var = _onbellek_oku(con, "ara", ak, now)
     if var is not None:
         return dict(var, onbellekten=True)
     tasiyici = tasiyici or VARSAYILAN_TASIYICI or _ag
     sonuclar, kullanilan, hatalar, gorulen = [], [], [], set()
-    for ad in a["saglayicilar"]:
+    for ad in sira(cfg):
         if len(sonuclar) >= n:
             break
         h = hazir_mi(cfg, ad)
@@ -557,17 +602,28 @@ def getir(con, cfg, rol, url, tasiyici=None, now=None, taze=False):
             m = _wiki_metin(url, tasiyici)
         else:
             durum_, basliklar, bayt, son = tasiyici(url, None, None, False)
-            if durum_ != 200:
-                return {"ok": False, "note": "Sayfa HTTP %s döndü." % durum_}
             metin, tur = _coz(bayt, basliklar)
-            if tur and tur not in METIN_TURLERI:
-                return {"ok": False, "note": "Bu içerik türü okunmuyor (%s)." % tur}
-            m = html_metin(metin) if tur != "text/plain" else {
-                "baslik": "", "metin": metin[:MAX_METIN], "dil": None, "yayin": None,
-                "aciklama": ""}
-            m["son_url"] = son or url
+            if durum_ != 200:
+                m = {"hata": "Sayfa HTTP %s döndü." % durum_, "metin": ""}
+            elif tur and tur not in METIN_TURLERI:
+                m = {"hata": "Bu içerik türü okunmuyor (%s)." % tur, "metin": ""}
+            else:
+                m = html_metin(metin) if tur != "text/plain" else {
+                    "baslik": "", "metin": metin[:MAX_METIN], "dil": None, "yayin": None,
+                    "aciklama": ""}
+                m["son_url"] = son or url
     except Exception as e:                      # noqa: BLE001
-        return {"ok": False, "note": "Sayfa okunamadı: %s" % str(e)[:200]}
+        m = {"hata": "Sayfa okunamadı: %s" % str(e)[:200], "metin": ""}
+    if len(m["metin"]) < 200 and anahtar_of(cfg, "ollama"):
+        # Dogrudan okuma yetmedi (JS ile cizilen sayfa, engel): Ollama okur.
+        izin, neden = _harca(con, cfg, now)
+        if izin:
+            try:
+                m = _ollama_getir(cfg, url, tasiyici)
+            except Exception as e:              # noqa: BLE001
+                m = dict(m, hata=m.get("hata") or "Sayfa okunamadı: %s" % str(e)[:200])
+    if m.get("hata") and len(m["metin"]) < 200:
+        return {"ok": False, "note": m["hata"]}
     if len(m["metin"]) < 200:
         return {"ok": False, "note": "Sayfada okunacak metin yok."}
     out = {"ok": True, "url": url, "son_url": m.get("son_url") or url,

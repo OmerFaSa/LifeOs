@@ -4703,13 +4703,16 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       h += '<div class="metric"><div class="metric__name">' + esc(s.ad)
         + '<div class="' + (s.hazir ? 'ok' : 'muted') + '" style="font-size:11px">'
         + (s.hazir ? 'hazır' : (s.anahtar ? 'anahtar girilmemiş' : esc(s.not || 'ayar bekliyor')))
-        + (secili.indexOf(id) >= 0 ? ' · sıra ' + esc(secili.indexOf(id) + 1) : '') + '</div></div>'
+        + (secili.indexOf(id) >= 0 ? ' · sıra ' + esc(secili.indexOf(id) + 1) : '') + '</div>'
+        + (s.anahtar && s.kayit ? '<div class="muted" style="font-size:11px">' + esc(s.not || '')
+          + ' <a href="' + esc(s.kayit) + '" target="_blank" rel="noopener">Anahtarı buradan al</a></div>' : '')
+        + '</div>'
         + '<div class="metric__val">'
         + (s.anahtar ? '<input id="web-k-' + esc(id) + '" type="password" value="'
           + esc(ah[id] || '') + '" placeholder="anahtar" class="alan alan--dar" autocomplete="off"'
           + ' aria-label="' + esc(s.ad) + ' anahtarı"/> ' : '')
-        + '<input type="checkbox" data-web-saglayici="' + esc(id) + '"'
-        + (secili.indexOf(id) >= 0 ? ' checked' : '') + ' aria-label="' + esc(s.ad) + ' kullanılsın"/>'
+        + (s.tur === 'video' ? '' : '<input type="checkbox" data-web-saglayici="' + esc(id) + '"'
+          + (secili.indexOf(id) >= 0 ? ' checked' : '') + ' aria-label="' + esc(s.ad) + ' kullanılsın"/>')
         + '</div></div>';
     });
     h += webAlan('web-cx', 'Google arama motoru kimliği (cx)', 'Google Programmable Search için',
