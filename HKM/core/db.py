@@ -614,6 +614,48 @@ CREATE TABLE IF NOT EXISTS aktif_is (
   govde       TEXT NOT NULL,                     -- JSON ozet
   PRIMARY KEY (ad, donem)
 );
+
+/* KING'IN EKIBI (core/is_kuyrugu.py, core/ekip.py, core/gorev.py). King
+   agir isi arka planda alt ajana verir; kullanici konusmaya devam eder.
+   Ayni anda en cok BIR is calisir (yerel model: 7 GB RAM, 6 GB VRAM).
+   Is hicbir module YAZMAZ: yazma yalniz niyet kuyruguna (intents) teklif. */
+CREATE TABLE IF NOT EXISTS king_isler (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  ajan        TEXT NOT NULL,                      -- akademik|beden|zihin|arastirmaci
+  tur         TEXT NOT NULL,                      -- devir|gorev_adim
+  baslik      TEXT NOT NULL,
+  girdi       TEXT NOT NULL DEFAULT '{}',         -- JSON
+  durum       TEXT NOT NULL DEFAULT 'bekliyor',   -- bekliyor|calisiyor|bitti|hata|iptal
+  ilerleme    INTEGER NOT NULL DEFAULT 0,         -- 0-100
+  adim        TEXT,                               -- su an ne yapiyor (ekran cumlesi)
+  sonuc       TEXT,                               -- JSON: ajanin raporu
+  hata        TEXT,
+  deneme      INTEGER NOT NULL DEFAULT 0,
+  iptal_istendi INTEGER NOT NULL DEFAULT 0,
+  gorev_id    INTEGER,
+  adim_no     INTEGER,
+  created_at  TEXT NOT NULL,
+  started_at  TEXT,
+  finished_at TEXT,
+  updated_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_king_isler_durum ON king_isler(durum, id);
+
+CREATE TABLE IF NOT EXISTS king_gorevler (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  hedef       TEXT NOT NULL,
+  modul       TEXT,                               -- ays|spi|esp
+  ajan        TEXT NOT NULL,                      -- adimlarin cogunun sahibi
+  baslangic   TEXT NOT NULL,                      -- YYYY-MM-DD
+  bitis       TEXT NOT NULL,
+  gunluk_dk   INTEGER,                            -- NULL = bilinmiyor (uydurulmaz)
+  dk_kaynak   TEXT,                               -- mesaj|hedef|zaman|NULL
+  adimlar     TEXT NOT NULL DEFAULT '[]',         -- JSON
+  durum       TEXT NOT NULL DEFAULT 'taslak',     -- taslak|suruyor|bitti|iptal
+  kaynak      TEXT NOT NULL DEFAULT '',           -- gorevi acan cumle
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
 """
 
 

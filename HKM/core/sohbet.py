@@ -912,6 +912,18 @@ def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, t
                 patron.log(con, kanal, "manager", govde, agent=gorevli)
             return {"ok": True, "mode": "emir", "command": "kapi", "text": govde, "agent": gorevli}
 
+    # 0b'' — KING'IN EKIBI (core/gorev.py, K1): «Bu hafta B1'e hazırla beni»
+    # cok adimli gorev taslagi, «görevi başlat», «ekip ne yapıyor», «arka
+    # planda …» devri. Agir is arka plan kuyruguna gider; sohbet beklemez.
+    if gorevli == "king":
+        from core import gorev
+        gc = gorev.sohbet_cevabi(con, cfg, metin, kanal=kanal or "local", transport=transport)
+        if gc:
+            if kayit:
+                patron.log(con, kanal, "user", metin, agent=gorevli)
+                patron.log(con, kanal, "manager", gc, agent=gorevli)
+            return {"ok": True, "mode": "ekip", "command": "gorev", "text": gc, "agent": gorevli}
+
     # 0b' — TEK CUMLEDE BIRDEN COK IS (fikir 43): her biri ayri emir.
     coklu = is_parcalari(metin) if gorevli == "king" else None
     if coklu is not None:

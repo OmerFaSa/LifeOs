@@ -113,7 +113,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import arastir, kutu, motor, tarife  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
-                  fis, hedefag, impact,
+                  fis, gorev, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, models, motto, ofismodel, ollama, outbox, patron,
                   ses, dinle,
                   profil, saat, schedule,
@@ -897,6 +897,10 @@ class Handler(BaseHTTPRequestHandler):
         date = (q.get("date") or [datetime.date.today().isoformat()])[0]
         if not _gun_mu(date):
             return self._send(400, {"error": "date yyyy-aa-gg olmali"})
+        # King'in ekibi (core/gorev.py): alt ajanlar, arka plan isleri, gorevler.
+        ek = gorev.uc(self.con, self.server.config, "GET", u.path, q)
+        if ek is not None:
+            return self._send(*ek)
         if u.path == "/api/aktif":
             return self._send(200, aktif.durum(self.con, self.server.config))
         if u.path.startswith("/api/merkez/"):
@@ -1271,6 +1275,15 @@ class Handler(BaseHTTPRequestHandler):
 
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
+        if gorev.bizim_mi(u.path):
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                govde = _nesne(ham) or {}
+            except ValueError:
+                return self._send(400, {"error": "govde JSON nesnesi olmali"})
+            return self._send(*gorev.uc(self.con, self.server.config, "POST", u.path, {}, govde))
         if u.path in ("/api/conversation/temizle", "/api/conversation/geri",
                       "/api/conversation/arsiv-sil"):
             ham, hata = self._read_body()
@@ -2109,6 +2122,8 @@ def main():
     srv.uyan = threading.Event()
     ritim = threading.Thread(target=_ritim, args=(srv,), daemon=True)
     ritim.start()
+    # King'in ekibi: arka plan isleri tek iscide (ayni anda en cok bir model isi).
+    threading.Thread(target=gorev.isci, args=(srv,), daemon=True).start()
     # Yoklama AYRI bir is parcaciginda: Telegram bizi 25 saniye bekletir ve
     # o sirada ritim ile HTTP sunucusu durmamali.
     yok = threading.Thread(target=yoklama.dongu, args=(srv, srv.db_path),
