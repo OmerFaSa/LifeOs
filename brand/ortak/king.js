@@ -3129,7 +3129,13 @@ window.LIFEOS.KING = (function(){
   }
   /* Uzun cevapta hafif biçim: **kalın**, madde ve başlık işaretleri (metin önce kaçırılır). */
   function bicimli(s){
-    return kac(s).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/^[ \t]*[*-][ \t]+/gm, '• ').replace(/^#{1,4}[ \t]+/gm, '');
+    return kac(s).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/^[ \t]*[*-][ \t]+/gm, '• ').replace(/^#{1,4}[ \t]+/gm, '')
+      .replace(/https?:\/\/(?:[^\s<>"'&]|&amp;)+/g, u => {
+        /* Sondaki noktalama linkin parçası değil. */
+        const son = u.match(/[.,;:!?)\]]+$/);
+        const ad = son ? u.slice(0, -son[0].length) : u;
+        return '<a href="' + ad + '" target="_blank" rel="noopener noreferrer">' + ad + '</a>' + (son ? son[0] : '');
+      });
   }
 
   async function isle(metin){
@@ -3794,6 +3800,7 @@ window.LIFEOS.KING = (function(){
     const bas = '<div class="king__bas">'
       + KURE + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + '</span>'
+      + isRozet()
       + '<span class="king__durum" title="' + (baglanti() ? 'Sorular Merkez’deki King’e (yapay zekâ) gider'
         : gorselZincir().length ? 'Merkez bağlı değil; sorulara yerel kurallarla, ekran ve fotoğrafa görüntü okuyan modelle cevap verir'
         : 'Merkez bağlı değil: King yerel kurallarla cevaplar') + '">'
@@ -4222,8 +4229,31 @@ window.LIFEOS.KING = (function(){
 
   /* Modülün tek çağrısı (app.js, model yüklendikten sonra). Başka bir
      modülden King'le gelindiyse (#king=rota[:sekme]) oraya gidilir. */
+  /* King 3.0 K1: arka plan işleri («King şu an 2 iş yapıyor»). Veri HKM'den
+     gelir (/api/king/isler, durum özeti); Merkez yoksa rozet hiç çizilmez. */
+  let isDurum = null, isAralik = null;
+  async function isDurumYokla(){
+    const k = baglanti();
+    if(!k){ if(isDurum){ isDurum = null; ciz(false); } return; }
+    try{
+      const res = await ortam.fetch(k.url + '/api/king/isler?limit=1', { headers:{ 'Authorization':'Bearer ' + k.token } });
+      const v = res && res.ok ? await res.json() : null;
+      const yeni = v && v.durum && v.durum.acik ? v.durum : null;
+      if(JSON.stringify(yeni) !== JSON.stringify(isDurum)){ isDurum = yeni; ciz(false); }
+    }catch(e){ /* HKM yanıt vermedi: rozet gizlenir, King sürer */ if(isDurum){ isDurum = null; ciz(false); } }
+  }
+  function isRozet(){
+    if(!isDurum) return '';
+    return '<span class="king__is-rozet" role="status" title="' + kac(isDurum.metin) + '">King şu an '
+      + kac(isDurum.acik) + ' iş yapıyor</span>';
+  }
+
   function kur(o){
     ayar = Object.assign({ modul:'spi' }, o || {});
+    if(typeof document !== 'undefined' && typeof setInterval === 'function' && !isAralik){
+      isDurumYokla();
+      isAralik = setInterval(isDurumYokla, 15000);
+    }
     /* Söz 36: King'in kendi araçları kataloğa (her çağrıda güncel kurulur). */
     if(L.ARAC){ L.ARAC.modulSec(ayar.modul); L.ARAC.ortakKur(ortakAraclar); }
     if(typeof window !== 'undefined') setTimeout(() => { try{ if(odak()) odakKur(); }catch(e){ /* yok */ } }, 0);
@@ -4283,6 +4313,7 @@ window.LIFEOS.KING = (function(){
 
   return {
     kur, ac, kapat, kucult, buyut, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
+    isDurumYaz:d => { isDurum = d; }, isRozet,
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,
     paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, kameraAc, kamSec, kamTazele, KAM, fotoYorumla, GORSEL_SISTEM, TASIMA,
     kisiKayitlari, kisiOzeti, disKisiTazele, tanismaVar:() => !!bekleyenTanisma,

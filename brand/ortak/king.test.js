@@ -1739,6 +1739,19 @@
       const { k } = sahne();
       expect(k.bicimli('**Başlık**\n* bir\n- iki\n## Alt\n<b>x</b>')).toBe('<b>Başlık</b>\n• bir\n• iki\nAlt\n&lt;b&gt;x&lt;/b&gt;');
     }));
+    it('metindeki http(s) linkleri tıklanabilir olur; sondaki noktalama dışarıda kalır', () => sahneyle(async () => {
+      const { k } = sahne();
+      expect(k.bicimli('Bak: https://a.com/x?b=1&c=2.')).toBe('Bak: <a href="https://a.com/x?b=1&amp;c=2" target="_blank" rel="noopener noreferrer">https://a.com/x?b=1&amp;c=2</a>.');
+      expect(k.bicimli('javascript:alert(1)')).toBe('javascript:alert(1)');
+    }));
+    it('iş rozeti yalnız açık iş varken çizilir ve sayıyı kod söyler', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.isDurumYaz(null);
+      expect(k.isRozet()).toBe('');
+      k.isDurumYaz({ acik:2, metin:'King şu an 2 iş yapıyor (1 çalışıyor, 1 sırada)' });
+      expect(k.isRozet()).toContain('King şu an 2 iş yapıyor');
+      k.isDurumYaz(null);
+    }));
   });
   /* Söz 31 (depo sahibi, 2026-10-19): «King ne kadar düşünecek seçilebilsin». */
   describe('King — düşünme derinliği (söz 31)', () => {

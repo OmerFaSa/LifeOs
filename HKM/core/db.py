@@ -953,7 +953,8 @@ BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
                  "conversations", "attachments", "memories", "intents", "outbox", "usage",
                  "inbox_seen", "bam_isler", "bam_kayitlar", "bam_iz",
                  "is_emirleri", "bildirimler", "hedef_ozet", "zaman_butcesi", "para",
-                 "meydan_deste", "meydan_isaret", "meydan_not", "meydan_yanit")
+                 "meydan_deste", "meydan_isaret", "meydan_not", "meydan_yanit",
+                 "king_isler", "king_gorevler")
 BACKUP_SCHEMA = 4
 
 
