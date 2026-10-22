@@ -2417,6 +2417,7 @@ window.LIFEOS.KING = (function(){
      ====================================================================== */
   const BOLUMLER = [
     { id:'sohbet', ad:'Sohbet', svg:'<path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 16.5h-7.5L7 20v-3.5H5A1.5 1.5 0 0 1 3.5 15V6.5A1.5 1.5 0 0 1 5 5z"/>' },
+    { id:'araclar', ad:'Araçlar', svg:'<path d="M11 3.5l1.7 4.6 4.6 1.7-4.6 1.7L11 16.1l-1.7-4.6-4.6-1.7 4.6-1.7z"/><path d="M18 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>' },
     { id:'gorev', ad:'Görevler', svg:'<path d="M10 7h10M10 12h10M10 17h10"/><path d="M3.8 7l1.4 1.4L7.8 5.6M3.8 12l1.4 1.4 2.6-2.8"/><circle cx="5.5" cy="17" r="1.3"/>' },
     { id:'rutin', ad:'Rutinler', svg:'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v3.8h-3.8"/><path d="M12 8.5V12l2.5 1.6"/>' },
     { id:'kutuphane', ad:'Kütüphane', svg:'<rect x="4" y="4.5" width="4" height="15" rx="1"/><rect x="10" y="4.5" width="4" height="15" rx="1"/><path d="M15.8 6.1l3.4-.9 2.6 13.4-3.4.9z"/>' },
@@ -2466,7 +2467,8 @@ window.LIFEOS.KING = (function(){
       : bolum === 'kutuphane' ? ust('klasor-yeni', 'Yeni klasör', SVG_KLASOR_EKLE) : '';
     return '<aside class="king__yan" aria-label="' + b.ad + '"><div class="king__yan-ust"><h2 class="king__yan-baslik">' + b.ad + '</h2>'
       + eylem + yanDugmeHtml('king__yan-kapa') + '</div><div class="king__yan-govde">'
-      + (bolum === 'gorev' ? gorevListe() : bolum === 'rutin' ? rutinListe() : bolum === 'kutuphane' ? kutuphaneListe() : sohbetListe())
+      + (bolum === 'gorev' ? gorevListe() : bolum === 'rutin' ? rutinListe() : bolum === 'kutuphane' ? kutuphaneListe()
+        : bolum === 'araclar' ? aracListe() : sohbetListe())
       + '</div></aside>';
   }
   /* Sohbet listesi günlere göre (2026-10-21): Bugün, Dün, Son 7 gün, Son 30 gün, Daha eski. */
@@ -2491,6 +2493,106 @@ window.LIFEOS.KING = (function(){
       + (sabit.length ? listeGrup('Sabitlenenler', '<ul class="king__gecmis">' + sabit.map(gecmisSatir).join('') + '</ul>') : '')
       + gunGrupla(gecmis.filter(k => !k.sabit)).map(g => listeGrup(g.ad, '<ul class="king__gecmis">' + g.l.map(gecmisSatir).join('') + '</ul>')).join('')
       + (gecmis.length ? '' : yanBos('Geçmiş sohbet yok. «Yeni sohbet» dediğinde ya da gün değişince açık sohbet buraya geçer.'));
+  }
+  /* ARAÇLAR (kullanıcı, 2026-10-22: «King'in özelliklerinin hepsini oradan
+     görebilirim ki aklımızda tutmak yerine»). King'in yapabildiği her şey
+     tek listede, gruplu ve aranır. Katalog UYDURULMAZ: her satırın örneği
+     King'in gerçek tetiğidir (KART_SORU, ODAK_RE, NOT_RE, HAFTA_RE …; testi
+     king.test.js «araçlar»), koşulu sağlanmayan satır hiç çizilmez (bankası
+     olmayan modülde «Bana soru sor» yok). Üç tür satır:
+       calis   dokununca hemen sorulur (yalnız okuyan komutlar)
+       doldur  örnek yazı alanına konur, gönderilmez (söz 37 kuralı)
+       is      var olan eylem (kamera, PDF, görev panosu, Beni nasıl tanıyorsun)
+     Merkez isteyen satır bağlı değilken «Merkez» etiketiyle söner; yine
+     dokunulur, King nedenini söyler. «Şimdi» grubu saate, güne ve modülün
+     sunduklarına göre en çok üç öneri seçer (kural; model yok). */
+  function yetenekler(){
+    const K = (ayar && ayar.kartlar) || {}, fn = n => typeof K[n] === 'function';
+    const s = (ad, ip, o) => Object.assign({ ad, ip }, o);
+    const sec = ARACLAR.filter(a => { try{ return a.kosul(); }catch(e){ return false; } });
+    const ek = id => { const a = sec.find(x => x.is === id); return a ? s(a.ad, a.ip, { is:a.is }) : null; };
+    const gruplar = [
+      { ad:'Kart ve soru', l:[
+        fn('istatistik') && s('İstatistik kartları', 'Modülün sayıları kart olarak', { calis:'istatistiklerim' }),
+        fn('soru') && s('Bana soru sor', 'Modülün bankasından soru kartı; şıklar düğme', { calis:'bana soru sor' }),
+        fn('soru') && s('Konudan soru', 'Belirli bir konudan soru', { doldur:'türev hakkında soru sor' }),
+        fn('oncelik') && s('Neye çalışayım', 'Öncelik sırası ve nedeni', { calis:'neye çalışayım' }),
+        fn('yuk') && s('Yük durumum', 'Son 7 gün ile önceki 7 gün', { calis:'yük durumum' }),
+      ] },
+      { ad:'Araştır ve oku', l:[
+        s('Araştır', 'Kaynaklı özet, videolar, okunacaklar', { doldur:'fotosentezi araştır', merkez:true }),
+        s('Arka planda araştır', 'Ekibe verilir, sen konuşmaya devam edersin', { doldur:'arka planda yapay zekâ tarihini araştır', merkez:true }),
+        ek('pdf-sec'),
+        D() && s('Notlarımda ara', 'Defter’deki notlarına dayanarak', { doldur:'notlarımda türev' }),
+      ] },
+      { ad:'Gör', l:[ek('foto-sec'), ek('kip:kamera'), ek('kip:ekran'), ek('ekran'), ek('barkod')] },
+      { ad:'Planla ve takip et', l:[
+        s('Bugünün özeti', 'Bu modülde bugün ne var', { hazir:HAZIR.findIndex(h => h.ozet) }),
+        s('Odak sayacı', 'Başlıkta kalan süre; bitince kaydet', { doldur:'25 dakika matematik çalışalım' }),
+        s('Görev kur', 'King adım adım plan kurar; sen başlatırsın', { doldur:'bu hafta B1’e hazırla beni', merkez:true }),
+        s('Haftalık değerlendirme', 'Merkez’in hafta raporu', { calis:'haftalık değerlendirme', merkez:true }),
+        s('Çapraz bulgu', 'Modüller birbirini nasıl etkiliyor', { calis:'çapraz bulgu', merkez:true }),
+        D() && s('Haftalık gözden geçirme', 'Üç soru; cevaplar Defter’e', { calis:'haftalık gözden geçirme' }),
+        s('Kişisel deney', 'Bir kuralı dene; önce ve sonra karşılaştırılır', { doldur:'deney başlat: her gün 10 dakika yürüyüş' }),
+        yetkiKatalog() && yetkiKatalog().bekleyenler && s('Bekleyen öneriler', 'Onaylar’da bekleyenler', { calis:'bekleyen öneriler' }),
+      ] },
+      { ad:'Kaydet', l:[
+        D() && s('Günlük', 'Anlattığın Defter’e günlük olur', { calis:'günlük yazalım' }),
+        D() && s('Deftere not', 'Tek satır not', { doldur:'deftere not: ' }),
+      ] },
+      { ad:'Rutin ve hafıza', l:[
+        s('Beceri öğret', 'Tekrarlanan işi King üstlenir', { doldur:'her pazartesi bana deneme hatırlat', merkez:true }),
+        s('Söz', 'Zamanı gelince nasıl geçtiğini sorar', { doldur:'yarın fizik sınavım var', merkez:true }),
+        s('Ekip ne yapıyor', 'Arka plandaki işler', { calis:'ekip ne yapıyor', merkez:true }),
+        s('Beni nasıl tanıyorsun', 'King’in seni tanıdığı her şey; sil ya da ekle', { is:'kisi' }),
+        s('Kişilik envanteri', '20 cümle; sonuç senin sözün olur', { calis:'kişilik testi' }),
+      ] },
+      { ad:'Sistem', l:[
+        s('Bu sistemde ne var', 'Modüller, sayfalar ve araçlar', { calis:'bu sistemde ne var' }),
+        s('Görünüm', 'Tema ve görünüm', { doldur:'koyu temaya geç' }),
+        s('Düşünme', 'Derin, dengeli ya da hızlı', { doldur:'derin düşün', merkez:true }),
+        s('Cevapları sesli oku', 'Yazsan da sesli cevap', { calis:'cevapları sesli oku' }),
+      ] },
+    ].map(g => ({ ad:g.ad, l:g.l.filter(Boolean) })).filter(g => g.l.length);
+    /* Şimdi: saat, gün ve bu modülün sunduklarından en çok üç öneri (öbür modülün işi girmez). */
+    const t = ortam.simdi(), saat = t.getHours(), hepsi = gruplar.reduce((a, g) => a.concat(g.l), []);
+    /* Modüllerin işleri (Tüm işler ile aynı kaynak, arac.js ISLER): bulunulan modül önce;
+       King'in ortak işleri ve yukarıda zaten olan ad tekrar edilmez. */
+    const modulGruplari = ((ARAC() && ARAC().isler) ? ARAC().isler() : []).filter(g => g.modul !== 'king')
+      .map(g => ({ ad:g.ad, l:g.isler.filter(x => !hepsi.some(y => y.ad === x.ad))
+        .map(x => s(x.ad, x.tur === 'foto' ? x.ne : '«' + String(x.ornek || '').trim() + '»', { is:'is-sec:' + x.i })) }))
+      .filter(g => g.l.length);
+    const bul = ad => hepsi.find(x => x.ad === ad);
+    const simdi = [saat < 12 && bul('Bugünün özeti'), bul('Neye çalışayım'), bul('Bana soru sor'),
+      t.getDay() === 0 && bul('Haftalık gözden geçirme'), saat >= 19 && bul('Günlük'), odak() ? null : bul('Odak sayacı')]
+      .filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).slice(0, 3);
+    const sistem = gruplar.pop();               // «Sistem» en sonda kalır
+    return (simdi.length ? [{ ad:'Şimdi', l:simdi }] : []).concat(gruplar, modulGruplari, [sistem]);
+  }
+  const SVG_YETENEK = {
+    calis:'<path d="M8 5.5v13l10-6.5z"/>',
+    doldur:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+    is:'<path d="M9 6l6 6-6 6"/>',
+  };
+  function aracListe(){
+    const bagli = baglanti();
+    const satir = x => {
+      const tur = x.calis ? 'calis' : x.doldur != null ? 'doldur' : 'is';
+      const eylem = x.calis ? 'oner-metin:' + x.calis : x.doldur != null ? 'doldur:' + x.doldur : x.hazir != null ? '' : x.is;
+      const sonuk = x.merkez && !bagli;
+      const ne = tur === 'calis' ? 'Hemen sor' : tur === 'doldur' ? 'Yazı alanına koy' : 'Aç';
+      return '<li data-king-ara="' + kac((x.ad + ' ' + x.ip + ' ' + (x.calis || x.doldur || '')).toLocaleLowerCase('tr')) + '">'
+        + '<button type="button" class="king__satir king__yetenek' + (sonuk ? ' is-sonuk' : '') + '"'
+        + (x.hazir != null ? ' data-king-hazir="' + x.hazir + '" data-king="hazir"' : ' data-king="' + kac(eylem) + '"')
+        + ' title="' + ne + (sonuk ? ' · Merkez bağlı değil' : '') + '">'
+        + '<span class="king__satir-bas"><span>' + kac(x.ad) + '</span>' + (sonuk ? '<em class="king__yetenek-etiket">Merkez</em>' : '') + '</span>'
+        + '<small>' + kac(x.doldur != null ? '«' + x.doldur.trim() + '»' : x.ip) + '</small>'
+        + '<svg class="king__yetenek-ne" viewBox="0 0 24 24" aria-hidden="true">' + SVG_YETENEK[tur] + '</svg></button></li>';
+    };
+    return '<input class="king__ara" type="search" data-king-ara-girdi placeholder="Ne yapmak istiyorsun?" aria-label="Araçlarda ara" autocomplete="off"/>'
+      + '<div class="king__araclar" data-king-araclar>'
+      + yetenekler().map(g => listeGrup(g.ad, '<ul class="king__gecmis">' + g.l.map(satir).join('') + '</ul>')).join('')
+      + '</div>';
   }
   /* Liste satırı: başlık, alt satır, isteğe bağlı ince çubuk; tıklayınca çalışma alanı. */
   function listeSatir(eylem, bas, alt, ek, canli){
@@ -4511,6 +4613,8 @@ window.LIFEOS.KING = (function(){
       const k = t.closest('[data-king]');
       if(!k){ if(acik && !mini) kucult(); return; }
       if(konusuyor > 0 && t.closest('.king__kure')){ sus(); return; }
+      /* Araçlar: dar ekranda liste sohbetin üstünde; seçince kapanır, sonuç görünür. */
+      if(t.closest('[data-king-araclar] [data-king]') && !ortam.genis()) yanAcik = false;
       const h = t.closest('[data-king-hazir]');
       if(h){ hazirSec(Number(h.getAttribute('data-king-hazir'))); return; }
       const c = t.closest('[data-king]:not(.king)');
@@ -4521,6 +4625,7 @@ window.LIFEOS.KING = (function(){
         if(is === 'kipler'){ kipAcik = !kipAcik; aracAcik = false; ciz(false); if(kipAcik) kamTazele(); return; }
         /* G: ray, çalışma alanı, «+» menüsündeki yeni satırlar. */
         if(/^bolum:[a-z]+$/.test(is)){ bolumSec(is.slice(6)); return; }
+        if(/^doldur:/.test(is)){ doldurulacak = is.slice(7); ciz(true); return; }
         if(is === 'alan-kapat'){ menu = null; silOnay = null; ciz(false); return; }
         if(is === 'onizle-buyut'){ alanAc('onizle'); return; }
         if(/^ars-ac:\d+$/.test(is)){ alanAc('ars:' + is.slice(7)); return; }
@@ -5294,7 +5399,7 @@ window.LIFEOS.KING = (function(){
     sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     yeniSohbet, kayitAc, ARACLAR, aktifKayit:() => aktifKayit,
-    BOLUMLER, bolumSec, bolum:() => bolum, listeGorunur, alanAc, pdfAl, nedenSatirlari,
+    BOLUMLER, bolumSec, bolum:() => bolum, listeGorunur, alanAc, pdfAl, nedenSatirlari, yetenekler,
     KIPLER, kip, kipSec, klasorler, klasorEkle, klasorSil, kayitTasi, kayitAdlandir, kayitSabitle,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla, _videoKaynak:videoKaynak, _gorunurluk:gorunurluk,

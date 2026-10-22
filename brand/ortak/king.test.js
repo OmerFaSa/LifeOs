@@ -1849,7 +1849,7 @@
       const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
       const { k } = sahne({ veri });
       k.ac();
-      expect(document.querySelectorAll('.king__ray [data-king^="bolum:"]').length).toBe(4);
+      expect(document.querySelectorAll('.king__ray [data-king^="bolum:"]').length).toBe(5);
       k.bolumSec('kutuphane');
       expect(document.querySelector('.king__yan').getAttribute('aria-label')).toBe('Kütüphane');
       document.querySelector('.king__ray [data-king="menu"]').click();
@@ -1858,6 +1858,77 @@
       expect(k.menuDurum()).toBe(null);
       await k.isle('uyku 7');
       expect(document.querySelector('[data-king-neden]').textContent).toContain('onaylamadan');
+    }));
+    /* Araçlar (kullanıcı, 2026-10-22: «King'in özelliklerinin hepsini oradan görebilirim»). */
+    function aracSahnesi(o){
+      const { k } = sahne();
+      k.kur({ modul:'ays', git:() => {}, ozet:() => ['Bugün plan var.'], acilis:false, kartlar:Object.assign({
+        istatistik:() => [{ ad:'Çözülen soru', deger:12, etiket:'ölçüldü' }],
+        soru:() => ({ id:'s1', govde:'2 + 2 kaçtır?', siklar:['3', '4', '5', '6', '7'] }),
+        oncelik:() => [{ ad:'Problemler', ders:'TYT Matematik', neden:'sık çıkar', puan:12 }],
+        yuk:() => ({ kartlar:[], sinyal:'' }) }, (o && o.kartlar) || {}) });
+      return k;
+    }
+    it('Araçlar: rayda Sohbet’in altında; gruplu, aranır; satırın türü simgesiyle bellidir', () => sahneyle(async () => {
+      const k = aracSahnesi();
+      k.ac();
+      expect([...document.querySelectorAll('.king__ray [data-king^="bolum:"]')].map(b => b.getAttribute('data-king')).slice(0, 2))
+        .toEqual(['bolum:sohbet', 'bolum:araclar']);
+      k.bolumSec('araclar');
+      const yan = document.querySelector('.king__yan');
+      expect(yan.getAttribute('aria-label')).toBe('Araçlar');
+      const gruplar = [...yan.querySelectorAll('.king__yan-ad')].map(h => h.textContent);
+      ['Kart ve soru', 'Araştır ve oku', 'Planla ve takip et', 'Rutin ve hafıza', 'AYS · sınav', 'SPİ · sağlık', 'Sistem'].forEach(g => expect(gruplar).toContain(g));
+      expect(gruplar[gruplar.length - 1]).toBe('Sistem');
+      /* Şimdi grubu en çok üç öneri (sabah 9: özet önce). */
+      expect(gruplar[0]).toBe('Şimdi');
+      const simdi = yan.querySelector('.king__yan-grup').querySelectorAll('li');
+      expect(simdi.length <= 3 && simdi.length > 0).toBe(true);
+      expect(simdi[0].textContent).toContain('Bugünün özeti');
+      /* Merkez bağlı değil: Merkez isteyen satır etiketli. */
+      const arastir = [...yan.querySelectorAll('.king__yetenek')].find(b => /^Araştır/.test(b.textContent));
+      expect(arastir.classList.contains('is-sonuk')).toBe(true);
+      expect(arastir.querySelector('.king__yetenek-etiket').textContent).toBe('Merkez');
+      /* Başka modülün işi de katalogda (Tüm işler ile aynı kaynak). */
+      expect(!!yan.querySelector('[data-king^="is-sec:"]')).toBe(true);
+    }));
+    it('Araçlar: bankası olmayan modülde soru satırı yok; olan modülde var', () => sahneyle(async () => {
+      const { k } = sahne();
+      const adlar = () => k.yetenekler().reduce((a, g) => a.concat(g.l.map(x => x.ad)), []);
+      expect(adlar().indexOf('Bana soru sor')).toBe(-1);
+      aracSahnesi();
+      expect(adlar()).toContain('Bana soru sor');
+      expect(adlar()).toContain('Neye çalışayım');
+    }));
+    it('Araçlar: «doldur» satırı örneği yazı alanına koyar, göndermez; «calis» satırı hemen sorar', () => sahneyle(async () => {
+      const k = aracSahnesi();
+      k.ac();
+      k.bolumSec('araclar');
+      const once = k.akis().length;
+      document.querySelector('.king__yan [data-king="doldur:25 dakika matematik çalışalım"]').click();
+      expect(document.querySelector('.king__girdi').value).toBe('25 dakika matematik çalışalım');
+      expect(k.akis().length).toBe(once);
+      document.querySelector('.king__yan [data-king="oner-metin:neye çalışayım"]').click();
+      for(let i = 0; i < 6; i++) await new Promise(r => setTimeout(r, 0));
+      expect(k.akis().some(m => m.kim === 'sen' && m.metin === 'neye çalışayım')).toBe(true);
+    }));
+    it('Araçlar: her örnek King’in gerçek tetiğidir (Merkez’siz olanlar kuralla anlaşılır)', () => sahneyle(async () => {
+      const eski = window.LIFEOS.DEFTER;
+      window.LIFEOS.DEFTER = { kuruluMu:() => true, yukle:async () => [{ id:'n1', baslik:'Türev', govde:'türev notu' }], yeni:async () => ({}), ac:() => true };
+      try{
+        const k = aracSahnesi();
+        k.ac();
+        /* Kalıcı ayar değiştirenler (tema, sesli cevap, odak sayacı) burada koşturulmaz. */
+        const atla = ['Görünüm', 'Cevapları sesli oku', 'Odak sayacı', 'Deftere not'];
+        const ornekler = k.yetenekler().filter(g => g.ad !== 'Şimdi').reduce((a, g) => a.concat(g.l), [])
+          .filter(x => !x.merkez && (x.calis || x.doldur) && atla.indexOf(x.ad) < 0).map(x => x.calis || x.doldur);
+        expect(ornekler.length >= 10).toBe(true);
+        for(const m of ornekler){
+          k._sifirla(); aracSahnesi(); k.ac();
+          const r = await k.isle(m);
+          expect([m, r && r.tur !== 'bilinmiyor']).toEqual([m, true]);
+        }
+      }finally{ window.LIFEOS.DEFTER = eski; }
     }));
     it('HKM’ye derinlik gider; Otomatik’te alan hiç gönderilmez', () => sahneyle(async () => {
       const { k, istekler } = derinSahnesi(true);

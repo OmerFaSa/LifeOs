@@ -22,7 +22,20 @@ biçim `brand/ortak/king.css` («G AŞAMASI» bölümü). Yeni jeton yok: ölç�
 └────┴──────────────┴────────────────────────────────┴──────────────────┘
 ```
 
-- **Ray** (`.king__ray`, `data-king="bolum:<ad>"`): Sohbet, Görevler, Rutinler
+- **Araçlar** (2026-10-22, kullanıcı: «King'in özelliklerinin hepsini oradan
+  görebilirim ki aklımızda tutmak yerine»): raydaki ikinci bölüm. King'in
+  yapabildiği her şey gruplu ve aranır (`yetenekler()`): Şimdi (saat, gün ve
+  modülün sunduklarından en çok üç öneri), Kart ve soru, Araştır ve oku, Gör,
+  Planla ve takip et, Kaydet, Rutin ve hafıza, modüllerin işleri (Tüm işler ile
+  aynı kaynak), Sistem. Satırın sağındaki simge türünü söyler: oynat hemen
+  sorar, kalem örneği yazı alanına koyar (gönderilmez), ok açar. Merkez
+  isteyen satır bağlı değilken sönük ve «Merkez» etiketli. Her örnek King'in
+  gerçek tetiğidir; `king.test.js` «Araçlar: her örnek …» bunu koşturarak
+  sınar, koşulu sağlanmayan satır çizilmez.
+- Pencere 2026-10-22'de genişledi: en çok 1520 × 960, kenar payı 16 px;
+  sütunlar liste 280 (1700 px üstü 300), çalışma alanı 380 (1400 px üstü
+  420), sohbet 760 → 820 → 880.
+- **Ray** (`.king__ray`, `data-king="bolum:<ad>"`): Sohbet, Araçlar, Görevler, Rutinler
   (beceriler ve sözler), Kütüphane (araştırmalar, klasörler, kayıtlı
   sohbetler); en altta Ayarlar (`data-king="menu"`). İkon 20 px, düğme
   40 × 40, köşe `--r-sm`. Üzerine gelince adı (ipucu, `--ink` zemin). Seçili
