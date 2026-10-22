@@ -155,6 +155,10 @@ ESP.SRS = (function(){
   function overdueDays(card, todayISO){
     const today = todayISO || U.todayISO();
     if(!card || !card.due) return 0;
+    /* Bugün ya da ileri vadeli kart ayrıştırılmadan 0 (2026-10-22, loadcheck:
+       10 050 kartta tarih ayrıştırma ofis çiziminin ~130 ms'iydi). İki tarih
+       de YYYY-AA-GG ise metin sırası tarih sırasıdır. */
+    if(card.due.length === 10 && today.length === 10 && card.due >= today) return 0;
     return Math.max(0, U.diffDays(card.due, today));
   }
 

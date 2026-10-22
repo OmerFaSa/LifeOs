@@ -94,6 +94,15 @@
         expect(SRS.overdueDays(c)).toBe(7);
       });
     });
+
+    /* 2026-10-22: ileri ya da bugün vadeli kart ayrıştırılmadan 0 (loadcheck);
+       ay ve yıl sınırında da sonuç aynı. */
+    it('bugün ve ileri vadeli kart 0, geçmiş vade gün olarak; ay ve yıl sınırı', () => {
+      expect(SRS.overdueDays({ due:'2026-09-12' }, '2026-09-12')).toBe(0);
+      expect(SRS.overdueDays({ due:'2026-10-01' }, '2026-09-12')).toBe(0);
+      expect(SRS.overdueDays({ due:'2026-08-31' }, '2026-09-01')).toBe(1);
+      expect(SRS.overdueDays({ due:'2025-12-31' }, '2026-01-02')).toBe(2);
+    });
   });
 
   describe('retansiyon', () => {

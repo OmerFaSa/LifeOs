@@ -523,16 +523,43 @@ SP.Model = (function(){
      seriesOf ile ayni sirada (once tahliller, sonra gunluk olcumler)
      gider ve esit tarihte SONRAKI kazanir (>=), kararli siralamanin
      sonuna dusen nokta gibi. */
+  /* Gunluk olcumlerde her alanin SON gunu, karede bir kez (2026-10-22):
+     latestOf her belirtec icin 1825 gunu bastan tariyordu; bes yillik
+     veriyle Tahliller'de ~150, Toplanti'da ~225 ms buraya gidiyordu
+     (loadcheck: labs 409–441 ms, esik 400). Gunluk tarama tek gecise
+     indi; sonuc ayni (en buyuk tarih, esitlikte gunluk olcum kazanir).
+     Kare disinda taze hesap (memo.js). */
+  function sonVitalGunleri(){
+    return SP.Memo.of('model.sonVital', () => {
+      const son = {};
+      Object.keys(SP.S.vitals).forEach(d => {
+        const v = SP.S.vitals[d];
+        if(!v) return;
+        for(const k in v) if(v[k] != null && (son[k] == null || d >= son[k])) son[k] = d;
+      });
+      return son;
+    });
+  }
+
+  function sonVitalGunu(markerId){
+    let son = null;
+    Object.keys(SP.S.vitals).forEach(d => {
+      const v = SP.S.vitals[d];
+      if(v && v[markerId] != null && (son == null || d >= son)) son = d;
+    });
+    return son;
+  }
+
   function latestOf(markerId){
     let lab = null, gun = null, tarih = null;
     SP.S.labs.forEach(l => {
       const cell = l.values[markerId];
       if(cell && cell.v != null && (tarih == null || l.date >= tarih)){ lab = l; gun = null; tarih = l.date; }
     });
-    Object.keys(SP.S.vitals).forEach(d => {
-      const v = SP.S.vitals[d];
-      if(v && v[markerId] != null && (tarih == null || d >= tarih)){ gun = d; tarih = d; }
-    });
+    /* Kare içinde dizin (bir kez kurulur); kare dışında dizin her çağrıda
+       baştan kurulurdu, orada tek alanın taraması daha ucuz. */
+    const vg = SP.Memo.acikMi() ? sonVitalGunleri()[markerId] : sonVitalGunu(markerId);
+    if(vg != null && (tarih == null || vg >= tarih)){ gun = vg; tarih = vg; }
     if(gun != null) return { date:gun, v:Number(SP.S.vitals[gun][markerId]), cert:'measured', src:'vital' };
     if(lab){
       const cell = lab.values[markerId];

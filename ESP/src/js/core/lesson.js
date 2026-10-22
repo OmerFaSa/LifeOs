@@ -92,7 +92,11 @@ ESP.Lesson = (function(){
     if(!ogeler.length) return [];
     const idx = {};
     ogeler.forEach(function(o){ idx[U.norm(o.front)] = true; });
-    return (S.cards || []).filter(function(c){ return idx[U.norm(c.front)]; });
+    /* Kartların normalleştirilmiş ön yüzü karede bir kez (2026-10-22): her
+       ünite çağrısı 10 050 kartı yeniden normalleştiriyordu (loadcheck,
+       ofis). Sıra destedeki sırayla aynı. */
+    const onler = ESP.Memo.of('lesson.kartOn', () => (S.cards || []).map(c => [U.norm(c.front), c]));
+    return onler.filter(x => idx[x[0]]).map(x => x[1]);
   }
 
   /* Ünite ilerlemesi — SRS'ten OKUNUR, tutulmaz.

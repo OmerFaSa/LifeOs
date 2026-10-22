@@ -17282,7 +17282,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'e4828c7c', at:'2026-10-22 19:03', dirty:true };
+SP.BUILD = { id:'cb0a3193', at:'2026-10-22 21:31', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -18994,9 +18994,11 @@ LIFEOS.PANO = (function(){
     /* Yıldız kart: öne çıkan tek şey (güzel bir soru, haftanın en iyi gecesi,
        rekor). Zemin modül renginin çok açık tonu, başlıkta yıldız ve «öne çıkan». */
     const yildiz = !!o.yildiz && !bos;
+    /* Başlık h2 (2026-10-22): kartlar sayfada çoğu kez doğrudan h1 altındadır;
+       h3 bir basamak atlıyordu (a11ycheck «h1 → h3», on ekranda). */
     return '<section class="pk' + (bos ? ' pk--bos' : '') + (yildiz ? ' pk--yildiz' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
       + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac((yildiz ? 'Öne çıkan: ' : '') + (o.ad || '')) + '">'
-      + '<header class="pk__bas">' + svg(bos ? 'bos' : yildiz ? 'yildiz' : o.simge) + '<h3 class="pk__ad">' + kac(o.ad || '') + '</h3>'
+      + '<header class="pk__bas">' + svg(bos ? 'bos' : yildiz ? 'yildiz' : o.simge) + '<h2 class="pk__ad">' + kac(o.ad || '') + '</h2>'
       + (yildiz ? '<span class="pk__yildiz">' + kac(typeof o.yildiz === 'string' ? o.yildiz : 'öne çıkan') + '</span>' : '')
       + (o.yuva != null && o.yuva !== '' ? '<span class="pk__yuva">' + kac(o.yuva) + '</span>' : '')
       + (o.dugme ? dugmeHtml(o.dugme, 'pk__basdugme') : '') + '</header>'
@@ -59695,16 +59697,43 @@ SP.Model = (function(){
      seriesOf ile ayni sirada (once tahliller, sonra gunluk olcumler)
      gider ve esit tarihte SONRAKI kazanir (>=), kararli siralamanin
      sonuna dusen nokta gibi. */
+  /* Gunluk olcumlerde her alanin SON gunu, karede bir kez (2026-10-22):
+     latestOf her belirtec icin 1825 gunu bastan tariyordu; bes yillik
+     veriyle Tahliller'de ~150, Toplanti'da ~225 ms buraya gidiyordu
+     (loadcheck: labs 409–441 ms, esik 400). Gunluk tarama tek gecise
+     indi; sonuc ayni (en buyuk tarih, esitlikte gunluk olcum kazanir).
+     Kare disinda taze hesap (memo.js). */
+  function sonVitalGunleri(){
+    return SP.Memo.of('model.sonVital', () => {
+      const son = {};
+      Object.keys(SP.S.vitals).forEach(d => {
+        const v = SP.S.vitals[d];
+        if(!v) return;
+        for(const k in v) if(v[k] != null && (son[k] == null || d >= son[k])) son[k] = d;
+      });
+      return son;
+    });
+  }
+
+  function sonVitalGunu(markerId){
+    let son = null;
+    Object.keys(SP.S.vitals).forEach(d => {
+      const v = SP.S.vitals[d];
+      if(v && v[markerId] != null && (son == null || d >= son)) son = d;
+    });
+    return son;
+  }
+
   function latestOf(markerId){
     let lab = null, gun = null, tarih = null;
     SP.S.labs.forEach(l => {
       const cell = l.values[markerId];
       if(cell && cell.v != null && (tarih == null || l.date >= tarih)){ lab = l; gun = null; tarih = l.date; }
     });
-    Object.keys(SP.S.vitals).forEach(d => {
-      const v = SP.S.vitals[d];
-      if(v && v[markerId] != null && (tarih == null || d >= tarih)){ gun = d; tarih = d; }
-    });
+    /* Kare içinde dizin (bir kez kurulur); kare dışında dizin her çağrıda
+       baştan kurulurdu, orada tek alanın taraması daha ucuz. */
+    const vg = SP.Memo.acikMi() ? sonVitalGunleri()[markerId] : sonVitalGunu(markerId);
+    if(vg != null && (tarih == null || vg >= tarih)){ gun = vg; tarih = vg; }
     if(gun != null) return { date:gun, v:Number(SP.S.vitals[gun][markerId]), cert:'measured', src:'vital' };
     if(lab){
       const cell = lab.values[markerId];

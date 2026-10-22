@@ -17886,7 +17886,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'e4828c7c', at:'2026-10-22 19:03', dirty:true };
+ESP.BUILD = { id:'cb0a3193', at:'2026-10-22 21:31', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19598,9 +19598,11 @@ LIFEOS.PANO = (function(){
     /* Yıldız kart: öne çıkan tek şey (güzel bir soru, haftanın en iyi gecesi,
        rekor). Zemin modül renginin çok açık tonu, başlıkta yıldız ve «öne çıkan». */
     const yildiz = !!o.yildiz && !bos;
+    /* Başlık h2 (2026-10-22): kartlar sayfada çoğu kez doğrudan h1 altındadır;
+       h3 bir basamak atlıyordu (a11ycheck «h1 → h3», on ekranda). */
     return '<section class="pk' + (bos ? ' pk--bos' : '') + (yildiz ? ' pk--yildiz' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
       + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac((yildiz ? 'Öne çıkan: ' : '') + (o.ad || '')) + '">'
-      + '<header class="pk__bas">' + svg(bos ? 'bos' : yildiz ? 'yildiz' : o.simge) + '<h3 class="pk__ad">' + kac(o.ad || '') + '</h3>'
+      + '<header class="pk__bas">' + svg(bos ? 'bos' : yildiz ? 'yildiz' : o.simge) + '<h2 class="pk__ad">' + kac(o.ad || '') + '</h2>'
       + (yildiz ? '<span class="pk__yildiz">' + kac(typeof o.yildiz === 'string' ? o.yildiz : 'öne çıkan') + '</span>' : '')
       + (o.yuva != null && o.yuva !== '' ? '<span class="pk__yuva">' + kac(o.yuva) + '</span>' : '')
       + (o.dugme ? dugmeHtml(o.dugme, 'pk__basdugme') : '') + '</header>'
@@ -67068,6 +67070,10 @@ ESP.SRS = (function(){
   function overdueDays(card, todayISO){
     const today = todayISO || U.todayISO();
     if(!card || !card.due) return 0;
+    /* Bugün ya da ileri vadeli kart ayrıştırılmadan 0 (2026-10-22, loadcheck:
+       10 050 kartta tarih ayrıştırma ofis çiziminin ~130 ms'iydi). İki tarih
+       de YYYY-AA-GG ise metin sırası tarih sırasıdır. */
+    if(card.due.length === 10 && today.length === 10 && card.due >= today) return 0;
     return Math.max(0, U.diffDays(card.due, today));
   }
 
@@ -73479,7 +73485,11 @@ ESP.Lesson = (function(){
     if(!ogeler.length) return [];
     const idx = {};
     ogeler.forEach(function(o){ idx[U.norm(o.front)] = true; });
-    return (S.cards || []).filter(function(c){ return idx[U.norm(c.front)]; });
+    /* Kartların normalleştirilmiş ön yüzü karede bir kez (2026-10-22): her
+       ünite çağrısı 10 050 kartı yeniden normalleştiriyordu (loadcheck,
+       ofis). Sıra destedeki sırayla aynı. */
+    const onler = ESP.Memo.of('lesson.kartOn', () => (S.cards || []).map(c => [U.norm(c.front), c]));
+    return onler.filter(x => idx[x[0]]).map(x => x[1]);
   }
 
   /* Ünite ilerlemesi — SRS'ten OKUNUR, tutulmaz.

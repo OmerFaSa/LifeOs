@@ -395,12 +395,21 @@ R.Calc = (function(){
   }
 
   /* ---------- gunluk minimum ---------- */
-  function minimumDayMet(dayISO){
+  /* on: { due, gozden:{ gün: n } } — behaviorStreak 60 günü dolaşırken
+     kartları BİR KEZ sayar (2026-10-22, loadcheck: her gün 5 400 kart iki
+     kez süzülüyordu). Tek günlük çağrı eskisi gibi doğrudan sayar. */
+  function minimumGunSayaclari(){
+    const gozden = {};
+    S.cards.forEach(c => { if(c.lastReviewedAt) gozden[c.lastReviewedAt] = (gozden[c.lastReviewedAt] || 0) + 1; });
+    return { due:dueCards().length, gozden };
+  }
+  function minimumDayMet(dayISO, on){
     const day = S.days[dayISO || U.todayISO()];
     if(!day) return false;
     const mins = U.sum(day.blocks.map(b => b.actualMin || 0));
-    const due = dueCards().length;
-    const reviewedToday = S.cards.filter(c => c.lastReviewedAt === (dayISO || U.todayISO())).length;
+    const due = on ? on.due : dueCards().length;
+    const reviewedToday = on ? (on.gozden[dayISO || U.todayISO()] || 0)
+      : S.cards.filter(c => c.lastReviewedAt === (dayISO || U.todayISO())).length;
     return mins >= R.ROUTINES.minimumDay.minutes
       && day.paragraphActual >= R.ROUTINES.minimumDay.paragraphs
       && (due === 0 || reviewedToday > 0);
@@ -685,10 +694,11 @@ R.Calc = (function(){
     let streak = 0;
     let checking = 0;
     const days = [];
+    const on = minimumGunSayaclari();
     for(let i = 0; i < 60; i++){
       const iso = U.iso(U.addDays(U.today(), -i));
       if(iso < R.PLAN.startISO) break;
-      const met = minimumDayMet(iso);
+      const met = minimumDayMet(iso, on);
       const isSunday = U.weekdayIndex(iso) === 6;
       /* Dondurulmus gun (hasta, izin, tatil — brand/ortak/seri.js) seriyi
          BOZMAZ; tutulduysa yine sayilir. */
@@ -868,7 +878,19 @@ R.Calc = (function(){
     };
   }
 
-  function topicRisk(subjectId, topicId){
+  /* on: { hata:{ 'ders|konu': n }, gec:{ ders: n } } — riskRanking bütün
+     konuları dolaşırken açık yanlışları ve geciken kartları BİR KEZ sayar
+     (2026-10-22, loadcheck: beş yıllık veriyle 184 konu × 5 400 kart ×
+     4 050 yanlış ofis çiziminin ~150 ms'iydi). Tek konuluk çağrı eskisi
+     gibi doğrudan sayar; sonuç aynıdır. */
+  function riskSayaclari(){
+    const hata = {}, gec = {};
+    S.errors.forEach(e => { if(!e.closedAt){ const k = e.subjectId + '|' + e.topicId; hata[k] = (hata[k] || 0) + 1; } });
+    overdueCards().forEach(c => { gec[c.subjectId] = (gec[c.subjectId] || 0) + 1; });
+    return { hata, gec };
+  }
+
+  function topicRisk(subjectId, topicId, on){
     const subject = R.SUBJECTS.find(s => s.id === subjectId);
     const topic = subject ? subject.topics.find(t => t.id === topicId) : null;
     if(!topic) return null;
@@ -888,11 +910,12 @@ R.Calc = (function(){
       : 1;                                    // not_started
 
     // 3) hata: bu konudan gelen acik yanlislar (3+ hata tavana yakin)
-    const errs = S.errors.filter(e => !e.closedAt && e.subjectId === subjectId && e.topicId === topicId).length;
+    const errs = on ? (on.hata[subjectId + '|' + topicId] || 0)
+      : S.errors.filter(e => !e.closedAt && e.subjectId === subjectId && e.topicId === topicId).length;
     const errorScore = U.clamp(errs / 3, 0, 1);
 
     // 4) kart: bu konunun gecikmis tekrar kartlari
-    const late = overdueCards().filter(c => c.subjectId === subjectId).length;
+    const late = on ? (on.gec[subjectId] || 0) : overdueCards().filter(c => c.subjectId === subjectId).length;
     const cardScore = U.clamp(late / 5, 0, 1);
 
     // 5) tazelik: son olcumden bu yana gecen sure
@@ -926,10 +949,10 @@ R.Calc = (function(){
 
   /* Tum konularin risk siralamasi. limit verilirse kirpilir. */
   function riskRanking(limit){
-    const out = [];
+    const out = [], on = riskSayaclari();
     R.SUBJECTS.forEach(s => {
       s.topics.forEach(t => {
-        const r = topicRisk(s.id, t.id);
+        const r = topicRisk(s.id, t.id, on);
         if(r && r.score > 0) out.push(r);
       });
     });

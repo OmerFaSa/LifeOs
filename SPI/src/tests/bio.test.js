@@ -233,6 +233,30 @@
       expect(SP.Model.latestOf('hgb')).toBe(null);
     });
 
+    /* 2026-10-22: kare içinde günlük ölçümlerin «son günü» dizini bir kez
+       kurulur (loadcheck: labs 409–441 ms, eşik 400). Kare içi ve dışı
+       sonuç aynı; dizin tek kayıt. */
+    it('kare içinde latestOf dizinle aynı sonucu verir; dizin bir kez kurulur', () => {
+      resetState();
+      pushLab('2026-05-01', { weight:80, hgb:14 });
+      pushVitals('2026-05-01', { weight:79, rhr:58 });
+      pushVitals('2026-06-02', { rhr:61 });
+      pushLab('2026-07-01', { rhr:70 });
+      const ids = ['weight', 'hgb', 'rhr', 'hrv'];
+      const disarida = ids.map(id => SP.Model.latestOf(id));
+      SP.Memo.baslat();
+      try{
+        const icerde = ids.map(id => SP.Model.latestOf(id));
+        expect(icerde).toEqual(disarida);
+        const n = SP.Memo.boyut();
+        ids.forEach(id => SP.Model.latestOf(id));
+        expect(SP.Memo.boyut()).toBe(n);
+      }finally{ SP.Memo.bitir(); }
+      expect(disarida[0].v).toBe(79);
+      expect(disarida[2].src).toBe('lab');
+      expect(disarida[3]).toBe(null);
+    });
+
     /* Bes yillik veriyle labs ve analytics ekranlari ayni belirtecin
        serisini bir cizimde defalarca kuruyordu (secici listesi her
        belirtec icin seriesOf().length soruyordu). Kare onbellegi: kare

@@ -172,6 +172,22 @@
         expect(['high','mid','low'].indexOf(r.band) >= 0).toBeTruthy();
       });
     });
+    /* 2026-10-22 (loadcheck): sıralama yanlışları ve geciken kartları bir kez
+       sayar; sonuç konu konu tek çağrıyla AYNIDIR. Seri de öyle. */
+    it('toplu sayım tek tek hesapla aynı: risk sıralaması ve davranış serisi', async function(){
+      resetState();
+      await M.ensureTopics(SID);
+      const t = R.SUBJECTS.find(s => s.id === SID).topics;
+      for(let i = 0; i < 4; i++) S.errors.push({ id:'q'+i, tag:'K', subjectId:SID, topicId:t[i % 2].id, closedAt:i === 3 ? U.todayISO() : null });
+      S.cards.push(M.newCard({ subjectId:SID, front:'a', back:'b', dueAt:U.iso(U.addDays(U.today(), -3)), lastReviewedAt:U.todayISO() }));
+      S.cards.push(M.newCard({ subjectId:SID, front:'c', back:'d', dueAt:U.iso(U.addDays(U.today(), 2)) }));
+      C.riskRanking().forEach(r => {
+        const tek = C.topicRisk(r.subjectId, r.topicId);
+        expect([r.topicId, r.score, r.errors, r.parts.cards]).toEqual([r.topicId, tek.score, tek.errors, tek.parts.cards]);
+      });
+      expect(C.riskRanking().find(r => r.topicId === t[0].id).errors).toBe(2);
+      C.behaviorStreak().days.forEach(d => expect(d.met).toBe(C.minimumDayMet(d.iso)));
+    });
   });
 
   describe('Konu bazlı pratik', function(){
