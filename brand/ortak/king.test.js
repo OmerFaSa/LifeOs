@@ -1866,7 +1866,11 @@
         istatistik:() => [{ ad:'Çözülen soru', deger:12, etiket:'ölçüldü' }],
         soru:() => ({ id:'s1', govde:'2 + 2 kaçtır?', siklar:['3', '4', '5', '6', '7'] }),
         oncelik:() => [{ ad:'Problemler', ders:'TYT Matematik', neden:'sık çıkar', puan:12 }],
-        yuk:() => ({ kartlar:[], sinyal:'' }) }, (o && o.kartlar) || {}) });
+        yuk:() => ({ kartlar:[], sinyal:'' }),
+        ders:konu => /türev/.test(konu) ? { id:'am-11', baslik:'Türev', alt:'AYT Matematik', giris:'Değişim hızı.', etiket:'elle yazıldı · doğrulanmadı',
+          sorgu:'Türev', soruVar:true, bolumler:[{ baslik:'Tanım', metin:'Anlık değişim hızı.' }, { baslik:'Kurallar', liste:['(x^n)′ = n·x^(n−1)'] },
+            { baslik:'Örnek', metin:'(x²)′ = 2x', dikkat:'Sabitin türevi 0.' }] } : null,
+        dersOrnek:'türevi anlat' }, (o && o.kartlar) || {}) });
       return k;
     }
     it('Araçlar: rayda Sohbet’in altında; gruplu, aranır; satırın türü simgesiyle bellidir', () => sahneyle(async () => {
@@ -1929,6 +1933,101 @@
           expect([m, r && r.tur !== 'bilinmiyor']).toEqual([m, true]);
         }
       }finally{ window.LIFEOS.DEFTER = eski; }
+    }));
+    /* Öğretmen (kullanıcı, 2026-10-22). */
+    it('Öğretmen: «X anlat / öğret / ders:» ders niyetidir; «bunu kısa anlatır mısın» ve günlük değildir', () => sahneyle(async () => {
+      const { k } = sahne();
+      expect(k.dersNiyeti('türevi anlat')).toEqual({ konu:'türevi' });
+      expect(k.dersNiyeti('bana olasılığı öğret')).toEqual({ konu:'olasılığı' });
+      expect(k.dersNiyeti('ders: paragraf')).toEqual({ konu:'paragraf' });
+      expect(k.dersNiyeti('türev konusunu anlatır mısın?')).toEqual({ konu:'türev' });
+      expect(k.dersNiyeti('bunu daha kısa anlatır mısın?')).toBe(null);
+      expect(k.dersNiyeti('bugünü anlatayım')).toBe(null);
+      expect(k.dersNiyeti('türev nedir')).toBe(null);
+    }));
+    it('Öğretmen: ders kartı modülün metniyle bölüm bölüm; soru bankadan; yanlışta «Konuyu yeniden anlat»', () => sahneyle(async () => {
+      const k = aracSahnesi({ kartlar:{ soru:konu => ({ id:'q1', konu:'Türev', soru:'(x³)′ nedir?', sec:['x²', '3x²', '3x'], sorgu:konu }),
+        cevapla:async () => ({ dogru:'B', cozum:['n·x^(n−1)'] }) } });
+      k.ac();
+      const r = await k.isle('türevi anlat');
+      expect(r).toEqual({ tur:'ders', bolum:3 });
+      const kart = () => document.querySelector('.king__ders');
+      expect(kart().querySelector('.king__ders-baslik').textContent).toBe('Tanım');
+      expect(kart().textContent).toContain('elle yazıldı · doğrulanmadı');
+      expect(kart().textContent).toContain('Değişim hızı.');
+      kart().querySelector('[data-king^="ders-ileri:"]').click();
+      kart().querySelector('[data-king^="ders-ileri:"]').click();
+      expect(kart().querySelector('.king__ders-baslik').textContent).toBe('Örnek');
+      expect(kart().textContent).toContain('Sabitin türevi 0.');
+      expect(kart().querySelector('[data-king^="ders-ileri:"]')).toBe(null);
+      kart().querySelector('[data-king^="ders-soru:"]').click();
+      for(let i = 0; i < 8; i++) await new Promise(x => setTimeout(x, 0));
+      const soru = [...document.querySelectorAll('[data-king^="soru-cevap:"]')];
+      expect(soru.length).toBe(3);
+      soru[0].click();
+      for(let i = 0; i < 8; i++) await new Promise(x => setTimeout(x, 0));
+      const cip = [...document.querySelectorAll('.king__cipler [data-king]')].map(b => b.textContent);
+      expect(cip[0]).toBe('Konuyu yeniden anlat');
+      document.querySelector('.king__cipler [data-king^="ders-tekrar:"]').click();
+      const son = [...document.querySelectorAll('.king__ders')].pop();
+      expect(son.querySelector('.king__ders-baslik').textContent).toBe('Tanım');
+    }));
+    it('Öğretmen: modülde konu yoksa ders kurulmaz, mesaj olağan yoluna gider', () => sahneyle(async () => {
+      const k = aracSahnesi();
+      k.ac();
+      const r = await k.isle('kuantum fiziğini anlat');
+      expect(r.tur === 'ders').toBe(false);
+      expect(document.querySelector('.king__ders')).toBe(null);
+    }));
+    /* K4 (2026-10-22): Merkez sırası ve sesli özet. */
+    it('K4: Merkez’e ulaşılamazsa soru sıraya girer; bağlantı gelince sırayla sorulur, balonda «sıradan»', () => sahneyle(async () => {
+      let ulasir = false;
+      const istek = [];
+      const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+      const fetch = async (url, o) => {
+        if(!ulasir) throw new Error('ağ yok');
+        if(/\/api\/chat/.test(url)) istek.push(JSON.parse(o.body).text || JSON.parse(o.body).message || '');
+        return { status:200, json:async () => ({ ok:true, text:'Sıradaki sorunun cevabı.', mode:'model' }), headers:{ get:() => null } };
+      };
+      const { k } = sahne({ hkm, fetch });
+      k.ac();
+      const r = await k.isle('kuantum dolanıklık nedir');
+      expect(r.tur).toBe('sira');
+      expect(k.sira().map(x => x.metin)).toEqual(['kuantum dolanıklık nedir']);
+      k.bolumSec('kutuphane');
+      expect(document.querySelector('.king__yan').textContent).toContain('Sırada');
+      /* yine ulaşamazsa başa döner, kaybolmaz */
+      expect(await k.siraBosalt()).toBe(0);
+      expect(k.sira().length).toBe(1);
+      ulasir = true;
+      expect(await k.siraBosalt()).toBe(1);
+      expect(k.sira().length).toBe(0);
+      const sen = k.akis().filter(m => m.kim === 'sen' && m.sira);
+      expect(sen.length).toBe(1);
+      expect(k.akis().some(m => m.kim === 'king' && m.metin === 'Sıradaki sorunun cevabı.')).toBe(true);
+      expect(!!document.querySelector('.king__siradan')).toBe(true);
+    }));
+    it('K4: Merkez kurulu değilse sıra yok (bekleyecek bir şey yok)', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.ac();
+      const r = await k.isle('kuantum dolanıklık nedir');
+      expect(r.tur === 'sira').toBe(false);
+      expect(k.sira().length).toBe(0);
+    }));
+    it('K4: «sesli özet» modülün satırlarını ve değerli kartlarını okur, Kütüphane’de kalır', () => sahneyle(async () => {
+      const k = aracSahnesi();
+      const okunan = [];
+      k._ortam.sentez = () => ({ getVoices:() => [{ name:'Yelda', lang:'tr-TR', localService:true }], speak:u => okunan.push(u.text || u), cancel(){} });
+      k._ortam.soz = m => ({ text:m });
+      k.ac();
+      const r = await k.isle('sesli özet');
+      expect(r).toEqual({ tur:'sesli-ozet', n:2 });
+      const son = k.akis()[k.akis().length - 1];
+      expect(son.satirlar).toEqual(['Bugün plan var.', 'Çözülen soru: 12 (ölçüldü)']);
+      expect(k.sozetler().length).toBe(1);
+      k.bolumSec('kutuphane');
+      expect(document.querySelector('.king__yan').textContent).toContain('Sesli özetler');
+      expect(!!document.querySelector('[data-king="sozet-dinle:0"]')).toBe(true);
     }));
     it('HKM’ye derinlik gider; Otomatik’te alan hiç gönderilmez', () => sahneyle(async () => {
       const { k, istekler } = derinSahnesi(true);

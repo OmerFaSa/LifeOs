@@ -1879,6 +1879,10 @@ ESP.App = (function(){
           },
           /* King'in kartları (king.js söz 32): son 30 gün, ESP'nin kendi hesabı. */
           kartlar:{
+            /* Öğretmen (King, 2026-10-22): ESP'nin öğrenme kartı ders olarak. Kartın
+               kendi sınırı («öğretmen incelemesi bekliyor») etikette durur. */
+            ders:konu => ESP.Lesson.kingDers(konu),
+            dersOrnek:'ses ve alfabe konusunu anlat',
             istatistik:() => {
               const dakika = {};
               let gun = 0;

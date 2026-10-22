@@ -1673,6 +1673,9 @@ SP.App = (function(){
           },
           /* King'in kartları (king.js söz 32): son 30 gün, SPİ'nin kendi hesabı. */
           kartlar:{
+            /* Öğretmen: SPİ kavramı ders olarak (core/kingders.js). */
+            ders:konu => SP.KingDers.ders(konu),
+            dersOrnek:'set kavramını anlat',
             istatistik:() => {
               const uyku = [];
               let ant = 0, kahve = 0, ogun = 0;

@@ -1736,6 +1736,10 @@ R.App = (function(){
             },
             soru:konu => R.Ogren.kingSoru(konu),
             cevapla:(id, harf) => R.Ogren.kingCevapla(id, harf),
+            /* Öğretmen: konu anlatımı ders olarak; «Modülde aç» Öğren'i o konuda açar. */
+            ders:konu => R.Ogren.kingDers(konu),
+            dersOrnek:'türevi anlat',
+            dersAc:async id => { const x = R.Ogren.konuyuBul(id); if(x.subject){ await R.Ogren.sec(x.subject.id, id); go('ogren'); } },
             /* Söz 34: puan önceliği (Öğren'in hesabı) ve konuyu Öğren'de açmak. */
             oncelik:() => R.Ogren.oncelikler(5),
             oncelikAc:async o => { if(o && o.topicId){ await R.Ogren.sec(o.subjectId, o.topicId); go('ogren'); } },

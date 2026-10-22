@@ -413,6 +413,28 @@ R.Ogren = (function(){
     const son = sonAcilan();
     return ilkCevapsiz((son && adaylar.find(k => k.topic.id === son.topic.id)) || adaylar[0]);
   }
+  /* Öğretmen (King, 2026-10-22): konunun anlatımı, yoksa çekirdek özeti, ders
+     olarak. Metin Öğren'in kendisidir (elle yazıldı · doğrulanmadı); King
+     yalnız bölüm bölüm gösterir. Konu bulunmazsa null: King ders kurmaz. */
+  function kingDers(konuMetni){
+    const t = String(konuMetni || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
+    if(t.length < 3) return null;
+    const OZ = R.KONU_OZET || {};
+    const adaylar = konular().filter(x => anlatim(x.topic.id) || OZ[x.topic.id]);
+    const ad = x => String(x.topic.name || '').toLocaleLowerCase('tr');
+    const kok = w => w.slice(0, Math.max(4, w.length - 2));
+    const x = adaylar.find(k => ad(k) === t) || adaylar.find(k => t.includes(ad(k)))
+      || adaylar.find(k => ad(k).includes(t))
+      || adaylar.find(k => t.split(' ').filter(w => w.length > 3).every(w => ad(k).includes(kok(w))));
+    if(!x) return null;
+    const a = anlatim(x.topic.id), oz = OZ[x.topic.id];
+    const bol = b => ({ baslik:b.baslik || '', metin:b.metin ? duzMetin(b.metin) : '',
+      liste:(b.liste || []).map(duzMetin), dikkat:b.dikkat ? duzMetin(b.dikkat) : '' });
+    const bolumler = a && Array.isArray(a.bolumler) && a.bolumler.length ? a.bolumler.map(bol)
+      : [bol({ baslik:'Özet', liste:oz.ana || [], dikkat:oz.dikkat })].concat(oz.ornek ? [bol({ baslik:'Örnek', metin:oz.ornek })] : []);
+    return { id:x.topic.id, baslik:x.topic.name, alt:x.subject.name, giris:a && a.giris ? duzMetin(a.giris) : '',
+      bolumler, etiket:'elle yazıldı · doğrulanmadı', sorgu:x.topic.name, soruVar:sorular(x.topic.id).length > 0 };
+  }
   /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). Yanlışsa
      soru yarın yeniden gelir; tekrarda doğruysa 3 ve 7 gün sonra; üç doğru
      turdan sonra takvimden çıkar. */
@@ -437,7 +459,7 @@ R.Ogren = (function(){
     tekrarYaz(tk);
     return { dogru:q.dogru, cozum:[].concat(q.cozum || []).map(duzMetin), not };
   }
-  return { HARFLER, SEVIYE, kingSoru, kingCevapla, oncelikler, TEKRAR, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
+  return { HARFLER, SEVIYE, kingSoru, kingCevapla, kingDers, oncelikler, TEKRAR, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
     derin, tabanSorular, seviye, gecerli, ekMetni, soru,
     anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle,
     kavramlar, akilliNot, kaynaklar, stratejiler };

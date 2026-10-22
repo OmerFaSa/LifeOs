@@ -449,7 +449,29 @@ ESP.Lesson = (function(){
     return { ok:true, result:r };
   }
 
-  return { units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
+  /* Öğretmen (King, 2026-10-22): ESP'nin öğrenme kartı ders olarak. Metin
+     kartın kendisidir; kartın sınırı («öğretmen incelemesi bekliyor») etikette. */
+  function kingDers(konu){
+    const t = String(konu || '').toLocaleLowerCase('tr').trim();
+    if(t.length < 3) return null;
+    const ad = c => String(c.title || '').toLocaleLowerCase('tr');
+    const ic = c => (c.original_topic_items || []).map(x => String(x).toLocaleLowerCase('tr'));
+    const c = (ESP.OGRENME_KARTLARI || []).find(k => ad(k) === t) || (ESP.OGRENME_KARTLARI || []).find(k => t.includes(ad(k)) || ad(k).includes(t))
+      || (ESP.OGRENME_KARTLARI || []).find(k => ic(k).some(x => x.includes(t) || t.includes(x)));
+    if(!c) return null;
+    const disc = ESP.DISCIPLINE_BY_ID && ESP.DISCIPLINE_BY_ID[c.discipline];
+    const p = c.practice || {};
+    return { id:c.id, baslik:c.title, alt:(disc ? disc.label : 'ESP') + (c.original_topic_items && c.original_topic_items.length ? ' · ' + c.original_topic_items.slice(0, 3).join(', ') : ''),
+      giris:c.goal || '', etiket:c.ready_for_app ? 'ESP öğrenme kartı' : 'doğrulanmadı · öğretmen incelemesi bekliyor',
+      sorgu:c.title, soruVar:false,
+      bolumler:[{ baslik:'Açıklama', metin:c.explanation },
+        { baslik:'Örnek', metin:c.worked_example && c.worked_example.text },
+        { baslik:'Sık yanlış', metin:c.common_misinterpretation },
+        { baslik:'Alıştırma', metin:p.prompt, liste:p.steps || [] },
+        { baslik:'Kendini sına', metin:p.expected_answer ? 'Cevabını yazdıktan sonra bak: ' + p.expected_answer : '' }].filter(b => b.metin) };
+  }
+
+  return { kingDers, units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
     topics, topicOf, topicMarks, topicProgress, markTopic, topicSummary,
     start, question, answer, result, log, correct, norm, shuffle,
     uniteSinavi, sonSinav, sinavYukle, SINAV_EN_AZ };

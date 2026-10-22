@@ -108,8 +108,28 @@ temada aynı düzen; küre ve kenar ışığı kısık.
   alanı alttan açılan sayfa (köşe 20 px, tutamak).
 - Küçük King (`is-mini`) değişmedi.
 
+## Öğretmen (2026-10-22)
+
+«türevi anlat», «bana olasılığı öğret», «ders: paragraf» → modülün KENDİ
+anlatımından ders kartı (`kartlar.ders`; AYS konu anlatımı ya da çekirdek
+özet, ESP öğrenme kartı, SPİ kavramı). Kart: modül ve etiket («elle yazıldı ·
+doğrulanmadı»), ince ilerleme çubuğu, bölüm başlığı, metin, liste, «Dikkat»;
+altta Önceki · Devam · Anladım, soru sor · Dinle · Modülde aç. Soru modülün
+bankasından gelir (söz 32 yolu); yanlışta «Konuyu yeniden anlat» çipi aynı
+dersi baştan açar. Modülde konu yoksa ders kurulmaz, mesaj Merkez'e gider.
+
+## K4: Merkez sırası ve sesli özet (2026-10-22)
+
+- Merkez kurulu ama ulaşılamıyorsa Merkez'e giden soru cihazda sıraya
+  girer (`lifeos.king.merkez-sira`, TASINAN'da; en çok 20, 7 gün). King
+  açılınca, cihaz çevrimiçi olunca ve açıkken dakikada bir yoklanır; cevap
+  sohbete düşer, soru balonunda «sıradan · ne zaman». Başarısız yeniden
+  deneme sohbete yazılmaz. Kütüphane › «Sırada · Merkez bekleniyor» (çıkar).
+- «sesli özet», «günümü özetle»: modülün günlük cümleleri ve değerli
+  kartları (etiketiyle) sesli; Kütüphane › «Sesli özetler»de kalır (son 20),
+  satıra dokununca yeniden okunur.
+
 ## Sonra gelecekler için yer
 
-K4 (çevrimdışı telefon, sesli özetler): Kütüphane'ye «Sesli özetler»
-grubu; ray değişmez. K6 («neden», çizim): `data-king-neden` satırı ve
+K6 («neden», çizim): `data-king-neden` satırı ve
 çalışma alanında «çizim» içeriği.

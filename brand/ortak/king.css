@@ -1032,3 +1032,27 @@ button.king__ekran-onizle:focus-visible{ outline:2px solid var(--k-vurgu); outli
   .king__alan-bas{ padding-left:var(--sp-4); }
 }
 @media (prefers-reduced-motion:reduce){ .king:not(.is-mini) .king__alan{ animation:none; } .king__canli-nokta{ animation:none; } }
+
+/* ======================================================================
+   ÖĞRETMEN — ders kartı (king.js «ÖĞRETMEN», 2026-10-22). Modülün metni
+   bölüm bölüm; üstte modül ve etiketi, ince ilerleme çubuğu, altta eylemler.
+   Kart dili cevap kartlarıyla aynı: düz yüzey, ince çizgi, gölge yok.
+   ====================================================================== */
+.king__ders{ display:flex; flex-direction:column; gap:10px; margin-top:var(--sp-2); padding:14px 16px;
+  border-radius:var(--r-md); background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); }
+.king__ders-bas{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 12px;
+  font-size:var(--fs-xs); font-weight:600; color:var(--text-2); }
+.king__ders-bas small{ font-weight:500; color:var(--text-3); }
+.king__ders-giris{ margin:0; font-size:var(--fs-sm); color:var(--text-2); line-height:1.55; }
+.king__ders-ilerleme{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:10px; }
+.king__ders-ilerleme small{ font-size:var(--fs-xs); color:var(--text-3); font-variant-numeric:tabular-nums; }
+.king__ders-ilerleme .king__cubuk{ margin:0; }
+.king__ders-baslik{ margin:2px 0 0; font-size:var(--fs-md); font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.king__ders p{ margin:0; line-height:1.6; }
+.king__ders-liste{ margin:0; padding-left:1.1em; display:flex; flex-direction:column; gap:6px; line-height:1.55; }
+.king__ders-dikkat{ padding:8px 12px; border-radius:var(--r-sm); background:var(--surface-2); font-size:var(--fs-sm); }
+.king__ders-dikkat b{ margin-right:6px; }
+.king__ders-eylem{ display:flex; flex-wrap:wrap; gap:6px; margin-top:2px; }
+
+/* K4: sıradan sorulan sorunun balonunda küçük not (ne zaman sorulmuştu). */
+.king__siradan{ display:block; margin-top:4px; font-size:var(--fs-xs); color:var(--text-3); text-align:right; }
