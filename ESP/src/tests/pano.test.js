@@ -16,6 +16,8 @@
     it('kart: başlık, yuva, gövde; metin kaçırılır; boş kart kesik çerçeve, tek cümle, tek düğme', () => {
       let k = dom(P().kart({ ad:'<b>Uyku</b>', simge:'uyku', yuva:'ölçüldü', govde:P().deger('6 sa 30 dk', '', 'plan 8 sa') }));
       expect(k.querySelector('.pk__ad').textContent).toBe('<b>Uyku</b>');
+      /* Başlık h2: sayfanın h1'inden basamak atlamaz (a11ycheck). */
+      expect(k.querySelector('.pk__ad').tagName).toBe('H2');
       expect(k.querySelector('.pk__yuva').textContent).toBe('ölçüldü');
       expect(k.querySelector('.pk__sayi').textContent).toBe('6 sa 30 dk');
       k = dom(P().kart({ ad:'Toparlanma', bos:{ cumle:'Uyku girilince hesaplanır.', dugme:{ label:'Uyku gir', act:'go', data:{ 'data-route':'gun' } } } }));

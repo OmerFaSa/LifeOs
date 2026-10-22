@@ -75,9 +75,11 @@ LIFEOS.PANO = (function(){
     /* Yıldız kart: öne çıkan tek şey (güzel bir soru, haftanın en iyi gecesi,
        rekor). Zemin modül renginin çok açık tonu, başlıkta yıldız ve «öne çıkan». */
     const yildiz = !!o.yildiz && !bos;
+    /* Başlık h2 (2026-10-22): kartlar sayfada çoğu kez doğrudan h1 altındadır;
+       h3 bir basamak atlıyordu (a11ycheck «h1 → h3», on ekranda). */
     return '<section class="pk' + (bos ? ' pk--bos' : '') + (yildiz ? ' pk--yildiz' : '') + (o.cls ? ' ' + kac(o.cls) : '') + '"' + (o.id ? ' id="' + kac(o.id) + '"' : '')
       + ' data-pano="' + kac(o.tur || 'kart') + '" aria-label="' + kac((yildiz ? 'Öne çıkan: ' : '') + (o.ad || '')) + '">'
-      + '<header class="pk__bas">' + svg(bos ? 'bos' : yildiz ? 'yildiz' : o.simge) + '<h3 class="pk__ad">' + kac(o.ad || '') + '</h3>'
+      + '<header class="pk__bas">' + svg(bos ? 'bos' : yildiz ? 'yildiz' : o.simge) + '<h2 class="pk__ad">' + kac(o.ad || '') + '</h2>'
       + (yildiz ? '<span class="pk__yildiz">' + kac(typeof o.yildiz === 'string' ? o.yildiz : 'öne çıkan') + '</span>' : '')
       + (o.yuva != null && o.yuva !== '' ? '<span class="pk__yuva">' + kac(o.yuva) + '</span>' : '')
       + (o.dugme ? dugmeHtml(o.dugme, 'pk__basdugme') : '') + '</header>'
