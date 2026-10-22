@@ -98,5 +98,13 @@ ESP.Siklik = (function(){
     return L && k != null && k in L.sira ? L.sira[k] + 1 : null;
   }
 
-  return { BANTLAR, OTURMUS_KUTU, liste, anahtar, desteHaritasi, kapsam, sirasi };
+  /* Tatoeba ornegi (data/kelimeornek.js): { yabanci, turkce, kaynak } ya da null.
+     Cumle aynen kaynaktadir; ornegi olmayan kelimeye cumle kurulmaz. */
+  function ornek(kelime, dil){
+    const O = ESP.KELIME_ORNEK, d = O && O.diller && O.diller[dil];
+    const k = anahtar(kelime, dil), x = d && k != null ? d[k] : null;
+    return x ? { yabanci:x[0], turkce:x[1], kaynak:O.adres + x[2], lisans:O.kaynak + ' · ' + O.lisans } : null;
+  }
+
+  return { BANTLAR, OTURMUS_KUTU, liste, anahtar, desteHaritasi, kapsam, sirasi, ornek };
 })();

@@ -131,3 +131,44 @@
     });
   });
 })();
+
+/* Tatoeba ornek cumlesi (data/kelimeornek.js). */
+(function(){
+  const { describe, it, expect, resetState } = ESP.Test;
+  const F = ESP.Siklik;
+  describe('sik kelime ornegi', () => {
+    it('ornek kaynaktaki cumledir; kelime cumlede ayri sozcuk olarak gecer', () => {
+      ['en', 'de', 'fr', 'es', 'it', 'ru', 'ar'].forEach(dil => {
+        const d = ESP.KELIME_ORNEK.diller[dil];
+        expect(Object.keys(d).length > 500).toBe(true);
+        Object.keys(d).slice(0, 50).forEach(k => {
+          /* Uretecle ayni sozcuk kurali: harf dizileri, kesmeyle birlesik olanlar tek sozcuk. */
+          const sozcukler = d[k][0].toLowerCase().match(/[\p{L}\p{M}]+(?:['’][\p{L}\p{M}]+)*/gu) || [];
+          expect([k, sozcukler.indexOf(k) >= 0]).toEqual([k, true]);
+        });
+      });
+    });
+    it('ornek() anahtarla bulur, kaynak adresi ve lisansi tasir; olmayana cumle kurmaz', () => {
+      const o = F.ornek('to love', 'en');
+      expect(!!o).toBe(true);
+      expect(o.kaynak.indexOf('https://tatoeba.org/sentences/show/')).toBe(0);
+      expect(o.lisans).toBe('Tatoeba · CC BY 2.0 FR');
+      expect(F.ornek('zzzqx', 'en')).toBe(null);
+      expect(F.ornek('amo', 'la')).toBe(null);
+    });
+    it('sik kelimeye dokununca Baglam ornekle dolar, Turkcesi ve kaynagi gorunur', async () => {
+      resetState();
+      ESP.S.ui.langDeck = 'en';
+      ESP.S.ui.siklikOn = 'you';
+      const d = document.createElement('div');
+      d.innerHTML = String(await ESP.Screens.lang.render());
+      document.body.appendChild(d);
+      try{
+        const o = F.ornek('you', 'en');
+        expect(d.querySelector('#c-ctx').value).toBe(o.yabanci);
+        expect(d.querySelector('.siklik-ornek').textContent).toContain(o.turkce);
+        expect(d.querySelector('.siklik-ornek a').getAttribute('href')).toBe(o.kaynak);
+      }finally{ d.remove(); ESP.S.ui.siklikOn = null; }
+    });
+  });
+})();

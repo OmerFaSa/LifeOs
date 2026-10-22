@@ -352,7 +352,7 @@ ESP.Screens.lang = (function(){
             ${K.Field({ label:'Ön yüz', input:K.Input({ id:'c-front', placeholder:'nevertheless', value:S.ui.siklikOn || null }) })}
             ${K.Field({ label:'Karşılık', input:K.Input({ id:'c-back', placeholder:'yine de' }) })}
             ${K.Field({ label:'Bağlam', hint:'isteğe bağlı',
-              input:K.Input({ id:'c-ctx', placeholder:'örnek cümle' }) })}
+              input:K.Input({ id:'c-ctx', placeholder:'örnek cümle', value:siklikOrnek() ? siklikOrnek().yabanci : null }) })}
           </div>
           <div class="cols-2 mt-8">
             ${K.Field({ label:'Eş anlamlılar', hint:'isteğe bağlı · virgülle',
@@ -360,6 +360,8 @@ ESP.Screens.lang = (function(){
             ${K.Field({ label:'Zıt anlamlı', hint:'isteğe bağlı',
               input:K.Input({ id:'c-zit', placeholder:'therefore' }) })}
           </div>
+          ${when(siklikOrnek(), () => html`<p class="small muted mt-8 siklik-ornek">Bağlam Tatoeba’dan: Türkçesi
+            «${siklikOrnek().turkce}» · <a href="${siklikOrnek().kaynak}" target="_blank" rel="noopener">kaynak</a> (${siklikOrnek().lisans})</p>`)}
           ${K.Button({ label:'Kart ekle', act:'add-card', class:'mt-10' })}`,
       }),
 
@@ -378,12 +380,16 @@ ESP.Screens.lang = (function(){
 
   /* Destede olmayan en sık kelimeler, sırayla. Dokunmak yalnız «Tek kart»ın
      ön yüzünü doldurur: karşılığı kullanıcı yazar, sistem çeviri uydurmaz. */
+  function siklikOrnek(){
+    return S.ui.siklikOn ? ESP.Siklik.ornek(S.ui.siklikOn, aktifDil()) : null;
+  }
+
   function siklikEkleRow(){
     const k = siklikKapsami();
     if(!k.var || !k.eksik.length) return '';
     return K.Entry({
       label:'Sık kelimeler', hint:'siklik', meta:'destede olmayan',
-      note:'Dokun: kelime «Ön yüz»e yazılır, karşılığı sen yazarsın.',
+      note:'Dokun: kelime «Ön yüz»e, varsa gerçek bir örnek cümle «Bağlam»a yazılır; karşılığı sen yazarsın.',
       body:html`<div class="siklik-kelimeler">${map(k.eksik, w => K.Button({ label:w, size:'sm',
         act:'siklik-on', data:{ 'data-word':w } }))}</div>`,
     });
