@@ -1,0 +1,15892 @@
+[
+{
+"no": "1.A.01",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcükte Anlam",
+"Gerçek anlam, mecaz anlam, terim anlam"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.02",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcükte Anlam",
+"Yan anlam ve temel anlam ayrımı"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.03",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcükte Anlam",
+"Eş anlamlı, zıt anlamlı, eş sesli sözcükler"
+],
+"kodlar": [
+"T",
+"Ö",
+"İ"
+]
+},
+{
+"no": "1.A.04",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcükte Anlam",
+"Deyimler ve anlamları"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.05",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcükte Anlam",
+"Atasözleri ve anlamları"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.06",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcükte Anlam",
+"İkilemeler, pekiştirmeler"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.07",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcükte Anlam",
+"Sözcükler arası anlam ilişkileri (üst-alt, tanım, neden-sonuç)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.08",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Cümlede Anlam",
+"Cümle yorumlama"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "1.A.09",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Cümlede Anlam",
+"Neden-sonuç, amaç-sonuç, koşul cümleleri"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.10",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Cümlede Anlam",
+"Karşılaştırma, benzetme, örneklendirme"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.11",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Cümlede Anlam",
+"Öznel ve nesnel yargı"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.12",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Cümlede Anlam",
+"Kesinlik, olasılık, varsayım bildiren cümleler"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.13",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Cümlede Anlam",
+"Anlatımda sözcük seçimi ve cümle tamamlama"
+],
+"kodlar": [
+"Y",
+"Ö"
+]
+},
+{
+"no": "1.A.14",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Cümlede Anlam",
+"Cümleler arası anlam ilişkisi, cümle sıralama"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "1.A.15",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Paragraf",
+"Ana düşünce, konu, başlık bulma"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "1.A.16",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Paragraf",
+"Yardımcı düşünce"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.17",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Paragraf",
+"Paragrafın yapısı (giriş, gelişme, sonuç)"
+],
+"kodlar": [
+"T",
+"V"
+]
+},
+{
+"no": "1.A.18",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Paragraf",
+"Düşünceyi geliştirme yolları (tanımlama, örnekleme, karşılaştırma, tanık gösterme, sayısal veri)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.19",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Paragraf",
+"Anlatım biçimleri (açıklayıcı, öyküleyici, betimleyici, tartışmacı)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.20",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Paragraf",
+"Anlatım teknikleri (betimleme, öyküleme, diyalog, tanımlama, karşılaştırma)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.21",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Paragraf",
+"Paragrafta yer ve zaman, kişi, durum ilişkisi"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "1.A.22",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Paragraf",
+"Paragrafı bölme, birleştirme, parçalardan ilk/son cümle bulma"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "1.A.23",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Paragraf",
+"Anlatıcı ve bakış açısı"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.24",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Paragraf",
+"Grafik, tablo ve görsel yorumlama"
+],
+"kodlar": [
+"Y",
+"Ö"
+]
+},
+{
+"no": "1.A.25",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Ses Bilgisi",
+"Ünlü ve ünsüzler, ses olayları"
+],
+"kodlar": [
+"T",
+"K",
+"İ",
+"Ö"
+]
+},
+{
+"no": "1.A.26",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Ses Bilgisi",
+"Ünlü uyumları (büyük, küçük)"
+],
+"kodlar": [
+"K",
+"İ",
+"Ö"
+]
+},
+{
+"no": "1.A.27",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Ses Bilgisi",
+"Ünsüz uyumu ve benzeşmesi, yumuşaması"
+],
+"kodlar": [
+"K",
+"İ",
+"Ö"
+]
+},
+{
+"no": "1.A.28",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Ses Bilgisi",
+"Ses düşmesi, türemesi, daralması, kaynaşması, ulaması, yaslanma"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.29",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Yapı Bilgisi",
+"Kök, ek, gövde, yapım ekleri, çekim ekleri"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.30",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Yapı Bilgisi",
+"Basit, türemiş, birleşik sözcükler"
+],
+"kodlar": [
+"T",
+"K",
+"Ö",
+"İ"
+]
+},
+{
+"no": "1.A.31",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcük Türleri",
+"İsimler (ad), adlaşma, ad tamlamaları"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.32",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcük Türleri",
+"Zamirler (kişi, işaret, belgisiz, soru, dönüşlülük)"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.33",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcük Türleri",
+"Sıfatlar (niteleme, belirtme, sayı, işaret, belgisiz)"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.34",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcük Türleri",
+"Zarflar"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.35",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Sözcük Türleri",
+"Edat, bağlaç, ünlem"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.36",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Fiiller",
+"Kip ve zaman ekleri, ek fiil, birleşik zamanlar"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.37",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Fiiller",
+"Fiilimsiler (isim-fiil, sıfat-fiil, zarf-fiil)"
+],
+"kodlar": [
+"T",
+"K",
+"Ö",
+"İ"
+]
+},
+{
+"no": "1.A.38",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Fiiller",
+"Fiil çatısı (öznesine göre, nesnesine göre)"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.39",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Fiiller",
+"Anlam özellikleri (olumlu, olumsuz, yeterlik, tezlik, sürerlik)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.40",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Cümle Bilgisi",
+"Cümlenin öğeleri (yüklem, özne, nesne, tümleçler)"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.41",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Cümle Bilgisi",
+"Cümle çeşitleri (yapı, yüklem, anlam bakımından)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.42",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Cümle Bilgisi",
+"Devrik, kurallı, eksiltili cümleler"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.A.43",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Yazım Kuralları",
+"Büyük harflerin kullanımı"
+],
+"kodlar": [
+"K",
+"Ö",
+"İ"
+]
+},
+{
+"no": "1.A.44",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Yazım Kuralları",
+"Birleşik sözcüklerin yazımı"
+],
+"kodlar": [
+"K",
+"Ö",
+"İ"
+]
+},
+{
+"no": "1.A.45",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Yazım Kuralları",
+"\"de/da\", \"ki\", \"mi\" yazımı"
+],
+"kodlar": [
+"K",
+"Ö",
+"İ"
+]
+},
+{
+"no": "1.A.46",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Yazım Kuralları",
+"Sayıların, kısaltmaların, ekleme yazımı"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.47",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Noktalama İşaretleri",
+"Nokta, virgül, noktalı virgül, iki nokta"
+],
+"kodlar": [
+"K",
+"Ö",
+"İ"
+]
+},
+{
+"no": "1.A.48",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Noktalama İşaretleri",
+"Üç nokta, tırnak, kesme, parantez, tire, eğik çizgi"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "1.A.49",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Anlatım Bozukluğu",
+"Anlamsal bozukluklar (gereksiz sözcük, anlam belirsizliği, mantık)"
+],
+"kodlar": [
+"T",
+"Ö",
+"H"
+]
+},
+{
+"no": "1.A.50",
+"sistem": "AYS",
+"yol": [
+"Türkçe",
+"Anlatım Bozukluğu",
+"Yapısal bozukluklar (özne-yüklem uyumu, ek-fiil, çatı uyumsuzluğu)"
+],
+"kodlar": [
+"T",
+"Ö",
+"H"
+]
+},
+{
+"no": "1.B.01",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Temel Kavramlar",
+"Sayı kümeleri (doğal, tam, rasyonel, irrasyonel, gerçek sayılar)"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.02",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Temel Kavramlar",
+"Asal sayılar, aralarında asal sayılar"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.03",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Temel Kavramlar",
+"Faktöriyel"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.04",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Temel Kavramlar",
+"Sayı basamakları, çözümleme"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.05",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Temel Kavramlar",
+"Ardışık sayılar, toplam formülleri"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.06",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Bölme ve Bölünebilme",
+"Bölme algoritması, kalan"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.07",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Bölme ve Bölünebilme",
+"Bölünebilme kuralları (2, 3, 4, 5, 6, 8, 9, 10, 11)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.08",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"EBOB ve EKOK",
+"Tanım, bulma yöntemleri, uygulama"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.09",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Rasyonel Sayılar",
+"Kesir işlemleri, sıralama"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.10",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Rasyonel Sayılar",
+"Ondalık gösterim, devirli ondalık"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.11",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Rasyonel Sayılar",
+"Basit eşitsizlikler ve aralık"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.12",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Üslü Sayılar",
+"Üslü ifadelerin özellikleri"
+],
+"kodlar": [
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.13",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Üslü Sayılar",
+"Bilimsel gösterim"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.14",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Köklü Sayılar",
+"Kök özellikleri, kök dışına çıkarma"
+],
+"kodlar": [
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.15",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Köklü Sayılar",
+"Paydayı kökten kurtarma (eşlenik)"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.B.16",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Mutlak Değer",
+"Tanım, geometrik anlamı, özellikler"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.17",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Mutlak Değer",
+"Mutlak değerli denklem ve eşitsizlik"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.B.18",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Çarpanlara Ayırma",
+"Ortak çarpan, gruplama"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.B.19",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Çarpanlara Ayırma",
+"Özdeşlikler (iki kare farkı, tam kare, küp)"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.20",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Çarpanlara Ayırma",
+"İkinci dereceden ifadeleri çarpanlara ayırma"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.B.21",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Denklemler",
+"Birinci dereceden denklemler"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.B.22",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Denklemler",
+"İki bilinmeyenli denklem sistemleri"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.B.23",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Denklemler",
+"Rasyonel denklemler"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.B.24",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Denklemler",
+"İkinci dereceden denklemler ve kökler"
+],
+"kodlar": [
+"T",
+"F",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.B.25",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Eşitsizlikler",
+"Birinci ve ikinci dereceden eşitsizlikler, işaret tablosu"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.B.26",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Oran ve Orantı",
+"Doğru ve ters orantı, orantı özellikleri"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.27",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Oran ve Orantı",
+"Bileşik orantı"
+],
+"kodlar": [
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.28",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Problemler",
+"Sayı ve kesir problemleri"
+],
+"kodlar": [
+"Y",
+"Ö"
+]
+},
+{
+"no": "1.B.29",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Problemler",
+"Yaş problemleri"
+],
+"kodlar": [
+"Y",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.30",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Problemler",
+"Yüzde, kâr-zarar, faiz problemleri"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.31",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Problemler",
+"Karışım ve derişim problemleri"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.32",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Problemler",
+"İşçi ve havuz problemleri"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.33",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Problemler",
+"Hareket problemleri (hız, yol, zaman)"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.34",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Problemler",
+"Grafik ve tablo problemleri"
+],
+"kodlar": [
+"Y",
+"Ö"
+]
+},
+{
+"no": "1.B.35",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Problemler",
+"Sayı ve rakam problemleri"
+],
+"kodlar": [
+"Y",
+"Ö"
+]
+},
+{
+"no": "1.B.36",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Kümeler",
+"Küme gösterimi, alt küme, işlemler"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.37",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Kümeler",
+"Kartezyen çarpım, Venn şeması problemleri"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.38",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Mantık",
+"Önerme, bileşik önerme, doğruluk tablosu"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.39",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Mantık",
+"Niceleyiciler"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.B.40",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Fonksiyonlar",
+"Tanım, gösterim, tanım-değer kümesi"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.41",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Fonksiyonlar",
+"Fonksiyon türleri (birebir, örten, sabit, birim), bileşke, ters"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.42",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Fonksiyonlar",
+"Grafik yorumlama"
+],
+"kodlar": [
+"Y",
+"Ö"
+]
+},
+{
+"no": "1.B.43",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Polinomlar",
+"Derece, katsayı, işlemler, bölme, kalan"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.B.44",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Permütasyon-Kombinasyon",
+"Sayma ilkeleri (toplama, çarpma)"
+],
+"kodlar": [
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.45",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Permütasyon-Kombinasyon",
+"Permütasyon ve kombinasyon"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.46",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Permütasyon-Kombinasyon",
+"Binom açılımı"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.47",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Olasılık",
+"Temel kavramlar, olay, örnek uzay"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.48",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Olasılık",
+"Koşullu olasılık, bağımsız olaylar"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.49",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Veri ve İstatistik",
+"Ortalama, medyan, mod, standart sapma"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.B.50",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Veri ve İstatistik",
+"Grafik türleri, veri yorumlama"
+],
+"kodlar": [
+"T",
+"Y",
+"Ö"
+]
+},
+{
+"no": "1.C.01",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Temel Kavramlar",
+"Nokta, doğru, düzlem, açı ölçüleri"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.C.02",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Açılar",
+"Ardışık, komşu, bütünler, tümler, ters açılar"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.C.03",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Açılar",
+"Paralel doğrularda açı ilişkileri"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "1.C.04",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Üçgenler",
+"Üçgende açı, kenar ilişkileri"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.05",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Üçgenler",
+"Pisagor bağıntısı ve özel üçgenler"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.06",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Üçgenler",
+"Açıortay, kenarortay, yükseklik, dik üçgen"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.07",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Üçgenler",
+"Eşlik ve benzerlik"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.C.08",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Üçgenler",
+"Alan bağıntıları"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.09",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Çokgenler",
+"İç ve dış açı toplamı, köşegen sayısı"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.10",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Dörtgenler",
+"Paralelkenar, eşkenar dörtgen, dikdörtgen, kare"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.11",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Dörtgenler",
+"Yamuk, deltoid"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.12",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Çember ve Daire",
+"Çemberde açılar, teğet, kiriş"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.C.13",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Çember ve Daire",
+"Alan, çevre, daire dilimi, yay uzunluğu"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.14",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Katı Cisimler",
+"Prizma, silindir"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.15",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Katı Cisimler",
+"Piramit, koni, küre"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.16",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Analitik Geometri",
+"Noktanın analitik incelenmesi, uzaklık"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.17",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Analitik Geometri",
+"Doğrunun denklemi, eğim"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.C.18",
+"sistem": "AYS",
+"yol": [
+"Geometri",
+"Dönüşümler",
+"Öteleme, yansıma, dönme"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.D.01",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Fizik Bilimine Giriş",
+"Fiziğin alt dalları, ölçme, birimler"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.D.02",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Madde ve Özellikleri",
+"Kütle, hacim, özkütle"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.03",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Basınç",
+"Katı, sıvı, gaz basıncı"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.04",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Kaldırma Kuvveti",
+"Arşimet ilkesi, yüzme-batma"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.05",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Isı ve Sıcaklık",
+"Sıcaklık ölçekleri, ısı alışverişi"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.06",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Isı ve Sıcaklık",
+"Hâl değişimi, öz ısı, ısı sığası"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.07",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Isı ve Sıcaklık",
+"Isı iletimi, yayılma yolları"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.D.08",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Hareket",
+"Konum, yer değiştirme, hız, ivme"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.09",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Hareket",
+"Sabit hızlı ve sabit ivmeli hareket grafikleri"
+],
+"kodlar": [
+"F",
+"Y",
+"Ö"
+]
+},
+{
+"no": "1.D.10",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Dinamik",
+"Newton'un hareket yasaları"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.11",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Dinamik",
+"Sürtünme kuvveti"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.12",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"İş, Güç, Enerji",
+"Kinetik ve potansiyel enerji"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.13",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"İş, Güç, Enerji",
+"Enerjinin korunumu, verim"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.14",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Momentum ve İtme",
+"Tanım, korunum"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.15",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Elektrostatik",
+"Elektrik yükü, Coulomb yasası"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.16",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Elektrik ve Manyetizma",
+"Akım, potansiyel farkı, Ohm yasası"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.17",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Elektrik ve Manyetizma",
+"Devre elemanları, seri-paralel bağlama"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.18",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Elektrik ve Manyetizma",
+"Mıknatıslar, manyetik alan"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.D.19",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Dalgalar",
+"Dalga türleri, özellikleri, yansıma, kırılma"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.20",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Dalgalar",
+"Ses dalgaları"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.21",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Optik",
+"Aynalar, kırılma, mercekler"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.D.22",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Optik",
+"Işığın kırılması, tam yansıma"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.E.01",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimya Bilimi",
+"Kimyanın alt dalları, laboratuvar güvenliği"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "1.E.02",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Atom ve Periyodik Sistem",
+"Atom modelleri"
+],
+"kodlar": [
+"T",
+"V"
+]
+},
+{
+"no": "1.E.03",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Atom ve Periyodik Sistem",
+"Atomun yapısı, izotop, elektron dizilimi"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.E.04",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Atom ve Periyodik Sistem",
+"Periyodik tablo, periyodik özellikler"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.E.05",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimyasal Türler Arası Etkileşimler",
+"İyonik, kovalent, metalik bağ"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.E.06",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimyasal Türler Arası Etkileşimler",
+"Zayıf etkileşimler"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.E.07",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Maddenin Hâlleri",
+"Katı, sıvı, gaz özellikleri"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "1.E.08",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Maddenin Hâlleri",
+"Gaz yasaları"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.E.09",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimyasal Hesaplamalar",
+"Mol kavramı, mol-kütle-hacim"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.E.10",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimyasal Hesaplamalar",
+"Kimyasal denklem denkleştirme"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.E.11",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Karışımlar",
+"Homojen, heterojen karışımlar, ayırma yöntemleri"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.E.12",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Karışımlar",
+"Çözeltiler, derişim birimleri"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.E.13",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Asitler, Bazlar, Tuzlar",
+"Tanımlar, pH, nötrleşme"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.E.14",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimya ve Enerji",
+"Tepkime ısısı, endotermik-ekzotermik"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.E.15",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimya ve Elektrik",
+"Pil, elektroliz"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.E.16",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimya ve Çevre",
+"Su, hava, toprak kirliliği, geri dönüşüm"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "1.E.17",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Doğa ve Kimya",
+"Yaygın kullanılan maddeler (sabun, deterjan)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.F.01",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Canlıların Ortak Özellikleri",
+"Yaşam özellikleri"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.F.02",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Canlıların Temel Bileşenleri",
+"Su, mineral, karbonhidrat, lipit, protein, vitamin"
+],
+"kodlar": [
+"T",
+"G",
+"Ö"
+]
+},
+{
+"no": "1.F.03",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Canlıların Temel Bileşenleri",
+"Nükleik asitler"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "1.F.04",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Hücre",
+"Hücre kuramı, hücre zarı, madde geçişi"
+],
+"kodlar": [
+"T",
+"G",
+"V"
+]
+},
+{
+"no": "1.F.05",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Hücre",
+"Organeller ve görevleri"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "1.F.06",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Hücre",
+"Prokaryot ve ökaryot hücre"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.F.07",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Canlıların Sınıflandırılması",
+"Sınıflandırma basamakları, ikili adlandırma"
+],
+"kodlar": [
+"T",
+"V",
+"Ö"
+]
+},
+{
+"no": "1.F.08",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Canlıların Sınıflandırılması",
+"Beş âlem"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.F.09",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Hücre Bölünmesi",
+"Mitoz"
+],
+"kodlar": [
+"T",
+"V",
+"G"
+]
+},
+{
+"no": "1.F.10",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Hücre Bölünmesi",
+"Mayoz"
+],
+"kodlar": [
+"T",
+"V",
+"G"
+]
+},
+{
+"no": "1.F.11",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Kalıtım",
+"Mendel, çaprazlamalar"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.F.12",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Kalıtım",
+"Kan grupları, eşeye bağlı kalıtım"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.F.13",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Ekosistem Ekolojisi",
+"Ekosistem, besin zinciri"
+],
+"kodlar": [
+"T",
+"V",
+"Ö"
+]
+},
+{
+"no": "1.F.14",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Ekosistem Ekolojisi",
+"Madde döngüleri"
+],
+"kodlar": [
+"T",
+"V"
+]
+},
+{
+"no": "1.F.15",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Güncel Çevre Sorunları",
+"İklim değişikliği, biyolojik çeşitlilik"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "1.F.16",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Sindirim Sistemi"
+],
+"kodlar": [
+"G",
+"V",
+"Ö"
+]
+},
+{
+"no": "1.F.17",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Dolaşım Sistemi"
+],
+"kodlar": [
+"G",
+"V",
+"Ö"
+]
+},
+{
+"no": "1.F.18",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Solunum Sistemi"
+],
+"kodlar": [
+"G",
+"V"
+]
+},
+{
+"no": "1.F.19",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Boşaltım Sistemi"
+],
+"kodlar": [
+"G",
+"V"
+]
+},
+{
+"no": "1.F.20",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Bağışıklık Sistemi"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "1.G.01",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Tarih ve Zaman",
+"Tarih bilimi, kaynaklar, yardımcı bilimler"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.G.02",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"İlk ve Orta Çağlarda Türk Dünyası",
+"İlk Türk devletleri (Hunlar, Göktürkler, Uygurlar)"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "1.G.03",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"İslam Medeniyetinin Doğuşu"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "1.G.04",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Türklerin İslamiyet'i Kabulü ve İlk Türk-İslam Devletleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "1.G.05",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Yerleşme ve Devletleşme Sürecinde Selçuklu Türkiyesi"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "1.G.06",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Beylikten Devlete Osmanlı Siyaseti"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "1.G.07",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Devletleşme Sürecinde Savaşçılar ve Askerler"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "1.G.08",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Dünya Gücü Osmanlı"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "1.G.09",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Değişim Çağında Avrupa ve Osmanlı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "1.G.10",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Uluslararası İlişkilerde Denge Stratejisi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "1.G.11",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Devrimler Çağında Değişen Devlet-Toplum İlişkileri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "1.G.12",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Sermaye ve Emek"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "1.G.13",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"XX. Yüzyıl Başlarında Osmanlı Devleti"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "1.G.14",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Milli Mücadele"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "1.G.15",
+"sistem": "AYS",
+"yol": [
+"Tarih",
+"Atatürkçülük ve Türk İnkılabı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "1.G.16",
+"sistem": "AYS",
+"yol": [
+"Coğrafya",
+"Doğa ve İnsan",
+"Coğrafyanın konusu ve alt dalları"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "1.G.17",
+"sistem": "AYS",
+"yol": [
+"Coğrafya",
+"Dünya'nın Şekli ve Hareketleri"
+],
+"kodlar": [
+"T",
+"G",
+"N"
+]
+},
+{
+"no": "1.G.18",
+"sistem": "AYS",
+"yol": [
+"Coğrafya",
+"Coğrafi Konum, Harita Bilgisi, Koordinat Sistemi"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.G.19",
+"sistem": "AYS",
+"yol": [
+"Coğrafya",
+"İklim Bilgisi",
+"İklim elemanları, iklim tipleri"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "1.G.20",
+"sistem": "AYS",
+"yol": [
+"Coğrafya",
+"Yerin Şekillenmesi",
+"İç ve dış kuvvetler"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "1.G.21",
+"sistem": "AYS",
+"yol": [
+"Coğrafya",
+"Nüfus ve Yerleşme"
+],
+"kodlar": [
+"T",
+"S",
+"N"
+]
+},
+{
+"no": "1.G.22",
+"sistem": "AYS",
+"yol": [
+"Coğrafya",
+"Ekonomik Faaliyetler ve Doğal Kaynaklar"
+],
+"kodlar": [
+"T",
+"S",
+"N"
+]
+},
+{
+"no": "1.G.23",
+"sistem": "AYS",
+"yol": [
+"Coğrafya",
+"Türkiye'nin Coğrafi Bölgeleri"
+],
+"kodlar": [
+"S",
+"T"
+]
+},
+{
+"no": "1.G.24",
+"sistem": "AYS",
+"yol": [
+"Coğrafya",
+"Afetler ve Sürdürülebilirlik"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "1.G.25",
+"sistem": "AYS",
+"yol": [
+"Felsefe",
+"Felsefeye Giriş, felsefenin konusu, bilgi felsefesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "1.G.26",
+"sistem": "AYS",
+"yol": [
+"Felsefe",
+"Varlık Felsefesi, Ahlak Felsefesi, Sanat Felsefesi, Siyaset Felsefesi"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "1.G.27",
+"sistem": "AYS",
+"yol": [
+"Felsefe",
+"Bilim Felsefesi, Din Felsefesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "1.G.28",
+"sistem": "AYS",
+"yol": [
+"Din Kültürü",
+"İnanç, ibadet, ahlak, İslam düşüncesinde yorumlar"
+],
+"kodlar": [
+"T",
+"S"
+]
+},
+{
+"no": "1.H.01",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Fonksiyonlar",
+"Fonksiyonlarda uygulamalar, parçalı, mutlak değerli"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.H.02",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Polinomlar",
+"Kalanlı bölme, kök-katsayı ilişkisi"
+],
+"kodlar": [
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.03",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"İkinci Dereceden Denklemler",
+"Kökler ve katsayılar arası ilişki"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.04",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Parabol",
+"Grafik, tepe noktası, kesişim"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.05",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Trigonometri",
+"Birim çember, trigonometrik fonksiyonlar"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.06",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Trigonometri",
+"Toplam-fark, ikili açı formülleri"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.07",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Trigonometri",
+"Denklemler, grafikler"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.H.08",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Logaritma",
+"Tanım, özellikler"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.09",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Logaritma",
+"Denklem ve eşitsizlikler"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.H.10",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Diziler",
+"Aritmetik ve geometrik diziler"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.11",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Limit ve Süreklilik"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.H.12",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Türev",
+"Tanım, kuralları"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.13",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Türev",
+"Türev uygulamaları (artan-azalan, ekstremum, grafik)"
+],
+"kodlar": [
+"K",
+"A",
+"Ö"
+]
+},
+{
+"no": "1.H.14",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"İntegral",
+"Belirsiz integral, belirli integral"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.15",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"İntegral",
+"Alan ve uygulama"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.16",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Analitik Geometri",
+"Çember, elips, parabol, hiperbol"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.17",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Geometri",
+"Dönüşümler, vektörler"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.H.18",
+"sistem": "AYS",
+"yol": [
+"Matematik",
+"Olasılık",
+"Koşullu ve bağımsız olay, Bayes'e giriş"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.01",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Vektörler"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.02",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Bağıl Hareket"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.03",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Newton'un Hareket Yasaları (ileri düzey)"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.04",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Bir Boyutta Sabit İvmeli Hareket"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.05",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"İki Boyutta Hareket (atışlar)"
+],
+"kodlar": [
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.06",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Enerji ve Hareket"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.07",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"İtme ve Çizgisel Momentum"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.08",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Tork ve Denge"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.09",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Kütle Merkezi"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.10",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Basit Makineler"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.11",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Elektriksel Kuvvet ve Elektrik Alanı"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.12",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Elektriksel Potansiyel, Sığa"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.13",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Manyetizma ve Elektromanyetik İndüksiyon"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.14",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Alternatif Akım, Transformatörler"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.15",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Düzgün Çembersel Hareket"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.16",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Dönme, Yuvarlanma, Açısal Momentum"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.17",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Kütle Çekim Kuvveti, Kepler Yasaları"
+],
+"kodlar": [
+"T",
+"K",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.18",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Basit Harmonik Hareket"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.I.19",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Dalga Mekaniği (girişim, kırınım, Doppler)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.I.20",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Atom Fiziğine Giriş, Atom Modelleri"
+],
+"kodlar": [
+"T",
+"V"
+]
+},
+{
+"no": "1.I.21",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Büyük Patlama ve Evrenin Oluşumu"
+],
+"kodlar": [
+"T",
+"N",
+"S"
+]
+},
+{
+"no": "1.I.22",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Radyoaktivite"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.I.23",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Özel Görelilik"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.I.24",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Kuantum Fiziğine Giriş (fotoelektrik olay, Compton)"
+],
+"kodlar": [
+"T",
+"V",
+"Ö"
+]
+},
+{
+"no": "1.I.25",
+"sistem": "AYS",
+"yol": [
+"Fizik",
+"Modern Fiziğin Teknolojideki Uygulamaları"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.J.01",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Modern Atom Teorisi, kuantum sayıları"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.J.02",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Gazlar (ideal gaz, karışımlar, gerçek gazlar)"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.J.03",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Sıvı Çözeltiler ve Çözünürlük"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.J.04",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimyasal Tepkimelerde Enerji (entalpi, Hess yasası)"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.J.05",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimyasal Tepkimelerde Hız"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.J.06",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimyasal Tepkimelerde Denge"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.J.07",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Asit-Baz Dengesi, tampon çözeltiler"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.J.08",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Çözünürlük Dengesi"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.J.09",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Kimya ve Elektrik (galvanik hücre, elektroliz)"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.J.10",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Karbon Kimyasına Giriş"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "1.J.11",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Organik Bileşikler (alkan, alken, alkin, aromatik)"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.J.12",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Alkoller, eterler, aldehit, keton, karboksilik asit, ester"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.J.13",
+"sistem": "AYS",
+"yol": [
+"Kimya",
+"Enerji Kaynakları ve Bilimsel Gelişmeler"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "1.K.01",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Sinir Sistemi"
+],
+"kodlar": [
+"G",
+"V"
+]
+},
+{
+"no": "1.K.02",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Endokrin Sistem ve Hormonlar"
+],
+"kodlar": [
+"G",
+"V",
+"Ö"
+]
+},
+{
+"no": "1.K.03",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Duyu Organları"
+],
+"kodlar": [
+"G",
+"V"
+]
+},
+{
+"no": "1.K.04",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Destek ve Hareket Sistemi"
+],
+"kodlar": [
+"G"
+]
+},
+{
+"no": "1.K.05",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Sindirim, Dolaşım, Solunum (ileri düzey)"
+],
+"kodlar": [
+"G",
+"V"
+]
+},
+{
+"no": "1.K.06",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Üreme Sistemi ve Embriyonik Gelişim"
+],
+"kodlar": [
+"G",
+"V"
+]
+},
+{
+"no": "1.K.07",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Komünite ve Popülasyon Ekolojisi"
+],
+"kodlar": [
+"T",
+"F",
+"Ö"
+]
+},
+{
+"no": "1.K.08",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Genden Proteine (DNA replikasyonu, transkripsiyon, translasyon)"
+],
+"kodlar": [
+"T",
+"V",
+"G"
+]
+},
+{
+"no": "1.K.09",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Genetik Mühendisliği ve Biyoteknoloji"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.K.10",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Canlılarda Enerji Dönüşümleri (fotosentez, solunum)"
+],
+"kodlar": [
+"T",
+"V",
+"G"
+]
+},
+{
+"no": "1.K.11",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Bitki Biyolojisi (taşınım, büyüme, hormonlar)"
+],
+"kodlar": [
+"T",
+"G",
+"V"
+]
+},
+{
+"no": "1.K.12",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Canlılar ve Çevre"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "1.K.13",
+"sistem": "AYS",
+"yol": [
+"Biyoloji",
+"Evrim ve Kalıtımdaki Çeşitlilik"
+],
+"kodlar": [
+"T",
+"N",
+"Ö"
+]
+},
+{
+"no": "1.L.01",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"Şiir Bilgisi (nazım biçimleri, ölçü, uyak, redif)"
+],
+"kodlar": [
+"T",
+"K",
+"Ö"
+]
+},
+{
+"no": "1.L.02",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"Söz Sanatları"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "1.L.03",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"Edebiyat Akımları (klasisizm, romantizm, realizm, sembolizm...)"
+],
+"kodlar": [
+"T",
+"B",
+"E"
+]
+},
+{
+"no": "1.L.04",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"İslamiyet Öncesi Türk Edebiyatı"
+],
+"kodlar": [
+"T",
+"E",
+"S"
+]
+},
+{
+"no": "1.L.05",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"Geçiş Dönemi Eserleri (Kutadgu Bilig, Divanü Lügati't-Türk, Atabetü'l-Hakayık)"
+],
+"kodlar": [
+"B",
+"E",
+"S"
+]
+},
+{
+"no": "1.L.06",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"Halk Edebiyatı (ozanlar, tekke, destan)"
+],
+"kodlar": [
+"T",
+"B",
+"E"
+]
+},
+{
+"no": "1.L.07",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"Divan Edebiyatı (şairler, nazım biçimleri)"
+],
+"kodlar": [
+"T",
+"B",
+"E"
+]
+},
+{
+"no": "1.L.08",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"Tanzimat Edebiyatı (birinci ve ikinci dönem)"
+],
+"kodlar": [
+"T",
+"B",
+"E",
+"S"
+]
+},
+{
+"no": "1.L.09",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"Servet-i Fünun ve Fecr-i Âti"
+],
+"kodlar": [
+"T",
+"B",
+"E"
+]
+},
+{
+"no": "1.L.10",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"Millî Edebiyat Dönemi"
+],
+"kodlar": [
+"T",
+"B",
+"E"
+]
+},
+{
+"no": "1.L.11",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"Cumhuriyet Dönemi Şiir ve Roman"
+],
+"kodlar": [
+"T",
+"B",
+"E"
+]
+},
+{
+"no": "1.L.12",
+"sistem": "AYS",
+"yol": [
+"Edebiyat",
+"Batı Edebiyatı, dünya edebiyatı yazarları"
+],
+"kodlar": [
+"B",
+"E"
+]
+},
+{
+"no": "1.L.13",
+"sistem": "AYS",
+"yol": [
+"Tarih-2",
+"Osmanlı Kuruluş, Yükselme, Dağılma Dönemi ayrıntıları"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "1.L.14",
+"sistem": "AYS",
+"yol": [
+"Tarih-2",
+"Kurtuluş Savaşı ve Cumhuriyet Dönemi Dış Politikası"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "1.L.15",
+"sistem": "AYS",
+"yol": [
+"Coğrafya-2",
+"Ekosistem, Nüfus Politikaları, Küresel Ticaret"
+],
+"kodlar": [
+"T",
+"S",
+"N"
+]
+},
+{
+"no": "1.L.16",
+"sistem": "AYS",
+"yol": [
+"Felsefe Grubu",
+"Mantık, Psikoloji, Sosyoloji"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "1.M.01",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Aralıklı tekrar (spaced repetition), Leitner sistemi"
+],
+"kodlar": [
+"T",
+"Y",
+"A"
+]
+},
+{
+"no": "1.M.02",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Aktif hatırlama (active recall), kendini test etme"
+],
+"kodlar": [
+"T",
+"Y",
+"A"
+]
+},
+{
+"no": "1.M.03",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Karışık uygulama (interleaving)"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "1.M.04",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Pomodoro tekniği"
+],
+"kodlar": [
+"T",
+"Y",
+"A"
+]
+},
+{
+"no": "1.M.05",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Feynman tekniği"
+],
+"kodlar": [
+"T",
+"Y",
+"A"
+]
+},
+{
+"no": "1.M.06",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Cornell not alma, zihin haritası"
+],
+"kodlar": [
+"T",
+"Y",
+"A"
+]
+},
+{
+"no": "1.M.07",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Unutma eğrisi"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "1.M.08",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Bellek türleri, çalışma belleği"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "1.M.09",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Uyku ve öğrenme ilişkisi"
+],
+"kodlar": [
+"T",
+"N",
+"R"
+]
+},
+{
+"no": "1.M.10",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Dikkat ve odaklanma"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "1.M.11",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Motivasyon, hedef belirleme, SMART hedefler"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "1.M.12",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Erteleme ve üstesinden gelme yolları"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "1.M.13",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Sınav kaygısı ve baş etme yöntemleri"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "1.M.14",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Deneme sınavı analizi, hata defteri"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "1.M.15",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Çalışma programı hazırlama, zaman yönetimi"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "1.M.16",
+"sistem": "AYS",
+"yol": [
+"Çalışma",
+"Sınav günü hazırlığı, süre yönetimi"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "1.N.01",
+"sistem": "AYS",
+"yol": [
+"YKS",
+"Yapısı: TYT, AYT, YDT, oturumlar, süreler, soru sayıları"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "1.N.02",
+"sistem": "AYS",
+"yol": [
+"YKS",
+"Puan türleri (TYT, SAY, EA, SÖZ, DİL) ve katsayılar"
+],
+"kodlar": [
+"S",
+"T"
+]
+},
+{
+"no": "1.N.03",
+"sistem": "AYS",
+"yol": [
+"YKS",
+"Net hesaplama kuralı ve yanlış cezası"
+],
+"kodlar": [
+"K",
+"S"
+]
+},
+{
+"no": "1.N.04",
+"sistem": "AYS",
+"yol": [
+"YKS",
+"Başvuru, tercih ve yerleştirme süreci"
+],
+"kodlar": [
+"A",
+"S"
+]
+},
+{
+"no": "1.N.05",
+"sistem": "AYS",
+"yol": [
+"YKS",
+"Kontenjan, taban puan ve başarı sırası kavramları"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "1.N.06",
+"sistem": "AYS",
+"yol": [
+"YKS",
+"Ek yerleştirme, ek tercih, özel yetenek sınavları"
+],
+"kodlar": [
+"T",
+"S"
+]
+},
+{
+"no": "1.N.07",
+"sistem": "AYS",
+"yol": [
+"YKS",
+"Yıllara göre konu bazlı soru dağılımı"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "1.N.08",
+"sistem": "AYS",
+"yol": [
+"YKS",
+"Engelli ve şehit/gazi çocukları gibi özel durumlar"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "2.A.01",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Karbonhidrat",
+"Tanım, türleri (basit, karmaşık)"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.A.02",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Karbonhidrat",
+"Besin kaynakları"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "2.A.03",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Karbonhidrat",
+"Glisemik indeks ve glisemik yük"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.A.04",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Karbonhidrat",
+"Posa (lif) türleri ve görevi"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.A.05",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Karbonhidrat",
+"Rafine ve tam tahıl farkı"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "2.A.06",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Protein",
+"Tanım, amino asitler, esansiyel amino asitler"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.A.07",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Protein",
+"Besin kaynakları (hayvansal, bitkisel)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "2.A.08",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Protein",
+"Vücuttaki görevleri"
+],
+"kodlar": [
+"G"
+]
+},
+{
+"no": "2.A.09",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Protein",
+"Protein kalitesi, tamamlayıcı protein"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.A.10",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Yağ",
+"Doymuş, tekli ve çoklu doymamış yağ asitleri"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.A.11",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Yağ",
+"Omega-3 ve omega-6"
+],
+"kodlar": [
+"T",
+"G",
+"Ö"
+]
+},
+{
+"no": "2.A.12",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Yağ",
+"Trans yağ"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.A.13",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Yağ",
+"Kolesterol, besin kaynakları"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "2.A.14",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Yağ",
+"Yağda çözünen vitaminlerin emilimi"
+],
+"kodlar": [
+"G"
+]
+},
+{
+"no": "2.A.15",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Enerji",
+"Kalori kavramı, enerji yoğunluğu"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.A.16",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Enerji",
+"Bazal metabolizma hızı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.A.17",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Enerji",
+"Besinlerin termik etkisi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.A.18",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Enerji",
+"Günlük enerji harcaması bileşenleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.A.19",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Enerji",
+"Makro besin dağılımı önerileri (resmî kurum)"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.A.20",
+"sistem": "SPI",
+"yol": [
+"Beslenme",
+"Enerji",
+"Vücut kompozisyonu, vücut kitle indeksi, bel çevresi"
+],
+"kodlar": [
+"T",
+"R"
+]
+},
+{
+"no": "2.B.01",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"A vitamini (retinol)"
+],
+"kodlar": [
+"G",
+"Ö",
+"R"
+]
+},
+{
+"no": "2.B.02",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"D vitamini"
+],
+"kodlar": [
+"G",
+"Ö",
+"R"
+]
+},
+{
+"no": "2.B.03",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"E vitamini"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.B.04",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"K vitamini"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.B.05",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"C vitamini"
+],
+"kodlar": [
+"G",
+"Ö",
+"R"
+]
+},
+{
+"no": "2.B.06",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"B1 (tiamin)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.B.07",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"B2 (riboflavin)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.B.08",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"B3 (niasin)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.B.09",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"B5 (pantotenik asit)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.B.10",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"B6 (piridoksin)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.B.11",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"B7 (biyotin)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.B.12",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"B9 (folat, folik asit)"
+],
+"kodlar": [
+"G",
+"Ö",
+"R"
+]
+},
+{
+"no": "2.B.13",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"B12 (kobalamin)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.B.14",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"Yağda ve suda çözünen vitaminlerin farkı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.B.15",
+"sistem": "SPI",
+"yol": [
+"Vitamin",
+"Gıdalarda vitamin kaybı (pişirme, depolama)"
+],
+"kodlar": [
+"N",
+"Y"
+]
+},
+{
+"no": "2.C.01",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"Kalsiyum"
+],
+"kodlar": [
+"G",
+"Ö",
+"R"
+]
+},
+{
+"no": "2.C.02",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"Demir (hem ve hem olmayan demir)"
+],
+"kodlar": [
+"G",
+"Ö",
+"R"
+]
+},
+{
+"no": "2.C.03",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"Magnezyum"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.C.04",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"Çinko"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.C.05",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"Potasyum"
+],
+"kodlar": [
+"G",
+"Ö",
+"R"
+]
+},
+{
+"no": "2.C.06",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"Sodyum ve tuz"
+],
+"kodlar": [
+"G",
+"Ö",
+"R"
+]
+},
+{
+"no": "2.C.07",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"Fosfor"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.C.08",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"İyot"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.C.09",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"Selenyum"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.C.10",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"Bakır, mangan, krom, flor"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.C.11",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"Demir emilimini artıran ve azaltan faktörler"
+],
+"kodlar": [
+"N",
+"Y"
+]
+},
+{
+"no": "2.C.12",
+"sistem": "SPI",
+"yol": [
+"Mineral",
+"Elektrolit dengesi"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.D.01",
+"sistem": "SPI",
+"yol": [
+"Su",
+"Vücuttaki görevleri"
+],
+"kodlar": [
+"G"
+]
+},
+{
+"no": "2.D.02",
+"sistem": "SPI",
+"yol": [
+"Su",
+"Günlük sıvı ihtiyacı için resmî öneriler"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.D.03",
+"sistem": "SPI",
+"yol": [
+"Su",
+"Dehidrasyon nedenleri ve genel belirtileri (tanı değil, genel bilgi)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.D.04",
+"sistem": "SPI",
+"yol": [
+"Su",
+"Sıvı kaynakları (içecekler, yiyecekler)"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.D.05",
+"sistem": "SPI",
+"yol": [
+"Su",
+"Çay, kahve ve kafein"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.D.06",
+"sistem": "SPI",
+"yol": [
+"Su",
+"Şekerli içecekler, enerji içecekleri"
+],
+"kodlar": [
+"T",
+"R"
+]
+},
+{
+"no": "2.D.07",
+"sistem": "SPI",
+"yol": [
+"Su",
+"Sporda sıvı alımı ilkeleri"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.D.08",
+"sistem": "SPI",
+"yol": [
+"Su",
+"Alkolün genel etkileri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.E.01",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Kahvaltının önemi ve içeriği"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.E.02",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Ana ve ara öğünler, öğün sayısı"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.E.03",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Öğün saatleri ve düzenli yeme"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.E.04",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Akşam yemeği zamanı ve uyku ilişkisi"
+],
+"kodlar": [
+"N",
+"Y"
+]
+},
+{
+"no": "2.E.05",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Kronobeslenme (chrononutrition)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.E.06",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Öğün atlama ve etkileri"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.E.07",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Porsiyon boyutu ve tabak modeli"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.E.08",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Bilinçli yeme (mindful eating)"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.E.09",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Yavaş yeme, tokluk sinyalleri"
+],
+"kodlar": [
+"G",
+"Y"
+]
+},
+{
+"no": "2.E.10",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Ekran karşısında yeme"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.E.11",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Sporcu öğünleri: antrenman öncesi ve sonrası"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.E.12",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Sınav dönemi beslenmesi"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.E.13",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Gece yemek ve atıştırma"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.E.14",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Yemek hazırlama (meal prep) ve alışveriş listesi"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "2.E.15",
+"sistem": "SPI",
+"yol": [
+"Öğün",
+"Besin etiketi okuma"
+],
+"kodlar": [
+"K",
+"Y"
+]
+},
+{
+"no": "2.F.01",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Akdeniz beslenme modeli"
+],
+"kodlar": [
+"T",
+"Ö",
+"R"
+]
+},
+{
+"no": "2.F.02",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Vejetaryenlik ve veganlık"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.F.03",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Aralıklı oruç (zaman kısıtlı yeme)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.F.04",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Ketojenik beslenme"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.F.05",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Düşük karbonhidratlı beslenme"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.F.06",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"DASH beslenme modeli"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.F.07",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Glutensiz beslenme, çölyak farkındalığı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.F.08",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Laktoz intoleransı ve süt alternatifleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.F.09",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Besin alerjisi ve intolerans farkı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.F.10",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Kalori kısıtlaması genel ilkeleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.F.11",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Popüler diyetlerin bilimsel değerlendirmesi"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.F.12",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Türkiye Beslenme Rehberi (TÜBER) ilkeleri"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.F.13",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Dünya Sağlık Örgütü sağlıklı beslenme önerileri"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.F.14",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Besin grupları ve önerilen porsiyonlar"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.F.15",
+"sistem": "SPI",
+"yol": [
+"Diyet",
+"Yaş gruplarına göre beslenme (çocuk, ergen, yetişkin, yaşlı)"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.G.01",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Süt ve süt ürünleri (süt, yoğurt, ayran, peynir, kefir)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.02",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Et ve et ürünleri (kırmızı, beyaz et, işlenmiş et)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.03",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Balık ve deniz ürünleri"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.04",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Yumurta"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.05",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Baklagiller (mercimek, nohut, fasulye)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.06",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Tahıllar (buğday, pirinç, yulaf, mısır, bulgur)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.07",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Ekmek çeşitleri"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.08",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Sebzeler (yeşil yapraklı, kök, turpgiller)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.09",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Meyveler ve meyve suyu farkı"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.10",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Kuru meyveler"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.11",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Yağlı tohumlar ve kuruyemişler"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.12",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Bitkisel yağlar (zeytinyağı, ayçiçek, kanola)"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.13",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Tereyağı ve margarin"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.14",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Bal, pekmez, şeker ve tatlandırıcılar"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.15",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Baharatlar ve otlar"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.16",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Çay, kahve, bitki çayları"
+],
+"kodlar": [
+"G",
+"Ö"
+]
+},
+{
+"no": "2.G.17",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Fermente gıdalar (turşu, boza, şalgam, kefir)"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.G.18",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Probiyotik ve prebiyotik"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.G.19",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"İşlenmiş ve ultra işlenmiş gıdalar"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "2.G.20",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Gıda katkı maddeleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.G.21",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Organik ve geleneksel tarım ürünleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.G.22",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Mevsimlik sebze ve meyveler (Türkiye)"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.G.23",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Gıda güvenliği: saklama, çapraz bulaşma, pişirme"
+],
+"kodlar": [
+"K",
+"Y"
+]
+},
+{
+"no": "2.G.24",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Gıda kaynaklı hastalıklardan korunma (genel bilgi)"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.G.25",
+"sistem": "SPI",
+"yol": [
+"Besin",
+"Pişirme yöntemleri ve besin değerine etkisi"
+],
+"kodlar": [
+"N",
+"Y"
+]
+},
+{
+"no": "2.H.01",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Mercimek çorbası"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.02",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Ezogelin çorbası"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.03",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Tarhana çorbası"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.04",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Yayla çorbası"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.05",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"İşkembe çorbası"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.06",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Kuru fasulye"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.07",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Nohut yemeği"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.08",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Barbunya pilaki"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.09",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Etli taze fasulye"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.10",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Zeytinyağlı yaprak sarma"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.11",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Zeytinyağlı enginar"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.12",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"İmam bayıldı"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.13",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Karnıyarık"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.14",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Patlıcan musakka"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.15",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Kabak dolması"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.16",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Biber dolması"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.17",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Etli dolma"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.18",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Mantı"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.19",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Su böreği"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.20",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Sigara böreği"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.21",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Gözleme"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.22",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Pide"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.23",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Lahmacun"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.24",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Döner"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.25",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Şiş kebap"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.26",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Adana kebap"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.27",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Urfa kebap"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.28",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"İskender kebap"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.29",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Köfte (kuru köfte, ızgara köfte)"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.30",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"İçli köfte"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.31",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Çiğ köfte"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.32",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Tavuk sote"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.33",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Hünkâr beğendi"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.34",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Pilav çeşitleri (pirinç, bulgur)"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.35",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Makarna ve erişte yemekleri"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.36",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Menemen"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.37",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Sucuklu yumurta"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.38",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Türk kahvaltısı (peynir, zeytin, reçel, bal, kaymak)"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.39",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Simit"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.40",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Poğaça ve açma"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.41",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Kısır"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.42",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Cacık"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.43",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Çoban salatası"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.44",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Haydari, ezme ve mezeler"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.45",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Balık yemekleri (hamsi, levrek, çipura)"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.46",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Baklava"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.47",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Sütlaç"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.48",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Aşure"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.49",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Kadayıf ve künefe"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.50",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Lokum"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.51",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Türk kahvesi ve çay kültürü"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.H.52",
+"sistem": "SPI",
+"yol": [
+"Yemek",
+"Ayran, şalgam, boza"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "2.I.01",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Fiziksel aktivite ve egzersiz farkı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.I.02",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Fiziksel uygunluğun bileşenleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.I.03",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Aerobik ve anaerobik egzersiz"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "2.I.04",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Kalp atış hızı, maksimum kalp atış hızı, egzersiz bölgeleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.I.05",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"VO2 max kavramı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.I.06",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Algılanan zorluk skalası (RPE)"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.I.07",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Aşamalı yüklenme (progressive overload)"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.I.08",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Antrenman hacmi, yoğunluk, sıklık"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.I.09",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Tekrar, set, dinlenme süreleri"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.I.10",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Periyodizasyon"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.I.11",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Isınma ilkeleri ve örnek rutin"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "2.I.12",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Soğuma ve toparlanma"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.I.13",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Toparlanma: uyku, beslenme, dinlenme günü"
+],
+"kodlar": [
+"Y",
+"N"
+]
+},
+{
+"no": "2.I.14",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Aşırı antrenman"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "2.I.15",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Gecikmeli kas ağrısı"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "2.I.16",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Kas hipertrofisi"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.I.17",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Kas gücü, dayanıklılığı ve hipertrofi farkı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.I.18",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Kas yapısı, kas kasılma türleri"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.I.19",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Yaralanma önleme ilkeleri"
+],
+"kodlar": [
+"K",
+"Y"
+]
+},
+{
+"no": "2.I.20",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Yaşa göre egzersiz önerileri (resmî kurum)"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.I.21",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Haftalık aktivite süreleri (WHO, Sağlık Bakanlığı)"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.I.22",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Hareketsiz yaşam ve sağlık etkisi"
+],
+"kodlar": [
+"N",
+"R"
+]
+},
+{
+"no": "2.I.23",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Ev egzersizi ve ekipmansız antrenman"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.I.24",
+"sistem": "SPI",
+"yol": [
+"Egzersiz",
+"Ders çalışırken hareket molaları"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.J.01",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Şınav (push-up)"
+],
+"kodlar": [
+"A",
+"H",
+"Ö"
+]
+},
+{
+"no": "2.J.02",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Diz üstü şınav"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.03",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Elmas şınav"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.04",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Pike şınav"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.05",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Dips (paralel bar)"
+],
+"kodlar": [
+"A",
+"H"
+]
+},
+{
+"no": "2.J.06",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Sandalye dips"
+],
+"kodlar": [
+"A",
+"H"
+]
+},
+{
+"no": "2.J.07",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Barfiks (pull-up)"
+],
+"kodlar": [
+"A",
+"H",
+"Ö"
+]
+},
+{
+"no": "2.J.08",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Chin-up"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.09",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Australian pull-up (yatay çekiş)"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.10",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Muscle-up"
+],
+"kodlar": [
+"A",
+"H"
+]
+},
+{
+"no": "2.J.11",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Squat (çömelme)"
+],
+"kodlar": [
+"A",
+"H",
+"Ö"
+]
+},
+{
+"no": "2.J.12",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Lunge"
+],
+"kodlar": [
+"A",
+"H",
+"Ö"
+]
+},
+{
+"no": "2.J.13",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Bulgar split squat"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.14",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Pistol squat"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.15",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Glute bridge"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.16",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Calf raise (baldır)"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.17",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Plank ve varyasyonları"
+],
+"kodlar": [
+"A",
+"H",
+"Ö"
+]
+},
+{
+"no": "2.J.18",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Yan plank"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.19",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Hollow body hold"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.20",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"L-sit"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.21",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Leg raise (bacak kaldırma)"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.22",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Mekik ve crunch"
+],
+"kodlar": [
+"A",
+"H"
+]
+},
+{
+"no": "2.J.23",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Mountain climber"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.24",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Burpee"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.25",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Jumping jack, ip atlama"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.26",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Handstand (amuda kalkma) ilerleyişi"
+],
+"kodlar": [
+"A",
+"V"
+]
+},
+{
+"no": "2.J.27",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Front lever ilerleyişi"
+],
+"kodlar": [
+"A",
+"V"
+]
+},
+{
+"no": "2.J.28",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Planche ilerleyişi"
+],
+"kodlar": [
+"A",
+"V"
+]
+},
+{
+"no": "2.J.29",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Human flag"
+],
+"kodlar": [
+"A",
+"V"
+]
+},
+{
+"no": "2.J.30",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Superman ve bird-dog"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.J.31",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Başlangıç, orta, ileri kalistenik programları"
+],
+"kodlar": [
+"Y",
+"V"
+]
+},
+{
+"no": "2.J.32",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Hareket ilerleyiş (progresyon) basamakları"
+],
+"kodlar": [
+"V"
+]
+},
+{
+"no": "2.J.33",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Kalistenik ve ağırlık antrenmanı karşılaştırması"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.J.34",
+"sistem": "SPI",
+"yol": [
+"Kalistenik",
+"Tekrar ve set önerileri, haftalık plan örnekleri"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.K.01",
+"sistem": "SPI",
+"yol": [
+"Direnç",
+"Deadlift"
+],
+"kodlar": [
+"A",
+"H"
+]
+},
+{
+"no": "2.K.02",
+"sistem": "SPI",
+"yol": [
+"Direnç",
+"Bench press"
+],
+"kodlar": [
+"A",
+"H"
+]
+},
+{
+"no": "2.K.03",
+"sistem": "SPI",
+"yol": [
+"Direnç",
+"Overhead press"
+],
+"kodlar": [
+"A",
+"H"
+]
+},
+{
+"no": "2.K.04",
+"sistem": "SPI",
+"yol": [
+"Direnç",
+"Barbell row"
+],
+"kodlar": [
+"A",
+"H"
+]
+},
+{
+"no": "2.K.05",
+"sistem": "SPI",
+"yol": [
+"Direnç",
+"Back squat ve front squat"
+],
+"kodlar": [
+"A",
+"H"
+]
+},
+{
+"no": "2.K.06",
+"sistem": "SPI",
+"yol": [
+"Direnç",
+"Romanian deadlift"
+],
+"kodlar": [
+"A",
+"H"
+]
+},
+{
+"no": "2.K.07",
+"sistem": "SPI",
+"yol": [
+"Direnç",
+"Dumbbell ve kettlebell hareketleri"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.K.08",
+"sistem": "SPI",
+"yol": [
+"Direnç",
+"Elastik bant egzersizleri"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "2.K.09",
+"sistem": "SPI",
+"yol": [
+"Direnç",
+"Tam vücut, üst-alt, itiş-çekiş bölünmüş programlar"
+],
+"kodlar": [
+"Y",
+"V"
+]
+},
+{
+"no": "2.K.10",
+"sistem": "SPI",
+"yol": [
+"Direnç",
+"1 tekrar maksimum kavramı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.K.11",
+"sistem": "SPI",
+"yol": [
+"Direnç",
+"Başlangıç için güvenlik ve spotter"
+],
+"kodlar": [
+"K",
+"Y"
+]
+},
+{
+"no": "2.L.01",
+"sistem": "SPI",
+"yol": [
+"Kardiyo",
+"Yürüyüş"
+],
+"kodlar": [
+"Y",
+"R"
+]
+},
+{
+"no": "2.L.02",
+"sistem": "SPI",
+"yol": [
+"Kardiyo",
+"Koşu tekniği, başlangıç programı"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "2.L.03",
+"sistem": "SPI",
+"yol": [
+"Kardiyo",
+"Bisiklet"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.L.04",
+"sistem": "SPI",
+"yol": [
+"Kardiyo",
+"Yüzme"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.L.05",
+"sistem": "SPI",
+"yol": [
+"Kardiyo",
+"HIIT ve interval antrenmanı"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.L.06",
+"sistem": "SPI",
+"yol": [
+"Kardiyo",
+"Tabata"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.L.07",
+"sistem": "SPI",
+"yol": [
+"Kardiyo",
+"Sirkuit antrenmanı"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.L.08",
+"sistem": "SPI",
+"yol": [
+"Kardiyo",
+"Pliometrik antrenman"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.L.09",
+"sistem": "SPI",
+"yol": [
+"Kardiyo",
+"Eşik (laktat) antrenmanı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.L.10",
+"sistem": "SPI",
+"yol": [
+"Kardiyo",
+"Basamak çıkma, ip atlama"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.M.01",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Esneklik ve hareket açıklığı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.M.02",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Statik germe"
+],
+"kodlar": [
+"T",
+"A",
+"Y"
+]
+},
+{
+"no": "2.M.03",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Dinamik germe"
+],
+"kodlar": [
+"T",
+"A",
+"Y"
+]
+},
+{
+"no": "2.M.04",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"PNF germe"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.M.05",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Balistik germe ve riskleri"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "2.M.06",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Germe süreleri ve sıklığı için öneriler"
+],
+"kodlar": [
+"R",
+"Y"
+]
+},
+{
+"no": "2.M.07",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Kalça fleksörleri germe"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.08",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Hamstring germe"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.09",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Quadriceps germe"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.10",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Baldır ve aşil germe"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.11",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Kalça açma (piriformis, glute)"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.12",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Omuz ve göğüs germe"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.13",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Sırt ve latissimus germe"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.14",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Boyun germe"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.15",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Bilek ve önkol germe (masa başı çalışanlar için)"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.16",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Omurga hareketliliği (kedi-deve)"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.17",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Torasik omurga mobilitesi"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.18",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Ayak bileği mobilitesi"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.M.19",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Köpük silindir (foam roller) kullanımı"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.M.20",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Yoga (asanalar, güneşe selam)"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "2.M.21",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Pilates"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "2.M.22",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Tai chi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.M.23",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Split ve köprü gibi ileri esneklik ilerleyişi"
+],
+"kodlar": [
+"V",
+"Y"
+]
+},
+{
+"no": "2.M.24",
+"sistem": "SPI",
+"yol": [
+"Esneklik",
+"Sabah ve akşam esneme rutinleri"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "2.N.01",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Sağlıklı omurga eğrilikleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.N.02",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Öne kayık baş duruşu"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "2.N.03",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Kifoz, lordoz, skolyoz (genel bilgi, tanı değil)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.N.04",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Ön pelvik eğim"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "2.N.05",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Oturma duruşu ve masa başı ergonomi"
+],
+"kodlar": [
+"K",
+"Y"
+]
+},
+{
+"no": "2.N.06",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Ekran yüksekliği, ışık, göz molası (20-20-20)"
+],
+"kodlar": [
+"K",
+"Y"
+]
+},
+{
+"no": "2.N.07",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Ayakta çalışma masası"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.N.08",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Uzun süre oturmanın etkileri, hareket molası"
+],
+"kodlar": [
+"N",
+"R"
+]
+},
+{
+"no": "2.N.09",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Çanta taşıma, uyku yastığı ve şiltesi"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.N.10",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Core (merkez) kaslarının rolü"
+],
+"kodlar": [
+"G"
+]
+},
+{
+"no": "2.N.11",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Bel ve boyun ağrısını önleyici genel alışkanlıklar"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.N.12",
+"sistem": "SPI",
+"yol": [
+"Duruş",
+"Denge ve koordinasyon egzersizleri"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.O.01",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Uyku evreleri (NREM, REM)"
+],
+"kodlar": [
+"T",
+"V"
+]
+},
+{
+"no": "2.O.02",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Uyku döngüsü ve süresi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.O.03",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Yaşa göre önerilen uyku süreleri"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.O.04",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Sirkadiyen ritim"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.O.05",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Kronotip (sabahçı, akşamcı)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.O.06",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Melatonin hormonu"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.O.07",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Işığın rolü, mavi ışık ve ekran"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.O.08",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Uyku hijyeni ilkeleri"
+],
+"kodlar": [
+"K",
+"Y"
+]
+},
+{
+"no": "2.O.09",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Yatak odası ortamı (ısı, ses, ışık)"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.O.10",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Kafein ve alkolün uykuya etkisi"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.O.11",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Akşam yemeği ve uyku"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.O.12",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Egzersizin uykuya etkisi ve zamanlaması"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.O.13",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Şekerleme (idle)"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "2.O.14",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Uyku yoksunluğu ve bilişsel etkiler"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.O.15",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Uyku ve bellek pekiştirme"
+],
+"kodlar": [
+"N",
+"G"
+]
+},
+{
+"no": "2.O.16",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Uyku borcu"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.O.17",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Vardiyalı çalışma ve jet lag (genel bilgi)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.O.18",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Uykuya dalma rutinleri"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "2.O.19",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"İnsomnia farkındalığı (tanı ve tedavi değil, genel bilgi)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.O.20",
+"sistem": "SPI",
+"yol": [
+"Uyku",
+"Sınav dönemi uyku düzeni"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "2.P.01",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Stres tepkisi, kortizol"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.P.02",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Kısa ve uzun süreli stres"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "2.P.03",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Stresle başa çıkma teknikleri"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "2.P.04",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Nefes egzersizleri (diyafram, kutu nefes)"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.P.05",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Meditasyon ve farkındalık"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "2.P.06",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"İlerleyici kas gevşetme"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "2.P.07",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Doğada zaman geçirme"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.P.08",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Sosyal destek, yalnızlık"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "2.P.09",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Tükenmişlik (genel bilgi)"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "2.P.10",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Dijital detoks, ekran süresi"
+],
+"kodlar": [
+"Y",
+"N"
+]
+},
+{
+"no": "2.P.11",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Soğuk maruziyeti ve sauna (genel bilgi ve sınırlılıklar)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.P.12",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Sigara ve alkolün genel etkileri"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "2.P.13",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Güneşten korunma ve D vitamini"
+],
+"kodlar": [
+"Y",
+"R"
+]
+},
+{
+"no": "2.P.14",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"El yıkama, ağız ve diş hijyeni"
+],
+"kodlar": [
+"K",
+"Y"
+]
+},
+{
+"no": "2.P.15",
+"sistem": "SPI",
+"yol": [
+"Stres",
+"Kişisel hijyen ve bulaşıcı hastalıklardan korunma (genel)"
+],
+"kodlar": [
+"K",
+"Y"
+]
+},
+{
+"no": "2.Q.01",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Kan basıncı nedir, ölçüm ilkeleri, resmî sınıflar"
+],
+"kodlar": [
+"T",
+"R"
+]
+},
+{
+"no": "2.Q.02",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Kolesterol ve lipit profili nedir"
+],
+"kodlar": [
+"T",
+"R"
+]
+},
+{
+"no": "2.Q.03",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Kan şekeri, insülin, tip 2 diyabet korunma"
+],
+"kodlar": [
+"T",
+"R"
+]
+},
+{
+"no": "2.Q.04",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Obezite tanımı ve korunma (WHO)"
+],
+"kodlar": [
+"T",
+"R"
+]
+},
+{
+"no": "2.Q.05",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Kalp-damar sağlığı ve risk faktörleri"
+],
+"kodlar": [
+"T",
+"R"
+]
+},
+{
+"no": "2.Q.06",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Kemik sağlığı, osteoporoz korunma"
+],
+"kodlar": [
+"T",
+"R"
+]
+},
+{
+"no": "2.Q.07",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Demir eksikliği ve anemi farkındalığı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.Q.08",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Bağışıklık sistemi ve aşılama"
+],
+"kodlar": [
+"T",
+"R"
+]
+},
+{
+"no": "2.Q.09",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Bağırsak mikrobiyotası"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "2.Q.10",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Tuz tüketimi ve sağlık (WHO)"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.Q.11",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Şeker tüketimi ve sağlık (WHO)"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.Q.12",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Sigara bırakma farkındalığı (genel)"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.Q.13",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Ruh sağlığı ve yardım arama (genel bilgi)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.Q.14",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Kadın sağlığı, ergenlik ve beslenme (genel)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "2.Q.15",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"İlk yardım temelleri (genel bilgi)"
+],
+"kodlar": [
+"A",
+"K"
+]
+},
+{
+"no": "2.Q.16",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Sağlıklı yaşlanma"
+],
+"kodlar": [
+"T",
+"R"
+]
+},
+{
+"no": "2.Q.17",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Check-up ve periyodik kontrol önerileri (resmî)"
+],
+"kodlar": [
+"R"
+]
+},
+{
+"no": "2.Q.18",
+"sistem": "SPI",
+"yol": [
+"Sağlık",
+"Sağlık okuryazarlığı, güvenilir kaynak ayırt etme"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "3.A.01",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Felsefenin tanımı, konusu ve yöntemi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.02",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Felsefe tarihinin dönemleri"
+],
+"kodlar": [
+"V"
+]
+},
+{
+"no": "3.A.03",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Epistemoloji (bilgi kuramı)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.04",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Ontoloji ve metafizik"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.05",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Etik (ahlak felsefesi)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.06",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Estetik (sanat felsefesi)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.07",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Mantık"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "3.A.08",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Siyaset felsefesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.09",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Bilim felsefesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.10",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Zihin felsefesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.11",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Dil felsefesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.12",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Din felsefesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.13",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Hukuk felsefesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.14",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Tarih felsefesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.15",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Eğitim felsefesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.16",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Rasyonalizm"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.17",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Ampirizm (deneycilik)"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.18",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Kritisizm (eleştiricilik)"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.19",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"İdealizm"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.20",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Materyalizm"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.21",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Pozitivizm"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.22",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Pragmatizm"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.23",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Fenomenoloji"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.24",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Varoluşçuluk"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.25",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Stoacılık"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.26",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Epikürcülük"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.27",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Septisizm (kuşkuculuk)"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.28",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Sofistler"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.29",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Analitik felsefe"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.30",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Yapısalcılık ve postyapısalcılık"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.31",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Postmodernizm"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.32",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Eleştirel kuram (Frankfurt Okulu)"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.33",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Faydacılık (utilitarizm)"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.34",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Deontolojik etik"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.35",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Erdem etiği"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.36",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Liberalizm, sosyalizm, anarşizm"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.37",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Sosyal sözleşme kuramları"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.38",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Nihilizm ve absürdizm"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.39",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Hümanizm"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.40",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Determinizm ve özgür irade"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.41",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"İslam felsefesi"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.42",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Hint felsefesi"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.43",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Çin felsefesi"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.44",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Japon felsefesi ve Zen"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.A.45",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Afrika felsefesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.A.46",
+"sistem": "ESP",
+"yol": [
+"Felsefe",
+"Türk felsefe geleneği"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.B.01",
+"sistem": "ESP",
+"yol": [
+"Presokratikler: Thales, Anaksimandros, Anaksimenes, Pythagoras, Herakleitos, Parmenides, Zenon (Elealı), Empedokles, Anaksagoras, Demokritos"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.02",
+"sistem": "ESP",
+"yol": [
+"Klasik Yunan: Protagoras, Gorgias, Sokrates, Platon, Aristoteles, Diogenes"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.03",
+"sistem": "ESP",
+"yol": [
+"Hellenistik ve Roma: Epikuros, Zenon (Stoacı), Epiktetos, Marcus Aurelius, Seneca, Cicero, Lucretius, Pirhon, Plotinos"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.04",
+"sistem": "ESP",
+"yol": [
+"Geç Antik ve Ortaçağ Hristiyan: Augustinus, Boethius, Anselm, Thomas Aquinas, Duns Scotus, William of Ockham, Nicolaus Cusanus"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.05",
+"sistem": "ESP",
+"yol": [
+"İslam dünyası: Kindî, Farabi, İbn-i Sina, Gazali, İbn Rüşd, İbn Bacce, İbn Tufeyl, İbn Haldun, Sühreverdî, Mevlânâ"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.06",
+"sistem": "ESP",
+"yol": [
+"Rönesans: Machiavelli, Thomas More, Erasmus, Giordano Bruno, Francis Bacon, Montaigne"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.07",
+"sistem": "ESP",
+"yol": [
+"17. yüzyıl: Hobbes, Descartes, Pascal, Spinoza, Locke, Leibniz, Malebranche"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.08",
+"sistem": "ESP",
+"yol": [
+"18. yüzyıl: Vico, Berkeley, Hume, Montesquieu, Voltaire, Rousseau, Diderot, Adam Smith, Kant"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.09",
+"sistem": "ESP",
+"yol": [
+"Alman idealizmi: Fichte, Schelling, Hegel, Schleiermacher"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.10",
+"sistem": "ESP",
+"yol": [
+"19. yüzyıl: Schopenhauer, Kierkegaard, Comte, John Stuart Mill, Marx, Engels, Nietzsche, Bentham"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.11",
+"sistem": "ESP",
+"yol": [
+"Pragmatistler: Peirce, William James, John Dewey"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.12",
+"sistem": "ESP",
+"yol": [
+"Fenomenoloji ve varoluşçuluk: Husserl, Heidegger, Sartre, Simone de Beauvoir, Camus, Merleau-Ponty, Karl Jaspers, Gabriel Marcel"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.13",
+"sistem": "ESP",
+"yol": [
+"Analitik gelenek: Frege, Russell, Moore, Wittgenstein, Carnap, Quine, Putnam, Kripke, Popper"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.14",
+"sistem": "ESP",
+"yol": [
+"Bilim felsefecileri: Thomas Kuhn, Imre Lakatos, Paul Feyerabend"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.15",
+"sistem": "ESP",
+"yol": [
+"Frankfurt Okulu ve eleştirel kuram: Adorno, Horkheimer, Marcuse, Habermas, Walter Benjamin, Erich Fromm"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.16",
+"sistem": "ESP",
+"yol": [
+"Siyaset felsefesi: Hannah Arendt, John Rawls, Robert Nozick, Isaiah Berlin, Michael Sandel, Alasdair MacIntyre, Charles Taylor"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.17",
+"sistem": "ESP",
+"yol": [
+"Yapısalcılık ve sonrası: Saussure, Lévi-Strauss, Barthes, Foucault, Derrida, Deleuze, Baudrillard, Lacan, Althusser"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.18",
+"sistem": "ESP",
+"yol": [
+"Çağdaş: Chomsky, Dennett, Martha Nussbaum, Peter Singer, Slavoj Žižek, Byung-Chul Han, Simone Weil, Levinas, Ricoeur, Gadamer, Ayn Rand"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.19",
+"sistem": "ESP",
+"yol": [
+"Doğu felsefesi: Konfüçyüs, Lao Zi, Zhuangzi, Mozi, Mencius, Xunzi, Han Fei, Sun Zi, Buda, Nagarjuna, Adi Shankara"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.20",
+"sistem": "ESP",
+"yol": [
+"Türk düşünürleri: Hilmi Ziya Ülken, Takiyettin Mengüşoğlu, Nermi Uygur, İoanna Kuçuradi, Cemil Meriç, Nurettin Topçu, Ahmet Cevdet Paşa, Ziya Gökalp"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.21",
+"sistem": "ESP",
+"yol": [
+"Kadın filozoflar: Hypatia, Simone Weil, Simone de Beauvoir, Hannah Arendt, Martha Nussbaum, Judith Butler, Mary Wollstonecraft"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.22",
+"sistem": "ESP",
+"yol": [
+"Psikoloji ve sosyoloji kurucuları: Freud, Jung, Adler, Piaget, Weber, Durkheim, Simmel"
+],
+"kodlar": [
+"B",
+"G",
+"E"
+]
+},
+{
+"no": "3.B.23",
+"sistem": "ESP",
+"yol": [
+"Felsefede ünlü düşünce deneyleri (mağara alegorisi, Gyges'in yüzüğü, Çin odası, tramvay ikilemi, gemi paradoksu, sonsuz maymun)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "3.B.24",
+"sistem": "ESP",
+"yol": [
+"Felsefede ünlü sorular (öz, varlık, bilgi, iyi, adalet, özgürlük, ölüm, anlam)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "3.C.01",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Tarih öncesi çağlar (Paleolitik, Mezolitik, Neolitik)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.C.02",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Neolitik devrim ve tarımın başlangıcı"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "3.C.03",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Göbeklitepe ve Çatalhöyük"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.C.04",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Bronz Çağı ve Demir Çağı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.C.05",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Mezopotamya uygarlıkları (Sümer, Akad, Babil, Asur)"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.06",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Antik Mısır"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.07",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Hititler"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.08",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Frigler, Lidyalılar, Urartular, İyonlar"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.09",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Fenikeliler ve alfabenin yayılışı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.C.10",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Persler (Ahameniş)"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.11",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Antik Yunan şehir devletleri, Atina, Sparta"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.12",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Pers Savaşları (Maraton, Termopilai, Salamis)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.C.13",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Peloponnesos Savaşı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.C.14",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Büyük İskender ve seferleri"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.15",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Helenistik krallıklar"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.C.16",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Roma Krallığı ve Cumhuriyeti"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.17",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Pön Savaşları (Kartaca)"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.18",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Jül Sezar, Augustus, Roma İmparatorluğu"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.19",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Roma hukuku ve mimarisi"
+],
+"kodlar": [
+"T",
+"E"
+]
+},
+{
+"no": "3.C.20",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Roma'nın bölünmesi ve Batı Roma'nın çöküşü"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.C.21",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Hindistan'da Maurya ve Gupta"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.22",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Çin'de Qin ve Han"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.C.23",
+"sistem": "ESP",
+"yol": [
+"Tarih",
+"Kavimler Göçü"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.01",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Bizans İmparatorluğu (kuruluş, Justinianus, çöküş)"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.D.02",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Franklar ve Şarlman"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.D.03",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Feodalizm ve şövalyelik"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "3.D.04",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Kilise gücü, Papalık"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "3.D.05",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Haçlı Seferleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.06",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Magna Carta"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.07",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Yüzyıl Savaşları ve Jeanne d'Arc"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.D.08",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Kara Ölüm (veba)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.09",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"İstanbul'un fethinin Avrupa'ya etkisi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.10",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Rönesans (İtalya)"
+],
+"kodlar": [
+"S",
+"B",
+"E"
+]
+},
+{
+"no": "3.D.11",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Matbaanın icadı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.12",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Coğrafi keşifler"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.D.13",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Reform ve Karşı Reform"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.D.14",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Otuz Yıl Savaşları ve Vestfalya Barışı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.15",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Bilimsel Devrim"
+],
+"kodlar": [
+"B",
+"E",
+"N"
+]
+},
+{
+"no": "3.D.16",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Aydınlanma Çağı"
+],
+"kodlar": [
+"B",
+"E",
+"N"
+]
+},
+{
+"no": "3.D.17",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Mutlakiyet (XIV. Louis, Büyük Petro, II. Katerina)"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.D.18",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"İngiliz devrimleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.19",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Amerikan Bağımsızlık Savaşı"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.D.20",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Fransız Devrimi"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.D.21",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Napolyon dönemi ve savaşları"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.D.22",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Viyana Kongresi ve Avrupa dengesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.23",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Sanayi Devrimi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.24",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"1848 Devrimleri, milliyetçilik"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.25",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"İtalya ve Almanya'nın birliği"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.D.26",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Sömürgecilik ve emperyalizm"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.D.27",
+"sistem": "ESP",
+"yol": [
+"Avrupa",
+"Doğu Sorunu"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.01",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Birinci Dünya Savaşı (nedenleri, cepheler, sonuçlar)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.02",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Versay Antlaşması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.03",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Rus Devrimi ve SSCB'nin kuruluşu"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.E.04",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Milletler Cemiyeti"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.05",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Büyük Ekonomik Bunalım (1929)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.06",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Faşizm ve Nazizm'in yükselişi"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.E.07",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"İkinci Dünya Savaşı (nedenleri, cepheler, sonuçlar)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.08",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Holokost"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.09",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Hiroşima ve Nagazaki"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.10",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Birleşmiş Milletler'in kuruluşu"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.11",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Soğuk Savaş"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.12",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Marshall Planı ve NATO"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.13",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Kore Savaşı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.14",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Küba Füze Krizi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.15",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Vietnam Savaşı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.16",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Berlin Duvarı ve yıkılışı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.17",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Sovyetler Birliği'nin dağılması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.18",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Avrupa Birliği'nin gelişimi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.19",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Sömürgeciliğin sonu, bağımsızlık hareketleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.20",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Ortadoğu (İsrail-Filistin, Körfez savaşları)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.E.21",
+"sistem": "ESP",
+"yol": [
+"Dünya",
+"Küreselleşme ve teknoloji devrimi"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "3.F.01",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Orta Asya Türk kültürü ve destanlar"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.F.02",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Asya Hun Devleti"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.F.03",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Avrupa Hun Devleti ve Attila"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.F.04",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Göktürk Devletleri, Orhun Yazıtları"
+],
+"kodlar": [
+"S",
+"B",
+"E"
+]
+},
+{
+"no": "3.F.05",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Uygurlar"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.F.06",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Avarlar, Hazarlar, Bulgarlar, Peçenekler, Kıpçaklar"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.F.07",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Karahanlılar"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.F.08",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Gazneliler"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.F.09",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Büyük Selçuklu Devleti ve Sultanları"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.F.10",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Malazgirt Muharebesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.F.11",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Dandanakan ve Pasinler Muharebeleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.F.12",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Anadolu Selçuklu Devleti"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.F.13",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Miryokefalon Muharebesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.F.14",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Kösedağ Muharebesi ve Moğol istilası"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.F.15",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Harzemşahlar"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.F.16",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Eyyubiler, Memlükler"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.F.17",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Anadolu beylikleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.F.18",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Türk-İslam medeniyeti (bilim, sanat, kurumlar)"
+],
+"kodlar": [
+"B",
+"E"
+]
+},
+{
+"no": "3.F.19",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Timur İmparatorluğu ve Ankara Muharebesi"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.F.20",
+"sistem": "ESP",
+"yol": [
+"Türk",
+"Akkoyunlular ve Karakoyunlular"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.01",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Kuruluş dönemi (Osman Bey, Orhan Bey, Murad Hüdavendigâr)"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.02",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Rumeli'ye geçiş ve Balkan fetihleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.03",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Kosova ve Niğbolu Muharebeleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.04",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Fetret devri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.05",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"II. Murad ve Varna"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.06",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"İstanbul'un Fethi (Fatih Sultan Mehmet)"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.07",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Fatih Kanunnamesi, Fatih dönemi kurumları"
+],
+"kodlar": [
+"S",
+"E"
+]
+},
+{
+"no": "3.G.08",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"II. Bayezid dönemi"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.09",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Yavuz Sultan Selim, Çaldıran, Mercidabık, Ridaniye"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.10",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Halifeliğin Osmanlı'ya geçişi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.11",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Kanuni Sultan Süleyman dönemi"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.12",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Mohaç Muharebesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.13",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Preveze Deniz Muharebesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.14",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Osmanlı denizciliği ve Barbaros Hayrettin Paşa"
+],
+"kodlar": [
+"S",
+"B"
+]
+},
+{
+"no": "3.G.15",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"İnebahtı Deniz Muharebesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.16",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Osmanlı devlet teşkilatı (divan, eyalet, sancak)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.G.17",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Osmanlı ordusu (kapıkulu, yeniçeri, timarlı sipahi)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.G.18",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Osmanlı ekonomisi (timar, vergi, esnaf, lonca)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.G.19",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Osmanlı hukuku ve millet sistemi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.G.20",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Osmanlı'da bilim, sanat, mimari (Mimar Sinan)"
+],
+"kodlar": [
+"B",
+"E"
+]
+},
+{
+"no": "3.G.21",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Duraklama dönemi (III. Murad - IV. Murad)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.22",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Kösem Sultan ve kadınlar saltanatı"
+],
+"kodlar": [
+"S",
+"B"
+]
+},
+{
+"no": "3.G.23",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Köprülüler dönemi"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.24",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"II. Viyana Kuşatması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.25",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Karlofça Antlaşması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.26",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Pasarofça Antlaşması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.27",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Lale Devri"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.28",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Belgrad Antlaşması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.29",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Küçük Kaynarca Antlaşması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.30",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"III. Selim ve Nizam-ı Cedid"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.31",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Sened-i İttifak"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.32",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"II. Mahmut ve Vaka-i Hayriye"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.33",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Tanzimat Fermanı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.34",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Islahat Fermanı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.35",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Kırım Savaşı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.36",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Kanun-ı Esasi ve I. Meşrutiyet"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.37",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"93 Harbi ve Berlin Antlaşması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.38",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"II. Abdülhamid dönemi"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.39",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"İttihat ve Terakki"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.40",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"II. Meşrutiyet ve 31 Mart Vakası"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.41",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Trablusgarp Savaşı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.42",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Balkan Savaşları"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.43",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Osmanlı'nın I. Dünya Savaşı'na girişi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.44",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Çanakkale Savaşları"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.G.45",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Kafkas, Irak, Kanal, Filistin cepheleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.46",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Mondros Ateşkes Antlaşması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.47",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Osmanlı Devleti'nin son dönemi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.G.48",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Kapitülasyonlar ve Düyun-ı Umumiye"
+],
+"kodlar": [
+"T",
+"S",
+"N"
+]
+},
+{
+"no": "3.G.49",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Osmanlı'da eğitim ve Darülfünun"
+],
+"kodlar": [
+"T",
+"S"
+]
+},
+{
+"no": "3.G.50",
+"sistem": "ESP",
+"yol": [
+"Osmanlı",
+"Osmanlı'da fikir akımları (Osmanlıcılık, İslamcılık, Türkçülük, Batıcılık)"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "3.H.01",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"İşgaller ve cemiyetler"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.02",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Mustafa Kemal'in Samsun'a çıkışı"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.H.03",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Amasya Genelgesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.04",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Erzurum ve Sivas Kongreleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.05",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Misak-ı Milli"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.06",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"TBMM'nin açılması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.07",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"İç ayaklanmalar"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.08",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Doğu, Güney, Batı cepheleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.09",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"I. ve II. İnönü Muharebeleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.10",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Sakarya Meydan Muharebesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.11",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Büyük Taarruz ve Başkomutanlık Meydan Muharebesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.12",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Mudanya Ateşkesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.13",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Lozan Barış Antlaşması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.14",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Saltanatın kaldırılması, Cumhuriyet'in ilanı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.15",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Halifeliğin kaldırılması, Tevhid-i Tedrisat"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.16",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"1924 Anayasası"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.17",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Siyasi inkılaplar"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.18",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Hukuk inkılapları (Medeni Kanun)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.19",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Eğitim ve kültür inkılapları (Harf Devrimi, TDK, TTK)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.20",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Toplumsal inkılaplar (Şapka Kanunu, Soyadı Kanunu, kadın hakları)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.21",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Ekonomik inkılaplar ve İzmir İktisat Kongresi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.22",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Devletçilik ve planlı kalkınma"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.23",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Atatürk ilkeleri (altı ok)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.H.24",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Çok partili hayata geçiş denemeleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.25",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Atatürk dönemi dış politikası (Montrö, Hatay, Balkan Antantı)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.26",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"II. Dünya Savaşı'nda Türkiye"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.27",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"1945 sonrası çok partili dönem"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.28",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Kore Savaşı ve NATO üyeliği"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.29",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"1960 darbesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.30",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Kıbrıs sorunu, 1974 Barış Harekâtı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.31",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"12 Mart, 12 Eylül dönemleri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.32",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"1980 sonrası ekonomi ve dış politika"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.H.33",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Atatürk'ün hayatı (çocukluk, askerlik, siyaset)"
+],
+"kodlar": [
+"S",
+"B"
+]
+},
+{
+"no": "3.H.34",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Atatürk'ün Nutuk ve diğer eserleri"
+],
+"kodlar": [
+"E"
+]
+},
+{
+"no": "3.H.35",
+"sistem": "ESP",
+"yol": [
+"Cumhuriyet",
+"Cumhuriyet dönemi bilim ve sanat"
+],
+"kodlar": [
+"B",
+"E"
+]
+},
+{
+"no": "3.I.01",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Çin'de ilk hanedanlar (Xia, Shang, Zhou)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.02",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Qin ve Han Hanedanları"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.I.03",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Tang Hanedanı"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.I.04",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Song Hanedanı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.05",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Yuan (Moğol) Hanedanı"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.I.06",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Ming Hanedanı ve Yasak Şehir"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.07",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Qing Hanedanı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.08",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Afyon Savaşları"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.09",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Boxer İsyanı, Xinhai Devrimi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.10",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Çin İç Savaşı ve Halk Cumhuriyeti"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.I.11",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Mao dönemi: Büyük İleri Atılım, Kültür Devrimi"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.I.12",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Çin'in ekonomik reformları"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.13",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"İpek Yolu"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.14",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Moğol İmparatorluğu ve Cengiz Han"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.I.15",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Moğol fetihleri ve etkileri"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.16",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Hindistan: Vedik dönem, Budizm'in doğuşu"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.I.17",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Delhi Sultanlığı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.18",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Babür İmparatorluğu"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.I.19",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"İngiliz Hindistanı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.20",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Hindistan Bağımsızlık Hareketi, Gandi"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.I.21",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Hindistan-Pakistan ayrılığı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.22",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Japonya: Yamato, Heian, Kamakura, Edo"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.23",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Samuray ve şogunluk"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "3.I.24",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Meiji Restorasyonu"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.25",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Rus-Japon Savaşı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.26",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Japonya'nın II. Dünya Savaşı ve sonrası"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.27",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Kore tarihi ve Kore Savaşı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.28",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Güneydoğu Asya (Kmer, Vietnam, Tayland)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.29",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"İran tarihi: Safeviler, Kaçarlar, Pehlevi, 1979 Devrimi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.30",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Arap yarımadası: İslam'ın doğuşu, Emeviler, Abbasiler"
+],
+"kodlar": [
+"S",
+"B",
+"N"
+]
+},
+{
+"no": "3.I.31",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Orta Asya hanlıkları (Buhara, Hive, Kokand)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.32",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Tibet ve Budizm tarihi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.I.33",
+"sistem": "ESP",
+"yol": [
+"Asya",
+"Asya'da sömürgecilik ve bağımsızlık"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.01",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Truva Savaşı (mit ve tarih)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.02",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Maraton, Termopilai, Salamis"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.03",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Gaugamela"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.04",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Kannai"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.05",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Zama"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.06",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Malazgirt"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.07",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Hastings"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.08",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Miryokefalon"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.09",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Kosova, Niğbolu, Varna"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.10",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Ankara Muharebesi"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.11",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Çaldıran, Mercidabık"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.12",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Mohaç"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.13",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Preveze"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.14",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Lepanto (İnebahtı)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.15",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Waterloo"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.16",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Austerlitz"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.17",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Trafalgar"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.18",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Gettysburg"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.19",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Verdun ve Somme"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.20",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Gelibolu (Çanakkale)"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.21",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Sarıkamış"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.22",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Stalingrad"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.23",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Normandiya Çıkarması"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.24",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Pearl Harbor"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.25",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Midway"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.26",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Sakarya, Dumlupınar"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.27",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Kıbrıs 1974"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.28",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Dien Bien Phu"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.29",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Altı Gün Savaşı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.J.30",
+"sistem": "ESP",
+"yol": [
+"Savaş",
+"Körfez Savaşı"
+],
+"kodlar": [
+"S",
+"N"
+]
+},
+{
+"no": "3.K.01",
+"sistem": "ESP",
+"yol": [
+"Kişi",
+"Hükümdarlar ve devlet adamları (Osman Gazi, Fatih, Kanuni, Atatürk, Napolyon, Cengiz Han, Büyük İskender, Sezar, Şarlman)"
+],
+"kodlar": [
+"S",
+"B"
+]
+},
+{
+"no": "3.K.02",
+"sistem": "ESP",
+"yol": [
+"Kişi",
+"Bilim insanları (Newton, Galileo, Darwin, Einstein, Tesla, Curie, Hawking, Cahit Arf, Ali Kuşçu, Biruni, Harezmi, Farabi, İbn Heysem, Uluğ Bey)"
+],
+"kodlar": [
+"B",
+"E"
+]
+},
+{
+"no": "3.K.03",
+"sistem": "ESP",
+"yol": [
+"Kişi",
+"Sanatçılar (Leonardo da Vinci, Michelangelo, Mimar Sinan, Rembrandt, Picasso, Van Gogh, Bach, Mozart, Beethoven, Itri, Yunus Emre)"
+],
+"kodlar": [
+"B",
+"E"
+]
+},
+{
+"no": "3.K.04",
+"sistem": "ESP",
+"yol": [
+"Kişi",
+"Kâşifler (Kolomb, Vasco da Gama, Magellan, Piri Reis, Evliya Çelebi, İbn Battuta, Marco Polo)"
+],
+"kodlar": [
+"S",
+"B"
+]
+},
+{
+"no": "3.K.05",
+"sistem": "ESP",
+"yol": [
+"Kavram",
+"Devlet, hanedan, imparatorluk, monarşi, cumhuriyet, demokrasi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.K.06",
+"sistem": "ESP",
+"yol": [
+"Kavram",
+"Feodalite, merkantilizm, kapitalizm, sosyalizm, komünizm, liberalizm, milliyetçilik"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.K.07",
+"sistem": "ESP",
+"yol": [
+"Kavram",
+"İhtilal, devrim, reform, isyan, darbe"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.K.08",
+"sistem": "ESP",
+"yol": [
+"Kavram",
+"Antlaşma, ateşkes, ittifak, cephe, kuşatma"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "3.K.09",
+"sistem": "ESP",
+"yol": [
+"Kavram",
+"Tarih yazıcılığı, birincil ve ikincil kaynak"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "3.K.10",
+"sistem": "ESP",
+"yol": [
+"Kavram",
+"Kronoloji, zaman şeridi, çağ ve dönem ayrımları"
+],
+"kodlar": [
+"T",
+"V"
+]
+},
+{
+"no": "4.A.01",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Dil edinimi ve ikinci dil edinimi"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "4.A.02",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Kritik dönem hipotezi"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "4.A.03",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Anlaşılır girdi (comprehensible input)"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.A.04",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Aralıklı tekrar ve kelime kartları"
+],
+"kodlar": [
+"T",
+"Y",
+"A"
+]
+},
+{
+"no": "4.A.05",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Anımsatıcı (mnemonic) teknikleri"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.A.06",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Gölgeleme (shadowing) tekniği"
+],
+"kodlar": [
+"T",
+"Y",
+"A"
+]
+},
+{
+"no": "4.A.07",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Dinleme becerisini geliştirme"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.A.08",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Konuşma becerisini geliştirme, dil değişimi"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.A.09",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Okuma becerisi, yoğun ve geniş okuma"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.A.10",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Yazma becerisi"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.A.11",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Telaffuz ve minimal çiftler"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.A.12",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Öğrenme yöntemleri (dilbilgisi-çeviri, doğrudan, iletişimsel)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.A.13",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Görev temelli dil öğrenimi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.A.14",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Kelime öğrenme stratejileri, kelime sıklığı ve kapsama oranı"
+],
+"kodlar": [
+"T",
+"Y",
+"S"
+]
+},
+{
+"no": "4.A.15",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Ortak Avrupa Dil Çerçevesi (A1-C2)"
+],
+"kodlar": [
+"T",
+"S"
+]
+},
+{
+"no": "4.A.16",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Dil sınavları (TOEFL, IELTS, TOEIC, YDS/YÖKDİL, Goethe, JLPT, DELF, DELE, TORFL, HSK, TOPIK)"
+],
+"kodlar": [
+"T",
+"S"
+]
+},
+{
+"no": "4.A.17",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Yabancı dil çalışma planı örnekleri"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "4.A.18",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Yaygın öğrenci hataları ve dil aktarımı (Türkçeden)"
+],
+"kodlar": [
+"H",
+"N"
+]
+},
+{
+"no": "4.A.19",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Çok dillilik ve bilişsel etkileri"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "4.A.20",
+"sistem": "ESP",
+"yol": [
+"Dil",
+"Kod değiştirme, ödünç sözcükler, yanlış arkadaşlar"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "4.B.01",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Alfabe, sesler, telaffuz (IPA), vurgu"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.B.02",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Yazım kuralları ve düzensiz yazımlar"
+],
+"kodlar": [
+"K",
+"İ"
+]
+},
+{
+"no": "4.B.03",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"İsimler, çoğul yapımı, sayılabilir ve sayılamaz"
+],
+"kodlar": [
+"K",
+"İ",
+"Ö"
+]
+},
+{
+"no": "4.B.04",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Tanımlıklar (a, an, the)"
+],
+"kodlar": [
+"K",
+"İ",
+"Ö"
+]
+},
+{
+"no": "4.B.05",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Zamirler (kişi, iyelik, dönüşlülük, ilgi)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.B.06",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Sıfatlar ve karşılaştırma dereceleri"
+],
+"kodlar": [
+"K",
+"İ",
+"Ö"
+]
+},
+{
+"no": "4.B.07",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Zarflar"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.B.08",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Edatlar (zaman, yer, hareket)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.B.09",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Bağlaçlar"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.B.10",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Fiil zamanları (12 zaman)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.B.11",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Düzensiz fiiller"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "4.B.12",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Modal fiiller"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.B.13",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Edilgen çatı"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.B.14",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Koşul cümleleri (0, 1, 2, 3, karma)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.B.15",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Dolaylı anlatım"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.B.16",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"İlgi cümleleri"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.B.17",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Gerund ve infinitive"
+],
+"kodlar": [
+"K",
+"İ",
+"Ö"
+]
+},
+{
+"no": "4.B.18",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Phrasal verbs"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "4.B.19",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Deyimler ve kalıplar"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "4.B.20",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Soru yapıları, soru ekleri"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.B.21",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Cümle yapısı, kelime sırası"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.B.22",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Noktalama ve büyük harf"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.B.23",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"Akademik yazı ve e-posta biçemi"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.B.24",
+"sistem": "ESP",
+"yol": [
+"İngilizce",
+"İngiliz ve Amerikan İngilizcesi farkları"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "4.C.01",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Alfabe, sesler, Umlaut, ß, telaffuz kuralları"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.C.02",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Ad cinsiyetleri (der, die, das) ve kural ipuçları"
+],
+"kodlar": [
+"K",
+"İ"
+]
+},
+{
+"no": "4.C.03",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Ad çekimi ve çoğul yapımı"
+],
+"kodlar": [
+"K",
+"İ",
+"Ö"
+]
+},
+{
+"no": "4.C.04",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Durumlar (Nominativ, Akkusativ, Dativ, Genitiv)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.05",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Tanımlık ve iyelik sıfatları çekimi"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.06",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Sıfat çekimi (güçlü, zayıf, karma)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.07",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Zamirler"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.08",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Fiil çekimi, düzenli ve düzensiz fiiller"
+],
+"kodlar": [
+"K",
+"İ",
+"Ö"
+]
+},
+{
+"no": "4.C.09",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Ayrılabilen ve ayrılamayan fiiller"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.10",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Modal fiiller"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.11",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Zamanlar (Präsens, Perfekt, Präteritum, Futur)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.12",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Konjunktiv II ve dolaylı anlatım"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.13",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Edilgen çatı (Passiv)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.14",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Edatlar (Akkusativ, Dativ, Wechselpräpositionen)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.15",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Cümle yapısı ve fiil konumu"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.16",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Yan cümleler ve bağlaçlar"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.17",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Bileşik sözcük yapımı"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.18",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Sayılar, saat, tarih"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.C.19",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Resmî mektup ve e-posta biçemi"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.C.20",
+"sistem": "ESP",
+"yol": [
+"Almanca",
+"Yaygın hatalar ve yanlış arkadaşlar"
+],
+"kodlar": [
+"H",
+"Ö"
+]
+},
+{
+"no": "4.D.01",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Kiril alfabesi ve harflerin sesleri"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.D.02",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Vurgu ve ünlü azalması"
+],
+"kodlar": [
+"K",
+"İ"
+]
+},
+{
+"no": "4.D.03",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Sert-yumuşak ünsüzler, yumuşatma işaretleri"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.D.04",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Ad cinsiyetleri"
+],
+"kodlar": [
+"K",
+"İ"
+]
+},
+{
+"no": "4.D.05",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Altı hâl (Именительный ... Предложный)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.D.06",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Ad çekimi ve çoğul"
+],
+"kodlar": [
+"K",
+"İ",
+"Ö"
+]
+},
+{
+"no": "4.D.07",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Sıfat ve zamir çekimi"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.D.08",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Fiil çekimi, bitmiş ve bitmemiş görünüş"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.D.09",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Hareket fiilleri"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.D.10",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Geçmiş ve gelecek zaman"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.D.11",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Emir kipi ve şart kipi"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.D.12",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Sayılar ve adlarla uyumu"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.D.13",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Edatlar ve hâl istemleri"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.D.14",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Cümle yapısı, olumsuz cümle"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.D.15",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Bağlaçlar ve ilgi cümleleri"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.D.16",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Selamlaşma, nezaket biçimleri"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "4.D.17",
+"sistem": "ESP",
+"yol": [
+"Rusça",
+"Yaygın hatalar (Türkçe konuşanlar için)"
+],
+"kodlar": [
+"H"
+]
+},
+{
+"no": "4.E.01",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Yazı sistemi: hiragana, katakana, kanji, romaji"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.E.02",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Hiragana öğrenme sırası ve yazım"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.E.03",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Katakana ve yabancı sözcükler"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.E.04",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Kanji: kökler, okunuşlar (on/kun), eğitim kanjileri"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.E.05",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Furigana ve okurigana"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.E.06",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Ses yapısı, mora, vurgu (pitch accent)"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.E.07",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Cümle yapısı (özne-nesne-yüklem)"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.E.08",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Ekler (は, が, を, に, で, へ, の, と, も)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.E.09",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Fiil grupları ve çekimi (ます, て, ない, た)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.E.10",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Sıfat çekimi (i-sıfatları, na-sıfatları)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.E.11",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Zamanlar, olumsuzluk, sorular"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.E.12",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"て-formu ve kullanımları"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.E.13",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"İstek, izin, yasak, zorunluluk kalıpları"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.E.14",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Karşılaştırma, koşul cümleleri"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.E.15",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Saygı dili (keigo: teineigo, sonkeigo, kenjōgo)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.E.16",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Sayılar, sayaçlar"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.E.17",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Zaman, tarih, saat ifadeleri"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.E.18",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Sınavlar (JLPT N5-N1) ve kanji sayıları"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "4.E.19",
+"sistem": "ESP",
+"yol": [
+"Japonca",
+"Kültürel dil kullanımı (aizuchi, selamlaşma)"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "4.F.01",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Alfabe, telaffuz ve vurgu"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.F.02",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Cinsiyet ve sayı uyumu"
+],
+"kodlar": [
+"K",
+"İ"
+]
+},
+{
+"no": "4.F.03",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Tanımlıklar"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.F.04",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Ser ve estar"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.F.05",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Fiil çekimleri (-ar, -er, -ir)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.F.06",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Geçmiş zamanlar (pretérito, imperfecto, perfecto)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.F.07",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Gelecek ve koşul"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.F.08",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Subjuntivo (dilek-şart kipi)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.F.09",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Zamirler (nesne, dönüşlü)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.F.10",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Edatlar (por/para, a/en)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.F.11",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Sıfatlar ve karşılaştırma"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.F.12",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Olumsuzluk ve soru"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.F.13",
+"sistem": "ESP",
+"yol": [
+"İspanyolca",
+"Kelime dağarcığı, yanlış arkadaşlar"
+],
+"kodlar": [
+"Ö",
+"H"
+]
+},
+{
+"no": "4.G.01",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"Alfabe, aksanlar, telaffuz"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.G.02",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"Sessiz harfler, liaison, enchaînement"
+],
+"kodlar": [
+"K",
+"İ"
+]
+},
+{
+"no": "4.G.03",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"Cinsiyet ve çoğul"
+],
+"kodlar": [
+"K",
+"İ"
+]
+},
+{
+"no": "4.G.04",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"Tanımlıklar (le, la, les, un, une, des, du, de la)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.G.05",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"Fiil çekimi (er, ir, re; düzensiz fiiller)"
+],
+"kodlar": [
+"K",
+"İ",
+"Ö"
+]
+},
+{
+"no": "4.G.06",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"Zamanlar (présent, passé composé, imparfait, futur)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.G.07",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"Subjonctif"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.G.08",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"Zamirler (nesne, dönüşlü, y, en)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.G.09",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"Olumsuzluk ve soru yapıları"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.G.10",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"Sıfatlar, zarflar, karşılaştırma"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.G.11",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"Edatlar ve yer-yön"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.G.12",
+"sistem": "ESP",
+"yol": [
+"Fransızca",
+"DELF/DALF sınavları"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "4.H.01",
+"sistem": "ESP",
+"yol": [
+"İtalyanca",
+"Telaffuz, çift ünsüzler, vurgu"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.H.02",
+"sistem": "ESP",
+"yol": [
+"İtalyanca",
+"Cinsiyet, tanımlık, çoğul"
+],
+"kodlar": [
+"K",
+"İ"
+]
+},
+{
+"no": "4.H.03",
+"sistem": "ESP",
+"yol": [
+"İtalyanca",
+"Fiil çekimi, zamanlar, congiuntivo"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.H.04",
+"sistem": "ESP",
+"yol": [
+"İtalyanca",
+"Zamirler, edatlar (preposizioni articolate)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.H.05",
+"sistem": "ESP",
+"yol": [
+"Portekizce",
+"Telaffuz (Brezilya ve Portekiz), nazal sesler"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.H.06",
+"sistem": "ESP",
+"yol": [
+"Portekizce",
+"Fiil çekimi, ser ve estar"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.H.07",
+"sistem": "ESP",
+"yol": [
+"Portekizce",
+"Zamirler ve edatlar"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.H.08",
+"sistem": "ESP",
+"yol": [
+"Hollandaca",
+"Telaffuz, ad cinsiyeti (de, het)"
+],
+"kodlar": [
+"K",
+"İ"
+]
+},
+{
+"no": "4.H.09",
+"sistem": "ESP",
+"yol": [
+"Hollandaca",
+"Fiil çekimi, cümle yapısı"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.I.01",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Alfabe, harflerin şekilleri, sağdan sola yazım"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.I.02",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Harekeler ve okunuş"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.I.03",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Ses yapısı (boğazsal sesler), telaffuz"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.I.04",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Ad ve fiil cümleleri"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.I.05",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Cinsiyet, sayı (tekil, ikil, çoğul), çoğul türleri"
+],
+"kodlar": [
+"K",
+"İ"
+]
+},
+{
+"no": "4.I.06",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Belirtme ve tamlama"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.I.07",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Fiil kökleri ve vezinler"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.I.08",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Fiil çekimi (mazi, muzari, emir)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.I.09",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Zamirler ve bitişik zamirler"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.I.10",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Harf-i cerler ve i'rab"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.I.11",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Fasih Arapça ve lehçeler"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.I.12",
+"sistem": "ESP",
+"yol": [
+"Arapça",
+"Sayılar"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.J.01",
+"sistem": "ESP",
+"yol": [
+"Korece",
+"Hangul yapısı ve öğrenme sırası"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.J.02",
+"sistem": "ESP",
+"yol": [
+"Korece",
+"Ses yapısı, telaffuz kuralları"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.J.03",
+"sistem": "ESP",
+"yol": [
+"Korece",
+"Cümle yapısı (özne-nesne-yüklem)"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.J.04",
+"sistem": "ESP",
+"yol": [
+"Korece",
+"Ekler (이/가, 은/는, 을/를, 에, 에서)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.J.05",
+"sistem": "ESP",
+"yol": [
+"Korece",
+"Fiil ve sıfat çekimi"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.J.06",
+"sistem": "ESP",
+"yol": [
+"Korece",
+"Saygı dereceleri (해요체, 합니다체)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.J.07",
+"sistem": "ESP",
+"yol": [
+"Korece",
+"Sayılar (öz Korece ve Sino-Korece)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.J.08",
+"sistem": "ESP",
+"yol": [
+"Korece",
+"Zamanlar ve bağlantı ekleri"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.J.09",
+"sistem": "ESP",
+"yol": [
+"Korece",
+"TOPIK sınavı"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "4.K.01",
+"sistem": "ESP",
+"yol": [
+"Çince",
+"Pinyin ve telaffuz"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.K.02",
+"sistem": "ESP",
+"yol": [
+"Çince",
+"Tonlar"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.K.03",
+"sistem": "ESP",
+"yol": [
+"Çince",
+"Çince karakterler, radikaller, vuruş sırası"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.K.04",
+"sistem": "ESP",
+"yol": [
+"Çince",
+"Basitleştirilmiş ve geleneksel karakter"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.K.05",
+"sistem": "ESP",
+"yol": [
+"Çince",
+"Cümle yapısı ve sözcük sırası"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.K.06",
+"sistem": "ESP",
+"yol": [
+"Çince",
+"Ölçü sözcükleri (量词)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.K.07",
+"sistem": "ESP",
+"yol": [
+"Çince",
+"Zaman ve görünüş partikülleri (了, 过, 着)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.K.08",
+"sistem": "ESP",
+"yol": [
+"Çince",
+"Olumsuzluk (不, 没)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.K.09",
+"sistem": "ESP",
+"yol": [
+"Çince",
+"Soru yapıları"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.K.10",
+"sistem": "ESP",
+"yol": [
+"Çince",
+"HSK seviyeleri"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "4.L.01",
+"sistem": "ESP",
+"yol": [
+"Türkçe",
+"Ses uyumları ve ekler (yabancılar için)"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.L.02",
+"sistem": "ESP",
+"yol": [
+"Türkçe",
+"Ünlü uyumu ve ek yapısı"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.L.03",
+"sistem": "ESP",
+"yol": [
+"Türkçe",
+"Türk dilleri ve dil ailesi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.L.04",
+"sistem": "ESP",
+"yol": [
+"Diller",
+"Diller ve dil aileleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.L.05",
+"sistem": "ESP",
+"yol": [
+"Diller",
+"Dilbilimin dalları (fonetik, morfoloji, sözdizim, anlambilim)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.L.06",
+"sistem": "ESP",
+"yol": [
+"Diller",
+"Yazı sistemlerinin türleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.L.07",
+"sistem": "ESP",
+"yol": [
+"Diller",
+"Dillerin ölümü ve korunması"
+],
+"kodlar": [
+"N"
+]
+},
+{
+"no": "4.M.01",
+"sistem": "ESP",
+"yol": [
+"Kelime",
+"İngilizce en sık 3000 kelime"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "4.M.02",
+"sistem": "ESP",
+"yol": [
+"Kelime",
+"Almanca en sık 3000 kelime"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "4.M.03",
+"sistem": "ESP",
+"yol": [
+"Kelime",
+"Rusça en sık 3000 kelime"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "4.M.04",
+"sistem": "ESP",
+"yol": [
+"Kelime",
+"Japonca en sık 3000 kelime"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "4.M.05",
+"sistem": "ESP",
+"yol": [
+"Kelime",
+"İspanyolca, Fransızca, İtalyanca, Portekizce, Hollandaca en sık 3000 kelime"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "4.M.06",
+"sistem": "ESP",
+"yol": [
+"Kelime",
+"Arapça, Korece, Çince en sık 3000 kelime"
+],
+"kodlar": [
+"S"
+]
+},
+{
+"no": "4.M.07",
+"sistem": "ESP",
+"yol": [
+"Kelime",
+"Tatoeba cümle çiftleri (Türkçe karşılıklı)"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "4.M.08",
+"sistem": "ESP",
+"yol": [
+"Kelime",
+"Konuya göre sözcük grupları (yiyecek, seyahat, iş, sağlık, aile, zaman)"
+],
+"kodlar": [
+"Ö"
+]
+},
+{
+"no": "4.N.01",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Gitar türleri (klasik, akustik, elektro, bas)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.N.02",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Gitarın bölümleri (gövde, sap, perde, akort burgusu)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.N.03",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Gitar seçimi ve bakımı"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.N.04",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Telleri ve akort (standart akort, alternatif akortlar)"
+],
+"kodlar": [
+"T",
+"K",
+"A"
+]
+},
+{
+"no": "4.N.05",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Akort yöntemleri (akort aleti, kulakla)"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.N.06",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Pena kullanımı ve tutuş"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.N.07",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Duruş, el pozisyonu, parmak numaraları"
+],
+"kodlar": [
+"Y",
+"H"
+]
+},
+{
+"no": "4.N.08",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Tablatür ve nota okuma"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.N.09",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Ritim, vuruş kalıpları"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.N.10",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Metronom kullanımı"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.N.11",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Açık akorlar (Am, C, G, D, E, Em, A, F)"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.N.12",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Barre akorları"
+],
+"kodlar": [
+"A",
+"H"
+]
+},
+{
+"no": "4.N.13",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Power akorlar"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.N.14",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Yedili akorlar, sus, add akorları"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.N.15",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Akor geçişleri çalışması"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.N.16",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Akor ilerlemeleri (I-IV-V, I-V-vi-IV, 12 bar blues)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "4.N.17",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Majör ve minör gam"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.N.18",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Pentatonik gam ve kalıpları"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.N.19",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Blues gamı"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.N.20",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Modlar"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.N.21",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"CAGED sistemi"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.N.22",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Beşliler çemberi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.N.23",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Aralıklar ve üçlü akorlar"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.N.24",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Arpej ve parmak stili"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.N.25",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Alternatif vuruş (alternate picking)"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.N.26",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Hammer-on ve pull-off"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.N.27",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Slide, bend, vibrato"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.N.28",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Palm mute"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.N.29",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Sweep picking, tremolo picking"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.N.30",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Kapodastr kullanımı"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.N.31",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Klasik gitar teknikleri (rasgueado, tirando, apoyando)"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.N.32",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Flamenko gitar"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.N.33",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Elektro gitar: amfi, pedal, efektler"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.N.34",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Solo ve doğaçlama çalışma"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.N.35",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Şarkı öğrenme ve kulaktan çıkarma"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.N.36",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Günlük çalışma rutini (15, 30, 60 dakika planı)"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "4.N.37",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Sık yapılan hatalar ve çözümleri"
+],
+"kodlar": [
+"H",
+"Y"
+]
+},
+{
+"no": "4.N.38",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Yeni başlayanlar için 90 günlük plan"
+],
+"kodlar": [
+"V",
+"A"
+]
+},
+{
+"no": "4.N.39",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Parmak ağrısı ve nasır hakkında genel bilgi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.N.40",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Müzik teorisi temelleri (nota değerleri, ölçü, tempo, işaretler)"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.N.41",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Türk müziği: saz, bağlama, makam kavramı"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.N.42",
+"sistem": "ESP",
+"yol": [
+"Gitar",
+"Kulak eğitimi"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.O.01",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Diksiyon nedir, amacı ve önemi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.O.02",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Solunum türleri ve diyafram nefesi"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.O.03",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Nefes kontrolü egzersizleri"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.O.04",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Ses organları, ses telleri"
+],
+"kodlar": [
+"T",
+"G"
+]
+},
+{
+"no": "4.O.05",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Ses ısınma egzersizleri"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.O.06",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Ses perdesi, ses şiddeti, ses rengi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.O.07",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Türkçe ünlülerin doğru söylenişi"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.O.08",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Türkçe ünsüzlerin doğru söylenişi"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.O.09",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Artikülasyon egzersizleri, dil, dudak, çene"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.O.10",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Tekerlemeler ve kullanımı"
+],
+"kodlar": [
+"A",
+"Ö"
+]
+},
+{
+"no": "4.O.11",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Vurgu (sözcük, cümle)"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.O.12",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Tonlama ve ses ayarı"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.O.13",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Duraklama ve vurgulama"
+],
+"kodlar": [
+"K",
+"Ö"
+]
+},
+{
+"no": "4.O.14",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Konuşma hızı ve ritim"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.O.15",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Ağız ve yöre şivelerinden arınma"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.O.16",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Yaygın telaffuz hataları (ğ, r, s, ş, h)"
+],
+"kodlar": [
+"H"
+]
+},
+{
+"no": "4.O.17",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"\"Dolgu\" sözcükleri ve azaltma"
+],
+"kodlar": [
+"H",
+"Y"
+]
+},
+{
+"no": "4.O.18",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Okuma egzersizleri (yüksek sesle okuma)"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.O.19",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Topluluk önünde konuşma temelleri"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.O.20",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Sahne korkusu ve stresle baş etme"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.O.21",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Beden dili, göz teması, jest ve mimik"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.O.22",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Konuşma yapısı (giriş, gelişme, sonuç)"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.O.23",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Hitabet ve retorik (ethos, pathos, logos)"
+],
+"kodlar": [
+"T",
+"B"
+]
+},
+{
+"no": "4.O.24",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"İkna edici konuşma"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.O.25",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Hikâye anlatımı"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.O.26",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Sunum hazırlama ve slayt tasarımı"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.O.27",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Mülakat ve toplantıda konuşma"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.O.28",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Tartışma ve münazara"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.O.29",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Etkin dinleme"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.O.30",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Mikrofon kullanımı ve kayıtla geri bildirim"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.O.31",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Ses sağlığı ve sesi koruma"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.O.32",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Konuşma bozukluklarına genel bakış (kekemelik vb., tanı değil)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.O.33",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"30 günlük diksiyon çalışma planı"
+],
+"kodlar": [
+"A",
+"V"
+]
+},
+{
+"no": "4.O.34",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Tiyatro, oyunculuk ve seslendirme temelleri"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.O.35",
+"sistem": "ESP",
+"yol": [
+"Diksiyon",
+"Şiir okuma"
+],
+"kodlar": [
+"A"
+]
+},
+{
+"no": "4.P.01",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Zaman yönetimi ilkeleri"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.02",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Eisenhower matrisi"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.P.03",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Pareto ilkesi (80/20)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.P.04",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Pomodoro tekniği"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.P.05",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Derin çalışma (deep work)"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.06",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Alışkanlık oluşturma (ipucu-rutin-ödül, alışkanlık istifleme)"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.07",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Hedef belirleme (SMART, OKR)"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.08",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Erteleme ve üstesinden gelme"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.09",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Odaklanma ve dikkat dağıtıcılar"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.P.10",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Planlama, günlük ve haftalık gözden geçirme"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "4.P.11",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Öncelik belirleme"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.P.12",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Karar verme yöntemleri"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.13",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Eleştirel düşünme"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.14",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Bilişsel çarpıtmalar ve mantık hataları (safsata)"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "4.P.15",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Problem çözme yöntemleri"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.P.16",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Yaratıcılık ve beyin fırtınası"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.17",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Öğrenmeyi öğrenmek: yöntemler"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.18",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Hızlı okuma (bilimsel bulgular ve sınırları)"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "4.P.19",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Hafıza teknikleri (hafıza sarayı, bağlantı, hikâye)"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.P.20",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Not alma yöntemleri (Cornell, zihin haritası, Zettelkasten)"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.P.21",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Kitap okuma alışkanlığı"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.P.22",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Büyüme zihniyeti"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.P.23",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Bilinçli pratik (deliberate practice)"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.24",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Akış hâli"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.P.25",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Motivasyon kuramları"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.P.26",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Öz disiplin ve irade"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.27",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Duygusal zekâ ve empati"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.28",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Duygu düzenleme"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.29",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Etkili iletişim"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.30",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Çatışma çözme ve müzakere"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.31",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Takım çalışması ve liderlik"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.32",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Sosyal beceriler ve ilişkiler"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.P.33",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Ağ kurma (networking)"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.P.34",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Kariyer planlama, CV ve mülakat"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "4.P.35",
+"sistem": "ESP",
+"yol": [
+"Verimlilik",
+"Dijital minimalizm"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.Q.01",
+"sistem": "ESP",
+"yol": [
+"Finans",
+"Bütçe yapma, tasarruf"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.Q.02",
+"sistem": "ESP",
+"yol": [
+"Finans",
+"Bileşik faiz"
+],
+"kodlar": [
+"T",
+"F"
+]
+},
+{
+"no": "4.Q.03",
+"sistem": "ESP",
+"yol": [
+"Finans",
+"Enflasyon"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.04",
+"sistem": "ESP",
+"yol": [
+"Finans",
+"Kredi, borç ve faiz"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.05",
+"sistem": "ESP",
+"yol": [
+"Finans",
+"Sigorta türleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.06",
+"sistem": "ESP",
+"yol": [
+"Finans",
+"Emeklilik sistemi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.07",
+"sistem": "ESP",
+"yol": [
+"Finans",
+"Vergi türleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.08",
+"sistem": "ESP",
+"yol": [
+"Finans",
+"Yatırım araçları ve risk (genel bilgi, tavsiye değil)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.09",
+"sistem": "ESP",
+"yol": [
+"Finans",
+"Ekonomik temel kavramlar (arz-talep, GSYH, işsizlik)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.10",
+"sistem": "ESP",
+"yol": [
+"Hukuk",
+"Anayasa ve temel haklar"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.11",
+"sistem": "ESP",
+"yol": [
+"Hukuk",
+"Tüketici hakları"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.12",
+"sistem": "ESP",
+"yol": [
+"Hukuk",
+"Sözleşme, kira, iş hukuku temel bilgiler"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.13",
+"sistem": "ESP",
+"yol": [
+"Hukuk",
+"Trafik kuralları ve ehliyet"
+],
+"kodlar": [
+"K"
+]
+},
+{
+"no": "4.Q.14",
+"sistem": "ESP",
+"yol": [
+"Hukuk",
+"Kişisel verilerin korunması (KVKK)"
+],
+"kodlar": [
+"T",
+"K"
+]
+},
+{
+"no": "4.Q.15",
+"sistem": "ESP",
+"yol": [
+"Teknoloji",
+"Dijital güvenlik, parola yönetimi, iki adımlı doğrulama"
+],
+"kodlar": [
+"Y",
+"K"
+]
+},
+{
+"no": "4.Q.16",
+"sistem": "ESP",
+"yol": [
+"Teknoloji",
+"Dolandırıcılık ve oltalama"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.Q.17",
+"sistem": "ESP",
+"yol": [
+"Teknoloji",
+"Medya okuryazarlığı, yanlış bilgi"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.Q.18",
+"sistem": "ESP",
+"yol": [
+"Teknoloji",
+"Bilgisayar ve internet temelleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.19",
+"sistem": "ESP",
+"yol": [
+"Teknoloji",
+"Programlamaya giriş"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.20",
+"sistem": "ESP",
+"yol": [
+"Teknoloji",
+"Algoritma ve veri yapıları temelleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.21",
+"sistem": "ESP",
+"yol": [
+"Teknoloji",
+"Yapay zekâ ve makine öğrenmesi temelleri"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.Q.22",
+"sistem": "ESP",
+"yol": [
+"Teknoloji",
+"Elektronik tablo kullanımı"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.Q.23",
+"sistem": "ESP",
+"yol": [
+"Teknoloji",
+"Yedekleme ve veri güvenliği"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.Q.24",
+"sistem": "ESP",
+"yol": [
+"Gündelik",
+"Afet hazırlığı ve deprem çantası"
+],
+"kodlar": [
+"Y",
+"K"
+]
+},
+{
+"no": "4.Q.25",
+"sistem": "ESP",
+"yol": [
+"Gündelik",
+"Yangın güvenliği"
+],
+"kodlar": [
+"K",
+"Y"
+]
+},
+{
+"no": "4.Q.26",
+"sistem": "ESP",
+"yol": [
+"Gündelik",
+"Temel ilk yardım (genel bilgi)"
+],
+"kodlar": [
+"A",
+"K"
+]
+},
+{
+"no": "4.Q.27",
+"sistem": "ESP",
+"yol": [
+"Gündelik",
+"Evde temel onarım ve bakım"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.Q.28",
+"sistem": "ESP",
+"yol": [
+"Gündelik",
+"Yemek pişirmeye başlangıç"
+],
+"kodlar": [
+"Y",
+"A"
+]
+},
+{
+"no": "4.Q.29",
+"sistem": "ESP",
+"yol": [
+"Gündelik",
+"Seyahat planlama"
+],
+"kodlar": [
+"Y"
+]
+},
+{
+"no": "4.Q.30",
+"sistem": "ESP",
+"yol": [
+"Gündelik",
+"Çevre, geri dönüşüm, sürdürülebilirlik"
+],
+"kodlar": [
+"T",
+"Y"
+]
+},
+{
+"no": "4.R.01",
+"sistem": "ESP",
+"yol": [
+"Sanat",
+"Sanat tarihi dönemleri"
+],
+"kodlar": [
+"V",
+"B"
+]
+},
+{
+"no": "4.R.02",
+"sistem": "ESP",
+"yol": [
+"Sanat",
+"Ünlü ressamlar ve eserleri"
+],
+"kodlar": [
+"B",
+"E"
+]
+},
+{
+"no": "4.R.03",
+"sistem": "ESP",
+"yol": [
+"Sanat",
+"Mimari üsluplar"
+],
+"kodlar": [
+"T",
+"Ö"
+]
+},
+{
+"no": "4.R.04",
+"sistem": "ESP",
+"yol": [
+"Sanat",
+"Türk-İslam sanatları (hat, minyatür, çini)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.R.05",
+"sistem": "ESP",
+"yol": [
+"Müzik",
+"Müzik tarihi dönemleri"
+],
+"kodlar": [
+"V",
+"B"
+]
+},
+{
+"no": "4.R.06",
+"sistem": "ESP",
+"yol": [
+"Müzik",
+"Klasik müzik bestecileri"
+],
+"kodlar": [
+"B",
+"E"
+]
+},
+{
+"no": "4.R.07",
+"sistem": "ESP",
+"yol": [
+"Müzik",
+"Türk halk ve sanat müziği"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.R.08",
+"sistem": "ESP",
+"yol": [
+"Edebiyat",
+"Dünya edebiyatı klasikleri"
+],
+"kodlar": [
+"B",
+"E"
+]
+},
+{
+"no": "4.R.09",
+"sistem": "ESP",
+"yol": [
+"Edebiyat",
+"Türk edebiyatı klasikleri"
+],
+"kodlar": [
+"B",
+"E"
+]
+},
+{
+"no": "4.R.10",
+"sistem": "ESP",
+"yol": [
+"Edebiyat",
+"Okuma listeleri"
+],
+"kodlar": [
+"E"
+]
+},
+{
+"no": "4.R.11",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Astronomi ve Güneş Sistemi"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.R.12",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Evrenin yapısı ve oluşumu"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.R.13",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Fizik, kimya, biyoloji tarihinden dönüm noktaları"
+],
+"kodlar": [
+"S",
+"B"
+]
+},
+{
+"no": "4.R.14",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Bilimsel yöntem"
+],
+"kodlar": [
+"T",
+"A"
+]
+},
+{
+"no": "4.R.15",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Matematik tarihi ve ünlü matematikçiler"
+],
+"kodlar": [
+"S",
+"B"
+]
+},
+{
+"no": "4.R.16",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Teknoloji tarihi ve icatlar"
+],
+"kodlar": [
+"S",
+"B"
+]
+},
+{
+"no": "4.R.17",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"İklim değişikliği"
+],
+"kodlar": [
+"T",
+"N"
+]
+},
+{
+"no": "4.R.18",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Enerji kaynakları"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.R.19",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Psikoloji temel kavramları"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.R.20",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Sosyoloji temel kavramları"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.R.21",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Ekonomi temel kavramları"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.R.22",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Coğrafya: ülkeler, başkentler, iklim kuşakları"
+],
+"kodlar": [
+"S",
+"T"
+]
+},
+{
+"no": "4.R.23",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Dünya dinleri ve inanç sistemleri (tarafsız, betimleyici)"
+],
+"kodlar": [
+"T"
+]
+},
+{
+"no": "4.R.24",
+"sistem": "ESP",
+"yol": [
+"Bilim",
+"Mitoloji (Yunan, Roma, Türk, Nordik)"
+],
+"kodlar": [
+"T",
+"E"
+]
+}
+]

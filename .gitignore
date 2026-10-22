@@ -38,3 +38,11 @@ sunucu.log
 # artik brand/medya'da BULUNMAYAN dosyalar hâline geldiler. Kayit
 # disi birakmak, o ayrismayi bir daha mumkun kilmamak icindir.
 */dist/img/marka/
+
+# toplanan ham veri git disi (buyuk)
+veri/ham/
+veri/gunluk/
+# buyuk derlemler: tools/veri_*.py yeniden uretir
+veri/temiz/spi/besin_usda.jsonl
+veri/temiz/esp/kelime_sikligi.jsonl
+veri/temiz/esp/cumle_ciftleri*.jsonl

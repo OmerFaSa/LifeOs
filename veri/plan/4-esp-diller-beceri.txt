@@ -1,0 +1,383 @@
+══════ BÖLÜM 4 — ESP: DİLLER, GİTAR, DİKSİYON, YAŞAM BECERİLERİ ══════
+
+4.A DİL ÖĞRENME YÖNTEMLERİ (tüm diller için ortak)
+[4.A.01] Dil > Dil edinimi ve ikinci dil edinimi | T N
+[4.A.02] Dil > Kritik dönem hipotezi | T N
+[4.A.03] Dil > Anlaşılır girdi (comprehensible input) | T Y
+[4.A.04] Dil > Aralıklı tekrar ve kelime kartları | T Y A
+[4.A.05] Dil > Anımsatıcı (mnemonic) teknikleri | T Y
+[4.A.06] Dil > Gölgeleme (shadowing) tekniği | T Y A
+[4.A.07] Dil > Dinleme becerisini geliştirme | Y
+[4.A.08] Dil > Konuşma becerisini geliştirme, dil değişimi | Y
+[4.A.09] Dil > Okuma becerisi, yoğun ve geniş okuma | T Y
+[4.A.10] Dil > Yazma becerisi | Y
+[4.A.11] Dil > Telaffuz ve minimal çiftler | T Y
+[4.A.12] Dil > Öğrenme yöntemleri (dilbilgisi-çeviri, doğrudan, iletişimsel) | T
+[4.A.13] Dil > Görev temelli dil öğrenimi | T
+[4.A.14] Dil > Kelime öğrenme stratejileri, kelime sıklığı ve kapsama oranı | T Y S
+[4.A.15] Dil > Ortak Avrupa Dil Çerçevesi (A1-C2) | T S
+[4.A.16] Dil > Dil sınavları (TOEFL, IELTS, TOEIC, YDS/YÖKDİL, Goethe, JLPT, DELF, DELE, TORFL, HSK, TOPIK) | T S
+[4.A.17] Dil > Yabancı dil çalışma planı örnekleri | Y A
+[4.A.18] Dil > Yaygın öğrenci hataları ve dil aktarımı (Türkçeden) | H N
+[4.A.19] Dil > Çok dillilik ve bilişsel etkileri | T N
+[4.A.20] Dil > Kod değiştirme, ödünç sözcükler, yanlış arkadaşlar | T Ö
+
+4.B İNGİLİZCE
+[4.B.01] İngilizce > Alfabe, sesler, telaffuz (IPA), vurgu | T K
+[4.B.02] İngilizce > Yazım kuralları ve düzensiz yazımlar | K İ
+[4.B.03] İngilizce > İsimler, çoğul yapımı, sayılabilir ve sayılamaz | K İ Ö
+[4.B.04] İngilizce > Tanımlıklar (a, an, the) | K İ Ö
+[4.B.05] İngilizce > Zamirler (kişi, iyelik, dönüşlülük, ilgi) | K Ö
+[4.B.06] İngilizce > Sıfatlar ve karşılaştırma dereceleri | K İ Ö
+[4.B.07] İngilizce > Zarflar | K Ö
+[4.B.08] İngilizce > Edatlar (zaman, yer, hareket) | K Ö
+[4.B.09] İngilizce > Bağlaçlar | K Ö
+[4.B.10] İngilizce > Fiil zamanları (12 zaman) | K Ö
+[4.B.11] İngilizce > Düzensiz fiiller | Ö
+[4.B.12] İngilizce > Modal fiiller | K Ö
+[4.B.13] İngilizce > Edilgen çatı | K Ö
+[4.B.14] İngilizce > Koşul cümleleri (0, 1, 2, 3, karma) | K Ö
+[4.B.15] İngilizce > Dolaylı anlatım | K Ö
+[4.B.16] İngilizce > İlgi cümleleri | K Ö
+[4.B.17] İngilizce > Gerund ve infinitive | K İ Ö
+[4.B.18] İngilizce > Phrasal verbs | Ö
+[4.B.19] İngilizce > Deyimler ve kalıplar | Ö
+[4.B.20] İngilizce > Soru yapıları, soru ekleri | K Ö
+[4.B.21] İngilizce > Cümle yapısı, kelime sırası | K
+[4.B.22] İngilizce > Noktalama ve büyük harf | K
+[4.B.23] İngilizce > Akademik yazı ve e-posta biçemi | Y
+[4.B.24] İngilizce > İngiliz ve Amerikan İngilizcesi farkları | T Ö
+
+4.C ALMANCA
+[4.C.01] Almanca > Alfabe, sesler, Umlaut, ß, telaffuz kuralları | T K
+[4.C.02] Almanca > Ad cinsiyetleri (der, die, das) ve kural ipuçları | K İ
+[4.C.03] Almanca > Ad çekimi ve çoğul yapımı | K İ Ö
+[4.C.04] Almanca > Durumlar (Nominativ, Akkusativ, Dativ, Genitiv) | K Ö
+[4.C.05] Almanca > Tanımlık ve iyelik sıfatları çekimi | K Ö
+[4.C.06] Almanca > Sıfat çekimi (güçlü, zayıf, karma) | K Ö
+[4.C.07] Almanca > Zamirler | K Ö
+[4.C.08] Almanca > Fiil çekimi, düzenli ve düzensiz fiiller | K İ Ö
+[4.C.09] Almanca > Ayrılabilen ve ayrılamayan fiiller | K Ö
+[4.C.10] Almanca > Modal fiiller | K Ö
+[4.C.11] Almanca > Zamanlar (Präsens, Perfekt, Präteritum, Futur) | K Ö
+[4.C.12] Almanca > Konjunktiv II ve dolaylı anlatım | K Ö
+[4.C.13] Almanca > Edilgen çatı (Passiv) | K Ö
+[4.C.14] Almanca > Edatlar (Akkusativ, Dativ, Wechselpräpositionen) | K Ö
+[4.C.15] Almanca > Cümle yapısı ve fiil konumu | K Ö
+[4.C.16] Almanca > Yan cümleler ve bağlaçlar | K Ö
+[4.C.17] Almanca > Bileşik sözcük yapımı | K Ö
+[4.C.18] Almanca > Sayılar, saat, tarih | K Ö
+[4.C.19] Almanca > Resmî mektup ve e-posta biçemi | Y
+[4.C.20] Almanca > Yaygın hatalar ve yanlış arkadaşlar | H Ö
+
+4.D RUSÇA
+[4.D.01] Rusça > Kiril alfabesi ve harflerin sesleri | T K
+[4.D.02] Rusça > Vurgu ve ünlü azalması | K İ
+[4.D.03] Rusça > Sert-yumuşak ünsüzler, yumuşatma işaretleri | K
+[4.D.04] Rusça > Ad cinsiyetleri | K İ
+[4.D.05] Rusça > Altı hâl (Именительный ... Предложный) | K Ö
+[4.D.06] Rusça > Ad çekimi ve çoğul | K İ Ö
+[4.D.07] Rusça > Sıfat ve zamir çekimi | K Ö
+[4.D.08] Rusça > Fiil çekimi, bitmiş ve bitmemiş görünüş | K Ö
+[4.D.09] Rusça > Hareket fiilleri | K Ö
+[4.D.10] Rusça > Geçmiş ve gelecek zaman | K Ö
+[4.D.11] Rusça > Emir kipi ve şart kipi | K Ö
+[4.D.12] Rusça > Sayılar ve adlarla uyumu | K Ö
+[4.D.13] Rusça > Edatlar ve hâl istemleri | K Ö
+[4.D.14] Rusça > Cümle yapısı, olumsuz cümle | K Ö
+[4.D.15] Rusça > Bağlaçlar ve ilgi cümleleri | K Ö
+[4.D.16] Rusça > Selamlaşma, nezaket biçimleri | Ö
+[4.D.17] Rusça > Yaygın hatalar (Türkçe konuşanlar için) | H
+
+4.E JAPONCA
+[4.E.01] Japonca > Yazı sistemi: hiragana, katakana, kanji, romaji | T K
+[4.E.02] Japonca > Hiragana öğrenme sırası ve yazım | A
+[4.E.03] Japonca > Katakana ve yabancı sözcükler | A
+[4.E.04] Japonca > Kanji: kökler, okunuşlar (on/kun), eğitim kanjileri | T K
+[4.E.05] Japonca > Furigana ve okurigana | T K
+[4.E.06] Japonca > Ses yapısı, mora, vurgu (pitch accent) | T K
+[4.E.07] Japonca > Cümle yapısı (özne-nesne-yüklem) | K
+[4.E.08] Japonca > Ekler (は, が, を, に, で, へ, の, と, も) | K Ö
+[4.E.09] Japonca > Fiil grupları ve çekimi (ます, て, ない, た) | K Ö
+[4.E.10] Japonca > Sıfat çekimi (i-sıfatları, na-sıfatları) | K Ö
+[4.E.11] Japonca > Zamanlar, olumsuzluk, sorular | K Ö
+[4.E.12] Japonca > て-formu ve kullanımları | K Ö
+[4.E.13] Japonca > İstek, izin, yasak, zorunluluk kalıpları | K Ö
+[4.E.14] Japonca > Karşılaştırma, koşul cümleleri | K Ö
+[4.E.15] Japonca > Saygı dili (keigo: teineigo, sonkeigo, kenjōgo) | K Ö
+[4.E.16] Japonca > Sayılar, sayaçlar | K Ö
+[4.E.17] Japonca > Zaman, tarih, saat ifadeleri | K Ö
+[4.E.18] Japonca > Sınavlar (JLPT N5-N1) ve kanji sayıları | S
+[4.E.19] Japonca > Kültürel dil kullanımı (aizuchi, selamlaşma) | Ö
+
+4.F İSPANYOLCA
+[4.F.01] İspanyolca > Alfabe, telaffuz ve vurgu | K
+[4.F.02] İspanyolca > Cinsiyet ve sayı uyumu | K İ
+[4.F.03] İspanyolca > Tanımlıklar | K Ö
+[4.F.04] İspanyolca > Ser ve estar | K Ö
+[4.F.05] İspanyolca > Fiil çekimleri (-ar, -er, -ir) | K Ö
+[4.F.06] İspanyolca > Geçmiş zamanlar (pretérito, imperfecto, perfecto) | K Ö
+[4.F.07] İspanyolca > Gelecek ve koşul | K Ö
+[4.F.08] İspanyolca > Subjuntivo (dilek-şart kipi) | K Ö
+[4.F.09] İspanyolca > Zamirler (nesne, dönüşlü) | K Ö
+[4.F.10] İspanyolca > Edatlar (por/para, a/en) | K Ö
+[4.F.11] İspanyolca > Sıfatlar ve karşılaştırma | K Ö
+[4.F.12] İspanyolca > Olumsuzluk ve soru | K Ö
+[4.F.13] İspanyolca > Kelime dağarcığı, yanlış arkadaşlar | Ö H
+
+4.G FRANSIZCA
+[4.G.01] Fransızca > Alfabe, aksanlar, telaffuz | K
+[4.G.02] Fransızca > Sessiz harfler, liaison, enchaînement | K İ
+[4.G.03] Fransızca > Cinsiyet ve çoğul | K İ
+[4.G.04] Fransızca > Tanımlıklar (le, la, les, un, une, des, du, de la) | K Ö
+[4.G.05] Fransızca > Fiil çekimi (er, ir, re; düzensiz fiiller) | K İ Ö
+[4.G.06] Fransızca > Zamanlar (présent, passé composé, imparfait, futur) | K Ö
+[4.G.07] Fransızca > Subjonctif | K Ö
+[4.G.08] Fransızca > Zamirler (nesne, dönüşlü, y, en) | K Ö
+[4.G.09] Fransızca > Olumsuzluk ve soru yapıları | K Ö
+[4.G.10] Fransızca > Sıfatlar, zarflar, karşılaştırma | K Ö
+[4.G.11] Fransızca > Edatlar ve yer-yön | K Ö
+[4.G.12] Fransızca > DELF/DALF sınavları | S
+
+4.H İTALYANCA, PORTEKİZCE, HOLLANDACA
+[4.H.01] İtalyanca > Telaffuz, çift ünsüzler, vurgu | K
+[4.H.02] İtalyanca > Cinsiyet, tanımlık, çoğul | K İ
+[4.H.03] İtalyanca > Fiil çekimi, zamanlar, congiuntivo | K Ö
+[4.H.04] İtalyanca > Zamirler, edatlar (preposizioni articolate) | K Ö
+[4.H.05] Portekizce > Telaffuz (Brezilya ve Portekiz), nazal sesler | K
+[4.H.06] Portekizce > Fiil çekimi, ser ve estar | K Ö
+[4.H.07] Portekizce > Zamirler ve edatlar | K Ö
+[4.H.08] Hollandaca > Telaffuz, ad cinsiyeti (de, het) | K İ
+[4.H.09] Hollandaca > Fiil çekimi, cümle yapısı | K Ö
+
+4.I ARAPÇA
+[4.I.01] Arapça > Alfabe, harflerin şekilleri, sağdan sola yazım | T K
+[4.I.02] Arapça > Harekeler ve okunuş | K
+[4.I.03] Arapça > Ses yapısı (boğazsal sesler), telaffuz | K
+[4.I.04] Arapça > Ad ve fiil cümleleri | K Ö
+[4.I.05] Arapça > Cinsiyet, sayı (tekil, ikil, çoğul), çoğul türleri | K İ
+[4.I.06] Arapça > Belirtme ve tamlama | K Ö
+[4.I.07] Arapça > Fiil kökleri ve vezinler | T K
+[4.I.08] Arapça > Fiil çekimi (mazi, muzari, emir) | K Ö
+[4.I.09] Arapça > Zamirler ve bitişik zamirler | K Ö
+[4.I.10] Arapça > Harf-i cerler ve i'rab | K Ö
+[4.I.11] Arapça > Fasih Arapça ve lehçeler | T
+[4.I.12] Arapça > Sayılar | K Ö
+
+4.J KORECE
+[4.J.01] Korece > Hangul yapısı ve öğrenme sırası | T A
+[4.J.02] Korece > Ses yapısı, telaffuz kuralları | K
+[4.J.03] Korece > Cümle yapısı (özne-nesne-yüklem) | K
+[4.J.04] Korece > Ekler (이/가, 은/는, 을/를, 에, 에서) | K Ö
+[4.J.05] Korece > Fiil ve sıfat çekimi | K Ö
+[4.J.06] Korece > Saygı dereceleri (해요체, 합니다체) | K Ö
+[4.J.07] Korece > Sayılar (öz Korece ve Sino-Korece) | K Ö
+[4.J.08] Korece > Zamanlar ve bağlantı ekleri | K Ö
+[4.J.09] Korece > TOPIK sınavı | S
+
+4.K ÇİNCE
+[4.K.01] Çince > Pinyin ve telaffuz | T K
+[4.K.02] Çince > Tonlar | T K
+[4.K.03] Çince > Çince karakterler, radikaller, vuruş sırası | T K
+[4.K.04] Çince > Basitleştirilmiş ve geleneksel karakter | T
+[4.K.05] Çince > Cümle yapısı ve sözcük sırası | K
+[4.K.06] Çince > Ölçü sözcükleri (量词) | K Ö
+[4.K.07] Çince > Zaman ve görünüş partikülleri (了, 过, 着) | K Ö
+[4.K.08] Çince > Olumsuzluk (不, 没) | K Ö
+[4.K.09] Çince > Soru yapıları | K Ö
+[4.K.10] Çince > HSK seviyeleri | S
+
+4.L TÜRKÇE VE DİĞER DİLLER
+[4.L.01] Türkçe > Ses uyumları ve ekler (yabancılar için) | K
+[4.L.02] Türkçe > Ünlü uyumu ve ek yapısı | K
+[4.L.03] Türkçe > Türk dilleri ve dil ailesi | T
+[4.L.04] Diller > Diller ve dil aileleri | T
+[4.L.05] Diller > Dilbilimin dalları (fonetik, morfoloji, sözdizim, anlambilim) | T
+[4.L.06] Diller > Yazı sistemlerinin türleri | T
+[4.L.07] Diller > Dillerin ölümü ve korunması | N
+
+4.M KELİME HAZİNESİ VE SIKLIK LİSTELERİ (kodla toplanır; model çevirmez)
+[4.M.01] Kelime > İngilizce en sık 3000 kelime | S
+[4.M.02] Kelime > Almanca en sık 3000 kelime | S
+[4.M.03] Kelime > Rusça en sık 3000 kelime | S
+[4.M.04] Kelime > Japonca en sık 3000 kelime | S
+[4.M.05] Kelime > İspanyolca, Fransızca, İtalyanca, Portekizce, Hollandaca en sık 3000 kelime | S
+[4.M.06] Kelime > Arapça, Korece, Çince en sık 3000 kelime | S
+[4.M.07] Kelime > Tatoeba cümle çiftleri (Türkçe karşılıklı) | Ö
+[4.M.08] Kelime > Konuya göre sözcük grupları (yiyecek, seyahat, iş, sağlık, aile, zaman) | Ö
+
+4.N GİTAR
+[4.N.01] Gitar > Gitar türleri (klasik, akustik, elektro, bas) | T
+[4.N.02] Gitar > Gitarın bölümleri (gövde, sap, perde, akort burgusu) | T
+[4.N.03] Gitar > Gitar seçimi ve bakımı | Y
+[4.N.04] Gitar > Telleri ve akort (standart akort, alternatif akortlar) | T K A
+[4.N.05] Gitar > Akort yöntemleri (akort aleti, kulakla) | A
+[4.N.06] Gitar > Pena kullanımı ve tutuş | Y
+[4.N.07] Gitar > Duruş, el pozisyonu, parmak numaraları | Y H
+[4.N.08] Gitar > Tablatür ve nota okuma | T K
+[4.N.09] Gitar > Ritim, vuruş kalıpları | T K
+[4.N.10] Gitar > Metronom kullanımı | Y
+[4.N.11] Gitar > Açık akorlar (Am, C, G, D, E, Em, A, F) | A
+[4.N.12] Gitar > Barre akorları | A H
+[4.N.13] Gitar > Power akorlar | T A
+[4.N.14] Gitar > Yedili akorlar, sus, add akorları | T A
+[4.N.15] Gitar > Akor geçişleri çalışması | Y
+[4.N.16] Gitar > Akor ilerlemeleri (I-IV-V, I-V-vi-IV, 12 bar blues) | T Ö
+[4.N.17] Gitar > Majör ve minör gam | T A
+[4.N.18] Gitar > Pentatonik gam ve kalıpları | T A
+[4.N.19] Gitar > Blues gamı | T A
+[4.N.20] Gitar > Modlar | T
+[4.N.21] Gitar > CAGED sistemi | T Y
+[4.N.22] Gitar > Beşliler çemberi | T
+[4.N.23] Gitar > Aralıklar ve üçlü akorlar | T
+[4.N.24] Gitar > Arpej ve parmak stili | T A
+[4.N.25] Gitar > Alternatif vuruş (alternate picking) | A
+[4.N.26] Gitar > Hammer-on ve pull-off | A
+[4.N.27] Gitar > Slide, bend, vibrato | A
+[4.N.28] Gitar > Palm mute | A
+[4.N.29] Gitar > Sweep picking, tremolo picking | A
+[4.N.30] Gitar > Kapodastr kullanımı | Y
+[4.N.31] Gitar > Klasik gitar teknikleri (rasgueado, tirando, apoyando) | A
+[4.N.32] Gitar > Flamenko gitar | T
+[4.N.33] Gitar > Elektro gitar: amfi, pedal, efektler | T Y
+[4.N.34] Gitar > Solo ve doğaçlama çalışma | Y
+[4.N.35] Gitar > Şarkı öğrenme ve kulaktan çıkarma | Y
+[4.N.36] Gitar > Günlük çalışma rutini (15, 30, 60 dakika planı) | Y A
+[4.N.37] Gitar > Sık yapılan hatalar ve çözümleri | H Y
+[4.N.38] Gitar > Yeni başlayanlar için 90 günlük plan | V A
+[4.N.39] Gitar > Parmak ağrısı ve nasır hakkında genel bilgi | T
+[4.N.40] Gitar > Müzik teorisi temelleri (nota değerleri, ölçü, tempo, işaretler) | T K
+[4.N.41] Gitar > Türk müziği: saz, bağlama, makam kavramı | T
+[4.N.42] Gitar > Kulak eğitimi | Y
+
+4.O DİKSİYON VE KONUŞMA
+[4.O.01] Diksiyon > Diksiyon nedir, amacı ve önemi | T
+[4.O.02] Diksiyon > Solunum türleri ve diyafram nefesi | T A
+[4.O.03] Diksiyon > Nefes kontrolü egzersizleri | A
+[4.O.04] Diksiyon > Ses organları, ses telleri | T G
+[4.O.05] Diksiyon > Ses ısınma egzersizleri | A
+[4.O.06] Diksiyon > Ses perdesi, ses şiddeti, ses rengi | T
+[4.O.07] Diksiyon > Türkçe ünlülerin doğru söylenişi | K Ö
+[4.O.08] Diksiyon > Türkçe ünsüzlerin doğru söylenişi | K Ö
+[4.O.09] Diksiyon > Artikülasyon egzersizleri, dil, dudak, çene | A
+[4.O.10] Diksiyon > Tekerlemeler ve kullanımı | A Ö
+[4.O.11] Diksiyon > Vurgu (sözcük, cümle) | K Ö
+[4.O.12] Diksiyon > Tonlama ve ses ayarı | K Ö
+[4.O.13] Diksiyon > Duraklama ve vurgulama | K Ö
+[4.O.14] Diksiyon > Konuşma hızı ve ritim | Y
+[4.O.15] Diksiyon > Ağız ve yöre şivelerinden arınma | Y
+[4.O.16] Diksiyon > Yaygın telaffuz hataları (ğ, r, s, ş, h) | H
+[4.O.17] Diksiyon > "Dolgu" sözcükleri ve azaltma | H Y
+[4.O.18] Diksiyon > Okuma egzersizleri (yüksek sesle okuma) | A
+[4.O.19] Diksiyon > Topluluk önünde konuşma temelleri | T Y
+[4.O.20] Diksiyon > Sahne korkusu ve stresle baş etme | Y
+[4.O.21] Diksiyon > Beden dili, göz teması, jest ve mimik | T Y
+[4.O.22] Diksiyon > Konuşma yapısı (giriş, gelişme, sonuç) | Y
+[4.O.23] Diksiyon > Hitabet ve retorik (ethos, pathos, logos) | T B
+[4.O.24] Diksiyon > İkna edici konuşma | T Y
+[4.O.25] Diksiyon > Hikâye anlatımı | T Y
+[4.O.26] Diksiyon > Sunum hazırlama ve slayt tasarımı | Y
+[4.O.27] Diksiyon > Mülakat ve toplantıda konuşma | Y
+[4.O.28] Diksiyon > Tartışma ve münazara | T K
+[4.O.29] Diksiyon > Etkin dinleme | T Y
+[4.O.30] Diksiyon > Mikrofon kullanımı ve kayıtla geri bildirim | Y
+[4.O.31] Diksiyon > Ses sağlığı ve sesi koruma | Y
+[4.O.32] Diksiyon > Konuşma bozukluklarına genel bakış (kekemelik vb., tanı değil) | T
+[4.O.33] Diksiyon > 30 günlük diksiyon çalışma planı | A V
+[4.O.34] Diksiyon > Tiyatro, oyunculuk ve seslendirme temelleri | T Y
+[4.O.35] Diksiyon > Şiir okuma | A
+
+4.P VERİMLİLİK VE KİŞİSEL GELİŞİM
+[4.P.01] Verimlilik > Zaman yönetimi ilkeleri | T Y
+[4.P.02] Verimlilik > Eisenhower matrisi | T A
+[4.P.03] Verimlilik > Pareto ilkesi (80/20) | T
+[4.P.04] Verimlilik > Pomodoro tekniği | T A
+[4.P.05] Verimlilik > Derin çalışma (deep work) | T Y
+[4.P.06] Verimlilik > Alışkanlık oluşturma (ipucu-rutin-ödül, alışkanlık istifleme) | T Y
+[4.P.07] Verimlilik > Hedef belirleme (SMART, OKR) | T Y
+[4.P.08] Verimlilik > Erteleme ve üstesinden gelme | T Y
+[4.P.09] Verimlilik > Odaklanma ve dikkat dağıtıcılar | Y
+[4.P.10] Verimlilik > Planlama, günlük ve haftalık gözden geçirme | Y A
+[4.P.11] Verimlilik > Öncelik belirleme | Y
+[4.P.12] Verimlilik > Karar verme yöntemleri | T Y
+[4.P.13] Verimlilik > Eleştirel düşünme | T Y
+[4.P.14] Verimlilik > Bilişsel çarpıtmalar ve mantık hataları (safsata) | T Ö
+[4.P.15] Verimlilik > Problem çözme yöntemleri | T A
+[4.P.16] Verimlilik > Yaratıcılık ve beyin fırtınası | T Y
+[4.P.17] Verimlilik > Öğrenmeyi öğrenmek: yöntemler | T Y
+[4.P.18] Verimlilik > Hızlı okuma (bilimsel bulgular ve sınırları) | T N
+[4.P.19] Verimlilik > Hafıza teknikleri (hafıza sarayı, bağlantı, hikâye) | T A
+[4.P.20] Verimlilik > Not alma yöntemleri (Cornell, zihin haritası, Zettelkasten) | T A
+[4.P.21] Verimlilik > Kitap okuma alışkanlığı | Y
+[4.P.22] Verimlilik > Büyüme zihniyeti | T
+[4.P.23] Verimlilik > Bilinçli pratik (deliberate practice) | T Y
+[4.P.24] Verimlilik > Akış hâli | T
+[4.P.25] Verimlilik > Motivasyon kuramları | T
+[4.P.26] Verimlilik > Öz disiplin ve irade | T Y
+[4.P.27] Verimlilik > Duygusal zekâ ve empati | T Y
+[4.P.28] Verimlilik > Duygu düzenleme | T Y
+[4.P.29] Verimlilik > Etkili iletişim | T Y
+[4.P.30] Verimlilik > Çatışma çözme ve müzakere | T Y
+[4.P.31] Verimlilik > Takım çalışması ve liderlik | T Y
+[4.P.32] Verimlilik > Sosyal beceriler ve ilişkiler | T Y
+[4.P.33] Verimlilik > Ağ kurma (networking) | Y
+[4.P.34] Verimlilik > Kariyer planlama, CV ve mülakat | Y A
+[4.P.35] Verimlilik > Dijital minimalizm | T Y
+
+4.Q FİNANS, HUKUK, TEKNOLOJİ VE GÜNDELİK BİLGİ
+[4.Q.01] Finans > Bütçe yapma, tasarruf | T Y
+[4.Q.02] Finans > Bileşik faiz | T F
+[4.Q.03] Finans > Enflasyon | T
+[4.Q.04] Finans > Kredi, borç ve faiz | T
+[4.Q.05] Finans > Sigorta türleri | T
+[4.Q.06] Finans > Emeklilik sistemi | T
+[4.Q.07] Finans > Vergi türleri | T
+[4.Q.08] Finans > Yatırım araçları ve risk (genel bilgi, tavsiye değil) | T
+[4.Q.09] Finans > Ekonomik temel kavramlar (arz-talep, GSYH, işsizlik) | T
+[4.Q.10] Hukuk > Anayasa ve temel haklar | T
+[4.Q.11] Hukuk > Tüketici hakları | T
+[4.Q.12] Hukuk > Sözleşme, kira, iş hukuku temel bilgiler | T
+[4.Q.13] Hukuk > Trafik kuralları ve ehliyet | K
+[4.Q.14] Hukuk > Kişisel verilerin korunması (KVKK) | T K
+[4.Q.15] Teknoloji > Dijital güvenlik, parola yönetimi, iki adımlı doğrulama | Y K
+[4.Q.16] Teknoloji > Dolandırıcılık ve oltalama | T Y
+[4.Q.17] Teknoloji > Medya okuryazarlığı, yanlış bilgi | T Y
+[4.Q.18] Teknoloji > Bilgisayar ve internet temelleri | T
+[4.Q.19] Teknoloji > Programlamaya giriş | T
+[4.Q.20] Teknoloji > Algoritma ve veri yapıları temelleri | T
+[4.Q.21] Teknoloji > Yapay zekâ ve makine öğrenmesi temelleri | T
+[4.Q.22] Teknoloji > Elektronik tablo kullanımı | Y
+[4.Q.23] Teknoloji > Yedekleme ve veri güvenliği | Y
+[4.Q.24] Gündelik > Afet hazırlığı ve deprem çantası | Y K
+[4.Q.25] Gündelik > Yangın güvenliği | K Y
+[4.Q.26] Gündelik > Temel ilk yardım (genel bilgi) | A K
+[4.Q.27] Gündelik > Evde temel onarım ve bakım | Y
+[4.Q.28] Gündelik > Yemek pişirmeye başlangıç | Y A
+[4.Q.29] Gündelik > Seyahat planlama | Y
+[4.Q.30] Gündelik > Çevre, geri dönüşüm, sürdürülebilirlik | T Y
+
+4.R SANAT, MÜZİK, EDEBİYAT VE BİLİM KÜLTÜRÜ
+[4.R.01] Sanat > Sanat tarihi dönemleri | V B
+[4.R.02] Sanat > Ünlü ressamlar ve eserleri | B E
+[4.R.03] Sanat > Mimari üsluplar | T Ö
+[4.R.04] Sanat > Türk-İslam sanatları (hat, minyatür, çini) | T
+[4.R.05] Müzik > Müzik tarihi dönemleri | V B
+[4.R.06] Müzik > Klasik müzik bestecileri | B E
+[4.R.07] Müzik > Türk halk ve sanat müziği | T
+[4.R.08] Edebiyat > Dünya edebiyatı klasikleri | B E
+[4.R.09] Edebiyat > Türk edebiyatı klasikleri | B E
+[4.R.10] Edebiyat > Okuma listeleri | E
+[4.R.11] Bilim > Astronomi ve Güneş Sistemi | T
+[4.R.12] Bilim > Evrenin yapısı ve oluşumu | T
+[4.R.13] Bilim > Fizik, kimya, biyoloji tarihinden dönüm noktaları | S B
+[4.R.14] Bilim > Bilimsel yöntem | T A
+[4.R.15] Bilim > Matematik tarihi ve ünlü matematikçiler | S B
+[4.R.16] Bilim > Teknoloji tarihi ve icatlar | S B
+[4.R.17] Bilim > İklim değişikliği | T N
+[4.R.18] Bilim > Enerji kaynakları | T
+[4.R.19] Bilim > Psikoloji temel kavramları | T
+[4.R.20] Bilim > Sosyoloji temel kavramları | T
+[4.R.21] Bilim > Ekonomi temel kavramları | T
+[4.R.22] Bilim > Coğrafya: ülkeler, başkentler, iklim kuşakları | S T
+[4.R.23] Bilim > Dünya dinleri ve inanç sistemleri (tarafsız, betimleyici) | T
+[4.R.24] Bilim > Mitoloji (Yunan, Roma, Türk, Nordik) | T E

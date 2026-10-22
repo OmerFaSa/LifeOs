@@ -1,0 +1,366 @@
+══════ BÖLÜM 2 — SPİ (sağlık ve yaşam düzeni) ══════
+SPİ teşhis koymaz, doz önermez, tedavi vermez. İlaç, doz, tedavi ve kişisel tıbbi talimat içeren cümleler ATLANIR.
+
+2.A MAKRO BESİNLER
+[2.A.01] Beslenme > Karbonhidrat > Tanım, türleri (basit, karmaşık) | T G
+[2.A.02] Beslenme > Karbonhidrat > Besin kaynakları | T Ö
+[2.A.03] Beslenme > Karbonhidrat > Glisemik indeks ve glisemik yük | T
+[2.A.04] Beslenme > Karbonhidrat > Posa (lif) türleri ve görevi | T G
+[2.A.05] Beslenme > Karbonhidrat > Rafine ve tam tahıl farkı | T Ö
+[2.A.06] Beslenme > Protein > Tanım, amino asitler, esansiyel amino asitler | T G
+[2.A.07] Beslenme > Protein > Besin kaynakları (hayvansal, bitkisel) | T Ö
+[2.A.08] Beslenme > Protein > Vücuttaki görevleri | G
+[2.A.09] Beslenme > Protein > Protein kalitesi, tamamlayıcı protein | T
+[2.A.10] Beslenme > Yağ > Doymuş, tekli ve çoklu doymamış yağ asitleri | T G
+[2.A.11] Beslenme > Yağ > Omega-3 ve omega-6 | T G Ö
+[2.A.12] Beslenme > Yağ > Trans yağ | T
+[2.A.13] Beslenme > Yağ > Kolesterol, besin kaynakları | T Ö
+[2.A.14] Beslenme > Yağ > Yağda çözünen vitaminlerin emilimi | G
+[2.A.15] Beslenme > Enerji > Kalori kavramı, enerji yoğunluğu | T
+[2.A.16] Beslenme > Enerji > Bazal metabolizma hızı | T
+[2.A.17] Beslenme > Enerji > Besinlerin termik etkisi | T
+[2.A.18] Beslenme > Enerji > Günlük enerji harcaması bileşenleri | T
+[2.A.19] Beslenme > Enerji > Makro besin dağılımı önerileri (resmî kurum) | R
+[2.A.20] Beslenme > Enerji > Vücut kompozisyonu, vücut kitle indeksi, bel çevresi | T R
+
+2.B MİKRO BESİNLER — VİTAMİNLER
+[2.B.01] Vitamin > A vitamini (retinol) | G Ö R
+[2.B.02] Vitamin > D vitamini | G Ö R
+[2.B.03] Vitamin > E vitamini | G Ö
+[2.B.04] Vitamin > K vitamini | G Ö
+[2.B.05] Vitamin > C vitamini | G Ö R
+[2.B.06] Vitamin > B1 (tiamin) | G Ö
+[2.B.07] Vitamin > B2 (riboflavin) | G Ö
+[2.B.08] Vitamin > B3 (niasin) | G Ö
+[2.B.09] Vitamin > B5 (pantotenik asit) | G Ö
+[2.B.10] Vitamin > B6 (piridoksin) | G Ö
+[2.B.11] Vitamin > B7 (biyotin) | G Ö
+[2.B.12] Vitamin > B9 (folat, folik asit) | G Ö R
+[2.B.13] Vitamin > B12 (kobalamin) | G Ö
+[2.B.14] Vitamin > Yağda ve suda çözünen vitaminlerin farkı | T
+[2.B.15] Vitamin > Gıdalarda vitamin kaybı (pişirme, depolama) | N Y
+
+2.C MİKRO BESİNLER — MİNERALLER
+[2.C.01] Mineral > Kalsiyum | G Ö R
+[2.C.02] Mineral > Demir (hem ve hem olmayan demir) | G Ö R
+[2.C.03] Mineral > Magnezyum | G Ö
+[2.C.04] Mineral > Çinko | G Ö
+[2.C.05] Mineral > Potasyum | G Ö R
+[2.C.06] Mineral > Sodyum ve tuz | G Ö R
+[2.C.07] Mineral > Fosfor | G Ö
+[2.C.08] Mineral > İyot | G Ö
+[2.C.09] Mineral > Selenyum | G Ö
+[2.C.10] Mineral > Bakır, mangan, krom, flor | G Ö
+[2.C.11] Mineral > Demir emilimini artıran ve azaltan faktörler | N Y
+[2.C.12] Mineral > Elektrolit dengesi | T G
+
+2.D SU VE SIVI DENGESİ
+[2.D.01] Su > Vücuttaki görevleri | G
+[2.D.02] Su > Günlük sıvı ihtiyacı için resmî öneriler | R
+[2.D.03] Su > Dehidrasyon nedenleri ve genel belirtileri (tanı değil, genel bilgi) | T
+[2.D.04] Su > Sıvı kaynakları (içecekler, yiyecekler) | Ö
+[2.D.05] Su > Çay, kahve ve kafein | T G
+[2.D.06] Su > Şekerli içecekler, enerji içecekleri | T R
+[2.D.07] Su > Sporda sıvı alımı ilkeleri | Y
+[2.D.08] Su > Alkolün genel etkileri | T
+
+2.E ÖĞÜN DÜZENİ VE BESLENME ALIŞKANLIKLARI
+[2.E.01] Öğün > Kahvaltının önemi ve içeriği | T Y
+[2.E.02] Öğün > Ana ve ara öğünler, öğün sayısı | T Y
+[2.E.03] Öğün > Öğün saatleri ve düzenli yeme | Y
+[2.E.04] Öğün > Akşam yemeği zamanı ve uyku ilişkisi | N Y
+[2.E.05] Öğün > Kronobeslenme (chrononutrition) | T
+[2.E.06] Öğün > Öğün atlama ve etkileri | N
+[2.E.07] Öğün > Porsiyon boyutu ve tabak modeli | T Y
+[2.E.08] Öğün > Bilinçli yeme (mindful eating) | T Y
+[2.E.09] Öğün > Yavaş yeme, tokluk sinyalleri | G Y
+[2.E.10] Öğün > Ekran karşısında yeme | N
+[2.E.11] Öğün > Sporcu öğünleri: antrenman öncesi ve sonrası | Y
+[2.E.12] Öğün > Sınav dönemi beslenmesi | Y
+[2.E.13] Öğün > Gece yemek ve atıştırma | N
+[2.E.14] Öğün > Yemek hazırlama (meal prep) ve alışveriş listesi | Y A
+[2.E.15] Öğün > Besin etiketi okuma | K Y
+
+2.F BESLENME DÜZENLERİ
+[2.F.01] Diyet > Akdeniz beslenme modeli | T Ö R
+[2.F.02] Diyet > Vejetaryenlik ve veganlık | T Y
+[2.F.03] Diyet > Aralıklı oruç (zaman kısıtlı yeme) | T
+[2.F.04] Diyet > Ketojenik beslenme | T
+[2.F.05] Diyet > Düşük karbonhidratlı beslenme | T
+[2.F.06] Diyet > DASH beslenme modeli | T
+[2.F.07] Diyet > Glutensiz beslenme, çölyak farkındalığı | T
+[2.F.08] Diyet > Laktoz intoleransı ve süt alternatifleri | T
+[2.F.09] Diyet > Besin alerjisi ve intolerans farkı | T
+[2.F.10] Diyet > Kalori kısıtlaması genel ilkeleri | T
+[2.F.11] Diyet > Popüler diyetlerin bilimsel değerlendirmesi | N
+[2.F.12] Diyet > Türkiye Beslenme Rehberi (TÜBER) ilkeleri | R
+[2.F.13] Diyet > Dünya Sağlık Örgütü sağlıklı beslenme önerileri | R
+[2.F.14] Diyet > Besin grupları ve önerilen porsiyonlar | R
+[2.F.15] Diyet > Yaş gruplarına göre beslenme (çocuk, ergen, yetişkin, yaşlı) | R
+
+2.G BESİN GRUPLARI VE TEKİL BESİNLER
+[2.G.01] Besin > Süt ve süt ürünleri (süt, yoğurt, ayran, peynir, kefir) | G Ö
+[2.G.02] Besin > Et ve et ürünleri (kırmızı, beyaz et, işlenmiş et) | G Ö
+[2.G.03] Besin > Balık ve deniz ürünleri | G Ö
+[2.G.04] Besin > Yumurta | G Ö
+[2.G.05] Besin > Baklagiller (mercimek, nohut, fasulye) | G Ö
+[2.G.06] Besin > Tahıllar (buğday, pirinç, yulaf, mısır, bulgur) | G Ö
+[2.G.07] Besin > Ekmek çeşitleri | G Ö
+[2.G.08] Besin > Sebzeler (yeşil yapraklı, kök, turpgiller) | G Ö
+[2.G.09] Besin > Meyveler ve meyve suyu farkı | G Ö
+[2.G.10] Besin > Kuru meyveler | G Ö
+[2.G.11] Besin > Yağlı tohumlar ve kuruyemişler | G Ö
+[2.G.12] Besin > Bitkisel yağlar (zeytinyağı, ayçiçek, kanola) | G Ö
+[2.G.13] Besin > Tereyağı ve margarin | G Ö
+[2.G.14] Besin > Bal, pekmez, şeker ve tatlandırıcılar | G Ö
+[2.G.15] Besin > Baharatlar ve otlar | G Ö
+[2.G.16] Besin > Çay, kahve, bitki çayları | G Ö
+[2.G.17] Besin > Fermente gıdalar (turşu, boza, şalgam, kefir) | T G
+[2.G.18] Besin > Probiyotik ve prebiyotik | T G
+[2.G.19] Besin > İşlenmiş ve ultra işlenmiş gıdalar | T N
+[2.G.20] Besin > Gıda katkı maddeleri | T
+[2.G.21] Besin > Organik ve geleneksel tarım ürünleri | T
+[2.G.22] Besin > Mevsimlik sebze ve meyveler (Türkiye) | Ö
+[2.G.23] Besin > Gıda güvenliği: saklama, çapraz bulaşma, pişirme | K Y
+[2.G.24] Besin > Gıda kaynaklı hastalıklardan korunma (genel bilgi) | Y
+[2.G.25] Besin > Pişirme yöntemleri ve besin değerine etkisi | N Y
+
+2.H TÜRK YEMEKLERİ (her biri için: içerik, malzeme, yöntem, bölge, açık yazılmış besin değeri)
+[2.H.01] Yemek > Mercimek çorbası | Ö
+[2.H.02] Yemek > Ezogelin çorbası | Ö
+[2.H.03] Yemek > Tarhana çorbası | Ö
+[2.H.04] Yemek > Yayla çorbası | Ö
+[2.H.05] Yemek > İşkembe çorbası | Ö
+[2.H.06] Yemek > Kuru fasulye | Ö
+[2.H.07] Yemek > Nohut yemeği | Ö
+[2.H.08] Yemek > Barbunya pilaki | Ö
+[2.H.09] Yemek > Etli taze fasulye | Ö
+[2.H.10] Yemek > Zeytinyağlı yaprak sarma | Ö
+[2.H.11] Yemek > Zeytinyağlı enginar | Ö
+[2.H.12] Yemek > İmam bayıldı | Ö
+[2.H.13] Yemek > Karnıyarık | Ö
+[2.H.14] Yemek > Patlıcan musakka | Ö
+[2.H.15] Yemek > Kabak dolması | Ö
+[2.H.16] Yemek > Biber dolması | Ö
+[2.H.17] Yemek > Etli dolma | Ö
+[2.H.18] Yemek > Mantı | Ö
+[2.H.19] Yemek > Su böreği | Ö
+[2.H.20] Yemek > Sigara böreği | Ö
+[2.H.21] Yemek > Gözleme | Ö
+[2.H.22] Yemek > Pide | Ö
+[2.H.23] Yemek > Lahmacun | Ö
+[2.H.24] Yemek > Döner | Ö
+[2.H.25] Yemek > Şiş kebap | Ö
+[2.H.26] Yemek > Adana kebap | Ö
+[2.H.27] Yemek > Urfa kebap | Ö
+[2.H.28] Yemek > İskender kebap | Ö
+[2.H.29] Yemek > Köfte (kuru köfte, ızgara köfte) | Ö
+[2.H.30] Yemek > İçli köfte | Ö
+[2.H.31] Yemek > Çiğ köfte | Ö
+[2.H.32] Yemek > Tavuk sote | Ö
+[2.H.33] Yemek > Hünkâr beğendi | Ö
+[2.H.34] Yemek > Pilav çeşitleri (pirinç, bulgur) | Ö
+[2.H.35] Yemek > Makarna ve erişte yemekleri | Ö
+[2.H.36] Yemek > Menemen | Ö
+[2.H.37] Yemek > Sucuklu yumurta | Ö
+[2.H.38] Yemek > Türk kahvaltısı (peynir, zeytin, reçel, bal, kaymak) | Ö
+[2.H.39] Yemek > Simit | Ö
+[2.H.40] Yemek > Poğaça ve açma | Ö
+[2.H.41] Yemek > Kısır | Ö
+[2.H.42] Yemek > Cacık | Ö
+[2.H.43] Yemek > Çoban salatası | Ö
+[2.H.44] Yemek > Haydari, ezme ve mezeler | Ö
+[2.H.45] Yemek > Balık yemekleri (hamsi, levrek, çipura) | Ö
+[2.H.46] Yemek > Baklava | Ö
+[2.H.47] Yemek > Sütlaç | Ö
+[2.H.48] Yemek > Aşure | Ö
+[2.H.49] Yemek > Kadayıf ve künefe | Ö
+[2.H.50] Yemek > Lokum | Ö
+[2.H.51] Yemek > Türk kahvesi ve çay kültürü | Ö
+[2.H.52] Yemek > Ayran, şalgam, boza | Ö
+
+2.I EGZERSİZ TEMELLERİ VE ANTRENMAN İLKELERİ
+[2.I.01] Egzersiz > Fiziksel aktivite ve egzersiz farkı | T
+[2.I.02] Egzersiz > Fiziksel uygunluğun bileşenleri | T
+[2.I.03] Egzersiz > Aerobik ve anaerobik egzersiz | T Ö
+[2.I.04] Egzersiz > Kalp atış hızı, maksimum kalp atış hızı, egzersiz bölgeleri | T
+[2.I.05] Egzersiz > VO2 max kavramı | T
+[2.I.06] Egzersiz > Algılanan zorluk skalası (RPE) | T Y
+[2.I.07] Egzersiz > Aşamalı yüklenme (progressive overload) | T Y
+[2.I.08] Egzersiz > Antrenman hacmi, yoğunluk, sıklık | T
+[2.I.09] Egzersiz > Tekrar, set, dinlenme süreleri | T Y
+[2.I.10] Egzersiz > Periyodizasyon | T
+[2.I.11] Egzersiz > Isınma ilkeleri ve örnek rutin | Y A
+[2.I.12] Egzersiz > Soğuma ve toparlanma | Y
+[2.I.13] Egzersiz > Toparlanma: uyku, beslenme, dinlenme günü | Y N
+[2.I.14] Egzersiz > Aşırı antrenman | T N
+[2.I.15] Egzersiz > Gecikmeli kas ağrısı | T N
+[2.I.16] Egzersiz > Kas hipertrofisi | T G
+[2.I.17] Egzersiz > Kas gücü, dayanıklılığı ve hipertrofi farkı | T
+[2.I.18] Egzersiz > Kas yapısı, kas kasılma türleri | T G
+[2.I.19] Egzersiz > Yaralanma önleme ilkeleri | K Y
+[2.I.20] Egzersiz > Yaşa göre egzersiz önerileri (resmî kurum) | R
+[2.I.21] Egzersiz > Haftalık aktivite süreleri (WHO, Sağlık Bakanlığı) | R
+[2.I.22] Egzersiz > Hareketsiz yaşam ve sağlık etkisi | N R
+[2.I.23] Egzersiz > Ev egzersizi ve ekipmansız antrenman | Y
+[2.I.24] Egzersiz > Ders çalışırken hareket molaları | Y
+
+2.J KALİSTENİK HAREKETLERİ (her hareket: hedef kaslar, yapılış, form, varyasyon, hata)
+[2.J.01] Kalistenik > Şınav (push-up) | A H Ö
+[2.J.02] Kalistenik > Diz üstü şınav | A Ö
+[2.J.03] Kalistenik > Elmas şınav | A Ö
+[2.J.04] Kalistenik > Pike şınav | A Ö
+[2.J.05] Kalistenik > Dips (paralel bar) | A H
+[2.J.06] Kalistenik > Sandalye dips | A H
+[2.J.07] Kalistenik > Barfiks (pull-up) | A H Ö
+[2.J.08] Kalistenik > Chin-up | A Ö
+[2.J.09] Kalistenik > Australian pull-up (yatay çekiş) | A Ö
+[2.J.10] Kalistenik > Muscle-up | A H
+[2.J.11] Kalistenik > Squat (çömelme) | A H Ö
+[2.J.12] Kalistenik > Lunge | A H Ö
+[2.J.13] Kalistenik > Bulgar split squat | A Ö
+[2.J.14] Kalistenik > Pistol squat | A Ö
+[2.J.15] Kalistenik > Glute bridge | A Ö
+[2.J.16] Kalistenik > Calf raise (baldır) | A Ö
+[2.J.17] Kalistenik > Plank ve varyasyonları | A H Ö
+[2.J.18] Kalistenik > Yan plank | A Ö
+[2.J.19] Kalistenik > Hollow body hold | A Ö
+[2.J.20] Kalistenik > L-sit | A Ö
+[2.J.21] Kalistenik > Leg raise (bacak kaldırma) | A Ö
+[2.J.22] Kalistenik > Mekik ve crunch | A H
+[2.J.23] Kalistenik > Mountain climber | A Ö
+[2.J.24] Kalistenik > Burpee | A Ö
+[2.J.25] Kalistenik > Jumping jack, ip atlama | A Ö
+[2.J.26] Kalistenik > Handstand (amuda kalkma) ilerleyişi | A V
+[2.J.27] Kalistenik > Front lever ilerleyişi | A V
+[2.J.28] Kalistenik > Planche ilerleyişi | A V
+[2.J.29] Kalistenik > Human flag | A V
+[2.J.30] Kalistenik > Superman ve bird-dog | A Ö
+[2.J.31] Kalistenik > Başlangıç, orta, ileri kalistenik programları | Y V
+[2.J.32] Kalistenik > Hareket ilerleyiş (progresyon) basamakları | V
+[2.J.33] Kalistenik > Kalistenik ve ağırlık antrenmanı karşılaştırması | N
+[2.J.34] Kalistenik > Tekrar ve set önerileri, haftalık plan örnekleri | Y
+
+2.K AĞIRLIK VE DİRENÇ ANTRENMANI
+[2.K.01] Direnç > Deadlift | A H
+[2.K.02] Direnç > Bench press | A H
+[2.K.03] Direnç > Overhead press | A H
+[2.K.04] Direnç > Barbell row | A H
+[2.K.05] Direnç > Back squat ve front squat | A H
+[2.K.06] Direnç > Romanian deadlift | A H
+[2.K.07] Direnç > Dumbbell ve kettlebell hareketleri | A Ö
+[2.K.08] Direnç > Elastik bant egzersizleri | A Ö
+[2.K.09] Direnç > Tam vücut, üst-alt, itiş-çekiş bölünmüş programlar | Y V
+[2.K.10] Direnç > 1 tekrar maksimum kavramı | T
+[2.K.11] Direnç > Başlangıç için güvenlik ve spotter | K Y
+
+2.L KARDİYO VE SPOR DALLARI
+[2.L.01] Kardiyo > Yürüyüş | Y R
+[2.L.02] Kardiyo > Koşu tekniği, başlangıç programı | Y A
+[2.L.03] Kardiyo > Bisiklet | Y
+[2.L.04] Kardiyo > Yüzme | Y
+[2.L.05] Kardiyo > HIIT ve interval antrenmanı | T Y
+[2.L.06] Kardiyo > Tabata | T Y
+[2.L.07] Kardiyo > Sirkuit antrenmanı | T Y
+[2.L.08] Kardiyo > Pliometrik antrenman | T Y
+[2.L.09] Kardiyo > Eşik (laktat) antrenmanı | T
+[2.L.10] Kardiyo > Basamak çıkma, ip atlama | Y
+
+2.M ESNEKLİK VE HAREKETLİLİK
+[2.M.01] Esneklik > Esneklik ve hareket açıklığı | T
+[2.M.02] Esneklik > Statik germe | T A Y
+[2.M.03] Esneklik > Dinamik germe | T A Y
+[2.M.04] Esneklik > PNF germe | T Y
+[2.M.05] Esneklik > Balistik germe ve riskleri | T N
+[2.M.06] Esneklik > Germe süreleri ve sıklığı için öneriler | R Y
+[2.M.07] Esneklik > Kalça fleksörleri germe | A
+[2.M.08] Esneklik > Hamstring germe | A
+[2.M.09] Esneklik > Quadriceps germe | A
+[2.M.10] Esneklik > Baldır ve aşil germe | A
+[2.M.11] Esneklik > Kalça açma (piriformis, glute) | A
+[2.M.12] Esneklik > Omuz ve göğüs germe | A
+[2.M.13] Esneklik > Sırt ve latissimus germe | A
+[2.M.14] Esneklik > Boyun germe | A
+[2.M.15] Esneklik > Bilek ve önkol germe (masa başı çalışanlar için) | A
+[2.M.16] Esneklik > Omurga hareketliliği (kedi-deve) | A
+[2.M.17] Esneklik > Torasik omurga mobilitesi | A
+[2.M.18] Esneklik > Ayak bileği mobilitesi | A
+[2.M.19] Esneklik > Köpük silindir (foam roller) kullanımı | T Y
+[2.M.20] Esneklik > Yoga (asanalar, güneşe selam) | T A
+[2.M.21] Esneklik > Pilates | T A
+[2.M.22] Esneklik > Tai chi | T
+[2.M.23] Esneklik > Split ve köprü gibi ileri esneklik ilerleyişi | V Y
+[2.M.24] Esneklik > Sabah ve akşam esneme rutinleri | Y A
+
+2.N DURUŞ VE ERGONOMİ
+[2.N.01] Duruş > Sağlıklı omurga eğrilikleri | T
+[2.N.02] Duruş > Öne kayık baş duruşu | T N
+[2.N.03] Duruş > Kifoz, lordoz, skolyoz (genel bilgi, tanı değil) | T
+[2.N.04] Duruş > Ön pelvik eğim | T N
+[2.N.05] Duruş > Oturma duruşu ve masa başı ergonomi | K Y
+[2.N.06] Duruş > Ekran yüksekliği, ışık, göz molası (20-20-20) | K Y
+[2.N.07] Duruş > Ayakta çalışma masası | Y
+[2.N.08] Duruş > Uzun süre oturmanın etkileri, hareket molası | N R
+[2.N.09] Duruş > Çanta taşıma, uyku yastığı ve şiltesi | Y
+[2.N.10] Duruş > Core (merkez) kaslarının rolü | G
+[2.N.11] Duruş > Bel ve boyun ağrısını önleyici genel alışkanlıklar | Y
+[2.N.12] Duruş > Denge ve koordinasyon egzersizleri | A
+
+2.O UYKU
+[2.O.01] Uyku > Uyku evreleri (NREM, REM) | T V
+[2.O.02] Uyku > Uyku döngüsü ve süresi | T
+[2.O.03] Uyku > Yaşa göre önerilen uyku süreleri | R
+[2.O.04] Uyku > Sirkadiyen ritim | T G
+[2.O.05] Uyku > Kronotip (sabahçı, akşamcı) | T
+[2.O.06] Uyku > Melatonin hormonu | T G
+[2.O.07] Uyku > Işığın rolü, mavi ışık ve ekran | N
+[2.O.08] Uyku > Uyku hijyeni ilkeleri | K Y
+[2.O.09] Uyku > Yatak odası ortamı (ısı, ses, ışık) | Y
+[2.O.10] Uyku > Kafein ve alkolün uykuya etkisi | N
+[2.O.11] Uyku > Akşam yemeği ve uyku | N
+[2.O.12] Uyku > Egzersizin uykuya etkisi ve zamanlaması | N
+[2.O.13] Uyku > Şekerleme (idle) | T Y
+[2.O.14] Uyku > Uyku yoksunluğu ve bilişsel etkiler | N
+[2.O.15] Uyku > Uyku ve bellek pekiştirme | N G
+[2.O.16] Uyku > Uyku borcu | T
+[2.O.17] Uyku > Vardiyalı çalışma ve jet lag (genel bilgi) | T
+[2.O.18] Uyku > Uykuya dalma rutinleri | Y A
+[2.O.19] Uyku > İnsomnia farkındalığı (tanı ve tedavi değil, genel bilgi) | T
+[2.O.20] Uyku > Sınav dönemi uyku düzeni | Y
+
+2.P STRES, ZİHİN VE YAŞAM ALIŞKANLIKLARI
+[2.P.01] Stres > Stres tepkisi, kortizol | T G
+[2.P.02] Stres > Kısa ve uzun süreli stres | T N
+[2.P.03] Stres > Stresle başa çıkma teknikleri | Y A
+[2.P.04] Stres > Nefes egzersizleri (diyafram, kutu nefes) | A
+[2.P.05] Stres > Meditasyon ve farkındalık | T A
+[2.P.06] Stres > İlerleyici kas gevşetme | A
+[2.P.07] Stres > Doğada zaman geçirme | N
+[2.P.08] Stres > Sosyal destek, yalnızlık | N
+[2.P.09] Stres > Tükenmişlik (genel bilgi) | T N
+[2.P.10] Stres > Dijital detoks, ekran süresi | Y N
+[2.P.11] Stres > Soğuk maruziyeti ve sauna (genel bilgi ve sınırlılıklar) | T
+[2.P.12] Stres > Sigara ve alkolün genel etkileri | T N
+[2.P.13] Stres > Güneşten korunma ve D vitamini | Y R
+[2.P.14] Stres > El yıkama, ağız ve diş hijyeni | K Y
+[2.P.15] Stres > Kişisel hijyen ve bulaşıcı hastalıklardan korunma (genel) | K Y
+
+2.Q GENEL SAĞLIK FARKINDALIĞI (tanı ve tedavi olmadan, tanım ve korunma)
+[2.Q.01] Sağlık > Kan basıncı nedir, ölçüm ilkeleri, resmî sınıflar | T R
+[2.Q.02] Sağlık > Kolesterol ve lipit profili nedir | T R
+[2.Q.03] Sağlık > Kan şekeri, insülin, tip 2 diyabet korunma | T R
+[2.Q.04] Sağlık > Obezite tanımı ve korunma (WHO) | T R
+[2.Q.05] Sağlık > Kalp-damar sağlığı ve risk faktörleri | T R
+[2.Q.06] Sağlık > Kemik sağlığı, osteoporoz korunma | T R
+[2.Q.07] Sağlık > Demir eksikliği ve anemi farkındalığı | T
+[2.Q.08] Sağlık > Bağışıklık sistemi ve aşılama | T R
+[2.Q.09] Sağlık > Bağırsak mikrobiyotası | T G
+[2.Q.10] Sağlık > Tuz tüketimi ve sağlık (WHO) | R
+[2.Q.11] Sağlık > Şeker tüketimi ve sağlık (WHO) | R
+[2.Q.12] Sağlık > Sigara bırakma farkındalığı (genel) | R
+[2.Q.13] Sağlık > Ruh sağlığı ve yardım arama (genel bilgi) | T
+[2.Q.14] Sağlık > Kadın sağlığı, ergenlik ve beslenme (genel) | T
+[2.Q.15] Sağlık > İlk yardım temelleri (genel bilgi) | A K
+[2.Q.16] Sağlık > Sağlıklı yaşlanma | T R
+[2.Q.17] Sağlık > Check-up ve periyodik kontrol önerileri (resmî) | R
+[2.Q.18] Sağlık > Sağlık okuryazarlığı, güvenilir kaynak ayırt etme | Y

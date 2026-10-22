@@ -1,0 +1,17 @@
+{
+  "_not": "Lisansi belirsiz kaynak buraya girmez. 'ikincil' = baska birinin derlemesi; etiket en fazla 'tahmin' olur, birincil (ÖSYM) ile capraz dogrulanana kadar.",
+  "kaynaklar": [
+    {"id": "tyt-dagilim-meb-2025", "sistem": "AYS", "tur": "pdf", "duzey": "ikincil",
+     "konu": "TYT yillara gore konu bazli soru dagilimi 2018-2025",
+     "url": "https://reyhanlisfkasml.meb.k12.tr/meb_iys_dosyalar/31/08/963209/dosyalar/2025_12/694bcadab4eec921652162_2025TYT_Y%C4%B1llara_Gore_Soru_Dag%C4%B1l%C4%B1m%C4%B1.pdf"},
+    {"id": "ayt-dagilim-meb-2025", "sistem": "AYS", "tur": "pdf", "duzey": "ikincil",
+     "konu": "AYT yillara gore konu bazli soru dagilimi 2019-2025",
+     "url": "https://reyhanlisfkasml.meb.k12.tr/meb_iys_dosyalar/31/08/963209/dosyalar/2025_12/694bcaf0da32d183108646_2025AYT_Y%C4%B1llara_Gore_Soru_Dag%C4%B1l%C4%B1m%C4%B1.pdf"},
+    {"id": "yks-analiz-rehberlik", "sistem": "AYS", "tur": "html", "duzey": "ikincil",
+     "konu": "2018-2025 YKS TYT-AYT soru dagilimi analizi",
+     "url": "https://www.rehberlikservisi.net/2018-2025-yks-tyt-ayt-soru-dagilimi-analizi/"},
+    {"id": "yks-dagilim-ozeldersalani", "sistem": "AYS", "tur": "html", "duzey": "ikincil",
+     "konu": "YKS konulari ve guncel soru dagilimi",
+     "url": "https://www.ozeldersalani.com/yks-tyt-ayt-soru-dagilimi"}
+  ]
+}

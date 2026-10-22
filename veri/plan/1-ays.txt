@@ -1,0 +1,344 @@
+══════ BÖLÜM 1 — AYS (YKS: TYT + AYT) ══════
+Satır biçimi: [no] Ders > Konu > Alt başlık | aranacak kodlar
+
+1.A TYT TÜRKÇE
+[1.A.01] Türkçe > Sözcükte Anlam > Gerçek anlam, mecaz anlam, terim anlam | T Ö
+[1.A.02] Türkçe > Sözcükte Anlam > Yan anlam ve temel anlam ayrımı | T Ö
+[1.A.03] Türkçe > Sözcükte Anlam > Eş anlamlı, zıt anlamlı, eş sesli sözcükler | T Ö İ
+[1.A.04] Türkçe > Sözcükte Anlam > Deyimler ve anlamları | T Ö
+[1.A.05] Türkçe > Sözcükte Anlam > Atasözleri ve anlamları | T Ö
+[1.A.06] Türkçe > Sözcükte Anlam > İkilemeler, pekiştirmeler | T Ö
+[1.A.07] Türkçe > Sözcükte Anlam > Sözcükler arası anlam ilişkileri (üst-alt, tanım, neden-sonuç) | T Ö
+[1.A.08] Türkçe > Cümlede Anlam > Cümle yorumlama | T Y
+[1.A.09] Türkçe > Cümlede Anlam > Neden-sonuç, amaç-sonuç, koşul cümleleri | T Ö
+[1.A.10] Türkçe > Cümlede Anlam > Karşılaştırma, benzetme, örneklendirme | T Ö
+[1.A.11] Türkçe > Cümlede Anlam > Öznel ve nesnel yargı | T Ö
+[1.A.12] Türkçe > Cümlede Anlam > Kesinlik, olasılık, varsayım bildiren cümleler | T Ö
+[1.A.13] Türkçe > Cümlede Anlam > Anlatımda sözcük seçimi ve cümle tamamlama | Y Ö
+[1.A.14] Türkçe > Cümlede Anlam > Cümleler arası anlam ilişkisi, cümle sıralama | Y A
+[1.A.15] Türkçe > Paragraf > Ana düşünce, konu, başlık bulma | T Y
+[1.A.16] Türkçe > Paragraf > Yardımcı düşünce | T Ö
+[1.A.17] Türkçe > Paragraf > Paragrafın yapısı (giriş, gelişme, sonuç) | T V
+[1.A.18] Türkçe > Paragraf > Düşünceyi geliştirme yolları (tanımlama, örnekleme, karşılaştırma, tanık gösterme, sayısal veri) | T Ö
+[1.A.19] Türkçe > Paragraf > Anlatım biçimleri (açıklayıcı, öyküleyici, betimleyici, tartışmacı) | T Ö
+[1.A.20] Türkçe > Paragraf > Anlatım teknikleri (betimleme, öyküleme, diyalog, tanımlama, karşılaştırma) | T Ö
+[1.A.21] Türkçe > Paragraf > Paragrafta yer ve zaman, kişi, durum ilişkisi | Y
+[1.A.22] Türkçe > Paragraf > Paragrafı bölme, birleştirme, parçalardan ilk/son cümle bulma | Y A
+[1.A.23] Türkçe > Paragraf > Anlatıcı ve bakış açısı | T Ö
+[1.A.24] Türkçe > Paragraf > Grafik, tablo ve görsel yorumlama | Y Ö
+[1.A.25] Türkçe > Ses Bilgisi > Ünlü ve ünsüzler, ses olayları | T K İ Ö
+[1.A.26] Türkçe > Ses Bilgisi > Ünlü uyumları (büyük, küçük) | K İ Ö
+[1.A.27] Türkçe > Ses Bilgisi > Ünsüz uyumu ve benzeşmesi, yumuşaması | K İ Ö
+[1.A.28] Türkçe > Ses Bilgisi > Ses düşmesi, türemesi, daralması, kaynaşması, ulaması, yaslanma | T K Ö
+[1.A.29] Türkçe > Yapı Bilgisi > Kök, ek, gövde, yapım ekleri, çekim ekleri | T K Ö
+[1.A.30] Türkçe > Yapı Bilgisi > Basit, türemiş, birleşik sözcükler | T K Ö İ
+[1.A.31] Türkçe > Sözcük Türleri > İsimler (ad), adlaşma, ad tamlamaları | T K Ö
+[1.A.32] Türkçe > Sözcük Türleri > Zamirler (kişi, işaret, belgisiz, soru, dönüşlülük) | T K Ö
+[1.A.33] Türkçe > Sözcük Türleri > Sıfatlar (niteleme, belirtme, sayı, işaret, belgisiz) | T K Ö
+[1.A.34] Türkçe > Sözcük Türleri > Zarflar | T K Ö
+[1.A.35] Türkçe > Sözcük Türleri > Edat, bağlaç, ünlem | T K Ö
+[1.A.36] Türkçe > Fiiller > Kip ve zaman ekleri, ek fiil, birleşik zamanlar | T K Ö
+[1.A.37] Türkçe > Fiiller > Fiilimsiler (isim-fiil, sıfat-fiil, zarf-fiil) | T K Ö İ
+[1.A.38] Türkçe > Fiiller > Fiil çatısı (öznesine göre, nesnesine göre) | T K Ö
+[1.A.39] Türkçe > Fiiller > Anlam özellikleri (olumlu, olumsuz, yeterlik, tezlik, sürerlik) | T Ö
+[1.A.40] Türkçe > Cümle Bilgisi > Cümlenin öğeleri (yüklem, özne, nesne, tümleçler) | T K Ö
+[1.A.41] Türkçe > Cümle Bilgisi > Cümle çeşitleri (yapı, yüklem, anlam bakımından) | T Ö
+[1.A.42] Türkçe > Cümle Bilgisi > Devrik, kurallı, eksiltili cümleler | T Ö
+[1.A.43] Türkçe > Yazım Kuralları > Büyük harflerin kullanımı | K Ö İ
+[1.A.44] Türkçe > Yazım Kuralları > Birleşik sözcüklerin yazımı | K Ö İ
+[1.A.45] Türkçe > Yazım Kuralları > "de/da", "ki", "mi" yazımı | K Ö İ
+[1.A.46] Türkçe > Yazım Kuralları > Sayıların, kısaltmaların, ekleme yazımı | K Ö
+[1.A.47] Türkçe > Noktalama İşaretleri > Nokta, virgül, noktalı virgül, iki nokta | K Ö İ
+[1.A.48] Türkçe > Noktalama İşaretleri > Üç nokta, tırnak, kesme, parantez, tire, eğik çizgi | K Ö
+[1.A.49] Türkçe > Anlatım Bozukluğu > Anlamsal bozukluklar (gereksiz sözcük, anlam belirsizliği, mantık) | T Ö H
+[1.A.50] Türkçe > Anlatım Bozukluğu > Yapısal bozukluklar (özne-yüklem uyumu, ek-fiil, çatı uyumsuzluğu) | T Ö H
+
+1.B TYT TEMEL MATEMATİK
+[1.B.01] Matematik > Temel Kavramlar > Sayı kümeleri (doğal, tam, rasyonel, irrasyonel, gerçek sayılar) | T K Ö
+[1.B.02] Matematik > Temel Kavramlar > Asal sayılar, aralarında asal sayılar | T K Ö
+[1.B.03] Matematik > Temel Kavramlar > Faktöriyel | T F Ö
+[1.B.04] Matematik > Temel Kavramlar > Sayı basamakları, çözümleme | T K Ö
+[1.B.05] Matematik > Temel Kavramlar > Ardışık sayılar, toplam formülleri | F Ö
+[1.B.06] Matematik > Bölme ve Bölünebilme > Bölme algoritması, kalan | T K Ö
+[1.B.07] Matematik > Bölme ve Bölünebilme > Bölünebilme kuralları (2, 3, 4, 5, 6, 8, 9, 10, 11) | K Ö
+[1.B.08] Matematik > EBOB ve EKOK > Tanım, bulma yöntemleri, uygulama | T K F Ö
+[1.B.09] Matematik > Rasyonel Sayılar > Kesir işlemleri, sıralama | K Ö
+[1.B.10] Matematik > Rasyonel Sayılar > Ondalık gösterim, devirli ondalık | T K Ö
+[1.B.11] Matematik > Rasyonel Sayılar > Basit eşitsizlikler ve aralık | T K Ö
+[1.B.12] Matematik > Üslü Sayılar > Üslü ifadelerin özellikleri | K F Ö
+[1.B.13] Matematik > Üslü Sayılar > Bilimsel gösterim | T K Ö
+[1.B.14] Matematik > Köklü Sayılar > Kök özellikleri, kök dışına çıkarma | K F Ö
+[1.B.15] Matematik > Köklü Sayılar > Paydayı kökten kurtarma (eşlenik) | K A Ö
+[1.B.16] Matematik > Mutlak Değer > Tanım, geometrik anlamı, özellikler | T K F Ö
+[1.B.17] Matematik > Mutlak Değer > Mutlak değerli denklem ve eşitsizlik | K A Ö
+[1.B.18] Matematik > Çarpanlara Ayırma > Ortak çarpan, gruplama | K A Ö
+[1.B.19] Matematik > Çarpanlara Ayırma > Özdeşlikler (iki kare farkı, tam kare, küp) | F Ö
+[1.B.20] Matematik > Çarpanlara Ayırma > İkinci dereceden ifadeleri çarpanlara ayırma | K A Ö
+[1.B.21] Matematik > Denklemler > Birinci dereceden denklemler | K A Ö
+[1.B.22] Matematik > Denklemler > İki bilinmeyenli denklem sistemleri | K A Ö
+[1.B.23] Matematik > Denklemler > Rasyonel denklemler | K A Ö
+[1.B.24] Matematik > Denklemler > İkinci dereceden denklemler ve kökler | T F A Ö
+[1.B.25] Matematik > Eşitsizlikler > Birinci ve ikinci dereceden eşitsizlikler, işaret tablosu | K A Ö
+[1.B.26] Matematik > Oran ve Orantı > Doğru ve ters orantı, orantı özellikleri | T K F Ö
+[1.B.27] Matematik > Oran ve Orantı > Bileşik orantı | K F Ö
+[1.B.28] Matematik > Problemler > Sayı ve kesir problemleri | Y Ö
+[1.B.29] Matematik > Problemler > Yaş problemleri | Y F Ö
+[1.B.30] Matematik > Problemler > Yüzde, kâr-zarar, faiz problemleri | F Ö
+[1.B.31] Matematik > Problemler > Karışım ve derişim problemleri | F Ö
+[1.B.32] Matematik > Problemler > İşçi ve havuz problemleri | F Ö
+[1.B.33] Matematik > Problemler > Hareket problemleri (hız, yol, zaman) | F Ö
+[1.B.34] Matematik > Problemler > Grafik ve tablo problemleri | Y Ö
+[1.B.35] Matematik > Problemler > Sayı ve rakam problemleri | Y Ö
+[1.B.36] Matematik > Kümeler > Küme gösterimi, alt küme, işlemler | T K Ö
+[1.B.37] Matematik > Kümeler > Kartezyen çarpım, Venn şeması problemleri | T F Ö
+[1.B.38] Matematik > Mantık > Önerme, bileşik önerme, doğruluk tablosu | T K Ö
+[1.B.39] Matematik > Mantık > Niceleyiciler | T Ö
+[1.B.40] Matematik > Fonksiyonlar > Tanım, gösterim, tanım-değer kümesi | T K Ö
+[1.B.41] Matematik > Fonksiyonlar > Fonksiyon türleri (birebir, örten, sabit, birim), bileşke, ters | T K Ö
+[1.B.42] Matematik > Fonksiyonlar > Grafik yorumlama | Y Ö
+[1.B.43] Matematik > Polinomlar > Derece, katsayı, işlemler, bölme, kalan | T K Ö
+[1.B.44] Matematik > Permütasyon-Kombinasyon > Sayma ilkeleri (toplama, çarpma) | K F Ö
+[1.B.45] Matematik > Permütasyon-Kombinasyon > Permütasyon ve kombinasyon | T F Ö
+[1.B.46] Matematik > Permütasyon-Kombinasyon > Binom açılımı | F Ö
+[1.B.47] Matematik > Olasılık > Temel kavramlar, olay, örnek uzay | T K F Ö
+[1.B.48] Matematik > Olasılık > Koşullu olasılık, bağımsız olaylar | T F Ö
+[1.B.49] Matematik > Veri ve İstatistik > Ortalama, medyan, mod, standart sapma | T F Ö
+[1.B.50] Matematik > Veri ve İstatistik > Grafik türleri, veri yorumlama | T Y Ö
+
+1.C TYT GEOMETRİ
+[1.C.01] Geometri > Temel Kavramlar > Nokta, doğru, düzlem, açı ölçüleri | T K Ö
+[1.C.02] Geometri > Açılar > Ardışık, komşu, bütünler, tümler, ters açılar | T K Ö
+[1.C.03] Geometri > Açılar > Paralel doğrularda açı ilişkileri | K Ö
+[1.C.04] Geometri > Üçgenler > Üçgende açı, kenar ilişkileri | T K F Ö
+[1.C.05] Geometri > Üçgenler > Pisagor bağıntısı ve özel üçgenler | F Ö
+[1.C.06] Geometri > Üçgenler > Açıortay, kenarortay, yükseklik, dik üçgen | T F Ö
+[1.C.07] Geometri > Üçgenler > Eşlik ve benzerlik | T K Ö
+[1.C.08] Geometri > Üçgenler > Alan bağıntıları | F Ö
+[1.C.09] Geometri > Çokgenler > İç ve dış açı toplamı, köşegen sayısı | F Ö
+[1.C.10] Geometri > Dörtgenler > Paralelkenar, eşkenar dörtgen, dikdörtgen, kare | T K F Ö
+[1.C.11] Geometri > Dörtgenler > Yamuk, deltoid | T K F Ö
+[1.C.12] Geometri > Çember ve Daire > Çemberde açılar, teğet, kiriş | T K Ö
+[1.C.13] Geometri > Çember ve Daire > Alan, çevre, daire dilimi, yay uzunluğu | F Ö
+[1.C.14] Geometri > Katı Cisimler > Prizma, silindir | T F Ö
+[1.C.15] Geometri > Katı Cisimler > Piramit, koni, küre | T F Ö
+[1.C.16] Geometri > Analitik Geometri > Noktanın analitik incelenmesi, uzaklık | T F Ö
+[1.C.17] Geometri > Analitik Geometri > Doğrunun denklemi, eğim | T F Ö
+[1.C.18] Geometri > Dönüşümler > Öteleme, yansıma, dönme | T K Ö
+
+1.D TYT FİZİK
+[1.D.01] Fizik > Fizik Bilimine Giriş > Fiziğin alt dalları, ölçme, birimler | T Ö
+[1.D.02] Fizik > Madde ve Özellikleri > Kütle, hacim, özkütle | T F Ö
+[1.D.03] Fizik > Basınç > Katı, sıvı, gaz basıncı | T F Ö
+[1.D.04] Fizik > Kaldırma Kuvveti > Arşimet ilkesi, yüzme-batma | T F Ö
+[1.D.05] Fizik > Isı ve Sıcaklık > Sıcaklık ölçekleri, ısı alışverişi | T F Ö
+[1.D.06] Fizik > Isı ve Sıcaklık > Hâl değişimi, öz ısı, ısı sığası | T F Ö
+[1.D.07] Fizik > Isı ve Sıcaklık > Isı iletimi, yayılma yolları | T K Ö
+[1.D.08] Fizik > Hareket > Konum, yer değiştirme, hız, ivme | T F Ö
+[1.D.09] Fizik > Hareket > Sabit hızlı ve sabit ivmeli hareket grafikleri | F Y Ö
+[1.D.10] Fizik > Dinamik > Newton'un hareket yasaları | T K F Ö
+[1.D.11] Fizik > Dinamik > Sürtünme kuvveti | T F Ö
+[1.D.12] Fizik > İş, Güç, Enerji > Kinetik ve potansiyel enerji | T F Ö
+[1.D.13] Fizik > İş, Güç, Enerji > Enerjinin korunumu, verim | T K F Ö
+[1.D.14] Fizik > Momentum ve İtme > Tanım, korunum | T F Ö
+[1.D.15] Fizik > Elektrostatik > Elektrik yükü, Coulomb yasası | T F Ö
+[1.D.16] Fizik > Elektrik ve Manyetizma > Akım, potansiyel farkı, Ohm yasası | T F Ö
+[1.D.17] Fizik > Elektrik ve Manyetizma > Devre elemanları, seri-paralel bağlama | T F Ö
+[1.D.18] Fizik > Elektrik ve Manyetizma > Mıknatıslar, manyetik alan | T K Ö
+[1.D.19] Fizik > Dalgalar > Dalga türleri, özellikleri, yansıma, kırılma | T F Ö
+[1.D.20] Fizik > Dalgalar > Ses dalgaları | T F Ö
+[1.D.21] Fizik > Optik > Aynalar, kırılma, mercekler | T F Ö
+[1.D.22] Fizik > Optik > Işığın kırılması, tam yansıma | T K F Ö
+
+1.E TYT KİMYA
+[1.E.01] Kimya > Kimya Bilimi > Kimyanın alt dalları, laboratuvar güvenliği | T K
+[1.E.02] Kimya > Atom ve Periyodik Sistem > Atom modelleri | T V
+[1.E.03] Kimya > Atom ve Periyodik Sistem > Atomun yapısı, izotop, elektron dizilimi | T K Ö
+[1.E.04] Kimya > Atom ve Periyodik Sistem > Periyodik tablo, periyodik özellikler | T K Ö
+[1.E.05] Kimya > Kimyasal Türler Arası Etkileşimler > İyonik, kovalent, metalik bağ | T K Ö
+[1.E.06] Kimya > Kimyasal Türler Arası Etkileşimler > Zayıf etkileşimler | T K Ö
+[1.E.07] Kimya > Maddenin Hâlleri > Katı, sıvı, gaz özellikleri | T K
+[1.E.08] Kimya > Maddenin Hâlleri > Gaz yasaları | T F Ö
+[1.E.09] Kimya > Kimyasal Hesaplamalar > Mol kavramı, mol-kütle-hacim | T F Ö
+[1.E.10] Kimya > Kimyasal Hesaplamalar > Kimyasal denklem denkleştirme | K A Ö
+[1.E.11] Kimya > Karışımlar > Homojen, heterojen karışımlar, ayırma yöntemleri | T Ö
+[1.E.12] Kimya > Karışımlar > Çözeltiler, derişim birimleri | T F Ö
+[1.E.13] Kimya > Asitler, Bazlar, Tuzlar > Tanımlar, pH, nötrleşme | T K F Ö
+[1.E.14] Kimya > Kimya ve Enerji > Tepkime ısısı, endotermik-ekzotermik | T Ö
+[1.E.15] Kimya > Kimya ve Elektrik > Pil, elektroliz | T Ö
+[1.E.16] Kimya > Kimya ve Çevre > Su, hava, toprak kirliliği, geri dönüşüm | T N
+[1.E.17] Kimya > Doğa ve Kimya > Yaygın kullanılan maddeler (sabun, deterjan) | T Ö
+
+1.F TYT BİYOLOJİ
+[1.F.01] Biyoloji > Canlıların Ortak Özellikleri > Yaşam özellikleri | T Ö
+[1.F.02] Biyoloji > Canlıların Temel Bileşenleri > Su, mineral, karbonhidrat, lipit, protein, vitamin | T G Ö
+[1.F.03] Biyoloji > Canlıların Temel Bileşenleri > Nükleik asitler | T G
+[1.F.04] Biyoloji > Hücre > Hücre kuramı, hücre zarı, madde geçişi | T G V
+[1.F.05] Biyoloji > Hücre > Organeller ve görevleri | T G
+[1.F.06] Biyoloji > Hücre > Prokaryot ve ökaryot hücre | T Ö
+[1.F.07] Biyoloji > Canlıların Sınıflandırılması > Sınıflandırma basamakları, ikili adlandırma | T V Ö
+[1.F.08] Biyoloji > Canlıların Sınıflandırılması > Beş âlem | T Ö
+[1.F.09] Biyoloji > Hücre Bölünmesi > Mitoz | T V G
+[1.F.10] Biyoloji > Hücre Bölünmesi > Mayoz | T V G
+[1.F.11] Biyoloji > Kalıtım > Mendel, çaprazlamalar | T K Ö
+[1.F.12] Biyoloji > Kalıtım > Kan grupları, eşeye bağlı kalıtım | T K Ö
+[1.F.13] Biyoloji > Ekosistem Ekolojisi > Ekosistem, besin zinciri | T V Ö
+[1.F.14] Biyoloji > Ekosistem Ekolojisi > Madde döngüleri | T V
+[1.F.15] Biyoloji > Güncel Çevre Sorunları > İklim değişikliği, biyolojik çeşitlilik | T N
+[1.F.16] Biyoloji > Sindirim Sistemi | G V Ö
+[1.F.17] Biyoloji > Dolaşım Sistemi | G V Ö
+[1.F.18] Biyoloji > Solunum Sistemi | G V
+[1.F.19] Biyoloji > Boşaltım Sistemi | G V
+[1.F.20] Biyoloji > Bağışıklık Sistemi | T G
+
+1.G TYT SOSYAL BİLİMLER
+[1.G.01] Tarih > Tarih ve Zaman > Tarih bilimi, kaynaklar, yardımcı bilimler | T Ö
+[1.G.02] Tarih > İlk ve Orta Çağlarda Türk Dünyası > İlk Türk devletleri (Hunlar, Göktürkler, Uygurlar) | S B N
+[1.G.03] Tarih > İslam Medeniyetinin Doğuşu | S B N
+[1.G.04] Tarih > Türklerin İslamiyet'i Kabulü ve İlk Türk-İslam Devletleri | S N
+[1.G.05] Tarih > Yerleşme ve Devletleşme Sürecinde Selçuklu Türkiyesi | S B N
+[1.G.06] Tarih > Beylikten Devlete Osmanlı Siyaseti | S B N
+[1.G.07] Tarih > Devletleşme Sürecinde Savaşçılar ve Askerler | S N
+[1.G.08] Tarih > Dünya Gücü Osmanlı | S B N
+[1.G.09] Tarih > Değişim Çağında Avrupa ve Osmanlı | S N
+[1.G.10] Tarih > Uluslararası İlişkilerde Denge Stratejisi | S N
+[1.G.11] Tarih > Devrimler Çağında Değişen Devlet-Toplum İlişkileri | S N
+[1.G.12] Tarih > Sermaye ve Emek | S N
+[1.G.13] Tarih > XX. Yüzyıl Başlarında Osmanlı Devleti | S N
+[1.G.14] Tarih > Milli Mücadele | S B N
+[1.G.15] Tarih > Atatürkçülük ve Türk İnkılabı | S N
+[1.G.16] Coğrafya > Doğa ve İnsan > Coğrafyanın konusu ve alt dalları | T
+[1.G.17] Coğrafya > Dünya'nın Şekli ve Hareketleri | T G N
+[1.G.18] Coğrafya > Coğrafi Konum, Harita Bilgisi, Koordinat Sistemi | T F Ö
+[1.G.19] Coğrafya > İklim Bilgisi > İklim elemanları, iklim tipleri | T N
+[1.G.20] Coğrafya > Yerin Şekillenmesi > İç ve dış kuvvetler | T N
+[1.G.21] Coğrafya > Nüfus ve Yerleşme | T S N
+[1.G.22] Coğrafya > Ekonomik Faaliyetler ve Doğal Kaynaklar | T S N
+[1.G.23] Coğrafya > Türkiye'nin Coğrafi Bölgeleri | S T
+[1.G.24] Coğrafya > Afetler ve Sürdürülebilirlik | T N
+[1.G.25] Felsefe > Felsefeye Giriş, felsefenin konusu, bilgi felsefesi | T
+[1.G.26] Felsefe > Varlık Felsefesi, Ahlak Felsefesi, Sanat Felsefesi, Siyaset Felsefesi | T B
+[1.G.27] Felsefe > Bilim Felsefesi, Din Felsefesi | T
+[1.G.28] Din Kültürü > İnanç, ibadet, ahlak, İslam düşüncesinde yorumlar | T S
+
+1.H AYT MATEMATİK
+[1.H.01] Matematik > Fonksiyonlar > Fonksiyonlarda uygulamalar, parçalı, mutlak değerli | T K Ö
+[1.H.02] Matematik > Polinomlar > Kalanlı bölme, kök-katsayı ilişkisi | K F Ö
+[1.H.03] Matematik > İkinci Dereceden Denklemler > Kökler ve katsayılar arası ilişki | F Ö
+[1.H.04] Matematik > Parabol > Grafik, tepe noktası, kesişim | T F Ö
+[1.H.05] Matematik > Trigonometri > Birim çember, trigonometrik fonksiyonlar | T F Ö
+[1.H.06] Matematik > Trigonometri > Toplam-fark, ikili açı formülleri | F Ö
+[1.H.07] Matematik > Trigonometri > Denklemler, grafikler | K A Ö
+[1.H.08] Matematik > Logaritma > Tanım, özellikler | T K F Ö
+[1.H.09] Matematik > Logaritma > Denklem ve eşitsizlikler | K A Ö
+[1.H.10] Matematik > Diziler > Aritmetik ve geometrik diziler | T F Ö
+[1.H.11] Matematik > Limit ve Süreklilik | T K Ö
+[1.H.12] Matematik > Türev > Tanım, kuralları | T F Ö
+[1.H.13] Matematik > Türev > Türev uygulamaları (artan-azalan, ekstremum, grafik) | K A Ö
+[1.H.14] Matematik > İntegral > Belirsiz integral, belirli integral | T F Ö
+[1.H.15] Matematik > İntegral > Alan ve uygulama | F Ö
+[1.H.16] Matematik > Analitik Geometri > Çember, elips, parabol, hiperbol | T F Ö
+[1.H.17] Matematik > Geometri > Dönüşümler, vektörler | T F Ö
+[1.H.18] Matematik > Olasılık > Koşullu ve bağımsız olay, Bayes'e giriş | T F Ö
+
+1.I AYT FİZİK
+[1.I.01] Fizik > Vektörler | T F Ö
+[1.I.02] Fizik > Bağıl Hareket | T F Ö
+[1.I.03] Fizik > Newton'un Hareket Yasaları (ileri düzey) | T F Ö
+[1.I.04] Fizik > Bir Boyutta Sabit İvmeli Hareket | F Ö
+[1.I.05] Fizik > İki Boyutta Hareket (atışlar) | F Ö
+[1.I.06] Fizik > Enerji ve Hareket | T F Ö
+[1.I.07] Fizik > İtme ve Çizgisel Momentum | T F Ö
+[1.I.08] Fizik > Tork ve Denge | T F Ö
+[1.I.09] Fizik > Kütle Merkezi | T F Ö
+[1.I.10] Fizik > Basit Makineler | T F Ö
+[1.I.11] Fizik > Elektriksel Kuvvet ve Elektrik Alanı | T F Ö
+[1.I.12] Fizik > Elektriksel Potansiyel, Sığa | T F Ö
+[1.I.13] Fizik > Manyetizma ve Elektromanyetik İndüksiyon | T F Ö
+[1.I.14] Fizik > Alternatif Akım, Transformatörler | T F Ö
+[1.I.15] Fizik > Düzgün Çembersel Hareket | T F Ö
+[1.I.16] Fizik > Dönme, Yuvarlanma, Açısal Momentum | T F Ö
+[1.I.17] Fizik > Kütle Çekim Kuvveti, Kepler Yasaları | T K F Ö
+[1.I.18] Fizik > Basit Harmonik Hareket | T F Ö
+[1.I.19] Fizik > Dalga Mekaniği (girişim, kırınım, Doppler) | T Ö
+[1.I.20] Fizik > Atom Fiziğine Giriş, Atom Modelleri | T V
+[1.I.21] Fizik > Büyük Patlama ve Evrenin Oluşumu | T N S
+[1.I.22] Fizik > Radyoaktivite | T Ö
+[1.I.23] Fizik > Özel Görelilik | T Ö
+[1.I.24] Fizik > Kuantum Fiziğine Giriş (fotoelektrik olay, Compton) | T V Ö
+[1.I.25] Fizik > Modern Fiziğin Teknolojideki Uygulamaları | T Ö
+
+1.J AYT KİMYA
+[1.J.01] Kimya > Modern Atom Teorisi, kuantum sayıları | T K Ö
+[1.J.02] Kimya > Gazlar (ideal gaz, karışımlar, gerçek gazlar) | T F Ö
+[1.J.03] Kimya > Sıvı Çözeltiler ve Çözünürlük | T F Ö
+[1.J.04] Kimya > Kimyasal Tepkimelerde Enerji (entalpi, Hess yasası) | T F Ö
+[1.J.05] Kimya > Kimyasal Tepkimelerde Hız | T F Ö
+[1.J.06] Kimya > Kimyasal Tepkimelerde Denge | T F Ö
+[1.J.07] Kimya > Asit-Baz Dengesi, tampon çözeltiler | T F Ö
+[1.J.08] Kimya > Çözünürlük Dengesi | T F Ö
+[1.J.09] Kimya > Kimya ve Elektrik (galvanik hücre, elektroliz) | T F Ö
+[1.J.10] Kimya > Karbon Kimyasına Giriş | T K
+[1.J.11] Kimya > Organik Bileşikler (alkan, alken, alkin, aromatik) | T K Ö
+[1.J.12] Kimya > Alkoller, eterler, aldehit, keton, karboksilik asit, ester | T K Ö
+[1.J.13] Kimya > Enerji Kaynakları ve Bilimsel Gelişmeler | T N
+
+1.K AYT BİYOLOJİ
+[1.K.01] Biyoloji > Sinir Sistemi | G V
+[1.K.02] Biyoloji > Endokrin Sistem ve Hormonlar | G V Ö
+[1.K.03] Biyoloji > Duyu Organları | G V
+[1.K.04] Biyoloji > Destek ve Hareket Sistemi | G
+[1.K.05] Biyoloji > Sindirim, Dolaşım, Solunum (ileri düzey) | G V
+[1.K.06] Biyoloji > Üreme Sistemi ve Embriyonik Gelişim | G V
+[1.K.07] Biyoloji > Komünite ve Popülasyon Ekolojisi | T F Ö
+[1.K.08] Biyoloji > Genden Proteine (DNA replikasyonu, transkripsiyon, translasyon) | T V G
+[1.K.09] Biyoloji > Genetik Mühendisliği ve Biyoteknoloji | T Ö
+[1.K.10] Biyoloji > Canlılarda Enerji Dönüşümleri (fotosentez, solunum) | T V G
+[1.K.11] Biyoloji > Bitki Biyolojisi (taşınım, büyüme, hormonlar) | T G V
+[1.K.12] Biyoloji > Canlılar ve Çevre | T N
+[1.K.13] Biyoloji > Evrim ve Kalıtımdaki Çeşitlilik | T N Ö
+
+1.L AYT EDEBİYAT VE SOSYAL
+[1.L.01] Edebiyat > Şiir Bilgisi (nazım biçimleri, ölçü, uyak, redif) | T K Ö
+[1.L.02] Edebiyat > Söz Sanatları | T Ö
+[1.L.03] Edebiyat > Edebiyat Akımları (klasisizm, romantizm, realizm, sembolizm...) | T B E
+[1.L.04] Edebiyat > İslamiyet Öncesi Türk Edebiyatı | T E S
+[1.L.05] Edebiyat > Geçiş Dönemi Eserleri (Kutadgu Bilig, Divanü Lügati't-Türk, Atabetü'l-Hakayık) | B E S
+[1.L.06] Edebiyat > Halk Edebiyatı (ozanlar, tekke, destan) | T B E
+[1.L.07] Edebiyat > Divan Edebiyatı (şairler, nazım biçimleri) | T B E
+[1.L.08] Edebiyat > Tanzimat Edebiyatı (birinci ve ikinci dönem) | T B E S
+[1.L.09] Edebiyat > Servet-i Fünun ve Fecr-i Âti | T B E
+[1.L.10] Edebiyat > Millî Edebiyat Dönemi | T B E
+[1.L.11] Edebiyat > Cumhuriyet Dönemi Şiir ve Roman | T B E
+[1.L.12] Edebiyat > Batı Edebiyatı, dünya edebiyatı yazarları | B E
+[1.L.13] Tarih-2 > Osmanlı Kuruluş, Yükselme, Dağılma Dönemi ayrıntıları | S B N
+[1.L.14] Tarih-2 > Kurtuluş Savaşı ve Cumhuriyet Dönemi Dış Politikası | S N
+[1.L.15] Coğrafya-2 > Ekosistem, Nüfus Politikaları, Küresel Ticaret | T S N
+[1.L.16] Felsefe Grubu > Mantık, Psikoloji, Sosyoloji | T B
+
+1.M ÇALIŞMA TEKNİKLERİ VE SINAV KAYGISI
+[1.M.01] Çalışma > Aralıklı tekrar (spaced repetition), Leitner sistemi | T Y A
+[1.M.02] Çalışma > Aktif hatırlama (active recall), kendini test etme | T Y A
+[1.M.03] Çalışma > Karışık uygulama (interleaving) | T Y
+[1.M.04] Çalışma > Pomodoro tekniği | T Y A
+[1.M.05] Çalışma > Feynman tekniği | T Y A
+[1.M.06] Çalışma > Cornell not alma, zihin haritası | T Y A
+[1.M.07] Çalışma > Unutma eğrisi | T N
+[1.M.08] Çalışma > Bellek türleri, çalışma belleği | T G
+[1.M.09] Çalışma > Uyku ve öğrenme ilişkisi | T N R
+[1.M.10] Çalışma > Dikkat ve odaklanma | T Y
+[1.M.11] Çalışma > Motivasyon, hedef belirleme, SMART hedefler | T Y
+[1.M.12] Çalışma > Erteleme ve üstesinden gelme yolları | T Y
+[1.M.13] Çalışma > Sınav kaygısı ve baş etme yöntemleri | T Y
+[1.M.14] Çalışma > Deneme sınavı analizi, hata defteri | Y A
+[1.M.15] Çalışma > Çalışma programı hazırlama, zaman yönetimi | Y A
+[1.M.16] Çalışma > Sınav günü hazırlığı, süre yönetimi | Y A
+
+1.N SINAV SİSTEMİ
+[1.N.01] YKS > Yapısı: TYT, AYT, YDT, oturumlar, süreler, soru sayıları | S
+[1.N.02] YKS > Puan türleri (TYT, SAY, EA, SÖZ, DİL) ve katsayılar | S T
+[1.N.03] YKS > Net hesaplama kuralı ve yanlış cezası | K S
+[1.N.04] YKS > Başvuru, tercih ve yerleştirme süreci | A S
+[1.N.05] YKS > Kontenjan, taban puan ve başarı sırası kavramları | T
+[1.N.06] YKS > Ek yerleştirme, ek tercih, özel yetenek sınavları | T S
+[1.N.07] YKS > Yıllara göre konu bazlı soru dağılımı | S
+[1.N.08] YKS > Engelli ve şehit/gazi çocukları gibi özel durumlar | K

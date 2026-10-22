@@ -1,0 +1,1449 @@
+KONU PLANI NASIL KULLANILIR
+Aşağıda konu başlıkları hiyerarşik satırlardır: [no] Ders > Konu > Alt başlık | kodlar.
+Bir sayfa okurken önce sayfanın HANGİ satırla ilgili olduğuna bak; yalnızca o satırın kodlarındaki bilgi türlerini çıkar.
+Satırda yazması bilginin sayfada olduğu anlamına gelmez: sayfada yoksa çıkarma. Plan bir ARAMA LİSTESİdir, bilgi kaynağı değil.
+Her çıkarılan olguya 'baslik' olarak satırın alt başlığını (ya da en yakın ifadesini) yaz.
+
+KODLAR (her satırın sonundaki harfler, o başlıkta NE aranacağını söyler):
+T=tanım  K=kural  F=formül (aynen kopyala)  A=adım/yapılış  Ö=örnek  İ=istisna  H=sık yapılan hata
+S=sayı/tarih/yıl  N=neden-sonuç  Y=yöntem/öneri  B=biyografi/kişi  G=görev/işleyiş  V=sıra/aşama/evre
+E=eser/kavram  R=resmî eşik/öneri (kurum adıyla, birimiyle)
+
+══════ BÖLÜM 1 — AYS (YKS: TYT + AYT) ══════
+Satır biçimi: [no] Ders > Konu > Alt başlık | aranacak kodlar
+
+1.A TYT TÜRKÇE
+[1.A.01] Türkçe > Sözcükte Anlam > Gerçek anlam, mecaz anlam, terim anlam | T Ö
+[1.A.02] Türkçe > Sözcükte Anlam > Yan anlam ve temel anlam ayrımı | T Ö
+[1.A.03] Türkçe > Sözcükte Anlam > Eş anlamlı, zıt anlamlı, eş sesli sözcükler | T Ö İ
+[1.A.04] Türkçe > Sözcükte Anlam > Deyimler ve anlamları | T Ö
+[1.A.05] Türkçe > Sözcükte Anlam > Atasözleri ve anlamları | T Ö
+[1.A.06] Türkçe > Sözcükte Anlam > İkilemeler, pekiştirmeler | T Ö
+[1.A.07] Türkçe > Sözcükte Anlam > Sözcükler arası anlam ilişkileri (üst-alt, tanım, neden-sonuç) | T Ö
+[1.A.08] Türkçe > Cümlede Anlam > Cümle yorumlama | T Y
+[1.A.09] Türkçe > Cümlede Anlam > Neden-sonuç, amaç-sonuç, koşul cümleleri | T Ö
+[1.A.10] Türkçe > Cümlede Anlam > Karşılaştırma, benzetme, örneklendirme | T Ö
+[1.A.11] Türkçe > Cümlede Anlam > Öznel ve nesnel yargı | T Ö
+[1.A.12] Türkçe > Cümlede Anlam > Kesinlik, olasılık, varsayım bildiren cümleler | T Ö
+[1.A.13] Türkçe > Cümlede Anlam > Anlatımda sözcük seçimi ve cümle tamamlama | Y Ö
+[1.A.14] Türkçe > Cümlede Anlam > Cümleler arası anlam ilişkisi, cümle sıralama | Y A
+[1.A.15] Türkçe > Paragraf > Ana düşünce, konu, başlık bulma | T Y
+[1.A.16] Türkçe > Paragraf > Yardımcı düşünce | T Ö
+[1.A.17] Türkçe > Paragraf > Paragrafın yapısı (giriş, gelişme, sonuç) | T V
+[1.A.18] Türkçe > Paragraf > Düşünceyi geliştirme yolları (tanımlama, örnekleme, karşılaştırma, tanık gösterme, sayısal veri) | T Ö
+[1.A.19] Türkçe > Paragraf > Anlatım biçimleri (açıklayıcı, öyküleyici, betimleyici, tartışmacı) | T Ö
+[1.A.20] Türkçe > Paragraf > Anlatım teknikleri (betimleme, öyküleme, diyalog, tanımlama, karşılaştırma) | T Ö
+[1.A.21] Türkçe > Paragraf > Paragrafta yer ve zaman, kişi, durum ilişkisi | Y
+[1.A.22] Türkçe > Paragraf > Paragrafı bölme, birleştirme, parçalardan ilk/son cümle bulma | Y A
+[1.A.23] Türkçe > Paragraf > Anlatıcı ve bakış açısı | T Ö
+[1.A.24] Türkçe > Paragraf > Grafik, tablo ve görsel yorumlama | Y Ö
+[1.A.25] Türkçe > Ses Bilgisi > Ünlü ve ünsüzler, ses olayları | T K İ Ö
+[1.A.26] Türkçe > Ses Bilgisi > Ünlü uyumları (büyük, küçük) | K İ Ö
+[1.A.27] Türkçe > Ses Bilgisi > Ünsüz uyumu ve benzeşmesi, yumuşaması | K İ Ö
+[1.A.28] Türkçe > Ses Bilgisi > Ses düşmesi, türemesi, daralması, kaynaşması, ulaması, yaslanma | T K Ö
+[1.A.29] Türkçe > Yapı Bilgisi > Kök, ek, gövde, yapım ekleri, çekim ekleri | T K Ö
+[1.A.30] Türkçe > Yapı Bilgisi > Basit, türemiş, birleşik sözcükler | T K Ö İ
+[1.A.31] Türkçe > Sözcük Türleri > İsimler (ad), adlaşma, ad tamlamaları | T K Ö
+[1.A.32] Türkçe > Sözcük Türleri > Zamirler (kişi, işaret, belgisiz, soru, dönüşlülük) | T K Ö
+[1.A.33] Türkçe > Sözcük Türleri > Sıfatlar (niteleme, belirtme, sayı, işaret, belgisiz) | T K Ö
+[1.A.34] Türkçe > Sözcük Türleri > Zarflar | T K Ö
+[1.A.35] Türkçe > Sözcük Türleri > Edat, bağlaç, ünlem | T K Ö
+[1.A.36] Türkçe > Fiiller > Kip ve zaman ekleri, ek fiil, birleşik zamanlar | T K Ö
+[1.A.37] Türkçe > Fiiller > Fiilimsiler (isim-fiil, sıfat-fiil, zarf-fiil) | T K Ö İ
+[1.A.38] Türkçe > Fiiller > Fiil çatısı (öznesine göre, nesnesine göre) | T K Ö
+[1.A.39] Türkçe > Fiiller > Anlam özellikleri (olumlu, olumsuz, yeterlik, tezlik, sürerlik) | T Ö
+[1.A.40] Türkçe > Cümle Bilgisi > Cümlenin öğeleri (yüklem, özne, nesne, tümleçler) | T K Ö
+[1.A.41] Türkçe > Cümle Bilgisi > Cümle çeşitleri (yapı, yüklem, anlam bakımından) | T Ö
+[1.A.42] Türkçe > Cümle Bilgisi > Devrik, kurallı, eksiltili cümleler | T Ö
+[1.A.43] Türkçe > Yazım Kuralları > Büyük harflerin kullanımı | K Ö İ
+[1.A.44] Türkçe > Yazım Kuralları > Birleşik sözcüklerin yazımı | K Ö İ
+[1.A.45] Türkçe > Yazım Kuralları > "de/da", "ki", "mi" yazımı | K Ö İ
+[1.A.46] Türkçe > Yazım Kuralları > Sayıların, kısaltmaların, ekleme yazımı | K Ö
+[1.A.47] Türkçe > Noktalama İşaretleri > Nokta, virgül, noktalı virgül, iki nokta | K Ö İ
+[1.A.48] Türkçe > Noktalama İşaretleri > Üç nokta, tırnak, kesme, parantez, tire, eğik çizgi | K Ö
+[1.A.49] Türkçe > Anlatım Bozukluğu > Anlamsal bozukluklar (gereksiz sözcük, anlam belirsizliği, mantık) | T Ö H
+[1.A.50] Türkçe > Anlatım Bozukluğu > Yapısal bozukluklar (özne-yüklem uyumu, ek-fiil, çatı uyumsuzluğu) | T Ö H
+
+1.B TYT TEMEL MATEMATİK
+[1.B.01] Matematik > Temel Kavramlar > Sayı kümeleri (doğal, tam, rasyonel, irrasyonel, gerçek sayılar) | T K Ö
+[1.B.02] Matematik > Temel Kavramlar > Asal sayılar, aralarında asal sayılar | T K Ö
+[1.B.03] Matematik > Temel Kavramlar > Faktöriyel | T F Ö
+[1.B.04] Matematik > Temel Kavramlar > Sayı basamakları, çözümleme | T K Ö
+[1.B.05] Matematik > Temel Kavramlar > Ardışık sayılar, toplam formülleri | F Ö
+[1.B.06] Matematik > Bölme ve Bölünebilme > Bölme algoritması, kalan | T K Ö
+[1.B.07] Matematik > Bölme ve Bölünebilme > Bölünebilme kuralları (2, 3, 4, 5, 6, 8, 9, 10, 11) | K Ö
+[1.B.08] Matematik > EBOB ve EKOK > Tanım, bulma yöntemleri, uygulama | T K F Ö
+[1.B.09] Matematik > Rasyonel Sayılar > Kesir işlemleri, sıralama | K Ö
+[1.B.10] Matematik > Rasyonel Sayılar > Ondalık gösterim, devirli ondalık | T K Ö
+[1.B.11] Matematik > Rasyonel Sayılar > Basit eşitsizlikler ve aralık | T K Ö
+[1.B.12] Matematik > Üslü Sayılar > Üslü ifadelerin özellikleri | K F Ö
+[1.B.13] Matematik > Üslü Sayılar > Bilimsel gösterim | T K Ö
+[1.B.14] Matematik > Köklü Sayılar > Kök özellikleri, kök dışına çıkarma | K F Ö
+[1.B.15] Matematik > Köklü Sayılar > Paydayı kökten kurtarma (eşlenik) | K A Ö
+[1.B.16] Matematik > Mutlak Değer > Tanım, geometrik anlamı, özellikler | T K F Ö
+[1.B.17] Matematik > Mutlak Değer > Mutlak değerli denklem ve eşitsizlik | K A Ö
+[1.B.18] Matematik > Çarpanlara Ayırma > Ortak çarpan, gruplama | K A Ö
+[1.B.19] Matematik > Çarpanlara Ayırma > Özdeşlikler (iki kare farkı, tam kare, küp) | F Ö
+[1.B.20] Matematik > Çarpanlara Ayırma > İkinci dereceden ifadeleri çarpanlara ayırma | K A Ö
+[1.B.21] Matematik > Denklemler > Birinci dereceden denklemler | K A Ö
+[1.B.22] Matematik > Denklemler > İki bilinmeyenli denklem sistemleri | K A Ö
+[1.B.23] Matematik > Denklemler > Rasyonel denklemler | K A Ö
+[1.B.24] Matematik > Denklemler > İkinci dereceden denklemler ve kökler | T F A Ö
+[1.B.25] Matematik > Eşitsizlikler > Birinci ve ikinci dereceden eşitsizlikler, işaret tablosu | K A Ö
+[1.B.26] Matematik > Oran ve Orantı > Doğru ve ters orantı, orantı özellikleri | T K F Ö
+[1.B.27] Matematik > Oran ve Orantı > Bileşik orantı | K F Ö
+[1.B.28] Matematik > Problemler > Sayı ve kesir problemleri | Y Ö
+[1.B.29] Matematik > Problemler > Yaş problemleri | Y F Ö
+[1.B.30] Matematik > Problemler > Yüzde, kâr-zarar, faiz problemleri | F Ö
+[1.B.31] Matematik > Problemler > Karışım ve derişim problemleri | F Ö
+[1.B.32] Matematik > Problemler > İşçi ve havuz problemleri | F Ö
+[1.B.33] Matematik > Problemler > Hareket problemleri (hız, yol, zaman) | F Ö
+[1.B.34] Matematik > Problemler > Grafik ve tablo problemleri | Y Ö
+[1.B.35] Matematik > Problemler > Sayı ve rakam problemleri | Y Ö
+[1.B.36] Matematik > Kümeler > Küme gösterimi, alt küme, işlemler | T K Ö
+[1.B.37] Matematik > Kümeler > Kartezyen çarpım, Venn şeması problemleri | T F Ö
+[1.B.38] Matematik > Mantık > Önerme, bileşik önerme, doğruluk tablosu | T K Ö
+[1.B.39] Matematik > Mantık > Niceleyiciler | T Ö
+[1.B.40] Matematik > Fonksiyonlar > Tanım, gösterim, tanım-değer kümesi | T K Ö
+[1.B.41] Matematik > Fonksiyonlar > Fonksiyon türleri (birebir, örten, sabit, birim), bileşke, ters | T K Ö
+[1.B.42] Matematik > Fonksiyonlar > Grafik yorumlama | Y Ö
+[1.B.43] Matematik > Polinomlar > Derece, katsayı, işlemler, bölme, kalan | T K Ö
+[1.B.44] Matematik > Permütasyon-Kombinasyon > Sayma ilkeleri (toplama, çarpma) | K F Ö
+[1.B.45] Matematik > Permütasyon-Kombinasyon > Permütasyon ve kombinasyon | T F Ö
+[1.B.46] Matematik > Permütasyon-Kombinasyon > Binom açılımı | F Ö
+[1.B.47] Matematik > Olasılık > Temel kavramlar, olay, örnek uzay | T K F Ö
+[1.B.48] Matematik > Olasılık > Koşullu olasılık, bağımsız olaylar | T F Ö
+[1.B.49] Matematik > Veri ve İstatistik > Ortalama, medyan, mod, standart sapma | T F Ö
+[1.B.50] Matematik > Veri ve İstatistik > Grafik türleri, veri yorumlama | T Y Ö
+
+1.C TYT GEOMETRİ
+[1.C.01] Geometri > Temel Kavramlar > Nokta, doğru, düzlem, açı ölçüleri | T K Ö
+[1.C.02] Geometri > Açılar > Ardışık, komşu, bütünler, tümler, ters açılar | T K Ö
+[1.C.03] Geometri > Açılar > Paralel doğrularda açı ilişkileri | K Ö
+[1.C.04] Geometri > Üçgenler > Üçgende açı, kenar ilişkileri | T K F Ö
+[1.C.05] Geometri > Üçgenler > Pisagor bağıntısı ve özel üçgenler | F Ö
+[1.C.06] Geometri > Üçgenler > Açıortay, kenarortay, yükseklik, dik üçgen | T F Ö
+[1.C.07] Geometri > Üçgenler > Eşlik ve benzerlik | T K Ö
+[1.C.08] Geometri > Üçgenler > Alan bağıntıları | F Ö
+[1.C.09] Geometri > Çokgenler > İç ve dış açı toplamı, köşegen sayısı | F Ö
+[1.C.10] Geometri > Dörtgenler > Paralelkenar, eşkenar dörtgen, dikdörtgen, kare | T K F Ö
+[1.C.11] Geometri > Dörtgenler > Yamuk, deltoid | T K F Ö
+[1.C.12] Geometri > Çember ve Daire > Çemberde açılar, teğet, kiriş | T K Ö
+[1.C.13] Geometri > Çember ve Daire > Alan, çevre, daire dilimi, yay uzunluğu | F Ö
+[1.C.14] Geometri > Katı Cisimler > Prizma, silindir | T F Ö
+[1.C.15] Geometri > Katı Cisimler > Piramit, koni, küre | T F Ö
+[1.C.16] Geometri > Analitik Geometri > Noktanın analitik incelenmesi, uzaklık | T F Ö
+[1.C.17] Geometri > Analitik Geometri > Doğrunun denklemi, eğim | T F Ö
+[1.C.18] Geometri > Dönüşümler > Öteleme, yansıma, dönme | T K Ö
+
+1.D TYT FİZİK
+[1.D.01] Fizik > Fizik Bilimine Giriş > Fiziğin alt dalları, ölçme, birimler | T Ö
+[1.D.02] Fizik > Madde ve Özellikleri > Kütle, hacim, özkütle | T F Ö
+[1.D.03] Fizik > Basınç > Katı, sıvı, gaz basıncı | T F Ö
+[1.D.04] Fizik > Kaldırma Kuvveti > Arşimet ilkesi, yüzme-batma | T F Ö
+[1.D.05] Fizik > Isı ve Sıcaklık > Sıcaklık ölçekleri, ısı alışverişi | T F Ö
+[1.D.06] Fizik > Isı ve Sıcaklık > Hâl değişimi, öz ısı, ısı sığası | T F Ö
+[1.D.07] Fizik > Isı ve Sıcaklık > Isı iletimi, yayılma yolları | T K Ö
+[1.D.08] Fizik > Hareket > Konum, yer değiştirme, hız, ivme | T F Ö
+[1.D.09] Fizik > Hareket > Sabit hızlı ve sabit ivmeli hareket grafikleri | F Y Ö
+[1.D.10] Fizik > Dinamik > Newton'un hareket yasaları | T K F Ö
+[1.D.11] Fizik > Dinamik > Sürtünme kuvveti | T F Ö
+[1.D.12] Fizik > İş, Güç, Enerji > Kinetik ve potansiyel enerji | T F Ö
+[1.D.13] Fizik > İş, Güç, Enerji > Enerjinin korunumu, verim | T K F Ö
+[1.D.14] Fizik > Momentum ve İtme > Tanım, korunum | T F Ö
+[1.D.15] Fizik > Elektrostatik > Elektrik yükü, Coulomb yasası | T F Ö
+[1.D.16] Fizik > Elektrik ve Manyetizma > Akım, potansiyel farkı, Ohm yasası | T F Ö
+[1.D.17] Fizik > Elektrik ve Manyetizma > Devre elemanları, seri-paralel bağlama | T F Ö
+[1.D.18] Fizik > Elektrik ve Manyetizma > Mıknatıslar, manyetik alan | T K Ö
+[1.D.19] Fizik > Dalgalar > Dalga türleri, özellikleri, yansıma, kırılma | T F Ö
+[1.D.20] Fizik > Dalgalar > Ses dalgaları | T F Ö
+[1.D.21] Fizik > Optik > Aynalar, kırılma, mercekler | T F Ö
+[1.D.22] Fizik > Optik > Işığın kırılması, tam yansıma | T K F Ö
+
+1.E TYT KİMYA
+[1.E.01] Kimya > Kimya Bilimi > Kimyanın alt dalları, laboratuvar güvenliği | T K
+[1.E.02] Kimya > Atom ve Periyodik Sistem > Atom modelleri | T V
+[1.E.03] Kimya > Atom ve Periyodik Sistem > Atomun yapısı, izotop, elektron dizilimi | T K Ö
+[1.E.04] Kimya > Atom ve Periyodik Sistem > Periyodik tablo, periyodik özellikler | T K Ö
+[1.E.05] Kimya > Kimyasal Türler Arası Etkileşimler > İyonik, kovalent, metalik bağ | T K Ö
+[1.E.06] Kimya > Kimyasal Türler Arası Etkileşimler > Zayıf etkileşimler | T K Ö
+[1.E.07] Kimya > Maddenin Hâlleri > Katı, sıvı, gaz özellikleri | T K
+[1.E.08] Kimya > Maddenin Hâlleri > Gaz yasaları | T F Ö
+[1.E.09] Kimya > Kimyasal Hesaplamalar > Mol kavramı, mol-kütle-hacim | T F Ö
+[1.E.10] Kimya > Kimyasal Hesaplamalar > Kimyasal denklem denkleştirme | K A Ö
+[1.E.11] Kimya > Karışımlar > Homojen, heterojen karışımlar, ayırma yöntemleri | T Ö
+[1.E.12] Kimya > Karışımlar > Çözeltiler, derişim birimleri | T F Ö
+[1.E.13] Kimya > Asitler, Bazlar, Tuzlar > Tanımlar, pH, nötrleşme | T K F Ö
+[1.E.14] Kimya > Kimya ve Enerji > Tepkime ısısı, endotermik-ekzotermik | T Ö
+[1.E.15] Kimya > Kimya ve Elektrik > Pil, elektroliz | T Ö
+[1.E.16] Kimya > Kimya ve Çevre > Su, hava, toprak kirliliği, geri dönüşüm | T N
+[1.E.17] Kimya > Doğa ve Kimya > Yaygın kullanılan maddeler (sabun, deterjan) | T Ö
+
+1.F TYT BİYOLOJİ
+[1.F.01] Biyoloji > Canlıların Ortak Özellikleri > Yaşam özellikleri | T Ö
+[1.F.02] Biyoloji > Canlıların Temel Bileşenleri > Su, mineral, karbonhidrat, lipit, protein, vitamin | T G Ö
+[1.F.03] Biyoloji > Canlıların Temel Bileşenleri > Nükleik asitler | T G
+[1.F.04] Biyoloji > Hücre > Hücre kuramı, hücre zarı, madde geçişi | T G V
+[1.F.05] Biyoloji > Hücre > Organeller ve görevleri | T G
+[1.F.06] Biyoloji > Hücre > Prokaryot ve ökaryot hücre | T Ö
+[1.F.07] Biyoloji > Canlıların Sınıflandırılması > Sınıflandırma basamakları, ikili adlandırma | T V Ö
+[1.F.08] Biyoloji > Canlıların Sınıflandırılması > Beş âlem | T Ö
+[1.F.09] Biyoloji > Hücre Bölünmesi > Mitoz | T V G
+[1.F.10] Biyoloji > Hücre Bölünmesi > Mayoz | T V G
+[1.F.11] Biyoloji > Kalıtım > Mendel, çaprazlamalar | T K Ö
+[1.F.12] Biyoloji > Kalıtım > Kan grupları, eşeye bağlı kalıtım | T K Ö
+[1.F.13] Biyoloji > Ekosistem Ekolojisi > Ekosistem, besin zinciri | T V Ö
+[1.F.14] Biyoloji > Ekosistem Ekolojisi > Madde döngüleri | T V
+[1.F.15] Biyoloji > Güncel Çevre Sorunları > İklim değişikliği, biyolojik çeşitlilik | T N
+[1.F.16] Biyoloji > Sindirim Sistemi | G V Ö
+[1.F.17] Biyoloji > Dolaşım Sistemi | G V Ö
+[1.F.18] Biyoloji > Solunum Sistemi | G V
+[1.F.19] Biyoloji > Boşaltım Sistemi | G V
+[1.F.20] Biyoloji > Bağışıklık Sistemi | T G
+
+1.G TYT SOSYAL BİLİMLER
+[1.G.01] Tarih > Tarih ve Zaman > Tarih bilimi, kaynaklar, yardımcı bilimler | T Ö
+[1.G.02] Tarih > İlk ve Orta Çağlarda Türk Dünyası > İlk Türk devletleri (Hunlar, Göktürkler, Uygurlar) | S B N
+[1.G.03] Tarih > İslam Medeniyetinin Doğuşu | S B N
+[1.G.04] Tarih > Türklerin İslamiyet'i Kabulü ve İlk Türk-İslam Devletleri | S N
+[1.G.05] Tarih > Yerleşme ve Devletleşme Sürecinde Selçuklu Türkiyesi | S B N
+[1.G.06] Tarih > Beylikten Devlete Osmanlı Siyaseti | S B N
+[1.G.07] Tarih > Devletleşme Sürecinde Savaşçılar ve Askerler | S N
+[1.G.08] Tarih > Dünya Gücü Osmanlı | S B N
+[1.G.09] Tarih > Değişim Çağında Avrupa ve Osmanlı | S N
+[1.G.10] Tarih > Uluslararası İlişkilerde Denge Stratejisi | S N
+[1.G.11] Tarih > Devrimler Çağında Değişen Devlet-Toplum İlişkileri | S N
+[1.G.12] Tarih > Sermaye ve Emek | S N
+[1.G.13] Tarih > XX. Yüzyıl Başlarında Osmanlı Devleti | S N
+[1.G.14] Tarih > Milli Mücadele | S B N
+[1.G.15] Tarih > Atatürkçülük ve Türk İnkılabı | S N
+[1.G.16] Coğrafya > Doğa ve İnsan > Coğrafyanın konusu ve alt dalları | T
+[1.G.17] Coğrafya > Dünya'nın Şekli ve Hareketleri | T G N
+[1.G.18] Coğrafya > Coğrafi Konum, Harita Bilgisi, Koordinat Sistemi | T F Ö
+[1.G.19] Coğrafya > İklim Bilgisi > İklim elemanları, iklim tipleri | T N
+[1.G.20] Coğrafya > Yerin Şekillenmesi > İç ve dış kuvvetler | T N
+[1.G.21] Coğrafya > Nüfus ve Yerleşme | T S N
+[1.G.22] Coğrafya > Ekonomik Faaliyetler ve Doğal Kaynaklar | T S N
+[1.G.23] Coğrafya > Türkiye'nin Coğrafi Bölgeleri | S T
+[1.G.24] Coğrafya > Afetler ve Sürdürülebilirlik | T N
+[1.G.25] Felsefe > Felsefeye Giriş, felsefenin konusu, bilgi felsefesi | T
+[1.G.26] Felsefe > Varlık Felsefesi, Ahlak Felsefesi, Sanat Felsefesi, Siyaset Felsefesi | T B
+[1.G.27] Felsefe > Bilim Felsefesi, Din Felsefesi | T
+[1.G.28] Din Kültürü > İnanç, ibadet, ahlak, İslam düşüncesinde yorumlar | T S
+
+1.H AYT MATEMATİK
+[1.H.01] Matematik > Fonksiyonlar > Fonksiyonlarda uygulamalar, parçalı, mutlak değerli | T K Ö
+[1.H.02] Matematik > Polinomlar > Kalanlı bölme, kök-katsayı ilişkisi | K F Ö
+[1.H.03] Matematik > İkinci Dereceden Denklemler > Kökler ve katsayılar arası ilişki | F Ö
+[1.H.04] Matematik > Parabol > Grafik, tepe noktası, kesişim | T F Ö
+[1.H.05] Matematik > Trigonometri > Birim çember, trigonometrik fonksiyonlar | T F Ö
+[1.H.06] Matematik > Trigonometri > Toplam-fark, ikili açı formülleri | F Ö
+[1.H.07] Matematik > Trigonometri > Denklemler, grafikler | K A Ö
+[1.H.08] Matematik > Logaritma > Tanım, özellikler | T K F Ö
+[1.H.09] Matematik > Logaritma > Denklem ve eşitsizlikler | K A Ö
+[1.H.10] Matematik > Diziler > Aritmetik ve geometrik diziler | T F Ö
+[1.H.11] Matematik > Limit ve Süreklilik | T K Ö
+[1.H.12] Matematik > Türev > Tanım, kuralları | T F Ö
+[1.H.13] Matematik > Türev > Türev uygulamaları (artan-azalan, ekstremum, grafik) | K A Ö
+[1.H.14] Matematik > İntegral > Belirsiz integral, belirli integral | T F Ö
+[1.H.15] Matematik > İntegral > Alan ve uygulama | F Ö
+[1.H.16] Matematik > Analitik Geometri > Çember, elips, parabol, hiperbol | T F Ö
+[1.H.17] Matematik > Geometri > Dönüşümler, vektörler | T F Ö
+[1.H.18] Matematik > Olasılık > Koşullu ve bağımsız olay, Bayes'e giriş | T F Ö
+
+1.I AYT FİZİK
+[1.I.01] Fizik > Vektörler | T F Ö
+[1.I.02] Fizik > Bağıl Hareket | T F Ö
+[1.I.03] Fizik > Newton'un Hareket Yasaları (ileri düzey) | T F Ö
+[1.I.04] Fizik > Bir Boyutta Sabit İvmeli Hareket | F Ö
+[1.I.05] Fizik > İki Boyutta Hareket (atışlar) | F Ö
+[1.I.06] Fizik > Enerji ve Hareket | T F Ö
+[1.I.07] Fizik > İtme ve Çizgisel Momentum | T F Ö
+[1.I.08] Fizik > Tork ve Denge | T F Ö
+[1.I.09] Fizik > Kütle Merkezi | T F Ö
+[1.I.10] Fizik > Basit Makineler | T F Ö
+[1.I.11] Fizik > Elektriksel Kuvvet ve Elektrik Alanı | T F Ö
+[1.I.12] Fizik > Elektriksel Potansiyel, Sığa | T F Ö
+[1.I.13] Fizik > Manyetizma ve Elektromanyetik İndüksiyon | T F Ö
+[1.I.14] Fizik > Alternatif Akım, Transformatörler | T F Ö
+[1.I.15] Fizik > Düzgün Çembersel Hareket | T F Ö
+[1.I.16] Fizik > Dönme, Yuvarlanma, Açısal Momentum | T F Ö
+[1.I.17] Fizik > Kütle Çekim Kuvveti, Kepler Yasaları | T K F Ö
+[1.I.18] Fizik > Basit Harmonik Hareket | T F Ö
+[1.I.19] Fizik > Dalga Mekaniği (girişim, kırınım, Doppler) | T Ö
+[1.I.20] Fizik > Atom Fiziğine Giriş, Atom Modelleri | T V
+[1.I.21] Fizik > Büyük Patlama ve Evrenin Oluşumu | T N S
+[1.I.22] Fizik > Radyoaktivite | T Ö
+[1.I.23] Fizik > Özel Görelilik | T Ö
+[1.I.24] Fizik > Kuantum Fiziğine Giriş (fotoelektrik olay, Compton) | T V Ö
+[1.I.25] Fizik > Modern Fiziğin Teknolojideki Uygulamaları | T Ö
+
+1.J AYT KİMYA
+[1.J.01] Kimya > Modern Atom Teorisi, kuantum sayıları | T K Ö
+[1.J.02] Kimya > Gazlar (ideal gaz, karışımlar, gerçek gazlar) | T F Ö
+[1.J.03] Kimya > Sıvı Çözeltiler ve Çözünürlük | T F Ö
+[1.J.04] Kimya > Kimyasal Tepkimelerde Enerji (entalpi, Hess yasası) | T F Ö
+[1.J.05] Kimya > Kimyasal Tepkimelerde Hız | T F Ö
+[1.J.06] Kimya > Kimyasal Tepkimelerde Denge | T F Ö
+[1.J.07] Kimya > Asit-Baz Dengesi, tampon çözeltiler | T F Ö
+[1.J.08] Kimya > Çözünürlük Dengesi | T F Ö
+[1.J.09] Kimya > Kimya ve Elektrik (galvanik hücre, elektroliz) | T F Ö
+[1.J.10] Kimya > Karbon Kimyasına Giriş | T K
+[1.J.11] Kimya > Organik Bileşikler (alkan, alken, alkin, aromatik) | T K Ö
+[1.J.12] Kimya > Alkoller, eterler, aldehit, keton, karboksilik asit, ester | T K Ö
+[1.J.13] Kimya > Enerji Kaynakları ve Bilimsel Gelişmeler | T N
+
+1.K AYT BİYOLOJİ
+[1.K.01] Biyoloji > Sinir Sistemi | G V
+[1.K.02] Biyoloji > Endokrin Sistem ve Hormonlar | G V Ö
+[1.K.03] Biyoloji > Duyu Organları | G V
+[1.K.04] Biyoloji > Destek ve Hareket Sistemi | G
+[1.K.05] Biyoloji > Sindirim, Dolaşım, Solunum (ileri düzey) | G V
+[1.K.06] Biyoloji > Üreme Sistemi ve Embriyonik Gelişim | G V
+[1.K.07] Biyoloji > Komünite ve Popülasyon Ekolojisi | T F Ö
+[1.K.08] Biyoloji > Genden Proteine (DNA replikasyonu, transkripsiyon, translasyon) | T V G
+[1.K.09] Biyoloji > Genetik Mühendisliği ve Biyoteknoloji | T Ö
+[1.K.10] Biyoloji > Canlılarda Enerji Dönüşümleri (fotosentez, solunum) | T V G
+[1.K.11] Biyoloji > Bitki Biyolojisi (taşınım, büyüme, hormonlar) | T G V
+[1.K.12] Biyoloji > Canlılar ve Çevre | T N
+[1.K.13] Biyoloji > Evrim ve Kalıtımdaki Çeşitlilik | T N Ö
+
+1.L AYT EDEBİYAT VE SOSYAL
+[1.L.01] Edebiyat > Şiir Bilgisi (nazım biçimleri, ölçü, uyak, redif) | T K Ö
+[1.L.02] Edebiyat > Söz Sanatları | T Ö
+[1.L.03] Edebiyat > Edebiyat Akımları (klasisizm, romantizm, realizm, sembolizm...) | T B E
+[1.L.04] Edebiyat > İslamiyet Öncesi Türk Edebiyatı | T E S
+[1.L.05] Edebiyat > Geçiş Dönemi Eserleri (Kutadgu Bilig, Divanü Lügati't-Türk, Atabetü'l-Hakayık) | B E S
+[1.L.06] Edebiyat > Halk Edebiyatı (ozanlar, tekke, destan) | T B E
+[1.L.07] Edebiyat > Divan Edebiyatı (şairler, nazım biçimleri) | T B E
+[1.L.08] Edebiyat > Tanzimat Edebiyatı (birinci ve ikinci dönem) | T B E S
+[1.L.09] Edebiyat > Servet-i Fünun ve Fecr-i Âti | T B E
+[1.L.10] Edebiyat > Millî Edebiyat Dönemi | T B E
+[1.L.11] Edebiyat > Cumhuriyet Dönemi Şiir ve Roman | T B E
+[1.L.12] Edebiyat > Batı Edebiyatı, dünya edebiyatı yazarları | B E
+[1.L.13] Tarih-2 > Osmanlı Kuruluş, Yükselme, Dağılma Dönemi ayrıntıları | S B N
+[1.L.14] Tarih-2 > Kurtuluş Savaşı ve Cumhuriyet Dönemi Dış Politikası | S N
+[1.L.15] Coğrafya-2 > Ekosistem, Nüfus Politikaları, Küresel Ticaret | T S N
+[1.L.16] Felsefe Grubu > Mantık, Psikoloji, Sosyoloji | T B
+
+1.M ÇALIŞMA TEKNİKLERİ VE SINAV KAYGISI
+[1.M.01] Çalışma > Aralıklı tekrar (spaced repetition), Leitner sistemi | T Y A
+[1.M.02] Çalışma > Aktif hatırlama (active recall), kendini test etme | T Y A
+[1.M.03] Çalışma > Karışık uygulama (interleaving) | T Y
+[1.M.04] Çalışma > Pomodoro tekniği | T Y A
+[1.M.05] Çalışma > Feynman tekniği | T Y A
+[1.M.06] Çalışma > Cornell not alma, zihin haritası | T Y A
+[1.M.07] Çalışma > Unutma eğrisi | T N
+[1.M.08] Çalışma > Bellek türleri, çalışma belleği | T G
+[1.M.09] Çalışma > Uyku ve öğrenme ilişkisi | T N R
+[1.M.10] Çalışma > Dikkat ve odaklanma | T Y
+[1.M.11] Çalışma > Motivasyon, hedef belirleme, SMART hedefler | T Y
+[1.M.12] Çalışma > Erteleme ve üstesinden gelme yolları | T Y
+[1.M.13] Çalışma > Sınav kaygısı ve baş etme yöntemleri | T Y
+[1.M.14] Çalışma > Deneme sınavı analizi, hata defteri | Y A
+[1.M.15] Çalışma > Çalışma programı hazırlama, zaman yönetimi | Y A
+[1.M.16] Çalışma > Sınav günü hazırlığı, süre yönetimi | Y A
+
+1.N SINAV SİSTEMİ
+[1.N.01] YKS > Yapısı: TYT, AYT, YDT, oturumlar, süreler, soru sayıları | S
+[1.N.02] YKS > Puan türleri (TYT, SAY, EA, SÖZ, DİL) ve katsayılar | S T
+[1.N.03] YKS > Net hesaplama kuralı ve yanlış cezası | K S
+[1.N.04] YKS > Başvuru, tercih ve yerleştirme süreci | A S
+[1.N.05] YKS > Kontenjan, taban puan ve başarı sırası kavramları | T
+[1.N.06] YKS > Ek yerleştirme, ek tercih, özel yetenek sınavları | T S
+[1.N.07] YKS > Yıllara göre konu bazlı soru dağılımı | S
+[1.N.08] YKS > Engelli ve şehit/gazi çocukları gibi özel durumlar | K
+
+══════ BÖLÜM 2 — SPİ (sağlık ve yaşam düzeni) ══════
+SPİ teşhis koymaz, doz önermez, tedavi vermez. İlaç, doz, tedavi ve kişisel tıbbi talimat içeren cümleler ATLANIR.
+
+2.A MAKRO BESİNLER
+[2.A.01] Beslenme > Karbonhidrat > Tanım, türleri (basit, karmaşık) | T G
+[2.A.02] Beslenme > Karbonhidrat > Besin kaynakları | T Ö
+[2.A.03] Beslenme > Karbonhidrat > Glisemik indeks ve glisemik yük | T
+[2.A.04] Beslenme > Karbonhidrat > Posa (lif) türleri ve görevi | T G
+[2.A.05] Beslenme > Karbonhidrat > Rafine ve tam tahıl farkı | T Ö
+[2.A.06] Beslenme > Protein > Tanım, amino asitler, esansiyel amino asitler | T G
+[2.A.07] Beslenme > Protein > Besin kaynakları (hayvansal, bitkisel) | T Ö
+[2.A.08] Beslenme > Protein > Vücuttaki görevleri | G
+[2.A.09] Beslenme > Protein > Protein kalitesi, tamamlayıcı protein | T
+[2.A.10] Beslenme > Yağ > Doymuş, tekli ve çoklu doymamış yağ asitleri | T G
+[2.A.11] Beslenme > Yağ > Omega-3 ve omega-6 | T G Ö
+[2.A.12] Beslenme > Yağ > Trans yağ | T
+[2.A.13] Beslenme > Yağ > Kolesterol, besin kaynakları | T Ö
+[2.A.14] Beslenme > Yağ > Yağda çözünen vitaminlerin emilimi | G
+[2.A.15] Beslenme > Enerji > Kalori kavramı, enerji yoğunluğu | T
+[2.A.16] Beslenme > Enerji > Bazal metabolizma hızı | T
+[2.A.17] Beslenme > Enerji > Besinlerin termik etkisi | T
+[2.A.18] Beslenme > Enerji > Günlük enerji harcaması bileşenleri | T
+[2.A.19] Beslenme > Enerji > Makro besin dağılımı önerileri (resmî kurum) | R
+[2.A.20] Beslenme > Enerji > Vücut kompozisyonu, vücut kitle indeksi, bel çevresi | T R
+
+2.B MİKRO BESİNLER — VİTAMİNLER
+[2.B.01] Vitamin > A vitamini (retinol) | G Ö R
+[2.B.02] Vitamin > D vitamini | G Ö R
+[2.B.03] Vitamin > E vitamini | G Ö
+[2.B.04] Vitamin > K vitamini | G Ö
+[2.B.05] Vitamin > C vitamini | G Ö R
+[2.B.06] Vitamin > B1 (tiamin) | G Ö
+[2.B.07] Vitamin > B2 (riboflavin) | G Ö
+[2.B.08] Vitamin > B3 (niasin) | G Ö
+[2.B.09] Vitamin > B5 (pantotenik asit) | G Ö
+[2.B.10] Vitamin > B6 (piridoksin) | G Ö
+[2.B.11] Vitamin > B7 (biyotin) | G Ö
+[2.B.12] Vitamin > B9 (folat, folik asit) | G Ö R
+[2.B.13] Vitamin > B12 (kobalamin) | G Ö
+[2.B.14] Vitamin > Yağda ve suda çözünen vitaminlerin farkı | T
+[2.B.15] Vitamin > Gıdalarda vitamin kaybı (pişirme, depolama) | N Y
+
+2.C MİKRO BESİNLER — MİNERALLER
+[2.C.01] Mineral > Kalsiyum | G Ö R
+[2.C.02] Mineral > Demir (hem ve hem olmayan demir) | G Ö R
+[2.C.03] Mineral > Magnezyum | G Ö
+[2.C.04] Mineral > Çinko | G Ö
+[2.C.05] Mineral > Potasyum | G Ö R
+[2.C.06] Mineral > Sodyum ve tuz | G Ö R
+[2.C.07] Mineral > Fosfor | G Ö
+[2.C.08] Mineral > İyot | G Ö
+[2.C.09] Mineral > Selenyum | G Ö
+[2.C.10] Mineral > Bakır, mangan, krom, flor | G Ö
+[2.C.11] Mineral > Demir emilimini artıran ve azaltan faktörler | N Y
+[2.C.12] Mineral > Elektrolit dengesi | T G
+
+2.D SU VE SIVI DENGESİ
+[2.D.01] Su > Vücuttaki görevleri | G
+[2.D.02] Su > Günlük sıvı ihtiyacı için resmî öneriler | R
+[2.D.03] Su > Dehidrasyon nedenleri ve genel belirtileri (tanı değil, genel bilgi) | T
+[2.D.04] Su > Sıvı kaynakları (içecekler, yiyecekler) | Ö
+[2.D.05] Su > Çay, kahve ve kafein | T G
+[2.D.06] Su > Şekerli içecekler, enerji içecekleri | T R
+[2.D.07] Su > Sporda sıvı alımı ilkeleri | Y
+[2.D.08] Su > Alkolün genel etkileri | T
+
+2.E ÖĞÜN DÜZENİ VE BESLENME ALIŞKANLIKLARI
+[2.E.01] Öğün > Kahvaltının önemi ve içeriği | T Y
+[2.E.02] Öğün > Ana ve ara öğünler, öğün sayısı | T Y
+[2.E.03] Öğün > Öğün saatleri ve düzenli yeme | Y
+[2.E.04] Öğün > Akşam yemeği zamanı ve uyku ilişkisi | N Y
+[2.E.05] Öğün > Kronobeslenme (chrononutrition) | T
+[2.E.06] Öğün > Öğün atlama ve etkileri | N
+[2.E.07] Öğün > Porsiyon boyutu ve tabak modeli | T Y
+[2.E.08] Öğün > Bilinçli yeme (mindful eating) | T Y
+[2.E.09] Öğün > Yavaş yeme, tokluk sinyalleri | G Y
+[2.E.10] Öğün > Ekran karşısında yeme | N
+[2.E.11] Öğün > Sporcu öğünleri: antrenman öncesi ve sonrası | Y
+[2.E.12] Öğün > Sınav dönemi beslenmesi | Y
+[2.E.13] Öğün > Gece yemek ve atıştırma | N
+[2.E.14] Öğün > Yemek hazırlama (meal prep) ve alışveriş listesi | Y A
+[2.E.15] Öğün > Besin etiketi okuma | K Y
+
+2.F BESLENME DÜZENLERİ
+[2.F.01] Diyet > Akdeniz beslenme modeli | T Ö R
+[2.F.02] Diyet > Vejetaryenlik ve veganlık | T Y
+[2.F.03] Diyet > Aralıklı oruç (zaman kısıtlı yeme) | T
+[2.F.04] Diyet > Ketojenik beslenme | T
+[2.F.05] Diyet > Düşük karbonhidratlı beslenme | T
+[2.F.06] Diyet > DASH beslenme modeli | T
+[2.F.07] Diyet > Glutensiz beslenme, çölyak farkındalığı | T
+[2.F.08] Diyet > Laktoz intoleransı ve süt alternatifleri | T
+[2.F.09] Diyet > Besin alerjisi ve intolerans farkı | T
+[2.F.10] Diyet > Kalori kısıtlaması genel ilkeleri | T
+[2.F.11] Diyet > Popüler diyetlerin bilimsel değerlendirmesi | N
+[2.F.12] Diyet > Türkiye Beslenme Rehberi (TÜBER) ilkeleri | R
+[2.F.13] Diyet > Dünya Sağlık Örgütü sağlıklı beslenme önerileri | R
+[2.F.14] Diyet > Besin grupları ve önerilen porsiyonlar | R
+[2.F.15] Diyet > Yaş gruplarına göre beslenme (çocuk, ergen, yetişkin, yaşlı) | R
+
+2.G BESİN GRUPLARI VE TEKİL BESİNLER
+[2.G.01] Besin > Süt ve süt ürünleri (süt, yoğurt, ayran, peynir, kefir) | G Ö
+[2.G.02] Besin > Et ve et ürünleri (kırmızı, beyaz et, işlenmiş et) | G Ö
+[2.G.03] Besin > Balık ve deniz ürünleri | G Ö
+[2.G.04] Besin > Yumurta | G Ö
+[2.G.05] Besin > Baklagiller (mercimek, nohut, fasulye) | G Ö
+[2.G.06] Besin > Tahıllar (buğday, pirinç, yulaf, mısır, bulgur) | G Ö
+[2.G.07] Besin > Ekmek çeşitleri | G Ö
+[2.G.08] Besin > Sebzeler (yeşil yapraklı, kök, turpgiller) | G Ö
+[2.G.09] Besin > Meyveler ve meyve suyu farkı | G Ö
+[2.G.10] Besin > Kuru meyveler | G Ö
+[2.G.11] Besin > Yağlı tohumlar ve kuruyemişler | G Ö
+[2.G.12] Besin > Bitkisel yağlar (zeytinyağı, ayçiçek, kanola) | G Ö
+[2.G.13] Besin > Tereyağı ve margarin | G Ö
+[2.G.14] Besin > Bal, pekmez, şeker ve tatlandırıcılar | G Ö
+[2.G.15] Besin > Baharatlar ve otlar | G Ö
+[2.G.16] Besin > Çay, kahve, bitki çayları | G Ö
+[2.G.17] Besin > Fermente gıdalar (turşu, boza, şalgam, kefir) | T G
+[2.G.18] Besin > Probiyotik ve prebiyotik | T G
+[2.G.19] Besin > İşlenmiş ve ultra işlenmiş gıdalar | T N
+[2.G.20] Besin > Gıda katkı maddeleri | T
+[2.G.21] Besin > Organik ve geleneksel tarım ürünleri | T
+[2.G.22] Besin > Mevsimlik sebze ve meyveler (Türkiye) | Ö
+[2.G.23] Besin > Gıda güvenliği: saklama, çapraz bulaşma, pişirme | K Y
+[2.G.24] Besin > Gıda kaynaklı hastalıklardan korunma (genel bilgi) | Y
+[2.G.25] Besin > Pişirme yöntemleri ve besin değerine etkisi | N Y
+
+2.H TÜRK YEMEKLERİ (her biri için: içerik, malzeme, yöntem, bölge, açık yazılmış besin değeri)
+[2.H.01] Yemek > Mercimek çorbası | Ö
+[2.H.02] Yemek > Ezogelin çorbası | Ö
+[2.H.03] Yemek > Tarhana çorbası | Ö
+[2.H.04] Yemek > Yayla çorbası | Ö
+[2.H.05] Yemek > İşkembe çorbası | Ö
+[2.H.06] Yemek > Kuru fasulye | Ö
+[2.H.07] Yemek > Nohut yemeği | Ö
+[2.H.08] Yemek > Barbunya pilaki | Ö
+[2.H.09] Yemek > Etli taze fasulye | Ö
+[2.H.10] Yemek > Zeytinyağlı yaprak sarma | Ö
+[2.H.11] Yemek > Zeytinyağlı enginar | Ö
+[2.H.12] Yemek > İmam bayıldı | Ö
+[2.H.13] Yemek > Karnıyarık | Ö
+[2.H.14] Yemek > Patlıcan musakka | Ö
+[2.H.15] Yemek > Kabak dolması | Ö
+[2.H.16] Yemek > Biber dolması | Ö
+[2.H.17] Yemek > Etli dolma | Ö
+[2.H.18] Yemek > Mantı | Ö
+[2.H.19] Yemek > Su böreği | Ö
+[2.H.20] Yemek > Sigara böreği | Ö
+[2.H.21] Yemek > Gözleme | Ö
+[2.H.22] Yemek > Pide | Ö
+[2.H.23] Yemek > Lahmacun | Ö
+[2.H.24] Yemek > Döner | Ö
+[2.H.25] Yemek > Şiş kebap | Ö
+[2.H.26] Yemek > Adana kebap | Ö
+[2.H.27] Yemek > Urfa kebap | Ö
+[2.H.28] Yemek > İskender kebap | Ö
+[2.H.29] Yemek > Köfte (kuru köfte, ızgara köfte) | Ö
+[2.H.30] Yemek > İçli köfte | Ö
+[2.H.31] Yemek > Çiğ köfte | Ö
+[2.H.32] Yemek > Tavuk sote | Ö
+[2.H.33] Yemek > Hünkâr beğendi | Ö
+[2.H.34] Yemek > Pilav çeşitleri (pirinç, bulgur) | Ö
+[2.H.35] Yemek > Makarna ve erişte yemekleri | Ö
+[2.H.36] Yemek > Menemen | Ö
+[2.H.37] Yemek > Sucuklu yumurta | Ö
+[2.H.38] Yemek > Türk kahvaltısı (peynir, zeytin, reçel, bal, kaymak) | Ö
+[2.H.39] Yemek > Simit | Ö
+[2.H.40] Yemek > Poğaça ve açma | Ö
+[2.H.41] Yemek > Kısır | Ö
+[2.H.42] Yemek > Cacık | Ö
+[2.H.43] Yemek > Çoban salatası | Ö
+[2.H.44] Yemek > Haydari, ezme ve mezeler | Ö
+[2.H.45] Yemek > Balık yemekleri (hamsi, levrek, çipura) | Ö
+[2.H.46] Yemek > Baklava | Ö
+[2.H.47] Yemek > Sütlaç | Ö
+[2.H.48] Yemek > Aşure | Ö
+[2.H.49] Yemek > Kadayıf ve künefe | Ö
+[2.H.50] Yemek > Lokum | Ö
+[2.H.51] Yemek > Türk kahvesi ve çay kültürü | Ö
+[2.H.52] Yemek > Ayran, şalgam, boza | Ö
+
+2.I EGZERSİZ TEMELLERİ VE ANTRENMAN İLKELERİ
+[2.I.01] Egzersiz > Fiziksel aktivite ve egzersiz farkı | T
+[2.I.02] Egzersiz > Fiziksel uygunluğun bileşenleri | T
+[2.I.03] Egzersiz > Aerobik ve anaerobik egzersiz | T Ö
+[2.I.04] Egzersiz > Kalp atış hızı, maksimum kalp atış hızı, egzersiz bölgeleri | T
+[2.I.05] Egzersiz > VO2 max kavramı | T
+[2.I.06] Egzersiz > Algılanan zorluk skalası (RPE) | T Y
+[2.I.07] Egzersiz > Aşamalı yüklenme (progressive overload) | T Y
+[2.I.08] Egzersiz > Antrenman hacmi, yoğunluk, sıklık | T
+[2.I.09] Egzersiz > Tekrar, set, dinlenme süreleri | T Y
+[2.I.10] Egzersiz > Periyodizasyon | T
+[2.I.11] Egzersiz > Isınma ilkeleri ve örnek rutin | Y A
+[2.I.12] Egzersiz > Soğuma ve toparlanma | Y
+[2.I.13] Egzersiz > Toparlanma: uyku, beslenme, dinlenme günü | Y N
+[2.I.14] Egzersiz > Aşırı antrenman | T N
+[2.I.15] Egzersiz > Gecikmeli kas ağrısı | T N
+[2.I.16] Egzersiz > Kas hipertrofisi | T G
+[2.I.17] Egzersiz > Kas gücü, dayanıklılığı ve hipertrofi farkı | T
+[2.I.18] Egzersiz > Kas yapısı, kas kasılma türleri | T G
+[2.I.19] Egzersiz > Yaralanma önleme ilkeleri | K Y
+[2.I.20] Egzersiz > Yaşa göre egzersiz önerileri (resmî kurum) | R
+[2.I.21] Egzersiz > Haftalık aktivite süreleri (WHO, Sağlık Bakanlığı) | R
+[2.I.22] Egzersiz > Hareketsiz yaşam ve sağlık etkisi | N R
+[2.I.23] Egzersiz > Ev egzersizi ve ekipmansız antrenman | Y
+[2.I.24] Egzersiz > Ders çalışırken hareket molaları | Y
+
+2.J KALİSTENİK HAREKETLERİ (her hareket: hedef kaslar, yapılış, form, varyasyon, hata)
+[2.J.01] Kalistenik > Şınav (push-up) | A H Ö
+[2.J.02] Kalistenik > Diz üstü şınav | A Ö
+[2.J.03] Kalistenik > Elmas şınav | A Ö
+[2.J.04] Kalistenik > Pike şınav | A Ö
+[2.J.05] Kalistenik > Dips (paralel bar) | A H
+[2.J.06] Kalistenik > Sandalye dips | A H
+[2.J.07] Kalistenik > Barfiks (pull-up) | A H Ö
+[2.J.08] Kalistenik > Chin-up | A Ö
+[2.J.09] Kalistenik > Australian pull-up (yatay çekiş) | A Ö
+[2.J.10] Kalistenik > Muscle-up | A H
+[2.J.11] Kalistenik > Squat (çömelme) | A H Ö
+[2.J.12] Kalistenik > Lunge | A H Ö
+[2.J.13] Kalistenik > Bulgar split squat | A Ö
+[2.J.14] Kalistenik > Pistol squat | A Ö
+[2.J.15] Kalistenik > Glute bridge | A Ö
+[2.J.16] Kalistenik > Calf raise (baldır) | A Ö
+[2.J.17] Kalistenik > Plank ve varyasyonları | A H Ö
+[2.J.18] Kalistenik > Yan plank | A Ö
+[2.J.19] Kalistenik > Hollow body hold | A Ö
+[2.J.20] Kalistenik > L-sit | A Ö
+[2.J.21] Kalistenik > Leg raise (bacak kaldırma) | A Ö
+[2.J.22] Kalistenik > Mekik ve crunch | A H
+[2.J.23] Kalistenik > Mountain climber | A Ö
+[2.J.24] Kalistenik > Burpee | A Ö
+[2.J.25] Kalistenik > Jumping jack, ip atlama | A Ö
+[2.J.26] Kalistenik > Handstand (amuda kalkma) ilerleyişi | A V
+[2.J.27] Kalistenik > Front lever ilerleyişi | A V
+[2.J.28] Kalistenik > Planche ilerleyişi | A V
+[2.J.29] Kalistenik > Human flag | A V
+[2.J.30] Kalistenik > Superman ve bird-dog | A Ö
+[2.J.31] Kalistenik > Başlangıç, orta, ileri kalistenik programları | Y V
+[2.J.32] Kalistenik > Hareket ilerleyiş (progresyon) basamakları | V
+[2.J.33] Kalistenik > Kalistenik ve ağırlık antrenmanı karşılaştırması | N
+[2.J.34] Kalistenik > Tekrar ve set önerileri, haftalık plan örnekleri | Y
+
+2.K AĞIRLIK VE DİRENÇ ANTRENMANI
+[2.K.01] Direnç > Deadlift | A H
+[2.K.02] Direnç > Bench press | A H
+[2.K.03] Direnç > Overhead press | A H
+[2.K.04] Direnç > Barbell row | A H
+[2.K.05] Direnç > Back squat ve front squat | A H
+[2.K.06] Direnç > Romanian deadlift | A H
+[2.K.07] Direnç > Dumbbell ve kettlebell hareketleri | A Ö
+[2.K.08] Direnç > Elastik bant egzersizleri | A Ö
+[2.K.09] Direnç > Tam vücut, üst-alt, itiş-çekiş bölünmüş programlar | Y V
+[2.K.10] Direnç > 1 tekrar maksimum kavramı | T
+[2.K.11] Direnç > Başlangıç için güvenlik ve spotter | K Y
+
+2.L KARDİYO VE SPOR DALLARI
+[2.L.01] Kardiyo > Yürüyüş | Y R
+[2.L.02] Kardiyo > Koşu tekniği, başlangıç programı | Y A
+[2.L.03] Kardiyo > Bisiklet | Y
+[2.L.04] Kardiyo > Yüzme | Y
+[2.L.05] Kardiyo > HIIT ve interval antrenmanı | T Y
+[2.L.06] Kardiyo > Tabata | T Y
+[2.L.07] Kardiyo > Sirkuit antrenmanı | T Y
+[2.L.08] Kardiyo > Pliometrik antrenman | T Y
+[2.L.09] Kardiyo > Eşik (laktat) antrenmanı | T
+[2.L.10] Kardiyo > Basamak çıkma, ip atlama | Y
+
+2.M ESNEKLİK VE HAREKETLİLİK
+[2.M.01] Esneklik > Esneklik ve hareket açıklığı | T
+[2.M.02] Esneklik > Statik germe | T A Y
+[2.M.03] Esneklik > Dinamik germe | T A Y
+[2.M.04] Esneklik > PNF germe | T Y
+[2.M.05] Esneklik > Balistik germe ve riskleri | T N
+[2.M.06] Esneklik > Germe süreleri ve sıklığı için öneriler | R Y
+[2.M.07] Esneklik > Kalça fleksörleri germe | A
+[2.M.08] Esneklik > Hamstring germe | A
+[2.M.09] Esneklik > Quadriceps germe | A
+[2.M.10] Esneklik > Baldır ve aşil germe | A
+[2.M.11] Esneklik > Kalça açma (piriformis, glute) | A
+[2.M.12] Esneklik > Omuz ve göğüs germe | A
+[2.M.13] Esneklik > Sırt ve latissimus germe | A
+[2.M.14] Esneklik > Boyun germe | A
+[2.M.15] Esneklik > Bilek ve önkol germe (masa başı çalışanlar için) | A
+[2.M.16] Esneklik > Omurga hareketliliği (kedi-deve) | A
+[2.M.17] Esneklik > Torasik omurga mobilitesi | A
+[2.M.18] Esneklik > Ayak bileği mobilitesi | A
+[2.M.19] Esneklik > Köpük silindir (foam roller) kullanımı | T Y
+[2.M.20] Esneklik > Yoga (asanalar, güneşe selam) | T A
+[2.M.21] Esneklik > Pilates | T A
+[2.M.22] Esneklik > Tai chi | T
+[2.M.23] Esneklik > Split ve köprü gibi ileri esneklik ilerleyişi | V Y
+[2.M.24] Esneklik > Sabah ve akşam esneme rutinleri | Y A
+
+2.N DURUŞ VE ERGONOMİ
+[2.N.01] Duruş > Sağlıklı omurga eğrilikleri | T
+[2.N.02] Duruş > Öne kayık baş duruşu | T N
+[2.N.03] Duruş > Kifoz, lordoz, skolyoz (genel bilgi, tanı değil) | T
+[2.N.04] Duruş > Ön pelvik eğim | T N
+[2.N.05] Duruş > Oturma duruşu ve masa başı ergonomi | K Y
+[2.N.06] Duruş > Ekran yüksekliği, ışık, göz molası (20-20-20) | K Y
+[2.N.07] Duruş > Ayakta çalışma masası | Y
+[2.N.08] Duruş > Uzun süre oturmanın etkileri, hareket molası | N R
+[2.N.09] Duruş > Çanta taşıma, uyku yastığı ve şiltesi | Y
+[2.N.10] Duruş > Core (merkez) kaslarının rolü | G
+[2.N.11] Duruş > Bel ve boyun ağrısını önleyici genel alışkanlıklar | Y
+[2.N.12] Duruş > Denge ve koordinasyon egzersizleri | A
+
+2.O UYKU
+[2.O.01] Uyku > Uyku evreleri (NREM, REM) | T V
+[2.O.02] Uyku > Uyku döngüsü ve süresi | T
+[2.O.03] Uyku > Yaşa göre önerilen uyku süreleri | R
+[2.O.04] Uyku > Sirkadiyen ritim | T G
+[2.O.05] Uyku > Kronotip (sabahçı, akşamcı) | T
+[2.O.06] Uyku > Melatonin hormonu | T G
+[2.O.07] Uyku > Işığın rolü, mavi ışık ve ekran | N
+[2.O.08] Uyku > Uyku hijyeni ilkeleri | K Y
+[2.O.09] Uyku > Yatak odası ortamı (ısı, ses, ışık) | Y
+[2.O.10] Uyku > Kafein ve alkolün uykuya etkisi | N
+[2.O.11] Uyku > Akşam yemeği ve uyku | N
+[2.O.12] Uyku > Egzersizin uykuya etkisi ve zamanlaması | N
+[2.O.13] Uyku > Şekerleme (idle) | T Y
+[2.O.14] Uyku > Uyku yoksunluğu ve bilişsel etkiler | N
+[2.O.15] Uyku > Uyku ve bellek pekiştirme | N G
+[2.O.16] Uyku > Uyku borcu | T
+[2.O.17] Uyku > Vardiyalı çalışma ve jet lag (genel bilgi) | T
+[2.O.18] Uyku > Uykuya dalma rutinleri | Y A
+[2.O.19] Uyku > İnsomnia farkındalığı (tanı ve tedavi değil, genel bilgi) | T
+[2.O.20] Uyku > Sınav dönemi uyku düzeni | Y
+
+2.P STRES, ZİHİN VE YAŞAM ALIŞKANLIKLARI
+[2.P.01] Stres > Stres tepkisi, kortizol | T G
+[2.P.02] Stres > Kısa ve uzun süreli stres | T N
+[2.P.03] Stres > Stresle başa çıkma teknikleri | Y A
+[2.P.04] Stres > Nefes egzersizleri (diyafram, kutu nefes) | A
+[2.P.05] Stres > Meditasyon ve farkındalık | T A
+[2.P.06] Stres > İlerleyici kas gevşetme | A
+[2.P.07] Stres > Doğada zaman geçirme | N
+[2.P.08] Stres > Sosyal destek, yalnızlık | N
+[2.P.09] Stres > Tükenmişlik (genel bilgi) | T N
+[2.P.10] Stres > Dijital detoks, ekran süresi | Y N
+[2.P.11] Stres > Soğuk maruziyeti ve sauna (genel bilgi ve sınırlılıklar) | T
+[2.P.12] Stres > Sigara ve alkolün genel etkileri | T N
+[2.P.13] Stres > Güneşten korunma ve D vitamini | Y R
+[2.P.14] Stres > El yıkama, ağız ve diş hijyeni | K Y
+[2.P.15] Stres > Kişisel hijyen ve bulaşıcı hastalıklardan korunma (genel) | K Y
+
+2.Q GENEL SAĞLIK FARKINDALIĞI (tanı ve tedavi olmadan, tanım ve korunma)
+[2.Q.01] Sağlık > Kan basıncı nedir, ölçüm ilkeleri, resmî sınıflar | T R
+[2.Q.02] Sağlık > Kolesterol ve lipit profili nedir | T R
+[2.Q.03] Sağlık > Kan şekeri, insülin, tip 2 diyabet korunma | T R
+[2.Q.04] Sağlık > Obezite tanımı ve korunma (WHO) | T R
+[2.Q.05] Sağlık > Kalp-damar sağlığı ve risk faktörleri | T R
+[2.Q.06] Sağlık > Kemik sağlığı, osteoporoz korunma | T R
+[2.Q.07] Sağlık > Demir eksikliği ve anemi farkındalığı | T
+[2.Q.08] Sağlık > Bağışıklık sistemi ve aşılama | T R
+[2.Q.09] Sağlık > Bağırsak mikrobiyotası | T G
+[2.Q.10] Sağlık > Tuz tüketimi ve sağlık (WHO) | R
+[2.Q.11] Sağlık > Şeker tüketimi ve sağlık (WHO) | R
+[2.Q.12] Sağlık > Sigara bırakma farkındalığı (genel) | R
+[2.Q.13] Sağlık > Ruh sağlığı ve yardım arama (genel bilgi) | T
+[2.Q.14] Sağlık > Kadın sağlığı, ergenlik ve beslenme (genel) | T
+[2.Q.15] Sağlık > İlk yardım temelleri (genel bilgi) | A K
+[2.Q.16] Sağlık > Sağlıklı yaşlanma | T R
+[2.Q.17] Sağlık > Check-up ve periyodik kontrol önerileri (resmî) | R
+[2.Q.18] Sağlık > Sağlık okuryazarlığı, güvenilir kaynak ayırt etme | Y
+
+══════ BÖLÜM 3 — ESP: FELSEFE VE TARİH ══════
+
+3.A FELSEFE DALLARI VE AKIMLARI
+[3.A.01] Felsefe > Felsefenin tanımı, konusu ve yöntemi | T
+[3.A.02] Felsefe > Felsefe tarihinin dönemleri | V
+[3.A.03] Felsefe > Epistemoloji (bilgi kuramı) | T
+[3.A.04] Felsefe > Ontoloji ve metafizik | T
+[3.A.05] Felsefe > Etik (ahlak felsefesi) | T
+[3.A.06] Felsefe > Estetik (sanat felsefesi) | T
+[3.A.07] Felsefe > Mantık | T K
+[3.A.08] Felsefe > Siyaset felsefesi | T
+[3.A.09] Felsefe > Bilim felsefesi | T
+[3.A.10] Felsefe > Zihin felsefesi | T
+[3.A.11] Felsefe > Dil felsefesi | T
+[3.A.12] Felsefe > Din felsefesi | T
+[3.A.13] Felsefe > Hukuk felsefesi | T
+[3.A.14] Felsefe > Tarih felsefesi | T
+[3.A.15] Felsefe > Eğitim felsefesi | T
+[3.A.16] Felsefe > Rasyonalizm | T B
+[3.A.17] Felsefe > Ampirizm (deneycilik) | T B
+[3.A.18] Felsefe > Kritisizm (eleştiricilik) | T B
+[3.A.19] Felsefe > İdealizm | T B
+[3.A.20] Felsefe > Materyalizm | T B
+[3.A.21] Felsefe > Pozitivizm | T B
+[3.A.22] Felsefe > Pragmatizm | T B
+[3.A.23] Felsefe > Fenomenoloji | T B
+[3.A.24] Felsefe > Varoluşçuluk | T B
+[3.A.25] Felsefe > Stoacılık | T B
+[3.A.26] Felsefe > Epikürcülük | T B
+[3.A.27] Felsefe > Septisizm (kuşkuculuk) | T B
+[3.A.28] Felsefe > Sofistler | T B
+[3.A.29] Felsefe > Analitik felsefe | T B
+[3.A.30] Felsefe > Yapısalcılık ve postyapısalcılık | T B
+[3.A.31] Felsefe > Postmodernizm | T B
+[3.A.32] Felsefe > Eleştirel kuram (Frankfurt Okulu) | T B
+[3.A.33] Felsefe > Faydacılık (utilitarizm) | T B
+[3.A.34] Felsefe > Deontolojik etik | T B
+[3.A.35] Felsefe > Erdem etiği | T B
+[3.A.36] Felsefe > Liberalizm, sosyalizm, anarşizm | T B
+[3.A.37] Felsefe > Sosyal sözleşme kuramları | T B
+[3.A.38] Felsefe > Nihilizm ve absürdizm | T B
+[3.A.39] Felsefe > Hümanizm | T B
+[3.A.40] Felsefe > Determinizm ve özgür irade | T
+[3.A.41] Felsefe > İslam felsefesi | T B
+[3.A.42] Felsefe > Hint felsefesi | T B
+[3.A.43] Felsefe > Çin felsefesi | T B
+[3.A.44] Felsefe > Japon felsefesi ve Zen | T B
+[3.A.45] Felsefe > Afrika felsefesi | T
+[3.A.46] Felsefe > Türk felsefe geleneği | T B
+
+3.B FİLOZOFLAR (her ad ayrı sayfa: yaşam S, dönem, temel görüşler G, kavramlar T, eserler E, etkilediği ve etkilendiği kişiler N)
+[3.B.01] Presokratikler: Thales, Anaksimandros, Anaksimenes, Pythagoras, Herakleitos, Parmenides, Zenon (Elealı), Empedokles, Anaksagoras, Demokritos | B G E
+[3.B.02] Klasik Yunan: Protagoras, Gorgias, Sokrates, Platon, Aristoteles, Diogenes | B G E
+[3.B.03] Hellenistik ve Roma: Epikuros, Zenon (Stoacı), Epiktetos, Marcus Aurelius, Seneca, Cicero, Lucretius, Pirhon, Plotinos | B G E
+[3.B.04] Geç Antik ve Ortaçağ Hristiyan: Augustinus, Boethius, Anselm, Thomas Aquinas, Duns Scotus, William of Ockham, Nicolaus Cusanus | B G E
+[3.B.05] İslam dünyası: Kindî, Farabi, İbn-i Sina, Gazali, İbn Rüşd, İbn Bacce, İbn Tufeyl, İbn Haldun, Sühreverdî, Mevlânâ | B G E
+[3.B.06] Rönesans: Machiavelli, Thomas More, Erasmus, Giordano Bruno, Francis Bacon, Montaigne | B G E
+[3.B.07] 17. yüzyıl: Hobbes, Descartes, Pascal, Spinoza, Locke, Leibniz, Malebranche | B G E
+[3.B.08] 18. yüzyıl: Vico, Berkeley, Hume, Montesquieu, Voltaire, Rousseau, Diderot, Adam Smith, Kant | B G E
+[3.B.09] Alman idealizmi: Fichte, Schelling, Hegel, Schleiermacher | B G E
+[3.B.10] 19. yüzyıl: Schopenhauer, Kierkegaard, Comte, John Stuart Mill, Marx, Engels, Nietzsche, Bentham | B G E
+[3.B.11] Pragmatistler: Peirce, William James, John Dewey | B G E
+[3.B.12] Fenomenoloji ve varoluşçuluk: Husserl, Heidegger, Sartre, Simone de Beauvoir, Camus, Merleau-Ponty, Karl Jaspers, Gabriel Marcel | B G E
+[3.B.13] Analitik gelenek: Frege, Russell, Moore, Wittgenstein, Carnap, Quine, Putnam, Kripke, Popper | B G E
+[3.B.14] Bilim felsefecileri: Thomas Kuhn, Imre Lakatos, Paul Feyerabend | B G E
+[3.B.15] Frankfurt Okulu ve eleştirel kuram: Adorno, Horkheimer, Marcuse, Habermas, Walter Benjamin, Erich Fromm | B G E
+[3.B.16] Siyaset felsefesi: Hannah Arendt, John Rawls, Robert Nozick, Isaiah Berlin, Michael Sandel, Alasdair MacIntyre, Charles Taylor | B G E
+[3.B.17] Yapısalcılık ve sonrası: Saussure, Lévi-Strauss, Barthes, Foucault, Derrida, Deleuze, Baudrillard, Lacan, Althusser | B G E
+[3.B.18] Çağdaş: Chomsky, Dennett, Martha Nussbaum, Peter Singer, Slavoj Žižek, Byung-Chul Han, Simone Weil, Levinas, Ricoeur, Gadamer, Ayn Rand | B G E
+[3.B.19] Doğu felsefesi: Konfüçyüs, Lao Zi, Zhuangzi, Mozi, Mencius, Xunzi, Han Fei, Sun Zi, Buda, Nagarjuna, Adi Shankara | B G E
+[3.B.20] Türk düşünürleri: Hilmi Ziya Ülken, Takiyettin Mengüşoğlu, Nermi Uygur, İoanna Kuçuradi, Cemil Meriç, Nurettin Topçu, Ahmet Cevdet Paşa, Ziya Gökalp | B G E
+[3.B.21] Kadın filozoflar: Hypatia, Simone Weil, Simone de Beauvoir, Hannah Arendt, Martha Nussbaum, Judith Butler, Mary Wollstonecraft | B G E
+[3.B.22] Psikoloji ve sosyoloji kurucuları: Freud, Jung, Adler, Piaget, Weber, Durkheim, Simmel | B G E
+[3.B.23] Felsefede ünlü düşünce deneyleri (mağara alegorisi, Gyges'in yüzüğü, Çin odası, tramvay ikilemi, gemi paradoksu, sonsuz maymun) | T Ö
+[3.B.24] Felsefede ünlü sorular (öz, varlık, bilgi, iyi, adalet, özgürlük, ölüm, anlam) | T Ö
+
+3.C ANTİK ÇAĞ VE İLK ÇAĞ TARİHİ
+[3.C.01] Tarih > Tarih öncesi çağlar (Paleolitik, Mezolitik, Neolitik) | S N
+[3.C.02] Tarih > Neolitik devrim ve tarımın başlangıcı | N
+[3.C.03] Tarih > Göbeklitepe ve Çatalhöyük | S N
+[3.C.04] Tarih > Bronz Çağı ve Demir Çağı | S N
+[3.C.05] Tarih > Mezopotamya uygarlıkları (Sümer, Akad, Babil, Asur) | S B N
+[3.C.06] Tarih > Antik Mısır | S B N
+[3.C.07] Tarih > Hititler | S B N
+[3.C.08] Tarih > Frigler, Lidyalılar, Urartular, İyonlar | S B N
+[3.C.09] Tarih > Fenikeliler ve alfabenin yayılışı | S N
+[3.C.10] Tarih > Persler (Ahameniş) | S B N
+[3.C.11] Tarih > Antik Yunan şehir devletleri, Atina, Sparta | S B N
+[3.C.12] Tarih > Pers Savaşları (Maraton, Termopilai, Salamis) | S N
+[3.C.13] Tarih > Peloponnesos Savaşı | S N
+[3.C.14] Tarih > Büyük İskender ve seferleri | S B N
+[3.C.15] Tarih > Helenistik krallıklar | S N
+[3.C.16] Tarih > Roma Krallığı ve Cumhuriyeti | S B N
+[3.C.17] Tarih > Pön Savaşları (Kartaca) | S B N
+[3.C.18] Tarih > Jül Sezar, Augustus, Roma İmparatorluğu | S B N
+[3.C.19] Tarih > Roma hukuku ve mimarisi | T E
+[3.C.20] Tarih > Roma'nın bölünmesi ve Batı Roma'nın çöküşü | S N
+[3.C.21] Tarih > Hindistan'da Maurya ve Gupta | S B N
+[3.C.22] Tarih > Çin'de Qin ve Han | S B N
+[3.C.23] Tarih > Kavimler Göçü | S N
+
+3.D ORTA ÇAĞ VE YENİ ÇAĞ AVRUPA TARİHİ
+[3.D.01] Avrupa > Bizans İmparatorluğu (kuruluş, Justinianus, çöküş) | S B N
+[3.D.02] Avrupa > Franklar ve Şarlman | S B N
+[3.D.03] Avrupa > Feodalizm ve şövalyelik | T N
+[3.D.04] Avrupa > Kilise gücü, Papalık | N
+[3.D.05] Avrupa > Haçlı Seferleri | S N
+[3.D.06] Avrupa > Magna Carta | S N
+[3.D.07] Avrupa > Yüzyıl Savaşları ve Jeanne d'Arc | S B N
+[3.D.08] Avrupa > Kara Ölüm (veba) | S N
+[3.D.09] Avrupa > İstanbul'un fethinin Avrupa'ya etkisi | S N
+[3.D.10] Avrupa > Rönesans (İtalya) | S B E
+[3.D.11] Avrupa > Matbaanın icadı | S N
+[3.D.12] Avrupa > Coğrafi keşifler | S B N
+[3.D.13] Avrupa > Reform ve Karşı Reform | S B N
+[3.D.14] Avrupa > Otuz Yıl Savaşları ve Vestfalya Barışı | S N
+[3.D.15] Avrupa > Bilimsel Devrim | B E N
+[3.D.16] Avrupa > Aydınlanma Çağı | B E N
+[3.D.17] Avrupa > Mutlakiyet (XIV. Louis, Büyük Petro, II. Katerina) | S B N
+[3.D.18] Avrupa > İngiliz devrimleri | S N
+[3.D.19] Avrupa > Amerikan Bağımsızlık Savaşı | S B N
+[3.D.20] Avrupa > Fransız Devrimi | S B N
+[3.D.21] Avrupa > Napolyon dönemi ve savaşları | S B N
+[3.D.22] Avrupa > Viyana Kongresi ve Avrupa dengesi | S N
+[3.D.23] Avrupa > Sanayi Devrimi | S N
+[3.D.24] Avrupa > 1848 Devrimleri, milliyetçilik | S N
+[3.D.25] Avrupa > İtalya ve Almanya'nın birliği | S B N
+[3.D.26] Avrupa > Sömürgecilik ve emperyalizm | S N
+[3.D.27] Avrupa > Doğu Sorunu | S N
+
+3.E YAKIN ÇAĞ VE MODERN DÜNYA
+[3.E.01] Dünya > Birinci Dünya Savaşı (nedenleri, cepheler, sonuçlar) | S N
+[3.E.02] Dünya > Versay Antlaşması | S N
+[3.E.03] Dünya > Rus Devrimi ve SSCB'nin kuruluşu | S B N
+[3.E.04] Dünya > Milletler Cemiyeti | S N
+[3.E.05] Dünya > Büyük Ekonomik Bunalım (1929) | S N
+[3.E.06] Dünya > Faşizm ve Nazizm'in yükselişi | S B N
+[3.E.07] Dünya > İkinci Dünya Savaşı (nedenleri, cepheler, sonuçlar) | S N
+[3.E.08] Dünya > Holokost | S N
+[3.E.09] Dünya > Hiroşima ve Nagazaki | S N
+[3.E.10] Dünya > Birleşmiş Milletler'in kuruluşu | S N
+[3.E.11] Dünya > Soğuk Savaş | S N
+[3.E.12] Dünya > Marshall Planı ve NATO | S N
+[3.E.13] Dünya > Kore Savaşı | S N
+[3.E.14] Dünya > Küba Füze Krizi | S N
+[3.E.15] Dünya > Vietnam Savaşı | S N
+[3.E.16] Dünya > Berlin Duvarı ve yıkılışı | S N
+[3.E.17] Dünya > Sovyetler Birliği'nin dağılması | S N
+[3.E.18] Dünya > Avrupa Birliği'nin gelişimi | S N
+[3.E.19] Dünya > Sömürgeciliğin sonu, bağımsızlık hareketleri | S N
+[3.E.20] Dünya > Ortadoğu (İsrail-Filistin, Körfez savaşları) | S N
+[3.E.21] Dünya > Küreselleşme ve teknoloji devrimi | N
+
+3.F TÜRK TARİHİ — İLK VE ORTA ÇAĞ
+[3.F.01] Türk > Orta Asya Türk kültürü ve destanlar | T
+[3.F.02] Türk > Asya Hun Devleti | S B N
+[3.F.03] Türk > Avrupa Hun Devleti ve Attila | S B N
+[3.F.04] Türk > Göktürk Devletleri, Orhun Yazıtları | S B E
+[3.F.05] Türk > Uygurlar | S N
+[3.F.06] Türk > Avarlar, Hazarlar, Bulgarlar, Peçenekler, Kıpçaklar | S N
+[3.F.07] Türk > Karahanlılar | S B N
+[3.F.08] Türk > Gazneliler | S B N
+[3.F.09] Türk > Büyük Selçuklu Devleti ve Sultanları | S B N
+[3.F.10] Türk > Malazgirt Muharebesi | S N
+[3.F.11] Türk > Dandanakan ve Pasinler Muharebeleri | S N
+[3.F.12] Türk > Anadolu Selçuklu Devleti | S B N
+[3.F.13] Türk > Miryokefalon Muharebesi | S N
+[3.F.14] Türk > Kösedağ Muharebesi ve Moğol istilası | S N
+[3.F.15] Türk > Harzemşahlar | S N
+[3.F.16] Türk > Eyyubiler, Memlükler | S N
+[3.F.17] Türk > Anadolu beylikleri | S N
+[3.F.18] Türk > Türk-İslam medeniyeti (bilim, sanat, kurumlar) | B E
+[3.F.19] Türk > Timur İmparatorluğu ve Ankara Muharebesi | S B N
+[3.F.20] Türk > Akkoyunlular ve Karakoyunlular | S N
+
+3.G OSMANLI TARİHİ
+[3.G.01] Osmanlı > Kuruluş dönemi (Osman Bey, Orhan Bey, Murad Hüdavendigâr) | S B N
+[3.G.02] Osmanlı > Rumeli'ye geçiş ve Balkan fetihleri | S N
+[3.G.03] Osmanlı > Kosova ve Niğbolu Muharebeleri | S N
+[3.G.04] Osmanlı > Fetret devri | S N
+[3.G.05] Osmanlı > II. Murad ve Varna | S B N
+[3.G.06] Osmanlı > İstanbul'un Fethi (Fatih Sultan Mehmet) | S B N
+[3.G.07] Osmanlı > Fatih Kanunnamesi, Fatih dönemi kurumları | S E
+[3.G.08] Osmanlı > II. Bayezid dönemi | S B N
+[3.G.09] Osmanlı > Yavuz Sultan Selim, Çaldıran, Mercidabık, Ridaniye | S B N
+[3.G.10] Osmanlı > Halifeliğin Osmanlı'ya geçişi | S N
+[3.G.11] Osmanlı > Kanuni Sultan Süleyman dönemi | S B N
+[3.G.12] Osmanlı > Mohaç Muharebesi | S N
+[3.G.13] Osmanlı > Preveze Deniz Muharebesi | S N
+[3.G.14] Osmanlı > Osmanlı denizciliği ve Barbaros Hayrettin Paşa | S B
+[3.G.15] Osmanlı > İnebahtı Deniz Muharebesi | S N
+[3.G.16] Osmanlı > Osmanlı devlet teşkilatı (divan, eyalet, sancak) | T
+[3.G.17] Osmanlı > Osmanlı ordusu (kapıkulu, yeniçeri, timarlı sipahi) | T
+[3.G.18] Osmanlı > Osmanlı ekonomisi (timar, vergi, esnaf, lonca) | T
+[3.G.19] Osmanlı > Osmanlı hukuku ve millet sistemi | T
+[3.G.20] Osmanlı > Osmanlı'da bilim, sanat, mimari (Mimar Sinan) | B E
+[3.G.21] Osmanlı > Duraklama dönemi (III. Murad - IV. Murad) | S N
+[3.G.22] Osmanlı > Kösem Sultan ve kadınlar saltanatı | S B
+[3.G.23] Osmanlı > Köprülüler dönemi | S B N
+[3.G.24] Osmanlı > II. Viyana Kuşatması | S N
+[3.G.25] Osmanlı > Karlofça Antlaşması | S N
+[3.G.26] Osmanlı > Pasarofça Antlaşması | S N
+[3.G.27] Osmanlı > Lale Devri | S B N
+[3.G.28] Osmanlı > Belgrad Antlaşması | S N
+[3.G.29] Osmanlı > Küçük Kaynarca Antlaşması | S N
+[3.G.30] Osmanlı > III. Selim ve Nizam-ı Cedid | S B N
+[3.G.31] Osmanlı > Sened-i İttifak | S N
+[3.G.32] Osmanlı > II. Mahmut ve Vaka-i Hayriye | S B N
+[3.G.33] Osmanlı > Tanzimat Fermanı | S N
+[3.G.34] Osmanlı > Islahat Fermanı | S N
+[3.G.35] Osmanlı > Kırım Savaşı | S N
+[3.G.36] Osmanlı > Kanun-ı Esasi ve I. Meşrutiyet | S N
+[3.G.37] Osmanlı > 93 Harbi ve Berlin Antlaşması | S N
+[3.G.38] Osmanlı > II. Abdülhamid dönemi | S B N
+[3.G.39] Osmanlı > İttihat ve Terakki | S B N
+[3.G.40] Osmanlı > II. Meşrutiyet ve 31 Mart Vakası | S N
+[3.G.41] Osmanlı > Trablusgarp Savaşı | S N
+[3.G.42] Osmanlı > Balkan Savaşları | S N
+[3.G.43] Osmanlı > Osmanlı'nın I. Dünya Savaşı'na girişi | S N
+[3.G.44] Osmanlı > Çanakkale Savaşları | S B N
+[3.G.45] Osmanlı > Kafkas, Irak, Kanal, Filistin cepheleri | S N
+[3.G.46] Osmanlı > Mondros Ateşkes Antlaşması | S N
+[3.G.47] Osmanlı > Osmanlı Devleti'nin son dönemi | S N
+[3.G.48] Osmanlı > Kapitülasyonlar ve Düyun-ı Umumiye | T S N
+[3.G.49] Osmanlı > Osmanlı'da eğitim ve Darülfünun | T S
+[3.G.50] Osmanlı > Osmanlı'da fikir akımları (Osmanlıcılık, İslamcılık, Türkçülük, Batıcılık) | T B
+
+3.H TÜRKİYE CUMHURİYETİ TARİHİ
+[3.H.01] Cumhuriyet > İşgaller ve cemiyetler | S N
+[3.H.02] Cumhuriyet > Mustafa Kemal'in Samsun'a çıkışı | S B N
+[3.H.03] Cumhuriyet > Amasya Genelgesi | S N
+[3.H.04] Cumhuriyet > Erzurum ve Sivas Kongreleri | S N
+[3.H.05] Cumhuriyet > Misak-ı Milli | S N
+[3.H.06] Cumhuriyet > TBMM'nin açılması | S N
+[3.H.07] Cumhuriyet > İç ayaklanmalar | S N
+[3.H.08] Cumhuriyet > Doğu, Güney, Batı cepheleri | S N
+[3.H.09] Cumhuriyet > I. ve II. İnönü Muharebeleri | S N
+[3.H.10] Cumhuriyet > Sakarya Meydan Muharebesi | S N
+[3.H.11] Cumhuriyet > Büyük Taarruz ve Başkomutanlık Meydan Muharebesi | S N
+[3.H.12] Cumhuriyet > Mudanya Ateşkesi | S N
+[3.H.13] Cumhuriyet > Lozan Barış Antlaşması | S N
+[3.H.14] Cumhuriyet > Saltanatın kaldırılması, Cumhuriyet'in ilanı | S N
+[3.H.15] Cumhuriyet > Halifeliğin kaldırılması, Tevhid-i Tedrisat | S N
+[3.H.16] Cumhuriyet > 1924 Anayasası | S N
+[3.H.17] Cumhuriyet > Siyasi inkılaplar | S N
+[3.H.18] Cumhuriyet > Hukuk inkılapları (Medeni Kanun) | S N
+[3.H.19] Cumhuriyet > Eğitim ve kültür inkılapları (Harf Devrimi, TDK, TTK) | S N
+[3.H.20] Cumhuriyet > Toplumsal inkılaplar (Şapka Kanunu, Soyadı Kanunu, kadın hakları) | S N
+[3.H.21] Cumhuriyet > Ekonomik inkılaplar ve İzmir İktisat Kongresi | S N
+[3.H.22] Cumhuriyet > Devletçilik ve planlı kalkınma | S N
+[3.H.23] Cumhuriyet > Atatürk ilkeleri (altı ok) | T
+[3.H.24] Cumhuriyet > Çok partili hayata geçiş denemeleri | S N
+[3.H.25] Cumhuriyet > Atatürk dönemi dış politikası (Montrö, Hatay, Balkan Antantı) | S N
+[3.H.26] Cumhuriyet > II. Dünya Savaşı'nda Türkiye | S N
+[3.H.27] Cumhuriyet > 1945 sonrası çok partili dönem | S N
+[3.H.28] Cumhuriyet > Kore Savaşı ve NATO üyeliği | S N
+[3.H.29] Cumhuriyet > 1960 darbesi | S N
+[3.H.30] Cumhuriyet > Kıbrıs sorunu, 1974 Barış Harekâtı | S N
+[3.H.31] Cumhuriyet > 12 Mart, 12 Eylül dönemleri | S N
+[3.H.32] Cumhuriyet > 1980 sonrası ekonomi ve dış politika | S N
+[3.H.33] Cumhuriyet > Atatürk'ün hayatı (çocukluk, askerlik, siyaset) | S B
+[3.H.34] Cumhuriyet > Atatürk'ün Nutuk ve diğer eserleri | E
+[3.H.35] Cumhuriyet > Cumhuriyet dönemi bilim ve sanat | B E
+
+3.I ASYA TARİHİ
+[3.I.01] Asya > Çin'de ilk hanedanlar (Xia, Shang, Zhou) | S N
+[3.I.02] Asya > Qin ve Han Hanedanları | S B N
+[3.I.03] Asya > Tang Hanedanı | S B N
+[3.I.04] Asya > Song Hanedanı | S N
+[3.I.05] Asya > Yuan (Moğol) Hanedanı | S B N
+[3.I.06] Asya > Ming Hanedanı ve Yasak Şehir | S N
+[3.I.07] Asya > Qing Hanedanı | S N
+[3.I.08] Asya > Afyon Savaşları | S N
+[3.I.09] Asya > Boxer İsyanı, Xinhai Devrimi | S N
+[3.I.10] Asya > Çin İç Savaşı ve Halk Cumhuriyeti | S B N
+[3.I.11] Asya > Mao dönemi: Büyük İleri Atılım, Kültür Devrimi | S B N
+[3.I.12] Asya > Çin'in ekonomik reformları | S N
+[3.I.13] Asya > İpek Yolu | S N
+[3.I.14] Asya > Moğol İmparatorluğu ve Cengiz Han | S B N
+[3.I.15] Asya > Moğol fetihleri ve etkileri | S N
+[3.I.16] Asya > Hindistan: Vedik dönem, Budizm'in doğuşu | S B N
+[3.I.17] Asya > Delhi Sultanlığı | S N
+[3.I.18] Asya > Babür İmparatorluğu | S B N
+[3.I.19] Asya > İngiliz Hindistanı | S N
+[3.I.20] Asya > Hindistan Bağımsızlık Hareketi, Gandi | S B N
+[3.I.21] Asya > Hindistan-Pakistan ayrılığı | S N
+[3.I.22] Asya > Japonya: Yamato, Heian, Kamakura, Edo | S N
+[3.I.23] Asya > Samuray ve şogunluk | T N
+[3.I.24] Asya > Meiji Restorasyonu | S N
+[3.I.25] Asya > Rus-Japon Savaşı | S N
+[3.I.26] Asya > Japonya'nın II. Dünya Savaşı ve sonrası | S N
+[3.I.27] Asya > Kore tarihi ve Kore Savaşı | S N
+[3.I.28] Asya > Güneydoğu Asya (Kmer, Vietnam, Tayland) | S N
+[3.I.29] Asya > İran tarihi: Safeviler, Kaçarlar, Pehlevi, 1979 Devrimi | S N
+[3.I.30] Asya > Arap yarımadası: İslam'ın doğuşu, Emeviler, Abbasiler | S B N
+[3.I.31] Asya > Orta Asya hanlıkları (Buhara, Hive, Kokand) | S N
+[3.I.32] Asya > Tibet ve Budizm tarihi | S N
+[3.I.33] Asya > Asya'da sömürgecilik ve bağımsızlık | S N
+
+3.J ÖNEMLİ SAVAŞLAR VE KİLOMETRE TAŞLARI (her biri: tarih, taraflar, komutanlar, sonuç, etkileri)
+[3.J.01] Savaş > Truva Savaşı (mit ve tarih) | S N
+[3.J.02] Savaş > Maraton, Termopilai, Salamis | S N
+[3.J.03] Savaş > Gaugamela | S N
+[3.J.04] Savaş > Kannai | S N
+[3.J.05] Savaş > Zama | S N
+[3.J.06] Savaş > Malazgirt | S N
+[3.J.07] Savaş > Hastings | S N
+[3.J.08] Savaş > Miryokefalon | S N
+[3.J.09] Savaş > Kosova, Niğbolu, Varna | S N
+[3.J.10] Savaş > Ankara Muharebesi | S N
+[3.J.11] Savaş > Çaldıran, Mercidabık | S N
+[3.J.12] Savaş > Mohaç | S N
+[3.J.13] Savaş > Preveze | S N
+[3.J.14] Savaş > Lepanto (İnebahtı) | S N
+[3.J.15] Savaş > Waterloo | S N
+[3.J.16] Savaş > Austerlitz | S N
+[3.J.17] Savaş > Trafalgar | S N
+[3.J.18] Savaş > Gettysburg | S N
+[3.J.19] Savaş > Verdun ve Somme | S N
+[3.J.20] Savaş > Gelibolu (Çanakkale) | S N
+[3.J.21] Savaş > Sarıkamış | S N
+[3.J.22] Savaş > Stalingrad | S N
+[3.J.23] Savaş > Normandiya Çıkarması | S N
+[3.J.24] Savaş > Pearl Harbor | S N
+[3.J.25] Savaş > Midway | S N
+[3.J.26] Savaş > Sakarya, Dumlupınar | S N
+[3.J.27] Savaş > Kıbrıs 1974 | S N
+[3.J.28] Savaş > Dien Bien Phu | S N
+[3.J.29] Savaş > Altı Gün Savaşı | S N
+[3.J.30] Savaş > Körfez Savaşı | S N
+
+3.K TARİHTE ÖNEMLİ KİŞİLER VE KAVRAMLAR
+[3.K.01] Kişi > Hükümdarlar ve devlet adamları (Osman Gazi, Fatih, Kanuni, Atatürk, Napolyon, Cengiz Han, Büyük İskender, Sezar, Şarlman) | S B
+[3.K.02] Kişi > Bilim insanları (Newton, Galileo, Darwin, Einstein, Tesla, Curie, Hawking, Cahit Arf, Ali Kuşçu, Biruni, Harezmi, Farabi, İbn Heysem, Uluğ Bey) | B E
+[3.K.03] Kişi > Sanatçılar (Leonardo da Vinci, Michelangelo, Mimar Sinan, Rembrandt, Picasso, Van Gogh, Bach, Mozart, Beethoven, Itri, Yunus Emre) | B E
+[3.K.04] Kişi > Kâşifler (Kolomb, Vasco da Gama, Magellan, Piri Reis, Evliya Çelebi, İbn Battuta, Marco Polo) | S B
+[3.K.05] Kavram > Devlet, hanedan, imparatorluk, monarşi, cumhuriyet, demokrasi | T
+[3.K.06] Kavram > Feodalite, merkantilizm, kapitalizm, sosyalizm, komünizm, liberalizm, milliyetçilik | T
+[3.K.07] Kavram > İhtilal, devrim, reform, isyan, darbe | T
+[3.K.08] Kavram > Antlaşma, ateşkes, ittifak, cephe, kuşatma | T
+[3.K.09] Kavram > Tarih yazıcılığı, birincil ve ikincil kaynak | T Y
+[3.K.10] Kavram > Kronoloji, zaman şeridi, çağ ve dönem ayrımları | T V
+
+══════ BÖLÜM 4 — ESP: DİLLER, GİTAR, DİKSİYON, YAŞAM BECERİLERİ ══════
+
+4.A DİL ÖĞRENME YÖNTEMLERİ (tüm diller için ortak)
+[4.A.01] Dil > Dil edinimi ve ikinci dil edinimi | T N
+[4.A.02] Dil > Kritik dönem hipotezi | T N
+[4.A.03] Dil > Anlaşılır girdi (comprehensible input) | T Y
+[4.A.04] Dil > Aralıklı tekrar ve kelime kartları | T Y A
+[4.A.05] Dil > Anımsatıcı (mnemonic) teknikleri | T Y
+[4.A.06] Dil > Gölgeleme (shadowing) tekniği | T Y A
+[4.A.07] Dil > Dinleme becerisini geliştirme | Y
+[4.A.08] Dil > Konuşma becerisini geliştirme, dil değişimi | Y
+[4.A.09] Dil > Okuma becerisi, yoğun ve geniş okuma | T Y
+[4.A.10] Dil > Yazma becerisi | Y
+[4.A.11] Dil > Telaffuz ve minimal çiftler | T Y
+[4.A.12] Dil > Öğrenme yöntemleri (dilbilgisi-çeviri, doğrudan, iletişimsel) | T
+[4.A.13] Dil > Görev temelli dil öğrenimi | T
+[4.A.14] Dil > Kelime öğrenme stratejileri, kelime sıklığı ve kapsama oranı | T Y S
+[4.A.15] Dil > Ortak Avrupa Dil Çerçevesi (A1-C2) | T S
+[4.A.16] Dil > Dil sınavları (TOEFL, IELTS, TOEIC, YDS/YÖKDİL, Goethe, JLPT, DELF, DELE, TORFL, HSK, TOPIK) | T S
+[4.A.17] Dil > Yabancı dil çalışma planı örnekleri | Y A
+[4.A.18] Dil > Yaygın öğrenci hataları ve dil aktarımı (Türkçeden) | H N
+[4.A.19] Dil > Çok dillilik ve bilişsel etkileri | T N
+[4.A.20] Dil > Kod değiştirme, ödünç sözcükler, yanlış arkadaşlar | T Ö
+
+4.B İNGİLİZCE
+[4.B.01] İngilizce > Alfabe, sesler, telaffuz (IPA), vurgu | T K
+[4.B.02] İngilizce > Yazım kuralları ve düzensiz yazımlar | K İ
+[4.B.03] İngilizce > İsimler, çoğul yapımı, sayılabilir ve sayılamaz | K İ Ö
+[4.B.04] İngilizce > Tanımlıklar (a, an, the) | K İ Ö
+[4.B.05] İngilizce > Zamirler (kişi, iyelik, dönüşlülük, ilgi) | K Ö
+[4.B.06] İngilizce > Sıfatlar ve karşılaştırma dereceleri | K İ Ö
+[4.B.07] İngilizce > Zarflar | K Ö
+[4.B.08] İngilizce > Edatlar (zaman, yer, hareket) | K Ö
+[4.B.09] İngilizce > Bağlaçlar | K Ö
+[4.B.10] İngilizce > Fiil zamanları (12 zaman) | K Ö
+[4.B.11] İngilizce > Düzensiz fiiller | Ö
+[4.B.12] İngilizce > Modal fiiller | K Ö
+[4.B.13] İngilizce > Edilgen çatı | K Ö
+[4.B.14] İngilizce > Koşul cümleleri (0, 1, 2, 3, karma) | K Ö
+[4.B.15] İngilizce > Dolaylı anlatım | K Ö
+[4.B.16] İngilizce > İlgi cümleleri | K Ö
+[4.B.17] İngilizce > Gerund ve infinitive | K İ Ö
+[4.B.18] İngilizce > Phrasal verbs | Ö
+[4.B.19] İngilizce > Deyimler ve kalıplar | Ö
+[4.B.20] İngilizce > Soru yapıları, soru ekleri | K Ö
+[4.B.21] İngilizce > Cümle yapısı, kelime sırası | K
+[4.B.22] İngilizce > Noktalama ve büyük harf | K
+[4.B.23] İngilizce > Akademik yazı ve e-posta biçemi | Y
+[4.B.24] İngilizce > İngiliz ve Amerikan İngilizcesi farkları | T Ö
+
+4.C ALMANCA
+[4.C.01] Almanca > Alfabe, sesler, Umlaut, ß, telaffuz kuralları | T K
+[4.C.02] Almanca > Ad cinsiyetleri (der, die, das) ve kural ipuçları | K İ
+[4.C.03] Almanca > Ad çekimi ve çoğul yapımı | K İ Ö
+[4.C.04] Almanca > Durumlar (Nominativ, Akkusativ, Dativ, Genitiv) | K Ö
+[4.C.05] Almanca > Tanımlık ve iyelik sıfatları çekimi | K Ö
+[4.C.06] Almanca > Sıfat çekimi (güçlü, zayıf, karma) | K Ö
+[4.C.07] Almanca > Zamirler | K Ö
+[4.C.08] Almanca > Fiil çekimi, düzenli ve düzensiz fiiller | K İ Ö
+[4.C.09] Almanca > Ayrılabilen ve ayrılamayan fiiller | K Ö
+[4.C.10] Almanca > Modal fiiller | K Ö
+[4.C.11] Almanca > Zamanlar (Präsens, Perfekt, Präteritum, Futur) | K Ö
+[4.C.12] Almanca > Konjunktiv II ve dolaylı anlatım | K Ö
+[4.C.13] Almanca > Edilgen çatı (Passiv) | K Ö
+[4.C.14] Almanca > Edatlar (Akkusativ, Dativ, Wechselpräpositionen) | K Ö
+[4.C.15] Almanca > Cümle yapısı ve fiil konumu | K Ö
+[4.C.16] Almanca > Yan cümleler ve bağlaçlar | K Ö
+[4.C.17] Almanca > Bileşik sözcük yapımı | K Ö
+[4.C.18] Almanca > Sayılar, saat, tarih | K Ö
+[4.C.19] Almanca > Resmî mektup ve e-posta biçemi | Y
+[4.C.20] Almanca > Yaygın hatalar ve yanlış arkadaşlar | H Ö
+
+4.D RUSÇA
+[4.D.01] Rusça > Kiril alfabesi ve harflerin sesleri | T K
+[4.D.02] Rusça > Vurgu ve ünlü azalması | K İ
+[4.D.03] Rusça > Sert-yumuşak ünsüzler, yumuşatma işaretleri | K
+[4.D.04] Rusça > Ad cinsiyetleri | K İ
+[4.D.05] Rusça > Altı hâl (Именительный ... Предложный) | K Ö
+[4.D.06] Rusça > Ad çekimi ve çoğul | K İ Ö
+[4.D.07] Rusça > Sıfat ve zamir çekimi | K Ö
+[4.D.08] Rusça > Fiil çekimi, bitmiş ve bitmemiş görünüş | K Ö
+[4.D.09] Rusça > Hareket fiilleri | K Ö
+[4.D.10] Rusça > Geçmiş ve gelecek zaman | K Ö
+[4.D.11] Rusça > Emir kipi ve şart kipi | K Ö
+[4.D.12] Rusça > Sayılar ve adlarla uyumu | K Ö
+[4.D.13] Rusça > Edatlar ve hâl istemleri | K Ö
+[4.D.14] Rusça > Cümle yapısı, olumsuz cümle | K Ö
+[4.D.15] Rusça > Bağlaçlar ve ilgi cümleleri | K Ö
+[4.D.16] Rusça > Selamlaşma, nezaket biçimleri | Ö
+[4.D.17] Rusça > Yaygın hatalar (Türkçe konuşanlar için) | H
+
+4.E JAPONCA
+[4.E.01] Japonca > Yazı sistemi: hiragana, katakana, kanji, romaji | T K
+[4.E.02] Japonca > Hiragana öğrenme sırası ve yazım | A
+[4.E.03] Japonca > Katakana ve yabancı sözcükler | A
+[4.E.04] Japonca > Kanji: kökler, okunuşlar (on/kun), eğitim kanjileri | T K
+[4.E.05] Japonca > Furigana ve okurigana | T K
+[4.E.06] Japonca > Ses yapısı, mora, vurgu (pitch accent) | T K
+[4.E.07] Japonca > Cümle yapısı (özne-nesne-yüklem) | K
+[4.E.08] Japonca > Ekler (は, が, を, に, で, へ, の, と, も) | K Ö
+[4.E.09] Japonca > Fiil grupları ve çekimi (ます, て, ない, た) | K Ö
+[4.E.10] Japonca > Sıfat çekimi (i-sıfatları, na-sıfatları) | K Ö
+[4.E.11] Japonca > Zamanlar, olumsuzluk, sorular | K Ö
+[4.E.12] Japonca > て-formu ve kullanımları | K Ö
+[4.E.13] Japonca > İstek, izin, yasak, zorunluluk kalıpları | K Ö
+[4.E.14] Japonca > Karşılaştırma, koşul cümleleri | K Ö
+[4.E.15] Japonca > Saygı dili (keigo: teineigo, sonkeigo, kenjōgo) | K Ö
+[4.E.16] Japonca > Sayılar, sayaçlar | K Ö
+[4.E.17] Japonca > Zaman, tarih, saat ifadeleri | K Ö
+[4.E.18] Japonca > Sınavlar (JLPT N5-N1) ve kanji sayıları | S
+[4.E.19] Japonca > Kültürel dil kullanımı (aizuchi, selamlaşma) | Ö
+
+4.F İSPANYOLCA
+[4.F.01] İspanyolca > Alfabe, telaffuz ve vurgu | K
+[4.F.02] İspanyolca > Cinsiyet ve sayı uyumu | K İ
+[4.F.03] İspanyolca > Tanımlıklar | K Ö
+[4.F.04] İspanyolca > Ser ve estar | K Ö
+[4.F.05] İspanyolca > Fiil çekimleri (-ar, -er, -ir) | K Ö
+[4.F.06] İspanyolca > Geçmiş zamanlar (pretérito, imperfecto, perfecto) | K Ö
+[4.F.07] İspanyolca > Gelecek ve koşul | K Ö
+[4.F.08] İspanyolca > Subjuntivo (dilek-şart kipi) | K Ö
+[4.F.09] İspanyolca > Zamirler (nesne, dönüşlü) | K Ö
+[4.F.10] İspanyolca > Edatlar (por/para, a/en) | K Ö
+[4.F.11] İspanyolca > Sıfatlar ve karşılaştırma | K Ö
+[4.F.12] İspanyolca > Olumsuzluk ve soru | K Ö
+[4.F.13] İspanyolca > Kelime dağarcığı, yanlış arkadaşlar | Ö H
+
+4.G FRANSIZCA
+[4.G.01] Fransızca > Alfabe, aksanlar, telaffuz | K
+[4.G.02] Fransızca > Sessiz harfler, liaison, enchaînement | K İ
+[4.G.03] Fransızca > Cinsiyet ve çoğul | K İ
+[4.G.04] Fransızca > Tanımlıklar (le, la, les, un, une, des, du, de la) | K Ö
+[4.G.05] Fransızca > Fiil çekimi (er, ir, re; düzensiz fiiller) | K İ Ö
+[4.G.06] Fransızca > Zamanlar (présent, passé composé, imparfait, futur) | K Ö
+[4.G.07] Fransızca > Subjonctif | K Ö
+[4.G.08] Fransızca > Zamirler (nesne, dönüşlü, y, en) | K Ö
+[4.G.09] Fransızca > Olumsuzluk ve soru yapıları | K Ö
+[4.G.10] Fransızca > Sıfatlar, zarflar, karşılaştırma | K Ö
+[4.G.11] Fransızca > Edatlar ve yer-yön | K Ö
+[4.G.12] Fransızca > DELF/DALF sınavları | S
+
+4.H İTALYANCA, PORTEKİZCE, HOLLANDACA
+[4.H.01] İtalyanca > Telaffuz, çift ünsüzler, vurgu | K
+[4.H.02] İtalyanca > Cinsiyet, tanımlık, çoğul | K İ
+[4.H.03] İtalyanca > Fiil çekimi, zamanlar, congiuntivo | K Ö
+[4.H.04] İtalyanca > Zamirler, edatlar (preposizioni articolate) | K Ö
+[4.H.05] Portekizce > Telaffuz (Brezilya ve Portekiz), nazal sesler | K
+[4.H.06] Portekizce > Fiil çekimi, ser ve estar | K Ö
+[4.H.07] Portekizce > Zamirler ve edatlar | K Ö
+[4.H.08] Hollandaca > Telaffuz, ad cinsiyeti (de, het) | K İ
+[4.H.09] Hollandaca > Fiil çekimi, cümle yapısı | K Ö
+
+4.I ARAPÇA
+[4.I.01] Arapça > Alfabe, harflerin şekilleri, sağdan sola yazım | T K
+[4.I.02] Arapça > Harekeler ve okunuş | K
+[4.I.03] Arapça > Ses yapısı (boğazsal sesler), telaffuz | K
+[4.I.04] Arapça > Ad ve fiil cümleleri | K Ö
+[4.I.05] Arapça > Cinsiyet, sayı (tekil, ikil, çoğul), çoğul türleri | K İ
+[4.I.06] Arapça > Belirtme ve tamlama | K Ö
+[4.I.07] Arapça > Fiil kökleri ve vezinler | T K
+[4.I.08] Arapça > Fiil çekimi (mazi, muzari, emir) | K Ö
+[4.I.09] Arapça > Zamirler ve bitişik zamirler | K Ö
+[4.I.10] Arapça > Harf-i cerler ve i'rab | K Ö
+[4.I.11] Arapça > Fasih Arapça ve lehçeler | T
+[4.I.12] Arapça > Sayılar | K Ö
+
+4.J KORECE
+[4.J.01] Korece > Hangul yapısı ve öğrenme sırası | T A
+[4.J.02] Korece > Ses yapısı, telaffuz kuralları | K
+[4.J.03] Korece > Cümle yapısı (özne-nesne-yüklem) | K
+[4.J.04] Korece > Ekler (이/가, 은/는, 을/를, 에, 에서) | K Ö
+[4.J.05] Korece > Fiil ve sıfat çekimi | K Ö
+[4.J.06] Korece > Saygı dereceleri (해요체, 합니다체) | K Ö
+[4.J.07] Korece > Sayılar (öz Korece ve Sino-Korece) | K Ö
+[4.J.08] Korece > Zamanlar ve bağlantı ekleri | K Ö
+[4.J.09] Korece > TOPIK sınavı | S
+
+4.K ÇİNCE
+[4.K.01] Çince > Pinyin ve telaffuz | T K
+[4.K.02] Çince > Tonlar | T K
+[4.K.03] Çince > Çince karakterler, radikaller, vuruş sırası | T K
+[4.K.04] Çince > Basitleştirilmiş ve geleneksel karakter | T
+[4.K.05] Çince > Cümle yapısı ve sözcük sırası | K
+[4.K.06] Çince > Ölçü sözcükleri (量词) | K Ö
+[4.K.07] Çince > Zaman ve görünüş partikülleri (了, 过, 着) | K Ö
+[4.K.08] Çince > Olumsuzluk (不, 没) | K Ö
+[4.K.09] Çince > Soru yapıları | K Ö
+[4.K.10] Çince > HSK seviyeleri | S
+
+4.L TÜRKÇE VE DİĞER DİLLER
+[4.L.01] Türkçe > Ses uyumları ve ekler (yabancılar için) | K
+[4.L.02] Türkçe > Ünlü uyumu ve ek yapısı | K
+[4.L.03] Türkçe > Türk dilleri ve dil ailesi | T
+[4.L.04] Diller > Diller ve dil aileleri | T
+[4.L.05] Diller > Dilbilimin dalları (fonetik, morfoloji, sözdizim, anlambilim) | T
+[4.L.06] Diller > Yazı sistemlerinin türleri | T
+[4.L.07] Diller > Dillerin ölümü ve korunması | N
+
+4.M KELİME HAZİNESİ VE SIKLIK LİSTELERİ (kodla toplanır; model çevirmez)
+[4.M.01] Kelime > İngilizce en sık 3000 kelime | S
+[4.M.02] Kelime > Almanca en sık 3000 kelime | S
+[4.M.03] Kelime > Rusça en sık 3000 kelime | S
+[4.M.04] Kelime > Japonca en sık 3000 kelime | S
+[4.M.05] Kelime > İspanyolca, Fransızca, İtalyanca, Portekizce, Hollandaca en sık 3000 kelime | S
+[4.M.06] Kelime > Arapça, Korece, Çince en sık 3000 kelime | S
+[4.M.07] Kelime > Tatoeba cümle çiftleri (Türkçe karşılıklı) | Ö
+[4.M.08] Kelime > Konuya göre sözcük grupları (yiyecek, seyahat, iş, sağlık, aile, zaman) | Ö
+
+4.N GİTAR
+[4.N.01] Gitar > Gitar türleri (klasik, akustik, elektro, bas) | T
+[4.N.02] Gitar > Gitarın bölümleri (gövde, sap, perde, akort burgusu) | T
+[4.N.03] Gitar > Gitar seçimi ve bakımı | Y
+[4.N.04] Gitar > Telleri ve akort (standart akort, alternatif akortlar) | T K A
+[4.N.05] Gitar > Akort yöntemleri (akort aleti, kulakla) | A
+[4.N.06] Gitar > Pena kullanımı ve tutuş | Y
+[4.N.07] Gitar > Duruş, el pozisyonu, parmak numaraları | Y H
+[4.N.08] Gitar > Tablatür ve nota okuma | T K
+[4.N.09] Gitar > Ritim, vuruş kalıpları | T K
+[4.N.10] Gitar > Metronom kullanımı | Y
+[4.N.11] Gitar > Açık akorlar (Am, C, G, D, E, Em, A, F) | A
+[4.N.12] Gitar > Barre akorları | A H
+[4.N.13] Gitar > Power akorlar | T A
+[4.N.14] Gitar > Yedili akorlar, sus, add akorları | T A
+[4.N.15] Gitar > Akor geçişleri çalışması | Y
+[4.N.16] Gitar > Akor ilerlemeleri (I-IV-V, I-V-vi-IV, 12 bar blues) | T Ö
+[4.N.17] Gitar > Majör ve minör gam | T A
+[4.N.18] Gitar > Pentatonik gam ve kalıpları | T A
+[4.N.19] Gitar > Blues gamı | T A
+[4.N.20] Gitar > Modlar | T
+[4.N.21] Gitar > CAGED sistemi | T Y
+[4.N.22] Gitar > Beşliler çemberi | T
+[4.N.23] Gitar > Aralıklar ve üçlü akorlar | T
+[4.N.24] Gitar > Arpej ve parmak stili | T A
+[4.N.25] Gitar > Alternatif vuruş (alternate picking) | A
+[4.N.26] Gitar > Hammer-on ve pull-off | A
+[4.N.27] Gitar > Slide, bend, vibrato | A
+[4.N.28] Gitar > Palm mute | A
+[4.N.29] Gitar > Sweep picking, tremolo picking | A
+[4.N.30] Gitar > Kapodastr kullanımı | Y
+[4.N.31] Gitar > Klasik gitar teknikleri (rasgueado, tirando, apoyando) | A
+[4.N.32] Gitar > Flamenko gitar | T
+[4.N.33] Gitar > Elektro gitar: amfi, pedal, efektler | T Y
+[4.N.34] Gitar > Solo ve doğaçlama çalışma | Y
+[4.N.35] Gitar > Şarkı öğrenme ve kulaktan çıkarma | Y
+[4.N.36] Gitar > Günlük çalışma rutini (15, 30, 60 dakika planı) | Y A
+[4.N.37] Gitar > Sık yapılan hatalar ve çözümleri | H Y
+[4.N.38] Gitar > Yeni başlayanlar için 90 günlük plan | V A
+[4.N.39] Gitar > Parmak ağrısı ve nasır hakkında genel bilgi | T
+[4.N.40] Gitar > Müzik teorisi temelleri (nota değerleri, ölçü, tempo, işaretler) | T K
+[4.N.41] Gitar > Türk müziği: saz, bağlama, makam kavramı | T
+[4.N.42] Gitar > Kulak eğitimi | Y
+
+4.O DİKSİYON VE KONUŞMA
+[4.O.01] Diksiyon > Diksiyon nedir, amacı ve önemi | T
+[4.O.02] Diksiyon > Solunum türleri ve diyafram nefesi | T A
+[4.O.03] Diksiyon > Nefes kontrolü egzersizleri | A
+[4.O.04] Diksiyon > Ses organları, ses telleri | T G
+[4.O.05] Diksiyon > Ses ısınma egzersizleri | A
+[4.O.06] Diksiyon > Ses perdesi, ses şiddeti, ses rengi | T
+[4.O.07] Diksiyon > Türkçe ünlülerin doğru söylenişi | K Ö
+[4.O.08] Diksiyon > Türkçe ünsüzlerin doğru söylenişi | K Ö
+[4.O.09] Diksiyon > Artikülasyon egzersizleri, dil, dudak, çene | A
+[4.O.10] Diksiyon > Tekerlemeler ve kullanımı | A Ö
+[4.O.11] Diksiyon > Vurgu (sözcük, cümle) | K Ö
+[4.O.12] Diksiyon > Tonlama ve ses ayarı | K Ö
+[4.O.13] Diksiyon > Duraklama ve vurgulama | K Ö
+[4.O.14] Diksiyon > Konuşma hızı ve ritim | Y
+[4.O.15] Diksiyon > Ağız ve yöre şivelerinden arınma | Y
+[4.O.16] Diksiyon > Yaygın telaffuz hataları (ğ, r, s, ş, h) | H
+[4.O.17] Diksiyon > "Dolgu" sözcükleri ve azaltma | H Y
+[4.O.18] Diksiyon > Okuma egzersizleri (yüksek sesle okuma) | A
+[4.O.19] Diksiyon > Topluluk önünde konuşma temelleri | T Y
+[4.O.20] Diksiyon > Sahne korkusu ve stresle baş etme | Y
+[4.O.21] Diksiyon > Beden dili, göz teması, jest ve mimik | T Y
+[4.O.22] Diksiyon > Konuşma yapısı (giriş, gelişme, sonuç) | Y
+[4.O.23] Diksiyon > Hitabet ve retorik (ethos, pathos, logos) | T B
+[4.O.24] Diksiyon > İkna edici konuşma | T Y
+[4.O.25] Diksiyon > Hikâye anlatımı | T Y
+[4.O.26] Diksiyon > Sunum hazırlama ve slayt tasarımı | Y
+[4.O.27] Diksiyon > Mülakat ve toplantıda konuşma | Y
+[4.O.28] Diksiyon > Tartışma ve münazara | T K
+[4.O.29] Diksiyon > Etkin dinleme | T Y
+[4.O.30] Diksiyon > Mikrofon kullanımı ve kayıtla geri bildirim | Y
+[4.O.31] Diksiyon > Ses sağlığı ve sesi koruma | Y
+[4.O.32] Diksiyon > Konuşma bozukluklarına genel bakış (kekemelik vb., tanı değil) | T
+[4.O.33] Diksiyon > 30 günlük diksiyon çalışma planı | A V
+[4.O.34] Diksiyon > Tiyatro, oyunculuk ve seslendirme temelleri | T Y
+[4.O.35] Diksiyon > Şiir okuma | A
+
+4.P VERİMLİLİK VE KİŞİSEL GELİŞİM
+[4.P.01] Verimlilik > Zaman yönetimi ilkeleri | T Y
+[4.P.02] Verimlilik > Eisenhower matrisi | T A
+[4.P.03] Verimlilik > Pareto ilkesi (80/20) | T
+[4.P.04] Verimlilik > Pomodoro tekniği | T A
+[4.P.05] Verimlilik > Derin çalışma (deep work) | T Y
+[4.P.06] Verimlilik > Alışkanlık oluşturma (ipucu-rutin-ödül, alışkanlık istifleme) | T Y
+[4.P.07] Verimlilik > Hedef belirleme (SMART, OKR) | T Y
+[4.P.08] Verimlilik > Erteleme ve üstesinden gelme | T Y
+[4.P.09] Verimlilik > Odaklanma ve dikkat dağıtıcılar | Y
+[4.P.10] Verimlilik > Planlama, günlük ve haftalık gözden geçirme | Y A
+[4.P.11] Verimlilik > Öncelik belirleme | Y
+[4.P.12] Verimlilik > Karar verme yöntemleri | T Y
+[4.P.13] Verimlilik > Eleştirel düşünme | T Y
+[4.P.14] Verimlilik > Bilişsel çarpıtmalar ve mantık hataları (safsata) | T Ö
+[4.P.15] Verimlilik > Problem çözme yöntemleri | T A
+[4.P.16] Verimlilik > Yaratıcılık ve beyin fırtınası | T Y
+[4.P.17] Verimlilik > Öğrenmeyi öğrenmek: yöntemler | T Y
+[4.P.18] Verimlilik > Hızlı okuma (bilimsel bulgular ve sınırları) | T N
+[4.P.19] Verimlilik > Hafıza teknikleri (hafıza sarayı, bağlantı, hikâye) | T A
+[4.P.20] Verimlilik > Not alma yöntemleri (Cornell, zihin haritası, Zettelkasten) | T A
+[4.P.21] Verimlilik > Kitap okuma alışkanlığı | Y
+[4.P.22] Verimlilik > Büyüme zihniyeti | T
+[4.P.23] Verimlilik > Bilinçli pratik (deliberate practice) | T Y
+[4.P.24] Verimlilik > Akış hâli | T
+[4.P.25] Verimlilik > Motivasyon kuramları | T
+[4.P.26] Verimlilik > Öz disiplin ve irade | T Y
+[4.P.27] Verimlilik > Duygusal zekâ ve empati | T Y
+[4.P.28] Verimlilik > Duygu düzenleme | T Y
+[4.P.29] Verimlilik > Etkili iletişim | T Y
+[4.P.30] Verimlilik > Çatışma çözme ve müzakere | T Y
+[4.P.31] Verimlilik > Takım çalışması ve liderlik | T Y
+[4.P.32] Verimlilik > Sosyal beceriler ve ilişkiler | T Y
+[4.P.33] Verimlilik > Ağ kurma (networking) | Y
+[4.P.34] Verimlilik > Kariyer planlama, CV ve mülakat | Y A
+[4.P.35] Verimlilik > Dijital minimalizm | T Y
+
+4.Q FİNANS, HUKUK, TEKNOLOJİ VE GÜNDELİK BİLGİ
+[4.Q.01] Finans > Bütçe yapma, tasarruf | T Y
+[4.Q.02] Finans > Bileşik faiz | T F
+[4.Q.03] Finans > Enflasyon | T
+[4.Q.04] Finans > Kredi, borç ve faiz | T
+[4.Q.05] Finans > Sigorta türleri | T
+[4.Q.06] Finans > Emeklilik sistemi | T
+[4.Q.07] Finans > Vergi türleri | T
+[4.Q.08] Finans > Yatırım araçları ve risk (genel bilgi, tavsiye değil) | T
+[4.Q.09] Finans > Ekonomik temel kavramlar (arz-talep, GSYH, işsizlik) | T
+[4.Q.10] Hukuk > Anayasa ve temel haklar | T
+[4.Q.11] Hukuk > Tüketici hakları | T
+[4.Q.12] Hukuk > Sözleşme, kira, iş hukuku temel bilgiler | T
+[4.Q.13] Hukuk > Trafik kuralları ve ehliyet | K
+[4.Q.14] Hukuk > Kişisel verilerin korunması (KVKK) | T K
+[4.Q.15] Teknoloji > Dijital güvenlik, parola yönetimi, iki adımlı doğrulama | Y K
+[4.Q.16] Teknoloji > Dolandırıcılık ve oltalama | T Y
+[4.Q.17] Teknoloji > Medya okuryazarlığı, yanlış bilgi | T Y
+[4.Q.18] Teknoloji > Bilgisayar ve internet temelleri | T
+[4.Q.19] Teknoloji > Programlamaya giriş | T
+[4.Q.20] Teknoloji > Algoritma ve veri yapıları temelleri | T
+[4.Q.21] Teknoloji > Yapay zekâ ve makine öğrenmesi temelleri | T
+[4.Q.22] Teknoloji > Elektronik tablo kullanımı | Y
+[4.Q.23] Teknoloji > Yedekleme ve veri güvenliği | Y
+[4.Q.24] Gündelik > Afet hazırlığı ve deprem çantası | Y K
+[4.Q.25] Gündelik > Yangın güvenliği | K Y
+[4.Q.26] Gündelik > Temel ilk yardım (genel bilgi) | A K
+[4.Q.27] Gündelik > Evde temel onarım ve bakım | Y
+[4.Q.28] Gündelik > Yemek pişirmeye başlangıç | Y A
+[4.Q.29] Gündelik > Seyahat planlama | Y
+[4.Q.30] Gündelik > Çevre, geri dönüşüm, sürdürülebilirlik | T Y
+
+4.R SANAT, MÜZİK, EDEBİYAT VE BİLİM KÜLTÜRÜ
+[4.R.01] Sanat > Sanat tarihi dönemleri | V B
+[4.R.02] Sanat > Ünlü ressamlar ve eserleri | B E
+[4.R.03] Sanat > Mimari üsluplar | T Ö
+[4.R.04] Sanat > Türk-İslam sanatları (hat, minyatür, çini) | T
+[4.R.05] Müzik > Müzik tarihi dönemleri | V B
+[4.R.06] Müzik > Klasik müzik bestecileri | B E
+[4.R.07] Müzik > Türk halk ve sanat müziği | T
+[4.R.08] Edebiyat > Dünya edebiyatı klasikleri | B E
+[4.R.09] Edebiyat > Türk edebiyatı klasikleri | B E
+[4.R.10] Edebiyat > Okuma listeleri | E
+[4.R.11] Bilim > Astronomi ve Güneş Sistemi | T
+[4.R.12] Bilim > Evrenin yapısı ve oluşumu | T
+[4.R.13] Bilim > Fizik, kimya, biyoloji tarihinden dönüm noktaları | S B
+[4.R.14] Bilim > Bilimsel yöntem | T A
+[4.R.15] Bilim > Matematik tarihi ve ünlü matematikçiler | S B
+[4.R.16] Bilim > Teknoloji tarihi ve icatlar | S B
+[4.R.17] Bilim > İklim değişikliği | T N
+[4.R.18] Bilim > Enerji kaynakları | T
+[4.R.19] Bilim > Psikoloji temel kavramları | T
+[4.R.20] Bilim > Sosyoloji temel kavramları | T
+[4.R.21] Bilim > Ekonomi temel kavramları | T
+[4.R.22] Bilim > Coğrafya: ülkeler, başkentler, iklim kuşakları | S T
+[4.R.23] Bilim > Dünya dinleri ve inanç sistemleri (tarafsız, betimleyici) | T
+[4.R.24] Bilim > Mitoloji (Yunan, Roma, Türk, Nordik) | T E
