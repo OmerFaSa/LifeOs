@@ -1026,3 +1026,16 @@
 .inc-ozet{ padding:12px; border-radius:var(--r-md); background:var(--surface-2); }
 .inc-ozet p{ margin:6px 0 0; }
 @media (max-width:520px){ .inc-fikir__bar{ grid-template-columns:1fr auto auto; } .inc-fikir__bar i{ grid-column:1 / -1; grid-row:2; } }
+
+/* Sik kelime kapsami (core/siklik.js): bant basina tek yigilmis cubuk.
+   Bos iz = destede yok; dolgu sifir degil, olculmus yokluktur. */
+.siklik{ display:flex; flex-direction:column; gap:10px; }
+.siklik__s{ display:grid; grid-template-columns:72px minmax(0, 1fr) 64px; align-items:center; gap:10px; }
+.siklik__ad{ font-size:12.5px; color:var(--text-2); }
+.siklik__iz{ display:flex; height:10px; border-radius:5px; overflow:hidden; background:color-mix(in oklab, var(--text) 6%, var(--surface)); }
+.siklik__iz i{ display:block; height:100%; }
+.siklik__m{ text-align:right; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; }
+.siklik__m small{ color:var(--text-3); font-weight:400; }
+.siklik__lejant{ margin-top:10px; }
+.siklik__lejant i.is-yok{ background:color-mix(in oklab, var(--text) 10%, var(--surface)); }
+.siklik-kelimeler{ display:flex; flex-wrap:wrap; gap:6px; }

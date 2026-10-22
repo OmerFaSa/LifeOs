@@ -349,7 +349,7 @@ ESP.Screens.lang = (function(){
         meta:'elle',
         body:html`
           <div class="cols-3">
-            ${K.Field({ label:'Ön yüz', input:K.Input({ id:'c-front', placeholder:'nevertheless' }) })}
+            ${K.Field({ label:'Ön yüz', input:K.Input({ id:'c-front', placeholder:'nevertheless', value:S.ui.siklikOn || null }) })}
             ${K.Field({ label:'Karşılık', input:K.Input({ id:'c-back', placeholder:'yine de' }) })}
             ${K.Field({ label:'Bağlam', hint:'isteğe bağlı',
               input:K.Input({ id:'c-ctx', placeholder:'örnek cümle' }) })}
@@ -363,6 +363,8 @@ ESP.Screens.lang = (function(){
           ${K.Button({ label:'Kart ekle', act:'add-card', class:'mt-10' })}`,
       }),
 
+      siklikEkleRow(),
+
       K.Entry({
         label:'Tohum deste', hint:'tohum-deste',
         meta:'başlangıç için',
@@ -372,6 +374,19 @@ ESP.Screens.lang = (function(){
           : K.Notice({ tone:'info', body:'Bu dil için tohum deste yok; kendi listeni yapıştırabilirsin.' }),
       }),
     ];
+  }
+
+  /* Destede olmayan en sık kelimeler, sırayla. Dokunmak yalnız «Tek kart»ın
+     ön yüzünü doldurur: karşılığı kullanıcı yazar, sistem çeviri uydurmaz. */
+  function siklikEkleRow(){
+    const k = siklikKapsami();
+    if(!k.var || !k.eksik.length) return '';
+    return K.Entry({
+      label:'Sık kelimeler', hint:'siklik', meta:'destede olmayan',
+      note:'Dokun: kelime «Ön yüz»e yazılır, karşılığı sen yazarsın.',
+      body:html`<div class="siklik-kelimeler">${map(k.eksik, w => K.Button({ label:w, size:'sm',
+        act:'siklik-on', data:{ 'data-word':w } }))}</div>`,
+    });
   }
 
   function vocabPreview(res){
@@ -419,6 +434,48 @@ ESP.Screens.lang = (function(){
     return VT().desteDurumu({ toplam:d.total, yeni:n(1), ogreniliyor:n(2) + n(3), oturmus:n(4) + n(5) });
   }
 
+  /* SIK KELİME KAPSAMI (core/siklik.js): bant başına tek yığılmış çubuk —
+     oturmuş · öğreniliyor · boş iz (destede yok). «Bildiğin» denmez. */
+  function siklikKapsami(){
+    return ESP.Memo.of('lang.siklik:' + aktifDil(), () => ESP.Siklik.kapsam(aktifDil(), M.cardsOf(aktifDil())));
+  }
+
+  function siklikHtml(k){
+    const yuz = (x, n) => Math.round(x / n * 1000) / 10;
+    const satir = b => {
+      const ogr = b.destede - b.oturmus;
+      return '<div class="siklik__s"><span class="siklik__ad">İlk ' + U.fmtNum(b.ust) + '</span>'
+        + '<span class="siklik__iz">'
+        + (b.oturmus ? '<i class="pk-renk0" style="width:' + yuz(b.oturmus, b.ust) + '%"></i>' : '')
+        + (ogr ? '<i class="pk-renk1" style="width:' + yuz(ogr, b.ust) + '%"></i>' : '')
+        + '</span><span class="siklik__m">' + U.fmtNum(b.destede) + '<small>/' + U.fmtNum(b.ust) + '</small></span></div>';
+    };
+    const sr = k.bantlar.map(b => 'ilk ' + b.ust + ' kelimenin ' + b.destede + ' tanesi destede, '
+      + b.oturmus + ' tanesi oturmuş').join('; ');
+    return '<div class="siklik" role="img" aria-label="' + U.esc('Sık kelime kapsamı: ' + sr + '.') + '">'
+      + k.bantlar.map(satir).join('') + '</div>'
+      + '<div class="pk-lejant siklik__lejant" aria-hidden="true">'
+      + '<span><i class="pk-renk0"></i>Oturmuş (kutu 4–5)</span>'
+      + '<span><i class="pk-renk1"></i>Öğreniliyor</span>'
+      + '<span><i class="is-yok"></i>Destede yok</span></div>';
+  }
+
+  function siklikRow(){
+    const k = siklikKapsami();
+    const dil = (ESP.LANG_BY_ID[aktifDil()] || {}).label || aktifDil();
+    if(!k.var){
+      return K.Entry({ label:'Sık kelime kapsamı', hint:'siklik', meta:'liste yok',
+        body:K.Notice({ tone:'info', body:dil + ' için sıklık listesi yok.' }) });
+    }
+    const b = k.bantlar.find(x => x.ust === 1000) || k.bantlar[k.bantlar.length - 1];
+    return K.Entry({
+      label:'Sık kelime kapsamı', hint:'siklik',
+      meta:'ilk ' + U.fmtNum(b.ust) + ': ' + U.fmtNum(b.destede) + ' destede',
+      note:'Destendeki kartlardan hesaplandı. Liste: altyazı derlemi sayımı (OpenSubtitles 2018, CC BY-SA 4.0).',
+      body:raw(siklikHtml(k)),
+    });
+  }
+
   function progressRows(){
     const d = ESP.SRS.deckStatus(aktifDil());
     const bant = ESP.cefrOf(d.active, d.retention.value);
@@ -453,6 +510,8 @@ ESP.Screens.lang = (function(){
               text:String(b.count) }))}`
           : K.Empty({ text:'Deste boş.' }),
       }),
+
+      siklikRow(),
 
       K.Entry({
         label:'Bant', hint:'bant',
@@ -816,6 +875,13 @@ ESP.Screens.lang = (function(){
       ESP.App.render();
     },
     async 'tab-ekle'(){ S.ui.langTab = 'ekle'; ESP.App.render(); },
+    async 'siklik-on'(el){
+      S.ui.siklikOn = el.dataset.word;
+      S.ui.langTab = 'ekle';
+      await ESP.App.render();
+      const k = document.getElementById('c-back');
+      if(k) k.focus();
+    },
 
     async 'start-review'(){ S.ui.speechTest = null; S.ui.reviewQueue = queueStart(); ESP.App.render(); },
     async 'reveal-card'(){ if(S.ui.reviewQueue) S.ui.reviewQueue.shown = true; ESP.App.render(); },
@@ -1005,6 +1071,7 @@ ESP.Screens.lang = (function(){
       if(!front || !back){ ESP.UI.toast('Ön yüz ve karşılık gerekir'); return; }
       const liste = t => t.split(',').map(x => x.trim()).filter(Boolean).slice(0, 8);
       await M.saveCard(M.newCard({ front, back, context:v('c-ctx'), lang:aktifDil(), es:liste(v('c-es')), zit:liste(v('c-zit')) }));
+      S.ui.siklikOn = null;
       ESP.Memo.bitir();
       ESP.UI.toast('Kart eklendi');
       ESP.App.render();
