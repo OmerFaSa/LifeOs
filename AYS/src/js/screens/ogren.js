@@ -855,7 +855,7 @@ R.Screens = R.Screens || {};
      ================================================================ */
 
   const T = () => R.OgrenTest;
-  const DURUM_AD = { bos:'cevaplanmadı', bakildi:'çözüme bakıldı', dogru:'doğru', yanlis:'yanlış' };
+  const DURUM_AD = { bos:'cevaplanmadı', bakildi:'çözüme bakıldı', dogru:'doğru', yanlis:'yanlış', isaretli:'işaretlendi' };
   const durumOf = (q, v) => !v ? 'bos' : v.bak ? 'bakildi' : v.h === q.dogru ? 'dogru' : 'yanlis';
   const KAYNAK_AD = { konu:'konu sorusu', test:'karma test', tekrar:'yeniden çözüm' };
 
@@ -902,12 +902,23 @@ R.Screens = R.Screens || {};
   function baslatSoruSayac(){
     if(typeof window === 'undefined') return;
     if(soruTimerId){ clearInterval(soruTimerId); soruTimerId = null; }
-    const el = document.getElementById('ogr-soru-sayac');
+    const el = document.getElementById('ogr-soru-sayac') || document.getElementById('ogr-prova-kalan');
     if(!el) return;
     if(!S.ui.soruGiris) S.ui.soruGiris = Date.now();
     const guncelle = () => {
+      const pk = document.getElementById('ogr-prova-kalan');
+      if(pk){
+        const kalan = T().kalanSn();
+        pk.textContent = sureYaz(kalan);
+        if(kalan === 0 && !S.ui.provaBitiyor){
+          S.ui.provaBitiyor = true;
+          T().bitir().then(oz => { S.ui.provaSonuc = oz ? oz.id : null; S.ui.provaBitiyor = false;
+            UI.toast('Süre doldu; prova bitti.'); R.App.render(); });
+        }
+      }
       const g = document.getElementById('ogr-soru-sayac');
-      if(!g){ if(soruTimerId){ clearInterval(soruTimerId); soruTimerId = null; } return; }
+      if(!g && !pk){ if(soruTimerId){ clearInterval(soruTimerId); soruTimerId = null; } return; }
+      if(!g) return;
       const sn = Math.max(0, Math.floor((Date.now() - (S.ui.soruGiris || Date.now())) / 1000));
       const dk = Math.floor(sn / 60);
       const s = sn % 60;
@@ -975,12 +986,14 @@ R.Screens = R.Screens || {};
     const tkAcik = !!(o.taktik && S.ui.taktik === o.taktik);
     const secenek = (metin, k) => {
       const harf = O().HARFLER[k];
-      const durum = !acik ? '' : harf === q.dogru ? 'is-dogru' : v.h === harf ? 'is-yanlis' : 'is-soluk';
+      const durum = !acik ? '' : o.gizli ? (v.h === harf ? 'is-secili' : 'is-soluk')
+        : harf === q.dogru ? 'is-dogru' : v.h === harf ? 'is-yanlis' : 'is-soluk';
       return html`<button class="${cls('secenek', durum)}" data-act="${o.cevapAct}" data-harf="${harf}"
           ${acik ? raw('disabled aria-disabled="true"') : ''}>
         <span class="secenek__harf" aria-hidden="true">${harf}</span><span class="secenek__metin">${fmt(metin)}</span>
-        ${when(acik && harf === q.dogru, () => html`<span class="sr-only">doğru cevap</span>`)}
-        ${when(acik && v.h === harf && harf !== q.dogru, () => html`<span class="sr-only">senin cevabın</span>`)}
+        ${when(acik && !o.gizli && harf === q.dogru, () => html`<span class="sr-only">doğru cevap</span>`)}
+        ${when(acik && o.gizli && v.h === harf, () => html`<span class="sr-only">işaretlediğin</span>`)}
+        ${when(acik && !o.gizli && v.h === harf && harf !== q.dogru, () => html`<span class="sr-only">senin cevabın</span>`)}
       </button>`;
     };
     const d = durumOf(q, v);
@@ -1008,7 +1021,9 @@ R.Screens = R.Screens || {};
         ${when(o.taktikNot && o.taktik && !tkAcik, () => K.Button({ label:'Taktik', icon:'zap', size:'sm', tone:'ghost', act:'soru-taktik', data:{ 'data-tk':o.taktik } }))}
         ${when(o.bakAct, () => K.Button({ label:'Cevaplamadan çözümü gör', size:'sm', tone:'ghost', act:o.bakAct }))}
       </div>`)}
-      ${when(acik, () => html`<div class="${cls('ogr-sonuc', 'is-' + d)}">
+      ${when(acik && o.gizli, () => html`<div class="ogr-sonuc is-isaretli"><p class="small"><b>İşaretlendi: ${v.h}</b>
+        · doğru cevap ve çözüm prova bitince</p></div>`)}
+      ${when(acik && !o.gizli, () => html`<div class="${cls('ogr-sonuc', 'is-' + d)}">
         <p class="small"><b>${sonuc}</b></p>
         ${when(v && v.sure, () => tempoRozeti(v.sure, o.ders))}
         ${o.ust || ''}
@@ -1080,6 +1095,7 @@ R.Screens = R.Screens || {};
   /* ---------- Karma test ---------- */
 
   function kapsamAdi(k){
+    if(k && k.prova) return 'Sınav provası · ' + ((T().PROVA[k.prova] || {}).ad || k.prova);
     const s = R.SUBJECTS.find(x => x.id === (k && k.ders));
     return (s ? s.name : 'Bütün dersler') + ' · ' + (k && k.konular === 'okunan' ? 'okuduğum konular' : 'bütün konular')
       + (k && k.seviye === 'sinav' ? ' · sınav tarzı' : '');
@@ -1124,27 +1140,46 @@ R.Screens = R.Screens || {};
         <span class="ogr-konu__ok" aria-hidden="true">${raw(UI.icon('right'))}</span></button>`)}</div>` });
   }
 
+  /* SINAV PROVASI (core/ogrentest.js söz 7): geri sayım ve tempo. Tempo
+     eşik çubuğu: cevaplanan oranı, geçen sürenin oranına karşı; üstündeysen
+     sınav temposunun önündesin. */
+  const sureYaz = sn => { sn = Math.max(0, Number(sn) || 0); const d = Math.floor(sn / 60), s = sn % 60; return (d < 10 ? '0' : '') + d + ':' + (s < 10 ? '0' : '') + s; };
+  function provaUst(a, sy){
+    const kalan = T().kalanSn(), top = a.prova.sureDk * 60;
+    const gecen = Math.max(0, top - (kalan || 0));
+    const G = (window.LIFEOS || {}).GRAFIK;
+    const tempo = G ? G.esikCubukHtml({ deger:Math.round(sy.cevaplanan * 100 / sy.toplam), esik:Math.round(gecen * 100 / top),
+      olcek:100, birim:'%', etiket:'Tempo · cevaplanan / geçen süre', yon:'artis-iyi' }) : '';
+    return html`<div class="ogr-prova-ust mt-10">
+      <span class="ogr-prova-kalan" id="ogr-prova-kalan" role="timer" aria-label="Kalan süre">${sureYaz(kalan)}</span>
+      <span class="tiny dim">kalan · ${a.prova.sureDk} dk</span></div>
+      <div class="mt-8">${raw(tempo)}</div>`;
+  }
+
   function karmaSoruKarti(){
     const a = T().aktif(), y = T().siradaki(), sy = T().say(a);
+    const prova = !!a.prova;
     const sonMu = y.sira === y.toplam - 1;
-    const durum = k => { const s = T().soruOf(a.sorular[k]); return s ? durumOf(s.q, a.cevaplar[k]) : 'bos'; };
-    const bas = kartBasi('Karma test', kapsamAdi(a.kapsam) + ' · ' + sy.cevaplanan + ' / ' + sy.toplam + ' cevaplandı',
-      K.Button({ label:'Vazgeç', size:'sm', tone:'ghost', act:'karma-vazgec' }));
+    const durum = k => { const s = T().soruOf(a.sorular[k]); return !s ? 'bos' : prova ? (a.cevaplar[k] ? 'isaretli' : 'bos') : durumOf(s.q, a.cevaplar[k]); };
+    const bas = html`${kartBasi(prova ? 'Sınav provası' : 'Karma test', kapsamAdi(a.kapsam) + ' · ' + sy.cevaplanan + ' / ' + sy.toplam + (prova ? ' işaretlendi' : ' cevaplandı'),
+      K.Button({ label:'Vazgeç', size:'sm', tone:'ghost', act:'karma-vazgec' }))}${prova ? provaUst(a, sy) : ''}`;
     const nav = html`<div class="row between wrap gap-6 mt-16">
       ${y.sira > 0 ? K.Button({ label:'Önceki', icon:'left', size:'sm', tone:'ghost', act:'test-git', data:{ 'data-i':String(y.sira - 1) } }) : html`<span></span>`}
       ${!sonMu ? K.Button({ label:'Sonraki soru', icon:'right', size:'sm', tone:y.v ? 'primary' : null, act:'test-git', data:{ 'data-i':String(y.sira + 1) } })
         : K.Button({ label:'Testi bitir', icon:'check', size:'sm', tone:'primary', act:'karma-bitir' })}
     </div>`;
-    const erken = when(!sonMu, () => html`<div class="mt-10">${K.Button({ label:'Testi şimdi bitir', size:'sm', tone:'ghost', act:'karma-bitir' })}</div>`);
+    const erken = when(!sonMu, () => html`<div class="mt-10">${K.Button({ label:prova ? 'Provayı şimdi bitir' : 'Testi şimdi bitir', size:'sm', tone:'ghost', act:'karma-bitir' })}</div>`);
     if(!y.s){
       return K.Card({ wide:true, body:html`${bas}${noktalar(y.toplam, y.sira, durum, 'test-git')}
         ${K.Notice({ tone:'info', body:'Bu soru içerikten kaldırıldı; boş sayılır.' })}${nav}${erken}` });
     }
-    const ust = y.v ? html`<p class="tiny dim mt-6">Konu: ${y.s.subject.name} · ${y.s.topic.name}</p>` : '';
+    const ust = y.v && !prova ? html`<p class="tiny dim mt-6">Konu: ${y.s.subject.name} · ${y.s.topic.name}</p>` : '';
     return K.Card({ wide:true,
       body:html`${bas}
         ${noktalar(y.toplam, y.sira, durum, 'test-git')}
-        ${soruGovdesi(y.s.q, y.v, { etiket:'Soru ' + (y.sira + 1) + ' / ' + y.toplam, seviye:O().seviye(y.s.topic.id, y.s.i),
+        ${soruGovdesi(y.s.q, y.v, prova
+          ? { etiket:y.s.subject.name + ' · soru ' + (y.sira + 1) + ' / ' + y.toplam, cevapAct:'test-cevap', ders:y.s.subject.id, gizli:true }
+          : { etiket:'Soru ' + (y.sira + 1) + ' / ' + y.toplam, seviye:O().seviye(y.s.topic.id, y.s.i),
           ipucu:'test:' + a.id + '#' + y.sira, cevapAct:'test-cevap', bakAct:'test-bak',
           ders:y.s.subject.id,
           ust, eylemler:soruEylemleri(y.s, y.v, y.s.k) })}
@@ -1178,8 +1213,65 @@ R.Screens = R.Screens || {};
         <p class="tiny dim mt-12">Bu sonuç bir ölçümdür; plan ve kapanış ona bakmaz. Boş bırakılan soru yanlış sayılmaz.</p>` });
   }
 
+  function provaKurulum(){
+    const sinav = T().PROVA[S.ui.provaSinav] ? S.ui.provaSinav : 'TYT';
+    const boy = T().PROVA_BOY.indexOf(Number(S.ui.provaBoy)) >= 0 ? Number(S.ui.provaBoy) : T().PROVA_BOY[0];
+    const p = T().provaPlani(sinav, boy), P = T().PROVA[sinav];
+    return K.Card({ wide:true,
+      body:html`${kartBasi('Sınav provası', 'Gerçek sınavın sırası, oranı ve temposu; sonuç bitince')}
+        <div class="ogr-kurulum">
+          <div><span class="ders__etiket tiny">Sınav</span>${K.Segmented({ act:'prova-sinav', value:sinav, aria:'Sınav',
+            items:Object.keys(T().PROVA).map(k => ({ value:k, label:T().PROVA[k].ad })) })}</div>
+          <div><span class="ders__etiket tiny">Soru sayısı</span>${K.Segmented({ act:'prova-boy', value:boy, aria:'Soru sayısı',
+            items:T().PROVA_BOY.map(n => ({ value:n, label:String(n) })) })}</div>
+        </div>
+        <div class="ogr-prova-plan mt-12">${map(p.dersler, d => html`<span class="${cls('ogr-prova-ders', d.havuz < d.n && 'is-eksik')}"
+          title="${d.havuz < d.n ? 'Havuzda ' + d.havuz + ' soru var' : ''}"><b>${d.n}</b> ${d.ad}</span>`)}
+          <span class="ogr-prova-ders"><b>${p.sureDk}</b> dk</span></div>
+        <div class="mt-16">${K.Button({ label:'Provayı başlat', icon:'right', tone:'primary', act:'prova-baslat' })}</div>
+        <p class="tiny dim mt-12">Süre gerçek sınavın soru başına süresiyle ölçeklenir (${P.ad}: ${P.dk} dk / ${P.soru} soru, ÖSYM).
+          Sınavda doğru/yanlış ve çözüm görünmez; ilk işaretin kilitlenir, süre dolunca prova biter. Net ÖSYM kuralıyla
+          hesaplanır: doğru − yanlış / 4. Sonuç bir ölçümdür; plan ve kapanış ona bakmaz.</p>` });
+  }
+  function provaSonucKarti(oz){
+    const p = oz.prova, P = (window.LIFEOS || {}).PANO;
+    const virgul = x => String(x).replace('.', ',');
+    const satir = d => ({ ad:d.ad, oran:d.n ? d.dogru / d.n : null, metin:'net ' + virgul(d.net) });
+    return K.Card({ wide:true,
+      body:html`${kartBasi('Prova sonucu', tarihAdi(oz.at) + ' · ' + p.ad + ' · ' + oz.toplam + ' soru',
+          K.Button({ label:'Yeni prova', size:'sm', tone:'ghost', act:'prova-yeni' }))}
+        <div class="ogr-sayilar">
+          ${K.Stat({ label:'Net · hesaplandı', value:virgul(p.net), unit:' / ' + oz.toplam })}
+          ${K.Stat({ label:'Doğru', value:oz.dogru })}
+          ${K.Stat({ label:'Yanlış', value:oz.yanlis })}
+          ${K.Stat({ label:'Boş', value:oz.bos })}
+        </div>
+        ${when(p.kullanilanDk != null, () => html`<p class="small mt-10">${Math.min(p.kullanilanDk, p.sureDk)} / ${p.sureDk} dk kullanıldı</p>`)}
+        ${when(P && p.dersler.length, () => html`<div class="ders__etiket tiny mt-16">Test test · çubuk doğru oranı</div>
+          <div class="mt-8">${raw(P.cubuklar({ satirlar:p.dersler.map(satir),
+            etiket:p.dersler.map(d => d.ad + ': ' + d.dogru + ' doğru, ' + d.yanlis + ' yanlış, ' + d.bos + ' boş, net ' + virgul(d.net)).join('; ') }))}</div>`)}
+        <p class="tiny dim mt-12">Net = doğru − yanlış / 4 (ÖSYM). Boş net düşürmez.</p>` });
+  }
+  function provaKip(){
+    const a = T().aktif();
+    if(a && a.prova) return [karmaSoruKarti()];
+    if(a) return [K.Card({ wide:true, body:html`${K.Notice({ tone:'info', body:'Süren bir karma test var; prova için önce onu bitir ya da vazgeç.' })}
+      <div class="mt-10">${K.Button({ label:'Karma teste dön', size:'sm', tone:'primary', act:'sorular-kip', data:{ 'data-tab':'karma' } })}</div>` })];
+    const oz = S.ui.provaSonuc ? T().gecmis().find(t => t.id === S.ui.provaSonuc) : null;
+    const gecmis = T().gecmis().filter(t => t.prova);
+    const liste = gecmis.length ? K.Card({ title:'Geçmiş provalar', sub:U.plural(gecmis.length, 'prova', 'prova') + ' · net hesaplandı',
+      body:html`<div class="list list--sik">${map(gecmis.slice(0, 8), t => html`<button class="listitem listitem--tap ogr-konu" data-act="prova-sonuc" data-id="${t.id}">
+        <span class="grow minw0"><span class="small strong">net ${String(t.prova.net).replace('.', ',')} · ${t.dogru} / ${t.toplam} doğru</span>
+          <span class="tiny dim">${tarihAdi(t.at)} · ${t.prova.ad}</span></span>
+        <span class="ogr-konu__ok" aria-hidden="true">${raw(UI.icon('right'))}</span></button>`)}</div>` }) : null;
+    return (oz && oz.prova ? [provaSonucKarti(oz), karmaSonucKarti(oz)] : [provaKurulum()]).concat(liste ? [liste] : []);
+  }
+
   function karmaKip(){
-    if(T().aktif()) return [karmaSoruKarti()];
+    const ak = T().aktif();
+    if(ak && ak.prova) return [K.Card({ wide:true, body:html`${K.Notice({ tone:'info', body:'Süren bir sınav provası var.' })}
+      <div class="mt-10">${K.Button({ label:'Provaya dön', size:'sm', tone:'primary', act:'sorular-kip', data:{ 'data-tab':'prova' } })}</div>` })];
+    if(ak) return [karmaSoruKarti()];
     const sid = S.ui.karmaSonuc;
     const oz = sid ? T().gecmis().find(t => t.id === sid) : null;
     return oz ? [karmaSonucKarti(oz), gecmisKarti()] : [karmaKurulum(), gecmisKarti()];
@@ -1315,11 +1407,12 @@ R.Screens = R.Screens || {};
     return K.Subtabs({ act:'sorular-kip', value:kip, aria:'Soru kipi', items:[
       { id:'konu', label:'Bu konu' },
       { id:'paragraf', label:'Günlük paragraf', count:po && po.toplam ? po.cevaplanan + '/' + po.toplam : null },
-      { id:'karma', label:'Karma test', count:a ? T().say(a).cevaplanan + '/' + a.sorular.length : null },
+      { id:'karma', label:'Karma test', count:a && !a.prova ? T().say(a).cevaplanan + '/' + a.sorular.length : null },
+      { id:'prova', label:'Sınav provası', count:a && a.prova ? T().say(a).cevaplanan + '/' + a.sorular.length : null },
       { id:'yanlis', label:'Yanlışlarım', count:n || null },
     ] });
   }
-  const kipOf = () => ['konu', 'paragraf', 'karma', 'yanlis'].indexOf(S.ui.ogrenKip) >= 0 ? S.ui.ogrenKip : 'konu';
+  const kipOf = () => ['konu', 'paragraf', 'karma', 'prova', 'yanlis'].indexOf(S.ui.ogrenKip) >= 0 ? S.ui.ogrenKip : 'konu';
 
   /* Bir sorunun kimliği: data-k varsa o (karma, yeniden çözüm), yoksa
      bu konunun ekrandaki sorusu. */
@@ -1338,6 +1431,7 @@ R.Screens = R.Screens || {};
     subtitle(){
       const kip = kipOf();
       if(kip === 'karma') return 'Konular karışık; sonuç konu konu';
+      if(kip === 'prova') return 'Gerçek sınavın temposu; sonuç bitince';
       if(kip === 'yanlis') return 'Yanlış çözdüklerini yeniden çöz';
       if(kip === 'paragraf') return 'Her gün birkaç paragraf; bitince gün kaydına';
       const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Örnek sorular';
@@ -1348,6 +1442,11 @@ R.Screens = R.Screens || {};
       const sekme = raw(kipSekmeleri(kip));
       setTimeout(baslatSoruSayac, 30);
       if(kip === 'karma') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(karmaKip())))]));
+      if(kip === 'prova'){
+        const a = T().aktif();
+        if(a && a.prova && T().kalanSn() === 0){ const oz = await T().bitir(); S.ui.provaSonuc = oz ? oz.id : null; }
+        return String(K.Grid([K.Span(12, K.Stack([raw(kipSekmeleri(kip))].concat(provaKip())))]));
+      }
       if(kip === 'yanlis') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(yanlisKip())))]));
       if(kip === 'paragraf'){
         if(P()) await P().hazirla();
@@ -1466,7 +1565,8 @@ R.Screens = R.Screens || {};
       async 'test-cevap'(el){
         const y = T().siradaki(), a = T().aktif();
         const sure = gecenSure();
-        if(y) await T().cevapla(y.sira, el.dataset.harf, S.ui.ipucu === 'test:' + a.id + '#' + y.sira, sure);
+        const r = y ? await T().cevapla(y.sira, el.dataset.harf, !a.prova && S.ui.ipucu === 'test:' + a.id + '#' + y.sira, sure) : null;
+        if(r && r.neden === 'sure'){ const oz = await T().bitir(); S.ui.provaSonuc = oz ? oz.id : null; UI.toast('Süre doldu; prova bitti.'); }
         R.App.render();
       },
       async 'test-bak'(){
@@ -1499,8 +1599,8 @@ R.Screens = R.Screens || {};
       async 'karma-bitir'(){
         const a = T().aktif();
         if(!a) return;
-        const bos = T().say(a).bos;
-        const bitir = async () => { const oz = await T().bitir(); S.ui.karmaSonuc = oz ? oz.id : null; window.scrollTo(0, 0); R.App.render(); };
+        const bos = T().say(a).bos, prova = !!a.prova;
+        const bitir = async () => { const oz = await T().bitir(); S.ui[prova ? 'provaSonuc' : 'karmaSonuc'] = oz ? oz.id : null; window.scrollTo(0, 0); R.App.render(); };
         if(!bos) return bitir();
         UI.confirmSheet('Testi bitir', U.plural(bos, 'soru', 'soru') + ' cevapsız: boş sayılır, yanlış sayılmaz.', bitir, false, 'Bitir');
       },
@@ -1508,6 +1608,19 @@ R.Screens = R.Screens || {};
         UI.confirmSheet('Testten vazgeç', 'Bu test silinir; geçmişe hiçbir şey yazılmaz.',
           async () => { await T().vazgec(); R.App.render(); }, true, 'Vazgeç');
       },
+      async 'prova-sinav'(el){ S.ui.provaSinav = el.dataset.value; R.App.render(); },
+      async 'prova-boy'(el){ S.ui.provaBoy = Number(el.dataset.value) || T().PROVA_BOY[0]; R.App.render(); },
+      async 'prova-baslat'(){
+        const r = await T().provaBaslat(T().PROVA[S.ui.provaSinav] ? S.ui.provaSinav : 'TYT', S.ui.provaBoy || T().PROVA_BOY[0]);
+        if(!r.ok){ UI.toast(r.metin, { life:6000 }); return; }
+        if(r.eksik.length) UI.toast('Havuz yetmedi: ' + r.eksik.join(', ') + '. Prova ' + r.n + ' soruyla, ' + r.sureDk + ' dk.', { life:6000 });
+        S.ui.provaSonuc = null;
+        soruSifirlaSure();
+        window.scrollTo(0, 0);
+        R.App.render();
+      },
+      async 'prova-sonuc'(el){ S.ui.provaSonuc = el.dataset.id; window.scrollTo(0, 0); R.App.render(); },
+      async 'prova-yeni'(){ S.ui.provaSonuc = null; R.App.render(); },
       async 'karma-sonuc'(el){ S.ui.karmaSonuc = el.dataset.id; window.scrollTo(0, 0); R.App.render(); },
       async 'karma-yeni'(){ S.ui.karmaSonuc = null; soruSifirlaSure(); R.App.render(); },
       /* Yanlışlarım */

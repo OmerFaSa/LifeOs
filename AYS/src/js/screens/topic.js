@@ -55,8 +55,31 @@ R.Screens.topic = (function(){
           K.Chip('tahmini ' + topic.days),
           when(weeks.length, () => K.Chip('plan: H' + weeks.join(', H'))),
         ], { wrap:true })}
-        <p class="small muted mt-10">${freq.note}</p>`,
+        <p class="small muted mt-10">${freq.note}</p>
+        ${raw(soruSiklikHtml(topic))}`,
     });
+  }
+
+  /* SORU SIKLIĞI (data/sorusiklik.js, 2026-10-22): konunun TYT'de yıllara göre
+     soru sayısı, ikincil kaynaktan («tahmin»). Kaynakta yılı olmayan sütun
+     kesiktir (sıfır değil). Öncelik hesabına girmez; yalnız kanıt olarak durur. */
+  function soruSiklikHtml(topic){
+    const SS = R.SORU_SIKLIK, l = SS && SS.konular && SS.konular[topic.id];
+    const P = (window.LIFEOS || {}).PANO;
+    if(!l || !P) return '';
+    const yil = y => '’' + String(y).slice(2);
+    const seri = x => {
+      const metin = SS.yillar.map((y, i) => y + ' ' + (x.seri[i] == null ? 'veri yok' : x.seri[i] + ' soru')).join(', ');
+      return '<div class="soru-siklik__s"><p class="small"><b>' + U.esc(x.ad) + '</b>'
+        + (x.ortak ? ' <span class="muted">· bu konu dahil, türlerin toplamı</span>' : '') + '</p>'
+        + P.sutun({ degerler:x.seri, yukseklik:36, gunler:SS.yillar.map(yil),
+            etiket:SS.sinav + ', ' + x.ad + ': ' + metin }) + '</div>';
+    };
+    return '<div class="soru-siklik mt-12" data-oz="soru-siklik"><p class="small muted">' + U.esc(SS.sinav)
+      + '’te yıllara göre soru · ' + SS.yillar[0] + '–' + SS.yillar[SS.yillar.length - 1] + '</p>'
+      + l.map(seri).join('')
+      + '<p class="small muted">Kesik sütun: kaynakta o yıl yok. İkincil kaynak (<a href="' + U.esc(SS.kaynak)
+      + '" target="_blank" rel="noopener">ozeldersalani.com</a>), etiket «tahmin»; öncelik sırasını değiştirmez.</p></div>';
   }
 
   /* ÖĞRENME YOLU (core/ogrenyolu.js): altı adım, sıradaki adım ve eylemi.

@@ -37,7 +37,17 @@
         anahtarını değiştirmez (kod otoritedir). İşaretli soru karma test
         ve günlük paragraf havuzundan çıkar, Yanlışlarım'ın altında
         «Bildirdiğin hatalar» olarak durur, kopyalanıp iletilebilir. Soru
-        sonradan yenilenirse işaret kendiliğinden kapanır. */
+        sonradan yenilenirse işaret kendiliğinden kapanır.
+     7. SINAV PROVASI (kullanıcı, 2026-10-22: «canlı sınav simülatörü»). TYT
+        ya da AYT (sayısal) biçiminde: dersler ÖSYM'nin test sırasıyla ve
+        soru oranıyla (R.SUBJECTS.questions) gelir, süre gerçek sınavın
+        soru başına süresiyle ölçeklenir (TYT 165 dk / 120 soru, AYT 180 dk /
+        80 soru; ÖSYM kılavuzu). Sınav süresince doğru/yanlış gösterilmez,
+        çözüme bakılmaz; süre dolunca test kendiliğinden biter. Sonuçta net
+        ÖSYM kuralıyla hesaplanır (doğru − yanlış / 4; «hesaplandı»), ders
+        ders ve konu konu. Ölçüm kuralları karma testle aynıdır (söz 3–5):
+        ilk işaret kilitlenir, boş yanlış sayılmaz, yanlışlar Yanlışlarım'a
+        düşer, plan ve kapanış bu sonuca bakmaz. */
 
 window.R = window.R || {};
 
@@ -46,6 +56,12 @@ R.OgrenTest = (function(){
   const BOYLAR = [10, 20];
   const EN_AZ = 5;
   const GECMIS = 30;
+  /* Söz 7: ÖSYM süreleri ve test sırası (kılavuz); yalnız ölçek için. */
+  const PROVA = {
+    TYT:{ ad:'TYT', dk:165, soru:120, sira:['tyt-turkce', 'tyt-sosyal', 'tyt-matematik', 'tyt-fen'] },
+    AYT:{ ad:'AYT · sayısal', dk:180, soru:80, sira:['ayt-matematik', 'ayt-fizik', 'ayt-kimya', 'ayt-biyoloji'] },
+  };
+  const PROVA_BOY = [20, 40];
   let doc = bos();
 
   function bos(){ return { aktif:null, gecmis:[], tekrar:{}, isaret:{} }; }
@@ -153,6 +169,53 @@ R.OgrenTest = (function(){
     return { ok:true, n:secilen.length };
   }
 
+  /* Söz 7: sınav provası. Ders kotası soru oranıyla (en büyük kalan yöntemi);
+     ders havuzunda yeterli soru yoksa olanla yetinilir, eksik söylenir. */
+  /* Provanın planı: ders kotaları ve süre (kurulum ekranı da bunu gösterir). */
+  function provaPlani(sinav, boy){
+    const P = PROVA[sinav];
+    if(!P) return null;
+    const n = PROVA_BOY.indexOf(Number(boy)) >= 0 ? Number(boy) : PROVA_BOY[0];
+    const dersler = P.sira.map(id => (R.SUBJECTS || []).find(s => s.id === id)).filter(Boolean);
+    const top = dersler.reduce((a, s) => a + (s.questions || 0), 0) || 1;
+    const kota = dersler.map(s => ({ s, ham:n * (s.questions || 0) / top }));
+    kota.forEach(x => { x.n = Math.floor(x.ham); });
+    let kalan = n - kota.reduce((a, x) => a + x.n, 0);
+    kota.slice().sort((a, b) => (b.ham - b.n) - (a.ham - a.n)).forEach(x => { if(kalan > 0){ x.n++; kalan--; } });
+    return { sinav, ad:P.ad, n, sureDk:Math.max(1, Math.round(P.dk * n / P.soru)),
+      dersler:kota.map(x => ({ id:x.s.id, ad:x.s.name, n:x.n, havuz:havuz({ ders:x.s.id, konular:'hepsi', seviye:'hepsi' }).length })) };
+  }
+  async function provaBaslat(sinav, boy, simdiMs){
+    const P = PROVA[sinav];
+    if(!P) return { ok:false, neden:'sinav', metin:'Böyle bir sınav yok.' };
+    const plan = provaPlani(sinav, boy), n = plan.n;
+    const kota = plan.dersler.map(d => ({ s:(R.SUBJECTS || []).find(s => s.id === d.id), n:d.n }));
+    const secilen = [], eksik = [];
+    kota.forEach(x => {
+      const sinavTarzi = havuz({ ders:x.s.id, konular:'hepsi', seviye:'sinav' });
+      const h = sinavTarzi.length >= x.n ? sinavTarzi : havuz({ ders:x.s.id, konular:'hepsi', seviye:'hepsi' });
+      const al = serpistir(karistir(h).slice(0, x.n));
+      if(al.length < x.n) eksik.push(x.s.name + ' ' + al.length + '/' + x.n);
+      al.forEach(y => secilen.push(y.k));
+    });
+    if(secilen.length < Math.ceil(n / 2)){
+      return { ok:false, neden:'az', n:secilen.length, metin:'Bu prova için yeterli soru yok (' + secilen.length + ' / ' + n + ').' };
+    }
+    const sureDk = Math.max(1, Math.round(P.dk * secilen.length / P.soru));
+    const bas = typeof simdiMs === 'number' ? simdiMs : Date.now();
+    doc.aktif = { id:R.U.uid('ot'), kapsam:{ prova:sinav }, prova:{ sinav, sureDk, bitis:new Date(bas + sureDk * 60000).toISOString() },
+      sorular:secilen, cevaplar:{}, sira:0, basladi:new Date(bas).toISOString() };
+    await yaz();
+    return { ok:true, n:secilen.length, sureDk, eksik };
+  }
+  /* Kalan saniye; prova değilse null. Süre dolduysa 0. */
+  function kalanSn(simdiMs){
+    const a = doc.aktif;
+    if(!a || !a.prova) return null;
+    const ms = Date.parse(a.prova.bitis) - (typeof simdiMs === 'number' ? simdiMs : Date.now());
+    return Math.max(0, Math.round(ms / 1000));
+  }
+
   /* ---------- test sırasında (söz 3, 4) ---------- */
 
   function aktif(){ return doc.aktif; }
@@ -173,14 +236,16 @@ R.OgrenTest = (function(){
     const s = a ? soruOf(a.sorular[sira]) : null;
     if(!s || O().HARFLER.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
     if(a.cevaplar[sira]) return { ok:false, neden:'kilitli' };
+    if(a.prova && kalanSn() === 0) return { ok:false, neden:'sure' };
     const kayit = ip ? { h:harf, ip:true, at:simdi() } : { h:harf, at:simdi() };
     if(typeof sure === 'number' && sure > 0) kayit.sure = Math.round(sure);
     a.cevaplar[sira] = kayit;
     await yaz();
-    return { ok:true, dogru:harf === s.q.dogru };
+    return a.prova ? { ok:true } : { ok:true, dogru:harf === s.q.dogru };
   }
   async function bak(sira, sure){
     const a = doc.aktif;
+    if(a && a.prova) return { ok:false, neden:'prova' };            // söz 7: sınavda çözüme bakılmaz
     if(!a || !soruOf(a.sorular[sira])) return { ok:false, neden:'gecersiz' };
     if(a.cevaplar[sira]) return { ok:false, neden:'kilitli' };
     const kayit = { h:null, bak:true, at:simdi() };
@@ -208,7 +273,7 @@ R.OgrenTest = (function(){
     const a = doc.aktif;
     if(!a) return null;
     const sonuc = {
-      id:a.id, at:simdi(), basladi:a.basladi, kapsam:a.kapsam,
+      id:a.id, at:simdi(), basladi:a.basladi, kapsam:a.kapsam, prova:a.prova || null,
       sorular:a.sorular.map((k, j) => {
         const v = a.cevaplar[j];
         return v ? Object.assign({ k, h:v.h || null, bak:!!v.bak, at:v.at }, v.ip ? { ip:true } : {}, v.sure ? { sure:v.sure } : {}) : { k, h:null, bos:true };
@@ -241,6 +306,22 @@ R.OgrenTest = (function(){
       y.n++; if(d) y.dogru++;
     });
     r.ortSure = saySure ? Math.round(topSure / saySure) : null;
+    /* Söz 7: provada net ÖSYM kuralıyla (doğru − yanlış/4), ders ders; çözüme bakılan yok. */
+    if(t.prova){
+      const net = x => Math.round((x.dogru - x.yanlis / 4) * 100) / 100;
+      const ders = {};
+      t.sorular.forEach(x => {
+        const s = soruOf(x.k, x.at || t.at);
+        if(!s) return;
+        const y = ders[s.subject.id] || (ders[s.subject.id] = { id:s.subject.id, ad:s.subject.name, n:0, dogru:0, yanlis:0, bos:0 });
+        y.n++;
+        if(x.bos) y.bos++; else if(dogruMu(s.q, x)) y.dogru++; else y.yanlis++;
+      });
+      const P = PROVA[t.prova.sinav] || { sira:[] };
+      r.prova = { sinav:t.prova.sinav, ad:(P.ad || t.prova.sinav), sureDk:t.prova.sureDk, net:net(r),
+        kullanilanDk:t.basladi ? Math.max(0, Math.round((Date.parse(t.at) - Date.parse(t.basladi)) / 60000)) : null,
+        dersler:Object.values(ders).sort((a, b) => P.sira.indexOf(a.id) - P.sira.indexOf(b.id)).map(y => Object.assign(y, { net:net(y) })) };
+    }
     r.konular = Object.values(kon).sort((a, b) => (a.dogru / a.n) - (b.dogru / b.n) || b.n - a.n
       || a.topic.name.localeCompare(b.topic.name, 'tr'));
     return r;
@@ -331,7 +412,7 @@ R.OgrenTest = (function(){
       + 'Uygulamadaki cevap: ' + x.q.dogru + (x.isaret.not ? '\nNot: ' + x.isaret.not : '')).join('\n\n');
   }
 
-  return { STORE, BOYLAR, EN_AZ, yukle, soruOf, havuz, baslat, aktif, siradaki, git, cevapla, bak, say,
+  return { STORE, BOYLAR, EN_AZ, PROVA, PROVA_BOY, provaPlani, provaBaslat, kalanSn, yukle, soruOf, havuz, baslat, aktif, siradaki, git, cevapla, bak, say,
     bitir, vazgec, ozet, gecmis, sonDenemeler, yanlislar, tekrarCevapla,
     isaretOf, isaretle, isaretKaldir, isaretliler, isaretMetni };
 })();

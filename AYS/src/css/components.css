@@ -2762,3 +2762,17 @@ body.is-dragging .drop.is-over{
 .qkarala__oge{ position:relative; width:120px; height:78px; border-radius:12px; overflow:hidden; background:var(--surface-2); box-shadow:var(--kart-golge, none); }
 .qkarala__oge img{ width:100%; height:100%; object-fit:cover; display:block; }
 .qkarala__sil{ position:absolute; top:4px; right:4px; width:24px; height:24px; border:0; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:14px; line-height:1; cursor:pointer; }
+
+/* SINAV PROVASI (core/ogrentest.js söz 7): geri sayım büyük ve sakin; işaretli
+   şık nötr çerçeve (doğru/yanlış sınav bitince); ders kotası tek satır. */
+.ogr-prova-ust{ display:flex; align-items:baseline; gap:10px; }
+.ogr-prova-kalan{ font-size:28px; font-weight:650; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.ogr-prova-plan{ display:flex; flex-wrap:wrap; gap:6px; }
+.ogr-prova-ders{ display:inline-flex; align-items:baseline; gap:5px; padding:4px 10px; border-radius:999px;
+  box-shadow:inset 0 0 0 1px var(--border); font-size:13px; color:var(--text-2); }
+.ogr-prova-ders b{ color:var(--text); font-variant-numeric:tabular-nums; }
+.ogr-prova-ders.is-eksik{ box-shadow:inset 0 0 0 1px var(--warn, var(--border-strong)); }
+.secenek.is-secili{ border-color:var(--primary); }
+.secenek.is-secili .secenek__harf{ color:var(--primary); box-shadow:inset 0 0 0 1.5px currentColor; }
+.ogr-nokta.is-isaretli{ color:var(--text); box-shadow:inset 0 0 0 1.5px var(--text-2); }
+.ogr-sonuc.is-isaretli{ background:var(--surface-2); }
