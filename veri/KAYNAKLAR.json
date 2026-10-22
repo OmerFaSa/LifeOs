@@ -12,6 +12,9 @@
      "url": "https://www.rehberlikservisi.net/2018-2025-yks-tyt-ayt-soru-dagilimi-analizi/"},
     {"id": "yks-dagilim-ozeldersalani", "sistem": "AYS", "tur": "html", "duzey": "ikincil",
      "konu": "YKS konulari ve guncel soru dagilimi",
-     "url": "https://www.ozeldersalani.com/yks-tyt-ayt-soru-dagilimi"}
+     "url": "https://www.ozeldersalani.com/yks-tyt-ayt-soru-dagilimi"},
+    {"id": "tuber-2022", "sistem": "SPI", "tur": "pdf", "duzey": "birincil",
+     "konu": "Turkiye Beslenme Rehberi (TUBER) 2022, T.C. Saglik Bakanligi; tools/veri_dogrula.py tuber",
+     "url": "https://hsgm.saglik.gov.tr/depo/birimler/saglikli-beslenme-ve-hareketli-hayat-db/Dokumanlar/Rehberler/Turkiye_Beslenme_Rehber_TUBER_2022_min.pdf"}
   ]
 }

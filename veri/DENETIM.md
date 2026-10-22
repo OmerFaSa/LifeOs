@@ -1,6 +1,6 @@
 # Veri denetimi
 
-`tools/veri_denetle.py` yazdı, 2026-10-22 16:18. Elle düzenlenmez.
+`tools/veri_denetle.py` yazdı, 2026-10-22 22:03. Elle düzenlenmez.
 Kurallar betiğin başında. Bu denetim biçimi ve kaynak izini sınar;
 içeriğin doğruluğunu kanıtlamaz. `taslak/` kaynakla doğrulanana dek hiçbir arayüze gitmez.
 
@@ -22,6 +22,7 @@ içeriğin doğruluğunu kanıtlamaz. `taslak/` kaynakla doğrulanana dek hiçbi
 | temiz/spi/besin_usda.jsonl | 7,793 | 0 |  |
 | temiz/spi/olgular.jsonl | 97 | 0 |  |
 | temiz/spi/reddedilen.jsonl | 45 | 0 |  |
+| temiz/spi/tuber_dogrulanan.jsonl | 7 | 0 |  |
 | temiz/spi/who_rehberler.jsonl | 191 | 0 |  |
 
 ## taslak/
@@ -46,6 +47,6 @@ içeriğin doğruluğunu kanıtlamaz. `taslak/` kaynakla doğrulanana dek hiçbi
 | taslak/spi/egzersiz_kalistenik_rehberi.jsonl | 17 | 0 |  |
 | taslak/spi/laboratuvar_referans.jsonl | 46 | 0 |  |
 | taslak/spi/nabiz_bolgeleri_metabolik_fizyoloji.jsonl | 5 | 0 |  |
-| taslak/spi/tuber_beslenme_rehberi.jsonl | 24 | 0 |  |
+| taslak/spi/tuber_beslenme_rehberi.jsonl | 17 | 0 |  |
 | taslak/spi/turk_yemekleri.jsonl | 43 | 0 |  |
 | taslak/spi/uyku_hijyeni_rehberi.jsonl | 7 | 0 |  |
