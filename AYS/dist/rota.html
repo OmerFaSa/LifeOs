@@ -4223,6 +4223,20 @@ body.is-dragging .drop.is-over{
 .qkarala__oge img{ width:100%; height:100%; object-fit:cover; display:block; }
 .qkarala__sil{ position:absolute; top:4px; right:4px; width:24px; height:24px; border:0; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:14px; line-height:1; cursor:pointer; }
 
+/* SINAV PROVASI (core/ogrentest.js söz 7): geri sayım büyük ve sakin; işaretli
+   şık nötr çerçeve (doğru/yanlış sınav bitince); ders kotası tek satır. */
+.ogr-prova-ust{ display:flex; align-items:baseline; gap:10px; }
+.ogr-prova-kalan{ font-size:28px; font-weight:650; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.ogr-prova-plan{ display:flex; flex-wrap:wrap; gap:6px; }
+.ogr-prova-ders{ display:inline-flex; align-items:baseline; gap:5px; padding:4px 10px; border-radius:999px;
+  box-shadow:inset 0 0 0 1px var(--border); font-size:13px; color:var(--text-2); }
+.ogr-prova-ders b{ color:var(--text); font-variant-numeric:tabular-nums; }
+.ogr-prova-ders.is-eksik{ box-shadow:inset 0 0 0 1px var(--warn, var(--border-strong)); }
+.secenek.is-secili{ border-color:var(--primary); }
+.secenek.is-secili .secenek__harf{ color:var(--primary); box-shadow:inset 0 0 0 1.5px currentColor; }
+.ogr-nokta.is-isaretli{ color:var(--text); box-shadow:inset 0 0 0 1.5px var(--text-2); }
+.ogr-sonuc.is-isaretli{ background:var(--surface-2); }
+
 /* ==== css/temel.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/temel.css içine yazılır; burası bir sonraki
@@ -15329,6 +15343,30 @@ button.king__ekran-onizle:focus-visible{ outline:2px solid var(--k-vurgu); outli
 }
 @media (prefers-reduced-motion:reduce){ .king:not(.is-mini) .king__alan{ animation:none; } .king__canli-nokta{ animation:none; } }
 
+/* ======================================================================
+   ÖĞRETMEN — ders kartı (king.js «ÖĞRETMEN», 2026-10-22). Modülün metni
+   bölüm bölüm; üstte modül ve etiketi, ince ilerleme çubuğu, altta eylemler.
+   Kart dili cevap kartlarıyla aynı: düz yüzey, ince çizgi, gölge yok.
+   ====================================================================== */
+.king__ders{ display:flex; flex-direction:column; gap:10px; margin-top:var(--sp-2); padding:14px 16px;
+  border-radius:var(--r-md); background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); }
+.king__ders-bas{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 12px;
+  font-size:var(--fs-xs); font-weight:600; color:var(--text-2); }
+.king__ders-bas small{ font-weight:500; color:var(--text-3); }
+.king__ders-giris{ margin:0; font-size:var(--fs-sm); color:var(--text-2); line-height:1.55; }
+.king__ders-ilerleme{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:10px; }
+.king__ders-ilerleme small{ font-size:var(--fs-xs); color:var(--text-3); font-variant-numeric:tabular-nums; }
+.king__ders-ilerleme .king__cubuk{ margin:0; }
+.king__ders-baslik{ margin:2px 0 0; font-size:var(--fs-md); font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.king__ders p{ margin:0; line-height:1.6; }
+.king__ders-liste{ margin:0; padding-left:1.1em; display:flex; flex-direction:column; gap:6px; line-height:1.55; }
+.king__ders-dikkat{ padding:8px 12px; border-radius:var(--r-sm); background:var(--surface-2); font-size:var(--fs-sm); }
+.king__ders-dikkat b{ margin-right:6px; }
+.king__ders-eylem{ display:flex; flex-wrap:wrap; gap:6px; margin-top:2px; }
+
+/* K4: sıradan sorulan sorunun balonunda küçük not (ne zaman sorulmuştu). */
+.king__siradan{ display:block; margin-top:4px; font-size:var(--fs-xs); color:var(--text-3); text-align:right; }
+
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/giris.css içine yazılır; burası bir sonraki
@@ -16865,7 +16903,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -18399,7 +18437,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'7f39f868', at:'2026-10-22 15:35', dirty:true };
+R.BUILD = { id:'e4828c7c', at:'2026-10-22 19:03', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -39475,6 +39513,7 @@ window.LIFEOS.KING = (function(){
     const ek = id => { const a = sec.find(x => x.is === id); return a ? s(a.ad, a.ip, { is:a.is }) : null; };
     const gruplar = [
       { ad:'Kart ve soru', l:[
+        fn('ders') && s('Konu anlat', 'Modülün anlatımı bölüm bölüm; sonunda soru', { doldur:String(K.dersOrnek || 'bu konuyu anlat') }),
         fn('istatistik') && s('İstatistik kartları', 'Modülün sayıları kart olarak', { calis:'istatistiklerim' }),
         fn('soru') && s('Bana soru sor', 'Modülün bankasından soru kartı; şıklar düğme', { calis:'bana soru sor' }),
         fn('soru') && s('Konudan soru', 'Belirli bir konudan soru', { doldur:'türev hakkında soru sor' }),
@@ -39491,6 +39530,7 @@ window.LIFEOS.KING = (function(){
       { ad:'Planla ve takip et', l:[
         s('Bugünün özeti', 'Bu modülde bugün ne var', { hazir:HAZIR.findIndex(h => h.ozet) }),
         s('Odak sayacı', 'Başlıkta kalan süre; bitince kaydet', { doldur:'25 dakika matematik çalışalım' }),
+        s('Sesli özet', 'Bugünü sesli dinle; Kütüphane’de kalır', { calis:'sesli özet' }),
         s('Görev kur', 'King adım adım plan kurar; sen başlatırsın', { doldur:'bu hafta B1’e hazırla beni', merkez:true }),
         s('Haftalık değerlendirme', 'Merkez’in hafta raporu', { calis:'haftalık değerlendirme', merkez:true }),
         s('Çapraz bulgu', 'Modüller birbirini nasıl etkiliyor', { calis:'çapraz bulgu', merkez:true }),
@@ -39525,7 +39565,7 @@ window.LIFEOS.KING = (function(){
         .map(x => s(x.ad, x.tur === 'foto' ? x.ne : '«' + String(x.ornek || '').trim() + '»', { is:'is-sec:' + x.i })) }))
       .filter(g => g.l.length);
     const bul = ad => hepsi.find(x => x.ad === ad);
-    const simdi = [saat < 12 && bul('Bugünün özeti'), bul('Neye çalışayım'), bul('Bana soru sor'),
+    const simdi = [saat < 12 && bul('Bugünün özeti'), bul('Neye çalışayım'), bul('Konu anlat'), bul('Bana soru sor'),
       t.getDay() === 0 && bul('Haftalık gözden geçirme'), saat >= 19 && bul('Günlük'), odak() ? null : bul('Odak sayacı')]
       .filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).slice(0, 3);
     const sistem = gruplar.pop();               // «Sistem» en sonda kalır
@@ -39597,7 +39637,14 @@ window.LIFEOS.KING = (function(){
   function kutuphaneListe(){
     const ars = akis.map((m, n) => ({ m, n })).filter(x => x.m && x.m.arastirma).reverse();
     const gecmis = arsivOku(), kls = klasorler();
-    return listeGrup('Araştırmalar', ars.length ? '<ul class="king__gecmis">' + ars.map(x => listeSatir('ars-ac:' + x.n, x.m.arastirma.konu,
+    const sr = sira(), so = sozetler();
+    return (sr.length ? listeGrup('Sırada · Merkez bekleniyor', '<ul class="king__gecmis">' + sr.map((x, i) => '<li class="king__satir-sar">'
+        + '<span class="king__satir"><span class="king__satir-bas"><span>' + kac(x.metin) + '</span></span><small>' + kac(tarihYaz(x.zaman)) + '</small></span>'
+        + '<button type="button" class="king__gecmis-ufak" data-king="sira-sil:' + i + '" aria-label="Sıradan çıkar" title="Sıradan çıkar">'
+        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></li>').join('') + '</ul>') : '')
+      + (so.length ? listeGrup('Sesli özetler', '<ul class="king__gecmis">' + so.map((x, i) => listeSatir('sozet-dinle:' + i,
+        (MODUL_AD[x.modul] || '') + ' · ' + tarihYaz(x.zaman), x.satirlar[0] || '')).join('') + '</ul>') : '')
+      + listeGrup('Araştırmalar', ars.length ? '<ul class="king__gecmis">' + ars.map(x => listeSatir('ars-ac:' + x.n, x.m.arastirma.konu,
         (x.m.arastirma.izle.length + x.m.arastirma.oku.length) + ' kaynak')).join('') + '</ul>'
       : yanBos('Bu sohbette araştırma yok. «… araştır» de; özeti ve kaynakları burada toplarım.'))
       + listeGrup('Klasörler', (klasorYeni ? '<form class="king__klasor-form" data-king-klasor><input class="king__ara" type="text" maxlength="40" placeholder="Klasör adı" aria-label="Klasör adı" data-king-klasor-ad/>'
@@ -40548,10 +40595,160 @@ window.LIFEOS.KING = (function(){
     m.soru.cevap = { harf, dogru:String(r.dogru), isabet:harf === r.dogru,
       cozum:(r.cozum || []).map(String).slice(0, 6), not:String(r.not || '') };
     cipler = [{ ad:'Bir soru daha', is:'soru-yeni:' + n }];
+    /* Öğretmen: yanlışta, bu konunun dersi sohbetteyse yeniden anlatmayı öner. */
+    const dn = m.soru.cevap.isabet ? -1 : dersBul(m.soru.sorgu);
+    if(dn >= 0) cipler.unshift({ ad:'Konuyu yeniden anlat', is:'ders-tekrar:' + dn });
     sakla();
     ciz(false);
     if(sesleMi()) seslendir(m.soru.cevap.isabet ? 'Doğru.' : 'Doğru cevap ' + m.soru.cevap.dogru + '.');
     return m.soru.cevap;
+  }
+  /* ---------- K4 (kullanıcı, 2026-10-22): MERKEZ SIRASI ve SESLİ ÖZET ----------
+     Merkez'e ulaşılamadığında (telefon dışarıda) Merkez'e giden soru
+     kaybolmaz: cihazda sıraya girer (lifeos.king.merkez-sira; TASINAN'da,
+     modül değişse de taşınır). King açılınca, cihaz yeniden çevrimiçi olunca
+     ve King açıkken dakikada bir yoklanır; Merkez'e ulaşınca sıra eskiden
+     yeniye sorulur ve cevap sohbete «sıradan» diye düşer. Sırada en çok 20
+     soru; 7 günden eskisi sorulmaz. Yalnız Merkez'e giden soru sıraya girer:
+     yerel kuralla cevaplanan ve kayıt olan cümle girmez. Merkez hiç
+     kurulmamışsa bekleyecek bir şey yoktur, sıra da yoktur.
+     SESLİ ÖZET: «sesli özet», «günümü özetle» → modülün günlük cümleleri ve
+     değeri olan kartları (sayıyı modül üretir, etiketiyle) sesli okunur,
+     Kütüphane › Sesli özetler'de kalır (son 20). */
+  const SIRA = 'lifeos.king.merkez-sira';
+  const SIRA_EN_COK = 20, SIRA_GUN = 7;
+  let siradanSoru = null, siraCalisiyor = false, siraSaat = null;
+  function sira(){
+    const l = ortam.depo.oku(SIRA), sinir = ortam.simdi().getTime() - SIRA_GUN * 864e5;
+    return (Array.isArray(l) ? l : []).filter(x => x && x.metin && Date.parse(x.zaman) >= sinir);
+  }
+  function siraYaz(l){ if(l.length) ortam.depo.yaz(SIRA, l.slice(-SIRA_EN_COK)); else ortam.depo.sil(SIRA); }
+  /* Sıradan sorulan yine ulaşamazsa başa geri döner, zamanı korunur. */
+  function siraEkle(metin){
+    const l = sira();
+    if(siradanSoru) l.unshift(siradanSoru);
+    else l.push({ metin:String(metin).trim(), zaman:ortam.simdi().toISOString(), modul:ayar && ayar.modul });
+    siraYaz(l);
+    return sira().length;
+  }
+  async function siraBosalt(){
+    if(siraCalisiyor || !acik || !baglanti() || !sira().length) return 0;
+    siraCalisiyor = true;
+    let n = 0;
+    try{
+      while(sira().length){
+        const x = sira()[0];
+        siraYaz(sira().slice(1));
+        siradanSoru = x;
+        const r = await isle(x.metin);
+        siradanSoru = null;
+        if(r && r.tur === 'sira') break;                   // hâlâ ulaşılamıyor; başa döndü
+        n++;
+      }
+    }finally{ siraCalisiyor = false; siradanSoru = null; }
+    return n;
+  }
+  function siraPlanla(){
+    if(siraSaat){ try{ clearInterval(siraSaat); }catch(e){ /* yok */ } siraSaat = null; }
+    if(typeof setInterval !== 'function' || !sira().length) return;
+    siraSaat = setInterval(() => { if(!acik || !sira().length){ clearInterval(siraSaat); siraSaat = null; return; } siraBosalt(); }, 60000);
+  }
+  const SOZET = 'lifeos.king.sesli-ozet';
+  const SOZET_RE = /(sesli özet|günü(?:mü)? özetle|özetimi (?:oku|söyle)|günün özetini (?:oku|söyle)|bana günümü anlat)/;
+  function sozetler(){ const l = ortam.depo.oku(SOZET); return Array.isArray(l) ? l.filter(x => x && Array.isArray(x.satirlar)) : []; }
+  function sozetMetni(x){ return [(MODUL_AD[x.modul] || '') + '’de ' + tarihYaz(x.zaman)].concat(x.satirlar).join('. '); }
+  function sesliOzet(metin){
+    akis.push({ kim:'sen', metin:String(metin).trim() });
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; cipler = null;
+    const K = ayar && ayar.kartlar, ad = MODUL_AD[ayar && ayar.modul] || 'Bu modül';
+    let kart = [];
+    try{ kart = (K && typeof K.istatistik === 'function' ? K.istatistik() : []) || []; }catch(e){ kart = []; }
+    kart = kart.filter(x => x && x.ad).map(kartTemiz).filter(x => x.deger != null).slice(0, 4);
+    const satirlar = ozetSatirlari().concat(kart.map(x => x.ad + ': ' + x.deger + (x.birim ? ' ' + x.birim : '') + ' (' + x.etiket + ')'));
+    if(!satirlar.length){ soyle(ad + ' için bugün özetlenecek bir şey yok.'); return { tur:'sesli-ozet', n:0 }; }
+    const x = { zaman:ortam.simdi().toISOString(), modul:ayar.modul, satirlar };
+    ortam.depo.yaz(SOZET, [x].concat(sozetler()).slice(0, 20));
+    cipler = [{ ad:'Yeniden dinle', is:'sozet-dinle:0' }];
+    const okunacak = !sesleMi();
+    soyle(ad + '’de bugün:', satirlar);
+    if(okunacak) seslendir(sozetMetni(x));                 // yazı kipinde de: istenen şey sesli özet
+    return { tur:'sesli-ozet', n:satirlar.length };
+  }
+  /* ---------- ÖĞRETMEN (kullanıcı, 2026-10-22: «King'i öğretmen yap») ----------
+     «türevi anlat», «bana olasılığı öğret», «ders: paragraf» → modülün KENDİ
+     anlatımı (kartlar.ders; AYS konu anlatımı, ESP öğrenme kartları) bölüm
+     bölüm bir ders kartında. Metni King yazmaz, model çağrılmaz; modülün
+     etiketi («elle yazıldı · doğrulanmadı») kartta durur. Sonunda «Anladım,
+     soru sor» modülün bankasından o konunun sorusunu getirir (söz 32 yolu);
+     yanlış cevapta «Konuyu yeniden anlat» önerilir, cevabı yine modül yazar
+     (AYS'de yanlış soru 1, 3, 7 gün sonra tekrar gelir). Modülde konu yoksa
+     ders kurulmaz ve mesaj olağan yoluna (Merkez) devam eder. */
+  const DERS_RE = /(?:^|\s)(?:anlat(?:ır m[ıi]s[ıi]n|abilir misin|sana)?|öğret(?:ir misin|sene)?|ders(?:i)? (?:ver|yap|anlat)|konu anlatımı)\s*[?.!]*\s*$|^(?:ders|konu anlatımı)\s*:/;
+  const DERS_DOLGU = /(^|\s)(bana|bir|biraz|kısaca|lütfen|king|konusunu|konusu|konu|ders|dersi|anlatımı|anlat\S*|öğret\S*|ver|yap|mısın|misin|musun|hakkında|bu|şu)(?=\s|$)/g;
+  function dersNiyeti(t){
+    if(!DERS_RE.test(t)) return null;
+    const konu = t.replace(/[.,!?;:]/g, ' ').replace(DERS_DOLGU, ' ').replace(DERS_DOLGU, ' ').replace(/\s+/g, ' ').trim();
+    if(konu.length < 3 || /^(bunu|şunu|onu|daha|bunları|onları|neden|niye)(\s|$)/.test(konu)) return null;
+    return { konu };
+  }
+  async function dersIsle(n, metin){
+    const K = ayar && ayar.kartlar;
+    if(!K || typeof K.ders !== 'function') return null;
+    let d = null;
+    try{ d = await K.ders(n.konu); }catch(e){ d = null; }
+    const yazi = (v, k) => String(v == null ? '' : v).trim().slice(0, k);
+    const bolumler = d && Array.isArray(d.bolumler) ? d.bolumler.filter(b => b && (b.metin || (b.liste && b.liste.length))).slice(0, 10)
+      .map(b => ({ baslik:yazi(b.baslik, 120), metin:yazi(b.metin, 1600), liste:(b.liste || []).slice(0, 10).map(x => yazi(x, 400)), dikkat:yazi(b.dikkat, 500) })) : [];
+    if(!d || !d.baslik || !bolumler.length) return null;
+    akis.push({ kim:'sen', metin:String(metin).trim() });
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; cipler = null;
+    const ders = { id:String(d.id || ''), baslik:yazi(d.baslik, 120), alt:yazi(d.alt, 120), giris:yazi(d.giris, 900),
+      etiket:yazi(d.etiket, 80), sorgu:yazi(d.sorgu || d.baslik, 120), soruVar:!!d.soruVar && typeof K.soru === 'function',
+      acilir:typeof K.dersAc === 'function', bolumler, adim:0 };
+    soyle(ders.baslik + ' · ders', null, null, null, { ders });
+    return { tur:'ders', bolum:bolumler.length };
+  }
+  function dersHtml(m, n){
+    const d = m.ders;
+    if(!d) return '';
+    const b = d.bolumler[d.adim] || d.bolumler[0], son = d.adim >= d.bolumler.length - 1;
+    return '<div class="king__ders" role="group" aria-label="Ders: ' + kac(d.baslik) + '">'
+      + '<div class="king__ders-bas"><span>' + kac(d.alt) + '</span>' + (d.etiket ? '<small>' + kac(d.etiket) + '</small>' : '') + '</div>'
+      + (d.adim === 0 && d.giris ? '<p class="king__ders-giris">' + bicimli(d.giris) + '</p>' : '')
+      + '<div class="king__ders-ilerleme">' + cubukHtml(Math.round((d.adim + 1) * 100 / d.bolumler.length), 'Bölüm ' + (d.adim + 1) + ' / ' + d.bolumler.length)
+      + '<small>' + (d.adim + 1) + ' / ' + d.bolumler.length + '</small></div>'
+      + '<h4 class="king__ders-baslik">' + kac(b.baslik) + '</h4>'
+      + (b.metin ? '<p>' + bicimli(b.metin) + '</p>' : '')
+      + (b.liste.length ? '<ul class="king__ders-liste">' + b.liste.map(x => '<li>' + bicimli(x) + '</li>').join('') + '</ul>' : '')
+      + (b.dikkat ? '<p class="king__ders-dikkat"><b>Dikkat</b> ' + bicimli(b.dikkat) + '</p>' : '')
+      + '<div class="king__ders-eylem">'
+      + (d.adim > 0 ? '<button type="button" class="king__cip" data-king="ders-geri:' + n + '">Önceki</button>' : '')
+      + (!son ? '<button type="button" class="king__cip' + (son ? '' : ' king__cip--ana') + '" data-king="ders-ileri:' + n + '">Devam</button>' : '')
+      + (d.soruVar ? '<button type="button" class="king__cip' + (son ? ' king__cip--ana' : '') + '" data-king="ders-soru:' + n + '">Anladım, soru sor</button>' : '')
+      + (ortam.sentez() ? '<button type="button" class="king__cip" data-king="ders-dinle:' + n + '">Dinle</button>' : '')
+      + (d.acilir ? '<button type="button" class="king__cip" data-king="ders-ac:' + n + '">Modülde aç</button>' : '')
+      + '</div></div>';
+  }
+  function dersAdim(n, fark){
+    const m = akis[n];
+    if(!m || !m.ders) return false;
+    m.ders.adim = Math.max(0, Math.min(m.ders.bolumler.length - 1, m.ders.adim + fark));
+    sakla();
+    ciz(false);
+    return true;
+  }
+  /* Yanlış cevaptan sonra: aynı konunun en son dersi yeniden, ilk bölümden. */
+  function dersBul(sorgu){
+    const s = kucuk(sorgu || '');
+    for(let i = akis.length - 1; i >= 0; i--) if(akis[i].ders && s && kucuk(akis[i].ders.sorgu) === s) return i;
+    return -1;
+  }
+  function dersTekrar(n){
+    const m = akis[n];
+    if(!m || !m.ders) return false;
+    cipler = null;
+    soyle('Bir daha bakalım: ' + m.ders.baslik, null, null, null, { ders:Object.assign({}, m.ders, { adim:0 }) });
+    return true;
   }
   /* ---------- söz 38: araştırma kartı (HKM arastirma.v1) ---------- */
   /* Sunucunun verisi süzülür: yalnız http(s) link, her bölümde en çok üç. */
@@ -40694,6 +40891,11 @@ window.LIFEOS.KING = (function(){
       ciz(false);
       return { tur:'envanter' };
     }
+    /* Öğretmen (2026-10-22): «türevi anlat» → modülün kendi anlatımından ders
+       kartı. Modülde o konu yoksa yol açık kalır (Merkez cevaplar). */
+    const DN = dersNiyeti(t0);
+    if(DN){ const r = await dersIsle(DN, metin); if(r) return r; }
+    if(SOZET_RE.test(t0)) return sesliOzet(metin);
     /* Söz 32: kartlar (istatistik, soru); «sorma» komutundan önce. */
     const KN = kartNiyeti(t0);
     if(KN) return kartIsle(KN, metin);
@@ -40820,7 +41022,8 @@ window.LIFEOS.KING = (function(){
   }
   /* Sohbet: anlatımdaki kayıtlar, modelsiz okuma, sonra HKM'deki King; olmazsa yerel. */
   async function merkezYolu(metin, y){
-    akis.push({ kim:'sen', metin:String(metin).trim() });
+    const senMesaj = Object.assign({ kim:'sen', metin:String(metin).trim() }, siradanSoru ? { sira:siradanSoru.zaman } : {});
+    akis.push(senMesaj);
     bekleyen = null;
     bekleyenGit = null;
     bekleyenIlet = null;
@@ -40875,6 +41078,16 @@ window.LIFEOS.KING = (function(){
         return { tur:'merkez', mode:r.mode };
       }
       neden = r.neden;
+    }
+    /* K4: Merkez kurulu ama ulaşılamıyor; Merkez'e giden soru sıraya girer. */
+    if(neden === 'baglanti' && !bulunan && y.tur === 'bilinmiyor'){
+      const n = siraEkle(metin);
+      /* Sıradan yeniden deneme başarısızsa sohbete hiçbir şey yazılmaz (dakikada bir gürültü olurdu). */
+      if(siradanSoru){ akis = akis.filter(m => m !== senMesaj); ciz(false); return { tur:'sira', n, sessiz:true }; }
+      cipler = [{ ad:'Sırayı gör', is:'bolum:kutuphane' }];
+      soyle('Merkeze (HKM) şu an ulaşılamadı. Sorunu sıraya aldım; bağlantı gelince kendim soracağım. Sırada ' + n + ' soru var.');
+      siraPlanla();
+      return { tur:'sira', n };
     }
     return yerel(y, neden, metin);
   }
@@ -41345,12 +41558,13 @@ window.LIFEOS.KING = (function(){
       + '<div class="king__hazirlar" role="group" aria-label="Hazır cevaplar">' + hazirlar + '</div></div>';
     const balonlar = satirlar.map((m, i) => m.kim === 'sen'
       ? (m.foto ? '<div class="king__balon king__balon--sen king__balon--foto"><img class="king__foto" src="' + kac(m.foto) + '" alt="Gönderdiğin fotoğraf"/></div>'
-        : '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p></div>')
+        : '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p>'
+          + (m.sira ? '<small class="king__siradan">sıradan · ' + kac(tarihYaz(m.sira)) + '</small>' : '') + '</div>')
       : m.bekliyor
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
       : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '"><div><p>' + bicimli(m.metin) + '</p>'
-        + kartlarHtml(m) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i) + arastirmaHtml(m, ilkSira + i) + k2Html(m, ilkSira + i)
+        + kartlarHtml(m) + dersHtml(m, ilkSira + i) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i) + arastirmaHtml(m, ilkSira + i) + k2Html(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
             + (m.onizleme.liste ? '<ul class="king__liste">' + m.onizleme.liste.map(x => '<li><b>' + kac(x) + '</b></li>').join('') + '</ul>'
@@ -41466,6 +41680,7 @@ window.LIFEOS.KING = (function(){
     if(mini) el.classList.add('is-mini');
     document.body.appendChild(el);
     isPlanla(800);                               // K1: işler; King açıkken yoklanır
+    ortam.zamanla(() => { siraBosalt(); siraPlanla(); }, 1200);   // K4: Merkez sırası
     tasimaYaz();
     cubukIsaretle();
     document.documentElement.classList.add(mini ? 'king-mini' : 'king-acik');
@@ -41609,6 +41824,15 @@ window.LIFEOS.KING = (function(){
         if(is === 'odak-dur'){ odakDur(); return; }
         if(/^odak-kaydet:\d+:/.test(is)){ const p = is.split(':'); cipler = null; isle(p[1] + ' dk ' + (decodeURIComponent(p.slice(2).join(':')) || 'çalıştım')); return; }
         if(/^soru-cevap:\d+:[A-E]$/.test(is)){ const p = is.split(':'); soruCevapla(Number(p[1]), p[2]); return; }
+        if(/^sozet-dinle:\d+$/.test(is)){ const x = sozetler()[Number(is.slice(12))]; if(x) seslendir(sozetMetni(x)); return; }
+        if(/^sira-sil:\d+$/.test(is)){ const l = sira(); l.splice(Number(is.slice(9)), 1); siraYaz(l); ciz(false); return; }
+        if(/^ders-(ileri|geri):\d+$/.test(is)){ const p = is.split(':'); dersAdim(Number(p[1]), p[0] === 'ders-ileri' ? 1 : -1); return; }
+        if(/^ders-soru:\d+$/.test(is)){ const m = akis[Number(is.slice(10))]; if(m && m.ders) isle('bana soru sor ' + m.ders.sorgu); return; }
+        if(/^ders-tekrar:\d+$/.test(is)){ dersTekrar(Number(is.slice(12))); return; }
+        if(/^ders-dinle:\d+$/.test(is)){ const m = akis[Number(is.slice(11))], b = m && m.ders && m.ders.bolumler[m.ders.adim];
+          if(b) seslendir([b.baslik, b.metin].concat(b.liste, b.dikkat ? ['Dikkat. ' + b.dikkat] : []).filter(Boolean).join('. ').replace(/\*\*/g, '')); return; }
+        if(/^ders-ac:\d+$/.test(is)){ const m = akis[Number(is.slice(8))], K = ayar && ayar.kartlar;
+          if(m && m.ders && K && K.dersAc){ kucult(); Promise.resolve(K.dersAc(m.ders.id)).catch(() => {}); } return; }
         if(/^soru-yeni:\d+$/.test(is)){ const m = akis[Number(is.slice(10))]; isle('bana bir soru daha sor' + (m && m.soru && m.soru.sorgu ? ' ' + m.soru.sorgu : '')); return; }
         if(/^derinlik:(oto|hizli|dengeli|derin)$/.test(is)){ derinlikSec(is.slice(9)); return; }
         if(is === 'kapat'){ sesli = false; kapat(); return; }
@@ -41734,6 +41958,8 @@ window.LIFEOS.KING = (function(){
       if(f) fotoAl(f);
       d.value = '';
     }, true);
+    /* K4: cihaz yeniden çevrimiçi olunca Merkez sırası. */
+    if(typeof window !== 'undefined' && window.addEventListener) window.addEventListener('online', () => { siraBosalt(); });
     document.addEventListener('paste', e => {
       if(!acik || !e.target || !e.target.closest || !e.target.closest('[data-king]')) return;
       const it = Array.from((e.clipboardData && e.clipboardData.items) || []).find(x => /^image\//.test(x.type));
@@ -42322,6 +42548,9 @@ window.LIFEOS.KING = (function(){
     }
     if(ayar) ortam.depo.sil(depoAnahtar());
     ortam.depo.sil(TASIMA);
+    ortam.depo.sil(SIRA); ortam.depo.sil(SOZET);
+    siradanSoru = null; siraCalisiyor = false;
+    if(siraSaat){ try{ clearInterval(siraSaat); }catch(e){ /* yok */ } siraSaat = null; }
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP); ortam.depo.sil(ALGILA); ortam.depo.sil(MIK); ortam.depo.sil(KAM); kamListe = [];
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
@@ -42361,7 +42590,7 @@ window.LIFEOS.KING = (function(){
     sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     yeniSohbet, kayitAc, ARACLAR, aktifKayit:() => aktifKayit,
-    BOLUMLER, bolumSec, bolum:() => bolum, listeGorunur, alanAc, pdfAl, nedenSatirlari, yetenekler,
+    BOLUMLER, bolumSec, bolum:() => bolum, listeGorunur, alanAc, pdfAl, nedenSatirlari, yetenekler, dersNiyeti, sira, siraBosalt, SIRA, SOZET, sozetler,
     KIPLER, kip, kipSec, klasorler, klasorEkle, klasorSil, kayitTasi, kayitAdlandir, kayitSabitle,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla, _videoKaynak:videoKaynak, _gorunurluk:gorunurluk,
@@ -47608,6 +47837,46 @@ R.SUBJECT_ALIASES = (function(){
   });
   return out.sort(function(a, b){ return b.alias.length - a.alias.length; });
 })();
+
+/* ==== js/data/sorusiklik.js ==== */
+/* ÜRETİLMİŞ DOSYA — BURAYI DÜZENLEME. Kaynak: veri/temiz/ays/konu_dagilimi.jsonl,
+   üreten: python tools/veri_ays_siklik.py
+
+   TYT Matematik'te konu başına yıllık soru sayısı (ikincil kaynak, «tahmin»).
+   null = kaynakta yok; sıfır sayılmaz. Öncelik hesabına GİRMEZ (calc.js
+   konunun freq alanını kullanır); konu ekranında kanıt olarak çizilir. */
+
+window.R = window.R || {};
+
+R.SORU_SIKLIK = {
+  kaynak:"https://www.ozeldersalani.com/yks-tyt-ayt-soru-dagilimi",
+  etiket:'tahmin',
+  sinav:'TYT Matematik',
+  yillar:[2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+  konular:{
+    'tm-01':[{"ad":"Temel Kavramlar","seri":[4,4,1,3,3,2,1,2],"ortak":false}],
+    'tm-02':[{"ad":"Sayı Basamakları","seri":[1,2,1,2,1,1,2,1],"ortak":false}],
+    'tm-03':[{"ad":"Bölünebilme Kuralları","seri":[null,1,1,1,1,1,1,2],"ortak":false}],
+    'tm-05':[{"ad":"Rasyonel Sayılar","seri":[null,1,3,null,2,2,2,1],"ortak":false}],
+    'tm-07':[{"ad":"Mutlak Değer","seri":[1,1,1,1,1,1,2,null],"ortak":false}],
+    'tm-08':[{"ad":"Üslü – Köklü Sayılar","seri":[1,2,2,2,2,2,2,2],"ortak":true}],
+    'tm-09':[{"ad":"Üslü – Köklü Sayılar","seri":[1,2,2,2,2,2,2,2],"ortak":true}],
+    'tm-11':[{"ad":"Oran – Orantı","seri":[null,null,1,1,1,1,null,1],"ortak":false}],
+    'tm-13':[{"ad":"Problemler (toplam)","seri":[11,12,13,11,13,10,11,14],"ortak":true}],
+    'tm-14':[{"ad":"Problemler (toplam)","seri":[11,12,13,11,13,10,11,14],"ortak":true}],
+    'tm-15':[{"ad":"Problemler (toplam)","seri":[11,12,13,11,13,10,11,14],"ortak":true}],
+    'tm-16':[{"ad":"Problemler (toplam)","seri":[11,12,13,11,13,10,11,14],"ortak":true}],
+    'tm-17':[{"ad":"Problemler (toplam)","seri":[11,12,13,11,13,10,11,14],"ortak":true}],
+    'tm-18':[{"ad":"Problemler (toplam)","seri":[11,12,13,11,13,10,11,14],"ortak":true}],
+    'tm-19':[{"ad":"Problemler (toplam)","seri":[11,12,13,11,13,10,11,14],"ortak":true}],
+    'tm-20':[{"ad":"Problemler (toplam)","seri":[11,12,13,11,13,10,11,14],"ortak":true}],
+    'tm-21':[{"ad":"Kümeler","seri":[2,1,1,1,1,1,1,1],"ortak":false}],
+    'tm-22':[{"ad":"Mantık","seri":[null,null,null,1,1,1,1,1],"ortak":false}],
+    'tm-23':[{"ad":"Fonksiyonlar","seri":[1,2,2,1,1,1,1,1],"ortak":false}],
+    'tm-26':[{"ad":"Permütasyon – Kombinasyon","seri":[1,1,2,null,null,1,3,2],"ortak":false},{"ad":"Olasılık","seri":[2,1,1,1,1,1,1,1],"ortak":false}],
+    'tm-27':[{"ad":"Veri – İstatistik","seri":[null,1,null,1,1,1,1,1],"ortak":false}],
+  },
+};
 
 /* ==== js/data/ozetler.js ==== */
 /* ÇEKİRDEK KONU ÖZETLERİ — her AYS konusunun uygulamanın İÇİNDE duran kısa özeti.
@@ -79730,6 +79999,28 @@ R.Ogren = (function(){
     const son = sonAcilan();
     return ilkCevapsiz((son && adaylar.find(k => k.topic.id === son.topic.id)) || adaylar[0]);
   }
+  /* Öğretmen (King, 2026-10-22): konunun anlatımı, yoksa çekirdek özeti, ders
+     olarak. Metin Öğren'in kendisidir (elle yazıldı · doğrulanmadı); King
+     yalnız bölüm bölüm gösterir. Konu bulunmazsa null: King ders kurmaz. */
+  function kingDers(konuMetni){
+    const t = String(konuMetni || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
+    if(t.length < 3) return null;
+    const OZ = R.KONU_OZET || {};
+    const adaylar = konular().filter(x => anlatim(x.topic.id) || OZ[x.topic.id]);
+    const ad = x => String(x.topic.name || '').toLocaleLowerCase('tr');
+    const kok = w => w.slice(0, Math.max(4, w.length - 2));
+    const x = adaylar.find(k => ad(k) === t) || adaylar.find(k => t.includes(ad(k)))
+      || adaylar.find(k => ad(k).includes(t))
+      || adaylar.find(k => t.split(' ').filter(w => w.length > 3).every(w => ad(k).includes(kok(w))));
+    if(!x) return null;
+    const a = anlatim(x.topic.id), oz = OZ[x.topic.id];
+    const bol = b => ({ baslik:b.baslik || '', metin:b.metin ? duzMetin(b.metin) : '',
+      liste:(b.liste || []).map(duzMetin), dikkat:b.dikkat ? duzMetin(b.dikkat) : '' });
+    const bolumler = a && Array.isArray(a.bolumler) && a.bolumler.length ? a.bolumler.map(bol)
+      : [bol({ baslik:'Özet', liste:oz.ana || [], dikkat:oz.dikkat })].concat(oz.ornek ? [bol({ baslik:'Örnek', metin:oz.ornek })] : []);
+    return { id:x.topic.id, baslik:x.topic.name, alt:x.subject.name, giris:a && a.giris ? duzMetin(a.giris) : '',
+      bolumler, etiket:'elle yazıldı · doğrulanmadı', sorgu:x.topic.name, soruVar:sorular(x.topic.id).length > 0 };
+  }
   /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). Yanlışsa
      soru yarın yeniden gelir; tekrarda doğruysa 3 ve 7 gün sonra; üç doğru
      turdan sonra takvimden çıkar. */
@@ -79754,7 +80045,7 @@ R.Ogren = (function(){
     tekrarYaz(tk);
     return { dogru:q.dogru, cozum:[].concat(q.cozum || []).map(duzMetin), not };
   }
-  return { HARFLER, SEVIYE, kingSoru, kingCevapla, oncelikler, TEKRAR, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
+  return { HARFLER, SEVIYE, kingSoru, kingCevapla, kingDers, oncelikler, TEKRAR, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
     derin, tabanSorular, seviye, gecerli, ekMetni, soru,
     anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle,
     kavramlar, akilliNot, kaynaklar, stratejiler };
@@ -79926,7 +80217,17 @@ R.KonuNotu = (function(){
         anahtarını değiştirmez (kod otoritedir). İşaretli soru karma test
         ve günlük paragraf havuzundan çıkar, Yanlışlarım'ın altında
         «Bildirdiğin hatalar» olarak durur, kopyalanıp iletilebilir. Soru
-        sonradan yenilenirse işaret kendiliğinden kapanır. */
+        sonradan yenilenirse işaret kendiliğinden kapanır.
+     7. SINAV PROVASI (kullanıcı, 2026-10-22: «canlı sınav simülatörü»). TYT
+        ya da AYT (sayısal) biçiminde: dersler ÖSYM'nin test sırasıyla ve
+        soru oranıyla (R.SUBJECTS.questions) gelir, süre gerçek sınavın
+        soru başına süresiyle ölçeklenir (TYT 165 dk / 120 soru, AYT 180 dk /
+        80 soru; ÖSYM kılavuzu). Sınav süresince doğru/yanlış gösterilmez,
+        çözüme bakılmaz; süre dolunca test kendiliğinden biter. Sonuçta net
+        ÖSYM kuralıyla hesaplanır (doğru − yanlış / 4; «hesaplandı»), ders
+        ders ve konu konu. Ölçüm kuralları karma testle aynıdır (söz 3–5):
+        ilk işaret kilitlenir, boş yanlış sayılmaz, yanlışlar Yanlışlarım'a
+        düşer, plan ve kapanış bu sonuca bakmaz. */
 
 window.R = window.R || {};
 
@@ -79935,6 +80236,12 @@ R.OgrenTest = (function(){
   const BOYLAR = [10, 20];
   const EN_AZ = 5;
   const GECMIS = 30;
+  /* Söz 7: ÖSYM süreleri ve test sırası (kılavuz); yalnız ölçek için. */
+  const PROVA = {
+    TYT:{ ad:'TYT', dk:165, soru:120, sira:['tyt-turkce', 'tyt-sosyal', 'tyt-matematik', 'tyt-fen'] },
+    AYT:{ ad:'AYT · sayısal', dk:180, soru:80, sira:['ayt-matematik', 'ayt-fizik', 'ayt-kimya', 'ayt-biyoloji'] },
+  };
+  const PROVA_BOY = [20, 40];
   let doc = bos();
 
   function bos(){ return { aktif:null, gecmis:[], tekrar:{}, isaret:{} }; }
@@ -80042,6 +80349,53 @@ R.OgrenTest = (function(){
     return { ok:true, n:secilen.length };
   }
 
+  /* Söz 7: sınav provası. Ders kotası soru oranıyla (en büyük kalan yöntemi);
+     ders havuzunda yeterli soru yoksa olanla yetinilir, eksik söylenir. */
+  /* Provanın planı: ders kotaları ve süre (kurulum ekranı da bunu gösterir). */
+  function provaPlani(sinav, boy){
+    const P = PROVA[sinav];
+    if(!P) return null;
+    const n = PROVA_BOY.indexOf(Number(boy)) >= 0 ? Number(boy) : PROVA_BOY[0];
+    const dersler = P.sira.map(id => (R.SUBJECTS || []).find(s => s.id === id)).filter(Boolean);
+    const top = dersler.reduce((a, s) => a + (s.questions || 0), 0) || 1;
+    const kota = dersler.map(s => ({ s, ham:n * (s.questions || 0) / top }));
+    kota.forEach(x => { x.n = Math.floor(x.ham); });
+    let kalan = n - kota.reduce((a, x) => a + x.n, 0);
+    kota.slice().sort((a, b) => (b.ham - b.n) - (a.ham - a.n)).forEach(x => { if(kalan > 0){ x.n++; kalan--; } });
+    return { sinav, ad:P.ad, n, sureDk:Math.max(1, Math.round(P.dk * n / P.soru)),
+      dersler:kota.map(x => ({ id:x.s.id, ad:x.s.name, n:x.n, havuz:havuz({ ders:x.s.id, konular:'hepsi', seviye:'hepsi' }).length })) };
+  }
+  async function provaBaslat(sinav, boy, simdiMs){
+    const P = PROVA[sinav];
+    if(!P) return { ok:false, neden:'sinav', metin:'Böyle bir sınav yok.' };
+    const plan = provaPlani(sinav, boy), n = plan.n;
+    const kota = plan.dersler.map(d => ({ s:(R.SUBJECTS || []).find(s => s.id === d.id), n:d.n }));
+    const secilen = [], eksik = [];
+    kota.forEach(x => {
+      const sinavTarzi = havuz({ ders:x.s.id, konular:'hepsi', seviye:'sinav' });
+      const h = sinavTarzi.length >= x.n ? sinavTarzi : havuz({ ders:x.s.id, konular:'hepsi', seviye:'hepsi' });
+      const al = serpistir(karistir(h).slice(0, x.n));
+      if(al.length < x.n) eksik.push(x.s.name + ' ' + al.length + '/' + x.n);
+      al.forEach(y => secilen.push(y.k));
+    });
+    if(secilen.length < Math.ceil(n / 2)){
+      return { ok:false, neden:'az', n:secilen.length, metin:'Bu prova için yeterli soru yok (' + secilen.length + ' / ' + n + ').' };
+    }
+    const sureDk = Math.max(1, Math.round(P.dk * secilen.length / P.soru));
+    const bas = typeof simdiMs === 'number' ? simdiMs : Date.now();
+    doc.aktif = { id:R.U.uid('ot'), kapsam:{ prova:sinav }, prova:{ sinav, sureDk, bitis:new Date(bas + sureDk * 60000).toISOString() },
+      sorular:secilen, cevaplar:{}, sira:0, basladi:new Date(bas).toISOString() };
+    await yaz();
+    return { ok:true, n:secilen.length, sureDk, eksik };
+  }
+  /* Kalan saniye; prova değilse null. Süre dolduysa 0. */
+  function kalanSn(simdiMs){
+    const a = doc.aktif;
+    if(!a || !a.prova) return null;
+    const ms = Date.parse(a.prova.bitis) - (typeof simdiMs === 'number' ? simdiMs : Date.now());
+    return Math.max(0, Math.round(ms / 1000));
+  }
+
   /* ---------- test sırasında (söz 3, 4) ---------- */
 
   function aktif(){ return doc.aktif; }
@@ -80062,14 +80416,16 @@ R.OgrenTest = (function(){
     const s = a ? soruOf(a.sorular[sira]) : null;
     if(!s || O().HARFLER.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
     if(a.cevaplar[sira]) return { ok:false, neden:'kilitli' };
+    if(a.prova && kalanSn() === 0) return { ok:false, neden:'sure' };
     const kayit = ip ? { h:harf, ip:true, at:simdi() } : { h:harf, at:simdi() };
     if(typeof sure === 'number' && sure > 0) kayit.sure = Math.round(sure);
     a.cevaplar[sira] = kayit;
     await yaz();
-    return { ok:true, dogru:harf === s.q.dogru };
+    return a.prova ? { ok:true } : { ok:true, dogru:harf === s.q.dogru };
   }
   async function bak(sira, sure){
     const a = doc.aktif;
+    if(a && a.prova) return { ok:false, neden:'prova' };            // söz 7: sınavda çözüme bakılmaz
     if(!a || !soruOf(a.sorular[sira])) return { ok:false, neden:'gecersiz' };
     if(a.cevaplar[sira]) return { ok:false, neden:'kilitli' };
     const kayit = { h:null, bak:true, at:simdi() };
@@ -80097,7 +80453,7 @@ R.OgrenTest = (function(){
     const a = doc.aktif;
     if(!a) return null;
     const sonuc = {
-      id:a.id, at:simdi(), basladi:a.basladi, kapsam:a.kapsam,
+      id:a.id, at:simdi(), basladi:a.basladi, kapsam:a.kapsam, prova:a.prova || null,
       sorular:a.sorular.map((k, j) => {
         const v = a.cevaplar[j];
         return v ? Object.assign({ k, h:v.h || null, bak:!!v.bak, at:v.at }, v.ip ? { ip:true } : {}, v.sure ? { sure:v.sure } : {}) : { k, h:null, bos:true };
@@ -80130,6 +80486,22 @@ R.OgrenTest = (function(){
       y.n++; if(d) y.dogru++;
     });
     r.ortSure = saySure ? Math.round(topSure / saySure) : null;
+    /* Söz 7: provada net ÖSYM kuralıyla (doğru − yanlış/4), ders ders; çözüme bakılan yok. */
+    if(t.prova){
+      const net = x => Math.round((x.dogru - x.yanlis / 4) * 100) / 100;
+      const ders = {};
+      t.sorular.forEach(x => {
+        const s = soruOf(x.k, x.at || t.at);
+        if(!s) return;
+        const y = ders[s.subject.id] || (ders[s.subject.id] = { id:s.subject.id, ad:s.subject.name, n:0, dogru:0, yanlis:0, bos:0 });
+        y.n++;
+        if(x.bos) y.bos++; else if(dogruMu(s.q, x)) y.dogru++; else y.yanlis++;
+      });
+      const P = PROVA[t.prova.sinav] || { sira:[] };
+      r.prova = { sinav:t.prova.sinav, ad:(P.ad || t.prova.sinav), sureDk:t.prova.sureDk, net:net(r),
+        kullanilanDk:t.basladi ? Math.max(0, Math.round((Date.parse(t.at) - Date.parse(t.basladi)) / 60000)) : null,
+        dersler:Object.values(ders).sort((a, b) => P.sira.indexOf(a.id) - P.sira.indexOf(b.id)).map(y => Object.assign(y, { net:net(y) })) };
+    }
     r.konular = Object.values(kon).sort((a, b) => (a.dogru / a.n) - (b.dogru / b.n) || b.n - a.n
       || a.topic.name.localeCompare(b.topic.name, 'tr'));
     return r;
@@ -80220,7 +80592,7 @@ R.OgrenTest = (function(){
       + 'Uygulamadaki cevap: ' + x.q.dogru + (x.isaret.not ? '\nNot: ' + x.isaret.not : '')).join('\n\n');
   }
 
-  return { STORE, BOYLAR, EN_AZ, yukle, soruOf, havuz, baslat, aktif, siradaki, git, cevapla, bak, say,
+  return { STORE, BOYLAR, EN_AZ, PROVA, PROVA_BOY, provaPlani, provaBaslat, kalanSn, yukle, soruOf, havuz, baslat, aktif, siradaki, git, cevapla, bak, say,
     bitir, vazgec, ozet, gecmis, sonDenemeler, yanlislar, tekrarCevapla,
     isaretOf, isaretle, isaretKaldir, isaretliler, isaretMetni };
 })();
@@ -106919,8 +107291,31 @@ R.Screens.topic = (function(){
           K.Chip('tahmini ' + topic.days),
           when(weeks.length, () => K.Chip('plan: H' + weeks.join(', H'))),
         ], { wrap:true })}
-        <p class="small muted mt-10">${freq.note}</p>`,
+        <p class="small muted mt-10">${freq.note}</p>
+        ${raw(soruSiklikHtml(topic))}`,
     });
+  }
+
+  /* SORU SIKLIĞI (data/sorusiklik.js, 2026-10-22): konunun TYT'de yıllara göre
+     soru sayısı, ikincil kaynaktan («tahmin»). Kaynakta yılı olmayan sütun
+     kesiktir (sıfır değil). Öncelik hesabına girmez; yalnız kanıt olarak durur. */
+  function soruSiklikHtml(topic){
+    const SS = R.SORU_SIKLIK, l = SS && SS.konular && SS.konular[topic.id];
+    const P = (window.LIFEOS || {}).PANO;
+    if(!l || !P) return '';
+    const yil = y => '’' + String(y).slice(2);
+    const seri = x => {
+      const metin = SS.yillar.map((y, i) => y + ' ' + (x.seri[i] == null ? 'veri yok' : x.seri[i] + ' soru')).join(', ');
+      return '<div class="soru-siklik__s"><p class="small"><b>' + U.esc(x.ad) + '</b>'
+        + (x.ortak ? ' <span class="muted">· bu konu dahil, türlerin toplamı</span>' : '') + '</p>'
+        + P.sutun({ degerler:x.seri, yukseklik:36, gunler:SS.yillar.map(yil),
+            etiket:SS.sinav + ', ' + x.ad + ': ' + metin }) + '</div>';
+    };
+    return '<div class="soru-siklik mt-12" data-oz="soru-siklik"><p class="small muted">' + U.esc(SS.sinav)
+      + '’te yıllara göre soru · ' + SS.yillar[0] + '–' + SS.yillar[SS.yillar.length - 1] + '</p>'
+      + l.map(seri).join('')
+      + '<p class="small muted">Kesik sütun: kaynakta o yıl yok. İkincil kaynak (<a href="' + U.esc(SS.kaynak)
+      + '" target="_blank" rel="noopener">ozeldersalani.com</a>), etiket «tahmin»; öncelik sırasını değiştirmez.</p></div>';
   }
 
   /* ÖĞRENME YOLU (core/ogrenyolu.js): altı adım, sıradaki adım ve eylemi.
@@ -108080,7 +108475,7 @@ R.Screens = R.Screens || {};
      ================================================================ */
 
   const T = () => R.OgrenTest;
-  const DURUM_AD = { bos:'cevaplanmadı', bakildi:'çözüme bakıldı', dogru:'doğru', yanlis:'yanlış' };
+  const DURUM_AD = { bos:'cevaplanmadı', bakildi:'çözüme bakıldı', dogru:'doğru', yanlis:'yanlış', isaretli:'işaretlendi' };
   const durumOf = (q, v) => !v ? 'bos' : v.bak ? 'bakildi' : v.h === q.dogru ? 'dogru' : 'yanlis';
   const KAYNAK_AD = { konu:'konu sorusu', test:'karma test', tekrar:'yeniden çözüm' };
 
@@ -108127,12 +108522,23 @@ R.Screens = R.Screens || {};
   function baslatSoruSayac(){
     if(typeof window === 'undefined') return;
     if(soruTimerId){ clearInterval(soruTimerId); soruTimerId = null; }
-    const el = document.getElementById('ogr-soru-sayac');
+    const el = document.getElementById('ogr-soru-sayac') || document.getElementById('ogr-prova-kalan');
     if(!el) return;
     if(!S.ui.soruGiris) S.ui.soruGiris = Date.now();
     const guncelle = () => {
+      const pk = document.getElementById('ogr-prova-kalan');
+      if(pk){
+        const kalan = T().kalanSn();
+        pk.textContent = sureYaz(kalan);
+        if(kalan === 0 && !S.ui.provaBitiyor){
+          S.ui.provaBitiyor = true;
+          T().bitir().then(oz => { S.ui.provaSonuc = oz ? oz.id : null; S.ui.provaBitiyor = false;
+            UI.toast('Süre doldu; prova bitti.'); R.App.render(); });
+        }
+      }
       const g = document.getElementById('ogr-soru-sayac');
-      if(!g){ if(soruTimerId){ clearInterval(soruTimerId); soruTimerId = null; } return; }
+      if(!g && !pk){ if(soruTimerId){ clearInterval(soruTimerId); soruTimerId = null; } return; }
+      if(!g) return;
       const sn = Math.max(0, Math.floor((Date.now() - (S.ui.soruGiris || Date.now())) / 1000));
       const dk = Math.floor(sn / 60);
       const s = sn % 60;
@@ -108200,12 +108606,14 @@ R.Screens = R.Screens || {};
     const tkAcik = !!(o.taktik && S.ui.taktik === o.taktik);
     const secenek = (metin, k) => {
       const harf = O().HARFLER[k];
-      const durum = !acik ? '' : harf === q.dogru ? 'is-dogru' : v.h === harf ? 'is-yanlis' : 'is-soluk';
+      const durum = !acik ? '' : o.gizli ? (v.h === harf ? 'is-secili' : 'is-soluk')
+        : harf === q.dogru ? 'is-dogru' : v.h === harf ? 'is-yanlis' : 'is-soluk';
       return html`<button class="${cls('secenek', durum)}" data-act="${o.cevapAct}" data-harf="${harf}"
           ${acik ? raw('disabled aria-disabled="true"') : ''}>
         <span class="secenek__harf" aria-hidden="true">${harf}</span><span class="secenek__metin">${fmt(metin)}</span>
-        ${when(acik && harf === q.dogru, () => html`<span class="sr-only">doğru cevap</span>`)}
-        ${when(acik && v.h === harf && harf !== q.dogru, () => html`<span class="sr-only">senin cevabın</span>`)}
+        ${when(acik && !o.gizli && harf === q.dogru, () => html`<span class="sr-only">doğru cevap</span>`)}
+        ${when(acik && o.gizli && v.h === harf, () => html`<span class="sr-only">işaretlediğin</span>`)}
+        ${when(acik && !o.gizli && v.h === harf && harf !== q.dogru, () => html`<span class="sr-only">senin cevabın</span>`)}
       </button>`;
     };
     const d = durumOf(q, v);
@@ -108233,7 +108641,9 @@ R.Screens = R.Screens || {};
         ${when(o.taktikNot && o.taktik && !tkAcik, () => K.Button({ label:'Taktik', icon:'zap', size:'sm', tone:'ghost', act:'soru-taktik', data:{ 'data-tk':o.taktik } }))}
         ${when(o.bakAct, () => K.Button({ label:'Cevaplamadan çözümü gör', size:'sm', tone:'ghost', act:o.bakAct }))}
       </div>`)}
-      ${when(acik, () => html`<div class="${cls('ogr-sonuc', 'is-' + d)}">
+      ${when(acik && o.gizli, () => html`<div class="ogr-sonuc is-isaretli"><p class="small"><b>İşaretlendi: ${v.h}</b>
+        · doğru cevap ve çözüm prova bitince</p></div>`)}
+      ${when(acik && !o.gizli, () => html`<div class="${cls('ogr-sonuc', 'is-' + d)}">
         <p class="small"><b>${sonuc}</b></p>
         ${when(v && v.sure, () => tempoRozeti(v.sure, o.ders))}
         ${o.ust || ''}
@@ -108305,6 +108715,7 @@ R.Screens = R.Screens || {};
   /* ---------- Karma test ---------- */
 
   function kapsamAdi(k){
+    if(k && k.prova) return 'Sınav provası · ' + ((T().PROVA[k.prova] || {}).ad || k.prova);
     const s = R.SUBJECTS.find(x => x.id === (k && k.ders));
     return (s ? s.name : 'Bütün dersler') + ' · ' + (k && k.konular === 'okunan' ? 'okuduğum konular' : 'bütün konular')
       + (k && k.seviye === 'sinav' ? ' · sınav tarzı' : '');
@@ -108349,27 +108760,46 @@ R.Screens = R.Screens || {};
         <span class="ogr-konu__ok" aria-hidden="true">${raw(UI.icon('right'))}</span></button>`)}</div>` });
   }
 
+  /* SINAV PROVASI (core/ogrentest.js söz 7): geri sayım ve tempo. Tempo
+     eşik çubuğu: cevaplanan oranı, geçen sürenin oranına karşı; üstündeysen
+     sınav temposunun önündesin. */
+  const sureYaz = sn => { sn = Math.max(0, Number(sn) || 0); const d = Math.floor(sn / 60), s = sn % 60; return (d < 10 ? '0' : '') + d + ':' + (s < 10 ? '0' : '') + s; };
+  function provaUst(a, sy){
+    const kalan = T().kalanSn(), top = a.prova.sureDk * 60;
+    const gecen = Math.max(0, top - (kalan || 0));
+    const G = (window.LIFEOS || {}).GRAFIK;
+    const tempo = G ? G.esikCubukHtml({ deger:Math.round(sy.cevaplanan * 100 / sy.toplam), esik:Math.round(gecen * 100 / top),
+      olcek:100, birim:'%', etiket:'Tempo · cevaplanan / geçen süre', yon:'artis-iyi' }) : '';
+    return html`<div class="ogr-prova-ust mt-10">
+      <span class="ogr-prova-kalan" id="ogr-prova-kalan" role="timer" aria-label="Kalan süre">${sureYaz(kalan)}</span>
+      <span class="tiny dim">kalan · ${a.prova.sureDk} dk</span></div>
+      <div class="mt-8">${raw(tempo)}</div>`;
+  }
+
   function karmaSoruKarti(){
     const a = T().aktif(), y = T().siradaki(), sy = T().say(a);
+    const prova = !!a.prova;
     const sonMu = y.sira === y.toplam - 1;
-    const durum = k => { const s = T().soruOf(a.sorular[k]); return s ? durumOf(s.q, a.cevaplar[k]) : 'bos'; };
-    const bas = kartBasi('Karma test', kapsamAdi(a.kapsam) + ' · ' + sy.cevaplanan + ' / ' + sy.toplam + ' cevaplandı',
-      K.Button({ label:'Vazgeç', size:'sm', tone:'ghost', act:'karma-vazgec' }));
+    const durum = k => { const s = T().soruOf(a.sorular[k]); return !s ? 'bos' : prova ? (a.cevaplar[k] ? 'isaretli' : 'bos') : durumOf(s.q, a.cevaplar[k]); };
+    const bas = html`${kartBasi(prova ? 'Sınav provası' : 'Karma test', kapsamAdi(a.kapsam) + ' · ' + sy.cevaplanan + ' / ' + sy.toplam + (prova ? ' işaretlendi' : ' cevaplandı'),
+      K.Button({ label:'Vazgeç', size:'sm', tone:'ghost', act:'karma-vazgec' }))}${prova ? provaUst(a, sy) : ''}`;
     const nav = html`<div class="row between wrap gap-6 mt-16">
       ${y.sira > 0 ? K.Button({ label:'Önceki', icon:'left', size:'sm', tone:'ghost', act:'test-git', data:{ 'data-i':String(y.sira - 1) } }) : html`<span></span>`}
       ${!sonMu ? K.Button({ label:'Sonraki soru', icon:'right', size:'sm', tone:y.v ? 'primary' : null, act:'test-git', data:{ 'data-i':String(y.sira + 1) } })
         : K.Button({ label:'Testi bitir', icon:'check', size:'sm', tone:'primary', act:'karma-bitir' })}
     </div>`;
-    const erken = when(!sonMu, () => html`<div class="mt-10">${K.Button({ label:'Testi şimdi bitir', size:'sm', tone:'ghost', act:'karma-bitir' })}</div>`);
+    const erken = when(!sonMu, () => html`<div class="mt-10">${K.Button({ label:prova ? 'Provayı şimdi bitir' : 'Testi şimdi bitir', size:'sm', tone:'ghost', act:'karma-bitir' })}</div>`);
     if(!y.s){
       return K.Card({ wide:true, body:html`${bas}${noktalar(y.toplam, y.sira, durum, 'test-git')}
         ${K.Notice({ tone:'info', body:'Bu soru içerikten kaldırıldı; boş sayılır.' })}${nav}${erken}` });
     }
-    const ust = y.v ? html`<p class="tiny dim mt-6">Konu: ${y.s.subject.name} · ${y.s.topic.name}</p>` : '';
+    const ust = y.v && !prova ? html`<p class="tiny dim mt-6">Konu: ${y.s.subject.name} · ${y.s.topic.name}</p>` : '';
     return K.Card({ wide:true,
       body:html`${bas}
         ${noktalar(y.toplam, y.sira, durum, 'test-git')}
-        ${soruGovdesi(y.s.q, y.v, { etiket:'Soru ' + (y.sira + 1) + ' / ' + y.toplam, seviye:O().seviye(y.s.topic.id, y.s.i),
+        ${soruGovdesi(y.s.q, y.v, prova
+          ? { etiket:y.s.subject.name + ' · soru ' + (y.sira + 1) + ' / ' + y.toplam, cevapAct:'test-cevap', ders:y.s.subject.id, gizli:true }
+          : { etiket:'Soru ' + (y.sira + 1) + ' / ' + y.toplam, seviye:O().seviye(y.s.topic.id, y.s.i),
           ipucu:'test:' + a.id + '#' + y.sira, cevapAct:'test-cevap', bakAct:'test-bak',
           ders:y.s.subject.id,
           ust, eylemler:soruEylemleri(y.s, y.v, y.s.k) })}
@@ -108403,8 +108833,65 @@ R.Screens = R.Screens || {};
         <p class="tiny dim mt-12">Bu sonuç bir ölçümdür; plan ve kapanış ona bakmaz. Boş bırakılan soru yanlış sayılmaz.</p>` });
   }
 
+  function provaKurulum(){
+    const sinav = T().PROVA[S.ui.provaSinav] ? S.ui.provaSinav : 'TYT';
+    const boy = T().PROVA_BOY.indexOf(Number(S.ui.provaBoy)) >= 0 ? Number(S.ui.provaBoy) : T().PROVA_BOY[0];
+    const p = T().provaPlani(sinav, boy), P = T().PROVA[sinav];
+    return K.Card({ wide:true,
+      body:html`${kartBasi('Sınav provası', 'Gerçek sınavın sırası, oranı ve temposu; sonuç bitince')}
+        <div class="ogr-kurulum">
+          <div><span class="ders__etiket tiny">Sınav</span>${K.Segmented({ act:'prova-sinav', value:sinav, aria:'Sınav',
+            items:Object.keys(T().PROVA).map(k => ({ value:k, label:T().PROVA[k].ad })) })}</div>
+          <div><span class="ders__etiket tiny">Soru sayısı</span>${K.Segmented({ act:'prova-boy', value:boy, aria:'Soru sayısı',
+            items:T().PROVA_BOY.map(n => ({ value:n, label:String(n) })) })}</div>
+        </div>
+        <div class="ogr-prova-plan mt-12">${map(p.dersler, d => html`<span class="${cls('ogr-prova-ders', d.havuz < d.n && 'is-eksik')}"
+          title="${d.havuz < d.n ? 'Havuzda ' + d.havuz + ' soru var' : ''}"><b>${d.n}</b> ${d.ad}</span>`)}
+          <span class="ogr-prova-ders"><b>${p.sureDk}</b> dk</span></div>
+        <div class="mt-16">${K.Button({ label:'Provayı başlat', icon:'right', tone:'primary', act:'prova-baslat' })}</div>
+        <p class="tiny dim mt-12">Süre gerçek sınavın soru başına süresiyle ölçeklenir (${P.ad}: ${P.dk} dk / ${P.soru} soru, ÖSYM).
+          Sınavda doğru/yanlış ve çözüm görünmez; ilk işaretin kilitlenir, süre dolunca prova biter. Net ÖSYM kuralıyla
+          hesaplanır: doğru − yanlış / 4. Sonuç bir ölçümdür; plan ve kapanış ona bakmaz.</p>` });
+  }
+  function provaSonucKarti(oz){
+    const p = oz.prova, P = (window.LIFEOS || {}).PANO;
+    const virgul = x => String(x).replace('.', ',');
+    const satir = d => ({ ad:d.ad, oran:d.n ? d.dogru / d.n : null, metin:'net ' + virgul(d.net) });
+    return K.Card({ wide:true,
+      body:html`${kartBasi('Prova sonucu', tarihAdi(oz.at) + ' · ' + p.ad + ' · ' + oz.toplam + ' soru',
+          K.Button({ label:'Yeni prova', size:'sm', tone:'ghost', act:'prova-yeni' }))}
+        <div class="ogr-sayilar">
+          ${K.Stat({ label:'Net · hesaplandı', value:virgul(p.net), unit:' / ' + oz.toplam })}
+          ${K.Stat({ label:'Doğru', value:oz.dogru })}
+          ${K.Stat({ label:'Yanlış', value:oz.yanlis })}
+          ${K.Stat({ label:'Boş', value:oz.bos })}
+        </div>
+        ${when(p.kullanilanDk != null, () => html`<p class="small mt-10">${Math.min(p.kullanilanDk, p.sureDk)} / ${p.sureDk} dk kullanıldı</p>`)}
+        ${when(P && p.dersler.length, () => html`<div class="ders__etiket tiny mt-16">Test test · çubuk doğru oranı</div>
+          <div class="mt-8">${raw(P.cubuklar({ satirlar:p.dersler.map(satir),
+            etiket:p.dersler.map(d => d.ad + ': ' + d.dogru + ' doğru, ' + d.yanlis + ' yanlış, ' + d.bos + ' boş, net ' + virgul(d.net)).join('; ') }))}</div>`)}
+        <p class="tiny dim mt-12">Net = doğru − yanlış / 4 (ÖSYM). Boş net düşürmez.</p>` });
+  }
+  function provaKip(){
+    const a = T().aktif();
+    if(a && a.prova) return [karmaSoruKarti()];
+    if(a) return [K.Card({ wide:true, body:html`${K.Notice({ tone:'info', body:'Süren bir karma test var; prova için önce onu bitir ya da vazgeç.' })}
+      <div class="mt-10">${K.Button({ label:'Karma teste dön', size:'sm', tone:'primary', act:'sorular-kip', data:{ 'data-tab':'karma' } })}</div>` })];
+    const oz = S.ui.provaSonuc ? T().gecmis().find(t => t.id === S.ui.provaSonuc) : null;
+    const gecmis = T().gecmis().filter(t => t.prova);
+    const liste = gecmis.length ? K.Card({ title:'Geçmiş provalar', sub:U.plural(gecmis.length, 'prova', 'prova') + ' · net hesaplandı',
+      body:html`<div class="list list--sik">${map(gecmis.slice(0, 8), t => html`<button class="listitem listitem--tap ogr-konu" data-act="prova-sonuc" data-id="${t.id}">
+        <span class="grow minw0"><span class="small strong">net ${String(t.prova.net).replace('.', ',')} · ${t.dogru} / ${t.toplam} doğru</span>
+          <span class="tiny dim">${tarihAdi(t.at)} · ${t.prova.ad}</span></span>
+        <span class="ogr-konu__ok" aria-hidden="true">${raw(UI.icon('right'))}</span></button>`)}</div>` }) : null;
+    return (oz && oz.prova ? [provaSonucKarti(oz), karmaSonucKarti(oz)] : [provaKurulum()]).concat(liste ? [liste] : []);
+  }
+
   function karmaKip(){
-    if(T().aktif()) return [karmaSoruKarti()];
+    const ak = T().aktif();
+    if(ak && ak.prova) return [K.Card({ wide:true, body:html`${K.Notice({ tone:'info', body:'Süren bir sınav provası var.' })}
+      <div class="mt-10">${K.Button({ label:'Provaya dön', size:'sm', tone:'primary', act:'sorular-kip', data:{ 'data-tab':'prova' } })}</div>` })];
+    if(ak) return [karmaSoruKarti()];
     const sid = S.ui.karmaSonuc;
     const oz = sid ? T().gecmis().find(t => t.id === sid) : null;
     return oz ? [karmaSonucKarti(oz), gecmisKarti()] : [karmaKurulum(), gecmisKarti()];
@@ -108540,11 +109027,12 @@ R.Screens = R.Screens || {};
     return K.Subtabs({ act:'sorular-kip', value:kip, aria:'Soru kipi', items:[
       { id:'konu', label:'Bu konu' },
       { id:'paragraf', label:'Günlük paragraf', count:po && po.toplam ? po.cevaplanan + '/' + po.toplam : null },
-      { id:'karma', label:'Karma test', count:a ? T().say(a).cevaplanan + '/' + a.sorular.length : null },
+      { id:'karma', label:'Karma test', count:a && !a.prova ? T().say(a).cevaplanan + '/' + a.sorular.length : null },
+      { id:'prova', label:'Sınav provası', count:a && a.prova ? T().say(a).cevaplanan + '/' + a.sorular.length : null },
       { id:'yanlis', label:'Yanlışlarım', count:n || null },
     ] });
   }
-  const kipOf = () => ['konu', 'paragraf', 'karma', 'yanlis'].indexOf(S.ui.ogrenKip) >= 0 ? S.ui.ogrenKip : 'konu';
+  const kipOf = () => ['konu', 'paragraf', 'karma', 'prova', 'yanlis'].indexOf(S.ui.ogrenKip) >= 0 ? S.ui.ogrenKip : 'konu';
 
   /* Bir sorunun kimliği: data-k varsa o (karma, yeniden çözüm), yoksa
      bu konunun ekrandaki sorusu. */
@@ -108563,6 +109051,7 @@ R.Screens = R.Screens || {};
     subtitle(){
       const kip = kipOf();
       if(kip === 'karma') return 'Konular karışık; sonuç konu konu';
+      if(kip === 'prova') return 'Gerçek sınavın temposu; sonuç bitince';
       if(kip === 'yanlis') return 'Yanlış çözdüklerini yeniden çöz';
       if(kip === 'paragraf') return 'Her gün birkaç paragraf; bitince gün kaydına';
       const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Örnek sorular';
@@ -108573,6 +109062,11 @@ R.Screens = R.Screens || {};
       const sekme = raw(kipSekmeleri(kip));
       setTimeout(baslatSoruSayac, 30);
       if(kip === 'karma') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(karmaKip())))]));
+      if(kip === 'prova'){
+        const a = T().aktif();
+        if(a && a.prova && T().kalanSn() === 0){ const oz = await T().bitir(); S.ui.provaSonuc = oz ? oz.id : null; }
+        return String(K.Grid([K.Span(12, K.Stack([raw(kipSekmeleri(kip))].concat(provaKip())))]));
+      }
       if(kip === 'yanlis') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(yanlisKip())))]));
       if(kip === 'paragraf'){
         if(P()) await P().hazirla();
@@ -108691,7 +109185,8 @@ R.Screens = R.Screens || {};
       async 'test-cevap'(el){
         const y = T().siradaki(), a = T().aktif();
         const sure = gecenSure();
-        if(y) await T().cevapla(y.sira, el.dataset.harf, S.ui.ipucu === 'test:' + a.id + '#' + y.sira, sure);
+        const r = y ? await T().cevapla(y.sira, el.dataset.harf, !a.prova && S.ui.ipucu === 'test:' + a.id + '#' + y.sira, sure) : null;
+        if(r && r.neden === 'sure'){ const oz = await T().bitir(); S.ui.provaSonuc = oz ? oz.id : null; UI.toast('Süre doldu; prova bitti.'); }
         R.App.render();
       },
       async 'test-bak'(){
@@ -108724,8 +109219,8 @@ R.Screens = R.Screens || {};
       async 'karma-bitir'(){
         const a = T().aktif();
         if(!a) return;
-        const bos = T().say(a).bos;
-        const bitir = async () => { const oz = await T().bitir(); S.ui.karmaSonuc = oz ? oz.id : null; window.scrollTo(0, 0); R.App.render(); };
+        const bos = T().say(a).bos, prova = !!a.prova;
+        const bitir = async () => { const oz = await T().bitir(); S.ui[prova ? 'provaSonuc' : 'karmaSonuc'] = oz ? oz.id : null; window.scrollTo(0, 0); R.App.render(); };
         if(!bos) return bitir();
         UI.confirmSheet('Testi bitir', U.plural(bos, 'soru', 'soru') + ' cevapsız: boş sayılır, yanlış sayılmaz.', bitir, false, 'Bitir');
       },
@@ -108733,6 +109228,19 @@ R.Screens = R.Screens || {};
         UI.confirmSheet('Testten vazgeç', 'Bu test silinir; geçmişe hiçbir şey yazılmaz.',
           async () => { await T().vazgec(); R.App.render(); }, true, 'Vazgeç');
       },
+      async 'prova-sinav'(el){ S.ui.provaSinav = el.dataset.value; R.App.render(); },
+      async 'prova-boy'(el){ S.ui.provaBoy = Number(el.dataset.value) || T().PROVA_BOY[0]; R.App.render(); },
+      async 'prova-baslat'(){
+        const r = await T().provaBaslat(T().PROVA[S.ui.provaSinav] ? S.ui.provaSinav : 'TYT', S.ui.provaBoy || T().PROVA_BOY[0]);
+        if(!r.ok){ UI.toast(r.metin, { life:6000 }); return; }
+        if(r.eksik.length) UI.toast('Havuz yetmedi: ' + r.eksik.join(', ') + '. Prova ' + r.n + ' soruyla, ' + r.sureDk + ' dk.', { life:6000 });
+        S.ui.provaSonuc = null;
+        soruSifirlaSure();
+        window.scrollTo(0, 0);
+        R.App.render();
+      },
+      async 'prova-sonuc'(el){ S.ui.provaSonuc = el.dataset.id; window.scrollTo(0, 0); R.App.render(); },
+      async 'prova-yeni'(){ S.ui.provaSonuc = null; R.App.render(); },
       async 'karma-sonuc'(el){ S.ui.karmaSonuc = el.dataset.id; window.scrollTo(0, 0); R.App.render(); },
       async 'karma-yeni'(){ S.ui.karmaSonuc = null; soruSifirlaSure(); R.App.render(); },
       /* Yanlışlarım */
@@ -118379,6 +118887,10 @@ R.App = (function(){
             },
             soru:konu => R.Ogren.kingSoru(konu),
             cevapla:(id, harf) => R.Ogren.kingCevapla(id, harf),
+            /* Öğretmen: konu anlatımı ders olarak; «Modülde aç» Öğren'i o konuda açar. */
+            ders:konu => R.Ogren.kingDers(konu),
+            dersOrnek:'türevi anlat',
+            dersAc:async id => { const x = R.Ogren.konuyuBul(id); if(x.subject){ await R.Ogren.sec(x.subject.id, id); go('ogren'); } },
             /* Söz 34: puan önceliği (Öğren'in hesabı) ve konuyu Öğren'de açmak. */
             oncelik:() => R.Ogren.oncelikler(5),
             oncelikAc:async o => { if(o && o.topicId){ await R.Ogren.sec(o.subjectId, o.topicId); go('ogren'); } },

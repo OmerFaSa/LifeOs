@@ -13952,6 +13952,30 @@ button.king__ekran-onizle:focus-visible{ outline:2px solid var(--k-vurgu); outli
 }
 @media (prefers-reduced-motion:reduce){ .king:not(.is-mini) .king__alan{ animation:none; } .king__canli-nokta{ animation:none; } }
 
+/* ======================================================================
+   ÖĞRETMEN — ders kartı (king.js «ÖĞRETMEN», 2026-10-22). Modülün metni
+   bölüm bölüm; üstte modül ve etiketi, ince ilerleme çubuğu, altta eylemler.
+   Kart dili cevap kartlarıyla aynı: düz yüzey, ince çizgi, gölge yok.
+   ====================================================================== */
+.king__ders{ display:flex; flex-direction:column; gap:10px; margin-top:var(--sp-2); padding:14px 16px;
+  border-radius:var(--r-md); background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); }
+.king__ders-bas{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 12px;
+  font-size:var(--fs-xs); font-weight:600; color:var(--text-2); }
+.king__ders-bas small{ font-weight:500; color:var(--text-3); }
+.king__ders-giris{ margin:0; font-size:var(--fs-sm); color:var(--text-2); line-height:1.55; }
+.king__ders-ilerleme{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:10px; }
+.king__ders-ilerleme small{ font-size:var(--fs-xs); color:var(--text-3); font-variant-numeric:tabular-nums; }
+.king__ders-ilerleme .king__cubuk{ margin:0; }
+.king__ders-baslik{ margin:2px 0 0; font-size:var(--fs-md); font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.king__ders p{ margin:0; line-height:1.6; }
+.king__ders-liste{ margin:0; padding-left:1.1em; display:flex; flex-direction:column; gap:6px; line-height:1.55; }
+.king__ders-dikkat{ padding:8px 12px; border-radius:var(--r-sm); background:var(--surface-2); font-size:var(--fs-sm); }
+.king__ders-dikkat b{ margin-right:6px; }
+.king__ders-eylem{ display:flex; flex-wrap:wrap; gap:6px; margin-top:2px; }
+
+/* K4: sıradan sorulan sorunun balonunda küçük not (ne zaman sorulmuştu). */
+.king__siradan{ display:block; margin-top:4px; font-size:var(--fs-xs); color:var(--text-3); text-align:right; }
+
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/giris.css içine yazılır; burası bir sonraki
@@ -15724,7 +15748,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -17258,7 +17282,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'7f39f868', at:'2026-10-22 15:35', dirty:true };
+SP.BUILD = { id:'e4828c7c', at:'2026-10-22 19:03', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -38457,6 +38481,7 @@ window.LIFEOS.KING = (function(){
     const ek = id => { const a = sec.find(x => x.is === id); return a ? s(a.ad, a.ip, { is:a.is }) : null; };
     const gruplar = [
       { ad:'Kart ve soru', l:[
+        fn('ders') && s('Konu anlat', 'Modülün anlatımı bölüm bölüm; sonunda soru', { doldur:String(K.dersOrnek || 'bu konuyu anlat') }),
         fn('istatistik') && s('İstatistik kartları', 'Modülün sayıları kart olarak', { calis:'istatistiklerim' }),
         fn('soru') && s('Bana soru sor', 'Modülün bankasından soru kartı; şıklar düğme', { calis:'bana soru sor' }),
         fn('soru') && s('Konudan soru', 'Belirli bir konudan soru', { doldur:'türev hakkında soru sor' }),
@@ -38473,6 +38498,7 @@ window.LIFEOS.KING = (function(){
       { ad:'Planla ve takip et', l:[
         s('Bugünün özeti', 'Bu modülde bugün ne var', { hazir:HAZIR.findIndex(h => h.ozet) }),
         s('Odak sayacı', 'Başlıkta kalan süre; bitince kaydet', { doldur:'25 dakika matematik çalışalım' }),
+        s('Sesli özet', 'Bugünü sesli dinle; Kütüphane’de kalır', { calis:'sesli özet' }),
         s('Görev kur', 'King adım adım plan kurar; sen başlatırsın', { doldur:'bu hafta B1’e hazırla beni', merkez:true }),
         s('Haftalık değerlendirme', 'Merkez’in hafta raporu', { calis:'haftalık değerlendirme', merkez:true }),
         s('Çapraz bulgu', 'Modüller birbirini nasıl etkiliyor', { calis:'çapraz bulgu', merkez:true }),
@@ -38507,7 +38533,7 @@ window.LIFEOS.KING = (function(){
         .map(x => s(x.ad, x.tur === 'foto' ? x.ne : '«' + String(x.ornek || '').trim() + '»', { is:'is-sec:' + x.i })) }))
       .filter(g => g.l.length);
     const bul = ad => hepsi.find(x => x.ad === ad);
-    const simdi = [saat < 12 && bul('Bugünün özeti'), bul('Neye çalışayım'), bul('Bana soru sor'),
+    const simdi = [saat < 12 && bul('Bugünün özeti'), bul('Neye çalışayım'), bul('Konu anlat'), bul('Bana soru sor'),
       t.getDay() === 0 && bul('Haftalık gözden geçirme'), saat >= 19 && bul('Günlük'), odak() ? null : bul('Odak sayacı')]
       .filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).slice(0, 3);
     const sistem = gruplar.pop();               // «Sistem» en sonda kalır
@@ -38579,7 +38605,14 @@ window.LIFEOS.KING = (function(){
   function kutuphaneListe(){
     const ars = akis.map((m, n) => ({ m, n })).filter(x => x.m && x.m.arastirma).reverse();
     const gecmis = arsivOku(), kls = klasorler();
-    return listeGrup('Araştırmalar', ars.length ? '<ul class="king__gecmis">' + ars.map(x => listeSatir('ars-ac:' + x.n, x.m.arastirma.konu,
+    const sr = sira(), so = sozetler();
+    return (sr.length ? listeGrup('Sırada · Merkez bekleniyor', '<ul class="king__gecmis">' + sr.map((x, i) => '<li class="king__satir-sar">'
+        + '<span class="king__satir"><span class="king__satir-bas"><span>' + kac(x.metin) + '</span></span><small>' + kac(tarihYaz(x.zaman)) + '</small></span>'
+        + '<button type="button" class="king__gecmis-ufak" data-king="sira-sil:' + i + '" aria-label="Sıradan çıkar" title="Sıradan çıkar">'
+        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></li>').join('') + '</ul>') : '')
+      + (so.length ? listeGrup('Sesli özetler', '<ul class="king__gecmis">' + so.map((x, i) => listeSatir('sozet-dinle:' + i,
+        (MODUL_AD[x.modul] || '') + ' · ' + tarihYaz(x.zaman), x.satirlar[0] || '')).join('') + '</ul>') : '')
+      + listeGrup('Araştırmalar', ars.length ? '<ul class="king__gecmis">' + ars.map(x => listeSatir('ars-ac:' + x.n, x.m.arastirma.konu,
         (x.m.arastirma.izle.length + x.m.arastirma.oku.length) + ' kaynak')).join('') + '</ul>'
       : yanBos('Bu sohbette araştırma yok. «… araştır» de; özeti ve kaynakları burada toplarım.'))
       + listeGrup('Klasörler', (klasorYeni ? '<form class="king__klasor-form" data-king-klasor><input class="king__ara" type="text" maxlength="40" placeholder="Klasör adı" aria-label="Klasör adı" data-king-klasor-ad/>'
@@ -39530,10 +39563,160 @@ window.LIFEOS.KING = (function(){
     m.soru.cevap = { harf, dogru:String(r.dogru), isabet:harf === r.dogru,
       cozum:(r.cozum || []).map(String).slice(0, 6), not:String(r.not || '') };
     cipler = [{ ad:'Bir soru daha', is:'soru-yeni:' + n }];
+    /* Öğretmen: yanlışta, bu konunun dersi sohbetteyse yeniden anlatmayı öner. */
+    const dn = m.soru.cevap.isabet ? -1 : dersBul(m.soru.sorgu);
+    if(dn >= 0) cipler.unshift({ ad:'Konuyu yeniden anlat', is:'ders-tekrar:' + dn });
     sakla();
     ciz(false);
     if(sesleMi()) seslendir(m.soru.cevap.isabet ? 'Doğru.' : 'Doğru cevap ' + m.soru.cevap.dogru + '.');
     return m.soru.cevap;
+  }
+  /* ---------- K4 (kullanıcı, 2026-10-22): MERKEZ SIRASI ve SESLİ ÖZET ----------
+     Merkez'e ulaşılamadığında (telefon dışarıda) Merkez'e giden soru
+     kaybolmaz: cihazda sıraya girer (lifeos.king.merkez-sira; TASINAN'da,
+     modül değişse de taşınır). King açılınca, cihaz yeniden çevrimiçi olunca
+     ve King açıkken dakikada bir yoklanır; Merkez'e ulaşınca sıra eskiden
+     yeniye sorulur ve cevap sohbete «sıradan» diye düşer. Sırada en çok 20
+     soru; 7 günden eskisi sorulmaz. Yalnız Merkez'e giden soru sıraya girer:
+     yerel kuralla cevaplanan ve kayıt olan cümle girmez. Merkez hiç
+     kurulmamışsa bekleyecek bir şey yoktur, sıra da yoktur.
+     SESLİ ÖZET: «sesli özet», «günümü özetle» → modülün günlük cümleleri ve
+     değeri olan kartları (sayıyı modül üretir, etiketiyle) sesli okunur,
+     Kütüphane › Sesli özetler'de kalır (son 20). */
+  const SIRA = 'lifeos.king.merkez-sira';
+  const SIRA_EN_COK = 20, SIRA_GUN = 7;
+  let siradanSoru = null, siraCalisiyor = false, siraSaat = null;
+  function sira(){
+    const l = ortam.depo.oku(SIRA), sinir = ortam.simdi().getTime() - SIRA_GUN * 864e5;
+    return (Array.isArray(l) ? l : []).filter(x => x && x.metin && Date.parse(x.zaman) >= sinir);
+  }
+  function siraYaz(l){ if(l.length) ortam.depo.yaz(SIRA, l.slice(-SIRA_EN_COK)); else ortam.depo.sil(SIRA); }
+  /* Sıradan sorulan yine ulaşamazsa başa geri döner, zamanı korunur. */
+  function siraEkle(metin){
+    const l = sira();
+    if(siradanSoru) l.unshift(siradanSoru);
+    else l.push({ metin:String(metin).trim(), zaman:ortam.simdi().toISOString(), modul:ayar && ayar.modul });
+    siraYaz(l);
+    return sira().length;
+  }
+  async function siraBosalt(){
+    if(siraCalisiyor || !acik || !baglanti() || !sira().length) return 0;
+    siraCalisiyor = true;
+    let n = 0;
+    try{
+      while(sira().length){
+        const x = sira()[0];
+        siraYaz(sira().slice(1));
+        siradanSoru = x;
+        const r = await isle(x.metin);
+        siradanSoru = null;
+        if(r && r.tur === 'sira') break;                   // hâlâ ulaşılamıyor; başa döndü
+        n++;
+      }
+    }finally{ siraCalisiyor = false; siradanSoru = null; }
+    return n;
+  }
+  function siraPlanla(){
+    if(siraSaat){ try{ clearInterval(siraSaat); }catch(e){ /* yok */ } siraSaat = null; }
+    if(typeof setInterval !== 'function' || !sira().length) return;
+    siraSaat = setInterval(() => { if(!acik || !sira().length){ clearInterval(siraSaat); siraSaat = null; return; } siraBosalt(); }, 60000);
+  }
+  const SOZET = 'lifeos.king.sesli-ozet';
+  const SOZET_RE = /(sesli özet|günü(?:mü)? özetle|özetimi (?:oku|söyle)|günün özetini (?:oku|söyle)|bana günümü anlat)/;
+  function sozetler(){ const l = ortam.depo.oku(SOZET); return Array.isArray(l) ? l.filter(x => x && Array.isArray(x.satirlar)) : []; }
+  function sozetMetni(x){ return [(MODUL_AD[x.modul] || '') + '’de ' + tarihYaz(x.zaman)].concat(x.satirlar).join('. '); }
+  function sesliOzet(metin){
+    akis.push({ kim:'sen', metin:String(metin).trim() });
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; cipler = null;
+    const K = ayar && ayar.kartlar, ad = MODUL_AD[ayar && ayar.modul] || 'Bu modül';
+    let kart = [];
+    try{ kart = (K && typeof K.istatistik === 'function' ? K.istatistik() : []) || []; }catch(e){ kart = []; }
+    kart = kart.filter(x => x && x.ad).map(kartTemiz).filter(x => x.deger != null).slice(0, 4);
+    const satirlar = ozetSatirlari().concat(kart.map(x => x.ad + ': ' + x.deger + (x.birim ? ' ' + x.birim : '') + ' (' + x.etiket + ')'));
+    if(!satirlar.length){ soyle(ad + ' için bugün özetlenecek bir şey yok.'); return { tur:'sesli-ozet', n:0 }; }
+    const x = { zaman:ortam.simdi().toISOString(), modul:ayar.modul, satirlar };
+    ortam.depo.yaz(SOZET, [x].concat(sozetler()).slice(0, 20));
+    cipler = [{ ad:'Yeniden dinle', is:'sozet-dinle:0' }];
+    const okunacak = !sesleMi();
+    soyle(ad + '’de bugün:', satirlar);
+    if(okunacak) seslendir(sozetMetni(x));                 // yazı kipinde de: istenen şey sesli özet
+    return { tur:'sesli-ozet', n:satirlar.length };
+  }
+  /* ---------- ÖĞRETMEN (kullanıcı, 2026-10-22: «King'i öğretmen yap») ----------
+     «türevi anlat», «bana olasılığı öğret», «ders: paragraf» → modülün KENDİ
+     anlatımı (kartlar.ders; AYS konu anlatımı, ESP öğrenme kartları) bölüm
+     bölüm bir ders kartında. Metni King yazmaz, model çağrılmaz; modülün
+     etiketi («elle yazıldı · doğrulanmadı») kartta durur. Sonunda «Anladım,
+     soru sor» modülün bankasından o konunun sorusunu getirir (söz 32 yolu);
+     yanlış cevapta «Konuyu yeniden anlat» önerilir, cevabı yine modül yazar
+     (AYS'de yanlış soru 1, 3, 7 gün sonra tekrar gelir). Modülde konu yoksa
+     ders kurulmaz ve mesaj olağan yoluna (Merkez) devam eder. */
+  const DERS_RE = /(?:^|\s)(?:anlat(?:ır m[ıi]s[ıi]n|abilir misin|sana)?|öğret(?:ir misin|sene)?|ders(?:i)? (?:ver|yap|anlat)|konu anlatımı)\s*[?.!]*\s*$|^(?:ders|konu anlatımı)\s*:/;
+  const DERS_DOLGU = /(^|\s)(bana|bir|biraz|kısaca|lütfen|king|konusunu|konusu|konu|ders|dersi|anlatımı|anlat\S*|öğret\S*|ver|yap|mısın|misin|musun|hakkında|bu|şu)(?=\s|$)/g;
+  function dersNiyeti(t){
+    if(!DERS_RE.test(t)) return null;
+    const konu = t.replace(/[.,!?;:]/g, ' ').replace(DERS_DOLGU, ' ').replace(DERS_DOLGU, ' ').replace(/\s+/g, ' ').trim();
+    if(konu.length < 3 || /^(bunu|şunu|onu|daha|bunları|onları|neden|niye)(\s|$)/.test(konu)) return null;
+    return { konu };
+  }
+  async function dersIsle(n, metin){
+    const K = ayar && ayar.kartlar;
+    if(!K || typeof K.ders !== 'function') return null;
+    let d = null;
+    try{ d = await K.ders(n.konu); }catch(e){ d = null; }
+    const yazi = (v, k) => String(v == null ? '' : v).trim().slice(0, k);
+    const bolumler = d && Array.isArray(d.bolumler) ? d.bolumler.filter(b => b && (b.metin || (b.liste && b.liste.length))).slice(0, 10)
+      .map(b => ({ baslik:yazi(b.baslik, 120), metin:yazi(b.metin, 1600), liste:(b.liste || []).slice(0, 10).map(x => yazi(x, 400)), dikkat:yazi(b.dikkat, 500) })) : [];
+    if(!d || !d.baslik || !bolumler.length) return null;
+    akis.push({ kim:'sen', metin:String(metin).trim() });
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; cipler = null;
+    const ders = { id:String(d.id || ''), baslik:yazi(d.baslik, 120), alt:yazi(d.alt, 120), giris:yazi(d.giris, 900),
+      etiket:yazi(d.etiket, 80), sorgu:yazi(d.sorgu || d.baslik, 120), soruVar:!!d.soruVar && typeof K.soru === 'function',
+      acilir:typeof K.dersAc === 'function', bolumler, adim:0 };
+    soyle(ders.baslik + ' · ders', null, null, null, { ders });
+    return { tur:'ders', bolum:bolumler.length };
+  }
+  function dersHtml(m, n){
+    const d = m.ders;
+    if(!d) return '';
+    const b = d.bolumler[d.adim] || d.bolumler[0], son = d.adim >= d.bolumler.length - 1;
+    return '<div class="king__ders" role="group" aria-label="Ders: ' + kac(d.baslik) + '">'
+      + '<div class="king__ders-bas"><span>' + kac(d.alt) + '</span>' + (d.etiket ? '<small>' + kac(d.etiket) + '</small>' : '') + '</div>'
+      + (d.adim === 0 && d.giris ? '<p class="king__ders-giris">' + bicimli(d.giris) + '</p>' : '')
+      + '<div class="king__ders-ilerleme">' + cubukHtml(Math.round((d.adim + 1) * 100 / d.bolumler.length), 'Bölüm ' + (d.adim + 1) + ' / ' + d.bolumler.length)
+      + '<small>' + (d.adim + 1) + ' / ' + d.bolumler.length + '</small></div>'
+      + '<h4 class="king__ders-baslik">' + kac(b.baslik) + '</h4>'
+      + (b.metin ? '<p>' + bicimli(b.metin) + '</p>' : '')
+      + (b.liste.length ? '<ul class="king__ders-liste">' + b.liste.map(x => '<li>' + bicimli(x) + '</li>').join('') + '</ul>' : '')
+      + (b.dikkat ? '<p class="king__ders-dikkat"><b>Dikkat</b> ' + bicimli(b.dikkat) + '</p>' : '')
+      + '<div class="king__ders-eylem">'
+      + (d.adim > 0 ? '<button type="button" class="king__cip" data-king="ders-geri:' + n + '">Önceki</button>' : '')
+      + (!son ? '<button type="button" class="king__cip' + (son ? '' : ' king__cip--ana') + '" data-king="ders-ileri:' + n + '">Devam</button>' : '')
+      + (d.soruVar ? '<button type="button" class="king__cip' + (son ? ' king__cip--ana' : '') + '" data-king="ders-soru:' + n + '">Anladım, soru sor</button>' : '')
+      + (ortam.sentez() ? '<button type="button" class="king__cip" data-king="ders-dinle:' + n + '">Dinle</button>' : '')
+      + (d.acilir ? '<button type="button" class="king__cip" data-king="ders-ac:' + n + '">Modülde aç</button>' : '')
+      + '</div></div>';
+  }
+  function dersAdim(n, fark){
+    const m = akis[n];
+    if(!m || !m.ders) return false;
+    m.ders.adim = Math.max(0, Math.min(m.ders.bolumler.length - 1, m.ders.adim + fark));
+    sakla();
+    ciz(false);
+    return true;
+  }
+  /* Yanlış cevaptan sonra: aynı konunun en son dersi yeniden, ilk bölümden. */
+  function dersBul(sorgu){
+    const s = kucuk(sorgu || '');
+    for(let i = akis.length - 1; i >= 0; i--) if(akis[i].ders && s && kucuk(akis[i].ders.sorgu) === s) return i;
+    return -1;
+  }
+  function dersTekrar(n){
+    const m = akis[n];
+    if(!m || !m.ders) return false;
+    cipler = null;
+    soyle('Bir daha bakalım: ' + m.ders.baslik, null, null, null, { ders:Object.assign({}, m.ders, { adim:0 }) });
+    return true;
   }
   /* ---------- söz 38: araştırma kartı (HKM arastirma.v1) ---------- */
   /* Sunucunun verisi süzülür: yalnız http(s) link, her bölümde en çok üç. */
@@ -39676,6 +39859,11 @@ window.LIFEOS.KING = (function(){
       ciz(false);
       return { tur:'envanter' };
     }
+    /* Öğretmen (2026-10-22): «türevi anlat» → modülün kendi anlatımından ders
+       kartı. Modülde o konu yoksa yol açık kalır (Merkez cevaplar). */
+    const DN = dersNiyeti(t0);
+    if(DN){ const r = await dersIsle(DN, metin); if(r) return r; }
+    if(SOZET_RE.test(t0)) return sesliOzet(metin);
     /* Söz 32: kartlar (istatistik, soru); «sorma» komutundan önce. */
     const KN = kartNiyeti(t0);
     if(KN) return kartIsle(KN, metin);
@@ -39802,7 +39990,8 @@ window.LIFEOS.KING = (function(){
   }
   /* Sohbet: anlatımdaki kayıtlar, modelsiz okuma, sonra HKM'deki King; olmazsa yerel. */
   async function merkezYolu(metin, y){
-    akis.push({ kim:'sen', metin:String(metin).trim() });
+    const senMesaj = Object.assign({ kim:'sen', metin:String(metin).trim() }, siradanSoru ? { sira:siradanSoru.zaman } : {});
+    akis.push(senMesaj);
     bekleyen = null;
     bekleyenGit = null;
     bekleyenIlet = null;
@@ -39857,6 +40046,16 @@ window.LIFEOS.KING = (function(){
         return { tur:'merkez', mode:r.mode };
       }
       neden = r.neden;
+    }
+    /* K4: Merkez kurulu ama ulaşılamıyor; Merkez'e giden soru sıraya girer. */
+    if(neden === 'baglanti' && !bulunan && y.tur === 'bilinmiyor'){
+      const n = siraEkle(metin);
+      /* Sıradan yeniden deneme başarısızsa sohbete hiçbir şey yazılmaz (dakikada bir gürültü olurdu). */
+      if(siradanSoru){ akis = akis.filter(m => m !== senMesaj); ciz(false); return { tur:'sira', n, sessiz:true }; }
+      cipler = [{ ad:'Sırayı gör', is:'bolum:kutuphane' }];
+      soyle('Merkeze (HKM) şu an ulaşılamadı. Sorunu sıraya aldım; bağlantı gelince kendim soracağım. Sırada ' + n + ' soru var.');
+      siraPlanla();
+      return { tur:'sira', n };
     }
     return yerel(y, neden, metin);
   }
@@ -40327,12 +40526,13 @@ window.LIFEOS.KING = (function(){
       + '<div class="king__hazirlar" role="group" aria-label="Hazır cevaplar">' + hazirlar + '</div></div>';
     const balonlar = satirlar.map((m, i) => m.kim === 'sen'
       ? (m.foto ? '<div class="king__balon king__balon--sen king__balon--foto"><img class="king__foto" src="' + kac(m.foto) + '" alt="Gönderdiğin fotoğraf"/></div>'
-        : '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p></div>')
+        : '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p>'
+          + (m.sira ? '<small class="king__siradan">sıradan · ' + kac(tarihYaz(m.sira)) + '</small>' : '') + '</div>')
       : m.bekliyor
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
       : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '"><div><p>' + bicimli(m.metin) + '</p>'
-        + kartlarHtml(m) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i) + arastirmaHtml(m, ilkSira + i) + k2Html(m, ilkSira + i)
+        + kartlarHtml(m) + dersHtml(m, ilkSira + i) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i) + arastirmaHtml(m, ilkSira + i) + k2Html(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
             + (m.onizleme.liste ? '<ul class="king__liste">' + m.onizleme.liste.map(x => '<li><b>' + kac(x) + '</b></li>').join('') + '</ul>'
@@ -40448,6 +40648,7 @@ window.LIFEOS.KING = (function(){
     if(mini) el.classList.add('is-mini');
     document.body.appendChild(el);
     isPlanla(800);                               // K1: işler; King açıkken yoklanır
+    ortam.zamanla(() => { siraBosalt(); siraPlanla(); }, 1200);   // K4: Merkez sırası
     tasimaYaz();
     cubukIsaretle();
     document.documentElement.classList.add(mini ? 'king-mini' : 'king-acik');
@@ -40591,6 +40792,15 @@ window.LIFEOS.KING = (function(){
         if(is === 'odak-dur'){ odakDur(); return; }
         if(/^odak-kaydet:\d+:/.test(is)){ const p = is.split(':'); cipler = null; isle(p[1] + ' dk ' + (decodeURIComponent(p.slice(2).join(':')) || 'çalıştım')); return; }
         if(/^soru-cevap:\d+:[A-E]$/.test(is)){ const p = is.split(':'); soruCevapla(Number(p[1]), p[2]); return; }
+        if(/^sozet-dinle:\d+$/.test(is)){ const x = sozetler()[Number(is.slice(12))]; if(x) seslendir(sozetMetni(x)); return; }
+        if(/^sira-sil:\d+$/.test(is)){ const l = sira(); l.splice(Number(is.slice(9)), 1); siraYaz(l); ciz(false); return; }
+        if(/^ders-(ileri|geri):\d+$/.test(is)){ const p = is.split(':'); dersAdim(Number(p[1]), p[0] === 'ders-ileri' ? 1 : -1); return; }
+        if(/^ders-soru:\d+$/.test(is)){ const m = akis[Number(is.slice(10))]; if(m && m.ders) isle('bana soru sor ' + m.ders.sorgu); return; }
+        if(/^ders-tekrar:\d+$/.test(is)){ dersTekrar(Number(is.slice(12))); return; }
+        if(/^ders-dinle:\d+$/.test(is)){ const m = akis[Number(is.slice(11))], b = m && m.ders && m.ders.bolumler[m.ders.adim];
+          if(b) seslendir([b.baslik, b.metin].concat(b.liste, b.dikkat ? ['Dikkat. ' + b.dikkat] : []).filter(Boolean).join('. ').replace(/\*\*/g, '')); return; }
+        if(/^ders-ac:\d+$/.test(is)){ const m = akis[Number(is.slice(8))], K = ayar && ayar.kartlar;
+          if(m && m.ders && K && K.dersAc){ kucult(); Promise.resolve(K.dersAc(m.ders.id)).catch(() => {}); } return; }
         if(/^soru-yeni:\d+$/.test(is)){ const m = akis[Number(is.slice(10))]; isle('bana bir soru daha sor' + (m && m.soru && m.soru.sorgu ? ' ' + m.soru.sorgu : '')); return; }
         if(/^derinlik:(oto|hizli|dengeli|derin)$/.test(is)){ derinlikSec(is.slice(9)); return; }
         if(is === 'kapat'){ sesli = false; kapat(); return; }
@@ -40716,6 +40926,8 @@ window.LIFEOS.KING = (function(){
       if(f) fotoAl(f);
       d.value = '';
     }, true);
+    /* K4: cihaz yeniden çevrimiçi olunca Merkez sırası. */
+    if(typeof window !== 'undefined' && window.addEventListener) window.addEventListener('online', () => { siraBosalt(); });
     document.addEventListener('paste', e => {
       if(!acik || !e.target || !e.target.closest || !e.target.closest('[data-king]')) return;
       const it = Array.from((e.clipboardData && e.clipboardData.items) || []).find(x => /^image\//.test(x.type));
@@ -41304,6 +41516,9 @@ window.LIFEOS.KING = (function(){
     }
     if(ayar) ortam.depo.sil(depoAnahtar());
     ortam.depo.sil(TASIMA);
+    ortam.depo.sil(SIRA); ortam.depo.sil(SOZET);
+    siradanSoru = null; siraCalisiyor = false;
+    if(siraSaat){ try{ clearInterval(siraSaat); }catch(e){ /* yok */ } siraSaat = null; }
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP); ortam.depo.sil(ALGILA); ortam.depo.sil(MIK); ortam.depo.sil(KAM); kamListe = [];
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
@@ -41343,7 +41558,7 @@ window.LIFEOS.KING = (function(){
     sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     yeniSohbet, kayitAc, ARACLAR, aktifKayit:() => aktifKayit,
-    BOLUMLER, bolumSec, bolum:() => bolum, listeGorunur, alanAc, pdfAl, nedenSatirlari, yetenekler,
+    BOLUMLER, bolumSec, bolum:() => bolum, listeGorunur, alanAc, pdfAl, nedenSatirlari, yetenekler, dersNiyeti, sira, siraBosalt, SIRA, SOZET, sozetler,
     KIPLER, kip, kipSec, klasorler, klasorEkle, klasorSil, kayitTasi, kayitAdlandir, kayitSabitle,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla, _videoKaynak:videoKaynak, _gorunurluk:gorunurluk,
@@ -56630,6 +56845,33 @@ SP.SPOR_KAYNAKLAR = [
     "full_scientific_verification": false
   }
 ];
+
+/* ==== js/core/kingders.js ==== */
+/* Öğretmen (King, 2026-10-22): SPİ'nin öğrenme kavramı King dersi olarak.
+
+   Metin data/ogrenme.js'teki kavramın kendisidir (tanım, dikkat, örnek); King
+   yazmaz, model çağrılmaz. Kavramın inceleme durumu etikette durur. SPİ teşhis
+   koymaz ve doz önermez (AGENTS §1.5): ders yalnız kayıt ve kavram anlatır. */
+
+window.SP = window.SP || {};
+
+SP.KingDers = (function(){
+  function ders(konu){
+    const t = String(konu || '').toLocaleLowerCase('tr').trim();
+    if(t.length < 3) return null;
+    const l = SP.OGRENME_KAVRAMLAR || [];
+    const ad = c => String(c.title || '').toLocaleLowerCase('tr');
+    const c = l.find(k => ad(k) === t) || l.find(k => t.includes(ad(k)) || ad(k).includes(t));
+    if(!c) return null;
+    return { id:c.id, baslik:c.title, alt:'SPİ · kavram', giris:'',
+      etiket:c.ready_for_app ? 'SPİ öğrenme kavramı' : 'doğrulanmadı · uzman incelemesi bekliyor',
+      sorgu:c.title, soruVar:false,
+      bolumler:[{ baslik:'Tanım', metin:c.definition },
+        { baslik:'Dikkat', metin:c.watch },
+        { baslik:'Örnek', metin:c.example }].filter(b => b.metin) };
+  }
+  return { ders };
+})();
 
 /* ==== js/data/met.js ==== */
 /* SPİ MET Referans Kataloğu — 2024 Adult Compendium of Physical Activities.
@@ -93602,6 +93844,9 @@ SP.App = (function(){
           },
           /* King'in kartları (king.js söz 32): son 30 gün, SPİ'nin kendi hesabı. */
           kartlar:{
+            /* Öğretmen: SPİ kavramı ders olarak (core/kingders.js). */
+            ders:konu => SP.KingDers.ders(konu),
+            dersOrnek:'set kavramını anlat',
             istatistik:() => {
               const uyku = [];
               let ant = 0, kahve = 0, ogun = 0;
