@@ -13434,16 +13434,6 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__satir-sar .king__satir{ flex:1; min-width:0; }
 .king__satir-sar.is-kapali .king__satir{ opacity:.6; }
 .king__satir-sar .king__secim{ min-height:32px; padding:0 4px; background:transparent; }
-/* Araçlar: ad ve örnek solda, türün simgesi sağda (oynat: hemen sorar · kalem: yazı
-   alanına koyar · ok: açar). Merkez isteyen satır bağlı değilken sönük ve etiketli. */
-.king__yetenek{ grid-template-columns:minmax(0, 1fr) auto; column-gap:var(--sp-2); }
-.king__yetenek > .king__satir-bas, .king__yetenek > small{ grid-column:1; }
-.king__yetenek-ne{ grid-column:2; grid-row:1 / span 2; align-self:center; width:14px; height:14px; fill:none; stroke:currentColor;
-  stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; color:var(--text-3); transition:color var(--dur) var(--ease); }
-.king__yetenek:hover .king__yetenek-ne, .king__yetenek:focus-visible .king__yetenek-ne{ color:var(--text); }
-.king__yetenek-etiket{ flex:none; font-style:normal; font-size:10.5px; font-weight:600; line-height:16px; padding:0 6px;
-  border-radius:999px; box-shadow:inset 0 0 0 1px var(--border); color:var(--text-3); }
-.king__yetenek.is-sonuk .king__satir-bas > span{ color:var(--text-2); }
 .king__canli-nokta{ flex:none; width:6px; height:6px; border-radius:50%; background:var(--k-vurgu); animation:king-nabiz 1.6s ease-in-out infinite; }
 .king__ara{ width:100%; min-height:34px; padding:0 var(--sp-3); border:1px solid var(--border); border-radius:var(--r-sm);
   background:var(--surface); color:var(--text); font:inherit; font-size:13px; }
@@ -13975,6 +13965,93 @@ button.king__ekran-onizle:focus-visible{ outline:2px solid var(--k-vurgu); outli
 
 /* K4: sıradan sorulan sorunun balonunda küçük not (ne zaman sorulmuştu). */
 .king__siradan{ display:block; margin-top:4px; font-size:var(--fs-xs); color:var(--text-3); text-align:right; }
+
+/* ======================================================================
+   DEVRİM (2026-10-22; belgeler/ekip/KING-DEVRIM.md). Kullanıcı: «King'in
+   arayüzünü biraz büyüt, biraz saydam yap, arka plan görünsün; araçlar
+   kısmını daha geniş ve anlaşılır yap; profesyonel».
+   ====================================================================== */
+/* Büyük ve yarı saydam pencere: yüzey %84 + bulanıklık; perde hafif. Metin
+   zemini (kartlar, vitrin kartları) dolu kalır: kontrast düşmez. */
+.king:not(.is-mini) .king__kutu{ width:min(1680px, calc(100vw - 24px)); height:min(1040px, calc(100dvh - 24px));
+  background:color-mix(in oklab, var(--surface) 84%, transparent);
+  -webkit-backdrop-filter:blur(28px) saturate(1.15); backdrop-filter:blur(28px) saturate(1.15); }
+.king:not(.is-mini) .king__ray{ background:transparent; }
+.king:not(.is-mini) .king__yan{ background:color-mix(in oklab, var(--surface-2) 40%, transparent); }
+.king:not(.is-mini) .king__alan{ background:color-mix(in oklab, var(--surface) 70%, transparent); }
+.king:not(.is-mini).is-acik .king-perde{ background:rgba(12,14,22,.08); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px); }
+:root[data-theme="dark"] .king:not(.is-mini).is-acik .king-perde{ background:rgba(0,0,0,.22); }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .king:not(.is-mini).is-acik .king-perde{ background:rgba(0,0,0,.22); } }
+@media (min-width:1500px){ .king{ --k-alan:440px; --k-sutun:880px; } }
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .king:not(.is-mini) .king__kutu{ background:var(--surface); }
+}
+
+/* ---- araçlar: sohbet ekranında minik ikonlu kutular (2026-10-23) ---- */
+.king__vitrin{ display:flex; flex-direction:column; gap:var(--sp-4); padding-bottom:var(--sp-4); }
+.kv-bas{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; }
+.kv-baslik{ margin:0; font-size:var(--fs-md); font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.kv-ara{ flex:1; min-width:200px; max-width:360px; margin-left:auto; min-height:34px; border-radius:999px; background:var(--surface); }
+.kv-grup{ scroll-margin-top:var(--sp-3); }
+.kv-grup-ad{ display:flex; align-items:baseline; gap:6px; margin:0 0 var(--sp-2); font-size:var(--fs-xs); font-weight:600; color:var(--text-3); }
+.kv-grup-ad small{ font-weight:500; font-variant-numeric:tabular-nums; }
+.kv-izgara{ display:grid; grid-template-columns:repeat(auto-fill, minmax(92px, 1fr)); gap:8px; }
+.kv-mini{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:7px; min-height:84px;
+  padding:12px 6px 10px; border:0; border-radius:var(--r-md); background:var(--surface); color:var(--text);
+  box-shadow:inset 0 0 0 1px var(--border); font:inherit; cursor:pointer; text-align:center;
+  transition:box-shadow var(--dur) var(--ease), background var(--dur) var(--ease), transform var(--dur-press, .12s) ease; }
+.kv-mini:hover{ background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--text-3); }
+.kv-mini:active{ transform:scale(.97); }
+.kv-mini:focus-visible{ outline:2px solid var(--k-vurgu); outline-offset:2px; }
+.kv-mini[hidden]{ display:none; }
+.kv-mini-simge{ position:relative; width:34px; height:34px; display:grid; place-items:center; border-radius:10px;
+  background:var(--surface-2); color:var(--text-2); }
+.kv-mini:hover .kv-mini-simge{ background:var(--surface-3); color:var(--text); }
+.kv-mini-simge svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; }
+.kv-mini-merkez{ position:absolute; top:-2px; right:-2px; width:8px; height:8px; border-radius:50%; background:var(--text-3); box-shadow:0 0 0 2px var(--surface); }
+.kv-mini-ad{ font-size:12px; font-weight:550; line-height:1.25; color:var(--text);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.kv-mini.is-sonuk .kv-mini-ad{ color:var(--text-2); }
+.kv-grup--one .kv-mini-simge, .king__bos-araclar .kv-mini-simge{ color:var(--k-vurgu); background:color-mix(in oklab, var(--k-vurgu) 12%, var(--surface)); }
+.kv-mini--tumu .kv-mini-simge{ color:var(--text-2); background:var(--surface-2); }
+.kv-not{ margin:0; font-size:var(--fs-xs); color:var(--text-3); }
+.king__bos-araclar{ width:100%; max-width:640px; margin:var(--sp-4) auto 0; grid-template-columns:repeat(auto-fit, minmax(84px, 1fr)); }
+@media (max-width:679px){ .kv-izgara{ grid-template-columns:repeat(auto-fill, minmax(78px, 1fr)); } .kv-mini{ min-height:76px; } }
+
+/* ---- kişisel yasalar ---- */
+.king__yasa{ display:flex; flex-direction:column; gap:10px; margin-top:var(--sp-2); }
+.king__yasa-s{ display:flex; flex-direction:column; gap:8px; padding:14px 16px; border-radius:var(--r-md); background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); }
+.king__yasa-s > p{ margin:0; font-weight:600; line-height:1.45; }
+.king__yasa-cubuklar{ display:flex; flex-direction:column; gap:6px; }
+.king__yasa-cubuk{ display:grid; grid-template-columns:150px minmax(0, 1fr) auto; align-items:center; gap:10px; }
+.king__yasa-cubuk small{ font-size:var(--fs-xs); color:var(--text-2); }
+.king__yasa-cubuk i{ display:block; height:8px; border-radius:4px; background:var(--k-vurgu); }
+.king__yasa-cubuk + .king__yasa-cubuk i{ background:color-mix(in oklab, var(--text) 30%, var(--surface)); }
+.king__yasa-cubuk b{ font-size:13px; font-variant-numeric:tabular-nums; }
+.king__yasa-alt{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.king__yasa-alt small{ font-size:var(--fs-xs); color:var(--text-3); }
+
+/* ---- günüm ---- */
+.king__gunum{ display:flex; flex-direction:column; gap:10px; margin-top:var(--sp-2); padding:14px 16px; border-radius:var(--r-md);
+  background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); }
+.king__gunum-l{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.king__gunum-s{ display:grid; grid-template-columns:14px minmax(0, 1fr) auto; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--border); }
+.king__gunum-s:first-child{ border-top:0; }
+.king__gunum-nokta{ width:10px; height:10px; border-radius:50%; box-shadow:inset 0 0 0 1.5px var(--text-3); }
+.king__gunum-s.is-bitti .king__gunum-nokta{ background:var(--text-2); box-shadow:none; }
+.king__gunum-s.is-atlandi .king__gunum-nokta{ box-shadow:inset 0 0 0 1.5px var(--border); }
+.king__gunum-s.is-siradaki .king__gunum-nokta{ background:var(--k-vurgu); box-shadow:0 0 0 3px color-mix(in oklab, var(--k-vurgu) 22%, transparent); }
+.king__gunum-ad{ display:grid; gap:1px; min-width:0; }
+.king__gunum-ad b{ font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.king__gunum-s.is-bitti .king__gunum-ad b, .king__gunum-s.is-atlandi .king__gunum-ad b{ color:var(--text-2); font-weight:500; }
+.king__gunum-ad small{ font-size:var(--fs-xs); color:var(--text-2); }
+.king__gunum-durum{ font-size:var(--fs-xs); color:var(--text-3); }
+.king__gunum-eylem{ grid-column:2 / -1; display:flex; flex-wrap:wrap; gap:6px; }
+.king__gunum-not{ margin:0; font-size:var(--fs-sm); color:var(--text-2); }
+
+/* ---- derse çevir: kaynaktan alıntı ---- */
+.king__ders-alinti{ padding:8px 12px; border-left:2px solid var(--border); font-size:var(--fs-sm); color:var(--text-2); }
+.king__ders-alinti b{ margin-right:6px; color:var(--text-3); font-weight:600; }
 
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -17282,7 +17359,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'cb0a3193', at:'2026-10-22 21:31', dirty:true };
+SP.BUILD = { id:'7f368dc5', at:'2026-10-23 09:14', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -37035,6 +37112,8 @@ window.LIFEOS.KING = (function(){
     const r = await merkezeSor('Kullanıcı bir PDF verdi: «' + ad + '»' + (g.sayfa ? ' (' + g.sayfa + ' sayfa)' : '') + '. Metni aşağıda. Türkçe, kısa özetle '
       + '(en çok beş madde) ve LifeOS’ta işine yarayacak sonraki adımı tek cümleyle öner; metinde olmayan sayıyı yazma.\n\n' + String(g.metin || '').slice(0, PDF_METIN));
     akis = akis.filter(m => m !== bek);
+    kaynakMetin = { ad, metin:String(g.metin || '') };
+    cipler = [{ ad:'Derse çevir', is:'derse-cevir' }];
     soyle(r.ok ? r.text : 'PDF’in metnini okudum (' + (Number(g.kelime) || 0) + ' kelime) ama Merkez özetleyemedi.', null, null, null, { neden });
     return true;
   }
@@ -37923,7 +38002,9 @@ window.LIFEOS.KING = (function(){
   function sakla(){
     if(!ayar) return;
     const l = akis.filter(m => !m.bekliyor).slice(-GUNLUK_EN_COK).map(m => Object.assign({ kim:m.kim, metin:m.foto ? '(fotoğraf)' : (m.metin || ''),
-      satirlar:m.satirlar || null, son:m.son || null }, m.arastirma ? { arastirma:m.arastirma } : {}));
+      satirlar:m.satirlar || null, son:m.son || null }, m.arastirma ? { arastirma:m.arastirma } : {},
+      /* DEVRİM: ders, yasa ve gün kartları da gün boyu kalır (yeniden açınca başlık tek kalmasın). */
+      m.ders ? { ders:m.ders } : {}, m.yasa ? { yasa:m.yasa } : {}, m.gun ? { gun:m.gun } : {}));
     ortam.depo.yaz(depoAnahtar(), { gun:bugunISO(), akis:l });
     tasimaYaz(l);
   }
@@ -38420,7 +38501,7 @@ window.LIFEOS.KING = (function(){
       + '<svg viewBox="0 0 24 24" aria-hidden="true">' + svg + '</svg>' + (nokta ? '<i class="king__ray-nokta" aria-hidden="true"></i>' : '') + '</button>';
     return '<nav class="king__ray" aria-label="King bölümleri">'
       + BOLUMLER.map(b => dugme('bolum:' + b.id, b.ad + (b.id === 'gorev' && is ? ' · ' + is + ' iş çalışıyor' : ''), b.svg,
-        menu !== 'menu' && (gorunur ? bolum === b.id : b.id === 'sohbet'), '', b.id === 'gorev' && is)).join('')
+        menu !== 'menu' && (gorunur || bolum === 'araclar' ? bolum === b.id : b.id === 'sohbet'), '', b.id === 'gorev' && is)).join('')
       + '<span class="king__ray-bosluk" aria-hidden="true"></span>'
       + dugme('menu', 'Ayarlar', SVG_AYAR, menu === 'menu', ' aria-expanded="' + (menu === 'menu' ? 'true' : 'false') + '"')
       + '</nav>';
@@ -38438,7 +38519,7 @@ window.LIFEOS.KING = (function(){
     return '<aside class="king__yan" aria-label="' + b.ad + '"><div class="king__yan-ust"><h2 class="king__yan-baslik">' + b.ad + '</h2>'
       + eylem + yanDugmeHtml('king__yan-kapa') + '</div><div class="king__yan-govde">'
       + (bolum === 'gorev' ? gorevListe() : bolum === 'rutin' ? rutinListe() : bolum === 'kutuphane' ? kutuphaneListe()
-        : bolum === 'araclar' ? aracListe() : sohbetListe())
+        : bolum === 'araclar' ? vitrinDizin() : sohbetListe())
       + '</div></aside>';
   }
   /* Sohbet listesi günlere göre (2026-10-21): Bugün, Dün, Son 7 gün, Son 30 gün, Daha eski. */
@@ -38495,12 +38576,18 @@ window.LIFEOS.KING = (function(){
         s('Arka planda araştır', 'Ekibe verilir, sen konuşmaya devam edersin', { doldur:'arka planda yapay zekâ tarihini araştır', merkez:true }),
         ek('pdf-sec'),
         D() && s('Notlarımda ara', 'Defter’deki notlarına dayanarak', { doldur:'notlarımda türev' }),
+        s('Derse çevir', 'PDF ya da metinden kaynaklı ders ve sorular', { doldur:'derse çevir: ', merkez:true }),
+        kdDersler().length && s('Derslerimden soru', 'Kendi derslerinden, tekrar takvimiyle', { calis:'derslerimden soru sor' }),
       ] },
       { ad:'Gör', l:[ek('foto-sec'), ek('kip:kamera'), ek('kip:ekran'), ek('ekran'), ek('barkod')] },
       { ad:'Planla ve takip et', l:[
         s('Bugünün özeti', 'Bu modülde bugün ne var', { hazir:HAZIR.findIndex(h => h.ozet) }),
         s('Odak sayacı', 'Başlıkta kalan süre; bitince kaydet', { doldur:'25 dakika matematik çalışalım' }),
         s('Sesli özet', 'Bugünü sesli dinle; Kütüphane’de kalır', { calis:'sesli özet' }),
+        fn('gun') && s('Günüm', 'Bugünün maddeleri; sıradakini tek dokunuşla başlat', { calis:'günüm' }),
+        fn('gun') && s('Günü kapat', 'Kalanlar ve sesli özet', { calis:'günü kapat' }),
+        K.olcu && s('Kişisel yasalar', 'Ölçülerinden senin kuralların; ilişki, neden değil', { calis:'yasalarım' }),
+        s('Sınav yolculuğu', 'Bu gidişle sınav günü ve «ne olursa» (AYS › Gelecek)', { calis:'gelecek sayfasını aç' }),
         s('Görev kur', 'King adım adım plan kurar; sen başlatırsın', { doldur:'bu hafta B1’e hazırla beni', merkez:true }),
         s('Haftalık değerlendirme', 'Merkez’in hafta raporu', { calis:'haftalık değerlendirme', merkez:true }),
         s('Çapraz bulgu', 'Modüller birbirini nasıl etkiliyor', { calis:'çapraz bulgu', merkez:true }),
@@ -38541,30 +38628,92 @@ window.LIFEOS.KING = (function(){
     const sistem = gruplar.pop();               // «Sistem» en sonda kalır
     return (simdi.length ? [{ ad:'Şimdi', l:simdi }] : []).concat(gruplar, modulGruplari, [sistem]);
   }
-  const SVG_YETENEK = {
-    calis:'<path d="M8 5.5v13l10-6.5z"/>',
-    doldur:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
-    is:'<path d="M9 6l6 6-6 6"/>',
+  /* ARAÇLAR SOHBETTE (kullanıcı, 2026-10-23: «araçlar kısmını sohbet ekranına
+     gelen minik ikonlarla duran minik kutular şeklinde»). Raydaki Araçlar
+     sohbet ekranını açar; akışın yerinde minik kutular durur, yazı alanı
+     altta kalır. Kutu: aracın kendi simgesi ve adı; açıklama ve örnek ipucu
+     olarak (title, aria-label). Merkez isteyen kutunun simgesinde nokta.
+     Dokunmak sohbete döner ve aracı çalıştırır. Boş sohbette öne çıkanlar
+     da aynı kutularla durur. Liste sütunu grupların dizinidir. */
+  const ONE_CIKAN = ['Kişisel yasalar', 'Günüm', 'Derse çevir', 'Sınav yolculuğu', 'Konu anlat'];
+  const S_ = (...l) => l.join('');
+  const ARAC_SIMGE = {
+    'Kişisel yasalar':S_('<path d="M12 4v16M5 20h14"/>', '<path d="M6 8h12M6 8l-3 6a3 3 0 0 0 6 0zM18 8l-3 6a3 3 0 0 0 6 0z"/>'),
+    'Günüm':S_('<circle cx="12" cy="12" r="4"/>', '<path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/>'),
+    'Günü kapat':'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+    'Derse çevir':S_('<path d="M3 6.5C5.5 5 8.5 5 12 7c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5z"/>', '<path d="M12 7v12.5"/>'),
+    'Sınav yolculuğu':S_('<path d="M4 19l5-6 4 3 7-9"/>', '<path d="M15 7h5v5"/>'),
+    'Konu anlat':S_('<path d="M2.5 9L12 4.5 21.5 9 12 13.5z"/>', '<path d="M6.5 11v4.5c3 2 8 2 11 0V11M21.5 9v5"/>'),
+    'İstatistik kartları':'<path d="M5 20V11M10 20V5M15 20v-7M20 20v-4"/>',
+    'Bana soru sor':S_('<circle cx="12" cy="12" r="8.5"/>', '<path d="M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/>'),
+    'Konudan soru':S_('<rect x="4" y="4" width="16" height="16" rx="3"/>', '<path d="M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/>'),
+    'Neye çalışayım':S_('<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/>', '<circle cx="12" cy="12" r="1"/>'),
+    'Yük durumum':S_('<path d="M4 16a8 8 0 1 1 16 0"/>', '<path d="M12 16l4-5"/>'),
+    'Araştır':S_('<circle cx="11" cy="11" r="6"/>', '<path d="M20 20l-4.5-4.5"/>'),
+    'Arka planda araştır':S_('<circle cx="10" cy="10" r="5"/>', '<path d="M17.5 17.5l-3.8-3.8M15 4h5M17.5 1.5v5"/>'),
+    'PDF':S_('<path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/>', '<path d="M14 3.5V8h4.5M9 13h6M9 16.5h4"/>'),
+    'Notlarımda ara':S_('<path d="M6 3.5h9l3.5 3.5v13.5H6z"/>', '<circle cx="11.5" cy="13" r="2.5"/><path d="M15.5 17l-2.2-2.2"/>'),
+    'Derslerimden soru':S_('<path d="M3 6.5C5.5 5 8.5 5 12 7c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5z"/>', '<path d="M12 11v.01"/>'),
+    'Fotoğraf':S_('<rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/>', '<path d="M20.5 15.5l-5-5-8.5 8.5"/>'),
+    'Kamera':S_('<rect x="3" y="7" width="13" height="10" rx="2"/>', '<path d="M16 11l5-3v8l-5-3"/>'),
+    'Ekran':S_('<rect x="3.5" y="5" width="17" height="11.5" rx="2"/>', '<path d="M9 20h6M12 16.5V20"/>'),
+    'Bu sayfayı göster':S_('<path d="M5 4.5h9l5 5v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1z"/>', '<circle cx="11" cy="13.5" r="2.5"/><path d="M13 15.5l2.5 2.5"/>'),
+    'Barkod':'<path d="M4 6v12M7 6v12M10.5 6v12M13 6v12M16.5 6v12M20 6v12"/>',
+    'Bugünün özeti':S_('<rect x="4" y="4.5" width="16" height="15" rx="2"/>', '<path d="M8 9h8M8 12.5h8M8 16h5"/>'),
+    'Odak sayacı':S_('<circle cx="12" cy="13" r="7.5"/>', '<path d="M12 9v4l2.5 1.5M10 2.5h4"/>'),
+    'Sesli özet':S_('<path d="M5 9.5v5h3.5L13 18.5v-13L8.5 9.5z"/>', '<path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/>'),
+    'Görev kur':S_('<path d="M10 7h10M10 12h10M10 17h10"/>', '<path d="M3.8 7l1.4 1.4L7.8 5.6M3.8 12l1.4 1.4 2.6-2.8"/><circle cx="5.5" cy="17" r="1.3"/>'),
+    'Haftalık değerlendirme':S_('<rect x="4" y="5" width="16" height="15" rx="2"/>', '<path d="M4 10h16M9 3v4M15 3v4M8.5 15l2 2 4-4"/>'),
+    'Çapraz bulgu':S_('<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/>', '<path d="M8.3 11l7.4-4M8.3 13l7.4 4"/>'),
+    'Haftalık gözden geçirme':S_('<path d="M4 12a8 8 0 1 0 2.3-5.6"/>', '<path d="M4 4.5v3.8h3.8M12 8v4.5l3 1.5"/>'),
+    'Kişisel deney':S_('<path d="M9.5 3.5h5M10 3.5v6L5 18a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-8.5v-6"/>', '<path d="M7.5 14.5h9"/>'),
+    'Bekleyen öneriler':S_('<path d="M4 13.5l2.5-8h11l2.5 8v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>', '<path d="M4 13.5h4.5l1.5 2.5h4l1.5-2.5H20"/>'),
+    'Günlük':S_('<path d="M6 3.5h11a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6z"/>', '<path d="M6 3.5v17M10 8h5M10 11.5h5"/>'),
+    'Deftere not':S_('<path d="M4 20h4L19 9l-4-4L4 16z"/>', '<path d="M13.5 6.5l4 4"/>'),
+    'Beceri öğret':'<path d="M13 2.5L5 13.5h6l-1 8 8-11h-6z"/>',
+    'Söz':S_('<path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 16.5h-7.5L7 20v-3.5H5A1.5 1.5 0 0 1 3.5 15V6.5A1.5 1.5 0 0 1 5 5z"/>', '<path d="M8.5 11l2.2 2.2L15.5 8.5"/>'),
+    'Ekip ne yapıyor':S_('<circle cx="9" cy="8.5" r="3"/><circle cx="17" cy="9.5" r="2.4"/>', '<path d="M3.5 19a5.5 5.5 0 0 1 11 0M14.5 19a4 4 0 0 1 6.5-3.1"/>'),
+    'Beni nasıl tanıyorsun':S_('<circle cx="12" cy="8.5" r="3.5"/>', '<path d="M5 20a7 7 0 0 1 14 0"/>'),
+    'Kişilik envanteri':S_('<circle cx="12" cy="8.5" r="3.5"/>', '<path d="M5 20a7 7 0 0 1 14 0M17.5 3.5l1 1.5 1.8.3-1.3 1.3.3 1.8-1.8-.9-1.6.9.3-1.8-1.3-1.3 1.8-.3z"/>'),
+    'Bu sistemde ne var':S_('<path d="M3.5 6.5l5.5-2 6 2 5.5-2v13l-5.5 2-6-2-5.5 2z"/>', '<path d="M9 4.5v13M15 6.5v13"/>'),
+    'Görünüm':S_('<path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.4 0 1.8-1 1.3-2.1-.6-1.3.3-2.4 1.7-2.4H18a2.5 2.5 0 0 0 2.5-2.5A8.5 8.5 0 0 0 12 3.5z"/>', '<circle cx="8" cy="11" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="15.5" cy="8.5" r="1"/>'),
+    'Düşünme':S_('<path d="M9 18.5h6M10 21h4"/>', '<path d="M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/>'),
+    'Cevapları sesli oku':S_('<path d="M5 9.5v5h3.5L13 18.5v-13L8.5 9.5z"/>', '<path d="M16.5 9a4 4 0 0 1 0 6"/>'),
   };
-  function aracListe(){
-    const bagli = baglanti();
-    const satir = x => {
-      const tur = x.calis ? 'calis' : x.doldur != null ? 'doldur' : 'is';
-      const eylem = x.calis ? 'oner-metin:' + x.calis : x.doldur != null ? 'doldur:' + x.doldur : x.hazir != null ? '' : x.is;
-      const sonuk = x.merkez && !bagli;
-      const ne = tur === 'calis' ? 'Hemen sor' : tur === 'doldur' ? 'Yazı alanına koy' : 'Aç';
-      return '<li data-king-ara="' + kac((x.ad + ' ' + x.ip + ' ' + (x.calis || x.doldur || '')).toLocaleLowerCase('tr')) + '">'
-        + '<button type="button" class="king__satir king__yetenek' + (sonuk ? ' is-sonuk' : '') + '"'
-        + (x.hazir != null ? ' data-king-hazir="' + x.hazir + '" data-king="hazir"' : ' data-king="' + kac(eylem) + '"')
-        + ' title="' + ne + (sonuk ? ' · Merkez bağlı değil' : '') + '">'
-        + '<span class="king__satir-bas"><span>' + kac(x.ad) + '</span>' + (sonuk ? '<em class="king__yetenek-etiket">Merkez</em>' : '') + '</span>'
-        + '<small>' + kac(x.doldur != null ? '«' + x.doldur.trim() + '»' : x.ip) + '</small>'
-        + '<svg class="king__yetenek-ne" viewBox="0 0 24 24" aria-hidden="true">' + SVG_YETENEK[tur] + '</svg></button></li>';
-    };
-    return '<input class="king__ara" type="search" data-king-ara-girdi placeholder="Ne yapmak istiyorsun?" aria-label="Araçlarda ara" autocomplete="off"/>'
-      + '<div class="king__araclar" data-king-araclar>'
-      + yetenekler().map(g => listeGrup(g.ad, '<ul class="king__gecmis">' + g.l.map(satir).join('') + '</ul>')).join('')
-      + '</div>';
+  const GRUP_SVG_MODUL = '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>';
+  function vitrinEylem(x){
+    const tur = x.calis ? 'calis' : x.doldur != null ? 'doldur' : 'is';
+    return { tur, eylem:x.calis ? 'oner-metin:' + x.calis : x.doldur != null ? 'doldur:' + x.doldur : x.is };
+  }
+  function miniKutu(x){
+    const e = vitrinEylem(x), sonuk = x.merkez && !baglanti();
+    const ornek = x.doldur != null ? x.doldur.trim() : x.calis || '';
+    const ip = x.ip + (ornek ? ' · «' + ornek + '»' : '') + (sonuk ? ' · Merkez gerekli' : '');
+    return '<button type="button" class="kv-mini' + (sonuk ? ' is-sonuk' : '') + '" data-king-ara="' + kac((x.ad + ' ' + x.ip + ' ' + ornek).toLocaleLowerCase('tr')) + '"'
+      + (x.hazir != null ? ' data-king-hazir="' + x.hazir + '" data-king="hazir"' : ' data-king="' + kac(e.eylem) + '"')
+      + ' title="' + kac(ip) + '" aria-label="' + kac(x.ad + ': ' + ip) + '">'
+      + '<span class="kv-mini-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + (ARAC_SIMGE[x.ad] || GRUP_SVG_MODUL) + '</svg>'
+      + (sonuk ? '<i class="kv-mini-merkez"></i>' : '') + '</span><span class="kv-mini-ad">' + kac(x.ad) + '</span></button>';
+  }
+  function oneCikanlar(){
+    const hepsi = yetenekler().reduce((a, g) => a.concat(g.l), []);
+    return ONE_CIKAN.map(ad => hepsi.find(x => x.ad === ad)).filter(Boolean);
+  }
+  function vitrinHtml(){
+    const gruplar = yetenekler(), one = oneCikanlar();
+    return '<section class="king__vitrin" data-king-vitrin aria-label="Araçlar">'
+      + '<header class="kv-bas"><h2 class="kv-baslik">Araçlar</h2>'
+      + '<input class="king__ara kv-ara" type="search" data-king-ara-girdi placeholder="Ara: ders, uyku, araştır…" aria-label="Araçlarda ara" autocomplete="off"/></header>'
+      + (one.length ? '<div class="kv-grup kv-grup--one"><h3 class="kv-grup-ad">Öne çıkanlar</h3><div class="kv-izgara">'
+        + one.map(miniKutu).join('') + '</div></div>' : '')
+      + gruplar.map((g, i) => '<div class="kv-grup" id="kv-' + i + '"><h3 class="kv-grup-ad">' + kac(g.ad) + '<small>' + g.l.length + '</small></h3>'
+        + '<div class="kv-izgara">' + g.l.map(miniKutu).join('') + '</div></div>').join('')
+      + '<p class="kv-not">Dokun: hemen yapar ya da örneği yazı alanına koyar. Üzerine gelince ne yaptığını söyler. Sayıları her zaman modülün kendi kodu üretir.</p>'
+      + '</section>';
+  }
+  function vitrinDizin(){
+    return '<nav class="kv-dizin" aria-label="Yetenek grupları"><ul class="king__gecmis">' + yetenekler().map((g, i) => '<li><button type="button" class="king__satir" data-king="vitrin-git:' + i + '">'
+      + '<span class="king__satir-bas"><span>' + kac(g.ad) + '</span></span><small>' + g.l.length + ' yetenek</small></button></li>').join('') + '</ul></nav>';
   }
   /* Liste satırı: başlık, alt satır, isteğe bağlı ince çubuk; tıklayınca çalışma alanı. */
   function listeSatir(eylem, bas, alt, ek, canli){
@@ -38607,8 +38756,10 @@ window.LIFEOS.KING = (function(){
   function kutuphaneListe(){
     const ars = akis.map((m, n) => ({ m, n })).filter(x => x.m && x.m.arastirma).reverse();
     const gecmis = arsivOku(), kls = klasorler();
-    const sr = sira(), so = sozetler();
-    return (sr.length ? listeGrup('Sırada · Merkez bekleniyor', '<ul class="king__gecmis">' + sr.map((x, i) => '<li class="king__satir-sar">'
+    const sr = sira(), so = sozetler(), kd = kdDersler();
+    return (kd.length ? listeGrup('Derslerim', '<ul class="king__gecmis">' + kd.map((d, i) => listeSatir('kd-ac:' + i, d.baslik,
+        d.kaynak + ' · ' + d.bolumler.length + ' bölüm · ' + d.sorular.length + ' soru')).join('') + '</ul>') : '')
+      + (sr.length ? listeGrup('Sırada · Merkez bekleniyor', '<ul class="king__gecmis">' + sr.map((x, i) => '<li class="king__satir-sar">'
         + '<span class="king__satir"><span class="king__satir-bas"><span>' + kac(x.metin) + '</span></span><small>' + kac(tarihYaz(x.zaman)) + '</small></span>'
         + '<button type="button" class="king__gecmis-ufak" data-king="sira-sil:' + i + '" aria-label="Sıradan çıkar" title="Sıradan çıkar">'
         + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></li>').join('') + '</ul>') : '')
@@ -39558,6 +39709,14 @@ window.LIFEOS.KING = (function(){
   }
   async function soruCevapla(n, harf){
     const m = akis[n], K = ayar && ayar.kartlar;
+    if(m && m.soru && !m.soru.cevap && /^kd:/.test(m.soru.id)){
+      const c = kdCevapla(m, harf);
+      if(!c) return null;
+      cipler = [{ ad:'Bir soru daha', is:'oner-metin:derslerimden soru sor' }];
+      sakla(); ciz(false);
+      if(sesleMi()) seslendir(c.isabet ? 'Doğru.' : 'Doğru cevap ' + c.dogru + '.');
+      return c;
+    }
     if(!m || !m.soru || m.soru.cevap || !K || typeof K.cevapla !== 'function') return null;
     let r = null;
     try{ r = await K.cevapla(m.soru.id, harf); }catch(e){ r = null; }
@@ -39573,6 +39732,242 @@ window.LIFEOS.KING = (function(){
     if(sesleMi()) seslendir(m.soru.cevap.isabet ? 'Doğru.' : 'Doğru cevap ' + m.soru.cevap.dogru + '.');
     return m.soru.cevap;
   }
+  /* ======================================================================
+     DEVRİM (kullanıcı, 2026-10-22: «devrimsel bir şey»; belgeler/ekip/
+     KING-DEVRIM.md). Üç yetenek, hepsinde sayıyı KOD üretir:
+       1. Kişisel yasalar — modülün günlük ölçülerinden (kartlar.olcu)
+          medyan bölmesi ve etki büyüklüğü; ilişki, neden değil.
+       2. Günüm — modülün bugünkü maddeleri (kartlar.gun); şimdi, sırada,
+          bitti; «Başlat» odak sayacını kurar. Yazma yok.
+       3. Derse çevir — Merkez kaynaktan ders ve soru yazar; KOD her bölümün
+          ve sorunun alıntısını kaynakta arar, bulamadığını atar.
+     ====================================================================== */
+  const YASA_RE = /(yasalarım|kişisel yasa|beni ne etkiliyor|bana ne iyi geliyor|neyin işe yaradığı)/;
+  const YASA_GUN = 120, YASA_EN_AZ = 8, YASA_ETKI = 0.5;
+  function gunGeri(n){
+    const d = ortam.simdi();
+    const g = new Date(d.getFullYear(), d.getMonth(), d.getDate() - n);
+    return g.getFullYear() + '-' + String(g.getMonth() + 1).padStart(2, '0') + '-' + String(g.getDate()).padStart(2, '0');
+  }
+  const ortalama = l => l.reduce((a, b) => a + b, 0) / l.length;
+  function medyan(l){ const s = l.slice().sort((a, b) => a - b), k = s.length >> 1; return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; }
+  /* Saf: { var, yasalar:[{ a, b, gecikme, esik, ust, alt, nUst, nAlt, etki }] }. */
+  function yasaHesapla(olcu){
+    if(!olcu || !Array.isArray(olcu.liste) || typeof olcu.deger !== 'function' || olcu.liste.length < 2)
+      return { var:false, neden:olcu && Array.isArray(olcu.liste) && olcu.liste.length === 1 ? 'tek-olcu' : 'olcu-yok' };
+    const gunler = [];
+    for(let i = 1; i <= YASA_GUN; i++) gunler.push(gunGeri(i));            // [0] dün, en eskisi sonda
+    const seri = {};
+    olcu.liste.forEach(x => {
+      seri[x.id] = gunler.map(g => { let v = null; try{ v = olcu.deger(x.id, g); }catch(e){ v = null; } return typeof v === 'number' && isFinite(v) ? v : null; });
+    });
+    const out = [];
+    olcu.liste.forEach(A => olcu.liste.forEach(B => {
+      if(A.id === B.id) return;
+      [0, 1].forEach(gecikme => {
+        const ciftler = [];
+        for(let k = gecikme; k < gunler.length; k++){
+          const a = seri[A.id][k], b = seri[B.id][k - gecikme];       // gecikme 1: B, A'nın ertesi günü
+          if(a != null && b != null) ciftler.push([a, b]);
+        }
+        if(ciftler.length < 2 * YASA_EN_AZ) return;
+        const esik = medyan(ciftler.map(c => c[0]));
+        const ust = ciftler.filter(c => c[0] > esik).map(c => c[1]), alt = ciftler.filter(c => c[0] < esik).map(c => c[1]);
+        if(ust.length < YASA_EN_AZ || alt.length < YASA_EN_AZ) return;
+        const mU = ortalama(ust), mA = ortalama(alt);
+        const v = l => { const m = ortalama(l); return l.reduce((s, x) => s + (x - m) * (x - m), 0) / (l.length - 1); };
+        const sd = Math.sqrt(((ust.length - 1) * v(ust) + (alt.length - 1) * v(alt)) / (ust.length + alt.length - 2));
+        if(!(sd > 0)) return;
+        const etki = (mU - mA) / sd;
+        if(Math.abs(etki) < YASA_ETKI) return;
+        out.push({ a:A, b:B, gecikme, esik, ust:mU, alt:mA, nUst:ust.length, nAlt:alt.length, etki });
+      });
+    }));
+    out.sort((x, y) => Math.abs(y.etki) - Math.abs(x.etki));
+    return { var:true, yasalar:out.slice(0, 6), gun:YASA_GUN };
+  }
+  const sayiYaz = (x, d) => (Math.round(x * Math.pow(10, d == null ? 1 : d)) / Math.pow(10, d == null ? 1 : d)).toLocaleString('tr-TR');
+  const birimli = (x, b) => sayiYaz(x) + (b ? ' ' + b : '');
+  function yasaCumlesi(y){
+    return y.a.ad + ' ' + birimli(y.esik, y.a.birim) + ' üstündeyken' + (y.gecikme ? ' ertesi gün ' : ' ') + y.b.ad.toLocaleLowerCase('tr')
+      + ' ortalama ' + birimli(Math.abs(y.ust - y.alt), y.b.birim) + (y.ust > y.alt ? ' daha yüksek' : ' daha düşük') + '.';
+  }
+  function yasaIsle(metin){
+    akis.push({ kim:'sen', metin:String(metin).trim() });
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; cipler = null;
+    const K = ayar && ayar.kartlar, ad = MODUL_AD[ayar && ayar.modul] || 'Bu modül';
+    const r = yasaHesapla(K && K.olcu);
+    const capraz = baglanti() ? [{ ad:'Modüller arası', is:'oner-metin:çapraz bulgu' }] : [];
+    if(!r.var){
+      cipler = capraz.length ? capraz : null;
+      soyle(r.neden === 'tek-olcu' ? ad + '’de tek bir günlük ölçü var; yasa için en az iki ölçü gerekir.' + (capraz.length ? ' Modüller arası bulguyu Merkez’den getirebilirim.' : '')
+        : ad + ' günlük ölçü vermiyor; kişisel yasa çıkaramam.');
+      return { tur:'yasa', n:0 };
+    }
+    if(!r.yasalar.length){
+      cipler = capraz.length ? capraz : null;
+      soyle('Son ' + r.gun + ' günde ' + ad + '’nin ölçüleri arasında belirgin bir bağ yok (ya da her grupta en az ' + YASA_EN_AZ + ' gün yok). Ölçtükçe yeniden bakarım.');
+      return { tur:'yasa', n:0 };
+    }
+    cipler = capraz.length ? capraz : null;
+    soyle('Senin yasaların · ' + ad, null, null, null, { yasa:{ gun:r.gun, l:r.yasalar.map(y => ({
+      cumle:yasaCumlesi(y), ust:y.ust, alt:y.alt, nUst:y.nUst, nAlt:y.nAlt, birim:y.b.birim, aAd:y.a.ad, bAd:y.b.ad,
+      deney:y.a.ad + ' ' + (y.ust > y.alt ? 'artınca' : 'azalınca') + ' ' + y.b.ad.toLocaleLowerCase('tr') + ' iyileşir mi' })) } });
+    return { tur:'yasa', n:r.yasalar.length };
+  }
+  function yasaHtml(m, n){
+    const y = m.yasa;
+    if(!y) return '';
+    return '<div class="king__yasa" role="list" aria-label="Kişisel yasalar">' + y.l.map((x, i) => {
+      const en = Math.max(Math.abs(x.ust), Math.abs(x.alt)) || 1;
+      const cubuk = (deger, ad) => '<span class="king__yasa-cubuk"><small>' + kac(ad) + '</small><i style="width:' + Math.max(4, Math.round(Math.abs(deger) / en * 100)) + '%"></i>'
+        + '<b>' + kac(birimli(deger, x.birim)) + '</b></span>';
+      return '<div class="king__yasa-s" role="listitem"><p>' + kac(x.cumle) + '</p>'
+        + '<div class="king__yasa-cubuklar" role="img" aria-label="' + kac(x.aAd + ' üstünde ' + x.nUst + ' gün ortalama ' + birimli(x.ust, x.birim) + ', altında ' + x.nAlt + ' gün ortalama ' + birimli(x.alt, x.birim)) + '">'
+        + cubuk(x.ust, 'üstünde · ' + x.nUst + ' gün') + cubuk(x.alt, 'altında · ' + x.nAlt + ' gün') + '</div>'
+        + '<div class="king__yasa-alt"><small>hesaplandı · ilişki, neden değil · son ' + y.gun + ' gün</small>'
+        + '<button type="button" class="king__cip" data-king="yasa-deney:' + n + ':' + i + '">Deneye çevir</button></div></div>';
+    }).join('') + '</div>';
+  }
+
+  const GUN_RE = /^(günüm|günümü (?:göster|kur|planla)|günü kur|bugün ne yapayım|bugünkü planım|günüm nasıl)\s*[?.!]*$/;
+  const GUN_KAPAT_RE = /^(günü kapat|günü bitir|gün sonu)\s*[?.!]*$/;
+  const GUN_DURUM = ['bitti', 'simdi', 'sirada', 'atlandi'];
+  function gunIsle(metin, kapat){
+    akis.push({ kim:'sen', metin:String(metin).trim() });
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; cipler = null;
+    const K = ayar && ayar.kartlar, ad = MODUL_AD[ayar && ayar.modul] || 'Bu modül';
+    let g = null;
+    try{ g = K && typeof K.gun === 'function' ? K.gun() : null; }catch(e){ g = null; }
+    const yazi = (v, k) => String(v == null ? '' : v).trim().slice(0, k);
+    const ogeler = (g && Array.isArray(g.ogeler) ? g.ogeler : []).filter(x => x && x.ad).slice(0, 12).map(x => ({
+      ad:yazi(x.ad, 80), alt:yazi(x.alt, 80), durum:GUN_DURUM.indexOf(x.durum) >= 0 ? x.durum : 'sirada',
+      dk:typeof x.dk === 'number' && x.dk > 0 ? Math.round(x.dk) : null, route:x.route ? String(x.route) : null }));
+    if(!ogeler.length){
+      soyle(g && g.not ? String(g.not) : ad + '’de bugün için planlanmış madde yok.');
+      return { tur:'gun', n:0 };
+    }
+    let siradaki = ogeler.findIndex(x => x.durum === 'simdi');
+    if(siradaki < 0) siradaki = ogeler.findIndex(x => x.durum === 'sirada');
+    const bekleyenN = ogeler.filter(x => x.durum === 'sirada' || x.durum === 'simdi').length;
+    const saat = ortam.simdi().getHours();
+    /* Uyarlama kuraldır: akşam çok madde bekliyorsa modülün sırasıyla öne alınacak tek madde. */
+    const not = kapat ? (bekleyenN ? bekleyenN + ' madde kaldı; yarına kalırlar, modülün planı onları yeniden dağıtır.' : 'Bugünün bütün maddeleri tamam.')
+      : saat >= 18 && bekleyenN >= 3 ? 'Akşam oldu ve ' + bekleyenN + ' madde bekliyor; önce «' + ogeler[siradaki].ad + '».' : (g && g.not ? yazi(g.not, 160) : '');
+    if(kapat) cipler = [{ ad:'Sesli özet', is:'oner-metin:sesli özet' }];
+    soyle(kapat ? 'Günün kapanışı · ' + ad : 'Bugün · ' + ad, null, null, null, { gun:{ ogeler, siradaki:kapat ? -1 : siradaki, not, modul:ayar.modul } });
+    return { tur:'gun', n:ogeler.length, siradaki };
+  }
+  const GUN_DURUM_AD = { bitti:'bitti', simdi:'şimdi', sirada:'sırada', atlandi:'atlandı' };
+  function gunKartHtml(m, n){
+    const g = m.gun;
+    if(!g) return '';
+    const bitti = g.ogeler.filter(x => x.durum === 'bitti').length;
+    return '<div class="king__gunum">' + '<div class="king__ders-ilerleme">' + cubukHtml(Math.round(bitti * 100 / g.ogeler.length), bitti + ' / ' + g.ogeler.length + ' madde bitti')
+      + '<small>' + bitti + ' / ' + g.ogeler.length + '</small></div>'
+      + '<ol class="king__gunum-l">' + g.ogeler.map((x, i) => '<li class="king__gunum-s is-' + x.durum + (i === g.siradaki ? ' is-siradaki' : '') + '">'
+        + '<i class="king__gunum-nokta" aria-hidden="true"></i><span class="king__gunum-ad"><b>' + kac(x.ad) + '</b>'
+        + (x.alt || x.dk ? '<small>' + kac([x.alt, x.dk ? x.dk + ' dk' : ''].filter(Boolean).join(' · ')) + '</small>' : '') + '</span>'
+        + '<span class="king__gunum-durum">' + (i === g.siradaki ? 'sıradaki' : GUN_DURUM_AD[x.durum]) + '</span>'
+        + (i === g.siradaki ? '<span class="king__gunum-eylem"><button type="button" class="king__cip king__cip--ana" data-king="gun-baslat:' + n + ':' + i + '">Başlat</button>'
+          + (x.route ? '<button type="button" class="king__cip" data-king="gun-ac:' + n + ':' + i + '">Modülde aç</button>' : '') + '</span>' : '')
+        + '</li>').join('') + '</ol>'
+      + (g.not ? '<p class="king__gunum-not">' + kac(g.not) + '</p>' : '') + '</div>';
+  }
+
+  const DERSLER = 'lifeos.king.dersler';
+  const DERSE_RE = /^(?:bunu |bu belgeyi |belgeyi |pdf'?i )?derse çevir\s*:?\s*([\s\S]*)$/;
+  const KD_SORU_RE = /derslerimden (?:bir )?soru/;
+  const KD_ARALIK = [1, 3, 7];
+  let kaynakMetin = null;                          // son PDF'in ya da yapıştırılan metnin kendisi (saklanmaz)
+  function kdDersler(){ const l = ortam.depo.oku(DERSLER); return Array.isArray(l) ? l.filter(x => x && x.id && Array.isArray(x.bolumler)) : []; }
+  function kdYaz(l){ ortam.depo.yaz(DERSLER, l.slice(0, 20)); }
+  const kdNorm = s => kucuk(String(s || '')).replace(/[’'`´“”"«»]/g, '').replace(/\s+/g, ' ').trim();
+  function kdDogrula(alinti, kaynakN){
+    const a = kdNorm(alinti);
+    return a.length >= 20 && a.length <= 500 && kaynakN.indexOf(a) >= 0;
+  }
+  function kdJson(metin){
+    const s = String(metin || ''), i = s.indexOf('{'), j = s.lastIndexOf('}');
+    if(i < 0 || j <= i) return null;
+    try{ return JSON.parse(s.slice(i, j + 1)); }catch(e){ return null; }
+  }
+  /* Saf: modelin JSON'u + kaynak metin → doğrulanmış ders ya da { hata }. */
+  function kdKur(j, kaynak, ad){
+    const kn = kdNorm(kaynak);
+    const yazi = (v, k) => String(v == null ? '' : v).trim().slice(0, k);
+    if(!j || typeof j !== 'object') return { hata:'Merkez ders biçiminde cevap vermedi.' };
+    const bolumler = (Array.isArray(j.bolumler) ? j.bolumler : []).filter(b => b && b.metin && kdDogrula(b.alinti, kn)).slice(0, 8)
+      .map(b => ({ baslik:yazi(b.baslik, 100) || 'Bölüm', metin:yazi(b.metin, 1400), liste:[], dikkat:'', alinti:yazi(b.alinti, 500) }));
+    const sorular = (Array.isArray(j.sorular) ? j.sorular : []).filter(q => q && q.soru && Array.isArray(q.secenekler)
+      && q.secenekler.length >= 3 && q.secenekler.length <= 5 && 'ABCDE'.slice(0, q.secenekler.length).indexOf(String(q.dogru || '').toUpperCase()) >= 0
+      && kdDogrula(q.alinti, kn)).slice(0, 10)
+      .map(q => ({ soru:yazi(q.soru, 400), sec:q.secenekler.map(x => yazi(x, 160)), dogru:String(q.dogru).toUpperCase(), alinti:yazi(q.alinti, 500) }));
+    const atilan = (Array.isArray(j.bolumler) ? j.bolumler.length : 0) - bolumler.length;
+    if(bolumler.length < 2) return { hata:'Kaynakla doğrulanabilen bölüm çıkmadı (alıntılar metinde bulunamadı); ders kurmadım.' };
+    return { ders:{ id:'kd' + ortam.simdi().getTime(), baslik:yazi(j.baslik, 100) || ad, kaynak:yazi(ad, 120), zaman:ortam.simdi().toISOString(),
+      bolumler, sorular, tekrar:{} }, atilan };
+  }
+  function kdDersMesaji(d){
+    return { id:d.id, baslik:d.baslik, alt:'Kaynak: ' + d.kaynak, giris:'', etiket:'Merkez yazdı · her bölüm kaynaktan alıntıyla doğrulandı',
+      sorgu:'kd:' + d.id, soruVar:d.sorular.length > 0, acilir:false, bolumler:d.bolumler, adim:0, kd:true };
+  }
+  async function derseCevir(metin, kaynakAd){
+    const kaynak = String(metin || '').trim();
+    if(kaynak.length < 400){ soyle('Derse çevirmek için en az bir paragraflık kaynak gerekir: bir PDF ver ya da «derse çevir:» deyip metni yapıştır.'); return { tur:'kd', n:0 }; }
+    if(!baglanti()){ soyle('Dersi Merkez’deki model yazar, kod kaynağa karşı doğrular; Merkez bağlı değil.'); return { tur:'kd', n:0 }; }
+    const bek = { kim:'king', bekliyor:true, metin:'' };
+    akis.push(bek); ciz(false);
+    const r = await merkezeSor('Aşağıdaki KAYNAK METİN’den Türkçe kısa bir ders kur. YALNIZ JSON döndür, başka hiçbir şey yazma:\n'
+      + '{"baslik":"…","bolumler":[{"baslik":"…","metin":"2-4 cümle anlatım","alinti":"kaynaktan AYNEN kopyalanmış bir cümle"}],'
+      + '"sorular":[{"soru":"…","secenekler":["…","…","…","…"],"dogru":"A","alinti":"cevabın geçtiği cümle, kaynaktan AYNEN"}]}\n'
+      + '3-6 bölüm, 3-6 soru. Her «alinti» kaynakta harfi harfine geçmeli; kaynakta olmayan bilgi ve sayı yazma.\n\nKAYNAK METİN:\n' + kaynak.slice(0, PDF_METIN),
+      bek, { araclar:false });
+    akis = akis.filter(m => m !== bek);
+    if(!r.ok){ soyle('Merkez’e ulaşılamadı; ders kurulamadı.'); return { tur:'kd', n:0 }; }
+    const k = kdKur(kdJson(r.text), kaynak, kaynakAd || 'yapıştırılan metin');
+    if(k.hata){ soyle(k.hata); return { tur:'kd', n:0 }; }
+    kdYaz([k.ders].concat(kdDersler()));
+    cipler = k.ders.sorular.length ? [{ ad:'Bu dersten soru sor', is:'oner-metin:derslerimden soru sor' }] : null;
+    soyle(k.ders.baslik + ' · ders' + (k.atilan > 0 ? ' (' + k.atilan + ' bölüm kaynakta doğrulanamadığı için atıldı)' : ''), null, null, null, { ders:kdDersMesaji(k.ders) });
+    return { tur:'kd', n:k.ders.bolumler.length, soru:k.ders.sorular.length };
+  }
+  /* Derslerden sıradaki soru: vadesi gelen (yanlış 1, doğru 3 ve 7 gün), yoksa hiç sorulmamış. */
+  function kdSoru(dersId){
+    const bugun = bugunISO();
+    const l = kdDersler().filter(d => !dersId || d.id === dersId);
+    let sec = null;
+    l.forEach(d => d.sorular.forEach((q, i) => {
+      const tk = d.tekrar[i];
+      const puan = tk ? (tk.bitti ? -1 : String(tk.sonraki) <= bugun ? 2 : -1) : 1;
+      if(puan > 0 && (!sec || puan > sec.puan)) sec = { d, i, q, puan };
+    }));
+    if(!sec){ soyle(l.length ? 'Derslerinde şu an sorulacak soru yok; vadesi gelince sorarım.' : 'Henüz dersin yok. Bir PDF ver ya da «derse çevir:» deyip metin yapıştır.'); return { tur:'kd-soru', n:0 }; }
+    const soru = { id:'kd:' + sec.d.id + ':' + sec.i, konu:sec.d.baslik, soru:sec.q.soru, sec:sec.q.sec, kaynak:'Kaynak: ' + sec.d.kaynak, not:'', sorgu:'kd:' + sec.d.id };
+    soyle(sec.d.baslik + ' · soru', null, null, null, { soru });
+    return { tur:'kd-soru', id:soru.id };
+  }
+  function kdCevapla(m, harf){
+    const p = m.soru.id.split(':'), l = kdDersler(), d = l.find(x => x.id === p[1]), i = Number(p[2]), q = d && d.sorular[i];
+    if(!q) return null;
+    const isabet = harf === q.dogru, tk = d.tekrar[i];
+    let not = '';
+    if(!isabet){ d.tekrar[i] = { n:0, sonraki:gunIleri(KD_ARALIK[0]) }; not = 'Yarın bu soruyu yeniden soracağım.'; }
+    else{
+      const n = tk ? tk.n + 1 : 1;
+      if(n >= KD_ARALIK.length){ d.tekrar[i] = { n, bitti:true }; not = 'Tekrarları tamamladın.'; }
+      else{ d.tekrar[i] = { n, sonraki:gunIleri(KD_ARALIK[n]) }; not = KD_ARALIK[n] + ' gün sonra bir kez daha soracağım.'; }
+    }
+    kdYaz(l);
+    m.soru.cevap = { harf, dogru:q.dogru, isabet, cozum:['Kaynakta: «' + q.alinti + '»'], not };
+    return m.soru.cevap;
+  }
+  function gunIleri(n){
+    const d = ortam.simdi();
+    const g = new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+    return g.getFullYear() + '-' + String(g.getMonth() + 1).padStart(2, '0') + '-' + String(g.getDate()).padStart(2, '0');
+  }
+
   /* ---------- K4 (kullanıcı, 2026-10-22): MERKEZ SIRASI ve SESLİ ÖZET ----------
      Merkez'e ulaşılamadığında (telefon dışarıda) Merkez'e giden soru
      kaybolmaz: cihazda sıraya girer (lifeos.king.merkez-sira; TASINAN'da,
@@ -39691,6 +40086,7 @@ window.LIFEOS.KING = (function(){
       + (b.metin ? '<p>' + bicimli(b.metin) + '</p>' : '')
       + (b.liste.length ? '<ul class="king__ders-liste">' + b.liste.map(x => '<li>' + bicimli(x) + '</li>').join('') + '</ul>' : '')
       + (b.dikkat ? '<p class="king__ders-dikkat"><b>Dikkat</b> ' + bicimli(b.dikkat) + '</p>' : '')
+      + (b.alinti ? '<p class="king__ders-alinti"><b>Kaynakta</b> «' + kac(b.alinti) + '»</p>' : '')
       + '<div class="king__ders-eylem">'
       + (d.adim > 0 ? '<button type="button" class="king__cip" data-king="ders-geri:' + n + '">Önceki</button>' : '')
       + (!son ? '<button type="button" class="king__cip' + (son ? '' : ' king__cip--ana') + '" data-king="ders-ileri:' + n + '">Devam</button>' : '')
@@ -39866,6 +40262,14 @@ window.LIFEOS.KING = (function(){
     const DN = dersNiyeti(t0);
     if(DN){ const r = await dersIsle(DN, metin); if(r) return r; }
     if(SOZET_RE.test(t0)) return sesliOzet(metin);
+    /* DEVRİM: derse çevir, derslerden soru, kişisel yasalar, günüm. */
+    const DC = String(metin || '').trim().match(DERSE_RE);
+    if(DC){ akis.push({ kim:'sen', metin:String(metin).trim().slice(0, 160) + (String(metin).length > 160 ? '…' : '') }); cipler = null;
+      return derseCevir(DC[1] && DC[1].length >= 400 ? DC[1] : (kaynakMetin && kaynakMetin.metin) || DC[1], DC[1] && DC[1].length >= 400 ? 'yapıştırılan metin' : kaynakMetin && kaynakMetin.ad); }
+    if(KD_SORU_RE.test(t0)){ akis.push({ kim:'sen', metin:String(metin).trim() }); cipler = null; return kdSoru(null); }
+    if(YASA_RE.test(t0)) return yasaIsle(metin);
+    if(GUN_KAPAT_RE.test(t0)) return gunIsle(metin, true);
+    if(GUN_RE.test(t0)) return gunIsle(metin, false);
     /* Söz 32: kartlar (istatistik, soru); «sorma» komutundan önce. */
     const KN = kartNiyeti(t0);
     if(KN) return kartIsle(KN, metin);
@@ -40508,7 +40912,8 @@ window.LIFEOS.KING = (function(){
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>';
     const alan = alanHtml();
     const ilkSira = akis.length - satirlar.length;
-    const yan = rayHtml() + listeHtml() + yanDugmeHtml('king__cikinti') + '<div class="king__ana">';
+    const vitrin = bolum === 'araclar';
+    const yan = rayHtml() + listeHtml() + yanDugmeHtml('king__cikinti') + '<div class="king__ana' + (vitrin ? ' king__ana--vitrin' : '') + '">';
     /* Boş sohbet = karşılama (söz 27; 2026-10-19 GPT gibi): ortada küre,
        selam, modülün kartları ve özeti, hazır cevaplar. İlk mesajla gider. */
     const kars = akis.length ? { kartlar:[], satirlar:[] } : karsilama();
@@ -40525,7 +40930,10 @@ window.LIFEOS.KING = (function(){
         ? (kars.kartlar.length ? '<div class="king__bos-veri">' + kartlarHtml(kars) + '</div>' : '')
           + (kars.satirlar.length ? '<ul class="king__bos-ozet">' + kars.satirlar.map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : '')
         : '<p class="king__bos-alt">Yaz, konuş ya da ekranını göster. Kaydetmeden önce her zaman sorarım.</p>')
-      + '<div class="king__hazirlar" role="group" aria-label="Hazır cevaplar">' + hazirlar + '</div></div>';
+      + '<div class="king__hazirlar" role="group" aria-label="Hazır cevaplar">' + hazirlar + '</div>'
+      + '<div class="king__bos-araclar kv-izgara" role="group" aria-label="Öne çıkan araçlar">' + oneCikanlar().map(miniKutu).join('')
+      + '<button type="button" class="kv-mini kv-mini--tumu" data-king="bolum:araclar" title="Bütün araçlar" aria-label="Bütün araçlar">'
+      + '<span class="kv-mini-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + GRUP_SVG_MODUL + '</svg></span><span class="kv-mini-ad">Tümü</span></button></div></div>';
     const balonlar = satirlar.map((m, i) => m.kim === 'sen'
       ? (m.foto ? '<div class="king__balon king__balon--sen king__balon--foto"><img class="king__foto" src="' + kac(m.foto) + '" alt="Gönderdiğin fotoğraf"/></div>'
         : '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p>'
@@ -40534,7 +40942,7 @@ window.LIFEOS.KING = (function(){
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
       : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '"><div><p>' + bicimli(m.metin) + '</p>'
-        + kartlarHtml(m) + dersHtml(m, ilkSira + i) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i) + arastirmaHtml(m, ilkSira + i) + k2Html(m, ilkSira + i)
+        + kartlarHtml(m) + yasaHtml(m, ilkSira + i) + gunKartHtml(m, ilkSira + i) + dersHtml(m, ilkSira + i) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i) + arastirmaHtml(m, ilkSira + i) + k2Html(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
             + (m.onizleme.liste ? '<ul class="king__liste">' + m.onizleme.liste.map(x => '<li><b>' + kac(x) + '</b></li>').join('') + '</ul>'
@@ -40561,8 +40969,8 @@ window.LIFEOS.KING = (function(){
     return yan + bas
       /* Hazır cevaplar son cevabın hemen altında, küçük (2026-10-19,
          kullanıcı: «çok aşağıda; daha minimalist bir yere»). */
-      + '<div class="king__akis" aria-live="polite">' + (akis.length ? balonlar : bos)
-      + (cip ? '<div class="king__cipler king__cipler--akis" role="group" aria-label="Hazır cevaplar">' + cip + '</div>' : '') + '</div>'
+      + '<div class="king__akis" aria-live="polite">' + (vitrin ? vitrinHtml() : akis.length ? balonlar : bos)
+      + (cip && !vitrin ? '<div class="king__cipler king__cipler--akis" role="group" aria-label="Hazır cevaplar">' + cip + '</div>' : '') + '</div>'
       + kipPanel()
       + '<form class="king__yaz" data-king-form data-ayar-disi>'
       + '<div class="king__arti-yer"><button type="button" class="king__arti' + (aracAcik ? ' is-acik' : '') + '" data-king="arac" aria-expanded="' + (aracAcik ? 'true' : 'false')
@@ -40760,6 +41168,8 @@ window.LIFEOS.KING = (function(){
       const k = t.closest('[data-king]');
       if(!k){ if(acik && !mini) kucult(); return; }
       if(konusuyor > 0 && t.closest('.king__kure')){ sus(); return; }
+      /* Vitrin: kartın eylemi sohbete döner ve orada çalışır. */
+      if(t.closest('[data-king-vitrin] [data-king]') && bolum === 'araclar'){ bolum = 'sohbet'; if(!ortam.genis()) yanAcik = false; }
       /* Araçlar: dar ekranda liste sohbetin üstünde; seçince kapanır, sonuç görünür. */
       if(t.closest('[data-king-araclar] [data-king]') && !ortam.genis()) yanAcik = false;
       const h = t.closest('[data-king-hazir]');
@@ -40797,7 +41207,18 @@ window.LIFEOS.KING = (function(){
         if(/^sozet-dinle:\d+$/.test(is)){ const x = sozetler()[Number(is.slice(12))]; if(x) seslendir(sozetMetni(x)); return; }
         if(/^sira-sil:\d+$/.test(is)){ const l = sira(); l.splice(Number(is.slice(9)), 1); siraYaz(l); ciz(false); return; }
         if(/^ders-(ileri|geri):\d+$/.test(is)){ const p = is.split(':'); dersAdim(Number(p[1]), p[0] === 'ders-ileri' ? 1 : -1); return; }
-        if(/^ders-soru:\d+$/.test(is)){ const m = akis[Number(is.slice(10))]; if(m && m.ders) isle('bana soru sor ' + m.ders.sorgu); return; }
+        if(/^ders-soru:\d+$/.test(is)){ const m = akis[Number(is.slice(10))];
+          if(m && m.ders && m.ders.kd){ cipler = null; kdSoru(m.ders.id); return; }
+          if(m && m.ders) isle('bana soru sor ' + m.ders.sorgu); return; }
+        if(/^yasa-deney:\d+:\d+$/.test(is)){ const p = is.split(':'), m = akis[Number(p[1])], y = m && m.yasa && m.yasa.l[Number(p[2])];
+          if(y) isle('deney başlat: ' + y.deney); return; }
+        if(/^gun-baslat:\d+:\d+$/.test(is)){ const p = is.split(':'), m = akis[Number(p[1])], x = m && m.gun && m.gun.ogeler[Number(p[2])];
+          if(x){ cipler = null; odakBaslat(x.dk || 25, x.ad); soyle((x.dk || 25) + ' dakikalık odak başladı (' + x.ad + '). Süre dolunca haber vereceğim.'); } return; }
+        if(/^gun-ac:\d+:\d+$/.test(is)){ const p = is.split(':'), m = akis[Number(p[1])], x = m && m.gun && m.gun.ogeler[Number(p[2])];
+          if(x && x.route){ cipler = null; git({ modul:m.gun.modul, route:x.route }); } return; }
+        if(is === 'derse-cevir'){ if(kaynakMetin){ cipler = null; derseCevir(kaynakMetin.metin, kaynakMetin.ad); } return; }
+        if(/^kd-ac:\d+$/.test(is)){ const d = kdDersler()[Number(is.slice(6))]; if(d){ cipler = null; soyle(d.baslik + ' · ders', null, null, null, { ders:kdDersMesaji(d) }); } return; }
+        if(/^vitrin-git:\d+$/.test(is)){ const el = document.getElementById('kv-' + is.slice(11)); if(el) try{ el.scrollIntoView({ block:'start', behavior:'smooth' }); }catch(e){ /* eski tarayıcı */ } return; }
         if(/^ders-tekrar:\d+$/.test(is)){ dersTekrar(Number(is.slice(12))); return; }
         if(/^ders-dinle:\d+$/.test(is)){ const m = akis[Number(is.slice(11))], b = m && m.ders && m.ders.bolumler[m.ders.adim];
           if(b) seslendir([b.baslik, b.metin].concat(b.liste, b.dikkat ? ['Dikkat. ' + b.dikkat] : []).filter(Boolean).join('. ').replace(/\*\*/g, '')); return; }
@@ -41518,7 +41939,7 @@ window.LIFEOS.KING = (function(){
     }
     if(ayar) ortam.depo.sil(depoAnahtar());
     ortam.depo.sil(TASIMA);
-    ortam.depo.sil(SIRA); ortam.depo.sil(SOZET);
+    ortam.depo.sil(SIRA); ortam.depo.sil(SOZET); ortam.depo.sil(DERSLER); kaynakMetin = null;
     siradanSoru = null; siraCalisiyor = false;
     if(siraSaat){ try{ clearInterval(siraSaat); }catch(e){ /* yok */ } siraSaat = null; }
     if(ayar) ortam.depo.sil(arsivAnahtar());
@@ -41560,7 +41981,7 @@ window.LIFEOS.KING = (function(){
     sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     yeniSohbet, kayitAc, ARACLAR, aktifKayit:() => aktifKayit,
-    BOLUMLER, bolumSec, bolum:() => bolum, listeGorunur, alanAc, pdfAl, nedenSatirlari, yetenekler, dersNiyeti, sira, siraBosalt, SIRA, SOZET, sozetler,
+    BOLUMLER, bolumSec, bolum:() => bolum, listeGorunur, alanAc, pdfAl, nedenSatirlari, yetenekler, dersNiyeti, yasaHesapla, kdKur, kdDersler, DERSLER, sira, siraBosalt, SIRA, SOZET, sozetler,
     KIPLER, kip, kipSec, klasorler, klasorEkle, klasorSil, kayitTasi, kayitAdlandir, kayitSabitle,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla, _videoKaynak:videoKaynak, _gorunurluk:gorunurluk,
@@ -93876,6 +94297,20 @@ SP.App = (function(){
             /* Öğretmen: SPİ kavramı ders olarak (core/kingders.js). */
             ders:konu => SP.KingDers.ders(konu),
             dersOrnek:'set kavramını anlat',
+            /* DEVRİM «Günüm»: haftalık planların bugünkü maddeleri, saatine göre;
+               bitti mi plan modülünün kendi sayımından (kayıt ya da işaret). */
+            gun:() => {
+              const H = SP.HaftaPlan, iso = SP.U.todayISO();
+              if(!H) return { ogeler:[] };
+              const og = [];
+              H.liste().filter(p => Array.isArray(p.maddeler) && p.maddeler.length).forEach(p => H.bugunMaddeleri(p, iso).forEach(m => {
+                const s = H.sayim(p, m, iso);
+                og.push({ ad:m.metin, alt:[H.zamanYaz(m.zaman), s.hedef > 1 ? s.n + ' / ' + s.hedef : ''].filter(Boolean).join(' · '),
+                  durum:s.tamam ? 'bitti' : 'sirada', route:'planlar', an:H.zamanAn(m.zaman) });
+              }));
+              og.sort((a, b) => a.an - b.an);
+              return { ogeler:og, not:og.length ? '' : 'Bugün için plan maddesi yok; Planlar’dan rutin ekleyebilirsin.' };
+            },
             istatistik:() => {
               const uyku = [];
               let ant = 0, kahve = 0, ogun = 0;
