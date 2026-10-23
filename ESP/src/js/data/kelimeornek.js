@@ -1,5 +1,4 @@
-/* ÜRETİLMİŞ DOSYA — BURAYI DÜZE
-EME. Kaynak: veri/temiz/esp/cumle_ciftleri*.jsonl
+/* ÜRETİLMİŞ DOSYA — BURAYI DÜZENLEME. Kaynak: veri/temiz/esp/cumle_ciftleri*.jsonl
    (Tatoeba, CC BY 2.0 FR), üreten: python tools/veri_esp_siklik.py
 
    Sık kelime başına, kelimenin geçtiği en kısa cümle çifti:

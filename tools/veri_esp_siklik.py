@@ -76,7 +76,7 @@ def uret_ornek(diller):
     o = ornekler(diller)
     govde = ",\n".join(f"    {dil}:{json.dumps(v, ensure_ascii=False, separators=(',', ':'))}" for dil, v in o.items())
     return (
-        "/* ÜRETİLMİŞ DOSYA — BURAYI DÜZE\nEME. Kaynak: veri/temiz/esp/cumle_ciftleri*.jsonl\n"
+        "/* ÜRETİLMİŞ DOSYA — BURAYI DÜZENLEME. Kaynak: veri/temiz/esp/cumle_ciftleri*.jsonl\n"
         "   (Tatoeba, CC BY 2.0 FR), üreten: python tools/veri_esp_siklik.py\n\n"
         "   Sık kelime başına, kelimenin geçtiği en kısa cümle çifti:\n"
         "   [yabancı cümle, Türkçesi, Tatoeba kimliği]. Cümle aynen alınır;\n"
