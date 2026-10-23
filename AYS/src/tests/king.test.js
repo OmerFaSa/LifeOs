@@ -1893,7 +1893,7 @@
       expect(!!document.querySelector('.king__girdi')).toBe(true);           // yazı alanı altta kalır
       expect(document.querySelector('.king__ray [data-king="bolum:araclar"]').getAttribute('aria-current')).toBe('true');
       const gruplar = [...v.querySelectorAll('.kv-grup-ad')].map(h => [...h.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join(''));
-      expect(gruplar[0]).toBe('Öne çıkanlar');
+      expect(gruplar[0]).toBe('Kartlarım');
       ['Şimdi', 'Kart ve soru', 'Araştır ve oku', 'Planla ve takip et', 'Rutin ve hafıza', 'AYS · sınav', 'SPİ · sağlık', 'Sistem'].forEach(g => expect(gruplar).toContain(g));
       expect(gruplar[gruplar.length - 1]).toBe('Sistem');
       /* Her kutu: simge ve ad; açıklama ipucu ve erişilebilir adda. */
@@ -1918,6 +1918,35 @@
       const gorunen = kutular.filter(b => !b.hidden).map(b => b.querySelector('.kv-mini-ad').textContent);
       expect(gorunen).toContain('Kişisel yasalar');
       expect(gorunen.indexOf('Araştır')).toBe(-1);
+    }));
+    it('Kartlarım: düzenle ile ekle ve çıkar, renk ve emoji, yeni kart; «kart yap:» sohbetten ekler', () => sahneyle(async () => {
+      const k = aracSahnesi();
+      k.ac();
+      k.bolumSec('araclar');
+      const tikla = s => document.querySelector(s).click();
+      tikla('.king__vitrin [data-king="kv-duzen"]');
+      expect(!!document.querySelector('.king__vitrin.is-duzen')).toBe(true);
+      tikla('.king__vitrin [data-king="kv-sabit:Günüm"]');                         // çıkar
+      expect(k.oneCikanlar().map(x => x.ad).indexOf('Günüm')).toBe(-1);
+      tikla('.king__vitrin [data-king="kv-sabit:Hesapla"]');                       // ekle
+      expect(k.oneCikanlar().map(x => x.ad)).toContain('Hesapla');
+      expect(!!document.querySelector('.king__vitrin')).toBe(true);                // düzenlemede sohbete dönmez
+      tikla('.king__vitrin [data-king="kv-sec:Hesapla"]');
+      tikla('.kv-panel [data-king="kv-renk:kirmizi"]');
+      tikla('.kv-panel [data-king="kv-emoji:🎯"]');
+      const kutu = document.querySelector('.kv-grup--one .kv-mini[data-renk="kirmizi"] .kv-mini-simge--emoji');
+      expect(kutu && kutu.textContent).toBe('🎯');
+      tikla('.king__vitrin [data-king="kv-yeni"]');
+      const f = document.querySelector('[data-king-kv-form]');
+      f.querySelector('[name="ad"]').value = 'Akşam';
+      f.querySelector('[name="metin"]').value = 'bugünü değerlendirelim';
+      f.dispatchEvent(new Event('submit', { bubbles:true, cancelable:true }));
+      const son = k.oneCikanlar().slice(-1)[0];
+      expect([son.ad, son.calis]).toEqual(['Akşam', 'bugünü değerlendirelim']);
+      tikla('.king__vitrin [data-king="kv-duzen"]');
+      const r = await k.isle('kart yap: türev çalışalım');
+      expect(r.tur).toBe('kart');
+      expect(k.oneCikanlar().map(x => x.ad)).toContain('türev çalışalım');
     }));
     it('Araçlar: bankası olmayan modülde soru satırı yok; olan modülde var', () => sahneyle(async () => {
       const { k } = sahne();
