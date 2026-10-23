@@ -14896,6 +14896,46 @@ button.king__ekran-onizle:focus-visible{ outline:2px solid var(--k-vurgu); outli
 .king__ders-alinti{ padding:8px 12px; border-left:2px solid var(--border); font-size:var(--fs-sm); color:var(--text-2); }
 .king__ders-alinti b{ margin-right:6px; color:var(--text-3); font-weight:600; }
 
+/* ---- tür renkleri (2026-10-23): simge ve grup noktası; metin nötr ---- */
+.kv-mini, .kv-grup{ --kv-l:56%; }
+:root[data-theme="dark"] .kv-mini, :root[data-theme="dark"] .kv-grup{ --kv-l:76%; }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .kv-mini, :root:not([data-theme="light"]) .kv-grup{ --kv-l:76%; } }
+[data-renk="mavi"]{ --kv-r:oklch(var(--kv-l) .13 250); }
+[data-renk="mor"]{ --kv-r:oklch(var(--kv-l) .14 300); }
+[data-renk="turkuaz"]{ --kv-r:oklch(var(--kv-l) .11 195); }
+[data-renk="turuncu"]{ --kv-r:oklch(var(--kv-l) .14 50); }
+[data-renk="yesil"]{ --kv-r:oklch(var(--kv-l) .13 150); }
+[data-renk="sari"]{ --kv-r:oklch(var(--kv-l) .12 95); }
+[data-renk="pembe"]{ --kv-r:oklch(var(--kv-l) .14 350); }
+[data-renk="kehribar"]{ --kv-r:oklch(var(--kv-l) .14 72); }
+[data-renk="lacivert"]{ --kv-r:oklch(var(--kv-l) .14 270); }
+[data-renk="gri"]{ --kv-r:var(--text-2); }
+[data-renk="ays"]{ --kv-r:var(--ays); } [data-renk="spi"]{ --kv-r:var(--spi); } [data-renk="esp"]{ --kv-r:var(--esp); }
+.kv-mini[data-renk] .kv-mini-simge, .kv-grup--one .kv-mini[data-renk] .kv-mini-simge, .king__bos-araclar .kv-mini[data-renk] .kv-mini-simge{
+  color:var(--kv-r); background:color-mix(in oklab, var(--kv-r) 14%, var(--surface)); }
+.kv-mini[data-renk]:hover .kv-mini-simge{ color:var(--kv-r); background:color-mix(in oklab, var(--kv-r) 22%, var(--surface)); }
+.kv-grup-nokta{ width:7px; height:7px; border-radius:50%; background:var(--kv-r, var(--text-3)); align-self:center; }
+
+/* ---- araç kutusu: yapılacaklar ve nefes ---- */
+.king__yap{ list-style:none; margin:var(--sp-2) 0 0; padding:0; display:flex; flex-direction:column; gap:2px; }
+.king__yap-is{ width:100%; display:flex; align-items:center; gap:10px; min-height:36px; padding:6px 10px; border:0; border-radius:var(--r-sm);
+  background:transparent; color:var(--text); font:inherit; text-align:left; cursor:pointer; }
+.king__yap-is:hover{ background:var(--surface-2); }
+.king__yap-is i{ flex:none; width:16px; height:16px; border-radius:5px; box-shadow:inset 0 0 0 1.5px var(--text-3); }
+.king__yap-is.is-bitti i{ background:var(--text-2); box-shadow:none; }
+.king__yap-is.is-bitti span{ color:var(--text-3); text-decoration:line-through; }
+.king__nefes{ display:grid; justify-items:center; gap:10px; margin-top:var(--sp-2); padding:20px 16px; border-radius:var(--r-md);
+  background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); }
+.king__nefes-daire{ width:120px; height:120px; border-radius:50%; background:color-mix(in oklab, var(--k-vurgu) 18%, var(--surface));
+  box-shadow:inset 0 0 0 2px color-mix(in oklab, var(--k-vurgu) 50%, transparent); animation:king-nefes 16s ease-in-out 4; transform:scale(.6); }
+.king__nefes-yazi{ position:relative; height:22px; width:60px; }
+.king__nefes-yazi b{ position:absolute; inset:0; text-align:center; font-weight:650; opacity:0; animation:king-nefes-yazi 16s linear 4; }
+.king__nefes-yazi b:nth-child(2){ animation-delay:4s; } .king__nefes-yazi b:nth-child(3){ animation-delay:8s; } .king__nefes-yazi b:nth-child(4){ animation-delay:12s; }
+.king__nefes small{ font-size:var(--fs-xs); color:var(--text-3); }
+@keyframes king-nefes{ 0%{ transform:scale(.6); } 25%{ transform:scale(1); } 50%{ transform:scale(1); } 75%{ transform:scale(.6); } 100%{ transform:scale(.6); } }
+@keyframes king-nefes-yazi{ 0%, 24%{ opacity:1; } 25%, 100%{ opacity:0; } }
+@media (prefers-reduced-motion:reduce){ .king__nefes-daire{ animation:none; transform:none; } .king__nefes-yazi{ display:none; } }
+
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/giris.css içine yazılır; burası bir sonraki
@@ -16429,7 +16469,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -17963,7 +18003,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'7f368dc5', at:'2026-10-23 09:15', dirty:true };
+ESP.BUILD = { id:'45c074e3', at:'2026-10-23 09:24', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -38535,7 +38575,7 @@ window.LIFEOS.KING = (function(){
     const l = akis.filter(m => !m.bekliyor).slice(-GUNLUK_EN_COK).map(m => Object.assign({ kim:m.kim, metin:m.foto ? '(fotoğraf)' : (m.metin || ''),
       satirlar:m.satirlar || null, son:m.son || null }, m.arastirma ? { arastirma:m.arastirma } : {},
       /* DEVRİM: ders, yasa ve gün kartları da gün boyu kalır (yeniden açınca başlık tek kalmasın). */
-      m.ders ? { ders:m.ders } : {}, m.yasa ? { yasa:m.yasa } : {}, m.gun ? { gun:m.gun } : {}));
+      m.ders ? { ders:m.ders } : {}, m.yasa ? { yasa:m.yasa } : {}, m.gun ? { gun:m.gun } : {}, m.yap ? { yap:true } : {}));
     ortam.depo.yaz(depoAnahtar(), { gun:bugunISO(), akis:l });
     tasimaYaz(l);
   }
@@ -39137,6 +39177,26 @@ window.LIFEOS.KING = (function(){
         s('Beni nasıl tanıyorsun', 'King’in seni tanıdığı her şey; sil ya da ekle', { is:'kisi' }),
         s('Kişilik envanteri', '20 cümle; sonuç senin sözün olur', { calis:'kişilik testi' }),
       ] },
+      { ad:'Araç kutusu', l:[
+        s('Hesapla', 'İşlem, yüzde, üs, parantez', { doldur:'hesapla: 1250*%18+40' }),
+        s('Birim çevir', 'Uzunluk, kütle, hacim, süre, sıcaklık', { doldur:'5 km kaç mil' }),
+        s('Gün hesapla', 'Kaç gün sonra hangi tarih', { doldur:'45 gün sonra hangi gün' }),
+        s('Kaç gün kaldı', 'Bir tarihe kalan gün ve hafta', { doldur:'19 haziran kaç gün kaldı' }),
+        s('Yapılacaklar', 'Listeni gör, dokunarak işaretle', { calis:'yapılacaklarım' }),
+        s('Listeye ekle', 'Birden çok madde için ; ile ayır', { doldur:'yapılacak: fatura öde; markete git' }),
+        s('Hatırlatıcı', 'Süre ya da saatle; zamanı gelince bildirim', { doldur:'20 dakika sonra hatırlat: çamaşırı as' }),
+        s('Hatırlatmalarım', 'Bekleyenler ve iptal', { calis:'hatırlatmalarım' }),
+        s('Karar ver', 'Seçenekler arasından rastgele', { doldur:'karar ver: pizza, makarna, çorba' }),
+        s('Nefes egzersizi', 'Kutu nefesi, yaklaşık bir dakika', { calis:'nefes egzersizi' }),
+      ] },
+      { ad:'Yazı ve dil', l:[
+        s('Çevir', 'Herhangi bir dile', { doldur:'şunu İngilizceye çevir: ', merkez:true }),
+        s('Özetle', 'Uzun metni üç maddede', { doldur:'şunu üç maddede özetle: ', merkez:true }),
+        s('Basitçe anlat', 'Karışık bir şeyi sade dille', { doldur:'bunu basitçe açıkla: ', merkez:true }),
+        s('Yazımı düzelt', 'Yazım ve noktalama', { doldur:'yazım ve noktalamayı düzelt: ', merkez:true }),
+        s('Mesaj taslağı', 'Kısa ve nazik bir mesaj', { doldur:'kısa ve nazik bir mesaj yaz: ', merkez:true }),
+        s('Fikir üret', 'Bir konuda beş fikir', { doldur:'şu konuda beş fikir ver: ', merkez:true }),
+      ] },
       { ad:'Sistem', l:[
         s('Bu sistemde ne var', 'Modüller, sayfalar ve araçlar', { calis:'bu sistemde ne var' }),
         s('Görünüm', 'Tema ve görünüm', { doldur:'koyu temaya geç' }),
@@ -39149,7 +39209,7 @@ window.LIFEOS.KING = (function(){
     /* Modüllerin işleri (Tüm işler ile aynı kaynak, arac.js ISLER): bulunulan modül önce;
        King'in ortak işleri ve yukarıda zaten olan ad tekrar edilmez. */
     const modulGruplari = ((ARAC() && ARAC().isler) ? ARAC().isler() : []).filter(g => g.modul !== 'king')
-      .map(g => ({ ad:g.ad, l:g.isler.filter(x => !hepsi.some(y => y.ad === x.ad))
+      .map(g => ({ ad:g.ad, modul:g.modul, l:g.isler.filter(x => !hepsi.some(y => y.ad === x.ad))
         .map(x => s(x.ad, x.tur === 'foto' ? x.ne : '«' + String(x.ornek || '').trim() + '»', { is:'is-sec:' + x.i })) }))
       .filter(g => g.l.length);
     const bul = ad => hepsi.find(x => x.ad === ad);
@@ -39209,6 +39269,22 @@ window.LIFEOS.KING = (function(){
     'Bu sistemde ne var':S_('<path d="M3.5 6.5l5.5-2 6 2 5.5-2v13l-5.5 2-6-2-5.5 2z"/>', '<path d="M9 4.5v13M15 6.5v13"/>'),
     'Görünüm':S_('<path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.4 0 1.8-1 1.3-2.1-.6-1.3.3-2.4 1.7-2.4H18a2.5 2.5 0 0 0 2.5-2.5A8.5 8.5 0 0 0 12 3.5z"/>', '<circle cx="8" cy="11" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="15.5" cy="8.5" r="1"/>'),
     'Düşünme':S_('<path d="M9 18.5h6M10 21h4"/>', '<path d="M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/>'),
+    'Hesapla':S_('<rect x="5" y="3.5" width="14" height="17" rx="2"/>', '<path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 15.5h.01M12 15.5h.01M15.5 15.5h.01"/>'),
+    'Birim çevir':S_('<path d="M4 8h13l-3-3M20 16H7l3 3"/>'),
+    'Gün hesapla':S_('<rect x="4" y="5" width="16" height="15" rx="2"/>', '<path d="M4 10h16M9 3v4M15 3v4M10 15h4M12 13v4"/>'),
+    'Kaç gün kaldı':S_('<rect x="4" y="5" width="16" height="15" rx="2"/>', '<path d="M4 10h16M9 3v4M15 3v4M12 13v3l2 1"/>'),
+    'Yapılacaklar':S_('<rect x="4" y="4" width="16" height="16" rx="3"/>', '<path d="M8 12l2.5 2.5L16 9"/>'),
+    'Listeye ekle':S_('<path d="M5 7h10M5 12h10M5 17h6"/>', '<path d="M18 14v6M15 17h6"/>'),
+    'Hatırlatıcı':S_('<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/>', '<path d="M10 20.5a2 2 0 0 0 4 0"/>'),
+    'Hatırlatmalarım':S_('<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/>', '<path d="M10 20.5a2 2 0 0 0 4 0M12 8v3.5l2 1"/>'),
+    'Karar ver':S_('<rect x="4" y="4" width="16" height="16" rx="3"/>', '<circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="15" r="1.2"/><circle cx="15" cy="9" r="1.2"/><circle cx="9" cy="15" r="1.2"/>'),
+    'Nefes egzersizi':S_('<path d="M4 9h10a3 3 0 1 0-3-3"/>', '<path d="M4 13h14a3 3 0 1 1-3 3M4 17h7"/>'),
+    'Çevir':S_('<path d="M4 6h8M8 4v2M5.5 6c.5 3 2.5 5.5 5.5 7M10.5 6c-.5 3-2.5 5.5-6 7"/>', '<path d="M12 20l4-9 4 9M13.5 17h5"/>'),
+    'Özetle':S_('<path d="M5 6h14M5 10h14M5 14h9M5 18h6"/>'),
+    'Basitçe anlat':S_('<path d="M9 18.5h6M10 21h4"/>', '<path d="M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/><path d="M10 9.5l2 2 2-2"/>'),
+    'Yazımı düzelt':S_('<path d="M4 18l4.5-12h1L14 18M5.5 14h7"/>', '<path d="M15 15l2 2 4-4"/>'),
+    'Mesaj taslağı':S_('<rect x="3.5" y="5.5" width="17" height="13" rx="2"/>', '<path d="M4 7l8 6 8-6"/>'),
+    'Fikir üret':S_('<path d="M12 3v2M5.6 5.6L7 7M3 12h2M19 12h2M17 7l1.4-1.4"/>', '<path d="M9 18h6M10 21h4M8.5 14.5a5 5 0 1 1 7 0c-.8.8-1.5 1.8-1.5 3h-4c0-1.2-.7-2.2-1.5-3z"/>'),
     'Cevapları sesli oku':S_('<path d="M5 9.5v5h3.5L13 18.5v-13L8.5 9.5z"/>', '<path d="M16.5 9a4 4 0 0 1 0 6"/>'),
   };
   const GRUP_SVG_MODUL = '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>';
@@ -39216,18 +39292,25 @@ window.LIFEOS.KING = (function(){
     const tur = x.calis ? 'calis' : x.doldur != null ? 'doldur' : 'is';
     return { tur, eylem:x.calis ? 'oner-metin:' + x.calis : x.doldur != null ? 'doldur:' + x.doldur : x.is };
   }
+  /* Tür renkleri (kullanıcı, 2026-10-23: «türlerine göre renkler ekle»): her grup
+     bir renk; modül grupları modülün kendi rengi. Renk yalnız simgeyi ve
+     grubun noktasını boyar, metin nötr kalır (kontrast). */
+  const RENK = { 'Şimdi':'mavi', 'Kart ve soru':'mor', 'Araştır ve oku':'turkuaz', 'Gör':'turuncu', 'Planla ve takip et':'yesil',
+    'Kaydet':'sari', 'Rutin ve hafıza':'pembe', 'Araç kutusu':'kehribar', 'Yazı ve dil':'lacivert', 'Sistem':'gri' };
+  const renkOf = g => g.modul || RENK[g.ad] || 'gri';
+  function renkHaritasi(){ const h = {}; yetenekler().forEach(g => g.l.forEach(x => { if(!h[x.ad]) h[x.ad] = renkOf(g); })); return h; }
   function miniKutu(x){
     const e = vitrinEylem(x), sonuk = x.merkez && !baglanti();
     const ornek = x.doldur != null ? x.doldur.trim() : x.calis || '';
     const ip = x.ip + (ornek ? ' · «' + ornek + '»' : '') + (sonuk ? ' · Merkez gerekli' : '');
-    return '<button type="button" class="kv-mini' + (sonuk ? ' is-sonuk' : '') + '" data-king-ara="' + kac((x.ad + ' ' + x.ip + ' ' + ornek).toLocaleLowerCase('tr')) + '"'
+    return '<button type="button" class="kv-mini' + (sonuk ? ' is-sonuk' : '') + '"' + (x.renk ? ' data-renk="' + x.renk + '"' : '') + ' data-king-ara="' + kac((x.ad + ' ' + x.ip + ' ' + ornek).toLocaleLowerCase('tr')) + '"'
       + (x.hazir != null ? ' data-king-hazir="' + x.hazir + '" data-king="hazir"' : ' data-king="' + kac(e.eylem) + '"')
       + ' title="' + kac(ip) + '" aria-label="' + kac(x.ad + ': ' + ip) + '">'
       + '<span class="kv-mini-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + (ARAC_SIMGE[x.ad] || GRUP_SVG_MODUL) + '</svg>'
       + (sonuk ? '<i class="kv-mini-merkez"></i>' : '') + '</span><span class="kv-mini-ad">' + kac(x.ad) + '</span></button>';
   }
   function oneCikanlar(){
-    const hepsi = yetenekler().reduce((a, g) => a.concat(g.l), []);
+    const gruplar = yetenekler(), hepsi = gruplar.reduce((a, g) => a.concat(g.l.map(x => Object.assign({ renk:renkOf(g) }, x))), []);
     return ONE_CIKAN.map(ad => hepsi.find(x => x.ad === ad)).filter(Boolean);
   }
   function vitrinHtml(){
@@ -39237,8 +39320,8 @@ window.LIFEOS.KING = (function(){
       + '<input class="king__ara kv-ara" type="search" data-king-ara-girdi placeholder="Ara: ders, uyku, araştır…" aria-label="Araçlarda ara" autocomplete="off"/></header>'
       + (one.length ? '<div class="kv-grup kv-grup--one"><h3 class="kv-grup-ad">Öne çıkanlar</h3><div class="kv-izgara">'
         + one.map(miniKutu).join('') + '</div></div>' : '')
-      + gruplar.map((g, i) => '<div class="kv-grup" id="kv-' + i + '"><h3 class="kv-grup-ad">' + kac(g.ad) + '<small>' + g.l.length + '</small></h3>'
-        + '<div class="kv-izgara">' + g.l.map(miniKutu).join('') + '</div></div>').join('')
+      + gruplar.map((g, i) => '<div class="kv-grup" id="kv-' + i + '" data-renk="' + renkOf(g) + '"><h3 class="kv-grup-ad"><i class="kv-grup-nokta" aria-hidden="true"></i>' + kac(g.ad) + '<small>' + g.l.length + '</small></h3>'
+        + '<div class="kv-izgara">' + g.l.map(x => miniKutu(Object.assign({ renk:renkOf(g) }, x))).join('') + '</div></div>').join('')
       + '<p class="kv-not">Dokun: hemen yapar ya da örneği yazı alanına koyar. Üzerine gelince ne yaptığını söyler. Sayıları her zaman modülün kendi kodu üretir.</p>'
       + '</section>';
   }
@@ -40499,6 +40582,194 @@ window.LIFEOS.KING = (function(){
     return g.getFullYear() + '-' + String(g.getMonth() + 1).padStart(2, '0') + '-' + String(g.getDate()).padStart(2, '0');
   }
 
+  /* ======================================================================
+     ARAÇ KUTUSU (kullanıcı, 2026-10-23: «araçları bir sürü arttır, güzel işe
+     yarayan şeyler»). Hepsi cihazda, modelsiz; sonucu KOD hesaplar:
+       hesapla        «hesapla: 15*4+2», yüzde «200*%15» — eval yok, küçük ayrıştırıcı
+       birim çevir    «5 km kaç mil», «70 kg kaç lb», «30 c kaç f», «90 dk kaç saat»
+       tarih          «45 gün sonra hangi gün», «19 haziran kaç gün kaldı»
+       yapılacaklar   «yapılacak: fatura öde», «yapılacaklarım» (TASINAN'da)
+       hatırlatıcı    «20 dakika sonra hatırlat: çamaşır», «saat 18:30 hatırlat: ilaç»
+                      sayfa açıkken zamanında bildirim; kapalıyken açılınca söyler
+       karar ver      «karar ver: pizza, makarna, çorba»
+       nefes          «nefes egzersizi» — kutu nefesi (4 al, 4 tut, 4 ver, 4 tut)
+     ====================================================================== */
+  const sayiTr = v => (Math.round(v * 1e8) / 1e8).toLocaleString('tr-TR', { maximumFractionDigits:8 });
+  const HESAP_RE = /^(?:hesapla|hesap et|hesap)\s*:?\s*(.+?)\s*(?:=|\?|kaç eder|kaç)?\s*$/;
+  /* Saf: «15*4+2» → 62; geçersizse null. Toplama, çıkarma, çarpma, bölme, üs (^), parantez, sondaki % (yüzde). */
+  function hesapla(s){
+    const t = String(s || '').replace(/(\d)\s*[x×]\s*(?=[\d(])/g, '$1*').replace(/÷|:/g, '/').replace(/,/g, '.').replace(/\s+/g, '');
+    if(!t || t.length > 120 || !/^[\d.+\-*/^%()]+$/.test(t)) return null;
+    let i = 0;
+    const sayi = () => { const m = t.slice(i).match(/^\d+(?:\.\d+)?/); if(!m) throw new Error('sayı'); i += m[0].length; return Number(m[0]); };
+    const birim = () => {
+      if(t[i] === '-'){ i++; return -birim(); }
+      if(t[i] === '+'){ i++; return birim(); }
+      if(t[i] === '%'){ i++; return birim() / 100; }        // Türkçe yazım: %18
+      let v;
+      if(t[i] === '('){ i++; v = toplam(); if(t[i] !== ')') throw new Error(')'); i++; }
+      else v = sayi();
+      while(t[i] === '%'){ i++; v /= 100; }
+      return v;
+    };
+    const us = () => { const v = birim(); if(t[i] === '^'){ i++; return Math.pow(v, us()); } return v; };
+    const carpim = () => { let v = us(); while(t[i] === '*' || t[i] === '/'){ const o = t[i++], w = us(); v = o === '*' ? v * w : v / w; } return v; };
+    const toplam = () => { let v = carpim(); while(t[i] === '+' || t[i] === '-'){ const o = t[i++], w = carpim(); v = o === '+' ? v + w : v - w; } return v; };
+    try{ const v = toplam(); return i === t.length && isFinite(v) ? v : null; }catch(e){ return null; }
+  }
+  const BIRIM = (() => {
+    const b = {};
+    const ekle = (tur, carpan, ...adlar) => adlar.forEach(a => { b[a] = { tur, carpan, ad:adlar[0] }; });
+    ekle('uzunluk', 1000, 'km', 'kilometre'); ekle('uzunluk', 1, 'm', 'metre'); ekle('uzunluk', 0.01, 'cm', 'santim', 'santimetre');
+    ekle('uzunluk', 0.001, 'mm', 'milimetre'); ekle('uzunluk', 1609.344, 'mil'); ekle('uzunluk', 0.3048, 'ft', 'fit', 'feet', 'ayak');
+    ekle('uzunluk', 0.0254, 'inç', 'inc', 'inch'); ekle('uzunluk', 0.9144, 'yarda', 'yard');
+    ekle('kütle', 1, 'g', 'gram'); ekle('kütle', 1000, 'kg', 'kilo', 'kilogram'); ekle('kütle', 0.001, 'mg', 'miligram');
+    ekle('kütle', 453.59237, 'lb', 'libre', 'pound'); ekle('kütle', 28.349523125, 'ons', 'oz'); ekle('kütle', 1e6, 'ton');
+    ekle('hacim', 1, 'l', 'lt', 'litre'); ekle('hacim', 0.001, 'ml', 'mililitre'); ekle('hacim', 3.785411784, 'galon', 'gal');
+    ekle('süre', 1, 'sn', 'saniye'); ekle('süre', 60, 'dk', 'dakika'); ekle('süre', 3600, 'sa', 'saat');
+    ekle('süre', 86400, 'gün'); ekle('süre', 604800, 'hafta');
+    ekle('sıcaklık', 'c', 'c', '°c', 'santigrat', 'derece'); ekle('sıcaklık', 'f', 'f', '°f', 'fahrenhayt', 'fahrenheit'); ekle('sıcaklık', 'k', 'k', 'kelvin');
+    return b;
+  })();
+  const BIRIM_RE = /^(-?\d+(?:[.,]\d+)?)\s*([a-zçğıöşü°]+)\s+(?:kaç|ne kadar|=|->|eşittir)\s*([a-zçğıöşü°]+)\s*(?:eder|yapar)?\s*\??$/;
+  /* Saf: (5, 'km', 'mil') → { deger, a, b } ya da null (bilinmeyen ya da farklı tür). */
+  function birimCevir(v, a, b){
+    const x = BIRIM[a], y = BIRIM[b];
+    if(!x || !y || x.tur !== y.tur) return null;
+    if(x.tur === 'sıcaklık'){
+      const c = x.carpan === 'c' ? v : x.carpan === 'f' ? (v - 32) * 5 / 9 : v - 273.15;
+      return { deger:y.carpan === 'c' ? c : y.carpan === 'f' ? c * 9 / 5 + 32 : c + 273.15, a:x.ad.toUpperCase(), b:y.ad.toUpperCase() };
+    }
+    return { deger:v * x.carpan / y.carpan, a:x.ad, b:y.ad };
+  }
+  const AYLAR = ['ocak', 'şubat', 'mart', 'nisan', 'mayıs', 'haziran', 'temmuz', 'ağustos', 'eylül', 'ekim', 'kasım', 'aralık'];
+  const GUNLER = ['pazar', 'pazartesi', 'salı', 'çarşamba', 'perşembe', 'cuma', 'cumartesi'];
+  const TARIH_ILERI_RE = /^(\d{1,4})\s*(gün|hafta|ay)\s*(sonra|önce)(?:\s*(?:hangi gün|hangi tarih|ne zaman|günlerden ne))?\s*\??$/;
+  const TARIH_KALAN_RE = new RegExp('^(\\d{1,2})\\s+(' + AYLAR.join('|') + ')(?:\\s+(\\d{4}))?\\S*\\s+(?:kaç gün|ne kadar)');
+  const tarihYazTr = d => d.getDate() + ' ' + AYLAR[d.getMonth()] + ' ' + d.getFullYear() + ', ' + GUNLER[d.getDay()];
+  function gunFarki(a, b){ return Math.round((Date.UTC(b.getFullYear(), b.getMonth(), b.getDate()) - Date.UTC(a.getFullYear(), a.getMonth(), a.getDate())) / 864e5); }
+
+  const YAP = 'lifeos.king.yapilacak';
+  const YAP_EKLE_RE = /^(?:yapılacak|yapılacaklara ekle|listeye ekle|todo)\s*:\s*(.+)$/;
+  const YAP_LISTE_RE = /^(yapılacaklar(?:ım)?|yapılacak listem|listem)\s*[?.!]*$/;
+  const YAP_TEMIZ_RE = /^(yapılanları|bitenleri|yapılacakları) temizle\s*[.!]*$/;
+  function yapilacaklar(){ const l = ortam.depo.oku(YAP); return Array.isArray(l) ? l.filter(x => x && x.id && x.metin) : []; }
+  function yapYaz(l){ if(l.length) ortam.depo.yaz(YAP, l.slice(-60)); else ortam.depo.sil(YAP); }
+  function yapHtml(m){
+    if(!m.yap) return '';
+    const l = yapilacaklar();
+    if(!l.length) return '<p class="king__gunum-not">Liste boş. «yapılacak: …» diye ekle.</p>';
+    return '<ul class="king__yap">' + l.map(x => '<li><button type="button" class="king__yap-is' + (x.bitti ? ' is-bitti' : '') + '" data-king="yap:' + kac(x.id)
+      + '" aria-pressed="' + (x.bitti ? 'true' : 'false') + '"><i aria-hidden="true"></i><span>' + kac(x.metin) + '</span></button></li>').join('') + '</ul>';
+  }
+
+  const HATIR = 'lifeos.king.hatirlat';
+  const HATIR_SURE_RE = /^(\d{1,3})\s*(dk|dakika|sa|saat)\s*sonra\s*(?:bana\s*)?(?:hatırlat|haber ver|söyle)\s*:?\s*(.*)$/;
+  const HATIR_SAAT_RE = /^saat\s*(\d{1,2})[:.](\d{2})\S*\s*(?:bana\s*)?(?:hatırlat|haber ver)\s*:?\s*(.*)$/;
+  const HATIR_LISTE_RE = /^hatırlatma(?:larım|lar)\s*[?.!]*$/;
+  let hatirSaat = null;
+  function hatirlatmalar(){ const l = ortam.depo.oku(HATIR); return Array.isArray(l) ? l.filter(x => x && x.id && x.zaman) : []; }
+  function hatirYaz(l){ if(l.length) ortam.depo.yaz(HATIR, l.slice(-30)); else ortam.depo.sil(HATIR); }
+  /* Vadesi gelenleri söyler; en yakını için tek zamanlayıcı kurar (gerçek setTimeout: sınama sahte zamanlamayı kullanmaz). */
+  function hatirlatKur(){
+    if(hatirSaat){ try{ clearTimeout(hatirSaat); }catch(e){ /* yok */ } hatirSaat = null; }
+    const simdi = ortam.simdi().getTime(), l = hatirlatmalar();
+    const gelen = l.filter(x => Date.parse(x.zaman) <= simdi);
+    if(gelen.length){
+      hatirYaz(l.filter(x => gelen.indexOf(x) < 0));
+      gelen.forEach(x => {
+        ortam.bildir('LifeOS · hatırlatma', x.metin);
+        if(acik) soyle('Hatırlatma: ' + x.metin);
+        else{ akis.push({ kim:'king', metin:'Hatırlatma: ' + x.metin }); sakla(); }
+      });
+    }
+    const sonraki = hatirlatmalar().map(x => Date.parse(x.zaman)).sort((a, b) => a - b)[0];
+    if(sonraki && typeof setTimeout === 'function' && sonraki - simdi < 864e5) hatirSaat = setTimeout(hatirlatKur, Math.max(1000, sonraki - simdi));
+  }
+  const KARAR_RE = /^(?:rastgele seç|karar ver|birini seç|seç)\s*:\s*(.+)$/;
+  function rastgele(n){
+    try{ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }catch(e){ return Math.floor(Math.random() * n); }
+  }
+  const NEFES_RE = /^(nefes egzersizi|kutu nefesi|nefes alalım|nefes çalışması|sakinleşmem lazım)\s*[?.!]*$/;
+  function nefesHtml(m){
+    if(!m.nefes) return '';
+    return '<div class="king__nefes" role="img" aria-label="Kutu nefesi: 4 saniye al, 4 tut, 4 ver, 4 tut; dört tur">'
+      + '<span class="king__nefes-daire" aria-hidden="true"></span>'
+      + '<span class="king__nefes-yazi" aria-hidden="true"><b>Al</b><b>Tut</b><b>Ver</b><b>Tut</b></span>'
+      + '<small>4 al · 4 tut · 4 ver · 4 tut · dört tur, yaklaşık bir dakika</small></div>';
+  }
+  /* Tek giriş: anlaşılırsa sonucu döner, değilse null (mesaj olağan yoluna gider). */
+  function aracKutusu(metin, t0){
+    const sen = () => { akis.push({ kim:'sen', metin:String(metin).trim() }); bekleyen = null; bekleyenGit = null; bekleyenIlet = null; cipler = null; };
+    let m = t0.match(HESAP_RE);
+    if(m){
+      const v = hesapla(m[1]);
+      if(v != null){ sen(); soyle(m[1].trim() + ' = ' + sayiTr(v), null, null, 'hesaplandı · cihazda, modelsiz'); return { tur:'hesap', deger:v }; }
+    }
+    m = t0.match(BIRIM_RE);
+    if(m){
+      const r = birimCevir(Number(m[1].replace(',', '.')), m[2], m[3]);
+      if(r){ sen(); soyle(sayiTr(Number(m[1].replace(',', '.'))) + ' ' + r.a + ' = ' + sayiTr(r.deger) + ' ' + r.b, null, null, 'hesaplandı'); return { tur:'birim', deger:r.deger }; }
+    }
+    m = t0.match(TARIH_ILERI_RE);
+    if(m){
+      const n = Number(m[1]) * (m[3] === 'önce' ? -1 : 1), d = ortam.simdi();
+      const h = m[2] === 'ay' ? new Date(d.getFullYear(), d.getMonth() + n, d.getDate()) : new Date(d.getFullYear(), d.getMonth(), d.getDate() + n * (m[2] === 'hafta' ? 7 : 1));
+      sen(); soyle(m[1] + ' ' + m[2] + ' ' + m[3] + ': ' + tarihYazTr(h)); return { tur:'tarih', iso:h.toISOString().slice(0, 10) };
+    }
+    m = t0.match(TARIH_KALAN_RE);
+    if(m){
+      const bugun = ortam.simdi(), ay = AYLAR.indexOf(m[2]);
+      let h = new Date(m[3] ? Number(m[3]) : bugun.getFullYear(), ay, Number(m[1]));
+      if(!m[3] && gunFarki(bugun, h) < 0) h = new Date(bugun.getFullYear() + 1, ay, Number(m[1]));
+      const g = gunFarki(bugun, h);
+      sen(); soyle(tarihYazTr(h) + ': ' + (g > 0 ? g + ' gün kaldı (' + Math.floor(g / 7) + ' hafta ' + (g % 7) + ' gün).' : g === 0 ? 'bugün.' : (-g) + ' gün geçti.'));
+      return { tur:'tarih', gun:g };
+    }
+    m = String(metin || '').trim().match(YAP_EKLE_RE);
+    if(m){
+      const l = yapilacaklar();
+      const yeni = m[1].split(/\s*;\s*/).map(x => x.trim()).filter(Boolean).slice(0, 10)
+        .map((x, i) => ({ id:'y' + ortam.simdi().getTime().toString(36) + i, metin:x.slice(0, 160), bitti:false }));
+      yapYaz(l.concat(yeni)); sen();
+      soyle(yeni.length === 1 ? 'Listeye ekledim.' : yeni.length + ' madde ekledim.', null, null, null, { yap:true });
+      return { tur:'yap', n:yeni.length };
+    }
+    if(YAP_LISTE_RE.test(t0)){ sen(); soyle('Yapılacaklar · ' + yapilacaklar().filter(x => !x.bitti).length + ' açık', null, null, null, { yap:true }); return { tur:'yap', n:yapilacaklar().length }; }
+    if(YAP_TEMIZ_RE.test(t0)){ const l = yapilacaklar(); yapYaz(l.filter(x => !x.bitti)); sen(); soyle((l.length - yapilacaklar().length) + ' biten maddeyi sildim.', null, null, null, { yap:true }); return { tur:'yap' }; }
+    m = t0.match(HATIR_SURE_RE) || t0.match(HATIR_SAAT_RE);
+    if(m){
+      const d = ortam.simdi();
+      let z;
+      if(m.length === 4 && /^(dk|dakika|sa|saat)$/.test(m[2])) z = new Date(d.getTime() + Number(m[1]) * (/^(sa|saat)$/.test(m[2]) ? 3600000 : 60000));
+      else{ z = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Number(m[1]), Number(m[2])); if(z <= d) z = new Date(z.getTime() + 864e5); }
+      const ne = (m[3] || '').trim() || 'Hatırlatma';
+      if(!(Number(m[1]) > 0 || m.length === 4 && !/^(dk|dakika|sa|saat)$/.test(m[2])) || isNaN(z)){ return null; }
+      hatirYaz(hatirlatmalar().concat([{ id:'h' + d.getTime().toString(36), zaman:z.toISOString(), metin:ne.slice(0, 160) }]));
+      sen(); soyle('Tamam, ' + String(z.getHours()).padStart(2, '0') + ':' + String(z.getMinutes()).padStart(2, '0') + (z.getDate() !== d.getDate() ? ' (yarın)' : '')
+        + '’de hatırlatacağım: ' + ne + '. Sayfa açıksa bildirim gelir; kapalıysa açtığında söylerim.');
+      hatirlatKur();
+      return { tur:'hatirlat' };
+    }
+    if(HATIR_LISTE_RE.test(t0)){
+      const l = hatirlatmalar().sort((a, b) => String(a.zaman).localeCompare(String(b.zaman)));
+      sen(); cipler = l.slice(0, 4).map(x => ({ ad:'İptal: ' + x.metin.slice(0, 18), is:'hat-sil:' + x.id }));
+      soyle(l.length ? l.length + ' hatırlatma bekliyor:' : 'Bekleyen hatırlatma yok.', l.map(x => tarihYaz(x.zaman) + ' · ' + x.metin));
+      return { tur:'hatirlat', n:l.length };
+    }
+    m = String(metin || '').trim().match(KARAR_RE);
+    if(m){
+      const l = m[1].split(/\s*(?:,|;|\bya da\b|\bveya\b|\byoksa\b)\s*/).map(x => x.trim()).filter(Boolean);
+      if(l.length >= 2){
+        sen(); cipler = [{ ad:'Yeniden seç', is:'oner-metin:' + String(metin).trim() }];
+        soyle('Seçtim: ' + l[rastgele(l.length)] + '.', null, null, 'rastgele, ' + l.length + ' seçenek arasından');
+        return { tur:'karar' };
+      }
+    }
+    if(NEFES_RE.test(t0)){ sen(); soyle('Kutu nefesi: daireyle birlikte nefes al, tut, ver, tut.', null, null, null, { nefes:true }); return { tur:'nefes' }; }
+    return null;
+  }
+
   /* ---------- K4 (kullanıcı, 2026-10-22): MERKEZ SIRASI ve SESLİ ÖZET ----------
      Merkez'e ulaşılamadığında (telefon dışarıda) Merkez'e giden soru
      kaybolmaz: cihazda sıraya girer (lifeos.king.merkez-sira; TASINAN'da,
@@ -40801,6 +41072,7 @@ window.LIFEOS.KING = (function(){
     if(YASA_RE.test(t0)) return yasaIsle(metin);
     if(GUN_KAPAT_RE.test(t0)) return gunIsle(metin, true);
     if(GUN_RE.test(t0)) return gunIsle(metin, false);
+    { const AK = aracKutusu(metin, t0); if(AK) return AK; }
     /* Söz 32: kartlar (istatistik, soru); «sorma» komutundan önce. */
     const KN = kartNiyeti(t0);
     if(KN) return kartIsle(KN, metin);
@@ -41473,7 +41745,7 @@ window.LIFEOS.KING = (function(){
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
       : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '"><div><p>' + bicimli(m.metin) + '</p>'
-        + kartlarHtml(m) + yasaHtml(m, ilkSira + i) + gunKartHtml(m, ilkSira + i) + dersHtml(m, ilkSira + i) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i) + arastirmaHtml(m, ilkSira + i) + k2Html(m, ilkSira + i)
+        + kartlarHtml(m) + yapHtml(m) + nefesHtml(m) + yasaHtml(m, ilkSira + i) + gunKartHtml(m, ilkSira + i) + dersHtml(m, ilkSira + i) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i) + arastirmaHtml(m, ilkSira + i) + k2Html(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
             + (m.onizleme.liste ? '<ul class="king__liste">' + m.onizleme.liste.map(x => '<li><b>' + kac(x) + '</b></li>').join('') + '</ul>'
@@ -41741,6 +42013,8 @@ window.LIFEOS.KING = (function(){
         if(/^ders-soru:\d+$/.test(is)){ const m = akis[Number(is.slice(10))];
           if(m && m.ders && m.ders.kd){ cipler = null; kdSoru(m.ders.id); return; }
           if(m && m.ders) isle('bana soru sor ' + m.ders.sorgu); return; }
+        if(/^yap:/.test(is)){ const l = yapilacaklar(), x = l.find(y => y.id === is.slice(4)); if(x){ x.bitti = !x.bitti; yapYaz(l); ciz(false); } return; }
+        if(/^hat-sil:/.test(is)){ hatirYaz(hatirlatmalar().filter(x => x.id !== is.slice(8))); cipler = null; soyle('Hatırlatmayı iptal ettim.'); hatirlatKur(); return; }
         if(/^yasa-deney:\d+:\d+$/.test(is)){ const p = is.split(':'), m = akis[Number(p[1])], y = m && m.yasa && m.yasa.l[Number(p[2])];
           if(y) isle('deney başlat: ' + y.deney); return; }
         if(/^gun-baslat:\d+:\d+$/.test(is)){ const p = is.split(':'), m = akis[Number(p[1])], x = m && m.gun && m.gun.ogeler[Number(p[2])];
@@ -42429,7 +42703,7 @@ window.LIFEOS.KING = (function(){
     uyanKur();
     /* Söz 36: King'in kendi araçları kataloğa (her çağrıda güncel kurulur). */
     if(L.ARAC){ L.ARAC.modulSec(ayar.modul); L.ARAC.ortakKur(ortakAraclar); }
-    if(typeof window !== 'undefined') setTimeout(() => { try{ if(odak()) odakKur(); }catch(e){ /* yok */ } }, 0);
+    if(typeof window !== 'undefined') setTimeout(() => { try{ if(odak()) odakKur(); hatirlatKur(); }catch(e){ /* yok */ } }, 0);
     bagla();
     disKisi = [];
     if(hafiza()) disKisiTazele();              // söz 22: öbür modüllerde öğrenilen
@@ -42471,6 +42745,7 @@ window.LIFEOS.KING = (function(){
     if(ayar) ortam.depo.sil(depoAnahtar());
     ortam.depo.sil(TASIMA);
     ortam.depo.sil(SIRA); ortam.depo.sil(SOZET); ortam.depo.sil(DERSLER); kaynakMetin = null;
+    ortam.depo.sil(YAP); ortam.depo.sil(HATIR); if(hatirSaat){ try{ clearTimeout(hatirSaat); }catch(e){ /* yok */ } hatirSaat = null; }
     siradanSoru = null; siraCalisiyor = false;
     if(siraSaat){ try{ clearInterval(siraSaat); }catch(e){ /* yok */ } siraSaat = null; }
     if(ayar) ortam.depo.sil(arsivAnahtar());
@@ -42512,7 +42787,7 @@ window.LIFEOS.KING = (function(){
     sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     yeniSohbet, kayitAc, ARACLAR, aktifKayit:() => aktifKayit,
-    BOLUMLER, bolumSec, bolum:() => bolum, listeGorunur, alanAc, pdfAl, nedenSatirlari, yetenekler, dersNiyeti, yasaHesapla, kdKur, kdDersler, DERSLER, sira, siraBosalt, SIRA, SOZET, sozetler,
+    BOLUMLER, bolumSec, bolum:() => bolum, listeGorunur, alanAc, pdfAl, nedenSatirlari, yetenekler, dersNiyeti, hesapla, birimCevir, yapilacaklar, hatirlatmalar, yasaHesapla, kdKur, kdDersler, DERSLER, sira, siraBosalt, SIRA, SOZET, sozetler,
     KIPLER, kip, kipSec, klasorler, klasorEkle, klasorSil, kayitTasi, kayitAdlandir, kayitSabitle,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla, _videoKaynak:videoKaynak, _gorunurluk:gorunurluk,
