@@ -1136,3 +1136,43 @@ button.king__ekran-onizle:focus-visible{ outline:2px solid var(--k-vurgu); outli
 /* ---- derse çevir: kaynaktan alıntı ---- */
 .king__ders-alinti{ padding:8px 12px; border-left:2px solid var(--border); font-size:var(--fs-sm); color:var(--text-2); }
 .king__ders-alinti b{ margin-right:6px; color:var(--text-3); font-weight:600; }
+
+/* ---- tür renkleri (2026-10-23): simge ve grup noktası; metin nötr ---- */
+.kv-mini, .kv-grup{ --kv-l:56%; }
+:root[data-theme="dark"] .kv-mini, :root[data-theme="dark"] .kv-grup{ --kv-l:76%; }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .kv-mini, :root:not([data-theme="light"]) .kv-grup{ --kv-l:76%; } }
+[data-renk="mavi"]{ --kv-r:oklch(var(--kv-l) .13 250); }
+[data-renk="mor"]{ --kv-r:oklch(var(--kv-l) .14 300); }
+[data-renk="turkuaz"]{ --kv-r:oklch(var(--kv-l) .11 195); }
+[data-renk="turuncu"]{ --kv-r:oklch(var(--kv-l) .14 50); }
+[data-renk="yesil"]{ --kv-r:oklch(var(--kv-l) .13 150); }
+[data-renk="sari"]{ --kv-r:oklch(var(--kv-l) .12 95); }
+[data-renk="pembe"]{ --kv-r:oklch(var(--kv-l) .14 350); }
+[data-renk="kehribar"]{ --kv-r:oklch(var(--kv-l) .14 72); }
+[data-renk="lacivert"]{ --kv-r:oklch(var(--kv-l) .14 270); }
+[data-renk="gri"]{ --kv-r:var(--text-2); }
+[data-renk="ays"]{ --kv-r:var(--ays); } [data-renk="spi"]{ --kv-r:var(--spi); } [data-renk="esp"]{ --kv-r:var(--esp); }
+.kv-mini[data-renk] .kv-mini-simge, .kv-grup--one .kv-mini[data-renk] .kv-mini-simge, .king__bos-araclar .kv-mini[data-renk] .kv-mini-simge{
+  color:var(--kv-r); background:color-mix(in oklab, var(--kv-r) 14%, var(--surface)); }
+.kv-mini[data-renk]:hover .kv-mini-simge{ color:var(--kv-r); background:color-mix(in oklab, var(--kv-r) 22%, var(--surface)); }
+.kv-grup-nokta{ width:7px; height:7px; border-radius:50%; background:var(--kv-r, var(--text-3)); align-self:center; }
+
+/* ---- araç kutusu: yapılacaklar ve nefes ---- */
+.king__yap{ list-style:none; margin:var(--sp-2) 0 0; padding:0; display:flex; flex-direction:column; gap:2px; }
+.king__yap-is{ width:100%; display:flex; align-items:center; gap:10px; min-height:36px; padding:6px 10px; border:0; border-radius:var(--r-sm);
+  background:transparent; color:var(--text); font:inherit; text-align:left; cursor:pointer; }
+.king__yap-is:hover{ background:var(--surface-2); }
+.king__yap-is i{ flex:none; width:16px; height:16px; border-radius:5px; box-shadow:inset 0 0 0 1.5px var(--text-3); }
+.king__yap-is.is-bitti i{ background:var(--text-2); box-shadow:none; }
+.king__yap-is.is-bitti span{ color:var(--text-3); text-decoration:line-through; }
+.king__nefes{ display:grid; justify-items:center; gap:10px; margin-top:var(--sp-2); padding:20px 16px; border-radius:var(--r-md);
+  background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); }
+.king__nefes-daire{ width:120px; height:120px; border-radius:50%; background:color-mix(in oklab, var(--k-vurgu) 18%, var(--surface));
+  box-shadow:inset 0 0 0 2px color-mix(in oklab, var(--k-vurgu) 50%, transparent); animation:king-nefes 16s ease-in-out 4; transform:scale(.6); }
+.king__nefes-yazi{ position:relative; height:22px; width:60px; }
+.king__nefes-yazi b{ position:absolute; inset:0; text-align:center; font-weight:650; opacity:0; animation:king-nefes-yazi 16s linear 4; }
+.king__nefes-yazi b:nth-child(2){ animation-delay:4s; } .king__nefes-yazi b:nth-child(3){ animation-delay:8s; } .king__nefes-yazi b:nth-child(4){ animation-delay:12s; }
+.king__nefes small{ font-size:var(--fs-xs); color:var(--text-3); }
+@keyframes king-nefes{ 0%{ transform:scale(.6); } 25%{ transform:scale(1); } 50%{ transform:scale(1); } 75%{ transform:scale(.6); } 100%{ transform:scale(.6); } }
+@keyframes king-nefes-yazi{ 0%, 24%{ opacity:1; } 25%, 100%{ opacity:0; } }
+@media (prefers-reduced-motion:reduce){ .king__nefes-daire{ animation:none; transform:none; } .king__nefes-yazi{ display:none; } }

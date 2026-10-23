@@ -1892,7 +1892,7 @@
       expect(!!v).toBe(true);                                                  // sohbet ekranının içinde
       expect(!!document.querySelector('.king__girdi')).toBe(true);           // yazı alanı altta kalır
       expect(document.querySelector('.king__ray [data-king="bolum:araclar"]').getAttribute('aria-current')).toBe('true');
-      const gruplar = [...v.querySelectorAll('.kv-grup-ad')].map(h => h.firstChild.textContent);
+      const gruplar = [...v.querySelectorAll('.kv-grup-ad')].map(h => [...h.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join(''));
       expect(gruplar[0]).toBe('Öne çıkanlar');
       ['Şimdi', 'Kart ve soru', 'Araştır ve oku', 'Planla ve takip et', 'Rutin ve hafıza', 'AYS · sınav', 'SPİ · sağlık', 'Sistem'].forEach(g => expect(gruplar).toContain(g));
       expect(gruplar[gruplar.length - 1]).toBe('Sistem');
