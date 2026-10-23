@@ -1676,6 +1676,20 @@ SP.App = (function(){
             /* Öğretmen: SPİ kavramı ders olarak (core/kingders.js). */
             ders:konu => SP.KingDers.ders(konu),
             dersOrnek:'set kavramını anlat',
+            /* DEVRİM «Günüm»: haftalık planların bugünkü maddeleri, saatine göre;
+               bitti mi plan modülünün kendi sayımından (kayıt ya da işaret). */
+            gun:() => {
+              const H = SP.HaftaPlan, iso = SP.U.todayISO();
+              if(!H) return { ogeler:[] };
+              const og = [];
+              H.liste().filter(p => Array.isArray(p.maddeler) && p.maddeler.length).forEach(p => H.bugunMaddeleri(p, iso).forEach(m => {
+                const s = H.sayim(p, m, iso);
+                og.push({ ad:m.metin, alt:[H.zamanYaz(m.zaman), s.hedef > 1 ? s.n + ' / ' + s.hedef : ''].filter(Boolean).join(' · '),
+                  durum:s.tamam ? 'bitti' : 'sirada', route:'planlar', an:H.zamanAn(m.zaman) });
+              }));
+              og.sort((a, b) => a.an - b.an);
+              return { ogeler:og, not:og.length ? '' : 'Bugün için plan maddesi yok; Planlar’dan rutin ekleyebilirsin.' };
+            },
             istatistik:() => {
               const uyku = [];
               let ant = 0, kahve = 0, ogun = 0;

@@ -1739,6 +1739,17 @@ R.App = (function(){
             /* Öğretmen: konu anlatımı ders olarak; «Modülde aç» Öğren'i o konuda açar. */
             ders:konu => R.Ogren.kingDers(konu),
             dersOrnek:'türevi anlat',
+            /* DEVRİM «Günüm» (king.js): bugünün blokları; durum bloğun kendi
+               kaydından (bitti, atlandı, sayaç çalışıyorsa şimdi). King yazmaz. */
+            gun:() => {
+              const d = S.days[U.todayISO()];
+              if(!d) return { ogeler:[], not:'Bugünün planı henüz kurulmadı; Bugün ekranı açılınca kurulur.' };
+              const calisan = S.timer && S.timer.dayISO === d.date ? S.timer.blockId : null;
+              return { ogeler:(d.blocks || []).filter(b => b.slot !== 'Dinlenme').map(b => ({
+                ad:b.topic || b.subject, alt:[b.slot, b.topic && b.topic !== b.subject ? b.subject : ''].filter(Boolean).join(' · '),
+                dk:b.targetMin || null, route:'today',
+                durum:b.status === 'done' || b.status === 'partial' ? 'bitti' : b.status === 'skipped' ? 'atlandi' : b.id === calisan ? 'simdi' : 'sirada' })) };
+            },
             dersAc:async id => { const x = R.Ogren.konuyuBul(id); if(x.subject){ await R.Ogren.sec(x.subject.id, id); go('ogren'); } },
             /* Söz 34: puan önceliği (Öğren'in hesabı) ve konuyu Öğren'de açmak. */
             oncelik:() => R.Ogren.oncelikler(5),

@@ -1870,31 +1870,51 @@
         ders:konu => /türev/.test(konu) ? { id:'am-11', baslik:'Türev', alt:'AYT Matematik', giris:'Değişim hızı.', etiket:'elle yazıldı · doğrulanmadı',
           sorgu:'Türev', soruVar:true, bolumler:[{ baslik:'Tanım', metin:'Anlık değişim hızı.' }, { baslik:'Kurallar', liste:['(x^n)′ = n·x^(n−1)'] },
             { baslik:'Örnek', metin:'(x²)′ = 2x', dikkat:'Sabitin türevi 0.' }] } : null,
-        dersOrnek:'türevi anlat' }, (o && o.kartlar) || {}) });
+        dersOrnek:'türevi anlat',
+        olcu:{ liste:[{ id:'sure', ad:'Çalışma süresi', birim:'dk' }, { id:'dogruluk', ad:'Doğruluk', birim:'%' }], deger:() => null },
+        gun:() => ({ ogeler:[{ ad:'Türev', alt:'Sabah', dk:40, durum:'bitti', route:'today' }, { ad:'Paragraf', alt:'Öğle', dk:30, durum:'sirada', route:'today' }] }) },
+        (o && o.kartlar) || {}) });
       return k;
     }
-    it('Araçlar: rayda Sohbet’in altında; gruplu, aranır; satırın türü simgesiyle bellidir', () => sahneyle(async () => {
+    it('Araçlar: sohbet ekranında minik ikonlu kutular; yazı alanı kalır; öne çıkanlar, gruplar, arama', () => sahneyle(async () => {
       const k = aracSahnesi();
       k.ac();
       expect([...document.querySelectorAll('.king__ray [data-king^="bolum:"]')].map(b => b.getAttribute('data-king')).slice(0, 2))
         .toEqual(['bolum:sohbet', 'bolum:araclar']);
-      k.bolumSec('araclar');
-      const yan = document.querySelector('.king__yan');
-      expect(yan.getAttribute('aria-label')).toBe('Araçlar');
-      const gruplar = [...yan.querySelectorAll('.king__yan-ad')].map(h => h.textContent);
-      ['Kart ve soru', 'Araştır ve oku', 'Planla ve takip et', 'Rutin ve hafıza', 'AYS · sınav', 'SPİ · sağlık', 'Sistem'].forEach(g => expect(gruplar).toContain(g));
+      /* Boş sohbette öne çıkan araçlar minik kutu; «Tümü» Araçlar'ı açar. */
+      const bos = [...document.querySelectorAll('.king__bos-araclar .kv-mini-ad')].map(x => x.textContent);
+      ['Kişisel yasalar', 'Günüm', 'Derse çevir', 'Sınav yolculuğu', 'Konu anlat', 'Tümü'].forEach(x => expect(bos).toContain(x));
+      document.querySelector('.king__bos-araclar [data-king="bolum:araclar"]').click();
+      const v = document.querySelector('.king__akis .king__vitrin');
+      expect(!!v).toBe(true);                                                  // sohbet ekranının içinde
+      expect(!!document.querySelector('.king__girdi')).toBe(true);           // yazı alanı altta kalır
+      expect(document.querySelector('.king__ray [data-king="bolum:araclar"]').getAttribute('aria-current')).toBe('true');
+      const gruplar = [...v.querySelectorAll('.kv-grup-ad')].map(h => h.firstChild.textContent);
+      expect(gruplar[0]).toBe('Öne çıkanlar');
+      ['Şimdi', 'Kart ve soru', 'Araştır ve oku', 'Planla ve takip et', 'Rutin ve hafıza', 'AYS · sınav', 'SPİ · sağlık', 'Sistem'].forEach(g => expect(gruplar).toContain(g));
       expect(gruplar[gruplar.length - 1]).toBe('Sistem');
-      /* Şimdi grubu en çok üç öneri (sabah 9: özet önce). */
-      expect(gruplar[0]).toBe('Şimdi');
-      const simdi = yan.querySelector('.king__yan-grup').querySelectorAll('li');
-      expect(simdi.length <= 3 && simdi.length > 0).toBe(true);
-      expect(simdi[0].textContent).toContain('Bugünün özeti');
-      /* Merkez bağlı değil: Merkez isteyen satır etiketli. */
-      const arastir = [...yan.querySelectorAll('.king__yetenek')].find(b => /^Araştır/.test(b.textContent));
-      expect(arastir.classList.contains('is-sonuk')).toBe(true);
-      expect(arastir.querySelector('.king__yetenek-etiket').textContent).toBe('Merkez');
-      /* Başka modülün işi de katalogda (Tüm işler ile aynı kaynak). */
-      expect(!!yan.querySelector('[data-king^="is-sec:"]')).toBe(true);
+      /* Her kutu: simge ve ad; açıklama ipucu ve erişilebilir adda. */
+      const kutular = [...v.querySelectorAll('.kv-mini')];
+      expect(kutular.length > 30).toBe(true);
+      kutular.forEach(b => {
+        expect(!!b.querySelector('.kv-mini-simge svg')).toBe(true);
+        expect(b.getAttribute('aria-label').indexOf(b.querySelector('.kv-mini-ad').textContent + ': ')).toBe(0);
+      });
+      const kutu = ad => kutular.find(b => b.querySelector('.kv-mini-ad').textContent === ad);
+      /* Merkez bağlı değil: Merkez isteyen kutu sönük, noktalı, ipucunda söyler. */
+      expect(kutu('Araştır').classList.contains('is-sonuk')).toBe(true);
+      expect(!!kutu('Araştır').querySelector('.kv-mini-merkez')).toBe(true);
+      expect(kutu('Araştır').getAttribute('title')).toContain('Merkez gerekli');
+      /* Başka modülün işi de burada; liste sütunu grup dizini. */
+      expect(!!v.querySelector('[data-king^="is-sec:"]')).toBe(true);
+      expect(document.querySelectorAll('.king__yan [data-king^="vitrin-git:"]').length).toBe(gruplar.length - 1);
+      /* Arama kutuları süzer. */
+      const ara = v.querySelector('[data-king-ara-girdi]');
+      ara.value = 'yasa';
+      ara.dispatchEvent(new Event('input', { bubbles:true }));
+      const gorunen = kutular.filter(b => !b.hidden).map(b => b.querySelector('.kv-mini-ad').textContent);
+      expect(gorunen).toContain('Kişisel yasalar');
+      expect(gorunen.indexOf('Araştır')).toBe(-1);
     }));
     it('Araçlar: bankası olmayan modülde soru satırı yok; olan modülde var', () => sahneyle(async () => {
       const { k } = sahne();
@@ -1909,10 +1929,12 @@
       k.ac();
       k.bolumSec('araclar');
       const once = k.akis().length;
-      document.querySelector('.king__yan [data-king="doldur:25 dakika matematik çalışalım"]').click();
+      document.querySelector('.king__vitrin [data-king="doldur:25 dakika matematik çalışalım"]').click();
+      expect(!!document.querySelector('.king__vitrin')).toBe(false);          // kart sohbete döndü
       expect(document.querySelector('.king__girdi').value).toBe('25 dakika matematik çalışalım');
       expect(k.akis().length).toBe(once);
-      document.querySelector('.king__yan [data-king="oner-metin:neye çalışayım"]').click();
+      k.bolumSec('araclar');
+      document.querySelector('.king__vitrin [data-king="oner-metin:neye çalışayım"]').click();
       for(let i = 0; i < 6; i++) await new Promise(r => setTimeout(r, 0));
       expect(k.akis().some(m => m.kim === 'sen' && m.metin === 'neye çalışayım')).toBe(true);
     }));
@@ -2028,6 +2050,127 @@
       k.bolumSec('kutuphane');
       expect(document.querySelector('.king__yan').textContent).toContain('Sesli özetler');
       expect(!!document.querySelector('[data-king="sozet-dinle:0"]')).toBe(true);
+    }));
+    /* DEVRİM (2026-10-22): kişisel yasalar, günüm, derse çevir. */
+    function olcuSahte(gun, f){
+      /* gun: kaç gün; f(i) → { sure, dogruluk } (i 1 = dün). */
+      const tablo = {};
+      for(let i = 1; i <= gun; i++){
+        const d = new Date(2026, 9, 5 - i);
+        tablo[d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')] = f(i);
+      }
+      return { liste:[{ id:'sure', ad:'Çalışma süresi', birim:'dk' }, { id:'dogruluk', ad:'Doğruluk', birim:'%' }],
+        deger:(id, iso) => tablo[iso] ? tablo[iso][id] : null };
+    }
+    it('Kişisel yasalar: güçlü bağı bulur, yönünü ve gün sayısını söyler; az veriyle ya da tek ölçüyle söz yok', () => sahneyle(async () => {
+      const { k } = sahne();
+      /* Uzun çalışılan günlerde doğruluk yüksek (yapay, kesin bağ). */
+      const r = k.yasaHesapla(olcuSahte(60, i => ({ sure:i % 2 ? 90 : 30, dogruluk:i % 2 ? 80 + (i % 3) : 60 + (i % 3) })));
+      expect(r.var).toBe(true);
+      const y = r.yasalar.find(x => x.a.id === 'sure' && x.b.id === 'dogruluk' && x.gecikme === 0);
+      expect(!!y).toBe(true);
+      expect(y.ust > y.alt).toBe(true);
+      expect(y.nUst >= 8 && y.nAlt >= 8).toBe(true);
+      /* 10 günlük veri: grup başına 8 gün yok. */
+      expect(k.yasaHesapla(olcuSahte(10, i => ({ sure:i % 2 ? 90 : 30, dogruluk:i % 2 ? 80 : 60 }))).yasalar.length).toBe(0);
+      /* Bağ yok: etki küçük. */
+      expect(k.yasaHesapla(olcuSahte(60, i => ({ sure:i % 2 ? 90 : 30, dogruluk:70 + (i % 5) }))).yasalar.filter(x => x.gecikme === 0 && x.a.id === 'sure').length).toBe(0);
+      expect(k.yasaHesapla({ liste:[{ id:'sure', ad:'Süre' }], deger:() => 1 })).toEqual({ var:false, neden:'tek-olcu' });
+    }));
+    it('Kişisel yasalar: kart cümle, iki çubuk ve etiketle; «Deneye çevir» deney başlatır', () => sahneyle(async () => {
+      const k = aracSahnesi({ kartlar:{ olcu:olcuSahte(60, i => ({ sure:i % 2 ? 90 : 30, dogruluk:i % 2 ? 80 + (i % 3) : 60 + (i % 3) })) } });
+      k.ac();
+      const r = await k.isle('yasalarım');
+      expect(r.tur).toBe('yasa');
+      expect(r.n > 0).toBe(true);
+      const s = document.querySelector('.king__yasa-s');
+      expect(s.querySelector('p').textContent).toContain('Çalışma süresi');
+      expect(s.textContent).toContain('ilişki, neden değil');
+      expect(s.querySelectorAll('.king__yasa-cubuk').length).toBe(2);
+      s.querySelector('[data-king^="yasa-deney:"]').click();
+      for(let i = 0; i < 6; i++) await new Promise(x => setTimeout(x, 0));
+      expect(k.akis().some(m => m.kim === 'sen' && /^deney başlat: /.test(m.metin))).toBe(true);
+    }));
+    it('Günüm: modülün maddeleri, sıradaki «Başlat» ile odak; akşam çok madde kalınca öne alınacak söylenir', () => sahneyle(async () => {
+      const k = aracSahnesi({ kartlar:{ gun:() => ({ ogeler:[{ ad:'Türev', dk:40, durum:'bitti', route:'today' },
+        { ad:'Paragraf', dk:30, durum:'sirada', route:'today' }, { ad:'Deneme', dk:60, durum:'sirada' }, { ad:'Tekrar', dk:20, durum:'sirada' }] }) } });
+      k.ac();
+      const r = await k.isle('günüm');
+      expect([r.tur, r.n, r.siradaki]).toEqual(['gun', 4, 1]);
+      const sira = document.querySelector('.king__gunum-s.is-siradaki');
+      expect(sira.textContent).toContain('Paragraf');
+      sira.querySelector('[data-king^="gun-baslat:"]').click();
+      expect(k.akis().pop().metin).toContain('30 dakikalık odak başladı');
+      await k.isle('sayacı durdur');
+      /* Akşam: bekleyen üç madde. */
+      k._ortam.simdi = () => new Date(2026, 9, 5, 20, 0);
+      await k.isle('günüm');
+      expect([...document.querySelectorAll('.king__gunum-not')].pop().textContent).toContain('önce «Paragraf»');
+      await k.isle('günü kapat');
+      expect(k.akis().pop().gun.siradaki).toBe(-1);
+    }));
+    it('Günüm, yasa ve ders kartları King kapanıp açılınca da yerinde', () => sahneyle(async () => {
+      const k = aracSahnesi();
+      k.ac();
+      await k.isle('günüm');
+      await k.isle('türevi anlat');
+      k.kapat();
+      k.ac();
+      expect(!!document.querySelector('.king__gunum')).toBe(true);
+      expect(!!document.querySelector('.king__ders')).toBe(true);
+    }));
+    it('Derse çevir: Merkez’in dersi kaynaktaki alıntıyla doğrulanır; doğrulanmayan bölüm ve soru atılır', () => sahneyle(async () => {
+      const { k } = sahne();
+      const kaynak = 'Fotosentez, bitkilerin ışık enerjisini kimyasal enerjiye dönüştürdüğü süreçtir. '
+        + 'Klorofil ışığı soğuran yeşil pigmenttir ve kloroplastlarda bulunur. '
+        + 'Süreç sonunda glikoz ve oksijen üretilir; oksijen yapraklardan atmosfere verilir.';
+      const j = { baslik:'Fotosentez', bolumler:[
+        { baslik:'Tanım', metin:'Işıktan kimyasal enerji.', alinti:'bitkilerin ışık enerjisini kimyasal enerjiye dönüştürdüğü süreçtir' },
+        { baslik:'Klorofil', metin:'Yeşil pigment.', alinti:'Klorofil ışığı soğuran yeşil pigmenttir' },
+        { baslik:'Uydurma', metin:'Fotosentez gece olur.', alinti:'fotosentez yalnız gece gerçekleşir ve karbon üretir' }],
+        sorular:[{ soru:'Klorofil nerede bulunur?', secenekler:['Kökte', 'Kloroplastlarda', 'Gövdede', 'Çiçekte'], dogru:'B', alinti:'ve kloroplastlarda bulunur' },
+          { soru:'Uydurma?', secenekler:['a', 'b', 'c'], dogru:'A', alinti:'kaynakta olmayan uydurma bir cümle burada' }] };
+      const r = k.kdKur(j, kaynak, 'biyoloji.pdf');
+      expect(r.atilan).toBe(1);
+      expect(r.ders.bolumler.map(b => b.baslik)).toEqual(['Tanım', 'Klorofil']);
+      expect(r.ders.sorular.length).toBe(1);
+      expect(k.kdKur({ baslik:'x', bolumler:[j.bolumler[2]] }, kaynak, 'a').hata).toContain('doğrulanabilen');
+    }));
+    it('Derse çevir: yapıştırılan metinden ders, Derslerim’de kalır; sorusu King’in kendi tekrarıyla', () => sahneyle(async () => {
+      const kaynak = ('Fotosentez, bitkilerin ışık enerjisini kimyasal enerjiye dönüştürdüğü süreçtir. '
+        + 'Klorofil ışığı soğuran yeşil pigmenttir ve kloroplastlarda bulunur. '
+        + 'Süreç sonunda glikoz ve oksijen üretilir; oksijen yapraklardan atmosfere verilir. ').repeat(4);
+      const cevap = JSON.stringify({ baslik:'Fotosentez', bolumler:[
+        { baslik:'Tanım', metin:'Işıktan kimyasal enerji.', alinti:'ışık enerjisini kimyasal enerjiye dönüştürdüğü süreçtir' },
+        { baslik:'Ürünler', metin:'Glikoz ve oksijen.', alinti:'glikoz ve oksijen üretilir' }],
+        sorular:[{ soru:'Klorofil nerede bulunur?', secenekler:['Kökte', 'Kloroplastlarda', 'Gövdede', 'Çiçekte'], dogru:'B', alinti:'kloroplastlarda bulunur' }] });
+      const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+      const fetch = async () => ({ status:200, json:async () => ({ ok:true, text:cevap, mode:'model' }), headers:{ get:() => null } });
+      const { k } = sahne({ hkm, fetch });
+      k.ac();
+      const r = await k.isle('derse çevir: ' + kaynak);
+      expect([r.tur, r.n, r.soru]).toEqual(['kd', 2, 1]);
+      expect(document.querySelector('.king__ders').textContent).toContain('kaynaktan alıntıyla doğrulandı');
+      expect(document.querySelector('.king__ders-alinti').textContent).toContain('ışık enerjisini kimyasal enerjiye');
+      expect(k.kdDersler().length).toBe(1);
+      const s = await k.isle('derslerimden soru sor');
+      expect(s.tur).toBe('kd-soru');
+      document.querySelector('[data-king$=":A"][data-king^="soru-cevap:"]').click();
+      for(let i = 0; i < 6; i++) await new Promise(x => setTimeout(x, 0));
+      const d = k.kdDersler()[0];
+      expect(d.tekrar[0].n).toBe(0);                                          // yanlış: yarın yeniden
+      expect(document.querySelector('.king__soru-cozum').textContent).toContain('Kaynakta');
+      k.bolumSec('kutuphane');
+      expect(document.querySelector('.king__yan').textContent).toContain('Derslerim');
+    }));
+    it('Derse çevir: Merkez yoksa ve kaynak kısaysa ders kurulmaz, neden söylenir', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.ac();
+      await k.isle('derse çevir: kısa metin');
+      expect(k.akis().pop().metin).toContain('en az bir paragraflık');
+      await k.isle('derse çevir: ' + 'uzun bir metin cümlesi. '.repeat(30));
+      expect(k.akis().pop().metin).toContain('Merkez bağlı değil');
+      expect(k.kdDersler().length).toBe(0);
     }));
     it('HKM’ye derinlik gider; Otomatik’te alan hiç gönderilmez', () => sahneyle(async () => {
       const { k, istekler } = derinSahnesi(true);

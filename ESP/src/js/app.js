@@ -1883,6 +1883,16 @@ ESP.App = (function(){
                kendi sınırı («öğretmen incelemesi bekliyor») etikette durur. */
             ders:konu => ESP.Lesson.kingDers(konu),
             dersOrnek:'ses ve alfabe konusunu anlat',
+            /* DEVRİM «Günüm»: haftalık rotanın ilk üç disiplini (Planner'ın
+               dengesi); bugün oturumu olan bitti sayılır. */
+            gun:() => {
+              const r = ESP.Planner.weeklyRoute(), bugun = U.todayISO();
+              const ss = M.sessionsOf(bugun).filter(s => s.minutes > 0);
+              return { ogeler:(r.rows || []).slice(0, 3).map(x => {
+                const dk = ss.filter(s => s.disc === x.disc.id).reduce((a, s) => a + s.minutes, 0);
+                return { ad:x.disc.label, alt:dk ? dk + ' dk çalışıldı' : 'haftanın dengesinde sırada', durum:dk ? 'bitti' : 'sirada', dk:25, route:x.disc.route || null };
+              }), not:r.note || '' };
+            },
             istatistik:() => {
               const dakika = {};
               let gun = 0;
