@@ -915,6 +915,30 @@
       expect(fareliOlmayan).toBe(0);
     });
 
+    /* Kullanıcı (2026-10-24): «bazen kasmalar oluyor, animasyonlar su gibi
+       akışkan değil». Gölge kenarın kendisindeyken genişlik kayarken her
+       karede büyük bulanık gölge yeniden çiziliyordu (masaüstünde açılış
+       başına ~400 ms kayıp kare). Açık kenarın dış gölgesi ayrı katmandadır
+       ve yalnız transform/opacity ile hareket eder. */
+    it('açık kenarın dış gölgesi kenarda değil, yalnız kayan ayrı katmanda', () => {
+      const kurallar = [];
+      /* Stil kuralının da (iç içe CSS) cssRules'u var: önce seçiciye bakılır. */
+      const gez = l => Array.from(l || []).forEach(r => { if(r.selectorText) kurallar.push(r); else if(r.cssRules) gez(r.cssRules); });
+      for(const ss of Array.from(document.styleSheets)){ try{ gez(ss.cssRules); }catch(e){ /* başka köken */ } }
+      /* Açık kenarın KENDİSİ (içindeki öğeler değil): `... > .kenar:hover` ya da `.kenar.kenar--tutulu`. */
+      const acikKenar = /kenar-dar.*\.site--v5 > \.kenar(?:\.kenar--tutulu|:hover|:focus-within|:is\([^)]*\))+$/;
+      const kenarda = kurallar.filter(r => r.selectorText.split(/,(?![^(]*\))/).some(p => acikKenar.test(p.trim())));
+      expect(kenarda.length >= 3).toBe(true);   // kabuk (iki) ve zemin
+      kenarda.forEach(r => {
+        expect(/shadow-lg/.test(r.style.boxShadow || '')).toBe(false);
+        expect(/box-shadow/.test(r.style.transition || '')).toBe(false);
+      });
+      const katman = kurallar.filter(r => /\.site--v5:has\(> \.kenar\)::after/.test(r.selectorText) && r.style.boxShadow);
+      expect(katman.length).toBe(1);
+      expect(katman[0].style.boxShadow).toContain('shadow-lg');
+      expect(katman[0].style.transitionProperty.split(',').map(s => s.trim()).sort().join(' ')).toBe('opacity transform');
+    });
+
     /* Tablet incelemesi (2026-10-05, AYS Ayarlar): yan yana iki alanda biri
        etiketinin yanında not taşıyınca (iki satır) kutusu ötekinden aşağıda
        kalıyordu. Yan yana alanların kutuları aynı hizadadır. */

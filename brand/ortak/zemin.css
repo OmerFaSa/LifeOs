@@ -179,7 +179,7 @@ html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
     -webkit-backdrop-filter:saturate(160%) blur(24px); backdrop-filter:saturate(160%) blur(24px); }
   html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu){
     background:var(--kenar-cam-acik); border-radius:0 20px 20px 0;
-    box-shadow:var(--cam-isik, none), var(--shadow-lg); }
+    box-shadow:var(--cam-isik, none); }   /* dış gölge ayrı katmanda: kabuk.css «AÇIK KENARIN GÖLGESİ» */
 }
 
 /* CANLI ZEMİN (kullanıcı, 2026-10-17: «arayüz cansız; arkadaki buzlu efekt

@@ -810,13 +810,28 @@ a.kenar__modul:hover{ color:var(--text); }
   html.kenar-dar .site--v5 > .kenar{ --kenar-acik:216px; width:64px; z-index:calc(var(--z-nav) + 5);
     padding:14px 10px 12px; gap:14px; align-items:stretch; overflow:hidden auto; scrollbar-width:none;
     interpolate-size:allow-keywords;
-    transition:width 340ms cubic-bezier(.4,0,.2,1), box-shadow 300ms ease, border-radius 340ms ease,
-      background-color 300ms ease; }
+    transition:width 340ms cubic-bezier(.4,0,.2,1), border-radius 340ms ease, background-color 300ms ease; }
   html.kenar-dar .site--v5 > .kenar::-webkit-scrollbar{ display:none; }
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within), html.kenar-dar .site--v5 > .kenar.kenar--tutulu{
-    width:var(--kenar-acik); box-shadow:var(--shadow-lg);
-    transition:width 520ms cubic-bezier(.32,.72,0,1), box-shadow 520ms ease, border-radius 520ms ease,
-      background-color 520ms ease; }
+    width:var(--kenar-acik);
+    transition:width 520ms cubic-bezier(.32,.72,0,1), border-radius 520ms ease, background-color 520ms ease; }
+
+  /* AÇIK KENARIN GÖLGESİ AYRI KATMANDA (kullanıcı, 2026-10-24: «bazen
+     kasmalar oluyor, animasyonlar su gibi akışkan değil»). Gölge kenarın
+     kendisindeyken genişlik kayarken her karede 1 057 px boyunda bulanık bir
+     gölge yeniden çiziliyordu: masaüstü uygulamasında (144 Hz) tek karede
+     40–67 ms GPU çizimi, kenarın her açılışında ~400 ms kayıp kare. Şimdi
+     gölge kenarın arkasında, açık kenar boyunda sabit bir katmandır; bir kez
+     çizilir, açılışta yalnız kayar ve belirir (transform + opacity: GPU
+     birleştirir, yeniden çizim yok). Kenarın içindeki cam ışığı (ince iç
+     çizgiler) kenarda kalır: bulanıklığı yok, ucuzdur. */
+  html.kenar-dar .site--v5:has(> .kenar)::after{ content:''; position:fixed; left:0; top:0; bottom:0;
+    width:216px; z-index:calc(var(--z-nav) + 4); pointer-events:none;
+    border-radius:0 20px 20px 0; box-shadow:var(--shadow-lg);
+    opacity:0; transform:translateX(-152px);
+    transition:opacity 300ms ease, transform 340ms cubic-bezier(.4,0,.2,1); }
+  html.kenar-dar .site--v5:has(> .kenar:is(:hover, :focus-within, .kenar--tutulu))::after{ opacity:1; transform:none;
+    transition:opacity 520ms ease, transform 520ms cubic-bezier(.32,.72,0,1); }
 
   /* Satırlar: simge 13 px içeriden başlar (10 + 13 + 9 = 32: şeridin ortası). */
   html.kenar-dar .site--v5 > .kenar .kenar__cekmece-kap{ display:block; }
@@ -1048,7 +1063,7 @@ html, body{ background:var(--bg); }
   @media (min-width:680px){
     html.kenar-dar .site--v5 > .kenar:hover, html.kenar-dar .site--v5 > .kenar:focus-within{
       background:var(--cam); -webkit-backdrop-filter:var(--cam-bulan); backdrop-filter:var(--cam-bulan);
-      box-shadow:var(--cam-isik), var(--shadow-lg); border-radius:0 20px 20px 0; }
+      box-shadow:var(--cam-isik); border-radius:0 20px 20px 0; }
   }
   .sheet, .popover{ background:var(--cam); -webkit-backdrop-filter:var(--cam-bulan); backdrop-filter:var(--cam-bulan);
     box-shadow:var(--cam-isik), var(--shadow-lg); border-color:transparent; }
@@ -1058,7 +1073,7 @@ html, body{ background:var(--bg); }
   html.kenar-dar .kenar:hover .kenar__ad, html.kenar-dar .kenar:hover .kenar__bolumler,
   html.kenar-dar .kenar:hover .kenar__marka span, html.kenar-dar .kenar:hover .kenar__modulsec-ad{ animation:none; }
   .kenar__modulpencere, .kenar__modulsec-ok{ transition:none !important; }
-  html.kenar-dar .site--v5 > .kenar{ transition:none; }
+  html.kenar-dar .site--v5 > .kenar, html.kenar-dar .site--v5:has(> .kenar)::after{ transition:none; }
 }
 @media (prefers-reduced-transparency:reduce){
   .sheet, .popover, html.kenar-dar .site--v5 > .kenar:hover{ background:var(--surface);

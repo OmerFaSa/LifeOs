@@ -392,6 +392,14 @@ window.LIFEOS.HAREKET = (function(){
     const az = o.az != null ? !!o.az : azMi();
     if(az || typeof document.startViewTransition !== 'function') return fn();
     const kart = el && el.closest ? el.closest('.kutu, .card, .lrow, .nextup, .okart') : null;
+    /* Kartsız (kenardan, menüden) geçişte görünüm geçişi YOK (kullanıcı,
+       2026-10-24: «bazen kasmalar oluyor»). Tarayıcı eski ekranın tam ekran
+       fotoğrafını çekip yenisiyle karıştırıyordu: masaüstü uygulamasında her
+       sayfa değişiminde 50–77 ms'lik ana iş parçacığı blokları ve 50 ms'lik
+       GPU sunum beklemesi. Yeni sayfanın kartları zaten sırayla yükselerek
+       gelir (kabuk.css SAYFA GEÇİŞİ); geçiş yalnız basılan kartın büyüdüğü
+       yerde kalır. */
+    if(!kart) return fn();
     try{
       if(kart) kart.style.viewTransitionName = 'h-kart';
       const t = document.startViewTransition(async () => {

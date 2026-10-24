@@ -135,6 +135,30 @@
       expect(sonuc).toBe('tamam');
     });
 
+    /* Kullanıcı (2026-10-24): «bazen kasmalar oluyor». Kenardan ya da
+       menüden sayfa değişince tam ekran fotoğraf (görünüm geçişi) çekilmez;
+       yalnız basılan kartın büyüdüğü geçişte çekilir. */
+    it('oz-153 kartsız geçiş görünüm geçişi başlatmaz; basılan kartla başlatır', async () => {
+      const eski = document.startViewTransition;
+      let cagri = 0;
+      document.startViewTransition = cb => { cagri++; const p = Promise.resolve().then(cb);
+        return { updateCallbackDone:p, finished:p }; };
+      const d = document.createElement('div');
+      d.innerHTML = '<div class="kutu"><button type="button">Aç</button></div>';
+      document.body.appendChild(d);
+      try{
+        let n = 0;
+        H.kaynak(document.body);
+        expect(H.gecis(() => { n++; return 'tamam'; }, { az:false })).toBe('tamam');
+        expect(n).toBe(1);
+        expect(cagri).toBe(0);
+        H.kaynak(d.querySelector('button'));
+        await H.gecis(() => { n++; }, { az:false });
+        expect(n).toBe(2);
+        expect(cagri).toBe(1);
+      }finally{ document.startViewTransition = eski; d.remove(); }
+    });
+
     it('oz-159 önizleme ekran adını ve cümlesini kaçışlayarak verir', () => {
       const ic = H.onizleIcerik('x', r => ({ baslik:'<Plan>', cumle:'3 blok & 1 deneme' }));
       expect(ic).toContain('&lt;Plan&gt;');
