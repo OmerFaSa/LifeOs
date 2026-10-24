@@ -247,6 +247,27 @@ async function portMuhafizi(portlar, ipucu){
       });
     }
 
+    /* ---- yönlendirme duyurusu ve odak (AYS ve SPİ ile aynı söz, 2026-10-25) ----
+
+       Tek sayfalık bir uygulamada gezinme tarayıcının sayfa yüklemesi
+       değildir: adres değişmez, başlık okunmaz, odak yerinde kalır.
+       Ekran okuyucuyla çalışan biri için hiçbir şey olmamış olur. */
+    const duyuruVar = await page.evaluate(() => !!document.getElementById('rota-duyuru'));
+    if(!duyuruVar) problems.push('yönlendirme duyurusu için canlı alan yok (#rota-duyuru)');
+    if(duyuruVar && routes.length > 1){
+      await page.evaluate(async r => { await ESP.App.go(r); }, routes[0]);
+      await wait(300);
+      await page.evaluate(() => { document.getElementById('rota-duyuru').textContent = ''; });
+      await page.evaluate(async r => { await ESP.App.go(r); }, routes[1]);
+      await wait(420);
+      const sonuc = await page.evaluate(() => ({
+        duyuru:(document.getElementById('rota-duyuru').textContent || '').trim(),
+        odakMain:document.activeElement && document.activeElement.id === 'main',
+      }));
+      if(!sonuc.duyuru) problems.push('ekran değişince duyuru yapılmıyor');
+      if(!sonuc.odakMain) problems.push('ekran değişince odak içeriğe taşınmıyor');
+    }
+
     /* ---- alt sayfa kipliliği ---- */
     await page.evaluate(async () => { await ESP.App.go('office'); });
     await wait(400);

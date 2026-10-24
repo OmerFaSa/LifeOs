@@ -609,7 +609,10 @@ ESP.App = (function(){
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
-      restoreFocus(focus);
+      /* Yönlendirmede eski odak geri konmaz: rotayaOdaklan onu içeriğe taşır
+         (AYS ve SPİ ile aynı, 2026-10-25). */
+      if(!rotaDegisti) restoreFocus(focus);
+      if(rotaDegisti){ rotaDegisti = false; rotayaOdaklan(sc); }
       if(H) H.sonra(appEl, S.route);
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.sonra(appEl, { rota:S.route, etkin:ayarlardaMi(S.route) });
       /* Ne değişti? (17): güncellemeden sonraki ilk açılışta sayfanın başında. */
@@ -690,9 +693,47 @@ ESP.App = (function(){
     S.route = route;
     /* King küçük kutusu hangi ekranda olduğunu bilir (king.js söz 9). */
     if(window.LIFEOS && window.LIFEOS.KING && window.LIFEOS.KING.ekranDegisti) setTimeout(() => window.LIFEOS.KING.ekranDegisti(), 0);
+    rotaDegisti = true;
     S.sidebarOpen = false;
     window.scrollTo(0, 0);
     render();
+  }
+
+  /* YÖNLENDİRME DUYURUSU (AYS ve SPİ ile aynı söz, 2026-10-25). Tek sayfalık
+     uygulamada gezinme sayfa yüklemesi değildir: adres değişmez, başlık
+     okunmaz, odak yerinde kalır; ekran okuyucuyla çalışan biri için hiçbir
+     şey olmamış olur. Yalnız YÖNLENDİRMEDE:
+
+       · gelinen ekranın adı görünmez bir canlı alana yazılır
+       · odak `<main>`'e taşınır (zaten `tabindex="-1"` taşır)
+
+     Her çizimde yapılsaydı, bir alana yazarken odak elden giderdi. */
+  let rotaDegisti = false;
+
+  function duyur(metin){
+    const el = document.getElementById('rota-duyuru');
+    if(!el || !metin) return;
+    /* Aynı metin üst üste yazılırsa okuyucu ikinciyi seslendirmez;
+       önce boşaltmak duyurunun her seferinde duyulmasını sağlar. */
+    el.textContent = '';
+    setTimeout(() => { el.textContent = metin; }, 30);
+  }
+
+  /* Odak, yeni sayfa bir kez çizildikten SONRA taşınır: o anda stil hazırdır
+     ve focus() bedavadır. Arada kullanıcı bir yere odaklandıysa (açılan alt
+     sayfa, yazılan alan) odağı ondan almaz. */
+  function rotayaOdaklan(sc){
+    let oldu = false;
+    const odaklan = () => {
+      if(oldu) return; oldu = true;
+      const main = document.getElementById('main');
+      const a = document.activeElement;
+      if(main && (!a || a === document.body)){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    };
+    if(typeof requestAnimationFrame === 'function') requestAnimationFrame(() => setTimeout(odaklan, 0));
+    setTimeout(odaklan, 120);
+    const ad = (sc && sc.title) || '';
+    if(ad) duyur(ad + ' ekranı açıldı');
   }
 
   function applyTheme(){
