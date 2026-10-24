@@ -635,8 +635,8 @@ table td, table th{
    gelir. Künye ve gezinme geçişe KATILMAZ — yerinde duran bir çerçeve
    sayfanın değiştiğini daha net anlatır, her şeyin birden kaybolması
    ise yön duygusunu siler. */
-::view-transition-old(root){ animation:vt-out 160ms var(--ease) both; }
-::view-transition-new(root){ animation:vt-in 240ms var(--ease) both; }
+html::view-transition-old(root){ animation:vt-out 160ms var(--ease) both; }
+html::view-transition-new(root){ animation:vt-in 240ms var(--ease) both; }
 @keyframes vt-out{ to{ opacity:0; } }
 @keyframes vt-in{ from{ opacity:0; transform:translateY(8px); } }
 
@@ -653,7 +653,7 @@ table td, table th{
 
 @media (prefers-reduced-motion:reduce){
   .content{ animation:none; }
-  ::view-transition-old(root), ::view-transition-new(root){ animation:none; }
+  html::view-transition-old(root), html::view-transition-new(root){ animation:none; }
   .btn:active, .subtab:active, .navlink:active, .pagelink:active,
   .iconbtn:active, .mic:active{ transform:none; }
 }
@@ -4133,8 +4133,10 @@ body.is-dragging .drop.is-over{
 .ogr-tablo th, .site--v5 .ogr-tablo th{ font-size:inherit; letter-spacing:0; text-transform:none; white-space:normal;
   padding:6px 12px; color:var(--text); border-bottom-color:var(--border); }
 .ogr-tablo thead th, .site--v5 .ogr-tablo thead th{ font-weight:600; }
-.ogr-tablo tbody tr:last-child :is(td, th){ border-bottom:1px solid var(--border); }
-.ogr-tablo tbody tr:hover :is(td, th){ background:none; }
+.ogr-tablo tbody tr:last-child td,
+.ogr-tablo tbody tr:last-child th{ border-bottom:1px solid var(--border); }
+.ogr-tablo tbody tr:hover td,
+.ogr-tablo tbody tr:hover th{ background:none; }
 /* Sade anlatım: kapalı ek bloklar (sınav kalıpları, sık hatalar, kaynaklar). */
 .ders__katlanir > summary{ display:flex; align-items:baseline; gap:8px; list-style:none; cursor:pointer; }
 .ders__katlanir > summary::-webkit-details-marker{ display:none; }
@@ -6861,16 +6863,59 @@ body.is-dragging .drop.is-over{
 
 /* v5 · ETİKETLER: büyük harf ve harf aralığı kalkar; etiket 12-13 px,
    ikinci metin rengi (tasarım dili «Yazı» panosu: etiket cümle düzeninde). */
-.site--v5 :is(.appear__label, .argcol__h, .asrow__kind, .ayar-ara__modul, .block__slot, .board__label,
-  .chain__kind, .chain__label, .cmdk__group, .desknote__label, .flashcard__side, .focusmode__slot,
-  .gauge__label, .haberci__ust, .hero__eyebrow, .herostat__label, .kmenu__bas, .lrow__label,
-  .masthead__wd, .mono-label, .nextup__label, .perde__ustyazi, .printdoc__h, .prop__kind, .qmsg__who,
-  .quizcard__src, .rail__label, .room3d__board-label, .rutbe-kart__ust, .rutbe-kunye__ust, .rx__kind,
-  .setup__kicker, .seviye-isler__tablo th, .seviye-rozet__ad, .sidestat__k, .sitefoot__k, .srsrow__day,
-  .stat__label, .symgrp__h, .topicgroup__head, .yenilik__baslik, th){
+.site--v5 .appear__label:not(html),
+.site--v5 .argcol__h:not(html),
+.site--v5 .asrow__kind:not(html),
+.site--v5 .ayar-ara__modul:not(html),
+.site--v5 .block__slot:not(html),
+.site--v5 .board__label:not(html),
+.site--v5 .chain__kind:not(html),
+.site--v5 .chain__label:not(html),
+.site--v5 .cmdk__group:not(html),
+.site--v5 .desknote__label:not(html),
+.site--v5 .flashcard__side:not(html),
+.site--v5 .focusmode__slot:not(html),
+.site--v5 .gauge__label:not(html),
+.site--v5 .haberci__ust:not(html),
+.site--v5 .hero__eyebrow:not(html),
+.site--v5 .herostat__label:not(html),
+.site--v5 .kmenu__bas:not(html),
+.site--v5 .lrow__label:not(html),
+.site--v5 .masthead__wd:not(html),
+.site--v5 .mono-label:not(html),
+.site--v5 .nextup__label:not(html),
+.site--v5 .perde__ustyazi:not(html),
+.site--v5 .printdoc__h:not(html),
+.site--v5 .prop__kind:not(html),
+.site--v5 .qmsg__who:not(html),
+.site--v5 .quizcard__src:not(html),
+.site--v5 .rail__label:not(html),
+.site--v5 .room3d__board-label:not(html),
+.site--v5 .rutbe-kart__ust:not(html),
+.site--v5 .rutbe-kunye__ust:not(html),
+.site--v5 .rx__kind:not(html),
+.site--v5 .setup__kicker:not(html),
+.site--v5 .seviye-isler__tablo th,
+.site--v5 .seviye-rozet__ad:not(html),
+.site--v5 .sidestat__k:not(html),
+.site--v5 .sitefoot__k:not(html),
+.site--v5 .srsrow__day:not(html),
+.site--v5 .stat__label:not(html),
+.site--v5 .symgrp__h:not(html),
+.site--v5 .topicgroup__head:not(html),
+.site--v5 .yenilik__baslik:not(html),
+.site--v5 th:not(:root){
   text-transform:none; letter-spacing:0; }
-.site--v5 :is(.lrow__label, .stat__label, .herostat__label, .sidestat__k, .rail__label, .board__label,
-  .topicgroup__head, .symgrp__h, .argcol__h, .gauge__label){ font-size:13px; font-weight:600; color:var(--text-2); }
+.site--v5 .lrow__label,
+.site--v5 .stat__label,
+.site--v5 .herostat__label,
+.site--v5 .sidestat__k,
+.site--v5 .rail__label,
+.site--v5 .board__label,
+.site--v5 .topicgroup__head,
+.site--v5 .symgrp__h,
+.site--v5 .argcol__h,
+.site--v5 .gauge__label{ font-size:13px; font-weight:600; color:var(--text-2); }
 .site--v5 th{ font-size:12px; font-weight:500; color:var(--text-3); }
 
 .site--v5 .nextup{ padding:18px 20px; }
@@ -6928,15 +6973,17 @@ body.is-dragging .drop.is-over{
 .site--v5 .ledger > .lrow .lrow__main > * + *{ margin-top:12px; }
 
 /* Bant ve yığın rafta çizilmez; içlerindeki her satır rafın bir kutusudur. */
-.site--v5 .ledger > .lband, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs){ display:contents; }
+.site--v5 .ledger > .lband,
+.site--v5 .ledger > .lband > .stack,
+.site--v5 .ledger > .lband > .stack-sm,
+.site--v5 .ledger > .lband > .stack-xs{ display:contents; }
 .site--v5 .ledger > .lband > :not(.lrow):not(.stack):not(.stack-sm):not(.stack-xs),
 .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > :not(.lrow){ grid-column:1 / -1; min-width:0; }
 
 /* 4 · Geniş içerik rafın bütün enini alır. */
-.site--v5 :is(.ledger > .lrow, .ledger > .lband > .lrow, .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow):is(
-  .lrow--wide,
-  :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4,
-    .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)){ grid-column:1 / -1; }
+.site--v5 .ledger > .lrow:not(:root):not(:root):is( .lrow--wide, :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4, .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)),
+.site--v5 .ledger > .lband > .lrow:not(:root):is( .lrow--wide, :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4, .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)),
+.site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow:is( .lrow--wide, :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4, .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)){ grid-column:1 / -1; }
 
 /* 6 · Eşi olmayan yarım kutu yalnız kalmaz: iki geniş kutunun arasında ya
    da rafın sonunda tek kalan kutu bütün eni alır. Eşleştirmeyi çizimden
@@ -6975,7 +7022,9 @@ body.is-dragging .drop.is-over{
 /* 5 · İç kaydırma yok. Çok geniş bir tablo (yalnız o) kendi kabında yana kayar. */
 .site--v5 .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
 .site--v5 .ledger .lrow__main table{ width:100%; }
-.site--v5 .ledger .lrow__main :is(.tablewrap, .table-wrap, .tbl){ overflow-x:auto; }
+.site--v5 .ledger .lrow__main .tablewrap,
+.site--v5 .ledger .lrow__main .table-wrap,
+.site--v5 .ledger .lrow__main .tbl{ overflow-x:auto; }
 
 /* Sayfa bölümleri de rafın katıdır: aralarında 32 px, başlık 16 px. */
 .site--v5 .sayfabolum + .sayfabolum{ margin-top:32px; }
@@ -11706,19 +11755,26 @@ a.kenar__modul:hover{ color:var(--text); }
      adı title'dan); açılışta yer açıldıktan sonra solarak gelir
      (@starting-style), kapanışta önce solar, sonra kalkar (allow-discrete).
      Desteklemeyen tarayıcıda yalnız solma yoktur, yerleşim yine oynamaz. */
-  html.kenar-dar .site--v5 > .kenar :is(.kenar__ad, .kenar__modulsec-ad, .kenar__modulsec-ok){
+  html.kenar-dar .site--v5 > .kenar .kenar__ad,
+  html.kenar-dar .site--v5 > .kenar .kenar__modulsec-ad,
+  html.kenar-dar .site--v5 > .kenar .kenar__modulsec-ok{
     display:none; white-space:nowrap; overflow:hidden; text-overflow:clip; opacity:0; transform:translateX(-4px);
     filter:blur(3px); animation:none;
     transition:opacity 140ms ease, transform 180ms ease, filter 140ms ease, display 180ms allow-discrete; }
-  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ad, .kenar__modulsec-ad){
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ad,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ad{
     display:block; }
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ok{ display:inline-block; }
-  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ad, .kenar__modulsec-ad, .kenar__modulsec-ok){
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ad,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ad,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ok{
     opacity:1; transform:none; filter:none;
     transition:opacity 340ms ease 140ms, transform 520ms cubic-bezier(.32,.72,0,1) 100ms, filter 340ms ease 140ms,
       display 0s allow-discrete; }
   @starting-style{
-    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ad, .kenar__modulsec-ad, .kenar__modulsec-ok){
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ad,
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ad,
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ok{
       opacity:0; transform:translateX(-4px); filter:blur(3px); }
   }
   /* Eski tablet düzeni (simge üstte, ad altta, 52 px) bu kenarda geçmez. */
@@ -11968,11 +12024,27 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
 /* BASINCA (2026-10-17, «arayüz canlı hissettirsin»): seçim kartı, çip ve
    tek dokunuşluk satır da düğme gibi hafifçe içe basar; bırakınca yerine
    döner. Yalnız basılıyken: süs değil, dokunuşun cevabı. */
-:is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .vt .ls2 > button, .ls2 > button){
+.pickcard:not(:root):not(html),
+.king__cip:not(:root):not(html),
+.giris__kisa:not(:root):not(html),
+.giris__ornek:not(:root):not(html),
+.temasec__secenek:not(:root):not(html),
+.vt .ls2 > button,
+.ls2 > button:not(:root){
   transition:transform var(--dur-press, 120ms) var(--ease, ease); }
-:is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .ls2 > button):active:not(:disabled){ transform:scale(.98); }
+.pickcard:not(html):active:not(:disabled),
+.king__cip:not(html):active:not(:disabled),
+.giris__kisa:not(html):active:not(:disabled),
+.giris__ornek:not(html):active:not(:disabled),
+.temasec__secenek:not(html):active:not(:disabled),
+.ls2 > button:active:not(:disabled){ transform:scale(.98); }
 @media (prefers-reduced-motion:reduce){
-  :is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .ls2 > button):active:not(:disabled){ transform:none; } }
+  .pickcard:not(html):active:not(:disabled),
+  .king__cip:not(html):active:not(:disabled),
+  .giris__kisa:not(html):active:not(:disabled),
+  .giris__ornek:not(html):active:not(:disabled),
+  .temasec__secenek:not(html):active:not(:disabled),
+  .ls2 > button:active:not(:disabled){ transform:none; } }
 
 .input, .select, .textarea{ border-color:transparent; background:var(--surface-2); border-radius:12px; }
 .input:hover, .select:hover, .textarea:hover{ border-color:transparent; background:color-mix(in oklab, var(--surface-3) 60%, var(--surface-2)); }
@@ -12064,12 +12136,38 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
    hafifçe yukarı kayarak belirir. Aynı sayfanın yeniden çizimi oynatmaz. */
 @keyframes sayfa-gir{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
 html.sayfa-gecis .site--v5 .sayfabasi{ animation:sayfa-gir var(--dur-lg) var(--ease) both; }
-html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .bolumcubugu){
+html.sayfa-gecis .site--v5 #main .kutu,
+html.sayfa-gecis .site--v5 #main .card,
+html.sayfa-gecis .site--v5 #main .donen,
+html.sayfa-gecis .site--v5 #main .kahraman,
+html.sayfa-gecis .site--v5 #main .notice,
+html.sayfa-gecis .site--v5 #main .okart-sar,
+html.sayfa-gecis .site--v5 #main .bolumcubugu{
   animation:sayfa-gir 460ms var(--ease) both; }
-html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(2){ animation-delay:50ms; }
-html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(3){ animation-delay:100ms; }
-html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(4){ animation-delay:150ms; }
-html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(n+5){ animation-delay:200ms; }
+html.sayfa-gecis .site--v5 #main .kutu:nth-child(2),
+html.sayfa-gecis .site--v5 #main .card:nth-child(2),
+html.sayfa-gecis .site--v5 #main .donen:nth-child(2),
+html.sayfa-gecis .site--v5 #main .kahraman:nth-child(2),
+html.sayfa-gecis .site--v5 #main .notice:nth-child(2),
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(2){ animation-delay:50ms; }
+html.sayfa-gecis .site--v5 #main .kutu:nth-child(3),
+html.sayfa-gecis .site--v5 #main .card:nth-child(3),
+html.sayfa-gecis .site--v5 #main .donen:nth-child(3),
+html.sayfa-gecis .site--v5 #main .kahraman:nth-child(3),
+html.sayfa-gecis .site--v5 #main .notice:nth-child(3),
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(3){ animation-delay:100ms; }
+html.sayfa-gecis .site--v5 #main .kutu:nth-child(4),
+html.sayfa-gecis .site--v5 #main .card:nth-child(4),
+html.sayfa-gecis .site--v5 #main .donen:nth-child(4),
+html.sayfa-gecis .site--v5 #main .kahraman:nth-child(4),
+html.sayfa-gecis .site--v5 #main .notice:nth-child(4),
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(4){ animation-delay:150ms; }
+html.sayfa-gecis .site--v5 #main .kutu:nth-child(n+5),
+html.sayfa-gecis .site--v5 #main .card:nth-child(n+5),
+html.sayfa-gecis .site--v5 #main .donen:nth-child(n+5),
+html.sayfa-gecis .site--v5 #main .kahraman:nth-child(n+5),
+html.sayfa-gecis .site--v5 #main .notice:nth-child(n+5),
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(n+5){ animation-delay:200ms; }
 @media (prefers-reduced-motion:reduce){
   html.sayfa-gecis .site--v5 .sayfabasi,
   html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .bolumcubugu),
@@ -12089,7 +12187,8 @@ svg.chart{ max-height:180px; }
    çıkar. Rütbe kartları olduğu gibi kalır (kullanıcı kararı). */
 .site--v5 .vk:not(#pane-rutbe .vk) :is(.cap, .et, .mod, .bs, .lb, .uy, .gb, .kn2, .hd, small){ letter-spacing:0; }
 .site--v5 .vk:not(#pane-rutbe .vk) .cap{ font-size:12px; }
-.site--v5 .vk:not(#pane-rutbe .vk) :is(.et, .mod){ font-size:11.5px; }
+.site--v5 .vk:not(#pane-rutbe .vk) .et,
+.site--v5 .vk:not(#pane-rutbe .vk) .mod{ font-size:11.5px; }
 
 /* Küçük bölüm şeritleri (sayfa düzeni) eşit ve sakin: aynı yazı boyutu,
    tek ok (soldaki), sağdaki «Aç» düğmesi yalnız üzerine gelince. */
@@ -12366,8 +12465,10 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
 .site--v5 .vk .serif{ font-weight:500; letter-spacing:-.02em; }
 .site--v5 .vk .x47 .av{ width:56px; height:56px; font-size:18px; box-shadow:none; }
 .site--v5 .vk .x47 b{ font-weight:600; font-size:20px; letter-spacing:-.015em; }
-.site--v5 .vk .w17 .ls2 :is(div, button){ border-color:transparent; background:var(--vk-s2); }
-.site--v5 .vk .w17 .ls2 :is(div, button).on{ border-color:transparent; background:color-mix(in oklab, var(--spi) 10%, var(--surface)); }
+.site--v5 .vk .w17 .ls2 div,
+.site--v5 .vk .w17 .ls2 button{ border-color:transparent; background:var(--vk-s2); }
+.site--v5 .vk .w17 .ls2 div.on,
+.site--v5 .vk .w17 .ls2 button.on{ border-color:transparent; background:color-mix(in oklab, var(--spi) 10%, var(--surface)); }
 
 .mealcard{ border:0; border-radius:0; background:none; padding:var(--sp-3) 0; margin:0; }
 .mealcard + .mealcard{ border-top:1px solid var(--border-soft); }
@@ -12418,7 +12519,10 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolum{
     animation:ayrac-gir 460ms var(--ease-ios) both; animation-delay:calc(140ms + var(--i, 0) * 40ms); }
   /* Açık kenarda yeniden çizim: adlar ve liste yeniden «gelmez». */
-  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi :is(.kenar__ad, .kenar__bolumler, .kenar__marka span, .kenar__modulsec-ad){
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__ad:not(html),
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__bolumler:not(html),
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__marka span,
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__modulsec-ad:not(html){
     animation:none; }
 }
 @media (prefers-reduced-motion:reduce){
@@ -12430,7 +12534,10 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within) .kenar__bolumler{ animation:none !important; }
   html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolum{
     animation:sol-gel 280ms ease-out both !important; animation-delay:calc(70ms + var(--i, 0) * 45ms) !important; }
-  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi :is(.kenar__ad, .kenar__bolumler, .kenar__marka span, .kenar__modulsec-ad){
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__ad:not(html),
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__bolumler:not(html),
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__marka span,
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__modulsec-ad:not(html){
     animation:none !important; }
 }
 
@@ -12537,15 +12644,27 @@ html .site--v5 > .kenar .kenar__arac:is(:hover, :focus-visible) .kenar__kisayol{
 /* Dar kenar (açık kenarın kırpılmış hâli): ekler ve bulut adlar gibi kapalıyken
    yoktur, kenar açılınca solarak gelir; simgeler ve avatar yerinde kalır. */
 @media (min-width:680px){
-  html.kenar-dar .site--v5 > .kenar :is(.kenar__kisayol, .kenar__ek, .kenar__sayi, .kenar__durum, .kenar__hesap){
+  html.kenar-dar .site--v5 > .kenar .kenar__kisayol,
+  html.kenar-dar .site--v5 > .kenar .kenar__ek,
+  html.kenar-dar .site--v5 > .kenar .kenar__sayi,
+  html.kenar-dar .site--v5 > .kenar .kenar__durum,
+  html.kenar-dar .site--v5 > .kenar .kenar__hesap{
     display:none; opacity:0; transition:opacity 140ms ease, display 180ms allow-discrete; }
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__kisayol{ display:inline-block; }
-  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ek, .kenar__durum){ display:block; }
-  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__sayi, .kenar__hesap){ display:grid; }
-  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ek, .kenar__sayi, .kenar__durum, .kenar__hesap){
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ek,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__durum{ display:block; }
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__sayi,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__hesap{ display:grid; }
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ek,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__sayi,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__durum,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__hesap{
     opacity:1; transition:opacity 340ms ease 140ms, display 0s allow-discrete; }
   @starting-style{
-    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ek, .kenar__sayi, .kenar__durum, .kenar__hesap){
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ek,
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__sayi,
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__durum,
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__hesap{
       opacity:0; }
   }
 }
@@ -12738,9 +12857,11 @@ html .site--v5 > .kenar .kenar__arac:is(:hover, :focus-visible) .kenar__kisayol{
 .kutu, .card:not(.card--flat), .site--v5 .ledger .lrow:not(.kahraman),
 .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{ box-shadow:var(--kart-golge); }
 .donen, .site--v5 .nextup{ box-shadow:inset 0 0 0 1px var(--kart-kenar), var(--kart-golge); }
-:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup,
-  .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover)
-  :is(.kutu, .card, .lrow, .donen, .nextup){ --kart-golge:0 0 #0000; }
+:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup, .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover) .kutu,
+:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup, .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover) .card,
+:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup, .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover) .lrow,
+:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup, .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover) .donen,
+:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup, .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover) .nextup{ --kart-golge:0 0 #0000; }
 
 /* ================================================================
    SAKİN KENAR (kullanıcı, 2026-10-05: «sol kenardaki kartı da
@@ -12817,7 +12938,10 @@ html.king-acik .site--v5 > .kenar, html.king-acik .site--v5 > .kenar *{ transiti
 .site--v5 .vk .w37 .st3 b{ font:600 40px/1 var(--font-body); letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
 
 /* Sayısız rozet bir noktadır (kabuk.js rozetHtml). */
-.site--v5 :is(.bolumcubugu__rozet, .kenar__rozet).is-nokta, :is(.bolumcubugu__rozet, .kenar__rozet).is-nokta{
+.site--v5 .bolumcubugu__rozet.is-nokta,
+.site--v5 .kenar__rozet.is-nokta,
+.bolumcubugu__rozet.is-nokta,
+.kenar__rozet.is-nokta{
   min-width:0; width:6px; height:6px; padding:0; border-radius:50%; background:currentColor; align-self:center; }
 
 /* Sayfa başındaki ayar arama kutusu levhanın camında beyaz durur: gri
@@ -12840,7 +12964,8 @@ html.king-acik .site--v5 > .kenar, html.king-acik .site--v5 > .kenar *{ transiti
    tepesinde, düğme ortasında kalıyordu (ESP Yazı › Taslaklar). Sayı
    sütunundan sonra gelen yazı sütunu nefes alır («0  7 Eki» yapışıyordu). */
 .site--v5 td{ vertical-align:middle; }
-.site--v5 :is(td, th).num + :is(td, th):not(.num){ padding-left:24px; }
+.site--v5 :is(td, th).num + td:not(.num),
+.site--v5 :is(td, th).num + th:not(.num){ padding-left:24px; }
 
 /* ================================================================
    RAFİNE (2026-10-07, kullanıcı: «daha da sadeleşmeye ve
@@ -12905,7 +13030,9 @@ html .site--v5 .ledger:not(.ledger .ledger){ row-gap:var(--raf-ara); }
 /* Dönen satırın görseli (tik sayacı, eşik çubuğu): cümlenin altında, ince. */
 .donen__gorsel{ margin-top:10px; max-width:420px; }
 .donen__gorsel .tik, .donen__gorsel .esikcubuk{ margin:0; }
-.donen__gorsel :is(.tik__et, .tik__sayi, .esikcubuk__et){ display:none; }
+.donen__gorsel .tik__et,
+.donen__gorsel .tik__sayi,
+.donen__gorsel .esikcubuk__et{ display:none; }
 
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -12988,8 +13115,8 @@ span.h-yuvarla, b.h-yuvarla, small.h-yuvarla{ display:inline-block; }
    yerinde büyüterek ayrıntıya çevirir. */
 /* 2026-10-05: iOS hissi için kabuğun yumuşak ritmi (520 ms, sakin başlar;
    önce 320 ms ve sert eğriyle geçiş fark edilmiyordu). */
-::view-transition-group(h-kart){ animation-duration:.52s; animation-timing-function:cubic-bezier(.32,.72,0,1); }
-::view-transition-old(h-kart), ::view-transition-new(h-kart){ height:100%; object-fit:cover; overflow:clip; }
+html::view-transition-group(h-kart){ animation-duration:.52s; animation-timing-function:cubic-bezier(.32,.72,0,1); }
+html::view-transition-old(h-kart), html::view-transition-new(h-kart){ height:100%; object-fit:cover; overflow:clip; }
 
 /* ------------------------------------------------ 156 · odak halkası akışı
    Klavyeyle gezerken halka bir önceki düğmeden kayarak gelir ve yerine
@@ -13025,9 +13152,15 @@ span.h-yuvarla, b.h-yuvarla, small.h-yuvarla{ display:inline-block; }
    Sayfada süren iş (`data-h-odak`) varken geri kalan her şey sisle örtülür;
    Esc (`hareket.js`) ya da işin kendi «bitir» düğmesi çıkarır. Sis yalnız
    görünüştür: tıklama ve klavye çalışmaya devam eder. */
-.site:has([data-h-odak]) :is(.ust, .gunserit, .sayfabasi, .bolumcubugu, .sayfasonu, .altbant),
+.site:has([data-h-odak]) .ust,
+.site:has([data-h-odak]) .gunserit,
+.site:has([data-h-odak]) .sayfabasi,
+.site:has([data-h-odak]) .bolumcubugu,
+.site:has([data-h-odak]) .sayfasonu,
+.site:has([data-h-odak]) .altbant,
 .site:has([data-h-odak]) .sayfabolum:not(:has([data-h-odak])),
-.site:has([data-h-odak]) .sayfabolum:has([data-h-odak]) :is(.lrow, .kutu):not(:has([data-h-odak])):not([data-h-odak]):not(:is(.lrow, .kutu) :is(.lrow, .kutu)){
+.site:has([data-h-odak]) .sayfabolum:has([data-h-odak]) .lrow:not(:has([data-h-odak])):not([data-h-odak]):not(:is(.lrow, .kutu) :is(.lrow, .kutu)),
+.site:has([data-h-odak]) .sayfabolum:has([data-h-odak]) .kutu:not(:has([data-h-odak])):not([data-h-odak]):not(:is(.lrow, .kutu) :is(.lrow, .kutu)){
   opacity:.28; filter:blur(2px) saturate(.5);
   transition:opacity var(--dur-lg) var(--ease), filter var(--dur-lg) var(--ease);
 }
@@ -13040,7 +13173,7 @@ span.h-yuvarla, b.h-yuvarla, small.h-yuvarla{ display:inline-block; }
   .h-tik svg path, .h-tik svg polyline{ stroke-dashoffset:0; }
   .h-kapanan, .h-halka, .ust__baslik{ transition:none; }
   .h-halka{ display:none; }
-  ::view-transition-group(h-kart){ animation:none; }
+  html::view-transition-group(h-kart){ animation:none; }
 }
 
 /* ------------------------------------------------ KAYDET DOKUNUŞU (hareket.js kaydedildi)
@@ -16228,12 +16361,38 @@ span.kt-ana{ cursor:default; }
 .sayfa--kapakli .bugun__alan > :not(.bugun__etiket) ~ :not(.bugun__etiket){ margin-top:22px; padding-top:22px;
   border-top:1px solid color-mix(in oklab, var(--text) 7%, transparent); }
 /* Kartın içindeki bileşen kendi kartını çizmez. */
-.sayfa--kapakli .bugun :is(.giris, .tekgun, .sorukart, .donen, .kutu, .kahraman, .kahraman > *, .card, .ledger, .lrow, .okart, .nextup, .notice){
+.sayfa--kapakli .bugun .giris,
+.sayfa--kapakli .bugun .tekgun,
+.sayfa--kapakli .bugun .sorukart,
+.sayfa--kapakli .bugun .donen,
+.sayfa--kapakli .bugun .kutu,
+.sayfa--kapakli .bugun .kahraman,
+.sayfa--kapakli .bugun .kahraman > *,
+.sayfa--kapakli .bugun .card,
+.sayfa--kapakli .bugun .ledger,
+.sayfa--kapakli .bugun .lrow,
+.sayfa--kapakli .bugun .okart,
+.sayfa--kapakli .bugun .nextup,
+.sayfa--kapakli .bugun .notice{
   background:transparent !important; box-shadow:none !important; border-color:transparent !important; border-radius:0 !important;
   -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
-.sayfa--kapakli .bugun :is(.giris, .tekgun, .sorukart, .donen, .kutu, .kahraman > *, .card, .okart, .nextup){
+.sayfa--kapakli .bugun .giris,
+.sayfa--kapakli .bugun .tekgun,
+.sayfa--kapakli .bugun .sorukart,
+.sayfa--kapakli .bugun .donen,
+.sayfa--kapakli .bugun .kutu,
+.sayfa--kapakli .bugun .kahraman > *,
+.sayfa--kapakli .bugun .card,
+.sayfa--kapakli .bugun .okart,
+.sayfa--kapakli .bugun .nextup{
   padding-left:0 !important; padding-right:0 !important; }
-.sayfa--kapakli .bugun :is(.giris, .tekgun, .sorukart, .donen, .kutu, .card, .okart){ padding-top:0 !important; padding-bottom:0 !important; }
+.sayfa--kapakli .bugun .giris,
+.sayfa--kapakli .bugun .tekgun,
+.sayfa--kapakli .bugun .sorukart,
+.sayfa--kapakli .bugun .donen,
+.sayfa--kapakli .bugun .kutu,
+.sayfa--kapakli .bugun .card,
+.sayfa--kapakli .bugun .okart{ padding-top:0 !important; padding-bottom:0 !important; }
 /* Durum: dönen satırlar iç karo; yan yana. */
 .sayfa--kapakli .bugun .bugun__alan > .donen{ padding:14px 16px 38px !important; border-radius:12px !important;
   background:transparent !important; border:1px solid color-mix(in oklab, var(--text) 8%, transparent) !important; }
@@ -16256,12 +16415,15 @@ span.kt-ana{ cursor:default; }
 .sayfa--kapakli .bugun .bugun__alan > :not(.bugun__etiket) ~ :not(.bugun__etiket):not(.donen){
   border-top:1px solid color-mix(in oklab, var(--text) 7%, transparent) !important; }
 /* Kutunun iç boşlukları da kalkar: içerik etiket sütununa hizalanır. */
-.sayfa--kapakli .bugun :is(.kutu__bas, .kutu__govde, .kutu__ayak){ padding-left:0 !important; padding-right:0 !important; }
+.sayfa--kapakli .bugun .kutu__bas,
+.sayfa--kapakli .bugun .kutu__govde,
+.sayfa--kapakli .bugun .kutu__ayak{ padding-left:0 !important; padding-right:0 !important; }
 .sayfa--kapakli .bugun .kutu__bas{ padding-top:0 !important; }
 /* Öneri alanının kendi kart kuralı (kabuk.css) ve defter satırlarının iç boşluğu da kalkar. */
 .site--v5 .sayfa--kapakli .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{
   background:transparent !important; box-shadow:none !important; border-color:transparent !important; padding:0 !important; border-radius:0 !important; }
-.sayfa--kapakli .bugun :is(.ledger, .lrow){ padding-left:0 !important; padding-right:0 !important; }
+.sayfa--kapakli .bugun .ledger,
+.sayfa--kapakli .bugun .lrow{ padding-left:0 !important; padding-right:0 !important; }
 .sayfa--kapakli .bugun .lrow + .lrow{ border-top:1px solid color-mix(in oklab, var(--text) 7%, transparent); }
 .sayfa--kapakli .bugun .input{ background:var(--surface); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--text) 9%, transparent); }
 .sayfa--kapakli .bugun .grid-form .input--num{ text-align:left; }
@@ -16269,14 +16431,17 @@ span.kt-ana{ cursor:default; }
 .sayfa--kapakli .bugun .vk .x35 .bd{ justify-content:flex-start !important; }
 .sayfa--kapakli .bugun .vk .x35 .sy{ text-align:left; }
 .sayfa--kapakli .bugun .vk .w17 .ls2{ gap:0; }
-.sayfa--kapakli .bugun .vk .w17 .ls2 :is(div, button){ grid-template-columns:minmax(0, 1fr) auto 26px; gap:16px; min-height:44px;
+.sayfa--kapakli .bugun .vk .w17 .ls2 div,
+.sayfa--kapakli .bugun .vk .w17 .ls2 button{ grid-template-columns:minmax(0, 1fr) auto 26px; gap:16px; min-height:44px;
   padding:0; border:0; border-radius:0; background:transparent; border-top:1px solid color-mix(in oklab, var(--text) 7%, transparent); }
-.sayfa--kapakli .bugun .vk .w17 .ls2 :is(div, button):first-child{ border-top:0; }
+.sayfa--kapakli .bugun .vk .w17 .ls2 div:first-child,
+.sayfa--kapakli .bugun .vk .w17 .ls2 button:first-child{ border-top:0; }
 .sayfa--kapakli .bugun .vk .w17 .ls2 b{ font-size:14px; font-weight:550; }
 .sayfa--kapakli .bugun .vk .w17 .ls2 span{ font-size:12.5px; }
 @media (min-width:680px){
   .sayfa--kapakli .bugun .vk .w17 .ls2{ grid-template-columns:1fr 1fr; column-gap:32px; }
-  .sayfa--kapakli .bugun .vk .w17 .ls2 :is(div, button):nth-child(2){ border-top:0; }
+  .sayfa--kapakli .bugun .vk .w17 .ls2 div:nth-child(2),
+  .sayfa--kapakli .bugun .vk .w17 .ls2 button:nth-child(2){ border-top:0; }
 }
 .sayfa--kapakli .bugun .vk .x35 .bd{ margin:0; padding-left:0; padding-right:0; }
 
@@ -16691,15 +16856,24 @@ html:not([data-zemin="yumusak"]) .zemin-isik{ display:none; }
    yine opak zemindedir (CAM kuralı): Ferah'ta zemin sayfanın kendisidir.
    ================================================================ */
 html[data-yuzey="ferah"] .site--v5 .sayfa::before{ display:none; }
-html[data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card, .donen){
+html[data-yuzey="ferah"] .sayfa section.kutu,
+html[data-yuzey="ferah"] .sayfa section.lrow,
+html[data-yuzey="ferah"] .sayfa .card:not(html),
+html[data-yuzey="ferah"] .sayfa .donen:not(html){
   background:transparent !important; border:0 !important; border-radius:0; box-shadow:none !important; padding-left:2px; padding-right:2px; }
-html[data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card) + :is(section.kutu, section.lrow, .card){
+html[data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card) + section.kutu,
+html[data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card) + section.lrow,
+html[data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card) + .card:not(html){
   border-top:1px solid color-mix(in oklab, var(--text) 9%, transparent) !important; margin-top:8px; padding-top:22px; }
-html[data-yuzey="ferah"] .sayfa :is(.kutu__ad, .card__title){ font-size:1.06em; letter-spacing:-.005em; }
-html[data-yuzey="ferah"] .sayfa :is(.ledger, .sayfabolumler){ gap:10px; }
+html[data-yuzey="ferah"] .sayfa .kutu__ad,
+html[data-yuzey="ferah"] .sayfa .card__title{ font-size:1.06em; letter-spacing:-.005em; }
+html[data-yuzey="ferah"] .sayfa .ledger,
+html[data-yuzey="ferah"] .sayfa .sayfabolumler{ gap:10px; }
 
 html[data-yuzey="serit"] .site--v5 .sayfa::before{ opacity:.55; }
-html[data-yuzey="serit"] .sayfa :is(section.kutu, section.lrow, .card){
+html[data-yuzey="serit"] .sayfa section.kutu,
+html[data-yuzey="serit"] .sayfa section.lrow,
+html[data-yuzey="serit"] .sayfa .card:not(html){
   background:color-mix(in oklab, var(--surface) 62%, transparent) !important; border:0 !important; border-radius:12px; box-shadow:none !important;
   border-left:3px solid color-mix(in oklab, var(--mod, var(--primary)) 55%, transparent) !important; }
 html[data-yuzey="serit"] .sayfa .donen{ background:color-mix(in oklab, var(--surface) 62%, transparent); box-shadow:none; }
@@ -18763,7 +18937,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'4c49b826', at:'2026-10-24 20:28', dirty:false };
+R.BUILD = { id:'89cfaf51', at:'2026-10-24 23:11', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -25039,12 +25213,33 @@ window.LIFEOS = window.LIFEOS || {};
        «King'e tıklıyorum, soldaki ayraç kapanıyor; sistem bunu hareket
        sanıp odak kipinden çıkıyor»). King bir odak katmanıdır: King'i
        açan tık ve kenarın kapanışı «fare kenara geldi» sayılmaz. */
+    /* Kenarın sağ kenarı önbellekte (kullanıcı, 2026-10-25: «sayfa
+       geçişindeki stil hesabını azalt»). Her fare hareketinde
+       getBoundingClientRect, sayfa yeni çizildiyse bütün stili ve yerleşimi
+       o anda hesaplatıyordu. Değeri ResizeObserver tazeler (yerleşimden
+       sonra, bedava); kenar yeniden çizilince ilk ölçüme kadar öncekinin
+       değeri geçer (aynı kenar, aynı en). Hiç değer yoksa doğrudan ölçülür. */
+    let izlenenKenar = null, kenarSag = null, kenarGozcu = null;
+    const kenarSagi = k => {
+      if(k !== izlenenKenar){
+        izlenenKenar = k;
+        if(typeof ResizeObserver === 'function'){
+          if(!kenarGozcu) kenarGozcu = new ResizeObserver(g => {
+            const son = g[g.length - 1];
+            if(son && son.target === izlenenKenar) kenarSag = son.target.getBoundingClientRect().right;
+          });
+          kenarGozcu.disconnect(); kenarGozcu.observe(k);
+        }
+      }
+      if(!kenarGozcu) return k.getBoundingClientRect().right;
+      return kenarSag != null ? kenarSag : (kenarSag = k.getBoundingClientRect().right);
+    };
     document.addEventListener('pointermove', e => {
       if(e.pointerType && e.pointerType !== 'mouse') return;
       if(kingAcik()) return;
       const k = document.querySelector('.site--v5 > .kenar');
       if(!k) return;
-      const sag = k.getBoundingClientRect().right;
+      const sag = kenarSagi(k);
       if(e.clientX <= sag + 48){ kenarUyandir(); }
       else if(sakinZaman == null && !document.documentElement.classList.contains('kenar-sakin')) sakinZamanla();
     }, { passive:true });
@@ -119102,7 +119297,11 @@ R.App = (function(){
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
-      restoreFocus(focus);
+      /* Yönlendirmede eski odak geri konmaz: rotayaOdaklan onu zaten içeriğe
+         taşır. Geri koymak (yeni kenar düğmesine) yeni sayfanın bütün stilini
+         çizimin ortasında hesaplatıyordu (kullanıcı, 2026-10-25: «sayfa
+         geçişindeki stil hesabını azalt»; geçiş başına ~12 ms). */
+      if(!rotaDegisti) restoreFocus(focus);
       if(H) H.sonra(appEl, S.route);
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.sonra(appEl, { rota:S.route, etkin:ayarlardaMi(S.route) });
       /* Ne değişti? (17): güncellemeden sonraki ilk açılışta sayfanın başında. */
@@ -119212,9 +119411,20 @@ R.App = (function(){
     setTimeout(() => { el.textContent = metin; }, 30);
   }
 
+  /* Odak, yeni sayfa bir kez çizildikten SONRA taşınır: o anda stil hazırdır
+     ve focus() bedavadır; çizimin ortasında çağrılınca bütün sayfanın stilini
+     erkenden hesaplatıyordu (2026-10-25). Arada kullanıcı bir yere
+     odaklandıysa (açılan alt sayfa, yazılan alan) odağı ondan almaz. */
   function rotayaOdaklan(sc){
-    const main = document.getElementById('main');
-    if(main){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    let oldu = false;
+    const odaklan = () => {
+      if(oldu) return; oldu = true;
+      const main = document.getElementById('main');
+      const a = document.activeElement;
+      if(main && (!a || a === document.body)){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    };
+    if(typeof requestAnimationFrame === 'function') requestAnimationFrame(() => setTimeout(odaklan, 0));
+    setTimeout(odaklan, 120);
     const ad = (sc && sc.title) || '';
     if(ad) duyur(ad + ' ekranı açıldı');
   }
