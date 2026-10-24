@@ -845,19 +845,26 @@ a.kenar__modul:hover{ color:var(--text); }
      adı title'dan); açılışta yer açıldıktan sonra solarak gelir
      (@starting-style), kapanışta önce solar, sonra kalkar (allow-discrete).
      Desteklemeyen tarayıcıda yalnız solma yoktur, yerleşim yine oynamaz. */
-  html.kenar-dar .site--v5 > .kenar :is(.kenar__ad, .kenar__modulsec-ad, .kenar__modulsec-ok){
+  html.kenar-dar .site--v5 > .kenar .kenar__ad,
+  html.kenar-dar .site--v5 > .kenar .kenar__modulsec-ad,
+  html.kenar-dar .site--v5 > .kenar .kenar__modulsec-ok{
     display:none; white-space:nowrap; overflow:hidden; text-overflow:clip; opacity:0; transform:translateX(-4px);
     filter:blur(3px); animation:none;
     transition:opacity 140ms ease, transform 180ms ease, filter 140ms ease, display 180ms allow-discrete; }
-  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ad, .kenar__modulsec-ad){
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ad,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ad{
     display:block; }
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ok{ display:inline-block; }
-  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ad, .kenar__modulsec-ad, .kenar__modulsec-ok){
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ad,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ad,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ok{
     opacity:1; transform:none; filter:none;
     transition:opacity 340ms ease 140ms, transform 520ms cubic-bezier(.32,.72,0,1) 100ms, filter 340ms ease 140ms,
       display 0s allow-discrete; }
   @starting-style{
-    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ad, .kenar__modulsec-ad, .kenar__modulsec-ok){
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ad,
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ad,
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ok{
       opacity:0; transform:translateX(-4px); filter:blur(3px); }
   }
   /* Eski tablet düzeni (simge üstte, ad altta, 52 px) bu kenarda geçmez. */
@@ -1107,11 +1114,27 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
 /* BASINCA (2026-10-17, «arayüz canlı hissettirsin»): seçim kartı, çip ve
    tek dokunuşluk satır da düğme gibi hafifçe içe basar; bırakınca yerine
    döner. Yalnız basılıyken: süs değil, dokunuşun cevabı. */
-:is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .vt .ls2 > button, .ls2 > button){
+.pickcard:not(:root):not(html),
+.king__cip:not(:root):not(html),
+.giris__kisa:not(:root):not(html),
+.giris__ornek:not(:root):not(html),
+.temasec__secenek:not(:root):not(html),
+.vt .ls2 > button,
+.ls2 > button:not(:root){
   transition:transform var(--dur-press, 120ms) var(--ease, ease); }
-:is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .ls2 > button):active:not(:disabled){ transform:scale(.98); }
+.pickcard:not(html):active:not(:disabled),
+.king__cip:not(html):active:not(:disabled),
+.giris__kisa:not(html):active:not(:disabled),
+.giris__ornek:not(html):active:not(:disabled),
+.temasec__secenek:not(html):active:not(:disabled),
+.ls2 > button:active:not(:disabled){ transform:scale(.98); }
 @media (prefers-reduced-motion:reduce){
-  :is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .ls2 > button):active:not(:disabled){ transform:none; } }
+  .pickcard:not(html):active:not(:disabled),
+  .king__cip:not(html):active:not(:disabled),
+  .giris__kisa:not(html):active:not(:disabled),
+  .giris__ornek:not(html):active:not(:disabled),
+  .temasec__secenek:not(html):active:not(:disabled),
+  .ls2 > button:active:not(:disabled){ transform:none; } }
 
 .input, .select, .textarea{ border-color:transparent; background:var(--surface-2); border-radius:12px; }
 .input:hover, .select:hover, .textarea:hover{ border-color:transparent; background:color-mix(in oklab, var(--surface-3) 60%, var(--surface-2)); }
@@ -1203,12 +1226,38 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
    hafifçe yukarı kayarak belirir. Aynı sayfanın yeniden çizimi oynatmaz. */
 @keyframes sayfa-gir{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
 html.sayfa-gecis .site--v5 .sayfabasi{ animation:sayfa-gir var(--dur-lg) var(--ease) both; }
-html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .bolumcubugu){
+html.sayfa-gecis .site--v5 #main .kutu,
+html.sayfa-gecis .site--v5 #main .card,
+html.sayfa-gecis .site--v5 #main .donen,
+html.sayfa-gecis .site--v5 #main .kahraman,
+html.sayfa-gecis .site--v5 #main .notice,
+html.sayfa-gecis .site--v5 #main .okart-sar,
+html.sayfa-gecis .site--v5 #main .bolumcubugu{
   animation:sayfa-gir 460ms var(--ease) both; }
-html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(2){ animation-delay:50ms; }
-html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(3){ animation-delay:100ms; }
-html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(4){ animation-delay:150ms; }
-html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(n+5){ animation-delay:200ms; }
+html.sayfa-gecis .site--v5 #main .kutu:nth-child(2),
+html.sayfa-gecis .site--v5 #main .card:nth-child(2),
+html.sayfa-gecis .site--v5 #main .donen:nth-child(2),
+html.sayfa-gecis .site--v5 #main .kahraman:nth-child(2),
+html.sayfa-gecis .site--v5 #main .notice:nth-child(2),
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(2){ animation-delay:50ms; }
+html.sayfa-gecis .site--v5 #main .kutu:nth-child(3),
+html.sayfa-gecis .site--v5 #main .card:nth-child(3),
+html.sayfa-gecis .site--v5 #main .donen:nth-child(3),
+html.sayfa-gecis .site--v5 #main .kahraman:nth-child(3),
+html.sayfa-gecis .site--v5 #main .notice:nth-child(3),
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(3){ animation-delay:100ms; }
+html.sayfa-gecis .site--v5 #main .kutu:nth-child(4),
+html.sayfa-gecis .site--v5 #main .card:nth-child(4),
+html.sayfa-gecis .site--v5 #main .donen:nth-child(4),
+html.sayfa-gecis .site--v5 #main .kahraman:nth-child(4),
+html.sayfa-gecis .site--v5 #main .notice:nth-child(4),
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(4){ animation-delay:150ms; }
+html.sayfa-gecis .site--v5 #main .kutu:nth-child(n+5),
+html.sayfa-gecis .site--v5 #main .card:nth-child(n+5),
+html.sayfa-gecis .site--v5 #main .donen:nth-child(n+5),
+html.sayfa-gecis .site--v5 #main .kahraman:nth-child(n+5),
+html.sayfa-gecis .site--v5 #main .notice:nth-child(n+5),
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(n+5){ animation-delay:200ms; }
 @media (prefers-reduced-motion:reduce){
   html.sayfa-gecis .site--v5 .sayfabasi,
   html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .bolumcubugu),
@@ -1228,7 +1277,8 @@ svg.chart{ max-height:180px; }
    çıkar. Rütbe kartları olduğu gibi kalır (kullanıcı kararı). */
 .site--v5 .vk:not(#pane-rutbe .vk) :is(.cap, .et, .mod, .bs, .lb, .uy, .gb, .kn2, .hd, small){ letter-spacing:0; }
 .site--v5 .vk:not(#pane-rutbe .vk) .cap{ font-size:12px; }
-.site--v5 .vk:not(#pane-rutbe .vk) :is(.et, .mod){ font-size:11.5px; }
+.site--v5 .vk:not(#pane-rutbe .vk) .et,
+.site--v5 .vk:not(#pane-rutbe .vk) .mod{ font-size:11.5px; }
 
 /* Küçük bölüm şeritleri (sayfa düzeni) eşit ve sakin: aynı yazı boyutu,
    tek ok (soldaki), sağdaki «Aç» düğmesi yalnız üzerine gelince. */
@@ -1505,8 +1555,10 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
 .site--v5 .vk .serif{ font-weight:500; letter-spacing:-.02em; }
 .site--v5 .vk .x47 .av{ width:56px; height:56px; font-size:18px; box-shadow:none; }
 .site--v5 .vk .x47 b{ font-weight:600; font-size:20px; letter-spacing:-.015em; }
-.site--v5 .vk .w17 .ls2 :is(div, button){ border-color:transparent; background:var(--vk-s2); }
-.site--v5 .vk .w17 .ls2 :is(div, button).on{ border-color:transparent; background:color-mix(in oklab, var(--spi) 10%, var(--surface)); }
+.site--v5 .vk .w17 .ls2 div,
+.site--v5 .vk .w17 .ls2 button{ border-color:transparent; background:var(--vk-s2); }
+.site--v5 .vk .w17 .ls2 div.on,
+.site--v5 .vk .w17 .ls2 button.on{ border-color:transparent; background:color-mix(in oklab, var(--spi) 10%, var(--surface)); }
 
 .mealcard{ border:0; border-radius:0; background:none; padding:var(--sp-3) 0; margin:0; }
 .mealcard + .mealcard{ border-top:1px solid var(--border-soft); }
@@ -1557,7 +1609,10 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolum{
     animation:ayrac-gir 460ms var(--ease-ios) both; animation-delay:calc(140ms + var(--i, 0) * 40ms); }
   /* Açık kenarda yeniden çizim: adlar ve liste yeniden «gelmez». */
-  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi :is(.kenar__ad, .kenar__bolumler, .kenar__marka span, .kenar__modulsec-ad){
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__ad:not(html),
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__bolumler:not(html),
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__marka span,
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__modulsec-ad:not(html){
     animation:none; }
 }
 @media (prefers-reduced-motion:reduce){
@@ -1569,7 +1624,10 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within) .kenar__bolumler{ animation:none !important; }
   html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolum{
     animation:sol-gel 280ms ease-out both !important; animation-delay:calc(70ms + var(--i, 0) * 45ms) !important; }
-  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi :is(.kenar__ad, .kenar__bolumler, .kenar__marka span, .kenar__modulsec-ad){
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__ad:not(html),
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__bolumler:not(html),
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__marka span,
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi .kenar__modulsec-ad:not(html){
     animation:none !important; }
 }
 
@@ -1676,15 +1734,27 @@ html .site--v5 > .kenar .kenar__arac:is(:hover, :focus-visible) .kenar__kisayol{
 /* Dar kenar (açık kenarın kırpılmış hâli): ekler ve bulut adlar gibi kapalıyken
    yoktur, kenar açılınca solarak gelir; simgeler ve avatar yerinde kalır. */
 @media (min-width:680px){
-  html.kenar-dar .site--v5 > .kenar :is(.kenar__kisayol, .kenar__ek, .kenar__sayi, .kenar__durum, .kenar__hesap){
+  html.kenar-dar .site--v5 > .kenar .kenar__kisayol,
+  html.kenar-dar .site--v5 > .kenar .kenar__ek,
+  html.kenar-dar .site--v5 > .kenar .kenar__sayi,
+  html.kenar-dar .site--v5 > .kenar .kenar__durum,
+  html.kenar-dar .site--v5 > .kenar .kenar__hesap{
     display:none; opacity:0; transition:opacity 140ms ease, display 180ms allow-discrete; }
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__kisayol{ display:inline-block; }
-  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ek, .kenar__durum){ display:block; }
-  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__sayi, .kenar__hesap){ display:grid; }
-  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ek, .kenar__sayi, .kenar__durum, .kenar__hesap){
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ek,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__durum{ display:block; }
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__sayi,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__hesap{ display:grid; }
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ek,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__sayi,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__durum,
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__hesap{
     opacity:1; transition:opacity 340ms ease 140ms, display 0s allow-discrete; }
   @starting-style{
-    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ek, .kenar__sayi, .kenar__durum, .kenar__hesap){
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__ek,
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__sayi,
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__durum,
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__hesap{
       opacity:0; }
   }
 }
@@ -1877,9 +1947,11 @@ html .site--v5 > .kenar .kenar__arac:is(:hover, :focus-visible) .kenar__kisayol{
 .kutu, .card:not(.card--flat), .site--v5 .ledger .lrow:not(.kahraman),
 .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{ box-shadow:var(--kart-golge); }
 .donen, .site--v5 .nextup{ box-shadow:inset 0 0 0 1px var(--kart-kenar), var(--kart-golge); }
-:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup,
-  .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover)
-  :is(.kutu, .card, .lrow, .donen, .nextup){ --kart-golge:0 0 #0000; }
+:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup, .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover) .kutu,
+:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup, .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover) .card,
+:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup, .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover) .lrow,
+:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup, .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover) .donen,
+:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup, .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover) .nextup{ --kart-golge:0 0 #0000; }
 
 /* ================================================================
    SAKİN KENAR (kullanıcı, 2026-10-05: «sol kenardaki kartı da
@@ -1956,7 +2028,10 @@ html.king-acik .site--v5 > .kenar, html.king-acik .site--v5 > .kenar *{ transiti
 .site--v5 .vk .w37 .st3 b{ font:600 40px/1 var(--font-body); letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
 
 /* Sayısız rozet bir noktadır (kabuk.js rozetHtml). */
-.site--v5 :is(.bolumcubugu__rozet, .kenar__rozet).is-nokta, :is(.bolumcubugu__rozet, .kenar__rozet).is-nokta{
+.site--v5 .bolumcubugu__rozet.is-nokta,
+.site--v5 .kenar__rozet.is-nokta,
+.bolumcubugu__rozet.is-nokta,
+.kenar__rozet.is-nokta{
   min-width:0; width:6px; height:6px; padding:0; border-radius:50%; background:currentColor; align-self:center; }
 
 /* Sayfa başındaki ayar arama kutusu levhanın camında beyaz durur: gri
@@ -1979,7 +2054,8 @@ html.king-acik .site--v5 > .kenar, html.king-acik .site--v5 > .kenar *{ transiti
    tepesinde, düğme ortasında kalıyordu (ESP Yazı › Taslaklar). Sayı
    sütunundan sonra gelen yazı sütunu nefes alır («0  7 Eki» yapışıyordu). */
 .site--v5 td{ vertical-align:middle; }
-.site--v5 :is(td, th).num + :is(td, th):not(.num){ padding-left:24px; }
+.site--v5 :is(td, th).num + td:not(.num),
+.site--v5 :is(td, th).num + th:not(.num){ padding-left:24px; }
 
 /* ================================================================
    RAFİNE (2026-10-07, kullanıcı: «daha da sadeleşmeye ve
@@ -2044,4 +2120,6 @@ html .site--v5 .ledger:not(.ledger .ledger){ row-gap:var(--raf-ara); }
 /* Dönen satırın görseli (tik sayacı, eşik çubuğu): cümlenin altında, ince. */
 .donen__gorsel{ margin-top:10px; max-width:420px; }
 .donen__gorsel .tik, .donen__gorsel .esikcubuk{ margin:0; }
-.donen__gorsel :is(.tik__et, .tik__sayi, .esikcubuk__et){ display:none; }
+.donen__gorsel .tik__et,
+.donen__gorsel .tik__sayi,
+.donen__gorsel .esikcubuk__et{ display:none; }

@@ -936,6 +936,60 @@
       expect(katman[0].style.transitionProperty.split(',').map(s => s.trim()).sort().join(' ')).toBe('opacity transform');
     });
 
+    /* Kullanıcı (2026-10-25): «sayfa geçişindeki stil hesabını azalt». Sağ
+       ucu `:is(...)` olan seçiciyi tarayıcı sınıfa göre ayıramaz, sayfadaki
+       HER öğede her stil hesabında dener: 104 böyle seçici eşleşme süresinin
+       %61'ini yiyordu. Liste olarak yazılır (`X .a, X .b`). Kalan dördü
+       bilerek kaldı: vitrin.css üretilir; ötekileri ucuz ya da özgüllükleri
+       birebir korunamıyor. */
+    it('sağ ucu :is(...) olan seçici yalnız bilinen dört yerde', () => {
+      const ust = s => { const o = []; let d = 0, c = ''; for(const ch of s){ if(ch === '(' || ch === '[') d++; if(ch === ')' || ch === ']') d--; if(!d && ch === ','){ o.push(c); c = ''; continue; } c += ch; } o.push(c); return o; };
+      const sagUc = s => { let d = 0, son = -1; for(let i = 0; i < s.length; i++){ const ch = s[i]; if(ch === '(' || ch === '[') d++; if(ch === ')' || ch === ']') d--; if(!d && /[\s>+~]/.test(ch)) son = i; } return s.slice(son + 1); };
+      const IZINLI = ['.vk :is(button', '.site--v5 .vk:not(#pane-rutbe .vk) :is(', '.site--v5 .ledger :is(.gizle-kucuk', '.defter :is(button'];
+      const kacak = [];
+      const gez = l => Array.from(l || []).forEach(r => {
+        if(r.selectorText) ust(r.selectorText).map(p => p.trim())
+          .filter(p => /^:is\(/.test(sagUc(p)) && !IZINLI.some(x => p.startsWith(x))).forEach(p => kacak.push(p));
+        else if(r.cssRules) gez(r.cssRules);
+      });
+      for(const ss of Array.from(document.styleSheets)){ try{ gez(ss.cssRules); }catch(e){ /* başka köken */ } }
+      expect(kacak).toEqual([]);
+    });
+
+    /* Görünüm geçişinin sözde öğeleri yalnız kökte doğar: `html::view-transition-*`
+       yazılınca tarayıcı onları her öğede denemez (2026-10-25). */
+    it('görünüm geçişi seçicileri html ile başlar', () => {
+      const yanlis = [];
+      const gez = l => Array.from(l || []).forEach(r => {
+        if(r.selectorText) r.selectorText.split(',').map(p => p.trim())
+          .filter(p => p.includes('::view-transition') && !p.startsWith('html::view-transition')).forEach(p => yanlis.push(p));
+        else if(r.cssRules) gez(r.cssRules);
+      });
+      for(const ss of Array.from(document.styleSheets)){ try{ gez(ss.cssRules); }catch(e){ /* başka köken */ } }
+      expect(yanlis).toEqual([]);
+    });
+
+    /* Fare her kıpırdadığında kenarın konumu ölçülmez (2026-10-25): sayfa yeni
+       çizildiyse her ölçüm bütün stili ve yerleşimi o anda hesaplatıyordu.
+       Değeri ResizeObserver tazeler. */
+    it('fare hareketinde kenar ölçülmez; değer ResizeObserver ile gelir', async () => {
+      if(typeof ResizeObserver !== 'function') return;
+      const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[], profil:{ ad:'Ömer' } }) + '</div>');
+      const kok = document.documentElement;
+      const kenar = d.querySelector('.kenar');
+      const hareket = x => document.dispatchEvent(new PointerEvent('pointermove', { clientX:x, clientY:200, pointerType:'mouse', bubbles:true }));
+      try{
+        hareket(4);
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        let olcum = 0;
+        const asil = kenar.getBoundingClientRect.bind(kenar);
+        kenar.getBoundingClientRect = () => { olcum++; return asil(); };
+        for(let i = 0; i < 5; i++) hareket(4 + i);
+        expect(olcum).toBe(0);
+        expect(kok.classList.contains('kenar-sakin')).toBe(false);
+      }finally{ delete kenar.getBoundingClientRect; K.kenarUyandir(); d.remove(); }
+    });
+
     /* Tablet incelemesi (2026-10-05, AYS Ayarlar): yan yana iki alanda biri
        etiketinin yanında not taşıyınca (iki satır) kutusu ötekinden aşağıda
        kalıyordu. Yan yana alanların kutuları aynı hizadadır. */

@@ -99,3 +99,18 @@ gerekirse yeri bu tablodur.
 Kısmen ortak olan üçü «ortak gövde + uygulama kuyruğu» ayrımını
 gerektirir. Bu bir tasarım kararıdır, bir kopyalama işi değil; ayrı
 bir turda yapılır.
+
+## Seçici yazımı: sağ ucu sınıf olsun
+
+Tarayıcı bir kuralı, seçicinin **en sağdaki** parçasındaki sınıfa, kimliğe ya
+da etikete göre ayırır ve yalnız onu taşıyan öğede dener. Sağ ucu `:is(...)`,
+`*` ya da yalnız `:not(...)` olan seçici ayrılamaz: sayfadaki **her öğede**,
+her stil hesabında denenir. 2026-10-25 ölçümünde böyle 104 seçici, eşleşme
+süresinin %61'ini yiyordu (bkz. `kabuk.test.js` «sağ ucu :is(...)»).
+
+- `X :is(.a, .b)` yerine `X .a, X .b` yaz.
+- Argümanların özgüllüğü farklıysa düz açmak önceliği değiştirir. Eksik
+  özgüllük, eşleşmeyi değiştirmeyen `:not(:root)` (+0,1,0) ve `:not(html)`
+  (+0,0,1) ile tamamlanır. Bu yalnız önünde ata seçici olan kuralda
+  geçerlidir, çünkü özne o zaman hiçbir zaman kök öğe olamaz.
+- Görünüm geçişi sözde öğeleri `html::view-transition-*` diye yazılır.

@@ -78,8 +78,8 @@ span.h-yuvarla, b.h-yuvarla, small.h-yuvarla{ display:inline-block; }
    yerinde büyüterek ayrıntıya çevirir. */
 /* 2026-10-05: iOS hissi için kabuğun yumuşak ritmi (520 ms, sakin başlar;
    önce 320 ms ve sert eğriyle geçiş fark edilmiyordu). */
-::view-transition-group(h-kart){ animation-duration:.52s; animation-timing-function:cubic-bezier(.32,.72,0,1); }
-::view-transition-old(h-kart), ::view-transition-new(h-kart){ height:100%; object-fit:cover; overflow:clip; }
+html::view-transition-group(h-kart){ animation-duration:.52s; animation-timing-function:cubic-bezier(.32,.72,0,1); }
+html::view-transition-old(h-kart), html::view-transition-new(h-kart){ height:100%; object-fit:cover; overflow:clip; }
 
 /* ------------------------------------------------ 156 · odak halkası akışı
    Klavyeyle gezerken halka bir önceki düğmeden kayarak gelir ve yerine
@@ -115,9 +115,15 @@ span.h-yuvarla, b.h-yuvarla, small.h-yuvarla{ display:inline-block; }
    Sayfada süren iş (`data-h-odak`) varken geri kalan her şey sisle örtülür;
    Esc (`hareket.js`) ya da işin kendi «bitir» düğmesi çıkarır. Sis yalnız
    görünüştür: tıklama ve klavye çalışmaya devam eder. */
-.site:has([data-h-odak]) :is(.ust, .gunserit, .sayfabasi, .bolumcubugu, .sayfasonu, .altbant),
+.site:has([data-h-odak]) .ust,
+.site:has([data-h-odak]) .gunserit,
+.site:has([data-h-odak]) .sayfabasi,
+.site:has([data-h-odak]) .bolumcubugu,
+.site:has([data-h-odak]) .sayfasonu,
+.site:has([data-h-odak]) .altbant,
 .site:has([data-h-odak]) .sayfabolum:not(:has([data-h-odak])),
-.site:has([data-h-odak]) .sayfabolum:has([data-h-odak]) :is(.lrow, .kutu):not(:has([data-h-odak])):not([data-h-odak]):not(:is(.lrow, .kutu) :is(.lrow, .kutu)){
+.site:has([data-h-odak]) .sayfabolum:has([data-h-odak]) .lrow:not(:has([data-h-odak])):not([data-h-odak]):not(:is(.lrow, .kutu) :is(.lrow, .kutu)),
+.site:has([data-h-odak]) .sayfabolum:has([data-h-odak]) .kutu:not(:has([data-h-odak])):not([data-h-odak]):not(:is(.lrow, .kutu) :is(.lrow, .kutu)){
   opacity:.28; filter:blur(2px) saturate(.5);
   transition:opacity var(--dur-lg) var(--ease), filter var(--dur-lg) var(--ease);
 }
@@ -130,7 +136,7 @@ span.h-yuvarla, b.h-yuvarla, small.h-yuvarla{ display:inline-block; }
   .h-tik svg path, .h-tik svg polyline{ stroke-dashoffset:0; }
   .h-kapanan, .h-halka, .ust__baslik{ transition:none; }
   .h-halka{ display:none; }
-  ::view-transition-group(h-kart){ animation:none; }
+  html::view-transition-group(h-kart){ animation:none; }
 }
 
 /* ------------------------------------------------ KAYDET DOKUNUŞU (hareket.js kaydedildi)

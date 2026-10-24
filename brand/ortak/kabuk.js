@@ -1197,12 +1197,33 @@ window.LIFEOS = window.LIFEOS || {};
        «King'e tıklıyorum, soldaki ayraç kapanıyor; sistem bunu hareket
        sanıp odak kipinden çıkıyor»). King bir odak katmanıdır: King'i
        açan tık ve kenarın kapanışı «fare kenara geldi» sayılmaz. */
+    /* Kenarın sağ kenarı önbellekte (kullanıcı, 2026-10-25: «sayfa
+       geçişindeki stil hesabını azalt»). Her fare hareketinde
+       getBoundingClientRect, sayfa yeni çizildiyse bütün stili ve yerleşimi
+       o anda hesaplatıyordu. Değeri ResizeObserver tazeler (yerleşimden
+       sonra, bedava); kenar yeniden çizilince ilk ölçüme kadar öncekinin
+       değeri geçer (aynı kenar, aynı en). Hiç değer yoksa doğrudan ölçülür. */
+    let izlenenKenar = null, kenarSag = null, kenarGozcu = null;
+    const kenarSagi = k => {
+      if(k !== izlenenKenar){
+        izlenenKenar = k;
+        if(typeof ResizeObserver === 'function'){
+          if(!kenarGozcu) kenarGozcu = new ResizeObserver(g => {
+            const son = g[g.length - 1];
+            if(son && son.target === izlenenKenar) kenarSag = son.target.getBoundingClientRect().right;
+          });
+          kenarGozcu.disconnect(); kenarGozcu.observe(k);
+        }
+      }
+      if(!kenarGozcu) return k.getBoundingClientRect().right;
+      return kenarSag != null ? kenarSag : (kenarSag = k.getBoundingClientRect().right);
+    };
     document.addEventListener('pointermove', e => {
       if(e.pointerType && e.pointerType !== 'mouse') return;
       if(kingAcik()) return;
       const k = document.querySelector('.site--v5 > .kenar');
       if(!k) return;
-      const sag = k.getBoundingClientRect().right;
+      const sag = kenarSagi(k);
       if(e.clientX <= sag + 48){ kenarUyandir(); }
       else if(sakinZaman == null && !document.documentElement.classList.contains('kenar-sakin')) sakinZamanla();
     }, { passive:true });

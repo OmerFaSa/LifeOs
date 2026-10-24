@@ -244,15 +244,24 @@ html:not([data-zemin="yumusak"]) .zemin-isik{ display:none; }
    yine opak zemindedir (CAM kuralı): Ferah'ta zemin sayfanın kendisidir.
    ================================================================ */
 html[data-yuzey="ferah"] .site--v5 .sayfa::before{ display:none; }
-html[data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card, .donen){
+html[data-yuzey="ferah"] .sayfa section.kutu,
+html[data-yuzey="ferah"] .sayfa section.lrow,
+html[data-yuzey="ferah"] .sayfa .card:not(html),
+html[data-yuzey="ferah"] .sayfa .donen:not(html){
   background:transparent !important; border:0 !important; border-radius:0; box-shadow:none !important; padding-left:2px; padding-right:2px; }
-html[data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card) + :is(section.kutu, section.lrow, .card){
+html[data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card) + section.kutu,
+html[data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card) + section.lrow,
+html[data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card) + .card:not(html){
   border-top:1px solid color-mix(in oklab, var(--text) 9%, transparent) !important; margin-top:8px; padding-top:22px; }
-html[data-yuzey="ferah"] .sayfa :is(.kutu__ad, .card__title){ font-size:1.06em; letter-spacing:-.005em; }
-html[data-yuzey="ferah"] .sayfa :is(.ledger, .sayfabolumler){ gap:10px; }
+html[data-yuzey="ferah"] .sayfa .kutu__ad,
+html[data-yuzey="ferah"] .sayfa .card__title{ font-size:1.06em; letter-spacing:-.005em; }
+html[data-yuzey="ferah"] .sayfa .ledger,
+html[data-yuzey="ferah"] .sayfa .sayfabolumler{ gap:10px; }
 
 html[data-yuzey="serit"] .site--v5 .sayfa::before{ opacity:.55; }
-html[data-yuzey="serit"] .sayfa :is(section.kutu, section.lrow, .card){
+html[data-yuzey="serit"] .sayfa section.kutu,
+html[data-yuzey="serit"] .sayfa section.lrow,
+html[data-yuzey="serit"] .sayfa .card:not(html){
   background:color-mix(in oklab, var(--surface) 62%, transparent) !important; border:0 !important; border-radius:12px; box-shadow:none !important;
   border-left:3px solid color-mix(in oklab, var(--mod, var(--primary)) 55%, transparent) !important; }
 html[data-yuzey="serit"] .sayfa .donen{ background:color-mix(in oklab, var(--surface) 62%, transparent); box-shadow:none; }

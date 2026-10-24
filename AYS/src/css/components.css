@@ -2673,8 +2673,10 @@ body.is-dragging .drop.is-over{
 .ogr-tablo th, .site--v5 .ogr-tablo th{ font-size:inherit; letter-spacing:0; text-transform:none; white-space:normal;
   padding:6px 12px; color:var(--text); border-bottom-color:var(--border); }
 .ogr-tablo thead th, .site--v5 .ogr-tablo thead th{ font-weight:600; }
-.ogr-tablo tbody tr:last-child :is(td, th){ border-bottom:1px solid var(--border); }
-.ogr-tablo tbody tr:hover :is(td, th){ background:none; }
+.ogr-tablo tbody tr:last-child td,
+.ogr-tablo tbody tr:last-child th{ border-bottom:1px solid var(--border); }
+.ogr-tablo tbody tr:hover td,
+.ogr-tablo tbody tr:hover th{ background:none; }
 /* Sade anlatım: kapalı ek bloklar (sınav kalıpları, sık hatalar, kaynaklar). */
 .ders__katlanir > summary{ display:flex; align-items:baseline; gap:8px; list-style:none; cursor:pointer; }
 .ders__katlanir > summary::-webkit-details-marker{ display:none; }

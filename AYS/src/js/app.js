@@ -645,7 +645,11 @@ R.App = (function(){
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
-      restoreFocus(focus);
+      /* Yönlendirmede eski odak geri konmaz: rotayaOdaklan onu zaten içeriğe
+         taşır. Geri koymak (yeni kenar düğmesine) yeni sayfanın bütün stilini
+         çizimin ortasında hesaplatıyordu (kullanıcı, 2026-10-25: «sayfa
+         geçişindeki stil hesabını azalt»; geçiş başına ~12 ms). */
+      if(!rotaDegisti) restoreFocus(focus);
       if(H) H.sonra(appEl, S.route);
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.sonra(appEl, { rota:S.route, etkin:ayarlardaMi(S.route) });
       /* Ne değişti? (17): güncellemeden sonraki ilk açılışta sayfanın başında. */
@@ -755,9 +759,20 @@ R.App = (function(){
     setTimeout(() => { el.textContent = metin; }, 30);
   }
 
+  /* Odak, yeni sayfa bir kez çizildikten SONRA taşınır: o anda stil hazırdır
+     ve focus() bedavadır; çizimin ortasında çağrılınca bütün sayfanın stilini
+     erkenden hesaplatıyordu (2026-10-25). Arada kullanıcı bir yere
+     odaklandıysa (açılan alt sayfa, yazılan alan) odağı ondan almaz. */
   function rotayaOdaklan(sc){
-    const main = document.getElementById('main');
-    if(main){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    let oldu = false;
+    const odaklan = () => {
+      if(oldu) return; oldu = true;
+      const main = document.getElementById('main');
+      const a = document.activeElement;
+      if(main && (!a || a === document.body)){ try{ main.focus({ preventScroll:true }); }catch(e){} }
+    };
+    if(typeof requestAnimationFrame === 'function') requestAnimationFrame(() => setTimeout(odaklan, 0));
+    setTimeout(odaklan, 120);
     const ad = (sc && sc.title) || '';
     if(ad) duyur(ad + ' ekranı açıldı');
   }

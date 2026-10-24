@@ -933,16 +933,59 @@
 
 /* v5 · ETİKETLER: büyük harf ve harf aralığı kalkar; etiket 12-13 px,
    ikinci metin rengi (tasarım dili «Yazı» panosu: etiket cümle düzeninde). */
-.site--v5 :is(.appear__label, .argcol__h, .asrow__kind, .ayar-ara__modul, .block__slot, .board__label,
-  .chain__kind, .chain__label, .cmdk__group, .desknote__label, .flashcard__side, .focusmode__slot,
-  .gauge__label, .haberci__ust, .hero__eyebrow, .herostat__label, .kmenu__bas, .lrow__label,
-  .masthead__wd, .mono-label, .nextup__label, .perde__ustyazi, .printdoc__h, .prop__kind, .qmsg__who,
-  .quizcard__src, .rail__label, .room3d__board-label, .rutbe-kart__ust, .rutbe-kunye__ust, .rx__kind,
-  .setup__kicker, .seviye-isler__tablo th, .seviye-rozet__ad, .sidestat__k, .sitefoot__k, .srsrow__day,
-  .stat__label, .symgrp__h, .topicgroup__head, .yenilik__baslik, th){
+.site--v5 .appear__label:not(html),
+.site--v5 .argcol__h:not(html),
+.site--v5 .asrow__kind:not(html),
+.site--v5 .ayar-ara__modul:not(html),
+.site--v5 .block__slot:not(html),
+.site--v5 .board__label:not(html),
+.site--v5 .chain__kind:not(html),
+.site--v5 .chain__label:not(html),
+.site--v5 .cmdk__group:not(html),
+.site--v5 .desknote__label:not(html),
+.site--v5 .flashcard__side:not(html),
+.site--v5 .focusmode__slot:not(html),
+.site--v5 .gauge__label:not(html),
+.site--v5 .haberci__ust:not(html),
+.site--v5 .hero__eyebrow:not(html),
+.site--v5 .herostat__label:not(html),
+.site--v5 .kmenu__bas:not(html),
+.site--v5 .lrow__label:not(html),
+.site--v5 .masthead__wd:not(html),
+.site--v5 .mono-label:not(html),
+.site--v5 .nextup__label:not(html),
+.site--v5 .perde__ustyazi:not(html),
+.site--v5 .printdoc__h:not(html),
+.site--v5 .prop__kind:not(html),
+.site--v5 .qmsg__who:not(html),
+.site--v5 .quizcard__src:not(html),
+.site--v5 .rail__label:not(html),
+.site--v5 .room3d__board-label:not(html),
+.site--v5 .rutbe-kart__ust:not(html),
+.site--v5 .rutbe-kunye__ust:not(html),
+.site--v5 .rx__kind:not(html),
+.site--v5 .setup__kicker:not(html),
+.site--v5 .seviye-isler__tablo th,
+.site--v5 .seviye-rozet__ad:not(html),
+.site--v5 .sidestat__k:not(html),
+.site--v5 .sitefoot__k:not(html),
+.site--v5 .srsrow__day:not(html),
+.site--v5 .stat__label:not(html),
+.site--v5 .symgrp__h:not(html),
+.site--v5 .topicgroup__head:not(html),
+.site--v5 .yenilik__baslik:not(html),
+.site--v5 th:not(:root){
   text-transform:none; letter-spacing:0; }
-.site--v5 :is(.lrow__label, .stat__label, .herostat__label, .sidestat__k, .rail__label, .board__label,
-  .topicgroup__head, .symgrp__h, .argcol__h, .gauge__label){ font-size:13px; font-weight:600; color:var(--text-2); }
+.site--v5 .lrow__label,
+.site--v5 .stat__label,
+.site--v5 .herostat__label,
+.site--v5 .sidestat__k,
+.site--v5 .rail__label,
+.site--v5 .board__label,
+.site--v5 .topicgroup__head,
+.site--v5 .symgrp__h,
+.site--v5 .argcol__h,
+.site--v5 .gauge__label{ font-size:13px; font-weight:600; color:var(--text-2); }
 .site--v5 th{ font-size:12px; font-weight:500; color:var(--text-3); }
 
 .site--v5 .nextup{ padding:18px 20px; }
@@ -1000,15 +1043,17 @@
 .site--v5 .ledger > .lrow .lrow__main > * + *{ margin-top:12px; }
 
 /* Bant ve yığın rafta çizilmez; içlerindeki her satır rafın bir kutusudur. */
-.site--v5 .ledger > .lband, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs){ display:contents; }
+.site--v5 .ledger > .lband,
+.site--v5 .ledger > .lband > .stack,
+.site--v5 .ledger > .lband > .stack-sm,
+.site--v5 .ledger > .lband > .stack-xs{ display:contents; }
 .site--v5 .ledger > .lband > :not(.lrow):not(.stack):not(.stack-sm):not(.stack-xs),
 .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > :not(.lrow){ grid-column:1 / -1; min-width:0; }
 
 /* 4 · Geniş içerik rafın bütün enini alır. */
-.site--v5 :is(.ledger > .lrow, .ledger > .lband > .lrow, .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow):is(
-  .lrow--wide,
-  :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4,
-    .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)){ grid-column:1 / -1; }
+.site--v5 .ledger > .lrow:not(:root):not(:root):is( .lrow--wide, :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4, .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)),
+.site--v5 .ledger > .lband > .lrow:not(:root):is( .lrow--wide, :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4, .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)),
+.site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow:is( .lrow--wide, :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4, .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)){ grid-column:1 / -1; }
 
 /* 6 · Eşi olmayan yarım kutu yalnız kalmaz: iki geniş kutunun arasında ya
    da rafın sonunda tek kalan kutu bütün eni alır. Eşleştirmeyi çizimden
@@ -1047,7 +1092,9 @@
 /* 5 · İç kaydırma yok. Çok geniş bir tablo (yalnız o) kendi kabında yana kayar. */
 .site--v5 .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
 .site--v5 .ledger .lrow__main table{ width:100%; }
-.site--v5 .ledger .lrow__main :is(.tablewrap, .table-wrap, .tbl){ overflow-x:auto; }
+.site--v5 .ledger .lrow__main .tablewrap,
+.site--v5 .ledger .lrow__main .table-wrap,
+.site--v5 .ledger .lrow__main .tbl{ overflow-x:auto; }
 
 /* Sayfa bölümleri de rafın katıdır: aralarında 32 px, başlık 16 px. */
 .site--v5 .sayfabolum + .sayfabolum{ margin-top:32px; }
