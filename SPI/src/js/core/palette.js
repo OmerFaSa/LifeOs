@@ -81,6 +81,7 @@ SP.Palette = (function(){
 
      Ayni kapi: onaysiz hicbir sey yazilmaz, her kayit geri alinabilir. */
   let bekleyen = null;     /* { oneriler, anlasilmayan, metin } */
+  let acilisTarihi = null; /* önizlemenin tarih alanı hangi günle açıldı */
 
   /* `q` verilmezse paletin o anki sorgusu kullanilir. Disaridan verilmesi
      bu islevi paleti acmadan denenebilir yapar ve AYS'nin ayni isi yapan
@@ -145,9 +146,13 @@ SP.Palette = (function(){
     const K = SP.C;
     const { html, map, when } = SP.h;
 
+    /* SIRALI ÖNİZLEME (2026-10-25): öneriler saveQuick'in yazacağı sırayla
+       önizlenir; «su 250 ve su 250» iki kez «toplam 1.250 ml» diyordu,
+       kayıt 1500 yazıyordu. */
+    const sira = SP.Proposals.sirali(r.oneriler);
     const bloklar = r.oneriler.map((o, i) => {
       const e = SP.Proposals.eylem(o.action);
-      const pv = SP.Proposals.preview(o);
+      const pv = sira[i].pv;
       return html`
         <div class="qeblok">
           <div class="qeblok__bas">
@@ -167,6 +172,11 @@ SP.Palette = (function(){
     });
 
     const engel = r.engellenen || [];
+    /* Tarih alanı cümlenin günüyle açılır («dün 2 bardak su»; 2026-10-25).
+       Öneriler farklı günlere düşüyorsa bugünle açılır; dokunulmazsa her
+       öneri kendi gününe yazılır (saveQuick). */
+    const gunler = Array.from(new Set(r.oneriler.map(o => (o.params && o.params.date) || U.todayISO())));
+    acilisTarihi = gunler.length === 1 ? gunler[0] : U.todayISO();
     SP.UI.sheet({
       title:!r.oneriler.length ? 'Bir şey sormam gerek'
         : r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
@@ -184,7 +194,7 @@ SP.Palette = (function(){
           title:'Ölçüm diye yazmadığım kısım:',
           body:engel.map(e => '«' + e.metin + '» — ' + e.soru).join(' ') })),
         when(r.oneriler.length, () => K.Field({ label:'Tarih',
-          input:K.Input({ id:'qe-date', type:'date', value:U.todayISO() }) })),
+          input:K.Input({ id:'qe-date', type:'date', value:acilisTarihi }) })),
       ])),
       footer:String(html`${K.Button({ label:r.oneriler.length ? 'Vazgeç' : 'Tamam', act:'sheet-close' })}
         ${when(r.oneriler.length, () => K.Button({ label:r.oneriler.length === 1 ? 'Kaydet' : 'Hepsini kaydet',
@@ -196,11 +206,13 @@ SP.Palette = (function(){
   async function saveQuick(){
     if(!bekleyen) return;
     const el = document.getElementById('qe-date');
-    const tarih = (el && el.value) || U.todayISO();
+    const secilen = (el && el.value) || acilisTarihi || U.todayISO();
+    /* Alan değiştirildiyse seçilen gün hepsine; değilse her öneri kendi gününe. */
+    const degisti = secilen !== acilisTarihi;
 
     let yazilan = 0, dusen = 0, rota = null;
     for(const o of bekleyen.oneriler){
-      /* Tarih alt sayfada degistirilmis olabilir. */
+      const tarih = degisti ? secilen : ((o.params && o.params.date) || secilen);
       const oneri = Object.assign({}, o, { source:'istek',
         params:Object.assign({}, o.params, { date:tarih }) });
       const kayit = await SP.Proposals.propose(oneri);
@@ -224,6 +236,8 @@ SP.Palette = (function(){
     'olcum-gir':'labs', 'semptom-isaretle':'today', 'bolum-ac-kapa':'guide',
     /* Plan ve programı Bugün › Özet › Hedeflerim gösterir. */
     'plan-uygula':'today', 'program-ekle':'today',
+    /* Hazır öğün ya da antrenman Bugün'de görünür (2026-10-25). */
+    'hazir-ekle':'today',
   };
 
   function filtered(){

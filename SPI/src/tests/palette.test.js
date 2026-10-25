@@ -101,5 +101,40 @@
       expect(document.body.innerHTML).toContain('data-act="quick-save"');
       SP.UI.closeSheet();
     });
+
+    /* HATA (2026-10-25): «dün 2 bardak su içtim» paletten bugüne yazılıyordu:
+       tarih alanı hep bugünle açılıyor ve kaydederken her öneriye o tarih
+       yazılıyordu. Alan cümlenin günüyle açılır; dokunulmazsa her öneri
+       kendi gününe, değiştirilirse seçilen güne yazılır. */
+    it('cümledeki gün sözü paletten de korunur', async function(){
+      resetState();
+      const dun = SP.U.iso(SP.U.addDays(SP.U.parse(SP.U.todayISO()), -1));
+      P.quickCommand('dün 2 bardak su içtim').run();
+      const alan = document.getElementById('qe-date');
+      expect(alan.value).toBe(dun);
+      await P.saveQuick();
+      expect(Number((SP.S.vitals[dun] || {}).water)).toBe(500);
+      expect((SP.S.vitals[SP.U.todayISO()] || {}).water == null).toBe(true);
+    });
+
+    /* HATA (2026-10-25): bir cümlede iki su eklemesi önizlemede iki kez
+       «toplam 1.250 ml» diyordu, kayıt 1500 yazıyordu. Her satırın önceki
+       ve sonraki değeri kendinden önceki satırı sayar. */
+    it('iki su eklemesinin önizlemesi sırayla toplar; yazılan son toplamdır', async function(){
+      resetState();
+      const bugun = SP.U.todayISO(), f = n => SP.U.fmtNum(n) + ' ml';
+      SP.Test.pushVitals(bugun, { water:1000 });
+      const c = P.quickCommand('su 250 ve su 250');
+      expect(c.hint).toContain('2 kayıt');
+      c.run();
+      const satirlar = Array.from(document.querySelectorAll('.qeblok__satir'))
+        .map(x => x.textContent.replace(/\s+/g, ' ').trim());
+      expect(satirlar).toEqual([
+        'Su ' + f(1000) + ' → +250 ml · toplam ' + f(1250),
+        'Su ' + f(1250) + ' → +250 ml · toplam ' + f(1500),
+      ]);
+      await P.saveQuick();
+      expect(Number(SP.S.vitals[bugun].water)).toBe(1500);
+    });
   });
 })();

@@ -1107,7 +1107,7 @@ SP.Screens.move = (function(){
                 <div class="row items-center gap-8">
                   <span class="num small" style="color:var(--accent);font-weight:600">${kcal} kcal</span>
                   <button type="button" class="btn btn--xs btn--ghost" data-act="add-met-workout"
-                    data-desc="${U.esc(r.description)}" data-met="${r.met}" data-min="${metMin}">
+                    data-desc="${U.esc(r.description)}" data-met="${r.met}" data-min="${metMin}" data-cat="${r.category || ''}">
                     Seansa ekle
                   </button>
                 </div>
@@ -1605,19 +1605,14 @@ SP.Screens.move = (function(){
       const desc = el.dataset.desc;
       const met = Number(el.dataset.met) || 4.5;
       const min = Number(el.dataset.min) || 30;
-      const rpe = Math.min(10, Math.max(1, Math.round(met)));
-      const w = {
-        id: U.uid(),
-        date: U.todayISO(),
-        name: desc,
-        minutes: min,
-        rpe: rpe,
-        items: [{ exId:'met', name:desc, met:met, minutes:min }],
-        note: 'MET: ' + met + ' (2024 Adult Compendium)'
-      };
-      await M.addWorkout(U.todayISO(), w);
+      /* 2026-10-25: tür etkinlikten (core/move.js metTuru); eskiden türsüz
+         yazılıp kuvvet sayılıyordu ve var olmayan M.addWorkout çağrılıyordu.
+         Zorlanma (RPE) kişinin hissidir: MET'ten türetilmez, boş kalır
+         (eskiden round(MET) yazılıp yüke karışıyordu; AGENTS §1.1). */
+      const w = SP.Move.metSeans({ ad:desc, met, dk:min, rpe:null, kategori:el.dataset.cat || '' }, U.todayISO());
+      await M.saveWorkout(w);
       UI.closeSheet();
-      UI.toast(desc + ' (' + min + ' dk) seans olarak eklendi');
+      UI.toast(desc + ' (' + min + ' dk) seans olarak eklendi', { undo:async () => { await M.deleteWorkout(w.id); SP.App.render(); } });
       SP.App.render();
     },
     async 'load-program-session'(el){

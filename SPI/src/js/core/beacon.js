@@ -770,8 +770,13 @@ SP.Beacon = (function(){
     }
     if(!metin || !SP.Proposals){ out.anlasilmayan.push(metin); return out; }
     const v = SP.Proposals.fromText(metin, { date:gun });
-    v.oneriler.forEach(function(x){
-      const pv = SP.Proposals.preview({ action:x.action, params:x.params });
+    /* Satırlar uygulanacakları sırayla önizlenir (2026-10-25): iki su
+       eklemesinde ikincinin toplamı birinciyi sayar (Proposals.sirali). */
+    const sira = SP.Proposals.sirali
+      ? SP.Proposals.sirali(v.oneriler.map(function(x){ return { action:x.action, params:x.params }; }))
+      : null;
+    v.oneriler.forEach(function(x, i){
+      const pv = sira ? sira[i].pv : SP.Proposals.preview({ action:x.action, params:x.params });
       const e = SP.Proposals.eylem(x.action) || {};
       if(pv.ok){
         out.yazilacak.push({ baslik:e.label || x.action, metin:x.metin,

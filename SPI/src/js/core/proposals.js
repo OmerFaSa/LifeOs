@@ -88,8 +88,46 @@ SP.Proposals = (function(){
       .sort((x, y) => sonraMi(x, y) ? 1 : sonraMi(y, x) ? -1 : 0);
   }
 
+  /* EKLEME GERİ ALINIR (2026-10-25): su toplanır; geri alma o kaydın
+     EKLEDİĞİNİ çıkarır, sonraki eklemeleri korur. +250 sonra +500 girilip
+     ilki geri alınınca toplam 500 kalır (750'de kalmaz). Zincirin arasına
+     elle düzenleme girdiyse dokunulmaz; sonraki mutlak kayıt bu eklemeyi
+     zaten ezmiştir.
+     ZİNCİR TEK YOLDUR (2026-10-25): mutlak kaydın geri alınması da buradan
+     geçer (`baslangic` = o kaydın yazdığı değer). Eskiden mutlak kayıt
+     yalnız İLK eklemeyi yeniden hesaplıyordu: 1000, +250, +250 yazılıp
+     ilki geri alınınca değer 1500'de kalıyordu (500 olmalıydı). Eksik
+     değer (null) ile 0 ayrı kalır: boş günün zinciri boşa döner. */
+  async function zincirGeriAl(geri, o, baslangic){
+    const sonraki = ayniHedef(o, 'vital-yaz', x => x.date === geri.date && x.field === geri.field);
+    let onceki = baslangic, yerine = geri.value;
+    for(const x of sonraki){
+      if(x.value !== onceki) return;
+      x.value = yerine;
+      if(x.ek == null) return;
+      onceki = x.yeni;
+      x.yeni = (yerine || 0) + x.ek;
+      yerine = x.yeni;
+    }
+    const v = M.vitalsOf(geri.date);
+    if(!v || v[geri.field] !== onceki) return;
+    const patch = {};
+    patch[geri.field] = yerine == null ? null : yerine;
+    await M.saveVitals(geri.date, patch);
+  }
+
   function yeniSira(){
     return liste().reduce((m, x) => Math.max(m, Number(x.sira) || 0), 0) + 1;
+  }
+
+  /* Günlük ölçümün o anki değeri: `sanal`da varsa öndeki önerinin
+     yazacağı değer, yoksa kayıtlı değer; girilmemişse null (0 değil). */
+  function sanalAnahtar(date, id){ return String(date) + '|' + id; }
+  function tabanOf(date, id, sanal){
+    const k = sanalAnahtar(date, id);
+    if(sanal && Object.prototype.hasOwnProperty.call(sanal, k)) return sanal[k];
+    const e = M.vitalsOf(date);
+    return e && e[id] != null ? Number(e[id]) : null;
   }
 
   const KATALOG = {
@@ -99,43 +137,54 @@ SP.Proposals = (function(){
       level:'kucuk',
       olcum:true,
       label:'Günlük ölçüm',
-      alanlar:['field', 'value', 'date'],
-      check(p){
+      /* `ekle` (2026-10-25; kullanıcı: «spi için daha işlevli veri girişi,
+         sürtünmeyi azaltacak teknikler ile daha güzel yap»): değer günün
+         toplamına EKLENİR (su). «2 bardak su içtim» 1000 ml'nin üstüne 400
+         yazıyordu. Toplam her doğrulamada o anki kayıttan yeniden hesaplanır:
+         bekleyen öneri arada eklenen suyu ezmez. `sanal` (2026-10-25):
+         birlikte gösterilen öneriler için öndeki satırların yazacağı değer
+         (sirali); verilmezse kayıtlı değer. */
+      alanlar:['field', 'value', 'date', 'ekle'],
+      check(p, sanal){
         const f = SP.Quick.VITAL_FIELDS[p.field];
         if(!f) return fail('Böyle bir günlük ölçüm alanı yok.');
         const v = Number(p.value);
         if(!isFinite(v)) return fail('Değer sayı değil.');
+        const once = tabanOf(p.date, f.id, sanal);
+        if(p.ekle === true && f.ekle){
+          if(v <= 0) return fail(f.label + ' için eklenecek miktar yok.');
+          const toplam = (once == null ? 0 : once) + v;
+          if(f.max != null && toplam > f.max) return fail(f.label + ' için toplam ' + U.fmtNum(toplam) + ' ' + f.unit + ' çok yüksek.');
+          return pass({ f, v:toplam, ek:v, once });
+        }
         if(f.min != null && v < f.min) return fail(f.label + ' için ' + v + ' çok düşük.');
         if(f.max != null && v > f.max) return fail(f.label + ' için ' + v + ' çok yüksek.');
-        return pass({ f, v });
+        return pass({ f, v, once });
       },
       preview(p, ctx){
-        const eski = M.vitalsOf(p.date);
-        const oncekiDeger = eski ? eski[ctx.f.id] : null;
+        const oncekiDeger = ctx.once;
         return [{ alan:ctx.f.label,
           once:oncekiDeger == null ? 'girilmemiş' : U.fmtNum(oncekiDeger) + ' ' + ctx.f.unit,
-          sonra:U.fmtNum(ctx.v) + ' ' + ctx.f.unit }];
+          sonra:ctx.ek != null
+            ? '+' + U.fmtNum(ctx.ek) + ' ' + ctx.f.unit + ' · toplam ' + U.fmtNum(ctx.v) + ' ' + ctx.f.unit
+            : U.fmtNum(ctx.v) + ' ' + ctx.f.unit }];
       },
       async apply(p, ctx){
         const eski = M.vitalsOf(p.date);
         const geri = { date:p.date, field:ctx.f.id,
           value:eski ? eski[ctx.f.id] : null, yeni:ctx.v };
+        if(ctx.ek != null) geri.ek = ctx.ek;
         const patch = {};
         patch[ctx.f.id] = ctx.v;
         await M.saveVitals(p.date, patch);
         return geri;
       },
-      /* Sonraki kaydı ve elle düzenlemeyi ezmez (HATALAR Y-6). */
+      /* Sonraki kaydı ve elle düzenlemeyi ezmez (HATALAR Y-6). Ekleme de
+         mutlak kayıt da aynı zincirden geri alınır (2026-10-25): sonraki
+         eklemelerin HEPSİ bu kayıt hiç olmamış gibi yeniden hesaplanır. */
       async revert(geri, o){
         const yeni = geri.yeni != null ? geri.yeni : Number(((o && o.params) || {}).value);
-        const sonraki = ayniHedef(o, 'vital-yaz',
-          x => x.date === geri.date && x.field === geri.field)[0];
-        if(sonraki){ if(sonraki.value === yeni) sonraki.value = geri.value; return; }
-        const v = M.vitalsOf(geri.date);
-        if(!v || v[geri.field] !== yeni) return;
-        const patch = {};
-        patch[geri.field] = geri.value;
-        await M.saveVitals(geri.date, patch);
+        return zincirGeriAl(geri, o, yeni);
       },
     },
 
@@ -371,53 +420,149 @@ SP.Proposals = (function(){
       level:'kucuk',
       olcum:true,
       label:'Şikâyet',
-      alanlar:['symptomId', 'severity', 'date'],
+      /* 2026-10-25: hızlı girişten de gelir («baş ağrısı orta»). Şiddet
+         YALNIZ kullanıcının sözünden; söylenmediyse yazılmaz, «şiddet
+         belirtilmedi» denir. `yok:true` = «şikâyetim yok» (Bugün'deki
+         «Şikâyetim yok» düğmesiyle aynı kayıt). İşaretleme teşhis değildir. */
+      alanlar:['symptomId', 'severity', 'date', 'yok'],
       check(p){
+        if(p.yok === true) return pass({ yok:true });
         const s = SP.SYMPTOM_BY_ID[p.symptomId];
         if(!s) return fail('Böyle bir şikâyet sözlükte yok.');
+        if(p.severity == null || p.severity === '') return fail(SP.Quick.SIDDET_YOK);
         const sd = Number(p.severity);
         if(!isFinite(sd) || sd < 1 || sd > 3) return fail('Şiddet 1 ile 3 arasında olmalı.');
         return pass({ s, sd:Math.round(sd) });
       },
       preview(p, ctx){
+        if(ctx.yok){
+          const v = M.vitalsOf(p.date);
+          const adlar = Object.keys((v && v.symptoms) || {}).map(id => (SP.SYMPTOM_BY_ID[id] || {}).name).filter(Boolean);
+          return [{ alan:'Şikâyet', once:adlar.length ? adlar.join(', ') : (v && v.symptomsLogged ? 'şikâyet yok' : 'işaretlenmemiş'),
+            sonra:'şikâyet yok' }];
+        }
         const onceki = SP.Symptom.ofDay(p.date)[ctx.s.id];
         return [{ alan:ctx.s.name,
           once:onceki ? 'şiddet ' + onceki : 'işaretlenmemiş',
           sonra:'şiddet ' + ctx.sd }];
       },
       async apply(p, ctx){
+        const v = M.vitalsOf(p.date);
+        const logged = !!(v && v.symptomsLogged);
+        if(ctx.yok){
+          const eski = Object.assign({}, (v && v.symptoms) || {});
+          await M.saveVitals(p.date, { symptoms:{}, symptomsLogged:true });
+          return { date:p.date, yok:true, eski, logged };
+        }
         const onceki = SP.Symptom.ofDay(p.date)[ctx.s.id] || 0;
         await SP.Symptom.setSymptom(p.date, ctx.s.id, ctx.sd);
-        return { date:p.date, symptomId:ctx.s.id, onceki, yeni:ctx.sd };
+        if(!logged) await M.saveVitals(p.date, { symptomsLogged:true });
+        return { date:p.date, symptomId:ctx.s.id, onceki, yeni:ctx.sd, logged };
       },
       async revert(geri, o){
-        const yeni = geri.yeni != null ? geri.yeni : Math.round(Number(((o && o.params) || {}).severity) || 0);
-        const sonraki = ayniHedef(o, 'semptom-isaretle',
-          x => x.date === geri.date && x.symptomId === geri.symptomId)[0];
-        if(sonraki){ if(sonraki.onceki === yeni) sonraki.onceki = geri.onceki; return; }
-        if((SP.Symptom.ofDay(geri.date)[geri.symptomId] || 0) !== yeni) return;
-        await SP.Symptom.setSymptom(geri.date, geri.symptomId, geri.onceki);
+        if(geri.yok){
+          /* Arada şikâyet işaretlendiyse o işaret silinmez. */
+          const v = M.vitalsOf(geri.date);
+          if(v && Object.keys(v.symptoms || {}).length) return;
+          await M.saveVitals(geri.date, { symptoms:geri.eski || {}, symptomsLogged:!!geri.logged });
+          return;
+        }
+        await semptomGeriAl(geri, o);
+        if(geri.logged === false){
+          const v = M.vitalsOf(geri.date);
+          if(v && v.symptomsLogged && !Object.keys(v.symptoms || {}).length) await M.saveVitals(geri.date, { symptomsLogged:false });
+        }
+      },
+    },
+
+    /* ------------------------------------------- hazır öğün / antrenman
+
+       2026-10-25: «menemen tabağımı yedim», «bacak günümü yaptım» Bugün
+       kutusunda bulunuyordu (core/hazir.js söz 5) ama paletten, King'in
+       ofis sohbetinden ve iPhone gelen kutusundan bulunmuyordu. Kayıt
+       kullanıcının kendi hazırından kopyalanır (söz 1–3); model öneremez:
+       hazır kimliklerini görmez. */
+    'hazir-ekle':{
+      level:'kucuk',
+      olcum:true,
+      modelYok:true,
+      label:'Hazır öğün ya da antrenman',
+      alanlar:['tur', 'hazirId', 'date', 'slot'],
+      check(p){
+        if(!SP.Hazir) return fail('Hazır kayıtlar yüklü değil.');
+        const l = p.tur === 'ogun' ? SP.Hazir.ogunler() : p.tur === 'antrenman' ? SP.Hazir.antrenmanlar() : null;
+        if(!l) return fail('Bilinmeyen hazır kayıt türü.');
+        const h = l.find(x => x.id === p.hazirId);
+        if(!h) return fail('Hazır kayıt bulunamadı; silinmiş olabilir.');
+        return pass({ h });
+      },
+      preview(p, ctx){
+        if(p.tur === 'ogun'){
+          const slot = p.slot || ctx.h.slot;
+          return [{ alan:ctx.h.ad, once:'—', sonra:'hazır öğün' + (slot ? ' · ' + (SP.Ogun ? SP.Ogun.ad(slot) : slot) : '')
+            + ' · ' + SP.Hazir.ogunOzet(ctx.h) }];
+        }
+        const oz = SP.Hazir.antrenmanOzet(ctx.h);
+        return [{ alan:ctx.h.ad, once:'—', sonra:'hazır antrenman' + (oz ? ' · ' + oz : '') }];
+      },
+      async apply(p){
+        const r = p.tur === 'ogun' ? await SP.Hazir.ogunEkle(p.hazirId, p.date, p.slot || undefined)
+          : await SP.Hazir.antrenmanEkle(p.hazirId, p.date);
+        if(!r.ok) throw new Error(r.why);
+        return { tur:p.tur, date:p.date, id:r.id };
+      },
+      async revert(geri){
+        if(geri.tur === 'ogun'){ if(M.deleteMeal) await M.deleteMeal(geri.date, geri.id); }
+        else if(M.deleteWorkout) await M.deleteWorkout(geri.id);
       },
     },
   };
+
+  /* Şikâyet şiddetinin geri alınması (HATALAR Y-6): sonraki kaydı ve elle
+     düzenlemeyi ezmez. */
+  async function semptomGeriAl(geri, o){
+    const yeni = geri.yeni != null ? geri.yeni : Math.round(Number(((o && o.params) || {}).severity) || 0);
+    const sonraki = ayniHedef(o, 'semptom-isaretle',
+      x => x.date === geri.date && x.symptomId === geri.symptomId)[0];
+    if(sonraki){ if(sonraki.onceki === yeni) sonraki.onceki = geri.onceki; return; }
+    if((SP.Symptom.ofDay(geri.date)[geri.symptomId] || 0) !== yeni) return;
+    await SP.Symptom.setSymptom(geri.date, geri.symptomId, geri.onceki);
+  }
 
   function eylem(id){ return KATALOG[id] || null; }
   function katalogIdleri(){ return Object.keys(KATALOG); }
 
   /* ==================== doğrulama ve önizleme ==================== */
 
-  function check(p){
+  function check(p, sanal){
     const e = eylem(p && p.action);
     if(!e) return fail('Bilinmeyen eylem: ' + (p && p.action));
-    try{ return e.check(p.params || {}); }
+    try{ return e.check(p.params || {}, sanal); }
     catch(err){ return fail('Doğrulanamadı: ' + (err && err.message || err)); }
   }
 
-  function preview(p){
-    const c = check(p);
+  function onizle(p, c){
     if(!c.ok) return { ok:false, why:c.why, rows:[] };
     try{ return { ok:true, rows:eylem(p.action).preview(p.params || {}, c.ctx) || [] }; }
     catch(err){ return { ok:false, why:'Önizlenemedi.', rows:[] }; }
+  }
+
+  function preview(p){ return onizle(p, check(p)); }
+
+  /* SIRALI ÖNİZLEME (2026-10-25): birlikte gösterilen öneriler
+     UYGULANACAKLARI sırayla önizlenir. Her biri ayrı ayrı önizlenince
+     1000 ml varken üç «su 250» üç kez «toplam 1.250 ml» diyordu, onay 1750
+     yazıyordu. Her satırın önceki ve sonraki değeri öndeki satırları sayar;
+     geçmeyen satır sanal değeri değiştirmez, approve da onu yazmaz.
+     Dönüş: [{ p, c, pv }] — c doğrulama, pv önizleme. */
+  function sirali(l){
+    const sanal = {};
+    return (l || []).map(p => {
+      const c = check(p, sanal);
+      const pv = onizle(p, c);
+      if(c.ok && p.action === 'vital-yaz') sanal[sanalAnahtar((p.params || {}).date, c.ctx.f.id)] = c.ctx.v;
+      return { p, c, pv };
+    });
   }
 
   /* ==================== kural motoru kaynağı ====================
@@ -434,23 +579,49 @@ SP.Proposals = (function(){
       .filter(x => x.length > 1);
   }
 
-  /* Hızlı giriş ayrıştırıcısının çıktısını katalog eylemine çevirir. */
-  function quickToAction(parsed, date, slot){
-    if(!parsed) return null;
-    if(parsed.kind === 'vital') return { action:'vital-yaz',
-      params:{ field:parsed.data.field.id, value:parsed.data.value, date } };
-    if(parsed.kind === 'nap') return { action:'kestirme-ekle',
-      params:{ dk:parsed.data.dk, bas:parsed.data.bas || null, date } };
-    if(parsed.kind === 'move') return { action:'seans-ekle',
+  /* Hızlı giriş ayrıştırıcısının çıktısını katalog eylemlerine çevirir.
+
+     2026-10-25: tek cümle İKİ eylem olabilir («tansiyon 120/80» → büyük ve
+     küçük tansiyon); cümlenin gün sözü («dün») tarihi, öğün sözü
+     («kahvaltıda») öğünü belirler; su günün toplamına eklenir (`ekle`) —
+     iPhone gelen kutusundan gelen «su 250» de (beş satır 1250 ml'dir).
+     Birimi uyuşmayan tahlil satırı eyleme dönmez (SP.Parse.rowsToSave). */
+  function quickToActions(parsed, date, slot){
+    if(!parsed) return [];
+    const d = SP.Quick.tarih ? SP.Quick.tarih(parsed, date) : date;
+    if(parsed.kind === 'vital'){
+      const ilk = { action:'vital-yaz', params:{ field:parsed.data.field.id, value:parsed.data.value, date:d } };
+      if(parsed.data.ekle) ilk.params.ekle = true;
+      const l = [ilk];
+      if(parsed.data.ikinci) l.push({ action:'vital-yaz',
+        params:{ field:parsed.data.ikinci.field.id, value:parsed.data.ikinci.value, date:d } });
+      return l;
+    }
+    if(parsed.kind === 'symptom') return [parsed.data.yok
+      ? { action:'semptom-isaretle', params:{ yok:true, date:d } }
+      : { action:'semptom-isaretle', params:{ symptomId:parsed.data.symptom.id, severity:parsed.data.severity, date:d } }];
+    if(parsed.kind === 'nap') return [{ action:'kestirme-ekle',
+      params:{ dk:parsed.data.dk, bas:parsed.data.bas || null, date:d } }];
+    if(parsed.kind === 'move') return [{ action:'seans-ekle',
       params:{ minutes:parsed.data.minutes,
-        exerciseId:parsed.data.exercise ? parsed.data.exercise.id : null, date } };
-    if(parsed.kind === 'lab') return { action:'olcum-gir',
-      params:{ rows:parsed.data.rows.map(r => ({ markerId:r.marker.id, value:r.value })), date } };
-    if(parsed.kind === 'meal') return { action:'ogun-ekle',
+        exerciseId:parsed.data.exercise ? parsed.data.exercise.id : null, date:d } }];
+    if(parsed.kind === 'lab'){
+      const rows = SP.Parse.rowsToSave ? SP.Parse.rowsToSave(parsed.data) : parsed.data.rows;
+      return rows.length ? [{ action:'olcum-gir',
+        params:{ rows:rows.map(r => ({ markerId:r.marker.id, value:r.value })), date:d } }] : [];
+    }
+    if(parsed.kind === 'meal') return [{ action:'ogun-ekle',
       params:{ items:parsed.data.items.map(i => ({ foodId:i.food.id, g:i.g, cert:i.cert })),
-        slot:slot || (SP.Ogun ? SP.Ogun.simdiki() : 'ara1'), date } };
-    return null;
+        slot:parsed.data.slot || slot || (SP.Ogun ? SP.Ogun.simdiki() : 'ara1'), date:d } }];
+    return [];
   }
+
+  /* Tek eylem isteyen eski çağıranlar için: ilk eylem. */
+  function quickToAction(parsed, date, slot){
+    return quickToActions(parsed, date, slot)[0] || null;
+  }
+
+  function gunEkle(iso, g){ return g ? U.iso(U.addDays(U.parse(iso), g)) : iso; }
 
   /* Serbest cümleden öneri üretir — MODEL GEREKMEZ.
 
@@ -462,32 +633,72 @@ SP.Proposals = (function(){
     const date = o.date || U.todayISO();
     const parcalar = yanCumleler(text);
     const oneriler = [], anlasilmayan = [], engellenen = [];
+    /* GÜN SÖZÜ SÜRER (2026-10-25): «dün 30 dakika yürüdüm ve 2 bardak su
+       içtim» iki parçası da dünündür; parça kendi gün sözünü söylerse
+       («bugün …») o geçer. «dün gece … uyudum» bugünün uykusudur ve
+       sonraki parçaya «dün» taşımaz. */
+    let sonGun = null;
 
     /* Sayısı bulunmuş ama ÖLÇÜM OLMAYAN parça («7 saat uyumadım», «yarın
        30 dakika yürüyeceğim») yazılmaz; nedeni ve sorulacak cümle
-       `engellenen`de döner (belgeler/ekip/HATALAR.md KR-1). */
+       `engellenen`de döner (belgeler/ekip/HATALAR.md KR-1). Anlaşılan ama
+       eksik parça (şiddeti söylenmemiş şikâyet, birimi uyuşmayan tahlil)
+       `eksik` notuyla anlaşılmayanlara gider: tahmin edilmez, söylenir. */
     function dene(p){
+      const engelOf = parsed => {
+        const e = SP.Quick.olcumEngeli ? SP.Quick.olcumEngeli(p, parsed) : LIFEOS.Olumsuz.olcumEngeli(p);
+        return e ? { engel:Object.assign({ metin:String(p).trim() }, e) } : null;
+      };
+      const z = SP.Quick.gunSozu ? SP.Quick.gunSozu(p) : { gun:null };
+
+      /* HAZIR ÖNCE (2026-10-25): Bugün kutusu gibi (app.js, core/hazir.js
+         söz 5). Palet, ofis sohbeti ve iPhone gelen kutusu da bulur. */
+      const hz = SP.Hazir && SP.Hazir.bul ? SP.Hazir.bul(p) : null;
+      if(hz){
+        const gun = z.gun != null ? z.gun : sonGun;
+        if(z.gun != null) sonGun = z.gun;
+        const params = { tur:hz.tur, hazirId:hz.hazir.id, date:gunEkle(date, gun) };
+        const slot = hz.tur === 'ogun' && SP.Quick.ogunSozu ? SP.Quick.ogunSozu(p) : null;
+        if(slot) params.slot = slot;
+        return engelOf(null) || { a:[{ action:'hazir-ekle', params }] };
+      }
+
       let parsed = null;
       try{ parsed = SP.Quick.parseHam(p); }catch(e){ parsed = null; }
-      const a = quickToAction(parsed, date, o.slot);
-      if(!a) return null;
-      const e = LIFEOS.Olumsuz.olcumEngeli(p);
-      return e ? { engel:Object.assign({ metin:String(p).trim() }, e) } : { a };
+      if(parsed){
+        if(parsed.gunSozu == null && sonGun != null) parsed.gun = sonGun;
+        else if(parsed.gunSozu != null && parsed.gunSurer !== false) sonGun = parsed.gun;
+      }else if(z.gun != null) sonGun = z.gun;
+      const a = quickToActions(parsed, date, o.slot);
+      if(!a.length){
+        if(parsed && parsed.kind === 'lab' && parsed.data.uyusmaz.length){
+          return engelOf(parsed) || { eksik:String(p).trim() + ' — ' + SP.Quick.uyusmazNotu(parsed.data.uyusmaz) };
+        }
+        return null;
+      }
+      const e = engelOf(parsed);
+      if(e) return e;
+      if(parsed.kind === 'symptom' && !parsed.data.yok && !parsed.data.severity){
+        return { eksik:String(p).trim() + ' — şiddet belirtilmedi («hafif», «orta» ya da «şiddetli» diye ekle)' };
+      }
+      return { a };
     }
 
     parcalar.forEach(p => {
       const r = dene(p);
       if(!r) anlasilmayan.push(p);
+      else if(r.eksik) anlasilmayan.push(r.eksik);
       else if(r.engel) engellenen.push(r.engel);
-      else oneriler.push(Object.assign(r.a, { kaynak:'rules', metin:p }));
+      else r.a.forEach(x => oneriler.push(Object.assign(x, { kaynak:'rules', metin:p })));
     });
 
     /* Tek parça hiç anlaşılmadıysa cümlenin TAMAMINI bir kez dene:
        bölme yanlış yerden olmuş olabilir. */
     if(!oneriler.length && !engellenen.length && parcalar.length > 1){
+      sonGun = null;
       const r = dene(text);
       if(r && r.engel) return { oneriler:[], anlasilmayan:[], engellenen:[r.engel] };
-      if(r) return { oneriler:[Object.assign(r.a, { kaynak:'rules', metin:String(text).trim() })],
+      if(r && r.a) return { oneriler:r.a.map(x => Object.assign(x, { kaynak:'rules', metin:String(text).trim() })),
         anlasilmayan:[], engellenen:[] };
     }
 
@@ -692,7 +903,10 @@ SP.Proposals = (function(){
      brand/ortak/hesap.js söz 20). iPhone Kısayollar, Apple Sağlık
      otomasyonu ya da Home Assistant «su 250» gönderir; sunucu satırı
      ANLAMAZ, burada kural motoru okur (fromText) ve her parça Onaylar'a
-     ÖNERİ olur. Ölçüm olduğu için hiçbir ayarda sormadan yazılmaz
+     ÖNERİ olur. SU EKLENİR (2026-10-25, Onaylar ajanından devir): beş
+     «su 250» satırı onaylanınca gün 1250 ml olur, 250 değil; önizleme
+     «+250 ml · toplam …» der. Kilo ve öteki ölçümler değer olarak yazılır.
+     Ölçüm olduğu için hiçbir ayarda sormadan yazılmaz
      (otomatikMi); kullanıcı «Kaydet»e basınca approve yazar, geri alınır.
 
      GÜN, satırın GÖNDERİLDİĞİ andır: 23:50'de gönderilip sabah işlenen su
@@ -741,8 +955,8 @@ SP.Proposals = (function(){
 
   return {
     KATALOG, eylem, katalogIdleri, catalogPrompt,
-    check, preview,
-    fromText, fromModel, yanCumleler, quickToAction,
+    check, preview, sirali,
+    fromText, fromModel, yanCumleler, quickToAction, quickToActions,
     propose, approve, reject, undo, clearResolved, disaridan,
     talep, otomatikMi, ayar, turAyari, SEVIYELER, MODLAR,
     pending, all, load, save, MAX,

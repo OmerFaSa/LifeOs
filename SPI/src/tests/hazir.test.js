@@ -66,5 +66,24 @@
       expect(H().bul('menemen nasıl yapılır')).toBe(null);
       expect(H().bul('bacak günü yedim')).toBe(null);
     });
+    /* 2026-10-25: «bacak günü» yazınca (fiil yok) kayıtlı antrenman
+       bulunmuyordu. Cümlenin KENDİSİ adsa (iyelik eki ve «bugün» olabilir)
+       fiil gerekmez; ekleme yine önizleme + onayla (app.js). Öğün yine fiil
+       ister; yanlış fiil ve adın geçtiği başka cümle bulunmaz. */
+    it('fiilsiz yazılan kayıtlı antrenman adı bulunur; bul hiçbir şey yazmaz', async () => {
+      resetState();
+      const m = pushMeal(GUN, 'kahvalti', [['tavuk-gogsu', 120]]);
+      await H().ogunSakla(m, 'Menemen');
+      await H().antrenmanSakla(pushWorkout(GUN, { name:'Bacak günü', minutes:50 }), '');
+      const once = SP.S.workouts.length;
+      expect(H().bul('bacak günü').hazir.ad).toBe('Bacak günü');
+      expect(H().bul('  Bacak Günü. ').tur).toBe('antrenman');
+      expect(H().bul('bugün bacak günü').tur).toBe('antrenman');
+      expect(H().bul('bacak günümü').tur).toBe('antrenman');
+      expect(H().bul('bacak günü nasıl yapılır')).toBe(null);
+      expect(H().bul('bacak günü yedim')).toBe(null);
+      expect(H().bul('menemen')).toBe(null);
+      expect(SP.S.workouts.length).toBe(once);
+    });
   });
 })();

@@ -402,6 +402,32 @@ SP.Move = (function(){
     return SP.PATTERNS.map(p => ({ pattern:p, count:seen[p.id] || 0, missing:!seen[p.id] }));
   }
 
+  /* MET SEANSININ TURU (2026-10-25). MET hesabindan eklenen seans tursuz
+     yaziliyordu; haftalik sutun tursuz seansi KUVVET saydigi icin yuruyus
+     «kuvvet» gorunuyordu. Tur etkinligin adindan ve Compendium
+     kategorisinden gelir: yuruyus, kosu, bisiklet, su ve kis sporlari
+     kategorisi kardiyo; digerinde ada bakilir: esneme/yoga mobilite,
+     agirlik/direnc kuvvet, geri kalan her etkinlik (ev isi, spor) kardiyo.
+     Yalniz sinif atar; hicbir sayi uretmez. */
+  const MET_MOBILITE = /(yoga|pilates|esne|stretch|mobil|tai ?chi|nefes|germe)/;
+  const MET_KUVVET = /(ağırlık|agirlik|direnç|direnc|kuvvet|halter|weight|resist|şınav|sinav|barfiks|squat|calisthen|vücut ağırlığı)/;
+  const MET_KARDIYO_KAT = ['walking', 'running', 'bicycling', 'water-activities', 'winter-activities'];
+  function metTuru(kategori, ad){
+    if(MET_KARDIYO_KAT.indexOf(kategori) >= 0) return 'cardio';
+    const t = String(ad || '').toLocaleLowerCase('tr-TR');
+    if(MET_MOBILITE.test(t)) return 'mobility';
+    if(MET_KUVVET.test(t)) return 'strength';
+    return 'cardio';
+  }
+  /* MET hesabindan bir seans kaydi (kaydetmez; ekran saveWorkout'a verir). */
+  function metSeans(o, gun){
+    const x = o || {};
+    return { id:U.uid('w'), date:gun || U.todayISO(), templateId:null,
+      name:x.ad, kind:metTuru(x.kategori, x.ad), minutes:x.dk, rpe:x.rpe == null ? null : x.rpe,
+      items:[{ exId:'met', name:x.ad, met:x.met, minutes:x.dk }],
+      note:'MET: ' + x.met + ' (2024 Adult Compendium)', createdAt:new Date().toISOString() };
+  }
+
   /* Son 30 gunun gunluk yuku — grafik icin. */
   function loadSeries(days){
     const n = days || 30;
@@ -417,7 +443,7 @@ SP.Move = (function(){
     baseline, sleepScore, hrvScore, rhrScore, sorenessScore, readiness,
     sessionLoad, loadInfo, loadOn, loadWindow, unknownWindow,
     acwr, deloadWeek, weeklyGrowth, prescription,
-    progressionCheck, patternBalance, loadSeries,
+    progressionCheck, patternBalance, loadSeries, metTuru, metSeans,
     ADVANCE_SESSIONS, ADVANCE_WINDOW,
   };
 })();

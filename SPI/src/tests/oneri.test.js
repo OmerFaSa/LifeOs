@@ -310,7 +310,9 @@
       expect(v('1,5 lt su')).toBe(1500);
       expect(v('su 500 ml')).toBe(500);
       expect(v('su 750')).toBe(750);
-      expect(v('3 bardak su içtim')).toBe(600);
+      /* Bir bardak SP.Quick.BARDAK_ML (250 ml; Bugün'deki bardak düğmesi de
+         250 ekler). Eskiden 200 sayılıyordu: düğme ile yazı ayrışıyordu. */
+      expect(v('3 bardak su içtim')).toBe(750);
       /* 20–49: ne makul litre ne makul ml — okunmaz, sorulur. */
       expect(v('su 30')).toBe(null);
     });
@@ -540,7 +542,7 @@
       /* Kullanıcı yazdığını GÖRMELİ: kayıttan sonra bir yere gidilir. */
       const rota = { 'vital-yaz':'today', 'kestirme-ekle':'today', 'ogun-ekle':'meals', 'seans-ekle':'move',
         'olcum-gir':'labs', 'semptom-isaretle':'today', 'bolum-ac-kapa':'guide',
-        'plan-uygula':'today', 'program-ekle':'today' };
+        'plan-uygula':'today', 'program-ekle':'today', 'hazir-ekle':'today' };
       SP.Proposals.katalogIdleri().forEach(id => {
         expect(typeof rota[id]).toBe('string');
         expect(Boolean(SP.Screens[rota[id]])).toBeTruthy();
@@ -848,6 +850,480 @@
         await SP.Proposals.disaridan({ id:44, metin:'kilo 72,4', zaman:new Date(2026, 2, 9, 9).getTime() });
         expect(SP.Proposals.pending()[0].params.date).toBe('2026-03-02');
       });
+    });
+  });
+})();
+
+/* HIZLI GİRİŞ — daha az sürtünme (2026-10-25). Kullanıcı: «spi için daha
+   işlevli veri girişi, sürtünmeyi azaltacak teknikler ile daha güzel yap».
+   Her bulgu önce bu testlerle yakalandı:
+     · «2 bardak su içtim» günün 1000 ml'sinin ÜSTÜNE 400 yazıyordu;
+     · «7 saat 30 dk uyudum» 420 dakikalık seans, «7 buçuk saat» hiç;
+     · «bel 84», «ateş 37,8», «spo2 97» tahlil oturumu açıyordu, «tansiyon
+       120/80» hiç okunmuyordu;
+     · «başım ağrıyor», «şikâyetim yok» anlaşılmıyordu;
+     · «dün 2 bardak su» bugüne, «kahvaltıda 2 yumurta» saatin öğününe;
+     · hazır öğün / antrenman paletten ve iPhone gelen kutusundan bulunmuyordu. */
+(function(){
+  const { describe, it, expect, resetState, withToday, withTodayAsync, pushVitals, pushMeal, pushWorkout } = SP.Test;
+  const U = SP.U, Q = () => SP.Quick, P = () => SP.Proposals;
+  const G = '2026-03-10', DUN = '2026-03-09';
+
+  async function onayla(o){
+    const row = await P().propose(Object.assign({ source:'istek' }, o));
+    const r = await P().approve(row.id);
+    expect([r.ok, r.why || null]).toEqual([true, null]);
+    return row;
+  }
+  const su = d => { const v = SP.Model.vitalsOf(d); return v ? v.water : null; };
+
+  describe('Hızlı giriş — su toplanır, üstüne yazılmaz', () => {
+    it('bir bardak tek sabittir: 250 ml', () => {
+      expect(Q().BARDAK_ML).toBe(250);
+    });
+
+    it('1000 ml varken «2 bardak su içtim» 1500 yazar; önizleme ne yazacağını söyler', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        pushVitals(G, { water:1000 });
+        const r = P().fromText('2 bardak su içtim');
+        expect(r.oneriler).toHaveLength(1);
+        expect([r.oneriler[0].params.value, r.oneriler[0].params.ekle]).toEqual([500, true]);
+        const pv = P().preview(r.oneriler[0]);
+        expect(pv.ok).toBe(true);
+        expect(pv.rows[0].sonra).toBe('+500 ml · toplam ' + U.fmtNum(1500) + ' ml');
+        await onayla(r.oneriler[0]);
+        expect(su(G)).toBe(1500);
+      });
+    });
+
+    it('boş günde «8 bardak su» 2000 yazar', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        await onayla(P().fromText('8 bardak su').oneriler[0]);
+        expect(su(G)).toBe(2000);
+      });
+    });
+
+    it('Bugün kutusu da toplar ve önizlemesi «Su +500 ml · toplam …» der', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        pushVitals(G, { water:1000 });
+        const p = Q().parse('2 bardak su içtim');
+        expect(Q().onizleme(p)).toBe('Su +500 ml · toplam ' + U.fmtNum(1500) + ' ml');
+        await Q().apply(p);
+        expect(su(G)).toBe(1500);
+      });
+    });
+
+    /* HATA (2026-10-25): «kahvaltıda 2 yumurta 1 çay, öğlen 1 tabak mercimek
+       çorbası» Bugün kutusunda tek öğüne birleşiyor, çay düşüyor, hepsi
+       kahvaltıya yazılıyordu. Öğün sözü olan parçalar kendi öğününe yazılır. */
+    it('Bugün kutusu öğün sözlerini ayrı öğün yazar, öğe düşürmez', async () => {
+      resetState();
+      /* Öğün sözü besinden önce ayrılır: «1 çay» sözün ardında düşüyordu. */
+      const tek = Q().parse('kahvaltıda 2 yumurta 1 çay');
+      expect(tek.data.items.length).toBe(2);
+      expect(tek.data.slot).toBe('kahvalti');
+      /* Ortak giriş testleri kutuyu sıfırlar: SPİ'nin gerçek kurulumu geri gelir. */
+      SP.App.girisKur();
+      await withTodayAsync(G, async () => {
+        const p = window.LIFEOS.GIRIS.onizle('kahvaltıda 2 yumurta 1 çay, öğlen 1 tabak mercimek çorbası');
+        expect(p && p.parcalar && p.parcalar.length).toBe(2);
+        await p.kaydet();
+        const ogun = SP.S.meals[G] || [];
+        expect(ogun.map(m => m.slot).sort()).toEqual(['kahvalti', 'ogle']);
+        const adlar = JSON.stringify(ogun.map(m => (m.items || []).map(i => (SP.FOOD_BY_ID[i.foodId] || {}).name || i.foodId)));
+        expect(/çay/i.test(adlar)).toBe(true);
+      });
+    });
+
+    it('geri alma yalnız o eklemeyi çıkarır; sıra fark etmez, elle düzenleme ezilmez', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const a = await onayla(P().fromText('su 250 ml').oneriler[0]);
+        const b = await onayla(P().fromText('su 500 ml').oneriler[0]);
+        expect(su(G)).toBe(750);
+        await P().undo(a.id);
+        expect(su(G)).toBe(500);
+        await P().undo(b.id);
+        expect(su(G) == null).toBe(true);
+        const c = await onayla(P().fromText('su 250 ml').oneriler[0]);
+        await SP.Model.saveVitals(G, { water:1200 });
+        await P().undo(c.id);
+        expect(su(G)).toBe(1200);
+      });
+    });
+
+    /* Onaylar ajanından devir (2026-10-25): gelen kutusundaki «su 250»
+       değer olarak yazılıyordu; beş satır onaylanınca gün 250 ml kalıyordu. */
+    it('iPhone gelen kutusundan iki «su 250» onaylanınca toplam +500; geri alma önceki toplamı verir', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        pushVitals(G, { water:1000 });
+        await P().disaridan({ id:71, metin:'su 250', kaynak:'iPhone', zaman:Date.now() });
+        await P().disaridan({ id:72, metin:'su 250', kaynak:'iPhone', zaman:Date.now() });
+        const l = P().pending().slice().reverse();
+        expect(l).toHaveLength(2);
+        expect(P().preview(l[0]).rows[0].sonra).toBe('+250 ml · toplam ' + U.fmtNum(1250) + ' ml');
+        for(const x of l) expect((await P().approve(x.id)).ok).toBe(true);
+        expect(su(G)).toBe(1500);
+        await P().undo(l[1].id);
+        expect(su(G)).toBe(1250);
+        await P().undo(l[0].id);
+        expect(su(G)).toBe(1000);
+        /* kilo değer olarak kalır */
+        await P().disaridan({ id:73, metin:'kilo 72,4', kaynak:'iPhone', zaman:Date.now() });
+        expect(P().pending()[0].params.ekle).toBeUndefined();
+      });
+    });
+
+    it('toplam alanın üst sınırını geçerse yazılmaz', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        pushVitals(G, { water:9900 });
+        const pv = P().preview(P().fromText('su 500 ml').oneriler[0]);
+        expect(pv.ok).toBe(false);
+      });
+    });
+
+    /* HATA (2026-10-25): mutlak su kaydının (King, model ya da eski öneri)
+       ardından iki ekleme gelince ilkinin geri alınması yalnız ilk eklemeyi
+       düzeltiyordu; ikinci ekleme son yazılan olduğu için hiçbir şey
+       yazılmıyor, sonraki geri almalar yanlış toplama dönüyordu. */
+    async function mutlakArtiIki(){
+      const a = await onayla({ action:'vital-yaz', params:{ field:'water', value:1000, date:G } });
+      const b = await onayla(P().fromText('su 250').oneriler[0]);
+      const c = await onayla(P().fromText('su 250').oneriler[0]);
+      expect(su(G)).toBe(1500);
+      return [a, b, c];
+    }
+
+    it('mutlak 1000 + iki «su 250»: 1, 3, 2 sırasıyla geri alma 500, 250, boş verir', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const [a, b, c] = await mutlakArtiIki();
+        await P().undo(a.id);
+        expect(su(G)).toBe(500);
+        await P().undo(c.id);
+        expect(su(G)).toBe(250);
+        await P().undo(b.id);
+        expect(su(G) == null).toBe(true);
+      });
+    });
+
+    it('mutlak 1000 + iki «su 250»: ters sırayla geri alma 1250, 1000, boş verir', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const [a, b, c] = await mutlakArtiIki();
+        await P().undo(c.id);
+        expect(su(G)).toBe(1250);
+        await P().undo(b.id);
+        expect(su(G)).toBe(1000);
+        await P().undo(a.id);
+        expect(su(G) == null).toBe(true);
+      });
+    });
+
+    it('gün 0 ml ile başladıysa geri alma 0\'a döner, boşa değil (2, 1, 3)', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        pushVitals(G, { water:0 });
+        const [a, b, c] = await mutlakArtiIki();
+        await P().undo(b.id);
+        expect(su(G)).toBe(1250);
+        await P().undo(a.id);
+        expect(su(G)).toBe(250);
+        await P().undo(c.id);
+        expect(su(G)).toBe(0);
+      });
+    });
+  });
+
+  describe('Hızlı giriş — uyku söyleyişleri', () => {
+    it('«7 saat 30 dk», «7,5 saat», «7 buçuk saat» uyku 7,5 olur; seans ya da kısa uyku değil', () => {
+      ['7 saat 30 dk uyudum', '7,5 saat uyudum', '7 buçuk saat uyudum', 'uyku 7 saat 30 dakika', '7 saat 30 dakika uyudum']
+        .forEach(t => {
+          const p = Q().parse(t);
+          expect([t, p && p.kind, p && p.data.field && p.data.field.id, p && p.data.value]).toEqual([t, 'vital', 'sleep', 7.5]);
+          expect([t, P().fromText(t).oneriler.map(o => o.action)]).toEqual([t, ['vital-yaz']]);
+        });
+    });
+
+    it('olumsuz söyleyiş yine yazılmaz', () => {
+      ['7 buçuk saat uyumadım', '7 saat 30 dk uyumadım'].forEach(t => {
+        const r = P().fromText(t);
+        expect([t, r.oneriler.length, r.engellenen.length]).toEqual([t, 0, 1]);
+        expect(r.engellenen[0].neden).toBe('olumsuz');
+      });
+    });
+  });
+
+  describe('Hızlı giriş — vücut ölçüleri ve yaşamsal ölçümler günlüğe yazılır', () => {
+    const vital = t => { const p = Q().parse(t); return p && p.kind === 'vital' ? [p.data.field.id, p.data.value] : [p && p.kind, null]; };
+    it('bel, yağ oranı, boyun, kalça günlük ölçümdür, tahlil değil', () => {
+      expect(Q().parse('bel 84').kind).toBe('vital');
+      expect(vital('bel 84')).toEqual(['waist', 84]);
+      expect(vital('yağ oranı 18,5')).toEqual(['bodyfat', 18.5]);
+      expect(vital('boyun 38')).toEqual(['neck', 38]);
+      expect(vital('kalça 98')).toEqual(['hip', 98]);
+    });
+
+    it('ateş ve oksijen günlük ölçümdür', () => {
+      expect(vital('ateş 37,8')).toEqual(['temp', 37.8]);
+      expect(vital('spo2 97')).toEqual(['spo2', 97]);
+      expect(vital('oksijen 96')).toEqual(['spo2', 96]);
+    });
+
+    it('«tansiyon 120/80» büyük 120, küçük 80 olarak iki ölçüm', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const r = P().fromText('tansiyon 120/80');
+        expect(r.oneriler.map(o => [o.action, o.params.field, o.params.value]))
+          .toEqual([['vital-yaz', 'sbp', 120], ['vital-yaz', 'dbp', 80]]);
+        for(const o of r.oneriler) await onayla(o);
+        const v = SP.Model.vitalsOf(G);
+        expect([v.sbp, v.dbp]).toEqual([120, 80]);
+        /* Bugün kutusu: tek önizleme, iki alan */
+        await SP.Model.saveVitals(G, { sbp:null, dbp:null });
+        const p = Q().parse('tansiyonum 118/76');
+        expect(p.label).toBe('Tansiyon 118/76 mmHg');
+        await Q().apply(p);
+        expect([SP.Model.vitalsOf(G).sbp, SP.Model.vitalsOf(G).dbp]).toEqual([118, 76]);
+      });
+    });
+
+    it('ters ya da sınır dışı tansiyon yazılmaz; sayı değiştirilmez', () => {
+      expect(vital('tansiyon 80/120')[0] === 'sbp').toBe(false);
+      expect(P().fromText('tansiyon 80/120').oneriler).toHaveLength(0);
+      expect(P().fromText('tansiyon 12/8').oneriler).toHaveLength(0);
+    });
+  });
+
+  describe('Hızlı giriş — şikâyet işaretleme (teşhis yok)', () => {
+    it('«baş ağrısı orta» semptom-isaretle olur, şiddet 2', () => {
+      const a = P().quickToAction(Q().parse('baş ağrısı orta'), G);
+      expect([a.action, a.params.symptomId, a.params.severity, a.params.date]).toEqual(['semptom-isaretle', 'bas-agrisi', 2, G]);
+      expect(P().quickToAction(Q().parse('hafif başım dönüyor'), G).params).toEqual({ symptomId:'bas-donmesi', severity:1, date:G });
+      expect(P().quickToAction(Q().parse('şiddetli kramp'), G).params.severity).toBe(3);
+    });
+
+    it('«başım ağrıyor»: şikâyet tanınır ama şiddet tahmin edilmez; «şiddet belirtilmedi» denir', () => {
+      const a = P().quickToAction(Q().parse('başım ağrıyor'), G);
+      expect([a.action, a.params.symptomId, a.params.severity]).toEqual(['semptom-isaretle', 'bas-agrisi', null]);
+      const c = P().check(a);
+      expect(c.ok).toBe(false);
+      expect(c.why).toContain('Şiddet belirtilmedi');
+      const r = P().fromText('başım ağrıyor');
+      expect(r.oneriler).toHaveLength(0);
+      expect(r.anlasilmayan).toHaveLength(1);
+      expect(r.anlasilmayan[0]).toContain('şiddet belirtilmedi');
+      /* bileşikte anlaşılan parça kaybolmaz */
+      const b = P().fromText('başım ağrıyor ve 2 bardak su içtim');
+      expect(b.oneriler.map(o => o.action)).toEqual(['vital-yaz']);
+      expect(b.anlasilmayan[0]).toContain('şiddet belirtilmedi');
+    });
+
+    it('şiddeti söylenen şikâyet onayla yazılır ve geri alınır', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const r = P().fromText('baş ağrısı orta');
+        expect(r.oneriler.map(o => o.action)).toEqual(['semptom-isaretle']);
+        const row = await onayla(r.oneriler[0]);
+        expect(SP.Symptom.ofDay(G)['bas-agrisi']).toBe(2);
+        expect(SP.Model.vitalsOf(G).symptomsLogged).toBe(true);
+        await P().undo(row.id);
+        expect(SP.Symptom.ofDay(G)['bas-agrisi'] || 0).toBe(0);
+      });
+    });
+
+    it('«şikâyetim yok» engellenmez: günü «şikâyet yok» işaretler, geri alınır', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const p = Q().parse('şikâyetim yok');
+        expect(p && p.kind).toBe('symptom');
+        const a = P().quickToAction(p, G);
+        expect([a.action, a.params.yok]).toEqual(['semptom-isaretle', true]);
+        const r = P().fromText('şikâyetim yok');
+        expect([r.oneriler.length, r.engellenen.length]).toEqual([1, 0]);
+        const row = await onayla(r.oneriler[0]);
+        const v = SP.Model.vitalsOf(G);
+        expect([v.symptomsLogged, Object.keys(v.symptoms || {}).length]).toEqual([true, 0]);
+        await P().undo(row.id);
+        expect(!!(SP.Model.vitalsOf(G) || {}).symptomsLogged).toBe(false);
+      });
+    });
+
+    it('olumsuz şikâyet cümlesi ve «yarın şikâyetim yok» yazılmaz', () => {
+      expect(P().fromText('başım ağrımıyor').oneriler).toHaveLength(0);
+      expect(P().fromText('yarın şikâyetim yok').engellenen).toHaveLength(1);
+    });
+
+    it('her şikâyetin Türkçe takma adı vardır', () => {
+      SP.SYMPTOMS.forEach(s => expect([s.id, Array.isArray(s.aliases) && s.aliases.length > 0]).toEqual([s.id, true]));
+    });
+  });
+
+  describe('Hızlı giriş — gün ve öğün sözleri', () => {
+    it('«dün 2 bardak su» düne yazılır; «yarın» engellenir', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const r = P().fromText('dün 2 bardak su');
+        expect(r.oneriler[0].params.date).toBe(DUN);
+        await onayla(r.oneriler[0]);
+        expect(su(DUN)).toBe(500);
+        expect(su(G) == null).toBe(true);
+        expect(P().fromText('yarın 2 bardak su').engellenen).toHaveLength(1);
+      });
+    });
+
+    it('Bugün kutusu da düne yazar', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const p = Q().parse('dün 2 bardak su');
+        expect(Q().tarih(p)).toBe(DUN);
+        await Q().apply(p);
+        expect(su(DUN)).toBe(500);
+        expect(su(G) == null).toBe(true);
+      });
+    });
+
+    it('«dün gece 7 saat uyudum» bugünün gece uykusudur; gün sözü bileşik cümlede sürer', () => {
+      withToday(G, () => {
+        expect(P().fromText('dün gece 7 saat uyudum').oneriler[0].params.date).toBe(G);
+        expect(P().fromText('dün 30 dakika yürüdüm ve 2 bardak su içtim').oneriler.map(o => o.params.date)).toEqual([DUN, DUN]);
+        expect(P().fromText('dün 30 dakika yürüdüm, bugün 2 bardak su içtim').oneriler.map(o => o.params.date)).toEqual([DUN, G]);
+      });
+    });
+
+    it('öğün sözü öğünü belirler: kahvaltı, öğle, akşam, ara öğün', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const slot = t => P().fromText(t).oneriler[0].params.slot;
+        expect(slot('kahvaltıda 2 yumurta')).toBe('kahvalti');
+        expect(slot('öğlen mercimek çorbası')).toBe('ogle');
+        expect(slot('akşam yemeğinde 200 gram tavuk')).toBe('aksam');
+        expect(/^ara/.test(slot('ara öğün elma'))).toBe(true);
+        await Q().apply(Q().parse('kahvaltıda 2 yumurta'));
+        expect(SP.Model.mealsOf(G)[0].slot).toBe('kahvalti');
+      });
+    });
+  });
+
+  describe('Hızlı giriş — hazır öğün ve antrenman paletten ve gelen kutusundan', () => {
+    it('hazır öğün adıyla öneri olur, onayla eklenir, geri alınır', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const m = pushMeal('2026-03-01', 'kahvalti', [['yumurta', 110, 'measured']]);
+        await SP.Hazir.ogunSakla(m, 'Menemen tabağı');
+        const r = P().fromText('menemen tabağımı yedim');
+        expect(r.oneriler.map(o => [o.action, o.params.tur])).toEqual([['hazir-ekle', 'ogun']]);
+        expect(P().preview(r.oneriler[0]).ok).toBe(true);
+        const row = await onayla(r.oneriler[0]);
+        expect(SP.Model.mealsOf(G).map(x => x.note)).toEqual(['Menemen tabağı']);
+        await P().undo(row.id);
+        expect(SP.Model.mealsOf(G)).toHaveLength(0);
+        /* gün sözü burada da geçer */
+        expect(P().fromText('dün menemen tabağımı yedim').oneriler[0].params.date).toBe(DUN);
+      });
+    });
+
+    it('hazır antrenman adıyla öneri olur', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const w = pushWorkout('2026-03-01', { name:'Bacak', minutes:50 });
+        await SP.Hazir.antrenmanSakla(w, 'Bacak günü');
+        const r = P().fromText('bacak günümü yaptım');
+        expect(r.oneriler.map(o => [o.action, o.params.tur])).toEqual([['hazir-ekle', 'antrenman']]);
+        const once = SP.Model.workoutsOf(G).length;
+        await onayla(r.oneriler[0]);
+        expect(SP.Model.workoutsOf(G).length).toBe(once + 1);
+      });
+    });
+
+    it('iPhone gelen kutusundaki hazır öğün Onaylar’a öneri olur, onaysız yazılmaz', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const m = pushMeal('2026-03-01', 'kahvalti', [['yumurta', 110, 'measured']]);
+        await SP.Hazir.ogunSakla(m, 'Menemen tabağı');
+        const r = await P().disaridan({ id:61, metin:'menemen tabağımı yedim', kaynak:'iPhone', zaman:Date.now() });
+        expect(r.durum).toBe('onayda');
+        expect(P().pending().map(x => x.action)).toEqual(['hazir-ekle']);
+        expect(SP.Model.mealsOf(G)).toHaveLength(0);
+      });
+    });
+  });
+
+  /* Tahliller ajanından devir (2026-10-25): hızlı giriş parseLab satırını
+     `skip`/`mismatch`e bakmadan yazıyordu; tanınmayan birimdeki sayı
+     kanonik birimin altına sessizce giriyordu. Yol SP.Parse.rowsToSave. */
+  describe('Hızlı giriş — birimi uyuşmayan tahlil sessizce yazılmaz', () => {
+    it('«ferritin 28 qux/zud» kutudan ve paletten ferritin yazmaz; neden söylenir', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        const p = Q().parse('ferritin 28 qux/zud');
+        if(p){
+          const r = await Q().apply(p);
+          expect(r.ok).toBe(false);
+        }
+        expect((SP.S.labs || []).some(l => l.values && l.values.ferritin)).toBe(false);
+        const f = P().fromText('ferritin 28 qux/zud');
+        expect(f.oneriler).toHaveLength(0);
+        expect(f.anlasilmayan).toHaveLength(1);
+        expect(f.anlasilmayan[0]).toContain('birimi uyuşmuyor');
+        /* birimi uyan satır eskisi gibi */
+        expect(P().fromText('ferritin 28 ng/ml').oneriler.map(o => o.action)).toEqual(['olcum-gir']);
+      });
+    });
+  });
+
+  /* Kısa yol şeridinde en çok kullanılan üç hazır kayıt (2026-10-25). Şerit
+     hiçbir şey yazmaz (kisayol.js söz 5): çip kutuyu «… yedim / yaptım»
+     diye doldurur, kayıt yine önizleme + Kaydet ile. Şeritteki modül
+     düğmesi beşi geçmez: Bugün'ün 14 düğme bütçesi büyümez. */
+  describe('Hızlı giriş — hazır kayıt kısa yolları', () => {
+    it('hazır yoksa şerit eskisi gibi; varsa en çok kullanılan üçü önde, toplam beş', async () => {
+      resetState();
+      await withTodayAsync(G, async () => {
+        expect(SP.App.kisayolDugmeleri().map(d => d.ad)).toEqual(['Uyku', 'Kilo', 'Öğün', 'Hareket', 'Testler']);
+        const m = pushMeal('2026-03-01', 'kahvalti', [['yumurta', 110]]);
+        for(const ad of ['Az kullanılan', 'Menemen tabağı', 'Yulaf kasesi', 'Ton salatası']) await SP.Hazir.ogunSakla(m, ad);
+        /* kaynak seans 30 günlük pencerenin dışında: yalnız eklenen sayılır */
+        const w = pushWorkout('2026-01-01', { name:'Bacak', minutes:50 });
+        await SP.Hazir.antrenmanSakla(w, 'Bacak günü');
+        const kullan = async (id, n) => { for(let i = 0; i < n; i++) await SP.Hazir.ogunEkle(id, U.iso(U.addDays(U.parse(G), -i))); };
+        const id = ad => SP.Hazir.ogunler().find(x => x.ad === ad).id;
+        await kullan(id('Menemen tabağı'), 3);
+        await kullan(id('Yulaf kasesi'), 2);
+        await SP.Hazir.antrenmanEkle(SP.Hazir.antrenmanlar()[0].id, G);
+        const l = SP.App.kisayolDugmeleri();
+        expect(l).toHaveLength(5);
+        expect(l.slice(0, 2).map(d => d.ad)).toEqual(['Uyku', 'Kilo']);
+        expect(l.slice(2).map(d => d.doldur)).toEqual(['Menemen tabağı yedim', 'Yulaf kasesi yedim', 'Bacak günü yaptım']);
+        /* doldurulan cümle hazırı gerçekten bulur */
+        l.slice(2).forEach(d => expect(!!SP.Hazir.bul(d.doldur)).toBe(true));
+      });
+    });
+  });
+
+  describe('Hızlı giriş — Enter ölçüm formunu kaydeder', () => {
+    it('Bugün ölçüm alanında Enter save-vitals eylemine bağlıdır', async () => {
+      expect(SP.App.enterEylemi('v-sleep')).toBe('save-vitals');
+      expect(SP.App.enterEylemi('v-water')).toBe('save-vitals');
+      expect(SP.App.enterEylemi('v-note')).toBe(null);
+      resetState();
+      const gercek = SP.App.render;
+      SP.App.render = () => {};
+      const el = document.createElement('input');
+      el.id = 'v-sleep'; el.type = 'number'; el.defaultValue = ''; el.value = '7';
+      document.body.appendChild(el);
+      try{
+        await withTodayAsync(G, async () => {
+          el.dispatchEvent(new KeyboardEvent('keydown', { key:'Enter', bubbles:true, cancelable:true }));
+          await new Promise(r => setTimeout(r, 30));
+          expect((SP.Model.vitalsOf(G) || {}).sleep).toBe(7);
+        });
+      }finally{ el.remove(); SP.App.render = gercek; }
     });
   });
 })();

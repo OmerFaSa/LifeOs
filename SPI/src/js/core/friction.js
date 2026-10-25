@@ -160,7 +160,8 @@ SP.Friction = (function(){
     if(bekleyen > 4){
       out.push({ id:'proposals', label:bekleyen + ' bekleyen öneri',
         note:'Karar bekleyen her öneri her açılışta yeniden okunuyor. '
-           + 'Toplu reddetmek de bir karardır.', route:'office' });
+           + 'Toplu reddetmek de bir karardır.', route:'onaylar' });
+      /* 2026-10-25: 'office'e gidiyordu; bekleyen öneriler Onaylar'dadır. */
     }
     const ilac = (S.meds || []).filter(m => m.active !== false).length;
     if(ilac > 8){

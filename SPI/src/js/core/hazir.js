@@ -21,7 +21,8 @@
         kez saklanırsa eskisinin yerine geçer.
      5. ADIYLA BULUNUR. «menemen tabağımı yedim» gibi bir cümle hazır öğünün
         adını içeriyorsa `bul` onu döner; ekleme yine önizleme ve onayla
-        (Bugün kutusu ve King, giris.js). */
+        (Bugün kutusu ve King, giris.js). Antrenmanın yalnız adı yazılırsa
+        («bacak günü») fiil gerekmez (2026-10-25). */
 
 window.SP = window.SP || {};
 
@@ -77,7 +78,9 @@ SP.Hazir = (function(){
 
   /* -------------------------------------------------------- antrenman */
 
-  const KOPYALANMAZ = ['id', 'date', 'rpe', 'note', 'createdAt', 'updatedAt', 'rota', 'route', 'gps'];
+  /* planId (2026-10-25): plan satırından yazılan seansın bağı; kopyaya
+     geçerse hazır antrenman her eklenişte «plandan» görünürdü. */
+  const KOPYALANMAZ = ['id', 'date', 'rpe', 'note', 'createdAt', 'updatedAt', 'rota', 'route', 'gps', 'planId'];
   async function antrenmanSakla(w, ad){
     if(!w) return { ok:false, why:'Seans bulunamadı.' };
     const kayit = JSON.parse(JSON.stringify(w));
@@ -112,12 +115,25 @@ SP.Hazir = (function(){
 
   const YEDIM = /(yedim|yedik|içtim|yiyorum|yiyeceğim|yemek yedim|atıştırdım|kahvaltı ettim)/;
   const YAPTIM = /(yaptım|yaptık|bitirdim|tamamladım|çalıştım|antrenman ettim|koştum)/;
+  /* FİİLSİZ AD (2026-10-25): «bacak günü» yazınca kayıtlı antrenman
+     bulunmuyordu, fiil şarttı. Cümlenin KENDİSİ bir antrenmanın adıysa
+     (başta «bugün», sonda iyelik eki ve noktalama olabilir) fiil gerekmez.
+     Adın geçtiği başka bir cümle («bacak günü nasıl yapılır») yine fiil
+     ister; öğün de fiil ister (yemeğin adı bir gıdanın da adı olabilir).
+     Ekleme yine önizleme ve onayla (söz 5). */
+  const sade = s => s.replace(/[.!?…,;:]+$/, '').replace(/^bugün\s+/, '').trim();
+  function yalnizAd(t, a){
+    return t === a || (t.indexOf(a) === 0 && /^[a-zçğıöşü]{1,4}$/.test(t.slice(a.length)));
+  }
   /* En uzun ad kazanır: «menemen» ve «menemen tabağı» varsa ikincisi. */
   function bul(metin){
     const t = kucuk(metin);
     if(!t) return null;
     const ad = (l, tur) => l.map(h => ({ h, tur, a:kucuk(h.ad) })).filter(x => x.a.length >= 3 && t.indexOf(x.a) >= 0);
-    const adaylar = (YEDIM.test(t) ? ad(ogunler(), 'ogun') : []).concat(YAPTIM.test(t) ? ad(antrenmanlar(), 'antrenman') : []);
+    const yalin = sade(t);
+    const fiilsiz = YEDIM.test(t) || YAPTIM.test(t) ? []
+      : antrenmanlar().map(h => ({ h, tur:'antrenman', a:kucuk(h.ad) })).filter(x => x.a.length >= 3 && yalnizAd(yalin, x.a));
+    const adaylar = (YEDIM.test(t) ? ad(ogunler(), 'ogun') : []).concat(YAPTIM.test(t) ? ad(antrenmanlar(), 'antrenman') : [], fiilsiz);
     if(!adaylar.length) return null;
     adaylar.sort((x, y) => y.a.length - x.a.length);
     return { tur:adaylar[0].tur, hazir:adaylar[0].h };

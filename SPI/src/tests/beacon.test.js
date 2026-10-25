@@ -565,6 +565,19 @@
       expect(SP.S.workouts.length).toBe(0);
     });
 
+    /* HATA (2026-10-25): iki su eklemesi olan teklifte her satırın toplamı
+       kayıtlı değerden hesaplanıyordu (1000 ml + iki «su 250»: ikisi de
+       «1250»). Satırlar uygulanacakları sırayla önizlenir (Proposals.sirali). */
+    it('iki su eklemesinde ikinci satırın toplamı birinciyi sayar', async () => {
+      resetState();
+      await SP.Model.saveVitals(DUN, { water:1000 });
+      const o = B().kayitOku(teklif('su 250, su 250'));
+      expect(o.yazilacak.length).toBe(2);
+      const metin = o.yazilacak.map(y => y.satirlar.join(' ')).join(' | ');
+      expect(metin).toContain(SP.U.fmtNum(1250) + ' ml');
+      expect(metin).toContain(SP.U.fmtNum(1500) + ' ml');
+    });
+
     it('«Kaydet» o günün kaydına yazar ve geri alınabilir', async () => {
       resetState(); await ayarla({}); await B().load();
       const n = teklif('7 saat uyudum');

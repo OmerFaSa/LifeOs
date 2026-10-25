@@ -23,39 +23,128 @@ SP.Screens.meals = (function(){
 
   /* ---------------------------------------------------------- giris */
 
-  /* Akıllı tahmin & hızlı besin önerileri — aradıkça canlı daralır, boşken yuvaya göre önerir. */
-  function mealSuggestionChips(){
-    const slot = S.ui.mealSlot || guessSlot();
-    const q = (S.ui.mealDraftQuery || '').trim();
-    let list = [];
-    if(q.length >= 2){
-      const n = U.norm(q);
-      list = SP.FOODS.filter(f => U.norm(f.name + ' ' + (f.aliases || []).join(' ')).indexOf(n) >= 0).slice(0, 6);
-    } else {
-      const slotMap = {
-        kahvalti: ['yumurta', 'lor-peyniri', 'beyaz-peynir', 'yulaf', 'zeytin-siyah', 'omlet'],
-        ara1:     ['muz', 'elma', 'badem', 'kefir', 'cilek'],
-        ogle:     ['tavuk-gogsu', 'bulgur-pilavi', 'mercimek-corbasi', 'salatalik', 'ayran'],
-        ara2:     ['protein-bar', 'fistik-ezmesi', 'ceviz', 'kuru-kayisi'],
-        aksam:    ['somon', 'kofte', 'kuru-fasulye-etli', 'haslanmis-patates', 'suzme-yogurt'],
-        gece:     ['kazein-protein', 'suzme-yogurt', 'yesil-cay', 'maden-suyu'],
-      };
-      const ids = slotMap[slot] || ['yumurta', 'tavuk-gogsu', 'yulaf', 'muz'];
-      list = ids.map(id => SP.FOOD_BY_ID[id]).filter(Boolean);
+  /* Seçili öğün: kullanıcı seçtiyse o, seçmediyse saate göre (2026-10-25:
+     hazır ve sık öğünler de bunu kullanır; eskiden hep saate bakıyordu). */
+  const seciliSlot = () => S.ui.mealSlot || guessSlot();
+
+  /* Yerleşik öneri listesi: kişisel veri yetmezse boşluğu bu doldurur. */
+  const SLOT_ONERI = {
+    kahvalti: ['yumurta', 'lor-peyniri', 'beyaz-peynir', 'yulaf', 'zeytin-siyah', 'omlet'],
+    ara1:     ['muz', 'elma', 'badem', 'kefir', 'cilek'],
+    ogle:     ['tavuk-gogsu', 'bulgur-pilavi', 'mercimek-corbasi', 'salatalik', 'ayran'],
+    ara2:     ['protein-bar', 'fistik-ezmesi', 'ceviz', 'kuru-kayisi'],
+    aksam:    ['somon', 'kofte', 'kuru-fasulye-etli', 'haslanmis-patates', 'suzme-yogurt'],
+    gece:     ['kazein-protein', 'suzme-yogurt', 'yesil-cay', 'maden-suyu'],
+  };
+  /* Kişisel öneri için bir gıdanın bu öğünde en az kaç kez girilmiş olması gerekir. */
+  const KISISEL_ESIK = 2;
+
+  /* SON PORSİYON (2026-10-25): her gıdanın son 90 günde en son girilen
+     gramı ve ev ölçüsü. Ayrı bir kayıt tutulmaz; defterin kendisinden
+     okunur, böylece silinen kayıt «hatırlanmaz». Gramı olmayan kalem atlanır. */
+  function sonPorsiyonlar(){
+    const harita = {};
+    for(let i = 0; i < 90; i++){
+      const d = U.iso(U.addDays(U.today(), -i));
+      const ogunler = M.mealsOf(d);
+      for(let j = ogunler.length - 1; j >= 0; j--){
+        const items = ogunler[j].items || [];
+        for(let k = items.length - 1; k >= 0; k--){
+          const it = items[k];
+          if(it && it.foodId && !harita[it.foodId] && Number(it.g) > 0){
+            harita[it.foodId] = { g:Math.round(Number(it.g)), portion:it.portion || null, date:d };
+          }
+        }
+      }
     }
-    if(!list.length) return '';
-    return html`
-      <div class="meal-suggs row wrap gap-6 mt-8" aria-label="Besin önerileri">
-        ${map(list.slice(0, 4), f => {
-          const p = (f.portions || [])[0];
-          const pName = p ? p.label : '100g';
-          return html`<button type="button" class="btn btn--xs btn--ghost chip-sugg"
-            data-act="quick-add-food" data-id="${f.id}" data-g="${p ? p.g : 100}" data-label="${pName}"
-            title="${f.name} · ${f.kcal} kcal · P ${f.p}g">
-            + ${f.name} <span class="tiny dim">(${pName})</span>
-          </button>`;
-        })}
-      </div>`;
+    return harita;
+  }
+  /* Son porsiyonun ekrandaki adı: ev ölçüsü gramıyla tutuyorsa ya da
+     çarpanlı bir ölçüyse («2 tabak») o, değilse gram. */
+  function porsiyonAdi(f, son){
+    const p = son.portion;
+    if(p){
+      const tanim = (f.portions || []).find(x => x.label === p);
+      if(tanim && Math.round(tanim.g) === son.g) return p;
+      if(!tanim && /^(½|\d+)\s+\S/.test(p) && !/^1\s/.test(p) && !/^\d+\s*g$/.test(p)) return p;
+    }
+    return son.g + ' g';
+  }
+
+  /* KİŞİSEL ÖNERİLER (2026-10-25): bu öğünde son 30 günde en az iki kez
+     girilen gıdalar, en sık olan başta. Sayı öğün başına sayılır (aynı
+     öğünde iki kez yazılan gıda bir kez); uydurulmaz. */
+  function kisiselSik(slot){
+    const say = {};
+    for(let i = 0; i < 30; i++){
+      M.mealsOf(U.iso(U.addDays(U.today(), -i))).forEach(m => {
+        if(m.slot !== slot) return;
+        const gordu = {};
+        (m.items || []).forEach(it => {
+          if(!it || !it.foodId || !SP.FOOD_BY_ID[it.foodId] || gordu[it.foodId]) return;
+          gordu[it.foodId] = 1;
+          say[it.foodId] = (say[it.foodId] || 0) + 1;
+        });
+      });
+    }
+    return Object.keys(say).filter(id => say[id] >= KISISEL_ESIK)
+      .sort((a, b) => say[b] - say[a] || a.localeCompare(b)).map(id => ({ id, n:say[id] }));
+  }
+
+  /* Öneri çipleri: yazı varsa aranan gıdalar, yoksa kişisel liste (eksiği
+     yerleşik listeden). Her çip son kullanılan porsiyonla gelir; hiç
+     girilmemiş gıda ilk ev ölçüsüyle. Döner: [{ f, g, label, n, son }]. */
+  function oneriListesi(slot, q){
+    const son = sonPorsiyonlar();
+    const cip = (f, n) => {
+      const s = son[f.id];
+      if(s) return { f, g:s.g, label:porsiyonAdi(f, s), n:n || null, son:true };
+      const p = (f.portions || [])[0];
+      return { f, g:p ? p.g : 100, label:p ? p.label : '100 g', n:n || null, son:false };
+    };
+    const metin = String(q || '').trim();
+    if(metin.length >= 2){
+      const n = U.norm(metin);
+      return SP.FOODS.filter(f => U.norm(f.name + ' ' + (f.aliases || []).join(' ')).indexOf(n) >= 0)
+        .slice(0, 4).map(f => cip(f));
+    }
+    const liste = kisiselSik(slot).slice(0, 4).map(x => cip(SP.FOOD_BY_ID[x.id], x.n));
+    (SLOT_ONERI[slot] || ['yumurta', 'tavuk-gogsu', 'yulaf', 'muz']).forEach(id => {
+      const f = SP.FOOD_BY_ID[id];
+      if(f && liste.length < 4 && !liste.some(x => x.f.id === id)) liste.push(cip(f));
+    });
+    return liste;
+  }
+  function cipDugmeleri(liste){
+    return liste.map(x => {
+      const baslik = x.f.name + ' · ' + x.f.kcal + ' kcal / 100 g'
+        + (x.n ? ' · son 30 günde bu öğünde ' + x.n + ' kez' : '')
+        + (x.son ? ' · son girdiğin porsiyon' : '');
+      return '<button type="button" class="btn btn--xs btn--ghost chip-sugg" data-act="quick-add-food"'
+        + ' data-id="' + U.esc(x.f.id) + '" data-g="' + x.g + '" data-label="' + U.esc(x.label) + '"'
+        + ' title="' + U.esc(baslik) + '">+ ' + U.esc(x.f.name)
+        + ' <span class="tiny dim">(' + U.esc(x.label) + ')</span></button>';
+    }).join('');
+  }
+  /* Çip kutusu her zaman çizilir; eşleşme yoksa gizlenir (eskiden yeni
+     yazı hiçbir gıdayla eşleşmeyince eski çipler ekranda kalıyordu). */
+  function mealSuggestionChips(){
+    const liste = oneriListesi(seciliSlot(), S.ui.mealDraftQuery);
+    return raw('<div class="meal-suggs row wrap gap-6 mt-8" aria-label="Besin önerileri"'
+      + (liste.length ? '' : ' hidden') + '>' + cipDugmeleri(liste) + '</div>');
+  }
+  function cipleriTazele(){
+    const kutu = document.querySelector('.meal-suggs');
+    if(!kutu) return;
+    const liste = oneriListesi(seciliSlot(), S.ui.mealDraftQuery);
+    kutu.innerHTML = cipDugmeleri(liste);
+    kutu.hidden = !liste.length;
+  }
+
+  /* GERİ AL (2026-10-25): her öğün ekleme ve silmesi «Geri al» taşır
+     (AGENTS §1.9, küçük aksiyon). Geri alma yalnız o işlemin yazdığını geri alır. */
+  function geriAlToast(metin, geriAl){
+    UI.toast(metin, { undo:async () => { await geriAl(); UI.toast('Geri alındı'); SP.App.render(); } });
   }
 
   /* iPhone Faz 2b: ev ölçüsü listesi ve «tarttıysan gramı yaz» ⓘ'de
@@ -307,8 +396,15 @@ SP.Screens.meals = (function(){
     const anahtar = items => (items || []).map(x => x.foodId).sort().join('+');
     const hazir = SP.Hazir ? SP.Hazir.ogunler() : [];
     const sik = sablonlar().filter(x => !hazir.some(h => anahtar(h.items) === x.anahtar));
-    if(!hazir.length && !sik.length) return '';
+    /* DÜNKÜNÜN AYNISI (2026-10-25, core/dunku.js): bir önceki günün bu
+       güne girilmemiş öğünleri tek dokunuşla; kopya kendi öğün yerine
+       yazılır, «Geri al» kalır. */
+    const dk = SP.Dunku ? SP.Dunku.adaylar(shownDate()).ogunler : [];
+    if(!hazir.length && !sik.length && !dk.length) return '';
     const duzen = !!S.ui.hazirOgunDuzen && hazir.length;
+    const dunkuHtml = dk.length && !duzen ? VT().ogunSablonlari({ act:'ogun-dunku-ekle',
+      baslik:(shownDate() === U.todayISO() ? 'dünün aynısı' : 'önceki günün aynısı') + ' · tek dokunuş',
+      sablonlar:dk.map(x => ({ ad:x.ad, icerik:x.ozet, on:false, data:{ 'data-id':x.id } })) }) : '';
     const ust = hazir.length ? '<div class="hazir__ust">'
       + String(K.Button({ label:duzen ? 'Bitti' : 'Düzenle', size:'sm', tone:'ghost', act:'hazir-ogun-duzen' })) + '</div>' : '';
     const liste = duzen
@@ -321,7 +417,7 @@ SP.Screens.meals = (function(){
       return { ad:SP.Ogun ? SP.Ogun.ad(x.slot) : (sl ? sl.label : x.slot), icerik:x.ids.map(id => SP.FOOD_BY_ID[id].name.toLocaleLowerCase('tr-TR')).join(' · '),
         on:bugun.indexOf(x.anahtar) >= 0, data:{ 'data-date':x.ornek.date, 'data-id':x.ornek.id } };
     }) }) : '';
-    return vkutu('Hazır öğünler', '', ust + liste + sikHtml);
+    return vkutu('Hazır öğünler', '', ust + liste + dunkuHtml + sikHtml);
   }
   function hazirOgunSheet(meal){
     UI.sheet({
@@ -616,15 +712,35 @@ SP.Screens.meals = (function(){
     barkodBagSheet();
   }
 
-  function portionSheet(foodId){
+  /* PORSİYON ÇARPANI (2026-10-25): «½ · 1 · 2 · 3» ev ölçüsünü çarpar.
+     Çarpılan ölçü yine «tahmin»dir; tartılan gram çarpılmaz. */
+  const CARPANLAR = [{ value:'0.5', label:'½' }, { value:'1', label:'1' }, { value:'2', label:'2' }, { value:'3', label:'3' }];
+  function carpanliEtiket(label, c){
+    if(c === 1) return label;
+    const ad = c === 0.5 ? '½' : String(c);
+    return /^1\s/.test(label) ? ad + label.slice(1) : ad + ' × ' + label;
+  }
+
+  function portionSheet(foodId, carpan){
     const f = SP.FOOD_BY_ID[foodId];
     if(!f) return;
+    const c = [0.5, 1, 2, 3].indexOf(Number(carpan)) >= 0 ? Number(carpan) : 1;
+    const son = sonPorsiyonlar()[f.id];
+    const dugme = (label, g, ekSinif) => {
+      const gc = Math.max(1, Math.round(g * c));
+      const ad = carpanliEtiket(label, c);
+      return K.Button({ label:ad + ' (' + gc + ' g)', size:'sm', tone:ekSinif || undefined,
+        act:'add-portion', data:{ 'data-id':f.id, 'data-g':gc, 'data-label':ad } });
+    };
     UI.sheet({
-      title:f.name, subtitle:'Porsiyon seç',
+      title:f.name, subtitle:'Porsiyon seç · ev ölçüsü tahmindir',
       body:String(K.Stack([
-        html`<div class="row wrap">${map(f.portions || [], p => K.Button({
-          label:p.label + ' (' + p.g + ' g)', size:'sm',
-          act:'add-portion', data:{ 'data-id':f.id, 'data-g':p.g, 'data-label':p.label } }))}</div>`,
+        html`<div class="row wrap gap-8"><span class="small dim">Kaç porsiyon</span>
+          ${K.Segmented({ act:'porsiyon-carpan', value:String(c), aria:'Porsiyon çarpanı', items:CARPANLAR,
+            data:{ 'data-id':f.id } })}</div>`,
+        when(son, () => html`<div class="row wrap gap-6"><span class="small dim">Son girdiğin</span>
+          ${dugme(son ? porsiyonAdi(f, son) : '', son ? son.g : 0, 'primary')}</div>`),
+        html`<div class="row wrap">${map(f.portions || [], p => dugme(p.label, p.g))}</div>`,
         K.Field({ label:'Ya da gram gir (tarttıysan)',
           input:K.Input({ id:'portion-g', type:'number', numeric:true, min:1, step:'1', placeholder:'150' }) }),
         K.Table({ tight:true, headers:['100 gramda', { label:'Değer', num:true }], rows:[
@@ -945,42 +1061,51 @@ SP.Screens.meals = (function(){
     if(mt && !mt._hasAutoListener){
       mt._hasAutoListener = true;
       mt.addEventListener('input', (e) => {
-        const val = e.target.value.trim();
-        S.ui.mealDraftQuery = val;
+        S.ui.mealDraftQuery = e.target.value.trim();
         S.ui.mealDraftText = e.target.value;
-        const cont = document.querySelector('.meal-suggs');
-        if(cont){
-          let list = [];
-          if(val.length >= 2){
-            const n = U.norm(val);
-            list = SP.FOODS.filter(f => U.norm(f.name + ' ' + (f.aliases || []).join(' ')).indexOf(n) >= 0).slice(0, 6);
-          }
-          if(list.length){
-            cont.innerHTML = list.slice(0, 4).map(f => {
-                const p = (f.portions || [])[0];
-                const pName = p ? p.label : '100g';
-                return `<button type="button" class="btn btn--xs btn--ghost chip-sugg"
-                  data-act="quick-add-food" data-id="${f.id}" data-g="${p ? p.g : 100}" data-label="${pName}"
-                  title="${f.name} · ${f.kcal} kcal · P ${f.p}g">
-                  + ${f.name} <span class="tiny dim">(${pName})</span>
-                </button>`;
-              }).join('');
-          }
-        }
+        /* 2026-10-25: çipler her harfte yazının kendisini izler; eşleşme
+           yoksa kutu boşalır, yazı silinince öğünün önerileri döner. */
+        cipleriTazele();
       });
     }
   }
 
-  /* Metinden gelen kalemleri secili ogune yazar. */
+  /* Metinden gelen kalemleri secili ogune yazar. Doner: geri alma bilgisi
+     (2026-10-25) -- hangi gun, hangi ogun, yeni mi acildi, hangi kalemler. */
   async function pushItems(items, note){
     const d = shownDate();
-    const slot = S.ui.mealSlot || guessSlot();
+    const slot = seciliSlot();
     const rows = M.mealsOf(d).slice();
     let meal = rows.find(m => m.slot === slot);
-    if(!meal){ meal = M.newMeal(slot); rows.push(meal); }
-    meal.items = (meal.items || []).concat(items);
+    const yeni = !meal;
+    if(yeni){ meal = M.newMeal(slot); rows.push(meal); }
+    const eskiNot = meal.note;
+    const eklenen = items.map(x => Object.assign({}, x));
+    meal.items = (meal.items || []).concat(eklenen);
     if(note) meal.note = [meal.note, note].filter(Boolean).join(' · ');
     await M.saveMeals(d, rows);
+    return { d, mealId:meal.id, yeni, eklenen, eskiNot };
+  }
+  /* Eklemeyi geri alir: yalniz o eklemenin kalemleri cikar; ogun bu
+     eklemeyle acildiysa ve baska kalemi yoksa ogun de gider. Kalem nesnesi
+     degistiyse (esitleme) ayni gida ve gram sondan eslenir. */
+  async function eklemeyiGeriAl(r){
+    const rows = M.mealsOf(r.d).slice();
+    const meal = rows.find(m => m.id === r.mealId);
+    if(!meal) return;
+    let kalan = (meal.items || []).filter(it => r.eklenen.indexOf(it) < 0);
+    if(kalan.length === (meal.items || []).length){
+      kalan = (meal.items || []).slice();
+      r.eklenen.forEach(x => {
+        for(let i = kalan.length - 1; i >= 0; i--){
+          if(kalan[i].foodId === x.foodId && Number(kalan[i].g) === Number(x.g)){ kalan.splice(i, 1); break; }
+        }
+      });
+    }
+    if(r.yeni && !kalan.length){ await M.deleteMeal(r.d, r.mealId); return; }
+    meal.items = kalan;
+    meal.note = r.eskiNot;
+    await M.saveMeals(r.d, rows);
   }
 
   const handle = {
@@ -1007,12 +1132,12 @@ SP.Screens.meals = (function(){
       if(!photoRes) return;
       const items = photoRes.items.filter(x => !x.skip);
       if(!items.length) return;
-      await pushItems(items.map(i => ({ foodId:i.foodId, g:i.g, cert:'estimated',
+      const r = await pushItems(items.map(i => ({ foodId:i.foodId, g:i.g, cert:'estimated',
         portion:'fotoğraf' })), 'fotoğraftan');
       photoRes = null; photoFile = null;
       UI.closeSheet();
-      UI.toast(items.length + ' gıda eklendi · tahmin');
       SP.App.render();
+      geriAlToast(items.length + ' gıda eklendi · tahmin', () => eklemeyiGeriAl(r));
     },
     async 'meal-tab'(el){ K.bolumeGit(el.dataset.tab); },
     /* Tahlil bagindan olcume gitmek: Testler bolumu o olcumun egilimini acar. */
@@ -1037,24 +1162,38 @@ SP.Screens.meals = (function(){
       if(!f) return;
       const g = Number(el.dataset.g) || 100;
       const portion = el.dataset.label || '1 porsiyon';
-      await pushItems([{ foodId:f.id, g:g, cert:'estimated', portion:portion }], f.name);
+      const eskiMetin = S.ui.mealDraftText || '';
+      const r = await pushItems([{ foodId:f.id, g:g, cert:'estimated', portion:portion }], f.name);
       S.ui.mealDraftText = '';
       S.ui.mealDraftQuery = '';
-      UI.toast(f.name + ' (' + portion + ') eklendi · tahmin');
       SP.App.render();
+      geriAlToast(f.name + ' (' + portion + ') eklendi · tahmin', async () => {
+        await eklemeyiGeriAl(r);
+        S.ui.mealDraftText = eskiMetin; S.ui.mealDraftQuery = eskiMetin.trim();
+      });
     },
+    /* 2026-10-25: tanınmayan parça atılmaz -- alanda kalır ve bildirimde
+       adıyla yazılır; kullanıcı düzeltip yeniden ekler (MIMARI §4). */
     async 'add-meal'(){
       const el = document.getElementById('meal-text');
       if(!el || !el.value.trim()) return;
-      const parsed = SP.Parse.parseMeal(el.value);
-      if(!parsed.items.length){ UI.toast(parsed.note); return; }
-      await pushItems(parsed.items.map(i => ({ foodId:i.foodId, g:i.g, cert:i.cert, portion:i.portion })),
-        el.value.trim());
-      el.value = '';
-      S.ui.mealDraftText = '';
-      S.ui.mealDraftQuery = '';
-      UI.toast(parsed.note);
+      const metin = el.value;
+      const parsed = SP.Parse.parseMeal(metin);
+      const kalan = (parsed.unmatched || []).join(', ');
+      if(!parsed.items.length){
+        UI.toast(kalan ? 'Tanınmadı: ' + kalan + '. «1 tabak mercimek çorbası» gibi yazmayı dene.' : parsed.note);
+        return;
+      }
+      const r = await pushItems(parsed.items.map(i => ({ foodId:i.foodId, g:i.g, cert:i.cert, portion:i.portion })),
+        parsed.items.map(i => i.source).filter(Boolean).join(', '));
+      el.value = kalan;
+      S.ui.mealDraftText = kalan;
+      S.ui.mealDraftQuery = kalan;
       SP.App.render();
+      geriAlToast(parsed.items.length + ' gıda eklendi' + (kalan ? ' · Tanınmadı: ' + kalan : ''), async () => {
+        await eklemeyiGeriAl(r);
+        S.ui.mealDraftText = metin; S.ui.mealDraftQuery = metin.trim();
+      });
     },
     'hazir-ogun-sakla'(el){
       const meal = M.mealsOf(shownDate()).find(m => m.id === el.dataset.id);
@@ -1070,7 +1209,7 @@ SP.Screens.meals = (function(){
     },
     async 'hazir-ogun-ekle'(el){
       const d = shownDate();
-      const r = await SP.Hazir.ogunEkle(el.dataset.id, d, guessSlot());
+      const r = await SP.Hazir.ogunEkle(el.dataset.id, d, seciliSlot());
       if(!r.ok){ UI.toast(r.why); return; }
       SP.App.render();
       { const Z = (window.LIFEOS || {}).ZEMIN; if(Z && Z.nabiz) Z.nabiz(); }
@@ -1089,26 +1228,63 @@ SP.Screens.meals = (function(){
     async 'sablon-ekle'(el){
       const kaynak = M.mealsOf(el.dataset.date).find(m => m.id === el.dataset.id);
       if(!kaynak) return;
-      const yeni = M.newMeal(guessSlot());
+      const yeni = M.newMeal(seciliSlot());
       yeni.items = (kaynak.items || []).map(x => Object.assign({}, x));
       const d = shownDate();
       await M.addMeal(d, yeni);
       SP.App.render();
       UI.toast('Öğün eklendi', { undo:async () => { await M.deleteMeal(d, yeni.id); SP.App.render(); } });
     },
-    async 'del-meal'(el){
-      await M.deleteMeal(shownDate(), el.dataset.id);
-      /* Öğünle birlikte fotoğrafı da gider; sahipsiz fotoğraf kalmaz. */
-      if(SP.Foto) await SP.Foto.sil('ogun:' + el.dataset.id);
+    async 'ogun-dunku-ekle'(el){
+      const d = shownDate();
+      const r = await SP.Dunku.ogunKopyala(d, el.dataset.id);
+      if(!r.ok){ UI.toast(r.why); return; }
       SP.App.render();
+      { const Z = (window.LIFEOS || {}).ZEMIN; if(Z && Z.nabiz) Z.nabiz(); }
+      geriAlToast('«' + r.ad + '» dünkü gibi eklendi', () => SP.Dunku.geriAl(d, 'ogun', r.id));
+    },
+    /* 2026-10-25: silme geri alınır. Öğünün kopyası ve fotoğrafı önce
+       alınır; «Geri al» ikisini de yerine koyar (Mutfak'taki gıda silme gibi). */
+    async 'del-meal'(el){
+      const d = shownDate(), id = el.dataset.id;
+      const rows = M.mealsOf(d);
+      const sira = rows.findIndex(m => m.id === id);
+      if(sira < 0) return;
+      const kopya = JSON.parse(JSON.stringify(rows[sira]));
+      let foto = null;
+      if(SP.Foto){ try{ foto = await SP.Foto.al('ogun:' + id); }catch(e){ foto = null; } }
+      await M.deleteMeal(d, id);
+      /* Öğünle birlikte fotoğrafı da gider; sahipsiz fotoğraf kalmaz. */
+      if(SP.Foto) await SP.Foto.sil('ogun:' + id);
+      SP.App.render();
+      const ad = SP.Ogun ? SP.Ogun.ad(kopya.slot) : kopya.slot;
+      geriAlToast('«' + ad + '» silindi', async () => {
+        const r2 = M.mealsOf(d).slice();
+        if(!r2.some(m => m.id === kopya.id)) r2.splice(Math.min(sira, r2.length), 0, kopya);
+        await M.saveMeals(d, r2);
+        if(foto && SP.Foto) await SP.Foto.kaydet('ogun:' + kopya.id, foto);
+      });
     },
     async 'del-item'(el){
-      const rows = M.mealsOf(shownDate()).slice();
+      const d = shownDate();
+      const rows = M.mealsOf(d).slice();
       const meal = rows.find(m => m.id === el.dataset.id);
       if(!meal) return;
-      meal.items.splice(Number(el.dataset.i), 1);
-      await M.saveMeals(shownDate(), rows);
+      const sira = Number(el.dataset.i);
+      const kalem = meal.items[sira];
+      if(!kalem) return;
+      const ogunKopya = JSON.parse(JSON.stringify(Object.assign({}, meal, { items:[] })));
+      meal.items.splice(sira, 1);
+      await M.saveMeals(d, rows);
       SP.App.render();
+      const f = SP.FOOD_BY_ID[kalem.foodId];
+      geriAlToast((f ? f.name : 'Kalem') + ' çıkarıldı', async () => {
+        const r2 = M.mealsOf(d).slice();
+        let m2 = r2.find(m => m.id === ogunKopya.id);
+        if(!m2){ m2 = ogunKopya; r2.push(m2); }
+        m2.items.splice(Math.min(sira, m2.items.length), 0, kalem);
+        await M.saveMeals(d, r2);
+      });
     },
     async 'open-search'(){ S.ui.foodPage = 1; searchSheet(); },
     async 'food-page'(el){ S.ui.foodPage = Number(el.dataset.page); searchSheet(); },
@@ -1124,21 +1300,25 @@ SP.Screens.meals = (function(){
       UI.toast('Barkod bağlandı');
       portionSheet(el.dataset.id);
     },
+    async 'porsiyon-carpan'(el){ portionSheet(el.dataset.id, Number(el.dataset.value)); },
     async 'add-portion'(el){
-      await pushItems([{ foodId:el.dataset.id, g:Number(el.dataset.g),
-        cert:'estimated', portion:el.dataset.label }]);
+      const f = SP.FOOD_BY_ID[el.dataset.id];
+      const g = Number(el.dataset.g);
+      if(!f || !(g > 0)) return;
+      const r = await pushItems([{ foodId:f.id, g, cert:'estimated', portion:el.dataset.label }]);
       UI.closeSheet();
-      UI.toast('Eklendi');
       SP.App.render();
+      geriAlToast(f.name + ' (' + el.dataset.label + ') eklendi · tahmin', () => eklemeyiGeriAl(r));
     },
     async 'add-grams'(el){
       const input = document.getElementById('portion-g');
       const g = input ? Number(input.value) : 0;
-      if(!g){ UI.toast('Gram gir'); return; }
-      await pushItems([{ foodId:el.dataset.id, g, cert:'measured', portion:null }]);
+      if(!(g > 0)){ UI.toast('Gram gir'); return; }
+      const f = SP.FOOD_BY_ID[el.dataset.id];
+      const r = await pushItems([{ foodId:el.dataset.id, g, cert:'measured', portion:null }]);
       UI.closeSheet();
-      UI.toast('Eklendi · ölçüldü');
       SP.App.render();
+      geriAlToast((f ? f.name + ' ' : '') + g + ' g eklendi · ölçüldü', () => eklemeyiGeriAl(r));
     },
     async 'open-nutrient'(el){ nutrientSheet(el.dataset.id); },
   };
@@ -1151,7 +1331,7 @@ SP.Screens.meals = (function(){
       const run = document.querySelector('[data-act="run-photo"]');
       if(run) run.disabled = !photoFile || !SP.Extract.modelReady();
     },
-    async 'pick-slot'(el){ S.ui.mealSlot = el.value; },
+    async 'pick-slot'(el){ S.ui.mealSlot = el.value; cipleriTazele(); },
     /* ÖĞÜNLERİM (core/ogun.js): ad ve saat kullanıcının. */
     'ogun-duzen'(){ S.ui.ogunTaslak = { liste:SP.Ogun.liste().map(x => Object.assign({}, x)), hata:null }; ogunSheet(); },
     'ogun-ekle'(){ ogunOku(); const t = S.ui.ogunTaslak; t.liste.push(SP.Ogun.yeni('', null)); ogunSheet(); },
@@ -1213,11 +1393,13 @@ SP.Screens.meals = (function(){
       const tg = SP.Nutri.targets();
       if(!tg.ok) return [];
       const t = SP.Nutri.dayTotals(shownDate());
+      /* Öğün girilmemiş gün «0» değildir (AGENTS §1.2, 2026-10-25): değer
+         «—», etiket «veri yok» der (Mutfak'taki besin kartıyla aynı düzen). */
       return [
         { value:U.fmtNum(tg.bmr), label:'bazal (kcal)' },
         { value:U.fmtNum(tg.kcal), label:'hedef (kcal)' },
-        { value:t.empty ? '0' : U.fmtNum(Math.round(t.kcal)), label:'bugün alınan' },
-        { value:t.empty ? '0' : Math.round(t.protein), unit:'g', label:'protein' },
+        t.empty ? { value:'—', label:'bugün alınan · veri yok' } : { value:U.fmtNum(Math.round(t.kcal)), label:'bugün alınan' },
+        t.empty ? { value:'—', label:'protein · veri yok' } : { value:Math.round(t.protein), unit:'g', label:'protein' },
       ];
     },
     subtitle(){

@@ -159,6 +159,39 @@
       await PS().handle['hp-isaret']({ dataset:{ id, madde:'a' } });
       expect(HP().isaretli(HP().bul('su'), bugun)).toEqual([]);
     });
+    /* 2026-10-25: «Yürüyüş · 30 dk» satırından kayıt girilemiyordu.
+       «Yaptım» planın KENDİ hareketini ve süresini seans yazar; geri alınır. */
+    it('hareket planı: «Yaptım» planın hareketini ve süresini seans yazar; ikinci kez yazmaz; geri alınır', async () => {
+      resetState();
+      SP.S.haftaplan = [];
+      const bugun = SP.U.todayISO(), p = HP().yeni('hareket');
+      p.gunler[HP().gunNo(bugun)] = { ne:'Yürüyüş', dk:30 };
+      await HP().kaydet(p);
+      const pl = HP().bul('hareket'), seans = () => SP.Model.workoutsOf(bugun);
+      const r = await HP().hareketYaptim(pl, bugun);
+      expect(r.ok).toBe(true);
+      expect(seans().map(w => [w.name, w.minutes, w.kind, w.items[0].exId])).toEqual([['Yürüyüş', 30, 'cardio', 'yuruyus']]);
+      expect(HP().planSeansi(pl, bugun).id).toBe(r.id);
+      expect((await HP().hareketYaptim(pl, bugun)).ok).toBe(false);
+      expect(seans()).toHaveLength(1);
+      await r.geriAl();
+      expect(seans()).toHaveLength(0);
+      /* ekran: satırda «Yaptım», sonra «Geri al» */
+      let d = dom(PS().render());
+      expect(d.querySelectorAll('[data-act="hp-hareket-yap"]').length).toBe(1);
+      await PS().handle['hp-hareket-yap']({ dataset:{ id:pl.id } });
+      expect(seans()).toHaveLength(1);
+      d = dom(PS().render());
+      expect(d.querySelectorAll('[data-act="hp-hareket-yap"]').length).toBe(0);
+      await PS().handle['hp-hareket-geri']({ dataset:{ id:pl.id } });
+      expect(seans()).toHaveLength(0);
+      /* dinlenme günü: düğme yok, yazılmaz */
+      const p2 = HP().kopya(HP().bul('hareket'));
+      p2.gunler[HP().gunNo(bugun)] = null;
+      await HP().kaydet(p2);
+      expect(dom(PS().render()).querySelectorAll('[data-act="hp-hareket-yap"]').length).toBe(0);
+      expect((await HP().hareketYaptim(HP().bul('hareket'), bugun)).ok).toBe(false);
+    });
     it('sayfada kaydet: doğru değer yazılır; bozuk değer yazılmaz ve sayfa nedeniyle açık kalır', async () => {
       resetState();
       SP.S.haftaplan = [];

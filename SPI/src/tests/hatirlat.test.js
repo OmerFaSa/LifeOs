@@ -68,6 +68,85 @@
       expect(H().tik(saat('2026-09-20', '10:05'))).toBe(0);
     });
   });
+  /* 2026-10-25 SÜRTÜNME: aynı saatte üç takviye üç ayrı «Aldım» istiyordu.
+     «Hepsini aldım» tek dokunuşta işaretler; her biri yine tek tek geri
+     alınır. Doz görünmez, uyum yüzdesi hesaplanmaz (söz 1, 4). */
+  describe('Hatırlatmalar — aynı saatte hepsi', () => {
+    const dom = h => { const d = document.createElement('div'); d.innerHTML = String(h); return d; };
+    async function ilac(ad){
+      const m = SP.Model.newMed();
+      m.name = ad; m.dose = 'günde 2×'; m.startDate = '2026-01-01';
+      await SP.Model.saveMed(m);
+      await H().ekle({ tur:'ilac', medId:m.id, saatler:'00:00' });
+      return m;
+    }
+    it('tek dokunuş hepsini işaretler; her biri ayrı geri alınır; toplu geri al yalnız kendi işaretlediğini kaldırır', async () => {
+      resetState();
+      await ilac('D vitamini'); await ilac('Omega 3'); await ilac('Magnezyum');
+      await H().ekle({ tur:'su', saatler:'23:59' });
+      const g = SP.U.todayISO();
+      const l = H().bugun(saat(g, '09:00')).filter(x => x.saat === '00:00');
+      expect(l).toHaveLength(3);
+      await H().isaretle(l[0].anahtar, true, g);                 // biri zaten alınmış
+      const r = await H().isaretleHepsi(l.map(x => x.anahtar), g);
+      expect(r.isaretlenen).toEqual([l[1].anahtar, l[2].anahtar]);
+      const durumlar = () => H().bugun(saat(g, '09:00')).map(x => x.durum);
+      expect(durumlar()).toEqual(['yapildi', 'yapildi', 'yapildi', 'sonra']);
+      await H().isaretle(l[1].anahtar, false, g);
+      expect(durumlar()).toEqual(['yapildi', 'vakti', 'yapildi', 'sonra']);
+      await r.geriAl();
+      expect(durumlar()).toEqual(['yapildi', 'vakti', 'vakti', 'sonra']);
+    });
+    it('Bugün satırı: aynı saatte iki ve fazlası için tek «Hepsini aldım»; doz ve yüzde yok', async () => {
+      resetState();
+      await ilac('D vitamini'); await ilac('Omega 3');
+      let d = dom(SP.HatirlatUI.vaktiRow());
+      const b = d.querySelectorAll('[data-act="ht-hepsi"]');
+      expect(b.length).toBe(1);
+      expect(b[0].textContent).toContain('Hepsini aldım');
+      expect(d.textContent.indexOf('günde') < 0 && d.textContent.indexOf('%') < 0).toBe(true);
+      await SP.HatirlatUI.handle['ht-hepsi'](b[0]);
+      expect(H().bugun().every(x => x.durum === 'yapildi')).toBe(true);
+      d = dom(SP.HatirlatUI.ozetEntry());
+      expect(d.querySelectorAll('[data-act="ht-hepsi"]').length).toBe(0);
+      expect(d.querySelectorAll('[data-act="ht-isaret"][data-v="0"]').length).toBe(2);   // her biri ayrı geri alınır
+    });
+  });
+
+  /* 2026-10-25: hareket hatırlatmasına «Yaptım» hiçbir şey yazmıyordu;
+     seans sonra ayrıca giriliyordu. İsteğe bağlı olarak bir HAZIR
+     ANTRENMANA bağlanır: «Yaptım» o seansı ekler, «Geri al» kaldırır.
+     Bağ yoksa düz işarettir. */
+  describe('Hatırlatmalar — hareket ve hazır antrenman', () => {
+    it('bağlıysa «Yaptım» seansı ekler ve geri alınır; bağ kaldırılınca düz işaret', async () => {
+      resetState();
+      const s = await SP.Hazir.antrenmanSakla(SP.Test.pushWorkout('2026-03-04', { name:'Bacak günü', minutes:50 }), '');
+      expect((await H().ekle({ tur:'hareket', saatler:'00:00', hazirId:'yok' })).ok).toBe(false);
+      await H().ekle({ tur:'hareket', saatler:'00:00', hazirId:s.kayit.id });
+      const g = SP.U.todayISO(), seans = () => SP.Model.workoutsOf(g);
+      const r = H().bugun().find(x => x.tur === 'hareket');
+      expect(r.hazirAd).toBe('Bacak günü');
+      const y = await H().yaptim(r.anahtar, g);
+      expect([y.ok, y.seans && y.seans.ad, seans().length, seans()[0].minutes]).toEqual([true, 'Bacak günü', 1, 50]);
+      expect(H().bugun().find(x => x.tur === 'hareket').durum).toBe('yapildi');
+      await y.geriAl();
+      expect([seans().length, H().bugun().find(x => x.tur === 'hareket').durum]).toEqual([0, 'vakti']);
+      /* satırdaki «Geri al» da eklenen seansı kaldırır */
+      await H().yaptim(r.anahtar, g);
+      await H().isaretle(r.anahtar, false, g);
+      expect(seans()).toHaveLength(0);
+      /* ekran: «Yaptım» seansı ekler */
+      await SP.HatirlatUI.handle['ht-isaret']({ dataset:{ k:r.anahtar, v:'1' } });
+      expect(seans()).toHaveLength(1);
+      await H().isaretle(r.anahtar, false, g);
+      /* bağ kaldırılır: yalnız işaret */
+      await H().ekle({ tur:'hareket', saatler:'00:00', hazirId:'' });
+      expect(H().bugun().find(x => x.tur === 'hareket').hazirAd).toBe(null);
+      const y2 = await H().yaptim(r.anahtar, g);
+      expect([y2.ok, y2.seans, seans().length]).toEqual([true, null, 0]);
+    });
+  });
+
   /* HATALAR O-8: Android Chrome sayfa içinden `new Notification` kurmaya
      izin vermez («Illegal constructor»); hata yutuluyor, izin verilmiş
      görünürken hiçbir hatırlatma gelmiyordu. Önce hizmet çalışanının

@@ -153,6 +153,83 @@ SP.Screens.onaylar = (function(){
       && n.okuma && n.okuma.yazilacak && n.okuma.yazilacak.length && SP.Beacon.canApply(n));
   }
 
+  /* GELEN KUTUSU TOPLU KAYDI (2026-10-25; kullanıcı: «spi için daha
+     işlevli veri girişi, sürtünmeyi azaltacak teknikler»). Kısayollar'dan
+     gelen beş «su 250» satırı tek tek onaylanınca altı dokunuş ediyordu.
+     Yalnız KATALOGDA KÜÇÜK seviyeli (AGENTS.md §1.9) ve şu an geçerli
+     ölçümler toplanır; ne yazılacağı dokunuştan ÖNCE satır satır görünür
+     (gelenOzet) ve tek «Geri al» bütün grubu geri alır. Tahlil (olcum-gir,
+     orta) hiçbir zaman toplanmaz, tek tek onaylanır. Sıra GELİŞ sırasıdır:
+     aynı alana iki satır geldiyse sonuncusu kalır.
+     SIRALI (2026-10-25): geçerlilik ve özet, satırlar uygulanacakları
+     sırayla doğrulanarak çıkar (SP.Proposals.sirali): 1000 ml varken üç
+     «su 250» özeti üç kez «toplam 1.250 ml» diyordu, dokunuş 1750 yazıyordu.
+     Artık toplamlar 1.250, 1.500, 1.750 der; sonuncusu yazılandır. */
+  function gelenToplu(){
+    if(!SP.Proposals) return [];
+    const adaylar = SP.Proposals.pending().filter(o => gelenMi(o) && o.action !== 'olcum-gir'
+      && (SP.Proposals.eylem(o.action) || {}).level === 'kucuk').reverse();
+    return SP.Proposals.sirali(adaylar).filter(x => x.c.ok).map(x => x.p);
+  }
+  function gelenOzet(l){
+    return SP.Proposals.sirali(l).map(({ p:o, pv }) => {
+      const d = o.params && o.params.date;
+      const ne = pv.ok && pv.rows.length ? pv.rows.map(r => r.alan + ' ' + r.sonra).join(', ')
+        : ((SP.Proposals.eylem(o.action) || {}).label || o.action);
+      return ne + (SP.U.isISO(d) && d !== SP.U.todayISO() ? ' (' + gunAd(d) + ')' : '');
+    }).join(' · ');
+  }
+  /* Bugün'ün düğmesi today.js'in ONAY_EYLEMLERI listesinden geçer; orada
+     «hkm-toplu» var, bu yüzden aynı eylem `data-kaynak="gelen"` ile ayrılır. */
+  function gelenTopluDugme(l, tone){
+    return K.Button({ label:'Hepsini kaydet (' + l.length + ')', size:'sm', tone, act:'hkm-toplu',
+      data:{ 'data-kaynak':'gelen' } });
+  }
+  function gelenTopluSatir(l){
+    return onaySatir({ baslik:'Kısayollar’dan ' + l.length + ' ölçüm', seviye:'kucuk',
+      ust:'Tek dokunuş hepsini yazar; «Geri al» hepsini birden geri alır. Tahliller tek tek onaylanır.',
+      govde:html`<p class="small mt-6">${gelenOzet(l)}</p>`,
+      eylem:gelenTopluDugme(l, 'primary') });
+  }
+  /* Bugün'ün sade kartı: liste + TEK düğme (Bugün 14 düğme bütçesi,
+     bugun.test.js); tek tek bakmak Onaylar'da, menü sayacından. Bugün'ün
+     tek dolu düğmesi ölçümü kaydetmektir, bu yüzden burada dolu değil. */
+  function GelenOzetKart(l){
+    return K.Kutu({ ad:'Kısayollar’dan ' + l.length + ' ölçüm', yuva:'onayını bekliyor',
+      govde:html`<p class="small">${gelenOzet(l)}</p>
+        <div class="row wrap gap-8 mt-8">${gelenTopluDugme(l)}</div>` });
+  }
+
+  /* Geri alma SON yazılandan başlar; sonraki kayıt kuralı (HATALAR Y-6)
+     proposals.js'te, burada yalnız sıra ve sonuç cümlesi. */
+  async function geriAl(idler){
+    let n = 0;
+    for(const id of idler.slice().reverse()){
+      const r = await SP.Proposals.undo(id);
+      if(r && r.ok) n++;
+    }
+    const kalan = idler.length - n;
+    UI.toast(idler.length === 1 ? (n ? 'Geri alındı.' : 'Geri alınamadı.')
+      : n + ' ölçüm geri alındı' + (kalan ? ', ' + kalan + ' tanesi geri alınamadı.' : '.'));
+    SP.App.render();
+  }
+
+  async function gelenTopluKaydet(){
+    const l = gelenToplu();
+    if(!l.length) return;
+    const yazilan = [];
+    let kalan = 0;
+    for(const o of l){
+      const r = await SP.Proposals.approve(o.id);
+      if(r.ok) yazilan.push(o.id); else kalan++;
+    }
+    if(!yazilan.length){ UI.toast('Hiçbir ölçüm kaydedilemedi.'); SP.App.render(); return; }
+    SP.UI.onayMuhru();
+    UI.toast(yazilan.length + ' ölçüm kaydedildi' + (kalan ? ', ' + kalan + ' tanesi kaydedilemedi.' : '.'),
+      { undo:async () => { await geriAl(yazilan); } });
+    SP.App.render();
+  }
+
   async function hkmToplu(){
     const l = topluKayitlar();
     let yazilan = 0, kalan = 0;
@@ -250,8 +327,12 @@ SP.Screens.onaylar = (function(){
     });
   }
 
-  function BekleyenKart(){
-    const liste = SP.Proposals ? SP.Proposals.pending() : [];
+  /* `enCok` (2026-10-25): Bugün'ün öneri alanı en çok BİR kart taşır
+     (vitrin 110); bütün bekleyenleri kart yapınca beş gelen satır 14
+     düğme bütçesini aşıyordu. */
+  function BekleyenKart(enCok){
+    const hepsi = SP.Proposals ? SP.Proposals.pending() : [];
+    const liste = enCok ? hepsi.slice(0, enCok) : hepsi;
     if(!liste.length) return '';
     const k = kopru();
     const kartlar = k ? liste.map(o => {
@@ -360,9 +441,10 @@ SP.Screens.onaylar = (function(){
   }
   function grupKutusu(g){
     const toplu = g.id === 'kayit' ? topluKayitlar().length : 0;
+    const gl = g.id === 'kayit' ? gelenToplu() : [];
     return K.Kutu({ ad:g.ad, ipucu:g.id === 'king' || g.id === 'sistem' ? 'hkm' : undefined,
       yuva:toplu >= 2 ? K.Button({ label:'Hepsini kaydet (' + toplu + ')', size:'sm', tone:'primary', act:'hkm-toplu' }) : String(g.satirlar.length),
-      govde:html`<div class="onay-liste" data-raf-tam>${map(g.satirlar, s => s.html)}</div>` });
+      govde:html`<div class="onay-liste" data-raf-tam>${when(gl.length >= 2, () => gelenTopluSatir(gl))}${map(g.satirlar, s => s.html)}</div>` });
   }
 
   /* Bekleyen: King + HKM (belirsizler dahil) + bekleyen kayıt. Kabuğun
@@ -387,9 +469,16 @@ SP.Screens.onaylar = (function(){
       kart = HkmTeklifKart();
       gosterilen = (S.ui.hkmIntents || []).length + (S.ui.hkmDoubts || []).length;
     }
+    /* Kısayollar'dan iki ve fazla küçük ölçüm geldiyse tek özet kart ve tek
+       dokunuş (2026-10-25); değilse en öndeki tek bekleyen kayıt. */
+    const gl = kart ? [] : gelenToplu();
+    if(!kart && gl.length >= 2){
+      kart = GelenOzetKart(gl);
+      gosterilen = gl.length;
+    }
     if(!kart){
-      kart = BekleyenKart();
-      gosterilen = SP.Proposals ? SP.Proposals.pending().length : 0;
+      kart = BekleyenKart(1);
+      gosterilen = SP.Proposals ? Math.min(1, SP.Proposals.pending().length) : 0;
     }
     const kalan = toplam - gosterilen;
     return html`<div class="stack-sm" data-oz="110">
@@ -510,7 +599,12 @@ SP.Screens.onaylar = (function(){
       S.ui.kingTeklifler = SP.KingTeklif.liste();
       SP.App.render();
     },
-    async 'hkm-toplu'(){ await hkmToplu(); },
+    /* Aynı eylem iki toplu kaydı taşır: Merkez günlük kaydı ve (data-kaynak
+       «gelen») Kısayollar ölçümleri — Bugün'den de aynı yol (today.js). */
+    async 'hkm-toplu'(el){
+      if(el && el.dataset && el.dataset.kaynak === 'gelen') await gelenTopluKaydet();
+      else await hkmToplu();
+    },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-apply'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
@@ -521,9 +615,13 @@ SP.Screens.onaylar = (function(){
         : 'Kapatıldı; merkeze şimdilik bildirilemedi.');
       SP.App.render();
     },
+    /* Tek onayda da «Geri al» (2026-10-25): küçük aksiyon geri alınabilir
+       olmalı (AGENTS.md §1.9); geri alma anlık görüntüsü yoksa düğme çıkmaz. */
     async 'bekleyen-onay'(el){
-      const r = await SP.Proposals.approve(el.dataset.id);
-      UI.toast(r.ok ? 'Kaydedildi' : (r.why || 'Kaydedilemedi'));
+      const id = el.dataset.id;
+      const r = await SP.Proposals.approve(id);
+      if(r.ok && r.proposal && r.proposal.undo) UI.toast('Kaydedildi', { undo:async () => { await geriAl([id]); } });
+      else UI.toast(r.ok ? 'Kaydedildi' : (r.why || 'Kaydedilemedi'));
       SP.App.render();
     },
     async 'bekleyen-ret'(el){

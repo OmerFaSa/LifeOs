@@ -17,7 +17,17 @@
      4. «YAPILDI» BİR KAYITTIR, ÖLÇÜM DEĞİL. Su hatırlatmasına «İçtim» demek
         mililitre yazmaz: miktar uydurulmaz, su alanı ayrıca girilir.
         İşaretlenmemiş bir saat «alınmadı» sayılmaz — «işaretlenmedi»dir;
-        bu yüzden uyum yüzdesi HESAPLANMAZ. */
+        bu yüzden uyum yüzdesi HESAPLANMAZ.
+     5. AYNI SAATTE HEPSİ (2026-10-25). Aynı saate düşen birkaç hatırlatma
+        tek dokunuşla işaretlenir (isaretleHepsi); her biri yine tek tek
+        geri alınır. Toplu «Geri al» yalnız o dokunuşun işaretlediğini
+        kaldırır. Doz görünmez, sayı ve yüzde üretilmez.
+     6. HAREKET HAZIR ANTRENMANA BAĞLANABİLİR (2026-10-25). Bağ isteğe
+        bağlıdır ve kullanıcının seçimidir (core/hazir.js). Bağlıysa Bugün'de
+        «Yaptım» (yaptim) o antrenmanı bugüne ekler; işaret kalkınca eklenen
+        seans da kalkar. Bağ yoksa ya da hazır antrenman silindiyse düz
+        işarettir. Telefon bildirimindeki düğme seans YAZMAZ: orada «Geri al»
+        yok. */
 
 window.SP = window.SP || {};
 
@@ -38,7 +48,7 @@ SP.Hatirlat = (function(){
     olcum:{ ad:'Sabah ölçümü', eylem:'Ölçtüm', metin:'Sabah tartısı' },
   };
 
-  function bos(){ return { liste:[], yapildi:{}, bildirim:false }; }
+  function bos(){ return { liste:[], yapildi:{}, seans:{}, bildirim:false }; }
   function durum(){
     if(!SP.S.hatirlat) SP.S.hatirlat = bos();
     return SP.S.hatirlat;
@@ -49,6 +59,7 @@ SP.Hatirlat = (function(){
     SP.S.hatirlat = Object.assign(bos(), d);
     if(!Array.isArray(SP.S.hatirlat.liste)) SP.S.hatirlat.liste = [];
     if(!SP.S.hatirlat.yapildi || typeof SP.S.hatirlat.yapildi !== 'object') SP.S.hatirlat.yapildi = {};
+    if(!SP.S.hatirlat.seans || typeof SP.S.hatirlat.seans !== 'object') SP.S.hatirlat.seans = {};
     /* Telefonda: izin durumu öğrenilir, önümüzdeki günler yeniden kurulur
        (her açılış pencereyi ileri taşır). Beklenmez. */
     if(telefonMu()) B().durum().then(() => planla(), () => null);
@@ -59,6 +70,7 @@ SP.Hatirlat = (function(){
     const d = durum();
     const sinir = U().iso(U().addDays(U().today(), -SAKLA_GUN));
     Object.keys(d.yapildi).forEach(g => { if(g < sinir) delete d.yapildi[g]; });
+    Object.keys(d.seans || {}).forEach(g => { if(g < sinir) delete d.seans[g]; });
     await SP.Store.set(KEY, d);
     planla();
     return d;
@@ -82,6 +94,11 @@ SP.Hatirlat = (function(){
   }
 
   function ilacOf(h){ return (SP.S.meds || []).find(m => m.id === h.medId) || null; }
+  /* Hareket hatırlatmasının bağlı hazır antrenmanı (söz 6); silindiyse yok. */
+  function hazirOf(h){
+    if(!h || h.tur !== 'hareket' || !h.hazirId || !SP.Hazir) return null;
+    return SP.Hazir.antrenmanlar().find(x => x.id === h.hazirId) || null;
+  }
 
   function adOf(h){
     if(h.tur === 'ilac'){
@@ -104,13 +121,22 @@ SP.Hatirlat = (function(){
     if(x.tur === 'ilac' && !(SP.S.meds || []).some(m => m.id === x.medId)){
       return { ok:false, why:'Hangi ilaç ya da takviye olduğu seçilmedi.' };
     }
+    /* Söz 6: `hazirId` verilmezse (undefined) var olan bağ kalır; boş
+       verilirse bağ kalkar. Olmayan antrenmana bağ kurulmaz. */
+    const bagVar = x.tur === 'hareket' && x.hazirId !== undefined;
+    const bag = bagVar && x.hazirId ? String(x.hazirId) : null;
+    if(bag && !(SP.Hazir && SP.Hazir.antrenmanlar().some(a => a.id === bag))){
+      return { ok:false, why:'Bağlanacak hazır antrenman bulunamadı.' };
+    }
     const s = saatOku(x.saatler);
     if(!s.ok) return s;
     const d = durum();
     const onceki = d.liste.find(h => h.tur === x.tur && (x.tur !== 'ilac' || h.medId === x.medId));
-    if(onceki) onceki.saatler = s.saatler;
-    else d.liste.push({ id:U().uid('ht'), tur:x.tur, medId:x.tur === 'ilac' ? x.medId : null,
-      saatler:s.saatler, at:new Date().toISOString() });
+    if(onceki){
+      onceki.saatler = s.saatler;
+      if(bagVar) onceki.hazirId = bag;
+    }else d.liste.push(Object.assign({ id:U().uid('ht'), tur:x.tur, medId:x.tur === 'ilac' ? x.medId : null,
+      saatler:s.saatler, at:new Date().toISOString() }, bag ? { hazirId:bag } : {}));
     await kaydet();
     return { ok:true, saatler:s.saatler };
   }
@@ -145,24 +171,85 @@ SP.Hatirlat = (function(){
     const out = [];
     d.liste.forEach(h => {
       if(!gecerli(h, gun)) return;
+      const hz = hazirOf(h);
       h.saatler.forEach(saat => {
         const anahtar = h.id + '@' + saat;
         out.push({ anahtar, id:h.id, tur:h.tur, saat, ad:adOf(h), eylem:TUR[h.tur].eylem,
+          hazirId:hz ? hz.id : null, hazirAd:hz ? hz.ad : null,
           durum:yap[anahtar] ? 'yapildi' : (n >= dk(saat) ? 'vakti' : 'sonra') });
       });
     });
     return out.sort((a, b) => a.saat < b.saat ? -1 : a.saat > b.saat ? 1 : 0);
   }
 
+  /* İşaret kalkınca o işaretin eklediği seans da kalkar (söz 6). Dönen
+     değer: bir seans kaldırıldıysa true. */
   async function isaretle(anahtar, deger, gunISO, zamanISO){
     const d = durum();
     const gun = gunISO || U().todayISO();
     d.yapildi[gun] = d.yapildi[gun] || {};
-    if(deger === false) delete d.yapildi[gun][anahtar];
+    let seansKalkti = false;
+    if(deger === false){
+      delete d.yapildi[gun][anahtar];
+      const sid = ((d.seans || {})[gun] || {})[anahtar];
+      if(sid){
+        delete d.seans[gun][anahtar];
+        if(SP.Model.workoutsOf(gun).some(w => w.id === sid)){ await SP.Model.deleteWorkout(sid); seansKalkti = true; }
+      }
+    }
     else d.yapildi[gun][anahtar] = zamanISO || new Date().toISOString();
     await kaydet();
     /* Telefonda: bu saatin ertelenmiş ve gelmiş bildirimi kalkar. */
     if(deger !== false && telefonMu()) B().yapildi(gun + '|' + anahtar);
+    return seansKalkti;
+  }
+
+  /* Bağlı hazır antrenmanı bugüne ekler ve bağı işaretin yanına yazar. */
+  async function seansEkle(h, anahtar, gun){
+    const hz = hazirOf(h);
+    if(!hz) return null;
+    const r = await SP.Hazir.antrenmanEkle(hz.id, gun);
+    if(!r.ok) return null;
+    const d = durum();
+    d.seans = d.seans || {};
+    d.seans[gun] = d.seans[gun] || {};
+    d.seans[gun][anahtar] = r.id;
+    return { id:r.id, ad:r.ad };
+  }
+  const hatOf = anahtar => durum().liste.find(x => x.id === String(anahtar || '').split('@')[0]) || null;
+
+  /* BUGÜN'DEKİ «YAPTIM» (söz 6): işaret + bağlı hazır antrenman varsa onu
+     bugüne ekler. Dönen: { ok, seans:{ id, ad } | null, geriAl }. */
+  async function yaptim(anahtar, gunISO){
+    const gun = gunISO || U().todayISO();
+    const h = hatOf(anahtar);
+    if(!h) return { ok:false, why:'Hatırlatma bulunamadı.' };
+    const zaten = !!(durum().yapildi[gun] || {})[anahtar];
+    const seans = zaten ? null : await seansEkle(h, anahtar, gun);
+    await isaretle(anahtar, true, gun);
+    return { ok:true, seans, geriAl:async () => { if(!zaten) await isaretle(anahtar, false, gun); } };
+  }
+
+  /* AYNI SAATTE HEPSİ (söz 5): tek kayıtla. Zaten işaretli olan dokunulmaz;
+     geri alma yalnız bu dokunuşun işaretlediğini kaldırır. Bağlı hareket
+     hatırlatması burada da seansını ekler (yaptim ile aynı kural). */
+  async function isaretleHepsi(anahtarlar, gunISO){
+    const gun = gunISO || U().todayISO();
+    const d = durum();
+    const yap = d.yapildi[gun] || {};
+    const yeni = (anahtarlar || []).filter((k, i, l) => k && l.indexOf(k) === i && !yap[k] && hatOf(k));
+    const seanslar = [];
+    for(const k of yeni){
+      const s = await seansEkle(hatOf(k), k, gun);
+      if(s) seanslar.push(s);
+    }
+    d.yapildi[gun] = d.yapildi[gun] || {};
+    const an = new Date().toISOString();
+    yeni.forEach(k => { d.yapildi[gun][k] = an; });
+    await kaydet();
+    if(telefonMu()) yeni.forEach(k => B().yapildi(gun + '|' + k));
+    return { ok:true, isaretlenen:yeni, seanslar,
+      geriAl:async () => { for(const k of yeni) await isaretle(k, false, gun); } };
   }
 
   /* BİLDİRİMDEKİ DÜĞME (brand/ortak/bildirim.js söz 7): kabuk «Aldım»ı
@@ -293,7 +380,7 @@ SP.Hatirlat = (function(){
   }
   function bildirimSorunu(){ return sorun; }
 
-  return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, isaretUygula, adOf, durum,
+  return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, isaretleHepsi, yaptim, isaretUygula, adOf, hazirOf, durum,
     bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, bildirimSorunu, tik,
     telefonMu, planListesi, planla, planBekle, PLAN_GUN };
 })();

@@ -444,10 +444,51 @@ SP.HaftaPlan = (function(){
     return p;
   }
 
+  /* ------------------------------------------------ plandan seans
+
+     2026-10-25 sürtünme turu: «Yürüyüş · 30 dk» satırından kayıt
+     girilemiyordu; seans ayrıca, üç adımda yazılıyordu. «Yaptım» planın
+     KENDİ hareketini ve süresini bugünün seansı olarak yazar. Hareket adı
+     hızlı girişin ad sözlüğüyle tanınır (SP.Quick.parseMove); tanınmazsa
+     plandaki adla serbest seans olur. Süre plandandır, uydurulmaz; zorlanma
+     puanı (RPE) yazılmaz, o günün hissidir. Seans `planId` taşır: aynı gün
+     ikinci kez yazılmaz, «Geri al» yalnız onu siler. */
+  function planSeansi(p, iso){
+    iso = iso || bugunISO();
+    return p ? (S().workouts || []).find(w => w && w.date === iso && w.planId === p.id) || null : null;
+  }
+  async function hareketYaptim(p, iso){
+    iso = iso || bugunISO();
+    if(!p || p.tur !== 'hareket') return { ok:false, why:'Hareket planı bulunamadı.' };
+    const d = (p.gunler || [])[gunNo(iso)];
+    if(!d) return { ok:false, why:'Bugün planda hareket yok.' };
+    if(planSeansi(p, iso)) return { ok:false, why:'Bugünün planı zaten kaydedildi.' };
+    const ne = String(d.ne || '').trim();
+    const q = SP.Quick && SP.Quick.parseMove ? SP.Quick.parseMove(ne + ' ' + d.dk + ' dk') : null;
+    const ex = q && q.exercise;
+    const w = SP.Model.newWorkout(iso);
+    w.name = ne || 'Planlı hareket';
+    w.minutes = d.dk;
+    w.planId = p.id;
+    if(ex){
+      w.kind = ex.kind || w.kind;
+      w.items = [{ exId:ex.id, levelId:null, sets:null, reps:null, minutes:d.dk }];
+    }
+    await SP.Model.saveWorkout(w);
+    return { ok:true, id:w.id, ad:w.name + ' · ' + d.dk + ' dk',
+      geriAl:async () => { await SP.Model.deleteWorkout(w.id); } };
+  }
+  async function hareketGeriAl(p, iso){
+    const w = planSeansi(p, iso);
+    if(!w) return { ok:false, why:'Bugün plandan yazılmış seans yok.' };
+    await SP.Model.deleteWorkout(w.id);
+    return { ok:true };
+  }
+
   /* Eski ad: OGUNLER sabit diziydi; artık kullanıcının öğünleridir. */
   return { TURLER, TUR_BY_ID, GUN_KISA, GUN_AD, DILIMLER, DILIM_BY_ID, UYKU_KIPLERI, SIMGELER, BAGLAR, BAG_BY_ID, STORE,
     get OGUNLER(){ return ogunler(null); }, ogunler,
     yeni, yeniMadde, yeniKestirme, dogrula, uykuDakika, sureYaz, gunNo, uykuOf, uykuKip, bugunKestirmeleri,
     zamanNorm, zamanYaz, zamanAn, bugun, bugunMaddeleri, isaretle, isaretli, sayim, kayitSay, maddeGecmisi, hedefOf,
-    uyum, liste, bul, bulId, yukle, kaydet, geriAl, sil, kopya };
+    uyum, liste, bul, bulId, yukle, kaydet, geriAl, sil, kopya, planSeansi, hareketYaptim, hareketGeriAl };
 })();

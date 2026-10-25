@@ -73,20 +73,21 @@ async function aysIyiGun(p, s){
 }
 
 async function spiIyiGun(p, s){
-  const alan = { sleep:7.5, rhr:56, hrv:55, weight:72 };
-  for(const k of Object.keys(alan)) await s.yaz('#v-' + k, alan[k], 'Ölçüm ' + k);
-  await s.tikla('[data-act="save-vitals"]', 'Kaydet');
-  for(let i = 0; i < 8; i++) await s.tikla('[data-act="su-ekle"]', 'Bir bardak su');
-  for(const cumle of ['2 yumurta 1 çay', '1 tabak mercimek çorbası', '1 tabak etli kuru fasulye']){
-    await s.yaz('#giris-girdi', cumle, 'Ne yaptın?');
-    await s.enter('#giris-girdi', 'önizle');
-    await s.enter('#giris-girdi', 'kaydet');
-  }
+  /* EN KISA YOL (2026-10-25): «Ne yaptın?» kutusu bütün günü tek cümlede
+     kayıpsız okur: dört ölçüm, su ekleme ve öğün sözleriyle üç ayrı öğün.
+     Eskisi: dört alan + Kaydet + 8 bardak + 3 × (cümle, önizle, kaydet) =
+     22 eylem. Doğrulama her alanı ve üç ayrı öğün yuvasını arar. */
+  await s.yaz('#giris-girdi', 'uyku 7.5, nabız 56, hrv 55, kilo 72, su 2 litre, '
+    + 'kahvaltıda 2 yumurta 1 çay, öğlen 1 tabak mercimek çorbası, akşam 1 tabak etli kuru fasulye', 'Ne yaptın?');
+  await s.enter('#giris-girdi', 'önizle');
+  await s.enter('#giris-girdi', 'kaydet');
   return p.evaluate(() => {
     const t = SP.U.todayISO(), v = SP.S.vitals[t] || {};
-    const ogun = (SP.S.meals[t] || []).length;
-    const ok = v.sleep === 7.5 && v.weight === 72 && Number(v.water) >= 2000 && ogun >= 3;
-    return { ok, not:'su ' + v.water + ' ml · ' + ogun + ' öğün' };
+    const ogunler = SP.S.meals[t] || [];
+    const yuva = new Set(ogunler.map(m => m.slot)).size;
+    const ok = v.sleep === 7.5 && v.rhr === 56 && v.hrv === 55 && v.weight === 72 && Number(v.water) >= 2000
+      && ogunler.length >= 3 && yuva >= 3;
+    return { ok, not:'su ' + v.water + ' ml · ' + ogunler.length + ' öğün, ' + yuva + ' ayrı yuva' };
   });
 }
 

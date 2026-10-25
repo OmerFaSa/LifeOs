@@ -88,12 +88,19 @@ SP.Screens.planlar = (function(){
     </div>`;
     const b = HP().bugun(p, iso), u = HP().uyum(p, iso);
     const maddeli = tur === 'su' || tur === 'serbest';
+    /* 2026-10-25: hareket planında bugünün satırından tek dokunuşla seans
+       (core/haftaplan.js hareketYaptim); yazıldıysa «Geri al». */
+    const hareketGunu = tur === 'hareket' && !!(p.gunler || [])[HP().gunNo(iso)];
+    const plandan = hareketGunu ? HP().planSeansi(p, iso) : null;
     return html`<div class="hp-satir">
       ${simge(tur)}
-      <div class="hp-satir__metin"><b>${p.ad || t.ad}</b><span>${b.metin}${etiket(b.etiket)}</span>
+      <div class="hp-satir__metin"><b>${p.ad || t.ad}</b><span>${b.metin}${etiket(b.etiket)}${when(plandan, () => html` · <span class="dim">kaydedildi</span>`)}</span>
         <small>${u.metin}${etiket(u.etiket)}</small>
         ${when(maddeli, () => maddeKarolari(p, iso))}</div>
       <div class="hp-satir__dug">
+        ${when(hareketGunu, () => plandan
+          ? K.Button({ label:'Geri al', size:'sm', tone:'ghost', act:'hp-hareket-geri', data:{ 'data-id':p.id }, aria:'Geri al: bugünün plan seansını sil' })
+          : K.Button({ label:'Yaptım', size:'sm', tone:'primary', act:'hp-hareket-yap', data:{ 'data-id':p.id }, aria:'Yaptım: ' + b.metin + ' seans olarak yazılır' }))}
         ${when(maddeli && (p.maddeler || []).length, () => K.Button({ label:'Takip', size:'sm', act:'hp-takip', data:{ 'data-id':p.id } }))}
         ${K.Button({ label:'Düzenle', size:'sm', tone:'ghost', act:'hp-ac', data:{ 'data-tur':tur, 'data-id':p.id } })}
       </div>
@@ -403,6 +410,18 @@ SP.Screens.planlar = (function(){
       UI.closeSheet();
       UI.toast((eski && eski.ad || 'Plan') + ' silindi', { undo:async () => { await HP().kaydet(eski); SP.App.render(); } });
       SP.App.render();
+    },
+    async 'hp-hareket-yap'(el){
+      const p = HP().bulId(el.dataset.id);
+      const r = await HP().hareketYaptim(p, SP.U.todayISO());
+      SP.App.render();
+      if(!r.ok){ UI.toast(r.why); return; }
+      UI.toast(r.ad + ' seans olarak yazıldı', { undo:async () => { await r.geriAl(); SP.App.render(); } });
+    },
+    async 'hp-hareket-geri'(el){
+      const r = await HP().hareketGeriAl(HP().bulId(el.dataset.id), SP.U.todayISO());
+      SP.App.render();
+      UI.toast(r.ok ? 'Plan seansı silindi' : r.why);
     },
     async 'hp-isaret'(el){
       const p = HP().bulId(el.dataset.id);

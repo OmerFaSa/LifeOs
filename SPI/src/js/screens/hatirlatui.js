@@ -1,7 +1,12 @@
 /* Hatırlatmaların yüzü (core/hatirlat.js). Bugün ekranında vakti gelenler,
    Özet'te günün listesi, İlaç sekmesinde «Hatırlat» düğmesi — üçü de aynı
    düzenleme sayfasını açar. Eylemler her ekrandan çalışsın diye app.js
-   bunları genel eylemlere katar. */
+   bunları genel eylemlere katar.
+
+   2026-10-25 sürtünme turu: aynı saate düşen iki ve fazlası hatırlatma
+   için tek «Hepsini aldım» (her satır yine kendi «Geri al»ını taşır);
+   hazır antrenmana bağlı hareket hatırlatmasında «Yaptım» o seansı ekler
+   ve «Geri al» bırakır (core/hatirlat.js söz 5, 6). */
 
 window.SP = window.SP || {};
 
@@ -23,9 +28,31 @@ SP.HatirlatUI = (function(){
 
   function satir(r){
     return html`<div class="row between wrap gap-6 mt-6">
-      <span class="small"><b class="num">${r.saat}</b> ${r.ad}
+      <span class="small"><b class="num">${r.saat}</b> ${r.ad}${when(r.hazirAd, () => html`<span class="dim"> · ${r.hazirAd}</span>`)}
         ${when(r.durum === 'sonra', () => html`<span class="tiny dim"> · saati gelmedi</span>`)}</span>
       ${satirDugme(r)}</div>`;
+  }
+
+  /* Aynı saatte işaretlenmemiş iki ve fazlası satır varsa saatin başına tek
+     düğme. Yalnız ilaç/takviyeyse «Hepsini aldım», karışıksa «Hepsini
+     işaretle». Doz ve sayı gösterilmez. */
+  function hepsiDugme(saat, l){
+    const bekleyen = l.filter(r => r.durum !== 'yapildi');
+    if(bekleyen.length < 2) return '';
+    const etiket = bekleyen.every(r => r.tur === 'ilac') ? 'Hepsini aldım' : 'Hepsini işaretle';
+    return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny dim"><b class="num">${saat}</b> · ${bekleyen.length} hatırlatma</span>
+      ${K.Button({ label:etiket, size:'sm', tone:bekleyen.some(r => r.durum === 'vakti') ? 'primary' : '', act:'ht-hepsi',
+        aria:etiket + ', ' + saat + ', ' + bekleyen.length + ' hatırlatma',
+        data:{ 'data-k':bekleyen.map(r => r.anahtar).join(',') } })}</div>`;
+  }
+  function satirlar(l){
+    const saatler = [];
+    l.forEach(r => { if(saatler.indexOf(r.saat) < 0) saatler.push(r.saat); });
+    return html`${map(saatler, saat => {
+      const g = l.filter(r => r.saat === saat);
+      return html`${hepsiDugme(saat, g)}${map(g, satir)}`;
+    })}`;
   }
 
   /* Bugün ekranının başı: yalnız VAKTİ GELMİŞ, işaretlenmemiş olanlar. */
@@ -34,7 +61,7 @@ SP.HatirlatUI = (function(){
     const l = H().bugun().filter(r => r.durum === 'vakti');
     if(!l.length) return null;
     return K.Entry({ label:'Hatırlatma', meta:l.length + ' bekliyor', wide:true,
-      body:html`${map(l, satir)}` });
+      body:satirlar(l) });
   }
 
   /* Özet sekmesi: günün bütün hatırlatmaları + düzenleme. */
@@ -44,11 +71,12 @@ SP.HatirlatUI = (function(){
     return K.Entry({ label:'Hatırlatmalar', meta:l.length ? l.length + ' saat' : 'yok',
       note:'Yalnız senin yazdığın saatler. Sistem saat ya da doz önermez.',
       action:K.Button({ label:l.length ? 'Düzenle' : 'Hatırlatma ekle', size:'sm', act:'ht-ac' }),
-      body:l.length ? html`${map(l, satir)}`
+      body:l.length ? satirlar(l)
         : html`<p class="small dim">İlaç ya da takviye, su ve hareket için saat koyabilirsin.</p>` });
   }
 
   let taslak = { tur:'su', medId:null };
+  const hazirlar = () => (SP.Hazir ? SP.Hazir.antrenmanlar() : []);
 
   function sayfa(){
     const d = H().durum();
@@ -69,6 +97,11 @@ SP.HatirlatUI = (function(){
         K.Field({ label:'Saatler', hint:'virgülle ayır — örn. 08:00, 21:00',
           input:K.Input({ id:'ht-saat', value:onceki ? onceki.saatler.join(', ') : '',
             placeholder:taslak.tur === 'su' ? '10:00, 13:00, 16:00' : taslak.tur === 'olcum' ? '07:30' : '08:00' }) }),
+        /* Söz 6: hareket hatırlatması isteğe bağlı bir hazır antrenmana bağlanır. */
+        when(taslak.tur === 'hareket' && hazirlar().length, () => K.Field({ label:'«Yaptım» deyince ekle',
+          hint:'Seçersen Bugün\'de «Yaptım» bu antrenmanı bugüne ekler; «Geri al» kaldırır.',
+          input:K.Select({ id:'ht-hazir', value:(onceki && onceki.hazirId) || '',
+            options:[{ value:'', label:'Hiçbiri — yalnız işaret' }].concat(hazirlar().map(a => ({ value:a.id, label:a.ad }))) }) })),
         html`<div id="ht-hata" class="small" role="alert"></div>`,
         when(!ilaclar.length, () => html`<p class="tiny dim">İlaç hatırlatması için önce
           Testler › İlaç sekmesinden kullandığın şeyi kaydet.</p>`),
@@ -107,7 +140,9 @@ SP.HatirlatUI = (function(){
     },
     async 'ht-kaydet'(){
       const e = document.getElementById('ht-saat');
-      const r = await H().ekle({ tur:taslak.tur, medId:taslak.medId, saatler:e ? e.value : '' });
+      const hz = document.getElementById('ht-hazir');
+      const r = await H().ekle({ tur:taslak.tur, medId:taslak.medId, saatler:e ? e.value : '',
+        hazirId:taslak.tur === 'hareket' && hz ? hz.value : undefined });
       if(!r.ok){
         const h = document.getElementById('ht-hata');
         if(h) h.textContent = r.why;
@@ -125,8 +160,23 @@ SP.HatirlatUI = (function(){
       UI.toast('Hatırlatma silindi', { undo:async () => { await H().geriKoy(r.geri); yenile(); } });
     },
     async 'ht-isaret'(el){
-      await H().isaretle(el.dataset.k, el.dataset.v === '1');
+      if(el.dataset.v === '1'){
+        const r = await H().yaptim(el.dataset.k);
+        yenile();
+        if(r.ok && r.seans) UI.toast('«' + r.seans.ad + '» bugüne eklendi', { undo:async () => { await r.geriAl(); yenile(); } });
+        return;
+      }
+      const kalkti = await H().isaretle(el.dataset.k, false);
       yenile();
+      if(kalkti) UI.toast('İşaret ve eklenen seans kaldırıldı');
+    },
+    async 'ht-hepsi'(el){
+      const l = String(el.dataset.k || '').split(',').filter(Boolean);
+      const r = await H().isaretleHepsi(l);
+      yenile();
+      if(!r.isaretlenen.length) return;
+      UI.toast(r.isaretlenen.length + ' hatırlatma işaretlendi' + (r.seanslar.length ? ' · seans eklendi' : ''),
+        { undo:async () => { await r.geriAl(); yenile(); } });
     },
     async 'bildirim-tur'(el){ bildirimYenile(el, 'bildirim-tur'); },
     async 'bildirim-sessiz'(el){ bildirimYenile(el, 'bildirim-sessiz'); },

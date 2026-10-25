@@ -104,12 +104,29 @@ SP.Screens.today = (function(){
 
      «Şikâyet yok» ile «girilmemiş» ayrı şeylerdir: işaretlemeden
      kaydeden bir gün ikincisidir ve sistem bunu karıştırmaz. */
+  /* Dünün şikâyetleri (yalnız katalogdaki kimlikler), bu gün boşsa; yoksa null. */
+  function dunkuSikayetler(d){
+    const v = M.vitalsOf(d);
+    if(Object.keys(SP.Symptom.ofDay(d)).length || (v && v.symptomsLogged)) return null;
+    const dun = SP.Symptom.ofDay(U.iso(U.addDays(U.parse(d), -1)));
+    const out = {};
+    Object.keys(dun).forEach(id => { if(SP.SYMPTOM_BY_ID[id] && dun[id]) out[id] = dun[id]; });
+    return Object.keys(out).length ? out : null;
+  }
+
   function symptomEntry(){
     const d = shownDate();
     const secili = SP.Symptom.ofDay(d);
     const v = M.vitalsOf(d);
     const kadin = (S.profile || {}).sex === 'female';
     const w = SP.Symptom.window(30);
+    /* DÜNKÜ ŞİKÂYETLER SÜRÜYOR (2026-10-25; kullanıcı: «spi için daha
+       işlevli veri girişi, sürtünmeyi azaltacak teknikler ile daha güzel
+       yap»). Süren bir şikâyeti her gün yeniden işaretlemek üç-dört
+       dokunuştu. Düğme yalnız dün şikâyet varken ve bu gün hiç
+       girilmemişken çıkar («şikâyet yok» denmiş günde çıkmaz). Bu
+       kullanıcının BEYANIDIR, teşhis değil: şiddetleri olduğu gibi taşır. */
+    const dunku = dunkuSikayetler(d);
 
     return K.Entry({
       label:'Bugün bir şikâyetin var mı?', hint:'not-sikayet',
@@ -117,7 +134,8 @@ SP.Screens.today = (function(){
         ? Object.keys(secili).length + ' işaretli'
         : (v && v.symptomsLogged ? 'şikâyet yok' : 'girilmedi'),
       /* Açıklama ⓘ'de (hints.js «not-sikayet»): sıkı ölçüde sabit not yok. */
-      action:html`${K.Button({ label:'Şikâyetim yok', size:'sm', act:'no-symptoms' })}`,
+      action:html`${when(dunku, () => K.Button({ label:'Dünkü şikâyetler sürüyor', size:'sm', act:'dunku-sikayet' }))}
+        ${K.Button({ label:'Şikâyetim yok', size:'sm', act:'no-symptoms' })}`,
       body:html`
         ${map(SP.SYMPTOM_GROUPS, g => html`
           <div class="symgrp">
@@ -810,6 +828,12 @@ SP.Screens.today = (function(){
      `save-vitals` ekranda olmayan alana dokunmaz. */
   const HIZLI_ALAN = ['sleep', 'rhr', 'hrv', 'weight'];
 
+  /* d gününden ÖNCEKİ son ölçüm; hiç yoksa null (uydurulmaz). */
+  function sonDeger(alan, d){
+    const t = Object.keys(S.vitals || {}).filter(x => x < d && S.vitals[x] && S.vitals[x][alan] != null).sort().pop();
+    return t ? Number(S.vitals[t][alan]) : null;
+  }
+
   function OlcumKutusu(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
@@ -820,11 +844,20 @@ SP.Screens.today = (function(){
          yoran şeyler var»): Bugün'ün dört alanı simgesiz, yalnız etiket —
          renkli simgeler «Günü düzenle»nin tam formunda durur. «Boş alan
          sıfır sayılmaz» cümlesi ekranın ⓘ kartında (lede). */
-      govde:html`<div class="grid-form">${map(alanlar, f => K.Field({
-          label:f.label,
-          input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
-            min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
-        }))}</div>
+      /* SON DEĞER YER TUTUCU (2026-10-25; kullanıcı: «spi için daha
+         işlevli veri girişi, sürtünmeyi azaltacak teknikler ile daha güzel
+         yap»): boş alanda gösterilen günden önceki son ölçüm gri yazar
+         («son: 78,2»). Yalnız ipucudur: alanın değeri boş kalır, Kaydet
+         onu yazmaz (save-vitals yalnız değişen alanı yazar). */
+      govde:html`<div class="grid-form">${map(alanlar, f => {
+          const son = v[f.id] == null ? sonDeger(f.id, d) : null;
+          return K.Field({
+            label:f.label,
+            input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
+              min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id],
+              placeholder:son == null ? null : 'son: ' + U.fmtNum(son) }),
+          });
+        })}</div>
         ${KestirmeSatiri(d, false)}
         <div id="suphe-yuva" aria-live="polite"></div>
         <div class="row wrap gap-8 mt-8">
@@ -905,16 +938,153 @@ SP.Screens.today = (function(){
       body:html`<div class="stack-sm">${raw(uyku || '')}${raw(kilo || '')}</div>` });
   }
 
-  /* 073 TEK DOKUNUŞ: su bardağı (250 ml). Asgari günün eşiği 2.000 ml =
-     8 bardak (core/calc.js). Küçük aksiyon: sormadan yazar, «Geri al». */
-  const BARDAK_ML = 250, SU_ESIK = 2000;
+  /* 073 SU — «n bardağa ayarla» (2026-10-25; kullanıcı: «spi için daha
+     işlevli veri girişi, sürtünmeyi azaltacak teknikler ile daha güzel
+     yap»). Önce bütün bardak sırası TEK düğmeydi (vitrin tekDokunus) ve
+     her dokunuş bir bardak ekliyordu: 2 000 ml sekiz dokunuştu. Şimdi her
+     bardak kendi değeridir: n'inci bardağa dokunmak günün suyunu n bardak
+     yapar; en üstteki dolu bardağa yeniden dokunmak bir bardak azaltır.
+
+     Denetim tek: bardaklardan çizilmiş bir radio grubu (role="radiogroup",
+     düğme değil — Bugün'ün 14 düğme bütçesine girmez, bugun.test). Klavyede
+     tek sekme durağı; oklar bir bardak artırır ya da azaltır, Boşluk/Enter
+     dokunmakla aynıdır (suKlavye). Ortak tekDokunus AYS/ESP vitrin
+     testlerinde de durduğu için ona dokunulmadı; çizim bu ekranda.
+
+     Bardak ölçüsü SP.Quick.BARDAK_ML (yoksa 250 ml). Asgari günün eşiği
+     2 000 ml (core/calc.js). Dokunulmamış gün null kalır; bir bardaktan
+     aşağı inmek de «girilmedi»dir, 0 ml değil (state.js normVitals: günde
+     0 ml su ölçüm sayılmaz). Küçük aksiyon: sormadan yazar, «Geri al».
+     HATA (düzeldi): kutu todayISO()'yu okuyup yazıyordu; ölçüm ve his
+     kutuları gösterilen güne yazar. Artık su da shownDate()'e. */
+  const SU_ESIK = 2000, SU_EN_COK = 8000;
+  function bardakMl(){
+    const b = SP.Quick && Number(SP.Quick.BARDAK_ML);
+    return b > 0 && isFinite(b) ? b : 250;
+  }
+  function suDurumu(d){
+    const b = bardakMl(), v = M.vitalsOf(d);
+    const ml = v && v.water != null ? Number(v.water) : null;
+    const hedef = Math.ceil(SU_ESIK / b);
+    const adet = ml == null ? null : Math.floor(ml / b);
+    return { b, ml, hedef, adet };
+  }
+  /* Bir bardağa dokunmanın yazacağı ml (2026-10-25 düzeltmesi). HATA:
+     yazılan hep n × bardaktı; 1 100 ml'de (adet 4) seçili bardağa dokunmak
+     ya da sol ok 750 yazıyor, ölçülmüş 100 ml sessizce siliniyordu.
+     Kural: niyet ±1 bardaksa (seçili bardak ya da bir alttaki = bir eksik,
+     bir üstteki = bir fazla) gerçek ml'ye bir bardak eklenir/çıkarılır;
+     bardağa denk gelmeyen kısım korunur. Komşu olmayan bardak açık bir
+     «n bardak» seçimidir: n × bardak yazılır; etiketi o ml'yi söyler ve
+     toast «Geri al» taşır, hiçbir şey sessizce gitmez. Bir bardaktan
+     aşağısı null («girilmedi»), asla 0. */
+  function suSonrasi(s, n){
+    const { b, ml, adet } = s, a = adet || 0, simdi = ml || 0;
+    const yeni = (adet >= 1 && (n === adet || n === adet - 1)) ? simdi - b
+      : n === a + 1 ? simdi + b : n * b;
+    return yeni < b ? null : yeni;
+  }
+  const BARDAK_SVG = dolu => '<svg viewBox="0 0 24 30" aria-hidden="true"><path d="M4 3h16l-2 24H6z" fill="' + (dolu ? 'var(--spi)' : 'none')
+    + '" stroke="' + (dolu ? 'var(--spi)' : 'var(--vk-ink4)') + '" stroke-width="1.5"/></svg>';
   function SuKutusu(){
     if(!VT()) return '';
-    const v = M.vitalsOf(U.todayISO());
-    const ml = v && v.water != null ? Number(v.water) : null;
-    return vkutu('Su', ml == null ? 'girilmedi' : U.fmtNum(ml) + ' ml', VT().tekDokunus({ hedef:SU_ESIK / BARDAK_ML,
-      adet:ml == null ? null : Math.floor(ml / BARDAK_ML), act:'su-ekle', ad:'Bir bardak su (250 ml)',
-      metin:ml == null ? null : Math.floor(ml / BARDAK_ML) + ' / ' + (SU_ESIK / BARDAK_ML) + ' bardak · ' + U.fmtNum(ml) + ' ml' }));
+    const d = shownDate();
+    const s = suDurumu(d), { b, ml, hedef, adet } = s;
+    const n = adet || 0;
+    /* Hedef dolunca bir bardak daha çizilir: hedefin ötesi de yazılabilsin. */
+    const sayi = Math.min(Math.max(hedef, n + (n >= hedef ? 1 : 0)), Math.floor(SU_EN_COK / b));
+    const gunAdi = d === U.todayISO() ? 'Bugün' : U.fmtDate(d);
+    const grupAd = ml == null
+      ? gunAdi + ' su girilmedi. Hedef ' + hedef + ' bardak; bir bardak ' + U.fmtNum(b) + ' ml.'
+      : gunAdi + ' ' + U.fmtNum(ml) + ' ml su: ' + adet + ' / ' + hedef + ' bardak.';
+    const bardaklar = [];
+    for(let i = 1; i <= sayi; i++){
+      const secili = adet != null && adet >= 1 && i === adet;
+      const odak = secili || ((adet == null || adet < 1) && i === 1);
+      /* Etiket dokunuşun yazacağını söyler; seçili bardak gerçek ml'yi (2026-10-25). */
+      const sonra = secili ? ml : suSonrasi(s, i), etiketMl = sonra == null ? i * b : sonra;
+      bardaklar.push('<span role="radio" class="su-bardak" data-act="su-ayarla" data-n="' + i + '" data-i="' + i + '"'
+        + ' tabindex="' + (odak ? '0' : '-1') + '" aria-checked="' + (secili ? 'true' : 'false') + '"'
+        + ' aria-label="' + SP.h.esc(i + ' bardak, ' + U.fmtNum(etiketMl) + ' ml' + (secili ? '; yeniden dokunursan bir bardak azalır' : '')) + '"'
+        + ' style="display:inline-flex;cursor:pointer;border-radius:4px">' + BARDAK_SVG(i <= n) + '</span>');
+    }
+    const ic = '<div class="vk" data-oz="073"><div class="d x35">'
+      + '<div class="bd" role="radiogroup" data-oz-su aria-label="' + SP.h.esc(grupAd) + '" style="flex-wrap:wrap">' + bardaklar.join('') + '</div>'
+      + '<div class="sy">' + SP.h.esc(ml == null ? 'Girilmedi · kaç bardak içtiysen o bardağa dokun'
+        : adet + ' / ' + hedef + ' bardak · ' + U.fmtNum(ml) + ' ml') + '</div></div></div>';
+    return vkutu('Su', ml == null ? 'girilmedi' : U.fmtNum(ml) + ' ml', ic);
+  }
+
+  /* Vakti gelmiş (saati geçmiş, işaretlenmemiş) hatırlatmaları kapatır
+     (core/hatirlat.js bugun + isaretle). Yön tek: ÖLÇÜM işareti kapatır;
+     işaret ölçüm yazmaz (hatirlat söz 4). Yalnız bugün: hatırlatmalar
+     günün saatleridir. Döner: kapatılan anahtarlar (geri al için). */
+  function bugunSimdi(){
+    const n = new Date(), t = U.parse(U.todayISO());
+    t.setHours(n.getHours(), n.getMinutes(), 0, 0);
+    return t;
+  }
+  async function hatirlatKapat(tur, d, tek){
+    const H = SP.Hatirlat;
+    if(!H || !H.bugun || !H.isaretle || d !== U.todayISO()) return [];
+    let vakti = H.bugun(bugunSimdi()).filter(x => x.tur === tur && x.durum === 'vakti');
+    /* Su (2026-10-25): bir artış en çok BİR işaret koyar, vakti gelmişlerin
+       en sonuncusu (bugun() saate göre sıralı döner). Önce hepsi kapanıyordu:
+       10:00, 13:00, 16:00 ve 17:00'de tek bardak, kullanıcının yapmadığı üç
+       «yapıldı» kaydıydı (hatirlat söz 4). */
+    if(tek) vakti = vakti.slice(-1);
+    for(const x of vakti) await H.isaretle(x.anahtar, true, d);
+    return vakti.map(x => x.anahtar);
+  }
+  async function hatirlatAc(anahtarlar, d){
+    for(const k of anahtarlar || []) await SP.Hatirlat.isaretle(k, false, d);
+  }
+
+  /* Suyu yazar; artınca vakti gelen su hatırlatması kapanır. Geri al:
+     önceki değer ve kapatılan işaretler. */
+  async function suYaz(d, ml){
+    const { b, hedef, ml:once } = suDurumu(d);
+    const sonra = ml == null || ml <= 0 ? null : Math.min(ml, SU_EN_COK);
+    await M.saveVitals(d, { water:sonra });
+    const kapanan = sonra != null && sonra > (once || 0) ? await hatirlatKapat('su', d, true) : [];
+    SP.App.render();
+    UI.toast(sonra == null ? 'Su girilmedi olarak bırakıldı'
+      : 'Su · ' + Math.floor(sonra / b) + ' / ' + hedef + ' bardak (' + U.fmtNum(sonra) + ' ml)',
+      { undo:async () => { await M.saveVitals(d, { water:once }); await hatirlatAc(kapanan, d); SP.App.render(); } });
+  }
+
+  /* Radio grubunun klavyesi: oklar bir bardak, Boşluk/Enter dokunuş.
+     Odak önce hedef bardağa taşınır; yeniden çizim onu korur (app.js
+     focusSnapshot data-act + data-i). Belgedeki satır gezinmesi (↑/↓) bu
+     grupta çalışmaz: olay burada durur. */
+  function suKlavye(){
+    const g = document.querySelector('[role="radiogroup"][data-oz-su]');
+    if(!g || g.dataset.bagli) return;
+    g.dataset.bagli = '1';
+    g.addEventListener('keydown', e => {
+      const el = e.target.closest && e.target.closest('[data-act="su-ayarla"]');
+      if(!el) return;
+      const d = shownDate(), s = suDurumu(d), adet = s.adet, n = adet || 0;
+      let hedef = null;
+      if(e.key === 'ArrowRight' || e.key === 'ArrowUp') hedef = n + 1;
+      else if(e.key === 'ArrowLeft' || e.key === 'ArrowDown') hedef = n - 1;
+      else if(e.key === ' ' || e.key === 'Enter'){
+        e.preventDefault(); e.stopPropagation();
+        /* ARIA radyo deseni: seçili radyoda Boşluk/Enter hiçbir şey yapmaz
+           (2026-10-25 düzeltmesi; önce bir bardak siliyordu). */
+        if(adet >= 1 && Number(el.dataset.n) === adet) return;
+        handle['su-ayarla'](el); return;
+      }
+      if(hedef == null) return;
+      e.preventDefault(); e.stopPropagation();
+      if(hedef < 1 && adet == null) return;          // girilmemiş gün zaten boş
+      const yeni = g.querySelector('[data-n="' + Math.max(1, hedef) + '"]');
+      if(yeni) yeni.focus();
+      /* Oklar gerçek ml'ye bir bardak ekler/çıkarır (suSonrasi kuralı);
+         bir bardaktan aşağısı null. */
+      const yeniMl = hedef > n ? (s.ml || 0) + s.b : (s.ml || 0) - s.b;
+      suYaz(d, yeniMl < s.b ? null : yeniMl);
+    });
   }
 
   /* 074 ENERJİ ÖLÇEĞİ: «Bugün nasıl hissediyorsun?» — günün hissi, beyan. */
@@ -1454,15 +1624,31 @@ SP.Screens.today = (function(){
       S.ui.mealDate = el.dataset.date === U.todayISO() ? null : el.dataset.date;
       SP.App.render();
     },
+    /* Bir bardak ekler (eski tek dokunuş; bildirim ve betikler için
+       duruyor). Gösterilen güne yazar (2026-10-25 düzeltmesi). */
     async 'su-ekle'(){
-      const d = U.todayISO();
+      const d = shownDate();
+      const { b, ml } = suDurumu(d);
+      await suYaz(d, (ml || 0) + b);
+    },
+    /* n'inci bardak: günü n bardak yapar; en üstteki doluysa bir azaltır.
+       ±1 bardak gerçek ml'nin üstünden işler (suSonrasi, 2026-10-25). */
+    async 'su-ayarla'(el){
+      const n = Math.floor(Number(el && el.dataset && el.dataset.n));
+      if(!(n >= 1)) return;
+      const d = shownDate();
+      await suYaz(d, suSonrasi(suDurumu(d), n));
+    },
+    async 'dunku-sikayet'(){
+      const d = shownDate();
+      const dunku = dunkuSikayetler(d);
+      if(!dunku){ SP.App.render(); return; }
       const v = M.vitalsOf(d);
-      const once = v && v.water != null ? Number(v.water) : null;
-      const sonra = (once || 0) + BARDAK_ML;
-      await M.saveVitals(d, { water:sonra });
+      const once = { symptoms:Object.assign({}, (v && v.symptoms) || {}), symptomsLogged:!!(v && v.symptomsLogged) };
+      await M.saveVitals(d, { symptoms:Object.assign({}, dunku), symptomsLogged:true });
       SP.App.render();
-      UI.toast('Su eklendi · ' + Math.floor(sonra / BARDAK_ML) + ' / ' + (SU_ESIK / BARDAK_ML) + ' bardak',
-        { undo:async () => { await M.saveVitals(d, { water:once }); SP.App.render(); } });
+      UI.toast('Dünkü ' + Object.keys(dunku).length + ' şikâyet bu güne yazıldı',
+        { undo:async () => { await M.saveVitals(d, once); SP.App.render(); } });
     },
     async tus(el){
       const k = el.dataset.k;
@@ -1539,12 +1725,22 @@ SP.Screens.today = (function(){
       const note = document.getElementById('v-note');
       if(note && degisti(note)) patch.note = note.value.trim();
       /* 088: tartının KAYIT ANI (yalnız bugün girilen ve değişen tartı). */
-      const eski = M.vitalsOf(shownDate());
-      if(patch.weight != null && shownDate() === U.todayISO() && (!eski || eski.weight !== patch.weight)) patch.weightAt = new Date().toISOString();
+      const d = shownDate();
+      const eski = M.vitalsOf(d);
+      if(patch.weight != null && d === U.todayISO() && (!eski || eski.weight !== patch.weight)) patch.weightAt = new Date().toISOString();
       tusTampon = '';
-      await M.saveVitals(shownDate(), patch);
+      /* GERİ AL (2026-10-25; kullanıcı: «spi için daha işlevli veri
+         girişi, sürtünmeyi azaltacak teknikler ile daha güzel yap»): yalnız
+         yazılan alanların önceki değeri saklanır; geri al onları geri koyar
+         ve bu kaydın kapattığı tartı hatırlatmasını yeniden açar. */
+      const onceki = {};
+      Object.keys(patch).forEach(k => { onceki[k] = eski && eski[k] !== undefined ? eski[k] : (k === 'note' ? '' : null); });
+      await M.saveVitals(d, patch);
+      /* Kaydedilen tartı vakti gelen «sabah ölçümü» hatırlatmasını kapatır. */
+      const kapanan = patch.weight != null ? await hatirlatKapat('olcum', d) : [];
       const flags = M.openFlags().filter(f => !f.ack);
-      UI.toast(flags.length ? 'Kaydedildi — ' + flags.length + ' kırmızı bayrak açık' : 'Kaydedildi');
+      UI.toast(flags.length ? 'Kaydedildi — ' + flags.length + ' kırmızı bayrak açık' : 'Kaydedildi',
+        { undo:async () => { await M.saveVitals(d, onceki); await hatirlatAc(kapanan, d); SP.App.render(); } });
       SP.App.render();
     },
   
@@ -1664,6 +1860,8 @@ SP.Screens.today = (function(){
        düğme değil, «Bugün» widget'ının ilk maddesidir. */
     actions(){ return ''; },
     render, handle,
+    /* Su bardaklarının klavyesi (radio grubu) her çizimden sonra bağlanır. */
+    afterRender:suKlavye,
     /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */
     ayrinti:{
       id:'gun',

@@ -307,12 +307,25 @@ SP.Screens.labs = (function(){
     /* Yalnız hesaplanan ölçümler forma girilmez — onları elle yazmak
        formülü ezmek olurdu. Ama LDL ve eGFR hem laboratuvarda ölçülür
        hem hesaplanır; onlar formda durur ve girilen değer hesabı ezer. */
-    const list = SP.BIOMARKERS.filter(b => {
+    const list0 = SP.BIOMARKERS.filter(b => {
       const d = SP.DERIVED[b.id];
       return !d || d.measured;
     }).filter(b => !q
       || b.name.toLocaleLowerCase('tr-TR').indexOf(q) >= 0
       || (b.aliases || []).some(a => a.toLocaleLowerCase('tr-TR').indexOf(q) >= 0));
+    /* 2026-10-25: sabitlenen ölçümler (sabitleme sırasıyla) ve son testte
+       ÖLÇÜLMÜŞ olanlar listenin başına gelir; gerisi katalog sırasında
+       kalır. Yalnız sıra değişir: kutular boştur, son değer yer tutucudur. */
+    const pins = M.pinnedIds ? M.pinnedIds() : [];
+    const son = S.labs.length ? S.labs[S.labs.length - 1].values || {} : {};
+    const derece = b => {
+      const p = pins.indexOf(b.id);
+      if(p >= 0) return p;
+      return son[b.id] && son[b.id].cert === 'measured' ? pins.length : pins.length + 1;
+    };
+    const list = list0.map((b, i) => [b, i])
+      .sort((x, y) => derece(x[0]) - derece(y[0]) || x[1] - y[1]).map(x => x[0]);
+    const onde = list.filter(b => derece(b) <= pins.length).length;
 
     const filled = Object.keys(draft.values).length;
 
@@ -351,7 +364,8 @@ SP.Screens.labs = (function(){
       }),
 
       K.Entry({
-        label:'Değerler', hint:'lab-entry', meta:list.length + ' satır',
+        label:'Değerler', hint:'lab-entry',
+        meta:list.length + ' satır' + (onde ? ' · sabitlenenler ve son test üstte' : ''),
         action:K.Input({ id:'entry-q', value:S.ui.labQuery || '',
           placeholder:'Ölçüm ara…', aria:'Test girişinde ölçüm ara', change:'lab-query', debounce:200 }),
         body:html`
@@ -1169,14 +1183,13 @@ SP.Screens.labs = (function(){
         K.Drop({ act:'lab-file', label:'Rapor dosyası ya da fotoğrafı', kamera:{},
           icon:'file', accept:'.txt,.csv,.md,image/*',
           hint:'Metin dosyası modelsiz okunur · fotoğraf için model gerekir' }),
+        /* 2026-10-25: tarih ve laboratuvar alanı buradan önizlemeye taşındı.
+           Dosya bırakma kutusu tarihin üstünde duruyordu ve tarih dosya
+           seçildiği an okunuyordu: önce dosyayı bırakan bugünün tarihine
+           yazıyordu. Tarih artık önizlemede, kaydetme anında okunur. */
         K.Notice({ tone:'info', body:'Ayıklayıcı emin olamadığı satırı atmaz. '
-          + 'Eşleşmeyen satırlar aşağıda listelenir; istersen elle bağlarsın.' }),
-        html`<div class="cols-2">
-          ${K.Field({ label:'Test tarihi',
-            input:K.Input({ id:'paste-date', type:'date', value:draft.date }) })}
-          ${K.Field({ label:'Laboratuvar (isteğe bağlı)',
-            input:K.Input({ id:'paste-lab', placeholder:'Hangi laboratuvar?' }) })}
-        </div>`,
+          + 'Sonraki adımda tarihi ve açlık durumunu denetlersin; eşleşmeyen '
+          + 'satırları istersen bir ölçüme bağlarsın.' }),
         K.Field({ label:'Rapor metni',
           input:html`<div class="withmic">
             ${K.Textarea({ id:'paste-text', rows:9,
@@ -1189,33 +1202,133 @@ SP.Screens.labs = (function(){
     });
   }
 
+  /* Önizlemenin oturum alanları yeniden çizimden ÖNCE okunur: bir satırın
+     tikini değiştirmek yazılmış tarihi ya da laboratuvarı geri almasın. */
+  function pvOku(){
+    if(!preview) return;
+    const d = document.getElementById('pv-date');
+    if(d && d.value) preview.date = d.value;
+    const l = document.getElementById('pv-lab');
+    if(l) preview.lab = String(l.value || '').trim();
+  }
+
+  /* Yeni önizlemenin oturum alanları: metinden okunan tarih öneridir,
+     yoksa giriş formundaki tarih; açlık hep «Bilmiyorum»dan başlar. */
+  function pvBasla(p){
+    p.unmatched = p.unmatched || [];
+    p.date = p.dateGuess || draft.date || U.todayISO();
+    p.lab = draft.lab || '';
+    p.fasting = 'unknown';
+  }
+
+  function pvNot(p){
+    const n = p.rows.length;
+    return n + ' değer eşleşti'
+      + (p.unmatched.length ? ', ' + p.unmatched.length + ' satır eşleşmedi' : '') + '.';
+  }
+
+  const ACLIK_SECENEK = [
+    { value:'unknown', label:'Bilmiyorum' },
+    { value:'yes', label:'Aç' },
+    { value:'no', label:'Tok' }];
+
   function previewSheet(){
     const p = preview;
+    const ac = p.fasting || 'unknown';
+    /* 2026-10-25: hedef oturum ve satır durumları tarih ve açlıkla her
+       çizimde yeniden hesaplanır; kayıt da aynı planı kullanır. */
+    const plan = SP.Parse.pastePlan(p, p.date, ac);
+    const kaydedilecek = plan.yazilacak;
+    const degisen = plan.satirlar.filter(s => s.durum === 'degisir').length;
+    /* Bağlama seçicisi: forma girilebilen ve listede henüz olmayan ölçümler. */
+    const listede = {};
+    p.rows.forEach(r => { listede[r.markerId] = true; });
+    const secenek = [{ value:'', label:'Ölçüme bağla…' }].concat(SP.BIOMARKERS
+      .filter(b => { const d = SP.DERIVED[b.id]; return (!d || d.measured) && !listede[b.id]; })
+      .map(b => ({ value:b.id, label:b.name + ' · ' + b.unit })));
     return UI.sheet({
       title:'Ayıklanan değerler', subtitle:p.note, wide:true,
       body:String(K.Stack([
-        when(p.rows.length, () => html`<div>${map(p.rows, (r, i) => html`
-          <div class="${r.skip ? 'pasterow pasterow--off' : 'pasterow'}">
-            ${K.Checkbox({ label:'', checked:!r.skip, act:'toggle-row', data:{ 'data-i':i } })}
+        /* 2026-10-25: oturum alanları önizlemede. Tarih metinden yerelde
+           okunmuşsa öneri olarak gelir; kaydetme anında alandan okunur. */
+        html`<div class="cols-2">
+          ${K.Field({ label:'Test tarihi',
+            hint:p.dateGuess && p.date === p.dateGuess ? 'rapordan okundu' : '',
+            input:K.Input({ id:'pv-date', type:'date', value:p.date, change:'pv-date' }) })}
+          ${K.Field({ label:'Laboratuvar', hint:'isteğe bağlı',
+            input:K.Input({ id:'pv-lab', value:p.lab || '', placeholder:'Hangi laboratuvar?',
+              change:'pv-lab' }) })}
+        </div>`,
+        html`<div class="field">
+          <span>Kan aç karnına mı alındı?
+            <span class="hint-text">glukoz, insülin ve trigliserit buna bağlı</span></span>
+          ${K.Segmented({ act:'pv-fasting', value:ac, aria:'Kan aç karnına mı alındı?',
+            items:ACLIK_SECENEK })}
+        </div>`,
+        when(ac === 'no', () => K.Notice({ tone:'warn', title:'Tok ölçüm:',
+          body:'Açlık glukozu, insülin, trigliserit ve onlardan hesaplanan değerler '
+            + 'kaydedilir ama yorumlanmaz.' })),
+        when(p.rows.some(r => r.mismatch), () => K.Notice({ tone:'warn',
+          body:'Birimi uyuşmayan satırlar işaretsiz geldi. Birimi kendin denetleyip '
+            + 'işaretlersen sayı olduğu gibi, gördüğün birimle yazılır; çevrilmez.' })),
+        /* 2026-10-25: aynı tarihte test varsa ne olacağı kayıttan önce
+           söylenir; kayıtlı değerin üstüne yazmak bilinçli bir seçimdir. */
+        when(plan.hedef, () => K.Notice({ tone:'info',
+          body:U.fmtDate(plan.date) + ' testine eklenir.'
+            + (plan.aclikYazilir ? ' Testin açlık durumu «' + FASTING_LABEL[plan.ac] + '» olarak yazılır.' : '') })),
+        when(plan.ayri, () => K.Notice({ tone:'warn',
+          body:(plan.neden === 'aclik'
+            ? 'Bu tarihteki test farklı bir açlık durumuyla kaydedilmiş. '
+            : 'Bu tarihte birden çok test var ve hangisine ekleneceği açlık durumundan anlaşılmıyor. ')
+            + 'Değerler aynı tarihte ayrı test olarak kaydedilir; önceki test değişmez.' })),
+        when(degisen, () => K.Notice({ tone:'warn',
+          body:'Bu testte değeri kayıtlı ' + degisen + ' ölçüm işaretsiz geldi. '
+            + 'İşaretlersen kayıtlı değerin yerine yenisi yazılır.' })),
+        when(p.rows.length, () => html`<div>${map(p.rows, (r, i) => {
+          const s = plan.satirlar[i];
+          const birim = r.mismatch && !r.converted ? r.mismatch : r.marker.unit;
+          const onceBirim = s.once ? (s.once.unit || r.marker.unit) : '';
+          const ayniBirim = String(onceBirim).toLowerCase() === String(birim).toLowerCase();
+          const deger = s.durum === 'degisir'
+            ? (ayniBirim ? U.fmtNum(s.once.v) + ' → ' + U.fmtNum(r.value) + ' ' + birim
+              : U.fmtNum(s.once.v) + ' ' + onceBirim + ' → ' + U.fmtNum(r.value) + ' ' + birim)
+            : U.fmtNum(r.value) + ' ' + birim;
+          return html`
+          <div class="${s.yaz ? 'pasterow' : 'pasterow pasterow--off'}">
+            ${s.durum === 'ayni' ? html`<span></span>` : K.Checkbox({ label:'', checked:s.yaz, act:'toggle-row',
+              data:{ 'data-i':i, 'aria-label':s.durum === 'degisir'
+                ? r.marker.name + ': kayıtlı ' + U.fmtNum(s.once.v) + ' yerine ' + U.fmtNum(r.value) + ' yazılsın'
+                : r.marker.name + ' kaydedilsin' } })}
             <span><b class="small">${r.marker.name}</b>
               ${when(r.converted, () => html` <span class="tiny dim">${r.from} → ${r.to} çevrildi</span>`)}
               ${when(r.mismatch, () => html` <span class="tiny">${K.Badge({ label:'birim ' + r.mismatch, tone:'warn' })}</span>`)}
+              ${when(r.bound, () => html` <span class="tiny dim">elle bağlandı</span>`)}
+              ${when(s.durum === 'degisir', () => html` <span class="tiny">${K.Badge({ label:'kayıtlı değer değişir', tone:'warn' })}</span>`)}
+              ${when(s.durum === 'ayni', () => html` <span class="tiny dim">zaten kayıtlı</span>`)}
             </span>
-            <span class="pasterow__val num">${U.fmtNum(r.value)} ${r.marker.unit}</span>
+            <span class="pasterow__val num">${deger}</span>
             <span class="pasterow__src">${r.line}</span>
-          </div>`)}</div>`),
+          </div>`; })}</div>`),
         when(!p.rows.length, () => K.Notice({ tone:'warn', body:p.note })),
+        /* 2026-10-25: eşleşmeyen satır yalnız bir liste değil; her satırın
+           yanında ölçüm seçici durur. Sayı yalnız o satırdan alınır
+           (SP.Parse.bindLine), uydurulmaz; bağlanan satır yukarıya geçer. */
         when(p.unmatched.length, () => K.Collapsible({
           title:'Eşleşmeyen satırlar', meta:p.unmatched.length + ' satır',
-          act:'toggle-unmatched', open:!!S.ui.pasteUnmatchedOpen,
-          body:html`<ul class="bullets small muted mt-10">
-            ${map(p.unmatched.slice(0, 40), x => html`<li>${x.line}</li>`)}</ul>
-            <p class="small muted">Bu satırlarda bilinen bir ölçüm adı bulunamadı.
-              Değerleri «Test gir» sayfasından elle yazabilirsin.</p>` })),
+          act:'toggle-unmatched', open:S.ui.pasteUnmatchedOpen !== false,
+          body:html`<div class="list mt-10">
+            ${map(p.unmatched.slice(0, 40), (x, j) => html`
+              <div class="listitem">
+                <span class="grow small">${x.line}</span>
+                ${K.Select({ size:'sm', value:'', change:'pv-bind', options:secenek,
+                  aria:'«' + x.line + '» satırını bir ölçüme bağla', data:{ 'data-i':j } })}
+              </div>`)}</div>
+            <p class="small muted">Bu satırlarda bilinen bir ölçüm adı bulunamadı. Bir ölçüme
+              bağlarsan sayı yalnız o satırdan alınır ve kaydetmeden önce yukarıda görünür.</p>` })),
       ])),
       footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
         ${K.Button({ label:'Kaydet', tone:'primary', act:'save-paste',
-          disabled:!p.rows.filter(r => !r.skip).length })}`),
+          disabled:!kaydedilecek })}`),
       noFocus:true,
     });
   }
@@ -1430,11 +1543,19 @@ SP.Screens.labs = (function(){
     async 'entry-save'(){
       const ids = Object.keys(draft.values);
       if(!ids.length){ UI.toast('Hiç değer yazılmadı'); return; }
-      /* Ayni tarihte oturum varsa ustune yazilir; bir gunun testi tek kayittir. */
-      const existing = S.labs.find(l => l.date === draft.date);
+      /* Ayni tarihte ACLIGI UYUMLU oturum varsa ona eklenir (2026-10-25;
+         yapistirmayla ayni kural, SP.Parse.pastePlan): bilinmeyen aclik
+         bilineni ezmez, bilinen bilinmeyeni doldurur; celisirse ayni tarihte
+         ayri test olur. Eskiden ilk oturuma yazip acligi eziyordu:
+         «Bilmiyorum» bilinen «Aç»i siliyor, «Tok» onceki glukozu tok yapiyordu. */
+      const aclik = f => f === 'yes' || f === 'no' ? f : 'unknown';
+      const ac = aclik(draft.fasting);
+      const uyumlu = S.labs.filter(l => l.date === draft.date
+        && (aclik(l.fasting) === ac || aclik(l.fasting) === 'unknown' || ac === 'unknown'));
+      const existing = uyumlu.find(l => aclik(l.fasting) === ac) || (uyumlu.length === 1 ? uyumlu[0] : null);
       const rec = existing || M.newLab(draft.date);
       if(draft.lab) rec.lab = draft.lab;
-      rec.fasting = draft.fasting || 'unknown';
+      if(!existing || (ac !== 'unknown' && aclik(existing.fasting) === 'unknown')) rec.fasting = ac;
       rec.time = draft.time || '';
       ids.forEach(id => {
         const b = SP.BIO_BY_ID[id];
@@ -1454,33 +1575,57 @@ SP.Screens.labs = (function(){
     async 'open-paste'(){ pasteSheet(); },
     async 'run-paste'(){
       const text = (document.getElementById('paste-text') || {}).value || '';
-      const date = (document.getElementById('paste-date') || {}).value || U.todayISO();
-      const lab = (document.getElementById('paste-lab') || {}).value || '';
       preview = SP.Parse.parseLab(text);
-      preview.date = date; preview.lab = lab;
+      pvBasla(preview);
       previewSheet();
     },
     async 'toggle-row'(el){
       const i = Number(el.dataset.i);
       if(!preview || !preview.rows[i]) return;
-      preview.rows[i].skip = !el.checked;
+      pvOku();
+      const r = preview.rows[i];
+      r.skip = !el.checked;
+      /* 2026-10-25: kayıtlı değerin üstüne yazmak yalnız o testin o değeri
+         için seçilir; tarih ya da açlık değişip hedef değişirse işaret geçmez. */
+      const plan = SP.Parse.pastePlan(preview, preview.date, preview.fasting);
+      if(plan.satirlar[i].durum === 'degisir') r.ustune = el.checked ? plan.hedef.id : null;
       previewSheet();
     },
     async 'toggle-unmatched'(){
-      S.ui.pasteUnmatchedOpen = !S.ui.pasteUnmatchedOpen;
+      pvOku();
+      S.ui.pasteUnmatchedOpen = S.ui.pasteUnmatchedOpen === false;
       previewSheet();
     },
+    async 'pv-fasting'(el){
+      if(!preview) return;
+      pvOku();
+      const v = el.dataset.value;
+      preview.fasting = v === 'yes' || v === 'no' ? v : 'unknown';
+      previewSheet();
+    },
+    /* Tarih KAYDETME anında alandan okunur (2026-10-25); dosya seçildiği
+       an değil. Boş tarih bugüne sessizce dönmez: sorulur. */
     async 'save-paste'(){
       if(!preview) return;
-      const rec = SP.Parse.toLabRecord(preview, preview.date, { lab:preview.lab });
-      const n = Object.keys(rec.values).length;
+      const d = document.getElementById('pv-date');
+      if(d && !d.value){ UI.toast('Test tarihini yaz'); return; }
+      pvOku();
+      const date = preview.date || U.todayISO();
+      /* 2026-10-25: sayı ve hedef, kaydın kullandığı plandan gelir. */
+      const plan = SP.Parse.pastePlan(preview, date, preview.fasting);
+      const n = plan.yazilacak;
       if(!n){ UI.toast('Kaydedilecek değer yok'); return; }
+      const degisti = plan.satirlar.filter(s => s.yaz && s.durum === 'degisir').length;
+      const rec = SP.Parse.toLabRecord(preview, date, { lab:preview.lab, fasting:preview.fasting });
       await M.saveLab(rec);
       preview = null;
       UI.closeSheet();
       S.ui.labTab = 'sonuc';
       const flags = M.openFlags().filter(f => !f.ack);
-      UI.toast(n + ' değer kaydedildi' + (flags.length ? ' · ' + flags.length + ' kırmızı bayrak' : ''));
+      UI.toast(n + ' değer ' + (plan.hedef ? U.fmtDate(date) + ' testine eklendi'
+          : plan.ayri ? U.fmtDate(date) + ' tarihinde ayrı test olarak kaydedildi' : 'kaydedildi')
+        + (degisti ? ' · ' + degisti + ' kayıtlı değer değişti' : '')
+        + (flags.length ? ' · ' + flags.length + ' kırmızı bayrak' : ''));
       SP.App.render();
     },
   };
@@ -1515,9 +1660,37 @@ SP.Screens.labs = (function(){
       if(!file) return;
       preview = await UI.withBusy('Rapor okunuyor', file.name,
         () => SP.Extract.fromLabFile(file));
-      preview.date = (document.getElementById('paste-date') || {}).value || U.todayISO();
-      preview.lab = (document.getElementById('paste-lab') || {}).value || '';
-      if(!preview.rows.length){ UI.toast(preview.note); return; }
+      /* 2026-10-25: tarih burada okunmaz; önizlemede durur ve kaydetmede
+         alınır. Bağlanabilir satır varsa önizleme yine açılır. */
+      pvBasla(preview);
+      if(!preview.rows.length && !(preview.unmatched || []).length){ UI.toast(preview.note); return; }
+      previewSheet();
+    },
+    /* 2026-10-25: tarih hedef testi değiştirir; önizleme yeniden çizilir ki
+       «28 → 35» ve işaretler o tarihin testine göre görünsün. */
+    async 'pv-date'(){
+      pvOku();
+      if(!preview) return;
+      previewSheet();
+      const d = document.getElementById('pv-date');
+      if(d) d.focus();
+    },
+    async 'pv-lab'(){ pvOku(); },
+    /* Eşleşmeyen satırı seçilen ölçüme bağlar. Sayı yalnız o satırdan. */
+    async 'pv-bind'(el){
+      if(!preview) return;
+      const i = Number(el.dataset.i);
+      const x = (preview.unmatched || [])[i];
+      if(!x || !el.value) return;
+      pvOku();
+      const r = SP.Parse.bindLine(x.line, el.value);
+      if(!r){ el.value = ''; UI.toast('Bu satırda ölçüm adından sonra bir sayı bulunamadı'); return; }
+      if(preview.rows.some(y => y.markerId === r.markerId)){
+        el.value = ''; UI.toast(r.marker.name + ' listede zaten var'); return;
+      }
+      preview.rows.push(r);
+      preview.unmatched.splice(i, 1);
+      preview.note = pvNot(preview);
       previewSheet();
     },
     async 'pick-marker'(el){ S.ui.trendMarker = el.value; SP.App.render(); },

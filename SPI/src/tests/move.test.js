@@ -16,6 +16,32 @@
       expect(onaylar[0].tehlikeli).toBe(true);
     });
   });
+  /* HATA (2026-10-25): MET hesabından «Seansa ekle» türsüz seans yazıyordu
+     (ve var olmayan M.addWorkout'u çağırıyordu); haftalık sütun türsüz
+     seansı KUVVET sayıyordu. MET seansı türünü etkinlikten alır. */
+  describe('Move — MET seansı türü', () => {
+    it('MET seansı kuvvet sayılmaz: yürüyüş kardiyo, yoga mobilite, ağırlık kuvvet', async () => {
+      resetState();
+      await SP.Screens.move.handle['add-met-workout']({ dataset:{ desc:'Yürüyüş, 5 km/sa', met:'3.5', min:'30', cat:'walking' } });
+      const w = SP.Model.workoutsOf(SP.U.todayISO());
+      expect(w).toHaveLength(1);
+      expect([w[0].kind, w[0].minutes, w[0].name]).toEqual(['cardio', 30, 'Yürüyüş, 5 km/sa']);
+      expect(SP.Move.metTuru('conditioning-exercise', 'Yoga, hatha')).toBe('mobility');
+      expect(SP.Move.metTuru('conditioning-exercise', 'Ağırlık çalışması, orta')).toBe('strength');
+      expect(SP.Move.metTuru('home-activities', 'Ev temizliği')).toBe('cardio');
+      expect(SP.Move.metTuru('', '')).toBe('cardio');
+    });
+    /* HATA (2026-10-25): zorlanma (RPE) MET değerinden türetiliyordu (round(MET)):
+       kişinin girmediği bir his puanı yüke karışıyordu. Uydurulmaz: boş kalır. */
+    it('MET seansı zorlanma puanı uydurmaz', async () => {
+      resetState();
+      await SP.Screens.move.handle['add-met-workout']({ dataset:{ desc:'Koşu, 10 km/sa', met:'9.8', min:'30', cat:'running' } });
+      const w = SP.Model.workoutsOf(SP.U.todayISO());
+      expect(w).toHaveLength(1);
+      expect(w[0].rpe).toBe(null);
+    });
+  });
+
   const U = SP.U;
 
   /* Yuku BILINMEYEN seans: ne zorluk ne taninan hareket.

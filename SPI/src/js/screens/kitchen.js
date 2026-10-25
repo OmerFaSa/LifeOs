@@ -79,6 +79,9 @@ SP.Screens.kitchen = (function(){
                 ${Math.round(r.gets.protein)} g protein taşır.`)}
               ${map(r.addons, a => html` <b>${a.text}</b>`)}
             </span>
+            ${when(r.member.self && r.share > 0, () => html`<span class="splitrow__note">${K.Button({
+              label:'Payımı öğüne ekle', icon:'plus', size:'sm', act:'pay-ogune-ekle',
+              data:{ 'data-id':res.food.id } })}</span>`)}
           </div>`)}
         ${when(res.short, () => K.Notice({ tone:'warn', class:'mt-12',
           body:'Tencere hanenin bu öğün için ihtiyacının altında: yaklaşık '
@@ -256,6 +259,28 @@ SP.Screens.kitchen = (function(){
   }
 
   const handle = {
+    /* PAYIMI ÖĞÜNE EKLE (2026-10-25): kendi payın bugünün öğününe tek
+       dokunuşla. Gram ekranda görünen paydır, yeniden hesaplanır (tıklanan
+       düğmenin taşıdığı sayıya güvenilmez); hesap tencere ve hedeften
+       geldiği için kesinlik «tahmin». Öğün yeri: seçili öğün, yoksa saate
+       göre. «Geri al» eklenen öğünü siler. */
+    async 'pay-ogune-ekle'(el){
+      const dishId = el.dataset.id || S.ui.kitchenDish || 'kuru-fasulye-etli';
+      const res = SP.Nutri.householdSplit(dishId, S.ui.kitchenGrams, members());
+      const ben = res.ok ? res.rows.find(r => r.member.self) : null;
+      const g = ben ? Math.round(Number(ben.share)) : 0;
+      if(!(g > 0)){ UI.toast('Payın hesaplanamadı; profilini tamamla.'); return; }
+      const d = U.todayISO();
+      const slot = S.ui.mealSlot || (SP.Ogun ? SP.Ogun.simdiki() : 'aksam');
+      const yeni = M.newMeal(slot);
+      yeni.items = [{ foodId:res.food.id, g, cert:'estimated', portion:'tencereden pay' }];
+      yeni.note = 'Mutfak · tencereden pay';
+      await M.addMeal(d, yeni);
+      SP.App.render();
+      const ad = SP.Ogun ? SP.Ogun.ad(slot) : slot;
+      UI.toast(res.food.name + ' ' + U.fmtNum(g) + ' g · «' + ad + '» öğününe eklendi · tahmin', { undo:async () => {
+        await M.deleteMeal(d, yeni.id); UI.toast('Geri alındı'); SP.App.render(); } });
+    },
     async 'evdeki-sepet'(){
       const m = SP.Evdeki.sepettenMalzeme().map(id => SP.Evdeki.MALZEME[id].ad);
       if(!m.length){ UI.toast('Sepette malzemeye çevrilebilen bir şey yok'); return; }

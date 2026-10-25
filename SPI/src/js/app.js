@@ -581,6 +581,80 @@ SP.App = (function(){
 
   let rendering = false;
   let queued = null;
+  /* TEK SATIR GİRİŞİN SPİ KURULUMU (brand/ortak/giris.js). Modül düzeyinde ve
+     adlı (2026-10-25): boot çağırır; testler ortak kutuyu sıfırladıktan sonra
+     SP.App.girisKur() ile gerçek kurulumu geri getirir. */
+  function girisKurucu(){ return window.LIFEOS.GIRIS.kur({ modul:'spi',
+      onizle:t => {
+        /* Hazır öğün / antrenman adıyla (core/hazir.js söz 5): «menemen
+           tabağımı yedim», «bacak günümü yaptım». Önizleme + onay.
+           2026-10-25: gün sözü («dün …») ve öğün sözü («akşam …») geçer. */
+        const Q = SP.Quick;
+        const hz = SP.Hazir && SP.Hazir.bul(t);
+        if(hz){
+          const ogun = hz.tur === 'ogun';
+          const gs = Q && Q.gunSozu ? Q.gunSozu(t) : { gun:null };
+          const gun = Q && Q.tarih ? Q.tarih({ gun:gs.gun }) : SP.U.todayISO();
+          const slot = ogun && Q && Q.ogunSozu ? Q.ogunSozu(t) : null;
+          const neye = gun === SP.U.todayISO() ? 'bugüne' : U.fmtDate(gun) + ' gününe';
+          return { tur:ogun ? 'ogun' : 'hareket', metin:hz.hazir.ad + (ogun ? ' · hazır öğün' : ' · hazır antrenman')
+              + (gun === SP.U.todayISO() ? '' : ' · ' + U.fmtDate(gun)),
+            ipucu:ogun ? SP.Hazir.ogunOzet(hz.hazir) : SP.Hazir.antrenmanOzet(hz.hazir),
+            kaydet:async () => {
+              const r = ogun ? await SP.Hazir.ogunEkle(hz.hazir.id, gun, slot || undefined) : await SP.Hazir.antrenmanEkle(hz.hazir.id, gun);
+              render();
+              return r.ok ? { metin:'«' + r.ad + '» ' + neye + ' eklendi.', geriAl:async () => { await r.geriAl(); render(); } } : r.why;
+            } };
+        }
+        const p = Q && Q.parse(t);
+        /* tur: King'in sohbet karşılığı için (king.js söz 8). */
+        const tur = !p ? '' : p.kind === 'nap' ? 'uyku' : p.kind === 'meal' ? 'ogun' : p.kind === 'move' ? 'hareket' : p.kind === 'lab' ? 'tahlil'
+          : p.kind === 'symptom' ? 'olcum'
+          : p.data.field.id === 'sleep' ? 'uyku' : p.data.field.id === 'water' ? 'su' : 'olcum';
+        /* KAYDIN GÜNÜ (2026-10-25): «dün 2 bardak su» bugüne yazılıyordu.
+           Önizleme ne yazacağını söyler: su için ekleme ve yeni toplam
+           («Su +500 ml · toplam 1.500 ml»), başka günse o gün. */
+        const gun = p ? Q.tarih(p) : null;
+        const gunEki = gun && gun !== SP.U.todayISO() ? ' · ' + U.fmtDate(gun) : '';
+        /* giris.js (2026-10-25): öğün sözü olan öğün kendi GRUBUNDADIR
+           (kahvaltı ve öğle tek öğüne birleşmez); çok parçalı önizlemede
+           su yalnız eklemeyi söyler, toplamı parça bilemez. */
+        const grup = p && p.kind === 'meal' && p.data && p.data.slot ? p.data.slot : undefined;
+        const metinKisa = p && p.kind === 'vital' && p.data.ekle
+          ? p.data.field.label + ' +' + U.fmtNum(p.data.value) + ' ' + p.data.field.unit + gunEki : undefined;
+        return p ? { tur, grup, metinKisa, metin:Q.onizleme(p, gun) + gunEki, ipucu:p.hint, kaydet:async () => {
+          /* Geri alma (giris.js söz 8): ne eklendiyse yalnız o kalkar;
+             ölçüm önceki değerine döner (önce yoksa «girilmedi»). Tahlil
+             aynı günün kaydıyla birleştiği için geri alınmaz. */
+          const t = gun;
+          const once = { v:JSON.parse(JSON.stringify(SP.S.vitals[t] || {})), ogun:(SP.S.meals[t] || []).map(m => m.id),
+            seans:(SP.S.workouts || []).map(w => w.id) };
+          const r = await Q.apply(p, { date:t });
+          render();
+          /* Yazılmadıysa (şiddet söylenmedi, birim uyuşmuyor, toplam
+             sınırı aştı) nedeni döner; «kaydedildi» denmez. */
+          if(!r || !r.ok) return (r && r.text) || 'Kaydedilemedi.';
+          let geriAl = null;
+          if(p.kind === 'nap'){
+            const id = r && r.kayit && r.kayit.id;
+            geriAl = id ? async () => { await SP.Uyku.sil(t, id); render(); } : null;
+          }else if(p.kind === 'vital' || p.kind === 'symptom'){
+            const alanlar = p.kind === 'symptom' ? ['symptoms', 'symptomsLogged']
+              : [p.data.field.id].concat(p.data.ikinci ? [p.data.ikinci.field.id] : []);
+            geriAl = async () => { const pt = {}; alanlar.forEach(f => { pt[f] = once.v[f] == null ? null : once.v[f]; });
+              if(p.kind === 'symptom'){ pt.symptoms = once.v.symptoms || {}; pt.symptomsLogged = !!once.v.symptomsLogged; }
+              await SP.Model.saveVitals(t, pt); render(); };
+          }else if(p.kind === 'meal'){
+            const yeni = (SP.S.meals[t] || []).filter(m => once.ogun.indexOf(m.id) < 0).map(m => m.id);
+            geriAl = async () => { for(const id of yeni) await SP.Model.deleteMeal(t, id); render(); };
+          }else if(p.kind === 'move'){
+            const yeni = (SP.S.workouts || []).filter(w => once.seans.indexOf(w.id) < 0).map(w => w.id);
+            geriAl = async () => { for(const id of yeni) await SP.Model.deleteWorkout(id); render(); };
+          }
+          return { metin:r.text, geriAl };
+        } } : null;
+      },
+      ornekler:['7 saat uyudum, 2 yumurta yedim', '45 dk yürüyüş', '2 yumurta 1 çay', 'kilo 72'] }); }
 
   /* Aynı karede peş peşe gelen render çağrılarını tek çizime indirger.
      Arka plan sekmesinde rAF hiç çalışmaz; bu yüzden zamanlayıcı yedeği vardır. */
@@ -1193,6 +1267,43 @@ SP.App = (function(){
   /* Enter ile hızlı giriş: metin alanında Enter, yanındaki eylemi tetikler. */
   const ENTER_ACTIONS = { 'meal-text':'add-meal', 'quick-meal':'quick-meal', 'chat-text':'send-chat',
     'barkod-kod':'barkod-bul', 'ht-saat':'ht-kaydet' };
+  /* BUGÜN ÖLÇÜM FORMU ENTER İLE KAYDEDER (2026-10-25; kullanıcı: «spi için
+     daha işlevli veri girişi, sürtünmeyi azaltacak teknikler ile daha güzel
+     yap»). Uykuyu yazıp «Kaydet»e uzanmak gerekiyordu. Sayı alanları
+     screens/today.js FIELDS (`v-` + id) ve vücut ölçüleri; not alanı
+     (textarea) ve kanama kutusu Enter'ı kendisi kullanır, listede yok. */
+  ['sleep', 'rhr', 'hrv', 'sbp', 'dbp', 'spo2', 'temp', 'weight', 'waist', 'bodyfat', 'neck', 'hip', 'water']
+    .forEach(id => { ENTER_ACTIONS['v-' + id] = 'save-vitals'; });
+  function enterEylemi(id){ return ENTER_ACTIONS[id] || null; }
+
+  /* KISA YOL ŞERİDİ (brand/ortak/kisayol.js). 2026-10-25: en çok kullanılan
+     üç hazır öğün / antrenman (core/hazir.js) şeritte tek dokunuşla durur
+     (kullanıcı: «spi için daha işlevli veri girişi, sürtünmeyi azaltacak
+     teknikler ile daha güzel yap»). Şerit HİÇBİR ŞEY YAZMAZ (kisayol.js söz
+     5): çip kutuyu «… yedim / yaptım» diye doldurur, kayıt yine önizleme ve
+     «Kaydet» ile. Sıra son 30 günde kaç kez eklendiği (öğün notu ya da seans
+     adı ve süresi), eşitlikte listedeki sıra. Modül düğmesi BEŞİ GEÇMEZ: hazır
+     çipler Öğün / Hareket / Testler'in yerini alır (onlar menüde ve G + harfte
+     durur), Bugün'ün 14 düğme bütçesi büyümez (tests/bugun.test.js). */
+  const KISAYOL_SABIT = [{ ad:'Uyku', doldur:'uyku ' }, { ad:'Kilo', doldur:'kilo ' }];
+  const KISAYOL_ROTA = [{ ad:'Öğün', rota:'meals' }, { ad:'Hareket', rota:'move' }, { ad:'Testler', rota:'labs' }];
+  function kisayolDugmeleri(){
+    const H = SP.Hazir;
+    let hazir = [];
+    if(H){
+      const bugun = U.todayISO(), bas = U.iso(U.addDays(U.parse(bugun), -29));
+      const pencere = d => d >= bas && d <= bugun;
+      const ogunSay = ad => Object.keys(S.meals || {}).filter(pencere)
+        .reduce((n, d) => n + (S.meals[d] || []).filter(m => m && m.note === ad).length, 0);
+      const seansSay = k => (S.workouts || []).filter(w => w && pencere(w.date)
+        && (w.name || '') === (k.name || '') && (w.minutes || 0) === (k.minutes || 0)).length;
+      hazir = H.ogunler().map((h, i) => ({ ad:h.ad, doldur:h.ad + ' yedim', n:ogunSay(h.ad), i }))
+        .concat(H.antrenmanlar().map((h, i) => ({ ad:h.ad, doldur:h.ad + ' yaptım', n:seansSay(h.kayit || {}), i:i + 0.5 })))
+        .sort((a, b) => b.n - a.n || a.i - b.i).slice(0, 3)
+        .map(x => ({ ad:x.ad, doldur:x.doldur }));
+    }
+    return KISAYOL_SABIT.concat(hazir, KISAYOL_ROTA).slice(0, 5);
+  }
   document.addEventListener('keydown', async e => {
     if((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')){
       e.preventDefault();
@@ -1779,67 +1890,13 @@ SP.App = (function(){
       }
       /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
          kapıyı kullanır; ayrıştırıcı SP.Quick (ölçüm, tahlil, hareket, öğün). */
-      if(window.LIFEOS && window.LIFEOS.GIRIS){
-        window.LIFEOS.GIRIS.kur({ modul:'spi',
-          onizle:t => {
-            /* Hazır öğün / antrenman adıyla (core/hazir.js söz 5): «menemen
-               tabağımı yedim», «bacak günümü yaptım». Önizleme + onay. */
-            const hz = SP.Hazir && SP.Hazir.bul(t);
-            if(hz){
-              const ogun = hz.tur === 'ogun';
-              return { tur:ogun ? 'ogun' : 'hareket', metin:hz.hazir.ad + (ogun ? ' · hazır öğün' : ' · hazır antrenman'),
-                ipucu:ogun ? SP.Hazir.ogunOzet(hz.hazir) : SP.Hazir.antrenmanOzet(hz.hazir),
-                kaydet:async () => {
-                  const gun = SP.U.todayISO();
-                  const r = ogun ? await SP.Hazir.ogunEkle(hz.hazir.id, gun) : await SP.Hazir.antrenmanEkle(hz.hazir.id, gun);
-                  render();
-                  return r.ok ? { metin:'«' + r.ad + '» bugüne eklendi.', geriAl:async () => { await r.geriAl(); render(); } } : r.why;
-                } };
-            }
-            const p = SP.Quick && SP.Quick.parse(t);
-            /* tur: King'in sohbet karşılığı için (king.js söz 8). */
-            const tur = !p ? '' : p.kind === 'nap' ? 'uyku' : p.kind === 'meal' ? 'ogun' : p.kind === 'move' ? 'hareket' : p.kind === 'lab' ? 'tahlil'
-              : p.data.field.id === 'sleep' ? 'uyku' : p.data.field.id === 'water' ? 'su' : 'olcum';
-            return p ? { tur, metin:p.label, ipucu:p.hint, kaydet:async () => {
-              /* Geri alma (giris.js söz 8): ne eklendiyse yalnız o kalkar;
-                 ölçüm önceki değerine döner (önce yoksa «girilmedi»). Tahlil
-                 aynı günün kaydıyla birleştiği için geri alınmaz. */
-              const t = SP.U.todayISO();
-              const once = { v:Object.assign({}, SP.S.vitals[t] || {}), ogun:(SP.S.meals[t] || []).map(m => m.id),
-                seans:(SP.S.workouts || []).map(w => w.id) };
-              const r = await SP.Quick.apply(p);
-              render();
-              let geriAl = null;
-              if(p.kind === 'nap'){
-                const id = r && r.kayit && r.kayit.id;
-                geriAl = id ? async () => { await SP.Uyku.sil(t, id); render(); } : null;
-              }else if(p.kind === 'vital'){
-                const f = p.data.field.id, eski = once.v[f];
-                geriAl = async () => { const pt = {}; pt[f] = eski == null ? null : eski; await SP.Model.saveVitals(t, pt); render(); };
-              }else if(p.kind === 'meal'){
-                const yeni = (SP.S.meals[t] || []).filter(m => once.ogun.indexOf(m.id) < 0).map(m => m.id);
-                geriAl = async () => { for(const id of yeni) await SP.Model.deleteMeal(t, id); render(); };
-              }else if(p.kind === 'move'){
-                const yeni = (SP.S.workouts || []).filter(w => once.seans.indexOf(w.id) < 0).map(w => w.id);
-                geriAl = async () => { for(const id of yeni) await SP.Model.deleteWorkout(id); render(); };
-              }
-              return { metin:r && r.text, geriAl };
-            } } : null;
-          },
-          ornekler:['7 saat uyudum, 2 yumurta yedim', '45 dk yürüyüş', '2 yumurta 1 çay', 'kilo 72'] });
-      }
+      if(window.LIFEOS && window.LIFEOS.GIRIS) girisKurucu();
 
       /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).
          Harita çekmecelerden türetilir; her çekmecenin ilk ekranı. */
       if(window.LIFEOS && window.LIFEOS.KISAYOL){
         window.LIFEOS.KISAYOL.kur({ modul:'spi', git:r => go(r), palet:() => SP.Palette.open(),
-          dugmeler:() => [
-            { ad:'Uyku', doldur:'uyku ' },
-            { ad:'Kilo', doldur:'kilo ' },
-            { ad:'Öğün', rota:'meals' },
-            { ad:'Hareket', rota:'move' },
-            { ad:'Testler', rota:'labs' },
-          ],
+          dugmeler:kisayolDugmeleri,
           cekmeceler:() => SECTIONS.filter(s => s.views.length).map(s => ({ id:s.id, rota:s.views[0].route })) });
       }
 
@@ -2022,8 +2079,8 @@ SP.App = (function(){
     }
   }
 
-  return { sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
-    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml, arkaPlan };
+  return { girisKur:() => girisKurucu(), sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
+    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml, arkaPlan, enterEylemi, kisayolDugmeleri };
 })();
 
 /* Test paketi bu dosyayı da yükler (ekran sözleşmelerini denetlemek için)
