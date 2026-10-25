@@ -18387,7 +18387,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'6f01dbb2', at:'2026-10-24 23:20', dirty:false };
+ESP.BUILD = { id:'4c812d78', at:'2026-10-25 11:23', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -32161,7 +32161,9 @@ window.LIFEOS.HESAP = (function(){
         lazım»). «7 saat uyudum, 2 yumurta yedim, 45 dk koştum» parçalara
         ayrılır (virgül, noktalı virgül, «ve», satır sonu); her parça
         modülün ayrıştırıcısına gider, aynı türdekiler («2 yumurta, 1 çay»)
-        yeniden birleştirilip tek kayıt olur. Önizleme liste gösterir,
+        yeniden birleştirilip tek kayıt olur; birleşme bir parçayı
+        düşürürse («nabız 56, hrv 55») her parça ayrı kalır (2026-10-25).
+        Önizleme liste gösterir,
         tek «Kaydet» hepsini yazar. Anlaşılmayan parça uydurulmaz:
         «yazılmayacak» diye adıyla söylenir. Tek türden bir cümle eskisi
         gibi bütün olarak ayrıştırılır.
@@ -32216,25 +32218,63 @@ window.LIFEOS.GIRIS = (function(){
     const anlasilan = tek.filter(o => o.p);
     const tur = o => o.p.tur || '?';
     const turler = anlasilan.map(tur).filter((v, i, l) => l.indexOf(v) === i);
-    /* Tek türden cümle: eskisi gibi bütün olarak (modül kendisi birleştirir). */
-    if(turler.length < 2){
+    /* KAYIPSIZ BİRLEŞME (2026-10-25): «nabız 56, hrv 55, kilo 72» yalnız
+       nabzı yazıyordu; SPİ'nin ölçüm ayrıştırıcısı bütün cümlede ilk
+       eşleşmeyi döndürür, öbür parçalar ne önizlemede ne «yazılmayacak»
+       listesinde görünüyordu («su 500, su 250» de yalnız 500). Birleşik
+       önizleme iki ya da daha çok anlaşılan parçadan birinin önizlemesiyle
+       AYNIYSA modül o parçayı okumuş, gerisini düşürmüştür: birleştirme
+       reddedilir, her parça kendi kaydı olur. Modülün gerçekten birleştirdiği
+       cümlede («Yumurta, Çay», «40 soru, 32'si doğru») önizleme yenidir. */
+    /* ÖĞE DÜŞMEZ (2026-10-25): «kahvaltıda 2 yumurta 1 çay, öğlen mercimek»
+       birleşik okununca «çay» düşüyor, önizleme yine yeni göründüğü için
+       kabul ediliyordu. Birleşik önizleme her parçanın önizlemesindeki her
+       öğeyi (virgül ve « · » ile ayrılan; baştaki «Öğün:» gibi etiket hariç)
+       içermelidir. Modül bir parçaya GRUP verirse (SPİ'de öğün sözü:
+       kahvaltı, öğle) farklı gruptakiler hiç birleşmez. */
+    const ogeler = m => String(m || '').split(/\s·\s|,\s(?![^()]*\))/)
+      .map(x => x.replace(/^[\p{L} ]{1,24}:\s+/u, '').trim()).filter(Boolean);
+    const kayipsiz = (j, g) => !!j && (g.length < 2 || (
+      g.every(o => String(o.p.metin || '') !== String(j.metin || ''))
+      && g.every(o => ogeler(o.p.metin).every(f => String(j.metin || '').indexOf(f) >= 0))));
+    const anahtar = o => tur(o) + (o.p.grup ? '|' + o.p.grup : '');
+    const anahtarlar = anlasilan.map(anahtar).filter((v, i, l) => l.indexOf(v) === i);
+    const kalan = tek.filter(o => !o.p).map(o => o.x);
+    let parcalar = null;
+    /* Tek türden (ve tek gruptan) cümle: eskisi gibi bütün olarak (modül kendisi birleştirir). */
+    if(anahtarlar.length < 2){
       const butun = tekOnizle(t);
-      if(butun) return butun;
-      if(!anlasilan.length) return null;
+      if(kayipsiz(butun, anlasilan)){
+        if(!kalan.length || !anlasilan.length) return butun;
+        /* ANLAŞILMAYAN PARÇA SÖYLENİR (2026-10-25): «kilo 72, falan filan»
+           bütün olarak okunuyor, «falan filan» hiç anılmıyordu. Bütünün
+           önizlemesi yalnız anlaşılan parçalarınkiyle aynıysa anlaşılmayanlar
+           hiçbir şey katmamıştır: kalan listesinde adıyla söylenir. Modül
+           onları kullandıysa («40 soru çözdüm, 32'si doğru») önizleme
+           değişmiştir; modülün kendi önizlemesi olduğu gibi döner. */
+        const yalniz = anlasilan.length === 1 ? anlasilan[0].p : tekOnizle(anlasilan.map(o => o.x).join(', '));
+        if(!yalniz || String(yalniz.metin || '') !== String(butun.metin || '')) return butun;
+        parcalar = [butun];
+      }
+      else if(!anlasilan.length) return null;
     }
     /* Aynı türdekiler yeniden birleştirilir: «2 yumurta, 1 çay» tek öğün. */
-    const parcalar = [];
-    turler.forEach(k => {
-      const g = anlasilan.filter(o => tur(o) === k);
-      const j = g.length > 1 ? tekOnizle(g.map(o => o.x).join(', ')) : null;
-      if(j) parcalar.push(j); else g.forEach(o => parcalar.push(o.p));
-    });
-    const kalan = tek.filter(o => !o.p).map(o => o.x);
+    if(!parcalar){
+      parcalar = [];
+      anahtarlar.forEach(k => {
+        const g = anlasilan.filter(o => anahtar(o) === k);
+        const j = g.length > 1 ? tekOnizle(g.map(o => o.x).join(', ')) : null;
+        if(kayipsiz(j, g)) parcalar.push(j); else g.forEach(o => parcalar.push(o.p));
+      });
+    }
     if(parcalar.length === 1 && !kalan.length) return parcalar[0];
     return {
       tur:turler.length === 1 ? turler[0] : 'veri',
       parcalar,
-      metin:parcalar.map(p => p.metin).join(' · '),
+      /* Çok parçada modülün KISA metni (varsa): parça önizlemeleri birbirinden
+         habersiz hesaplanır; «Su +500 ml · toplam 1.500 ml» iki su parçasında
+         ikincinin toplamını yanlış söylerdi (2026-10-25). */
+      metin:parcalar.map(p => (parcalar.length > 1 && p.metinKisa) || p.metin).join(' · '),
       ipucu:kalan.length ? 'Anlaşılmadı, yazılmayacak: «' + kalan.join('», «') + '»'
         : (parcalar.length > 1 ? parcalar.length + ' kayıt birlikte yazılır.' : (parcalar[0].ipucu || '')),
       async kaydet(){

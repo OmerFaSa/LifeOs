@@ -17780,7 +17780,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'89cfaf51', at:'2026-10-24 23:11', dirty:false };
+SP.BUILD = { id:'4c812d78', at:'2026-10-25 11:23', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -31554,7 +31554,9 @@ window.LIFEOS.HESAP = (function(){
         lazım»). «7 saat uyudum, 2 yumurta yedim, 45 dk koştum» parçalara
         ayrılır (virgül, noktalı virgül, «ve», satır sonu); her parça
         modülün ayrıştırıcısına gider, aynı türdekiler («2 yumurta, 1 çay»)
-        yeniden birleştirilip tek kayıt olur. Önizleme liste gösterir,
+        yeniden birleştirilip tek kayıt olur; birleşme bir parçayı
+        düşürürse («nabız 56, hrv 55») her parça ayrı kalır (2026-10-25).
+        Önizleme liste gösterir,
         tek «Kaydet» hepsini yazar. Anlaşılmayan parça uydurulmaz:
         «yazılmayacak» diye adıyla söylenir. Tek türden bir cümle eskisi
         gibi bütün olarak ayrıştırılır.
@@ -31609,25 +31611,63 @@ window.LIFEOS.GIRIS = (function(){
     const anlasilan = tek.filter(o => o.p);
     const tur = o => o.p.tur || '?';
     const turler = anlasilan.map(tur).filter((v, i, l) => l.indexOf(v) === i);
-    /* Tek türden cümle: eskisi gibi bütün olarak (modül kendisi birleştirir). */
-    if(turler.length < 2){
+    /* KAYIPSIZ BİRLEŞME (2026-10-25): «nabız 56, hrv 55, kilo 72» yalnız
+       nabzı yazıyordu; SPİ'nin ölçüm ayrıştırıcısı bütün cümlede ilk
+       eşleşmeyi döndürür, öbür parçalar ne önizlemede ne «yazılmayacak»
+       listesinde görünüyordu («su 500, su 250» de yalnız 500). Birleşik
+       önizleme iki ya da daha çok anlaşılan parçadan birinin önizlemesiyle
+       AYNIYSA modül o parçayı okumuş, gerisini düşürmüştür: birleştirme
+       reddedilir, her parça kendi kaydı olur. Modülün gerçekten birleştirdiği
+       cümlede («Yumurta, Çay», «40 soru, 32'si doğru») önizleme yenidir. */
+    /* ÖĞE DÜŞMEZ (2026-10-25): «kahvaltıda 2 yumurta 1 çay, öğlen mercimek»
+       birleşik okununca «çay» düşüyor, önizleme yine yeni göründüğü için
+       kabul ediliyordu. Birleşik önizleme her parçanın önizlemesindeki her
+       öğeyi (virgül ve « · » ile ayrılan; baştaki «Öğün:» gibi etiket hariç)
+       içermelidir. Modül bir parçaya GRUP verirse (SPİ'de öğün sözü:
+       kahvaltı, öğle) farklı gruptakiler hiç birleşmez. */
+    const ogeler = m => String(m || '').split(/\s·\s|,\s(?![^()]*\))/)
+      .map(x => x.replace(/^[\p{L} ]{1,24}:\s+/u, '').trim()).filter(Boolean);
+    const kayipsiz = (j, g) => !!j && (g.length < 2 || (
+      g.every(o => String(o.p.metin || '') !== String(j.metin || ''))
+      && g.every(o => ogeler(o.p.metin).every(f => String(j.metin || '').indexOf(f) >= 0))));
+    const anahtar = o => tur(o) + (o.p.grup ? '|' + o.p.grup : '');
+    const anahtarlar = anlasilan.map(anahtar).filter((v, i, l) => l.indexOf(v) === i);
+    const kalan = tek.filter(o => !o.p).map(o => o.x);
+    let parcalar = null;
+    /* Tek türden (ve tek gruptan) cümle: eskisi gibi bütün olarak (modül kendisi birleştirir). */
+    if(anahtarlar.length < 2){
       const butun = tekOnizle(t);
-      if(butun) return butun;
-      if(!anlasilan.length) return null;
+      if(kayipsiz(butun, anlasilan)){
+        if(!kalan.length || !anlasilan.length) return butun;
+        /* ANLAŞILMAYAN PARÇA SÖYLENİR (2026-10-25): «kilo 72, falan filan»
+           bütün olarak okunuyor, «falan filan» hiç anılmıyordu. Bütünün
+           önizlemesi yalnız anlaşılan parçalarınkiyle aynıysa anlaşılmayanlar
+           hiçbir şey katmamıştır: kalan listesinde adıyla söylenir. Modül
+           onları kullandıysa («40 soru çözdüm, 32'si doğru») önizleme
+           değişmiştir; modülün kendi önizlemesi olduğu gibi döner. */
+        const yalniz = anlasilan.length === 1 ? anlasilan[0].p : tekOnizle(anlasilan.map(o => o.x).join(', '));
+        if(!yalniz || String(yalniz.metin || '') !== String(butun.metin || '')) return butun;
+        parcalar = [butun];
+      }
+      else if(!anlasilan.length) return null;
     }
     /* Aynı türdekiler yeniden birleştirilir: «2 yumurta, 1 çay» tek öğün. */
-    const parcalar = [];
-    turler.forEach(k => {
-      const g = anlasilan.filter(o => tur(o) === k);
-      const j = g.length > 1 ? tekOnizle(g.map(o => o.x).join(', ')) : null;
-      if(j) parcalar.push(j); else g.forEach(o => parcalar.push(o.p));
-    });
-    const kalan = tek.filter(o => !o.p).map(o => o.x);
+    if(!parcalar){
+      parcalar = [];
+      anahtarlar.forEach(k => {
+        const g = anlasilan.filter(o => anahtar(o) === k);
+        const j = g.length > 1 ? tekOnizle(g.map(o => o.x).join(', ')) : null;
+        if(kayipsiz(j, g)) parcalar.push(j); else g.forEach(o => parcalar.push(o.p));
+      });
+    }
     if(parcalar.length === 1 && !kalan.length) return parcalar[0];
     return {
       tur:turler.length === 1 ? turler[0] : 'veri',
       parcalar,
-      metin:parcalar.map(p => p.metin).join(' · '),
+      /* Çok parçada modülün KISA metni (varsa): parça önizlemeleri birbirinden
+         habersiz hesaplanır; «Su +500 ml · toplam 1.500 ml» iki su parçasında
+         ikincinin toplamını yanlış söylerdi (2026-10-25). */
+      metin:parcalar.map(p => (parcalar.length > 1 && p.metinKisa) || p.metin).join(' · '),
       ipucu:kalan.length ? 'Anlaşılmadı, yazılmayacak: «' + kalan.join('», «') + '»'
         : (parcalar.length > 1 ? parcalar.length + ' kayıt birlikte yazılır.' : (parcalar[0].ipucu || '')),
       async kaydet(){
@@ -47520,12 +47560,53 @@ SP.HaftaPlan = (function(){
     return p;
   }
 
+  /* ------------------------------------------------ plandan seans
+
+     2026-10-25 sürtünme turu: «Yürüyüş · 30 dk» satırından kayıt
+     girilemiyordu; seans ayrıca, üç adımda yazılıyordu. «Yaptım» planın
+     KENDİ hareketini ve süresini bugünün seansı olarak yazar. Hareket adı
+     hızlı girişin ad sözlüğüyle tanınır (SP.Quick.parseMove); tanınmazsa
+     plandaki adla serbest seans olur. Süre plandandır, uydurulmaz; zorlanma
+     puanı (RPE) yazılmaz, o günün hissidir. Seans `planId` taşır: aynı gün
+     ikinci kez yazılmaz, «Geri al» yalnız onu siler. */
+  function planSeansi(p, iso){
+    iso = iso || bugunISO();
+    return p ? (S().workouts || []).find(w => w && w.date === iso && w.planId === p.id) || null : null;
+  }
+  async function hareketYaptim(p, iso){
+    iso = iso || bugunISO();
+    if(!p || p.tur !== 'hareket') return { ok:false, why:'Hareket planı bulunamadı.' };
+    const d = (p.gunler || [])[gunNo(iso)];
+    if(!d) return { ok:false, why:'Bugün planda hareket yok.' };
+    if(planSeansi(p, iso)) return { ok:false, why:'Bugünün planı zaten kaydedildi.' };
+    const ne = String(d.ne || '').trim();
+    const q = SP.Quick && SP.Quick.parseMove ? SP.Quick.parseMove(ne + ' ' + d.dk + ' dk') : null;
+    const ex = q && q.exercise;
+    const w = SP.Model.newWorkout(iso);
+    w.name = ne || 'Planlı hareket';
+    w.minutes = d.dk;
+    w.planId = p.id;
+    if(ex){
+      w.kind = ex.kind || w.kind;
+      w.items = [{ exId:ex.id, levelId:null, sets:null, reps:null, minutes:d.dk }];
+    }
+    await SP.Model.saveWorkout(w);
+    return { ok:true, id:w.id, ad:w.name + ' · ' + d.dk + ' dk',
+      geriAl:async () => { await SP.Model.deleteWorkout(w.id); } };
+  }
+  async function hareketGeriAl(p, iso){
+    const w = planSeansi(p, iso);
+    if(!w) return { ok:false, why:'Bugün plandan yazılmış seans yok.' };
+    await SP.Model.deleteWorkout(w.id);
+    return { ok:true };
+  }
+
   /* Eski ad: OGUNLER sabit diziydi; artık kullanıcının öğünleridir. */
   return { TURLER, TUR_BY_ID, GUN_KISA, GUN_AD, DILIMLER, DILIM_BY_ID, UYKU_KIPLERI, SIMGELER, BAGLAR, BAG_BY_ID, STORE,
     get OGUNLER(){ return ogunler(null); }, ogunler,
     yeni, yeniMadde, yeniKestirme, dogrula, uykuDakika, sureYaz, gunNo, uykuOf, uykuKip, bugunKestirmeleri,
     zamanNorm, zamanYaz, zamanAn, bugun, bugunMaddeleri, isaretle, isaretli, sayim, kayitSay, maddeGecmisi, hedefOf,
-    uyum, liste, bul, bulId, yukle, kaydet, geriAl, sil, kopya };
+    uyum, liste, bul, bulId, yukle, kaydet, geriAl, sil, kopya, planSeansi, hareketYaptim, hareketGeriAl };
 })();
 
 /* ==== js/data/rehber.js ==== */
@@ -59459,64 +59540,72 @@ SP.SYMPTOM_GROUPS = [
 ];
 
 SP.SYMPTOMS = [
-  { id:'yorgunluk', name:'Olağandışı yorgunluk', group:'genel',
+  { id:'yorgunluk', name:'Olağandışı yorgunluk', aliases:['olağandışı yorgun', 'aşırı yorgun', 'halsiz'], group:'genel',
     markers:['ferritin', 'hgb', 'tsh', 'vitd', 'b12'],
     hint:'Demir deposu, tiroit ve B12 ile birlikte okunur.' },
-  { id:'bas-agrisi', name:'Baş ağrısı', group:'genel',
+  { id:'bas-agrisi', name:'Baş ağrısı', aliases:['baş ağrı', 'başım ağrı'], group:'genel',
     markers:['sbp', 'dbp', 'hgb'],
     hint:'Tansiyon ve hemoglobin ile birlikte okunur.' },
-  { id:'bas-donmesi', name:'Baş dönmesi', group:'genel',
+  { id:'bas-donmesi', name:'Baş dönmesi', aliases:['baş dön', 'başım dön'], group:'genel',
     markers:['hgb', 'ferritin', 'sbp'],
     hint:'Ayağa kalkarken oluyorsa tansiyonla birlikte okunur.' },
-  { id:'carpinti', name:'Çarpıntı', group:'genel',
+  { id:'carpinti', name:'Çarpıntı', aliases:['çarpıntı', 'kalbim çarp'], group:'genel',
     markers:['tsh', 'ft4', 'hgb', 'rhr'],
     hint:'Tiroit ve hemoglobin ile birlikte okunur.' },
-  { id:'nefes-darligi', name:'Nefes darlığı', group:'genel',
+  { id:'nefes-darligi', name:'Nefes darlığı', aliases:['nefes darl', 'nefesim daral'], group:'genel',
     markers:['hgb', 'spo2'],
     hint:'Hemoglobin ve oksijen satürasyonu ile birlikte okunur.' },
-  { id:'sogua-hassasiyet', name:'Üşüme', group:'genel',
+  { id:'sogua-hassasiyet', name:'Üşüme', aliases:['üşüme', 'üşüyor', 'üşüdüm'], group:'genel',
     markers:['tsh', 'ft4', 'ferritin'],
     hint:'Tiroit ve demir deposu ile birlikte okunur.' },
-  { id:'sac-dokulmesi', name:'Saç dökülmesi', group:'genel',
+  { id:'sac-dokulmesi', name:'Saç dökülmesi', aliases:['saç dökül', 'saçım dökül', 'saçlarım dökül'], group:'genel',
     markers:['ferritin', 'tsh', 'zinc', 'vitd'],
     hint:'Ferritin, tiroit ve çinko ile birlikte okunur.' },
 
-  { id:'sisme', name:'Şişkinlik', group:'sindirim',
+  { id:'sisme', name:'Şişkinlik', aliases:['şişkin', 'karnım şiş'], group:'sindirim',
     markers:['crp'],
     hint:'Öğün kayıtlarıyla birlikte okunur.' },
-  { id:'mide-yanmasi', name:'Mide yanması', group:'sindirim',
+  { id:'mide-yanmasi', name:'Mide yanması', aliases:['mide yanma', 'midem yan'], group:'sindirim',
     markers:['b12', 'ferritin'],
     hint:'Mide koruyucu kullanımı B12 ve demir emilimini etkiler.' },
-  { id:'kabizlik', name:'Kabızlık', group:'sindirim',
+  { id:'kabizlik', name:'Kabızlık', aliases:['kabız'], group:'sindirim',
     markers:['tsh', 'mg'],
     hint:'Tiroit, lif alımı ve magnezyum ile birlikte okunur.' },
-  { id:'ishal', name:'İshal', group:'sindirim',
+  { id:'ishal', name:'İshal', aliases:['ishal'], group:'sindirim',
     markers:['crp', 'alb'],
     hint:'Süreklilik kazanırsa inflamasyon belirteçleriyle okunur.' },
 
-  { id:'kramp', name:'Kas krampı', group:'kas',
+  { id:'kramp', name:'Kas krampı', aliases:['kramp'], group:'kas',
     markers:['mg', 'k', 'ca_corr', 'ferritin'],
     hint:'Magnezyum, potasyum ve kalsiyum ile birlikte okunur.' },
-  { id:'eklem-agrisi', name:'Eklem ağrısı', group:'kas',
+  { id:'eklem-agrisi', name:'Eklem ağrısı', aliases:['eklem ağrı', 'eklemlerim ağrı'], group:'kas',
     markers:['crp', 'esr', 'uric', 'vitd'],
     hint:'İnflamasyon belirteçleri ve ürik asit ile birlikte okunur.' },
-  { id:'kas-agrisi', name:'Kas ağrısı', group:'kas',
+  { id:'kas-agrisi', name:'Kas ağrısı', aliases:['kas ağrı', 'kaslarım ağrı'], group:'kas',
     markers:['vitd', 'crp'],
     hint:'Antrenman yükü ve D vitamini ile birlikte okunur.' },
-  { id:'guc-kaybi', name:'Güç kaybı', group:'kas',
+  { id:'guc-kaybi', name:'Güç kaybı', aliases:['güç kayb', 'güçsüzlük'], group:'kas',
     markers:['ferritin', 'vitd', 'testo'],
     hint:'Antrenman kayıtlarıyla birlikte okunur.' },
 
-  { id:'uykusuzluk', name:'Uykuya dalamama', group:'zihin',
+  { id:'uykusuzluk', name:'Uykuya dalamama', aliases:['uykuya dalama', 'uykusuzluk'], group:'zihin',
     markers:['cortisol', 'mg', 'tsh'],
     hint:'Uyku süresi kaydı ve kortizol ile birlikte okunur.' },
-  { id:'dikkat', name:'Dikkat dağınıklığı', group:'zihin',
+  { id:'dikkat', name:'Dikkat dağınıklığı', aliases:['dikkat dağın', 'dikkatim dağı'], group:'zihin',
     markers:['b12', 'ferritin', 'vitd', 'tsh'],
     hint:'B12, demir ve tiroit ile birlikte okunur.' },
-  { id:'moral', name:'Moral düşüklüğü', group:'zihin',
+  { id:'moral', name:'Moral düşüklüğü', aliases:['moral düşük', 'moralim bozuk', 'moralim düşük'], group:'zihin',
     markers:['vitd', 'b12', 'tsh'],
     hint:'D vitamini ve tiroit ile birlikte okunur. Sürekliyse hekime.' },
 ];
+
+/* TAKMA ADLAR (2026-10-25; kullanıcı: «spi için daha işlevli veri girişi,
+   sürtünmeyi azaltacak teknikler ile daha güzel yap»). Hızlı giriş
+   (core/quickentry.js parseSymptom) «başım ağrıyor», «midem yanıyor» gibi
+   günlük sözü buradan tanır. Takma ad KÖKTÜR, kelime başında aranır ve ek
+   alabilir («baş ağrı» → «baş ağrısı», «baş ağrım»). Yalnız işaretleme
+   içindir: söz hiçbir zaman teşhis ya da şiddet üretmez; şiddet yalnız
+   kullanıcının «hafif / orta / şiddetli» sözünden gelir. */
 
 SP.SYMPTOM_BY_ID = SP.SYMPTOMS.reduce(function(acc, s){ acc[s.id] = s; return acc; }, {});
 
@@ -64690,7 +64779,8 @@ SP.Friction = (function(){
     if(bekleyen > 4){
       out.push({ id:'proposals', label:bekleyen + ' bekleyen öneri',
         note:'Karar bekleyen her öneri her açılışta yeniden okunuyor. '
-           + 'Toplu reddetmek de bir karardır.', route:'office' });
+           + 'Toplu reddetmek de bir karardır.', route:'onaylar' });
+      /* 2026-10-25: 'office'e gidiyordu; bekleyen öneriler Onaylar'dadır. */
     }
     const ilac = (S.meds || []).filter(m => m.active !== false).length;
     if(ilac > 8){
@@ -66642,8 +66732,13 @@ SP.Beacon = (function(){
     }
     if(!metin || !SP.Proposals){ out.anlasilmayan.push(metin); return out; }
     const v = SP.Proposals.fromText(metin, { date:gun });
-    v.oneriler.forEach(function(x){
-      const pv = SP.Proposals.preview({ action:x.action, params:x.params });
+    /* Satırlar uygulanacakları sırayla önizlenir (2026-10-25): iki su
+       eklemesinde ikincinin toplamı birinciyi sayar (Proposals.sirali). */
+    const sira = SP.Proposals.sirali
+      ? SP.Proposals.sirali(v.oneriler.map(function(x){ return { action:x.action, params:x.params }; }))
+      : null;
+    v.oneriler.forEach(function(x, i){
+      const pv = sira ? sira[i].pv : SP.Proposals.preview({ action:x.action, params:x.params });
       const e = SP.Proposals.eylem(x.action) || {};
       if(pv.ok){
         out.yazilacak.push({ baslik:e.label || x.action, metin:x.metin,
@@ -68192,6 +68287,32 @@ SP.Move = (function(){
     return SP.PATTERNS.map(p => ({ pattern:p, count:seen[p.id] || 0, missing:!seen[p.id] }));
   }
 
+  /* MET SEANSININ TURU (2026-10-25). MET hesabindan eklenen seans tursuz
+     yaziliyordu; haftalik sutun tursuz seansi KUVVET saydigi icin yuruyus
+     «kuvvet» gorunuyordu. Tur etkinligin adindan ve Compendium
+     kategorisinden gelir: yuruyus, kosu, bisiklet, su ve kis sporlari
+     kategorisi kardiyo; digerinde ada bakilir: esneme/yoga mobilite,
+     agirlik/direnc kuvvet, geri kalan her etkinlik (ev isi, spor) kardiyo.
+     Yalniz sinif atar; hicbir sayi uretmez. */
+  const MET_MOBILITE = /(yoga|pilates|esne|stretch|mobil|tai ?chi|nefes|germe)/;
+  const MET_KUVVET = /(ağırlık|agirlik|direnç|direnc|kuvvet|halter|weight|resist|şınav|sinav|barfiks|squat|calisthen|vücut ağırlığı)/;
+  const MET_KARDIYO_KAT = ['walking', 'running', 'bicycling', 'water-activities', 'winter-activities'];
+  function metTuru(kategori, ad){
+    if(MET_KARDIYO_KAT.indexOf(kategori) >= 0) return 'cardio';
+    const t = String(ad || '').toLocaleLowerCase('tr-TR');
+    if(MET_MOBILITE.test(t)) return 'mobility';
+    if(MET_KUVVET.test(t)) return 'strength';
+    return 'cardio';
+  }
+  /* MET hesabindan bir seans kaydi (kaydetmez; ekran saveWorkout'a verir). */
+  function metSeans(o, gun){
+    const x = o || {};
+    return { id:U.uid('w'), date:gun || U.todayISO(), templateId:null,
+      name:x.ad, kind:metTuru(x.kategori, x.ad), minutes:x.dk, rpe:x.rpe == null ? null : x.rpe,
+      items:[{ exId:'met', name:x.ad, met:x.met, minutes:x.dk }],
+      note:'MET: ' + x.met + ' (2024 Adult Compendium)', createdAt:new Date().toISOString() };
+  }
+
   /* Son 30 gunun gunluk yuku — grafik icin. */
   function loadSeries(days){
     const n = days || 30;
@@ -68207,7 +68328,7 @@ SP.Move = (function(){
     baseline, sleepScore, hrvScore, rhrScore, sorenessScore, readiness,
     sessionLoad, loadInfo, loadOn, loadWindow, unknownWindow,
     acwr, deloadWeek, weeklyGrowth, prescription,
-    progressionCheck, patternBalance, loadSeries,
+    progressionCheck, patternBalance, loadSeries, metTuru, metSeans,
     ADVANCE_SESSIONS, ADVANCE_WINDOW,
   };
 })();
@@ -70992,6 +71113,116 @@ SP.Parse = (function(){
      "mmol/lt" gibi bir varyant eklenirse sira anlam kazanir. */
   const UNIT_RE = /(mg\/dl|g\/dl|ng\/ml|pg\/ml|µg\/dl|ug\/dl|µg\/l|ug\/l|miu\/l|mIU\/L|µiu\/ml|uiu\/ml|mmol\/mol|mmol\/l|µmol\/l|umol\/l|pmol\/l|nmol\/l|mm\/saat|u\/l|mmhg|10\^3\/µl|10\^3\/ul|fl|%|ms|°c)/i;
 
+  /* Eslesen bir satirin onizleme satirini kurar. parseLab ve elle
+     baglama (bindLine) AYNI yoldan gecer: birim cevirimi ve uyusmazlik
+     denetimi iki yolda da ayni kalir. */
+  function satirKur(markerId, nums, tail, line, i){
+    const unitHit = tail.match(UNIT_RE);
+    const conv = convert(markerId, nums[0], unitHit ? unitHit[1] : null);
+    const b = SP.BIO_BY_ID[markerId];
+
+    /* Birim tanindiysa `convert` karar verdi. Taninmadiysa satirda
+       birim GORUNUYOR olabilir ve o zaman sayi birimsiz DEGILDIR:
+       uyusmazlik bildirilir, deger kanonik birimdeymis gibi kabul
+       edilmez. */
+    const iz = unitHit ? null : tail.match(BIRIM_IZI);
+    const bilinmeyen = iz ? iz[2] : null;
+    const mismatch = conv.mismatch || bilinmeyen || null;
+
+    return {
+      markerId, marker:b,
+      value:conv.value, raw:nums[0],
+      unit:unitHit ? unitHit[1] : null,
+      converted:!!conv.converted, from:conv.from, to:conv.to,
+      mismatch,
+      /* 2026-10-25: birimi uyusmayan satir onizlemede ISARETSIZ gelir.
+         Isaretli geliyordu; tek «Kaydet» tanimadigimiz birimdeki sayiyi
+         kanonik birimin altina yaziyordu. Kullanici bilerek isaretler. */
+      skip:!!mismatch,
+      /* Referans araligi satirda genelde ikinci ve ucuncu sayidir;
+         yalnizca bilgi olarak tasinir, hesaba girmez. */
+      othersInLine:nums.slice(1),
+      line, i,
+    };
+  }
+
+  /* ------------------------------------------------------------ tarih
+
+     2026-10-25: raporun tarihi metinden YERELDE okunur, modele hic
+     gitmez. Sonuc yalniz onizlemedeki tarih alanina oneridir; kullanici
+     gorur ve degistirir. Dogum, kontrol ya da gelecek tarihi oneri
+     olmaz: yanlis tarihe yazilmis bir test butun egilimi kaydirir. */
+  const TARIH_TR = /(?:^|\D)(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})(?!\d)/;
+  const TARIH_ISO = /(?:^|\D)(\d{4})-(\d{1,2})-(\d{1,2})(?!\d)/;
+
+  function tarihOku(line){
+    let y, mo, d, m = String(line || '').match(TARIH_ISO);
+    if(m){ y = +m[1]; mo = +m[2]; d = +m[3]; }
+    else{
+      m = String(line || '').match(TARIH_TR);
+      if(!m) return null;
+      d = +m[1]; mo = +m[2]; y = +m[3];
+    }
+    const t = new Date(y, mo - 1, d);
+    if(y < 1900 || t.getFullYear() !== y || t.getMonth() !== mo - 1 || t.getDate() !== d) return null;
+    return y + '-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+  }
+
+  /* Satirdaki butun rakamlar tarih ve saatten mi ibaret? */
+  function tarihSatiri(line){
+    if(!tarihOku(line)) return false;
+    const kalan = String(line)
+      .replace(/\d{4}-\d{1,2}-\d{1,2}/g, ' ')
+      .replace(/\d{1,2}[.\/-]\d{1,2}[.\/-]\d{4}/g, ' ')
+      .replace(/\d{1,2}:\d{2}(?::\d{2})?/g, ' ');
+    return !/\d/.test(kalan);
+  }
+
+  function findDate(text){
+    const bugun = U.todayISO();
+    let en = null, enPuan = 0;
+    String(text || '').split(/\r?\n/).forEach(line => {
+      const iso = tarihOku(line);
+      if(!iso || iso > bugun) return;
+      const n = U.norm(line);
+      if(/dogum|kontrol|sonraki|gecerlilik/.test(n)) return;
+      const puan = /numune|alim|kabul|kan alma/.test(n) ? 3
+        : /tarih/.test(n) ? 2 : tarihSatiri(line) ? 1 : 0;
+      if(puan > enPuan){ en = iso; enPuan = puan; }
+    });
+    return en;
+  }
+
+  /* ------------------------------------------------------- elle baglama
+
+     2026-10-25: eslesmeyen satiri kullanici bir olcume baglar. Sayi
+     YALNIZ o satirdan gelir: adi olusturan sozcuklerden SONRA duran ilk
+     yalin sayi alinir («25-OH D3 vit 30» → 30; «Ferr. 28» → 28). Adin
+     onunde duran sayi («28 Ferr.») sonuc sayilmaz — tahmin edilmez,
+     baglanmaz. Satir yine birim denetiminden gecer. */
+  function bindLine(line, markerId){
+    const b = SP.BIO_BY_ID[markerId];
+    if(!b) return null;
+    const d = SP.DERIVED && SP.DERIVED[markerId];
+    if(d && !d.measured) return null;
+    const s = String(line || '').trim();
+    const TOK = /\S+/g;
+    let t, at = -1, harf = false;
+    while((t = TOK.exec(s))){
+      const yalin = t[0].replace(/^[:=;(]+|[:;)]+$/g, '');
+      if(harf && /^-?\d+(?:[.,]\d+)?$/.test(yalin)){ at = t.index + t[0].indexOf(yalin); break; }
+      if(/[a-zçğıöşüµ]/i.test(t[0])) harf = true;
+    }
+    if(at < 0) return null;
+    const tail = s.slice(at);
+    NUM_RE.lastIndex = 0;
+    const nums = (tail.match(NUM_RE) || []).map(num).filter(v => v != null);
+    if(!nums.length) return null;
+    const row = satirKur(markerId, nums, tail, s, -1);
+    row.bound = true;
+    return row;
+  }
+
   function parseLab(text){
     const lines = String(text || '').split(/\r?\n/);
     const rows = [], unmatched = [];
@@ -71003,7 +71234,11 @@ SP.Parse = (function(){
       const m = matchMarker(trimmed);
       if(!m){
         /* Sayi iceren ama eslesmeyen satirlar kullaniciya gosterilir;
-           icinde hic sayi olmayan basliklar sessizce gecilir. */
+           icinde hic sayi olmayan basliklar sessizce gecilir.
+           2026-10-25: sayisi yalniz tarih ve saatten ibaret bir satir
+           («Tarih 12.10.2026 08:30») olcum degildir; eslesmeyenlere
+           dusmez, tarih onerisi icin okunur. */
+        if(tarihSatiri(trimmed)) return;
         if(NUM_RE.test(trimmed)){ NUM_RE.lastIndex = 0; unmatched.push({ line:trimmed, i }); }
         NUM_RE.lastIndex = 0;
         return;
@@ -71016,28 +71251,7 @@ SP.Parse = (function(){
       const nums = (tail.match(NUM_RE) || []).map(num).filter(v => v != null);
       if(!nums.length){ unmatched.push({ line:trimmed, i, marker:m.id }); return; }
 
-      const unitHit = tail.match(UNIT_RE);
-      const conv = convert(m.id, nums[0], unitHit ? unitHit[1] : null);
-      const b = SP.BIO_BY_ID[m.id];
-
-      /* Birim tanindiysa `convert` karar verdi. Taninmadiysa satirda
-         birim GORUNUYOR olabilir ve o zaman sayi birimsiz DEGILDIR:
-         uyusmazlik bildirilir, deger kanonik birimdeymis gibi kabul
-         edilmez. */
-      const iz = unitHit ? null : tail.match(BIRIM_IZI);
-      const bilinmeyen = iz ? iz[2] : null;
-
-      rows.push({
-        markerId:m.id, marker:b,
-        value:conv.value, raw:nums[0],
-        unit:unitHit ? unitHit[1] : null,
-        converted:!!conv.converted, from:conv.from, to:conv.to,
-        mismatch:conv.mismatch || bilinmeyen || null,
-        /* Referans araligi satirda genelde ikinci ve ucuncu sayidir;
-           yalnizca bilgi olarak tasinir, hesaba girmez. */
-        othersInLine:nums.slice(1),
-        line:trimmed, i,
-      });
+      rows.push(satirKur(m.id, nums, tail, trimmed, i));
     });
 
     /* Ayni belirtec birden fazla satirda gectiyse ilki tutulur;
@@ -71052,6 +71266,8 @@ SP.Parse = (function(){
     return {
       rows:unique, duplicates:rows.filter(r => r.duplicate).length,
       unmatched, lines:lines.length,
+      /* Onizlemedeki tarih alanina YALNIZ oneri: kullanici gorur, degistirir. */
+      dateGuess:findDate(text),
       note:unique.length
         ? unique.length + ' değer eşleşti'
           + (unmatched.length ? ', ' + unmatched.length + ' satır eşleşmedi' : '') + '.'
@@ -71208,22 +71424,89 @@ SP.Parse = (function(){
     };
   }
 
-  /* Ayristirilmis satirlari bir tahlil oturumuna yazar. */
+  /* Kayda girecek satirlar. 2026-10-25: birimi uyusan satir isaretsizse
+     girmez; birimi uyusmayan satir yalniz ACIKCA isaretlendiyse
+     (`skip === false`) girer — `skip` alani hic olmayan bir satir da
+     sessizce gecmez. */
+  function rowsToSave(parsed){
+    return ((parsed && parsed.rows) || []).filter(r =>
+      !r.skip && !(r.mismatch && r.skip !== false));
+  }
+
+  /* 2026-10-25: yapistirmanin hedef oturumu ve her satirin durumu.
+     Bulgu: ayni gune yapistirma oturumu kopyalayip values[id]'yi ve
+     fasting'i sessizce eziyordu (kayitli ferritin 28 onizlemede
+     gorunmeden 35 oluyordu; «Aç» oturuma «Tok» yapistirma onceki glukoz
+     ve trigliseridi yorumlanmaz yapiyordu). Kural:
+     - Aclik uyumluysa (esit ya da bir yani bilinmiyor) ayni oturuma
+       eklenir; bilinmeyen bilineni ezmez, bilinen bilinmeyeni doldurur.
+     - Celisirse ya da hangi oturuma eklenecegi belirsizse yapistirma ayni
+       tarihte AYRI oturum olur; onceki oturumun aclik bayragi degismez.
+     - Kayitli degeri olan satir yalniz o oturumun degeri icin acikca
+       isaretlendiyse (`ustune === hedef.id`) yazilir; tarih ya da aclik
+       degisip hedef degisirse isaret gecmez. Ayni deger hic yazilmaz.
+     Onizleme ve kayit ayni plani kullanir. */
+  function aclikOf(f){ return f === 'yes' || f === 'no' ? f : 'unknown'; }
+
+  function hucre(r){
+    const kanonik = r.marker ? r.marker.unit : null;
+    /* Cevrilmis deger kanonik birimdedir; cevrilmemis uyusmaz deger
+       satirda gorulen birimle yazilir, kanonik birim diye degil. */
+    return { v:r.value, cert:'measured',
+      unit:r.converted ? kanonik : (r.unit || r.mismatch || kanonik),
+      converted:r.converted || false };
+  }
+
+  function ayniDeger(once, r){
+    const kanonik = r.marker ? r.marker.unit : '';
+    const yeniBirim = r.mismatch && !r.converted ? r.mismatch : kanonik;
+    return Number(once.v) === Number(r.value)
+      && String(once.unit || kanonik).toLowerCase() === String(yeniBirim || '').toLowerCase();
+  }
+
+  function pastePlan(parsed, dateISO, fasting){
+    const date = dateISO || U.todayISO();
+    const ac = aclikOf(fasting);
+    const gun = ((SP.S && SP.S.labs) || []).filter(l => l.date === date);
+    const uyumlu = gun.filter(l => {
+      const o = aclikOf(l.fasting);
+      return o === ac || o === 'unknown' || ac === 'unknown';
+    });
+    const hedef = uyumlu.find(l => aclikOf(l.fasting) === ac)
+      || (uyumlu.length === 1 ? uyumlu[0] : null);
+    const kayitli = (hedef && hedef.values) || {};
+    const secili = rowsToSave(parsed);
+    const satirlar = ((parsed && parsed.rows) || []).map(r => {
+      const once = kayitli[r.markerId] || null;
+      const durum = !once ? 'yeni' : ayniDeger(once, r) ? 'ayni' : 'degisir';
+      const yaz = secili.indexOf(r) >= 0
+        && (durum === 'yeni' || (durum === 'degisir' && r.ustune === hedef.id));
+      return { durum, once, yaz };
+    });
+    return { date, ac, hedef:hedef || null, ayri:!hedef && gun.length > 0,
+      neden:hedef || !gun.length ? null : (uyumlu.length ? 'belirsiz' : 'aclik'),
+      aclikYazilir:!!hedef && ac !== 'unknown' && aclikOf(hedef.fasting) === 'unknown',
+      satirlar, yazilacak:satirlar.filter(s => s.yaz).length };
+  }
+
+  /* Ayristirilmis satirlari bir tahlil oturumuna yazar; hedefi pastePlan
+     secer. Var olan oturum kopyalanir: onizleme vazgecilirse depoda hicbir
+     sey degismemis olur. */
   function toLabRecord(parsed, dateISO, meta){
-    const rec = SP.Model.newLab(dateISO);
-    rec.source = 'paste';
+    const plan = pastePlan(parsed, dateISO, meta && meta.fasting);
+    const rec = plan.hedef ? JSON.parse(JSON.stringify(plan.hedef)) : SP.Model.newLab(plan.date);
+    if(!plan.hedef){ rec.source = 'paste'; rec.fasting = plan.ac; }
+    else if(plan.aclikYazilir) rec.fasting = plan.ac;
     if(meta && meta.lab) rec.lab = meta.lab;
-    parsed.rows.forEach(r => {
-      if(r.skip) return;
-      rec.values[r.markerId] = { v:r.value, cert:'measured',
-        unit:r.unit || (r.marker ? r.marker.unit : null),
-        converted:r.converted || false };
+    ((parsed && parsed.rows) || []).forEach((r, i) => {
+      if(plan.satirlar[i].yaz) rec.values[r.markerId] = hucre(r);
     });
     return rec;
   }
 
   return { num, parseLab, parseMeal, matchMarker, matchFood, matchPortion,
-    convert, toLabRecord, ALIAS_INDEX, WORD_NUM, rebuildFoodIndex,
+    convert, toLabRecord, pastePlan, rowsToSave, findDate, bindLine,
+    ALIAS_INDEX, WORD_NUM, rebuildFoodIndex,
     get FOOD_ALIAS(){ return FOOD_ALIAS; } };
 })();
 
@@ -77153,7 +77436,18 @@ SP.Office = (function(){
 
    2. ANLASILMAYAN SATIR UYDURULMAZ. Eslesme yoksa `null` doner ve palet
       o satiri komut olarak gostermez. Yaklasik bir eslesme «buldum»
-      diye sunulmaz. */
+      diye sunulmaz.
+
+   ─────────────────────────────────────────────────────────────────
+
+   2026-10-25 · kullanici: «spi için daha işlevli veri girişi, sürtünmeyi
+   azaltacak teknikler ile daha güzel yap». Bu turda eklenenler:
+     · su TOPLANIR («2 bardak su içtim» günün toplamına +500);
+     · «7 saat 30 dk», «7 buçuk saat» uykudur;
+     · tansiyon, ateş, oksijen, bel/yağ/boyun/kalça günlüğe yazılır;
+     · şikâyet işaretleme (şiddet yalnız açık sözle; teşhis yok);
+     · «dün» günü, «kahvaltıda / öğlen / akşam / ara öğün» öğünü belirler;
+     · birimi uyuşmayan tahlil satırı sessizce yazılmaz (SP.Parse.rowsToSave). */
 
 window.SP = window.SP || {};
 
@@ -77171,7 +77465,8 @@ SP.Quick = (function(){
       aliases:['hrv', 'rmssd'] },
     weight:{ id:'weight', label:'Kilo', unit:'kg', min:20, max:300,
       aliases:['kilo', 'agirlik', 'weight'] },
-    water:{ id:'water', label:'Su', unit:'ml', min:0, max:10000,
+    /* `ekle`: yazilan deger gunun toplamina EKLENIR (asagida BARDAK_ML). */
+    water:{ id:'water', label:'Su', unit:'ml', min:0, max:10000, ekle:true,
       aliases:['su', 'water'] },
     /* ÖLÜ ALAN OLARAK BAŞLAMIŞTI: id `mood` idi, ama gunun tek gunluk
        "his" alani `state.js`'te `soreness` adiyla duruyor (Today ekrani
@@ -77183,7 +77478,33 @@ SP.Quick = (function(){
        alan acmak degil, VAR OLAN alana baglamaktı. */
     soreness:{ id:'soreness', label:'Enerji', unit:'/5', min:1, max:5,
       aliases:['enerji', 'mod', 'ruh hali'] },
+    /* YAŞAMSAL ÖLÇÜM VE VÜCUT ÖLÇÜSÜ GÜNLÜĞE (2026-10-25). «bel 84», «ateş
+       37,8», «spo2 97» tahlil oturumu açıyordu; Bugün formu (screens/today.js
+       FIELDS) ve vücut analizi (core/vucut.js, move.js vucutVerisi) bunları
+       GÜNLÜKTE okur. Alan adları ve sınırlar oradakiyle aynı; boyun ve kalça
+       move.js'in vücut formundaki sınırla. */
+    sbp:{ id:'sbp', label:'Büyük tansiyon', unit:'mmHg', min:60, max:250,
+      aliases:['buyuk tansiyon', 'sistolik', 'sbp'] },
+    dbp:{ id:'dbp', label:'Küçük tansiyon', unit:'mmHg', min:30, max:160,
+      aliases:['kucuk tansiyon', 'diyastolik', 'dbp'] },
+    spo2:{ id:'spo2', label:'Oksijen', unit:'%', min:70, max:100,
+      aliases:['oksijen saturasyonu', 'spo2', 'oksijen', 'saturasyon'] },
+    temp:{ id:'temp', label:'Ateş', unit:'°C', min:33, max:43,
+      aliases:['vucut sicakligi', 'ates', 'atesim'] },
+    waist:{ id:'waist', label:'Bel çevresi', unit:'cm', min:40, max:200,
+      aliases:['bel cevresi', 'bel', 'belim'] },
+    bodyfat:{ id:'bodyfat', label:'Yağ oranı', unit:'%', min:3, max:60,
+      aliases:['yag orani', 'yag oranim', 'vucut yagi', 'bodyfat'] },
+    neck:{ id:'neck', label:'Boyun çevresi', unit:'cm', min:20, max:70,
+      aliases:['boyun cevresi', 'boyun'] },
+    hip:{ id:'hip', label:'Kalça çevresi', unit:'cm', min:50, max:200,
+      aliases:['kalca cevresi', 'kalca'] },
   };
+
+  /* SU TOPLANIR (2026-10-25). Alan günün TOPLAMIdır; yazılan su ona eklenir.
+     1000 ml varken «2 bardak su içtim» 400 yazıyordu (üstüne). Bir bardak
+     tek sabittir: Bugün'deki bardak düğmesi de bunu okur. */
+  const BARDAK_ML = 250;
 
   /* Sure birimleri — «45 dk yuruyus» ve «1 saat kosu» ayni sey. */
   const SURE_RE = /(\d+(?:[.,]\d+)?)\s*(dk|dakika|dakka|sa|saat|s)\b/i;
@@ -77194,14 +77515,86 @@ SP.Quick = (function(){
     return isFinite(n) ? n : null;
   }
 
+  /* U.norm «â/î/û»yu katlamaz: «şikâyet» → «sikâyet». */
+  function katla(s){ return U.norm(s).replace(/â/g, 'a').replace(/î/g, 'i').replace(/û/g, 'u'); }
+
+  /* ------------------------------------------------------- gun sozu
+
+     «dün 2 bardak su» bugüne yaziliyordu (2026-10-25). Gun sozu kaydin
+     GUNUNU belirler; «yarın» olcum degildir, LIFEOS.Olumsuz engeller.
+     «dün gece» / «dün akşam» UYKU icin bugunun kaydidir: `vitals.sleep`
+     uyanilan gunun gece uykusudur (core/uyku.js soz 1). */
+  const GUN_SOZ = [
+    { re:/(^|[\s,;])(evvelsi gün|evvelki gün|önceki gün)(?=$|[\s,;.!])/, gun:-2 },
+    { re:/(^|[\s,;])(dün)(?=$|[\s,;.!])/, gun:-1 },
+    { re:/(^|[\s,;])(bugün)(?=$|[\s,;.!])/, gun:0 },
+  ];
+  function gunSozu(text){
+    const t = String(text || '');
+    const k = t.toLocaleLowerCase('tr-TR');
+    for(const g of GUN_SOZ){
+      const m = k.match(g.re);
+      if(!m) continue;
+      const bas = m.index + m[1].length, son = bas + m[2].length;
+      return { gun:g.gun, kelime:m[2], gece:g.gun === -1 && /^\s+(gece|akşam)/.test(k.slice(son)),
+        metin:(t.slice(0, bas) + t.slice(son)).replace(/\s+/g, ' ').trim() };
+    }
+    return { gun:null, kelime:null, gece:false, metin:t };
+  }
+
+  /* Kaydin gunu: cumlenin gun sozu `base`e (yoksa bugune) gore. */
+  function tarih(parsed, base){
+    const b = base || U.todayISO();
+    const g = parsed && parsed.gun;
+    return g ? U.iso(U.addDays(U.parse(b), g)) : b;
+  }
+
+  /* ----------------------------------------------------- ogun sozu
+
+     «kahvaltıda 2 yumurta» saatin ogunune yaziliyordu (2026-10-25). Soz
+     yalniz kullanicinin ACIK tuttugu ogunlerden birine baglanir; ogun
+     kapatilmissa ya da yoksa eski kural (saatin ogunu) gecer. */
+  const OGUN_SOZ = [
+    { re:/(^|[^a-z])ara ogun/, id:'ara' },
+    { re:/(^|[^a-z])kahvalti/, id:'kahvalti' },
+    { re:/(^|[^a-z])ogle(n|yin|nde|de|ye)?([^a-z]|$)/, id:'ogle' },
+    { re:/(^|[^a-z])ikindi/, id:'ara2' },
+    { re:/(^|[^a-z])aksam/, id:'aksam' },
+    { re:/(^|[^a-z])gece([^a-z]|$)/, id:'gece' },
+  ];
+  function ogunSozu(text){
+    const n = katla(text);
+    const s = OGUN_SOZ.find(x => x.re.test(n));
+    if(!s) return null;
+    const acik = SP.Ogun ? SP.Ogun.liste().map(x => x.id) : (SP.MEAL_SLOTS || []).map(x => x.id);
+    if(s.id === 'ara'){
+      const simdi = SP.Ogun ? SP.Ogun.simdiki() : null;
+      if(/^ara/.test(simdi || '') && acik.indexOf(simdi) >= 0) return simdi;
+      const sira = new Date().getHours() < 15 ? ['ara1', 'ara2'] : ['ara2', 'ara1'];
+      return sira.find(id => acik.indexOf(id) >= 0) || null;
+    }
+    return acik.indexOf(s.id) >= 0 ? s.id : null;
+  }
+
+  /* Baştaki öğün sözünü (ve «yemeğinde», «öğünü» gibi eşini) atar; besin
+     ayrıştırıcısı yalnız besinleri görür. */
+  const OGUN_SOZ_BAS = /^(kahvalti\S*|ogle\S*|aksam\S*|ikindi\S*|gece\S*|ara)$/;
+  const OGUN_SOZ_EK = /^(ogun\S*|yemeg\S*|yemek\S*)$/;
+  function ogunSozunuAt(text){
+    const k = String(text).trim().split(/\s+/);
+    let i = 0;
+    while(i < k.length && (OGUN_SOZ_BAS.test(katla(k[i])) || (i > 0 && OGUN_SOZ_EK.test(katla(k[i]))))) i++;
+    return i ? k.slice(i).join(' ') : text;
+  }
+
   /* ------------------------------------------------------------ gunluk */
 
   /* SU BIRIMIYLE OKUNUR. Alan ml tutar; «su 2» eskiden 2 ml yaziliyordu ve
      «2 litre su ictim» hic okunmuyordu (sayi kelimeden once). Kural: ml
-     oldugu gibi, litre x1000, bardak x200 (su bardagi olcusu); birimsiz
-     sayi 20'den kucukse litre, 50 ve ustuyse ml. Aradaki (20-49) ne makul
-     litre ne makul ml: okunmaz, sorulur. */
-  const SU_BIRIM = { ml:1, mililitre:1, litre:1000, lt:1000, l:1000, bardak:200 };
+     oldugu gibi, litre x1000, bardak x BARDAK_ML (2026-10-25: 200'du, Bugun
+     dugmesi 250 ekliyordu); birimsiz sayi 20'den kucukse litre, 50 ve
+     ustuyse ml. Aradaki (20-49) ne makul litre ne makul ml: okunmaz, sorulur. */
+  const SU_BIRIM = { ml:1, mililitre:1, litre:1000, lt:1000, l:1000, bardak:BARDAK_ML };
   const SU_BIRIM_RE = '(ml|mililitre|litre|lt|l|bardak)';
 
   function suMiktari(n, at, alias){
@@ -77218,8 +77611,36 @@ SP.Quick = (function(){
     return v >= 50 ? Math.round(v) : null;
   }
 
+  /* UYKU SÜRESİ SÖYLEYİŞLERİ (2026-10-25): «7 saat 30 dk uyudum» 420
+     dakikalık seans oluyordu (saatten sonraki dakika okunmuyordu), «7 buçuk
+     saat uyudum» hiç okunmuyordu. Süre saat cinsine ÇEVRİLİR (30 dk = 0,5);
+     sayı uydurulmaz: birimi «saat» olmayan sayı bu yoldan okunmaz. */
+  const UYKU_SURE = '(\\d+(?:[.,]\\d+)?)\\s*(bucuk\\s*)?(?:saat|sa)(?:lik)?(?:\\s*(?:ve\\s+)?(\\d{1,2})\\s*(?:dk|dakika|dakka))?';
+  function uykuSaati(m){
+    const v = sayi(m[1]);
+    if(v == null) return null;
+    const dk = m[3] ? Number(m[3]) : 0;
+    if(dk >= 60 || (m[2] && dk)) return null;
+    return Math.round((v + (m[2] ? 0.5 : 0) + dk / 60) * 100) / 100;
+  }
+
+  /* TANSİYON ÇİFTİ (2026-10-25): «tansiyon 120/80» hiç okunmuyordu. İki
+     sayı iki alana yazılır; büyük küçükten büyük değilse ya da sınır
+     dışıysa okunmaz («12/8» cmHg söyleyişi çevrilmez: sorulur). */
+  const TANSIYON_RE = /(^|[^a-z])(tansiyon(?:um)?|kan basinci(?:m)?)\s*(?:[:=]\s*)?(\d{2,3})\s*[\/\-]\s*(\d{2,3})(?!\d)/;
+  function parseTansiyon(n){
+    const m = n.match(TANSIYON_RE);
+    if(!m) return null;
+    const b = Number(m[3]), k = Number(m[4]);
+    const fb = VITAL_FIELDS.sbp, fk = VITAL_FIELDS.dbp;
+    if(b < fb.min || b > fb.max || k < fk.min || k > fk.max || b <= k) return null;
+    return { field:fb, value:b, ikinci:{ field:fk, value:k } };
+  }
+
   function parseVital(text){
     const n = U.norm(text);
+    const tn = parseTansiyon(n);
+    if(tn) return tn;
     for(const key of Object.keys(VITAL_FIELDS)){
       const f = VITAL_FIELDS[key];
       for(const a of f.aliases){
@@ -77232,27 +77653,41 @@ SP.Quick = (function(){
         if(f.id === 'water'){
           const ml = suMiktari(n, at, U.norm(a));
           if(ml == null || ml < f.min || ml > f.max) continue;
-          return { field:f, value:ml };
+          return { field:f, value:ml, ekle:true };
         }
         /* SAYI KENDİ PARÇASINDAN (2026-10-16): «7 saat uyudum, 2 yumurta
            yedim» uykuyu 2 okuyordu. Kuyruk ilk ayıraçta (virgül — ondalık
            değil —, noktalı virgül, «ve», satır sonu) kesilir. */
         const kuyruk = text.slice(Math.min(text.length, at + a.length))
           .split(/(?<!\d),|,(?!\d)|;|\n|\s+ve\s+|\+/i)[0];
-        let m = kuyruk.match(/(\d+(?:[.,]\d+)?)/);
+        let v = null;
+        if(f.id === 'sleep'){
+          const s = U.norm(kuyruk).match(new RegExp('^\\s*(?:[:=]\\s*)?' + UYKU_SURE));
+          if(s) v = uykuSaati(s);
+        }
+        let m = v == null ? kuyruk.match(/(\d+(?:[.,]\d+)?)/) : null;
         /* SAYI KELIMEDEN ONCE DE GELIR: «7 saat uyudum». Yalniz ardinda
            aranirsa bu cumle «7 saat» sureli bir ANTRENMAN oluyordu (420
            dakikalik serbest seans). Onde yalniz UYKU ve yalniz «saat»
            birimiyle okunur: «20 dakika uyudum» ya da «72 kilo kaldirdim»
            gibi birimi baska olan sayiyi bu alana yazmak uydurmak olurdu. */
-        if(!m && f.id === 'sleep'){
-          m = n.slice(0, at).match(/(\d+(?:[.,]\d+)?)\s*(?:saat|sa)(?:lik)?\s+(?:[a-z]+\s+){0,2}$/);
+        if(v == null && !m && f.id === 'sleep'){
+          const s = n.slice(0, at).match(new RegExp(UYKU_SURE + '\\s+(?:[a-z]+\\s+){0,2}$'));
+          if(s) v = uykuSaati(s);
         }
-        if(!m) continue;
-        const v = sayi(m[1]);
+        if(v == null && m) v = sayi(m[1]);
         if(v == null || v < f.min || v > f.max) continue;
         return { field:f, value:v };
       }
+    }
+    /* Fiilin öteki çekimleri («7 buçuk saat uyumadım», «uyuyabildim»):
+       süre saatle söylendiyse uyku diye OKUNUR ki olumsuzluk kapısı
+       (LIFEOS.Olumsuz) engelini söylesin; okunmasaydı cümle sessizce
+       «anlaşılmadı» olurdu (2026-10-25). */
+    const s = n.match(new RegExp(UYKU_SURE + '\\s+(?:[a-z]+\\s+){0,2}(?:uyu|uyku)[a-z]*(?![a-z])'));
+    if(s){
+      const f = VITAL_FIELDS.sleep, v = uykuSaati(s);
+      if(v != null && v >= f.min && v <= f.max) return { field:f, value:v };
     }
     return null;
   }
@@ -77318,12 +77753,61 @@ SP.Quick = (function(){
     return { dk:Math.round(dk), bas };
   }
 
-  /* ------------------------------------------------------------ tahlil */
+  /* ------------------------------------------------------------ sikayet
 
+     «başım ağrıyor», «baş ağrısı orta», «şikâyetim yok» (2026-10-25).
+     Yalniz ISARETLEME: sozlukteki (data/symptoms.js) bir sikayet ya da
+     «bugun sikayet yok». Teshis yok. SIDDET YALNIZ ACIK SOZDEN gelir
+     (hafif / orta / şiddetli); soz yoksa siddet `null` kalir ve kayit
+     yazilmaz, «şiddet belirtilmedi» denir — tahmin edilmez. */
+  const SIDDET = { hafif:1, orta:2, siddetli:3 };
+  const SIKAYET_YOK_RE = /(^|[^a-z])(hicbir\s+)?sikayet(im|imiz)?\s+(yok|olmadi)(?=[^a-z]|$)/;
+
+  function parseSymptom(text){
+    const n = katla(text);
+    if(SIKAYET_YOK_RE.test(n)) return { yok:true, symptom:null, severity:null };
+    let en = null;
+    (SP.SYMPTOMS || []).forEach(s => {
+      (s.aliases || []).concat([s.name]).forEach(a => {
+        const an = katla(a);
+        if(an.length < 3) return;
+        let at = n.indexOf(an);
+        while(at >= 0){
+          /* Kelime BAŞINDA; sonu ek alabilir («baş ağrı» → «baş ağrısı»). */
+          if(at === 0 || /[^a-z0-9]/.test(n[at - 1])){
+            if(!en || an.length > en.uzunluk) en = { s, uzunluk:an.length };
+            return;
+          }
+          at = n.indexOf(an, at + 1);
+        }
+      });
+    });
+    if(!en) return null;
+    const sm = n.match(/(^|[^a-z])(hafif|orta|siddetli)(?=[^a-z]|$)/);
+    return { yok:false, symptom:en.s, severity:sm ? SIDDET[sm[2]] : null };
+  }
+
+  /* ------------------------------------------------------------ tahlil
+
+     BİRİMİ UYUŞMAYAN SATIR SESSİZCE YAZILMAZ (2026-10-25, Tahliller
+     ajanından devir). Satırlar `skip`/`mismatch`e bakılmadan yazılıyordu:
+     «ferritin 28 qux/zud» kanonik birimin (ng/mL) altına giriyordu. Kayda
+     yalnız SP.Parse.rowsToSave'in geçirdiği satır girer; uyuşmayan satır
+     `uyusmaz`ta taşınır ve önizlemede söylenir. */
   function parseLabLine(text){
     const r = SP.Parse.parseLab(text);
     if(!r.rows.length) return null;
-    return { rows:r.rows };
+    const kayit = SP.Parse.rowsToSave ? SP.Parse.rowsToSave(r)
+      : r.rows.filter(x => !x.skip && !x.mismatch);
+    const uyusmaz = r.rows.filter(x => kayit.indexOf(x) < 0 && x.mismatch);
+    if(!kayit.length && !uyusmaz.length) return null;
+    return { rows:kayit, uyusmaz };
+  }
+
+  /* Uyuşmayan satırın ekrandaki notu (Tahliller'deki uyarının sözüyle). */
+  function uyusmazNotu(rows){
+    return (rows || []).map(r => r.marker.name + ' birimi uyuşmuyor (' + r.mismatch + ')').join(', ')
+      + '; birimi Tahliller’de kendin denetleyip işaretlersen yazılır';
   }
 
   /* ------------------------------------------------------------- ogun */
@@ -77341,6 +77825,8 @@ SP.Quick = (function(){
 
      «45 dk yuruyus» once hareket olarak denenir cunku icinde sure
      birimi var; tahlil ve ogun ayristiricilari sure birimi tanimaz.
+     Sikayet hareketten ONCE: «başım ağrıyor 2 saattir» 120 dakikalik
+     seans degildir.
 
      `parse` OLCUM olmayan cumleyi hic tanimaz: «7 saat uyumadim» 420
      dakikalik seans, «2 bardak su icmedim» 400 ml su oluyordu
@@ -77348,20 +77834,53 @@ SP.Quick = (function(){
      engelin NEDENINI soylemek isteyen `Proposals.fromText` kullanir. */
   function parse(text){
     const r = parseHam(text);
-    return r && !LIFEOS.Olumsuz.olcumEngeli(text) ? r : null;
+    return r && !olcumEngeli(text, r) ? r : null;
+  }
+
+  /* Olumsuzluk kapisi. «şikâyetim yok»un «yok»u olumsuzluk degil cumlenin
+     KENDISIdir: o soz cikarilip geri kalanina bakilir («yarın şikâyetim
+     yok» yine engellenir). */
+  function olcumEngeli(text, parsed){
+    let t = String(text || '');
+    if(parsed && parsed.kind === 'symptom' && parsed.data.yok){
+      t = t.replace(/(hiçbir\s+|hicbir\s+)?şik[âa]yet(im|imiz)?\s+(yok|olmadı|olmadi)/gi, ' ');
+    }
+    return LIFEOS.Olumsuz.olcumEngeli(t);
   }
 
   function parseHam(text){
-    const t = String(text || '').trim();
+    const t0 = String(text || '').trim();
+    if(t0.length < 2) return null;
+    const z = gunSozu(t0);
+    const t = z.metin;
     if(t.length < 2) return null;
+    const r = parseIc(t);
+    if(!r) return null;
+    r.gun = z.gun;
+    r.gunSozu = z.kelime;
+    /* «dün gece … uyudum» bugünün gece uykusudur; bu «dün» bileşik cümlenin
+       sonraki parçasına taşınmaz (Proposals.fromText). */
+    r.gunSurer = true;
+    if(z.gece && r.kind === 'vital' && r.data.field.id === 'sleep'){ r.gun = 0; r.gunSurer = false; }
+    return r;
+  }
 
+  function parseIc(t){
     const kz = parseNap(t);
     if(kz) return { kind:'nap', data:kz, label:'Kısa uyku · ' + kz.dk + ' dk' + (kz.bas ? ' (' + kz.bas + ')' : ''),
       hint:'Uyku' };
 
     const v = parseVital(t);
-    if(v) return { kind:'vital', data:v, label:v.field.label + ' ' + U.fmtNum(v.value)
-      + ' ' + v.field.unit, hint:'Günlük ölçüm' };
+    if(v) return { kind:'vital', data:v,
+      label:v.ikinci ? 'Tansiyon ' + v.value + '/' + v.ikinci.value + ' ' + v.field.unit
+        : v.field.label + ' ' + (v.ekle ? '+' : '') + U.fmtNum(v.value) + ' ' + v.field.unit,
+      hint:'Günlük ölçüm' };
+
+    const sk = parseSymptom(t);
+    if(sk) return { kind:'symptom', data:sk,
+      label:sk.yok ? 'Şikâyet yok'
+        : sk.symptom.name + ' · ' + (sk.severity ? SP.SYMPTOM_SEVERITY[sk.severity - 1].label : 'şiddet belirtilmedi'),
+      hint:'Şikâyet' };
 
     const mv = parseMove(t);
     if(mv) return { kind:'move', data:mv,
@@ -77370,15 +77889,35 @@ SP.Quick = (function(){
 
     const lb = parseLabLine(t);
     if(lb) return { kind:'lab', data:lb,
-      label:lb.rows.map(r => r.marker.name + ' ' + U.fmtNum(r.value)).join(', '),
-      hint:lb.rows.length + ' ölçüm' };
+      label:lb.rows.length ? lb.rows.map(r => r.marker.name + ' ' + U.fmtNum(r.value)).join(', ')
+        : lb.uyusmaz.map(r => r.marker.name + ' ' + U.fmtNum(r.value) + ' ' + r.mismatch).join(', ') + ' · yazılmaz',
+      hint:lb.rows.length ? lb.rows.length + ' ölçüm' + (lb.uyusmaz.length ? ' · ' + uyusmazNotu(lb.uyusmaz) : '')
+        : uyusmazNotu(lb.uyusmaz) };
 
-    const ml = parseMealLine(t);
-    if(ml) return { kind:'meal', data:ml,
+    /* Öğün sözü besinden ÖNCE ayrılır (2026-10-25): «kahvaltıda 2 yumurta 1
+       çay» besin ayrıştırıcısına olduğu gibi gidince «1 çay» sessizce
+       düşüyordu. Baştaki söz («kahvaltıda», «öğlen», «akşam yemeğinde»,
+       «ara öğün») yuvayı söyler; besinler sözsüz metinden okunur. */
+    const slot = ogunSozu(t);
+    const ml = parseMealLine(slot ? ogunSozunuAt(t) : t);
+    if(ml) return { kind:'meal', data:Object.assign(ml, { slot }),
       label:ml.items.map(i => i.food.name).join(', '),
       hint:ml.items.length + ' gıda' };
 
     return null;
+  }
+
+  /* Bugün kutusunun önizleme cümlesi: ne YAZILACAĞI. Su için ekleme ve
+     günün yeni toplamı («Su +500 ml · toplam 1.500 ml»). */
+  function onizleme(parsed, date){
+    if(!parsed) return '';
+    if(parsed.kind === 'vital' && parsed.data.ekle){
+      const f = parsed.data.field, v = SP.Model.vitalsOf(date || tarih(parsed));
+      const once = v && v[f.id] != null ? Number(v[f.id]) : 0;
+      return f.label + ' +' + U.fmtNum(parsed.data.value) + ' ' + f.unit
+        + ' · toplam ' + U.fmtNum(once + parsed.data.value) + ' ' + f.unit;
+    }
+    return parsed.label;
   }
 
   /* ========================================================== uygulama
@@ -77387,22 +77926,41 @@ SP.Quick = (function(){
      cagirmaz: once kullaniciya gosterir. */
   async function apply(parsed, opts){
     const o = opts || {};
-    const tarih = o.date || U.todayISO();
+    const gun = o.date || tarih(parsed);
 
     if(parsed.kind === 'vital'){
+      const d = parsed.data, f = d.field;
       const patch = {};
-      patch[parsed.data.field.id] = parsed.data.value;
-      await SP.Model.saveVitals(tarih, patch);
-      return { ok:true, text:parsed.data.field.label + ' kaydedildi', route:'today' };
+      if(d.ekle){
+        const v = SP.Model.vitalsOf(gun);
+        const toplam = (v && v[f.id] != null ? Number(v[f.id]) : 0) + d.value;
+        if(toplam > f.max) return { ok:false, text:f.label + ' için toplam ' + U.fmtNum(toplam) + ' ' + f.unit + ' çok yüksek.' };
+        patch[f.id] = toplam;
+      }else patch[f.id] = d.value;
+      if(d.ikinci) patch[d.ikinci.field.id] = d.ikinci.value;
+      await SP.Model.saveVitals(gun, patch);
+      return { ok:true, text:(d.ikinci ? 'Tansiyon' : f.label) + ' kaydedildi', route:'today' };
     }
 
     if(parsed.kind === 'nap'){
-      const r = await SP.Uyku.ekle(tarih, parsed.data);
+      const r = await SP.Uyku.ekle(gun, parsed.data);
       return r.ok ? { ok:true, text:'Kısa uyku kaydedildi', route:'today', kayit:r.kayit } : { ok:false, text:r.why };
     }
 
+    if(parsed.kind === 'symptom'){
+      const d = parsed.data;
+      if(d.yok){
+        await SP.Model.saveVitals(gun, { symptoms:{}, symptomsLogged:true });
+        return { ok:true, text:'Şikâyet yok olarak kaydedildi', route:'today' };
+      }
+      if(!d.severity) return { ok:false, text:SIDDET_YOK };
+      await SP.Symptom.setSymptom(gun, d.symptom.id, d.severity);
+      await SP.Model.saveVitals(gun, { symptomsLogged:true });
+      return { ok:true, text:d.symptom.name + ' işaretlendi', route:'today' };
+    }
+
     if(parsed.kind === 'move'){
-      const w = SP.Model.newWorkout(tarih);
+      const w = SP.Model.newWorkout(gun);
       w.minutes = parsed.data.minutes;
       if(parsed.data.exercise){
         w.name = parsed.data.exercise.name;
@@ -77415,32 +77973,38 @@ SP.Quick = (function(){
     }
 
     if(parsed.kind === 'lab'){
+      /* Yalniz rowsToSave'in gecirdigi satir (yukarida parseLabLine). */
+      const rows = SP.Parse.rowsToSave ? SP.Parse.rowsToSave(parsed.data) : parsed.data.rows;
+      if(!rows.length) return { ok:false, text:'Yazılmadı: ' + uyusmazNotu(parsed.data.uyusmaz) + '.' };
       /* Ayni gune ikinci bir oturum acilmaz; var olanin ustune yazilir. */
-      const mevcut = (SP.S.labs || []).find(l => l.date === tarih);
-      const rec = mevcut || SP.Model.newLab(tarih);
-      parsed.data.rows.forEach(r => {
+      const mevcut = (SP.S.labs || []).find(l => l.date === gun);
+      const rec = mevcut || SP.Model.newLab(gun);
+      rows.forEach(r => {
         rec.values[r.marker.id] = { v:r.value, cert:'measured', unit:r.marker.unit };
       });
       await SP.Model.saveLab(rec);
-      return { ok:true, text:parsed.data.rows.length + ' ölçüm kaydedildi', route:'labs' };
+      return { ok:true, text:rows.length + ' ölçüm kaydedildi', route:'labs' };
     }
 
     if(parsed.kind === 'meal'){
-      const meal = SP.Model.newMeal(o.slot || (SP.Ogun ? SP.Ogun.simdiki() : 'ara1'));
+      const meal = SP.Model.newMeal(parsed.data.slot || o.slot || (SP.Ogun ? SP.Ogun.simdiki() : 'ara1'));
       /* Ayristirici gram degerini `g` alaninda uretir. Burada `i.grams`
          okunuyordu ve boyle bir alan yok: komut paletinden girilen HER
          ogun gramsiz kaydediliyordu. Sessiz bir kayipti — ogun listede
          gorunuyor ama kalorisi, makrosu ve mikro besini sifir. */
       meal.items = parsed.data.items.map(i => ({ foodId:i.food.id, g:i.g,
         cert:i.cert || 'estimated' }));
-      await SP.Model.addMeal(tarih, meal);
+      await SP.Model.addMeal(gun, meal);
       return { ok:true, text:'Öğün eklendi', route:'meals' };
     }
 
     return { ok:false, text:'Anlaşılmadı' };
   }
 
-  return { parse, parseHam, apply, parseVital, parseMove, parseNap, VITAL_FIELDS };
+  const SIDDET_YOK = 'Şiddet belirtilmedi: «hafif», «orta» ya da «şiddetli» diye ekle.';
+
+  return { parse, parseHam, apply, parseVital, parseMove, parseNap, parseSymptom, VITAL_FIELDS,
+    BARDAK_ML, gunSozu, ogunSozu, tarih, onizleme, olcumEngeli, uyusmazNotu, SIDDET_YOK };
 })();
 
 /* ==== js/core/dunku.js ==== */
@@ -77535,7 +78099,8 @@ SP.Dunku = (function(){
         kez saklanırsa eskisinin yerine geçer.
      5. ADIYLA BULUNUR. «menemen tabağımı yedim» gibi bir cümle hazır öğünün
         adını içeriyorsa `bul` onu döner; ekleme yine önizleme ve onayla
-        (Bugün kutusu ve King, giris.js). */
+        (Bugün kutusu ve King, giris.js). Antrenmanın yalnız adı yazılırsa
+        («bacak günü») fiil gerekmez (2026-10-25). */
 
 window.SP = window.SP || {};
 
@@ -77591,7 +78156,9 @@ SP.Hazir = (function(){
 
   /* -------------------------------------------------------- antrenman */
 
-  const KOPYALANMAZ = ['id', 'date', 'rpe', 'note', 'createdAt', 'updatedAt', 'rota', 'route', 'gps'];
+  /* planId (2026-10-25): plan satırından yazılan seansın bağı; kopyaya
+     geçerse hazır antrenman her eklenişte «plandan» görünürdü. */
+  const KOPYALANMAZ = ['id', 'date', 'rpe', 'note', 'createdAt', 'updatedAt', 'rota', 'route', 'gps', 'planId'];
   async function antrenmanSakla(w, ad){
     if(!w) return { ok:false, why:'Seans bulunamadı.' };
     const kayit = JSON.parse(JSON.stringify(w));
@@ -77626,12 +78193,25 @@ SP.Hazir = (function(){
 
   const YEDIM = /(yedim|yedik|içtim|yiyorum|yiyeceğim|yemek yedim|atıştırdım|kahvaltı ettim)/;
   const YAPTIM = /(yaptım|yaptık|bitirdim|tamamladım|çalıştım|antrenman ettim|koştum)/;
+  /* FİİLSİZ AD (2026-10-25): «bacak günü» yazınca kayıtlı antrenman
+     bulunmuyordu, fiil şarttı. Cümlenin KENDİSİ bir antrenmanın adıysa
+     (başta «bugün», sonda iyelik eki ve noktalama olabilir) fiil gerekmez.
+     Adın geçtiği başka bir cümle («bacak günü nasıl yapılır») yine fiil
+     ister; öğün de fiil ister (yemeğin adı bir gıdanın da adı olabilir).
+     Ekleme yine önizleme ve onayla (söz 5). */
+  const sade = s => s.replace(/[.!?…,;:]+$/, '').replace(/^bugün\s+/, '').trim();
+  function yalnizAd(t, a){
+    return t === a || (t.indexOf(a) === 0 && /^[a-zçğıöşü]{1,4}$/.test(t.slice(a.length)));
+  }
   /* En uzun ad kazanır: «menemen» ve «menemen tabağı» varsa ikincisi. */
   function bul(metin){
     const t = kucuk(metin);
     if(!t) return null;
     const ad = (l, tur) => l.map(h => ({ h, tur, a:kucuk(h.ad) })).filter(x => x.a.length >= 3 && t.indexOf(x.a) >= 0);
-    const adaylar = (YEDIM.test(t) ? ad(ogunler(), 'ogun') : []).concat(YAPTIM.test(t) ? ad(antrenmanlar(), 'antrenman') : []);
+    const yalin = sade(t);
+    const fiilsiz = YEDIM.test(t) || YAPTIM.test(t) ? []
+      : antrenmanlar().map(h => ({ h, tur:'antrenman', a:kucuk(h.ad) })).filter(x => x.a.length >= 3 && yalnizAd(yalin, x.a));
+    const adaylar = (YEDIM.test(t) ? ad(ogunler(), 'ogun') : []).concat(YAPTIM.test(t) ? ad(antrenmanlar(), 'antrenman') : [], fiilsiz);
     if(!adaylar.length) return null;
     adaylar.sort((x, y) => y.a.length - x.a.length);
     return { tur:adaylar[0].tur, hazir:adaylar[0].h };
@@ -78054,7 +78634,17 @@ SP.Tahmin = (function(){
      4. «YAPILDI» BİR KAYITTIR, ÖLÇÜM DEĞİL. Su hatırlatmasına «İçtim» demek
         mililitre yazmaz: miktar uydurulmaz, su alanı ayrıca girilir.
         İşaretlenmemiş bir saat «alınmadı» sayılmaz — «işaretlenmedi»dir;
-        bu yüzden uyum yüzdesi HESAPLANMAZ. */
+        bu yüzden uyum yüzdesi HESAPLANMAZ.
+     5. AYNI SAATTE HEPSİ (2026-10-25). Aynı saate düşen birkaç hatırlatma
+        tek dokunuşla işaretlenir (isaretleHepsi); her biri yine tek tek
+        geri alınır. Toplu «Geri al» yalnız o dokunuşun işaretlediğini
+        kaldırır. Doz görünmez, sayı ve yüzde üretilmez.
+     6. HAREKET HAZIR ANTRENMANA BAĞLANABİLİR (2026-10-25). Bağ isteğe
+        bağlıdır ve kullanıcının seçimidir (core/hazir.js). Bağlıysa Bugün'de
+        «Yaptım» (yaptim) o antrenmanı bugüne ekler; işaret kalkınca eklenen
+        seans da kalkar. Bağ yoksa ya da hazır antrenman silindiyse düz
+        işarettir. Telefon bildirimindeki düğme seans YAZMAZ: orada «Geri al»
+        yok. */
 
 window.SP = window.SP || {};
 
@@ -78075,7 +78665,7 @@ SP.Hatirlat = (function(){
     olcum:{ ad:'Sabah ölçümü', eylem:'Ölçtüm', metin:'Sabah tartısı' },
   };
 
-  function bos(){ return { liste:[], yapildi:{}, bildirim:false }; }
+  function bos(){ return { liste:[], yapildi:{}, seans:{}, bildirim:false }; }
   function durum(){
     if(!SP.S.hatirlat) SP.S.hatirlat = bos();
     return SP.S.hatirlat;
@@ -78086,6 +78676,7 @@ SP.Hatirlat = (function(){
     SP.S.hatirlat = Object.assign(bos(), d);
     if(!Array.isArray(SP.S.hatirlat.liste)) SP.S.hatirlat.liste = [];
     if(!SP.S.hatirlat.yapildi || typeof SP.S.hatirlat.yapildi !== 'object') SP.S.hatirlat.yapildi = {};
+    if(!SP.S.hatirlat.seans || typeof SP.S.hatirlat.seans !== 'object') SP.S.hatirlat.seans = {};
     /* Telefonda: izin durumu öğrenilir, önümüzdeki günler yeniden kurulur
        (her açılış pencereyi ileri taşır). Beklenmez. */
     if(telefonMu()) B().durum().then(() => planla(), () => null);
@@ -78096,6 +78687,7 @@ SP.Hatirlat = (function(){
     const d = durum();
     const sinir = U().iso(U().addDays(U().today(), -SAKLA_GUN));
     Object.keys(d.yapildi).forEach(g => { if(g < sinir) delete d.yapildi[g]; });
+    Object.keys(d.seans || {}).forEach(g => { if(g < sinir) delete d.seans[g]; });
     await SP.Store.set(KEY, d);
     planla();
     return d;
@@ -78119,6 +78711,11 @@ SP.Hatirlat = (function(){
   }
 
   function ilacOf(h){ return (SP.S.meds || []).find(m => m.id === h.medId) || null; }
+  /* Hareket hatırlatmasının bağlı hazır antrenmanı (söz 6); silindiyse yok. */
+  function hazirOf(h){
+    if(!h || h.tur !== 'hareket' || !h.hazirId || !SP.Hazir) return null;
+    return SP.Hazir.antrenmanlar().find(x => x.id === h.hazirId) || null;
+  }
 
   function adOf(h){
     if(h.tur === 'ilac'){
@@ -78141,13 +78738,22 @@ SP.Hatirlat = (function(){
     if(x.tur === 'ilac' && !(SP.S.meds || []).some(m => m.id === x.medId)){
       return { ok:false, why:'Hangi ilaç ya da takviye olduğu seçilmedi.' };
     }
+    /* Söz 6: `hazirId` verilmezse (undefined) var olan bağ kalır; boş
+       verilirse bağ kalkar. Olmayan antrenmana bağ kurulmaz. */
+    const bagVar = x.tur === 'hareket' && x.hazirId !== undefined;
+    const bag = bagVar && x.hazirId ? String(x.hazirId) : null;
+    if(bag && !(SP.Hazir && SP.Hazir.antrenmanlar().some(a => a.id === bag))){
+      return { ok:false, why:'Bağlanacak hazır antrenman bulunamadı.' };
+    }
     const s = saatOku(x.saatler);
     if(!s.ok) return s;
     const d = durum();
     const onceki = d.liste.find(h => h.tur === x.tur && (x.tur !== 'ilac' || h.medId === x.medId));
-    if(onceki) onceki.saatler = s.saatler;
-    else d.liste.push({ id:U().uid('ht'), tur:x.tur, medId:x.tur === 'ilac' ? x.medId : null,
-      saatler:s.saatler, at:new Date().toISOString() });
+    if(onceki){
+      onceki.saatler = s.saatler;
+      if(bagVar) onceki.hazirId = bag;
+    }else d.liste.push(Object.assign({ id:U().uid('ht'), tur:x.tur, medId:x.tur === 'ilac' ? x.medId : null,
+      saatler:s.saatler, at:new Date().toISOString() }, bag ? { hazirId:bag } : {}));
     await kaydet();
     return { ok:true, saatler:s.saatler };
   }
@@ -78182,24 +78788,85 @@ SP.Hatirlat = (function(){
     const out = [];
     d.liste.forEach(h => {
       if(!gecerli(h, gun)) return;
+      const hz = hazirOf(h);
       h.saatler.forEach(saat => {
         const anahtar = h.id + '@' + saat;
         out.push({ anahtar, id:h.id, tur:h.tur, saat, ad:adOf(h), eylem:TUR[h.tur].eylem,
+          hazirId:hz ? hz.id : null, hazirAd:hz ? hz.ad : null,
           durum:yap[anahtar] ? 'yapildi' : (n >= dk(saat) ? 'vakti' : 'sonra') });
       });
     });
     return out.sort((a, b) => a.saat < b.saat ? -1 : a.saat > b.saat ? 1 : 0);
   }
 
+  /* İşaret kalkınca o işaretin eklediği seans da kalkar (söz 6). Dönen
+     değer: bir seans kaldırıldıysa true. */
   async function isaretle(anahtar, deger, gunISO, zamanISO){
     const d = durum();
     const gun = gunISO || U().todayISO();
     d.yapildi[gun] = d.yapildi[gun] || {};
-    if(deger === false) delete d.yapildi[gun][anahtar];
+    let seansKalkti = false;
+    if(deger === false){
+      delete d.yapildi[gun][anahtar];
+      const sid = ((d.seans || {})[gun] || {})[anahtar];
+      if(sid){
+        delete d.seans[gun][anahtar];
+        if(SP.Model.workoutsOf(gun).some(w => w.id === sid)){ await SP.Model.deleteWorkout(sid); seansKalkti = true; }
+      }
+    }
     else d.yapildi[gun][anahtar] = zamanISO || new Date().toISOString();
     await kaydet();
     /* Telefonda: bu saatin ertelenmiş ve gelmiş bildirimi kalkar. */
     if(deger !== false && telefonMu()) B().yapildi(gun + '|' + anahtar);
+    return seansKalkti;
+  }
+
+  /* Bağlı hazır antrenmanı bugüne ekler ve bağı işaretin yanına yazar. */
+  async function seansEkle(h, anahtar, gun){
+    const hz = hazirOf(h);
+    if(!hz) return null;
+    const r = await SP.Hazir.antrenmanEkle(hz.id, gun);
+    if(!r.ok) return null;
+    const d = durum();
+    d.seans = d.seans || {};
+    d.seans[gun] = d.seans[gun] || {};
+    d.seans[gun][anahtar] = r.id;
+    return { id:r.id, ad:r.ad };
+  }
+  const hatOf = anahtar => durum().liste.find(x => x.id === String(anahtar || '').split('@')[0]) || null;
+
+  /* BUGÜN'DEKİ «YAPTIM» (söz 6): işaret + bağlı hazır antrenman varsa onu
+     bugüne ekler. Dönen: { ok, seans:{ id, ad } | null, geriAl }. */
+  async function yaptim(anahtar, gunISO){
+    const gun = gunISO || U().todayISO();
+    const h = hatOf(anahtar);
+    if(!h) return { ok:false, why:'Hatırlatma bulunamadı.' };
+    const zaten = !!(durum().yapildi[gun] || {})[anahtar];
+    const seans = zaten ? null : await seansEkle(h, anahtar, gun);
+    await isaretle(anahtar, true, gun);
+    return { ok:true, seans, geriAl:async () => { if(!zaten) await isaretle(anahtar, false, gun); } };
+  }
+
+  /* AYNI SAATTE HEPSİ (söz 5): tek kayıtla. Zaten işaretli olan dokunulmaz;
+     geri alma yalnız bu dokunuşun işaretlediğini kaldırır. Bağlı hareket
+     hatırlatması burada da seansını ekler (yaptim ile aynı kural). */
+  async function isaretleHepsi(anahtarlar, gunISO){
+    const gun = gunISO || U().todayISO();
+    const d = durum();
+    const yap = d.yapildi[gun] || {};
+    const yeni = (anahtarlar || []).filter((k, i, l) => k && l.indexOf(k) === i && !yap[k] && hatOf(k));
+    const seanslar = [];
+    for(const k of yeni){
+      const s = await seansEkle(hatOf(k), k, gun);
+      if(s) seanslar.push(s);
+    }
+    d.yapildi[gun] = d.yapildi[gun] || {};
+    const an = new Date().toISOString();
+    yeni.forEach(k => { d.yapildi[gun][k] = an; });
+    await kaydet();
+    if(telefonMu()) yeni.forEach(k => B().yapildi(gun + '|' + k));
+    return { ok:true, isaretlenen:yeni, seanslar,
+      geriAl:async () => { for(const k of yeni) await isaretle(k, false, gun); } };
   }
 
   /* BİLDİRİMDEKİ DÜĞME (brand/ortak/bildirim.js söz 7): kabuk «Aldım»ı
@@ -78330,7 +78997,7 @@ SP.Hatirlat = (function(){
   }
   function bildirimSorunu(){ return sorun; }
 
-  return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, isaretUygula, adOf, durum,
+  return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, isaretleHepsi, yaptim, isaretUygula, adOf, hazirOf, durum,
     bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, bildirimSorunu, tik,
     telefonMu, planListesi, planla, planBekle, PLAN_GUN };
 })();
@@ -79569,8 +80236,46 @@ SP.Proposals = (function(){
       .sort((x, y) => sonraMi(x, y) ? 1 : sonraMi(y, x) ? -1 : 0);
   }
 
+  /* EKLEME GERİ ALINIR (2026-10-25): su toplanır; geri alma o kaydın
+     EKLEDİĞİNİ çıkarır, sonraki eklemeleri korur. +250 sonra +500 girilip
+     ilki geri alınınca toplam 500 kalır (750'de kalmaz). Zincirin arasına
+     elle düzenleme girdiyse dokunulmaz; sonraki mutlak kayıt bu eklemeyi
+     zaten ezmiştir.
+     ZİNCİR TEK YOLDUR (2026-10-25): mutlak kaydın geri alınması da buradan
+     geçer (`baslangic` = o kaydın yazdığı değer). Eskiden mutlak kayıt
+     yalnız İLK eklemeyi yeniden hesaplıyordu: 1000, +250, +250 yazılıp
+     ilki geri alınınca değer 1500'de kalıyordu (500 olmalıydı). Eksik
+     değer (null) ile 0 ayrı kalır: boş günün zinciri boşa döner. */
+  async function zincirGeriAl(geri, o, baslangic){
+    const sonraki = ayniHedef(o, 'vital-yaz', x => x.date === geri.date && x.field === geri.field);
+    let onceki = baslangic, yerine = geri.value;
+    for(const x of sonraki){
+      if(x.value !== onceki) return;
+      x.value = yerine;
+      if(x.ek == null) return;
+      onceki = x.yeni;
+      x.yeni = (yerine || 0) + x.ek;
+      yerine = x.yeni;
+    }
+    const v = M.vitalsOf(geri.date);
+    if(!v || v[geri.field] !== onceki) return;
+    const patch = {};
+    patch[geri.field] = yerine == null ? null : yerine;
+    await M.saveVitals(geri.date, patch);
+  }
+
   function yeniSira(){
     return liste().reduce((m, x) => Math.max(m, Number(x.sira) || 0), 0) + 1;
+  }
+
+  /* Günlük ölçümün o anki değeri: `sanal`da varsa öndeki önerinin
+     yazacağı değer, yoksa kayıtlı değer; girilmemişse null (0 değil). */
+  function sanalAnahtar(date, id){ return String(date) + '|' + id; }
+  function tabanOf(date, id, sanal){
+    const k = sanalAnahtar(date, id);
+    if(sanal && Object.prototype.hasOwnProperty.call(sanal, k)) return sanal[k];
+    const e = M.vitalsOf(date);
+    return e && e[id] != null ? Number(e[id]) : null;
   }
 
   const KATALOG = {
@@ -79580,43 +80285,54 @@ SP.Proposals = (function(){
       level:'kucuk',
       olcum:true,
       label:'Günlük ölçüm',
-      alanlar:['field', 'value', 'date'],
-      check(p){
+      /* `ekle` (2026-10-25; kullanıcı: «spi için daha işlevli veri girişi,
+         sürtünmeyi azaltacak teknikler ile daha güzel yap»): değer günün
+         toplamına EKLENİR (su). «2 bardak su içtim» 1000 ml'nin üstüne 400
+         yazıyordu. Toplam her doğrulamada o anki kayıttan yeniden hesaplanır:
+         bekleyen öneri arada eklenen suyu ezmez. `sanal` (2026-10-25):
+         birlikte gösterilen öneriler için öndeki satırların yazacağı değer
+         (sirali); verilmezse kayıtlı değer. */
+      alanlar:['field', 'value', 'date', 'ekle'],
+      check(p, sanal){
         const f = SP.Quick.VITAL_FIELDS[p.field];
         if(!f) return fail('Böyle bir günlük ölçüm alanı yok.');
         const v = Number(p.value);
         if(!isFinite(v)) return fail('Değer sayı değil.');
+        const once = tabanOf(p.date, f.id, sanal);
+        if(p.ekle === true && f.ekle){
+          if(v <= 0) return fail(f.label + ' için eklenecek miktar yok.');
+          const toplam = (once == null ? 0 : once) + v;
+          if(f.max != null && toplam > f.max) return fail(f.label + ' için toplam ' + U.fmtNum(toplam) + ' ' + f.unit + ' çok yüksek.');
+          return pass({ f, v:toplam, ek:v, once });
+        }
         if(f.min != null && v < f.min) return fail(f.label + ' için ' + v + ' çok düşük.');
         if(f.max != null && v > f.max) return fail(f.label + ' için ' + v + ' çok yüksek.');
-        return pass({ f, v });
+        return pass({ f, v, once });
       },
       preview(p, ctx){
-        const eski = M.vitalsOf(p.date);
-        const oncekiDeger = eski ? eski[ctx.f.id] : null;
+        const oncekiDeger = ctx.once;
         return [{ alan:ctx.f.label,
           once:oncekiDeger == null ? 'girilmemiş' : U.fmtNum(oncekiDeger) + ' ' + ctx.f.unit,
-          sonra:U.fmtNum(ctx.v) + ' ' + ctx.f.unit }];
+          sonra:ctx.ek != null
+            ? '+' + U.fmtNum(ctx.ek) + ' ' + ctx.f.unit + ' · toplam ' + U.fmtNum(ctx.v) + ' ' + ctx.f.unit
+            : U.fmtNum(ctx.v) + ' ' + ctx.f.unit }];
       },
       async apply(p, ctx){
         const eski = M.vitalsOf(p.date);
         const geri = { date:p.date, field:ctx.f.id,
           value:eski ? eski[ctx.f.id] : null, yeni:ctx.v };
+        if(ctx.ek != null) geri.ek = ctx.ek;
         const patch = {};
         patch[ctx.f.id] = ctx.v;
         await M.saveVitals(p.date, patch);
         return geri;
       },
-      /* Sonraki kaydı ve elle düzenlemeyi ezmez (HATALAR Y-6). */
+      /* Sonraki kaydı ve elle düzenlemeyi ezmez (HATALAR Y-6). Ekleme de
+         mutlak kayıt da aynı zincirden geri alınır (2026-10-25): sonraki
+         eklemelerin HEPSİ bu kayıt hiç olmamış gibi yeniden hesaplanır. */
       async revert(geri, o){
         const yeni = geri.yeni != null ? geri.yeni : Number(((o && o.params) || {}).value);
-        const sonraki = ayniHedef(o, 'vital-yaz',
-          x => x.date === geri.date && x.field === geri.field)[0];
-        if(sonraki){ if(sonraki.value === yeni) sonraki.value = geri.value; return; }
-        const v = M.vitalsOf(geri.date);
-        if(!v || v[geri.field] !== yeni) return;
-        const patch = {};
-        patch[geri.field] = geri.value;
-        await M.saveVitals(geri.date, patch);
+        return zincirGeriAl(geri, o, yeni);
       },
     },
 
@@ -79852,53 +80568,149 @@ SP.Proposals = (function(){
       level:'kucuk',
       olcum:true,
       label:'Şikâyet',
-      alanlar:['symptomId', 'severity', 'date'],
+      /* 2026-10-25: hızlı girişten de gelir («baş ağrısı orta»). Şiddet
+         YALNIZ kullanıcının sözünden; söylenmediyse yazılmaz, «şiddet
+         belirtilmedi» denir. `yok:true` = «şikâyetim yok» (Bugün'deki
+         «Şikâyetim yok» düğmesiyle aynı kayıt). İşaretleme teşhis değildir. */
+      alanlar:['symptomId', 'severity', 'date', 'yok'],
       check(p){
+        if(p.yok === true) return pass({ yok:true });
         const s = SP.SYMPTOM_BY_ID[p.symptomId];
         if(!s) return fail('Böyle bir şikâyet sözlükte yok.');
+        if(p.severity == null || p.severity === '') return fail(SP.Quick.SIDDET_YOK);
         const sd = Number(p.severity);
         if(!isFinite(sd) || sd < 1 || sd > 3) return fail('Şiddet 1 ile 3 arasında olmalı.');
         return pass({ s, sd:Math.round(sd) });
       },
       preview(p, ctx){
+        if(ctx.yok){
+          const v = M.vitalsOf(p.date);
+          const adlar = Object.keys((v && v.symptoms) || {}).map(id => (SP.SYMPTOM_BY_ID[id] || {}).name).filter(Boolean);
+          return [{ alan:'Şikâyet', once:adlar.length ? adlar.join(', ') : (v && v.symptomsLogged ? 'şikâyet yok' : 'işaretlenmemiş'),
+            sonra:'şikâyet yok' }];
+        }
         const onceki = SP.Symptom.ofDay(p.date)[ctx.s.id];
         return [{ alan:ctx.s.name,
           once:onceki ? 'şiddet ' + onceki : 'işaretlenmemiş',
           sonra:'şiddet ' + ctx.sd }];
       },
       async apply(p, ctx){
+        const v = M.vitalsOf(p.date);
+        const logged = !!(v && v.symptomsLogged);
+        if(ctx.yok){
+          const eski = Object.assign({}, (v && v.symptoms) || {});
+          await M.saveVitals(p.date, { symptoms:{}, symptomsLogged:true });
+          return { date:p.date, yok:true, eski, logged };
+        }
         const onceki = SP.Symptom.ofDay(p.date)[ctx.s.id] || 0;
         await SP.Symptom.setSymptom(p.date, ctx.s.id, ctx.sd);
-        return { date:p.date, symptomId:ctx.s.id, onceki, yeni:ctx.sd };
+        if(!logged) await M.saveVitals(p.date, { symptomsLogged:true });
+        return { date:p.date, symptomId:ctx.s.id, onceki, yeni:ctx.sd, logged };
       },
       async revert(geri, o){
-        const yeni = geri.yeni != null ? geri.yeni : Math.round(Number(((o && o.params) || {}).severity) || 0);
-        const sonraki = ayniHedef(o, 'semptom-isaretle',
-          x => x.date === geri.date && x.symptomId === geri.symptomId)[0];
-        if(sonraki){ if(sonraki.onceki === yeni) sonraki.onceki = geri.onceki; return; }
-        if((SP.Symptom.ofDay(geri.date)[geri.symptomId] || 0) !== yeni) return;
-        await SP.Symptom.setSymptom(geri.date, geri.symptomId, geri.onceki);
+        if(geri.yok){
+          /* Arada şikâyet işaretlendiyse o işaret silinmez. */
+          const v = M.vitalsOf(geri.date);
+          if(v && Object.keys(v.symptoms || {}).length) return;
+          await M.saveVitals(geri.date, { symptoms:geri.eski || {}, symptomsLogged:!!geri.logged });
+          return;
+        }
+        await semptomGeriAl(geri, o);
+        if(geri.logged === false){
+          const v = M.vitalsOf(geri.date);
+          if(v && v.symptomsLogged && !Object.keys(v.symptoms || {}).length) await M.saveVitals(geri.date, { symptomsLogged:false });
+        }
+      },
+    },
+
+    /* ------------------------------------------- hazır öğün / antrenman
+
+       2026-10-25: «menemen tabağımı yedim», «bacak günümü yaptım» Bugün
+       kutusunda bulunuyordu (core/hazir.js söz 5) ama paletten, King'in
+       ofis sohbetinden ve iPhone gelen kutusundan bulunmuyordu. Kayıt
+       kullanıcının kendi hazırından kopyalanır (söz 1–3); model öneremez:
+       hazır kimliklerini görmez. */
+    'hazir-ekle':{
+      level:'kucuk',
+      olcum:true,
+      modelYok:true,
+      label:'Hazır öğün ya da antrenman',
+      alanlar:['tur', 'hazirId', 'date', 'slot'],
+      check(p){
+        if(!SP.Hazir) return fail('Hazır kayıtlar yüklü değil.');
+        const l = p.tur === 'ogun' ? SP.Hazir.ogunler() : p.tur === 'antrenman' ? SP.Hazir.antrenmanlar() : null;
+        if(!l) return fail('Bilinmeyen hazır kayıt türü.');
+        const h = l.find(x => x.id === p.hazirId);
+        if(!h) return fail('Hazır kayıt bulunamadı; silinmiş olabilir.');
+        return pass({ h });
+      },
+      preview(p, ctx){
+        if(p.tur === 'ogun'){
+          const slot = p.slot || ctx.h.slot;
+          return [{ alan:ctx.h.ad, once:'—', sonra:'hazır öğün' + (slot ? ' · ' + (SP.Ogun ? SP.Ogun.ad(slot) : slot) : '')
+            + ' · ' + SP.Hazir.ogunOzet(ctx.h) }];
+        }
+        const oz = SP.Hazir.antrenmanOzet(ctx.h);
+        return [{ alan:ctx.h.ad, once:'—', sonra:'hazır antrenman' + (oz ? ' · ' + oz : '') }];
+      },
+      async apply(p){
+        const r = p.tur === 'ogun' ? await SP.Hazir.ogunEkle(p.hazirId, p.date, p.slot || undefined)
+          : await SP.Hazir.antrenmanEkle(p.hazirId, p.date);
+        if(!r.ok) throw new Error(r.why);
+        return { tur:p.tur, date:p.date, id:r.id };
+      },
+      async revert(geri){
+        if(geri.tur === 'ogun'){ if(M.deleteMeal) await M.deleteMeal(geri.date, geri.id); }
+        else if(M.deleteWorkout) await M.deleteWorkout(geri.id);
       },
     },
   };
+
+  /* Şikâyet şiddetinin geri alınması (HATALAR Y-6): sonraki kaydı ve elle
+     düzenlemeyi ezmez. */
+  async function semptomGeriAl(geri, o){
+    const yeni = geri.yeni != null ? geri.yeni : Math.round(Number(((o && o.params) || {}).severity) || 0);
+    const sonraki = ayniHedef(o, 'semptom-isaretle',
+      x => x.date === geri.date && x.symptomId === geri.symptomId)[0];
+    if(sonraki){ if(sonraki.onceki === yeni) sonraki.onceki = geri.onceki; return; }
+    if((SP.Symptom.ofDay(geri.date)[geri.symptomId] || 0) !== yeni) return;
+    await SP.Symptom.setSymptom(geri.date, geri.symptomId, geri.onceki);
+  }
 
   function eylem(id){ return KATALOG[id] || null; }
   function katalogIdleri(){ return Object.keys(KATALOG); }
 
   /* ==================== doğrulama ve önizleme ==================== */
 
-  function check(p){
+  function check(p, sanal){
     const e = eylem(p && p.action);
     if(!e) return fail('Bilinmeyen eylem: ' + (p && p.action));
-    try{ return e.check(p.params || {}); }
+    try{ return e.check(p.params || {}, sanal); }
     catch(err){ return fail('Doğrulanamadı: ' + (err && err.message || err)); }
   }
 
-  function preview(p){
-    const c = check(p);
+  function onizle(p, c){
     if(!c.ok) return { ok:false, why:c.why, rows:[] };
     try{ return { ok:true, rows:eylem(p.action).preview(p.params || {}, c.ctx) || [] }; }
     catch(err){ return { ok:false, why:'Önizlenemedi.', rows:[] }; }
+  }
+
+  function preview(p){ return onizle(p, check(p)); }
+
+  /* SIRALI ÖNİZLEME (2026-10-25): birlikte gösterilen öneriler
+     UYGULANACAKLARI sırayla önizlenir. Her biri ayrı ayrı önizlenince
+     1000 ml varken üç «su 250» üç kez «toplam 1.250 ml» diyordu, onay 1750
+     yazıyordu. Her satırın önceki ve sonraki değeri öndeki satırları sayar;
+     geçmeyen satır sanal değeri değiştirmez, approve da onu yazmaz.
+     Dönüş: [{ p, c, pv }] — c doğrulama, pv önizleme. */
+  function sirali(l){
+    const sanal = {};
+    return (l || []).map(p => {
+      const c = check(p, sanal);
+      const pv = onizle(p, c);
+      if(c.ok && p.action === 'vital-yaz') sanal[sanalAnahtar((p.params || {}).date, c.ctx.f.id)] = c.ctx.v;
+      return { p, c, pv };
+    });
   }
 
   /* ==================== kural motoru kaynağı ====================
@@ -79915,23 +80727,49 @@ SP.Proposals = (function(){
       .filter(x => x.length > 1);
   }
 
-  /* Hızlı giriş ayrıştırıcısının çıktısını katalog eylemine çevirir. */
-  function quickToAction(parsed, date, slot){
-    if(!parsed) return null;
-    if(parsed.kind === 'vital') return { action:'vital-yaz',
-      params:{ field:parsed.data.field.id, value:parsed.data.value, date } };
-    if(parsed.kind === 'nap') return { action:'kestirme-ekle',
-      params:{ dk:parsed.data.dk, bas:parsed.data.bas || null, date } };
-    if(parsed.kind === 'move') return { action:'seans-ekle',
+  /* Hızlı giriş ayrıştırıcısının çıktısını katalog eylemlerine çevirir.
+
+     2026-10-25: tek cümle İKİ eylem olabilir («tansiyon 120/80» → büyük ve
+     küçük tansiyon); cümlenin gün sözü («dün») tarihi, öğün sözü
+     («kahvaltıda») öğünü belirler; su günün toplamına eklenir (`ekle`) —
+     iPhone gelen kutusundan gelen «su 250» de (beş satır 1250 ml'dir).
+     Birimi uyuşmayan tahlil satırı eyleme dönmez (SP.Parse.rowsToSave). */
+  function quickToActions(parsed, date, slot){
+    if(!parsed) return [];
+    const d = SP.Quick.tarih ? SP.Quick.tarih(parsed, date) : date;
+    if(parsed.kind === 'vital'){
+      const ilk = { action:'vital-yaz', params:{ field:parsed.data.field.id, value:parsed.data.value, date:d } };
+      if(parsed.data.ekle) ilk.params.ekle = true;
+      const l = [ilk];
+      if(parsed.data.ikinci) l.push({ action:'vital-yaz',
+        params:{ field:parsed.data.ikinci.field.id, value:parsed.data.ikinci.value, date:d } });
+      return l;
+    }
+    if(parsed.kind === 'symptom') return [parsed.data.yok
+      ? { action:'semptom-isaretle', params:{ yok:true, date:d } }
+      : { action:'semptom-isaretle', params:{ symptomId:parsed.data.symptom.id, severity:parsed.data.severity, date:d } }];
+    if(parsed.kind === 'nap') return [{ action:'kestirme-ekle',
+      params:{ dk:parsed.data.dk, bas:parsed.data.bas || null, date:d } }];
+    if(parsed.kind === 'move') return [{ action:'seans-ekle',
       params:{ minutes:parsed.data.minutes,
-        exerciseId:parsed.data.exercise ? parsed.data.exercise.id : null, date } };
-    if(parsed.kind === 'lab') return { action:'olcum-gir',
-      params:{ rows:parsed.data.rows.map(r => ({ markerId:r.marker.id, value:r.value })), date } };
-    if(parsed.kind === 'meal') return { action:'ogun-ekle',
+        exerciseId:parsed.data.exercise ? parsed.data.exercise.id : null, date:d } }];
+    if(parsed.kind === 'lab'){
+      const rows = SP.Parse.rowsToSave ? SP.Parse.rowsToSave(parsed.data) : parsed.data.rows;
+      return rows.length ? [{ action:'olcum-gir',
+        params:{ rows:rows.map(r => ({ markerId:r.marker.id, value:r.value })), date:d } }] : [];
+    }
+    if(parsed.kind === 'meal') return [{ action:'ogun-ekle',
       params:{ items:parsed.data.items.map(i => ({ foodId:i.food.id, g:i.g, cert:i.cert })),
-        slot:slot || (SP.Ogun ? SP.Ogun.simdiki() : 'ara1'), date } };
-    return null;
+        slot:parsed.data.slot || slot || (SP.Ogun ? SP.Ogun.simdiki() : 'ara1'), date:d } }];
+    return [];
   }
+
+  /* Tek eylem isteyen eski çağıranlar için: ilk eylem. */
+  function quickToAction(parsed, date, slot){
+    return quickToActions(parsed, date, slot)[0] || null;
+  }
+
+  function gunEkle(iso, g){ return g ? U.iso(U.addDays(U.parse(iso), g)) : iso; }
 
   /* Serbest cümleden öneri üretir — MODEL GEREKMEZ.
 
@@ -79943,32 +80781,72 @@ SP.Proposals = (function(){
     const date = o.date || U.todayISO();
     const parcalar = yanCumleler(text);
     const oneriler = [], anlasilmayan = [], engellenen = [];
+    /* GÜN SÖZÜ SÜRER (2026-10-25): «dün 30 dakika yürüdüm ve 2 bardak su
+       içtim» iki parçası da dünündür; parça kendi gün sözünü söylerse
+       («bugün …») o geçer. «dün gece … uyudum» bugünün uykusudur ve
+       sonraki parçaya «dün» taşımaz. */
+    let sonGun = null;
 
     /* Sayısı bulunmuş ama ÖLÇÜM OLMAYAN parça («7 saat uyumadım», «yarın
        30 dakika yürüyeceğim») yazılmaz; nedeni ve sorulacak cümle
-       `engellenen`de döner (belgeler/ekip/HATALAR.md KR-1). */
+       `engellenen`de döner (belgeler/ekip/HATALAR.md KR-1). Anlaşılan ama
+       eksik parça (şiddeti söylenmemiş şikâyet, birimi uyuşmayan tahlil)
+       `eksik` notuyla anlaşılmayanlara gider: tahmin edilmez, söylenir. */
     function dene(p){
+      const engelOf = parsed => {
+        const e = SP.Quick.olcumEngeli ? SP.Quick.olcumEngeli(p, parsed) : LIFEOS.Olumsuz.olcumEngeli(p);
+        return e ? { engel:Object.assign({ metin:String(p).trim() }, e) } : null;
+      };
+      const z = SP.Quick.gunSozu ? SP.Quick.gunSozu(p) : { gun:null };
+
+      /* HAZIR ÖNCE (2026-10-25): Bugün kutusu gibi (app.js, core/hazir.js
+         söz 5). Palet, ofis sohbeti ve iPhone gelen kutusu da bulur. */
+      const hz = SP.Hazir && SP.Hazir.bul ? SP.Hazir.bul(p) : null;
+      if(hz){
+        const gun = z.gun != null ? z.gun : sonGun;
+        if(z.gun != null) sonGun = z.gun;
+        const params = { tur:hz.tur, hazirId:hz.hazir.id, date:gunEkle(date, gun) };
+        const slot = hz.tur === 'ogun' && SP.Quick.ogunSozu ? SP.Quick.ogunSozu(p) : null;
+        if(slot) params.slot = slot;
+        return engelOf(null) || { a:[{ action:'hazir-ekle', params }] };
+      }
+
       let parsed = null;
       try{ parsed = SP.Quick.parseHam(p); }catch(e){ parsed = null; }
-      const a = quickToAction(parsed, date, o.slot);
-      if(!a) return null;
-      const e = LIFEOS.Olumsuz.olcumEngeli(p);
-      return e ? { engel:Object.assign({ metin:String(p).trim() }, e) } : { a };
+      if(parsed){
+        if(parsed.gunSozu == null && sonGun != null) parsed.gun = sonGun;
+        else if(parsed.gunSozu != null && parsed.gunSurer !== false) sonGun = parsed.gun;
+      }else if(z.gun != null) sonGun = z.gun;
+      const a = quickToActions(parsed, date, o.slot);
+      if(!a.length){
+        if(parsed && parsed.kind === 'lab' && parsed.data.uyusmaz.length){
+          return engelOf(parsed) || { eksik:String(p).trim() + ' — ' + SP.Quick.uyusmazNotu(parsed.data.uyusmaz) };
+        }
+        return null;
+      }
+      const e = engelOf(parsed);
+      if(e) return e;
+      if(parsed.kind === 'symptom' && !parsed.data.yok && !parsed.data.severity){
+        return { eksik:String(p).trim() + ' — şiddet belirtilmedi («hafif», «orta» ya da «şiddetli» diye ekle)' };
+      }
+      return { a };
     }
 
     parcalar.forEach(p => {
       const r = dene(p);
       if(!r) anlasilmayan.push(p);
+      else if(r.eksik) anlasilmayan.push(r.eksik);
       else if(r.engel) engellenen.push(r.engel);
-      else oneriler.push(Object.assign(r.a, { kaynak:'rules', metin:p }));
+      else r.a.forEach(x => oneriler.push(Object.assign(x, { kaynak:'rules', metin:p })));
     });
 
     /* Tek parça hiç anlaşılmadıysa cümlenin TAMAMINI bir kez dene:
        bölme yanlış yerden olmuş olabilir. */
     if(!oneriler.length && !engellenen.length && parcalar.length > 1){
+      sonGun = null;
       const r = dene(text);
       if(r && r.engel) return { oneriler:[], anlasilmayan:[], engellenen:[r.engel] };
-      if(r) return { oneriler:[Object.assign(r.a, { kaynak:'rules', metin:String(text).trim() })],
+      if(r && r.a) return { oneriler:r.a.map(x => Object.assign(x, { kaynak:'rules', metin:String(text).trim() })),
         anlasilmayan:[], engellenen:[] };
     }
 
@@ -80173,7 +81051,10 @@ SP.Proposals = (function(){
      brand/ortak/hesap.js söz 20). iPhone Kısayollar, Apple Sağlık
      otomasyonu ya da Home Assistant «su 250» gönderir; sunucu satırı
      ANLAMAZ, burada kural motoru okur (fromText) ve her parça Onaylar'a
-     ÖNERİ olur. Ölçüm olduğu için hiçbir ayarda sormadan yazılmaz
+     ÖNERİ olur. SU EKLENİR (2026-10-25, Onaylar ajanından devir): beş
+     «su 250» satırı onaylanınca gün 1250 ml olur, 250 değil; önizleme
+     «+250 ml · toplam …» der. Kilo ve öteki ölçümler değer olarak yazılır.
+     Ölçüm olduğu için hiçbir ayarda sormadan yazılmaz
      (otomatikMi); kullanıcı «Kaydet»e basınca approve yazar, geri alınır.
 
      GÜN, satırın GÖNDERİLDİĞİ andır: 23:50'de gönderilip sabah işlenen su
@@ -80222,8 +81103,8 @@ SP.Proposals = (function(){
 
   return {
     KATALOG, eylem, katalogIdleri, catalogPrompt,
-    check, preview,
-    fromText, fromModel, yanCumleler, quickToAction,
+    check, preview, sirali,
+    fromText, fromModel, yanCumleler, quickToAction, quickToActions,
     propose, approve, reject, undo, clearResolved, disaridan,
     talep, otomatikMi, ayar, turAyari, SEVIYELER, MODLAR,
     pending, all, load, save, MAX,
@@ -80314,6 +81195,7 @@ SP.Palette = (function(){
 
      Ayni kapi: onaysiz hicbir sey yazilmaz, her kayit geri alinabilir. */
   let bekleyen = null;     /* { oneriler, anlasilmayan, metin } */
+  let acilisTarihi = null; /* önizlemenin tarih alanı hangi günle açıldı */
 
   /* `q` verilmezse paletin o anki sorgusu kullanilir. Disaridan verilmesi
      bu islevi paleti acmadan denenebilir yapar ve AYS'nin ayni isi yapan
@@ -80378,9 +81260,13 @@ SP.Palette = (function(){
     const K = SP.C;
     const { html, map, when } = SP.h;
 
+    /* SIRALI ÖNİZLEME (2026-10-25): öneriler saveQuick'in yazacağı sırayla
+       önizlenir; «su 250 ve su 250» iki kez «toplam 1.250 ml» diyordu,
+       kayıt 1500 yazıyordu. */
+    const sira = SP.Proposals.sirali(r.oneriler);
     const bloklar = r.oneriler.map((o, i) => {
       const e = SP.Proposals.eylem(o.action);
-      const pv = SP.Proposals.preview(o);
+      const pv = sira[i].pv;
       return html`
         <div class="qeblok">
           <div class="qeblok__bas">
@@ -80400,6 +81286,11 @@ SP.Palette = (function(){
     });
 
     const engel = r.engellenen || [];
+    /* Tarih alanı cümlenin günüyle açılır («dün 2 bardak su»; 2026-10-25).
+       Öneriler farklı günlere düşüyorsa bugünle açılır; dokunulmazsa her
+       öneri kendi gününe yazılır (saveQuick). */
+    const gunler = Array.from(new Set(r.oneriler.map(o => (o.params && o.params.date) || U.todayISO())));
+    acilisTarihi = gunler.length === 1 ? gunler[0] : U.todayISO();
     SP.UI.sheet({
       title:!r.oneriler.length ? 'Bir şey sormam gerek'
         : r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
@@ -80417,7 +81308,7 @@ SP.Palette = (function(){
           title:'Ölçüm diye yazmadığım kısım:',
           body:engel.map(e => '«' + e.metin + '» — ' + e.soru).join(' ') })),
         when(r.oneriler.length, () => K.Field({ label:'Tarih',
-          input:K.Input({ id:'qe-date', type:'date', value:U.todayISO() }) })),
+          input:K.Input({ id:'qe-date', type:'date', value:acilisTarihi }) })),
       ])),
       footer:String(html`${K.Button({ label:r.oneriler.length ? 'Vazgeç' : 'Tamam', act:'sheet-close' })}
         ${when(r.oneriler.length, () => K.Button({ label:r.oneriler.length === 1 ? 'Kaydet' : 'Hepsini kaydet',
@@ -80429,11 +81320,13 @@ SP.Palette = (function(){
   async function saveQuick(){
     if(!bekleyen) return;
     const el = document.getElementById('qe-date');
-    const tarih = (el && el.value) || U.todayISO();
+    const secilen = (el && el.value) || acilisTarihi || U.todayISO();
+    /* Alan değiştirildiyse seçilen gün hepsine; değilse her öneri kendi gününe. */
+    const degisti = secilen !== acilisTarihi;
 
     let yazilan = 0, dusen = 0, rota = null;
     for(const o of bekleyen.oneriler){
-      /* Tarih alt sayfada degistirilmis olabilir. */
+      const tarih = degisti ? secilen : ((o.params && o.params.date) || secilen);
       const oneri = Object.assign({}, o, { source:'istek',
         params:Object.assign({}, o.params, { date:tarih }) });
       const kayit = await SP.Proposals.propose(oneri);
@@ -80457,6 +81350,8 @@ SP.Palette = (function(){
     'olcum-gir':'labs', 'semptom-isaretle':'today', 'bolum-ac-kapa':'guide',
     /* Plan ve programı Bugün › Özet › Hedeflerim gösterir. */
     'plan-uygula':'today', 'program-ekle':'today',
+    /* Hazır öğün ya da antrenman Bugün'de görünür (2026-10-25). */
+    'hazir-ekle':'today',
   };
 
   function filtered(){
@@ -80764,7 +81659,12 @@ SP.Setup = (function(){
 /* Hatırlatmaların yüzü (core/hatirlat.js). Bugün ekranında vakti gelenler,
    Özet'te günün listesi, İlaç sekmesinde «Hatırlat» düğmesi — üçü de aynı
    düzenleme sayfasını açar. Eylemler her ekrandan çalışsın diye app.js
-   bunları genel eylemlere katar. */
+   bunları genel eylemlere katar.
+
+   2026-10-25 sürtünme turu: aynı saate düşen iki ve fazlası hatırlatma
+   için tek «Hepsini aldım» (her satır yine kendi «Geri al»ını taşır);
+   hazır antrenmana bağlı hareket hatırlatmasında «Yaptım» o seansı ekler
+   ve «Geri al» bırakır (core/hatirlat.js söz 5, 6). */
 
 window.SP = window.SP || {};
 
@@ -80786,9 +81686,31 @@ SP.HatirlatUI = (function(){
 
   function satir(r){
     return html`<div class="row between wrap gap-6 mt-6">
-      <span class="small"><b class="num">${r.saat}</b> ${r.ad}
+      <span class="small"><b class="num">${r.saat}</b> ${r.ad}${when(r.hazirAd, () => html`<span class="dim"> · ${r.hazirAd}</span>`)}
         ${when(r.durum === 'sonra', () => html`<span class="tiny dim"> · saati gelmedi</span>`)}</span>
       ${satirDugme(r)}</div>`;
+  }
+
+  /* Aynı saatte işaretlenmemiş iki ve fazlası satır varsa saatin başına tek
+     düğme. Yalnız ilaç/takviyeyse «Hepsini aldım», karışıksa «Hepsini
+     işaretle». Doz ve sayı gösterilmez. */
+  function hepsiDugme(saat, l){
+    const bekleyen = l.filter(r => r.durum !== 'yapildi');
+    if(bekleyen.length < 2) return '';
+    const etiket = bekleyen.every(r => r.tur === 'ilac') ? 'Hepsini aldım' : 'Hepsini işaretle';
+    return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny dim"><b class="num">${saat}</b> · ${bekleyen.length} hatırlatma</span>
+      ${K.Button({ label:etiket, size:'sm', tone:bekleyen.some(r => r.durum === 'vakti') ? 'primary' : '', act:'ht-hepsi',
+        aria:etiket + ', ' + saat + ', ' + bekleyen.length + ' hatırlatma',
+        data:{ 'data-k':bekleyen.map(r => r.anahtar).join(',') } })}</div>`;
+  }
+  function satirlar(l){
+    const saatler = [];
+    l.forEach(r => { if(saatler.indexOf(r.saat) < 0) saatler.push(r.saat); });
+    return html`${map(saatler, saat => {
+      const g = l.filter(r => r.saat === saat);
+      return html`${hepsiDugme(saat, g)}${map(g, satir)}`;
+    })}`;
   }
 
   /* Bugün ekranının başı: yalnız VAKTİ GELMİŞ, işaretlenmemiş olanlar. */
@@ -80797,7 +81719,7 @@ SP.HatirlatUI = (function(){
     const l = H().bugun().filter(r => r.durum === 'vakti');
     if(!l.length) return null;
     return K.Entry({ label:'Hatırlatma', meta:l.length + ' bekliyor', wide:true,
-      body:html`${map(l, satir)}` });
+      body:satirlar(l) });
   }
 
   /* Özet sekmesi: günün bütün hatırlatmaları + düzenleme. */
@@ -80807,11 +81729,12 @@ SP.HatirlatUI = (function(){
     return K.Entry({ label:'Hatırlatmalar', meta:l.length ? l.length + ' saat' : 'yok',
       note:'Yalnız senin yazdığın saatler. Sistem saat ya da doz önermez.',
       action:K.Button({ label:l.length ? 'Düzenle' : 'Hatırlatma ekle', size:'sm', act:'ht-ac' }),
-      body:l.length ? html`${map(l, satir)}`
+      body:l.length ? satirlar(l)
         : html`<p class="small dim">İlaç ya da takviye, su ve hareket için saat koyabilirsin.</p>` });
   }
 
   let taslak = { tur:'su', medId:null };
+  const hazirlar = () => (SP.Hazir ? SP.Hazir.antrenmanlar() : []);
 
   function sayfa(){
     const d = H().durum();
@@ -80832,6 +81755,11 @@ SP.HatirlatUI = (function(){
         K.Field({ label:'Saatler', hint:'virgülle ayır — örn. 08:00, 21:00',
           input:K.Input({ id:'ht-saat', value:onceki ? onceki.saatler.join(', ') : '',
             placeholder:taslak.tur === 'su' ? '10:00, 13:00, 16:00' : taslak.tur === 'olcum' ? '07:30' : '08:00' }) }),
+        /* Söz 6: hareket hatırlatması isteğe bağlı bir hazır antrenmana bağlanır. */
+        when(taslak.tur === 'hareket' && hazirlar().length, () => K.Field({ label:'«Yaptım» deyince ekle',
+          hint:'Seçersen Bugün\'de «Yaptım» bu antrenmanı bugüne ekler; «Geri al» kaldırır.',
+          input:K.Select({ id:'ht-hazir', value:(onceki && onceki.hazirId) || '',
+            options:[{ value:'', label:'Hiçbiri — yalnız işaret' }].concat(hazirlar().map(a => ({ value:a.id, label:a.ad }))) }) })),
         html`<div id="ht-hata" class="small" role="alert"></div>`,
         when(!ilaclar.length, () => html`<p class="tiny dim">İlaç hatırlatması için önce
           Testler › İlaç sekmesinden kullandığın şeyi kaydet.</p>`),
@@ -80870,7 +81798,9 @@ SP.HatirlatUI = (function(){
     },
     async 'ht-kaydet'(){
       const e = document.getElementById('ht-saat');
-      const r = await H().ekle({ tur:taslak.tur, medId:taslak.medId, saatler:e ? e.value : '' });
+      const hz = document.getElementById('ht-hazir');
+      const r = await H().ekle({ tur:taslak.tur, medId:taslak.medId, saatler:e ? e.value : '',
+        hazirId:taslak.tur === 'hareket' && hz ? hz.value : undefined });
       if(!r.ok){
         const h = document.getElementById('ht-hata');
         if(h) h.textContent = r.why;
@@ -80888,8 +81818,23 @@ SP.HatirlatUI = (function(){
       UI.toast('Hatırlatma silindi', { undo:async () => { await H().geriKoy(r.geri); yenile(); } });
     },
     async 'ht-isaret'(el){
-      await H().isaretle(el.dataset.k, el.dataset.v === '1');
+      if(el.dataset.v === '1'){
+        const r = await H().yaptim(el.dataset.k);
+        yenile();
+        if(r.ok && r.seans) UI.toast('«' + r.seans.ad + '» bugüne eklendi', { undo:async () => { await r.geriAl(); yenile(); } });
+        return;
+      }
+      const kalkti = await H().isaretle(el.dataset.k, false);
       yenile();
+      if(kalkti) UI.toast('İşaret ve eklenen seans kaldırıldı');
+    },
+    async 'ht-hepsi'(el){
+      const l = String(el.dataset.k || '').split(',').filter(Boolean);
+      const r = await H().isaretleHepsi(l);
+      yenile();
+      if(!r.isaretlenen.length) return;
+      UI.toast(r.isaretlenen.length + ' hatırlatma işaretlendi' + (r.seanslar.length ? ' · seans eklendi' : ''),
+        { undo:async () => { await r.geriAl(); yenile(); } });
     },
     async 'bildirim-tur'(el){ bildirimYenile(el, 'bildirim-tur'); },
     async 'bildirim-sessiz'(el){ bildirimYenile(el, 'bildirim-sessiz'); },
@@ -81107,12 +82052,29 @@ SP.Screens.today = (function(){
 
      «Şikâyet yok» ile «girilmemiş» ayrı şeylerdir: işaretlemeden
      kaydeden bir gün ikincisidir ve sistem bunu karıştırmaz. */
+  /* Dünün şikâyetleri (yalnız katalogdaki kimlikler), bu gün boşsa; yoksa null. */
+  function dunkuSikayetler(d){
+    const v = M.vitalsOf(d);
+    if(Object.keys(SP.Symptom.ofDay(d)).length || (v && v.symptomsLogged)) return null;
+    const dun = SP.Symptom.ofDay(U.iso(U.addDays(U.parse(d), -1)));
+    const out = {};
+    Object.keys(dun).forEach(id => { if(SP.SYMPTOM_BY_ID[id] && dun[id]) out[id] = dun[id]; });
+    return Object.keys(out).length ? out : null;
+  }
+
   function symptomEntry(){
     const d = shownDate();
     const secili = SP.Symptom.ofDay(d);
     const v = M.vitalsOf(d);
     const kadin = (S.profile || {}).sex === 'female';
     const w = SP.Symptom.window(30);
+    /* DÜNKÜ ŞİKÂYETLER SÜRÜYOR (2026-10-25; kullanıcı: «spi için daha
+       işlevli veri girişi, sürtünmeyi azaltacak teknikler ile daha güzel
+       yap»). Süren bir şikâyeti her gün yeniden işaretlemek üç-dört
+       dokunuştu. Düğme yalnız dün şikâyet varken ve bu gün hiç
+       girilmemişken çıkar («şikâyet yok» denmiş günde çıkmaz). Bu
+       kullanıcının BEYANIDIR, teşhis değil: şiddetleri olduğu gibi taşır. */
+    const dunku = dunkuSikayetler(d);
 
     return K.Entry({
       label:'Bugün bir şikâyetin var mı?', hint:'not-sikayet',
@@ -81120,7 +82082,8 @@ SP.Screens.today = (function(){
         ? Object.keys(secili).length + ' işaretli'
         : (v && v.symptomsLogged ? 'şikâyet yok' : 'girilmedi'),
       /* Açıklama ⓘ'de (hints.js «not-sikayet»): sıkı ölçüde sabit not yok. */
-      action:html`${K.Button({ label:'Şikâyetim yok', size:'sm', act:'no-symptoms' })}`,
+      action:html`${when(dunku, () => K.Button({ label:'Dünkü şikâyetler sürüyor', size:'sm', act:'dunku-sikayet' }))}
+        ${K.Button({ label:'Şikâyetim yok', size:'sm', act:'no-symptoms' })}`,
       body:html`
         ${map(SP.SYMPTOM_GROUPS, g => html`
           <div class="symgrp">
@@ -81813,6 +82776,12 @@ SP.Screens.today = (function(){
      `save-vitals` ekranda olmayan alana dokunmaz. */
   const HIZLI_ALAN = ['sleep', 'rhr', 'hrv', 'weight'];
 
+  /* d gününden ÖNCEKİ son ölçüm; hiç yoksa null (uydurulmaz). */
+  function sonDeger(alan, d){
+    const t = Object.keys(S.vitals || {}).filter(x => x < d && S.vitals[x] && S.vitals[x][alan] != null).sort().pop();
+    return t ? Number(S.vitals[t][alan]) : null;
+  }
+
   function OlcumKutusu(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
@@ -81823,11 +82792,20 @@ SP.Screens.today = (function(){
          yoran şeyler var»): Bugün'ün dört alanı simgesiz, yalnız etiket —
          renkli simgeler «Günü düzenle»nin tam formunda durur. «Boş alan
          sıfır sayılmaz» cümlesi ekranın ⓘ kartında (lede). */
-      govde:html`<div class="grid-form">${map(alanlar, f => K.Field({
-          label:f.label,
-          input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
-            min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
-        }))}</div>
+      /* SON DEĞER YER TUTUCU (2026-10-25; kullanıcı: «spi için daha
+         işlevli veri girişi, sürtünmeyi azaltacak teknikler ile daha güzel
+         yap»): boş alanda gösterilen günden önceki son ölçüm gri yazar
+         («son: 78,2»). Yalnız ipucudur: alanın değeri boş kalır, Kaydet
+         onu yazmaz (save-vitals yalnız değişen alanı yazar). */
+      govde:html`<div class="grid-form">${map(alanlar, f => {
+          const son = v[f.id] == null ? sonDeger(f.id, d) : null;
+          return K.Field({
+            label:f.label,
+            input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
+              min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id],
+              placeholder:son == null ? null : 'son: ' + U.fmtNum(son) }),
+          });
+        })}</div>
         ${KestirmeSatiri(d, false)}
         <div id="suphe-yuva" aria-live="polite"></div>
         <div class="row wrap gap-8 mt-8">
@@ -81908,16 +82886,153 @@ SP.Screens.today = (function(){
       body:html`<div class="stack-sm">${raw(uyku || '')}${raw(kilo || '')}</div>` });
   }
 
-  /* 073 TEK DOKUNUŞ: su bardağı (250 ml). Asgari günün eşiği 2.000 ml =
-     8 bardak (core/calc.js). Küçük aksiyon: sormadan yazar, «Geri al». */
-  const BARDAK_ML = 250, SU_ESIK = 2000;
+  /* 073 SU — «n bardağa ayarla» (2026-10-25; kullanıcı: «spi için daha
+     işlevli veri girişi, sürtünmeyi azaltacak teknikler ile daha güzel
+     yap»). Önce bütün bardak sırası TEK düğmeydi (vitrin tekDokunus) ve
+     her dokunuş bir bardak ekliyordu: 2 000 ml sekiz dokunuştu. Şimdi her
+     bardak kendi değeridir: n'inci bardağa dokunmak günün suyunu n bardak
+     yapar; en üstteki dolu bardağa yeniden dokunmak bir bardak azaltır.
+
+     Denetim tek: bardaklardan çizilmiş bir radio grubu (role="radiogroup",
+     düğme değil — Bugün'ün 14 düğme bütçesine girmez, bugun.test). Klavyede
+     tek sekme durağı; oklar bir bardak artırır ya da azaltır, Boşluk/Enter
+     dokunmakla aynıdır (suKlavye). Ortak tekDokunus AYS/ESP vitrin
+     testlerinde de durduğu için ona dokunulmadı; çizim bu ekranda.
+
+     Bardak ölçüsü SP.Quick.BARDAK_ML (yoksa 250 ml). Asgari günün eşiği
+     2 000 ml (core/calc.js). Dokunulmamış gün null kalır; bir bardaktan
+     aşağı inmek de «girilmedi»dir, 0 ml değil (state.js normVitals: günde
+     0 ml su ölçüm sayılmaz). Küçük aksiyon: sormadan yazar, «Geri al».
+     HATA (düzeldi): kutu todayISO()'yu okuyup yazıyordu; ölçüm ve his
+     kutuları gösterilen güne yazar. Artık su da shownDate()'e. */
+  const SU_ESIK = 2000, SU_EN_COK = 8000;
+  function bardakMl(){
+    const b = SP.Quick && Number(SP.Quick.BARDAK_ML);
+    return b > 0 && isFinite(b) ? b : 250;
+  }
+  function suDurumu(d){
+    const b = bardakMl(), v = M.vitalsOf(d);
+    const ml = v && v.water != null ? Number(v.water) : null;
+    const hedef = Math.ceil(SU_ESIK / b);
+    const adet = ml == null ? null : Math.floor(ml / b);
+    return { b, ml, hedef, adet };
+  }
+  /* Bir bardağa dokunmanın yazacağı ml (2026-10-25 düzeltmesi). HATA:
+     yazılan hep n × bardaktı; 1 100 ml'de (adet 4) seçili bardağa dokunmak
+     ya da sol ok 750 yazıyor, ölçülmüş 100 ml sessizce siliniyordu.
+     Kural: niyet ±1 bardaksa (seçili bardak ya da bir alttaki = bir eksik,
+     bir üstteki = bir fazla) gerçek ml'ye bir bardak eklenir/çıkarılır;
+     bardağa denk gelmeyen kısım korunur. Komşu olmayan bardak açık bir
+     «n bardak» seçimidir: n × bardak yazılır; etiketi o ml'yi söyler ve
+     toast «Geri al» taşır, hiçbir şey sessizce gitmez. Bir bardaktan
+     aşağısı null («girilmedi»), asla 0. */
+  function suSonrasi(s, n){
+    const { b, ml, adet } = s, a = adet || 0, simdi = ml || 0;
+    const yeni = (adet >= 1 && (n === adet || n === adet - 1)) ? simdi - b
+      : n === a + 1 ? simdi + b : n * b;
+    return yeni < b ? null : yeni;
+  }
+  const BARDAK_SVG = dolu => '<svg viewBox="0 0 24 30" aria-hidden="true"><path d="M4 3h16l-2 24H6z" fill="' + (dolu ? 'var(--spi)' : 'none')
+    + '" stroke="' + (dolu ? 'var(--spi)' : 'var(--vk-ink4)') + '" stroke-width="1.5"/></svg>';
   function SuKutusu(){
     if(!VT()) return '';
-    const v = M.vitalsOf(U.todayISO());
-    const ml = v && v.water != null ? Number(v.water) : null;
-    return vkutu('Su', ml == null ? 'girilmedi' : U.fmtNum(ml) + ' ml', VT().tekDokunus({ hedef:SU_ESIK / BARDAK_ML,
-      adet:ml == null ? null : Math.floor(ml / BARDAK_ML), act:'su-ekle', ad:'Bir bardak su (250 ml)',
-      metin:ml == null ? null : Math.floor(ml / BARDAK_ML) + ' / ' + (SU_ESIK / BARDAK_ML) + ' bardak · ' + U.fmtNum(ml) + ' ml' }));
+    const d = shownDate();
+    const s = suDurumu(d), { b, ml, hedef, adet } = s;
+    const n = adet || 0;
+    /* Hedef dolunca bir bardak daha çizilir: hedefin ötesi de yazılabilsin. */
+    const sayi = Math.min(Math.max(hedef, n + (n >= hedef ? 1 : 0)), Math.floor(SU_EN_COK / b));
+    const gunAdi = d === U.todayISO() ? 'Bugün' : U.fmtDate(d);
+    const grupAd = ml == null
+      ? gunAdi + ' su girilmedi. Hedef ' + hedef + ' bardak; bir bardak ' + U.fmtNum(b) + ' ml.'
+      : gunAdi + ' ' + U.fmtNum(ml) + ' ml su: ' + adet + ' / ' + hedef + ' bardak.';
+    const bardaklar = [];
+    for(let i = 1; i <= sayi; i++){
+      const secili = adet != null && adet >= 1 && i === adet;
+      const odak = secili || ((adet == null || adet < 1) && i === 1);
+      /* Etiket dokunuşun yazacağını söyler; seçili bardak gerçek ml'yi (2026-10-25). */
+      const sonra = secili ? ml : suSonrasi(s, i), etiketMl = sonra == null ? i * b : sonra;
+      bardaklar.push('<span role="radio" class="su-bardak" data-act="su-ayarla" data-n="' + i + '" data-i="' + i + '"'
+        + ' tabindex="' + (odak ? '0' : '-1') + '" aria-checked="' + (secili ? 'true' : 'false') + '"'
+        + ' aria-label="' + SP.h.esc(i + ' bardak, ' + U.fmtNum(etiketMl) + ' ml' + (secili ? '; yeniden dokunursan bir bardak azalır' : '')) + '"'
+        + ' style="display:inline-flex;cursor:pointer;border-radius:4px">' + BARDAK_SVG(i <= n) + '</span>');
+    }
+    const ic = '<div class="vk" data-oz="073"><div class="d x35">'
+      + '<div class="bd" role="radiogroup" data-oz-su aria-label="' + SP.h.esc(grupAd) + '" style="flex-wrap:wrap">' + bardaklar.join('') + '</div>'
+      + '<div class="sy">' + SP.h.esc(ml == null ? 'Girilmedi · kaç bardak içtiysen o bardağa dokun'
+        : adet + ' / ' + hedef + ' bardak · ' + U.fmtNum(ml) + ' ml') + '</div></div></div>';
+    return vkutu('Su', ml == null ? 'girilmedi' : U.fmtNum(ml) + ' ml', ic);
+  }
+
+  /* Vakti gelmiş (saati geçmiş, işaretlenmemiş) hatırlatmaları kapatır
+     (core/hatirlat.js bugun + isaretle). Yön tek: ÖLÇÜM işareti kapatır;
+     işaret ölçüm yazmaz (hatirlat söz 4). Yalnız bugün: hatırlatmalar
+     günün saatleridir. Döner: kapatılan anahtarlar (geri al için). */
+  function bugunSimdi(){
+    const n = new Date(), t = U.parse(U.todayISO());
+    t.setHours(n.getHours(), n.getMinutes(), 0, 0);
+    return t;
+  }
+  async function hatirlatKapat(tur, d, tek){
+    const H = SP.Hatirlat;
+    if(!H || !H.bugun || !H.isaretle || d !== U.todayISO()) return [];
+    let vakti = H.bugun(bugunSimdi()).filter(x => x.tur === tur && x.durum === 'vakti');
+    /* Su (2026-10-25): bir artış en çok BİR işaret koyar, vakti gelmişlerin
+       en sonuncusu (bugun() saate göre sıralı döner). Önce hepsi kapanıyordu:
+       10:00, 13:00, 16:00 ve 17:00'de tek bardak, kullanıcının yapmadığı üç
+       «yapıldı» kaydıydı (hatirlat söz 4). */
+    if(tek) vakti = vakti.slice(-1);
+    for(const x of vakti) await H.isaretle(x.anahtar, true, d);
+    return vakti.map(x => x.anahtar);
+  }
+  async function hatirlatAc(anahtarlar, d){
+    for(const k of anahtarlar || []) await SP.Hatirlat.isaretle(k, false, d);
+  }
+
+  /* Suyu yazar; artınca vakti gelen su hatırlatması kapanır. Geri al:
+     önceki değer ve kapatılan işaretler. */
+  async function suYaz(d, ml){
+    const { b, hedef, ml:once } = suDurumu(d);
+    const sonra = ml == null || ml <= 0 ? null : Math.min(ml, SU_EN_COK);
+    await M.saveVitals(d, { water:sonra });
+    const kapanan = sonra != null && sonra > (once || 0) ? await hatirlatKapat('su', d, true) : [];
+    SP.App.render();
+    UI.toast(sonra == null ? 'Su girilmedi olarak bırakıldı'
+      : 'Su · ' + Math.floor(sonra / b) + ' / ' + hedef + ' bardak (' + U.fmtNum(sonra) + ' ml)',
+      { undo:async () => { await M.saveVitals(d, { water:once }); await hatirlatAc(kapanan, d); SP.App.render(); } });
+  }
+
+  /* Radio grubunun klavyesi: oklar bir bardak, Boşluk/Enter dokunuş.
+     Odak önce hedef bardağa taşınır; yeniden çizim onu korur (app.js
+     focusSnapshot data-act + data-i). Belgedeki satır gezinmesi (↑/↓) bu
+     grupta çalışmaz: olay burada durur. */
+  function suKlavye(){
+    const g = document.querySelector('[role="radiogroup"][data-oz-su]');
+    if(!g || g.dataset.bagli) return;
+    g.dataset.bagli = '1';
+    g.addEventListener('keydown', e => {
+      const el = e.target.closest && e.target.closest('[data-act="su-ayarla"]');
+      if(!el) return;
+      const d = shownDate(), s = suDurumu(d), adet = s.adet, n = adet || 0;
+      let hedef = null;
+      if(e.key === 'ArrowRight' || e.key === 'ArrowUp') hedef = n + 1;
+      else if(e.key === 'ArrowLeft' || e.key === 'ArrowDown') hedef = n - 1;
+      else if(e.key === ' ' || e.key === 'Enter'){
+        e.preventDefault(); e.stopPropagation();
+        /* ARIA radyo deseni: seçili radyoda Boşluk/Enter hiçbir şey yapmaz
+           (2026-10-25 düzeltmesi; önce bir bardak siliyordu). */
+        if(adet >= 1 && Number(el.dataset.n) === adet) return;
+        handle['su-ayarla'](el); return;
+      }
+      if(hedef == null) return;
+      e.preventDefault(); e.stopPropagation();
+      if(hedef < 1 && adet == null) return;          // girilmemiş gün zaten boş
+      const yeni = g.querySelector('[data-n="' + Math.max(1, hedef) + '"]');
+      if(yeni) yeni.focus();
+      /* Oklar gerçek ml'ye bir bardak ekler/çıkarır (suSonrasi kuralı);
+         bir bardaktan aşağısı null. */
+      const yeniMl = hedef > n ? (s.ml || 0) + s.b : (s.ml || 0) - s.b;
+      suYaz(d, yeniMl < s.b ? null : yeniMl);
+    });
   }
 
   /* 074 ENERJİ ÖLÇEĞİ: «Bugün nasıl hissediyorsun?» — günün hissi, beyan. */
@@ -82457,15 +83572,31 @@ SP.Screens.today = (function(){
       S.ui.mealDate = el.dataset.date === U.todayISO() ? null : el.dataset.date;
       SP.App.render();
     },
+    /* Bir bardak ekler (eski tek dokunuş; bildirim ve betikler için
+       duruyor). Gösterilen güne yazar (2026-10-25 düzeltmesi). */
     async 'su-ekle'(){
-      const d = U.todayISO();
+      const d = shownDate();
+      const { b, ml } = suDurumu(d);
+      await suYaz(d, (ml || 0) + b);
+    },
+    /* n'inci bardak: günü n bardak yapar; en üstteki doluysa bir azaltır.
+       ±1 bardak gerçek ml'nin üstünden işler (suSonrasi, 2026-10-25). */
+    async 'su-ayarla'(el){
+      const n = Math.floor(Number(el && el.dataset && el.dataset.n));
+      if(!(n >= 1)) return;
+      const d = shownDate();
+      await suYaz(d, suSonrasi(suDurumu(d), n));
+    },
+    async 'dunku-sikayet'(){
+      const d = shownDate();
+      const dunku = dunkuSikayetler(d);
+      if(!dunku){ SP.App.render(); return; }
       const v = M.vitalsOf(d);
-      const once = v && v.water != null ? Number(v.water) : null;
-      const sonra = (once || 0) + BARDAK_ML;
-      await M.saveVitals(d, { water:sonra });
+      const once = { symptoms:Object.assign({}, (v && v.symptoms) || {}), symptomsLogged:!!(v && v.symptomsLogged) };
+      await M.saveVitals(d, { symptoms:Object.assign({}, dunku), symptomsLogged:true });
       SP.App.render();
-      UI.toast('Su eklendi · ' + Math.floor(sonra / BARDAK_ML) + ' / ' + (SU_ESIK / BARDAK_ML) + ' bardak',
-        { undo:async () => { await M.saveVitals(d, { water:once }); SP.App.render(); } });
+      UI.toast('Dünkü ' + Object.keys(dunku).length + ' şikâyet bu güne yazıldı',
+        { undo:async () => { await M.saveVitals(d, once); SP.App.render(); } });
     },
     async tus(el){
       const k = el.dataset.k;
@@ -82542,12 +83673,22 @@ SP.Screens.today = (function(){
       const note = document.getElementById('v-note');
       if(note && degisti(note)) patch.note = note.value.trim();
       /* 088: tartının KAYIT ANI (yalnız bugün girilen ve değişen tartı). */
-      const eski = M.vitalsOf(shownDate());
-      if(patch.weight != null && shownDate() === U.todayISO() && (!eski || eski.weight !== patch.weight)) patch.weightAt = new Date().toISOString();
+      const d = shownDate();
+      const eski = M.vitalsOf(d);
+      if(patch.weight != null && d === U.todayISO() && (!eski || eski.weight !== patch.weight)) patch.weightAt = new Date().toISOString();
       tusTampon = '';
-      await M.saveVitals(shownDate(), patch);
+      /* GERİ AL (2026-10-25; kullanıcı: «spi için daha işlevli veri
+         girişi, sürtünmeyi azaltacak teknikler ile daha güzel yap»): yalnız
+         yazılan alanların önceki değeri saklanır; geri al onları geri koyar
+         ve bu kaydın kapattığı tartı hatırlatmasını yeniden açar. */
+      const onceki = {};
+      Object.keys(patch).forEach(k => { onceki[k] = eski && eski[k] !== undefined ? eski[k] : (k === 'note' ? '' : null); });
+      await M.saveVitals(d, patch);
+      /* Kaydedilen tartı vakti gelen «sabah ölçümü» hatırlatmasını kapatır. */
+      const kapanan = patch.weight != null ? await hatirlatKapat('olcum', d) : [];
       const flags = M.openFlags().filter(f => !f.ack);
-      UI.toast(flags.length ? 'Kaydedildi — ' + flags.length + ' kırmızı bayrak açık' : 'Kaydedildi');
+      UI.toast(flags.length ? 'Kaydedildi — ' + flags.length + ' kırmızı bayrak açık' : 'Kaydedildi',
+        { undo:async () => { await M.saveVitals(d, onceki); await hatirlatAc(kapanan, d); SP.App.render(); } });
       SP.App.render();
     },
   
@@ -82667,6 +83808,8 @@ SP.Screens.today = (function(){
        düğme değil, «Bugün» widget'ının ilk maddesidir. */
     actions(){ return ''; },
     render, handle,
+    /* Su bardaklarının klavyesi (radio grubu) her çizimden sonra bağlanır. */
+    afterRender:suKlavye,
     /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */
     ayrinti:{
       id:'gun',
@@ -82788,12 +83931,19 @@ SP.Screens.planlar = (function(){
     </div>`;
     const b = HP().bugun(p, iso), u = HP().uyum(p, iso);
     const maddeli = tur === 'su' || tur === 'serbest';
+    /* 2026-10-25: hareket planında bugünün satırından tek dokunuşla seans
+       (core/haftaplan.js hareketYaptim); yazıldıysa «Geri al». */
+    const hareketGunu = tur === 'hareket' && !!(p.gunler || [])[HP().gunNo(iso)];
+    const plandan = hareketGunu ? HP().planSeansi(p, iso) : null;
     return html`<div class="hp-satir">
       ${simge(tur)}
-      <div class="hp-satir__metin"><b>${p.ad || t.ad}</b><span>${b.metin}${etiket(b.etiket)}</span>
+      <div class="hp-satir__metin"><b>${p.ad || t.ad}</b><span>${b.metin}${etiket(b.etiket)}${when(plandan, () => html` · <span class="dim">kaydedildi</span>`)}</span>
         <small>${u.metin}${etiket(u.etiket)}</small>
         ${when(maddeli, () => maddeKarolari(p, iso))}</div>
       <div class="hp-satir__dug">
+        ${when(hareketGunu, () => plandan
+          ? K.Button({ label:'Geri al', size:'sm', tone:'ghost', act:'hp-hareket-geri', data:{ 'data-id':p.id }, aria:'Geri al: bugünün plan seansını sil' })
+          : K.Button({ label:'Yaptım', size:'sm', tone:'primary', act:'hp-hareket-yap', data:{ 'data-id':p.id }, aria:'Yaptım: ' + b.metin + ' seans olarak yazılır' }))}
         ${when(maddeli && (p.maddeler || []).length, () => K.Button({ label:'Takip', size:'sm', act:'hp-takip', data:{ 'data-id':p.id } }))}
         ${K.Button({ label:'Düzenle', size:'sm', tone:'ghost', act:'hp-ac', data:{ 'data-tur':tur, 'data-id':p.id } })}
       </div>
@@ -83103,6 +84253,18 @@ SP.Screens.planlar = (function(){
       UI.closeSheet();
       UI.toast((eski && eski.ad || 'Plan') + ' silindi', { undo:async () => { await HP().kaydet(eski); SP.App.render(); } });
       SP.App.render();
+    },
+    async 'hp-hareket-yap'(el){
+      const p = HP().bulId(el.dataset.id);
+      const r = await HP().hareketYaptim(p, SP.U.todayISO());
+      SP.App.render();
+      if(!r.ok){ UI.toast(r.why); return; }
+      UI.toast(r.ad + ' seans olarak yazıldı', { undo:async () => { await r.geriAl(); SP.App.render(); } });
+    },
+    async 'hp-hareket-geri'(el){
+      const r = await HP().hareketGeriAl(HP().bulId(el.dataset.id), SP.U.todayISO());
+      SP.App.render();
+      UI.toast(r.ok ? 'Plan seansı silindi' : r.why);
     },
     async 'hp-isaret'(el){
       const p = HP().bulId(el.dataset.id);
@@ -83468,12 +84630,25 @@ SP.Screens.labs = (function(){
     /* Yalnız hesaplanan ölçümler forma girilmez — onları elle yazmak
        formülü ezmek olurdu. Ama LDL ve eGFR hem laboratuvarda ölçülür
        hem hesaplanır; onlar formda durur ve girilen değer hesabı ezer. */
-    const list = SP.BIOMARKERS.filter(b => {
+    const list0 = SP.BIOMARKERS.filter(b => {
       const d = SP.DERIVED[b.id];
       return !d || d.measured;
     }).filter(b => !q
       || b.name.toLocaleLowerCase('tr-TR').indexOf(q) >= 0
       || (b.aliases || []).some(a => a.toLocaleLowerCase('tr-TR').indexOf(q) >= 0));
+    /* 2026-10-25: sabitlenen ölçümler (sabitleme sırasıyla) ve son testte
+       ÖLÇÜLMÜŞ olanlar listenin başına gelir; gerisi katalog sırasında
+       kalır. Yalnız sıra değişir: kutular boştur, son değer yer tutucudur. */
+    const pins = M.pinnedIds ? M.pinnedIds() : [];
+    const son = S.labs.length ? S.labs[S.labs.length - 1].values || {} : {};
+    const derece = b => {
+      const p = pins.indexOf(b.id);
+      if(p >= 0) return p;
+      return son[b.id] && son[b.id].cert === 'measured' ? pins.length : pins.length + 1;
+    };
+    const list = list0.map((b, i) => [b, i])
+      .sort((x, y) => derece(x[0]) - derece(y[0]) || x[1] - y[1]).map(x => x[0]);
+    const onde = list.filter(b => derece(b) <= pins.length).length;
 
     const filled = Object.keys(draft.values).length;
 
@@ -83512,7 +84687,8 @@ SP.Screens.labs = (function(){
       }),
 
       K.Entry({
-        label:'Değerler', hint:'lab-entry', meta:list.length + ' satır',
+        label:'Değerler', hint:'lab-entry',
+        meta:list.length + ' satır' + (onde ? ' · sabitlenenler ve son test üstte' : ''),
         action:K.Input({ id:'entry-q', value:S.ui.labQuery || '',
           placeholder:'Ölçüm ara…', aria:'Test girişinde ölçüm ara', change:'lab-query', debounce:200 }),
         body:html`
@@ -84330,14 +85506,13 @@ SP.Screens.labs = (function(){
         K.Drop({ act:'lab-file', label:'Rapor dosyası ya da fotoğrafı', kamera:{},
           icon:'file', accept:'.txt,.csv,.md,image/*',
           hint:'Metin dosyası modelsiz okunur · fotoğraf için model gerekir' }),
+        /* 2026-10-25: tarih ve laboratuvar alanı buradan önizlemeye taşındı.
+           Dosya bırakma kutusu tarihin üstünde duruyordu ve tarih dosya
+           seçildiği an okunuyordu: önce dosyayı bırakan bugünün tarihine
+           yazıyordu. Tarih artık önizlemede, kaydetme anında okunur. */
         K.Notice({ tone:'info', body:'Ayıklayıcı emin olamadığı satırı atmaz. '
-          + 'Eşleşmeyen satırlar aşağıda listelenir; istersen elle bağlarsın.' }),
-        html`<div class="cols-2">
-          ${K.Field({ label:'Test tarihi',
-            input:K.Input({ id:'paste-date', type:'date', value:draft.date }) })}
-          ${K.Field({ label:'Laboratuvar (isteğe bağlı)',
-            input:K.Input({ id:'paste-lab', placeholder:'Hangi laboratuvar?' }) })}
-        </div>`,
+          + 'Sonraki adımda tarihi ve açlık durumunu denetlersin; eşleşmeyen '
+          + 'satırları istersen bir ölçüme bağlarsın.' }),
         K.Field({ label:'Rapor metni',
           input:html`<div class="withmic">
             ${K.Textarea({ id:'paste-text', rows:9,
@@ -84350,33 +85525,133 @@ SP.Screens.labs = (function(){
     });
   }
 
+  /* Önizlemenin oturum alanları yeniden çizimden ÖNCE okunur: bir satırın
+     tikini değiştirmek yazılmış tarihi ya da laboratuvarı geri almasın. */
+  function pvOku(){
+    if(!preview) return;
+    const d = document.getElementById('pv-date');
+    if(d && d.value) preview.date = d.value;
+    const l = document.getElementById('pv-lab');
+    if(l) preview.lab = String(l.value || '').trim();
+  }
+
+  /* Yeni önizlemenin oturum alanları: metinden okunan tarih öneridir,
+     yoksa giriş formundaki tarih; açlık hep «Bilmiyorum»dan başlar. */
+  function pvBasla(p){
+    p.unmatched = p.unmatched || [];
+    p.date = p.dateGuess || draft.date || U.todayISO();
+    p.lab = draft.lab || '';
+    p.fasting = 'unknown';
+  }
+
+  function pvNot(p){
+    const n = p.rows.length;
+    return n + ' değer eşleşti'
+      + (p.unmatched.length ? ', ' + p.unmatched.length + ' satır eşleşmedi' : '') + '.';
+  }
+
+  const ACLIK_SECENEK = [
+    { value:'unknown', label:'Bilmiyorum' },
+    { value:'yes', label:'Aç' },
+    { value:'no', label:'Tok' }];
+
   function previewSheet(){
     const p = preview;
+    const ac = p.fasting || 'unknown';
+    /* 2026-10-25: hedef oturum ve satır durumları tarih ve açlıkla her
+       çizimde yeniden hesaplanır; kayıt da aynı planı kullanır. */
+    const plan = SP.Parse.pastePlan(p, p.date, ac);
+    const kaydedilecek = plan.yazilacak;
+    const degisen = plan.satirlar.filter(s => s.durum === 'degisir').length;
+    /* Bağlama seçicisi: forma girilebilen ve listede henüz olmayan ölçümler. */
+    const listede = {};
+    p.rows.forEach(r => { listede[r.markerId] = true; });
+    const secenek = [{ value:'', label:'Ölçüme bağla…' }].concat(SP.BIOMARKERS
+      .filter(b => { const d = SP.DERIVED[b.id]; return (!d || d.measured) && !listede[b.id]; })
+      .map(b => ({ value:b.id, label:b.name + ' · ' + b.unit })));
     return UI.sheet({
       title:'Ayıklanan değerler', subtitle:p.note, wide:true,
       body:String(K.Stack([
-        when(p.rows.length, () => html`<div>${map(p.rows, (r, i) => html`
-          <div class="${r.skip ? 'pasterow pasterow--off' : 'pasterow'}">
-            ${K.Checkbox({ label:'', checked:!r.skip, act:'toggle-row', data:{ 'data-i':i } })}
+        /* 2026-10-25: oturum alanları önizlemede. Tarih metinden yerelde
+           okunmuşsa öneri olarak gelir; kaydetme anında alandan okunur. */
+        html`<div class="cols-2">
+          ${K.Field({ label:'Test tarihi',
+            hint:p.dateGuess && p.date === p.dateGuess ? 'rapordan okundu' : '',
+            input:K.Input({ id:'pv-date', type:'date', value:p.date, change:'pv-date' }) })}
+          ${K.Field({ label:'Laboratuvar', hint:'isteğe bağlı',
+            input:K.Input({ id:'pv-lab', value:p.lab || '', placeholder:'Hangi laboratuvar?',
+              change:'pv-lab' }) })}
+        </div>`,
+        html`<div class="field">
+          <span>Kan aç karnına mı alındı?
+            <span class="hint-text">glukoz, insülin ve trigliserit buna bağlı</span></span>
+          ${K.Segmented({ act:'pv-fasting', value:ac, aria:'Kan aç karnına mı alındı?',
+            items:ACLIK_SECENEK })}
+        </div>`,
+        when(ac === 'no', () => K.Notice({ tone:'warn', title:'Tok ölçüm:',
+          body:'Açlık glukozu, insülin, trigliserit ve onlardan hesaplanan değerler '
+            + 'kaydedilir ama yorumlanmaz.' })),
+        when(p.rows.some(r => r.mismatch), () => K.Notice({ tone:'warn',
+          body:'Birimi uyuşmayan satırlar işaretsiz geldi. Birimi kendin denetleyip '
+            + 'işaretlersen sayı olduğu gibi, gördüğün birimle yazılır; çevrilmez.' })),
+        /* 2026-10-25: aynı tarihte test varsa ne olacağı kayıttan önce
+           söylenir; kayıtlı değerin üstüne yazmak bilinçli bir seçimdir. */
+        when(plan.hedef, () => K.Notice({ tone:'info',
+          body:U.fmtDate(plan.date) + ' testine eklenir.'
+            + (plan.aclikYazilir ? ' Testin açlık durumu «' + FASTING_LABEL[plan.ac] + '» olarak yazılır.' : '') })),
+        when(plan.ayri, () => K.Notice({ tone:'warn',
+          body:(plan.neden === 'aclik'
+            ? 'Bu tarihteki test farklı bir açlık durumuyla kaydedilmiş. '
+            : 'Bu tarihte birden çok test var ve hangisine ekleneceği açlık durumundan anlaşılmıyor. ')
+            + 'Değerler aynı tarihte ayrı test olarak kaydedilir; önceki test değişmez.' })),
+        when(degisen, () => K.Notice({ tone:'warn',
+          body:'Bu testte değeri kayıtlı ' + degisen + ' ölçüm işaretsiz geldi. '
+            + 'İşaretlersen kayıtlı değerin yerine yenisi yazılır.' })),
+        when(p.rows.length, () => html`<div>${map(p.rows, (r, i) => {
+          const s = plan.satirlar[i];
+          const birim = r.mismatch && !r.converted ? r.mismatch : r.marker.unit;
+          const onceBirim = s.once ? (s.once.unit || r.marker.unit) : '';
+          const ayniBirim = String(onceBirim).toLowerCase() === String(birim).toLowerCase();
+          const deger = s.durum === 'degisir'
+            ? (ayniBirim ? U.fmtNum(s.once.v) + ' → ' + U.fmtNum(r.value) + ' ' + birim
+              : U.fmtNum(s.once.v) + ' ' + onceBirim + ' → ' + U.fmtNum(r.value) + ' ' + birim)
+            : U.fmtNum(r.value) + ' ' + birim;
+          return html`
+          <div class="${s.yaz ? 'pasterow' : 'pasterow pasterow--off'}">
+            ${s.durum === 'ayni' ? html`<span></span>` : K.Checkbox({ label:'', checked:s.yaz, act:'toggle-row',
+              data:{ 'data-i':i, 'aria-label':s.durum === 'degisir'
+                ? r.marker.name + ': kayıtlı ' + U.fmtNum(s.once.v) + ' yerine ' + U.fmtNum(r.value) + ' yazılsın'
+                : r.marker.name + ' kaydedilsin' } })}
             <span><b class="small">${r.marker.name}</b>
               ${when(r.converted, () => html` <span class="tiny dim">${r.from} → ${r.to} çevrildi</span>`)}
               ${when(r.mismatch, () => html` <span class="tiny">${K.Badge({ label:'birim ' + r.mismatch, tone:'warn' })}</span>`)}
+              ${when(r.bound, () => html` <span class="tiny dim">elle bağlandı</span>`)}
+              ${when(s.durum === 'degisir', () => html` <span class="tiny">${K.Badge({ label:'kayıtlı değer değişir', tone:'warn' })}</span>`)}
+              ${when(s.durum === 'ayni', () => html` <span class="tiny dim">zaten kayıtlı</span>`)}
             </span>
-            <span class="pasterow__val num">${U.fmtNum(r.value)} ${r.marker.unit}</span>
+            <span class="pasterow__val num">${deger}</span>
             <span class="pasterow__src">${r.line}</span>
-          </div>`)}</div>`),
+          </div>`; })}</div>`),
         when(!p.rows.length, () => K.Notice({ tone:'warn', body:p.note })),
+        /* 2026-10-25: eşleşmeyen satır yalnız bir liste değil; her satırın
+           yanında ölçüm seçici durur. Sayı yalnız o satırdan alınır
+           (SP.Parse.bindLine), uydurulmaz; bağlanan satır yukarıya geçer. */
         when(p.unmatched.length, () => K.Collapsible({
           title:'Eşleşmeyen satırlar', meta:p.unmatched.length + ' satır',
-          act:'toggle-unmatched', open:!!S.ui.pasteUnmatchedOpen,
-          body:html`<ul class="bullets small muted mt-10">
-            ${map(p.unmatched.slice(0, 40), x => html`<li>${x.line}</li>`)}</ul>
-            <p class="small muted">Bu satırlarda bilinen bir ölçüm adı bulunamadı.
-              Değerleri «Test gir» sayfasından elle yazabilirsin.</p>` })),
+          act:'toggle-unmatched', open:S.ui.pasteUnmatchedOpen !== false,
+          body:html`<div class="list mt-10">
+            ${map(p.unmatched.slice(0, 40), (x, j) => html`
+              <div class="listitem">
+                <span class="grow small">${x.line}</span>
+                ${K.Select({ size:'sm', value:'', change:'pv-bind', options:secenek,
+                  aria:'«' + x.line + '» satırını bir ölçüme bağla', data:{ 'data-i':j } })}
+              </div>`)}</div>
+            <p class="small muted">Bu satırlarda bilinen bir ölçüm adı bulunamadı. Bir ölçüme
+              bağlarsan sayı yalnız o satırdan alınır ve kaydetmeden önce yukarıda görünür.</p>` })),
       ])),
       footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
         ${K.Button({ label:'Kaydet', tone:'primary', act:'save-paste',
-          disabled:!p.rows.filter(r => !r.skip).length })}`),
+          disabled:!kaydedilecek })}`),
       noFocus:true,
     });
   }
@@ -84591,11 +85866,19 @@ SP.Screens.labs = (function(){
     async 'entry-save'(){
       const ids = Object.keys(draft.values);
       if(!ids.length){ UI.toast('Hiç değer yazılmadı'); return; }
-      /* Ayni tarihte oturum varsa ustune yazilir; bir gunun testi tek kayittir. */
-      const existing = S.labs.find(l => l.date === draft.date);
+      /* Ayni tarihte ACLIGI UYUMLU oturum varsa ona eklenir (2026-10-25;
+         yapistirmayla ayni kural, SP.Parse.pastePlan): bilinmeyen aclik
+         bilineni ezmez, bilinen bilinmeyeni doldurur; celisirse ayni tarihte
+         ayri test olur. Eskiden ilk oturuma yazip acligi eziyordu:
+         «Bilmiyorum» bilinen «Aç»i siliyor, «Tok» onceki glukozu tok yapiyordu. */
+      const aclik = f => f === 'yes' || f === 'no' ? f : 'unknown';
+      const ac = aclik(draft.fasting);
+      const uyumlu = S.labs.filter(l => l.date === draft.date
+        && (aclik(l.fasting) === ac || aclik(l.fasting) === 'unknown' || ac === 'unknown'));
+      const existing = uyumlu.find(l => aclik(l.fasting) === ac) || (uyumlu.length === 1 ? uyumlu[0] : null);
       const rec = existing || M.newLab(draft.date);
       if(draft.lab) rec.lab = draft.lab;
-      rec.fasting = draft.fasting || 'unknown';
+      if(!existing || (ac !== 'unknown' && aclik(existing.fasting) === 'unknown')) rec.fasting = ac;
       rec.time = draft.time || '';
       ids.forEach(id => {
         const b = SP.BIO_BY_ID[id];
@@ -84615,33 +85898,57 @@ SP.Screens.labs = (function(){
     async 'open-paste'(){ pasteSheet(); },
     async 'run-paste'(){
       const text = (document.getElementById('paste-text') || {}).value || '';
-      const date = (document.getElementById('paste-date') || {}).value || U.todayISO();
-      const lab = (document.getElementById('paste-lab') || {}).value || '';
       preview = SP.Parse.parseLab(text);
-      preview.date = date; preview.lab = lab;
+      pvBasla(preview);
       previewSheet();
     },
     async 'toggle-row'(el){
       const i = Number(el.dataset.i);
       if(!preview || !preview.rows[i]) return;
-      preview.rows[i].skip = !el.checked;
+      pvOku();
+      const r = preview.rows[i];
+      r.skip = !el.checked;
+      /* 2026-10-25: kayıtlı değerin üstüne yazmak yalnız o testin o değeri
+         için seçilir; tarih ya da açlık değişip hedef değişirse işaret geçmez. */
+      const plan = SP.Parse.pastePlan(preview, preview.date, preview.fasting);
+      if(plan.satirlar[i].durum === 'degisir') r.ustune = el.checked ? plan.hedef.id : null;
       previewSheet();
     },
     async 'toggle-unmatched'(){
-      S.ui.pasteUnmatchedOpen = !S.ui.pasteUnmatchedOpen;
+      pvOku();
+      S.ui.pasteUnmatchedOpen = S.ui.pasteUnmatchedOpen === false;
       previewSheet();
     },
+    async 'pv-fasting'(el){
+      if(!preview) return;
+      pvOku();
+      const v = el.dataset.value;
+      preview.fasting = v === 'yes' || v === 'no' ? v : 'unknown';
+      previewSheet();
+    },
+    /* Tarih KAYDETME anında alandan okunur (2026-10-25); dosya seçildiği
+       an değil. Boş tarih bugüne sessizce dönmez: sorulur. */
     async 'save-paste'(){
       if(!preview) return;
-      const rec = SP.Parse.toLabRecord(preview, preview.date, { lab:preview.lab });
-      const n = Object.keys(rec.values).length;
+      const d = document.getElementById('pv-date');
+      if(d && !d.value){ UI.toast('Test tarihini yaz'); return; }
+      pvOku();
+      const date = preview.date || U.todayISO();
+      /* 2026-10-25: sayı ve hedef, kaydın kullandığı plandan gelir. */
+      const plan = SP.Parse.pastePlan(preview, date, preview.fasting);
+      const n = plan.yazilacak;
       if(!n){ UI.toast('Kaydedilecek değer yok'); return; }
+      const degisti = plan.satirlar.filter(s => s.yaz && s.durum === 'degisir').length;
+      const rec = SP.Parse.toLabRecord(preview, date, { lab:preview.lab, fasting:preview.fasting });
       await M.saveLab(rec);
       preview = null;
       UI.closeSheet();
       S.ui.labTab = 'sonuc';
       const flags = M.openFlags().filter(f => !f.ack);
-      UI.toast(n + ' değer kaydedildi' + (flags.length ? ' · ' + flags.length + ' kırmızı bayrak' : ''));
+      UI.toast(n + ' değer ' + (plan.hedef ? U.fmtDate(date) + ' testine eklendi'
+          : plan.ayri ? U.fmtDate(date) + ' tarihinde ayrı test olarak kaydedildi' : 'kaydedildi')
+        + (degisti ? ' · ' + degisti + ' kayıtlı değer değişti' : '')
+        + (flags.length ? ' · ' + flags.length + ' kırmızı bayrak' : ''));
       SP.App.render();
     },
   };
@@ -84676,9 +85983,37 @@ SP.Screens.labs = (function(){
       if(!file) return;
       preview = await UI.withBusy('Rapor okunuyor', file.name,
         () => SP.Extract.fromLabFile(file));
-      preview.date = (document.getElementById('paste-date') || {}).value || U.todayISO();
-      preview.lab = (document.getElementById('paste-lab') || {}).value || '';
-      if(!preview.rows.length){ UI.toast(preview.note); return; }
+      /* 2026-10-25: tarih burada okunmaz; önizlemede durur ve kaydetmede
+         alınır. Bağlanabilir satır varsa önizleme yine açılır. */
+      pvBasla(preview);
+      if(!preview.rows.length && !(preview.unmatched || []).length){ UI.toast(preview.note); return; }
+      previewSheet();
+    },
+    /* 2026-10-25: tarih hedef testi değiştirir; önizleme yeniden çizilir ki
+       «28 → 35» ve işaretler o tarihin testine göre görünsün. */
+    async 'pv-date'(){
+      pvOku();
+      if(!preview) return;
+      previewSheet();
+      const d = document.getElementById('pv-date');
+      if(d) d.focus();
+    },
+    async 'pv-lab'(){ pvOku(); },
+    /* Eşleşmeyen satırı seçilen ölçüme bağlar. Sayı yalnız o satırdan. */
+    async 'pv-bind'(el){
+      if(!preview) return;
+      const i = Number(el.dataset.i);
+      const x = (preview.unmatched || [])[i];
+      if(!x || !el.value) return;
+      pvOku();
+      const r = SP.Parse.bindLine(x.line, el.value);
+      if(!r){ el.value = ''; UI.toast('Bu satırda ölçüm adından sonra bir sayı bulunamadı'); return; }
+      if(preview.rows.some(y => y.markerId === r.markerId)){
+        el.value = ''; UI.toast(r.marker.name + ' listede zaten var'); return;
+      }
+      preview.rows.push(r);
+      preview.unmatched.splice(i, 1);
+      preview.note = pvNot(preview);
       previewSheet();
     },
     async 'pick-marker'(el){ S.ui.trendMarker = el.value; SP.App.render(); },
@@ -84784,39 +86119,128 @@ SP.Screens.meals = (function(){
 
   /* ---------------------------------------------------------- giris */
 
-  /* Akıllı tahmin & hızlı besin önerileri — aradıkça canlı daralır, boşken yuvaya göre önerir. */
-  function mealSuggestionChips(){
-    const slot = S.ui.mealSlot || guessSlot();
-    const q = (S.ui.mealDraftQuery || '').trim();
-    let list = [];
-    if(q.length >= 2){
-      const n = U.norm(q);
-      list = SP.FOODS.filter(f => U.norm(f.name + ' ' + (f.aliases || []).join(' ')).indexOf(n) >= 0).slice(0, 6);
-    } else {
-      const slotMap = {
-        kahvalti: ['yumurta', 'lor-peyniri', 'beyaz-peynir', 'yulaf', 'zeytin-siyah', 'omlet'],
-        ara1:     ['muz', 'elma', 'badem', 'kefir', 'cilek'],
-        ogle:     ['tavuk-gogsu', 'bulgur-pilavi', 'mercimek-corbasi', 'salatalik', 'ayran'],
-        ara2:     ['protein-bar', 'fistik-ezmesi', 'ceviz', 'kuru-kayisi'],
-        aksam:    ['somon', 'kofte', 'kuru-fasulye-etli', 'haslanmis-patates', 'suzme-yogurt'],
-        gece:     ['kazein-protein', 'suzme-yogurt', 'yesil-cay', 'maden-suyu'],
-      };
-      const ids = slotMap[slot] || ['yumurta', 'tavuk-gogsu', 'yulaf', 'muz'];
-      list = ids.map(id => SP.FOOD_BY_ID[id]).filter(Boolean);
+  /* Seçili öğün: kullanıcı seçtiyse o, seçmediyse saate göre (2026-10-25:
+     hazır ve sık öğünler de bunu kullanır; eskiden hep saate bakıyordu). */
+  const seciliSlot = () => S.ui.mealSlot || guessSlot();
+
+  /* Yerleşik öneri listesi: kişisel veri yetmezse boşluğu bu doldurur. */
+  const SLOT_ONERI = {
+    kahvalti: ['yumurta', 'lor-peyniri', 'beyaz-peynir', 'yulaf', 'zeytin-siyah', 'omlet'],
+    ara1:     ['muz', 'elma', 'badem', 'kefir', 'cilek'],
+    ogle:     ['tavuk-gogsu', 'bulgur-pilavi', 'mercimek-corbasi', 'salatalik', 'ayran'],
+    ara2:     ['protein-bar', 'fistik-ezmesi', 'ceviz', 'kuru-kayisi'],
+    aksam:    ['somon', 'kofte', 'kuru-fasulye-etli', 'haslanmis-patates', 'suzme-yogurt'],
+    gece:     ['kazein-protein', 'suzme-yogurt', 'yesil-cay', 'maden-suyu'],
+  };
+  /* Kişisel öneri için bir gıdanın bu öğünde en az kaç kez girilmiş olması gerekir. */
+  const KISISEL_ESIK = 2;
+
+  /* SON PORSİYON (2026-10-25): her gıdanın son 90 günde en son girilen
+     gramı ve ev ölçüsü. Ayrı bir kayıt tutulmaz; defterin kendisinden
+     okunur, böylece silinen kayıt «hatırlanmaz». Gramı olmayan kalem atlanır. */
+  function sonPorsiyonlar(){
+    const harita = {};
+    for(let i = 0; i < 90; i++){
+      const d = U.iso(U.addDays(U.today(), -i));
+      const ogunler = M.mealsOf(d);
+      for(let j = ogunler.length - 1; j >= 0; j--){
+        const items = ogunler[j].items || [];
+        for(let k = items.length - 1; k >= 0; k--){
+          const it = items[k];
+          if(it && it.foodId && !harita[it.foodId] && Number(it.g) > 0){
+            harita[it.foodId] = { g:Math.round(Number(it.g)), portion:it.portion || null, date:d };
+          }
+        }
+      }
     }
-    if(!list.length) return '';
-    return html`
-      <div class="meal-suggs row wrap gap-6 mt-8" aria-label="Besin önerileri">
-        ${map(list.slice(0, 4), f => {
-          const p = (f.portions || [])[0];
-          const pName = p ? p.label : '100g';
-          return html`<button type="button" class="btn btn--xs btn--ghost chip-sugg"
-            data-act="quick-add-food" data-id="${f.id}" data-g="${p ? p.g : 100}" data-label="${pName}"
-            title="${f.name} · ${f.kcal} kcal · P ${f.p}g">
-            + ${f.name} <span class="tiny dim">(${pName})</span>
-          </button>`;
-        })}
-      </div>`;
+    return harita;
+  }
+  /* Son porsiyonun ekrandaki adı: ev ölçüsü gramıyla tutuyorsa ya da
+     çarpanlı bir ölçüyse («2 tabak») o, değilse gram. */
+  function porsiyonAdi(f, son){
+    const p = son.portion;
+    if(p){
+      const tanim = (f.portions || []).find(x => x.label === p);
+      if(tanim && Math.round(tanim.g) === son.g) return p;
+      if(!tanim && /^(½|\d+)\s+\S/.test(p) && !/^1\s/.test(p) && !/^\d+\s*g$/.test(p)) return p;
+    }
+    return son.g + ' g';
+  }
+
+  /* KİŞİSEL ÖNERİLER (2026-10-25): bu öğünde son 30 günde en az iki kez
+     girilen gıdalar, en sık olan başta. Sayı öğün başına sayılır (aynı
+     öğünde iki kez yazılan gıda bir kez); uydurulmaz. */
+  function kisiselSik(slot){
+    const say = {};
+    for(let i = 0; i < 30; i++){
+      M.mealsOf(U.iso(U.addDays(U.today(), -i))).forEach(m => {
+        if(m.slot !== slot) return;
+        const gordu = {};
+        (m.items || []).forEach(it => {
+          if(!it || !it.foodId || !SP.FOOD_BY_ID[it.foodId] || gordu[it.foodId]) return;
+          gordu[it.foodId] = 1;
+          say[it.foodId] = (say[it.foodId] || 0) + 1;
+        });
+      });
+    }
+    return Object.keys(say).filter(id => say[id] >= KISISEL_ESIK)
+      .sort((a, b) => say[b] - say[a] || a.localeCompare(b)).map(id => ({ id, n:say[id] }));
+  }
+
+  /* Öneri çipleri: yazı varsa aranan gıdalar, yoksa kişisel liste (eksiği
+     yerleşik listeden). Her çip son kullanılan porsiyonla gelir; hiç
+     girilmemiş gıda ilk ev ölçüsüyle. Döner: [{ f, g, label, n, son }]. */
+  function oneriListesi(slot, q){
+    const son = sonPorsiyonlar();
+    const cip = (f, n) => {
+      const s = son[f.id];
+      if(s) return { f, g:s.g, label:porsiyonAdi(f, s), n:n || null, son:true };
+      const p = (f.portions || [])[0];
+      return { f, g:p ? p.g : 100, label:p ? p.label : '100 g', n:n || null, son:false };
+    };
+    const metin = String(q || '').trim();
+    if(metin.length >= 2){
+      const n = U.norm(metin);
+      return SP.FOODS.filter(f => U.norm(f.name + ' ' + (f.aliases || []).join(' ')).indexOf(n) >= 0)
+        .slice(0, 4).map(f => cip(f));
+    }
+    const liste = kisiselSik(slot).slice(0, 4).map(x => cip(SP.FOOD_BY_ID[x.id], x.n));
+    (SLOT_ONERI[slot] || ['yumurta', 'tavuk-gogsu', 'yulaf', 'muz']).forEach(id => {
+      const f = SP.FOOD_BY_ID[id];
+      if(f && liste.length < 4 && !liste.some(x => x.f.id === id)) liste.push(cip(f));
+    });
+    return liste;
+  }
+  function cipDugmeleri(liste){
+    return liste.map(x => {
+      const baslik = x.f.name + ' · ' + x.f.kcal + ' kcal / 100 g'
+        + (x.n ? ' · son 30 günde bu öğünde ' + x.n + ' kez' : '')
+        + (x.son ? ' · son girdiğin porsiyon' : '');
+      return '<button type="button" class="btn btn--xs btn--ghost chip-sugg" data-act="quick-add-food"'
+        + ' data-id="' + U.esc(x.f.id) + '" data-g="' + x.g + '" data-label="' + U.esc(x.label) + '"'
+        + ' title="' + U.esc(baslik) + '">+ ' + U.esc(x.f.name)
+        + ' <span class="tiny dim">(' + U.esc(x.label) + ')</span></button>';
+    }).join('');
+  }
+  /* Çip kutusu her zaman çizilir; eşleşme yoksa gizlenir (eskiden yeni
+     yazı hiçbir gıdayla eşleşmeyince eski çipler ekranda kalıyordu). */
+  function mealSuggestionChips(){
+    const liste = oneriListesi(seciliSlot(), S.ui.mealDraftQuery);
+    return raw('<div class="meal-suggs row wrap gap-6 mt-8" aria-label="Besin önerileri"'
+      + (liste.length ? '' : ' hidden') + '>' + cipDugmeleri(liste) + '</div>');
+  }
+  function cipleriTazele(){
+    const kutu = document.querySelector('.meal-suggs');
+    if(!kutu) return;
+    const liste = oneriListesi(seciliSlot(), S.ui.mealDraftQuery);
+    kutu.innerHTML = cipDugmeleri(liste);
+    kutu.hidden = !liste.length;
+  }
+
+  /* GERİ AL (2026-10-25): her öğün ekleme ve silmesi «Geri al» taşır
+     (AGENTS §1.9, küçük aksiyon). Geri alma yalnız o işlemin yazdığını geri alır. */
+  function geriAlToast(metin, geriAl){
+    UI.toast(metin, { undo:async () => { await geriAl(); UI.toast('Geri alındı'); SP.App.render(); } });
   }
 
   /* iPhone Faz 2b: ev ölçüsü listesi ve «tarttıysan gramı yaz» ⓘ'de
@@ -85068,8 +86492,15 @@ SP.Screens.meals = (function(){
     const anahtar = items => (items || []).map(x => x.foodId).sort().join('+');
     const hazir = SP.Hazir ? SP.Hazir.ogunler() : [];
     const sik = sablonlar().filter(x => !hazir.some(h => anahtar(h.items) === x.anahtar));
-    if(!hazir.length && !sik.length) return '';
+    /* DÜNKÜNÜN AYNISI (2026-10-25, core/dunku.js): bir önceki günün bu
+       güne girilmemiş öğünleri tek dokunuşla; kopya kendi öğün yerine
+       yazılır, «Geri al» kalır. */
+    const dk = SP.Dunku ? SP.Dunku.adaylar(shownDate()).ogunler : [];
+    if(!hazir.length && !sik.length && !dk.length) return '';
     const duzen = !!S.ui.hazirOgunDuzen && hazir.length;
+    const dunkuHtml = dk.length && !duzen ? VT().ogunSablonlari({ act:'ogun-dunku-ekle',
+      baslik:(shownDate() === U.todayISO() ? 'dünün aynısı' : 'önceki günün aynısı') + ' · tek dokunuş',
+      sablonlar:dk.map(x => ({ ad:x.ad, icerik:x.ozet, on:false, data:{ 'data-id':x.id } })) }) : '';
     const ust = hazir.length ? '<div class="hazir__ust">'
       + String(K.Button({ label:duzen ? 'Bitti' : 'Düzenle', size:'sm', tone:'ghost', act:'hazir-ogun-duzen' })) + '</div>' : '';
     const liste = duzen
@@ -85082,7 +86513,7 @@ SP.Screens.meals = (function(){
       return { ad:SP.Ogun ? SP.Ogun.ad(x.slot) : (sl ? sl.label : x.slot), icerik:x.ids.map(id => SP.FOOD_BY_ID[id].name.toLocaleLowerCase('tr-TR')).join(' · '),
         on:bugun.indexOf(x.anahtar) >= 0, data:{ 'data-date':x.ornek.date, 'data-id':x.ornek.id } };
     }) }) : '';
-    return vkutu('Hazır öğünler', '', ust + liste + sikHtml);
+    return vkutu('Hazır öğünler', '', ust + liste + dunkuHtml + sikHtml);
   }
   function hazirOgunSheet(meal){
     UI.sheet({
@@ -85377,15 +86808,35 @@ SP.Screens.meals = (function(){
     barkodBagSheet();
   }
 
-  function portionSheet(foodId){
+  /* PORSİYON ÇARPANI (2026-10-25): «½ · 1 · 2 · 3» ev ölçüsünü çarpar.
+     Çarpılan ölçü yine «tahmin»dir; tartılan gram çarpılmaz. */
+  const CARPANLAR = [{ value:'0.5', label:'½' }, { value:'1', label:'1' }, { value:'2', label:'2' }, { value:'3', label:'3' }];
+  function carpanliEtiket(label, c){
+    if(c === 1) return label;
+    const ad = c === 0.5 ? '½' : String(c);
+    return /^1\s/.test(label) ? ad + label.slice(1) : ad + ' × ' + label;
+  }
+
+  function portionSheet(foodId, carpan){
     const f = SP.FOOD_BY_ID[foodId];
     if(!f) return;
+    const c = [0.5, 1, 2, 3].indexOf(Number(carpan)) >= 0 ? Number(carpan) : 1;
+    const son = sonPorsiyonlar()[f.id];
+    const dugme = (label, g, ekSinif) => {
+      const gc = Math.max(1, Math.round(g * c));
+      const ad = carpanliEtiket(label, c);
+      return K.Button({ label:ad + ' (' + gc + ' g)', size:'sm', tone:ekSinif || undefined,
+        act:'add-portion', data:{ 'data-id':f.id, 'data-g':gc, 'data-label':ad } });
+    };
     UI.sheet({
-      title:f.name, subtitle:'Porsiyon seç',
+      title:f.name, subtitle:'Porsiyon seç · ev ölçüsü tahmindir',
       body:String(K.Stack([
-        html`<div class="row wrap">${map(f.portions || [], p => K.Button({
-          label:p.label + ' (' + p.g + ' g)', size:'sm',
-          act:'add-portion', data:{ 'data-id':f.id, 'data-g':p.g, 'data-label':p.label } }))}</div>`,
+        html`<div class="row wrap gap-8"><span class="small dim">Kaç porsiyon</span>
+          ${K.Segmented({ act:'porsiyon-carpan', value:String(c), aria:'Porsiyon çarpanı', items:CARPANLAR,
+            data:{ 'data-id':f.id } })}</div>`,
+        when(son, () => html`<div class="row wrap gap-6"><span class="small dim">Son girdiğin</span>
+          ${dugme(son ? porsiyonAdi(f, son) : '', son ? son.g : 0, 'primary')}</div>`),
+        html`<div class="row wrap">${map(f.portions || [], p => dugme(p.label, p.g))}</div>`,
         K.Field({ label:'Ya da gram gir (tarttıysan)',
           input:K.Input({ id:'portion-g', type:'number', numeric:true, min:1, step:'1', placeholder:'150' }) }),
         K.Table({ tight:true, headers:['100 gramda', { label:'Değer', num:true }], rows:[
@@ -85706,42 +87157,51 @@ SP.Screens.meals = (function(){
     if(mt && !mt._hasAutoListener){
       mt._hasAutoListener = true;
       mt.addEventListener('input', (e) => {
-        const val = e.target.value.trim();
-        S.ui.mealDraftQuery = val;
+        S.ui.mealDraftQuery = e.target.value.trim();
         S.ui.mealDraftText = e.target.value;
-        const cont = document.querySelector('.meal-suggs');
-        if(cont){
-          let list = [];
-          if(val.length >= 2){
-            const n = U.norm(val);
-            list = SP.FOODS.filter(f => U.norm(f.name + ' ' + (f.aliases || []).join(' ')).indexOf(n) >= 0).slice(0, 6);
-          }
-          if(list.length){
-            cont.innerHTML = list.slice(0, 4).map(f => {
-                const p = (f.portions || [])[0];
-                const pName = p ? p.label : '100g';
-                return `<button type="button" class="btn btn--xs btn--ghost chip-sugg"
-                  data-act="quick-add-food" data-id="${f.id}" data-g="${p ? p.g : 100}" data-label="${pName}"
-                  title="${f.name} · ${f.kcal} kcal · P ${f.p}g">
-                  + ${f.name} <span class="tiny dim">(${pName})</span>
-                </button>`;
-              }).join('');
-          }
-        }
+        /* 2026-10-25: çipler her harfte yazının kendisini izler; eşleşme
+           yoksa kutu boşalır, yazı silinince öğünün önerileri döner. */
+        cipleriTazele();
       });
     }
   }
 
-  /* Metinden gelen kalemleri secili ogune yazar. */
+  /* Metinden gelen kalemleri secili ogune yazar. Doner: geri alma bilgisi
+     (2026-10-25) -- hangi gun, hangi ogun, yeni mi acildi, hangi kalemler. */
   async function pushItems(items, note){
     const d = shownDate();
-    const slot = S.ui.mealSlot || guessSlot();
+    const slot = seciliSlot();
     const rows = M.mealsOf(d).slice();
     let meal = rows.find(m => m.slot === slot);
-    if(!meal){ meal = M.newMeal(slot); rows.push(meal); }
-    meal.items = (meal.items || []).concat(items);
+    const yeni = !meal;
+    if(yeni){ meal = M.newMeal(slot); rows.push(meal); }
+    const eskiNot = meal.note;
+    const eklenen = items.map(x => Object.assign({}, x));
+    meal.items = (meal.items || []).concat(eklenen);
     if(note) meal.note = [meal.note, note].filter(Boolean).join(' · ');
     await M.saveMeals(d, rows);
+    return { d, mealId:meal.id, yeni, eklenen, eskiNot };
+  }
+  /* Eklemeyi geri alir: yalniz o eklemenin kalemleri cikar; ogun bu
+     eklemeyle acildiysa ve baska kalemi yoksa ogun de gider. Kalem nesnesi
+     degistiyse (esitleme) ayni gida ve gram sondan eslenir. */
+  async function eklemeyiGeriAl(r){
+    const rows = M.mealsOf(r.d).slice();
+    const meal = rows.find(m => m.id === r.mealId);
+    if(!meal) return;
+    let kalan = (meal.items || []).filter(it => r.eklenen.indexOf(it) < 0);
+    if(kalan.length === (meal.items || []).length){
+      kalan = (meal.items || []).slice();
+      r.eklenen.forEach(x => {
+        for(let i = kalan.length - 1; i >= 0; i--){
+          if(kalan[i].foodId === x.foodId && Number(kalan[i].g) === Number(x.g)){ kalan.splice(i, 1); break; }
+        }
+      });
+    }
+    if(r.yeni && !kalan.length){ await M.deleteMeal(r.d, r.mealId); return; }
+    meal.items = kalan;
+    meal.note = r.eskiNot;
+    await M.saveMeals(r.d, rows);
   }
 
   const handle = {
@@ -85768,12 +87228,12 @@ SP.Screens.meals = (function(){
       if(!photoRes) return;
       const items = photoRes.items.filter(x => !x.skip);
       if(!items.length) return;
-      await pushItems(items.map(i => ({ foodId:i.foodId, g:i.g, cert:'estimated',
+      const r = await pushItems(items.map(i => ({ foodId:i.foodId, g:i.g, cert:'estimated',
         portion:'fotoğraf' })), 'fotoğraftan');
       photoRes = null; photoFile = null;
       UI.closeSheet();
-      UI.toast(items.length + ' gıda eklendi · tahmin');
       SP.App.render();
+      geriAlToast(items.length + ' gıda eklendi · tahmin', () => eklemeyiGeriAl(r));
     },
     async 'meal-tab'(el){ K.bolumeGit(el.dataset.tab); },
     /* Tahlil bagindan olcume gitmek: Testler bolumu o olcumun egilimini acar. */
@@ -85798,24 +87258,38 @@ SP.Screens.meals = (function(){
       if(!f) return;
       const g = Number(el.dataset.g) || 100;
       const portion = el.dataset.label || '1 porsiyon';
-      await pushItems([{ foodId:f.id, g:g, cert:'estimated', portion:portion }], f.name);
+      const eskiMetin = S.ui.mealDraftText || '';
+      const r = await pushItems([{ foodId:f.id, g:g, cert:'estimated', portion:portion }], f.name);
       S.ui.mealDraftText = '';
       S.ui.mealDraftQuery = '';
-      UI.toast(f.name + ' (' + portion + ') eklendi · tahmin');
       SP.App.render();
+      geriAlToast(f.name + ' (' + portion + ') eklendi · tahmin', async () => {
+        await eklemeyiGeriAl(r);
+        S.ui.mealDraftText = eskiMetin; S.ui.mealDraftQuery = eskiMetin.trim();
+      });
     },
+    /* 2026-10-25: tanınmayan parça atılmaz -- alanda kalır ve bildirimde
+       adıyla yazılır; kullanıcı düzeltip yeniden ekler (MIMARI §4). */
     async 'add-meal'(){
       const el = document.getElementById('meal-text');
       if(!el || !el.value.trim()) return;
-      const parsed = SP.Parse.parseMeal(el.value);
-      if(!parsed.items.length){ UI.toast(parsed.note); return; }
-      await pushItems(parsed.items.map(i => ({ foodId:i.foodId, g:i.g, cert:i.cert, portion:i.portion })),
-        el.value.trim());
-      el.value = '';
-      S.ui.mealDraftText = '';
-      S.ui.mealDraftQuery = '';
-      UI.toast(parsed.note);
+      const metin = el.value;
+      const parsed = SP.Parse.parseMeal(metin);
+      const kalan = (parsed.unmatched || []).join(', ');
+      if(!parsed.items.length){
+        UI.toast(kalan ? 'Tanınmadı: ' + kalan + '. «1 tabak mercimek çorbası» gibi yazmayı dene.' : parsed.note);
+        return;
+      }
+      const r = await pushItems(parsed.items.map(i => ({ foodId:i.foodId, g:i.g, cert:i.cert, portion:i.portion })),
+        parsed.items.map(i => i.source).filter(Boolean).join(', '));
+      el.value = kalan;
+      S.ui.mealDraftText = kalan;
+      S.ui.mealDraftQuery = kalan;
       SP.App.render();
+      geriAlToast(parsed.items.length + ' gıda eklendi' + (kalan ? ' · Tanınmadı: ' + kalan : ''), async () => {
+        await eklemeyiGeriAl(r);
+        S.ui.mealDraftText = metin; S.ui.mealDraftQuery = metin.trim();
+      });
     },
     'hazir-ogun-sakla'(el){
       const meal = M.mealsOf(shownDate()).find(m => m.id === el.dataset.id);
@@ -85831,7 +87305,7 @@ SP.Screens.meals = (function(){
     },
     async 'hazir-ogun-ekle'(el){
       const d = shownDate();
-      const r = await SP.Hazir.ogunEkle(el.dataset.id, d, guessSlot());
+      const r = await SP.Hazir.ogunEkle(el.dataset.id, d, seciliSlot());
       if(!r.ok){ UI.toast(r.why); return; }
       SP.App.render();
       { const Z = (window.LIFEOS || {}).ZEMIN; if(Z && Z.nabiz) Z.nabiz(); }
@@ -85850,26 +87324,63 @@ SP.Screens.meals = (function(){
     async 'sablon-ekle'(el){
       const kaynak = M.mealsOf(el.dataset.date).find(m => m.id === el.dataset.id);
       if(!kaynak) return;
-      const yeni = M.newMeal(guessSlot());
+      const yeni = M.newMeal(seciliSlot());
       yeni.items = (kaynak.items || []).map(x => Object.assign({}, x));
       const d = shownDate();
       await M.addMeal(d, yeni);
       SP.App.render();
       UI.toast('Öğün eklendi', { undo:async () => { await M.deleteMeal(d, yeni.id); SP.App.render(); } });
     },
-    async 'del-meal'(el){
-      await M.deleteMeal(shownDate(), el.dataset.id);
-      /* Öğünle birlikte fotoğrafı da gider; sahipsiz fotoğraf kalmaz. */
-      if(SP.Foto) await SP.Foto.sil('ogun:' + el.dataset.id);
+    async 'ogun-dunku-ekle'(el){
+      const d = shownDate();
+      const r = await SP.Dunku.ogunKopyala(d, el.dataset.id);
+      if(!r.ok){ UI.toast(r.why); return; }
       SP.App.render();
+      { const Z = (window.LIFEOS || {}).ZEMIN; if(Z && Z.nabiz) Z.nabiz(); }
+      geriAlToast('«' + r.ad + '» dünkü gibi eklendi', () => SP.Dunku.geriAl(d, 'ogun', r.id));
+    },
+    /* 2026-10-25: silme geri alınır. Öğünün kopyası ve fotoğrafı önce
+       alınır; «Geri al» ikisini de yerine koyar (Mutfak'taki gıda silme gibi). */
+    async 'del-meal'(el){
+      const d = shownDate(), id = el.dataset.id;
+      const rows = M.mealsOf(d);
+      const sira = rows.findIndex(m => m.id === id);
+      if(sira < 0) return;
+      const kopya = JSON.parse(JSON.stringify(rows[sira]));
+      let foto = null;
+      if(SP.Foto){ try{ foto = await SP.Foto.al('ogun:' + id); }catch(e){ foto = null; } }
+      await M.deleteMeal(d, id);
+      /* Öğünle birlikte fotoğrafı da gider; sahipsiz fotoğraf kalmaz. */
+      if(SP.Foto) await SP.Foto.sil('ogun:' + id);
+      SP.App.render();
+      const ad = SP.Ogun ? SP.Ogun.ad(kopya.slot) : kopya.slot;
+      geriAlToast('«' + ad + '» silindi', async () => {
+        const r2 = M.mealsOf(d).slice();
+        if(!r2.some(m => m.id === kopya.id)) r2.splice(Math.min(sira, r2.length), 0, kopya);
+        await M.saveMeals(d, r2);
+        if(foto && SP.Foto) await SP.Foto.kaydet('ogun:' + kopya.id, foto);
+      });
     },
     async 'del-item'(el){
-      const rows = M.mealsOf(shownDate()).slice();
+      const d = shownDate();
+      const rows = M.mealsOf(d).slice();
       const meal = rows.find(m => m.id === el.dataset.id);
       if(!meal) return;
-      meal.items.splice(Number(el.dataset.i), 1);
-      await M.saveMeals(shownDate(), rows);
+      const sira = Number(el.dataset.i);
+      const kalem = meal.items[sira];
+      if(!kalem) return;
+      const ogunKopya = JSON.parse(JSON.stringify(Object.assign({}, meal, { items:[] })));
+      meal.items.splice(sira, 1);
+      await M.saveMeals(d, rows);
       SP.App.render();
+      const f = SP.FOOD_BY_ID[kalem.foodId];
+      geriAlToast((f ? f.name : 'Kalem') + ' çıkarıldı', async () => {
+        const r2 = M.mealsOf(d).slice();
+        let m2 = r2.find(m => m.id === ogunKopya.id);
+        if(!m2){ m2 = ogunKopya; r2.push(m2); }
+        m2.items.splice(Math.min(sira, m2.items.length), 0, kalem);
+        await M.saveMeals(d, r2);
+      });
     },
     async 'open-search'(){ S.ui.foodPage = 1; searchSheet(); },
     async 'food-page'(el){ S.ui.foodPage = Number(el.dataset.page); searchSheet(); },
@@ -85885,21 +87396,25 @@ SP.Screens.meals = (function(){
       UI.toast('Barkod bağlandı');
       portionSheet(el.dataset.id);
     },
+    async 'porsiyon-carpan'(el){ portionSheet(el.dataset.id, Number(el.dataset.value)); },
     async 'add-portion'(el){
-      await pushItems([{ foodId:el.dataset.id, g:Number(el.dataset.g),
-        cert:'estimated', portion:el.dataset.label }]);
+      const f = SP.FOOD_BY_ID[el.dataset.id];
+      const g = Number(el.dataset.g);
+      if(!f || !(g > 0)) return;
+      const r = await pushItems([{ foodId:f.id, g, cert:'estimated', portion:el.dataset.label }]);
       UI.closeSheet();
-      UI.toast('Eklendi');
       SP.App.render();
+      geriAlToast(f.name + ' (' + el.dataset.label + ') eklendi · tahmin', () => eklemeyiGeriAl(r));
     },
     async 'add-grams'(el){
       const input = document.getElementById('portion-g');
       const g = input ? Number(input.value) : 0;
-      if(!g){ UI.toast('Gram gir'); return; }
-      await pushItems([{ foodId:el.dataset.id, g, cert:'measured', portion:null }]);
+      if(!(g > 0)){ UI.toast('Gram gir'); return; }
+      const f = SP.FOOD_BY_ID[el.dataset.id];
+      const r = await pushItems([{ foodId:el.dataset.id, g, cert:'measured', portion:null }]);
       UI.closeSheet();
-      UI.toast('Eklendi · ölçüldü');
       SP.App.render();
+      geriAlToast((f ? f.name + ' ' : '') + g + ' g eklendi · ölçüldü', () => eklemeyiGeriAl(r));
     },
     async 'open-nutrient'(el){ nutrientSheet(el.dataset.id); },
   };
@@ -85912,7 +87427,7 @@ SP.Screens.meals = (function(){
       const run = document.querySelector('[data-act="run-photo"]');
       if(run) run.disabled = !photoFile || !SP.Extract.modelReady();
     },
-    async 'pick-slot'(el){ S.ui.mealSlot = el.value; },
+    async 'pick-slot'(el){ S.ui.mealSlot = el.value; cipleriTazele(); },
     /* ÖĞÜNLERİM (core/ogun.js): ad ve saat kullanıcının. */
     'ogun-duzen'(){ S.ui.ogunTaslak = { liste:SP.Ogun.liste().map(x => Object.assign({}, x)), hata:null }; ogunSheet(); },
     'ogun-ekle'(){ ogunOku(); const t = S.ui.ogunTaslak; t.liste.push(SP.Ogun.yeni('', null)); ogunSheet(); },
@@ -85974,11 +87489,13 @@ SP.Screens.meals = (function(){
       const tg = SP.Nutri.targets();
       if(!tg.ok) return [];
       const t = SP.Nutri.dayTotals(shownDate());
+      /* Öğün girilmemiş gün «0» değildir (AGENTS §1.2, 2026-10-25): değer
+         «—», etiket «veri yok» der (Mutfak'taki besin kartıyla aynı düzen). */
       return [
         { value:U.fmtNum(tg.bmr), label:'bazal (kcal)' },
         { value:U.fmtNum(tg.kcal), label:'hedef (kcal)' },
-        { value:t.empty ? '0' : U.fmtNum(Math.round(t.kcal)), label:'bugün alınan' },
-        { value:t.empty ? '0' : Math.round(t.protein), unit:'g', label:'protein' },
+        t.empty ? { value:'—', label:'bugün alınan · veri yok' } : { value:U.fmtNum(Math.round(t.kcal)), label:'bugün alınan' },
+        t.empty ? { value:'—', label:'protein · veri yok' } : { value:Math.round(t.protein), unit:'g', label:'protein' },
       ];
     },
     subtitle(){
@@ -86079,6 +87596,9 @@ SP.Screens.kitchen = (function(){
                 ${Math.round(r.gets.protein)} g protein taşır.`)}
               ${map(r.addons, a => html` <b>${a.text}</b>`)}
             </span>
+            ${when(r.member.self && r.share > 0, () => html`<span class="splitrow__note">${K.Button({
+              label:'Payımı öğüne ekle', icon:'plus', size:'sm', act:'pay-ogune-ekle',
+              data:{ 'data-id':res.food.id } })}</span>`)}
           </div>`)}
         ${when(res.short, () => K.Notice({ tone:'warn', class:'mt-12',
           body:'Tencere hanenin bu öğün için ihtiyacının altında: yaklaşık '
@@ -86256,6 +87776,28 @@ SP.Screens.kitchen = (function(){
   }
 
   const handle = {
+    /* PAYIMI ÖĞÜNE EKLE (2026-10-25): kendi payın bugünün öğününe tek
+       dokunuşla. Gram ekranda görünen paydır, yeniden hesaplanır (tıklanan
+       düğmenin taşıdığı sayıya güvenilmez); hesap tencere ve hedeften
+       geldiği için kesinlik «tahmin». Öğün yeri: seçili öğün, yoksa saate
+       göre. «Geri al» eklenen öğünü siler. */
+    async 'pay-ogune-ekle'(el){
+      const dishId = el.dataset.id || S.ui.kitchenDish || 'kuru-fasulye-etli';
+      const res = SP.Nutri.householdSplit(dishId, S.ui.kitchenGrams, members());
+      const ben = res.ok ? res.rows.find(r => r.member.self) : null;
+      const g = ben ? Math.round(Number(ben.share)) : 0;
+      if(!(g > 0)){ UI.toast('Payın hesaplanamadı; profilini tamamla.'); return; }
+      const d = U.todayISO();
+      const slot = S.ui.mealSlot || (SP.Ogun ? SP.Ogun.simdiki() : 'aksam');
+      const yeni = M.newMeal(slot);
+      yeni.items = [{ foodId:res.food.id, g, cert:'estimated', portion:'tencereden pay' }];
+      yeni.note = 'Mutfak · tencereden pay';
+      await M.addMeal(d, yeni);
+      SP.App.render();
+      const ad = SP.Ogun ? SP.Ogun.ad(slot) : slot;
+      UI.toast(res.food.name + ' ' + U.fmtNum(g) + ' g · «' + ad + '» öğününe eklendi · tahmin', { undo:async () => {
+        await M.deleteMeal(d, yeni.id); UI.toast('Geri alındı'); SP.App.render(); } });
+    },
     async 'evdeki-sepet'(){
       const m = SP.Evdeki.sepettenMalzeme().map(id => SP.Evdeki.MALZEME[id].ad);
       if(!m.length){ UI.toast('Sepette malzemeye çevrilebilen bir şey yok'); return; }
@@ -87484,7 +89026,7 @@ SP.Screens.move = (function(){
                 <div class="row items-center gap-8">
                   <span class="num small" style="color:var(--accent);font-weight:600">${kcal} kcal</span>
                   <button type="button" class="btn btn--xs btn--ghost" data-act="add-met-workout"
-                    data-desc="${U.esc(r.description)}" data-met="${r.met}" data-min="${metMin}">
+                    data-desc="${U.esc(r.description)}" data-met="${r.met}" data-min="${metMin}" data-cat="${r.category || ''}">
                     Seansa ekle
                   </button>
                 </div>
@@ -87982,19 +89524,14 @@ SP.Screens.move = (function(){
       const desc = el.dataset.desc;
       const met = Number(el.dataset.met) || 4.5;
       const min = Number(el.dataset.min) || 30;
-      const rpe = Math.min(10, Math.max(1, Math.round(met)));
-      const w = {
-        id: U.uid(),
-        date: U.todayISO(),
-        name: desc,
-        minutes: min,
-        rpe: rpe,
-        items: [{ exId:'met', name:desc, met:met, minutes:min }],
-        note: 'MET: ' + met + ' (2024 Adult Compendium)'
-      };
-      await M.addWorkout(U.todayISO(), w);
+      /* 2026-10-25: tür etkinlikten (core/move.js metTuru); eskiden türsüz
+         yazılıp kuvvet sayılıyordu ve var olmayan M.addWorkout çağrılıyordu.
+         Zorlanma (RPE) kişinin hissidir: MET'ten türetilmez, boş kalır
+         (eskiden round(MET) yazılıp yüke karışıyordu; AGENTS §1.1). */
+      const w = SP.Move.metSeans({ ad:desc, met, dk:min, rpe:null, kategori:el.dataset.cat || '' }, U.todayISO());
+      await M.saveWorkout(w);
       UI.closeSheet();
-      UI.toast(desc + ' (' + min + ' dk) seans olarak eklendi');
+      UI.toast(desc + ' (' + min + ' dk) seans olarak eklendi', { undo:async () => { await M.deleteWorkout(w.id); SP.App.render(); } });
       SP.App.render();
     },
     async 'load-program-session'(el){
@@ -93101,6 +94638,83 @@ SP.Screens.onaylar = (function(){
       && n.okuma && n.okuma.yazilacak && n.okuma.yazilacak.length && SP.Beacon.canApply(n));
   }
 
+  /* GELEN KUTUSU TOPLU KAYDI (2026-10-25; kullanıcı: «spi için daha
+     işlevli veri girişi, sürtünmeyi azaltacak teknikler»). Kısayollar'dan
+     gelen beş «su 250» satırı tek tek onaylanınca altı dokunuş ediyordu.
+     Yalnız KATALOGDA KÜÇÜK seviyeli (AGENTS.md §1.9) ve şu an geçerli
+     ölçümler toplanır; ne yazılacağı dokunuştan ÖNCE satır satır görünür
+     (gelenOzet) ve tek «Geri al» bütün grubu geri alır. Tahlil (olcum-gir,
+     orta) hiçbir zaman toplanmaz, tek tek onaylanır. Sıra GELİŞ sırasıdır:
+     aynı alana iki satır geldiyse sonuncusu kalır.
+     SIRALI (2026-10-25): geçerlilik ve özet, satırlar uygulanacakları
+     sırayla doğrulanarak çıkar (SP.Proposals.sirali): 1000 ml varken üç
+     «su 250» özeti üç kez «toplam 1.250 ml» diyordu, dokunuş 1750 yazıyordu.
+     Artık toplamlar 1.250, 1.500, 1.750 der; sonuncusu yazılandır. */
+  function gelenToplu(){
+    if(!SP.Proposals) return [];
+    const adaylar = SP.Proposals.pending().filter(o => gelenMi(o) && o.action !== 'olcum-gir'
+      && (SP.Proposals.eylem(o.action) || {}).level === 'kucuk').reverse();
+    return SP.Proposals.sirali(adaylar).filter(x => x.c.ok).map(x => x.p);
+  }
+  function gelenOzet(l){
+    return SP.Proposals.sirali(l).map(({ p:o, pv }) => {
+      const d = o.params && o.params.date;
+      const ne = pv.ok && pv.rows.length ? pv.rows.map(r => r.alan + ' ' + r.sonra).join(', ')
+        : ((SP.Proposals.eylem(o.action) || {}).label || o.action);
+      return ne + (SP.U.isISO(d) && d !== SP.U.todayISO() ? ' (' + gunAd(d) + ')' : '');
+    }).join(' · ');
+  }
+  /* Bugün'ün düğmesi today.js'in ONAY_EYLEMLERI listesinden geçer; orada
+     «hkm-toplu» var, bu yüzden aynı eylem `data-kaynak="gelen"` ile ayrılır. */
+  function gelenTopluDugme(l, tone){
+    return K.Button({ label:'Hepsini kaydet (' + l.length + ')', size:'sm', tone, act:'hkm-toplu',
+      data:{ 'data-kaynak':'gelen' } });
+  }
+  function gelenTopluSatir(l){
+    return onaySatir({ baslik:'Kısayollar’dan ' + l.length + ' ölçüm', seviye:'kucuk',
+      ust:'Tek dokunuş hepsini yazar; «Geri al» hepsini birden geri alır. Tahliller tek tek onaylanır.',
+      govde:html`<p class="small mt-6">${gelenOzet(l)}</p>`,
+      eylem:gelenTopluDugme(l, 'primary') });
+  }
+  /* Bugün'ün sade kartı: liste + TEK düğme (Bugün 14 düğme bütçesi,
+     bugun.test.js); tek tek bakmak Onaylar'da, menü sayacından. Bugün'ün
+     tek dolu düğmesi ölçümü kaydetmektir, bu yüzden burada dolu değil. */
+  function GelenOzetKart(l){
+    return K.Kutu({ ad:'Kısayollar’dan ' + l.length + ' ölçüm', yuva:'onayını bekliyor',
+      govde:html`<p class="small">${gelenOzet(l)}</p>
+        <div class="row wrap gap-8 mt-8">${gelenTopluDugme(l)}</div>` });
+  }
+
+  /* Geri alma SON yazılandan başlar; sonraki kayıt kuralı (HATALAR Y-6)
+     proposals.js'te, burada yalnız sıra ve sonuç cümlesi. */
+  async function geriAl(idler){
+    let n = 0;
+    for(const id of idler.slice().reverse()){
+      const r = await SP.Proposals.undo(id);
+      if(r && r.ok) n++;
+    }
+    const kalan = idler.length - n;
+    UI.toast(idler.length === 1 ? (n ? 'Geri alındı.' : 'Geri alınamadı.')
+      : n + ' ölçüm geri alındı' + (kalan ? ', ' + kalan + ' tanesi geri alınamadı.' : '.'));
+    SP.App.render();
+  }
+
+  async function gelenTopluKaydet(){
+    const l = gelenToplu();
+    if(!l.length) return;
+    const yazilan = [];
+    let kalan = 0;
+    for(const o of l){
+      const r = await SP.Proposals.approve(o.id);
+      if(r.ok) yazilan.push(o.id); else kalan++;
+    }
+    if(!yazilan.length){ UI.toast('Hiçbir ölçüm kaydedilemedi.'); SP.App.render(); return; }
+    SP.UI.onayMuhru();
+    UI.toast(yazilan.length + ' ölçüm kaydedildi' + (kalan ? ', ' + kalan + ' tanesi kaydedilemedi.' : '.'),
+      { undo:async () => { await geriAl(yazilan); } });
+    SP.App.render();
+  }
+
   async function hkmToplu(){
     const l = topluKayitlar();
     let yazilan = 0, kalan = 0;
@@ -93198,8 +94812,12 @@ SP.Screens.onaylar = (function(){
     });
   }
 
-  function BekleyenKart(){
-    const liste = SP.Proposals ? SP.Proposals.pending() : [];
+  /* `enCok` (2026-10-25): Bugün'ün öneri alanı en çok BİR kart taşır
+     (vitrin 110); bütün bekleyenleri kart yapınca beş gelen satır 14
+     düğme bütçesini aşıyordu. */
+  function BekleyenKart(enCok){
+    const hepsi = SP.Proposals ? SP.Proposals.pending() : [];
+    const liste = enCok ? hepsi.slice(0, enCok) : hepsi;
     if(!liste.length) return '';
     const k = kopru();
     const kartlar = k ? liste.map(o => {
@@ -93308,9 +94926,10 @@ SP.Screens.onaylar = (function(){
   }
   function grupKutusu(g){
     const toplu = g.id === 'kayit' ? topluKayitlar().length : 0;
+    const gl = g.id === 'kayit' ? gelenToplu() : [];
     return K.Kutu({ ad:g.ad, ipucu:g.id === 'king' || g.id === 'sistem' ? 'hkm' : undefined,
       yuva:toplu >= 2 ? K.Button({ label:'Hepsini kaydet (' + toplu + ')', size:'sm', tone:'primary', act:'hkm-toplu' }) : String(g.satirlar.length),
-      govde:html`<div class="onay-liste" data-raf-tam>${map(g.satirlar, s => s.html)}</div>` });
+      govde:html`<div class="onay-liste" data-raf-tam>${when(gl.length >= 2, () => gelenTopluSatir(gl))}${map(g.satirlar, s => s.html)}</div>` });
   }
 
   /* Bekleyen: King + HKM (belirsizler dahil) + bekleyen kayıt. Kabuğun
@@ -93335,9 +94954,16 @@ SP.Screens.onaylar = (function(){
       kart = HkmTeklifKart();
       gosterilen = (S.ui.hkmIntents || []).length + (S.ui.hkmDoubts || []).length;
     }
+    /* Kısayollar'dan iki ve fazla küçük ölçüm geldiyse tek özet kart ve tek
+       dokunuş (2026-10-25); değilse en öndeki tek bekleyen kayıt. */
+    const gl = kart ? [] : gelenToplu();
+    if(!kart && gl.length >= 2){
+      kart = GelenOzetKart(gl);
+      gosterilen = gl.length;
+    }
     if(!kart){
-      kart = BekleyenKart();
-      gosterilen = SP.Proposals ? SP.Proposals.pending().length : 0;
+      kart = BekleyenKart(1);
+      gosterilen = SP.Proposals ? Math.min(1, SP.Proposals.pending().length) : 0;
     }
     const kalan = toplam - gosterilen;
     return html`<div class="stack-sm" data-oz="110">
@@ -93458,7 +95084,12 @@ SP.Screens.onaylar = (function(){
       S.ui.kingTeklifler = SP.KingTeklif.liste();
       SP.App.render();
     },
-    async 'hkm-toplu'(){ await hkmToplu(); },
+    /* Aynı eylem iki toplu kaydı taşır: Merkez günlük kaydı ve (data-kaynak
+       «gelen») Kısayollar ölçümleri — Bugün'den de aynı yol (today.js). */
+    async 'hkm-toplu'(el){
+      if(el && el.dataset && el.dataset.kaynak === 'gelen') await gelenTopluKaydet();
+      else await hkmToplu();
+    },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'seen'); },
     async 'hkm-intent-apply'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
@@ -93469,9 +95100,13 @@ SP.Screens.onaylar = (function(){
         : 'Kapatıldı; merkeze şimdilik bildirilemedi.');
       SP.App.render();
     },
+    /* Tek onayda da «Geri al» (2026-10-25): küçük aksiyon geri alınabilir
+       olmalı (AGENTS.md §1.9); geri alma anlık görüntüsü yoksa düğme çıkmaz. */
     async 'bekleyen-onay'(el){
-      const r = await SP.Proposals.approve(el.dataset.id);
-      UI.toast(r.ok ? 'Kaydedildi' : (r.why || 'Kaydedilemedi'));
+      const id = el.dataset.id;
+      const r = await SP.Proposals.approve(id);
+      if(r.ok && r.proposal && r.proposal.undo) UI.toast('Kaydedildi', { undo:async () => { await geriAl([id]); } });
+      else UI.toast(r.ok ? 'Kaydedildi' : (r.why || 'Kaydedilemedi'));
       SP.App.render();
     },
     async 'bekleyen-ret'(el){
@@ -94255,6 +95890,80 @@ SP.App = (function(){
 
   let rendering = false;
   let queued = null;
+  /* TEK SATIR GİRİŞİN SPİ KURULUMU (brand/ortak/giris.js). Modül düzeyinde ve
+     adlı (2026-10-25): boot çağırır; testler ortak kutuyu sıfırladıktan sonra
+     SP.App.girisKur() ile gerçek kurulumu geri getirir. */
+  function girisKurucu(){ return window.LIFEOS.GIRIS.kur({ modul:'spi',
+      onizle:t => {
+        /* Hazır öğün / antrenman adıyla (core/hazir.js söz 5): «menemen
+           tabağımı yedim», «bacak günümü yaptım». Önizleme + onay.
+           2026-10-25: gün sözü («dün …») ve öğün sözü («akşam …») geçer. */
+        const Q = SP.Quick;
+        const hz = SP.Hazir && SP.Hazir.bul(t);
+        if(hz){
+          const ogun = hz.tur === 'ogun';
+          const gs = Q && Q.gunSozu ? Q.gunSozu(t) : { gun:null };
+          const gun = Q && Q.tarih ? Q.tarih({ gun:gs.gun }) : SP.U.todayISO();
+          const slot = ogun && Q && Q.ogunSozu ? Q.ogunSozu(t) : null;
+          const neye = gun === SP.U.todayISO() ? 'bugüne' : U.fmtDate(gun) + ' gününe';
+          return { tur:ogun ? 'ogun' : 'hareket', metin:hz.hazir.ad + (ogun ? ' · hazır öğün' : ' · hazır antrenman')
+              + (gun === SP.U.todayISO() ? '' : ' · ' + U.fmtDate(gun)),
+            ipucu:ogun ? SP.Hazir.ogunOzet(hz.hazir) : SP.Hazir.antrenmanOzet(hz.hazir),
+            kaydet:async () => {
+              const r = ogun ? await SP.Hazir.ogunEkle(hz.hazir.id, gun, slot || undefined) : await SP.Hazir.antrenmanEkle(hz.hazir.id, gun);
+              render();
+              return r.ok ? { metin:'«' + r.ad + '» ' + neye + ' eklendi.', geriAl:async () => { await r.geriAl(); render(); } } : r.why;
+            } };
+        }
+        const p = Q && Q.parse(t);
+        /* tur: King'in sohbet karşılığı için (king.js söz 8). */
+        const tur = !p ? '' : p.kind === 'nap' ? 'uyku' : p.kind === 'meal' ? 'ogun' : p.kind === 'move' ? 'hareket' : p.kind === 'lab' ? 'tahlil'
+          : p.kind === 'symptom' ? 'olcum'
+          : p.data.field.id === 'sleep' ? 'uyku' : p.data.field.id === 'water' ? 'su' : 'olcum';
+        /* KAYDIN GÜNÜ (2026-10-25): «dün 2 bardak su» bugüne yazılıyordu.
+           Önizleme ne yazacağını söyler: su için ekleme ve yeni toplam
+           («Su +500 ml · toplam 1.500 ml»), başka günse o gün. */
+        const gun = p ? Q.tarih(p) : null;
+        const gunEki = gun && gun !== SP.U.todayISO() ? ' · ' + U.fmtDate(gun) : '';
+        /* giris.js (2026-10-25): öğün sözü olan öğün kendi GRUBUNDADIR
+           (kahvaltı ve öğle tek öğüne birleşmez); çok parçalı önizlemede
+           su yalnız eklemeyi söyler, toplamı parça bilemez. */
+        const grup = p && p.kind === 'meal' && p.data && p.data.slot ? p.data.slot : undefined;
+        const metinKisa = p && p.kind === 'vital' && p.data.ekle
+          ? p.data.field.label + ' +' + U.fmtNum(p.data.value) + ' ' + p.data.field.unit + gunEki : undefined;
+        return p ? { tur, grup, metinKisa, metin:Q.onizleme(p, gun) + gunEki, ipucu:p.hint, kaydet:async () => {
+          /* Geri alma (giris.js söz 8): ne eklendiyse yalnız o kalkar;
+             ölçüm önceki değerine döner (önce yoksa «girilmedi»). Tahlil
+             aynı günün kaydıyla birleştiği için geri alınmaz. */
+          const t = gun;
+          const once = { v:JSON.parse(JSON.stringify(SP.S.vitals[t] || {})), ogun:(SP.S.meals[t] || []).map(m => m.id),
+            seans:(SP.S.workouts || []).map(w => w.id) };
+          const r = await Q.apply(p, { date:t });
+          render();
+          /* Yazılmadıysa (şiddet söylenmedi, birim uyuşmuyor, toplam
+             sınırı aştı) nedeni döner; «kaydedildi» denmez. */
+          if(!r || !r.ok) return (r && r.text) || 'Kaydedilemedi.';
+          let geriAl = null;
+          if(p.kind === 'nap'){
+            const id = r && r.kayit && r.kayit.id;
+            geriAl = id ? async () => { await SP.Uyku.sil(t, id); render(); } : null;
+          }else if(p.kind === 'vital' || p.kind === 'symptom'){
+            const alanlar = p.kind === 'symptom' ? ['symptoms', 'symptomsLogged']
+              : [p.data.field.id].concat(p.data.ikinci ? [p.data.ikinci.field.id] : []);
+            geriAl = async () => { const pt = {}; alanlar.forEach(f => { pt[f] = once.v[f] == null ? null : once.v[f]; });
+              if(p.kind === 'symptom'){ pt.symptoms = once.v.symptoms || {}; pt.symptomsLogged = !!once.v.symptomsLogged; }
+              await SP.Model.saveVitals(t, pt); render(); };
+          }else if(p.kind === 'meal'){
+            const yeni = (SP.S.meals[t] || []).filter(m => once.ogun.indexOf(m.id) < 0).map(m => m.id);
+            geriAl = async () => { for(const id of yeni) await SP.Model.deleteMeal(t, id); render(); };
+          }else if(p.kind === 'move'){
+            const yeni = (SP.S.workouts || []).filter(w => once.seans.indexOf(w.id) < 0).map(w => w.id);
+            geriAl = async () => { for(const id of yeni) await SP.Model.deleteWorkout(id); render(); };
+          }
+          return { metin:r.text, geriAl };
+        } } : null;
+      },
+      ornekler:['7 saat uyudum, 2 yumurta yedim', '45 dk yürüyüş', '2 yumurta 1 çay', 'kilo 72'] }); }
 
   /* Aynı karede peş peşe gelen render çağrılarını tek çizime indirger.
      Arka plan sekmesinde rAF hiç çalışmaz; bu yüzden zamanlayıcı yedeği vardır. */
@@ -94867,6 +96576,43 @@ SP.App = (function(){
   /* Enter ile hızlı giriş: metin alanında Enter, yanındaki eylemi tetikler. */
   const ENTER_ACTIONS = { 'meal-text':'add-meal', 'quick-meal':'quick-meal', 'chat-text':'send-chat',
     'barkod-kod':'barkod-bul', 'ht-saat':'ht-kaydet' };
+  /* BUGÜN ÖLÇÜM FORMU ENTER İLE KAYDEDER (2026-10-25; kullanıcı: «spi için
+     daha işlevli veri girişi, sürtünmeyi azaltacak teknikler ile daha güzel
+     yap»). Uykuyu yazıp «Kaydet»e uzanmak gerekiyordu. Sayı alanları
+     screens/today.js FIELDS (`v-` + id) ve vücut ölçüleri; not alanı
+     (textarea) ve kanama kutusu Enter'ı kendisi kullanır, listede yok. */
+  ['sleep', 'rhr', 'hrv', 'sbp', 'dbp', 'spo2', 'temp', 'weight', 'waist', 'bodyfat', 'neck', 'hip', 'water']
+    .forEach(id => { ENTER_ACTIONS['v-' + id] = 'save-vitals'; });
+  function enterEylemi(id){ return ENTER_ACTIONS[id] || null; }
+
+  /* KISA YOL ŞERİDİ (brand/ortak/kisayol.js). 2026-10-25: en çok kullanılan
+     üç hazır öğün / antrenman (core/hazir.js) şeritte tek dokunuşla durur
+     (kullanıcı: «spi için daha işlevli veri girişi, sürtünmeyi azaltacak
+     teknikler ile daha güzel yap»). Şerit HİÇBİR ŞEY YAZMAZ (kisayol.js söz
+     5): çip kutuyu «… yedim / yaptım» diye doldurur, kayıt yine önizleme ve
+     «Kaydet» ile. Sıra son 30 günde kaç kez eklendiği (öğün notu ya da seans
+     adı ve süresi), eşitlikte listedeki sıra. Modül düğmesi BEŞİ GEÇMEZ: hazır
+     çipler Öğün / Hareket / Testler'in yerini alır (onlar menüde ve G + harfte
+     durur), Bugün'ün 14 düğme bütçesi büyümez (tests/bugun.test.js). */
+  const KISAYOL_SABIT = [{ ad:'Uyku', doldur:'uyku ' }, { ad:'Kilo', doldur:'kilo ' }];
+  const KISAYOL_ROTA = [{ ad:'Öğün', rota:'meals' }, { ad:'Hareket', rota:'move' }, { ad:'Testler', rota:'labs' }];
+  function kisayolDugmeleri(){
+    const H = SP.Hazir;
+    let hazir = [];
+    if(H){
+      const bugun = U.todayISO(), bas = U.iso(U.addDays(U.parse(bugun), -29));
+      const pencere = d => d >= bas && d <= bugun;
+      const ogunSay = ad => Object.keys(S.meals || {}).filter(pencere)
+        .reduce((n, d) => n + (S.meals[d] || []).filter(m => m && m.note === ad).length, 0);
+      const seansSay = k => (S.workouts || []).filter(w => w && pencere(w.date)
+        && (w.name || '') === (k.name || '') && (w.minutes || 0) === (k.minutes || 0)).length;
+      hazir = H.ogunler().map((h, i) => ({ ad:h.ad, doldur:h.ad + ' yedim', n:ogunSay(h.ad), i }))
+        .concat(H.antrenmanlar().map((h, i) => ({ ad:h.ad, doldur:h.ad + ' yaptım', n:seansSay(h.kayit || {}), i:i + 0.5 })))
+        .sort((a, b) => b.n - a.n || a.i - b.i).slice(0, 3)
+        .map(x => ({ ad:x.ad, doldur:x.doldur }));
+    }
+    return KISAYOL_SABIT.concat(hazir, KISAYOL_ROTA).slice(0, 5);
+  }
   document.addEventListener('keydown', async e => {
     if((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')){
       e.preventDefault();
@@ -95453,67 +97199,13 @@ SP.App = (function(){
       }
       /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
          kapıyı kullanır; ayrıştırıcı SP.Quick (ölçüm, tahlil, hareket, öğün). */
-      if(window.LIFEOS && window.LIFEOS.GIRIS){
-        window.LIFEOS.GIRIS.kur({ modul:'spi',
-          onizle:t => {
-            /* Hazır öğün / antrenman adıyla (core/hazir.js söz 5): «menemen
-               tabağımı yedim», «bacak günümü yaptım». Önizleme + onay. */
-            const hz = SP.Hazir && SP.Hazir.bul(t);
-            if(hz){
-              const ogun = hz.tur === 'ogun';
-              return { tur:ogun ? 'ogun' : 'hareket', metin:hz.hazir.ad + (ogun ? ' · hazır öğün' : ' · hazır antrenman'),
-                ipucu:ogun ? SP.Hazir.ogunOzet(hz.hazir) : SP.Hazir.antrenmanOzet(hz.hazir),
-                kaydet:async () => {
-                  const gun = SP.U.todayISO();
-                  const r = ogun ? await SP.Hazir.ogunEkle(hz.hazir.id, gun) : await SP.Hazir.antrenmanEkle(hz.hazir.id, gun);
-                  render();
-                  return r.ok ? { metin:'«' + r.ad + '» bugüne eklendi.', geriAl:async () => { await r.geriAl(); render(); } } : r.why;
-                } };
-            }
-            const p = SP.Quick && SP.Quick.parse(t);
-            /* tur: King'in sohbet karşılığı için (king.js söz 8). */
-            const tur = !p ? '' : p.kind === 'nap' ? 'uyku' : p.kind === 'meal' ? 'ogun' : p.kind === 'move' ? 'hareket' : p.kind === 'lab' ? 'tahlil'
-              : p.data.field.id === 'sleep' ? 'uyku' : p.data.field.id === 'water' ? 'su' : 'olcum';
-            return p ? { tur, metin:p.label, ipucu:p.hint, kaydet:async () => {
-              /* Geri alma (giris.js söz 8): ne eklendiyse yalnız o kalkar;
-                 ölçüm önceki değerine döner (önce yoksa «girilmedi»). Tahlil
-                 aynı günün kaydıyla birleştiği için geri alınmaz. */
-              const t = SP.U.todayISO();
-              const once = { v:Object.assign({}, SP.S.vitals[t] || {}), ogun:(SP.S.meals[t] || []).map(m => m.id),
-                seans:(SP.S.workouts || []).map(w => w.id) };
-              const r = await SP.Quick.apply(p);
-              render();
-              let geriAl = null;
-              if(p.kind === 'nap'){
-                const id = r && r.kayit && r.kayit.id;
-                geriAl = id ? async () => { await SP.Uyku.sil(t, id); render(); } : null;
-              }else if(p.kind === 'vital'){
-                const f = p.data.field.id, eski = once.v[f];
-                geriAl = async () => { const pt = {}; pt[f] = eski == null ? null : eski; await SP.Model.saveVitals(t, pt); render(); };
-              }else if(p.kind === 'meal'){
-                const yeni = (SP.S.meals[t] || []).filter(m => once.ogun.indexOf(m.id) < 0).map(m => m.id);
-                geriAl = async () => { for(const id of yeni) await SP.Model.deleteMeal(t, id); render(); };
-              }else if(p.kind === 'move'){
-                const yeni = (SP.S.workouts || []).filter(w => once.seans.indexOf(w.id) < 0).map(w => w.id);
-                geriAl = async () => { for(const id of yeni) await SP.Model.deleteWorkout(id); render(); };
-              }
-              return { metin:r && r.text, geriAl };
-            } } : null;
-          },
-          ornekler:['7 saat uyudum, 2 yumurta yedim', '45 dk yürüyüş', '2 yumurta 1 çay', 'kilo 72'] });
-      }
+      if(window.LIFEOS && window.LIFEOS.GIRIS) girisKurucu();
 
       /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).
          Harita çekmecelerden türetilir; her çekmecenin ilk ekranı. */
       if(window.LIFEOS && window.LIFEOS.KISAYOL){
         window.LIFEOS.KISAYOL.kur({ modul:'spi', git:r => go(r), palet:() => SP.Palette.open(),
-          dugmeler:() => [
-            { ad:'Uyku', doldur:'uyku ' },
-            { ad:'Kilo', doldur:'kilo ' },
-            { ad:'Öğün', rota:'meals' },
-            { ad:'Hareket', rota:'move' },
-            { ad:'Testler', rota:'labs' },
-          ],
+          dugmeler:kisayolDugmeleri,
           cekmeceler:() => SECTIONS.filter(s => s.views.length).map(s => ({ id:s.id, rota:s.views[0].route })) });
       }
 
@@ -95696,8 +97388,8 @@ SP.App = (function(){
     }
   }
 
-  return { sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
-    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml, arkaPlan };
+  return { girisKur:() => girisKurucu(), sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
+    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml, arkaPlan, enterEylemi, kisayolDugmeleri };
 })();
 
 /* Test paketi bu dosyayı da yükler (ekran sözleşmelerini denetlemek için)
