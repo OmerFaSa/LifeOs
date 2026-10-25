@@ -18415,7 +18415,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'43554221', at:'2026-10-25 16:58', dirty:true };
+ESP.BUILD = { id:'ad64ed65', at:'2026-10-25 19:04', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -65648,6 +65648,15 @@ ESP.Model = (function(){
     return info ? info.minutes : null;
   }
 
+  /* Yalniz OLCULMUS dakika (depo sahibi, 2026-10-25): XP, rozet ve
+     mufredat sayaclari tahmini oturumu saymaz. Olculmus oturum yoksa
+     null — sifir degil. */
+  function olculenDakika(dateISO, discId){
+    const rows = sessionsOf(dateISO)
+      .filter(s => (!discId || s.disc === discId) && s.minutesCert === 'measured' && s.minutes != null);
+    return rows.length ? rows.reduce((a, s) => a + s.minutes, 0) : null;
+  }
+
   async function saveDay(dateISO){
     const rec = ensureDay(dateISO);
     rec.updatedAt = new Date().toISOString();
@@ -66720,7 +66729,7 @@ ESP.Model = (function(){
     profileList, addProfile, removeProfile, switchProfile, activeProfileId,
     /* gun ve oturum */
     newDay, dayOf, ensureDay, saveDay, dayHasEntry, sessionsOf, minutesOf, minutesInfo,
-    addSession, updateSession, deleteSession, recentDays, streak,
+    addSession, updateSession, deleteSession, recentDays, streak, olculenDakika,
     /* dil */
     newCard, saveCard, deleteCard, cardsOf,
     /* felsefe */
@@ -68646,8 +68655,8 @@ ESP.XPSayim = (function(){
     g.forEach(gun => {
       out[gun] = {
         'esp.kart':kart[gun] || 0,
-        /* Dakika: ölçülmemiş oturum sayılmaz — `minutesOf` null döner. */
-        'esp.oturum':M.minutesOf(gun) || 0,
+        /* Dakika: ölçülmemiş ya da tahmini oturum sayılmaz. */
+        'esp.oturum':M.olculenDakika(gun) || 0,
         'esp.okuma':not[gun] || 0,
         'esp.yazi':taslak[gun] || 0,
         'esp.gun':M.dayHasEntry(M.dayOf(gun)) ? 1 : 0,
@@ -68679,7 +68688,7 @@ ESP.XPSayim = (function(){
 
    ESP'DE NE SAYILIR
 
-     dakika    `Model.minutesOf(gün)` — oturumların ölçülmüş süresi.
+     dakika    `Model.olculenDakika(gün)` — oturumların ölçülmüş süresi; tahmin sayılmaz.
                XP'nin `esp.oturum` için kullandığı sayının aynısı;
                ikinci bir «pratik süresi» tanımı açmak, ikisinin bir
                gün ayrışması demekti.
@@ -68705,8 +68714,8 @@ ESP.BasarimSayim = (function(){
     const taslak = (S.drafts || []).filter(function(t){
       return ESP.U.gunOf(String((t && t.createdAt) || '')) === gun; }).length;
 
-    /* Ölçülmemiş oturum sayılmaz — `minutesOf` null döner. */
-    const dakika = Number(M.minutesOf(gun)) || 0;
+    /* Ölçülmemiş ya da tahmini oturum sayılmaz — `olculenDakika` null döner. */
+    const dakika = Number(M.olculenDakika(gun)) || 0;
     const gunKaydi = M.dayHasEntry(M.dayOf(gun)) ? 1 : 0;
 
     return {
@@ -70488,12 +70497,12 @@ ESP.Curriculum = (function(){
 
   function days(n){ return U.lastDays(n); }
 
-  /* Bir disiplinin son N gunde toplam dakikasi. Hic gun girilmemisse
-     'missing' doner — sifir degil. */
+  /* Bir disiplinin son N gunde OLCULMUS toplam dakikasi; tahmini oturum
+     kapiyi gecirmez. Hic olculmus gun yoksa 'missing' doner — sifir degil. */
   function minutes(discId, n){
     let toplam = 0, girilen = 0;
     days(n).forEach(function(d){
-      const v = ESP.Model.minutesOf(d, discId);
+      const v = ESP.Model.olculenDakika(d, discId);
       if(v == null) return;
       toplam += v; girilen++;
     });
@@ -97622,32 +97631,7 @@ ESP.App = (function(){
                 return { ad:x.disc.label, alt:dk ? dk + ' dk çalışıldı' : 'haftanın dengesinde sırada', durum:dk ? 'bitti' : 'sirada', dk:25, route:x.disc.route || null };
               }), not:r.note || '' };
             },
-            istatistik:() => {
-              const dakika = {};
-              let gun = 0;
-              for(let i = 0; i < 30; i++){
-                const ss = M.sessionsOf(U.iso(U.addDays(U.today(), -i))).filter(s => s.minutes > 0);
-                if(ss.length) gun++;
-                ss.forEach(s => { dakika[s.disc] = (dakika[s.disc] || 0) + s.minutes; });
-              }
-              const top = Object.keys(dakika).reduce((a, k) => a + dakika[k], 0);
-              /* Son 7 gün dakika (eskiden yeniye); oturumu olmayan gün boşluk kalır. */
-              const seri = [];
-              for(let i = 6; i >= 0; i--){
-                const ss = M.sessionsOf(U.iso(U.addDays(U.today(), -i))).filter(s => s.minutes > 0);
-                seri.push(ss.length ? ss.reduce((a, s) => a + s.minutes, 0) : null);
-              }
-              const enCok = Object.keys(dakika).sort((a, b) => dakika[b] - dakika[a])[0];
-              const sinir = U.iso(U.addDays(U.today(), -29));
-              const biten = (S.books || []).filter(b => b.finishedAt && String(b.finishedAt).slice(0, 10) >= sinir).length;
-              return [
-                { ad:'Çalışılan gün · 30 gün', deger:gun || null, birim:'/ 30', etiket:'ölçüldü' },
-                { ad:'Toplam süre · 30 gün', deger:top || null, birim:'dk', etiket:'ölçüldü', seri },
-                { ad:'En çok çalışılan alan', deger:enCok ? (ESP.DISCIPLINE_BY_ID[enCok] || {}).label || enCok : null, etiket:'hesaplandı',
-                  alt:enCok ? dakika[enCok] + ' dk' : '' },
-                { ad:'Biten kitap · 30 gün', deger:biten || null, etiket:'ölçüldü' },
-              ];
-            },
+            istatistik:() => kralIstatistik(),
             /* Kelime soru kartı: senin dil kartlarından (ön yüz → doğru arka yüz,
                üç çeldirici başka kartlardan). Cevap tekrar takvimine yazılmaz. */
             soru:() => {
@@ -97863,7 +97847,36 @@ ESP.App = (function(){
     }
   }
 
-  return { sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS,
+  /* Kral «istatistik» kartı. Toplam süre tahmini oturum içeriyorsa
+     «tahmin» der (Günü kapat plan oturumunu tahmin etiketiyle yazar). */
+  function kralIstatistik(){
+    const dakika = {};
+    let gun = 0, tahmin = false;
+    for(let i = 0; i < 30; i++){
+      const ss = M.sessionsOf(U.iso(U.addDays(U.today(), -i))).filter(s => s.minutes > 0);
+      if(ss.length) gun++;
+      ss.forEach(s => { dakika[s.disc] = (dakika[s.disc] || 0) + s.minutes; if(s.minutesCert !== 'measured') tahmin = true; });
+    }
+    const top = Object.keys(dakika).reduce((a, k) => a + dakika[k], 0);
+    /* Son 7 gün dakika (eskiden yeniye); oturumu olmayan gün boşluk kalır. */
+    const seri = [];
+    for(let i = 6; i >= 0; i--){
+      const ss = M.sessionsOf(U.iso(U.addDays(U.today(), -i))).filter(s => s.minutes > 0);
+      seri.push(ss.length ? ss.reduce((a, s) => a + s.minutes, 0) : null);
+    }
+    const enCok = Object.keys(dakika).sort((a, b) => dakika[b] - dakika[a])[0];
+    const sinir = U.iso(U.addDays(U.today(), -29));
+    const biten = (S.books || []).filter(b => b.finishedAt && String(b.finishedAt).slice(0, 10) >= sinir).length;
+    return [
+      { ad:'Çalışılan gün · 30 gün', deger:gun || null, birim:'/ 30', etiket:'ölçüldü' },
+      { ad:'Toplam süre · 30 gün', deger:top || null, birim:'dk', etiket:tahmin ? 'tahmin' : 'ölçüldü', seri },
+      { ad:'En çok çalışılan alan', deger:enCok ? (ESP.DISCIPLINE_BY_ID[enCok] || {}).label || enCok : null, etiket:'hesaplandı',
+        alt:enCok ? dakika[enCok] + ' dk' : '' },
+      { ad:'Biten kitap · 30 gün', deger:biten || null, etiket:'ölçüldü' },
+    ];
+  }
+
+  return { sayfaSonuRota, boot, kralIstatistik, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS,
     sectionOf, routeOn, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest, girisKur, gunuKapatKur,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, arkaPlan };
 })();
