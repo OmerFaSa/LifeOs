@@ -472,4 +472,26 @@
       }
     });
   });
+
+  /* HATA (2026-10-25, Günü kapat Adım 0): P2 «girildi» kuralı varsayılanla
+     dolan her ölçüm satırını sayıyordu (symptoms:{}, symptomsLogged:false,
+     period:false); boş satır ve geri alınmış kayıt günü «girildi» yapıyordu.
+     Girilen: dolu bir sayı, işaretlenmiş şikâyet ya da «şikâyet yok», adet
+     işareti ya da öğün. */
+  describe('Pusula P2 — SPİ «girildi» kuralı', () => {
+    it('boş ya da geri alınmış ölçüm satırı günü girildi saymaz', async () => {
+      resetState();
+      const g = SP.App.girildi;
+      expect(g(GUN)).toBe(false);
+      await SP.Model.saveVitals(GUN, { water:500 });
+      expect(g(GUN)).toBe(true);
+      await SP.Model.saveVitals(GUN, { water:null });
+      expect(g(GUN)).toBe(false);
+      await SP.Model.saveVitals(GUN, { symptomsLogged:true });
+      expect(g(GUN)).toBe(true);
+      resetState();
+      pushMeal(GUN, {});
+      expect(g(GUN)).toBe(true);
+    });
+  });
 })();

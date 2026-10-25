@@ -197,9 +197,12 @@ R.Beacon = (function(){
       ? metric(R.Calc.gunSorusu(gun), 'measured')
       : metric(null, 'missing');
 
+    /* Plandan doldurulan dakika «tahmin»dir (blok.minCert); bir blok bile
+       tahminse günün toplamı ölçüm diye gitmez. */
     const sure = bloklar.filter(function(b){ return b.actualMin != null; });
     out.study_minutes = sure.length
-      ? metric(sure.reduce(function(a, b){ return a + Number(b.actualMin || 0); }, 0), 'measured')
+      ? metric(sure.reduce(function(a, b){ return a + Number(b.actualMin || 0); }, 0),
+        sure.some(function(b){ return b.minCert === 'estimated'; }) ? 'estimated' : 'measured')
       : metric(null, 'missing');
 
     /* Net: TEK deneme değil MEDYAN. Tek denemeyle konuşmak bu depoda

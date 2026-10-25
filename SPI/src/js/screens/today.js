@@ -1042,15 +1042,129 @@ SP.Screens.today = (function(){
 
   /* Suyu yazar; artınca vakti gelen su hatırlatması kapanır. Geri al:
      önceki değer ve kapatılan işaretler. */
-  async function suYaz(d, ml){
-    const { b, hedef, ml:once } = suDurumu(d);
+  /* Yazımın kendisi (Günü kapat da bunu kullanır): bildirim yok, geri al döner. */
+  async function suYazCekirdek(d, ml){
+    const { ml:once } = suDurumu(d);
     const sonra = ml == null || ml <= 0 ? null : Math.min(ml, SU_EN_COK);
     await M.saveVitals(d, { water:sonra });
     const kapanan = sonra != null && sonra > (once || 0) ? await hatirlatKapat('su', d, true) : [];
+    return { sonra, geriAl:async () => { await M.saveVitals(d, { water:once }); await hatirlatAc(kapanan, d); SP.App.render(); } };
+  }
+  async function suYaz(d, ml){
+    const { b, hedef } = suDurumu(d);
+    const r = await suYazCekirdek(d, ml), sonra = r.sonra;
     SP.App.render();
     UI.toast(sonra == null ? 'Su girilmedi olarak bırakıldı'
       : 'Su · ' + Math.floor(sonra / b) + ' / ' + hedef + ' bardak (' + U.fmtNum(sonra) + ' ml)',
-      { undo:async () => { await M.saveVitals(d, { water:once }); await hatirlatAc(kapanan, d); SP.App.render(); } });
+      { undo:r.geriAl });
+  }
+
+  /* GÜNÜ KAPAT — SPİ satırları (KOLAY-PLANI Faz 1; çekirdek core/gunukapat.js).
+     Depo sahibi (2026-10-25): ölçüm satırları toplu onaylanmaz, tek satırla
+     yazılır. Satırlar dürüst kurulur:
+       · Su (beyan): hedefin (SU_ESIK) altındaysa «Hedef: 2.000 ml», suYaz
+         yolundan; hedefe ulaştıysa «kaydedildi».
+       · Öğünler (beyan): boş her öğün yuvası için «her zamanki» YALNIZ son
+         7 günün en az 4'ünde aynı öğünden (aynı yuva, aynı gıdalar; kalip()).
+         Kalıp yoksa öneri yok: öğün uydurulmaz.
+       · Hatırlatmalar (beyan, yalnız bugün): vakti gelmiş, işaretlenmemişler
+         tek satır, isaretleHepsi ile. Doz ve ilaç adı görünmez.
+       · Uyku, nabız, HRV, kilo (ölçüm): yazma işlevi yok; son değer yalnız
+         ipucu. Ölçüm alttaki tek satıra yazılır (GIRIS, SP.Quick). */
+  const GK_OLCUM = [
+    { id:'uyku', alan:'sleep', ad:'Uyku', birim:'sa' },
+    { id:'nabiz', alan:'rhr', ad:'İstirahat nabzı', birim:'atım/dk' },
+    { id:'hrv', alan:'hrv', ad:'HRV', birim:'ms' },
+    { id:'kilo', alan:'weight', ad:'Kilo', birim:'kg' },
+  ];
+  function gkOgunOzet(m){
+    return m.items.map(it => {
+      const f = SP.FOOD_BY_ID && SP.FOOD_BY_ID[it.foodId];
+      const g = it.g != null ? it.g : (it.kg != null ? Math.round(it.kg * 1000) : null);
+      return (f ? f.name : it.foodId) + (g ? ' ' + U.fmtNum(g) + ' g' : '');
+    }).join(', ');
+  }
+  const GK_OGUN_NOTU = 'Her zamanki';
+  const gkAnahtar = m => (m.items || []).map(it => it && it.foodId).filter(Boolean).sort().join('+');
+  function gkSatirlari(gun){
+    const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
+    const out = [];
+    const s = suDurumu(gun);
+    if(s.ml != null && s.ml >= SU_ESIK) out.push({ id:'su', ad:'Su', tur:'beyan', yazildi:true, ipucu:U.fmtNum(s.ml) + ' ml' });
+    /* Satır kurulduktan sonra su değiştiyse (tek satır «su 2 bardak» yazdı)
+       ölçülen değer hedef tahminiyle ezilmez: satır atlanır. */
+    else{
+      const suOnce = (M.vitalsOf(gun) || {}).water;
+      out.push({ id:'su', ad:'Su', tur:'beyan', oneri:{ metin:'Hedef: ' + U.fmtNum(SU_ESIK) + ' ml', kaynak:'plan' },
+        yaz:async g => {
+          const simdi = (M.vitalsOf(g) || {}).water;
+          if(g !== gun || (simdi == null ? null : Number(simdi)) !== (suOnce == null ? null : Number(suOnce))) return { atlandi:true };
+          const r = await suYazCekirdek(g, SU_ESIK); return { metin:'Su ' + U.fmtNum(SU_ESIK) + ' ml', geriAl:r.geriAl }; } });
+    }
+
+    const bugunkuler = M.mealsOf(gun).filter(m => m.items.length);
+    (SP.Ogun ? SP.Ogun.liste() : []).forEach(sl => {
+      const id = 'ogun-' + sl.id;
+      const var_ = bugunkuler.filter(m => m.slot === sl.id);
+      if(var_.length){ out.push({ id, ad:sl.label, tur:'beyan', yazildi:true, ipucu:var_.map(gkOgunOzet).join(' · ') }); return; }
+      const kayit = [], son = {};
+      for(let i = 1; i <= 7; i++){
+        const d = U.iso(U.addDays(U.parse(gun), -i));
+        /* Günü kapat'ın kendi yazdığı öğün kalıbı beslemez (kendini doğrulardı). */
+        M.mealsOf(d).filter(m => m.slot === sl.id && m.items.length && m.note !== GK_OGUN_NOTU).forEach(m => {
+          const a = gkAnahtar(m);
+          if(!a) return;
+          kayit.push({ gun:d, anahtar:a });
+          if(!son[a]) son[a] = m;                         // en yeni örnek kopyalanır
+        });
+      }
+      const k = G ? G.kalip(kayit, gun) : [];
+      if(!k.length){ out.push({ id, ad:sl.label, tur:'beyan' }); return; }
+      const ornek = son[k[0]];
+      out.push({ id, ad:sl.label, tur:'beyan', oneri:{ metin:gkOgunOzet(ornek), kaynak:'kalip' },
+        yaz:async g => {
+          const yeni = Object.assign(M.newMeal(sl.id), { items:ornek.items.map(it => Object.assign({}, it)), note:GK_OGUN_NOTU });
+          await M.addMeal(g, yeni);
+          return { metin:sl.label, geriAl:async () => { await M.deleteMeal(g, yeni.id); } };
+        } });
+    });
+
+    const H = SP.Hatirlat;
+    if(gun === U.todayISO() && H && H.bugun && H.isaretleHepsi){
+      const l = H.bugun(bugunSimdi());
+      const vakti = l.filter(x => x.durum === 'vakti').map(x => x.anahtar);
+      if(vakti.length) out.push({ id:'hatirlatma', ad:'Hatırlatmalar', tur:'beyan',
+        oneri:{ metin:vakti.length + ' hatırlatma · yapıldı', kaynak:'plan' },
+        yaz:async g => { const r = await H.isaretleHepsi(vakti, g); return { metin:'Hatırlatmalar', geriAl:r.geriAl }; } });
+      else if(l.some(x => x.durum === 'yapildi')) out.push({ id:'hatirlatma', ad:'Hatırlatmalar', tur:'beyan', yazildi:true, ipucu:'vakti gelenler işaretli' });
+    }
+
+    const v = M.vitalsOf(gun) || {};
+    const onceki = Object.keys(S.vitals || {}).filter(t => t < gun).sort().reverse();
+    GK_OLCUM.forEach(f => {
+      const yaz = x => U.fmtNum(Number(x)) + ' ' + f.birim;
+      if(v[f.alan] != null){ out.push({ id:f.id, ad:f.ad, tur:'olcum', yazildi:true, ipucu:yaz(v[f.alan]) }); return; }
+      const t = onceki.find(x => S.vitals[x] && S.vitals[x][f.alan] != null);
+      out.push({ id:f.id, ad:f.ad, tur:'olcum', yazildi:false,
+        ipucu:t ? 'son: ' + yaz(S.vitals[t][f.alan]) + ' · ' + U.fmtShort(t) : 'son: veri yok' });
+    });
+    return out;
+  }
+  /* Açık «Günü kapat» alt sayfası kayıttan ve geri almadan sonra tazelenir. */
+  function gkTazele(){
+    const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
+    const k = document.querySelector('#sheet [data-gunukapat]');
+    if(!G || !k) return;
+    k.outerHTML = G.cizim(k.getAttribute('data-gun'));
+  }
+  /* Yalnız bugün (2026-10-25): tek satırın ölçümü gün sözü yoksa bugüne
+     yazılır; geçmiş gün açılsa ölçüm ve beyan ayrı günlere düşerdi.
+     Geçmiş gün «Günü düzenle» yolundan girilir. */
+  function gkAc(gun){
+    const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
+    if(!G || !G.kuruluMu || !G.kuruluMu() || gun !== U.todayISO()){ SP.App.go('gun'); return; }
+    UI.sheet({ title:'Günü kapat', body:G.cizim(gun),
+      footer:String(K.Button({ label:'Günü düzenle', tone:'ghost', act:'go', data:{ 'data-route':'gun' } })) });
   }
 
   /* Radio grubunun klavyesi: oklar bir bardak, Boşluk/Enter dokunuş.
@@ -1280,7 +1394,8 @@ SP.Screens.today = (function(){
       { ad:'Hareket', deger:hareketDk(t), birim:'dk', kesinlik:'measured', seri:yedi.map(hareketDk), git:'move' },
     ];
     return KS.kapakHtml({ modul:'spi', selam:KS.acilis('spi').selam, cumle:SP.Screens.today.headline(), sayilar,
-      eylem:String(K.Button({ label:'Günü kaydet', tone:'primary', act:'go', data:{ 'data-route':'gun' } })),
+      /* Günü kapat (KOLAY-PLANI Faz 1): alt sayfa; «Günü düzenle» onun içinde. */
+      eylem:String(K.Button({ label:'Günü kaydet', tone:'primary', act:'gunu-kapat' })),
       ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
   }
 
@@ -1462,6 +1577,8 @@ SP.Screens.today = (function(){
   const handle = {
     async 'dunku-ogun'(el){ await dunkuEkle('ogun', el.dataset.id); },
     async 'dunku-antrenman'(el){ await dunkuEkle('antrenman', el.dataset.id); },
+    /* Kapak bugünü gösterir: sayfa da bugünü açar (gizli görünen gün değil). */
+    'gunu-kapat'(){ gkAc(U.todayISO()); },
     async 'kotu-gun'(){
       const r = await SP.KotuGun.ac();
       if(!r.ok){ UI.toast(r.why); return; }
@@ -1802,6 +1919,8 @@ SP.Screens.today = (function(){
        sıradaki hatırlatma. İlaç adı SÖYLENMEZ (hatirlat.js söz 3): yalnız
        «ilaç ya da takviye». Kural metni, model yok. */
     kapak,
+    /* Günü kapat: app.js kurar (GUNUKAPAT.kur); satırlar ve tazeleme burada. */
+    gunuKapat:{ satirlar:gkSatirlari, tazele:gkTazele, ac:gkAc },
     sesli(simdi){
       const now = simdi || new Date();
       const r = SP.Move.readiness(SP.U.todayISO());

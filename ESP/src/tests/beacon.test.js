@@ -319,6 +319,23 @@
       });
     });
 
+    /* Günü kapat'ın planlı dakikası tahmindir (minutesCert:'estimated'):
+       toplamda tek bir tahmin bile varsa dakika «ölçüldü» gitmez. */
+    it('tahmin içeren günün dakikası tahmin gider, ölçüm gitmez', async () => {
+      resetState();
+      await B().save({ level:'gelismis' });
+      ESP.S.days[BUGUN] = { date:BUGUN, sessions:[
+        { id:'s1', disc:'lang', minutes:45, minutesCert:'measured' },
+        { id:'s2', disc:'lang', minutes:25, minutesCert:'estimated' }] };
+      let m = B().payload(BUGUN).metrics;
+      expect(m.practice_minutes).toEqual({ value:70, cert:'estimated' });
+      expect(m['disc.lang.minutes']).toEqual({ value:70, cert:'estimated' });
+      ESP.S.days[BUGUN].sessions.pop();
+      m = B().payload(BUGUN).metrics;
+      expect(m.practice_minutes).toEqual({ value:45, cert:'measured' });
+      expect(m['disc.lang.minutes']).toEqual({ value:45, cert:'measured' });
+    });
+
     /* Bugunku degeri dunun tarihiyle yollamak, ambara SAHTE bir olcum
        yazmaktir: bugunden turetilen alanlar gecmis gunde gitmez. */
     it('bugünden türetilen alan geçmiş güne yazılmaz', async () => {

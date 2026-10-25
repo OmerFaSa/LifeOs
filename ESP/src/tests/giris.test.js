@@ -158,6 +158,27 @@
       }finally{ G()._sifirla(); }
     });
 
+    /* 2026-10-25 inceleme: çok parçalı kayıtta ikinci parça hata verirse
+       birincisi yazılı kalıyordu. Hepsi ya da hiçbiri. */
+    it('çok parçalı kayıtta yarıda hata olursa yazılan parçalar geri alınır, hata iletilir', async () => {
+      const gunluk = [];
+      G()._sifirla();
+      G().kur({ modul:'deneme', ornekler:[], onizle:t => {
+        const m = t.match(/^(nabız|kilo) (\d+)$/);
+        if(!m) return null;
+        return { tur:'olcum', metin:t, kaydet:async () => {
+          if(m[1] === 'kilo') throw new Error('depo kapalı');
+          gunluk.push('yaz:' + t); return { metin:'ok', geriAl:async () => { gunluk.push('geri:' + t); } }; } };
+      } });
+      try{
+        const p = G().onizle('nabız 56, kilo 72');
+        let hata = null;
+        try{ await p.kaydet(); }catch(e){ hata = e; }
+        expect(hata && hata.message).toBe('depo kapalı');
+        expect(gunluk).toEqual(['yaz:nabız 56', 'geri:nabız 56']);
+      }finally{ G()._sifirla(); }
+    });
+
     /* 2026-10-25 hata: «kahvaltıda 2 yumurta 1 çay, öğlen mercimek» tek öğüne
        birleşiyor, «çay» sessizce düşüyor ve hepsi kahvaltıya yazılıyordu.
        Birleşik önizleme her parçanın her öğesini içermelidir; modülün grup

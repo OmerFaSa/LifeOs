@@ -16,6 +16,14 @@ R.Screens.today = (function(){
   const c = R.C;
 
   function todayDoc(){ return S.days[U.todayISO()]; }
+  /* Dakikanın kesinliği (AGENTS §1.2): plandan doldurulan dakika
+     «tahmin»dir; sayaç ya da elle yazılan «ölçüldü». Tahmine eklenen
+     sayaç dakikası toplamı ölçüme çevirmez. Etiketsiz eski kayıt ölçümdür. */
+  function planDakikasi(b){ b.actualMin = b.targetMin; b.minCert = 'estimated'; }
+  function sayacDakikasi(b, dk){
+    b.actualMin = (b.actualMin || 0) + dk;
+    if(b.minCert !== 'estimated') b.minCert = 'measured';
+  }
 
   /* ---------- zamanlayici ---------- */
   let tickHandle = null;
@@ -948,8 +956,11 @@ R.Screens.today = (function(){
       govde:bloklar.length
         ? html`<ol class="akis" data-oz="001">${map(bloklar, b => AkisSatiri(b, sira))}</ol>${raw(VT() && bloklar.some(b => b.status === 'pending' && !b.startedAt) ? VT().kaydirIpucu() : '')}`
         : html`<p class="akis__bos small muted">${day.ara ? 'Bugün ara günü: plan boş.' : 'Bugün için blok yok.'}</p>`,
-      ayak:c.Button({ label:'Blokları ve sayaçları aç', size:'sm', tone:'ghost', act:'go',
-        data:{ 'data-route':'gun' } }) });
+      /* «Günü kapat» (KOLAY Faz 1): ortak çekirdek kuruluysa; ince düğme,
+         Bugün'ün tek dolu düğmesi kahramanda kalır. Günü düzenle yerinde. */
+      ayak:html`${window.LIFEOS && window.LIFEOS.GUNUKAPAT && window.LIFEOS.GUNUKAPAT.kuruluMu()
+        ? c.Button({ label:'Günü kapat', icon:'check', size:'sm', tone:'ghost', act:'gunu-kapat' }) : ''}${c.Button({ label:'Blokları ve sayaçları aç', size:'sm', tone:'ghost', act:'go',
+        data:{ 'data-route':'gun' } })}` });
   }
 
   function OzetKutusu(day, dateISO){
@@ -1534,8 +1545,284 @@ R.Screens.today = (function(){
     'hkm-intent-seen', 'hkm-intent-no', 'hkm-doubt-ok', 'office-approve', 'office-reject', 'office-undo',
     'oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'];
 
+  /* ---------- GÜNÜ KAPAT (KOLAY-PLANI Faz 1; brand/ortak/gunukapat.js) ----------
+
+     Akşam tek alt sayfa: satırları bu ekran kurar, ortak çekirdek çizer ve
+     yazar; bağlantı app.js'te (R.App.gunuKapatKur). Depo sahibinin
+     kararları (2026-10-25) ve doktrin (AGENTS §1.1, §1.2, §1.7):
+
+       · BEYAN yalnız bekleyen bloğun «tamamlandı»sıdır: durum 'done' ve
+         actualMin boşsa planlanan dakika — «block-kaydir» ile aynı emsal.
+         actualQ / correctQ bu satırda ASLA yazılmaz. Blok kaydında
+         dakikanın kesinlik alanı yok; satırda kaynağı «plan» diye görünür.
+       · ÖLÇÜM satırları (blok başına soru / doğru, paragraf, problem,
+         uyku) toplu yazılmaz ve ön doldurulmaz; plan ve son değer yalnız
+         ipucudur. Ölçüm ekranın tek satırına yazılır ve AYS'nin
+         ayrıştırıcısından geçer (core/komut.js → core/entry.js).
+       · SORU BLOĞA YAZILIR, BLOK UYDURULMAZ. Satırdaki her soru parçası
+         için hedef blok şu sırayla bulunur:
+           1. parçada bir bloğun adı (konu, ders ya da yuva) geçiyorsa o
+              blok; iki bloğun adı birden geçiyorsa reddedilir;
+           2. ayrıştırıcı bir ders bulduysa o dersin bugünkü TEK bloğu;
+              o derste birden çok blok varsa ya da hiç yoksa reddedilir;
+           3. ad da ders de yoksa: günde tek blok varsa o, birden çoksa
+              reddedilir («bugün 2 blok var; bölüştürmem»).
+         Toplam bloklara ASLA bölüştürülmez. Bloğu hiç olmayan günde (ara
+         günü) soru ayrıştırıcının kendi yoluyla günün plan dışı toplamına
+         gider (soru-yaz). Bloğa yazım Günü düzenle'nin blok alanıyla aynı
+         alanlara gider (actualQ, correctQ; ekleyerek, soru-yaz gibi) ama
+         bloğun DURUMUNA dokunmaz: işaretini kaldırdığın «tamamlandı»
+         satırı ölçüm yüzünden yazılmış olmasın.
+       · Belirsiz parça tahmin edilmez: anlaşılmayan, iki ölçümü tek
+         parçada taşıyan («20 soru 15 doğru 7 saat uyudum» yalnız uykuyu
+         okurdu), boş sayısı söylenmemiş «yanlış» (doğru = çözülen − yanlış
+         varsayımı) ve plan komutu reddedilir; hiçbir şey yazılmaz. */
+  const GK_OLCUM = { 'soru-yaz':1, 'uyku-yaz':1, 'paragraf-yaz':1, 'problem-yaz':1, 'sure-yaz':1 };
+  /* Ölçüm dilinin sözcükleri blok adı sayılmaz. */
+  const GK_DIL = ['soru', 'dogru', 'yanlis', 'bos', 'net', 'tane', 'dakika', 'saat', 'uyku', 'ders'];
+  /* Bir parçada görülüp de okunmayan ölçüm (normalize metinde). */
+  const GK_AILE = [
+    ['uyku-yaz', /uyu|uyku/],
+    ['soru-yaz', /\d\s*(?:tane\s*)?soru|soru\s+\d/],
+    ['paragraf-yaz', /\d\s*(?:tane\s*)?paragraf|paragraf\s+\d/],
+    ['problem-yaz', /\d\s*(?:tane\s*)?problem|problem\s+\d/],
+  ];
+  const GK_ORNEK = '«20 soru 15 doğru, 7 saat uyudum»';
+  const gkBloklar = day => ((day && day.blocks) || []).filter(b => b.slot !== 'Dinlenme');
+  const gkAd = b => b.topic || b.subject || b.slot || 'Blok';
+  const gkNorm = s => U.norm(s).replace(/[^a-z0-9]+/g, ' ').trim();
+
+  /* Son değer (ipucu): bu günden önceki en yakın kayıt. */
+  function gkSon(gun, alan, gecerli){
+    const d = Object.keys(S.days || {}).filter(x => x < gun).sort().reverse()
+      .find(x => gecerli(S.days[x] && S.days[x][alan]));
+    return d ? { deger:S.days[d][alan], gun:d } : null;
+  }
+
+  function gkSatirlar(gun){
+    const day = S.days[gun];
+    if(!day) return [];
+    const bl = gkBloklar(day);
+    const out = [];
+    bl.forEach(b => {
+      const id = 'blok:' + b.id, ad = gkAd(b);
+      if(b.status === 'pending' && b.startedAt){
+        out.push({ id, ad, tur:'beyan', ipucu:'sürüyor · önce «Bitir»' });
+      }else if(b.status === 'pending'){
+        const dk = b.actualMin != null ? b.actualMin + ' dk' : Number(b.targetMin) > 0 ? 'planlanan ' + b.targetMin + ' dk' : '';
+        out.push({ id, ad, tur:'beyan', oneri:{ metin:'tamamlandı' + (dk ? ' · ' + dk : ''), kaynak:'plan' },
+          yaz:() => gkBlokBitti(gun, b.id) });
+      }else{
+        const durum = (STATUSES.find(s => s[0] === b.status) || [, b.status])[1].toLocaleLowerCase('tr');
+        out.push({ id, ad, tur:'beyan', yazildi:true,
+          ipucu:durum + (b.actualMin != null ? ' · ' + b.actualMin + ' dk' : '') });
+      }
+    });
+    bl.forEach(b => {
+      const q = b.actualQ != null;
+      out.push({ id:'soru:' + b.id, ad:gkAd(b), tur:'olcum', yazildi:q,
+        ipucu:q ? 'girildi: ' + b.actualQ + ' soru' + (b.correctQ != null ? ', ' + b.correctQ + ' doğru' : '')
+          : 'soru / doğru · ' + (Number(b.targetQ) > 0 ? 'plan: ' + b.targetQ + ' soru' : 'planda soru yok') });
+    });
+    [['paragraphActual', 'paragraphTarget', 'Paragraf'], ['problemActual', 'problemTarget', 'Problem']].forEach(([alan, hedef, ad]) => {
+      const n = Number(day[alan]) || 0;
+      const son = gkSon(gun, alan, v => Number(v) > 0);
+      out.push({ id:alan === 'paragraphActual' ? 'paragraf' : 'problem', ad, tur:'olcum', yazildi:n > 0,
+        ipucu:n > 0 ? 'girildi: ' + n : [son ? 'son: ' + son.deger + ' · ' + U.fmtShort(son.gun) : '',
+          Number(day[hedef]) > 0 ? 'hedef: ' + day[hedef] : ''].filter(Boolean).join(' · ') || 'girmezsen boş kalır' });
+    });
+    const sonUyku = gkSon(gun, 'sleepHours', v => v != null);
+    out.push({ id:'uyku', ad:'Uyku', tur:'olcum', yazildi:day.sleepHours != null,
+      ipucu:day.sleepHours != null ? 'girildi: ' + day.sleepHours + ' saat'
+        : sonUyku ? 'son: ' + sonUyku.deger + ' saat · ' + U.fmtShort(sonUyku.gun) : 'ölçtüysen aşağıya yaz' });
+    return out;
+  }
+
+  /* Beyan: yalnız durum ve (boşsa) planlanan dakika. Geri al ikisini
+     olduğu gibi geri koyar. Satır o arada başka yoldan yazıldıysa
+     (ör. ölçüm satırındaki «matematik 50 dk») dokunulmaz. */
+  async function gkBlokBitti(gun, id){
+    const bul = () => { const d = S.days[gun]; return d && (d.blocks || []).find(x => x.id === id); };
+    const b = bul();
+    if(!b) throw new Error('Blok bulunamadı');
+    if(b.status !== 'pending' || b.startedAt) return { atlandi:true };
+    const once = { status:b.status, actualMin:b.actualMin, minCert:b.minCert };
+    b.status = 'done';
+    if(b.actualMin == null && Number(b.targetMin) > 0) planDakikasi(b);
+    await M.saveDay(gun);
+    return { metin:gkAd(b) + ' tamamlandı', geriAl:async () => {
+      const y = bul();
+      if(!y) return;
+      y.status = once.status; y.actualMin = once.actualMin; y.minCert = once.minCert;
+      await M.saveDay(gun);
+    } };
+  }
+
+  /* Parçada adı geçen bloklar: önce tam ad (en uzun eşleşme kazanır),
+     yoksa yalnız bir bloğa ait ayırt edici sözcük (≥ 4 harf; ek alabilir:
+     «noktalamadan»). */
+  function gkAdiGecen(metin, bl){
+    const t = ' ' + gkNorm(metin);
+    const anahtar = b => [gkAd(b), b.subject, b.slot].filter(Boolean).map(gkNorm).filter(k => k.length >= 3);
+    const puan = bl.map(b => Math.max(0, ...anahtar(b).filter(k => t.indexOf(' ' + k) >= 0).map(k => k.length)));
+    const en = Math.max(0, ...puan);
+    if(en) return bl.filter((b, i) => puan[i] === en);
+    const sozcuk = t.trim().split(' ');
+    const sahip = {};
+    bl.forEach((b, i) => anahtar(b).join(' ').split(' ').forEach(w => {
+      if(w.length >= 4 && GK_DIL.indexOf(w) < 0) (sahip[w] = sahip[w] || new Set()).add(i);
+    }));
+    return bl.filter((b, i) => Object.keys(sahip).some(w => sahip[w].size === 1 && sahip[w].has(i)
+      && sozcuk.some(s => s.indexOf(w) === 0)));
+  }
+
+  function gkHedef(o, bl){
+    const p = o.params || {};
+    const adlar = bl.map(b => '«' + gkAd(b) + '»').join(', ');
+    const ornek = bl.length ? ' Örneğin «' + gkAd(bl[0]).toLocaleLowerCase('tr') + ' 20 soru 15 doğru».' : '';
+    const adli = gkAdiGecen(o.metin || '', bl);
+    if(adli.length === 1) return { blok:adli[0] };
+    if(adli.length > 1) return { red:'«' + o.metin + '»: birden çok bloğun adı geçiyor (' + adli.map(b => '«' + gkAd(b) + '»').join(', ')
+      + '); her bloğu ayrı parçada yaz.' };
+    const s = p.subjectId ? (R.SUBJECTS || []).find(x => x.id === p.subjectId) : null;
+    if(s){
+      const l = bl.filter(b => b.subjectId === s.id || (b.subject && U.norm(b.subject) === U.norm(s.name)));
+      if(l.length === 1) return { blok:l[0] };
+      if(!bl.length) return { planDisi:true };
+      return { red:'«' + o.metin + '»: ' + s.name + (l.length ? ' için bugün ' + l.length + ' blok var' : ' için bugün blok yok')
+        + '; bloğun adıyla yaz (' + adlar + ').' + ornek };
+    }
+    if(bl.length === 1) return { blok:bl[0] };
+    if(!bl.length) return { planDisi:true };
+    return { red:'«' + o.metin + '»: bugün ' + bl.length + ' blok var (' + adlar + '); toplamı bloklara bölüştürmem. '
+      + 'Her bloğu adıyla ayrı yaz.' + ornek };
+  }
+
+  /* Satırın tamamı yazılabilir mi? { plan:[…] } ya da { red:'neden' }. */
+  function gkDenetle(metin, gun){
+    const t = String(metin || '').trim();
+    if(!t) return { plan:[] };
+    const day = S.days[gun];
+    if(!day) return { red:'Bu günün kaydı açılmamış; hiçbir şey yazılmadı.' };
+    if(!R.Komut || !R.Entry) return { red:'Ölçüm satırı bu sürümde okunamıyor; hiçbir şey yazılmadı.' };
+    let r;
+    try{ r = R.Komut.anla(t, { date:gun }); }catch(e){ return { red:'Satırı okuyamadım; hiçbir şey yazılmadı.' }; }
+    if((r.sorular || []).length) return { red:r.sorular.map(x => x.soru).join(' ') };
+    if((r.anlasilmayan || []).length) return { red:'Anlaşılmadı: «' + r.anlasilmayan.join('», «') + '». Örneğin ' + GK_ORNEK + '.' };
+    if(!r.oneriler.length) return { red:'Bu satırda ölçüm bulamadım. Örneğin ' + GK_ORNEK + '.' };
+    const disi = r.oneriler.filter(o => !GK_OLCUM[o.action]);
+    if(disi.length) return { red:'Bu satır yalnız ölçüm içindir; «' + (disi[0].metin || t) + '» bir plan değişikliği. Onu «Ne yaptın?» kutusuna yaz.' };
+    const gruplar = {};
+    r.oneriler.forEach(o => { const m = o.metin || t; (gruplar[m] = gruplar[m] || []).push(o.action); });
+    for(const m of Object.keys(gruplar)){
+      const n = U.norm(m);
+      if(GK_AILE.some(([a, re]) => re.test(n) && gruplar[m].indexOf(a) < 0))
+        return { red:'«' + m + '»: iki ölçüm tek parçada kaldı; virgülle ayır, örneğin ' + GK_ORNEK + '.' };
+    }
+    const bl = gkBloklar(day);
+    const plan = [];
+    for(const o of r.oneriler){
+      if(o.action !== 'soru-yaz'){ plan.push({ tur:'komut', o }); continue; }
+      const ps = R.Entry.parseSoru(o.metin || t);
+      if(ps && ps.bosVarsayim) return { red:'«' + o.metin + '»: boş sayısını da yaz («20 soru 4 yanlış 1 boş») ya da doğruyu yaz; boşu sıfır saymam.' };
+      const h = gkHedef(o, bl);
+      if(h.red) return { red:h.red };
+      plan.push(h.blok ? { tur:'blok', o, blok:h.blok } : { tur:'komut', o });
+    }
+    return { plan };
+  }
+
+  function gkParcaMetni(x){
+    const p = x.o.params || {};
+    const sr = (n, d) => n + ' soru' + (d != null ? ', ' + d + ' doğru' : '');
+    if(x.tur === 'blok') return gkAd(x.blok) + ': ' + sr(p.count, p.correct);
+    if(x.o.action === 'soru-yaz') return 'Plan dışı: ' + sr(p.count, p.correct);
+    if(x.o.action === 'uyku-yaz') return 'Uyku: ' + p.hours + ' saat';
+    if(x.o.action === 'paragraf-yaz') return 'Paragraf: ' + p.count;
+    if(x.o.action === 'problem-yaz') return 'Problem: ' + p.count;
+    const s = (R.SUBJECTS || []).find(y => y.id === p.subjectId);
+    return (s ? s.name : 'Süre') + ': ' + p.minutes + ' dk';
+  }
+
+  /* GIRIS kapısının önizlemesi (Günü kapat bağlamında; app.js). Yazılamaz
+     satır null döner: çekirdek o zaman hiçbir şey yazmaz. */
+  function gkOnizle(metin, gun){
+    const d = gkDenetle(metin, gun);
+    if(d.red || !d.plan.length) return null;
+    return {
+      tur:d.plan.every(x => x.o.action === 'uyku-yaz') ? 'uyku' : 'calisma',
+      metin:d.plan.map(gkParcaMetni).join(' · '),
+      ipucu:'',
+      kaydet:() => gkOlcumYaz(gun, d.plan, String(metin || '').trim()),
+    };
+  }
+
+  /* Hepsi ya da hiçbiri: herhangi bir adım patlarsa bu işlevin o ana dek
+     yaptığı (blok sorusu, uygulanan öneri) geri alınır, hata çekirdeğe gider. */
+  async function gkOlcumYaz(gun, plan, metin){
+    const geri = [];
+    const hepsiniGeriAl = async () => { while(geri.length) await geri.pop()(); };
+    const uygulanan = () => (S.officeProposals || []).filter(p => p.status === 'applied').map(p => p.id);
+    const onceki = new Set(uygulanan());
+    try{
+      const bloklu = plan.filter(x => x.tur === 'blok');
+      if(bloklu.length){
+        const day = S.days[gun];
+        const once = {};
+        geri.push(async () => {
+          const g = S.days[gun];
+          (g && g.blocks || []).forEach(b => { if(once[b.id]){ b.actualQ = once[b.id].actualQ; b.correctQ = once[b.id].correctQ; } });
+          await M.saveDay(gun);
+        });
+        bloklu.forEach(x => {
+          const b = day.blocks.find(y => y.id === x.blok.id);
+          if(!(b.id in once)) once[b.id] = { actualQ:b.actualQ, correctQ:b.correctQ };
+          const p = x.o.params;
+          b.actualQ = (Number(b.actualQ) || 0) + Math.round(Number(p.count));
+          if(p.correct != null) b.correctQ = (Number(b.correctQ) || 0) + Math.round(Number(p.correct));
+        });
+        await M.saveDay(gun);
+      }
+      const komut = plan.filter(x => x.tur === 'komut').map(x => x.o);
+      if(komut.length){
+        /* Ayrıştırıcının kendi yolu: öneri kutusu, kaynak 'istek', ölçüm
+           onayla yazılır (Kaydet dokunuşu onaydır; palette.js kingOnizle ile aynı).
+           Yarıda patlarsa bu satırla uygulanan her öneri geri alınır. */
+        const yeniler = async () => { for(const id of uygulanan().filter(id => !onceki.has(id)).reverse()) await R.Proposals.undo(id); };
+        geri.push(yeniler);
+        const islem = await R.Komut.isle({ oneriler:komut, sorular:[] }, { metin });
+        const onay = await R.Komut.onayla(islem.bekleyen.map(k => k.row.id));
+        const ids = islem.yapilan.concat(islem.bekleyen).map(k => k.row && k.row.id).filter(id =>
+          id && (S.officeProposals || []).some(p => p.id === id && p.status === 'applied'));
+        geri.splice(geri.indexOf(yeniler), 1, async () => { for(const id of ids.slice().reverse()) await R.Proposals.undo(id); });
+        if(ids.length !== komut.length){
+          /* Yarım kayıt bırakılmaz: neden söylenir (geri alma aşağıda). */
+          const neden = islem.dusen.map(k => k.why).concat(onay.why || []).filter(Boolean).join(' · ');
+          throw new Error(neden || 'ölçüm yazılamadı');
+        }
+      }
+    }catch(e){
+      try{ await hepsiniGeriAl(); }
+      catch(e2){ throw new Error(((e && e.message) || 'ölçüm yazılamadı') + '; satırın bir kısmı geri alınamadı'); }
+      throw e;
+    }
+    return { metin:plan.length === 1 ? 'Kaydedildi.' : plan.length + ' ölçüm yazıldı.', geriAl:hepsiniGeriAl };
+  }
+
+  /* Alt sayfa: Bugün › Günün akışı › «Günü kapat». Çekirdek kurulmadıysa
+     (eski kabuk) Günü düzenle açılır. */
+  function gkAc(gun){
+    const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
+    const g = gun || U.todayISO();
+    if(!G || !G.kuruluMu()){ R.App.go('gun'); return false; }
+    UI.sheet({ title:'Günü kapat', subtitle:U.fmtDate(g), body:G.cizim(g), noFocus:true });
+    setTimeout(() => { const i = document.getElementById('gk-olcum'); if(i) i.focus(); }, 40);
+    return true;
+  }
+
   /* ---------- eylemler ---------- */
   const handle = {
+    async 'gunu-kapat'(){ gkAc(U.todayISO()); },
     async 'seri-hasta'(){
       const r = await R.Seri.dondur(U.todayISO(), null, 'hasta');
       if(!r.ok){ UI.toast(r.why); return; }
@@ -1756,13 +2043,13 @@ R.Screens.today = (function(){
       const b = day && day.blocks.find(x => x.id === el.dataset.block);
       if(!b || b.status !== 'pending' || b.startedAt) return;
       if(el.dataset.yon === 'sol') return handle['block-sonra'](el);
-      const once = { status:b.status, actualMin:b.actualMin };
+      const once = { status:b.status, actualMin:b.actualMin, minCert:b.minCert };
       b.status = 'done';
-      if(b.actualMin == null) b.actualMin = b.targetMin;
+      if(b.actualMin == null) planDakikasi(b);
       await M.saveDay(day.date);
       /* Küçük aksiyon: sormadan uygulanır, «Geri al» kalır. */
       UI.toast((b.topic || b.subject || b.slot) + ' bitti.', { undo:async () => {
-        b.status = once.status; b.actualMin = once.actualMin; await M.saveDay(day.date); R.App.render(); } });
+        b.status = once.status; b.actualMin = once.actualMin; b.minCert = once.minCert; await M.saveDay(day.date); R.App.render(); } });
       R.App.render();
     },
     async 'block-sonra'(el){
@@ -1816,9 +2103,9 @@ R.Screens.today = (function(){
       const day = todayDoc();
       const b = day.blocks.find(x => x.id === el.dataset.block);
       b.status = el.dataset.value;
-      if(b.status === 'done' && b.actualMin == null && !b.startedAt) b.actualMin = b.targetMin;
+      if(b.status === 'done' && b.actualMin == null && !b.startedAt) planDakikasi(b);
       if(b.status !== 'skipped') b.skipReason = null;
-      if(b.startedAt){ oturumYaz(b, Math.round(elapsedSeconds(b)/60)); b.actualMin = (b.actualMin||0) + Math.round(elapsedSeconds(b)/60); b.startedAt = null; }
+      if(b.startedAt){ oturumYaz(b, Math.round(elapsedSeconds(b)/60)); sayacDakikasi(b, Math.round(elapsedSeconds(b)/60)); b.startedAt = null; }
       await M.saveDay(day.date);
       R.App.render();
     },
@@ -1832,7 +2119,7 @@ R.Screens.today = (function(){
     async 'timer-start'(el){
       const day = todayDoc();
       day.blocks.forEach(b => {
-        if(b.startedAt){ oturumYaz(b, Math.round(elapsedSeconds(b)/60)); b.actualMin = (b.actualMin||0) + Math.round(elapsedSeconds(b)/60); b.startedAt = null; }
+        if(b.startedAt){ oturumYaz(b, Math.round(elapsedSeconds(b)/60)); sayacDakikasi(b, Math.round(elapsedSeconds(b)/60)); b.startedAt = null; }
       });
       const b = day.blocks.find(x => x.id === el.dataset.block);
       b.startedAt = new Date().toISOString();
@@ -1844,7 +2131,7 @@ R.Screens.today = (function(){
       const b = day.blocks.find(x => x.id === el.dataset.block);
       const mins = Math.round(elapsedSeconds(b)/60);
       oturumYaz(b, mins);
-      b.actualMin = (b.actualMin||0) + mins;
+      sayacDakikasi(b, mins);
       b.startedAt = null;
       if(b.status === 'pending') b.status = mins >= b.targetMin*0.8 ? 'done' : 'partial';
       await M.saveDay(day.date);
@@ -1905,6 +2192,7 @@ R.Screens.today = (function(){
       const day = todayDoc();
       const b = day.blocks.find(x => x.id === el.dataset.block);
       b[el.dataset.field] = el.value === '' ? null : Number(el.value);
+      if(el.dataset.field === 'actualMin') b.minCert = el.value === '' ? null : 'measured';
       await M.saveDay(day.date);
       R.App.render();
     },
@@ -1947,6 +2235,9 @@ R.Screens.today = (function(){
        oradan kalksın»): ikisi Bugün › Ayrıntı'nın başında durur. */
     actions(){ return ''; },
     render, afterRender, handle, change,
+    /* Günü kapat (KOLAY Faz 1): satırlar, ölçüm satırının denetimi ve
+       önizlemesi, alt sayfa. Bağlantı app.js'te (R.App.gunuKapatKur). */
+    gunuKapat:{ satirlar:gkSatirlar, denetle:gkDenetle, onizle:gkOnizle, ac:gkAc, adiGecen:gkAdiGecen },
     /* Bugün › Ayrıntı: aynı işleyiciler, aynı sayaç; ayrı bir çizim. */
     ayrinti:{
       id:'gun',

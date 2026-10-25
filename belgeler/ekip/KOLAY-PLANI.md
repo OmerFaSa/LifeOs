@@ -244,7 +244,7 @@ korunur ama kolaylık fazlarının arkasına geçer; simülatör yapıldı.
 | Tek gün (Otopilot 1) | yapıldı | `4cac9fb2` | Bugün'de, öteki modülden iş gelince görünür |
 | Gelecek simülatörü | yapıldı | `98f3e6be` | AYS Analiz › Gelecek; ufuk ≤ 3× ölçülen süre |
 | 0 · Pusula | yapıldı | `73f84e06` | başlangıç değerleri aşağıda; uygulamada Ayarlar › Genel'de pusula satırı |
-| 1 · Günü kapat | sırada | — | |
+| 1 · Günü kapat | yapıldı | aşağıda | ortak çekirdek `brand/ortak/gunukapat.js`; Bugün'den açılan alt sayfa, üç modülde |
 | 2 · Basit görünüm | bekliyor | — | |
 | 3 · Telefonda tek dokunuş | bekliyor | — | |
 | 4 · Otopilot 2–3 | bekliyor | — | |
@@ -278,11 +278,47 @@ yeniden tanımlanıp ölçülecek. P1 ve P2 kullanıcının cihazında ölçül�
 - SPİ'de su sekiz ayrı dokunuş; «hedefe ulaştım» tek dokunuşu yok.
 - SPİ'de üç öğün üç ayrı cümle; aynı öğünler her gün tekrar ediyorsa «her zamanki gibi» yok.
 
+### Faz 1 ölçümü (2026-10-25, `node tools/pusula.js`, 1280 × 900)
+
+| Modül | Y1 eylem | Karakter | Süre (tahmin) | En kısa yol | Faz 0 |
+|---|---|---|---|---|---|
+| AYS | **3** | 64 | 24 sn | Günü kapat › tek satır (blok adıyla soru/doğru + uyku) › Kaydet | 12 (sonra 9) |
+| SPİ | **3** | 35 | 15 sn | Günü kapat › tek satır (uyku, nabız, HRV, kilo) › Kaydet; su hedefi ve «her zamanki» öğünler beyan | 22 |
+| ESP | 3 | 15 | 9 sn | Ne yaptın? «45 dk ingilizce» (Günü kapat da 3 eylem, 9 sn) | 3 |
+
+Süre tahmindir: eylem × 1,5 sn + karakter × 0,3 sn; gerçek süre P1, cihazda. SPİ senaryosu
+alışkanlıklı kullanıcıdır (son 4 günde aynı üç öğün; kalıp = son 7 günün ≥ 4'ü); eski tek
+cümle yolu 3 eylem ama 140 karakter, 47 sn. Eski yollar pusulada «öbür yol» olarak durur.
+
+**Faz 1 kararları (depo sahibi, 2026-10-25):**
+- Ölçüm satırları (kilo, nabız, HRV, uyku, soru/doğru, paragraf/problem) toplu onaylanmaz,
+  önceden doldurulmaz; tek satıra yazılır ve modülün ayrıştırıcısıyla (`GIRIS`) okunur.
+  Anlaşılmayan parça varsa hiçbir şey yazılmaz.
+- «Hepsi doğru» yalnız beyanları yazar (plan bloğu/oturumu yapıldı, su hedefi, «her
+  zamanki» öğün, vadesi gelen hatırlatma); işareti kaldırılan ya da önerisiz satır yazılmaz.
+  Satır + beyanlar tek «Geri al»; yarıda hata olursa yazılan geri alınır.
+- Plandan gelen dakika «tahmin» etiketlidir: AYS bloğunda `minCert:'estimated'` (Günü kapat,
+  «Tamamlandı», kaydırma), sayaç ya da elle yazılan «ölçüldü»; HKM'ye `study_minutes`
+  bir blok bile tahminse `estimated` gider. Çok blokta adsız toplam bloklara bölüştürülmez.
+
+**İnceleme (2026-10-25, salt okur ajan, 10 bulgu, hepsi testli düzeltildi):** ölçüm satırı
+yazılamazsa beyanlar da yazılmaz; çok parçalı satır, AYS ve ESP satır yazımı hepsi ya da hiçbiri;
+çift gönderim iki kez yazmaz; geri almalardan biri bozulsa da ötekiler koşar; SPİ'de alt sayfa
+yalnız bugün; satırdaki su, su hedefi beyanını atlatır; virgülsüz ölçüm satırı («uyku 7.5 nabız
+56») bölünür; «her zamanki» kalıbı Günü kapat'ın kendi kayıtlarından beslenmez; tahmin dakika
+HKM'ye, pano ve Kral kartlarına «ölçüldü» diye gitmez; AYS'de tahmin bloğa yazılan dakika
+tahminin yerine geçer, üstüne eklenmez. Açık: ESP Kral «Toplam süre · 30 gün» etiketi; XP,
+rozet ve müfredat sayaçları tahmini dakikayı da sayıyor (politika kararı).
+
+**Faz 1 sınırları (açık):** AYS ve ESP'de Günü kapat yalnız bugün için; erişilebilirlik ve
+düzen araçları alt sayfayı açmıyor (testlerle kapsanıyor); iOS bildirimindeki `eylem`
+`bildirim.js temizle`de düşüyor (Faz 3'ün işi).
+
 ## 9. Devir notu — sıradaki oturum buradan başlar
 
-- Sıradaki iş **Faz 1 · Günü kapat**. Başarı ölçüsü: `node tools/pusula.js` ile AYS ve SPİ
-  Y1 ≤ 3 (başlangıç 12 ve 22). Senaryolar `tools/pusula.js` içinde; Faz 1 yeni yolu senaryoya
-  ekler, eski yolu silmez.
+- Faz 1 bitti (üç modülde Y1 = 3, ≤ 30 sn tahmin). Sıradaki iş **Faz 2 · Basit görünüm**:
+  Y3 9/8/8 → ≤ 4. Senaryolar `tools/pusula.js` içinde; yeni yol senaryoya eklenir, eski yol
+  silinmez (`SENARYO[mod]` birden çok yol tutar, en kısa doğrulanan sayılır).
 - Önce okunacaklar: bu dosya, `AGENTS.md`, `IPHONE-PLANI.md` §2 (sadelik sözleşmesi),
   `brand/ortak/tekgun.js` (Faz 4'ün temeli), `AYS/src/js/core/gelecek.js` (Faz 5'in bağlanacağı yer).
 - Denetim seti: üç modülde `runtests`, `smoke`, `layoutcheck`, `a11ycheck`; `tools/sadelik.js`;

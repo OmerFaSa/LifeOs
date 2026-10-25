@@ -581,6 +581,26 @@ SP.App = (function(){
 
   let rendering = false;
   let queued = null;
+  /* P2 «GİRİLDİ» KURALI (pusula; KOLAY-PLANI §1). 2026-10-25: varsayılanla
+     dolan alanlar (symptoms:{}, symptomsLogged:false, period:false) boş ya da
+     geri alınmış satırı «girildi» yapıyordu. Girilen: dolu bir değer
+     (null, '', false ve boş nesne değil) ya da öğün. */
+  function girildi(t){
+    const v = SP.S.vitals[t];
+    const dolu = x => x != null && x !== '' && x !== false
+      && !(typeof x === 'object' && !Array.isArray(x) && !Object.keys(x).length);
+    const olcum = !!v && Object.keys(v).some(k => k !== 'date' && dolu(v[k]));
+    return olcum || ((SP.S.meals || {})[t] || []).length > 0;
+  }
+  /* GÜNÜ KAPAT'IN SPİ KURULUMU (brand/ortak/gunukapat.js; KOLAY-PLANI Faz 1).
+     girisKurucu gibi modül düzeyinde: boot çağırır, testler SP.App.gunuKapatKur()
+     ile kurar. Satırlar Bugün ekranının kodundadır (today.js gunuKapat); ölçüm
+     satırı tek satır girişten (GIRIS) geçer. Bildirim mevcut «Geri al» şeridi. */
+  function gunuKapatKurucu(){ return window.LIFEOS.GUNUKAPAT.kur({ modul:'spi',
+      satirlar:g => SP.Screens.today.gunuKapat.satirlar(g),
+      bildir:(metin, geriAl) => UI.toast(metin, geriAl ? { undo:geriAl } : {}),
+      yenile:() => { render(); SP.Screens.today.gunuKapat.tazele(); },
+      olcumOrnek:'uyku 7.5, nabız 56, kilo 72' }); }
   /* TEK SATIR GİRİŞİN SPİ KURULUMU (brand/ortak/giris.js). Modül düzeyinde ve
      adlı (2026-10-25): boot çağırır; testler ortak kutuyu sıfırladıktan sonra
      SP.App.girisKur() ile gerçek kurulumu geri getirir. */
@@ -606,6 +626,12 @@ SP.App = (function(){
               return r.ok ? { metin:'«' + r.ad + '» ' + neye + ' eklendi.', geriAl:async () => { await r.geriAl(); render(); } } : r.why;
             } };
         }
+        /* «uyku 7.5 nabız 56 kilo 72» (virgülsüz): ölçüm adlarından bölünür,
+           tek satırın çok parçalı yolundan okunur (Quick.vitalBol); yoksa
+           yalnız ilk ölçüm yazılıp başarı deniyordu (2026-10-25). */
+        const vb = Q && Q.vitalBol ? Q.vitalBol(t) : null;
+        const Gi = window.LIFEOS && window.LIFEOS.GIRIS;
+        if(vb && Gi && Gi.kuruluMu && Gi.kuruluMu()) return Gi.onizle(vb.join(', '));
         const p = Q && Q.parse(t);
         /* tur: King'in sohbet karşılığı için (king.js söz 8). */
         const tur = !p ? '' : p.kind === 'nap' ? 'uyku' : p.kind === 'meal' ? 'ogun' : p.kind === 'move' ? 'hareket' : p.kind === 'lab' ? 'tahlil'
@@ -632,8 +658,10 @@ SP.App = (function(){
           const r = await Q.apply(p, { date:t });
           render();
           /* Yazılmadıysa (şiddet söylenmedi, birim uyuşmuyor, toplam
-             sınırı aştı) nedeni döner; «kaydedildi» denmez. */
-          if(!r || !r.ok) return (r && r.text) || 'Kaydedilemedi.';
+             sınırı aştı) nedeniyle hata atılır; «kaydedildi» denmez. Düz
+             metin dönünce kutu bunu başarı sanıyor, Günü kapat beyanları
+             da yazıyordu (2026-10-25). Kutu ve King «Kaydedilemedi: …» der. */
+          if(!r || !r.ok) throw new Error((r && r.text) || 'yazılamadı');
           let geriAl = null;
           if(p.kind === 'nap'){
             const id = r && r.kayit && r.kayit.id;
@@ -1891,6 +1919,8 @@ SP.App = (function(){
       /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
          kapıyı kullanır; ayrıştırıcı SP.Quick (ölçüm, tahlil, hareket, öğün). */
       if(window.LIFEOS && window.LIFEOS.GIRIS) girisKurucu();
+      /* GÜNÜ KAPAT: kapaktaki «Günü kaydet» açar (today.js gunu-kapat). */
+      if(window.LIFEOS && window.LIFEOS.GUNUKAPAT) gunuKapatKurucu();
 
       /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).
          Harita çekmecelerden türetilir; her çekmecenin ilk ekranı. */
@@ -1903,8 +1933,6 @@ SP.App = (function(){
       /* PUSULA (brand/ortak/pusula.js; KOLAY-PLANI §1): P1 sürtünme ölçerinden,
          P2 «girildi» kuralı bu modülün. */
       if(window.LIFEOS && window.LIFEOS.PUSULA && SP.Friction){
-        const girildi = t => { const v = SP.S.vitals[t]; const olcum = !!v && Object.keys(v).some(k => k !== 'date' && v[k] != null && v[k] !== '');
-          return olcum || ((SP.S.meals || {})[t] || []).length > 0; };
         window.LIFEOS.PUSULA.kur({ modul:'spi', kullanim:() => (SP.S.usage && SP.S.usage.days) || {}, girildi,
           ilkGun:() => {
             const l = Object.keys(Object.assign({}, SP.S.vitals, SP.S.meals) || {}).filter(girildi)
@@ -2079,7 +2107,7 @@ SP.App = (function(){
     }
   }
 
-  return { girisKur:() => girisKurucu(), sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
+  return { girisKur:() => girisKurucu(), gunuKapatKur:() => gunuKapatKurucu(), girildi, sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml, arkaPlan, enterEylemi, kisayolDugmeleri };
 })();
 

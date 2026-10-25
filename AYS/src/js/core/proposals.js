@@ -726,12 +726,18 @@ R.Proposals = (function(){
       preview(p, ctx){
         return [{ label:(ctx.blok.topic || ctx.subject.name) + ' · süre',
           before:ctx.blok.actualMin == null ? 'girilmemiş' : ctx.blok.actualMin + ' dk',
-          after:((Number(ctx.blok.actualMin) || 0) + ctx.dk) + ' dk' }];
+          after:(ctx.blok.minCert === 'estimated' ? ctx.dk : (Number(ctx.blok.actualMin) || 0) + ctx.dk) + ' dk' }];
       },
+      /* Plandan gelen dakika tahmindir (minCert 'estimated'): yazılan süre
+         ona EKLENMEZ, yerine geçer (`yerine`). Ölçülmüşe eklenir. Geri al
+         eski dakikayı da kesinliğini de olduğu gibi geri koyar. */
       async apply(p, ctx){
-        const geri = { date:p.date, blockId:ctx.blok.id, eski:ctx.blok.actualMin, dk:ctx.dk,
+        const yerine = ctx.blok.minCert === 'estimated';
+        const geri = { date:p.date, blockId:ctx.blok.id, eski:ctx.blok.actualMin, eskiCert:ctx.blok.minCert, dk:ctx.dk,
           durum:ctx.blok.status === 'pending' ? 'pending' : null };
-        ctx.blok.actualMin = (Number(ctx.blok.actualMin) || 0) + ctx.dk;
+        if(yerine) geri.yerine = true;
+        ctx.blok.actualMin = yerine ? ctx.dk : (Number(ctx.blok.actualMin) || 0) + ctx.dk;
+        ctx.blok.minCert = 'measured';
         if(ctx.blok.status === 'pending') ctx.blok.status = 'done';
         await R.Model.saveDay(p.date);
         return geri;
@@ -741,12 +747,30 @@ R.Proposals = (function(){
         if(!day) return;
         const dk = s.dk != null ? s.dk : Math.round(Number(((o && o.params) || {}).minutes) || 0);
         const b = (day.blocks || []).find(x => x.id === s.blockId);
-        if(b){
-          b.actualMin = farkGeri(b.actualMin, dk, s.eski);
-          durumGeri(b, s, o);
+        const sonra = ayniHedef(o, 'sure-yaz', x => x.date === s.date && x.blockId === s.blockId);
+        const eskiCert = 'eskiCert' in s ? s.eskiCert : undefined;
+        if(s.yerine){
+          /* Bu kayıt hiç olmasaydı: sonraki ilk kayıt tahminin yerine geçerdi.
+             Rol ona devredilir, ondan sonrakilerin tabanı dk kadar düşer. */
+          const ilk = sonra[0];
+          if(ilk && ilk.yerine){ if(ilk.eski === dk){ ilk.eski = s.eski; ilk.eskiCert = eskiCert; } }
+          else if(ilk){
+            const bas = sonra.findIndex(x => x.yerine), ek = bas < 0 ? sonra.slice(1) : sonra.slice(1, bas);
+            Object.assign(ilk, { yerine:true, eski:s.eski, eskiCert });
+            ek.forEach(x => { x.eski = Math.max(0, (Number(x.eski) || 0) - dk); });
+            if(b && bas < 0) b.actualMin = farkGeri(b.actualMin, dk, null);
+          }
+          else if(b && b.actualMin === dk){ b.actualMin = s.eski; b.minCert = eskiCert; }
+          if(b) durumGeri(b, s, o);
+        }else{
+          if(b){
+            b.actualMin = farkGeri(b.actualMin, dk, s.eski);
+            if(b.actualMin == null) b.minCert = null;
+            else if(!sonra.length && eskiCert !== undefined && b.actualMin === s.eski) b.minCert = eskiCert;
+            durumGeri(b, s, o);
+          }
+          sonra.forEach(x => { x.eski = farkZincir(x.eski, dk, s.eski); });
         }
-        ayniHedef(o, 'sure-yaz', x => x.date === s.date && x.blockId === s.blockId)
-          .forEach(x => { x.eski = farkZincir(x.eski, dk, s.eski); });
         await R.Model.saveDay(s.date);
       },
     },

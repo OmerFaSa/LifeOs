@@ -489,12 +489,12 @@ R.Screens.analytics = (function(){
         K.Card({ title:'Sürtünme', hint:'friction',
           body:html`
             ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info', body:f.title + ' — ' + f.note })}
-            ${when(f.cert === 'measured', () => html`
+            ${when(f.cert === 'measured' || f.cert === 'estimated', () => html`
               <div class="mt-12">${K.Cols(3, [
                 K.Stat({ label:'Yönetim', value:String(f.window.perDay), note:'dk/gün' }),
                 K.Stat({ label:'Çalışma',
                   value:String(Math.round(f.window.work / Math.max(1, f.window.measuredDays))),
-                  note:'dk/gün' }),
+                  note:f.cert === 'estimated' ? 'dk/gün · tahmin' : 'dk/gün' }),
                 K.Stat({ label:'Yönetim payı',
                   value:f.window.ratio == null ? '—' : '%' + Math.round(f.window.ratio * 100),
                   tone:f.level === 'high' ? 'warn' : null }),

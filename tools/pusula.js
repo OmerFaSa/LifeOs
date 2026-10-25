@@ -5,6 +5,11 @@
         uygulamanın sunduğu EN KISA yol gerçekten yürütülür ve kaydın yazıldığı
         DOĞRULANIR — doğrulanmayan senaryo sayılmaz (ölçülmemiş şey «temiz»
         diye raporlanmaz, AGENTS §1.7).
+        SÜRE (2026-10-25, Faz 1 kabulü «≤ 30 sn»): tahmin = eylem × 1,5 sn +
+        karakter × 0,3 sn. Kişinin süresi değil, yolun yükü; çıktıda «tahmin»
+        diye yazılır. Gerçek süre P1'dir (cihazda ölçülür).
+        Modülün birden çok yolu olabilir (Faz 1 yeni yolu ekler, eskisini
+        silmez); Y1 doğrulanan en kısa yoldur.
    Y2 · Bugün yoğunluğu: Bugün ekranında açık kart (sadelik.js ile aynı kural).
    Y3 · Menü öğesi: kenar çubuğundaki çekmece sayısı.
 
@@ -18,7 +23,7 @@
 
      node tools/pusula.js              # tablo
      node tools/pusula.js --json       # makinece okunur
-     node tools/pusula.js --denetle    # hedefin gerisindeyse çıkış 1 (Y1 ≤ 3, Y2 ≤ 3, Y3 ≤ 4)
+     node tools/pusula.js --denetle    # hedefin gerisindeyse çıkış 1 (Y1 ≤ 3 ve ≤ 30 sn tahmin, Y2 ≤ 3, Y3 ≤ 4)
 
    Sunucu gerekmez: dist/*.html dosyadan açılır; sabit port yok. Önce build.py. */
 
@@ -26,7 +31,9 @@ const path = require('path');
 const { chromium } = require(path.join(__dirname, '..', 'ESP', 'node_modules', 'playwright'));
 
 const KOK = path.join(__dirname, '..');
-const HEDEF = { y1:3, y2:3, y3:4 };
+const HEDEF = { y1:3, sure:30, y2:3, y3:4 };
+/* Tahmini süre (sn): eylem başına 1,5, yazılan karakter başına 0,3. */
+const sureTahmini = (adim, karakter) => Math.round(adim * 1.5 + karakter * 0.3);
 const BEKLE = 300;
 
 const MODUL = {
@@ -72,6 +79,32 @@ async function aysIyiGun(p, s){
   }, bloklar.length);
 }
 
+/* AYS GÜNÜ KAPAT (Faz 1): bekleyen bloklar «Hepsi doğru» ile tamamlanır
+   (dakika plandan, «tahmin» etiketli); soru/doğru ve uyku ölçümdür, tek
+   satıra yazılır. Satır blok adlarıyla kurulur: çok blokta adsız toplam
+   reddedilir. Kısa ad (konunun ilk sözcüğü) anlaşılmazsa tam ad. */
+async function aysGunuKapat(p, s){
+  await s.tikla('[data-act="gunu-kapat"]', 'Günü kapat');
+  const satir = await p.evaluate(() => {
+    const gun = R.U.todayISO(), d = R.S.days[gun];
+    const l = ((d && d.blocks) || []).filter(b => b.slot !== 'Dinlenme');
+    const kur = ad => l.map(b => ad(b) + ' ' + (b.targetQ || 20) + ' soru ' + Math.round((b.targetQ || 20) * 0.75) + ' doğru')
+      .concat(['7 saat uyudum']).join(', ');
+    const ad = b => String(b.topic || b.subject || b.slot).toLocaleLowerCase('tr');
+    const kisa = kur(b => ad(b).split(/\s+/)[0]);
+    return R.Screens.today.gunuKapat.denetle(kisa, gun).red ? kur(ad) : kisa;
+  });
+  await s.yaz('#gk-olcum', satir, 'Ölçümler');
+  await s.tikla('.gk__kapat', 'Kaydet');
+  await p.waitForTimeout(BEKLE);
+  return p.evaluate(() => {
+    const d = R.S.days[R.U.todayISO()];
+    const l = ((d && d.blocks) || []).filter(b => b.slot !== 'Dinlenme');
+    const ok = l.length > 0 && l.every(b => b.status === 'done' && b.actualQ > 0 && b.correctQ != null) && d.sleepHours === 7;
+    return { ok, not:l.length + ' blok' };
+  });
+}
+
 async function spiIyiGun(p, s){
   /* EN KISA YOL (2026-10-25): «Ne yaptın?» kutusu bütün günü tek cümlede
      kayıpsız okur: dört ölçüm, su ekleme ve öğün sözleriyle üç ayrı öğün.
@@ -91,6 +124,51 @@ async function spiIyiGun(p, s){
   });
 }
 
+/* GÜNÜ KAPAT (Faz 1, 2026-10-25). Senaryo KOLAY-PLANI'nın hedeflediği
+   kullanıcıdır: son 4 günde aynı üç öğün (kalıp, KOLAY §2.4: son 7 günün
+   ≥ 4'ü). Kurulum sayılmaz; yalnız bugünün eylemleri sayılır. Ölçümler
+   toplu onaylanmaz: tek satıra yazılır; su hedefi, «her zamanki» öğünler
+   ve vadesi gelen hatırlatmalar «Hepsi doğru» ile. */
+async function spiGunuKapat(p, s){
+  await p.evaluate(async () => {
+    const ogun = { kahvalti:'2 yumurta 1 çay', ogle:'1 tabak mercimek çorbası', aksam:'1 tabak etli kuru fasulye' };
+    const bugun = SP.U.parse(SP.U.todayISO());
+    for(let i = 1; i <= 4; i++){
+      const d = SP.U.iso(SP.U.addDays(bugun, -i));
+      for(const slot of Object.keys(ogun)){
+        const meal = SP.Model.newMeal(slot);
+        meal.items = SP.Quick.parse(ogun[slot]).data.items.map(x => ({ foodId:x.food.id, g:x.g, cert:'estimated' }));
+        await SP.Model.addMeal(d, meal);
+      }
+    }
+    SP.App.render();
+  });
+  await p.waitForTimeout(BEKLE);
+  await s.tikla('.kapak__eylem [data-act="gunu-kapat"]', 'Günü kapat');
+  await s.yaz('#gk-olcum', 'uyku 7.5, nabız 56, hrv 55, kilo 72', 'Ölçümler');
+  await s.tikla('.gk__kapat', 'Hepsi doğru');
+  await p.waitForTimeout(BEKLE);
+  return p.evaluate(() => {
+    const t = SP.U.todayISO(), v = SP.S.vitals[t] || {};
+    const ogunler = SP.S.meals[t] || [];
+    const yuva = new Set(ogunler.map(m => m.slot)).size;
+    const ok = v.sleep === 7.5 && v.rhr === 56 && v.hrv === 55 && v.weight === 72 && Number(v.water) >= 2000
+      && ogunler.length >= 3 && yuva >= 3;
+    return { ok, not:'su ' + v.water + ' ml · ' + ogunler.length + ' öğün, ' + yuva + ' ayrı yuva' };
+  });
+}
+
+async function espGunuKapat(p, s){
+  await s.tikla('[data-act="gunu-kapat"]', 'Günü kapat');
+  await s.yaz('#gk-olcum', '45 dk ingilizce', 'Ölçümler');
+  await s.tikla('.gk__kapat', 'Kaydet');
+  await p.waitForTimeout(BEKLE);
+  return p.evaluate(() => {
+    const l = ((ESP.S.days[ESP.U.todayISO()] || {}).sessions) || [];
+    return { ok:l.some(x => Number(x.minutes) === 45), not:l.length + ' oturum' };
+  });
+}
+
 async function espIyiGun(p, s){
   /* «45 dk ingilizce» Faz 0'da anlaşılmıyordu; dil adları takma ada eklendi (parse.js). */
   await s.yaz('#giris-girdi', '45 dk ingilizce', 'Ne yaptın?');
@@ -102,9 +180,14 @@ async function espIyiGun(p, s){
   });
 }
 
-const SENARYO = { AYS:aysIyiGun, SPI:spiIyiGun, ESP:espIyiGun };
+/* Modül başına yollar: Faz 1 «Günü kapat» yolunu ekler, eskisini silmez. */
+const SENARYO = {
+  AYS:[{ yol:'Günü düzenle', fn:aysIyiGun }, { yol:'Günü kapat', fn:aysGunuKapat }],
+  SPI:[{ yol:'Ne yaptın? (tek cümle)', fn:spiIyiGun }, { yol:'Günü kapat (alışkanlıklı kullanıcı)', fn:spiGunuKapat }],
+  ESP:[{ yol:'Ne yaptın?', fn:espIyiGun }, { yol:'Günü kapat', fn:espGunuKapat }],
+};
 
-async function olc(ad, m, b){
+async function olc(ad, m, b, yol){
   const p = await b.newPage({ viewport:{ width:1280, height:900 }, reducedMotion:'reduce' });
   const hata = [];
   p.on('pageerror', e => hata.push(e.message));
@@ -125,28 +208,42 @@ async function olc(ad, m, b){
   const y3 = await p.evaluate(m.menu);
   const s = sayac(p);
   let sonuc;
-  try{ sonuc = await SENARYO[ad](p, s); }
+  try{ sonuc = await yol.fn(p, s); }
   catch(e){ sonuc = { ok:false, not:'senaryo yürümedi: ' + String(e.message).split('\n')[0] }; }
   await p.close();
-  return { ad, y1:sonuc.ok ? s.adim : null, karakter:sonuc.ok ? s.karakter : null, dogrulandi:sonuc.ok, not:sonuc.not,
+  return { ad, yol:yol.yol, y1:sonuc.ok ? s.adim : null, karakter:sonuc.ok ? s.karakter : null,
+    sure:sonuc.ok ? sureTahmini(s.adim, s.karakter) : null, dogrulandi:sonuc.ok, not:sonuc.not,
     y2, y3, adimlar:s.gunluk, hata };
+}
+/* Modülün özeti: doğrulanan en kısa yol (önce eylem, sonra tahmini süre). */
+function enKisa(l){
+  const ok = l.filter(r => r.dogrulandi).sort((a, c) => a.y1 - c.y1 || a.sure - c.sure);
+  return ok[0] || l[0];
 }
 
 (async () => {
   const json = process.argv.includes('--json'), denetle = process.argv.includes('--denetle');
   const b = await chromium.launch();
-  const sonuc = [];
-  for(const ad of Object.keys(MODUL)) sonuc.push(await olc(ad, MODUL[ad], b));
+  const yollar = [];
+  for(const ad of Object.keys(MODUL)) for(const yol of SENARYO[ad]) yollar.push(await olc(ad, MODUL[ad], b, yol));
   await b.close();
+  const sonuc = Object.keys(MODUL).map(ad => Object.assign({}, enKisa(yollar.filter(r => r.ad === ad)),
+    { yollar:yollar.filter(r => r.ad === ad).map(r => ({ yol:r.yol, y1:r.y1, karakter:r.karakter, sure:r.sure, dogrulandi:r.dogrulandi, not:r.not })) }));
   if(json){ process.stdout.write(JSON.stringify(sonuc, null, 1) + '\n'); }
   else{
     const pad = (x, n) => String(x).padEnd(n);
-    console.log(pad('modül', 7) + pad('Y1 eylem', 10) + pad('karakter', 10) + pad('Y2 kart', 9) + pad('Y3 menü', 9) + 'doğrulama');
-    sonuc.forEach(r => console.log(pad(r.ad, 7) + pad(r.y1 == null ? '—' : r.y1, 10) + pad(r.karakter == null ? '—' : r.karakter, 10)
-      + pad(r.y2, 9) + pad(r.y3, 9) + (r.dogrulandi ? 'kayıt yazıldı (' + r.not + ')' : 'DOĞRULANMADI — ' + r.not)));
-    console.log('\nHedef: Y1 ≤ ' + HEDEF.y1 + ' eylem · Y2 ≤ ' + HEDEF.y2 + ' kart · Y3 ≤ ' + HEDEF.y3 + ' çekmece');
-    sonuc.filter(r => r.hata.length).forEach(r => console.log('  ' + r.ad + ' sayfa hatası: ' + r.hata[0]));
+    const bos = x => x == null ? '—' : x;
+    console.log(pad('modül', 7) + pad('Y1 eylem', 10) + pad('karakter', 10) + pad('süre*', 8) + pad('Y2 kart', 9) + pad('Y3 menü', 9) + 'en kısa yol · doğrulama');
+    sonuc.forEach(r => {
+      console.log(pad(r.ad, 7) + pad(bos(r.y1), 10) + pad(bos(r.karakter), 10) + pad(r.sure == null ? '—' : r.sure + ' sn', 8)
+        + pad(r.y2, 9) + pad(r.y3, 9) + r.yol + ' · ' + (r.dogrulandi ? 'kayıt yazıldı (' + r.not + ')' : 'DOĞRULANMADI — ' + r.not));
+      r.yollar.filter(y => y.yol !== r.yol).forEach(y => console.log(pad('', 7) + pad(bos(y.y1), 10) + pad(bos(y.karakter), 10)
+        + pad(y.sure == null ? '—' : y.sure + ' sn', 8) + pad('', 18) + 'öbür yol: ' + y.yol + (y.dogrulandi ? '' : ' · DOĞRULANMADI — ' + y.not)));
+    });
+    console.log('\n* süre tahmindir: eylem × 1,5 sn + karakter × 0,3 sn (gerçek süre P1, cihazda).');
+    console.log('Hedef: Y1 ≤ ' + HEDEF.y1 + ' eylem ve ≤ ' + HEDEF.sure + ' sn · Y2 ≤ ' + HEDEF.y2 + ' kart · Y3 ≤ ' + HEDEF.y3 + ' çekmece');
+    yollar.filter(r => r.hata.length).forEach(r => console.log('  ' + r.ad + ' (' + r.yol + ') sayfa hatası: ' + r.hata[0]));
   }
-  const geride = sonuc.some(r => !r.dogrulandi || r.y1 > HEDEF.y1 || r.y2 > HEDEF.y2 || r.y3 > HEDEF.y3);
+  const geride = sonuc.some(r => !r.dogrulandi || r.y1 > HEDEF.y1 || r.sure > HEDEF.sure || r.y2 > HEDEF.y2 || r.y3 > HEDEF.y3);
   process.exit(denetle && geride ? 1 : 0);
 })();

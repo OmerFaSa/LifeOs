@@ -1574,7 +1574,101 @@ R.App = (function(){
 
   window.addEventListener('beforeinstallprompt', e => arkaPlan.kurulum(e, render));
 
+  /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
+     kapıyı kullanır. Önce «not: …» (core/konunotu.js), sonra veri cümlesi
+     (core/komut.js; paletle aynı): önizlenir, «Kaydet»le yazılır.
+     Günü kapat bağlamında (gkBaglam) aynı kapı o günün bloklarına göre
+     okur: R.Screens.today.gunuKapat.onizle (blok eşlemesi orada). */
+  let gkBaglam = null;
+  function girisKur(){
+    if(!(window.LIFEOS && window.LIFEOS.GIRIS)) return false;
+    window.LIFEOS.GIRIS.kur({ modul:'ays',
+      onizle:t => {
+        if(gkBaglam) return R.Screens.today.gunuKapat.onizle(t, gkBaglam.gun);
+        const n = R.KonuNotu && R.KonuNotu.onizle(t);
+        if(n) return Object.assign(n, { tur:'not' });
+        return R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null;
+      },
+      ornekler:['matematikten 40 soru çözdüm', '12 paragraf yaptım', '7 saat uyudum', 'not: üslülerde tabanlar aynıysa üsler toplanır'] });
+    return true;
+  }
+
+  /* GÜNÜ KAPAT (KOLAY-PLANI Faz 1; brand/ortak/gunukapat.js). Satırlar
+     Bugün ekranının (screens/today.js); bildirim AYS'nin «Geri al»lı
+     tostu, yenileme çizim + açık alt sayfanın yeniden çizimi. Testler
+     boot'suz kurar: o (bildir, yenile) yerine konabilir. */
+  function gunuKapatCiz(){
+    const k = document.querySelector('#sheet [data-gunukapat]');
+    if(k && window.LIFEOS.GUNUKAPAT) k.outerHTML = window.LIFEOS.GUNUKAPAT.cizim(k.getAttribute('data-gun'));
+  }
+  function gunuKapatKur(o){
+    const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
+    if(!G) return false;
+    G.kur(Object.assign({ modul:'ays',
+      satirlar:gun => R.Screens.today.gunuKapat.satirlar(gun),
+      bildir:(metin, geriAl) => UI.toast(metin, geriAl ? { undo:async () => { await geriAl(); UI.toast('Geri alındı'); } } : {}),
+      yenile:() => { gunuKapatCiz(); render(); },
+      olcumOrnek:'20 soru 15 doğru, 7 saat uyudum' }, o || {}));
+    return true;
+  }
+  /* Satır önce bütün olarak denetlenir (blok eşlemesi, belirsiz parça):
+     yazılamıyorsa NEDENİ söylenir ve hiçbir şey yazılmaz. Sonra çekirdeğin
+     kapat'ı; onun ölçüm önizlemesi eşzamanlı alındığından bağlam yalnız o
+     çağrı boyunca açıktır. */
+  function gunuKapat(gun, metin){
+    const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
+    if(!G || !G.kuruluMu()) return Promise.resolve({ ok:false, neden:'Günü kapat kurulmadı.' });
+    const t = String(metin || '').trim();
+    if(t){
+      const d = R.Screens.today.gunuKapat.denetle(t, gun);
+      if(d.red){
+        document.querySelectorAll('[data-gunukapat]').forEach(k => {
+          if(k.getAttribute('data-gun') !== gun) return;
+          const s = k.querySelector('[data-gk-sonuc]');
+          if(s) s.innerHTML = '<p class="gk__mesaj gk__mesaj--uyari" role="status">'
+            + U.esc(d.red + ' Hiçbir şey yazılmadı.') + '</p>';
+        });
+        return Promise.resolve({ ok:false, neden:d.red });
+      }
+    }
+    gkBaglam = { gun };
+    try{ return G.kapat(gun, { olcumMetni:t }); }
+    finally{ gkBaglam = null; }
+  }
+  /* Alt sayfanın formu bu yoldan geçer (yakalama evresi; çekirdeğin
+     kendi gönderimi denetimsiz kalmasın diye durdurulur). */
+  document.addEventListener('submit', e => {
+    const f = e.target && e.target.closest ? e.target.closest('[data-gk-form]') : null;
+    const k = f && f.closest('[data-gunukapat]');
+    if(!k) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const g = f.querySelector('.gk__girdi');
+    gunuKapat(k.getAttribute('data-gun'), g ? g.value : '');
+  }, true);
+
   /* ---------- acilis ---------- */
+  /* Söz 34: yük (son 7 gün / önceki 7 gün); günlük değerler AYS'nin kaydı.
+     Plandan doldurulan dakika «tahmin»dir (blok.minCert): pencerede bir
+     blok bile tahminse çalışma kartı «ölçüldü» demez. */
+  function calismaYuku(){
+    const gun = (bas, n) => { let dk = 0, q = 0, d = 0, var_ = false, tahmin = false;
+      for(let i = bas; i < bas + n; i++){ const day = S.days[U.iso(U.addDays(U.today(), -i))];
+        (day && day.blocks || []).forEach(b => { if(b.actualMin){ dk += b.actualMin; var_ = true; if(b.minCert === 'estimated') tahmin = true; }
+          if(b.actualQ){ q += b.actualQ; d += b.correctQ || 0; } }); }
+      return { dk, oran:q ? Math.round(d * 100 / q) : null, var_, tahmin }; };
+    const a = gun(0, 7), o = gun(7, 7);
+    const kart = [
+      { ad:'Çalışma · son 7 gün', deger:a.var_ ? a.dk : null, birim:'dk', etiket:a.tahmin ? 'tahmin' : 'ölçüldü',
+        alt:o.var_ ? 'önceki 7 gün: ' + o.dk + ' dk' + (o.tahmin ? ' (tahmin)' : '') : '' },
+      { ad:'Doğruluk · son 7 gün', deger:a.oran, birim:'%', etiket:'hesaplandı', alt:o.oran != null ? 'önceki 7 gün: %' + o.oran : '' },
+    ];
+    let sinyal = '';
+    if(a.var_ && o.var_ && a.dk > o.dk * 1.3 && a.oran != null && o.oran != null && a.oran < o.oran - 5)
+      sinyal = 'Son 7 günde çalışma arttı ama doğruluk düştü; bir hafif gün düşünebilirsin.';
+    return { kartlar:kart, sinyal };
+  }
+
   async function boot(){
     try{
       /* Hareket (T4, hareket.js): odak halkası, önizleme, odak kapısı.
@@ -1770,21 +1864,7 @@ R.App = (function(){
             oncelik:() => R.Ogren.oncelikler(5),
             oncelikAc:async o => { if(o && o.topicId){ await R.Ogren.sec(o.subjectId, o.topicId); go('ogren'); } },
             /* Söz 34: yük (son 7 gün / önceki 7 gün) ve deney ölçüleri; günlük değerler AYS'nin kaydı. */
-            yuk:() => {
-              const gun = (bas, n) => { let dk = 0, q = 0, d = 0, var_ = false;
-                for(let i = bas; i < bas + n; i++){ const day = S.days[U.iso(U.addDays(U.today(), -i))];
-                  (day && day.blocks || []).forEach(b => { if(b.actualMin){ dk += b.actualMin; var_ = true; } if(b.actualQ){ q += b.actualQ; d += b.correctQ || 0; } }); }
-                return { dk, oran:q ? Math.round(d * 100 / q) : null, var_ }; };
-              const a = gun(0, 7), o = gun(7, 7);
-              const kart = [
-                { ad:'Çalışma · son 7 gün', deger:a.var_ ? a.dk : null, birim:'dk', etiket:'ölçüldü', alt:o.var_ ? 'önceki 7 gün: ' + o.dk + ' dk' : '' },
-                { ad:'Doğruluk · son 7 gün', deger:a.oran, birim:'%', etiket:'hesaplandı', alt:o.oran != null ? 'önceki 7 gün: %' + o.oran : '' },
-              ];
-              let sinyal = '';
-              if(a.var_ && o.var_ && a.dk > o.dk * 1.3 && a.oran != null && o.oran != null && a.oran < o.oran - 5)
-                sinyal = 'Son 7 günde çalışma arttı ama doğruluk düştü; bir hafif gün düşünebilirsin.';
-              return { kartlar:kart, sinyal };
-            },
+            yuk:calismaYuku,
             olcu:{
               liste:[{ id:'dogruluk', ad:'Doğruluk', birim:'%' }, { id:'sure', ad:'Çalışma süresi', birim:'dk' }],
               deger:(id, iso) => {
@@ -1823,9 +1903,7 @@ R.App = (function(){
           },
           /* Veri kapısı ortak giriş kapısıdır (aşağıda GIRIS.kur). */ });
       }
-      /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
-         kapıyı kullanır. Önce «not: …» (core/konunotu.js), sonra veri cümlesi
-         (core/komut.js; paletle aynı): önizlenir, «Kaydet»le yazılır. */
+      /* Tek satır giriş ve Günü kapat aşağıda kurulur (girisKur, gunuKapatKur). */
       /* NOTLARIM (brand/ortak/notum.js): AYS'nin notları konu notlarıdır
          (core/konunotu.js); panel onları ek kaynak olarak listeler. */
       if(window.LIFEOS && window.LIFEOS.NOTUM && R.KonuNotu){
@@ -1838,15 +1916,8 @@ R.App = (function(){
         window.LIFEOS.DEFTER.kur({ modul:'ays', store:{ set:(p, d) => R.Store.set(p, d), list:c => R.Store.list(c), remove:p => R.Store.remove(p) } });
         try{ await window.LIFEOS.DEFTER.yukle(); }catch(e){ /* defter boş başlar */ }
       }
-      if(window.LIFEOS && window.LIFEOS.GIRIS){
-        window.LIFEOS.GIRIS.kur({ modul:'ays',
-          onizle:t => {
-            const n = R.KonuNotu && R.KonuNotu.onizle(t);
-            if(n) return Object.assign(n, { tur:'not' });
-            return R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null;
-          },
-          ornekler:['matematikten 40 soru çözdüm', '12 paragraf yaptım', '7 saat uyudum', 'not: üslülerde tabanlar aynıysa üsler toplanır'] });
-      }
+      girisKur();
+      gunuKapatKur();
 
       /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).
          Harita çekmecelerden türetilir; her çekmecenin ilk ekranı. */
@@ -2037,7 +2108,7 @@ R.App = (function(){
   }
 
   return { sayfaSonuRota, boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, canInstall, promptInstall, installManifest,
-    notifyState, askNotify, notifyFromOffice, arkaPlan };
+    notifyState, askNotify, notifyFromOffice, arkaPlan, girisKur, gunuKapatKur, gunuKapat, calismaYuku };
 })();
 
 /* Test paketi bu dosyayı da yükler (ekran sözleşmesini denetlemek için)

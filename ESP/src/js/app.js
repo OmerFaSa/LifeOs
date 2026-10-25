@@ -1716,6 +1716,68 @@ ESP.App = (function(){
     },
   };
 
+  /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
+     kapıyı kullanır; ayrıştırıcı ESP.Parse.parseSession («45 dk gitar»).
+     Önce Bugün'de ayrı bir «Konuşarak gir» formu vardı; King veri giremiyordu.
+     Açılıştan ayrı adlı işlev (2026-10-25): «Günü kapat»ın ölçüm satırı bu
+     ayrıştırıcıdan geçer ve testler onu açılış koşmadan kurar. `o.yenile`
+     yalnız testte verilir (test sayfasında kabuk yok). */
+  function girisKur(o){
+    if(!(window.LIFEOS && window.LIFEOS.GIRIS)) return;
+    const ciz = (o && o.yenile) || render;
+    window.LIFEOS.GIRIS.kur({ modul:'esp',
+      onizle:t => {
+        const res = ESP.Parse.parseSession(t);
+        if(!res || !res.rows.length) return null;
+        const ad = r => (ESP.DISCIPLINE_BY_ID[r.disc] || {}).label || r.disc;
+        return {
+          tur:'oturum',
+          metin:res.rows.map(r => ad(r) + ' ' + U.fmtMin(r.minutes)
+            + (r.count != null ? ' · ' + U.fmtNum(r.count) + ' ' + (r.countWhat || '') : '')).join(' · '),
+          ipucu:res.unmatched.length ? 'Kaydedilmeyecek: «' + res.unmatched.map(u => u.text).join('», «') + '»'
+            : 'Bugünün oturumu olarak yazılır.',
+          async kaydet(){
+            const gun = U.todayISO(), ids = [];
+            /* Ayrıntı ve duygu oturumun notuna (2026-10-19: «akustik çalıştım, şu parçayı; memnunum»). */
+            const not = String(t || '').replace(/\s+/g, ' ').trim().slice(0, 240);
+            /* Hepsi ya da hiçbiri: bir oturum yazılamazsa bu cümlenin bellekte
+               kalan bütün oturumları silinir (kaydı patlayan da) ve hata fırlar. */
+            const once = new Set(ESP.Model.sessionsOf(gun).map(s => s.id));
+            try{
+              for(const r of res.rows){ const s = await ESP.Model.addSession(gun, { disc:r.disc, minutes:r.minutes, count:r.count, note:res.rows.length === 1 ? not : (r.note || '') }); if(s && s.id) ids.push(s.id); }
+            }catch(e){
+              for(const s of ESP.Model.sessionsOf(gun).filter(s => !once.has(s.id))){ try{ await ESP.Model.deleteSession(gun, s.id); }catch(e2){ /* kayıt patlasa da bellekten silindi */ } }
+              ciz();
+              throw e instanceof Error ? e : new Error(String(e || 'oturum yazılamadı'));
+            }
+            /* Geri alma (giris.js söz 8): yalnız bu cümlenin oturumları. */
+            const geriAl = async () => { for(const id of ids) await ESP.Model.deleteSession(gun, id); ciz(); };
+            if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+            ciz();
+            return { metin:res.rows.length === 1 ? 'Oturum kaydedildi.' : res.rows.length + ' oturum kaydedildi.', geriAl };
+          },
+        };
+      },
+      ornekler:['45 dk gitar, 20 dakika kelime', '30 dk felsefe okuması', '20 dakika kelime'] });
+  }
+
+  /* GÜNÜ KAPAT (brand/ortak/gunukapat.js; KOLAY-PLANI Faz 1). Satırları
+     Bugün ekranı kurar (screens/today.js `gunuKapatSatirlari`): plandaki
+     disiplin oturumu ve «her zamanki» oturum BEYANdır, «tahmin» etiketiyle
+     yazılır; sırası gelen kart ÖLÇÜMdür, toplu yazılmaz. Ölçüm ekrandaki tek
+     satıra yazılır ve «Ne yaptın?» ayrıştırıcısından (girisKur) geçer:
+     yazılan dakika ölçümdür. Depo sahibi 2026-10-25. `o` yalnız testte. */
+  function gunuKapatKur(o){
+    const GK = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
+    if(!GK) return;
+    o = o || {};
+    GK.kur({ modul:'esp', olcumOrnek:'45 dk ingilizce',
+      satirlar:g => ESP.Screens.today.gunuKapatSatirlari(g),
+      bildir:o.bildir || ((metin, geriAl) => UI.toast(metin, geriAl ? { undo:geriAl } : {})),
+      /* Ekran ve açık alt sayfa birlikte tazelenir: kaydedilen satır «kaydedildi» olur. */
+      yenile:o.yenile || (() => { render(); ESP.Screens.today.gunuKapatTazele(); }) });
+  }
+
   async function boot(){
     try{
       /* Hareket (T4, hareket.js): odak halkası, önizleme, odak kapısı.
@@ -1986,36 +2048,10 @@ ESP.App = (function(){
           },
           ozet:() => [ESP.Screens.today.headline()] });
       }
-      /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
-         kapıyı kullanır; ayrıştırıcı ESP.Parse.parseSession («45 dk gitar»).
-         Önce Bugün'de ayrı bir «Konuşarak gir» formu vardı; King veri giremiyordu. */
-      if(window.LIFEOS && window.LIFEOS.GIRIS){
-        window.LIFEOS.GIRIS.kur({ modul:'esp',
-          onizle:t => {
-            const res = ESP.Parse.parseSession(t);
-            if(!res || !res.rows.length) return null;
-            const ad = r => (ESP.DISCIPLINE_BY_ID[r.disc] || {}).label || r.disc;
-            return {
-              tur:'oturum',
-              metin:res.rows.map(r => ad(r) + ' ' + U.fmtMin(r.minutes)
-                + (r.count != null ? ' · ' + U.fmtNum(r.count) + ' ' + (r.countWhat || '') : '')).join(' · '),
-              ipucu:res.unmatched.length ? 'Kaydedilmeyecek: «' + res.unmatched.map(u => u.text).join('», «') + '»'
-                : 'Bugünün oturumu olarak yazılır.',
-              async kaydet(){
-                const gun = U.todayISO(), ids = [];
-                /* Ayrıntı ve duygu oturumun notuna (2026-10-19: «akustik çalıştım, şu parçayı; memnunum»). */
-                const not = String(t || '').replace(/\s+/g, ' ').trim().slice(0, 240);
-                for(const r of res.rows){ const s = await ESP.Model.addSession(gun, { disc:r.disc, minutes:r.minutes, count:r.count, note:res.rows.length === 1 ? not : (r.note || '') }); if(s && s.id) ids.push(s.id); }
-                /* Geri alma (giris.js söz 8): yalnız bu cümlenin oturumları. */
-                const geriAl = async () => { for(const id of ids) await ESP.Model.deleteSession(gun, id); render(); };
-                if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
-                render();
-                return { metin:res.rows.length === 1 ? 'Oturum kaydedildi.' : res.rows.length + ' oturum kaydedildi.', geriAl };
-              },
-            };
-          },
-          ornekler:['45 dk gitar, 20 dakika kelime', '30 dk felsefe okuması', '20 dakika kelime'] });
-      }
+      /* TEK SATIR GİRİŞ ve GÜNÜ KAPAT: kurulumları adlı işlevlerde
+         (girisKur, gunuKapatKur); testler açılışı koşmadan kurabilsin. */
+      girisKur();
+      gunuKapatKur();
 
       /* PUSULA (brand/ortak/pusula.js; KOLAY-PLANI §1): P1 sürtünme ölçerinden,
          P2 «girildi» kuralı bu modülün. */
@@ -2202,7 +2238,7 @@ ESP.App = (function(){
   }
 
   return { sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS,
-    sectionOf, routeOn, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
+    sectionOf, routeOn, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest, girisKur, gunuKapatKur,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, arkaPlan };
 })();
 

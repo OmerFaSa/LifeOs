@@ -105,6 +105,12 @@ R.Friction = (function(){
     if(!d) return 0;
     return (d.blocks || []).reduce((a, b) => a + (Number(b.actualMin) || 0), 0);
   }
+  /* Plandan doldurulan dakika «tahmin»dir (blok.minCert): bir blok bile
+     tahminse günün çalışma süresi ölçüm sayılmaz (beacon study_minutes ile aynı). */
+  function workTahmin(tarih){
+    const d = S.days[tarih || bugun()];
+    return !!d && (d.blocks || []).some(b => (Number(b.actualMin) || 0) > 0 && b.minCert === 'estimated');
+  }
 
   function day(tarih){
     const t = tarih || bugun();
@@ -117,23 +123,24 @@ R.Friction = (function(){
     if(!work) return { date:t, admin, work:0, ratio:null, cert:'partial' };
     const toplam = admin + work;
     return { date:t, admin, work, ratio:toplam > 0 ? admin / toplam : null,
-      cert:'measured' };
+      cert:workTahmin(t) ? 'estimated' : 'measured' };
   }
 
   function window_(gunSayisi){
     const n = Math.max(1, Math.round(gunSayisi || PENCERE));
-    let admin = 0, work = 0, olculen = 0;
+    let admin = 0, work = 0, olculen = 0, tahmin = false;
     for(let i = 0; i < n; i++){
       const t = U.iso(U.addDays(U.parse(bugun()), -i));
       const d = day(t);
       if(d.cert === 'missing') continue;
       admin += d.admin; work += d.work; olculen++;
+      if(d.cert === 'estimated') tahmin = true;
     }
     const toplam = admin + work;
     return { days:n, measuredDays:olculen, admin, work,
       ratio:toplam > 0 ? admin / toplam : null,
       perDay:olculen ? Math.round(admin / olculen) : 0,
-      cert:olculen ? (work > 0 ? 'measured' : 'partial') : 'missing' };
+      cert:olculen ? (work > 0 ? (tahmin ? 'estimated' : 'measured') : 'partial') : 'missing' };
   }
 
   function verdict(gunSayisi){
@@ -154,7 +161,7 @@ R.Friction = (function(){
     const butceAsti = w.perDay > BUTCE_DK;
     const oranAsti = w.ratio != null && w.ratio > ORAN_ESIK;
     if(butceAsti && oranAsti){
-      return { level:'high', cert:'measured', window:w,
+      return { level:'high', cert:w.cert, window:w,
         title:'Sistem, çalışmanın önüne geçiyor olabilir',
         note:'Son ' + w.days + ' günde günde ' + w.perDay + ' dk sistemle, '
            + Math.round(w.work / Math.max(1, w.measuredDays)) + ' dk çalışmayla '
@@ -162,12 +169,12 @@ R.Friction = (function(){
            + BUTCE_DK + ' dk ve %' + Math.round(ORAN_ESIK * 100) + '.' };
     }
     if(butceAsti || oranAsti){
-      return { level:'watch', cert:'measured', window:w,
+      return { level:'watch', cert:w.cert, window:w,
         title:'Sürtünme sınıra yakın',
         note:'İki eşikten biri aşıldı. Hafta planı kurulan ya da deneme '
            + 'analizi yapılan bir gün doğal olarak yönetim ağırlıklıdır.' };
     }
-    return { level:'ok', cert:'measured', window:w,
+    return { level:'ok', cert:w.cert, window:w,
       title:'Sürtünme bütçede',
       note:'Günde ' + w.perDay + ' dk sistem, %'
          + (w.ratio == null ? '—' : Math.round(w.ratio * 100)) + ' yönetim payı.' };

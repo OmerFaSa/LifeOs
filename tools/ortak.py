@@ -301,6 +301,9 @@ DOSYALAR = {
     "tekgun.js":       "js/core",
     "tekgun.css":      "css",
     "tekgun.test.js":  "tests",
+    "gunukapat.js":      "js/core",
+    "gunukapat.css":     "css",
+    "gunukapat.test.js": "tests",
     "yetki.js":        "js/core",
     "yetki.test.js":   "tests",
     # ARAC KATALOGU — King'in sohbetten yaptigi her isin tek tip listesi (King 2.0 B, 2026-10-20).

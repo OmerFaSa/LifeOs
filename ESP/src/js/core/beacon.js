@@ -196,8 +196,10 @@ ESP.Beacon = (function(){
       out.retention_cards = ret.n ? metric(ret.n, 'computed') : metric(null, 'missing');
     }
 
-    const dk = ESP.Model.minutesOf(d);
-    out.practice_minutes = dk == null ? metric(null, 'missing') : metric(dk, 'measured');
+    /* Kesinlik toplamdan gelir (state.js minutesInfo): Günü kapat'ın planlı
+       dakikası tahmindir; tek bir tahmin bile varsa gün dakikası ölçüm gitmez. */
+    const dk = ESP.Model.minutesInfo(d);
+    out.practice_minutes = dk ? metric(dk.minutes, dk.cert) : metric(null, 'missing');
 
     /* Sentez açığı: en eski BAĞLANMAMIŞ notun yaşı. Hiç not yoksa bu bir
        «0 gün açık» değil, ölçülmemiş bir alandır. Bağlantı durumu BUGÜNÜN
@@ -268,7 +270,7 @@ ESP.Beacon = (function(){
 
   /* Gelişmiş kapsam — disiplin disiplin dakika. Hangi kitabı okuduğun,
      hangi parçayı çalıştığın ve not içeriği gitmez; giden şey AÇIK olan
-     disiplinlerin o günkü ölçülmüş dakikasıdır.
+     disiplinlerin o günkü dakikası, kendi kesinliğiyle (tahmin içeriyorsa tahmin).
 
      Kapalı bir disiplin hiç gönderilmez: kapalı bölümün «0 dakika»sı bir
      ölçüm değil, olmayan bir sorunun cevabıdır. */
@@ -276,9 +278,9 @@ ESP.Beacon = (function(){
     const out = {};
     (ESP.DISCIPLINES || []).forEach(function(disc){
       if(ESP.Mod && !ESP.Mod.isOn(disc.id)) return;
-      const dk = ESP.Model.minutesOf(d, disc.id);
-      out['disc.' + disc.id + '.minutes'] = dk == null
-        ? metric(null, 'missing') : metric(dk, 'measured');
+      const dk = ESP.Model.minutesInfo(d, disc.id);
+      out['disc.' + disc.id + '.minutes'] = dk
+        ? metric(dk.minutes, dk.cert) : metric(null, 'missing');
     });
     const oturum = ESP.Model.sessionsOf(d);
     out.sessions = oturum.length ? metric(oturum.length, 'measured')

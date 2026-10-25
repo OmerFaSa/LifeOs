@@ -152,6 +152,9 @@ window.LIFEOS.GIRIS = (function(){
     return {
       tur:turler.length === 1 ? turler[0] : 'veri',
       parcalar,
+      /* Anlaşılmayan parçalar, metin olarak da (2026-10-25): «Günü kapat»
+         (gunukapat.js) anlaşılmayan parça varken hiçbir şey yazmaz. */
+      kalan:kalan.slice(),
       /* Çok parçada modülün KISA metni (varsa): parça önizlemeleri birbirinden
          habersiz hesaplanır; «Su +500 ml · toplam 1.500 ml» iki su parçasında
          ikincinin toplamını yanlış söylerdi (2026-10-25). */
@@ -161,7 +164,13 @@ window.LIFEOS.GIRIS = (function(){
       async kaydet(){
         let n = 0;
         const geri = [];
-        for(const p of parcalar){ const g = geriAlOf(await p.kaydet()); if(g) geri.push(g); n++; }
+        /* Hepsi ya da hiçbiri: yarıda hata olursa yazılan parçalar geri alınır. */
+        try{
+          for(const p of parcalar){ const g = geriAlOf(await p.kaydet()); if(g) geri.push(g); n++; }
+        }catch(e){
+          for(const g of geri.slice().reverse()){ try{ await g(); }catch(err){ /* elden gelen */ } }
+          throw e;
+        }
         return { metin:n > 1 ? n + ' kayıt eklendi.' : 'Kaydedildi.',
           geriAl:geri.length === parcalar.length ? async () => { for(const g of geri.slice().reverse()) await g(); } : null };
       },

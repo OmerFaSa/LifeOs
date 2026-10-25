@@ -925,17 +925,20 @@
       const tek = Q().parse('kahvaltıda 2 yumurta 1 çay');
       expect(tek.data.items.length).toBe(2);
       expect(tek.data.slot).toBe('kahvalti');
-      /* Ortak giriş testleri kutuyu sıfırlar: SPİ'nin gerçek kurulumu geri gelir. */
+      /* Testlerde boot koşmaz: SPİ'nin gerçek kutu kurulumu burada kurulur,
+         sonunda kurulmamış hâline döner (sonraki testler düğme sayar). */
       SP.App.girisKur();
-      await withTodayAsync(G, async () => {
-        const p = window.LIFEOS.GIRIS.onizle('kahvaltıda 2 yumurta 1 çay, öğlen 1 tabak mercimek çorbası');
-        expect(p && p.parcalar && p.parcalar.length).toBe(2);
-        await p.kaydet();
-        const ogun = SP.S.meals[G] || [];
-        expect(ogun.map(m => m.slot).sort()).toEqual(['kahvalti', 'ogle']);
-        const adlar = JSON.stringify(ogun.map(m => (m.items || []).map(i => (SP.FOOD_BY_ID[i.foodId] || {}).name || i.foodId)));
-        expect(/çay/i.test(adlar)).toBe(true);
-      });
+      try{
+        await withTodayAsync(G, async () => {
+          const p = window.LIFEOS.GIRIS.onizle('kahvaltıda 2 yumurta 1 çay, öğlen 1 tabak mercimek çorbası');
+          expect(p && p.parcalar && p.parcalar.length).toBe(2);
+          await p.kaydet();
+          const ogun = SP.S.meals[G] || [];
+          expect(ogun.map(m => m.slot).sort()).toEqual(['kahvalti', 'ogle']);
+          const adlar = JSON.stringify(ogun.map(m => (m.items || []).map(i => (SP.FOOD_BY_ID[i.foodId] || {}).name || i.foodId)));
+          expect(/çay/i.test(adlar)).toBe(true);
+        });
+      }finally{ window.LIFEOS.GIRIS._sifirla(); }
     });
 
     it('geri alma yalnız o eklemeyi çıkarır; sıra fark etmez, elle düzenleme ezilmez', async () => {

@@ -102,11 +102,13 @@ ESP.Inceleme = (function(){
   function hafta(){
     const gunler = []; for(let i = 0; i < 7; i++) gunler.push(gun(i));
     const dk = gunler.map(dakika).filter(v => v != null);
+    /* Günü kapat'ın planlı dakikası tahmindir: bir gün bile tahmin içeriyorsa toplam tahmindir. */
+    const tahminli = gunler.some(d => { const i = ESP.Model.minutesInfo(d); return i && i.cert !== 'measured'; });
     const oturum = gunler.reduce((a, d) => a + ESP.Model.sessionsOf(d).length, 0);
     const r = ESP.SRS.retention();
     const tamam = r && r.cert !== 'missing' && r.value != null;
     return [
-      { ad:'Toplam süre', deger:dk.length ? dk.reduce((a, b) => a + b, 0) : null, birim:'dk', n:dk.length, etiket:dk.length ? 'ölçüldü' : 'veri yok' },
+      { ad:'Toplam süre', deger:dk.length ? dk.reduce((a, b) => a + b, 0) : null, birim:'dk', n:dk.length, etiket:!dk.length ? 'veri yok' : tahminli ? 'tahmin' : 'ölçüldü' },
       { ad:'Çalışılan gün', deger:dk.length, birim:'/7', n:null, etiket:'ölçüldü' },
       { ad:'Oturum', deger:oturum, birim:'oturum', n:null, etiket:'ölçüldü' },
       { ad:'Kart hatırlama', deger:tamam ? Math.round(r.value * 100) : null, birim:'%', n:tamam ? r.n : null, nBirim:'kart', etiket:tamam ? 'hesaplandı' : 'veri yok' },

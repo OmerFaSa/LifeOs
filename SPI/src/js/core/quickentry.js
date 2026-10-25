@@ -276,6 +276,34 @@ SP.Quick = (function(){
     return null;
   }
 
+  /* VİRGÜLSÜZ ÇOK ÖLÇÜM (2026-10-25): «uyku 7.5 nabız 56 kilo 72» yalnız
+     uykuyu yazıyordu (parseVital ilk alanı döndürür); geri kalanı ne
+     önizlemede ne «anlaşılmadı»da görünüyordu. Ardından sayı gelen iki ya da
+     daha çok ölçüm adı ayıraçsız yan yanaysa cümle adlardan bölünür; gün
+     sözü («dün») her parçaya geçer. Bölünecek bir şey yoksa null. Bölünen
+     parçalar virgülle birleşince her ad çiftinin arasında ayıraç vardır:
+     yeniden bölünmez. */
+  const AYIRAC_RE = /(?<!\d),|,(?!\d)|;|\n|\s+ve\s+|\s+sonra\s+/i;
+  function vitalBol(text){
+    const z = gunSozu(text);
+    const t = z.metin, n = U.norm(t);
+    const adlar = [];
+    Object.keys(VITAL_FIELDS).forEach(k => VITAL_FIELDS[k].aliases.forEach(a => adlar.push(U.norm(a))));
+    adlar.sort((x, y) => y.length - x.length);
+    const yer = [];
+    for(let i = 0; i < n.length; i++){
+      if(i > 0 && /[a-z0-9]/.test(n[i - 1])) continue;
+      const a = adlar.find(x => n.startsWith(x, i) && !/[a-z0-9]/.test(n[i + x.length] || ' ')
+        && /^\s*(?:[:=]\s*)?\d/.test(n.slice(i + x.length)));
+      if(a){ yer.push(i); i += a.length - 1; }
+    }
+    const kes = yer.filter((p, j) => j > 0 && !AYIRAC_RE.test(t.slice(yer[j - 1], p)));
+    if(!kes.length) return null;
+    const bas = [0].concat(kes);
+    return bas.map((p, j) => t.slice(p, bas[j + 1]).trim()).filter(Boolean)
+      .map(x => z.kelime ? z.kelime + ' ' + x : x);
+  }
+
   /* ------------------------------------------------------------ hareket */
 
   function parseMove(text){
@@ -587,6 +615,6 @@ SP.Quick = (function(){
 
   const SIDDET_YOK = 'Şiddet belirtilmedi: «hafif», «orta» ya da «şiddetli» diye ekle.';
 
-  return { parse, parseHam, apply, parseVital, parseMove, parseNap, parseSymptom, VITAL_FIELDS,
+  return { parse, parseHam, apply, parseVital, vitalBol, parseMove, parseNap, parseSymptom, VITAL_FIELDS,
     BARDAK_ML, gunSozu, ogunSozu, tarih, onizleme, olcumEngeli, uyusmazNotu, SIDDET_YOK };
 })();
