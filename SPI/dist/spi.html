@@ -14611,6 +14611,34 @@ span.kt-ana{ cursor:default; }
 .tekgun--saatsiz .tekgun__saat{ display:none; }
 @media (max-width:480px){ .tekgun--saatsiz .tekgun__is{ grid-template-columns:10px minmax(0,1fr) 16px; } }
 
+/* ==== css/gunukapat.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/gunukapat.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GÜNÜ KAPAT — tek kaynak `brand/ortak/gunukapat.css` (ortak.py --yay ile üç arayüze).
+   Sade liste (AGENTS §1.10): satır başına ad · öneri · kaynak; gölge ve süs yok. */
+.gunukapat{ display:flex; flex-direction:column; gap:14px; }
+.gk__not{ margin:0; color:var(--text-2); font-size:14px; }
+.gk__bos{ margin:0; color:var(--text-3); }
+.gk__liste{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+.gk__satir{ display:flex; align-items:center; gap:10px; min-height:44px; padding:6px 10px; border-radius:12px; background:var(--surface-2); }
+.gk__sec{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; cursor:pointer; }
+.gk__sec input{ width:20px; height:20px; flex:none; accent-color:var(--primary); }
+.gk__ad{ font-weight:600; color:var(--text); flex:0 1 auto; min-width:0; max-width:50%; overflow-wrap:anywhere; }
+.gk__oneri{ flex:1; min-width:0; color:var(--text-2); overflow-wrap:anywhere; }
+.gk__kaynak, .gk__durum{ flex:none; font-size:12px; color:var(--text-3); }
+.gk__durum{ color:var(--ok, var(--text-2)); }
+.gk__satir.is-atla .gk__oneri{ text-decoration:line-through; color:var(--text-3); }
+.gk__satir.is-yazildi, .gk__satir.is-bos{ background:transparent; }
+.gk__satir.is-bos .gk__oneri, .gk__satir--olcum .gk__oneri{ color:var(--text-3); }
+.gk__form{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.gk__etiket{ flex-basis:100%; font-size:13px; color:var(--text-2); }
+.gk__girdi{ flex:1; min-width:180px; min-height:44px; padding:0 12px; border:0; border-radius:12px; background:var(--surface-2); color:var(--text); font:inherit; }
+.gk__kapat{ min-height:44px; }
+.gk__mesaj{ margin:0; font-size:14px; }
+.gk__mesaj--uyari{ color:var(--danger, var(--text)); }
+@media (max-width:679px){ .gk__kaynak{ display:none; } .gk__kapat{ flex-basis:100%; } }
+
 /* ==== css/defter.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/defter.css içine yazılır; burası bir sonraki
@@ -17780,7 +17808,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'df275c01', at:'2026-10-25 11:25', dirty:false };
+SP.BUILD = { id:'43554221', at:'2026-10-25 16:58', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -31664,6 +31692,9 @@ window.LIFEOS.GIRIS = (function(){
     return {
       tur:turler.length === 1 ? turler[0] : 'veri',
       parcalar,
+      /* Anlaşılmayan parçalar, metin olarak da (2026-10-25): «Günü kapat»
+         (gunukapat.js) anlaşılmayan parça varken hiçbir şey yazmaz. */
+      kalan:kalan.slice(),
       /* Çok parçada modülün KISA metni (varsa): parça önizlemeleri birbirinden
          habersiz hesaplanır; «Su +500 ml · toplam 1.500 ml» iki su parçasında
          ikincinin toplamını yanlış söylerdi (2026-10-25). */
@@ -31673,7 +31704,13 @@ window.LIFEOS.GIRIS = (function(){
       async kaydet(){
         let n = 0;
         const geri = [];
-        for(const p of parcalar){ const g = geriAlOf(await p.kaydet()); if(g) geri.push(g); n++; }
+        /* Hepsi ya da hiçbiri: yarıda hata olursa yazılan parçalar geri alınır. */
+        try{
+          for(const p of parcalar){ const g = geriAlOf(await p.kaydet()); if(g) geri.push(g); n++; }
+        }catch(e){
+          for(const g of geri.slice().reverse()){ try{ await g(); }catch(err){ /* elden gelen */ } }
+          throw e;
+        }
         return { metin:n > 1 ? n + ' kayıt eklendi.' : 'Kaydedildi.',
           geriAl:geri.length === parcalar.length ? async () => { for(const g of geri.slice().reverse()) await g(); } : null };
       },
@@ -32574,6 +32611,268 @@ window.LIFEOS.TEKGUN = (function(){
 
   return { kur, parca, kartHtml, birlestir, tazele, git, kuruluMu:() => !!ayar,
     _ortam:ortam, _sifirla, _onbellek:v => { onbellek = v; } };
+})();
+
+/* ==== js/core/gunukapat.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/gunukapat.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GÜNÜ KAPAT — akşam tek ekran: doğru olanı tek dokunuşla kaydet (KOLAY-PLANI Faz 1).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/gunukapat.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Biçimi `gunukapat.css`.
+   ==================================================================
+
+   Depo sahibi (2026-10-25): «Günü kapat özelliği için ölçümlü bir plan
+   hazırla» → kararlar: «ölçüm satırları toplu onaylanmaz, tek satırla
+   yazılır; süre pusulada tahmin etiketiyle ölçülür».
+
+   SÖZLEŞME — modül bir kez bağlar:
+       GUNUKAPAT.kur({ modul, satirlar(gun) → [Satır], bildir(metin, geriAl), yenile(), olcumOrnek })
+       Satır = { id, ad, tur:'beyan'|'olcum', yazildi?, oneri?:{ metin, kaynak:'plan'|'kalip'|'dun'|'son' },
+                 ipucu?, yaz?(gun) → metin | { metin, geriAl } | { atlandi:true } }
+
+   Sözler:
+     1. İKİ TÜR SATIR. BEYAN satırı (su hedefi, kalıptan öğün, hatırlatma
+        işareti, plandaki işin «yapıldı»sı) önerisiyle gelir ve «Hepsi doğru»
+        ile yazılır: kullanıcının beyanıdır (KOLAY §2.1). ÖLÇÜM satırı (kilo,
+        nabız, uyku, soru, doğru) ASLA toplu yazılmaz: son değer yalnız ipucu
+        olarak görünür; ölçüm ekrandaki tek satıra yazılır ve modülün kendi
+        tek satır ayrıştırıcısından (giris.js) geçer (AGENTS §1.1).
+     2. DOKUNULMAYAN YAZILMAZ. Önerisi olmayan, zaten yazılmış ya da
+        kullanıcının işaretini kaldırdığı satır yazılmaz; gün «girilmedi»
+        kalır, sıfır sayılmaz (AGENTS §1.2).
+     3. HEPSİ YA DA HİÇBİRİ. Ölçüm satırında anlaşılmayan parça varsa hiçbir
+        şey yazılmaz ve nedeni söylenir (giris söz 2). Yazarken bir satır
+        hata verirse o ana kadar yazılanlar geri alınır.
+     4. TEK «GERİ AL». Bütün yazılanlar tek dokunuşla, sondan başa geri
+        alınır (küçük aksiyon, AGENTS §1.9). «Emin misin?» sorulmaz.
+     5. SATIRI MODÜL YAZAR. Bu dosya karar üretmez ve hiçbir depoya
+        yazmaz; her satırın yaz()'ı modülün kendi kodudur (KOLAY §2.6).
+     6. KALIP ÖLÇÜLÜR, UYDURULMAZ. «Her zamanki» önerisi yalnız son 7 günün
+        en az 4'ünde aynı kayıttan gelir (kalip(); KOLAY §2.4). */
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.GUNUKAPAT = (function(){
+  'use strict';
+
+  let ayar = null;
+  let bagli = false;
+  const atla = {};        // gun → { satırId:true }  (kullanıcı işaretini kaldırdı)
+  const sonMesaj = {};    // gun → { tur, metin }
+  const suruyor = {};     // gun → true  (kapat sürüyor; ikinci çağrı yazmaz)
+
+  const KAYNAK = { plan:'plan', kalip:'her zamanki', dun:'dünkü', son:'son değer' };
+
+  function kac(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+  const metinOf = r => r && typeof r === 'object' ? String(r.metin || '') : (r ? String(r) : '');
+  const geriAlOf = r => r && typeof r === 'object' && typeof r.geriAl === 'function' ? r.geriAl : null;
+
+  function satirlar(gun){
+    if(!ayar || typeof ayar.satirlar !== 'function') return [];
+    try{ return (ayar.satirlar(gun) || []).filter(s => s && s.id && s.ad); }
+    catch(e){ console.error('Günü kapat: satırlar', e); return []; }
+  }
+  /* Söz 1–2: «Hepsi doğru»nun yazacağı beyan satırları. */
+  function yazilacaklar(gun){
+    const a = atla[gun] || {};
+    return satirlar(gun).filter(s => s.tur === 'beyan' && !s.yazildi && s.oneri && typeof s.yaz === 'function' && !a[s.id]);
+  }
+
+  /* Söz 6: son `pencere` günün (bugün hariç) en az `esik`inde görülen anahtarlar.
+     kayitlar: [{ gun:'YYYY-AA-GG', anahtar }]; bir gün bir anahtarı bir kez sayar. */
+  function kalip(kayitlar, bugun, o){
+    o = Object.assign({ pencere:7, esik:4 }, o || {});
+    const b = new Date(String(bugun) + 'T12:00:00');
+    if(isNaN(b)) return [];
+    const gunler = new Set();
+    for(let i = 1; i <= o.pencere; i++){
+      const d = new Date(b); d.setDate(b.getDate() - i);
+      gunler.add(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'));
+    }
+    const say = {};
+    (kayitlar || []).forEach(k => {
+      if(!k || !gunler.has(k.gun) || k.anahtar == null || k.anahtar === '') return;
+      (say[k.anahtar] = say[k.anahtar] || new Set()).add(k.gun);
+    });
+    return Object.keys(say).filter(a => say[a].size >= o.esik).sort((x, y) => say[y].size - say[x].size);
+  }
+
+  function satirHtml(s, gun){
+    const a = atla[gun] || {};
+    if(s.tur === 'olcum'){
+      return '<li class="gk__satir gk__satir--olcum">'
+        + '<span class="gk__ad">' + kac(s.ad) + '</span>'
+        + '<span class="gk__oneri">' + kac(s.ipucu || 'ölçtüysen aşağıya yaz') + '</span>'
+        + (s.yazildi ? '<span class="gk__durum">girildi</span>' : '<span class="gk__kaynak">ölçüm · toplu yazılmaz</span>')
+        + '</li>';
+    }
+    if(s.yazildi){
+      return '<li class="gk__satir is-yazildi"><span class="gk__ad">' + kac(s.ad) + '</span>'
+        + '<span class="gk__oneri">' + kac((s.oneri && s.oneri.metin) || s.ipucu || '') + '</span>'
+        + '<span class="gk__durum">kaydedildi</span></li>';
+    }
+    if(!s.oneri || typeof s.yaz !== 'function'){
+      return '<li class="gk__satir is-bos"><span class="gk__ad">' + kac(s.ad) + '</span>'
+        + '<span class="gk__oneri">' + kac(s.ipucu || 'öneri yok · girmezsen boş kalır') + '</span></li>';
+    }
+    const sec = !a[s.id];
+    return '<li class="gk__satir' + (sec ? '' : ' is-atla') + '">'
+      + '<label class="gk__sec"><input type="checkbox" data-gk-sec="' + kac(s.id) + '"' + (sec ? ' checked' : '')
+      + ' aria-label="' + kac(s.ad + ': ' + s.oneri.metin + (sec ? ', kaydedilecek' : ', kaydedilmeyecek')) + '"/>'
+      + '<span class="gk__ad">' + kac(s.ad) + '</span>'
+      + '<span class="gk__oneri">' + kac(s.oneri.metin) + '</span>'
+      + '<span class="gk__kaynak">' + kac(KAYNAK[s.oneri.kaynak] || s.oneri.kaynak || '') + '</span></label></li>';
+  }
+
+  /* Modülün ekranı ya da alt sayfası bunu çizer. */
+  function cizim(gun){
+    if(!ayar) return '';
+    bagla();
+    const l = satirlar(gun);
+    const n = yazilacaklar(gun).length;
+    const m = sonMesaj[gun];
+    const ornek = ayar.olcumOrnek ? 'Örneğin: ' + ayar.olcumOrnek : 'Ölçtüğünü yaz';
+    return '<section class="gunukapat" data-gunukapat data-gun="' + kac(gun) + '" aria-label="Günü kapat">'
+      + '<p class="gk__not">Doğru olanı tek dokunuşla kaydet. Farklı olanın işaretini kaldır; ölçümleri aşağıya yaz.</p>'
+      + (l.length ? '<ul class="gk__liste">' + l.map(s => satirHtml(s, gun)).join('') + '</ul>'
+        : '<p class="gk__bos">Bugün için önerilecek bir şey yok.</p>')
+      + '<form class="gk__form" data-gk-form data-ayar-disi>'
+      + '<label class="gk__etiket" for="gk-olcum">Ölçümler</label>'
+      + '<input class="gk__girdi" id="gk-olcum" type="text" autocomplete="off" enterkeyhint="done" placeholder="' + kac(ornek) + '"/>'
+      + '<button type="submit" class="btn btn--primary gk__kapat" data-gk="kapat"><span class="btn__label">'
+      + (n ? 'Hepsi doğru · kaydet (' + n + ')' : 'Kaydet') + '</span></button>'
+      + '</form>'
+      + '<div class="gk__sonuc" data-gk-sonuc aria-live="polite">'
+      + (m ? '<p class="gk__mesaj gk__mesaj--' + m.tur + '" role="status">' + kac(m.metin) + '</p>' : '') + '</div>'
+      + '</section>';
+  }
+
+  /* Söz 1–4. olcumMetni boşsa yalnız beyanlar yazılır. Aynı gün için
+     ikinci çağrı birincisi bitmeden yazmaz (çift Enter iki kez eklerdi). */
+  async function kapat(gun, o){
+    if(!ayar) return { ok:false, neden:'Günü kapat kurulmadı.' };
+    if(suruyor[gun]) return { ok:false, neden:'Kayıt sürüyor.' };
+    suruyor[gun] = true;
+    try{ return await kapatIc(gun, o || {}); }finally{ delete suruyor[gun]; }
+  }
+  /* Geri almaları sondan başa, her biri ayrı: biri bozulsa da ötekiler koşar. */
+  async function hepsiniGeriAl(geri){
+    let bozuk = 0;
+    for(const g of geri.slice().reverse()){ try{ await g(); }catch(e){ bozuk++; } }
+    return bozuk;
+  }
+  async function kapatIc(gun, o){
+    const metin = String(o.olcumMetni || '').trim();
+    const geri = [];
+    const yazilan = [];
+    let geriAlinamaz = false;
+    const G = window.LIFEOS.GIRIS;
+    let p = null;
+    if(metin){
+      if(!G || !G.kuruluMu || !G.kuruluMu()) return sonuc(gun, { ok:false, neden:'Ölçüm satırı bu modülde okunamıyor; hiçbir şey yazılmadı.' });
+      p = G.onizle(metin);
+      if(!p) return sonuc(gun, { ok:false, neden:'Ölçüm satırını anlayamadım; hiçbir şey yazılmadı.' });
+      if(p.kalan && p.kalan.length){
+        return sonuc(gun, { ok:false, neden:'Anlaşılmadı: «' + p.kalan.join('», «') + '». Hiçbir şey yazılmadı; düzeltip yeniden kaydet.' });
+      }
+    }
+    const beyanlar = yazilacaklar(gun);
+    if(!p && !beyanlar.length) return sonuc(gun, { ok:false, neden:'Kaydedilecek bir şey yok.' });
+    try{
+      if(p){
+        const r = await p.kaydet();
+        /* Modül yazamadığını { ok:false } ile söylerse ölçüm yazılmamıştır:
+           beyanlar da yazılmaz (hepsi ya da hiçbiri). */
+        if(r && typeof r === 'object' && r.ok === false) throw new Error(r.neden || r.metin || 'ölçüm satırı yazılamadı');
+        const g = geriAlOf(r); if(g) geri.push(g); else geriAlinamaz = true;
+        yazilan.push(p.metin || metinOf(r));
+      }
+      for(const s of beyanlar){
+        const r = await s.yaz(gun);
+        /* Satır yazmamayı seçebilir ({ atlandi:true }): ölçüm satırı aynı işi
+           az önce ölçülmüş olarak yazdıysa tahmini tekrar yazılmaz, sayılmaz. */
+        if(r && typeof r === 'object' && r.atlandi) continue;
+        const g = geriAlOf(r); if(g) geri.push(g); else geriAlinamaz = true;
+        yazilan.push(s.ad);
+      }
+    }catch(e){
+      /* Söz 3: yarıda kalan yazım geri alınır. */
+      const bozuk = await hepsiniGeriAl(geri);
+      const durum = !geri.length && !geriAlinamaz ? 'Hiçbir şey yazılmadı.'
+        : bozuk || geriAlinamaz ? 'Yazılanın bir kısmı geri alınamadı.' : 'Yazılan geri alındı.';
+      return sonuc(gun, { ok:false, neden:'Kaydedilemedi: ' + ((e && e.message) || 'bilinmeyen hata') + '. ' + durum });
+    }
+    const geriAl = geri.length ? async () => {
+      const bozuk = await hepsiniGeriAl(geri);
+      sonMesaj[gun] = bozuk ? { tur:'uyari', metin:'Bir kısmı geri alınamadı.' } : { tur:'ok', metin:'Geri alındı.' };
+      if(ayar && typeof ayar.yenile === 'function') ayar.yenile();
+    } : null;
+    const yazi = 'Gün kapatıldı: ' + yazilan.length + ' kayıt.' + (geriAlinamaz ? ' Bir kısmı geri alınamaz.' : '');
+    return sonuc(gun, { ok:true, metin:yazi, yazilan, geriAl });
+  }
+  function sonuc(gun, r){
+    sonMesaj[gun] = r.ok ? { tur:'ok', metin:r.metin } : { tur:'uyari', metin:r.neden };
+    if(r.ok){
+      delete atla[gun];
+      if(ayar && typeof ayar.bildir === 'function'){ try{ ayar.bildir(r.metin, r.geriAl); }catch(e){ /* bildirim yok */ } }
+      if(ayar && typeof ayar.yenile === 'function'){ try{ ayar.yenile(); }catch(e){ /* çizim yok */ } }
+    }else tazele(gun);
+    return r;
+  }
+  function tazele(gun){
+    if(typeof document === 'undefined') return;
+    document.querySelectorAll('[data-gunukapat]').forEach(k => {
+      if(k.getAttribute('data-gun') !== gun) return;
+      const s = k.querySelector('[data-gk-sonuc]');
+      const m = sonMesaj[gun];
+      if(s) s.innerHTML = m ? '<p class="gk__mesaj gk__mesaj--' + m.tur + '" role="status">' + kac(m.metin) + '</p>' : '';
+      const b = k.querySelector('.gk__kapat .btn__label');
+      const n = yazilacaklar(gun).length;
+      if(b) b.textContent = n ? 'Hepsi doğru · kaydet (' + n + ')' : 'Kaydet';
+    });
+  }
+
+  function bagla(){
+    if(bagli || typeof document === 'undefined') return;
+    bagli = true;
+    document.addEventListener('change', e => {
+      const c = e.target && e.target.closest ? e.target.closest('[data-gk-sec]') : null;
+      if(!c) return;
+      const k = c.closest('[data-gunukapat]');
+      const gun = k ? k.getAttribute('data-gun') : '';
+      const id = c.getAttribute('data-gk-sec');
+      atla[gun] = atla[gun] || {};
+      if(c.checked) delete atla[gun][id]; else atla[gun][id] = true;
+      const li = c.closest('.gk__satir');
+      if(li) li.classList.toggle('is-atla', !c.checked);
+      tazele(gun);
+    });
+    document.addEventListener('submit', e => {
+      const f = e.target && e.target.closest ? e.target.closest('[data-gk-form]') : null;
+      if(!f) return;
+      e.preventDefault();
+      const k = f.closest('[data-gunukapat]');
+      const g = f.querySelector('.gk__girdi');
+      const b = f.querySelector('.gk__kapat');
+      if(b) b.disabled = true;
+      kapat(k ? k.getAttribute('data-gun') : '', { olcumMetni:g ? g.value : '' })
+        .finally(() => { if(b) b.disabled = false; });
+    });
+  }
+
+  function kur(o){
+    ayar = Object.assign({ modul:'', olcumOrnek:'' }, o || {});
+    bagla();
+  }
+  function _sifirla(){ ayar = null; Object.keys(suruyor).forEach(k => delete suruyor[k]); Object.keys(atla).forEach(k => delete atla[k]); Object.keys(sonMesaj).forEach(k => delete sonMesaj[k]); }
+
+  return { kur, cizim, kapat, kalip, yazilacaklar, satirlar, KAYNAK, kuruluMu:() => !!ayar, _sifirla };
 })();
 
 /* ==== js/core/yetki.js ==== */
@@ -77692,6 +77991,34 @@ SP.Quick = (function(){
     return null;
   }
 
+  /* VİRGÜLSÜZ ÇOK ÖLÇÜM (2026-10-25): «uyku 7.5 nabız 56 kilo 72» yalnız
+     uykuyu yazıyordu (parseVital ilk alanı döndürür); geri kalanı ne
+     önizlemede ne «anlaşılmadı»da görünüyordu. Ardından sayı gelen iki ya da
+     daha çok ölçüm adı ayıraçsız yan yanaysa cümle adlardan bölünür; gün
+     sözü («dün») her parçaya geçer. Bölünecek bir şey yoksa null. Bölünen
+     parçalar virgülle birleşince her ad çiftinin arasında ayıraç vardır:
+     yeniden bölünmez. */
+  const AYIRAC_RE = /(?<!\d),|,(?!\d)|;|\n|\s+ve\s+|\s+sonra\s+/i;
+  function vitalBol(text){
+    const z = gunSozu(text);
+    const t = z.metin, n = U.norm(t);
+    const adlar = [];
+    Object.keys(VITAL_FIELDS).forEach(k => VITAL_FIELDS[k].aliases.forEach(a => adlar.push(U.norm(a))));
+    adlar.sort((x, y) => y.length - x.length);
+    const yer = [];
+    for(let i = 0; i < n.length; i++){
+      if(i > 0 && /[a-z0-9]/.test(n[i - 1])) continue;
+      const a = adlar.find(x => n.startsWith(x, i) && !/[a-z0-9]/.test(n[i + x.length] || ' ')
+        && /^\s*(?:[:=]\s*)?\d/.test(n.slice(i + x.length)));
+      if(a){ yer.push(i); i += a.length - 1; }
+    }
+    const kes = yer.filter((p, j) => j > 0 && !AYIRAC_RE.test(t.slice(yer[j - 1], p)));
+    if(!kes.length) return null;
+    const bas = [0].concat(kes);
+    return bas.map((p, j) => t.slice(p, bas[j + 1]).trim()).filter(Boolean)
+      .map(x => z.kelime ? z.kelime + ' ' + x : x);
+  }
+
   /* ------------------------------------------------------------ hareket */
 
   function parseMove(text){
@@ -78003,7 +78330,7 @@ SP.Quick = (function(){
 
   const SIDDET_YOK = 'Şiddet belirtilmedi: «hafif», «orta» ya da «şiddetli» diye ekle.';
 
-  return { parse, parseHam, apply, parseVital, parseMove, parseNap, parseSymptom, VITAL_FIELDS,
+  return { parse, parseHam, apply, parseVital, vitalBol, parseMove, parseNap, parseSymptom, VITAL_FIELDS,
     BARDAK_ML, gunSozu, ogunSozu, tarih, onizleme, olcumEngeli, uyusmazNotu, SIDDET_YOK };
 })();
 
@@ -82990,15 +83317,129 @@ SP.Screens.today = (function(){
 
   /* Suyu yazar; artınca vakti gelen su hatırlatması kapanır. Geri al:
      önceki değer ve kapatılan işaretler. */
-  async function suYaz(d, ml){
-    const { b, hedef, ml:once } = suDurumu(d);
+  /* Yazımın kendisi (Günü kapat da bunu kullanır): bildirim yok, geri al döner. */
+  async function suYazCekirdek(d, ml){
+    const { ml:once } = suDurumu(d);
     const sonra = ml == null || ml <= 0 ? null : Math.min(ml, SU_EN_COK);
     await M.saveVitals(d, { water:sonra });
     const kapanan = sonra != null && sonra > (once || 0) ? await hatirlatKapat('su', d, true) : [];
+    return { sonra, geriAl:async () => { await M.saveVitals(d, { water:once }); await hatirlatAc(kapanan, d); SP.App.render(); } };
+  }
+  async function suYaz(d, ml){
+    const { b, hedef } = suDurumu(d);
+    const r = await suYazCekirdek(d, ml), sonra = r.sonra;
     SP.App.render();
     UI.toast(sonra == null ? 'Su girilmedi olarak bırakıldı'
       : 'Su · ' + Math.floor(sonra / b) + ' / ' + hedef + ' bardak (' + U.fmtNum(sonra) + ' ml)',
-      { undo:async () => { await M.saveVitals(d, { water:once }); await hatirlatAc(kapanan, d); SP.App.render(); } });
+      { undo:r.geriAl });
+  }
+
+  /* GÜNÜ KAPAT — SPİ satırları (KOLAY-PLANI Faz 1; çekirdek core/gunukapat.js).
+     Depo sahibi (2026-10-25): ölçüm satırları toplu onaylanmaz, tek satırla
+     yazılır. Satırlar dürüst kurulur:
+       · Su (beyan): hedefin (SU_ESIK) altındaysa «Hedef: 2.000 ml», suYaz
+         yolundan; hedefe ulaştıysa «kaydedildi».
+       · Öğünler (beyan): boş her öğün yuvası için «her zamanki» YALNIZ son
+         7 günün en az 4'ünde aynı öğünden (aynı yuva, aynı gıdalar; kalip()).
+         Kalıp yoksa öneri yok: öğün uydurulmaz.
+       · Hatırlatmalar (beyan, yalnız bugün): vakti gelmiş, işaretlenmemişler
+         tek satır, isaretleHepsi ile. Doz ve ilaç adı görünmez.
+       · Uyku, nabız, HRV, kilo (ölçüm): yazma işlevi yok; son değer yalnız
+         ipucu. Ölçüm alttaki tek satıra yazılır (GIRIS, SP.Quick). */
+  const GK_OLCUM = [
+    { id:'uyku', alan:'sleep', ad:'Uyku', birim:'sa' },
+    { id:'nabiz', alan:'rhr', ad:'İstirahat nabzı', birim:'atım/dk' },
+    { id:'hrv', alan:'hrv', ad:'HRV', birim:'ms' },
+    { id:'kilo', alan:'weight', ad:'Kilo', birim:'kg' },
+  ];
+  function gkOgunOzet(m){
+    return m.items.map(it => {
+      const f = SP.FOOD_BY_ID && SP.FOOD_BY_ID[it.foodId];
+      const g = it.g != null ? it.g : (it.kg != null ? Math.round(it.kg * 1000) : null);
+      return (f ? f.name : it.foodId) + (g ? ' ' + U.fmtNum(g) + ' g' : '');
+    }).join(', ');
+  }
+  const GK_OGUN_NOTU = 'Her zamanki';
+  const gkAnahtar = m => (m.items || []).map(it => it && it.foodId).filter(Boolean).sort().join('+');
+  function gkSatirlari(gun){
+    const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
+    const out = [];
+    const s = suDurumu(gun);
+    if(s.ml != null && s.ml >= SU_ESIK) out.push({ id:'su', ad:'Su', tur:'beyan', yazildi:true, ipucu:U.fmtNum(s.ml) + ' ml' });
+    /* Satır kurulduktan sonra su değiştiyse (tek satır «su 2 bardak» yazdı)
+       ölçülen değer hedef tahminiyle ezilmez: satır atlanır. */
+    else{
+      const suOnce = (M.vitalsOf(gun) || {}).water;
+      out.push({ id:'su', ad:'Su', tur:'beyan', oneri:{ metin:'Hedef: ' + U.fmtNum(SU_ESIK) + ' ml', kaynak:'plan' },
+        yaz:async g => {
+          const simdi = (M.vitalsOf(g) || {}).water;
+          if(g !== gun || (simdi == null ? null : Number(simdi)) !== (suOnce == null ? null : Number(suOnce))) return { atlandi:true };
+          const r = await suYazCekirdek(g, SU_ESIK); return { metin:'Su ' + U.fmtNum(SU_ESIK) + ' ml', geriAl:r.geriAl }; } });
+    }
+
+    const bugunkuler = M.mealsOf(gun).filter(m => m.items.length);
+    (SP.Ogun ? SP.Ogun.liste() : []).forEach(sl => {
+      const id = 'ogun-' + sl.id;
+      const var_ = bugunkuler.filter(m => m.slot === sl.id);
+      if(var_.length){ out.push({ id, ad:sl.label, tur:'beyan', yazildi:true, ipucu:var_.map(gkOgunOzet).join(' · ') }); return; }
+      const kayit = [], son = {};
+      for(let i = 1; i <= 7; i++){
+        const d = U.iso(U.addDays(U.parse(gun), -i));
+        /* Günü kapat'ın kendi yazdığı öğün kalıbı beslemez (kendini doğrulardı). */
+        M.mealsOf(d).filter(m => m.slot === sl.id && m.items.length && m.note !== GK_OGUN_NOTU).forEach(m => {
+          const a = gkAnahtar(m);
+          if(!a) return;
+          kayit.push({ gun:d, anahtar:a });
+          if(!son[a]) son[a] = m;                         // en yeni örnek kopyalanır
+        });
+      }
+      const k = G ? G.kalip(kayit, gun) : [];
+      if(!k.length){ out.push({ id, ad:sl.label, tur:'beyan' }); return; }
+      const ornek = son[k[0]];
+      out.push({ id, ad:sl.label, tur:'beyan', oneri:{ metin:gkOgunOzet(ornek), kaynak:'kalip' },
+        yaz:async g => {
+          const yeni = Object.assign(M.newMeal(sl.id), { items:ornek.items.map(it => Object.assign({}, it)), note:GK_OGUN_NOTU });
+          await M.addMeal(g, yeni);
+          return { metin:sl.label, geriAl:async () => { await M.deleteMeal(g, yeni.id); } };
+        } });
+    });
+
+    const H = SP.Hatirlat;
+    if(gun === U.todayISO() && H && H.bugun && H.isaretleHepsi){
+      const l = H.bugun(bugunSimdi());
+      const vakti = l.filter(x => x.durum === 'vakti').map(x => x.anahtar);
+      if(vakti.length) out.push({ id:'hatirlatma', ad:'Hatırlatmalar', tur:'beyan',
+        oneri:{ metin:vakti.length + ' hatırlatma · yapıldı', kaynak:'plan' },
+        yaz:async g => { const r = await H.isaretleHepsi(vakti, g); return { metin:'Hatırlatmalar', geriAl:r.geriAl }; } });
+      else if(l.some(x => x.durum === 'yapildi')) out.push({ id:'hatirlatma', ad:'Hatırlatmalar', tur:'beyan', yazildi:true, ipucu:'vakti gelenler işaretli' });
+    }
+
+    const v = M.vitalsOf(gun) || {};
+    const onceki = Object.keys(S.vitals || {}).filter(t => t < gun).sort().reverse();
+    GK_OLCUM.forEach(f => {
+      const yaz = x => U.fmtNum(Number(x)) + ' ' + f.birim;
+      if(v[f.alan] != null){ out.push({ id:f.id, ad:f.ad, tur:'olcum', yazildi:true, ipucu:yaz(v[f.alan]) }); return; }
+      const t = onceki.find(x => S.vitals[x] && S.vitals[x][f.alan] != null);
+      out.push({ id:f.id, ad:f.ad, tur:'olcum', yazildi:false,
+        ipucu:t ? 'son: ' + yaz(S.vitals[t][f.alan]) + ' · ' + U.fmtShort(t) : 'son: veri yok' });
+    });
+    return out;
+  }
+  /* Açık «Günü kapat» alt sayfası kayıttan ve geri almadan sonra tazelenir. */
+  function gkTazele(){
+    const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
+    const k = document.querySelector('#sheet [data-gunukapat]');
+    if(!G || !k) return;
+    k.outerHTML = G.cizim(k.getAttribute('data-gun'));
+  }
+  /* Yalnız bugün (2026-10-25): tek satırın ölçümü gün sözü yoksa bugüne
+     yazılır; geçmiş gün açılsa ölçüm ve beyan ayrı günlere düşerdi.
+     Geçmiş gün «Günü düzenle» yolundan girilir. */
+  function gkAc(gun){
+    const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
+    if(!G || !G.kuruluMu || !G.kuruluMu() || gun !== U.todayISO()){ SP.App.go('gun'); return; }
+    UI.sheet({ title:'Günü kapat', body:G.cizim(gun),
+      footer:String(K.Button({ label:'Günü düzenle', tone:'ghost', act:'go', data:{ 'data-route':'gun' } })) });
   }
 
   /* Radio grubunun klavyesi: oklar bir bardak, Boşluk/Enter dokunuş.
@@ -83228,7 +83669,8 @@ SP.Screens.today = (function(){
       { ad:'Hareket', deger:hareketDk(t), birim:'dk', kesinlik:'measured', seri:yedi.map(hareketDk), git:'move' },
     ];
     return KS.kapakHtml({ modul:'spi', selam:KS.acilis('spi').selam, cumle:SP.Screens.today.headline(), sayilar,
-      eylem:String(K.Button({ label:'Günü kaydet', tone:'primary', act:'go', data:{ 'data-route':'gun' } })),
+      /* Günü kapat (KOLAY-PLANI Faz 1): alt sayfa; «Günü düzenle» onun içinde. */
+      eylem:String(K.Button({ label:'Günü kaydet', tone:'primary', act:'gunu-kapat' })),
       ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
   }
 
@@ -83410,6 +83852,8 @@ SP.Screens.today = (function(){
   const handle = {
     async 'dunku-ogun'(el){ await dunkuEkle('ogun', el.dataset.id); },
     async 'dunku-antrenman'(el){ await dunkuEkle('antrenman', el.dataset.id); },
+    /* Kapak bugünü gösterir: sayfa da bugünü açar (gizli görünen gün değil). */
+    'gunu-kapat'(){ gkAc(U.todayISO()); },
     async 'kotu-gun'(){
       const r = await SP.KotuGun.ac();
       if(!r.ok){ UI.toast(r.why); return; }
@@ -83750,6 +84194,8 @@ SP.Screens.today = (function(){
        sıradaki hatırlatma. İlaç adı SÖYLENMEZ (hatirlat.js söz 3): yalnız
        «ilaç ya da takviye». Kural metni, model yok. */
     kapak,
+    /* Günü kapat: app.js kurar (GUNUKAPAT.kur); satırlar ve tazeleme burada. */
+    gunuKapat:{ satirlar:gkSatirlari, tazele:gkTazele, ac:gkAc },
     sesli(simdi){
       const now = simdi || new Date();
       const r = SP.Move.readiness(SP.U.todayISO());
@@ -95890,6 +96336,26 @@ SP.App = (function(){
 
   let rendering = false;
   let queued = null;
+  /* P2 «GİRİLDİ» KURALI (pusula; KOLAY-PLANI §1). 2026-10-25: varsayılanla
+     dolan alanlar (symptoms:{}, symptomsLogged:false, period:false) boş ya da
+     geri alınmış satırı «girildi» yapıyordu. Girilen: dolu bir değer
+     (null, '', false ve boş nesne değil) ya da öğün. */
+  function girildi(t){
+    const v = SP.S.vitals[t];
+    const dolu = x => x != null && x !== '' && x !== false
+      && !(typeof x === 'object' && !Array.isArray(x) && !Object.keys(x).length);
+    const olcum = !!v && Object.keys(v).some(k => k !== 'date' && dolu(v[k]));
+    return olcum || ((SP.S.meals || {})[t] || []).length > 0;
+  }
+  /* GÜNÜ KAPAT'IN SPİ KURULUMU (brand/ortak/gunukapat.js; KOLAY-PLANI Faz 1).
+     girisKurucu gibi modül düzeyinde: boot çağırır, testler SP.App.gunuKapatKur()
+     ile kurar. Satırlar Bugün ekranının kodundadır (today.js gunuKapat); ölçüm
+     satırı tek satır girişten (GIRIS) geçer. Bildirim mevcut «Geri al» şeridi. */
+  function gunuKapatKurucu(){ return window.LIFEOS.GUNUKAPAT.kur({ modul:'spi',
+      satirlar:g => SP.Screens.today.gunuKapat.satirlar(g),
+      bildir:(metin, geriAl) => UI.toast(metin, geriAl ? { undo:geriAl } : {}),
+      yenile:() => { render(); SP.Screens.today.gunuKapat.tazele(); },
+      olcumOrnek:'uyku 7.5, nabız 56, kilo 72' }); }
   /* TEK SATIR GİRİŞİN SPİ KURULUMU (brand/ortak/giris.js). Modül düzeyinde ve
      adlı (2026-10-25): boot çağırır; testler ortak kutuyu sıfırladıktan sonra
      SP.App.girisKur() ile gerçek kurulumu geri getirir. */
@@ -95915,6 +96381,12 @@ SP.App = (function(){
               return r.ok ? { metin:'«' + r.ad + '» ' + neye + ' eklendi.', geriAl:async () => { await r.geriAl(); render(); } } : r.why;
             } };
         }
+        /* «uyku 7.5 nabız 56 kilo 72» (virgülsüz): ölçüm adlarından bölünür,
+           tek satırın çok parçalı yolundan okunur (Quick.vitalBol); yoksa
+           yalnız ilk ölçüm yazılıp başarı deniyordu (2026-10-25). */
+        const vb = Q && Q.vitalBol ? Q.vitalBol(t) : null;
+        const Gi = window.LIFEOS && window.LIFEOS.GIRIS;
+        if(vb && Gi && Gi.kuruluMu && Gi.kuruluMu()) return Gi.onizle(vb.join(', '));
         const p = Q && Q.parse(t);
         /* tur: King'in sohbet karşılığı için (king.js söz 8). */
         const tur = !p ? '' : p.kind === 'nap' ? 'uyku' : p.kind === 'meal' ? 'ogun' : p.kind === 'move' ? 'hareket' : p.kind === 'lab' ? 'tahlil'
@@ -95941,8 +96413,10 @@ SP.App = (function(){
           const r = await Q.apply(p, { date:t });
           render();
           /* Yazılmadıysa (şiddet söylenmedi, birim uyuşmuyor, toplam
-             sınırı aştı) nedeni döner; «kaydedildi» denmez. */
-          if(!r || !r.ok) return (r && r.text) || 'Kaydedilemedi.';
+             sınırı aştı) nedeniyle hata atılır; «kaydedildi» denmez. Düz
+             metin dönünce kutu bunu başarı sanıyor, Günü kapat beyanları
+             da yazıyordu (2026-10-25). Kutu ve King «Kaydedilemedi: …» der. */
+          if(!r || !r.ok) throw new Error((r && r.text) || 'yazılamadı');
           let geriAl = null;
           if(p.kind === 'nap'){
             const id = r && r.kayit && r.kayit.id;
@@ -97200,6 +97674,8 @@ SP.App = (function(){
       /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
          kapıyı kullanır; ayrıştırıcı SP.Quick (ölçüm, tahlil, hareket, öğün). */
       if(window.LIFEOS && window.LIFEOS.GIRIS) girisKurucu();
+      /* GÜNÜ KAPAT: kapaktaki «Günü kaydet» açar (today.js gunu-kapat). */
+      if(window.LIFEOS && window.LIFEOS.GUNUKAPAT) gunuKapatKurucu();
 
       /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).
          Harita çekmecelerden türetilir; her çekmecenin ilk ekranı. */
@@ -97212,8 +97688,6 @@ SP.App = (function(){
       /* PUSULA (brand/ortak/pusula.js; KOLAY-PLANI §1): P1 sürtünme ölçerinden,
          P2 «girildi» kuralı bu modülün. */
       if(window.LIFEOS && window.LIFEOS.PUSULA && SP.Friction){
-        const girildi = t => { const v = SP.S.vitals[t]; const olcum = !!v && Object.keys(v).some(k => k !== 'date' && v[k] != null && v[k] !== '');
-          return olcum || ((SP.S.meals || {})[t] || []).length > 0; };
         window.LIFEOS.PUSULA.kur({ modul:'spi', kullanim:() => (SP.S.usage && SP.S.usage.days) || {}, girildi,
           ilkGun:() => {
             const l = Object.keys(Object.assign({}, SP.S.vitals, SP.S.meals) || {}).filter(girildi)
@@ -97388,7 +97862,7 @@ SP.App = (function(){
     }
   }
 
-  return { girisKur:() => girisKurucu(), sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
+  return { girisKur:() => girisKurucu(), gunuKapatKur:() => gunuKapatKurucu(), girildi, sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml, arkaPlan, enterEylemi, kisayolDugmeleri };
 })();
 
