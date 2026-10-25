@@ -1996,32 +1996,7 @@ ESP.App = (function(){
                 return { ad:x.disc.label, alt:dk ? dk + ' dk çalışıldı' : 'haftanın dengesinde sırada', durum:dk ? 'bitti' : 'sirada', dk:25, route:x.disc.route || null };
               }), not:r.note || '' };
             },
-            istatistik:() => {
-              const dakika = {};
-              let gun = 0;
-              for(let i = 0; i < 30; i++){
-                const ss = M.sessionsOf(U.iso(U.addDays(U.today(), -i))).filter(s => s.minutes > 0);
-                if(ss.length) gun++;
-                ss.forEach(s => { dakika[s.disc] = (dakika[s.disc] || 0) + s.minutes; });
-              }
-              const top = Object.keys(dakika).reduce((a, k) => a + dakika[k], 0);
-              /* Son 7 gün dakika (eskiden yeniye); oturumu olmayan gün boşluk kalır. */
-              const seri = [];
-              for(let i = 6; i >= 0; i--){
-                const ss = M.sessionsOf(U.iso(U.addDays(U.today(), -i))).filter(s => s.minutes > 0);
-                seri.push(ss.length ? ss.reduce((a, s) => a + s.minutes, 0) : null);
-              }
-              const enCok = Object.keys(dakika).sort((a, b) => dakika[b] - dakika[a])[0];
-              const sinir = U.iso(U.addDays(U.today(), -29));
-              const biten = (S.books || []).filter(b => b.finishedAt && String(b.finishedAt).slice(0, 10) >= sinir).length;
-              return [
-                { ad:'Çalışılan gün · 30 gün', deger:gun || null, birim:'/ 30', etiket:'ölçüldü' },
-                { ad:'Toplam süre · 30 gün', deger:top || null, birim:'dk', etiket:'ölçüldü', seri },
-                { ad:'En çok çalışılan alan', deger:enCok ? (ESP.DISCIPLINE_BY_ID[enCok] || {}).label || enCok : null, etiket:'hesaplandı',
-                  alt:enCok ? dakika[enCok] + ' dk' : '' },
-                { ad:'Biten kitap · 30 gün', deger:biten || null, etiket:'ölçüldü' },
-              ];
-            },
+            istatistik:() => kralIstatistik(),
             /* Kelime soru kartı: senin dil kartlarından (ön yüz → doğru arka yüz,
                üç çeldirici başka kartlardan). Cevap tekrar takvimine yazılmaz. */
             soru:() => {
@@ -2237,7 +2212,36 @@ ESP.App = (function(){
     }
   }
 
-  return { sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS,
+  /* Kral «istatistik» kartı. Toplam süre tahmini oturum içeriyorsa
+     «tahmin» der (Günü kapat plan oturumunu tahmin etiketiyle yazar). */
+  function kralIstatistik(){
+    const dakika = {};
+    let gun = 0, tahmin = false;
+    for(let i = 0; i < 30; i++){
+      const ss = M.sessionsOf(U.iso(U.addDays(U.today(), -i))).filter(s => s.minutes > 0);
+      if(ss.length) gun++;
+      ss.forEach(s => { dakika[s.disc] = (dakika[s.disc] || 0) + s.minutes; if(s.minutesCert !== 'measured') tahmin = true; });
+    }
+    const top = Object.keys(dakika).reduce((a, k) => a + dakika[k], 0);
+    /* Son 7 gün dakika (eskiden yeniye); oturumu olmayan gün boşluk kalır. */
+    const seri = [];
+    for(let i = 6; i >= 0; i--){
+      const ss = M.sessionsOf(U.iso(U.addDays(U.today(), -i))).filter(s => s.minutes > 0);
+      seri.push(ss.length ? ss.reduce((a, s) => a + s.minutes, 0) : null);
+    }
+    const enCok = Object.keys(dakika).sort((a, b) => dakika[b] - dakika[a])[0];
+    const sinir = U.iso(U.addDays(U.today(), -29));
+    const biten = (S.books || []).filter(b => b.finishedAt && String(b.finishedAt).slice(0, 10) >= sinir).length;
+    return [
+      { ad:'Çalışılan gün · 30 gün', deger:gun || null, birim:'/ 30', etiket:'ölçüldü' },
+      { ad:'Toplam süre · 30 gün', deger:top || null, birim:'dk', etiket:tahmin ? 'tahmin' : 'ölçüldü', seri },
+      { ad:'En çok çalışılan alan', deger:enCok ? (ESP.DISCIPLINE_BY_ID[enCok] || {}).label || enCok : null, etiket:'hesaplandı',
+        alt:enCok ? dakika[enCok] + ' dk' : '' },
+      { ad:'Biten kitap · 30 gün', deger:biten || null, etiket:'ölçüldü' },
+    ];
+  }
+
+  return { sayfaSonuRota, boot, kralIstatistik, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS,
     sectionOf, routeOn, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest, girisKur, gunuKapatKur,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, arkaPlan };
 })();

@@ -66,8 +66,8 @@ ESP.XPSayim = (function(){
     g.forEach(gun => {
       out[gun] = {
         'esp.kart':kart[gun] || 0,
-        /* Dakika: ölçülmemiş oturum sayılmaz — `minutesOf` null döner. */
-        'esp.oturum':M.minutesOf(gun) || 0,
+        /* Dakika: ölçülmemiş ya da tahmini oturum sayılmaz. */
+        'esp.oturum':M.olculenDakika(gun) || 0,
         'esp.okuma':not[gun] || 0,
         'esp.yazi':taslak[gun] || 0,
         'esp.gun':M.dayHasEntry(M.dayOf(gun)) ? 1 : 0,

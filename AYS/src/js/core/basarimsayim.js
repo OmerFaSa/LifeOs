@@ -33,9 +33,10 @@ R.BasarimSayim = (function(){
     const d = S.days[gun];
     const bloklar = (d && Array.isArray(d.blocks)) ? d.blocks : [];
 
-    /* Yalnız ÖLÇÜLMÜŞ süre: `actualMin` null ise o blok süresizdir. */
+    /* Yalnız ÖLÇÜLMÜŞ süre: `actualMin` null ise o blok süresizdir; plandan
+       gelen tahmin (`minCert:'estimated'`) sayılmaz (depo sahibi, 2026-10-25). */
     const dakika = bloklar.reduce(function(t, b){
-      return t + (b && b.actualMin != null ? Number(b.actualMin) || 0 : 0);
+      return t + (b && b.actualMin != null && b.minCert !== 'estimated' ? Number(b.actualMin) || 0 : 0);
     }, 0);
 
     const bitenBlok = bloklar.filter(function(b){ return b.status === 'done'; }).length;

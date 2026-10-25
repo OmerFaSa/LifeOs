@@ -362,4 +362,22 @@
       });
     });
   });
+  /* 2026-10-25 depo sahibi: rozet sayacı ve «günde N saat çalışma»
+     alışkanlığı yalnız ölçülmüş dakikayı sayar; plandan gelen tahmin girmez. */
+  describe('Sayaçlar yalnız ölçülmüş dakikayı sayar — AYS', () => {
+    it('rozet dakikası ve alışkanlık dakikası tahmini blok dakikasını saymaz', async () => {
+      await withTodayAsync(GUN, async () => {
+        try{
+          const { day } = await hazirla();
+          day.blocks[0].actualMin = 60; day.blocks[0].minCert = 'estimated';
+          day.blocks[1].actualMin = 25; day.blocks[1].minCert = 'measured';
+          expect(R.BasarimSayim.gunluk(GUN).dakika).toBe(25);
+          expect(R.Hedefler.olculenDakika(GUN)).toBe(25);
+          day.blocks[1].actualMin = null; day.blocks[1].minCert = null;
+          expect(R.BasarimSayim.gunluk(GUN).dakika).toBe(0);
+          expect(R.Hedefler.olculenDakika(GUN)).toBe(null);
+        }finally{ bitir(); }
+      });
+    });
+  });
 })();

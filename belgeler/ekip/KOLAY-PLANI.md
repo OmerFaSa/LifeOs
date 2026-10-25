@@ -307,8 +307,9 @@ yazılamazsa beyanlar da yazılmaz; çok parçalı satır, AYS ve ESP satır yaz
 yalnız bugün; satırdaki su, su hedefi beyanını atlatır; virgülsüz ölçüm satırı («uyku 7.5 nabız
 56») bölünür; «her zamanki» kalıbı Günü kapat'ın kendi kayıtlarından beslenmez; tahmin dakika
 HKM'ye, pano ve Kral kartlarına «ölçüldü» diye gitmez; AYS'de tahmin bloğa yazılan dakika
-tahminin yerine geçer, üstüne eklenmez. Açık: ESP Kral «Toplam süre · 30 gün» etiketi; XP,
-rozet ve müfredat sayaçları tahmini dakikayı da sayıyor (politika kararı).
+tahminin yerine geçer, üstüne eklenmez. Depo sahibinin kararıyla XP, rozet, müfredat ve AYS
+«günde N saat çalışma» alışkanlığı yalnız ölçülmüş dakikayı sayar; ESP Kral «Toplam süre · 30
+gün» tahmin içeriyorsa «tahmin» der.
 
 **Faz 1 sınırları (açık):** AYS ve ESP'de Günü kapat yalnız bugün için; erişilebilirlik ve
 düzen araçları alt sayfayı açmıyor (testlerle kapsanıyor); iOS bildirimindeki `eylem`

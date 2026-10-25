@@ -30,12 +30,12 @@ ESP.Curriculum = (function(){
 
   function days(n){ return U.lastDays(n); }
 
-  /* Bir disiplinin son N gunde toplam dakikasi. Hic gun girilmemisse
-     'missing' doner — sifir degil. */
+  /* Bir disiplinin son N gunde OLCULMUS toplam dakikasi; tahmini oturum
+     kapiyi gecirmez. Hic olculmus gun yoksa 'missing' doner — sifir degil. */
   function minutes(discId, n){
     let toplam = 0, girilen = 0;
     days(n).forEach(function(d){
-      const v = ESP.Model.minutesOf(d, discId);
+      const v = ESP.Model.olculenDakika(d, discId);
       if(v == null) return;
       toplam += v; girilen++;
     });

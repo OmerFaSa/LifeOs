@@ -286,4 +286,34 @@
       }
     });
   });
+  /* 2026-10-25 depo sahibi: XP, rozet ve müfredat sayaçları yalnız ölçülmüş
+     dakikayı sayar; Günü kapat'ın tahmini oturumu sayaca girmez. Kral'ın
+     «Toplam süre» kartı tahmin içeriyorsa «tahmin» der. */
+  describe('Sayaçlar yalnız ölçülmüş dakikayı sayar', () => {
+    it('ölçülmüş dakika: rozet, XP, müfredat tahmini saymaz; Kral kartı tahmini söyler', async () => {
+      await withTodayAsync('2026-03-10', async () => {
+        resetState();
+        const t = ESP.U.todayISO();
+        pushSession(t, 'lang', 30);
+        pushSession(t, 'lang', 45, { minutesCert:'estimated' });
+        expect(ESP.Model.minutesOf(t, 'lang')).toBe(75);
+        expect(ESP.Model.olculenDakika(t, 'lang')).toBe(30);
+        expect(ESP.Model.olculenDakika(t)).toBe(30);
+        expect(ESP.BasarimSayim.gunluk(t).dakika).toBe(30);
+        expect(ESP.XPSayim.gunluk(t)['esp.oturum']).toBe(30);
+        expect(ESP.Curriculum.measure('lang.minutes30').value).toBe(30);
+        const k = ESP.App.kralIstatistik().find(x => x.ad === 'Toplam süre · 30 gün');
+        expect([k.deger, k.etiket]).toEqual([75, 'tahmin']);
+        resetState();
+        pushSession(t, 'lang', 45, { minutesCert:'estimated' });
+        expect(ESP.Model.olculenDakika(t, 'lang')).toBe(null);
+        expect(ESP.Curriculum.measure('lang.minutes30').cert).toBe('missing');
+        pushSession(t, 'lang', 20);
+        expect(ESP.App.kralIstatistik().find(x => x.ad === 'Toplam süre · 30 gün').etiket).toBe('tahmin');
+        resetState();
+        pushSession(t, 'lang', 20);
+        expect(ESP.App.kralIstatistik().find(x => x.ad === 'Toplam süre · 30 gün').etiket).toBe('ölçüldü');
+      });
+    });
+  });
 })();

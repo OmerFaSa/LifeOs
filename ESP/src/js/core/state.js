@@ -417,6 +417,15 @@ ESP.Model = (function(){
     return info ? info.minutes : null;
   }
 
+  /* Yalniz OLCULMUS dakika (depo sahibi, 2026-10-25): XP, rozet ve
+     mufredat sayaclari tahmini oturumu saymaz. Olculmus oturum yoksa
+     null — sifir degil. */
+  function olculenDakika(dateISO, discId){
+    const rows = sessionsOf(dateISO)
+      .filter(s => (!discId || s.disc === discId) && s.minutesCert === 'measured' && s.minutes != null);
+    return rows.length ? rows.reduce((a, s) => a + s.minutes, 0) : null;
+  }
+
   async function saveDay(dateISO){
     const rec = ensureDay(dateISO);
     rec.updatedAt = new Date().toISOString();
@@ -1489,7 +1498,7 @@ ESP.Model = (function(){
     profileList, addProfile, removeProfile, switchProfile, activeProfileId,
     /* gun ve oturum */
     newDay, dayOf, ensureDay, saveDay, dayHasEntry, sessionsOf, minutesOf, minutesInfo,
-    addSession, updateSession, deleteSession, recentDays, streak,
+    addSession, updateSession, deleteSession, recentDays, streak, olculenDakika,
     /* dil */
     newCard, saveCard, deleteCard, cardsOf,
     /* felsefe */

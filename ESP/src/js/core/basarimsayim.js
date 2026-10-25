@@ -15,7 +15,7 @@
 
    ESP'DE NE SAYILIR
 
-     dakika    `Model.minutesOf(gün)` — oturumların ölçülmüş süresi.
+     dakika    `Model.olculenDakika(gün)` — oturumların ölçülmüş süresi; tahmin sayılmaz.
                XP'nin `esp.oturum` için kullandığı sayının aynısı;
                ikinci bir «pratik süresi» tanımı açmak, ikisinin bir
                gün ayrışması demekti.
@@ -41,8 +41,8 @@ ESP.BasarimSayim = (function(){
     const taslak = (S.drafts || []).filter(function(t){
       return ESP.U.gunOf(String((t && t.createdAt) || '')) === gun; }).length;
 
-    /* Ölçülmemiş oturum sayılmaz — `minutesOf` null döner. */
-    const dakika = Number(M.minutesOf(gun)) || 0;
+    /* Ölçülmemiş ya da tahmini oturum sayılmaz — `olculenDakika` null döner. */
+    const dakika = Number(M.olculenDakika(gun)) || 0;
     const gunKaydi = M.dayHasEntry(M.dayOf(gun)) ? 1 : 0;
 
     return {

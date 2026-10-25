@@ -389,13 +389,16 @@ R.Hedefler = (function(){
     alanlar:[
       { id:'calisma', ad:'Ders çalışma', kelime:/(ders|çalış|soru çöz|matematik|türkçe|fizik|kimya|biyoloji|tarih|coğrafya|geometri|paragraf|tyt|ayt)/ },
     ],
-    dakika:(alan, iso) => {
-      const d = (R.S.days || {})[iso];
-      const l = d ? (d.blocks || []).filter(b => b && b.actualMin != null) : [];
-      if(!l.length) return null;
-      return l.reduce((a, b) => a + (Number(b.actualMin) || 0), 0);
-    },
+    dakika:(alan, iso) => olculenDakika(iso),
   }) : null;
+  /* Yalnız ölçülmüş blok dakikası; plandan gelen tahmin alışkanlığı
+     tutturmaz (depo sahibi, 2026-10-25). Ölçülmüş blok yoksa null. */
+  function olculenDakika(iso){
+    const d = (R.S.days || {})[iso];
+    const l = d ? (d.blocks || []).filter(b => b && b.actualMin != null && b.minCert !== 'estimated') : [];
+    if(!l.length) return null;
+    return l.reduce((a, b) => a + (Number(b.actualMin) || 0), 0);
+  }
 
   const PAKETLER = (ALISKANLIK ? [ALISKANLIK.paket] : []).concat([NET, KONU]);
   const PAKET_BY_ID = { konu:KONU, net:NET };
@@ -511,7 +514,7 @@ R.Hedefler = (function(){
     baskaIs:m => !!(R.Komut && R.Komut.anla(m).komut) || !!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi && LIFEOS.Ofis.bamIstegi(m)),
   }) : null;
 
-  return { PAKETLER, PAKET_BY_ID, KONU, NET, ALISKANLIK, SAAT_GUN, DERS_TEST, EN_AZ_DENEME,
+  return { PAKETLER, PAKET_BY_ID, KONU, NET, ALISKANLIK, SAAT_GUN, olculenDakika, DERS_TEST, EN_AZ_DENEME,
     dersleriBul, kapsamBul, konular, kalanKonular, siraliKalan, durumOf, konuSaati, seri, netHizi, azami, netAdi, sinavTarihi,
     notlar, yukle, kaydet, liste, aktifler, durumDegistir, ozet, sohbet, ozetler, yarin, ag };
 })();
