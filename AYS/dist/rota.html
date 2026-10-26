@@ -18968,7 +18968,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'d9ba6ac8', at:'2026-10-26 14:34', dirty:true };
+R.BUILD = { id:'030cf6a5', at:'2026-10-26 15:07', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -75610,7 +75610,7 @@ R.Store = (function(){
 
   async function set(path, data){
     const localOk = lSet(path, data);
-    degisti([path]);
+    if(localOk) degisti([path]);   // yazılmayan kayda «kaydedildi» denmez
     if(db){
       health.pendingCloudWrites++;
       try{
@@ -76324,8 +76324,10 @@ R.Model = (function(){
     R.S.days[id] = normDay(doc);
     return R.S.days[id];
   }
+  /* Yazma başarısızsa (kota) hata: giriş / Günü kapat geri alır ve
+     «Kaydedilemedi» der; «Kaydedildi» denmez (ESP state.js write()). */
   async function saveDay(dateISO){
-    await R.Store.set('days/'+dateISO, R.S.days[dateISO]);
+    if(await R.Store.set('days/'+dateISO, R.S.days[dateISO]) === false) throw new Error('tarayıcı depolama alanı dolu');
   }
   function dayOf(dateISO){ return R.S.days[dateISO] || null; }
 
@@ -98075,7 +98077,11 @@ R.Proposals = (function(){
   }
 
   async function save(){
-    S.officeProposals = (S.officeProposals || []).slice(-MAX);
+    /* Bekleyen asla atılmaz (onaysız kaybolurdu, anahtarı da yeniden önerilmesini
+       engellerdi); sınıra kadar kalan yer en yeni sonuçlananlarındır. */
+    const l = S.officeProposals || [];
+    let yer = MAX - l.filter(p => p.status === 'pending').length;
+    S.officeProposals = l.slice().reverse().filter(p => p.status === 'pending' || yer-- > 0).reverse();
     S.officeProposalKeys = (S.officeProposalKeys || []).slice(-MAX_ANAHTAR);
     await R.Store.set(STORE, { items:S.officeProposals, anahtarlar:S.officeProposalKeys });
     return S.officeProposals;
@@ -101951,7 +101957,10 @@ R.Screens.today = (function(){
   const { html, raw, when, map, cls } = R.h;
   const c = R.C;
 
-  function todayDoc(){ return S.days[U.todayISO()]; }
+  /* Ekran hangi gün için çizildiyse dokunuş o güne yazılır: gece yarısını
+     geçip yeniden çizilmeyen ekranda giriş ertesi güne kaymaz, kaybolmaz. */
+  let cizilenGun = null;
+  function todayDoc(){ return S.days[cizilenGun] || S.days[U.todayISO()]; }
   /* Dakikanın kesinliği (AGENTS §1.2): plandan doldurulan dakika
      «tahmin»dir; sayaç ya da elle yazılan «ölçüldü». Tahmine eklenen
      sayaç dakikası toplamı ölçüme çevirmez. Etiketsiz eski kayıt ölçümdür. */
@@ -101964,10 +101973,17 @@ R.Screens.today = (function(){
   /* ---------- zamanlayici ---------- */
   let tickHandle = null;
 
-  function runningBlock(){
-    const day = todayDoc();
-    return day ? (day.blocks.find(b => b.startedAt) || null) : null;
+  /* Çalışan sayaç çizilen günde, yoksa bir önceki günde aranır: 23:30'da
+     başlayıp 00:20'de duran sayacın dakikası başladığı güne yazılır. */
+  function calisan(id){
+    const g = cizilenGun || U.todayISO();
+    for(const iso of [g, U.iso(U.addDays(U.parse(g), -1))]){
+      const day = S.days[iso], b = day && day.blocks.find(x => x.startedAt && (!id || x.id === id));
+      if(b) return { day, b };
+    }
+    return null;
   }
+  function runningBlock(){ const r = calisan(); return r ? r.b : null; }
   function elapsedSeconds(block){
     if(!block || !block.startedAt) return 0;
     return Math.max(0, Math.floor((Date.now() - new Date(block.startedAt).getTime())/1000));
@@ -103380,7 +103396,7 @@ R.Screens.today = (function(){
   }
 
   async function render(){
-    const dateISO = U.todayISO();
+    const dateISO = cizilenGun = U.todayISO();
     const n = M.currentWeek();
     await M.ensureWeek(n);
     const day = await M.ensureDay(U.today());
@@ -103414,7 +103430,7 @@ R.Screens.today = (function(){
      ritüel, seri, telafi… Hiçbiri kalkmadı; yalnız yeri değişti (envanter
      tabanı bunu denetler). Bugün'de duran şey burada tekrar çizilmez. */
   async function renderAyrinti(){
-    const dateISO = U.todayISO();
+    const dateISO = cizilenGun = U.todayISO();
     const n = M.currentWeek();
     await M.ensureWeek(n);
     const day = await M.ensureDay(U.today());
@@ -104063,8 +104079,9 @@ R.Screens.today = (function(){
       R.App.render();
     },
     async 'timer-stop'(el){
-      const day = todayDoc();
-      const b = day.blocks.find(x => x.id === el.dataset.block);
+      const r = calisan(el.dataset.block);
+      if(!r){ R.App.render(); return; }   /* çalışan sayaç yok: 0 dk «yarım» yazılmaz */
+      const { day, b } = r;
       const mins = Math.round(elapsedSeconds(b)/60);
       oturumYaz(b, mins);
       sayacDakikasi(b, mins);
