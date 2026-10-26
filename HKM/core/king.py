@@ -33,8 +33,8 @@ import json
 import re
 import statistics
 
-from core import (ai, bam, butce, depo, espbelge, intents, kaynakli, kitap, mufredat, planlama, program, spibilgi, unite,
-                  urunler, web)
+from core import (ai, bam, butce, depo, espbelge, intents, kaynakli, kendiliginden, kitap, mufredat, planlama,
+                  program, spibilgi, unite, urunler, web)
 from core import teklif as tkl
 
 # «hkm»: kullanicinin HKM'nin kendisinden (Telegram, HKM ekrani) verdigi is.
@@ -462,11 +462,14 @@ TESLIM_KANALLARI = ("telegram", "whatsapp")
 MAX_HEDEF = 80
 
 
-def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None, hedef=None):
+def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None, hedef=None,
+            kendi=False):
     """Modulun is emri. Doner: {ok, emir, karar, ...} ya da {ok:False, errors}.
 
     `kanal`/`hedef`: emir Telegram ya da WhatsApp sohbetinden geldiyse o
-    kanal ve alici. Is bitince sonuc AYNI kanaldan teslim edilir (_teslim)."""
+    kanal ve alici. Is bitince sonuc AYNI kanaldan teslim edilir (_teslim).
+    `kendi`: emri kullanici degil HKM acti (bekci); BAM isi «kendiliginden»
+    kaynaklidir ve anahtar kapaliyken kosmaz (core/kendiliginden.py)."""
     kanal = kanal if kanal in TESLIM_KANALLARI else None
     hedef = (str(hedef).strip()[:MAX_HEDEF] or None) if (kanal and hedef) else None
     if modul not in MODULLER:
@@ -616,14 +619,14 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
         _teslim(con, e, "", depo_["kayit_id"], yalniz_belge=True, now=at)
         return {"ok": True, "yeni": True, "emir": emir(con, e["id"]), "karar": karar}
 
-    return _bam_ac(con, e, temiz, karar, kontrol, aday, at)
+    return _bam_ac(con, e, temiz, karar, kontrol, aday, at, kendi=kendi)
 
 
-def _bam_ac(con, e, temiz, karar, kontrol, aday, at):
+def _bam_ac(con, e, temiz, karar, kontrol, aday, at, kendi=False):
     """Onaylanan isi BAM'da acar ve bildirir. emir_ac ve teklif_onayla
     ayni kapidan gecer: ikinci bir acma yolu, bir gun ayrisirdi."""
     modul, tur, konu = e["modul"], e["tur"], e["konu"]
-    j = bam.is_ac(con, konu, kaynak="kullanici" if modul == "hkm" else modul,
+    j = bam.is_ac(con, konu, kaynak="kendiliginden" if kendi else "kullanici" if modul == "hkm" else modul,
                   hedef_modul=None if modul == "hkm" else modul, ofisler=ofisler_of(tur, temiz),
                   govde=dict(temiz, emir_id=e["id"], **({"depo_aday": aday} if aday else {})),
                   emir_id=e["id"], now=at)
@@ -1158,7 +1161,10 @@ def esitle(con, now=None):
 # harcar ve kullanici istemeden harcanmaz.
 
 def bekci(con, cfg, now=None, tasiyici=None):
-    """Doner: None (is yok / kapali) ya da {kayit_id, durum, emir_id?}."""
+    """Doner: None (is yok / kapali) ya da {kayit_id, durum, emir_id?}.
+    Tek anahtar (core/kendiliginden.py) kapaliyken hic bakmaz."""
+    if not kendiliginden.acik(cfg):
+        return None
     ws = web.settings(cfg)
     gun = ws.get("guncellik_gun")
     if not ws["acik"] or not isinstance(gun, int) or gun <= 0:
@@ -1203,7 +1209,7 @@ def bekci(con, cfg, now=None, tasiyici=None):
                "araştırma açılmadı.", now=at)
         return out
     e = emir_ac(con, cfg, "hkm", "bam.arastirma", {"arastirma": {"konu": konu}},
-                neden=neden, now=at)
+                neden=neden, now=at, kendi=True)
     out["emir_id"] = (e.get("emir") or {}).get("id")
     return out
 

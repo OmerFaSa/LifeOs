@@ -48,6 +48,7 @@ import json
 import re
 import urllib.request
 
+from core import kendiliginden as _kendi  # ayni adli fonksiyon asagida (bulunca bagla)
 from core import models
 
 VARSAYILAN = {"kendiligi": True, "sicak": True}
@@ -275,7 +276,8 @@ VARSAYILAN_GONDER = _gonder
 
 def isit(cfg, tarama, gonder=None):
     """Kural 6: bagli ekonomik modeli bellekte tutar. Doner: model adi ya da None."""
-    if not settings(cfg)["sicak"] or (tarama or {}).get("durum") != "bagli":
+    if (not settings(cfg)["sicak"] or not _kendi.acik(cfg)
+            or (tarama or {}).get("durum") != "bagli"):
         return None
     model = models.yerel_of(cfg).get("ekonomik")
     if not model:

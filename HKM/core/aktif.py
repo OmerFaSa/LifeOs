@@ -39,7 +39,7 @@
 import datetime
 import json
 
-from core import adlar, bam, db, depo, eksik, hedefag, king, manager, saat, weekly
+from core import adlar, bam, db, depo, eksik, hedefag, kendiliginden, king, manager, saat, weekly
 
 VARSAYILAN = {"enabled": False, "aralik_dk": 30}
 ALANLAR = {"enabled": bool, "aralik_dk": int}
@@ -385,4 +385,5 @@ def durum(con, cfg, n=8):
                        "icerik": len(g.get("icerik") or [])})
     son = son_tur(con)
     return {"ayar": settings(cfg), "acik": settings(cfg)["enabled"],
+            "kendiliginden": kendiliginden.acik(cfg),
             "son": son["govde"] if son else None, "gecmis": gecmis}

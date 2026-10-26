@@ -5743,10 +5743,16 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   function aktifCiz(d){
     var k = $('aktif');
     if(!k) return;
-    var son = d.son, acik = !!d.acik;
+    var son = d.son, acik = !!d.acik, kendi = !!d.kendiliginden;
     var h = '<div class="kart-bas"><span class="tag">Sistem</span>'
       + '<span class="aktif__durum' + (acik ? ' aktif__durum--acik' : '') + '">'
       + (acik ? 'Aktif' + (son ? ' · son kontrol ' + esc(aktifSaat(son.at)) : '') : 'Kapalı') + '</span></div>';
+    /* TEK ANAHTAR (core/kendiliginden.py): HKM modeli kendi başına kullanır mı. */
+    h += '<div class="kendi"><div class="kendi__metin"><b id="kendi-ad">Kendi başına araştırma</b>'
+      + '<span class="muted">' + (kendi ? 'Açık · King eskiyen araştırmayı kendisi yeniler, model hazır tutulur.'
+        : 'Kapalı · Model yalnız sen isteyince çalışır.') + '</span></div>'
+      + '<button type="button" class="kendi-anahtar" id="kendi-anahtar" role="switch" aria-checked="' + kendi
+      + '" aria-labelledby="kendi-ad"></button></div>';
     if(!acik && !son){
       h += '<p class="muted aktif__not">Başlatınca HKM kendi turunu atar: kayıt gelir gelmez üç modülü kontrol eder, '
         + 'brifingi kurar, öneriyi Onaylar’a bırakır ve eksikleri yazar. Hiçbir modüle yazmaz, model çağırmaz.</p>';
@@ -5803,6 +5809,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '<p class="muted aktif__not" id="aktif-not" role="status"></p>';
     k.innerHTML = h;
     $('aktif-ac').addEventListener('click', function(){ aktifAyarla(!acik); });
+    $('kendi-anahtar').addEventListener('click', function(){ kendiAyarla(!kendi); });
     $('aktif-tara').addEventListener('click', aktifTara);
     k.querySelectorAll('.aktif-baslat').forEach(function(b){
       b.addEventListener('click', function(){ aktifBaslat(b); });
@@ -5833,6 +5840,17 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     }
     /* Baslatinca ilk tur hemen: dakikalik ritmi beklemeden ne gordugunu soyler. */
     if(acik){ await aktifTara(); return; }
+    await aktifYukle();
+  }
+  async function kendiAyarla(acik){
+    var b = $('kendi-anahtar'), not = $('aktif-not');
+    if(b){ b.disabled = true; b.setAttribute('aria-checked', acik ? 'true' : 'false'); }
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify({ king:{ kendiliginden:!!acik } }) });
+    if(r.status !== 200){
+      if(b){ b.disabled = false; b.setAttribute('aria-checked', acik ? 'false' : 'true'); }
+      if(not) not.textContent = 'Kaydedilemedi — ' + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+      return;
+    }
     await aktifYukle();
   }
   async function aktifTara(){
@@ -7724,6 +7742,21 @@ button.gorevli.on:hover{ background:var(--fg); }
 .aktif__eylem{ display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
 .aktif__not{ margin:8px 0 0; font-size:13px; }
 .aktif__not:empty{ display:none; }
+/* Tek anahtar: kendi başına model kullanımı. Renk yalnız açık halde. */
+.kendi{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:12px; padding:12px 0;
+  border-bottom:1px solid var(--line); }
+.kendi__metin{ display:flex; flex-direction:column; gap:2px; min-width:0; font-size:14px; }
+.kendi__metin b{ font-weight:600; }
+.kendi__metin .muted{ font-size:13px; }
+.kendi-anahtar{ flex:none; position:relative; width:46px; height:28px; padding:0; border:0; border-radius:999px;
+  background:color-mix(in oklab, var(--fg) 18%, transparent); cursor:pointer; transition:background .25s ease; }
+.kendi-anahtar::after{ content:''; position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%;
+  background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:transform .3s cubic-bezier(.32,.72,0,1); }
+.kendi-anahtar[aria-checked="true"]{ background:var(--ok); }
+.kendi-anahtar[aria-checked="true"]::after{ transform:translateX(18px); }
+.kendi-anahtar:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.kendi-anahtar:disabled{ opacity:.6; cursor:default; }
+@media (prefers-reduced-motion: reduce){ .kendi-anahtar, .kendi-anahtar::after{ transition:none; } }
 </style>
 </body>
 </html>

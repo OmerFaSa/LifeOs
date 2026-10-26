@@ -28,7 +28,8 @@ import json
 import os
 import re
 
-from core import adlar, aktif, bildirim, butce, channels, media, models, ollama, schedule, ses, thresholds, web
+from core import (adlar, aktif, bildirim, butce, channels, kendiliginden, media, models, ollama, schedule, ses,
+                  thresholds, web)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -97,7 +98,8 @@ def read(cfg):
     out["media"] = media.settings(cfg)
     # Web katmani (core/web.py): arama anahtarlari MASKELI.
     out["web"] = web.read(cfg)
-    out["king"] = {"sormadan_dusuk": bool(((cfg or {}).get("king") or {}).get("sormadan_dusuk"))}
+    out["king"] = {"sormadan_dusuk": bool(((cfg or {}).get("king") or {}).get("sormadan_dusuk")),
+                   "kendiliginden": kendiliginden.acik(cfg)}
     # Sessiz saat, gunluk sinir, teklif omru (core/bildirim.py).
     out["bildirim"] = bildirim.settings(cfg)
     # Aktif kip (core/aktif.py): sistemin kendi turlari.
@@ -127,10 +129,10 @@ def validate(patch):
             hata.append("king bir nesne olmalı")
         else:
             for ad, deger in kg.items():
-                if ad != "sormadan_dusuk":
+                if ad not in ("sormadan_dusuk", "kendiliginden"):
                     hata.append("bilinmeyen King ayarı: %s" % ad)
                 elif not isinstance(deger, bool):
-                    hata.append("king.sormadan_dusuk true ya da false olmalı")
+                    hata.append("king.%s true ya da false olmalı" % ad)
 
     if patch.get("aktif") is not None:
         ok_a, hata_a = aktif.validate(patch["aktif"])

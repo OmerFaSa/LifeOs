@@ -245,7 +245,11 @@ def run_daemon():
         try:
             eq(s.call("/api/aktif", token=None)[0], 401)
             st, d = s.call("/api/aktif")
-            eq((st, d["acik"], d["son"]), (200, False, None))
+            eq((st, d["acik"], d["son"], d["kendiliginden"]), (200, False, None, False))
+            eq(s.call("/api/config", body={"king": {"kendiliginden": "evet"}})[0], 422)
+            st, c = s.call("/api/config", body={"king": {"kendiliginden": True}})
+            eq((st, c["config"]["king"]["kendiliginden"]), (200, True))
+            eq(s.call("/api/aktif")[1]["kendiliginden"], True)
             st, r = s.call("/api/aktif/tara", body={})
             eq((st, r["tur"]["neden"], len(r["tur"]["nabiz"])), (200, "elle", 3))
             eq(s.call("/api/config", body={"aktif": {"enabled": "evet"}})[0], 422)

@@ -318,5 +318,8 @@ def run():
         ok(settings.validate({"king": {"sormadan_dusuk": True}})[0])
         no(settings.validate({"king": {"sormadan_orta": True}})[0])
         no(settings.validate({"king": {"sormadan_dusuk": "evet"}})[0])
+        ok(settings.validate({"king": {"kendiliginden": True}})[0])
+        no(settings.validate({"king": {"kendiliginden": 1}})[0])
+        eq(settings.read({})["king"], {"sormadan_dusuk": False, "kendiliginden": False})
     test("ne zaman sorulur: kural isi hic, dusuk ayara bagli, orta ve ustu hep",
          t_ne_zaman_sorulur)

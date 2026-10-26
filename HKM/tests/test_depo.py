@@ -248,6 +248,7 @@ def run():
 
     def t_bekci():
         con, cfg, m, ag = db.connect(":memory:"), _cfg_web(), _Model(), _Ag()
+        cfg["king"] = {"kendiliginden": True}
         eski = bam.web_tasiyici
         bam.web_tasiyici = ag
         try:
@@ -256,6 +257,10 @@ def run():
         finally:
             bam.web_tasiyici = eski
         eq(king.bekci(con, cfg, now=DORT_GUN, tasiyici=ag), None, "yedi gun dolmadan bakilmaz")
+        # Tek anahtar (king.kendiliginden) kapaliyken tur hic bakmaz.
+        n = len(ag.cagri)
+        eq(king.bekci(con, dict(cfg, king={}), now=ON_GUN, tasiyici=ag), None, "anahtar kapali")
+        eq(len(ag.cagri), n, "kapaliyken kaynak da acilmaz")
         r = king.bekci(con, cfg, now=ON_GUN, tasiyici=ag)
         eq((r["kayit_id"], r["durum"]), (kid, "guncel"))
         eq(king.bekci(con, cfg, now=ON_GUN, tasiyici=ag), None, "ayni kayda hemen donulmez")
@@ -267,12 +272,27 @@ def run():
         e = king.emir(con, r["emir_id"])
         eq((e["tur"], e["modul"]), ("bam.arastirma", "hkm"))
         ok("güncellik turu" in e["neden"])
+        if e.get("bam_is_id"):
+            eq(con.execute("SELECT kaynak FROM bam_isler WHERE id=?", (e["bam_is_id"],)).fetchone()[0],
+               "kendiliginden")
         kapali = _cfg()
         kapali["web"] = {"acik": False}
         eq(king.bekci(con, kapali, now="2026-12-01T10:00:00", tasiyici=ag), None)
         cfg["web"]["guncellik_gun"] = 0
         eq(king.bekci(con, cfg, now="2026-12-01T10:00:00", tasiyici=ag), None)
     test("King'in guncellik turu arada bir bakar; degisende emir acar", t_bekci)
+
+    def t_kendiliginden_is():
+        con, m = db.connect(":memory:"), _Model()
+        j = bam.is_ac(con, "Osmanlı kuruluşu araştır", kaynak="kendiliginden", now=AN)
+        ok(j["ok"], j)
+        kapali, acik = _cfg(), dict(_cfg(), king={"kendiliginden": True})
+        eq(bam.ilerlet(con, kapali, transport=m, now=AN), None, "anahtar kapali: is beklemede kalir")
+        eq(con.execute("SELECT durum FROM bam_isler WHERE id=?", (j["id"],)).fetchone()[0], "bekliyor")
+        u = bam.is_ac(con, "Selçuklu kuruluşu araştır", now=AN)
+        eq(bam.ilerlet(con, kapali, transport=m, now=AN)["is_id"], u["id"], "kullanicinin isi kosar")
+        eq(bam.ilerlet(con, acik, transport=m, now=AN)["is_id"], j["id"], "acinca sirasi gelir")
+    test("kendiliginden is anahtar kapaliyken kosmaz; kullanicinin isi kosar", t_kendiliginden_is)
 
     def t_depo_denetim():
         con = db.connect(":memory:")

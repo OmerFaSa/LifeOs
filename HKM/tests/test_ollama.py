@@ -222,7 +222,8 @@ def run():
     test("son sohbet çağrısı defterden okunur; neden adıyla söylenir", t_son_cagri)
 
     def t_isit():
-        cfg = {"models": {"yer": "yerel", "yerel": {"ekonomik": "gemma3:4b"}}}
+        cfg = {"models": {"yer": "yerel", "yerel": {"ekonomik": "gemma3:4b"}},
+               "king": {"kendiliginden": True}}
         giden = []
         gonder = lambda url, govde, t: giden.append((url, govde)) or True      # noqa: E731
         eq(ollama.isit(cfg, {"durum": "bagli"}, gonder), "gemma3:4b")
@@ -230,6 +231,7 @@ def run():
         eq(ollama.isit(cfg, {"durum": "kapali"}, gonder), None)
         eq(ollama.isit(dict(cfg, ollama={"sicak": False}), {"durum": "bagli"}, gonder), None)
         eq(ollama.isit({}, {"durum": "bagli"}, gonder), None)
+        eq(ollama.isit(dict(cfg, king={}), {"durum": "bagli"}, gonder), None, "anahtar kapali: isitma yok")
         eq(ollama.isit(cfg, {"durum": "bagli"}, lambda *a: (_ for _ in ()).throw(OSError("x"))), None)
         eq(len(giden), 1)
     test("sıcak tutma: bağlı model bellekte tutulur; kapalıysa ya da ayar kapalıysa gitmez", t_isit)

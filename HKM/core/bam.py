@@ -38,8 +38,8 @@ import datetime
 import json
 import re
 
-from core import (ai, butce, depo, editor, espbelge, intents, kaynakli, kitap, mufredat, planlama, spibilgi, unite,
-                  program, urunler, web)
+from core import (ai, butce, depo, editor, espbelge, intents, kaynakli, kendiliginden, kitap, mufredat, planlama,
+                  spibilgi, unite, program, urunler, web)
 
 OFISLER = {
     "kayit": {
@@ -86,7 +86,7 @@ OFISLER = {
 }
 SIRA = ("kayit", "arastirma", "planlama", "uretim")
 MODULLER = ("ays", "spi", "esp")
-KAYNAKLAR = ("kullanici", "ays", "spi", "esp", "motto")
+KAYNAKLAR = ("kullanici", "ays", "spi", "esp", "motto", "kendiliginden")
 TURLER = ("arastirma", "plan", "materyal")
 DOGRULUK = ("dogrulanmadi", "kaynakli", "celiskili")
 MAX_TALEP = 2000
@@ -271,9 +271,12 @@ def _kaydet(con, j, now=None):
 
 def ilerlet(con, cfg, transport=None, now=None):
     """Kuyruktaki en eski isin siradaki adimini kosar. Is yoksa None.
-    Ritim her tikte bir adim ilerletir: uzun is sunucuyu kilitlemez."""
-    r = con.execute("SELECT * FROM bam_isler WHERE durum='bekliyor' "
-                    "ORDER BY id LIMIT 1").fetchone()
+    Ritim her tikte bir adim ilerletir: uzun is sunucuyu kilitlemez.
+    Anahtar kapaliyken (core/kendiliginden.py) HKM'nin kendi actigi is
+    atlanir ve sirasini korur."""
+    r = con.execute("SELECT * FROM bam_isler WHERE durum='bekliyor' %s"
+                    "ORDER BY id LIMIT 1" % ("" if kendiliginden.acik(cfg) else
+                                             "AND kaynak != 'kendiliginden' ")).fetchone()
     if not r:
         return None
     j = _is_satiri(r)

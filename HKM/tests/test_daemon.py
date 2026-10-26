@@ -1129,7 +1129,7 @@ def run_extra(S):
         ok(o["emir"]["durum"] in ("onaylandi", "kismen_onay") and o["emir"]["bam_is_id"])
         eq(S.call("/api/king/emir/%d/onayla" % eid, body={})[0], 409)
         kod, cfgv = S.call("/api/config")
-        eq(cfgv["king"], {"sormadan_dusuk": False})
+        eq(cfgv["king"], {"sormadan_dusuk": False, "kendiliginden": False})
         # Modulun teklif karti: yalniz acik teklifler, govdesiz.
         kod, r2 = S.call("/api/king/emir", body={"modul": "esp", "tur": "bam.urun", "govde": {
             "urun": {"tur": "pankart", "konu": "Gitar bakımı"}}})

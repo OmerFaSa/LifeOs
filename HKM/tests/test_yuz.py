@@ -751,6 +751,20 @@ def t_sistem_secici_ve_yumusak_acilis():
         ok(s in b, s)
 
 
+
+def t_kendiliginden_anahtari():
+    """Kullanici, 2026-10-26: «HKM modeli ne zaman kullanir, ben karar vereyim;
+    kendi basina arastirmayi tek dugmeyle acip kapatayim.» Anahtar Bugun'un
+    sistem kartindadir; durumu /api/aktif'ten okur, ayar yamasiyla yazar."""
+    y = _yuz()
+    m = re.search(r"function aktifCiz\(d\)\{(.*?)\n  \}\n", y, re.S)
+    ok(m, "aktifCiz bulunamadi")
+    g = m.group(1)
+    ok('role="switch"' in g and 'id="kendi-anahtar"' in g, "sistem kartinda anahtar yok")
+    ok("d.kendiliginden" in g, "anahtar durumunu sunucudan okumuyor")
+    ok("king:{ kendiliginden:" in y, "anahtar /api/config king.kendiliginden yamasi degil")
+    ok(re.search(r"\.kendi-anahtar\[aria-checked=\"true\"\]", y), "acik hali gorunmuyor")
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -784,3 +798,4 @@ def run():
     test("sistem seçici tıklayınca açılır; kenar yumuşak açılır (2026-10-05)", t_sistem_secici_ve_yumusak_acilis)
     test("ekranlar sade: başlık çekmecenin adı, satır, katlı form, açıklama ⓘ'de", t_ekranlar_sade)
     test("karşılama: Merkez'in italik selamı modüllerin havuzuyla aynı (2026-10-18)", t_karsilama_ortak_havuz)
+    test("Bugün: tek anahtar kendiliğinden model kullanımını açar/kapatır (2026-10-26)", t_kendiliginden_anahtari)
