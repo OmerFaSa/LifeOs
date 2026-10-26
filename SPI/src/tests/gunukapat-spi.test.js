@@ -80,7 +80,7 @@
         expect(!k.oneri && !k.yaz).toBe(true);
         const d = document.createElement('div');
         d.innerHTML = GK().cizim(GUN);
-        expect(d.textContent).toContain('öneri yok');
+        expect(d.textContent).toContain('Önerisi yok, girmezsen boş kalır: Kahvaltı');
       });
     });
 
@@ -127,8 +127,37 @@
       });
     });
 
-    /* Kapak karoları hepsini «ölçüldü» diye çiziyordu. */
-    it('kapak karoları kesinliği kaynağından alır', async () => {
+    /* Ölçüm kutuları (2026-10-26): kutu boş çizilir, son değer yalnız silik
+       ipucudur; doldurulan kutu tek satır gibi yazılır, boş kutu hiçbir şey. */
+    it('ölçüm satırları boş sayı kutusuyla çizilir; doldurulan yazılır, boş kutu yazılmaz', async () => {
+      resetState();
+      pushVitals(once(2), { sleep:6.5, weight:78.2 });
+      pushVitals(GUN, { water:2100 });                     // su kaydedildi: yazılacak beyan yok
+      await kurulu(async () => {
+        const d = document.createElement('div');
+        d.innerHTML = GK().cizim(GUN);
+        const k = Array.from(d.querySelectorAll('[data-gk-alan]'));
+        expect(k.map(i => i.getAttribute('data-gk-alan'))).toEqual(['uyku:0', 'nabiz:0', 'hrv:0', 'kilo:0']);
+        expect(k.every(i => i.value === '' && !i.hasAttribute('value'))).toBe(true);
+        expect(k[0].getAttribute('placeholder')).toContain('son 6,5');
+        expect(k[3].closest('.gk__alan').textContent).toContain('kg');
+        const ol = () => { const v = SP.Model.vitalsOf(GUN) || {}; return [v.sleep, v.rhr, v.hrv, v.weight].map(x => x == null ? null : x); };
+        await GK().kapat(GUN, { alanlar:{ 'uyku:0':'', 'nabiz:0':' ', 'hrv:0':'', 'kilo:0':'' } });
+        expect(ol()).toEqual([null, null, null, null]);
+        const r = await GK().kapat(GUN, { alanlar:{ 'uyku:0':'7,5', 'nabiz:0':'', 'hrv:0':'', 'kilo:0':'72' } });
+        expect(r.ok).toBe(true);
+        expect(ol()).toEqual([7.5, null, null, 72]);
+        expect(SP.Model.vitalsOf(GUN).water).toBe(2100);
+        expect(SP.Model.mealsOf(GUN)).toHaveLength(0);
+        /* Yazılan ölçüm kutusunu kaybeder: «girildi». */
+        d.innerHTML = GK().cizim(GUN);
+        expect(Array.from(d.querySelectorAll('[data-gk-alan]')).map(i => i.getAttribute('data-gk-alan'))).toEqual(['nabiz:0', 'hrv:0']);
+      });
+    });
+
+    /* Kapak karoları hepsini «ölçüldü» diye çiziyordu. Karolar 2026-10-26'dan
+       beri Analiz'in başındaki «Bugün» özetindedir (KOLAY-PLANI Faz 2). */
+    it('özet karoları kesinliği kaynağından alır', async () => {
       resetState();
       pushVitals(GUN, { sleep:7, water:2000, waterSrc:'beyan' });
       pushMeal(GUN, 'kahvalti', KAHVALTI);
@@ -137,13 +166,13 @@
         const d = document.createElement('div');
         const k = ad => Array.from(d.querySelectorAll('.kapak__sayi'))
           .find(x => x.querySelector('.kapak__ad').textContent.indexOf(ad) === 0).getAttribute('data-kesinlik');
-        d.innerHTML = T().kapak();
+        d.innerHTML = T().ozet();
         expect(k('Uyku')).toBe('measured');
         expect(k('Su')).toBe('estimated');
         expect(k('Öğün')).toBe('computed');
         expect(k('Hareket')).toBe('estimated');
         SP.S.vitals[GUN].waterSrc = null;
-        d.innerHTML = T().kapak();
+        d.innerHTML = T().ozet();
         expect(k('Su')).toBe('measured');
       });
     });
@@ -216,6 +245,8 @@
         try{
           const b = d.querySelectorAll('.btn--primary');
           expect(b.length).toBe(1);
+          /* Kapak yalnız cümle ve tek eylemdir (Faz 2): karolar Analiz'de. */
+          expect(d.querySelectorAll('.kapak__sayi').length).toBe(0);
           expect(b[0].textContent).toContain('Günü kaydet');
           expect(b[0].getAttribute('data-act')).toBe('gunu-kapat');
           await T().handle['gunu-kapat'](b[0]);

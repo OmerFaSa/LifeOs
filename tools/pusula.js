@@ -10,7 +10,8 @@
         diye yazılır. Gerçek süre P1'dir (cihazda ölçülür).
         Modülün birden çok yolu olabilir (Faz 1 yeni yolu ekler, eskisini
         silmez); Y1 doğrulanan en kısa yoldur.
-   Y2 · Bugün yoğunluğu: Bugün ekranında açık kart (sadelik.js ile aynı kural).
+   Y2 · Bugün yoğunluğu: Bugün ekranında açık kart (sadelik.js kuralı) + görünen
+        pano kartı ve kapak kutucuğu (2026-10-26: yalnız bölüm sayılıyordu, 11 kutu 2 görünüyordu).
    Y3 · Menü öğesi: kenar çubuğundaki çekmece sayısı.
 
    P1 ve P2 kullanıcının cihazındaki veriden gelir; bu araç onları ölçmez,
@@ -197,13 +198,15 @@ async function olc(ad, m, b, yol){
   for(let i = 0; i < 3; i++){ await p.keyboard.press('Escape'); await p.waitForTimeout(150); }
   await p.evaluate(ns => window[ns].App.go('today'), m.ns);
   await p.waitForTimeout(800);
-  /* Y2: Bugün'de açık kart (sadelik.js kuralı). */
+  /* Y2: Bugün'de açık kart (sadelik.js kuralı) + pano kartı + kapak kutucuğu. */
   const y2 = await p.evaluate(() => {
     const kok = document.getElementById('app') || document.body, G = window.LIFEOS.Gizle;
     const gor = el => { const s = getComputedStyle(el); return s.display !== 'none' && s.visibility !== 'hidden' && el.offsetParent !== null; };
     const bl = Array.from(kok.querySelectorAll('section.sayfabolum'));
-    return (bl.length ? bl : [kok]).reduce((en, x) => Math.max(en, G.bolumler(x)
+    const bolum = (bl.length ? bl : [kok]).reduce((en, x) => Math.max(en, G.bolumler(x)
       .filter(y => !y.el.classList.contains('gizle-kucuk') && !y.el.classList.contains('gizle-gizli') && gor(y.el)).length), 0);
+    const kutu = Array.from(kok.querySelectorAll('section.pk, .kapak__sayilar > *')).filter(gor).length;
+    return bolum + kutu;
   });
   const y3 = await p.evaluate(m.menu);
   const s = sayac(p);

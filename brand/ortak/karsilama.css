@@ -185,6 +185,8 @@
    hareket yeşil…); renk yalnız ayırır, iyi/kötü bildirmez. Halka yalnız
    modül bir hedef bildiğinde çizilir. */
 .kapak{ min-height:min(62vh, 580px); padding-bottom:64px; }
+/* Karosuz kapak (KOLAY Faz 2: karolar Analiz'de) boş alan bırakmaz; Ne yaptın? ilk ekranda görünür. */
+.kapak:not(:has(.kapak__sayilar)){ min-height:0; padding-top:clamp(28px, 6vh, 72px); padding-bottom:40px; }
 .kapak__ic{ display:grid; max-width:none; width:100%; align-items:start;
   grid-template-columns:minmax(0, 1fr); grid-template-areas:"selam" "cumle" "eylem" "sayilar"; }
 .kapak__selam{ grid-area:selam; margin:0 0 12px; font-size:clamp(20px, 2.4vw, 26px); color:var(--text-3); }

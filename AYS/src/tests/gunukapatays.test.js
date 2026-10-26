@@ -6,7 +6,7 @@
      2. Dokunulmayan ya da işareti kaldırılan satır yazılmaz.
      3. Ölçüm tek satırdan, AYS'nin ayrıştırıcısıyla; satır + beyanlar tek geri al.
      4. Toplam bloklara bölüştürülmez: çok blokta adsız toplam reddedilir.
-     5. Alt sayfa Bugün'den açılır; Bugün'ün tek dolu düğmesi kahramanda kalır. */
+     5. Alt sayfa Bugün'den açılır; Bugün'ün tek dolu düğmesi kapakta kalır. */
 
 (function(){
   const { describe, it, expect, resetState, withTodayAsync } = R.Test;
@@ -241,7 +241,9 @@
           expect(!!ac).toBe(true);
           expect(ac.classList.contains('btn--primary')).toBe(false);
           expect(kap.querySelector('[data-act="go"][data-route="gun"]') !== null).toBe(true);
-          expect(kap.querySelectorAll('.bugun__alan[aria-label="Şimdi"] .btn--primary')).toHaveLength(1);
+          /* Faz 2: Bugün'ün tek dolu düğmesi kapakta; sayfada dolu düğme yok. */
+          expect(kap.querySelectorAll('.btn--primary')).toHaveLength(0);
+          expect(!!kap.querySelector('.bugun__alan[aria-label="Gün"] [data-act="gunu-kapat"]')).toBe(true);
           await R.Screens.today.handle['gunu-kapat']();
           const sh = document.getElementById('sheet');
           expect(sh.querySelector('h3').textContent).toBe('Günü kapat');
@@ -348,6 +350,94 @@
           expect(R.Friction.verdict(1).cert).toBe('measured');
           expect(R.App.calismaYuku().kartlar[0].etiket).toBe('ölçüldü');
         }finally{ bitir(); }
+      });
+    });
+
+    /* 2026-10-26: ölçüm satırlarında boş sayı kutuları (çekirdeğin alanlar'ı).
+       Kutu ön doldurulmaz; boş kutu yazılmaz; metin AYS ayrıştırıcısından geçer. */
+    it('ölçüm satırları boş kutularla: blokta soru + doğru, paragraf / problem / uyku birer kutu', async () => {
+      await withTodayAsync(GUN, async () => {
+        try{
+          await hazirla();
+          R.S.days['2026-10-11'] = { date:'2026-10-11', blocks:[], sleepHours:6.5 };
+          const k = document.createElement('div');
+          k.innerHTML = K().cizim(GUN);
+          const kutu = id => Array.from(k.querySelectorAll('[data-gk-alan^="' + id + ':"]'));
+          expect(kutu('soru:b0').map(i => i.getAttribute('aria-label'))).toEqual(['Türev soru', 'Türev doğru']);
+          expect(kutu('soru:b1')).toHaveLength(2);
+          expect(kutu('soru:b2')).toHaveLength(0);
+          ['paragraf', 'problem', 'uyku'].forEach(id => expect(kutu(id)).toHaveLength(1));
+          k.querySelectorAll('[data-gk-alan]').forEach(i => {
+            expect(i.value).toBe('');
+            expect(/^\d/.test(i.getAttribute('placeholder'))).toBe(false);   /* ipucu değer gibi görünmez */
+          });
+          expect(kutu('uyku')[0].getAttribute('placeholder')).toBe('son 6.5');
+          expect(kutu('soru:b0')[0].getAttribute('placeholder')).toBe('plan 20');
+        }finally{ bitir(); }
+      });
+    });
+
+    it('kutular: soru / doğru yalnız kendi bloğuna, uyku sleepHours; boş kutu yazmaz; tek geri al', async () => {
+      await withTodayAsync(GUN, async () => {
+        try{
+          const { day } = await hazirla();
+          const once = kopya(day);
+          const r = await cizimsiz(() => K().kapat(GUN, { alanlar:{ 'soru:b1:0':'20', 'soru:b1:1':'15', 'uyku:0':'7,5', 'paragraf:0':' ' } }));
+          expect(r.ok).toBe(true);
+          expect(day.blocks.map(b => [b.actualQ, b.correctQ])).toEqual([[null, null], [20, 15], [null, null]]);
+          expect(day.sleepHours).toBe(7.5);
+          expect([day.paragraphActual, day.problemActual]).toEqual([null, null]);
+          await cizimsiz(() => r.geriAl());
+          expect(kopya(day)).toEqual(once);
+          /* yalnız soru: doğru boş kalır; paragraf ve problem kutusu */
+          const r2 = await cizimsiz(() => K().kapat(GUN, { alanlar:{ 'soru:b0:0':'12', 'paragraf:0':'14', 'problem:0':'6' } }));
+          expect(r2.ok).toBe(true);
+          expect([day.blocks[0].actualQ, day.blocks[0].correctQ, day.blocks[1].actualQ]).toEqual([12, null, null]);
+          expect([day.paragraphActual, day.problemActual]).toEqual([14, 6]);
+          await cizimsiz(() => r2.geriAl());
+          expect(kopya(day)).toEqual(once);
+        }finally{ bitir(); }
+      });
+    });
+
+    it('kutular: yalnız doğru ya da sayı olmayan değer reddedilir, nedeni söylenir, hiçbir şey yazılmaz', async () => {
+      await withTodayAsync(GUN, async () => {
+        try{
+          const { day } = await hazirla();
+          const once = kopya(day);
+          const r = await cizimsiz(() => K().kapat(GUN, { alanlar:{ 'soru:b0:1':'9' } }));
+          expect(r.ok).toBe(false);
+          expect(kopya(day)).toEqual(once);
+          const r2 = await cizimsiz(() => R.App.gunuKapat(GUN, '', { 'soru:b0:1':'9', 'uyku:0':'7' }));
+          expect(r2.ok).toBe(false);
+          expect(r2.neden).toContain('kaç soru');
+          expect(kopya(day)).toEqual(once);
+          const r3 = await cizimsiz(() => K().kapat(GUN, { alanlar:{ 'uyku:0':'yedi' } }));
+          expect(r3.neden).toContain('sayı değil');
+          expect(kopya(day)).toEqual(once);
+        }finally{ bitir(); }
+      });
+    });
+
+    it('kutular: adı ölçüm sözcüğü olan blok («Paragraf») da yalnız kendi sorusunu alır; formdan da gider', async () => {
+      await withTodayAsync(GUN, async () => {
+        const kap = document.createElement('div');
+        try{
+          const { day } = await hazirla([blok('b0'), blok('p', { slot:'İkinci ders', subject:'Türkçe', topic:'Paragraf', targetQ:15 })]);
+          const r = await cizimsiz(() => K().kapat(GUN, { alanlar:{ 'soru:p:0':'10', 'soru:p:1':'8' } }));
+          expect(r.ok).toBe(true);
+          expect([day.blocks[1].actualQ, day.blocks[1].correctQ, day.blocks[0].actualQ, day.paragraphActual]).toEqual([10, 8, null, null]);
+          await cizimsiz(() => r.geriAl());
+          kap.innerHTML = K().cizim(GUN);
+          document.body.appendChild(kap);
+          kap.querySelector('[data-gk-alan="soru:b0:0"]').value = '20';
+          kap.querySelector('[data-gk-alan="soru:b0:1"]').value = '15';
+          await cizimsiz(async () => {
+            kap.querySelector('[data-gk-form]').dispatchEvent(new Event('submit', { bubbles:true, cancelable:true }));
+            for(let i = 0; i < 50 && day.blocks[0].actualQ == null; i++) await new Promise(res => setTimeout(res, 20));
+          });
+          expect([day.blocks[0].actualQ, day.blocks[0].correctQ, day.blocks[1].actualQ]).toEqual([20, 15, null]);
+        }finally{ kap.remove(); bitir(); }
       });
     });
 

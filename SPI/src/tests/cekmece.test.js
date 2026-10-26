@@ -79,7 +79,14 @@
       ['king-onayla', 'hkm-intent-apply', 'bekleyen-onay', 'oneri-uygula', 'oneri-gec-neden'].forEach(a => {
         expect(typeof SP.Screens.today.handle[a]).toBe('function');
         expect(typeof SP.Screens.onaylar.handle[a]).toBe('function');
+        expect(typeof SP.Screens.analytics.handle[a]).toBe('function');
       });
+      /* KOLAY-PLANI Faz 2: öneri alanı Analiz'de; ama onay bekleyen ücretli
+         King işi Bugün'de kalır (yalnız bekleyen varken), gözden kaçmasın. */
+      expect(bugun.indexOf('data-act="king-onayla"') >= 0).toBe(true);
+      const analiz = String(await SP.Screens.analytics.render());
+      expect(analiz.indexOf('aria-label="Öneri"') >= 0).toBe(true);
+      expect(analiz.indexOf('data-act="king-onayla"') >= 0).toBe(true);
       temizle();
     });
 

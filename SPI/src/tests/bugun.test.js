@@ -23,18 +23,57 @@
   }
 
   describe('Bugün (SPİ) — üç alan', () => {
-    it('oz-003 sekme yok; Şimdi ve Durum alanları; düğme 14\'ü aşmaz', async () => {
+    /* KOLAY-PLANI Faz 2 (2026-10-26): Bugün üç blok — Şimdi (kapak: cümle
+       ve tek eylem) · Ne yaptın? · Gün. Karolar, pano kartları, Durum ve
+       Öneri kalkmadı: Analiz'in başındaki «Bugün» özetinde. */
+    it('oz-003 sekme yok; Ne yaptın? ve Gün alanları; düğme 14\'ü aşmaz', async () => {
       dolu();
       await withTodayAsync(GUN, async () => {
         const d = yerlestir(await SP.Screens.today.render());
         try{
           expect(d.querySelectorAll('[role="tab"], .subtabs').length).toBe(0);
           const alanlar = Array.from(d.querySelectorAll('.bugun__alan')).map(x => x.getAttribute('aria-label'));
-          expect(alanlar.indexOf('Şimdi') >= 0).toBe(true);
-          expect(alanlar.indexOf('Durum') >= 0).toBe(true);
+          expect(alanlar).toEqual(['Ne yaptın?', 'Gün']);
           expect(d.querySelectorAll('button').length <= 14).toBe(true);
           /* Tek dolu düğme: günün ölçümünü kaydetmek. */
           expect(d.querySelectorAll('.btn--primary').length).toBe(1);
+          /* Gün: öğün yuvaları ve Öğün'e bağ. */
+          const g = d.querySelector('.bugun__alan[aria-label="Gün"]');
+          expect(g.querySelector('.minrow.is-done .minrow__label').textContent).toBe('Kahvaltı');
+          expect(!!g.querySelector('[data-act="go"][data-route="meals"]')).toBe(true);
+          ['.pk-ust', '.donen', '.kapak__sayi'].forEach(c => expect(d.querySelector(c)).toBe(null));
+        }finally{ d.remove(); }
+      });
+    });
+
+    it('karolar, pano kartları ve Durum Analiz\'in başında', async () => {
+      dolu();
+      await withTodayAsync(GUN, async () => {
+        const d = yerlestir(await SP.Screens.analytics.render());
+        try{
+          const o = d.querySelector('.analiz-bugun');
+          expect(!!o).toBe(true);
+          expect(o.querySelectorAll('.kapak__sayi').length).toBe(4);
+          expect(!!o.querySelector('.pk-ust [data-pano="uyku"]')).toBe(true);
+          expect(!!o.querySelector('.bugun__alan[aria-label="Durum"] .donen')).toBe(true);
+          /* Özet sayfanın başındadır: «Bu hafta» kutusundan önce. */
+          expect(d.firstElementChild).toBe(o);
+        }finally{ d.remove(); }
+      });
+    });
+
+    it('boş profilde Bugün: cümle, ölçüm alanları, boş öğün yuvaları; «uyku girilmedi» tekrarlanmaz', async () => {
+      resetState();
+      await withTodayAsync(GUN, async () => {
+        const d = yerlestir(await SP.Screens.today.render());
+        const k = document.createElement('div');
+        k.innerHTML = SP.Screens.today.kapak();
+        try{
+          expect(k.querySelector('.kapak__cumle').textContent).toBe('Bugünün verisi henüz girilmedi.');
+          expect(!!d.querySelector('#v-sleep')).toBe(true);
+          expect(d.querySelectorAll('.bugun__alan[aria-label="Gün"] .minrow').length > 0).toBe(true);
+          expect(d.querySelectorAll('.bugun__alan[aria-label="Gün"] .minrow.is-done').length).toBe(0);
+          expect(/uykusu girilmedi|Uyku girilince/.test(d.textContent)).toBe(false);
         }finally{ d.remove(); }
       });
     });

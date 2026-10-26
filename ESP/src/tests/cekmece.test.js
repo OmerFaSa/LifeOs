@@ -38,8 +38,16 @@
       expect(alan.indexOf('data-act="king-onayla"') >= 0).toBe(true);
       expect(alan.indexOf('data-act="hkm-intent-') < 0).toBe(true);
       expect(alan.indexOf('öneri Onaylar') >= 0).toBe(true);
-      /* Bugün'deki düğme Onaylar'ın işleyicisine gider: tek yol. */
+      /* Öneri alanının düğmesi Onaylar'ın işleyicisine gider: tek yol. KOLAY
+         Faz 2: alan Bugün'den Analiz'in başına taşındı; bekleyen onay oradan da açılır. */
       expect(typeof ESP.Screens.today.handle['king-onayla']).toBe('function');
+      expect(typeof ESP.Screens.analytics.handle['king-onayla']).toBe('function');
+      const an = document.createElement('div'); an.innerHTML = String(await ESP.Screens.analytics.render());
+      expect(!!an.querySelector('[aria-label="Öneri"] [data-act="king-onayla"]')).toBe(true);
+      /* Onay bekleyen ücretli King işi Bugün'de kalır (yalnız bekleyen varken). */
+      expect(String(await ESP.Screens.today.render()).indexOf('data-act="king-onayla"') >= 0).toBe(true);
+      ESP.S.ui.kingTeklifler = [];
+      expect(String(await ESP.Screens.today.render()).indexOf('aria-label="Onay bekliyor"') < 0).toBe(true);
       expect(typeof ESP.Screens.onaylar.handle['king-onayla']).toBe('function');
       temizle();
     });

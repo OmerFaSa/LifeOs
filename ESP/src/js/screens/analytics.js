@@ -708,7 +708,10 @@ ESP.Screens.analytics = (function(){
 
   function render(){
     const acik = !!S.ui.analizAyrinti;
+    /* KOLAY Faz 2 (2026-10-26): Bugün'ün karoları, pano ve dönen kartları,
+       haftalık özeti ve bekleyen önerisi burada, en başta (today.analizOzeti). */
     return K.Grid(html`
+      ${map(ESP.Screens.today.analizOzeti(), x => K.Span(12, raw(x)))}
       ${K.Span(12, alanKarolari())}
       ${K.Span(12, raw('<div class="pk-izgara pk-izgara--iki">' + isiHaritasi() + '</div>'))}
       ${K.Span(12, raw(panoAnaliz()))}
@@ -759,6 +762,9 @@ ESP.Screens.analytics = (function(){
       ESP.App.render();
     },
   };
+
+  /* Öneri kartının düğmeleri Onaylar'ın işleyicilerine gider (tek yol). */
+  ESP.Screens.today.onayEylemleri.forEach(a => { handle[a] = el => ESP.Screens.onaylar.handle[a](el); });
 
   /* Tahminin vadesi: haftalık sayılar hafta bitmeden, aylık kapı tahmini
      ay bitmeden kapanmaz. Erken kapanış tahmini kolaylaştırır. */

@@ -65,40 +65,71 @@
       });
     });
 
-    it('oz-042 Bugün ekranında en büyük öğe sıradaki blok; 390 pikselde de ilk ekranda görünür.', async () => {
+    /* KOLAY-PLANI Faz 2 (2026-10-26): Bugün üç blok — Şimdi (kapak: cümle +
+       TEK dolu eylem), Ne yaptın? (giriş kutusu), Gün (günün akışı + Günü
+       kapat). Sayılar, pano, dönen Durum ve Öneri İlerleme › Özet'te. */
+    it('oz-042 Bugün üç blok: kapak tek eylemli ve en büyük; sayı karosu, pano, Durum, Öneri yok', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
-        /* 390 px'lik gerçek bir kaba basılır: ölçü uygulamanın CSS'iyle. */
         const kap = document.createElement('div');
         kap.style.cssText = 'position:absolute;left:-10000px;top:0;width:390px';
-        kap.innerHTML = String(await R.Screens.today.render());
+        kap.innerHTML = R.Screens.today.kapak() + String(await R.Screens.today.render());
         document.body.appendChild(kap);
         try{
-          const simdi = kap.querySelector('.bugun__alan[aria-label="Şimdi"]');
-          const kahraman = simdi.querySelector('.kahraman[data-oz="042"]');
-          expect(kahraman.querySelector('.nextup')).toBeTruthy();
-          /* Şimdi alanında kahramandan önce yalnız acil uyarı durabilir. */
-          /* Alan etiketi (v5 «Şimdi» yazısı) içerik değil, alanın adıdır. */
-          const once = Array.prototype.filter.call(simdi.children, el => !el.classList.contains('bugun__etiket')
-            && (el.compareDocumentPosition(kahraman) & 4));
-          expect(once.length <= 1).toBeTruthy();
-          /* En büyük: başlığı ekrandaki her kart başlığından büyük; alanın
-             tek dolu düğmesi onun içinde. */
+          const kapak = kap.querySelector('.kapak');
+          expect(!!kapak).toBe(true);
+          expect(kapak.querySelectorAll('.kapak__sayi')).toHaveLength(0);
+          expect(kapak.querySelectorAll('.btn--primary')).toHaveLength(1);
+          expect(kapak.querySelector('.btn--primary').textContent).toContain('Başla');
+          expect(kap.querySelectorAll('.btn--primary')).toHaveLength(1);
+          expect(Array.from(kap.querySelectorAll('.bugun__alan')).map(x => x.getAttribute('aria-label')).join(',')).toBe('Ne yaptın?,Gün');
+          if(window.LIFEOS.GIRIS.kuruluMu()) expect(!!kap.querySelector('.bugun__alan[aria-label="Ne yaptın?"] [data-giris-kutu]')).toBe(true);
+          expect(!!kap.querySelector('.bugun__alan[aria-label="Gün"] .akis')).toBe(true);
+          ['.pk-ust', '.donen', '[data-oz="042"]', '.bugun__alan[aria-label="Öneri"]'].forEach(q => expect(kap.querySelector(q)).toBeNull());
+          /* «Tekrar borcu» bir kez bile tekrar edilmez (eskiden 5 kez). */
+          expect((kap.textContent.match(/[Tt]ekrar borcu/g) || []).length <= 1).toBe(true);
+          /* En büyük: kapağın cümlesi her kutu başlığından büyük; 390 px'te taşmaz. */
           const px = el => parseFloat(getComputedStyle(el).fontSize);
-          const baslik = px(kahraman.querySelector('.nextup__title'));
-          const digerleri = Array.prototype.map.call(kap.querySelectorAll('.kutu__ad'), px);
-          expect(digerleri.length > 0).toBeTruthy();
-          digerleri.forEach(d => expect(baslik > d).toBeTruthy());
-          const dolu = simdi.querySelectorAll('.btn--primary');
-          expect(dolu).toHaveLength(1);
-          expect(kahraman.contains(dolu[0])).toBeTruthy();
-          /* Kahraman 390 px'te taşmaz ve tek ekrana sığar (780 px'lik telefon
-             ekranının yarısından az). Üst çubuk + sayfa başıyla birlikte ilk
-             ekranda olduğu gerçek sayfada ölçülür (layoutcheck, H). */
-          const r = kahraman.getBoundingClientRect();
-          expect(r.width <= 390).toBeTruthy();
-          expect(r.height < 390).toBeTruthy();
+          const baslik = px(kapak.querySelector('.kapak__cumle'));
+          Array.prototype.forEach.call(kap.querySelectorAll('.kutu__ad'), el => expect(baslik > px(el)).toBeTruthy());
+          expect(kapak.getBoundingClientRect().width <= 390).toBeTruthy();
+          /* «15 dakikam var» kapakta ince düğme: cümle süreye sığan işi söyler. */
+          const on = R.S.ui.onbesDk;
+          try{
+            R.S.ui.onbesDk = true;
+            expect(dom(R.Screens.today.kapak()).querySelector('.kapak__cumle').textContent.indexOf('15 dakikan var: ')).toBe(0);
+          }finally{ R.S.ui.onbesDk = on; }
         }finally{ kap.remove(); }
+      });
+    });
+
+    it('Faz 2: Bugün’den çıkan sayılar İlerleme › Özet’te; Öneri onay işleyicileri orada da çalışır', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const k = dom(await R.Screens.progress.render());
+        const ozet = k.querySelector('[data-ozet="ilerleme"]');
+        expect(!!ozet).toBe(true);
+        expect(!!k.querySelector('.pk-ust')).toBe(true);
+        expect(Array.from(ozet.querySelectorAll('.donen')).map(d => d.getAttribute('aria-label')).join(',')).toBe('Bugün,Gidişat');
+        /* Göstergeler kartı ayrı kimlikte: aynı sayfada iki «Gidişat» olmaz. */
+        expect(k.querySelectorAll('.donen[aria-label="Gidişat"]')).toHaveLength(1);
+        expect(!!k.querySelector('.donen[aria-label="Göstergeler"]')).toBe(true);
+        expect(typeof R.Screens.progress.handle['king-onayla']).toBe('function');
+        expect(typeof R.Screens.progress.handle['oneri-uygula']).toBe('function');
+      });
+    });
+
+    it('Faz 2: onay bekleyen ücretli King işi Bugün’de kalır; bekleyen yoksa blok yok', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const eski = R.S.ui.kingTeklifler;
+        try{
+          R.S.ui.kingTeklifler = [{ id:1, konu:'Türev ünitesi', durum:'bekliyor', oneri:'tam', neden:'',
+            secenekler:[{ id:'tam', ad:'Tam', metin:'Tam iş · 0,02 USD (tahmin)' }] }];
+          expect(String(await R.Screens.today.render()).indexOf('data-act="king-onayla"') >= 0).toBe(true);
+          R.S.ui.kingTeklifler = [];
+          expect(String(await R.Screens.today.render()).indexOf('aria-label="Onay bekliyor"') < 0).toBe(true);
+        }finally{ R.S.ui.kingTeklifler = eski; }
       });
     });
 
@@ -190,14 +221,14 @@
 
     /* Dönen Durum (2026-10-02): Bugün'de dört büyük kart yerine tek küçük
        dönen kart; maddeler kural motorundan, eksik veri cümle. */
-    it('sadelik: Bugün Durum tek dönen kart; dört kart Ayrıntı\u2019da; eksik veri sıfır değil cümle', async () => {
+    it('sadelik: Durum tek dönen kart (Faz 2: İlerleme › Özet); dört kart Ayrıntı\u2019da; eksik veri sıfır değil cümle', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
         const exams = R.S.exams, cards = R.S.cards;
         try{
           R.S.exams = []; R.S.cards = [];
-          const k = dom(await R.Screens.today.render());
-          const durum = k.querySelector('.bugun__alan[aria-label="Durum"]');
+          const k = dom(await R.Screens.progress.render());
+          const durum = k.querySelector('[data-ozet="ilerleme"] .bugun__alan[aria-label="Durum"]');
           /* iki küçük widget: Bugün (sayaç, seri) ve Gidişat (deneme, borç, sınav) */
           expect(Array.from(durum.querySelectorAll('.donen')).map(d => d.getAttribute('aria-label')).join(',')).toBe('Bugün,Gidişat');
           expect(durum.querySelectorAll('.kutu .ozet, .durumkart').length).toBe(0);
@@ -297,8 +328,8 @@
     it('sadelik: günün açılışı (006) Bugün\'de kahramanı tekrarlamaz, Ayrıntı\'da durur', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
-        const k = dom(await R.Screens.today.render());
-        expect(k.querySelector('[data-oz="042"]')).toBeTruthy();
+        const k = dom(R.Screens.today.kapak() + await R.Screens.today.render());
+        expect(k.querySelector('.kapak [data-act="next-action"]')).toBeTruthy();
         expect(k.querySelector('[data-oz~="006"]')).toBeNull();
         const a = dom(await R.Screens.gun.render());
         if(window.LIFEOS && LIFEOS.VITRIN) expect(a.querySelector('[data-oz~="006"]')).toBeTruthy();
@@ -322,7 +353,8 @@
         const gun = await hazirla();
         const bl = gun.blocks.filter(b => b.slot !== 'Dinlenme');
         const dk = bl.reduce((t, b) => t + (Number(b.targetMin) || 0), 0);
-        const akis = durumKart(dom(await R.Screens.today.render()), 'Günün akışı');
+        const k = dom(await R.Screens.today.render());
+        const akis = Array.from(k.querySelectorAll('.bugun__alan[aria-label="Gün"] .kutu')).find(x => adMetni(x.querySelector('.kutu__ad')) === 'Günün akışı');
         const yuva = akis.querySelector('.kutu__yuva').textContent;
         expect(yuva).toContain(bl.length + ' blok · 0 bitti');
         if(dk > 0) expect(yuva).toContain(R.Screens.today.sureMetni(dk));

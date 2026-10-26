@@ -549,14 +549,17 @@
 (function(){
   const { describe, it, expect, resetState } = ESP.Test;
   describe('Sade (ESP) · Bugün', () => {
-    it('sıradaki iş tek kart; gerekçe ve örnek ⓘ kartında', () => {
+    /* KOLAY Faz 2 (2026-10-26): sıradaki iş bir kez, kapağın tek birincil
+       düğmesinde adıyla; ayrı «Sıradaki iş» kartı yok. */
+    it('sıradaki iş bir kez (kapağın düğmesi); gerekçe ve örnek ⓘ kartında', () => {
       resetState();
       const d = document.createElement('div');
-      d.innerHTML = String(ESP.Screens.today.render());
-      const kah = d.querySelector('.kahraman');
-      expect(!!kah).toBe(true);
-      expect(kah.matches('section.lrow')).toBe(false);
-      expect(kah.querySelector('.nextup__label').textContent).toContain(ESP.Planner.nextAction().rank ? 'Sıradaki iş' : 'Bekleyen iş yok');
+      d.innerHTML = String(ESP.Screens.today.render()) + ESP.Screens.today.kapak();
+      expect(d.querySelector('.kahraman')).toBe(null);
+      const ia = ESP.Planner.nextAction();
+      const eb = d.querySelectorAll('.kapak .btn--primary');
+      expect(eb.length).toBe(ia.rank && ia.route && ia.route !== 'today' ? 1 : 0);
+      if(eb.length) expect(eb[0].textContent.trim()).toBe(String(ia.title).split(' — ')[0]);
       expect(d.textContent.indexOf('Öncelik ')).toBe(-1);
       expect(d.textContent.indexOf('gibi yazabilirsin')).toBe(-1);
       const b = document.createElement('div');

@@ -354,8 +354,9 @@
         const g = R.S.days[R.U.todayISO()];
         const bl = g.blocks.filter(b => b.slot !== 'Dinlenme');
         bl[0].status = 'done'; bl[0].actualQ = 30; bl[0].correctQ = 23; bl[0].actualMin = 64;
-        const k = dom(await R.Screens.today.render());
-        const z = k.querySelector('[data-oz="060"]');
+        /* Faz 2: blok bitiş özeti Bugün › Ayrıntı'da. */
+        expect(dom(await R.Screens.today.render()).querySelector('[data-oz="060"]')).toBeNull();
+        const z = dom(await R.Screens.gun.render()).querySelector('[data-oz="060"]');
         expect(z.querySelectorAll('.uc > div').length).toBe(3);
         expect(z.querySelector('[data-act="timer-start"]').getAttribute('data-block')).toBe(bl[1].id);
         const a = dom(await R.Screens.gun.render());

@@ -1584,7 +1584,12 @@ R.App = (function(){
     if(!(window.LIFEOS && window.LIFEOS.GIRIS)) return false;
     window.LIFEOS.GIRIS.kur({ modul:'ays',
       onizle:t => {
-        if(gkBaglam) return R.Screens.today.gunuKapat.onizle(t, gkBaglam.gun);
+        if(gkBaglam){
+          const T = R.Screens.today.gunuKapat, p = T.onizle(t, gkBaglam.gun);
+          /* Okunmayan parçanın nedeni: kapı yalnız null görür (gunuKapat söyler). */
+          if(!p && !gkBaglam.red) gkBaglam.red = T.denetle(t, gkBaglam.gun).red || null;
+          return p;
+        }
         const n = R.KonuNotu && R.KonuNotu.onizle(t);
         if(n) return Object.assign(n, { tur:'not' });
         return R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null;
@@ -1604,8 +1609,16 @@ R.App = (function(){
   function gunuKapatKur(o){
     const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
     if(!G) return false;
+    /* Kutuların metni çekirdeğin kapat'ında GIRIS'e gitmeden hemen önce,
+       eşzamanlı istenir: o gün için bağlam o an açılır, ilk mikro görevde
+       kapanır (çekirdek doğrudan çağrılsa da metin bloğa göre okunur). */
+    const kutuBaglami = (gun, f) => v => {
+      if(!gkBaglam){ const b = gkBaglam = { gun }; queueMicrotask(() => { if(gkBaglam === b) gkBaglam = null; }); }
+      return f(v);
+    };
     G.kur(Object.assign({ modul:'ays',
-      satirlar:gun => R.Screens.today.gunuKapat.satirlar(gun),
+      satirlar:gun => R.Screens.today.gunuKapat.satirlar(gun)
+        .map(s => typeof s.metin === 'function' ? Object.assign(s, { metin:kutuBaglami(gun, s.metin) }) : s),
       bildir:(metin, geriAl) => UI.toast(metin, geriAl ? { undo:async () => { await geriAl(); UI.toast('Geri alındı'); } } : {}),
       yenile:() => { gunuKapatCiz(); render(); },
       olcumOrnek:'20 soru 15 doğru, 7 saat uyudum' }, o || {}));
@@ -1615,25 +1628,30 @@ R.App = (function(){
      yazılamıyorsa NEDENİ söylenir ve hiçbir şey yazılmaz. Sonra çekirdeğin
      kapat'ı; onun ölçüm önizlemesi eşzamanlı alındığından bağlam yalnız o
      çağrı boyunca açıktır. */
-  function gunuKapat(gun, metin){
+  function gunuKapat(gun, metin, alanlar){
     const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
     if(!G || !G.kuruluMu()) return Promise.resolve({ ok:false, neden:'Günü kapat kurulmadı.' });
     const t = String(metin || '').trim();
+    const reddet = red => {
+      document.querySelectorAll('[data-gunukapat]').forEach(k => {
+        if(k.getAttribute('data-gun') !== gun) return;
+        const s = k.querySelector('[data-gk-sonuc]');
+        if(s) s.innerHTML = '<p class="gk__mesaj gk__mesaj--uyari" role="status">'
+          + U.esc(red + ' Hiçbir şey yazılmadı.') + '</p>';
+      });
+      return { ok:false, neden:red };
+    };
     if(t){
       const d = R.Screens.today.gunuKapat.denetle(t, gun);
-      if(d.red){
-        document.querySelectorAll('[data-gunukapat]').forEach(k => {
-          if(k.getAttribute('data-gun') !== gun) return;
-          const s = k.querySelector('[data-gk-sonuc]');
-          if(s) s.innerHTML = '<p class="gk__mesaj gk__mesaj--uyari" role="status">'
-            + U.esc(d.red + ' Hiçbir şey yazılmadı.') + '</p>';
-        });
-        return Promise.resolve({ ok:false, neden:d.red });
-      }
+      if(d.red) return Promise.resolve(reddet(d.red));
     }
-    gkBaglam = { gun };
-    try{ return G.kapat(gun, { olcumMetni:t }); }
+    /* Kutuların metni çekirdekte kurulur: okunmazsa çekirdek yalnız «anlayamadım»
+       der; nedeni kapının denetiminden (girisKur) alınır. */
+    const b = gkBaglam = { gun, red:null };
+    let p;
+    try{ p = G.kapat(gun, { olcumMetni:t, alanlar }); }
     finally{ gkBaglam = null; }
+    return p.then(r => !r.ok && b.red && /anlayamadım|Anlaşılmadı/.test(r.neden || '') ? reddet(b.red) : r);
   }
   /* Alt sayfanın formu bu yoldan geçer (yakalama evresi; çekirdeğin
      kendi gönderimi denetimsiz kalmasın diye durdurulur). */
@@ -1644,7 +1662,9 @@ R.App = (function(){
     e.preventDefault();
     e.stopPropagation();
     const g = f.querySelector('.gk__girdi');
-    gunuKapat(k.getAttribute('data-gun'), g ? g.value : '');
+    const alanlar = {};
+    k.querySelectorAll('[data-gk-alan]').forEach(i => { alanlar[i.getAttribute('data-gk-alan')] = i.value; });
+    gunuKapat(k.getAttribute('data-gun'), g ? g.value : '', alanlar);
   }, true);
 
   /* ---------- acilis ---------- */

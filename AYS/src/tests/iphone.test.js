@@ -264,7 +264,8 @@
         const kok = await ciz('progress');
         try{
           expect(kok.querySelector('.kpigrid')).toBeNull();
-          const d = kok.querySelector('.donen[aria-label="Gidişat"]');
+          /* KPI kartı «Göstergeler» (Faz 2: Özet'teki Bugün «Gidişat»ından ayrı). */
+          const d = kok.querySelector('.donen[aria-label="Göstergeler"]');
           expect(!!d).toBe(true);
           expect(d.querySelectorAll('.donen__madde').length >= 8).toBe(true);
           const acik = bolumBolum(R, 'progress', kok)[0].acik;
@@ -513,7 +514,7 @@
        arka plansız, kartların arasında yüzüyordu (SPİ'de defterin içinde). */
     /* 2026-10-16: «Bir soru» üç modülde ortak sade karttır (brand/ortak/sorukart.js):
        soru görünür, iç gösterge adı yalnız ipucunda (title), alt yazı sade. */
-    it('Bugün: «Bir soru» sade kartta; iç gösterge adı görünmez, ipucunda durur', async () => {
+    it('Bugün › Ayrıntı (Faz 2): «Bir soru» sade kartta; iç gösterge adı görünmez, ipucunda durur', async () => {
       R.Test.resetState();
       R.S.profile.setupDone = true;
       await R.Model.ensurePlan(true);
@@ -524,7 +525,8 @@
         question:'Süre artıyor ama konu kapanmıyor?', seenAt:new Date().toISOString() });
       const d = document.createElement('div');
       try{
-        d.innerHTML = String(await R.Screens.today.render());
+        expect(String(await R.Screens.today.render()).indexOf('sorukart') < 0).toBe(true);
+        d.innerHTML = String(await R.Screens.gun.render());
         document.body.appendChild(d);
         const kart = d.querySelector('.sorukart');
         expect(!!kart).toBe(true);

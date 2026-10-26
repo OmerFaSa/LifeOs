@@ -17,11 +17,13 @@
       SP.S.profile.setupDone = true;
       try{
         SP.S.ui.haftaOzet = VERI;
-        const k = dom(await SP.Screens.today.render());
-        expect(k.querySelectorAll('.bugun [data-oz="120"]').length).toBe(1);
+        /* 2026-10-26'dan beri Analiz › Bugün özetinde (KOLAY-PLANI Faz 2). */
+        const k = dom(await SP.Screens.analytics.render());
+        expect(k.querySelectorAll('.analiz-bugun [data-oz="120"]').length).toBe(1);
         expect(k.querySelectorAll('[data-oz="120"] .hozet__satir').length).toBe(3);
-        SP.S.ui.haftaOzet = null;
         expect(dom(await SP.Screens.today.render()).querySelector('[data-oz="120"]')).toBe(null);
+        SP.S.ui.haftaOzet = null;
+        expect(dom(await SP.Screens.analytics.render()).querySelector('[data-oz="120"]')).toBe(null);
       }finally{ SP.S.ui.haftaOzet = null; }
     });
   });

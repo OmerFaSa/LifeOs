@@ -129,16 +129,17 @@
       expect(out.indexOf('title="veri yok"') >= 0).toBe(true);
     });
 
-    it('plan dışı çözülen soru Bugün ekranında görünür', async () => {
+    /* Faz 2 (2026-10-26): günlük sayaç dönen kartla İlerleme › Özet'e taşındı. */
+    it('plan dışı çözülen soru İlerleme › Özet’te görünür', async () => {
       resetState();
       await withTodayAsync('2026-10-12', async () => {
         await R.Model.ensurePlan(true);
         await R.Model.ensureWeek(R.Model.currentWeek());
         const gun = await R.Model.ensureDay(R.U.today());
-        let out = String(await R.Screens.today.render());
+        let out = String(await R.Screens.progress.render());
         expect(out.indexOf('Plan dışı') < 0).toBe(true);
         gun.freeQ = 40; gun.freeCorrect = 31;
-        out = String(await R.Screens.today.render());
+        out = String(await R.Screens.progress.render());
         expect(out.indexOf('Plan dışı: 40 soru') >= 0).toBe(true);
         expect(out.indexOf('31 doğru') >= 0).toBe(true);
       });

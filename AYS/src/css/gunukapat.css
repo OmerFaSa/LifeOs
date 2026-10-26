@@ -17,7 +17,14 @@
 .gk__satir.is-atla .gk__oneri{ text-decoration:line-through; color:var(--text-3); }
 .gk__satir.is-yazildi, .gk__satir.is-bos{ background:transparent; }
 .gk__satir.is-bos .gk__oneri, .gk__satir--olcum .gk__oneri{ color:var(--text-3); }
-.gk__form{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+/* Kaydet düğmesi sayfanın altında sabit: uzun listede kaydırmadan görünür. */
+.gk__form{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; position:sticky; bottom:0; z-index:1;
+  margin:0 -2px; padding:10px 2px calc(10px + env(safe-area-inset-bottom, 0px)); background:var(--surface, var(--bg)); border-top:1px solid var(--line, transparent); }
+.gk__alanlar{ display:flex; gap:8px; margin-left:auto; flex:none; }
+.gk__alan{ display:inline-flex; align-items:center; gap:4px; }
+.gk__sayi{ width:72px; min-height:44px; padding:0 10px; border:0; border-radius:10px; background:var(--surface, var(--bg)); color:var(--text); font:inherit; text-align:right; }
+.gk__sayi::placeholder{ color:var(--text-3); }
+.gk__birim{ font-size:12px; color:var(--text-3); }
 .gk__etiket{ flex-basis:100%; font-size:13px; color:var(--text-2); }
 .gk__girdi{ flex:1; min-width:180px; min-height:44px; padding:0 12px; border:0; border-radius:12px; background:var(--surface-2); color:var(--text); font:inherit; }
 .gk__kapat{ min-height:44px; }

@@ -11,17 +11,19 @@
       { modul:'esp', modul_adi:'ESP', cumle:'7 günün 5 gününde kayıt geldi.', kesinlik:'ölçüldü' }],
     bekleyen:{ moduller:{}, king:0, toplam:0 } };
 
-  describe('120 Haftalık Merkez özeti — Bugün', () => {
-    it('oz-120 veri varsa Bugün\'de tek kart; yoksa hiç çizilmez', async () => {
+  /* KOLAY Faz 2 (2026-10-26): Bugün'ün Özet alanı Analiz'in başına taşındı. */
+  describe('120 Haftalık Merkez özeti — Analiz', () => {
+    it('oz-120 veri varsa Analiz\'in Özet alanında tek kart, Bugün\'de yok; veri yoksa hiç çizilmez', async () => {
       resetState();
       ESP.S.profile.setupDone = true;
       try{
         ESP.S.ui.haftaOzet = VERI;
-        const k = dom(await ESP.Screens.today.render());
-        expect(k.querySelectorAll('.bugun [data-oz="120"]').length).toBe(1);
+        const k = dom(await ESP.Screens.analytics.render());
+        expect(k.querySelectorAll('[aria-label="Özet"] [data-oz="120"]').length).toBe(1);
         expect(k.querySelectorAll('[data-oz="120"] .hozet__satir').length).toBe(3);
-        ESP.S.ui.haftaOzet = null;
         expect(dom(await ESP.Screens.today.render()).querySelector('[data-oz="120"]')).toBe(null);
+        ESP.S.ui.haftaOzet = null;
+        expect(dom(await ESP.Screens.analytics.render()).querySelector('[data-oz="120"]')).toBe(null);
       }finally{ ESP.S.ui.haftaOzet = null; }
     });
   });

@@ -172,6 +172,61 @@
       }finally{ bitir(); }
     });
 
+    /* 2026-10-26 (Adım 0 denetimi, B): ölçüm satırı kendi boş sayı kutusuyla
+       gelir; değer önceden doldurulmaz (son değer yalnız ipucu), boş kutu
+       yazılmaz, değerler modülün metnine çevrilip aynı ayrıştırıcıdan geçer. */
+    function olcumSatiri(){
+      return [{ id:'kilo', ad:'Kilo', tur:'olcum', ipucu:'son 72', alanlar:[{ ad:'Kilo', birim:'kg' }],
+        metin:v => 'kilo ' + v[0] }];
+    }
+    function girisOndalik(gunluk){
+      G()._sifirla();
+      G().kur({ modul:'deneme', ornekler:[], onizle:t => {
+        const m = t.match(/^kilo (\d+(?:\.\d+)?)$/);
+        return m ? { tur:'olcum', metin:'Kilo ' + m[1], kaydet:async () => { gunluk.push('olcum:' + m[1]);
+          return { metin:'ok', geriAl:async () => {} }; } } : null;
+      } });
+    }
+
+    it('ölçüm satırı boş sayı kutusuyla çizilir; değer yok, son değer ipucu', () => {
+      kurulum({ satirlar:olcumSatiri() });
+      try{
+        const h = K().cizim(GUN);
+        expect(h).toContain('data-gk-alan="kilo:0"');
+        expect(h).toContain('inputmode="decimal"');
+        expect(h).toContain('placeholder="son 72"');
+        expect(h.indexOf(' value=') < 0).toBe(true);
+      }finally{ bitir(); }
+    });
+
+    it('kutudaki değer modülün metnine çevrilir (virgüllü ondalık); boş kutu yazılmaz; sayı değilse hiçbir şey yazılmaz', async () => {
+      const gunluk = [];
+      kurulum({ satirlar:olcumSatiri() });
+      girisOndalik(gunluk);
+      try{
+        const r = await K().kapat(GUN, { alanlar:{ 'kilo:0':'72,5' } });
+        expect(r.ok).toBe(true);
+        expect(gunluk).toEqual(['olcum:72.5']);
+        const bos = await K().kapat(GUN, { alanlar:{ 'kilo:0':'  ' } });
+        expect(bos.ok).toBe(false);
+        expect(gunluk.length).toBe(1);
+        const kotu = await K().kapat(GUN, { alanlar:{ 'kilo:0':'yetmiş' } });
+        expect(kotu.ok).toBe(false);
+        expect(kotu.neden).toContain('Kilo');
+        expect(gunluk.length).toBe(1);
+      }finally{ bitir(); }
+    });
+
+    it('önerisi olmayan satırlar tek satırda toplanır', () => {
+      const bos = id => ({ id, ad:id, tur:'beyan', oneri:null });
+      kurulum({ satirlar:[bos('Ara öğün'), bos('İkindi')] });
+      try{
+        const h = K().cizim(GUN);
+        expect((h.match(/is-bos/g) || []).length).toBe(1);
+        expect(h).toContain('Ara öğün, İkindi');
+      }finally{ bitir(); }
+    });
+
     it('yarıda hata olursa yazılan geri alınır; yazılacak bir şey yoksa yazmaz', async () => {
       const gunluk = [];
       const iyi = { id:'su', ad:'Su', tur:'beyan', oneri:{ metin:'2 L', kaynak:'plan' },

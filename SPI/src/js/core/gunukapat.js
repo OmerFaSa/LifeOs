@@ -15,7 +15,8 @@
    SÖZLEŞME — modül bir kez bağlar:
        GUNUKAPAT.kur({ modul, satirlar(gun) → [Satır], bildir(metin, geriAl), yenile(), olcumOrnek })
        Satır = { id, ad, tur:'beyan'|'olcum', yazildi?, oneri?:{ metin, kaynak:'plan'|'kalip'|'dun'|'son' },
-                 ipucu?, yaz?(gun) → metin | { metin, geriAl } | { atlandi:true } }
+                 ipucu?, yaz?(gun) → metin | { metin, geriAl } | { atlandi:true },
+                 alanlar?:[{ ad, birim?, ipucu? }], metin?(degerler) → tek satır metni }   (yalnız ölçüm)
 
    Sözler:
      1. İKİ TÜR SATIR. BEYAN satırı (su hedefi, kalıptan öğün, hatırlatma
@@ -87,8 +88,21 @@ window.LIFEOS.GUNUKAPAT = (function(){
     return Object.keys(say).filter(a => say[a].size >= o.esik).sort((x, y) => say[y].size - say[x].size);
   }
 
+  /* Ölçüm satırının boş sayı kutuları (2026-10-26): değer yazılmaz, son
+     değer yalnız silik ipucudur; boş bırakılan kutu yazılmaz (söz 1–2). */
+  function alanHtml(s){
+    return '<span class="gk__alanlar">' + s.alanlar.map((f, i) =>
+      '<label class="gk__alan"><input class="gk__sayi" type="text" inputmode="decimal" autocomplete="off"'
+      + ' data-gk-alan="' + kac(s.id + ':' + i) + '" aria-label="' + kac(f.ad || s.ad) + '"'
+      + ' placeholder="' + kac(f.ipucu != null ? f.ipucu : (s.alanlar.length === 1 && s.ipucu) || '') + '"/>'
+      + (f.birim ? '<span class="gk__birim">' + kac(f.birim) + '</span>' : '') + '</label>').join('') + '</span>';
+  }
+
   function satirHtml(s, gun){
     const a = atla[gun] || {};
+    if(s.tur === 'olcum' && !s.yazildi && Array.isArray(s.alanlar) && s.alanlar.length && typeof s.metin === 'function'){
+      return '<li class="gk__satir gk__satir--olcum"><span class="gk__ad">' + kac(s.ad) + '</span>' + alanHtml(s) + '</li>';
+    }
     if(s.tur === 'olcum'){
       return '<li class="gk__satir gk__satir--olcum">'
         + '<span class="gk__ad">' + kac(s.ad) + '</span>'
@@ -122,12 +136,19 @@ window.LIFEOS.GUNUKAPAT = (function(){
     const n = yazilacaklar(gun).length;
     const m = sonMesaj[gun];
     const ornek = ayar.olcumOrnek ? 'Örneğin: ' + ayar.olcumOrnek : 'Ölçtüğünü yaz';
+    /* Önerisi olmayan beyanlar tek sessiz satırda (ekranı boş satırla doldurmaz). */
+    const bos = l.filter(s => s.tur !== 'olcum' && !s.yazildi && (!s.oneri || typeof s.yaz !== 'function'));
+    const gorunen = l.filter(s => bos.indexOf(s) < 0);
+    const kutulu = gorunen.some(s => s.tur === 'olcum' && !s.yazildi && s.alanlar);
     return '<section class="gunukapat" data-gunukapat data-gun="' + kac(gun) + '" aria-label="Günü kapat">'
-      + '<p class="gk__not">Doğru olanı tek dokunuşla kaydet. Farklı olanın işaretini kaldır; ölçümleri aşağıya yaz.</p>'
-      + (l.length ? '<ul class="gk__liste">' + l.map(s => satirHtml(s, gun)).join('') + '</ul>'
+      + '<p class="gk__not">Doğru olanı tek dokunuşla kaydet.' + (n ? ' Farklı olanın işaretini kaldır.' : '')
+      + (kutulu ? ' Ölçtüklerini kutulara yaz.' : '') + '</p>'
+      + (l.length ? '<ul class="gk__liste">' + gorunen.map(s => satirHtml(s, gun)).join('')
+          + (bos.length ? '<li class="gk__satir is-bos"><span class="gk__oneri">Önerisi yok, girmezsen boş kalır: '
+            + kac(bos.map(s => s.ad).join(', ')) + '</span></li>' : '') + '</ul>'
         : '<p class="gk__bos">Bugün için önerilecek bir şey yok.</p>')
       + '<form class="gk__form" data-gk-form data-ayar-disi>'
-      + '<label class="gk__etiket" for="gk-olcum">Ölçümler</label>'
+      + '<label class="gk__etiket" for="gk-olcum">' + (kutulu ? 'Başka ölçüm' : 'Ölçümler') + '</label>'
       + '<input class="gk__girdi" id="gk-olcum" type="text" autocomplete="off" enterkeyhint="done" placeholder="' + kac(ornek) + '"/>'
       + '<button type="submit" class="btn btn--primary gk__kapat" data-gk="kapat"><span class="btn__label">'
       + (n ? 'Hepsi doğru · kaydet (' + n + ')' : 'Kaydet') + '</span></button>'
@@ -151,8 +172,25 @@ window.LIFEOS.GUNUKAPAT = (function(){
     for(const g of geri.slice().reverse()){ try{ await g(); }catch(e){ bozuk++; } }
     return bozuk;
   }
+  /* Kutulardaki değerler → modülün tek satır metni. Sayı değilse hata (hiçbir
+     şey yazılmaz); virgüllü ondalık noktaya çevrilir, yoksa giris virgülde böler. */
+  function alanMetni(gun, alanlar){
+    const parca = [];
+    for(const s of satirlar(gun)){
+      if(s.tur !== 'olcum' || !Array.isArray(s.alanlar) || typeof s.metin !== 'function') continue;
+      const v = s.alanlar.map((f, i) => String((alanlar || {})[s.id + ':' + i] || '').trim().replace(',', '.'));
+      if(!v.some(Boolean)) continue;
+      const kotu = v.find(x => x && !/^\d+(\.\d+)?$/.test(x));
+      if(kotu != null) return { hata:s.ad + ': «' + kotu + '» sayı değil. Hiçbir şey yazılmadı.' };
+      parca.push(s.metin(v.map(x => x === '' ? null : x)));
+    }
+    return { metin:parca.join(', ') };
+  }
+
   async function kapatIc(gun, o){
-    const metin = String(o.olcumMetni || '').trim();
+    const am = alanMetni(gun, o.alanlar);
+    if(am.hata) return sonuc(gun, { ok:false, neden:am.hata });
+    const metin = [am.metin, String(o.olcumMetni || '').trim()].filter(Boolean).join(', ');
     const geri = [];
     const yazilan = [];
     let geriAlinamaz = false;
@@ -237,6 +275,13 @@ window.LIFEOS.GUNUKAPAT = (function(){
       if(li) li.classList.toggle('is-atla', !c.checked);
       tazele(gun);
     });
+    /* Kutular formun dışında (listede): Enter onlarda da kaydeder. */
+    document.addEventListener('keydown', e => {
+      if(e.key !== 'Enter' || !e.target || !e.target.matches || !e.target.matches('[data-gk-alan]')) return;
+      const f = e.target.closest('[data-gunukapat]');
+      const form = f && f.querySelector('[data-gk-form]');
+      if(form){ e.preventDefault(); form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable:true, bubbles:true })); }
+    });
     document.addEventListener('submit', e => {
       const f = e.target && e.target.closest ? e.target.closest('[data-gk-form]') : null;
       if(!f) return;
@@ -244,8 +289,10 @@ window.LIFEOS.GUNUKAPAT = (function(){
       const k = f.closest('[data-gunukapat]');
       const g = f.querySelector('.gk__girdi');
       const b = f.querySelector('.gk__kapat');
+      const alanlar = {};
+      if(k) k.querySelectorAll('[data-gk-alan]').forEach(i => { alanlar[i.getAttribute('data-gk-alan')] = i.value; });
       if(b) b.disabled = true;
-      kapat(k ? k.getAttribute('data-gun') : '', { olcumMetni:g ? g.value : '' })
+      kapat(k ? k.getAttribute('data-gun') : '', { olcumMetni:g ? g.value : '', alanlar })
         .finally(() => { if(b) b.disabled = false; });
     });
   }

@@ -800,13 +800,8 @@ SP.Screens.today = (function(){
           data:{ 'data-route':'guide' } })}` })}</div>`;
   }
 
-  /* BUGÜN — üç alan (katalog 03, EKIP-PLANI §3):
-
-       ŞİMDİ   en acil tek uyarı, vakti gelen hatırlatma, günün sorusu ve
-               tek canlı öğe: günün ölçümü (sık yazılan dört alan) ile
-               öğün satırı
-       DURUM   toparlanma · asgari gün · beslenme — kutular, düğmesiz
-       ÖNERİ   en çok bir kart; fazlası «+N öneri Onaylar'da»
+  /* BUGÜN — üç blok (KOLAY-PLANI Faz 2; ayrıntısı render() üstünde):
+     Şimdi (kapak) · Ne yaptın? · Gün. Durum ve Öneri Analiz'in başında.
 
      Geri kalan her kart «Bugün › Ayrıntı»dadır (renderAyrinti): bütün
      alanlarıyla ölçüm formu, şikâyetler, seri, HKM şeridi, özet ve geçmiş.
@@ -1071,12 +1066,14 @@ SP.Screens.today = (function(){
        · Hatırlatmalar (beyan, yalnız bugün): vakti gelmiş, işaretlenmemişler
          tek satır, isaretleHepsi ile. Doz ve ilaç adı görünmez.
        · Uyku, nabız, HRV, kilo (ölçüm): yazma işlevi yok; son değer yalnız
-         ipucu. Ölçüm alttaki tek satıra yazılır (GIRIS, SP.Quick). */
+         ipucu. Her satırın boş sayı kutusu (2026-10-26) çekirdekte tek satır
+         metnine çevrilir («uyku 7.5») ve tek satırla aynı yoldan yazılır
+         (GIRIS, SP.Quick); boş kutu yazılmaz, kutu asla önceden dolmaz. */
   const GK_OLCUM = [
-    { id:'uyku', alan:'sleep', ad:'Uyku', birim:'sa' },
-    { id:'nabiz', alan:'rhr', ad:'İstirahat nabzı', birim:'atım/dk' },
-    { id:'hrv', alan:'hrv', ad:'HRV', birim:'ms' },
-    { id:'kilo', alan:'weight', ad:'Kilo', birim:'kg' },
+    { id:'uyku', alan:'sleep', ad:'Uyku', birim:'sa', soz:'uyku' },
+    { id:'nabiz', alan:'rhr', ad:'İstirahat nabzı', birim:'atım/dk', soz:'nabız' },
+    { id:'hrv', alan:'hrv', ad:'HRV', birim:'ms', soz:'hrv' },
+    { id:'kilo', alan:'weight', ad:'Kilo', birim:'kg', soz:'kilo' },
   ];
   function gkOgunOzet(m){
     return m.items.map(it => {
@@ -1147,7 +1144,8 @@ SP.Screens.today = (function(){
       if(v[f.alan] != null){ out.push({ id:f.id, ad:f.ad, tur:'olcum', yazildi:true, ipucu:yaz(v[f.alan]) }); return; }
       const t = onceki.find(x => S.vitals[x] && S.vitals[x][f.alan] != null);
       out.push({ id:f.id, ad:f.ad, tur:'olcum', yazildi:false,
-        ipucu:t ? 'son: ' + yaz(S.vitals[t][f.alan]) + ' · ' + U.fmtShort(t) : 'son: veri yok' });
+        ipucu:t ? 'son: ' + yaz(S.vitals[t][f.alan]) + ' · ' + U.fmtShort(t) : 'son: veri yok',
+        alanlar:[{ ad:f.ad, birim:f.birim, ipucu:t ? 'son ' + U.fmtNum(Number(S.vitals[t][f.alan])) : '' }], metin:d => f.soz + ' ' + d[0] });
     });
     return out;
   }
@@ -1364,10 +1362,10 @@ SP.Screens.today = (function(){
      gibi olsun»): levhanın üstünde. Selam perdedekiyle aynı açılıştan
      (brand/ortak/karsilama.js); cümle kural motorunun başlık cümlesi;
      sayılar bugünün KAYDINDAN — kayıt yoksa «—» (veri yok), sıfır değil.
-     Tarih yok (2026-10-02 kararı). */
-  function kapak(){
-    const KS = window.LIFEOS && window.LIFEOS.KARSILAMA;
-    if(!KS) return '';
+     Tarih yok (2026-10-02 kararı). KOLAY-PLANI Faz 2 (2026-10-26): kapak
+     yalnız cümle ve tek eylemdir; dört karo Analiz'in başındaki «Bugün»
+     özetinde (ozet()). */
+  function kapakSayilari(){
     const t = SP.U.todayISO();
     const v = SP.S.vitals[t] || {};
     const ogun = (SP.S.meals[t] || []).length;
@@ -1398,7 +1396,12 @@ SP.Screens.today = (function(){
         oran:ogun && slot ? ogun / slot : null, halka:slot > 0, git:'meals' },
       { ad:'Hareket', deger:hareketDk(t), birim:'dk', kesinlik:'estimated', seri:yedi.map(hareketDk), git:'move' },
     ];
-    return KS.kapakHtml({ modul:'spi', selam:KS.acilis('spi').selam, cumle:SP.Screens.today.headline(), sayilar,
+    return sayilar;
+  }
+  function kapak(){
+    const KS = window.LIFEOS && window.LIFEOS.KARSILAMA;
+    if(!KS) return '';
+    return KS.kapakHtml({ modul:'spi', selam:KS.acilis('spi').selam, cumle:SP.Screens.today.headline(), sayilar:[],
       /* Günü kapat (KOLAY-PLANI Faz 1): alt sayfa; «Günü düzenle» onun içinde. */
       eylem:String(K.Button({ label:'Günü kaydet', tone:'primary', act:'gunu-kapat' })),
       ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
@@ -1480,9 +1483,36 @@ SP.Screens.today = (function(){
     return '<div class="pk-ust">' + P.izgara([uyku, topar, seriKart, gece, bulgu]) + '</div>';
   }
 
+  /* GÜN (KOLAY-PLANI Faz 2): bugünün öğün yuvaları tek kutuda, her biri
+     girildi mi; ayrıntı ve giriş Öğün ekranında. Hedef yoksa ölçer yok. */
+  function GunKutusu(){
+    const t = U.todayISO();
+    const dolu = M.mealsOf(t).filter(m => m.items.length);
+    const yuvalar = SP.Ogun ? SP.Ogun.liste() : [];
+    const top = SP.Nutri.dayTotals(t), tg = SP.Nutri.targets();
+    return K.Kutu({ ad:'Öğünler', yuva:dolu.length ? dolu.length + ' öğün girildi' : 'girilmedi',
+      govde:html`${map(yuvalar, sl => {
+          const v = dolu.filter(m => m.slot === sl.id);
+          return P.minRow({ ok:v.length > 0, label:sl.label, detail:v.length ? v.map(gkOgunOzet).join(' · ') : '—' });
+        })}
+        ${when(tg.ok && !top.empty, () => html`<div class="mt-8">${K.Meter({ label:'Enerji', value:tg.kcal ? 100 * top.kcal / tg.kcal : 0,
+          text:U.fmtNum(Math.round(top.kcal)) + ' / ' + U.fmtNum(tg.kcal) + ' kcal' })}</div>`)}
+        <div class="row wrap gap-8 mt-8">${K.Button({ label:'Öğün', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'meals' } })}</div>` });
+  }
+
+  /* BUGÜN — üç blok (KOLAY-PLANI Faz 2, 2026-10-26; Bugün ~11 kutuydu ve
+     «uyku girilmedi»yi altı kez söylüyordu):
+       ŞİMDİ      kapak: günün cümlesi ve tek eylem («Günü kaydet»)
+       NE YAPTIN? tek satır, günün ölçümü (dört alan), his ve su bardakları
+       GÜN        en acil uyarı, öğün yuvaları, vakti gelen hatırlatma, günün sorusu
+     Kapağın karoları, pano kartları, Durum ve Öneri kalkmadı: Analiz'in
+     başındaki «Bugün» özetinde (ozet()). */
   async function render(){
     /* Karşılamanın notu: bugünün kural cümlesi (Siri'ye giden aynı cümle). */
     if(window.LIFEOS && window.LIFEOS.KARSILAMA && SP.Screens.today.sesli) window.LIFEOS.KARSILAMA.notYaz(SP.Screens.today.sesli(), SP.U.todayISO());
+    /* Seçim sayfasının minik özeti Bugün açılınca yazılır (hesap.js söz 16);
+       dönen kartın kendisi Analiz'de çizilir. */
+    DonenKutular();
     const acil = bugunUyarisi();
     const vakti = SP.HatirlatUI ? SP.HatirlatUI.vaktiRow() : '';
     /* «Bir soru»: ortak sade kart (brand/ortak/sorukart.js). */
@@ -1490,31 +1520,51 @@ SP.Screens.today = (function(){
     if(sig && !sig.seenAt) SP.Signals.markSeen(sig.id);
     const soruKart = sig && window.LIFEOS && window.LIFEOS.SORUKART ? window.LIFEOS.SORUKART.kartHtml(sig) : '';
     const soru = soruKart ? null : signalEntry();
-    /* Onaylar tek çekmecede: burada yalnız en öndeki kart (screens/onaylar.js). */
-    const oneri = SP.Screens.onaylar && SP.Screens.onaylar.bekleyen() ? SP.Screens.onaylar.oneriAlani() : '';
 
-    return String(html`${raw(PanoUst())}<div class="bugun" data-oz="003">
+    return String(html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
-        <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
+        ${/* Onay bekleyen ücretli King işi gözden kaçmasın: yalnız bekleyen varken (Faz 2). */''}
+        ${(SP.S.ui.kingTeklifler || []).length ? html`<section class="bugun__alan" aria-label="Onay bekliyor">
+          ${SP.Screens.onaylar.kingKart()}</section>` : ''}
+        <section class="bugun__alan" aria-label="Ne yaptın?">
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '')}
-          ${when(acil, () => acil.kart)}
-          ${when(vakti, () => K.Ledger([vakti]))}
-          ${raw(soruKart)}
-          ${when(soru, () => K.Ledger([soru]))}
           ${OlcumKutusu()}
           <div class="bugun__cift">${EnerjiKutusu()}${SuKutusu()}</div>
           ${(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu()) ? '' : OgunKutusu()}
         </section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
-          ${DonenKutular()}
-          ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
-          ${raw(window.LIFEOS.ONERI && SP.Hedefler && SP.Hedefler.ag ? window.LIFEOS.ONERI.butceCakismaHtml(SP.Hedefler.ag.butce()) : '')}
+        <section class="bugun__alan" aria-label="Gün"><h2 class="bugun__etiket" aria-hidden="true">Gün</h2>
+          ${when(acil, () => acil.kart)}
+          ${GunKutusu()}
+          ${when(vakti, () => K.Ledger([vakti]))}
+          ${raw(soruKart)}
+          ${when(soru, () => K.Ledger([soru]))}
         </section>
-        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>
     </div>`);
+  }
+
+  /* BUGÜNÜN ÖZETİ (Analiz'in başı, KOLAY-PLANI Faz 2): Bugün'den taşınan
+     dört karo, pano kartları, Durum ve Öneri. Karolar kapağın kendi
+     çiziminden alınır (brand/ortak/karsilama.js), ayrı kopya yazılmaz.
+     Öneri kartının düğmeleri Onaylar'ın işleyicisine gider (onayHandle). */
+  function ozet(){
+    const KS = window.LIFEOS && window.LIFEOS.KARSILAMA;
+    const k = document.createElement('div');
+    k.innerHTML = KS ? KS.kapakHtml({ modul:'spi', sayilar:kapakSayilari() }) : '';
+    const karolar = k.querySelector('.kapak__sayilar');
+    const oneri = SP.Screens.onaylar && SP.Screens.onaylar.bekleyen() ? SP.Screens.onaylar.oneriAlani() : '';
+    return String(html`<section class="analiz-bugun mb-16" aria-label="Bugünün özeti">
+      ${raw(karolar ? karolar.outerHTML : '')}
+      ${raw(PanoUst())}
+      <section class="bugun__alan mt-16" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
+        ${DonenKutular()}
+        ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
+        ${raw(window.LIFEOS.ONERI && SP.Hedefler && SP.Hedefler.ag ? window.LIFEOS.ONERI.butceCakismaHtml(SP.Hedefler.ag.butce()) : '')}
+      </section>
+      ${when(oneri, () => html`<section class="bugun__alan mt-16" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
+    </section>`);
   }
 
   /* GÜNÜN AYRINTISI (Bugün › Ayrıntı). Önce Günlük'ün üç sekmesiydi
@@ -1907,7 +1957,8 @@ SP.Screens.today = (function(){
     },
   };
 
-  ONAY_EYLEMLERI.forEach(a => { handle[a] = onayIsleyici(a); });
+  const onayHandle = {};
+  ONAY_EYLEMLERI.forEach(a => { handle[a] = onayHandle[a] = onayIsleyici(a); });
 
   return {
     id:'today',
@@ -1924,6 +1975,8 @@ SP.Screens.today = (function(){
        sıradaki hatırlatma. İlaç adı SÖYLENMEZ (hatirlat.js söz 3): yalnız
        «ilaç ya da takviye». Kural metni, model yok. */
     kapak,
+    /* Analiz'in başındaki «Bugün» özeti ve onun öneri düğmeleri (Faz 2). */
+    ozet, onayHandle,
     /* Günü kapat: app.js kurar (GUNUKAPAT.kur); satırlar ve tazeleme burada. */
     gunuKapat:{ satirlar:gkSatirlari, tazele:gkTazele, ac:gkAc },
     sesli(simdi){

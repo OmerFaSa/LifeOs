@@ -12,16 +12,17 @@
     bekleyen:{ moduller:{}, king:0, toplam:0 } };
 
   describe('120 Haftalık Merkez özeti — Bugün', () => {
-    it('oz-120 veri varsa Bugün\'de tek kart; yoksa hiç çizilmez', async () => {
+    it('oz-120 veri varsa İlerleme › Özet\'te tek kart (Faz 2: Bugün\'den taşındı); yoksa hiç çizilmez', async () => {
       resetState();
       R.S.profile.setupDone = true;
       try{
         R.S.ui.haftaOzet = VERI;
-        const k = dom(await R.Screens.today.render());
-        expect(k.querySelectorAll('.bugun [data-oz="120"]').length).toBe(1);
+        const k = dom(await R.Screens.progress.render());
+        expect(k.querySelectorAll('[data-ozet="ilerleme"] [data-oz="120"]').length).toBe(1);
         expect(k.querySelectorAll('[data-oz="120"] .hozet__satir').length).toBe(3);
-        R.S.ui.haftaOzet = null;
         expect(dom(await R.Screens.today.render()).querySelector('[data-oz="120"]')).toBe(null);
+        R.S.ui.haftaOzet = null;
+        expect(dom(await R.Screens.progress.render()).querySelector('[data-oz="120"]')).toBe(null);
       }finally{ R.S.ui.haftaOzet = null; }
     });
   });

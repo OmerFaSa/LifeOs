@@ -85,7 +85,8 @@ R.Screens.progress = (function(){
     const ayt = C.medianTrend('AYT'), ab = C.examBase('AYT');
     if(ayt.last3 != null) m.push({ ust:'AYT medyanı', sayi:sayi({ deger:ayt.last3, birim:'net', ondalik:2, kesinlik:'computed',
       formul:'son 3 tam AYT denemesinin medyanı' }), cumle:'son 3 tam deneme.', vurgu:ab == null ? 'Taban yok.' : 'Taban ' + U.fmtNet(ab) + '.', sistem:'ays' });
-    return raw(V.donen({ id:'ays-gidisat', ad:'Gidişat', maddeler:m }));
+    /* Özet'teki Bugün'ün «Gidişat»ından ayrı kimlik ve ad (aynı sayfada iki kart). */
+    return raw(V.donen({ id:'ays-kpi', ad:'Göstergeler', maddeler:m }));
   }
 
   /* ---------- trend ---------- */
@@ -246,10 +247,13 @@ R.Screens.progress = (function(){
     const sleep = C.sleepAverage(7);
     const debt = C.cardDebt();
     const closure = C.overallClosure().pct;
+    /* Özet (KOLAY-PLANI Faz 2): Bugün'den taşınan günün sayıları en üstte. */
+    const ozet = await R.Screens.today.ozet();
 
     /* Raf iki sütunu DOM sırasıyla dizer: trend ile karar kapısı yan yana,
        şeritler altta; gizli başvuru kartları en sonda (iPhone Faz 3). */
     return String(K.Grid([
+      K.Span(12, raw(ozet)),
       K.Span(12, DonenGidisat()),
       K.Span(6, K.Stack([ trendCard() ])),
       K.Span(4, K.Stack([ gateCard() ])),
@@ -313,6 +317,9 @@ R.Screens.progress = (function(){
       }, false, 'Müdahaleyi kaldır');
     },
   };
+
+  /* Özet'in Öneri kartının düğmeleri Onaylar'ın işleyicilerine gider (Bugün'deki gibi). */
+  R.Screens.today.onayEylemleri.forEach(a => { handle[a] = el => R.Screens.onaylar.handle[a](el); });
 
   return {
     id:'progress',

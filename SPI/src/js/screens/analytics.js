@@ -655,7 +655,10 @@ SP.Screens.analytics = (function(){
   async function render(){
     const acik = !!S.ui.spiAnalizAyrinti;
     const bolumler = TABS.filter(t => acik || ONDE.indexOf(t.id) >= 0).map(t => ({ id:t.id, ad:t.label, govde:govde(t) }));
-    return String(html`${K.Kutu({ ad:'Bu hafta', yuva:'kayıttan · son 7 gün', govde:ozetHtml() })}
+    /* Başta bugünün özeti (KOLAY-PLANI Faz 2): Bugün'den taşınan karolar,
+       pano kartları, Durum ve Öneri (screens/today.js ozet). */
+    const bugun = SP.Screens.today && SP.Screens.today.ozet ? SP.Screens.today.ozet() : '';
+    return String(html`${raw(bugun)}${K.Kutu({ ad:'Bu hafta', yuva:'kayıttan · son 7 gün', govde:ozetHtml() })}
       <div class="mt-16">${K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri', bolumler })}</div>
       <h2 class="analiz-ara-baslik">Kategoriler</h2>
       ${kategorilerHtml()}
@@ -704,6 +707,9 @@ SP.Screens.analytics = (function(){
       SP.App.render();
     },
   };
+
+  /* Özetteki öneri kartının düğmeleri: Onaylar'ın işleyicisi, tek yol. */
+  Object.assign(handle, (SP.Screens.today && SP.Screens.today.onayHandle) || {});
 
   /* Günlük ölçümler aynı gün kapanır; haftalık olanlar hafta sonunda. */
   function vadeFor(kind){

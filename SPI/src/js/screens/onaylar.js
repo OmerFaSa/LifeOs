@@ -634,6 +634,7 @@ SP.Screens.onaylar = (function(){
 
   return {
     id:'onaylar',
+    kingKart:KingTeklifKart,
     title:'Onaylar',
     subtitle(){
       const n = bekleyen();

@@ -62,7 +62,7 @@
       expect(l.filter(s => s.oneri).length).toBe(0);
       expect(satir('plan').yaz === undefined).toBe(true);
       kur();
-      try{ expect(K().cizim(bugun())).toContain('öneri yok'); }finally{ bitir(); }
+      try{ expect(K().cizim(bugun())).toContain('Önerisi yok'); }finally{ bitir(); }
 
       /* Plandaki disipline bugün oturum girildiyse satır «kaydedildi». */
       planKur('lang', 30);
@@ -171,6 +171,57 @@
       expect(satir('kalip-music').oneri.metin).toBe(ESP.DISCIPLINE_BY_ID.music.label + ' · 20 dk');
     });
 
+    it('planlı disiplinin boş «dk» kutusu: yazılan dakika ölçümdür, plan tahmini atlanır; boş kutu yazmaz', async () => {
+      resetState();
+      planKur('lang', 30);
+      pushCard({ front:'a', back:'b' });
+      const o = satir('olcum-lang');
+      expect([o.tur, o.alanlar.length, o.alanlar[0].birim, o.metin(['45'])]).toEqual(['olcum', 1, 'dk', '45 dk dil']);
+      kur();
+      ESP.App.girisKur({ yenile:() => {} });
+      const kap = document.createElement('div');
+      try{
+        kap.innerHTML = K().cizim(bugun());
+        const kutu = kap.querySelector('[data-gk-alan="olcum-lang:0"]');
+        expect(!!kutu && kutu.value === '' && kutu.getAttribute('placeholder') === '').toBe(true);   // önceden doldurulmaz
+        expect(kutu.closest('.gk__satir').querySelector('.gk__birim').textContent).toBe('dk');
+        expect(kap.querySelector('[data-gk-alan^="kart"]')).toBe(null);                          // kart tekrarı kutusuz
+
+        /* Kutu 45 → tek ölçülmüş oturum; plan tahmini atlanır (satır beyanlardan ÖNCE yazılır). */
+        const r = await K().kapat(bugun(), { alanlar:{ 'olcum-lang:0':'45' } });
+        expect(r.ok).toBe(true);
+        expect(oturumlar()).toEqual([['lang', 45, 'measured']]);
+        expect(satir('olcum-lang')).toBe(undefined);
+        await r.geriAl();
+        expect(oturumlar()).toEqual([]);
+
+        /* Boş kutu yazılmaz: yalnız işaretli tahmin yazılır. */
+        const r2 = await K().kapat(bugun(), { alanlar:{ 'olcum-lang:0':'' } });
+        expect(oturumlar()).toEqual([['lang', 30, 'estimated']]);
+        await r2.geriAl();
+
+        /* Planda süre yok: tahmin yok, kutu var; boş kutu hiçbir şey yazmaz. */
+        planKur('lang', 0);
+        expect(!!satir('olcum-lang')).toBe(true);
+        const r3 = await K().kapat(bugun(), { alanlar:{ 'olcum-lang:0':' ' } });
+        expect(r3.ok).toBe(false);
+        expect(ESP.Model.dayHasEntry(ESP.S.days[bugun()])).toBe(false);
+      }finally{ bitir(); }
+    });
+
+    it('her disiplinin kutu sözcüğü ayrıştırıcıdan o disipline döner; sözcüğü olmayan kutu almaz', () => {
+      resetState();
+      Object.keys(ESP.DISCIPLINE_BY_ID).forEach(d => {
+        planKur(d, 20);
+        const o = satir('olcum-' + d);
+        if(!o) return;
+        const r = ESP.Parse.parseSession(o.metin(['20']));
+        expect(d + ':' + r.rows.map(x => x.disc + '/' + x.minutes).join(',') + ':' + r.unmatched.length).toBe(d + ':' + d + '/20:0');
+      });
+      planKur('lang', 20);
+      expect(!!satir('olcum-lang')).toBe(true);
+    });
+
     it('gece yarısını geçen sayfa eski güne yazmaz; ölçüm satırı da geri alınır', async () => {
       resetState();
       const dun = gunOnce(1);
@@ -219,19 +270,20 @@
     const dom = h => { const d = document.createElement('div'); d.innerHTML = String(h); return d; };
     const karisik = () => { resetState(); pushSession(bugun(), 'lang', 30); pushSession(bugun(), 'music', 20, { minutesCert:'estimated' }); };
 
-    it('kapak «Süre», dönen «Günün dakikası» ve pano kartı tahmini söyler', async () => {
+    /* KOLAY Faz 2: karolar, dönen kart ve pano kartı Bugün'den Analiz'in başına taşındı. */
+    it('Analiz’deki «Süre» karosu, dönen «Günün dakikası», pano kartı ve Bugün’ün taban rakamı tahmini söyler', async () => {
       karisik();
-      const kapak = dom(T().kapak());
-      expect(kapak.querySelectorAll('[data-kesinlik="estimated"]').length).toBe(1);
-      const d = dom(await T().render());
+      const d = dom(await ESP.Screens.analytics.render());
+      expect(Array.from(d.querySelectorAll('.kapak__sayi[data-kesinlik="estimated"]')).map(x => x.getAttribute('data-simge'))).toEqual(['sure']);
       expect(Array.from(d.querySelectorAll('.pk__yuva')).map(x => x.textContent)).toContain('tahmin içerir');
-      expect(d.querySelectorAll('[data-kesinlik="estimated"]').length > 0).toBe(true);
+      expect(d.querySelectorAll('.donen [data-kesinlik="estimated"]').length > 0).toBe(true);
+      expect(String(await T().render())).toContain('tahmin içerir');
 
       /* Yalnız ölçülmüş gün: hiçbir yerde tahmin yok. */
       resetState();
       pushSession(bugun(), 'lang', 30);
-      expect(dom(T().kapak()).querySelectorAll('[data-kesinlik="estimated"]').length).toBe(0);
-      const d2 = dom(await T().render());
+      expect(String(await T().render()).indexOf('tahmin içerir') < 0).toBe(true);
+      const d2 = dom(await ESP.Screens.analytics.render());
       expect(Array.from(d2.querySelectorAll('.pk__yuva')).map(x => x.textContent)).toContain('ölçüldü');
       expect(d2.querySelectorAll('[data-kesinlik="estimated"]').length).toBe(0);
     });
@@ -271,7 +323,10 @@
       }finally{ ESP.UI.closeSheet(); d.remove(); bitir(); }
     });
 
-    it('düğme bütçesi: «Günü kapat» Bugün’ün düğme sayısını artırmaz', async () => {
+    /* KOLAY Faz 2: eskiden dönen kartın bağı düşerek denkleşiyordu; dönen
+       kartlar Analiz'e taşındı. Söz: eklenen tek düğme «Günü kapat», Bugün
+       bütçenin (14) altında. */
+    it('düğme bütçesi: «Günü kapat» tek ek düğmedir; Bugün bütçenin altında', async () => {
       resetState();
       for(const oturum of [false, true]){
         if(oturum) pushSession(bugun(), 'lang', 30);
@@ -281,9 +336,45 @@
         try{
           const d = dugmeler(await T().render());
           expect(!!d.querySelector('[data-act="gunu-kapat"]')).toBe(true);
-          expect(d.querySelectorAll('button, a.btn').length).toBe(once);
+          expect(d.querySelectorAll('button, a.btn').length).toBe(once + 1);
+          expect(d.querySelectorAll('button, a.btn').length + dugmeler(T().kapak()).querySelectorAll('button, a.btn').length <= 14).toBe(true);
         }finally{ bitir(); }
       }
+    });
+
+    it('Bugün üç blok: Şimdi (kapak, tek birincil eylem), Ne yaptın?, Gün; özet kartları Analiz’in başında', async () => {
+      resetState();
+      planKur('lang', 30);
+      pushSession(bugun(), 'music', 20);
+      kur();
+      try{
+        const k = dugmeler(T().kapak());
+        expect(k.querySelectorAll('.kapak__sayi').length).toBe(0);
+        const n = ESP.Planner.nextAction();
+        const birincil = Array.from(k.querySelectorAll('.btn--primary'));
+        expect(birincil.length).toBe(n.rank && n.route && n.route !== 'today' ? 1 : 0);
+        if(birincil.length) expect(birincil[0].textContent.trim()).toBe(String(n.title).split(' — ')[0]);
+        const d = dugmeler(await T().render());
+        expect(Array.from(d.querySelectorAll('.bugun__alan')).map(x => x.getAttribute('aria-label'))).toEqual(['Ne yaptın?', 'Gün']);
+        expect(!!d.querySelector('[aria-label="Gün"] .ledger [data-act="gunu-kapat"]')).toBe(true);
+        ['.kahraman', '.pk-ust', '.donen', '.kapak__sayi', '[aria-label="Özet"]', '[aria-label="Öneri"]'].forEach(s => expect(s + ':' + !!d.querySelector(s)).toBe(s + ':false'));
+        expect(d.textContent.indexOf('Sıradaki işi aç')).toBe(-1);
+        expect(d.textContent.indexOf('Planda bugün')).toBe(-1);
+        expect(String(await ESP.Screens.gun.render())).toContain('Planda bugün');
+        const a = dugmeler(await ESP.Screens.analytics.render());
+        expect(a.querySelectorAll('.kapak__sayi').length).toBe(3);
+        expect(!!a.querySelector('.pk-ust') && !!a.querySelector('[aria-label="Özet"] .donen')).toBe(true);
+        expect(a.querySelector('h1')).toBe(null);
+      }finally{ bitir(); }
+
+      /* Boş profil: cümle, giriş kutusu ve boş gün kartı «Günü kapat»la. */
+      resetState();
+      kur();
+      try{
+        const d = dugmeler(await T().render());
+        expect(d.textContent).toContain('henüz oturum girilmedi');
+        expect(!!d.querySelector('[data-act="gunu-kapat"]')).toBe(true);
+      }finally{ bitir(); }
     });
   });
   /* 2026-10-25 depo sahibi: XP, rozet ve müfredat sayaçları yalnız ölçülmüş

@@ -24,30 +24,6 @@ ESP.Screens.today = (function(){
     { id:'gecmis', label:'Geçmiş' },
   ];
 
-  /* ------------------------------------------------------------ siradaki is */
-
-  /* SADE (kullanıcı, 2026-10-02: «ESP'de AYS kadar sade olmayan, göz yoran
-     şeyler var»): sıradaki iş AYS'deki gibi tek kart — üstünde ayrı bir
-     etiket satırı («Sıradaki iş · Öncelik 1») ve not yok. Kuralın gerekçesi
-     (n.why) ekranın ⓘ kartında (lede); kartta iş ve ölçülen ayrıntı. */
-  function nextCard(){
-    const n = ESP.Planner.nextAction();
-    return html`<div class="kahraman">${K.NextUp({
-        icon:n.rank ? 'zap' : 'check',
-        calm:!n.rank,
-        /* Bekleyen iş kalmadığında görünür. ESP'nin işi bilgidir;
-           kartın üstündeki kitap onu söyler. */
-        sanat:'bilgi',
-        label:n.rank ? 'Sıradaki iş' : 'Bekleyen iş yok', hint:'next-action',
-        title:n.title,
-        why:n.detail,
-        action:n.route && n.route !== 'today'
-          ? K.Button({ label:'Aç', tone:'primary', size:'sm', act:'go',
-              data:{ 'data-route':n.route } })
-          : '',
-      })}</div>`;
-  }
-
   /* Denetim sorusu — AYRI EKRAN DEĞİL, mevcut akışın içinde tek satır.
 
      Nöbetçi ve sürtünme ölçer arka planda çalışır (core/signals.js);
@@ -206,8 +182,8 @@ ESP.Screens.today = (function(){
      2026-10-05: kartın dışında, kartsız yüzüyordu). */
   /* «Günü kapat» (KOLAY-PLANI Faz 1) aynı satırda: akşamın tek ekranı alt
      sayfada açılır. Yalnız bugün için: ölçüm satırı «Ne yaptın?»
-     ayrıştırıcısından geçer ve o bugüne yazar. Düğme bütçesi artmasın diye
-     dönen «Bugün» kartındaki aynı yere giden kısa bağ düşer (DonenKutular). */
+     ayrıştırıcısından geçer ve o bugüne yazar. Dönen kartlar Analiz'e
+     taşındığından (KOLAY Faz 2) Bugün'e eklenen tek düğme budur. */
   const gunuKapatAcik = () => !!(window.LIFEOS && window.LIFEOS.GUNUKAPAT && window.LIFEOS.GUNUKAPAT.kuruluMu())
     && gun() === U.todayISO();
   const gunDugmesi = () => html`<div class="row wrap gap-6 mt-8">${when(gunuKapatAcik(), () => K.Button({ label:'Günü kapat',
@@ -224,9 +200,12 @@ ESP.Screens.today = (function(){
       });
     }
     const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
+    /* KOLAY Faz 2: Bugün'ün tek dakika rakamı tabana göredir; toplam başlık cümlesinde. */
+    const taban = ESP.GunSure ? ESP.GunSure.taban(gun()).dakika : ((S.profile && S.profile.dailyMinutes) || null);
     return K.Entry({
       label:'Bugünün oturumları',
-      meta:rows.length + ' oturum · ' + U.fmtMin(toplam),
+      meta:rows.length + ' oturum' + (taban ? ' · taban ' + taban + ' dk · ' + (toplam < taban ? (taban - toplam) + ' dk kaldı' : 'tutuldu') : '')
+        + (dkKesinlik(gun()) === 'measured' ? '' : ' · tahmin içerir'),
       /* GÜNÜN ODAK ROZETİ — eylemlerin yanında, günün raporunda.
          Başarımlar sekmesindeki odak rozeti ömürlük rekordur; bu ise
          BU GÜNÜN kendisi (bkz. core/basarim.js, gununOdagi). Eşiğin
@@ -797,11 +776,7 @@ ESP.Screens.today = (function(){
         </div>` });
   }
 
-  /* BUGÜN — üç alan (katalog 03, EKIP-PLANI §3):
-       ŞİMDİ   sıradaki tek iş, tek cümlelik hızlı kayıt, (varsa) günün sorusu
-       DURUM   özet · bugünün oturumları · planda bugün
-       ÖNERİ   en çok bir kart; fazlası «+N öneri Onaylar'da»
-     Geri kalan her satır «Bugün › Ayrıntı»dadır (renderAyrinti). Sadelik
+  /* Bugün'ün üç bloğu render()'ın başında (KOLAY Faz 2). Sadelik
      bütçesi: sayfa boyu 1800 px, görünen düğme 14. */
   function OzetKutusu(){
     const d = ESP.SRS.deckStatus();
@@ -887,14 +862,28 @@ ESP.Screens.today = (function(){
      gibi olsun»): levhanın üstünde. Selam perdedekiyle aynı açılıştan
      (brand/ortak/karsilama.js); cümle kural motorunun başlık cümlesi;
      sayılar bugünün KAYDINDAN — oturum yoksa «—» (veri yok), sıfır değil.
-     Tarih yok (2026-10-02 kararı). */
+     Tarih yok (2026-10-02 kararı).
+     KOLAY Faz 2 (2026-10-26): kapak «Şimdi»dir — cümle ve TEK birincil
+     eylem: sıradaki işin kendisi (adıyla; ayrı «Sıradaki iş» kartı yok).
+     Karolar Analiz'in başında (analizOzeti). */
   function kapak(){
     const KS = window.LIFEOS && window.LIFEOS.KARSILAMA;
     if(!KS) return '';
+    const n = ESP.Planner.nextAction();
+    return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.headline(), sayilar:[],
+      eylem:n.rank && n.route && n.route !== 'today' ? String(K.Button({ label:String(n.title).split(' — ')[0], tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '',
+      ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
+  }
+
+  /* Bugün kapağının karoları (Analiz'in başında). shortcut: karolar
+     kapakHtml'in çıktısından ayıklanır; ortak karsilama.js yalnız-karo
+     çizimi verirse ona geç. */
+  function kapakKarolari(){
+    const KS = window.LIFEOS && window.LIFEOS.KARSILAMA;
+    if(!KS || typeof document === 'undefined') return '';
     const t = U.todayISO();
     const rows = M.sessionsOf(t);
     const h = M.dueReminders(null, t).filter(r => ESP.Mod.isOn(r.disc)).length;
-    const n = ESP.Planner.nextAction();
     /* Görsel pano (2026-10-20): günlük taban (GunSure) biliniyorsa süreye
        halka; sütunlar son yedi günün kaydı (girilmemiş gün boş). */
     const taban = ESP.GunSure ? ESP.GunSure.taban(t).dakika : ((S.profile && S.profile.dailyMinutes) || null);
@@ -906,9 +895,10 @@ ESP.Screens.today = (function(){
         alt:taban ? 'taban ' + taban + ' dk' : '', seri:yedi.map(d => M.minutesOf(d)) },
       { ad:'Hatırlatıcı', deger:h, kesinlik:'computed' },
     ];
-    return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.headline(), sayilar,
-      eylem:n.route && n.route !== 'today' ? String(K.Button({ label:'Sıradaki işi aç', tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '',
-      ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
+    const d = document.createElement('div');
+    d.innerHTML = KS.kapakHtml({ modul:'esp', cumle:'', sayilar });
+    const s = d.querySelector('.kapak__sayilar');
+    return s ? s.outerHTML : '';
   }
 
   /* PANO KARTLARI (2026-10-20, kullanıcı onaylı katalog; brand/ortak/pano.js).
@@ -982,9 +972,18 @@ ESP.Screens.today = (function(){
        kalip-*  BEYAN · «her zamanki»: aynı disiplin son 7 günün en az 4'ünde
                 (GUNUKAPAT.kalip); dakika o günlerde en sık girilen süre.
                 Plandaki disiplin için ayrı satır yok.
+       olcum-*  ÖLÇÜM · plandaki ve «her zamanki» disiplinin boş «dk» kutusu
+                (2026-10-26). Yazılan sayı «Ne yaptın?» ayrıştırıcısından
+                ölçülmüş oturum olarak geçer ve beyanlardan ÖNCE yazılır; aynı
+                disiplinin tahmini o yüzden atlanır (tahminYaz). Boş = yazılmaz.
        kart     ÖLÇÜM · sırası gelen kart; yalnız ipucu, asla toplu yazılmaz
                 (tekrar kartın kendi cevabıdır, tekrar ekranında). */
   const discAd = id => (ESP.DISCIPLINE_BY_ID[id] || {}).label || id;
+  /* Ayrıştırıcının (core/parse.js ALIASES) o disipline döndürdüğü sözcük;
+     sözcüğü olmayan disiplin (tarih) kutu almaz. */
+  const KUTU_SOZ = { lang:'dil', philo:'felsefe', music:'müzik', diction:'diksiyon', reading:'okuma', writing:'yazı' };
+  const olcumKutusu = d => KUTU_SOZ[d] ? [{ id:'olcum-' + d, ad:discAd(d), tur:'olcum',
+    alanlar:[{ ad:discAd(d) + ' · ölçülen dakika', birim:'dk' }], metin:v => v[0] + ' dk ' + KUTU_SOZ[d] }] : [];
 
   /* Beyan satırının yazımı: tahmin etiketli tek oturum ve onun geri alması.
      Aynı disiplin «Günü kapat»ın ölçüm satırında az önce girildiyse
@@ -1027,6 +1026,7 @@ ESP.Screens.today = (function(){
     else if(isFinite(pdk) && pdk > 0) l.push({ id:'plan', ad:'Planda bugün', tur:'beyan',
       oneri:{ metin:discAd(p.disc) + ' · ' + pdk + ' dk', kaynak:'plan' }, yaz:tahminYaz(p.disc, pdk, 'plandan') });
     else l.push({ id:'plan', ad:'Planda bugün', tur:'beyan', ipucu:discAd(p.disc) + ' · planda süre yok · öneri yok' });
+    if(p && !girildi(p.disc)) l.push(...olcumKutusu(p.disc));
 
     if(GK){
       const kayit = [];
@@ -1041,7 +1041,7 @@ ESP.Screens.today = (function(){
         const dk = sikSure(kayit.filter(x => x.anahtar === d));
         if(girildi(d)) l.push({ id:'kalip-' + d, ad:'Her zamanki', tur:'beyan', yazildi:true, ipucu:discAd(d) + ' · oturum girildi' });
         else if(dk) l.push({ id:'kalip-' + d, ad:'Her zamanki', tur:'beyan',
-          oneri:{ metin:discAd(d) + ' · ' + dk + ' dk', kaynak:'kalip' }, yaz:tahminYaz(d, dk, 'her zamanki') });
+          oneri:{ metin:discAd(d) + ' · ' + dk + ' dk', kaynak:'kalip' }, yaz:tahminYaz(d, dk, 'her zamanki') }, ...olcumKutusu(d));
       });
     }
 
@@ -1063,37 +1063,55 @@ ESP.Screens.today = (function(){
     if(GK && k) k.outerHTML = GK.cizim(k.getAttribute('data-gun'));
   }
 
+  /* BUGÜN = ÜÇ BLOK (KOLAY-PLANI Faz 2, 2026-10-26; telefonda 2951 px,
+     günün dakikası 6, sıradaki iş 3 kez yazıyordu):
+       ŞİMDİ      kapak: günün cümlesi + tek birincil eylem (kapak())
+       NE YAPTIN? tek satır giriş, sık oturumlar, (varsa) günün sorusu
+       GÜN        bugünün oturumları, tabana göre tek rakam, «Günü kapat»
+     Karolar, pano kartları, dönen kartlar, haftalık özet ve öneri Analiz'in
+     başında (analizOzeti); «Planda bugün» Bugün › Ayrıntı'da. */
   function render(){
     /* Karşılamanın notu: bugünün kural cümlesi (Siri'ye giden aynı cümle). */
     if(window.LIFEOS && window.LIFEOS.KARSILAMA && ESP.Screens.today.sesli) window.LIFEOS.KARSILAMA.notYaz(ESP.Screens.today.sesli(), U.todayISO());
-    const O = ESP.Screens.onaylar;
-    const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
-    return html`${raw(PanoUst())}<div class="bugun" data-oz="003">
+    /* Seçim sayfasının minik özeti (hesap.js söz 16) Bugün açılınca da tazelenir; kartlar Analiz'de. */
+    DonenKutular();
+    const GI = window.LIFEOS && window.LIFEOS.GIRIS;
+    return html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
-        <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
-          ${raw(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu() ? window.LIFEOS.GIRIS.kutuHtml() : '')}
+        ${/* Onay bekleyen ücretli King işi gözden kaçmasın: yalnız bekleyen varken (Faz 2). */''}
+        ${(ESP.S.ui.kingTeklifler || []).length ? html`<section class="bugun__alan" aria-label="Onay bekliyor">
+          ${ESP.Screens.onaylar.kingKart()}</section>` : ''}
+        <section class="bugun__alan" aria-label="Ne yaptın?">
+          ${raw(GI && GI.kuruluMu() ? GI.kutuHtml() : '')}
           ${raw(sikSerit())}
-          ${nextCard()}
           ${raw(soruKartHtml())}
-          ${K.Ledger(() => [(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu()) ? null : quickForm(),
+          ${K.Ledger(() => [GI && GI.kuruluMu() ? null : quickForm(),
             window.LIFEOS && window.LIFEOS.SORUKART ? null : signalRow()].filter(Boolean))}
-        </section>
-        <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
-          ${K.Ledger(() => [sessionList(), planRowToday()].filter(Boolean))}
         </section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>${DonenKutular()}${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}</section>
-        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
+        <section class="bugun__alan" aria-label="Gün"><h2 class="bugun__etiket" aria-hidden="true">Gün</h2>
+          ${K.Ledger(() => [sessionList()])}
+        </section>
       </div>
     </div>`;
+  }
+
+  /* Analiz'in başı: Bugün'den taşınan özet (karolar, pano, dönen kartlar,
+     haftalık özet) ve bekleyen öneri. Kesinlik etiketleri olduğu gibi. */
+  function analizOzeti(){
+    const O = ESP.Screens.onaylar;
+    const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
+    return [kapakKarolari(), PanoUst(),
+      String(html`<section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>${DonenKutular()}${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}</section>`),
+      oneri ? String(html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`) : ''].filter(Boolean);
   }
 
   /* GÜNÜN AYRINTISI (Bugün › Ayrıntı). Önce Günlük'ün üç sekmesiydi
      (Giriş · Özet · Geçmiş); şimdi üçü alt alta bölümdür ve eski sekme
      eylemi (`day-tab`) bölüm çubuğunda kalır. Bugün'de duran şey (sıradaki
-     iş, günün sorusu, oturumlar, planda bugün, öneri) burada tekrar
-     çizilmez. */
+     iş, günün sorusu, oturumlar) burada tekrar çizilmez; «Planda bugün»
+     KOLAY Faz 2'den beri burada, öneri Analiz'in başında. */
   function renderAyrinti(){
     const guvenli = f => { try{ return K.Ledger(() => [].concat(f()).filter(Boolean)); }
       catch(e){ console.error(e); return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; kayıtların yerinde duruyor.' }); } };
@@ -1101,7 +1119,7 @@ ESP.Screens.today = (function(){
     return K.Grid(html`${K.Span(12, html`<section class="bugun__alan" aria-label="Özet">${OzetKutusu()}${DakikaKutusu()}</section>`)}
       ${K.Span(12, K.SayfaBolumleri({ act:'day-tab', aria:'Günün bölümleri', bolumler:[
       { id:'giris', ad:'Giriş', sayi:M.sessionsOf(gun()).length || null, govde:guvenli(() => [yedekRow(), hkmSeritRow(),
-        seriRow(), dunkuRow(), planRow(), reminderRow(), entryForm()]) },
+        seriRow(), dunkuRow(), planRowToday(), planRow(), reminderRow(), entryForm()]) },
       { id:'ozet', ad:'Özet', govde:guvenli(summaryRows) },
       { id:'gecmis', ad:'Geçmiş', govde:guvenli(historyRows) },
     ] }))}`);
@@ -1372,7 +1390,9 @@ ESP.Screens.today = (function(){
     headlineOz:'004',
     /* Siri «Bugün ne var?» (hesap sunucu sözü 21): günün cümlesi ve bugüne
        düşen hatırlatıcı sayısı (kapalı bölümünki sayılmaz). Kural metni. */
-    kapak,
+    kapak, analizOzeti,
+    /* Öneri kartının düğmeleri (Analiz'de çizilir). */
+    onayEylemleri:ONAY_EYLEMLERI,
     sesli(){
       const rows = M.sessionsOf(U.todayISO());
       const n = ESP.Planner.nextAction();

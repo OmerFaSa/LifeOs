@@ -14,9 +14,10 @@
       const eski = SP.Hedefler.ag;
       try{
         SP.Hedefler.ag = { butce:() => CAK };
-        expect(dom(await SP.Screens.today.render()).querySelectorAll('[data-oz="112"]').length).toBe(1);
+        /* 2026-10-26'dan beri Analiz › Bugün özetinde (KOLAY-PLANI Faz 2). */
+        expect(dom(await SP.Screens.analytics.render()).querySelectorAll('.analiz-bugun [data-oz="112"]').length).toBe(1);
         SP.Hedefler.ag = { butce:() => null };
-        expect(dom(await SP.Screens.today.render()).querySelector('[data-oz="112"]')).toBe(null);
+        expect(dom(await SP.Screens.analytics.render()).querySelector('[data-oz="112"]')).toBe(null);
       }finally{ SP.Hedefler.ag = eski; }
     });
   });
