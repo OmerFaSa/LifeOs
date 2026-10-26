@@ -184,6 +184,8 @@ const OLC = `(() => {
           + Math.round(r.width) + '×' + Math.round(r.height));
       }
       const etiket = (el.getAttribute('aria-label') || el.textContent || '').trim()
+        || (el.getAttribute('aria-labelledby') || '').split(' ')
+          .map(i => (document.getElementById(i) || {}).textContent || '').join('').trim()
         || (el.labels && el.labels.length ? 'label' : '')
         || el.getAttribute('placeholder') || '';
       if(!etiket && sonuc.etiketsiz.length < 6){
@@ -265,18 +267,17 @@ async function main(){
   const hatalar = [];
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hkm-yuz-'));
   DB_YOLU = path.join(tmp, 'hkm.db');
-  const cfgYol = path.join(ROOT, 'config.json');
-  const vardi = fs.existsSync(cfgYol);
-  const yedek = vardi ? fs.readFileSync(cfgYol, 'utf8') : null;
+  /* Ayar kendi gecici klasorunde, daemon'a HKM_CONFIG ile; kullanicinin
+     config.json'una dokunulmaz (2026-10-26). */
+  const cfgYol = path.join(tmp, 'config.json');
   fs.writeFileSync(cfgYol, JSON.stringify({ host:'127.0.0.1', port:PORT,
     local_token:TOKEN, db_path:path.join(tmp, 'hkm.db') }, null, 2));
 
   const daemon = spawn('python3', [path.join(ROOT, 'daemon.py')],
-    { cwd:ROOT, stdio:'ignore' });
+    { cwd:ROOT, stdio:'ignore', env:Object.assign({}, process.env, { HKM_CONFIG:cfgYol }) });
   let browser;
   const kapat = () => {
     try{ daemon.kill(); }catch(e){}
-    if(vardi) fs.writeFileSync(cfgYol, yedek); else { try{ fs.unlinkSync(cfgYol); }catch(e){} }
     try{ fs.rmSync(tmp, { recursive:true, force:true }); }catch(e){}
   };
 

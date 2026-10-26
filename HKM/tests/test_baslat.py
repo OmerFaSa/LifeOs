@@ -229,3 +229,25 @@ def run():
                     if x.poll() is None:
                         x.kill()
     test("--dur POSIX'te yalniz adi tutan sureci kapatir", t_stop_by_name_posix_real)
+
+    # 2026-10-26 denetim: entegre.js ve yuz.js gercek config.json'un ustune
+    # test ayari yaziyor, sonda bellekten geri koyuyordu; yarida kesilen bir
+    # kosu kullanicinin ayarini test ayariyla birakti (port 4299, Temp'te db).
+    # Arac kendi ayarini kendi klasorune yazar, daemon'a HKM_CONFIG ile verir.
+    def t_config_yolu_ortamdan():
+        import subprocess
+        import sys
+        kok = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        with tempfile.TemporaryDirectory() as d:
+            yol = os.path.join(d, "test-config.json")
+            r = subprocess.run([sys.executable, "-c", "import daemon; print(daemon.CONFIG_PATH)"],
+                               cwd=kok, env=dict(os.environ, HKM_CONFIG=yol),
+                               capture_output=True, text=True, timeout=60)
+            eq(r.stdout.strip(), yol)
+        araclar = (os.path.join(kok, "tools", "yuz.js"), os.path.join(os.path.dirname(kok), "tools", "entegre.js"))
+        for a in araclar:
+            with open(a, encoding="utf-8") as f:
+                metin = f.read()
+            ok("HKM_CONFIG" in metin, a)
+            no("path.join(ROOT, 'config.json')" in metin or "path.join(ROOT, 'HKM', 'config.json')" in metin, a)
+    test("denetim araclari gercek config.json'a yazmaz (HKM_CONFIG)", t_config_yolu_ortamdan)

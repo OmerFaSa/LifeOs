@@ -110,12 +110,10 @@ async function main(){
   }
   const hatalar = [];
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hkm-entegre-'));
-  const cfg = path.join(ROOT, 'HKM', 'config.json');
-  const cfgVardi = fs.existsSync(cfg);
-  const cfgYedek = cfgVardi ? fs.readFileSync(cfg, 'utf8') : null;
-
-  /* HKM'nin kendi config'i varsa DOKUNULMAZ: denetim, kullanicinin
-     jetonunu degistirmez — yedeklenir ve sonunda geri konur. */
+  /* Denetimin ayari kendi gecici klasorunde; daemon'a HKM_CONFIG ile
+     verilir. Kullanicinin HKM/config.json'una hic dokunulmaz (yarida kesilen
+     kosu eskiden onu test ayariyla birakiyordu, 2026-10-26). */
+  const cfg = path.join(tmp, 'config.json');
   fs.writeFileSync(cfg, JSON.stringify({
     host:'127.0.0.1', port:HKM_PORT, local_token:TOKEN,
     db_path:path.join(tmp, 'hkm.db'),
@@ -126,15 +124,13 @@ async function main(){
   }, null, 2));
 
   const daemon = spawn('python3', [path.join(ROOT, 'HKM', 'daemon.py')],
-    { cwd:path.join(ROOT, 'HKM'), stdio:'ignore' });
+    { cwd:path.join(ROOT, 'HKM'), stdio:'ignore', env:Object.assign({}, process.env, { HKM_CONFIG:cfg }) });
   const sunucular = [];
   let browser;
 
   function kapat(){
     try{ daemon.kill(); }catch(e){}
     sunucular.forEach(s => { try{ s.kill(); }catch(e){} });
-    if(cfgVardi) fs.writeFileSync(cfg, cfgYedek);
-    else { try{ fs.unlinkSync(cfg); }catch(e){} }
     try{ fs.rmSync(tmp, { recursive:true, force:true }); }catch(e){}
   }
 

@@ -126,7 +126,9 @@ from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cro
                   urunler, weekly, web, yedek, yoklama)
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-CONFIG_PATH = os.path.join(ROOT, "config.json")
+# HKM_CONFIG: denetim araclari (tools/entegre.js, tools/yuz.js) kendi ayarini
+# kendi klasorunde tutar; kullanicinin config.json'una hic dokunmaz.
+CONFIG_PATH = os.environ.get("HKM_CONFIG") or os.path.join(ROOT, "config.json")
 
 # Esleme penceresi: jetonu elle yapistirmayi bitirir ama kapiyi acik
 # birakmaz. Kisa, KOKEN BASINA TEK KULLANIMLIK ve yalniz YEREL kokene.
