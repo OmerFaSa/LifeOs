@@ -320,6 +320,32 @@
       expect(!!hata).toBe(true);
       expect(hata.code).toBe('local-write');
     });
+
+    /* Kota dolu: gün yazılamadıysa «Kaydedildi» denmez — saveDay hata verir
+       (giriş/Günü kapat geri alır, «Kaydedilemedi» der), kayıt olayı çıkmaz. */
+    it('yerel yazma başarısızsa saveDay hata verir ve kayıt olayı çıkmaz', async () => {
+      const ISO = '1999-01-01', olay = [], dinle = e => olay.push(e.detail.yollar[0]);
+      const eskiDepo = R.Store, eski = Object.getOwnPropertyDescriptor(window, 'localStorage');
+      R.Store = S(); R.S.days[ISO] = { date:ISO, blocks:[], sleepHours:7 };
+      window.addEventListener('lifeos:kayit', dinle);
+      let hata = null;
+      try{
+        Object.defineProperty(window, 'localStorage', { configurable:true, value:{
+          getItem:() => null, removeItem:() => {},
+          setItem:() => { const e = new Error('kota'); e.name = 'QuotaExceededError'; throw e; } } });
+        try{ await R.Model.saveDay(ISO); }catch(e){ hata = e; }
+        if(eski) Object.defineProperty(window, 'localStorage', eski);
+        expect(!!hata).toBe(true);
+        expect(olay).toEqual([]);
+        await R.Model.saveDay(ISO);
+        expect(olay).toEqual(['days/' + ISO]);
+      }finally{
+        if(eski) Object.defineProperty(window, 'localStorage', eski);
+        window.removeEventListener('lifeos:kayit', dinle);
+        await S().remove('days/' + ISO);
+        R.Store = eskiDepo; delete R.S.days[ISO];
+      }
+    });
   });
 
 })();

@@ -15,7 +15,10 @@ R.Screens.today = (function(){
   const { html, raw, when, map, cls } = R.h;
   const c = R.C;
 
-  function todayDoc(){ return S.days[U.todayISO()]; }
+  /* Ekran hangi gün için çizildiyse dokunuş o güne yazılır: gece yarısını
+     geçip yeniden çizilmeyen ekranda giriş ertesi güne kaymaz, kaybolmaz. */
+  let cizilenGun = null;
+  function todayDoc(){ return S.days[cizilenGun] || S.days[U.todayISO()]; }
   /* Dakikanın kesinliği (AGENTS §1.2): plandan doldurulan dakika
      «tahmin»dir; sayaç ya da elle yazılan «ölçüldü». Tahmine eklenen
      sayaç dakikası toplamı ölçüme çevirmez. Etiketsiz eski kayıt ölçümdür. */
@@ -28,10 +31,17 @@ R.Screens.today = (function(){
   /* ---------- zamanlayici ---------- */
   let tickHandle = null;
 
-  function runningBlock(){
-    const day = todayDoc();
-    return day ? (day.blocks.find(b => b.startedAt) || null) : null;
+  /* Çalışan sayaç çizilen günde, yoksa bir önceki günde aranır: 23:30'da
+     başlayıp 00:20'de duran sayacın dakikası başladığı güne yazılır. */
+  function calisan(id){
+    const g = cizilenGun || U.todayISO();
+    for(const iso of [g, U.iso(U.addDays(U.parse(g), -1))]){
+      const day = S.days[iso], b = day && day.blocks.find(x => x.startedAt && (!id || x.id === id));
+      if(b) return { day, b };
+    }
+    return null;
   }
+  function runningBlock(){ const r = calisan(); return r ? r.b : null; }
   function elapsedSeconds(block){
     if(!block || !block.startedAt) return 0;
     return Math.max(0, Math.floor((Date.now() - new Date(block.startedAt).getTime())/1000));
@@ -1444,7 +1454,7 @@ R.Screens.today = (function(){
   }
 
   async function render(){
-    const dateISO = U.todayISO();
+    const dateISO = cizilenGun = U.todayISO();
     const n = M.currentWeek();
     await M.ensureWeek(n);
     const day = await M.ensureDay(U.today());
@@ -1478,7 +1488,7 @@ R.Screens.today = (function(){
      ritüel, seri, telafi… Hiçbiri kalkmadı; yalnız yeri değişti (envanter
      tabanı bunu denetler). Bugün'de duran şey burada tekrar çizilmez. */
   async function renderAyrinti(){
-    const dateISO = U.todayISO();
+    const dateISO = cizilenGun = U.todayISO();
     const n = M.currentWeek();
     await M.ensureWeek(n);
     const day = await M.ensureDay(U.today());
@@ -2127,8 +2137,9 @@ R.Screens.today = (function(){
       R.App.render();
     },
     async 'timer-stop'(el){
-      const day = todayDoc();
-      const b = day.blocks.find(x => x.id === el.dataset.block);
+      const r = calisan(el.dataset.block);
+      if(!r){ R.App.render(); return; }   /* çalışan sayaç yok: 0 dk «yarım» yazılmaz */
+      const { day, b } = r;
       const mins = Math.round(elapsedSeconds(b)/60);
       oturumYaz(b, mins);
       sayacDakikasi(b, mins);

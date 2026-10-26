@@ -23,13 +23,14 @@ def _guvenli_medya_adi(ad, izinli=None):
     Yuzde kodlamasi ONCE cozulur. Cozmeden birakmak iki sey yapardi:
     `kademe%201.png` gibi bosluklu bir ad hic bulunamaz (sessiz 404) ve
     muhafiz, cozulmus hali hic gormedigi icin yanlis yerde guven
-    duyardi. Cozduktan sonra alt klasor, ".." ve gizli dosya reddedilir.
+    duyardi. Cozduktan sonra alt klasor, ".." ve gizli dosya reddedilir;
+    ":" da: Windows'ta `D:foto.png` os.path.join'i D: surucusune atlatir.
     """
     try:
         ad = _unquote(ad or "")
     except Exception:
         return None
-    if not ad or "/" in ad or "\\" in ad or ad.startswith("."):
+    if not ad or "/" in ad or "\\" in ad or ":" in ad or ad.startswith("."):
         return None
     uzanti = os.path.splitext(ad)[1].lower()
     if uzanti not in (izinli if izinli is not None else MEDYA_TURLERI):
@@ -82,4 +83,18 @@ def _ortak_seviye_yolu(clean, kok):
     if not ad:
         return None
     return os.path.join(kok, "brand", "seviye", "medya", ad)
+
+
+def _ortak_dist_yolu(clean, kok):
+    """/dist/<yol> -> <kok>/dist/<yol>, /dist degilse None.
+
+    ".." ust klasore, ":" iceren parca (`E:`, `C:x`) Windows'ta baska bir
+    surucuye cikar: `/dist/E:/` telefon portundan depo disini listeliyordu
+    (2026-10-26). Ikisinden biri varsa dist kokune duser."""
+    if clean != "/dist" and not clean.startswith("/dist/"):
+        return None
+    parca = [p for p in clean[len("/dist/"):].replace("\\", "/").split("/") if p not in ("", ".")]
+    if any(p == ".." or ":" in p for p in parca):
+        return os.path.join(kok, "dist")
+    return os.path.join(kok, "dist", *parca)
 # ===== URETILMIS BLOK SONU =====

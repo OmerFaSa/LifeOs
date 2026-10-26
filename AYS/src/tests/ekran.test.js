@@ -204,4 +204,64 @@
       expect(out.indexOf('Yıllık tatil sınırı') >= 0).toBe(true);
     });
   });
+
+  /* Gece yarısı: ekran D günü için çizildi, saat 00:00'ı geçti, yeniden
+     çizilmedi. Girilen her şey çizilen güne, sayaç başladığı güne yazılır. */
+  describe('Bugün — gece yarısı', () => {
+    const D = '2026-10-12', ERTESI = '2026-10-13';
+    const blok = id => ({ id, slot:'Ana ders', subject:'Matematik', topic:'Türev', targetMin:60, targetQ:20,
+      status:'pending', actualMin:null, actualQ:null, correctQ:null, skipReason:null, startedAt:null });
+    async function cizimsiz(fn){
+      const eski = R.App.render; R.App.render = () => {};
+      try{ return await fn(); }finally{ R.App.render = eski; }
+    }
+    async function kur(){
+      resetState();
+      await R.Model.ensurePlan(true);
+      await R.Model.ensureWeek(R.Model.currentWeek());
+      const gun = await R.Model.ensureDay(R.U.today());
+      gun.blocks = [blok('b0'), blok('b1')];
+      await R.Screens.today.render();
+      return gun;
+    }
+    const h = () => R.Screens.today.handle;
+
+    it('23:30 başlayan sayaç 00:20 durunca (çizim yok) dakika başladığı güne yazılır', async () => {
+      await withTodayAsync(D, async () => {
+        const gun = await kur(), b = gun.blocks[0];
+        await cizimsiz(() => h()['timer-start']({ dataset:{ block:'b0' } }));
+        b.startedAt = new Date(Date.now() - 50*60000).toISOString();
+        await withTodayAsync(ERTESI, () => cizimsiz(() => h()['timer-stop']({ dataset:{ block:'b0' } })));
+        expect([b.startedAt, b.actualMin, b.status]).toEqual([null, 50, 'done']);
+      });
+    });
+
+    it('gece yarısından sonra yeniden çizildiyse sayaç yine dünkü bloğa; yeni günde 0 dk «yarım» yok', async () => {
+      await withTodayAsync(D, async () => {
+        const gun = await kur(), b = gun.blocks[0];
+        await cizimsiz(() => h()['timer-start']({ dataset:{ block:'b0' } }));
+        b.startedAt = new Date(Date.now() - 50*60000).toISOString();
+        await withTodayAsync(ERTESI, async () => {
+          const yeni = await R.Model.ensureDay(R.U.today());
+          yeni.blocks = [blok('b0'), blok('b1')];
+          await R.Screens.today.render();
+          await cizimsiz(() => h()['timer-stop']({ dataset:{ block:'b0' } }));
+          expect([yeni.blocks[0].status, yeni.blocks[0].actualMin]).toEqual(['pending', null]);
+        });
+        expect([b.startedAt, b.actualMin]).toEqual([null, 50]);
+      });
+    });
+
+    it('yeniden çizilmeden girilen uyku ve not çizilen güne yazılır', async () => {
+      await withTodayAsync(D, async () => {
+        const gun = await kur();
+        await withTodayAsync(ERTESI, async () => {
+          await cizimsiz(() => R.Screens.today.change.sleep({ value:'7' }));
+          await cizimsiz(() => R.Screens.today.change['day-note']({ value:'geç yattım' }));
+        });
+        expect([gun.sleepHours, gun.note]).toEqual([7, 'geç yattım']);
+        expect(R.S.days[ERTESI]).toBe(undefined);
+      });
+    });
+  });
 })();

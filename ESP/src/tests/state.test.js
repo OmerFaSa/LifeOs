@@ -7,6 +7,28 @@
   const { describe, it, expect, resetState, withToday, pushSession, withTodayAsync, pushCard } = ESP.Test;
   const M = ESP.Model, S = ESP.S, U = ESP.U;
 
+  describe('depo — basarisiz yazma «kaydedildi» olayi uretmez', () => {
+    it('yerel yazma dusunce set false doner ve lifeos:kayit cikmaz; normal yazma cikarir', async () => {
+      const St = ESP.Test.realStore, gercek = Storage.prototype.setItem;
+      let olay = 0;
+      const say = () => { olay++; };
+      window.addEventListener('lifeos:kayit', say);
+      try{
+        Storage.prototype.setItem = function(){ const e = new Error('doldu'); e.name = 'QuotaExceededError'; throw e; };
+        let ok;
+        try{ ok = await St.set('test/kayit-yok', { v:1 }); }
+        finally{ Storage.prototype.setItem = gercek; }
+        expect(ok).toBe(false);
+        expect(olay).toBe(0);
+        expect(await St.set('test/kayit-yok', { v:2 })).toBe(true);
+        expect(olay).toBe(1);
+      }finally{
+        window.removeEventListener('lifeos:kayit', say);
+        await St.remove('test/kayit-yok');
+      }
+    });
+  });
+
   describe('kesinlik — girilmemis alan sifir degildir', () => {
 
     it('bos alan null doner ve etiketi «veri yok» olur', () => {

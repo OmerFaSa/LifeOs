@@ -481,7 +481,7 @@ SP.Model = (function(){
     const i = SP.S.labs.findIndex(l => l.id === rec.id);
     if(i >= 0) SP.S.labs[i] = rec; else SP.S.labs.push(rec);
     SP.S.labs.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
-    await SP.Store.set('labs/' + rec.id, rec);
+    await yaz('labs/' + rec.id, rec);
     await refreshFlags();
     return rec;
   }
@@ -623,13 +623,19 @@ SP.Model = (function(){
     return SP.S.vitals[dateISO];
   }
 
+  /* Ölçüm yazılamadıysa (kota) «Kaydedildi» denmez: çağıran yakalar, geri
+     alır ve «Kaydedilemedi» der. Bellekteki durum yerinde kalır. */
+  async function yaz(path, doc){
+    if(await SP.Store.set(path, doc) === false) throw new Error('tarayıcı depolama alanı dolu');
+  }
+
   async function saveVitals(dateISO, patch){
     /* Su kaynağı (waterSrc:'beyan', Günü kapat) yalnız onu yazan yolda
        durur: su başka yoldan yazılınca ölçüm sayılır. */
     if(patch && patch.water !== undefined && !('waterSrc' in patch)) patch = Object.assign({ waterSrc:null }, patch);
     const rec = Object.assign(ensureVitals(dateISO), patch || {});
     SP.S.vitals[dateISO] = rec;
-    await SP.Store.set('vitals/' + dateISO, rec);
+    await yaz('vitals/' + dateISO, rec);
     await refreshFlags();
     return rec;
   }
@@ -647,7 +653,7 @@ SP.Model = (function(){
 
   async function saveMeals(dateISO, rows){
     SP.S.meals[dateISO] = normDayMeals(rows);
-    await SP.Store.set('meals/' + dateISO, { date:dateISO, rows:SP.S.meals[dateISO] });
+    await yaz('meals/' + dateISO, { date:dateISO, rows:SP.S.meals[dateISO] });
     return SP.S.meals[dateISO];
   }
 
@@ -683,7 +689,7 @@ SP.Model = (function(){
     const i = SP.S.workouts.findIndex(w => w.id === rec.id);
     if(i >= 0) SP.S.workouts[i] = rec; else SP.S.workouts.push(rec);
     SP.S.workouts.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
-    await SP.Store.set('workouts/' + rec.id, rec);
+    await yaz('workouts/' + rec.id, rec);
     return rec;
   }
 

@@ -796,7 +796,13 @@ SP.Proposals = (function(){
       otomatik:false,
     });
     liste().unshift(kayit);
-    if(liste().length > MAX) liste().length = MAX;
+    /* Kırpma yalnız sonuçlananı düşürür: bekleyen (ör. Kısayollar'dan
+       gelen) öneri onaysız kaybolmaz. Bekleyen hep kalır, kalan yer en
+       yeni sonuçlananlara. */
+    if(liste().length > MAX){
+      let yer = MAX - pending().length;
+      SP.S.proposals = liste().filter(x => x.status === 'pending' || yer-- > 0);
+    }
     if(anahtar){
       anahtarlar().push(anahtar);
       if(anahtarlar().length > MAX_ANAHTAR) SP.S.proposalKeys = anahtarlar().slice(-MAX_ANAHTAR);

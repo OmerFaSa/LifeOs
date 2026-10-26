@@ -235,7 +235,7 @@ R.Store = (function(){
 
   async function set(path, data){
     const localOk = lSet(path, data);
-    degisti([path]);
+    if(localOk) degisti([path]);   // yazılmayan kayda «kaydedildi» denmez
     if(db){
       health.pendingCloudWrites++;
       try{

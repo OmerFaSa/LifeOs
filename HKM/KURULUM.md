@@ -153,6 +153,10 @@ Bearer'sız POST yolu **üçtür**; her birinin kendi kapısı vardır:
 - `POST /api/pair` — cihaz eşleme. İsteyen taraf jetonu zaten bilmez;
   kapısı HKM yüzünde «Cihazları bağla» ile açılan **köken başına tek
   kullanımlık, süreli pencere**, yalnız yerel köken ve deneme sınırıdır.
+  `Origin` uydurulabildiği için kapı ayrıca `Host` yerel değilse
+  (`127.0.0.1`, `localhost`, `::1`) ya da istekte vekil başlığı varsa
+  (`X-Forwarded-For`, `Forwarded`, `Cf-Connecting-Ip`…) jeton vermez: tünel
+  ve DNS rebinding üzerinden eşleme yapılamaz.
 
 ## 4. Telegram — iki yol, biri hiçbir kapı açmaz
 

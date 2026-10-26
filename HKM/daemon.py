@@ -111,7 +111,7 @@ import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import parse_qs, quote, unquote, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -171,6 +171,9 @@ sayfasinin yerel HKM'ye istek atabilmesi demektir. Jeton yine sarttir;
 CORS bir kimlik dogrulama degil, bir tarayici sinirdir."""
 LOCAL_ORIGIN = re.compile(
     r"^https?://(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$", re.I)
+# Bunlardan biri varsa istek bir vekilden/tunelden gecmistir: yerel degildir.
+VEKIL_BASLIKLARI = ("X-Forwarded-For", "X-Forwarded-Host", "Forwarded",
+                    "Cf-Connecting-Ip", "X-Real-Ip")
 
 
 def _koken_portu(koken):
@@ -238,13 +241,14 @@ def _guvenli_medya_adi(ad, izinli=None):
     Yuzde kodlamasi ONCE cozulur. Cozmeden birakmak iki sey yapardi:
     `kademe%201.png` gibi bosluklu bir ad hic bulunamaz (sessiz 404) ve
     muhafiz, cozulmus hali hic gormedigi icin yanlis yerde guven
-    duyardi. Cozduktan sonra alt klasor, ".." ve gizli dosya reddedilir.
+    duyardi. Cozduktan sonra alt klasor, ".." ve gizli dosya reddedilir;
+    ":" da: Windows'ta `D:foto.png` os.path.join'i D: surucusune atlatir.
     """
     try:
         ad = _unquote(ad or "")
     except Exception:
         return None
-    if not ad or "/" in ad or "\\" in ad or ad.startswith("."):
+    if not ad or "/" in ad or "\\" in ad or ":" in ad or ad.startswith("."):
         return None
     uzanti = os.path.splitext(ad)[1].lower()
     if uzanti not in (izinli if izinli is not None else MEDYA_TURLERI):
@@ -297,6 +301,20 @@ def _ortak_seviye_yolu(clean, kok):
     if not ad:
         return None
     return os.path.join(kok, "brand", "seviye", "medya", ad)
+
+
+def _ortak_dist_yolu(clean, kok):
+    """/dist/<yol> -> <kok>/dist/<yol>, /dist degilse None.
+
+    ".." ust klasore, ":" iceren parca (`E:`, `C:x`) Windows'ta baska bir
+    surucuye cikar: `/dist/E:/` telefon portundan depo disini listeliyordu
+    (2026-10-26). Ikisinden biri varsa dist kokune duser."""
+    if clean != "/dist" and not clean.startswith("/dist/"):
+        return None
+    parca = [p for p in clean[len("/dist/"):].replace("\\", "/").split("/") if p not in ("", ".")]
+    if any(p == ".." or ":" in p for p in parca):
+        return os.path.join(kok, "dist")
+    return os.path.join(kok, "dist", *parca)
 # ===== URETILMIS BLOK SONU =====
 # SEVIYE:yol-bit
 
@@ -742,7 +760,15 @@ class Handler(BaseHTTPRequestHandler):
 
     def _pair_take(self):
         """Jetonu yerel cihaza verir. Bearer ISTEMEZ — isteyen taraf zaten
-        jetonu bilmiyor; kapi pencerenin kendisidir."""
+        jetonu bilmiyor; kapi pencerenin kendisidir.
+
+        Origin'i tarayici disi istemci uydurur: kapi yalniz Host'u yerel
+        olan ve vekil basligi tasimayan istege acilir. Tunel (cloudflared,
+        ngrok) ve DNS rebinding boyle disarida kalir (2026-10-26)."""
+        host = re.sub(r":\d+$", "", self.headers.get("Host", "").strip().lower())
+        if host not in ("127.0.0.1", "localhost", "[::1]", "::1") or any(
+                self.headers.get(b) for b in VEKIL_BASLIKLARI):
+            return self._send(403, {"error": "yalniz yerel istek"})
         origin = self.headers.get("Origin", "")
         if origin and not LOCAL_ORIGIN.match(origin):
             return self._send(403, {"error": "yalniz yerel koken"})
@@ -818,19 +844,15 @@ class Handler(BaseHTTPRequestHandler):
         duz dosya adi kabul edilir ve yalniz gorsel uzantilari; bir
         gorsel kapisinin dosya sistemine acilan bir pencereye donusmesi
         bu depoda kabul edilebilir bir bedel degil."""
-        # Yuzde kodlamasi ONCE cozulur: cozmeden birakmak bosluklu bir
-        # dosya adini (kademe%201.png) sessizce bulunamaz yapardi ve
-        # muhafiz, cozulmus hali hic gormedigi icin yanlis yerde guven
-        # duyardi. (Ayni gerekce: brand/seviye/ortak_yol.py)
-        ad = unquote(ad or "")
-        if not ad or "/" in ad or "\\" in ad or ad.startswith("."):
-            return self._send(404, {"error": "yok"})
-        uzanti = os.path.splitext(ad)[1].lower()
+        # Muhafiz tek kaynaktan (`_guvenli_medya_adi`, brand/seviye/ortak_yol.py):
+        # kendi kopyasi `D:logo.png`u geciriyordu (Windows'ta baska surucu).
         turler = {".png": "image/png", ".jpg": "image/jpeg",
                   ".jpeg": "image/jpeg", ".webp": "image/webp",
                   ".svg": "image/svg+xml", ".mp4": "video/mp4"}
-        if uzanti not in turler:
+        ad = _guvenli_medya_adi(ad, turler)
+        if not ad:
             return self._send(404, {"error": "yok"})
+        uzanti = os.path.splitext(ad)[1].lower()
         yol = os.path.join(ROOT, "brand", ad)
         if not os.path.exists(yol):
             return self._send(404, {"error": "yok"})

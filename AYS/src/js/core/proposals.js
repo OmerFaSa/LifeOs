@@ -868,7 +868,11 @@ R.Proposals = (function(){
   }
 
   async function save(){
-    S.officeProposals = (S.officeProposals || []).slice(-MAX);
+    /* Bekleyen asla atılmaz (onaysız kaybolurdu, anahtarı da yeniden önerilmesini
+       engellerdi); sınıra kadar kalan yer en yeni sonuçlananlarındır. */
+    const l = S.officeProposals || [];
+    let yer = MAX - l.filter(p => p.status === 'pending').length;
+    S.officeProposals = l.slice().reverse().filter(p => p.status === 'pending' || yer-- > 0).reverse();
     S.officeProposalKeys = (S.officeProposalKeys || []).slice(-MAX_ANAHTAR);
     await R.Store.set(STORE, { items:S.officeProposals, anahtarlar:S.officeProposalKeys });
     return S.officeProposals;

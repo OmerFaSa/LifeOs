@@ -1012,7 +1012,9 @@ BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
                  "inbox_seen", "bam_isler", "bam_kayitlar", "bam_iz",
                  "is_emirleri", "bildirimler", "hedef_ozet", "zaman_butcesi", "para",
                  "meydan_deste", "meydan_isaret", "meydan_not", "meydan_yanit",
-                 "king_isler", "king_gorevler", "king_beceriler", "king_sozler", "king_bekleyen")
+                 "king_isler", "king_gorevler", "king_beceriler", "king_sozler", "king_bekleyen",
+                 # Kullanicinin kendi yazisi; 2026-10-26'ya dek yedekte yoktu.
+                 "motto_nodes", "motto_versions", "motto_links", "motto_tags", "susturmalar")
 BACKUP_SCHEMA = 4
 
 
@@ -1359,8 +1361,11 @@ def import_all(con, veri, replace=False):
         # degildir, ACIKCA istenir.
         con.execute("BEGIN IMMEDIATE")
         if replace:
+            # Yalniz yedekte OLAN tablo bosaltilir: o tabloyu tanimayan eski
+            # bir yedek, sonradan eklenen tabloyu (motto) silmemeli.
             for t in tablolar:
-                con.execute("DELETE FROM %s" % t)
+                if t in veri:
+                    con.execute("DELETE FROM %s" % t)
         for t in tablolar:
             satirlar = veri.get(t) or []
             if not satirlar:

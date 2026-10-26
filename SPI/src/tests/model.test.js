@@ -50,6 +50,31 @@
       expect(SP.Model.vitalsOf('2026-03-01').waterSrc == null).toBe(true);
     });
 
+    it('depo dolunca ölçüm kaydı hata verir ve «kaydedildi» olayı çıkmaz', async () => {
+      resetState();
+      const sahte = SP.Store, gercek = Storage.prototype.setItem;
+      let olay = 0, hata = null;
+      const say = () => { olay++; };
+      window.addEventListener('lifeos:kayit', say);
+      SP.Store = realStore;
+      Storage.prototype.setItem = function(){ const e = new Error('doldu'); e.name = 'QuotaExceededError'; throw e; };
+      try{ await SP.Model.saveVitals('2026-03-02', { sleep:7 }); }
+      catch(e){ hata = e; }
+      finally{ Storage.prototype.setItem = gercek; }
+      try{
+        expect(hata && hata.message).toContain('depolama alanı dolu');
+        expect(olay).toBe(0);
+        /* Kullanıcının yazdığı bellekte durur. */
+        expect(SP.Model.vitalsOf('2026-03-02').sleep).toBe(7);
+        await SP.Model.saveMeals('2026-03-02', []);
+        expect(olay).toBe(1);
+      }finally{
+        window.removeEventListener('lifeos:kayit', say);
+        await realStore.remove('vitals/2026-03-02'); await realStore.remove('meals/2026-03-02');
+        SP.Store = sahte;
+      }
+    });
+
     it('profil kaydı depoya yazılır', async () => {
       resetState();
       await SP.Model.saveProfile({ name:'Deneme' });

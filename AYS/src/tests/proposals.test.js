@@ -884,4 +884,20 @@
       });
     });
   });
+
+  /* Kırpma yalnız sonuçlananları atar: bekleyen (ör. iPhone kısayolundan
+     gelen) öneri 40 yeni kayıttan sonra sessizce kaybolmaz. */
+  describe('Öneri — saklama sınırı', () => {
+    it('1 bekleyen + 60 sonuçlanan: bekleyen kalır, en yeni sonuçlananlar sınıra kadar', async () => {
+      reset();
+      S.officeProposals = [{ id:'bek', status:'pending' }]
+        .concat(Array.from({ length:60 }, (_, i) => ({ id:'r' + i, status:i % 2 ? 'applied' : 'rejected' })));
+      await P.save();
+      const ids = S.officeProposals.map(p => p.id);
+      expect(ids[0]).toBe('bek');
+      expect(ids.length).toBe(P.MAX);
+      expect(ids[ids.length - 1]).toBe('r59');
+      expect(ids.indexOf('r20')).toBe(-1);
+    });
+  });
 })();

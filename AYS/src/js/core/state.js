@@ -427,8 +427,10 @@ R.Model = (function(){
     R.S.days[id] = normDay(doc);
     return R.S.days[id];
   }
+  /* Yazma başarısızsa (kota) hata: giriş / Günü kapat geri alır ve
+     «Kaydedilemedi» der; «Kaydedildi» denmez (ESP state.js write()). */
   async function saveDay(dateISO){
-    await R.Store.set('days/'+dateISO, R.S.days[dateISO]);
+    if(await R.Store.set('days/'+dateISO, R.S.days[dateISO]) === false) throw new Error('tarayıcı depolama alanı dolu');
   }
   function dayOf(dateISO){ return R.S.days[dateISO] || null; }
 

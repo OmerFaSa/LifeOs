@@ -236,7 +236,8 @@ SP.Store = (function(){
 
   async function set(path, data){
     const localOk = lSet(path, data);
-    degisti([path]);
+    /* Yazılamayan kayıt «kaydedildi» olayı üretmez (kota dolu). */
+    if(localOk) degisti([path]);
     if(db){
       health.pendingCloudWrites++;
       try{

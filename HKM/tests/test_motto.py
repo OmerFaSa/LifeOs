@@ -303,3 +303,33 @@ def run():
         no(bam.mottodan_is(con, 999, "arastir")["ok"])
         no(bam.mottodan_is(con, n["id"], "sil")["ok"])
     test("dusunceden BAM'a is verilir, dusunce degismez", t_bam_from_thought)
+
+    def t_yedek_tasir():
+        """Yedek kullanicinin KENDI yazisini tasir: motto ve susturmalar
+        yedege hic girmiyordu (2026-10-26). Bu tablolari tasimayan ESKI bir
+        yedekle ustune yazmak da var olan mottolari silmez."""
+        from core import bildirim
+        a = db.connect(":memory:")
+        n = motto.ekle(a, "Disiplin", body="Motivasyona bağlı olmayan davranış.",
+                       tags=["irade"])["id"]
+        m = motto.ekle(a, "Özgürlük")["id"]
+        ok(motto.bagla(a, n, m)["ok"])
+        bildirim.sustur(a, "yarin", "Yarın özeti")
+        a.commit()
+        yedek = db.export_all(a)
+        sayi = lambda c, t: c.execute("SELECT COUNT(*) FROM %s" % t).fetchone()[0]
+        b = db.connect(":memory:")
+        r = db.import_all(b, yedek)
+        ok(r["ok"], str(r.get("error")))
+        for t in ("motto_nodes", "motto_versions", "motto_links", "motto_tags", "susturmalar"):
+            eq(sayi(b, t), sayi(a, t), t)
+            ok(sayi(b, t) >= 1, t)
+        eq(motto.dugum(b, n)["title"], "Disiplin")
+        eski = {k: v for k, v in yedek.items() if not k.startswith("motto_") and k != "susturmalar"}
+        eski["__meta"] = dict(yedek["__meta"], tables={k: v for k, v in yedek["__meta"]["tables"].items()
+                                                       if k in eski})
+        r = db.import_all(b, eski, replace=True)
+        ok(r["ok"], str(r.get("error")))
+        eq(sayi(b, "motto_nodes"), 2)
+        eq(sayi(b, "susturmalar"), 1)
+    test("yedek mottoyu ve susturmalari tasir; eski yedek mottoyu silmez", t_yedek_tasir)

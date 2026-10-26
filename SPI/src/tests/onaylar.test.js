@@ -188,6 +188,22 @@
     });
   });
 
+  describe('Onaylar — kırpma bekleyeni silmez', () => {
+    it('liste MAX’ı aşınca en eski bekleyen kalır, eski sonuçlananlar düşer', async () => {
+      resetState();
+      const MAX = SP.Proposals.MAX;
+      for(let i = 0; i < MAX; i++) SP.S.proposals.push({ id:'r' + i, status:'applied', action:'vital-yaz' });
+      SP.S.proposals.push({ id:'eski', status:'pending', action:'vital-yaz', anahtar:'gelen:1:0' });
+      await SP.Proposals.propose({ action:'vital-yaz', source:'istek', params:{} });
+      const l = SP.Proposals.all();
+      expect(l.some(p => p.id === 'eski')).toBe(true);
+      expect(SP.Proposals.pending()).toHaveLength(2);
+      expect(l).toHaveLength(MAX);
+      expect(l.some(p => p.id === 'r0')).toBe(true);
+      expect(l.some(p => p.id === 'r' + (MAX - 1))).toBe(false);
+    });
+  });
+
   describe('Sürtünme — bekleyen öneri ipucu', () => {
     it('bekleyen öneriler ipucu Onaylar\'a götürür (Ofis\'e değil)', async () => {
       resetState();

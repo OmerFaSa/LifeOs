@@ -358,6 +358,30 @@ def _run():
             eq(al("https://4200.example.com")[0], 403)
         test("LifeOS kapilari jetonu penceresiz alir", t_pair_lifeos_ports_need_no_window)
 
+        def t_pair_forged_origin_needs_local_host():
+            """Origin'i tarayici disi istemci uydurur. Tunel (cloudflared,
+            ngrok) ya da DNS rebinding ile gelen istek Host'u yerel olmayan
+            ya da vekil basligi tasiyan istektir: jeton verilmez (2026-10-26)."""
+            S.srv.rate = {}
+            S.call("/api/pair/open", body={})
+            koken = {"Content-Type": "application/json", "Origin": "http://127.0.0.1:4173"}
+            for ek in ({"Host": "abc.trycloudflare.com"}, {"Host": "kotu.example:%d" % S.port},
+                       {"X-Forwarded-For": "1.2.3.4"}, {"Forwarded": "for=1.2.3.4"},
+                       {"Cf-Connecting-Ip": "1.2.3.4"}, {"X-Real-Ip": "1.2.3.4"},
+                       {"X-Forwarded-Host": "abc.ngrok.app"}):
+                kod, r = S.ham("/api/pair", b"{}", dict(koken, **ek))
+                eq(kod, 403, ek)
+                no(TOKEN in r, ek)
+            # Pencerenin kendi yolu da (Origin'siz) ayni kapidan gecer.
+            kod, r = S.ham("/api/pair", b"{}", {"Host": "abc.trycloudflare.com"})
+            eq(kod, 403)
+            for host in ("127.0.0.1:%d" % S.port, "localhost:%d" % S.port, "[::1]:%d" % S.port):
+                kod, r = S.ham("/api/pair", b"{}", dict(koken, Host=host))
+                eq(kod, 200, host)
+                eq(json.loads(r)["token"], TOKEN)
+        test("esleme yalniz yerel Host'a ve vekilsiz istege jeton verir",
+             t_pair_forged_origin_needs_local_host)
+
         def t_pair_window_has_origin_cap():
             """Koken basina tek kullanim SINIRSIZ degildir: bir pencere en
             fazla PAIR_MAX_ORIGINS kokene jeton verir (yuz + uc modul)."""

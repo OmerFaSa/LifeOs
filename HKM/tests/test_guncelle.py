@@ -311,6 +311,40 @@ def run():
             sunucu.guncelle.uygula = eski
     test("giris sayfasi: izinsiz POST 403, izinli POST guncellemeyi cagirir", t_http)
 
+    # 2026-10-26 denetim: Windows'ta «E:» parcasi os.path.join'i baska
+    # surucuye atlatir; /dist/E:/LifeOS-yedek/ telefon portundan depo
+    # disini (hesap yedegi dahil) listeliyordu. Dort sunucu ve HKM sinanir.
+    def t_surucu_harfi():
+        import importlib.util
+        from unittest import mock
+        import daemon
+        icinde = lambda p, k: (os.path.abspath(p) + os.sep).startswith(os.path.join(k, ""))
+        isleyici = [(sunucu.Sunucu, sunucu.KOK)]
+        argv, sys.argv = sys.argv, sys.argv[:1]         # devserver portu argv'den okur
+        try:
+            for s in ("AYS", "SPI", "ESP"):
+                spec = importlib.util.spec_from_file_location("devserver_" + s, os.path.join(KOK, s, "devserver.py"))
+                m = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(m)
+                isleyici.append((m.NoCacheHandler, m.REPO))
+        finally:
+            sys.argv = argv
+        for sinif, repo in isleyici:
+            h = sinif.__new__(sinif)
+            h.directory = os.path.join(repo, "src")
+            for yol in ("/dist/E:/LifeOS-yedek/", "/dist/Z:x", "/dist/C:x", "/dist/a/E:/x", "/dist/../x"):
+                ok(icinde(h.translate_path(yol), os.path.join(repo, "dist")), (sinif.__module__, yol))
+            ok(icinde(h.translate_path("/img/seviye/D:foto.png"), KOK), sinif.__module__)
+            eq(h.translate_path("/dist/rota.html"), os.path.join(repo, "dist", "rota.html"))
+        eq(daemon._ortak_seviye_yolu("/img/seviye/D:foto.png", KOK), None)
+        h = daemon.Handler.__new__(daemon.Handler)
+        h._send = lambda kod, veri: kod
+        gorulen = []
+        with mock.patch.object(daemon.os.path, "exists", side_effect=lambda p: gorulen.append(p) or False):
+            eq(h._send_brand("D:logo.png"), 404)
+        ok(all(icinde(p, os.path.join(daemon.ROOT, "brand")) for p in gorulen), gorulen)
+    test("yol muhafizi surucu harfiyle depo disina cikmaz (dist, img, HKM brand)", t_surucu_harfi)
+
     def t_sayfa():
         """Giris sayfasi: dort sistemin KENDI logosu, surum, guncelleme kutusu."""
         h = sunucu.giris_html()
