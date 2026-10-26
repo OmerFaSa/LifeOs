@@ -6993,7 +6993,10 @@ body.is-dragging .drop.is-over{
 
 /* 045 çevrilen kart: yükseklik metinden gelir, yüzler üst üste. */
 .vk .x24{ height:auto; }
-.vk .x24 .kk{ display:grid; transition:transform var(--dur-lg) var(--ease); }
+/* Çevrilen kart içeriği kadardır; vitrin'in `.kk{height:100%}`'ü de kalkar.
+   Doctype'sız dist (iOS paketi) tuhaf kipte açılır: %100 ızgara satırına
+   çözülür, kart satır kadar uzar, alttakiler biner (2026-10-26, AYS Tekrar). */
+.vk .x24 .kk{ display:grid; height:auto; transition:transform var(--dur-lg) var(--ease); }
 .vk .x24 .yz{ position:relative; inset:auto; grid-area:1 / 1; min-height:124px; gap:8px; }
 .vk .x24 .kk.is-cevrik{ transform:rotateY(180deg); }
 
@@ -17808,7 +17811,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'ad64ed65', at:'2026-10-25 19:05', dirty:false };
+SP.BUILD = { id:'d9ba6ac8', at:'2026-10-26 14:35', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -46596,18 +46599,8 @@ SP.Hedefler = (function(){
   /* ---------------------------------------------------- durum profili */
 
   function sonKilo(){
-    const gunler = Object.keys(SP.S.vitals || {}).sort().reverse();
-    for(const d of gunler){
-      const v = SP.S.vitals[d];
-      if(v && v.weight != null && isFinite(Number(v.weight))){
-        return { deger:Number(v.weight), birim:'kg', etiket:'olculdu', tarih:d };
-      }
-    }
-    const p = SP.S.profile || {};
-    if(p.weightKg != null && isFinite(Number(p.weightKg))){
-      return { deger:Number(p.weightKg), birim:'kg', etiket:'tahmin', tarih:null };
-    }
-    return null;
+    const k = SP.Model.kiloOf();
+    return k ? { deger:k.kg, birim:'kg', etiket:k.date ? 'olculdu' : 'tahmin', tarih:k.date } : null;
   }
 
   function boyCm(h){
@@ -61207,7 +61200,9 @@ SP.Model = (function(){
       name:'',
       role:'self',            // self | family
       birthYear:null,
-      sex:'male',             // male | female
+      /* null = seçilmedi (§1.7: varsayılmaz). Eski profillerde kalmış
+         'male' varsayılanı bilinçli seçimden ayırt edilemez; dokunulmaz. */
+      sex:null,               // male | female | null
       heightCm:null,
       weightKg:null,
       activity:'moderate',
@@ -61293,7 +61288,7 @@ SP.Model = (function(){
     const id = U.slug(name) || U.uid('p');
     const list = householdList();
     if(list.some(x => x.id === id)) return { ok:false, error:'Bu adla bir profil zaten var.' };
-    list.push({ id, name, role:o.role || 'family', sex:o.sex || 'female',
+    list.push({ id, name, role:o.role || 'family', sex:o.sex || null,
       birthYear:o.birthYear || null, seenAt:null });
     writeHousehold(list);
     SP.S.profiles = list;
@@ -61479,7 +61474,7 @@ SP.Model = (function(){
           en temel kuralinin ihlalidir. */
   function applyDerived(rec){
     const prof = SP.S.profile || {};
-    const ctx = { age:ageOf(prof), sex:prof.sex || 'male' };
+    const ctx = { age:ageOf(prof), sex:prof.sex || null };
 
     Object.keys(SP.DERIVED).forEach(id => {
       const def = SP.DERIVED[id];
@@ -61604,6 +61599,17 @@ SP.Model = (function(){
     return null;
   }
 
+  /* Güncel kilo: etkin profilin son ÖLÇÜLEN kilosu (tarihiyle); ölçüm yoksa
+     profildeki değer (date:null). Kilo isteyen her hesap buradan okur —
+     ölçümler profile hiç dönmüyordu. Başka profilin ölçümü yoktur. */
+  function kiloOf(p){
+    const prof = p || SP.S.profile;
+    if(!prof) return null;
+    const son = !p || (SP.S.profile && prof.id === SP.S.profile.id) ? latestOf('weight') : null;
+    if(son && son.v > 0) return { kg:son.v, date:son.date };
+    return Number(prof.weightKg) > 0 ? { kg:Number(prof.weightKg), date:null } : null;
+  }
+
   /* Butun belirteclerin son degeri — kirmizi bayrak ve ofis brifingi icin. */
   function latestAll(){
     const out = {};
@@ -61647,6 +61653,9 @@ SP.Model = (function(){
   }
 
   async function saveVitals(dateISO, patch){
+    /* Su kaynağı (waterSrc:'beyan', Günü kapat) yalnız onu yazan yolda
+       durur: su başka yoldan yazılınca ölçüm sayılır. */
+    if(patch && patch.water !== undefined && !('waterSrc' in patch)) patch = Object.assign({ waterSrc:null }, patch);
     const rec = Object.assign(ensureVitals(dateISO), patch || {});
     SP.S.vitals[dateISO] = rec;
     await SP.Store.set('vitals/' + dateISO, rec);
@@ -62059,7 +62068,7 @@ SP.Model = (function(){
     defaultProfile, saveProfile, ageOf, defaultPrefs, savePrefs,
     householdList, addHouseholdMember, removeHouseholdMember, switchProfile, activeProfileId,
     /* tahlil */
-    newLab, saveLab, deleteLab, applyDerived, seriesOf, latestOf, latestAll,
+    newLab, saveLab, deleteLab, applyDerived, seriesOf, latestOf, latestAll, kiloOf,
     /* gunluk olcum */
     defaultVitals, normVitals, vitalsOf, ensureVitals, saveVitals,
     /* ogun */
@@ -64068,7 +64077,9 @@ SP.Bio = (function(){
     if(field == null) return null;
     if(Array.isArray(field)) return field;
     const p = profile || SP.S.profile || {};
-    const sex = p.sex === 'female' ? 'female' : 'male';
+    const sex = p.sex === 'female' || p.sex === 'male' ? p.sex : null;
+    /* Cinsiyete bağlı alan, cinsiyet seçilmeden çözülmez: erkek varsayılmaz. */
+    if(!sex) return null;
     const age = SP.Model.ageOf(p);
 
     /* Yasa bagli varyantlar once denenir. */
@@ -64083,11 +64094,15 @@ SP.Bio = (function(){
   function refFor(markerId, profile){
     const b = SP.BIO_BY_ID[markerId];
     if(!b) return null;
+    const sex = (profile || SP.S.profile || {}).sex;
+    const ref = pick(b.ref, profile);
     return {
       marker:b,
-      ref:pick(b.ref, profile),
+      ref,
       optimal:pick(b.optimal, profile),
       red:b.red || {},
+      /* Aralık cinsiyete bağlı ve cinsiyet seçilmemiş: «veri yok», Profil'e yönlendir. */
+      cinsiyetGerek:!ref && sex !== 'male' && sex !== 'female' && b.ref != null && !Array.isArray(b.ref),
     };
   }
 
@@ -64113,6 +64128,7 @@ SP.Bio = (function(){
 
     if(r.red.below != null && v < r.red.below) return STATUS.red;
     if(r.red.above != null && v > r.red.above) return STATUS.red;
+    if(r.cinsiyetGerek) return STATUS.unknown;
 
     if(r.ref){
       if(v < r.ref[0]) return STATUS.low;
@@ -64146,6 +64162,7 @@ SP.Bio = (function(){
       case 'ok':
         return r.optimal ? 'Hedef bandın içinde.' : 'Referans aralığının içinde.';
       default:
+        if(r.cinsiyetGerek && value != null) return 'Referans aralığı cinsiyete bağlı: Profil\'de cinsiyet seç.';
         return 'Bu ölçüm hiç girilmemiş. Sıfır sayılmaz.';
     }
   }
@@ -67587,10 +67604,12 @@ SP.Nutri = (function(){
      ayni katsayilari, farkli sabiti kullanir. */
   function bmr(profile){
     const p = profile || SP.S.profile;
-    if(!p || !p.weightKg || !p.heightCm) return null;
+    const kilo = p && SP.Model.kiloOf(p);
+    /* Cinsiyet seçilmemişse sabit bilinmez: erkek varsayılmaz. */
+    if(!kilo || !p.heightCm || (p.sex !== 'male' && p.sex !== 'female')) return null;
     const age = SP.Model.ageOf(p);
     if(age == null) return null;
-    const base = 10 * p.weightKg + 6.25 * p.heightCm - 5 * age;
+    const base = 10 * kilo.kg + 6.25 * p.heightCm - 5 * age;
     return Math.round(p.sex === 'female' ? base - 161 : base + 5);
   }
 
@@ -67618,7 +67637,7 @@ SP.Nutri = (function(){
   function moveEnergy(dateISO, profile){
     const p = profile || SP.S.profile || {};
     const d = dateISO || U.todayISO();
-    const kg = Number(p.weightKg) || null;
+    const kg = (SP.Model.kiloOf(p) || {}).kg || null;
     const list = SP.Model && SP.Model.workoutsOf ? SP.Model.workoutsOf(d) : [];
     const out = { date:d, seanslar:[], kcal:0, dakika:0, eksik:[], kayitVar:list.length > 0 };
     if(!kg){ out.kcal = null; out.neden = 'Profilde kilo yok'; return out; }
@@ -67774,9 +67793,11 @@ SP.Nutri = (function(){
     const n = SP.NUTRI_BY_ID[nutrientId];
     if(!n || !n.rda) return null;
     const p = profile || SP.S.profile || {};
-    const sex = p.sex === 'female' ? 'female' : 'male';
+    const sex = p.sex === 'female' || p.sex === 'male' ? p.sex : null;
     const age = SP.Model.ageOf(p);
     const r = n.rda;
+    /* Cinsiyet seçilmemiş: yalnız iki cinsiyette aynı olan değer verilir. */
+    if(!sex) return r.male != null && r.male === r.female ? r.male : null;
     if(age != null && age >= 51 && sex === 'female' && (r.female51 != null || r.female50 != null)){
       return r.female51 != null ? r.female51 : r.female50;
     }
@@ -67805,9 +67826,11 @@ SP.Nutri = (function(){
       bmr:bmr(p), tdee:energy, need, adjustments:adj,
       missing:[],
     };
-    if(!p || !p.weightKg) out.missing.push('kilo');
+    const kg = p ? (SP.Model.kiloOf(p) || {}).kg : null;
+    if(!kg) out.missing.push('kilo');
     if(!p || !p.heightCm) out.missing.push('boy');
     if(!p || !p.birthYear) out.missing.push('doğum yılı');
+    if(!p || (p.sex !== 'male' && p.sex !== 'female')) out.missing.push('cinsiyet');
     if(!out.ok) return out;
 
     const goal = SP.GOALS.find(g => g.id === (p.goal || 'health')) || SP.GOALS[0];
@@ -67832,11 +67855,11 @@ SP.Nutri = (function(){
     /* protein: g/kg araligi, hedefe gore */
     const pr = SP.MACRO_RULES.protein.byGoal[goal.id] || SP.MACRO_RULES.protein.byGoal.health;
     const pMult = (adj.protein && adj.protein.mult) || 1;
-    out.protein = { min:Math.round(pr[0] * p.weightKg * pMult), max:Math.round(pr[1] * p.weightKg * pMult) };
+    out.protein = { min:Math.round(pr[0] * kg * pMult), max:Math.round(pr[1] * kg * pMult) };
 
     /* yag: kalorinin yuzdesi, alt sinir kg basina */
     const fLo = Math.max(Math.round(out.kcal * SP.MACRO_RULES.fat.pctRange[0] / 100 / 9),
-                         Math.round(SP.MACRO_RULES.fat.minPerKg * p.weightKg));
+                         Math.round(SP.MACRO_RULES.fat.minPerKg * kg));
     const fHi = Math.round(out.kcal * SP.MACRO_RULES.fat.pctRange[1] / 100 / 9);
     out.fat = { min:fLo, max:Math.max(fHi, fLo) };
 
@@ -68135,7 +68158,7 @@ SP.Nutri = (function(){
   function householdSplit(foodId, totalGrams, members){
     const f = SP.FOOD_BY_ID[foodId];
     if(!f) return { ok:false, error:'Yemek bulunamadı.' };
-    const list = (members || []).filter(m => m.weightKg && m.heightCm && m.birthYear);
+    const list = (members || []).filter(m => SP.Model.kiloOf(m) && m.heightCm && m.birthYear);
     if(!list.length) return { ok:false, error:'Porsiyon hesabı için en az bir profilde kilo, boy ve doğum yılı gerekir.' };
 
     /* Her uye icin gunluk kalori hedefi; bu ogunun payi hedefin %35'i sayilir
@@ -70946,8 +70969,8 @@ SP.Calc = (function(){
     const d = dateISO || U.todayISO();
     const v = SP.S.vitals[d] || {};
     const totals = SP.Nutri.dayTotals(d);
-    const p = SP.S.profile;
-    const proteinFloor = p && p.weightKg ? Math.round(1.2 * p.weightKg) : null;
+    const kilo = SP.Model.kiloOf();
+    const proteinFloor = kilo ? Math.round(1.2 * kilo.kg) : null;
     const moveMin = U.sum(SP.Model.workoutsOf(d).map(w => w.minutes || 0));
 
     const rows = [
@@ -78611,7 +78634,7 @@ SP.Vucut = (function(){
   }
   function navyYag(cins, cm, boyun, bel, kalca){
     cm = sayi(cm); boyun = sayi(boyun); bel = sayi(bel); kalca = sayi(kalca);
-    if(!cm || !boyun || !bel) return null;
+    if(!cm || !boyun || !bel || (cins !== 'female' && cins !== 'male')) return null;
     let v;
     if(cins === 'female'){
       if(!kalca || bel + kalca - boyun <= 0) return null;
@@ -78675,7 +78698,7 @@ SP.Vucut = (function(){
     if(!cm) eksik.push('boy (profil)');
     if(!kg) eksik.push('kilo');
     if(!sayi(v.waist)) eksik.push('bel');
-    if(!yag) eksik.push(p.sex === 'female' ? 'boyun ve kalça (yağ oranı için)' : 'boyun (yağ oranı için)');
+    if(!yag) eksik.push(p.sex === 'female' ? 'boyun ve kalça (yağ oranı için)' : p.sex === 'male' ? 'boyun (yağ oranı için)' : 'cinsiyet (profil)');
     return { bki:b, belBoy:bb, yag, navy, yagsiz:ys, egilim:eg, enerji:en, eksik };
   }
 
@@ -81909,8 +81932,8 @@ SP.Setup = (function(){
               min:yil.min, max:yil.max, value:p.birthYear || '',
               placeholder:String(yil.max - 25) }) })}
           ${K.Field({ label:'Cinsiyet', hint:'ferritin ve hemoglobin aralıkları buna bağlı',
-            input:K.Select({ id:'su-sex', value:p.sex || 'male',
-              options:[{ value:'male', label:'Erkek' }, { value:'female', label:'Kadın' }] }) })}
+            input:K.Select({ id:'su-sex', value:p.sex || '',
+              options:[{ value:'', label:'Seç' }, { value:'male', label:'Erkek' }, { value:'female', label:'Kadın' }] }) })}
           ${K.Field({ label:'Boy (cm)', hint:'bazal metabolizma hesabına girer',
             input:K.Input({ id:'su-height', type:'number', numeric:true,
               min:80, max:230, value:p.heightCm || '', placeholder:'178' }) })}
@@ -81941,7 +81964,7 @@ SP.Setup = (function(){
     const patch = {
       name:get('su-name'),
       birthYear:numOr(get('su-birth')),
-      sex:get('su-sex') || 'male',
+      sex:get('su-sex') || null,
       heightCm:numOr(get('su-height')),
       weightKg:numOr(get('su-weight')),
       goal:get('su-goal') || 'health',
@@ -83318,12 +83341,13 @@ SP.Screens.today = (function(){
   /* Suyu yazar; artınca vakti gelen su hatırlatması kapanır. Geri al:
      önceki değer ve kapatılan işaretler. */
   /* Yazımın kendisi (Günü kapat da bunu kullanır): bildirim yok, geri al döner. */
-  async function suYazCekirdek(d, ml){
-    const { ml:once } = suDurumu(d);
+  /* `src`: 'beyan' yalnız Günü kapat hedef satırından; geri al eski kaynağı da koyar. */
+  async function suYazCekirdek(d, ml, src){
+    const { ml:once } = suDurumu(d), srcOnce = (M.vitalsOf(d) || {}).waterSrc || null;
     const sonra = ml == null || ml <= 0 ? null : Math.min(ml, SU_EN_COK);
-    await M.saveVitals(d, { water:sonra });
+    await M.saveVitals(d, { water:sonra, waterSrc:src || null });
     const kapanan = sonra != null && sonra > (once || 0) ? await hatirlatKapat('su', d, true) : [];
-    return { sonra, geriAl:async () => { await M.saveVitals(d, { water:once }); await hatirlatAc(kapanan, d); SP.App.render(); } };
+    return { sonra, geriAl:async () => { await M.saveVitals(d, { water:once, waterSrc:srcOnce }); await hatirlatAc(kapanan, d); SP.App.render(); } };
   }
   async function suYaz(d, ml){
     const { b, hedef } = suDurumu(d);
@@ -83374,7 +83398,7 @@ SP.Screens.today = (function(){
         yaz:async g => {
           const simdi = (M.vitalsOf(g) || {}).water;
           if(g !== gun || (simdi == null ? null : Number(simdi)) !== (suOnce == null ? null : Number(suOnce))) return { atlandi:true };
-          const r = await suYazCekirdek(g, SU_ESIK); return { metin:'Su ' + U.fmtNum(SU_ESIK) + ' ml', geriAl:r.geriAl }; } });
+          const r = await suYazCekirdek(g, SU_ESIK, 'beyan'); return { metin:'Su ' + U.fmtNum(SU_ESIK) + ' ml', geriAl:r.geriAl }; } });
     }
 
     const bugunkuler = M.mealsOf(gun).filter(m => m.items.length);
@@ -83657,16 +83681,20 @@ SP.Screens.today = (function(){
     const planDk = uyu ? HP.uykuDakika(uyu.yat, uyu.kalk) : null;
     const slot = SP.Ogun ? SP.Ogun.liste().length : 0;
     const hareketDk = d => { const l = (SP.S.workouts || []).filter(w => w && w.date === d); return l.length ? l.reduce((a, w) => a + (Number(w.minutes) || 0), 0) : null; };
+    /* Kesinlik kaynağından (kit: measured · estimated · computed): Günü kapat'ın
+       yazdığı su beyandır (estimated); öğün SAYISI hesaplanır (gramları tahmin);
+       hareket dakikası cihazdan gelmez, kullanıcı beyanıdır. Girilmemiş uyku
+       kitte «veri yok» çizilir. */
     const sayilar = [
       { ad:'Uyku', deger:v.sleep == null ? null : SP.U.fmtNet(v.sleep), birim:'sa', kesinlik:'measured',
         oran:v.sleep != null && planDk ? Number(v.sleep) * 60 / planDk : null,
         halka:!!planDk, alt:planDk ? 'plan ' + HP.sureYaz(planDk) : '', git:'gun',
         seri:yedi.map(d => { const x = SP.S.vitals[d]; return x && x.sleep != null ? Number(x.sleep) : null; }) },
-      { ad:'Su', deger:v.water == null ? null : Number(v.water).toLocaleString('tr-TR'), birim:'ml', kesinlik:'measured',
+      { ad:'Su', deger:v.water == null ? null : Number(v.water).toLocaleString('tr-TR'), birim:'ml', kesinlik:v.waterSrc === 'beyan' ? 'estimated' : 'measured',
         oran:v.water == null ? null : Number(v.water) / SU_ESIK, halka:true, alt:'eşik ' + U.fmtNum(SU_ESIK) + ' ml', git:'gun' },
-      { ad:'Öğün', deger:ogun || null, birim:slot ? '/ ' + slot : '', kesinlik:'measured',
+      { ad:'Öğün', deger:ogun || null, birim:slot ? '/ ' + slot : '', kesinlik:'computed',
         oran:ogun && slot ? ogun / slot : null, halka:slot > 0, git:'meals' },
-      { ad:'Hareket', deger:hareketDk(t), birim:'dk', kesinlik:'measured', seri:yedi.map(hareketDk), git:'move' },
+      { ad:'Hareket', deger:hareketDk(t), birim:'dk', kesinlik:'estimated', seri:yedi.map(hareketDk), git:'move' },
     ];
     return KS.kapakHtml({ modul:'spi', selam:KS.acilis('spi').selam, cumle:SP.Screens.today.headline(), sayilar,
       /* Günü kapat (KOLAY-PLANI Faz 1): alt sayfa; «Günü düzenle» onun içinde. */
@@ -85243,7 +85271,8 @@ SP.Screens.labs = (function(){
         <p class="markerrow__note">${SP.Bio.statusNote(id, last.v)}</p>
       </div>`),
       K.Table({ tight:true, headers:['Alan', 'Değer', 'Dayanak'], rows:[
-        ['Referans aralığı', r.ref ? U.fmtNum(r.ref[0]) + ' – ' + U.fmtNum(r.ref[1]) + ' ' + b.unit : '—',
+        ['Referans aralığı', r.ref ? U.fmtNum(r.ref[0]) + ' – ' + U.fmtNum(r.ref[1]) + ' ' + b.unit
+          : r.cinsiyetGerek ? html`veri yok · ${K.Button({ label:'Cinsiyet seç', size:'sm', act:'go', data:{ 'data-route':'family' } })}` : '—',
           dayanak(id, 'ref')],
         ['Hedef bant', r.optimal ? U.fmtNum(r.optimal[0]) + ' – ' + U.fmtNum(r.optimal[1]) + ' ' + b.unit : 'tanımlı değil',
           r.optimal ? dayanak(id, 'optimal') : '—'],
@@ -85435,9 +85464,9 @@ SP.Screens.labs = (function(){
         <div class="printdoc__who">
           ${when(p2.name, () => html`<b>${p2.name}</b>`)}
           <span>${yas != null ? yas + ' yaş' : 'yaş girilmemiş'} ·
-            ${p2.sex === 'female' ? 'kadın' : 'erkek'}</span>
-          ${when(p2.heightCm && p2.weightKg,
-            () => html`<span>${U.fmtNum(p2.heightCm)} cm · ${U.fmtNum(p2.weightKg)} kg</span>`)}
+            ${p2.sex === 'female' ? 'kadın' : p2.sex === 'male' ? 'erkek' : 'cinsiyet seçilmemiş'}</span>
+          ${when(p2.heightCm && M.kiloOf(p2),
+            () => html`<span>${U.fmtNum(p2.heightCm)} cm · ${U.fmtNum(M.kiloOf(p2).kg)} kg</span>`)}
         </div>
       </div>
 
@@ -87985,7 +88014,7 @@ SP.Screens.kitchen = (function(){
     const list = M.householdList();
     const me = S.profile;
     return list.map(row => {
-      if(row.id === me.id) return Object.assign({}, me, { self:true });
+      if(row.id === me.id) return Object.assign({}, me, { self:true, weightKg:(M.kiloOf(me) || {}).kg || null });
       return Object.assign({ self:false, weightKg:null, heightCm:null }, row);
     });
   }
@@ -89434,7 +89463,7 @@ SP.Screens.move = (function(){
 
   let metQ = '', metMin = 30, metCat = 'all';
   function metCalcSheet(){
-    const weight = (S.profile && S.profile.weightKg) ? Number(S.profile.weightKg) : 70;
+    const weight = (M.kiloOf() || {}).kg || 70;
     let list = SP.MET_REFS || [];
     if(metCat !== 'all') list = list.filter(r => r.category === metCat);
     if(metQ.trim()){
@@ -92835,6 +92864,7 @@ SP.Screens.family = (function(){
   function profileCard(){
     const p = S.profile;
     const t = SP.Nutri.targets();
+    const kilo = M.kiloOf(p);
     return K.Card({
       title:'Profilin', hint:'profiles',
       sub:p.name || 'adsız profil',
@@ -92847,14 +92877,14 @@ SP.Screens.family = (function(){
             input:K.Input({ id:'p-birth', type:'number', numeric:true, min:1900, max:2026,
               value:p.birthYear || '' }) })}
           ${K.Field({ label:'Cinsiyet',
-            input:K.Select({ id:'p-sex', value:p.sex, options:[
+            input:K.Select({ id:'p-sex', value:p.sex || '', options:[{ value:'', label:'Seç' },
               { value:'male', label:'Erkek' }, { value:'female', label:'Kadın' }] }) })}
           ${K.Field({ label:'Boy (cm)',
             input:K.Input({ id:'p-height', type:'number', numeric:true, min:80, max:230,
               value:p.heightCm || '' }) })}
-          ${K.Field({ label:'Kilo (kg)',
+          ${K.Field({ label:'Kilo (kg)', hint:kilo && kilo.date ? 'ölçüldü · ' + U.fmtDate(kilo.date) : '',
             input:K.Input({ id:'p-weight', type:'number', numeric:true, step:'0.1', min:20, max:250,
-              value:p.weightKg || '' }) })}
+              value:kilo ? kilo.kg : '' }) })}
           ${K.Field({ label:'Hedef',
             input:K.Select({ id:'p-goal', value:p.goal,
               options:SP.GOALS.map(g => ({ value:g.id, label:g.label })) }) })}
@@ -92983,18 +93013,20 @@ SP.Screens.family = (function(){
     async 'save-profile'(){
       const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
       const numOr = v => v === '' ? null : Number(String(v).replace(',', '.'));
+      const once = M.kiloOf();
       await M.saveProfile({
         name:get('p-name'),
         birthYear:numOr(get('p-birth')),
-        sex:get('p-sex') || 'male',
+        sex:get('p-sex') || null,
         heightCm:numOr(get('p-height')),
         weightKg:numOr(get('p-weight')),
         goal:get('p-goal') || 'health',
       });
       /* Kilo profilde tutulur ama gunluk olcum de ayni gun kaydini besler:
          tek yerde yazilir, iki yerde okunur diye ikisi de guncellenir. */
+      /* Alan son ölçümle dolu gelir: değişmeden kaydetmek bugüne ölçüm yazmaz. */
       const w = numOr(get('p-weight'));
-      if(w) await M.saveVitals(U.todayISO(), { weight:w });
+      if(w && w !== (once && once.kg)) await M.saveVitals(U.todayISO(), { weight:w });
       UI.toast('Profil kaydedildi');
       SP.App.render();
     },
@@ -93009,7 +93041,7 @@ SP.Screens.family = (function(){
         title:'Profil ekle', subtitle:'Aile bireyi ya da ikinci profil',
         body:String(K.Stack([
           K.Field({ label:'Ad', input:K.Input({ id:'np-name', placeholder:'Örnek: Ayşe' }) }),
-          K.Field({ label:'Cinsiyet', input:K.Select({ id:'np-sex', value:'female', options:[
+          K.Field({ label:'Cinsiyet', input:K.Select({ id:'np-sex', value:'', options:[{ value:'', label:'Seç' },
             { value:'female', label:'Kadın' }, { value:'male', label:'Erkek' }] }) }),
           K.Field({ label:'Doğum yılı',
             input:K.Input({ id:'np-birth', type:'number', numeric:true, min:1900, max:2026 }) }),
@@ -93063,8 +93095,8 @@ SP.Screens.family = (function(){
     },
     lede(){
       const t = SP.Nutri.targets();
-      if(!t.ok) return 'Kilo, boy ve doğum yılı girilince bütün hedefler '
-        + 'kendiliğinden hesaplanır. Bu üçü olmadan hiçbir sayı tahmin edilmez.';
+      if(!t.ok) return 'Kilo, boy, doğum yılı ve cinsiyet girilince bütün hedefler '
+        + 'kendiliğinden hesaplanır. Bunlar olmadan hiçbir sayı tahmin edilmez.';
       return 'Hedefler, görünüm ve hane üyeleri burada. Her profil kendi '
         + 'temasını ve hedefini taşır.';
     },

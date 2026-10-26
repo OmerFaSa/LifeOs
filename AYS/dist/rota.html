@@ -7112,7 +7112,10 @@ body.is-dragging .drop.is-over{
 
 /* 045 çevrilen kart: yükseklik metinden gelir, yüzler üst üste. */
 .vk .x24{ height:auto; }
-.vk .x24 .kk{ display:grid; transition:transform var(--dur-lg) var(--ease); }
+/* Çevrilen kart içeriği kadardır; vitrin'in `.kk{height:100%}`'ü de kalkar.
+   Doctype'sız dist (iOS paketi) tuhaf kipte açılır: %100 ızgara satırına
+   çözülür, kart satır kadar uzar, alttakiler biner (2026-10-26, AYS Tekrar). */
+.vk .x24 .kk{ display:grid; height:auto; transition:transform var(--dur-lg) var(--ease); }
 .vk .x24 .yz{ position:relative; inset:auto; grid-area:1 / 1; min-height:124px; gap:8px; }
 .vk .x24 .kk.is-cevrik{ transform:rotateY(180deg); }
 
@@ -18965,7 +18968,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'ad64ed65', at:'2026-10-25 19:04', dirty:false };
+R.BUILD = { id:'d9ba6ac8', at:'2026-10-26 14:34', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -76011,12 +76014,9 @@ R.Model = (function(){
     });
     if(doc.paragraphTarget == null) doc.paragraphTarget = 18;
     if(doc.problemTarget == null) doc.problemTarget = 18;
-    if(doc.paragraphActual == null) doc.paragraphActual = 0;
-    /* Bloga baglanmayan serbest soru: «10 soru cozdum» dendiginde ders
-       belli degilse gunun toplamina yazilir. */
-    if(doc.freeQ == null) doc.freeQ = 0;
-    if(doc.freeCorrect == null) doc.freeCorrect = 0;
-    if(doc.problemActual == null) doc.problemActual = 0;
+    /* paragraphActual, problemActual, freeQ (bloga baglanmayan serbest
+       soru), freeCorrect: girilmemisse null kalir, 0 yazilmaz (AGENTS §1.2).
+       shortcut: eski kayitlarda saklanan 0 gercek 0'dan ayrilamaz, tasinmaz. */
     if(doc.note == null) doc.note = '';
     if(doc.badDay == null) doc.badDay = false;
     if(doc.distractions == null) doc.distractions = 0;
@@ -76293,9 +76293,9 @@ R.Model = (function(){
       date:U.iso(dateObj),
       dow,
       ritual:tmpl.ritual || null,
-      paragraphTarget:18, paragraphActual:0,
-      freeQ:0, freeCorrect:0,
-      problemTarget:18, problemActual:0,
+      paragraphTarget:18, paragraphActual:null,
+      freeQ:null, freeCorrect:null,
+      problemTarget:18, problemActual:null,
       sleepHours:null,
       checklist:{},
       blocks,
@@ -83233,7 +83233,7 @@ R.Calc = (function(){
     const reviewedToday = on ? (on.gozden[dayISO || U.todayISO()] || 0)
       : S.cards.filter(c => c.lastReviewedAt === (dayISO || U.todayISO())).length;
     return mins >= R.ROUTINES.minimumDay.minutes
-      && day.paragraphActual >= R.ROUTINES.minimumDay.paragraphs
+      && (Number(day.paragraphActual) || 0) >= R.ROUTINES.minimumDay.paragraphs
       && (due === 0 || reviewedToday > 0);
   }
 
@@ -83380,18 +83380,19 @@ R.Calc = (function(){
         why:'Açık yanlışın reçetesi: «' + String(recete[0].recipe).slice(0, 80) + '» (~10 dakika, tahmin).',
         route:'cards', tone:'normal' };
     }
-    if(day && day.paragraphActual < day.paragraphTarget){
-      const n = Math.min(day.paragraphTarget - day.paragraphActual, Math.floor(sure / 3));
+    const pa = day && (Number(day.paragraphActual) || 0), qa = day && (Number(day.problemActual) || 0);
+    if(day && pa < day.paragraphTarget){
+      const n = Math.min(day.paragraphTarget - pa, Math.floor(sure / 3));
       return Object.assign({ key:'onbes-paragraf', icon:'book', label:sure + ' dakikam var',
         title:n + ' paragraf sorusu çöz', dk:n * 3,
-        why:'Günün paragraf çıpasından ' + (day.paragraphTarget - day.paragraphActual)
+        why:'Günün paragraf çıpasından ' + (day.paragraphTarget - pa)
           + ' kaldı; soru başı ~3 dakika (tahmin).' + paragrafSeti().not, tone:'normal' }, paragrafSeti().yol);
     }
-    if(day && day.problemActual < day.problemTarget){
-      const n = Math.min(day.problemTarget - day.problemActual, Math.floor(sure / 3));
+    if(day && qa < day.problemTarget){
+      const n = Math.min(day.problemTarget - qa, Math.floor(sure / 3));
       return { key:'onbes-problem', icon:'chart', label:sure + ' dakikam var',
         title:n + ' problem sorusu çöz', dk:n * 3,
-        why:'Günün problem çıpasından ' + (day.problemTarget - day.problemActual) + ' kaldı.', tone:'normal' };
+        why:'Günün problem çıpasından ' + (day.problemTarget - qa) + ' kaldı.', tone:'normal' };
     }
     const vade = dueCards();
     if(vade.length){
@@ -83477,16 +83478,17 @@ R.Calc = (function(){
           why:next.slot+' · '+next.targetMin+' dakika'+(next.targetQ ? ' · '+next.targetQ+' soru hedefi' : ''),
           act:'timer-start', blockId:next.id, tone:'normal' };
       }
-      if(day.paragraphActual < day.paragraphTarget){
+      const pa = Number(day.paragraphActual) || 0, qa = Number(day.problemActual) || 0;
+      if(pa < day.paragraphTarget){
         return Object.assign({ key:'anchor', icon:'book', label:'Günlük çıpa',
           title:'Paragraf çıpasını tamamla',
-          why:(day.paragraphTarget - day.paragraphActual)+' paragraf kaldı — çıpa konudan bağımsız düşmez.' + paragrafSeti().not,
+          why:(day.paragraphTarget - pa)+' paragraf kaldı — çıpa konudan bağımsız düşmez.' + paragrafSeti().not,
           tone:'normal' }, paragrafSeti().yol);
       }
-      if(day.problemActual < day.problemTarget){
+      if(qa < day.problemTarget){
         return { key:'anchor2', icon:'chart', label:'Günlük çıpa',
           title:'Problem çıpasını tamamla',
-          why:(day.problemTarget - day.problemActual)+' soru kaldı.',
+          why:(day.problemTarget - qa)+' soru kaldı.',
           tone:'normal' };
       }
     }
@@ -88605,8 +88607,9 @@ R.Beacon = (function(){
     const bloklar = (gun && gun.blocks) || [];
 
     /* Günün sorusu tek tanımdır: R.Calc.gunSorusu (blok + serbest +
-       paragraf + problem, HATALAR O-5). Serbest/paragraf/problem alanı 0
-       ile başlar; 0 «girilmedi»dir, ölçüm değil. Hiçbir parça
+       paragraf + problem, HATALAR O-5). Serbest/paragraf/problem alanı boş
+       (null) başlar; eski kayıtlarda 0 ile başlardı, o 0 ayırt edilemediği
+       için burada da ölçüm sayılmaz. Hiçbir parça
        girilmemişse veri yok — sıfır gönderilmez. */
     const soru = bloklar.filter(function(b){ return b.actualQ != null; });
     const serbestVar = gun && ['freeQ', 'paragraphActual', 'problemActual']
@@ -88707,8 +88710,8 @@ R.Beacon = (function(){
       out.plan_blocks = metric(bloklar.length, 'measured');
       out.plan_done = metric(bloklar.filter(function(b){
         return b.status === 'done'; }).length, 'measured');
-      out.paragraph_done = metric(Number(gun.paragraphActual) || 0, 'measured');
-      out.problem_done = metric(Number(gun.problemActual) || 0, 'measured');
+      out.paragraph_done = metric(gun.paragraphActual, 'measured');   /* null → missing */
+      out.problem_done = metric(gun.problemActual, 'measured');
       const dogru = bloklar.filter(function(b){ return b.correctQ != null; });
       out.correct_questions = dogru.length
         ? metric(dogru.reduce(function(a, b){ return a + Number(b.correctQ || 0); }, 0),
@@ -97766,7 +97769,7 @@ R.Proposals = (function(){
       preview(p, ctx){
         const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : 'Plan dışı (günün toplamı)';
         const once = ctx.blok ? (ctx.blok.actualQ == null ? 'girilmemiş' : String(ctx.blok.actualQ))
-          : String(ctx.day.freeQ || 0);
+          : ctx.day.freeQ == null ? 'girilmemiş' : String(ctx.day.freeQ);
         const sonra = ctx.blok ? String((Number(ctx.blok.actualQ) || 0) + ctx.n)
           : String((ctx.day.freeQ || 0) + ctx.n);
         const rows = [{ label:nereye + ' · soru', before:once, after:sonra }];
@@ -97780,8 +97783,8 @@ R.Proposals = (function(){
       },
       async apply(p, ctx){
         const geri = { date:p.date, blockId:ctx.blok ? ctx.blok.id : null,
-          eskiQ:ctx.blok ? ctx.blok.actualQ : (ctx.day.freeQ || 0),
-          eskiC:ctx.blok ? ctx.blok.correctQ : (ctx.day.freeCorrect || 0),
+          eskiQ:ctx.blok ? ctx.blok.actualQ : ctx.day.freeQ,
+          eskiC:ctx.blok ? ctx.blok.correctQ : ctx.day.freeCorrect,
           n:ctx.n, dogru:ctx.dogru,
           durum:ctx.blok && ctx.blok.status === 'pending' ? 'pending' : null };
         if(ctx.blok){
@@ -97836,11 +97839,11 @@ R.Proposals = (function(){
         return pass({ n:Math.round(n), day });
       },
       preview(p, ctx){
-        return [{ label:'Paragraf', before:String(ctx.day.paragraphActual || 0),
+        return [{ label:'Paragraf', before:ctx.day.paragraphActual == null ? 'girilmemiş' : String(ctx.day.paragraphActual),
           after:String((ctx.day.paragraphActual || 0) + ctx.n) }];
       },
       async apply(p, ctx){
-        const geri = { date:p.date, eski:ctx.day.paragraphActual || 0, n:ctx.n };
+        const geri = { date:p.date, eski:ctx.day.paragraphActual, n:ctx.n };
         ctx.day.paragraphActual = (ctx.day.paragraphActual || 0) + ctx.n;
         await R.Model.saveDay(p.date);
         return geri;
@@ -97864,11 +97867,11 @@ R.Proposals = (function(){
         return pass({ n:Math.round(n), day });
       },
       preview(p, ctx){
-        return [{ label:'Problem', before:String(ctx.day.problemActual || 0),
+        return [{ label:'Problem', before:ctx.day.problemActual == null ? 'girilmemiş' : String(ctx.day.problemActual),
           after:String((ctx.day.problemActual || 0) + ctx.n) }];
       },
       async apply(p, ctx){
-        const geri = { date:p.date, eski:ctx.day.problemActual || 0, n:ctx.n };
+        const geri = { date:p.date, eski:ctx.day.problemActual, n:ctx.n };
         ctx.day.problemActual = (ctx.day.problemActual || 0) + ctx.n;
         await R.Model.saveDay(p.date);
         return geri;
@@ -102000,14 +102003,14 @@ R.Screens.today = (function(){
       <div class="stack-xs">
         <div class="row between">
           <span class="stat__label">${o.label}</span>
-          ${o.actual >= o.target ? c.Badge({ label:'tamam', tone:'ok' }) : html`<span class="tiny dim">${o.hint}</span>`}
+          ${o.actual != null && o.actual >= o.target ? c.Badge({ label:'tamam', tone:'ok' }) : html`<span class="tiny dim">${o.hint}</span>`}
         </div>
         ${VT() && VT().adimliSayi
           /* 168 ADIMLI SAYI: küçük sayı için büyük artı/eksi (48 px); +5 yanında. */
-          ? html`${raw(VT().adimliSayi({ etiket:o.label + ' · bugün', ad:o.label, deger:Number(o.actual) || 0,
+          ? html`${raw(VT().adimliSayi({ etiket:o.label + ' · bugün', ad:o.label, deger:o.actual == null ? null : Number(o.actual),
               birim:'/ ' + o.target + ' soru', act:'anchor', data:{ 'data-kind':o.kind }, not:'tek dokunuş · +5 aşağıda' }))}
             <div class="row row--tight">${step(5)}</div>`
-          : html`<span class="anchor__value num">${o.actual}<span class="dim">/${o.target}</span></span>
+          : html`<span class="anchor__value num">${o.actual == null ? '—' : o.actual}<span class="dim">/${o.target}</span></span>
             ${c.Bar({ value:pct, tone:'' })}
             <div class="row row--tight">${step(-1)}${step(1)}${step(5)}</div>`}
       </div>` });
@@ -103558,10 +103561,10 @@ R.Screens.today = (function(){
           : 'soru / doğru · ' + (Number(b.targetQ) > 0 ? 'plan: ' + b.targetQ + ' soru' : 'planda soru yok') });
     });
     [['paragraphActual', 'paragraphTarget', 'Paragraf'], ['problemActual', 'problemTarget', 'Problem']].forEach(([alan, hedef, ad]) => {
-      const n = Number(day[alan]) || 0;
+      const n = day[alan], girildi = n != null;
       const son = gkSon(gun, alan, v => Number(v) > 0);
-      out.push({ id:alan === 'paragraphActual' ? 'paragraf' : 'problem', ad, tur:'olcum', yazildi:n > 0,
-        ipucu:n > 0 ? 'girildi: ' + n : [son ? 'son: ' + son.deger + ' · ' + U.fmtShort(son.gun) : '',
+      out.push({ id:alan === 'paragraphActual' ? 'paragraf' : 'problem', ad, tur:'olcum', yazildi:girildi,
+        ipucu:girildi ? 'girildi: ' + n : [son ? 'son: ' + son.deger + ' · ' + U.fmtShort(son.gun) : '',
           Number(day[hedef]) > 0 ? 'hedef: ' + day[hedef] : ''].filter(Boolean).join(' · ') || 'girmezsen boş kalır' });
     });
     const sonUyku = gkSon(gun, 'sleepHours', v => v != null);
@@ -111152,7 +111155,7 @@ R.Screens = R.Screens || {};
     const x = O().konuyuBul(q.konu), ak = P().anahtar(q);
     const day = S.days[U.todayISO()];
     const cipa = day && Number(day.paragraphTarget) > 0
-      ? 'Bugünün paragraf çıpası: ' + (Number(day.paragraphActual) || 0) + ' / ' + day.paragraphTarget : null;
+      ? 'Bugünün paragraf çıpası: ' + (day.paragraphActual == null ? '—' : day.paragraphActual) + ' / ' + day.paragraphTarget : null;
     const sonMu = i === l.length - 1;
     return K.Card({ wide:true,
       body:html`

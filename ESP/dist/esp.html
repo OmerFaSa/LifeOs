@@ -6793,7 +6793,10 @@ body.is-dragging .drop.is-over{
 
 /* 045 çevrilen kart: yükseklik metinden gelir, yüzler üst üste. */
 .vk .x24{ height:auto; }
-.vk .x24 .kk{ display:grid; transition:transform var(--dur-lg) var(--ease); }
+/* Çevrilen kart içeriği kadardır; vitrin'in `.kk{height:100%}`'ü de kalkar.
+   Doctype'sız dist (iOS paketi) tuhaf kipte açılır: %100 ızgara satırına
+   çözülür, kart satır kadar uzar, alttakiler biner (2026-10-26, AYS Tekrar). */
+.vk .x24 .kk{ display:grid; height:auto; transition:transform var(--dur-lg) var(--ease); }
 .vk .x24 .yz{ position:relative; inset:auto; grid-area:1 / 1; min-height:124px; gap:8px; }
 .vk .x24 .kk.is-cevrik{ transform:rotateY(180deg); }
 
@@ -18415,7 +18418,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'ad64ed65', at:'2026-10-25 19:04', dirty:false };
+ESP.BUILD = { id:'d9ba6ac8', at:'2026-10-26 14:35', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -77338,13 +77341,14 @@ ESP.Parse = (function(){
 /* DÜNKÜNÜN AYNISI (fikir 5) — dünün çalışma oturumu tek dokunuşla bugüne.
 
    Sözler: kullanıcı seçer (kendiliğinden kopya yok); kopya bugünün kaydıdır
-   (süre ve sayım aslındaki gibi, «kalite» kopyalanmaz — o günün hissidir);
+   (süre aslındaki gibi ama TAHMİN — ölçülmedi, XP/rozet saymaz; sayım ve
+   «kalite» kopyalanmaz — o günün ölçümü ve hissidir);
    bugün aynı disipline zaten oturum girildiyse önerilmez; geri alınır.
 
    SIK OTURUMLAR (2026-10-17, depo sahibi: «ESP'de veri girişi çok kolay
    olsun»): son 14 günde en az iki kez aynı disiplin ve süreyle girilen
    oturum Bugün'de tek dokunuşla eklenir. Süre kullanıcının kendi
-   kayıtlarından gelir (uydurulmaz); sayım ve kalite kopyalanmaz — o günün
+   kayıtlarından gelir (uydurulmaz) ama tahmin sayılır; sayım ve kalite kopyalanmaz — o günün
    ölçümüdür. Bugün aynı disipline oturum girildiyse işaretli görünür,
    yine eklenebilir (ikinci oturum). En çok dört. */
 
@@ -77369,8 +77373,7 @@ ESP.Dunku = (function(){
     const s = ESP.Model.sessionsOf(dun(bugun)).find(x => x.id === id);
     if(!s) return { ok:false, why:'Dünün oturumu bulunamadı.' };
     if(!adaylar(bugun).oturumlar.some(x => x.id === id)) return { ok:false, why:'Bugün bu disipline zaten oturum girilmiş.' };
-    const yeni = await ESP.Model.addSession(bugun, { disc:s.disc, minutes:s.minutes, count:s.count,
-      countWhat:s.countWhat, note:'Dünün aynısı' });
+    const yeni = await ESP.Model.addSession(bugun, { disc:s.disc, minutes:s.minutes, minutesCert:'estimated', note:'Dünün aynısı' });
     const disc = ESP.DISCIPLINE_BY_ID[s.disc];
     return { ok:true, id:yeni.id, ad:disc ? disc.label : s.disc };
   }
@@ -77396,7 +77399,7 @@ ESP.Dunku = (function(){
   async function sikEkle(bugun, disc, dk){
     const x = sik(bugun).find(s => s.disc === disc && s.dk === Number(dk));
     if(!x) return { ok:false, why:'Bu oturum sık oturumlarda yok.' };
-    const yeni = await ESP.Model.addSession(bugun, { disc:x.disc, minutes:x.dk, note:'' });
+    const yeni = await ESP.Model.addSession(bugun, { disc:x.disc, minutes:x.dk, minutesCert:'estimated', note:'' });
     return { ok:true, id:yeni.id, ad:x.ad, dk:x.dk };
   }
 
@@ -85439,7 +85442,7 @@ ESP.Screens.today = (function(){
     const a = ESP.Dunku.adaylar(U.todayISO());
     if(!a.oturumlar.length) return null;
     return K.Entry({ label:'Dünkünün aynısı', meta:U.fmtShort(a.dun), wide:true,
-      note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; kalite puanı kopyalanmaz.',
+      note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; süre tahmin sayılır, sayım ve kalite kopyalanmaz.',
       body:html`${map(a.oturumlar, o => html`<div class="row between wrap gap-6 mt-4">
         <span class="small"><b>${o.ad}</b> <span class="tiny dim">${o.dk} dk${o.sayim ? ' · ' + o.sayim : ''}</span></span>
         ${K.Button({ label:'Bugüne ekle', size:'sm', act:'dunku-oturum', data:{ 'data-id':o.id } })}</div>`)}` });
@@ -86105,13 +86108,13 @@ ESP.Screens.today = (function(){
       if(!r.ok){ ESP.UI.toast(r.why); return; }
       ESP.App.render();
       { const Z = (window.LIFEOS || {}).ZEMIN; if(Z && Z.nabiz) Z.nabiz(); }
-      ESP.UI.toast(r.ad + ' ' + U.fmtMin(r.dk) + ' bugüne eklendi', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
+      ESP.UI.toast(r.ad + ' ' + U.fmtMin(r.dk) + ' bugüne eklendi (tahmini süre)', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
     },
     async 'dunku-oturum'(el){
       const bugun = U.todayISO();
       const r = await ESP.Dunku.kopyala(bugun, el.dataset.id);
       if(!r.ok){ ESP.UI.toast(r.why); return; }
-      ESP.UI.toast(r.ad + ' bugüne eklendi', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
+      ESP.UI.toast(r.ad + ' bugüne eklendi (tahmini süre)', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
       ESP.App.render();
     },
     async 'kotu-gun'(){
@@ -86288,9 +86291,13 @@ ESP.Screens.today = (function(){
     },
 
     async 'del-session'(el){
-      await M.deleteSession(gun(), el.dataset.id);
+      const g = gun(), l = M.sessionsOf(g), i = l.findIndex(s => s.id === el.dataset.id), s = l[i];
+      await M.deleteSession(g, el.dataset.id);
       ESP.Memo.bitir();
       ESP.App.render();
+      /* Geri al: aynı nesne aynı sıraya döner (kimlik ve kesinlik korunur). */
+      if(s) ESP.UI.toast('Oturum silindi', { undo:async () => {
+        M.ensureDay(g).sessions.splice(i, 0, s); await M.saveDay(g); ESP.App.render(); } });
     },
 
     async 'parse-quick'(){
