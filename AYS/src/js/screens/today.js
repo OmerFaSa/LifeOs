@@ -67,14 +67,14 @@ R.Screens.today = (function(){
       <div class="stack-xs">
         <div class="row between">
           <span class="stat__label">${o.label}</span>
-          ${o.actual >= o.target ? c.Badge({ label:'tamam', tone:'ok' }) : html`<span class="tiny dim">${o.hint}</span>`}
+          ${o.actual != null && o.actual >= o.target ? c.Badge({ label:'tamam', tone:'ok' }) : html`<span class="tiny dim">${o.hint}</span>`}
         </div>
         ${VT() && VT().adimliSayi
           /* 168 ADIMLI SAYI: küçük sayı için büyük artı/eksi (48 px); +5 yanında. */
-          ? html`${raw(VT().adimliSayi({ etiket:o.label + ' · bugün', ad:o.label, deger:Number(o.actual) || 0,
+          ? html`${raw(VT().adimliSayi({ etiket:o.label + ' · bugün', ad:o.label, deger:o.actual == null ? null : Number(o.actual),
               birim:'/ ' + o.target + ' soru', act:'anchor', data:{ 'data-kind':o.kind }, not:'tek dokunuş · +5 aşağıda' }))}
             <div class="row row--tight">${step(5)}</div>`
-          : html`<span class="anchor__value num">${o.actual}<span class="dim">/${o.target}</span></span>
+          : html`<span class="anchor__value num">${o.actual == null ? '—' : o.actual}<span class="dim">/${o.target}</span></span>
             ${c.Bar({ value:pct, tone:'' })}
             <div class="row row--tight">${step(-1)}${step(1)}${step(5)}</div>`}
       </div>` });
@@ -1625,10 +1625,10 @@ R.Screens.today = (function(){
           : 'soru / doğru · ' + (Number(b.targetQ) > 0 ? 'plan: ' + b.targetQ + ' soru' : 'planda soru yok') });
     });
     [['paragraphActual', 'paragraphTarget', 'Paragraf'], ['problemActual', 'problemTarget', 'Problem']].forEach(([alan, hedef, ad]) => {
-      const n = Number(day[alan]) || 0;
+      const n = day[alan], girildi = n != null;
       const son = gkSon(gun, alan, v => Number(v) > 0);
-      out.push({ id:alan === 'paragraphActual' ? 'paragraf' : 'problem', ad, tur:'olcum', yazildi:n > 0,
-        ipucu:n > 0 ? 'girildi: ' + n : [son ? 'son: ' + son.deger + ' · ' + U.fmtShort(son.gun) : '',
+      out.push({ id:alan === 'paragraphActual' ? 'paragraf' : 'problem', ad, tur:'olcum', yazildi:girildi,
+        ipucu:girildi ? 'girildi: ' + n : [son ? 'son: ' + son.deger + ' · ' + U.fmtShort(son.gun) : '',
           Number(day[hedef]) > 0 ? 'hedef: ' + day[hedef] : ''].filter(Boolean).join(' · ') || 'girmezsen boş kalır' });
     });
     const sonUyku = gkSon(gun, 'sleepHours', v => v != null);

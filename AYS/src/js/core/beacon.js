@@ -187,8 +187,9 @@ R.Beacon = (function(){
     const bloklar = (gun && gun.blocks) || [];
 
     /* Günün sorusu tek tanımdır: R.Calc.gunSorusu (blok + serbest +
-       paragraf + problem, HATALAR O-5). Serbest/paragraf/problem alanı 0
-       ile başlar; 0 «girilmedi»dir, ölçüm değil. Hiçbir parça
+       paragraf + problem, HATALAR O-5). Serbest/paragraf/problem alanı boş
+       (null) başlar; eski kayıtlarda 0 ile başlardı, o 0 ayırt edilemediği
+       için burada da ölçüm sayılmaz. Hiçbir parça
        girilmemişse veri yok — sıfır gönderilmez. */
     const soru = bloklar.filter(function(b){ return b.actualQ != null; });
     const serbestVar = gun && ['freeQ', 'paragraphActual', 'problemActual']
@@ -289,8 +290,8 @@ R.Beacon = (function(){
       out.plan_blocks = metric(bloklar.length, 'measured');
       out.plan_done = metric(bloklar.filter(function(b){
         return b.status === 'done'; }).length, 'measured');
-      out.paragraph_done = metric(Number(gun.paragraphActual) || 0, 'measured');
-      out.problem_done = metric(Number(gun.problemActual) || 0, 'measured');
+      out.paragraph_done = metric(gun.paragraphActual, 'measured');   /* null → missing */
+      out.problem_done = metric(gun.problemActual, 'measured');
       const dogru = bloklar.filter(function(b){ return b.correctQ != null; });
       out.correct_questions = dogru.length
         ? metric(dogru.reduce(function(a, b){ return a + Number(b.correctQ || 0); }, 0),

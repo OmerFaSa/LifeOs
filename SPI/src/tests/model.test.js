@@ -8,7 +8,8 @@
     it('varsayılan profil boş ama geçerli', () => {
       resetState();
       const p = SP.Model.defaultProfile();
-      expect(p.sex).toBe('male');
+      /* Cinsiyet varsayılmaz (§1.7): seçilene kadar null. */
+      expect(p.sex).toBeNull();
       expect(p.goal).toBe('health');
       expect(p.weightKg).toBeNull();
     });
@@ -23,6 +24,30 @@
       resetState();
       SP.S.profile.birthYear = null;
       expect(SP.Model.ageOf()).toBeNull();
+    });
+
+    /* Ölçülen kilo profile hiç dönmüyordu: günlerce tartılan kişide Profil ›
+       Kilo boş, protein tabanı bilinmiyor, seri başlamıyordu. */
+    it('güncel kilo son ölçülen kilodur (tarihiyle); ölçüm yoksa profildeki', () => {
+      resetState();
+      SP.S.profile.weightKg = null;
+      expect(SP.Model.kiloOf()).toBeNull();
+      SP.S.profile.weightKg = 78;
+      expect(SP.Model.kiloOf()).toEqual({ kg:78, date:null });
+      pushVitals('2026-03-01', { weight:80.4 });
+      pushVitals('2026-03-03', { sleep:7 });
+      expect(SP.Model.kiloOf()).toEqual({ kg:80.4, date:'2026-03-01' });
+      /* Etkin profilin ölçümü başka profile yazılmaz. */
+      expect(SP.Model.kiloOf({ id:'diger', weightKg:60 })).toEqual({ kg:60, date:null });
+    });
+
+    it('su elle yazılınca «beyan» kaynağı silinir; başka alan yazmak silmez', async () => {
+      resetState();
+      await SP.Model.saveVitals('2026-03-01', { water:2000, waterSrc:'beyan' });
+      await SP.Model.saveVitals('2026-03-01', { sleep:7 });
+      expect(SP.Model.vitalsOf('2026-03-01').waterSrc).toBe('beyan');
+      await SP.Model.saveVitals('2026-03-01', { water:1500 });
+      expect(SP.Model.vitalsOf('2026-03-01').waterSrc == null).toBe(true);
     });
 
     it('profil kaydı depoya yazılır', async () => {

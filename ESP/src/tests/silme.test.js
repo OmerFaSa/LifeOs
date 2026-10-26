@@ -333,6 +333,24 @@ describe('Oturum — güncelleme ve silme', () => {
     await M.deleteSession('2026-03-04', a.id);
     expect(M.dayHasEntry(S.days['2026-03-04'])).toBe(false);
   });
+
+  it('Bugün\'de «Sil» geri alınır: oturum aynı kimlik, alan ve sırayla döner', async () => {
+    resetState();
+    await M.addSession('2026-03-04', { disc:'lang', minutes:30 });
+    const b = await M.addSession('2026-03-04', { disc:'music', minutes:20, count:5, note:'etüt' });
+    await M.addSession('2026-03-04', { disc:'lang', minutes:10, minutesCert:'estimated' });
+    const once = JSON.parse(JSON.stringify(S.days['2026-03-04'].sessions));
+    const eski = { toast:ESP.UI.toast, render:ESP.App.render }, tostlar = [];
+    ESP.UI.toast = (m, o) => tostlar.push(o || {});
+    ESP.App.render = () => {};
+    S.ui.dayDate = '2026-03-04';
+    try{
+      await ESP.Screens.today.handle['del-session']({ dataset:{ id:b.id } });
+      expect(S.days['2026-03-04'].sessions).toHaveLength(2);
+      await tostlar[0].undo();
+    }finally{ ESP.UI.toast = eski.toast; ESP.App.render = eski.render; S.ui.dayDate = null; }
+    expect(S.days['2026-03-04'].sessions).toEqual(once);
+  });
 });
 
 describe('Gün listesi — girilmemiş gün dizide YOKTUR', () => {

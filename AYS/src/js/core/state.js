@@ -117,12 +117,9 @@ R.Model = (function(){
     });
     if(doc.paragraphTarget == null) doc.paragraphTarget = 18;
     if(doc.problemTarget == null) doc.problemTarget = 18;
-    if(doc.paragraphActual == null) doc.paragraphActual = 0;
-    /* Bloga baglanmayan serbest soru: «10 soru cozdum» dendiginde ders
-       belli degilse gunun toplamina yazilir. */
-    if(doc.freeQ == null) doc.freeQ = 0;
-    if(doc.freeCorrect == null) doc.freeCorrect = 0;
-    if(doc.problemActual == null) doc.problemActual = 0;
+    /* paragraphActual, problemActual, freeQ (bloga baglanmayan serbest
+       soru), freeCorrect: girilmemisse null kalir, 0 yazilmaz (AGENTS §1.2).
+       shortcut: eski kayitlarda saklanan 0 gercek 0'dan ayrilamaz, tasinmaz. */
     if(doc.note == null) doc.note = '';
     if(doc.badDay == null) doc.badDay = false;
     if(doc.distractions == null) doc.distractions = 0;
@@ -399,9 +396,9 @@ R.Model = (function(){
       date:U.iso(dateObj),
       dow,
       ritual:tmpl.ritual || null,
-      paragraphTarget:18, paragraphActual:0,
-      freeQ:0, freeCorrect:0,
-      problemTarget:18, problemActual:0,
+      paragraphTarget:18, paragraphActual:null,
+      freeQ:null, freeCorrect:null,
+      problemTarget:18, problemActual:null,
       sleepHours:null,
       checklist:{},
       blocks,

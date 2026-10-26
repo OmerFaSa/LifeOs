@@ -22,7 +22,7 @@ SP.Screens.kitchen = (function(){
     const list = M.householdList();
     const me = S.profile;
     return list.map(row => {
-      if(row.id === me.id) return Object.assign({}, me, { self:true });
+      if(row.id === me.id) return Object.assign({}, me, { self:true, weightKg:(M.kiloOf(me) || {}).kg || null });
       return Object.assign({ self:false, weightKg:null, heightCm:null }, row);
     });
   }

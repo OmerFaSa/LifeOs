@@ -18,6 +18,7 @@ SP.Screens.family = (function(){
   function profileCard(){
     const p = S.profile;
     const t = SP.Nutri.targets();
+    const kilo = M.kiloOf(p);
     return K.Card({
       title:'Profilin', hint:'profiles',
       sub:p.name || 'adsız profil',
@@ -30,14 +31,14 @@ SP.Screens.family = (function(){
             input:K.Input({ id:'p-birth', type:'number', numeric:true, min:1900, max:2026,
               value:p.birthYear || '' }) })}
           ${K.Field({ label:'Cinsiyet',
-            input:K.Select({ id:'p-sex', value:p.sex, options:[
+            input:K.Select({ id:'p-sex', value:p.sex || '', options:[{ value:'', label:'Seç' },
               { value:'male', label:'Erkek' }, { value:'female', label:'Kadın' }] }) })}
           ${K.Field({ label:'Boy (cm)',
             input:K.Input({ id:'p-height', type:'number', numeric:true, min:80, max:230,
               value:p.heightCm || '' }) })}
-          ${K.Field({ label:'Kilo (kg)',
+          ${K.Field({ label:'Kilo (kg)', hint:kilo && kilo.date ? 'ölçüldü · ' + U.fmtDate(kilo.date) : '',
             input:K.Input({ id:'p-weight', type:'number', numeric:true, step:'0.1', min:20, max:250,
-              value:p.weightKg || '' }) })}
+              value:kilo ? kilo.kg : '' }) })}
           ${K.Field({ label:'Hedef',
             input:K.Select({ id:'p-goal', value:p.goal,
               options:SP.GOALS.map(g => ({ value:g.id, label:g.label })) }) })}
@@ -166,18 +167,20 @@ SP.Screens.family = (function(){
     async 'save-profile'(){
       const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
       const numOr = v => v === '' ? null : Number(String(v).replace(',', '.'));
+      const once = M.kiloOf();
       await M.saveProfile({
         name:get('p-name'),
         birthYear:numOr(get('p-birth')),
-        sex:get('p-sex') || 'male',
+        sex:get('p-sex') || null,
         heightCm:numOr(get('p-height')),
         weightKg:numOr(get('p-weight')),
         goal:get('p-goal') || 'health',
       });
       /* Kilo profilde tutulur ama gunluk olcum de ayni gun kaydini besler:
          tek yerde yazilir, iki yerde okunur diye ikisi de guncellenir. */
+      /* Alan son ölçümle dolu gelir: değişmeden kaydetmek bugüne ölçüm yazmaz. */
       const w = numOr(get('p-weight'));
-      if(w) await M.saveVitals(U.todayISO(), { weight:w });
+      if(w && w !== (once && once.kg)) await M.saveVitals(U.todayISO(), { weight:w });
       UI.toast('Profil kaydedildi');
       SP.App.render();
     },
@@ -192,7 +195,7 @@ SP.Screens.family = (function(){
         title:'Profil ekle', subtitle:'Aile bireyi ya da ikinci profil',
         body:String(K.Stack([
           K.Field({ label:'Ad', input:K.Input({ id:'np-name', placeholder:'Örnek: Ayşe' }) }),
-          K.Field({ label:'Cinsiyet', input:K.Select({ id:'np-sex', value:'female', options:[
+          K.Field({ label:'Cinsiyet', input:K.Select({ id:'np-sex', value:'', options:[{ value:'', label:'Seç' },
             { value:'female', label:'Kadın' }, { value:'male', label:'Erkek' }] }) }),
           K.Field({ label:'Doğum yılı',
             input:K.Input({ id:'np-birth', type:'number', numeric:true, min:1900, max:2026 }) }),
@@ -246,8 +249,8 @@ SP.Screens.family = (function(){
     },
     lede(){
       const t = SP.Nutri.targets();
-      if(!t.ok) return 'Kilo, boy ve doğum yılı girilince bütün hedefler '
-        + 'kendiliğinden hesaplanır. Bu üçü olmadan hiçbir sayı tahmin edilmez.';
+      if(!t.ok) return 'Kilo, boy, doğum yılı ve cinsiyet girilince bütün hedefler '
+        + 'kendiliğinden hesaplanır. Bunlar olmadan hiçbir sayı tahmin edilmez.';
       return 'Hedefler, görünüm ve hane üyeleri burada. Her profil kendi '
         + 'temasını ve hedefini taşır.';
     },

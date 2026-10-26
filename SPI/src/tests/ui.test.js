@@ -526,6 +526,21 @@
     /* Tek tasarımda (§8-4) görünüm listesi yalnız temadır: Açık · Koyu ·
        Sistem. Palet ve düzen listeleri kalkıyor; tema listesi kalmalı ve
        anında uygulanmalı. */
+    /* Profil › Kilo ölçülen kiloyu göstermiyor, cinsiyet «Erkek» varsayılıyordu. */
+    it('Profil son ölçülen kiloyu tarihiyle gösterir; cinsiyet seçilmemişse «Seç»', async () => {
+      resetState();
+      SP.S.profile.weightKg = null;
+      SP.S.profile.sex = null;
+      SP.Test.pushVitals('2026-03-01', { weight:80.4 });
+      const d = document.createElement('div');
+      d.innerHTML = String(await SP.Screens.family.render());
+      expect(d.querySelector('#p-weight').value).toBe('80.4');
+      expect(d.querySelector('#p-weight').closest('.field').textContent).toContain('1 Mar');
+      const sel = d.querySelector('#p-sex');
+      expect(sel.value).toBe('');
+      expect(sel.options[sel.selectedIndex].textContent).toBe('Seç');
+    });
+
     it('tema listesi anında uygulanmak üzere bağlanmış', async () => {
       resetState();
       SP.S.profile = SP.Model.defaultProfile();

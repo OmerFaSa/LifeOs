@@ -401,6 +401,7 @@ button{ font:inherit; }
 .kart__ozet i{ font-style:normal; font-size:11.5px; color:var(--fg-3); margin-left:2px; }
 .kart__ozet-ne{ flex:none; font-size:12px; color:var(--fg-3); }
 .durum{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--fg-3); }
+.durum[hidden]{ display:none; }
 .durum i{ width:8px; height:8px; border-radius:50%; background:var(--kapali); }
 .durum[data-hal="acik"]{ color:var(--ok); } .durum[data-hal="acik"] i{ background:var(--ok); box-shadow:0 0 0 3px var(--ok-t); }
 .port{ font:12px/1 var(--mono); color:var(--fg-3); }
@@ -546,15 +547,18 @@ html.giris-hazir:not(.hesap-kapi-acik) :is(.kart__ust, .kart__ozet, .kart__alt){
   bak.addEventListener('click', function(){ kontrol(true); });
   kontrol(false);
 
-  /* Durum isigi: kapi GERCEKTEN cevap verdiginde yanar. Uc sistem ayni
-     surecte oldugu icin dogrudan yoklanir; HKM'yi sunucu yoklar. */
+  /* Durum isigi. Uc sistem bu sayfayla ayni surecte: sayfa geldiyse onlar da
+     ayaktadir ve no-cors yoklamasi her HTTP cevabinda (503 dahil) cozulur.
+     Bu yuzden modul durumu yalniz ag hatasinda («Kapalı») gorunur; HKM'yi
+     sunucu yoklar. */
   function yak(kart, acik){
     var d = kart.querySelector('.durum');
+    d.hidden = false;
     d.setAttribute('data-hal', acik ? 'acik' : 'kapali');
     d.lastChild.textContent = acik ? 'Çalışıyor' : 'Kapalı';
   }
   document.querySelectorAll('.kart[data-yokla]').forEach(function(k){
-    fetch(k.getAttribute('data-yokla'), { mode:'no-cors' }).then(function(){ yak(k, true); }).catch(function(){ yak(k, false); });
+    fetch(k.getAttribute('data-yokla'), { mode:'no-cors' }).catch(function(){ yak(k, false); });
   });
   var hkm = document.querySelector('.kart[data-hkm]');
   var hkmDugme = hkm.querySelector('.dugme');
@@ -633,8 +637,8 @@ def giris_html(telefon=False):
             kartlar.append(bas + ozet + '</a>')
             continue
         kartlar.append(bas + ozet
-                       + '<div class="kart__alt"><span class="durum" data-hal="bekle"><i></i><span>Bakılıyor…</span></span>'
-                       '<span class="dugme">%s</span></div></a>' % ("Başlat" if hkm else "Aç"))
+                       + '<div class="kart__alt"><span class="durum" data-hal="bekle"%s><i></i><span>Bakılıyor…</span></span>'
+                       '<span class="dugme">%s</span></div></a>' % ("" if hkm else " hidden", "Başlat" if hkm else "Aç"))
     s = guncelle.surum()
     surum = ("sürüm %s · %s" % (s["kisa"], s["tarih"])) if s else "zip sürümü"
     sayfa = GIRIS_SAYFASI

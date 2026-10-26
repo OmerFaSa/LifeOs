@@ -1,13 +1,14 @@
 /* DÜNKÜNÜN AYNISI (fikir 5) — dünün çalışma oturumu tek dokunuşla bugüne.
 
    Sözler: kullanıcı seçer (kendiliğinden kopya yok); kopya bugünün kaydıdır
-   (süre ve sayım aslındaki gibi, «kalite» kopyalanmaz — o günün hissidir);
+   (süre aslındaki gibi ama TAHMİN — ölçülmedi, XP/rozet saymaz; sayım ve
+   «kalite» kopyalanmaz — o günün ölçümü ve hissidir);
    bugün aynı disipline zaten oturum girildiyse önerilmez; geri alınır.
 
    SIK OTURUMLAR (2026-10-17, depo sahibi: «ESP'de veri girişi çok kolay
    olsun»): son 14 günde en az iki kez aynı disiplin ve süreyle girilen
    oturum Bugün'de tek dokunuşla eklenir. Süre kullanıcının kendi
-   kayıtlarından gelir (uydurulmaz); sayım ve kalite kopyalanmaz — o günün
+   kayıtlarından gelir (uydurulmaz) ama tahmin sayılır; sayım ve kalite kopyalanmaz — o günün
    ölçümüdür. Bugün aynı disipline oturum girildiyse işaretli görünür,
    yine eklenebilir (ikinci oturum). En çok dört. */
 
@@ -32,8 +33,7 @@ ESP.Dunku = (function(){
     const s = ESP.Model.sessionsOf(dun(bugun)).find(x => x.id === id);
     if(!s) return { ok:false, why:'Dünün oturumu bulunamadı.' };
     if(!adaylar(bugun).oturumlar.some(x => x.id === id)) return { ok:false, why:'Bugün bu disipline zaten oturum girilmiş.' };
-    const yeni = await ESP.Model.addSession(bugun, { disc:s.disc, minutes:s.minutes, count:s.count,
-      countWhat:s.countWhat, note:'Dünün aynısı' });
+    const yeni = await ESP.Model.addSession(bugun, { disc:s.disc, minutes:s.minutes, minutesCert:'estimated', note:'Dünün aynısı' });
     const disc = ESP.DISCIPLINE_BY_ID[s.disc];
     return { ok:true, id:yeni.id, ad:disc ? disc.label : s.disc };
   }
@@ -59,7 +59,7 @@ ESP.Dunku = (function(){
   async function sikEkle(bugun, disc, dk){
     const x = sik(bugun).find(s => s.disc === disc && s.dk === Number(dk));
     if(!x) return { ok:false, why:'Bu oturum sık oturumlarda yok.' };
-    const yeni = await ESP.Model.addSession(bugun, { disc:x.disc, minutes:x.dk, note:'' });
+    const yeni = await ESP.Model.addSession(bugun, { disc:x.disc, minutes:x.dk, minutesCert:'estimated', note:'' });
     return { ok:true, id:yeni.id, ad:x.ad, dk:x.dk };
   }
 

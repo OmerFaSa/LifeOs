@@ -1069,7 +1069,7 @@ SP.Screens.move = (function(){
 
   let metQ = '', metMin = 30, metCat = 'all';
   function metCalcSheet(){
-    const weight = (S.profile && S.profile.weightKg) ? Number(S.profile.weightKg) : 70;
+    const weight = (M.kiloOf() || {}).kg || 70;
     let list = SP.MET_REFS || [];
     if(metCat !== 'all') list = list.filter(r => r.category === metCat);
     if(metQ.trim()){

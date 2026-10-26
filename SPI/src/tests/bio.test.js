@@ -19,6 +19,17 @@
       expect(a.ref).toEqual(b.ref);
     });
 
+    it('cinsiyet seçilmemişse cinsiyete bağlı aralık yok; durum «veri yok», erkek varsayılmaz', () => {
+      resetState();
+      const p = { sex:null, birthYear:1996 };
+      const r = SP.Bio.refFor('hgb', p);
+      expect(r.ref).toBeNull();
+      expect(r.cinsiyetGerek).toBe(true);
+      expect(SP.Bio.statusOf('hgb', 14, p).id).toBe('unknown');
+      expect(SP.Bio.statusNote('hgb', 14, p)).toContain('cinsiyet');
+      expect(SP.Bio.refFor('glucose', p).ref).toEqual(SP.Bio.refFor('glucose', { sex:'male' }).ref);
+    });
+
     it('bilinmeyen belirteç için null döner', () => {
       expect(SP.Bio.refFor('olmayan-olcum')).toBeNull();
     });

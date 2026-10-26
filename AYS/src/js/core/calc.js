@@ -411,7 +411,7 @@ R.Calc = (function(){
     const reviewedToday = on ? (on.gozden[dayISO || U.todayISO()] || 0)
       : S.cards.filter(c => c.lastReviewedAt === (dayISO || U.todayISO())).length;
     return mins >= R.ROUTINES.minimumDay.minutes
-      && day.paragraphActual >= R.ROUTINES.minimumDay.paragraphs
+      && (Number(day.paragraphActual) || 0) >= R.ROUTINES.minimumDay.paragraphs
       && (due === 0 || reviewedToday > 0);
   }
 
@@ -558,18 +558,19 @@ R.Calc = (function(){
         why:'Açık yanlışın reçetesi: «' + String(recete[0].recipe).slice(0, 80) + '» (~10 dakika, tahmin).',
         route:'cards', tone:'normal' };
     }
-    if(day && day.paragraphActual < day.paragraphTarget){
-      const n = Math.min(day.paragraphTarget - day.paragraphActual, Math.floor(sure / 3));
+    const pa = day && (Number(day.paragraphActual) || 0), qa = day && (Number(day.problemActual) || 0);
+    if(day && pa < day.paragraphTarget){
+      const n = Math.min(day.paragraphTarget - pa, Math.floor(sure / 3));
       return Object.assign({ key:'onbes-paragraf', icon:'book', label:sure + ' dakikam var',
         title:n + ' paragraf sorusu çöz', dk:n * 3,
-        why:'Günün paragraf çıpasından ' + (day.paragraphTarget - day.paragraphActual)
+        why:'Günün paragraf çıpasından ' + (day.paragraphTarget - pa)
           + ' kaldı; soru başı ~3 dakika (tahmin).' + paragrafSeti().not, tone:'normal' }, paragrafSeti().yol);
     }
-    if(day && day.problemActual < day.problemTarget){
-      const n = Math.min(day.problemTarget - day.problemActual, Math.floor(sure / 3));
+    if(day && qa < day.problemTarget){
+      const n = Math.min(day.problemTarget - qa, Math.floor(sure / 3));
       return { key:'onbes-problem', icon:'chart', label:sure + ' dakikam var',
         title:n + ' problem sorusu çöz', dk:n * 3,
-        why:'Günün problem çıpasından ' + (day.problemTarget - day.problemActual) + ' kaldı.', tone:'normal' };
+        why:'Günün problem çıpasından ' + (day.problemTarget - qa) + ' kaldı.', tone:'normal' };
     }
     const vade = dueCards();
     if(vade.length){
@@ -655,16 +656,17 @@ R.Calc = (function(){
           why:next.slot+' · '+next.targetMin+' dakika'+(next.targetQ ? ' · '+next.targetQ+' soru hedefi' : ''),
           act:'timer-start', blockId:next.id, tone:'normal' };
       }
-      if(day.paragraphActual < day.paragraphTarget){
+      const pa = Number(day.paragraphActual) || 0, qa = Number(day.problemActual) || 0;
+      if(pa < day.paragraphTarget){
         return Object.assign({ key:'anchor', icon:'book', label:'Günlük çıpa',
           title:'Paragraf çıpasını tamamla',
-          why:(day.paragraphTarget - day.paragraphActual)+' paragraf kaldı — çıpa konudan bağımsız düşmez.' + paragrafSeti().not,
+          why:(day.paragraphTarget - pa)+' paragraf kaldı — çıpa konudan bağımsız düşmez.' + paragrafSeti().not,
           tone:'normal' }, paragrafSeti().yol);
       }
-      if(day.problemActual < day.problemTarget){
+      if(qa < day.problemTarget){
         return { key:'anchor2', icon:'chart', label:'Günlük çıpa',
           title:'Problem çıpasını tamamla',
-          why:(day.problemTarget - day.problemActual)+' soru kaldı.',
+          why:(day.problemTarget - qa)+' soru kaldı.',
           tone:'normal' };
       }
     }

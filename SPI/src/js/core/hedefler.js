@@ -38,18 +38,8 @@ SP.Hedefler = (function(){
   /* ---------------------------------------------------- durum profili */
 
   function sonKilo(){
-    const gunler = Object.keys(SP.S.vitals || {}).sort().reverse();
-    for(const d of gunler){
-      const v = SP.S.vitals[d];
-      if(v && v.weight != null && isFinite(Number(v.weight))){
-        return { deger:Number(v.weight), birim:'kg', etiket:'olculdu', tarih:d };
-      }
-    }
-    const p = SP.S.profile || {};
-    if(p.weightKg != null && isFinite(Number(p.weightKg))){
-      return { deger:Number(p.weightKg), birim:'kg', etiket:'tahmin', tarih:null };
-    }
-    return null;
+    const k = SP.Model.kiloOf();
+    return k ? { deger:k.kg, birim:'kg', etiket:k.date ? 'olculdu' : 'tahmin', tarih:k.date } : null;
   }
 
   function boyCm(h){

@@ -1043,12 +1043,13 @@ SP.Screens.today = (function(){
   /* Suyu yazar; artınca vakti gelen su hatırlatması kapanır. Geri al:
      önceki değer ve kapatılan işaretler. */
   /* Yazımın kendisi (Günü kapat da bunu kullanır): bildirim yok, geri al döner. */
-  async function suYazCekirdek(d, ml){
-    const { ml:once } = suDurumu(d);
+  /* `src`: 'beyan' yalnız Günü kapat hedef satırından; geri al eski kaynağı da koyar. */
+  async function suYazCekirdek(d, ml, src){
+    const { ml:once } = suDurumu(d), srcOnce = (M.vitalsOf(d) || {}).waterSrc || null;
     const sonra = ml == null || ml <= 0 ? null : Math.min(ml, SU_EN_COK);
-    await M.saveVitals(d, { water:sonra });
+    await M.saveVitals(d, { water:sonra, waterSrc:src || null });
     const kapanan = sonra != null && sonra > (once || 0) ? await hatirlatKapat('su', d, true) : [];
-    return { sonra, geriAl:async () => { await M.saveVitals(d, { water:once }); await hatirlatAc(kapanan, d); SP.App.render(); } };
+    return { sonra, geriAl:async () => { await M.saveVitals(d, { water:once, waterSrc:srcOnce }); await hatirlatAc(kapanan, d); SP.App.render(); } };
   }
   async function suYaz(d, ml){
     const { b, hedef } = suDurumu(d);
@@ -1099,7 +1100,7 @@ SP.Screens.today = (function(){
         yaz:async g => {
           const simdi = (M.vitalsOf(g) || {}).water;
           if(g !== gun || (simdi == null ? null : Number(simdi)) !== (suOnce == null ? null : Number(suOnce))) return { atlandi:true };
-          const r = await suYazCekirdek(g, SU_ESIK); return { metin:'Su ' + U.fmtNum(SU_ESIK) + ' ml', geriAl:r.geriAl }; } });
+          const r = await suYazCekirdek(g, SU_ESIK, 'beyan'); return { metin:'Su ' + U.fmtNum(SU_ESIK) + ' ml', geriAl:r.geriAl }; } });
     }
 
     const bugunkuler = M.mealsOf(gun).filter(m => m.items.length);
@@ -1382,16 +1383,20 @@ SP.Screens.today = (function(){
     const planDk = uyu ? HP.uykuDakika(uyu.yat, uyu.kalk) : null;
     const slot = SP.Ogun ? SP.Ogun.liste().length : 0;
     const hareketDk = d => { const l = (SP.S.workouts || []).filter(w => w && w.date === d); return l.length ? l.reduce((a, w) => a + (Number(w.minutes) || 0), 0) : null; };
+    /* Kesinlik kaynağından (kit: measured · estimated · computed): Günü kapat'ın
+       yazdığı su beyandır (estimated); öğün SAYISI hesaplanır (gramları tahmin);
+       hareket dakikası cihazdan gelmez, kullanıcı beyanıdır. Girilmemiş uyku
+       kitte «veri yok» çizilir. */
     const sayilar = [
       { ad:'Uyku', deger:v.sleep == null ? null : SP.U.fmtNet(v.sleep), birim:'sa', kesinlik:'measured',
         oran:v.sleep != null && planDk ? Number(v.sleep) * 60 / planDk : null,
         halka:!!planDk, alt:planDk ? 'plan ' + HP.sureYaz(planDk) : '', git:'gun',
         seri:yedi.map(d => { const x = SP.S.vitals[d]; return x && x.sleep != null ? Number(x.sleep) : null; }) },
-      { ad:'Su', deger:v.water == null ? null : Number(v.water).toLocaleString('tr-TR'), birim:'ml', kesinlik:'measured',
+      { ad:'Su', deger:v.water == null ? null : Number(v.water).toLocaleString('tr-TR'), birim:'ml', kesinlik:v.waterSrc === 'beyan' ? 'estimated' : 'measured',
         oran:v.water == null ? null : Number(v.water) / SU_ESIK, halka:true, alt:'eşik ' + U.fmtNum(SU_ESIK) + ' ml', git:'gun' },
-      { ad:'Öğün', deger:ogun || null, birim:slot ? '/ ' + slot : '', kesinlik:'measured',
+      { ad:'Öğün', deger:ogun || null, birim:slot ? '/ ' + slot : '', kesinlik:'computed',
         oran:ogun && slot ? ogun / slot : null, halka:slot > 0, git:'meals' },
-      { ad:'Hareket', deger:hareketDk(t), birim:'dk', kesinlik:'measured', seri:yedi.map(hareketDk), git:'move' },
+      { ad:'Hareket', deger:hareketDk(t), birim:'dk', kesinlik:'estimated', seri:yedi.map(hareketDk), git:'move' },
     ];
     return KS.kapakHtml({ modul:'spi', selam:KS.acilis('spi').selam, cumle:SP.Screens.today.headline(), sayilar,
       /* Günü kapat (KOLAY-PLANI Faz 1): alt sayfa; «Günü düzenle» onun içinde. */

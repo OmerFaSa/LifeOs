@@ -30,8 +30,8 @@ SP.Calc = (function(){
     const d = dateISO || U.todayISO();
     const v = SP.S.vitals[d] || {};
     const totals = SP.Nutri.dayTotals(d);
-    const p = SP.S.profile;
-    const proteinFloor = p && p.weightKg ? Math.round(1.2 * p.weightKg) : null;
+    const kilo = SP.Model.kiloOf();
+    const proteinFloor = kilo ? Math.round(1.2 * kilo.kg) : null;
     const moveMin = U.sum(SP.Model.workoutsOf(d).map(w => w.minutes || 0));
 
     const rows = [

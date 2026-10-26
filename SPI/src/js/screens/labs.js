@@ -474,7 +474,8 @@ SP.Screens.labs = (function(){
         <p class="markerrow__note">${SP.Bio.statusNote(id, last.v)}</p>
       </div>`),
       K.Table({ tight:true, headers:['Alan', 'Değer', 'Dayanak'], rows:[
-        ['Referans aralığı', r.ref ? U.fmtNum(r.ref[0]) + ' – ' + U.fmtNum(r.ref[1]) + ' ' + b.unit : '—',
+        ['Referans aralığı', r.ref ? U.fmtNum(r.ref[0]) + ' – ' + U.fmtNum(r.ref[1]) + ' ' + b.unit
+          : r.cinsiyetGerek ? html`veri yok · ${K.Button({ label:'Cinsiyet seç', size:'sm', act:'go', data:{ 'data-route':'family' } })}` : '—',
           dayanak(id, 'ref')],
         ['Hedef bant', r.optimal ? U.fmtNum(r.optimal[0]) + ' – ' + U.fmtNum(r.optimal[1]) + ' ' + b.unit : 'tanımlı değil',
           r.optimal ? dayanak(id, 'optimal') : '—'],
@@ -666,9 +667,9 @@ SP.Screens.labs = (function(){
         <div class="printdoc__who">
           ${when(p2.name, () => html`<b>${p2.name}</b>`)}
           <span>${yas != null ? yas + ' yaş' : 'yaş girilmemiş'} ·
-            ${p2.sex === 'female' ? 'kadın' : 'erkek'}</span>
-          ${when(p2.heightCm && p2.weightKg,
-            () => html`<span>${U.fmtNum(p2.heightCm)} cm · ${U.fmtNum(p2.weightKg)} kg</span>`)}
+            ${p2.sex === 'female' ? 'kadın' : p2.sex === 'male' ? 'erkek' : 'cinsiyet seçilmemiş'}</span>
+          ${when(p2.heightCm && M.kiloOf(p2),
+            () => html`<span>${U.fmtNum(p2.heightCm)} cm · ${U.fmtNum(M.kiloOf(p2).kg)} kg</span>`)}
         </div>
       </div>
 

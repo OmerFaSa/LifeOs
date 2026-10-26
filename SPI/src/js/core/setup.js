@@ -121,8 +121,8 @@ SP.Setup = (function(){
               min:yil.min, max:yil.max, value:p.birthYear || '',
               placeholder:String(yil.max - 25) }) })}
           ${K.Field({ label:'Cinsiyet', hint:'ferritin ve hemoglobin aralıkları buna bağlı',
-            input:K.Select({ id:'su-sex', value:p.sex || 'male',
-              options:[{ value:'male', label:'Erkek' }, { value:'female', label:'Kadın' }] }) })}
+            input:K.Select({ id:'su-sex', value:p.sex || '',
+              options:[{ value:'', label:'Seç' }, { value:'male', label:'Erkek' }, { value:'female', label:'Kadın' }] }) })}
           ${K.Field({ label:'Boy (cm)', hint:'bazal metabolizma hesabına girer',
             input:K.Input({ id:'su-height', type:'number', numeric:true,
               min:80, max:230, value:p.heightCm || '', placeholder:'178' }) })}
@@ -153,7 +153,7 @@ SP.Setup = (function(){
     const patch = {
       name:get('su-name'),
       birthYear:numOr(get('su-birth')),
-      sex:get('su-sex') || 'male',
+      sex:get('su-sex') || null,
       heightCm:numOr(get('su-height')),
       weightKg:numOr(get('su-weight')),
       goal:get('su-goal') || 'health',

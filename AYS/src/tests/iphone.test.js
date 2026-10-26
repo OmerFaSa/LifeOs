@@ -551,4 +551,26 @@
       }finally{ d.remove(); }
     });
   });
+
+  /* dist/rota.html doctype'sız bir parçadır; iOS paketi onu olduğu gibi
+     kopyalar, sayfa tuhaf kipte (quirks) açılır. Orada `.kk{height:100%}`
+     en yakın belirli boylu ataya (ızgara satırı) çözülüyor, kart satırı
+     kadar uzuyor; «Tekrar paketi» kartın üstüne, «Cevabı göster» alttaki
+     şeride biniyordu (390×844). */
+  describe('Tekrar kartı tuhaf kipte satır boyu uzamaz', () => {
+    it('ön/arka kartı içeriği kadar; ızgara satırının boyunu almaz', async () => {
+      const f = document.createElement('iframe');
+      f.style.cssText = 'position:absolute;left:-9999px;width:390px;height:844px';
+      /* srcdoc hep standart kiptedir; blob adresi doctype'sız açılır. */
+      const h = ['vitrin', 'kart', 'rota'].map(x => '<link rel="stylesheet" href="' + new URL('../css/' + x + '.css', location.href) + '">').join('')
+        + '<div style="display:grid;height:600px"><div><div class="vk"><div class="d x24"><div class="kk">'
+        + '<div class="yz">ön</div><div class="yz ar">arka</div></div></div></div></div></div>';
+      f.src = URL.createObjectURL(new Blob([h], { type:'text/html' }));
+      try{
+        await new Promise(r => { f.onload = r; document.body.appendChild(f); });
+        expect(f.contentDocument.compatMode).toBe('BackCompat');
+        expect(f.contentDocument.querySelector('.kk').getBoundingClientRect().height).toBeLessThan(200);
+      }finally{ URL.revokeObjectURL(f.src); f.remove(); }
+    });
+  });
 })();

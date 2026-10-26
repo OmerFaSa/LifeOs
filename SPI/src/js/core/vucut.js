@@ -60,7 +60,7 @@ SP.Vucut = (function(){
   }
   function navyYag(cins, cm, boyun, bel, kalca){
     cm = sayi(cm); boyun = sayi(boyun); bel = sayi(bel); kalca = sayi(kalca);
-    if(!cm || !boyun || !bel) return null;
+    if(!cm || !boyun || !bel || (cins !== 'female' && cins !== 'male')) return null;
     let v;
     if(cins === 'female'){
       if(!kalca || bel + kalca - boyun <= 0) return null;
@@ -124,7 +124,7 @@ SP.Vucut = (function(){
     if(!cm) eksik.push('boy (profil)');
     if(!kg) eksik.push('kilo');
     if(!sayi(v.waist)) eksik.push('bel');
-    if(!yag) eksik.push(p.sex === 'female' ? 'boyun ve kalça (yağ oranı için)' : 'boyun (yağ oranı için)');
+    if(!yag) eksik.push(p.sex === 'female' ? 'boyun ve kalça (yağ oranı için)' : p.sex === 'male' ? 'boyun (yağ oranı için)' : 'cinsiyet (profil)');
     return { bki:b, belBoy:bb, yag, navy, yagsiz:ys, egilim:eg, enerji:en, eksik };
   }
 

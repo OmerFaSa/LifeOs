@@ -16,7 +16,7 @@
      6. P2: kapatılan gün SP.App.girildi() ile «girildi» olur. */
 
 (function(){
-  const { describe, it, expect, resetState, pushVitals, pushMeal, withTodayAsync } = SP.Test;
+  const { describe, it, expect, resetState, pushVitals, pushMeal, pushWorkout, withTodayAsync } = SP.Test;
   const GUN = '2026-03-10';
   const GK = () => window.LIFEOS.GUNUKAPAT;
   const T = () => SP.Screens.today;
@@ -113,13 +113,38 @@
         expect(s.oneri).toEqual({ metin:'Hedef: 2.000 ml', kaynak:'plan' });
         const r = await s.yaz(GUN);
         expect(SP.Model.vitalsOf(GUN).water).toBe(2000);
+        /* Hedefin yazılması bir beyandır, ölçüm değil. */
+        expect(SP.Model.vitalsOf(GUN).waterSrc).toBe('beyan');
         await r.geriAl();
         expect(SP.Model.vitalsOf(GUN).water == null).toBe(true);
-        pushVitals(GUN, { water:1500 });
+        expect(SP.Model.vitalsOf(GUN).waterSrc == null).toBe(true);
+        pushVitals(GUN, { water:1500, waterSrc:'beyan' });
         const r2 = await satir('su').yaz(GUN);
         expect(SP.Model.vitalsOf(GUN).water).toBe(2000);
         await r2.geriAl();
         expect(SP.Model.vitalsOf(GUN).water).toBe(1500);
+        expect(SP.Model.vitalsOf(GUN).waterSrc).toBe('beyan');
+      });
+    });
+
+    /* Kapak karoları hepsini «ölçüldü» diye çiziyordu. */
+    it('kapak karoları kesinliği kaynağından alır', async () => {
+      resetState();
+      pushVitals(GUN, { sleep:7, water:2000, waterSrc:'beyan' });
+      pushMeal(GUN, 'kahvalti', KAHVALTI);
+      pushWorkout(GUN, { minutes:30 });
+      await kurulu(async () => {
+        const d = document.createElement('div');
+        const k = ad => Array.from(d.querySelectorAll('.kapak__sayi'))
+          .find(x => x.querySelector('.kapak__ad').textContent.indexOf(ad) === 0).getAttribute('data-kesinlik');
+        d.innerHTML = T().kapak();
+        expect(k('Uyku')).toBe('measured');
+        expect(k('Su')).toBe('estimated');
+        expect(k('Öğün')).toBe('computed');
+        expect(k('Hareket')).toBe('estimated');
+        SP.S.vitals[GUN].waterSrc = null;
+        d.innerHTML = T().kapak();
+        expect(k('Su')).toBe('measured');
       });
     });
 

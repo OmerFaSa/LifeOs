@@ -562,7 +562,7 @@ R.Proposals = (function(){
       preview(p, ctx){
         const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : 'Plan dışı (günün toplamı)';
         const once = ctx.blok ? (ctx.blok.actualQ == null ? 'girilmemiş' : String(ctx.blok.actualQ))
-          : String(ctx.day.freeQ || 0);
+          : ctx.day.freeQ == null ? 'girilmemiş' : String(ctx.day.freeQ);
         const sonra = ctx.blok ? String((Number(ctx.blok.actualQ) || 0) + ctx.n)
           : String((ctx.day.freeQ || 0) + ctx.n);
         const rows = [{ label:nereye + ' · soru', before:once, after:sonra }];
@@ -576,8 +576,8 @@ R.Proposals = (function(){
       },
       async apply(p, ctx){
         const geri = { date:p.date, blockId:ctx.blok ? ctx.blok.id : null,
-          eskiQ:ctx.blok ? ctx.blok.actualQ : (ctx.day.freeQ || 0),
-          eskiC:ctx.blok ? ctx.blok.correctQ : (ctx.day.freeCorrect || 0),
+          eskiQ:ctx.blok ? ctx.blok.actualQ : ctx.day.freeQ,
+          eskiC:ctx.blok ? ctx.blok.correctQ : ctx.day.freeCorrect,
           n:ctx.n, dogru:ctx.dogru,
           durum:ctx.blok && ctx.blok.status === 'pending' ? 'pending' : null };
         if(ctx.blok){
@@ -632,11 +632,11 @@ R.Proposals = (function(){
         return pass({ n:Math.round(n), day });
       },
       preview(p, ctx){
-        return [{ label:'Paragraf', before:String(ctx.day.paragraphActual || 0),
+        return [{ label:'Paragraf', before:ctx.day.paragraphActual == null ? 'girilmemiş' : String(ctx.day.paragraphActual),
           after:String((ctx.day.paragraphActual || 0) + ctx.n) }];
       },
       async apply(p, ctx){
-        const geri = { date:p.date, eski:ctx.day.paragraphActual || 0, n:ctx.n };
+        const geri = { date:p.date, eski:ctx.day.paragraphActual, n:ctx.n };
         ctx.day.paragraphActual = (ctx.day.paragraphActual || 0) + ctx.n;
         await R.Model.saveDay(p.date);
         return geri;
@@ -660,11 +660,11 @@ R.Proposals = (function(){
         return pass({ n:Math.round(n), day });
       },
       preview(p, ctx){
-        return [{ label:'Problem', before:String(ctx.day.problemActual || 0),
+        return [{ label:'Problem', before:ctx.day.problemActual == null ? 'girilmemiş' : String(ctx.day.problemActual),
           after:String((ctx.day.problemActual || 0) + ctx.n) }];
       },
       async apply(p, ctx){
-        const geri = { date:p.date, eski:ctx.day.problemActual || 0, n:ctx.n };
+        const geri = { date:p.date, eski:ctx.day.problemActual, n:ctx.n };
         ctx.day.problemActual = (ctx.day.problemActual || 0) + ctx.n;
         await R.Model.saveDay(p.date);
         return geri;

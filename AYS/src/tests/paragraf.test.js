@@ -127,7 +127,7 @@
       await temiz();
       await R.Model.ensureDay(R.U.today());
       const day = R.S.days[R.U.todayISO()];
-      const once = Number(day.paragraphActual) || 0;
+      const once = day.paragraphActual, n0 = Number(once) || 0;
       await P().hazirla();
       const g = P().gunu(), id0 = g.sorular[0], q0 = P().bul(id0);
       expect((await P().gunKaydinaYaz()).ok).toBe(false);
@@ -141,17 +141,17 @@
       const r = await P().gunKaydinaYaz();
       expect(r.ok).toBe(true);
       expect(r.n).toBe(4);
-      expect(R.S.days[R.U.todayISO()].paragraphActual).toBe(once + 4);
+      expect(R.S.days[R.U.todayISO()].paragraphActual).toBe(n0 + 4);
       expect(r.row.action).toBe('paragraf-yaz');
       expect((await P().gunKaydinaYaz()).ok).toBe(false);
-      expect(R.S.days[R.U.todayISO()].paragraphActual).toBe(once + 4);
+      expect(R.S.days[R.U.todayISO()].paragraphActual).toBe(n0 + 4);
       await R.Proposals.undo(r.row.id);
       expect(R.S.days[R.U.todayISO()].paragraphActual).toBe(once);
       /* Geri alınan yazım düşer; yeniden yazılabilir. */
       expect(P().yazim()).toBeNull();
       const r2 = await P().gunKaydinaYaz();
       expect(r2.ok).toBe(true);
-      expect(R.S.days[R.U.todayISO()].paragraphActual).toBe(once + 4);
+      expect(R.S.days[R.U.todayISO()].paragraphActual).toBe(n0 + 4);
     });
 
     it('havuz soruları karma testte, Yanlışlarım’da ve yanlış defterinde aynı kimlikle', async () => {

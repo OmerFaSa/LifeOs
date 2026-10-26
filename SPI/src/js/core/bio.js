@@ -28,7 +28,9 @@ SP.Bio = (function(){
     if(field == null) return null;
     if(Array.isArray(field)) return field;
     const p = profile || SP.S.profile || {};
-    const sex = p.sex === 'female' ? 'female' : 'male';
+    const sex = p.sex === 'female' || p.sex === 'male' ? p.sex : null;
+    /* Cinsiyete bağlı alan, cinsiyet seçilmeden çözülmez: erkek varsayılmaz. */
+    if(!sex) return null;
     const age = SP.Model.ageOf(p);
 
     /* Yasa bagli varyantlar once denenir. */
@@ -43,11 +45,15 @@ SP.Bio = (function(){
   function refFor(markerId, profile){
     const b = SP.BIO_BY_ID[markerId];
     if(!b) return null;
+    const sex = (profile || SP.S.profile || {}).sex;
+    const ref = pick(b.ref, profile);
     return {
       marker:b,
-      ref:pick(b.ref, profile),
+      ref,
       optimal:pick(b.optimal, profile),
       red:b.red || {},
+      /* Aralık cinsiyete bağlı ve cinsiyet seçilmemiş: «veri yok», Profil'e yönlendir. */
+      cinsiyetGerek:!ref && sex !== 'male' && sex !== 'female' && b.ref != null && !Array.isArray(b.ref),
     };
   }
 
@@ -73,6 +79,7 @@ SP.Bio = (function(){
 
     if(r.red.below != null && v < r.red.below) return STATUS.red;
     if(r.red.above != null && v > r.red.above) return STATUS.red;
+    if(r.cinsiyetGerek) return STATUS.unknown;
 
     if(r.ref){
       if(v < r.ref[0]) return STATUS.low;
@@ -106,6 +113,7 @@ SP.Bio = (function(){
       case 'ok':
         return r.optimal ? 'Hedef bandın içinde.' : 'Referans aralığının içinde.';
       default:
+        if(r.cinsiyetGerek && value != null) return 'Referans aralığı cinsiyete bağlı: Profil\'de cinsiyet seç.';
         return 'Bu ölçüm hiç girilmemiş. Sıfır sayılmaz.';
     }
   }

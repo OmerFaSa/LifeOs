@@ -1,7 +1,7 @@
 /* Modül 2 — hedefler, öğün hesabı, biyoyararlanım ve hane paylaştırması. */
 
 (function(){
-  const { describe, it, expect, resetState, withToday, pushLab, pushMeal } = SP.Test;
+  const { describe, it, expect, resetState, withToday, pushLab, pushMeal, pushVitals } = SP.Test;
   const U = SP.U;
 
   describe('Nutri — enerji hesabı', () => {
@@ -15,6 +15,22 @@
       resetState();
       const p = Object.assign({}, SP.S.profile, { sex:'female' });
       expect(SP.Nutri.bmr(p)).toBe(1748 - 5 - 161);
+    });
+
+    it('hesap profildeki değil son ölçülen kiloyla yapılır', () => {
+      resetState();
+      pushVitals('2026-03-01', { weight:90 });
+      expect(SP.Nutri.bmr()).toBe(1748 + 120);
+    });
+
+    it('cinsiyet seçilmemişse BMR ve cinsiyete bağlı RDA hesaplanmaz', () => {
+      resetState();
+      SP.S.profile.sex = null;
+      expect(SP.Nutri.bmr()).toBeNull();
+      const t = SP.Nutri.targets();
+      expect(t.ok).toBeFalsy();
+      expect(t.missing).toContain('cinsiyet');
+      expect(SP.Nutri.baseRda('iron')).toBeNull();
     });
 
     it('profil eksikse hesap yapılmaz — tahmin üretilmez', () => {

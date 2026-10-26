@@ -1185,7 +1185,10 @@
 
 /* 045 çevrilen kart: yükseklik metinden gelir, yüzler üst üste. */
 .vk .x24{ height:auto; }
-.vk .x24 .kk{ display:grid; transition:transform var(--dur-lg) var(--ease); }
+/* Çevrilen kart içeriği kadardır; vitrin'in `.kk{height:100%}`'ü de kalkar.
+   Doctype'sız dist (iOS paketi) tuhaf kipte açılır: %100 ızgara satırına
+   çözülür, kart satır kadar uzar, alttakiler biner (2026-10-26, AYS Tekrar). */
+.vk .x24 .kk{ display:grid; height:auto; transition:transform var(--dur-lg) var(--ease); }
 .vk .x24 .yz{ position:relative; inset:auto; grid-area:1 / 1; min-height:124px; gap:8px; }
 .vk .x24 .kk.is-cevrik{ transform:rotateY(180deg); }
 

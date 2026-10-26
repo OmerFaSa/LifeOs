@@ -171,7 +171,9 @@ SP.Model = (function(){
       name:'',
       role:'self',            // self | family
       birthYear:null,
-      sex:'male',             // male | female
+      /* null = seçilmedi (§1.7: varsayılmaz). Eski profillerde kalmış
+         'male' varsayılanı bilinçli seçimden ayırt edilemez; dokunulmaz. */
+      sex:null,               // male | female | null
       heightCm:null,
       weightKg:null,
       activity:'moderate',
@@ -257,7 +259,7 @@ SP.Model = (function(){
     const id = U.slug(name) || U.uid('p');
     const list = householdList();
     if(list.some(x => x.id === id)) return { ok:false, error:'Bu adla bir profil zaten var.' };
-    list.push({ id, name, role:o.role || 'family', sex:o.sex || 'female',
+    list.push({ id, name, role:o.role || 'family', sex:o.sex || null,
       birthYear:o.birthYear || null, seenAt:null });
     writeHousehold(list);
     SP.S.profiles = list;
@@ -443,7 +445,7 @@ SP.Model = (function(){
           en temel kuralinin ihlalidir. */
   function applyDerived(rec){
     const prof = SP.S.profile || {};
-    const ctx = { age:ageOf(prof), sex:prof.sex || 'male' };
+    const ctx = { age:ageOf(prof), sex:prof.sex || null };
 
     Object.keys(SP.DERIVED).forEach(id => {
       const def = SP.DERIVED[id];
@@ -568,6 +570,17 @@ SP.Model = (function(){
     return null;
   }
 
+  /* Güncel kilo: etkin profilin son ÖLÇÜLEN kilosu (tarihiyle); ölçüm yoksa
+     profildeki değer (date:null). Kilo isteyen her hesap buradan okur —
+     ölçümler profile hiç dönmüyordu. Başka profilin ölçümü yoktur. */
+  function kiloOf(p){
+    const prof = p || SP.S.profile;
+    if(!prof) return null;
+    const son = !p || (SP.S.profile && prof.id === SP.S.profile.id) ? latestOf('weight') : null;
+    if(son && son.v > 0) return { kg:son.v, date:son.date };
+    return Number(prof.weightKg) > 0 ? { kg:Number(prof.weightKg), date:null } : null;
+  }
+
   /* Butun belirteclerin son degeri — kirmizi bayrak ve ofis brifingi icin. */
   function latestAll(){
     const out = {};
@@ -611,6 +624,9 @@ SP.Model = (function(){
   }
 
   async function saveVitals(dateISO, patch){
+    /* Su kaynağı (waterSrc:'beyan', Günü kapat) yalnız onu yazan yolda
+       durur: su başka yoldan yazılınca ölçüm sayılır. */
+    if(patch && patch.water !== undefined && !('waterSrc' in patch)) patch = Object.assign({ waterSrc:null }, patch);
     const rec = Object.assign(ensureVitals(dateISO), patch || {});
     SP.S.vitals[dateISO] = rec;
     await SP.Store.set('vitals/' + dateISO, rec);
@@ -1023,7 +1039,7 @@ SP.Model = (function(){
     defaultProfile, saveProfile, ageOf, defaultPrefs, savePrefs,
     householdList, addHouseholdMember, removeHouseholdMember, switchProfile, activeProfileId,
     /* tahlil */
-    newLab, saveLab, deleteLab, applyDerived, seriesOf, latestOf, latestAll,
+    newLab, saveLab, deleteLab, applyDerived, seriesOf, latestOf, latestAll, kiloOf,
     /* gunluk olcum */
     defaultVitals, normVitals, vitalsOf, ensureVitals, saveVitals,
     /* ogun */

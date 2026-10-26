@@ -23,10 +23,12 @@ SP.Nutri = (function(){
      ayni katsayilari, farkli sabiti kullanir. */
   function bmr(profile){
     const p = profile || SP.S.profile;
-    if(!p || !p.weightKg || !p.heightCm) return null;
+    const kilo = p && SP.Model.kiloOf(p);
+    /* Cinsiyet seçilmemişse sabit bilinmez: erkek varsayılmaz. */
+    if(!kilo || !p.heightCm || (p.sex !== 'male' && p.sex !== 'female')) return null;
     const age = SP.Model.ageOf(p);
     if(age == null) return null;
-    const base = 10 * p.weightKg + 6.25 * p.heightCm - 5 * age;
+    const base = 10 * kilo.kg + 6.25 * p.heightCm - 5 * age;
     return Math.round(p.sex === 'female' ? base - 161 : base + 5);
   }
 
@@ -54,7 +56,7 @@ SP.Nutri = (function(){
   function moveEnergy(dateISO, profile){
     const p = profile || SP.S.profile || {};
     const d = dateISO || U.todayISO();
-    const kg = Number(p.weightKg) || null;
+    const kg = (SP.Model.kiloOf(p) || {}).kg || null;
     const list = SP.Model && SP.Model.workoutsOf ? SP.Model.workoutsOf(d) : [];
     const out = { date:d, seanslar:[], kcal:0, dakika:0, eksik:[], kayitVar:list.length > 0 };
     if(!kg){ out.kcal = null; out.neden = 'Profilde kilo yok'; return out; }
@@ -210,9 +212,11 @@ SP.Nutri = (function(){
     const n = SP.NUTRI_BY_ID[nutrientId];
     if(!n || !n.rda) return null;
     const p = profile || SP.S.profile || {};
-    const sex = p.sex === 'female' ? 'female' : 'male';
+    const sex = p.sex === 'female' || p.sex === 'male' ? p.sex : null;
     const age = SP.Model.ageOf(p);
     const r = n.rda;
+    /* Cinsiyet seçilmemiş: yalnız iki cinsiyette aynı olan değer verilir. */
+    if(!sex) return r.male != null && r.male === r.female ? r.male : null;
     if(age != null && age >= 51 && sex === 'female' && (r.female51 != null || r.female50 != null)){
       return r.female51 != null ? r.female51 : r.female50;
     }
@@ -241,9 +245,11 @@ SP.Nutri = (function(){
       bmr:bmr(p), tdee:energy, need, adjustments:adj,
       missing:[],
     };
-    if(!p || !p.weightKg) out.missing.push('kilo');
+    const kg = p ? (SP.Model.kiloOf(p) || {}).kg : null;
+    if(!kg) out.missing.push('kilo');
     if(!p || !p.heightCm) out.missing.push('boy');
     if(!p || !p.birthYear) out.missing.push('doğum yılı');
+    if(!p || (p.sex !== 'male' && p.sex !== 'female')) out.missing.push('cinsiyet');
     if(!out.ok) return out;
 
     const goal = SP.GOALS.find(g => g.id === (p.goal || 'health')) || SP.GOALS[0];
@@ -268,11 +274,11 @@ SP.Nutri = (function(){
     /* protein: g/kg araligi, hedefe gore */
     const pr = SP.MACRO_RULES.protein.byGoal[goal.id] || SP.MACRO_RULES.protein.byGoal.health;
     const pMult = (adj.protein && adj.protein.mult) || 1;
-    out.protein = { min:Math.round(pr[0] * p.weightKg * pMult), max:Math.round(pr[1] * p.weightKg * pMult) };
+    out.protein = { min:Math.round(pr[0] * kg * pMult), max:Math.round(pr[1] * kg * pMult) };
 
     /* yag: kalorinin yuzdesi, alt sinir kg basina */
     const fLo = Math.max(Math.round(out.kcal * SP.MACRO_RULES.fat.pctRange[0] / 100 / 9),
-                         Math.round(SP.MACRO_RULES.fat.minPerKg * p.weightKg));
+                         Math.round(SP.MACRO_RULES.fat.minPerKg * kg));
     const fHi = Math.round(out.kcal * SP.MACRO_RULES.fat.pctRange[1] / 100 / 9);
     out.fat = { min:fLo, max:Math.max(fHi, fLo) };
 
@@ -571,7 +577,7 @@ SP.Nutri = (function(){
   function householdSplit(foodId, totalGrams, members){
     const f = SP.FOOD_BY_ID[foodId];
     if(!f) return { ok:false, error:'Yemek bulunamadı.' };
-    const list = (members || []).filter(m => m.weightKg && m.heightCm && m.birthYear);
+    const list = (members || []).filter(m => SP.Model.kiloOf(m) && m.heightCm && m.birthYear);
     if(!list.length) return { ok:false, error:'Porsiyon hesabı için en az bir profilde kilo, boy ve doğum yılı gerekir.' };
 
     /* Her uye icin gunluk kalori hedefi; bu ogunun payi hedefin %35'i sayilir

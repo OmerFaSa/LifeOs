@@ -1363,7 +1363,7 @@ R.Screens = R.Screens || {};
     const x = O().konuyuBul(q.konu), ak = P().anahtar(q);
     const day = S.days[U.todayISO()];
     const cipa = day && Number(day.paragraphTarget) > 0
-      ? 'Bugünün paragraf çıpası: ' + (Number(day.paragraphActual) || 0) + ' / ' + day.paragraphTarget : null;
+      ? 'Bugünün paragraf çıpası: ' + (day.paragraphActual == null ? '—' : day.paragraphActual) + ' / ' + day.paragraphTarget : null;
     const sonMu = i === l.length - 1;
     return K.Card({ wide:true,
       body:html`

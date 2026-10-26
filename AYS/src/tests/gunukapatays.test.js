@@ -30,7 +30,7 @@
       blok('b1', { slot:'İkinci ders', subject:'Biyoloji', topic:'Hücre', targetMin:45, targetQ:15 }),
       blok('b2', { slot:'Dinlenme', subject:'Dinlenme', topic:'Dinlenme', targetMin:0, targetQ:0 }),
     ];
-    day.sleepHours = null; day.paragraphActual = 0; day.problemActual = 0;
+    day.sleepHours = null; day.paragraphActual = null; day.problemActual = null;
     const bildirilen = [];
     R.App.girisKur();
     R.App.gunuKapatKur({ bildir:(m, g) => bildirilen.push([m, g]), yenile:() => {} });
@@ -91,7 +91,7 @@
           expect(day.blocks.map(b => [b.status, b.actualMin, b.actualQ, b.correctQ])).toEqual([
             ['done', 60, null, null], ['done', 20, null, null], ['pending', null, null, null]]);
           expect(day.sleepHours).toBe(null);
-          expect(day.paragraphActual).toBe(0);
+          expect(day.paragraphActual).toBe(null);
           expect(typeof bildirilen[0][1]).toBe('function');
           await r.geriAl();
           expect(kopya(day)).toEqual(once);
@@ -358,6 +358,33 @@
           bitir();
           const h = String(await R.Screens.today.render());
           expect(h.indexOf('data-act="gunu-kapat"') < 0).toBe(true);
+        }finally{ bitir(); }
+      });
+    });
+  });
+  /* AGENTS §1.2: girilmemiş sayaç boştur, 0 değil. Yeni gün 0 ile açılıyordu:
+     Günü düzenle «0 / 18» gösteriyor, Günü kapat gerçek 0'ı girilmiş sayamıyordu. */
+  describe('Girilmemiş sayaç boştur, sıfır değil — AYS', () => {
+    it('yeni gün boş açılır; ekran «—» der; gerçek 0 girilmiş sayılır; geri al boşa döner', async () => {
+      await withTodayAsync(GUN, async () => {
+        try{
+          const { day } = await hazirla();
+          const yeni = await R.Model.ensureDay('2026-10-13');
+          ['paragraphActual', 'problemActual', 'freeQ', 'freeCorrect'].forEach(k => expect(yeni[k]).toBe(null));
+          const h = String(await cizimsiz(() => R.Screens.gun.render()));
+          expect(h.indexOf('aria-live="polite">—<') >= 0).toBe(true);
+          const by = id => T().satirlar(GUN).find(s => s.id === id);
+          expect(by('paragraf').yazildi).toBe(false);
+          day.problemActual = 0;
+          expect(by('problem').yazildi).toBe(true);
+          expect(by('problem').ipucu).toBe('girildi: 0');
+          await R.Beacon.save({ level:'gelismis' });
+          expect(R.Beacon.collect(GUN).paragraph_done).toEqual({ value:null, cert:'missing' });
+          await R.Beacon.save({ level:'ozet' });
+          const a = await R.Proposals.hemen({ action:'paragraf-yaz', params:{ date:GUN, count:10 } });
+          expect(day.paragraphActual).toBe(10);
+          await R.Proposals.undo(a.row.id);
+          expect(day.paragraphActual).toBe(null);
         }finally{ bitir(); }
       });
     });

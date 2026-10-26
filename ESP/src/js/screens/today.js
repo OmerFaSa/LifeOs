@@ -469,7 +469,7 @@ ESP.Screens.today = (function(){
     const a = ESP.Dunku.adaylar(U.todayISO());
     if(!a.oturumlar.length) return null;
     return K.Entry({ label:'Dünkünün aynısı', meta:U.fmtShort(a.dun), wide:true,
-      note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; kalite puanı kopyalanmaz.',
+      note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; süre tahmin sayılır, sayım ve kalite kopyalanmaz.',
       body:html`${map(a.oturumlar, o => html`<div class="row between wrap gap-6 mt-4">
         <span class="small"><b>${o.ad}</b> <span class="tiny dim">${o.dk} dk${o.sayim ? ' · ' + o.sayim : ''}</span></span>
         ${K.Button({ label:'Bugüne ekle', size:'sm', act:'dunku-oturum', data:{ 'data-id':o.id } })}</div>`)}` });
@@ -1135,13 +1135,13 @@ ESP.Screens.today = (function(){
       if(!r.ok){ ESP.UI.toast(r.why); return; }
       ESP.App.render();
       { const Z = (window.LIFEOS || {}).ZEMIN; if(Z && Z.nabiz) Z.nabiz(); }
-      ESP.UI.toast(r.ad + ' ' + U.fmtMin(r.dk) + ' bugüne eklendi', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
+      ESP.UI.toast(r.ad + ' ' + U.fmtMin(r.dk) + ' bugüne eklendi (tahmini süre)', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
     },
     async 'dunku-oturum'(el){
       const bugun = U.todayISO();
       const r = await ESP.Dunku.kopyala(bugun, el.dataset.id);
       if(!r.ok){ ESP.UI.toast(r.why); return; }
-      ESP.UI.toast(r.ad + ' bugüne eklendi', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
+      ESP.UI.toast(r.ad + ' bugüne eklendi (tahmini süre)', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
       ESP.App.render();
     },
     async 'kotu-gun'(){
@@ -1318,9 +1318,13 @@ ESP.Screens.today = (function(){
     },
 
     async 'del-session'(el){
-      await M.deleteSession(gun(), el.dataset.id);
+      const g = gun(), l = M.sessionsOf(g), i = l.findIndex(s => s.id === el.dataset.id), s = l[i];
+      await M.deleteSession(g, el.dataset.id);
       ESP.Memo.bitir();
       ESP.App.render();
+      /* Geri al: aynı nesne aynı sıraya döner (kimlik ve kesinlik korunur). */
+      if(s) ESP.UI.toast('Oturum silindi', { undo:async () => {
+        M.ensureDay(g).sessions.splice(i, 0, s); await M.saveDay(g); ESP.App.render(); } });
     },
 
     async 'parse-quick'(){

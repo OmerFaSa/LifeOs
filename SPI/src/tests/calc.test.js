@@ -48,6 +48,14 @@
       expect(p.ok).toBeFalsy();
     });
 
+    it('profilde kilo yoksa son ölçülen kilo protein tabanını kurar', () => {
+      resetState();
+      SP.S.profile.weightKg = null;
+      pushVitals('2026-02-27', { weight:80 });
+      const p = SP.Calc.minimumDay('2026-03-01').rows.find(r => r.id === 'protein');
+      expect(p.detail).toContain('/ 96 g');
+    });
+
     it('15 dakikanın altında hareket sayılmaz', () => {
       resetState();
       pushWorkout('2026-03-01', { minutes:10, rpe:5 });

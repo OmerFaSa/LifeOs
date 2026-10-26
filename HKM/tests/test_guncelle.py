@@ -390,6 +390,17 @@ def run():
         ok('<span class="dugme">Aç</span>' in pc and 'data-hkm="1"' in pc)       # PC'de durum ve dugme kalir
     test("secim sayfasi: karar gelene dek gizli, belirme, ozet yuvalari, telefonda ok", t_secim_sayfasi)
 
+    # 2026-10-26 denetim: uc modul bu sayfayla AYNI surecte; no-cors yoklamasi
+    # her HTTP cevabinda (503 dahil) cozulur, yani «Calisiyor» hep yesildi.
+    # Durum yalniz ag hatasinda («Kapali») gorunur; HKM'nin durumu kalir.
+    def t_modul_durumu():
+        pc = sunucu.giris_html()
+        eq(pc.count('<span class="durum" data-hal="bekle" hidden>'), 3)
+        eq(pc.count('<span class="durum" data-hal="bekle">'), 1)                # HKM
+        no("then(function(){ yak(k, true); })" in pc)
+        ok(".catch(function(){ yak(k, false); })" in pc)
+    test("giris kartlari: modul durumu yalniz kapaliyken gorunur", t_modul_durumu)
+
     def t_uclar():
         srv = _Srv(("127.0.0.1", 0), sunucu.Giris)
         _th.Thread(target=srv.serve_forever, daemon=True).start()
