@@ -18427,7 +18427,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'861c4124', at:'2026-10-27 09:34', dirty:true };
+ESP.BUILD = { id:'8a982aa1', at:'2026-10-27 09:43', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -30020,7 +30020,7 @@ window.LIFEOS.HESAP = (function(){
   }
 
   const OZET = 'lifeos_ozet_';
-  const OZET_SATIR = 4, OZET_UZUN = 80, OZET_GUN = 7, OZET_DON = 3600;
+  const OZET_SATIR = 4, OZET_UZUN = 80, OZET_GUN = 7;
   const KES_AD = { measured:'ölçüldü', computed:'hesaplandı', estimated:'tahmin', missing:'veri yok' };
   const VARLIK = { amp:'&', lt:'<', gt:'>', quot:'"', '#39':"'" };
   function duzMetin(html){
@@ -30088,33 +30088,19 @@ window.LIFEOS.HESAP = (function(){
     if(fark === 1) return 'dün';
     return fark + ' gün önce';
   }
-  let ozetId = null;
+  /* Tek sabit satır (2026-10-27, WCAG 2.2.2): satırlar 3,6 sn'de kendiliğinden
+     dönüyordu ve durdurma yolu yoktu. Kartın ilk maddesi kalır. */
   function ozetCiz(){
     if(typeof document === 'undefined') return;
     document.querySelectorAll('[data-ozet]').forEach(el => {
       const o = ozetOku(el.getAttribute('data-ozet'));
       el.hidden = !o;
       if(!o){ el.innerHTML = ''; return; }
-      el.innerHTML = '<span class="kart__ozet-sahne">' + o.satirlar.map((x, i) =>
-          '<span class="kart__ozet-satir' + (i ? '' : ' is-on') + '"><b>' + kac(x.u) + '</b> ' + kac(x.m)
-          + (x.k ? ' <i>' + KES_AD[x.k] + '</i>' : '') + '</span>').join('') + '</span>'
+      const x = o.satirlar[0];
+      el.innerHTML = '<span class="kart__ozet-sahne"><span class="kart__ozet-satir is-on"><b>' + kac(x.u) + '</b> ' + kac(x.m)
+          + (x.k ? ' <i>' + KES_AD[x.k] + '</i>' : '') + '</span></span>'
         + '<span class="kart__ozet-ne">' + kac(ozetZamani(o.t)) + '</span>';
     });
-    if(ozetId == null) ozetId = ortam.zamanla(ozetDondur, OZET_DON);
-  }
-  function ozetDondur(){
-    ozetId = null;
-    if(typeof document === 'undefined') return;
-    /* Giden satır yukarı solar, gelen aşağıdan belirir (sunucu.py stili). */
-    document.querySelectorAll('.kart__ozet-sahne').forEach(sahne => {
-      const l = sahne.children;
-      if(l.length < 2) return;
-      const i = Array.prototype.findIndex.call(l, x => x.classList.contains('is-on'));
-      Array.prototype.forEach.call(l, x => x.classList.remove('is-giden'));
-      if(i >= 0){ l[i].classList.remove('is-on'); l[i].classList.add('is-giden'); }
-      l[(i + 1) % l.length].classList.add('is-on');
-    });
-    ozetId = ortam.zamanla(ozetDondur, OZET_DON);
   }
   function azaltilmis(){ try{ return !!ortam.azalt(); }catch(e){ return true; } }
   /* Kart yeni içeriğin boyuna yumuşakça uzar/kısalır (zıplamaz). */
@@ -32134,8 +32120,6 @@ window.LIFEOS.HESAP = (function(){
     kapiKapat(false);
     merkezKapat();
     bagDur();
-    if(ozetId != null) ortam.iptal(ozetId);
-    ozetId = null;
     if(typeof document !== 'undefined'){
       document.querySelectorAll('[data-hesap-kapi-cikis]').forEach(el => el.remove());
       document.documentElement.classList.remove('giris-hazir');
