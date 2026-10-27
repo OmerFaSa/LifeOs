@@ -47,14 +47,18 @@ window.LIFEOS.MINIK = (function(){
      Gözlük kalktı: gözler imleci izleyince yerinde kalıp kayık duruyordu.
      Her sayfa kadrodan kendi miniklerini çağırır (kadro()); aynı sayfaya
      dönünce aynıları. */
+  /* Ad ve huy, üstüne gelince küçük bir etikette görünür (kullanıcı,
+     2026-10-28: «agentlar daha anlaşılır olsun»); perde miniğin ses tonudur
+     (ses.js «bla», «gidik»): bilge alçak, neşeli ince konuşur. */
   const KISILER = Object.freeze([
-    { bicim:'yuvarlak', tip:'kulak',   huy:'uykucu',   boy:34, ton:0 },
-    { bicim:'kare',     tip:'anten',   huy:'konuskan', boy:30, ton:28 },
-    { bicim:'ucgen',    tip:'filiz',   huy:'merakli',  boy:36, ton:-26 },
-    { bicim:'yuvarlak', tip:'kurdele', huy:'neseli',   boy:30, ton:-12 },
-    { bicim:'ucgen',    tip:'yok',     huy:'hayalci',  boy:32, ton:14 },
-    { bicim:'kare',     tip:'yok',     huy:'bilge',    boy:33, ton:40 }
+    { ad:'Pofuduk', bicim:'yuvarlak', tip:'kulak',   huy:'uykucu',   boy:34, ton:0,   perde:0.9 },
+    { ad:'Bıcır',   bicim:'kare',     tip:'anten',   huy:'konuskan', boy:30, ton:28,  perde:1.15 },
+    { ad:'Filiz',   bicim:'ucgen',    tip:'filiz',   huy:'merakli',  boy:36, ton:-26, perde:1.05 },
+    { ad:'Ponpon',  bicim:'yuvarlak', tip:'kurdele', huy:'neseli',   boy:30, ton:-12, perde:1.25 },
+    { ad:'Bulut',   bicim:'ucgen',    tip:'yok',     huy:'hayalci',  boy:32, ton:14,  perde:1 },
+    { ad:'Bilge',   bicim:'kare',     tip:'yok',     huy:'bilge',    boy:33, ton:40,  perde:0.8 }
   ]);
+  const HUY_AD = Object.freeze({ uykucu:'uykucu', konuskan:'konuşkan', merakli:'meraklı', neseli:'neşeli', hayalci:'hayalci', bilge:'bilge' });
   const BALON = Object.freeze(['hey!', '♪', '…', 'hı hı', 'ooo', '!?', 'hihi', '♡']);
 
   /* --- saf hesaplar (test edilir) --- */
@@ -136,7 +140,7 @@ window.LIFEOS.MINIK = (function(){
 
   /* --- DOM --- */
 
-  const durum = { kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0 };
+  const durum = { kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null };
   /* Sohbet gibi çok adımlı işlerin zamanlayıcıları: sayfa değişince silinir. */
   function zamanla(fn, ms){ const t = setTimeout(fn, ms); durum.zamanlar.push(t); return t; }
   /* Meşgul işareti 12 sn'de kendiliğinden düşer: yarıda kalan bir iş
@@ -151,7 +155,15 @@ window.LIFEOS.MINIK = (function(){
     const h = document.documentElement;
     return azMi() || h.getAttribute('data-zemin') !== 'yumusak' || h.classList.contains('king-acik');
   }
-  function ses(tur){ try{ if(window.LIFEOS.SES) window.LIFEOS.SES.tik(tur); }catch(e){} }
+  /* Kendi tonunda ses. kur:false — yalnız kullanıcı daha önce bir şeye
+     dokunduysa (ses bağlamı kuruluysa) çalar; sohbet kendiliğinden ses
+     açmaz. Sekme arkadaysa ya da pencere odakta değilse minikler susar. */
+  function ses(tur, mk, kur){
+    try{
+      if(kur === false && (document.visibilityState === 'hidden' || (document.hasFocus && !document.hasFocus()))) return;
+      if(window.LIFEOS.SES) window.LIFEOS.SES.tik(tur, kur, { perde:mk && mk.perde || 1 });
+    }catch(e){}
+  }
   const rasgele = l => l[Math.floor(Math.random() * l.length)];
 
   function olcum(){
@@ -171,6 +183,9 @@ window.LIFEOS.MINIK = (function(){
 
   function giydir(mk, k){
     mk.huy = k.huy;
+    mk.perde = k.perde;
+    mk.el.querySelector('.minik__ad b').textContent = k.ad;
+    mk.el.querySelector('.minik__ad i').textContent = HUY_AD[k.huy] || k.huy;
     mk.el.dataset.tip = k.tip;
     mk.el.dataset.bicim = k.bicim;
     mk.el.style.setProperty('--boy', k.boy + 'px');
@@ -184,8 +199,8 @@ window.LIFEOS.MINIK = (function(){
       + '<i class="minik__kol minik__kol--sol"></i><i class="minik__kol minik__kol--sag"></i>'
       + '<span class="minik__govde"><i class="minik__deri"></i><i class="minik__goz"></i><i class="minik__goz"></i>'
       + '<i class="minik__agiz"></i><i class="minik__sus"></i></span><span class="minik__balon"></span><span class="minik__zzz">z</span>'
-      + '<span class="minik__kalp">♡</span>';
-    const mk = { el:m, z:null, x:0, y:0, anim:null, zaman:0, huy:'', mesgul:false, mesgulSon:0 };
+      + '<span class="minik__kalp">♡</span><span class="minik__ad"><b></b> · <i></i><small>Dokun, gıdıkla</small></span>';
+    const mk = { el:m, z:null, x:0, y:0, anim:null, zaman:0, huy:'', perde:1, mesgul:false, mesgulSon:0 };
     giydir(mk, KISILER[i % KISILER.length]);
     m.addEventListener('pointerenter', () => { m.classList.add('is-farkinda'); if(!mesgulMu(mk) && !m.classList.contains('is-uyuyor')) ekHal(mk, 'is-selam', 900); });
     m.addEventListener('pointerleave', () => m.classList.remove('is-farkinda'));
@@ -253,6 +268,7 @@ window.LIFEOS.MINIK = (function(){
       (m === a ? b : a).el.classList.remove('is-konusuyor');
       m.el.querySelector('.minik__balon').textContent = rasgele(BALON);
       hal(m, 'is-konusuyor');
+      ses('bla', m, false);
       if(i === 0) ekHal(m, 'is-selam', 900);
     }, i * 1300));
     zamanla(() => {
@@ -270,7 +286,7 @@ window.LIFEOS.MINIK = (function(){
     const uyuyordu = mk.el.classList.contains('is-uyuyor');
     hal(mk, uyuyordu ? 'is-uyaniyor' : 'is-gidik');
     if(!uyuyordu) ekHal(mk, 'is-kalp', 1400);
-    ses(uyuyordu ? 'tik' : 'gidik');
+    ses(uyuyordu ? 'tik' : 'gidik', mk);
     sonra(mk, uyuyordu ? 1600 : 1500);
   }
 
@@ -334,8 +350,14 @@ window.LIFEOS.MINIK = (function(){
         mk.z = ayni;
         if(Math.abs(ayni.y - mk.y) > .5 && !(mk.anim && mk.anim.playState === 'running')) koy(mk, Math.min(ayni.x2, Math.max(ayni.x1, mk.x)), ayni.y);
       } else {
-        /* Sayfa geçişinde yerleşmeyi sayfaDegisti yapar (içerik oturunca). */
-        if(document.documentElement.classList.contains('sayfa-gecis')) return;
+        /* Sayfa değiştiyse yerleşmeyi sayfaDegisti yapar (içerik oturunca). */
+        if(durum.yerlesme) return;
+        /* Aynı sayfa yeniden çizildi (kart yenisiyle değişti): miniğin
+           altındaki yeni kenar bulunur, minik yerinde kalır. Bulunmazsa
+           görünen bir kenara konur — eski yerinde havada beklemez. */
+        const yakin = !(mk.anim && mk.anim.playState === 'running')
+          && durum.zeminler.find(o => mk.x >= o.x1 && mk.x <= o.x2 && Math.abs(o.y - mk.y) < 60);
+        if(yakin){ mk.z = yakin; koy(mk, mk.x, yakin.y); return; }
         if(mk.anim) mk.anim.cancel();
         mesgul(mk, false); temizle(mk);
         mk.el.classList.remove('is-yuruyor', 'is-ucuyor');
@@ -362,6 +384,7 @@ window.LIFEOS.MINIK = (function(){
     });
     clearTimeout(durum.yerlesme);
     durum.yerlesme = setTimeout(() => {
+      durum.yerlesme = 0;
       durum.zeminler = olcum();
       durum.minikler.forEach((mk, i) => { if(yerlestir(mk)) sonra(mk, 2000 + i * 1400); });
     }, 720);
@@ -417,7 +440,20 @@ window.LIFEOS.MINIK = (function(){
   }
 
   function kur(){
-    if(durum.kat || typeof document === 'undefined' || !document.querySelector('#app .site--v5')) return;   // test sayfasında #app yok
+    if(durum.kat || typeof document === 'undefined') return;
+    /* Uygulama ilk açılışta kurulum ekranındaysa kabuk henüz yok: kabuk
+       çizilince kurulur (test sayfasında #app yok, hiç kurulmaz). */
+    if(!document.querySelector('#app .site--v5')){
+      const app = document.getElementById('app');
+      if(app && !durum.bekci && typeof MutationObserver === 'function'){
+        durum.bekci = new MutationObserver(() => {
+          if(!document.querySelector('#app .site--v5')) return;
+          durum.bekci.disconnect(); durum.bekci = null; kur();
+        });
+        durum.bekci.observe(app, { childList:true, subtree:true });
+      }
+      return;
+    }
     const kat = document.createElement('div');
     kat.className = 'minikkat';
     kat.setAttribute('aria-hidden', 'true');
@@ -443,6 +479,15 @@ window.LIFEOS.MINIK = (function(){
       onceki = k; tazele();
       if(!k) durum.minikler.forEach(mk => sonra(mk, 400));
     }).observe(document.documentElement, { attributes:true, attributeFilter:['class', 'data-zemin', 'data-sayfa'] });
+    /* Bekçi: kart DOM değişmeden de kayabilir (üstteki kapak büyür, yazı
+       yüklenir); saniyede bir miniğin durduğu kartın yeri okunur (en çok üç
+       ölçüm), kaymışsa minik kenarla birlikte iner. */
+    setInterval(() => {
+      if(durum.kat.hidden || document.visibilityState === 'hidden') return;
+      const sy = window.scrollY || 0;
+      if(durum.minikler.some(mk => mk.z && mk.z.el && !(mk.anim && mk.anim.playState === 'running')
+        && Math.abs(mk.z.el.getBoundingClientRect().top + sy - mk.y) > 1)) tazele();
+    }, 1000);
     window.addEventListener('resize', iste);
     window.addEventListener('scroll', iste, { passive:true });
     document.addEventListener('click', sevin, true);
@@ -454,5 +499,5 @@ window.LIFEOS.MINIK = (function(){
     else window.addEventListener('load', () => setTimeout(kur, 60));
   }
 
-  return { kur, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, KISILER, KART, EN_AZ, PAY };
+  return { kur, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, KISILER, HUY_AD, KART, EN_AZ, PAY };
 })();

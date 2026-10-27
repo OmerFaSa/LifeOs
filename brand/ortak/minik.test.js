@@ -89,6 +89,14 @@
       expect(C.sohbetEsi([a, b, c, d], a)).toBe(b);
       expect(C.sohbetEsi([a, c, d], a)).toBe(null);
     });
+    it('her miniğin adı, Türkçe huy adı ve kendi ses tonu var (üstüne gelince adı görünür)', () => {
+      expect(new Set(C.KISILER.map(k => k.ad)).size).toBe(C.KISILER.length);
+      C.KISILER.forEach(k => {
+        expect(typeof C.HUY_AD[k.huy]).toBe('string');
+        expect(k.perde >= 0.7 && k.perde <= 1.4).toBe(true);
+      });
+      expect(new Set(C.KISILER.map(k => k.perde)).size >= 5).toBe(true);
+    });
     it('her minik başka: huyu farklı', () => {
       expect(new Set(C.KISILER.map(k => k.huy)).size).toBe(C.KISILER.length);
     });

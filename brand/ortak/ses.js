@@ -502,25 +502,53 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- tık sesleri
 
-     «Kısık, tok, kısa»: sinüs, hızlı zarf, düşük kazanç. Dosya yok; her ses
-     birkaç osilatör notasıdır. Nota: [gecikme sn, başlangıç Hz, bitiş Hz,
-     süre sn, tepe kazanç, yükselme sn]. */
+     «Kısık, tok, kısa» (2026-10-02); «daha profesyonel» (2026-10-28). Dosya
+     yok: her ses birkaç katmanlı küçük bir sentezdir. Katman türleri:
+       ton      osilatör (sine/triangle), istenirse alçak geçiren süzgeç
+       hisirti  beyaz gürültü, bant süzgeci (dokunuşun «tık»ı, sayfa hışırtısı)
+       ses      testere dişi → iki bant süzgeci (ünlü formantı): miniğin sesi
+     Alanlar: t gecikme sn · f [başlangıç, bitiş] Hz · d süre sn · g tepe
+     kazanç · a yükselme sn · suz süzgeç Hz · q · oda yankı payı · un ünlü.
+     Hepsi ortak bir çıkıştan geçer: kısa oda yankısı (üretilmiş, dosya yok)
+     ve yumuşak bir sıkıştırıcı — sesler aynı odada çalıyor gibi durur,
+     üst üste binince patlamaz. Her çalışta perde ±%2 oynar: aynı tık art
+     arda makineli tüfek gibi duyulmaz. */
   const SESLER = Object.freeze({
-    /* Su damlası (2026-10-27, sıvı cam teması): kısa, yukarı kayan «blop». */
-    tik:  [[0, 420, 760, 0.06, 0.03, 0.004]],
-    ac:   [[0, 380, 620, 0.05, 0.028, 0.003], [0.06, 560, 900, 0.06, 0.026, 0.003]],
-    kapa: [[0, 560, 900, 0.05, 0.026, 0.003], [0.06, 380, 560, 0.06, 0.028, 0.003]],
-    tamam:[[0, 392, 386, 0.2, 0.03, 0.014]],
-    /* Sayfa açılınca: iki yumuşak cam notası (E6 → B6), uzun sönüm. */
-    sayfa:[[0, 1318, 1318, 0.42, 0.012, 0.01], [0.07, 1975, 1975, 0.5, 0.009, 0.012]],
-    /* Miniğe dokununca kıkırdama: tiz, sekerek yükselen beş hece. */
-    gidik:[[0, 880, 1250, 0.07, 0.03, 0.006], [0.085, 990, 1400, 0.07, 0.028, 0.006], [0.17, 1050, 1500, 0.07, 0.026, 0.006],
-           [0.255, 1180, 1650, 0.08, 0.024, 0.006], [0.35, 1320, 1900, 0.1, 0.02, 0.006]],
-    /* Minik sohbeti («bla bla»): alçak, inip çıkan heceler. */
-    bla:  [[0, 520, 640, 0.07, 0.016, 0.006], [0.1, 640, 470, 0.07, 0.016, 0.006], [0.2, 560, 700, 0.08, 0.014, 0.006]],
+    /* Dokunuş: 1 kHz üstü kısa hışırtı + cam gövde + çok hafif ağırlık. */
+    tik:  [{ t:0, tur:'hisirti', f:[3600, 2400], q:1.2, d:0.014, g:0.03, a:0.001 },
+           { t:0, tur:'ton', dalga:'sine', f:[1760, 1480], d:0.04, g:0.013, a:0.002 },
+           { t:0, tur:'ton', dalga:'sine', f:[190, 120], d:0.035, g:0.016, a:0.002 }],
+    /* Aç/kapa: iki notalık yumuşak tel (G5 ↔ D6), hafif yankı. */
+    ac:   [{ t:0, tur:'ton', dalga:'triangle', f:[784, 784], suz:2600, d:0.09, g:0.016, a:0.003, oda:0.12 },
+           { t:0.055, tur:'ton', dalga:'triangle', f:[1175, 1175], suz:3200, d:0.12, g:0.014, a:0.003, oda:0.16 }],
+    kapa: [{ t:0, tur:'ton', dalga:'triangle', f:[1175, 1175], suz:3200, d:0.08, g:0.014, a:0.003, oda:0.12 },
+           { t:0.055, tur:'ton', dalga:'triangle', f:[784, 784], suz:2400, d:0.11, g:0.015, a:0.003, oda:0.12 }],
+    /* Kaydedildi: iki vuruşluk cam çan (C6 → E6), çanın kısmi sesiyle. */
+    tamam:[{ t:0, tur:'ton', dalga:'sine', f:[1047, 1047], d:0.55, g:0.009, a:0.004, oda:0.3 },
+           { t:0, tur:'ton', dalga:'sine', f:[2890, 2890], d:0.18, g:0.003, a:0.002, oda:0.3 },
+           { t:0.09, tur:'ton', dalga:'sine', f:[1319, 1319], d:0.7, g:0.008, a:0.004, oda:0.35 },
+           { t:0.09, tur:'ton', dalga:'sine', f:[3640, 3640], d:0.2, g:0.0025, a:0.002, oda:0.35 }],
+    /* Sayfa açılınca: camın üstünden geçen hava — yükselen yumuşak hışırtı
+       ve en sonda belli belirsiz bir cam notası. */
+    sayfa:[{ t:0, tur:'hisirti', f:[420, 2200], q:0.8, d:0.28, g:0.007, a:0.11, oda:0.25 },
+           { t:0.14, tur:'ton', dalga:'sine', f:[1568, 1568], d:0.36, g:0.003, a:0.02, oda:0.4 }],
+    /* Miniğe dokununca kıkırdama: «hi-hi-hi», ince ve yükselen ünlüler. */
+    gidik:[{ t:0, tur:'ses', un:'i', f:[620, 700], d:0.07, g:0.018, a:0.008 },
+           { t:0.085, tur:'ses', un:'i', f:[680, 760], d:0.07, g:0.017, a:0.008 },
+           { t:0.17, tur:'ses', un:'e', f:[740, 840], d:0.07, g:0.016, a:0.008 },
+           { t:0.26, tur:'ses', un:'i', f:[820, 960], d:0.1, g:0.014, a:0.008, oda:0.15 }],
+    /* Minik sohbeti («bla bla»): alçak, inip çıkan üç hece. */
+    bla:  [{ t:0, tur:'ses', un:'a', f:[430, 470], d:0.09, g:0.009, a:0.01 },
+           { t:0.12, tur:'ses', un:'o', f:[480, 420], d:0.09, g:0.009, a:0.01 },
+           { t:0.24, tur:'ses', un:'e', f:[450, 520], d:0.11, g:0.008, a:0.01, oda:0.1 }],
   });
+  /* Küçük bir ağızdan ünlüler: [F1, F2] Hz (insan sesinin biraz üstü). */
+  const UNLU = Object.freeze({ a:[950, 1500], e:[600, 2300], i:[400, 2800], o:[640, 1050], u:[420, 950] });
+  const ARA = 0.04;          // aynı ses bundan sık çalmaz (sn)
   let baglam = null;
+  let zincir = null;
   let sonBitis = 0;
+  const sonCal = {};
 
   /* kur: AudioContext yoksa kurulsun mu? Yalnız kullanıcının dokunuşunda
      kurulur (tarayıcı başka türlü askıda başlatır). */
@@ -535,33 +563,130 @@ window.LIFEOS = window.LIFEOS || {};
     if(baglam.state === 'suspended' && baglam.resume){ try{ baglam.resume(); }catch(e){} }
     return baglam;
   }
-  function nota(c, t, f0, f1, sure, tepe, yuksel){
-    const o = c.createOscillator();
-    const g = c.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(f0, t);
-    if(f1 && f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + sure);
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(tepe, t + yuksel);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + sure);
-    o.connect(g);
-    g.connect(c.destination);
-    o.start(t);
-    o.stop(t + sure + 0.02);
+
+  /* Ortak çıkış (bağlamda bir kez): giriş → sıkıştırıcı → hoparlör; yankı
+     gönderisi → kısa oda → sıkıştırıcı. Bağlam bir düğümü tanımıyorsa
+     (eski tarayıcı) o halka atlanır, ses yine çalar. */
+  function zincirKur(c){
+    if(zincir && zincir.c === c) return zincir;
+    let hedef = c.destination;
+    try{
+      if(c.createDynamicsCompressor){
+        const k = c.createDynamicsCompressor();
+        k.threshold.value = -24; k.knee.value = 18; k.ratio.value = 3; k.attack.value = 0.003; k.release.value = 0.12;
+        k.connect(c.destination);
+        hedef = k;
+      }
+    }catch(e){ hedef = c.destination; }
+    let oda = null;
+    try{
+      if(c.createConvolver && c.createBuffer){
+        /* Kısa oda: 0,7 sn, üstel sönen ve gittikçe yumuşayan gürültü. */
+        const sr = c.sampleRate || 44100, n = Math.floor(sr * 0.7);
+        const ir = c.createBuffer(2, n, sr);
+        for(let k = 0; k < 2; k++){
+          const v = ir.getChannelData(k);
+          let once = 0;
+          for(let i = 0; i < n; i++){
+            const x = i / n, yumusa = 0.25 + 0.7 * x;
+            once = once + (Math.random() * 2 - 1 - once) * (1 - yumusa);
+            v[i] = once * Math.pow(1 - x, 3.2);
+          }
+        }
+        oda = c.createConvolver();
+        oda.buffer = ir;
+        const og = c.createGain();
+        og.gain.value = 0.5;
+        oda.connect(og); og.connect(hedef);
+      }
+    }catch(e){ oda = null; }
+    let gurultu = null;
+    try{
+      if(c.createBuffer){
+        const sr = c.sampleRate || 44100;
+        gurultu = c.createBuffer(1, Math.floor(sr * 0.4), sr);
+        const v = gurultu.getChannelData(0);
+        for(let i = 0; i < v.length; i++) v[i] = Math.random() * 2 - 1;
+      }
+    }catch(e){ gurultu = null; }
+    zincir = { c, hedef, oda, gurultu };
+    return zincir;
   }
-  /* Döner: çaldı mı. `kur` yoksa yalnız kurulu bağlam kullanılır. */
-  function tik(tur, kur){
+
+  function zarf(c, g, t, tepe, yuksel, sure){
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(tepe, t + Math.max(0.001, yuksel));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + sure);
+  }
+  function suzgec(c, tur, f, q, t){
+    if(!c.createBiquadFilter) return null;
+    const s = c.createBiquadFilter();
+    s.type = tur;
+    s.frequency.setValueAtTime(f, t);
+    if(q != null) s.Q.value = q;
+    return s;
+  }
+
+  function katman(c, z, t, k, perde){
+    const f0 = k.f[0] * perde, f1 = (k.f[1] || k.f[0]) * perde;
+    const g = c.createGain();
+    zarf(c, g, t, k.g, k.a || 0.003, k.d);
+    g.connect(z.hedef);
+    if(k.oda && z.oda){ const s = c.createGain(); s.gain.value = k.oda; g.connect(s); s.connect(z.oda); }
+    let kaynak;
+    if(k.tur === 'hisirti'){
+      if(!z.gurultu || !c.createBufferSource) return;
+      kaynak = c.createBufferSource();
+      kaynak.buffer = z.gurultu;
+      const b = suzgec(c, 'bandpass', f0, k.q == null ? 1 : k.q, t);
+      if(b){
+        if(f1 !== f0) b.frequency.exponentialRampToValueAtTime(f1, t + k.d);
+        kaynak.connect(b); b.connect(g);
+      } else kaynak.connect(g);
+    } else {
+      kaynak = c.createOscillator();
+      kaynak.type = k.tur === 'ses' ? 'sawtooth' : (k.dalga || 'sine');
+      kaynak.frequency.setValueAtTime(f0, t);
+      if(f1 !== f0) kaynak.frequency.exponentialRampToValueAtTime(f1, t + k.d);
+      if(k.tur === 'ses'){
+        /* İki formant yan yana: ünlü rengini bunlar verir; perde biraz da
+           formantı taşır (küçük minik, ince ağız). */
+        const u = UNLU[k.un] || UNLU.a, fp = Math.sqrt(perde);
+        const b1 = suzgec(c, 'bandpass', u[0] * fp, 6, t), b2 = suzgec(c, 'bandpass', u[1] * fp, 9, t);
+        if(b1 && b2){
+          /* Dar süzgeç enerjiyi yer: telafi kazancı öteki seslerle aynı düzeye getirir. */
+          const g2 = c.createGain(), dz = c.createGain();
+          g2.gain.value = 0.6; dz.gain.value = 3;
+          kaynak.connect(b1); b1.connect(dz);
+          kaynak.connect(b2); b2.connect(g2); g2.connect(dz);
+          dz.connect(g);
+        } else kaynak.connect(g);
+      } else if(k.suz){
+        const b = suzgec(c, 'lowpass', k.suz * perde, 0.7, t);
+        if(b){ kaynak.connect(b); b.connect(g); } else kaynak.connect(g);
+      } else kaynak.connect(g);
+    }
+    kaynak.start(t);
+    kaynak.stop(t + k.d + 0.03);
+  }
+
+  /* Döner: çaldı mı. `kur` yoksa yalnız kurulu bağlam kullanılır.
+     o.perde: frekans çarpanı (her minik kendi tonunda konuşur). */
+  function tik(tur, kur, o){
     const plan = SESLER[tur];
     if(!plan) return false;
     const c = sesBaglami(kur !== false);
     if(!c) return false;
     try{
       const simdi = c.currentTime || 0;
+      if(sonCal[tur] != null && simdi - sonCal[tur] < ARA && simdi >= sonCal[tur]) return false;
+      sonCal[tur] = simdi;
+      const z = zincirKur(c);
       /* «Tamam» notası tıkın üstüne binmez, ardından gelir. */
-      const bas = tur === 'tamam' ? Math.max(simdi, sonBitis + 0.02) : simdi;
-      plan.forEach(n => nota(c, bas + n[0], n[1], n[2], n[3], n[4], n[5]));
-      const son = plan[plan.length - 1];
-      sonBitis = Math.max(sonBitis, bas + son[0] + son[3]);
+      const bas = tur === 'tamam' ? Math.max(simdi, sonBitis + 0.02) : simdi + 0.005;
+      const perde = (o && o.perde > 0 ? o.perde : 1) * (1 + (Math.random() - 0.5) * 0.04);
+      plan.forEach(k => katman(c, z, bas + k.t, k, perde));
+      sonBitis = Math.max(sonBitis, bas + Math.max.apply(null, plan.map(k => k.t + k.d)));
       return true;
     }catch(e){ return false; }
   }
@@ -574,7 +699,9 @@ window.LIFEOS = window.LIFEOS || {};
   function baglamKapat(){
     if(baglam && baglam.close){ try{ baglam.close(); }catch(e){} }
     baglam = null;
+    zincir = null;
     sonBitis = 0;
+    Object.keys(sonCal).forEach(k => delete sonCal[k]);
   }
 
   const TIKLANAN = 'button, [role="button"], [role="switch"], a[href], .chip--tap, summary';

@@ -319,16 +319,25 @@
 
   describe('Ses — tık sesleri', () => {
     function sahteBaglam(){
-      const kayit = { kurulan:0, nota:[] };
+      const kayit = { kurulan:0, nota:[], gurultu:[], filtre:[], sikistirici:0, yanki:0, saat:0, tepe:0 };
+      const param = () => ({ value:0, setValueAtTime(){}, linearRampToValueAtTime(){},
+        exponentialRampToValueAtTime(v){ kayit.tepe = Math.max(kayit.tepe, v); } });
+      const dugum = o => Object.assign({ connect(){ return {}; } }, o);
       function Baglam(){
         kayit.kurulan++;
-        this.currentTime = 0; this.state = 'running'; this.destination = {};
+        Object.defineProperty(this, 'currentTime', { get:() => kayit.saat });
+        this.state = 'running'; this.destination = {}; this.sampleRate = 8000;
         this.createOscillator = () => {
-          const o = { type:'', frequency:{ setValueAtTime(f){ o.f0 = f; }, exponentialRampToValueAtTime(f){ o.f1 = f; } },
-            connect(){ return {}; }, start(t){ o.t = t; kayit.nota.push(o); }, stop(){} };
+          const o = dugum({ type:'', frequency:{ setValueAtTime(f){ o.f0 = f; }, exponentialRampToValueAtTime(f){ o.f1 = f; } },
+            start(t){ o.t = t; kayit.nota.push(o); }, stop(){} });
           return o;
         };
-        this.createGain = () => ({ gain:{ setValueAtTime(){}, exponentialRampToValueAtTime(v){ kayit.tepe = Math.max(kayit.tepe || 0, v); } }, connect(){ return {}; } });
+        this.createGain = () => dugum({ gain:param() });
+        this.createBiquadFilter = () => { const f = dugum({ type:'', Q:param(), frequency:{ setValueAtTime(v){ f.f = v; }, exponentialRampToValueAtTime(){} } }); kayit.filtre.push(f); return f; };
+        this.createBuffer = (k, n) => ({ getChannelData:() => new Float32Array(n) });
+        this.createBufferSource = () => { const b = dugum({ start(t){ b.t = t; kayit.gurultu.push(b); }, stop(){} }); return b; };
+        this.createDynamicsCompressor = () => { kayit.sikistirici++; return dugum({ threshold:param(), knee:param(), ratio:param(), attack:param(), release:param() }); };
+        this.createConvolver = () => { kayit.yanki++; return dugum({}); };
         this.resume = () => Promise.resolve();
       }
       return { Baglam, kayit };
@@ -354,24 +363,61 @@
       });
     });
 
-    it('su damlası: tık kısa, yukarı kayan «blop» (420→760 Hz), kazanç ≤ 0.05; aç yukarı, kapa aşağı', () => {
+    /* Kullanıcı (2026-10-28): «sesleri daha profesyonel yap». Tık artık
+       sinüs «blop» değil: kısa bir dokunuş hışırtısı + cam gövde + hafif
+       ağırlık; aç/kapa iki notalık tel (aç yükselir, kapa iner); hepsi
+       kısık, ortak bir sıkıştırıcıdan ve kısa bir oda yankısından geçer. */
+    it('tık: hışırtı + ton katmanı, 60 ms\'den kısa; aç yükselir, kapa iner; «tamam» yankılı çan', () => {
       const { Baglam, kayit } = sahteBaglam();
       return ortamla({ AudioContext:Baglam, sentetik:true }, () => {
         S.tikAc(true);
-        kayit.nota.length = 0;
         expect(S.tik('tik')).toBe(true);
-        expect(kayit.nota[0].f0).toBe(420);
-        expect(kayit.nota[0].f1).toBe(760);
-        expect(kayit.tepe <= 0.05).toBe(true);
-        kayit.nota.length = 0;
-        S.tik('ac');
-        expect(kayit.nota.map(n => n.f0)).toEqual([380, 560]);
-        kayit.nota.length = 0;
-        S.tik('kapa');
-        expect(kayit.nota.map(n => n.f0)).toEqual([560, 380]);
-        kayit.nota.length = 0;
-        S.tik('tamam');
-        expect(kayit.nota.length).toBe(1);
+        expect(kayit.gurultu.length).toBe(1);
+        expect(kayit.nota.length > 0).toBe(true);
+        expect(Math.max.apply(null, S.SESLER.tik.map(k => k.t + k.d)) <= 0.06).toBe(true);
+        const ton = ad => { kayit.saat += 1; kayit.nota.length = 0; S.tik(ad); return kayit.nota.map(n => n.f0); };
+        const ac = ton('ac'), kapa = ton('kapa');
+        expect(ac.length).toBe(2);
+        expect(ac[1]).toBeGreaterThan(ac[0]);
+        expect(kapa[0]).toBeGreaterThan(kapa[1]);
+        expect(S.SESLER.tamam.some(k => k.oda > 0 && k.d >= 0.4)).toBe(true);
+      });
+    });
+
+    it('çıkış zinciri: bir sıkıştırıcı ve bir oda yankısı (bağlamda bir kez); aynı ses 40 ms içinde üst üste çalmaz', () => {
+      const { Baglam, kayit } = sahteBaglam();
+      return ortamla({ AudioContext:Baglam, sentetik:true }, () => {
+        S.tikAc(true);
+        expect(S.tik('tik')).toBe(true);
+        expect(S.tik('tik')).toBe(false);
+        kayit.saat += 0.05;
+        expect(S.tik('tik')).toBe(true);
+        expect(kayit.sikistirici).toBe(1);
+        expect(kayit.yanki).toBe(1);
+      });
+    });
+
+    it('her ses kısık: hiçbir katman 0.03 kazancı geçmez; kısa sesler 1 sn\'yi geçmez', () => {
+      Object.keys(S.SESLER).forEach(ad => S.SESLER[ad].forEach(k => {
+        expect(k.g > 0 && k.g <= 0.03).toBe(true);
+        expect(k.t + k.d <= 1).toBe(true);
+      }));
+    });
+
+    it('minik sesi: gıdık ve sohbet ünlü süzgecinden (formant) geçer; perde sesin tonunu taşır', () => {
+      const { Baglam, kayit } = sahteBaglam();
+      return ortamla({ AudioContext:Baglam, sentetik:true }, () => {
+        S.tikAc(true);
+        expect(S.SESLER.gidik.every(k => k.tur === 'ses' && k.un)).toBe(true);
+        expect(S.SESLER.bla.every(k => k.tur === 'ses' && k.un)).toBe(true);
+        kayit.nota.length = 0; kayit.filtre.length = 0;
+        S.tik('bla');
+        expect(kayit.filtre.filter(f => f.type === 'bandpass').length >= 2).toBe(true);
+        const alcak = kayit.nota[0].f0;
+        kayit.saat += 1; kayit.nota.length = 0;
+        S.tik('bla', true, { perde:1.4 });
+        const ort = kayit.nota[0].f0 / alcak;
+        expect(ort > 1.25 && ort < 1.55).toBe(true);
       });
     });
 
@@ -385,12 +431,15 @@
         try{
           kayit.nota.length = 0;
           tikla(d.querySelector('#tk-p'));
-          expect(kayit.nota.map(n => n.f0)).toEqual([380, 560]);
-          kayit.nota.length = 0;
+          const ac = kayit.nota.map(n => n.f0);
+          expect(ac.length).toBe(2);
+          expect(ac[1]).toBeGreaterThan(ac[0]);
+          kayit.saat += 1; kayit.nota.length = 0;
           const c = d.querySelector('#tk-c');
           c.checked = true;
           c.dispatchEvent(new Event('change', { bubbles:true }));
-          expect(kayit.nota.map(n => n.f0)).toEqual([380, 560]);
+          expect(kayit.nota.length).toBe(2);
+          expect(kayit.nota[1].f0).toBeGreaterThan(kayit.nota[0].f0);
         }finally{ d.remove(); }
       });
     });
