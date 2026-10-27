@@ -1096,6 +1096,11 @@
         expect(esp.textContent).toContain('hesaplandı');
         expect(esp.textContent).toContain('bugün');
         expect(yuva.querySelector('[data-ozet="ays"]').hidden).toBe(true);
+        /* Tek sabit satır (WCAG 2.2.2, 2026-10-27): kendiliğinden dönen satır yok. */
+        h.ozetYaz('esp', 'esp-bugun', [{ ust:'Tekrar', sayi:'15 kart', cumle:'bekliyor.' }, { ust:'Seri', sayi:'3 gün', cumle:'üst üste.' }]);
+        h.ozetCiz();
+        expect(esp.querySelectorAll('.kart__ozet-satir').length).toBe(1);
+        expect(esp.textContent).toContain('Tekrar');
         c.jar.lifeos_ozet_ays = '%7Bbozuk';
         h.ozetCiz();
         expect(yuva.querySelector('[data-ozet="ays"]').hidden).toBe(true);

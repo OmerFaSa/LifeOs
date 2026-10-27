@@ -355,6 +355,13 @@ def run():
             ok(y not in h)                              # yer tutucu kalmadi
         ok('data-hkm="1"' in h)
         ok("Yedekle ve güncelle" in h and "yedekle=1" in h)   # ayrismis kopyanin cikisi
+        # 2026-10-27 sadelik: gelistirici metni yok (durdurma komutu, commit kodu);
+        # guncel sistemde kutu surum etiketine katlanir, etiket yeniden kontrol eder.
+        no("baslat.py --dur" in h)
+        s = sunucu.guncelle.surum()
+        if s:
+            no(s["kisa"] in h[h.index('id="surum"'):h.index('id="surum"') + 200], "surumde commit kodu")
+        ok("kutu.hidden = true" in h and "surumEt.addEventListener('click'" in h)
     test("giris sayfasi dort logoyu, surumu ve guncelleme kutusunu tasir", t_sayfa)
 
     # 2026-10-04: «Yedekle ve güncelle» metnindeki kesme isareti Python

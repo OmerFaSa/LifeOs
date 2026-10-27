@@ -331,8 +331,9 @@ button{ font:inherit; }
 .ust h1{ margin:0; font-size:20px; font-weight:650; letter-spacing:-.01em; }
 .ust h1 span{ color:var(--fg-3); font-weight:450; margin-left:6px; }
 .surum{ margin-left:auto; font:12px/1 var(--mono); color:var(--fg-3); padding:7px 10px;
-  border:1px solid var(--cizgi); border-radius:999px; background:var(--yuzey); white-space:nowrap; }
+  border:1px solid var(--cizgi); border-radius:999px; background:var(--yuzey); white-space:nowrap; cursor:pointer; }
 /* ---- guncelleme ---- */
+.guncel[hidden]{ display:none; }
 .guncel{ display:flex; gap:16px; align-items:flex-start; padding:18px 20px; margin-bottom:32px;
   background:var(--yuzey); border:1px solid var(--cizgi); border-radius:14px; box-shadow:var(--golge); }
 .guncel__ikon{ flex:none; width:40px; height:40px; border-radius:10px; display:grid; place-items:center;
@@ -450,7 +451,7 @@ html.giris-hazir:not(.hesap-kapi-acik) :is(.kart__ust, .kart__ozet, .kart__alt){
     <span class="isaret" aria-hidden="true"><b></b><b></b><b></b><b></b></span>
     <h1>LifeOS<span>Kontrol paneli</span></h1>
     <button type="button" class="hesap-cip" data-hesap-cip hidden></button>
-    <span class="surum" id="surum">__SURUM__</span>
+    <button type="button" class="surum" id="surum" title="Güncellemeyi yeniden kontrol et">__SURUM__</button>
   </header>
 
   <section class="guncel" id="guncel" data-hal="bekle" aria-live="polite" aria-label="Güncelleme" style="--sira:1">
@@ -473,7 +474,6 @@ html.giris-hazir:not(.hesap-kapi-acik) :is(.kart__ust, .kart__ozet, .kart__alt){
 
   <footer class="dip">
     <span>Verin bu bilgisayarda kalır; güncelleme ona dokunmaz.</span>
-    <span>Durdurmak: <code>python sistem/baslat.py --dur</code></span>
   </footer>
 </main>
 <script>
@@ -488,6 +488,9 @@ html.giris-hazir:not(.hesap-kapi-acik) :is(.kart__ust, .kart__ozet, .kart__alt){
   var kutu = $('guncel'), baslik = $('guncel-baslik'), alt = $('guncel-alt'), liste = $('guncel-liste'),
       dugme = $('guncel-dugme'), bak = $('guncel-bak');
   var sonraki = null;     // ana dugmenin yapacagi is
+  /* Guncel sistemde kutu surum etiketine katlanir (2026-10-27); etiket yeniden kontrol eder. */
+  var surumEt = $('surum'), surumMetni = surumEt.textContent;
+  surumEt.addEventListener('click', function(){ kutu.hidden = false; kontrol(true); });
   function post(yol){
     return fetch(yol, { method:'POST', headers:{ 'X-LifeOS':'guncelle' } })
       .then(function(r){ return r.json(); });
@@ -518,8 +521,10 @@ html.giris-hazir:not(.hesap-kapi-acik) :is(.kart__ust, .kart__ozet, .kart__alt){
     }
     hal('ok', 'Sistem güncel', d.ag ? 'En yeni sürümü kullanıyorsun.' : 'GitHub\\'a ulaşılamadı; son bilinen duruma göre.');
     ana('', null);
+    if(d.ag){ kutu.hidden = true; surumEt.textContent = surumMetni + ' · güncel'; }
   }
   function kontrol(taze){
+    surumEt.textContent = surumMetni;
     hal('bekle', 'Güncelleme kontrol ediliyor…', ''); bak.hidden = true; ana('', null);
     fetch('/api/guncelleme' + (taze ? '?taze=1' : '')).then(function(r){ return r.json(); }).then(ciz)
       .catch(function(){ hal('uyari', 'Güncelleme durumu okunamadı', ''); bak.hidden = false; });
@@ -646,7 +651,7 @@ def giris_html(telefon=False):
                        + '<div class="kart__alt"><span class="durum" data-hal="bekle"%s><i></i><span>Bakılıyor…</span></span>'
                        '<span class="dugme">%s</span></div></a>' % ("" if hkm else " hidden", "Başlat" if hkm else "Aç"))
     s = guncelle.surum()
-    surum = ("sürüm %s · %s" % (s["kisa"], s["tarih"])) if s else "zip sürümü"
+    surum = ("sürüm %s" % s["tarih"]) if s else "zip sürümü"
     sayfa = GIRIS_SAYFASI
     if telefon:
         sayfa = _telefon_iskeleti(sayfa)
