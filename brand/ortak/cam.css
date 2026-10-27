@@ -1,0 +1,159 @@
+/* CAM — sistem geneli cam yüzey dili (kullanıcı, 2026-10-27).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/cam.css`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/css/` klasörüne birebir kopyalanır. Her arayüzde EN SON
+   yüklenen stil dosyasıdır: zemin.css ve kabuk.css'in üstüne yazar.
+
+   Kullanıcı: «buğulu cam temayı daha glassy, canlı, sıvı akışkan, daha
+   soft»; örnekleri «Minimal Glassmorphism», visionOS paneller, Liquid
+   Glass; «daha profesyonel ama daha sade, eski hâlinden çok az kalsın,
+   yalnız bir yere değil, geniş çaplı»; «sağlık yeşilse yeşillikle,
+   akademi kitapla, ESP turuncu-kahve kitaplar». İlk iki deneme canlı
+   ekran görüntüsüyle gösterildi; ikincisinin yönü onaylandı.
+
+   · ZEMİN: modülün tonunda derin taban + üç büyük yumuşak küre (dört
+     leke ve kum tonu yok). Koyuda aynı aile, çok koyu.
+   · Modülün kimliği zeminin tonudur. Sağ üstte cam küre + çizgi motif
+     (kitap, yaprak) denendi; kullanıcı «çakma, kötü» dedi, kalktı.
+   · KART: levha kalktı; kartlar doğrudan zeminde süzülen yarı saydam
+     camdır. backdrop-filter YALNIZ yüzen katmanlarda (alt bant, kenar,
+     kağıt, menü, King): zemin zaten yumuşak geçiştir, kartta bulanıklık
+     görünmez ama uzun listede kaydırmayı pahalılaştırırdı.
+   · YAZI: kapak başlığı büyük, sıkı; selam küçük sans (italik serif yok).
+   · KING ve AJANLAR: King küresi gözlü cam küre; ajanlar modül tonunda
+     minik gözlü küre (harf aria-hidden süstü, ad zaten yanında yazar).
+   · «Sade» zemin (Görünüm ya da işletim sisteminin «saydamlığı azalt»ı):
+     bu dosyanın hiçbir kuralı çalışmaz; kartlar opak kalır. */
+
+:root{
+  --z-taban:oklch(from var(--mod) .955 .018 h);
+  --z-taban-2:oklch(from var(--mod) .915 .04 calc(h + 20));
+  --z-kure:oklch(from var(--mod) .78 .13 h / .55);
+  --z-kure-2:oklch(from var(--mod) .84 .10 calc(h - 35) / .5);
+  --z-kure-3:oklch(from var(--mod) .86 .09 calc(h + 40) / .45);
+  --cam:linear-gradient(140deg, rgba(255,255,255,.66), rgba(255,255,255,.4));
+  --cam-ince:linear-gradient(140deg, rgba(255,255,255,.5), rgba(255,255,255,.24));
+  --cam-katman:rgba(255,255,255,.72);
+  --cam-kenar:rgba(255,255,255,.78);
+  --cam-ust:inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(255,255,255,.25);
+  --cam-golge:0 30px 60px -34px oklch(from var(--mod) .35 .08 h / .42), 0 2px 6px -2px rgba(20,24,40,.06);
+  --cam-girdi:rgba(255,255,255,.5);
+}
+:root[data-theme="dark"]{
+  --z-taban:oklch(from var(--mod) .17 .02 h);
+  --z-taban-2:oklch(from var(--mod) .13 .025 calc(h + 20));
+  --z-kure:oklch(from var(--mod) .52 .15 h / .55);
+  --z-kure-2:oklch(from var(--mod) .42 .12 calc(h - 35) / .45);
+  --z-kure-3:oklch(from var(--mod) .40 .10 calc(h + 40) / .4);
+  --cam:linear-gradient(140deg, rgba(255,255,255,.10), rgba(255,255,255,.045));
+  --cam-ince:linear-gradient(140deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  --cam-katman:rgba(28,28,34,.72);
+  --cam-kenar:rgba(255,255,255,.12);
+  --cam-ust:inset 0 1px 0 rgba(255,255,255,.16);
+  --cam-golge:0 30px 60px -30px rgba(0,0,0,.7);
+  --cam-girdi:rgba(0,0,0,.22);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --z-taban:oklch(from var(--mod) .17 .02 h);
+    --z-taban-2:oklch(from var(--mod) .13 .025 calc(h + 20));
+    --z-kure:oklch(from var(--mod) .52 .15 h / .55);
+    --z-kure-2:oklch(from var(--mod) .42 .12 calc(h - 35) / .45);
+    --z-kure-3:oklch(from var(--mod) .40 .10 calc(h + 40) / .4);
+    --cam:linear-gradient(140deg, rgba(255,255,255,.10), rgba(255,255,255,.045));
+    --cam-ince:linear-gradient(140deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    --cam-katman:rgba(28,28,34,.72);
+    --cam-kenar:rgba(255,255,255,.12);
+    --cam-ust:inset 0 1px 0 rgba(255,255,255,.16);
+    --cam-golge:0 30px 60px -30px rgba(0,0,0,.7);
+    --cam-girdi:rgba(0,0,0,.22);
+  }
+}
+
+/* 1) ZEMİN. Nefes animasyonu (zemin.css) aynı katmanı oynatır; dokunulmaz. */
+html[data-zemin="yumusak"] body::before{
+  background:
+    radial-gradient(closest-side, var(--z-kure), transparent) 78% -12% / 62vmax 62vmax no-repeat,
+    radial-gradient(closest-side, var(--z-kure-2), transparent) -14% 108% / 70vmax 70vmax no-repeat,
+    radial-gradient(closest-side, var(--z-kure-3), transparent) 108% 92% / 48vmax 48vmax no-repeat,
+    linear-gradient(160deg, var(--z-taban), var(--z-taban-2));
+}
+html[data-zemin="yumusak"] .site--v5 .sayfa::before{ display:none; }
+
+/* 3) KARTLAR — süzülen cam, TEK KAT. Kartın içindeki kart, not, öneri ya da
+   küçük kare çerçevesiz ve dolgusuz olur: kart içinde kart yok (kullanıcı,
+   2026-10-27: «iç içe giren kartlar var, karmaşık»; ESP Analiz'de öneri
+   kartı bu yüzden başlığın üstüne biniyordu). Gruplu liste (.ledger
+   şeritleri, kabuk.css RAFİNE) köşe ve aralığını kendi kuralından alır:
+   burada yalnız yüzeyi cam olur. */
+html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .donen, .site--v5 .nextup,
+  .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard, .site--v5 .rehber__konular){
+  background:var(--cam); border:1px solid var(--cam-kenar); border-radius:24px;
+  box-shadow:var(--cam-ust), var(--cam-golge);
+}
+html[data-zemin="yumusak"] .site--v5 .ledger .lrow:not(.kahraman){
+  background:var(--cam); border-color:var(--cam-kenar); box-shadow:var(--cam-ust), var(--cam-golge); }
+html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card, .giris, .donen, .site--v5 .nextup, .site--v5 .ledger .lrow,
+  .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, .site--v5 .pk, .sheet, .popover, .menusayfa, .king__kutu)
+  *:is(.kutu, .card, .giris, .donen, .notice, .okart, .ozet-kare, .alan-kare, .pk){
+  background:transparent; border-color:transparent; box-shadow:none;
+}
+html[data-zemin="yumusak"] :is(.kutu, .card, .lrow, .bugun__alan) *.notice{ padding-inline:0; }
+/* Kart içindeki küçük kareler dokunulabilir: yalnız üzerine gelince dolar. */
+html[data-zemin="yumusak"] :is(.kutu, .card, .lrow) *:is(.ozet-kare, .alan-kare):hover{ background:var(--cam-ince); }
+/* Hızlı kayıt satırı bir girdi gibidir. */
+html[data-zemin="yumusak"] .site--v5 .sat2{ background:var(--cam-girdi); border-color:var(--cam-kenar); box-shadow:inset 0 1px 3px rgba(20,24,40,.06); }
+html[data-zemin="yumusak"] .site--v5 .sat2 *:is(select, input:not([type=checkbox]):not([type=radio])){ background:transparent; border-color:transparent; box-shadow:none; }
+
+/* Girdiler ve hap düğmeler cam; ana düğme grafit kalır. */
+html[data-zemin="yumusak"] :is(.giris__girdi, .site--v5 input:not([type=checkbox]):not([type=radio]):not([type=range]), .site--v5 select, .site--v5 textarea){
+  background:var(--cam-girdi); border-color:var(--cam-kenar); box-shadow:inset 0 1px 3px rgba(20,24,40,.06); }
+html[data-zemin="yumusak"] :is(.site--v5 .chip, .kisayol > button, .kisayol > a){
+  background:var(--cam-ince); border-color:transparent; box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
+
+/* 4) YÜZEN KATMANLAR — gerçek buzlu cam (arkasında yazı var). */
+html[data-zemin="yumusak"] :is(.sheet, .popover, .menusayfa, .king__kutu){
+  background:var(--cam-katman); border-color:var(--cam-kenar);
+  -webkit-backdrop-filter:saturate(150%) blur(30px); backdrop-filter:saturate(150%) blur(30px);
+  box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), var(--shadow-lg); }
+html[data-zemin="yumusak"] .king__yan{ background:transparent; }
+@media (min-width:680px){
+  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar{ background:var(--cam-ince);
+    box-shadow:inset -1px 0 0 var(--cam-kenar);
+    -webkit-backdrop-filter:saturate(150%) blur(28px); backdrop-filter:saturate(150%) blur(28px); }
+  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu){ background:var(--cam-katman); }
+}
+
+/* 5) YAZI. */
+:is(.karsilama__selam, .kapak__selam){ font-family:inherit; font-style:normal; font-weight:500;
+  font-size:14px; letter-spacing:.02em; color:var(--text-3); }
+.kapak__cumle{ font-weight:600; letter-spacing:-.04em; line-height:1.04; }
+@media (min-width:680px){ .kapak__cumle{ font-size:clamp(40px, 4.4vw, 56px); } }
+
+/* 6) TELEFON — alt bant yüzen cam hap; üst şerit zeminle bir, yalnız buzlu. */
+@media (max-width:679px){
+  html[data-zemin="yumusak"] .site--v5 .ust{ background:transparent; border-bottom-color:transparent; box-shadow:none;
+    -webkit-backdrop-filter:saturate(150%) blur(20px); backdrop-filter:saturate(150%) blur(20px); }
+  html[data-zemin="yumusak"] .site--v5 .altbant{ left:14px; right:14px; bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+    height:var(--altbant-h); padding:0 6px; border-radius:30px; border:1px solid var(--cam-kenar); background:var(--cam-katman);
+    -webkit-backdrop-filter:saturate(150%) blur(28px); backdrop-filter:saturate(150%) blur(28px);
+    box-shadow:var(--cam-ust), var(--cam-golge); }
+  html[data-zemin="yumusak"] .site--v5 .altbant__sekme.is-on::before{ top:6px; bottom:6px; left:8px; right:8px; height:auto;
+    border-radius:22px; background:var(--cam-ince); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); z-index:-1; }
+}
+
+/* 7) KING küresi gözlü cam küre; ajanlar modül tonunda minik gözlü küre. */
+.king__kure::after{
+  background:radial-gradient(ellipse 9% 15% at 37% 52%, rgba(255,255,255,.96) 88%, transparent 100%),
+    radial-gradient(ellipse 9% 15% at 63% 52%, rgba(255,255,255,.96) 88%, transparent 100%),
+    radial-gradient(42% 30% at 34% 18%, rgba(255,255,255,.7), rgba(255,255,255,0) 75%),
+    radial-gradient(circle at 50% 46%, transparent 55%, rgba(8,10,32,.45) 100%);
+}
+.site--v5 .agentav, .agentkare{ color:transparent; border-radius:50%;
+  background:radial-gradient(circle at 34% 26%, rgba(255,255,255,.75), transparent 45%),
+    radial-gradient(circle at 50% 60%, color-mix(in oklab, var(--mod) 70%, #fff), var(--mod));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.4), 0 6px 14px -8px var(--mod); }
+.site--v5 .agentav::after, .agentkare::after{ content:''; position:absolute; inset:0; border-radius:50%;
+  background:radial-gradient(ellipse 9% 15% at 38% 54%, #fff 88%, transparent 100%),
+    radial-gradient(ellipse 9% 15% at 62% 54%, #fff 88%, transparent 100%); }

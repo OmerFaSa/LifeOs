@@ -344,6 +344,8 @@ DOSYALAR = {
     "zemin.js":       "js/core",
     "zemin.css":      "css",
     "zemin.test.js":  "tests",
+    # CAM (kullanici, 2026-10-27) — sistem geneli cam yuzey dili; her arayuzde EN SON stil.
+    "cam.css":        "css",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     # 167 ana ekran rozeti (pwa.js rozet): pwa.test.js degismesin diye ayri dosya.

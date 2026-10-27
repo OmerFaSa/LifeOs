@@ -7760,6 +7760,58 @@ button.gorevli.on:hover{ background:var(--fg); }
 .kendi-anahtar:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 .kendi-anahtar:disabled{ opacity:.6; cursor:default; }
 @media (prefers-reduced-motion: reduce){ .kendi-anahtar, .kendi-anahtar::after{ transition:none; } }
+/* CAM (kullanıcı, 2026-10-27) — modüllerdeki brand/ortak/cam.css'in Merkez
+   karşılığı (HKM ortak dosya yüklemez; aynı karar burada elle tutulur).
+   Merkez morunda derin taban + üç yumuşak küre, levhasız süzülen cam kart,
+   küçük sans selam. Giriş ekranı kendi zeminini korur. */
+:root{
+  --z-taban:oklch(from var(--mer) .955 .018 h);
+  --z-taban-2:oklch(from var(--mer) .915 .04 calc(h + 20));
+  --z-kure:oklch(from var(--mer) .78 .13 h / .55);
+  --z-kure-2:oklch(from var(--mer) .84 .10 calc(h - 35) / .5);
+  --z-kure-3:oklch(from var(--mer) .86 .09 calc(h + 40) / .45);
+  --cam:linear-gradient(140deg, rgba(255,255,255,.66), rgba(255,255,255,.4));
+  --cam-kenar:rgba(255,255,255,.78);
+  --cam-ust:inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(255,255,255,.25);
+  --cam-golge:0 30px 60px -34px oklch(from var(--mer) .35 .08 h / .42), 0 2px 6px -2px rgba(20,24,40,.06);
+}
+html[data-tema="koyu"]{
+  --z-taban:oklch(from var(--mer) .17 .02 h);
+  --z-taban-2:oklch(from var(--mer) .13 .025 calc(h + 20));
+  --z-kure:oklch(from var(--mer) .52 .15 h / .55);
+  --z-kure-2:oklch(from var(--mer) .42 .12 calc(h - 35) / .45);
+  --z-kure-3:oklch(from var(--mer) .40 .10 calc(h + 40) / .4);
+  --cam:linear-gradient(140deg, rgba(255,255,255,.10), rgba(255,255,255,.045));
+  --cam-kenar:rgba(255,255,255,.12);
+  --cam-ust:inset 0 1px 0 rgba(255,255,255,.16);
+  --cam-golge:0 30px 60px -30px rgba(0,0,0,.7);
+}
+@media (prefers-color-scheme:dark){
+  html:not([data-tema="acik"]){
+    --z-taban:oklch(from var(--mer) .17 .02 h);
+    --z-taban-2:oklch(from var(--mer) .13 .025 calc(h + 20));
+    --z-kure:oklch(from var(--mer) .52 .15 h / .55);
+    --z-kure-2:oklch(from var(--mer) .42 .12 calc(h - 35) / .45);
+    --z-kure-3:oklch(from var(--mer) .40 .10 calc(h + 40) / .4);
+    --cam:linear-gradient(140deg, rgba(255,255,255,.10), rgba(255,255,255,.045));
+    --cam-kenar:rgba(255,255,255,.12);
+    --cam-ust:inset 0 1px 0 rgba(255,255,255,.16);
+    --cam-golge:0 30px 60px -30px rgba(0,0,0,.7);
+  }
+}
+@media (prefers-reduced-transparency: no-preference){
+  body:not(:has(#giris:not([hidden])))::before{
+    background:
+      radial-gradient(closest-side, var(--z-kure), transparent) 78% -12% / 62vmax 62vmax no-repeat,
+      radial-gradient(closest-side, var(--z-kure-2), transparent) -14% 108% / 70vmax 70vmax no-repeat,
+      radial-gradient(closest-side, var(--z-kure-3), transparent) 108% 92% / 48vmax 48vmax no-repeat,
+      linear-gradient(160deg, var(--z-taban), var(--z-taban-2)); }
+  body:not(:has(#giris:not([hidden]))) .wrap::before{ display:none; }
+  body:not(:has(#giris:not([hidden]))) :is(.card, #serit.serit){
+    background:var(--cam); border:1px solid var(--cam-kenar); border-radius:24px; box-shadow:var(--cam-ust), var(--cam-golge); }
+  body:not(:has(#giris:not([hidden]))) .card *:is(.card, .serit__kutu){ background:transparent; box-shadow:none; }
+}
+.hkm-kars__selam{ font-family:inherit; font-style:normal; font-weight:600; letter-spacing:-.04em; }
 </style>
 </body>
 </html>
