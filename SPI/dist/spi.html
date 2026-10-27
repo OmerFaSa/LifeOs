@@ -17820,7 +17820,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'d29f8af4', at:'2026-10-26 19:28', dirty:true };
+SP.BUILD = { id:'112382dd', at:'2026-10-27 06:35', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -60739,7 +60739,7 @@ SP.Store = (function(){
      Her yazma hangi yolun değiştiğini hesap katmanına bildirir; hesap
      yolu sıraya yazar ve PC sunucusuna ulaşınca gönderir. Uzaktan gelen
      kayıt `uzaktan` ile yazılır ve BİLDİRİLMEZ (geri gönderilmez). Cihaza
-     ait anahtarlar (CIHAZA_AIT: HKM jetonu, depo ölçümü) eşitlenmez. */
+     ait anahtarlar (CIHAZA_AIT: HKM jetonu, depo ve kullanım ölçümü) eşitlenmez. */
   let onDegisim = null;
   function degisti(yollar){
     const y = (yollar || []).filter(p => CIHAZA_AIT.indexOf(p) < 0);
@@ -60867,7 +60867,7 @@ SP.Store = (function(){
      hizini bozar. Eslenirken her acilis oteki cihazlara «degisiklik» diye
      gidiyor, o cihaz da yenilerken kendi olcumunu yaziyordu: iki acik
      cihaz birbirini durmadan yeniletti (hesap.js, 2026-10-05). */
-  const CIHAZA_AIT = ['hkm', 'storage'];
+  const CIHAZA_AIT = ['hkm', 'storage', 'usage'];
   function cihazsiz(data){
     const out = Object.assign({}, data);
     CIHAZA_AIT.forEach(k => { delete out[k]; });

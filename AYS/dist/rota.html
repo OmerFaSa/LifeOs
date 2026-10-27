@@ -18977,7 +18977,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'d29f8af4', at:'2026-10-26 19:28', dirty:true };
+R.BUILD = { id:'112382dd', at:'2026-10-27 06:35', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -75602,7 +75602,7 @@ R.Store = (function(){
      Her yazma hangi yolun değiştiğini hesap katmanına bildirir; hesap
      yolu sıraya yazar ve PC sunucusuna ulaşınca gönderir. Uzaktan gelen
      kayıt `uzaktan` ile yazılır ve BİLDİRİLMEZ (geri gönderilmez). Cihaza
-     ait anahtarlar (CIHAZA_AIT: HKM jetonu, depo ölçümü) eşitlenmez. */
+     ait anahtarlar (CIHAZA_AIT: HKM jetonu, depo ve kullanım ölçümü) eşitlenmez. */
   let onDegisim = null;
   function degisti(yollar){
     const y = (yollar || []).filter(p => CIHAZA_AIT.indexOf(p) < 0);
@@ -75729,7 +75729,7 @@ R.Store = (function(){
      hizini bozar. Eslenirken her acilis oteki cihazlara «degisiklik» diye
      gidiyor, o cihaz da yenilerken kendi olcumunu yaziyordu: iki acik
      cihaz birbirini durmadan yeniletti (hesap.js, 2026-10-05). */
-  const CIHAZA_AIT = ['hkm', 'storage'];
+  const CIHAZA_AIT = ['hkm', 'storage', 'usage'];
   function cihazsiz(data){
     const out = Object.assign({}, data);
     CIHAZA_AIT.forEach(k => { delete out[k]; });
@@ -77009,6 +77009,7 @@ R.Model = (function(){
   async function badDay(dateISO){
     const iso = dateISO || U.todayISO();
     const day = await ensureDay(iso);
+    if(!day.badDay) day.badDayTargets = { paragraph:day.paragraphTarget, problem:day.problemTarget };
     day.badDay = true;
     day.paragraphTarget = Math.min(day.paragraphTarget, R.ROUTINES.minimumDay.paragraphs);
     day.problemTarget = Math.min(day.problemTarget, R.ROUTINES.minimumDay.paragraphs);
@@ -77027,6 +77028,11 @@ R.Model = (function(){
     const day = R.S.days[iso];
     if(!day) return null;
     day.badDay = false;
+    if(day.badDayTargets){
+      day.paragraphTarget = day.badDayTargets.paragraph;
+      day.problemTarget = day.badDayTargets.problem;
+      delete day.badDayTargets;
+    }
     day.blocks.forEach(b => {
       if(b.skipReason === R.BAD_DAY.reason && b.status === 'skipped'){
         b.status = 'pending';
@@ -97471,7 +97477,9 @@ R.Proposals = (function(){
       async revert(s){
         const day = M.dayOf(s.date);
         if(!day) return;
-        day.blocks = (day.blocks || []).filter(b => b.id !== s.blockId);
+        /* Üstüne iş girilmiş blok silinmez: geri alma ölçümü yok etmez. */
+        day.blocks = (day.blocks || []).filter(b => b.id !== s.blockId
+          || b.status !== 'pending' || b.actualMin != null || b.actualQ != null);
         await M.saveDay(s.date);
       },
     },
@@ -97502,12 +97510,13 @@ R.Proposals = (function(){
           c.dueAt = ctx.today;
           await M.saveCard(c);
         }
-        return { cards:before };
+        return { cards:before, today:ctx.today };
       },
       async revert(s){
         for(const row of (s.cards || [])){
           const c = (S.cards || []).find(x => x.id === row.id);
-          if(!c) continue;
+          /* Arada tekrar edilen kartın yeni tarihi ezilmez. */
+          if(!c || c.dueAt !== (s.today || U.todayISO())) continue;
           c.dueAt = row.dueAt;
           await M.saveCard(c);
         }
