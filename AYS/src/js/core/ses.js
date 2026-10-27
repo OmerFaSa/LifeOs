@@ -132,7 +132,11 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- tercih */
 
-  function bosTercih(){ return { tur:'chill', ses:0.6, tik:false, son:{}, caliyordu:0 }; }
+  /* Arayüz sesleri varsayılan AÇIK (kullanıcı, 2026-10-27: «sistemde ses de
+     olsun; tıklama, sayfa açılma, miniklere dokununca tatlı sesler»).
+     surum 2'den eski kayıttaki «kapalı» bir kez açılır; sonraki seçim korunur. */
+  const SES_SURUM = 2;
+  function bosTercih(){ return { tur:'chill', ses:0.6, tik:true, son:{}, caliyordu:0, surum:SES_SURUM }; }
   function tercihOku(){
     const t = bosTercih();
     let d = null;
@@ -140,7 +144,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(!d || typeof d !== 'object') return t;
     if(TURLER.some(x => x.id === d.tur)) t.tur = d.tur;
     if(typeof d.ses === 'number' && d.ses >= 0 && d.ses <= 1) t.ses = d.ses;
-    t.tik = d.tik === true;
+    t.tik = d.surum === SES_SURUM ? d.tik === true : true;
     if(d.son && typeof d.son === 'object') Object.keys(d.son).forEach(k => {
       if(typeof d.son[k] === 'string' && /^https:\/\//.test(d.son[k])) t.son[k] = d.son[k];
     });
@@ -505,10 +509,18 @@ window.LIFEOS = window.LIFEOS || {};
      birkaç osilatör notasıdır. Nota: [gecikme sn, başlangıç Hz, bitiş Hz,
      süre sn, tepe kazanç, yükselme sn]. */
   const SESLER = Object.freeze({
-    tik:  [[0, 200, 140, 0.05, 0.04, 0.004]],
-    ac:   [[0, 180, 168, 0.035, 0.035, 0.003], [0.055, 240, 224, 0.035, 0.035, 0.003]],
-    kapa: [[0, 240, 224, 0.035, 0.035, 0.003], [0.055, 180, 168, 0.035, 0.035, 0.003]],
+    /* Su damlası (2026-10-27, sıvı cam teması): kısa, yukarı kayan «blop». */
+    tik:  [[0, 420, 760, 0.06, 0.03, 0.004]],
+    ac:   [[0, 380, 620, 0.05, 0.028, 0.003], [0.06, 560, 900, 0.06, 0.026, 0.003]],
+    kapa: [[0, 560, 900, 0.05, 0.026, 0.003], [0.06, 380, 560, 0.06, 0.028, 0.003]],
     tamam:[[0, 392, 386, 0.2, 0.03, 0.014]],
+    /* Sayfa açılınca: iki yumuşak cam notası (E6 → B6), uzun sönüm. */
+    sayfa:[[0, 1318, 1318, 0.42, 0.012, 0.01], [0.07, 1975, 1975, 0.5, 0.009, 0.012]],
+    /* Miniğe dokununca kıkırdama: tiz, sekerek yükselen beş hece. */
+    gidik:[[0, 880, 1250, 0.07, 0.03, 0.006], [0.085, 990, 1400, 0.07, 0.028, 0.006], [0.17, 1050, 1500, 0.07, 0.026, 0.006],
+           [0.255, 1180, 1650, 0.08, 0.024, 0.006], [0.35, 1320, 1900, 0.1, 0.02, 0.006]],
+    /* Minik sohbeti («bla bla»): alçak, inip çıkan heceler. */
+    bla:  [[0, 520, 640, 0.07, 0.016, 0.006], [0.1, 640, 470, 0.07, 0.016, 0.006], [0.2, 560, 700, 0.08, 0.014, 0.006]],
   });
   let baglam = null;
   let sonBitis = 0;
@@ -596,6 +608,16 @@ window.LIFEOS = window.LIFEOS || {};
       else if(basili === 'false') tik('ac');
       else tik('tik');
     }, true);
+    /* Sayfa değişince (kabuk.js köke `sayfa-gecis` koyar) yumuşak çınlama;
+       bağlam yalnız daha önce bir dokunuşla kurulduysa (kur:false). */
+    if(typeof MutationObserver === 'function' && document.documentElement){
+      let vardi = document.documentElement.classList.contains('sayfa-gecis');
+      new MutationObserver(() => {
+        const var_ = document.documentElement.classList.contains('sayfa-gecis');
+        if(var_ && !vardi) tik('sayfa', false);
+        vardi = var_;
+      }).observe(document.documentElement, { attributes:true, attributeFilter:['class'] });
+    }
     document.addEventListener('change', e => {
       const el = e.target;
       if(!tercih.tik || !gercekMi(e) || !el || !el.matches || !el.matches('input[type="checkbox"]')) return;
@@ -694,7 +716,7 @@ window.LIFEOS = window.LIFEOS || {};
     ANAHTAR, TURLER,
     tercih:() => JSON.parse(JSON.stringify(tercih)),
     durum, dugme, panelHtml,
-    cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret,
+    cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret, SESLER,
     _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik,
   });
   /* Başka modülde çalıyorduysa: gövde hazır olunca sürdürmeyi dene. */

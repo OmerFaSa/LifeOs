@@ -299,6 +299,7 @@ window.LIFEOS = window.LIFEOS || {};
     const cekmeceDegisti = String(anahtar).split(':')[0] !== String(sonSayfa).split(':')[0];
     sonSayfa = anahtar;
     const k = document.documentElement;
+    k.dataset.sayfa = anahtar;   // minik.js her sayfaya kendi miniklerini seçer
     k.classList.add('sayfa-gecis');
     k.classList.toggle('cekmece-gecis', cekmeceDegisti);
     if(gecisSaati) clearTimeout(gecisSaati);

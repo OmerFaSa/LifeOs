@@ -445,6 +445,13 @@ html.giris-hazir:not(.hesap-kapi-acik) :is(.kart__ust, .kart__ozet, .kart__alt){
 /* Azaltilmis harekette (LifeOS'un kendi ayari, animasyon.js) gecis yok;
    kendiliginden gorunme (yedek) kalir. */
 @media (prefers-reduced-motion:reduce){ *{ transition:none !important; } :not(.sarmal){ animation:none !important; } }
+/* SICAK ISIK (kullanici, 2026-10-27; modullerdeki cam.css ile ayni dil):
+   altta sicak zemin isigi ve ince yansima cizgisi; kartin alt kenarinda o
+   isigin yansimasi. Duran isik; dort sistem kapisi zemini degismez. */
+html::after{ content:''; position:fixed; inset:auto 0 0 0; height:42vh; z-index:-1; pointer-events:none;
+  background:radial-gradient(30% 2.4% at 50% 84%, rgba(255,236,222,.9), transparent),
+    radial-gradient(55% 34% at 50% 100%, rgba(255,168,120,.5), transparent 75%); }
+.kart{ box-shadow:var(--golge), inset 0 1px 0 rgba(255,255,255,.6), inset 0 -14px 26px -20px rgba(255,168,120,.32); }
 </style></head><body>
 <main class="sarmal">
   <header class="ust" style="--sira:0">

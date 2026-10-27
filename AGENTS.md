@@ -127,6 +127,14 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    tek vurgu rengi. Görsel veri uydurmaz: hedef yoksa halka/çubuk yok,
    girilmemiş gün nokta ya da boşluk (sıfır değil), her görselin
    `aria-label`'ı sayıyı cümleyle söyler.
+   **Cam ve sıcak ışık istisnası (2026-10-27, depo sahibinin kararı:
+   «sıcak ışıklar, yansımalar… tasarımı değiştirme pahasına izin
+   veriyorum»):** yüzey dili `brand/ortak/cam.css`'tir (süzülen cam kart,
+   kalın cam plaka, yüzen kenar). Parıltı yalnız orada sayılı üç yerde
+   ve duran ışıktır: zemin altındaki sıcak ışık ve yansıma çizgisi, cam
+   kartın alt kenarındaki sıcak yansıma, dolu çubuk ile ana düğmenin
+   hâlesi. Sürekli oynayan parıltı yine yok; renk yine ölçüyü ayırır.
+   «Sade» zeminde bu katmanın hiçbiri çalışmaz.
 
 ## 2. Denetimler — birleştirmeden önce koşar
 

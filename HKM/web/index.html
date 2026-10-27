@@ -7761,55 +7761,79 @@ button.gorevli.on:hover{ background:var(--fg); }
 .kendi-anahtar:disabled{ opacity:.6; cursor:default; }
 @media (prefers-reduced-motion: reduce){ .kendi-anahtar, .kendi-anahtar::after{ transition:none; } }
 /* CAM (kullanıcı, 2026-10-27) — modüllerdeki brand/ortak/cam.css'in Merkez
-   karşılığı (HKM ortak dosya yüklemez; aynı karar burada elle tutulur).
-   Merkez morunda derin taban + üç yumuşak küre, levhasız süzülen cam kart,
-   küçük sans selam. Giriş ekranı kendi zeminini korur. */
+   karşılığı (HKM ortak dosya yüklemez; aynı karar burada elle tutulur):
+   nötr stüdyo zemini, çapraz ışık, altta sıcak ışık ve yansıma çizgisi,
+   kalın cam plaka, süzülen cam kart (alt kenarında sıcak yansıma), Merkez
+   morunda parlayan ana düğme. Giriş ekranı kendi zeminini korur.
+   Parıltı istisnası: AGENTS.md §1.10. */
 :root{
-  --z-taban:oklch(from var(--mer) .955 .018 h);
-  --z-taban-2:oklch(from var(--mer) .915 .04 calc(h + 20));
-  --z-kure:oklch(from var(--mer) .78 .13 h / .55);
-  --z-kure-2:oklch(from var(--mer) .84 .10 calc(h - 35) / .5);
-  --z-kure-3:oklch(from var(--mer) .86 .09 calc(h + 40) / .45);
+  --z-taban:#eef0f3; --z-taban-2:#e2e4ea;
+  --z-kure:oklch(from var(--mer) .82 .09 h / .38);
+  --z-isik:rgba(255,255,255,.72); --z-golge:rgba(30,34,48,.05);
+  --sicak:255 168 120; --sicak-zemin:.55; --sicak-cizgi:.9; --sicak-yansima:.32;
   --cam:linear-gradient(140deg, rgba(255,255,255,.66), rgba(255,255,255,.4));
   --cam-kenar:rgba(255,255,255,.78);
   --cam-ust:inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(255,255,255,.25);
-  --cam-golge:0 30px 60px -34px oklch(from var(--mer) .35 .08 h / .42), 0 2px 6px -2px rgba(20,24,40,.06);
+  --cam-golge:0 30px 60px -34px rgba(40,30,80,.35), 0 2px 6px -2px rgba(20,24,40,.06);
+  --levha:linear-gradient(150deg, rgba(255,255,255,.58), rgba(255,255,255,.26));
+  --levha-ic:inset 0 1.5px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.55);
+  --levha-kenar:0 0 0 7px rgba(255,255,255,.26), 0 0 0 8px rgba(255,255,255,.7);
+  --levha-golge:0 60px 100px -60px rgba(20,24,40,.38), 0 10px 30px -18px rgba(20,24,40,.12);
+  --dugme:var(--mer);
 }
 html[data-tema="koyu"]{
-  --z-taban:oklch(from var(--mer) .17 .02 h);
-  --z-taban-2:oklch(from var(--mer) .13 .025 calc(h + 20));
-  --z-kure:oklch(from var(--mer) .52 .15 h / .55);
-  --z-kure-2:oklch(from var(--mer) .42 .12 calc(h - 35) / .45);
-  --z-kure-3:oklch(from var(--mer) .40 .10 calc(h + 40) / .4);
+  --z-taban:oklch(.30 .035 285); --z-taban-2:oklch(.17 .03 285);
+  --z-kure:oklch(from var(--mer) .45 .12 h / .4);
+  --z-isik:rgba(255,255,255,.045); --z-golge:rgba(0,0,0,.18);
+  --sicak-zemin:.6; --sicak-cizgi:1; --sicak-yansima:.3;
   --cam:linear-gradient(140deg, rgba(255,255,255,.10), rgba(255,255,255,.045));
   --cam-kenar:rgba(255,255,255,.12);
   --cam-ust:inset 0 1px 0 rgba(255,255,255,.16);
   --cam-golge:0 30px 60px -30px rgba(0,0,0,.7);
+  --levha:linear-gradient(150deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+  --levha-ic:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px rgba(255,255,255,.06);
+  --levha-kenar:0 0 0 7px rgba(255,255,255,.035), 0 0 0 8px rgba(255,255,255,.1);
+  --levha-golge:0 60px 100px -50px rgba(0,0,0,.7);
+  --dugme:oklch(from var(--mer) .46 .14 h);
 }
 @media (prefers-color-scheme:dark){
   html:not([data-tema="acik"]){
-    --z-taban:oklch(from var(--mer) .17 .02 h);
-    --z-taban-2:oklch(from var(--mer) .13 .025 calc(h + 20));
-    --z-kure:oklch(from var(--mer) .52 .15 h / .55);
-    --z-kure-2:oklch(from var(--mer) .42 .12 calc(h - 35) / .45);
-    --z-kure-3:oklch(from var(--mer) .40 .10 calc(h + 40) / .4);
+    --z-taban:oklch(.30 .035 285); --z-taban-2:oklch(.17 .03 285);
+    --z-kure:oklch(from var(--mer) .45 .12 h / .4);
+    --z-isik:rgba(255,255,255,.045); --z-golge:rgba(0,0,0,.18);
+    --sicak-zemin:.6; --sicak-cizgi:1; --sicak-yansima:.3;
     --cam:linear-gradient(140deg, rgba(255,255,255,.10), rgba(255,255,255,.045));
     --cam-kenar:rgba(255,255,255,.12);
     --cam-ust:inset 0 1px 0 rgba(255,255,255,.16);
     --cam-golge:0 30px 60px -30px rgba(0,0,0,.7);
+    --levha:linear-gradient(150deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+    --levha-ic:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px rgba(255,255,255,.06);
+    --levha-kenar:0 0 0 7px rgba(255,255,255,.035), 0 0 0 8px rgba(255,255,255,.1);
+    --levha-golge:0 60px 100px -50px rgba(0,0,0,.7);
+    --dugme:oklch(from var(--mer) .46 .14 h);
   }
 }
 @media (prefers-reduced-transparency: no-preference){
   body:not(:has(#giris:not([hidden])))::before{
     background:
-      radial-gradient(closest-side, var(--z-kure), transparent) 78% -12% / 62vmax 62vmax no-repeat,
-      radial-gradient(closest-side, var(--z-kure-2), transparent) -14% 108% / 70vmax 70vmax no-repeat,
-      radial-gradient(closest-side, var(--z-kure-3), transparent) 108% 92% / 48vmax 48vmax no-repeat,
+      radial-gradient(30% 1% at 50% 93%, rgb(255 236 222 / var(--sicak-cizgi)), transparent),
+      radial-gradient(55% 14% at 50% 100%, rgb(var(--sicak) / var(--sicak-zemin)), transparent 75%),
+      radial-gradient(35% 50% at 50% 100%, rgb(var(--sicak) / calc(var(--sicak-zemin) * .35)), transparent 80%),
+      linear-gradient(118deg, transparent 22%, var(--z-isik) 36%, transparent 52%),
+      linear-gradient(118deg, transparent 54%, var(--z-golge) 66%, transparent 82%),
+      radial-gradient(closest-side, var(--z-kure), transparent) 100% 0% / 60vmax 60vmax no-repeat,
       linear-gradient(160deg, var(--z-taban), var(--z-taban-2)); }
-  body:not(:has(#giris:not([hidden]))) .wrap::before{ display:none; }
+  @media (min-width:1024px){
+    body:not(:has(#giris:not([hidden]))) .wrap::before{ border-radius:36px; background:var(--levha);
+      box-shadow:var(--levha-ic), var(--levha-kenar), var(--levha-golge); }
+  }
   body:not(:has(#giris:not([hidden]))) :is(.card, #serit.serit){
-    background:var(--cam); border:1px solid var(--cam-kenar); border-radius:24px; box-shadow:var(--cam-ust), var(--cam-golge); }
+    background:var(--cam); border:1px solid var(--cam-kenar); border-radius:24px;
+    box-shadow:var(--cam-ust), inset 0 -14px 26px -20px rgb(var(--sicak) / var(--sicak-yansima)), var(--cam-golge); }
   body:not(:has(#giris:not([hidden]))) .card *:is(.card, .serit__kutu){ background:transparent; box-shadow:none; }
+  body:not(:has(#giris:not([hidden]))) button.primary{
+    background:linear-gradient(180deg, color-mix(in oklab, var(--dugme) 78%, #fff), var(--dugme) 55%) var(--dugme); border-color:transparent; color:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 10px 22px -10px var(--dugme); }
 }
 .hkm-kars__selam{ font-family:inherit; font-style:normal; font-weight:600; letter-spacing:-.04em; }
 </style>

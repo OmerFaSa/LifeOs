@@ -346,6 +346,9 @@ DOSYALAR = {
     "zemin.test.js":  "tests",
     # CAM (kullanici, 2026-10-27) — sistem geneli cam yuzey dili; her arayuzde EN SON stil.
     "cam.css":        "css",
+    # MINIK (kullanici, 2026-10-27) — kartlarin ustunde yasayan minikler (sus, veri degil).
+    "minik.js":       "js/core",
+    "minik.test.js":  "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     # 167 ana ekran rozeti (pwa.js rozet): pwa.test.js degismesin diye ayri dosya.

@@ -753,6 +753,7 @@
         expect(k.classList.contains('cekmece-gecis')).toBe(false);
         ciz('analiz', 'analytics');
         expect(k.classList.contains('cekmece-gecis')).toBe(true);
+        expect(k.dataset.sayfa).toBe('analiz:analytics');   // minik.js her sayfaya kendi miniklerini seçer
       }finally{ k.classList.remove('sayfa-gecis', 'cekmece-gecis'); }
     });
 

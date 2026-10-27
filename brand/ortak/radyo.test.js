@@ -65,11 +65,24 @@
       });
     });
 
-    it('varsayılan kapalı: açılışta ses öğesi kurulmaz, ağa çıkılmaz', () => ortamla({ sesOgesi:() => { throw new Error('kurulmamalıydı'); } }, () => {
+    it('radyo varsayılan kapalı (ses öğesi kurulmaz, ağa çıkılmaz); arayüz sesleri varsayılan açık', () => ortamla({ sesOgesi:() => { throw new Error('kurulmamalıydı'); } }, () => {
       expect(S.durum().hal).toBe('kapali');
-      expect(S.tercih().tik).toBe(false);
+      expect(S.tercih().tik).toBe(true);
       expect(S._acilis()).toBe(false);
     }));
+
+    it('arayüz sesleri bir kez açılır: eski kayıttaki «kapalı» 2026-10-27 isteğiyle açılır, sonra yeni seçim korunur', () => ortamla({ sesOgesi:() => sahteOge() }, () => {
+      localStorage.setItem(S.ANAHTAR, JSON.stringify({ tur:'chill', ses:0.5, tik:false }));
+      S._sifirla();
+      expect(S.tercih().tik).toBe(true);
+      S.tikAc(false);
+      S._sifirla();
+      expect(S.tercih().tik).toBe(false);
+    }));
+
+    it('yeni sesler tanımlı: sayfa, gıdık, sohbet', () => {
+      ['sayfa', 'gidik', 'bla'].forEach(t => expect(S.SESLER[t].length > 0).toBe(true));
+    });
 
     it('tercih kalıcı: tür, ses düzeyi, tık sesleri', () => ortamla({ sesOgesi:() => sahteOge() }, () => {
       S.turSec('tr-slow', { calma:true });
@@ -87,7 +100,7 @@
       localStorage.setItem(S.ANAHTAR, '{bozuk');
       S._sifirla();
       expect(S.tercih().tur).toBe('chill');
-      expect(S.tercih().tik).toBe(false);
+      expect(S.tercih().tik).toBe(true);
     }));
 
     it('ölü akışta türün sonraki istasyonuna geçer; çalınca adı söylenir', () => {
@@ -286,7 +299,7 @@
         expect(p.querySelector('input[type="range"][data-ses="duzey"]').getAttribute('aria-label')).toBe('Ses düzeyi');
         const tk = p.querySelector('[data-ses="tik"]');
         expect(tk.getAttribute('role')).toBe('switch');
-        expect(tk.textContent.trim()).toBe('Kapalı');
+        expect(tk.textContent.trim()).toBe('Açık');   // arayüz sesleri varsayılan açık (2026-10-27)
       }finally{ d.remove(); }
     }));
 
@@ -329,6 +342,7 @@
         d.innerHTML = '<button type="button" id="tk-a">A</button>';
         document.body.appendChild(d);
         try{
+          S.tikAc(false);
           tikla(d.querySelector('#tk-a'));
           expect(S.tik('tik')).toBe(false);
           expect(kayit.kurulan).toBe(0);
@@ -340,21 +354,21 @@
       });
     });
 
-    it('kısık, tok, kısa: tık ~200→140 Hz, kazanç ≤ 0.05; aç yukarı, kapa aşağı', () => {
+    it('su damlası: tık kısa, yukarı kayan «blop» (420→760 Hz), kazanç ≤ 0.05; aç yukarı, kapa aşağı', () => {
       const { Baglam, kayit } = sahteBaglam();
       return ortamla({ AudioContext:Baglam, sentetik:true }, () => {
         S.tikAc(true);
         kayit.nota.length = 0;
         expect(S.tik('tik')).toBe(true);
-        expect(kayit.nota[0].f0).toBe(200);
-        expect(kayit.nota[0].f1).toBe(140);
+        expect(kayit.nota[0].f0).toBe(420);
+        expect(kayit.nota[0].f1).toBe(760);
         expect(kayit.tepe <= 0.05).toBe(true);
         kayit.nota.length = 0;
         S.tik('ac');
-        expect(kayit.nota.map(n => n.f0)).toEqual([180, 240]);
+        expect(kayit.nota.map(n => n.f0)).toEqual([380, 560]);
         kayit.nota.length = 0;
         S.tik('kapa');
-        expect(kayit.nota.map(n => n.f0)).toEqual([240, 180]);
+        expect(kayit.nota.map(n => n.f0)).toEqual([560, 380]);
         kayit.nota.length = 0;
         S.tik('tamam');
         expect(kayit.nota.length).toBe(1);
@@ -371,12 +385,12 @@
         try{
           kayit.nota.length = 0;
           tikla(d.querySelector('#tk-p'));
-          expect(kayit.nota.map(n => n.f0)).toEqual([180, 240]);
+          expect(kayit.nota.map(n => n.f0)).toEqual([380, 560]);
           kayit.nota.length = 0;
           const c = d.querySelector('#tk-c');
           c.checked = true;
           c.dispatchEvent(new Event('change', { bubbles:true }));
-          expect(kayit.nota.map(n => n.f0)).toEqual([180, 240]);
+          expect(kayit.nota.map(n => n.f0)).toEqual([380, 560]);
         }finally{ d.remove(); }
       });
     });
