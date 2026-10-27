@@ -18977,7 +18977,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'112382dd', at:'2026-10-27 06:35', dirty:false };
+R.BUILD = { id:'223fdaa9', at:'2026-10-27 08:16', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -23565,7 +23565,7 @@ window.LIFEOS = window.LIFEOS || {};
       ornek:'40 doğru, 8 yanlış: 40 − 8 ÷ 4 = 38 net.',
       kaynak:'AYS data/hints.js net · data/evidence.js' },
     'minimum-gun':{ terim:'Minimum gün', modul:'ays',
-      tanim:'Kötü günün alt sınırı: 45 dakika, 15 paragraf ve vadesi gelen kartlar.',
+      tanim:'Kötü günün alt sınırı: 45 dakika, 10 paragraf ve vadesi gelen kartlar.',
       ornek:'Hiçbir şey yapamadığın gün bu üçünü tutturursan seri kırılmaz.',
       kaynak:'AYS data/hints.js minimum-day' },
     'seri':{ terim:'Seri',
@@ -72734,7 +72734,7 @@ R.SRS_PROTOCOL = [
 
 /* ---------- 7.2–7.4 Rutin, uyku, kaygi ---------- */
 R.ROUTINES = {
-  minimumDay: { minutes:45, paragraphs:15, note:'Motivasyon çalışmanın önkoşulu değil, düzenin yan ürünüdür. Kötü günün standardı: 45 dakika + 15 paragraf + due kartlar.' },
+  minimumDay: { minutes:45, paragraphs:10, problems:10, note:'Motivasyon çalışmanın önkoşulu değil, düzenin yan ürünüdür. Kötü günün standardı: 45 dakika + 10 paragraf + due kartlar.' },
   motivation:[
     'Kötü deneme sonrası 24 saat içinde plan değiştirilmez; analiz tamamlanır ve üç deneme trendi beklenir.',
     'Haftalık başarı "net" kadar süreç davranışıyla ölçülür: oturum sayısı, analiz tamamlama, uyku ve kart borcu.',
@@ -73510,7 +73510,7 @@ R.HINTS = {
   /* --- gunluk --- */
   'anchor':{ t:'Günlük çıpalar', b:'Paragraf ve problem her gün sabit kalır; konu değişse de bu iki rutin düşmez.',
     more:'Paragraf TYT Türkçe’nin en büyük soru bloğu (2018–2025 arası 199 soru) ve dokuz ay süren bir beceridir. Problem rutini ilk dört ay boyunca her güne yayılır.' },
-  'minimum-day':{ t:'Minimum gün', b:'Kötü günün alt sınırı: 45 dakika + 15 paragraf + due kartlar.',
+  'minimum-day':{ t:'Minimum gün', b:'Kötü günün alt sınırı: 45 dakika + 10 paragraf + due kartlar.',
     more:'Motivasyon çalışmanın önkoşulu değil, düzenin yan ürünüdür. Hiçbir şey yapamadığın gün bile bu üçünü tutturursan seri kırılmaz.' },
   'block':{ t:'Çalışma bloğu', b:'Gün üç bloğa bölünür: 75 dk ana ders, 65 dk ikinci ders, 40 dk rutin.',
     more:'Bloklar arası 10–15 dakika ara verilir. Blok konusu haftanın ana konularından seçilir; konu sayısı bloktan fazlaysa konular günlere sırayla dağılır. Serbestçe değiştirilebilir.' },
@@ -77005,14 +77005,21 @@ R.Model = (function(){
 
   /* ---------- kotu gun protokolu ----------
      Sistem cokmesin diye tek dugmelik inis: hedef minimum gune duser,
-     kalan bloklar "kotu gun" nedeniyle atlanir, seri korunur. */
-  async function badDay(dateISO){
+     kalan bloklar "kotu gun" nedeniyle atlanir, seri korunur.
+     soruYok: o gun paragraf/problem de yok; hedef 0, minimum gun yalniz
+     dakika ve kartla tutar. */
+  async function badDay(dateISO, opts){
     const iso = dateISO || U.todayISO();
     const day = await ensureDay(iso);
     if(!day.badDay) day.badDayTargets = { paragraph:day.paragraphTarget, problem:day.problemTarget };
     day.badDay = true;
     day.paragraphTarget = Math.min(day.paragraphTarget, R.ROUTINES.minimumDay.paragraphs);
-    day.problemTarget = Math.min(day.problemTarget, R.ROUTINES.minimumDay.paragraphs);
+    day.problemTarget = Math.min(day.problemTarget, R.ROUTINES.minimumDay.problems);
+    if(opts && opts.soruYok){
+      day.badDaySoruYok = true;
+      day.paragraphTarget = 0;
+      day.problemTarget = 0;
+    }
     day.blocks.forEach(b => {
       if(b.slot === 'Dinlenme') return;
       if(b.status === 'pending'){
@@ -77033,6 +77040,7 @@ R.Model = (function(){
       day.problemTarget = day.badDayTargets.problem;
       delete day.badDayTargets;
     }
+    delete day.badDaySoruYok;
     day.blocks.forEach(b => {
       if(b.skipReason === R.BAD_DAY.reason && b.status === 'skipped'){
         b.status = 'pending';
@@ -83297,7 +83305,7 @@ R.Calc = (function(){
     const reviewedToday = on ? (on.gozden[dayISO || U.todayISO()] || 0)
       : S.cards.filter(c => c.lastReviewedAt === (dayISO || U.todayISO())).length;
     return mins >= R.ROUTINES.minimumDay.minutes
-      && (Number(day.paragraphActual) || 0) >= R.ROUTINES.minimumDay.paragraphs
+      && (day.badDaySoruYok || (Number(day.paragraphActual) || 0) >= R.ROUTINES.minimumDay.paragraphs)
       && (due === 0 || reviewedToday > 0);
   }
 
@@ -102740,9 +102748,12 @@ R.Screens.today = (function(){
         <div class="row between wrap gap-8">
           <div class="minw0">
             <b class="small">Bugün kötü gün olarak işaretli</b>
-            <div class="tiny dim">Hedef minimuma indi, seri korunuyor.</div>
+            <div class="tiny dim">${day.badDaySoruYok ? 'Bugün paragraf ve problem yok; seri dakika ve kartla korunuyor.' : 'Hedef minimuma indi, seri korunuyor.'}</div>
           </div>
-          ${c.Button({ label:'Geri al', size:'sm', act:'bad-day-undo' })}
+          <div class="row gap-8">
+            ${day.badDaySoruYok ? '' : c.Button({ label:'Soru da yok', size:'sm', act:'bad-day-soru-yok' })}
+            ${c.Button({ label:'Geri al', size:'sm', act:'bad-day-undo' })}
+          </div>
         </div>` });
     }
     return c.Card({ pad:'sm', body:html`
@@ -103996,6 +104007,11 @@ R.Screens.today = (function(){
           UI.toast('Bugün minimuma indi — seri korunuyor');
           R.App.render();
         }, false, 'Bugünü minimuma indir');
+    },
+    async 'bad-day-soru-yok'(){
+      await M.badDay(null, { soruYok:true });
+      UI.toast('Bugün paragraf ve problem yok');
+      R.App.render();
     },
     async 'bad-day-undo'(){
       await M.undoBadDay();
