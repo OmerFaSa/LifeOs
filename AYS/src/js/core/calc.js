@@ -411,7 +411,7 @@ R.Calc = (function(){
     const reviewedToday = on ? (on.gozden[dayISO || U.todayISO()] || 0)
       : S.cards.filter(c => c.lastReviewedAt === (dayISO || U.todayISO())).length;
     return mins >= R.ROUTINES.minimumDay.minutes
-      && (Number(day.paragraphActual) || 0) >= R.ROUTINES.minimumDay.paragraphs
+      && (day.badDaySoruYok || (Number(day.paragraphActual) || 0) >= R.ROUTINES.minimumDay.paragraphs)
       && (due === 0 || reviewedToday > 0);
   }
 

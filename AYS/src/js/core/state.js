@@ -1052,14 +1052,21 @@ R.Model = (function(){
 
   /* ---------- kotu gun protokolu ----------
      Sistem cokmesin diye tek dugmelik inis: hedef minimum gune duser,
-     kalan bloklar "kotu gun" nedeniyle atlanir, seri korunur. */
-  async function badDay(dateISO){
+     kalan bloklar "kotu gun" nedeniyle atlanir, seri korunur.
+     soruYok: o gun paragraf/problem de yok; hedef 0, minimum gun yalniz
+     dakika ve kartla tutar. */
+  async function badDay(dateISO, opts){
     const iso = dateISO || U.todayISO();
     const day = await ensureDay(iso);
     if(!day.badDay) day.badDayTargets = { paragraph:day.paragraphTarget, problem:day.problemTarget };
     day.badDay = true;
     day.paragraphTarget = Math.min(day.paragraphTarget, R.ROUTINES.minimumDay.paragraphs);
-    day.problemTarget = Math.min(day.problemTarget, R.ROUTINES.minimumDay.paragraphs);
+    day.problemTarget = Math.min(day.problemTarget, R.ROUTINES.minimumDay.problems);
+    if(opts && opts.soruYok){
+      day.badDaySoruYok = true;
+      day.paragraphTarget = 0;
+      day.problemTarget = 0;
+    }
     day.blocks.forEach(b => {
       if(b.slot === 'Dinlenme') return;
       if(b.status === 'pending'){
@@ -1080,6 +1087,7 @@ R.Model = (function(){
       day.problemTarget = day.badDayTargets.problem;
       delete day.badDayTargets;
     }
+    delete day.badDaySoruYok;
     day.blocks.forEach(b => {
       if(b.skipReason === R.BAD_DAY.reason && b.status === 'skipped'){
         b.status = 'pending';

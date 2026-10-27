@@ -733,9 +733,12 @@ R.Screens.today = (function(){
         <div class="row between wrap gap-8">
           <div class="minw0">
             <b class="small">Bugün kötü gün olarak işaretli</b>
-            <div class="tiny dim">Hedef minimuma indi, seri korunuyor.</div>
+            <div class="tiny dim">${day.badDaySoruYok ? 'Bugün paragraf ve problem yok; seri dakika ve kartla korunuyor.' : 'Hedef minimuma indi, seri korunuyor.'}</div>
           </div>
-          ${c.Button({ label:'Geri al', size:'sm', act:'bad-day-undo' })}
+          <div class="row gap-8">
+            ${day.badDaySoruYok ? '' : c.Button({ label:'Soru da yok', size:'sm', act:'bad-day-soru-yok' })}
+            ${c.Button({ label:'Geri al', size:'sm', act:'bad-day-undo' })}
+          </div>
         </div>` });
     }
     return c.Card({ pad:'sm', body:html`
@@ -1989,6 +1992,11 @@ R.Screens.today = (function(){
           UI.toast('Bugün minimuma indi — seri korunuyor');
           R.App.render();
         }, false, 'Bugünü minimuma indir');
+    },
+    async 'bad-day-soru-yok'(){
+      await M.badDay(null, { soruYok:true });
+      UI.toast('Bugün paragraf ve problem yok');
+      R.App.render();
     },
     async 'bad-day-undo'(){
       await M.undoBadDay();

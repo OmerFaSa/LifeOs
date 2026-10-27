@@ -473,17 +473,17 @@
   });
 
   describe('Calc.minimumDayMet', function(){
-    it('45 dk + 15 paragraf saglanmadan false verir', function(){
+    it('45 dk + 10 paragraf saglanmadan false verir', function(){
       resetState();
       withToday('2026-09-15', function(){
-        S.days['2026-09-15'] = { date:'2026-09-15', blocks:[{ actualMin:30, status:'partial' }], paragraphActual:10, checklist:{} };
+        S.days['2026-09-15'] = { date:'2026-09-15', blocks:[{ actualMin:30, status:'partial' }], paragraphActual:9, checklist:{} };
         expect(C.minimumDayMet('2026-09-15')).toBeFalsy();
       });
     });
     it('esikler saglandiginda true verir', function(){
       resetState();
       withToday('2026-09-15', function(){
-        S.days['2026-09-15'] = { date:'2026-09-15', blocks:[{ actualMin:50, status:'done' }], paragraphActual:15, checklist:{} };
+        S.days['2026-09-15'] = { date:'2026-09-15', blocks:[{ actualMin:50, status:'done' }], paragraphActual:10, checklist:{} };
         expect(C.minimumDayMet('2026-09-15')).toBeTruthy();
       });
     });

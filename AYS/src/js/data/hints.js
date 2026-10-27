@@ -28,7 +28,7 @@ R.HINTS = {
   /* --- gunluk --- */
   'anchor':{ t:'Günlük çıpalar', b:'Paragraf ve problem her gün sabit kalır; konu değişse de bu iki rutin düşmez.',
     more:'Paragraf TYT Türkçe’nin en büyük soru bloğu (2018–2025 arası 199 soru) ve dokuz ay süren bir beceridir. Problem rutini ilk dört ay boyunca her güne yayılır.' },
-  'minimum-day':{ t:'Minimum gün', b:'Kötü günün alt sınırı: 45 dakika + 15 paragraf + due kartlar.',
+  'minimum-day':{ t:'Minimum gün', b:'Kötü günün alt sınırı: 45 dakika + 10 paragraf + due kartlar.',
     more:'Motivasyon çalışmanın önkoşulu değil, düzenin yan ürünüdür. Hiçbir şey yapamadığın gün bile bu üçünü tutturursan seri kırılmaz.' },
   'block':{ t:'Çalışma bloğu', b:'Gün üç bloğa bölünür: 75 dk ana ders, 65 dk ikinci ders, 40 dk rutin.',
     more:'Bloklar arası 10–15 dakika ara verilir. Blok konusu haftanın ana konularından seçilir; konu sayısı bloktan fazlaysa konular günlere sırayla dağılır. Serbestçe değiştirilebilir.' },

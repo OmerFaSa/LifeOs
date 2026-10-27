@@ -148,7 +148,7 @@ R.SRS_PROTOCOL = [
 
 /* ---------- 7.2–7.4 Rutin, uyku, kaygi ---------- */
 R.ROUTINES = {
-  minimumDay: { minutes:45, paragraphs:15, note:'Motivasyon çalışmanın önkoşulu değil, düzenin yan ürünüdür. Kötü günün standardı: 45 dakika + 15 paragraf + due kartlar.' },
+  minimumDay: { minutes:45, paragraphs:10, problems:10, note:'Motivasyon çalışmanın önkoşulu değil, düzenin yan ürünüdür. Kötü günün standardı: 45 dakika + 10 paragraf + due kartlar.' },
   motivation:[
     'Kötü deneme sonrası 24 saat içinde plan değiştirilmez; analiz tamamlanır ve üç deneme trendi beklenir.',
     'Haftalık başarı "net" kadar süreç davranışıyla ölçülür: oturum sayısı, analiz tamamlama, uyku ve kart borcu.',

@@ -59,7 +59,7 @@ window.LIFEOS = window.LIFEOS || {};
       ornek:'40 doğru, 8 yanlış: 40 − 8 ÷ 4 = 38 net.',
       kaynak:'AYS data/hints.js net · data/evidence.js' },
     'minimum-gun':{ terim:'Minimum gün', modul:'ays',
-      tanim:'Kötü günün alt sınırı: 45 dakika, 15 paragraf ve vadesi gelen kartlar.',
+      tanim:'Kötü günün alt sınırı: 45 dakika, 10 paragraf ve vadesi gelen kartlar.',
       ornek:'Hiçbir şey yapamadığın gün bu üçünü tutturursan seri kırılmaz.',
       kaynak:'AYS data/hints.js minimum-day' },
     'seri':{ terim:'Seri',

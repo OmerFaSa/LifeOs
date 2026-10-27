@@ -664,6 +664,35 @@
         expect(day.problemTarget).toBe(30);
       });
     });
+    it('kötü gün hedefi 10 paragraf ve 10 problemdir', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        resetState();
+        const day = await M.ensureDay('2026-09-15');
+        day.paragraphTarget = 18; day.problemTarget = 18;
+        await M.badDay('2026-09-15');
+        expect(day.paragraphTarget).toBe(10);
+        expect(day.problemTarget).toBe(10);
+      });
+    });
+    it('«soru da yok»: hedef sıfır, minimum gün yalnız dakika ve kartla tutar, geri alınır', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        resetState();
+        const day = await M.ensureDay('2026-09-15');
+        day.paragraphTarget = 18; day.problemTarget = 18;
+        await M.badDay('2026-09-15');
+        await M.badDay('2026-09-15', { soruYok:true });
+        expect(day.badDaySoruYok).toBe(true);
+        expect(day.paragraphTarget).toBe(0);
+        expect(day.problemTarget).toBe(0);
+        day.blocks.push({ actualMin:45, status:'done' });
+        expect(R.Calc.minimumDayMet('2026-09-15')).toBeTruthy();
+        await M.undoBadDay('2026-09-15');
+        expect(day.badDaySoruYok).toBeFalsy();
+        expect(day.paragraphTarget).toBe(18);
+        expect(day.problemTarget).toBe(18);
+        expect(R.Calc.minimumDayMet('2026-09-15')).toBeFalsy();
+      });
+    });
     it('blok ekleme geri alınınca sonradan girilen iş silinmez', async function(){
       await withTodayAsync('2026-09-15', async () => {
         resetState();
