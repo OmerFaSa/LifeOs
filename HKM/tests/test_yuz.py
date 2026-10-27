@@ -73,6 +73,26 @@ def _karsilama_tr():
     return out
 
 
+def t_hkm_durust_ve_tek_sozluk():
+    """2026-10-27 denetim: hukum adlari BES sozlukteydi («eksik», «eksik veri»,
+    «veri yok» ayni INCOMPLETE icin); veri yokken konsey «0 bulgu» yaziyordu;
+    karar Bugun'de onaylanirken «Onaylar'da 1 oneri» deniyordu; metrik
+    satirinda ic anahtar (study_minutes) gorunuyordu; 14 gundur veri yokken
+    brifing ayni «veri gelmedi»yi uc satirda tekrarliyordu."""
+    m = _yuz()
+    ok("var HUKUM = {" in m)
+    for eski in ("var HUKUM_SOZ", "var HUKUM_AD", "var HUKUM_KISA", "var HUKUM_ISARET", "var HUKUM_TON", "'eksik veri'"):
+        no(eski in m, eski)
+    ok("INCOMPLETE:{ ad:'veri yok'" in m)
+    kon = _islev(m, "konseyCiz")
+    ok("u.verdict && u.verdict !== 'INCOMPLETE'" in kon, "veri yokken bulgu sayisi yazilmaz")
+    no("'Onaylar’da ' + b.oneri" in m)
+    ok("'Bugün’de ' + b.oneri" in m)
+    no("esc(kayit.metric) + ' · '" in m, "ic anahtar ekranda")
+    oz = _islev(m, "ozetCiz")
+    ok("hicVeriYok" in oz, "veri yokken tek satir")
+
+
 def t_karsilama_ortak_havuz():
     """Merkez'in italik selami modullerin havuzuyla AYNI (kullanici,
     2026-10-18: «hos geldin Merkez icin de; turlu turlu»). Liste kopyadir;
@@ -799,3 +819,4 @@ def run():
     test("ekranlar sade: başlık çekmecenin adı, satır, katlı form, açıklama ⓘ'de", t_ekranlar_sade)
     test("karşılama: Merkez'in italik selamı modüllerin havuzuyla aynı (2026-10-18)", t_karsilama_ortak_havuz)
     test("Bugün: tek anahtar kendiliğinden model kullanımını açar/kapatır (2026-10-26)", t_kendiliginden_anahtari)
+    test("HKM yüzü: tek hüküm sözlüğü, veri yokken bulgu ve tekrar yok, doğru yer, iç anahtar yok", t_hkm_durust_ve_tek_sozluk)

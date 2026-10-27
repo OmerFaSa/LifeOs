@@ -1305,7 +1305,15 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
 
   /* --------------------------------------------------------------- çizim */
 
-  var TON = { ANOMALY:'danger', INCOMPLETE:'warn', APPROVED:'ok' };
+  /* Hukum adlari TEK sozlukte (2026-10-27): ayni INCOMPLETE bes ayri yerde
+     «eksik», «eksik veri», «veri yok» diye yaziliyordu. vp_base: veri yok. */
+  var HUKUM = {
+    APPROVED:  { ad:'yolunda',  ton:'ok' },
+    ANOMALY:   { ad:'dikkat',   ton:'danger' },
+    INCOMPLETE:{ ad:'veri yok', ton:'warn' },
+  };
+  var TON = {}, HUKUM_ADI = {};
+  Object.keys(HUKUM).forEach(function(k){ TON[k] = HUKUM[k].ton; HUKUM_ADI[k] = HUKUM[k].ad; });
   var ETIKET = { measured:'ölçüldü', estimated:'tahmin', computed:'hesaplandı',
     missing:'veri yok' };
   var MODUL = { ays:'AYS', spi:'SPİ', esp:'ESP' };
@@ -1389,8 +1397,6 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
      gunun tek cumlesini Buyuk Patron tasir. Bu satirlar o zinciri
      gorunur kilar: susturulan VP yanilmis degildir, sirasi gelmemistir —
      ve bulgusu silinmez, ertesi gun yine sayilir. */
-  var HUKUM_ISARET = { APPROVED:'ok', ANOMALY:'danger', INCOMPLETE:'warn' };
-  var HUKUM_KISA = { APPROVED:'onay', ANOMALY:'aykırı', INCOMPLETE:'eksik' };
 
   /* ---------- konsey: uc alt patron, kendi sistemleriyle birlikte
 
@@ -1426,9 +1432,10 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
         + '<i class="nokta nokta--' + esc(u.module) + '" aria-hidden="true"></i>'
         + '<div class="konsey__ad"><b>' + esc(u.module_label || '') + '</b>'
         + '<span>' + esc(u.title) + '</span></div>'
-        + '<div class="konsey__durum"><span class="' + (HUKUM_ISARET[u.verdict] || 'muted') + '">'
-        + esc(u.verdict ? HUKUM_KISA[u.verdict] : 'veri yok') + '</span>'
-        + ' · ' + esc(u.findings) + ' bulgu'
+        + '<div class="konsey__durum"><span class="' + (TON[u.verdict] || 'muted') + '">'
+        + esc(HUKUM_ADI[u.verdict] || 'veri yok') + '</span>'
+        /* Veri yokken bulgu sayısı yazılmaz: «0 bulgu» gelmemiş veriyi sıfır gösterirdi. */
+        + (u.verdict && u.verdict !== 'INCOMPLETE' ? ' · ' + esc(u.findings) + ' bulgu' : '')
         + (u.heard ? ' · <b>bugün duyulan</b>' : '')
         + (g.ready ? '' : ' · model yok') + '</div>'
         + '<a class="konsey__git" href="#/sohbet/' + esc(u.vp) + '" aria-label="'
@@ -2174,8 +2181,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
           + '</div>'
           + '<div class="metric__val">' + esc(son[1] == null ? '—' : son[1]) + '</div>'
           + '<div class="metric__spark">' + spark(kayit.points) + '</div>'
-          + '<div class="metric__meta">' + esc(kayit.metric) + ' · '
-          + esc(kayit.n) + ' ölçüm · '
+          + '<div class="metric__meta">' + esc(kayit.n) + ' ölçüm · '
           + esc(kayit.certs.map(function(c){ return ETIKET[c] || c; }).join(', '))
           + ' · en az ' + esc(kayit.min) + ' / ortanca ' + esc(kayit.median)
           + ' / en çok ' + esc(kayit.max) + ' · '
@@ -3717,11 +3723,6 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
      biter ve kaynastirma ister (SPİ’yi), «esp» ünsüzle biter ve son
      ünlüsü ince (ESP’i). Tek bir ek yazmak ucunden ikisini bozardi. */
   var SISTEM_EKLI = { ays:'AYS’ı', spi:'SPİ’yi', esp:'ESP’i' };
-  var HUKUM_SOZ = {
-    APPROVED:  { metin:'yolunda', sinif:'ok' },
-    ANOMALY:   { metin:'dikkat',  sinif:'danger' },
-    INCOMPLETE:{ metin:'eksik veri', sinif:'warn' },
-  };
 
   function selam(){
     var s = new Date().getHours();
@@ -3789,9 +3790,8 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     });
     var h = '';
     uyeler.forEach(function(u){
-      var d = HUKUM_SOZ[u.verdict];
-      var durum = d ? d.metin : 'veri yok';
-      var sinif = d ? d.sinif : 'muted';
+      var durum = HUKUM_ADI[u.verdict] || 'veri yok';
+      var sinif = TON[u.verdict] || 'muted';
       var adres = SISTEM_ADRES[u.module];
       h += '<div class="serit__kutu">'
         + '<div class="serit__ad"><i class="nokta nokta--' + esc(u.module) + '" aria-hidden="true"></i>'
@@ -3892,7 +3892,12 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
 
   /* Brifing: gunluk ekranda KISA. Dayanak «Dayanağı göster» altinda. */
   function ozetCiz(b){
+    /* 14 gündür hiç veri yoksa kapsam satırı hepsini söyler: «bugün veri
+       gelmedi» ve «hiç veri göndermedi» aynı şeyi tekrar ediyordu
+       (şerit de üç sistemde «veri yok» der). */
+    var hicVeriYok = (b.lines || []).some(function(l){ return l.kind === 'coverage' && !l.total; });
     var satirlar = (b.lines || []).filter(function(l){
+      if(hicVeriYok && (l.kind === 'blind' || (l.kind === 'vp' && l.silent))) return false;
       return l.kind !== 'proposal';
     });
     /* SADE (2026-10-05): ilk ÜÇ satır; kalanı aynı kartta «Tümü» ile
@@ -4210,8 +4215,6 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
      gösterir. Kaynaksız kayıt HER ZAMAN «doğrulanmadı» diye görünür. */
   var OFIS_KAT = [['bio', 'SPİ', 'Biyolojik sermaye'], ['academic', 'AYS', 'Akademik hedef'],
                   ['intellect', 'ESP', 'Entelektüel gelişim']];
-  var HUKUM_AD = { ANOMALY:'eşik kırıldı', INCOMPLETE:'eksik veri', APPROVED:'eşikler içinde' };
-  var HUKUM_TON = { ANOMALY:'danger', INCOMPLETE:'warn', APPROVED:'ok' };
   var BAM_OFIS_AD = { kayit:'Kayıt', arastirma:'Araştırma', planlama:'Planlama', uretim:'Üretim' };
   var OFIS_DURUM = { hazir:'hazır', ertelendi:'henüz açılmadı' };
   var IS_DURUM = { bekliyor:'kuyrukta', beklemede:'bekliyor — model ya da bütçe',
@@ -4249,11 +4252,11 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
         : '<span class="muted">Bugün King’in bir önerisi yok.</span>') + '</p><div class="satirlar">';
     OFIS_KAT.forEach(function(k){
       var l = vp[k[0]];
-      var ton = l && HUKUM_TON[l.verdict];
+      var ton = l && TON[l.verdict];
       h += '<div class="satir"><i class="nokta nokta--' + MOD[k[1]] + ' satir__isaret" aria-hidden="true"></i>'
         + '<div class="satir__metin"><b>' + esc(k[1]) + ' Patronu</b>'
         + '<span>' + esc(k[2]) + ' · ' + esc(l ? l.text : 'Bugün veri gelmedi.') + '</span></div>'
-        + '<span class="hap ' + (ton || '') + '">' + esc((l && HUKUM_AD[l.verdict]) || 'veri yok') + '</span></div>';
+        + '<span class="hap ' + (ton || '') + '">' + esc((l && HUKUM_ADI[l.verdict]) || 'veri yok') + '</span></div>';
     });
     $('ofis-katlar').innerHTML = h + '</div>';
   }
@@ -5755,7 +5758,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '" aria-labelledby="kendi-ad"></button></div>';
     if(!acik && !son){
       h += '<p class="muted aktif__not">Başlatınca HKM kendi turunu atar: kayıt gelir gelmez üç modülü kontrol eder, '
-        + 'brifingi kurar, öneriyi Onaylar’a bırakır ve eksikleri yazar. Hiçbir modüle yazmaz, model çağırmaz.</p>';
+        + 'brifingi kurar, öneriyi Bugün’e bırakır ve eksikleri yazar. Hiçbir modüle yazmaz, model çağırmaz.</p>';
     }
     if(son){
       h += '<ul class="aktif__nabiz">';
@@ -5794,7 +5797,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
         h += '</ul>';
       }
       var b = son.bekleyen || {}, parca = [];
-      if(b.oneri) parca.push('Onaylar’da ' + b.oneri + ' öneri');
+      if(b.oneri) parca.push('Bugün’de ' + b.oneri + ' öneri');
       if(b.teklif) parca.push('modüllerde ' + b.teklif + ' teklif');
       if(b.king) parca.push('King’de ' + b.king + ' onay');
       if(b.bam_hata) parca.push('BAM’da ' + b.bam_hata + ' hatalı iş');
