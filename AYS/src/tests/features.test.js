@@ -654,10 +654,51 @@
       await withTodayAsync('2026-09-15', async () => {
         resetState();
         await M.ensureWeek(M.currentWeek());
+        const once = await M.ensureDay('2026-09-15');
+        once.paragraphTarget = 40; once.problemTarget = 30;
         await M.badDay('2026-09-15');
         const day = await M.undoBadDay('2026-09-15');
         expect(day.badDay).toBeFalsy();
         expect(day.blocks.some(b => b.status === 'pending')).toBeTruthy();
+        expect(day.paragraphTarget).toBe(40);
+        expect(day.problemTarget).toBe(30);
+      });
+    });
+    it('blok ekleme geri alınınca sonradan girilen iş silinmez', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        resetState();
+        S.officeProposals = []; S.officeProposalKeys = [];
+        await M.ensureDay('2026-09-15');
+        const sub = R.SUBJECTS.find(x => (x.topics || []).length), top = sub.topics[0];
+        const ekle = async () => {
+          const t = await R.Proposals.talep({ action:'block-add', agent:'rehber', source:'istek',
+            params:{ subjectId:sub.id, topicId:top.id, minutes:30 } });
+          if(!t.otomatik) await R.Proposals.approve(t.row.id);
+          return t.row;
+        };
+        const bos = await ekle();
+        const dolu = await ekle();
+        const blok = id => M.dayOf('2026-09-15').blocks.find(b => b.id === id);
+        const dolBlok = blok(dolu.undo.blockId);
+        dolBlok.actualMin = 25; dolBlok.status = 'done';
+        await R.Proposals.undo(bos.id);
+        await R.Proposals.undo(dolu.id);
+        expect(blok(bos.undo.blockId)).toBeFalsy();
+        expect(blok(dolu.undo.blockId).actualMin).toBe(25);
+      });
+    });
+    it('geciken kart geri alınınca yalnız hâlâ bugünde olan döner', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        resetState();
+        S.officeProposals = []; S.officeProposalKeys = [];
+        S.cards = [{ id:'g1', dueAt:'2026-09-10' }, { id:'g2', dueAt:'2026-09-11' }];
+        const t = await R.Proposals.talep({ action:'cards-due-today', agent:'analist', source:'istek',
+          params:{ limit:5 } });
+        if(!t.otomatik) await R.Proposals.approve(t.row.id);
+        S.cards.find(c => c.id === 'g2').dueAt = '2026-09-18';   // bugün tekrar edildi
+        await R.Proposals.undo(t.row.id);
+        expect(S.cards.find(c => c.id === 'g1').dueAt).toBe('2026-09-10');
+        expect(S.cards.find(c => c.id === 'g2').dueAt).toBe('2026-09-18');
       });
     });
     it('dikkat sayacı artar', async function(){

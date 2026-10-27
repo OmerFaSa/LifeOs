@@ -1056,6 +1056,7 @@ R.Model = (function(){
   async function badDay(dateISO){
     const iso = dateISO || U.todayISO();
     const day = await ensureDay(iso);
+    if(!day.badDay) day.badDayTargets = { paragraph:day.paragraphTarget, problem:day.problemTarget };
     day.badDay = true;
     day.paragraphTarget = Math.min(day.paragraphTarget, R.ROUTINES.minimumDay.paragraphs);
     day.problemTarget = Math.min(day.problemTarget, R.ROUTINES.minimumDay.paragraphs);
@@ -1074,6 +1075,11 @@ R.Model = (function(){
     const day = R.S.days[iso];
     if(!day) return null;
     day.badDay = false;
+    if(day.badDayTargets){
+      day.paragraphTarget = day.badDayTargets.paragraph;
+      day.problemTarget = day.badDayTargets.problem;
+      delete day.badDayTargets;
+    }
     day.blocks.forEach(b => {
       if(b.skipReason === R.BAD_DAY.reason && b.status === 'skipped'){
         b.status = 'pending';

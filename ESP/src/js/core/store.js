@@ -173,7 +173,7 @@ ESP.Store = (function(){
      Her yazma hangi yolun değiştiğini hesap katmanına bildirir; hesap
      yolu sıraya yazar ve PC sunucusuna ulaşınca gönderir. Uzaktan gelen
      kayıt `uzaktan` ile yazılır ve BİLDİRİLMEZ (geri gönderilmez). Cihaza
-     ait anahtarlar (CIHAZA_AIT: HKM jetonu, depo ölçümü) eşitlenmez. */
+     ait anahtarlar (CIHAZA_AIT: HKM jetonu, depo ve kullanım ölçümü) eşitlenmez. */
   let onDegisim = null;
   function degisti(yollar){
     const y = (yollar || []).filter(p => CIHAZA_AIT.indexOf(p) < 0);
@@ -301,7 +301,7 @@ ESP.Store = (function(){
      hizini bozar. Eslenirken her acilis oteki cihazlara «degisiklik» diye
      gidiyor, o cihaz da yenilerken kendi olcumunu yaziyordu: iki acik
      cihaz birbirini durmadan yeniletti (hesap.js, 2026-10-05). */
-  const CIHAZA_AIT = ['hkm', 'storage'];
+  const CIHAZA_AIT = ['hkm', 'storage', 'usage'];
   function cihazsiz(data){
     const out = Object.assign({}, data);
     CIHAZA_AIT.forEach(k => { delete out[k]; });

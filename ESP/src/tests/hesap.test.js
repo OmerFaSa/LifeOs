@@ -2300,23 +2300,27 @@
     });
 
     /* `storage` bu tarayıcının deposunun boyut defteridir (core/storage.js,
-       her açılışta bir örnek). Eşitlenince her açılış öteki cihazlara
+       her açılışta bir örnek); `usage` bu cihazın kullanım süresidir (friction.js,
+       dakikada bir yazar).
+       Eşitlenince her yazış öteki cihazlara
        «değişiklik» diye gidiyor ve PC'nin büyüme hızı telefonun
        ölçümleriyle eziliyordu. */
-    it('depo ölçümü (storage) cihaza aittir: eşitlemeye bildirilmez, uzaktan gelmez', async () => {
+    it('depo ve kullanım ölçümü (storage, usage) cihaza aittir: eşitlemeye bildirilmez, uzaktan gelmez', async () => {
       if(!S || typeof S.uzaktan !== 'function'){ expect('store.js kancası').toBe('var'); return; }
-      const gelen = [], eski = await S.get('storage');
-      const yedek = eski == null ? null : JSON.parse(JSON.stringify(eski));
-      S.onDegisim = y => gelen.push.apply(gelen, y);
-      try{
-        await S.set('storage', { samples:[{ date:'2026-10-05', bytes:1234 }] });
-        expect(gelen).toEqual([]);
-        expect(S.hepsi().storage).toBe(undefined);
-        S.uzaktan([['storage', { samples:[{ date:'2026-10-05', bytes:999999 }] }]]);
-        expect((await S.get('storage')).samples[0].bytes).toBe(1234);
-      }finally{
-        S.onDegisim = null;
-        if(yedek == null) await S.remove('storage'); else await S.set('storage', yedek);
+      for(const k of ['storage', 'usage']){
+        const gelen = [], eski = await S.get(k);
+        const yedek = eski == null ? null : JSON.parse(JSON.stringify(eski));
+        S.onDegisim = y => gelen.push.apply(gelen, y);
+        try{
+          await S.set(k, { samples:[{ date:'2026-10-05', bytes:1234 }] });
+          expect(gelen).toEqual([]);
+          expect(S.hepsi()[k]).toBe(undefined);
+          S.uzaktan([[k, { samples:[{ date:'2026-10-05', bytes:999999 }] }]]);
+          expect((await S.get(k)).samples[0].bytes).toBe(1234);
+        }finally{
+          S.onDegisim = null;
+          if(yedek == null) await S.remove(k); else await S.set(k, yedek);
+        }
       }
     });
   });

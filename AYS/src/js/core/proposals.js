@@ -206,7 +206,9 @@ R.Proposals = (function(){
       async revert(s){
         const day = M.dayOf(s.date);
         if(!day) return;
-        day.blocks = (day.blocks || []).filter(b => b.id !== s.blockId);
+        /* Üstüne iş girilmiş blok silinmez: geri alma ölçümü yok etmez. */
+        day.blocks = (day.blocks || []).filter(b => b.id !== s.blockId
+          || b.status !== 'pending' || b.actualMin != null || b.actualQ != null);
         await M.saveDay(s.date);
       },
     },
@@ -237,12 +239,13 @@ R.Proposals = (function(){
           c.dueAt = ctx.today;
           await M.saveCard(c);
         }
-        return { cards:before };
+        return { cards:before, today:ctx.today };
       },
       async revert(s){
         for(const row of (s.cards || [])){
           const c = (S.cards || []).find(x => x.id === row.id);
-          if(!c) continue;
+          /* Arada tekrar edilen kartın yeni tarihi ezilmez. */
+          if(!c || c.dueAt !== (s.today || U.todayISO())) continue;
           c.dueAt = row.dueAt;
           await M.saveCard(c);
         }
