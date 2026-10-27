@@ -233,10 +233,11 @@
           expect(Array.from(durum.querySelectorAll('.donen')).map(d => d.getAttribute('aria-label')).join(',')).toBe('Bugün,Gidişat');
           expect(durum.querySelectorAll('.kutu .ozet, .durumkart').length).toBe(0);
           const ust = Array.from(durum.querySelectorAll('.donen__ust')).map(x => x.textContent.trim());
-          expect(ust.indexOf('Son deneme') >= 0 && ust.indexOf('Tekrar borcu') >= 0 && ust.indexOf('Sınav') >= 0).toBe(true);
+          expect(ust.indexOf('Son deneme') >= 0).toBe(true);
+          /* Seri, tekrar borcu ve sınav pano kartında; dönen kart tekrar etmez (2026-10-27). */
+          ['Seri', 'Tekrar borcu', 'Sınav'].forEach(a => expect(a + ':' + ust.indexOf(a)).toBe(a + ':-1'));
           const metin = durum.textContent;
           expect(metin).toContain('Henüz tam deneme yok.');
-          expect(metin).toContain('Tekrar kartı yok.');
           /* Görünmeyen madde odak almaz. */
           expect(durum.querySelectorAll('.donen__madde:not([inert])').length).toBe(2);
           const a = dom(await R.Screens.gun.render());

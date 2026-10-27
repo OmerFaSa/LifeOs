@@ -396,6 +396,12 @@
           expect([day.paragraphActual, day.problemActual]).toEqual([14, 6]);
           await cizimsiz(() => r2.geriAl());
           expect(kopya(day)).toEqual(once);
+          /* «0» ölçülmüş sıfırdır, boş değil: yazılır ve geri alınınca boşa döner */
+          const r3 = await cizimsiz(() => K().kapat(GUN, { alanlar:{ 'paragraf:0':'0', 'problem:0':'0' } }));
+          expect(r3.ok).toBe(true);
+          expect([day.paragraphActual, day.problemActual]).toEqual([0, 0]);
+          await cizimsiz(() => r3.geriAl());
+          expect(kopya(day)).toEqual(once);
         }finally{ bitir(); }
       });
     });

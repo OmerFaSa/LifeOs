@@ -629,7 +629,7 @@ R.Proposals = (function(){
     'paragraf-yaz':{
       check(p){
         const n = Number(p.count);
-        if(!isFinite(n) || n <= 0 || n > 500) return fail('Paragraf sayısı anlaşılmadı.');
+        if(!isFinite(n) || n < 0 || n > 500) return fail('Paragraf sayısı anlaşılmadı.');
         const day = R.S.days[p.date];
         if(!day) return fail('O günün kaydı henüz açılmamış.');
         return pass({ n:Math.round(n), day });
@@ -657,7 +657,7 @@ R.Proposals = (function(){
     'problem-yaz':{
       check(p){
         const n = Number(p.count);
-        if(!isFinite(n) || n <= 0 || n > 500) return fail('Problem sayısı anlaşılmadı.');
+        if(!isFinite(n) || n < 0 || n > 500) return fail('Problem sayısı anlaşılmadı.');
         const day = R.S.days[p.date];
         if(!day) return fail('O günün kaydı henüz açılmamış.');
         return pass({ n:Math.round(n), day });

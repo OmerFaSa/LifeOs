@@ -1212,7 +1212,9 @@ R.Screens.today = (function(){
      Ayrıntı'nın başında durur, hiçbiri kalkmadı. Maddeyi ve sayıyı kural
      motoru verir; sayı kesinlik işaretini taşır (SAYI); eksik veri sayı
      değil cümledir. */
-  function DonenKutu(day, dateISO, yalnizOzet){
+  /* analiz: İlerleme › Özet'te seri, tekrar borcu ve sınav pano kartıdır;
+     dönen kart ikinci kez yazmaz, seçim sayfasının özetine de dokunmaz. */
+  function DonenKutu(day, dateISO, yalnizOzet, analiz){
     const V = VT();
     if(!V || !V.donen) return '';
     const L = VL();
@@ -1280,15 +1282,16 @@ R.Screens.today = (function(){
     const bugunAd = ['Günlük sayaç', 'Seri', 'Hafıza yoklaması'];
     /* Seçim sayfasının minik özeti (hesap.js söz 16); örnek profil yazmaz. */
     const ozet = R.Ornek && R.Ornek.acik() ? null : 'ays';
-    const bugun = m.filter(x => bugunAd.indexOf(x.ust) >= 0), gidisat = m.filter(x => bugunAd.indexOf(x.ust) < 0);
+    const m2 = analiz ? m.filter(x => ['Seri', 'Tekrar borcu', 'Sınav'].indexOf(x.ust) < 0) : m;
+    const bugun = m2.filter(x => bugunAd.indexOf(x.ust) >= 0), gidisat = m2.filter(x => bugunAd.indexOf(x.ust) < 0);
     /* yalnizOzet: kart çizilmez, yalnız seçim sayfasının özeti yazılır (Bugün). */
     if(yalnizOzet){
       const H = (window.LIFEOS || {}).HESAP;
       if(ozet && H && H.ozetYaz){ try{ H.ozetYaz(ozet, 'ays-bugun', bugun); H.ozetYaz(ozet, 'ays-gidisat', gidisat); }catch(e){ /* özet yazılamadı */ } }
       return '';
     }
-    return raw(V.donen({ id:'ays-bugun', ad:'Bugün', ozet, maddeler:bugun })
-      + V.donen({ id:'ays-gidisat', ad:'Gidişat', ozet, maddeler:gidisat }));
+    return raw(V.donen({ id:'ays-bugun', ad:'Bugün', ozet:analiz ? null : ozet, maddeler:bugun })
+      + V.donen({ id:'ays-gidisat', ad:'Gidişat', ozet:analiz ? null : ozet, maddeler:gidisat }));
   }
 
   /* 04 SAYFA BAŞI CÜMLESİ (belgeler/ekip/EKIP-PLANI Ek A) — günün durumu TEK cümle,
@@ -1481,7 +1484,7 @@ R.Screens.today = (function(){
     return String(html`${raw(PanoUst(day, dateISO))}<div class="bugun" data-ozet="ilerleme">
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
-          ${DonenKutu(day, dateISO)}
+          ${DonenKutu(day, dateISO, false, true)}
           ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
         </section>
         ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}

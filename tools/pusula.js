@@ -106,6 +106,29 @@ async function aysGunuKapat(p, s){
   });
 }
 
+/* AYS GÜNÜ KAPAT, KUTULARLA (2026-10-26): satır yerine her bloğun soru /
+   doğru kutusu ve uyku kutusu; her kutu bir yazma eylemidir. */
+async function aysGunuKapatKutu(p, s){
+  await s.tikla('[data-act="gunu-kapat"]', 'Günü kapat');
+  const bloklar = await p.evaluate(() => {
+    const d = R.S.days[R.U.todayISO()];
+    return ((d && d.blocks) || []).filter(b => b.slot !== 'Dinlenme').map(b => ({ id:b.id, q:b.targetQ || 20 }));
+  });
+  for(const b of bloklar){
+    await s.yaz('[data-gk-alan="soru:' + b.id + ':0"]', b.q, 'Soru');
+    await s.yaz('[data-gk-alan="soru:' + b.id + ':1"]', Math.round(b.q * 0.75), 'Doğru');
+  }
+  await s.yaz('[data-gk-alan="uyku:0"]', 7, 'Uyku');
+  await s.tikla('.gk__kapat', 'Kaydet');
+  await p.waitForTimeout(BEKLE);
+  return p.evaluate(n => {
+    const d = R.S.days[R.U.todayISO()];
+    const l = ((d && d.blocks) || []).filter(b => b.slot !== 'Dinlenme');
+    const ok = l.length === n && l.every(b => b.status === 'done' && b.actualQ > 0 && b.correctQ != null) && d.sleepHours === 7;
+    return { ok, not:l.length + ' blok' };
+  }, bloklar.length);
+}
+
 async function spiIyiGun(p, s){
   /* EN KISA YOL (2026-10-25): «Ne yaptın?» kutusu bütün günü tek cümlede
      kayıpsız okur: dört ölçüm, su ekleme ve öğün sözleriyle üç ayrı öğün.
@@ -183,7 +206,7 @@ async function espIyiGun(p, s){
 
 /* Modül başına yollar: Faz 1 «Günü kapat» yolunu ekler, eskisini silmez. */
 const SENARYO = {
-  AYS:[{ yol:'Günü düzenle', fn:aysIyiGun }, { yol:'Günü kapat', fn:aysGunuKapat }],
+  AYS:[{ yol:'Günü düzenle', fn:aysIyiGun }, { yol:'Günü kapat', fn:aysGunuKapat }, { yol:'Günü kapat (kutular)', fn:aysGunuKapatKutu }],
   SPI:[{ yol:'Ne yaptın? (tek cümle)', fn:spiIyiGun }, { yol:'Günü kapat (alışkanlıklı kullanıcı)', fn:spiGunuKapat }],
   ESP:[{ yol:'Ne yaptın?', fn:espIyiGun }, { yol:'Günü kapat', fn:espGunuKapat }],
 };

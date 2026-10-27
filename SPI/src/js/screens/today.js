@@ -1269,7 +1269,9 @@ SP.Screens.today = (function(){
      «Bugün» (sıradaki hamle, asgari gün, seri) ve «Sağlık» (toparlanma,
      beslenme). Kartların kendisi Ayrıntı'nın başındadır, hiçbiri kalkmadı.
      Madde ve sayıyı kural motoru verir; eksik veri sayı değil cümledir. */
-  function DonenKutular(){
+  /* analiz: Analiz'in başında seri ve toparlanma pano kartıdır; dönen
+     kartta ikinci kez yazılmaz. Bugün'ün minik özeti (seçim sayfası) tam kalır. */
+  function DonenKutular(analiz){
     const V = VT();
     if(!V || !V.donen) return '';
     const SAYI = (window.LIFEOS || {}).SAYI;
@@ -1315,7 +1317,9 @@ SP.Screens.today = (function(){
 
     /* Seçim sayfasının minik özeti (hesap.js söz 16); örnek profil yazmaz. */
     const ozet = SP.Ornek && SP.Ornek.acik() ? null : 'spi';
-    return raw(V.donen({ id:'spi-bugun', ad:'Bugün', ozet, maddeler:gun }) + V.donen({ id:'spi-saglik', ad:'Sağlık', ozet, maddeler:saglik }));
+    const ayikla = l => analiz ? l.filter(x => x.ust !== 'Seri' && x.ust !== 'Toparlanma') : l;
+    return raw(V.donen({ id:'spi-bugun', ad:'Bugün', ozet:analiz ? null : ozet, maddeler:ayikla(gun) })
+      + V.donen({ id:'spi-saglik', ad:'Sağlık', ozet:analiz ? null : ozet, maddeler:ayikla(saglik) }));
   }
 
   function BeslenmeKutusu(){
@@ -1559,7 +1563,7 @@ SP.Screens.today = (function(){
       ${raw(karolar ? karolar.outerHTML : '')}
       ${raw(PanoUst())}
       <section class="bugun__alan mt-16" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
-        ${DonenKutular()}
+        ${DonenKutular(true)}
         ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
         ${raw(window.LIFEOS.ONERI && SP.Hedefler && SP.Hedefler.ag ? window.LIFEOS.ONERI.butceCakismaHtml(SP.Hedefler.ag.butce()) : '')}
       </section>

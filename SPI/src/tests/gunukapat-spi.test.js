@@ -177,6 +177,20 @@
       });
     });
 
+    /* Seri ve toparlanma panoda kart olarak durur; Analiz'deki dönen kartlar
+       onları ikinci kez yazmaz (2026-10-27). Bugün'ün minik özeti tam kalır. */
+    it('Analiz özetinde seri ve toparlanma dönen kartta tekrar etmez', async () => {
+      resetState();
+      pushVitals(GUN, { sleep:7 });
+      await kurulu(async () => {
+        const d = document.createElement('div');
+        d.innerHTML = T().ozet();
+        const ustler = Array.from(d.querySelectorAll('.donen')).map(x => x.textContent).join(' ');
+        expect(ustler.indexOf('Seri') < 0 && ustler.indexOf('Toparlanma') < 0).toBe(true);
+        expect(ustler.indexOf('Asgari gün') >= 0).toBe(true);
+      });
+    });
+
     it('işareti kaldırılan ve önerisi olmayan satır yazılmaz; satırsız ölçüm yazılmaz', async () => {
       resetState();
       kalipGunleri(4);

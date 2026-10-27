@@ -52,6 +52,16 @@
       temizle();
     });
 
+    it('Analiz özetinde günün dakikası tek kartta (karolar ve dönen «Bugün» tekrar etmez)', async () => {
+      resetState(); temizle();
+      await ESP.Model.addSession(ESP.U.todayISO(), { disc:'reading', minutes:30 });
+      const d = document.createElement('div'); d.innerHTML = ESP.Screens.today.analizOzeti().join('');
+      expect(d.querySelectorAll('.kapak__sayilar').length).toBe(0);
+      expect(d.innerHTML.indexOf('esp-bugun') < 0).toBe(true);
+      expect(d.innerHTML.indexOf('esp-calisma') >= 0).toBe(true);
+      resetState();
+    });
+
     it('ajan teklifleri Ofis\'te değil Onaylar\'da', async () => {
       resetState(); temizle();
       const ofis = String(await ESP.Screens.office.render());

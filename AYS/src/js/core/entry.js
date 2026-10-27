@@ -130,7 +130,7 @@ R.Entry = (function(){
     const m = String(text).match(PARAGRAF_RE);
     if(!m) return null;
     const n = sayacSayisi(m, text, 'paragraf');
-    if(n == null || n <= 0 || n > 500) return null;
+    if(n == null || n < 0 || n > 500) return null;   // 0 ölçülmüş sıfırdır, boş değil
     return { kind:'paragraf', count:Math.round(n) };
   }
 
@@ -138,7 +138,7 @@ R.Entry = (function(){
     const m = String(text).match(PROBLEM_RE);
     if(!m) return null;
     const n = sayacSayisi(m, text, 'problem');
-    if(n == null || n <= 0 || n > 500) return null;
+    if(n == null || n < 0 || n > 500) return null;   // 0 ölçülmüş sıfırdır, boş değil
     return { kind:'problem', count:Math.round(n) };
   }
 

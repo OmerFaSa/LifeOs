@@ -271,12 +271,12 @@
     const karisik = () => { resetState(); pushSession(bugun(), 'lang', 30); pushSession(bugun(), 'music', 20, { minutesCert:'estimated' }); };
 
     /* KOLAY Faz 2: karolar, dönen kart ve pano kartı Bugün'den Analiz'in başına taşındı. */
-    it('Analiz’deki «Süre» karosu, dönen «Günün dakikası», pano kartı ve Bugün’ün taban rakamı tahmini söyler', async () => {
+    /* Analiz'de günün dakikası yalnız pano kartındadır (karolar ve dönen
+       «Bugün» tekrarı 2026-10-27'de düştü). */
+    it('Analiz’deki pano kartı ve Bugün’ün taban rakamı tahmini söyler', async () => {
       karisik();
       const d = dom(await ESP.Screens.analytics.render());
-      expect(Array.from(d.querySelectorAll('.kapak__sayi[data-kesinlik="estimated"]')).map(x => x.getAttribute('data-simge'))).toEqual(['sure']);
       expect(Array.from(d.querySelectorAll('.pk__yuva')).map(x => x.textContent)).toContain('tahmin içerir');
-      expect(d.querySelectorAll('.donen [data-kesinlik="estimated"]').length > 0).toBe(true);
       expect(String(await T().render())).toContain('tahmin içerir');
 
       /* Yalnız ölçülmüş gün: hiçbir yerde tahmin yok. */
@@ -362,7 +362,7 @@
         expect(d.textContent.indexOf('Planda bugün')).toBe(-1);
         expect(String(await ESP.Screens.gun.render())).toContain('Planda bugün');
         const a = dugmeler(await ESP.Screens.analytics.render());
-        expect(a.querySelectorAll('.kapak__sayi').length).toBe(3);
+        expect(a.querySelectorAll('.kapak__sayi').length).toBe(0);
         expect(!!a.querySelector('.pk-ust') && !!a.querySelector('[aria-label="Özet"] .donen')).toBe(true);
         expect(a.querySelector('h1')).toBe(null);
       }finally{ bitir(); }
