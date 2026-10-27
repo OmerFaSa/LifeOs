@@ -45,6 +45,9 @@ window.LIFEOS = window.LIFEOS || {};
      «Öğren» 2026-10-09'da eklendi (kullanıcı: «konu öğrenmek başlığı
      altında sol tarafa bölüm aç»); şimdilik yalnız AYS'de dolu. Bölümü
      olmayan modülde çekmece görünmez (her modül kendi listesini verir). */
+  /* KOLAY-PLANI Faz 2 (2026-10-27): kenarda yalnız bu üçü + Menü; öteki
+     çekmeceler Menü sayfasında adıyla durur (hiçbiri kalkmaz). */
+  const ANA_CEKMECE = Object.freeze(['bugun', 'calisma', 'analiz']);
   const CEKMECELER = Object.freeze([
     { id:'bugun',     ad:'Bugün' },
     { id:'plan',      ad:'Plan' },
@@ -328,10 +331,17 @@ window.LIFEOS = window.LIFEOS || {};
         + ' aria-label="' + kac(c.ad + (c.sayac ? ', ' + c.sayac + ' bekleyen' : '')) + '"' + (c.on && !(c.bolumler || []).some(b => b.on && b.route !== c.route) ? ' aria-current="page"' : '') + '>'
         + simge(c.id) + '<span class="kenar__ad">' + kac(c.ad) + '</span>' + sayac + '</button>' + bol + '</div>';
     };
-    /* Sekiz çekmece DÜZ listede (kullanıcı, 2026-10-03: «şu daha fazla
-       kısmını da kaldır, bir işe yaramıyor»). Ofis ve Kütüphanem önceden
-       «Daha fazla»nın altındaydı; hiçbiri kalkmadı, sıra ve adlar aynı. */
-    const cek = (o.cekmeceler || []).map(cekHtml).join('');
+    /* Dört öğe (KOLAY-PLANI Faz 2): üç ana çekmece, açıksa bulunduğun
+       çekmece (bölümleriyle) ve Menü. Menü telefondaki bütün çekmeceler
+       sayfasını açar; gizlenen çekmecelerin sayacı (Onaylar) Menü'de. */
+    const tum = o.cekmeceler || [];
+    const gorunen = tum.filter(c => ANA_CEKMECE.indexOf(c.id) >= 0 || c.on);
+    const menuSayac = tum.filter(c => gorunen.indexOf(c) < 0).reduce((a, c) => a + (Number(c.sayac) || 0), 0);
+    const menu = tum.length ? '<div class="kenar__cekmece-kap"><button class="kenar__cekmece" data-act="toggle-sidebar" data-cekmece="menu" title="Menü"'
+      + ' aria-label="' + kac('Menü' + (menuSayac ? ', ' + menuSayac + ' bekleyen' : '')) + '">'
+      + simge('menu') + '<span class="kenar__ad">Menü</span>'
+      + (menuSayac ? '<span class="kenar__sayac" data-oz="115" aria-hidden="true">' + menuSayac + '</span>' : '') + '</button></div>' : '';
+    const cek = gorunen.map(cekHtml).join('') + menu;
     /* Kenar açıkken (fare üstünde ya da odak içinde) yeniden çizilirse —
        bir bölüme basınca olduğu gibi — açılış dizilişi TEKRAR oynamaz:
        çizim eski kenar hâlâ ekrandayken kurulur, açık olduğu buradan bilinir.
@@ -1267,7 +1277,7 @@ window.LIFEOS = window.LIFEOS || {};
   kur();
 
   L.KABUK = Object.freeze({
-    CEKMECELER, MODULLER, SIRA,
+    CEKMECELER, ANA_CEKMECE, MODULLER, SIRA,
     simge, modulIsareti, adres, simdiOrani, saatMetni,
     ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, railBilgiye, seciciHazirla, seciciKomsu,
     bolumCubugu, altBant, menuSayfasi,

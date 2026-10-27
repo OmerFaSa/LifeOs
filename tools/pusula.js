@@ -38,9 +38,9 @@ const sureTahmini = (adim, karakter) => Math.round(adim * 1.5 + karakter * 0.3);
 const BEKLE = 300;
 
 const MODUL = {
-  AYS:{ dosya:'AYS/dist/rota.html', ns:'R', menu:'(R.App.NAV || []).length' },
-  SPI:{ dosya:'SPI/dist/spi.html', ns:'SP', menu:'(SP.App.SECTIONS || []).length' },
-  ESP:{ dosya:'ESP/dist/esp.html', ns:'ESP', menu:'(ESP.Nav.sections() || []).length' },
+  AYS:{ dosya:'AYS/dist/rota.html', ns:'R' },
+  SPI:{ dosya:'SPI/dist/spi.html', ns:'SP' },
+  ESP:{ dosya:'ESP/dist/esp.html', ns:'ESP' },
 };
 
 function sayac(p){
@@ -231,7 +231,8 @@ async function olc(ad, m, b, yol){
     const kutu = Array.from(kok.querySelectorAll('section.pk, .kapak__sayilar > *')).filter(gor).length;
     return bolum + kutu;
   });
-  const y3 = await p.evaluate(m.menu);
+  /* Y3: kenarda görünen öğe (KOLAY Faz 2: üç ana çekmece + Menü; Bugün açıkken). */
+  const y3 = await p.evaluate(() => document.querySelectorAll('.kenar__nav [data-cekmece]').length);
   const s = sayac(p);
   let sonuc;
   try{ sonuc = await yol.fn(p, s); }

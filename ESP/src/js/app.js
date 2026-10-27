@@ -32,8 +32,8 @@ ESP.App = (function(){
      Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
   const UST = { gun:'today' };
 
-  /* Telefon alt bandı (karar 3): Bugün · Plan · Çalışma · Menü. */
-  const BANT = ['bugun', 'plan', 'calisma'];
+  /* Telefon alt bandı (KOLAY-PLANI Faz 2): Bugün · Çalışma · Analiz · Menü; masaüstü kenarı da aynı (kabuk.js ANA_CEKMECE). */
+  const BANT = ['bugun', 'calisma', 'analiz'];
 
   function viewOf(route){
     const r = UST[route] || route;

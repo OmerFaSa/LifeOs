@@ -317,8 +317,13 @@ düzen araçları alt sayfayı açmıyor (testlerle kapsanıyor); iOS bildirimin
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
 
-- Faz 1 bitti (üç modülde Y1 = 3, ≤ 30 sn tahmin). Sıradaki iş **Faz 2 · Basit görünüm**:
-  Y3 9/8/8 → ≤ 4. Senaryolar `tools/pusula.js` içinde; yeni yol senaryoya eklenir, eski yol
+- Faz 1 bitti (üç modülde Y1 = 3, ≤ 30 sn tahmin). Faz 2 (2026-10-26/27): Bugün üç blok;
+  Y3 9/8/8 → **4**: kenarda ve telefon bandında Bugün · Çalışma · Analiz · Menü
+  (`brand/ortak/kabuk.js` `ANA_CEKMECE`, modüllerde `BANT`); öteki çekmeceler Menü sayfasında
+  adıyla, açık çekmece bölümleriyle kenarda kalır, Onaylar sayısı Menü düğmesinde. Rota
+  kalkmadı. Açık: çekmece adları («Çalış», «İlerleme») ve §5 eşlemesindeki birleştirmeler
+  (AYS Öğren → Çalış, ESP Merdiven → İlerleme) kullanıcı kararını bekliyor; «Uzman görünüm»
+  anahtarı yapılmadı. Senaryolar `tools/pusula.js` içinde; yeni yol senaryoya eklenir, eski yol
   silinmez (`SENARYO[mod]` birden çok yol tutar, en kısa doğrulanan sayılır).
 - Önce okunacaklar: bu dosya, `AGENTS.md`, `IPHONE-PLANI.md` §2 (sadelik sözleşmesi),
   `brand/ortak/tekgun.js` (Faz 4'ün temeli), `AYS/src/js/core/gelecek.js` (Faz 5'in bağlanacağı yer).

@@ -72,7 +72,8 @@
         const cek = site.querySelector('.kenar__cekmece');
         expect(cek.getAttribute('title')).toBe('Bugün');
         expect(cek.getAttribute('aria-label')).toBe('Bugün');
-        expect(site.querySelector('[data-cekmece="onaylar"]').getAttribute('aria-label')).toBe('Onaylar, 3 bekleyen');
+        /* Onaylar kenarda değil (KOLAY Faz 2): sayısı Menü düğmesinde okunur. */
+        expect(site.querySelector('[data-cekmece="menu"]').getAttribute('aria-label')).toBe('Menü, 3 bekleyen');
         if(window.innerWidth >= 680){
           expect(getComputedStyle(site.firstElementChild).gridTemplateColumns.split(' ')[0]).toBe('64px');
         }
@@ -94,15 +95,26 @@
 
     /* Kullanıcı (2026-10-03): «şu daha fazla kısmını da kaldır, bir işe
        yaramıyor». Sekiz çekmece kenarda düz listede; hiçbiri kalkmaz. */
-    it('sade: dokuz çekmece düz listede, «Daha fazla» yok; hiçbiri kalkmaz', () => {
-      const cek = on => K.CEKMECELER.map(c => ({ id:c.id, ad:c.ad, route:c.id, on:c.id === on }));
-      const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:cek('ofis') }) + '</div>');
+    /* KOLAY-PLANI Faz 2 (2026-10-27): kenarda dört öğe — Bugün · Çalışma ·
+       Analiz · Menü. Öteki çekmeceler Menü'de adıyla durur; açık olan çekmece
+       (bölümleriyle) kenarda kalır. Onaylar'ın sayısı Menü düğmesinde. */
+    it('sade: kenarda üç ana çekmece + Menü; açık çekmece kalır; Onaylar sayısı Menü\'de', () => {
+      const cek = on => K.CEKMECELER.map(c => ({ id:c.id, ad:c.ad, route:c.id, on:c.id === on, sayac:c.id === 'onaylar' ? 2 : 0 }));
+      const idler = d => Array.from(d.querySelectorAll('.kenar__nav [data-cekmece]')).map(x => x.dataset.cekmece);
+      const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:cek('bugun') }) + '</div>');
       try{
-        expect(Array.from(d.querySelectorAll('.kenar__nav [data-cekmece]')).map(x => x.dataset.cekmece))
-          .toEqual(K.CEKMECELER.map(c => c.id));
-        expect(!!d.querySelector('.kenar__dahafazla, .kenar__dahafazla-dugme, .kenar__dahafazla-liste')).toBe(false);
-        expect(d.querySelector('[data-cekmece="ofis"]').classList.contains('is-on')).toBe(true);
+        expect(idler(d)).toEqual(['bugun', 'calisma', 'analiz', 'menu']);
+        const m = d.querySelector('[data-cekmece="menu"]');
+        expect(m.getAttribute('data-act')).toBe('toggle-sidebar');
+        expect(m.querySelector('.kenar__sayac').textContent).toBe('2');
+        expect(m.getAttribute('aria-label')).toBe('Menü, 2 bekleyen');
       }finally{ d.remove(); }
+      const o = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:cek('ofis') }) + '</div>');
+      try{
+        expect(idler(o)).toEqual(['bugun', 'calisma', 'analiz', 'ofis', 'menu']);
+        expect(o.querySelector('[data-cekmece="ofis"]').classList.contains('is-on')).toBe(true);
+        expect(!!o.querySelector('.kenar__dahafazla, .kenar__dahafazla-dugme, .kenar__dahafazla-liste')).toBe(false);
+      }finally{ o.remove(); }
     });
 
     it('sade: kenar her zaman dar açılır; eski «açık» kaydı da dar (düğmesi yok)', () => {
