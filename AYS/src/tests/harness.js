@@ -92,7 +92,10 @@ R.Test = (function(){
     for(const suite of suites){
       for(const test of suite.tests){
         try{
-          await test.fn();
+          /* Tek test en çok 15 sn: takılan test bütün koşuyu (runtests sınırı) düşürmesin. */
+          let saat;
+          await Promise.race([test.fn(), new Promise((_, red) => { saat = setTimeout(() => red(new Error('zaman aşımı (15 sn)')), 15000); })])
+            .finally(() => clearTimeout(saat));
           results.push({ suite:suite.name, name:test.name, ok:true });
           passed++;
         }catch(err){

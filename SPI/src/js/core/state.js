@@ -478,10 +478,12 @@ SP.Model = (function(){
   async function saveLab(rec){
     applyDerived(rec);
     rec.updatedAt = new Date().toISOString();
+    const once = SP.S.labs.slice();
     const i = SP.S.labs.findIndex(l => l.id === rec.id);
     if(i >= 0) SP.S.labs[i] = rec; else SP.S.labs.push(rec);
     SP.S.labs.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
-    await yaz('labs/' + rec.id, rec);
+    /* Yazılamayan kayıt bellekte de kalmaz (yoksa yenileyince kaybolurdu). */
+    try{ await yaz('labs/' + rec.id, rec); }catch(e){ SP.S.labs = once; throw e; }
     await refreshFlags();
     return rec;
   }
@@ -686,10 +688,11 @@ SP.Model = (function(){
 
   async function saveWorkout(rec){
     normWorkout(rec);
+    const once = SP.S.workouts.slice();
     const i = SP.S.workouts.findIndex(w => w.id === rec.id);
     if(i >= 0) SP.S.workouts[i] = rec; else SP.S.workouts.push(rec);
     SP.S.workouts.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
-    await yaz('workouts/' + rec.id, rec);
+    try{ await yaz('workouts/' + rec.id, rec); }catch(e){ SP.S.workouts = once; throw e; }
     return rec;
   }
 

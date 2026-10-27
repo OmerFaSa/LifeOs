@@ -113,7 +113,7 @@ async function portMuhafizi(portlar, ipucu){
 
     await page.goto('http://127.0.0.1:' + PORT + '/tests/', { waitUntil:'load' });
     const summary = await page.waitForFunction(() => window.__ROTA_TESTS__, null,
-      { timeout:60000 }).then(h => h.jsonValue());
+      { timeout:240000 }).then(h => h.jsonValue());   // AYS ~50 sn ve büyüyor; tek test ayrıca 15 sn ile sınırlı (harness)
 
     const failed = summary.results.filter(r => !r.ok);
     failed.forEach(r => console.log('✕ ' + r.suite + ' › ' + r.name + '\n    ' + r.error));

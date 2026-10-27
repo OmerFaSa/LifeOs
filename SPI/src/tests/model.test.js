@@ -419,6 +419,32 @@
      gidiyor, o cihaz da tazelerken aynısını yapıyordu: iki açık cihaz
      dakikada bir birbirini yeniletti. Depo ölçümü (storage) bu cihaza
      aittir ve eşitlenmez (store.js CIHAZA_AIT). */
+  /* Depo yazamazsa (dolu) kayıt bellekte de kalmaz: yoksa sayfa yenilenene
+     dek «kaydedildi» görünür, sonra kaybolurdu (2026-10-27). */
+  describe('Model — yazılamayan kayıt', () => {
+    it('saveLab ve saveWorkout yazamazsa hata verir, bellekteki liste eski hâlinde kalır', async () => {
+      resetState();
+      const set = SP.Store.set;
+      const w0 = await SP.Model.saveWorkout({ id:'w1', date:'2026-03-10', minutes:30 });
+      const eskiDk = w0.minutes;
+      SP.Store.set = async () => false;
+      try{
+        let hata = null;
+        try{ await SP.Model.saveWorkout({ id:'w2', date:'2026-03-11', minutes:20 }); }catch(e){ hata = e; }
+        expect(!!hata).toBe(true);
+        expect(SP.S.workouts.map(w => w.id)).toEqual(['w1']);
+        hata = null;
+        try{ await SP.Model.saveWorkout({ id:'w1', date:'2026-03-10', minutes:90 }); }catch(e){ hata = e; }
+        expect(!!hata).toBe(true);
+        expect(SP.S.workouts[0].minutes).toBe(eskiDk);
+        hata = null;
+        try{ await SP.Model.saveLab({ id:'l1', date:'2026-03-10', kind:'blood', values:{} }); }catch(e){ hata = e; }
+        expect(!!hata).toBe(true);
+        expect(SP.S.labs.length).toBe(0);
+      }finally{ SP.Store.set = set; resetState(); }
+    });
+  });
+
   describe('Model — yükleme', () => {
     it('ikinci loadAll depoya yalnız cihaza ait ölçümü yazar', async () => {
       resetState();

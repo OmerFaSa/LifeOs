@@ -637,6 +637,19 @@
 
   /* ==================== davranış ==================== */
 
+  /* Gece yarısını geçen blok (2026-10-27): palet yalnız bugüne bakıyordu;
+     23:50'de başlatılan blok 00:00'da «Çalışan blok yok» oluyordu. */
+  describe('Palet — çalışan blok', function(){
+    it('dün başlatılıp sürmekte olan blok bulunur', function(){
+      withToday('2026-09-16', () => {
+        resetState();
+        S.days['2026-09-15'] = { date:'2026-09-15', blocks:[{ id:'gb', slot:'Akşam', topic:'Türev', startedAt:'2026-09-15T20:50:00.000Z', status:'pending' }] };
+        S.days['2026-09-16'] = { date:'2026-09-16', blocks:[{ id:'yb', status:'pending' }] };
+        expect((R.Palette.runningBlock() || {}).id).toBe('gb');
+      });
+    });
+  });
+
   describe('Kötü gün ve ödül eşiği', function(){
     it('kötü gün blokları atlar ve hedefi indirir', async function(){
       await withTodayAsync('2026-09-15', async () => {

@@ -536,10 +536,13 @@ R.Palette = (function(){
   /* ---------- odak modu ---------- */
   let focusTick = null;
 
+  /* Bugün, sonra dün: gece yarısını geçen blok sürmeye devam eder. */
   function runningBlock(){
-    const day = S.days[U.todayISO()];
-    if(!day) return null;
-    return day.blocks.find(b => b.startedAt) || null;
+    for(const iso of [U.todayISO(), U.iso(U.addDays(U.parse(U.todayISO()), -1))]){
+      const b = ((S.days[iso] || {}).blocks || []).find(x => x.startedAt);
+      if(b) return b;
+    }
+    return null;
   }
   function elapsed(b){
     return b && b.startedAt ? Math.max(0, Math.floor((Date.now() - new Date(b.startedAt).getTime())/1000)) : 0;
