@@ -17329,7 +17329,7 @@ html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .c
 /* Akkor dolgu: renkten beyaza ısınan uç + iki katlı hale. */
 html[data-zemin="yumusak"] :is(.bar__fill:not(.bar__fill--warn):not(.bar__fill--danger), .esikcubuk__dolu, .donen__nokta.is-on:not([data-sistem])){
   background:linear-gradient(90deg, var(--mod), color-mix(in oklab, var(--mod) 45%, #fff) 82%, #fff);
-  box-shadow:0 0 8px 0 color-mix(in oklab, var(--mod) 70%, transparent), 0 0 18px 2px rgb(var(--sicak) / .35); }
+  box-shadow:0 0 6px 0 color-mix(in oklab, var(--mod) 55%, transparent), 0 0 12px 1px rgb(var(--sicak) / .22); }
 html[data-zemin="yumusak"] .donen__nokta.is-on[data-sistem]{ box-shadow:0 0 8px 0 rgb(var(--sicak) / .5); background-image:linear-gradient(90deg, transparent 40%, rgba(255,255,255,.85)); }   /* sistem rengi kendi kuralında */
 
 /* Ray: cam oyuk (kaydırıcıdaki gibi); hale taşabilsin diye kırpmaz. */
@@ -17360,7 +17360,7 @@ html[data-zemin="yumusak"] :is(.sheet, .king__kutu, .menusayfa){
   box-shadow:var(--levha-ic), inset 0 -16px 28px -22px rgb(var(--sicak) / var(--sicak-yansima)), var(--levha-golge); }
 html[data-zemin="yumusak"] .sheet{ border-radius:28px; }
 @media (min-width:680px){
-  html[data-zemin="yumusak"] .menusayfa{ top:14px; right:14px; bottom:14px; width:380px; border:0; border-radius:28px; }
+  html[data-zemin="yumusak"] .menusayfa{ top:14px; right:14px; bottom:14px; width:440px; border:0; border-radius:28px; }
 }
 
 /* Sayfa seçicinin hapı: parlak cam, altında sıcak ışık. */
@@ -17384,7 +17384,7 @@ html[data-zemin="yumusak"] .site--v5 .altbant__sekme.is-on .kbk-ic{ filter:drop-
   html[data-zemin="yumusak"] .site--v5 :is(.pickcard, .kapak__sayi.is-git, .alan-kare, .ozet-kare, button.pk, a.pk):hover{
     background-image:radial-gradient(120% 90% at 18% 0%, rgba(255,255,255,.42), transparent 60%); }
   html[data-zemin="yumusak"] .site--v5 :is(.chip, .kisayol > button, .kisayol > a):hover{
-    box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), 0 8px 16px -10px rgb(var(--sicak) / .8); }
+    box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), 0 8px 16px -10px rgb(var(--sicak) / .5); }
 }
 
 /* Klavye odağı: modül renginde ışık halkası (dış çizgi yerinde kalır). */
@@ -17419,7 +17419,7 @@ html[data-zemin="yumusak"] .menusayfa__bas{ background:transparent; border-botto
     .alan-kare, .ozet-kare, .kenar__cekmece, .altbant__sekme, .bolumcubugu__ad){
     transition:transform 620ms var(--su), background-color var(--dur) var(--ease), color var(--dur) var(--ease), box-shadow 300ms var(--ease); }
   html[data-zemin="yumusak"] .site--v5 :is(.btn, .chip, .kisayol > button, .kisayol > a, .giris__gonder, .kenar__cekmece, .altbant__sekme, .bolumcubugu__ad):active:not(:disabled){
-    transform:scale(.94); transition-duration:110ms; transition-timing-function:cubic-bezier(.3,0,.7,1); }
+    transform:scale(.96); transition-duration:110ms; transition-timing-function:cubic-bezier(.3,0,.7,1); }
   html[data-zemin="yumusak"] .site--v5 :is(.pickcard, .kapak__sayi.is-git, .alan-kare, .ozet-kare):active{
     transform:scale(.975); transition-duration:120ms; }
 
@@ -17433,10 +17433,10 @@ html[data-zemin="yumusak"] .menusayfa__bas{ background:transparent; border-botto
   html[data-zemin="yumusak"] .site--v5 .kenar__cekmece.is-on.is-kayan::before{ animation:isaret-dikey 620ms var(--su-dalga) both, su-damla 620ms var(--su) both; }
 
   /* Kağıt, menü ve King damla gibi süzülüp oturur. */
-  html[data-zemin="yumusak"] :is(.sheet, .menusayfa){ animation:su-gel 560ms var(--su) both; }
+  html[data-zemin="yumusak"] :is(.sheet, .menusayfa){ animation:su-gel 440ms var(--su) both; }
 }
 @keyframes su-damla{ 0%{ scale:1 1.18; } 45%{ scale:1.06 .94; } 100%{ scale:1 1; } }
-@keyframes su-gel{ from{ opacity:0; transform:translateY(18px) scale(.97); } 40%{ opacity:1; } to{ opacity:1; transform:none; } }
+@keyframes su-gel{ from{ opacity:0; transform:translateY(10px) scale(.985); } 40%{ opacity:1; } to{ opacity:1; transform:none; } }
 
 /* 11) MİNİKLER — ajanlar sevimli, ışıyan küçük yaratıklar (kullanıcı,
    2026-10-27, örnek: turuncu ve mavi ışıyan minik avatarlar; «AYS'de mavi,
@@ -17588,8 +17588,8 @@ html[data-zemin="yumusak"] .site--v5 .kenar__logo b{ box-shadow:0 0 6px -1px cur
   html[data-zemin="yumusak"] .site--v5 .kenar__logo b:nth-child(3){ animation-delay:.36s; }
   html[data-zemin="yumusak"] .site--v5 .kenar__logo b:nth-child(4){ animation-delay:.54s; }
 }
-@keyframes logo-nabiz{ 0%, 100%{ filter:brightness(1); } 50%{ filter:brightness(1.35) saturate(1.2); } }
-@keyframes logo-isil{ 0%, 82%, 100%{ filter:none; } 88%{ filter:brightness(1.7) saturate(1.3); } }
+@keyframes logo-nabiz{ 0%, 100%{ filter:brightness(1); } 50%{ filter:brightness(1.15) saturate(1.1); } }
+@keyframes logo-isil{ 0%, 82%, 100%{ filter:none; } 88%{ filter:brightness(1.35) saturate(1.15); } }
 
 /* Ajan avatarının gözüne parıltı: daha canlı, daha minnoş. */
 .site--v5 :is(.agentav, .agentkare)::after{
@@ -17737,31 +17737,32 @@ html:not([data-zemin="yumusak"]) .minikkat, html.king-acik .minikkat{ display:no
    (minik.js --mx/--my yazar); gerçek camdaki yansıma gibi yumuşak, geniş. */
 @media (hover:hover) and (pointer:fine){
   html[data-zemin="yumusak"] .site--v5 .isikli:not(.pk):not(.kapak__sayi){
-    background:radial-gradient(320px circle at var(--mx, 50%) var(--my, 0%), var(--el-isik), transparent 65%), var(--cam); }
+    background:radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%), var(--el-isik), transparent 65%), var(--cam); }
   html[data-zemin="yumusak"] .site--v5 :is(.pk, .kapak__sayi).isikli{
     background:radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), var(--el-isik), transparent 65%), var(--karo); }
 }
-:root{ --el-isik:rgba(255,255,255,.32); }
+:root{ --el-isik:rgba(255,255,255,.22); }
 html[data-theme="dark"]{ --el-isik:rgba(255,236,220,.07); }
 @media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --el-isik:rgba(255,236,220,.07); } }
 
-/* 14) SAYFA GİRİŞİ — sıvı cam: içerik bulanıktan netleşerek, hafifçe
-   büyüyüp yükselerek sırayla gelir (kabuk.js sayfa değişince köke
-   `sayfa-gecis` koyar; aynı sayfanın yeniden çizimi oynatmaz). */
+/* 14) SAYFA GİRİŞİ — sıvı cam: içerik hafif bulanıktan netleşerek, az
+   yükselerek sırayla gelir (kabuk.js sayfa değişince köke `sayfa-gecis`
+   koyar; aynı sayfanın yeniden çizimi oynatmaz). 2026-10-28 «daha
+   profesyonel»: 700 → 460 ms, taşmasız yavaşlayan eğri, aralık 35 ms. */
 @media (prefers-reduced-motion:no-preference){
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 .sayfabasi{ animation:cam-gir-baslik 620ms var(--su) both; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 .sayfabasi{ animation:cam-gir-baslik 420ms cubic-bezier(.2,.8,.2,1) both; }
   html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi,
-    .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard, .bolumcubugu){ animation:cam-gir 700ms var(--su) both; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(2){ animation-delay:55ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(3){ animation-delay:110ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(4){ animation-delay:165ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(5){ animation-delay:220ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(6){ animation-delay:275ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(7){ animation-delay:330ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(8){ animation-delay:385ms; }
+    .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard, .bolumcubugu){ animation:cam-gir 460ms cubic-bezier(.2,.8,.2,1) both; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(2){ animation-delay:35ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(3){ animation-delay:70ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(4){ animation-delay:105ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(5){ animation-delay:140ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(6){ animation-delay:175ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(7){ animation-delay:210ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(8){ animation-delay:245ms; }
 }
-@keyframes cam-gir{ from{ opacity:0; transform:translateY(18px) scale(.965); filter:blur(8px); } 55%{ opacity:1; filter:blur(0); } to{ opacity:1; transform:none; filter:none; } }
-@keyframes cam-gir-baslik{ from{ opacity:0; transform:translateY(8px); filter:blur(6px); } to{ opacity:1; transform:none; filter:none; } }
+@keyframes cam-gir{ from{ opacity:0; transform:translateY(10px) scale(.985); filter:blur(4px); } 60%{ opacity:1; filter:blur(0); } to{ opacity:1; transform:none; filter:none; } }
+@keyframes cam-gir-baslik{ from{ opacity:0; transform:translateY(6px); filter:blur(3px); } to{ opacity:1; transform:none; filter:none; } }
 
 /* 15) MİNİKLER — daha tatlı: kollar ve el sallama, kalp, yeni süsler
    (kurdele, bere, yuvarlak gözlük); sayfa geçişinde katman içerikle
@@ -17790,25 +17791,73 @@ html.sayfa-gecis .minikkat{ opacity:0; filter:blur(6px); transition:none; }
   100%{ opacity:0; transform:translate(10px, -22px) scale(.9); } }
 
 /* 16) IŞIK KENARI — gerçek camda kenar ışığı yakalar: sol üstte parlak bir
-   ışık çizgisi, sağ altta sıcak geri yansıma, arada çok hafif bir renk
-   kırılması (Liquid Glass). 1 px maskeli halka (::before); imleç kartın
+   ışık çizgisi, sağ altta sıcak geri yansıma (renk kırılması 2026-10-28'de
+   kalktı: gökkuşağı kenar yapay duruyordu). 1 px maskeli halka (::before); imleç kartın
    üstündeyse kenarın imlece yakın kısmı parlar (EL IŞIĞI ile aynı --mx/--my).
    Gruplu liste satırı (::before ayraç), iç içe kart ve masa kartı dışarıda. */
-:root{ --rim-ust:rgba(255,255,255,.98); --rim-orta:rgba(255,255,255,.18); --rim-kirilma:.22; }
-html[data-theme="dark"]{ --rim-ust:rgba(255,255,255,.38); --rim-orta:rgba(255,255,255,.05); --rim-kirilma:.16; }
-@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --rim-ust:rgba(255,255,255,.38); --rim-orta:rgba(255,255,255,.05); --rim-kirilma:.16; } }
+:root{ --rim-ust:rgba(255,255,255,.98); --rim-orta:rgba(255,255,255,.18); }
+html[data-theme="dark"]{ --rim-ust:rgba(255,255,255,.38); --rim-orta:rgba(255,255,255,.05); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --rim-ust:rgba(255,255,255,.38); --rim-orta:rgba(255,255,255,.05); } }
 html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard){
   position:relative; border-color:transparent; }
 html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::before{
   content:''; display:block; position:absolute; inset:-1px; width:auto; height:auto; z-index:1; border-radius:inherit; padding:1px; pointer-events:none;
-  background:radial-gradient(160px circle at var(--mx, -400px) var(--my, -400px), rgba(255,255,255,.95), transparent 70%),
-    linear-gradient(135deg, var(--rim-ust) 0%, var(--rim-orta) 26%, transparent 46%, transparent 62%, rgb(var(--sicak) / .55) 90%, rgb(var(--gul) / .5) 100%),
-    conic-gradient(from 210deg, rgb(120 180 255 / var(--rim-kirilma)), rgb(255 140 200 / var(--rim-kirilma)), rgb(255 220 140 / var(--rim-kirilma)), rgb(120 180 255 / var(--rim-kirilma)));
+  background:radial-gradient(140px circle at var(--mx, -400px) var(--my, -400px), rgba(255,255,255,.75), transparent 70%),
+    linear-gradient(135deg, var(--rim-ust) 0%, var(--rim-orta) 26%, transparent 46%, transparent 64%, rgb(var(--sicak) / .32) 92%, rgb(var(--gul) / .28) 100%);
   -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor;
   mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite:exclude; }
 html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card, .giris, .donen, .site--v5 .nextup, .site--v5 .ledger .lrow,
   .site--v5 .pk, .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, .sheet, .popover, .menusayfa, .king__kutu) *:is(.kutu, .card, .giris, .pk)::before,
 html[data-zemin="yumusak"] .site--v5 .desk::before{ content:none; }
+
+/* 17) MENÜ VE MİNİK ADI (kullanıcı, 2026-10-28: «menü kısmını, agentları
+   ve arayüzü daha anlaşılır yap»).
+   · MENÜ: her çekmecenin simgesi modül tonunda küçük cam karoda; bölümler
+     iki sütunlu düzgün ızgara (sarkan tek çip yok); bulunduğun bölüm modül
+     renginde dolu hap. Sistem geçişi bölümlü seçici gibi parlak hap.
+     Metin eklenmedi (§1.10 az metin): ayrım görsel sıradüzenle.
+   · MİNİK ADI: üstüne gelince küçük cam etiket: ad · huy, altında
+     «Dokun, gıdıkla» (minik.js KISILER). Balon o sırada susar. */
+html[data-zemin="yumusak"] .menusayfa__bas{ height:64px; padding:0 14px 0 22px; font-size:19px; letter-spacing:-.02em; }
+html[data-zemin="yumusak"] .menusayfa__kapat{ border-radius:50%; }
+html[data-zemin="yumusak"] .menusayfa__kapat:hover{ background:var(--cam-ince); }
+html[data-zemin="yumusak"] .menusayfa__sistemler{ margin:12px 16px 4px; border-radius:16px; background:var(--ray); }
+html[data-zemin="yumusak"] .menusayfa__sistem{ border-radius:12px; }
+html[data-zemin="yumusak"] .menusayfa__sistem.is-on{ background:var(--seg-hap, rgba(255,255,255,.9)); color:var(--text);
+  box-shadow:var(--seg-golge, 0 1px 2px rgba(20,24,40,.1)); }
+html[data-zemin="yumusak"] .menusayfa__govde{ padding:4px 14px 18px; }
+html[data-zemin="yumusak"] .menusayfa__cekmece{ padding:12px 4px 10px; border-bottom:0; }
+html[data-zemin="yumusak"] .menusayfa__cekmece + .menusayfa__cekmece{
+  background:linear-gradient(90deg, transparent, var(--border-soft) 12%, var(--border-soft) 88%, transparent) top / 100% 1px no-repeat; }
+html[data-zemin="yumusak"] .menusayfa__ad{ gap:10px; margin:0 0 10px; font-size:15px; letter-spacing:-.01em; }
+html[data-zemin="yumusak"] .menusayfa__ad .kbk-ic{ box-sizing:content-box; padding:6px; border-radius:10px; flex:none;
+  color:var(--mod-ink, var(--mod)); background:var(--karo);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px rgba(255,255,255,.35), 0 4px 10px -6px var(--mod); }
+html[data-zemin="yumusak"] .menusayfa__bolumler{ display:grid; grid-template-columns:repeat(auto-fill, minmax(108px, 1fr)); gap:6px; padding-left:40px; }
+html[data-zemin="yumusak"] .menusayfa__bolum{ min-height:36px; padding:0 12px; border-radius:12px; text-align:left;
+  border-color:transparent; background:var(--cam-ince); color:var(--text-2); box-shadow:inset 0 0 0 1px var(--cam-kenar); }
+html[data-zemin="yumusak"] .menusayfa__bolum:hover{ background:var(--cam-katman); color:var(--text); }
+html[data-zemin="yumusak"] .menusayfa__bolum.is-on{ background:var(--dugme); color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 6px 14px -8px var(--dugme); }
+html[data-zemin="yumusak"] .menusayfa__ayak{ background:transparent; border-top-color:var(--cam-kenar); }
+@media (prefers-reduced-motion:no-preference){
+  html[data-zemin="yumusak"] .menusayfa__cekmece{ animation:cam-gir 420ms cubic-bezier(.2,.8,.2,1) both; }
+  html[data-zemin="yumusak"] .menusayfa__cekmece:nth-child(2){ animation-delay:30ms; }
+  html[data-zemin="yumusak"] .menusayfa__cekmece:nth-child(3){ animation-delay:60ms; }
+  html[data-zemin="yumusak"] .menusayfa__cekmece:nth-child(4){ animation-delay:90ms; }
+  html[data-zemin="yumusak"] .menusayfa__cekmece:nth-child(n+5){ animation-delay:120ms; }
+}
+
+.minik__ad{ position:absolute; left:50%; bottom:calc(100% + 10px); z-index:2; translate:-50% 4px; opacity:0; pointer-events:none;
+  padding:5px 10px 6px; border-radius:12px; white-space:nowrap; text-align:center;
+  font:600 11.5px/1.3 var(--font-body, system-ui); color:var(--text);
+  background:var(--cam-katman, rgba(255,255,255,.92)); -webkit-backdrop-filter:saturate(150%) blur(16px); backdrop-filter:saturate(150%) blur(16px);
+  box-shadow:var(--cam-ust, none), inset 0 0 0 1px var(--cam-kenar, transparent), 0 8px 18px -10px rgba(20,24,40,.35);
+  transition:opacity .16s ease, translate .32s cubic-bezier(.2,.8,.2,1); }
+.minik__ad i{ font-style:normal; font-weight:500; color:var(--text-3); }
+.minik__ad small{ display:block; font-weight:500; font-size:10.5px; color:var(--text-3); }
+.minik.is-farkinda .minik__ad{ opacity:1; translate:-50% 0; transition-delay:.25s, .25s; }
+.minik.is-farkinda .minik__balon{ opacity:0; }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -19709,7 +19758,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'71dfd3b3', at:'2026-10-27 17:48', dirty:true };
+R.BUILD = { id:'7e3b6ad5', at:'2026-10-27 21:11', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -29082,25 +29131,53 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- tık sesleri
 
-     «Kısık, tok, kısa»: sinüs, hızlı zarf, düşük kazanç. Dosya yok; her ses
-     birkaç osilatör notasıdır. Nota: [gecikme sn, başlangıç Hz, bitiş Hz,
-     süre sn, tepe kazanç, yükselme sn]. */
+     «Kısık, tok, kısa» (2026-10-02); «daha profesyonel» (2026-10-28). Dosya
+     yok: her ses birkaç katmanlı küçük bir sentezdir. Katman türleri:
+       ton      osilatör (sine/triangle), istenirse alçak geçiren süzgeç
+       hisirti  beyaz gürültü, bant süzgeci (dokunuşun «tık»ı, sayfa hışırtısı)
+       ses      testere dişi → iki bant süzgeci (ünlü formantı): miniğin sesi
+     Alanlar: t gecikme sn · f [başlangıç, bitiş] Hz · d süre sn · g tepe
+     kazanç · a yükselme sn · suz süzgeç Hz · q · oda yankı payı · un ünlü.
+     Hepsi ortak bir çıkıştan geçer: kısa oda yankısı (üretilmiş, dosya yok)
+     ve yumuşak bir sıkıştırıcı — sesler aynı odada çalıyor gibi durur,
+     üst üste binince patlamaz. Her çalışta perde ±%2 oynar: aynı tık art
+     arda makineli tüfek gibi duyulmaz. */
   const SESLER = Object.freeze({
-    /* Su damlası (2026-10-27, sıvı cam teması): kısa, yukarı kayan «blop». */
-    tik:  [[0, 420, 760, 0.06, 0.03, 0.004]],
-    ac:   [[0, 380, 620, 0.05, 0.028, 0.003], [0.06, 560, 900, 0.06, 0.026, 0.003]],
-    kapa: [[0, 560, 900, 0.05, 0.026, 0.003], [0.06, 380, 560, 0.06, 0.028, 0.003]],
-    tamam:[[0, 392, 386, 0.2, 0.03, 0.014]],
-    /* Sayfa açılınca: iki yumuşak cam notası (E6 → B6), uzun sönüm. */
-    sayfa:[[0, 1318, 1318, 0.42, 0.012, 0.01], [0.07, 1975, 1975, 0.5, 0.009, 0.012]],
-    /* Miniğe dokununca kıkırdama: tiz, sekerek yükselen beş hece. */
-    gidik:[[0, 880, 1250, 0.07, 0.03, 0.006], [0.085, 990, 1400, 0.07, 0.028, 0.006], [0.17, 1050, 1500, 0.07, 0.026, 0.006],
-           [0.255, 1180, 1650, 0.08, 0.024, 0.006], [0.35, 1320, 1900, 0.1, 0.02, 0.006]],
-    /* Minik sohbeti («bla bla»): alçak, inip çıkan heceler. */
-    bla:  [[0, 520, 640, 0.07, 0.016, 0.006], [0.1, 640, 470, 0.07, 0.016, 0.006], [0.2, 560, 700, 0.08, 0.014, 0.006]],
+    /* Dokunuş: 1 kHz üstü kısa hışırtı + cam gövde + çok hafif ağırlık. */
+    tik:  [{ t:0, tur:'hisirti', f:[3600, 2400], q:1.2, d:0.014, g:0.03, a:0.001 },
+           { t:0, tur:'ton', dalga:'sine', f:[1760, 1480], d:0.04, g:0.013, a:0.002 },
+           { t:0, tur:'ton', dalga:'sine', f:[190, 120], d:0.035, g:0.016, a:0.002 }],
+    /* Aç/kapa: iki notalık yumuşak tel (G5 ↔ D6), hafif yankı. */
+    ac:   [{ t:0, tur:'ton', dalga:'triangle', f:[784, 784], suz:2600, d:0.09, g:0.016, a:0.003, oda:0.12 },
+           { t:0.055, tur:'ton', dalga:'triangle', f:[1175, 1175], suz:3200, d:0.12, g:0.014, a:0.003, oda:0.16 }],
+    kapa: [{ t:0, tur:'ton', dalga:'triangle', f:[1175, 1175], suz:3200, d:0.08, g:0.014, a:0.003, oda:0.12 },
+           { t:0.055, tur:'ton', dalga:'triangle', f:[784, 784], suz:2400, d:0.11, g:0.015, a:0.003, oda:0.12 }],
+    /* Kaydedildi: iki vuruşluk cam çan (C6 → E6), çanın kısmi sesiyle. */
+    tamam:[{ t:0, tur:'ton', dalga:'sine', f:[1047, 1047], d:0.55, g:0.009, a:0.004, oda:0.3 },
+           { t:0, tur:'ton', dalga:'sine', f:[2890, 2890], d:0.18, g:0.003, a:0.002, oda:0.3 },
+           { t:0.09, tur:'ton', dalga:'sine', f:[1319, 1319], d:0.7, g:0.008, a:0.004, oda:0.35 },
+           { t:0.09, tur:'ton', dalga:'sine', f:[3640, 3640], d:0.2, g:0.0025, a:0.002, oda:0.35 }],
+    /* Sayfa açılınca: camın üstünden geçen hava — yükselen yumuşak hışırtı
+       ve en sonda belli belirsiz bir cam notası. */
+    sayfa:[{ t:0, tur:'hisirti', f:[420, 2200], q:0.8, d:0.28, g:0.007, a:0.11, oda:0.25 },
+           { t:0.14, tur:'ton', dalga:'sine', f:[1568, 1568], d:0.36, g:0.003, a:0.02, oda:0.4 }],
+    /* Miniğe dokununca kıkırdama: «hi-hi-hi», ince ve yükselen ünlüler. */
+    gidik:[{ t:0, tur:'ses', un:'i', f:[620, 700], d:0.07, g:0.018, a:0.008 },
+           { t:0.085, tur:'ses', un:'i', f:[680, 760], d:0.07, g:0.017, a:0.008 },
+           { t:0.17, tur:'ses', un:'e', f:[740, 840], d:0.07, g:0.016, a:0.008 },
+           { t:0.26, tur:'ses', un:'i', f:[820, 960], d:0.1, g:0.014, a:0.008, oda:0.15 }],
+    /* Minik sohbeti («bla bla»): alçak, inip çıkan üç hece. */
+    bla:  [{ t:0, tur:'ses', un:'a', f:[430, 470], d:0.09, g:0.009, a:0.01 },
+           { t:0.12, tur:'ses', un:'o', f:[480, 420], d:0.09, g:0.009, a:0.01 },
+           { t:0.24, tur:'ses', un:'e', f:[450, 520], d:0.11, g:0.008, a:0.01, oda:0.1 }],
   });
+  /* Küçük bir ağızdan ünlüler: [F1, F2] Hz (insan sesinin biraz üstü). */
+  const UNLU = Object.freeze({ a:[950, 1500], e:[600, 2300], i:[400, 2800], o:[640, 1050], u:[420, 950] });
+  const ARA = 0.04;          // aynı ses bundan sık çalmaz (sn)
   let baglam = null;
+  let zincir = null;
   let sonBitis = 0;
+  const sonCal = {};
 
   /* kur: AudioContext yoksa kurulsun mu? Yalnız kullanıcının dokunuşunda
      kurulur (tarayıcı başka türlü askıda başlatır). */
@@ -29115,33 +29192,130 @@ window.LIFEOS = window.LIFEOS || {};
     if(baglam.state === 'suspended' && baglam.resume){ try{ baglam.resume(); }catch(e){} }
     return baglam;
   }
-  function nota(c, t, f0, f1, sure, tepe, yuksel){
-    const o = c.createOscillator();
-    const g = c.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(f0, t);
-    if(f1 && f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + sure);
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(tepe, t + yuksel);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + sure);
-    o.connect(g);
-    g.connect(c.destination);
-    o.start(t);
-    o.stop(t + sure + 0.02);
+
+  /* Ortak çıkış (bağlamda bir kez): giriş → sıkıştırıcı → hoparlör; yankı
+     gönderisi → kısa oda → sıkıştırıcı. Bağlam bir düğümü tanımıyorsa
+     (eski tarayıcı) o halka atlanır, ses yine çalar. */
+  function zincirKur(c){
+    if(zincir && zincir.c === c) return zincir;
+    let hedef = c.destination;
+    try{
+      if(c.createDynamicsCompressor){
+        const k = c.createDynamicsCompressor();
+        k.threshold.value = -24; k.knee.value = 18; k.ratio.value = 3; k.attack.value = 0.003; k.release.value = 0.12;
+        k.connect(c.destination);
+        hedef = k;
+      }
+    }catch(e){ hedef = c.destination; }
+    let oda = null;
+    try{
+      if(c.createConvolver && c.createBuffer){
+        /* Kısa oda: 0,7 sn, üstel sönen ve gittikçe yumuşayan gürültü. */
+        const sr = c.sampleRate || 44100, n = Math.floor(sr * 0.7);
+        const ir = c.createBuffer(2, n, sr);
+        for(let k = 0; k < 2; k++){
+          const v = ir.getChannelData(k);
+          let once = 0;
+          for(let i = 0; i < n; i++){
+            const x = i / n, yumusa = 0.25 + 0.7 * x;
+            once = once + (Math.random() * 2 - 1 - once) * (1 - yumusa);
+            v[i] = once * Math.pow(1 - x, 3.2);
+          }
+        }
+        oda = c.createConvolver();
+        oda.buffer = ir;
+        const og = c.createGain();
+        og.gain.value = 0.5;
+        oda.connect(og); og.connect(hedef);
+      }
+    }catch(e){ oda = null; }
+    let gurultu = null;
+    try{
+      if(c.createBuffer){
+        const sr = c.sampleRate || 44100;
+        gurultu = c.createBuffer(1, Math.floor(sr * 0.4), sr);
+        const v = gurultu.getChannelData(0);
+        for(let i = 0; i < v.length; i++) v[i] = Math.random() * 2 - 1;
+      }
+    }catch(e){ gurultu = null; }
+    zincir = { c, hedef, oda, gurultu };
+    return zincir;
   }
-  /* Döner: çaldı mı. `kur` yoksa yalnız kurulu bağlam kullanılır. */
-  function tik(tur, kur){
+
+  function zarf(c, g, t, tepe, yuksel, sure){
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(tepe, t + Math.max(0.001, yuksel));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + sure);
+  }
+  function suzgec(c, tur, f, q, t){
+    if(!c.createBiquadFilter) return null;
+    const s = c.createBiquadFilter();
+    s.type = tur;
+    s.frequency.setValueAtTime(f, t);
+    if(q != null) s.Q.value = q;
+    return s;
+  }
+
+  function katman(c, z, t, k, perde){
+    const f0 = k.f[0] * perde, f1 = (k.f[1] || k.f[0]) * perde;
+    const g = c.createGain();
+    zarf(c, g, t, k.g, k.a || 0.003, k.d);
+    g.connect(z.hedef);
+    if(k.oda && z.oda){ const s = c.createGain(); s.gain.value = k.oda; g.connect(s); s.connect(z.oda); }
+    let kaynak;
+    if(k.tur === 'hisirti'){
+      if(!z.gurultu || !c.createBufferSource) return;
+      kaynak = c.createBufferSource();
+      kaynak.buffer = z.gurultu;
+      const b = suzgec(c, 'bandpass', f0, k.q == null ? 1 : k.q, t);
+      if(b){
+        if(f1 !== f0) b.frequency.exponentialRampToValueAtTime(f1, t + k.d);
+        kaynak.connect(b); b.connect(g);
+      } else kaynak.connect(g);
+    } else {
+      kaynak = c.createOscillator();
+      kaynak.type = k.tur === 'ses' ? 'sawtooth' : (k.dalga || 'sine');
+      kaynak.frequency.setValueAtTime(f0, t);
+      if(f1 !== f0) kaynak.frequency.exponentialRampToValueAtTime(f1, t + k.d);
+      if(k.tur === 'ses'){
+        /* İki formant yan yana: ünlü rengini bunlar verir; perde biraz da
+           formantı taşır (küçük minik, ince ağız). */
+        const u = UNLU[k.un] || UNLU.a, fp = Math.sqrt(perde);
+        const b1 = suzgec(c, 'bandpass', u[0] * fp, 6, t), b2 = suzgec(c, 'bandpass', u[1] * fp, 9, t);
+        if(b1 && b2){
+          /* Dar süzgeç enerjiyi yer: telafi kazancı öteki seslerle aynı düzeye getirir. */
+          const g2 = c.createGain(), dz = c.createGain();
+          g2.gain.value = 0.6; dz.gain.value = 3;
+          kaynak.connect(b1); b1.connect(dz);
+          kaynak.connect(b2); b2.connect(g2); g2.connect(dz);
+          dz.connect(g);
+        } else kaynak.connect(g);
+      } else if(k.suz){
+        const b = suzgec(c, 'lowpass', k.suz * perde, 0.7, t);
+        if(b){ kaynak.connect(b); b.connect(g); } else kaynak.connect(g);
+      } else kaynak.connect(g);
+    }
+    kaynak.start(t);
+    kaynak.stop(t + k.d + 0.03);
+  }
+
+  /* Döner: çaldı mı. `kur` yoksa yalnız kurulu bağlam kullanılır.
+     o.perde: frekans çarpanı (her minik kendi tonunda konuşur). */
+  function tik(tur, kur, o){
     const plan = SESLER[tur];
     if(!plan) return false;
     const c = sesBaglami(kur !== false);
     if(!c) return false;
     try{
       const simdi = c.currentTime || 0;
+      if(sonCal[tur] != null && simdi - sonCal[tur] < ARA && simdi >= sonCal[tur]) return false;
+      sonCal[tur] = simdi;
+      const z = zincirKur(c);
       /* «Tamam» notası tıkın üstüne binmez, ardından gelir. */
-      const bas = tur === 'tamam' ? Math.max(simdi, sonBitis + 0.02) : simdi;
-      plan.forEach(n => nota(c, bas + n[0], n[1], n[2], n[3], n[4], n[5]));
-      const son = plan[plan.length - 1];
-      sonBitis = Math.max(sonBitis, bas + son[0] + son[3]);
+      const bas = tur === 'tamam' ? Math.max(simdi, sonBitis + 0.02) : simdi + 0.005;
+      const perde = (o && o.perde > 0 ? o.perde : 1) * (1 + (Math.random() - 0.5) * 0.04);
+      plan.forEach(k => katman(c, z, bas + k.t, k, perde));
+      sonBitis = Math.max(sonBitis, bas + Math.max.apply(null, plan.map(k => k.t + k.d)));
       return true;
     }catch(e){ return false; }
   }
@@ -29154,7 +29328,9 @@ window.LIFEOS = window.LIFEOS || {};
   function baglamKapat(){
     if(baglam && baglam.close){ try{ baglam.close(); }catch(e){} }
     baglam = null;
+    zincir = null;
     sonBitis = 0;
+    Object.keys(sonCal).forEach(k => delete sonCal[k]);
   }
 
   const TIKLANAN = 'button, [role="button"], [role="switch"], a[href], .chip--tap, summary';
@@ -120270,14 +120446,18 @@ window.LIFEOS.MINIK = (function(){
      Gözlük kalktı: gözler imleci izleyince yerinde kalıp kayık duruyordu.
      Her sayfa kadrodan kendi miniklerini çağırır (kadro()); aynı sayfaya
      dönünce aynıları. */
+  /* Ad ve huy, üstüne gelince küçük bir etikette görünür (kullanıcı,
+     2026-10-28: «agentlar daha anlaşılır olsun»); perde miniğin ses tonudur
+     (ses.js «bla», «gidik»): bilge alçak, neşeli ince konuşur. */
   const KISILER = Object.freeze([
-    { bicim:'yuvarlak', tip:'kulak',   huy:'uykucu',   boy:34, ton:0 },
-    { bicim:'kare',     tip:'anten',   huy:'konuskan', boy:30, ton:28 },
-    { bicim:'ucgen',    tip:'filiz',   huy:'merakli',  boy:36, ton:-26 },
-    { bicim:'yuvarlak', tip:'kurdele', huy:'neseli',   boy:30, ton:-12 },
-    { bicim:'ucgen',    tip:'yok',     huy:'hayalci',  boy:32, ton:14 },
-    { bicim:'kare',     tip:'yok',     huy:'bilge',    boy:33, ton:40 }
+    { ad:'Pofuduk', bicim:'yuvarlak', tip:'kulak',   huy:'uykucu',   boy:34, ton:0,   perde:0.9 },
+    { ad:'Bıcır',   bicim:'kare',     tip:'anten',   huy:'konuskan', boy:30, ton:28,  perde:1.15 },
+    { ad:'Filiz',   bicim:'ucgen',    tip:'filiz',   huy:'merakli',  boy:36, ton:-26, perde:1.05 },
+    { ad:'Ponpon',  bicim:'yuvarlak', tip:'kurdele', huy:'neseli',   boy:30, ton:-12, perde:1.25 },
+    { ad:'Bulut',   bicim:'ucgen',    tip:'yok',     huy:'hayalci',  boy:32, ton:14,  perde:1 },
+    { ad:'Bilge',   bicim:'kare',     tip:'yok',     huy:'bilge',    boy:33, ton:40,  perde:0.8 }
   ]);
+  const HUY_AD = Object.freeze({ uykucu:'uykucu', konuskan:'konuşkan', merakli:'meraklı', neseli:'neşeli', hayalci:'hayalci', bilge:'bilge' });
   const BALON = Object.freeze(['hey!', '♪', '…', 'hı hı', 'ooo', '!?', 'hihi', '♡']);
 
   /* --- saf hesaplar (test edilir) --- */
@@ -120359,7 +120539,7 @@ window.LIFEOS.MINIK = (function(){
 
   /* --- DOM --- */
 
-  const durum = { kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0 };
+  const durum = { kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null };
   /* Sohbet gibi çok adımlı işlerin zamanlayıcıları: sayfa değişince silinir. */
   function zamanla(fn, ms){ const t = setTimeout(fn, ms); durum.zamanlar.push(t); return t; }
   /* Meşgul işareti 12 sn'de kendiliğinden düşer: yarıda kalan bir iş
@@ -120374,7 +120554,15 @@ window.LIFEOS.MINIK = (function(){
     const h = document.documentElement;
     return azMi() || h.getAttribute('data-zemin') !== 'yumusak' || h.classList.contains('king-acik');
   }
-  function ses(tur){ try{ if(window.LIFEOS.SES) window.LIFEOS.SES.tik(tur); }catch(e){} }
+  /* Kendi tonunda ses. kur:false — yalnız kullanıcı daha önce bir şeye
+     dokunduysa (ses bağlamı kuruluysa) çalar; sohbet kendiliğinden ses
+     açmaz. Sekme arkadaysa ya da pencere odakta değilse minikler susar. */
+  function ses(tur, mk, kur){
+    try{
+      if(kur === false && (document.visibilityState === 'hidden' || (document.hasFocus && !document.hasFocus()))) return;
+      if(window.LIFEOS.SES) window.LIFEOS.SES.tik(tur, kur, { perde:mk && mk.perde || 1 });
+    }catch(e){}
+  }
   const rasgele = l => l[Math.floor(Math.random() * l.length)];
 
   function olcum(){
@@ -120394,6 +120582,9 @@ window.LIFEOS.MINIK = (function(){
 
   function giydir(mk, k){
     mk.huy = k.huy;
+    mk.perde = k.perde;
+    mk.el.querySelector('.minik__ad b').textContent = k.ad;
+    mk.el.querySelector('.minik__ad i').textContent = HUY_AD[k.huy] || k.huy;
     mk.el.dataset.tip = k.tip;
     mk.el.dataset.bicim = k.bicim;
     mk.el.style.setProperty('--boy', k.boy + 'px');
@@ -120407,8 +120598,8 @@ window.LIFEOS.MINIK = (function(){
       + '<i class="minik__kol minik__kol--sol"></i><i class="minik__kol minik__kol--sag"></i>'
       + '<span class="minik__govde"><i class="minik__deri"></i><i class="minik__goz"></i><i class="minik__goz"></i>'
       + '<i class="minik__agiz"></i><i class="minik__sus"></i></span><span class="minik__balon"></span><span class="minik__zzz">z</span>'
-      + '<span class="minik__kalp">♡</span>';
-    const mk = { el:m, z:null, x:0, y:0, anim:null, zaman:0, huy:'', mesgul:false, mesgulSon:0 };
+      + '<span class="minik__kalp">♡</span><span class="minik__ad"><b></b> · <i></i><small>Dokun, gıdıkla</small></span>';
+    const mk = { el:m, z:null, x:0, y:0, anim:null, zaman:0, huy:'', perde:1, mesgul:false, mesgulSon:0 };
     giydir(mk, KISILER[i % KISILER.length]);
     m.addEventListener('pointerenter', () => { m.classList.add('is-farkinda'); if(!mesgulMu(mk) && !m.classList.contains('is-uyuyor')) ekHal(mk, 'is-selam', 900); });
     m.addEventListener('pointerleave', () => m.classList.remove('is-farkinda'));
@@ -120476,6 +120667,7 @@ window.LIFEOS.MINIK = (function(){
       (m === a ? b : a).el.classList.remove('is-konusuyor');
       m.el.querySelector('.minik__balon').textContent = rasgele(BALON);
       hal(m, 'is-konusuyor');
+      ses('bla', m, false);
       if(i === 0) ekHal(m, 'is-selam', 900);
     }, i * 1300));
     zamanla(() => {
@@ -120493,7 +120685,7 @@ window.LIFEOS.MINIK = (function(){
     const uyuyordu = mk.el.classList.contains('is-uyuyor');
     hal(mk, uyuyordu ? 'is-uyaniyor' : 'is-gidik');
     if(!uyuyordu) ekHal(mk, 'is-kalp', 1400);
-    ses(uyuyordu ? 'tik' : 'gidik');
+    ses(uyuyordu ? 'tik' : 'gidik', mk);
     sonra(mk, uyuyordu ? 1600 : 1500);
   }
 
@@ -120557,8 +120749,14 @@ window.LIFEOS.MINIK = (function(){
         mk.z = ayni;
         if(Math.abs(ayni.y - mk.y) > .5 && !(mk.anim && mk.anim.playState === 'running')) koy(mk, Math.min(ayni.x2, Math.max(ayni.x1, mk.x)), ayni.y);
       } else {
-        /* Sayfa geçişinde yerleşmeyi sayfaDegisti yapar (içerik oturunca). */
-        if(document.documentElement.classList.contains('sayfa-gecis')) return;
+        /* Sayfa değiştiyse yerleşmeyi sayfaDegisti yapar (içerik oturunca). */
+        if(durum.yerlesme) return;
+        /* Aynı sayfa yeniden çizildi (kart yenisiyle değişti): miniğin
+           altındaki yeni kenar bulunur, minik yerinde kalır. Bulunmazsa
+           görünen bir kenara konur — eski yerinde havada beklemez. */
+        const yakin = !(mk.anim && mk.anim.playState === 'running')
+          && durum.zeminler.find(o => mk.x >= o.x1 && mk.x <= o.x2 && Math.abs(o.y - mk.y) < 60);
+        if(yakin){ mk.z = yakin; koy(mk, mk.x, yakin.y); return; }
         if(mk.anim) mk.anim.cancel();
         mesgul(mk, false); temizle(mk);
         mk.el.classList.remove('is-yuruyor', 'is-ucuyor');
@@ -120585,6 +120783,7 @@ window.LIFEOS.MINIK = (function(){
     });
     clearTimeout(durum.yerlesme);
     durum.yerlesme = setTimeout(() => {
+      durum.yerlesme = 0;
       durum.zeminler = olcum();
       durum.minikler.forEach((mk, i) => { if(yerlestir(mk)) sonra(mk, 2000 + i * 1400); });
     }, 720);
@@ -120640,7 +120839,20 @@ window.LIFEOS.MINIK = (function(){
   }
 
   function kur(){
-    if(durum.kat || typeof document === 'undefined' || !document.querySelector('#app .site--v5')) return;   // test sayfasında #app yok
+    if(durum.kat || typeof document === 'undefined') return;
+    /* Uygulama ilk açılışta kurulum ekranındaysa kabuk henüz yok: kabuk
+       çizilince kurulur (test sayfasında #app yok, hiç kurulmaz). */
+    if(!document.querySelector('#app .site--v5')){
+      const app = document.getElementById('app');
+      if(app && !durum.bekci && typeof MutationObserver === 'function'){
+        durum.bekci = new MutationObserver(() => {
+          if(!document.querySelector('#app .site--v5')) return;
+          durum.bekci.disconnect(); durum.bekci = null; kur();
+        });
+        durum.bekci.observe(app, { childList:true, subtree:true });
+      }
+      return;
+    }
     const kat = document.createElement('div');
     kat.className = 'minikkat';
     kat.setAttribute('aria-hidden', 'true');
@@ -120666,6 +120878,15 @@ window.LIFEOS.MINIK = (function(){
       onceki = k; tazele();
       if(!k) durum.minikler.forEach(mk => sonra(mk, 400));
     }).observe(document.documentElement, { attributes:true, attributeFilter:['class', 'data-zemin', 'data-sayfa'] });
+    /* Bekçi: kart DOM değişmeden de kayabilir (üstteki kapak büyür, yazı
+       yüklenir); saniyede bir miniğin durduğu kartın yeri okunur (en çok üç
+       ölçüm), kaymışsa minik kenarla birlikte iner. */
+    setInterval(() => {
+      if(durum.kat.hidden || document.visibilityState === 'hidden') return;
+      const sy = window.scrollY || 0;
+      if(durum.minikler.some(mk => mk.z && mk.z.el && !(mk.anim && mk.anim.playState === 'running')
+        && Math.abs(mk.z.el.getBoundingClientRect().top + sy - mk.y) > 1)) tazele();
+    }, 1000);
     window.addEventListener('resize', iste);
     window.addEventListener('scroll', iste, { passive:true });
     document.addEventListener('click', sevin, true);
@@ -120677,7 +120898,7 @@ window.LIFEOS.MINIK = (function(){
     else window.addEventListener('load', () => setTimeout(kur, 60));
   }
 
-  return { kur, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, KISILER, KART, EN_AZ, PAY };
+  return { kur, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, KISILER, HUY_AD, KART, EN_AZ, PAY };
 })();
 
 /* ==== js/app.js ==== */
