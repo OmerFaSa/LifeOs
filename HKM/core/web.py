@@ -292,8 +292,13 @@ def _onbellek_oku(con, tur, anahtar, now=None):
 
 
 def _onbellek_yaz(con, tur, anahtar, govde, now=None):
+    simdi = _simdi(now)
+    # Suresi gecenler her yazimda silinir; yoksa tablo durmadan buyurdu.
+    for t, gun in ONBELLEK_GUN.items():
+        sinir = (datetime.datetime.fromisoformat(simdi) - datetime.timedelta(days=gun)).isoformat(timespec="seconds")
+        con.execute("DELETE FROM web_onbellek WHERE tur=? AND alindi < ?", (t, sinir))
     con.execute("INSERT OR REPLACE INTO web_onbellek(anahtar, tur, govde, alindi) VALUES (?,?,?,?)",
-                (anahtar, tur, json.dumps(govde, ensure_ascii=False), _simdi(now)))
+                (anahtar, tur, json.dumps(govde, ensure_ascii=False), simdi))
 
 
 def _sayac(con, now=None):

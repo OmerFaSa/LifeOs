@@ -282,6 +282,23 @@ def run():
         eq(king.bekci(con, cfg, now="2026-12-01T10:00:00", tasiyici=ag), None)
     test("King'in guncellik turu arada bir bakar; degisende emir acar", t_bekci)
 
+    def t_bekci_saatte_bir():
+        # 2026-10-27: tur her tikte (dakikada bir) bir kayit aciyordu; eski kayit
+        # coksa gunluk web siniri dakikalar icinde biterdi. Saatte en cok bir.
+        con, cfg, m, ag = db.connect(":memory:"), _cfg_web(), _Model(), _Ag()
+        cfg["king"] = {"kendiliginden": True}
+        eski = bam.web_tasiyici
+        bam.web_tasiyici = ag
+        try:
+            _arastir(con, cfg, m, "Osmanlı kuruluşu", AN, 5)
+            _arastir(con, cfg, m, "Selçuklu kuruluşu", AN, 5)
+        finally:
+            bam.web_tasiyici = eski
+        ok(king.bekci(con, cfg, now="2026-10-11T10:00:00", tasiyici=ag))
+        eq(king.bekci(con, cfg, now="2026-10-11T10:01:00", tasiyici=ag), None, "dakika sonra yine bakmaz")
+        ok(king.bekci(con, cfg, now="2026-10-11T11:01:00", tasiyici=ag), "saat dolunca sonraki kayit")
+    test("guncellik turu saatte en cok bir kayda bakar", t_bekci_saatte_bir)
+
     def t_kendiliginden_is():
         con, m = db.connect(":memory:"), _Model()
         j = bam.is_ac(con, "Osmanlı kuruluşu araştır", kaynak="kendiliginden", now=AN)

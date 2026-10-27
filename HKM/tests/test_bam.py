@@ -70,6 +70,20 @@ def run():
         eq(adim["bulunan"], [k["id"]])
     test("her is once Depolama Burosu'ndan gecer", t_record_office_first)
 
+    def t_model_kilidi():
+        # 2026-10-27: BAM adimi is kuyrugunun MODEL_KILIDI'ni almiyordu; iki
+        # model isi tek GPU'da birbirini bellekten atardi. Kilit doluysa adim
+        # kosmaz, sirasini korur.
+        from core.is_kuyrugu import MODEL_KILIDI
+        con = db.connect(":memory:")
+        i = bam.is_ac(con, "Ferritin neden düşer, araştır", now=AN)
+        with MODEL_KILIDI:
+            r = bam.ilerlet(con, {}, now=AN)
+        eq(r["durum"], "bekliyor")
+        eq(bam.is_getir(con, i["id"])["adimlar"][0]["durum"], "bekliyor")
+        eq(bam.ilerlet(con, {}, now=AN)["ofis"], "kayit")      # kilit bosalinca koşar
+    test("BAM adimi model kilidini alir; kilit doluysa sirasini korur", t_model_kilidi)
+
     def t_no_model_waits():
         con = db.connect(":memory:")
         i = bam.is_ac(con, "Ferritin neden düşer, araştır", now=AN)

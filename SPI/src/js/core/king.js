@@ -5528,6 +5528,9 @@ window.LIFEOS.KING = (function(){
     const yeniVar = akis.some(m => m.yeni);
     const altta = !eski || eski.scrollHeight - eski.scrollTop - eski.clientHeight < 48;
     const yer = eski ? eski.scrollTop : 0;
+    /* Yazılmakta olan metin çizimden sağ çıkar (küçükken ekran değişince,
+       küçült/büyüt arasında siliniyordu). Gönderim kutuyu önce boşaltır. */
+    const taslak = (kutu.querySelector('.king__girdi') || {}).value || '';
     kutu.innerHTML = govde();
     k.classList.toggle('is-yan-acik', !mini && yanAcik);
     k.classList.toggle('is-yan-dar', !mini && yanDar());
@@ -5537,6 +5540,7 @@ window.LIFEOS.KING = (function(){
     k.classList.toggle('is-alan-acik', !mini && !!kutu.querySelector('.king__alan'));
     const g = kutu.querySelector('.king__girdi');
     if(g && doldurulacak){ g.value = doldurulacak; doldurulacak = ''; }   // söz 37: işin örnek cümlesi
+    else if(g && taslak) g.value = taslak;
     const akisEl = kutu.querySelector('.king__akis');
     /* Araçlar: açılınca baştan; düzenlerken yerinde kalır. */
     if(akisEl) akisEl.scrollTop = (bolum === 'araclar' || bolum === 'kutuphane') ? (vitrinIlk ? 0 : yer) : (altta || yeniVar) ? akisEl.scrollHeight : yer;

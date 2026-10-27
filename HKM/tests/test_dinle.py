@@ -129,6 +129,8 @@ def run_daemon():
             eq(s.call("/api/dinle/durum")[0], 200)
             st, r = s.call("/api/dinle", body={"wav": "eHg="})
             eq((st, r["ok"]), (503, False))
+            # Bozuk govde (nesne degil) 500 degil 400 (2026-10-27).
+            eq(s.call("/api/dinle", body=[1])[0], 400)
         finally:
             s.close()
 

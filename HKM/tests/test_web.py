@@ -92,6 +92,15 @@ def run():
         eq((d["bugun"]["cagri"], d["bugun"]["kacinilan"]), (1, 1))
     test("once onbellek; kacinilan cagri sayilir", t_ara_ve_onbellek)
 
+    def t_onbellek_temizlenir():
+        # 2026-10-27: suresi gecen satir hic silinmiyordu; tablo durmadan buyurdu.
+        con = db.connect(":memory:")
+        web._onbellek_yaz(con, "ara", "eski", {"x": 1}, now="2026-01-01T10:00:00")
+        web._onbellek_yaz(con, "sayfa", "taze", {"x": 2}, now="2026-01-05T10:00:00")
+        web._onbellek_yaz(con, "ara", "yeni", {"x": 3}, now="2026-01-05T10:00:00")
+        eq(sorted(r[0] for r in con.execute("SELECT anahtar FROM web_onbellek")), ["taze", "yeni"])
+    test("suresi gecen onbellek satiri yeni yazimda silinir", t_onbellek_temizlenir)
+
     def t_zincir_ve_sinir():
         con = db.connect(":memory:")
         cfg = {"web": {"saglayicilar": ["brave", "wikipedia"], "gunluk_sinir": 1}}

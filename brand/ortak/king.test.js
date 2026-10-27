@@ -274,6 +274,21 @@
       expect(k.acikMi()).toBe(false);
     }));
 
+    /* 2026-10-27: her çizim kutunun içini baştan yazıyordu; küçükken ekran
+       değişince ya da küçült/büyüt arasında yazılmakta olan metin siliniyordu. */
+    it('yazılmakta olan metin ekran değişince, küçültünce ve büyütünce kaybolmaz', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.ac({ mini:true });
+      document.querySelector('.king__girdi').value = 'yarım cümle';
+      k.ekranDegisti();
+      expect(document.querySelector('.king__girdi').value).toBe('yarım cümle');
+      k.buyut();
+      expect(document.querySelector('.king__girdi').value).toBe('yarım cümle');
+      k.kucult();
+      expect(document.querySelector('.king__girdi').value).toBe('yarım cümle');
+      k.kapat();
+    }));
+
     /* Söz 11–15 (2026-10-16: «King'e o an fotoğraf yükleyip gönderebilelim, ekranı
        açabilelim, sesli konuşabilelim; söylemediğim eksikleri de bul»). */
     it('fotoğraf modülün kendi akışına teslim edilir; işi olmayan modülde söylenir', () => sahneyle(async () => {

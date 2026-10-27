@@ -1892,6 +1892,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(413, {"error": hata})
             try:
                 body = _nesne(ham)
+            except ValueError:
+                return self._send(400, {"error": "Gövde okunamadı."})
+            try:
                 wav = base64.b64decode(str(body.get("wav") or ""))
             except ValueError:
                 wav = b""

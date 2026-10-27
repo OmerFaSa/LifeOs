@@ -284,6 +284,12 @@ def ilerlet(con, cfg, transport=None, now=None):
     if adim is None:
         _kaydet(con, j, now)
         return None
+    # Tek GPU: is kuyruguyla ayni MODEL_KILIDI. Kilit doluysa adim kosmaz,
+    # sirasini korur (bir sonraki tikte); beklemek ritmi kilitlerdi.
+    from core.is_kuyrugu import MODEL_KILIDI
+    if not MODEL_KILIDI.acquire(blocking=False):
+        return {"ok": False, "is_id": j["id"], "ofis": adim["ofis"], "durum": "bekliyor",
+                "not": "Model başka bir işte; adım sonraki turda koşar."}
     try:
         # Adimin model cagrilari bu ise yazilir (butce.is_baglami):
         # isin gercek maliyeti defterden olculur.
@@ -293,6 +299,8 @@ def ilerlet(con, cfg, transport=None, now=None):
             sonuc = ADIM[adim["ofis"]](con, cfg, j, transport, now)
     except Exception as e:                      # noqa: BLE001
         sonuc = {"durum": "hata", "not": "%s: %s" % (type(e).__name__, e)}
+    finally:
+        MODEL_KILIDI.release()
     adim.update(sonuc)
     adim["at"] = _simdi(now)
     _kaydet(con, j, now)

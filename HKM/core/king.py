@@ -1170,6 +1170,12 @@ def bekci(con, cfg, now=None, tasiyici=None):
     if not ws["acik"] or not isinstance(gun, int) or gun <= 0:
         return None
     at = _simdi(now)
+    # Saatte en cok bir denetim: tur her tikte (dakikada bir) kosar; eski kayit
+    # coksa her dakika kaynak acip gunluk web sinirini tuketiyordu.
+    saat_once = (_zaman(at) - datetime.timedelta(hours=1)).isoformat(timespec="seconds")
+    if con.execute("SELECT 1 FROM bam_kayitlar WHERE json_extract(denetim, '$.rol')='king' "
+                   "AND json_extract(denetim, '$.at') > ? LIMIT 1", (saat_once,)).fetchone():
+        return None
     sinir = (_zaman(at) - datetime.timedelta(days=gun)).isoformat(timespec="seconds")
     r = con.execute(
         "SELECT id FROM bam_kayitlar k WHERE tur='arastirma' AND anahtar IS NOT NULL "
