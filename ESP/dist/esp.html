@@ -17925,6 +17925,49 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
 }
 @keyframes mk-tasin{ from{ transform:rotate(-7deg) translateY(2px); } to{ transform:rotate(7deg) translateY(2px); } }
 @keyframes mk-sarkit{ from{ transform:translateY(12%) rotate(-16deg); } to{ transform:translateY(12%) rotate(18deg); } }
+
+/* 32) ÜZERİNDEKİ KART VE SAKİN KENAR (kullanıcı, 2026-10-28: «üzerinde
+   durduğumuz kart çok az belirgin olsun, yine buğulu ama sol taraftaki
+   kadar değil; sol tarafı birazcık daha buğulu yap, dikkat dağıtmasın —
+   çok minik miktarda»).
+   · Kart (minik.js imlecin altındakine .isikli koyar): camın içi çok hafif
+     aydınlanır (açık %10, koyu %3,5) ve gölge bir tık derinleşir. İç gölge
+     ile yapılır: gradyan zemin yumuşak geçmez, gölge geçer.
+   · Kenar: bulanıklık 28 → 40 px, cam biraz daha dolgun; etkin olmayan
+     simge çok az söner (üzerine gelince ve etkinde tam). */
+:root{ --on-tint:rgba(255,255,255,.1); --on-golge:0 1px 2px rgba(20,24,40,.06), 0 14px 34px -14px rgba(20,24,40,.24);
+  --kenar-cam:linear-gradient(140deg, rgba(255,255,255,.58), rgba(255,255,255,.34)); }
+html[data-theme="dark"]{ --on-tint:rgba(255,255,255,.035); --on-golge:0 1px 2px rgba(0,0,0,.3), 0 18px 40px -18px rgba(0,0,0,.65);
+  --kenar-cam:linear-gradient(140deg, rgba(255,255,255,.1), rgba(255,255,255,.045)); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --on-tint:rgba(255,255,255,.035); --on-golge:0 1px 2px rgba(0,0,0,.3), 0 18px 40px -18px rgba(0,0,0,.65);
+  --kenar-cam:linear-gradient(140deg, rgba(255,255,255,.1), rgba(255,255,255,.045)); } }
+html[data-zemin="yumusak"] :is(.kutu, .card:not(.card--flat), .site--v5 .ledger .lrow:not(.kahraman), .site--v5 .sayfa--kapakli .bugun__alan, .giris){
+  transition:box-shadow .5s cubic-bezier(.2,.8,.2,1); }
+@media (hover:hover) and (pointer:fine){
+  html[data-zemin="yumusak"] :is(.kutu, .card:not(.card--flat), .site--v5 .ledger .lrow:not(.kahraman), .site--v5 .sayfa--kapakli .bugun__alan, .giris).isikli{
+    box-shadow:var(--cam-ust), inset 0 0 0 100vmax var(--on-tint), var(--on-golge); }
+}
+@media (min-width:680px){
+  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar{ background:var(--kenar-cam);
+    -webkit-backdrop-filter:saturate(140%) blur(40px); backdrop-filter:saturate(140%) blur(40px); }
+  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece:not(.is-on):not(:hover):not(:focus-visible){ opacity:.82; }
+  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece{ transition:background var(--dur) var(--ease), color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), opacity .3s ease, transform 620ms var(--su); }
+}
+
+/* 33) SADE İMLEÇ IŞIĞI (kullanıcı, 2026-10-28: «mouse'taki ışık işini ya
+   kaldır ya çok daha minimalist, küçük bir şey yap»). Zemindeki ortam ışığı
+   ve kart kenarının imlece göre parlaması kalktı (sol üstteki duran kenar
+   ışığı kalır); kartın içinde yalnız küçük, soluk bir parıltı kalır. */
+.ortam-isik{ display:none !important; }
+html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::before{
+  background:linear-gradient(135deg, var(--rim-ust) 0%, var(--rim-orta) 26%, transparent 46%); }
+@media (hover:hover) and (pointer:fine){
+  html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{
+    --a:calc(var(--isik-ic) * .6 * var(--isik-guc, 1));
+    background:radial-gradient(circle 110px at var(--mx, 50%) var(--my, 0%),
+      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 100%), transparent),
+      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 45%), transparent) 40%, transparent 100%); }
+}
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -19825,7 +19868,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'0cd62907', at:'2026-10-28 12:33', dirty:true };
+ESP.BUILD = { id:'dbf303ee', at:'2026-10-28 12:50', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
