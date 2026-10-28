@@ -178,7 +178,11 @@ LIFEOS.Gizle = (function(){
        gelinip 250 ms dolmadan sayfa değişirse önceki ekranın bölümü YENİ
        sayfada açılıyordu (ESP Profil'in düğmeleri Genel'de, 2026-10-02). */
     onizlemeKapat();
-    son = o;
+    /* olcum:false — çağıran (çizimden sonra HAREKET.sonra) raf ve seçiciyi
+       zaten ölçecek; ikinci ölçüm sayfa geçişinde stil ve yerleşimi iki kez
+       hesaplatıyordu. Gizle'nin kendi yeniden uygulaması (son) yine ölçer. */
+    const olc = o.olcum !== false;
+    son = olc ? o : Object.assign({}, o, { olcum:true });
     const d = oku(o);
     let degisti = false;
     const ilkListe = bolumler(o.kok);
@@ -271,8 +275,10 @@ LIFEOS.Gizle = (function(){
     /* «Nasıl okunur» şeridi ⓘ'ye (kabuk.railBilgiye): raf ölçmeden önce. */
     try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.railBilgiye && o.kok) KB.railBilgiye(o.kok); }catch(e){}
     /* Bölüm çubukları (sayfa başındaki ve #main içindeki): seçili ortada. */
-    try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.seciciHazirla && o.kok) KB.seciciHazirla(o.kok.parentElement || o.kok); }catch(e){}
-    try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.raf && o.kok) H.raf(o.kok); }catch(e){}
+    if(olc){
+      try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.seciciHazirla && o.kok) KB.seciciHazirla(o.kok.parentElement || o.kok); }catch(e){}
+      try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.raf && o.kok) H.raf(o.kok); }catch(e){}
+    }
     dipCiz(o, liste, gizliUyari);
     sayacYaz(gizliListe().length, gizliUyari);
     if(panel) panelCiz();

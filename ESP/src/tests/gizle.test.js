@@ -642,6 +642,25 @@
       }finally{ temizle(kok); }
     });
 
+    /* Başarım (2026-10-29): çizimden sonra raf ve seçici HAREKET.sonra'da
+       ölçülür; Gizle onları ikinci kez ölçerse sayfa geçişi stili ve
+       yerleşimi iki kez hesaplar (~60 ms). olcum:false ile Gizle ölçmez;
+       kendi düğmesiyle yeniden uygularken (çizim yok) yine ölçer. */
+    it('olcum:false ile raf ölçülmez; düğmeyle yeniden uygulamada ölçülür', () => {
+      // KABUK donmuş nesne (seçici yerine konamaz); ikisi aynı koşulda çağrılır, raf sayılır.
+      const H = window.LIFEOS.HAREKET;
+      const eskiRaf = H.raf; let raf = 0;
+      H.raf = () => { raf++; };
+      const kok = sayfa();
+      try{
+        G()._sifirla();
+        G().uygula({ kok, modul:MOD, profil:'p', ekran:'olcum', olcum:false });
+        expect(raf).toBe(0);
+        G().kucult(G().bolumler(kok)[1].anahtar);
+        expect(raf).toBe(1);
+      }finally{ H.raf = eskiRaf; temizle(kok); }
+    });
+
     /* Kullanıcı (2026-10-02 gece): sağ üstün araçları kenarın dibine taşındı. */
     it('kenarın dibindeki düğmeden açılan panel kenarın sağına yerleşir ve kenarı açık tutar; kapanınca bırakır', () => {
       const kok = sayfa3('Kenar', AD); G()._sifirla();

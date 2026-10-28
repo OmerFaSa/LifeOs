@@ -623,7 +623,6 @@ ESP.App = (function(){
          (AYS ve SPİ ile aynı, 2026-10-25). */
       if(!rotaDegisti) restoreFocus(focus);
       if(rotaDegisti){ rotaDegisti = false; rotayaOdaklan(sc); }
-      if(H) H.sonra(appEl, S.route);
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.sonra(appEl, { rota:S.route, etkin:ayarlardaMi(S.route) });
       /* Ne değişti? (17): güncellemeden sonraki ilk açılışta sayfanın başında. */
       if(window.LIFEOS && window.LIFEOS.YENILIK) window.LIFEOS.YENILIK.yerlestir(appEl, { modul:'esp',
@@ -643,9 +642,13 @@ ESP.App = (function(){
         try{
           LIFEOS.Gizle.uygula({ kok:document.getElementById('main'), modul:'esp',
             profil:(ESP.Ornek && ESP.Ornek.aktif && ESP.Ornek.aktif()) || 'main', ekran:sc.id,
-            varsayilan:(sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []), kucukVarsayilan:(sc.kucukVarsayilan || []).concat(ayarListesi(sc, document.getElementById('main'))) });
+            varsayilan:(sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []), olcum:!H, kucukVarsayilan:(sc.kucukVarsayilan || []).concat(ayarListesi(sc, document.getElementById('main'))) });
         }catch(e){ console.error('Gizle:', e); }
       }
+      /* Hareket (raf, seçici, işaretler) en sonda: bölümler gizlendikten ve
+         ekranın afterRender'ı çizdikten sonra tek kez ölçülür (2026-10-29:
+         Gizle'den önce de ölçülüyordu; geçişte stil ve yerleşim iki kez). */
+      if(H) H.sonra(appEl, S.route);
     }catch(err){
       /* Kabuğun kendisi çizilemedi. Ekranın kendi hatası bir üstteki
          yakalayıcıda ele alınır; buraya düşmek künye, hero ya da alt
