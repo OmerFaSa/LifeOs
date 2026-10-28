@@ -18282,6 +18282,199 @@ html[data-zemin="yumusak"] .site--v5 .ledger .sayfabolum .lrow:not(.kahraman){ p
 /* Ferah yüzeyde kart zeminsizdir: el ışığı orada havada asılı köşeli bir
    kutu gibi kalıyordu (26 kart, üç modül). Zemin yoksa ışık da yok. */
 html[data-zemin="yumusak"][data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card, .donen)::after{ background:none; }
+
+/* 28) PROFESYONEL ZEMİN, IŞIK VE DAHA TATLI MİNİKLER (kullanıcı,
+   2026-10-28: «arka planı çok daha profesyonel yap, minikleri daha tatlı
+   yap, mouse'un arka planda oluşturduğu ışığı çok daha güzel yap»).
+   · Zemin: gökkuşağı gibi üç ayrı renk (±70°) yerine tek renk ailesi:
+     modülün tonu ve ±12–30° komşuları, düşük doygunluk. Üstten yumuşak
+     gök ışığı; koyu temada kenarlar hafifçe kararır (vinyet). Gren kalır.
+   · Işık: modülün renginde, beş duraklı yumuşak düşüşle (kenarı seçilmez)
+     küçük bir spot. Kart kenarı imlece yakın yerde modül renginde parlar;
+     koyu temada ışık eklenerek (plus-lighter) karışır, gri leke olmaz.
+   · Minikler: renk daha dolgun (açık zeminde solmaz), gözler iri ve
+     aşağıda, iki parıltı, belirgin yanak, net ince kenar; eşya tutarken
+     yaka kartı gizlenir (kalabalık olmasın). */
+:root{
+  --zm-1:oklch(from var(--mod) .978 .01 h); --zm-2:oklch(from var(--mod) .952 .022 calc(h + 12));
+  --zm-a:oklch(from var(--mod) .86 .085 h / .55); --zm-b:oklch(from var(--mod) .93 .045 calc(h + 30) / .5);
+  --zm-c:oklch(from var(--mod) .9 .05 calc(h - 18) / .45); --gun-a:.26;
+  --gok:rgba(255,255,255,.75); --vin:transparent;
+  --isik-renk:color-mix(in oklab, var(--mod) 22%, #fff);
+  --isik-ic:.24; --isik-kenar:.95;
+}
+html[data-theme="dark"]{
+  --zm-1:oklch(from var(--mod) .2 .035 h); --zm-2:oklch(from var(--mod) .125 .022 calc(h + 15));
+  --zm-a:oklch(from var(--mod) .42 .13 h / .42); --zm-b:oklch(from var(--mod) .3 .07 calc(h + 30) / .32);
+  --zm-c:oklch(from var(--mod) .28 .06 calc(h - 18) / .28); --gun-a:.06;
+  --gok:oklch(from var(--mod) .5 .08 h / .22); --vin:rgba(0,0,0,.38);
+  --isik-renk:color-mix(in oklab, var(--mod) 45%, #fff);
+  --isik-ic:.11; --isik-kenar:.55;
+}
+@media (prefers-color-scheme:dark){
+  html:not([data-theme="light"]){
+    --zm-1:oklch(from var(--mod) .2 .035 h); --zm-2:oklch(from var(--mod) .125 .022 calc(h + 15));
+    --zm-a:oklch(from var(--mod) .42 .13 h / .42); --zm-b:oklch(from var(--mod) .3 .07 calc(h + 30) / .32);
+    --zm-c:oklch(from var(--mod) .28 .06 calc(h - 18) / .28); --gun-a:.06;
+    --gok:oklch(from var(--mod) .5 .08 h / .22); --vin:rgba(0,0,0,.38);
+    --isik-renk:color-mix(in oklab, var(--mod) 45%, #fff);
+    --isik-ic:.11; --isik-kenar:.55;
+  }
+}
+html[data-zemin="yumusak"] body::before{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 .045'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(130% 95% at 50% 42%, transparent 58%, var(--vin) 100%),
+    radial-gradient(70% 46% at 50% -8%, var(--gok), transparent 72%),
+    radial-gradient(64% 60% at 4% 0%, var(--zm-a), transparent 72%),
+    radial-gradient(56% 60% at 100% 14%, var(--zm-b), transparent 72%),
+    radial-gradient(76% 60% at 70% 108%, var(--zm-c), transparent 72%),
+    radial-gradient(95% 75% at 12% 112%, rgb(var(--gun) / var(--gun-a)), rgb(var(--gun) / calc(var(--gun-a) * .72)) 22%,
+      rgb(var(--gun) / calc(var(--gun-a) * .38)) 46%, rgb(var(--gun) / calc(var(--gun-a) * .12)) 68%, rgb(var(--gun) / 0) 88%),
+    linear-gradient(175deg, var(--zm-1), var(--zm-2));
+}
+html[data-zemin="yumusak"]::before{ opacity:.45; }
+
+/* Kartın içindeki el ışığı: modül renginde, beş duraklı düşüş. */
+@media (hover:hover) and (pointer:fine){
+  html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{
+    --a:calc(var(--isik-ic) * var(--isik-guc, 1));
+    background:radial-gradient(circle 240px at var(--mx, 50%) var(--my, 0%),
+      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 100%), transparent),
+      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 68%), transparent) 18%,
+      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 34%), transparent) 40%,
+      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 11%), transparent) 65%, transparent 100%); }
+  html[data-theme="dark"][data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{ mix-blend-mode:plus-lighter; }
+}
+@media (hover:hover) and (pointer:fine) and (prefers-color-scheme:dark){
+  html:not([data-theme="light"])[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{ mix-blend-mode:plus-lighter; }
+}
+/* Kenar: imlece yakın yer modül renginde parlar (sol üst duran ışık kalır). */
+html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::before{
+  background:radial-gradient(160px circle at var(--mx, -400px) var(--my, -400px),
+      color-mix(in oklab, var(--isik-renk) calc(var(--isik) * var(--isik-kenar) * 100%), transparent),
+      color-mix(in oklab, var(--isik-renk) calc(var(--isik) * var(--isik-kenar) * 40%), transparent) 45%, transparent 80%),
+    linear-gradient(135deg, var(--rim-ust) 0%, var(--rim-orta) 26%, transparent 46%); }
+
+/* Zemindeki ortam ışığı: dev beyaz leke yerine modül renginde yumuşak spot. */
+.ortam-isik::before{ left:-30vmax; top:-30vmax; width:60vmax; height:60vmax;
+  background:radial-gradient(closest-side, color-mix(in oklab, var(--isik-renk) 46%, transparent), color-mix(in oklab, var(--isik-renk) 26%, transparent) 26%,
+    color-mix(in oklab, var(--isik-renk) 10%, transparent) 55%, color-mix(in oklab, var(--isik-renk) 3%, transparent) 78%, transparent 100%); }
+html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
+  background:radial-gradient(closest-side, color-mix(in oklab, var(--isik-renk) 13%, transparent), color-mix(in oklab, var(--isik-renk) 7%, transparent) 26%,
+    color-mix(in oklab, var(--isik-renk) 3%, transparent) 55%, transparent 100%); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]) .ortam-isik::before{ mix-blend-mode:plus-lighter;
+  background:radial-gradient(closest-side, color-mix(in oklab, var(--isik-renk) 13%, transparent), color-mix(in oklab, var(--isik-renk) 7%, transparent) 26%,
+    color-mix(in oklab, var(--isik-renk) 3%, transparent) 55%, transparent 100%); } }
+
+/* Minikler: daha dolgun renk, iri ve aşağıda göz, belirgin yanak, net kenar. */
+.minik{ --hat-filtre:drop-shadow(0 0 .7px color-mix(in oklab, var(--g3) 70%, transparent)) drop-shadow(0 0 .5px rgba(255,255,255,.95))
+    drop-shadow(0 4px 5px color-mix(in oklab, var(--g3) 34%, transparent)); }
+.minik__deri{
+  background:radial-gradient(70% 42% at 50% 104%, color-mix(in oklab, var(--g1) 75%, #fff), transparent 72%),
+    radial-gradient(17% 10% at 23% 70%, rgba(255,120,160,.62), transparent),
+    radial-gradient(17% 10% at 77% 70%, rgba(255,120,160,.62), transparent),
+    radial-gradient(90% 80% at 50% 40%, transparent 58%, color-mix(in oklab, var(--g3) 42%, transparent) 100%),
+    linear-gradient(170deg, color-mix(in oklab, var(--g1) 86%, transparent), color-mix(in oklab, var(--g2) 94%, transparent)); }
+.minik__goz{ width:19%; height:25%; top:44%;
+  background:radial-gradient(circle at 70% 74%, rgba(255,255,255,.85) 0 7%, transparent 9%), radial-gradient(circle at 45% 35%, #2f3570, #12142a 72%); }
+.minik__goz:nth-of-type(2){ left:23%; } .minik__goz:nth-of-type(3){ right:23%; }
+.minik__goz::after{ left:16%; top:12%; width:44%; height:40%; }
+.minik.is-farkinda:not(.is-uyuyor) .minik__goz{ height:28%; top:42%; }
+.minik__agiz{ opacity:1; }
+.minik[data-esya] .minik__kart{ display:none; }
+.minik[data-esya] .minik__esya{ scale:.82; transform-origin:30% 30%; }
+
+/* 29) ANİMASYONLAR (kullanıcı, 2026-10-28: «sayfa animasyonları, agent,
+   buton gibi türlü türlü animasyonları profesyonelleştir»). Hepsi
+   «hareketi azalt» sorgusunun içinde (animasyon.js kullanıcının seçimine
+   göre yazar); yalnız transform, opacity, filter ve gölge.
+   · Sayfa girişi: hızlı başlayıp uzun yavaşlayan eğri (ease-out-expo),
+     biraz daha derin yükseliş; kartlarda bulanıklık yok (§30), başlıkta ilk yarıda kalkar.
+   · Düğme: üzerine gelince 1 px yükselir; basınca içe göçer, ana düğmede
+     modül renginde bir halka yayılıp söner (bırakınca 300 ms'de).
+   · Çubuk ve eşik dolgusu yayla dolar; kenar simgesi üzerine gelince büyür;
+     odak halkası sıçramadan açılır. */
+@media (prefers-reduced-motion:no-preference){
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 .sayfabasi{ animation:cam-gir-baslik2 560ms cubic-bezier(.16,1,.3,1) both; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi,
+    .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard, .bolumcubugu){ animation-name:cam-gir2; animation-duration:580ms; animation-timing-function:cubic-bezier(.16,1,.3,1); }
+
+  @media (hover:hover) and (pointer:fine){
+    html[data-zemin="yumusak"] .site--v5 :is(.btn, .chip, .kisayol > button, .kisayol > a, .giris__gonder):hover:not(:active):not(:disabled){ transform:translateY(-1px); }
+    html[data-zemin="yumusak"] .site--v5 .kenar__cekmece svg{ transition:transform 520ms var(--su); }
+    html[data-zemin="yumusak"] .site--v5 .kenar__cekmece:hover svg{ transform:scale(1.1); }
+  }
+  html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder):active:not(:disabled){
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 1px 1px rgba(16,20,40,.18), 0 0 0 6px color-mix(in oklab, var(--dugme) 22%, transparent); }
+
+  html[data-zemin="yumusak"] :is(.bar__fill, .esikcubuk__dolu){ transition:width 900ms var(--su), transform 900ms var(--su), background-color .3s ease; }
+  html[data-zemin="yumusak"] .site--v5 :is(button, a, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible{ transition:outline-offset 260ms var(--su), box-shadow 260ms ease; }
+}
+@keyframes cam-gir2{ from{ opacity:0; transform:translateY(16px) scale(.98); } 60%{ opacity:1; } to{ opacity:1; transform:none; } }   /* bulaniksiz: Edge'de kare p95 15,5 -> 12,3 ms (§30) */
+@keyframes cam-gir-baslik2{ from{ opacity:0; transform:translateY(10px); filter:blur(4px); } 50%{ filter:blur(0); } to{ opacity:1; transform:none; filter:none; } }
+
+/* 30) HAREKET DİLİ (kullanıcı, 2026-10-28: «sistemin bütün animasyonlarını
+   geliştir, bu işe çok odaklan, master seviyeye çık»). Tek dil:
+   · Süre: mikro 140 ms (üzerine gelme, basma) · kısa 220 ms (çıkış,
+     açılır pencere) · orta 320 ms (bölüm açılması) · uzun 520 ms (kağıt,
+     bildirim girişi; yay).
+   · Eğri: giren hızlı başlar, uzun yavaşlar (--e-cik, expo); çıkan
+     hızlanarak gider (--e-git); yerleşen hafif taşar (--su yayı).
+   · Giriş ve çıkış simetrik: kağıt yaylanarak gelir, aşağı süzülüp söner
+     (hareket.js cikis kopyası); bildirim kayıp gelir, küçülüp gider.
+   · Yalnız transform ve opacity; bulanıklık yalnız tek öğede (başlık).
+     Kartlarda bulanık giriş kalktı: Edge'de ölçüldü, sayfa geçişinde
+     kare p95 15,5 → 12,3 ms.
+   · Hepsi «hareketi azalt»ın içinde; Görünüm › Animasyonlar Az'da kapanır. */
+:root{ --h-mikro:140ms; --h-kisa:220ms; --h-orta:320ms; --h-uzun:520ms;
+  --e-cik:cubic-bezier(.16,1,.3,1); --e-git:cubic-bezier(.4,0,1,1); --e-std:cubic-bezier(.2,0,0,1); }
+@media (prefers-reduced-motion:no-preference){
+  /* Kağıt: karartma solar, kağıt yaylanarak yükselir; masaüstünde ortadan büyür. */
+  body .overlay{ animation:h-karart-gel var(--h-kisa) var(--e-std) both; }
+  html[data-zemin="yumusak"] .overlay .sheet, .overlay .sheet{ animation:h-kagit-gel var(--h-uzun) var(--su) both; transform-origin:50% 100%; }
+  @media (min-width:680px){ html[data-zemin="yumusak"] .overlay .sheet, .overlay .sheet{ transform-origin:50% 40%; } }
+  /* Kapanış kopyası (hareket.js cikis): karartma söner, kağıt aşağı süzülür. */
+  body .overlay.h-cikis{ pointer-events:none; animation:h-karart-git var(--h-kisa) var(--e-git) forwards; }
+  html[data-zemin="yumusak"] .overlay.h-cikis .sheet, .overlay.h-cikis .sheet{ animation:h-kagit-git var(--h-kisa) var(--e-git) forwards; }
+
+  /* Bildirim: kayıp yaylanarak gelir; süresi dolunca küçülüp aşağı gider. */
+  .toast-root .toast{ animation:h-bildirim-gel var(--h-uzun) var(--su) both; }
+  .toast-root .toast.is-gidiyor{ animation:h-bildirim-git var(--h-kisa) var(--e-git) forwards; }
+
+  /* Açılır pencere ve önizleme: bağlandığı yerden büyüyerek açılır. */
+  body .popover, body .h-onizle{ animation:h-acilir var(--h-kisa) var(--e-cik) both; transform-origin:50% 0; }
+
+  /* Açılır bölüm: içerik yukarıdan süzülerek gelir (yalnız kullanıcı açınca, hareket.js). */
+  details.h-acildi > :not(summary){ animation:h-bolum-ac var(--h-orta) var(--e-cik) both; }
+  details > summary::marker, details > summary .chev, details > summary svg{ transition:transform var(--h-orta) var(--su); }
+}
+@keyframes h-karart-gel{ from{ opacity:0; } }
+@keyframes h-karart-git{ to{ opacity:0; } }
+@keyframes h-kagit-gel{ from{ opacity:0; transform:translateY(22px) scale(.965); } 45%{ opacity:1; } to{ opacity:1; transform:none; } }
+@keyframes h-kagit-git{ to{ opacity:0; transform:translateY(14px) scale(.97); } }
+@keyframes h-bildirim-gel{ from{ opacity:0; transform:translateY(14px) scale(.94); } 40%{ opacity:1; } to{ opacity:1; transform:none; } }
+@keyframes h-bildirim-git{ to{ opacity:0; transform:translateY(8px) scale(.95); } }
+@keyframes h-acilir{ from{ opacity:0; transform:translateY(-4px) scale(.96); } to{ opacity:1; transform:none; } }
+@keyframes h-bolum-ac{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
+
+/* 31) SÜRÜKLE BIRAK (kullanıcı, 2026-10-28: «agent'ı basılı tutup
+   sürükleyebilelim bir yere»; minik.js surukBasla/dus). Elde: tutulduğu
+   yerden sarkar, hafifçe sallanır, ayakları çırpınır, gözler açılır,
+   yerdeki gölgesi silinir; bırakılınca düşüş ve iniş ezilmesi JS'te. */
+.minik{ touch-action:none; cursor:grab; }
+.minik.is-tasiniyor{ cursor:grabbing; z-index:6; }
+.minik.is-tasiniyor .minik__govde{ transform-origin:50% 8%; filter:var(--hat-filtre) drop-shadow(0 10px 8px color-mix(in oklab, var(--g3) 30%, transparent)); }
+.minik.is-tasiniyor .minik__golge{ opacity:0; }
+.minik.is-tasiniyor .minik__goz{ height:28%; top:40%; }
+.minik.is-tasiniyor .minik__agiz{ height:12%; border-radius:50%; border-top:1.6px solid #1d2140; }
+@media (prefers-reduced-motion:no-preference){
+  .minik.is-tasiniyor .minik__govde{ animation:mk-tasin .9s ease-in-out infinite alternate; }
+  .minik.is-tasiniyor .minik__ayak{ animation:mk-sarkit .32s ease-in-out infinite alternate; }
+  .minik.is-tasiniyor .minik__ayak--sag{ animation-delay:-.16s; }
+}
+@keyframes mk-tasin{ from{ transform:rotate(-7deg) translateY(2px); } to{ transform:rotate(7deg) translateY(2px); } }
+@keyframes mk-sarkit{ from{ transform:translateY(12%) rotate(-16deg); } to{ transform:translateY(12%) rotate(18deg); } }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -20182,7 +20375,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'a6ff0384', at:'2026-10-28 11:13', dirty:true };
+R.BUILD = { id:'0cd62907', at:'2026-10-28 12:33', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -26971,6 +27164,43 @@ window.LIFEOS.HAREKET = (function(){
     }
   }
 
+  /* Kapanış kopyası: katman (kağıt, komut kutusu) hemen kaldırılır, yerinde
+     dokunulmaz bir kopyası söner (cam.css «h-cikis»). Asıl öğenin eş zamanlı
+     kalkmasına güvenen odak ve testler bozulmaz. */
+  function cikis(el, o){
+    o = o || {};
+    const az = o.az != null ? !!o.az : azMi();
+    if(az || !el || !el.isConnected || !el.cloneNode) return null;
+    const k = el.cloneNode(true);
+    /* Açık katman sayılmasın: kısayol ve odak kapısı [role=dialog][aria-modal] arar. */
+    const SIL = ['id', 'data-act', 'data-change', 'name', 'role', 'aria-modal'];
+    SIL.forEach(a => k.removeAttribute(a));
+    k.classList.add('h-cikis');
+    k.setAttribute('aria-hidden', 'true');
+    k.setAttribute('inert', '');
+    k.querySelectorAll('[id], [data-act], [data-change], [name], [role], [aria-modal]').forEach(e => SIL.forEach(a => e.removeAttribute(a)));
+    document.body.appendChild(k);
+    setTimeout(() => k.remove(), o.sure || 260);
+    return k;
+  }
+
+  /* Açılır bölüm yalnız kullanıcı başlığa dokununca oynar: yeniden çizimde
+     «open» ile gelen bölüm de toggle olayı atar, o sayılmaz. */
+  let sonOzet = null, sonOzetZaman = 0;
+  if(typeof document !== 'undefined'){
+    document.addEventListener('click', e => {
+      const s = e.target && e.target.closest ? e.target.closest('summary') : null;
+      if(s){ sonOzet = s; sonOzetZaman = Date.now(); }
+    }, true);
+    document.addEventListener('toggle', e => {
+      const d = e.target;
+      if(!d || d.tagName !== 'DETAILS' || !d.open || azMi()) return;
+      if(!sonOzet || Date.now() - sonOzetZaman > 600 || sonOzet.parentElement !== d) return;
+      d.classList.remove('h-acildi'); void d.offsetWidth; d.classList.add('h-acildi');
+      setTimeout(() => d.classList.remove('h-acildi'), 450);
+    }, true);
+  }
+
   /* ---------------------------------------------------------- 156 */
 
   let halkaEl = null, halkaZaman = null;
@@ -27111,7 +27341,7 @@ window.LIFEOS.HAREKET = (function(){
     return true;
   }
 
-  return { once, sonra, tekCanli, baslikKopyala, raf, kesimler, kaynak, gecis, halka, onizleIcerik, odakCik, kur, kaydedildi,
+  return { once, sonra, tekCanli, baslikKopyala, raf, kesimler, kaynak, gecis, cikis, halka, onizleIcerik, odakCik, kur, kaydedildi,
     isaretKaydir, EN_COK_KAPANAN };
 })();
 
@@ -86986,6 +87216,8 @@ R.UI = (function(){
   function closeSheet(){
     const el = document.getElementById('sheet');
     if(!el) return;
+    /* Kapanış da yaylanır: yerinde dokunulmaz bir kopya söner (hareket.js cikis). */
+    try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.cikis) H.cikis(el); }catch(e){ /* kopya yoksa anında kapanır */ }
     el.remove();
     document.body.style.overflow = sheetScroll;
     const kabuk = document.querySelector('.site');
@@ -87084,7 +87316,7 @@ R.UI = (function(){
       if(L && L.ONERI && typeof L.ONERI.cizgi === 'function') el.appendChild(L.ONERI.cizgi(life));
       setTimeout(() => { const b = el.querySelector('.toast__undo'); if(b) b.disabled = true; }, life);
     }
-    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, life);
+    setTimeout(() => el.classList.add('is-gidiyor'), life);   // cikis: cam.css toast-cik
     setTimeout(() => el.remove(), life + 300);
     return el;
   }
@@ -121093,8 +121325,10 @@ window.LIFEOS.MINIK = (function(){
   /* Dikdörtgenlerden yürünebilir kenarlar: belge koordinatında {x1, x2, y}.
      Ekrandan çıkan kart da zemindir: minik kartıyla birlikte kayar. */
   const UST_BOS = 56;         // kenarın üstünde bu kadar boşluk yoksa (başka kart) zemin olmaz
-  function zeminler(kutular){
-    const sikisik = k => kutular.some(o => o !== k && o.alt != null && o.alt <= k.ust + 1 && k.ust - o.alt < UST_BOS
+  const ELLE_BOS = 16;        // elle bırakılan kartta bu kadarı yeter (kartlar arası 24 px)
+  function zeminler(kutular, elle){
+    const sikisik = k => kutular.some(o => o !== k && o.alt != null && o.alt <= k.ust + 1
+      && k.ust - o.alt < (elle && elle.has(k.el) ? ELLE_BOS : UST_BOS)
       && o.sol < k.sol + k.genis && o.sol + o.genis > k.sol);
     return kutular
       .filter(k => !k.engel && k.genis >= EN_AZ && !sikisik(k))
@@ -121225,7 +121459,7 @@ window.LIFEOS.MINIK = (function(){
 
   /* --- DOM --- */
 
-  const durum = { havuz:KISILER, radyo:false, kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null, ruhlar:{}, isikTazele:false };
+  const durum = { elle:new Set(), havuz:KISILER, radyo:false, kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null, ruhlar:{}, isikTazele:false };
   /* Sohbet gibi çok adımlı işlerin zamanlayıcıları: sayfa değişince silinir. */
   function zamanla(fn, ms){ const t = setTimeout(fn, ms); durum.zamanlar.push(t); return t; }
   /* Meşgul işareti 12 sn'de kendiliğinden düşer: yarıda kalan bir iş
@@ -121256,7 +121490,7 @@ window.LIFEOS.MINIK = (function(){
   }
   const rasgele = l => l[Math.floor(Math.random() * l.length)];
 
-  function olcum(){
+  function olcum(elle){
     const sy = window.scrollY || 0, sx = window.scrollX || 0;
     const kutular = [];
     document.querySelectorAll(KART).forEach(el => {
@@ -121273,7 +121507,7 @@ window.LIFEOS.MINIK = (function(){
       const r = el.getBoundingClientRect();
       if(r.width && r.height) kutular.push({ sol:r.left + sx, ust:r.top + sy, alt:r.bottom + sy, genis:r.width, el, engel:true });
     });
-    return zeminler(kutular);
+    return zeminler(kutular, elle || durum.elle);
   }
 
   /* Ruh hâli kişinindir: sayfa değişip minik başka kişiyi giyince o kişinin hâli gelir. */
@@ -121332,8 +121566,76 @@ window.LIFEOS.MINIK = (function(){
       if(!mesgulMu(mk) && !m.classList.contains('is-uyuyor') && r !== 'kizgin' && r !== 'uzgun') ekHal(mk, 'is-selam', 900);
     });
     m.addEventListener('pointerleave', () => m.classList.remove('is-farkinda'));
-    m.addEventListener('click', e => { e.stopPropagation(); gidikla(mk); });
+    m.addEventListener('pointerdown', e => surukBasla(mk, e));
+    m.addEventListener('click', e => { e.stopPropagation(); if(mk.surukledi){ mk.surukledi = false; return; } gidikla(mk); });
     return mk;
+  }
+
+  /* Sürükle bırak (kullanıcı, 2026-10-28: «agent'ı basılı tutup
+     sürükleyebilelim bir yere»). Basılı tutunca (260 ms) ya da 6 px
+     oynatınca minik ele gelir, tutulduğu yerden imleci izler; bırakılınca
+     altındaki kenara düşer (dus). Sürüklemesiz dokunuş gıdık olarak kalır. */
+  function inisYeri(liste, x, y){
+    if(!liste || !liste.length) return null;
+    const kirp = z => Math.min(z.x2, Math.max(z.x1, x));
+    const alt = liste.filter(z => x >= z.x1 && x <= z.x2 && z.y >= y - 4).sort((a, b) => a.y - b.y);
+    if(alt.length) return { z:alt[0], x:kirp(alt[0]) };
+    let en = null, enD = Infinity;
+    liste.forEach(z => { const d = Math.hypot(x - kirp(z), z.y - y); if(d < enD){ enD = d; en = z; } });
+    return { z:en, x:kirp(en) };
+  }
+  function surukBasla(mk, e){
+    if(e.button !== 0 || kapaliMi() || !durum.kat) return;
+    e.preventDefault();
+    const bas = { x:e.clientX, y:e.clientY }, sx = () => window.scrollX || 0, sy = () => window.scrollY || 0;
+    let acik = false;
+    const al = () => {
+      if(acik) return;
+      acik = true;
+      clearTimeout(mk.zaman); clearInterval(mk.adimT);
+      if(mk.anim){ const t = new DOMMatrixReadOnly(getComputedStyle(mk.el).transform); mk.anim.cancel(); koy(mk, t.m41, t.m42); }
+      mesgul(mk, true); mk.tasiniyor = true; mk.z = null;
+      temizle(mk); mk.el.classList.remove('is-yuruyor', 'is-ucuyor'); mk.el.classList.add('is-tasiniyor');
+      mk.tut = { dx:bas.x + sx() - mk.x, dy:bas.y + sy() - mk.y };
+      ses('tik', mk);
+    };
+    const tut = setTimeout(al, 260);
+    const git = ev => {
+      if(!acik && Math.hypot(ev.clientX - bas.x, ev.clientY - bas.y) > 6) al();
+      if(acik) koy(mk, ev.clientX + sx() - mk.tut.dx, ev.clientY + sy() - mk.tut.dy);
+    };
+    const birak = () => {
+      clearTimeout(tut);
+      window.removeEventListener('pointermove', git); window.removeEventListener('pointerup', birak); window.removeEventListener('pointercancel', birak);
+      if(!acik) return;
+      mk.surukledi = true; setTimeout(() => { mk.surukledi = false; }, 400);
+      dus(mk);
+    };
+    window.addEventListener('pointermove', git); window.addEventListener('pointerup', birak); window.addEventListener('pointercancel', birak);
+  }
+  /* Yerçekimi: hızlanarak iner, kenara değince ezilip toparlanır, silkinir. */
+  function dus(mk){
+    const yer = inisYeri(olcum({ has:() => true }), mk.x, mk.y);
+    if(yer) durum.elle.add(yer.z.el);
+    durum.zeminler = olcum();
+    mk.tasiniyor = false;
+    mk.el.classList.remove('is-tasiniyor');
+    if(!yer){ mesgul(mk, false); if(yerlestir(mk)) sonra(mk, 1500); return; }
+    const a = { x:mk.x, y:mk.y }, b = { x:yer.x, y:yer.z.y };
+    const ms = Math.round(Math.min(720, 200 + Math.sqrt(Math.abs(b.y - a.y) + Math.abs(b.x - a.x) * .3) * 22));
+    const t = (x, y, gx, gy) => 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) scale(' + gx + ',' + gy + ')';
+    mk.el.classList.add('is-ucuyor');
+    mk.anim = mk.el.animate([
+      { transform:t(a.x, a.y, .94, 1.08), easing:'cubic-bezier(.5,0,.9,.5)' },
+      { transform:t(b.x, b.y, 1.24, .74), offset:.78, easing:'cubic-bezier(.2,.8,.3,1)' },
+      { transform:t(b.x, b.y, .96, 1.05), offset:.9 },
+      { transform:t(b.x, b.y, 1, 1) }
+    ], { duration:ms, fill:'forwards' });
+    mk.anim.onfinish = () => {
+      mk.el.classList.remove('is-ucuyor'); mk.z = yer.z; koy(mk, b.x, b.y); mk.anim.cancel();
+      mesgul(mk, false); ses('tik', mk, false); ekHal(mk, 'is-silkiniyor', 900);
+      sonra(mk, 1800);
+    };
   }
 
   function koy(mk, x, y){
@@ -121528,6 +121830,7 @@ window.LIFEOS.MINIK = (function(){
     durum.kat.hidden = false;
     durum.zeminler = olcum();
     durum.minikler.forEach(mk => {
+      if(mk.tasiniyor) return;   // elde: yerine bırakılınca düşer
       const ayni = mk.z && durum.zeminler.find(o => o.el === mk.z.el);
       if(ayni){
         mk.z = ayni;
@@ -121555,6 +121858,7 @@ window.LIFEOS.MINIK = (function(){
     const anahtar = document.documentElement.dataset.sayfa || '';
     if(anahtar === durum.sayfa) return;
     durum.sayfa = anahtar;
+    durum.elle.clear();
     durum.zamanlar.forEach(clearTimeout); durum.zamanlar = [];
     const k = kadro(anahtar, durum.minikler.length, durum.havuz);
     durum.minikler.forEach((mk, i) => {
@@ -121774,7 +122078,7 @@ window.LIFEOS.MINIK = (function(){
   }
 
   return { kur, sayi, seciciHtml, yanSes, radyoda, ofisKisileri, ICERIK, DIYALOG, diyalogSec, ESYALAR, esyaSec,
-    SES_ANAHTAR, sesAyar, sesAyarla, sesIzinli, sesSeciciHtml, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh,
+    SES_ANAHTAR, sesAyar, sesAyarla, sesIzinli, sesSeciciHtml, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh, inisYeri,
     KISILER, HUY_AD, RUH, RUH_AD, KART, EN_AZ, PAY };
 })();
 
