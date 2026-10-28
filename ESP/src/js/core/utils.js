@@ -43,11 +43,19 @@ ESP.U = (function(){
 
   /* Cozulemeyen tarih icin `null` doner — gecersiz bir Date DEGIL.
      Cagiran taraf ikisini ayirt edebilmeli. */
+  /* Önbellek: dize -> zaman damgası (ya da geçersiz için NaN). Ofis notları
+     her çizimde aynı tarihleri binlerce kez çözüyordu (~25 ms). Date
+     nesnesi paylaşılmaz: her çağrı yeni nesne alır. */
+  const PARSE = new Map();
   function parse(s){
     if(s instanceof Date) return isFinite(s.getTime()) ? s : null;
-    if(!isISO(s)) return null;
-    const parts = String(s).slice(0,10).split('-').map(Number);
-    return new Date(parts[0], parts[1]-1, parts[2]);
+    let t = typeof s === 'string' ? PARSE.get(s) : undefined;
+    if(t === undefined){
+      if(!isISO(s)) t = NaN;
+      else { const parts = String(s).slice(0,10).split('-').map(Number); t = new Date(parts[0], parts[1]-1, parts[2]).getTime(); }
+      if(typeof s === 'string'){ if(PARSE.size > 20000) PARSE.clear(); PARSE.set(s, t); }
+    }
+    return isNaN(t) ? null : new Date(t);
   }
 
   function today(){

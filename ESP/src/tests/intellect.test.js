@@ -117,6 +117,43 @@
       expect(I.linkSuggestions().length).toBe(0);
     });
 
+    /* Başarım (2026-10-29): sayısal anahtar, bağ kümesi ve kararlı ilk-k seçimi.
+       Sonuç eski yöntemle (bütün çiftleri kurup tam sıralama) birebir aynı olmalı:
+       eşit puanda önce gelen önce kalır. */
+    it('öneri listesi eski tam sıralamayla birebir aynı (eşitlik dahil)', () => {
+      const eski = (notlar, limit) => {
+        const dizin = new Map();
+        notlar.forEach((n, i) => (n.concepts || []).forEach(c => { const k = ESP.U.norm(c); if(!k) return;
+          if(!dizin.has(k)) dizin.set(k, []); const kv = dizin.get(k); if(kv[kv.length - 1] !== i) kv.push(i); }));
+        const kovalar = Array.from(dizin.entries()).filter(e => e[1].length > 1).sort((x, y) => x[1].length - y[1].length);
+        const ciftler = new Map(); let sayac = 0;
+        for(const [kavram, kova] of kovalar){
+          for(let x = 0; x < kova.length && sayac < 20000; x++) for(let y = x + 1; y < kova.length && sayac < 20000; y++){
+            const A = notlar[kova[x]], B = notlar[kova[y]];
+            if((A.links || []).some(l => l.to === B.id)) continue;
+            const k = kova[x] + '|' + kova[y], r = ciftler.get(k);
+            if(r) r.concepts.push(kavram); else { ciftler.set(k, { a:A, b:B, concepts:[kavram] }); sayac++; }
+          }
+          if(sayac >= 20000) break;
+        }
+        const out = []; ciftler.forEach(q => { const f = q.a.bookId && q.b.bookId && q.a.bookId !== q.b.bookId;
+          out.push({ a:q.a, b:q.b, concepts:q.concepts, cross:f, score:q.concepts.length + (f ? 2 : 0) }); });
+        return out.sort((x, y) => y.score - x.score).slice(0, limit || 8);
+      };
+      const ozet = l => l.map(o => o.a.id + '-' + o.b.id + ':' + o.score + ':' + o.concepts.join('/') + ':' + o.cross).join(' ');
+      resetState();
+      const kitap = [pushBook('Devlet', 'Platon'), pushBook('Etika', 'Spinoza'), pushBook('Dava', 'Kafka')];
+      const r = ESP.U && ESP.Test && (() => { let t = 7; return () => (t = (t * 16807) % 2147483647) / 2147483647; })();
+      const havuz = ['adalet', 'zaman', 'özgürlük', 'erdem', 'devlet', 'akıl', 'tanrı', 'bilgi', 'güç', 'dil'];
+      const nl = [];
+      for(let i = 0; i < 90; i++){
+        const k = havuz.filter(() => r() < 0.22);
+        nl.push(pushNote('N' + i, kitap[i % 3].id, k));
+      }
+      nl.forEach((n, i) => { if(i % 7 === 0 && nl[i + 3]) n.links = [{ to:nl[i + 3].id }]; });
+      [8, 30, 200].forEach(lim => expect(ozet(I.linkSuggestions(lim))).toBe(ozet(eski(S.notes, lim))));
+    });
+
     it('farkli kaynaktan gelen oneri once siralanir', () => {
       resetState();
       const b1 = pushBook('Devlet', 'Platon');

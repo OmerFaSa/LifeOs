@@ -105,15 +105,18 @@ SP.Tahmin = (function(){
     return o;
   }
   /* Etiketli günler: Günün hissi (soreness 1–5, senin beyanın). */
-  function veriSeti(gunSayisi){
+  function etiketler(gunSayisi){
     const U = SP.U, out = [];
     for(let i = (gunSayisi || 365) - 1; i >= 0; i--){
       const d = U.iso(U.addDays(U.today(), -i));
       const v = SP.S.vitals[d];
       if(!v || v.soreness == null || !isFinite(Number(v.soreness))) continue;
-      out.push({ tarih:d, x:gunOzellik(d), y:Number(v.soreness) });
+      out.push({ tarih:d, y:Number(v.soreness) });
     }
     return out;
+  }
+  function veriSeti(gunSayisi){
+    return etiketler(gunSayisi).map(r => ({ tarih:r.tarih, x:gunOzellik(r.tarih), y:r.y }));
   }
 
   /* ------------------------------------------------------------- modeller */
@@ -240,14 +243,16 @@ SP.Tahmin = (function(){
     };
   }
 
-  /* Ekran ve King için: etiketli günler değişmedikçe yeniden eğitilmez. */
+  /* Ekran ve King için: etiketli günler değişmedikçe yeniden eğitilmez.
+     Anahtar yalnız etiketten (ucuz); özellik (öğün, besin toplamı) yalnız
+     anahtar değişince hesaplanır — durum() her çizimde çağrılır. */
   let onbellek = null;
   function durum(){
-    const veri = veriSeti(365);
+    const veri = etiketler(365);
     const imza = SP.U.todayISO() + '|' + veri.length + '|' + veri.map(r => r.tarih + r.y).join(',').length
       + '|' + veri.reduce((a, r) => a + r.y, 0) + '|' + Object.keys(dis).map(k => k + Object.keys(dis[k]).length).join(',');
     if(onbellek && onbellek.imza === imza) return onbellek.sonuc;
-    const m = egit(veri);
+    const m = egit(veri.map(r => ({ tarih:r.tarih, x:gunOzellik(r.tarih), y:r.y })));
     const sonuc = m.ok ? Object.assign({}, m, { bugun:m.iyi ? m.tahminEt(gunOzellik(SP.U.todayISO())) : null }) : m;
     onbellek = { imza, sonuc };
     return sonuc;

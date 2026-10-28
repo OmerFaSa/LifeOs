@@ -476,7 +476,8 @@ html[data-zemin="yumusak"] .site--v5 .kenar__logo b{ box-shadow:0 0 6px -1px cur
   html[data-zemin="yumusak"] .site--v5 .kenar__logo b:nth-child(3){ animation-delay:.36s; }
   html[data-zemin="yumusak"] .site--v5 .kenar__logo b:nth-child(4){ animation-delay:.54s; }
 }
-@keyframes logo-nabiz{ 0%, 100%{ filter:brightness(1); } 50%{ filter:brightness(1.15) saturate(1.1); } }
+/* opacity: GPU'da döner; filter (brightness) her karede ana iş parçacığında hesaplanıyordu (2026-10-29). */
+@keyframes logo-nabiz{ 0%, 100%{ opacity:1; } 50%{ opacity:.78; } }
 @keyframes logo-isil{ 0%, 82%, 100%{ filter:none; } 88%{ filter:brightness(1.35) saturate(1.15); } }
 
 /* Ajan avatarının gözüne parıltı: daha canlı, daha minnoş. */

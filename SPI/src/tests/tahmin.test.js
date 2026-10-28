@@ -56,6 +56,24 @@
         expect(['espMuzik', 'espToplam'].indexOf(m.onem[0].ozellik) >= 0).toBe(true);
       }finally{ SP.S.vitals = eskiV; T()._dis({}); }
     });
+    /* Başarım (2026-10-29): durum() her çizimde (Onaylar sayacı) çağrılır; önbellek
+       anahtarı için bile 365 günün özelliği (öğünler, besin toplamı) hesaplanıyordu
+       (~45 ms). Etiketler değişmedikçe özellik hesaplanmaz; etiket değişince yeniden. */
+    it('etiketler değişmedikçe durum() özellik hesaplamaz; etiket değişince hesaplar', () => {
+      const eskiV = SP.S.vitals, eskiM = SP.Model.mealsOf; let say = 0;
+      try{
+        SP.S.vitals = {};
+        for(let i = 0; i < 25; i++){ const d = SP.U.iso(SP.U.addDays(SP.U.today(), -i)); SP.S.vitals[d] = { sleep:6 + (i % 3), soreness:1 + (i % 5) }; }
+        SP.Model.mealsOf = d => { say++; return eskiM.call(SP.Model, d); };
+        T().durum(); const ilk = say;
+        T().durum();
+        expect(ilk > 0).toBe(true);
+        expect(say).toBe(ilk);
+        SP.S.vitals[SP.U.todayISO()].soreness = 5;
+        T().durum();
+        expect(say > ilk).toBe(true);
+      }finally{ SP.S.vitals = eskiV; SP.Model.mealsOf = eskiM; }
+    });
     it('tohumlu eğitim tekrarlanabilir', () => {
       const a = T().egit(sentetik(40, true)), b = T().egit(sentetik(40, true));
       expect(a.maeModel).toBe(b.maeModel);

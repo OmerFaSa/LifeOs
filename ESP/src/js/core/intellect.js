@@ -240,6 +240,12 @@ ESP.Intellect = (function(){
       .filter(function(e){ return e[1].length > 1; })
       .sort(function(a, b){ return a[1].length - b[1].length; });
 
+    /* Başarım (2026-10-29): bağlı çiftler önceden kümede, çift anahtarı sayı
+       (i * n + j), sıralama yerine kararlı ilk-k seçimi. Çıktı eskisiyle
+       birebir aynıdır (intellect.test: eski tam sıralamayla karşılaştırma). */
+    const n = notlar.length;
+    const bagli = new Set();
+    notlar.forEach(function(a, i){ (a.links || []).forEach(function(l){ bagli.add(a.id + '>' + l.to); }); });
     const ciftler = new Map();
     let sayac = 0;
     for(const [kavram, kova] of kovalar){
@@ -247,8 +253,8 @@ ESP.Intellect = (function(){
         for(let y = x + 1; y < kova.length && sayac < MAX_PAIRS; y++){
           const i = kova[x], j = kova[y];
           const a = notlar[i], b = notlar[j];
-          if((a.links || []).some(function(l){ return l.to === b.id; })) continue;
-          const anahtar = i + '|' + j;
+          if(bagli.size && bagli.has(a.id + '>' + b.id)) continue;
+          const anahtar = i * n + j;
           const kayit = ciftler.get(anahtar);
           if(kayit){ kayit.concepts.push(kavram); }
           else{ ciftler.set(anahtar, { a:a, b:b, concepts:[kavram] }); sayac++; }
@@ -257,15 +263,21 @@ ESP.Intellect = (function(){
       if(sayac >= MAX_PAIRS) break;
     }
 
-    const out = [];
+    /* Kararlı ilk-k: eşit puanlı yeni kayıt öncekilerin ARKASINA girer
+       (tam sıralamanın kararlılığıyla aynı). */
+    const k = limit || 8, ust = [];
     ciftler.forEach(function(p){
       /* Ayni kaynaktan iki not zaten ayni yazari paylasir; sentopik olan
          FARKLI kaynaklar arasindaki bagdir ve once o onerilir. */
       const farkliKaynak = p.a.bookId && p.b.bookId && p.a.bookId !== p.b.bookId;
-      out.push({ a:p.a, b:p.b, concepts:p.concepts, cross:farkliKaynak,
-        score:p.concepts.length + (farkliKaynak ? 2 : 0) });
+      const score = p.concepts.length + (farkliKaynak ? 2 : 0);
+      if(ust.length >= k && score <= ust[ust.length - 1].score) return;
+      let yer = ust.length;
+      while(yer > 0 && ust[yer - 1].score < score) yer--;
+      ust.splice(yer, 0, { a:p.a, b:p.b, concepts:p.concepts, cross:farkliKaynak, score:score });
+      if(ust.length > k) ust.pop();
     });
-    return out.sort(function(x, y){ return y.score - x.score; }).slice(0, limit || 8);
+    return ust;
   }
 
   /* ============================================================ arguman

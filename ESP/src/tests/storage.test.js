@@ -198,6 +198,18 @@
       expect(U.isISO('2026-13-01')).toBeFalsy();
     });
 
+    /* parse önbellekli (2026-10-29, başarım: notesRaw her çizimde binlerce
+       kez çağırıyordu); önbellek Date nesnesini paylaşmamalı — çağıran
+       setDate ile değiştirirse sonraki parse bozulurdu. */
+    it('parse her çağrıda yeni Date verir; değiştirmek sonrakini bozmaz', () => {
+      const a = U.parse('2026-03-10'); a.setDate(a.getDate() + 5);
+      const b = U.parse('2026-03-10');
+      expect(a === b).toBe(false);
+      expect(U.iso(b)).toBe('2026-03-10');
+      expect(U.parse('2026-02-31')).toBe(null);
+      expect(U.parse('2026-02-31')).toBe(null);
+    });
+
     it('bicimsiz girdiyi reddeder', () => {
       expect(U.isISO('')).toBeFalsy();
       expect(U.isISO(null)).toBeFalsy();
