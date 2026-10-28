@@ -54,12 +54,12 @@ window.LIFEOS.MINIK = (function(){
      2026-10-28: «agentlar daha anlaşılır olsun»); perde miniğin ses tonudur
      (ses.js «bla», «gidik»): bilge alçak, neşeli ince konuşur. */
   const KISILER = Object.freeze([
-    { ad:'Pofuduk', bicim:'yuvarlak', tip:'kulak',   huy:'uykucu',   boy:34, ton:0,   perde:0.9 },
-    { ad:'Bıcır',   bicim:'kare',     tip:'anten',   huy:'konuskan', boy:30, ton:28,  perde:1.15 },
-    { ad:'Filiz',   bicim:'ucgen',    tip:'filiz',   huy:'merakli',  boy:36, ton:-26, perde:1.05 },
-    { ad:'Ponpon',  bicim:'yuvarlak', tip:'kurdele', huy:'neseli',   boy:30, ton:-12, perde:1.25 },
-    { ad:'Bulut',   bicim:'ucgen',    tip:'yok',     huy:'hayalci',  boy:32, ton:14,  perde:1 },
-    { ad:'Bilge',   bicim:'kare',     tip:'yok',     huy:'bilge',    boy:33, ton:40,  perde:0.8 }
+    { ad:'Pofuduk', bicim:'yuvarlak', tip:'kulak',   huy:'uykucu',   boy:42, ton:0,   perde:0.9 },
+    { ad:'Bıcır',   bicim:'kare',     tip:'anten',   huy:'konuskan', boy:38, ton:28,  perde:1.15 },
+    { ad:'Filiz',   bicim:'ucgen',    tip:'filiz',   huy:'merakli',  boy:44, ton:-26, perde:1.05 },
+    { ad:'Ponpon',  bicim:'yuvarlak', tip:'kurdele', huy:'neseli',   boy:38, ton:-12, perde:1.25 },
+    { ad:'Bulut',   bicim:'ucgen',    tip:'percem',  huy:'hayalci',  boy:40, ton:14,  perde:1 },
+    { ad:'Bilge',   bicim:'kare',     tip:'yok',     huy:'bilge',    boy:41, ton:40,  perde:0.8 }
   ]);
   const HUY_AD = Object.freeze({ uykucu:'uykucu', konuskan:'konuşkan', merakli:'meraklı', neseli:'neşeli', hayalci:'hayalci', bilge:'bilge' });
   const BALON = Object.freeze(['hey!', '♪', '…', 'hı hı', 'ooo', '!?', 'hihi', '♡']);
@@ -72,7 +72,29 @@ window.LIFEOS.MINIK = (function(){
   const RUH_AD = Object.freeze({ mutlu:'mutlu', uzgun:'üzgün', uykulu:'uykulu', kizgin:'kızgın' });
   const RUH_IPUCU = Object.freeze({ kizgin:'Biraz bekle', uzgun:'Dokun, sevindir', uykulu:'Dokun, uyandır' });
 
+  /* Sayfadaki sayı (kullanıcı, 2026-10-28: «bir sayfada görünebilecek
+     sayıyı değiştirebilelim»): Görünüm › Minikler, Yok ya da 1–6. Tercih
+     bu kapının deposunda durur, modül geçişinde taşınır (animasyon.js
+     TASINAN); seçilmemişse ekran genişliği karar verir. */
+  const ANAHTAR = 'lifeos.minik';
+  const EN_COK = KISILER.length;
+
   /* --- saf hesaplar (test edilir) --- */
+
+  function sayi(tercih, en){
+    const n = tercih == null || tercih === '' ? NaN : Number(tercih);
+    if(Number.isInteger(n) && n >= 0 && n <= EN_COK) return n;
+    return en < 680 ? 1 : en < 1100 ? 2 : 3;
+  }
+  function seciciHtml(n){
+    const s = n == null ? simdikiSayi() : n;
+    let h = '<div class="seg seg--block miniksec" role="group" aria-label="Minikler">';
+    for(let i = 0; i <= EN_COK; i++){
+      h += '<button type="button" class="' + (i === s ? 'is-on' : '') + '" data-minik-sec="' + i + '" aria-pressed="' + (i === s ? 'true' : 'false') + '"'
+        + ' title="' + (i ? 'Sayfada en çok ' + i + ' minik' : 'Minik yok') + '">' + (i ? i : 'Yok') + '</button>';
+    }
+    return h + '</div>';
+  }
 
   /* Dikdörtgenlerden yürünebilir kenarlar: belge koordinatında {x1, x2, y}.
      Ekrandan çıkan kart da zemindir: minik kartıyla birlikte kayar. */
@@ -187,6 +209,9 @@ window.LIFEOS.MINIK = (function(){
   function mesgul(mk, v){ mk.mesgul = !!v; mk.mesgulSon = v ? Date.now() + 12000 : 0; }
   function mesgulMu(mk){ if(mk.mesgul && Date.now() > mk.mesgulSon) mesgul(mk, false); return mk.mesgul; }
 
+  function tercihOku(){ try{ return localStorage.getItem(ANAHTAR); }catch(e){ return null; } }
+  function simdikiSayi(){ return sayi(tercihOku(), typeof window !== 'undefined' ? window.innerWidth || 1024 : 1024); }
+
   function azMi(){
     try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; }
   }
@@ -271,7 +296,7 @@ window.LIFEOS.MINIK = (function(){
 
   function sonra(mk, ms){ clearTimeout(mk.zaman); mk.zaman = setTimeout(() => yasat(mk), ms); }
 
-  const HALLER = ['is-bakiyor', 'is-kirpiyor', 'is-hopluyor', 'is-oturuyor', 'is-uyuyor', 'is-uyaniyor', 'is-konusuyor', 'is-gidik', 'is-selam', 'is-tepin', 'is-esniyor'];
+  const HALLER = ['is-bakiyor', 'is-kirpiyor', 'is-hopluyor', 'is-oturuyor', 'is-uyuyor', 'is-uyaniyor', 'is-konusuyor', 'is-gidik', 'is-selam', 'is-tepin', 'is-esniyor', 'is-kasiniyor', 'is-silkiniyor', 'is-dans'];
   /* Kısa süren ek hâl (el sallama, kalp): hâlin üstüne biner, kendiliğinden düşer. */
   function ekHal(mk, h, ms){ mk.el.classList.add(h); setTimeout(() => mk.el.classList.remove(h), ms); }
   function temizle(mk){ HALLER.forEach(h => mk.el.classList.remove(h)); }
@@ -315,9 +340,14 @@ window.LIFEOS.MINIK = (function(){
     if(r < uyku + otur){ hal(mk, 'is-oturuyor'); return sonra(mk, 6000 + Math.random() * 7000); }
     const s = r - uyku - otur;
     if(ne === 'uykulu' && s < .25){ hal(mk, 'is-esniyor'); return sonra(mk, 2600 + Math.random() * 2000); }
-    const hop = ne === 'mutlu' ? .62 : ne === 'uzgun' ? .34 : .42;
-    hal(mk, s < .2 ? 'is-bakiyor' : s < .34 ? 'is-kirpiyor' : s < hop ? 'is-hopluyor' : '');
-    sonra(mk, 2200 + Math.random() * 4200);
+    /* Küçük işler: kaşınma, silkinme; mutlu ya da neşeli olan dans eder. */
+    const hop = ne === 'mutlu' ? .5 : ne === 'uzgun' ? .3 : .38;
+    const dans = ne === 'mutlu' || mk.huy === 'neseli' ? .12 : 0;
+    const is = s < .2 ? 'is-bakiyor' : s < .3 ? 'is-kirpiyor' : s < hop ? 'is-hopluyor'
+      : s < hop + .14 ? 'is-kasiniyor' : s < hop + .2 ? 'is-silkiniyor' : s < hop + .2 + dans ? 'is-dans' : '';
+    if(is === 'is-dans') mk.el.querySelector('.minik__balon').textContent = '♪';
+    hal(mk, is);
+    sonra(mk, (is === 'is-kasiniyor' || is === 'is-dans' ? 2700 : 2200) + Math.random() * 4200);
   }
 
   /* Sohbet: ikisi birbirine döner, sırayla balon açar. */
@@ -476,6 +506,46 @@ window.LIFEOS.MINIK = (function(){
     }, 720);
   }
 
+  /* Sayı değişince: fazlası iner, eksiği kadronun sıradakiyle görünen bir
+     kenara konur (sayfayı yeniden açmadan). */
+  function sayiUygula(){
+    if(!durum.kat) return;
+    const n = simdikiSayi();
+    while(durum.minikler.length > n){
+      const mk = durum.minikler.pop();
+      clearTimeout(mk.zaman); if(mk.anim) mk.anim.cancel();
+      mk.el.remove();
+    }
+    if(durum.minikler.length >= n) return;
+    const k = kadro(durum.sayfa, n);
+    durum.zeminler = olcum();
+    for(let i = durum.minikler.length; i < n; i++){
+      const mk = minikYap(i);
+      giydir(mk, KISILER[k[i]]);
+      durum.kat.appendChild(mk.el); durum.minikler.push(mk);
+      if(yerlestir(mk)) sonra(mk, 1200 + i * 900);
+    }
+  }
+  function ayarla(n){
+    try{ localStorage.setItem(ANAHTAR, String(n)); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    const s = simdikiSayi();
+    document.querySelectorAll('[data-minik-sec]').forEach(b => {
+      const on = Number(b.getAttribute('data-minik-sec')) === s;
+      b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    sayiUygula();
+    return s;
+  }
+  if(typeof document !== 'undefined'){
+    document.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-minik-sec]') : null;
+      if(!b) return;
+      e.preventDefault();
+      ayarla(Number(b.getAttribute('data-minik-sec')));
+    });
+    window.addEventListener('storage', e => { if(e.key === ANAHTAR) sayiUygula(); });
+  }
+
   /* İki ölçüm: biri hemen, biri kartların giriş animasyonu bittikten sonra. */
   let ikinci = 0;
   function iste(){
@@ -575,9 +645,8 @@ window.LIFEOS.MINIK = (function(){
     kat.setAttribute('aria-hidden', 'true');
     document.body.appendChild(kat);
     durum.kat = kat;
-    const en = window.innerWidth || 1024;
-    const sayi = en < 680 ? 1 : en < 1100 ? 2 : 3;
-    for(let i = 0; i < sayi; i++){ const mk = minikYap(i); kat.appendChild(mk.el); durum.minikler.push(mk); }
+    const n = simdikiSayi();
+    for(let i = 0; i < n; i++){ const mk = minikYap(i); kat.appendChild(mk.el); durum.minikler.push(mk); }
     durum.sayfa = document.documentElement.dataset.sayfa || '';
     const ilk = kadro(durum.sayfa, durum.minikler.length);
     durum.minikler.forEach((mk, i) => giydir(mk, KISILER[ilk[i]]));
@@ -618,6 +687,6 @@ window.LIFEOS.MINIK = (function(){
     else window.addEventListener('load', () => setTimeout(kur, 60));
   }
 
-  return { kur, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh,
+  return { kur, sayi, seciciHtml, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh,
     KISILER, HUY_AD, RUH, RUH_AD, KART, EN_AZ, PAY };
 })();

@@ -511,7 +511,8 @@ window.LIFEOS = window.LIFEOS || {};
        hisirti  beyaz gürültü, bant süzgeci (dokunuşun «tık»ı, sayfa hışırtısı)
        ses      testere dişi → iki bant süzgeci (ünlü formantı): miniğin sesi
      Alanlar: t gecikme sn · f [başlangıç, bitiş] Hz · d süre sn · g tepe
-     kazanç · a yükselme sn · suz süzgeç Hz · q · oda yankı payı · un ünlü.
+     kazanç · a yükselme sn · suz süzgeç Hz · q · oda yankı payı · un ünlü ·
+     vib [hız Hz, derinlik oranı] titreşim.
      Hepsi ortak bir çıkıştan geçer: kısa oda yankısı (üretilmiş, dosya yok)
      ve yumuşak bir sıkıştırıcı — sesler aynı odada çalıyor gibi durur,
      üst üste binince patlamaz. Her çalışta perde ±%2 oynar: aynı tık art
@@ -538,18 +539,22 @@ window.LIFEOS = window.LIFEOS || {};
     /* Sayfa açılınca: camın üstünden geçen hava — alçaktan yükselen yumuşak hışırtı. */
     sayfa:[{ t:0, tur:'hisirti', f:[280, 1000], q:0.7, d:0.3, g:0.22, a:0.12, oda:0.25 },
            { t:0.16, tur:'ton', dalga:'sine', f:[784, 784], d:0.3, g:0.035, a:0.02, oda:0.4 }],
-    /* Miniğe dokununca kıkırdama: «hi-hi-hi», yükselen kısa heceler. */
-    gidik:[{ t:0, tur:'ses', un:'i', f:[520, 600], d:0.07, g:0.08, a:0.008 },
-           { t:0.085, tur:'ses', un:'i', f:[570, 650], d:0.07, g:0.075, a:0.008 },
-           { t:0.17, tur:'ses', un:'e', f:[620, 720], d:0.07, g:0.07, a:0.008 },
-           { t:0.26, tur:'ses', un:'i', f:[680, 820], d:0.1, g:0.065, a:0.008, oda:0.15 }],
-    /* Kızan minik: alçak, inen bir homurtu («hıh!»). */
-    hirr: [{ t:0, tur:'ses', un:'o', f:[240, 180], d:0.13, g:0.11, a:0.01 },
-           { t:0.15, tur:'ses', un:'u', f:[210, 150], d:0.16, g:0.09, a:0.01 }],
-    /* Minik sohbeti («bla bla»): alçak, inip çıkan üç hece; arkada kalır. */
-    bla:  [{ t:0, tur:'ses', un:'a', f:[300, 340], d:0.09, g:0.07, a:0.01 },
-           { t:0.12, tur:'ses', un:'o', f:[350, 300], d:0.09, g:0.07, a:0.01 },
-           { t:0.24, tur:'ses', un:'e', f:[320, 380], d:0.11, g:0.06, a:0.01, oda:0.1 }],
+    /* MİNİK SESLERİ, üçüncü tur (2026-10-28, «çok daha minnoş»): ince,
+       kısa, titrek. Küçük bir ağızdan çıkan sinüs «cıvıltı» + altında
+       hafif ünlü (ses); perde hecede yukarı kıvrılır, vibrato titretir. */
+    /* Gıdıklanınca kıkırdama: «hi-hi-hi-hiii», her hece biraz daha ince. */
+    gidik:[{ t:0, tur:'ton', dalga:'sine', f:[880, 1180], d:0.06, g:0.12, a:0.004, vib:[14, 0.03] },
+           { t:0, tur:'ses', un:'i', f:[600, 760], d:0.06, g:0.05, a:0.006 },
+           { t:0.09, tur:'ton', dalga:'sine', f:[940, 1260], d:0.06, g:0.11, a:0.004, vib:[14, 0.03] },
+           { t:0.18, tur:'ton', dalga:'sine', f:[1000, 1320], d:0.06, g:0.1, a:0.004, vib:[14, 0.03] },
+           { t:0.28, tur:'ton', dalga:'sine', f:[1060, 1400], d:0.11, g:0.09, a:0.004, vib:[9, 0.04], oda:0.15 }],
+    /* Kızan minik: burnundan «hım-fff» — homurtu ama ince, titreyerek iner. */
+    hirr: [{ t:0, tur:'ses', un:'u', f:[420, 360], d:0.09, g:0.09, a:0.008 },
+           { t:0.12, tur:'ton', dalga:'sine', f:[520, 330], d:0.13, g:0.1, a:0.006, vib:[11, 0.05] }],
+    /* Minik sohbeti: üç kısa, ezgili hece («ba-bu-bi»); arkada kalır. */
+    bla:  [{ t:0, tur:'ses', un:'a', f:[560, 660], d:0.075, g:0.07, a:0.006, vib:[8, 0.03] },
+           { t:0.1, tur:'ses', un:'o', f:[640, 560], d:0.075, g:0.07, a:0.006 },
+           { t:0.2, tur:'ses', un:'e', f:[600, 720], d:0.09, g:0.06, a:0.006, vib:[8, 0.04], oda:0.1 }],
   });
   /* Küçük bir ağızdan ünlüler: [F1, F2] Hz; F2 2 kHz'de kesilir (tizlik yok). */
   const UNLU = Object.freeze({ a:[800, 1250], e:[500, 1700], i:[350, 1900], o:[550, 900], u:[380, 780] });
@@ -679,6 +684,14 @@ window.LIFEOS = window.LIFEOS || {};
     }
     kaynak.start(t);
     kaynak.stop(t + k.d + 0.03);
+    /* Titreşim: perdeyi oran kadar oynatan yavaş osilatör (kaynaktan sonra başlar). */
+    if(k.vib && kaynak.frequency){
+      const l = c.createOscillator(), lg = c.createGain();
+      l.frequency.setValueAtTime(k.vib[0], t);
+      lg.gain.value = f0 * k.vib[1];
+      l.connect(lg); lg.connect(kaynak.frequency);
+      l.start(t); l.stop(t + k.d + 0.03);
+    }
   }
 
   /* Döner: çaldı mı. `kur` yoksa yalnız kurulu bağlam kullanılır.

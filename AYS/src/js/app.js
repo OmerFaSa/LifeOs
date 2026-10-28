@@ -472,6 +472,8 @@ R.App = (function(){
         ${raw(window.LIFEOS.ANIMASYON ? LIFEOS.ANIMASYON.seciciHtml() : '')}
         <div class="appear__label">Zemin</div>
         ${raw(window.LIFEOS.ZEMIN ? LIFEOS.ZEMIN.seciciHtml() : '')}
+        <div class="appear__label">Minikler</div>
+        ${raw(window.LIFEOS.MINIK ? LIFEOS.MINIK.seciciHtml() : '')}
         <div class="appear__label">Yüzey · bu modül</div>
         ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.yuzeySeciciHtml ? LIFEOS.ZEMIN.yuzeySeciciHtml() : '')}
 

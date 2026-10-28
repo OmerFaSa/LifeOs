@@ -164,6 +164,35 @@
     });
   });
 
+  /* Kullanıcı (2026-10-28): «bir sayfada görünebilecek sayıyı
+     değiştirebilelim». Görünüm › Minikler: Yok, 1–6; seçilmemişse ekran
+     genişliği karar verir (telefon 1, tablet 2, masaüstü 3). */
+  describe('Minik · sayfadaki sayı', () => {
+    it('tercih yoksa ekrana göre; 0–6 tercihi olduğu gibi; bozuk tercih yok sayılır', () => {
+      expect(C.sayi(null, 400)).toBe(1);
+      expect(C.sayi(null, 900)).toBe(2);
+      expect(C.sayi(null, 1400)).toBe(3);
+      expect(C.sayi('0', 1400)).toBe(0);
+      expect(C.sayi('6', 400)).toBe(6);
+      expect(C.sayi('4', 900)).toBe(4);
+      expect(C.sayi('9', 1400)).toBe(3);
+      expect(C.sayi('x', 400)).toBe(1);
+      expect(C.EN_COK).toBe(C.KISILER.length);
+    });
+    it('seçici: Yok ve 1–6; yalnız seçili olan basılı', () => {
+      const d = document.createElement('div');
+      d.innerHTML = C.seciciHtml(2);
+      const b = [...d.querySelectorAll('[data-minik-sec]')];
+      expect(b.map(x => x.getAttribute('data-minik-sec')).join()).toBe('0,1,2,3,4,5,6');
+      expect(b[0].textContent).toBe('Yok');
+      expect(b.filter(x => x.getAttribute('aria-pressed') === 'true').map(x => x.getAttribute('data-minik-sec')).join()).toBe('2');
+      expect(d.firstElementChild.getAttribute('aria-label')).toBe('Minikler');
+    });
+    it('tercih modüller arasında taşınır', () => {
+      expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(C.ANAHTAR) >= 0).toBe(true);
+    });
+  });
+
   describe('Minik · kurulum', () => {
     it('kabuk yokken (test sayfası) katman kurulmaz', () => {
       C.kur();

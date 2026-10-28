@@ -325,13 +325,14 @@
       const kayit = { kurulan:0, nota:[], gurultu:[], filtre:[], sikistirici:0, yanki:0, saat:0, tepe:0 };
       const param = () => ({ value:0, setValueAtTime(){}, linearRampToValueAtTime(){},
         exponentialRampToValueAtTime(v){ kayit.tepe = Math.max(kayit.tepe, v); } });
-      const dugum = o => Object.assign({ connect(){ return {}; } }, o);
+      /* Osilatörün frekansına bağlanan düğüm titreşimdir (vibrato LFO'su). */
+      const dugum = o => Object.assign({ connect(h){ if(h && h.sahip) h.sahip.vibrato = true; return {}; } }, o);
       function Baglam(){
         kayit.kurulan++;
         Object.defineProperty(this, 'currentTime', { get:() => kayit.saat });
         this.state = 'running'; this.destination = {}; this.sampleRate = 8000;
         this.createOscillator = () => {
-          const o = dugum({ type:'', frequency:{ setValueAtTime(f){ o.f0 = f; }, exponentialRampToValueAtTime(f){ o.f1 = f; } },
+          const o = dugum({ type:'', frequency:{ setValueAtTime(f){ o.f0 = f; }, exponentialRampToValueAtTime(f){ o.f1 = f; }, get sahip(){ return o; } },
             start(t){ o.t = t; kayit.nota.push(o); }, stop(){} });
           return o;
         };
@@ -424,11 +425,31 @@
       });
     });
 
+    /* Kullanıcı (2026-10-28, üçüncü tur): «sesleri çok daha minnoş yap».
+       Minnoş: ince (küçük ağız), kısa heceler, kıvrılan perde (titrek
+       vibrato) — homurtu bile alçak bir hırıltı değil, burundan «hımf». */
+    it('minik sesleri minnoş: ince, kısa heceli, titrek; homurtu da ince', () => {
+      ['gidik', 'bla', 'hirr'].forEach(ad => {
+        const l = S.SESLER[ad];
+        const ort = l.reduce((t, k) => t + k.f[0], 0) / l.length;
+        expect(ort >= (ad === 'hirr' ? 330 : 480)).toBe(true);
+        l.forEach(k => expect(k.d <= 0.14).toBe(true));
+        expect(l.some(k => k.vib && k.vib[0] >= 6 && k.vib[1] > 0 && k.vib[1] <= 0.08)).toBe(true);
+      });
+      const { Baglam, kayit } = sahteBaglam();
+      return ortamla({ AudioContext:Baglam, sentetik:true }, () => {
+        S.tikAc(true);
+        kayit.saat += 3; kayit.nota.length = 0;
+        expect(S.tik('gidik', true)).toBe(true);
+        expect(kayit.nota.some(n => n.vibrato)).toBe(true);
+      });
+    });
+
     it('minik sesi: gıdık ve sohbet ünlü süzgecinden (formant) geçer; perde sesin tonunu taşır', () => {
       const { Baglam, kayit } = sahteBaglam();
       return ortamla({ AudioContext:Baglam, sentetik:true }, () => {
         S.tikAc(true);
-        expect(S.SESLER.gidik.every(k => k.tur === 'ses' && k.un)).toBe(true);
+        expect(S.SESLER.gidik.some(k => k.tur === 'ses' && k.un)).toBe(true);
         expect(S.SESLER.bla.every(k => k.tur === 'ses' && k.un)).toBe(true);
         kayit.nota.length = 0; kayit.filtre.length = 0;
         S.tik('bla');
