@@ -16415,7 +16415,8 @@ html[data-zemin="yumusak"] .site--v5 .kenar__logo b{ box-shadow:0 0 6px -1px cur
   html[data-zemin="yumusak"] .site--v5 .kenar__logo b:nth-child(3){ animation-delay:.36s; }
   html[data-zemin="yumusak"] .site--v5 .kenar__logo b:nth-child(4){ animation-delay:.54s; }
 }
-@keyframes logo-nabiz{ 0%, 100%{ filter:brightness(1); } 50%{ filter:brightness(1.15) saturate(1.1); } }
+/* opacity: GPU'da döner; filter (brightness) her karede ana iş parçacığında hesaplanıyordu (2026-10-29). */
+@keyframes logo-nabiz{ 0%, 100%{ opacity:1; } 50%{ opacity:.78; } }
 @keyframes logo-isil{ 0%, 82%, 100%{ filter:none; } 88%{ filter:brightness(1.35) saturate(1.15); } }
 
 /* Ajan avatarının gözüne parıltı: daha canlı, daha minnoş. */
@@ -19492,7 +19493,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'c9898c7b', at:'2026-10-28 22:11', dirty:true };
+SP.BUILD = { id:'6ed3c2e6', at:'2026-10-28 22:46', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -81105,15 +81106,18 @@ SP.Tahmin = (function(){
     return o;
   }
   /* Etiketli günler: Günün hissi (soreness 1–5, senin beyanın). */
-  function veriSeti(gunSayisi){
+  function etiketler(gunSayisi){
     const U = SP.U, out = [];
     for(let i = (gunSayisi || 365) - 1; i >= 0; i--){
       const d = U.iso(U.addDays(U.today(), -i));
       const v = SP.S.vitals[d];
       if(!v || v.soreness == null || !isFinite(Number(v.soreness))) continue;
-      out.push({ tarih:d, x:gunOzellik(d), y:Number(v.soreness) });
+      out.push({ tarih:d, y:Number(v.soreness) });
     }
     return out;
+  }
+  function veriSeti(gunSayisi){
+    return etiketler(gunSayisi).map(r => ({ tarih:r.tarih, x:gunOzellik(r.tarih), y:r.y }));
   }
 
   /* ------------------------------------------------------------- modeller */
@@ -81240,14 +81244,16 @@ SP.Tahmin = (function(){
     };
   }
 
-  /* Ekran ve King için: etiketli günler değişmedikçe yeniden eğitilmez. */
+  /* Ekran ve King için: etiketli günler değişmedikçe yeniden eğitilmez.
+     Anahtar yalnız etiketten (ucuz); özellik (öğün, besin toplamı) yalnız
+     anahtar değişince hesaplanır — durum() her çizimde çağrılır. */
   let onbellek = null;
   function durum(){
-    const veri = veriSeti(365);
+    const veri = etiketler(365);
     const imza = SP.U.todayISO() + '|' + veri.length + '|' + veri.map(r => r.tarih + r.y).join(',').length
       + '|' + veri.reduce((a, r) => a + r.y, 0) + '|' + Object.keys(dis).map(k => k + Object.keys(dis[k]).length).join(',');
     if(onbellek && onbellek.imza === imza) return onbellek.sonuc;
-    const m = egit(veri);
+    const m = egit(veri.map(r => ({ tarih:r.tarih, x:gunOzellik(r.tarih), y:r.y })));
     const sonuc = m.ok ? Object.assign({}, m, { bugun:m.iyi ? m.tahminEt(gunOzellik(SP.U.todayISO())) : null }) : m;
     onbellek = { imza, sonuc };
     return sonuc;
