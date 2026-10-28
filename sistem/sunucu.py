@@ -52,6 +52,7 @@
       yalniz bu bilgisayardan kurulur.
 """
 
+import hashlib
 import html
 import json
 import os
@@ -192,6 +193,48 @@ def _ortak_dist_yolu(clean, kok):
 # SEVIYE:yol-bit
 
 
+# Guncel tek dosya (2026-10-29, kullanici: «yuklenme gecikiyor»). Kapinin
+# kokunden src/index.html ~230 ayri istekti (tarayici bir kokene alti
+# baglanti acar: kabuk ~1,2-1,4 sn); dist uc istektir (~0,33 sn). build.py
+# dist'in yanina hangi kaynaklardan derlendigini yazar (dist/kaynak.json:
+# dosya basina sha256, satir sonu esitlenmis — Windows'ta git CRLF'e cevirir).
+# Kok dist'i YALNIZ listedeki her kaynak ayniysa sunar; degil ya da liste
+# yoksa/bozuksa src (kural 2: eski surum calismaz). Imza mtime+boyut
+# degismedikce yeniden hesaplanmaz. Test: tools/dist_sun_test.py
+_IMZA = {}
+
+
+def _dosya_imzasi(yol):
+    st = os.stat(yol)
+    anahtar = (st.st_mtime_ns, st.st_size)
+    eski = _IMZA.get(yol)
+    if eski and eski[0] == anahtar:
+        return eski[1]
+    with open(yol, encoding="utf-8", newline=None) as f:
+        imza = hashlib.sha256(f.read().encode("utf-8")).hexdigest()
+    _IMZA[yol] = (anahtar, imza)
+    return imza
+
+
+def _guncel_dist(repo):
+    """Kaynakla ayni derlenmis dist dosyasinin yolu; degilse None."""
+    try:
+        with open(os.path.join(repo, "dist", "kaynak.json"), encoding="utf-8") as f:
+            liste = json.load(f)
+        ad = _guvenli_medya_adi(str(liste["dosya"]), (".html",))
+        kaynak = liste["kaynak"]
+        if not ad or not isinstance(kaynak, dict) or not kaynak:
+            return None
+        src = os.path.join(repo, "src")
+        for rel, imza in kaynak.items():
+            if _dosya_imzasi(os.path.join(src, rel)) != imza:
+                return None
+        dist = os.path.join(repo, "dist", ad)
+        return dist if os.path.isfile(dist) else None
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        return None
+
+
 class Sunucu(SimpleHTTPRequestHandler):
     """Bir sistemin src/ klasoru.
 
@@ -209,6 +252,10 @@ class Sunucu(SimpleHTTPRequestHandler):
 
     def translate_path(self, path):
         clean = path.split("?", 1)[0].split("#", 1)[0]
+        if clean in ("/", "/index.html"):
+            dist = _guncel_dist(self.repo)
+            if dist:
+                return dist
         ortak = (_ortak_seviye_yolu(clean, KOK)
                  or _ortak_marka_yolu(clean, KOK))
         return ortak or _ortak_dist_yolu(clean, self.repo) or super().translate_path(path)

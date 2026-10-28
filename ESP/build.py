@@ -12,6 +12,8 @@ Kullanim:
 """
 
 import base64
+import hashlib
+import json
 import re
 import shutil
 import sys
@@ -109,13 +111,13 @@ def inline_css(html: str, minify: bool):
 
     html = re.sub(r'\s*<link rel="stylesheet" href="(?!https)([^"]+)"\s*/?>', collect, html)
     if not files:
-        return html, []
+        return html, [], []
     blocks = []
     for rel in files:
         body = read(rel).strip()
         blocks.append(minify_css(body) if minify else f"/* ==== {rel} ==== */\n{body}")
     joiner = "" if minify else "\n\n"
-    return html, ["<style>\n" + joiner.join(blocks) + "\n</style>"]
+    return html, ["<style>\n" + joiner.join(blocks) + "\n</style>"], files
 
 
 def inline_js(html: str, minify: bool):
@@ -329,7 +331,7 @@ def build(minify: bool = False, denetle: bool = False):
     font_links = re.findall(r'<link[^>]+fonts\.(?:googleapis|gstatic)\.com[^>]*>', html)
     telefon_etiketleri = ikonu_gom(pwa_etiketleri(html))
 
-    html, style_blocks = inline_css(html, minify)
+    html, style_blocks, css_files = inline_css(html, minify)
     html, script_blocks, js_files = inline_js(html, minify)
 
     body_match = re.search(r"<body[^>]*>(.*?)</body>", html, re.S)
@@ -356,10 +358,12 @@ def build(minify: bool = False, denetle: bool = False):
     output = "\n".join(parts) + "\n"
 
     out_path = DIST / "esp.html"
+    liste = kaynak_listesi(out_path.name, ["index.html"] + css_files + js_files)
     if denetle:
-        return denetle_dist(out_path, output)
+        return denetle_dist(out_path, output) or denetle_liste(liste)
     DIST.mkdir(exist_ok=True)
     out_path.write_text(output, encoding="utf-8")
+    (DIST / "kaynak.json").write_text(liste, encoding="utf-8")
     copy_brand_assets()
     copy_level_assets()
     copy_service_worker()
@@ -369,6 +373,25 @@ def build(minify: bool = False, denetle: bool = False):
     print(f"OK   {out_path}  [{mode}]")
     print(f"     {len(js_files)} js modulu, {output.count(chr(10))+1} satir, {size_kb:,.0f} KB")
     print(f"     damga {damga}")
+
+
+def kaynak_listesi(ad: str, dosyalar: list) -> str:
+    """dist/kaynak.json: dist hangi kaynaklardan derlendi (dosya basina sha256,
+    satir sonu esitlenmis). sistem/sunucu.py kapinin kokunde dist'i yalniz
+    bunlarin hepsi ayniysa sunar (230 istek yerine 3; tools/dist_sun_test.py)."""
+    kaynak = {rel: hashlib.sha256(read(rel).encode("utf-8")).hexdigest() for rel in dosyalar}
+    return json.dumps({"dosya": ad, "kaynak": kaynak}, ensure_ascii=False, indent=0, sort_keys=True) + "\n"
+
+
+def denetle_liste(liste: str) -> int:
+    try:
+        mevcut = (DIST / "kaynak.json").read_text(encoding="utf-8")
+    except FileNotFoundError:
+        mevcut = None
+    if mevcut == liste:
+        return 0
+    print("KIRMIZI  dist/kaynak.json kaynakla ayni degil; python3 build.py kos.")
+    return 1
 
 
 def denetle_dist(out_path, output: str) -> int:

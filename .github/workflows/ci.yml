@@ -170,6 +170,12 @@ jobs:
       - name: Sunucular bekleyen bağlantıyı reddetmez
         run: python3 tools/kuyruk_test.py
 
+      # GÜNCEL TEK DOSYA. Modül kapısının kökü dist'i yalnız kaynaklar
+      # aynıysa sunar (230 istek yerine 3); değilse src. dist/kaynak.json
+      # build.py'den, denetimi build.py --denetle'de de.
+      - name: Modül kapısı yalnız güncel dist'i sunar
+        run: python3 tools/dist_sun_test.py
+
       # TELEFON (ev ağı + https). Sertifika yokken hiçbir kapı ev ağına
       # açılmaz; varsa üç modül https ile açılır, kurulum sayfası özel
       # anahtarı ve depo dosyalarını asla vermez. Geçici klasörde koşar.
