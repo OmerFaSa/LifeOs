@@ -231,6 +231,15 @@
       const yanda = C.zeminler([{ sol:0, ust:100, alt:300, genis:300 }, { sol:420, ust:304, alt:500, genis:300 }]);
       expect(yanda.length).toBe(2);
     });
+
+    /* Kullanıcı (2026-10-28, ekran görüntüsü): dar pencerede yapışık bölüm
+       bandı (buzlu cam, z 29) ilk kartın 20 px üstünde; minik orada bandın
+       arkasında kalıp başı ve adı kesiliyordu. Engel zemin olmaz ama
+       altındaki kenarı sıkıştırır. */
+    it('yapışık bant engeldir: kendisi zemin olmaz, hemen altındaki kenarı da kapatır', () => {
+      const z = C.zeminler([{ sol:0, ust:80, alt:122, genis:600, engel:true }, { sol:0, ust:142, alt:400, genis:600 }, { sol:0, ust:460, alt:700, genis:600 }]);
+      expect(z.map(x => x.y).join()).toBe('460');
+    });
   });
 
   /* Kullanıcı (2026-10-28): «radyo açarsak minikler dans etsin, hepsi chill,

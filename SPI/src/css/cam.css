@@ -1195,3 +1195,6 @@ html[data-zemin="yumusak"] .site--v5 .empty .btn--sm{ min-height:30px; padding:0
 /* Sayfa bölümünün içindeki defter satırı kart.css'in iç boşluk yolunun
    dışında kalır; cam onu kart gibi boyadığı için yazı kenara dayanıyordu. */
 html[data-zemin="yumusak"] .site--v5 .ledger .sayfabolum .lrow:not(.kahraman){ padding-inline:20px; }
+/* Ferah yüzeyde kart zeminsizdir: el ışığı orada havada asılı köşeli bir
+   kutu gibi kalıyordu (26 kart, üç modül). Zemin yoksa ışık da yok. */
+html[data-zemin="yumusak"][data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card, .donen)::after{ background:none; }

@@ -168,7 +168,7 @@ window.LIFEOS.MINIK = (function(){
     const sikisik = k => kutular.some(o => o !== k && o.alt != null && o.alt <= k.ust + 1 && k.ust - o.alt < UST_BOS
       && o.sol < k.sol + k.genis && o.sol + o.genis > k.sol);
     return kutular
-      .filter(k => k.genis >= EN_AZ && !sikisik(k))
+      .filter(k => !k.engel && k.genis >= EN_AZ && !sikisik(k))
       .map(k => ({ x1:k.sol + PAY, x2:k.sol + k.genis - PAY, y:k.ust, el:k.el }))
       .sort((a, b) => a.y - b.y || a.x1 - b.x1);
   }
@@ -338,6 +338,11 @@ window.LIFEOS.MINIK = (function(){
       const once = el.previousElementSibling;
       if(once && once.matches && once.matches('.lrow') && Math.abs(once.getBoundingClientRect().bottom - r.top) < 3) return;
       kutular.push({ sol:r.left + sx, ust:r.top + sy, alt:r.bottom + sy, genis:r.width, el });
+    });
+    /* Yapışık bölüm bandı minigin ustundedir (z 29): altındaki kenar zemin olmaz. */
+    document.querySelectorAll('.bolumcubugu--kabuk').forEach(el => {
+      const r = el.getBoundingClientRect();
+      if(r.width && r.height) kutular.push({ sol:r.left + sx, ust:r.top + sy, alt:r.bottom + sy, genis:r.width, el, engel:true });
     });
     return zeminler(kutular);
   }
