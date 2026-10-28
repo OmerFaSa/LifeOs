@@ -3188,4 +3188,31 @@
       expect(!!a.querySelector('.minik[data-tip="tac"] .minik__govde')).toBe(true);
     }));
   });
+
+  /* Kullanıcı (2026-10-28): «King konuşmaya başladığında o olsun; bazen
+     konuşurken yürüsün, düşünsün, yatsın, ayaklarını aşağı uzatsın; grafik
+     çıkarsın; türlü eşyalar ekle». */
+  describe('King — arkadaş konuşurken', () => {
+    it('konuşurken poz türlü: dur, yürü, otur (ayaklar aşağı), uzan', () => {
+      const k = K();
+      const p = [0, .3, .55, .8].map(r => k.arkadasPoz(() => r));
+      expect(p.join()).toBe('dur,yuru,otur,uzan');
+    });
+    it('eşyayı cevap seçer: veri kartı grafik, araştırma büyüteç, kayıt önizlemesi not; yoksa kahve ya da ampul olabilir', () => {
+      const k = K();
+      expect(k.arkadasEsya({ kartlar:[{}] }, () => .9)).toBe('grafik');
+      expect(k.arkadasEsya({ satirlar:['a'] }, () => .9)).toBe('grafik');
+      expect(k.arkadasEsya({ arastirma:{} }, () => .9)).toBe('buyutec');
+      expect(k.arkadasEsya({ onizleme:{ metin:'x' } }, () => .9)).toBe('not');
+      expect(k.arkadasEsya({}, () => .1)).toBe('ampul');
+      expect(k.arkadasEsya({}, () => .3)).toBe('kahve');
+      expect(k.arkadasEsya({}, () => .9)).toBe('');
+    });
+    it('küçük King de arkadaşı taşır', () => sahneyle(async () => {
+      if(!window.LIFEOS.MINIK) return;
+      const { k } = sahne();
+      k.ac({ mini:true });
+      expect(!!document.querySelector('.king__yaz .king__arkadas .minik')).toBe(true);
+    }));
+  });
 })();

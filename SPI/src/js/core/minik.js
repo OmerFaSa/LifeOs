@@ -69,8 +69,65 @@ window.LIFEOS.MINIK = (function(){
   ]);
   const HUY_AD = Object.freeze({ uykucu:'uykucu', konuskan:'konuşkan', merakli:'meraklı', neseli:'neşeli', hayalci:'hayalci', bilge:'bilge',
     utangac:'utangaç', tembel:'tembel', sarkici:'şarkıcı', oyuncu:'oyuncu', cesur:'cesur', sakar:'sakar' });
-  const BALON = Object.freeze(['hey!', '♪', '…', 'hı hı', 'ooo', '!?', 'hihi', '♡']);
-  const IS_BALON = Object.freeze(['rapor!', 'toplantı', 'kahve?', 'hı hı', 'tamamdır', 'not aldım', '…', 'harika']);
+  /* Sohbet senaryoları (kullanıcı, 2026-10-28: «aralarındaki konuşmaları
+     daha çeşitli yap»): soru–cevap; Ofis'in kendi işi, sabahın ve gecenin
+     kendi lafı. Her satır balona sığar (en çok 18 harf). */
+  const DIYALOG = Object.freeze({
+    genel:[['Hey!', 'Selam!'], ['Nasılsın?', 'Süperim!'], ['Bak, bulut!', 'Pofuduk!'], ['Oyun?', 'Olur!'],
+      ['Acıktım…', 'Kurabiye?'], ['Hihi', 'Ne gülüyorsun?'], ['Şarkı söyle', 'La la la ♪'], ['Sıkıldım', 'Zıplayalım!'],
+      ['Bugün güzel', 'Evet ya!'], ['Sır mı?', 'Kimseye deme'], ['Yarış?', 'Hazır… başla!'], ['Hmm?', 'Düşünüyorum'],
+      ['Bunu gördün mü?', 'Vay!', 'Değil mi?']],
+    ofis:[['Rapor hazır mı?', 'Az kaldı!'], ['Toplantı kaçta?', 'Beşte'], ['Kahve?', 'Çifte şekerli'], ['Plan nasıl?', 'Yolunda'],
+      ['Grafiğe bak', 'Yükseliyor!'], ['Not aldın mı?', 'Hepsini'], ['Patron geliyor', 'Çabuk çalış!'], ['Mola?', 'Beş dakika'],
+      ['Hedef?', 'Tutturacağız'], ['Yeni görev', 'Hallederim'], ['Veri geldi', 'Bakıyorum'], ['Harika iş', 'Sağ ol!'],
+      ['Sunum hazır', 'Göster bakalım', 'Bayıldım!']],
+    sabah:[['Günaydın!', 'Günaydın ☀'], ['Kahvaltı?', 'Simit!'], ['Erken kalktın', 'Yeni gün!']],
+    gece:[['İyi geceler', 'Tatlı rüyalar'], ['Uykum var…', 'Bende de'], ['Yıldızlar!', 'Ne güzel']]
+  });
+  function diyalogSec(ofis, saat, rnd){
+    const r = rnd(), sec = l => l[Math.min(l.length - 1, Math.floor(rnd() * l.length))];
+    if((saat >= 22 || saat < 5) && r < .4) return sec(DIYALOG.gece);
+    if(saat >= 5 && saat < 11 && r < .4) return sec(DIYALOG.sabah);
+    return sec(ofis && r < .7 ? DIYALOG.ofis : DIYALOG.genel);
+  }
+  /* Eşya: Ofis çalışanı gezerken arada elinde bir şey taşır; King'in
+     arkadaşı cevaba göre seçer (büyüteç, ampul de). */
+  const ESYALAR = Object.freeze(['kahve', 'not', 'grafik', 'buyutec', 'ampul']);
+  function esyaSec(mk, rnd){
+    if(!mk || !mk.ofis) return '';
+    const r = rnd();
+    return r < 1 / 3 ? 'kahve' : r < 2 / 3 ? 'not' : 'grafik';
+  }
+
+  /* Ses ayarı (kullanıcı, 2026-10-28: «yürüme sesi, konuşma sesi gibi
+     olayları ayarlardan ayarlayabilelim»): Görünüm › Minik sesleri. */
+  const SES_ANAHTAR = 'lifeos.minik.ses';
+  const SES_TUR = Object.freeze({ adim:'adim', bla:'konusma', hirr:'konusma', gidik:'gidik' });
+  const SES_AD = Object.freeze({ adim:'Adım', konusma:'Konuşma', gidik:'Gıdık' });
+  function sesAyar(){
+    let d = null;
+    try{ d = JSON.parse(localStorage.getItem(SES_ANAHTAR) || 'null'); }catch(e){ d = null; }
+    const a = {};
+    Object.keys(SES_AD).forEach(k => { a[k] = !(d && d[k] === false); });
+    return a;
+  }
+  function sesAyarla(k, v){
+    const a = sesAyar();
+    if(!(k in a)) return a;
+    a[k] = !!v;
+    try{ localStorage.setItem(SES_ANAHTAR, JSON.stringify(a)); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    if(typeof document !== 'undefined') document.querySelectorAll('[data-minik-ses="' + k + '"]').forEach(b => {
+      b.classList.toggle('is-on', a[k]); b.setAttribute('aria-pressed', a[k] ? 'true' : 'false');
+    });
+    return a;
+  }
+  function sesIzinli(tur){ const k = SES_TUR[tur]; return !k || sesAyar()[k]; }
+  function sesSeciciHtml(){
+    const a = sesAyar();
+    return '<div class="seg seg--block miniksessec" role="group" aria-label="Minik sesleri">'
+      + Object.keys(SES_AD).map(k => '<button type="button" class="' + (a[k] ? 'is-on' : '') + '" data-minik-ses="' + k + '" aria-pressed="' + (a[k] ? 'true' : 'false') + '"'
+        + ' title="' + SES_AD[k] + ' sesi">' + SES_AD[k] + '</button>').join('') + '</div>';
+  }
 
   /* Ruh hâli (kullanıcı, 2026-10-28: «çok tıklarsak kızsın; üzgün, mutlu,
      uykulu olsunlar»). Kişi başına oturumda bellekte durur; hiçbir kayda
@@ -261,6 +318,7 @@ window.LIFEOS.MINIK = (function(){
      dokunduysa (ses bağlamı kuruluysa) çalar; sohbet kendiliğinden ses
      açmaz. Sekme arkadaysa ya da pencere odakta değilse minikler susar. */
   function ses(tur, mk, kur){
+    if(!sesIzinli(tur)) return;
     try{
       if(kur === false && (document.visibilityState === 'hidden' || (document.hasFocus && !document.hasFocus()))) return;
       const r = mk && mk.el.getBoundingClientRect();
@@ -325,7 +383,7 @@ window.LIFEOS.MINIK = (function(){
   const ICERIK = '<i class="minik__golge"></i><i class="minik__ayak minik__ayak--sol"></i><i class="minik__ayak minik__ayak--sag"></i>'
       + '<i class="minik__kol minik__kol--sol"></i><i class="minik__kol minik__kol--sag"></i>'
       + '<span class="minik__govde"><i class="minik__deri"></i><i class="minik__goz"></i><i class="minik__goz"></i>'
-      + '<i class="minik__agiz"></i><i class="minik__sus"></i><i class="minik__kravat"></i><i class="minik__kart"></i></span><span class="minik__balon"></span><span class="minik__zzz">z</span>'
+      + '<i class="minik__agiz"></i><i class="minik__sus"></i><i class="minik__kravat"></i><i class="minik__kart"></i><i class="minik__esya"></i></span><span class="minik__balon"></span><span class="minik__zzz">z</span>'
       + '<span class="minik__kalp">♡</span><span class="minik__ad"><b></b> · <i></i><small>Dokun, gıdıkla</small></span>';
 
   function minikYap(i){
@@ -403,6 +461,8 @@ window.LIFEOS.MINIK = (function(){
   function dinlen(mk){
     if(mesgulMu(mk)) return;
     const ne = ruhUygula(mk);
+    const esya = Math.random() < .3 ? esyaSec(mk, Math.random) : '';
+    if(esya) mk.el.dataset.esya = esya; else delete mk.el.dataset.esya;
     const r = Math.random();
     const uyku = durum.radyo ? 0 : ne === 'uykulu' ? .4 : mk.huy === 'uykucu' ? .22 : mk.huy === 'tembel' ? .16 : ne ? .02 : .06;
     const otur = durum.radyo ? .35 : ne === 'uzgun' ? .45 : mk.huy === 'tembel' ? .4 : mk.huy === 'merakli' ? .12 : .2;
@@ -426,11 +486,12 @@ window.LIFEOS.MINIK = (function(){
     [a, b].forEach(m => { clearTimeout(m.zaman); if(m.anim) m.anim.cancel(); mesgul(m, true); temizle(m); m.el.classList.remove('is-yuruyor'); });
     const solda = a.x < b.x ? a : b, sagda = solda === a ? b : a;
     solda.el.dataset.yon = 'sag'; sagda.el.dataset.yon = 'sol';
-    const sira = [a, b, a, b, a].slice(0, 3 + Math.floor(Math.random() * 3));
+    const sn = diyalogSec(a.ofis || b.ofis, new Date().getHours(), Math.random);
+    const sira = sn.map((_, i) => i % 2 ? b : a);
     sira.forEach((m, i) => zamanla(() => {
       if(!durum.kat || kapaliMi()) return;
       (m === a ? b : a).el.classList.remove('is-konusuyor');
-      m.el.querySelector('.minik__balon').textContent = rasgele(m.ofis ? IS_BALON : BALON);
+      m.el.querySelector('.minik__balon').textContent = sn[i];
       hal(m, 'is-konusuyor');
       ses('bla', m, false);
       if(i === 0) ekHal(m, 'is-selam', 900);
@@ -610,6 +671,8 @@ window.LIFEOS.MINIK = (function(){
   }
   if(typeof document !== 'undefined'){
     document.addEventListener('click', e => {
+      const t = e.target && e.target.closest ? e.target.closest('[data-minik-ses]') : null;
+      if(t){ e.preventDefault(); const k = t.getAttribute('data-minik-ses'); sesAyarla(k, !sesAyar()[k]); return; }
       const b = e.target && e.target.closest ? e.target.closest('[data-minik-sec]') : null;
       if(!b) return;
       e.preventDefault();
@@ -669,9 +732,17 @@ window.LIFEOS.MINIK = (function(){
   /* Basınca ışık parmağın altında toplanır; bırakınca yayılır. */
   function bas(e){ if(isikli && isikli.contains(e.target)) isikli.classList.add('isik-bas'); }
   function birak(){ if(isikli) isikli.classList.remove('isik-bas'); }
+  /* Ortam ışığı (kullanıcı, 2026-10-28: «ışık fiziğini geliştir»): zeminde
+     imleci yavaşça izleyen çok yumuşak bir ışık; yalnız transform (cam.css
+     «ORTAM IŞIĞI»), geçişi CSS yapar. */
+  function ortamIsigi(){
+    if(!durum.ortam || !imlec) return;
+    durum.ortam.style.transform = 'translate3d(' + Math.round(imlec.x) + 'px,' + Math.round(imlec.y) + 'px,0)';
+  }
   function gozler(){
     kare = 0;
     elIsigi();
+    ortamIsigi();
     durum.minikler.forEach(mk => {
       if(mk.el.hidden || mk.el.classList.contains('is-uyuyor')){ mk.el.classList.remove('is-takip'); return; }
       const r = mk.el.getBoundingClientRect();
@@ -713,6 +784,11 @@ window.LIFEOS.MINIK = (function(){
       }
       return;
     }
+    const ortam = document.createElement('div');
+    ortam.className = 'ortam-isik';
+    ortam.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(ortam);
+    durum.ortam = ortam;
     const kat = document.createElement('div');
     kat.className = 'minikkat';
     kat.setAttribute('aria-hidden', 'true');
@@ -763,6 +839,7 @@ window.LIFEOS.MINIK = (function(){
     else window.addEventListener('load', () => setTimeout(kur, 60));
   }
 
-  return { kur, sayi, seciciHtml, yanSes, radyoda, ofisKisileri, ICERIK, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh,
+  return { kur, sayi, seciciHtml, yanSes, radyoda, ofisKisileri, ICERIK, DIYALOG, diyalogSec, ESYALAR, esyaSec,
+    SES_ANAHTAR, sesAyar, sesAyarla, sesIzinli, sesSeciciHtml, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh,
     KISILER, HUY_AD, RUH, RUH_AD, KART, EN_AZ, PAY };
 })();

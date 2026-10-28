@@ -1079,7 +1079,7 @@ html[data-theme="dark"][data-zemin="yumusak"] .king:not(.is-mini) .king__yaz{ bo
 .king__yaz{ position:relative; }
 .king__arkadas{ position:absolute; right:110px; top:1px; width:0; height:0; z-index:2;
   --mod:oklch(.64 .15 292); }
-html:not([data-zemin="yumusak"]) .king__arkadas, .king.is-mini .king__arkadas{ display:none; }
+html:not([data-zemin="yumusak"]) .king__arkadas{ display:none; }
 .king__arkadas .minik{ --boy:50px; --ton:0; }
 .king__arkadas .minik__balon{ bottom:calc(100% + 18px); }
 .king__arkadas .minik__ad{ display:none; }
@@ -1104,3 +1104,83 @@ html:not([data-zemin="yumusak"]) .king__arkadas, .king.is-mini .king__arkadas{ d
 }
 @keyframes ka-gez{ 0%, 100%{ translate:0 0; } 42%, 50%{ translate:-150px 0; } 92%{ translate:0 0; } }
 @keyframes ka-uyku{ 0%, 100%{ transform:translateY(18%) rotate(-6deg) scale(1.08, .9); } 50%{ transform:translateY(17%) rotate(-6deg) scale(1.05, .93); } }
+
+/* 26) EŞYALAR, KING'İN POZLARI VE ORTAM IŞIĞI (kullanıcı, 2026-10-28:
+   «King konuşurken bazen yürüsün, düşünsün, yatsın, ayaklarını aşağı
+   uzatsın; grafik çıkarsın; türlü eşyalar ekle»; «ışık fiziğini
+   geliştir»).
+   · Eşya (data-esya): grafik panosu, kahve, not defteri, büyüteç, fikir
+     ampulü. Sağ el eşyayı tutar. Ofis çalışanları gezerken taşır; King'in
+     arkadaşı cevaba göre seçer (king.js arkadasEsya).
+   · King'in konuşma pozları (data-poz): dur (ağzı oynar), yürü (konuşa
+     konuşa sağa sola), otur (yazı alanının kenarına oturur, ayakları aşağı
+     sarkar), uzan (yüzüstü uzanır, ayaklarını sallar).
+   · Ortam ışığı (.ortam-isik): zeminde imleci yavaşça izleyen çok yumuşak
+     ışık; yalnız transform, geçişi CSS yapar. */
+.minik__esya{ display:none; position:absolute; pointer-events:none; z-index:3; }
+.minik[data-esya] .minik__esya{ display:block; }
+.minik[data-esya]:not([data-esya="ampul"]) .minik__kol--sag{ z-index:4; top:64%; right:6%; rotate:-34deg; }
+.minik[data-esya="grafik"] .minik__esya{ left:50%; top:50%; width:50%; height:40%; border-radius:3px; rotate:-6deg;
+  background:linear-gradient(color-mix(in oklab, var(--mod) 80%, #fff), var(--mod)) 16% 86% / 16% 38% no-repeat,
+    linear-gradient(color-mix(in oklab, var(--mod) 80%, #fff), var(--mod)) 42% 86% / 16% 58% no-repeat,
+    linear-gradient(#7fd69b, #3fae6a) 68% 86% / 16% 78% no-repeat,
+    linear-gradient(#fff, #f1f2f8);
+  box-shadow:0 0 0 .6px rgba(30,34,60,.35), 0 2px 3px rgba(20,24,40,.18); }
+.minik[data-esya="kahve"] .minik__esya{ left:60%; top:58%; width:24%; height:24%; border-radius:2px 2px 40% 40%;
+  background:linear-gradient(#7a4a2c 0 18%, #fff 18%); box-shadow:0 0 0 .6px rgba(30,34,60,.35), 0 2px 2px rgba(20,24,40,.15); }
+.minik[data-esya="kahve"] .minik__esya::after{ content:""; position:absolute; right:-34%; top:22%; width:40%; height:44%; border:1.5px solid #e9e6f0; border-left:0; border-radius:0 50% 50% 0; }
+.minik[data-esya="kahve"] .minik__esya::before{ content:""; position:absolute; left:20%; bottom:110%; width:60%; height:70%; opacity:.7;
+  background:radial-gradient(ellipse 22% 46% at 30% 60%, rgba(255,255,255,.9), transparent 70%), radial-gradient(ellipse 22% 46% at 70% 40%, rgba(255,255,255,.8), transparent 70%); }
+.minik[data-esya="not"] .minik__esya{ left:54%; top:52%; width:34%; height:40%; border-radius:2px; rotate:8deg;
+  background:linear-gradient(#ffd45c 0 16%, transparent 16%), repeating-linear-gradient(#fffdf6 0 20%, #cfd6ea 20% 24%);
+  box-shadow:0 0 0 .6px rgba(30,34,60,.35), 0 2px 3px rgba(20,24,40,.15); }
+.minik[data-esya="not"] .minik__esya::after{ content:""; position:absolute; right:-30%; top:10%; width:12%; height:80%; rotate:24deg; border-radius:1px;
+  background:linear-gradient(#ffb3c6 0 14%, #ffcf4d 14% 82%, #6b4b2a 82%); }
+.minik[data-esya="buyutec"] .minik__esya{ left:56%; top:36%; width:34%; aspect-ratio:1; border-radius:50%;
+  border:2.4px solid #4a5170; background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.85), rgba(190,225,255,.35) 60%); }
+.minik[data-esya="buyutec"] .minik__esya::after{ content:""; position:absolute; right:-42%; bottom:-46%; width:20%; height:64%; rotate:-45deg; border-radius:2px; background:#4a5170; }
+.minik[data-esya="ampul"] .minik__esya{ left:38%; top:-64%; width:24%; height:30%; border-radius:50% 50% 42% 42%;
+  background:radial-gradient(circle at 40% 35%, #fffbe0, #ffd84a 70%); box-shadow:0 0 10px 2px rgba(255,214,90,.65); }
+.minik[data-esya="ampul"] .minik__esya::after{ content:""; position:absolute; left:28%; right:28%; bottom:-24%; height:26%; border-radius:0 0 2px 2px; background:#b9bfd3; }
+@media (prefers-reduced-motion:no-preference){
+  .minik[data-esya="kahve"] .minik__esya::before{ animation:es-buhar 2.4s ease-out infinite; }
+  .minik[data-esya="ampul"] .minik__esya{ animation:es-ampul 1.6s ease-in-out infinite; }
+}
+@keyframes es-buhar{ 0%{ opacity:0; translate:0 3px; } 40%{ opacity:.75; } 100%{ opacity:0; translate:0 -6px; } }
+@keyframes es-ampul{ 0%, 100%{ box-shadow:0 0 6px 1px rgba(255,214,90,.5); } 50%{ box-shadow:0 0 14px 4px rgba(255,214,90,.8); } }
+
+/* King konuşurken: ağız oynar; poza göre yürür, oturur ya da uzanır. */
+@media (prefers-reduced-motion:no-preference){
+  .king__arkadas .minik.is-konusuyor .minik__agiz{ animation:ka-agiz .26s ease-in-out infinite alternate; }
+  .king__arkadas:has(.minik.is-konusuyor[data-poz="yuru"]){ animation:ka-gez 5s ease-in-out infinite; }
+  .king__arkadas .minik.is-konusuyor[data-poz="yuru"] .minik__govde{ animation:mk-paytak .56s ease-in-out infinite; }
+  .king__arkadas .minik.is-konusuyor[data-poz="yuru"] .minik__ayak--sol{ animation:mk-ayak .56s ease-in-out infinite; }
+  .king__arkadas .minik.is-konusuyor[data-poz="yuru"] .minik__ayak--sag{ animation:mk-ayak .56s ease-in-out -.28s infinite; }
+  .king__arkadas .minik.is-konusuyor[data-poz="dur"] .minik__govde{ animation:mk-konus .5s ease-in-out infinite; }
+  .king__arkadas .minik.is-konusuyor[data-poz="uzan"] .minik__ayak{ animation:ka-tekme .7s ease-in-out infinite alternate; }
+  .king__arkadas .minik.is-konusuyor[data-poz="uzan"] .minik__ayak--sag{ animation-delay:-.35s; }
+}
+@keyframes ka-agiz{ from{ height:6%; border-radius:0 0 8px 8px; } to{ height:14%; border-radius:50%; border-top:1.5px solid #1d2140; } }
+@keyframes ka-tekme{ from{ rotate:-20deg; } to{ rotate:30deg; } }
+/* Uzan: yüzüstü, çenesi ellerinde, ayakları arkada havada. */
+.king__arkadas .minik[data-poz="uzan"] .minik__govde{ transform:translateY(26%) scale(1.14, .78); }
+.king__arkadas .minik[data-poz="uzan"] .minik__kol{ z-index:1; top:78%; width:26%; }
+.king__arkadas .minik[data-poz="uzan"] .minik__kol--sol{ left:16%; rotate:10deg; } .king__arkadas .minik[data-poz="uzan"] .minik__kol--sag{ right:16%; rotate:-10deg; }
+.king__arkadas .minik[data-poz="uzan"] .minik__ayak{ bottom:34%; transform-origin:50% 100%; }
+.king__arkadas .minik[data-poz="uzan"] .minik__ayak--sol{ left:-6%; } .king__arkadas .minik[data-poz="uzan"] .minik__ayak--sag{ left:4%; right:auto; }
+/* Otur: yazı alanının kenarına oturur, ayaklar aşağı sarkar (is-oturuyor). */
+.king__arkadas .minik.is-oturuyor .minik__ayak{ bottom:-34%; }
+/* Küçük King: arkadaş küçük kutunun yazı alanının üstünde. */
+.king.is-mini .king__arkadas{ right:64px; }
+.king.is-mini .king__arkadas .minik{ --boy:36px; }
+
+/* Ortam ışığı: zeminde imleci yavaşça izler (yumuşak, büyük, çok hafif). */
+.ortam-isik{ position:fixed; left:0; top:0; width:0; height:0; z-index:-1; pointer-events:none;
+  transition:transform 1.6s cubic-bezier(.2,.8,.2,1); }
+.ortam-isik::before{ content:""; position:absolute; left:-36vmax; top:-36vmax; width:72vmax; height:72vmax; border-radius:50%;
+  background:radial-gradient(closest-side, rgba(255,255,255,.34), rgba(255,255,255,.14) 45%, rgba(255,255,255,0) 100%); }
+html[data-theme="dark"] .ortam-isik::before{ background:radial-gradient(closest-side, rgba(255,232,214,.07), rgba(255,232,214,.03) 45%, transparent 100%); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]) .ortam-isik::before{ background:radial-gradient(closest-side, rgba(255,232,214,.07), rgba(255,232,214,.03) 45%, transparent 100%); } }
+html:not([data-zemin="yumusak"]) .ortam-isik, html.king-acik .ortam-isik{ display:none; }
+@media (prefers-reduced-motion:reduce){ .ortam-isik{ display:none; } }
+@media (hover:none){ .ortam-isik{ display:none; } }

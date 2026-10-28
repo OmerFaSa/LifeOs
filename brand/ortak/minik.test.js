@@ -280,6 +280,59 @@
     });
   });
 
+  /* Kullanıcı (2026-10-28): «yürüme sesi, konuşma sesi gibi olayları
+     ayarlardan ayarlayabilelim». Görünüm › Minik sesleri: adım, konuşma,
+     gıdık ayrı ayrı; tercih bu kapıda durur, modüller arasında taşınır. */
+  describe('Minik · ses ayarı', () => {
+    it('varsayılan hepsi açık; biri kapanınca yalnız o susar; tercih kalıcı ve taşınır', () => {
+      let eski = null; try{ eski = localStorage.getItem(C.SES_ANAHTAR); localStorage.removeItem(C.SES_ANAHTAR); }catch(e){}
+      try{
+        expect(C.sesAyar()).toEqual({ adim:true, konusma:true, gidik:true });
+        C.sesAyarla('adim', false);
+        expect(C.sesIzinli('adim')).toBe(false);
+        expect(C.sesIzinli('bla')).toBe(true);
+        expect(C.sesIzinli('gidik')).toBe(true);
+        C.sesAyarla('konusma', false);
+        expect(C.sesIzinli('bla')).toBe(false);
+        expect(C.sesIzinli('hirr')).toBe(false);
+        expect(JSON.parse(localStorage.getItem(C.SES_ANAHTAR)).adim).toBe(false);
+        const d = document.createElement('div'); d.innerHTML = C.sesSeciciHtml();
+        const b = [...d.querySelectorAll('[data-minik-ses]')];
+        expect(b.map(x => x.getAttribute('data-minik-ses')).join()).toBe('adim,konusma,gidik');
+        expect(b.map(x => x.getAttribute('aria-pressed')).join()).toBe('false,false,true');
+        expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(C.SES_ANAHTAR) >= 0).toBe(true);
+      } finally { try{ if(eski == null) localStorage.removeItem(C.SES_ANAHTAR); else localStorage.setItem(C.SES_ANAHTAR, eski); }catch(e){} }
+    });
+  });
+
+  /* Kullanıcı (2026-10-28): «aralarındaki konuşmaları daha çeşitli yap».
+     Sohbet artık rastgele tek kelime değil: soru–cevap senaryosu; Ofis
+     çalışanlarının kendi işi, sabahın ve gecenin kendi lafı var. */
+  describe('Minik · sohbet senaryoları', () => {
+    it('senaryolar geniş ve kısa: her satır balona sığar; Ofis, sabah ve gece ayrı', () => {
+      const D = C.DIYALOG;
+      ['genel', 'ofis', 'sabah', 'gece'].forEach(k => {
+        expect(D[k].length >= (k === 'genel' || k === 'ofis' ? 10 : 3)).toBe(true);
+        D[k].forEach(sn => { expect(sn.length >= 2).toBe(true); sn.forEach(x => expect(x.length <= 18).toBe(true)); });
+      });
+      const sabit = v => () => v;
+      expect(D.ofis.indexOf(C.diyalogSec(true, 14, sabit(.99))) >= 0 || D.genel.indexOf(C.diyalogSec(true, 14, sabit(.99))) >= 0).toBe(true);
+      expect(D.ofis.indexOf(C.diyalogSec(true, 14, sabit(.1))) >= 0).toBe(true);
+      expect(D.sabah.indexOf(C.diyalogSec(false, 8, sabit(.1))) >= 0).toBe(true);
+      expect(D.gece.indexOf(C.diyalogSec(false, 23, sabit(.1))) >= 0).toBe(true);
+      expect(D.genel.indexOf(C.diyalogSec(false, 14, sabit(.1))) >= 0).toBe(true);
+    });
+  });
+
+  /* Ofis çalışanları gezerken arada elinde bir şey taşır (kahve, not, grafik). */
+  describe('Minik · eşya', () => {
+    it('yalnız Ofis çalışanı eşya taşır; eşya bilinen türlerden', () => {
+      expect(C.esyaSec({ ofis:false }, () => 0)).toBe('');
+      ['kahve', 'not', 'grafik'].forEach((e, i) => expect(C.esyaSec({ ofis:true }, () => i / 3 + .01)).toBe(e));
+      expect(C.ESYALAR.indexOf('buyutec') >= 0 && C.ESYALAR.indexOf('ampul') >= 0).toBe(true);
+    });
+  });
+
   describe('Minik · kurulum', () => {
     it('kabuk yokken (test sayfası) katman kurulmaz', () => {
       C.kur();

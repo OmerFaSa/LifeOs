@@ -874,7 +874,19 @@ window.LIFEOS.KING = (function(){
      cevap bekleniyor, mikrofon/yazı, boşta geçen süre); hiçbir şey yazmaz,
      ekran okuyucuya görünmez. Gövdesi gezen miniklerle aynıdır (minik.js). */
   const ARKADAS_UYKU = 45000;
-  let arkadasSon = 0, arkadasKonus = 0, arkadasAralik = 0, arkadasOnceki = '';
+  let arkadasSon = 0, arkadasKonus = 0, arkadasAralik = 0, arkadasOnceki = '', arkadasPozu = 'dur', arkadasEsyasi = '', arkadasEsyaSon = 0;
+  /* Konuşurken poz türlü (kullanıcı, 2026-10-28: «bazen konuşurken yürüsün,
+     düşünsün, yatsın, ayaklarını aşağı uzatsın»); eşyayı cevap seçer: veri
+     kartı grafik panosu, araştırma büyüteç, kayıt önizlemesi not defteri;
+     yoksa ara sıra kahve ya da fikir ampulü. */
+  function arkadasPoz(rnd){ const r = rnd(); return r < .25 ? 'dur' : r < .5 ? 'yuru' : r < .75 ? 'otur' : 'uzan'; }
+  function arkadasEsya(m, rnd){
+    if(m && ((m.kartlar && m.kartlar.length) || (m.satirlar && m.satirlar.length))) return 'grafik';
+    if(m && m.arastirma) return 'buyutec';
+    if(m && m.onizleme) return 'not';
+    const r = rnd();
+    return r < .2 ? 'ampul' : r < .4 ? 'kahve' : '';
+  }
   function arkadasHal(o){
     if(o.konusuyor) return 'konusuyor';
     if(o.bekliyor) return 'dusunuyor';
@@ -898,6 +910,10 @@ window.LIFEOS.KING = (function(){
     const h = arkadasHal({ konusuyor:konusuyor > 0 || simdi < arkadasKonus, bekliyor:akis.some(m => m.bekliyor),
       dinliyor:!!dinleyen, yaziyor:!!(g && g.value), bosta:simdi - arkadasSon });
     Object.keys(ARKADAS_SINIF).forEach(k => a.classList.toggle(ARKADAS_SINIF[k], k === h));
+    const poz = h === 'konusuyor' ? arkadasPozu : '';
+    if(poz) a.dataset.poz = poz; else delete a.dataset.poz;
+    a.classList.toggle('is-oturuyor', poz === 'otur');
+    if(arkadasEsyasi && (h === 'konusuyor' || simdi < arkadasEsyaSon)) a.dataset.esya = arkadasEsyasi; else delete a.dataset.esya;
     if(arkadasOnceki === 'uyuyor' && h !== 'uyuyor'){ a.classList.add('is-uyaniyor'); setTimeout(() => a.classList.remove('is-uyaniyor'), 1200); }
     a.querySelector('.minik__balon').textContent = h === 'dusunuyor' ? 'hımm…' : '';
     arkadasOnceki = h;
@@ -5440,7 +5456,7 @@ window.LIFEOS.KING = (function(){
         + '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>' : '';
     return bas + (paylasim ? '<div class="king__paylasim" role="status"><i class="king__canli" aria-hidden="true"></i>' + (kameraMi() ? 'Kamera açık' : 'Ekran paylaşılıyor') + ' · sorduğunda görürüm'
       + '<button type="button" class="king__paylasim-dur" data-king="paylasim-bitir">Durdur</button></div>' : '') + govdeM + cip
-      + '<form class="king__yaz" data-king-form data-ayar-disi>'
+      + '<form class="king__yaz" data-king-form data-ayar-disi>' + arkadasHtml()
       + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
       + '<label class="king__foto-dugme" title="Fotoğraf gönder (Ctrl+V ile yapıştır, sürükleyip bırak da olur)" aria-label="Fotoğraf gönder">'
       + '<input type="file" accept="image/*" data-king-dosya class="sr-only"/>'
@@ -5589,7 +5605,14 @@ window.LIFEOS.KING = (function(){
       paylasim.video.setAttribute('aria-hidden', 'true');
       onz.appendChild(paylasim.video);
     }
-    if(yeniVar){ arkadasKonus = Date.now() + 1800; setTimeout(arkadasGuncelle, 1900); }
+    if(yeniVar){
+      const son = akis.slice().reverse().find(m => m.kim === 'king' && !m.bekliyor) || {};
+      const sure = Math.min(6000, 1400 + String(son.metin || '').length * 22);
+      arkadasPozu = arkadasPoz(Math.random);
+      arkadasEsyasi = arkadasEsya(son, Math.random);
+      arkadasKonus = Date.now() + sure; arkadasEsyaSon = arkadasKonus + 4000;
+      setTimeout(arkadasGuncelle, sure + 100); setTimeout(arkadasGuncelle, sure + 4100);
+    }
     akis.forEach(m => { m.yeni = false; });
     durum();
     if(odak !== false && g && !(mini && odak !== true) && !(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu())){
@@ -5625,7 +5648,7 @@ window.LIFEOS.KING = (function(){
       const m = e.target && e.target.closest ? e.target.closest('.king__arkadas .minik') : null;
       if(!m) return;
       m.classList.add('is-gidik'); setTimeout(() => m.classList.remove('is-gidik'), 1100);
-      try{ if(L.SES) L.SES.tik('gidik', true, { perde:0.95 }); }catch(x){ /* ses yok */ }
+      try{ if(L.SES && !(L.MINIK && L.MINIK.sesIzinli && !L.MINIK.sesIzinli('gidik'))) L.SES.tik('gidik', true, { perde:0.95 }); }catch(x){ /* ses yok */ }
     });
     clearInterval(arkadasAralik);
     arkadasAralik = setInterval(arkadasGuncelle, 5000);
@@ -6577,7 +6600,7 @@ window.LIFEOS.KING = (function(){
 
   return {
     kur, ac, kapat, kucult, buyut, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
-    isDurumYaz:d => { isDurum = d; }, arkadasHal, ARKADAS_UYKU, isRozet, isYokla, ekipAc, ekipHtml, gorevHtml, isZamanli:() => !!isZaman,
+    isDurumYaz:d => { isDurum = d; }, arkadasHal, arkadasPoz, arkadasEsya, ARKADAS_UYKU, isRozet, isYokla, ekipAc, ekipHtml, gorevHtml, isZamanli:() => !!isZaman,
     beceriAc, beceriPanelHtml, bekleyenAl, eylemleriCalistir, k2Html, ODAK_SON,
     uyanCumlesi, uyanSec, uyanAcikMi, uyanParca, uyanKontrol, uyanikMi:() => !!uyanik, uyanTurMu:() => uyanTur, UYAN,
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,
