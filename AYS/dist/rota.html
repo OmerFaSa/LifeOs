@@ -18673,6 +18673,10 @@ html[data-zemin="yumusak"] .king:has(.king__arkadas) .king__akis{ padding-bottom
 
 /* 2) Sekme gizliyken hareket durur (minik.js is-durgun). */
 .minikkat.is-durgun *, .minikkat.is-durgun{ animation-play-state:paused !important; }
+
+/* 3) Üçgen ofis miniğinde ağız gözlerin hemen altında (73–81 %); kravat
+   oraya inerse ağzı örter ve yüzde «+» gibi durur. Kravat ağzın altına. */
+.minik[data-ofis][data-bicim="ucgen"] .minik__kravat{ top:85%; height:13%; width:10%; left:45%; }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -20624,7 +20628,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'f2c04dfb', at:'2026-10-28 20:48', dirty:true };
+R.BUILD = { id:'13a89e61', at:'2026-10-28 21:07', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -122076,7 +122080,7 @@ window.LIFEOS.MINIK = (function(){
   }
   const ICERIK = '<i class="minik__golge"></i><i class="minik__ayak minik__ayak--sol"></i><i class="minik__ayak minik__ayak--sag"></i>'
       + '<i class="minik__kol minik__kol--sol"></i><i class="minik__kol minik__kol--sag"></i>'
-      + '<span class="minik__govde"><i class="minik__deri"></i><i class="minik__isik"></i><i class="minik__goz"></i><i class="minik__goz"></i>'
+      + '<span class="minik__govde"><i class="minik__deri"></i><b class="minik__isik"></b><i class="minik__goz"></i><i class="minik__goz"></i>'
       + '<i class="minik__agiz"></i><i class="minik__sus"></i><i class="minik__kravat"></i><i class="minik__kart"></i><i class="minik__esya"></i></span><span class="minik__balon"></span><span class="minik__zzz">z</span>'
       + '<span class="minik__kalp">♡</span><span class="minik__ad"><b></b> · <i></i><small>Dokun, gıdıkla</small></span>';
 
