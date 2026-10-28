@@ -16561,15 +16561,7 @@ html[data-yuzey="serit"] .sayfa .donen{ background:color-mix(in oklab, var(--sur
      bu dosyanın hiçbir kuralı çalışmaz; kartlar opak kalır. */
 
 :root{
-  --z-taban:oklch(from var(--mod) .955 .006 h);
-  --z-taban-2:oklch(from var(--mod) .905 .01 h);
-  --z-kure:oklch(from var(--mod) .82 .09 h / .38);
-  --z-kure-2:rgba(255,255,255,.75);
-  --z-kure-3:oklch(from var(--mod) .86 .07 calc(h + 30) / .3);
-  --z-isik:rgba(255,255,255,.72);
-  --z-golge:rgba(30,34,48,.05);
-  --z-dolgu:rgba(196,214,255,.28);
-  --levha:linear-gradient(150deg, rgba(255,255,255,.58), rgba(255,255,255,.26));
+  --levha:linear-gradient(150deg, rgba(255,255,255,.42), rgba(255,255,255,.14));
   --levha-kenar:0 0 0 7px rgba(255,255,255,.26), 0 0 0 8px rgba(255,255,255,.7);
   --levha-golge:24px 50px 100px -56px rgba(20,24,40,.36), 8px 12px 30px -18px rgba(20,24,40,.12), 18px 40px 70px -50px rgb(var(--sicak) / .25);
   --karo:linear-gradient(150deg, oklch(from var(--mod) .9 .07 h / .8), oklch(from var(--mod) .96 .03 h / .55));
@@ -16579,7 +16571,7 @@ html[data-yuzey="serit"] .sayfa .donen{ background:color-mix(in oklab, var(--sur
   --ray:rgba(30,34,48,.07);
   --dugme:var(--mod-ink, var(--mod));
   --levha-ic:inset 0 1.5px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.55);
-  --cam:radial-gradient(90% 70% at 0% 0%, rgba(255,255,255,.42), transparent 58%), linear-gradient(140deg, rgba(255,255,255,.64), rgba(255,255,255,.38));
+  --cam:radial-gradient(90% 70% at 0% 0%, rgba(255,255,255,.4), transparent 58%), linear-gradient(140deg, rgba(255,255,255,.52), rgba(255,255,255,.26));
   --cam-ince:linear-gradient(140deg, rgba(255,255,255,.5), rgba(255,255,255,.24));
   --cam-katman:rgba(255,255,255,.72);
   --cam-kenar:rgba(255,255,255,.78);
@@ -16588,16 +16580,8 @@ html[data-yuzey="serit"] .sayfa .donen{ background:color-mix(in oklab, var(--sur
   --cam-girdi:rgba(255,255,255,.5);
 }
 :root[data-theme="dark"]{
-  --z-taban:oklch(.30 .035 285);
-  --z-taban-2:oklch(.17 .03 285);
   --sicak-zemin:.6; --sicak-cizgi:.5; --sicak-yansima:.3; --ray:rgba(255,255,255,.08);
   --dugme:oklch(from var(--mod) .46 .14 h);
-  --z-kure:oklch(from var(--mod) .45 .12 h / .4);
-  --z-kure-2:rgba(255,255,255,.04);
-  --z-kure-3:oklch(from var(--mod) .38 .08 calc(h + 30) / .3);
-  --z-isik:rgba(255,255,255,.045);
-  --z-golge:rgba(0,0,0,.18);
-  --z-dolgu:rgba(120,140,220,.08);
   --levha:linear-gradient(150deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
   --levha-kenar:0 0 0 7px rgba(255,255,255,.035), 0 0 0 8px rgba(255,255,255,.1);
   --levha-golge:24px 50px 100px -46px rgba(0,0,0,.7), 18px 40px 70px -50px rgb(var(--sicak) / .2);
@@ -16614,16 +16598,8 @@ html[data-yuzey="serit"] .sayfa .donen{ background:color-mix(in oklab, var(--sur
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --z-taban:oklch(.30 .035 285);
-    --z-taban-2:oklch(.17 .03 285);
     --sicak-zemin:.6; --sicak-cizgi:.5; --sicak-yansima:.3; --ray:rgba(255,255,255,.08);
     --dugme:oklch(from var(--mod) .46 .14 h);
-    --z-kure:oklch(from var(--mod) .45 .12 h / .4);
-    --z-kure-2:rgba(255,255,255,.04);
-    --z-kure-3:oklch(from var(--mod) .38 .08 calc(h + 30) / .3);
-    --z-isik:rgba(255,255,255,.045);
-    --z-golge:rgba(0,0,0,.18);
-    --z-dolgu:rgba(120,140,220,.08);
     --levha:linear-gradient(150deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
     --levha-kenar:0 0 0 7px rgba(255,255,255,.035), 0 0 0 8px rgba(255,255,255,.1);
     --levha-golge:24px 50px 100px -46px rgba(0,0,0,.7), 18px 40px 70px -50px rgb(var(--sicak) / .2);
@@ -16641,23 +16617,7 @@ html[data-yuzey="serit"] .sayfa .donen{ background:color-mix(in oklab, var(--sur
   }
 }
 
-/* 1) ZEMİN — Liquid Glass Kit (kullanıcı, 2026-10-27: «özellikle 1.
-   fotoğraftaki tema»): nötr açık gri stüdyo; çapraz düşen tek ışık ve onun
-   gölgesi; modülün tonu yalnız iki çok hafif kürede. Koyuda grafit. */
-html[data-zemin="yumusak"] body::before{
-  background:
-    radial-gradient(30% 1% at 50% 93%, rgb(255 236 222 / var(--sicak-cizgi)), transparent),
-    radial-gradient(55% 14% at 50% 100%, rgb(var(--sicak) / var(--sicak-zemin)), transparent 75%),
-    radial-gradient(35% 50% at 50% 100%, rgb(var(--sicak) / calc(var(--sicak-zemin) * .35)), transparent 80%),
-    linear-gradient(118deg, transparent 18%, var(--z-isik) 30%, var(--z-isik) 40%, transparent 54%),
-    linear-gradient(118deg, transparent 27.5%, var(--z-golge) 29%, transparent 30.5%, transparent 37.5%, var(--z-golge) 39%, transparent 40.5%),
-    linear-gradient(118deg, transparent 54%, var(--z-golge) 66%, transparent 82%),
-    radial-gradient(60% 70% at 100% 40%, var(--z-dolgu), transparent 70%),
-    radial-gradient(closest-side, var(--z-kure), transparent) 100% 0% / 60vmax 60vmax no-repeat,
-    radial-gradient(closest-side, var(--z-kure-3), transparent) 0% 100% / 56vmax 56vmax no-repeat,
-    radial-gradient(closest-side, var(--z-kure-2), transparent) 30% 20% / 50vmax 50vmax no-repeat,
-    linear-gradient(160deg, var(--z-taban), var(--z-taban-2));
-}
+/* 1) ZEMİN — 12. bölümde (akışkan renk alanı). */
 
 /* 2) LEVHA — kalın cam plaka: içerik onun üstünde durur. Dışta 7 px yarı
    saydam pervaz + ince parlak çizgi (camın kalınlığı), içte üst ışık. */
@@ -16829,9 +16789,10 @@ html[data-theme="dark"][data-zemin="yumusak"] .site--v5{
 /* Telefon bandında seçili simge modül renginde hafif parlar. */
 html[data-zemin="yumusak"] .site--v5 .altbant__sekme.is-on .kbk-ic{ filter:drop-shadow(0 0 6px color-mix(in oklab, var(--mod) 65%, transparent)); }
 
-/* Tıklanabilir cam: üzerine gelince ışık kartın üst köşesine düşer. */
+/* Tıklanabilir küçük cam: üzerine gelince ışık üst köşeye düşer (büyük
+   kartlarda bunu el ışığı yapar). */
 @media (hover:hover) and (pointer:fine){
-  html[data-zemin="yumusak"] .site--v5 :is(.pickcard, .kapak__sayi.is-git, .alan-kare, .ozet-kare, button.pk, a.pk):hover{
+  html[data-zemin="yumusak"] .site--v5 :is(.alan-kare, .ozet-kare):hover{
     background-image:radial-gradient(120% 90% at 18% 0%, rgba(255,255,255,.42), transparent 60%); }
   html[data-zemin="yumusak"] .site--v5 :is(.chip, .kisayol > button, .kisayol > a):hover{
     box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), 0 8px 16px -10px rgb(var(--sicak) / .5); }
@@ -16972,12 +16933,7 @@ html[data-zemin="yumusak"] .site--v5 .desk::before{ display:none; }
    türlü yerlerde ışık; turuncu olmasın, daha güzel; logo parlasın;
    agentlar kartların üstünde fiziksel bir yermiş gibi hareket etsin»).
 
-   · STÜDYO: zemin bir fotoğraf stüdyosu gibidir: üstte duvar, ekranın
-     %64'ünde yumuşak bir ufuk (ışığı yakalayan ince çizgi), altında hafif
-     sıcak, parlak bir yer. Turuncu yerine altın-gül akşam ışığı.
-   · CANLI IŞIK: duvara pencereden düşen ışık camları (html::before) güneş
-     gibi çok yavaş kayar; yerdeki yansıma (html::after) tersine salınır.
-     Yalnız transform; «Az» animasyonda durur, ışık yerinde kalır.
+   · ZEMİN: aşağıda (stüdyo 2026-10-28'de akışkan renk alanına döndü).
    · LOGO: kenarın tepesindeki modül işareti ışır; dört kare sırayla parlar.
    · MİNİKLER (minik.js): kartların üst kenarında yürür, zıplar. Burada
      yalnız görünüşleri: ışıyan gövde, iri göz ve parıltısı, gülümseme,
@@ -16985,48 +16941,51 @@ html[data-zemin="yumusak"] .site--v5 .desk::before{ display:none; }
 :root{
   --sicak:255 200 160;                    /* altın-şeftali (eski: turuncu) */
   --gul:255 172 196;
-  --stud-duvar-1:oklch(from var(--mod) .965 .006 h); --stud-duvar-2:oklch(from var(--mod) .925 .01 h);
-  --stud-yer-1:rgba(255,251,246,.65); --stud-yer-2:rgba(240,236,232,.9);
-  --stud-ufuk:rgba(255,255,255,.45);
-  --stud-pencere:rgba(255,251,240,.55);
+}
+/* ZEMİN, ikinci tur (kullanıcı, 2026-10-28: «arka plan hâlâ iğrenç»):
+   stüdyo (gri duvar, ufuk çizgisi, pencere çizgileri) kalktı — cam ancak
+   arkasında renk varsa cam görünür. Yerine modülün tonundan türeyen
+   akışkan bir renk alanı (macOS/iOS duvar kâğıtları gibi): dört yumuşak
+   renk kümesi, ince bir film greni (geçişte basamak/şerit olmasın diye)
+   ve çok yavaş akan iki küre (html::before). Ufuk ya da yatay ışık
+   çizgisi yok (reddedildi). */
+:root{
+  --zm-1:oklch(from var(--mod) .968 .018 calc(h - 25)); --zm-2:oklch(from var(--mod) .94 .03 calc(h + 25));
+  --zm-a:oklch(from var(--mod) .79 .14 h / .7);  --zm-b:oklch(from var(--mod) .84 .12 calc(h + 70) / .6);
+  --zm-c:oklch(from var(--mod) .87 .11 calc(h - 70) / .6); --zm-d:rgb(var(--sicak) / .45);
 }
 html[data-theme="dark"]{
-  --stud-duvar-1:oklch(.27 .03 290); --stud-duvar-2:oklch(.2 .028 290);
-  --stud-yer-1:rgba(20,18,30,.35); --stud-yer-2:rgba(8,8,14,.75);
-  --stud-ufuk:rgba(255,220,200,.14);
-  --stud-pencere:rgba(200,190,255,.07);
+  --zm-1:oklch(from var(--mod) .21 .05 calc(h - 20)); --zm-2:oklch(from var(--mod) .13 .035 calc(h + 30));
+  --zm-a:oklch(from var(--mod) .46 .17 h / .55); --zm-b:oklch(from var(--mod) .4 .15 calc(h + 70) / .42);
+  --zm-c:oklch(from var(--mod) .38 .12 calc(h - 70) / .4); --zm-d:rgb(var(--sicak) / .1);
 }
 @media (prefers-color-scheme:dark){
   html:not([data-theme="light"]){
-    --stud-duvar-1:oklch(.27 .03 290); --stud-duvar-2:oklch(.2 .028 290);
-    --stud-yer-1:rgba(20,18,30,.35); --stud-yer-2:rgba(8,8,14,.75);
-    --stud-ufuk:rgba(255,220,200,.14);
-    --stud-pencere:rgba(200,190,255,.07);
+    --zm-1:oklch(from var(--mod) .21 .05 calc(h - 20)); --zm-2:oklch(from var(--mod) .13 .035 calc(h + 30));
+    --zm-a:oklch(from var(--mod) .46 .17 h / .55); --zm-b:oklch(from var(--mod) .4 .15 calc(h + 70) / .42);
+    --zm-c:oklch(from var(--mod) .38 .12 calc(h - 70) / .4); --zm-d:rgb(var(--sicak) / .1);
   }
 }
 html[data-zemin="yumusak"] body::before{
   background:
-    radial-gradient(90% 34% at 50% 118%, rgb(var(--sicak) / calc(var(--sicak-zemin) * .55)), transparent 72%),
-    radial-gradient(70% 26% at 30% 120%, rgb(var(--gul) / calc(var(--sicak-zemin) * .3)), transparent 75%),
-    linear-gradient(180deg, transparent 66%, var(--stud-ufuk) 74%, transparent 84%),
-    linear-gradient(180deg, transparent 62%, var(--stud-yer-1) 76%, var(--stud-yer-2) 100%),
-    radial-gradient(60% 70% at 100% 30%, var(--z-dolgu), transparent 70%),
-    radial-gradient(closest-side, var(--z-kure), transparent) 100% 0% / 60vmax 60vmax no-repeat,
-    radial-gradient(120% 90% at 50% 45%, transparent 60%, var(--z-golge) 100%),
-    linear-gradient(180deg, var(--stud-duvar-1), var(--stud-duvar-2) 64%);
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 .045'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(62% 58% at 6% 0%, var(--zm-a), transparent 72%),
+    radial-gradient(55% 62% at 100% 16%, var(--zm-b), transparent 72%),
+    radial-gradient(72% 58% at 72% 106%, var(--zm-c), transparent 72%),
+    radial-gradient(48% 46% at 0% 100%, var(--zm-d), transparent 72%),
+    linear-gradient(160deg, var(--zm-1), var(--zm-2));
 }
-/* Pencere ışığı: duvara düşen dört cam, kenarları yumuşak; güneş gibi kayar. */
+/* Akan iki küre: suyun altındaki ışık gibi çok yavaş yer değiştirir (yalnız transform). */
 html[data-zemin="yumusak"]::before{
-  content:''; position:fixed; z-index:-1; pointer-events:none; left:-10vw; top:-6vh; width:80vw; height:70vh;
-  background:repeating-linear-gradient(118deg, transparent 0 3%, var(--stud-pencere) 3% 15%, transparent 15% 17%);
-  -webkit-mask:radial-gradient(50% 50% at 40% 45%, #000 20%, transparent 75%); mask:radial-gradient(50% 50% at 40% 45%, #000 20%, transparent 75%);
-  filter:blur(6px);
+  content:''; position:fixed; z-index:-1; pointer-events:none; inset:-18vmax;
+  background:radial-gradient(30vmax 26vmax at 34% 38%, var(--zm-a), transparent 70%),
+    radial-gradient(28vmax 24vmax at 70% 64%, var(--zm-b), transparent 70%);
+  opacity:.6;
 }
-/* Yerdeki yansıma kalktı (kullanıcı, 2026-10-27: «alttaki ışık kötü duruyor»). */
 @media (prefers-reduced-motion:no-preference){
-  html[data-zemin="yumusak"]::before{ animation:stud-gunes 90s ease-in-out infinite alternate; }
+  html[data-zemin="yumusak"]::before{ animation:zm-akis 80s ease-in-out infinite alternate; }
 }
-@keyframes stud-gunes{ from{ transform:translate3d(0, 0, 0) skewX(0deg); opacity:.85; } to{ transform:translate3d(14vw, 4vh, 0) skewX(-6deg); opacity:1; } }
+@keyframes zm-akis{ from{ transform:translate3d(-5vmax, 3vmax, 0) rotate(0deg); } to{ transform:translate3d(6vmax, -4vmax, 0) rotate(10deg) scale(1.08); } }
 
 /* Logo: modül işareti ışır; dört kare sırayla parlar (ışık üstünden geçer). */
 html[data-zemin="yumusak"] .site--v5 .kenar__nokta{ box-shadow:0 0 6px 1px color-mix(in oklab, var(--mod) 60%, transparent), 0 0 14px 2px rgb(var(--sicak) / .35); }
@@ -17183,17 +17142,29 @@ html:not([data-zemin="yumusak"]) .minikkat, html.king-acik .minikkat{ display:no
 @keyframes mk-farket{ 0%{ transform:none; } 40%{ transform:translateY(-3px) scale(.96, 1.06); } 100%{ transform:none; } }
 @keyframes mk-anten{ 0%, 100%{ rotate:-8deg; } 50%{ rotate:8deg; } }
 
-/* 13) EL IŞIĞI — imlecin üstünde durduğu cam kartta ışık imleci izler
-   (minik.js --mx/--my yazar); gerçek camdaki yansıma gibi yumuşak, geniş. */
+/* 13) EL IŞIĞI — imlecin altındaki cam kartta küçük, yumuşak bir parıltı
+   (minik.js --mx/--my yazar). İkinci tur (kullanıcı, 2026-10-28: «çok
+   kalitesiz, çok büyük; karta ya da miniğe tıklayınca gidiyor»): 380 px
+   leke yerine 200 px yumuşak düşüşlü parıltı; ayrı katmanda (::after)
+   söner ve yanar, imleci gecikmeyle izler (minik.js her karede yolun
+   %22'si), miniğin üstündeyken altındaki kartta kalır, kart yeniden
+   çizilince yenisine geçer. Basınca ışık parmağın altında toplanır
+   (.isik-bas). Kartın kendi zemini artık hiç değişmez. */
+@property --isik{ syntax:'<number>'; inherits:false; initial-value:0; }
+:root{ --el-isik:255 255 255; --el-isik-a:.17; }
+html[data-theme="dark"]{ --el-isik:255 236 220; --el-isik-a:.075; }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --el-isik:255 236 220; --el-isik-a:.075; } }
 @media (hover:hover) and (pointer:fine){
-  html[data-zemin="yumusak"] .site--v5 .isikli:not(.pk):not(.kapak__sayi){
-    background:radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%), var(--el-isik), transparent 65%), var(--cam); }
-  html[data-zemin="yumusak"] .site--v5 :is(.pk, .kapak__sayi).isikli{
-    background:radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), var(--el-isik), transparent 65%), var(--karo); }
+  html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{
+    content:''; position:absolute; inset:0; z-index:1; border-radius:inherit; pointer-events:none;
+    --a:calc(var(--el-isik-a) * var(--isik-guc, 1));
+    background:radial-gradient(circle 200px at var(--mx, 50%) var(--my, 0%), rgb(var(--el-isik) / var(--a)),
+      rgb(var(--el-isik) / calc(var(--a) * .62)) 22%, rgb(var(--el-isik) / calc(var(--a) * .28)) 46%, rgb(var(--el-isik) / calc(var(--a) * .08)) 70%, transparent 88%);
+    opacity:0; transition:opacity .6s cubic-bezier(.2,.8,.2,1); }
+  html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard).isikli::after{ opacity:1; transition-duration:.3s; }
+  html[data-zemin="yumusak"] .isik-bas{ --isik-guc:1.9; }
+  html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard).isik-hemen::after{ transition:none; }
 }
-:root{ --el-isik:rgba(255,255,255,.22); }
-html[data-theme="dark"]{ --el-isik:rgba(255,236,220,.07); }
-@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --el-isik:rgba(255,236,220,.07); } }
 
 /* 14) SAYFA GİRİŞİ — sıvı cam: içerik hafif bulanıktan netleşerek, az
    yükselerek sırayla gelir (kabuk.js sayfa değişince köke `sayfa-gecis`
@@ -17251,13 +17222,17 @@ html[data-theme="dark"]{ --rim-ust:rgba(255,255,255,.38); --rim-orta:rgba(255,25
 html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard){
   position:relative; border-color:transparent; }
 html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::before{
-  content:''; display:block; position:absolute; inset:-1px; width:auto; height:auto; z-index:1; border-radius:inherit; padding:1px; pointer-events:none;
-  background:radial-gradient(140px circle at var(--mx, -400px) var(--my, -400px), rgba(255,255,255,.75), transparent 70%),
+  content:''; display:block; position:absolute; inset:-1px; width:auto; height:auto; z-index:2; border-radius:inherit; padding:1px; pointer-events:none;
+  transition:--isik .5s cubic-bezier(.2,.8,.2,1);
+  background:radial-gradient(110px circle at var(--mx, -400px) var(--my, -400px), rgba(255,255,255, calc(.85 * var(--isik))), transparent 70%),
     linear-gradient(135deg, var(--rim-ust) 0%, var(--rim-orta) 26%, transparent 46%, transparent 64%, rgb(var(--sicak) / .32) 92%, rgb(var(--gul) / .28) 100%);
   -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor;
   mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite:exclude; }
+html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard).isikli::before{ --isik:1; transition-duration:.25s; }
 html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card, .giris, .donen, .site--v5 .nextup, .site--v5 .ledger .lrow,
   .site--v5 .pk, .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, .sheet, .popover, .menusayfa, .king__kutu) *:is(.kutu, .card, .giris, .pk)::before,
+html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card, .giris, .donen, .site--v5 .nextup, .site--v5 .ledger .lrow,
+  .site--v5 .pk, .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, .sheet, .popover, .menusayfa, .king__kutu) *:is(.kutu, .card, .giris, .pk)::after,
 html[data-zemin="yumusak"] .site--v5 .desk::before{ content:none; }
 
 /* 17) MENÜ VE MİNİK ADI (kullanıcı, 2026-10-28: «menü kısmını, agentları
@@ -17307,7 +17282,100 @@ html[data-zemin="yumusak"] .menusayfa__ayak{ background:transparent; border-top-
 .minik__ad i{ font-style:normal; font-weight:500; color:var(--text-3); }
 .minik__ad small{ display:block; font-weight:500; font-size:10.5px; color:var(--text-3); }
 .minik.is-farkinda .minik__ad{ opacity:1; translate:-50% 0; transition-delay:.25s, .25s; }
-.minik.is-farkinda .minik__balon{ opacity:0; }
+.minik.is-farkinda:not(.is-tepin) .minik__balon{ opacity:0; }
+.minik.is-tepin .minik__ad{ opacity:0; transition-delay:0s; }
+
+/* 18) MİNİKLERİN RUH HÂLİ (kullanıcı, 2026-10-28: «çok tıklarsak kızsın;
+   üzgün, mutlu, uykulu olsunlar, canlılık katar»). minik.js data-ruh
+   yazar; yazı yok, yüz söyler: kaş (gözün ::before'u), ağız, yanak,
+   kollar, renk. Etikette huyun yerine ruh hâli yazar.
+   · mutlu: ağız açık gülüş, yanaklar pembe, daha sık hoplar.
+   · üzgün: kaşlar içten kalkık, ağız ters, renk solgun, gözden yaş süzülür.
+   · uykulu: göz kapakları yarı inik, ara sıra esner.
+   · kızgın: kaşlar çatık, ağız düz, kollar kavuşuk, kırmızı kızarma,
+     başın üstünde öfke işareti; imleçten gözünü kaçırır. */
+.minik__goz::before{ content:''; position:absolute; left:-18%; right:-18%; top:-46%; height:17%; border-radius:2px;
+  background:#1d2140; opacity:0; transition:opacity .25s ease, rotate .3s ease, top .3s ease; }
+.minik[data-ruh="uzgun"] .minik__goz::before, .minik[data-ruh="kizgin"] .minik__goz::before{ opacity:.85; }
+.minik[data-ruh="uzgun"] .minik__goz:nth-of-type(2)::before{ rotate:-20deg; }
+.minik[data-ruh="uzgun"] .minik__goz:nth-of-type(3)::before{ rotate:20deg; }
+.minik[data-ruh="kizgin"] .minik__goz:nth-of-type(2)::before{ rotate:24deg; top:-30%; }
+.minik[data-ruh="kizgin"] .minik__goz:nth-of-type(3)::before{ rotate:-24deg; top:-30%; }
+.minik__deri::after{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0; transition:opacity .4s ease; }
+.minik[data-ruh="mutlu"] .minik__deri::after{ opacity:1;
+  background:radial-gradient(15% 10% at 25% 68%, rgba(255,105,150,.6), transparent), radial-gradient(15% 10% at 75% 68%, rgba(255,105,150,.6), transparent); }
+.minik[data-ruh="kizgin"] .minik__deri::after{ opacity:1; background:radial-gradient(80% 55% at 50% 100%, rgba(255,70,80,.5), transparent 75%); }
+.minik[data-ruh="uzgun"] .minik__deri{ filter:saturate(.6) brightness(.97); }
+
+/* Ağız. */
+.minik[data-ruh="mutlu"]:not(.is-uyuyor) .minik__agiz{ left:37%; width:26%; height:17%; top:61%; border:0; border-radius:2px 2px 50% 50% / 2px 2px 100% 100%;
+  background:linear-gradient(#1d2140 58%, #ff7d9c 58%); opacity:.9; }
+.minik[data-ruh="uzgun"]:not(.is-uyuyor) .minik__agiz{ top:67%; height:6%; border:1.6px solid #1d2140; border-bottom:0; border-radius:8px 8px 0 0; }
+.minik[data-ruh="kizgin"] .minik__agiz{ top:67%; left:41%; width:18%; height:0; border:0; border-top:2px solid #1d2140; border-radius:2px; rotate:-5deg; }
+.minik[data-bicim="ucgen"][data-ruh] .minik__agiz{ top:75%; }
+
+/* Uykulu: yarı inik göz kapağı (üstü düz). */
+.minik[data-ruh="uykulu"]:not(.is-uyuyor):not(.is-farkinda):not(.is-gidik) .minik__goz{ height:12%; top:47%; border-radius:2px 2px 50% 50% / 2px 2px 100% 100%; }
+.minik[data-ruh="uykulu"]:not(.is-uyuyor):not(.is-farkinda):not(.is-gidik) .minik__goz::after{ top:8%; height:30%; }
+.minik.is-esniyor .minik__goz{ height:5%; top:50%; border-radius:4px; }
+.minik.is-esniyor .minik__goz::after{ display:none; }
+
+/* Gözyaşı (üzgün). */
+.minik__govde::after{ content:''; position:absolute; left:24%; top:60%; width:8%; height:12%; opacity:0; pointer-events:none;
+  border-radius:50% 50% 50% 50% / 62% 62% 38% 38%; background:linear-gradient(#d8f0ff, #6cb8f0); }
+
+/* Kızgın: kollar göğüste kavuşuk, başın üstünde öfke işareti. */
+.minik[data-ruh="kizgin"] .minik__kol{ z-index:1; top:60%; width:30%; height:13%; }
+.minik[data-ruh="kizgin"] .minik__kol--sol{ left:16%; rotate:22deg; }
+.minik[data-ruh="kizgin"] .minik__kol--sag{ right:16%; rotate:-22deg; }
+.minik::after{ content:''; position:absolute; right:-16%; top:-14%; width:11px; height:11px; opacity:0; pointer-events:none;
+  background:radial-gradient(circle at 0 0, transparent 40%, #ff4d5e 42% 64%, transparent 66%) 0 0 / 50% 50% no-repeat,
+    radial-gradient(circle at 100% 0, transparent 40%, #ff4d5e 42% 64%, transparent 66%) 100% 0 / 50% 50% no-repeat,
+    radial-gradient(circle at 0 100%, transparent 40%, #ff4d5e 42% 64%, transparent 66%) 0 100% / 50% 50% no-repeat,
+    radial-gradient(circle at 100% 100%, transparent 40%, #ff4d5e 42% 64%, transparent 66%) 100% 100% / 50% 50% no-repeat; }
+.minik[data-ruh="kizgin"]::after{ opacity:1; }
+/* Kızgınken imleçten gözünü kaçırır. */
+.minik[data-ruh="kizgin"].is-takip .minik__goz{ transform:translate(calc(var(--gx, 0) * -1), calc(var(--gy, 0) * -1)); }
+
+@media (prefers-reduced-motion:no-preference){
+  .minik[data-ruh="uzgun"]:not(.is-uyuyor) .minik__govde::after{ animation:mk-yas 3.4s ease-in 1s infinite; }
+  .minik[data-ruh="uzgun"]:not(.is-yuruyor):not(.is-oturuyor):not(.is-uyuyor) .minik__govde{ animation:mk-ic-cek 5s ease-in-out infinite; }
+  .minik[data-ruh="kizgin"]:not(.is-yuruyor):not(.is-tepin) .minik__govde{ animation:mk-sinir 1.3s ease-in-out infinite; }
+  .minik[data-ruh="kizgin"]::after{ animation:mk-ofke .9s ease-in-out infinite; }
+  .minik.is-tepin .minik__govde{ animation:mk-tepin .16s ease-in-out 6; }
+  .minik.is-tepin .minik__ayak--sol{ animation:mk-ayak-vur .32s ease-in-out 3; }
+  .minik.is-tepin .minik__ayak--sag{ animation:mk-ayak-vur .32s ease-in-out -.16s 3; }
+  .minik[data-ruh="mutlu"]:not(.is-yuruyor):not(.is-oturuyor):not(.is-uyuyor):not(.is-hopluyor):not(.is-gidik) .minik__govde{ animation:mk-nese 2.4s ease-in-out infinite; }
+  .minik[data-ruh="uykulu"]:not(.is-yuruyor):not(.is-oturuyor):not(.is-uyuyor):not(.is-esniyor) .minik__govde{ animation:mk-nefes 6.5s ease-in-out infinite; }
+  .minik.is-esniyor .minik__agiz{ animation:mk-esne 2.4s ease-in-out both; }
+  .minik.is-esniyor .minik__govde{ animation:mk-esne-govde 2.4s ease-in-out both; }
+}
+@keyframes mk-yas{ 0%{ opacity:0; transform:translateY(0) scale(.6); } 18%{ opacity:.95; transform:translateY(0) scale(1); }
+  70%{ opacity:.9; transform:translateY(5px); } 100%{ opacity:0; transform:translateY(9px) scale(.8); } }
+@keyframes mk-ic-cek{ 0%, 100%{ transform:translateY(4%) scale(1.02, .97); } 40%{ transform:translateY(2%) scale(.99, 1.02); } 55%{ transform:translateY(5%) scale(1.04, .95); } }
+@keyframes mk-sinir{ 0%, 100%{ transform:scale(1.03, .97); } 50%{ transform:scale(1.07, .93); } }
+@keyframes mk-ofke{ 0%, 100%{ transform:scale(.85); } 50%{ transform:scale(1.15); } }
+@keyframes mk-tepin{ 0%, 100%{ transform:translateY(0) rotate(-4deg) scale(1.04, .96); } 50%{ transform:translateY(-2px) rotate(4deg) scale(.98, 1.03); } }
+@keyframes mk-ayak-vur{ 0%, 100%{ transform:translateY(0); } 40%{ transform:translateY(-4px); } 60%{ transform:translateY(0) scaleX(1.2); } }
+@keyframes mk-nese{ 0%, 100%{ transform:scale(1, 1) rotate(0); } 25%{ transform:scale(1.02, .98) rotate(-3deg); } 75%{ transform:scale(1.02, .98) rotate(3deg); } }
+@keyframes mk-esne{ 0%, 100%{ width:14%; left:43%; height:8%; border-radius:0 0 8px 8px; }
+  30%, 70%{ width:18%; left:41%; height:20%; top:60%; border:0; border-radius:50%; background:#1d2140; } }
+@keyframes mk-esne-govde{ 0%, 100%{ transform:none; } 35%, 65%{ transform:translateY(-1px) scale(.96, 1.07); } }
+
+/* 19) KALAN OPAK YÜZEYLER CAM OLUR (kullanıcı, 2026-10-28: «bazı yerler hâlâ
+   liquid glass gibi görünmüyor»). Kartların içinde dolu gri/beyaz kalan
+   küçük yüzeyler tarandı (opak2.js): ikincil düğmeler, hızlı kayıt
+   seçicileri, pano şeridinin sıradaki blokları. Hepsi ince cam: yarı
+   saydam dolgu, üstte ışık çizgisi, ince parlak kenar. Ana düğme dolu kalır. */
+html[data-zemin="yumusak"] .site--v5 #main :is(.btn:not(.btn--primary):not(.btn--ghost):not(.btn--danger):not(.btn--ink), .pk__dugme--ikincil, .vk .x30 .ci, .pk-serit .is-sira){
+  background:var(--cam-ince); border-color:transparent;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px var(--cam-kenar), 0 4px 12px -8px rgba(20,24,40,.25); }
+html[data-theme="dark"][data-zemin="yumusak"] .site--v5 #main :is(.btn:not(.btn--primary):not(.btn--ghost):not(.btn--danger):not(.btn--ink), .pk__dugme--ikincil, .vk .x30 .ci, .pk-serit .is-sira){
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px var(--cam-kenar), 0 4px 12px -8px rgba(0,0,0,.5); }
+@media (prefers-color-scheme:dark){
+  html:not([data-theme="light"])[data-zemin="yumusak"] .site--v5 #main :is(.btn:not(.btn--primary):not(.btn--ghost):not(.btn--danger):not(.btn--ink), .pk__dugme--ikincil, .vk .x30 .ci, .pk-serit .is-sira){
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px var(--cam-kenar), 0 4px 12px -8px rgba(0,0,0,.5); }
+}
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -19208,7 +19276,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'7e3b6ad5', at:'2026-10-27 21:11', dirty:true };
+ESP.BUILD = { id:'c57680fb', at:'2026-10-28 00:53', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -28581,7 +28649,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- tık sesleri
 
-     «Kısık, tok, kısa» (2026-10-02); «daha profesyonel» (2026-10-28). Dosya
+     «Tok, kısa» (2026-10-02); «daha profesyonel», «zayıf ve tırmalıyor» (2026-10-28). Dosya
      yok: her ses birkaç katmanlı küçük bir sentezdir. Katman türleri:
        ton      osilatör (sine/triangle), istenirse alçak geçiren süzgeç
        hisirti  beyaz gürültü, bant süzgeci (dokunuşun «tık»ı, sayfa hışırtısı)
@@ -28592,37 +28660,44 @@ window.LIFEOS = window.LIFEOS || {};
      ve yumuşak bir sıkıştırıcı — sesler aynı odada çalıyor gibi durur,
      üst üste binince patlamaz. Her çalışta perde ±%2 oynar: aynı tık art
      arda makineli tüfek gibi duyulmaz. */
+  /* İkinci tur (2026-10-28, «çok zayıf ve kulak tırmalıyor»): eskisi
+     −33…−42 dBFS idi, duyulmuyordu; tık 3,6 kHz hışırtı ve 1,7 kHz ton,
+     minik sesi testere dişiydi (yarısı 2,5 kHz üstü). Şimdi her şey 2 kHz
+     altında, sinüs/üçgen; tepe −14…−22 dBFS: dokunuş tok bir «tık»,
+     notalar marimba gibi yumuşak. */
   const SESLER = Object.freeze({
-    /* Dokunuş: 1 kHz üstü kısa hışırtı + cam gövde + çok hafif ağırlık. */
-    tik:  [{ t:0, tur:'hisirti', f:[3600, 2400], q:1.2, d:0.014, g:0.03, a:0.001 },
-           { t:0, tur:'ton', dalga:'sine', f:[1760, 1480], d:0.04, g:0.013, a:0.002 },
-           { t:0, tur:'ton', dalga:'sine', f:[190, 120], d:0.035, g:0.016, a:0.002 }],
-    /* Aç/kapa: iki notalık yumuşak tel (G5 ↔ D6), hafif yankı. */
-    ac:   [{ t:0, tur:'ton', dalga:'triangle', f:[784, 784], suz:2600, d:0.09, g:0.016, a:0.003, oda:0.12 },
-           { t:0.055, tur:'ton', dalga:'triangle', f:[1175, 1175], suz:3200, d:0.12, g:0.014, a:0.003, oda:0.16 }],
-    kapa: [{ t:0, tur:'ton', dalga:'triangle', f:[1175, 1175], suz:3200, d:0.08, g:0.014, a:0.003, oda:0.12 },
-           { t:0.055, tur:'ton', dalga:'triangle', f:[784, 784], suz:2400, d:0.11, g:0.015, a:0.003, oda:0.12 }],
-    /* Kaydedildi: iki vuruşluk cam çan (C6 → E6), çanın kısmi sesiyle. */
-    tamam:[{ t:0, tur:'ton', dalga:'sine', f:[1047, 1047], d:0.55, g:0.009, a:0.004, oda:0.3 },
-           { t:0, tur:'ton', dalga:'sine', f:[2890, 2890], d:0.18, g:0.003, a:0.002, oda:0.3 },
-           { t:0.09, tur:'ton', dalga:'sine', f:[1319, 1319], d:0.7, g:0.008, a:0.004, oda:0.35 },
-           { t:0.09, tur:'ton', dalga:'sine', f:[3640, 3640], d:0.2, g:0.0025, a:0.002, oda:0.35 }],
-    /* Sayfa açılınca: camın üstünden geçen hava — yükselen yumuşak hışırtı
-       ve en sonda belli belirsiz bir cam notası. */
-    sayfa:[{ t:0, tur:'hisirti', f:[420, 2200], q:0.8, d:0.28, g:0.007, a:0.11, oda:0.25 },
-           { t:0.14, tur:'ton', dalga:'sine', f:[1568, 1568], d:0.36, g:0.003, a:0.02, oda:0.4 }],
-    /* Miniğe dokununca kıkırdama: «hi-hi-hi», ince ve yükselen ünlüler. */
-    gidik:[{ t:0, tur:'ses', un:'i', f:[620, 700], d:0.07, g:0.018, a:0.008 },
-           { t:0.085, tur:'ses', un:'i', f:[680, 760], d:0.07, g:0.017, a:0.008 },
-           { t:0.17, tur:'ses', un:'e', f:[740, 840], d:0.07, g:0.016, a:0.008 },
-           { t:0.26, tur:'ses', un:'i', f:[820, 960], d:0.1, g:0.014, a:0.008, oda:0.15 }],
-    /* Minik sohbeti («bla bla»): alçak, inip çıkan üç hece. */
-    bla:  [{ t:0, tur:'ses', un:'a', f:[430, 470], d:0.09, g:0.009, a:0.01 },
-           { t:0.12, tur:'ses', un:'o', f:[480, 420], d:0.09, g:0.009, a:0.01 },
-           { t:0.24, tur:'ses', un:'e', f:[450, 520], d:0.11, g:0.008, a:0.01, oda:0.1 }],
+    /* Dokunuş: perdesi düşen tok bir vuruş + alttan ağırlık + çok kısa yumuşak hışırtı. */
+    tik:  [{ t:0, tur:'hisirti', f:[1400, 900], q:0.8, d:0.012, g:0.08, a:0.001 },
+           { t:0, tur:'ton', dalga:'sine', f:[1100, 760], d:0.045, g:0.28, a:0.002 },
+           { t:0, tur:'ton', dalga:'sine', f:[210, 140], d:0.05, g:0.2, a:0.002 }],
+    /* Aç/kapa: iki notalık yumuşak marimba (C5 ↔ G5); aç yükselir, kapa iner. */
+    ac:   [{ t:0, tur:'ton', dalga:'sine', f:[523, 523], d:0.13, g:0.15, a:0.004, oda:0.12 },
+           { t:0.06, tur:'ton', dalga:'sine', f:[784, 784], d:0.18, g:0.14, a:0.004, oda:0.15 }],
+    kapa: [{ t:0, tur:'ton', dalga:'sine', f:[784, 784], d:0.12, g:0.14, a:0.004, oda:0.12 },
+           { t:0.06, tur:'ton', dalga:'sine', f:[523, 523], d:0.16, g:0.15, a:0.004, oda:0.12 }],
+    /* Kaydedildi: iki vuruşluk yumuşak çan (E5 → B5), ilkinde kısa oktav parıltısı. */
+    tamam:[{ t:0, tur:'ton', dalga:'sine', f:[659, 659], d:0.5, g:0.14, a:0.005, oda:0.25 },
+           { t:0, tur:'ton', dalga:'sine', f:[1318, 1318], d:0.12, g:0.03, a:0.002, oda:0.25 },
+           { t:0.1, tur:'ton', dalga:'sine', f:[988, 988], d:0.6, g:0.13, a:0.005, oda:0.3 }],
+    /* Sayfa açılınca: camın üstünden geçen hava — alçaktan yükselen yumuşak hışırtı. */
+    sayfa:[{ t:0, tur:'hisirti', f:[280, 1000], q:0.7, d:0.3, g:0.22, a:0.12, oda:0.25 },
+           { t:0.16, tur:'ton', dalga:'sine', f:[784, 784], d:0.3, g:0.035, a:0.02, oda:0.4 }],
+    /* Miniğe dokununca kıkırdama: «hi-hi-hi», yükselen kısa heceler. */
+    gidik:[{ t:0, tur:'ses', un:'i', f:[520, 600], d:0.07, g:0.08, a:0.008 },
+           { t:0.085, tur:'ses', un:'i', f:[570, 650], d:0.07, g:0.075, a:0.008 },
+           { t:0.17, tur:'ses', un:'e', f:[620, 720], d:0.07, g:0.07, a:0.008 },
+           { t:0.26, tur:'ses', un:'i', f:[680, 820], d:0.1, g:0.065, a:0.008, oda:0.15 }],
+    /* Kızan minik: alçak, inen bir homurtu («hıh!»). */
+    hirr: [{ t:0, tur:'ses', un:'o', f:[240, 180], d:0.13, g:0.11, a:0.01 },
+           { t:0.15, tur:'ses', un:'u', f:[210, 150], d:0.16, g:0.09, a:0.01 }],
+    /* Minik sohbeti («bla bla»): alçak, inip çıkan üç hece; arkada kalır. */
+    bla:  [{ t:0, tur:'ses', un:'a', f:[300, 340], d:0.09, g:0.07, a:0.01 },
+           { t:0.12, tur:'ses', un:'o', f:[350, 300], d:0.09, g:0.07, a:0.01 },
+           { t:0.24, tur:'ses', un:'e', f:[320, 380], d:0.11, g:0.06, a:0.01, oda:0.1 }],
   });
-  /* Küçük bir ağızdan ünlüler: [F1, F2] Hz (insan sesinin biraz üstü). */
-  const UNLU = Object.freeze({ a:[950, 1500], e:[600, 2300], i:[400, 2800], o:[640, 1050], u:[420, 950] });
+  /* Küçük bir ağızdan ünlüler: [F1, F2] Hz; F2 2 kHz'de kesilir (tizlik yok). */
+  const UNLU = Object.freeze({ a:[800, 1250], e:[500, 1700], i:[350, 1900], o:[550, 900], u:[380, 780] });
+  const TAVAN = 2000;        // hiçbir süzgeç bunun üstüne çıkmaz (Hz)
   const ARA = 0.04;          // aynı ses bundan sık çalmaz (sn)
   let baglam = null;
   let zincir = null;
@@ -28652,7 +28727,7 @@ window.LIFEOS = window.LIFEOS || {};
     try{
       if(c.createDynamicsCompressor){
         const k = c.createDynamicsCompressor();
-        k.threshold.value = -24; k.knee.value = 18; k.ratio.value = 3; k.attack.value = 0.003; k.release.value = 0.12;
+        k.threshold.value = -12; k.knee.value = 8; k.ratio.value = 4; k.attack.value = 0.002; k.release.value = 0.15;
         k.connect(c.destination);
         hedef = k;
       }
@@ -28717,27 +28792,28 @@ window.LIFEOS = window.LIFEOS || {};
       if(!z.gurultu || !c.createBufferSource) return;
       kaynak = c.createBufferSource();
       kaynak.buffer = z.gurultu;
-      const b = suzgec(c, 'bandpass', f0, k.q == null ? 1 : k.q, t);
+      const b = suzgec(c, 'bandpass', Math.min(TAVAN, f0), k.q == null ? 1 : k.q, t);
       if(b){
-        if(f1 !== f0) b.frequency.exponentialRampToValueAtTime(f1, t + k.d);
+        if(f1 !== f0) b.frequency.exponentialRampToValueAtTime(Math.min(TAVAN, f1), t + k.d);
         kaynak.connect(b); b.connect(g);
       } else kaynak.connect(g);
     } else {
       kaynak = c.createOscillator();
-      kaynak.type = k.tur === 'ses' ? 'sawtooth' : (k.dalga || 'sine');
+      kaynak.type = k.tur === 'ses' ? 'triangle' : (k.dalga || 'sine');
       kaynak.frequency.setValueAtTime(f0, t);
       if(f1 !== f0) kaynak.frequency.exponentialRampToValueAtTime(f1, t + k.d);
       if(k.tur === 'ses'){
-        /* İki formant yan yana: ünlü rengini bunlar verir; perde biraz da
-           formantı taşır (küçük minik, ince ağız). */
+        /* Üçgen dalga (yumuşak) + iki geniş formant: ünlü rengini bunlar
+           verir; perde biraz da formantı taşır (küçük minik, ince ağız).
+           Kuru yolun yarısı da gider: ses incelip cızırdamaz. */
         const u = UNLU[k.un] || UNLU.a, fp = Math.sqrt(perde);
-        const b1 = suzgec(c, 'bandpass', u[0] * fp, 6, t), b2 = suzgec(c, 'bandpass', u[1] * fp, 9, t);
+        const b1 = suzgec(c, 'bandpass', Math.min(TAVAN, u[0] * fp), 3, t), b2 = suzgec(c, 'bandpass', Math.min(TAVAN, u[1] * fp), 4, t);
         if(b1 && b2){
-          /* Dar süzgeç enerjiyi yer: telafi kazancı öteki seslerle aynı düzeye getirir. */
-          const g2 = c.createGain(), dz = c.createGain();
-          g2.gain.value = 0.6; dz.gain.value = 3;
+          const g2 = c.createGain(), dz = c.createGain(), kuru = c.createGain();
+          g2.gain.value = 0.5; dz.gain.value = 1.6; kuru.gain.value = 0.5;
           kaynak.connect(b1); b1.connect(dz);
           kaynak.connect(b2); b2.connect(g2); g2.connect(dz);
+          kaynak.connect(kuru); kuru.connect(dz);
           dz.connect(g);
         } else kaynak.connect(g);
       } else if(k.suz){
@@ -96696,6 +96772,14 @@ window.LIFEOS.MINIK = (function(){
   const HUY_AD = Object.freeze({ uykucu:'uykucu', konuskan:'konuşkan', merakli:'meraklı', neseli:'neşeli', hayalci:'hayalci', bilge:'bilge' });
   const BALON = Object.freeze(['hey!', '♪', '…', 'hı hı', 'ooo', '!?', 'hihi', '♡']);
 
+  /* Ruh hâli (kullanıcı, 2026-10-28: «çok tıklarsak kızsın; üzgün, mutlu,
+     uykulu olsunlar»). Kişi başına oturumda bellekte durur; hiçbir kayda
+     bakmaz, hiçbir şey yazmaz. Sıra: kızgın > küs (üzgün) > mutlu > gece
+     uykulu > özlem (üzgün) > huyun kendi hâli. */
+  const RUH = Object.freeze({ SIK:5, PENCERE:4000, KIZ:8000, KUS:20000, MUTLU:15000, OZLEM:30 * 60000 });
+  const RUH_AD = Object.freeze({ mutlu:'mutlu', uzgun:'üzgün', uykulu:'uykulu', kizgin:'kızgın' });
+  const RUH_IPUCU = Object.freeze({ kizgin:'Biraz bekle', uzgun:'Dokun, sevindir', uykulu:'Dokun, uyandır' });
+
   /* --- saf hesaplar (test edilir) --- */
 
   /* Dikdörtgenlerden yürünebilir kenarlar: belge koordinatında {x1, x2, y}.
@@ -96773,9 +96857,37 @@ window.LIFEOS.MINIK = (function(){
     return liste.find(o => o !== mk && o.z && mk.z && o.z.el === mk.z.el && Math.abs(o.x - mk.x) <= 260) || null;
   }
 
+  function yeniRuh(simdi){ return { dokunus:[], kizgin:0, kus:0, mutlu:0, son:simdi }; }
+
+  /* Dokunuş: 'kalp' (sevindi), 'kizdi' (4 sn'de 5. dokunuş), 'hirr'
+     (kızgınken dokunuldu, kızgınlık uzar), 'baristi' (küsken tek dokunuş). */
+  function dokun(r, simdi){
+    r.son = simdi;
+    r.dokunus = r.dokunus.filter(t => simdi - t < RUH.PENCERE).concat(simdi);
+    if(simdi < r.kizgin){ r.kizgin = Math.max(r.kizgin, simdi + RUH.KIZ * .6); r.kus = r.kizgin + RUH.KUS; return 'hirr'; }
+    if(r.dokunus.length >= RUH.SIK){
+      r.dokunus = []; r.mutlu = 0;
+      r.kizgin = simdi + RUH.KIZ; r.kus = r.kizgin + RUH.KUS;
+      return 'kizdi';
+    }
+    if(simdi < r.kus){ r.kus = 0; r.mutlu = simdi + RUH.MUTLU; return 'baristi'; }
+    r.mutlu = simdi + RUH.MUTLU;
+    return 'kalp';
+  }
+
+  function ruh(r, simdi, saat, huy){
+    if(simdi < r.kizgin) return 'kizgin';
+    if(simdi < r.kus) return 'uzgun';
+    if(simdi < r.mutlu) return 'mutlu';
+    if(saat >= 23 || saat < 6) return 'uykulu';
+    if(huy === 'uykucu' && saat >= 13 && saat < 16) return 'uykulu';
+    if(simdi - r.son > RUH.OZLEM) return 'uzgun';
+    return huy === 'neseli' ? 'mutlu' : '';
+  }
+
   /* --- DOM --- */
 
-  const durum = { kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null };
+  const durum = { kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null, ruhlar:{}, isikTazele:false };
   /* Sohbet gibi çok adımlı işlerin zamanlayıcıları: sayfa değişince silinir. */
   function zamanla(fn, ms){ const t = setTimeout(fn, ms); durum.zamanlar.push(t); return t; }
   /* Meşgul işareti 12 sn'de kendiliğinden düşer: yarıda kalan bir iş
@@ -96816,15 +96928,28 @@ window.LIFEOS.MINIK = (function(){
     return zeminler(kutular);
   }
 
+  /* Ruh hâli kişinindir: sayfa değişip minik başka kişiyi giyince o kişinin hâli gelir. */
+  function ruhu(mk){ return durum.ruhlar[mk.ad] || (durum.ruhlar[mk.ad] = yeniRuh(Date.now())); }
+  function ruhNe(mk){ return ruh(ruhu(mk), Date.now(), new Date().getHours(), mk.huy); }
+  /* Yüz (cam.css data-ruh) ve etiket: ruh hâli varsa huyun yerine o yazar. */
+  function ruhUygula(mk){
+    const r = ruhNe(mk);
+    if((mk.el.dataset.ruh || '') !== r){ if(r) mk.el.dataset.ruh = r; else delete mk.el.dataset.ruh; }
+    mk.el.querySelector('.minik__ad i').textContent = r ? RUH_AD[r] : (HUY_AD[mk.huy] || mk.huy);
+    mk.el.querySelector('.minik__ad small').textContent = RUH_IPUCU[r] || 'Dokun, gıdıkla';
+    return r;
+  }
+
   function giydir(mk, k){
     mk.huy = k.huy;
+    mk.ad = k.ad;
     mk.perde = k.perde;
     mk.el.querySelector('.minik__ad b').textContent = k.ad;
-    mk.el.querySelector('.minik__ad i').textContent = HUY_AD[k.huy] || k.huy;
     mk.el.dataset.tip = k.tip;
     mk.el.dataset.bicim = k.bicim;
     mk.el.style.setProperty('--boy', k.boy + 'px');
     mk.el.style.setProperty('--ton', String(k.ton));   // birimsiz: oklch'nin h'si sayı
+    ruhUygula(mk);
   }
 
   function minikYap(i){
@@ -96835,9 +96960,13 @@ window.LIFEOS.MINIK = (function(){
       + '<span class="minik__govde"><i class="minik__deri"></i><i class="minik__goz"></i><i class="minik__goz"></i>'
       + '<i class="minik__agiz"></i><i class="minik__sus"></i></span><span class="minik__balon"></span><span class="minik__zzz">z</span>'
       + '<span class="minik__kalp">♡</span><span class="minik__ad"><b></b> · <i></i><small>Dokun, gıdıkla</small></span>';
-    const mk = { el:m, z:null, x:0, y:0, anim:null, zaman:0, huy:'', perde:1, mesgul:false, mesgulSon:0 };
+    const mk = { el:m, z:null, x:0, y:0, anim:null, zaman:0, huy:'', ad:'', perde:1, mesgul:false, mesgulSon:0 };
     giydir(mk, KISILER[i % KISILER.length]);
-    m.addEventListener('pointerenter', () => { m.classList.add('is-farkinda'); if(!mesgulMu(mk) && !m.classList.contains('is-uyuyor')) ekHal(mk, 'is-selam', 900); });
+    m.addEventListener('pointerenter', () => {
+      m.classList.add('is-farkinda');
+      const r = ruhUygula(mk);
+      if(!mesgulMu(mk) && !m.classList.contains('is-uyuyor') && r !== 'kizgin' && r !== 'uzgun') ekHal(mk, 'is-selam', 900);
+    });
     m.addEventListener('pointerleave', () => m.classList.remove('is-farkinda'));
     m.addEventListener('click', e => { e.stopPropagation(); gidikla(mk); });
     return mk;
@@ -96850,11 +96979,14 @@ window.LIFEOS.MINIK = (function(){
 
   function sonra(mk, ms){ clearTimeout(mk.zaman); mk.zaman = setTimeout(() => yasat(mk), ms); }
 
-  const HALLER = ['is-bakiyor', 'is-kirpiyor', 'is-hopluyor', 'is-oturuyor', 'is-uyuyor', 'is-uyaniyor', 'is-konusuyor', 'is-gidik', 'is-selam'];
+  const HALLER = ['is-bakiyor', 'is-kirpiyor', 'is-hopluyor', 'is-oturuyor', 'is-uyuyor', 'is-uyaniyor', 'is-konusuyor', 'is-gidik', 'is-selam', 'is-tepin', 'is-esniyor'];
   /* Kısa süren ek hâl (el sallama, kalp): hâlin üstüne biner, kendiliğinden düşer. */
   function ekHal(mk, h, ms){ mk.el.classList.add(h); setTimeout(() => mk.el.classList.remove(h), ms); }
   function temizle(mk){ HALLER.forEach(h => mk.el.classList.remove(h)); }
   function hal(mk, h){ temizle(mk); if(h){ void mk.el.offsetWidth; mk.el.classList.add(h); } }
+
+  /* Üzgün ağır, uykulu ağır aksak, mutlu ve kızgın hızlı yürür. */
+  const HIZ_RUH = Object.freeze({ uzgun:.6, uykulu:.7, mutlu:1.25, kizgin:1.5 });
 
   /* Paytak yürüyüş: önce yöne hafifçe eğilir, sonra kısa adımlarla, yavaş
      başlayıp yavaş durarak yürür (adım ritmi CSS'te). */
@@ -96865,7 +96997,7 @@ window.LIFEOS.MINIK = (function(){
     mk.el.classList.add('is-yuruyor');
     const a = mk.x, y = mk.y;
     mk.anim = mk.el.animate([{ transform:'translate(' + a + 'px,' + y + 'px)' }, { transform:'translate(' + hedef + 'px,' + y + 'px)' }],
-      { duration:Math.max(900, yol / HIZ * 1000), delay:180, easing:'cubic-bezier(.45,.05,.4,1)', fill:'both' });
+      { duration:Math.max(900, yol / (HIZ * (HIZ_RUH[mk.el.dataset.ruh] || 1)) * 1000), delay:180, easing:'cubic-bezier(.45,.05,.4,1)', fill:'both' });
     mk.anim.onfinish = () => { mk.el.classList.remove('is-yuruyor'); koy(mk, hedef, y); mk.anim.cancel(); (bitince || dinlen)(mk); };
   }
 
@@ -96882,13 +97014,17 @@ window.LIFEOS.MINIK = (function(){
      turda gerinip uyanır (yasat). */
   function dinlen(mk){
     if(mesgulMu(mk)) return;
+    const ne = ruhUygula(mk);
     const r = Math.random();
-    const uyku = mk.huy === 'uykucu' ? .22 : .06;
-    const otur = mk.huy === 'merakli' ? .12 : .2;
+    const uyku = ne === 'uykulu' ? .4 : mk.huy === 'uykucu' ? .22 : ne ? .02 : .06;
+    const otur = ne === 'uzgun' ? .45 : mk.huy === 'merakli' ? .12 : .2;
+    if(ne === 'kizgin'){ hal(mk, ''); return sonra(mk, 1600 + Math.random() * 1200); }   // kollar kavuşuk, ayak vurur (CSS)
     if(r < uyku){ hal(mk, 'is-uyuyor'); return sonra(mk, 11000 + Math.random() * 9000); }
     if(r < uyku + otur){ hal(mk, 'is-oturuyor'); return sonra(mk, 6000 + Math.random() * 7000); }
     const s = r - uyku - otur;
-    hal(mk, s < .2 ? 'is-bakiyor' : s < .34 ? 'is-kirpiyor' : s < .42 ? 'is-hopluyor' : '');
+    if(ne === 'uykulu' && s < .25){ hal(mk, 'is-esniyor'); return sonra(mk, 2600 + Math.random() * 2000); }
+    const hop = ne === 'mutlu' ? .62 : ne === 'uzgun' ? .34 : .42;
+    hal(mk, s < .2 ? 'is-bakiyor' : s < .34 ? 'is-kirpiyor' : s < hop ? 'is-hopluyor' : '');
     sonra(mk, 2200 + Math.random() * 4200);
   }
 
@@ -96914,11 +97050,22 @@ window.LIFEOS.MINIK = (function(){
   }
 
   /* Gıdıklanınca kıvrılır, gözleri «^ ^» olur, kıkırdar; uyuyorsa irkilir. */
+  /* Çok gıdıklanınca kızar: ayak vurur, «hıh!» der, kollarını kavuşturur,
+     imleçten başını çevirir (CSS); kızgınlık geçince bir süre küser, tek
+     bir dokunuşla barışır. */
   function gidikla(mk){
     if(mesgulMu(mk)) return;
     clearTimeout(mk.zaman);
-    if(mk.anim){ mk.anim.cancel(); mk.el.classList.remove('is-yuruyor'); }
+    if(mk.anim){ mk.anim.cancel(); mk.el.classList.remove('is-yuruyor'); koy(mk, mk.x, mk.y); }
     const uyuyordu = mk.el.classList.contains('is-uyuyor');
+    const olay = dokun(ruhu(mk), Date.now());
+    ruhUygula(mk);
+    if(olay === 'kizdi' || olay === 'hirr'){
+      mk.el.querySelector('.minik__balon').textContent = olay === 'kizdi' ? 'hıh!' : 'hı-ıh';
+      hal(mk, 'is-tepin'); mk.el.classList.add('is-konusuyor');
+      ses('hirr', mk);
+      return sonra(mk, 1400);
+    }
     hal(mk, uyuyordu ? 'is-uyaniyor' : 'is-gidik');
     if(!uyuyordu) ekHal(mk, 'is-kalp', 1400);
     ses(uyuyordu ? 'tik' : 'gidik', mk);
@@ -96951,9 +97098,18 @@ window.LIFEOS.MINIK = (function(){
     }
     if(!mk.z){ yerlestir(mk); return sonra(mk, 1800 + Math.random() * 2000); }
     if(mk.el.classList.contains('is-uyuyor')){ hal(mk, 'is-uyaniyor'); return sonra(mk, 1600); }
-    /* Aynı karttaki arkadaşının yanına gidip sohbet açar (konuşkan daha sık). */
+    const ne = ruhUygula(mk);
+    /* Kızgın: imleçten uzağa, kenarın öbür ucuna yürür. */
+    if(ne === 'kizgin'){
+      const uzak = imlec && imlec.x + (window.scrollX || 0) > mk.x ? mk.z.x1 + 20 : mk.z.x2 - 20;
+      if(Math.abs(uzak - mk.x) > 30) return yuru(mk, uzak);
+      return dinlen(mk);
+    }
+    /* Aynı karttaki arkadaşının yanına gidip sohbet açar (konuşkan daha sık);
+       üzgün ya da kızgın olan sohbete girmez. */
     const es = sohbetEsi(durum.minikler, mk);
-    if(es && !mesgulMu(es) && !es.el.classList.contains('is-uyuyor') && Math.random() < (mk.huy === 'konuskan' ? .45 : .2)){
+    const keyifli = m => { const r = ruhNe(m); return r !== 'kizgin' && r !== 'uzgun'; };
+    if(es && keyifli(mk) && keyifli(es) && !mesgulMu(es) && !es.el.classList.contains('is-uyuyor') && Math.random() < (mk.huy === 'konuskan' ? .45 : ne === 'mutlu' ? .3 : .2)){
       clearTimeout(es.zaman);
       if(es.anim){ es.anim.cancel(); es.el.classList.remove('is-yuruyor'); }
       if(Math.abs(es.x - mk.x) <= SOHBET_YAKIN + 10) return sohbet(mk, es);
@@ -96976,6 +97132,9 @@ window.LIFEOS.MINIK = (function(){
   function tazele(){
     durum.bekle = 0;
     if(!durum.kat) return;
+    /* Sayfa yeniden çizildi ya da kaydı: imleç yerinde, altındaki kart değişmiş olabilir. */
+    if(imlec && (!hedef || !hedef.isConnected || durum.isikTazele)){ hedef = null; elIsigi(); }
+    durum.isikTazele = false;
     if(kapaliMi()){ durum.kat.hidden = true; return; }
     durum.kat.hidden = false;
     durum.zeminler = olcum();
@@ -97033,19 +97192,49 @@ window.LIFEOS.MINIK = (function(){
   }
 
   /* Gözler fareyi izler; imlecin altındaki en dış cam kartta ışık imleci
-     takip eder (cam.css «EL IŞIĞI»). İkisi de karede en çok bir kez. */
-  let imlec = null, kare = 0, hedef = null, isikli = null;
-  function elIsigi(){
-    let k = hedef && hedef.closest ? hedef.closest(KART) : null;
+     takip eder (cam.css «EL IŞIĞI»). İkisi de karede en çok bir kez.
+     Işık imlece gecikmeyle yetişir (her karede yolun %22'si: suyun
+     altındaki ışık gibi süzülür); miniğin üstündeyken altındaki kartta
+     kalır; kart yeniden çizilince (tıklama, kayıt) aynı yerdeki yeni
+     karta sönmeden geçer. Ayrılınca --mx/--my kalır: ışık olduğu yerde söner. */
+  let imlec = null, kare = 0, hedef = null, isikli = null, isikKare = 0;
+  const isikYer = { x:0, y:0, hx:0, hy:0 };
+  function isikKarti(){
+    let el = hedef;
+    if(imlec && (!el || !el.isConnected)) el = hedef = document.elementFromPoint(imlec.x, imlec.y);
+    const m = el && el.closest && el.closest('.minik');
+    if(m){ const mk = durum.minikler.find(o => o.el === m); return mk && mk.z && mk.z.el && mk.z.el.isConnected ? mk.z.el : null; }
+    let k = el && el.closest ? el.closest(KART) : null;
     while(k && k.parentElement && k.parentElement.closest(KART)) k = k.parentElement.closest(KART);
-    if(isikli && isikli !== k){ isikli.classList.remove('isikli'); isikli.style.removeProperty('--mx'); isikli.style.removeProperty('--my'); }
-    isikli = k;
-    if(!k || !imlec) return;
-    const r = k.getBoundingClientRect();
-    k.style.setProperty('--mx', (imlec.x - r.left).toFixed(0) + 'px');
-    k.style.setProperty('--my', (imlec.y - r.top).toFixed(0) + 'px');
-    k.classList.add('isikli');
+    return k;
   }
+  function elIsigi(){
+    const k = imlec ? isikKarti() : null;
+    const kopan = isikli && !isikli.isConnected;
+    if(isikli && isikli !== k) isikli.classList.remove('isikli', 'isik-bas');
+    if(!k){ isikli = null; return; }
+    const r = k.getBoundingClientRect();
+    isikYer.hx = imlec.x - r.left; isikYer.hy = imlec.y - r.top;
+    if(isikli !== k){
+      if(!kopan){ isikYer.x = isikYer.hx; isikYer.y = isikYer.hy; }
+      else k.classList.add('isik-hemen');
+      k.classList.add('isikli');
+      isikli = k;
+    }
+    if(!isikKare) isikKare = requestAnimationFrame(isikAdim);
+  }
+  function isikAdim(){
+    isikKare = 0;
+    if(!isikli) return;
+    isikli.classList.remove('isik-hemen');
+    isikYer.x += (isikYer.hx - isikYer.x) * .22; isikYer.y += (isikYer.hy - isikYer.y) * .22;
+    isikli.style.setProperty('--mx', isikYer.x.toFixed(1) + 'px');
+    isikli.style.setProperty('--my', isikYer.y.toFixed(1) + 'px');
+    if(Math.abs(isikYer.hx - isikYer.x) + Math.abs(isikYer.hy - isikYer.y) > .6) isikKare = requestAnimationFrame(isikAdim);
+  }
+  /* Basınca ışık parmağın altında toplanır; bırakınca yayılır. */
+  function bas(e){ if(isikli && isikli.contains(e.target)) isikli.classList.add('isik-bas'); }
+  function birak(){ if(isikli) isikli.classList.remove('isik-bas'); }
   function gozler(){
     kare = 0;
     elIsigi();
@@ -97124,7 +97313,10 @@ window.LIFEOS.MINIK = (function(){
         && Math.abs(mk.z.el.getBoundingClientRect().top + sy - mk.y) > 1)) tazele();
     }, 1000);
     window.addEventListener('resize', iste);
-    window.addEventListener('scroll', iste, { passive:true });
+    window.addEventListener('scroll', () => { durum.isikTazele = true; iste(); }, { passive:true });
+    document.addEventListener('pointerdown', bas, true);
+    document.addEventListener('pointerup', birak, true);
+    document.addEventListener('pointercancel', birak, true);
     document.addEventListener('click', sevin, true);
     document.addEventListener('pointermove', fare, { passive:true });
   }
@@ -97134,7 +97326,8 @@ window.LIFEOS.MINIK = (function(){
     else window.addEventListener('load', () => setTimeout(kur, 60));
   }
 
-  return { kur, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, KISILER, HUY_AD, KART, EN_AZ, PAY };
+  return { kur, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh,
+    KISILER, HUY_AD, RUH, RUH_AD, KART, EN_AZ, PAY };
 })();
 
 /* ==== js/app.js ==== */
