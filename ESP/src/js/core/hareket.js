@@ -419,6 +419,43 @@ window.LIFEOS.HAREKET = (function(){
     }
   }
 
+  /* Kapanış kopyası: katman (kağıt, komut kutusu) hemen kaldırılır, yerinde
+     dokunulmaz bir kopyası söner (cam.css «h-cikis»). Asıl öğenin eş zamanlı
+     kalkmasına güvenen odak ve testler bozulmaz. */
+  function cikis(el, o){
+    o = o || {};
+    const az = o.az != null ? !!o.az : azMi();
+    if(az || !el || !el.isConnected || !el.cloneNode) return null;
+    const k = el.cloneNode(true);
+    /* Açık katman sayılmasın: kısayol ve odak kapısı [role=dialog][aria-modal] arar. */
+    const SIL = ['id', 'data-act', 'data-change', 'name', 'role', 'aria-modal'];
+    SIL.forEach(a => k.removeAttribute(a));
+    k.classList.add('h-cikis');
+    k.setAttribute('aria-hidden', 'true');
+    k.setAttribute('inert', '');
+    k.querySelectorAll('[id], [data-act], [data-change], [name], [role], [aria-modal]').forEach(e => SIL.forEach(a => e.removeAttribute(a)));
+    document.body.appendChild(k);
+    setTimeout(() => k.remove(), o.sure || 260);
+    return k;
+  }
+
+  /* Açılır bölüm yalnız kullanıcı başlığa dokununca oynar: yeniden çizimde
+     «open» ile gelen bölüm de toggle olayı atar, o sayılmaz. */
+  let sonOzet = null, sonOzetZaman = 0;
+  if(typeof document !== 'undefined'){
+    document.addEventListener('click', e => {
+      const s = e.target && e.target.closest ? e.target.closest('summary') : null;
+      if(s){ sonOzet = s; sonOzetZaman = Date.now(); }
+    }, true);
+    document.addEventListener('toggle', e => {
+      const d = e.target;
+      if(!d || d.tagName !== 'DETAILS' || !d.open || azMi()) return;
+      if(!sonOzet || Date.now() - sonOzetZaman > 600 || sonOzet.parentElement !== d) return;
+      d.classList.remove('h-acildi'); void d.offsetWidth; d.classList.add('h-acildi');
+      setTimeout(() => d.classList.remove('h-acildi'), 450);
+    }, true);
+  }
+
   /* ---------------------------------------------------------- 156 */
 
   let halkaEl = null, halkaZaman = null;
@@ -559,6 +596,6 @@ window.LIFEOS.HAREKET = (function(){
     return true;
   }
 
-  return { once, sonra, tekCanli, baslikKopyala, raf, kesimler, kaynak, gecis, halka, onizleIcerik, odakCik, kur, kaydedildi,
+  return { once, sonra, tekCanli, baslikKopyala, raf, kesimler, kaynak, gecis, cikis, halka, onizleIcerik, odakCik, kur, kaydedildi,
     isaretKaydir, EN_COK_KAPANAN };
 })();

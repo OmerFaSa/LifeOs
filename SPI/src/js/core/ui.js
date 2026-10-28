@@ -708,6 +708,8 @@ SP.UI = (function(){
   function closeSheet(){
     const el = document.getElementById('sheet');
     if(!el) return;
+    /* Kapanış da yaylanır: yerinde dokunulmaz bir kopya söner (hareket.js cikis). */
+    try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.cikis) H.cikis(el); }catch(e){ /* kopya yoksa anında kapanır */ }
     el.remove();
     document.body.style.overflow = sheetScroll;
     const kabuk = document.querySelector('.site');
@@ -806,7 +808,7 @@ SP.UI = (function(){
       if(L && L.ONERI && typeof L.ONERI.cizgi === 'function') el.appendChild(L.ONERI.cizgi(life));
       setTimeout(() => { const b = el.querySelector('.toast__undo'); if(b) b.disabled = true; }, life);
     }
-    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, life);
+    setTimeout(() => el.classList.add('is-gidiyor'), life);   // cikis: cam.css toast-cik
     setTimeout(() => el.remove(), life + 300);
     return el;
   }

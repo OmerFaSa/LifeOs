@@ -397,6 +397,26 @@ describe('022 · Sonucu söyleyen düğme', () => {
   });
 });
 
+/* Kullanıcı (2026-10-28, «animasyonları master seviyeye çıkar»): bildirim
+   kayarak geliyor, yalnız solarak gidiyordu. Süre dolunca `is-gidiyor`
+   alır (cam.css toast-cik: aşağı kayıp küçülerek söner), sonra kalkar. */
+describe('Bildirim çıkışı (ui.js toast)', () => {
+  const UI = () => (window.R || window.SP || window.ESP).UI;
+  it('süre dolunca bildirim çıkış sınıfı alır, satır içi solma yazılmaz, sonra kalkar', async () => {
+    let kok = document.getElementById('toast-root'), kurdum = false;
+    if(!kok){ kok = document.createElement('div'); kok.id = 'toast-root'; document.body.appendChild(kok); kurdum = true; }
+    try{
+      const el = UI().toast('Kaydedildi', { life:40 });
+      expect(el.classList.contains('is-gidiyor')).toBe(false);
+      await new Promise(r => setTimeout(r, 90));
+      expect(el.classList.contains('is-gidiyor')).toBe(true);
+      expect(el.style.opacity).toBe('');
+      await new Promise(r => setTimeout(r, 400));
+      expect(el.isConnected).toBe(false);
+    }finally{ if(kurdum) kok.remove(); }
+  });
+});
+
 describe('150 · Geri al şeridi (ui.js toast)', () => {
   const UI = () => (window.R || window.SP || window.ESP).UI;
 

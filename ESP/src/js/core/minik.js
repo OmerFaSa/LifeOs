@@ -164,8 +164,10 @@ window.LIFEOS.MINIK = (function(){
   /* Dikdörtgenlerden yürünebilir kenarlar: belge koordinatında {x1, x2, y}.
      Ekrandan çıkan kart da zemindir: minik kartıyla birlikte kayar. */
   const UST_BOS = 56;         // kenarın üstünde bu kadar boşluk yoksa (başka kart) zemin olmaz
-  function zeminler(kutular){
-    const sikisik = k => kutular.some(o => o !== k && o.alt != null && o.alt <= k.ust + 1 && k.ust - o.alt < UST_BOS
+  const ELLE_BOS = 16;        // elle bırakılan kartta bu kadarı yeter (kartlar arası 24 px)
+  function zeminler(kutular, elle){
+    const sikisik = k => kutular.some(o => o !== k && o.alt != null && o.alt <= k.ust + 1
+      && k.ust - o.alt < (elle && elle.has(k.el) ? ELLE_BOS : UST_BOS)
       && o.sol < k.sol + k.genis && o.sol + o.genis > k.sol);
     return kutular
       .filter(k => !k.engel && k.genis >= EN_AZ && !sikisik(k))
@@ -296,7 +298,7 @@ window.LIFEOS.MINIK = (function(){
 
   /* --- DOM --- */
 
-  const durum = { havuz:KISILER, radyo:false, kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null, ruhlar:{}, isikTazele:false };
+  const durum = { elle:new Set(), havuz:KISILER, radyo:false, kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null, ruhlar:{}, isikTazele:false };
   /* Sohbet gibi çok adımlı işlerin zamanlayıcıları: sayfa değişince silinir. */
   function zamanla(fn, ms){ const t = setTimeout(fn, ms); durum.zamanlar.push(t); return t; }
   /* Meşgul işareti 12 sn'de kendiliğinden düşer: yarıda kalan bir iş
@@ -327,7 +329,7 @@ window.LIFEOS.MINIK = (function(){
   }
   const rasgele = l => l[Math.floor(Math.random() * l.length)];
 
-  function olcum(){
+  function olcum(elle){
     const sy = window.scrollY || 0, sx = window.scrollX || 0;
     const kutular = [];
     document.querySelectorAll(KART).forEach(el => {
@@ -344,7 +346,7 @@ window.LIFEOS.MINIK = (function(){
       const r = el.getBoundingClientRect();
       if(r.width && r.height) kutular.push({ sol:r.left + sx, ust:r.top + sy, alt:r.bottom + sy, genis:r.width, el, engel:true });
     });
-    return zeminler(kutular);
+    return zeminler(kutular, elle || durum.elle);
   }
 
   /* Ruh hâli kişinindir: sayfa değişip minik başka kişiyi giyince o kişinin hâli gelir. */
@@ -403,8 +405,76 @@ window.LIFEOS.MINIK = (function(){
       if(!mesgulMu(mk) && !m.classList.contains('is-uyuyor') && r !== 'kizgin' && r !== 'uzgun') ekHal(mk, 'is-selam', 900);
     });
     m.addEventListener('pointerleave', () => m.classList.remove('is-farkinda'));
-    m.addEventListener('click', e => { e.stopPropagation(); gidikla(mk); });
+    m.addEventListener('pointerdown', e => surukBasla(mk, e));
+    m.addEventListener('click', e => { e.stopPropagation(); if(mk.surukledi){ mk.surukledi = false; return; } gidikla(mk); });
     return mk;
+  }
+
+  /* Sürükle bırak (kullanıcı, 2026-10-28: «agent'ı basılı tutup
+     sürükleyebilelim bir yere»). Basılı tutunca (260 ms) ya da 6 px
+     oynatınca minik ele gelir, tutulduğu yerden imleci izler; bırakılınca
+     altındaki kenara düşer (dus). Sürüklemesiz dokunuş gıdık olarak kalır. */
+  function inisYeri(liste, x, y){
+    if(!liste || !liste.length) return null;
+    const kirp = z => Math.min(z.x2, Math.max(z.x1, x));
+    const alt = liste.filter(z => x >= z.x1 && x <= z.x2 && z.y >= y - 4).sort((a, b) => a.y - b.y);
+    if(alt.length) return { z:alt[0], x:kirp(alt[0]) };
+    let en = null, enD = Infinity;
+    liste.forEach(z => { const d = Math.hypot(x - kirp(z), z.y - y); if(d < enD){ enD = d; en = z; } });
+    return { z:en, x:kirp(en) };
+  }
+  function surukBasla(mk, e){
+    if(e.button !== 0 || kapaliMi() || !durum.kat) return;
+    e.preventDefault();
+    const bas = { x:e.clientX, y:e.clientY }, sx = () => window.scrollX || 0, sy = () => window.scrollY || 0;
+    let acik = false;
+    const al = () => {
+      if(acik) return;
+      acik = true;
+      clearTimeout(mk.zaman); clearInterval(mk.adimT);
+      if(mk.anim){ const t = new DOMMatrixReadOnly(getComputedStyle(mk.el).transform); mk.anim.cancel(); koy(mk, t.m41, t.m42); }
+      mesgul(mk, true); mk.tasiniyor = true; mk.z = null;
+      temizle(mk); mk.el.classList.remove('is-yuruyor', 'is-ucuyor'); mk.el.classList.add('is-tasiniyor');
+      mk.tut = { dx:bas.x + sx() - mk.x, dy:bas.y + sy() - mk.y };
+      ses('tik', mk);
+    };
+    const tut = setTimeout(al, 260);
+    const git = ev => {
+      if(!acik && Math.hypot(ev.clientX - bas.x, ev.clientY - bas.y) > 6) al();
+      if(acik) koy(mk, ev.clientX + sx() - mk.tut.dx, ev.clientY + sy() - mk.tut.dy);
+    };
+    const birak = () => {
+      clearTimeout(tut);
+      window.removeEventListener('pointermove', git); window.removeEventListener('pointerup', birak); window.removeEventListener('pointercancel', birak);
+      if(!acik) return;
+      mk.surukledi = true; setTimeout(() => { mk.surukledi = false; }, 400);
+      dus(mk);
+    };
+    window.addEventListener('pointermove', git); window.addEventListener('pointerup', birak); window.addEventListener('pointercancel', birak);
+  }
+  /* Yerçekimi: hızlanarak iner, kenara değince ezilip toparlanır, silkinir. */
+  function dus(mk){
+    const yer = inisYeri(olcum({ has:() => true }), mk.x, mk.y);
+    if(yer) durum.elle.add(yer.z.el);
+    durum.zeminler = olcum();
+    mk.tasiniyor = false;
+    mk.el.classList.remove('is-tasiniyor');
+    if(!yer){ mesgul(mk, false); if(yerlestir(mk)) sonra(mk, 1500); return; }
+    const a = { x:mk.x, y:mk.y }, b = { x:yer.x, y:yer.z.y };
+    const ms = Math.round(Math.min(720, 200 + Math.sqrt(Math.abs(b.y - a.y) + Math.abs(b.x - a.x) * .3) * 22));
+    const t = (x, y, gx, gy) => 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) scale(' + gx + ',' + gy + ')';
+    mk.el.classList.add('is-ucuyor');
+    mk.anim = mk.el.animate([
+      { transform:t(a.x, a.y, .94, 1.08), easing:'cubic-bezier(.5,0,.9,.5)' },
+      { transform:t(b.x, b.y, 1.24, .74), offset:.78, easing:'cubic-bezier(.2,.8,.3,1)' },
+      { transform:t(b.x, b.y, .96, 1.05), offset:.9 },
+      { transform:t(b.x, b.y, 1, 1) }
+    ], { duration:ms, fill:'forwards' });
+    mk.anim.onfinish = () => {
+      mk.el.classList.remove('is-ucuyor'); mk.z = yer.z; koy(mk, b.x, b.y); mk.anim.cancel();
+      mesgul(mk, false); ses('tik', mk, false); ekHal(mk, 'is-silkiniyor', 900);
+      sonra(mk, 1800);
+    };
   }
 
   function koy(mk, x, y){
@@ -599,6 +669,7 @@ window.LIFEOS.MINIK = (function(){
     durum.kat.hidden = false;
     durum.zeminler = olcum();
     durum.minikler.forEach(mk => {
+      if(mk.tasiniyor) return;   // elde: yerine bırakılınca düşer
       const ayni = mk.z && durum.zeminler.find(o => o.el === mk.z.el);
       if(ayni){
         mk.z = ayni;
@@ -626,6 +697,7 @@ window.LIFEOS.MINIK = (function(){
     const anahtar = document.documentElement.dataset.sayfa || '';
     if(anahtar === durum.sayfa) return;
     durum.sayfa = anahtar;
+    durum.elle.clear();
     durum.zamanlar.forEach(clearTimeout); durum.zamanlar = [];
     const k = kadro(anahtar, durum.minikler.length, durum.havuz);
     durum.minikler.forEach((mk, i) => {
@@ -845,6 +917,6 @@ window.LIFEOS.MINIK = (function(){
   }
 
   return { kur, sayi, seciciHtml, yanSes, radyoda, ofisKisileri, ICERIK, DIYALOG, diyalogSec, ESYALAR, esyaSec,
-    SES_ANAHTAR, sesAyar, sesAyarla, sesIzinli, sesSeciciHtml, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh,
+    SES_ANAHTAR, sesAyar, sesAyarla, sesIzinli, sesSeciciHtml, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh, inisYeri,
     KISILER, HUY_AD, RUH, RUH_AD, KART, EN_AZ, PAY };
 })();

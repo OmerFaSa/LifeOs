@@ -428,6 +428,68 @@
   });
   /* 2026-10-05 (kullanıcı, «3 güzel»): Kaydet dokunuşu yalnız gerçekten
      kayıt yazıldıysa; doğrulama geri çevirdiyse «kaydedildi» hissi yok. */
+  /* Kullanıcı (2026-10-28: «sistemin bütün animasyonlarını geliştir, master
+     seviyeye çık»): kağıt açılırken yaylanıyor, kapanırken bir anda yok
+     oluyordu. closeSheet öğeyi yine hemen kaldırır (odak ve testler eş
+     zamanlı davranışa güvenir); yerinde dokunulmaz bir kopya söner. */
+  describe('Hareket — kapanış kopyası', () => {
+    function katman(){
+      const d = kok('<div id="sheet" class="overlay"><div class="sheet" role="dialog" aria-modal="true"><input id="ad" name="ad"><button data-act="kaydet">Kaydet</button></div></div>');
+      return d.firstChild;
+    }
+    it('azaltılmış harekette kopya çizilmez', () => {
+      const el = katman();
+      try{
+        expect(H.cikis(el, { az:true })).toBe(null);
+        expect(document.querySelectorAll('.h-cikis').length).toBe(0);
+      }finally{ el.parentNode.remove(); }
+    });
+    it('kopya dokunulmaz, okunmaz, kimliksizdir ve kendi kalkar', async () => {
+      const el = katman();
+      try{
+        const k = H.cikis(el, { az:false, sure:40 });
+        expect(k.classList.contains('h-cikis')).toBe(true);
+        expect(k.getAttribute('aria-hidden')).toBe('true');
+        expect(k.hasAttribute('inert')).toBe(true);
+        expect(k.id).toBe('');
+        expect(k.querySelector('[id], [data-act], [name]')).toBe(null);
+        /* Açık katman sayılmaz: kısayol ve odak kapısı [role=dialog][aria-modal] arar. */
+        expect(k.matches('[role], [aria-modal]') || !!k.querySelector('[role="dialog"], [aria-modal]')).toBe(false);
+        expect(document.getElementById('sheet')).toBe(el);
+        await new Promise(r => setTimeout(r, 120));
+        expect(k.isConnected).toBe(false);
+      }finally{ el.parentNode.remove(); }
+    });
+  });
+
+  /* Açılır bölüm (details) yalnız kullanıcı başlığa dokununca yumuşakça
+     açılır; yeniden çizimde açık gelen bölüm oynamaz (aynı ekran sözü). */
+  describe('Hareket — açılır bölüm', () => {
+    async function hareketli(fn){
+      const eski = window.matchMedia;
+      window.matchMedia = q => ({ matches:false, media:q, addEventListener(){}, removeEventListener(){}, addListener(){}, removeListener(){} });
+      try{ await fn(); }finally{ window.matchMedia = eski; }
+    }
+    const bekle = ms => new Promise(r => setTimeout(r, ms));
+    it('başlığa dokununca açılan bölüm h-acildi alır', () => hareketli(async () => {
+      const d = kok('<details><summary>Ayrıntı</summary><p>İçerik</p></details>');
+      try{
+        d.querySelector('summary').click();
+        await bekle(40);
+        const det = d.querySelector('details');
+        expect(det.open).toBe(true);
+        expect(det.classList.contains('h-acildi')).toBe(true);
+      }finally{ d.remove(); }
+    }));
+    it('yeniden çizimde açık gelen bölüm oynamaz', () => hareketli(async () => {
+      const d = kok('<details open><summary>Ayrıntı</summary><p>İçerik</p></details>');
+      try{
+        await bekle(40);
+        expect(d.querySelector('details').classList.contains('h-acildi')).toBe(false);
+      }finally{ d.remove(); }
+    }));
+  });
+
   describe('Hareket — Kaydet dokunuşu', () => {
     const H = () => window.LIFEOS.HAREKET;
     function kur(){

@@ -245,6 +245,34 @@
     });
   });
 
+  /* Kullanıcı (2026-10-28: «agent'ı basılı tutup sürükleyebilelim bir
+     yere»): bırakınca minik, bırakıldığı noktanın ALTINDAKİ ilk kart
+     kenarına düşer (yerçekimi); altında kenar yoksa en yakın kenara. */
+  describe('Minik · sürükle bırak', () => {
+    const l = [{ x1:100, x2:500, y:200 }, { x1:100, x2:500, y:600 }, { x1:700, x2:1100, y:400 }];
+    it('bırakılan noktanın altındaki ilk kenara iner, x kenarın içinde kalır', () => {
+      const a = C.inisYeri(l, 300, 120);
+      expect(a.z.y).toBe(200); expect(a.x).toBe(300);
+      const b = C.inisYeri(l, 300, 350);
+      expect(b.z.y).toBe(600);
+      const c = C.inisYeri(l, 90, 150);
+      expect(c.z.y).toBe(200); expect(c.x).toBe(100);
+    });
+    /* Kartlar arası 24 px: kendiliğinden gezerken zemin olmaz (56 px ister),
+       ama elle bırakılan kartta 16 px yeter; dipdibe (4 px) yine olmaz. */
+    it('elle bırakılan kartta 24 px boşluk yeter, 4 px yetmez', () => {
+      const ust = { sol:0, ust:100, alt:300, genis:400, el:'a' }, alt24 = { sol:0, ust:324, alt:500, genis:400, el:'b' }, alt4 = { sol:0, ust:504, alt:700, genis:400, el:'c' };
+      expect(C.zeminler([ust, alt24, alt4]).map(z => z.y).join()).toBe('100');
+      const elle = new Set(['b', 'c']);
+      expect(C.zeminler([ust, alt24, alt4], elle).map(z => z.y).join()).toBe('100,324');
+    });
+    it('altında kenar yoksa en yakın kenara; kenar yoksa iniş de yok', () => {
+      const a = C.inisYeri(l, 1150, 900);
+      expect(a.z.y).toBe(400); expect(a.x).toBe(1100);
+      expect(C.inisYeri([], 10, 10)).toBe(null);
+    });
+  });
+
   /* Kullanıcı (2026-10-28): «radyo açarsak minikler dans etsin, hepsi chill,
      radyoya uysun». Radyo çalarken ritimle sallanır (kulaklık istenmedi, kalktı). */
   describe('Minik · radyo', () => {
