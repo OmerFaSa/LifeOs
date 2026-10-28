@@ -1184,3 +1184,14 @@ html[data-theme="dark"] .ortam-isik::before{ background:radial-gradient(closest-
 html:not([data-zemin="yumusak"]) .ortam-isik, html.king-acik .ortam-isik{ display:none; }
 @media (prefers-reduced-motion:reduce){ .ortam-isik{ display:none; } }
 @media (hover:none){ .ortam-isik{ display:none; } }
+
+/* 27) BOŞ DURUMDAKİ DÜĞME (kullanıcı, 2026-10-28, ekran görüntüsü: «hâlâ
+   böyle çok kötü butonlar var»). temel.css boş durumun düğmesini dolgusuz
+   bağlantı gibi tanımlar; cam yüzey onu dolu renge boyayınca yazı rengin
+   kenarına dayanıyordu. Camda gerçek düğme ölçüsü alır. */
+html[data-zemin="yumusak"] .site--v5 .empty .btn{ min-height:34px; padding:0 16px; gap:7px; margin-top:4px; }
+html[data-zemin="yumusak"] .site--v5 .empty .btn:hover{ text-decoration:none; }
+html[data-zemin="yumusak"] .site--v5 .empty .btn--sm{ min-height:30px; padding:0 13px; }
+/* Sayfa bölümünün içindeki defter satırı kart.css'in iç boşluk yolunun
+   dışında kalır; cam onu kart gibi boyadığı için yazı kenara dayanıyordu. */
+html[data-zemin="yumusak"] .site--v5 .ledger .sayfabolum .lrow:not(.kahraman){ padding-inline:20px; }

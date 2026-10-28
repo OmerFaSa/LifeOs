@@ -250,8 +250,33 @@ async function portMuhafizi(portlar, ipucu){
                 }
               }
             });
+            /* BOYALI AMA DOLGUSUZ DÜĞME: rengi dolu bir düğmenin yazısı
+               kenarına yapışıksa düğme ezik görünür. Boş durumdaki düğme
+               bağlantı gibi dolgusuz tanımlıydı, cam yüzey onu mavi
+               boyayınca «Kart ekle» rengin kenarına dayanıyordu
+               (kullanıcı, 2026-10-28, ekran görüntüsü). */
+            const basik = [];
+            document.querySelectorAll('#main button, #main a.btn').forEach(el => {
+              const r = el.getBoundingClientRect();
+              if(!r.width || !(el.textContent || '').trim() || el.matches(':hover, :focus')) return;   // yalniz uzerine gelince dolan baglanti sayilmaz
+              const st = getComputedStyle(el);
+              const boyali = st.backgroundImage !== 'none' || !/rgba\(0, 0, 0, 0\)|transparent/.test(st.backgroundColor);
+              if(!boyali || Math.min(parseFloat(st.paddingLeft), parseFloat(st.paddingRight)) >= 6) return;
+              const ad = (el.getAttribute('data-act') || el.tagName.toLowerCase()) + ' «' + el.textContent.trim().slice(0, 24) + '»';
+              if(basik.indexOf(ad) < 0) basik.push(ad);
+            });
+            /* Boyalı defter satırının yazısı da kartın kenarına dayanmaz:
+               sayfa bölümünün içindeki satır kart.css'in iç boşluk yolunun
+               dışında kalıyordu (AYS Kartlar, boş durum). */
+            document.querySelectorAll('#main .ledger .lrow:not(.kahraman)').forEach(el => {
+              const st = getComputedStyle(el);
+              if(!el.getBoundingClientRect().width || (st.backgroundImage === 'none' && /rgba\(0, 0, 0, 0\)|transparent/.test(st.backgroundColor))) return;
+              if(Math.min(parseFloat(st.paddingLeft), parseFloat(st.paddingRight)) >= 6) return;
+              const ad = 'satır «' + (el.textContent || '').trim().slice(0, 24) + '»';
+              if(basik.indexOf(ad) < 0) basik.push(ad);
+            });
             return { tasma, sucluler:sucluler.slice(0, 4), kucuk:kucuk.slice(0, 4), yapisik:yapisik.slice(0, 4),
-              dikey:dikey.slice(0, 4) };
+              dikey:dikey.slice(0, 4), basik:basik.slice(0, 4) };
           }, { minTap:MIN_TAP, allow:TAP_ALLOW });
 
           const yer = (G.ad === 'tablet' ? 'tablet ' : '') + r + (t ? '/' + t : '');
@@ -261,6 +286,7 @@ async function portMuhafizi(portlar, ipucu){
               + (sonuc.sucluler.length ? ' — ' + sonuc.sucluler.join(', ') : ''));
           }
           sonuc.kucuk.forEach(k => errors.push(yer + ': küçük dokunma hedefi — ' + k));
+          sonuc.basik.forEach(k => errors.push(yer + ': boyalı yüzeyin yazısı kenarına yapışık — ' + k));
           sonuc.dikey.forEach(k => errors.push(yer + ': içerik kutusundan taşıp komşusuna biniyor — ' + k));
           if(sonuc.tasma <= 1){
             sonuc.yapisik.forEach(k => errors.push(yer + ': pencere kenarına yapışık (başka tarayıcıda taşar) — ' + k));
