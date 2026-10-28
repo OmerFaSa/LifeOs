@@ -411,7 +411,7 @@ window.LIFEOS.MINIK = (function(){
   }
   const ICERIK = '<i class="minik__golge"></i><i class="minik__ayak minik__ayak--sol"></i><i class="minik__ayak minik__ayak--sag"></i>'
       + '<i class="minik__kol minik__kol--sol"></i><i class="minik__kol minik__kol--sag"></i>'
-      + '<span class="minik__govde"><i class="minik__deri"></i><i class="minik__isik"></i><i class="minik__goz"></i><i class="minik__goz"></i>'
+      + '<span class="minik__govde"><i class="minik__deri"></i><b class="minik__isik"></b><i class="minik__goz"></i><i class="minik__goz"></i>'
       + '<i class="minik__agiz"></i><i class="minik__sus"></i><i class="minik__kravat"></i><i class="minik__kart"></i><i class="minik__esya"></i></span><span class="minik__balon"></span><span class="minik__zzz">z</span>'
       + '<span class="minik__kalp">♡</span><span class="minik__ad"><b></b> · <i></i><small>Dokun, gıdıkla</small></span>';
 

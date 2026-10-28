@@ -266,6 +266,14 @@
         expect(C.ICERIK.indexOf('minik__isik') >= 0).toBe(true);
       }finally{ C.boyAyarla(once); }
     });
+    it('gözler gövdedeki 2. ve 3. <i>: konum ve kaş kuralları nth-of-type ile yazıldı', () => {
+      // Hata (2026-10-29): iç ışık <i> olarak gözlerden önce girdi; sol göz sağa
+      // kaydı, sağ göz konumsuz kaldı, kravat ağzın yerinde «+» gibi göründü.
+      const d = document.createElement('div'); d.innerHTML = C.ICERIK;
+      const g = d.querySelectorAll('.minik__govde > i:nth-of-type(2), .minik__govde > i:nth-of-type(3)');
+      expect(g.length).toBe(2);
+      expect(g[0].className + ' ' + g[1].className).toBe('minik__goz minik__goz');
+    });
   });
 
   describe('Minik · sürükle bırak', () => {

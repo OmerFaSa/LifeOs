@@ -38,3 +38,7 @@
 
 /* 2) Sekme gizliyken hareket durur (minik.js is-durgun). */
 .minikkat.is-durgun *, .minikkat.is-durgun{ animation-play-state:paused !important; }
+
+/* 3) Üçgen ofis miniğinde ağız gözlerin hemen altında (73–81 %); kravat
+   oraya inerse ağzı örter ve yüzde «+» gibi durur. Kravat ağzın altına. */
+.minik[data-ofis][data-bicim="ucgen"] .minik__kravat{ top:85%; height:13%; width:10%; left:45%; }
