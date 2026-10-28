@@ -397,11 +397,28 @@
       });
     });
 
-    it('her ses kısık: hiçbir katman 0.03 kazancı geçmez; kısa sesler 1 sn\'yi geçmez', () => {
-      Object.keys(S.SESLER).forEach(ad => S.SESLER[ad].forEach(k => {
-        expect(k.g > 0 && k.g <= 0.03).toBe(true);
-        expect(k.t + k.d <= 1).toBe(true);
-      }));
+    /* Kullanıcı (2026-10-28, ikinci tur): «sesler çok zayıf ve kulak
+       tırmalıyor». Ölçüm: tepe −33…−42 dBFS (duyulmuyordu), Ponpon'un
+       kıkırdamasının yarısı 2,5 kHz üstündeydi (testere dişi + 2,8 kHz
+       ünlü). Şimdi: duyulur düzey, tizlik yok, testere dişi yok. */
+    it('duyulur ama yumuşak: katman kazancı 0.05–0.3; hiçbir ton ya da süzgeç 2,2 kHz üstüne çıkmaz; testere dişi yok', () => {
+      Object.keys(S.SESLER).forEach(ad => {
+        expect(Math.max.apply(null, S.SESLER[ad].map(k => k.g)) >= 0.05).toBe(true);
+        S.SESLER[ad].forEach(k => { expect(k.g > 0 && k.g <= 0.3).toBe(true); expect(k.t + k.d <= 1).toBe(true); });
+      });
+      const { Baglam, kayit } = sahteBaglam();
+      return ortamla({ AudioContext:Baglam, sentetik:true }, () => {
+        S.tikAc(true);
+        Object.keys(S.SESLER).forEach(ad => {
+          kayit.saat += 2; kayit.nota.length = 0; kayit.filtre.length = 0;
+          expect(S.tik(ad, true, { perde:1.25 })).toBe(true);
+          kayit.nota.forEach(n => {
+            expect(n.type === 'sawtooth' || n.type === 'square').toBe(false);
+            expect(Math.max(n.f0, n.f1 || 0) <= 2200).toBe(true);
+          });
+          kayit.filtre.forEach(f => expect(f.f <= 2200).toBe(true));
+        });
+      });
     });
 
     it('minik sesi: gıdık ve sohbet ünlü süzgecinden (formant) geçer; perde sesin tonunu taşır', () => {

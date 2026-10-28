@@ -505,7 +505,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- tık sesleri
 
-     «Kısık, tok, kısa» (2026-10-02); «daha profesyonel» (2026-10-28). Dosya
+     «Tok, kısa» (2026-10-02); «daha profesyonel», «zayıf ve tırmalıyor» (2026-10-28). Dosya
      yok: her ses birkaç katmanlı küçük bir sentezdir. Katman türleri:
        ton      osilatör (sine/triangle), istenirse alçak geçiren süzgeç
        hisirti  beyaz gürültü, bant süzgeci (dokunuşun «tık»ı, sayfa hışırtısı)
@@ -516,37 +516,44 @@ window.LIFEOS = window.LIFEOS || {};
      ve yumuşak bir sıkıştırıcı — sesler aynı odada çalıyor gibi durur,
      üst üste binince patlamaz. Her çalışta perde ±%2 oynar: aynı tık art
      arda makineli tüfek gibi duyulmaz. */
+  /* İkinci tur (2026-10-28, «çok zayıf ve kulak tırmalıyor»): eskisi
+     −33…−42 dBFS idi, duyulmuyordu; tık 3,6 kHz hışırtı ve 1,7 kHz ton,
+     minik sesi testere dişiydi (yarısı 2,5 kHz üstü). Şimdi her şey 2 kHz
+     altında, sinüs/üçgen; tepe −14…−22 dBFS: dokunuş tok bir «tık»,
+     notalar marimba gibi yumuşak. */
   const SESLER = Object.freeze({
-    /* Dokunuş: 1 kHz üstü kısa hışırtı + cam gövde + çok hafif ağırlık. */
-    tik:  [{ t:0, tur:'hisirti', f:[3600, 2400], q:1.2, d:0.014, g:0.03, a:0.001 },
-           { t:0, tur:'ton', dalga:'sine', f:[1760, 1480], d:0.04, g:0.013, a:0.002 },
-           { t:0, tur:'ton', dalga:'sine', f:[190, 120], d:0.035, g:0.016, a:0.002 }],
-    /* Aç/kapa: iki notalık yumuşak tel (G5 ↔ D6), hafif yankı. */
-    ac:   [{ t:0, tur:'ton', dalga:'triangle', f:[784, 784], suz:2600, d:0.09, g:0.016, a:0.003, oda:0.12 },
-           { t:0.055, tur:'ton', dalga:'triangle', f:[1175, 1175], suz:3200, d:0.12, g:0.014, a:0.003, oda:0.16 }],
-    kapa: [{ t:0, tur:'ton', dalga:'triangle', f:[1175, 1175], suz:3200, d:0.08, g:0.014, a:0.003, oda:0.12 },
-           { t:0.055, tur:'ton', dalga:'triangle', f:[784, 784], suz:2400, d:0.11, g:0.015, a:0.003, oda:0.12 }],
-    /* Kaydedildi: iki vuruşluk cam çan (C6 → E6), çanın kısmi sesiyle. */
-    tamam:[{ t:0, tur:'ton', dalga:'sine', f:[1047, 1047], d:0.55, g:0.009, a:0.004, oda:0.3 },
-           { t:0, tur:'ton', dalga:'sine', f:[2890, 2890], d:0.18, g:0.003, a:0.002, oda:0.3 },
-           { t:0.09, tur:'ton', dalga:'sine', f:[1319, 1319], d:0.7, g:0.008, a:0.004, oda:0.35 },
-           { t:0.09, tur:'ton', dalga:'sine', f:[3640, 3640], d:0.2, g:0.0025, a:0.002, oda:0.35 }],
-    /* Sayfa açılınca: camın üstünden geçen hava — yükselen yumuşak hışırtı
-       ve en sonda belli belirsiz bir cam notası. */
-    sayfa:[{ t:0, tur:'hisirti', f:[420, 2200], q:0.8, d:0.28, g:0.007, a:0.11, oda:0.25 },
-           { t:0.14, tur:'ton', dalga:'sine', f:[1568, 1568], d:0.36, g:0.003, a:0.02, oda:0.4 }],
-    /* Miniğe dokununca kıkırdama: «hi-hi-hi», ince ve yükselen ünlüler. */
-    gidik:[{ t:0, tur:'ses', un:'i', f:[620, 700], d:0.07, g:0.018, a:0.008 },
-           { t:0.085, tur:'ses', un:'i', f:[680, 760], d:0.07, g:0.017, a:0.008 },
-           { t:0.17, tur:'ses', un:'e', f:[740, 840], d:0.07, g:0.016, a:0.008 },
-           { t:0.26, tur:'ses', un:'i', f:[820, 960], d:0.1, g:0.014, a:0.008, oda:0.15 }],
-    /* Minik sohbeti («bla bla»): alçak, inip çıkan üç hece. */
-    bla:  [{ t:0, tur:'ses', un:'a', f:[430, 470], d:0.09, g:0.009, a:0.01 },
-           { t:0.12, tur:'ses', un:'o', f:[480, 420], d:0.09, g:0.009, a:0.01 },
-           { t:0.24, tur:'ses', un:'e', f:[450, 520], d:0.11, g:0.008, a:0.01, oda:0.1 }],
+    /* Dokunuş: perdesi düşen tok bir vuruş + alttan ağırlık + çok kısa yumuşak hışırtı. */
+    tik:  [{ t:0, tur:'hisirti', f:[1400, 900], q:0.8, d:0.012, g:0.08, a:0.001 },
+           { t:0, tur:'ton', dalga:'sine', f:[1100, 760], d:0.045, g:0.28, a:0.002 },
+           { t:0, tur:'ton', dalga:'sine', f:[210, 140], d:0.05, g:0.2, a:0.002 }],
+    /* Aç/kapa: iki notalık yumuşak marimba (C5 ↔ G5); aç yükselir, kapa iner. */
+    ac:   [{ t:0, tur:'ton', dalga:'sine', f:[523, 523], d:0.13, g:0.15, a:0.004, oda:0.12 },
+           { t:0.06, tur:'ton', dalga:'sine', f:[784, 784], d:0.18, g:0.14, a:0.004, oda:0.15 }],
+    kapa: [{ t:0, tur:'ton', dalga:'sine', f:[784, 784], d:0.12, g:0.14, a:0.004, oda:0.12 },
+           { t:0.06, tur:'ton', dalga:'sine', f:[523, 523], d:0.16, g:0.15, a:0.004, oda:0.12 }],
+    /* Kaydedildi: iki vuruşluk yumuşak çan (E5 → B5), ilkinde kısa oktav parıltısı. */
+    tamam:[{ t:0, tur:'ton', dalga:'sine', f:[659, 659], d:0.5, g:0.14, a:0.005, oda:0.25 },
+           { t:0, tur:'ton', dalga:'sine', f:[1318, 1318], d:0.12, g:0.03, a:0.002, oda:0.25 },
+           { t:0.1, tur:'ton', dalga:'sine', f:[988, 988], d:0.6, g:0.13, a:0.005, oda:0.3 }],
+    /* Sayfa açılınca: camın üstünden geçen hava — alçaktan yükselen yumuşak hışırtı. */
+    sayfa:[{ t:0, tur:'hisirti', f:[280, 1000], q:0.7, d:0.3, g:0.22, a:0.12, oda:0.25 },
+           { t:0.16, tur:'ton', dalga:'sine', f:[784, 784], d:0.3, g:0.035, a:0.02, oda:0.4 }],
+    /* Miniğe dokununca kıkırdama: «hi-hi-hi», yükselen kısa heceler. */
+    gidik:[{ t:0, tur:'ses', un:'i', f:[520, 600], d:0.07, g:0.08, a:0.008 },
+           { t:0.085, tur:'ses', un:'i', f:[570, 650], d:0.07, g:0.075, a:0.008 },
+           { t:0.17, tur:'ses', un:'e', f:[620, 720], d:0.07, g:0.07, a:0.008 },
+           { t:0.26, tur:'ses', un:'i', f:[680, 820], d:0.1, g:0.065, a:0.008, oda:0.15 }],
+    /* Kızan minik: alçak, inen bir homurtu («hıh!»). */
+    hirr: [{ t:0, tur:'ses', un:'o', f:[240, 180], d:0.13, g:0.11, a:0.01 },
+           { t:0.15, tur:'ses', un:'u', f:[210, 150], d:0.16, g:0.09, a:0.01 }],
+    /* Minik sohbeti («bla bla»): alçak, inip çıkan üç hece; arkada kalır. */
+    bla:  [{ t:0, tur:'ses', un:'a', f:[300, 340], d:0.09, g:0.07, a:0.01 },
+           { t:0.12, tur:'ses', un:'o', f:[350, 300], d:0.09, g:0.07, a:0.01 },
+           { t:0.24, tur:'ses', un:'e', f:[320, 380], d:0.11, g:0.06, a:0.01, oda:0.1 }],
   });
-  /* Küçük bir ağızdan ünlüler: [F1, F2] Hz (insan sesinin biraz üstü). */
-  const UNLU = Object.freeze({ a:[950, 1500], e:[600, 2300], i:[400, 2800], o:[640, 1050], u:[420, 950] });
+  /* Küçük bir ağızdan ünlüler: [F1, F2] Hz; F2 2 kHz'de kesilir (tizlik yok). */
+  const UNLU = Object.freeze({ a:[800, 1250], e:[500, 1700], i:[350, 1900], o:[550, 900], u:[380, 780] });
+  const TAVAN = 2000;        // hiçbir süzgeç bunun üstüne çıkmaz (Hz)
   const ARA = 0.04;          // aynı ses bundan sık çalmaz (sn)
   let baglam = null;
   let zincir = null;
@@ -576,7 +583,7 @@ window.LIFEOS = window.LIFEOS || {};
     try{
       if(c.createDynamicsCompressor){
         const k = c.createDynamicsCompressor();
-        k.threshold.value = -24; k.knee.value = 18; k.ratio.value = 3; k.attack.value = 0.003; k.release.value = 0.12;
+        k.threshold.value = -12; k.knee.value = 8; k.ratio.value = 4; k.attack.value = 0.002; k.release.value = 0.15;
         k.connect(c.destination);
         hedef = k;
       }
@@ -641,27 +648,28 @@ window.LIFEOS = window.LIFEOS || {};
       if(!z.gurultu || !c.createBufferSource) return;
       kaynak = c.createBufferSource();
       kaynak.buffer = z.gurultu;
-      const b = suzgec(c, 'bandpass', f0, k.q == null ? 1 : k.q, t);
+      const b = suzgec(c, 'bandpass', Math.min(TAVAN, f0), k.q == null ? 1 : k.q, t);
       if(b){
-        if(f1 !== f0) b.frequency.exponentialRampToValueAtTime(f1, t + k.d);
+        if(f1 !== f0) b.frequency.exponentialRampToValueAtTime(Math.min(TAVAN, f1), t + k.d);
         kaynak.connect(b); b.connect(g);
       } else kaynak.connect(g);
     } else {
       kaynak = c.createOscillator();
-      kaynak.type = k.tur === 'ses' ? 'sawtooth' : (k.dalga || 'sine');
+      kaynak.type = k.tur === 'ses' ? 'triangle' : (k.dalga || 'sine');
       kaynak.frequency.setValueAtTime(f0, t);
       if(f1 !== f0) kaynak.frequency.exponentialRampToValueAtTime(f1, t + k.d);
       if(k.tur === 'ses'){
-        /* İki formant yan yana: ünlü rengini bunlar verir; perde biraz da
-           formantı taşır (küçük minik, ince ağız). */
+        /* Üçgen dalga (yumuşak) + iki geniş formant: ünlü rengini bunlar
+           verir; perde biraz da formantı taşır (küçük minik, ince ağız).
+           Kuru yolun yarısı da gider: ses incelip cızırdamaz. */
         const u = UNLU[k.un] || UNLU.a, fp = Math.sqrt(perde);
-        const b1 = suzgec(c, 'bandpass', u[0] * fp, 6, t), b2 = suzgec(c, 'bandpass', u[1] * fp, 9, t);
+        const b1 = suzgec(c, 'bandpass', Math.min(TAVAN, u[0] * fp), 3, t), b2 = suzgec(c, 'bandpass', Math.min(TAVAN, u[1] * fp), 4, t);
         if(b1 && b2){
-          /* Dar süzgeç enerjiyi yer: telafi kazancı öteki seslerle aynı düzeye getirir. */
-          const g2 = c.createGain(), dz = c.createGain();
-          g2.gain.value = 0.6; dz.gain.value = 3;
+          const g2 = c.createGain(), dz = c.createGain(), kuru = c.createGain();
+          g2.gain.value = 0.5; dz.gain.value = 1.6; kuru.gain.value = 0.5;
           kaynak.connect(b1); b1.connect(dz);
           kaynak.connect(b2); b2.connect(g2); g2.connect(dz);
+          kaynak.connect(kuru); kuru.connect(dz);
           dz.connect(g);
         } else kaynak.connect(g);
       } else if(k.suz){

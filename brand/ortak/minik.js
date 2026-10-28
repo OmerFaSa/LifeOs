@@ -61,6 +61,14 @@ window.LIFEOS.MINIK = (function(){
   const HUY_AD = Object.freeze({ uykucu:'uykucu', konuskan:'konuşkan', merakli:'meraklı', neseli:'neşeli', hayalci:'hayalci', bilge:'bilge' });
   const BALON = Object.freeze(['hey!', '♪', '…', 'hı hı', 'ooo', '!?', 'hihi', '♡']);
 
+  /* Ruh hâli (kullanıcı, 2026-10-28: «çok tıklarsak kızsın; üzgün, mutlu,
+     uykulu olsunlar»). Kişi başına oturumda bellekte durur; hiçbir kayda
+     bakmaz, hiçbir şey yazmaz. Sıra: kızgın > küs (üzgün) > mutlu > gece
+     uykulu > özlem (üzgün) > huyun kendi hâli. */
+  const RUH = Object.freeze({ SIK:5, PENCERE:4000, KIZ:8000, KUS:20000, MUTLU:15000, OZLEM:30 * 60000 });
+  const RUH_AD = Object.freeze({ mutlu:'mutlu', uzgun:'üzgün', uykulu:'uykulu', kizgin:'kızgın' });
+  const RUH_IPUCU = Object.freeze({ kizgin:'Biraz bekle', uzgun:'Dokun, sevindir', uykulu:'Dokun, uyandır' });
+
   /* --- saf hesaplar (test edilir) --- */
 
   /* Dikdörtgenlerden yürünebilir kenarlar: belge koordinatında {x1, x2, y}.
@@ -138,9 +146,37 @@ window.LIFEOS.MINIK = (function(){
     return liste.find(o => o !== mk && o.z && mk.z && o.z.el === mk.z.el && Math.abs(o.x - mk.x) <= 260) || null;
   }
 
+  function yeniRuh(simdi){ return { dokunus:[], kizgin:0, kus:0, mutlu:0, son:simdi }; }
+
+  /* Dokunuş: 'kalp' (sevindi), 'kizdi' (4 sn'de 5. dokunuş), 'hirr'
+     (kızgınken dokunuldu, kızgınlık uzar), 'baristi' (küsken tek dokunuş). */
+  function dokun(r, simdi){
+    r.son = simdi;
+    r.dokunus = r.dokunus.filter(t => simdi - t < RUH.PENCERE).concat(simdi);
+    if(simdi < r.kizgin){ r.kizgin = Math.max(r.kizgin, simdi + RUH.KIZ * .6); r.kus = r.kizgin + RUH.KUS; return 'hirr'; }
+    if(r.dokunus.length >= RUH.SIK){
+      r.dokunus = []; r.mutlu = 0;
+      r.kizgin = simdi + RUH.KIZ; r.kus = r.kizgin + RUH.KUS;
+      return 'kizdi';
+    }
+    if(simdi < r.kus){ r.kus = 0; r.mutlu = simdi + RUH.MUTLU; return 'baristi'; }
+    r.mutlu = simdi + RUH.MUTLU;
+    return 'kalp';
+  }
+
+  function ruh(r, simdi, saat, huy){
+    if(simdi < r.kizgin) return 'kizgin';
+    if(simdi < r.kus) return 'uzgun';
+    if(simdi < r.mutlu) return 'mutlu';
+    if(saat >= 23 || saat < 6) return 'uykulu';
+    if(huy === 'uykucu' && saat >= 13 && saat < 16) return 'uykulu';
+    if(simdi - r.son > RUH.OZLEM) return 'uzgun';
+    return huy === 'neseli' ? 'mutlu' : '';
+  }
+
   /* --- DOM --- */
 
-  const durum = { kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null };
+  const durum = { kat:null, minikler:[], zeminler:[], bekle:0, zamanlar:[], sayfa:null, yerlesme:0, bekci:null, ruhlar:{}, isikTazele:false };
   /* Sohbet gibi çok adımlı işlerin zamanlayıcıları: sayfa değişince silinir. */
   function zamanla(fn, ms){ const t = setTimeout(fn, ms); durum.zamanlar.push(t); return t; }
   /* Meşgul işareti 12 sn'de kendiliğinden düşer: yarıda kalan bir iş
@@ -181,15 +217,28 @@ window.LIFEOS.MINIK = (function(){
     return zeminler(kutular);
   }
 
+  /* Ruh hâli kişinindir: sayfa değişip minik başka kişiyi giyince o kişinin hâli gelir. */
+  function ruhu(mk){ return durum.ruhlar[mk.ad] || (durum.ruhlar[mk.ad] = yeniRuh(Date.now())); }
+  function ruhNe(mk){ return ruh(ruhu(mk), Date.now(), new Date().getHours(), mk.huy); }
+  /* Yüz (cam.css data-ruh) ve etiket: ruh hâli varsa huyun yerine o yazar. */
+  function ruhUygula(mk){
+    const r = ruhNe(mk);
+    if((mk.el.dataset.ruh || '') !== r){ if(r) mk.el.dataset.ruh = r; else delete mk.el.dataset.ruh; }
+    mk.el.querySelector('.minik__ad i').textContent = r ? RUH_AD[r] : (HUY_AD[mk.huy] || mk.huy);
+    mk.el.querySelector('.minik__ad small').textContent = RUH_IPUCU[r] || 'Dokun, gıdıkla';
+    return r;
+  }
+
   function giydir(mk, k){
     mk.huy = k.huy;
+    mk.ad = k.ad;
     mk.perde = k.perde;
     mk.el.querySelector('.minik__ad b').textContent = k.ad;
-    mk.el.querySelector('.minik__ad i').textContent = HUY_AD[k.huy] || k.huy;
     mk.el.dataset.tip = k.tip;
     mk.el.dataset.bicim = k.bicim;
     mk.el.style.setProperty('--boy', k.boy + 'px');
     mk.el.style.setProperty('--ton', String(k.ton));   // birimsiz: oklch'nin h'si sayı
+    ruhUygula(mk);
   }
 
   function minikYap(i){
@@ -200,9 +249,13 @@ window.LIFEOS.MINIK = (function(){
       + '<span class="minik__govde"><i class="minik__deri"></i><i class="minik__goz"></i><i class="minik__goz"></i>'
       + '<i class="minik__agiz"></i><i class="minik__sus"></i></span><span class="minik__balon"></span><span class="minik__zzz">z</span>'
       + '<span class="minik__kalp">♡</span><span class="minik__ad"><b></b> · <i></i><small>Dokun, gıdıkla</small></span>';
-    const mk = { el:m, z:null, x:0, y:0, anim:null, zaman:0, huy:'', perde:1, mesgul:false, mesgulSon:0 };
+    const mk = { el:m, z:null, x:0, y:0, anim:null, zaman:0, huy:'', ad:'', perde:1, mesgul:false, mesgulSon:0 };
     giydir(mk, KISILER[i % KISILER.length]);
-    m.addEventListener('pointerenter', () => { m.classList.add('is-farkinda'); if(!mesgulMu(mk) && !m.classList.contains('is-uyuyor')) ekHal(mk, 'is-selam', 900); });
+    m.addEventListener('pointerenter', () => {
+      m.classList.add('is-farkinda');
+      const r = ruhUygula(mk);
+      if(!mesgulMu(mk) && !m.classList.contains('is-uyuyor') && r !== 'kizgin' && r !== 'uzgun') ekHal(mk, 'is-selam', 900);
+    });
     m.addEventListener('pointerleave', () => m.classList.remove('is-farkinda'));
     m.addEventListener('click', e => { e.stopPropagation(); gidikla(mk); });
     return mk;
@@ -215,11 +268,14 @@ window.LIFEOS.MINIK = (function(){
 
   function sonra(mk, ms){ clearTimeout(mk.zaman); mk.zaman = setTimeout(() => yasat(mk), ms); }
 
-  const HALLER = ['is-bakiyor', 'is-kirpiyor', 'is-hopluyor', 'is-oturuyor', 'is-uyuyor', 'is-uyaniyor', 'is-konusuyor', 'is-gidik', 'is-selam'];
+  const HALLER = ['is-bakiyor', 'is-kirpiyor', 'is-hopluyor', 'is-oturuyor', 'is-uyuyor', 'is-uyaniyor', 'is-konusuyor', 'is-gidik', 'is-selam', 'is-tepin', 'is-esniyor'];
   /* Kısa süren ek hâl (el sallama, kalp): hâlin üstüne biner, kendiliğinden düşer. */
   function ekHal(mk, h, ms){ mk.el.classList.add(h); setTimeout(() => mk.el.classList.remove(h), ms); }
   function temizle(mk){ HALLER.forEach(h => mk.el.classList.remove(h)); }
   function hal(mk, h){ temizle(mk); if(h){ void mk.el.offsetWidth; mk.el.classList.add(h); } }
+
+  /* Üzgün ağır, uykulu ağır aksak, mutlu ve kızgın hızlı yürür. */
+  const HIZ_RUH = Object.freeze({ uzgun:.6, uykulu:.7, mutlu:1.25, kizgin:1.5 });
 
   /* Paytak yürüyüş: önce yöne hafifçe eğilir, sonra kısa adımlarla, yavaş
      başlayıp yavaş durarak yürür (adım ritmi CSS'te). */
@@ -230,7 +286,7 @@ window.LIFEOS.MINIK = (function(){
     mk.el.classList.add('is-yuruyor');
     const a = mk.x, y = mk.y;
     mk.anim = mk.el.animate([{ transform:'translate(' + a + 'px,' + y + 'px)' }, { transform:'translate(' + hedef + 'px,' + y + 'px)' }],
-      { duration:Math.max(900, yol / HIZ * 1000), delay:180, easing:'cubic-bezier(.45,.05,.4,1)', fill:'both' });
+      { duration:Math.max(900, yol / (HIZ * (HIZ_RUH[mk.el.dataset.ruh] || 1)) * 1000), delay:180, easing:'cubic-bezier(.45,.05,.4,1)', fill:'both' });
     mk.anim.onfinish = () => { mk.el.classList.remove('is-yuruyor'); koy(mk, hedef, y); mk.anim.cancel(); (bitince || dinlen)(mk); };
   }
 
@@ -247,13 +303,17 @@ window.LIFEOS.MINIK = (function(){
      turda gerinip uyanır (yasat). */
   function dinlen(mk){
     if(mesgulMu(mk)) return;
+    const ne = ruhUygula(mk);
     const r = Math.random();
-    const uyku = mk.huy === 'uykucu' ? .22 : .06;
-    const otur = mk.huy === 'merakli' ? .12 : .2;
+    const uyku = ne === 'uykulu' ? .4 : mk.huy === 'uykucu' ? .22 : ne ? .02 : .06;
+    const otur = ne === 'uzgun' ? .45 : mk.huy === 'merakli' ? .12 : .2;
+    if(ne === 'kizgin'){ hal(mk, ''); return sonra(mk, 1600 + Math.random() * 1200); }   // kollar kavuşuk, ayak vurur (CSS)
     if(r < uyku){ hal(mk, 'is-uyuyor'); return sonra(mk, 11000 + Math.random() * 9000); }
     if(r < uyku + otur){ hal(mk, 'is-oturuyor'); return sonra(mk, 6000 + Math.random() * 7000); }
     const s = r - uyku - otur;
-    hal(mk, s < .2 ? 'is-bakiyor' : s < .34 ? 'is-kirpiyor' : s < .42 ? 'is-hopluyor' : '');
+    if(ne === 'uykulu' && s < .25){ hal(mk, 'is-esniyor'); return sonra(mk, 2600 + Math.random() * 2000); }
+    const hop = ne === 'mutlu' ? .62 : ne === 'uzgun' ? .34 : .42;
+    hal(mk, s < .2 ? 'is-bakiyor' : s < .34 ? 'is-kirpiyor' : s < hop ? 'is-hopluyor' : '');
     sonra(mk, 2200 + Math.random() * 4200);
   }
 
@@ -279,11 +339,22 @@ window.LIFEOS.MINIK = (function(){
   }
 
   /* Gıdıklanınca kıvrılır, gözleri «^ ^» olur, kıkırdar; uyuyorsa irkilir. */
+  /* Çok gıdıklanınca kızar: ayak vurur, «hıh!» der, kollarını kavuşturur,
+     imleçten başını çevirir (CSS); kızgınlık geçince bir süre küser, tek
+     bir dokunuşla barışır. */
   function gidikla(mk){
     if(mesgulMu(mk)) return;
     clearTimeout(mk.zaman);
-    if(mk.anim){ mk.anim.cancel(); mk.el.classList.remove('is-yuruyor'); }
+    if(mk.anim){ mk.anim.cancel(); mk.el.classList.remove('is-yuruyor'); koy(mk, mk.x, mk.y); }
     const uyuyordu = mk.el.classList.contains('is-uyuyor');
+    const olay = dokun(ruhu(mk), Date.now());
+    ruhUygula(mk);
+    if(olay === 'kizdi' || olay === 'hirr'){
+      mk.el.querySelector('.minik__balon').textContent = olay === 'kizdi' ? 'hıh!' : 'hı-ıh';
+      hal(mk, 'is-tepin'); mk.el.classList.add('is-konusuyor');
+      ses('hirr', mk);
+      return sonra(mk, 1400);
+    }
     hal(mk, uyuyordu ? 'is-uyaniyor' : 'is-gidik');
     if(!uyuyordu) ekHal(mk, 'is-kalp', 1400);
     ses(uyuyordu ? 'tik' : 'gidik', mk);
@@ -316,9 +387,18 @@ window.LIFEOS.MINIK = (function(){
     }
     if(!mk.z){ yerlestir(mk); return sonra(mk, 1800 + Math.random() * 2000); }
     if(mk.el.classList.contains('is-uyuyor')){ hal(mk, 'is-uyaniyor'); return sonra(mk, 1600); }
-    /* Aynı karttaki arkadaşının yanına gidip sohbet açar (konuşkan daha sık). */
+    const ne = ruhUygula(mk);
+    /* Kızgın: imleçten uzağa, kenarın öbür ucuna yürür. */
+    if(ne === 'kizgin'){
+      const uzak = imlec && imlec.x + (window.scrollX || 0) > mk.x ? mk.z.x1 + 20 : mk.z.x2 - 20;
+      if(Math.abs(uzak - mk.x) > 30) return yuru(mk, uzak);
+      return dinlen(mk);
+    }
+    /* Aynı karttaki arkadaşının yanına gidip sohbet açar (konuşkan daha sık);
+       üzgün ya da kızgın olan sohbete girmez. */
     const es = sohbetEsi(durum.minikler, mk);
-    if(es && !mesgulMu(es) && !es.el.classList.contains('is-uyuyor') && Math.random() < (mk.huy === 'konuskan' ? .45 : .2)){
+    const keyifli = m => { const r = ruhNe(m); return r !== 'kizgin' && r !== 'uzgun'; };
+    if(es && keyifli(mk) && keyifli(es) && !mesgulMu(es) && !es.el.classList.contains('is-uyuyor') && Math.random() < (mk.huy === 'konuskan' ? .45 : ne === 'mutlu' ? .3 : .2)){
       clearTimeout(es.zaman);
       if(es.anim){ es.anim.cancel(); es.el.classList.remove('is-yuruyor'); }
       if(Math.abs(es.x - mk.x) <= SOHBET_YAKIN + 10) return sohbet(mk, es);
@@ -341,6 +421,9 @@ window.LIFEOS.MINIK = (function(){
   function tazele(){
     durum.bekle = 0;
     if(!durum.kat) return;
+    /* Sayfa yeniden çizildi ya da kaydı: imleç yerinde, altındaki kart değişmiş olabilir. */
+    if(imlec && (!hedef || !hedef.isConnected || durum.isikTazele)){ hedef = null; elIsigi(); }
+    durum.isikTazele = false;
     if(kapaliMi()){ durum.kat.hidden = true; return; }
     durum.kat.hidden = false;
     durum.zeminler = olcum();
@@ -398,19 +481,49 @@ window.LIFEOS.MINIK = (function(){
   }
 
   /* Gözler fareyi izler; imlecin altındaki en dış cam kartta ışık imleci
-     takip eder (cam.css «EL IŞIĞI»). İkisi de karede en çok bir kez. */
-  let imlec = null, kare = 0, hedef = null, isikli = null;
-  function elIsigi(){
-    let k = hedef && hedef.closest ? hedef.closest(KART) : null;
+     takip eder (cam.css «EL IŞIĞI»). İkisi de karede en çok bir kez.
+     Işık imlece gecikmeyle yetişir (her karede yolun %22'si: suyun
+     altındaki ışık gibi süzülür); miniğin üstündeyken altındaki kartta
+     kalır; kart yeniden çizilince (tıklama, kayıt) aynı yerdeki yeni
+     karta sönmeden geçer. Ayrılınca --mx/--my kalır: ışık olduğu yerde söner. */
+  let imlec = null, kare = 0, hedef = null, isikli = null, isikKare = 0;
+  const isikYer = { x:0, y:0, hx:0, hy:0 };
+  function isikKarti(){
+    let el = hedef;
+    if(imlec && (!el || !el.isConnected)) el = hedef = document.elementFromPoint(imlec.x, imlec.y);
+    const m = el && el.closest && el.closest('.minik');
+    if(m){ const mk = durum.minikler.find(o => o.el === m); return mk && mk.z && mk.z.el && mk.z.el.isConnected ? mk.z.el : null; }
+    let k = el && el.closest ? el.closest(KART) : null;
     while(k && k.parentElement && k.parentElement.closest(KART)) k = k.parentElement.closest(KART);
-    if(isikli && isikli !== k){ isikli.classList.remove('isikli'); isikli.style.removeProperty('--mx'); isikli.style.removeProperty('--my'); }
-    isikli = k;
-    if(!k || !imlec) return;
-    const r = k.getBoundingClientRect();
-    k.style.setProperty('--mx', (imlec.x - r.left).toFixed(0) + 'px');
-    k.style.setProperty('--my', (imlec.y - r.top).toFixed(0) + 'px');
-    k.classList.add('isikli');
+    return k;
   }
+  function elIsigi(){
+    const k = imlec ? isikKarti() : null;
+    const kopan = isikli && !isikli.isConnected;
+    if(isikli && isikli !== k) isikli.classList.remove('isikli', 'isik-bas');
+    if(!k){ isikli = null; return; }
+    const r = k.getBoundingClientRect();
+    isikYer.hx = imlec.x - r.left; isikYer.hy = imlec.y - r.top;
+    if(isikli !== k){
+      if(!kopan){ isikYer.x = isikYer.hx; isikYer.y = isikYer.hy; }
+      else k.classList.add('isik-hemen');
+      k.classList.add('isikli');
+      isikli = k;
+    }
+    if(!isikKare) isikKare = requestAnimationFrame(isikAdim);
+  }
+  function isikAdim(){
+    isikKare = 0;
+    if(!isikli) return;
+    isikli.classList.remove('isik-hemen');
+    isikYer.x += (isikYer.hx - isikYer.x) * .22; isikYer.y += (isikYer.hy - isikYer.y) * .22;
+    isikli.style.setProperty('--mx', isikYer.x.toFixed(1) + 'px');
+    isikli.style.setProperty('--my', isikYer.y.toFixed(1) + 'px');
+    if(Math.abs(isikYer.hx - isikYer.x) + Math.abs(isikYer.hy - isikYer.y) > .6) isikKare = requestAnimationFrame(isikAdim);
+  }
+  /* Basınca ışık parmağın altında toplanır; bırakınca yayılır. */
+  function bas(e){ if(isikli && isikli.contains(e.target)) isikli.classList.add('isik-bas'); }
+  function birak(){ if(isikli) isikli.classList.remove('isik-bas'); }
   function gozler(){
     kare = 0;
     elIsigi();
@@ -489,7 +602,10 @@ window.LIFEOS.MINIK = (function(){
         && Math.abs(mk.z.el.getBoundingClientRect().top + sy - mk.y) > 1)) tazele();
     }, 1000);
     window.addEventListener('resize', iste);
-    window.addEventListener('scroll', iste, { passive:true });
+    window.addEventListener('scroll', () => { durum.isikTazele = true; iste(); }, { passive:true });
+    document.addEventListener('pointerdown', bas, true);
+    document.addEventListener('pointerup', birak, true);
+    document.addEventListener('pointercancel', birak, true);
     document.addEventListener('click', sevin, true);
     document.addEventListener('pointermove', fare, { passive:true });
   }
@@ -499,5 +615,6 @@ window.LIFEOS.MINIK = (function(){
     else window.addEventListener('load', () => setTimeout(kur, 60));
   }
 
-  return { kur, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, KISILER, HUY_AD, KART, EN_AZ, PAY };
+  return { kur, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh,
+    KISILER, HUY_AD, RUH, RUH_AD, KART, EN_AZ, PAY };
 })();

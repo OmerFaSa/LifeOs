@@ -121,6 +121,49 @@
     });
   });
 
+  /* Kullanıcı (2026-10-28): «çok tıklarsak minikler kızsın; ruh hâlleri
+     olsun: üzgün, mutlu, uykulu». Ruh hâli süstür: oturumda bellekte
+     durur, hiçbir kayda bakmaz, hiçbir şey yazmaz. */
+  describe('Minik · ruh hâli', () => {
+    const SAAT = 14;   // öğleden sonra, gece değil
+    it('arka arkaya çok dokunulursa kızar (4 sn içinde 5 dokunuş); kızgınken dokunmak homurdatır', () => {
+      const r = C.yeniRuh(0);
+      const olay = [0, 300, 600, 900].map(t => C.dokun(r, t));
+      expect(olay.every(o => o === 'kalp')).toBe(true);
+      expect(C.dokun(r, 1200)).toBe('kizdi');
+      expect(C.ruh(r, 1300, SAAT, 'bilge')).toBe('kizgin');
+      expect(C.dokun(r, 2000)).toBe('hirr');
+    });
+    it('ağır ağır sevmek kızdırmaz: 1,2 sn arayla on dokunuş hep kalp, minik mutlu', () => {
+      const r = C.yeniRuh(0);
+      for(let i = 0; i < 10; i++) expect(C.dokun(r, i * 1200)).toBe('kalp');
+      expect(C.ruh(r, 11000, SAAT, 'bilge')).toBe('mutlu');
+    });
+    it('kızgınlık geçince küser (üzgün); tek dokunuş barıştırır ve mutlu eder', () => {
+      const r = C.yeniRuh(0);
+      [0, 200, 400, 600, 800].forEach(t => C.dokun(r, t));
+      const sonra = 800 + C.RUH.KIZ + 1000;
+      expect(C.ruh(r, sonra, SAAT, 'bilge')).toBe('uzgun');
+      expect(C.dokun(r, sonra)).toBe('baristi');
+      expect(C.ruh(r, sonra + 10, SAAT, 'bilge')).toBe('mutlu');
+      expect(C.ruh(r, sonra + C.RUH.MUTLU + 10, SAAT, 'bilge')).toBe('');
+    });
+    it('gece herkes uykulu; uykucu öğleden sonra da; uzun süre dokunulmayan özler; neşeli kendiliğinden mutlu', () => {
+      const r = C.yeniRuh(0);
+      expect(C.ruh(r, 1000, 23, 'bilge')).toBe('uykulu');
+      expect(C.ruh(r, 1000, 3, 'neseli')).toBe('uykulu');
+      expect(C.ruh(r, 1000, 14, 'uykucu')).toBe('uykulu');
+      expect(C.ruh(r, 1000, 10, 'uykucu')).toBe('');
+      expect(C.ruh(r, 1000, 10, 'neseli')).toBe('mutlu');
+      expect(C.ruh(r, C.RUH.OZLEM + 1, 10, 'bilge')).toBe('uzgun');
+    });
+    it('her ruh hâlinin Türkçe adı var (etikette huyun yerine görünür)', () => {
+      ['mutlu', 'uzgun', 'uykulu', 'kizgin'].forEach(r => expect(typeof C.RUH_AD[r]).toBe('string'));
+      expect(C.RUH_AD.uzgun).toBe('üzgün');
+      expect(C.RUH_AD.kizgin).toBe('kızgın');
+    });
+  });
+
   describe('Minik · kurulum', () => {
     it('kabuk yokken (test sayfası) katman kurulmaz', () => {
       C.kur();
