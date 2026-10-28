@@ -193,6 +193,8 @@
 .kapak .kapak__cumle{ grid-area:cumle; font-size:clamp(30px, 4.2vw, 50px); font-weight:650; letter-spacing:-.03em; line-height:1.04; max-width:20ch; }
 .kapak__eylem{ grid-area:eylem; margin-top:clamp(20px, 3vh, 28px); }
 .kapak__sayilar{ grid-area:sayilar; display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:14px; width:100%; margin-top:clamp(28px, 4.5vh, 44px); }
+/* Kapak dışında (SPİ Analiz) karoların altındaki kart sırası yapışmasın (kullanıcı, 2026-10-28: «kartlar arasında kalabalık»). */
+.analiz-bugun > .kapak__sayilar{ margin-bottom:16px; }
 .kapak__sayilar[data-adet="3"]{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
 .kapak__sayilar[data-adet="2"]{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
 .kapak__sayilar[data-adet="1"]{ grid-template-columns:minmax(0, 320px); }

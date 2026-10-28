@@ -107,7 +107,7 @@
 
   describe('Minik · sayfaya göre kadro', () => {
     it('kadro geniş: en az altı ayrı minik; biçim ve süs birlikte her birinde başka', () => {
-      expect(C.KISILER.length >= 6).toBe(true);
+      expect(C.KISILER.length >= 12).toBe(true);
       expect(new Set(C.KISILER.map(k => k.bicim + '/' + k.tip)).size).toBe(C.KISILER.length);
     });
     it('biçimler: yuvarlak, kare ve üçgen; gözlük yok (gözler kayınca yerinde kalıp bozuk görünüyordu)', () => {
@@ -169,18 +169,19 @@
 
   /* Kullanıcı (2026-10-28): «bir sayfada görünebilecek sayıyı
      değiştirebilelim». Görünüm › Minikler: Yok, 1–6; seçilmemişse ekran
-     genişliği karar verir (telefon 1, tablet 2, masaüstü 3). */
+     genişliği karar verir (az: masaüstü 2, tablet ve telefon 1). */
   describe('Minik · sayfadaki sayı', () => {
-    it('tercih yoksa ekrana göre; 0–6 tercihi olduğu gibi; bozuk tercih yok sayılır', () => {
+    it('tercih yoksa ekrana göre (az: masaüstü 2, öbürleri 1); 0–6 tercihi olduğu gibi; bozuk tercih yok sayılır', () => {
       expect(C.sayi(null, 400)).toBe(1);
-      expect(C.sayi(null, 900)).toBe(2);
-      expect(C.sayi(null, 1400)).toBe(3);
+      expect(C.sayi(null, 900)).toBe(1);
+      expect(C.sayi(null, 1400)).toBe(2);
       expect(C.sayi('0', 1400)).toBe(0);
       expect(C.sayi('6', 400)).toBe(6);
       expect(C.sayi('4', 900)).toBe(4);
-      expect(C.sayi('9', 1400)).toBe(3);
+      expect(C.sayi('9', 1400)).toBe(2);
       expect(C.sayi('x', 400)).toBe(1);
-      expect(C.EN_COK).toBe(C.KISILER.length);
+      expect(C.EN_COK).toBe(6);
+      expect(C.KISILER.length > C.EN_COK).toBe(true);   // sayfalar arasında kadro değişir
     });
     it('seçici: Yok ve 1–6; yalnız seçili olan basılı', () => {
       const d = document.createElement('div');
@@ -193,6 +194,92 @@
     });
     it('tercih modüller arasında taşınır', () => {
       expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(C.ANAHTAR) >= 0).toBe(true);
+    });
+  });
+
+  /* Yürüyen minik hafif adım sesi çıkarır; ses miniğin ekrandaki yerinden gelir. */
+  describe('Minik · adım sesi', () => {
+    it('stereo konum: solda -0.8, ortada 0, sağda 0.8; taşanı sınırlar', () => {
+      expect(C.yanSes(0, 1000)).toBe(-0.8);
+      expect(C.yanSes(500, 1000)).toBe(0);
+      expect(C.yanSes(1000, 1000)).toBe(0.8);
+      expect(C.yanSes(-300, 1000)).toBe(-0.8);
+      expect(C.yanSes(250, 1000)).toBe(-0.4);
+    });
+  });
+
+  /* Kullanıcı (2026-10-28): «minik agentların çeşitliliğini ve kalitesini
+     zirveye taşı, bütün detaylarıyla». Her kişinin kendi süsü (12 ayrı),
+     deseni (karın, çil) var (kuyruk kullanıcının isteğiyle kalktı); huyu davranışını değiştirir. */
+  describe('Minik · çeşitlilik', () => {
+    it('on iki kişi: on iki ayrı süs; desen türlü; her huyun Türkçe adı var', () => {
+      expect(new Set(C.KISILER.map(k => k.tip)).size).toBe(C.KISILER.length);
+      C.KISILER.forEach(k => {
+        expect(['yok', 'karin', 'cil'].indexOf(k.desen) >= 0).toBe(true);
+        expect(typeof C.HUY_AD[k.huy]).toBe('string');
+      });
+      ['karin', 'cil'].forEach(d => expect(C.KISILER.some(k => k.desen === d)).toBe(true));
+    });
+  });
+
+  /* Kullanıcı (2026-10-28, SPİ Analiz görüntüsü): iki sıra kart arasında
+     boşluk yokken minik alttaki kartın kenarına konup üstteki kartın içinde
+     görünüyordu. Üstünde (miniğin boyu kadar) başka kart olan kenar zemin olmaz. */
+  describe('Minik · sıkışık kenar', () => {
+    it('hemen üstünde kart olan kenar zemin olmaz; arada boşluk varsa olur', () => {
+      const sik = C.zeminler([{ sol:0, ust:100, alt:300, genis:400 }, { sol:0, ust:304, alt:500, genis:400 }]);
+      expect(sik.map(z => z.y).join()).toBe('100');
+      const bos = C.zeminler([{ sol:0, ust:100, alt:300, genis:400 }, { sol:0, ust:380, alt:500, genis:400 }]);
+      expect(bos.length).toBe(2);
+      const yanda = C.zeminler([{ sol:0, ust:100, alt:300, genis:300 }, { sol:420, ust:304, alt:500, genis:300 }]);
+      expect(yanda.length).toBe(2);
+    });
+  });
+
+  /* Kullanıcı (2026-10-28): «radyo açarsak minikler dans etsin, hepsi chill,
+     radyoya uysun». Radyo çalarken ritimle sallanır (kulaklık istenmedi, kalktı). */
+  describe('Minik · radyo', () => {
+    it('yalnız çalarken radyoda sayılır', () => {
+      expect(C.radyoda({ hal:'caliyor' })).toBe(true);
+      expect(C.radyoda({ hal:'baglaniyor' })).toBe(false);
+      expect(C.radyoda({ hal:'durdu' })).toBe(false);
+      expect(C.radyoda(null)).toBe(false);
+    });
+  });
+
+  /* Kullanıcı (2026-10-28): «etrafta gezen agentların arasında ofis
+     çalışanları da olsun». Modülün kendi Ofis kadrosu (R/SP/ESP.AGENTS)
+     gezen minik olur: kravat ve baş harfli yaka kartı (Patron kırmızı
+     kravatlı), etikette görevi. Sayfada iki ve daha çok minik varsa en az
+     biri Ofis'ten. */
+  describe('Minik · ofis çalışanları', () => {
+    const AJAN = [{ id:'patron', name:'Patron', role:'Ofis şefi', initial:'P' },
+      { id:'tyt', name:'Tuna', role:'TYT uzmanı', initial:'T' },
+      { id:'polyglot', name:'Polyglot Mentor', short:'Polyglot', role:'Yabancı dil', initial:'Pg' }];
+    it('her ajan bir minik olur: adı, görevi, baş harfi; Patron ayrı giyinir', () => {
+      const o = C.ofisKisileri(AJAN);
+      expect(o.length).toBe(3);
+      o.forEach(k => { expect(k.ofis).toBe(true); expect(typeof k.rol).toBe('string'); expect(['yuvarlak', 'kare', 'ucgen'].indexOf(k.bicim) >= 0).toBe(true); });
+      expect(o.map(k => k.ad).join()).toBe('Patron,Tuna,Polyglot');
+      expect(o[0].tip).toBe('patron');
+      expect(o[1].tip).toBe('yaka');
+      expect(o[1].harf).toBe('T');
+      expect(C.ofisKisileri(null).length).toBe(0);
+    });
+    /* İkinci istek (aynı gün): «sayısını azalt; dışarıda ofis çalışanları
+       gezsin, diğerleri az olsun». Ofis varsa sayfadakilerin hepsi Ofis'ten;
+       üç ve daha çok seçildiyse yalnız biri diğerlerinden. */
+    it('kadroda Ofis varsa sayfadakiler Ofis çalışanı; üç ve daha çok minikte en çok biri diğerlerinden', () => {
+      const havuz = C.KISILER.concat(C.ofisKisileri(AJAN));
+      ['bugun:today', 'calisma:solve', 'analiz:progress', 'ofis:office', 'menu:x', 'a', 'b', 'c'].forEach(a => {
+        const k = C.kadro(a, 3, havuz);
+        expect(new Set(k).size).toBe(3);
+        expect(k.filter(i => !havuz[i].ofis).length <= 1).toBe(true);
+        expect(C.kadro(a, 2, havuz).every(i => havuz[i].ofis)).toBe(true);
+        expect(C.kadro(a, 1, havuz).every(i => havuz[i].ofis)).toBe(true);
+        expect(C.kadro(a, 3, havuz)).toEqual(k);
+      });
+      expect(C.kadro('bugun:today', 3)).toEqual(C.kadro('bugun:today', 3, C.KISILER));
     });
   });
 

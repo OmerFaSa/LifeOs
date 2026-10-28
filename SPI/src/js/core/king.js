@@ -866,6 +866,43 @@ window.LIFEOS.KING = (function(){
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
   let konusuyor = 0;         // okunmayı bekleyen parça sayısı
+
+  /* ARKADAŞ (kullanıcı, 2026-10-28: «King'in arayüzünü bu temaya geçir;
+     tatlı bir şey bizimle konuşsun: düşünürken elini arkaya atıp sağa sola
+     yürüsün, uzun süre cevap vermezsek yazı yerinde uyusun»). Yazı alanının
+     üstünde taçlı bir minik: hâlini King'in kendi durumundan okur (konuşuyor,
+     cevap bekleniyor, mikrofon/yazı, boşta geçen süre); hiçbir şey yazmaz,
+     ekran okuyucuya görünmez. Gövdesi gezen miniklerle aynıdır (minik.js). */
+  const ARKADAS_UYKU = 45000;
+  let arkadasSon = 0, arkadasKonus = 0, arkadasAralik = 0, arkadasOnceki = '';
+  function arkadasHal(o){
+    if(o.konusuyor) return 'konusuyor';
+    if(o.bekliyor) return 'dusunuyor';
+    if(o.dinliyor || o.yaziyor) return 'dinliyor';
+    if((o.bosta || 0) >= ARKADAS_UYKU) return 'uyuyor';
+    return '';
+  }
+  function arkadasHtml(){
+    const M = L.MINIK;
+    if(!M || !M.ICERIK) return '';
+    return '<div class="king__arkadas" aria-hidden="true"><div class="minik minik--king" data-tip="tac" data-bicim="yuvarlak" data-desen="karin" data-yon="sag">'
+      + M.ICERIK + '</div></div>';
+  }
+  const ARKADAS_SINIF = { konusuyor:'is-konusuyor', dusunuyor:'is-dusunuyor', dinliyor:'is-farkinda', uyuyor:'is-uyuyor' };
+  function arkadasGuncelle(){
+    if(typeof document === 'undefined') return;
+    const a = document.querySelector('.king__arkadas .minik');
+    if(!a){ clearInterval(arkadasAralik); arkadasAralik = 0; return; }
+    const g = document.querySelector('.king__girdi');
+    const simdi = Date.now();
+    const h = arkadasHal({ konusuyor:konusuyor > 0 || simdi < arkadasKonus, bekliyor:akis.some(m => m.bekliyor),
+      dinliyor:!!dinleyen, yaziyor:!!(g && g.value), bosta:simdi - arkadasSon });
+    Object.keys(ARKADAS_SINIF).forEach(k => a.classList.toggle(ARKADAS_SINIF[k], k === h));
+    if(arkadasOnceki === 'uyuyor' && h !== 'uyuyor'){ a.classList.add('is-uyaniyor'); setTimeout(() => a.classList.remove('is-uyaniyor'), 1200); }
+    a.querySelector('.minik__balon').textContent = h === 'dusunuyor' ? 'hımm…' : '';
+    arkadasOnceki = h;
+  }
+  function arkadasUyandir(){ arkadasSon = Date.now(); arkadasGuncelle(); }
   let sesNo = 0;             // söz 28: her yeni okuma eskisini geçersiz kılar
   let calan = null;          // çalan sunucu sesi ({ dur })
   let sonMotor = '';         // son okumayı kim yaptı: gemini | piper | cihaz
@@ -1590,6 +1627,7 @@ window.LIFEOS.KING = (function(){
   function durum(){
     if(uyanik || uyanAralik) uyanKontrol();      // K3: King konuşur ya da dinlerken uyanma dinleyicisi susar
     if(typeof document === 'undefined') return;
+    arkadasGuncelle();
     const el = document.querySelector('[data-king]');
     if(!el) return;
     el.classList.toggle('is-dinliyor', !!dinleyen);
@@ -5486,7 +5524,7 @@ window.LIFEOS.KING = (function(){
       + '<div class="king__akis" aria-live="polite">' + (vitrin ? (bolum === 'kutuphane' ? kutuphaneHtml() : vitrinHtml()) : akis.length ? balonlar : bos)
       + (cip && !vitrin ? '<div class="king__cipler king__cipler--akis" role="group" aria-label="Hazır cevaplar">' + cip + '</div>' : '') + '</div>'
       + kipPanel()
-      + '<form class="king__yaz" data-king-form data-ayar-disi>'
+      + '<form class="king__yaz" data-king-form data-ayar-disi>' + arkadasHtml()
       + '<div class="king__arti-yer"><button type="button" class="king__arti' + (aracAcik ? ' is-acik' : '') + '" data-king="arac" aria-expanded="' + (aracAcik ? 'true' : 'false')
       + '" aria-haspopup="menu" aria-label="Ekle" title="Ekle: fotoğraf, kamera, ekran, PDF, barkod">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>' + aracMenu() + '</div>'
@@ -5551,6 +5589,7 @@ window.LIFEOS.KING = (function(){
       paylasim.video.setAttribute('aria-hidden', 'true');
       onz.appendChild(paylasim.video);
     }
+    if(yeniVar){ arkadasKonus = Date.now() + 1800; setTimeout(arkadasGuncelle, 1900); }
     akis.forEach(m => { m.yeni = false; });
     durum();
     if(odak !== false && g && !(mini && odak !== true) && !(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu())){
@@ -5579,6 +5618,17 @@ window.LIFEOS.KING = (function(){
       + '<div class="king__kutu" role="dialog" aria-modal="false" aria-label="King ile konuş"></div>';
     if(mini) el.classList.add('is-mini');
     document.body.appendChild(el);
+    /* Arkadaş: yazınca ve fare kıpırdayınca uyanır; boşta kalınca uyur; dokununca kıkırdar. */
+    arkadasSon = Date.now();
+    ['input', 'keydown', 'pointerdown'].forEach(t => el.addEventListener(t, arkadasUyandir));
+    el.addEventListener('click', e => {
+      const m = e.target && e.target.closest ? e.target.closest('.king__arkadas .minik') : null;
+      if(!m) return;
+      m.classList.add('is-gidik'); setTimeout(() => m.classList.remove('is-gidik'), 1100);
+      try{ if(L.SES) L.SES.tik('gidik', true, { perde:0.95 }); }catch(x){ /* ses yok */ }
+    });
+    clearInterval(arkadasAralik);
+    arkadasAralik = setInterval(arkadasGuncelle, 5000);
     isPlanla(800);                               // K1: işler; King açıkken yoklanır
     ortam.zamanla(() => { siraBosalt(); siraPlanla(); }, 1200);   // K4: Merkez sırası
     tasimaYaz();
@@ -6527,7 +6577,7 @@ window.LIFEOS.KING = (function(){
 
   return {
     kur, ac, kapat, kucult, buyut, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
-    isDurumYaz:d => { isDurum = d; }, isRozet, isYokla, ekipAc, ekipHtml, gorevHtml, isZamanli:() => !!isZaman,
+    isDurumYaz:d => { isDurum = d; }, arkadasHal, ARKADAS_UYKU, isRozet, isYokla, ekipAc, ekipHtml, gorevHtml, isZamanli:() => !!isZaman,
     beceriAc, beceriPanelHtml, bekleyenAl, eylemleriCalistir, k2Html, ODAK_SON,
     uyanCumlesi, uyanSec, uyanAcikMi, uyanParca, uyanKontrol, uyanikMi:() => !!uyanik, uyanTurMu:() => uyanTur, UYAN,
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,

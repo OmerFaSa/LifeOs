@@ -3157,5 +3157,32 @@
       expect(s.istekler.some(x => x.yol === '/api/king/bekleyen/12/geri' && x.yontem === 'POST')).toBe(true);
     }));
   });
-})();
 
+  /* Kullanıcı (2026-10-28): «King'in arayüzünü de bu temaya geçir; tatlı bir
+     şey bizimle konuşsun: düşünürken elini arkaya atıp sağa sola yürüsün,
+     uzun süre cevap vermezsek yazı yerinde uyusun». Karakter süstür: hâlini
+     King'in kendi durumundan okur, hiçbir şey yazmaz, ekran okuyucuya
+     görünmez. */
+  describe('King — arkadaş (taçlı minik)', () => {
+    it('hâl önceliği: konuşuyor > düşünüyor > dinliyor > uyuyor (uzun süre boşta) > boş', () => {
+      const k = K(), U = k.ARKADAS_UYKU;
+      expect(U >= 30000).toBe(true);
+      expect(k.arkadasHal({ konusuyor:true, bekliyor:true })).toBe('konusuyor');
+      expect(k.arkadasHal({ bekliyor:true, yaziyor:true })).toBe('dusunuyor');
+      expect(k.arkadasHal({ yaziyor:true, bosta:U + 1 })).toBe('dinliyor');
+      expect(k.arkadasHal({ dinliyor:true })).toBe('dinliyor');
+      expect(k.arkadasHal({ bosta:U + 1 })).toBe('uyuyor');
+      expect(k.arkadasHal({ bosta:U - 1 })).toBe('');
+      expect(k.arkadasHal({})).toBe('');
+    });
+    it('büyük King açılınca taçlı minik yazı alanının üstünde durur; ekran okuyucuya gizli', () => sahneyle(async () => {
+      if(!window.LIFEOS.MINIK) return;
+      const { k } = sahne();
+      k.ac({ mini:false, mesaj:'x' });
+      const a = document.querySelector('.king__yaz .king__arkadas');
+      expect(!!a).toBe(true);
+      expect(a.getAttribute('aria-hidden')).toBe('true');
+      expect(!!a.querySelector('.minik[data-tip="tac"] .minik__govde')).toBe(true);
+    }));
+  });
+})();

@@ -132,10 +132,11 @@
 
 /* Süreyle orantılı şerit (bloklar) */
 .pk-serit{ display:flex; gap:4px; height:34px; }
-.pk-serit span{ min-width:0; display:flex; align-items:center; justify-content:center; padding:0 4px; border-radius:7px; box-sizing:border-box;
+/* Blok: flex değil (flex kapta «…» çalışmaz, uzun ad kırpılıyordu — 2026-10-28). */
+.pk-serit span{ min-width:0; display:block; line-height:32px; text-align:center; padding:0 7px; border-radius:7px; box-sizing:border-box;
   font-size:11px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .pk-serit .is-bitti{ background:var(--primary); color:var(--primary-ink); }
-.pk-serit .is-simdi{ background:color-mix(in oklab, var(--primary) 12%, var(--surface)); border:2px solid var(--primary); color:var(--primary); }
+.pk-serit .is-simdi{ background:color-mix(in oklab, var(--primary) 12%, var(--surface)); border:2px solid var(--primary); color:var(--primary); line-height:30px; }
 .pk-serit .is-sira{ background:var(--surface); border:1px solid var(--border); color:var(--text-3); }
 
 /* Liste */
