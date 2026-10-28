@@ -17412,6 +17412,13 @@ html[data-zemin="yumusak"] .perde--marka .perde__dugme:focus-visible{ outline:2p
    kartı kalktı (kravat yeter). */
 .minik[data-ofis][data-tip="yaka"] .minik__kart{ display:none; }
 
+/* 36) KALAN OPAK YÜZEYLER CAM (kullanıcı, 2026-10-28: «bazı kartlar hem camsı
+   değil hem buğulu değil»; görsel tarama: ekip konsolu, Rütbe sayıları,
+   toplantı sayaçları, plandaki bu hafta, ders kazanım/örnek kutuları, SPİ
+   ses kutusu, ESP Merdiven kartları opak zemindeydi). */
+html[data-zemin="yumusak"] .site--v5 main :is(.opencere, .opencere__yan, .stat, .inc-sayi, .tlweek.is-current, .ders__kazanim, .ders__ornek, .ses, .ladcard){
+  background-color:transparent; background-image:var(--cam-ince); border-color:var(--cam-kenar); box-shadow:var(--cam-ust); }
+
 /* ==== css/king-cam.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/king-cam.css içine yazılır; burası bir sonraki
@@ -19460,7 +19467,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'2d39fbfa', at:'2026-10-28 20:32', dirty:true };
+SP.BUILD = { id:'f2c04dfb', at:'2026-10-28 20:48', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -93958,6 +93965,9 @@ SP.Screens.office = (function(){
     const b = SP.Office.brief(agent.id);
     const line = SP.Office.ruleText(agent.id, b);
     const notes = SP.Office.notes().filter(n => n.agent === agent.id);
+    /* «Günün özeti» aynı cümleyi zaten yazıyorsa (model kapalı) patron masası yinelemez. */
+    const ozet = (S.officeBriefings || {})[U.todayISO()];
+    const tekrar = agent.id === 'patron' && ozet && String(ozet.text || '').trim() === String(line || '').trim();
 
     return K.Card({
       box:true, class:'desk desk--' + agent.id,
@@ -93974,7 +93984,7 @@ SP.Screens.office = (function(){
           ${SP.Office.ready(agent.id) ? K.Badge({ label:'model açık', tone:'info' })
             : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false })}
         </div>
-        ${K.Katmanli({ metin:line, sinif:'desk__line' })}
+        ${tekrar ? '' : K.Katmanli({ metin:line, sinif:'desk__line' })}
         ${when(notes.length, () => html`<div class="notes mt-10">
           ${map(notes.slice(0, DESK_NOTES), n => html`
             <div class="note note--${n.tone}"><span class="note__dot"></span>
