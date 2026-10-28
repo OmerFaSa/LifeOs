@@ -19492,7 +19492,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'5e10f73a', at:'2026-10-28 21:19', dirty:true };
+SP.BUILD = { id:'c9898c7b', at:'2026-10-28 22:11', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -27353,7 +27353,11 @@ LIFEOS.Gizle = (function(){
        gelinip 250 ms dolmadan sayfa değişirse önceki ekranın bölümü YENİ
        sayfada açılıyordu (ESP Profil'in düğmeleri Genel'de, 2026-10-02). */
     onizlemeKapat();
-    son = o;
+    /* olcum:false — çağıran (çizimden sonra HAREKET.sonra) raf ve seçiciyi
+       zaten ölçecek; ikinci ölçüm sayfa geçişinde stil ve yerleşimi iki kez
+       hesaplatıyordu. Gizle'nin kendi yeniden uygulaması (son) yine ölçer. */
+    const olc = o.olcum !== false;
+    son = olc ? o : Object.assign({}, o, { olcum:true });
     const d = oku(o);
     let degisti = false;
     const ilkListe = bolumler(o.kok);
@@ -27446,8 +27450,10 @@ LIFEOS.Gizle = (function(){
     /* «Nasıl okunur» şeridi ⓘ'ye (kabuk.railBilgiye): raf ölçmeden önce. */
     try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.railBilgiye && o.kok) KB.railBilgiye(o.kok); }catch(e){}
     /* Bölüm çubukları (sayfa başındaki ve #main içindeki): seçili ortada. */
-    try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.seciciHazirla && o.kok) KB.seciciHazirla(o.kok.parentElement || o.kok); }catch(e){}
-    try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.raf && o.kok) H.raf(o.kok); }catch(e){}
+    if(olc){
+      try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.seciciHazirla && o.kok) KB.seciciHazirla(o.kok.parentElement || o.kok); }catch(e){}
+      try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.raf && o.kok) H.raf(o.kok); }catch(e){}
+    }
     dipCiz(o, liste, gizliUyari);
     sayacYaz(gizliListe().length, gizliUyari);
     if(panel) panelCiz();
@@ -99900,7 +99906,6 @@ SP.App = (function(){
          çizimin ortasında hesaplatıyordu (kullanıcı, 2026-10-25: «sayfa
          geçişindeki stil hesabını azalt»; geçiş başına ~12 ms). */
       if(!rotaDegisti) restoreFocus(focus);
-      if(H) H.sonra(appEl, S.route);
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.sonra(appEl, { rota:S.route, etkin:ayarlardaMi(S.route) });
       /* Ne değişti? (17): güncellemeden sonraki ilk açılışta sayfanın başında. */
       if(window.LIFEOS && window.LIFEOS.YENILIK) window.LIFEOS.YENILIK.yerlestir(appEl, { modul:'spi',
@@ -99923,9 +99928,13 @@ SP.App = (function(){
         try{
           LIFEOS.Gizle.uygula({ kok:document.getElementById('main'), modul:'spi',
             profil:(SP.Ornek && SP.Ornek.aktif && SP.Ornek.aktif()) || 'main', ekran:sc.id,
-            varsayilan:(sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []), kucukVarsayilan:(sc.kucukVarsayilan || []).concat(ayarListesi(sc, document.getElementById('main'))) });
+            varsayilan:(sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []), olcum:!H, kucukVarsayilan:(sc.kucukVarsayilan || []).concat(ayarListesi(sc, document.getElementById('main'))) });
         }catch(e){ console.error('Gizle:', e); }
       }
+      /* Hareket (raf, seçici, işaretler) en sonda: bölümler gizlendikten ve
+         ekranın afterRender'ı çizdikten sonra tek kez ölçülür (2026-10-29:
+         Gizle'den önce de ölçülüyordu; geçişte stil ve yerleşim iki kez). */
+      if(H) H.sonra(appEl, S.route);
     }catch(err){
       /* Kabuğun kendisi çizilemedi. Ekranın kendi hatası bir üstteki
          yakalayıcıda ele alınır; buraya düşmek künye, hero ya da alt
