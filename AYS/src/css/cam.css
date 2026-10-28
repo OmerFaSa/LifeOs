@@ -1472,3 +1472,10 @@ html[data-zemin="yumusak"] .perde--marka .perde__dugme:focus-visible{ outline:2p
    Varsayılan tek minik (minik.js sayi), eşya seyrek; Ofis çalışanının yaka
    kartı kalktı (kravat yeter). */
 .minik[data-ofis][data-tip="yaka"] .minik__kart{ display:none; }
+
+/* 36) KALAN OPAK YÜZEYLER CAM (kullanıcı, 2026-10-28: «bazı kartlar hem camsı
+   değil hem buğulu değil»; görsel tarama: ekip konsolu, Rütbe sayıları,
+   toplantı sayaçları, plandaki bu hafta, ders kazanım/örnek kutuları, SPİ
+   ses kutusu, ESP Merdiven kartları opak zemindeydi). */
+html[data-zemin="yumusak"] .site--v5 main :is(.opencere, .opencere__yan, .stat, .inc-sayi, .tlweek.is-current, .ders__kazanim, .ders__ornek, .ses, .ladcard){
+  background-color:transparent; background-image:var(--cam-ince); border-color:var(--cam-kenar); box-shadow:var(--cam-ust); }

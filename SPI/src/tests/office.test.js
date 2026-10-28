@@ -467,4 +467,23 @@
       expect(SP.Office.cfgFor('nutri').provider).toBe('builtin');
     });
   });
+
+  /* Görsel gözlem (2026-10-28): Ofis'te aynı kural cümlesi iki kez görünüyordu
+     (vitrin satırı + açık masanın kartı). Vitrin varken kart onu yinelemez. */
+  describe('Ofis — tekrar yok', () => {
+    it('açık masanın kural cümlesi ekranda bir kez geçer', async () => {
+      const once = SP.S.ui.officeDesk, gun = SP.U.todayISO(), ozetOnce = (SP.S.officeBriefings || {})[gun];
+      const tam = SP.Office.ruleText('patron', SP.Office.brief('patron'));
+      try{
+        SP.S.ui.officeDesk = 'patron';
+        SP.S.officeBriefings = SP.S.officeBriefings || {};
+        SP.S.officeBriefings[gun] = { text:tam, source:'rule' };   // model kapalı: özet = kural cümlesi
+        const d = document.createElement('div');
+        d.innerHTML = String(await SP.Screens.office.render());
+        const cumle = SP.Office.ruleText('patron', SP.Office.brief('patron')).slice(0, 40);
+        const n = d.textContent.split(cumle).length - 1;
+        expect(n).toBe(1);
+      }finally{ SP.S.ui.officeDesk = once; if(ozetOnce) SP.S.officeBriefings[gun] = ozetOnce; else delete SP.S.officeBriefings[gun]; }
+    });
+  });
 })();

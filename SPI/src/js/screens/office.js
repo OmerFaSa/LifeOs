@@ -92,6 +92,9 @@ SP.Screens.office = (function(){
     const b = SP.Office.brief(agent.id);
     const line = SP.Office.ruleText(agent.id, b);
     const notes = SP.Office.notes().filter(n => n.agent === agent.id);
+    /* «Günün özeti» aynı cümleyi zaten yazıyorsa (model kapalı) patron masası yinelemez. */
+    const ozet = (S.officeBriefings || {})[U.todayISO()];
+    const tekrar = agent.id === 'patron' && ozet && String(ozet.text || '').trim() === String(line || '').trim();
 
     return K.Card({
       box:true, class:'desk desk--' + agent.id,
@@ -108,7 +111,7 @@ SP.Screens.office = (function(){
           ${SP.Office.ready(agent.id) ? K.Badge({ label:'model açık', tone:'info' })
             : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false })}
         </div>
-        ${K.Katmanli({ metin:line, sinif:'desk__line' })}
+        ${tekrar ? '' : K.Katmanli({ metin:line, sinif:'desk__line' })}
         ${when(notes.length, () => html`<div class="notes mt-10">
           ${map(notes.slice(0, DESK_NOTES), n => html`
             <div class="note note--${n.tone}"><span class="note__dot"></span>
