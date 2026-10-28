@@ -346,9 +346,15 @@ DOSYALAR = {
     "zemin.test.js":  "tests",
     # CAM (kullanici, 2026-10-27) — sistem geneli cam yuzey dili; her arayuzde EN SON stil.
     "cam.css":        "css",
+    # EKIP (2026-10-28): King ve minikler icin cam.css'ten sonra gelen kendi stilleri.
+    "king-cam.css":   "css",
+    "minik-cam.css":  "css",
     # MINIK (kullanici, 2026-10-27) — kartlarin ustunde yasayan minikler (sus, veri degil).
     "minik.js":       "js/core",
     "minik.test.js":  "tests",
+    # SES KAYITLARI (2026-10-28): arayuz seslerinin CC0 kayitlari (ses.js cozer).
+    "sesler.js":      "js/core",
+    "sesler.test.js": "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     # 167 ana ekran rozeti (pwa.js rozet): pwa.test.js degismesin diye ayri dosya.

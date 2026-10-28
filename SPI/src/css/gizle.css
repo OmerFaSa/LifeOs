@@ -262,6 +262,9 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
   -webkit-backdrop-filter:saturate(180%) blur(16px); backdrop-filter:saturate(180%) blur(16px);
   box-shadow:0 0 0 1px var(--border), 0 4px 12px rgba(0,0,0,.10); }
 .gizle-araclar--uzerinde .gizle-dugme{ width:26px; height:26px; border-radius:999px; color:var(--text-2); }
+/* Düğmenin yeri başlık satırından ayrılır: satırın sağındaki üst bilgi («3 blok · 0 bitti»)
+   düğmenin altında kalıyordu (2026-10-28, layoutcheck «küçült düğmesi … örtüyor»). */
+.gizle-acik:has(> .gizle-araclar--uzerinde) > .kutu__bas::after{ content:''; flex:0 0 30px; }
 @media (prefers-reduced-motion:reduce){ .gizle-araclar--uzerinde{ transition:none; transform:none; } }
 
 /* ---------- önizleme penceresi ---------- */

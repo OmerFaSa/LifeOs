@@ -3193,10 +3193,11 @@
      konuşurken yürüsün, düşünsün, yatsın, ayaklarını aşağı uzatsın; grafik
      çıkarsın; türlü eşyalar ekle». */
   describe('King — arkadaş konuşurken', () => {
-    it('konuşurken poz türlü: dur, yürü, otur (ayaklar aşağı), uzan', () => {
+    /* 2026-10-28: «uzan» çıktı (King gözlemi: ezilen gövdede gözler bozuluyordu). */
+    it('konuşurken poz türlü: dur, yürü, otur (ayaklar aşağı)', () => {
       const k = K();
-      const p = [0, .3, .55, .8].map(r => k.arkadasPoz(() => r));
-      expect(p.join()).toBe('dur,yuru,otur,uzan');
+      const p = [0, .5, .8].map(r => k.arkadasPoz(() => r));
+      expect(p.join()).toBe('dur,yuru,otur');
     });
     it('eşyayı cevap seçer: veri kartı grafik, araştırma büyüteç, kayıt önizlemesi not; yoksa kahve ya da ampul olabilir', () => {
       const k = K();
@@ -3214,5 +3215,42 @@
       k.ac({ mini:true });
       expect(!!document.querySelector('.king__yaz .king__arkadas .minik')).toBe(true);
     }));
+  });
+})();
+
+/* Kullanıcı (2026-10-28): «King'in arayüzünü temaya uyumlu yap; konuşma
+   yerinde King bizimle konuşsun»; «hem erkek hem kadın tarafı: pembe
+   yapabilmeliyiz, mavi yapabilmeliyiz». King gözlemcisi: model cevabı
+   akarken arkadaş susuyordu; ağız süresi metinden kopuktu. */
+(function(){
+  const NS = window.R || window.SP || window.ESP;
+  const { describe, it, expect } = NS.Test;
+  const K = () => window.LIFEOS.KING;
+  describe('King — konuşan sahne ve görünüş', () => {
+    it('model cevabı akarken arkadaş konuşur', () => {
+      expect(K().arkadasHal({ akiyor:true })).toBe('konusuyor');
+    });
+    it('yazım süresi metinle büyür, 320–1400 ms içinde kalır', () => {
+      const y = K().yazimSuresi;
+      expect(y('Tamam.')).toBe(320);
+      expect(y('bir iki üç dört beş altı yedi sekiz dokuz on on bir on iki') > 320).toBe(true);
+      expect(y(new Array(200).fill('kelime').join(' '))).toBe(1400);
+    });
+    it('Mavi / Pembe: tercih köke yazılır, seçici bilir, sesli okumada ses cinsiyeti tercihe uyar', () => {
+      const once = K().gorunus(), kok = document.documentElement;
+      const sesler = [{ lang:'tr-TR', name:'Microsoft Tolga', localService:true }, { lang:'tr-TR', name:'Microsoft Seda', localService:true }];
+      try{
+        expect(K().gorunusAyarla('pembe')).toBe(true);
+        expect(K().gorunus()).toBe('pembe');
+        expect(kok.getAttribute('data-king-gorunus')).toBe('pembe');
+        const d = document.createElement('div'); d.innerHTML = K().gorunusSeciciHtml();
+        expect(d.querySelector('[data-king-gorunus-sec="pembe"]').getAttribute('aria-pressed')).toBe('true');
+        expect(K()._sesSec(sesler).name).toBe('Microsoft Seda');
+        K().gorunusAyarla('mavi');
+        expect(K()._sesSec(sesler).name).toBe('Microsoft Tolga');
+        expect(K().gorunusAyarla('mor')).toBe(false);
+        expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf('lifeos.king.gorunus') >= 0).toBe(true);
+      }finally{ K().gorunusAyarla(once); }
+    });
   });
 })();

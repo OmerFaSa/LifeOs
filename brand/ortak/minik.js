@@ -146,7 +146,7 @@ window.LIFEOS.MINIK = (function(){
   function sayi(tercih, en){
     const n = tercih == null || tercih === '' ? NaN : Number(tercih);
     if(Number.isInteger(n) && n >= 0 && n <= EN_COK) return n;
-    return en < 1100 ? 1 : 2;   // az olsun (kullanıcı, 2026-10-28: «sayısını azalt»)
+    return 1;   // tek minik (kullanıcı, 2026-10-28: «sayısını azalt», «kalabalık görünümü engelle»)
   }
   function seciciHtml(n){
     const s = n == null ? simdikiSayi() : n;
@@ -378,15 +378,40 @@ window.LIFEOS.MINIK = (function(){
     mk.el.dataset.bicim = k.bicim;
     mk.el.dataset.desen = k.desen;
     mk.el.dataset.huy = k.huy;
-    mk.el.style.setProperty('--boy', k.boy + 'px');
+    mk.tabanBoy = k.boy;
+    mk.el.style.setProperty('--boy', boyPx(k.boy) + 'px');
     mk.el.style.setProperty('--ton', String(k.ton));   // birimsiz: oklch'nin h'si sayı
     ruhUygula(mk);
   }
 
   /* Miniğin gövdesi (King'in taçlı miniği de aynısını giyer: king.js arkadasHtml). */
+  /* BOY (kullanıcı, 2026-10-28: «agentların kademeli küçülmesi»): çarpan
+     --boy'a işler, miniğin bütün ölçüleri onunla birlikte değişir; tercih
+     `lifeos.minik.boy` (animasyon.js TASINAN). King'in arkadaşı etkilenmez. */
+  const BOY_ANAHTAR = 'lifeos.minik.boy';
+  const BOYLAR = Object.freeze({ kucuk:.82, orta:1, buyuk:1.2 });
+  const BOY_AD = Object.freeze({ kucuk:'Küçük', orta:'Orta', buyuk:'Büyük' });
+  function boy(){ let v = null; try{ v = localStorage.getItem(BOY_ANAHTAR); }catch(e){} return BOYLAR[v] ? v : 'orta'; }
+  function boyPx(taban){ return Math.round(taban * BOYLAR[boy()]); }
+  function boyAyarla(v){
+    if(!BOYLAR[v]) return false;
+    try{ if(v === 'orta') localStorage.removeItem(BOY_ANAHTAR); else localStorage.setItem(BOY_ANAHTAR, v); }catch(e){ /* depo kapalı */ }
+    durum.minikler.forEach(mk => { if(mk.tabanBoy) mk.el.style.setProperty('--boy', boyPx(mk.tabanBoy) + 'px'); });
+    if(typeof document !== 'undefined') document.querySelectorAll('[data-minik-boy]').forEach(b => {
+      const on = b.getAttribute('data-minik-boy') === v;
+      b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    return true;
+  }
+  function boySeciciHtml(){
+    const s = boy();
+    return '<div class="seg seg--block minikboy" role="group" aria-label="Minik boyu">'
+      + Object.keys(BOYLAR).map(k => '<button type="button" class="' + (k === s ? 'is-on' : '') + '" data-minik-boy="' + k + '" aria-pressed="' + (k === s ? 'true' : 'false') + '">' + BOY_AD[k] + '</button>').join('')
+      + '</div>';
+  }
   const ICERIK = '<i class="minik__golge"></i><i class="minik__ayak minik__ayak--sol"></i><i class="minik__ayak minik__ayak--sag"></i>'
       + '<i class="minik__kol minik__kol--sol"></i><i class="minik__kol minik__kol--sag"></i>'
-      + '<span class="minik__govde"><i class="minik__deri"></i><i class="minik__goz"></i><i class="minik__goz"></i>'
+      + '<span class="minik__govde"><i class="minik__deri"></i><i class="minik__isik"></i><i class="minik__goz"></i><i class="minik__goz"></i>'
       + '<i class="minik__agiz"></i><i class="minik__sus"></i><i class="minik__kravat"></i><i class="minik__kart"></i><i class="minik__esya"></i></span><span class="minik__balon"></span><span class="minik__zzz">z</span>'
       + '<span class="minik__kalp">♡</span><span class="minik__ad"><b></b> · <i></i><small>Dokun, gıdıkla</small></span>';
 
@@ -512,8 +537,10 @@ window.LIFEOS.MINIK = (function(){
        ekranda olmayan minik ses çıkarmaz. */
     const anim = mk.anim;
     clearInterval(mk.adimT);
+    let vurus = 0;   // seyrek: iki ayak vuruşunda bir, yürüyüş başına en çok 6 (ses gözlemi: adım sesin %90'ıydı)
     mk.adimT = setInterval(() => {
       if(mk.anim !== anim || anim.playState !== 'running' || !mk.el.classList.contains('is-yuruyor')){ clearInterval(mk.adimT); return; }
+      if(++vurus % 2 || vurus > 12) return;
       const r = mk.el.getBoundingClientRect();
       if(r.bottom > 0 && r.top < (window.innerHeight || 800)) ses('adim', mk, false);
     }, 280);
@@ -533,7 +560,7 @@ window.LIFEOS.MINIK = (function(){
   function dinlen(mk){
     if(mesgulMu(mk)) return;
     const ne = ruhUygula(mk);
-    const esya = Math.random() < .3 ? esyaSec(mk, Math.random) : '';
+    const esya = Math.random() < .15 ? esyaSec(mk, Math.random) : '';   // seyrek: kalabalık olmasın
     if(esya) mk.el.dataset.esya = esya; else delete mk.el.dataset.esya;
     const r = Math.random();
     const uyku = durum.radyo ? 0 : ne === 'uykulu' ? .4 : mk.huy === 'uykucu' ? .22 : mk.huy === 'tembel' ? .16 : ne ? .02 : .06;
@@ -745,6 +772,8 @@ window.LIFEOS.MINIK = (function(){
   }
   if(typeof document !== 'undefined'){
     document.addEventListener('click', e => {
+      const bb = e.target && e.target.closest ? e.target.closest('[data-minik-boy]') : null;
+      if(bb){ e.preventDefault(); boyAyarla(bb.getAttribute('data-minik-boy')); return; }
       const t = e.target && e.target.closest ? e.target.closest('[data-minik-ses]') : null;
       if(t){ e.preventDefault(); const k = t.getAttribute('data-minik-ses'); sesAyarla(k, !sesAyar()[k]); return; }
       const b = e.target && e.target.closest ? e.target.closest('[data-minik-sec]') : null;
@@ -900,6 +929,8 @@ window.LIFEOS.MINIK = (function(){
     window.addEventListener('resize', iste);
     window.addEventListener('scroll', () => { durum.isikTazele = true; iste(); }, { passive:true });
     document.addEventListener('pointerdown', bas, true);
+    /* Sekme gizliyken minikler durur: arka planda kare üretmesinler. */
+    document.addEventListener('visibilitychange', () => { if(durum.kat) durum.kat.classList.toggle('is-durgun', document.hidden); });
     document.addEventListener('pointerup', birak, true);
     document.addEventListener('pointercancel', birak, true);
     document.addEventListener('click', sevin, true);
@@ -913,7 +944,7 @@ window.LIFEOS.MINIK = (function(){
     else window.addEventListener('load', () => setTimeout(kur, 60));
   }
 
-  return { kur, sayi, seciciHtml, yanSes, radyoda, ofisKisileri, ICERIK, DIYALOG, diyalogSec, ESYALAR, esyaSec,
+  return { kur, sayi, seciciHtml, BOY_ANAHTAR, BOYLAR, boy, boyPx, boyAyarla, boySeciciHtml, yanSes, radyoda, ofisKisileri, ICERIK, DIYALOG, diyalogSec, ESYALAR, esyaSec,
     SES_ANAHTAR, sesAyar, sesAyarla, sesIzinli, sesSeciciHtml, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh, inisYeri,
     KISILER, HUY_AD, RUH, RUH_AD, KART, EN_AZ, PAY };
 })();

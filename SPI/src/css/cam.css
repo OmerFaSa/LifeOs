@@ -1350,9 +1350,9 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
   body .overlay{ animation:h-karart-gel var(--h-kisa) var(--e-std) both; }
   html[data-zemin="yumusak"] .overlay .sheet, .overlay .sheet{ animation:h-kagit-gel var(--h-uzun) var(--su) both; transform-origin:50% 100%; }
   @media (min-width:680px){ html[data-zemin="yumusak"] .overlay .sheet, .overlay .sheet{ transform-origin:50% 40%; } }
-  /* Kapanış kopyası (hareket.js cikis): karartma söner, kağıt aşağı süzülür. */
-  body .overlay.h-cikis{ pointer-events:none; animation:h-karart-git var(--h-kisa) var(--e-git) forwards; }
-  html[data-zemin="yumusak"] .overlay.h-cikis .sheet, .overlay.h-cikis .sheet{ animation:h-kagit-git var(--h-kisa) var(--e-git) forwards; }
+  /* Kapanış kopyası (hareket.js cikis; içerik değil, yalnız görünüş): karartma söner, kağıdın camı aşağı süzülür. */
+  .h-cikis{ animation:h-karart-git var(--h-kisa) var(--e-git) forwards; }
+  .h-cikis__kagit{ animation:h-kagit-git var(--h-kisa) var(--e-git) forwards; }
 
   /* Bildirim: kayıp yaylanarak gelir; süresi dolunca küçülüp aşağı gider. */
   .toast-root .toast{ animation:h-bildirim-gel var(--h-uzun) var(--su) both; }
@@ -1392,45 +1392,83 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
 @keyframes mk-tasin{ from{ transform:rotate(-7deg) translateY(2px); } to{ transform:rotate(7deg) translateY(2px); } }
 @keyframes mk-sarkit{ from{ transform:translateY(12%) rotate(-16deg); } to{ transform:translateY(12%) rotate(18deg); } }
 
-/* 32) ÜZERİNDEKİ KART VE SAKİN KENAR (kullanıcı, 2026-10-28: «üzerinde
-   durduğumuz kart çok az belirgin olsun, yine buğulu ama sol taraftaki
-   kadar değil; sol tarafı birazcık daha buğulu yap, dikkat dağıtmasın —
-   çok minik miktarda»).
-   · Kart (minik.js imlecin altındakine .isikli koyar): camın içi çok hafif
-     aydınlanır (açık %10, koyu %3,5) ve gölge bir tık derinleşir. İç gölge
-     ile yapılır: gradyan zemin yumuşak geçmez, gölge geçer.
-   · Kenar: bulanıklık 28 → 40 px, cam biraz daha dolgun; etkin olmayan
-     simge çok az söner (üzerine gelince ve etkinde tam). */
-:root{ --on-tint:rgba(255,255,255,.1); --on-golge:0 1px 2px rgba(20,24,40,.06), 0 14px 34px -14px rgba(20,24,40,.24);
-  --kenar-cam:linear-gradient(140deg, rgba(255,255,255,.58), rgba(255,255,255,.34)); }
-html[data-theme="dark"]{ --on-tint:rgba(255,255,255,.035); --on-golge:0 1px 2px rgba(0,0,0,.3), 0 18px 40px -18px rgba(0,0,0,.65);
-  --kenar-cam:linear-gradient(140deg, rgba(255,255,255,.1), rgba(255,255,255,.045)); }
-@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --on-tint:rgba(255,255,255,.035); --on-golge:0 1px 2px rgba(0,0,0,.3), 0 18px 40px -18px rgba(0,0,0,.65);
-  --kenar-cam:linear-gradient(140deg, rgba(255,255,255,.1), rgba(255,255,255,.045)); } }
-html[data-zemin="yumusak"] :is(.kutu, .card:not(.card--flat), .site--v5 .ledger .lrow:not(.kahraman), .site--v5 .sayfa--kapakli .bugun__alan, .giris){
-  transition:box-shadow .5s cubic-bezier(.2,.8,.2,1); }
-@media (hover:hover) and (pointer:fine){
-  html[data-zemin="yumusak"] :is(.kutu, .card:not(.card--flat), .site--v5 .ledger .lrow:not(.kahraman), .site--v5 .sayfa--kapakli .bugun__alan, .giris).isikli{
-    box-shadow:var(--cam-ust), inset 0 0 0 100vmax var(--on-tint), var(--on-golge); }
-}
-@media (min-width:680px){
-  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar{ background:var(--kenar-cam);
-    -webkit-backdrop-filter:saturate(140%) blur(40px); backdrop-filter:saturate(140%) blur(40px); }
-  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece:not(.is-on):not(:hover):not(:focus-visible){ opacity:.82; }
-  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece{ transition:background var(--dur) var(--ease), color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), opacity .3s ease, transform 620ms var(--su); }
-}
-
-/* 33) SADE İMLEÇ IŞIĞI (kullanıcı, 2026-10-28: «mouse'taki ışık işini ya
-   kaldır ya çok daha minimalist, küçük bir şey yap»). Zemindeki ortam ışığı
-   ve kart kenarının imlece göre parlaması kalktı (sol üstteki duran kenar
-   ışığı kalır); kartın içinde yalnız küçük, soluk bir parıltı kalır. */
+/* 32) İMLEÇ IŞIĞI YOK (kullanıcı, 2026-10-28: «mouse'taki ışık işini ya
+   kaldır ya çok daha minimalist»; ardından küçültülmüşü de beğenilmedi).
+   Zemindeki ortam ışığı, kartın içindeki parıltı ve kenarın imlece göre
+   parlaması kalktı; kartın sol üstündeki duran ince kenar ışığı kalır.
+   Üzerindeki kartı belirginleştirme ve daha buğulu kenar denendi, geri
+   alındı («en son yaptığını beğenmedim»). */
 .ortam-isik{ display:none !important; }
 html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::before{
   background:linear-gradient(135deg, var(--rim-ust) 0%, var(--rim-orta) 26%, transparent 46%); }
-@media (hover:hover) and (pointer:fine){
-  html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{
-    --a:calc(var(--isik-ic) * .6 * var(--isik-guc, 1));
-    background:radial-gradient(circle 110px at var(--mx, 50%) var(--my, 0%),
-      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 100%), transparent),
-      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 45%), transparent) 40%, transparent 100%); }
+html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{ content:none; }
+
+/* 33) MANZARA VE GERÇEK CAM (kullanıcı, 2026-10-28: «sistemin arka planına
+   gerekirse resim koy, devasa bir güncelleme istiyorum»; referans: Liquid
+   Glass Kit, manzara üstünde cam gezinme hapı). Cam ancak arkasında bir şey
+   varsa cam görünür: zemin modülün kendi CC0 fotoğrafıdır (zemin.js
+   --manzara; Görünüm › Manzara «Kapalı» eski renk alanına döner).
+   · Fotoğraf sabittir (kaydırınca kaymaz); üstünde okuma perdesi: açıkta
+     beyaz bir sis, başlığın durduğu sol üstte daha yoğun; koyuda fotoğraf
+     geceye döner (lacivert, modül tonunda).
+   · Kartlar gerçek buzlu cam olur: arkasını 22 px bulanık, doygun gösterir.
+     İç içe kart bulanıklığı tekrarlamaz (performans). */
+:root{
+  --manzara-sis:linear-gradient(180deg, rgba(255,255,255,.46), rgba(255,255,255,.4) 36%, rgba(255,255,255,.16) 60%, rgba(255,255,255,.28));
+  --manzara-okuma:radial-gradient(85% 62% at 14% 8%, rgba(255,255,255,.62), transparent 74%);
+  --manzara-hale:0 1px 14px rgba(255,255,255,.75);
 }
+html[data-manzara="acik"]{ --cam:radial-gradient(90% 70% at 0% 0%, rgba(255,255,255,.46), transparent 58%), linear-gradient(140deg, rgba(255,255,255,.62), rgba(255,255,255,.4)); }
+html[data-theme="dark"]{
+  --manzara-sis:linear-gradient(180deg, oklch(from var(--mod) .16 .03 h / .7), oklch(from var(--mod) .13 .025 h / .58) 45%, oklch(from var(--mod) .1 .02 h / .78));
+  --manzara-okuma:radial-gradient(70% 55% at 16% 10%, rgba(4,6,14,.42), transparent 72%);
+  --manzara-hale:0 1px 14px rgba(0,0,0,.55);
+}
+html[data-manzara="acik"][data-theme="dark"]{ --cam:radial-gradient(90% 70% at 0% 0%, rgba(255,255,255,.08), transparent 58%), linear-gradient(140deg, rgba(255,255,255,.1), rgba(255,255,255,.05)); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){
+  --manzara-sis:linear-gradient(180deg, oklch(from var(--mod) .16 .03 h / .7), oklch(from var(--mod) .13 .025 h / .58) 45%, oklch(from var(--mod) .1 .02 h / .78));
+  --manzara-okuma:radial-gradient(70% 55% at 16% 10%, rgba(4,6,14,.42), transparent 72%); --manzara-hale:0 1px 14px rgba(0,0,0,.55); } }
+@media (prefers-color-scheme:dark){ html[data-manzara="acik"]:not([data-theme="light"]){ --cam:radial-gradient(90% 70% at 0% 0%, rgba(255,255,255,.08), transparent 58%), linear-gradient(140deg, rgba(255,255,255,.1), rgba(255,255,255,.05)); } }
+html[data-yuzey="ferah"]{ --manzara-sis:linear-gradient(rgba(255,255,255,.58), rgba(255,255,255,.5)); }
+html[data-yuzey="ferah"][data-theme="dark"]{ --manzara-sis:linear-gradient(rgba(6,8,16,.8), rgba(6,8,16,.76)); }
+html[data-zemin="yumusak"][data-manzara="acik"] body::before{
+  background:var(--manzara-okuma), var(--manzara-sis), var(--manzara) center / cover no-repeat, linear-gradient(175deg, var(--zm-1), var(--zm-2)); }
+html[data-zemin="yumusak"][data-manzara="acik"]::before{ display:none; }
+html[data-zemin="yumusak"][data-manzara="acik"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .donen, .site--v5 .nextup,
+  .site--v5 .ledger .lrow:not(.kahraman), .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard, .site--v5 .rehber__konular){
+  -webkit-backdrop-filter:blur(22px) saturate(140%); backdrop-filter:blur(22px) saturate(140%); }
+/* Başlık ve selam doğrudan fotoğrafın üstünde: hafif bir hale okunurluğu taşır. */
+html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 :is(.kapak, .sayfabasi){ text-shadow:var(--manzara-hale); }
+html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .kapak .btn--ghost{ color:var(--text); font-weight:600; }
+html[data-zemin="yumusak"][data-manzara="acik"] :is(.kutu, .card, .giris, .donen, .site--v5 .ledger .lrow, .site--v5 .pk) :is(.kutu, .card, .giris, .donen, .lrow, .pk, .kapak__sayi, .pickcard){
+  -webkit-backdrop-filter:none; backdrop-filter:none; }
+
+/* 34) KARŞILAMA PERDESİ: MANZARA ÜSTÜNDE CAM KART (kullanıcı, 2026-10-28:
+   «seçtiğimiz bölümden yüklenme ekranlarına kadar zirveye taşı»). Perde
+   arkadaki uygulamanın bulanık görüntüsü yerine modülün manzarasını
+   gösterir; selam ortada bir cam kartta, büyük serif italik (§5'teki
+   küçültme yalnız Bugün kapağı içindir). «Geç» cam haptır; ilk odakta
+   kalın siyah halka yerine ince, modül renginde bir halka. */
+html[data-zemin="yumusak"][data-manzara="acik"] .perde--karsilama{
+  background:var(--manzara-okuma), var(--manzara-sis), var(--manzara) center / cover no-repeat, var(--pm-zemin);
+  -webkit-backdrop-filter:none; backdrop-filter:none; }
+html[data-zemin="yumusak"] .perde--karsilama .karsilama{ max-width:min(880px, calc(100vw - 48px));
+  padding:clamp(28px, 5vh, 44px) clamp(36px, 6vw, 68px); border-radius:34px;
+  background:var(--cam); border:1px solid var(--cam-kenar);
+  box-shadow:var(--cam-ust), 0 30px 80px -40px rgba(20,30,60,.45);
+  -webkit-backdrop-filter:blur(26px) saturate(150%); backdrop-filter:blur(26px) saturate(150%); }
+html[data-zemin="yumusak"] .perde--karsilama .karsilama__selam{ font-family:var(--karsilama-serif); font-style:italic; font-weight:400;
+  font-size:clamp(36px, 5.4vw, 60px); letter-spacing:-.01em; color:var(--text); text-wrap:balance; }
+html[data-zemin="yumusak"] .perde--karsilama .karsilama__cizgi{ width:36px; height:3px; background:var(--mod, var(--primary)); opacity:.8; }
+html[data-zemin="yumusak"] .perde--karsilama .karsilama__not{ color:var(--text-2); }
+html[data-zemin="yumusak"] .perde--marka .perde__dugme{ background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.8); color:var(--text);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 8px 20px -12px rgba(20,30,60,.4);
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
+html[data-zemin="yumusak"][data-theme="dark"] .perde--marka .perde__dugme{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 8px 20px -12px rgba(0,0,0,.6); }
+html[data-zemin="yumusak"] .perde--marka .perde__dugme:focus-visible{ outline:2px solid color-mix(in oklab, var(--mod, var(--primary)) 65%, transparent); outline-offset:3px; }
+
+/* 35) KALABALIK YOK (kullanıcı, 2026-10-28: «kalabalık görünümü engelle»).
+   Varsayılan tek minik (minik.js sayi), eşya seyrek; Ofis çalışanının yaka
+   kartı kalktı (kravat yeter). */
+.minik[data-ofis][data-tip="yaka"] .minik__kart{ display:none; }

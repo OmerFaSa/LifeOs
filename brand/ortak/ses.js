@@ -530,6 +530,9 @@ window.LIFEOS = window.LIFEOS || {};
     kapa: [{ t:0, tur:'tel', f:[587], d:0.5, g:0.2, a:0.004, oda:0.15, parlak:0.45 },
            { t:0.07, tur:'tel', f:[392], d:0.6, g:0.22, a:0.004, oda:0.18, parlak:0.45 }],
     /* Kaydedildi: tel üzerinde yumuşak bir arpej (C5 · E5 · G5). */
+    /* Uyarı (hata bildirimi): yumuşak, iki nota aşağı; sert değil. */
+    uyari:[{ t:0, tur:'tel', f:[494], d:0.5, g:0.17, a:0.006, oda:0.2, parlak:0.35 },
+           { t:0.12, tur:'tel', f:[392], d:0.6, g:0.15, a:0.006, oda:0.22, parlak:0.35 }],
     tamam:[{ t:0, tur:'tel', f:[523], d:0.8, g:0.2, a:0.004, oda:0.25, parlak:0.5 },
            { t:0.09, tur:'tel', f:[659], d:0.8, g:0.18, a:0.004, oda:0.25, parlak:0.5 },
            { t:0.18, tur:'tel', f:[784], d:0.8, g:0.16, a:0.004, oda:0.3, parlak:0.5 }],
@@ -553,6 +556,57 @@ window.LIFEOS = window.LIFEOS || {};
   });
   const TAVAN = 2000;        // hiçbir süzgeç bunun üstüne çıkmaz (Hz)
   const ARA = 0.04;          // aynı ses bundan sık çalmaz (sn)
+  const KAYIT_TAVAN = 5500;  // kayıtların yumuşak tavanı: tizlik törpülenir, boğulmaz (sentez 2 kHz'de kalır)
+  /* AİLELER ve AYRINTILI DÜZEY (kullanıcı, 2026-10-28: «ayarlarda ses kısmında
+     her şeyini detaylı ayarlayabilelim: yürümenin sesinin yüksekliği, agentların
+     konuşmasının sesi, sistemdeki tüm sesler»). Her tür bir aileye bağlıdır;
+     ailenin düzeyi genel düzeyle çarpılır, 0 olan aile hiç çalmaz. Tercih
+     `lifeos.ses.duzey` (animasyon.js TASINAN). King'in sesli okuması 'king'. */
+  const AILE = Object.freeze({ tik:'dokunus', ac:'gecis', kapa:'gecis', sayfa:'gecis', tamam:'onay', uyari:'onay',
+    gidik:'karakter', hirr:'karakter', bla:'karakter', adim:'ortam' });
+  const DUZEY_ANAHTAR = 'lifeos.ses.duzey';
+  const DUZEY_VARSAYILAN = Object.freeze({ genel:1, dokunus:1, gecis:1, onay:1, karakter:.8, ortam:.7, king:1 });
+  const DUZEY_AD = Object.freeze({ genel:'Genel', dokunus:'Dokunuş', gecis:'Geçiş ve sayfa', onay:'Onay ve uyarı',
+    karakter:'Minik konuşması ve gıdık', ortam:'Minik adımları', king:'King’in sesi' });
+  function duzeyler(){
+    let v = null;
+    try{ v = JSON.parse(localStorage.getItem(DUZEY_ANAHTAR) || 'null'); }catch(e){ v = null; }
+    return Object.assign({}, DUZEY_VARSAYILAN, v && typeof v === 'object' ? v : {});
+  }
+  function duzey(aile){
+    const d = duzeyler(), x = k => Math.max(0, Math.min(1, Number(d[k]) || 0));
+    return aile === 'genel' || !(aile in DUZEY_VARSAYILAN) ? x('genel') : x('genel') * x(aile);
+  }
+  function duzeyAyarla(aile, v){
+    if(!(aile in DUZEY_VARSAYILAN)) return false;
+    const d = duzeyler();
+    d[aile] = Math.max(0, Math.min(1, Number(v) || 0));
+    try{ localStorage.setItem(DUZEY_ANAHTAR, JSON.stringify(d)); }catch(e){ /* depo kapalı: bu sayfada geçerli değil */ }
+    return true;
+  }
+  const yuzde = y => y ? '%' + y : 'Kapalı';
+  function duzeySeciciHtml(){
+    const d = duzeyler();
+    return '<div class="sesduzey" role="group" aria-label="Ses düzeyleri">' + Object.keys(DUZEY_AD).map(k => {
+      const y = Math.round(Math.max(0, Math.min(1, Number(d[k]) || 0)) * 100);
+      return '<label class="sesduzey__satir"><span class="sesduzey__ad">' + DUZEY_AD[k] + '</span>'
+        + '<input type="range" min="0" max="100" step="5" value="' + y + '" data-ses-duzey="' + k + '" aria-valuetext="' + yuzde(y) + '">'
+        + '<output class="sesduzey__deger">' + yuzde(y) + '</output></label>';
+    }).join('') + '</div>';
+  }
+  let sonDokunus = -1, sonOnay = -9;
+  /* Göç (bir kez): eski «Minik sesleri» aç/kapa düğmeleri kalktı; kapalı olan
+     aile kaydırıcıda «Kapalı» görünsün, yeniden açılabilsin. */
+  try{
+    const eski = typeof localStorage !== 'undefined' && JSON.parse(localStorage.getItem('lifeos.minik.ses') || 'null');
+    if(eski && typeof eski === 'object'){
+      const d = duzeyler();
+      if(eski.adim === false) d.ortam = 0;
+      if(eski.konusma === false && eski.gidik === false) d.karakter = 0;
+      localStorage.setItem(DUZEY_ANAHTAR, JSON.stringify(d));
+      localStorage.removeItem('lifeos.minik.ses');
+    }
+  }catch(e){ /* depo kapalı */ }
   let baglam = null;
   let zincir = null;
   let sonBitis = 0;
@@ -567,6 +621,7 @@ window.LIFEOS = window.LIFEOS || {};
       const C = ortam.AudioContext || (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext));
       if(!C) return null;
       try{ baglam = new C(); }catch(e){ return null; }
+      kayitHazirla(baglam);
     }
     if(baglam.state === 'suspended' && baglam.resume){ try{ baglam.resume(); }catch(e){} }
     return baglam;
@@ -584,6 +639,7 @@ window.LIFEOS = window.LIFEOS || {};
         k.threshold.value = -12; k.knee.value = 8; k.ratio.value = 4; k.attack.value = 0.002; k.release.value = 0.15;
         k.connect(c.destination);
         hedef = k;
+        var sikistirici = k;
       }
       if(c.createBiquadFilter){
         const s = c.createBiquadFilter();
@@ -592,6 +648,17 @@ window.LIFEOS = window.LIFEOS || {};
         hedef = s;
       }
     }catch(e){ hedef = c.destination; }
+    /* Kayıtların ayrı ve yumuşak yolu: 2 kHz tavan tiz kayıtları boğup
+       kısıyordu (ölçüldü: tık 10,7, aç 9,9, kapa 15,7 LU kayıp). */
+    let kayit = hedef;
+    try{
+      if(c.createBiquadFilter && hedef !== c.destination){
+        const s2 = c.createBiquadFilter();
+        s2.type = 'lowpass'; s2.frequency.setValueAtTime(KAYIT_TAVAN, 0); s2.Q.value = 0.5;
+        s2.connect(typeof sikistirici !== 'undefined' ? sikistirici : c.destination);
+        kayit = s2;
+      }
+    }catch(e){ kayit = hedef; }
     let oda = null;
     try{
       if(c.createConvolver && c.createBuffer){
@@ -623,7 +690,7 @@ window.LIFEOS = window.LIFEOS || {};
         for(let i = 0; i < v.length; i++) v[i] = Math.random() * 2 - 1;
       }
     }catch(e){ gurultu = null; }
-    zincir = { c, hedef, oda, gurultu };
+    zincir = { c, hedef, oda, gurultu, kayit:(typeof sikistirici !== 'undefined' && kayit !== hedef) ? kayit : hedef };
     return zincir;
   }
 
@@ -699,6 +766,54 @@ window.LIFEOS = window.LIFEOS || {};
     return b;
   }
 
+  /* KAYITLAR (2026-10-28, sesler.js): arayüz sesleri ve adım gerçek CC0
+     kayıttır; sentezle AYNI zincirden geçer (oda, 2 kHz tavan, sıkıştırıcı,
+     perde). İlk seste bir kez çözülür; çözülene kadar ya da çözülemezse
+     sentez çalar. Kazançlar sentezin yüksekliğine eşlenmiştir. */
+  const KAYITLI = Object.freeze(['tik', 'ac', 'kapa', 'tamam', 'sayfa', 'adim']);
+  const KAYIT_KAZANC = { tik:.42, ac:1.1, kapa:.95, tamam:.23, sayfa:.2, adim:.06 };   // ses gözlemi 2026-10-28: aile hedeflerine eşlendi
+  /* Çözülen tampon bağlamına aittir: bağlam yeniden kurulursa (ya da test
+     sahte bir bağlam verirse) eskisinin tamponu kullanılmaz. */
+  const KAYITLAR = new WeakMap();
+  function kayitHazirla(c){
+    if(!c || KAYITLAR.has(c) || typeof c.decodeAudioData !== 'function') return;
+    const K = L.SES_KAYIT;
+    if(!K) return;
+    const d = { tablo:new Map(), bekleyen:0 };
+    KAYITLAR.set(c, d);
+    KAYITLI.forEach(tur => {
+      if(!K[tur]) return;
+      try{
+        const ikili = atob(K[tur]), u8 = new Uint8Array(ikili.length);
+        for(let i = 0; i < ikili.length; i++) u8[i] = ikili.charCodeAt(i);
+        d.bekleyen++;
+        const s = c.decodeAudioData(u8.buffer, b => { d.tablo.set(tur, b); d.bekleyen--; }, () => { d.bekleyen--; });
+        if(s && typeof s.catch === 'function') s.catch(() => {});
+      }catch(e){ /* çözülemedi: sentez çalar */ }
+    });
+  }
+  /* Kapa, açın aynı kaydının bir perde aşağısıdır (aile tutarlı: aç yükselir, kapa iner). */
+  function kayitCal(c, cikis, oda, tur, bas, perde){
+    const d = KAYITLAR.get(c), kaynak = tur === 'kapa' && d && d.tablo.get('ac') ? 'ac' : tur;
+    const b = d && d.tablo.get(kaynak);
+    if(!b || !c.createBufferSource) return 0;
+    const s = c.createBufferSource(), oran = perde * (tur === 'kapa' && kaynak === 'ac' ? .84 : 1);
+    s.buffer = b;
+    if(s.playbackRate) s.playbackRate.value = oran;
+    const g = c.createGain();
+    g.gain.value = KAYIT_KAZANC[tur] || .4;
+    s.connect(g); g.connect(cikis);
+    if(oda){ const o = c.createGain(); o.gain.value = .12; g.connect(o); o.connect(oda); }
+    s.start(bas);
+    /* Onay kısa kalır (en çok 0,6 sn): kalimba yumuşakça susar. */
+    const sure = tur === 'tamam' ? Math.min(.6, b.duration / oran) : b.duration / oran;
+    if(tur === 'tamam' && g.gain.setValueAtTime && g.gain.linearRampToValueAtTime){
+      g.gain.setValueAtTime(KAYIT_KAZANC.tamam, bas + .4); g.gain.linearRampToValueAtTime(0, bas + .6);
+      try{ s.stop(bas + .62); }catch(e){}
+    }
+    return sure;
+  }
+
   /* Döner: çaldı mı. `kur` yoksa yalnız kurulu bağlam kullanılır.
      o.perde: frekans çarpanı (her minik kendi tonunda konuşur).
      o.pan: -1 (sol) … 1 (sağ); ses miniğin ekrandaki yerinden gelir. */
@@ -710,17 +825,36 @@ window.LIFEOS = window.LIFEOS || {};
     try{
       const simdi = c.currentTime || 0;
       if(sonCal[tur] != null && simdi - sonCal[tur] < ARA && simdi >= sonCal[tur]) return false;
+      const aile = AILE[tur], dz = duzey(aile || 'genel');
+      if(dz <= 0) return false;
+      /* Bir olay bir ses: dokunuşun hemen ardından gelen sayfa sesi, kullanıcı
+         sesinin ardından gelen ortam sesi çalmaz; onay ve uyarı 1,5 sn'de bir. */
+      if(tur === 'sayfa' && simdi - sonDokunus < .15) return false;
+      if(aile === 'ortam' && simdi - sonDokunus < .4) return false;
+      if(aile === 'onay' && simdi - sonOnay < 1.5 && simdi >= sonOnay) return false;
+      if(aile === 'dokunus' || aile === 'gecis') sonDokunus = simdi;
+      if(aile === 'onay') sonOnay = simdi;
       sonCal[tur] = simdi;
-      let z = zincirKur(c);
-      if(o && o.pan && c.createStereoPanner){
-        const p = c.createStereoPanner();
-        p.pan.value = o.pan;
-        p.connect(z.hedef);
-        z = Object.assign({}, z, { hedef:p });
-      }
+      const z0 = zincirKur(c);
+      const yol = cikis => {
+        let h = cikis;
+        if(dz < 1 && c.createGain){ const g = c.createGain(); g.gain.value = dz; g.connect(h); h = g; }
+        if(o && o.pan && c.createStereoPanner){ const p = c.createStereoPanner(); p.pan.value = o.pan; p.connect(h); h = p; }
+        return h;
+      };
+
       /* «Tamam» notası tıkın üstüne binmez, ardından gelir. */
       const bas = tur === 'tamam' ? Math.max(simdi, sonBitis + 0.02) : simdi + 0.005;
       const perde = (o && o.perde > 0 ? o.perde : 1) * (1 + (Math.random() - 0.5) * 0.04);
+      kayitHazirla(c);
+      if(KAYITLI.indexOf(tur) >= 0){
+        const d = KAYITLAR.get(c), hazir = d && (d.tablo.has(tur) || (tur === 'kapa' && d.tablo.has('ac')));
+        if(hazir){
+          const ks = kayitCal(c, yol(z0.kayit || z0.hedef), z0.oda, tur, bas, perde);
+          if(ks){ sonBitis = Math.max(sonBitis, bas + ks); return true; }
+        } else if(d && d.bekleyen > 0) return false;   // kayıt çözülüyor: sentez değil sessizlik (ilk ses farklı çıkmasın)
+      }
+      const z = Object.assign({}, z0, { hedef:yol(z0.hedef) });
       plan.forEach(k => katman(c, z, bas + k.t, k, perde));
       sonBitis = Math.max(sonBitis, bas + Math.max.apply(null, plan.map(k => k.t + k.d)));
       return true;
@@ -828,13 +962,34 @@ window.LIFEOS = window.LIFEOS || {};
       if(r && r.matches && r.matches('[data-ses-panel] [data-ses="duzey"]')) sesAyarla(Number(r.value) / 100);
     });
 
+    /* Ses düzeyi kaydırıcıları (Görünüm › Ses): değer anında yazılır, bırakınca örnek ses çalar. */
+    document.addEventListener('input', e => {
+      const r = e.target && e.target.closest ? e.target.closest('[data-ses-duzey]') : null;
+      if(!r) return;
+      const y = Number(r.value) || 0;
+      duzeyAyarla(r.getAttribute('data-ses-duzey'), y / 100);
+      r.setAttribute('aria-valuetext', yuzde(y));
+      const o = r.parentElement && r.parentElement.querySelector('output');
+      if(o) o.textContent = yuzde(y);
+    });
+    document.addEventListener('change', e => {
+      const r = e.target && e.target.closest ? e.target.closest('[data-ses-duzey]') : null;
+      const ornek = r && { genel:'tik', dokunus:'tik', gecis:'ac', onay:'tamam', karakter:'gidik', ortam:'adim' }[r.getAttribute('data-ses-duzey')];
+      if(ornek){ sonDokunus = -1; sonOnay = -9; tik(ornek, true); }
+    });
+
     /* «Kaydedildi» bildirimi: tek yumuşak nota (yalnız kurulu bağlamla). */
     const kur = () => {
       const kok = document.getElementById('toast-root');
       if(!kok || typeof MutationObserver === 'undefined') return;
       new MutationObserver(ms => {
         if(!tercih.tik) return;
-        if(ms.some(m => Array.from(m.addedNodes).some(n => n.classList && n.classList.contains('toast')))) tik('tamam', false);
+        const t = ms.reduce((v, m) => v || Array.from(m.addedNodes).find(n => n.classList && n.classList.contains('toast')), null);
+        if(!t) return;
+        /* Hata bildiriminde başarı sesi değil, yumuşak uyarı. */
+        const hata = t.classList.contains('toast--hata') || t.classList.contains('toast--uyari') || t.getAttribute('data-ses') === 'uyari'
+          || /başarısız|okunamadı|hata|silinemedi|bağlanamadı|yüklenemedi|kaydedilemedi|geçersiz/i.test(t.textContent || '');
+        tik(hata ? 'uyari' : 'tamam', false);
       }).observe(kok, { childList:true });
     };
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
@@ -876,7 +1031,9 @@ window.LIFEOS = window.LIFEOS || {};
     ANAHTAR, TURLER,
     tercih:() => JSON.parse(JSON.stringify(tercih)),
     durum, dugme, panelHtml,
-    cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret, SESLER,
+    cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret, SESLER, KAYITLI,
+    AILE, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml,
+    chime:ad => tik(/bitti|kapa|dur/i.test(String(ad || '')) ? 'kapa' : 'ac'),
     _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik,
   });
   /* Başka modülde çalıyorduysa: gövde hazır olunca sürdürmeyi dene. */

@@ -280,6 +280,24 @@ async function portMuhafizi(portlar, ipucu){
               const ad = 'satır «' + (el.textContent || '').trim().slice(0, 24) + '»';
               if(basik.indexOf(ad) < 0) basik.push(ad);
             });
+            /* ÜZERİNE GELİNCE BELİREN DÜĞME YAZIYI ÖRTMEZ: kartın «Küçült»
+               düğmesi sağ üst köşede belirir; kartın başlık satırının sağındaki
+               üst bilgi («3 blok · 0 bitti · 3 sa») tam oradaydı ve düğme onun
+               üstüne biniyordu (kullanıcı, 2026-10-28, ekran görüntüsü). */
+            document.querySelectorAll('#main .gizle-araclar--uzerinde').forEach(ar => {
+              const kart = ar.parentElement, bas = kart && kart.querySelector(':scope > .kutu__bas');
+              if(!bas) return;
+              const r = ar.getBoundingClientRect();
+              if(!r.width) return;
+              bas.querySelectorAll('*').forEach(y => {
+                if(y.firstElementChild || !(y.textContent || '').trim()) return;
+                const q = y.getBoundingClientRect();
+                if(q.width && q.left < r.right - 1 && q.right > r.left + 1 && q.top < r.bottom - 1 && q.bottom > r.top + 1){
+                  const ad = 'küçült düğmesi «' + y.textContent.trim().slice(0, 24) + '» yazısını örtüyor';
+                  if(basik.indexOf(ad) < 0) basik.push(ad);
+                }
+              });
+            });
             return { tasma, sucluler:sucluler.slice(0, 4), kucuk:kucuk.slice(0, 4), yapisik:yapisik.slice(0, 4),
               dikey:dikey.slice(0, 4), basik:basik.slice(0, 4) };
           }, { minTap:MIN_TAP, allow:TAP_ALLOW });

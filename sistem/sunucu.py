@@ -452,6 +452,47 @@ html::after{ content:''; position:fixed; inset:auto 0 0 0; height:42vh; z-index:
   background:radial-gradient(30% 2.4% at 50% 84%, rgba(255,236,222,.9), transparent),
     radial-gradient(55% 34% at 50% 100%, rgba(255,168,120,.5), transparent 75%); }
 .kart{ box-shadow:var(--golge), inset 0 1px 0 rgba(255,255,255,.6), inset 0 -14px 26px -20px rgba(255,168,120,.32); }
+/* CAM VE MANZARA (kullanici, 2026-10-28: «HKM, AYS, SPI, ESP sectigimiz
+   bolumden yuklenme ekranlarina kadar zirveye tasi»; referans Liquid Glass
+   Kit). Modullerle ayni dil: CC0 manzara (brand/medya/doku/doku-manzara-secim)
+   uzerinde buzlu cam kartlar, pastel karoda beyaz isaret, cam hap dugmeler.
+   Eski sicak zemin isigi ve yansima cizgisi kalkti (reddedilmisti). */
+html::after{ content:none; }
+:root{ --cam:linear-gradient(140deg, rgba(255,255,255,.66), rgba(255,255,255,.42)); --cam-kenar:rgba(255,255,255,.72);
+  --cam-ust:inset 0 1px 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.3);
+  --cam-golge:0 1px 2px rgba(20,24,40,.06), 0 18px 40px -22px rgba(20,30,60,.38);
+  --hap:rgba(255,255,255,.56); --hap-kenar:rgba(255,255,255,.85); --hale:0 1px 14px rgba(255,255,255,.8); }
+@media (prefers-color-scheme:dark){ :root{ --cam:linear-gradient(140deg, rgba(255,255,255,.1), rgba(255,255,255,.05)); --cam-kenar:rgba(255,255,255,.12);
+  --cam-ust:inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(255,255,255,.05);
+  --cam-golge:0 1px 2px rgba(0,0,0,.3), 0 22px 48px -26px rgba(0,0,0,.75);
+  --hap:rgba(255,255,255,.08); --hap-kenar:rgba(255,255,255,.16); --hale:0 1px 14px rgba(0,0,0,.6); } }
+body{ background:#dfe8f3 url("/img/marka/doku-manzara-secim.webp") center / cover no-repeat fixed; }
+body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(80% 60% at 20% 8%, rgba(255,255,255,.55), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,.16) 50%, rgba(255,255,255,.32)); }
+@media (prefers-color-scheme:dark){ body{ background-color:#0d1220; }
+  body::before{ background:linear-gradient(180deg, rgba(8,12,26,.74), rgba(8,12,26,.6) 45%, rgba(8,12,26,.82)); } }
+.ust h1, .bolum, .dip{ text-shadow:var(--hale); }
+.surum{ background:var(--hap); border-color:var(--hap-kenar); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
+.guncel, .kart{ background:var(--cam); border:1px solid var(--cam-kenar); border-radius:26px; box-shadow:var(--cam-ust), var(--cam-golge);
+  -webkit-backdrop-filter:blur(24px) saturate(150%); backdrop-filter:blur(24px) saturate(150%); }
+.kart{ transition:transform .5s cubic-bezier(.16,1,.3,1), box-shadow .5s cubic-bezier(.16,1,.3,1); }
+.kart:hover{ transform:translateY(-3px);
+  box-shadow:var(--cam-ust), 0 1px 2px rgba(20,24,40,.06), 0 26px 50px -24px color-mix(in oklab, var(--renk) 50%, rgba(20,30,60,.4)); }
+.kart:active{ transform:translateY(-1px) scale(.99); transition-duration:.12s; }
+.kart__ozet{ border-top-color:var(--hap-kenar); }
+.logo{ width:52px; height:52px; border-radius:16px;
+  background:linear-gradient(160deg, color-mix(in oklab, var(--renk) 26%, #fff), color-mix(in oklab, var(--renk) 52%, #fff));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 0 color-mix(in oklab, var(--renk) 30%, transparent), 0 10px 20px -12px var(--renk); }
+@media (prefers-color-scheme:dark){ .logo{ background:linear-gradient(160deg, color-mix(in oklab, var(--renk) 62%, #fff), var(--renk));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 10px 22px -12px var(--renk); } }
+.sekil{ background:#fff; width:22px; height:22px; filter:drop-shadow(0 1px 1.5px color-mix(in oklab, var(--renk) 70%, transparent)); }
+.dugme{ background:var(--hap); border:1px solid var(--hap-kenar); border-radius:999px; box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 4px 12px -8px rgba(20,30,60,.35);
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); transition:background-color .25s ease, transform .4s cubic-bezier(.16,1,.3,1); }
+.dugme:hover{ background:color-mix(in oklab, var(--hap) 70%, #fff); transform:translateY(-1px); }
+.kart__alt .dugme{ color:color-mix(in oklab, var(--renk) 82%, #000); font-weight:650; }
+.kart::before{ background:radial-gradient(closest-side, color-mix(in oklab, var(--renk) 16%, transparent), transparent); }
+@media (prefers-color-scheme:dark){ .kart__alt .dugme{ color:color-mix(in oklab, var(--renk) 70%, #fff); } }
 </style></head><body>
 <main class="sarmal">
   <header class="ust" style="--sira:0">

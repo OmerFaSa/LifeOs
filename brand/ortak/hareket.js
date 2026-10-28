@@ -419,18 +419,31 @@ window.LIFEOS.HAREKET = (function(){
   /* Kapanış kopyası: katman (kağıt, komut kutusu) hemen kaldırılır, yerinde
      dokunulmaz bir kopyası söner (cam.css «h-cikis»). Asıl öğenin eş zamanlı
      kalkmasına güvenen odak ve testler bozulmaz. */
+  /* İçerik KOPYALANMAZ: kopyadaki sınıf ve nitelikler (.qeblok__satir,
+     [data-hp-kok]) 260 ms boyunca belgede bulunuyor, onları arayan kod ve
+     testler hayaleti açık kağıt sanıyordu. Yalnız görünüş taşınır: aynı
+     renkte boş karartma ve kağıdın yerinde aynı camdan boş bir pano. */
   function cikis(el, o){
     o = o || {};
     const az = o.az != null ? !!o.az : azMi();
-    if(az || !el || !el.isConnected || !el.cloneNode) return null;
-    const k = el.cloneNode(true);
-    /* Açık katman sayılmasın: kısayol ve odak kapısı [role=dialog][aria-modal] arar. */
-    const SIL = ['id', 'data-act', 'data-change', 'name', 'role', 'aria-modal'];
-    SIL.forEach(a => k.removeAttribute(a));
-    k.classList.add('h-cikis');
+    if(az || !el || !el.isConnected || !el.getBoundingClientRect) return null;
+    const st = getComputedStyle(el);
+    const k = document.createElement('div');
+    k.className = 'h-cikis';
     k.setAttribute('aria-hidden', 'true');
     k.setAttribute('inert', '');
-    k.querySelectorAll('[id], [data-act], [data-change], [name], [role], [aria-modal]').forEach(e => SIL.forEach(a => e.removeAttribute(a)));
+    k.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:' + (st.zIndex === 'auto' ? 60 : st.zIndex)
+      + ';background-color:' + st.backgroundColor + ';background-image:' + st.backgroundImage;
+    const kagit = el.querySelector('.sheet, .cmdk__box') || el.firstElementChild;
+    if(kagit && kagit.getBoundingClientRect){
+      const r = kagit.getBoundingClientRect(), s = getComputedStyle(kagit), p = document.createElement('div');
+      p.className = 'h-cikis__kagit';
+      p.style.cssText = 'position:fixed;left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px'
+        + ';border-radius:' + s.borderRadius + ';background-color:' + s.backgroundColor + ';background-image:' + s.backgroundImage
+        + ';box-shadow:' + s.boxShadow + ';border:' + s.borderTopWidth + ' solid ' + s.borderTopColor
+        + ';-webkit-backdrop-filter:' + s.backdropFilter + ';backdrop-filter:' + s.backdropFilter;
+      k.appendChild(p);
+    }
     document.body.appendChild(k);
     setTimeout(() => k.remove(), o.sure || 260);
     return k;

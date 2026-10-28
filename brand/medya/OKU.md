@@ -185,3 +185,18 @@ dosya sürümüne kopyalar.
 **Eksik görsel hata değildir.** Hiçbir ekran bir marka görselinin
 varlığına bel bağlamaz: `onerror` düğümü kaldırır, altındaki yazı ya da
 renk görünür kalır.
+
+## Manzara zeminleri (`doku/doku-manzara-*`)
+
+Kullanıcının isteği (2026-10-28): «sistemin arka planına gerekirse resim
+koy». Yalnız **CC0** (atıf gerekmez) fotoğraflar; kaynak Wikimedia Commons.
+2400 px'e (SPİ 2000 px, hafif yumuşatılmış) indirildi, WebP. Modül yalnız
+kendi fotoğrafını yükler; Görünüm › Manzara «Kapalı» ise hiç istenmez.
+
+| Dosya | Yer | Commons sayfası | Lisans |
+|---|---|---|---|
+| `doku-manzara-ays` | AYS | File:Sunset sky water.jpg | CC0 |
+| `doku-manzara-spi` | SPİ | File:Field with mixed intercropping of oat and rye 2.jpg (W.carter) | CC0 |
+| `doku-manzara-esp` | ESP | File:Gmunden golden horu (Unsplash).jpg (Michael Fruehmann) | CC0 |
+| `doku-manzara-hkm` | Merkez | File:Matterhorn sunset 2016 (Unsplash).jpg (Sam Ferrara) | CC0 |
+| `doku-manzara-secim` | seçim sayfası | File:BlueSkyWhiteClouds22.jpg (Raysonho) | CC0 |

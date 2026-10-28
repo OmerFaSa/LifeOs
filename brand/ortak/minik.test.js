@@ -166,16 +166,17 @@
 
   /* Kullanıcı (2026-10-28): «bir sayfada görünebilecek sayıyı
      değiştirebilelim». Görünüm › Minikler: Yok, 1–6; seçilmemişse ekran
-     genişliği karar verir (az: masaüstü 2, tablet ve telefon 1). */
+     genişliği karar verir. 2026-10-28 «kalabalık görünümü engelle»: her
+     genişlikte 1 (manzara ve cam ön planda; Görünüm'den artırılır). */
   describe('Minik · sayfadaki sayı', () => {
-    it('tercih yoksa ekrana göre (az: masaüstü 2, öbürleri 1); 0–6 tercihi olduğu gibi; bozuk tercih yok sayılır', () => {
+    it('tercih yoksa her ekranda 1; 0–6 tercihi olduğu gibi; bozuk tercih yok sayılır', () => {
       expect(C.sayi(null, 400)).toBe(1);
       expect(C.sayi(null, 900)).toBe(1);
-      expect(C.sayi(null, 1400)).toBe(2);
+      expect(C.sayi(null, 1400)).toBe(1);
       expect(C.sayi('0', 1400)).toBe(0);
       expect(C.sayi('6', 400)).toBe(6);
       expect(C.sayi('4', 900)).toBe(4);
-      expect(C.sayi('9', 1400)).toBe(2);
+      expect(C.sayi('9', 1400)).toBe(1);
       expect(C.sayi('x', 400)).toBe(1);
       expect(C.EN_COK).toBe(6);
       expect(C.KISILER.length > C.EN_COK).toBe(true);   // sayfalar arasında kadro değişir
@@ -245,6 +246,25 @@
   /* Kullanıcı (2026-10-28: «agent'ı basılı tutup sürükleyebilelim bir
      yere»): bırakınca minik, bırakıldığı noktanın ALTINDAKİ ilk kart
      kenarına düşer (yerçekimi); altında kenar yoksa en yakın kenara. */
+  /* Kullanıcı (2026-10-28): «agentların kademeli küçülmesi» — boy ayarı. */
+  describe('Minik · boy', () => {
+    it('Küçük · Orta · Büyük: çarpan boya işler; tercih taşınır; bozuk değer yok sayılır', () => {
+      const once = C.boy();
+      try{
+        expect(C.boyAyarla('buyuk')).toBe(true);
+        expect(C.boy()).toBe('buyuk');
+        expect(C.boyPx(40)).toBe(48);
+        expect(C.boyAyarla('kucuk')).toBe(true);
+        expect(C.boyPx(40)).toBe(33);
+        expect(C.boyAyarla('dev')).toBe(false);
+        const d = document.createElement('div'); d.innerHTML = C.boySeciciHtml();
+        expect(d.querySelector('[data-minik-boy="kucuk"]').getAttribute('aria-pressed')).toBe('true');
+        expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf('lifeos.minik.boy') >= 0).toBe(true);
+        expect(C.ICERIK.indexOf('minik__isik') >= 0).toBe(true);
+      }finally{ C.boyAyarla(once); }
+    });
+  });
+
   describe('Minik · sürükle bırak', () => {
     const l = [{ x1:100, x2:500, y:200 }, { x1:100, x2:500, y:600 }, { x1:700, x2:1100, y:400 }];
     it('bırakılan noktanın altındaki ilk kenara iner, x kenarın içinde kalır', () => {

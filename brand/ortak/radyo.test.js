@@ -418,7 +418,8 @@
             expect(n.type === 'sawtooth' || n.type === 'square').toBe(false);
             expect(Math.max(n.f0, n.f1 || 0) <= 2200).toBe(true);
           });
-          kayit.filtre.forEach(f => expect(f.f <= 2200).toBe(true));
+          /* 2026-10-28: gerçek kayıtların yolu ayrı ve 5,5 kHz (S.KAYIT_TAVAN): yalnız kayıt geçer, sentez 2,2 kHz altında kalır. */
+          kayit.filtre.forEach(f => expect(f.f <= 2200 || f.f === S.KAYIT_TAVAN).toBe(true));
         });
       });
     });

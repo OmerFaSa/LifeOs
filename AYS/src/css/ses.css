@@ -74,3 +74,11 @@
 @media (prefers-reduced-motion:reduce){
   .ust__ses.is-baglaniyor .ust__ses-nokta{ animation:none; }
 }
+
+/* SES DÜZEYLERİ (Görünüm › Ses; ses.js duzeySeciciHtml): ince cam ray, modül renginde dolgu. */
+.sesduzey{ display:grid; gap:10px; }
+.sesduzey__satir{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:2px 12px; font-size:13.5px; }
+.sesduzey__satir input[type="range"]{ grid-column:1 / -1; grid-row:2; }
+.sesduzey__ad{ color:var(--text); }
+.sesduzey__deger{ font-variant-numeric:tabular-nums; color:var(--text-2); text-align:right; font-size:12.5px; }
+.sesduzey input[type="range"]{ width:100%; accent-color:var(--mod, var(--primary)); min-height:24px; }

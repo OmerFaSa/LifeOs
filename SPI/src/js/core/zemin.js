@@ -202,8 +202,56 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div>';
   }
 
+  /* MANZARA (kullanıcı, 2026-10-28: «sistemin arka planına gerekirse resim
+     koy»): modülün kendi CC0 fotoğrafı (brand/medya/doku/doku-manzara-<modül>,
+     künyesi brand/medya/OKU.md). Adres belgenin kendi adresinden kurulur:
+     dist dosyada, LifeOS sunucusunda ve geliştirme sunucusunda aynı yol
+     çalışır. Kapalıysa resim hiç istenmez. Görünüşü cam.css «MANZARA». */
+  const MANZARA_ANAHTAR = 'lifeos.manzara';
+  const MANZARALAR = Object.freeze(['acik', 'kapali']);
+  const MANZARA_AD = { acik:'Açık', kapali:'Kapalı' };
+  function manzaraOku(){
+    let v = null;
+    try{ v = localStorage.getItem(MANZARA_ANAHTAR); }catch(e){}
+    return MANZARALAR.indexOf(v) >= 0 ? v : 'acik';
+  }
+  let manzaraSimdi = 'acik';
+  function manzaraUygula(){
+    if(typeof document === 'undefined' || !document.documentElement) return;
+    const kok = document.documentElement;
+    if(manzaraSimdi === 'acik'){
+      let u = '';
+      try{ u = new URL('img/marka/doku-manzara-' + modulOf().replace(/[^a-z]/g, '') + '.webp', document.baseURI).href; }catch(e){}
+      kok.setAttribute('data-manzara', 'acik');
+      if(u) kok.style.setProperty('--manzara', 'url("' + u + '")');
+    } else {
+      kok.removeAttribute('data-manzara');
+      kok.style.removeProperty('--manzara');
+    }
+    document.querySelectorAll('[data-manzara-sec]').forEach(b => {
+      const on = b.getAttribute('data-manzara-sec') === manzaraSimdi;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  function manzaraYenile(){ manzaraSimdi = manzaraOku(); manzaraUygula(); }
+  function manzaraAyarla(k){
+    if(MANZARALAR.indexOf(k) < 0) return false;
+    try{ localStorage.setItem(MANZARA_ANAHTAR, k); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    manzaraSimdi = k;
+    manzaraUygula();
+    return true;
+  }
+  function manzaraSeciciHtml(){
+    return '<div class="seg seg--block manzarasec" role="group" aria-label="Manzara">'
+      + MANZARALAR.map(k => '<button type="button" class="' + (k === manzaraSimdi ? 'is-on' : '') + '" data-manzara-sec="' + k + '"'
+        + ' aria-pressed="' + (k === manzaraSimdi ? 'true' : 'false') + '">' + MANZARA_AD[k] + '</button>').join('')
+      + '</div>';
+  }
+
   uygula();
   yuzeyUygula();
+  if(typeof document !== 'undefined') manzaraYenile();
   temaIlk();
   if(typeof document !== 'undefined' && typeof MutationObserver !== 'undefined'){
     /* Tema değişince saat tonu da hemen tazelenir (koyuda yarısı). */
@@ -213,6 +261,8 @@ window.LIFEOS = window.LIFEOS || {};
     document.addEventListener('click', e => {
       const y = e.target && e.target.closest ? e.target.closest('[data-yuzey-sec]') : null;
       if(y){ e.preventDefault(); yuzeyAyarla(y.getAttribute('data-yuzey-sec')); return; }
+      const mz = e.target && e.target.closest ? e.target.closest('[data-manzara-sec]') : null;
+      if(mz){ e.preventDefault(); manzaraAyarla(mz.getAttribute('data-manzara-sec')); return; }
       const b = e.target && e.target.closest ? e.target.closest('[data-zemin-sec]') : null;
       if(!b) return;
       e.preventDefault();
@@ -220,7 +270,7 @@ window.LIFEOS = window.LIFEOS || {};
     });
   }
   if(typeof window !== 'undefined' && window.addEventListener){
-    window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); if(e.key === yuzeyAnahtar()){ yuzeySimdi = yuzeyOku(); yuzeyUygula(); } });
+    window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); if(e.key === MANZARA_ANAHTAR) manzaraYenile(); if(e.key === yuzeyAnahtar()){ yuzeySimdi = yuzeyOku(); yuzeyUygula(); } });
     try{ window.matchMedia('(prefers-reduced-transparency: reduce)').addEventListener('change', uygula); }catch(e){}
     try{ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => saatUygula()); }catch(e){}
   }
@@ -272,7 +322,8 @@ window.LIFEOS = window.LIFEOS || {};
 
   L.ZEMIN = Object.freeze({ ANAHTAR, KIPLER, TEMA, kip, ayarla, yenile, seciciHtml, temaIlk, _temaKaydet,
     saatTonu, saatUygula, _saatSaglayici, nabiz, gunIlk, GUN_ANAHTAR,
-    YUZEYLER, yuzey:() => yuzeySimdi, yuzeyAyarla, yuzeySeciciHtml, yuzeyAnahtar });
+    YUZEYLER, yuzey:() => yuzeySimdi, yuzeyAyarla, yuzeySeciciHtml, yuzeyAnahtar,
+    MANZARA_ANAHTAR, manzara:() => manzaraSimdi, manzaraAyarla, manzaraYenile, manzaraSeciciHtml });
   /* Gövde hazır olunca, ilk çizimden biraz sonra: açılış animasyonuyla çakışmasın. */
   if(typeof document !== 'undefined' && typeof setTimeout === 'function'
       && !/\/tests\//.test(String(location.pathname || ''))){   // test sayfasında kendiliğinden oynamaz

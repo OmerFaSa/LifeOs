@@ -455,6 +455,12 @@
         expect(k.querySelector('[id], [data-act], [name]')).toBe(null);
         /* Açık katman sayılmaz: kısayol ve odak kapısı [role=dialog][aria-modal] arar. */
         expect(k.matches('[role], [aria-modal]') || !!k.querySelector('[role="dialog"], [aria-modal]')).toBe(false);
+        /* İçeriği kopyalamaz (SPİ testleri, 2026-10-28: kopyadaki [data-hp-kok] ve
+           .qeblok__satir 260 ms boyunca belgede bulunuyordu): yalnız karartma ve
+           kağıdın boş camı; uygulamanın aradığı hiçbir sınıf ya da nitelik yok. */
+        expect(k.matches('.overlay, .sheet')).toBe(false);
+        expect(k.querySelector('.overlay, .sheet, input, button, [class*="__"]:not(.h-cikis__kagit), [data-hp-kok]')).toBe(null);
+        expect(!!k.querySelector('.h-cikis__kagit')).toBe(true);
         expect(document.getElementById('sheet')).toBe(el);
         await new Promise(r => setTimeout(r, 120));
         expect(k.isConnected).toBe(false);

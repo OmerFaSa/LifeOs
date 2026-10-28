@@ -1,0 +1,54 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/king-cam.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KING CAMDA — King paneli, konusma sahnesi ve gorunusu (Mavi / Pembe).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynagi `brand/ortak/king-cam.css`; `tools/ortak.py --yay` ile uc
+   arayuzun `src/css/` klasorune birebir kopyalanir. cam.css'ten SONRA
+   yuklenir: King'in cam dilindeki son sozu burasidir (cam.css §25-26
+   eski King kurallari burada ezilir).
+   ================================================================== */
+
+/* 1) GÖRÜNÜŞ: MAVİ / PEMBE (king.js gorunus; kök data-king-gorunus). Vurgu
+   King'in gönder düğmesi ve ana çipidir; arkadaş minik tarzın renginde. */
+:root{ --king-vurgu:#3f6fe8; --king-a1:#dfe9ff; --king-a2:#a8c3ff; --king-a3:#4f7cff; --king-tac:#ffd25a; --king-tac-kenar:#d9a225; }
+html[data-king-gorunus="pembe"]{ --king-vurgu:#e0508f; --king-a1:#ffe1ee; --king-a2:#ffadd0; --king-a3:#e2669d; --king-tac:#ffd6e6; --king-tac-kenar:#e889b0; }
+.king .king__gonder, .king .king__cipler .king__cip--ana, .king .king__cipler--akis .king__cip--ana{
+  background:var(--king-vurgu) !important; color:#fff !important; border-color:transparent !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.28), 0 6px 16px -10px var(--king-vurgu) !important; }
+.king__arkadas .minik{ --g1:var(--king-a1); --g2:var(--king-a2); --g3:var(--king-a3); }
+.king__arkadas .minik[data-tip="tac"] .minik__sus{ filter:drop-shadow(0 0 .6px var(--king-tac-kenar)); }
+html[data-king-gorunus="pembe"] .king__arkadas .minik[data-tip="tac"] .minik__sus{ background:linear-gradient(180deg, #fff3f8, var(--king-tac)); }
+/* Pembe: kirpik (iki gözde, dışa doğru), kurdele yanakta değil tacın yanında. */
+html[data-king-gorunus="pembe"] .king__arkadas .minik__goz::before{ content:''; position:absolute; top:-16%; width:48%; height:34%;
+  border-top:1.6px solid #2a2f55; border-radius:60% 60% 0 0; pointer-events:none; }
+html[data-king-gorunus="pembe"] .king__arkadas .minik__goz:nth-of-type(2)::before{ left:-18%; transform:rotate(-18deg); }
+html[data-king-gorunus="pembe"] .king__arkadas .minik__goz:nth-of-type(3)::before{ right:-18%; transform:rotate(18deg); }
+
+/* 2) TEMA: King'in yüzeyleri cam (gözlem: kartlar, karolar, menüler opaktı;
+   ana çipin yazısı zemine karışıyordu 1,27:1). Pencerede manzara görünsün:
+   bulanıklık 40 → 24 px. Camdaki ikincil yazı okunur (en az 4,5:1). */
+html[data-zemin="yumusak"] .king:not(.is-mini) :is(.king__kart, .king__ars, .king__onizle, .king__soru, .king__sira, .king__bulunan),
+html[data-zemin="yumusak"] .king :is(.king__alan .king__gorev, .king__ders, .king__yasa-s, .king__gunum, .kt-kart, .kv-mini, .king__balon--sen){
+  background:var(--cam-ince) !important; border:1px solid var(--cam-kenar) !important; box-shadow:var(--cam-ust) !important; }
+html[data-zemin="yumusak"] .king__arac-menu{ background:var(--cam-katman) !important; border:1px solid var(--cam-kenar);
+  -webkit-backdrop-filter:saturate(150%) blur(24px); backdrop-filter:saturate(150%) blur(24px); box-shadow:var(--cam-ust), var(--shadow-lg); }
+html[data-zemin="yumusak"] .king .king__kutu{ -webkit-backdrop-filter:saturate(150%) blur(24px); backdrop-filter:saturate(150%) blur(24px); }
+html[data-zemin="yumusak"] .king :is(.king__balon li, .king__cipler--akis .king__cip:not(.king__cip--ana), .king__neden, .king__arac small){ color:var(--text); }
+
+/* 3) KONUŞAN SAHNE: arkadaş King'in tarafında (solda), son cevabın altında
+   kendine ayrılan bantta durur; son satırı örtmez. Yeni cevap yukarıdan
+   aşağı satır satır belirir (--yazim, king.js yazimSuresi); kartlar ve
+   çipler cümle bitince gelir. Ağız tam bu süre oynar. */
+html[data-zemin="yumusak"] .king:not(.is-mini) .king__arkadas{ left:18px; right:auto; }
+html[data-zemin="yumusak"] .king.is-mini .king__arkadas{ left:10px; right:auto; }
+html[data-zemin="yumusak"] .king:has(.king__arkadas) .king__akis{ padding-bottom:58px; }
+@media (prefers-reduced-motion:no-preference){
+  .king__balon--king.is-yeni > div > p:first-child{ animation:king-yaz var(--yazim, 600ms) cubic-bezier(.35,0,.65,1) both; }
+  .king__balon--king.is-yeni > div > :not(p:first-child){ animation:king-sonra .4s cubic-bezier(.16,1,.3,1) var(--yazim, 600ms) both; }
+}
+@keyframes king-yaz{ from{ clip-path:inset(0 0 100% 0); opacity:.3; } 12%{ opacity:1; } to{ clip-path:inset(0 0 0 0); opacity:1; } }
+@keyframes king-sonra{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
+/* Oturunca ayaklar girdinin içine sarkmaz. */
+.king__arkadas .minik.is-oturuyor .minik__ayak{ bottom:-14%; }

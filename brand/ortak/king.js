@@ -876,7 +876,11 @@ window.LIFEOS.KING = (function(){
      düşünsün, yatsın, ayaklarını aşağı uzatsın»); eşyayı cevap seçer: veri
      kartı grafik panosu, araştırma büyüteç, kayıt önizlemesi not defteri;
      yoksa ara sıra kahve ya da fikir ampulü. */
-  function arkadasPoz(rnd){ const r = rnd(); return r < .25 ? 'dur' : r < .5 ? 'yuru' : r < .75 ? 'otur' : 'uzan'; }
+  /* «uzan» çıktı (King gözlemi 2026-10-28: ezilen gövdede gözler bozuluyordu). */
+  function arkadasPoz(rnd){ const r = rnd(); return r < .45 ? 'dur' : r < .75 ? 'yuru' : 'otur'; }
+  /* Konuşan sahne: yeni cevap yukarıdan aşağı satır satır belirir; ağız tam bu
+     süre oynar (kelime başına 40 ms, 320–1400 ms). */
+  function yazimSuresi(metin){ const n = String(metin || '').trim().split(/\s+/).filter(Boolean).length; return Math.max(320, Math.min(1400, n * 40)); }
   function arkadasEsya(m, rnd){
     if(m && ((m.kartlar && m.kartlar.length) || (m.satirlar && m.satirlar.length))) return 'grafik';
     if(m && m.arastirma) return 'buyutec';
@@ -885,7 +889,7 @@ window.LIFEOS.KING = (function(){
     return r < .2 ? 'ampul' : r < .4 ? 'kahve' : '';
   }
   function arkadasHal(o){
-    if(o.konusuyor) return 'konusuyor';
+    if(o.konusuyor || o.akiyor) return 'konusuyor';   // model cevabı akarken de konuşur (2026-10-28)
     if(o.bekliyor) return 'dusunuyor';
     if(o.dinliyor || o.yaziyor) return 'dinliyor';
     if((o.bosta || 0) >= ARKADAS_UYKU) return 'uyuyor';
@@ -904,7 +908,7 @@ window.LIFEOS.KING = (function(){
     if(!a){ clearInterval(arkadasAralik); arkadasAralik = 0; return; }
     const g = document.querySelector('.king__girdi');
     const simdi = Date.now();
-    const h = arkadasHal({ konusuyor:konusuyor > 0 || simdi < arkadasKonus, bekliyor:akis.some(m => m.bekliyor),
+    const h = arkadasHal({ konusuyor:konusuyor > 0 || simdi < arkadasKonus, akiyor:akis.some(m => m.akiyor), bekliyor:akis.some(m => m.bekliyor),
       dinliyor:!!dinleyen, yaziyor:!!(g && g.value), bosta:simdi - arkadasSon });
     Object.keys(ARKADAS_SINIF).forEach(k => a.classList.toggle(ARKADAS_SINIF[k], k === h));
     const poz = h === 'konusuyor' ? arkadasPozu : '';
@@ -1626,7 +1630,7 @@ window.LIFEOS.KING = (function(){
       && !/online/i.test(v.name || ''));
     if(!tr.length) return null;
     const puan = v => (/premium|enhanced|gelişmiş|natural|neural/i.test(v.name || '') ? 4 : 0)
-      + (/siri|yelda/i.test(v.name || '') ? 2 : 0) + (v.default ? 1 : 0);
+      + (/siri|yelda/i.test(v.name || '') ? 2 : 0) + (v.default ? 1 : 0) + cinsiyetPuan(v);
     return tr.slice().sort((a, b) => puan(b) - puan(a))[0];
   }
   /* Kısa parçalar: uzun metinde Chrome okumayı yarıda sessizce keser. */
@@ -1797,6 +1801,7 @@ window.LIFEOS.KING = (function(){
     konusuyor = (ekle ? konusuyor : 0) + parcalar.length;
     parcalar.forEach(p => {
       const u = ortam.soz(p);
+      try{ if(L.SES && L.SES.duzey) u.volume = L.SES.duzey('king'); }catch(e){ /* düzey yok: tam ses */ }
       u.lang = 'tr-TR';
       if(ses) u.voice = ses;
       u.rate = 1.03 * hiz();
@@ -3780,6 +3785,39 @@ window.LIFEOS.KING = (function(){
     if(!cevapSonrasi && K && typeof K.oncelik === 'function') l.unshift(['Neye çalışayım?', 'neye çalışayım']);
     return l.slice(0, 4).map(x => ({ ad:x[0], is:'oner-metin:' + x[1] }));
   }
+  /* GÖRÜNÜŞ (kullanıcı, 2026-10-28: «hem erkek hem kadın tarafı: pembe
+     yapabilmeliyiz, mavi yapabilmeliyiz»). Köke data-king-gorunus yazılır;
+     renk ve taç king-cam.css'te. Sesli okumada cihaz sesi tercihe göre
+     kadın ya da erkek seçilir (sesSec). TASINAN'da. */
+  const GORUNUS = 'lifeos.king.gorunus';
+  const GORUNUSLER = ['mavi', 'pembe'];
+  const GORUNUS_AD = { mavi:'Mavi', pembe:'Pembe' };
+  function gorunus(){ const v = ortam.depo.oku(GORUNUS); return GORUNUSLER.indexOf(v) > 0 ? v : 'mavi'; }
+  function gorunusUygula(){ try{ if(typeof document !== 'undefined' && document.documentElement) document.documentElement.setAttribute('data-king-gorunus', gorunus()); }catch(e){ /* kök yok */ } }
+  function gorunusAyarla(v){
+    if(GORUNUSLER.indexOf(v) < 0) return false;
+    if(v === 'mavi') ortam.depo.sil(GORUNUS); else ortam.depo.yaz(GORUNUS, v);
+    gorunusUygula();
+    if(typeof document !== 'undefined') document.querySelectorAll('[data-king-gorunus-sec]').forEach(x => {
+      const on = x.getAttribute('data-king-gorunus-sec') === v;
+      x.classList.toggle('is-on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    return true;
+  }
+  function gorunusSeciciHtml(){
+    const g = gorunus();
+    return '<div class="seg seg--block kinggorunus" role="group" aria-label="King\'in görünüşü">'
+      + GORUNUSLER.map(k => '<button type="button" class="' + (k === g ? 'is-on' : '') + '" data-king-gorunus-sec="' + k + '" aria-pressed="' + (k === g ? 'true' : 'false') + '">' + GORUNUS_AD[k] + '</button>').join('')
+      + '</div>';
+  }
+  gorunusUygula();
+  if(typeof document !== 'undefined') document.addEventListener('click', e => {
+    const b = e.target && e.target.closest ? e.target.closest('[data-king-gorunus-sec]') : null;
+    if(b){ e.preventDefault(); gorunusAyarla(b.getAttribute('data-king-gorunus-sec')); }
+  });
+  const KADIN_SES = /seda|emel|yelda|filiz|zeynep|elif|ay[sş]e|female|kad[ıi]n/i, ERKEK_SES = /tolga|ahmet|kemal|mehmet|erkek|\bmale\b/i;
+  /* Cinsiyet kaliteden sonra gelir: gelişmiş ses (+4) düz sesten hep üstün; eşit kalitede tercih seçer. */
+  function cinsiyetPuan(v){ const ad = (v && v.name) || ''; return gorunus() === 'pembe' ? (KADIN_SES.test(ad) ? 3 : 0) : (ERKEK_SES.test(ad) && !/female/i.test(ad) ? 3 : 0); }
   const TARZ = 'lifeos.king.tarz';      // 'samimi' | 'resmi' | 'kisa'; TASINAN'da
   const TARZLAR = ['samimi', 'resmi', 'kisa'];
   const TARZ_AD = { samimi:'Samimi', resmi:'Resmi', kisa:'Kısa' };
@@ -5145,6 +5183,7 @@ window.LIFEOS.KING = (function(){
     cevap:{ ad:'Cevap biçimi', degerler:['oto', 'ses', 'yazi'], oku:() => cevapBicimi(), yaz:v => cevapSec(v), adlar:{ oto:'Otomatik', ses:'Sesli', yazi:'Yazılı' } },
     derinlik:{ ad:'Düşünme', degerler:DERIN_TERCIH, oku:() => derinlik(), yaz:v => derinlikSec(v), adlar:DERIN_AD },
     tarz:{ ad:'Tarz', degerler:TARZLAR, oku:() => tarz(), yaz:v => tarzSec(v), adlar:TARZ_AD },
+    gorunus:{ ad:'Görünüş', degerler:GORUNUSLER, oku:() => gorunus(), yaz:v => gorunusAyarla(v), adlar:GORUNUS_AD },
     ses:{ ad:'Ses', degerler:SES_TERCIH, oku:() => sesTercihi(), yaz:v => sesTercihSec(v), adlar:SES_AD },
   };
   /* Kendi akışını çizen araç (kart, öncelik, not arama…): kullanıcının mesajı
@@ -5405,7 +5444,7 @@ window.LIFEOS.KING = (function(){
     const ad = o.hitap || o.gorunen_ad || o.ad || '';
     const gun = String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
     if(o.dogum_gun && o.dogum_gun === gun) return 'İyi ki doğdun' + (ad ? ' ' + ad : '') + '. Ne yapıyoruz?';
-    const zaman = s < 5 ? 'İyi geceler' : s < 12 ? 'Günaydın' : s < 18 ? 'İyi günler' : 'İyi akşamlar';
+    const zaman = s < 5 ? 'İyi geceler' : s < 12 ? 'Günaydın' : s < 17 ? 'İyi günler' : 'İyi akşamlar';   // eşik sayfayla aynı (karsilama.js 17)
     return zaman + (ad ? ' ' + ad : '') + '. Ne yapıyoruz?';
   }
 
@@ -5506,7 +5545,7 @@ window.LIFEOS.KING = (function(){
       : m.bekliyor
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
-      : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '"><div><p>' + bicimli(m.metin) + '</p>'
+      : '<div class="king__balon king__balon--king' + (m.yeni && !m.yazildi ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '" style="--yazim:' + yazimSuresi(m.metin) + 'ms"><div><p>' + bicimli(m.metin) + '</p>'
         + kartlarHtml(m) + yapHtml(m) + nefesHtml(m) + yasaHtml(m, ilkSira + i) + gunKartHtml(m, ilkSira + i) + dersHtml(m, ilkSira + i) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i) + arastirmaHtml(m, ilkSira + i) + k2Html(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
@@ -5576,13 +5615,19 @@ window.LIFEOS.KING = (function(){
        bir durum çizimi seni aşağı çekiyordu. Altta ya da yeni mesaj varsa
        alta, değilse kaldığın yerde. */
     const eski = kutu.querySelector('.king__akis');
-    const yeniVar = akis.some(m => m.yeni);
+    const yeniVar = akis.some(m => m.yeni && !m.yazildi);
     const altta = !eski || eski.scrollHeight - eski.scrollTop - eski.clientHeight < 48;
     const yer = eski ? eski.scrollTop : 0;
     /* Yazılmakta olan metin çizimden sağ çıkar (küçükken ekran değişince,
        küçült/büyüt arasında siliniyordu). Gönderim kutuyu önce boşaltır. */
     const taslak = (kutu.querySelector('.king__girdi') || {}).value || '';
+    /* Arkadaş yeniden yaratılmaz (King gözlemi: akan bir cevapta 8 kez baştan
+       yaratılıyordu, animasyonu her seferinde başa dönüyordu). */
+    const arkEski = kutu.querySelector('.king__arkadas');
     kutu.innerHTML = govde();
+    const arkYeni = kutu.querySelector('.king__arkadas');
+    if(arkEski && arkYeni && arkEski !== arkYeni) arkYeni.replaceWith(arkEski);
+    akis.forEach(m => { if(m.yeni) m.yazildi = true; });   // beliriş bir kez oynar
     k.classList.toggle('is-yan-acik', !mini && yanAcik);
     k.classList.toggle('is-yan-dar', !mini && yanDar());
     k.classList.toggle('is-dizin', !mini && (bolum === 'araclar' || bolum === 'kutuphane'));
@@ -5604,7 +5649,7 @@ window.LIFEOS.KING = (function(){
     }
     if(yeniVar){
       const son = akis.slice().reverse().find(m => m.kim === 'king' && !m.bekliyor) || {};
-      const sure = Math.min(6000, 1400 + String(son.metin || '').length * 22);
+      const sure = yazimSuresi(son.metin) + 300;   // ağız, cevabın belirişi kadar
       arkadasPozu = arkadasPoz(Math.random);
       arkadasEsyasi = arkadasEsya(son, Math.random);
       arkadasKonus = Date.now() + sure; arkadasEsyaSon = arkadasKonus + 4000;
@@ -6597,7 +6642,8 @@ window.LIFEOS.KING = (function(){
 
   return {
     kur, ac, kapat, kucult, buyut, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
-    isDurumYaz:d => { isDurum = d; }, arkadasHal, arkadasPoz, arkadasEsya, ARKADAS_UYKU, isRozet, isYokla, ekipAc, ekipHtml, gorevHtml, isZamanli:() => !!isZaman,
+    isDurumYaz:d => { isDurum = d; }, arkadasHal, arkadasPoz, arkadasEsya, ARKADAS_UYKU, yazimSuresi,
+    GORUNUS_ANAHTAR:GORUNUS, gorunus, gorunusAyarla, gorunusSeciciHtml, _sesSec:sesSec, isRozet, isYokla, ekipAc, ekipHtml, gorevHtml, isZamanli:() => !!isZaman,
     beceriAc, beceriPanelHtml, bekleyenAl, eylemleriCalistir, k2Html, ODAK_SON,
     uyanCumlesi, uyanSec, uyanAcikMi, uyanParca, uyanKontrol, uyanikMi:() => !!uyanik, uyanTurMu:() => uyanTur, UYAN,
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,

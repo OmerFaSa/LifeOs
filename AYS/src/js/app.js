@@ -474,10 +474,16 @@ R.App = (function(){
         ${raw(window.LIFEOS.ZEMIN ? LIFEOS.ZEMIN.seciciHtml() : '')}
         <div class="appear__label">Minikler</div>
         ${raw(window.LIFEOS.MINIK ? LIFEOS.MINIK.seciciHtml() : '')}
-        <div class="appear__label">Minik sesleri</div>
-        ${raw(window.LIFEOS.MINIK && LIFEOS.MINIK.sesSeciciHtml ? LIFEOS.MINIK.sesSeciciHtml() : '')}
+        <div class="appear__label">Minik boyu</div>
+        ${raw(window.LIFEOS.MINIK && LIFEOS.MINIK.boySeciciHtml ? LIFEOS.MINIK.boySeciciHtml() : '')}
+        <div class="appear__label">King’in görünüşü</div>
+        ${raw(window.LIFEOS.KING && LIFEOS.KING.gorunusSeciciHtml ? LIFEOS.KING.gorunusSeciciHtml() : '')}
+        <div class="appear__label">Ses düzeyleri</div>
+        ${raw(window.LIFEOS.SES && LIFEOS.SES.duzeySeciciHtml ? LIFEOS.SES.duzeySeciciHtml() : '')}
         <div class="appear__label">Yüzey · bu modül</div>
         ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.yuzeySeciciHtml ? LIFEOS.ZEMIN.yuzeySeciciHtml() : '')}
+        <div class="appear__label">Manzara</div>
+        ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.manzaraSeciciHtml ? LIFEOS.ZEMIN.manzaraSeciciHtml() : '')}
 
         <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
           cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>

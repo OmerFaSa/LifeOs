@@ -1,0 +1,40 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/minik-cam.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* MINIKLER CAMDA — minik gorunusu, boyu ve hareketi (cam.css'ten SONRA).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynagi `brand/ortak/minik-cam.css`; `tools/ortak.py --yay` ile uc
+   arayuzun `src/css/` klasorune birebir kopyalanir. cam.css'teki minik
+   bolumlerinin (11, 15, 18, 20, 23, 24, 26, 31) ustune yazar.
+   ================================================================== */
+
+/* 1) POFUDUK KÜRE (kullanıcı, 2026-10-28: «gerçekçi, daha pofuduk; GPT'deki
+   dots gibi, Claude'daki noktalar gibi»). Gövde içten ışıyan, katmanlı ve
+   yumuşak bir küre: üstte parlak yansıma, içte renkli bulutumsu katman, altta
+   ılık iç ışık, kenarda ince iç gölge; dış çizgi yok. İç ışık katmanı
+   (.minik__isik) çok yavaş döner ve kayar; yalnız transform. */
+.minik__deri{
+  background:
+    radial-gradient(58% 42% at 33% 24%, rgba(255,255,255,.92), rgba(255,255,255,0) 72%),
+    radial-gradient(16% 10% at 23% 70%, rgba(255,120,160,.5), transparent),
+    radial-gradient(16% 10% at 77% 70%, rgba(255,120,160,.5), transparent),
+    radial-gradient(75% 60% at 50% 108%, color-mix(in oklab, var(--g1) 65%, #fff), transparent 74%),
+    radial-gradient(110% 110% at 45% 35%, color-mix(in oklab, var(--g1) 90%, #fff) 0%, color-mix(in oklab, var(--g2) 92%, transparent) 58%,
+      color-mix(in oklab, var(--g3) 78%, var(--g2)) 100%) !important;
+  box-shadow:inset 0 -3px 7px color-mix(in oklab, var(--g3) 40%, transparent), inset 0 2px 4px rgba(255,255,255,.65); }
+.minik__isik{ position:absolute; inset:14% 12% 22% 14%; border-radius:50%; pointer-events:none; z-index:0;
+  background:radial-gradient(45% 40% at 35% 40%, color-mix(in oklab, var(--g2) 55%, #fff) 0%, transparent 70%),
+    radial-gradient(40% 36% at 68% 62%, color-mix(in oklab, var(--g3) 35%, transparent) 0%, transparent 72%);
+  opacity:.75; mix-blend-mode:soft-light; }
+.minik[data-bicim="ucgen"] .minik__isik{ inset:34% 26% 20% 26%; }
+@media (prefers-reduced-motion:no-preference){
+  .minik__isik{ animation:mk-ic-isik 11s ease-in-out infinite alternate; }
+  .minik--2 .minik__isik{ animation-delay:-4s; } .minik--3 .minik__isik{ animation-delay:-7s; }
+}
+@keyframes mk-ic-isik{ from{ transform:rotate(-10deg) translate(-3%, 2%) scale(.96); } to{ transform:rotate(14deg) translate(4%, -3%) scale(1.04); } }
+/* Fotoğraf zeminde net ayrışsın: yumuşak, renkli gölge (filtre canlandırılmaz). */
+.minikkat .minik{ --hat-filtre:drop-shadow(0 0 .6px rgba(255,255,255,.9)) drop-shadow(0 3px 5px color-mix(in oklab, var(--g3) 40%, rgba(20,24,40,.25))); }
+
+/* 2) Sekme gizliyken hareket durur (minik.js is-durgun). */
+.minikkat.is-durgun *, .minikkat.is-durgun{ animation-play-state:paused !important; }

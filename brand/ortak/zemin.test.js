@@ -304,4 +304,35 @@
       }
     });
   });
+
+  /* Kullanıcı (2026-10-28: «sistemin arka planına gerekirse resim koy;
+     devasa bir güncelleme»): modülün kendi CC0 manzarası (brand/medya/doku).
+     Varsayılan açık; kapalıysa resim hiç istenmez (eski renk alanı). Tercih
+     üç modülde ortaktır (animasyon.js TASINAN). */
+  describe('Zemin — manzara', () => {
+    it('varsayılan açık: <html data-manzara> ve modülün kendi resmi; kapalıda ikisi de kalkar', () => {
+      const Z = window.LIFEOS.ZEMIN, kok = document.documentElement;
+      const onceModul = kok.getAttribute('data-modul'), once = localStorage.getItem('lifeos.manzara');
+      kok.setAttribute('data-modul', 'spi');
+      try{
+        localStorage.removeItem('lifeos.manzara');
+        Z.manzaraYenile();
+        expect(Z.manzara()).toBe('acik');
+        expect(kok.getAttribute('data-manzara')).toBe('acik');
+        expect(kok.style.getPropertyValue('--manzara')).toContain('img/marka/doku-manzara-spi.webp');
+        expect(Z.manzaraAyarla('kapali')).toBe(true);
+        expect(kok.hasAttribute('data-manzara')).toBe(false);
+        expect(kok.style.getPropertyValue('--manzara')).toBe('');
+        expect(localStorage.getItem('lifeos.manzara')).toBe('kapali');
+        expect(Z.manzaraAyarla('bilinmez')).toBe(false);
+        const d = document.createElement('div'); d.innerHTML = Z.manzaraSeciciHtml();
+        expect(d.querySelector('[data-manzara-sec="kapali"]').getAttribute('aria-pressed')).toBe('true');
+        expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf('lifeos.manzara') >= 0).toBe(true);
+      }finally{
+        try{ if(once == null) localStorage.removeItem('lifeos.manzara'); else localStorage.setItem('lifeos.manzara', once); }catch(e){}
+        if(onceModul) kok.setAttribute('data-modul', onceModul); else kok.removeAttribute('data-modul');
+        Z.manzaraYenile();
+      }
+    });
+  });
 })();

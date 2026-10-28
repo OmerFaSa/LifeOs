@@ -321,6 +321,10 @@ def build(minify: bool = False, denetle: bool = False):
 
     html = read("index.html")
     title_match = re.search(r"<title>(.*?)</title>", html, re.S)
+    # <html> etiketi (lang, data-modul) kaynaktan aynen gelir: sarmalayici soyulunca
+    # kayboluyordu; zemin.js modulu <html data-modul>'den tanir (manzara, yuzey).
+    # Gomulu acilista ayristirici bu etiketin niteliklerini koke ekler.
+    html_ac = re.search(r"<html\b[^>]*>", html)
     title = title_match.group(1).strip() if title_match else "Rota"
     font_links = re.findall(r'<link[^>]+fonts\.(?:googleapis|gstatic)\.com[^>]*>', html)
     telefon_etiketleri = ikonu_gom(pwa_etiketleri(html))
@@ -338,6 +342,7 @@ def build(minify: bool = False, denetle: bool = False):
     # dosya tek basina acildiginda (mobil, file://, kendi sunucu) Turkce
     # karakterlerin bozulmamasi buna bagli.
     parts = [
+        html_ac.group(0) if html_ac else '',
         '<meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
         '<meta name="google" content="notranslate">',
