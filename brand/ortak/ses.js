@@ -581,7 +581,26 @@ window.LIFEOS = window.LIFEOS || {};
     try{ v = JSON.parse(localStorage.getItem(DUZEY_ANAHTAR) || 'null'); }catch(e){ v = null; }
     return Object.assign({}, DUZEY_VARSAYILAN, v && typeof v === 'object' ? v : {});
   }
+  /* SESSİZ SAATLER (kullanıcı, 2026-10-29: Ayarlar › Bildirimler): seçilen
+     aralıkta bütün sesler ve King'in sesli okuması susar; gece yarısını
+     geçebilir (22:00–07:00). Radyo kullanıcının kendi çaldığıdır, susmaz. */
+  const SESSIZ_ANAHTAR = 'lifeos.sessiz';
+  function sessiz(){
+    let v = null;
+    try{ v = JSON.parse(localStorage.getItem(SESSIZ_ANAHTAR) || 'null'); }catch(e){ v = null; }
+    const saat = x => typeof x === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(x);
+    return { acik:!!(v && v.acik), bas:v && saat(v.bas) ? v.bas : '22:00', bit:v && saat(v.bit) ? v.bit : '07:00' };
+  }
+  function sessizMi(tarih){
+    const s = sessiz();
+    if(!s.acik) return false;
+    const d = tarih || new Date(), dk = d.getHours() * 60 + d.getMinutes();
+    const m = x => Number(x.slice(0, 2)) * 60 + Number(x.slice(3));
+    const a = m(s.bas), b = m(s.bit);
+    return a === b ? false : a < b ? dk >= a && dk < b : dk >= a || dk < b;
+  }
   function duzey(aile){
+    if(sessizMi()) return 0;
     const d = duzeyler(), x = k => Math.max(0, Math.min(1, Number(d[k]) || 0));
     if(aile === 'genel' || !(aile in DUZEY_VARSAYILAN)) return x('genel');
     return x('genel') * (GRUP[aile] ? x(GRUP[aile]) : 1) * x(aile);
@@ -1055,7 +1074,7 @@ window.LIFEOS = window.LIFEOS || {};
     tercih:() => JSON.parse(JSON.stringify(tercih)),
     durum, dugme, panelHtml,
     cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret, SESLER, KAYITLI,
-    AILE, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml,
+    AILE, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml, SESSIZ_ANAHTAR, sessiz, sessizMi,
     chime:ad => tik(/bitti|kapa|dur/i.test(String(ad || '')) ? 'kapa' : 'ac'),
     _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik, _onKur:onKur,
   });

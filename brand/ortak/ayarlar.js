@@ -71,18 +71,67 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- bölümler */
   /* GRUPLAR (kullanıcı, 2026-10-29: «sistem direkt olmayacak; Sistem altında ses,
-     animasyon, plan; sonra Hesap: güvenlik, bağlantılar, Google»). Grup adı
-     listede başlıktır, kendisi sekme değildir. */
+     animasyon, plan; sonra Hesap: güvenlik, bağlantılar, Google»; «görünüm ve
+     minik ve King'i de Sistem'in içine koy; seçenekleri arttır; arka plan
+     fotoğrafını değiştirebilmeyi göremedim»). Grup adı başlıktır, sekme değil. */
   const BOLUMLER = Object.freeze([
-    { id:'gorunum',  ad:'Görünüm' },
-    { id:'ekip',     ad:'Minikler ve King' },
-    { id:'ses',      ad:'Ses',         grup:'Sistem' },
-    { id:'hareket',  ad:'Animasyon',   grup:'Sistem' },
-    { id:'sistem',   ad:'Planlama',    grup:'Sistem' },
-    { id:'hesap',    ad:'Güvenlik',    grup:'Hesap' },
-    { id:'baglanti', ad:'Bağlantılar', grup:'Hesap' },
+    { id:'gorunum',  ad:'Görünüm',          grup:'Sistem' },
+    { id:'zemin',    ad:'Arka plan',        grup:'Sistem' },
+    { id:'ekip',     ad:'Minikler ve King', grup:'Sistem' },
+    { id:'ses',      ad:'Ses',              grup:'Sistem' },
+    { id:'hareket',  ad:'Animasyon',        grup:'Sistem' },
+    { id:'bildirim', ad:'Bildirimler',      grup:'Sistem' },
+    { id:'sistem',   ad:'Planlama',         grup:'Sistem' },
+    { id:'hesap',    ad:'Güvenlik',         grup:'Hesap' },
+    { id:'baglanti', ad:'Bağlantılar',      grup:'Hesap' },
     { id:'modul',    ad:'Bu modül' },
   ]);
+
+  /* SEÇİMLER: tek anahtarlı, kökte niteliği olan tercihler (biçimi cam.css §45).
+     Nitelik hep yazılır (varsayılan da): CSS özgüllüğü buna dayanır. */
+  const SECIMLER = Object.freeze({
+    cam:     { anahtar:'lifeos.cam',           kok:'data-cam',      vars:'orta',  sira:['az', 'orta', 'cok'],  ad:{ az:'Dolu', orta:'Orta', cok:'Saydam' } },
+    kontrast:{ anahtar:'lifeos.kontrast',      kok:'data-kontrast', vars:'normal', sira:['normal', 'yuksek'], ad:{ normal:'Normal', yuksek:'Yüksek' } },
+    perde:   { anahtar:'lifeos.perde',         kok:'data-perde',    vars:'orta',  sira:['az', 'orta', 'cok'],  ad:{ az:'Az', orta:'Orta', cok:'Çok' } },
+    bulanik: { anahtar:'lifeos.zemin.bulanik', kok:'data-bulanik',  vars:'yok',   sira:['yok', 'hafif', 'cok'], ad:{ yok:'Net', hafif:'Hafif', cok:'Yumuşak' } },
+    rozet:   { anahtar:'lifeos.rozet',         kok:'data-rozet',    vars:'acik',  sira:['acik', 'kapali'],     ad:{ acik:'Göster', kapali:'Gizle' } },
+  });
+  function secim(k){
+    const x = SECIMLER[k];
+    let v = null;
+    try{ v = localStorage.getItem(x.anahtar); }catch(e){}
+    return x.sira.indexOf(v) >= 0 ? v : x.vars;
+  }
+  function secimUygula(k){ if(typeof document !== 'undefined') document.documentElement.setAttribute(SECIMLER[k].kok, secim(k)); }
+  function secimAyarla(k, v){
+    const x = SECIMLER[k];
+    if(!x || x.sira.indexOf(v) < 0) return false;
+    try{ if(v === x.vars) localStorage.removeItem(x.anahtar); else localStorage.setItem(x.anahtar, v); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    secimUygula(k);
+    if(typeof document !== 'undefined') document.querySelectorAll('[data-secim^="' + k + ':"]').forEach(b => {
+      const on = b.getAttribute('data-secim') === k + ':' + v;
+      b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    return true;
+  }
+  const secimHtml = (k, ad) => '<div class="seg seg--block" role="group" aria-label="' + kac(ad) + '">' + SECIMLER[k].sira.map(v => {
+    const on = v === secim(k);
+    return '<button type="button" class="' + (on ? 'is-on' : '') + '" data-secim="' + k + ':' + v + '" aria-pressed="' + on + '">' + SECIMLER[k].ad[v] + '</button>';
+  }).join('') + '</div>';
+  Object.keys(SECIMLER).forEach(secimUygula);
+
+  /* «Görünümü varsayılana döndür»: yalnız görünüş tercihleri; veri değil. İki adım. */
+  const SIFIRLANAN = Object.freeze(['lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik',
+    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet']);
+
+  /* Arka plan önizlemesi (zemin.js onizle). */
+  function onizleHtml(yuva){
+    const o = L.ZEMIN && L.ZEMIN.onizle ? L.ZEMIN.onizle(yuva) : null;
+    if(!o) return '';
+    const etiket = { modul:'Modülün fotoğrafı', foto:'Kendi fotoğrafın', video:'Kendi videon', renk:yuva === 'gece' ? 'Gece rengi' : 'Renk alanı' }[o.tur];
+    return '<span class="zemin-onizle zemin-onizle--' + o.tur + '"' + (o.tur === 'modul' || o.tur === 'foto' ? ' style="background-image:url(&quot;' + kac(o.adres) + '&quot;)"' : '') + '>'
+      + '<small>' + kac(etiket) + '</small></span>';
+  }
   let secili = 'gorunum';
 
   const H = (ad, not, denetim) => '<div class="ayarlar__satir"><div class="ayarlar__ad">' + kac(ad)
@@ -129,11 +178,27 @@ window.LIFEOS = window.LIFEOS || {};
   function icerik(id, o){
     if(id === 'gorunum') return H('Tema', 'Sistem seçiliyken cihazın açık/koyu tercihi izlenir', o.tema)
       + H('Yazı tipi', 'Bütün modüllerde aynı', yaziSeciciHtml())
-      + H('Zemin', '', cagir(L.ZEMIN, 'seciciHtml'))
-      + H('Gündüz arka planı', 'Açık tema; kendi fotoğrafın ya da videon', cagir(L.ZEMIN, 'manzaraSeciciHtml'))
-      + H('Gece arka planı', 'Koyu tema; gece rengi fotoğrafı karartmaz', cagir(L.ZEMIN, 'geceSeciciHtml'))
-      + H('Saate göre tema', '07:00–19:00 açık, sonra koyu', cagir(L.ZEMIN, 'otoSeciciHtml'))
-      + H('Yüzey', 'Yalnız bu modül', cagir(L.ZEMIN, 'yuzeySeciciHtml'));
+      + H('Cam yoğunluğu', 'Kartların ne kadar saydam olduğu', secimHtml('cam', 'Cam yoğunluğu'))
+      + H('Kontrast', 'Yüksek: soluk yazılar koyulaşır, kartlar dolar', secimHtml('kontrast', 'Kontrast'))
+      + H('Yüzey', 'Yalnız bu modül', cagir(L.ZEMIN, 'yuzeySeciciHtml'))
+      + H('Varsayılana dön', 'Tema dışındaki görünüş tercihleri ilk hâline döner; verin değişmez',
+        '<button type="button" class="btn btn--sm" data-ayarlar-sifirla>Görünümü sıfırla</button>');
+    if(id === 'zemin') return '<div class="zemin-yuvalar">'
+      + '<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>Gündüz</b><small>Açık tema</small></div>' + onizleHtml('gunduz') + cagir(L.ZEMIN, 'manzaraSeciciHtml') + '</div>'
+      + '<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>Gece</b><small>Koyu tema</small></div>' + onizleHtml('gece') + cagir(L.ZEMIN, 'geceSeciciHtml') + '</div></div>'
+      + H('Okunaklık perdesi', 'Fotoğrafın üstündeki örtü: az olunca fotoğraf canlı, çok olunca yazı rahat', secimHtml('perde', 'Okunaklık perdesi'))
+      + H('Fotoğrafı yumuşat', 'Fotoğraf hafifçe bulanır; kartlar öne çıkar', secimHtml('bulanik', 'Fotoğrafı yumuşat'))
+      + H('Zemin', 'Sade: fotoğraf ve cam yok, düz zemin', cagir(L.ZEMIN, 'seciciHtml'))
+      + H('Saate göre tema', '07:00–19:00 açık, sonra koyu', cagir(L.ZEMIN, 'otoSeciciHtml'));
+    if(id === 'bildirim'){
+      const ss = L.SES && L.SES.sessiz ? L.SES.sessiz() : null;
+      return (ss ? H('Sessiz saatler', 'Bu aralıkta bütün sesler ve King’in sesli okuması susar; radyo susmaz',
+          '<div class="sessiz">' + '<button type="button" class="plan__anahtar' + (ss.acik ? ' is-on' : '') + '" role="switch" aria-checked="' + ss.acik + '" data-sessiz-ac>'
+          + '<i aria-hidden="true"></i><span class="sr-only">' + (ss.acik ? 'Açık' : 'Kapalı') + '</span></button>'
+          + '<input type="time" class="plan__saat" data-sessiz="bas" value="' + kac(ss.bas) + '" aria-label="Başlangıç">'
+          + '<span aria-hidden="true">–</span><input type="time" class="plan__saat" data-sessiz="bit" value="' + kac(ss.bit) + '" aria-label="Bitiş"></div>') : '')
+        + H('Sayaçlar ve noktalar', 'Kenardaki bildirim sayısı ve kırmızı nokta', secimHtml('rozet', 'Sayaçlar ve noktalar'));
+    }
     if(id === 'hareket') return H('Animasyonlar', 'Az: yalnız gerekli geçişler', cagir(L.ANIMASYON, 'seciciHtml'))
       + G('Hız', 'Arayüz ve ajanlar ayrı; Ayrıntı içindekileri tek tek ayarlar', cagir(L.ANIMASYON, 'hizSeciciHtml'));
     if(id === 'ses') return G('Ses düzeyleri', 'Genel hepsini birlikte kısar; Ayrıntı grubun içindekileri tek tek', cagir(L.SES, 'duzeySeciciHtml'));
@@ -169,17 +234,40 @@ window.LIFEOS = window.LIFEOS || {};
       + '<button type="button" class="ayarlar__sekme' + (b.grup ? ' ayarlar__sekme--grupta' : '') + (b.id === secili ? ' is-on' : '') + '" role="tab"'
       + ' id="ayarlar-sekme-' + b.id + '" aria-selected="' + (b.id === secili) + '" aria-controls="ayarlar-bolum-' + b.id + '"'
       + ' data-ayar-bolum="' + b.id + '">' + kac(b.ad) + '</button>').join('');
-    const govde = BOLUMLER.map(b => '<section class="ayarlar__bolum" role="tabpanel" id="ayarlar-bolum-' + b.id + '"'
+    const govde = BOLUMLER.map(b => '<section class="ayarlar__bolum" role="tabpanel" id="ayarlar-bolum-' + b.id + '" data-baslik="' + kac(b.ad) + '"'
       + ' aria-labelledby="ayarlar-sekme-' + b.id + '"' + (b.id === secili ? '' : ' hidden') + '>'
       + icerik(b.id, o) + '</section>').join('');
     return '<div class="katman kmenu kmenu--yan ayarlar" role="dialog" aria-label="Ayarlar">'
       + '<header class="ayarlar__bas"><b>Ayarlar</b>'
       + '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Ayarları kapat">'
       + (L.KABUK ? L.KABUK.simge('kapat') : '×') + '</button></header>'
-      + '<div class="ayarlar__govde"><nav class="ayarlar__nav" role="tablist" aria-label="Ayar bölümleri" aria-orientation="vertical">' + nav + '</nav>'
+      + '<div class="ayarlar__govde"><nav class="ayarlar__nav" role="tablist" aria-label="Ayar bölümleri" aria-orientation="vertical">'
+      + '<input type="search" class="ayarlar__ara" data-ayarlar-ara placeholder="Ayarlarda ara" aria-label="Ayarlarda ara" autocomplete="off">' + nav + '</nav>'
       + '<div class="ayarlar__icerik">' + govde + '</div></div></div>';
   }
 
+  function sessizYaz(degisen){
+    if(!(L.SES && L.SES.sessiz)) return;
+    const v = Object.assign(L.SES.sessiz(), degisen);
+    try{ localStorage.setItem(L.SES.SESSIZ_ANAHTAR, JSON.stringify(v)); }catch(e){ /* depo kapalı */ }
+  }
+  const kucukHarf = x => String(x || '').toLocaleLowerCase('tr-TR');
+  function ara(panel, q){
+    if(!panel) return;
+    const a = kucukHarf(q).trim();
+    panel.classList.toggle('is-aranir', !!a);
+    panel.querySelectorAll('.ayarlar__bolum').forEach(sec => {
+      if(!a){ sec.hidden = sec.id !== 'ayarlar-bolum-' + secili; sec.querySelectorAll('[data-ara-gizli]').forEach(x => { x.hidden = false; x.removeAttribute('data-ara-gizli'); }); return; }
+      const satirlar = Array.from(sec.querySelectorAll('.ayarlar__satir, .zemin-yuvasi, .minikgal__kart'));
+      const basUyar = kucukHarf(sec.getAttribute('data-baslik')).indexOf(a) >= 0;   // bölümün adı tutarsa hepsi kalır
+      satirlar.forEach(x => {
+        const uy = basUyar || kucukHarf(x.textContent).indexOf(a) >= 0;
+        x.hidden = !uy;
+        if(uy) x.removeAttribute('data-ara-gizli'); else x.setAttribute('data-ara-gizli', '');
+      });
+      sec.hidden = !(basUyar || satirlar.some(x => !x.hidden));
+    });
+  }
   function sekmeSec(panel, id){
     if(!panel || !BOLUMLER.some(b => b.id === id)) return;
     secili = id;
@@ -304,6 +392,17 @@ window.LIFEOS = window.LIFEOS || {};
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
       if(planTikla(t)) return;
+      const se = t.closest('[data-secim]');
+      if(se){ const [k, v] = se.getAttribute('data-secim').split(':'); secimAyarla(k, v); return; }
+      const sf = t.closest('[data-ayarlar-sifirla]');
+      if(sf){
+        if(sf.getAttribute('data-onay') !== '1'){ sf.setAttribute('data-onay', '1'); sf.textContent = 'Emin misin? Sıfırla'; return; }
+        SIFIRLANAN.forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
+        try{ location.reload(); }catch(e){}
+        return;
+      }
+      const sa = t.closest('[data-sessiz-ac]');
+      if(sa){ sessizYaz({ acik:sa.getAttribute('aria-checked') !== 'true' }); sa.classList.toggle('is-on'); sa.setAttribute('aria-checked', String(sa.classList.contains('is-on'))); return; }
       const sk = t.closest('[data-ayar-bolum]');
       if(sk){ sekmeSec(sk.closest('.ayarlar'), sk.getAttribute('data-ayar-bolum')); return; }
       const yz = t.closest('[data-yazi-sec]');
@@ -324,7 +423,16 @@ window.LIFEOS = window.LIFEOS || {};
         L.HESAP.merkezAc(hs.getAttribute('data-ayarlar-hesap') || 'kok');
       }
     });
-    document.addEventListener('change', e => { if(e.target && e.target.matches) planDegisti(e.target); });
+    document.addEventListener('change', e => {
+      if(!(e.target && e.target.matches)) return;
+      if(e.target.matches('[data-sessiz]') && /^\d\d:\d\d$/.test(e.target.value)) sessizYaz({ [e.target.getAttribute('data-sessiz')]:e.target.value });
+      else planDegisti(e.target);
+    });
+    /* Ayarlarda ara: yazınca bütün bölümler açılır, eşleşmeyen satır gizlenir. */
+    document.addEventListener('input', e => {
+      if(!(e.target && e.target.matches && e.target.matches('[data-ayarlar-ara]'))) return;
+      ara(e.target.closest('.ayarlar'), e.target.value);
+    });
     /* Sekmelerde ok tuşları (dikey liste). */
     document.addEventListener('keydown', e => {
       if(e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
@@ -337,5 +445,5 @@ window.LIFEOS = window.LIFEOS || {};
   }
 
   L.AYARLAR = Object.freeze({ html, BOLUMLER, YAZILAR, yazi, yaziAyarla, HESAP_SAYFALARI, BAGLANTI_SAYFALARI, ODEME_ANAHTAR, odemeAcik, odemeAyarla,
-    _sec:id => { secili = id; } });
+    SECIMLER, secim, secimAyarla, SIFIRLANAN, ara, _sec:id => { secili = id; } });
 })();

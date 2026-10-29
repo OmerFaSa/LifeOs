@@ -1658,3 +1658,35 @@ html[data-theme="dark"]{ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,.34),
 video.zemin-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-3; pointer-events:none; }
 html:not([data-zemin="yumusak"]) video.zemin-video{ display:none; }
 html[data-zemin="yumusak"][data-zemin-video] body::before{ background:var(--manzara-okuma), var(--manzara-sis); }
+
+/* 45) AYARLAR › GÖRÜNÜM, ARKA PLAN, BİLDİRİMLER (kullanıcı, 2026-10-29:
+   «seçenekleri arttır; arka plan fotoğrafını değiştirebilmek yok, göremedim»).
+   Kök nitelikleri ayarlar.js yazar (hep, varsayılan da). */
+/* Cam yoğunluğu: Dolu (az saydam) · Orta · Saydam. */
+html[data-cam="az"]{ --cam:linear-gradient(140deg, rgba(255,255,255,.86), rgba(255,255,255,.7)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.8), rgba(255,255,255,.62)); }
+html[data-cam="az"][data-theme="dark"]{ --cam:linear-gradient(140deg, rgba(34,36,46,.9), rgba(26,28,36,.86)); --cam-ince:linear-gradient(140deg, rgba(40,42,52,.86), rgba(30,32,40,.8)); }
+html[data-cam="cok"]{ --cam:linear-gradient(140deg, rgba(255,255,255,.3), rgba(255,255,255,.12)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.26), rgba(255,255,255,.1)); }
+html[data-cam="cok"][data-theme="dark"]{ --cam:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); }
+@media (prefers-color-scheme:dark){
+  html[data-cam="az"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, rgba(34,36,46,.9), rgba(26,28,36,.86)); --cam-ince:linear-gradient(140deg, rgba(40,42,52,.86), rgba(30,32,40,.8)); }
+  html[data-cam="cok"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); }
+}
+/* Yüksek kontrast: soluk yazılar koyulaşır, çizgiler belirginleşir, cam dolar. */
+html[data-kontrast="yuksek"]{ --text-2:var(--text); --text-3:color-mix(in oklab, var(--text) 82%, transparent);
+  --border:color-mix(in oklab, var(--text) 26%, transparent); --border-soft:color-mix(in oklab, var(--text) 18%, transparent);
+  --cam:linear-gradient(140deg, rgba(255,255,255,.9), rgba(255,255,255,.8)); }
+html[data-kontrast="yuksek"][data-theme="dark"]{ --cam:linear-gradient(140deg, rgba(30,32,40,.94), rgba(24,26,32,.92)); }
+@media (prefers-color-scheme:dark){ html[data-kontrast="yuksek"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, rgba(30,32,40,.94), rgba(24,26,32,.92)); } }
+/* Okunaklık perdesi: fotoğrafın üstündeki örtünün gücü (Az .45 · Orta 1 · Çok 1.7). */
+html[data-perde]{ --perde:1; } html[data-perde="az"]{ --perde:.45; } html[data-perde="cok"]{ --perde:1.7; }
+html[data-perde]{ --manzara-sis:linear-gradient(180deg, rgba(255,255,255,calc(.46 * var(--perde))), rgba(255,255,255,calc(.4 * var(--perde))) 36%,
+  rgba(255,255,255,calc(.16 * var(--perde))) 60%, rgba(255,255,255,calc(.28 * var(--perde)))); }
+html[data-perde][data-theme="dark"]{ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,calc(.34 * var(--perde))), rgba(6,8,14,calc(.22 * var(--perde))) 45%, rgba(6,8,14,calc(.46 * var(--perde)))); }
+@media (prefers-color-scheme:dark){ html[data-perde]:not([data-theme="light"]){ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,calc(.34 * var(--perde))), rgba(6,8,14,calc(.22 * var(--perde))) 45%, rgba(6,8,14,calc(.46 * var(--perde)))); } }
+/* Fotoğrafı yumuşat: duran zemin katmanı bir kez bulanır (kaydırmada yeniden çizilmez). */
+html[data-zemin="yumusak"][data-manzara="acik"][data-bulanik="hafif"] body::before{ inset:-24px; filter:blur(6px); }
+html[data-zemin="yumusak"][data-manzara="acik"][data-bulanik="cok"] body::before{ inset:-40px; filter:blur(14px); }
+html[data-bulanik="hafif"] video.zemin-video{ filter:blur(6px); transform:scale(1.04); }
+html[data-bulanik="cok"] video.zemin-video{ filter:blur(14px); transform:scale(1.08); }
+/* Sayaçlar ve noktalar gizli. */
+html[data-rozet="kapali"] .kenar__sayi, html[data-rozet="kapali"] .kenar__sayac, html[data-rozet="kapali"] .ust__zil-nokta{ display:none !important; }

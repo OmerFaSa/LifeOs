@@ -154,4 +154,31 @@
       }finally{ S.tikAc(tikVardi); S._ortam(null); S._sifirla(); }
     });
   });
+  /* 2026-10-29: Ayarlar › Bildirimler › Sessiz saatler. */
+  describe('Ses · sessiz saatler', () => {
+    const S = () => window.LIFEOS.SES;
+    function ile(v, fn){
+      const once = localStorage.getItem(S().SESSIZ_ANAHTAR);
+      try{ if(v) localStorage.setItem(S().SESSIZ_ANAHTAR, JSON.stringify(v)); else localStorage.removeItem(S().SESSIZ_ANAHTAR); return fn(); }
+      finally{ if(once == null) localStorage.removeItem(S().SESSIZ_ANAHTAR); else localStorage.setItem(S().SESSIZ_ANAHTAR, once); }
+    }
+    const t = (h, m) => new Date(2026, 9, 29, h, m || 0);
+    it('kapalıyken hiç susmaz; varsayılan 22:00–07:00', () => ile(null, () => {
+      expect(S().sessiz()).toEqual({ acik:false, bas:'22:00', bit:'07:00' });
+      expect(S().sessizMi(t(23))).toBe(false);
+    }));
+    it('gece yarısını geçen aralık: 22–07 arası sessiz, dışı değil; açıkken düzey 0', () => ile({ acik:true, bas:'22:00', bit:'07:00' }, () => {
+      expect(S().sessizMi(t(23, 30))).toBe(true);
+      expect(S().sessizMi(t(3))).toBe(true);
+      expect(S().sessizMi(t(7))).toBe(false);
+      expect(S().sessizMi(t(12))).toBe(false);
+      expect(S().sessizMi(t(21, 59))).toBe(false);
+    }));
+    it('gün içi aralık ve bozuk saat', () => ile({ acik:true, bas:'13:00', bit:'14:00' }, () => {
+      expect(S().sessizMi(t(13, 30))).toBe(true);
+      expect(S().sessizMi(t(14))).toBe(false);
+      localStorage.setItem(S().SESSIZ_ANAHTAR, JSON.stringify({ acik:true, bas:'25:00', bit:'x' }));
+      expect(S().sessiz().bas).toBe('22:00');
+    }));
+  });
 })();

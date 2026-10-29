@@ -26,20 +26,21 @@
   }
 
   describe('Ayarlar (bölümlü panel)', () => {
-    it('sekiz bölüm, Sistem ve Hesap grup; yalnız seçili olan görünür, sekmeye basınca değişir', () => {
+    it('on bölüm, Sistem ve Hesap grup; yalnız seçili olan görünür, sekmeye basınca değişir', () => {
       A._sec('gorunum');
       const d = koy();
       try{
         const sek = Array.from(d.querySelectorAll('[data-ayar-bolum]'));
-        expect(sek.map(s => s.textContent)).toEqual(['Görünüm', 'Minikler ve King', 'Ses', 'Animasyon', 'Planlama', 'Güvenlik', 'Bağlantılar', 'Bu modül']);
-        /* Sistem ve Hesap sekme değil, grup başlığı; altındakiler sırayla. */
+        expect(sek.map(s => s.textContent)).toEqual(['Görünüm', 'Arka plan', 'Minikler ve King', 'Ses', 'Animasyon', 'Bildirimler', 'Planlama',
+          'Güvenlik', 'Bağlantılar', 'Bu modül']);
+        /* Sistem ve Hesap sekme değil, grup başlığı (2026-10-29: «görünüm ve minikleri de Sistem'in içine koy»). */
         expect(Array.from(d.querySelectorAll('.ayarlar__grup')).map(g => g.textContent)).toEqual(['Sistem', 'Hesap']);
-        expect(d.querySelector('.ayarlar__grup').nextElementSibling.textContent).toBe('Ses');
+        expect(d.querySelector('.ayarlar__grup').nextElementSibling.textContent).toBe('Görünüm');
         const gorunen = () => Array.from(d.querySelectorAll('.ayarlar__bolum')).filter(s => !s.hidden).map(s => s.id);
         expect(gorunen()).toEqual(['ayarlar-bolum-gorunum']);
-        sek[2].click();
+        sek[3].click();
         expect(gorunen()).toEqual(['ayarlar-bolum-ses']);
-        expect(sek[2].getAttribute('aria-selected')).toBe('true');
+        expect(sek[3].getAttribute('aria-selected')).toBe('true');
         expect(sek[0].getAttribute('aria-selected')).toBe('false');
       }finally{ d.remove(); A._sec('gorunum'); }
     });
@@ -111,6 +112,66 @@
       A.HESAP_SAYFALARI.forEach(([sayfa]) => expect(typeof sayfa).toBe('string'));
       expect(A.HESAP_SAYFALARI.map(x => x[0])).toEqual(['guvenlik', 'ikiadim', 'cihazlar', 'etkinlik', 'yedek', 'verin']);
       expect(A.BAGLANTI_SAYFALARI.map(x => x[0])).toEqual(['baglantilar', 'bagla', 'anahtarlar', 'gelen', 'takvim']);
+    });
+
+    /* 2026-10-29 (kullanıcı: «seçenekleri arttır; arka plan fotoğrafını değiştirebilmeyi göremedim»). */
+    it('görünüm seçimleri köke yazılır, kalıcıdır ve taşınır; varsayılan hep yazılı', () => {
+      const anahtarlar = Object.keys(A.SECIMLER).map(k => A.SECIMLER[k].anahtar);
+      const once = anahtarlar.map(k => localStorage.getItem(k));
+      const d = koy();
+      try{
+        anahtarlar.forEach(k => localStorage.removeItem(k));
+        Object.keys(A.SECIMLER).forEach(k => A.secimAyarla(k, A.SECIMLER[k].vars));
+        expect(document.documentElement.getAttribute('data-cam')).toBe('orta');
+        expect(document.documentElement.getAttribute('data-perde')).toBe('orta');
+        d.querySelector('[data-secim="cam:cok"]').click();
+        expect(document.documentElement.getAttribute('data-cam')).toBe('cok');
+        expect(localStorage.getItem('lifeos.cam')).toBe('cok');
+        expect(d.querySelector('[data-secim="cam:cok"]').getAttribute('aria-pressed')).toBe('true');
+        expect(A.secimAyarla('cam', 'bilinmez')).toBe(false);
+        d.querySelector('[data-secim="kontrast:yuksek"]').click();
+        expect(document.documentElement.getAttribute('data-kontrast')).toBe('yuksek');
+        anahtarlar.forEach(k => expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(k) >= 0).toBe(true));
+        expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf('lifeos.sessiz') >= 0).toBe(true);
+      }finally{
+        d.remove();
+        anahtarlar.forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); });
+        Object.keys(A.SECIMLER).forEach(k => A.secimAyarla(k, A.secim(k)));
+      }
+    });
+    it('arka plan kendi bölümünde: iki yuva önizlemeli; perde ve yumuşatma seçicisi var', () => {
+      const d = koy();
+      try{
+        const z = d.querySelector('#ayarlar-bolum-zemin');
+        expect(z.querySelectorAll('.zemin-yuvasi').length).toBe(2);
+        if(window.LIFEOS.ZEMIN && window.LIFEOS.ZEMIN.onizle) expect(z.querySelectorAll('.zemin-onizle').length).toBe(2);
+        expect(!!z.querySelector('[data-secim="perde:cok"]')).toBe(true);
+        expect(!!z.querySelector('[data-secim="bulanik:hafif"]')).toBe(true);
+      }finally{ d.remove(); }
+    });
+    it('ayarlarda ara: bütün bölümlerden eşleşen satırlar kalır; silince eski hâline döner', () => {
+      A._sec('gorunum');
+      const d = koy();
+      try{
+        const p = d.querySelector('.ayarlar');
+        A.ara(p, 'perde');
+        const acik = Array.from(p.querySelectorAll('.ayarlar__bolum')).filter(s => !s.hidden).map(s => s.id);
+        expect(acik).toEqual(['ayarlar-bolum-zemin']);
+        const satir = Array.from(p.querySelectorAll('#ayarlar-bolum-zemin .ayarlar__satir')).filter(x => !x.hidden);
+        expect(satir.length).toBe(1);
+        A.ara(p, '');
+        expect(Array.from(p.querySelectorAll('.ayarlar__bolum')).filter(s => !s.hidden).map(s => s.id)).toEqual(['ayarlar-bolum-gorunum']);
+        expect(p.querySelectorAll('[data-ara-gizli]').length).toBe(0);
+      }finally{ d.remove(); }
+    });
+    it('görünümü sıfırla iki adımdır: ilk basış yalnız sorar', () => {
+      const d = koy();
+      try{
+        const b = d.querySelector('[data-ayarlar-sifirla]');
+        b.click();
+        expect(b.textContent).toBe('Emin misin? Sıfırla');
+        expect(A.SIFIRLANAN.indexOf('lifeos.manzara') >= 0 && A.SIFIRLANAN.indexOf('lifeos.kilit.odeme') < 0).toBe(true);
+      }finally{ d.remove(); }
     });
 
     it('hesap sunucusu yokken düğme yok, durum söylenir', () => {

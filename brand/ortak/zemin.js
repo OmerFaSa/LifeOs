@@ -243,6 +243,19 @@ window.LIFEOS = window.LIFEOS || {};
     try{ surum = localStorage.getItem('lifeos.manzara.surum') || ''; }catch(e){}
     try{ return new URL('/api/zemin/' + yuva + (surum ? '?v=' + surum : ''), location.href).href; }catch(e){ return ''; }
   }
+  /* Ayarlar'daki önizleme: bir yuvanın şu anki seçimi { tur:'modul'|'foto'|'video'|'renk', adres }. */
+  function onizle(yuva){
+    const secim = yuva === 'gece' ? (geceSimdi === 'ayni' ? manzaraSimdi : geceSimdi) : manzaraSimdi;
+    const kendiYuva = yuva === 'gece' && geceSimdi === 'kendi' ? 'gece' : 'gunduz';
+    const modul = () => { try{ return new URL('img/marka/doku-manzara-' + modulOf().replace(/[^a-z]/g, '') + '.webp', document.baseURI).href; }catch(e){ return ''; } };
+    if(secim === 'kendi'){
+      const t = dosyaTuru(kendiYuva);
+      if(t && sunucuVar()) return { tur:t, adres:dosyaAdresi(kendiYuva) };
+      return { tur:'modul', adres:modul() };
+    }
+    if(secim === 'acik') return { tur:'modul', adres:modul() };
+    return { tur:'renk', adres:'' };
+  }
   /* Şu an geçerli olan: { tur:'modul'|'foto'|'video'|'yok', yuva } */
   function etkinZemin(){
     const gece = karanlik();
@@ -454,7 +467,7 @@ window.LIFEOS = window.LIFEOS || {};
     YUZEYLER, yuzey:() => yuzeySimdi, yuzeyAyarla, yuzeySeciciHtml, yuzeyAnahtar,
     MANZARA_ANAHTAR, manzara:() => manzaraSimdi, manzaraAyarla, manzaraYenile, manzaraSeciciHtml,
     GECE_ANAHTAR, OTO_ANAHTAR, gece:() => geceSimdi, geceAyarla, geceSeciciHtml, oto:() => otoSimdi, otoAyarla, otoSeciciHtml,
-    otoTema, etkinZemin, karanlik, dosyaYukle });
+    otoTema, etkinZemin, karanlik, dosyaYukle, onizle });
   /* Gövde hazır olunca, ilk çizimden biraz sonra: açılış animasyonuyla çakışmasın. */
   if(typeof document !== 'undefined' && typeof setTimeout === 'function'
       && !/\/tests\//.test(String(location.pathname || ''))){   // test sayfasında kendiliğinden oynamaz
