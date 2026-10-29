@@ -15720,6 +15720,26 @@ html[data-zemin="yumusak"] .ayarlar .themebtn.is-on{ border-color:transparent; b
 .zemin-durum:empty{ display:none; }
 .ayarlar .seg button{ white-space:nowrap; }
 
+/* Minik galerisi (minik.js galeriHtml): her minik kendi kartında canlı;
+   basınca sayfadan çıkar ya da gelir. Kapalı olan soluk. */
+.minikgal{ display:grid; grid-template-columns:repeat(auto-fill, minmax(112px, 1fr)); gap:8px; width:100%; }
+.minikgal__kart{ position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:0; padding:10px 8px 10px;
+  border:1px solid var(--border); border-radius:16px; background:transparent; color:var(--text-2); font:inherit; text-align:center; cursor:pointer;
+  transition:background var(--dur) var(--ease), border-color var(--dur) var(--ease), opacity var(--dur) var(--ease); }
+.minikgal__kart:hover{ background:color-mix(in oklab, var(--text) 5%, transparent); }
+.minikgal__kart b{ font-size:13px; font-weight:600; color:var(--text); }
+.minikgal__kart small{ font-size:11px; line-height:1.3; color:var(--text-3); }
+.minikgal__kart:not(.is-on){ opacity:.5; }
+.minikgal__kart:not(.is-on) .minikgal__sahne{ filter:grayscale(.85); }
+.minikgal__kart.is-on{ border-color:transparent; background:var(--secili-zemin, var(--primary-soft)); box-shadow:var(--secili-golge, none); }
+.minikgal__kart::after{ content:''; position:absolute; top:8px; right:8px; width:14px; height:14px; border-radius:50%;
+  box-shadow:inset 0 0 0 1.5px var(--border-strong); }
+.minikgal__kart.is-on::after{ box-shadow:none; background:var(--secili-yazi, var(--primary))
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 7.2l2.3 2.3 4.7-4.9' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat; }
+.minikgal__sahne{ position:relative; width:64px; height:60px; margin-bottom:4px; }
+.minikgal__sahne .minik{ --boy:40px; left:calc(50% - var(--boy) / 2); top:calc(100% - var(--boy) - 4px); pointer-events:none; cursor:default; }
+.minikgal__sahne .minik__balon, .minikgal__sahne .minik__ad{ display:none; }
+
 /* ==== css/rota.css ==== */
 /* ROTA — Hareket › Kardiyo'daki rota kartı ve kağıtları (core/rota.js,
    core/harita.js). Sade kalır: harita, bir satır özet, iki hayalet düğme.
@@ -17925,6 +17945,37 @@ html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz{ border-radius:24px; b
 /* 3) Üçgen ofis miniğinde ağız gözlerin hemen altında (73–81 %); kravat
    oraya inerse ağzı örter ve yüzde «+» gibi durur. Kravat ağzın altına. */
 .minik[data-ofis][data-bicim="ucgen"] .minik__kravat{ top:85%; height:13%; width:10%; left:45%; }
+
+/* 4) ALTI YENİ KİŞİ (kullanıcı, 2026-10-29: «ajan çeşitliliğini arttırıp
+   kalitesini arttır»). Süsler dosyasız: renk geçişi ve kesme yolu.
+   Bere (ponponlu), hilal, alev perçemi, bulut, kalp anteni, damla. */
+.minik[data-tip="bere"] .minik__sus{ left:10%; right:10%; top:-14%; height:30%; border-radius:50% 50% 12% 12% / 80% 80% 20% 20%;
+  background:repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 2px, transparent 2px 6px), linear-gradient(#ff8fa3, #e2577a); }
+.minik[data-tip="bere"] .minik__sus::after{ content:''; position:absolute; left:40%; top:-34%; width:22%; aspect-ratio:1; border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #fff, #f3e6ec); }
+.minik[data-bicim="ucgen"][data-tip="bere"] .minik__sus{ left:22%; right:22%; top:-4%; }
+.minik[data-tip="ay"] .minik__sus{ left:60%; top:-24%; width:30%; height:30%; rotate:-18deg; border-radius:50%;
+  background:radial-gradient(circle at 68% 38%, transparent 0 40%, #ffe7a3 41%, #f6c453 70%); filter:drop-shadow(0 0 3px rgba(255,214,120,.6)); }
+.minik[data-tip="alev"] .minik__sus{ left:34%; width:32%; top:-34%; height:42%;
+  background:radial-gradient(60% 50% at 50% 78%, #fff3b0, transparent 70%), linear-gradient(180deg, #ff9f43, #ff5e3a);
+  clip-path:polygon(50% 0, 66% 30%, 82% 18%, 84% 56%, 100% 72%, 76% 100%, 24% 100%, 0 72%, 16% 56%, 20% 22%, 36% 34%); }
+.minik[data-tip="bulut"] .minik__sus{ left:20%; right:20%; top:-10%; height:20%; border-radius:999px;
+  background:linear-gradient(#fff, #e6eefc); filter:drop-shadow(0 1px 1.5px rgba(110,130,180,.35)); }
+.minik[data-tip="bulut"] .minik__sus::before, .minik[data-tip="bulut"] .minik__sus::after{ content:""; position:absolute; border-radius:50%; aspect-ratio:1;
+  background:radial-gradient(circle at 40% 35%, #fff 0 55%, #eef3fd); }
+.minik[data-tip="bulut"] .minik__sus::before{ left:8%; bottom:28%; width:46%; }
+.minik[data-tip="bulut"] .minik__sus::after{ left:44%; bottom:18%; width:38%; }
+.minik[data-tip="kalp"] .minik__sus{ left:47%; width:6%; top:-30%; height:32%; border-radius:2px; background:var(--g3); }
+.minik[data-tip="kalp"] .minik__sus::after{ content:''; position:absolute; left:-180%; top:-60%; width:460%; aspect-ratio:1;
+  background:linear-gradient(#ff8fb1, #ff4f7e); clip-path:path('M5 9 C1 6 0 4 1.6 2.2 C3 .8 4.6 1.4 5 2.8 C5.4 1.4 7 .8 8.4 2.2 C10 4 9 6 5 9 Z'); scale:1.8; transform-origin:0 0; }
+.minik[data-tip="damla"] .minik__sus{ left:62%; top:-26%; width:22%; height:30%;
+  background:radial-gradient(circle at 40% 62%, #fff 0 12%, transparent 14%), linear-gradient(180deg, #a8e3ff, #3fa9f5);
+  border-radius:50% 50% 50% 50% / 62% 62% 38% 38%; clip-path:polygon(50% 0, 100% 62%, 92% 88%, 50% 100%, 8% 88%, 0 62%); }
+@media (prefers-reduced-motion:no-preference){
+  .minik[data-tip="alev"] .minik__sus{ animation:mk-alev 1.6s ease-in-out infinite alternate; transform-origin:50% 100%; }
+  .minik[data-tip="kalp"] .minik__sus{ animation:mk-anten 3.4s ease-in-out infinite; transform-origin:50% 100%; }
+}
+@keyframes mk-alev{ from{ transform:scale(1, .94) skewX(-3deg); } to{ transform:scale(1, 1.06) skewX(3deg); } }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -19219,7 +19270,8 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'hareket') return H('Animasyonlar', 'Az: yalnız gerekli geçişler', cagir(L.ANIMASYON, 'seciciHtml'))
       + G('Hız', 'Arayüz ve ajanlar ayrı; Ayrıntı içindekileri tek tek ayarlar', cagir(L.ANIMASYON, 'hizSeciciHtml'));
     if(id === 'ses') return G('Ses düzeyleri', 'Genel hepsini birlikte kısar; Ayrıntı grubun içindekileri tek tek', cagir(L.SES, 'duzeySeciciHtml'));
-    if(id === 'ekip') return H('Minikler', 'Sayfada en çok kaç minik', cagir(L.MINIK, 'seciciHtml'))
+    if(id === 'ekip') return G('Kimler gezsin', 'Basınca sayfadan çıkar ya da gelir; yeni minikler açık gelir', cagir(L.MINIK, 'galeriHtml'))
+      + H('Minikler', 'Sayfada en çok kaç minik', cagir(L.MINIK, 'seciciHtml'))
       + H('Minik boyu', '', cagir(L.MINIK, 'boySeciciHtml'))
       + H('King’in görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml'));
     if(id === 'hesap'){
@@ -20329,7 +20381,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'9c2663d7', at:'2026-10-29 15:28', dirty:true };
+SP.BUILD = { id:'520fa1f7', at:'2026-10-29 15:49', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -99181,10 +99233,24 @@ window.LIFEOS.MINIK = (function(){
     { ad:'Çiçek',    bicim:'ucgen',    tip:'cicek',   huy:'sarkici',  desen:'cil',   boy:39, ton:80,  perde:1.15 },
     { ad:'Boncuk',   bicim:'yuvarlak', tip:'boynuz',  huy:'oyuncu',   desen:'cil',   boy:36, ton:-60, perde:1.3 },
     { ad:'Yıldız',   bicim:'kare',     tip:'yildiz',  huy:'cesur',    desen:'yok',   boy:40, ton:100, perde:1.1 },
-    { ad:'Pıtırcık', bicim:'ucgen',    tip:'mantar',  huy:'sakar',    desen:'cil',   boy:37, ton:-90, perde:1.05 }
+    { ad:'Pıtırcık', bicim:'ucgen',    tip:'mantar',  huy:'sakar',    desen:'cil',   boy:37, ton:-90, perde:1.05 },
+    /* 2026-10-29 (kullanıcı: «ajan çeşitliliğini arttırıp kalitesini arttır»). */
+    { ad:'Bereli',   bicim:'yuvarlak', tip:'bere',    huy:'sevecen',  desen:'yok',   boy:40, ton:150, perde:1.15 },
+    { ad:'Hilal',    bicim:'ucgen',    tip:'ay',      huy:'dalgin',   desen:'yok',   boy:41, ton:-120, perde:0.95 },
+    { ad:'Alev',     bicim:'kare',     tip:'alev',    huy:'enerjik',  desen:'cil',   boy:39, ton:-150, perde:1.1 },
+    { ad:'Pamuk',    bicim:'yuvarlak', tip:'bulut',   huy:'sakin',    desen:'karin', boy:43, ton:120, perde:0.88 },
+    { ad:'Sevgi',    bicim:'kare',     tip:'kalp',    huy:'nazik',    desen:'karin', boy:37, ton:170, perde:1.22 },
+    { ad:'Damla',    bicim:'ucgen',    tip:'damla',   huy:'telasli',  desen:'yok',   boy:38, ton:-170, perde:1.12 }
   ]);
   const HUY_AD = Object.freeze({ uykucu:'uykucu', konuskan:'konuşkan', merakli:'meraklı', neseli:'neşeli', hayalci:'hayalci', bilge:'bilge',
-    utangac:'utangaç', tembel:'tembel', sarkici:'şarkıcı', oyuncu:'oyuncu', cesur:'cesur', sakar:'sakar' });
+    utangac:'utangaç', tembel:'tembel', sarkici:'şarkıcı', oyuncu:'oyuncu', cesur:'cesur', sakar:'sakar',
+    sevecen:'sevecen', dalgin:'dalgın', enerjik:'enerjik', sakin:'sakin', nazik:'nazik', telasli:'telaşlı' });
+  /* Galerideki tek cümle: huy ne yapar (yalnız görünüş; hiçbir karara girmez). */
+  const HUY_NOT = Object.freeze({ uykucu:'Sık sık esner, uyuklar', konuskan:'Her fırsatta laf atar', merakli:'Kartları kurcalar',
+    neseli:'Zıplar, güler', hayalci:'Bulutlara dalar', bilge:'Ağır ağır yürür', utangac:'Dokununca saklanır', tembel:'Pek kıpırdamaz',
+    sarkici:'Arada şarkı mırıldanır', oyuncu:'Koşturur, oynar', cesur:'Yüksek kartlara atlar', sakar:'Arada tökezler',
+    sevecen:'Yanına gelene sokulur', dalgin:'Uzaklara bakar', enerjik:'Hiç yerinde durmaz', sakin:'Yavaş ve sakin',
+    nazik:'Selam verir, teşekkür eder', telasli:'Hep bir yere yetişir' });
   /* Sohbet senaryoları (kullanıcı, 2026-10-28: «aralarındaki konuşmaları
      daha çeşitli yap»): soru–cevap; Ofis'in kendi işi, sabahın ve gecenin
      kendi lafı. Her satır balona sığar (en çok 18 harf). */
@@ -99377,6 +99443,48 @@ window.LIFEOS.MINIK = (function(){
     const d = n >= 3 ? 1 : 0;
     const sec = ofis.slice(0, n - d).concat(diger.slice(0, d));
     return sec.concat(diger.slice(d)).slice(0, Math.min(n, l.length));
+  }
+
+  /* KADRO SEÇİMİ (kullanıcı, 2026-10-29: «mini ajanların hangilerinin olacağını
+     görüp seçip çıkartıp ekleyebilelim»). Tercih kapatılanların adlarıdır:
+     yeni eklenen minik kendiliğinden açık gelir. 'ofis' Ofis çalışanlarının
+     hepsidir. Hepsi kapalıysa sayfada minik yoktur (sayı da 0 sayılır). */
+  const KADRO_ANAHTAR = 'lifeos.minik.kapali';
+  function kapalilar(){
+    let v = null;
+    try{ v = JSON.parse(localStorage.getItem(KADRO_ANAHTAR) || '[]'); }catch(e){ v = null; }
+    return new Set(Array.isArray(v) ? v.filter(x => typeof x === 'string') : []);
+  }
+  function havuzKur(ajanListesi){
+    const k = kapalilar();
+    return KISILER.filter(x => !k.has(x.ad)).concat(k.has('ofis') ? [] : ofisKisileri(ajanListesi));
+  }
+  function kadroAyarla(ad, acik){
+    const k = kapalilar();
+    if(acik) k.delete(ad); else k.add(ad);
+    try{ localStorage.setItem(KADRO_ANAHTAR, JSON.stringify(Array.from(k))); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    if(typeof document !== 'undefined') document.querySelectorAll('[data-minik-kadro]').forEach(b => {
+      const on = !k.has(b.getAttribute('data-minik-kadro'));
+      b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    kadroUygula();
+    return k;
+  }
+  /* Galeri: her minik kendi kartında canlı (nefes, göz kırpma); basınca çıkar ya da gelir. */
+  function galeriHtml(){
+    const k = kapalilar();
+    const kart = (ad, alt, govde, on) => '<button type="button" class="minikgal__kart' + (on ? ' is-on' : '') + '" data-minik-kadro="' + ad + '"'
+      + ' aria-pressed="' + (on ? 'true' : 'false') + '" title="' + (on ? 'Sayfadan çıkar' : 'Sayfaya ekle') + '">'
+      + '<span class="minikgal__sahne" aria-hidden="true">' + govde + '</span><b>' + ad + '</b><small>' + alt + '</small></button>';
+    const kisi = x => '<span class="minik" data-tip="' + x.tip + '" data-bicim="' + x.bicim + '" data-desen="' + x.desen + '" data-huy="' + x.huy + '"'
+      + ' data-yon="sag" style="--ton:' + x.ton + '">' + ICERIK + '</span>';
+    const ofis = ofisKisileri(ajanlar());
+    return '<div class="minikgal" role="group" aria-label="Minikler: sayfada kimler gezsin">'
+      + KISILER.map(x => kart(x.ad, HUY_AD[x.huy] + ' · ' + HUY_NOT[x.huy], kisi(x), !k.has(x.ad))).join('')
+      + (ofis.length ? kart('ofis', 'Ofis çalışanları · ' + ofis.length + ' kişi, işinin başında',
+        '<span class="minik" data-ofis="" data-tip="' + ofis[0].tip + '" data-bicim="' + ofis[0].bicim + '" data-desen="yok" data-yon="sag" style="--ton:' + ofis[0].ton + '">' + ICERIK + '</span>', !k.has('ofis'))
+        .replace('<b>ofis</b>', '<b>Ofis</b>') : '')
+      + '</div>';
   }
 
   /* Sohbet edebilecek eş: aynı kartın kenarında, en çok 260 px ötede. */
@@ -99634,7 +99742,7 @@ window.LIFEOS.MINIK = (function(){
 
   /* Üzgün ağır, uykulu ağır aksak, mutlu ve kızgın hızlı yürür. */
   const HIZ_RUH = Object.freeze({ uzgun:.6, uykulu:.7, mutlu:1.25, kizgin:1.5 });
-  const HIZ_HUY = Object.freeze({ tembel:.7, oyuncu:1.2, cesur:1.15 });
+  const HIZ_HUY = Object.freeze({ tembel:.7, oyuncu:1.2, cesur:1.15, enerjik:1.3, telasli:1.25, sakin:.8 });
 
   /* Paytak yürüyüş: önce yöne hafifçe eğilir, sonra kısa adımlarla, yavaş
      başlayıp yavaş durarak yürür (adım ritmi CSS'te). */
@@ -99869,7 +99977,7 @@ window.LIFEOS.MINIK = (function(){
      kenara konur (sayfayı yeniden açmadan). */
   function sayiUygula(){
     if(!durum.kat) return;
-    const n = simdikiSayi();
+    const n = Math.min(simdikiSayi(), durum.havuz.length);
     while(durum.minikler.length > n){
       const mk = durum.minikler.pop();
       clearTimeout(mk.zaman); if(mk.anim) mk.anim.cancel();
@@ -99885,6 +99993,17 @@ window.LIFEOS.MINIK = (function(){
       if(yerlestir(mk)) sonra(mk, 1200 + i * 900);
     }
   }
+  /* Kadro değişince: hepsi iner, yeni kadronun ilk n'i görünen kenarlara konur. */
+  function kadroUygula(){
+    durum.havuz = havuzKur(ajanlar());
+    if(!durum.kat) return;
+    while(durum.minikler.length){
+      const mk = durum.minikler.pop();
+      clearTimeout(mk.zaman); if(mk.anim) mk.anim.cancel();
+      mk.el.remove();
+    }
+    sayiUygula();
+  }
   function ayarla(n){
     try{ localStorage.setItem(ANAHTAR, String(n)); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
     const s = simdikiSayi();
@@ -99897,6 +100016,8 @@ window.LIFEOS.MINIK = (function(){
   }
   if(typeof document !== 'undefined'){
     document.addEventListener('click', e => {
+      const kd = e.target && e.target.closest ? e.target.closest('[data-minik-kadro]') : null;
+      if(kd){ e.preventDefault(); const ad = kd.getAttribute('data-minik-kadro'); kadroAyarla(ad, kapalilar().has(ad)); return; }
       const bb = e.target && e.target.closest ? e.target.closest('[data-minik-boy]') : null;
       if(bb){ e.preventDefault(); boyAyarla(bb.getAttribute('data-minik-boy')); return; }
       const t = e.target && e.target.closest ? e.target.closest('[data-minik-ses]') : null;
@@ -99906,7 +100027,7 @@ window.LIFEOS.MINIK = (function(){
       e.preventDefault();
       ayarla(Number(b.getAttribute('data-minik-sec')));
     });
-    window.addEventListener('storage', e => { if(e.key === ANAHTAR) sayiUygula(); });
+    window.addEventListener('storage', e => { if(e.key === ANAHTAR) sayiUygula(); if(e.key === KADRO_ANAHTAR) kadroUygula(); });
   }
 
   /* İki ölçüm: biri hemen, biri kartların giriş animasyonu bittikten sonra. */
@@ -100022,10 +100143,10 @@ window.LIFEOS.MINIK = (function(){
     kat.setAttribute('aria-hidden', 'true');
     document.body.appendChild(kat);
     durum.kat = kat;
-    const n = simdikiSayi();
+    durum.havuz = havuzKur(ajanlar());
+    const n = Math.min(simdikiSayi(), durum.havuz.length);
     for(let i = 0; i < n; i++){ const mk = minikYap(i); kat.appendChild(mk.el); durum.minikler.push(mk); }
     durum.sayfa = document.documentElement.dataset.sayfa || '';
-    durum.havuz = KISILER.concat(ofisKisileri(ajanlar()));
     const ilk = kadro(durum.sayfa, durum.minikler.length, durum.havuz);
     durum.minikler.forEach((mk, i) => giydir(mk, durum.havuz[ilk[i]]));
     durum.zeminler = olcum();
@@ -100079,7 +100200,8 @@ window.LIFEOS.MINIK = (function(){
 
   return { kur, sayi, seciciHtml, BOY_ANAHTAR, BOYLAR, boy, boyPx, boyAyarla, boySeciciHtml, yanSes, radyoda, ofisKisileri, ICERIK, DIYALOG, diyalogSec, ESYALAR, esyaSec,
     SES_ANAHTAR, sesAyar, sesAyarla, sesIzinli, sesSeciciHtml, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh, inisYeri,
-    KISILER, HUY_AD, RUH, RUH_AD, KART, EN_AZ, PAY };
+    KISILER, HUY_AD, HUY_NOT, RUH, RUH_AD, KART, EN_AZ, PAY,
+    KADRO_ANAHTAR, kapalilar, havuzKur, kadroAyarla, galeriHtml };
 })();
 
 /* ==== js/app.js ==== */
