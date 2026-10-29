@@ -442,6 +442,16 @@ def run():
         ok(".catch(function(){ yak(k, false); })" in pc)
     test("giris kartlari: modul durumu yalniz kapaliyken gorunur", t_modul_durumu)
 
+    def t_kendiliginden_yeniden():
+        """Hata (2026-10-29, sahada): guncelleme sunucu dosyasini degistirdi ama
+        «Yeniden baslat»a basilmadi; sunucu yarim gun eski kodla calisti (kok hala
+        230 istekle aciliyordu). Sunucu dosyasi degistiyse sayfa kendisi yeniden baslatir."""
+        pc = sunucu.giris_html()
+        ok("if(s.yeniden_baslat){" in pc)
+        ok("return yeniden();" in pc)
+        no("s.yeniden_baslat ? ana('Yeniden başlat', yeniden)" in pc)
+    test("guncelleme sunucu dosyasini degistirdiyse yeniden baslatma kendiliginden", t_kendiliginden_yeniden)
+
     def t_uclar():
         srv = _Srv(("127.0.0.1", 0), sunucu.Giris)
         _th.Thread(target=srv.serve_forever, daemon=True).start()

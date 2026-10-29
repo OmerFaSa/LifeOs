@@ -628,8 +628,14 @@ body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:no
     dugme.disabled = true; dugme.textContent = 'İndiriliyor…'; bak.hidden = true;
     post('/api/guncelle' + (yedekle === true ? '?yedekle=1' : '')).then(function(s){
       if(s.durum === 'guncellendi'){
-        hal('ok', s.mesaj || 'Güncellendi', s.yeniden_baslat ? 'Yeni sürümün tamamı için sistemi yeniden başlat.' : 'Açık sayfaları yenile.', s.yeni);
-        return s.yeniden_baslat ? ana('Yeniden başlat', yeniden) : ana('Sayfayı yenile', function(){ location.reload(); });
+        /* Sunucu dosyasi degistiyse yeniden baslatma kendiliginden (2026-10-29):
+           dugmeye basilmayinca sunucu yarim gun eski kodla calismisti. */
+        if(s.yeniden_baslat){
+          hal('ok', s.mesaj || 'Güncellendi', 'Yeni sürüm için sistem yeniden başlatılıyor…', s.yeni);
+          return yeniden();
+        }
+        hal('ok', s.mesaj || 'Güncellendi', 'Açık sayfaları yenile.', s.yeni);
+        return ana('Sayfayı yenile', function(){ location.reload(); });
       }
       if(s.durum === 'guncel'){ hal('ok', 'Sistem güncel', ''); return ana('', null); }
       hal('uyari', 'Güncelleme yapılmadı', s.mesaj || ''); bak.hidden = false;
