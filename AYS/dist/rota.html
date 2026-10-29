@@ -18612,6 +18612,17 @@ html[data-zemin="yumusak"] .menusayfa__bolum:hover{ background:var(--cam-katman)
 html[data-zemin="yumusak"] .menusayfa__bolum.is-on{ background:var(--dugme); color:#fff; font-weight:600;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
 html[data-zemin="yumusak"] .menusayfa__ayak{ border-top:0; }
+/* Menü daha dar ve yalnız bu modülün çekmeceleri (kullanıcı, 2026-10-29: «enine
+   küçük, yukarıda SPİ ESP görünmesin»); sistem geçişi kenarın üstündeki seçicide. */
+@media (min-width:680px){ html[data-zemin="yumusak"] .menusayfa{ width:360px; } }
+html[data-zemin="yumusak"] .menusayfa__sistemler{ display:none; }
+
+/* 39) KENARIN DİBİ FERAH (kullanıcı, 2026-10-29: «arama, sayfa düzeni ve radyo
+   kısmını ferahlat»): satırlar biraz daha uzun, satırlar ve gruplar arası nefes. */
+html[data-zemin="yumusak"] .site--v5 .kenar .kenar__araclar{ gap:18px; }
+html[data-zemin="yumusak"] .site--v5 .kenar .kenar__grup{ gap:4px; }
+html[data-zemin="yumusak"] .site--v5 .kenar .kenar__arac{ height:40px; border-radius:12px; }
+html[data-zemin="yumusak"] .site--v5 .kenar .kenar__arac:hover{ background:var(--cam-katman); }
 
 /* ==== css/king-cam.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20695,7 +20706,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'b44f48ed', at:'2026-10-29 08:13', dirty:true };
+R.BUILD = { id:'551da838', at:'2026-10-29 08:48', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -93915,7 +93926,11 @@ R.LLM = (function(){
     return parts;
   }
 
-  function openaiBody(req, fix, stream){
+  /* Ollama'da düşünen model (gemma4, qwen3): düşünme kapalı (2026-10-29). Açıkken
+     tek kelimelik cevap ~21 sn sürüyor, bütçe düşünmeye gidip cevap boş dönüyordu;
+     reasoning_effort:"none" ile ~0,5 sn. HKM aynısını yapar (HKM/core/ai.py). */
+  const DUSUNEN = /^(gemma4|qwen3)/i;
+  function openaiBody(req, fix, stream, provider){
     const messages = [];
     if(req.system){
       /* Bazi ucler 'system' rolunu reddeder; onarim ogrenildiyse ilk
@@ -93930,6 +93945,7 @@ R.LLM = (function(){
     if(fix.tokenField === 'max_completion_tokens') body.max_completion_tokens = budget;
     else body.max_tokens = budget;
     if(!fix.dropTemperature) body.temperature = req.temperature == null ? 0.4 : req.temperature;
+    if(provider && provider.id === 'ollama' && DUSUNEN.test(String(req.model || ''))) body.reasoning_effort = 'none';
     return body;
   }
 
@@ -93960,7 +93976,7 @@ R.LLM = (function(){
       try{
         response = await fetch(endpoint, {
           method:'POST', headers, signal:guard.signal,
-          body:JSON.stringify(openaiBody(req, fix, stream)),
+          body:JSON.stringify(openaiBody(req, fix, stream, provider)),
         });
       }catch(e){
         guard.done();
@@ -94622,7 +94638,7 @@ R.LLM = (function(){
     listModels, modelsFor, cachedModels, clearCatalog, MODEL_STORE,
     errorText, retryable, resumable, offline, onceOnline, inSandbox, KEY_STORE,
     truncated, trimToSentence, capSentences, joinContinuation, dropLastWord, stripThinking,
-    endpointFor, normalizeOpenAI, normalizeGemini, classify,
+    endpointFor, normalizeOpenAI, normalizeGemini, classify, openaiBody,
     hasImages, supportsVision, visionChain,
     DEFAULT_MAX_TOKENS,
   };
