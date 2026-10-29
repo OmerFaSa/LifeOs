@@ -559,6 +559,13 @@ ESP.App = (function(){
     catch(e){ return fn(); }
   }
 
+  /* Kabuğu koruyan çizim (brand/ortak/kabuk.js yamala): değişmeyen kenar,
+     şerit ve menü yerinde kalır; yalnız değişen parça yenilenir. */
+  function kabukYaz(el, markup){
+    const KB = window.LIFEOS && window.LIFEOS.KABUK;
+    if(KB && KB.yamala) KB.yamala(el, markup); else el.innerHTML = markup;
+  }
+
   async function doRender(){
     if(rendering) return;
     rendering = true;
@@ -615,7 +622,7 @@ ESP.App = (function(){
       const H = window.LIFEOS && window.LIFEOS.HAREKET;
       if(H) H.once(appEl);
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.once(appEl);
-      await withTransition(() => { appEl.innerHTML = markup; });
+      await withTransition(() => { kabukYaz(appEl, markup); });
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;

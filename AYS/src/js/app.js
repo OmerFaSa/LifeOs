@@ -604,6 +604,13 @@ R.App = (function(){
     return queued;
   }
 
+  /* Kabuğu koruyan çizim (brand/ortak/kabuk.js yamala): değişmeyen kenar,
+     şerit ve menü yerinde kalır; yalnız değişen parça yenilenir. */
+  function kabukYaz(el, markup){
+    const KB = window.LIFEOS && window.LIFEOS.KABUK;
+    if(KB && KB.yamala) KB.yamala(el, markup); else el.innerHTML = markup;
+  }
+
   async function doRender(){
     if(rendering) return;
     /* Cizilecek ekran yoksa (test sayfasi, kapanan sekme) gec gelen bir
@@ -633,7 +640,7 @@ R.App = (function(){
       const H = window.LIFEOS && window.LIFEOS.HAREKET;
       if(H) H.once(appEl);
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.once(appEl);
-      const ciz = () => { appEl.innerHTML = String(html`
+      const ciz = () => { kabukYaz(appEl, String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
         ${when(ornekAcik(), () => raw(LIFEOS.OrnekKip.filigranHtml()))}
         <div class="site site--v5">
@@ -650,7 +657,7 @@ R.App = (function(){
           ${sayfaSonuRota(S.route) ? safe(footerHtml) : ''}
           ${raw(safe(() => altBantHtml(sc)))}
         </div>
-        ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`); };
+        ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`)); };
       if(H && rotaDegisti) await H.gecis(ciz); else ciz();
 
       const newMain = document.getElementById('main');

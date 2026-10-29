@@ -1278,9 +1278,44 @@ window.LIFEOS = window.LIFEOS || {};
     if(sakinZaman != null) clearTimeout(sakinZaman);
     sakinZaman = setTimeout(() => { sakinZaman = null; if(!kenarSakinlestir()) sakinZamanla(); }, ms == null ? SAKIN_MS : ms);
   }
+  /* KABUĞU KORUYAN ÇİZİM (kullanıcı, 2026-10-29: «sayfa geçişinde kasma»).
+     Modüller her çizimde #app'i innerHTML ile baştan kuruyordu: kenar, üst
+     şerit, bölüm çubuğu, menü (~250 öge) her geçişte yeniden ayrıştırılıyor,
+     stili ve yerleşimi hesaplanıyor, camı yeniden boyanıyordu. yamala yeni
+     HTML'i ayrıştırır ve kabuğun kapsayıcılarında (.site, .site__body,
+     .sayfa) çocukları tek tek karşılaştırır: aynısı olan düğüm YERİNDE
+     kalır, değişen (her zaman #main, seçili değişince kenar) yenisiyle
+     değişir. Sonuç innerHTML ile aynı belgedir; yapı tutmazsa o düzeyde
+     hepsi değişir. Olay dinleyicileri belgeye bağlıdır (temsilci), korunan
+     düğüm ikinci dinleyici almaz. */
+  const YAMA_KAP = '.site, .site__body, .sayfa';
+  function nitelikEsle(x, y){
+    Array.from(x.attributes).forEach(n => { if(!y.hasAttribute(n.name)) x.removeAttribute(n.name); });
+    Array.from(y.attributes).forEach(n => { if(x.getAttribute(n.name) !== n.value) x.setAttribute(n.name, n.value); });
+  }
+  function esle(eski, yeni){
+    const a = Array.from(eski.childNodes), b = Array.from(yeni.childNodes);
+    if(a.length !== b.length){ eski.replaceChildren(...b); return; }
+    for(let i = 0; i < a.length; i++){
+      const x = a[i], y = b[i];
+      if(x.nodeType !== y.nodeType || x.nodeName !== y.nodeName){ eski.replaceChild(y, x); continue; }
+      if(x.isEqualNode(y)) continue;
+      if(x.nodeType === 1 && x.id !== 'main' && x.matches(YAMA_KAP)){ nitelikEsle(x, y); esle(x, y); continue; }
+      eski.replaceChild(y, x);
+    }
+  }
+  function yamala(kok, html){
+    if(!kok || typeof document === 'undefined') return;
+    if(!kok.firstChild){ kok.innerHTML = html; return; }
+    const t = document.createElement('template');
+    t.innerHTML = html;
+    esle(kok, t.content);
+  }
+
   kur();
 
   L.KABUK = Object.freeze({
+    yamala,
     CEKMECELER, ANA_CEKMECE, MODULLER, SIRA,
     simge, modulIsareti, adres, simdiOrani, saatMetni,
     ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, railBilgiye, seciciHazirla, seciciKomsu,

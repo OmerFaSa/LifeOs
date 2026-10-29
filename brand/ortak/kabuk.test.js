@@ -1190,4 +1190,39 @@
       }finally{ uzun.remove(); }
     });
   });
+
+  /* Kullanıcı (2026-10-29): «sayfa geçişinde kasma». Her geçişte bütün kabuk
+     (kenar, üst şerit, menü ~250 öge) innerHTML ile yeniden kuruluyordu; stili,
+     yerleşimi ve camı her seferinde baştan. yamala yalnız değişen parçayı koyar. */
+  describe('Kabuk — yamala (değişmeyen kabuk korunur)', () => {
+    const sayfa = (kenar, icerik, ek) => '<a class="skiplink" href="#main">a</a><div class="site site--v5"' + (ek || '') + '>'
+      + '<aside class="kenar">' + kenar + '</aside><div class="site__body"><div class="wrapc sayfa"><nav class="bolumcubugu">b</nav>'
+      + '<main class="content" id="main">' + icerik + '</main></div></div></div>';
+    it('aynı kenar ve şerit aynı düğüm kalır; içerik yenilenir; nitelikler eşitlenir', () => {
+      const kok = document.createElement('div'); document.body.appendChild(kok);
+      try{
+        kok.innerHTML = sayfa('<b>Bugün</b>', '<p>bir</p>', ' inert=""');
+        const kenar = kok.querySelector('.kenar'), site = kok.querySelector('.site'), cubuk = kok.querySelector('.bolumcubugu');
+        K.yamala(kok, sayfa('<b>Bugün</b>', '<p>iki</p>'));
+        expect(kok.querySelector('.kenar') === kenar).toBe(true);
+        expect(kok.querySelector('.site') === site).toBe(true);
+        expect(kok.querySelector('.bolumcubugu') === cubuk).toBe(true);
+        expect(kok.querySelector('#main').textContent).toBe('iki');
+        expect(site.hasAttribute('inert')).toBe(false);
+        K.yamala(kok, sayfa('<b>Analiz</b>', '<p>iki</p>'));
+        expect(kok.querySelector('.kenar') === kenar).toBe(false);
+        expect(kok.querySelector('.kenar').textContent).toBe('Analiz');
+        expect(kok.innerHTML).toBe(sayfa('<b>Analiz</b>', '<p>iki</p>'));
+      }finally{ kok.remove(); }
+    });
+    it('yapı değişirse (parça eklenir) sonuç innerHTML ile aynıdır', () => {
+      const kok = document.createElement('div'); document.body.appendChild(kok);
+      try{
+        kok.innerHTML = sayfa('k', 'x');
+        const yeni = sayfa('k', 'x') + '<div class="menusayfa">m</div>';
+        K.yamala(kok, yeni);
+        expect(kok.innerHTML).toBe(yeni);
+      }finally{ kok.remove(); }
+    });
+  });
 })();
