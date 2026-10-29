@@ -3,7 +3,7 @@
 "kaynak": {
 "css/ayar.css": "4e073209ae0e8d926ba9a100d8cbfe4d312ce0e7abf44e5f61134818599a2ad7",
 "css/base.css": "10b8931098c357f26cd7af1d90b8dceeb72209a203ae9b5950d5901d8c779ad9",
-"css/cam.css": "f7e34773feee2c22a8f9c752ddf8cdd9141b4961b595bce0b575bfa9a565d90f",
+"css/cam.css": "8ab21e5d399f92bc2fc0ba85ca9f5dd4b28cd2360ae1a1dd0d9c75a08ce04103",
 "css/components.css": "cd690f2b267e094723a0311520d3daeb6833f0fcfe6ed58f96ca98207b49c5ed",
 "css/defter.css": "537c505e7ee77f38bcef9d8521e0b94bde381bc3078a3ed797ad24b15d1dbde1",
 "css/esp.css": "46542a3f7a192c687e42fa263aa9edc49049953974934c57b8b5a5b163ed096a",
@@ -160,7 +160,7 @@
 "js/core/zemin.js": "69c972c2faeb8f4cceee489bc4a006b675481b69c99a0d20aab1a497f4fa2b8b",
 "js/data/agents.js": "54724976cff790eb2dc347758c3789c478762b1d1bce0683d0c98986b13035d8",
 "js/data/basarimlar.js": "3aa43feb6cfa75db2788fa9a20e0152c0c4918e7871004b340f2d78657713c40",
-"js/data/build.js": "f837123426a76ca4e078f4571bbfaf6d3ffb29f29f3da6659e4fe2e3e29cbaec",
+"js/data/build.js": "d9ece40010173d31cdb163d3a6ce5a9ed2b6cf1853686c86df5c4c4713027a53",
 "js/data/canon.js": "b70bdfb623f530ee2b8956dd413bcebbf124eb4ff2e60be379fd4903d53776a1",
 "js/data/curriculum.js": "8274048bed7d6ee034e0c80d2833ebfa1f13aa1881baeb554dbe1c61a7ece1c9",
 "js/data/drills.js": "248902fc251f4d51e27e1c1ddcfae3d7bc08174a62cfde3d3fab6595f9d79521",

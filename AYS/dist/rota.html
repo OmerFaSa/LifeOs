@@ -18591,26 +18591,27 @@ html[data-zemin="yumusak"] .perde--marka .perde__dugme:focus-visible{ outline:2p
 html[data-zemin="yumusak"] .site--v5 main :is(.opencere, .opencere__yan, .stat, .inc-sayi, .tlweek.is-current, .ders__kazanim, .ders__ornek, .ses, .ladcard){
   background-color:transparent; background-image:var(--cam-ince); border-color:var(--cam-kenar); box-shadow:var(--cam-ust); }
 
-/* 37) MENÜ (kullanıcı, 2026-10-29: «menü kısmını daha güzel yap, ikonları
-   ve tasarımını»). Her çekmece kendi cam grubunda (iPhone Ayarlar'daki
-   gruplu liste gibi); başlık simgesi dolu, tek vurgu rengi, beyaz çizgi;
-   bölümler kutusuz yazı karoları, seçili olan ağır dolgu yerine hafif vurgu. */
-html[data-zemin="yumusak"] .menusayfa__govde{ padding:8px 14px 18px; }
+/* 37) MENÜ — sol kenarla aynı buzul (kullanıcı, 2026-10-29: «menüyü sol
+   taraftaki gibi buzul ve minimalist yap»). Tek cam yaprak, iç kart yok;
+   simge kenardaki gibi ince çizgi; bölümler kutusuz satır, seçili olan
+   kenardaki seçili gibi dolu. Çekmeceler arasında yalnız boşluk. */
+html[data-zemin="yumusak"] .menusayfa{ background:var(--cam-ince);
+  -webkit-backdrop-filter:saturate(150%) blur(28px); backdrop-filter:saturate(150%) blur(28px); }
+html[data-zemin="yumusak"] .menusayfa__bas{ border-bottom:0; }
+html[data-zemin="yumusak"] .menusayfa__govde{ padding:6px 12px 18px; }
 html[data-zemin="yumusak"] .menusayfa__cekmece, html[data-zemin="yumusak"] .menusayfa__cekmece + .menusayfa__cekmece{
-  margin:0 0 10px; padding:12px 10px 10px; border-radius:20px;
-  background:var(--cam-ince); box-shadow:inset 0 0 0 1px var(--cam-kenar), var(--cam-ust); }
-html[data-zemin="yumusak"] .menusayfa__ad{ gap:11px; margin:0 0 8px; padding:0 4px; font-size:15px; font-weight:650; }
-html[data-zemin="yumusak"] .menusayfa__ad .kbk-ic{ width:17px; height:17px; padding:6.5px; border-radius:9px; stroke-width:2;
-  color:#fff; background:linear-gradient(165deg, color-mix(in oklab, var(--dugme) 72%, #fff), var(--dugme) 70%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 3px 8px -4px var(--dugme); }
-html[data-zemin="yumusak"] .menusayfa__bolumler{ grid-template-columns:repeat(auto-fill, minmax(118px, 1fr)); gap:2px; padding-left:0; }
-html[data-zemin="yumusak"] .menusayfa__bolum{ min-height:40px; padding:0 12px; border-radius:12px; background:transparent; box-shadow:none;
-  color:var(--text); font-weight:500; transition:background-color .18s, color .18s; }
-html[data-zemin="yumusak"] .menusayfa__bolum:hover{ background:var(--cam-katman); }
-html[data-zemin="yumusak"] .menusayfa__bolum.is-on{ color:var(--text); font-weight:650;
-  background:color-mix(in oklab, var(--dugme) 15%, transparent); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--dugme) 32%, transparent); }
-html[data-zemin="yumusak"] .menusayfa__bolum.is-on::before{ content:''; display:inline-block; width:6px; height:6px; margin:0 8px 1px 0;
-  border-radius:50%; background:var(--mod, var(--dugme)); vertical-align:middle; }
+  margin:0; padding:10px 0 6px; border:0; border-radius:0; background:none; box-shadow:none; }
+html[data-zemin="yumusak"] .menusayfa__ad{ gap:10px; margin:0 0 4px; padding:0 12px; font-size:12px; font-weight:600;
+  letter-spacing:.02em; color:var(--text-3); }
+html[data-zemin="yumusak"] .menusayfa__ad .kbk-ic{ width:16px; height:16px; padding:0; border-radius:0; background:none; box-shadow:none;
+  color:var(--text-3); stroke-width:1.8; }
+html[data-zemin="yumusak"] .menusayfa__bolumler{ grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:2px; padding-left:0; }
+html[data-zemin="yumusak"] .menusayfa__bolum{ min-height:38px; padding:0 12px; border:0; border-radius:12px; background:transparent; box-shadow:none;
+  color:var(--text-2); font-weight:500; transition:background-color .18s, color .18s; }
+html[data-zemin="yumusak"] .menusayfa__bolum:hover{ background:var(--cam-katman); color:var(--text); }
+html[data-zemin="yumusak"] .menusayfa__bolum.is-on{ background:var(--dugme); color:#fff; font-weight:600;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+html[data-zemin="yumusak"] .menusayfa__ayak{ border-top:0; }
 
 /* ==== css/king-cam.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20694,7 +20695,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'79351c30', at:'2026-10-29 07:46', dirty:true };
+R.BUILD = { id:'b44f48ed', at:'2026-10-29 08:13', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.

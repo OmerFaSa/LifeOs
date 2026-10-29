@@ -3,7 +3,7 @@
 "kaynak": {
 "css/ayar.css": "4e073209ae0e8d926ba9a100d8cbfe4d312ce0e7abf44e5f61134818599a2ad7",
 "css/base.css": "10b8931098c357f26cd7af1d90b8dceeb72209a203ae9b5950d5901d8c779ad9",
-"css/cam.css": "f7e34773feee2c22a8f9c752ddf8cdd9141b4961b595bce0b575bfa9a565d90f",
+"css/cam.css": "8ab21e5d399f92bc2fc0ba85ca9f5dd4b28cd2360ae1a1dd0d9c75a08ce04103",
 "css/components.css": "7cb0407b5f3506b8a3f42028e0bd5d7ca489f33e4695ae7e60e68a02ccbd98ab",
 "css/defter.css": "537c505e7ee77f38bcef9d8521e0b94bde381bc3078a3ed797ad24b15d1dbde1",
 "css/fonts.css": "13191dc4cf7c63066293590cc0a4ebc278735a1c171eca956910fa1fbd6e50a1",
@@ -170,7 +170,7 @@
 "js/data/agents.js": "fbf341ed470a8cefa54207dac929c2e832df1107b7ca17f99c1f128cc0dc8d0e",
 "js/data/basarimlar.js": "3aa43feb6cfa75db2788fa9a20e0152c0c4918e7871004b340f2d78657713c40",
 "js/data/biomarkers.js": "6742a46d86d71301d40faa0a25bd4298e7553f89d2c1baad9dfdb9ffe641fe04",
-"js/data/build.js": "f7c9701822f85236c55b3ba5db9b23ba733893f6365b53060b1c58eb6e4e2deb",
+"js/data/build.js": "e380504c57b5ddf006d052c29eb7ef92fffcec22fa45b46c2eac1db3dad22fcb",
 "js/data/designs.js": "87ac27ffe1c78d5f84e9c6d74540d04ab8b2f5cd295ea21669fdc561762975c9",
 "js/data/egzersizkatalog.js": "d3805e013df03e032bdc22336fe104f71c4c10499da8f7e677a8c7fe745bfa20",
 "js/data/evidence.js": "7f2324b28ab65844cc42e6f8635756505234b4f3f9d2173648454efb8072ba25",
