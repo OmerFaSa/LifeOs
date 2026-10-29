@@ -15398,27 +15398,100 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
   .king__dkart--arka{ transition:transform .3s ease, opacity .3s ease; }
 }
 @keyframes deste-gel{ from{ transform:translateY(10px) scale(.98); } to{ transform:none; } }
-/* Yelpaze: «+»nın üstünde yay; her araç yuvarlak cam düğme, altında kısa adı. */
-.king.is-mini .king__arti-yer{ position:relative; }
-.king__yelpaze{ position:absolute; left:50%; bottom:calc(100% + 14px); width:0; height:0; z-index:6; }
-.king__yelpaze-oge{ --a:calc(-165deg + var(--i) * (150deg / max(1, var(--n) - 1))); position:absolute; left:0; top:0; width:44px; height:44px;
-  display:grid; place-items:center; padding:0; border:0; border-radius:50%; cursor:pointer; color:var(--text);
-  background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border), 0 8px 18px -12px rgba(20,24,40,.5);
-  transform:translate(-50%, -50%) rotate(var(--a)) translateX(124px) rotate(calc(-1 * var(--a))); }
-.king.is-mini .king__deste, .king.is-mini .king__cipler{ transition:opacity .2s ease, filter .2s ease; }
-.king.is-mini .king__kutu:has(.king__yelpaze) .king__deste,
-.king.is-mini .king__kutu:has(.king__yelpaze) .king__cipler{ opacity:.12; filter:blur(2px); pointer-events:none; }
+/* Kadran (2026-10-30; kullanıcı ekran görüntüsünde yay başlığın üstüne
+   taşıyordu: «çok daha profesyonel güzel olsun ama mantık güzel»). Yay adanın
+   İÇİNDE, yazı alanının üstünde yarım elips; deste o sırada yerini korur ama
+   görünmez. Ortada kadran: üstüne gelinen aracın adı ve ne yaptığı. */
+.king.is-mini .king__yaz{ position:relative; }
+.king.is-mini .king__arti-yer{ position:static; }
+.king.is-mini .king__kutu:has(.king__yelpaze) .king__deste{ visibility:hidden; min-height:222px; }
+.king.is-mini .king__kutu:has(.king__yelpaze) .king__cipler{ display:none; }
+.king__yelpaze{ --rx:min(176px, calc(50vw - 64px)); --ry:124px; position:absolute; left:50%; bottom:calc(100% + 42px); width:0; height:0; z-index:6; }
+.king__yelpaze-merkez{ position:absolute; left:0; bottom:8px; width:min(220px, 56vw); transform:translateX(-50%); display:grid; gap:2px; text-align:center; pointer-events:none; }
+.king__yelpaze-merkez b{ font-size:14px; font-weight:650; color:var(--text); }
+.king__yelpaze-merkez small{ font-size:12px; line-height:1.35; color:var(--text-2); }
+.king__yelpaze-oge{ --a:calc(-180deg + var(--i) * (180deg / max(1, var(--n) - 1)));
+  position:absolute; left:0; top:0; width:44px; height:44px; display:grid; place-items:center; padding:0; border:0; border-radius:50%;
+  cursor:pointer; color:var(--text); background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border);
+  transform:translate(calc(-50% + cos(var(--a)) * var(--rx)), calc(-50% + sin(var(--a)) * var(--ry)));
+  transition:color .15s ease, box-shadow .15s ease, background .15s ease; }
 .king__yelpaze-oge svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-.king__yelpaze-oge small{ position:absolute; top:calc(100% + 3px); left:50%; transform:translateX(-50%); white-space:nowrap; font-size:10.5px; color:var(--text-2); pointer-events:none;
-  padding:1px 6px; border-radius:6px; background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border); opacity:0; transition:opacity .15s ease; z-index:1; }
-/* Ad yalnız üstüne gelince ya da odakta (yayın uçlarında adlar komşu düğmeye biniyordu); dokunmatikte hep görünür. */
-.king__yelpaze-oge:hover small, .king__yelpaze-oge:focus-visible small{ opacity:1; }
-@media (hover:none){ .king__yelpaze-oge small{ opacity:1; background:transparent; box-shadow:none; } }
-.king__yelpaze-oge:hover{ color:var(--secili-yazi, var(--primary)); box-shadow:inset 0 0 0 1px var(--secili-yazi, var(--primary)), 0 8px 18px -12px rgba(20,24,40,.5); }
+.king__yelpaze-oge small{ position:absolute; top:calc(100% + 4px); left:50%; transform:translateX(-50%); white-space:nowrap; font-size:11px; color:var(--text-2); pointer-events:none; }
+.king__yelpaze-oge:hover, .king__yelpaze-oge:focus-visible{ outline:none; color:var(--secili-yazi, var(--primary)); background:var(--secili-zemin, var(--surface-2));
+  box-shadow:inset 0 0 0 1px var(--secili-yazi, var(--primary)); }
+.king__yelpaze-oge:hover small, .king__yelpaze-oge:focus-visible small{ color:var(--text); }
 @media (prefers-reduced-motion:no-preference){
-  .king__yelpaze-oge{ animation:yelpaze-ac .32s cubic-bezier(.16,1,.3,1) both; animation-delay:calc(var(--i) * 22ms); }
+  .king__yelpaze-oge{ animation:yelpaze-ac .36s cubic-bezier(.16,1,.3,1) both; animation-delay:calc(var(--i) * 24ms); }
+  .king__yelpaze-merkez{ animation:yelpaze-yazi .3s ease both .12s; }
 }
-@keyframes yelpaze-ac{ from{ opacity:0; transform:translate(-50%, -50%) rotate(var(--a)) translateX(30px) rotate(calc(-1 * var(--a))) scale(.6); } }
+@keyframes yelpaze-ac{ from{ opacity:0; transform:translate(-50%, -50%) scale(.5); } }
+@keyframes yelpaze-yazi{ from{ opacity:0; } }
+
+/* ======================================================================
+   KING MASASI (2026-10-30; kullanıcı: «bu ekranı da bambaşka yap; sistemle
+   daha uyumlu olsun, farklı fikirlerle donat, daha profesyonel»). Geniş
+   ekranda pencere çizgiyle bölünmüş sütunlar değil, içinde yüzen kartlar:
+   ray dikey hap, liste ve Bağlam yuvarlak kart, ortada zaman çizgili sohbet.
+   Seçili dil sistemin (--secili-*). Dar ekran düzeni (≤ 1023 px) aynı kalır.
+   ====================================================================== */
+.king{ --k-baglam:300px; }
+.king__baglam{ display:none; }
+@media (min-width:1024px){
+  .king.king:not(.is-mini) .king__kutu{ --k-liste-g:var(--k-liste); --k-baglam-g:0px; --k-alan-g:0px; }
+  .king.king.is-yan-dar:not(.is-mini) .king__kutu{ --k-liste-g:0px; }
+  .king.king.is-alan-acik:not(.is-mini) .king__kutu{ --k-alan-g:var(--k-alan); }
+  .king.king:not(.is-mini) .king__kutu, .king.king.is-yan-dar:not(.is-mini) .king__kutu,
+  .king.king.is-alan-acik:not(.is-mini) .king__kutu, .king.king.is-alan-acik.is-yan-dar:not(.is-mini) .king__kutu{
+    grid-template-columns:var(--k-ray) var(--k-liste-g) minmax(0, 1fr) var(--k-baglam-g) var(--k-alan-g); }
+  /* ray: çizgisiz dikey hap; seçili bölüm sistemin seçili rengi */
+  .king.king:not(.is-mini) .king__ray{ margin:10px 0 10px 10px; padding:8px 0; border-right:0; border-radius:20px;
+    background:color-mix(in oklab, var(--surface-2) 55%, transparent); box-shadow:inset 0 0 0 1px var(--border); }
+  .king:not(.is-mini) .king__ray-is{ border-radius:14px; }
+  .king.king:not(.is-mini) .king__ray-is.is-secili{ background:var(--secili-zemin, var(--surface-3)); color:var(--secili-yazi, var(--text));
+    box-shadow:var(--secili-golge, none); }
+  /* liste: yüzen kart */
+  .king.king:not(.is-mini) .king__yan{ margin:10px 0 10px 10px; border-right:0; border-radius:20px;
+    background:color-mix(in oklab, var(--surface-2) 55%, transparent); box-shadow:inset 0 0 0 1px var(--border); }
+  .king.king.is-yan-dar:not(.is-mini) .king__yan{ margin-left:0; box-shadow:none; }
+  .king:not(.is-mini) .king__cikinti{ left:calc(var(--k-ray) + 10px); }
+  .king.king:not(.is-mini) .king__gecmis-is.is-acik{ background:var(--secili-zemin, var(--surface-3)); color:var(--secili-yazi, var(--text)); }
+  /* sohbet: King'in cevapları zaman çizgisinde; her cevabın başında küçük
+     işaret, aralarında ince çizgi. Senin mesajın sağda cam hap. */
+  .king:not(.is-mini) .king__akis > .king__balon--king{ padding-left:30px; }
+  .king:not(.is-mini) .king__akis > .king__balon--king::before{ content:''; position:absolute; left:5px; top:7px; width:9px; height:9px;
+    border-radius:50%; background:var(--surface); box-shadow:inset 0 0 0 2px var(--secili-yazi, var(--k-vurgu)); }
+  .king:not(.is-mini) .king__akis > .king__balon--king::after{ content:''; position:absolute; left:9px; top:22px; bottom:calc(-1 * var(--sp-6) + 6px);
+    width:1px; background:var(--border); }
+  .king:not(.is-mini) .king__akis > .king__balon--king:last-child::after,
+  .king:not(.is-mini) .king__akis > .king__balon--king.is-bekliyor::after{ display:none; }
+  .king:not(.is-mini) .king__akis > .king__balon--king.is-bekliyor::before{ animation:king-nabiz 1.6s ease-in-out infinite; }
+  /* Bağlam kartı */
+  .king.king:not(.is-mini) .king__baglam{ display:flex; flex-direction:column; gap:var(--sp-4); min-width:0; min-height:0; overflow-y:auto;
+    overscroll-behavior:contain; margin:10px 10px 10px 0; padding:var(--sp-4); border-radius:20px;
+    background:color-mix(in oklab, var(--surface-2) 55%, transparent); box-shadow:inset 0 0 0 1px var(--border); }
+}
+@media (min-width:1280px){
+  .king.king:not(.is-mini):not(.is-alan-acik) .king__kutu:has(> .king__baglam){ --k-baglam-g:var(--k-baglam); }
+  /* Bağlam açıkken boş karşılama kartları tekrarlamaz. */
+  .king:not(.is-mini) .king__kutu:has(> .king__baglam) .king__bos-veri,
+  .king:not(.is-mini) .king__kutu:has(> .king__baglam) .king__bos-ozet{ display:none; }
+}
+@media (max-width:1279px){ .king.king:not(.is-mini) .king__baglam{ display:none; } }
+.king.is-alan-acik .king__baglam{ display:none !important; }
+.king__baglam-ust{ display:flex; align-items:center; gap:var(--sp-2); }
+.king__baglam-ust h2{ flex:1; margin:0; font-size:var(--fs-md, 15px); font-weight:650; color:var(--text); }
+.king__baglam-gor{ margin:0; font-size:13px; line-height:1.45; color:var(--text-2); }
+.king__baglam-gor b{ display:block; font-weight:600; color:var(--text); }
+.king__baglam-bolum h3{ margin:0 0 var(--sp-2); font-size:var(--fs-xs, 12px); font-weight:600; color:var(--text-3); }
+.king__baglam .king__kartlar{ margin:0; grid-template-columns:repeat(2, minmax(0, 1fr)); }
+.king__baglam-not{ list-style:none; margin:0; padding:0; display:grid; gap:6px; font-size:13px; line-height:1.45; color:var(--text-2); }
+.king__baglam-not li{ padding-left:12px; position:relative; }
+.king__baglam-not li::before{ content:''; position:absolute; left:0; top:.6em; width:4px; height:4px; border-radius:50%; background:var(--text-3); }
+.king__baglam-sor{ display:flex; flex-direction:column; gap:4px; }
+.king__baglam-oner{ min-height:36px; padding:0 12px; border:0; border-radius:12px; background:transparent; color:var(--text); font:inherit; font-size:13.5px;
+  text-align:left; cursor:pointer; box-shadow:inset 0 0 0 1px var(--border); transition:background .15s ease; }
+.king__baglam-oner:hover{ background:var(--surface); }
+.king__baglam-oner:focus-visible{ outline:2px solid var(--k-vurgu); outline-offset:1px; }
 
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -18663,8 +18736,17 @@ html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz{ border-radius:24px; b
 
 /* 5) ADA CAMDA: kapsül cam, deste kartları ve yelpaze ince cam. */
 html[data-zemin="yumusak"] .king.is-mini .king__dkart--on{ background:var(--cam-katman); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
-html[data-zemin="yumusak"] .king__yelpaze-oge{ background:var(--cam-katman); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), 0 8px 18px -12px rgba(20,24,40,.5);
-  -webkit-backdrop-filter:blur(14px) saturate(150%); backdrop-filter:blur(14px) saturate(150%); }
+html[data-zemin="yumusak"] .king__yelpaze-oge:not(:hover):not(:focus-visible){ background:var(--cam-katman); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
+
+/* 6) MASA CAMDA (2026-10-30): ray, liste ve Bağlam pencerenin içinde cam kart
+   (2'deki «ray ve liste saydam» kuralının geniş ekran hâli). */
+@media (min-width:1024px){
+  html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray,
+  html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__yan,
+  html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__baglam{ background:var(--cam-katman) !important;
+    box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar) !important; }
+  html[data-zemin="yumusak"] .king.king.is-yan-dar:not(.is-mini) .king__yan{ box-shadow:none !important; }
+}
 
 /* ==== css/minik-cam.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -21427,7 +21509,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'2d62e719', at:'2026-10-29 21:20', dirty:true };
+ESP.BUILD = { id:'153b2e3c', at:'2026-10-29 21:56', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -46504,8 +46586,11 @@ window.LIFEOS.KING = (function(){
     const l = ARACLAR.filter(a => a.is !== 'isler' && (() => { try{ return a.kosul(); }catch(e){ return false; } })())
       .map(a => ({ is:/^kip:(kamera|ekran)$/.test(a.is) ? 'ada-' + a.is : a.is, ad:a.ad, ip:a.ip, svg:ARAC_SVG[a.is] || '' }))
       .concat([{ is:'buyut', ad:'Genişlet', ip:'Geçmiş, kütüphane ve bütün araçlar', svg:YELPAZE_GENISLET }]);
-    return '<div class="king__yelpaze" role="menu" aria-label="Araçlar" style="--n:' + l.length + '">' + l.map((x, i) =>
-      '<button type="button" role="menuitem" class="king__yelpaze-oge" style="--i:' + i + '" data-king="' + x.is + '" aria-label="' + kac(x.ad) + '" title="' + kac(x.ad + ' — ' + x.ip) + '">'
+    /* Kadran (2026-10-30, kullanıcı: «çok daha profesyonel güzel olsun ama mantık güzel»):
+       yay adanın içinde açılır; ortası üstüne gelinen aracın adını ve ne yaptığını söyler. */
+    return '<div class="king__yelpaze" role="menu" aria-label="Araçlar" style="--n:' + l.length + '">'
+      + '<div class="king__yelpaze-merkez" aria-hidden="true"><b>Araçlar</b><small>Birini seç</small></div>' + l.map((x, i) =>
+      '<button type="button" role="menuitem" class="king__yelpaze-oge" style="--i:' + i + '" data-king="' + x.is + '" aria-label="' + kac(x.ad) + '" data-ip="' + kac(x.ip) + '">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true">' + x.svg + '</svg><small>' + kac(x.ad) + '</small></button>').join('') + '</div>';
   }
   function miniGovde(){
@@ -46549,6 +46634,27 @@ window.LIFEOS.KING = (function(){
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>';
   }
 
+  /* MASA (2026-10-30, kullanıcı: «bu ekranı da bambaşka yap; sistemle daha
+     uyumlu olsun, farklı fikirlerle donat, daha profesyonel»). Büyük pencerenin
+     sağında Bağlam: King'in şu an neyi gördüğü ve modülün kendi kartları.
+     Sayıyı modül üretir, King yalnız gösterir (§1.1); kart etiketini taşır.
+     Yalnız sohbette ve geniş ekranda; dar ekranda boş karşılama aynı kartları
+     zaten gösterir. */
+  function baglamHtml(vitrin){
+    if(mini || vitrin || bolum !== 'sohbet' || !ortam.genis()) return '';
+    const kars = karsilama(), ekran = ekranAdi(), modul = MODUL_AD[ayar && ayar.modul] || '';
+    const sor = akis.length ? oneriListesi(false) : [];
+    if(!kars.kartlar.length && !kars.satirlar.length && !sor.length && !ekran) return '';
+    const kisim = (ad, ic) => '<section class="king__baglam-bolum"><h3>' + ad + '</h3>' + ic + '</section>';
+    return '<aside class="king__baglam" aria-label="Bağlam">'
+      + '<div class="king__baglam-ust"><h2>Bağlam</h2><span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(modul) + '</span></div>'
+      + (ekran ? '<p class="king__baglam-gor">Şu an gördüğüm <b>' + kac(ekran) + '</b></p>' : '')
+      + (kars.kartlar.length ? kisim('Durum', kartlarHtml(kars)) : '')
+      + (kars.satirlar.length ? kisim('Notlar', '<ul class="king__baglam-not">' + kars.satirlar.map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>') : '')
+      + (sor.length ? kisim('Sorabileceklerin', '<div class="king__baglam-sor">' + sor.map(o => '<button type="button" class="king__baglam-oner" data-king="' + o.is + '">'
+        + kac(o.ad) + '</button>').join('') + '</div>') : '')
+      + '</aside>';
+  }
   function govde(){
     if(mini) return miniGovde();
     const satirlar = akis.slice(-GUNLUK_EN_COK);
@@ -46634,7 +46740,7 @@ window.LIFEOS.KING = (function(){
       + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : kip() === 'ekran' ? 'Ekran hakkında sor…' : kip() === 'kamera' ? 'Kameradakini sor…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
       + mik
       + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
-      + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form></div>' + alan;
+      + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form></div>' + baglamHtml(vitrin) + alan;
   }
   /* «Neden?» (G; K6 dolduracak): önerinin altında, yalnız bilinen kaynak. */
   function nedenSatirlari(m){
@@ -46735,6 +46841,12 @@ window.LIFEOS.KING = (function(){
     /* Arkadaş: yazınca ve fare kıpırdayınca uyanır; boşta kalınca uyur; dokununca kıkırdar. */
     arkadasSon = Date.now();
     ['input', 'keydown', 'pointerdown'].forEach(t => el.addEventListener(t, arkadasUyandir));
+    const kadran = e => {
+      const b = e.target && e.target.closest ? e.target.closest('.king__yelpaze-oge') : null;
+      const m = b && b.parentNode.querySelector('.king__yelpaze-merkez');
+      if(m) m.innerHTML = '<b>' + kac(b.getAttribute('aria-label')) + '</b><small>' + kac(b.getAttribute('data-ip') || '') + '</small>';
+    };
+    el.addEventListener('pointerover', kadran); el.addEventListener('focusin', kadran);
     el.addEventListener('click', e => {
       const m = e.target && e.target.closest ? e.target.closest('.king__arkadas .minik') : null;
       if(!m) return;
@@ -46780,6 +46892,7 @@ window.LIFEOS.KING = (function(){
   function buyut(){
     if(!acik || !mini || typeof document === 'undefined') return;
     mini = false;
+    aracAcik = false;                            // adanın yelpazesi büyük pencerede menü olarak açık kalmasın
     const el = document.querySelector('[data-king]');
     if(el) el.classList.remove('is-mini');
     document.documentElement.classList.remove('king-mini');
