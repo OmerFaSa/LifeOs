@@ -14523,6 +14523,53 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 .king__yuz--buyuk{ width:84px; height:84px; border-radius:28px; }
 .king__yuz--buyuk .minik{ --boy:62px; bottom:6px; }
 
+/* KING ADASI (2026-10-29; king.js miniGovde): deste ve yelpaze.
+   Deste: öndeki kart dolu, arkadakiler onun arkasından yukarı doğru kademeli
+   (küçülür, solar); içleri görünmez, yalnız kenarları. Yeni kart hafifçe yükselir. */
+.king.is-mini .king__deste{ position:relative; display:flex; flex-direction:column; padding-top:20px; min-height:0; }
+.king__dkart--on{ position:relative; z-index:3; min-height:0; overflow:auto; overscroll-behavior:contain; padding:12px 14px; border-radius:18px;
+  background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border), 0 10px 24px -18px rgba(20,24,40,.45); }
+.king__dkart--on .king__mini-son{ padding:0; }
+.king__dkart--arka{ position:absolute; left:0; right:0; top:20px; height:56px; z-index:1; border-radius:18px; pointer-events:none;
+  background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border); transform-origin:50% 0; }
+/* Arka kartın kenarı öndekinden belirgin: koyu camda aynı zemin görünmüyordu. */
+.king.is-mini .king__dkart--arka{ background:color-mix(in srgb, var(--text) 7%, var(--surface, #fff)); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--text) 22%, transparent); }
+.king__dkart--arka > *{ visibility:hidden; }
+.king__dkart--arka[data-derinlik="1"]{ transform:translateY(-10px) scale(.95); opacity:.8; z-index:2; }
+.king__dkart--arka[data-derinlik="2"]{ transform:translateY(-19px) scale(.9); opacity:.5; }
+.king__deste-gez{ display:flex; align-items:center; justify-content:center; gap:10px; margin-top:6px; font-size:12px; color:var(--text-3); }
+.king__deste-ok{ width:28px; height:28px; border:0; border-radius:50%; background:transparent; color:var(--text-2); font:inherit; font-size:18px; line-height:1; cursor:pointer; }
+.king__deste-ok:hover:not(:disabled){ background:var(--surface-2); color:var(--text); }
+.king__deste-ok:disabled{ opacity:.3; cursor:default; }
+.king__deste-sayi{ font-variant-numeric:tabular-nums; }
+.king__ada-oneri{ margin-top:4px; font-size:13px; color:var(--text-2); }
+@media (prefers-reduced-motion:no-preference){
+  .king__dkart--on{ animation:deste-gel .34s cubic-bezier(.16,1,.3,1) both; }
+  .king__dkart--arka{ transition:transform .3s ease, opacity .3s ease; }
+}
+@keyframes deste-gel{ from{ transform:translateY(10px) scale(.98); } to{ transform:none; } }
+/* Yelpaze: «+»nın üstünde yay; her araç yuvarlak cam düğme, altında kısa adı. */
+.king.is-mini .king__arti-yer{ position:relative; }
+.king__yelpaze{ position:absolute; left:50%; bottom:calc(100% + 14px); width:0; height:0; z-index:6; }
+.king__yelpaze-oge{ --a:calc(-165deg + var(--i) * (150deg / max(1, var(--n) - 1))); position:absolute; left:0; top:0; width:44px; height:44px;
+  display:grid; place-items:center; padding:0; border:0; border-radius:50%; cursor:pointer; color:var(--text);
+  background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border), 0 8px 18px -12px rgba(20,24,40,.5);
+  transform:translate(-50%, -50%) rotate(var(--a)) translateX(124px) rotate(calc(-1 * var(--a))); }
+.king.is-mini .king__deste, .king.is-mini .king__cipler{ transition:opacity .2s ease, filter .2s ease; }
+.king.is-mini .king__kutu:has(.king__yelpaze) .king__deste,
+.king.is-mini .king__kutu:has(.king__yelpaze) .king__cipler{ opacity:.12; filter:blur(2px); pointer-events:none; }
+.king__yelpaze-oge svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.king__yelpaze-oge small{ position:absolute; top:calc(100% + 3px); left:50%; transform:translateX(-50%); white-space:nowrap; font-size:10.5px; color:var(--text-2); pointer-events:none;
+  padding:1px 6px; border-radius:6px; background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border); opacity:0; transition:opacity .15s ease; z-index:1; }
+/* Ad yalnız üstüne gelince ya da odakta (yayın uçlarında adlar komşu düğmeye biniyordu); dokunmatikte hep görünür. */
+.king__yelpaze-oge:hover small, .king__yelpaze-oge:focus-visible small{ opacity:1; }
+@media (hover:none){ .king__yelpaze-oge small{ opacity:1; background:transparent; box-shadow:none; } }
+.king__yelpaze-oge:hover{ color:var(--secili-yazi, var(--primary)); box-shadow:inset 0 0 0 1px var(--secili-yazi, var(--primary)), 0 8px 18px -12px rgba(20,24,40,.5); }
+@media (prefers-reduced-motion:no-preference){
+  .king__yelpaze-oge{ animation:yelpaze-ac .32s cubic-bezier(.16,1,.3,1) both; animation-delay:calc(var(--i) * 22ms); }
+}
+@keyframes yelpaze-ac{ from{ opacity:0; transform:translate(-50%, -50%) rotate(var(--a)) translateX(30px) rotate(calc(-1 * var(--a))) scale(.6); } }
+
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/giris.css içine yazılır; burası bir sonraki
@@ -15786,6 +15833,27 @@ html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--ca
 .ayarlar__grup{ display:block; margin:12px 0 2px; padding:0 12px; font-size:11.5px; font-weight:600; letter-spacing:.02em; color:var(--text-3); }
 .ayarlar__sekme--grupta{ padding-left:22px; }
 @media (max-width:679px){ .ayarlar__grup{ display:none; } .ayarlar__sekme--grupta{ padding-left:12px; } }
+
+/* Ayarlarda ara: listenin üstünde; ararken bölümler alt alta, başlıklı. */
+.ayarlar__ara{ width:100%; height:34px; margin:0 0 6px; padding:0 12px; border:1px solid var(--border); border-radius:10px;
+  background:transparent; color:var(--text); font:inherit; font-size:13px; }
+.ayarlar__ara::placeholder{ color:var(--text-3); }
+.ayarlar.is-aranir .ayarlar__bolum:not([hidden])::before{ content:attr(data-baslik); display:block; margin:14px 0 2px; font-size:12px; font-weight:600; color:var(--text-3); }
+.ayarlar.is-aranir .ayarlar__sekme.is-on{ background:transparent; box-shadow:none; color:var(--text-2); font-weight:500; }
+
+/* Arka plan: iki yuva yan yana, büyük önizleme ve seçici. */
+.zemin-yuvalar{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; padding:6px 0 14px; }
+.zemin-yuvasi{ display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:16px; background:color-mix(in oklab, var(--text) 4%, transparent); }
+.zemin-yuvasi__bas{ display:flex; align-items:baseline; gap:8px; } .zemin-yuvasi__bas b{ font-size:14px; } .zemin-yuvasi__bas small{ font-size:12px; color:var(--text-3); }
+.zemin-yuvasi .zemin-yuva{ justify-content:flex-start; }
+.zemin-yuvasi .zemin-durum{ text-align:left; }
+.zemin-onizle{ position:relative; display:block; aspect-ratio:16 / 9; border-radius:12px; overflow:hidden;
+  background:linear-gradient(175deg, var(--zm-1, #1d2340), var(--zm-2, #0e1222)) center / cover no-repeat; box-shadow:inset 0 0 0 1px var(--border); }
+.zemin-onizle--modul, .zemin-onizle--foto{ background-size:cover; background-position:center; }
+.zemin-onizle--video{ background:linear-gradient(135deg, #2a2f45, #141826); }
+.zemin-onizle small{ position:absolute; left:8px; bottom:8px; padding:2px 8px; border-radius:999px; font-size:11px; color:#fff; background:rgba(0,0,0,.45); }
+.sessiz{ display:flex; align-items:center; gap:8px; color:var(--text-3); }
+@media (max-width:679px){ .zemin-yuvalar{ grid-template-columns:1fr; } }
 
 /* ==== css/rota.css ==== */
 /* ROTA — Hareket › Kardiyo'daki rota kartı ve kağıtları (core/rota.js,
@@ -17845,6 +17913,38 @@ video.zemin-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 html:not([data-zemin="yumusak"]) video.zemin-video{ display:none; }
 html[data-zemin="yumusak"][data-zemin-video] body::before{ background:var(--manzara-okuma), var(--manzara-sis); }
 
+/* 45) AYARLAR › GÖRÜNÜM, ARKA PLAN, BİLDİRİMLER (kullanıcı, 2026-10-29:
+   «seçenekleri arttır; arka plan fotoğrafını değiştirebilmek yok, göremedim»).
+   Kök nitelikleri ayarlar.js yazar (hep, varsayılan da). */
+/* Cam yoğunluğu: Dolu (az saydam) · Orta · Saydam. */
+html[data-cam="az"]{ --cam:linear-gradient(140deg, rgba(255,255,255,.86), rgba(255,255,255,.7)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.8), rgba(255,255,255,.62)); }
+html[data-cam="az"][data-theme="dark"]{ --cam:linear-gradient(140deg, rgba(34,36,46,.9), rgba(26,28,36,.86)); --cam-ince:linear-gradient(140deg, rgba(40,42,52,.86), rgba(30,32,40,.8)); }
+html[data-cam="cok"]{ --cam:linear-gradient(140deg, rgba(255,255,255,.3), rgba(255,255,255,.12)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.26), rgba(255,255,255,.1)); }
+html[data-cam="cok"][data-theme="dark"]{ --cam:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); }
+@media (prefers-color-scheme:dark){
+  html[data-cam="az"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, rgba(34,36,46,.9), rgba(26,28,36,.86)); --cam-ince:linear-gradient(140deg, rgba(40,42,52,.86), rgba(30,32,40,.8)); }
+  html[data-cam="cok"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); }
+}
+/* Yüksek kontrast: soluk yazılar koyulaşır, çizgiler belirginleşir, cam dolar. */
+html[data-kontrast="yuksek"]{ --text-2:var(--text); --text-3:color-mix(in oklab, var(--text) 82%, transparent);
+  --border:color-mix(in oklab, var(--text) 26%, transparent); --border-soft:color-mix(in oklab, var(--text) 18%, transparent);
+  --cam:linear-gradient(140deg, rgba(255,255,255,.9), rgba(255,255,255,.8)); }
+html[data-kontrast="yuksek"][data-theme="dark"]{ --cam:linear-gradient(140deg, rgba(30,32,40,.94), rgba(24,26,32,.92)); }
+@media (prefers-color-scheme:dark){ html[data-kontrast="yuksek"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, rgba(30,32,40,.94), rgba(24,26,32,.92)); } }
+/* Okunaklık perdesi: fotoğrafın üstündeki örtünün gücü (Az .45 · Orta 1 · Çok 1.7). */
+html[data-perde]{ --perde:1; } html[data-perde="az"]{ --perde:.45; } html[data-perde="cok"]{ --perde:1.7; }
+html[data-perde]{ --manzara-sis:linear-gradient(180deg, rgba(255,255,255,calc(.46 * var(--perde))), rgba(255,255,255,calc(.4 * var(--perde))) 36%,
+  rgba(255,255,255,calc(.16 * var(--perde))) 60%, rgba(255,255,255,calc(.28 * var(--perde)))); }
+html[data-perde][data-theme="dark"]{ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,calc(.34 * var(--perde))), rgba(6,8,14,calc(.22 * var(--perde))) 45%, rgba(6,8,14,calc(.46 * var(--perde)))); }
+@media (prefers-color-scheme:dark){ html[data-perde]:not([data-theme="light"]){ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,calc(.34 * var(--perde))), rgba(6,8,14,calc(.22 * var(--perde))) 45%, rgba(6,8,14,calc(.46 * var(--perde)))); } }
+/* Fotoğrafı yumuşat: duran zemin katmanı bir kez bulanır (kaydırmada yeniden çizilmez). */
+html[data-zemin="yumusak"][data-manzara="acik"][data-bulanik="hafif"] body::before{ inset:-24px; filter:blur(6px); }
+html[data-zemin="yumusak"][data-manzara="acik"][data-bulanik="cok"] body::before{ inset:-40px; filter:blur(14px); }
+html[data-bulanik="hafif"] video.zemin-video{ filter:blur(6px); transform:scale(1.04); }
+html[data-bulanik="cok"] video.zemin-video{ filter:blur(14px); transform:scale(1.08); }
+/* Sayaçlar ve noktalar gizli. */
+html[data-rozet="kapali"] .kenar__sayi, html[data-rozet="kapali"] .kenar__sayac, html[data-rozet="kapali"] .ust__zil-nokta{ display:none !important; }
+
 /* ==== css/king-cam.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/king-cam.css içine yazılır; burası bir sonraki
@@ -17946,6 +18046,11 @@ html[data-zemin="yumusak"] .king:not(.is-mini) .king__ray [aria-current="true"],
 html[data-zemin="yumusak"] .king:not(.is-mini) .king__ray .is-on{ background:var(--secili-zemin) !important; color:var(--secili-yazi) !important; box-shadow:var(--secili-golge) !important; }
 /* Yazı alanı: yüzen ince kapsül (yuva solda). */
 html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz{ border-radius:24px; background:var(--surface-2, #f1f2f5); box-shadow:inset 0 0 0 1px var(--border); }
+
+/* 5) ADA CAMDA: kapsül cam, deste kartları ve yelpaze ince cam. */
+html[data-zemin="yumusak"] .king.is-mini .king__dkart--on{ background:var(--cam-katman); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
+html[data-zemin="yumusak"] .king__yelpaze-oge{ background:var(--cam-katman); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), 0 8px 18px -12px rgba(20,24,40,.5);
+  -webkit-backdrop-filter:blur(14px) saturate(150%); backdrop-filter:blur(14px) saturate(150%); }
 
 /* ==== css/minik-cam.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -18394,7 +18499,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -18992,6 +19097,19 @@ window.LIFEOS = window.LIFEOS || {};
     try{ surum = localStorage.getItem('lifeos.manzara.surum') || ''; }catch(e){}
     try{ return new URL('/api/zemin/' + yuva + (surum ? '?v=' + surum : ''), location.href).href; }catch(e){ return ''; }
   }
+  /* Ayarlar'daki önizleme: bir yuvanın şu anki seçimi { tur:'modul'|'foto'|'video'|'renk', adres }. */
+  function onizle(yuva){
+    const secim = yuva === 'gece' ? (geceSimdi === 'ayni' ? manzaraSimdi : geceSimdi) : manzaraSimdi;
+    const kendiYuva = yuva === 'gece' && geceSimdi === 'kendi' ? 'gece' : 'gunduz';
+    const modul = () => { try{ return new URL('img/marka/doku-manzara-' + modulOf().replace(/[^a-z]/g, '') + '.webp', document.baseURI).href; }catch(e){ return ''; } };
+    if(secim === 'kendi'){
+      const t = dosyaTuru(kendiYuva);
+      if(t && sunucuVar()) return { tur:t, adres:dosyaAdresi(kendiYuva) };
+      return { tur:'modul', adres:modul() };
+    }
+    if(secim === 'acik') return { tur:'modul', adres:modul() };
+    return { tur:'renk', adres:'' };
+  }
   /* Şu an geçerli olan: { tur:'modul'|'foto'|'video'|'yok', yuva } */
   function etkinZemin(){
     const gece = karanlik();
@@ -19203,7 +19321,7 @@ window.LIFEOS = window.LIFEOS || {};
     YUZEYLER, yuzey:() => yuzeySimdi, yuzeyAyarla, yuzeySeciciHtml, yuzeyAnahtar,
     MANZARA_ANAHTAR, manzara:() => manzaraSimdi, manzaraAyarla, manzaraYenile, manzaraSeciciHtml,
     GECE_ANAHTAR, OTO_ANAHTAR, gece:() => geceSimdi, geceAyarla, geceSeciciHtml, oto:() => otoSimdi, otoAyarla, otoSeciciHtml,
-    otoTema, etkinZemin, karanlik, dosyaYukle });
+    otoTema, etkinZemin, karanlik, dosyaYukle, onizle });
   /* Gövde hazır olunca, ilk çizimden biraz sonra: açılış animasyonuyla çakışmasın. */
   if(typeof document !== 'undefined' && typeof setTimeout === 'function'
       && !/\/tests\//.test(String(location.pathname || ''))){   // test sayfasında kendiliğinden oynamaz
@@ -19289,18 +19407,67 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- bölümler */
   /* GRUPLAR (kullanıcı, 2026-10-29: «sistem direkt olmayacak; Sistem altında ses,
-     animasyon, plan; sonra Hesap: güvenlik, bağlantılar, Google»). Grup adı
-     listede başlıktır, kendisi sekme değildir. */
+     animasyon, plan; sonra Hesap: güvenlik, bağlantılar, Google»; «görünüm ve
+     minik ve King'i de Sistem'in içine koy; seçenekleri arttır; arka plan
+     fotoğrafını değiştirebilmeyi göremedim»). Grup adı başlıktır, sekme değil. */
   const BOLUMLER = Object.freeze([
-    { id:'gorunum',  ad:'Görünüm' },
-    { id:'ekip',     ad:'Minikler ve King' },
-    { id:'ses',      ad:'Ses',         grup:'Sistem' },
-    { id:'hareket',  ad:'Animasyon',   grup:'Sistem' },
-    { id:'sistem',   ad:'Planlama',    grup:'Sistem' },
-    { id:'hesap',    ad:'Güvenlik',    grup:'Hesap' },
-    { id:'baglanti', ad:'Bağlantılar', grup:'Hesap' },
+    { id:'gorunum',  ad:'Görünüm',          grup:'Sistem' },
+    { id:'zemin',    ad:'Arka plan',        grup:'Sistem' },
+    { id:'ekip',     ad:'Minikler ve King', grup:'Sistem' },
+    { id:'ses',      ad:'Ses',              grup:'Sistem' },
+    { id:'hareket',  ad:'Animasyon',        grup:'Sistem' },
+    { id:'bildirim', ad:'Bildirimler',      grup:'Sistem' },
+    { id:'sistem',   ad:'Planlama',         grup:'Sistem' },
+    { id:'hesap',    ad:'Güvenlik',         grup:'Hesap' },
+    { id:'baglanti', ad:'Bağlantılar',      grup:'Hesap' },
     { id:'modul',    ad:'Bu modül' },
   ]);
+
+  /* SEÇİMLER: tek anahtarlı, kökte niteliği olan tercihler (biçimi cam.css §45).
+     Nitelik hep yazılır (varsayılan da): CSS özgüllüğü buna dayanır. */
+  const SECIMLER = Object.freeze({
+    cam:     { anahtar:'lifeos.cam',           kok:'data-cam',      vars:'orta',  sira:['az', 'orta', 'cok'],  ad:{ az:'Dolu', orta:'Orta', cok:'Saydam' } },
+    kontrast:{ anahtar:'lifeos.kontrast',      kok:'data-kontrast', vars:'normal', sira:['normal', 'yuksek'], ad:{ normal:'Normal', yuksek:'Yüksek' } },
+    perde:   { anahtar:'lifeos.perde',         kok:'data-perde',    vars:'orta',  sira:['az', 'orta', 'cok'],  ad:{ az:'Az', orta:'Orta', cok:'Çok' } },
+    bulanik: { anahtar:'lifeos.zemin.bulanik', kok:'data-bulanik',  vars:'yok',   sira:['yok', 'hafif', 'cok'], ad:{ yok:'Net', hafif:'Hafif', cok:'Yumuşak' } },
+    rozet:   { anahtar:'lifeos.rozet',         kok:'data-rozet',    vars:'acik',  sira:['acik', 'kapali'],     ad:{ acik:'Göster', kapali:'Gizle' } },
+  });
+  function secim(k){
+    const x = SECIMLER[k];
+    let v = null;
+    try{ v = localStorage.getItem(x.anahtar); }catch(e){}
+    return x.sira.indexOf(v) >= 0 ? v : x.vars;
+  }
+  function secimUygula(k){ if(typeof document !== 'undefined') document.documentElement.setAttribute(SECIMLER[k].kok, secim(k)); }
+  function secimAyarla(k, v){
+    const x = SECIMLER[k];
+    if(!x || x.sira.indexOf(v) < 0) return false;
+    try{ if(v === x.vars) localStorage.removeItem(x.anahtar); else localStorage.setItem(x.anahtar, v); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    secimUygula(k);
+    if(typeof document !== 'undefined') document.querySelectorAll('[data-secim^="' + k + ':"]').forEach(b => {
+      const on = b.getAttribute('data-secim') === k + ':' + v;
+      b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    return true;
+  }
+  const secimHtml = (k, ad) => '<div class="seg seg--block" role="group" aria-label="' + kac(ad) + '">' + SECIMLER[k].sira.map(v => {
+    const on = v === secim(k);
+    return '<button type="button" class="' + (on ? 'is-on' : '') + '" data-secim="' + k + ':' + v + '" aria-pressed="' + on + '">' + SECIMLER[k].ad[v] + '</button>';
+  }).join('') + '</div>';
+  Object.keys(SECIMLER).forEach(secimUygula);
+
+  /* «Görünümü varsayılana döndür»: yalnız görünüş tercihleri; veri değil. İki adım. */
+  const SIFIRLANAN = Object.freeze(['lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik',
+    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet']);
+
+  /* Arka plan önizlemesi (zemin.js onizle). */
+  function onizleHtml(yuva){
+    const o = L.ZEMIN && L.ZEMIN.onizle ? L.ZEMIN.onizle(yuva) : null;
+    if(!o) return '';
+    const etiket = { modul:'Modülün fotoğrafı', foto:'Kendi fotoğrafın', video:'Kendi videon', renk:yuva === 'gece' ? 'Gece rengi' : 'Renk alanı' }[o.tur];
+    return '<span class="zemin-onizle zemin-onizle--' + o.tur + '"' + (o.tur === 'modul' || o.tur === 'foto' ? ' style="background-image:url(&quot;' + kac(o.adres) + '&quot;)"' : '') + '>'
+      + '<small>' + kac(etiket) + '</small></span>';
+  }
   let secili = 'gorunum';
 
   const H = (ad, not, denetim) => '<div class="ayarlar__satir"><div class="ayarlar__ad">' + kac(ad)
@@ -19347,11 +19514,27 @@ window.LIFEOS = window.LIFEOS || {};
   function icerik(id, o){
     if(id === 'gorunum') return H('Tema', 'Sistem seçiliyken cihazın açık/koyu tercihi izlenir', o.tema)
       + H('Yazı tipi', 'Bütün modüllerde aynı', yaziSeciciHtml())
-      + H('Zemin', '', cagir(L.ZEMIN, 'seciciHtml'))
-      + H('Gündüz arka planı', 'Açık tema; kendi fotoğrafın ya da videon', cagir(L.ZEMIN, 'manzaraSeciciHtml'))
-      + H('Gece arka planı', 'Koyu tema; gece rengi fotoğrafı karartmaz', cagir(L.ZEMIN, 'geceSeciciHtml'))
-      + H('Saate göre tema', '07:00–19:00 açık, sonra koyu', cagir(L.ZEMIN, 'otoSeciciHtml'))
-      + H('Yüzey', 'Yalnız bu modül', cagir(L.ZEMIN, 'yuzeySeciciHtml'));
+      + H('Cam yoğunluğu', 'Kartların ne kadar saydam olduğu', secimHtml('cam', 'Cam yoğunluğu'))
+      + H('Kontrast', 'Yüksek: soluk yazılar koyulaşır, kartlar dolar', secimHtml('kontrast', 'Kontrast'))
+      + H('Yüzey', 'Yalnız bu modül', cagir(L.ZEMIN, 'yuzeySeciciHtml'))
+      + H('Varsayılana dön', 'Tema dışındaki görünüş tercihleri ilk hâline döner; verin değişmez',
+        '<button type="button" class="btn btn--sm" data-ayarlar-sifirla>Görünümü sıfırla</button>');
+    if(id === 'zemin') return '<div class="zemin-yuvalar">'
+      + '<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>Gündüz</b><small>Açık tema</small></div>' + onizleHtml('gunduz') + cagir(L.ZEMIN, 'manzaraSeciciHtml') + '</div>'
+      + '<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>Gece</b><small>Koyu tema</small></div>' + onizleHtml('gece') + cagir(L.ZEMIN, 'geceSeciciHtml') + '</div></div>'
+      + H('Okunaklık perdesi', 'Fotoğrafın üstündeki örtü: az olunca fotoğraf canlı, çok olunca yazı rahat', secimHtml('perde', 'Okunaklık perdesi'))
+      + H('Fotoğrafı yumuşat', 'Fotoğraf hafifçe bulanır; kartlar öne çıkar', secimHtml('bulanik', 'Fotoğrafı yumuşat'))
+      + H('Zemin', 'Sade: fotoğraf ve cam yok, düz zemin', cagir(L.ZEMIN, 'seciciHtml'))
+      + H('Saate göre tema', '07:00–19:00 açık, sonra koyu', cagir(L.ZEMIN, 'otoSeciciHtml'));
+    if(id === 'bildirim'){
+      const ss = L.SES && L.SES.sessiz ? L.SES.sessiz() : null;
+      return (ss ? H('Sessiz saatler', 'Bu aralıkta bütün sesler ve King’in sesli okuması susar; radyo susmaz',
+          '<div class="sessiz">' + '<button type="button" class="plan__anahtar' + (ss.acik ? ' is-on' : '') + '" role="switch" aria-checked="' + ss.acik + '" data-sessiz-ac>'
+          + '<i aria-hidden="true"></i><span class="sr-only">' + (ss.acik ? 'Açık' : 'Kapalı') + '</span></button>'
+          + '<input type="time" class="plan__saat" data-sessiz="bas" value="' + kac(ss.bas) + '" aria-label="Başlangıç">'
+          + '<span aria-hidden="true">–</span><input type="time" class="plan__saat" data-sessiz="bit" value="' + kac(ss.bit) + '" aria-label="Bitiş"></div>') : '')
+        + H('Sayaçlar ve noktalar', 'Kenardaki bildirim sayısı ve kırmızı nokta', secimHtml('rozet', 'Sayaçlar ve noktalar'));
+    }
     if(id === 'hareket') return H('Animasyonlar', 'Az: yalnız gerekli geçişler', cagir(L.ANIMASYON, 'seciciHtml'))
       + G('Hız', 'Arayüz ve ajanlar ayrı; Ayrıntı içindekileri tek tek ayarlar', cagir(L.ANIMASYON, 'hizSeciciHtml'));
     if(id === 'ses') return G('Ses düzeyleri', 'Genel hepsini birlikte kısar; Ayrıntı grubun içindekileri tek tek', cagir(L.SES, 'duzeySeciciHtml'));
@@ -19387,17 +19570,40 @@ window.LIFEOS = window.LIFEOS || {};
       + '<button type="button" class="ayarlar__sekme' + (b.grup ? ' ayarlar__sekme--grupta' : '') + (b.id === secili ? ' is-on' : '') + '" role="tab"'
       + ' id="ayarlar-sekme-' + b.id + '" aria-selected="' + (b.id === secili) + '" aria-controls="ayarlar-bolum-' + b.id + '"'
       + ' data-ayar-bolum="' + b.id + '">' + kac(b.ad) + '</button>').join('');
-    const govde = BOLUMLER.map(b => '<section class="ayarlar__bolum" role="tabpanel" id="ayarlar-bolum-' + b.id + '"'
+    const govde = BOLUMLER.map(b => '<section class="ayarlar__bolum" role="tabpanel" id="ayarlar-bolum-' + b.id + '" data-baslik="' + kac(b.ad) + '"'
       + ' aria-labelledby="ayarlar-sekme-' + b.id + '"' + (b.id === secili ? '' : ' hidden') + '>'
       + icerik(b.id, o) + '</section>').join('');
     return '<div class="katman kmenu kmenu--yan ayarlar" role="dialog" aria-label="Ayarlar">'
       + '<header class="ayarlar__bas"><b>Ayarlar</b>'
       + '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Ayarları kapat">'
       + (L.KABUK ? L.KABUK.simge('kapat') : '×') + '</button></header>'
-      + '<div class="ayarlar__govde"><nav class="ayarlar__nav" role="tablist" aria-label="Ayar bölümleri" aria-orientation="vertical">' + nav + '</nav>'
+      + '<div class="ayarlar__govde"><nav class="ayarlar__nav" role="tablist" aria-label="Ayar bölümleri" aria-orientation="vertical">'
+      + '<input type="search" class="ayarlar__ara" data-ayarlar-ara placeholder="Ayarlarda ara" aria-label="Ayarlarda ara" autocomplete="off">' + nav + '</nav>'
       + '<div class="ayarlar__icerik">' + govde + '</div></div></div>';
   }
 
+  function sessizYaz(degisen){
+    if(!(L.SES && L.SES.sessiz)) return;
+    const v = Object.assign(L.SES.sessiz(), degisen);
+    try{ localStorage.setItem(L.SES.SESSIZ_ANAHTAR, JSON.stringify(v)); }catch(e){ /* depo kapalı */ }
+  }
+  const kucukHarf = x => String(x || '').toLocaleLowerCase('tr-TR');
+  function ara(panel, q){
+    if(!panel) return;
+    const a = kucukHarf(q).trim();
+    panel.classList.toggle('is-aranir', !!a);
+    panel.querySelectorAll('.ayarlar__bolum').forEach(sec => {
+      if(!a){ sec.hidden = sec.id !== 'ayarlar-bolum-' + secili; sec.querySelectorAll('[data-ara-gizli]').forEach(x => { x.hidden = false; x.removeAttribute('data-ara-gizli'); }); return; }
+      const satirlar = Array.from(sec.querySelectorAll('.ayarlar__satir, .zemin-yuvasi, .minikgal__kart'));
+      const basUyar = kucukHarf(sec.getAttribute('data-baslik')).indexOf(a) >= 0;   // bölümün adı tutarsa hepsi kalır
+      satirlar.forEach(x => {
+        const uy = basUyar || kucukHarf(x.textContent).indexOf(a) >= 0;
+        x.hidden = !uy;
+        if(uy) x.removeAttribute('data-ara-gizli'); else x.setAttribute('data-ara-gizli', '');
+      });
+      sec.hidden = !(basUyar || satirlar.some(x => !x.hidden));
+    });
+  }
   function sekmeSec(panel, id){
     if(!panel || !BOLUMLER.some(b => b.id === id)) return;
     secili = id;
@@ -19522,6 +19728,17 @@ window.LIFEOS = window.LIFEOS || {};
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
       if(planTikla(t)) return;
+      const se = t.closest('[data-secim]');
+      if(se){ const [k, v] = se.getAttribute('data-secim').split(':'); secimAyarla(k, v); return; }
+      const sf = t.closest('[data-ayarlar-sifirla]');
+      if(sf){
+        if(sf.getAttribute('data-onay') !== '1'){ sf.setAttribute('data-onay', '1'); sf.textContent = 'Emin misin? Sıfırla'; return; }
+        SIFIRLANAN.forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
+        try{ location.reload(); }catch(e){}
+        return;
+      }
+      const sa = t.closest('[data-sessiz-ac]');
+      if(sa){ sessizYaz({ acik:sa.getAttribute('aria-checked') !== 'true' }); sa.classList.toggle('is-on'); sa.setAttribute('aria-checked', String(sa.classList.contains('is-on'))); return; }
       const sk = t.closest('[data-ayar-bolum]');
       if(sk){ sekmeSec(sk.closest('.ayarlar'), sk.getAttribute('data-ayar-bolum')); return; }
       const yz = t.closest('[data-yazi-sec]');
@@ -19542,7 +19759,16 @@ window.LIFEOS = window.LIFEOS || {};
         L.HESAP.merkezAc(hs.getAttribute('data-ayarlar-hesap') || 'kok');
       }
     });
-    document.addEventListener('change', e => { if(e.target && e.target.matches) planDegisti(e.target); });
+    document.addEventListener('change', e => {
+      if(!(e.target && e.target.matches)) return;
+      if(e.target.matches('[data-sessiz]') && /^\d\d:\d\d$/.test(e.target.value)) sessizYaz({ [e.target.getAttribute('data-sessiz')]:e.target.value });
+      else planDegisti(e.target);
+    });
+    /* Ayarlarda ara: yazınca bütün bölümler açılır, eşleşmeyen satır gizlenir. */
+    document.addEventListener('input', e => {
+      if(!(e.target && e.target.matches && e.target.matches('[data-ayarlar-ara]'))) return;
+      ara(e.target.closest('.ayarlar'), e.target.value);
+    });
     /* Sekmelerde ok tuşları (dikey liste). */
     document.addEventListener('keydown', e => {
       if(e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
@@ -19555,7 +19781,7 @@ window.LIFEOS = window.LIFEOS || {};
   }
 
   L.AYARLAR = Object.freeze({ html, BOLUMLER, YAZILAR, yazi, yaziAyarla, HESAP_SAYFALARI, BAGLANTI_SAYFALARI, ODEME_ANAHTAR, odemeAcik, odemeAyarla,
-    _sec:id => { secili = id; } });
+    SECIMLER, secim, secimAyarla, SIFIRLANAN, ara, _sec:id => { secili = id; } });
 })();
 
 /* ==== js/core/perde.js ==== */
@@ -20587,7 +20813,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'884db50a', at:'2026-10-29 19:59', dirty:true };
+SP.BUILD = { id:'2d62e719', at:'2026-10-29 21:20', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -30212,7 +30438,26 @@ window.LIFEOS = window.LIFEOS || {};
     try{ v = JSON.parse(localStorage.getItem(DUZEY_ANAHTAR) || 'null'); }catch(e){ v = null; }
     return Object.assign({}, DUZEY_VARSAYILAN, v && typeof v === 'object' ? v : {});
   }
+  /* SESSİZ SAATLER (kullanıcı, 2026-10-29: Ayarlar › Bildirimler): seçilen
+     aralıkta bütün sesler ve King'in sesli okuması susar; gece yarısını
+     geçebilir (22:00–07:00). Radyo kullanıcının kendi çaldığıdır, susmaz. */
+  const SESSIZ_ANAHTAR = 'lifeos.sessiz';
+  function sessiz(){
+    let v = null;
+    try{ v = JSON.parse(localStorage.getItem(SESSIZ_ANAHTAR) || 'null'); }catch(e){ v = null; }
+    const saat = x => typeof x === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(x);
+    return { acik:!!(v && v.acik), bas:v && saat(v.bas) ? v.bas : '22:00', bit:v && saat(v.bit) ? v.bit : '07:00' };
+  }
+  function sessizMi(tarih){
+    const s = sessiz();
+    if(!s.acik) return false;
+    const d = tarih || new Date(), dk = d.getHours() * 60 + d.getMinutes();
+    const m = x => Number(x.slice(0, 2)) * 60 + Number(x.slice(3));
+    const a = m(s.bas), b = m(s.bit);
+    return a === b ? false : a < b ? dk >= a && dk < b : dk >= a || dk < b;
+  }
   function duzey(aile){
+    if(sessizMi()) return 0;
     const d = duzeyler(), x = k => Math.max(0, Math.min(1, Number(d[k]) || 0));
     if(aile === 'genel' || !(aile in DUZEY_VARSAYILAN)) return x('genel');
     return x('genel') * (GRUP[aile] ? x(GRUP[aile]) : 1) * x(aile);
@@ -30686,7 +30931,7 @@ window.LIFEOS = window.LIFEOS || {};
     tercih:() => JSON.parse(JSON.stringify(tercih)),
     durum, dugme, panelHtml,
     cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret, SESLER, KAYITLI,
-    AILE, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml,
+    AILE, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml, SESSIZ_ANAHTAR, sessiz, sessizMi,
     chime:ad => tik(/bitti|kapa|dur/i.test(String(ad || '')) ? 'kapa' : 'ac'),
     _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik, _onKur:onKur,
   });
@@ -43562,6 +43807,7 @@ window.LIFEOS.KING = (function(){
   }
 
   function soyle(metin, satirlar, onizleme, son, ek){
+    deste = 0;                                   // ada: yeni cevap destenin önüne
     akis.forEach(m => { m.yeni = false; });
     akis.push(Object.assign({ kim:'king', metin, satirlar, onizleme, son, yeni:true }, ek || {}));
     /* Söz 8: ekranda son altı satır; söz 19: günün tamamı saklanır. */
@@ -45691,34 +45937,74 @@ window.LIFEOS.KING = (function(){
   const SVG_BUYUT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M10 19H5v-5M19 5l-6 6M5 19l6-6"/></svg>';
   const SVG_KAPAT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
 
+  /* KING ADASI (kullanıcı, 2026-10-29: «King'in arayüzünü komple değiştir;
+     boyutunu küçülterek, bambaşka bir arayüz ve mekanikle; normal tasarımlardan
+     bıkkınlıktan kurtaran bir şey»; seçtiği öneri: ada + kart destesi + araç
+     yelpazesi). King ekranın altında yüzen bir cam adadır:
+     · DESTE: her cevap bir kart; en yenisi önde, öncekiler arkada küçülerek
+       (en çok üç görünür). ‹ › ile geçmişte gezilir; yeni cevap gelince öne döner.
+     · YELPAZE: «+» araçları adanın üstünde yay şeklinde açar (fotoğraf, PDF,
+       barkod, bu sayfa, kamera, ekran, genişlet). Kamera ve ekran büyük
+       pencerede çalışır: önce genişler.
+     · Genişlet büyük pencereyi açar (geçmiş, kütüphane, araçlar; aynı King).
+     Kartın içi eski küçük kutunun sözleşmesidir (.king__mini-son). */
+  let deste = 0;             // ada: önden kaçıncı cevap (0 = en yeni)
+  function desteKart(m){
+    if(!m) return '<div class="king__mini-son" aria-live="polite"><p>Buradayım. Yaz ya da konuş.</p>'
+      + (() => { const o = oneriListesi(false)[0]; return o ? '<p class="king__ada-oneri">Öneri: ' + kac(o.ad) + '</p>' : ''; })() + '</div>';
+    return '<div class="king__mini-son" aria-live="polite"><p>' + kac(m.metin) + '</p>'
+      + (m.satirlar && m.satirlar.length ? '<ul class="king__mini-liste">' + m.satirlar.slice(0, 5).map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : '')
+      + (m.onizleme ? '<b class="king__mini-oz">' + kac(m.onizleme.metin) + '</b>' : '')
+      + (m.son ? '<p class="king__mini-soru">' + kac(m.son) + '</p>' : '') + '</div>';
+  }
+  const YELPAZE_GENISLET = '<path d="M14 5h5v5M10 19H5v-5M19 5l-6 6M5 19l6-6"/>';
+  function yelpazeHtml(){
+    if(!aracAcik) return '';
+    const l = ARACLAR.filter(a => a.is !== 'isler' && (() => { try{ return a.kosul(); }catch(e){ return false; } })())
+      .map(a => ({ is:/^kip:(kamera|ekran)$/.test(a.is) ? 'ada-' + a.is : a.is, ad:a.ad, ip:a.ip, svg:ARAC_SVG[a.is] || '' }))
+      .concat([{ is:'buyut', ad:'Genişlet', ip:'Geçmiş, kütüphane ve bütün araçlar', svg:YELPAZE_GENISLET }]);
+    return '<div class="king__yelpaze" role="menu" aria-label="Araçlar" style="--n:' + l.length + '">' + l.map((x, i) =>
+      '<button type="button" role="menuitem" class="king__yelpaze-oge" style="--i:' + i + '" data-king="' + x.is + '" aria-label="' + kac(x.ad) + '" title="' + kac(x.ad + ' — ' + x.ip) + '">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true">' + x.svg + '</svg><small>' + kac(x.ad) + '</small></button>').join('') + '</div>';
+  }
   function miniGovde(){
-    const son = akis.filter(m => m.kim === 'king' && !m.bekliyor).slice(-1)[0];
+    const kingler = akis.filter(m => m.kim === 'king' && !m.bekliyor);
     const bekliyor = akis.some(m => m.bekliyor);
+    deste = Math.max(0, Math.min(deste, Math.max(0, kingler.length - 1)));
     const ekran = ekranAdi();
     const bas = '<div class="king__bas">' + yuzHtml() + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + (ekran ? ' · ' + kac(ekran) : '') + '</span>'
       + isRozet()
-      + '<button type="button" class="king__kapat king__buyut" data-king="buyut" aria-label="Büyüt" title="Büyüt (Ctrl iki kez)">' + SVG_BUYUT + '</button>'
+      + '<button type="button" class="king__kapat king__buyut" data-king="buyut" aria-label="Genişlet" title="Genişlet (Ctrl iki kez)">' + SVG_BUYUT + '</button>'
       + '<button type="button" class="king__kapat" data-king="kapat" aria-label="Kapat" title="Kapat (Esc)">' + SVG_KAPAT + '</button></div>';
-    const govdeM = bekliyor
+    /* Deste: önde gösterilen kart ve arkasında en çok iki eski cevap. */
+    const sira = kingler.slice().reverse();
+    const on = bekliyor && !deste
       ? '<div class="king__mini-son is-bekliyor" role="status" aria-label="King düşünüyor"><div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
-      : '<div class="king__mini-son" aria-live="polite"><p>' + kac(son ? son.metin : 'Buradayım. Yaz ya da konuş.') + '</p>'
-        + (son && son.satirlar && son.satirlar.length ? '<ul class="king__mini-liste">' + son.satirlar.slice(0, 5).map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : '')
-        + (son && son.onizleme ? '<b class="king__mini-oz">' + kac(son.onizleme.metin) + '</b>' : '')
-        + (son && son.son ? '<p class="king__mini-soru">' + kac(son.son) + '</p>' : '') + '</div>';
-    const cip = cipler ? '<div class="king__cipler" role="group" aria-label="Cevaplar">' + cipler.map(c => '<button type="button" class="king__cip'
+      : desteKart(sira[deste]);
+    const arka = sira.slice(deste + (bekliyor && !deste ? 0 : 1), deste + 3).map((m, i) =>
+      '<div class="king__dkart king__dkart--arka" data-derinlik="' + (i + 1) + '" aria-hidden="true">' + desteKart(m) + '</div>').reverse().join('');
+    const gez = sira.length > 1 ? '<div class="king__deste-gez" role="group" aria-label="Cevaplar arasında gez">'
+      + '<button type="button" class="king__deste-ok" data-king="deste:eski" aria-label="Önceki cevap"' + (deste >= sira.length - 1 ? ' disabled' : '') + '>‹</button>'
+      + '<span class="king__deste-sayi">' + (deste + 1) + ' / ' + sira.length + '</span>'
+      + '<button type="button" class="king__deste-ok" data-king="deste:yeni" aria-label="Sonraki cevap"' + (deste ? '' : ' disabled') + '>›</button></div>' : '';
+    const desteHtml = '<div class="king__deste">' + arka + '<div class="king__dkart king__dkart--on" data-derinlik="0">' + on + '</div>' + gez + '</div>';
+    const cip = cipler && !deste ? '<div class="king__cipler" role="group" aria-label="Cevaplar">' + cipler.map(c => '<button type="button" class="king__cip'
       + (c.is === 'kaydet' || c.is === 'ilet' || /^foto:0$/.test(c.is) || (c.is === 'foto-yorum' && !/foto:0/.test(JSON.stringify(cipler))) ? ' king__cip--ana' : '') + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('') + '</div>' : '';
     const mik = konusabilir()
       ? '<button type="button" class="king__mik' + (dinleyen ? ' is-acik' : '') + '" data-king="dinle" aria-pressed="' + (dinleyen ? 'true' : 'false')
         + '" aria-label="' + (dinleyen ? 'Dinlemeyi bitir' : 'Konuşarak sor') + '"><svg viewBox="0 0 24 24" aria-hidden="true">'
         + '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>' : '';
     return bas + (paylasim ? '<div class="king__paylasim" role="status"><i class="king__canli" aria-hidden="true"></i>' + (kameraMi() ? 'Kamera açık' : 'Ekran paylaşılıyor') + ' · sorduğunda görürüm'
-      + '<button type="button" class="king__paylasim-dur" data-king="paylasim-bitir">Durdur</button></div>' : '') + govdeM + cip
+      + '<button type="button" class="king__paylasim-dur" data-king="paylasim-bitir">Durdur</button></div>' : '') + desteHtml + cip
       + '<form class="king__yaz" data-king-form data-ayar-disi>' + arkadasHtml()
-      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
-      + '<label class="king__foto-dugme" title="Fotoğraf gönder (Ctrl+V ile yapıştır, sürükleyip bırak da olur)" aria-label="Fotoğraf gönder">'
+      + '<div class="king__arti-yer"><button type="button" class="king__arti' + (aracAcik ? ' is-acik' : '') + '" data-king="arac" aria-expanded="' + (aracAcik ? 'true' : 'false')
+      + '" aria-haspopup="menu" aria-label="Araçlar" title="Araçlar: fotoğraf, PDF, kamera, ekran, genişlet">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>' + yelpazeHtml() + '</div>'
       + '<input type="file" accept="image/*" data-king-dosya class="sr-only"/>'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2h6.8L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></label>' + mik + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
+      + '<input type="file" accept="application/pdf,.pdf" data-king-pdf class="sr-only"/>'
+      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
+      + mik + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>';
   }
 
@@ -46010,14 +46296,14 @@ window.LIFEOS.KING = (function(){
       if(e.key !== 'Control'){ baskaTus = true; return; }
       if(e.repeat) return;
       const s = Date.now();
-      if(!baskaTus && s - sonCtrl < 400){ sonCtrl = 0; !acik ? ac() : mini ? buyut() : kapat(); return; }
+      if(!baskaTus && s - sonCtrl < 400){ sonCtrl = 0; !acik ? ac({ mini:true }) : mini ? buyut() : kapat(); return; }   // ada önce
       sonCtrl = s;
       baskaTus = false;
     }, true);
     document.addEventListener('click', e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
-      if(t.closest('[data-king-ac]')){ e.preventDefault(); e.stopPropagation(); ac(); return; }
+      if(t.closest('[data-king-ac]')){ e.preventDefault(); e.stopPropagation(); ac({ mini:true }); return; }   // ada önce
       /* Söz 9: perde ve dışarısı KAPATMAZ, küçültür; küçükken sayfa serbest. */
       if(t.closest('.king-perde')){ e.preventDefault(); e.stopPropagation(); kucult(); return; }
       /* Dar ekranda açık kenar çubuğu: sohbete dokununca kapanır (söz 26). */
@@ -46108,6 +46394,9 @@ window.LIFEOS.KING = (function(){
         if(is === 'dinle'){ if(mikBasili === 'oldu'){ mikBasili = null; return; } dinle(); return; }
         if(is === 'kucult'){ kucult(); return; }
         if(is === 'buyut'){ buyut(); return; }
+        if(is === 'deste:eski'){ deste++; ciz(false); return; }
+        if(is === 'deste:yeni'){ deste = Math.max(0, deste - 1); ciz(false); return; }
+        if(/^ada-kip:(kamera|ekran)$/.test(is)){ buyut(); kipSec(is.slice(8)).then(() => ciz(false)); return; }
         if(is === 'ilet'){ ilet(); return; }
         if(is === 'ekran'){ ekranGoster(); return; }
         if(is === 'paylas'){ paylasimBaslat(); return; }
@@ -46319,7 +46608,7 @@ window.LIFEOS.KING = (function(){
     document.addEventListener('pointerdown', e => {
       const p = e.target && e.target.closest ? e.target.closest('.hizliekle') : null;
       if(!p) return;
-      basili = setTimeout(() => { basili = 'oldu'; ac(); }, 450);
+      basili = setTimeout(() => { basili = 'oldu'; ac({ mini:true }); }, 450);
     }, true);
     const birak = e => {
       if(basili === 'oldu'){ basili = null; if(e && e.type === 'pointerup') e.preventDefault(); return; }
