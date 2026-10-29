@@ -1499,3 +1499,14 @@ html[data-zemin="yumusak"] .menusayfa__bolum:hover{ background:var(--cam-katman)
 html[data-zemin="yumusak"] .menusayfa__bolum.is-on{ background:var(--dugme); color:#fff; font-weight:600;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
 html[data-zemin="yumusak"] .menusayfa__ayak{ border-top:0; }
+/* Menü daha dar ve yalnız bu modülün çekmeceleri (kullanıcı, 2026-10-29: «enine
+   küçük, yukarıda SPİ ESP görünmesin»); sistem geçişi kenarın üstündeki seçicide. */
+@media (min-width:680px){ html[data-zemin="yumusak"] .menusayfa{ width:360px; } }
+html[data-zemin="yumusak"] .menusayfa__sistemler{ display:none; }
+
+/* 39) KENARIN DİBİ FERAH (kullanıcı, 2026-10-29: «arama, sayfa düzeni ve radyo
+   kısmını ferahlat»): satırlar biraz daha uzun, satırlar ve gruplar arası nefes. */
+html[data-zemin="yumusak"] .site--v5 .kenar .kenar__araclar{ gap:18px; }
+html[data-zemin="yumusak"] .site--v5 .kenar .kenar__grup{ gap:4px; }
+html[data-zemin="yumusak"] .site--v5 .kenar .kenar__arac{ height:40px; border-radius:12px; }
+html[data-zemin="yumusak"] .site--v5 .kenar .kenar__arac:hover{ background:var(--cam-katman); }

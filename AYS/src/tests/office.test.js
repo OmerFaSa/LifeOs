@@ -1917,6 +1917,18 @@
         .toBe('http://192.168.1.5:11434/v1/chat/completions');
     });
 
+    /* Hata (2026-10-29, kullanıcı: «Ollama bağlanmıyor, çekemiyor»): gemma4 ve qwen3
+       düşünen modeldir; tarayıcıdan giden istekte düşünme açık kalınca tek kelimelik
+       cevap ~21 sn sürüyor, bütçe düşünmeye gidip cevap BOŞ dönüyordu. HKM bunu
+       zaten kapatıyordu (core/ai.py); modüllerin kendi katmanı kapatmıyordu. */
+    it('Ollama düşünen modelde düşünme kapalı gider; öbür sağlayıcı ve model etkilenmez', () => {
+      const g = (p, m) => R.LLM.openaiBody({ model:m, messages:[{ role:'user', text:'a' }] }, {}, false, p);
+      expect(g(R.PROVIDERS.ollama, 'gemma4:e2b').reasoning_effort).toBe('none');
+      expect(g(R.PROVIDERS.ollama, 'qwen3-vl:4b').reasoning_effort).toBe('none');
+      expect(g(R.PROVIDERS.ollama, 'gemma3:4b').reasoning_effort).toBe(undefined);
+      expect(g(R.PROVIDERS.groq || { id:'groq' }, 'qwen3-32b').reasoning_effort).toBe(undefined);
+    });
+
     /* ---------- 4. eksik adres tamamlanır ---------- */
 
     it('eksik yazılmış uç adresi tamamlanır', () => {

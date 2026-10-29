@@ -657,7 +657,11 @@ SP.LLM = (function(){
     return parts;
   }
 
-  function openaiBody(req, fix, stream){
+  /* Ollama'da düşünen model (gemma4, qwen3): düşünme kapalı (2026-10-29). Açıkken
+     tek kelimelik cevap ~21 sn sürüyor, bütçe düşünmeye gidip cevap boş dönüyordu;
+     reasoning_effort:"none" ile ~0,5 sn. HKM aynısını yapar (HKM/core/ai.py). */
+  const DUSUNEN = /^(gemma4|qwen3)/i;
+  function openaiBody(req, fix, stream, provider){
     const messages = [];
     if(req.system){
       /* Bazi ucler 'system' rolunu reddeder; onarim ogrenildiyse ilk
@@ -672,6 +676,7 @@ SP.LLM = (function(){
     if(fix.tokenField === 'max_completion_tokens') body.max_completion_tokens = budget;
     else body.max_tokens = budget;
     if(!fix.dropTemperature) body.temperature = req.temperature == null ? 0.4 : req.temperature;
+    if(provider && provider.id === 'ollama' && DUSUNEN.test(String(req.model || ''))) body.reasoning_effort = 'none';
     return body;
   }
 
@@ -702,7 +707,7 @@ SP.LLM = (function(){
       try{
         response = await fetch(endpoint, {
           method:'POST', headers, signal:guard.signal,
-          body:JSON.stringify(openaiBody(req, fix, stream)),
+          body:JSON.stringify(openaiBody(req, fix, stream, provider)),
         });
       }catch(e){
         guard.done();
@@ -1364,7 +1369,7 @@ SP.LLM = (function(){
     listModels, modelsFor, cachedModels, clearCatalog, MODEL_STORE,
     errorText, retryable, resumable, offline, onceOnline, inSandbox, KEY_STORE,
     truncated, trimToSentence, capSentences, joinContinuation, dropLastWord, stripThinking,
-    endpointFor, normalizeOpenAI, normalizeGemini, classify,
+    endpointFor, normalizeOpenAI, normalizeGemini, classify, openaiBody,
     hasImages, supportsVision, visionChain,
     DEFAULT_MAX_TOKENS,
   };
