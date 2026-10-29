@@ -18476,12 +18476,17 @@ window.LIFEOS = window.LIFEOS || {};
     if(typeof CSSMediaRule !== 'undefined') return r instanceof CSSMediaRule;
     return r && r.type === 4;
   }
+  /* Açılışta ~7 000 kural gezilir: düz döngü, iç kuralı olmayan stil kuralı
+     (type 1) hemen geçilir (Array.from + her kural için çağrı ~10 ms idi). */
   function gez(kurallar, fn){
-    Array.from(kurallar || []).forEach(r => {
+    if(!kurallar) return;
+    for(let i = 0; i < kurallar.length; i++){
+      const r = kurallar[i];
+      if(r.type === 1 && !(r.cssRules && r.cssRules.length)) continue;
       if(medyaKuraliMi(r)) fn(r);
       if(r.styleSheet){ try{ gez(r.styleSheet.cssRules, fn); }catch(e){} }   /* @import */
-      if(r.cssRules) gez(r.cssRules, fn);                                     /* @media, @supports, @layer */
-    });
+      if(r.cssRules) gez(r.cssRules, fn);                                     /* @media, @supports, @layer, iç içe */
+    }
   }
   /* Döner: hareket koşulu taşıyan kaç kural bulundu. Başka kökenden gelen
      sayfa (cssRules okunamaz) sessizce atlanır. */
@@ -20172,7 +20177,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'b9bb700f', at:'2026-10-29 10:40', dirty:true };
+ESP.BUILD = { id:'db5f8dd9', at:'2026-10-29 12:45', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20403,11 +20408,16 @@ window.LIFEOS = window.LIFEOS || {};
     return sayiMi(s.deger) || (typeof s.deger === 'string' && s.deger.trim() !== '');
   }
 
-  /* Türkçe sayı yazımı: ondalık virgül, binlik nokta. */
+  /* Türkçe sayı yazımı: ondalık virgül, binlik nokta. Biçimleyici ondalık
+     sayısı başına bir kez kurulur: seçenekli toLocaleString her çağrıda yeni
+     Intl.NumberFormat kurar (uzun listelerde fark eder; açılıştaki ilk
+     çağrının ~8 ms'si tr-TR verisinin tek seferlik yüklenmesidir). */
+  const BICIMCI = {};
   function bicim(n, ondalik){
     if(!sayiMi(n)) return '—';
     const od = ondalik == null ? (Number.isInteger(n) ? 0 : 1) : ondalik;
-    return n.toLocaleString('tr-TR', { minimumFractionDigits:0, maximumFractionDigits:od });
+    const b = BICIMCI[od] || (BICIMCI[od] = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:0, maximumFractionDigits:od }));
+    return b.format(n);
   }
 
   /* Birimle birlikte: Türkçede yüzde işareti sayının ÖNÜNDE durur. */
