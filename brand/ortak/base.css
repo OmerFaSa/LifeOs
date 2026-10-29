@@ -198,9 +198,13 @@ table td, table th{
 
 /* Sayfa değişiminde içerik altı piksel yükselerek gelir. Geçişin
    kendisi görünmez; görünen tek şey, sayfanın "yerleşmiş" olmasıdır. */
+/* Opaklıksız (2026-10-29, kullanıcı: «geçişte arka plan net görünüyor,
+   cam aniden buğulanıyor»): opaklığı 1'in altındaki öğe içindeki camın
+   backdrop-filter'ını keser (backdrop root); animasyon bitince bulanıklık
+   birden geliyordu. Transform kesmez: cam ilk kareden buğulu. */
 @keyframes content-in{
-  from{ opacity:0; transform:translateY(6px); }
-  to{ opacity:1; transform:none; }
+  from{ transform:translateY(6px); }
+  to{ transform:none; }
 }
 /* Yalnız YENİ ekranda (`.h-yeni`, hareket.js): uygulama her eylemde
    yeniden çizdiği için burada koşulsuz bir animasyon her tıklamada

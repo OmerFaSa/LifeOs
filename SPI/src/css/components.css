@@ -973,7 +973,7 @@ button.listitem.is-on{ background:var(--primary-soft); }
 
 /* Ekran degistiginde icerik yalnizca bir kez, cok kisa sekilde belirir. */
 .content > .grid, .content > .stack{ animation:content-in var(--dur-lg) var(--ease); }
-@keyframes content-in{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
+@keyframes content-in{ from{ transform:translateY(4px); } to{ transform:none; } }   /* opaklıksız: cam buğusu kesilmez (base.css) */
 
 /* Kart cevrildiginde yuz degisimi ani degil. */
 .flashcard{ transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
