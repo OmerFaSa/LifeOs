@@ -153,6 +153,7 @@ python3 tools/rutbe.py <klasor>      # rutbe gorsellerini medya/'ya isler (kayip
 python3 tools/rutbe.py --liste       # medya/ altinda ne var
 python3 tools/rutbe.py --eksik       # katalog ne bekliyor da yok (node ile)
 python3 tools/yazi.py --denetle      # ekran basliklari: cumle duzeni, «&» yok, emoji ve ic terim yok
+python3 tools/olucss.py              # hicbir ogeye uyamayan CSS kurali (--sil ile siler, sonra --yay + build)
 node tools/pusula.js                 # Kolay LifeOS pusulasi: iyi gun kaydi eylem sayisi, Bugun ve menu (belgeler/ekip/KOLAY-PLANI.md)
 
 # her sistem kendi dizininde

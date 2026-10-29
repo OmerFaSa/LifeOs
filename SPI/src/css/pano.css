@@ -72,7 +72,6 @@
 .pk-segment i{ display:block; height:8px; border-radius:3px; background:color-mix(in oklab, var(--text) 8%, var(--surface)); }
 .pk-segment i.is-dolu{ background:var(--primary); }
 .pk-segment.is-yok i{ background:transparent; border:1px dashed color-mix(in oklab, var(--text) 25%, transparent); box-sizing:border-box; }
-.pk-segment--iri i{ height:34px; border-radius:7px; }
 
 /* Eşik çubuğu */
 .pk-esik{ position:relative; height:8px; border-radius:4px; background:color-mix(in oklab, var(--text) 7%, var(--surface)); }

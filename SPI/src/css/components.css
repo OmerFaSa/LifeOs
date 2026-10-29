@@ -11,7 +11,6 @@
    Kural: bilesenler yalniz tokens.css degiskenlerini kullanir; ham renk
    ya da olcu yazilmaz. Ayrinti icin src/STIL.md. */
 
-
 /* ---------- kart ----------
    Tek kart stili. Vurgu için renkli kenarlık kullanılmaz; başlığın yanına
    rozet konur. Gölge bir kenarlık kadar sessizdir — kart sayfadan kopmaz,
@@ -181,7 +180,6 @@
 }
 .chip--tap:hover{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); cursor:pointer; }
 .chip--on{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); }
-
 
 /* ---------- olcum ---------- */
 .stat{
@@ -2054,7 +2052,6 @@ button.minrow:hover{ background:var(--surface-2); }
 }
 .minw0{ min-width:0; }
 
-
 /* ================= kayan şeritlerin kenarı =================
 
    Taşan bir sekme şeridinin sağ kenarında öge yarım kesilir ve bu bir
@@ -2531,7 +2528,7 @@ body.is-dragging .drop.is-over{
 .hp-satir__metin small{ font-size:12.5px; color:var(--text-3); }
 .hp-satir__metin .hp-etiket{ margin-left:4px; font-size:11px; color:var(--text-3); white-space:nowrap; }
 .hp-satir__metin .hp-etiket::before{ content:'· '; }
-.hp-maddeler{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+
 .hp-madde, .hp-gun{ min-height:30px; padding:0 12px; border:1px solid var(--border); border-radius:999px; background:none;
   color:var(--text-2); font:inherit; font-size:13px; cursor:pointer; transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
 .hp-madde.is-on, .hp-gun.is-on{ background:var(--sec); border-color:var(--sec); color:var(--primary-ink); }
@@ -2544,7 +2541,6 @@ body.is-dragging .drop.is-over{
 .hp-hareket .field:last-child{ flex:0 0 110px; }
 .hp-hata{ color:var(--danger); margin-top:12px; }
 @media (max-width:520px){ .hp-satir{ grid-template-columns:32px 1fr; } .hp-satir > .btn{ grid-column:2; justify-self:start; margin-top:8px; } }
-
 
 /* ---------- Planlar: alışkanlık karoları, takip penceresi (2026-10-20) ----------
    Kullanıcı: «küçük alışkanlıklar daha güzel görünsün; sistemle uyumlu küçük
@@ -2616,7 +2612,6 @@ body.is-dragging .drop.is-over{
 .ogun-satir > .input[type="time"]{ flex:0 0 120px; }
 @media (max-width:520px){ .hp-satir__dug{ grid-column:2; flex-direction:row; align-items:center; margin-top:8px; } .hp-takip__izgara{ grid-template-columns:1fr; } }
 
-
 /* ---------- Ofis › İnceleme (2026-10-20) ----------
    Kayıttan sayılar, gündem çubukları, iki grup karşılaştırması (fikir),
    belirgin bağlar, plan uyumu ve tek karar. Grafik: yatay çubuklar; renk
@@ -2656,8 +2651,6 @@ body.is-dragging .drop.is-over{
 .inc-ozet{ padding:12px; border-radius:var(--r-md); background:var(--surface-2); }
 .inc-ozet p{ margin:6px 0 0; }
 @media (max-width:520px){ .inc-fikir__bar{ grid-template-columns:1fr auto auto; } .inc-fikir__bar i{ grid-column:1 / -1; grid-row:2; } }
-
-
 
 /* ---------- Analiz › Bu hafta (2026-10-20) ----------
    Dört özet karo (mini sütunlu), bugünün enerji dengesi, altta kategoriler.

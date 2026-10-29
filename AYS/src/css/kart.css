@@ -866,7 +866,6 @@
 .bugun-cumle{ display:block; margin-top:var(--sp-1); color:var(--text); font-weight:500; }
 .kahraman{ min-width:0; }
 
-
 /* ================================================================
    v5 · BUGÜN (LifeOS Tasarım Dili sürüm 5, «AYS · Bugün»)
    Şimdi · Durum · Özet · Öneri alt alta; Durum/Özet kartları yan yana.
@@ -1473,4 +1472,4 @@
 .grafik__ort{ stroke:var(--text-3); stroke-width:1; stroke-dasharray:4 4; vector-effect:non-scaling-stroke; opacity:.8; }
 .grafik__son{ fill:none; stroke:currentColor; stroke-width:9; stroke-linecap:round; vector-effect:non-scaling-stroke; }
 .metrik--bos{ padding:8px 0; }
-.metrik__bos{ margin:0; font-size:14px; color:var(--text-2); }
+
