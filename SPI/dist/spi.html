@@ -1448,7 +1448,6 @@ html::view-transition-new(root){ animation:vt-in 240ms var(--ease) both; }
    Kural: bilesenler yalniz tokens.css degiskenlerini kullanir; ham renk
    ya da olcu yazilmaz. Ayrinti icin src/STIL.md. */
 
-
 /* ---------- kart ----------
    Tek kart stili. Vurgu için renkli kenarlık kullanılmaz; başlığın yanına
    rozet konur. Gölge bir kenarlık kadar sessizdir — kart sayfadan kopmaz,
@@ -1618,7 +1617,6 @@ html::view-transition-new(root){ animation:vt-in 240ms var(--ease) both; }
 }
 .chip--tap:hover{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); cursor:pointer; }
 .chip--on{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); }
-
 
 /* ---------- olcum ---------- */
 .stat{
@@ -3491,7 +3489,6 @@ button.minrow:hover{ background:var(--surface-2); }
 }
 .minw0{ min-width:0; }
 
-
 /* ================= kayan şeritlerin kenarı =================
 
    Taşan bir sekme şeridinin sağ kenarında öge yarım kesilir ve bu bir
@@ -3968,7 +3965,7 @@ body.is-dragging .drop.is-over{
 .hp-satir__metin small{ font-size:12.5px; color:var(--text-3); }
 .hp-satir__metin .hp-etiket{ margin-left:4px; font-size:11px; color:var(--text-3); white-space:nowrap; }
 .hp-satir__metin .hp-etiket::before{ content:'· '; }
-.hp-maddeler{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+
 .hp-madde, .hp-gun{ min-height:30px; padding:0 12px; border:1px solid var(--border); border-radius:999px; background:none;
   color:var(--text-2); font:inherit; font-size:13px; cursor:pointer; transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
 .hp-madde.is-on, .hp-gun.is-on{ background:var(--sec); border-color:var(--sec); color:var(--primary-ink); }
@@ -3981,7 +3978,6 @@ body.is-dragging .drop.is-over{
 .hp-hareket .field:last-child{ flex:0 0 110px; }
 .hp-hata{ color:var(--danger); margin-top:12px; }
 @media (max-width:520px){ .hp-satir{ grid-template-columns:32px 1fr; } .hp-satir > .btn{ grid-column:2; justify-self:start; margin-top:8px; } }
-
 
 /* ---------- Planlar: alışkanlık karoları, takip penceresi (2026-10-20) ----------
    Kullanıcı: «küçük alışkanlıklar daha güzel görünsün; sistemle uyumlu küçük
@@ -4053,7 +4049,6 @@ body.is-dragging .drop.is-over{
 .ogun-satir > .input[type="time"]{ flex:0 0 120px; }
 @media (max-width:520px){ .hp-satir__dug{ grid-column:2; flex-direction:row; align-items:center; margin-top:8px; } .hp-takip__izgara{ grid-template-columns:1fr; } }
 
-
 /* ---------- Ofis › İnceleme (2026-10-20) ----------
    Kayıttan sayılar, gündem çubukları, iki grup karşılaştırması (fikir),
    belirgin bağlar, plan uyumu ve tek karar. Grafik: yatay çubuklar; renk
@@ -4093,8 +4088,6 @@ body.is-dragging .drop.is-over{
 .inc-ozet{ padding:12px; border-radius:var(--r-md); background:var(--surface-2); }
 .inc-ozet p{ margin:6px 0 0; }
 @media (max-width:520px){ .inc-fikir__bar{ grid-template-columns:1fr auto auto; } .inc-fikir__bar i{ grid-column:1 / -1; grid-row:2; } }
-
-
 
 /* ---------- Analiz › Bu hafta (2026-10-20) ----------
    Dört özet karo (mini sütunlu), bugünün enerji dengesi, altta kategoriler.
@@ -6675,7 +6668,6 @@ body.is-dragging .drop.is-over{
 .bugun-cumle{ display:block; margin-top:var(--sp-1); color:var(--text); font-weight:500; }
 .kahraman{ min-width:0; }
 
-
 /* ================================================================
    v5 · BUGÜN (LifeOS Tasarım Dili sürüm 5, «AYS · Bugün»)
    Şimdi · Durum · Özet · Öneri alt alta; Durum/Özet kartları yan yana.
@@ -7282,7 +7274,6 @@ body.is-dragging .drop.is-over{
 .grafik__ort{ stroke:var(--text-3); stroke-width:1; stroke-dasharray:4 4; vector-effect:non-scaling-stroke; opacity:.8; }
 .grafik__son{ fill:none; stroke:currentColor; stroke-width:9; stroke-linecap:round; vector-effect:non-scaling-stroke; }
 .metrik--bos{ padding:8px 0; }
-.metrik__bos{ margin:0; font-size:14px; color:var(--text-2); }
 
 /* ==== css/pano.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -7359,7 +7350,6 @@ body.is-dragging .drop.is-over{
 .pk-segment i{ display:block; height:8px; border-radius:3px; background:color-mix(in oklab, var(--text) 8%, var(--surface)); }
 .pk-segment i.is-dolu{ background:var(--primary); }
 .pk-segment.is-yok i{ background:transparent; border:1px dashed color-mix(in oklab, var(--text) 25%, transparent); box-sizing:border-box; }
-.pk-segment--iri i{ height:34px; border-radius:7px; }
 
 /* Eşik çubuğu */
 .pk-esik{ position:relative; height:8px; border-radius:4px; background:color-mix(in oklab, var(--text) 7%, var(--surface)); }
@@ -13228,7 +13218,6 @@ html.king-acik .site, html.king-acik .site *{ -webkit-backdrop-filter:none !impo
   stroke-linecap:round; stroke-linejoin:round; }
 .king__cip:focus-visible, .king__gonder:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 
-
 /* ======================================================================
    PROFESYONEL (kullanıcı, 2026-10-05: «Apple Intelligence gibi olan King
    özelliğini profesyonelleştir»): baloncuğun başında King ve bulunulan
@@ -13288,8 +13277,6 @@ html.king-acik .site, html.king-acik .site *{ -webkit-backdrop-filter:none !impo
 .king__gonder{ transition:opacity .2s ease, transform .2s ease; }
 .king__yaz:has(.king__girdi:placeholder-shown) .king__gonder{ opacity:.35; }
 .king__gonder:active{ transform:scale(.94); }
-.king__ipucu{ margin:-4px 0 0; text-align:center; font-size:11.5px; color:var(--text-2); }
-@media (max-width:679px), (hover:none){ .king__ipucu{ display:none; } }
 
 /* Telefonda alt bandın üstünde. */
 @media (max-width:679px){
@@ -13369,7 +13356,7 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__mini-soru{ color:var(--text); font-weight:550; }
 .king.is-mini .king__cipler{ gap:6px; }
 .king.is-mini .king__cip{ min-height:30px; font-size:12.5px; }
-.king.is-mini .king__ipucu{ display:none; }
+
 @media (max-width:679px){
   .king.is-mini .king__kutu, .king.is-mini.is-acik .king__kutu{ top:calc(var(--ust-h, 56px) + 8px + env(safe-area-inset-top, 0px));
     right:12px; width:calc(100vw - 24px); max-height:44vh; }
@@ -13379,7 +13366,7 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__foto-dugme{ flex:none; width:40px; height:40px; display:grid; place-items:center; border-radius:50%; cursor:pointer; color:var(--text-2); }
 .king__foto-dugme:hover{ background:var(--surface-2); color:var(--text); }
 .king__foto-dugme:focus-within{ outline:2px solid var(--primary); outline-offset:2px; }
-.king__foto-dugme svg, .king__ekran svg, .king__sohbet svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.king__foto-dugme svg, .king__ekran svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .king__balon--foto{ padding:4px; background:none; }
 .king__foto{ display:block; max-width:180px; max-height:160px; border-radius:14px; object-fit:cover; box-shadow:0 1px 0 rgba(0,0,0,.06); }
 .king__durum{ font-size:11px; font-weight:600; color:var(--text-2); padding:2px 8px; border-radius:999px; background:var(--surface-2); white-space:nowrap; }
@@ -13424,7 +13411,7 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 @media (max-width:420px){ .king__gun{ grid-template-columns:72px 1fr; } .king__adimlar small{ display:none; } }
 .king__ekran{ margin-left:auto; }
 .king__ekran ~ .king__kucult{ margin-left:0; }
-.king__sohbet.is-acik{ color:#fff; background:var(--primary); }
+
 .king__mini-liste{ margin:2px 0 0; padding-left:16px; font-size:13px; color:var(--text-2); }
 /* Başlık düğmeleri sağda bitişik: yalnız ilki sola iter. */
 .king__ekran ~ .king__kapat, .king__buyut ~ .king__kapat, .king__kucult ~ .king__kapat{ margin-left:0; }
@@ -13437,11 +13424,11 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__paylasim-dur{ margin-left:auto; min-height:26px; padding:2px 10px; border:0; border-radius:999px; font:inherit; font-size:12px; font-weight:600;
   background:var(--surface); color:var(--text); cursor:pointer; box-shadow:inset 0 0 0 1px var(--border); }
 .king__ekran.is-acik{ color:#fff; background:var(--danger, #e5484d); }
-.king__sayfa svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
 @media (prefers-reduced-motion:reduce){ .king__canli{ animation:none; } }
 
 /* Söz 19: «Daha fazla» — cevap biçimi, sohbeti kaydet, kayıtlar, temizle. */
-.king__akis--panel{ gap:0; }
+
 .king__menu{ display:flex; flex-direction:column; gap:8px; padding:4px 2px 2px; }
 .king__menu-satir{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:4px 0 8px; }
 .king__menu-ad{ font-size:13px; font-weight:600; color:var(--text-2); }
@@ -14543,17 +14530,13 @@ html .king:not(.is-mini) .king__balon--sen{ background:var(--surface-2, #f1f2f5)
 /* Öğrenme yüzeyi */
 .ogrenme{ display:flex; flex-direction:column; gap:8px; padding:12px 14px; border-radius:12px; background:var(--surface-2);
   box-shadow:inset 0 0 0 1px var(--border); }
-.ogrenme__bas{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
-.ogrenme__bas b{ font-size:14px; }
+
 .ogrenme__etiket{ font-size:11.5px; color:var(--text-2); white-space:nowrap; }
 .ogrenme p{ margin:0; font-size:14px; line-height:1.55; }
-.ogrenme__ornek{ font-size:13.5px; line-height:1.5; }
-.ogrenme__ornek b, .ogrenme__pratik b, .ogrenme__aktarim b{ font-weight:600; }
+
 .ogrenme__dikkat{ padding:8px 10px; border-radius:8px; background:var(--surface); border-left:3px solid var(--primary);
   font-size:13px; line-height:1.5; color:var(--text-2); }
-.ogrenme__pratik{ padding-top:8px; border-top:1px dashed var(--border); font-size:13.5px; line-height:1.5; }
-.ogrenme__pratik details{ margin-top:4px; font-size:13px; color:var(--text-2); }
-.ogrenme__aktarim{ font-size:13px; line-height:1.5; color:var(--text-2); }
+
 .ogrenme-liste{ display:flex; flex-direction:column; gap:8px; }
 .ogrenme-liste--kaydir{ max-height:420px; overflow-y:auto; padding-right:2px; }
 .ogrenme__kutu{ padding:8px 10px; border-radius:8px; background:var(--surface); }
@@ -19570,7 +19553,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'db5f8dd9', at:'2026-10-29 12:45', dirty:true };
+SP.BUILD = { id:'1a18fc83', at:'2026-10-29 13:00', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
