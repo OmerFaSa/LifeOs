@@ -157,12 +157,17 @@ window.LIFEOS = window.LIFEOS || {};
     if(typeof CSSMediaRule !== 'undefined') return r instanceof CSSMediaRule;
     return r && r.type === 4;
   }
+  /* Açılışta ~7 000 kural gezilir: düz döngü, iç kuralı olmayan stil kuralı
+     (type 1) hemen geçilir (Array.from + her kural için çağrı ~10 ms idi). */
   function gez(kurallar, fn){
-    Array.from(kurallar || []).forEach(r => {
+    if(!kurallar) return;
+    for(let i = 0; i < kurallar.length; i++){
+      const r = kurallar[i];
+      if(r.type === 1 && !(r.cssRules && r.cssRules.length)) continue;
       if(medyaKuraliMi(r)) fn(r);
       if(r.styleSheet){ try{ gez(r.styleSheet.cssRules, fn); }catch(e){} }   /* @import */
-      if(r.cssRules) gez(r.cssRules, fn);                                     /* @media, @supports, @layer */
-    });
+      if(r.cssRules) gez(r.cssRules, fn);                                     /* @media, @supports, @layer, iç içe */
+    }
   }
   /* Döner: hareket koşulu taşıyan kaç kural bulundu. Başka kökenden gelen
      sayfa (cssRules okunamaz) sessizce atlanır. */

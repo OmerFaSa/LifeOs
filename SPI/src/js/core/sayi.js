@@ -108,11 +108,16 @@ window.LIFEOS = window.LIFEOS || {};
     return sayiMi(s.deger) || (typeof s.deger === 'string' && s.deger.trim() !== '');
   }
 
-  /* Türkçe sayı yazımı: ondalık virgül, binlik nokta. */
+  /* Türkçe sayı yazımı: ondalık virgül, binlik nokta. Biçimleyici ondalık
+     sayısı başına bir kez kurulur: seçenekli toLocaleString her çağrıda yeni
+     Intl.NumberFormat kurar (uzun listelerde fark eder; açılıştaki ilk
+     çağrının ~8 ms'si tr-TR verisinin tek seferlik yüklenmesidir). */
+  const BICIMCI = {};
   function bicim(n, ondalik){
     if(!sayiMi(n)) return '—';
     const od = ondalik == null ? (Number.isInteger(n) ? 0 : 1) : ondalik;
-    return n.toLocaleString('tr-TR', { minimumFractionDigits:0, maximumFractionDigits:od });
+    const b = BICIMCI[od] || (BICIMCI[od] = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:0, maximumFractionDigits:od }));
+    return b.format(n);
   }
 
   /* Birimle birlikte: Türkçede yüzde işareti sayının ÖNÜNDE durur. */
