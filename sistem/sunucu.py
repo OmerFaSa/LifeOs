@@ -56,6 +56,7 @@ import hashlib
 import html
 import json
 import os
+import re
 import socket
 import ssl
 import subprocess
@@ -235,6 +236,39 @@ def _guncel_dist(repo):
         return None
 
 
+# Dist'in buyuk satir ici betigi ayri adresten (2026-10-29). Chromium satir
+# ici betigi ana is parcaciginda derler (AYS 6 MB: ~85 ms); ayri dosyayi
+# inerken arka planda derler, calistirma da hizlanir. Olculen (AYS): tekrar
+# acilista DOMContentLoaded ~440 -> ~330 ms, ilk acilis ~1450 -> ~780 ms.
+# Dist dosyasi degismez; yalniz sunulurken bolunur. Test: tools/dist_sun_test.py
+DIST_BETIK = "/dist-betik.js"
+_BOLUK = {}
+
+
+def _dist_bol(yol):
+    """(html, betik, surum). En buyuk <script> govdesi betige tasinir ve HTML'de
+    ayni yerde <script src> kalir (sira ve engelleme ayni); betik yoksa None.
+    Surum adreste durur: tutan istek onbellege girer, V8 derlemeyi de saklar."""
+    st = os.stat(yol)
+    anahtar = (st.st_mtime_ns, st.st_size)
+    eski = _BOLUK.get(yol)
+    if eski and eski[0] == anahtar:
+        return eski[1]
+    with open(yol, encoding="utf-8") as f:
+        metin = f.read()
+    en = max(re.finditer(r"<script>(.*?)</script>", metin, re.S),
+             key=lambda m: len(m.group(1)), default=None)
+    if en is None:
+        sonuc = (metin.encode("utf-8"), None, None)
+    else:
+        betik = en.group(1).encode("utf-8")
+        surum = hashlib.sha256(betik).hexdigest()[:12]
+        etiket = '<script src="%s?v=%s"></script>' % (DIST_BETIK, surum)
+        sonuc = ((metin[:en.start()] + etiket + metin[en.end():]).encode("utf-8"), betik, surum)
+    _BOLUK[yol] = (anahtar, sonuc)
+    return sonuc
+
+
 class Sunucu(SimpleHTTPRequestHandler):
     """Bir sistemin src/ klasoru.
 
@@ -277,6 +311,23 @@ class Sunucu(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/api/hesap/"):
             return hesap.isle(self)
+        clean = self.path.split("?", 1)[0].split("#", 1)[0]
+        if clean in ("/", "/index.html", DIST_BETIK):
+            dist = _guncel_dist(self.repo)
+            if dist:
+                sayfa, betik, surum = _dist_bol(dist)
+                govde = betik if clean == DIST_BETIK else sayfa
+                if govde is not None:
+                    tur = "text/javascript" if clean == DIST_BETIK else "text/html"
+                    # Yalniz surumu tutan adres saklanir; yaris aninda eski
+                    # surum adresine yeni govde gittiyse saklanmaz.
+                    self._kalici = clean == DIST_BETIK and self.path.endswith("?v=" + surum)
+                    self.send_response(200)
+                    self.send_header("Content-Type", tur + "; charset=utf-8")
+                    self.send_header("Content-Length", str(len(govde)))
+                    self.end_headers()
+                    self.wfile.write(govde)
+                    return
         return super().do_GET()
 
     def do_POST(self):
@@ -290,6 +341,10 @@ class Sunucu(SimpleHTTPRequestHandler):
         return self.send_error(405)
 
     def end_headers(self):
+        if getattr(self, "_kalici", False):
+            self._kalici = False   # keep-alive: ayni isleyici sonraki istege gecer
+            self.send_header("Cache-Control", "public, max-age=31536000, immutable")
+            return super().end_headers()
         self.send_header("Cache-Control",
                          "no-store, no-cache, must-revalidate, max-age=0")
         self.send_header("Pragma", "no-cache")
@@ -1032,7 +1087,19 @@ def _sunucu_kur(klasor, port):
     if not os.path.isdir(src):
         return None
     sinif = type("Sunucu_" + klasor, (Sunucu,), {"repo": kok})
-    return KuyrukluSunucu((HOST, port), partial(sinif, directory=src))
+    sunucu = KuyrukluSunucu((HOST, port), partial(sinif, directory=src))
+    threading.Thread(target=_dist_isit, args=(kok,), daemon=True).start()
+    return sunucu
+
+
+def _dist_isit(kok):
+    """Ilk bolme ~100 ms; ilk acilis beklemesin diye sunucu kurulunca yapilir."""
+    try:
+        dist = _guncel_dist(kok)
+        if dist:
+            _dist_bol(dist)
+    except OSError:
+        pass
 
 
 # ------------------------------------------------------------ telefon

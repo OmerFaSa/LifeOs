@@ -63,7 +63,7 @@ try:
     (repo / 'dist').mkdir()
     (repo / 'src' / 'index.html').write_bytes(b'<script src="js/a.js"></script>\n')
     (repo / 'src' / 'js' / 'a.js').write_bytes(b'var a = 1;\r\nvar b = 2;\r\n')   # CRLF: Windows kopyasi
-    (repo / 'dist' / 'mod.html').write_text('<p>tek dosya</p>', encoding='utf-8')
+    (repo / 'dist' / 'mod.html').write_text('<p>tek dosya</p><script>var kucuk = 1;</script><script>var buyuk = "çok uzun betik";</script><p>son</p>', encoding='utf-8')
     liste = {'dosya': 'mod.html', 'kaynak': {'index.html': imza('<script src="js/a.js"></script>\n'),
                                              'js/a.js': imza('var a = 1;\nvar b = 2;\n')}}   # LF ile derlenmis
     (repo / 'dist' / 'kaynak.json').write_text(json.dumps(liste), encoding='utf-8')
@@ -99,10 +99,26 @@ try:
             govde, onbellek = r.read().decode('utf-8'), r.headers.get('Cache-Control', '')
         dogru('kok guncel dist\'i sunar', 'tek dosya' in govde, govde[:60])
         dogru('onbellek kurali degismez (no-store)', 'no-store' in onbellek, onbellek)
+        dogru('buyuk betik ayni yerde ayri adrese tasinir', '<script>var kucuk = 1;</script><script src="/dist-betik.js?v=' in govde
+              and '"></script><p>son</p>' in govde and 'buyuk' not in govde, govde)
+        surum = govde.split('dist-betik.js?v=', 1)[-1].split('"', 1)[0]
+        with urllib.request.urlopen(adres + 'dist-betik.js?v=' + surum, timeout=5) as r:
+            betik, tur, onbellek = r.read().decode('utf-8'), r.headers.get('Content-Type', ''), r.headers.get('Cache-Control', '')
+        dogru('betik adresi buyuk govdeyi sunar (UTF-8, js)', betik == 'var buyuk = "çok uzun betik";' and 'javascript' in tur, (betik, tur))
+        dogru('surumu tutan betik saklanir (V8 derlemeyi saklar)', 'immutable' in onbellek and 'no-store' not in onbellek, onbellek)
+        with urllib.request.urlopen(adres + 'dist-betik.js?v=eski', timeout=5) as r:
+            onbellek = r.headers.get('Cache-Control', '')
+        dogru('eski surum adresi saklanmaz (no-store)', 'no-store' in onbellek and 'immutable' not in onbellek, onbellek)
         (repo / 'src' / 'js' / 'a.js').write_bytes(b'var degisti = 1;\n')
         with urllib.request.urlopen(adres, timeout=5) as r:
             govde = r.read().decode('utf-8')
         dogru('kaynak degisince kok src/index.html\'i sunar', 'js/a.js' in govde, govde[:60])
+        try:
+            urllib.request.urlopen(adres + 'dist-betik.js', timeout=5)
+            kod = 200
+        except urllib.error.HTTPError as h:
+            kod = h.code
+        dogru('dist eskiyken betik adresi yok (404)', kod == 404, kod)
     finally:
         s.shutdown(); s.server_close()
 
