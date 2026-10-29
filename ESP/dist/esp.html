@@ -597,9 +597,13 @@ table td, table th{
 
 /* Sayfa değişiminde içerik altı piksel yükselerek gelir. Geçişin
    kendisi görünmez; görünen tek şey, sayfanın "yerleşmiş" olmasıdır. */
+/* Opaklıksız (2026-10-29, kullanıcı: «geçişte arka plan net görünüyor,
+   cam aniden buğulanıyor»): opaklığı 1'in altındaki öğe içindeki camın
+   backdrop-filter'ını keser (backdrop root); animasyon bitince bulanıklık
+   birden geliyordu. Transform kesmez: cam ilk kareden buğulu. */
 @keyframes content-in{
-  from{ opacity:0; transform:translateY(6px); }
-  to{ opacity:1; transform:none; }
+  from{ transform:translateY(6px); }
+  to{ transform:none; }
 }
 /* Yalnız YENİ ekranda (`.h-yeni`, hareket.js): uygulama her eylemde
    yeniden çizdiği için burada koşulsuz bir animasyon her tıklamada
@@ -2412,7 +2416,7 @@ button.listitem.is-on{ background:var(--primary-soft); }
 
 /* Ekran degistiginde icerik yalnizca bir kez, cok kisa sekilde belirir. */
 .content > .grid, .content > .stack{ animation:content-in var(--dur-lg) var(--ease); }
-@keyframes content-in{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
+@keyframes content-in{ from{ transform:translateY(4px); } to{ transform:none; } }   /* opaklıksız: cam buğusu kesilmez (base.css) */
 
 /* Kart cevrildiginde yuz degisimi ani degil. */
 .flashcard{ transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease); }
@@ -11585,8 +11589,14 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
 }
 
 /* SAYFA GEÇİŞİ (2026-10-02): yalnız sayfa değişince; kartlar sırayla,
-   hafifçe yukarı kayarak belirir. Aynı sayfanın yeniden çizimi oynatmaz. */
-@keyframes sayfa-gir{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+   hafifçe yukarı kayarak belirir. Aynı sayfanın yeniden çizimi oynatmaz.
+   2026-10-29 (kullanıcı: «insanın fark edebileceği optimizasyon»): içerik
+   ~400-540 ms'de okunur oluyordu; 340 ms, aralık 15 ms, opaklık %40'ta tam. */
+/* Opaklıksız (2026-10-29, kullanıcı: «geçişte arka plan net görünüyor,
+   cam aniden buğulanıyor»): opaklığı 1'in altındaki öğe içindeki camın
+   backdrop-filter'ını keser (backdrop root); animasyon bitince bulanıklık
+   birden geliyordu. Transform kesmez: cam ilk kareden buğulu. */
+@keyframes sayfa-gir{ from{ transform:translateY(8px); } to{ transform:none; } }
 html.sayfa-gecis .site--v5 .sayfabasi{ animation:sayfa-gir var(--dur-lg) var(--ease) both; }
 html.sayfa-gecis .site--v5 #main .kutu,
 html.sayfa-gecis .site--v5 #main .card,
@@ -11595,31 +11605,31 @@ html.sayfa-gecis .site--v5 #main .kahraman,
 html.sayfa-gecis .site--v5 #main .notice,
 html.sayfa-gecis .site--v5 #main .okart-sar,
 html.sayfa-gecis .site--v5 #main .bolumcubugu{
-  animation:sayfa-gir 460ms var(--ease) both; }
+  animation:sayfa-gir 340ms var(--ease) both; }
 html.sayfa-gecis .site--v5 #main .kutu:nth-child(2),
 html.sayfa-gecis .site--v5 #main .card:nth-child(2),
 html.sayfa-gecis .site--v5 #main .donen:nth-child(2),
 html.sayfa-gecis .site--v5 #main .kahraman:nth-child(2),
 html.sayfa-gecis .site--v5 #main .notice:nth-child(2),
-html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(2){ animation-delay:50ms; }
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(2){ animation-delay:15ms; }
 html.sayfa-gecis .site--v5 #main .kutu:nth-child(3),
 html.sayfa-gecis .site--v5 #main .card:nth-child(3),
 html.sayfa-gecis .site--v5 #main .donen:nth-child(3),
 html.sayfa-gecis .site--v5 #main .kahraman:nth-child(3),
 html.sayfa-gecis .site--v5 #main .notice:nth-child(3),
-html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(3){ animation-delay:100ms; }
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(3){ animation-delay:30ms; }
 html.sayfa-gecis .site--v5 #main .kutu:nth-child(4),
 html.sayfa-gecis .site--v5 #main .card:nth-child(4),
 html.sayfa-gecis .site--v5 #main .donen:nth-child(4),
 html.sayfa-gecis .site--v5 #main .kahraman:nth-child(4),
 html.sayfa-gecis .site--v5 #main .notice:nth-child(4),
-html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(4){ animation-delay:150ms; }
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(4){ animation-delay:45ms; }
 html.sayfa-gecis .site--v5 #main .kutu:nth-child(n+5),
 html.sayfa-gecis .site--v5 #main .card:nth-child(n+5),
 html.sayfa-gecis .site--v5 #main .donen:nth-child(n+5),
 html.sayfa-gecis .site--v5 #main .kahraman:nth-child(n+5),
 html.sayfa-gecis .site--v5 #main .notice:nth-child(n+5),
-html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(n+5){ animation-delay:200ms; }
+html.sayfa-gecis .site--v5 #main .okart-sar:nth-child(n+5){ animation-delay:60ms; }
 @media (prefers-reduced-motion:reduce){
   html.sayfa-gecis .site--v5 .sayfabasi,
   html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .bolumcubugu),
@@ -17221,21 +17231,27 @@ html[data-theme="dark"]{ --el-isik:255 236 220; --el-isik-a:.075; }
 /* 14) SAYFA GİRİŞİ — sıvı cam: içerik hafif bulanıktan netleşerek, az
    yükselerek sırayla gelir (kabuk.js sayfa değişince köke `sayfa-gecis`
    koyar; aynı sayfanın yeniden çizimi oynatmaz). 2026-10-28 «daha
-   profesyonel»: 700 → 460 ms, taşmasız yavaşlayan eğri, aralık 35 ms. */
+   profesyonel»: 700 → 460 ms, taşmasız yavaşlayan eğri, aralık 35 ms.
+   2026-10-29: içerik geç okunuyordu (~400-540 ms) — 360 ms, aralık 15 ms,
+   opaklık %40'ta tam (§29). */
 @media (prefers-reduced-motion:no-preference){
   html[data-zemin="yumusak"].sayfa-gecis .site--v5 .sayfabasi{ animation:cam-gir-baslik 420ms cubic-bezier(.2,.8,.2,1) both; }
   html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi,
     .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard, .bolumcubugu){ animation:cam-gir 460ms cubic-bezier(.2,.8,.2,1) both; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(2){ animation-delay:35ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(3){ animation-delay:70ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(4){ animation-delay:105ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(5){ animation-delay:140ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(6){ animation-delay:175ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(7){ animation-delay:210ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(8){ animation-delay:245ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(2){ animation-delay:15ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(3){ animation-delay:30ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(4){ animation-delay:45ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(5){ animation-delay:60ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(6){ animation-delay:75ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(7){ animation-delay:90ms; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(8){ animation-delay:105ms; }
 }
-@keyframes cam-gir{ from{ opacity:0; transform:translateY(10px) scale(.985); } 60%{ opacity:1; } to{ opacity:1; transform:none; } }
-@keyframes cam-gir-baslik{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+/* Opaklıksız (2026-10-29, kullanıcı: «geçişte arka plan net görünüyor,
+   cam aniden buğulanıyor»): opaklığı 1'in altındaki öğe içindeki camın
+   backdrop-filter'ını keser (backdrop root); animasyon bitince bulanıklık
+   birden geliyordu. Transform kesmez: cam ilk kareden buğulu. */
+@keyframes cam-gir{ from{ transform:translateY(8px) scale(.99); } to{ transform:none; } }
+@keyframes cam-gir-baslik{ from{ transform:translateY(6px); } to{ transform:none; } }
 
 /* 15) MİNİKLER — daha tatlı: kollar ve el sallama, kalp, yeni süsler
    (kurdele, bere, yuvarlak gözlük); sayfa geçişinde katman içerikle
@@ -17872,9 +17888,9 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
    · Çubuk ve eşik dolgusu yayla dolar; kenar simgesi üzerine gelince büyür;
      odak halkası sıçramadan açılır. */
 @media (prefers-reduced-motion:no-preference){
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 .sayfabasi{ animation:cam-gir-baslik2 560ms cubic-bezier(.16,1,.3,1) both; }
+  html[data-zemin="yumusak"].sayfa-gecis .site--v5 .sayfabasi{ animation:cam-gir-baslik2 360ms cubic-bezier(.16,1,.3,1) both; }
   html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi,
-    .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard, .bolumcubugu){ animation-name:cam-gir2; animation-duration:580ms; animation-timing-function:cubic-bezier(.16,1,.3,1); }
+    .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard, .bolumcubugu){ animation-name:cam-gir2; animation-duration:360ms; animation-timing-function:cubic-bezier(.16,1,.3,1); }
 
   @media (hover:hover) and (pointer:fine){
     html[data-zemin="yumusak"] .site--v5 :is(.btn, .chip, .kisayol > button, .kisayol > a, .giris__gonder):hover:not(:active):not(:disabled){ transform:translateY(-1px); }
@@ -17887,9 +17903,9 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
   html[data-zemin="yumusak"] :is(.bar__fill, .esikcubuk__dolu){ transition:width 900ms var(--su), transform 900ms var(--su), background-color .3s ease; }
   html[data-zemin="yumusak"] .site--v5 :is(button, a, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible{ transition:outline-offset 260ms var(--su), box-shadow 260ms ease; }
 }
-@keyframes cam-gir2{ from{ opacity:0; transform:translateY(16px) scale(.98); } 60%{ opacity:1; } to{ opacity:1; transform:none; } }   /* bulaniksiz: Edge'de kare p95 15,5 -> 12,3 ms (§30) */
+@keyframes cam-gir2{ from{ transform:translateY(8px) scale(.99); } to{ transform:none; } }   /* bulaniksiz: Edge'de kare p95 15,5 -> 12,3 ms (§30) */
 /* Bulanıksız (2026-10-29): filter GPU'ya devredilmiyor (Edge: compositeFailed 4096); her sayfa geçişinde başlık ana iş parçacığında boyanıyordu. */
-@keyframes cam-gir-baslik2{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+@keyframes cam-gir-baslik2{ from{ transform:translateY(6px); } to{ transform:none; } }
 
 /* 30) HAREKET DİLİ (kullanıcı, 2026-10-28: «sistemin bütün animasyonlarını
    geliştir, bu işe çok odaklan, master seviyeye çık»). Tek dil:
@@ -20167,7 +20183,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'1a18fc83', at:'2026-10-29 13:00', dirty:true };
+ESP.BUILD = { id:'945685d9', at:'2026-10-29 13:18', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
