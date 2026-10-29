@@ -675,8 +675,8 @@ html[data-theme="dark"]{ --el-isik:255 236 220; --el-isik-a:.075; }
   html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(7){ animation-delay:210ms; }
   html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(8){ animation-delay:245ms; }
 }
-@keyframes cam-gir{ from{ opacity:0; transform:translateY(10px) scale(.985); filter:blur(4px); } 60%{ opacity:1; filter:blur(0); } to{ opacity:1; transform:none; filter:none; } }
-@keyframes cam-gir-baslik{ from{ opacity:0; transform:translateY(6px); filter:blur(3px); } to{ opacity:1; transform:none; filter:none; } }
+@keyframes cam-gir{ from{ opacity:0; transform:translateY(10px) scale(.985); } 60%{ opacity:1; } to{ opacity:1; transform:none; } }
+@keyframes cam-gir-baslik{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
 
 /* 15) MİNİKLER — daha tatlı: kollar ve el sallama, kalp, yeni süsler
    (kurdele, bere, yuvarlak gözlük); sayfa geçişinde katman içerikle
@@ -1329,7 +1329,8 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
   html[data-zemin="yumusak"] .site--v5 :is(button, a, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible{ transition:outline-offset 260ms var(--su), box-shadow 260ms ease; }
 }
 @keyframes cam-gir2{ from{ opacity:0; transform:translateY(16px) scale(.98); } 60%{ opacity:1; } to{ opacity:1; transform:none; } }   /* bulaniksiz: Edge'de kare p95 15,5 -> 12,3 ms (§30) */
-@keyframes cam-gir-baslik2{ from{ opacity:0; transform:translateY(10px); filter:blur(4px); } 50%{ filter:blur(0); } to{ opacity:1; transform:none; filter:none; } }
+/* Bulanıksız (2026-10-29): filter GPU'ya devredilmiyor (Edge: compositeFailed 4096); her sayfa geçişinde başlık ana iş parçacığında boyanıyordu. */
+@keyframes cam-gir-baslik2{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
 
 /* 30) HAREKET DİLİ (kullanıcı, 2026-10-28: «sistemin bütün animasyonlarını
    geliştir, bu işe çok odaklan, master seviyeye çık»). Tek dil:

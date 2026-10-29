@@ -114,4 +114,28 @@
       }finally{ S._ortam(null); S._sifirla(); }
     });
   });
+
+  /* Başarım (2026-10-29): sayfa açıldıktan sonraki İLK dokunuş 470-700 ms sürüyordu;
+     181 ms'si `new AudioContext()` (Windows ses aygıtını o an kurar). Bağlam boşta
+     ÖNCEDEN askıda kurulur; ilk dokunuş yalnız resume() çağırır. Ses kapalıyken kurulmaz. */
+  describe('Ses — bağlam önceden kurulur', () => {
+    it('onKur boşta bağlamı askıda kurar, resume çağırmaz; ikinci kez kurmaz; ses kapalıyken kurmaz', () => {
+      const S = window.LIFEOS.SES; let kurulan = 0, resume = 0;
+      function Baglam(){ kurulan++; this.state = 'suspended'; this.currentTime = 0; this.destination = {};
+        this.resume = () => { resume++; return Promise.resolve(); }; this.close = () => Promise.resolve(); }
+      S._ortam({ AudioContext:Baglam, sentetik:true, cevrimici:() => true, fetch:() => Promise.resolve({ ok:true, json:() => [] }) });
+      S._sifirla();
+      const tikVardi = S.tercih().tik;
+      try{
+        S.tikAc(true);
+        expect(S._onKur()).toBe(true);
+        expect(kurulan + ',' + resume).toBe('1,0');
+        expect(S._onKur()).toBe(false);
+        expect(kurulan).toBe(1);
+        S._sifirla(); S.tikAc(false);
+        expect(S._onKur()).toBe(false);
+        expect(kurulan).toBe(1);
+      }finally{ S.tikAc(tikVardi); S._ortam(null); S._sifirla(); }
+    });
+  });
 })();

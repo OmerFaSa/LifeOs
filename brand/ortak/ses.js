@@ -612,16 +612,23 @@ window.LIFEOS = window.LIFEOS || {};
   let sonBitis = 0;
   const sonCal = {};
 
-  /* kur: AudioContext yoksa kurulsun mu? Yalnız kullanıcının dokunuşunda
-     kurulur (tarayıcı başka türlü askıda başlatır). */
+  /* Bağlamı ASKIDA kurar (resume yok). Sayfa açılınca boşta çağrılır: `new
+     AudioContext()` Windows'ta ses aygıtını o an kurar (~180 ms); ilk dokunuşta
+     kurulunca ilk tık 470-700 ms sürüyordu (2026-10-29). Dokunuş yalnız resume eder. */
+  function onKur(){
+    if(!tercih.tik || baglam) return false;
+    const C = ortam.AudioContext || (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext));
+    if(!C) return false;
+    try{ baglam = new C(); }catch(e){ return false; }
+    kayitHazirla(baglam);
+    return true;
+  }
+  /* kur: AudioContext yoksa kurulsun mu? Çalmak için kullanıcının dokunuşu
+     gerekir (tarayıcı başka türlü askıda tutar). */
   function sesBaglami(kur){
     if(!tercih.tik) return null;
     if(!baglam){
-      if(!kur) return null;
-      const C = ortam.AudioContext || (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext));
-      if(!C) return null;
-      try{ baglam = new C(); }catch(e){ return null; }
-      kayitHazirla(baglam);
+      if(!kur || !onKur()) return null;
     }
     if(baglam.state === 'suspended' && baglam.resume){ try{ baglam.resume(); }catch(e){} }
     return baglam;
@@ -917,8 +924,10 @@ window.LIFEOS = window.LIFEOS || {};
       if(!tercih.tik || !gercekMi(e) || !el || !el.matches || !el.matches('input[type="checkbox"]')) return;
       tik(el.checked ? 'ac' : 'kapa');
     }, true);
-    /* AudioContext ilk dokunuşta kurulur: ilk tık gecikmesin. */
-    document.addEventListener('pointerdown', e => { if(tercih.tik && !baglam && gercekMi(e)) sesBaglami(true); }, true);
+    /* Bağlam boşta önceden kurulur (onKur); ilk dokunuş onu yalnız sürdürür. */
+    const bosta = typeof requestIdleCallback === 'function' ? requestIdleCallback : f => setTimeout(f, 1500);
+    bosta(() => onKur(), { timeout:4000 });
+    document.addEventListener('pointerdown', e => { if(tercih.tik && gercekMi(e)) sesBaglami(true); }, true);
 
     /* «Dokun, sürsün»: tarayıcı kendiliğinden çalmayı reddettiyse ilk
        dokunuşta müzik devam eder. ♪ ve panel HARİÇ: onların kendi işi var
@@ -1034,7 +1043,7 @@ window.LIFEOS = window.LIFEOS || {};
     cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret, SESLER, KAYITLI,
     AILE, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml,
     chime:ad => tik(/bitti|kapa|dur/i.test(String(ad || '')) ? 'kapa' : 'ac'),
-    _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik,
+    _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik, _onKur:onKur,
   });
   /* Başka modülde çalıyorduysa: gövde hazır olunca sürdürmeyi dene. */
   if(typeof document !== 'undefined'){
