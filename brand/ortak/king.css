@@ -1374,3 +1374,12 @@ span.kt-ana{ cursor:default; }
   .kt-kart, .kt-simge, .kt-cip, .kt-gorsel-ac img{ transition:none; }
   .kt-kart:hover, .kt-kart:hover .kt-simge, .kt-gorsel-ac:hover img{ transform:none; }
 }
+
+/* OPAK PENCERE (kullanıcı, 2026-10-29: «evet, opak olsun»). Büyük pencerenin
+   40 px'lik bulanıklığı ilk açılışta GPU'da ~0,5 sn'lik bir kare yapıyordu
+   (bulanıksız ~0,18 sn; önceden ısıtmak işe yaramadı). Arkadaki sayfa zaten
+   örtülü: yüzey dolu, bulanıklık yok. Küçük King (is-mini) camlı kalır. */
+html .king:not(.is-mini) .king__kutu{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+  background:var(--surface, #fff) !important; }
+/* Opak pencerede «sen» balonu beyaz zeminde kaybolmasın: hafif dolu yüzey. */
+html .king:not(.is-mini) .king__balon--sen{ background:var(--surface-2, #f1f2f5) !important; }

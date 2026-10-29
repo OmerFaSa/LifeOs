@@ -49,3 +49,9 @@ html[data-zemin="yumusak"] .king:has(.king__arkadas) .king__akis{ padding-bottom
 @keyframes king-sonra{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
 /* Oturunca ayaklar girdinin içine sarkmaz. */
 .king__arkadas .minik.is-oturuyor .minik__ayak{ bottom:-14%; }
+
+/* Opak büyük pencere (king.css, 2026-10-29): içindeki cam kartlar ve «sen»
+   balonu beyaz zeminde kayboluyordu (cam-ince yarı saydam beyaz). Dolu yüzey. */
+html[data-zemin="yumusak"] .king:not(.is-mini) .king__kutu :is(.king__kart, .king__ars, .king__onizle, .king__soru, .king__sira, .king__bulunan,
+  .king__alan .king__gorev, .king__ders, .king__yasa-s, .king__gunum, .kt-kart, .kv-mini, .king__balon--sen){
+  background:var(--surface-2) !important; border:1px solid var(--border) !important; box-shadow:none !important; }

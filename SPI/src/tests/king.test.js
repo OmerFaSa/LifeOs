@@ -3275,5 +3275,19 @@
         expect(bd(perde)).toBe('none');
       }finally{ kok.classList.toggle('king-acik', vardi); site.remove(); perde.remove(); }
     });
+    /* Kullanıcı (2026-10-29): «evet, opak olsun». Büyük pencerenin 40 px'lik
+       bulanıklığı ilk açılışta GPU'da ~0,5 sn'lik kare yapıyordu. */
+    it('büyük King penceresi bulanıklık hesaplamaz, yüzeyi neredeyse opak', () => {
+      const k = document.createElement('div'); k.className = 'king';
+      const kutu = document.createElement('div'); kutu.className = 'king__kutu'; k.appendChild(kutu); document.body.appendChild(k);
+      try{
+        const cs = getComputedStyle(kutu);
+        expect(cs.backdropFilter || cs.webkitBackdropFilter || 'none').toBe('none');
+        const m = cs.backgroundColor.match(/rgba?\(([^)]+)\)/) || [];
+        const p = String(m[1] || '').split(/[ ,\/]+/).filter(Boolean);
+        const a = p.length > 3 ? Number(p[3]) : (/color\(/.test(cs.backgroundColor) ? Number((cs.backgroundColor.match(/\/\s*([\d.]+)/) || [0, 1])[1]) : 1);
+        expect(a >= 0.9).toBe(true);
+      }finally{ k.remove(); }
+    });
   });
 })();
