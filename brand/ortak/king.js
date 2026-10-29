@@ -4801,6 +4801,8 @@ window.LIFEOS.KING = (function(){
       });
   }
 
+  /* Ödeme cümlesi: satın al, sipariş ver, öde(me yap), kart bilgisi; «ödev» değil. */
+  const ODEME = /\s(satın al|satin al|sipariş ver|siparis ver|ödeme yap|odeme yap|öde\s|öder misin|ödeyebilir misin|kredi kart|banka kart|kart numara|kart bilgi|cvv|abone ol|bilet al)/;
   async function isle(metin){
     gozSonEtkilesim = ortam.simdi().getTime();
     if((bolum === 'araclar' || bolum === 'kutuphane')){ bolum = 'sohbet'; kvGiris = true; }     // sayfadayken sorulan sohbette görünür
@@ -4836,6 +4838,18 @@ window.LIFEOS.KING = (function(){
     if(k2Soru && t0 && baglanti() && ortam.simdi().getTime() - k2Soru < 12 * 3600 * 1000){
       k2Soru = 0;
       return merkezYolu(metin, { tur:'bilinmiyor', metin });
+    }
+    /* SATIN ALMA VE KART (kullanıcı, 2026-10-29: «satın alma ve kart işlemlerini
+       açıp kapatabilelim»). Ayarlar › Hesap'taki kilit (lifeos.kilit.odeme,
+       varsayılan kapalı). LifeOS'ta ödeme yapan bir araç yoktur: açıkken de King
+       bu işi yapmaz, yalnız söyler. Cümle Merkez'e de gitmez (kart bilgisi taşıyabilir). */
+    if(ODEME.test(' ' + t0 + ' ')){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      let acik = false;
+      try{ acik = localStorage.getItem('lifeos.kilit.odeme') === 'acik'; }catch(e){}
+      soyle(acik ? 'LifeOS’ta ödeme yapan bir araç yok; bunu kendi tarayıcında yapman gerekir. Kart bilgini buraya yazma.'
+        : 'Satın alma ve kart işlemleri kapalı (Ayarlar › Hesap). Ödeme, sipariş ya da kart işine girmem; kart bilgini de buraya yazma.');
+      return { tur:'odeme' };
     }
     /* Söz 14: «geri al», «sonu sil», «onu sil». */
     if(/^(geri al|son (kaydı|kayıt|girdiyi) (geri al|sil)|onu (sil|geri al)|sil onu|yanlış oldu geri al)[.!]?$/.test(t0)){

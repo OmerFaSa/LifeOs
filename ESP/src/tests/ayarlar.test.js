@@ -84,6 +84,31 @@
       }finally{ window.fetch = eski; d.remove(); A._sec('gorunum'); }
     });
 
+    /* 2026-10-29 (kullanıcı: «satın alma ve kart işlemlerini açıp kapatabilelim; güvenlik
+       ve sistem hakkında birçok şeyi ayarlayabilelim»; Google: «kendi tarayıcımda açsın»). */
+    it('Hesap: satın alma ve kart kilidi varsayılan kapalı, basınca değişir; Google bağlanmaz yazar; gizlilik kilidi burada', () => {
+      let eski = null;
+      try{ eski = localStorage.getItem(A.ODEME_ANAHTAR); localStorage.removeItem(A.ODEME_ANAHTAR); }catch(e){}
+      const d = koy();
+      try{
+        const h = d.querySelector('#ayarlar-bolum-hesap');
+        expect(A.odemeAcik()).toBe(false);
+        expect(h.querySelector('[data-odeme="kapali"]').getAttribute('aria-pressed')).toBe('true');
+        h.querySelector('[data-odeme="acik"]').click();
+        expect(A.odemeAcik()).toBe(true);
+        expect(h.querySelector('[data-odeme="acik"]').getAttribute('aria-pressed')).toBe('true');
+        h.querySelector('[data-odeme="kapali"]').click();
+        expect(A.odemeAcik()).toBe(false);
+        expect(h.textContent.indexOf('LifeOS Google’a veri göndermez') >= 0).toBe(true);
+        if(window.LIFEOS.KILIT) expect(!!h.querySelector('[data-kilit-ayar]')).toBe(true);
+        expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(A.ODEME_ANAHTAR) >= 0).toBe(true);
+      }finally{ d.remove(); try{ if(eski == null) localStorage.removeItem(A.ODEME_ANAHTAR); else localStorage.setItem(A.ODEME_ANAHTAR, eski); }catch(e){} }
+    });
+    it('Hesap: güvenlik satırları hesap merkezinin gerçek sayfalarına açılır', () => {
+      A.HESAP_SAYFALARI.forEach(([sayfa]) => expect(typeof sayfa).toBe('string'));
+      expect(A.HESAP_SAYFALARI.map(x => x[0])).toEqual(['guvenlik', 'ikiadim', 'cihazlar', 'etkinlik', 'yedek', 'verin', 'baglantilar']);
+    });
+
     it('hesap sunucusu yokken düğme yok, durum söylenir', () => {
       const d = koy();
       try{

@@ -89,6 +89,29 @@ window.LIFEOS = window.LIFEOS || {};
   /* Geniş denetim (kaydırıcılar, katmanlı seçiciler): ad üstte, denetim altta tam genişlik. */
   const G = (ad, not, denetim) => H(ad, not, denetim).replace('ayarlar__satir"', 'ayarlar__satir ayarlar__satir--genis"');
   const hesapVar = () => { try{ const d = L.HESAP && L.HESAP.dugme ? L.HESAP.dugme() : null; return !!(d && !d.gizli); }catch(e){ return false; } };
+  /* Hesap merkezinin sayfaları (hesap.js SAYFA_AD): tek tıkla oraya açılır. */
+  const HESAP_SAYFALARI = Object.freeze([
+    ['guvenlik', 'Güvenlik kontrolü', 'İki adım, kurtarma sorusu, cihazlar ve yedek tek bakışta'],
+    ['ikiadim', 'İki adımlı doğrulama', 'Girişte telefondaki kodu da sorar; yedek kodlar'],
+    ['cihazlar', 'Oturum açık cihazlar', 'Hangi cihazlar bağlı; birinden ya da hepsinden çık'],
+    ['etkinlik', 'Son etkinlik', 'Girişler ve yanlış denemeler'],
+    ['yedek', 'Yedekler', 'Hesap deposunun yedekleri; geri yükle, indir'],
+    ['verin', 'Verin', 'Bütün verini dışa aktar ya da hesabı sil'],
+    ['baglantilar', 'Bağlantılar', 'Kısayollar, takvim aboneliği, gelen kutusu'],
+  ]);
+  const modulAdi = () => (typeof document !== 'undefined' && document.documentElement.getAttribute('data-modul')) || 'ays';
+  const ODEME_ANAHTAR = 'lifeos.kilit.odeme';
+  function odemeAcik(){ try{ return localStorage.getItem(ODEME_ANAHTAR) === 'acik'; }catch(e){ return false; } }
+  function odemeAyarla(acik){
+    try{ if(acik) localStorage.setItem(ODEME_ANAHTAR, 'acik'); else localStorage.removeItem(ODEME_ANAHTAR); }catch(e){ /* depo kapalı */ }
+    if(typeof document !== 'undefined') document.querySelectorAll('[data-odeme]').forEach(b => {
+      const on = (b.getAttribute('data-odeme') === 'acik') === acik;
+      b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  const odemeSecici = () => '<div class="seg seg--block" role="group" aria-label="Satın alma ve kart işlemleri">'
+    + [['kapali', 'Kapalı'], ['acik', 'Açık']].map(([k, ad]) => { const on = (k === 'acik') === odemeAcik();
+      return '<button type="button" class="' + (on ? 'is-on' : '') + '" data-odeme="' + k + '" aria-pressed="' + on + '">' + ad + '</button>'; }).join('') + '</div>';
   const cagir = (nesne, ad) => { try{ return nesne && typeof nesne[ad] === 'function' ? nesne[ad]() : ''; }catch(e){ return ''; } };
 
   /* o = { tema:'<tema seçici HTML>', profil:{ ad, alt, route }, modul:[{ ad, route, not }] } */
@@ -113,9 +136,14 @@ window.LIFEOS = window.LIFEOS || {};
         + '<span><b>' + kac(p.ad || 'Profil') + '</b><small>' + kac(p.alt || '') + '</small></span>'
         + (p.route ? '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(p.route) + '">Profili aç</button>' : '') + '</div>'
         + (hesapVar()
-          ? H('Hesap ve eşitleme', 'Cihazlar, iki adımlı doğrulama, yedek',
-            '<button type="button" class="btn btn--sm ayarlar__hesap" data-ayarlar-hesap>Hesabı aç</button>')
-          : H('Hesap ve eşitleme', 'LifeOS sunucusu kapalı ya da giriş yapılmadı; kayıtlar bu cihazda', ''));
+          ? '<h5 class="plan__alt">Güvenlik</h5>' + HESAP_SAYFALARI.map(([sayfa, ad, not]) => H(ad, not,
+            '<button type="button" class="btn btn--sm" data-ayarlar-hesap="' + sayfa + '">Aç</button>')).join('')
+          : H('Hesap ve eşitleme', 'LifeOS sunucusu kapalı ya da giriş yapılmadı; kayıtlar bu cihazda', ''))
+        + '<h5 class="plan__alt">Bu cihaz ve kilitler</h5>'
+        + (L.KILIT && L.KILIT.ayarHtml ? H('Gizlilik kilidi', 'Bu modül açılırken dört haneli kod sorar', L.KILIT.ayarHtml(modulAdi(), { govde:true })) : '')
+        + H('Satın alma ve kart işlemleri', odemeAcik() ? 'Açık; yine de LifeOS’ta ödeme yapan bir araç yok'
+            : 'Kapalı: King ve ajanlar ödeme, sipariş ya da kart işine girmez', odemeSecici())
+        + H('Google ve YouTube', 'Hesap bağlanmaz: King’in bulduğu bağlantılar senin tarayıcında, kendi oturumunla açılır; LifeOS Google’a veri göndermez', '');
     }
     if(id === 'sistem') return '<h4 class="plan__baslik">Sistem planlaması</h4><div class="plan" data-plan-kok><p class="ayarlar__bos">Yükleniyor…</p></div>';
     if(id === 'modul') return (o.modul || []).map(m => H(m.ad, m.not || '',
@@ -277,10 +305,13 @@ window.LIFEOS = window.LIFEOS || {};
         });
         return;
       }
-      /* Hesap paneli kabuğun hesap düğmesindedir (hesap.js); yoksa sessiz. */
-      if(t.closest('[data-ayarlar-hesap]')){
-        const h = document.querySelector('.kenar .ust__hesap:not([hidden])') || document.querySelector('.ust__hesap:not([hidden])');
-        if(h){ if(L.KABUK) L.KABUK.katmanKapat(); h.click(); }
+      const od = t.closest('[data-odeme]');
+      if(od){ odemeAyarla(od.getAttribute('data-odeme') === 'acik'); return; }
+      /* Hesap merkezi istenen sayfasında açılır (hesap.js merkezAc). */
+      const hs = t.closest('[data-ayarlar-hesap]');
+      if(hs && L.HESAP && L.HESAP.merkezAc){
+        if(L.KABUK) L.KABUK.katmanKapat();
+        L.HESAP.merkezAc(hs.getAttribute('data-ayarlar-hesap') || 'kok');
       }
     });
     document.addEventListener('change', e => { if(e.target && e.target.matches) planDegisti(e.target); });
@@ -295,5 +326,6 @@ window.LIFEOS = window.LIFEOS || {};
     });
   }
 
-  L.AYARLAR = Object.freeze({ html, BOLUMLER, YAZILAR, yazi, yaziAyarla, _sec:id => { secili = id; } });
+  L.AYARLAR = Object.freeze({ html, BOLUMLER, YAZILAR, yazi, yaziAyarla, HESAP_SAYFALARI, ODEME_ANAHTAR, odemeAcik, odemeAyarla,
+    _sec:id => { secili = id; } });
 })();

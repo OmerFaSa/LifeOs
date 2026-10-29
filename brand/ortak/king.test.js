@@ -151,6 +151,28 @@
       expect(gidilen).toHaveLength(0);
     }));
 
+    /* 2026-10-29 (kullanıcı: «satın alma işlemleri ve kart işlemlerini açıp
+       kapatabilelim; sistemde böyle bir şeye ihtiyaç olacağını sanmıyorum»). */
+    it('satın alma ve kart işlemleri: kilit kapalıyken reddeder, açıkken de ödeme aracı olmadığını söyler; hiçbir yere götürmez', () => sahneyle(async () => {
+      let eski = null;
+      try{ eski = localStorage.getItem('lifeos.kilit.odeme'); }catch(e){}
+      try{
+        localStorage.removeItem('lifeos.kilit.odeme');
+        const { k, giden, gidilen } = sahne();
+        const r = await k.isle('bana şu kulaklığı satın al');
+        expect(r.tur).toBe('odeme');
+        expect(k.akis().slice(-1)[0].metin).toContain('kapalı');
+        await k.isle('kredi kartı numaramı kaydet');
+        expect(k.akis().slice(-1)[0].metin).toContain('kart bilgini');
+        localStorage.setItem('lifeos.kilit.odeme', 'acik');
+        await k.isle('sipariş ver');
+        expect(k.akis().slice(-1)[0].metin).toContain('ödeme yapan bir araç yok');
+        expect(giden.length + gidilen.length).toBe(0);
+        const r2 = await k.isle('ödevlerimi göster');
+        expect((r2 && r2.tur) === 'odeme').toBe(false);
+      }finally{ try{ if(eski == null) localStorage.removeItem('lifeos.kilit.odeme'); else localStorage.setItem('lifeos.kilit.odeme', eski); }catch(e){} }
+    }));
+
     it('anlaşılmayan istek hiçbir yere götürmez, ne yapılabildiğini söyler', () => sahneyle(async () => {
       const { k, giden, gidilen } = sahne();
       await k.isle('bilmem ne şey');
