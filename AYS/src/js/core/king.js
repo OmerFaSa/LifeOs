@@ -5452,6 +5452,16 @@ window.LIFEOS.KING = (function(){
   }
 
   const KURE = '<span class="king__kure" aria-hidden="true"></span>';
+  /* YÜZ (kullanıcı, 2026-10-29: «sol üstteki hâlâ tatlı konsept; minik
+     agentlar değil»): başlıkta ve karşılamada küre yerine King'in kendisi —
+     taçlı minik, duran portre (süs; ekran okuyucuya gizli, dokunulmaz).
+     Minikler yoksa küre kalır. Sesli sohbet şeridi küreyi korur. */
+  function yuzHtml(buyuk){
+    const M = L.MINIK;
+    if(!M || !M.ICERIK) return KURE;
+    return '<span class="king__yuz' + (buyuk ? ' king__yuz--buyuk' : '') + '" aria-hidden="true"><span class="minik minik--king minik--yuz" data-tip="tac" data-bicim="yuvarlak" data-desen="karin" data-yon="sag">'
+      + M.ICERIK + '</span></span>';
+  }
   const NOKTA = m => '<i class="king__nokta king__nokta--' + (m || 'mer') + '" aria-hidden="true"></i>';
 
   /* PROFESYONEL (kullanıcı, 2026-10-05: «Apple Intelligence gibi olan King'i
@@ -5476,7 +5486,7 @@ window.LIFEOS.KING = (function(){
     const son = akis.filter(m => m.kim === 'king' && !m.bekliyor).slice(-1)[0];
     const bekliyor = akis.some(m => m.bekliyor);
     const ekran = ekranAdi();
-    const bas = '<div class="king__bas">' + KURE + '<b>King</b>'
+    const bas = '<div class="king__bas">' + yuzHtml() + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + (ekran ? ' · ' + kac(ekran) : '') + '</span>'
       + isRozet()
       + '<button type="button" class="king__kapat king__buyut" data-king="buyut" aria-label="Büyüt" title="Büyüt (Ctrl iki kez)">' + SVG_BUYUT + '</button>'
@@ -5510,7 +5520,7 @@ window.LIFEOS.KING = (function(){
        kip seçici, küçült, kapat. Bağlantı durumu Ayarlar'da; liste düğmesi
        listenin içinde ve kenardaki çıkıntıda. */
     const bas = '<div class="king__bas">'
-      + KURE + '<b>King</b>'
+      + yuzHtml() + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + '</span>'
       + isRozet() + odakHtml() + kipHtml()
       + '<button type="button" class="king__kapat king__kucult" data-king="kucult" aria-label="Küçült" title="Küçült: sayfayı kullanırken açık kalır">'
@@ -5531,7 +5541,7 @@ window.LIFEOS.KING = (function(){
           || ((b.h.modul === (ayar && ayar.modul)) - (a.h.modul === (ayar && ayar.modul))) || a.i - b.i)
           .map(({ h, i }) => '<button type="button" class="king__cip king__hazir" data-king-hazir="' + i + '">'
           + NOKTA(h.ozet ? (ayar && ayar.modul) : h.modul) + kac(h.ad) + '</button>').join('');
-    const bos = '<div class="king__bos"><span class="king__bos-kure" aria-hidden="true">' + KURE + '</span>'
+    const bos = '<div class="king__bos"><span class="king__bos-kure" aria-hidden="true">' + yuzHtml(true) + '</span>'
       + '<h2 class="king__bos-selam">' + kac(selam()) + '</h2>'
       + (kars.kartlar.length || kars.satirlar.length
         ? (kars.kartlar.length ? '<div class="king__bos-veri">' + kartlarHtml(kars) + '</div>' : '')

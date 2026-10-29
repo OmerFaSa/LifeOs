@@ -517,8 +517,8 @@ window.LIFEOS = window.LIFEOS || {};
   /* Öğenin hangi alana düştüğü: önce ajanlar, sonra kabuk katmanları. */
   function hizAlani(el, ad){
     if(!el || !el.closest) return 'sayfa';
+    if(el.closest('.king__arkadas, .king__yuz, .king__kure, .ust__king')) return 'king';
     if(el.closest('.minik, .minikkat')) return 'minik';
-    if(el.closest('.king__kure, .ust__king')) return 'king';
     if(el.closest('.katman, .sheet, .menusayfa, .kmenu, .kenar, .popover, .h-onizle, .king')) return 'panel';
     if(el.matches && el.matches('.bar__fill, .esikcubuk__dolu, .donen__nokta, [class*="halka"], [data-sayi]')) return 'gosterge';
     if(/^(cam-gir|sayfa-gir|content-in|vt-)/.test(ad || '')) return 'sayfa';

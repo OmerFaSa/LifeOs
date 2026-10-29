@@ -3215,6 +3215,38 @@
       k.ac({ mini:true });
       expect(!!document.querySelector('.king__yaz .king__arkadas .minik')).toBe(true);
     }));
+    /* 2026-10-29 (kullanıcı: «agent sağ üstte durduğu çok kötü»; «arama
+       butonunun dışında yürüyor»; «resim yerine minik canlı bir King»). */
+    it('küçük King alt ortada; başlıkta resim yok, King yuvasındaki canlı minik', () => sahneyle(async () => {
+      if(!window.LIFEOS.MINIK) return;
+      const { k } = sahne();
+      k.ac({ mini:true });
+      await new Promise(r => setTimeout(r, 30));
+      const r = document.querySelector('.king__kutu').getBoundingClientRect();
+      expect(Math.abs((r.left + r.right) / 2 - innerWidth / 2) <= 2).toBe(true);
+      expect(r.bottom > innerHeight * .6).toBe(true);
+      const y = document.querySelector('.king__bas .king__yuz');
+      expect(!y || getComputedStyle(y).display === 'none').toBe(true);
+    }));
+    it('arkadaş yuvasından çıkmaz: düşünürken de yerinde, yuva yazı alanının içinde', () => sahneyle(async () => {
+      if(!window.LIFEOS.MINIK) return;
+      const { k } = sahne();
+      k.ac({ mini:false, mesaj:'x' });
+      const a = document.querySelector('.king__arkadas'), f = document.querySelector('.king__yaz');
+      a.querySelector('.minik').classList.add('is-dusunuyor');
+      expect(getComputedStyle(a).animationName).toBe('none');
+      const ra = a.getBoundingClientRect(), rf = f.getBoundingClientRect();
+      expect(ra.width > 30 && ra.left >= rf.left && ra.right <= rf.right && ra.top >= rf.top - 1 && ra.bottom <= rf.bottom + 1).toBe(true);
+    }));
+    it('büyük King başlığında küre değil King’in kendisi (taçlı minik)', () => sahneyle(async () => {
+      if(!window.LIFEOS.MINIK) return;
+      const { k } = sahne();
+      k.ac({ mini:false, mesaj:'x' });
+      const y = document.querySelector('.king__bas .king__yuz');
+      expect(!!(y && y.querySelector('.minik[data-tip="tac"]'))).toBe(true);
+      expect(y.getAttribute('aria-hidden')).toBe('true');
+      expect(!!document.querySelector('.king__bas .king__kure')).toBe(false);
+    }));
   });
 })();
 

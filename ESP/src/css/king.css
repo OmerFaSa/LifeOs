@@ -263,13 +263,15 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 @media (prefers-reduced-motion:reduce){ .king__dusun i{ animation:none; opacity:.6; } }
 
 /* ---------- küçük kutu (king.js söz 9) ----------
-   Sağ üstte; perde ve ışık yok, sayfa kullanılır. Ekranın adı, son cevap,
-   yazı alanı ve mikrofon. Yalnız ✕ ya da Esc kapatır. */
+   Ekranın altında, ortada cam kapsül (kullanıcı, 2026-10-29: «agent sağ
+   üstte durduğu çok kötü»); perde ve ışık yok, sayfa kullanılır. Ekranın
+   adı, son cevap, yazı alanı ve mikrofon. Yalnız ✕ ya da Esc kapatır. */
 .king.is-mini .king-perde, .king.is-mini .king-isik{ display:none; }
-.king.is-mini .king__kutu, .king.is-mini.is-acik .king__kutu{ left:auto; right:16px; top:16px; bottom:auto;
-  width:min(340px, calc(100vw - 32px)); max-height:min(52vh, 440px); gap:8px; padding:10px 12px; border-radius:20px;
-  opacity:1; transform:none; }
-.king.is-mini.is-kapaniyor .king__kutu{ opacity:0; transform:translateY(-6px) scale(.985); }
+.king.is-mini .king__kutu, .king.is-mini.is-acik .king__kutu{ left:50%; right:auto; top:auto;
+  bottom:calc(22px + env(safe-area-inset-bottom, 0px));
+  width:min(600px, calc(100vw - 32px)); max-height:min(56vh, 480px); gap:8px; padding:12px 12px 10px; border-radius:26px;
+  opacity:1; transform:translate(-50%, 0); }
+.king.is-mini.is-kapaniyor .king__kutu{ opacity:0; transform:translate(-50%, 8px) scale(.985); }
 .king.is-mini .king__bas{ min-height:28px; }
 .king.is-mini .king__yer{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
 .king__buyut, .king__kucult{ margin-left:auto; }
@@ -283,8 +285,8 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king.is-mini .king__cip{ min-height:30px; font-size:12.5px; }
 
 @media (max-width:679px){
-  .king.is-mini .king__kutu, .king.is-mini.is-acik .king__kutu{ top:calc(var(--ust-h, 56px) + 8px + env(safe-area-inset-top, 0px));
-    right:12px; width:calc(100vw - 24px); max-height:44vh; }
+  .king.is-mini .king__kutu, .king.is-mini.is-acik .king__kutu{ top:auto; right:auto;
+    bottom:calc(var(--altbant-h, 64px) + 18px + env(safe-area-inset-bottom, 0px)); width:calc(100vw - 24px); max-height:46vh; }
 }
 
 /* ---------- fotoğraf, ekran, sesli sohbet (king.js söz 11–15) ---------- */
@@ -1383,3 +1385,28 @@ html .king:not(.is-mini) .king__kutu{ -webkit-backdrop-filter:none !important; b
   background:var(--surface, #fff) !important; }
 /* Opak pencerede «sen» balonu beyaz zeminde kaybolmasın: hafif dolu yüzey. */
 html .king:not(.is-mini) .king__balon--sen{ background:var(--surface-2, #f1f2f5) !important; }
+
+/* YUVA VE YÜZ (kullanıcı, 2026-10-29: «minik agenta uygun bir alan»; «bazen
+   arama butonunun dışında yürüyor»; «sol üstteki hâlâ tatlı konsept»).
+   Minik ajanın yuvası yazı alanının solundaki oyuktur: bütün hâlleri orada,
+   yazının üstüne binmez, kutudan dışarı yürümez. Başlıkta küre yerine King'in
+   kendisi (king.js yuzHtml); küçük kipte başlıkta yok, King yuvadaki canlı
+   miniktir. Renkleri king-cam.css verir. */
+.king{ --yuva:color-mix(in oklab, var(--primary) 12%, var(--surface-2, #f1f2f5)); --yuva-kenar:color-mix(in oklab, var(--primary) 20%, transparent); }
+.king .king__yaz{ position:relative; padding-left:60px !important; }
+.king.is-mini .king__yaz{ padding-left:54px !important; }
+html .king .king__arkadas{ position:absolute; left:6px; right:auto; top:50%; width:46px; height:46px; margin-top:-23px;
+  border-radius:16px; background:var(--yuva); box-shadow:inset 0 0 0 1px var(--yuva-kenar);
+  animation:none !important; translate:none !important; z-index:1; }
+html .king.is-mini .king__arkadas{ left:5px; width:42px; height:42px; margin-top:-21px; border-radius:14px; }
+html .king .king__arkadas .minik{ --boy:34px; left:calc(50% - var(--boy) / 2); top:calc(100% - var(--boy) - 5px); }
+html .king.is-mini .king__arkadas .minik{ --boy:30px; }
+html .king .king__arkadas .minik.is-oturuyor .minik__ayak{ bottom:-6%; }
+html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
+.king__yuz{ position:relative; flex:none; width:28px; height:28px; border-radius:50%; background:var(--yuva);
+  box-shadow:inset 0 0 0 1px var(--yuva-kenar); }
+.king__yuz .minik{ --boy:22px; position:absolute; left:calc(50% - var(--boy) / 2); top:auto; bottom:2px; pointer-events:none; cursor:default; }
+.king__yuz .minik__balon, .king__yuz .minik__ad, .king__yuz .minik__golge{ display:none; }
+.king.is-mini .king__bas .king__yuz{ display:none; }
+.king__yuz--buyuk{ width:84px; height:84px; border-radius:28px; }
+.king__yuz--buyuk .minik{ --boy:62px; bottom:6px; }
