@@ -16480,7 +16480,7 @@ html[data-yazi="kitap"]{ --font-body:'Newsreader', ui-serif, Georgia, serif; }
 .ayarlar__bas{ display:flex; align-items:center; gap:10px; padding:18px 18px 10px 24px; }
 .ayarlar__bas b{ font-size:17px; font-weight:650; letter-spacing:-.01em; }
 .ayarlar__bas .bildirim__kapat{ margin-left:auto; }
-.ayarlar__govde{ flex:1; min-height:0; display:grid; grid-template-columns:168px minmax(0,1fr); }
+.ayarlar__govde{ flex:1; min-height:0; display:grid; grid-template-columns:168px minmax(0,1fr); grid-template-rows:minmax(0,1fr); }
 .ayarlar__nav{ display:flex; flex-direction:column; gap:2px; padding:6px 10px 18px 14px; overflow:auto; }
 .ayarlar__sekme{ display:flex; align-items:center; min-height:36px; padding:0 12px; border:0; border-radius:10px;
   background:transparent; color:var(--text-2); font:inherit; font-size:13.5px; font-weight:500; text-align:left; cursor:pointer;
@@ -16628,6 +16628,8 @@ html[data-zemin="yumusak"] .ayarlar .themebtn.is-on{ border-color:transparent; b
 @media (max-width:679px){ .plan__cizgi{ grid-template-columns:repeat(4, minmax(0, 1fr)); } }
 .plan__olay{ overflow-wrap:anywhere; hyphens:auto; }
 html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--cam-ince); border-color:transparent; color:var(--text); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
+/* Panelde [hidden] her biçimden üstündür (kilit kutusunun gizli düğmeleri görünüyordu). */
+.ayarlar [hidden]{ display:none !important; }
 
 /* ==== css/ofissohbet.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19000,7 +19002,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -19910,6 +19912,29 @@ window.LIFEOS = window.LIFEOS || {};
   /* Geniş denetim (kaydırıcılar, katmanlı seçiciler): ad üstte, denetim altta tam genişlik. */
   const G = (ad, not, denetim) => H(ad, not, denetim).replace('ayarlar__satir"', 'ayarlar__satir ayarlar__satir--genis"');
   const hesapVar = () => { try{ const d = L.HESAP && L.HESAP.dugme ? L.HESAP.dugme() : null; return !!(d && !d.gizli); }catch(e){ return false; } };
+  /* Hesap merkezinin sayfaları (hesap.js SAYFA_AD): tek tıkla oraya açılır. */
+  const HESAP_SAYFALARI = Object.freeze([
+    ['guvenlik', 'Güvenlik kontrolü', 'İki adım, kurtarma sorusu, cihazlar ve yedek tek bakışta'],
+    ['ikiadim', 'İki adımlı doğrulama', 'Girişte telefondaki kodu da sorar; yedek kodlar'],
+    ['cihazlar', 'Oturum açık cihazlar', 'Hangi cihazlar bağlı; birinden ya da hepsinden çık'],
+    ['etkinlik', 'Son etkinlik', 'Girişler ve yanlış denemeler'],
+    ['yedek', 'Yedekler', 'Hesap deposunun yedekleri; geri yükle, indir'],
+    ['verin', 'Verin', 'Bütün verini dışa aktar ya da hesabı sil'],
+    ['baglantilar', 'Bağlantılar', 'Kısayollar, takvim aboneliği, gelen kutusu'],
+  ]);
+  const modulAdi = () => (typeof document !== 'undefined' && document.documentElement.getAttribute('data-modul')) || 'ays';
+  const ODEME_ANAHTAR = 'lifeos.kilit.odeme';
+  function odemeAcik(){ try{ return localStorage.getItem(ODEME_ANAHTAR) === 'acik'; }catch(e){ return false; } }
+  function odemeAyarla(acik){
+    try{ if(acik) localStorage.setItem(ODEME_ANAHTAR, 'acik'); else localStorage.removeItem(ODEME_ANAHTAR); }catch(e){ /* depo kapalı */ }
+    if(typeof document !== 'undefined') document.querySelectorAll('[data-odeme]').forEach(b => {
+      const on = (b.getAttribute('data-odeme') === 'acik') === acik;
+      b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  const odemeSecici = () => '<div class="seg seg--block" role="group" aria-label="Satın alma ve kart işlemleri">'
+    + [['kapali', 'Kapalı'], ['acik', 'Açık']].map(([k, ad]) => { const on = (k === 'acik') === odemeAcik();
+      return '<button type="button" class="' + (on ? 'is-on' : '') + '" data-odeme="' + k + '" aria-pressed="' + on + '">' + ad + '</button>'; }).join('') + '</div>';
   const cagir = (nesne, ad) => { try{ return nesne && typeof nesne[ad] === 'function' ? nesne[ad]() : ''; }catch(e){ return ''; } };
 
   /* o = { tema:'<tema seçici HTML>', profil:{ ad, alt, route }, modul:[{ ad, route, not }] } */
@@ -19934,9 +19959,14 @@ window.LIFEOS = window.LIFEOS || {};
         + '<span><b>' + kac(p.ad || 'Profil') + '</b><small>' + kac(p.alt || '') + '</small></span>'
         + (p.route ? '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(p.route) + '">Profili aç</button>' : '') + '</div>'
         + (hesapVar()
-          ? H('Hesap ve eşitleme', 'Cihazlar, iki adımlı doğrulama, yedek',
-            '<button type="button" class="btn btn--sm ayarlar__hesap" data-ayarlar-hesap>Hesabı aç</button>')
-          : H('Hesap ve eşitleme', 'LifeOS sunucusu kapalı ya da giriş yapılmadı; kayıtlar bu cihazda', ''));
+          ? '<h5 class="plan__alt">Güvenlik</h5>' + HESAP_SAYFALARI.map(([sayfa, ad, not]) => H(ad, not,
+            '<button type="button" class="btn btn--sm" data-ayarlar-hesap="' + sayfa + '">Aç</button>')).join('')
+          : H('Hesap ve eşitleme', 'LifeOS sunucusu kapalı ya da giriş yapılmadı; kayıtlar bu cihazda', ''))
+        + '<h5 class="plan__alt">Bu cihaz ve kilitler</h5>'
+        + (L.KILIT && L.KILIT.ayarHtml ? H('Gizlilik kilidi', 'Bu modül açılırken dört haneli kod sorar', L.KILIT.ayarHtml(modulAdi(), { govde:true })) : '')
+        + H('Satın alma ve kart işlemleri', odemeAcik() ? 'Açık; yine de LifeOS’ta ödeme yapan bir araç yok'
+            : 'Kapalı: King ve ajanlar ödeme, sipariş ya da kart işine girmez', odemeSecici())
+        + H('Google ve YouTube', 'Hesap bağlanmaz: King’in bulduğu bağlantılar senin tarayıcında, kendi oturumunla açılır; LifeOS Google’a veri göndermez', '');
     }
     if(id === 'sistem') return '<h4 class="plan__baslik">Sistem planlaması</h4><div class="plan" data-plan-kok><p class="ayarlar__bos">Yükleniyor…</p></div>';
     if(id === 'modul') return (o.modul || []).map(m => H(m.ad, m.not || '',
@@ -20098,10 +20128,13 @@ window.LIFEOS = window.LIFEOS || {};
         });
         return;
       }
-      /* Hesap paneli kabuğun hesap düğmesindedir (hesap.js); yoksa sessiz. */
-      if(t.closest('[data-ayarlar-hesap]')){
-        const h = document.querySelector('.kenar .ust__hesap:not([hidden])') || document.querySelector('.ust__hesap:not([hidden])');
-        if(h){ if(L.KABUK) L.KABUK.katmanKapat(); h.click(); }
+      const od = t.closest('[data-odeme]');
+      if(od){ odemeAyarla(od.getAttribute('data-odeme') === 'acik'); return; }
+      /* Hesap merkezi istenen sayfasında açılır (hesap.js merkezAc). */
+      const hs = t.closest('[data-ayarlar-hesap]');
+      if(hs && L.HESAP && L.HESAP.merkezAc){
+        if(L.KABUK) L.KABUK.katmanKapat();
+        L.HESAP.merkezAc(hs.getAttribute('data-ayarlar-hesap') || 'kok');
       }
     });
     document.addEventListener('change', e => { if(e.target && e.target.matches) planDegisti(e.target); });
@@ -20116,7 +20149,8 @@ window.LIFEOS = window.LIFEOS || {};
     });
   }
 
-  L.AYARLAR = Object.freeze({ html, BOLUMLER, YAZILAR, yazi, yaziAyarla, _sec:id => { secili = id; } });
+  L.AYARLAR = Object.freeze({ html, BOLUMLER, YAZILAR, yazi, yaziAyarla, HESAP_SAYFALARI, ODEME_ANAHTAR, odemeAcik, odemeAyarla,
+    _sec:id => { secili = id; } });
 })();
 
 /* ==== js/core/perde.js ==== */
@@ -21148,7 +21182,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'7e677499', at:'2026-10-29 16:31', dirty:true };
+ESP.BUILD = { id:'65bda886', at:'2026-10-29 17:43', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -45487,6 +45521,8 @@ window.LIFEOS.KING = (function(){
       });
   }
 
+  /* Ödeme cümlesi: satın al, sipariş ver, öde(me yap), kart bilgisi; «ödev» değil. */
+  const ODEME = /\s(satın al|satin al|sipariş ver|siparis ver|ödeme yap|odeme yap|öde\s|öder misin|ödeyebilir misin|kredi kart|banka kart|kart numara|kart bilgi|cvv|abone ol|bilet al)/;
   async function isle(metin){
     gozSonEtkilesim = ortam.simdi().getTime();
     if((bolum === 'araclar' || bolum === 'kutuphane')){ bolum = 'sohbet'; kvGiris = true; }     // sayfadayken sorulan sohbette görünür
@@ -45522,6 +45558,18 @@ window.LIFEOS.KING = (function(){
     if(k2Soru && t0 && baglanti() && ortam.simdi().getTime() - k2Soru < 12 * 3600 * 1000){
       k2Soru = 0;
       return merkezYolu(metin, { tur:'bilinmiyor', metin });
+    }
+    /* SATIN ALMA VE KART (kullanıcı, 2026-10-29: «satın alma ve kart işlemlerini
+       açıp kapatabilelim»). Ayarlar › Hesap'taki kilit (lifeos.kilit.odeme,
+       varsayılan kapalı). LifeOS'ta ödeme yapan bir araç yoktur: açıkken de King
+       bu işi yapmaz, yalnız söyler. Cümle Merkez'e de gitmez (kart bilgisi taşıyabilir). */
+    if(ODEME.test(' ' + t0 + ' ')){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      let acik = false;
+      try{ acik = localStorage.getItem('lifeos.kilit.odeme') === 'acik'; }catch(e){}
+      soyle(acik ? 'LifeOS’ta ödeme yapan bir araç yok; bunu kendi tarayıcında yapman gerekir. Kart bilgini buraya yazma.'
+        : 'Satın alma ve kart işlemleri kapalı (Ayarlar › Hesap). Ödeme, sipariş ya da kart işine girmem; kart bilgini de buraya yazma.');
+      return { tur:'odeme' };
     }
     /* Söz 14: «geri al», «sonu sil», «onu sil». */
     if(/^(geri al|son (kaydı|kayıt|girdiyi) (geri al|sil)|onu (sil|geri al)|sil onu|yanlış oldu geri al)[.!]?$/.test(t0)){
