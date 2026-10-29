@@ -449,8 +449,38 @@ window.LIFEOS = window.LIFEOS || {};
     window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); });
   }
 
+  /* DİNLENME (kullanıcı, 2026-10-29: «bir dakika dokunulmazsa dursunlar»).
+     Boştayken süs animasyonları (zemin nefesi, logo nabzı, kapak oku,
+     minikler) ana iş parçacığında her karede stil hesaplatıyordu (~%29).
+     Bir dakika girdi yoksa <html> `is-dinlen` alır: CSS onları kaldığı
+     yerde durdurur (hareket.css, DİNLENME), minik.js yeni hareket başlatmaz. İlk
+     fare, tuş, tekerlek, dokunuş ya da kaydırmada kalkar. */
+  let dinlenMs = 60000, dinlenZaman = null;
+  function dinlenKur(){
+    clearTimeout(dinlenZaman);
+    dinlenZaman = setTimeout(() => document.documentElement.classList.add('is-dinlen'), dinlenMs);
+  }
+  function uyan(){
+    const h = document.documentElement;
+    if(h.classList.contains('is-dinlen')) h.classList.remove('is-dinlen');
+    dinlenKur();
+  }
+  if(typeof document !== 'undefined' && document.addEventListener){
+    ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(t =>
+      document.addEventListener(t, uyan, { capture:true, passive:true }));
+    dinlenKur();
+  }
+  /* Test ve ayar için: süreyi değiştirir (ms), öncekini döner; argümansız okur. */
+  function dinlenSure(ms){
+    const eski = dinlenMs;
+    if(ms == null) return eski;
+    dinlenMs = ms; uyan();
+    return eski;
+  }
+
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
+    dinlenSure,
     ANAHTAR, KIPLER, TASINAN,
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,

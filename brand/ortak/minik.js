@@ -639,8 +639,11 @@ window.LIFEOS.MINIK = (function(){
     return true;
   }
 
+  /* Dinlenme (animasyon.js is-dinlen): bir dakika girdi yoksa yeni hareket
+     başlamaz; uyanınca zincir yeniden kurulur (aşağıdaki gözcü). */
+  const dinleniyor = () => document.documentElement.classList.contains('is-dinlen');
   function yasat(mk){
-    if(!durum.kat || kapaliMi() || mesgulMu(mk)) return;
+    if(!durum.kat || kapaliMi() || mesgulMu(mk) || dinleniyor()) return;
     /* Her adımdan önce kenarlar yeniden ölçülür: kart giriş animasyonuyla,
        açılıp kapanan bölümle ya da yazı yüklenince kayabilir. */
     const l = durum.zeminler = olcum();
@@ -909,9 +912,17 @@ window.LIFEOS.MINIK = (function(){
     const icerik = document.querySelector('.site--v5') || document.body;
     if(typeof MutationObserver === 'function') new MutationObserver(iste).observe(icerik, { childList:true, subtree:true });
     /* Kökün sınıfı sık değişir (kenar-sakin…): yalnız açık/kapalı geçişinde uyanır. */
-    let onceki = kapaliMi();
+    let onceki = kapaliMi(), dinlenOnce = dinleniyor();
     new MutationObserver(() => {
       if((document.documentElement.dataset.sayfa || '') !== durum.sayfa) sayfaDegisti();
+      const dn = dinleniyor();
+      if(dn !== dinlenOnce){
+        dinlenOnce = dn;
+        durum.minikler.forEach(mk => {
+          try{ if(mk.anim && mk.anim.playState === (dn ? 'running' : 'paused')) dn ? mk.anim.pause() : mk.anim.play(); }catch(e){}
+          if(!dn) sonra(mk, 400);
+        });
+      }
       const k = kapaliMi();
       if(k === onceki) return;
       onceki = k; tazele();
@@ -921,7 +932,7 @@ window.LIFEOS.MINIK = (function(){
        yüklenir); saniyede bir miniğin durduğu kartın yeri okunur (en çok üç
        ölçüm), kaymışsa minik kenarla birlikte iner. */
     setInterval(() => {
-      if(durum.kat.hidden || document.visibilityState === 'hidden') return;
+      if(durum.kat.hidden || document.visibilityState === 'hidden' || dinleniyor()) return;
       const sy = window.scrollY || 0;
       if(durum.minikler.some(mk => mk.z && mk.z.el && !(mk.anim && mk.anim.playState === 'running')
         && Math.abs(mk.z.el.getBoundingClientRect().top + sy - mk.y) > 1)) tazele();

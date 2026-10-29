@@ -163,3 +163,10 @@ html::view-transition-old(h-kart), html::view-transition-new(h-kart){ height:100
   .h-kaydedildi > *, .h-kaydedildi::after, .h-isik::before{ animation:none; }
   .h-kaydedildi::after, .h-isik::before{ display:none; }
 }
+
+/* DİNLENME (kullanıcı, 2026-10-29): bir dakika dokunulmazsa süs
+   animasyonları kaldığı yerde durur (animasyon.js is-dinlen; minik.js yeni hareket başlatmaz); ilk girdide
+   devam eder. Boştayken her kare stil hesabı (~%29 ana iş parçacığı). */
+html.is-dinlen body::before, html.is-dinlen .kenar__nokta, html.is-dinlen .kapak__asagi,
+html.is-dinlen .minikkat, html.is-dinlen .minikkat *, html.is-dinlen .minikkat *::before, html.is-dinlen .minikkat *::after{
+  animation-play-state:paused !important; }

@@ -330,4 +330,35 @@
       }
     });
   });
+
+  /* Dinlenme (kullanıcı, 2026-10-29: «evet, dursunlar»): bir dakika dokunulmazsa
+     süs animasyonları (zemin nefesi, logo nabzı, kapak oku, minikler) durur;
+     ilk dokunuşta kaldığı yerden devam eder. Boştayken ana iş parçacığı her
+     karede stil hesaplıyordu (~%29). */
+  describe('Animasyonlar — boştayken dinlenme', () => {
+    it('süre dolunca html.is-dinlen; ilk dokunuşta kalkar; süs animasyonu durur', async () => {
+      const A = window.LIFEOS.ANIMASYON, kok = document.documentElement;
+      const eski = A.dinlenSure(40);
+      // denetim tarayıcısı «hareketi azalt» der; azaltılmış kipte animasyon zaten yok
+      let eskiKip = null; try{ eskiKip = localStorage.getItem(A.ANAHTAR); }catch(e){}
+      A.ayarla('tam');
+      const kat = document.createElement('div'); kat.className = 'minikkat';
+      const ic = document.createElement('i'); ic.style.animation = 'mk-kol 3s infinite'; kat.appendChild(ic); document.body.appendChild(kat);
+      try{
+        expect(A.dinlenSure()).toBe(40);
+        document.dispatchEvent(new Event('pointermove'));
+        expect(kok.classList.contains('is-dinlen')).toBe(false);
+        await new Promise(r => setTimeout(r, 90));
+        expect(kok.classList.contains('is-dinlen')).toBe(true);
+        expect(getComputedStyle(ic).animationPlayState).toBe('paused');
+        document.dispatchEvent(new Event('keydown'));
+        expect(kok.classList.contains('is-dinlen')).toBe(false);
+        expect(getComputedStyle(ic).animationPlayState).toBe('running');
+      }finally{
+        A.dinlenSure(eski); kat.remove(); kok.classList.remove('is-dinlen');
+        try{ if(eskiKip == null) localStorage.removeItem(A.ANAHTAR); else localStorage.setItem(A.ANAHTAR, eskiKip); }catch(e){}
+        A.yenile();
+      }
+    });
+  });
 })();
