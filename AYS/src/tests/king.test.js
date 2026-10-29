@@ -3253,4 +3253,27 @@
       }finally{ K().gorunusAyarla(once); }
     });
   });
+
+  /* Başarım (2026-10-29): King açılırken GPU'da 200 ms'lik kareler. Bulanıklık
+     bulanıklığın üstündeydi: her kart fotoğrafı bulanıklaştırıyor, üstünde tam
+     ekran perde (2-4 px), onun üstünde 40 px'lik pencere. Büyük King açıkken
+     arkadaki sayfa bulanıklık hesaplamaz (pencerenin altında görünmüyor);
+     perde yalnız karartır. */
+  describe('King — açıkken arkada bulanıklık yok', () => {
+    it('king-acik iken .site içindeki öge ve perde backdrop-filter hesaplamaz', () => {
+      const site = document.createElement('div'); site.className = 'site';
+      const kart = document.createElement('div'); kart.style.cssText = 'backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)';
+      site.appendChild(kart); document.body.appendChild(site);
+      const perde = document.createElement('div'); perde.className = 'king-perde'; document.body.appendChild(perde);
+      const kok = document.documentElement, vardi = kok.classList.contains('king-acik');
+      const bd = e => getComputedStyle(e).backdropFilter || getComputedStyle(e).webkitBackdropFilter || 'none';
+      try{
+        kok.classList.remove('king-acik');
+        expect(bd(kart) !== 'none').toBe(true);
+        kok.classList.add('king-acik');
+        expect(bd(kart)).toBe('none');
+        expect(bd(perde)).toBe('none');
+      }finally{ kok.classList.toggle('king-acik', vardi); site.remove(); perde.remove(); }
+    });
+  });
 })();
