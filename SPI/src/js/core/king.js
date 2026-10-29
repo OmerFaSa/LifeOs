@@ -3367,6 +3367,7 @@ window.LIFEOS.KING = (function(){
   }
 
   function soyle(metin, satirlar, onizleme, son, ek){
+    deste = 0;                                   // ada: yeni cevap destenin önüne
     akis.forEach(m => { m.yeni = false; });
     akis.push(Object.assign({ kim:'king', metin, satirlar, onizleme, son, yeni:true }, ek || {}));
     /* Söz 8: ekranda son altı satır; söz 19: günün tamamı saklanır. */
@@ -5496,34 +5497,74 @@ window.LIFEOS.KING = (function(){
   const SVG_BUYUT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M10 19H5v-5M19 5l-6 6M5 19l6-6"/></svg>';
   const SVG_KAPAT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
 
+  /* KING ADASI (kullanıcı, 2026-10-29: «King'in arayüzünü komple değiştir;
+     boyutunu küçülterek, bambaşka bir arayüz ve mekanikle; normal tasarımlardan
+     bıkkınlıktan kurtaran bir şey»; seçtiği öneri: ada + kart destesi + araç
+     yelpazesi). King ekranın altında yüzen bir cam adadır:
+     · DESTE: her cevap bir kart; en yenisi önde, öncekiler arkada küçülerek
+       (en çok üç görünür). ‹ › ile geçmişte gezilir; yeni cevap gelince öne döner.
+     · YELPAZE: «+» araçları adanın üstünde yay şeklinde açar (fotoğraf, PDF,
+       barkod, bu sayfa, kamera, ekran, genişlet). Kamera ve ekran büyük
+       pencerede çalışır: önce genişler.
+     · Genişlet büyük pencereyi açar (geçmiş, kütüphane, araçlar; aynı King).
+     Kartın içi eski küçük kutunun sözleşmesidir (.king__mini-son). */
+  let deste = 0;             // ada: önden kaçıncı cevap (0 = en yeni)
+  function desteKart(m){
+    if(!m) return '<div class="king__mini-son" aria-live="polite"><p>Buradayım. Yaz ya da konuş.</p>'
+      + (() => { const o = oneriListesi(false)[0]; return o ? '<p class="king__ada-oneri">Öneri: ' + kac(o.ad) + '</p>' : ''; })() + '</div>';
+    return '<div class="king__mini-son" aria-live="polite"><p>' + kac(m.metin) + '</p>'
+      + (m.satirlar && m.satirlar.length ? '<ul class="king__mini-liste">' + m.satirlar.slice(0, 5).map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : '')
+      + (m.onizleme ? '<b class="king__mini-oz">' + kac(m.onizleme.metin) + '</b>' : '')
+      + (m.son ? '<p class="king__mini-soru">' + kac(m.son) + '</p>' : '') + '</div>';
+  }
+  const YELPAZE_GENISLET = '<path d="M14 5h5v5M10 19H5v-5M19 5l-6 6M5 19l6-6"/>';
+  function yelpazeHtml(){
+    if(!aracAcik) return '';
+    const l = ARACLAR.filter(a => a.is !== 'isler' && (() => { try{ return a.kosul(); }catch(e){ return false; } })())
+      .map(a => ({ is:/^kip:(kamera|ekran)$/.test(a.is) ? 'ada-' + a.is : a.is, ad:a.ad, ip:a.ip, svg:ARAC_SVG[a.is] || '' }))
+      .concat([{ is:'buyut', ad:'Genişlet', ip:'Geçmiş, kütüphane ve bütün araçlar', svg:YELPAZE_GENISLET }]);
+    return '<div class="king__yelpaze" role="menu" aria-label="Araçlar" style="--n:' + l.length + '">' + l.map((x, i) =>
+      '<button type="button" role="menuitem" class="king__yelpaze-oge" style="--i:' + i + '" data-king="' + x.is + '" aria-label="' + kac(x.ad) + '" title="' + kac(x.ad + ' — ' + x.ip) + '">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true">' + x.svg + '</svg><small>' + kac(x.ad) + '</small></button>').join('') + '</div>';
+  }
   function miniGovde(){
-    const son = akis.filter(m => m.kim === 'king' && !m.bekliyor).slice(-1)[0];
+    const kingler = akis.filter(m => m.kim === 'king' && !m.bekliyor);
     const bekliyor = akis.some(m => m.bekliyor);
+    deste = Math.max(0, Math.min(deste, Math.max(0, kingler.length - 1)));
     const ekran = ekranAdi();
     const bas = '<div class="king__bas">' + yuzHtml() + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + (ekran ? ' · ' + kac(ekran) : '') + '</span>'
       + isRozet()
-      + '<button type="button" class="king__kapat king__buyut" data-king="buyut" aria-label="Büyüt" title="Büyüt (Ctrl iki kez)">' + SVG_BUYUT + '</button>'
+      + '<button type="button" class="king__kapat king__buyut" data-king="buyut" aria-label="Genişlet" title="Genişlet (Ctrl iki kez)">' + SVG_BUYUT + '</button>'
       + '<button type="button" class="king__kapat" data-king="kapat" aria-label="Kapat" title="Kapat (Esc)">' + SVG_KAPAT + '</button></div>';
-    const govdeM = bekliyor
+    /* Deste: önde gösterilen kart ve arkasında en çok iki eski cevap. */
+    const sira = kingler.slice().reverse();
+    const on = bekliyor && !deste
       ? '<div class="king__mini-son is-bekliyor" role="status" aria-label="King düşünüyor"><div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
-      : '<div class="king__mini-son" aria-live="polite"><p>' + kac(son ? son.metin : 'Buradayım. Yaz ya da konuş.') + '</p>'
-        + (son && son.satirlar && son.satirlar.length ? '<ul class="king__mini-liste">' + son.satirlar.slice(0, 5).map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : '')
-        + (son && son.onizleme ? '<b class="king__mini-oz">' + kac(son.onizleme.metin) + '</b>' : '')
-        + (son && son.son ? '<p class="king__mini-soru">' + kac(son.son) + '</p>' : '') + '</div>';
-    const cip = cipler ? '<div class="king__cipler" role="group" aria-label="Cevaplar">' + cipler.map(c => '<button type="button" class="king__cip'
+      : desteKart(sira[deste]);
+    const arka = sira.slice(deste + (bekliyor && !deste ? 0 : 1), deste + 3).map((m, i) =>
+      '<div class="king__dkart king__dkart--arka" data-derinlik="' + (i + 1) + '" aria-hidden="true">' + desteKart(m) + '</div>').reverse().join('');
+    const gez = sira.length > 1 ? '<div class="king__deste-gez" role="group" aria-label="Cevaplar arasında gez">'
+      + '<button type="button" class="king__deste-ok" data-king="deste:eski" aria-label="Önceki cevap"' + (deste >= sira.length - 1 ? ' disabled' : '') + '>‹</button>'
+      + '<span class="king__deste-sayi">' + (deste + 1) + ' / ' + sira.length + '</span>'
+      + '<button type="button" class="king__deste-ok" data-king="deste:yeni" aria-label="Sonraki cevap"' + (deste ? '' : ' disabled') + '>›</button></div>' : '';
+    const desteHtml = '<div class="king__deste">' + arka + '<div class="king__dkart king__dkart--on" data-derinlik="0">' + on + '</div>' + gez + '</div>';
+    const cip = cipler && !deste ? '<div class="king__cipler" role="group" aria-label="Cevaplar">' + cipler.map(c => '<button type="button" class="king__cip'
       + (c.is === 'kaydet' || c.is === 'ilet' || /^foto:0$/.test(c.is) || (c.is === 'foto-yorum' && !/foto:0/.test(JSON.stringify(cipler))) ? ' king__cip--ana' : '') + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('') + '</div>' : '';
     const mik = konusabilir()
       ? '<button type="button" class="king__mik' + (dinleyen ? ' is-acik' : '') + '" data-king="dinle" aria-pressed="' + (dinleyen ? 'true' : 'false')
         + '" aria-label="' + (dinleyen ? 'Dinlemeyi bitir' : 'Konuşarak sor') + '"><svg viewBox="0 0 24 24" aria-hidden="true">'
         + '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>' : '';
     return bas + (paylasim ? '<div class="king__paylasim" role="status"><i class="king__canli" aria-hidden="true"></i>' + (kameraMi() ? 'Kamera açık' : 'Ekran paylaşılıyor') + ' · sorduğunda görürüm'
-      + '<button type="button" class="king__paylasim-dur" data-king="paylasim-bitir">Durdur</button></div>' : '') + govdeM + cip
+      + '<button type="button" class="king__paylasim-dur" data-king="paylasim-bitir">Durdur</button></div>' : '') + desteHtml + cip
       + '<form class="king__yaz" data-king-form data-ayar-disi>' + arkadasHtml()
-      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
-      + '<label class="king__foto-dugme" title="Fotoğraf gönder (Ctrl+V ile yapıştır, sürükleyip bırak da olur)" aria-label="Fotoğraf gönder">'
+      + '<div class="king__arti-yer"><button type="button" class="king__arti' + (aracAcik ? ' is-acik' : '') + '" data-king="arac" aria-expanded="' + (aracAcik ? 'true' : 'false')
+      + '" aria-haspopup="menu" aria-label="Araçlar" title="Araçlar: fotoğraf, PDF, kamera, ekran, genişlet">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>' + yelpazeHtml() + '</div>'
       + '<input type="file" accept="image/*" data-king-dosya class="sr-only"/>'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2h6.8L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></label>' + mik + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
+      + '<input type="file" accept="application/pdf,.pdf" data-king-pdf class="sr-only"/>'
+      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
+      + mik + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>';
   }
 
@@ -5815,14 +5856,14 @@ window.LIFEOS.KING = (function(){
       if(e.key !== 'Control'){ baskaTus = true; return; }
       if(e.repeat) return;
       const s = Date.now();
-      if(!baskaTus && s - sonCtrl < 400){ sonCtrl = 0; !acik ? ac() : mini ? buyut() : kapat(); return; }
+      if(!baskaTus && s - sonCtrl < 400){ sonCtrl = 0; !acik ? ac({ mini:true }) : mini ? buyut() : kapat(); return; }   // ada önce
       sonCtrl = s;
       baskaTus = false;
     }, true);
     document.addEventListener('click', e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
-      if(t.closest('[data-king-ac]')){ e.preventDefault(); e.stopPropagation(); ac(); return; }
+      if(t.closest('[data-king-ac]')){ e.preventDefault(); e.stopPropagation(); ac({ mini:true }); return; }   // ada önce
       /* Söz 9: perde ve dışarısı KAPATMAZ, küçültür; küçükken sayfa serbest. */
       if(t.closest('.king-perde')){ e.preventDefault(); e.stopPropagation(); kucult(); return; }
       /* Dar ekranda açık kenar çubuğu: sohbete dokununca kapanır (söz 26). */
@@ -5913,6 +5954,9 @@ window.LIFEOS.KING = (function(){
         if(is === 'dinle'){ if(mikBasili === 'oldu'){ mikBasili = null; return; } dinle(); return; }
         if(is === 'kucult'){ kucult(); return; }
         if(is === 'buyut'){ buyut(); return; }
+        if(is === 'deste:eski'){ deste++; ciz(false); return; }
+        if(is === 'deste:yeni'){ deste = Math.max(0, deste - 1); ciz(false); return; }
+        if(/^ada-kip:(kamera|ekran)$/.test(is)){ buyut(); kipSec(is.slice(8)).then(() => ciz(false)); return; }
         if(is === 'ilet'){ ilet(); return; }
         if(is === 'ekran'){ ekranGoster(); return; }
         if(is === 'paylas'){ paylasimBaslat(); return; }
@@ -6124,7 +6168,7 @@ window.LIFEOS.KING = (function(){
     document.addEventListener('pointerdown', e => {
       const p = e.target && e.target.closest ? e.target.closest('.hizliekle') : null;
       if(!p) return;
-      basili = setTimeout(() => { basili = 'oldu'; ac(); }, 450);
+      basili = setTimeout(() => { basili = 'oldu'; ac({ mini:true }); }, 450);
     }, true);
     const birak = e => {
       if(basili === 'oldu'){ basili = null; if(e && e.type === 'pointerup') e.preventDefault(); return; }

@@ -1234,7 +1234,9 @@
       const { k } = sahne();
       const tus = key => document.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles:true }));
       tus('Control'); tus('Control');
-      expect(k.acikMi()).toBe(true);
+      expect(k.acikMi() && k.miniMi()).toBe(true);           // 2026-10-29: önce ada
+      tus('Control'); tus('Control');
+      expect(k.acikMi() && !k.miniMi()).toBe(true);          // ikinci kez: büyük pencere
       const el = document.querySelector('[data-king]');
       expect(!!el.querySelector('.king-isik')).toBe(true);
       expect(el.querySelector('[role="dialog"]').getAttribute('aria-label')).toBe('King ile konuş');
@@ -1244,7 +1246,7 @@
       tus('Escape');
       expect(k.acikMi()).toBe(false);
       /* Odak: arka plan perdesi; dokununca kapanır, sayfaya tıklama geçmez. */
-      tus('Control'); tus('Control');
+      tus('Control'); tus('Control'); tus('Control'); tus('Control');
       const perde = document.querySelector('[data-king] .king-perde');
       expect(!!perde).toBe(true);
       perde.click();                                          /* söz 9: perde kapatmaz, küçültür */
@@ -3246,6 +3248,65 @@
       expect(r.bottom > innerHeight * .6).toBe(true);
       const y = document.querySelector('.king__bas .king__yuz');
       expect(!y || getComputedStyle(y).display === 'none').toBe(true);
+    }));
+    /* King Adası (2026-10-29, kullanıcı: «King'in arayüzünü komple değiştir;
+       bambaşka bir arayüz, bambaşka bir mekanik»; seçtiği: ada + deste). */
+    it('ada: her cevap bir kart; en yeni önde, ‹ › geçmişte gezer, yeni cevap öne döner', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.ac({ mini:true });
+      const el = () => document.querySelector('[data-king]');
+      expect(!!el().querySelector('.king__deste .king__dkart--on')).toBe(true);
+      expect(el().querySelectorAll('.king__dkart--arka').length).toBe(0);
+      expect(!!el().querySelector('.king__deste-gez')).toBe(false);
+      const sorular = ['bugünün özeti', 'hareket sayfasına git', 'test çözeceğim', 'okuma sayfasını aç'];
+      for(const x of sorular) await k.isle(x);
+      const on = () => el().querySelector('.king__dkart--on').textContent;
+      const sayi = () => el().querySelector('.king__deste-sayi').textContent;
+      const n = k.akis().filter(m => m.kim === 'king' && !m.bekliyor).length;
+      expect(n >= 4).toBe(true);
+      const ilk = on();
+      expect(el().querySelectorAll('.king__dkart--arka').length).toBe(2);   // en çok üç kart görünür
+      expect(sayi()).toBe('1 / ' + n);
+      expect(el().querySelector('[data-king="deste:yeni"]').disabled).toBe(true);
+      el().querySelector('[data-king="deste:eski"]').click();
+      expect(sayi()).toBe('2 / ' + n);
+      expect(on() === ilk).toBe(false);
+      for(let i = 2; i < n; i++) el().querySelector('[data-king="deste:eski"]').click();
+      expect(sayi()).toBe(n + ' / ' + n);
+      expect(el().querySelector('[data-king="deste:eski"]').disabled).toBe(true);
+      el().querySelector('[data-king="deste:yeni"]').click();
+      expect(sayi()).toBe((n - 1) + ' / ' + n);
+      await k.isle('bugünün özeti');
+      expect(sayi()).toBe('1 / ' + (n + 1));                               // yeni cevap öne döner
+    }));
+    it('ada: «+» araçları yay şeklinde açar; Genişlet büyük pencereyi açar', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.ac({ mini:true });
+      const el = () => document.querySelector('[data-king]');
+      expect(!!el().querySelector('.king__yelpaze')).toBe(false);
+      el().querySelector('.king__arti').click();
+      const y = el().querySelector('.king__yelpaze');
+      expect(y.getAttribute('role')).toBe('menu');
+      const ogeler = [...y.querySelectorAll('.king__yelpaze-oge')];
+      expect(ogeler.length >= 2).toBe(true);
+      expect(Number(y.style.getPropertyValue('--n'))).toBe(ogeler.length);
+      ogeler.forEach(b => expect(!!b.getAttribute('aria-label')).toBe(true));
+      expect(ogeler.some(b => b.dataset.king === 'isler')).toBe(false);
+      expect(ogeler.every(b => !/^kip:/.test(b.dataset.king))).toBe(true);   // kamera/ekran önce genişler
+      const g = ogeler[ogeler.length - 1];
+      expect(g.dataset.king).toBe('buyut');
+      g.click();
+      expect(k.acikMi() && !k.miniMi()).toBe(true);
+    }));
+    it('ada: Kral düğmesi de önce adayı açar', () => sahneyle(async () => {
+      const { k } = sahne();
+      const b = document.createElement('button');
+      b.setAttribute('data-king-ac', '');
+      document.body.appendChild(b);
+      try{
+        b.click();
+        expect(k.acikMi() && k.miniMi()).toBe(true);
+      }finally{ b.remove(); }
     }));
     it('arkadaş yuvasından çıkmaz: düşünürken de yerinde, yuva yazı alanının içinde', () => sahneyle(async () => {
       if(!window.LIFEOS.MINIK) return;

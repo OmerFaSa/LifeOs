@@ -1410,3 +1410,50 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 .king.is-mini .king__bas .king__yuz{ display:none; }
 .king__yuz--buyuk{ width:84px; height:84px; border-radius:28px; }
 .king__yuz--buyuk .minik{ --boy:62px; bottom:6px; }
+
+/* KING ADASI (2026-10-29; king.js miniGovde): deste ve yelpaze.
+   Deste: öndeki kart dolu, arkadakiler onun arkasından yukarı doğru kademeli
+   (küçülür, solar); içleri görünmez, yalnız kenarları. Yeni kart hafifçe yükselir. */
+.king.is-mini .king__deste{ position:relative; display:flex; flex-direction:column; padding-top:20px; min-height:0; }
+.king__dkart--on{ position:relative; z-index:3; min-height:0; overflow:auto; overscroll-behavior:contain; padding:12px 14px; border-radius:18px;
+  background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border), 0 10px 24px -18px rgba(20,24,40,.45); }
+.king__dkart--on .king__mini-son{ padding:0; }
+.king__dkart--arka{ position:absolute; left:0; right:0; top:20px; height:56px; z-index:1; border-radius:18px; pointer-events:none;
+  background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border); transform-origin:50% 0; }
+/* Arka kartın kenarı öndekinden belirgin: koyu camda aynı zemin görünmüyordu. */
+.king.is-mini .king__dkart--arka{ background:color-mix(in srgb, var(--text) 7%, var(--surface, #fff)); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--text) 22%, transparent); }
+.king__dkart--arka > *{ visibility:hidden; }
+.king__dkart--arka[data-derinlik="1"]{ transform:translateY(-10px) scale(.95); opacity:.8; z-index:2; }
+.king__dkart--arka[data-derinlik="2"]{ transform:translateY(-19px) scale(.9); opacity:.5; }
+.king__deste-gez{ display:flex; align-items:center; justify-content:center; gap:10px; margin-top:6px; font-size:12px; color:var(--text-3); }
+.king__deste-ok{ width:28px; height:28px; border:0; border-radius:50%; background:transparent; color:var(--text-2); font:inherit; font-size:18px; line-height:1; cursor:pointer; }
+.king__deste-ok:hover:not(:disabled){ background:var(--surface-2); color:var(--text); }
+.king__deste-ok:disabled{ opacity:.3; cursor:default; }
+.king__deste-sayi{ font-variant-numeric:tabular-nums; }
+.king__ada-oneri{ margin-top:4px; font-size:13px; color:var(--text-2); }
+@media (prefers-reduced-motion:no-preference){
+  .king__dkart--on{ animation:deste-gel .34s cubic-bezier(.16,1,.3,1) both; }
+  .king__dkart--arka{ transition:transform .3s ease, opacity .3s ease; }
+}
+@keyframes deste-gel{ from{ transform:translateY(10px) scale(.98); } to{ transform:none; } }
+/* Yelpaze: «+»nın üstünde yay; her araç yuvarlak cam düğme, altında kısa adı. */
+.king.is-mini .king__arti-yer{ position:relative; }
+.king__yelpaze{ position:absolute; left:50%; bottom:calc(100% + 14px); width:0; height:0; z-index:6; }
+.king__yelpaze-oge{ --a:calc(-165deg + var(--i) * (150deg / max(1, var(--n) - 1))); position:absolute; left:0; top:0; width:44px; height:44px;
+  display:grid; place-items:center; padding:0; border:0; border-radius:50%; cursor:pointer; color:var(--text);
+  background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border), 0 8px 18px -12px rgba(20,24,40,.5);
+  transform:translate(-50%, -50%) rotate(var(--a)) translateX(124px) rotate(calc(-1 * var(--a))); }
+.king.is-mini .king__deste, .king.is-mini .king__cipler{ transition:opacity .2s ease, filter .2s ease; }
+.king.is-mini .king__kutu:has(.king__yelpaze) .king__deste,
+.king.is-mini .king__kutu:has(.king__yelpaze) .king__cipler{ opacity:.12; filter:blur(2px); pointer-events:none; }
+.king__yelpaze-oge svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.king__yelpaze-oge small{ position:absolute; top:calc(100% + 3px); left:50%; transform:translateX(-50%); white-space:nowrap; font-size:10.5px; color:var(--text-2); pointer-events:none;
+  padding:1px 6px; border-radius:6px; background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border); opacity:0; transition:opacity .15s ease; z-index:1; }
+/* Ad yalnız üstüne gelince ya da odakta (yayın uçlarında adlar komşu düğmeye biniyordu); dokunmatikte hep görünür. */
+.king__yelpaze-oge:hover small, .king__yelpaze-oge:focus-visible small{ opacity:1; }
+@media (hover:none){ .king__yelpaze-oge small{ opacity:1; background:transparent; box-shadow:none; } }
+.king__yelpaze-oge:hover{ color:var(--secili-yazi, var(--primary)); box-shadow:inset 0 0 0 1px var(--secili-yazi, var(--primary)), 0 8px 18px -12px rgba(20,24,40,.5); }
+@media (prefers-reduced-motion:no-preference){
+  .king__yelpaze-oge{ animation:yelpaze-ac .32s cubic-bezier(.16,1,.3,1) both; animation-delay:calc(var(--i) * 22ms); }
+}
+@keyframes yelpaze-ac{ from{ opacity:0; transform:translate(-50%, -50%) rotate(var(--a)) translateX(30px) rotate(calc(-1 * var(--a))) scale(.6); } }
