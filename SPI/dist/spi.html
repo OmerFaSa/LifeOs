@@ -11816,6 +11816,13 @@ html::view-transition-old(h-kart), html::view-transition-new(h-kart){ height:100
   .h-kaydedildi::after, .h-isik::before{ display:none; }
 }
 
+/* DİNLENME (kullanıcı, 2026-10-29): bir dakika dokunulmazsa süs
+   animasyonları kaldığı yerde durur (animasyon.js is-dinlen; minik.js yeni hareket başlatmaz); ilk girdide
+   devam eder. Boştayken her kare stil hesabı (~%29 ana iş parçacığı). */
+html.is-dinlen body::before, html.is-dinlen .kenar__nokta, html.is-dinlen .kapak__asagi,
+html.is-dinlen .minikkat, html.is-dinlen .minikkat *, html.is-dinlen .minikkat *::before, html.is-dinlen .minikkat *::after{
+  animation-play-state:paused !important; }
+
 /* ==== css/ayar.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/ayar.css içine yazılır; burası bir sonraki
@@ -18126,8 +18133,38 @@ window.LIFEOS = window.LIFEOS || {};
     window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); });
   }
 
+  /* DİNLENME (kullanıcı, 2026-10-29: «bir dakika dokunulmazsa dursunlar»).
+     Boştayken süs animasyonları (zemin nefesi, logo nabzı, kapak oku,
+     minikler) ana iş parçacığında her karede stil hesaplatıyordu (~%29).
+     Bir dakika girdi yoksa <html> `is-dinlen` alır: CSS onları kaldığı
+     yerde durdurur (hareket.css, DİNLENME), minik.js yeni hareket başlatmaz. İlk
+     fare, tuş, tekerlek, dokunuş ya da kaydırmada kalkar. */
+  let dinlenMs = 60000, dinlenZaman = null;
+  function dinlenKur(){
+    clearTimeout(dinlenZaman);
+    dinlenZaman = setTimeout(() => document.documentElement.classList.add('is-dinlen'), dinlenMs);
+  }
+  function uyan(){
+    const h = document.documentElement;
+    if(h.classList.contains('is-dinlen')) h.classList.remove('is-dinlen');
+    dinlenKur();
+  }
+  if(typeof document !== 'undefined' && document.addEventListener){
+    ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(t =>
+      document.addEventListener(t, uyan, { capture:true, passive:true }));
+    dinlenKur();
+  }
+  /* Test ve ayar için: süreyi değiştirir (ms), öncekini döner; argümansız okur. */
+  function dinlenSure(ms){
+    const eski = dinlenMs;
+    if(ms == null) return eski;
+    dinlenMs = ms; uyan();
+    return eski;
+  }
+
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
+    dinlenSure,
     ANAHTAR, KIPLER, TASINAN,
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
@@ -19500,7 +19537,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'6d063935', at:'2026-10-28 23:58', dirty:true };
+SP.BUILD = { id:'79351c30', at:'2026-10-29 07:46', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -98807,8 +98844,11 @@ window.LIFEOS.MINIK = (function(){
     return true;
   }
 
+  /* Dinlenme (animasyon.js is-dinlen): bir dakika girdi yoksa yeni hareket
+     başlamaz; uyanınca zincir yeniden kurulur (aşağıdaki gözcü). */
+  const dinleniyor = () => document.documentElement.classList.contains('is-dinlen');
   function yasat(mk){
-    if(!durum.kat || kapaliMi() || mesgulMu(mk)) return;
+    if(!durum.kat || kapaliMi() || mesgulMu(mk) || dinleniyor()) return;
     /* Her adımdan önce kenarlar yeniden ölçülür: kart giriş animasyonuyla,
        açılıp kapanan bölümle ya da yazı yüklenince kayabilir. */
     const l = durum.zeminler = olcum();
@@ -99077,9 +99117,17 @@ window.LIFEOS.MINIK = (function(){
     const icerik = document.querySelector('.site--v5') || document.body;
     if(typeof MutationObserver === 'function') new MutationObserver(iste).observe(icerik, { childList:true, subtree:true });
     /* Kökün sınıfı sık değişir (kenar-sakin…): yalnız açık/kapalı geçişinde uyanır. */
-    let onceki = kapaliMi();
+    let onceki = kapaliMi(), dinlenOnce = dinleniyor();
     new MutationObserver(() => {
       if((document.documentElement.dataset.sayfa || '') !== durum.sayfa) sayfaDegisti();
+      const dn = dinleniyor();
+      if(dn !== dinlenOnce){
+        dinlenOnce = dn;
+        durum.minikler.forEach(mk => {
+          try{ if(mk.anim && mk.anim.playState === (dn ? 'running' : 'paused')) dn ? mk.anim.pause() : mk.anim.play(); }catch(e){}
+          if(!dn) sonra(mk, 400);
+        });
+      }
       const k = kapaliMi();
       if(k === onceki) return;
       onceki = k; tazele();
@@ -99089,7 +99137,7 @@ window.LIFEOS.MINIK = (function(){
        yüklenir); saniyede bir miniğin durduğu kartın yeri okunur (en çok üç
        ölçüm), kaymışsa minik kenarla birlikte iner. */
     setInterval(() => {
-      if(durum.kat.hidden || document.visibilityState === 'hidden') return;
+      if(durum.kat.hidden || document.visibilityState === 'hidden' || dinleniyor()) return;
       const sy = window.scrollY || 0;
       if(durum.minikler.some(mk => mk.z && mk.z.el && !(mk.anim && mk.anim.playState === 'running')
         && Math.abs(mk.z.el.getBoundingClientRect().top + sy - mk.y) > 1)) tazele();
