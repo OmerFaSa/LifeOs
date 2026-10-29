@@ -3301,6 +3301,37 @@
       g.click();
       expect(k.acikMi() && !k.miniMi()).toBe(true);
     }));
+    it('ada: kadran ortada üstüne gelinen aracı söyler; büyütünce araç menüsü kapanır', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.ac({ mini:true });
+      document.querySelector('[data-king] .king__arti').click();
+      const m = () => document.querySelector('.king__yelpaze-merkez');
+      expect(m().textContent).toBe('AraçlarBirini seç');
+      const g = document.querySelector('.king__yelpaze-oge[data-king="buyut"]');
+      g.dispatchEvent(new Event('pointerover', { bubbles:true }));
+      expect(m().querySelector('b').textContent).toBe('Genişlet');
+      expect(m().querySelector('small').textContent).toBe(g.getAttribute('data-ip'));
+      g.click();
+      expect(k.acikMi() && !k.miniMi()).toBe(true);
+      expect(document.querySelector('[data-king] .king__arti').getAttribute('aria-expanded')).toBe('false');
+    }));
+    /* King Masası (2026-10-30, kullanıcı: «bu ekranı da bambaşka yap; sistemle daha uyumlu olsun»). */
+    it('masa: geniş ekranda sohbette Bağlam kartı modülün özetini taşır; dar ekranda ve araçlarda yok', () => sahneyle(async () => {
+      const { k } = sahne();
+      k._ortam.genis = () => true;
+      k.ac({ mini:false, mesaj:'x' });
+      const b = () => document.querySelector('[data-king] .king__kutu > .king__baglam');
+      expect(!!b()).toBe(true);
+      expect(b().getAttribute('aria-label')).toBe('Bağlam');
+      expect(b().textContent).toContain('Toparlanma iyi.');
+      k.bolumSec('araclar');
+      expect(!!b()).toBe(false);
+      k.bolumSec('sohbet');
+      expect(!!b()).toBe(true);
+      k._ortam.genis = () => false;
+      k.kapat(); k.ac({ mini:false, mesaj:'x' });
+      expect(!!b()).toBe(false);
+    }));
     it('ada: Kral düğmesi de önce adayı açar', () => sahneyle(async () => {
       const { k } = sahne();
       const b = document.createElement('button');

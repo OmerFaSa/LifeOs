@@ -5520,8 +5520,11 @@ window.LIFEOS.KING = (function(){
     const l = ARACLAR.filter(a => a.is !== 'isler' && (() => { try{ return a.kosul(); }catch(e){ return false; } })())
       .map(a => ({ is:/^kip:(kamera|ekran)$/.test(a.is) ? 'ada-' + a.is : a.is, ad:a.ad, ip:a.ip, svg:ARAC_SVG[a.is] || '' }))
       .concat([{ is:'buyut', ad:'Genişlet', ip:'Geçmiş, kütüphane ve bütün araçlar', svg:YELPAZE_GENISLET }]);
-    return '<div class="king__yelpaze" role="menu" aria-label="Araçlar" style="--n:' + l.length + '">' + l.map((x, i) =>
-      '<button type="button" role="menuitem" class="king__yelpaze-oge" style="--i:' + i + '" data-king="' + x.is + '" aria-label="' + kac(x.ad) + '" title="' + kac(x.ad + ' — ' + x.ip) + '">'
+    /* Kadran (2026-10-30, kullanıcı: «çok daha profesyonel güzel olsun ama mantık güzel»):
+       yay adanın içinde açılır; ortası üstüne gelinen aracın adını ve ne yaptığını söyler. */
+    return '<div class="king__yelpaze" role="menu" aria-label="Araçlar" style="--n:' + l.length + '">'
+      + '<div class="king__yelpaze-merkez" aria-hidden="true"><b>Araçlar</b><small>Birini seç</small></div>' + l.map((x, i) =>
+      '<button type="button" role="menuitem" class="king__yelpaze-oge" style="--i:' + i + '" data-king="' + x.is + '" aria-label="' + kac(x.ad) + '" data-ip="' + kac(x.ip) + '">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true">' + x.svg + '</svg><small>' + kac(x.ad) + '</small></button>').join('') + '</div>';
   }
   function miniGovde(){
@@ -5565,6 +5568,27 @@ window.LIFEOS.KING = (function(){
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>';
   }
 
+  /* MASA (2026-10-30, kullanıcı: «bu ekranı da bambaşka yap; sistemle daha
+     uyumlu olsun, farklı fikirlerle donat, daha profesyonel»). Büyük pencerenin
+     sağında Bağlam: King'in şu an neyi gördüğü ve modülün kendi kartları.
+     Sayıyı modül üretir, King yalnız gösterir (§1.1); kart etiketini taşır.
+     Yalnız sohbette ve geniş ekranda; dar ekranda boş karşılama aynı kartları
+     zaten gösterir. */
+  function baglamHtml(vitrin){
+    if(mini || vitrin || bolum !== 'sohbet' || !ortam.genis()) return '';
+    const kars = karsilama(), ekran = ekranAdi(), modul = MODUL_AD[ayar && ayar.modul] || '';
+    const sor = akis.length ? oneriListesi(false) : [];
+    if(!kars.kartlar.length && !kars.satirlar.length && !sor.length && !ekran) return '';
+    const kisim = (ad, ic) => '<section class="king__baglam-bolum"><h3>' + ad + '</h3>' + ic + '</section>';
+    return '<aside class="king__baglam" aria-label="Bağlam">'
+      + '<div class="king__baglam-ust"><h2>Bağlam</h2><span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(modul) + '</span></div>'
+      + (ekran ? '<p class="king__baglam-gor">Şu an gördüğüm <b>' + kac(ekran) + '</b></p>' : '')
+      + (kars.kartlar.length ? kisim('Durum', kartlarHtml(kars)) : '')
+      + (kars.satirlar.length ? kisim('Notlar', '<ul class="king__baglam-not">' + kars.satirlar.map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>') : '')
+      + (sor.length ? kisim('Sorabileceklerin', '<div class="king__baglam-sor">' + sor.map(o => '<button type="button" class="king__baglam-oner" data-king="' + o.is + '">'
+        + kac(o.ad) + '</button>').join('') + '</div>') : '')
+      + '</aside>';
+  }
   function govde(){
     if(mini) return miniGovde();
     const satirlar = akis.slice(-GUNLUK_EN_COK);
@@ -5650,7 +5674,7 @@ window.LIFEOS.KING = (function(){
       + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : kip() === 'ekran' ? 'Ekran hakkında sor…' : kip() === 'kamera' ? 'Kameradakini sor…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
       + mik
       + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
-      + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form></div>' + alan;
+      + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form></div>' + baglamHtml(vitrin) + alan;
   }
   /* «Neden?» (G; K6 dolduracak): önerinin altında, yalnız bilinen kaynak. */
   function nedenSatirlari(m){
@@ -5751,6 +5775,12 @@ window.LIFEOS.KING = (function(){
     /* Arkadaş: yazınca ve fare kıpırdayınca uyanır; boşta kalınca uyur; dokununca kıkırdar. */
     arkadasSon = Date.now();
     ['input', 'keydown', 'pointerdown'].forEach(t => el.addEventListener(t, arkadasUyandir));
+    const kadran = e => {
+      const b = e.target && e.target.closest ? e.target.closest('.king__yelpaze-oge') : null;
+      const m = b && b.parentNode.querySelector('.king__yelpaze-merkez');
+      if(m) m.innerHTML = '<b>' + kac(b.getAttribute('aria-label')) + '</b><small>' + kac(b.getAttribute('data-ip') || '') + '</small>';
+    };
+    el.addEventListener('pointerover', kadran); el.addEventListener('focusin', kadran);
     el.addEventListener('click', e => {
       const m = e.target && e.target.closest ? e.target.closest('.king__arkadas .minik') : null;
       if(!m) return;
@@ -5796,6 +5826,7 @@ window.LIFEOS.KING = (function(){
   function buyut(){
     if(!acik || !mini || typeof document === 'undefined') return;
     mini = false;
+    aracAcik = false;                            // adanın yelpazesi büyük pencerede menü olarak açık kalmasın
     const el = document.querySelector('[data-king]');
     if(el) el.classList.remove('is-mini');
     document.documentElement.classList.remove('king-mini');
