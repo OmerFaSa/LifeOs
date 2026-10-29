@@ -7,7 +7,6 @@ Artifact olarak yayimlanabilir bir parca (fragment) uretir: dist/spi.html
 
 Kullanim:
   python build.py              # okunabilir cikti (varsayilan)
-  python build.py --minify     # CSS sikistirilir, JS yorum/bosluklari azaltilir
   python build.py --denetle    # dist kaynaktan derlenmis haliyle ayni mi (CI)
 """
 
@@ -32,77 +31,9 @@ def read(rel: str) -> str:
     return path.read_text(encoding="utf-8")
 
 
-# ---------------------------------------------------------------- minifikasyon
-
-def minify_css(css: str) -> str:
-    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)      # yorumlar
-    css = re.sub(r"\s+", " ", css)                        # bosluk daralt
-    css = re.sub(r"\s*([{}:;,>])\s*", r"\1", css)         # ayrac cevresi
-    css = css.replace(";}", "}")
-    return css.strip()
-
-
-def minify_js(js: str) -> str:
-    """Muhafazakar JS sadelestirme.
-
-    Sablon literalleri (`...`), metin sabitleri ve regex'ler korunur; yalnizca
-    onlarin DISINDA kalan yorumlar ve satir basi bosluklari kaldirilir.
-    Kod semantigi degismez: hicbir ifade birlestirilmez, noktali virgul eklenmez.
-    """
-    out = []
-    i, n = 0, len(js)
-    quote = None          # ' " ` icindeysek hangi karakterle acildigi
-    depth_tpl = 0         # sablon literali icindeki ${...} derinligi
-    while i < n:
-        ch = js[i]
-        nxt = js[i+1] if i+1 < n else ""
-
-        if quote:
-            out.append(ch)
-            if ch == "\\":
-                if i+1 < n:
-                    out.append(js[i+1]); i += 2; continue
-            elif quote == "`" and ch == "$" and nxt == "{":
-                out.append(nxt); depth_tpl += 1; i += 2; continue
-            elif quote == "`" and ch == "}" and depth_tpl > 0:
-                depth_tpl -= 1
-            elif ch == quote and depth_tpl == 0:
-                quote = None
-            i += 1
-            continue
-
-        # metin/sablon baslangici
-        if ch in "'\"`":
-            quote = ch
-            out.append(ch); i += 1; continue
-
-        # blok yorum
-        if ch == "/" and nxt == "*":
-            end = js.find("*/", i+2)
-            i = n if end == -1 else end + 2
-            continue
-
-        # satir yorumu (bolme operatoru ile karismasin diye satir basinda ya da
-        # bosluktan sonra gelenler kaldirilir)
-        if ch == "/" and nxt == "/":
-            prev = "".join(out[-1:]) or "\n"
-            if prev in " \t\n(=,;:{[":
-                end = js.find("\n", i)
-                i = n if end == -1 else end
-                continue
-
-        out.append(ch); i += 1
-
-    text = "".join(out)
-    lines = [ln.rstrip() for ln in text.split("\n")]
-    lines = [ln for ln in lines if ln.strip()]
-    # satir basi girintisini kaldir (sablon literali icindekiler yukarida korundu)
-    return "\n".join(lines)
-
-
 # ---------------------------------------------------------------- gomme
 
-def inline_css(html: str, minify: bool):
+def inline_css(html: str):
     files = []
 
     def collect(match):
@@ -115,12 +46,11 @@ def inline_css(html: str, minify: bool):
     blocks = []
     for rel in files:
         body = read(rel).strip()
-        blocks.append(minify_css(body) if minify else f"/* ==== {rel} ==== */\n{body}")
-    joiner = "" if minify else "\n\n"
-    return html, ["<style>\n" + joiner.join(blocks) + "\n</style>"], files
+        blocks.append(f"/* ==== {rel} ==== */\n{body}")
+    return html, ["<style>\n" + "\n\n".join(blocks) + "\n</style>"], files
 
 
-def inline_js(html: str, minify: bool):
+def inline_js(html: str):
     files = []
 
     def collect(match):
@@ -131,7 +61,7 @@ def inline_js(html: str, minify: bool):
     blocks = []
     for rel in files:
         body = read(rel).strip()
-        blocks.append(minify_js(body) if minify else f"/* ==== {rel} ==== */\n{body}")
+        blocks.append(f"/* ==== {rel} ==== */\n{body}")
     return html, ["<script>\n" + "\n\n".join(blocks) + "\n</script>"], files
 
 
@@ -312,7 +242,7 @@ def ikonu_gom(etiketler: list) -> list:
             for e in etiketler]
 
 
-def build(minify: bool = False, denetle: bool = False):
+def build(denetle: bool = False):
     for name in REQUIRED:
         if not (SRC / name).exists():
             sys.exit(f"HATA: src/{name} yok")
@@ -331,8 +261,8 @@ def build(minify: bool = False, denetle: bool = False):
     font_links = re.findall(r'<link[^>]+fonts\.(?:googleapis|gstatic)\.com[^>]*>', html)
     telefon_etiketleri = ikonu_gom(pwa_etiketleri(html))
 
-    html, style_blocks, css_files = inline_css(html, minify)
-    html, script_blocks, js_files = inline_js(html, minify)
+    html, style_blocks, css_files = inline_css(html)
+    html, script_blocks, js_files = inline_js(html)
 
     body_match = re.search(r"<body[^>]*>(.*?)</body>", html, re.S)
     if not body_match:
@@ -369,8 +299,7 @@ def build(minify: bool = False, denetle: bool = False):
     copy_service_worker()
 
     size_kb = len(output.encode("utf-8")) / 1024
-    mode = "minify" if minify else "okunabilir"
-    print(f"OK   {out_path}  [{mode}]")
+    print(f"OK   {out_path}")
     print(f"     {len(js_files)} js modulu, {output.count(chr(10))+1} satir, {size_kb:,.0f} KB")
     print(f"     damga {damga}")
 
@@ -417,5 +346,5 @@ def denetle_dist(out_path, output: str) -> int:
 
 if __name__ == "__main__":
     if "--denetle" in sys.argv:
-        sys.exit(build(minify="--minify" in sys.argv, denetle=True))
-    build(minify="--minify" in sys.argv)
+        sys.exit(build(denetle=True))
+    build()

@@ -71,7 +71,6 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 ```bash
 python devserver.py          # önbelleksiz geliştirme sunucusu
 python build.py              # tek dosyalık dağıtım + derleme damgası
-python build.py --minify     # sıkıştırılmış
 
 node tools/runtests.js       # birim testleri (başsız tarayıcı)
 node tools/a11ycheck.js      # erişilebilirlik — ÇİZİLEN sayfadan
