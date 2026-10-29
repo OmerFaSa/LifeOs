@@ -179,6 +179,25 @@
       });
     });
 
+    /* 2026-10-29 (kullanıcı: «sakin bir radyo daha hareketli pop çalıyor»):
+       yedek arama yalnız etikete bakıyordu; «slow» etiketli dans/kulüp akışı
+       sakin türe giriyordu. */
+    it('sakin türün yedeği dans, rap ya da rock etiketli akışı almaz', () => {
+      const a = sahteOge();
+      const yanit = [
+        { name:'Kulüp Slow Mix', url_resolved:'https://x.test/kulup.mp3', hls:0, codec:'MP3', tags:'slow,dance,club' },
+        { name:'Sakin Akış', url_resolved:'https://x.test/sakin.mp3', hls:0, codec:'MP3', tags:'slow,akustik' },
+      ];
+      return ortamla({ sesOgesi:() => a, fetch:() => Promise.resolve({ ok:true, json:() => yanit }) }, async () => {
+        S.turSec('tr-slow');
+        const n = S.TURLER.find(x => x.id === 'tr-slow').istasyonlar.length;
+        for(let i = 0; i < n; i++) a.tetikle('error');
+        await bekle(10);
+        expect(a.src).toBe('https://x.test/sakin.mp3');
+        S.durdur();
+      });
+    });
+
     it('internet yoksa «Bağlantı yok»; ses öğesine kaynak verilmez', () => {
       const a = sahteOge();
       return ortamla({ sesOgesi:() => a, cevrimici:() => false }, () => {

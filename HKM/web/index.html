@@ -6699,6 +6699,12 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
      beyaz kart, ortada kısa başlık, açıklama ⓘ'de, hap düğme, bölümlü
      seçici, grafit koyu tema. Eş aralıklı yazı yalnız kodda kalır. -->
 <style id="hkm-sade">
+/* İnce kaydırma çubuğu — üç arayüzle aynı (Windows'un kalın gri çubuğu, 2026-10-29). */
+*{ scrollbar-width:thin; scrollbar-color:var(--line-strong) transparent; }
+*::-webkit-scrollbar{ width:10px; height:10px; }
+*::-webkit-scrollbar-track{ background:transparent; }
+*::-webkit-scrollbar-thumb{ background:var(--line-strong); border-radius:8px; border:3px solid transparent; background-clip:padding-box; }
+*::-webkit-scrollbar-button{ display:none; }
 :root{
   --r-kart:22px;
   --gri-ray:rgba(118,118,128,.12);

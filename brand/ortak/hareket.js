@@ -488,6 +488,8 @@ window.LIFEOS.HAREKET = (function(){
     halkaEl.style.transform = 'translate(' + Math.round(r.left - 3) + 'px,' + Math.round(r.top - 3) + 'px)';
     halkaEl.style.width = Math.round(r.width + 6) + 'px';
     halkaEl.style.height = Math.round(r.height + 6) + 'px';
+    /* Halka hedefin biçimini alır: yuvarlak düğmede kare halka iki ayrı ışık gibi duruyordu (2026-10-29). */
+    try{ halkaEl.style.borderRadius = getComputedStyle(hedef).borderRadius; }catch(e){}
     halkaEl.getBoundingClientRect();
     halkaEl.classList.remove('is-anlik');
     halkaEl.classList.add('is-acik');

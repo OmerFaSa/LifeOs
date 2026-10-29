@@ -592,6 +592,8 @@ body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:no
 .dugme{ background:var(--hap); border:1px solid var(--hap-kenar); border-radius:999px; box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 4px 12px -8px rgba(20,30,60,.35);
   -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); transition:background-color .25s ease, transform .4s cubic-bezier(.16,1,.3,1); }
 .dugme:hover{ background:color-mix(in oklab, var(--hap) 70%, #fff); transform:translateY(-1px); }
+/* Ana düğme cam hapın üstünde renkli cam: zemini cam kuralına yenilip yazısı koyu kalıyordu (koyu temada okunmuyordu, 2026-10-29). */
+.dugme--ana, .dugme--ana:hover{ background:color-mix(in oklab, var(--ays) 26%, var(--hap)); border-color:color-mix(in oklab, var(--ays) 40%, transparent); color:var(--fg); opacity:1; }
 .kart__alt .dugme{ color:color-mix(in oklab, var(--renk) 82%, #000); font-weight:650; }
 .kart::before{ background:radial-gradient(closest-side, color-mix(in oklab, var(--renk) 16%, transparent), transparent); }
 @media (prefers-color-scheme:dark){ .kart__alt .dugme{ color:color-mix(in oklab, var(--renk) 70%, #fff); } }

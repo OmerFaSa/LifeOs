@@ -70,10 +70,13 @@ window.LIFEOS = window.LIFEOS || {};
      sona yakındır. Power Türk/Power FM/Kral Pop'un HLS adresleri değil,
      Power'ın doğrudan icecast yolları kullanıldı. SomaFM «Headless»
      tarayıcı kimliğini reddeder (403); gerçek tarayıcıda çalar.
-     `ara`: liste tükenirse radio-browser'a sorulan süzgeç. */
+     `ara`: liste tükenirse radio-browser'a sorulan süzgeç; `haric`: etiketi
+     buna uyan yedek akış alınmaz (sakin türe dans/pop girmesin, 2026-10-29).
+     2026-10-29 akış başlıklarıyla (icy-name) denetlendi: bigFM US Rap adresi
+     «bigFM 2000er» (pop) veriyordu, SomaFM ice6 403 dönüyordu. */
   const TURLER = Object.freeze([
-    { id:'chill', ad:'Chill', ara:{ tag:'chillout' }, istasyonlar:[
-      { ad:'SomaFM Groove Salad', url:'https://ice6.somafm.com/groovesalad-128-mp3' },
+    { id:'chill', ad:'Chill', ara:{ tag:'chillout' }, haric:/pop|dance|club|hits|rap|hip.?hop|rock|metal/i, istasyonlar:[
+      { ad:'SomaFM Groove Salad', url:'https://ice2.somafm.com/groovesalad-128-mp3' },
       { ad:'FluxFM Chillhop', url:'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/' },
       { ad:'0R Lo-Fi', url:'https://0nlineradio.radioho.st/0r-lo-fi' },
     ] },
@@ -83,7 +86,7 @@ window.LIFEOS = window.LIFEOS || {};
       { ad:'Radyo Viva', url:'https://radyoviva.radyotvonline.net/radyovivaaac' },
       { ad:'Süper FM', url:'https://playerservices.streamtheworld.com/api/livestream-redirect/SUPER_FM_SC' },
     ] },
-    { id:'tr-slow', ad:'Türkçe Slow', ara:{ tag:'slow', countrycode:'TR' }, istasyonlar:[
+    { id:'tr-slow', ad:'Türkçe Slow', ara:{ tag:'slow', countrycode:'TR' }, haric:/dance|club|rap|hip.?hop|rock|metal|arabesk/i, istasyonlar:[
       { ad:'Power Türk Slow', url:'https://listen.powerapp.com.tr/powerturkslow/mpeg/icecast.audio' },
       { ad:'Joy Türk', url:'https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_TURK_SC' },
       { ad:'Slow Türk', url:'https://radyo.duhnet.tv/ak_dtvh_slowturk' },
@@ -98,13 +101,13 @@ window.LIFEOS = window.LIFEOS || {};
       { ad:'Power Pop', url:'https://listen.powerapp.com.tr/powerpop/mpeg/icecast.audio' },
       { ad:'Virgin Radio', url:'https://playerservices.streamtheworld.com/api/livestream-redirect/VIRGIN_RADIO_SC' },
     ] },
-    { id:'en-slow', ad:'İngilizce Slow', ara:{ tag:'love songs', language:'english' }, istasyonlar:[
+    { id:'en-slow', ad:'İngilizce Slow', ara:{ tag:'love songs', language:'english' }, haric:/dance|club|rap|hip.?hop|rock|metal/i, istasyonlar:[
       { ad:'Joy FM', url:'https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_FM_SC' },
       { ad:'Power Love', url:'https://listen.powerapp.com.tr/powerlove/mpeg/icecast.audio' },
     ] },
     { id:'en-rap', ad:'İngilizce Rap', ara:{ tag:'hip-hop', language:'english' }, istasyonlar:[
       { ad:'90s90s Hip Hop', url:'https://streams.90s90s.de/hiphop/mp3-192/streams.90s90s.de/' },
-      { ad:'bigFM US Rap', url:'https://stream.bigfm.de/usrap/mp3-128/' },
+      { ad:'bigFM US Rap', url:'https://streams.bigfm.de/bigfm-usrap-128-mp3' },
       { ad:'bigFM Oldschool Rap', url:'https://stream.bigfm.de/oldschoolrap/mp3-128/' },
     ] },
   ].map(t => Object.freeze(Object.assign({}, t, { istasyonlar:Object.freeze(t.istasyonlar.map(Object.freeze)) }))));
@@ -295,6 +298,7 @@ window.LIFEOS = window.LIFEOS || {};
         .filter(s => s && !Number(s.hls) && /^(mp3|aac\+?)$/i.test(String(s.codec || '').trim())
           && /^https:\/\//.test(String(s.url_resolved || '')) && !/\.m3u8?(\?|$)/i.test(s.url_resolved))
         .filter(s => !t.istasyonlar.some(i => i.url === s.url_resolved))
+        .filter(s => !(t.haric && t.haric.test(String(s.tags || '') + ' ' + String(s.name || ''))))
         .slice(0, 5)
         .map(s => Object.freeze({ ad:String(s.name || 'İstasyon').trim().slice(0, 48) || 'İstasyon',
           url:String(s.url_resolved), yedek:true })))

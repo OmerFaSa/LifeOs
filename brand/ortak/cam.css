@@ -44,6 +44,15 @@
   --cam-ust:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px rgba(255,255,255,.28);
   --cam-golge:0 1px 2px rgba(20,24,40,.05), 0 10px 30px -14px rgba(20,24,40,.18);
   --cam-girdi:rgba(255,255,255,.5);
+  /* SEÇİLİ VE ANA DÜĞME — renkli cam (kullanıcı, 2026-10-29: «seçili buton,
+     kaydet, menü çok katı, sistemle uyumsuz»). Dolu koyu blok yerine modül
+     renginde hafif boyanmış cam: ince renkli kenar, üstte 1 px ışık, yazı
+     modülün koyu/açık tonu. Seçili çekmece, menü bölümü ve ana düğme aynı dil. */
+  --secili-zemin:color-mix(in oklab, var(--mod) 14%, rgba(255,255,255,.62));
+  --secili-yazi:var(--mod-ink, var(--mod));
+  --secili-golge:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px color-mix(in oklab, var(--mod) 26%, transparent), 0 6px 16px -12px color-mix(in oklab, var(--mod) 60%, transparent);
+  --ana-zemin:color-mix(in oklab, var(--mod) 22%, rgba(255,255,255,.55));
+  --ana-zemin-ust:color-mix(in oklab, var(--mod) 30%, rgba(255,255,255,.6));
 }
 :root[data-theme="dark"]{
   --sicak-zemin:.6; --sicak-cizgi:.5; --sicak-yansima:.3; --ray:rgba(255,255,255,.08);
@@ -61,6 +70,9 @@
   --cam-ust:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.03);
   --cam-golge:0 1px 2px rgba(0,0,0,.25), 0 14px 34px -18px rgba(0,0,0,.55);
   --cam-girdi:rgba(0,0,0,.22);
+    --secili-zemin:color-mix(in oklab, var(--mod) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--mod) 28%, #fff);
+    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent);
+    --ana-zemin:color-mix(in oklab, var(--mod) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--mod) 44%, rgba(255,255,255,.08));
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -80,6 +92,9 @@
     --cam-ust:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.03);
     --cam-golge:0 1px 2px rgba(0,0,0,.25), 0 14px 34px -18px rgba(0,0,0,.55);
     --cam-girdi:rgba(0,0,0,.22);
+    --secili-zemin:color-mix(in oklab, var(--mod) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--mod) 28%, #fff);
+    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent);
+    --ana-zemin:color-mix(in oklab, var(--mod) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--mod) 44%, rgba(255,255,255,.08));
   }
 }
 
@@ -99,10 +114,9 @@
     border-radius:28px; box-shadow:var(--levha-ic), var(--levha-golge); }
   html.kenar-dar .site--v5:has(> .kenar)::after{ left:12px; top:14px; bottom:14px; border-radius:28px; }
   html[data-zemin="yumusak"] .kenar__cekmece{ border-radius:14px; height:38px; }
-  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece.is-on{ color:#fff; }
-  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece.is-on .kbk-ic{ color:#fff; }
-  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece.is-on::before{ background:var(--kenar-on);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 8px 18px -10px var(--kenar-on); }
+  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece.is-on{ color:var(--secili-yazi); }
+  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece.is-on .kbk-ic{ color:var(--secili-yazi); }
+  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece.is-on::before{ background:var(--secili-zemin); box-shadow:var(--secili-golge); }
 }
 
 /* 3) KARTLAR — süzülen cam, TEK KAT. Kartın içindeki kart, not, öneri ya da
@@ -217,13 +231,14 @@ html[data-zemin="yumusak"] .bar__fill{ max-width:100%; }
    «Kart ekle gibi bir sürü buton kalitesiz»): eski «aqua» kabartma (üstte
    parlak leke, kalın renkli hale, çift kenar) kalktı; iOS'taki dolu düğme
    gibi düz renk, belli belirsiz koyulaşma, 1 px iç ışık, kısa sıkı gölge. */
+/* Dördüncü tur (2026-10-29: «çok katı, sistemle uyumsuz»): dolu blok yerine
+   renkli cam — seçili çekmeceyle aynı dil, bir ton daha yoğun. */
 html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder){
-  background:linear-gradient(180deg, color-mix(in oklab, var(--dugme) 92%, #fff), color-mix(in oklab, var(--dugme) 94%, #000)) var(--dugme);
-  border-color:transparent; color:#fff; font-weight:600; letter-spacing:-.005em;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 1px 2px rgba(16,20,40,.16), 0 6px 14px -8px color-mix(in oklab, var(--dugme) 70%, #000);
+  background:var(--ana-zemin); border-color:transparent; color:var(--secili-yazi); font-weight:600; letter-spacing:-.005em;
+  box-shadow:var(--secili-golge);
+  -webkit-backdrop-filter:blur(12px) saturate(150%); backdrop-filter:blur(12px) saturate(150%);
   transition:background-color .2s ease, box-shadow .2s ease, transform .12s ease; }
-html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder):hover{
-  background:linear-gradient(180deg, color-mix(in oklab, var(--dugme) 84%, #fff), var(--dugme)) var(--dugme); }
+html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder):hover{ background:var(--ana-zemin-ust); }
 html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder):active{ transform:scale(.97);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 1px 1px rgba(16,20,40,.18); }
 
@@ -270,10 +285,10 @@ html[data-zemin="yumusak"] .site--v5 .altbant__sekme.is-on .kbk-ic{ filter:drop-
     box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), 0 8px 16px -10px rgb(var(--sicak) / .5); }
 }
 
-/* Klavye odağı: modül renginde ışık halkası (dış çizgi yerinde kalır). */
+/* Klavye odağı: modül renginde tek ince çizgi. Işık halkası kalktı
+   (kullanıcı, 2026-10-29: «hem daire hem kare ışık çıkıyor, minimalist yap»). */
 html[data-zemin="yumusak"] .site--v5 :is(button, a, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible{
-  outline:2px solid var(--mod); outline-offset:2px;
-  box-shadow:0 0 0 6px color-mix(in oklab, var(--mod) 22%, transparent), 0 0 18px 2px color-mix(in oklab, var(--mod) 30%, transparent); }
+  outline:2px solid var(--mod); outline-offset:2px; }
 
 /* Kayıt ışığı: üstte modül rengi, altta sıcak zemin ışığı birlikte parlar. */
 html[data-zemin="yumusak"] .zemin-isik{
@@ -758,8 +773,7 @@ html[data-zemin="yumusak"] .menusayfa__bolumler{ display:grid; grid-template-col
 html[data-zemin="yumusak"] .menusayfa__bolum{ min-height:36px; padding:0 12px; border-radius:12px; text-align:left;
   border-color:transparent; background:var(--cam-ince); color:var(--text-2); box-shadow:inset 0 0 0 1px var(--cam-kenar); }
 html[data-zemin="yumusak"] .menusayfa__bolum:hover{ background:var(--cam-katman); color:var(--text); }
-html[data-zemin="yumusak"] .menusayfa__bolum.is-on{ background:var(--dugme); color:#fff;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 6px 14px -8px var(--dugme); }
+html[data-zemin="yumusak"] .menusayfa__bolum.is-on{ background:var(--secili-zemin); color:var(--secili-yazi); box-shadow:var(--secili-golge); }
 html[data-zemin="yumusak"] .menusayfa__ayak{ background:transparent; border-top-color:var(--cam-kenar); }
 @media (prefers-reduced-motion:no-preference){
   html[data-zemin="yumusak"] .menusayfa__cekmece{ animation:cam-gir 420ms cubic-bezier(.2,.8,.2,1) both; }
@@ -1503,8 +1517,8 @@ html[data-zemin="yumusak"] .menusayfa__bolumler{ grid-template-columns:repeat(au
 html[data-zemin="yumusak"] .menusayfa__bolum{ min-height:38px; padding:0 12px; border:0; border-radius:12px; background:transparent; box-shadow:none;
   color:var(--text-2); font-weight:500; transition:background-color .18s, color .18s; }
 html[data-zemin="yumusak"] .menusayfa__bolum:hover{ background:var(--cam-katman); color:var(--text); }
-html[data-zemin="yumusak"] .menusayfa__bolum.is-on{ background:var(--dugme); color:#fff; font-weight:600;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+html[data-zemin="yumusak"] .menusayfa__bolum.is-on{ background:var(--secili-zemin); color:var(--secili-yazi); font-weight:600;
+  box-shadow:var(--secili-golge); }
 html[data-zemin="yumusak"] .menusayfa__ayak{ border-top:0; }
 /* Menü daha dar ve yalnız bu modülün çekmeceleri (kullanıcı, 2026-10-29: «enine
    küçük, yukarıda SPİ ESP görünmesin»); sistem geçişi kenarın üstündeki seçicide. */
@@ -1517,3 +1531,102 @@ html[data-zemin="yumusak"] .site--v5 .kenar .kenar__araclar{ gap:18px; }
 html[data-zemin="yumusak"] .site--v5 .kenar .kenar__grup{ gap:4px; }
 html[data-zemin="yumusak"] .site--v5 .kenar .kenar__arac{ height:40px; border-radius:12px; }
 html[data-zemin="yumusak"] .site--v5 .kenar .kenar__arac:hover{ background:var(--cam-katman); }
+
+/* 40) KOYU VE AÇIK TEMADA OPAK KALANLAR (kullanıcı, 2026-10-29, ekran
+   görüntüleriyle: «siyah temada camsı tasarım var diye bazı yerler kötü
+   gözüküyor: AYS Çalışma'da konular, bazı yazılar, sol menü»). Bu öğeler
+   opak --surface / --primary-soft alıyordu: fotoğrafın üstünde siyah (ya da
+   açıkta beyaz) kalıp. Hepsi cam ya da seçili cam olur. Genel --surface
+   değişmez: yapışkan kaydet şeritleri opak kalmalı. Seçiciler liste: sağ
+   ucu :is(...) olan kural her öğede denenir (OKU.md). */
+html[data-zemin="yumusak"] .site--v5 #main button.listitem.is-on,
+html[data-zemin="yumusak"] .site--v5 #main .listitem.is-on,
+html[data-zemin="yumusak"] .site--v5 #main .pickcard.is-on,
+html[data-zemin="yumusak"] .site--v5 #main .themebtn.is-on,
+html[data-zemin="yumusak"] .site--v5 #main .palbtn.is-on,
+html[data-zemin="yumusak"] .site--v5 #main .agenttabs .agenttab.is-on,
+html[data-zemin="yumusak"] .site--v5 #main .iconbtn.is-on{
+  background:var(--secili-zemin); color:var(--secili-yazi); border-color:transparent; box-shadow:var(--secili-golge); }
+html[data-zemin="yumusak"] .site--v5 #main .listitem.is-on small,
+html[data-zemin="yumusak"] .site--v5 #main .listitem.is-on .listitem__sub,
+html[data-zemin="yumusak"] .site--v5 #main .listitem.is-on .muted{ color:inherit; opacity:.75; }
+/* Sayfa içi seçiciler: oyuk cam ray, seçili hap parlak cam. */
+html[data-zemin="yumusak"] .site--v5 #main .seg{ background:var(--ray); border-color:var(--cam-kenar); }
+html[data-zemin="yumusak"] .site--v5 #main .seg button.is-on{ background:var(--seg-hap); box-shadow:var(--seg-golge); color:var(--text); }
+html[data-zemin="yumusak"] .site--v5 #main .seg--primary button.is-on{ background:var(--secili-zemin); box-shadow:var(--secili-golge); color:var(--secili-yazi); }
+/* Ray'in alt ışığı koyuda beyaz kabartma gibi duruyordu (boş çubuk beyaz hap). */
+html[data-theme="dark"][data-zemin="yumusak"] .bar,
+html[data-theme="dark"][data-zemin="yumusak"] .esikcubuk__ray{ box-shadow:inset 0 1px 2px rgba(0,0,0,.3), 0 1px 0 rgba(255,255,255,.04); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"])[data-zemin="yumusak"] .bar,
+html:not([data-theme="light"])[data-zemin="yumusak"] .esikcubuk__ray{ box-shadow:inset 0 1px 2px rgba(0,0,0,.3), 0 1px 0 rgba(255,255,255,.04); } }
+/* Uzun kutunun dibi: opak renge solmak yerine buzlanarak söner; düğme cam. */
+html[data-zemin="yumusak"] .site--v5 .ledger .raf-uzun::after{ background:none;
+  -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+  -webkit-mask-image:linear-gradient(to bottom, transparent, #000 84px); mask-image:linear-gradient(to bottom, transparent, #000 84px); }
+html[data-zemin="yumusak"] .site--v5 .raf-ac{ border:0; border-radius:12px; background:var(--cam-katman); box-shadow:var(--cam-ust);
+  -webkit-backdrop-filter:blur(16px) saturate(140%); backdrop-filter:blur(16px) saturate(140%); }
+/* Kenar: sistem seçicisi ve açılan listesi cam; seçili sistem seçili cam. */
+html[data-zemin="yumusak"] .site--v5 .kenar__modulsec{ background:var(--cam-ince); box-shadow:var(--cam-ust); }
+html[data-zemin="yumusak"] .site--v5 .kenar__modulliste{ background:var(--cam-katman); box-shadow:var(--cam-ust), var(--cam-golge);
+  -webkit-backdrop-filter:blur(24px) saturate(150%); backdrop-filter:blur(24px) saturate(150%); }
+html[data-zemin="yumusak"] .site--v5 .kenar__moduller .kenar__modul:hover{ background:var(--cam-ince); }
+html[data-zemin="yumusak"] .site--v5 .kenar__moduller .kenar__modul.is-on{ background:var(--secili-zemin); box-shadow:var(--secili-golge); }
+html[data-zemin="yumusak"] .site--v5 .kenar .kenar__arac[aria-expanded="true"]{ background:var(--cam-katman); box-shadow:var(--cam-ust); }
+/* Bildirimler: satırlar ve düğmeler aynı ince cam; «Hepsini gördüm» tek satır. */
+html[data-zemin="yumusak"] .kmenu--bildirim .kmenu__bildirim,
+html[data-zemin="yumusak"] .kmenu--bildirim .bildirim__ertele,
+html[data-zemin="yumusak"] .kmenu--bildirim .bildirim__gordu{ background:var(--cam-ince); box-shadow:var(--cam-ust); }
+html[data-zemin="yumusak"] .kmenu--bildirim .kmenu__bildirim:hover,
+html[data-zemin="yumusak"] .kmenu--bildirim .bildirim__ertele:hover{ background:var(--cam-katman); }
+.bildirim__gordu, .bildirim__temizle{ white-space:nowrap; flex:none; }
+
+/* 41) İÇ İÇE YOK (kullanıcı, 2026-10-29: «bazı görseller iç içe girmiş, sade
+   değil»). Hızlı kayıt: kartın içinde koyu oyuk, oyuğun içinde hap, hapın
+   içinde ayrıca girdi zemini — üç kat. Oyuk kalkar; seçiciler yalnız cam hap.
+   Şerit yüzeyde küçültülmüş bölüm dizisi (Kaynaklarım + Çözülen sorular)
+   tek grup gibi köşe alır: Şerit kuralı her birine 24 px köşe ve kenar
+   verince birleşme yerinde şerit kırılıyordu (kabuk.css gruplamasıyla aynı). */
+html[data-zemin="yumusak"] .site--v5 #main .vk .x30 .sat2{ background:transparent; border-color:transparent; box-shadow:none; padding-left:0; padding-right:0; }
+html[data-zemin="yumusak"] .site--v5 #main .vk .x30 .ci select{ background:transparent; box-shadow:none; }
+html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk + .gizle-kucuk:not(html),
+html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk + [data-gizle-gizli] + .gizle-kucuk:not(html),
+html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk + [data-gizle-gizli] + [data-gizle-gizli] + .gizle-kucuk:not(html){
+  border-top-left-radius:0; border-top-right-radius:0; border-top-color:transparent !important; }
+html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk:has(+ .gizle-kucuk):not(html),
+html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk:has(+ [data-gizle-gizli] + .gizle-kucuk):not(html),
+html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk:has(+ [data-gizle-gizli] + [data-gizle-gizli] + .gizle-kucuk):not(html){
+  border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom-color:transparent !important; }
+
+/* 42) TEK TON KENAR (kullanıcı, 2026-10-29: «camsı tarz için kenarları beyaz
+   yapıyorsun, sonra beyazdan karanlığa geçiyor; olacaksa tam karanlık ya da
+   tam aydınlık; camsı efekti ikisine de esneyecek şekilde kaliteli yap ya da
+   azalt»). Sol üstten sönen kenar ışığı (§16, §32) kalktı: kart çevresi her
+   yerde aynı ince çizgi — açıkta yumuşak beyaz, koyuda belli belirsiz açık.
+   Koyuda üst iç ışıklar da kısıldı; renk geçişi yok, tema tek tondur. */
+:root{ --kenar-tek:rgba(255,255,255,.55); }
+html[data-theme="dark"]{ --kenar-tek:rgba(255,255,255,.075);
+  --levha-ic:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.05);
+  --cam-ust:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.03);
+  --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --kenar-tek:rgba(255,255,255,.075);
+  --levha-ic:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.05);
+  --cam-ust:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.03);
+  --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent); } }
+html[data-zemin="yumusak"] .site--v5 .sayfa--kapakli .bugun__alan::before,
+html[data-zemin="yumusak"] .kutu::before,
+html[data-zemin="yumusak"] .card:not(.card--flat)::before,
+html[data-zemin="yumusak"] .giris::before,
+html[data-zemin="yumusak"] .site--v5 .pk::before,
+html[data-zemin="yumusak"] .site--v5 .kapak__sayi::before,
+html[data-zemin="yumusak"] .site--v5 .pickcard::before{
+  background:var(--kenar-tek); }
+/* Çizgi jetonları camda yarı saydam: opak gri çizgi (#2C2C31) cam kartın
+   içindeki her kutuyu ayrı gri çerçeveye çeviriyordu (Öğren › Dersler
+   karoları, listeler). Yarı saydam çizgi arkasındaki tonu alır: koyuda tam
+   koyu, açıkta tam açık kalır. */
+html[data-zemin="yumusak"]{ --border:rgba(20,24,40,.1); --border-soft:rgba(20,24,40,.06); --border-strong:rgba(20,24,40,.16); }
+html[data-theme="dark"][data-zemin="yumusak"]{ --border:rgba(255,255,255,.08); --border-soft:rgba(255,255,255,.05); --border-strong:rgba(255,255,255,.14); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"])[data-zemin="yumusak"]{ --border:rgba(255,255,255,.08); --border-soft:rgba(255,255,255,.05); --border-strong:rgba(255,255,255,.14); } }
+/* Öğren › Dersler karosu: çerçeve yok, ince cam; seçili olan seçili cam. */
+html[data-zemin="yumusak"] .site--v5 #main .ogr-ders{ border-color:transparent; background:var(--cam-ince); box-shadow:var(--cam-ust); }
+html[data-zemin="yumusak"] .site--v5 #main .ogr-ders.is-on{ background:var(--secili-zemin); box-shadow:var(--secili-golge); }
