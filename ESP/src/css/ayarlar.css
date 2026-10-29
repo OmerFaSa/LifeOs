@@ -106,3 +106,23 @@ html[data-zemin="yumusak"] .ayarlar .themebtn.is-on{ border-color:transparent; b
 .zemin-durum{ flex-basis:100%; text-align:right; font-size:12px; color:var(--text-3); }
 .zemin-durum:empty{ display:none; }
 .ayarlar .seg button{ white-space:nowrap; }
+
+/* Minik galerisi (minik.js galeriHtml): her minik kendi kartında canlı;
+   basınca sayfadan çıkar ya da gelir. Kapalı olan soluk. */
+.minikgal{ display:grid; grid-template-columns:repeat(auto-fill, minmax(112px, 1fr)); gap:8px; width:100%; }
+.minikgal__kart{ position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:0; padding:10px 8px 10px;
+  border:1px solid var(--border); border-radius:16px; background:transparent; color:var(--text-2); font:inherit; text-align:center; cursor:pointer;
+  transition:background var(--dur) var(--ease), border-color var(--dur) var(--ease), opacity var(--dur) var(--ease); }
+.minikgal__kart:hover{ background:color-mix(in oklab, var(--text) 5%, transparent); }
+.minikgal__kart b{ font-size:13px; font-weight:600; color:var(--text); }
+.minikgal__kart small{ font-size:11px; line-height:1.3; color:var(--text-3); }
+.minikgal__kart:not(.is-on){ opacity:.5; }
+.minikgal__kart:not(.is-on) .minikgal__sahne{ filter:grayscale(.85); }
+.minikgal__kart.is-on{ border-color:transparent; background:var(--secili-zemin, var(--primary-soft)); box-shadow:var(--secili-golge, none); }
+.minikgal__kart::after{ content:''; position:absolute; top:8px; right:8px; width:14px; height:14px; border-radius:50%;
+  box-shadow:inset 0 0 0 1.5px var(--border-strong); }
+.minikgal__kart.is-on::after{ box-shadow:none; background:var(--secili-yazi, var(--primary))
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 7.2l2.3 2.3 4.7-4.9' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat; }
+.minikgal__sahne{ position:relative; width:64px; height:60px; margin-bottom:4px; }
+.minikgal__sahne .minik{ --boy:40px; left:calc(50% - var(--boy) / 2); top:calc(100% - var(--boy) - 4px); pointer-events:none; cursor:default; }
+.minikgal__sahne .minik__balon, .minikgal__sahne .minik__ad{ display:none; }

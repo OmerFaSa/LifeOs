@@ -99,7 +99,8 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'hareket') return H('Animasyonlar', 'Az: yalnız gerekli geçişler', cagir(L.ANIMASYON, 'seciciHtml'))
       + G('Hız', 'Arayüz ve ajanlar ayrı; Ayrıntı içindekileri tek tek ayarlar', cagir(L.ANIMASYON, 'hizSeciciHtml'));
     if(id === 'ses') return G('Ses düzeyleri', 'Genel hepsini birlikte kısar; Ayrıntı grubun içindekileri tek tek', cagir(L.SES, 'duzeySeciciHtml'));
-    if(id === 'ekip') return H('Minikler', 'Sayfada en çok kaç minik', cagir(L.MINIK, 'seciciHtml'))
+    if(id === 'ekip') return G('Kimler gezsin', 'Basınca sayfadan çıkar ya da gelir; yeni minikler açık gelir', cagir(L.MINIK, 'galeriHtml'))
+      + H('Minikler', 'Sayfada en çok kaç minik', cagir(L.MINIK, 'seciciHtml'))
       + H('Minik boyu', '', cagir(L.MINIK, 'boySeciciHtml'))
       + H('King’in görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml'));
     if(id === 'hesap'){

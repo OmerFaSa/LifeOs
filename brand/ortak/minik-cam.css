@@ -39,3 +39,34 @@
 /* 3) Üçgen ofis miniğinde ağız gözlerin hemen altında (73–81 %); kravat
    oraya inerse ağzı örter ve yüzde «+» gibi durur. Kravat ağzın altına. */
 .minik[data-ofis][data-bicim="ucgen"] .minik__kravat{ top:85%; height:13%; width:10%; left:45%; }
+
+/* 4) ALTI YENİ KİŞİ (kullanıcı, 2026-10-29: «ajan çeşitliliğini arttırıp
+   kalitesini arttır»). Süsler dosyasız: renk geçişi ve kesme yolu.
+   Bere (ponponlu), hilal, alev perçemi, bulut, kalp anteni, damla. */
+.minik[data-tip="bere"] .minik__sus{ left:10%; right:10%; top:-14%; height:30%; border-radius:50% 50% 12% 12% / 80% 80% 20% 20%;
+  background:repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 2px, transparent 2px 6px), linear-gradient(#ff8fa3, #e2577a); }
+.minik[data-tip="bere"] .minik__sus::after{ content:''; position:absolute; left:40%; top:-34%; width:22%; aspect-ratio:1; border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #fff, #f3e6ec); }
+.minik[data-bicim="ucgen"][data-tip="bere"] .minik__sus{ left:22%; right:22%; top:-4%; }
+.minik[data-tip="ay"] .minik__sus{ left:60%; top:-24%; width:30%; height:30%; rotate:-18deg; border-radius:50%;
+  background:radial-gradient(circle at 68% 38%, transparent 0 40%, #ffe7a3 41%, #f6c453 70%); filter:drop-shadow(0 0 3px rgba(255,214,120,.6)); }
+.minik[data-tip="alev"] .minik__sus{ left:34%; width:32%; top:-34%; height:42%;
+  background:radial-gradient(60% 50% at 50% 78%, #fff3b0, transparent 70%), linear-gradient(180deg, #ff9f43, #ff5e3a);
+  clip-path:polygon(50% 0, 66% 30%, 82% 18%, 84% 56%, 100% 72%, 76% 100%, 24% 100%, 0 72%, 16% 56%, 20% 22%, 36% 34%); }
+.minik[data-tip="bulut"] .minik__sus{ left:20%; right:20%; top:-10%; height:20%; border-radius:999px;
+  background:linear-gradient(#fff, #e6eefc); filter:drop-shadow(0 1px 1.5px rgba(110,130,180,.35)); }
+.minik[data-tip="bulut"] .minik__sus::before, .minik[data-tip="bulut"] .minik__sus::after{ content:""; position:absolute; border-radius:50%; aspect-ratio:1;
+  background:radial-gradient(circle at 40% 35%, #fff 0 55%, #eef3fd); }
+.minik[data-tip="bulut"] .minik__sus::before{ left:8%; bottom:28%; width:46%; }
+.minik[data-tip="bulut"] .minik__sus::after{ left:44%; bottom:18%; width:38%; }
+.minik[data-tip="kalp"] .minik__sus{ left:47%; width:6%; top:-30%; height:32%; border-radius:2px; background:var(--g3); }
+.minik[data-tip="kalp"] .minik__sus::after{ content:''; position:absolute; left:-180%; top:-60%; width:460%; aspect-ratio:1;
+  background:linear-gradient(#ff8fb1, #ff4f7e); clip-path:path('M5 9 C1 6 0 4 1.6 2.2 C3 .8 4.6 1.4 5 2.8 C5.4 1.4 7 .8 8.4 2.2 C10 4 9 6 5 9 Z'); scale:1.8; transform-origin:0 0; }
+.minik[data-tip="damla"] .minik__sus{ left:62%; top:-26%; width:22%; height:30%;
+  background:radial-gradient(circle at 40% 62%, #fff 0 12%, transparent 14%), linear-gradient(180deg, #a8e3ff, #3fa9f5);
+  border-radius:50% 50% 50% 50% / 62% 62% 38% 38%; clip-path:polygon(50% 0, 100% 62%, 92% 88%, 50% 100%, 8% 88%, 0 62%); }
+@media (prefers-reduced-motion:no-preference){
+  .minik[data-tip="alev"] .minik__sus{ animation:mk-alev 1.6s ease-in-out infinite alternate; transform-origin:50% 100%; }
+  .minik[data-tip="kalp"] .minik__sus{ animation:mk-anten 3.4s ease-in-out infinite; transform-origin:50% 100%; }
+}
+@keyframes mk-alev{ from{ transform:scale(1, .94) skewX(-3deg); } to{ transform:scale(1, 1.06) skewX(3deg); } }

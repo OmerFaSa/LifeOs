@@ -404,4 +404,53 @@
       expect(document.querySelector('.minikkat')).toBe(null);
     });
   });
+  /* Kullanıcı (2026-10-29): «mini ajanların hangilerinin olacağını görüp seçip
+     çıkartıp ekleyebilelim; ajan çeşitliliğini arttır». */
+  describe('Minik · kadro seçimi', () => {
+    function ile(fn){
+      let eski = null;
+      try{ eski = localStorage.getItem(C.KADRO_ANAHTAR); }catch(e){}
+      try{ localStorage.removeItem(C.KADRO_ANAHTAR); return fn(); }
+      finally{ try{ if(eski == null) localStorage.removeItem(C.KADRO_ANAHTAR); else localStorage.setItem(C.KADRO_ANAHTAR, eski); }catch(e){} }
+    }
+    const AJ = [{ id:'patron', name:'Patron' }, { id:'a', name:'Asistan' }];
+    it('kadro on sekiz kişi; yeni altısı da kendi süsü ve huyuyla', () => {
+      expect(C.KISILER.length).toBe(18);
+      ['Bereli', 'Hilal', 'Alev', 'Pamuk', 'Sevgi', 'Damla'].forEach(ad => expect(C.KISILER.some(k => k.ad === ad)).toBe(true));
+      C.KISILER.forEach(k => expect(typeof C.HUY_NOT[k.huy]).toBe('string'));
+    });
+    it('varsayılan herkes açık; kapatılan havuzdan çıkar, ofis hepsini birden çıkarır', () => ile(() => {
+      expect(C.havuzKur(AJ).length).toBe(C.KISILER.length + 2);
+      C.kadroAyarla('Pofuduk', false);
+      expect(C.havuzKur(AJ).some(k => k.ad === 'Pofuduk')).toBe(false);
+      C.kadroAyarla('ofis', false);
+      expect(C.havuzKur(AJ).some(k => k.ofis)).toBe(false);
+      expect(C.havuzKur(AJ).length).toBe(C.KISILER.length - 1);
+      C.kadroAyarla('Pofuduk', true);
+      expect(Array.from(C.kapalilar())).toEqual(['ofis']);
+    }));
+    it('yeni eklenen minik kendiliğinden açık gelir: tercih yalnız kapatılanların adıdır', () => ile(() => {
+      localStorage.setItem(C.KADRO_ANAHTAR, JSON.stringify(['Bıcır', 'Eski bir minik']));
+      const h = C.havuzKur([]);
+      expect(h.some(k => k.ad === 'Damla')).toBe(true);
+      expect(h.some(k => k.ad === 'Bıcır')).toBe(false);
+      localStorage.setItem(C.KADRO_ANAHTAR, '{bozuk');
+      expect(C.havuzKur([]).length).toBe(C.KISILER.length);
+    }));
+    it('galeri: her kişi bir kart (canlı minik, ad, huy); basınca kapanır, yeniden basınca açılır', () => ile(() => {
+      const d = document.createElement('div'); d.innerHTML = C.galeriHtml(); document.body.appendChild(d);
+      try{
+        const kartlar = Array.from(d.querySelectorAll('[data-minik-kadro]'));
+        expect(kartlar.filter(b => b.getAttribute('data-minik-kadro') !== 'ofis').length).toBe(C.KISILER.length);
+        kartlar.forEach(b => expect(!!b.querySelector('.minikgal__sahne .minik .minik__govde')).toBe(true));
+        const b = d.querySelector('[data-minik-kadro="Hilal"]');
+        expect(b.getAttribute('aria-pressed')).toBe('true');
+        b.click();
+        expect(b.getAttribute('aria-pressed')).toBe('false');
+        expect(C.kapalilar().has('Hilal')).toBe(true);
+        b.click();
+        expect(C.kapalilar().has('Hilal')).toBe(false);
+      }finally{ d.remove(); }
+    }));
+  });
 })();

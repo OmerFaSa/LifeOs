@@ -65,10 +65,24 @@ window.LIFEOS.MINIK = (function(){
     { ad:'Çiçek',    bicim:'ucgen',    tip:'cicek',   huy:'sarkici',  desen:'cil',   boy:39, ton:80,  perde:1.15 },
     { ad:'Boncuk',   bicim:'yuvarlak', tip:'boynuz',  huy:'oyuncu',   desen:'cil',   boy:36, ton:-60, perde:1.3 },
     { ad:'Yıldız',   bicim:'kare',     tip:'yildiz',  huy:'cesur',    desen:'yok',   boy:40, ton:100, perde:1.1 },
-    { ad:'Pıtırcık', bicim:'ucgen',    tip:'mantar',  huy:'sakar',    desen:'cil',   boy:37, ton:-90, perde:1.05 }
+    { ad:'Pıtırcık', bicim:'ucgen',    tip:'mantar',  huy:'sakar',    desen:'cil',   boy:37, ton:-90, perde:1.05 },
+    /* 2026-10-29 (kullanıcı: «ajan çeşitliliğini arttırıp kalitesini arttır»). */
+    { ad:'Bereli',   bicim:'yuvarlak', tip:'bere',    huy:'sevecen',  desen:'yok',   boy:40, ton:150, perde:1.15 },
+    { ad:'Hilal',    bicim:'ucgen',    tip:'ay',      huy:'dalgin',   desen:'yok',   boy:41, ton:-120, perde:0.95 },
+    { ad:'Alev',     bicim:'kare',     tip:'alev',    huy:'enerjik',  desen:'cil',   boy:39, ton:-150, perde:1.1 },
+    { ad:'Pamuk',    bicim:'yuvarlak', tip:'bulut',   huy:'sakin',    desen:'karin', boy:43, ton:120, perde:0.88 },
+    { ad:'Sevgi',    bicim:'kare',     tip:'kalp',    huy:'nazik',    desen:'karin', boy:37, ton:170, perde:1.22 },
+    { ad:'Damla',    bicim:'ucgen',    tip:'damla',   huy:'telasli',  desen:'yok',   boy:38, ton:-170, perde:1.12 }
   ]);
   const HUY_AD = Object.freeze({ uykucu:'uykucu', konuskan:'konuşkan', merakli:'meraklı', neseli:'neşeli', hayalci:'hayalci', bilge:'bilge',
-    utangac:'utangaç', tembel:'tembel', sarkici:'şarkıcı', oyuncu:'oyuncu', cesur:'cesur', sakar:'sakar' });
+    utangac:'utangaç', tembel:'tembel', sarkici:'şarkıcı', oyuncu:'oyuncu', cesur:'cesur', sakar:'sakar',
+    sevecen:'sevecen', dalgin:'dalgın', enerjik:'enerjik', sakin:'sakin', nazik:'nazik', telasli:'telaşlı' });
+  /* Galerideki tek cümle: huy ne yapar (yalnız görünüş; hiçbir karara girmez). */
+  const HUY_NOT = Object.freeze({ uykucu:'Sık sık esner, uyuklar', konuskan:'Her fırsatta laf atar', merakli:'Kartları kurcalar',
+    neseli:'Zıplar, güler', hayalci:'Bulutlara dalar', bilge:'Ağır ağır yürür', utangac:'Dokununca saklanır', tembel:'Pek kıpırdamaz',
+    sarkici:'Arada şarkı mırıldanır', oyuncu:'Koşturur, oynar', cesur:'Yüksek kartlara atlar', sakar:'Arada tökezler',
+    sevecen:'Yanına gelene sokulur', dalgin:'Uzaklara bakar', enerjik:'Hiç yerinde durmaz', sakin:'Yavaş ve sakin',
+    nazik:'Selam verir, teşekkür eder', telasli:'Hep bir yere yetişir' });
   /* Sohbet senaryoları (kullanıcı, 2026-10-28: «aralarındaki konuşmaları
      daha çeşitli yap»): soru–cevap; Ofis'in kendi işi, sabahın ve gecenin
      kendi lafı. Her satır balona sığar (en çok 18 harf). */
@@ -261,6 +275,48 @@ window.LIFEOS.MINIK = (function(){
     const d = n >= 3 ? 1 : 0;
     const sec = ofis.slice(0, n - d).concat(diger.slice(0, d));
     return sec.concat(diger.slice(d)).slice(0, Math.min(n, l.length));
+  }
+
+  /* KADRO SEÇİMİ (kullanıcı, 2026-10-29: «mini ajanların hangilerinin olacağını
+     görüp seçip çıkartıp ekleyebilelim»). Tercih kapatılanların adlarıdır:
+     yeni eklenen minik kendiliğinden açık gelir. 'ofis' Ofis çalışanlarının
+     hepsidir. Hepsi kapalıysa sayfada minik yoktur (sayı da 0 sayılır). */
+  const KADRO_ANAHTAR = 'lifeos.minik.kapali';
+  function kapalilar(){
+    let v = null;
+    try{ v = JSON.parse(localStorage.getItem(KADRO_ANAHTAR) || '[]'); }catch(e){ v = null; }
+    return new Set(Array.isArray(v) ? v.filter(x => typeof x === 'string') : []);
+  }
+  function havuzKur(ajanListesi){
+    const k = kapalilar();
+    return KISILER.filter(x => !k.has(x.ad)).concat(k.has('ofis') ? [] : ofisKisileri(ajanListesi));
+  }
+  function kadroAyarla(ad, acik){
+    const k = kapalilar();
+    if(acik) k.delete(ad); else k.add(ad);
+    try{ localStorage.setItem(KADRO_ANAHTAR, JSON.stringify(Array.from(k))); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    if(typeof document !== 'undefined') document.querySelectorAll('[data-minik-kadro]').forEach(b => {
+      const on = !k.has(b.getAttribute('data-minik-kadro'));
+      b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    kadroUygula();
+    return k;
+  }
+  /* Galeri: her minik kendi kartında canlı (nefes, göz kırpma); basınca çıkar ya da gelir. */
+  function galeriHtml(){
+    const k = kapalilar();
+    const kart = (ad, alt, govde, on) => '<button type="button" class="minikgal__kart' + (on ? ' is-on' : '') + '" data-minik-kadro="' + ad + '"'
+      + ' aria-pressed="' + (on ? 'true' : 'false') + '" title="' + (on ? 'Sayfadan çıkar' : 'Sayfaya ekle') + '">'
+      + '<span class="minikgal__sahne" aria-hidden="true">' + govde + '</span><b>' + ad + '</b><small>' + alt + '</small></button>';
+    const kisi = x => '<span class="minik" data-tip="' + x.tip + '" data-bicim="' + x.bicim + '" data-desen="' + x.desen + '" data-huy="' + x.huy + '"'
+      + ' data-yon="sag" style="--ton:' + x.ton + '">' + ICERIK + '</span>';
+    const ofis = ofisKisileri(ajanlar());
+    return '<div class="minikgal" role="group" aria-label="Minikler: sayfada kimler gezsin">'
+      + KISILER.map(x => kart(x.ad, HUY_AD[x.huy] + ' · ' + HUY_NOT[x.huy], kisi(x), !k.has(x.ad))).join('')
+      + (ofis.length ? kart('ofis', 'Ofis çalışanları · ' + ofis.length + ' kişi, işinin başında',
+        '<span class="minik" data-ofis="" data-tip="' + ofis[0].tip + '" data-bicim="' + ofis[0].bicim + '" data-desen="yok" data-yon="sag" style="--ton:' + ofis[0].ton + '">' + ICERIK + '</span>', !k.has('ofis'))
+        .replace('<b>ofis</b>', '<b>Ofis</b>') : '')
+      + '</div>';
   }
 
   /* Sohbet edebilecek eş: aynı kartın kenarında, en çok 260 px ötede. */
@@ -518,7 +574,7 @@ window.LIFEOS.MINIK = (function(){
 
   /* Üzgün ağır, uykulu ağır aksak, mutlu ve kızgın hızlı yürür. */
   const HIZ_RUH = Object.freeze({ uzgun:.6, uykulu:.7, mutlu:1.25, kizgin:1.5 });
-  const HIZ_HUY = Object.freeze({ tembel:.7, oyuncu:1.2, cesur:1.15 });
+  const HIZ_HUY = Object.freeze({ tembel:.7, oyuncu:1.2, cesur:1.15, enerjik:1.3, telasli:1.25, sakin:.8 });
 
   /* Paytak yürüyüş: önce yöne hafifçe eğilir, sonra kısa adımlarla, yavaş
      başlayıp yavaş durarak yürür (adım ritmi CSS'te). */
@@ -753,7 +809,7 @@ window.LIFEOS.MINIK = (function(){
      kenara konur (sayfayı yeniden açmadan). */
   function sayiUygula(){
     if(!durum.kat) return;
-    const n = simdikiSayi();
+    const n = Math.min(simdikiSayi(), durum.havuz.length);
     while(durum.minikler.length > n){
       const mk = durum.minikler.pop();
       clearTimeout(mk.zaman); if(mk.anim) mk.anim.cancel();
@@ -769,6 +825,17 @@ window.LIFEOS.MINIK = (function(){
       if(yerlestir(mk)) sonra(mk, 1200 + i * 900);
     }
   }
+  /* Kadro değişince: hepsi iner, yeni kadronun ilk n'i görünen kenarlara konur. */
+  function kadroUygula(){
+    durum.havuz = havuzKur(ajanlar());
+    if(!durum.kat) return;
+    while(durum.minikler.length){
+      const mk = durum.minikler.pop();
+      clearTimeout(mk.zaman); if(mk.anim) mk.anim.cancel();
+      mk.el.remove();
+    }
+    sayiUygula();
+  }
   function ayarla(n){
     try{ localStorage.setItem(ANAHTAR, String(n)); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
     const s = simdikiSayi();
@@ -781,6 +848,8 @@ window.LIFEOS.MINIK = (function(){
   }
   if(typeof document !== 'undefined'){
     document.addEventListener('click', e => {
+      const kd = e.target && e.target.closest ? e.target.closest('[data-minik-kadro]') : null;
+      if(kd){ e.preventDefault(); const ad = kd.getAttribute('data-minik-kadro'); kadroAyarla(ad, kapalilar().has(ad)); return; }
       const bb = e.target && e.target.closest ? e.target.closest('[data-minik-boy]') : null;
       if(bb){ e.preventDefault(); boyAyarla(bb.getAttribute('data-minik-boy')); return; }
       const t = e.target && e.target.closest ? e.target.closest('[data-minik-ses]') : null;
@@ -790,7 +859,7 @@ window.LIFEOS.MINIK = (function(){
       e.preventDefault();
       ayarla(Number(b.getAttribute('data-minik-sec')));
     });
-    window.addEventListener('storage', e => { if(e.key === ANAHTAR) sayiUygula(); });
+    window.addEventListener('storage', e => { if(e.key === ANAHTAR) sayiUygula(); if(e.key === KADRO_ANAHTAR) kadroUygula(); });
   }
 
   /* İki ölçüm: biri hemen, biri kartların giriş animasyonu bittikten sonra. */
@@ -906,10 +975,10 @@ window.LIFEOS.MINIK = (function(){
     kat.setAttribute('aria-hidden', 'true');
     document.body.appendChild(kat);
     durum.kat = kat;
-    const n = simdikiSayi();
+    durum.havuz = havuzKur(ajanlar());
+    const n = Math.min(simdikiSayi(), durum.havuz.length);
     for(let i = 0; i < n; i++){ const mk = minikYap(i); kat.appendChild(mk.el); durum.minikler.push(mk); }
     durum.sayfa = document.documentElement.dataset.sayfa || '';
-    durum.havuz = KISILER.concat(ofisKisileri(ajanlar()));
     const ilk = kadro(durum.sayfa, durum.minikler.length, durum.havuz);
     durum.minikler.forEach((mk, i) => giydir(mk, durum.havuz[ilk[i]]));
     durum.zeminler = olcum();
@@ -963,5 +1032,6 @@ window.LIFEOS.MINIK = (function(){
 
   return { kur, sayi, seciciHtml, BOY_ANAHTAR, BOYLAR, boy, boyPx, boyAyarla, boySeciciHtml, yanSes, radyoda, ofisKisileri, ICERIK, DIYALOG, diyalogSec, ESYALAR, esyaSec,
     SES_ANAHTAR, sesAyar, sesAyarla, sesIzinli, sesSeciciHtml, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh, inisYeri,
-    KISILER, HUY_AD, RUH, RUH_AD, KART, EN_AZ, PAY };
+    KISILER, HUY_AD, HUY_NOT, RUH, RUH_AD, KART, EN_AZ, PAY,
+    KADRO_ANAHTAR, kapalilar, havuzKur, kadroAyarla, galeriHtml };
 })();
