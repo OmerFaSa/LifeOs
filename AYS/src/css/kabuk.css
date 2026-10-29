@@ -1740,6 +1740,21 @@ html .site--v5 > .kenar .kenar__arac:is(:hover, :focus-visible) .kenar__kisayol{
 .site--v5 .kenar .kenar__hesap .kbk-ic{ width:18px; height:18px; }
 .kenar__hesap[hidden]{ display:none !important; }
 @media (prefers-reduced-motion:reduce){ .kenar__arac--profil[data-hal="esitleniyor"] .kenar__avatar::after{ animation:none; } }
+/* PROFİL PENCERESİ (2026-10-29): Ara · Bildirimler · Radyo · Sayfa düzeni
+   profilin üstünde, kenarın içinde açılır (sistem seçimiyle aynı kayış:
+   0fr -> 1fr). Kapalıyken yer tutmaz. Zil noktası avatarın köşesinde. */
+.kenar__benler{ display:flex; flex-direction:column; }
+.kenar__benpencere{ display:none; grid-template-rows:0fr; visibility:hidden; opacity:0;
+  transition:grid-template-rows var(--dur-lg) var(--ease), opacity var(--dur) var(--ease), margin var(--dur-lg) var(--ease),
+    visibility 0s linear var(--dur-lg), display var(--dur-lg) allow-discrete; }
+.kenar__benler.is-acik .kenar__benpencere{ display:grid; grid-template-rows:1fr; visibility:visible; opacity:1; margin-bottom:6px;
+  transition:grid-template-rows var(--dur-lg) var(--ease), opacity var(--dur) var(--ease), margin var(--dur-lg) var(--ease),
+    visibility 0s, display 0s allow-discrete; }
+@starting-style{ .kenar__benler.is-acik .kenar__benpencere{ grid-template-rows:0fr; opacity:0; margin-bottom:0; } }
+.kenar__benliste{ min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:1px; }
+.site--v5 .kenar .kenar__avatar .ust__zil-nokta{ position:absolute; top:-2px; right:-2px; left:auto; width:8px; height:8px;
+  border-radius:50%; background:var(--now); box-shadow:0 0 0 2px var(--surface-2); }
+.site--v5 .kenar .kenar__bensec[aria-expanded="true"]{ background:transparent; }
 /* Dar kenar (açık kenarın kırpılmış hâli): ekler ve bulut adlar gibi kapalıyken
    yoktur, kenar açılınca solarak gelir; simgeler ve avatar yerinde kalır. */
 @media (min-width:680px){

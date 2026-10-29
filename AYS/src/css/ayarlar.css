@@ -1,0 +1,108 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/ayarlar.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* AYARLAR — bölüm bölüm ayar paneli (kullanıcı, 2026-10-29: «sade ve
+   minimalist olması çok değerli»). Kaynağı brand/ortak/ayarlar.css.
+   Kenarın yanında ekran boyunca yan sayfa (kmenu--yan, capaYerlestir);
+   telefonda alttan açılır. Solda bölümler (ince liste), sağda satırlar:
+   adı solda, denetimi sağda; satırlar arasında yalnız ince çizgi. */
+
+html[data-yazi="manrope"]{ --font-body:'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
+html[data-yazi="sistem"]{ --font-body:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+html[data-yazi="kitap"]{ --font-body:'Newsreader', ui-serif, Georgia, serif; }
+
+.ayarlar{ display:flex; flex-direction:column; padding:0; overflow:hidden; }
+/* Yan sayfanın 380 px genişliğini (bildirimler) aşar: iki sütun sığsın. */
+.kmenu--yan.ayarlar:not(.is-alttan){ width:min(720px, calc(100vw - 260px)); }
+.ayarlar__bas{ display:flex; align-items:center; gap:10px; padding:18px 18px 10px 24px; }
+.ayarlar__bas b{ font-size:17px; font-weight:650; letter-spacing:-.01em; }
+.ayarlar__bas .bildirim__kapat{ margin-left:auto; }
+.ayarlar__govde{ flex:1; min-height:0; display:grid; grid-template-columns:168px minmax(0,1fr); }
+.ayarlar__nav{ display:flex; flex-direction:column; gap:2px; padding:6px 10px 18px 14px; overflow:auto; }
+.ayarlar__sekme{ display:flex; align-items:center; min-height:36px; padding:0 12px; border:0; border-radius:10px;
+  background:transparent; color:var(--text-2); font:inherit; font-size:13.5px; font-weight:500; text-align:left; cursor:pointer;
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.ayarlar__sekme:hover{ color:var(--text); background:color-mix(in oklab, var(--text) 6%, transparent); }
+.ayarlar__sekme.is-on{ color:var(--secili-yazi, var(--text)); font-weight:600;
+  background:var(--secili-zemin, color-mix(in oklab, var(--primary) 12%, transparent)); box-shadow:var(--secili-golge, none); }
+.ayarlar__icerik{ min-height:0; overflow:auto; padding:2px 24px 28px 14px; }
+.ayarlar__satir{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0;
+  border-top:1px solid var(--border-soft); }
+.ayarlar__satir:first-child{ border-top:0; padding-top:6px; }
+.ayarlar__ad{ flex:0 1 190px; min-width:0; font-size:14px; font-weight:550; color:var(--text); }
+.ayarlar__ad small{ display:block; margin-top:2px; font-size:12px; font-weight:450; color:var(--text-3); line-height:1.35; }
+.ayarlar__deger{ flex:1 1 auto; min-width:0; display:flex; justify-content:flex-end; }
+.ayarlar__deger > *{ max-width:100%; }
+.ayarlar__deger .sesduzey{ width:100%; }
+.ayarlar__bos{ margin:14px 0; font-size:13px; color:var(--text-3); }
+
+/* Yazı tipi: dört küçük örnek kutusu; her biri kendi yazısıyla «Aa». */
+.ayarlar__yazilar{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px; width:100%; }
+.ayarlar__yazi{ display:flex; flex-direction:column; align-items:flex-start; gap:1px; min-width:0; padding:10px 10px 9px;
+  border:1px solid var(--border); border-radius:12px; background:transparent; color:var(--text-2); font:inherit; text-align:left; cursor:pointer;
+  transition:background var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.ayarlar__yazi:hover{ background:color-mix(in oklab, var(--text) 5%, transparent); }
+.ayarlar__yazi b{ font-size:20px; font-weight:600; color:var(--text); line-height:1.1; }
+.ayarlar__yazi span{ font-size:12.5px; font-weight:600; }
+.ayarlar__yazi small{ font-size:11px; color:var(--text-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; }
+.ayarlar__yazi.is-on{ border-color:transparent; background:var(--secili-zemin, var(--primary-soft)); box-shadow:var(--secili-golge, none); color:var(--secili-yazi, var(--primary)); }
+.ayarlar__yazi[data-yazi-ornek="inter"] b{ font-family:'Inter', sans-serif; }
+.ayarlar__yazi[data-yazi-ornek="manrope"] b{ font-family:'Manrope', sans-serif; }
+.ayarlar__yazi[data-yazi-ornek="sistem"] b{ font-family:system-ui, -apple-system, 'Segoe UI', sans-serif; }
+.ayarlar__yazi[data-yazi-ornek="kitap"] b{ font-family:'Newsreader', Georgia, serif; font-weight:500; }
+
+.ayarlar__profil{ display:flex; align-items:center; gap:12px; padding:12px 0 14px; }
+.ayarlar__profil > span{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.ayarlar__profil b{ font-size:15px; }
+.ayarlar__profil small{ font-size:12px; color:var(--text-3); }
+.ayarlar__avatar{ width:40px; height:40px; flex:none; border-radius:50%; display:grid; place-items:center;
+  background:var(--surface-3, var(--surface-2)); color:var(--text); font-style:normal; font-weight:650; }
+
+/* Dar ekran: bölümler üstte yatay kayan şerit, satırlar alt alta. */
+@media (max-width:679px){
+  .ayarlar{ width:auto; max-height:88vh; }
+  .ayarlar__govde{ grid-template-columns:1fr; grid-template-rows:auto minmax(0,1fr); }
+  .ayarlar__nav{ flex-direction:row; overflow-x:auto; padding:0 16px 8px; scrollbar-width:none; }
+  .ayarlar__sekme{ flex:none; }
+  .ayarlar__icerik{ padding:0 16px 24px; }
+  .ayarlar__satir{ flex-direction:column; align-items:stretch; gap:10px; }
+  .ayarlar__ad{ flex:none; }
+  .ayarlar__deger{ justify-content:flex-start; }
+  .ayarlar__yazilar{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+
+/* Paneldeki seçiciler sayfadakiyle aynı cam dil (opak koyu blok değil):
+   oyuk ray, seçili hap parlak cam; seçili tema seçili cam. Panel kabuğun
+   dışında (#overlay-root) durur, cam jetonlarına yedek değer verilir. */
+html[data-zemin="yumusak"] .ayarlar .seg{ background:var(--ray, rgba(127,127,140,.12)); border-color:var(--cam-kenar, var(--border)); }
+html[data-zemin="yumusak"] .ayarlar .seg button.is-on{ background:var(--cam-katman); color:var(--text);
+  box-shadow:var(--cam-ust), 0 1px 3px rgba(0,0,0,.12); }
+html[data-zemin="yumusak"] .ayarlar .themebtn{ border-color:var(--border); background:transparent; }
+html[data-zemin="yumusak"] .ayarlar .themebtn.is-on{ border-color:transparent; background:var(--secili-zemin); color:var(--secili-yazi); box-shadow:var(--secili-golge); }
+
+/* Geniş satır: ad üstte, denetim altta tam genişlik (ses ve hız katmanları). */
+.ayarlar__satir--genis{ flex-direction:column; align-items:stretch; gap:12px; }
+.ayarlar__satir--genis .ayarlar__ad{ flex:none; }
+.ayarlar__satir--genis .ayarlar__deger{ justify-content:stretch; }
+.ayarlar__satir--genis .ayarlar__deger > *{ width:100%; }
+
+/* Animasyon hızı (animasyon.js hizSeciciHtml): grup satırı, sağ üstte Ayrıntı. */
+.anihiz__kok{ display:grid; gap:4px; }
+.anihiz__grup{ position:relative; display:grid; gap:8px; padding:10px 0; border-top:1px solid var(--border-soft); }
+.anihiz__grup:first-child{ border-top:0; padding-top:0; }
+.anihiz__satir{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.anihiz__ad{ font-size:13.5px; color:var(--text); }
+.anihiz__ayrinti .anihiz__ad{ font-size:12.5px; color:var(--text-2); }
+.anihiz .is-on{ font-weight:600; }
+.anihiz__ayrinti > summary{ width:max-content; list-style:none; cursor:pointer; font-size:12px; font-weight:550; color:var(--text-3); }
+.anihiz__ayrinti > summary::-webkit-details-marker{ display:none; }
+.anihiz__ayrinti > summary::after{ content:'›'; display:inline-block; margin-left:4px; transition:transform var(--dur) var(--ease); }
+.anihiz__ayrinti[open] > summary::after{ transform:rotate(90deg); }
+.anihiz__ayrinti[open]{ display:grid; gap:8px; }
+.anihiz__ayrinti[open] > .anihiz__satir{ padding-left:14px; }
+/* Arka plan yuvası: seçici + «Dosya seç» + durum cümlesi. */
+.zemin-yuva{ display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:8px; }
+.zemin-dosya{ cursor:pointer; }
+.zemin-durum{ flex-basis:100%; text-align:right; font-size:12px; color:var(--text-3); }
+.zemin-durum:empty{ display:none; }
+.ayarlar .seg button{ white-space:nowrap; }

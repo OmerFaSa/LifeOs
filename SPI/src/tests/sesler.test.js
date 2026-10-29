@@ -57,7 +57,23 @@
       expect(S().tik('tik')).toBe(false);
       const d = document.createElement('div'); d.innerHTML = S().duzeySeciciHtml();
       expect(d.querySelector('[data-ses-duzey="dokunus"]').getAttribute('aria-valuetext')).toBe('Kapalı');
-      expect(d.querySelectorAll('input[type="range"]').length).toBe(7);
+      expect(d.querySelectorAll('input[type="range"]').length).toBe(9);
+    }));
+    /* 2026-10-29 (kullanıcı: «genel, ajan, UI seslerini tek seferde kısalım; köşedeki
+       şeye tıklayınca içlerindekini teker teker»): aile ile genel arasında grup. */
+    it('üç ana kaydırıcı (Genel · Arayüz · Ajanlar); grup kendi ailelerini çarpar, ötekine dokunmaz', () => ile(() => {
+      expect(S().duzeyAyarla('arayuz', .5)).toBe(true);
+      expect(Math.abs(S().duzey('dokunus') - .5) < 1e-9).toBe(true);
+      expect(Math.abs(S().duzey('onay') - .5) < 1e-9).toBe(true);
+      expect(Math.abs(S().duzey('karakter') - .8) < 1e-9).toBe(true);
+      expect(S().duzeyAyarla('ajan', 0)).toBe(true);
+      expect(S().duzey('king')).toBe(0);
+      const d = document.createElement('div'); d.innerHTML = S().duzeySeciciHtml();
+      const ana = Array.from(d.querySelectorAll('.sesduzey > .sesduzey__satir input, .sesduzey__grup > .sesduzey__satir input')).map(i => i.getAttribute('data-ses-duzey'));
+      expect(ana).toEqual(['genel', 'arayuz', 'ajan']);
+      const ayr = Array.from(d.querySelectorAll('details.sesduzey__ayrinti')).map(x => Array.from(x.querySelectorAll('input')).map(i => i.getAttribute('data-ses-duzey')));
+      expect(ayr).toEqual([['dokunus', 'gecis', 'onay'], ['karakter', 'ortam', 'king']]);
+      expect(d.querySelector('details.sesduzey__ayrinti').open).toBe(false);
     }));
     it('bir olay bir ses: dokunuşun hemen ardından gelen sayfa sesi çalmaz; uyarı sesi var; chime aç/kapa çalar', () => ile(() => {
       expect(S().tik('tik')).toBe(true);

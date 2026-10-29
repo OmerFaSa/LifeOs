@@ -73,6 +73,7 @@ sys.dont_write_bytecode = True      # __pycache__ birikmesin
 sys.path.insert(0, SISTEM)
 import guncelle  # noqa: E402
 import hesap  # noqa: E402
+import zemin  # noqa: E402  (kullanicinin arka plan dosyasi, sistem/zemin.py)
 import telefon  # noqa: E402
 
 HOST = "127.0.0.1"
@@ -311,6 +312,8 @@ class Sunucu(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if self.path.startswith("/api/zemin/"):
+            return zemin.isle(self)
         clean = self.path.split("?", 1)[0].split("#", 1)[0]
         if clean in ("/", "/index.html", DIST_BETIK):
             dist = _guncel_dist(self.repo)
@@ -333,6 +336,13 @@ class Sunucu(SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if self.path.startswith("/api/zemin/"):
+            return zemin.isle(self)
+        return self.send_error(405)
+
+    def do_DELETE(self):
+        if self.path.startswith("/api/zemin/"):
+            return zemin.isle(self)
         return self.send_error(405)
 
     def do_OPTIONS(self):
@@ -597,16 +607,99 @@ body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:no
 .kart__alt .dugme{ color:color-mix(in oklab, var(--renk) 82%, #000); font-weight:650; }
 .kart::before{ background:radial-gradient(closest-side, color-mix(in oklab, var(--renk) 16%, transparent), transparent); }
 @media (prefers-color-scheme:dark){ .kart__alt .dugme{ color:color-mix(in oklab, var(--renk) 70%, #fff); } }
+/* YENI DUZEN (kullanici, 2026-10-29, cizimle: «ESP, SPI, AYS kartlari dikey
+   yan yana; yukarida S kisminda surum, G kisminda guncelleme, HKM ortada;
+   uzerine geldigimizde belirginlesecek»). Ust: kavisli cam serit. Alt: uc
+   dikey cam kart, ortadaki biraz asagida; uzerine gelinen one cikar,
+   otekiler hafifce geri cekilir. Guncelleme kutusu G'ye basinca acilir. */
+.sarmal{ max-width:min(1320px, 92vw); padding-top:0; }
+/* (2026-10-29, ikinci bakis: «guncelleme baska yere gelsin; LifeOS sag kisimda
+   olsun, yukarida degil; HKM'nin oldugu yarim sey yukariya yapisik olsun»):
+   marka sag ustte, serit ekranin ust kenarindan sarkar, guncelleme kutusu
+   sol ustte yuzen kart (sayfayi itmez). */
+.ust{ position:fixed; top:18px; right:26px; z-index:3; margin:0; }
+.ust h1{ margin:0; font-size:clamp(18px, 1.4vw, 22px); }
+.bolum{ position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.yay{ position:relative; display:flex; align-items:center; justify-content:center; gap:10px; width:max-content; max-width:100%;
+  margin:0 auto clamp(24px, 4vh, 48px); padding:clamp(12px, 1.6vh, 18px) clamp(16px, 1.6vw, 26px) clamp(16px, 2.2vh, 24px);
+  border-top:0; border-radius:0 0 140px 140px / 0 0 52px 52px; font-size:clamp(13px, .95vw, 15px);
+  background:var(--cam); border:1px solid var(--cam-kenar); box-shadow:var(--cam-ust), var(--cam-golge);
+  -webkit-backdrop-filter:blur(24px) saturate(150%); backdrop-filter:blur(24px) saturate(150%); }
+.yay__uc{ position:relative; display:flex; align-items:center; gap:8px; min-height:44px; padding:0 14px 0 8px; border-radius:999px;
+  border:0; background:transparent; color:var(--fg-2); font:inherit; font-size:13px; font-weight:550; cursor:pointer;
+  transition:background .2s, color .2s; }
+.yay__uc:hover{ background:var(--hap); color:var(--fg); }
+.yay__uc b{ width:30px; height:30px; display:grid; place-items:center; border-radius:50%; background:var(--hap);
+  box-shadow:inset 0 0 0 1px var(--hap-kenar); font-size:13px; font-weight:700; color:var(--fg); }
+.yay__s span{ font:12px var(--mono); }
+.yay__g[aria-expanded="true"]{ background:var(--hap); color:var(--fg); }
+.yay__nokta{ position:absolute; top:7px; left:31px; width:8px; height:8px; border-radius:50%; background:var(--uyari); display:none; }
+.yay__g[data-hal="var"] .yay__nokta, .yay__g[data-hal="uyari"] .yay__nokta{ display:block; }
+.yay .kart--hkm{ flex-direction:row; align-items:center; gap:12px; padding:8px 10px 8px 8px; border-radius:999px; min-width:0; }
+.yay .kart--hkm::before{ display:none; }
+.yay .kart--hkm .kart__ust{ gap:10px; }
+.yay .kart--hkm .logo{ width:36px; height:36px; border-radius:50%; }
+.yay .kart--hkm .sekil{ width:15px; height:15px; }
+.yay .kart--hkm .kart__ad{ font-size:14.5px; }
+.yay .kart--hkm .kart__ad small, .yay .kart--hkm .kart__acik{ display:none; }
+.yay .kart--hkm .kart__alt{ margin:0; padding:0; gap:10px; }
+.yay .kart--hkm .hkm-eski{ display:none; }
+.yay .kart--hkm:hover{ transform:translateY(-1px); }
+.guncel{ position:fixed; z-index:4; bottom:20px; left:20px; width:min(440px, calc(100vw - 40px)); margin:0; flex-wrap:wrap; }
+.guncel .guncel__eylem{ width:100%; justify-content:flex-end; }
+.sarmal{ min-height:100vh; display:flex; flex-direction:column; }
+.izgara{ margin-block:auto; }
+/* ORANLI (2026-10-29: «daha oranli yap»): kart, aralik, simge ve ortadaki
+   kayma ekranin boyuyla olceklenir; buyuk ekranda kucuk kalmaz. */
+.izgara{ display:flex; justify-content:center; align-items:flex-start; gap:clamp(18px, 2.4vw, 40px); }
+.izgara .kart{ flex:0 1 clamp(250px, 23vw, 360px); min-height:clamp(340px, 46vh, 500px); padding:clamp(24px, 2.6vw, 38px) clamp(20px, 2vw, 30px) clamp(20px, 2vw, 28px);
+  border-radius:clamp(26px, 2.4vw, 36px); text-align:center; }
+.izgara .kart:nth-child(2){ margin-top:clamp(28px, 6vh, 64px); }
+.izgara .kart__ust{ flex-direction:column; gap:16px; }
+.izgara .logo{ width:clamp(64px, 6vw, 92px); height:clamp(64px, 6vw, 92px); border-radius:clamp(20px, 1.8vw, 28px); }
+.izgara .sekil{ width:clamp(26px, 2.3vw, 36px); height:clamp(26px, 2.3vw, 36px); }
+.izgara .kart__ad{ justify-content:center; flex-direction:column; align-items:center; gap:2px; font-size:clamp(21px, 1.8vw, 28px); }
+.izgara .kart__acik{ font-size:clamp(13.5px, 1vw, 15.5px); }
+.izgara .kart__acik{ margin-top:8px; text-wrap:balance; }
+.izgara .kart__ozet{ text-align:left; }
+.izgara .kart__alt{ justify-content:center; }
+.izgara .kart__alt .dugme{ margin-left:0; }
+@media (hover:hover){
+  .izgara .kart{ transition:transform .5s cubic-bezier(.16,1,.3,1), box-shadow .5s cubic-bezier(.16,1,.3,1), opacity .4s ease, filter .4s ease; }
+  .izgara:has(.kart:hover) .kart:not(:hover){ opacity:.7; filter:saturate(.8); transform:scale(.975); }
+  .izgara .kart:hover{ transform:translateY(-8px) scale(1.035); }
+  .izgara .kart:nth-child(2):hover{ transform:translateY(-8px) scale(1.035); }
+}
+@media (max-width:760px){
+  .izgara{ flex-direction:column; align-items:stretch; }
+  .izgara .kart{ flex:none; min-height:0; text-align:left; }
+  .izgara .kart:nth-child(2){ margin-top:0; }
+  .izgara .kart__ust{ flex-direction:row; }
+  .izgara .logo{ width:52px; height:52px; border-radius:16px; }
+  .izgara .kart__ad{ align-items:flex-start; font-size:17px; }
+  .yay{ border-radius:0 0 22px 22px; }
+  .ust{ position:static; justify-content:center; margin:16px 0; }
+}
+/* KENDI ARKA PLANIN (Ayarlar › Görünüm; sistem/zemin.py): fotoğraf ya da video;
+   koyu temada gece yuvasi, yoksa fotograf karartilmaz: derin renk zemin. */
+body{ min-height:100vh; }
+.dip{ justify-content:center; text-align:center; }
+@media (prefers-color-scheme:dark){ html:not([data-kendi]) body{ background-image:none;
+  background:radial-gradient(60% 50% at 18% 0%, rgba(80,110,220,.22), transparent 70%), radial-gradient(60% 60% at 100% 100%, rgba(120,90,220,.16), transparent 70%), linear-gradient(175deg, #10162a, #090c16);
+  background-attachment:fixed; }
+  html:not([data-kendi]) body::before{ background:none; } }
+html[data-kendi="foto"] body{ background-image:var(--kendi); }
+video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; pointer-events:none; }
 </style></head><body>
 <main class="sarmal">
   <header class="ust" style="--sira:0">
     <span class="isaret" aria-hidden="true"><b></b><b></b><b></b><b></b></span>
     <h1>LifeOS<span>Kontrol paneli</span></h1>
     <button type="button" class="hesap-cip" data-hesap-cip hidden></button>
-    <button type="button" class="surum" id="surum" title="Güncellemeyi yeniden kontrol et">__SURUM__</button>
   </header>
+  __YAY__
 
-  <section class="guncel" id="guncel" data-hal="bekle" aria-live="polite" aria-label="Güncelleme" style="--sira:1">
+  <section class="guncel" id="guncel" data-hal="bekle" aria-live="polite" aria-label="Güncelleme" style="--sira:1" hidden>
     <div class="guncel__ikon" id="guncel-ikon"></div>
     <div class="guncel__govde">
       <div class="guncel__baslik" id="guncel-baslik">Güncelleme kontrol ediliyor…</div>
@@ -630,6 +723,28 @@ body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:no
 </main>
 <script>
 (function(){
+  /* Kendi arka planin: koyu temada gece yuvasi, acikta gunduz; yoksa varsayilan. */
+  try{
+    var gece = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+    var adres = '/api/zemin/' + (gece ? 'gece' : 'gunduz');
+    var iptal = new AbortController();
+    fetch(adres, { signal:iptal.signal, cache:'no-store' }).then(function(r){
+      if(!r.ok) return;
+      var tur = (r.headers.get('Content-Type') || '').split(';')[0];
+      iptal.abort();
+      var kok = document.documentElement;
+      if(/^image[/]/.test(tur)){ kok.style.setProperty('--kendi', 'url("' + adres + '")'); kok.setAttribute('data-kendi', 'foto'); }
+      else if(/^video[/]/.test(tur)){
+        var v = document.createElement('video');
+        v.className = 'giris-video'; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+        v.setAttribute('aria-hidden', 'true'); v.src = adres;
+        document.body.insertBefore(v, document.body.firstChild);
+        kok.setAttribute('data-kendi', 'video');
+      }
+    }).catch(function(){});
+  }catch(e){}
+})();
+(function(){
   var IKON = {
     bekle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>',
     ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
@@ -641,13 +756,17 @@ body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:no
       dugme = $('guncel-dugme'), bak = $('guncel-bak');
   var sonraki = null;     // ana dugmenin yapacagi is
   /* Guncel sistemde kutu surum etiketine katlanir (2026-10-27); etiket yeniden kontrol eder. */
-  var surumEt = $('surum'), surumMetni = surumEt.textContent;
-  surumEt.addEventListener('click', function(){ kutu.hidden = false; kontrol(true); });
+  var surumEt = $('surum'), surumYazi = $('surum-metin'), surumMetni = surumYazi.textContent;
+  var yayG = $('yay-g');
+  function kutuAc(ac){ kutu.hidden = !ac; if(yayG) yayG.setAttribute('aria-expanded', ac ? 'true' : 'false'); }
+  surumEt.addEventListener('click', function(){ kutuAc(true); kontrol(true); });
+  if(yayG) yayG.addEventListener('click', function(){ kutuAc(kutu.hidden); });
   function post(yol){
     return fetch(yol, { method:'POST', headers:{ 'X-LifeOS':'guncelle' } })
       .then(function(r){ return r.json(); });
   }
   function hal(h, b, a, satirlar){
+    if(yayG) yayG.setAttribute('data-hal', h);
     kutu.setAttribute('data-hal', h); $('guncel-ikon').innerHTML = IKON[h] || IKON.bekle;
     baslik.textContent = b; alt.textContent = a || '';
     liste.innerHTML = ''; liste.hidden = !(satirlar && satirlar.length);
@@ -673,10 +792,10 @@ body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:no
     }
     hal('ok', 'Sistem güncel', d.ag ? 'En yeni sürümü kullanıyorsun.' : 'GitHub\\'a ulaşılamadı; son bilinen duruma göre.');
     ana('', null);
-    if(d.ag){ kutu.hidden = true; surumEt.textContent = surumMetni + ' · güncel'; }
+    if(d.ag){ kutuAc(false); surumYazi.textContent = surumMetni + ' · güncel'; }
   }
   function kontrol(taze){
-    surumEt.textContent = surumMetni;
+    surumYazi.textContent = surumMetni;
     hal('bekle', 'Güncelleme kontrol ediliyor…', ''); bak.hidden = true; ana('', null);
     fetch('/api/guncelleme' + (taze ? '?taze=1' : '')).then(function(r){ return r.json(); }).then(ciz)
       .catch(function(){ hal('uyari', 'Güncelleme durumu okunamadı', ''); bak.hidden = false; });
@@ -785,8 +904,12 @@ def giris_html(telefon=False):
     karti, guncelleme kutusu ve bilgisayarin API'lerine giden betik yok
     (telefonda ikisi de yok; moduller HKM'siz calisir, AGENTS §1.4)."""
     kartlar = []
+    hkm_kart = ""
     sira = 2
-    for anahtar, kisa, ad, aciklama, port in KARTLAR:
+    # Kullanicinin cizimi (2026-10-29): ESP · SPI · AYS yan yana dikey kartlar,
+    # HKM ustteki kavisli seridin ortasinda.
+    duzen = {"esp": 0, "spi": 1, "ays": 2, "hkm": 3}
+    for anahtar, kisa, ad, aciklama, port in sorted(KARTLAR, key=lambda k: duzen.get(k[0], 9)):
         adres = "http://%s:%d/" % (HOST, port)
         hkm = anahtar == "hkm"
         if telefon and hkm:
@@ -805,15 +928,29 @@ def giris_html(telefon=False):
         if telefon:
             kartlar.append(bas + ozet + '</a>')
             continue
-        kartlar.append(bas + ozet
-                       + '<div class="kart__alt"><span class="durum" data-hal="bekle"%s><i></i><span>Bakılıyor…</span></span>'
-                       '<span class="dugme">%s</span></div></a>' % ("" if hkm else " hidden", "Başlat" if hkm else "Aç"))
+        kart = (bas + ozet
+                + '<div class="kart__alt"><span class="durum" data-hal="bekle"%s><i></i><span>Bakılıyor…</span></span>'
+                '<span class="dugme">%s</span></div></a>' % ("" if hkm else " hidden", "Başlat" if hkm else "Aç"))
+        if hkm:
+            hkm_kart = kart.replace('class="kart"', 'class="kart kart--hkm"', 1)
+        else:
+            kartlar.append(kart)
     s = guncelle.surum()
     surum = ("sürüm %s" % s["tarih"]) if s else "zip sürümü"
+    # KAVISLI SERIT: G (guncelleme) · HKM · S (surum). Telefonda yalniz S.
+    s_dugme = ('<button type="button" class="yay__uc yay__s surum" id="surum" title="Güncellemeyi yeniden kontrol et">'
+               '<b aria-hidden="true">S</b><span id="surum-metin">%s</span></button>' % _kac(surum))
+    if telefon:
+        yay = '<div class="yay yay--tek" style="--sira:1"><span class="yay__uc yay__s"><b aria-hidden="true">S</b><span>%s</span></span></div>' % _kac(surum)
+    else:
+        yay = ('<nav class="yay" aria-label="Güncelleme, Merkez ve sürüm" style="--sira:1">'
+               '<button type="button" class="yay__uc yay__g" id="yay-g" aria-expanded="false" aria-controls="guncel" title="Güncelleme">'
+               '<b aria-hidden="true">G</b><span>Güncelleme</span><i class="yay__nokta" aria-hidden="true"></i></button>'
+               + hkm_kart + s_dugme + '</nav>')
     sayfa = GIRIS_SAYFASI
     if telefon:
         sayfa = _telefon_iskeleti(sayfa)
-    return (sayfa.replace("__KARTLAR__", "\n  ".join(kartlar))
+    return (sayfa.replace("__KARTLAR__", "\n  ".join(kartlar)).replace("__YAY__", yay)
             .replace("__SURUM__", _kac(surum)).replace("__IKON__", _IKON))
 
 
@@ -959,6 +1096,11 @@ class Giris(SimpleHTTPRequestHandler):
             return hesap.isle(self)
         return self.send_error(405)
 
+    def do_DELETE(self):
+        if self.path.startswith("/api/zemin/"):
+            return zemin.isle(self)
+        return self.send_error(405)
+
     def _hesap_dosyasi(self, ad):
         """/hesap.js, /hesap.css, /animasyon.js, /qr.js — giris ve secim
         sayfasi (brand/ortak); kapali liste. qr.js: hesap sayfasinin iki
@@ -978,6 +1120,8 @@ class Giris(SimpleHTTPRequestHandler):
         yol = self.path.split("?", 1)[0]
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if yol.startswith("/api/zemin/"):
+            return zemin.isle(self)
         if yol not in ("/api/guncelle", "/api/hkm", "/api/hkm/yeniden", "/api/yeniden"):
             return self.send_error(404)
         if not guncelleme_izinli(self.headers):
@@ -1003,6 +1147,8 @@ class Giris(SimpleHTTPRequestHandler):
         yol = self.path.split("?", 1)[0]
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if yol.startswith("/api/zemin/"):
+            return zemin.isle(self)
         if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js"):
             return self._hesap_dosyasi(yol[1:])
         if yol == "/api/guncelleme":

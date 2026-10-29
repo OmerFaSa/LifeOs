@@ -1045,7 +1045,11 @@
       }finally{ d.remove(); }
     });
 
-    it('kenarın dibi: ara · sayfa düzeni · radyo · bildirimler · profil; rütbe ve Merkez satırı yok', () => {
+    /* SADE KENAR (kullanıcı, 2026-10-29: «sol tarafa ayarlar yap; hesaba
+       tıklayınca altta çıkanları kaldır, oraya bildirimler, radyo, sayfa düzeni,
+       arama ekle; sol tarafı temizleyelim»). Kenarda King · Ayarlar · profil;
+       dört araç profilin üstünde açılan pencerede. */
+    it('kenarın dibi: King · Ayarlar · profil; araçlar profil penceresinde; rütbe ve Merkez satırı yok', () => {
       const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[],
         baglanti:{ durum:'bagli', saat:'14:08' }, rutbe:{ ad:'Bronz', etiket:'1.1', route:'rutbe' },
         bildirim:{ sayi:2 }, profil:{ ad:'Ömer' } }) + '</div>');
@@ -1055,17 +1059,45 @@
         expect(!!d.querySelector('.kenar__dip .ust__hesap')).toBe(true);
         /* King (brand/ortak/king.js) kenarın dibinde ilk araç. */
         expect(d.querySelector('.kenar__dip button[data-king-ac] .kenar__ad').textContent).toBe('King');
-        const a = Array.from(d.querySelectorAll('.kenar__dip button:not([hidden]):not([data-king-ac])'));
-        expect(a.map(b => b.querySelector('.kenar__ad').textContent)).toEqual(['Ara', 'Sayfa düzeni', 'Radyo', 'Bildirimler', 'Ömer']);
+        const ana = Array.from(d.querySelectorAll('.kenar__dip button:not([hidden]):not([data-king-ac])'))
+          .filter(b => !b.closest('.kenar__benpencere'));
+        expect(ana.map(b => b.querySelector('.kenar__ad').textContent)).toEqual(['Ayarlar', 'Ömer']);
+        expect(ana[0].getAttribute('data-act')).toBe('open-appearance');
+        const prof = ana[1];
+        expect(prof.classList.contains('kenar__bensec')).toBe(true);
+        expect(prof.getAttribute('aria-expanded')).toBe('false');
+        /* Pencere kapalıyken bildirim profilin üstünde söylenir. */
+        expect(!!prof.querySelector('.ust__zil-nokta')).toBe(true);
+        expect(prof.getAttribute('aria-label').indexOf('2 bildirim') >= 0).toBe(true);
+        const p = d.querySelector('#' + prof.getAttribute('aria-controls'));
+        expect(p.classList.contains('kenar__benpencere')).toBe(true);
+        const a = Array.from(p.querySelectorAll('button'));
+        expect(a.map(b => b.querySelector('.kenar__ad').textContent)).toEqual(['Ara', 'Bildirimler', 'Radyo', 'Sayfa düzeni']);
         expect(a[0].getAttribute('data-act')).toBe('open-palette');
-        expect(a[1].classList.contains('ust__gizli')).toBe(true);
+        expect(a[1].getAttribute('data-act')).toBe('bildirim-ac');
+        expect(!!a[1].querySelector('.ust__zil-nokta')).toBe(true);
         expect(a[2].classList.contains('ust__ses')).toBe(true);
-        expect(a[3].getAttribute('data-act')).toBe('bildirim-ac');
-        expect(!!a[3].querySelector('.ust__zil-nokta')).toBe(true);
-        expect(a[4].getAttribute('data-act')).toBe('open-appearance');
+        expect(a[3].classList.contains('ust__gizli')).toBe(true);
         expect(!!d.querySelector('.kenar__rutbe, .kenar__bag, [data-oz="140"], [data-oz="118"]')).toBe(false);
         /* Erişilebilir ad görünen yazıyı içerir. */
-        a.forEach(b => expect(b.getAttribute('aria-label').indexOf(b.querySelector('.kenar__ad').textContent) >= 0).toBe(true));
+        a.concat(ana[0]).forEach(b => expect(b.getAttribute('aria-label').indexOf(b.querySelector('.kenar__ad').textContent) >= 0).toBe(true));
+      }finally{ d.remove(); }
+    });
+
+    it('profile basınca araç penceresi açılır, ikinci basış ve dışarısı kapatır', () => {
+      const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[], profil:{ ad:'Ömer' } }) + '</div>');
+      try{
+        K.kur && K.kur();
+        const prof = d.querySelector('.kenar__bensec');
+        const kap = prof.closest('.kenar__benler');
+        prof.click();
+        expect(kap.classList.contains('is-acik')).toBe(true);
+        expect(prof.getAttribute('aria-expanded')).toBe('true');
+        prof.click();
+        expect(kap.classList.contains('is-acik')).toBe(false);
+        prof.click();
+        document.body.click();
+        expect(kap.classList.contains('is-acik')).toBe(false);
       }finally{ d.remove(); }
     });
 
@@ -1080,10 +1112,11 @@
         bildirim:{ sayi:3, acil:true }, profil:{ ad:'Altay' } }) + '</div>');
       try{
         const dip = d.querySelector('.kenar__dip');
-        expect(dip.querySelectorAll('.kenar__grup').length).toBe(2);
-        const g = Array.from(dip.querySelectorAll('.kenar__grup')).map(x =>
+        /* 2026-10-29: tek grup (King · Ayarlar); araçlar profil penceresinde. */
+        expect(dip.querySelectorAll('.kenar__grup').length).toBe(1);
+        const g = Array.from(dip.querySelectorAll('.kenar__grup, .kenar__benliste')).map(x =>
           Array.from(x.querySelectorAll('.kenar__ad')).map(a => a.textContent));
-        expect(g).toEqual([['King', 'Ara'], ['Sayfa düzeni', 'Radyo', 'Bildirimler']]);
+        expect(g).toEqual([['King', 'Ayarlar'], ['Ara', 'Bildirimler', 'Radyo', 'Sayfa düzeni']]);
         /* Kısayol görünür metindir ama ekran okuyucuya ikinci kez okunmaz (aria-label'da var). */
         const k = Array.from(dip.querySelectorAll('.kenar__kisayol')).map(x => x.textContent);
         expect(k).toEqual(['Ctrl Ctrl', 'Ctrl K']);

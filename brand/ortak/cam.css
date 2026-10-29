@@ -1630,3 +1630,28 @@ html[data-theme="dark"][data-zemin="yumusak"]{ --border:rgba(255,255,255,.08); -
 /* Öğren › Dersler karosu: çerçeve yok, ince cam; seçili olan seçili cam. */
 html[data-zemin="yumusak"] .site--v5 #main .ogr-ders{ border-color:transparent; background:var(--cam-ince); box-shadow:var(--cam-ust); }
 html[data-zemin="yumusak"] .site--v5 #main .ogr-ders.is-on{ background:var(--secili-zemin); box-shadow:var(--secili-golge); }
+
+/* 43) GENİŞ KENAR DA YÜZEN CAM (kullanıcı, 2026-10-29, ekran görüntüsüyle:
+   «sol taraf açılınca solu karemsi düz oluyor; yuvarlaksı yumuşak olsun»).
+   Sabit açık (dar olmayan) kenar ekranın soluna yapışık, köşesiz ve opaktı;
+   yuvarlak cam yalnız dar kipteydi. Şimdi iki kip aynı: kenardan 12 px
+   içeride, 28 px köşe, ince cam. */
+@media (min-width:680px){
+  html[data-zemin="yumusak"]:not(.kenar-dar) .site--v5:has(> .kenar){ grid-template-columns:232px minmax(0,1fr); }
+  html[data-zemin="yumusak"]:not(.kenar-dar) .site--v5 > .kenar{ top:14px; height:calc(100vh - 28px); margin:14px 0 14px 12px;
+    border-radius:28px; background:var(--cam-katman); box-shadow:var(--levha-ic), var(--levha-golge);
+    -webkit-backdrop-filter:saturate(150%) blur(28px); backdrop-filter:saturate(150%) blur(28px); }
+}
+
+/* 44) ARKA PLAN: GECE VE KENDİ DOSYAN (kullanıcı, 2026-10-29: «karanlık temada
+   arka planın kararması kötü gözüküyor, daha akıllıca bir şey»; zemin.js
+   ARKA PLAN). Koyu temada gündüz fotoğrafı varsayılan olarak hiç gösterilmez
+   (gece yuvası «Gece rengi»: modül tonunda derin renk alanı). Kullanıcı
+   koyuda da fotoğraf seçerse lacivert perde yerine hafif, nötr bir gölge:
+   okunurluğu buzlu cam kartlar taşır. Video seçiliyse fotoğraf katmanı
+   yerine videonun kendisi; üstünde yalnız okuma perdesi. */
+html[data-theme="dark"]{ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,.34), rgba(6,8,14,.22) 45%, rgba(6,8,14,.46)); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,.34), rgba(6,8,14,.22) 45%, rgba(6,8,14,.46)); } }
+video.zemin-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-3; pointer-events:none; }
+html:not([data-zemin="yumusak"]) video.zemin-video{ display:none; }
+html[data-zemin="yumusak"][data-zemin-video] body::before{ background:var(--manzara-okuma), var(--manzara-sis); }

@@ -204,47 +204,165 @@ window.LIFEOS = window.LIFEOS || {};
      künyesi brand/medya/OKU.md). Adres belgenin kendi adresinden kurulur:
      dist dosyada, LifeOS sunucusunda ve geliştirme sunucusunda aynı yol
      çalışır. Kapalıysa resim hiç istenmez. Görünüşü cam.css «MANZARA». */
+  /* ARKA PLAN (kullanıcı, 2026-10-29: «arka planın fotoğraflarını değiştirebilelim;
+     gece ile sabah aynı ya da ayrı olsun; PC'den fotoğraf ekleyebilelim; arka
+     plana bir video seçimi koyabilelim; gece olunca tema otomatik geçsin ya da
+     geçmesin»; «karanlık temada arka planın kararması kötü, daha akıllıca bir
+     şey»). İki yuva:
+       gündüz  modülün fotoğrafı (acik) · kendi dosyan (kendi) · kapalı
+       gece    gece rengi (renk, varsayılan) · gündüzle aynı (ayni) · kendi dosyan
+     Koyu temada gündüz fotoğrafı artık lacivert perdeyle karartılmaz: gece
+     yuvası boşsa zemin modül tonunda derin renk alanıdır (cam.css §12).
+     Kendi dosya (foto ya da video) PC'deki LifeOS sunucusunda durur
+     (sistem/zemin.py, /api/zemin/<yuva>): her modül ve giriş sayfası aynısını
+     görür; sunucu yoksa (dist dosya, telefon) modülün fotoğrafına düşer.
+     Türü ve sürümü yerelde tutulur (`lifeos.manzara.tur.<yuva>`, taşınır). */
   const MANZARA_ANAHTAR = 'lifeos.manzara';
-  const MANZARALAR = Object.freeze(['acik', 'kapali']);
-  const MANZARA_AD = { acik:'Açık', kapali:'Kapalı' };
-  function manzaraOku(){
-    let v = null;
-    try{ v = localStorage.getItem(MANZARA_ANAHTAR); }catch(e){}
-    return MANZARALAR.indexOf(v) >= 0 ? v : 'acik';
+  const GECE_ANAHTAR = 'lifeos.manzara.gece';
+  const OTO_ANAHTAR = 'lifeos.tema.oto';
+  const MANZARALAR = Object.freeze(['acik', 'kendi', 'kapali']);
+  const GECELER = Object.freeze(['renk', 'ayni', 'kendi']);
+  const OTOLAR = Object.freeze(['kapali', 'saat']);
+  const MANZARA_AD = { acik:'Modülün', kendi:'Kendi', kapali:'Kapalı' };
+  const GECE_AD = { renk:'Gece rengi', ayni:'Gündüzle aynı', kendi:'Kendi' };
+  const OTO_AD = { kapali:'Kapalı', saat:'Saate göre' };
+  const depoOku = (k, liste, vars) => { let v = null; try{ v = localStorage.getItem(k); }catch(e){} return liste.indexOf(v) >= 0 ? v : vars; };
+  const depoYaz = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){ /* depo kapalı: bu sayfada geçerli */ } };
+  function manzaraOku(){ return depoOku(MANZARA_ANAHTAR, MANZARALAR, 'acik'); }
+  let manzaraSimdi = 'acik', geceSimdi = 'renk', otoSimdi = 'kapali';
+  function karanlik(){
+    if(typeof document === 'undefined') return false;
+    const t = document.documentElement.getAttribute('data-theme');
+    if(t) return t === 'dark';
+    try{ return !!window.matchMedia('(prefers-color-scheme: dark)').matches; }catch(e){ return false; }
   }
-  let manzaraSimdi = 'acik';
+  function sunucuVar(){ return typeof location !== 'undefined' && /^https?:$/.test(location.protocol); }
+  function dosyaTuru(yuva){ let v = null; try{ v = localStorage.getItem('lifeos.manzara.tur.' + yuva); }catch(e){} return v === 'video' || v === 'foto' ? v : null; }
+  function dosyaAdresi(yuva){
+    let surum = '';
+    try{ surum = localStorage.getItem('lifeos.manzara.surum') || ''; }catch(e){}
+    try{ return new URL('/api/zemin/' + yuva + (surum ? '?v=' + surum : ''), location.href).href; }catch(e){ return ''; }
+  }
+  /* Şu an geçerli olan: { tur:'modul'|'foto'|'video'|'yok', yuva } */
+  function etkinZemin(){
+    const gece = karanlik();
+    const secim = gece ? (geceSimdi === 'ayni' ? manzaraSimdi : geceSimdi) : manzaraSimdi;
+    const yuva = gece && geceSimdi === 'kendi' ? 'gece' : 'gunduz';
+    if(secim === 'acik') return { tur:'modul', yuva };
+    if(secim === 'kendi'){
+      const t = dosyaTuru(yuva);
+      if(t && sunucuVar()) return { tur:t, yuva };
+      return { tur:'modul', yuva };                 // dosya yok ya da sunucu yok: modülün fotoğrafı
+    }
+    return { tur:'yok', yuva };
+  }
+  function videoKur(adres){
+    if(typeof document === 'undefined') return;
+    let v = document.querySelector('video.zemin-video');
+    if(!adres){ if(v) v.remove(); return; }
+    if(!document.body){ document.addEventListener('DOMContentLoaded', () => videoKur(adres), { once:true }); return; }
+    if(!v){
+      v = document.createElement('video');
+      v.className = 'zemin-video';
+      v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+      v.setAttribute('aria-hidden', 'true'); v.setAttribute('tabindex', '-1');
+      document.body.insertBefore(v, document.body.firstChild);
+    }
+    if(v.getAttribute('src') !== adres) v.setAttribute('src', adres);
+    /* Az hareket ya da dinlenmede ilk kare durur (CPU ve dikkat). */
+    const dur = (L.hareketAz && L.hareketAz()) || document.documentElement.classList.contains('is-dinlen');
+    try{ if(dur) v.pause(); else { const p = v.play(); if(p && p.catch) p.catch(() => {}); } }catch(e){}
+  }
   function manzaraUygula(){
     if(typeof document === 'undefined' || !document.documentElement) return;
     const kok = document.documentElement;
-    if(manzaraSimdi === 'acik'){
+    const z = etkinZemin();
+    if(z.tur === 'modul' || z.tur === 'foto'){
       let u = '';
-      try{ u = new URL('img/marka/doku-manzara-' + modulOf().replace(/[^a-z]/g, '') + '.webp', document.baseURI).href; }catch(e){}
+      try{ u = z.tur === 'foto' ? dosyaAdresi(z.yuva) : new URL('img/marka/doku-manzara-' + modulOf().replace(/[^a-z]/g, '') + '.webp', document.baseURI).href; }catch(e){}
       kok.setAttribute('data-manzara', 'acik');
       if(u) kok.style.setProperty('--manzara', 'url("' + u + '")');
-    } else {
+      videoKur(null);
+    }else if(z.tur === 'video'){
+      kok.setAttribute('data-manzara', 'acik');
+      kok.style.setProperty('--manzara', 'none');
+      videoKur(dosyaAdresi(z.yuva));
+    }else{
       kok.removeAttribute('data-manzara');
       kok.style.removeProperty('--manzara');
+      videoKur(null);
     }
-    document.querySelectorAll('[data-manzara-sec]').forEach(b => {
-      const on = b.getAttribute('data-manzara-sec') === manzaraSimdi;
+    kok.toggleAttribute('data-zemin-video', z.tur === 'video');
+    const isaretle = (sec, simdi) => document.querySelectorAll('[' + sec + ']').forEach(b => {
+      const on = b.getAttribute(sec) === simdi;
       b.classList.toggle('is-on', on);
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
+    isaretle('data-manzara-sec', manzaraSimdi);
+    isaretle('data-gece-sec', geceSimdi);
+    isaretle('data-oto-sec', otoSimdi);
   }
-  function manzaraYenile(){ manzaraSimdi = manzaraOku(); manzaraUygula(); }
+  /* Saate göre tema: 07:00–19:00 açık, öbür saatler koyu. Açıkken modülün
+     tema seçimi yerine saat geçerlidir; kapatınca seçim geri gelir. */
+  function otoTema(tarih){ const h = (tarih || saatSimdi()).getHours(); return h >= 7 && h < 19 ? 'light' : 'dark'; }
+  let otoOnceki = null;
+  function otoUygula(){
+    if(typeof document === 'undefined') return;
+    const kok = document.documentElement;
+    if(otoSimdi !== 'saat'){
+      if(otoOnceki !== null){ if(otoOnceki) kok.setAttribute('data-theme', otoOnceki); else kok.removeAttribute('data-theme'); otoOnceki = null; }
+      return;
+    }
+    const t = otoTema();
+    if(otoOnceki === null) otoOnceki = kok.getAttribute('data-theme') || '';
+    if(kok.getAttribute('data-theme') !== t) kok.setAttribute('data-theme', t);
+  }
+  function manzaraYenile(){
+    manzaraSimdi = manzaraOku();
+    geceSimdi = depoOku(GECE_ANAHTAR, GECELER, 'renk');
+    otoSimdi = depoOku(OTO_ANAHTAR, OTOLAR, 'kapali');
+    otoUygula();
+    manzaraUygula();
+  }
   function manzaraAyarla(k){
     if(MANZARALAR.indexOf(k) < 0) return false;
-    try{ localStorage.setItem(MANZARA_ANAHTAR, k); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
-    manzaraSimdi = k;
-    manzaraUygula();
+    depoYaz(MANZARA_ANAHTAR, k); manzaraSimdi = k; manzaraUygula();
     return true;
   }
-  function manzaraSeciciHtml(){
-    return '<div class="seg seg--block manzarasec" role="group" aria-label="Manzara">'
-      + MANZARALAR.map(k => '<button type="button" class="' + (k === manzaraSimdi ? 'is-on' : '') + '" data-manzara-sec="' + k + '"'
-        + ' aria-pressed="' + (k === manzaraSimdi ? 'true' : 'false') + '">' + MANZARA_AD[k] + '</button>').join('')
-      + '</div>';
+  function geceAyarla(k){
+    if(GECELER.indexOf(k) < 0) return false;
+    depoYaz(GECE_ANAHTAR, k); geceSimdi = k; manzaraUygula();
+    return true;
   }
+  function otoAyarla(k){
+    if(OTOLAR.indexOf(k) < 0) return false;
+    depoYaz(OTO_ANAHTAR, k); otoSimdi = k; otoUygula(); manzaraUygula();
+    return true;
+  }
+  /* Kendi dosyanı yükler: PC'deki sunucuya (yalnız bu bilgisayardan). */
+  function dosyaYukle(yuva, dosya){
+    if(!sunucuVar()) return Promise.resolve({ ok:false, mesaj:'Kendi dosyan için LifeOS bu bilgisayarda açık olmalı.' });
+    const tur = String(dosya && dosya.type || '');
+    if(!/^(image\/(jpeg|png|webp)|video\/(mp4|webm))$/.test(tur)) return Promise.resolve({ ok:false, mesaj:'Yalnız JPEG, PNG, WebP fotoğraf ya da MP4, WebM video.' });
+    return fetch(new URL('/api/zemin/' + yuva, location.href).href, { method:'POST', headers:{ 'Content-Type':tur, 'X-LifeOS':'zemin' }, body:dosya })
+      .then(r => r.ok ? null : r.text().then(t => { throw new Error(t || 'Yüklenemedi.'); }))
+      .then(() => {
+        depoYaz('lifeos.manzara.tur.' + yuva, /^video/.test(tur) ? 'video' : 'foto');
+        depoYaz('lifeos.manzara.surum', String(Date.now()));
+        if(yuva === 'gece') geceAyarla('kendi'); else manzaraAyarla('kendi');
+        return { ok:true, mesaj:/^video/.test(tur) ? 'Video kaydedildi.' : 'Fotoğraf kaydedildi.' };
+      })
+      .catch(e => ({ ok:false, mesaj:(e && e.message) || 'Yüklenemedi: LifeOS sunucusu yanıt vermedi.' }));
+  }
+  const seg = (ad, sec, sinif, liste, adlar, simdi) => '<div class="seg seg--block ' + sinif + '" role="group" aria-label="' + ad + '">'
+    + liste.map(k => '<button type="button" class="' + (k === simdi ? 'is-on' : '') + '" ' + sec + '="' + k + '"'
+      + ' aria-pressed="' + (k === simdi ? 'true' : 'false') + '">' + adlar[k] + '</button>').join('') + '</div>';
+  const dosyaDugmesi = yuva => sunucuVar() ? '<label class="btn btn--sm zemin-dosya">Dosya seç'
+    + '<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" data-zemin-dosya="' + yuva + '" hidden></label>'
+    + '<small class="zemin-durum" data-zemin-durum="' + yuva + '" role="status"></small>' : '';
+  function manzaraSeciciHtml(){ return '<div class="zemin-yuva">' + seg('Gündüz arka planı', 'data-manzara-sec', 'manzarasec', MANZARALAR, MANZARA_AD, manzaraSimdi) + dosyaDugmesi('gunduz') + '</div>'; }
+  function geceSeciciHtml(){ return '<div class="zemin-yuva">' + seg('Gece arka planı', 'data-gece-sec', 'gecesec', GECELER, GECE_AD, geceSimdi) + dosyaDugmesi('gece') + '</div>'; }
+  function otoSeciciHtml(){ return seg('Saate göre tema', 'data-oto-sec', 'otosec', OTOLAR, OTO_AD, otoSimdi); }
 
   uygula();
   yuzeyUygula();
@@ -252,7 +370,7 @@ window.LIFEOS = window.LIFEOS || {};
   temaIlk();
   if(typeof document !== 'undefined' && typeof MutationObserver !== 'undefined'){
     /* Tema değişince saat tonu da hemen tazelenir (koyuda yarısı). */
-    new MutationObserver(() => { _temaKaydet(); saatUygula(); }).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+    new MutationObserver(() => { otoUygula(); _temaKaydet(); saatUygula(); manzaraUygula(); }).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
   }
   if(typeof document !== 'undefined'){
     document.addEventListener('click', e => {
@@ -260,20 +378,34 @@ window.LIFEOS = window.LIFEOS || {};
       if(y){ e.preventDefault(); yuzeyAyarla(y.getAttribute('data-yuzey-sec')); return; }
       const mz = e.target && e.target.closest ? e.target.closest('[data-manzara-sec]') : null;
       if(mz){ e.preventDefault(); manzaraAyarla(mz.getAttribute('data-manzara-sec')); return; }
+      const gc = e.target && e.target.closest ? e.target.closest('[data-gece-sec]') : null;
+      if(gc){ e.preventDefault(); geceAyarla(gc.getAttribute('data-gece-sec')); return; }
+      const ot = e.target && e.target.closest ? e.target.closest('[data-oto-sec]') : null;
+      if(ot){ e.preventDefault(); otoAyarla(ot.getAttribute('data-oto-sec')); return; }
       const b = e.target && e.target.closest ? e.target.closest('[data-zemin-sec]') : null;
       if(!b) return;
       e.preventDefault();
       ayarla(b.getAttribute('data-zemin-sec'));
     });
   }
+  if(typeof document !== 'undefined'){
+    document.addEventListener('change', e => {
+      const g = e.target && e.target.matches && e.target.matches('[data-zemin-dosya]') ? e.target : null;
+      if(!g || !g.files || !g.files[0]) return;
+      const yuva = g.getAttribute('data-zemin-dosya');
+      const durum = document.querySelector('[data-zemin-durum="' + yuva + '"]');
+      if(durum) durum.textContent = 'Yükleniyor…';
+      dosyaYukle(yuva, g.files[0]).then(s => { if(durum) durum.textContent = s.mesaj; g.value = ''; });
+    });
+  }
   if(typeof window !== 'undefined' && window.addEventListener){
     window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); if(e.key === MANZARA_ANAHTAR) manzaraYenile(); if(e.key === yuzeyAnahtar()){ yuzeySimdi = yuzeyOku(); yuzeyUygula(); } });
     try{ window.matchMedia('(prefers-reduced-transparency: reduce)').addEventListener('change', uygula); }catch(e){}
-    try{ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => saatUygula()); }catch(e){}
+    try{ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { saatUygula(); manzaraUygula(); }); }catch(e){}
   }
 
   saatUygula();
-  if(typeof setInterval === 'function') setInterval(saatUygula, 5 * 60 * 1000);
+  if(typeof setInterval === 'function') setInterval(() => { saatUygula(); otoUygula(); }, 5 * 60 * 1000);
 
   /* KAYIT IŞIĞI (2026-10-17, zemin.css «CANLI ZEMİN»): bir kayıt gerçekten
      yazıldığında çağrılır; üstten bir ışık bir kez yayılıp söner. Işık
@@ -320,7 +452,9 @@ window.LIFEOS = window.LIFEOS || {};
   L.ZEMIN = Object.freeze({ ANAHTAR, KIPLER, TEMA, kip, ayarla, yenile, seciciHtml, temaIlk, _temaKaydet,
     saatTonu, saatUygula, _saatSaglayici, nabiz, gunIlk, GUN_ANAHTAR,
     YUZEYLER, yuzey:() => yuzeySimdi, yuzeyAyarla, yuzeySeciciHtml, yuzeyAnahtar,
-    MANZARA_ANAHTAR, manzara:() => manzaraSimdi, manzaraAyarla, manzaraYenile, manzaraSeciciHtml });
+    MANZARA_ANAHTAR, manzara:() => manzaraSimdi, manzaraAyarla, manzaraYenile, manzaraSeciciHtml,
+    GECE_ANAHTAR, OTO_ANAHTAR, gece:() => geceSimdi, geceAyarla, geceSeciciHtml, oto:() => otoSimdi, otoAyarla, otoSeciciHtml,
+    otoTema, etkinZemin, karanlik, dosyaYukle });
   /* Gövde hazır olunca, ilk çizimden biraz sonra: açılış animasyonuyla çakışmasın. */
   if(typeof document !== 'undefined' && typeof setTimeout === 'function'
       && !/\/tests\//.test(String(location.pathname || ''))){   // test sayfasında kendiliğinden oynamaz

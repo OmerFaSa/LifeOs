@@ -182,6 +182,11 @@ jobs:
       - name: Telefon kapıları yalnız bilinçli kurulumla ve https ile açılır
         run: python3 tools/telefon_test.py
 
+      # KENDİ ARKA PLANIN (2026-10-29). Kullanıcının fotoğrafı/videosu PC'de
+      # durur; yalnız bu bilgisayardan okunur ve yazılır, tür içerikle uyuşmalı.
+      - name: Arka plan dosyası yalnız bu bilgisayardan ve doğru türle
+        run: python3 tools/zemin_test.py
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç

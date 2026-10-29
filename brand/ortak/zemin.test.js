@@ -313,7 +313,9 @@
     it('varsayılan açık: <html data-manzara> ve modülün kendi resmi; kapalıda ikisi de kalkar', () => {
       const Z = window.LIFEOS.ZEMIN, kok = document.documentElement;
       const onceModul = kok.getAttribute('data-modul'), once = localStorage.getItem('lifeos.manzara');
+      const onceTema = kok.getAttribute('data-theme');
       kok.setAttribute('data-modul', 'spi');
+      kok.setAttribute('data-theme', 'light');
       try{
         localStorage.removeItem('lifeos.manzara');
         Z.manzaraYenile();
@@ -331,8 +333,67 @@
       }finally{
         try{ if(once == null) localStorage.removeItem('lifeos.manzara'); else localStorage.setItem('lifeos.manzara', once); }catch(e){}
         if(onceModul) kok.setAttribute('data-modul', onceModul); else kok.removeAttribute('data-modul');
+        if(onceTema) kok.setAttribute('data-theme', onceTema); else kok.removeAttribute('data-theme');
         Z.manzaraYenile();
       }
     });
+
+    /* 2026-10-29 (kullanıcı: «gece ile sabah aynı ya da ayrı olsun»; «karanlık
+       temada arka planın kararması kötü, daha akıllıca bir şey»). */
+    function temizle(fn){
+      const Z = window.LIFEOS.ZEMIN, kok = document.documentElement;
+      const anahtarlar = ['lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece'];
+      const once = anahtarlar.map(k => localStorage.getItem(k)), onceTema = kok.getAttribute('data-theme');
+      try{ anahtarlar.forEach(k => localStorage.removeItem(k)); Z.manzaraYenile(); return fn(Z, kok); }
+      finally{
+        anahtarlar.forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); });
+        Z.manzaraYenile();
+        if(onceTema) kok.setAttribute('data-theme', onceTema); else kok.removeAttribute('data-theme');
+      }
+    }
+    it('koyu temada varsayılan gece rengi: gündüz fotoğrafı karartılmaz, gösterilmez', () => temizle((Z, kok) => {
+      kok.setAttribute('data-theme', 'dark'); Z.manzaraYenile();
+      expect(Z.gece()).toBe('renk');
+      expect(Z.etkinZemin().tur).toBe('yok');
+      expect(kok.hasAttribute('data-manzara')).toBe(false);
+      expect(Z.geceAyarla('ayni')).toBe(true);
+      expect(Z.etkinZemin().tur).toBe('modul');
+      expect(kok.getAttribute('data-manzara')).toBe('acik');
+      kok.setAttribute('data-theme', 'light');
+      expect(Z.etkinZemin().tur).toBe('modul');
+      expect(Z.geceAyarla('yok-boyle')).toBe(false);
+    }));
+    it('kendi dosyan: türü biliniyorsa sunucudan okunur; dosya yoksa modülün fotoğrafına düşer', () => temizle((Z, kok) => {
+      kok.setAttribute('data-theme', 'light');
+      Z.manzaraAyarla('kendi');
+      expect(Z.etkinZemin().tur).toBe('modul');                    // henüz dosya yok
+      localStorage.setItem('lifeos.manzara.tur.gunduz', 'video');
+      Z.manzaraYenile();
+      const z = Z.etkinZemin();
+      if(/^https?:$/.test(location.protocol)){
+        expect(z.tur).toBe('video');
+        expect(kok.hasAttribute('data-zemin-video')).toBe(true);
+        expect(document.querySelector('video.zemin-video').getAttribute('src')).toContain('/api/zemin/gunduz');
+      }
+      Z.manzaraAyarla('acik');
+      expect(!!document.querySelector('video.zemin-video')).toBe(false);
+      ['lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.surum'].forEach(k =>
+        expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(k) >= 0).toBe(true));
+    }));
+    it('saate göre tema: 07–19 açık, öbür saatler koyu; kapatınca önceki tema geri gelir', () => temizle((Z, kok) => {
+      const g = h => { const d = new Date(2026, 9, 29, h, 30); return d; };
+      expect(Z.otoTema(g(6))).toBe('dark');
+      expect(Z.otoTema(g(7))).toBe('light');
+      expect(Z.otoTema(g(18))).toBe('light');
+      expect(Z.otoTema(g(19))).toBe('dark');
+      kok.setAttribute('data-theme', 'dark');
+      const eskiSaat = Z._saatSaglayici(() => g(10));
+      try{
+        expect(Z.otoAyarla('saat')).toBe(true);
+        expect(kok.getAttribute('data-theme')).toBe('light');
+        expect(Z.otoAyarla('kapali')).toBe(true);
+        expect(kok.getAttribute('data-theme')).toBe('dark');
+      }finally{ Z._saatSaglayici(eskiSaat); }
+    }));
   });
 })();

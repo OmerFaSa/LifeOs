@@ -389,32 +389,54 @@ window.LIFEOS = window.LIFEOS || {};
     const kisayol = s => '<kbd class="kenar__kisayol" aria-hidden="true">' + kac(s) + '</kbd>';
     const H = L.HESAP;
     const hd = (H && H.dugme ? H.dugme() : null) || { kisa:'', hal:'yok', gizli:true };
+    /* SADE KENAR (kullanıcı, 2026-10-29: «sol tarafa ayarlar yap; hesaba
+       tıklayınca altta çıkanları kaldır, oraya bildirimler, radyo, sayfa
+       düzeni, arama ekle»). Kenarda King · Ayarlar · profil kalır. Dört araç
+       profilin üstünde açılan pencerededir (sistem seçimi gibi, kenarın
+       içinde): kendi panelleri düğmelerinin hizasında açılır, düğme yerinde
+       kalmalıdır. Pencere kapalıyken bildirim profilin üstünde söylenir.
+       Ayarlar her modülün kendi «open-appearance» eylemidir. */
+    const pid = 'kenar-ben-' + (++modulPencereSayac);
+    const zil = zilNoktaVar(bil);
     return '<div class="kenar__araclar" role="group" aria-label="Araçlar">'
       + '<div class="kenar__grup">'
       /* King (brand/ortak/king.js): her yerden sade sohbet; Ctrl iki kez. */
       + '<button class="ust__king kenar__arac" type="button" data-king-ac aria-haspopup="dialog"'
       +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket('King') + kisayol('Ctrl Ctrl') + '</button>'
+      + '<button class="ust__ayarlar kenar__arac" type="button" data-act="open-appearance" aria-haspopup="dialog"'
+      +   ' aria-label="Ayarlar" title="Ayarlar">' + simge('ayarlar') + etiket('Ayarlar') + '</button>'
+      + '</div><div class="kenar__benler">'
+      + '<div class="kenar__benpencere" id="' + pid + '" role="group" aria-label="Araçlar"><div class="kenar__benliste">'
       + '<button class="ust__ara kenar__arac" type="button" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)" title="Ara (Ctrl K)">'
       +   simge('ara') + etiket('Ara') + kisayol('Ctrl K') + '</button>'
-      + '</div><div class="kenar__grup">'
+      + '<button class="ust__zil kenar__arac" type="button" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
+      +   ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
+      +   simge('zil') + (zil ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler')
+      +   (bil.sayi ? '<span class="kenar__sayi' + (bil.acil ? ' is-acil' : '') + '" aria-hidden="true">' + kac(bil.sayi) + '</span>' : '')
+      + '</button>'
+      + ustSes(true)
       + '<button class="ust__gizli kenar__arac" type="button" aria-haspopup="dialog" aria-expanded="false"'
       +   ' aria-label="Sayfa düzeni" title="Sayfa düzeni: sırala, küçült, gizle">'
       +   simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i>' + etiket('Sayfa düzeni') + '</button>'
-      + ustSes(true)
-      + '<button class="ust__zil kenar__arac" type="button" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
-      +   ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
-      +   simge('zil') + (zilNoktaVar(bil) ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler')
-      +   (bil.sayi ? '<span class="kenar__sayi' + (bil.acil ? ' is-acil' : '') + '" aria-hidden="true">' + kac(bil.sayi) + '</span>' : '')
-      + '</button>'
-      + '</div><div class="kenar__ben">'
-      + '<button class="ust__profil kenar__arac kenar__arac--profil" type="button" data-act="open-appearance" aria-haspopup="dialog"'
+      + '</div></div>'
+      + '<div class="kenar__ben">'
+      + '<button class="ust__profil kenar__arac kenar__arac--profil kenar__bensec" type="button" aria-expanded="false" aria-controls="' + pid + '"'
       +   ' data-hesap-ben data-hal="' + kac(hd.gizli ? 'yok' : hd.hal) + '"'
-      +   ' aria-label="' + kac('Profil ve görünüm' + (ad ? ' — ' + ad : '')) + '">'
-      +   '<i class="kenar__avatar" aria-hidden="true">' + kac(harf) + '</i>'
+      +   ' aria-label="' + kac((ad || 'Profil') + ' — araçlar' + (bil.sayi ? ', ' + bil.sayi + ' bildirim' : '')) + '">'
+      +   '<i class="kenar__avatar" aria-hidden="true">' + kac(harf) + (zil ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</i>'
       +   '<span class="kenar__kim">' + etiket(ad || 'Profil')
       +   '<small class="kenar__durum" data-hesap-durum' + (hd.kisa ? '' : ' hidden') + '>' + kac(hd.kisa) + '</small></span></button>'
       + ustHesap(true)
-      + '</div></div>';
+      + '</div></div></div>';
+  }
+  function benPencereKapat(haric){
+    if(typeof document === 'undefined') return;
+    document.querySelectorAll('.kenar__benler.is-acik').forEach(m => {
+      if(m === haric) return;
+      m.classList.remove('is-acik');
+      const b = m.querySelector('.kenar__bensec');
+      if(b) b.setAttribute('aria-expanded', 'false');
+    });
   }
 
   /* İnce üst şerit. o: { modul, yol:[…], bildirim:{ sayi, acil }, profil,
@@ -868,6 +890,12 @@ window.LIFEOS = window.LIFEOS || {};
       if(say){ if(d.sayi) say.textContent = String(d.sayi); else say.remove(); }
       b.setAttribute('aria-label', d.sayi ? 'Bildirimler, ' + d.sayi + ' tane' : 'Bildirimler, yok');
     });
+    /* Profil (pencere kapalıyken bildirimi o söyler). */
+    document.querySelectorAll('.kenar__bensec .kenar__avatar').forEach(av => {
+      const nokta = av.querySelector('.ust__zil-nokta');
+      if(!(d.acil || d.yeni)){ if(nokta) nokta.remove(); }
+      else if(!nokta){ const i = document.createElement('i'); i.className = 'ust__zil-nokta'; i.setAttribute('aria-hidden', 'true'); av.appendChild(i); }
+    });
   }
 
   /* Gruplu bildirimler (09). o: { gruplar:[{ modul, satirlar:[{ id, metin, route, act, data, acil }] }] }
@@ -1147,6 +1175,17 @@ window.LIFEOS = window.LIFEOS || {};
         return;
       }
       if(!(e.target.closest && e.target.closest('.kenar__modulpencere'))) modulPencereKapat();
+      /* Profil: araç penceresini açar/kapatır; dışarısı (açık katman hariç) kapatır. */
+      const bs = e.target.closest && e.target.closest('.kenar__bensec');
+      if(bs){
+        const kap = bs.closest('.kenar__benler');
+        const ac = !kap.classList.contains('is-acik');
+        benPencereKapat(kap);
+        kap.classList.toggle('is-acik', ac);
+        bs.setAttribute('aria-expanded', ac ? 'true' : 'false');
+        return;
+      }
+      if(!(e.target.closest && e.target.closest('.kenar__benpencere, .katman'))) benPencereKapat();
       const k = e.target.closest && e.target.closest('[data-kenar-ac]');
       if(k){ e.preventDefault(); kenarDar(); return; }
       const a = e.target.closest && e.target.closest('a[data-modul-gecis]');
@@ -1156,7 +1195,7 @@ window.LIFEOS = window.LIFEOS || {};
       gecis(a.getAttribute('data-modul-gecis'), a.href, a);
     });
     window.addEventListener('resize', () => { if(acikId && !telefonMu()) katmanKapat(); });
-    document.addEventListener('keydown', e => { if(e.key === 'Escape'){ bilgiKapat(); modulPencereKapat(); } });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape'){ bilgiKapat(); modulPencereKapat(); if(!acikId) benPencereKapat(); } });
     /* Seçicide ok tuşları komşu bölüme odaklanır (Enter/boşluk seçer). */
     document.addEventListener('keydown', e => {
       if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;

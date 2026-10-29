@@ -569,8 +569,12 @@ window.LIFEOS = window.LIFEOS || {};
   const AILE = Object.freeze({ tik:'dokunus', ac:'gecis', kapa:'gecis', sayfa:'gecis', tamam:'onay', uyari:'onay',
     gidik:'karakter', hirr:'karakter', bla:'karakter', adim:'ortam' });
   const DUZEY_ANAHTAR = 'lifeos.ses.duzey';
-  const DUZEY_VARSAYILAN = Object.freeze({ genel:1, dokunus:1, gecis:1, onay:1, karakter:.8, ortam:.7, king:1 });
-  const DUZEY_AD = Object.freeze({ genel:'Genel', dokunus:'Dokunuş', gecis:'Geçiş ve sayfa', onay:'Onay ve uyarı',
+  /* GRUPLAR (kullanıcı, 2026-10-29: «genel, ajan, UI seslerini tek seferde kısalım;
+     kenar köşesindeki şeye tıklayınca içlerindekini teker teker»): aile ile
+     genel arasında bir çarpan daha. Düzey = genel × grup × aile. */
+  const GRUP = Object.freeze({ dokunus:'arayuz', gecis:'arayuz', onay:'arayuz', karakter:'ajan', ortam:'ajan', king:'ajan' });
+  const DUZEY_VARSAYILAN = Object.freeze({ genel:1, arayuz:1, ajan:1, dokunus:1, gecis:1, onay:1, karakter:.8, ortam:.7, king:1 });
+  const DUZEY_AD = Object.freeze({ genel:'Genel', arayuz:'Arayüz', ajan:'Ajanlar ve King', dokunus:'Dokunuş', gecis:'Geçiş ve sayfa', onay:'Onay ve uyarı',
     karakter:'Minik konuşması ve gıdık', ortam:'Minik adımları', king:'King’in sesi' });
   function duzeyler(){
     let v = null;
@@ -579,7 +583,8 @@ window.LIFEOS = window.LIFEOS || {};
   }
   function duzey(aile){
     const d = duzeyler(), x = k => Math.max(0, Math.min(1, Number(d[k]) || 0));
-    return aile === 'genel' || !(aile in DUZEY_VARSAYILAN) ? x('genel') : x('genel') * x(aile);
+    if(aile === 'genel' || !(aile in DUZEY_VARSAYILAN)) return x('genel');
+    return x('genel') * (GRUP[aile] ? x(GRUP[aile]) : 1) * x(aile);
   }
   function duzeyAyarla(aile, v){
     if(!(aile in DUZEY_VARSAYILAN)) return false;
@@ -591,12 +596,17 @@ window.LIFEOS = window.LIFEOS || {};
   const yuzde = y => y ? '%' + y : 'Kapalı';
   function duzeySeciciHtml(){
     const d = duzeyler();
-    return '<div class="sesduzey" role="group" aria-label="Ses düzeyleri">' + Object.keys(DUZEY_AD).map(k => {
+    const satir = k => {
       const y = Math.round(Math.max(0, Math.min(1, Number(d[k]) || 0)) * 100);
       return '<label class="sesduzey__satir"><span class="sesduzey__ad">' + DUZEY_AD[k] + '</span>'
         + '<input type="range" min="0" max="100" step="5" value="' + y + '" data-ses-duzey="' + k + '" aria-valuetext="' + yuzde(y) + '">'
         + '<output class="sesduzey__deger">' + yuzde(y) + '</output></label>';
-    }).join('') + '</div>';
+    };
+    /* Ana kaydırıcı görünür; ailelerin tek tek düzeyi kapalı «Ayrıntı»da. */
+    const grup = g => '<div class="sesduzey__grup">' + satir(g)
+      + '<details class="sesduzey__ayrinti"><summary>Ayrıntı</summary>'
+      + Object.keys(GRUP).filter(k => GRUP[k] === g).map(satir).join('') + '</details></div>';
+    return '<div class="sesduzey" role="group" aria-label="Ses düzeyleri">' + satir('genel') + grup('arayuz') + grup('ajan') + '</div>';
   }
   let sonDokunus = -1, sonOnay = -9;
   /* Göç (bir kez): eski «Minik sesleri» aç/kapa düğmeleri kalktı; kapalı olan
@@ -987,7 +997,7 @@ window.LIFEOS = window.LIFEOS || {};
     });
     document.addEventListener('change', e => {
       const r = e.target && e.target.closest ? e.target.closest('[data-ses-duzey]') : null;
-      const ornek = r && { genel:'tik', dokunus:'tik', gecis:'ac', onay:'tamam', karakter:'gidik', ortam:'adim' }[r.getAttribute('data-ses-duzey')];
+      const ornek = r && { genel:'tik', arayuz:'tik', ajan:'gidik', dokunus:'tik', gecis:'ac', onay:'tamam', karakter:'gidik', ortam:'adim' }[r.getAttribute('data-ses-duzey')];
       if(ornek){ sonDokunus = -1; sonOnay = -9; tik(ornek, true); }
     });
 

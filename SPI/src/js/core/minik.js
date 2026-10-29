@@ -41,6 +41,9 @@ window.LIFEOS.MINIK = (function(){
   const EN_AZ = 150;          // daha dar kart zemin olmaz (minik sığmaz, kenarı görünmez)
   const PAY = 18;             // kartın köşesine bu kadar yaklaşmaz (yuvarlak köşe)
   const HIZ = 30;             // yürüyüş, piksel/sn (paytak, acelesiz)
+  /* Ayarlar › Animasyon › Minikler (animasyon.js hız katmanı): JS ile oynatılan
+     hareket de aynı orana uyar; «Kapalı» hareketi bitmiş hâline atlatır. */
+  const hizla = a => { const A = window.LIFEOS.ANIMASYON; if(A && A.hizUygula) A.hizUygula(a, 'minik'); return a; };
   const MENZIL = { x:520, y:420 };   // zıplayabileceği en uzak kenar
   const SOHBET_YAKIN = 70;    // sohbette aradaki mesafe
   const GOZ = { menzil:420, en:2.2 }; // göz bebeği en çok 2,2 px kayar
@@ -500,6 +503,7 @@ window.LIFEOS.MINIK = (function(){
       mesgul(mk, false); ses('tik', mk, false); ekHal(mk, 'is-silkiniyor', 900);
       sonra(mk, 1800);
     };
+    hizla(mk.anim);
   }
 
   function koy(mk, x, y){
@@ -535,6 +539,7 @@ window.LIFEOS.MINIK = (function(){
       if(!bitince && mk.huy === 'sakar' && Math.random() < .3){ hal(mk, 'is-takil'); ses('hirr', mk, false); return sonra(mk, 1500); }
       (bitince || dinlen)(mk);
     };
+    hizla(mk.anim);
     /* Hafif, uzaktan adım sesi: CSS'teki her ayak vuruşunda (0,28 sn) bir;
        yürüyüş bitince ya da kesilince (anim değişir) kendiliğinden susar;
        ekranda olmayan minik ses çıkarmaz. */
@@ -556,6 +561,7 @@ window.LIFEOS.MINIK = (function(){
     const kare = sicrama({ x:mk.x, y:mk.y }, { x, y:z.y });
     mk.anim = mk.el.animate(kare, { duration:ms || 900, fill:'forwards' });
     mk.anim.onfinish = () => { mk.el.classList.remove('is-ucuyor'); mk.z = z; koy(mk, x, z.y); mk.anim.cancel(); dinlen(mk); };
+    hizla(mk.anim);
   }
 
   /* Dururken küçük şeyler; huy olasılıkları değiştirir. Uyuyan bir sonraki

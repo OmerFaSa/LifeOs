@@ -411,6 +411,12 @@ ESP.App = (function(){
     const p = S.profile || {};
     const theme = p.theme || 'system';
     const ad = (p.name || '').trim();
+    /* AYARLAR (kullanıcı, 2026-10-29): eski «Görünüm» paneli bölüm bölüm ortak
+       Ayarlar panelidir (brand/ortak/ayarlar.js); kenardaki «Ayarlar» açar. */
+    if(window.LIFEOS && LIFEOS.AYARLAR) return LIFEOS.AYARLAR.html({
+      tema:String(ESP.C.TemaSecici({ value:theme, act:'set-theme' })),
+      profil:{ ad, alt:brandLine(), route:'profile' },
+      modul:safe(() => ayarRotalari(), []) || [] });
     return String(html`
       <div class="katman appear" id="appearance" role="dialog" aria-label="Profil ve görünüm">
         <div class="appear__profil">

@@ -344,6 +344,11 @@ DOSYALAR = {
     "zemin.js":       "js/core",
     "zemin.css":      "css",
     "zemin.test.js":  "tests",
+    # AYARLAR (kullanici, 2026-10-29) — bolum bolum tek ayar paneli ve yazi tipi;
+    # js <head>'de zemin.js'ten SONRA (yazi tercihi ilk cizimden once).
+    "ayarlar.js":     "js/core",
+    "ayarlar.css":    "css",
+    "ayarlar.test.js": "tests",
     # CAM (kullanici, 2026-10-27) — sistem geneli cam yuzey dili; her arayuzde EN SON stil.
     "cam.css":        "css",
     # EKIP (2026-10-28): King ve minikler icin cam.css'ten sonra gelen kendi stilleri.

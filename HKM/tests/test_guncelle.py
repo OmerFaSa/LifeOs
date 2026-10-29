@@ -361,7 +361,16 @@ def run():
         s = sunucu.guncelle.surum()
         if s:
             no(s["kisa"] in h[h.index('id="surum"'):h.index('id="surum"') + 200], "surumde commit kodu")
-        ok("kutu.hidden = true" in h and "surumEt.addEventListener('click'" in h)
+        ok("kutuAc(false)" in h and "surumEt.addEventListener('click'" in h)
+        # 2026-10-29 (kullanicinin cizimi): ustte kavisli serit G · HKM · S; kutu G ile
+        # acilir (bastan kapali); moduller ESP · SPI · AYS sirasiyla dikey kart.
+        yay = h[h.index('<nav class="yay"'):h.index("</nav>", h.index('<nav class="yay"'))]
+        ok(yay.index('id="yay-g"') < yay.index('data-hkm="1"') < yay.index('id="surum"'))
+        ok('aria-controls="guncel"' in yay)
+        ok('<section class="guncel" id="guncel"' in h and 'style="--sira:1" hidden>' in h)
+        izgara = h[h.index('<div class="izgara">'):]
+        ok(izgara.index('data-modul="esp"') < izgara.index('data-modul="spi"') < izgara.index('data-modul="ays"'))
+        no('data-modul="hkm"' in izgara[:izgara.index("</div>\n  <footer") if "</div>\n  <footer" in izgara else len(izgara)])
     test("giris sayfasi dort logoyu, surumu ve guncelleme kutusunu tasir", t_sayfa)
 
     # 2026-10-04: «Yedekle ve güncelle» metnindeki kesme isareti Python

@@ -361,4 +361,55 @@
       }
     });
   });
+  /* 2026-10-29 (kullanıcı: «UI animasyonu, ajan animasyonu diye ana yerden aç-kapa,
+     hız; ayrıntıda UI düğme animasyonu, ajan animasyonları»). */
+  describe('Animasyonlar — hız katmanları', () => {
+    function ile(fn){
+      let eski = null;
+      try{ eski = localStorage.getItem(A.HIZ_ANAHTAR); }catch(e){}
+      try{ localStorage.removeItem(A.HIZ_ANAHTAR); return fn(); }
+      finally{ try{ if(eski == null) localStorage.removeItem(A.HIZ_ANAHTAR); else localStorage.setItem(A.HIZ_ANAHTAR, eski); }catch(e){} }
+    }
+    it('varsayılan orta (1); oran grup × alan; biri kapalıysa 0', () => ile(() => {
+      expect(A.hizOrani('dugme')).toBe(1);
+      expect(A.hizAyarla('ui', 'yavas')).toBe(true);
+      expect(A.hizAyarla('dugme', 'hizli')).toBe(true);
+      expect(Math.abs(A.hizOrani('dugme') - .96) < 1e-9).toBe(true);
+      expect(A.hizOrani('minik')).toBe(1);
+      expect(A.hizAyarla('ajan', 'kapali')).toBe(true);
+      expect(A.hizOrani('king')).toBe(0);
+      expect(A.hizAyarla('dugme', 'cok-hizli')).toBe(false);
+      expect(A.TASINAN.indexOf('lifeos.hareket.hiz') >= 0).toBe(true);
+    }));
+    it('öğe alanını bulur: minik, panel, düğme', () => {
+      const d = document.createElement('div');
+      d.innerHTML = '<div class="minik"><i class="m"></i></div><div class="katman"><b class="k"></b></div><button class="btn"><span class="b"></span></button>';
+      document.body.appendChild(d);
+      try{
+        expect(A.hizAlani(d.querySelector('.m'), 'mk-salla')).toBe('minik');
+        expect(A.hizAlani(d.querySelector('.k'), 'x')).toBe('panel');
+        expect(A.hizAlani(d.querySelector('.b'), 'x')).toBe('dugme');
+      }finally{ d.remove(); }
+    });
+    it('uygula: yavaş oranı yazar; kapalı biteni bitirir, sonsuzu durdurur', () => ile(() => {
+      const sahte = (son) => ({ playbackRate:1, durum:'', effect:{ getComputedTiming:() => ({ endTime:son }) },
+        finish(){ this.durum = 'bitti'; }, cancel(){ this.durum = 'iptal'; } });
+      A.hizAyarla('ui', 'yavas');
+      const a = sahte(400); A.hizUygula(a, 'panel'); expect(a.playbackRate).toBe(.6);
+      A.hizAyarla('ui', 'kapali');
+      const b = sahte(400); A.hizUygula(b, 'panel'); expect(b.durum).toBe('bitti');
+      const c = sahte(Infinity); A.hizUygula(c, 'dugme'); expect(c.durum).toBe('iptal');
+    }));
+    it('seçici: iki grup, alanları kapalı Ayrıntı içinde; basınca kaydedilir', () => ile(() => {
+      const d = document.createElement('div'); d.innerHTML = A.hizSeciciHtml(); document.body.appendChild(d);
+      try{
+        const ayr = Array.from(d.querySelectorAll('details.anihiz__ayrinti')).map(x =>
+          Array.from(x.querySelectorAll('.anihiz__satir')).map(r => r.querySelector('[data-anihiz]').getAttribute('data-anihiz')));
+        expect(ayr).toEqual([['dugme', 'sayfa', 'panel', 'gosterge'], ['minik', 'king']]);
+        d.querySelector('[data-anihiz="ajan"][data-hiz="hizli"]').click();
+        expect(A.hizlar().ajan).toBe('hizli');
+        expect(d.querySelector('[data-anihiz="ajan"][data-hiz="hizli"]').getAttribute('aria-pressed')).toBe('true');
+      }finally{ d.remove(); }
+    }));
+  });
 })();

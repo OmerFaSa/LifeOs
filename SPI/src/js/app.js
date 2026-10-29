@@ -462,6 +462,12 @@ SP.App = (function(){
     const p = S.profile || {};
     const theme = p.theme || 'system';
     const ad = (p.name || '').trim();
+    /* AYARLAR (kullanıcı, 2026-10-29): eski «Görünüm» paneli bölüm bölüm ortak
+       Ayarlar panelidir (brand/ortak/ayarlar.js); kenardaki «Ayarlar» açar. */
+    if(window.LIFEOS && LIFEOS.AYARLAR) return LIFEOS.AYARLAR.html({
+      tema:String(SP.C.TemaSecici({ value:theme, act:'set-theme' })),
+      profil:{ ad, alt:brandLine(), route:'family' },
+      modul:safe(() => (SECTIONS.find(s => s.id === 'ayarlar') || { views:[] }).views.map(v => ({ ad:v.label, route:v.route })), []) || [] });
     return String(html`
       <div class="katman appear" id="appearance" role="dialog" aria-label="Profil ve görünüm">
         <div class="appear__profil">

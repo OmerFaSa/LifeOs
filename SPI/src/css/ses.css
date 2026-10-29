@@ -82,3 +82,13 @@
 .sesduzey__ad{ color:var(--text); }
 .sesduzey__deger{ font-variant-numeric:tabular-nums; color:var(--text-2); text-align:right; font-size:12.5px; }
 .sesduzey input[type="range"]{ width:100%; accent-color:var(--mod, var(--primary)); min-height:24px; }
+/* Grup: ana kaydırıcı + sağ üstte küçük «Ayrıntı»; açılınca aileler girintili. */
+.sesduzey__grup{ position:relative; display:grid; gap:8px; padding-top:10px; border-top:1px solid var(--border-soft); }
+.sesduzey__ayrinti > summary{ position:absolute; top:10px; right:52px; list-style:none; cursor:pointer;
+  font-size:12px; font-weight:550; color:var(--text-3); border-radius:6px; padding:0 4px; }
+.sesduzey__ayrinti > summary::-webkit-details-marker{ display:none; }
+.sesduzey__ayrinti > summary::after{ content:'›'; display:inline-block; margin-left:4px; transition:transform var(--dur) var(--ease); }
+.sesduzey__ayrinti[open] > summary::after{ transform:rotate(90deg); }
+.sesduzey__ayrinti > summary:hover{ color:var(--text); }
+.sesduzey__ayrinti[open]{ display:grid; gap:10px; padding:4px 0 2px 14px; border-left:2px solid var(--border-soft); }
+.sesduzey__ayrinti .sesduzey__satir{ font-size:12.5px; }

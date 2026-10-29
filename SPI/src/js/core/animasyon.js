@@ -243,7 +243,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.manzara', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -483,12 +483,110 @@ window.LIFEOS = window.LIFEOS || {};
     return eski;
   }
 
+  /* HIZ KATMANLARI (kullanıcı, 2026-10-29: «animasyonun hızını ya da olup
+     olmayacağını ses kısmındaki gibi UI animasyonu, ajan animasyonu diye ana
+     yerden açıp kapatalım; az, orta, çok ya da yavaştan hızlıya; kenardaki
+     ayrıntı düğmesiyle içerideki UI düğme animasyonu, ajan animasyonları»).
+     CSS'e dokunmadan: her CSS animasyonu ve geçişi başlarken tarayıcının
+     kendi oynatma hızı (playbackRate) gruba göre ayarlanır; «Kapalı» olan
+     bitmiş hâline atlar (sonsuz döngü durur). JS ile oynatılanlar (minik
+     yürüyüşü) oranı `hizOrani` ile okur. Kip (Tam/Az/Sistem) üstte kalır:
+     Az'da hareket zaten kısalmıştır. Tercih `lifeos.hareket.hiz`, taşınır. */
+  const HIZ_ANAHTAR = 'lifeos.hareket.hiz';
+  const HIZLAR = Object.freeze(['kapali', 'yavas', 'orta', 'hizli']);
+  const HIZ_AD = Object.freeze({ kapali:'Kapalı', yavas:'Yavaş', orta:'Orta', hizli:'Hızlı' });
+  const HIZ_ORAN = Object.freeze({ kapali:0, yavas:.6, orta:1, hizli:1.6 });
+  const HIZ_GRUP = Object.freeze({ dugme:'ui', sayfa:'ui', panel:'ui', gosterge:'ui', minik:'ajan', king:'ajan' });
+  const HIZ_ADLAR = Object.freeze({ ui:'Arayüz', ajan:'Ajanlar', dugme:'Düğme ve dokunuş', sayfa:'Sayfa geçişi',
+    panel:'Panel ve menü', gosterge:'Gösterge ve sayı', minik:'Minikler', king:'King' });
+  function hizlar(){
+    let v = null;
+    try{ v = JSON.parse(localStorage.getItem(HIZ_ANAHTAR) || 'null'); }catch(e){ v = null; }
+    const o = {};
+    Object.keys(HIZ_ADLAR).forEach(k => { o[k] = v && HIZLAR.indexOf(v[k]) >= 0 ? v[k] : 'orta'; });
+    return o;
+  }
+  function hizAyarla(alan, h){
+    if(!(alan in HIZ_ADLAR) || HIZLAR.indexOf(h) < 0) return false;
+    const o = hizlar(); o[alan] = h;
+    try{ localStorage.setItem(HIZ_ANAHTAR, JSON.stringify(o)); }catch(e){ /* depo kapalı */ }
+    return true;
+  }
+  /* Alanın etkin oranı: grup × alan (ikisinden biri kapalıysa 0). */
+  function hizOrani(alan){
+    const o = hizlar(), g = HIZ_GRUP[alan] || (alan in HIZ_ORAN ? null : alan);
+    return (g ? HIZ_ORAN[o[g]] : 1) * (alan in HIZ_GRUP ? HIZ_ORAN[o[alan]] : 1);
+  }
+  /* Öğenin hangi alana düştüğü: önce ajanlar, sonra kabuk katmanları. */
+  function hizAlani(el, ad){
+    if(!el || !el.closest) return 'sayfa';
+    if(el.closest('.minik, .minikkat')) return 'minik';
+    if(el.closest('.king__kure, .ust__king')) return 'king';
+    if(el.closest('.katman, .sheet, .menusayfa, .kmenu, .kenar, .popover, .h-onizle, .king')) return 'panel';
+    if(el.matches && el.matches('.bar__fill, .esikcubuk__dolu, .donen__nokta, [class*="halka"], [data-sayi]')) return 'gosterge';
+    if(/^(cam-gir|sayfa-gir|content-in|vt-)/.test(ad || '')) return 'sayfa';
+    if(el.closest('button, a, .btn, .chip, [role="button"], input, select, summary')) return 'dugme';
+    return 'sayfa';
+  }
+  /* Bir animasyonu alanın hızına getirir; kapalıysa bitirir (sonsuzu durdurur). */
+  function hizUygula(a, alan){
+    if(!a) return;
+    const r = hizOrani(alan);
+    try{
+      if(r === 0){
+        const t = a.effect && a.effect.getComputedTiming ? a.effect.getComputedTiming() : null;
+        if(t && t.endTime === Infinity) a.cancel(); else a.finish();
+      }else if(r !== 1 && a.playbackRate !== r) a.playbackRate = r;
+    }catch(e){ /* zaten bitmiş ya da iptal */ }
+  }
+  function hizOlay(e){
+    const el = e.target;
+    if(!el || !el.getAnimations || simdiki === 'az') return;
+    const ad = e.animationName || '';
+    const alan = hizAlani(el, ad);
+    if(hizOrani(alan) === 1) return;
+    const sozde = e.pseudoElement || '';
+    let liste = [];
+    try{ liste = el.getAnimations({ subtree:!!sozde }); }catch(e2){ return; }
+    liste.filter(a => (!a.effect || a.effect.target === el) && ((a.effect && a.effect.pseudoElement) || '') === sozde
+      && (ad ? a.animationName === ad : a.transitionProperty === e.propertyName)).forEach(a => hizUygula(a, alan));
+  }
+  if(typeof document !== 'undefined' && document.addEventListener){
+    document.addEventListener('animationstart', hizOlay, true);
+    document.addEventListener('transitionrun', hizOlay, true);
+  }
+  /* Ayarlar paneli: kip ve iki grup; her grubun alanları «Ayrıntı»da. */
+  function hizSeg(alan){
+    const h = hizlar()[alan];
+    return '<div class="seg anihiz" role="group" aria-label="' + HIZ_ADLAR[alan] + ' hızı">' + HIZLAR.map(k =>
+      '<button type="button" class="' + (k === h ? 'is-on' : '') + '" data-anihiz="' + alan + '" data-hiz="' + k + '" aria-pressed="' + (k === h) + '">'
+      + HIZ_AD[k] + '</button>').join('') + '</div>';
+  }
+  function hizSeciciHtml(){
+    const satir = alan => '<div class="anihiz__satir"><span class="anihiz__ad">' + HIZ_ADLAR[alan] + '</span>' + hizSeg(alan) + '</div>';
+    const grup = g => '<div class="anihiz__grup">' + satir(g) + '<details class="anihiz__ayrinti"><summary>Ayrıntı</summary>'
+      + Object.keys(HIZ_GRUP).filter(k => HIZ_GRUP[k] === g).map(satir).join('') + '</details></div>';
+    return '<div class="anihiz__kok">' + grup('ui') + grup('ajan') + '</div>';
+  }
+  if(typeof document !== 'undefined' && document.addEventListener){
+    document.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-anihiz]') : null;
+      if(!b) return;
+      const alan = b.getAttribute('data-anihiz');
+      if(!hizAyarla(alan, b.getAttribute('data-hiz'))) return;
+      b.parentElement.querySelectorAll('[data-anihiz]').forEach(x => {
+        const on = x === b; x.classList.toggle('is-on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    });
+  }
+
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
     dinlenSure,
     ANAHTAR, KIPLER, TASINAN,
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
+    HIZ_ANAHTAR, HIZLAR, HIZ_GRUP, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,
     gecis, gecisVaris, gecisOnyukle, gecisBitir, logoAdresi, GECIS_CEREZ, GECIS_MS,
     _yonlendir:fn => { const eski = yonlendir; if(typeof fn === 'function') yonlendir = fn; return eski; },
   });
