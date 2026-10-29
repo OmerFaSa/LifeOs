@@ -70,14 +70,18 @@ window.LIFEOS = window.LIFEOS || {};
   }
 
   /* ---------------------------------------------------------- bölümler */
+  /* GRUPLAR (kullanıcı, 2026-10-29: «sistem direkt olmayacak; Sistem altında ses,
+     animasyon, plan; sonra Hesap: güvenlik, bağlantılar, Google»). Grup adı
+     listede başlıktır, kendisi sekme değildir. */
   const BOLUMLER = Object.freeze([
-    { id:'gorunum', ad:'Görünüm' },
-    { id:'hareket', ad:'Animasyon' },
-    { id:'ses',     ad:'Ses' },
-    { id:'ekip',    ad:'Minikler ve King' },
-    { id:'hesap',   ad:'Hesap' },
-    { id:'sistem',  ad:'Sistem' },
-    { id:'modul',   ad:'Bu modül' },
+    { id:'gorunum',  ad:'Görünüm' },
+    { id:'ekip',     ad:'Minikler ve King' },
+    { id:'ses',      ad:'Ses',         grup:'Sistem' },
+    { id:'hareket',  ad:'Animasyon',   grup:'Sistem' },
+    { id:'sistem',   ad:'Planlama',    grup:'Sistem' },
+    { id:'hesap',    ad:'Güvenlik',    grup:'Hesap' },
+    { id:'baglanti', ad:'Bağlantılar', grup:'Hesap' },
+    { id:'modul',    ad:'Bu modül' },
   ]);
   let secili = 'gorunum';
 
@@ -94,8 +98,18 @@ window.LIFEOS = window.LIFEOS || {};
     ['etkinlik', 'Son etkinlik', 'Girişler ve yanlış denemeler'],
     ['yedek', 'Yedekler', 'Hesap deposunun yedekleri; geri yükle, indir'],
     ['verin', 'Verin', 'Bütün verini dışa aktar ya da hesabı sil'],
-    ['baglantilar', 'Bağlantılar', 'Kısayollar, takvim aboneliği, gelen kutusu'],
   ]);
+  /* Bağlantılar: hesap merkezinin bağlantı sayfaları (hesap.js SAYFA_AD). */
+  const BAGLANTI_SAYFALARI = Object.freeze([
+    ['baglantilar', 'Bütün bağlantılar', 'Bu hesaba bağlı olan her şey tek listede'],
+    ['bagla', 'Yeni cihaz bağla', 'Telefonu ya da tableti kodla bağla'],
+    ['anahtarlar', 'Kısayollar ve otomasyon', 'iPhone Kısayollar, Home Assistant erişim anahtarları'],
+    ['gelen', 'Gelen kutusu', 'Kısayollardan gelen satırlar; modül onaylamadan yazılmaz'],
+    ['takvim', 'Takvim aboneliği', 'Planını telefonun takvimine abone et'],
+  ]);
+  const sayfaSatirlari = l => l.map(([sayfa, ad, not]) => H(ad, not,
+    '<button type="button" class="btn btn--sm" data-ayarlar-hesap="' + sayfa + '">Aç</button>')).join('');
+  const hesapYok = () => H('Hesap ve eşitleme', 'LifeOS sunucusu kapalı ya da giriş yapılmadı; kayıtlar bu cihazda', '');
   const modulAdi = () => (typeof document !== 'undefined' && document.documentElement.getAttribute('data-modul')) || 'ays';
   const ODEME_ANAHTAR = 'lifeos.kilit.odeme';
   function odemeAcik(){ try{ return localStorage.getItem(ODEME_ANAHTAR) === 'acik'; }catch(e){ return false; } }
@@ -132,16 +146,14 @@ window.LIFEOS = window.LIFEOS || {};
       return '<div class="ayarlar__profil"><i class="ayarlar__avatar" aria-hidden="true">' + kac(((p.ad || 'Ben').trim().charAt(0) || 'B').toLocaleUpperCase('tr-TR')) + '</i>'
         + '<span><b>' + kac(p.ad || 'Profil') + '</b><small>' + kac(p.alt || '') + '</small></span>'
         + (p.route ? '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(p.route) + '">Profili aç</button>' : '') + '</div>'
-        + (hesapVar()
-          ? '<h5 class="plan__alt">Güvenlik</h5>' + HESAP_SAYFALARI.map(([sayfa, ad, not]) => H(ad, not,
-            '<button type="button" class="btn btn--sm" data-ayarlar-hesap="' + sayfa + '">Aç</button>')).join('')
-          : H('Hesap ve eşitleme', 'LifeOS sunucusu kapalı ya da giriş yapılmadı; kayıtlar bu cihazda', ''))
+        + (hesapVar() ? sayfaSatirlari(HESAP_SAYFALARI) : hesapYok())
         + '<h5 class="plan__alt">Bu cihaz ve kilitler</h5>'
         + (L.KILIT && L.KILIT.ayarHtml ? H('Gizlilik kilidi', 'Bu modül açılırken dört haneli kod sorar', L.KILIT.ayarHtml(modulAdi(), { govde:true })) : '')
         + H('Satın alma ve kart işlemleri', odemeAcik() ? 'Açık; yine de LifeOS’ta ödeme yapan bir araç yok'
-            : 'Kapalı: King ve ajanlar ödeme, sipariş ya da kart işine girmez', odemeSecici())
-        + H('Google ve YouTube', 'Hesap bağlanmaz: King’in bulduğu bağlantılar senin tarayıcında, kendi oturumunla açılır; LifeOS Google’a veri göndermez', '');
+            : 'Kapalı: King ve ajanlar ödeme, sipariş ya da kart işine girmez', odemeSecici());
     }
+    if(id === 'baglanti') return H('Google ve YouTube', 'Hesap bağlanmaz: King’in bulduğu bağlantılar senin tarayıcında, kendi oturumunla açılır; LifeOS Google’a veri göndermez', '')
+      + (hesapVar() ? sayfaSatirlari(BAGLANTI_SAYFALARI) : hesapYok());
     if(id === 'sistem') return '<h4 class="plan__baslik">Sistem planlaması</h4><div class="plan" data-plan-kok><p class="ayarlar__bos">Yükleniyor…</p></div>';
     if(id === 'modul') return (o.modul || []).map(m => H(m.ad, m.not || '',
       '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(m.route) + '">Aç</button>')).join('')
@@ -153,7 +165,8 @@ window.LIFEOS = window.LIFEOS || {};
     o = o || {};
     if(!BOLUMLER.some(b => b.id === secili)) secili = 'gorunum';
     if(secili === 'sistem' && typeof setTimeout === 'function') setTimeout(() => planYukle(), 0);
-    const nav = BOLUMLER.map(b => '<button type="button" class="ayarlar__sekme' + (b.id === secili ? ' is-on' : '') + '" role="tab"'
+    const nav = BOLUMLER.map((b, i) => (b.grup && (!i || BOLUMLER[i - 1].grup !== b.grup) ? '<span class="ayarlar__grup" role="presentation">' + kac(b.grup) + '</span>' : '')
+      + '<button type="button" class="ayarlar__sekme' + (b.grup ? ' ayarlar__sekme--grupta' : '') + (b.id === secili ? ' is-on' : '') + '" role="tab"'
       + ' id="ayarlar-sekme-' + b.id + '" aria-selected="' + (b.id === secili) + '" aria-controls="ayarlar-bolum-' + b.id + '"'
       + ' data-ayar-bolum="' + b.id + '">' + kac(b.ad) + '</button>').join('');
     const govde = BOLUMLER.map(b => '<section class="ayarlar__bolum" role="tabpanel" id="ayarlar-bolum-' + b.id + '"'
@@ -323,6 +336,6 @@ window.LIFEOS = window.LIFEOS || {};
     });
   }
 
-  L.AYARLAR = Object.freeze({ html, BOLUMLER, YAZILAR, yazi, yaziAyarla, HESAP_SAYFALARI, ODEME_ANAHTAR, odemeAcik, odemeAyarla,
+  L.AYARLAR = Object.freeze({ html, BOLUMLER, YAZILAR, yazi, yaziAyarla, HESAP_SAYFALARI, BAGLANTI_SAYFALARI, ODEME_ANAHTAR, odemeAcik, odemeAyarla,
     _sec:id => { secili = id; } });
 })();

@@ -23,12 +23,15 @@
   }
 
   describe('Ayarlar (bölümlü panel)', () => {
-    it('yedi bölüm; yalnız seçili olan görünür, sekmeye basınca değişir', () => {
+    it('sekiz bölüm, Sistem ve Hesap grup; yalnız seçili olan görünür, sekmeye basınca değişir', () => {
       A._sec('gorunum');
       const d = koy();
       try{
         const sek = Array.from(d.querySelectorAll('[data-ayar-bolum]'));
-        expect(sek.map(s => s.textContent)).toEqual(['Görünüm', 'Animasyon', 'Ses', 'Minikler ve King', 'Hesap', 'Sistem', 'Bu modül']);
+        expect(sek.map(s => s.textContent)).toEqual(['Görünüm', 'Minikler ve King', 'Ses', 'Animasyon', 'Planlama', 'Güvenlik', 'Bağlantılar', 'Bu modül']);
+        /* Sistem ve Hesap sekme değil, grup başlığı; altındakiler sırayla. */
+        expect(Array.from(d.querySelectorAll('.ayarlar__grup')).map(g => g.textContent)).toEqual(['Sistem', 'Hesap']);
+        expect(d.querySelector('.ayarlar__grup').nextElementSibling.textContent).toBe('Ses');
         const gorunen = () => Array.from(d.querySelectorAll('.ayarlar__bolum')).filter(s => !s.hidden).map(s => s.id);
         expect(gorunen()).toEqual(['ayarlar-bolum-gorunum']);
         sek[2].click();
@@ -96,14 +99,15 @@
         expect(h.querySelector('[data-odeme="acik"]').getAttribute('aria-pressed')).toBe('true');
         h.querySelector('[data-odeme="kapali"]').click();
         expect(A.odemeAcik()).toBe(false);
-        expect(h.textContent.indexOf('LifeOS Google’a veri göndermez') >= 0).toBe(true);
+        expect(d.querySelector('#ayarlar-bolum-baglanti').textContent.indexOf('LifeOS Google’a veri göndermez') >= 0).toBe(true);
         if(window.LIFEOS.KILIT) expect(!!h.querySelector('[data-kilit-ayar]')).toBe(true);
         expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(A.ODEME_ANAHTAR) >= 0).toBe(true);
       }finally{ d.remove(); try{ if(eski == null) localStorage.removeItem(A.ODEME_ANAHTAR); else localStorage.setItem(A.ODEME_ANAHTAR, eski); }catch(e){} }
     });
     it('Hesap: güvenlik satırları hesap merkezinin gerçek sayfalarına açılır', () => {
       A.HESAP_SAYFALARI.forEach(([sayfa]) => expect(typeof sayfa).toBe('string'));
-      expect(A.HESAP_SAYFALARI.map(x => x[0])).toEqual(['guvenlik', 'ikiadim', 'cihazlar', 'etkinlik', 'yedek', 'verin', 'baglantilar']);
+      expect(A.HESAP_SAYFALARI.map(x => x[0])).toEqual(['guvenlik', 'ikiadim', 'cihazlar', 'etkinlik', 'yedek', 'verin']);
+      expect(A.BAGLANTI_SAYFALARI.map(x => x[0])).toEqual(['baglantilar', 'bagla', 'anahtarlar', 'gelen', 'takvim']);
     });
 
     it('hesap sunucusu yokken düğme yok, durum söylenir', () => {
