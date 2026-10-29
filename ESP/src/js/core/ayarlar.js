@@ -79,6 +79,7 @@ window.LIFEOS = window.LIFEOS || {};
     { id:'ses',     ad:'Ses' },
     { id:'ekip',    ad:'Minikler ve King' },
     { id:'hesap',   ad:'Hesap' },
+    { id:'sistem',  ad:'Sistem' },
     { id:'modul',   ad:'Bu modül' },
   ]);
   let secili = 'gorunum';
@@ -116,6 +117,7 @@ window.LIFEOS = window.LIFEOS || {};
             '<button type="button" class="btn btn--sm ayarlar__hesap" data-ayarlar-hesap>Hesabı aç</button>')
           : H('Hesap ve eşitleme', 'LifeOS sunucusu kapalı ya da giriş yapılmadı; kayıtlar bu cihazda', ''));
     }
+    if(id === 'sistem') return '<h4 class="plan__baslik">Sistem planlaması</h4><div class="plan" data-plan-kok><p class="ayarlar__bos">Yükleniyor…</p></div>';
     if(id === 'modul') return (o.modul || []).map(m => H(m.ad, m.not || '',
       '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(m.route) + '">Aç</button>')).join('')
       || '<p class="ayarlar__bos">Bu modülün ayrı ayar ekranı yok.</p>';
@@ -125,6 +127,7 @@ window.LIFEOS = window.LIFEOS || {};
   function html(o){
     o = o || {};
     if(!BOLUMLER.some(b => b.id === secili)) secili = 'gorunum';
+    if(secili === 'sistem' && typeof setTimeout === 'function') setTimeout(() => planYukle(), 0);
     const nav = BOLUMLER.map(b => '<button type="button" class="ayarlar__sekme' + (b.id === secili ? ' is-on' : '') + '" role="tab"'
       + ' id="ayarlar-sekme-' + b.id + '" aria-selected="' + (b.id === secili) + '" aria-controls="ayarlar-bolum-' + b.id + '"'
       + ' data-ayar-bolum="' + b.id + '">' + kac(b.ad) + '</button>').join('');
@@ -147,12 +150,122 @@ window.LIFEOS = window.LIFEOS || {};
       b.classList.toggle('is-on', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
     });
     panel.querySelectorAll('.ayarlar__bolum').forEach(s => { s.hidden = s.id !== 'ayarlar-bolum-' + id; });
+    if(id === 'sistem') planYukle();
+  }
+
+  /* SİSTEM PLANLAMASI (kullanıcı, 2026-10-29: «sistemin kendini ne zaman
+     başlatacağını, ne zaman kapatacağını periyodik bir çizgi üzerinden
+     haftalık ayarlayalım; misal her cumartesi 7'de genel tarama; kaçarsa en
+     müsait anda yapsın ya da onayımızı beklesin»). Plan PC'deki sunucudadır
+     (sistem/planlama.py, /api/planlama; yalnız bu bilgisayardan): her
+     değişiklik hemen kaydedilir. Haftalık çizgi yedi gündür; her günde o gün
+     planlanan açılış, kapanış ve işler saatiyle durur. */
+  let plan = null, planMesaj = '', planZaman = 0;
+  const saatAd = t => { try{ const d = new Date(t * 1000); return d.toLocaleDateString('tr-TR', { day:'numeric', month:'short' }) + ' ' + d.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }); }catch(e){ return ''; } };
+  function planKok(){ return typeof document !== 'undefined' ? document.querySelector('[data-plan-kok]') : null; }
+  function planYukle(){
+    const kok = planKok();
+    if(!kok || typeof fetch !== 'function') return;
+    if(!/^https?:$/.test(location.protocol)){ kok.innerHTML = planYok(); return; }
+    fetch('/api/planlama', { cache:'no-store' }).then(r => r.ok ? r.json() : Promise.reject())
+      .then(v => { plan = v; planCiz(); })
+      .catch(() => { const k = planKok(); if(k) k.innerHTML = planYok(); });
+  }
+  const planYok = () => '<p class="ayarlar__bos">Sistem planlaması LifeOS sunucusunun bu bilgisayarda açık olmasını ister; telefonda ve tek dosya sürümünde yoktur.</p>';
+  function gunCipleri(ad, secili, tek){
+    return '<div class="plan__gunler" role="group" aria-label="Günler">' + plan.gunler.map((g, i) => {
+      const on = tek ? secili === i : secili.indexOf(i) >= 0;
+      return '<button type="button" class="plan__gun' + (on ? ' is-on' : '') + '" data-plan-gun="' + ad + '|' + i + '" aria-pressed="' + on + '">' + kac(g) + '</button>';
+    }).join('') + '</div>';
+  }
+  const anahtar = (ad, acik) => '<button type="button" class="plan__anahtar' + (acik ? ' is-on' : '') + '" role="switch" aria-checked="' + acik + '" data-plan-ac="' + ad + '">'
+    + '<i aria-hidden="true"></i><span class="sr-only">' + (acik ? 'Açık' : 'Kapalı') + '</span></button>';
+  const saatGirdi = (ad, v) => '<input type="time" class="plan__saat" data-plan-saat="' + ad + '" value="' + kac(v) + '" aria-label="Saat">';
+  function cizgi(){
+    const p = plan.plan, gunler = plan.gunler.map(() => []);
+    ['acilis', 'kapanis'].forEach(k => { if(p[k].acik) p[k].gunler.forEach(g => gunler[g].push({ saat:p[k].saat, ad:k === 'acilis' ? 'Açılış' : 'Kapanış', tur:k })); });
+    plan.isler.forEach(x => { const i = p.isler[x.id]; if(i.acik) gunler[i.gun].push({ saat:i.saat, ad:x.ad, tur:'is' }); });
+    return '<ol class="plan__cizgi" aria-label="Haftalık plan">' + gunler.map((l, i) => '<li><b>' + kac(plan.gunler[i]) + '</b>'
+      + l.sort((a, b) => a.saat.localeCompare(b.saat)).map(x => '<span class="plan__olay plan__olay--' + x.tur + '"><time>' + kac(x.saat) + '</time>' + kac(x.ad) + '</span>').join('')
+      + '</li>').join('') + '</ol>';
+  }
+  function planCiz(){
+    const kok = planKok();
+    if(!kok || !plan) return;
+    const p = plan.plan;
+    const bekleyen = p.bekleyen.length ? '<div class="plan__bekleyen" role="status"><b>Saatinde yapılamadı</b>' + p.bekleyen.map(id => {
+      const x = plan.isler.find(i => i.id === id) || { ad:id };
+      return '<div class="plan__bek-satir"><span>' + kac(x.ad) + '</span><button type="button" class="btn btn--sm" data-plan-yap="' + id + '">Yap</button>'
+        + '<button type="button" class="btn btn--sm btn--ghost" data-plan-atla="' + id + '">Atla</button></div>';
+    }).join('') + '</div>' : '';
+    const ucSatir = (k, ad, not) => '<div class="plan__satir"><div class="plan__ad">' + ad + '<small>' + not + '</small></div>' + anahtar(k, p[k].acik)
+      + (p[k].acik ? '<div class="plan__ayar">' + gunCipleri(k, p[k].gunler) + saatGirdi(k, p[k].saat) + '</div>' : '') + '</div>';
+    const isler = plan.isler.map(x => {
+      const i = p.isler[x.id], son = p.son[x.id];
+      return '<div class="plan__satir plan__satir--is"><div class="plan__ad">' + kac(x.ad) + '<small>' + kac(x.not) + '</small></div>' + anahtar('is:' + x.id, i.acik)
+        + (i.acik ? '<div class="plan__ayar">' + gunCipleri('is:' + x.id, i.gun, true) + saatGirdi('is:' + x.id, i.saat)
+          + '<div class="seg plan__kacarsa" role="group" aria-label="Kaçarsa">'
+          + ['hemen', 'onay'].map(k => '<button type="button" class="' + (i.kacarsa === k ? 'is-on' : '') + '" data-plan-kacarsa="' + x.id + ':' + k + '" aria-pressed="' + (i.kacarsa === k) + '">'
+            + (k === 'hemen' ? 'Kaçarsa ilk müsait an' : 'Kaçarsa onay bekle') + '</button>').join('') + '</div>'
+          + (x.id === 'guncelleme' ? '<label class="plan__kur"><input type="checkbox" data-plan-kur' + (i.kur ? ' checked' : '') + '> Yenilik varsa kur</label>' : '')
+          + '</div>' : '')
+        + '<div class="plan__son">' + (son && son.zaman ? '<span class="' + (son.ok ? 'is-ok' : 'is-sorun') + '">' + (son.ok ? '✓ ' : '✕ ') + kac(saatAd(son.zaman)) + ' · ' + kac(son.mesaj || '') + '</span>' : '<span>Henüz yapılmadı</span>')
+        + (plan.calisan.indexOf(x.id) >= 0 ? '<span>Çalışıyor…</span>' : '<button type="button" class="btn btn--sm btn--ghost" data-plan-yap="' + x.id + '">Şimdi yap</button>') + '</div></div>';
+    }).join('');
+    kok.innerHTML = bekleyen + cizgi()
+      + '<h5 class="plan__alt">Açılış ve kapanış</h5>'
+      + ucSatir('acilis', 'Açılış', plan.windows ? 'LifeOS kapalıysa Windows açar; bilgisayar açık olmalı' : 'Yalnız Windows’ta')
+      + ucSatir('kapanis', 'Kapanış', 'Bu saatte LifeOS kendini kapatır')
+      + '<h5 class="plan__alt">Periyodik işler</h5>' + isler
+      + '<p class="plan__mesaj" role="status">' + kac(planMesaj) + '</p>';
+  }
+  function planKaydet(){
+    clearTimeout(planZaman);
+    planZaman = setTimeout(() => {
+      fetch('/api/planlama', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-LifeOS':'planlama' }, body:JSON.stringify(plan.plan) })
+        .then(r => r.json().then(v => ({ ok:r.ok, v })))
+        .then(({ ok, v }) => { if(ok){ plan.plan = v.plan; planMesaj = v.mesaj || 'Kaydedildi.'; } else planMesaj = v.hata || 'Kaydedilemedi.'; planCiz(); })
+        .catch(() => { planMesaj = 'Kaydedilemedi: LifeOS sunucusu yanıt vermedi.'; planCiz(); });
+    }, 350);
+  }
+  function hedef(ad){ return ad.indexOf('is:') === 0 ? plan.plan.isler[ad.slice(3)] : plan.plan[ad]; }
+  function planTikla(t){
+    if(!plan) return false;
+    const ac = t.closest('[data-plan-ac]');
+    if(ac){ const h = hedef(ac.getAttribute('data-plan-ac')); h.acik = !h.acik; planCiz(); planKaydet(); return true; }
+    const g = t.closest('[data-plan-gun]');
+    if(g){
+      const [ad, n] = g.getAttribute('data-plan-gun').split('|'), i = Number(n);
+      const h = hedef(ad);
+      if(ad.indexOf('is:') === 0) h.gun = i;
+      else if(h.gunler.indexOf(i) >= 0){ if(h.gunler.length > 1) h.gunler = h.gunler.filter(x => x !== i); }
+      else h.gunler = h.gunler.concat(i).sort();
+      planCiz(); planKaydet(); return true;
+    }
+    const k = t.closest('[data-plan-kacarsa]');
+    if(k){ const [id, v] = k.getAttribute('data-plan-kacarsa').split(':'); plan.plan.isler[id].kacarsa = v; planCiz(); planKaydet(); return true; }
+    const y = t.closest('[data-plan-yap], [data-plan-atla]');
+    if(y){
+      const yap = y.hasAttribute('data-plan-yap'), id = y.getAttribute(yap ? 'data-plan-yap' : 'data-plan-atla');
+      fetch('/api/planlama/' + (yap ? 'yap/' : 'atla/') + id, { method:'POST', headers:{ 'X-LifeOS':'planlama' } })
+        .then(() => setTimeout(planYukle, yap ? 1200 : 0)).catch(() => {});
+      if(yap){ plan.calisan = plan.calisan.concat(id); planCiz(); }
+      return true;
+    }
+    return false;
+  }
+  function planDegisti(t){
+    if(!plan) return false;
+    if(t.matches('[data-plan-saat]')){ const h = hedef(t.getAttribute('data-plan-saat')); if(/^\d\d:\d\d$/.test(t.value)){ h.saat = t.value; planCiz(); planKaydet(); } return true; }
+    if(t.matches('[data-plan-kur]')){ plan.plan.isler.guncelleme.kur = t.checked; planKaydet(); return true; }
+    return false;
   }
 
   if(typeof document !== 'undefined'){
     document.addEventListener('click', e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
+      if(planTikla(t)) return;
       const sk = t.closest('[data-ayar-bolum]');
       if(sk){ sekmeSec(sk.closest('.ayarlar'), sk.getAttribute('data-ayar-bolum')); return; }
       const yz = t.closest('[data-yazi-sec]');
@@ -170,6 +283,7 @@ window.LIFEOS = window.LIFEOS || {};
         if(h){ if(L.KABUK) L.KABUK.katmanKapat(); h.click(); }
       }
     });
+    document.addEventListener('change', e => { if(e.target && e.target.matches) planDegisti(e.target); });
     /* Sekmelerde ok tuşları (dikey liste). */
     document.addEventListener('keydown', e => {
       if(e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;

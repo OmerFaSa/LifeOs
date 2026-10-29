@@ -74,6 +74,7 @@ sys.path.insert(0, SISTEM)
 import guncelle  # noqa: E402
 import hesap  # noqa: E402
 import zemin  # noqa: E402  (kullanicinin arka plan dosyasi, sistem/zemin.py)
+import planlama  # noqa: E402  (Sistem planlamasi, sistem/planlama.py)
 import telefon  # noqa: E402
 
 HOST = "127.0.0.1"
@@ -314,6 +315,8 @@ class Sunucu(SimpleHTTPRequestHandler):
             return hesap.isle(self)
         if self.path.startswith("/api/zemin/"):
             return zemin.isle(self)
+        if self.path.startswith("/api/planlama"):
+            return plan_isle(self)
         clean = self.path.split("?", 1)[0].split("#", 1)[0]
         if clean in ("/", "/index.html", DIST_BETIK):
             dist = _guncel_dist(self.repo)
@@ -338,6 +341,8 @@ class Sunucu(SimpleHTTPRequestHandler):
             return hesap.isle(self)
         if self.path.startswith("/api/zemin/"):
             return zemin.isle(self)
+        if self.path.startswith("/api/planlama"):
+            return plan_isle(self)
         return self.send_error(405)
 
     def do_DELETE(self):
@@ -1050,6 +1055,81 @@ def yeniden_baslat_zamanla(popen=subprocess.Popen, isletim=None):
                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+# SISTEM PLANLAMASI (sistem/planlama.py): islerin kendisi burada, ne zaman
+# orada. Her is (ok, cumle) doner; hicbiri veriyi degistirmez (yedek kopya
+# ekler, guncelleme yalniz «kur» seciliyse kurar).
+def _plan_araclari():
+    def guncelleme():
+        d = guncelleme_durumu(taze=True)
+        if d.get("durum") != "ok":
+            return False, d.get("mesaj") or "Güncelleme durumu okunamadı."
+        n = d.get("geride") or 0
+        if not n:
+            return True, "Sistem güncel."
+        if d.get("ileride"):
+            return False, "%d yenilik var ama bu klasörde gönderilmemiş kayıt var; giriş sayfasından «Yedekle ve güncelle»." % n
+        if not planlama.oku()["isler"]["guncelleme"]["kur"]:
+            return True, "%d yenilik var; kurmak için giriş sayfasında «Güncelle»." % n
+        with _GUNCEL_KILIT:
+            sonuc = guncelle.uygula()
+            _GUNCEL.update(zaman=0.0, veri=None)
+        if sonuc.get("durum") != "guncellendi":
+            return False, sonuc.get("mesaj") or "Güncelleme yapılmadı."
+        if sonuc.get("yeniden_baslat"):
+            yeniden_baslat_zamanla()
+        return True, sonuc.get("mesaj") or "Güncellendi."
+
+    def yedek():
+        b = hesap.depo().kopya_al("elle")
+        return True, "Yedek alındı: %s kayıt." % b.get("kayit", "?")
+
+    def denetim():
+        return planlama.veri_denetimi(hesap.depo().yol)
+
+    def ozet():
+        betik = os.path.join(KOK, "HKM", "hkm.py")
+        if not os.path.exists(betik):
+            return False, "Merkez (HKM) klasörü yok."
+        r = subprocess.run([sys.executable, betik, "hafta"], cwd=os.path.dirname(betik), capture_output=True, text=True,
+                           timeout=120, encoding="utf-8", errors="replace",
+                           env=dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1", PYTHONDONTWRITEBYTECODE="1"))
+        metin = (r.stdout or "").strip()
+        return (r.returncode == 0 and bool(metin)), (metin[:400] or "Merkez haftanın özetini çıkaramadı.")
+
+    def temizlik():
+        guncelle.artiklari_temizle()
+        return True, "Geçici dosyalar temizlendi."
+
+    def hkm():
+        if not hkm_ayakta():
+            return True, "Merkez kapalı; tazelenecek bir şey yok."
+        s = hkm_yeniden()
+        return bool(s.get("ok")), s.get("mesaj") or "Merkez yeniden başlatıldı."
+
+    def kapat():
+        arg = [sys.executable, os.path.join(SISTEM, "baslat.py"), "--dur"]
+        if os.name == "nt":
+            subprocess.Popen(["cmd", "/c", "start", "", "/b"] + arg, cwd=KOK, creationflags=0x08000000)
+        else:
+            subprocess.Popen(arg, cwd=KOK, start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    return {"guncelleme": guncelleme, "yedek": yedek, "denetim": denetim, "ozet": ozet,
+            "temizlik": temizlik, "hkm": hkm, "kapat": kapat}
+
+
+_PLAN = {"z": None}
+
+
+def plan_zamanlayici():
+    if _PLAN["z"] is None:
+        _PLAN["z"] = planlama.Zamanlayici(_plan_araclari())
+    return _PLAN["z"]
+
+
+def plan_isle(h):
+    return planlama.isle(h, plan_zamanlayici(), os.path.join(KOK, "BASLAT.bat"))
+
+
 # Guncelleme durumu: her sayfa acilisinda aga cikmamak icin kisa sure
 # saklanir. Uygulamadan sonra silinir.
 _GUNCEL = {"zaman": 0.0, "veri": None}
@@ -1122,6 +1202,8 @@ class Giris(SimpleHTTPRequestHandler):
             return hesap.isle(self)
         if yol.startswith("/api/zemin/"):
             return zemin.isle(self)
+        if yol.startswith("/api/planlama"):
+            return plan_isle(self)
         if yol not in ("/api/guncelle", "/api/hkm", "/api/hkm/yeniden", "/api/yeniden"):
             return self.send_error(404)
         if not guncelleme_izinli(self.headers):
@@ -1149,6 +1231,8 @@ class Giris(SimpleHTTPRequestHandler):
             return hesap.isle(self)
         if yol.startswith("/api/zemin/"):
             return zemin.isle(self)
+        if yol.startswith("/api/planlama"):
+            return plan_isle(self)
         if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js"):
             return self._hesap_dosyasi(yol[1:])
         if yol == "/api/guncelleme":
@@ -1519,6 +1603,7 @@ def main():
 
     for _, _, s in sunucular + tel:
         threading.Thread(target=s.serve_forever, daemon=True).start()
+    plan_zamanlayici().baslat()
     if kurulum:
         threading.Thread(target=kurulum.serve_forever, daemon=True).start()
     try:

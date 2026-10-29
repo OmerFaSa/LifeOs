@@ -23,12 +23,12 @@
   }
 
   describe('Ayarlar (bölümlü panel)', () => {
-    it('altı bölüm; yalnız seçili olan görünür, sekmeye basınca değişir', () => {
+    it('yedi bölüm; yalnız seçili olan görünür, sekmeye basınca değişir', () => {
       A._sec('gorunum');
       const d = koy();
       try{
         const sek = Array.from(d.querySelectorAll('[data-ayar-bolum]'));
-        expect(sek.map(s => s.textContent)).toEqual(['Görünüm', 'Animasyon', 'Ses', 'Minikler ve King', 'Hesap', 'Bu modül']);
+        expect(sek.map(s => s.textContent)).toEqual(['Görünüm', 'Animasyon', 'Ses', 'Minikler ve King', 'Hesap', 'Sistem', 'Bu modül']);
         const gorunen = () => Array.from(d.querySelectorAll('.ayarlar__bolum')).filter(s => !s.hidden).map(s => s.id);
         expect(gorunen()).toEqual(['ayarlar-bolum-gorunum']);
         sek[2].click();
@@ -65,6 +65,20 @@
         d.remove();
         A.yaziAyarla(eski || 'inter');
       }
+    });
+
+    /* 2026-10-29: Sistem › Sistem planlaması PC'deki sunucudadır; sunucu yoksa söylenir. */
+    it('Sistem planlaması: sunucu yoksa uydurmaz, nedenini söyler', async () => {
+      const d = koy();
+      const eski = window.fetch;
+      window.fetch = () => Promise.resolve(new Response('', { status:404 }));
+      try{
+        d.querySelector('[data-ayar-bolum="sistem"]').click();
+        await new Promise(r => setTimeout(r, 30));
+        const k = d.querySelector('[data-plan-kok]');
+        expect(k.textContent.indexOf('LifeOS sunucusunun bu bilgisayarda açık olmasını') >= 0).toBe(true);
+        expect(!!k.querySelector('[data-plan-ac]')).toBe(false);
+      }finally{ window.fetch = eski; d.remove(); A._sec('gorunum'); }
     });
 
     it('hesap sunucusu yokken düğme yok, durum söylenir', () => {

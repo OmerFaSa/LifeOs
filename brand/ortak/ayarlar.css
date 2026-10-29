@@ -123,3 +123,42 @@ html[data-zemin="yumusak"] .ayarlar .themebtn.is-on{ border-color:transparent; b
 .minikgal__sahne{ position:relative; width:64px; height:60px; margin-bottom:4px; }
 .minikgal__sahne .minik{ --boy:40px; left:calc(50% - var(--boy) / 2); top:calc(100% - var(--boy) - 4px); pointer-events:none; cursor:default; }
 .minikgal__sahne .minik__balon, .minikgal__sahne .minik__ad{ display:none; }
+
+/* Sistem planlaması (ayarlar.js): haftalık çizgi, açılış/kapanış, işler. */
+.plan__baslik{ margin:4px 0 12px; font-size:15px; font-weight:650; color:var(--text); }
+.plan{ display:flex; flex-direction:column; gap:4px; }
+.plan__cizgi{ list-style:none; margin:0 0 10px; padding:0; display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:4px; }
+.plan__cizgi li{ min-height:84px; display:flex; flex-direction:column; gap:4px; padding:8px 6px; border-radius:12px;
+  background:color-mix(in oklab, var(--text) 4%, transparent); }
+.plan__cizgi b{ font-size:11.5px; font-weight:600; color:var(--text-3); text-align:center; margin-bottom:2px; }
+.plan__olay{ display:flex; flex-direction:column; padding:4px 6px; border-radius:8px; font-size:11px; line-height:1.25; color:var(--text);
+  background:var(--secili-zemin, var(--primary-soft)); overflow:hidden; text-overflow:ellipsis; }
+.plan__olay time{ font-size:10.5px; font-variant-numeric:tabular-nums; color:var(--text-2); }
+.plan__olay--acilis, .plan__olay--kapanis{ background:transparent; box-shadow:inset 0 0 0 1px var(--border-strong); }
+.plan__alt{ margin:14px 0 2px; font-size:12px; font-weight:600; color:var(--text-3); }
+.plan__satir{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:8px 12px; padding:12px 0; border-top:1px solid var(--border-soft); }
+.plan__ad{ font-size:14px; font-weight:550; color:var(--text); }
+.plan__ad small{ display:block; font-size:12px; font-weight:450; color:var(--text-3); }
+.plan__ayar{ grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.plan__gunler{ display:flex; gap:3px; }
+.plan__gun{ min-width:34px; height:30px; padding:0 6px; border:0; border-radius:9px; background:color-mix(in oklab, var(--text) 6%, transparent);
+  color:var(--text-2); font:inherit; font-size:12px; cursor:pointer; }
+.plan__gun.is-on{ background:var(--secili-zemin, var(--primary-soft)); color:var(--secili-yazi, var(--primary)); box-shadow:var(--secili-golge, none); font-weight:600; }
+.plan__saat{ height:30px; padding:0 8px; border:1px solid var(--border); border-radius:9px; background:transparent; color:var(--text); font:inherit; font-size:13px; }
+.plan__kacarsa button{ white-space:nowrap; }
+.plan__kur{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-2); }
+.plan__son{ grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12px; color:var(--text-3); }
+.plan__son .is-ok{ color:var(--ok, var(--text-2)); } .plan__son .is-sorun{ color:var(--danger, var(--text)); }
+.plan__anahtar{ position:relative; width:42px; height:26px; flex:none; border:0; border-radius:999px; padding:0; cursor:pointer;
+  background:color-mix(in oklab, var(--text) 16%, transparent); transition:background var(--dur) var(--ease); }
+.plan__anahtar i{ position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25);
+  transition:transform var(--dur) var(--ease); }
+.plan__anahtar.is-on{ background:var(--mod, var(--primary)); }
+.plan__anahtar.is-on i{ transform:translateX(16px); }
+.plan__bekleyen{ display:flex; flex-direction:column; gap:6px; margin-bottom:10px; padding:10px 12px; border-radius:12px;
+  background:color-mix(in oklab, var(--accent, #d99a1e) 14%, transparent); font-size:13px; }
+.plan__bek-satir{ display:flex; align-items:center; gap:8px; } .plan__bek-satir span{ flex:1; }
+.plan__mesaj{ margin:10px 0 0; font-size:12px; color:var(--text-3); } .plan__mesaj:empty{ display:none; }
+@media (max-width:679px){ .plan__cizgi{ grid-template-columns:repeat(4, minmax(0, 1fr)); } }
+.plan__olay{ overflow-wrap:anywhere; hyphens:auto; }
+html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--cam-ince); border-color:transparent; color:var(--text); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }

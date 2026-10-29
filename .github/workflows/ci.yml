@@ -187,6 +187,11 @@ jobs:
       - name: Arka plan dosyası yalnız bu bilgisayardan ve doğru türle
         run: python3 tools/zemin_test.py
 
+      # SİSTEM PLANLAMASI (2026-10-29). Haftalık vade, kaçan iş (hemen/onay),
+      # kapanış, Windows açılış görevi komutu, salt okunur veri denetimi.
+      - name: Sistem planlaması vadeyi ve kaçan işi doğru sayar
+        run: python3 tools/planlama_test.py
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç
