@@ -14463,6 +14463,15 @@ span.kt-ana{ cursor:default; }
   .kt-kart:hover, .kt-kart:hover .kt-simge, .kt-gorsel-ac:hover img{ transform:none; }
 }
 
+/* OPAK PENCERE (kullanıcı, 2026-10-29: «evet, opak olsun»). Büyük pencerenin
+   40 px'lik bulanıklığı ilk açılışta GPU'da ~0,5 sn'lik bir kare yapıyordu
+   (bulanıksız ~0,18 sn; önceden ısıtmak işe yaramadı). Arkadaki sayfa zaten
+   örtülü: yüzey dolu, bulanıklık yok. Küçük King (is-mini) camlı kalır. */
+html .king:not(.is-mini) .king__kutu{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+  background:var(--surface, #fff) !important; }
+/* Opak pencerede «sen» balonu beyaz zeminde kaybolmasın: hafif dolu yüzey. */
+html .king:not(.is-mini) .king__balon--sen{ background:var(--surface-2, #f1f2f5) !important; }
+
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/giris.css içine yazılır; burası bir sonraki
@@ -17524,6 +17533,12 @@ html[data-zemin="yumusak"] .king:has(.king__arkadas) .king__akis{ padding-bottom
 /* Oturunca ayaklar girdinin içine sarkmaz. */
 .king__arkadas .minik.is-oturuyor .minik__ayak{ bottom:-14%; }
 
+/* Opak büyük pencere (king.css, 2026-10-29): içindeki cam kartlar ve «sen»
+   balonu beyaz zeminde kayboluyordu (cam-ince yarı saydam beyaz). Dolu yüzey. */
+html[data-zemin="yumusak"] .king:not(.is-mini) .king__kutu :is(.king__kart, .king__ars, .king__onizle, .king__soru, .king__sira, .king__bulunan,
+  .king__alan .king__gorev, .king__ders, .king__yasa-s, .king__gunum, .kt-kart, .kv-mini, .king__balon--sen){
+  background:var(--surface-2) !important; border:1px solid var(--border) !important; box-shadow:none !important; }
+
 /* ==== css/minik-cam.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/minik-cam.css içine yazılır; burası bir sonraki
@@ -19550,7 +19565,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'f5a18bfc', at:'2026-10-29 09:04', dirty:true };
+SP.BUILD = { id:'3a29577e', at:'2026-10-29 09:35', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
