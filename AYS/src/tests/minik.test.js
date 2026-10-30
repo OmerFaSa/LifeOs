@@ -215,6 +215,23 @@
   /* Kullanıcı (2026-10-28): «minik agentların çeşitliliğini ve kalitesini
      zirveye taşı, bütün detaylarıyla». Her kişinin kendi süsü (12 ayrı),
      deseni (karın, çil) var (kuyruk kullanıcının isteğiyle kalktı); huyu davranışını değiştirir. */
+  /* 2026-10-30 (kullanıcı: «hâlâ çok amatör; kod yoğunluğu karman çorman»): gövdenin içi tek SVG çizim. */
+  describe('Minik · çizim', () => {
+    it('her kişi kendi çizimini alır; gradyan kimlikleri tekil; kulak ve ışın arkadaki çizimde', () => {
+      const ids = new Set();
+      C.KISILER.forEach(k => {
+        const c = C.sanat(k);
+        expect(c.deri.indexOf('<svg class="minik__sanat"') === 0).toBe(true);
+        (c.deri.match(/id="([^"]+)"/g) || []).forEach(x => { expect(ids.has(x)).toBe(false); ids.add(x); });
+        expect(/fill="var\(/.test(c.deri + c.sus)).toBe(false);                 // değişken yalnız style'da işler
+      });
+      ['Mırnav', 'Pati', 'Ayıcık', 'Tavşi', 'Işıl', 'Yeşilcik'].forEach(ad => expect(!!C.sanat(C.KISILER.find(k => k.ad === ad)).sus).toBe(true));
+      expect(C.sanat(C.KISILER.find(k => k.ad === 'Pofuduk')).sus).toBe('');     // şekillerin süsü CSS'te kalır
+      const d = document.createElement('div'); d.innerHTML = C.galeriHtml();
+      expect(d.querySelectorAll('.minik[data-sanat] .minik__deri svg').length > 0).toBe(true);
+    });
+  });
+
   describe('Minik · çeşitlilik', () => {
     it('şekillerde her süs ayrı; desen türlü; her huyun Türkçe adı var', () => {
       const sekil = C.KISILER.filter(k => (k.aile || 'sekil') === 'sekil');

@@ -218,3 +218,13 @@
 /* Galeri: takım seçicisi üstte, tam satır. */
 .minikgal__takim{ grid-column:1 / -1; justify-self:start; margin-bottom:4px; }
 
+/* ÇİZİM (2026-10-30; minik.js sanat): gövdenin içi tek SVG; eski CSS boyası ve
+   desen katmanı devre dışı. Arkadaki çizim (kulak, ışın, sap) varsa CSS süsü
+   onun yerine geçmez. */
+.minik[data-sanat] .minik__deri{ background:none !important; }
+.minik[data-sanat] .minik__deri::before{ display:none; }
+.minik__sanat{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.minik[data-sanat-sus] .minik__sus{ left:-25% !important; top:-45% !important; right:auto !important; bottom:auto !important; width:150% !important; height:150% !important;
+  background:none !important; clip-path:none !important; rotate:none !important; border-radius:0 !important; z-index:-1 !important; box-shadow:none !important; }
+.minik[data-sanat-sus] .minik__sus::before, .minik[data-sanat-sus] .minik__sus::after{ display:none !important; }
+.minik__sanat-sus{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; display:block; }

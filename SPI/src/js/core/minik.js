@@ -346,7 +346,7 @@ window.LIFEOS.MINIK = (function(){
       + ' aria-pressed="' + (on ? 'true' : 'false') + '" title="' + (on ? 'Sayfadan çıkar' : 'Sayfaya ekle') + '">'
       + '<span class="minikgal__sahne" aria-hidden="true">' + govde + '</span><b>' + ad + '</b><small>' + alt + '</small></button>';
     const kisi = x => '<span class="minik" data-tip="' + x.tip + '" data-bicim="' + x.bicim + '" data-desen="' + x.desen + '" data-huy="' + x.huy + '"'
-      + ' data-aile="' + aileOf(x) + '" data-yon="sag" style="' + renkStil(x) + '">' + ICERIK + '</span>';
+      + ' data-aile="' + aileOf(x) + '" data-yon="sag" data-sanat=""' + (sanat(x).sus ? ' data-sanat-sus=""' : '') + ' style="' + renkStil(x) + '">' + sanatIcerik(x) + '</span>';
     const ofis = ofisKisileri(ajanlar()), t = takim();
     const sec = '<div class="seg minikgal__takim" role="group" aria-label="Minik takımı">' + TAKIMLAR.map(x => '<button type="button" class="' + (x === t ? 'is-on' : '') + '"'
       + ' data-minik-takim="' + x + '" aria-pressed="' + (x === t) + '">' + TAKIM_AD[x] + '</button>').join('') + '</div>';
@@ -483,6 +483,7 @@ window.LIFEOS.MINIK = (function(){
     if(k.en) mk.el.style.setProperty('--en', String(k.en)); else mk.el.style.removeProperty('--en');   // hayvanın eni: ayı uzun, kurbağa basık
     mk.el.style.setProperty('--ton', String(k.ton));   // birimsiz: oklch'nin h'si sayı
     ['--g1', '--g2', '--g3'].forEach((v, i) => { if(k.renk) mk.el.style.setProperty(v, k.renk[i]); else mk.el.style.removeProperty(v); });
+    if(!k.ofis) sanatGiydir(mk.el, k); else { mk.el.removeAttribute('data-sanat'); mk.el.removeAttribute('data-sanat-sus'); }
     ruhUygula(mk);
   }
 
@@ -517,6 +518,84 @@ window.LIFEOS.MINIK = (function(){
       + '<i class="minik__agiz"></i><i class="minik__sus"></i><i class="minik__kravat"></i><i class="minik__kart"></i><i class="minik__esya"></i></span><span class="minik__balon"></span><span class="minik__zzz">z</span>'
       + '<span class="minik__kalp">♡</span><span class="minik__ad"><b></b> · <i></i><small>Dokun, gıdıkla</small></span>';
 
+  /* ÇİZİM (kullanıcı, 2026-10-30: «minikler hâlâ çok amatör; pofuduk
+     görünmekten çok kod yoğunluğu karman çormanına dönmüş; yüksek yoğunlukta
+     çalış»). Gövdenin içi artık katmanlı CSS gradyanı değil, tek bir SVG
+     çizimdir: üç tonlu yumuşak hacim, üstte ışık, altta kendi renginde
+     gölge, kenarda koyulaşma, yanak; türün ayrıntısı (ağızlık, burun, bıyık,
+     yama, göğüs, damar, parıltı) çizginin kendisidir. Dış hat yine maskedir
+     (ruh hâli ışıması ve yerleşim ona bağlı). Kulak, ışın ve sap gövdenin
+     arkasındaki ikinci çizimde (minik__sus). Gözler, kollar ve ayaklar CSS'te
+     kalır: göz kırpma, bakış, yürüme ve ruh hâli bozulmaz. */
+  let sanatNo = 0;
+  const YANAK = { yuvarlak:[64, 23], kare:[64, 24], ucgen:[72, 17], hayvan:[57, 23], alev:[75, 18], damla:[77, 18],
+    bulut:[72, 19], yildiz:[64, 14], yaprak:[69, 20], kalp:[54, 23] };
+  const AYRINTI = {
+    ayi:'<ellipse cx="50" cy="61" rx="20" ry="14" fill="#f6e6d2"/><path d="M44 53.5c0-2.6 2.7-4.2 6-4.2s6 1.6 6 4.2c0 2.4-3 4.6-6 4.6s-6-2.2-6-4.6z" fill="#3a2a22"/><ellipse cx="48" cy="52" rx="2" ry="1.1" fill="#fff" opacity=".7"/>',
+    kopek:'<ellipse cx="66" cy="42" rx="12" ry="14" fill="#8b5a36" opacity=".28"/><ellipse cx="50" cy="62" rx="22" ry="15" fill="#fff6ea"/><path d="M43.5 54c0-3 3-4.8 6.5-4.8s6.5 1.8 6.5 4.8c0 2.8-3.2 5-6.5 5s-6.5-2.2-6.5-5z" fill="#2d2422"/><ellipse cx="47.6" cy="52.3" rx="2.2" ry="1.2" fill="#fff" opacity=".7"/>',
+    kedi:'<path d="M47 54.5h6l-3 3.2z" fill="#ff8fab" stroke="#ff8fab" stroke-width="1.6" stroke-linejoin="round"/>'
+      + '<g stroke="#5b3f30" stroke-opacity=".45" stroke-width="1.3" stroke-linecap="round" fill="none"><path d="M6 56l15 2M6 64l15-1M94 56l-15 2M94 64l-15-1"/></g>',
+    tavsan:'<ellipse cx="50" cy="60" rx="17" ry="12" fill="#ffffff"/><path d="M47.4 54.6h5.2l-2.6 2.8z" fill="#ff8fab" stroke="#ff8fab" stroke-width="1.6" stroke-linejoin="round"/>',
+    panda:'<ellipse cx="35" cy="45" rx="12" ry="15" transform="rotate(-24 35 45)" fill="#2c2d36"/><ellipse cx="65" cy="45" rx="12" ry="15" transform="rotate(24 65 45)" fill="#2c2d36"/>'
+      + '<ellipse cx="50" cy="61" rx="15" ry="10" fill="#ffffff"/><path d="M45.5 56c0-2.2 2-3.4 4.5-3.4s4.5 1.2 4.5 3.4c0 2-2.3 3.6-4.5 3.6s-4.5-1.6-4.5-3.6z" fill="#2c2d36"/>',
+    penguen:'<path d="M50 30c11 0 18 6 20 13 3 9 7 14 7 24 0 17-13 27-27 27S23 84 23 67c0-10 4-15 7-24 2-7 9-13 20-13z" fill="#fdfdff"/>',
+    tilki:'<path d="M16 58c8 1 16 6 22 14 4 6 8 8 12 8s8-2 12-8c6-8 14-13 22-14-2 18-17 34-34 34S18 76 16 58z" fill="#fff4e8"/>'
+      + '<path d="M45.5 55c0-2.2 2-3.4 4.5-3.4s4.5 1.2 4.5 3.4c0 2-2.3 3.6-4.5 3.6s-4.5-1.6-4.5-3.6z" fill="#2d2422"/>',
+    kurbaga:'<ellipse cx="50" cy="84" rx="30" ry="18" fill="#fbffe6" opacity=".55"/>',
+    baykus:'<circle cx="35.5" cy="44" r="14" fill="#fff3df"/><circle cx="64.5" cy="44" r="14" fill="#fff3df"/>'
+      + '<ellipse cx="50" cy="85" rx="25" ry="17" fill="#fff0d6" opacity=".7"/><g fill="none" stroke="#86633f" stroke-opacity=".35" stroke-width="1.4" stroke-linecap="round"><path d="M40 80q3 3 6 0M54 80q3 3 6 0M47 87q3 3 6 0"/></g>',
+    alev:'<path d="M50 50c4 6 12 10 12 22 0 9-5.5 15-12 15s-12-6-12-15c0-7 4-10 6-15 1 3 3 5 5 5-1-4 0-8 1-12z" fill="#fff8d6" opacity=".9"/>',
+    parilti:'<ellipse cx="31" cy="40" rx="5" ry="8.5" transform="rotate(20 31 40)" fill="#fff" opacity=".85"/><circle cx="38.5" cy="30" r="2.6" fill="#fff" opacity=".85"/>',
+    damar:'<g fill="none" stroke="#3f7a2c" stroke-opacity=".32" stroke-width="1.6" stroke-linecap="round"><path d="M50 98V74M50 86l-10-8M50 86l10-8M50 78l-7-6M50 78l7-6"/></g>',
+    buz:'<path d="M14 18l14-8M14 30l26-16" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".9"/><rect x="4" y="4" width="92" height="92" rx="20" fill="none" stroke="#7cc8e6" stroke-opacity=".5" stroke-width="5"/>',
+  };
+  const ARKA = {
+    kedi:'<path style="fill:var(--g2);stroke:var(--g2)" d="M14 32L20 -6 44 22z" stroke-width="5" stroke-linejoin="round"/><path style="fill:var(--g2);stroke:var(--g2)" d="M86 32L80 -6 56 22z" stroke-width="5" stroke-linejoin="round"/>'
+      + '<path d="M21 22l2.5-17 11.5 13z" fill="#ffb8c9"/><path d="M79 22l-2.5-17-11.5 13z" fill="#ffb8c9"/>',
+    tilki:'<path style="fill:var(--g2);stroke:var(--g2)" d="M12 34L18 -14 44 22z" stroke-width="5" stroke-linejoin="round"/><path style="fill:var(--g2);stroke:var(--g2)" d="M88 34L82 -14 56 22z" stroke-width="5" stroke-linejoin="round"/>'
+      + '<path d="M15.6 6L18 -14 27.4 -1z" fill="#4a2a1c" stroke="#4a2a1c" stroke-width="4" stroke-linejoin="round"/><path d="M84.4 6L82 -14 72.6 -1z" fill="#4a2a1c" stroke="#4a2a1c" stroke-width="4" stroke-linejoin="round"/>'
+      + '<path d="M21 22l3-20 11 16z" fill="#fff2e2"/><path d="M79 22l-3-20-11 16z" fill="#fff2e2"/>',
+    kopek:'<ellipse style="fill:var(--g3)" cx="10" cy="44" rx="11" ry="24" transform="rotate(16 10 44)"/><ellipse style="fill:var(--g3)" cx="90" cy="44" rx="11" ry="24" transform="rotate(-16 90 44)"/>',
+    ayi:'<circle style="fill:var(--g3)" cx="19" cy="14" r="13"/><circle style="fill:var(--g3)" cx="81" cy="14" r="13"/><circle style="fill:var(--g1)" cx="19" cy="14" r="6.5"/><circle style="fill:var(--g1)" cx="81" cy="14" r="6.5"/>',
+    panda:'<circle cx="19" cy="14" r="13" fill="#2c2d36"/><circle cx="81" cy="14" r="13" fill="#2c2d36"/>',
+    tavsan:'<ellipse style="fill:var(--g1);stroke:var(--g3)" cx="37" cy="-14" rx="8.5" ry="25" transform="rotate(-8 37 -14)" stroke-opacity=".25" stroke-width="1.2"/>'
+      + '<ellipse style="fill:var(--g1);stroke:var(--g3)" cx="63" cy="-14" rx="8.5" ry="25" transform="rotate(9 63 -14)" stroke-opacity=".25" stroke-width="1.2"/>'
+      + '<ellipse cx="37" cy="-12" rx="4" ry="17" transform="rotate(-8 37 -12)" fill="#ffc1d2"/><ellipse cx="63" cy="-12" rx="4" ry="17" transform="rotate(9 63 -12)" fill="#ffc1d2"/>',
+    kurbaga:'<circle style="fill:var(--g2)" cx="29" cy="10" r="16"/><circle style="fill:var(--g2)" cx="71" cy="10" r="16"/><circle cx="25" cy="5" r="5" fill="#fff" opacity=".35"/><circle cx="67" cy="5" r="5" fill="#fff" opacity=".35"/>',
+    baykus:'<path style="fill:var(--g3);stroke:var(--g3)" d="M6 30L8 -4 30 16z" stroke-width="4" stroke-linejoin="round"/><path style="fill:var(--g3);stroke:var(--g3)" d="M94 30L92 -4 70 16z" stroke-width="4" stroke-linejoin="round"/>',
+    isin:Array.from({ length:12 }, (_, i) => '<rect style="fill:var(--g2)" x="46.5" y="-16" width="7" height="14" rx="3.5" transform="rotate(' + (i * 30) + ' 50 52)"/>').join(''),
+    sap:'<path d="M50 10 C49 4 51 -2 55 -6" fill="none" stroke="#6b9b3e" stroke-width="4.5" stroke-linecap="round"/><path d="M55 -4c6-6 15-6 19-2-5 5-13 6-19 2z" fill="#8ed05e"/>',
+  };
+  /* k: kişi. Döner { deri, sus }: deri gövdenin içi, sus arkadaki çizim (yoksa ''). */
+  function sanat(k){
+    const n = 'mk' + (++sanatNo);
+    const [yy, yx] = YANAK[k.bicim] || YANAK.yuvarlak;
+    const tur = k.aile === 'hayvan' ? k.tip : k.aile === 'emoji' ? (k.bicim === 'alev' ? 'alev' : k.desen) : '';
+    const deri = '<svg class="minik__sanat" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false"><defs>'
+      + '<radialGradient id="' + n + 'g" cx=".36" cy=".26" r=".9"><stop offset="0" style="stop-color:var(--g1)"/><stop offset=".55" style="stop-color:var(--g2)"/><stop offset="1" style="stop-color:var(--g3)"/></radialGradient>'
+      + '<radialGradient id="' + n + 'k" cx=".5" cy=".46" r=".62"><stop offset=".62" stop-color="#000" stop-opacity="0"/><stop offset="1" style="stop-color:var(--g3)" stop-opacity=".55"/></radialGradient>'
+      + '<radialGradient id="' + n + 'i" cx=".34" cy=".2" r=".42"><stop offset="0" stop-color="#fff" stop-opacity=".78"/><stop offset=".6" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
+      + '<radialGradient id="' + n + 'y"><stop offset="0" stop-color="#ff7aa2" stop-opacity=".62"/><stop offset="1" stop-color="#ff7aa2" stop-opacity="0"/></radialGradient></defs>'
+      + '<rect width="100" height="100" fill="url(#' + n + 'g)"/><rect width="100" height="100" fill="url(#' + n + 'k)"/>'
+      + (AYRINTI[tur] || '')
+      + '<rect width="100" height="100" fill="url(#' + n + 'i)"/>'
+      + '<ellipse cx="' + (50 - yx) + '" cy="' + yy + '" rx="10" ry="6.5" fill="url(#' + n + 'y)"/><ellipse cx="' + (50 + yx) + '" cy="' + yy + '" rx="10" ry="6.5" fill="url(#' + n + 'y)"/>'
+      + '</svg>';
+    const arkaAd = k.aile === 'hayvan' ? k.tip : k.aile === 'emoji' ? k.tip : '';
+    const sus = ARKA[arkaAd] ? '<svg class="minik__sanat-sus" viewBox="-25 -45 150 150" aria-hidden="true" focusable="false">' + ARKA[arkaAd] + '</svg>' : '';
+    return { deri, sus };
+  }
+  /* Gövdenin içini ve arkasını çizer; minik öğesinde ya da galeri kartında. */
+  function sanatGiydir(el, k){
+    const deri = el.querySelector('.minik__deri'), sus = el.querySelector('.minik__sus');
+    if(!deri) return;
+    const c = sanat(k);
+    deri.innerHTML = c.deri;
+    el.setAttribute('data-sanat', '');
+    if(sus){ sus.innerHTML = c.sus; el.toggleAttribute('data-sanat-sus', !!c.sus); }
+  }
+  const sanatIcerik = k => { const c = sanat(k); return ICERIK.replace('<i class="minik__deri"></i>', '<i class="minik__deri">' + c.deri + '</i>')
+    .replace('<i class="minik__sus"></i>', '<i class="minik__sus">' + c.sus + '</i>'); };
   function minikYap(i){
     const m = document.createElement('div');
     m.className = 'minik minik--' + (i + 1);
@@ -1078,5 +1157,5 @@ window.LIFEOS.MINIK = (function(){
   return { kur, sayi, seciciHtml, BOY_ANAHTAR, BOYLAR, boy, boyPx, boyAyarla, boySeciciHtml, yanSes, radyoda, ofisKisileri, ICERIK, DIYALOG, diyalogSec, ESYALAR, esyaSec,
     SES_ANAHTAR, sesAyar, sesAyarla, sesIzinli, sesSeciciHtml, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh, inisYeri,
     KISILER, HUY_AD, HUY_NOT, RUH, RUH_AD, KART, EN_AZ, PAY,
-    KADRO_ANAHTAR, kapalilar, havuzKur, kadroAyarla, galeriHtml, TAKIMLAR, TAKIM_AD, TAKIM_ANAHTAR, takim, takimAyarla };
+    KADRO_ANAHTAR, kapalilar, havuzKur, kadroAyarla, galeriHtml, sanat, TAKIMLAR, TAKIM_AD, TAKIM_ANAHTAR, takim, takimAyarla };
 })();
