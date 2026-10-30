@@ -5515,17 +5515,32 @@ window.LIFEOS.KING = (function(){
       + (m.son ? '<p class="king__mini-soru">' + kac(m.son) + '</p>' : '') + '</div>';
   }
   const YELPAZE_GENISLET = '<path d="M14 5h5v5M10 19H5v-5M19 5l-6 6M5 19l6-6"/>';
+  /* YAPRAK MENÜSÜ (kullanıcı, 2026-10-30, örnek görsel: «minik King
+     konuşmasında ya da King yerinde +'ya tıkladığımızda açılan bölüm o
+     görseldeki gibi olsun»). «+»nın üstünde yarım halka: her araç bir cam
+     yaprak (clip-path), ortada kesik halka ve seçilenin adı. Adada kamera ve
+     ekran önce genişler, son yaprak Genişlet; büyük pencerede Tüm işler
+     yaprağı listeyi açar. */
+  const YAPRAK = { R:168, r:64, bosluk:2.4 };
+  const KISA_AD = { ekran:'Bu sayfa', isler:'İşler', 'foto-sec':'Fotoğraf', 'pdf-sec':'PDF' };
+  function yaprakYolu(i, n){
+    const { R, r, bosluk } = YAPRAK, adim = 180 / n, d = Math.PI / 180;
+    const a0 = (180 + i * adim + bosluk / 2) * d, a1 = (180 + (i + 1) * adim - bosluk / 2) * d;
+    const p = (rr, a) => (R + rr * Math.cos(a)).toFixed(1) + ' ' + (R + rr * Math.sin(a)).toFixed(1);
+    return 'M' + p(R, a0) + ' A' + R + ' ' + R + ' 0 0 1 ' + p(R, a1) + ' L' + p(r, a1) + ' A' + r + ' ' + r + ' 0 0 0 ' + p(r, a0) + ' Z';
+  }
   function yelpazeHtml(){
     if(!aracAcik) return '';
-    const l = ARACLAR.filter(a => a.is !== 'isler' && (() => { try{ return a.kosul(); }catch(e){ return false; } })())
-      .map(a => ({ is:/^kip:(kamera|ekran)$/.test(a.is) ? 'ada-' + a.is : a.is, ad:a.ad, ip:a.ip, svg:ARAC_SVG[a.is] || '' }))
-      .concat([{ is:'buyut', ad:'Genişlet', ip:'Geçmiş, kütüphane ve bütün araçlar', svg:YELPAZE_GENISLET }]);
-    /* Kadran (2026-10-30, kullanıcı: «çok daha profesyonel güzel olsun ama mantık güzel»):
-       yay adanın içinde açılır; ortası üstüne gelinen aracın adını ve ne yaptığını söyler. */
-    return '<div class="king__yelpaze" role="menu" aria-label="Araçlar" style="--n:' + l.length + '">'
-      + '<div class="king__yelpaze-merkez" aria-hidden="true"><b>Araçlar</b><small>Birini seç</small></div>' + l.map((x, i) =>
-      '<button type="button" role="menuitem" class="king__yelpaze-oge" style="--i:' + i + '" data-king="' + x.is + '" aria-label="' + kac(x.ad) + '" data-ip="' + kac(x.ip) + '">'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true">' + x.svg + '</svg><small>' + kac(x.ad) + '</small></button>').join('') + '</div>';
+    const l = ARACLAR.filter(a => !(mini && a.is === 'isler') && (() => { try{ return a.kosul(); }catch(e){ return false; } })())
+      .map(a => ({ is:mini && /^kip:(kamera|ekran)$/.test(a.is) ? 'ada-' + a.is : a.is, ad:KISA_AD[a.is] || a.ad, uzun:a.ad, ip:a.ip, svg:ARAC_SVG[a.is] || '' }))
+      .concat(mini ? [{ is:'buyut', ad:'Genişlet', uzun:'Genişlet', ip:'Geçmiş, kütüphane ve bütün araçlar', svg:YELPAZE_GENISLET }] : []);
+    const n = l.length, { R, r } = YAPRAK, rm = (R + r) / 2, d = Math.PI / 180;
+    return '<div class="king__yelpaze" role="menu" aria-label="Araçlar" style="--n:' + n + '">'
+      + '<div class="king__yelpaze-merkez" aria-hidden="true"><b>Araçlar</b><small>Birini seç</small></div>' + l.map((x, i) => {
+        const a = (180 + (i + .5) * 180 / n) * d, cx = (R + rm * Math.cos(a)).toFixed(1) + 'px', cy = (R + rm * Math.sin(a)).toFixed(1) + 'px';
+        return '<button type="button" role="menuitem" class="king__yelpaze-oge" style="--i:' + i + ';--cx:' + cx + ';--cy:' + cy + ';clip-path:path(\'' + yaprakYolu(i, n) + '\')" data-king="' + x.is + '"'
+          + ' aria-label="' + kac(x.uzun) + '" data-ip="' + kac(x.ip) + '"><span class="king__yaprak-ic" style="left:' + cx + ';top:' + cy + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + x.svg + '</svg><small>' + kac(x.ad) + '</small></span></button>';
+      }).join('') + '</div>';
   }
   function miniGovde(){
     const kingler = akis.filter(m => m.kim === 'king' && !m.bekliyor);
@@ -5668,7 +5683,7 @@ window.LIFEOS.KING = (function(){
       + '<form class="king__yaz" data-king-form data-ayar-disi>' + arkadasHtml()
       + '<div class="king__arti-yer"><button type="button" class="king__arti' + (aracAcik ? ' is-acik' : '') + '" data-king="arac" aria-expanded="' + (aracAcik ? 'true' : 'false')
       + '" aria-haspopup="menu" aria-label="Ekle" title="Ekle: fotoğraf, kamera, ekran, PDF, barkod">'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>' + aracMenu() + '</div>'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>' + (aracSayfa === 'isler' ? aracMenu() : yelpazeHtml()) + '</div>'
       + '<input type="file" accept="image/*" data-king-dosya class="sr-only"/>'
       + '<input type="file" accept="application/pdf,.pdf" data-king-pdf class="sr-only"/>'
       + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : kip() === 'ekran' ? 'Ekran hakkında sor…' : kip() === 'kamera' ? 'Kameradakini sor…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'

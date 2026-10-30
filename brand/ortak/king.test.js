@@ -781,10 +781,11 @@
       /* Söz 27: araçlar yazı alanındaki «+» menüsünde; solda yalnız sohbetler. */
       expect(!!document.querySelector('.king__yan .king__arac')).toBe(false);
       document.querySelector('[data-king="arac"]').click();
-      const araclar = Array.from(document.querySelectorAll('.king__arac-menu [data-king]')).map(b => b.getAttribute('data-king'));
+      const araclar = Array.from(document.querySelectorAll('.king__yelpaze [data-king]')).map(b => b.getAttribute('data-king'));
       expect(araclar.indexOf('ekran') >= 0 && araclar.indexOf('foto-sec') >= 0 && araclar.indexOf('pdf-sec') >= 0).toBe(true);
-      document.querySelector('.king__arac-menu [data-king="ekran"]').click();
-      expect(!!document.querySelector('.king__arac-menu')).toBe(false);          // seçince kapanır
+      expect(araclar.indexOf('isler') >= 0 && araclar.indexOf('buyut') < 0).toBe(true);   // büyük pencerede Tüm işler var, Genişlet yok
+      document.querySelector('.king__yelpaze [data-king="ekran"]').click();
+      expect(!!document.querySelector('.king__yelpaze')).toBe(false);          // seçince kapanır
       k.menuAc('menu');
       expect(k.ARACLAR.every(a => a.is && a.ad && typeof a.kosul === 'function')).toBe(true);
       /* küçük King kenar çubuğu çizmez */
@@ -2777,7 +2778,7 @@
       Object.assign(k._ortam, { nesneUrl:() => 'blob:sahte', kameraDestek:() => false });
       k.ac();
       document.querySelector('[data-king="arac"]').click();
-      document.querySelector('.king__arac-menu [data-king="isler"]').click();
+      document.querySelector('.king__yelpaze [data-king="isler"]').click();
       const gruplar = Array.from(document.querySelectorAll('.king__isler-ad')).map(x => x.textContent);
       expect(gruplar).toEqual(['SPİ · sağlık', 'AYS · sınav · oraya geçer', 'ESP · gelişim · oraya geçer', 'King · her modülde']);
       const A = window.LIFEOS.ARAC;

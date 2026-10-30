@@ -97,8 +97,11 @@
       });
       expect(new Set(C.KISILER.map(k => k.perde)).size >= 5).toBe(true);
     });
-    it('her minik başka: huyu farklı', () => {
-      expect(new Set(C.KISILER.map(k => k.huy)).size).toBe(C.KISILER.length);
+    it('her minik başka: takımının içinde huyu farklı', () => {
+      C.TAKIMLAR.filter(t => t !== 'karma').forEach(t => {
+        const l = C.KISILER.filter(k => (k.aile || 'sekil') === t);
+        expect(new Set(l.map(k => k.huy)).size).toBe(l.length);
+      });
     });
   });
 
@@ -210,10 +213,11 @@
      zirveye taşı, bütün detaylarıyla». Her kişinin kendi süsü (12 ayrı),
      deseni (karın, çil) var (kuyruk kullanıcının isteğiyle kalktı); huyu davranışını değiştirir. */
   describe('Minik · çeşitlilik', () => {
-    it('on iki kişi: on iki ayrı süs; desen türlü; her huyun Türkçe adı var', () => {
-      expect(new Set(C.KISILER.map(k => k.tip)).size).toBe(C.KISILER.length);
+    it('şekillerde her süs ayrı; desen türlü; her huyun Türkçe adı var', () => {
+      const sekil = C.KISILER.filter(k => (k.aile || 'sekil') === 'sekil');
+      expect(new Set(sekil.map(k => k.tip)).size).toBe(sekil.length);
       C.KISILER.forEach(k => {
-        expect(['yok', 'karin', 'cil'].indexOf(k.desen) >= 0).toBe(true);
+        expect(['yok', 'karin', 'cil', 'biyik', 'panda', 'penguen', 'tilki', 'baykus', 'damar', 'buz'].indexOf(k.desen) >= 0).toBe(true);
         expect(typeof C.HUY_AD[k.huy]).toBe('string');
       });
       ['karin', 'cil'].forEach(d => expect(C.KISILER.some(k => k.desen === d)).toBe(true));
@@ -410,22 +414,29 @@
     function ile(fn){
       let eski = null;
       try{ eski = localStorage.getItem(C.KADRO_ANAHTAR); }catch(e){}
-      try{ localStorage.removeItem(C.KADRO_ANAHTAR); return fn(); }
-      finally{ try{ if(eski == null) localStorage.removeItem(C.KADRO_ANAHTAR); else localStorage.setItem(C.KADRO_ANAHTAR, eski); }catch(e){} }
+      const eskiTakim = localStorage.getItem(C.TAKIM_ANAHTAR);
+      try{ localStorage.removeItem(C.KADRO_ANAHTAR); localStorage.removeItem(C.TAKIM_ANAHTAR); return fn(); }
+      finally{
+        try{ if(eski == null) localStorage.removeItem(C.KADRO_ANAHTAR); else localStorage.setItem(C.KADRO_ANAHTAR, eski); }catch(e){}
+        try{ if(eskiTakim == null) localStorage.removeItem(C.TAKIM_ANAHTAR); else localStorage.setItem(C.TAKIM_ANAHTAR, eskiTakim); }catch(e){}
+      }
     }
+    const SEKIL = () => C.KISILER.filter(k => (k.aile || 'sekil') === 'sekil').length;
     const AJ = [{ id:'patron', name:'Patron' }, { id:'a', name:'Asistan' }];
-    it('kadro on sekiz kişi; yeni altısı da kendi süsü ve huyuyla', () => {
-      expect(C.KISILER.length).toBe(18);
+    it('kadro üç takım: on altı şekil, dokuz hayvan, sekiz emoji; hepsi kendi süsü ve huyuyla', () => {
+      const say = t => C.KISILER.filter(k => (k.aile || 'sekil') === t).length;
+      expect([say('sekil'), say('hayvan'), say('emoji')]).toEqual([16, 9, 8]);
+      C.KISILER.filter(k => k.aile).forEach(k => expect(k.renk.length).toBe(3));   // hayvan ve emojinin rengi kendinin
       ['Bereli', 'Hilal', 'Alev', 'Pamuk', 'Sevgi', 'Damla'].forEach(ad => expect(C.KISILER.some(k => k.ad === ad)).toBe(true));
       C.KISILER.forEach(k => expect(typeof C.HUY_NOT[k.huy]).toBe('string'));
     });
     it('varsayılan herkes açık; kapatılan havuzdan çıkar, ofis hepsini birden çıkarır', () => ile(() => {
-      expect(C.havuzKur(AJ).length).toBe(C.KISILER.length + 2);
+      expect(C.havuzKur(AJ).length).toBe(SEKIL() + 2);
       C.kadroAyarla('Pofuduk', false);
       expect(C.havuzKur(AJ).some(k => k.ad === 'Pofuduk')).toBe(false);
       C.kadroAyarla('ofis', false);
       expect(C.havuzKur(AJ).some(k => k.ofis)).toBe(false);
-      expect(C.havuzKur(AJ).length).toBe(C.KISILER.length - 1);
+      expect(C.havuzKur(AJ).length).toBe(SEKIL() - 1);
       C.kadroAyarla('Pofuduk', true);
       expect(Array.from(C.kapalilar())).toEqual(['ofis']);
     }));
@@ -435,13 +446,36 @@
       expect(h.some(k => k.ad === 'Damla')).toBe(true);
       expect(h.some(k => k.ad === 'Bıcır')).toBe(false);
       localStorage.setItem(C.KADRO_ANAHTAR, '{bozuk');
+      expect(C.havuzKur([]).length).toBe(SEKIL());
+    }));
+    /* 2026-10-30 (kullanıcı: «şekil mi, hayvan mı, emoji mi seçeceğiz; istersek karma»). */
+    it('takım: varsayılan şekiller; hayvan ve emoji kendi kadrosunu çağırır; karma hepsini; galeri seçili takımı gösterir', () => ile(() => {
+      expect(C.takim()).toBe('sekil');
+      expect(C.havuzKur([]).every(k => !k.aile)).toBe(true);
+      expect(C.takimAyarla('hayvan')).toBe(true);
+      expect(C.havuzKur([]).every(k => k.aile === 'hayvan')).toBe(true);
+      expect(localStorage.getItem(C.TAKIM_ANAHTAR)).toBe('hayvan');
+      const d = document.createElement('div'); d.innerHTML = C.galeriHtml(); document.body.appendChild(d);
+      try{
+        expect(d.querySelector('[data-minik-takim="hayvan"]').getAttribute('aria-pressed')).toBe('true');
+        expect(!!d.querySelector('[data-minik-kadro="Mırnav"]') && !d.querySelector('[data-minik-kadro="Pofuduk"]')).toBe(true);
+        expect(d.querySelector('[data-minik-kadro="Mırnav"] .minik').getAttribute('style')).toContain('--g2:#ffb067');
+        d.querySelector('[data-minik-takim="emoji"]').click();         // galeri yerinde yenilenir
+        expect(!!document.querySelector('[data-minik-kadro="Çıtır"]')).toBe(true);
+        expect(C.havuzKur([]).every(k => k.aile === 'emoji')).toBe(true);
+      }finally{ d.remove(); }
+      C.takimAyarla('karma');
       expect(C.havuzKur([]).length).toBe(C.KISILER.length);
+      expect(C.takimAyarla('bilinmez')).toBe(false);
+      C.takimAyarla('sekil');
+      expect(localStorage.getItem(C.TAKIM_ANAHTAR)).toBe(null);
+      expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(C.TAKIM_ANAHTAR) >= 0).toBe(true);
     }));
     it('galeri: her kişi bir kart (canlı minik, ad, huy); basınca kapanır, yeniden basınca açılır', () => ile(() => {
       const d = document.createElement('div'); d.innerHTML = C.galeriHtml(); document.body.appendChild(d);
       try{
         const kartlar = Array.from(d.querySelectorAll('[data-minik-kadro]'));
-        expect(kartlar.filter(b => b.getAttribute('data-minik-kadro') !== 'ofis').length).toBe(C.KISILER.length);
+        expect(kartlar.filter(b => b.getAttribute('data-minik-kadro') !== 'ofis').length).toBe(SEKIL());
         kartlar.forEach(b => expect(!!b.querySelector('.minikgal__sahne .minik .minik__govde')).toBe(true));
         const b = d.querySelector('[data-minik-kadro="Hilal"]');
         expect(b.getAttribute('aria-pressed')).toBe('true');

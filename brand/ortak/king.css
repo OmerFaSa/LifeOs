@@ -1433,34 +1433,37 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
   .king__dkart--arka{ transition:transform .3s ease, opacity .3s ease; }
 }
 @keyframes deste-gel{ from{ transform:translateY(10px) scale(.98); } to{ transform:none; } }
-/* Kadran (2026-10-30; kullanıcı ekran görüntüsünde yay başlığın üstüne
-   taşıyordu: «çok daha profesyonel güzel olsun ama mantık güzel»). Yay adanın
-   İÇİNDE, yazı alanının üstünde yarım elips; deste o sırada yerini korur ama
-   görünmez. Ortada kadran: üstüne gelinen aracın adı ve ne yaptığı. */
-.king.is-mini .king__yaz{ position:relative; }
-.king.is-mini .king__arti-yer{ position:static; }
-.king.is-mini .king__kutu:has(.king__yelpaze) .king__deste{ visibility:hidden; min-height:222px; }
+/* Yaprak menüsü (2026-10-30; king.js yelpazeHtml): «+»nın üstünde yarım
+   halka, her araç bir cam yaprak. Üstüne gelinen yaprak gökkuşağı
+   yansımasıyla ışır: kullanıcının örneğindeki duran ışık, oynamaz (§1.10'un
+   cam istisnasındaki gibi yalnız bir olayda: üstüne gelince). Adada deste o
+   sırada yerini korur ama görünmez. */
+.king .king__yaz{ position:relative; }
+.king .king__arti-yer{ position:static; }
+.king.is-mini .king__kutu:has(.king__yelpaze) .king__deste{ visibility:hidden; min-height:200px; }
 .king.is-mini .king__kutu:has(.king__yelpaze) .king__cipler{ display:none; }
-.king__yelpaze{ --rx:min(176px, calc(50vw - 64px)); --ry:124px; position:absolute; left:50%; bottom:calc(100% + 42px); width:0; height:0; z-index:6; }
-.king__yelpaze-merkez{ position:absolute; left:0; bottom:8px; width:min(220px, 56vw); transform:translateX(-50%); display:grid; gap:2px; text-align:center; pointer-events:none; }
-.king__yelpaze-merkez b{ font-size:14px; font-weight:650; color:var(--text); }
-.king__yelpaze-merkez small{ font-size:12px; line-height:1.35; color:var(--text-2); }
-.king__yelpaze-oge{ --a:calc(-180deg + var(--i) * (180deg / max(1, var(--n) - 1)));
-  position:absolute; left:0; top:0; width:44px; height:44px; display:grid; place-items:center; padding:0; border:0; border-radius:50%;
-  cursor:pointer; color:var(--text); background:var(--surface, #fff); box-shadow:inset 0 0 0 1px var(--border);
-  transform:translate(calc(-50% + cos(var(--a)) * var(--rx)), calc(-50% + sin(var(--a)) * var(--ry)));
-  transition:color .15s ease, box-shadow .15s ease, background .15s ease; }
-.king__yelpaze-oge svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-.king__yelpaze-oge small{ position:absolute; top:calc(100% + 4px); left:50%; transform:translateX(-50%); white-space:nowrap; font-size:11px; color:var(--text-2); pointer-events:none; }
-.king__yelpaze-oge:hover, .king__yelpaze-oge:focus-visible{ outline:none; color:var(--secili-yazi, var(--primary)); background:var(--secili-zemin, var(--surface-2));
-  box-shadow:inset 0 0 0 1px var(--secili-yazi, var(--primary)); }
-.king__yelpaze-oge:hover small, .king__yelpaze-oge:focus-visible small{ color:var(--text); }
+.king__yelpaze{ position:absolute; left:50%; bottom:calc(100% + 12px); width:336px; height:168px; z-index:6; overflow:hidden;
+  transform:translateX(-50%); transform-origin:50% 100%; }
+.king__yelpaze::before{ content:''; position:absolute; left:50%; bottom:-46px; width:92px; height:92px; margin-left:-46px; border-radius:50%;
+  border:1.5px dashed color-mix(in oklab, var(--text) 24%, transparent); pointer-events:none; }
+.king__yelpaze-merkez{ position:absolute; left:50%; bottom:10px; width:96px; transform:translateX(-50%); text-align:center; pointer-events:none; }
+.king__yelpaze-merkez b{ display:block; font-size:12px; font-weight:650; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.king__yelpaze-merkez small{ display:none; }
+.king__yelpaze-oge{ position:absolute; inset:0; padding:0; border:0; cursor:pointer; color:var(--text);
+  background:linear-gradient(180deg, rgba(255,255,255,.86), rgba(240,242,248,.74)); transition:background .2s ease; }
+:root[data-theme="dark"] .king__yelpaze-oge{ background:linear-gradient(180deg, rgba(52,54,66,.9), rgba(36,38,48,.82)); }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .king__yelpaze-oge{ background:linear-gradient(180deg, rgba(52,54,66,.9), rgba(36,38,48,.82)); } }
+.king .king__yelpaze-oge:hover, .king .king__yelpaze-oge:focus-visible{ outline:none; color:#16181f;
+  background:radial-gradient(circle at var(--cx) var(--cy), rgba(255,255,255,.92) 0 12px, rgba(255,255,255,.35) 26px, rgba(255,255,255,0) 52px),
+    conic-gradient(from 200deg at var(--cx) var(--cy), #ffb8de, #ffe08f, #aef0cf, #9fd6ff, #cfb2ff, #ffb8de); }
+.king__yaprak-ic{ position:absolute; transform:translate(-50%, -50%); display:grid; justify-items:center; gap:3px; pointer-events:none; }
+.king__yaprak-ic svg{ width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.king__yaprak-ic small{ font-size:10.5px; font-weight:550; white-space:nowrap; color:inherit; opacity:.82; }
 @media (prefers-reduced-motion:no-preference){
-  .king__yelpaze-oge{ animation:yelpaze-ac .36s cubic-bezier(.16,1,.3,1) both; animation-delay:calc(var(--i) * 24ms); }
-  .king__yelpaze-merkez{ animation:yelpaze-yazi .3s ease both .12s; }
+  .king__yelpaze-oge{ transform-origin:50% 100%; animation:yaprak-ac .38s cubic-bezier(.16,1,.3,1) both; animation-delay:calc(var(--i) * 22ms); }
 }
-@keyframes yelpaze-ac{ from{ opacity:0; transform:translate(-50%, -50%) scale(.5); } }
-@keyframes yelpaze-yazi{ from{ opacity:0; } }
+@keyframes yaprak-ac{ from{ opacity:0; transform:scale(.55); } }
+@media (max-width:420px){ .king__yelpaze{ transform:translateX(-50%) scale(.84); } }
 
 /* ======================================================================
    KING MASASI (2026-10-30; kullanıcı: «bu ekranı da bambaşka yap; sistemle

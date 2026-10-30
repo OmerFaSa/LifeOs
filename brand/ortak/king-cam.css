@@ -98,7 +98,7 @@ html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz{ border-radius:24px; b
 
 /* 5) ADA CAMDA: kapsül cam, deste kartları ve yelpaze ince cam. */
 html[data-zemin="yumusak"] .king.is-mini .king__dkart--on{ background:var(--cam-katman); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
-html[data-zemin="yumusak"] .king__yelpaze-oge:not(:hover):not(:focus-visible){ background:var(--cam-katman); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
+html[data-zemin="yumusak"] .king__yelpaze-oge:not(:hover):not(:focus-visible){ background:var(--cam-katman); }
 
 /* 6) MASA CAMDA (2026-10-30): ray, liste ve Bağlam pencerenin içinde cam kart
    (2'deki «ray ve liste saydam» kuralının geniş ekran hâli). */

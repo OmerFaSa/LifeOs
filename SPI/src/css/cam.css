@@ -1726,3 +1726,8 @@ html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .bolumcubugu{ backgrou
 html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .bolumcubugu__ad:not(.is-on){ color:var(--text-2); opacity:1; }
 html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .bolumcubugu--kabuk{ width:fit-content; max-width:calc(100% - 24px); margin-inline:auto;
   padding:0 8px; border-radius:16px; -webkit-mask-image:none; mask-image:none; }
+
+/* 47) OYUNSU CAM DÜĞME (2026-10-30; kisayol.css): camda kutu cam olur;
+   düğmenin kendisi hap değil (§3'teki «.kisayol > button» camı burada geri alınır). */
+html[data-zemin="yumusak"] .giris .kisayol > button{ background:transparent; box-shadow:none; border-color:transparent; }
+html[data-zemin="yumusak"] .giris .kisayol__simge{ background:var(--cam); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), 0 6px 14px -9px rgba(20,24,40,.32); }

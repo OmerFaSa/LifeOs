@@ -63,8 +63,8 @@ window.LIFEOS.MINIK = (function(){
     { ad:'Ponpon',   bicim:'yuvarlak', tip:'kurdele', huy:'neseli',   desen:'karin', boy:38, ton:-12, perde:1.25 },
     { ad:'Bulut',    bicim:'ucgen',    tip:'percem',  huy:'hayalci',  desen:'yok',   boy:40, ton:14,  perde:1 },
     { ad:'Bilge',    bicim:'kare',     tip:'kas',     huy:'bilge',    desen:'karin', boy:41, ton:40,  perde:0.8 },
-    { ad:'Tavşi',    bicim:'yuvarlak', tip:'tavsan',  huy:'utangac',  desen:'karin', boy:38, ton:60,  perde:1.2 },
-    { ad:'Ayıcık',   bicim:'kare',     tip:'ayi',     huy:'tembel',   desen:'karin', boy:43, ton:-40, perde:0.85 },
+    { ad:'Tavşi',    bicim:'yuvarlak', tip:'tavsan',  huy:'utangac',  desen:'karin', boy:38, ton:60,  perde:1.2, aile:'hayvan', renk:['#ffffff', '#f4eef2', '#dccfd8'] },
+    { ad:'Ayıcık',   bicim:'kare',     tip:'ayi',     huy:'tembel',   desen:'karin', boy:43, ton:-40, perde:0.85, aile:'hayvan', renk:['#e9c9a4', '#c08d5e', '#93643e'] },
     { ad:'Çiçek',    bicim:'ucgen',    tip:'cicek',   huy:'sarkici',  desen:'cil',   boy:39, ton:80,  perde:1.15 },
     { ad:'Boncuk',   bicim:'yuvarlak', tip:'boynuz',  huy:'oyuncu',   desen:'cil',   boy:36, ton:-60, perde:1.3 },
     { ad:'Yıldız',   bicim:'kare',     tip:'yildiz',  huy:'cesur',    desen:'yok',   boy:40, ton:100, perde:1.1 },
@@ -75,8 +75,33 @@ window.LIFEOS.MINIK = (function(){
     { ad:'Alev',     bicim:'kare',     tip:'alev',    huy:'enerjik',  desen:'cil',   boy:39, ton:-150, perde:1.1 },
     { ad:'Pamuk',    bicim:'yuvarlak', tip:'bulut',   huy:'sakin',    desen:'karin', boy:43, ton:120, perde:0.88 },
     { ad:'Sevgi',    bicim:'kare',     tip:'kalp',    huy:'nazik',    desen:'karin', boy:37, ton:170, perde:1.22 },
-    { ad:'Damla',    bicim:'ucgen',    tip:'damla',   huy:'telasli',  desen:'yok',   boy:38, ton:-170, perde:1.12 }
+    { ad:'Damla',    bicim:'ucgen',    tip:'damla',   huy:'telasli',  desen:'yok',   boy:38, ton:-170, perde:1.12 },
+    /* TAKIMLAR (kullanıcı, 2026-10-30: «şekillerden oluşan minikler var; bir de
+       hayvanlardan oluşan grup olsun; ateş, su emojisi gibi insan özelliği
+       olmayan ama yüz ekleyince tatlı duran emojiler; ayarlardan şekil mi,
+       hayvan mı, emoji mi seçelim, istersek karma»). Hayvan ve emojilerin
+       rengi kendinedir (renk: açık, orta, koyu); şekiller modülün tonunu alır. */
+    { ad:'Mırnav',   bicim:'yuvarlak', tip:'kedi',    huy:'oyuncu',   desen:'biyik',   boy:39, ton:0, perde:1.2,  aile:'hayvan', renk:['#ffe0b8', '#ffb067', '#ea8238'] },
+    { ad:'Pati',     bicim:'yuvarlak', tip:'kopek',   huy:'sevecen',  desen:'karin',   boy:41, ton:0, perde:1.05, aile:'hayvan', renk:['#f6e3c9', '#dcae7f', '#b5814f'] },
+    { ad:'Bambu',    bicim:'yuvarlak', tip:'panda',   huy:'sakin',    desen:'panda',   boy:43, ton:0, perde:0.9,  aile:'hayvan', renk:['#ffffff', '#f3f3f6', '#d8d9e2'] },
+    { ad:'Penpen',   bicim:'yuvarlak',    tip:'penguen', huy:'sakar',    desen:'penguen', boy:40, ton:0, perde:1.15, aile:'hayvan', renk:['#5a6888', '#36425e', '#222a3f'] },
+    { ad:'Kızıl',    bicim:'yuvarlak', tip:'tilki',   huy:'merakli',  desen:'tilki',   boy:39, ton:0, perde:1.1,  aile:'hayvan', renk:['#ffcf9a', '#ff9447', '#e2632a'] },
+    { ad:'Vırak',    bicim:'yuvarlak', tip:'kurbaga', huy:'neseli',   desen:'karin',   boy:38, ton:0, perde:1.25, aile:'hayvan', renk:['#d4f7a8', '#8edb63', '#57ad3e'] },
+    { ad:'Gececi',   bicim:'kare',     tip:'baykus',  huy:'bilge',    desen:'baykus',  boy:41, ton:0, perde:0.82, aile:'hayvan', renk:['#e5cfac', '#b38c62', '#86633f'] },
+    { ad:'Çıtır',    bicim:'alev',     tip:'yok',     huy:'enerjik',  desen:'yok',     boy:40, ton:0, perde:1.2,  aile:'emoji', renk:['#fff1a8', '#ffb03a', '#ff6a2b'] },
+    { ad:'Şıpşıp',   bicim:'damla',    tip:'yok',     huy:'telasli',  desen:'yok',     boy:39, ton:0, perde:1.15, aile:'emoji', renk:['#e2f4ff', '#86c8ff', '#4a8fe6'] },
+    { ad:'Pufpuf',   bicim:'bulut',    tip:'yok',     huy:'hayalci',  desen:'yok',     boy:44, ton:0, perde:0.95, aile:'emoji', renk:['#ffffff', '#eef3fb', '#c9d6ea'] },
+    { ad:'Parıltı',  bicim:'yildiz',   tip:'yok',     huy:'cesur',    desen:'yok',     boy:43, ton:0, perde:1.2,  aile:'emoji', renk:['#fff6c2', '#ffd34d', '#f2a51f'] },
+    { ad:'Yeşilcik', bicim:'yaprak',   tip:'yok',     huy:'merakli',  desen:'damar',   boy:40, ton:0, perde:1.1,  aile:'emoji', renk:['#dcf8bf', '#93d865', '#549f3a'] },
+    { ad:'Gönül',    bicim:'kalp',     tip:'yok',     huy:'nazik',    desen:'yok',     boy:40, ton:0, perde:1.22, aile:'emoji', renk:['#ffd3de', '#ff86a6', '#e5507c'] },
+    { ad:'Işıl',     bicim:'yuvarlak', tip:'isin',    huy:'neseli',   desen:'yok',     boy:38, ton:0, perde:1.25, aile:'emoji', renk:['#fff5b8', '#ffd042', '#ffa01c'] },
+    { ad:'Buzcuk',   bicim:'kare',     tip:'yok',     huy:'sakin',    desen:'buz',     boy:38, ton:0, perde:0.95, aile:'emoji', renk:['#f2fcff', '#c6eefc', '#8fd2ec'] }
   ]);
+  const TAKIMLAR = Object.freeze(['sekil', 'hayvan', 'emoji', 'karma']);
+  const TAKIM_AD = Object.freeze({ sekil:'Şekiller', hayvan:'Hayvanlar', emoji:'Emojiler', karma:'Karma' });
+  const TAKIM_ANAHTAR = 'lifeos.minik.takim';
+  const aileOf = x => x.aile || 'sekil';
+  function takim(){ let v = null; try{ v = localStorage.getItem(TAKIM_ANAHTAR); }catch(e){} return TAKIMLAR.indexOf(v) >= 0 ? v : 'sekil'; }
   const HUY_AD = Object.freeze({ uykucu:'uykucu', konuskan:'konuşkan', merakli:'meraklı', neseli:'neşeli', hayalci:'hayalci', bilge:'bilge',
     utangac:'utangaç', tembel:'tembel', sarkici:'şarkıcı', oyuncu:'oyuncu', cesur:'cesur', sakar:'sakar',
     sevecen:'sevecen', dalgin:'dalgın', enerjik:'enerjik', sakin:'sakin', nazik:'nazik', telasli:'telaşlı' });
@@ -291,9 +316,18 @@ window.LIFEOS.MINIK = (function(){
     return new Set(Array.isArray(v) ? v.filter(x => typeof x === 'string') : []);
   }
   function havuzKur(ajanListesi){
-    const k = kapalilar();
-    return KISILER.filter(x => !k.has(x.ad)).concat(k.has('ofis') ? [] : ofisKisileri(ajanListesi));
+    const k = kapalilar(), t = takim();
+    return KISILER.filter(x => (t === 'karma' || aileOf(x) === t) && !k.has(x.ad)).concat(k.has('ofis') ? [] : ofisKisileri(ajanListesi));
   }
+  function takimAyarla(t){
+    if(TAKIMLAR.indexOf(t) < 0) return false;
+    try{ if(t === 'sekil') localStorage.removeItem(TAKIM_ANAHTAR); else localStorage.setItem(TAKIM_ANAHTAR, t); }catch(e){ /* depo kapalı */ }
+    if(typeof document !== 'undefined') document.querySelectorAll('.minikgal').forEach(g => { g.outerHTML = galeriHtml(); });
+    kadroUygula();
+    return true;
+  }
+  /* Kişinin rengi: hayvan ve emojide kendi üç tonu; şekilde modülün tonu. */
+  const renkStil = x => '--ton:' + x.ton + (x.renk ? ';--g1:' + x.renk[0] + ';--g2:' + x.renk[1] + ';--g3:' + x.renk[2] : '');
   function kadroAyarla(ad, acik){
     const k = kapalilar();
     if(acik) k.delete(ad); else k.add(ad);
@@ -312,10 +346,13 @@ window.LIFEOS.MINIK = (function(){
       + ' aria-pressed="' + (on ? 'true' : 'false') + '" title="' + (on ? 'Sayfadan çıkar' : 'Sayfaya ekle') + '">'
       + '<span class="minikgal__sahne" aria-hidden="true">' + govde + '</span><b>' + ad + '</b><small>' + alt + '</small></button>';
     const kisi = x => '<span class="minik" data-tip="' + x.tip + '" data-bicim="' + x.bicim + '" data-desen="' + x.desen + '" data-huy="' + x.huy + '"'
-      + ' data-yon="sag" style="--ton:' + x.ton + '">' + ICERIK + '</span>';
-    const ofis = ofisKisileri(ajanlar());
-    return '<div class="minikgal" role="group" aria-label="Minikler: sayfada kimler gezsin">'
-      + KISILER.map(x => kart(x.ad, HUY_AD[x.huy] + ' · ' + HUY_NOT[x.huy], kisi(x), !k.has(x.ad))).join('')
+      + ' data-aile="' + aileOf(x) + '" data-yon="sag" style="' + renkStil(x) + '">' + ICERIK + '</span>';
+    const ofis = ofisKisileri(ajanlar()), t = takim();
+    const sec = '<div class="seg minikgal__takim" role="group" aria-label="Minik takımı">' + TAKIMLAR.map(x => '<button type="button" class="' + (x === t ? 'is-on' : '') + '"'
+      + ' data-minik-takim="' + x + '" aria-pressed="' + (x === t) + '">' + TAKIM_AD[x] + '</button>').join('') + '</div>';
+    const liste = KISILER.filter(x => t === 'karma' || aileOf(x) === t);
+    return '<div class="minikgal" role="group" aria-label="Minikler: sayfada kimler gezsin">' + sec
+      + liste.map(x => kart(x.ad, HUY_AD[x.huy] + ' · ' + HUY_NOT[x.huy], kisi(x), !k.has(x.ad))).join('')
       + (ofis.length ? kart('ofis', 'Ofis çalışanları · ' + ofis.length + ' kişi, işinin başında',
         '<span class="minik" data-ofis="" data-tip="' + ofis[0].tip + '" data-bicim="' + ofis[0].bicim + '" data-desen="yok" data-yon="sag" style="--ton:' + ofis[0].ton + '">' + ICERIK + '</span>', !k.has('ofis'))
         .replace('<b>ofis</b>', '<b>Ofis</b>') : '')
@@ -440,9 +477,11 @@ window.LIFEOS.MINIK = (function(){
     mk.el.dataset.bicim = k.bicim;
     mk.el.dataset.desen = k.desen;
     mk.el.dataset.huy = k.huy;
+    mk.el.dataset.aile = k.aile || 'sekil';
     mk.tabanBoy = k.boy;
     mk.el.style.setProperty('--boy', boyPx(k.boy) + 'px');
     mk.el.style.setProperty('--ton', String(k.ton));   // birimsiz: oklch'nin h'si sayı
+    ['--g1', '--g2', '--g3'].forEach((v, i) => { if(k.renk) mk.el.style.setProperty(v, k.renk[i]); else mk.el.style.removeProperty(v); });
     ruhUygula(mk);
   }
 
@@ -853,6 +892,8 @@ window.LIFEOS.MINIK = (function(){
     document.addEventListener('click', e => {
       const kd = e.target && e.target.closest ? e.target.closest('[data-minik-kadro]') : null;
       if(kd){ e.preventDefault(); const ad = kd.getAttribute('data-minik-kadro'); kadroAyarla(ad, kapalilar().has(ad)); return; }
+      const tk = e.target && e.target.closest ? e.target.closest('[data-minik-takim]') : null;
+      if(tk){ e.preventDefault(); takimAyarla(tk.getAttribute('data-minik-takim')); return; }
       const bb = e.target && e.target.closest ? e.target.closest('[data-minik-boy]') : null;
       if(bb){ e.preventDefault(); boyAyarla(bb.getAttribute('data-minik-boy')); return; }
       const t = e.target && e.target.closest ? e.target.closest('[data-minik-ses]') : null;
@@ -862,7 +903,7 @@ window.LIFEOS.MINIK = (function(){
       e.preventDefault();
       ayarla(Number(b.getAttribute('data-minik-sec')));
     });
-    window.addEventListener('storage', e => { if(e.key === ANAHTAR) sayiUygula(); if(e.key === KADRO_ANAHTAR) kadroUygula(); });
+    window.addEventListener('storage', e => { if(e.key === ANAHTAR) sayiUygula(); if(e.key === KADRO_ANAHTAR || e.key === TAKIM_ANAHTAR) kadroUygula(); });
   }
 
   /* İki ölçüm: biri hemen, biri kartların giriş animasyonu bittikten sonra. */
@@ -1036,5 +1077,5 @@ window.LIFEOS.MINIK = (function(){
   return { kur, sayi, seciciHtml, BOY_ANAHTAR, BOYLAR, boy, boyPx, boyAyarla, boySeciciHtml, yanSes, radyoda, ofisKisileri, ICERIK, DIYALOG, diyalogSec, ESYALAR, esyaSec,
     SES_ANAHTAR, sesAyar, sesAyarla, sesIzinli, sesSeciciHtml, ayarla, ANAHTAR, EN_COK, zeminler, gorunenler, adim, komsular, sicrama, gozYonu, sohbetEsi, kadro, yeniRuh, dokun, ruh, inisYeri,
     KISILER, HUY_AD, HUY_NOT, RUH, RUH_AD, KART, EN_AZ, PAY,
-    KADRO_ANAHTAR, kapalilar, havuzKur, kadroAyarla, galeriHtml };
+    KADRO_ANAHTAR, kapalilar, havuzKur, kadroAyarla, galeriHtml, TAKIMLAR, TAKIM_AD, TAKIM_ANAHTAR, takim, takimAyarla };
 })();
