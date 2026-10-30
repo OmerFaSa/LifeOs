@@ -465,3 +465,8 @@ html[data-vurgu]:not([data-vurgu="modul"]){ --vurgu-ink:color-mix(in oklab, var(
   .skart .ayarlar__deger{ flex:1 1 100%; justify-content:flex-start; }
 }
 .skart .seg{ max-width:100%; flex-wrap:wrap; }
+/* Geniş satır (ad üstte, denetim altta) sarılmaz: dikey + sarma, denetimi yan sütuna kaçırıp kartın dışına taşıyordu (yazı boyutu, 2026-10-30). */
+.skart .ayarlar__satir--genis{ flex-wrap:nowrap !important; }
+.skart .ayarlar__satir--genis .ayarlar__deger{ flex:none !important; width:100%; }
+.skart .ayarlar__satir--genis .seg{ width:100%; }
+.skart .ayarlar__satir--genis .seg button{ flex:1 1 0; min-width:0; overflow:hidden; text-overflow:ellipsis; }
