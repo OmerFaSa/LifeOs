@@ -20054,7 +20054,10 @@ window.LIFEOS = window.LIFEOS || {};
     const fark = ortakFark();
     if(!Object.keys(fark).length || typeof fetch !== 'function') return false;
     Object.keys(fark).forEach(k => { if(fark[k] == null) delete ortakSon[k]; else ortakSon[k] = fark[k]; });
-    try{ fetch('/api/ayar', { method:'POST', keepalive:!!cikis, headers:{ 'Content-Type':'application/json', 'X-LifeOS':'ayar' }, body:JSON.stringify({ ayar:fark }) }).catch(() => {}); }catch(e){ return false; }
+    const govde = JSON.stringify({ ayar:fark });
+    /* keepalive gövdesi tarayıcıda ~64 KB ile sınırlı; aşarsa düz istek (profil gibi büyük
+       değişiklikler zaten anında gider: ayarlar.js profilKaydet → ortakGonder). */
+    try{ fetch('/api/ayar', { method:'POST', keepalive:!!cikis && govde.length < 60000, headers:{ 'Content-Type':'application/json', 'X-LifeOS':'ayar' }, body:govde }).catch(() => {}); }catch(e){ return false; }
     return true;
   }
   /* Sayfa yenilenmeden önce değişiklik sunucuya yazılır ve beklenir (2026-10-31, uçtan
@@ -20407,7 +20410,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
     dinlenSure,
-    ANAHTAR, KIPLER, TASINAN, ORTAK, ILK_ESIT, ortakAl, ortakFark, ortakYenile,
+    ANAHTAR, KIPLER, TASINAN, ORTAK, ILK_ESIT, ortakAl, ortakFark, ortakGonder, ortakYenile, _ortakSifirla:() => { ortakSon = null; },
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
     HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,
@@ -20658,7 +20661,10 @@ window.LIFEOS = window.LIFEOS || {};
     if(t) return t === 'dark';
     try{ return !!window.matchMedia('(prefers-color-scheme: dark)').matches; }catch(e){ return false; }
   }
-  function sunucuVar(){ return typeof location !== 'undefined' && /^https?:$/.test(location.protocol); }
+  /* Kendi dosyan yalnız bu bilgisayardan okunur (sistem/zemin.py söz 1): sayfa ev ağından
+     (tablet) açıldıysa «Kendi» modülün fotoğrafına düşer, yükleme düğmesi yok (2026-10-31). */
+  const yerelMi = host => /^(127\.0\.0\.1|localhost|\[::1\])$/.test(String(host || ''));
+  function sunucuVar(){ return typeof location !== 'undefined' && /^https?:$/.test(location.protocol) && yerelMi(location.hostname); }
   function dosyaTuru(yuva){ let v = null; try{ v = localStorage.getItem('lifeos.manzara.tur.' + yuva); }catch(e){} return v === 'video' || v === 'foto' ? v : null; }
   function dosyaAdresi(yuva){
     let surum = '';
@@ -21059,7 +21065,7 @@ window.LIFEOS = window.LIFEOS || {};
     MANZARA_ANAHTAR, manzara:() => manzaraSimdi, manzaraAyarla, manzaraYenile, manzaraSeciciHtml,
     GECE_ANAHTAR, OTO_ANAHTAR, gece:() => geceSimdi, geceAyarla, geceSeciciHtml, oto:() => otoSimdi, otoAyarla, otoSeciciHtml,
     otoTema, etkinZemin, karanlik, dosyaYukle, onizle, onizleHtml, ONIZLE_SADE,
-    VIDEO_ANAHTAR, HIZLAR, videoAyar, videoAyarla, videoAyarHtml, videoSesli });
+    VIDEO_ANAHTAR, HIZLAR, videoAyar, videoAyarla, videoAyarHtml, videoSesli, yerelMi });
   /* Gövde hazır olunca, ilk çizimden biraz sonra: açılış animasyonuyla çakışmasın. */
   if(typeof document !== 'undefined' && typeof setTimeout === 'function'
       && !/\/tests\//.test(String(location.pathname || ''))){   // test sayfasında kendiliğinden oynamaz
@@ -21305,6 +21311,8 @@ window.LIFEOS = window.LIFEOS || {};
      TASINAN). Öbür modül açılınca etkin profilin damgası orada görülmemişse
      profil oraya da uygulanır ve sayfa bir kez yenilenir. */
   /* Yenilemeden önce ortak ayarı sunucuya yaz (animasyon.js ortakYenile). */
+  /* Büyük ortak değişiklik (profiller) beklemeden sunucuya: kapanıştaki keepalive sınırına kalmasın. */
+  function ortakSimdi(){ try{ if(L.ANIMASYON && L.ANIMASYON.ortakGonder) L.ANIMASYON.ortakGonder(false); }catch(e){ /* yok */ } }
   function yenileKaydet(){ if(L.ANIMASYON && L.ANIMASYON.ortakYenile) L.ANIMASYON.ortakYenile(); else try{ location.reload(); }catch(e){ /* yok */ } }
   const PROFIL_ANAHTAR = 'lifeos.profiller', ETKIN_ANAHTAR = 'lifeos.profil.etkin', GORDU_ANAHTAR = 'lifeos.profil.gordu', TEMA_BEKLE = 'lifeos.profil.tema';
   const PROFIL_EN = 8;
@@ -21342,6 +21350,7 @@ window.LIFEOS = window.LIFEOS || {};
     const damga = String(Date.now());
     depoKoy(ETKIN_ANAHTAR, JSON.stringify({ ad:p.ad, damga }));
     depoKoy(GORDU_ANAHTAR, damga);
+    ortakSimdi();
     return { ok:true, mesaj:i >= 0 ? '«' + p.ad + '» güncellendi.' : '«' + p.ad + '» kaydedildi.' };
   }
   /* Profilin ayarlarını depoya yazar (profilde olmayan anahtar varsayılana döner). */
@@ -21370,6 +21379,7 @@ window.LIFEOS = window.LIFEOS || {};
     depoKoy(PROFIL_ANAHTAR, k.length ? JSON.stringify(k) : null);
     const e = etkinProfil();
     if(e && ayni(e.ad, ad)) depoKoy(ETKIN_ANAHTAR, null);
+    ortakSimdi();
     return true;
   }
   /* Açılışta: başka modülde seçilen profil burada görülmediyse uygulanır (bir kez). */
@@ -23037,7 +23047,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'f0b72e60', at:'2026-10-30 22:40', dirty:false };
+ESP.BUILD = { id:'2fe56a1c', at:'2026-10-30 22:51', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -33253,7 +33263,7 @@ window.LIFEOS.MUZIK = (function(){
   const VAR_ANAHTAR = 'lifeos.muzik.var';
   const kac = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
   const VARSAYILAN_ORTAM = {
-    sunucu:() => typeof location !== 'undefined' && /^https?:$/.test(location.protocol),
+    sunucu:() => typeof location !== 'undefined' && /^https?:$/.test(location.protocol) && /^(127\.0\.0\.1|localhost|\[::1\])$/.test(location.hostname),   // müzik yalnız bu bilgisayarda (ev ağından 403)
     fetch:(u, o) => fetch(u, o),
     simdi:() => new Date(),
     karistir:l => l.slice().sort(() => Math.random() - .5),
@@ -33681,7 +33691,7 @@ window.LIFEOS.ICE = (function(){
   const L = window.LIFEOS;
   const VAR_ANAHTAR = 'lifeos.ice.var';
   const kac = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
-  const VARSAYILAN_ORTAM = { sunucu:() => typeof location !== 'undefined' && /^https?:$/.test(location.protocol), fetch:(u, o) => fetch(u, o) };
+  const VARSAYILAN_ORTAM = { sunucu:() => typeof location !== 'undefined' && /^https?:$/.test(location.protocol) && /^(127\.0\.0\.1|localhost|\[::1\])$/.test(location.hostname), fetch:(u, o) => fetch(u, o) };
   let ortam = Object.assign({}, VARSAYILAN_ORTAM);
   let veri = null, mesaj = '', ayarOkundu = false;
 
