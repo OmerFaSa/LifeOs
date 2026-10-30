@@ -462,6 +462,7 @@ window.LIFEOS = window.LIFEOS || {};
       +   '<button type="button" class="ses__anahtar" data-ses="tik" role="switch" aria-labelledby="ses-tik-ad ses-tik-deger"'
       +     ' aria-checked="' + (tercih.tik ? 'true' : 'false') + '"><span id="ses-tik-deger">' + (tercih.tik ? 'Açık' : 'Kapalı') + '</span></button>'
       + '</div>'
+      + (L.MUZIK ? L.MUZIK.panelHtml() : '')   // 2026-10-30: radyonun altında Müzik (muzik.js)
       + '</div>';
   }
 

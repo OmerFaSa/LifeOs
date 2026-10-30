@@ -192,6 +192,11 @@ jobs:
       - name: Sistem planlaması vadeyi ve kaçan işi doğru sayar
         run: python3 tools/planlama_test.py
 
+      # MÜZİK (2026-10-30). Kullanıcının parçaları ve listeleri PC'de durur;
+      # yalnız bu bilgisayardan, doğru türle; listede yalnız var olan parça.
+      - name: Müzik dosyaları ve listeleri yalnız bu bilgisayardan
+        run: python3 tools/muzik_test.py
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç

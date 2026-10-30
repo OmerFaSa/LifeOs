@@ -263,6 +263,8 @@ DOSYALAR = {
     # Test adi `ses.test.js` DEGIL: SPI ve ESP'nin kendi ses (konusma)
     # testleri o adi tasir ve yayim onlarin ustune yazardi.
     "ses.js":         "js/core",
+    "muzik.js":       "js/core",
+    "muzik.test.js":  "tests",
     "ses.css":        "css",
     "radyo.test.js":  "tests",
     # HESAP — PC sunucusuyla giris ve esitleme (sistem/hesap.py, 2026-10-04).

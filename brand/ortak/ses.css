@@ -89,3 +89,30 @@
 .sesduzey__ayrinti > summary:hover{ color:var(--text); }
 .sesduzey__ayrinti[open]{ display:grid; gap:10px; padding:4px 0 2px 14px; border-left:2px solid var(--border-soft); }
 .sesduzey__ayrinti .sesduzey__satir{ font-size:12.5px; }
+
+/* MÜZİK (2026-10-30; muzik.js): radyonun altında kendi bölümü; Ayarlar › Ses › Müzik. */
+.muzik{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border-soft, var(--border)); display:grid; gap:8px; }
+.muzik .ses__tur small{ margin-left:4px; font-size:11px; opacity:.6; font-variant-numeric:tabular-nums; }
+.muzik .ses__tur:disabled{ opacity:.45; cursor:default; }
+.muzik-ayar{ display:grid; gap:10px; width:100%; }
+.muzik-ayar__ust{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.muzik-ayar__durum{ font-size:12px; color:var(--text-3); }
+.muzik__liste{ list-style:none; margin:0; padding:0; display:grid; gap:2px; }
+.muzik__parca{ display:flex; align-items:center; gap:10px; min-height:40px; padding:4px 6px; border-radius:10px; }
+.muzik__parca:hover{ background:color-mix(in oklab, var(--text) 5%, transparent); }
+.muzik__ad{ flex:1; min-width:0; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.muzik__atama{ display:flex; gap:3px; flex-wrap:wrap; justify-content:flex-end; }
+.muzik__cip{ height:24px; padding:0 8px; border:0; border-radius:999px; background:transparent; color:var(--text-3); font:inherit; font-size:11.5px; cursor:pointer;
+  box-shadow:inset 0 0 0 1px var(--border); }
+.muzik__cip.is-on{ background:var(--secili-zemin, var(--primary-soft)); color:var(--secili-yazi, var(--primary)); box-shadow:var(--secili-golge, none); font-weight:600; }
+.muzik__dinle, .muzik__sil{ flex:none; width:28px; height:28px; display:grid; place-items:center; padding:0; border:0; border-radius:50%;
+  background:transparent; color:var(--text-2); cursor:pointer; font:inherit; }
+.muzik__dinle:hover, .muzik__sil:hover{ background:color-mix(in oklab, var(--text) 8%, transparent); color:var(--text); }
+.muzik__dinle .ses__sim{ width:14px; height:14px; fill:currentColor; }
+.muzik__sil[data-emin="1"]{ width:auto; padding:0 8px; border-radius:999px; color:var(--danger, #c0392b); font-size:12px; }
+.muzik-ayar__satir{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--text-2); }
+.muzik-ayar__satir select, .muzik-ayar__satir input[type="number"]{ height:30px; padding:0 8px; border:1px solid var(--border); border-radius:9px; background:transparent;
+  color:var(--text); font:inherit; font-size:13px; }
+.muzik-ayar__satir input[type="number"]{ width:64px; }
+.muzik-ayar__ses{ display:flex; align-items:center; gap:8px; }
+@media (max-width:679px){ .muzik__parca{ flex-wrap:wrap; } .muzik__atama{ width:100%; justify-content:flex-start; } }

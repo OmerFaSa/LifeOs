@@ -74,6 +74,7 @@ sys.path.insert(0, SISTEM)
 import guncelle  # noqa: E402
 import hesap  # noqa: E402
 import zemin  # noqa: E402  (kullanicinin arka plan dosyasi, sistem/zemin.py)
+import muzik  # noqa: E402  (kullanicinin muzik dosyalari ve listeleri, sistem/muzik.py)
 import planlama  # noqa: E402  (Sistem planlamasi, sistem/planlama.py)
 import telefon  # noqa: E402
 
@@ -313,6 +314,8 @@ class Sunucu(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if self.path.startswith("/api/muzik"):
+            return muzik.isle(self)
         if self.path.startswith("/api/zemin/"):
             return zemin.isle(self)
         if self.path.startswith("/api/planlama"):
@@ -339,6 +342,8 @@ class Sunucu(SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if self.path.startswith("/api/muzik"):
+            return muzik.isle(self)
         if self.path.startswith("/api/zemin/"):
             return zemin.isle(self)
         if self.path.startswith("/api/planlama"):
@@ -346,6 +351,8 @@ class Sunucu(SimpleHTTPRequestHandler):
         return self.send_error(405)
 
     def do_DELETE(self):
+        if self.path.startswith("/api/muzik"):
+            return muzik.isle(self)
         if self.path.startswith("/api/zemin/"):
             return zemin.isle(self)
         return self.send_error(405)
@@ -1177,6 +1184,8 @@ class Giris(SimpleHTTPRequestHandler):
         return self.send_error(405)
 
     def do_DELETE(self):
+        if self.path.startswith("/api/muzik"):
+            return muzik.isle(self)
         if self.path.startswith("/api/zemin/"):
             return zemin.isle(self)
         return self.send_error(405)
@@ -1200,6 +1209,8 @@ class Giris(SimpleHTTPRequestHandler):
         yol = self.path.split("?", 1)[0]
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if yol.startswith("/api/muzik"):
+            return muzik.isle(self)
         if yol.startswith("/api/zemin/"):
             return zemin.isle(self)
         if yol.startswith("/api/planlama"):
@@ -1229,6 +1240,8 @@ class Giris(SimpleHTTPRequestHandler):
         yol = self.path.split("?", 1)[0]
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if yol.startswith("/api/muzik"):
+            return muzik.isle(self)
         if yol.startswith("/api/zemin/"):
             return zemin.isle(self)
         if yol.startswith("/api/planlama"):

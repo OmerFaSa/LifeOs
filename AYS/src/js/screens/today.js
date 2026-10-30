@@ -2175,6 +2175,7 @@ R.Screens.today = (function(){
       const b = day.blocks.find(x => x.id === el.dataset.block);
       b.startedAt = new Date().toISOString();
       await M.saveDay(day.date);
+      try{ window.dispatchEvent(new CustomEvent('lifeos:calisma', { detail:{ acik:true } })); }catch(e){}   // müzik: Çalışırken listesi
       R.App.render();
     },
     async 'timer-stop'(el){
@@ -2187,6 +2188,7 @@ R.Screens.today = (function(){
       b.startedAt = null;
       if(b.status === 'pending') b.status = mins >= b.targetMin*0.8 ? 'done' : 'partial';
       await M.saveDay(day.date);
+      try{ window.dispatchEvent(new CustomEvent('lifeos:calisma', { detail:{ acik:false } })); }catch(e){}
       UI.toast(mins+' dakika kaydedildi');
       R.App.render();
     },

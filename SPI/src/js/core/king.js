@@ -3856,8 +3856,11 @@ window.LIFEOS.KING = (function(){
   const ODAK_RE = /(?:(\d{1,3})\s*(?:dk|dakika)(?:lık)?\s*(.*?)\s*(?:çalışalım|çalışayım|odaklanalım|odaklanayım)(?![a-zçğıöşü]))|pomodoro|odak (?:modu|sayacı|zamanlayıcı)(?:nı|sı)? ?(?:başlat|aç)/;
   let odakSaat = null, odakAralik = null;
   function odak(){ const v = ortam.depo.oku(ODAK); return v && v.bitis ? v : null; }
+  /* Çalışma oturumu olayı (2026-10-30): müzik «Çalışırken» listesine geçer (muzik.js). */
+  const calismaOlayi = acik => { try{ if(typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('lifeos:calisma', { detail:{ acik } })); }catch(e){ /* yok */ } };
   function odakBaslat(dk, konu){
     ortam.depo.yaz(ODAK, { bitis:ortam.simdi().getTime() + dk * 60000, dk, konu:konu || '' });
+    calismaOlayi(true);
     odakKur();
     ciz(false);
   }
@@ -3890,6 +3893,7 @@ window.LIFEOS.KING = (function(){
     odakTemizle();
     if(!v) return;
     ortam.depo.sil(ODAK);
+    calismaOlayi(false);
     ortam.depo.yaz(ODAK_SON, { dk:v.dk, konu:v.konu || '', at:ortam.simdi().getTime() });
     if(ortam.bildir) ortam.bildir('King', 'Odak süresi doldu: ' + v.dk + ' dakika.');
     soyle('Süre doldu: ' + v.dk + ' dakika' + (v.konu ? ' ' + v.konu : '') + ' tamam. Kaydedeyim mi?');
@@ -3900,6 +3904,7 @@ window.LIFEOS.KING = (function(){
     const v = odak();
     odakTemizle();
     ortam.depo.sil(ODAK);
+    if(v) calismaOlayi(false);
     soyle(v ? 'Odak sayacını durdurdum.' : 'Çalışan bir odak sayacı yok.');
   }
   function odakHtml(){
