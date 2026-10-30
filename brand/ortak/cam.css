@@ -1777,28 +1777,32 @@ html[data-zemin="yumusak"][data-manzara="acik"][data-yuzey="ferah"] .sayfa :is(s
     background:linear-gradient(160deg, rgba(26,28,38,.52), rgba(18,20,28,.4)) !important; }
 }
 
-/* 51) TEMA PAKETİ (kullanıcı, 2026-10-30: «buzul camsı efekte Türklükle ilgili
-   şeyler; kardeşim tatlışlar; kimisi uzay, kimisi fantastik, kimisi mitoloji»;
-   Ayarlar › Görünüm › Tema paketi). Paket seçili hâlleri kendi rengiyle boyar
-   (modülün rengi, kimliği ve ölçü renkleri değişmez) ve uygulama kabının
-   arka planına hafif bir motif koyar (içeriğin altında, fotoğrafın üstünde;
-   oynamaz). «Sade» hiçbir şey eklemez. */
-html[data-paket="turk"]{ --paket:#c8102e; --paket-motif:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='140'%20height='140'%20viewBox='0%200%20140%20140'%3E%3Cg%20fill='none'%20stroke='%23c8102e'%20stroke-opacity='.14'%20stroke-width='2.5'%3E%3Cpath%20d='M70%2012%20104%2070%2070%20128%2036%2070z'/%3E%3Cpath%20d='M70%2040%2086%2070%2070%20100%2054%2070z'/%3E%3Cpath%20d='M36%2070h-14M104%2070h14M70%2012V2M70%20128v10'/%3E%3Cpath%20d='M22%2062v16M118%2062v16'/%3E%3C/g%3E%3Cpath%20d='M70%2058%2077%2070%2070%2082%2063%2070z'%20fill='%23c9a227'%20fill-opacity='.22'/%3E%3Cg%20fill='%23c9a227'%20fill-opacity='.16'%3E%3Cpath%20d='M4%204h10v10H4zM126%20126h10v10h-10zM126%204h10v10h-10zM4%20126h10v10H4z'/%3E%3C/g%3E%3C/svg%3E"); }
-html[data-paket="tatli"]{ --paket:#e2558f; --paket-motif:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='140'%20height='140'%20viewBox='0%200%20140%20140'%3E%3Cg%20fill='%23ff7aa8'%20fill-opacity='.16'%3E%3Cpath%20d='M30%2040c-6-8-20-4-18%206%202%209%2018%2018%2018%2018s16-9%2018-18c2-10-12-14-18-6z'/%3E%3Cpath%20d='M100%20100c-4-6-14-3-13%204%201%207%2013%2013%2013%2013s12-6%2013-13c1-7-9-10-13-4z'/%3E%3C/g%3E%3Cg%20fill='%23a98bff'%20fill-opacity='.18'%3E%3Ccircle%20cx='105'%20cy='30'%20r='4'/%3E%3Ccircle%20cx='40'%20cy='110'%20r='3'/%3E%3Ccircle%20cx='70'%20cy='70'%20r='2.5'/%3E%3C/g%3E%3Cpath%20d='M110%2060l2%205%205%202-5%202-2%205-2-5-5-2%205-2z'%20fill='%23ffc94d'%20fill-opacity='.28'/%3E%3C/svg%3E"); }
-html[data-paket="uzay"]{ --paket:#5b6cff; --paket-motif:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='140'%20height='140'%20viewBox='0%200%20140%20140'%3E%3Cg%20fill='%23b9c4ff'%20fill-opacity='.35'%3E%3Ccircle%20cx='14'%20cy='20'%20r='1.4'/%3E%3Ccircle%20cx='60'%20cy='8'%20r='1'/%3E%3Ccircle%20cx='120'%20cy='34'%20r='1.6'/%3E%3Ccircle%20cx='90'%20cy='76'%20r='1'/%3E%3Ccircle%20cx='30'%20cy='96'%20r='1.2'/%3E%3Ccircle%20cx='70'%20cy='124'%20r='1.5'/%3E%3Ccircle%20cx='128'%20cy='110'%20r='1'/%3E%3C/g%3E%3Cg%20fill='none'%20stroke='%237d8bff'%20stroke-opacity='.2'%20stroke-width='1.5'%3E%3Ccircle%20cx='44'%20cy='52'%20r='9'/%3E%3Cellipse%20cx='44'%20cy='52'%20rx='17'%20ry='5'%20transform='rotate%28-20%2044%2052%29'/%3E%3C/g%3E%3C/svg%3E"); }
-html[data-paket="fantastik"]{ --paket:#8a6a2f; --paket-motif:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='140'%20height='140'%20viewBox='0%200%20140%20140'%3E%3Cg%20fill='none'%20stroke='%238a6a2f'%20stroke-opacity='.16'%20stroke-width='2'%3E%3Cpath%20d='M0%2070c20-20%2050-20%2070%200s50%2020%2070%200'/%3E%3Cpath%20d='M0%2070c20%2020%2050%2020%2070%200s50-20%2070%200'/%3E%3Cpath%20d='M70%2030c-6%208-6%2016%200%2022%206-6%206-14%200-22zM70%2088c-6%208-6%2016%200%2022%206-6%206-14%200-22z'/%3E%3C/g%3E%3Ccircle%20cx='70'%20cy='70'%20r='4'%20fill='%238a6a2f'%20fill-opacity='.18'/%3E%3C/svg%3E"); }
-html[data-paket="mitoloji"]{ --paket:#b8913a; --paket-motif:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='140'%20height='140'%20viewBox='0%200%20140%20140'%3E%3Cg%20fill='none'%20stroke='%23b8913a'%20stroke-opacity='.2'%20stroke-width='3'%3E%3Cpath%20d='M4%2020h28v20H16v-8h8M40%2020h28v20H52v-8h8M76%2020h28v20H88v-8h8M112%2020h24v20h-12v-8h6'/%3E%3Cpath%20d='M4%20120h28v-20H16v8h8M40%20120h28v-20H52v8h8M76%20120h28v-20H88v8h8M112%20120h24v-20h-12v8h6'/%3E%3C/g%3E%3C/svg%3E"); }
-html[data-paket]:not([data-paket="sade"]){
-  --secili-zemin:color-mix(in oklab, var(--paket) 14%, rgba(255,255,255,.62)); --secili-yazi:color-mix(in oklab, var(--paket) 78%, #000);
-  --secili-golge:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px color-mix(in oklab, var(--paket) 30%, transparent), 0 6px 16px -12px color-mix(in oklab, var(--paket) 60%, transparent);
-  --ana-zemin:color-mix(in oklab, var(--paket) 22%, rgba(255,255,255,.55)); }
-html[data-paket]:not([data-paket="sade"])[data-theme="dark"]{
-  --secili-zemin:color-mix(in oklab, var(--paket) 26%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--paket) 30%, #fff);
-  --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--paket) 40%, transparent);
-  --ana-zemin:color-mix(in oklab, var(--paket) 34%, rgba(255,255,255,.06)); }
-@media (prefers-color-scheme:dark){ html[data-paket]:not([data-paket="sade"]):not([data-theme="light"]){
-  --secili-zemin:color-mix(in oklab, var(--paket) 26%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--paket) 30%, #fff);
-  --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--paket) 40%, transparent);
-  --ana-zemin:color-mix(in oklab, var(--paket) 34%, rgba(255,255,255,.06)); } }
-html[data-paket]:not([data-paket="sade"]) .site--v5{ background-image:var(--paket-motif); background-size:140px 140px; }
-html[data-paket="uzay"] .site--v5{ background-size:180px 180px; }
+/* 51) FOTOĞRAF ÜSTÜNDE OKUNUR KENAR ve «HİÇ» BULANIKLIK (kullanıcı, 2026-10-30:
+   «sol menüde yazılar okunmuyor»; «yumuşatmada hiç seçeneği yok; arka planda
+   öyle bir şey olmasın»). Tema paketleri (eski §51) kullanıcının isteğiyle
+   kalktı; yerini ayar profilleri aldı (ayarlar.js).
+   Kenar: fotoğraf üstünde ikincil gri (--text-2) açık fotoğrafta kayboluyordu;
+   bütün satırlar ana yazı rengine çıkar, cam kenarın tabanı biraz dolar. */
+html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 > .kenar :is(.kenar__arac, .kenar__cekmece:not(.is-on), .kenar__kim small){ color:var(--text); }
+@media (min-width:680px){
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"] .site--v5 > .kenar,
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"] .site--v5 > .kenar:hover,
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"] .site--v5 > .kenar:focus-within,
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"] .site--v5 > .kenar.kenar--tutulu{
+    background:linear-gradient(160deg, rgba(255,255,255,.7), rgba(255,255,255,.58)) !important; }
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar,
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar:hover,
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar:focus-within,
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar.kenar--tutulu{
+    background:linear-gradient(160deg, rgba(20,22,30,.74), rgba(14,16,22,.66)) !important; }
+}
+@media (min-width:680px) and (prefers-color-scheme:dark){
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar,
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar:hover,
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar:focus-within,
+  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar.kenar--tutulu{
+    background:linear-gradient(160deg, rgba(20,22,30,.74), rgba(14,16,22,.66)) !important; }
+}
+/* «Hiç»: fotoğraf bulanmaz, kartların arkası da bulanmaz (buzlu cam yok, renk tabanı kalır). */
+html[data-bulanik="hic"] :is(*, *::before, *::after){ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+html[data-bulanik="hic"] body::before, html[data-bulanik="hic"] video.zemin-video{ filter:none !important; }

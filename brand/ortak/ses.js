@@ -619,7 +619,7 @@ window.LIFEOS = window.LIFEOS || {};
     const satir = k => {
       const y = Math.round(Math.max(0, Math.min(1, Number(d[k]) || 0)) * 100);
       return '<label class="sesduzey__satir"><span class="sesduzey__ad">' + DUZEY_AD[k] + '</span>'
-        + '<input type="range" min="0" max="100" step="5" value="' + y + '" data-ses-duzey="' + k + '" aria-valuetext="' + yuzde(y) + '">'
+        + '<input type="range" min="0" max="100" step="5" value="' + y + '" data-ses-duzey="' + k + '" aria-valuetext="' + yuzde(y) + '" style="--dolu:' + y + '%">'
         + '<output class="sesduzey__deger">' + yuzde(y) + '</output></label>';
     };
     /* Ana kaydırıcı görünür; ailelerin tek tek düzeyi kapalı «Ayrıntı»da. */
@@ -1012,6 +1012,7 @@ window.LIFEOS = window.LIFEOS || {};
       const y = Number(r.value) || 0;
       duzeyAyarla(r.getAttribute('data-ses-duzey'), y / 100);
       r.setAttribute('aria-valuetext', yuzde(y));
+      r.style.setProperty('--dolu', y + '%');
       const o = r.parentElement && r.parentElement.querySelector('output');
       if(o) o.textContent = yuzde(y);
     });

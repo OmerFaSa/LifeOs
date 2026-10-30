@@ -430,4 +430,34 @@
       }finally{ Z._saatSaglayici(eskiSaat); }
     }));
   });
+
+  /* 2026-10-30 (kullanıcı: «arka plan videosunu düzenleyebilelim ya da kendi sesiyle gelsin»). */
+  describe('Zemin — arka plan videosunun sesi, kesiti, hızı', () => {
+    const sakla = fn => {
+      const once = [Z.VIDEO_ANAHTAR, 'lifeos.manzara.tur.gunduz'].map(k => localStorage.getItem(k));
+      try{ return fn(); }finally{
+        [Z.VIDEO_ANAHTAR, 'lifeos.manzara.tur.gunduz'].forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); });
+      }
+    };
+    it('varsayılan: ses kapalı, tam video, 1×; bozuk değer sınırlanır, bitiş başlangıçtan önceyse yok sayılır', () => sakla(() => {
+      localStorage.removeItem(Z.VIDEO_ANAHTAR);
+      expect(Z.videoAyar()).toEqual({ ses:false, duzey:.6, bas:0, bit:0, hiz:1, muzik:'sus' });
+      localStorage.setItem(Z.VIDEO_ANAHTAR, JSON.stringify({ ses:true, duzey:7, bas:20, bit:10, hiz:3, muzik:'x' }));
+      expect(Z.videoAyar()).toEqual({ ses:true, duzey:1, bas:20, bit:0, hiz:1, muzik:'sus' });
+      expect(Z.videoAyarla({ bit:45, hiz:1.5, muzik:'birlikte' })).toEqual({ ses:true, duzey:1, bas:20, bit:45, hiz:1.5, muzik:'birlikte' });
+      expect(Z.videoSesli()).toBe(false);                                 // video yok: sesli sayılmaz
+    }));
+    it('ayar: video yokken ne yapılacağını söyler; varken ses, kesit ve hız denetimi', () => sakla(() => {
+      localStorage.removeItem('lifeos.manzara.tur.gunduz');
+      const ilk = Z.videoAyarHtml();
+      if(localStorage.getItem('lifeos.manzara.tur.gece') !== 'video') expect(ilk).toContain('Arka plana bir video koyunca');
+      localStorage.setItem('lifeos.manzara.tur.gunduz', 'video');
+      localStorage.setItem(Z.VIDEO_ANAHTAR, JSON.stringify({ ses:true, bas:5, bit:30 }));
+      const h = Z.videoAyarHtml();
+      expect(h).toContain('data-zv-ses="true"');
+      expect(h).toContain('0:05 – 0:30');
+      expect(h).toContain('data-zv-hiz="0.5"');
+      expect(h).toContain('Baştan sona');
+    }));
+  });
 })();

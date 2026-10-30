@@ -240,7 +240,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.muzik.var', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.tema.paket', 'lifeos.king.ad', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.muzik.var', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.king.ad', 'lifeos.zemin.video', 'lifeos.minik.kapali', 'lifeos.profiller', 'lifeos.profil.etkin', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -262,7 +262,7 @@ window.LIFEOS = window.LIFEOS || {};
     let n = 0;
     TASINAN.forEach(k => {
       const v = veri[k];
-      if(typeof v !== 'string' || v.length > 4000) return;
+      if(typeof v !== 'string' || v.length > (k === 'lifeos.profiller' ? 60000 : 4000)) return;   // profiller: sekiz profilin hepsi
       try{ localStorage.setItem(k, v); n++; }catch(e){}
     });
     return n;

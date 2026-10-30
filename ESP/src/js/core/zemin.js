@@ -293,22 +293,114 @@ window.LIFEOS = window.LIFEOS || {};
     }
     return { tur:'yok', yuva };
   }
+  /* VİDEONUN SESİ, KESİTİ, HIZI (kullanıcı, 2026-10-30: «arka plana koyacağımız
+     videoyu düzenleyebilelim ya da kendi sesiyle gelsin; arka plan videosu ve
+     müziği ses anlamında daha güzel olsun»). Ses varsayılan kapalı. Kesit:
+     video `bas`tan başlar, `bit`e gelince başa sarar (0 = sonuna kadar).
+     Video sesliyken arka plan müziği susar (muzik:'sus') ya da birlikte
+     çalar; radyo ya da bir müzik listesi çalınca video kısılır. */
+  const VIDEO_ANAHTAR = 'lifeos.zemin.video';
+  const HIZLAR = Object.freeze([.5, .75, 1, 1.25, 1.5, 2]);
+  const sinir = (x, a, b, v) => { const n = Number(x); return x != null && isFinite(n) ? Math.max(a, Math.min(b, n)) : v; };
+  function videoAyar(){
+    let v = null;
+    try{ v = JSON.parse(localStorage.getItem(VIDEO_ANAHTAR) || 'null'); }catch(e){ v = null; }
+    v = v && typeof v === 'object' ? v : {};
+    const bas = sinir(v.bas, 0, 36000, 0), bit = sinir(v.bit, 0, 36000, 0);
+    return { ses:v.ses === true, duzey:sinir(v.duzey, 0, 1, .6), bas, bit:bit > bas ? bit : 0,
+      hiz:HIZLAR.indexOf(Number(v.hiz)) >= 0 ? Number(v.hiz) : 1, muzik:v.muzik === 'birlikte' ? 'birlikte' : 'sus' };
+  }
+  let videoSure = 0, videoKisik = false;
+  const videoOge = () => typeof document !== 'undefined' ? document.querySelector('video.zemin-video') : null;
+  function genelSes(){ try{ return L.SES && L.SES.duzey ? Math.max(0, Math.min(1, Number(L.SES.duzey('genel')))) : 1; }catch(e){ return 1; } }
+  function videoSesli(){ const v = videoOge(), a = videoAyar(); return !!(v && !v.paused && a.ses && !videoKisik); }
+  let sesBekliyor = false;
+  function dokununcaSes(){
+    if(sesBekliyor || typeof document === 'undefined') return;
+    sesBekliyor = true;
+    const f = () => { sesBekliyor = false; document.removeEventListener('pointerdown', f, true); document.removeEventListener('keydown', f, true); videoUygula(); };
+    document.addEventListener('pointerdown', f, true);
+    document.addEventListener('keydown', f, true);
+  }
+  function videoUygula(){
+    const v = videoOge();
+    if(!v) return;
+    const a = videoAyar();
+    try{ v.playbackRate = a.hiz; }catch(e){ /* eski tarayıcı */ }
+    v.volume = Math.max(0, Math.min(1, a.duzey * genelSes()));
+    let sessizSaat = false;
+    try{ sessizSaat = !!(L.SES && L.SES.sessizMi && L.SES.sessizMi()); }catch(e){ /* yok */ }
+    if(!a.ses || videoKisik || sessizSaat){ v.muted = true; return; }
+    v.muted = false;
+    /* Tarayıcı sesli oynatmayı reddederse video sessiz sürer; ilk dokunuşta ses gelir. */
+    const p = v.paused ? null : v.play && v.play();
+    if(p && p.catch) p.catch(() => { v.muted = true; v.play().catch(() => {}); dokununcaSes(); });
+  }
+  function sesOlayi(){ try{ window.dispatchEvent(new CustomEvent('lifeos:zemin-ses', { detail:{ sesli:videoSesli(), muzik:videoAyar().muzik } })); }catch(e){ /* yok */ } }
+  function videoAyarla(degisen){
+    const a = Object.assign(videoAyar(), degisen || {});
+    try{ localStorage.setItem(VIDEO_ANAHTAR, JSON.stringify(a)); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    videoUygula();
+    sesOlayi();
+    return videoAyar();
+  }
+  const sureYaz = sn => { sn = Math.max(0, Math.round(sn)); return Math.floor(sn / 60) + ':' + ('0' + (sn % 60)).slice(-2); };
+  const kesitYaz = a => sureYaz(a.bas) + ' – ' + (a.bit ? sureYaz(a.bit) : videoSure ? sureYaz(videoSure) : 'sonu');
+  const videoVar = () => dosyaTuru('gunduz') === 'video' || dosyaTuru('gece') === 'video';
+  const segHtml = (ad, cift, simdi, veri) => '<div class="seg" role="group" aria-label="' + ad + '">' + cift.map(([v, y]) => {
+    const on = String(v) === String(simdi);
+    return '<button type="button" class="' + (on ? 'is-on' : '') + '" ' + veri + '="' + v + '" aria-pressed="' + on + '">' + y + '</button>'; }).join('') + '</div>';
+  /* Ayarlar › Arka plan ve Ayarlar › Ses'te aynı denetim; ikisi birlikte yenilenir. */
+  function videoAyarHtml(){
+    if(!videoVar()) return '<div class="vayar" data-zemin-video-ayar><p class="skart__not">Arka plana bir video koyunca (Arka plan › Kendi) sesi, kesiti ve hızı burada ayarlanır.</p></div>';
+    const a = videoAyar(), ust = Math.ceil(Math.max(videoSure || 0, a.bit, a.bas, 1));
+    const y = Math.round(a.duzey * 100), bit = a.bit || ust;
+    return '<div class="vayar" data-zemin-video-ayar>'
+      + '<div class="skart__satir"><span class="skart__etiket">Videonun sesi</span>' + segHtml('Videonun sesi', [[false, 'Kapalı'], [true, 'Açık']], a.ses, 'data-zv-ses') + '</div>'
+      + '<label class="skart__satir skart__kaydir' + (a.ses ? '' : ' is-pasif') + '"><span class="skart__etiket">Düzey</span>'
+      + '<input type="range" min="0" max="100" step="1" value="' + y + '" data-zv-duzey aria-label="Videonun ses düzeyi" aria-valuetext="%' + y + '"' + (a.ses ? '' : ' disabled') + ' style="--dolu:' + y + '%">'
+      + '<output data-zv-cikti="duzey">%' + y + '</output></label>'
+      + '<div class="skart__satir"><span class="skart__etiket">Video sesliyken müzik</span>' + segHtml('Video sesliyken arka plan müziği', [['sus', 'Susar'], ['birlikte', 'Birlikte çalar']], a.muzik, 'data-zv-muzik') + '</div>'
+      + '<div class="skart__satir skart__satir--ust"><span class="skart__etiket">Kesit<small data-zv-cikti="kesit">' + kacir(kesitYaz(a)) + '</small></span>'
+      + '<div class="skart__kesit">'
+      + '<label><span>Başlangıç</span><input type="range" min="0" max="' + ust + '" step="0.5" value="' + a.bas + '" data-zv-kesit="bas" aria-label="Kesitin başlangıcı, saniye" style="--dolu:' + (a.bas / ust * 100) + '%"></label>'
+      + '<label><span>Bitiş</span><input type="range" min="0" max="' + ust + '" step="0.5" value="' + bit + '" data-zv-kesit="bit" aria-label="Kesitin bitişi, saniye" style="--dolu:' + (bit / ust * 100) + '%"></label>'
+      + (a.bas || a.bit ? '<button type="button" class="linkbtn" data-zv-tum>Baştan sona</button>' : '') + '</div></div>'
+      + '<div class="skart__satir"><span class="skart__etiket">Hız</span>' + segHtml('Videonun hızı', HIZLAR.map(h => [h, String(h).replace('.', ',') + '×']), a.hiz, 'data-zv-hiz') + '</div>'
+      + (videoSure ? '' : '<p class="skart__not">Video şu anki temada oynamıyor; süresi bilinmediği için kesit saniyeyle ayarlanır.</p>')
+      + '</div>';
+  }
+  function videoAyarYenile(){ if(typeof document !== 'undefined') document.querySelectorAll('[data-zemin-video-ayar]').forEach(el => { el.outerHTML = videoAyarHtml(); }); }
   function videoKur(adres){
     if(typeof document === 'undefined') return;
     let v = document.querySelector('video.zemin-video');
-    if(!adres){ if(v) v.remove(); return; }
+    if(!adres){ if(v){ v.remove(); videoSure = 0; sesOlayi(); } return; }
     if(!document.body){ document.addEventListener('DOMContentLoaded', () => videoKur(adres), { once:true }); return; }
     if(!v){
       v = document.createElement('video');
       v.className = 'zemin-video';
       v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
       v.setAttribute('aria-hidden', 'true'); v.setAttribute('tabindex', '-1');
+      v.addEventListener('loadedmetadata', () => {
+        videoSure = isFinite(v.duration) ? v.duration : 0;
+        const a = videoAyar();
+        if(a.bas) try{ v.currentTime = a.bas; }catch(e){ /* yok */ }
+        videoAyarYenile();
+      });
+      /* Kesit: bitişe gelince ya da döngü başa sarınca başlangıca. */
+      v.addEventListener('timeupdate', () => {
+        const a = videoAyar();
+        if((a.bit && v.currentTime >= a.bit) || (a.bas && v.currentTime < a.bas - .3)) try{ v.currentTime = a.bas; }catch(e){ /* yok */ }
+      });
+      v.addEventListener('play', sesOlayi);
+      v.addEventListener('pause', sesOlayi);
       document.body.insertBefore(v, document.body.firstChild);
     }
     if(v.getAttribute('src') !== adres) v.setAttribute('src', adres);
+    videoUygula();
     /* Az hareket ya da dinlenmede ilk kare durur (CPU ve dikkat). */
     const dur = (L.hareketAz && L.hareketAz()) || document.documentElement.classList.contains('is-dinlen');
-    try{ if(dur) v.pause(); else { const p = v.play(); if(p && p.catch) p.catch(() => {}); } }catch(e){}
+    try{ if(dur) v.pause(); else { const p = v.play(); if(p && p.catch) p.catch(() => { if(!v.muted){ v.muted = true; v.play().catch(() => {}); dokununcaSes(); } }); } }catch(e){}
   }
   function manzaraUygula(){
     if(typeof document === 'undefined' || !document.documentElement) return;
@@ -422,6 +514,16 @@ window.LIFEOS = window.LIFEOS || {};
       if(gc){ e.preventDefault(); geceAyarla(gc.getAttribute('data-gece-sec')); return; }
       const sd = e.target && e.target.closest ? e.target.closest('[data-zemin-onizle-sade]') : null;
       if(sd){ e.preventDefault(); depoYaz(ONIZLE_SADE, onizleSade() ? '0' : '1'); manzaraUygula(); return; }
+      const zv = e.target && e.target.closest ? e.target.closest('[data-zv-ses], [data-zv-muzik], [data-zv-hiz], [data-zv-tum]') : null;
+      if(zv){
+        e.preventDefault();
+        if(zv.hasAttribute('data-zv-ses')) videoAyarla({ ses:zv.getAttribute('data-zv-ses') === 'true' });
+        else if(zv.hasAttribute('data-zv-muzik')) videoAyarla({ muzik:zv.getAttribute('data-zv-muzik') });
+        else if(zv.hasAttribute('data-zv-hiz')) videoAyarla({ hiz:Number(zv.getAttribute('data-zv-hiz')) });
+        else videoAyarla({ bas:0, bit:0 });
+        videoAyarYenile();
+        return;
+      }
       const ot = e.target && e.target.closest ? e.target.closest('[data-oto-sec]') : null;
       if(ot){ e.preventDefault(); otoAyarla(ot.getAttribute('data-oto-sec')); return; }
       const b = e.target && e.target.closest ? e.target.closest('[data-zemin-sec]') : null;
@@ -439,6 +541,31 @@ window.LIFEOS = window.LIFEOS || {};
       if(durum) durum.textContent = /^video/.test(g.files[0].type) ? 'Video yükleniyor… büyük dosya biraz sürer.' : 'Yükleniyor…';
       dosyaYukle(yuva, g.files[0]).then(s => { if(durum) durum.textContent = s.mesaj; g.value = ''; });
     });
+  }
+  /* Kaydırıcılar sürüklerken canlı uygulanır; denetim yeniden çizilmez (tutamak elden kaçmasın). */
+  if(typeof document !== 'undefined'){
+    document.addEventListener('input', e => {
+      const t = e.target;
+      if(t && t.matches && t.matches('[data-ses-duzey]')){ setTimeout(videoUygula, 0); return; }   // genel ses videoyu da kısar
+      if(!(t && t.matches && t.matches('[data-zv-duzey], [data-zv-kesit]'))) return;
+      const kok = t.closest('[data-zemin-video-ayar]'), n = Number(t.value);
+      t.style.setProperty('--dolu', (n / (Number(t.max) || 100) * 100) + '%');
+      if(t.matches('[data-zv-duzey]')){
+        videoAyarla({ duzey:n / 100 });
+        t.setAttribute('aria-valuetext', '%' + n);
+        const o = kok && kok.querySelector('[data-zv-cikti="duzey"]'); if(o) o.textContent = '%' + n;
+        return;
+      }
+      const ad = t.getAttribute('data-zv-kesit'), a = videoAyar(), ust = Number(t.max) || 0;
+      const s = videoAyarla(ad === 'bas' ? { bas:Math.max(0, Math.min(n, (a.bit || ust) - .5)) } : { bit:n >= ust ? 0 : Math.max(n, a.bas + .5) });
+      const o = kok && kok.querySelector('[data-zv-cikti="kesit"]'); if(o) o.textContent = kesitYaz(s);
+      const v = videoOge();
+      if(v && ad === 'bas') try{ v.currentTime = s.bas; }catch(x){ /* yok */ }
+    });
+    /* Radyo ya da bir müzik listesi çalınca video kısılır; bitince sesi döner. */
+    const kis = k => { if(videoKisik === k) return; videoKisik = k; videoUygula(); sesOlayi(); };
+    window.addEventListener('lifeos:ses', e => { const h = e.detail && e.detail.hal; kis(h === 'caliyor' || h === 'baglaniyor'); });
+    window.addEventListener('lifeos:muzik', e => { const u = e.detail || {}; kis(!!(u.caliyor && u.kip && u.kip !== 'arka')); });
   }
   if(typeof window !== 'undefined' && window.addEventListener){
     window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); if(e.key === MANZARA_ANAHTAR) manzaraYenile(); if(e.key === yuzeyAnahtar()){ yuzeySimdi = yuzeyOku(); yuzeyUygula(); } });
@@ -496,7 +623,8 @@ window.LIFEOS = window.LIFEOS || {};
     YUZEYLER, yuzey:() => yuzeySimdi, yuzeyAyarla, yuzeySeciciHtml, yuzeyAnahtar,
     MANZARA_ANAHTAR, manzara:() => manzaraSimdi, manzaraAyarla, manzaraYenile, manzaraSeciciHtml,
     GECE_ANAHTAR, OTO_ANAHTAR, gece:() => geceSimdi, geceAyarla, geceSeciciHtml, oto:() => otoSimdi, otoAyarla, otoSeciciHtml,
-    otoTema, etkinZemin, karanlik, dosyaYukle, onizle, onizleHtml, ONIZLE_SADE });
+    otoTema, etkinZemin, karanlik, dosyaYukle, onizle, onizleHtml, ONIZLE_SADE,
+    VIDEO_ANAHTAR, HIZLAR, videoAyar, videoAyarla, videoAyarHtml, videoSesli });
   /* Gövde hazır olunca, ilk çizimden biraz sonra: açılış animasyonuyla çakışmasın. */
   if(typeof document !== 'undefined' && typeof setTimeout === 'function'
       && !/\/tests\//.test(String(location.pathname || ''))){   // test sayfasında kendiliğinden oynamaz

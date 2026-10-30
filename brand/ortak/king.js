@@ -3790,15 +3790,14 @@ window.LIFEOS.KING = (function(){
      yapabilmeliyiz, mavi yapabilmeliyiz»). Köke data-king-gorunus yazılır;
      renk ve taç king-cam.css'te. Sesli okumada cihaz sesi tercihe göre
      kadın ya da erkek seçilir (sesSec). TASINAN'da. */
-  /* AD (kullanıcı, 2026-10-30: «King'in ismini değiştirelim»; tema paketi).
-     Kullanıcının yazdığı ad önce gelir; yoksa paketin adı; yoksa King.
-     Yönelme eki sesli uyumuyla: King'e, Kağan'a, Bilge'ye. */
+  /* AD (kullanıcı, 2026-10-30: «King'in ismini değiştirelim»). Kullanıcının
+     yazdığı ad, yoksa King; ayar profiliyle birlikte değişir (tema paketleri
+     kalktı). Yönelme eki sesli uyumuyla: King'e, Kağan'a, Bilge'ye. */
   const AD_ANAHTAR = 'lifeos.king.ad';
-  const PAKET_AD = Object.freeze({ turk:'Kağan', tatli:'Pamuk', uzay:'Komutan', fantastik:'Bilge', mitoloji:'Kâhin' });
   function ad(){
-    let v = '', p = null;
-    try{ v = String(localStorage.getItem(AD_ANAHTAR) || '').trim(); p = localStorage.getItem('lifeos.tema.paket'); }catch(e){ /* depo yok */ }
-    return v ? v.slice(0, 20) : (PAKET_AD[p] || 'King');
+    let v = '';
+    try{ v = String(localStorage.getItem(AD_ANAHTAR) || '').trim(); }catch(e){ /* depo yok */ }
+    return v ? v.slice(0, 20) : 'King';
   }
   function adYonelme(a){
     a = a || ad();
@@ -6782,7 +6781,7 @@ window.LIFEOS.KING = (function(){
   }
 
   return {
-    kur, ac, kapat, kucult, buyut, ad, adYonelme, AD_ANAHTAR, PAKET_AD, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
+    kur, ac, kapat, kucult, buyut, ad, adYonelme, AD_ANAHTAR, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
     isDurumYaz:d => { isDurum = d; }, arkadasHal, arkadasPoz, arkadasEsya, ARKADAS_UYKU, yazimSuresi,
     GORUNUS_ANAHTAR:GORUNUS, gorunus, gorunusAyarla, gorunusSeciciHtml, _sesSec:sesSec, isRozet, isYokla, ekipAc, ekipHtml, gorevHtml, isZamanli:() => !!isZaman,
     beceriAc, beceriPanelHtml, bekleyenAl, eylemleriCalistir, k2Html, ODAK_SON,

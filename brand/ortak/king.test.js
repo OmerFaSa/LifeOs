@@ -40,18 +40,17 @@
 
   /* 2026-10-30 (kullanıcı: «King'in ismini değiştirelim»; tema paketi). */
   describe('King — ad', () => {
-    it('ad: kullanıcının yazdığı, yoksa paketin, yoksa King; yönelme eki sesli uyumuyla', () => {
+    it('ad: kullanıcının yazdığı, yoksa King; yönelme eki sesli uyumuyla; tema paketi artık ad vermez', () => {
       const k = K(), once = [localStorage.getItem(k.AD_ANAHTAR), localStorage.getItem('lifeos.tema.paket')];
       try{
-        localStorage.removeItem(k.AD_ANAHTAR); localStorage.removeItem('lifeos.tema.paket');
+        localStorage.removeItem(k.AD_ANAHTAR);
+        localStorage.setItem('lifeos.tema.paket', 'turk');
         expect(k.ad()).toBe('King');
         expect(k.adYonelme()).toBe('King’e');
-        localStorage.setItem('lifeos.tema.paket', 'turk');
-        expect(k.ad()).toBe('Kağan');
-        expect(k.adYonelme()).toBe('Kağan’a');
+        expect(k.PAKET_AD).toBe(undefined);
         localStorage.setItem(k.AD_ANAHTAR, 'Bilge');
         expect(k.adYonelme()).toBe('Bilge’ye');
-        expect(['Kâhin', 'Pamuk', 'Komutan', 'Ece'].map(x => k.adYonelme(x))).toEqual(['Kâhin’e', 'Pamuk’a', 'Komutan’a', 'Ece’ye']);
+        expect(['Kâhin', 'Pamuk', 'Kağan', 'Ece'].map(x => k.adYonelme(x))).toEqual(['Kâhin’e', 'Pamuk’a', 'Kağan’a', 'Ece’ye']);
       }finally{
         [k.AD_ANAHTAR, 'lifeos.tema.paket'].forEach((x, i) => { if(once[i] == null) localStorage.removeItem(x); else localStorage.setItem(x, once[i]); });
       }

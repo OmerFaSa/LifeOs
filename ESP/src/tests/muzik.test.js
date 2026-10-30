@@ -71,6 +71,11 @@
     it('ayar: parçayı listeye atamak sunucuya listeler olarak gider, özel başlıkla', () => sahne(DIZIN(), g => {
       const d = document.createElement('div'); d.innerHTML = M().ayarHtml(); document.body.appendChild(d);
       try{
+        /* Kitaplık sade: önce liste seçilir, parçada tek «listede» anahtarı (2026-10-30). */
+        expect(d.querySelectorAll('[data-muzik-ata]').length).toBe(3);
+        expect(!!d.querySelector('[data-muzik-ata="spor|aaaaaaaaaaa1"]')).toBe(false);
+        d.querySelector('[data-muzik-listesec="spor"]').click();
+        expect(d.querySelector('[data-muzik-ata="spor|aaaaaaaaaaa2"]').getAttribute('aria-checked')).toBe('true');
         d.querySelector('[data-muzik-ata="spor|aaaaaaaaaaa1"]').click();
         const [u, o] = g[g.length - 1];
         expect(u).toBe('/api/muzik/ayar');
@@ -78,6 +83,23 @@
         expect(JSON.parse(o.body).listeler.spor).toEqual(['aaaaaaaaaaa2', 'aaaaaaaaaaa1']);
         expect(d.querySelectorAll('.muzik__parca').length).toBe(3);
       }finally{ d.remove(); }
+    }));
+    it('arka plan videosu kendi sesiyle oynarken («Susar») arka plan müziği bekler, video susunca döner', () => sahne(DIZIN(), () => {
+      M().cal('arka');
+      window.dispatchEvent(new CustomEvent('lifeos:zemin-ses', { detail:{ sesli:true, muzik:'sus' } }));
+      expect(M().durum().kip).toBe(null);
+      window.dispatchEvent(new CustomEvent('lifeos:zemin-ses', { detail:{ sesli:false, muzik:'sus' } }));
+      expect(M().durum().kip).toBe('arka');
+      M().cal('genel');
+      window.dispatchEvent(new CustomEvent('lifeos:zemin-ses', { detail:{ sesli:true, muzik:'sus' } }));
+      expect(M().durum().kip).toBe('genel');                             // kullanıcının seçtiği liste susmaz
+      M().durdur();
+    }));
+    it('ayar: açılış kesiti saniyeyle yazılır, kesit yazısı süreyi söyler; kesiti dinle düğmesi var', () => sahne(DIZIN(), () => {
+      const h = M().ayarHtml();
+      expect(h).toContain('0:05 – 0:12 · 7 sn');
+      expect(h).toContain('data-muzik="acilis-dinle"');
+      expect(h).toContain('Müzik kitaplığı');
     }));
     it('sunucu yoksa uydurmaz: panel ve ayar bunu söyler', () => {
       M()._ortam({ sunucu:() => false });

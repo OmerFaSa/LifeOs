@@ -31,17 +31,17 @@
       const d = koy();
       try{
         const sek = Array.from(d.querySelectorAll('[data-ayar-bolum]'));
-        expect(sek.map(s => s.textContent)).toEqual(['Görünüm', 'Arka plan', 'Minikler ve King', 'Ses', 'Animasyon', 'Bildirimler', 'Planlama',
+        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Minikler ve King', 'Ses', 'Animasyon', 'Bildirimler', 'Planlama',
           'Güvenlik', 'Bağlantılar', 'Bu modül']);
         /* Sistem ve Hesap sekme değil, grup başlığı (2026-10-29: «görünüm ve minikleri de Sistem'in içine koy»). */
         expect(Array.from(d.querySelectorAll('.ayarlar__grup')).map(g => g.textContent)).toEqual(['Sistem', 'Hesap']);
-        expect(d.querySelector('.ayarlar__grup').nextElementSibling.textContent).toBe('Görünüm');
+        expect(d.querySelector('.ayarlar__grup').nextElementSibling.textContent).toBe('Profiller');
         const gorunen = () => Array.from(d.querySelectorAll('.ayarlar__bolum')).filter(s => !s.hidden).map(s => s.id);
         expect(gorunen()).toEqual(['ayarlar-bolum-gorunum']);
-        sek[3].click();
+        sek[4].click();
         expect(gorunen()).toEqual(['ayarlar-bolum-ses']);
-        expect(sek[3].getAttribute('aria-selected')).toBe('true');
-        expect(sek[0].getAttribute('aria-selected')).toBe('false');
+        expect(sek[4].getAttribute('aria-selected')).toBe('true');
+        expect(sek[1].getAttribute('aria-selected')).toBe('false');
       }finally{ d.remove(); A._sec('gorunum'); }
     });
 
@@ -229,6 +229,72 @@
       }finally{ d.remove(); }
     });
 
+    /* 2026-10-30 (kullanıcı: «tema paketlerini kaldır; kastım ayar profilleri: adını koyayım,
+       ona geçince bütün ayarlarım o profildekine dönsün»). */
+    it('ayar profili: şu anki ayarları adla saklar, geçince hepsi döner, profilde olmayan varsayılana iner', () => {
+      const anahtarlar = [A.PROFIL_ANAHTAR, A.ETKIN_ANAHTAR, A.GORDU_ANAHTAR, A.TEMA_BEKLE].concat(A.PROFIL_KAPSAR);
+      const once = anahtarlar.map(k => localStorage.getItem(k));
+      try{
+        anahtarlar.forEach(k => localStorage.removeItem(k));
+        localStorage.setItem('lifeos.cam', 'cok');
+        localStorage.setItem('lifeos.king.ad', 'Kağan');
+        expect(A.profilKaydet('  Türklük ', 'dark').ok).toBe(true);
+        expect(A.etkinProfil().ad).toBe('Türklük');
+        localStorage.removeItem('lifeos.king.ad');
+        localStorage.setItem('lifeos.cam', 'az');
+        localStorage.setItem('lifeos.perde', 'cok');
+        expect(A.profilKaydet('Sade', null).ok).toBe(true);
+        expect(A.profiller().map(p => p.ad)).toEqual(['Türklük', 'Sade']);
+        expect(A.profilUygula('türklük', false)).toBe(true);           // büyük/küçük harf fark etmez
+        expect(localStorage.getItem('lifeos.cam')).toBe('cok');
+        expect(localStorage.getItem('lifeos.king.ad')).toBe('Kağan');
+        expect(localStorage.getItem('lifeos.perde')).toBe(null);         // Türklük'te yoktu: varsayılan
+        expect(localStorage.getItem(A.TEMA_BEKLE)).toBe('dark');          // tema modülün kendi eylemiyle
+        expect(A.profilKaydet('Türklük', 'light').mesaj).toContain('güncellendi');
+        expect(A.profiller().length).toBe(2);
+        expect(A.profilKaydet('   ').ok).toBe(false);
+        /* Veri, hesap ve kilit profile girmez. */
+        ['lifeos.kilit.odeme', 'lifeos.kisi.izin', 'lifeos.king.kartlarim'].forEach(k => expect(A.PROFIL_KAPSAR.indexOf(k)).toBe(-1));
+        /* Öbür modülde seçilen profil burada bir kez uygulanır. */
+        localStorage.setItem(A.ETKIN_ANAHTAR, JSON.stringify({ ad:'Sade', damga:'99' }));
+        expect(A.profilEsitle()).toBe(true);
+        expect(localStorage.getItem('lifeos.cam')).toBe('az');
+        expect(A.profilEsitle()).toBe(false);
+        expect(A.profilSil('Sade')).toBe(true);
+        expect(A.etkinProfil()).toBe(null);
+        [A.PROFIL_ANAHTAR, A.ETKIN_ANAHTAR].forEach(k => expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(k) >= 0).toBe(true));
+      }finally{
+        anahtarlar.forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); });
+      }
+    });
+    it('profiller bölümü: boşken ne yapılacağını söyler; kayıtlı profilde Geç, etkin olanda Güncelle', () => {
+      const once = [A.PROFIL_ANAHTAR, A.ETKIN_ANAHTAR].map(k => localStorage.getItem(k));
+      try{
+        localStorage.removeItem(A.PROFIL_ANAHTAR); localStorage.removeItem(A.ETKIN_ANAHTAR);
+        expect(A.profilHtml()).toContain('Henüz profil yok');
+        localStorage.setItem(A.PROFIL_ANAHTAR, JSON.stringify([{ ad:'Gece <b>', ayar:{ 'lifeos.cam':'cok' } }, { ad:'Gündüz', ayar:{} }]));
+        localStorage.setItem(A.ETKIN_ANAHTAR, JSON.stringify({ ad:'Gündüz', damga:'1' }));
+        const h = A.profilHtml();
+        expect(h).toContain('Gece &lt;b&gt;');
+        expect(h).toContain('data-profil-gec="Gece &lt;b&gt;"');
+        expect(h).toContain('data-profil-guncelle="Gündüz"');
+      }finally{
+        [A.PROFIL_ANAHTAR, A.ETKIN_ANAHTAR].forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); });
+      }
+    });
+    it('tema paketi kalktı; bulanıklıkta «Hiç» var ve köke yazılır', () => {
+      expect(A.SECIMLER.paket).toBe(undefined);
+      expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf('lifeos.tema.paket')).toBe(-1);
+      expect(A.SECIMLER.bulanik.sira[0]).toBe('hic');
+      const once = localStorage.getItem('lifeos.zemin.bulanik');
+      try{
+        expect(A.secimAyarla('bulanik', 'hic')).toBe(true);
+        expect(document.documentElement.getAttribute('data-bulanik')).toBe('hic');
+      }finally{
+        if(once == null) localStorage.removeItem('lifeos.zemin.bulanik'); else localStorage.setItem('lifeos.zemin.bulanik', once);
+        A.secimAyarla('bulanik', A.secim('bulanik'));
+      }
+    });
     it('hesap sunucusu yokken düğme yok, durum söylenir', () => {
       const d = koy();
       try{
