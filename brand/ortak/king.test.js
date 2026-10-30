@@ -38,6 +38,31 @@
   function birak(){ const k = K(); k._sifirla(); if(yedek) Object.assign(k._ortam, yedek); }
   async function sahneyle(fn){ try{ await fn(); } finally{ birak(); } }
 
+  /* 2026-10-30 (kullanıcı: «King kısmında güzel şeyler yap»): Ayarlar › King. */
+  describe('King — Ayarlar bölümü', () => {
+    it('canlı önizleme adı ve tarzı söyler; seçim King\'in kendi kaydına yazılır ve önizleme değişir', () => {
+      const k = K(), once = ['lifeos.king.tarz', 'lifeos.king.hiz', 'lifeos.king.ad'].map(x => localStorage.getItem(x));
+      const d = document.createElement('div');
+      try{
+        localStorage.removeItem('lifeos.king.tarz'); localStorage.removeItem('lifeos.king.hiz'); localStorage.setItem('lifeos.king.ad', 'Kağan');
+        d.innerHTML = k.ayarHtml(); document.body.appendChild(d);
+        expect(d.querySelector('.kingayar__metin b').textContent).toBe('Kağan');
+        expect(d.querySelector('.kingayar__metin p').textContent).toContain('Selam');
+        d.querySelector('[data-king-tercih="tarz:resmi"]').click();
+        expect(K().tarz ? K().tarz() : JSON.parse(localStorage.getItem('lifeos.king.tarz'))).toBe('resmi');
+        expect(d.querySelector('.kingayar__metin p').textContent).toContain('Size nasıl');
+        d.querySelector('[data-king-tercih="hiz:1.3"]').click();
+        expect(Number(JSON.parse(localStorage.getItem('lifeos.king.hiz')))).toBe(1.3);
+        expect(d.querySelector('[data-king-tercih="hiz:1.3"]').getAttribute('aria-pressed')).toBe('true');
+        d.querySelector('[data-king-tercih="hiz:1"]').click();
+        expect(localStorage.getItem('lifeos.king.hiz')).toBe(null);
+      }finally{
+        d.remove();
+        ['lifeos.king.tarz', 'lifeos.king.hiz', 'lifeos.king.ad'].forEach((x, i) => { if(once[i] == null) localStorage.removeItem(x); else localStorage.setItem(x, once[i]); });
+      }
+    });
+  });
+
   /* 2026-10-30 (kullanıcı: «King'in ismini değiştirelim»; tema paketi). */
   describe('King — ad', () => {
     it('ad: kullanıcının yazdığı, yoksa King; yönelme eki sesli uyumuyla; tema paketi artık ad vermez', () => {

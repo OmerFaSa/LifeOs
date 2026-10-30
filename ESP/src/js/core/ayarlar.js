@@ -121,7 +121,8 @@ window.LIFEOS = window.LIFEOS || {};
     { id:'zemin',    ad:'Arka plan',        grup:'Sistem' },
     { id:'ses',      ad:'Ses ve müzik',     grup:'Sistem' },
     { id:'hareket',  ad:'Animasyon',        grup:'Sistem' },
-    { id:'ekip',     ad:'Minikler ve King', grup:'Sistem' },
+    { id:'king',     ad:'King',             grup:'Sistem' },
+    { id:'ekip',     ad:'Minikler',         grup:'Sistem' },
     { id:'bildirim', ad:'Bildirimler',      grup:'Sistem' },
     { id:'sistem',   ad:'Planlama',         grup:'Sistem' },
     { id:'modul',    ad:'Modül ayarları',   grup:'Bu modül' },
@@ -129,6 +130,18 @@ window.LIFEOS = window.LIFEOS || {};
     { id:'baglanti', ad:'Bağlantılar',      grup:'Hesap' },
   ]);
   const MODUL_AD = Object.freeze({ ays:'AYS', spi:'SPİ', esp:'ESP' });
+  /* ALANLAR (kullanıcı, 2026-10-30: «sistem ile yalnız o modül arasındaki ayrımı
+     daha güzel yap; ayarları daha minimalist, anlaşılır yap»). Üstte üç alan;
+     solda yalnız seçili alanın bölümleri. Modül alanı modülün renginde. */
+  const ALANLAR = Object.freeze(['Sistem', 'Bu modül', 'Hesap']);
+  const alanOf = id => (BOLUMLER.find(b => b.id === id) || {}).grup || 'Sistem';
+  function alanlarHtml(){
+    const m = MODUL_AD[modulAdi()] || 'Bu modül', simdi = alanOf(secili);
+    const bilgi = { 'Sistem':['Sistem', 'her yerde'], 'Bu modül':[m, 'yalnız burada'], 'Hesap':['Hesap', 'hesabın'] };
+    return '<div class="ayarlar__alanlar" role="group" aria-label="Ayar alanı">' + ALANLAR.map(a => '<button type="button" class="ayarlar__alan ayarlar__alan--'
+      + (a === 'Bu modül' ? 'modul' : a === 'Hesap' ? 'hesap' : 'sistem') + (a === simdi ? ' is-on' : '') + '" aria-pressed="' + (a === simdi) + '" data-ayar-alan="' + kac(a) + '">'
+      + SIMGE_KAPSAM[a === 'Bu modül' ? 'modul' : a === 'Hesap' ? 'hesap' : 'sistem'] + '<b>' + kac(bilgi[a][0]) + '</b><small>' + bilgi[a][1] + '</small></button>').join('') + '</div>';
+  }
   const SIMGE_KAPSAM = {
     sistem:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
     modul:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 9h16"/></svg>',
@@ -151,6 +164,9 @@ window.LIFEOS = window.LIFEOS || {};
     /* «Hiç» (kullanıcı, 2026-10-30: «az var ama hiç seçeneği yok; arka planda öyle bir şey olmasın»):
        fotoğraf da kartların arkası da bulanmaz (cam.css §51). «Net» yalnız fotoğrafı bulandırmaz. */
     bulanik: { anahtar:'lifeos.zemin.bulanik', kok:'data-bulanik',  vars:'yok',   sira:['hic', 'yok', 'hafif', 'cok'], ad:{ hic:'Hiç', yok:'Net', hafif:'Hafif', cok:'Yumuşak' } },
+    /* Vurgu rengi (2026-10-30, yeni): seçili düğme, sekme ve anahtarın rengi; ölçü renkleri değişmez (§1.10). */
+    vurgu:   { anahtar:'lifeos.vurgu',         kok:'data-vurgu',    vars:'modul', sira:['modul', 'mavi', 'yesil', 'mor', 'turuncu', 'pembe', 'grafit'],
+      ad:{ modul:'Modülün', mavi:'Mavi', yesil:'Yeşil', mor:'Mor', turuncu:'Turuncu', pembe:'Pembe', grafit:'Grafit' } },
     /* Yazı boyutu (2026-10-30, yeni): bütün arayüz birlikte büyür ya da küçülür (ayarlar.css «boyut»). */
     boyut:   { anahtar:'lifeos.boyut',         kok:'data-boyut',    vars:'normal', sira:['kucuk', 'normal', 'buyuk', 'enbuyuk'], ad:{ kucuk:'Küçük', normal:'Normal', buyuk:'Büyük', enbuyuk:'En büyük' } },
     rozet:   { anahtar:'lifeos.rozet',         kok:'data-rozet',    vars:'acik',  sira:['acik', 'kapali'],     ad:{ acik:'Göster', kapali:'Gizle' } },
@@ -179,6 +195,11 @@ window.LIFEOS = window.LIFEOS || {};
     const on = v === secim(k);
     return '<button type="button" class="' + (on ? 'is-on' : '') + '" data-secim="' + k + ':' + v + '" aria-pressed="' + on + '">' + SECIMLER[k].ad[v] + '</button>';
   }).join('') + '</div>';
+  const VURGU_RENK = Object.freeze({ modul:'var(--mod, var(--primary))', mavi:'#2f6bff', yesil:'#1f9d6b', mor:'#7a5af5', turuncu:'#e2761f', pembe:'#e2558f', grafit:'#4a4f5a' });
+  const vurguHtml = () => '<div class="vurgu" role="group" aria-label="Vurgu rengi">' + SECIMLER.vurgu.sira.map(v => {
+    const on = v === secim('vurgu');
+    return '<button type="button" class="vurgu__renk' + (on ? ' is-on' : '') + '" data-secim="vurgu:' + v + '" aria-pressed="' + on + '" title="' + SECIMLER.vurgu.ad[v] + '"'
+      + ' aria-label="' + SECIMLER.vurgu.ad[v] + '" style="--v:' + VURGU_RENK[v] + '"></button>'; }).join('') + '</div>';
   Object.keys(SECIMLER).forEach(secimUygula);
   /* Tema paketleri kalktı (kullanıcı, 2026-10-30: «o kısımları kaldır; kastım ayar
      profilleri»): eski seçim depoda kalmasın. */
@@ -194,7 +215,7 @@ window.LIFEOS = window.LIFEOS || {};
      profil oraya da uygulanır ve sayfa bir kez yenilenir. */
   const PROFIL_ANAHTAR = 'lifeos.profiller', ETKIN_ANAHTAR = 'lifeos.profil.etkin', GORDU_ANAHTAR = 'lifeos.profil.gordu', TEMA_BEKLE = 'lifeos.profil.tema';
   const PROFIL_EN = 8;
-  const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
+  const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
     'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.zemin.video', 'lifeos.zemin.onizle.sade',
     'lifeos.yuzey.ays', 'lifeos.yuzey.spi', 'lifeos.yuzey.esp',
     'lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.ses.duzey', 'lifeos.sessiz',
@@ -320,7 +341,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* «Görünümü varsayılana döndür»: yalnız görünüş tercihleri; veri değil. İki adım. */
   const SIFIRLANAN = Object.freeze(['lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik',
-    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet', 'lifeos.boyut', 'lifeos.kenar.yuzey']);
+    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.kenar.yuzey']);
 
   /* Arka plan önizlemesi zemin.js'te: seçim ve yüklemede kendini yeniler. */
   const onizleHtml = yuva => L.ZEMIN && L.ZEMIN.onizleHtml ? L.ZEMIN.onizleHtml(yuva) : '';
@@ -377,8 +398,10 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'profil') return profilHtml();
     if(id === 'gorunum') return H('Tema', 'Sistem: cihazın açık/koyu tercihi', o.tema)
       + H('Saate göre tema', '07:00–19:00 açık, sonra koyu', cagir(L.ZEMIN, 'otoSeciciHtml'))
-      + H('Yazı tipi', '', yaziSeciciHtml())
-      + H('Yazı boyutu', 'Bütün arayüz birlikte büyür', secimHtml('boyut', 'Yazı boyutu'))
+      + '<details class="ayarlar__acilir"><summary class="ayarlar__satir"><span class="ayarlar__ad">Yazı tipi<small>Bütün modüllerde aynı</small></span>'
+      + '<span class="ayarlar__acilir-deger" data-yazi-ad>' + kac((YAZILAR.find(y => y.id === yazi()) || YAZILAR[0]).ad) + '</span></summary>' + yaziSeciciHtml() + '</details>'
+      + G('Yazı boyutu', 'Bütün arayüz birlikte büyür', secimHtml('boyut', 'Yazı boyutu'))
+      + H('Vurgu rengi', 'Seçili düğme ve sekmelerin rengi', vurguHtml())
       + H('Cam yoğunluğu', 'Kartların ne kadar saydam olduğu', secimHtml('cam', 'Cam yoğunluğu'))
       + H('Kontrast', 'Yüksek: soluk yazılar koyulaşır, kartlar dolar', secimHtml('kontrast', 'Kontrast'))
       + H('Sol menü', 'Cam: arkadaki fotoğraf görünür', secimHtml('kenar', 'Sol menü'))
@@ -410,11 +433,11 @@ window.LIFEOS = window.LIFEOS || {};
       + '<button type="button" class="skart skart--bag" data-ayarlar-git="zemin">' + SIMGE_VIDEO
       + '<span class="skart__baslik"><b>Arka plan videosunun sesi</b><small>Arka plan bölümünde: ses, kesit ve hız</small></span><span aria-hidden="true">›</span></button>'
       + '</div>';
-    if(id === 'ekip') return H('King’in adı', 'Boş bırakırsan King',
+    if(id === 'king') return H('Adı', 'Boş bırakırsan King',
         '<input class="ayarlar__girdi" type="text" maxlength="20" data-king-ad placeholder="King"'
         + ' value="' + kac((() => { try{ return localStorage.getItem('lifeos.king.ad') || ''; }catch(e){ return ''; } })()) + '" aria-label="King’in adı">')
-      + H('King’in görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml'))
-      + H('Minikler', 'Sayfada en çok kaç minik', cagir(L.MINIK, 'seciciHtml'))
+      + (L.KING && L.KING.ayarHtml ? cagir(L.KING, 'ayarHtml') : H('Görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml')));
+    if(id === 'ekip') return H('Minikler', 'Sayfada en çok kaç minik', cagir(L.MINIK, 'seciciHtml'))
       + H('Minik boyu', '', cagir(L.MINIK, 'boySeciciHtml'))
       + G('Kimler gezsin', 'Basınca sayfadan çıkar ya da gelir; yeni minikler açık gelir', cagir(L.MINIK, 'galeriHtml'));
     if(id === 'hesap'){
@@ -442,10 +465,8 @@ window.LIFEOS = window.LIFEOS || {};
     o = o || {};
     if(!BOLUMLER.some(b => b.id === secili)) secili = 'gorunum';
     if(secili === 'sistem' && typeof setTimeout === 'function') setTimeout(() => planYukle(), 0);
-    const grupAd = g => g === 'Bu modül' ? (MODUL_AD[modulAdi()] || 'Bu modül') : g;
-    const nav = BOLUMLER.map((b, i) => (b.grup && (!i || BOLUMLER[i - 1].grup !== b.grup) ? '<span class="ayarlar__grup" role="presentation">' + kac(grupAd(b.grup))
-        + '<small>' + (b.grup === 'Sistem' ? 'her yerde' : b.grup === 'Bu modül' ? 'yalnız burada' : '') + '</small></span>' : '')
-      + '<button type="button" class="ayarlar__sekme' + (b.grup ? ' ayarlar__sekme--grupta' : '') + (b.id === secili ? ' is-on' : '') + '" role="tab"'
+    const alan = alanOf(secili);
+    const nav = BOLUMLER.map(b => '<button type="button" class="ayarlar__sekme' + (b.id === secili ? ' is-on' : '') + '" role="tab"' + (b.grup === alan ? '' : ' hidden')
       + ' id="ayarlar-sekme-' + b.id + '" aria-selected="' + (b.id === secili) + '" aria-controls="ayarlar-bolum-' + b.id + '"'
       + ' data-ayar-bolum="' + b.id + '">' + kac(b.ad) + '</button>').join('');
     const govde = BOLUMLER.map(b => '<section class="ayarlar__bolum" role="tabpanel" id="ayarlar-bolum-' + b.id + '" data-baslik="' + kac(b.ad) + '"'
@@ -455,6 +476,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<header class="ayarlar__bas"><b>Ayarlar</b>'
       + '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Ayarları kapat">'
       + (L.KABUK ? L.KABUK.simge('kapat') : '×') + '</button></header>'
+      + alanlarHtml()
       + '<div class="ayarlar__govde"><nav class="ayarlar__nav" role="tablist" aria-label="Ayar bölümleri" aria-orientation="vertical">'
       + '<input type="search" class="ayarlar__ara" data-ayarlar-ara placeholder="Ayarlarda ara" aria-label="Ayarlarda ara" autocomplete="off">' + nav + '</nav>'
       + '<div class="ayarlar__icerik">' + govde + '</div></div></div>';
@@ -490,6 +512,9 @@ window.LIFEOS = window.LIFEOS || {};
       b.classList.toggle('is-on', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
     });
     panel.querySelectorAll('.ayarlar__bolum').forEach(s => { s.hidden = s.id !== 'ayarlar-bolum-' + id; });
+    const alan = alanOf(id);
+    panel.querySelectorAll('[data-ayar-bolum]').forEach(b => { b.hidden = alanOf(b.getAttribute('data-ayar-bolum')) !== alan; });
+    panel.querySelectorAll('[data-ayar-alan]').forEach(b => { const on = b.getAttribute('data-ayar-alan') === alan; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     if(id === 'sistem') planYukle();
   }
 
@@ -688,6 +713,8 @@ window.LIFEOS = window.LIFEOS || {};
         /* Elle tema seçmek «Saate göre»yi kapatır: yoksa düğme işe yaramıyor gibi görünüyordu. */
         if(L.ZEMIN && L.ZEMIN.oto && L.ZEMIN.oto() === 'saat') L.ZEMIN.otoAyarla('kapali');
       }
+      const al = t.closest('[data-ayar-alan]');
+      if(al){ const ilk = BOLUMLER.find(b => b.grup === al.getAttribute('data-ayar-alan')); if(ilk) sekmeSec(al.closest('.ayarlar'), ilk.id); return; }
       const git = t.closest('[data-ayarlar-git]');
       if(git){ e.preventDefault(); sekmeSec(git.closest('.ayarlar'), git.getAttribute('data-ayarlar-git')); return; }
       const pg = t.closest('[data-profil-gec], [data-profil-guncelle], [data-profil-sil]');
@@ -706,6 +733,8 @@ window.LIFEOS = window.LIFEOS || {};
       const yz = t.closest('[data-yazi-sec]');
       if(yz){
         yaziAyarla(yz.getAttribute('data-yazi-sec'));
+        const yad = (YAZILAR.find(y => y.id === yz.getAttribute('data-yazi-sec')) || {}).ad;
+        document.querySelectorAll('[data-yazi-ad]').forEach(x => { x.textContent = yad || ''; });
         const g = yz.closest('.ayarlar__yazilar');
         if(g) g.querySelectorAll('[data-yazi-sec]').forEach(b => {
           const on = b === yz; b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');

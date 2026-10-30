@@ -1506,31 +1506,48 @@
 
 /* ================================================================
    AĞ HARİTASI (2026-10-30; agharita.js): ilerlemenin yol haritası.
-   Renk ölçüyü ayırır: dolu = tamam, halka = yolda, soluk = bekliyor.
+   İkinci tur (aynı gün: «daha güzel, daha profesyonel»): ince kılavuz
+   halkalar, eğri bağlar, ortada genel oran, kümede kendi oranı; bir
+   kümenin üstüne gelince öbürleri solar. Renk ölçüyü ayırır: dolu =
+   tamam, halka = yolda, küçük boş nokta = bekliyor. Hareket yok.
    ================================================================ */
-.agh{ display:grid; gap:8px; }
+.agh{ display:grid; gap:12px; }
 .agh--bos p{ margin:0; font-size:13px; color:var(--text-2); }
-.agh__svg{ width:100%; height:auto; max-height:540px; display:block; }
-.agh__bag{ stroke:color-mix(in oklab, var(--text) 18%, transparent); stroke-width:1.1; stroke-dasharray:3 4; }
-.agh__bag.is-dolu{ stroke:var(--mod, var(--primary)); stroke-dasharray:none; stroke-width:1.8; stroke-opacity:.65; }
-.agh__merkez circle{ fill:var(--mod, var(--primary)); }
-.agh__merkez text{ fill:#fff; font-size:11.5px; font-weight:700; }
-.agh__kume > circle:first-of-type{ fill:var(--surface); stroke:color-mix(in oklab, var(--mod, var(--primary)) 55%, transparent); stroke-width:2; }
-.agh__ilerleme{ fill:none; stroke:var(--mod, var(--primary)); stroke-width:3; stroke-linecap:round; }
-.agh__dugum > circle:first-of-type{ transition:r .15s ease; }
-.agh__dugum--bitti > circle:first-of-type{ fill:var(--mod, var(--primary)); }
-.agh__dugum--suruyor > circle:first-of-type{ fill:var(--surface); stroke:var(--mod, var(--primary)); stroke-width:2; }
-.agh__dugum--sirada > circle:first-of-type{ fill:color-mix(in oklab, var(--mod, var(--primary)) 22%, var(--surface)); stroke:var(--mod, var(--primary)); stroke-width:3; }
-.agh__dugum--bekliyor > circle:first-of-type{ fill:color-mix(in oklab, var(--text) 24%, transparent); }
-.agh__dugum:hover > circle:first-of-type{ stroke:var(--text); stroke-width:2.5; }
+.agh__svg{ width:100%; height:auto; max-height:560px; display:block; overflow:visible; }
+.agh__kilavuz circle{ fill:none; stroke:color-mix(in oklab, var(--text) 7%, transparent); stroke-width:1; }
+.agh__bag{ fill:none; stroke:color-mix(in oklab, var(--text) 16%, transparent); stroke-width:1; }
+.agh__bag.is-dolu{ stroke:var(--mod, var(--primary)); stroke-width:1.6; stroke-opacity:.55; }
+.agh__bag--kok{ stroke-dasharray:2 4; }
+.agh__bag--kok.is-dolu{ stroke-dasharray:none; stroke-opacity:.35; }
+.agh__merkez > circle:first-child{ fill:var(--surface); stroke:color-mix(in oklab, var(--mod, var(--primary)) 25%, transparent); stroke-width:1; }
+.agh__merkez-oran{ fill:var(--text); font-size:17px; font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.agh__merkez-ad{ fill:var(--text-2); font-size:9.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
+.agh__ilerleme{ fill:none; stroke:var(--mod, var(--primary)); stroke-width:2.4; stroke-linecap:round; }
+.agh__ilerleme--merkez{ stroke-width:3.5; }
+.agh__kume > circle:first-of-type{ fill:var(--surface); stroke:color-mix(in oklab, var(--text) 12%, transparent); stroke-width:3; }
+.agh__oran{ fill:var(--text); font-size:10px; font-weight:700; font-variant-numeric:tabular-nums; }
+.agh__dugum--bitti > circle{ fill:var(--mod, var(--primary)); }
+.agh__dugum--suruyor > circle:not(.agh__ilerleme){ fill:var(--surface); stroke:var(--mod, var(--primary)); stroke-width:1.6; }
+.agh__dugum--sirada > circle:not(.agh__hale){ fill:var(--surface); stroke:var(--mod, var(--primary)); stroke-width:2.6; }
+.agh__hale{ fill:color-mix(in oklab, var(--mod, var(--primary)) 14%, transparent); stroke:none; }
+.agh__dugum--bekliyor > circle{ fill:var(--surface); stroke:color-mix(in oklab, var(--text) 26%, transparent); stroke-width:1.2; }
 .agh__yazi{ fill:var(--text-2); font-size:10.5px; }
-.agh__yazi--kume{ fill:var(--text); font-size:12.5px; font-weight:650; }
-.agh__ozet{ display:flex; align-items:center; flex-wrap:wrap; gap:4px 6px; margin:0; font-size:12.5px; color:var(--text-2); }
-.agh__lejant{ display:inline-block; width:10px; height:10px; margin-left:10px; border-radius:50%; }
+.agh__yazi.is-sirada{ fill:var(--text); font-weight:600; }
+.agh__yazi--kume{ fill:var(--text); font-size:12px; font-weight:650; }
+.agh__k{ transition:opacity .2s ease; outline:none; }
+.agh__svg:has(.agh__k:is(:hover, :focus-visible)) .agh__k:not(:hover):not(:focus-visible){ opacity:.22; }
+.agh__k:focus-visible .agh__kume > circle:first-of-type{ stroke:var(--mod, var(--primary)); }
+.agh__alt{ display:grid; gap:8px; }
+.agh__cubuk{ display:flex; height:6px; border-radius:3px; overflow:hidden; background:color-mix(in oklab, var(--text) 9%, transparent); }
+.agh__p--bitti{ background:var(--mod, var(--primary)); }
+.agh__p--suruyor{ background:color-mix(in oklab, var(--mod, var(--primary)) 40%, transparent); }
+.agh__ozet{ display:flex; align-items:center; flex-wrap:wrap; gap:4px 6px; margin:0; font-size:12.5px; color:var(--text-2); font-variant-numeric:tabular-nums; }
+.agh__lejant{ display:inline-block; width:9px; height:9px; margin-left:12px; border-radius:50%; }
 .agh__lejant:first-child{ margin-left:0; }
 .agh__lejant--bitti{ background:var(--mod, var(--primary)); }
-.agh__lejant--suruyor{ box-shadow:inset 0 0 0 2px var(--mod, var(--primary)); }
-.agh__lejant--bekliyor{ background:color-mix(in oklab, var(--text) 24%, transparent); }
+.agh__lejant--suruyor{ background:color-mix(in oklab, var(--mod, var(--primary)) 40%, transparent); }
+.agh__lejant--bekliyor{ box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--text) 30%, transparent); }
+@media (prefers-reduced-motion:reduce){ .agh__k{ transition:none; } }
 
 /* ICE (2026-10-30): Analiz'de «Google'dan gelen» — takvim, adım, YouTube özeti. */
 [data-ice-kart]:empty{ display:none; }

@@ -31,13 +31,19 @@
       const d = koy();
       try{
         const sek = Array.from(d.querySelectorAll('[data-ayar-bolum]'));
-        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Ses ve müzik', 'Animasyon', 'Minikler ve King', 'Bildirimler', 'Planlama',
+        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Ses ve müzik', 'Animasyon', 'King', 'Minikler', 'Bildirimler', 'Planlama',
           'Modül ayarları', 'Güvenlik', 'Bağlantılar']);
-        /* Üç grup: Sistem (her yerde), modülün kendisi (yalnız burada), Hesap (2026-10-30: «sistem ayarları, modül ayarları diye ayırın»). */
-        const gruplar = Array.from(d.querySelectorAll('.ayarlar__grup')).map(g => g.firstChild.textContent);
-        expect(gruplar.length).toBe(3);
-        expect([gruplar[0], gruplar[2]]).toEqual(['Sistem', 'Hesap']);
-        expect(d.querySelector('.ayarlar__grup').nextElementSibling.textContent).toBe('Profiller');
+        /* Üç alan üstte: Sistem (her yerde), modülün kendisi (yalnız burada), Hesap; solda yalnız seçili alanın bölümleri
+           (2026-10-30: «sistem ile yalnız o modül arasındaki ayrımı daha güzel yap»). */
+        const alanlar = Array.from(d.querySelectorAll('[data-ayar-alan]'));
+        expect(alanlar.map(a => a.getAttribute('data-ayar-alan'))).toEqual(['Sistem', 'Bu modül', 'Hesap']);
+        expect(alanlar[0].getAttribute('aria-pressed')).toBe('true');
+        expect(sek.filter(s => !s.hidden).length).toBe(9);
+        alanlar[1].click();
+        expect(sek.filter(s => !s.hidden).map(s => s.textContent)).toEqual(['Modül ayarları']);
+        expect(alanlar[1].getAttribute('aria-pressed')).toBe('true');
+        sek[1].click();
+        expect(alanlar[0].getAttribute('aria-pressed')).toBe('true');
         const gorunen = () => Array.from(d.querySelectorAll('.ayarlar__bolum')).filter(s => !s.hidden).map(s => s.id);
         expect(gorunen()).toEqual(['ayarlar-bolum-gorunum']);
         sek[3].click();

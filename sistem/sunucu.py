@@ -756,6 +756,35 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 .gacilis{ position:fixed; z-index:15; left:50%; bottom:24px; transform:translateX(-50%); display:flex; align-items:center; gap:12px;
   padding:10px 10px 10px 16px; border-radius:999px; background:var(--yuzey); color:var(--fg); box-shadow:0 10px 30px -12px rgba(10,14,30,.4), inset 0 0 0 1px var(--cizgi); font-size:13.5px; }
 @media (prefers-color-scheme:dark){ .gayar, .gacilis{ background:#1b1e26; } .gayar__seg button.is-on{ background:#2a2e38; } .gayar select{ background:#1b1e26; } }
+/* SADE GIRIS (kullanici, 2026-10-30: «uc kartin oldugu yerde tasarim cok
+   kalabalik oldu; oran-orantiyi ve minimalistligi sagla»). Kartlar ayni
+   hizada ve ayni boyda (ortadaki kayma yok); kartta logo, ad ve tek satir;
+   tam ad ve «Ac» yazisi yok (kartin tamami baglanti); durum yalniz kosede
+   bir nokta (yazisi ekran okuyucuda). Ust serit ince, marka yalniz LifeOS,
+   alt yazi yok. */
+.izgara{ align-items:stretch; gap:clamp(14px, 1.8vw, 28px); }
+.izgara .kart{ position:relative; flex:0 1 clamp(210px, 18vw, 290px); min-height:clamp(240px, 34vh, 360px);
+  padding:clamp(26px, 2.4vw, 36px) clamp(18px, 1.8vw, 26px); justify-content:center; }
+.izgara .kart:nth-child(2){ margin-top:0; }
+.izgara .kart__ust{ gap:14px; }
+.izgara .logo{ width:clamp(56px, 4.6vw, 76px); height:clamp(56px, 4.6vw, 76px); border-radius:clamp(18px, 1.5vw, 24px); }
+.izgara .sekil{ width:clamp(22px, 1.9vw, 30px); height:clamp(22px, 1.9vw, 30px); }
+.izgara .kart__ad{ font-size:clamp(20px, 1.6vw, 26px); letter-spacing:-.01em; }
+.izgara .kart__ad small{ display:none; }
+.izgara .kart__acik{ margin-top:2px; font-size:clamp(12.5px, .9vw, 14px); color:var(--fg-3); }
+.izgara .kart__alt{ position:absolute; top:14px; right:14px; margin:0; padding:0; border:0; }
+.izgara .kart__alt .dugme{ display:none; }
+.izgara .kart__alt .durum{ padding:0; background:none; }
+.izgara .kart__alt .durum > span{ position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+@media (hover:hover){ .izgara .kart:nth-child(2):hover{ transform:translateY(-6px) scale(1.025); } .izgara .kart:hover{ transform:translateY(-6px) scale(1.025); } }
+.ust h1 span{ display:none; }
+.yay{ gap:4px; padding:6px 10px 10px; margin-bottom:clamp(20px, 3vh, 36px); }
+.yay__uc{ min-height:38px; font-size:12.5px; }
+.yay__uc b{ width:26px; height:26px; font-size:12px; }
+.yay__g > span, .yay__s > span{ position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.yay__uc{ padding:0 6px; }
+.dip{ display:none; }
+@media (max-width:760px){ .izgara .kart{ min-height:0; } .izgara .kart__alt{ top:50%; transform:translateY(-50%); } }
 </style></head><body>
 <main class="sarmal">
   <header class="ust" style="--sira:0">

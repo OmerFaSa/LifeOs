@@ -48,11 +48,11 @@
      kaydet, menü çok katı, sistemle uyumsuz»). Dolu koyu blok yerine modül
      renginde hafif boyanmış cam: ince renkli kenar, üstte 1 px ışık, yazı
      modülün koyu/açık tonu. Seçili çekmece, menü bölümü ve ana düğme aynı dil. */
-  --secili-zemin:color-mix(in oklab, var(--mod) 14%, rgba(255,255,255,.62));
-  --secili-yazi:var(--mod-ink, var(--mod));
-  --secili-golge:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px color-mix(in oklab, var(--mod) 26%, transparent), 0 6px 16px -12px color-mix(in oklab, var(--mod) 60%, transparent);
-  --ana-zemin:color-mix(in oklab, var(--mod) 22%, rgba(255,255,255,.55));
-  --ana-zemin-ust:color-mix(in oklab, var(--mod) 30%, rgba(255,255,255,.6));
+  --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 14%, rgba(255,255,255,.62));
+  --secili-yazi:var(--vurgu-ink, var(--mod-ink, var(--mod)));
+  --secili-golge:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 26%, transparent), 0 6px 16px -12px color-mix(in oklab, var(--vurgu, var(--mod)) 60%, transparent);
+  --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 22%, rgba(255,255,255,.55));
+  --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 30%, rgba(255,255,255,.6));
 }
 :root[data-theme="dark"]{
   --sicak-zemin:.6; --sicak-cizgi:.5; --sicak-yansima:.3; --ray:rgba(255,255,255,.08);
@@ -70,9 +70,9 @@
   --cam-ust:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.03);
   --cam-golge:0 1px 2px rgba(0,0,0,.25), 0 14px 34px -18px rgba(0,0,0,.55);
   --cam-girdi:rgba(0,0,0,.22);
-    --secili-zemin:color-mix(in oklab, var(--mod) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--mod) 28%, #fff);
-    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent);
-    --ana-zemin:color-mix(in oklab, var(--mod) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--mod) 44%, rgba(255,255,255,.08));
+    --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--vurgu, var(--mod)) 28%, #fff);
+    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent);
+    --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 44%, rgba(255,255,255,.08));
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -92,9 +92,9 @@
     --cam-ust:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.03);
     --cam-golge:0 1px 2px rgba(0,0,0,.25), 0 14px 34px -18px rgba(0,0,0,.55);
     --cam-girdi:rgba(0,0,0,.22);
-    --secili-zemin:color-mix(in oklab, var(--mod) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--mod) 28%, #fff);
-    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent);
-    --ana-zemin:color-mix(in oklab, var(--mod) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--mod) 44%, rgba(255,255,255,.08));
+    --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--vurgu, var(--mod)) 28%, #fff);
+    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent);
+    --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 44%, rgba(255,255,255,.08));
   }
 }
 
@@ -1607,11 +1607,11 @@ html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk:ha
 html[data-theme="dark"]{ --kenar-tek:rgba(255,255,255,.075);
   --levha-ic:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.05);
   --cam-ust:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.03);
-  --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent); }
+  --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent); }
 @media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --kenar-tek:rgba(255,255,255,.075);
   --levha-ic:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.05);
   --cam-ust:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.03);
-  --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent); } }
+  --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent); } }
 html[data-zemin="yumusak"] .site--v5 .sayfa--kapakli .bugun__alan::before,
 html[data-zemin="yumusak"] .kutu::before,
 html[data-zemin="yumusak"] .card:not(.card--flat)::before,

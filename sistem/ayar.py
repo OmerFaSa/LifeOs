@@ -27,7 +27,7 @@ import re
 import threading
 import time
 
-ANAHTAR = re.compile(r"^lifeos\.(yazi|boyut|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+"
+ANAHTAR = re.compile(r"^lifeos\.(yazi|boyut|vurgu|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+"
                      r"|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|minik|minik\.[a-z]+"
                      r"|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun)|profiller|profil\.etkin)$")
 EN_COK = 120

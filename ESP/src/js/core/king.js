@@ -5224,6 +5224,38 @@ window.LIFEOS.KING = (function(){
     gorunus:{ ad:'Görünüş', degerler:GORUNUSLER, oku:() => gorunus(), yaz:v => gorunusAyarla(v), adlar:GORUNUS_AD },
     ses:{ ad:'Ses', degerler:SES_TERCIH, oku:() => sesTercihi(), yaz:v => sesTercihSec(v), adlar:SES_AD },
   };
+  /* AYARLAR › KING (kullanıcı, 2026-10-30: «King kısmında güzel şeyler yap; tasarım
+     ve özellik bakımından»). Üstte canlı önizleme: King'in yüzü, adı ve seçilen
+     tarzda bir selam; «Sesini dene» seçilen sesle okur. Altında King'in kendi
+     tercihleri (KING_AYAR) ve okuma hızı: King penceresindekilerle aynı kayıt. */
+  const AYAR_SELAM = Object.freeze({ samimi:'Selam! Bugün neye bakalım?', resmi:'Merhaba. Size nasıl yardımcı olabilirim?', kisa:'Hazırım.' });
+  const AYAR_SIRA = ['tarz', 'derinlik', 'cevap', 'ses', 'gorunus'];
+  const AYAR_NOT = { tarz:'Nasıl konuşsun', derinlik:'Ne kadar düşünsün', cevap:'Yazıyla mı, sesle mi', ses:'Hangi ses okusun', gorunus:'Rengi' };
+  function ayarHtml(){
+    const seg = (ad, liste, simdi, veri, adlar) => '<div class="seg" role="group" aria-label="' + kac(ad) + '">' + liste.map(d => {
+      const on = String(d) === String(simdi);
+      return '<button type="button" class="' + (on ? 'is-on' : '') + '" aria-pressed="' + on + '" data-king-tercih="' + veri + ':' + d + '">' + kac(adlar ? adlar[d] : d) + '</button>'; }).join('') + '</div>';
+    return '<div class="kingayar" data-king-tercih-kok>'
+      + '<div class="kingayar__onizle">' + yuzHtml(true)
+      + '<div class="kingayar__metin"><b>' + kac(ad()) + '</b><p>«' + kac(AYAR_SELAM[tarz()]) + '»</p><small>' + kac(DERIN_IP[derinlik()]) + '</small></div>'
+      + '<button type="button" class="btn btn--sm btn--ghost" data-king-tercih="dene:1">Sesini dene</button></div>'
+      + AYAR_SIRA.map(k => { const x = KING_AYAR[k];
+        return '<div class="kingayar__satir"><span class="kingayar__ad">' + kac(x.ad) + '<small>' + kac(AYAR_NOT[k]) + '</small></span>' + seg(x.ad, x.degerler, x.oku(), k, x.adlar) + '</div>'; }).join('')
+      + '<div class="kingayar__satir"><span class="kingayar__ad">Okuma hızı<small>Sesli okurken</small></span>'
+      + seg('Okuma hızı', HIZLAR, hiz(), 'hiz', HIZLAR.reduce((o, v) => { o[v] = String(v).replace('.', ',') + '×'; return o; }, {})) + '</div>'
+      + '</div>';
+  }
+  function ayarYenile(){ if(typeof document !== 'undefined') document.querySelectorAll('[data-king-tercih-kok]').forEach(el => { el.outerHTML = ayarHtml(); }); }
+  if(typeof document !== 'undefined') document.addEventListener('click', e => {
+    const b = e.target && e.target.closest ? e.target.closest('[data-king-tercih]') : null;
+    if(!b) return;
+    e.preventDefault();
+    const [k, v] = b.getAttribute('data-king-tercih').split(':');
+    if(k === 'dene'){ try{ seslendir(ad() + '. ' + AYAR_SELAM[tarz()]); }catch(x){ /* ses yok */ } return; }
+    if(k === 'hiz'){ const n = Number(v); if(HIZLAR.indexOf(n) >= 0){ if(n === 1) ortam.depo.sil(HIZ); else ortam.depo.yaz(HIZ, n); } }
+    else if(KING_AYAR[k] && KING_AYAR[k].degerler.indexOf(v) >= 0) KING_AYAR[k].yaz(v);
+    ayarYenile();
+  });
   /* Kendi akışını çizen araç (kart, öncelik, not arama…): kullanıcının mesajı
      zaten sohbette; akış onu yeniden ekler, iki kez görünmesin. */
   async function akisla(fn){
@@ -6784,7 +6816,7 @@ window.LIFEOS.KING = (function(){
   }
 
   return {
-    kur, ac, kapat, kucult, buyut, ad, adYonelme, AD_ANAHTAR, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
+    kur, ac, kapat, kucult, buyut, ad, adYonelme, AD_ANAHTAR, ayarHtml, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
     isDurumYaz:d => { isDurum = d; }, arkadasHal, arkadasPoz, arkadasEsya, ARKADAS_UYKU, yazimSuresi,
     GORUNUS_ANAHTAR:GORUNUS, gorunus, gorunusAyarla, gorunusSeciciHtml, _sesSec:sesSec, isRozet, isYokla, ekipAc, ekipHtml, gorevHtml, isZamanli:() => !!isZaman,
     beceriAc, beceriPanelHtml, bekleyenAl, eylemleriCalistir, k2Html, ODAK_SON,
