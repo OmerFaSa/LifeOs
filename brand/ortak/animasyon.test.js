@@ -434,6 +434,7 @@
       try{ return fn(); }finally{
         Object.keys(Object.assign({}, localStorage)).forEach(k => { if(!(k in once)) localStorage.removeItem(k); });
         Object.keys(once).forEach(k => localStorage.setItem(k, once[k]));
+        A()._ortakSifirla();                                          // sonraki testler sunucusuz sayfa gibi
       }
     };
     it('yalnız sistem ayarları ortaktır; kilit, modül yüzeyi ve King hafızası değil', () => {

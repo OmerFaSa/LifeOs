@@ -1187,7 +1187,9 @@ def giris_html(telefon=False, tema=None):
         # Sistem ayarindaki tema (sistem/ayar.py, lifeos.tema.secim): sayfa
         # cihazin tercihine degil secime uyar. Koyu kurallar ya hep ya hic.
         sayfa = (sayfa.replace("@media (prefers-color-scheme:dark)", "@media all" if tema == "dark" else "@media not all")
-                 .replace("color-scheme:light dark;", "color-scheme:%s;" % tema))
+                 .replace("color-scheme:light dark;", "color-scheme:%s;" % tema)
+                 # hesap.css (giris ve hesap kutusu) temayi data-theme'den okur
+                 .replace('<html lang="tr">', '<html lang="tr" data-theme="%s">' % tema, 1))
     return (sayfa.replace("__KARTLAR__", "\n  ".join(kartlar)).replace("__YAY__", yay)
             .replace("__SURUM__", _kac(surum)).replace("__IKON__", _IKON))
 

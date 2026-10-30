@@ -231,6 +231,8 @@ window.LIFEOS = window.LIFEOS || {};
      TASINAN). Öbür modül açılınca etkin profilin damgası orada görülmemişse
      profil oraya da uygulanır ve sayfa bir kez yenilenir. */
   /* Yenilemeden önce ortak ayarı sunucuya yaz (animasyon.js ortakYenile). */
+  /* Büyük ortak değişiklik (profiller) beklemeden sunucuya: kapanıştaki keepalive sınırına kalmasın. */
+  function ortakSimdi(){ try{ if(L.ANIMASYON && L.ANIMASYON.ortakGonder) L.ANIMASYON.ortakGonder(false); }catch(e){ /* yok */ } }
   function yenileKaydet(){ if(L.ANIMASYON && L.ANIMASYON.ortakYenile) L.ANIMASYON.ortakYenile(); else try{ location.reload(); }catch(e){ /* yok */ } }
   const PROFIL_ANAHTAR = 'lifeos.profiller', ETKIN_ANAHTAR = 'lifeos.profil.etkin', GORDU_ANAHTAR = 'lifeos.profil.gordu', TEMA_BEKLE = 'lifeos.profil.tema';
   const PROFIL_EN = 8;
@@ -268,6 +270,7 @@ window.LIFEOS = window.LIFEOS || {};
     const damga = String(Date.now());
     depoKoy(ETKIN_ANAHTAR, JSON.stringify({ ad:p.ad, damga }));
     depoKoy(GORDU_ANAHTAR, damga);
+    ortakSimdi();
     return { ok:true, mesaj:i >= 0 ? '«' + p.ad + '» güncellendi.' : '«' + p.ad + '» kaydedildi.' };
   }
   /* Profilin ayarlarını depoya yazar (profilde olmayan anahtar varsayılana döner). */
@@ -296,6 +299,7 @@ window.LIFEOS = window.LIFEOS || {};
     depoKoy(PROFIL_ANAHTAR, k.length ? JSON.stringify(k) : null);
     const e = etkinProfil();
     if(e && ayni(e.ad, ad)) depoKoy(ETKIN_ANAHTAR, null);
+    ortakSimdi();
     return true;
   }
   /* Açılışta: başka modülde seçilen profil burada görülmediyse uygulanır (bir kez). */

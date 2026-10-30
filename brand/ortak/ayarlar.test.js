@@ -277,6 +277,25 @@
         anahtarlar.forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); });
       }
     });
+    it('profil kaydı iki saniyeyi beklemeden sunucuya gider (kapanıştaki keepalive sınırına kalmasın)', () => {
+      const Y = window.LIFEOS.ANIMASYON, eskiFetch = window.fetch, giden = [];
+      const once = {}; for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); once[k] = localStorage.getItem(k); }
+      window.fetch = (u, o) => { giden.push([u, o]); return Promise.resolve(new Response('{}')); };
+      try{
+        localStorage.setItem(Y.ILK_ESIT, '1');
+        Y.ortakAl({ 'lifeos.cam':'orta' });
+        localStorage.setItem('lifeos.cam', 'orta');
+        A.profilKaydet('Hızlı', 'light');
+        const g = giden.find(x => x[0] === '/api/ayar');
+        expect(!!g).toBe(true);
+        expect(JSON.parse(g[1].body).ayar['lifeos.profiller']).toContain('Hızlı');
+      }finally{
+        window.fetch = eskiFetch;
+        Object.keys(Object.assign({}, localStorage)).forEach(k => { if(!(k in once)) localStorage.removeItem(k); });
+        Object.keys(once).forEach(k => localStorage.setItem(k, once[k]));
+        Y._ortakSifirla();
+      }
+    });
     it('profiller bölümü: boşken ne yapılacağını söyler; kayıtlı profilde Geç, etkin olanda Güncelle', () => {
       const once = [A.PROFIL_ANAHTAR, A.ETKIN_ANAHTAR].map(k => localStorage.getItem(k));
       try{

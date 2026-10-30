@@ -317,7 +317,10 @@ window.LIFEOS = window.LIFEOS || {};
     const fark = ortakFark();
     if(!Object.keys(fark).length || typeof fetch !== 'function') return false;
     Object.keys(fark).forEach(k => { if(fark[k] == null) delete ortakSon[k]; else ortakSon[k] = fark[k]; });
-    try{ fetch('/api/ayar', { method:'POST', keepalive:!!cikis, headers:{ 'Content-Type':'application/json', 'X-LifeOS':'ayar' }, body:JSON.stringify({ ayar:fark }) }).catch(() => {}); }catch(e){ return false; }
+    const govde = JSON.stringify({ ayar:fark });
+    /* keepalive gövdesi tarayıcıda ~64 KB ile sınırlı; aşarsa düz istek (profil gibi büyük
+       değişiklikler zaten anında gider: ayarlar.js profilKaydet → ortakGonder). */
+    try{ fetch('/api/ayar', { method:'POST', keepalive:!!cikis && govde.length < 60000, headers:{ 'Content-Type':'application/json', 'X-LifeOS':'ayar' }, body:govde }).catch(() => {}); }catch(e){ return false; }
     return true;
   }
   /* Sayfa yenilenmeden önce değişiklik sunucuya yazılır ve beklenir (2026-10-31, uçtan
@@ -670,7 +673,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
     dinlenSure,
-    ANAHTAR, KIPLER, TASINAN, ORTAK, ILK_ESIT, ortakAl, ortakFark, ortakYenile,
+    ANAHTAR, KIPLER, TASINAN, ORTAK, ILK_ESIT, ortakAl, ortakFark, ortakGonder, ortakYenile, _ortakSifirla:() => { ortakSon = null; },
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
     HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,

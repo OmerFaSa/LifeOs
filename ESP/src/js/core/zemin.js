@@ -239,7 +239,10 @@ window.LIFEOS = window.LIFEOS || {};
     if(t) return t === 'dark';
     try{ return !!window.matchMedia('(prefers-color-scheme: dark)').matches; }catch(e){ return false; }
   }
-  function sunucuVar(){ return typeof location !== 'undefined' && /^https?:$/.test(location.protocol); }
+  /* Kendi dosyan yalnız bu bilgisayardan okunur (sistem/zemin.py söz 1): sayfa ev ağından
+     (tablet) açıldıysa «Kendi» modülün fotoğrafına düşer, yükleme düğmesi yok (2026-10-31). */
+  const yerelMi = host => /^(127\.0\.0\.1|localhost|\[::1\])$/.test(String(host || ''));
+  function sunucuVar(){ return typeof location !== 'undefined' && /^https?:$/.test(location.protocol) && yerelMi(location.hostname); }
   function dosyaTuru(yuva){ let v = null; try{ v = localStorage.getItem('lifeos.manzara.tur.' + yuva); }catch(e){} return v === 'video' || v === 'foto' ? v : null; }
   function dosyaAdresi(yuva){
     let surum = '';
@@ -640,7 +643,7 @@ window.LIFEOS = window.LIFEOS || {};
     MANZARA_ANAHTAR, manzara:() => manzaraSimdi, manzaraAyarla, manzaraYenile, manzaraSeciciHtml,
     GECE_ANAHTAR, OTO_ANAHTAR, gece:() => geceSimdi, geceAyarla, geceSeciciHtml, oto:() => otoSimdi, otoAyarla, otoSeciciHtml,
     otoTema, etkinZemin, karanlik, dosyaYukle, onizle, onizleHtml, ONIZLE_SADE,
-    VIDEO_ANAHTAR, HIZLAR, videoAyar, videoAyarla, videoAyarHtml, videoSesli });
+    VIDEO_ANAHTAR, HIZLAR, videoAyar, videoAyarla, videoAyarHtml, videoSesli, yerelMi });
   /* Gövde hazır olunca, ilk çizimden biraz sonra: açılış animasyonuyla çakışmasın. */
   if(typeof document !== 'undefined' && typeof setTimeout === 'function'
       && !/\/tests\//.test(String(location.pathname || ''))){   // test sayfasında kendiliğinden oynamaz

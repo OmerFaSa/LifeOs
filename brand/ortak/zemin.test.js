@@ -429,6 +429,13 @@
   });
 
   /* 2026-10-30 (kullanıcı: «arka plan videosunu düzenleyebilelim ya da kendi sesiyle gelsin»). */
+  /* 2026-10-31: kendi dosya yalnız bu bilgisayardan okunur; ev ağından açılan sayfa modülün fotoğrafına düşer. */
+  describe('Zemin — kendi dosya yalnız bu bilgisayarda', () => {
+    it('yerel adresler: 127.0.0.1, localhost, [::1]; ev ağı ve alan adları değil', () => {
+      ['127.0.0.1', 'localhost', '[::1]'].forEach(h => expect(Z.yerelMi(h)).toBe(true));
+      ['192.168.1.20', 'lifeos.local', 'ornek.com', ''].forEach(h => expect(Z.yerelMi(h)).toBe(false));
+    });
+  });
   describe('Zemin — arka plan videosunun sesi, kesiti, hızı', () => {
     const sakla = fn => {
       const once = [Z.VIDEO_ANAHTAR, 'lifeos.manzara.tur.gunduz'].map(k => localStorage.getItem(k));

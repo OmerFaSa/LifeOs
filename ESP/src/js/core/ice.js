@@ -28,7 +28,7 @@ window.LIFEOS.ICE = (function(){
   const L = window.LIFEOS;
   const VAR_ANAHTAR = 'lifeos.ice.var';
   const kac = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
-  const VARSAYILAN_ORTAM = { sunucu:() => typeof location !== 'undefined' && /^https?:$/.test(location.protocol), fetch:(u, o) => fetch(u, o) };
+  const VARSAYILAN_ORTAM = { sunucu:() => typeof location !== 'undefined' && /^https?:$/.test(location.protocol) && /^(127\.0\.0\.1|localhost|\[::1\])$/.test(location.hostname), fetch:(u, o) => fetch(u, o) };
   let ortam = Object.assign({}, VARSAYILAN_ORTAM);
   let veri = null, mesaj = '', ayarOkundu = false;
 

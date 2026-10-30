@@ -54,7 +54,7 @@ window.LIFEOS.MUZIK = (function(){
   const VAR_ANAHTAR = 'lifeos.muzik.var';
   const kac = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
   const VARSAYILAN_ORTAM = {
-    sunucu:() => typeof location !== 'undefined' && /^https?:$/.test(location.protocol),
+    sunucu:() => typeof location !== 'undefined' && /^https?:$/.test(location.protocol) && /^(127\.0\.0\.1|localhost|\[::1\])$/.test(location.hostname),   // müzik yalnız bu bilgisayarda (ev ağından 403)
     fetch:(u, o) => fetch(u, o),
     simdi:() => new Date(),
     karistir:l => l.slice().sort(() => Math.random() - .5),
