@@ -17,20 +17,29 @@ Yuvalar: gunduz, gece. Sozler:
   1. YALNIZ BU BILGISAYAR. Okuma da yazma da yalniz 127.0.0.1'den: kisisel
      fotograf ev agindan (telefon, tablet) okunamaz. Telefon modulun kendi
      fotografini gorur.
-  2. YALNIZ GORSEL VE VIDEO. jpeg, png, webp, mp4, webm; tur basliktan ve
-     dosyanin ilk baytlarindan denetlenir. Ust sinir 80 MB.
+  2. YALNIZ GORSEL VE VIDEO. jpeg, png, webp, mp4, m4v, mov, webm; tur
+     basliktan ve dosyanin ilk baytlarindan denetlenir. Ust sinir 600 MB
+     (kullanici, 2026-10-30: «PC'den indirdigim videoyu eklemek istiyorum,
+     bitince basa donsun»; indirilen duvar videolari 80 MB'i asiyordu).
+     Yazma da okuma da parca parca akar: dosya bellege alinmaz; video
+     tarayicinin istedigi araligi (Range) alir, dongu ve atlama akicidir.
   3. DEPONUN DISINDA. %LOCALAPPDATA%\\LifeOS\\zemin (hesap klasorunun yani);
      guncelleme ona dokunmaz.
 """
 
+import io
 import os
+import re
 
 YUVALAR = ("gunduz", "gece")
 TURLER = {
     "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp",
-    "video/mp4": ".mp4", "video/webm": ".webm",
+    "video/mp4": ".mp4", "video/webm": ".webm", "video/x-m4v": ".m4v", "video/quicktime": ".mov",
 }
-UST_SINIR = 80 * 1024 * 1024
+UST_SINIR = 600 * 1024 * 1024
+SINIR_CUMLE = "Dosya boş ya da 600 MB'tan büyük."
+TUR_CUMLE = "Yalnız JPEG, PNG, WebP fotoğraf ya da MP4, MOV, WebM video (MKV ve AVI'yi önce MP4'e çevir)."
+PARCA = 1024 * 1024
 
 
 def klasor():
@@ -51,8 +60,10 @@ def imza_uyar(tur, bas):
         return bas[:8] == b"\x89PNG\r\n\x1a\n"
     if tur == "image/webp":
         return bas[:4] == b"RIFF" and bas[8:12] == b"WEBP"
-    if tur == "video/mp4":
+    if tur in ("video/mp4", "video/x-m4v"):
         return bas[4:8] == b"ftyp"
+    if tur == "video/quicktime":
+        return bas[4:8] in (b"ftyp", b"moov", b"wide", b"mdat", b"free", b"skip")
     if tur == "video/webm":
         return bas[:4] == b"\x1a\x45\xdf\xa3"
     return False
@@ -77,22 +88,80 @@ def sil(yuva, kok=None):
 
 
 def yaz(yuva, tur, veri, kok=None):
-    """Dogrular ve yazar. Hata: (kod, cumle)."""
+    """Dogrular ve yazar (bayt). Hata: (kod, cumle)."""
+    return yaz_akis(yuva, tur, io.BytesIO(veri or b""), len(veri or b""), kok)
+
+
+def yaz_akis(yuva, tur, okuyucu, boy, kok=None):
+    """Govdeyi parca parca diske yazar; bellege almaz. Hata: (kod, cumle).
+    Eski dosya yalniz yeni dosya tamamlaninca silinir (yarida kalan yukleme
+    eskisini bozmaz)."""
     if yuva not in YUVALAR:
         raise ValueError((404, "Böyle bir zemin yuvası yok."))
     if tur not in TURLER:
-        raise ValueError((415, "Yalnız JPEG, PNG, WebP fotoğraf ya da MP4, WebM video."))
-    if not veri or len(veri) > UST_SINIR:
-        raise ValueError((413, "Dosya boş ya da 80 MB'tan büyük."))
-    if not imza_uyar(tur, veri[:16]):
+        raise ValueError((415, TUR_CUMLE))
+    if boy <= 0 or boy > UST_SINIR:
+        raise ValueError((413, SINIR_CUMLE))
+    bas = okuyucu.read(min(16, boy))
+    if not imza_uyar(tur, bas):
         raise ValueError((415, "Dosyanın içeriği türüyle uyuşmuyor."))
     kok = kok or klasor()
     os.makedirs(kok, exist_ok=True)
-    sil(yuva, kok)
     gecici = os.path.join(kok, yuva + ".yaziliyor")
+    kalan = boy - len(bas)
     with open(gecici, "wb") as f:
-        f.write(veri)
+        f.write(bas)
+        while kalan > 0:
+            p = okuyucu.read(min(PARCA, kalan))
+            if not p:
+                break
+            f.write(p)
+            kalan -= len(p)
+    if kalan > 0:
+        os.remove(gecici)
+        raise ValueError((400, "Yükleme yarıda kaldı; yeniden dene."))
+    sil(yuva, kok)
     os.replace(gecici, os.path.join(kok, yuva + TURLER[tur]))
+
+
+def _akit(h, yol, tur):
+    """Dosyayi parca parca gonderir; Range (tek aralik) gelirse 206."""
+    boy = os.path.getsize(yol)
+    bas, son = 0, boy - 1
+    m = re.match(r"^bytes=(\d*)-(\d*)$", (h.headers.get("Range") or "").strip())
+    kod = 200
+    if m and boy and (m.group(1) or m.group(2)):
+        if m.group(1):
+            bas = int(m.group(1))
+            son = min(int(m.group(2)), boy - 1) if m.group(2) else boy - 1
+        else:
+            bas = max(0, boy - int(m.group(2)))
+        if bas > son or bas >= boy:
+            h.send_response(416)
+            h.send_header("Content-Range", "bytes */%d" % boy)
+            h.send_header("Content-Length", "0")
+            h.end_headers()
+            return
+        kod = 206
+    h.send_response(kod)
+    h.send_header("Content-Type", tur)
+    h.send_header("Accept-Ranges", "bytes")
+    h.send_header("Content-Length", str(son - bas + 1))
+    h.send_header("Cache-Control", "no-store")
+    if kod == 206:
+        h.send_header("Content-Range", "bytes %d-%d/%d" % (bas, son, boy))
+    h.end_headers()
+    if h.command == "HEAD":
+        return
+    with open(yol, "rb") as f:
+        f.seek(bas)
+        kalan = son - bas + 1
+        while kalan > 0:
+            p = f.read(min(PARCA, kalan))
+            if not p:
+                break
+            h.wfile.write(p)
+            kalan -= len(p)
 
 
 def _yanit(h, kod, govde=b"", tur="text/plain; charset=utf-8"):
@@ -120,8 +189,7 @@ def isle(h):
         yol, tur = bul(yuva)
         if not yol:
             return _yanit(h, 404)
-        with open(yol, "rb") as f:
-            return _yanit(h, 200, f.read(), tur)
+        return _akit(h, yol, tur)
     if h.command == "DELETE":
         sil(yuva)
         return _yanit(h, 204)
@@ -131,10 +199,10 @@ def isle(h):
         except ValueError:
             boy = 0
         if boy <= 0 or boy > UST_SINIR:
-            return _yanit(h, 413, "Dosya boş ya da 80 MB'tan büyük.".encode("utf-8"))
+            return _yanit(h, 413, SINIR_CUMLE.encode("utf-8"))
         tur = (h.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
         try:
-            yaz(yuva, tur, h.rfile.read(boy))
+            yaz_akis(yuva, tur, h.rfile, boy)
         except ValueError as e:
             kod, cumle = e.args[0]
             return _yanit(h, kod, cumle.encode("utf-8"))

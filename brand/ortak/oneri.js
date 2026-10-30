@@ -306,6 +306,8 @@ window.LIFEOS = window.LIFEOS || {};
                kapsam:'yalnız bugün' }
      Geçersiz öneri BOŞ dize döner: kart çizilmez (HKM kapalıyken
      `kingteklif.js` de aynı şeyi yapar — bilinmeyeni göstermez). */
+  const OKART_SIMGE = { kucuk:'<path d="M5 12.5l4.2 4.2L19 7"/>', orta:'<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+    buyuk:'<path d="M12 4l8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4M4 16l8 4 8-4"/>', merkez:'<path d="M12 3.5l1.9 5.6 5.6 1.9-5.6 1.9L12 18.5l-1.9-5.6-5.6-1.9 5.6-1.9z"/>' };
   function kartHtml(oneri, katalog){
     if(dogrula(oneri, katalog).length) return '';
     const k = kalip(oneri, katalog);
@@ -329,6 +331,9 @@ window.LIFEOS = window.LIFEOS || {};
     if(k.geriAl) alt.push('geri alınabilir');
     return '<article class="kutu okart ' + (merkez ? 'okart--merkez' : 'okart--modul') + '" data-oz="110"'
       + ' data-seviye="' + k.seviye + '" data-oneri="' + kac(oneri.id || '') + '" aria-labelledby="' + kid + '">'
+      /* Simge kutusu (2026-10-30, kullanıcı görseli: «bazı kartlar profesyonelce değil, çok dandirik»):
+         seviyeyi bir bakışta söyler; adı yine rozette. */
+      + '<span class="okart__simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + (OKART_SIMGE[merkez ? 'merkez' : k.seviye] || OKART_SIMGE.kucuk) + '</svg></span>'
       + '<div class="okart__bas">' + (merkez ? '<span class="okart__kaynak">Merkez önerisi</span>' : '') + seviyeRozeti(k.seviye) + '</div>'
       + (oneri.capraz ? caprazHtml(oneri.capraz) : '')
       /* Başlık seviyesi kartın durduğu yere göre: kutu içinde h3 (kutunun

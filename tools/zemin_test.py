@@ -79,6 +79,32 @@ with tempfile.TemporaryDirectory() as d:
     h = Sahte("POST", "/api/zemin/gece", govde=PNG, tur="image/png")
     Z.isle(h)
     bekle("baslikla yazilir", h.kod == 204 and Z.bul("gece", d)[1] == "image/png")
+    # 2026-10-30: video parca parca yazilir ve okunur; Range 206; MOV kabul; 600 MB siniri
+    BUYUK = MP4 + bytes(range(256)) * 12000                    # ~3 MB, birden cok parca
+    h = Sahte("POST", "/api/zemin/gece", govde=BUYUK, tur="video/mp4")
+    Z.isle(h)
+    bekle("buyuk video akarak yazilir", h.kod == 204 and (Path(d) / "gece.mp4").read_bytes() == BUYUK)
+    h = Sahte("GET", "/api/zemin/gece")
+    h.headers["Range"] = "bytes=100-199"
+    Z.isle(h)
+    bekle("Range 206 ve dogru aralik", h.kod == 206 and h.wfile.getvalue() == BUYUK[100:200])
+    h = Sahte("GET", "/api/zemin/gece")
+    h.headers["Range"] = "bytes=%d-" % (len(BUYUK) + 5)
+    Z.isle(h)
+    bekle("aralik disi 416", h.kod == 416)
+    MOV = b"\0\0\0\x14ftypqt  " + b"\0" * 32
+    Z.yaz("gece", "video/quicktime", MOV, d)
+    bekle("mov yazilir", Z.bul("gece", d)[1] == "video/quicktime")
+    h = Sahte("POST", "/api/zemin/gece", govde=b"x", tur="video/mp4")
+    h.headers["Content-Length"] = str(Z.UST_SINIR + 1)
+    Z.isle(h)
+    bekle("600 MB ustu 413, eski dosya kalir", h.kod == 413 and Z.bul("gece", d)[1] == "video/quicktime" and Z.UST_SINIR == 600 * 1024 * 1024)
+    h = Sahte("POST", "/api/zemin/gece", govde=MP4[:20], tur="video/mp4")
+    h.headers["Content-Length"] = "5000"
+    Z.isle(h)
+    bekle("yarida kalan yukleme eskisini bozmaz", h.kod == 400 and Z.bul("gece", d)[1] == "video/quicktime")
+    h = Sahte("POST", "/api/zemin/gece", govde=PNG, tur="image/png")
+    Z.isle(h)
     h = Sahte("DELETE", "/api/zemin/gece")
     Z.isle(h)
     bekle("silinir", h.kod == 204 and Z.bul("gece", d)[0] is None)

@@ -381,22 +381,24 @@ window.LIFEOS = window.LIFEOS || {};
   function dosyaYukle(yuva, dosya){
     if(!sunucuVar()) return Promise.resolve({ ok:false, mesaj:'Kendi dosyan için LifeOS bu bilgisayarda açık olmalı.' });
     const tur = String(dosya && dosya.type || '');
-    if(!/^(image\/(jpeg|png|webp)|video\/(mp4|webm))$/.test(tur)) return Promise.resolve({ ok:false, mesaj:'Yalnız JPEG, PNG, WebP fotoğraf ya da MP4, WebM video.' });
+    if(!/^(image\/(jpeg|png|webp)|video\/(mp4|webm|quicktime|x-m4v))$/.test(tur)) return Promise.resolve({ ok:false, mesaj:'Yalnız JPEG, PNG, WebP fotoğraf ya da MP4, MOV, WebM video (MKV ve AVI’yi önce MP4’e çevir).' });
+    if(dosya.size > 600 * 1024 * 1024) return Promise.resolve({ ok:false, mesaj:'Dosya 600 MB’tan büyük.' });
     return fetch(new URL('/api/zemin/' + yuva, location.href).href, { method:'POST', headers:{ 'Content-Type':tur, 'X-LifeOS':'zemin' }, body:dosya })
       .then(r => r.ok ? null : r.text().then(t => { throw new Error(t || 'Yüklenemedi.'); }))
       .then(() => {
         depoYaz('lifeos.manzara.tur.' + yuva, /^video/.test(tur) ? 'video' : 'foto');
         depoYaz('lifeos.manzara.surum', String(Date.now()));
         if(yuva === 'gece') geceAyarla('kendi'); else manzaraAyarla('kendi');
-        return { ok:true, mesaj:/^video/.test(tur) ? 'Video kaydedildi.' : 'Fotoğraf kaydedildi.' };
+        return { ok:true, mesaj:/^video/.test(tur) ? 'Video kaydedildi; bitince başa döner.' : 'Fotoğraf kaydedildi.' };
       })
       .catch(e => ({ ok:false, mesaj:(e && e.message) || 'Yüklenemedi: LifeOS sunucusu yanıt vermedi.' }));
   }
   const seg = (ad, sec, sinif, liste, adlar, simdi) => '<div class="seg seg--block ' + sinif + '" role="group" aria-label="' + ad + '">'
     + liste.map(k => '<button type="button" class="' + (k === simdi ? 'is-on' : '') + '" ' + sec + '="' + k + '"'
       + ' aria-pressed="' + (k === simdi ? 'true' : 'false') + '">' + adlar[k] + '</button>').join('') + '</div>';
-  const dosyaDugmesi = yuva => sunucuVar() ? '<label class="btn btn--sm zemin-dosya">Dosya seç'
-    + '<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" data-zemin-dosya="' + yuva + '" hidden></label>'
+  /* «Fotoğraf ya da video» (kullanıcı, 2026-10-30: «yalnız resim seçeneği olmasın»): video bitince başa döner (videoKur loop). */
+  const dosyaDugmesi = yuva => sunucuVar() ? '<label class="btn btn--sm zemin-dosya">Fotoğraf ya da video seç'
+    + '<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/x-m4v,.mov,.m4v" data-zemin-dosya="' + yuva + '" hidden></label>'
     + '<small class="zemin-durum" data-zemin-durum="' + yuva + '" role="status"></small>' : '';
   function manzaraSeciciHtml(){ return '<div class="zemin-yuva">' + seg('Gündüz arka planı', 'data-manzara-sec', 'manzarasec', MANZARALAR, MANZARA_AD, manzaraSimdi) + dosyaDugmesi('gunduz') + '</div>'; }
   function geceSeciciHtml(){ return '<div class="zemin-yuva">' + seg('Gece arka planı', 'data-gece-sec', 'gecesec', GECELER, GECE_AD, geceSimdi) + dosyaDugmesi('gece') + '</div>'; }
@@ -434,7 +436,7 @@ window.LIFEOS = window.LIFEOS || {};
       if(!g || !g.files || !g.files[0]) return;
       const yuva = g.getAttribute('data-zemin-dosya');
       const durum = document.querySelector('[data-zemin-durum="' + yuva + '"]');
-      if(durum) durum.textContent = 'Yükleniyor…';
+      if(durum) durum.textContent = /^video/.test(g.files[0].type) ? 'Video yükleniyor… büyük dosya biraz sürer.' : 'Yükleniyor…';
       dosyaYukle(yuva, g.files[0]).then(s => { if(durum) durum.textContent = s.mesaj; g.value = ''; });
     });
   }

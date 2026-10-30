@@ -145,31 +145,31 @@ window.LIFEOS.KISAYOL = (function(){
     return l;
   }
 
-  /* Oyunsu düğme (kullanıcı, 2026-10-30, örnek: cam kareler, üstte eğlenceli
-     renkli simge, altta minik ad: «daha oyunsu, anlaşılması kolay, sistem daha
-     sıcak olur; camsı efekti unutma»). Simge adın anlamından seçilir; tanınmayan
-     ad yıldız alır. Renk süs değildir, düğmeyi bulmayı kolaylaştırır. */
+  /* Cam kutu, ince çizgi simge (kullanıcı, 2026-10-30: önce «cam kareler, üstte
+     eğlenceli simge, altta minik ad»; sonra «ikonlar çok emojisel, daha
+     profesyonel»). Simgeler tek renk, ince çizgi (sistemin geri kalanı gibi),
+     rengi modülün rengi; anlam addan seçilir, tanınmayan ad yıldız alır. */
   const SIMGELER = [
-    [/uyku/, '<path d="M15.5 3.5a8.5 8.5 0 1 0 5 15.4A7 7 0 0 1 15.5 3.5z" fill="#8B7CF6"/><circle cx="18.2" cy="5.8" r="1.3" fill="#FFC93C"/><circle cx="20.6" cy="9.8" r=".9" fill="#FFC93C"/>'],
-    [/kilo|tart/, '<rect x="3.5" y="4" width="17" height="16" rx="4.5" fill="#2EC4B6"/><path d="M8 11a4 4 0 0 1 8 0z" fill="#fff"/><path d="M12 11l1.7-2.4" stroke="#2EC4B6" stroke-width="1.4" stroke-linecap="round"/>'],
-    [/öğün|yemek|kahvalt|öğle|akşam|besin|mutfak/, '<path d="M3.5 11h17a8.5 8.5 0 0 1-17 0z" fill="#FF9F43"/><path d="M9 3.8c-1 1.2 1 2 0 3.4M13 3.8c-1 1.2 1 2 0 3.4" stroke="#FFC93C" stroke-width="1.6" fill="none" stroke-linecap="round"/>'],
-    [/hareket|antrenman|koşu|yürüyüş|spor|ağırlık/, '<path d="M13.5 2.5 5 13.5h6l-1.5 8 9-11.5h-6z" fill="#FFB020"/><path d="M13.5 2.5 5 13.5h6z" fill="#FF8A3D"/>'],
-    [/test|tahlil/, '<path d="M10 3v5.5L4.8 17.6A2.3 2.3 0 0 0 6.8 21h10.4a2.3 2.3 0 0 0 2-3.4L14 8.5V3" fill="#DDF7EC" stroke="#2ECC8F" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.3 15h11.4l1.5 2.6a2.3 2.3 0 0 1-2 3.4H6.8a2.3 2.3 0 0 1-2-3.4z" fill="#2ECC8F"/><path d="M8.5 3h7" stroke="#2ECC8F" stroke-width="1.8" stroke-linecap="round"/>'],
-    [/su\b|sıvı/, '<path d="M12 3.5c3.3 4 5.5 7.1 5.5 10a5.5 5.5 0 0 1-11 0c0-2.9 2.2-6 5.5-10z" fill="#4DA3FF"/><path d="M9.5 14a2.5 2.5 0 0 0 2.5 2.5" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>'],
-    [/not/, '<rect x="5" y="3" width="14" height="18" rx="3" fill="#FFC93C"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'],
-    [/king/, '<path d="M3.5 8l4.2 3.6L12 5l4.3 6.6L20.5 8l-1.8 10H5.3z" fill="#FFB020"/><rect x="5.3" y="18.6" width="13.4" height="2.2" rx="1.1" fill="#E89611"/><circle cx="12" cy="13.6" r="1.5" fill="#fff"/>'],
-    [/soru/, '<path d="M12 3.5a8.5 8.5 0 0 1 0 17c-1.5 0-2.9-.4-4.1-1L4 20.5l1.1-3.6A8.5 8.5 0 0 1 12 3.5z" fill="#4DA3FF"/><path d="M9.8 9.6a2.3 2.3 0 1 1 3.3 2.1c-.7.3-1.1.9-1.1 1.6v.4" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round"/><circle cx="12" cy="16.4" r="1" fill="#fff"/>'],
-    [/tekrar/, '<path d="M19 9a7.5 7.5 0 0 0-13.4-2.6M5 15a7.5 7.5 0 0 0 13.4 2.6" stroke="#2EC4B6" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M5 3.5v4h4M19 20.5v-4h-4" stroke="#2EC4B6" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'],
-    [/konu|okuma|kitap|ders/, '<path d="M3.5 5.5c3-1.2 5.8-1 8.5.8v14c-2.7-1.8-5.5-2-8.5-.8z" fill="#4DA3FF"/><path d="M20.5 5.5c-3-1.2-5.8-1-8.5.8v14c2.7-1.8 5.5-2 8.5-.8z" fill="#9CCBFF"/>'],
-    [/deneme|sınav/, '<rect x="5" y="4.5" width="14" height="16.5" rx="3" fill="#FF6B9D"/><rect x="9" y="3" width="6" height="3.5" rx="1.5" fill="#FFB3CC"/><path d="M8.5 12.5l2.2 2.2 4.8-4.8" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'],
-    [/dil|kelime/, '<path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4A2.5 2.5 0 0 1 4 13.5z" fill="#FF6B9D"/><path d="M8 9h8M8 12h5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>'],
-    [/felsefe|fikir/, '<path d="M12 3a6.5 6.5 0 0 0-3.8 11.8c.6.4.8 1 .8 1.7V17h6v-.5c0-.7.3-1.3.8-1.7A6.5 6.5 0 0 0 12 3z" fill="#FFC93C"/><rect x="9" y="18" width="6" height="2.8" rx="1.2" fill="#A99FD0"/>'],
-    [/tarih/, '<path d="M6 3.5h12M6 20.5h12" stroke="#8B7CF6" stroke-width="2" stroke-linecap="round"/><path d="M7.5 4v2.5c0 2 4.5 3.7 4.5 5.5S7.5 15.5 7.5 17.5V20h9v-2.5c0-2-4.5-3.7-4.5-5.5s4.5-3.5 4.5-5.5V4z" fill="#DCD5FF"/><path d="M9 20h6c0-1.8-3-2.6-3-3.6 0 1-3 1.8-3 3.6z" fill="#FF9F43"/>'],
-    [/ses|müzik/, '<path d="M4 12v0M7.5 8.5v7M11 5v14M14.5 8v8M18 10v4" stroke="#FF6B9D" stroke-width="2.4" stroke-linecap="round"/>'],
-    [/yazı|yaz\b/, '<path d="M15.5 4.5l4 4L9 19l-5 1 1-5z" fill="#FF9F43"/><path d="M14 6l4 4" stroke="#fff" stroke-width="1.4"/>'],
-    [/merdiven|seviye/, '<path d="M4 20h4v-4h4v-4h4V8h4V4" stroke="#2ECC8F" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19.5" cy="4.5" r="2" fill="#FFC93C"/>'],
+    [/uyku/, '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>'],
+    [/kilo|tart/, '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 10.5a3.5 3.5 0 0 1 7 0"/><path d="M12 10.5l1.5-2"/>'],
+    [/öğün|yemek|kahvalt|öğle|akşam|besin|mutfak/, '<path d="M4 11h16a8 8 0 0 1-16 0z"/><path d="M9 4.5c-.8 1 .8 1.8 0 3M13 4.5c-.8 1 .8 1.8 0 3"/>'],
+    [/hareket|antrenman|koşu|yürüyüş|spor|ağırlık/, '<path d="M3 12h3l2.5-6 4 12 2.5-6h6"/>'],
+    [/test|tahlil/, '<path d="M9.5 3.5h5M10 3.5v6L5 18.5a1.5 1.5 0 0 0 1.3 2.2h11.4a1.5 1.5 0 0 0 1.3-2.2L14 9.5v-6"/><path d="M7.5 15h9"/>'],
+    [/su\b|sıvı/, '<path d="M12 3.5c3 3.8 5.5 6.8 5.5 10a5.5 5.5 0 0 1-11 0c0-3.2 2.5-6.2 5.5-10z"/>'],
+    [/not/, '<path d="M14 3.5H7A2.5 2.5 0 0 0 4.5 6v12A2.5 2.5 0 0 0 7 20.5h10a2.5 2.5 0 0 0 2.5-2.5V9z"/><path d="M14 3.5V9h5.5M8.5 13h7M8.5 16.5h4.5"/>'],
+    [/king/, '<path d="M4 8l4 3.5L12 5l4 6.5L20 8l-1.5 9.5h-13z"/><path d="M5.5 20.5h13"/>'],
+    [/soru/, '<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.2 1-1.2 1.8"/><path d="M12 16.6v.1"/>'],
+    [/tekrar/, '<path d="M19 9a7.5 7.5 0 0 0-13.4-2.6M5 15a7.5 7.5 0 0 0 13.4 2.6"/><path d="M5 3.5v4h4M19 20.5v-4h-4"/>'],
+    [/konu|okuma|kitap|ders/, '<path d="M12 6.5C10 5 7 4.5 3.5 5v13.5C7 18 10 18.5 12 20c2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/><path d="M12 6.5V20"/>'],
+    [/deneme|sınav/, '<rect x="5" y="4.5" width="14" height="16" rx="2.5"/><path d="M9 3.5h6v3H9zM8.5 13l2.2 2.2 4.8-4.8"/>'],
+    [/dil|kelime/, '<path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2H11l-4.5 3.5v-3.5h0a2 2 0 0 1-2-2z"/><path d="M8.5 9h7M8.5 12h4.5"/>'],
+    [/felsefe|fikir/, '<path d="M9 17.5h6M10 20.5h4"/><path d="M12 3.5a6 6 0 0 0-3.6 10.8c.6.5.6.9.6 1.7v1.5h6V16c0-.8 0-1.2.6-1.7A6 6 0 0 0 12 3.5z"/>'],
+    [/tarih/, '<path d="M6.5 3.5h11M6.5 20.5h11"/><path d="M7.5 3.5c0 4 4.5 5.5 4.5 8.5s-4.5 4.5-4.5 8.5M16.5 3.5c0 4-4.5 5.5-4.5 8.5s4.5 4.5 4.5 8.5"/>'],
+    [/ses|müzik/, '<path d="M4 12h0M7.5 9v6M11 6v12M14.5 8.5v7M18 10.5v3"/>'],
+    [/yazı|yaz\b/, '<path d="M15 4.5l4.5 4.5L9 19.5l-5 1 1-5z"/><path d="M13 6.5l4.5 4.5"/>'],
+    [/merdiven|seviye/, '<path d="M4 19.5h4v-4h4v-4h4v-4h4"/>'],
   ];
-  const YILDIZ = '<path d="M12 3l1.9 5.6 5.6 1.9-5.6 1.9L12 18l-1.9-5.6-5.6-1.9 5.6-1.9z" fill="#8B7CF6"/><path d="M18.5 15.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z" fill="#FFC93C"/>';
+  const YILDIZ = '<path d="M12 3.5l1.9 5.6 5.6 1.9-5.6 1.9L12 18.5l-1.9-5.6-5.6-1.9 5.6-1.9z"/>';
   function simge(ad){
     const t = String(ad || '').toLocaleLowerCase('tr-TR');
     const s = SIMGELER.find(x => x[0].test(t));

@@ -31,7 +31,8 @@
   background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(238,240,246,.86));
   box-shadow:inset 0 1px 0 #fff, inset 0 0 0 1px rgba(20,24,40,.06), 0 6px 14px -9px rgba(20,24,40,.38);
   transition:transform .22s cubic-bezier(.2,.8,.2,1), box-shadow .22s ease; }
-.giris .kisayol__simge svg{ width:24px; height:24px; }
+.giris .kisayol__simge{ color:color-mix(in oklab, var(--mod, var(--primary)) 82%, var(--text)); }
+.giris .kisayol__simge svg{ width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
 .giris .kisayol__d:hover .kisayol__simge{ transform:translateY(-2px); box-shadow:inset 0 1px 0 #fff, inset 0 0 0 1px rgba(20,24,40,.08), 0 10px 18px -10px rgba(20,24,40,.45); }
 .giris .kisayol__d:active .kisayol__simge{ transform:scale(.93); }
 .giris .kisayol__d:active{ transform:none; }
