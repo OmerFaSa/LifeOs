@@ -132,6 +132,12 @@ window.LIFEOS = window.LIFEOS || {};
     bulanik: { anahtar:'lifeos.zemin.bulanik', kok:'data-bulanik',  vars:'yok',   sira:['yok', 'hafif', 'cok'], ad:{ yok:'Net', hafif:'Hafif', cok:'Yumuşak' } },
     rozet:   { anahtar:'lifeos.rozet',         kok:'data-rozet',    vars:'acik',  sira:['acik', 'kapali'],     ad:{ acik:'Göster', kapali:'Gizle' } },
     /* 2026-10-30 (kullanıcı: «sol taraftaki menüyü de camsı yapabilelim ayarlarda»). */
+    /* Tema paketi (kullanıcı, 2026-10-30: «genel tema ayarlar olmalı; buzul camsı
+       efekte Türklükle ilgili şeyler, kardeşim tatlışlar; King'in adını
+       değiştirelim; kimisi uzay, kimisi fantastik, kimisi mitoloji»). Paket
+       vurgu rengi, arka plan motifi ve King'in adını verir; sayıya dokunmaz. */
+    paket:   { anahtar:'lifeos.tema.paket',    kok:'data-paket',    vars:'sade',  sira:['sade', 'turk', 'tatli', 'uzay', 'fantastik', 'mitoloji'],
+      ad:{ sade:'Sade', turk:'Türk', tatli:'Tatlı', uzay:'Uzay', fantastik:'Fantastik', mitoloji:'Mitoloji' } },
     kenar:   { anahtar:'lifeos.kenar.yuzey',   kok:'data-kenar',    vars:'buzlu', sira:['buzlu', 'cam'],       ad:{ buzlu:'Buzlu', cam:'Cam' } },
   });
   function secim(k){
@@ -212,6 +218,10 @@ window.LIFEOS = window.LIFEOS || {};
       + H('Yazı tipi', 'Bütün modüllerde aynı', yaziSeciciHtml())
       + H('Cam yoğunluğu', 'Kartların ne kadar saydam olduğu', secimHtml('cam', 'Cam yoğunluğu'))
       + H('Sol menü', 'Cam: arkadaki fotoğraf görünür', secimHtml('kenar', 'Sol menü'))
+      + G('Tema paketi', 'Vurgu rengi, arka plan motifi ve King’in adı', secimHtml('paket', 'Tema paketi'))
+      + H('King’in adı', 'Boş bırakırsan paketin adı: ' + (L.KING && L.KING.PAKET_AD ? (L.KING.PAKET_AD[secim('paket')] || 'King') : 'King'),
+        '<input class="ayarlar__girdi" type="text" maxlength="20" data-king-ad placeholder="' + kac(L.KING && L.KING.PAKET_AD ? (L.KING.PAKET_AD[secim('paket')] || 'King') : 'King')
+        + '" value="' + kac((() => { try{ return localStorage.getItem('lifeos.king.ad') || ''; }catch(e){ return ''; } })()) + '" aria-label="King’in adı">')
       + H('Kontrast', 'Yüksek: soluk yazılar koyulaşır, kartlar dolar', secimHtml('kontrast', 'Kontrast'))
       + H('Yüzey', 'Yalnız bu modül', cagir(L.ZEMIN, 'yuzeySeciciHtml'))
       + H('Varsayılana dön', 'Tema dışındaki görünüş tercihleri ilk hâline döner; verin değişmez',
@@ -525,6 +535,10 @@ window.LIFEOS = window.LIFEOS || {};
     document.addEventListener('change', e => {
       if(!(e.target && e.target.matches)) return;
       if(e.target.matches('[data-sessiz]') && /^\d\d:\d\d$/.test(e.target.value)) sessizYaz({ [e.target.getAttribute('data-sessiz')]:e.target.value });
+      else if(e.target.matches('[data-king-ad]')){
+        const v = String(e.target.value || '').replace(/[<>"]/g, '').trim().slice(0, 20);
+        try{ if(v) localStorage.setItem('lifeos.king.ad', v); else localStorage.removeItem('lifeos.king.ad'); }catch(x){ /* depo kapalı */ }
+      }
       else planDegisti(e.target);
     });
     /* Ayarlarda ara: yazınca bütün bölümler açılır, eşleşmeyen satır gizlenir. */

@@ -3793,6 +3793,22 @@ window.LIFEOS.KING = (function(){
      yapabilmeliyiz, mavi yapabilmeliyiz»). Köke data-king-gorunus yazılır;
      renk ve taç king-cam.css'te. Sesli okumada cihaz sesi tercihe göre
      kadın ya da erkek seçilir (sesSec). TASINAN'da. */
+  /* AD (kullanıcı, 2026-10-30: «King'in ismini değiştirelim»; tema paketi).
+     Kullanıcının yazdığı ad önce gelir; yoksa paketin adı; yoksa King.
+     Yönelme eki sesli uyumuyla: King'e, Kağan'a, Bilge'ye. */
+  const AD_ANAHTAR = 'lifeos.king.ad';
+  const PAKET_AD = Object.freeze({ turk:'Kağan', tatli:'Pamuk', uzay:'Komutan', fantastik:'Bilge', mitoloji:'Kâhin' });
+  function ad(){
+    let v = '', p = null;
+    try{ v = String(localStorage.getItem(AD_ANAHTAR) || '').trim(); p = localStorage.getItem('lifeos.tema.paket'); }catch(e){ /* depo yok */ }
+    return v ? v.slice(0, 20) : (PAKET_AD[p] || 'King');
+  }
+  function adYonelme(a){
+    a = a || ad();
+    const k = a.toLocaleLowerCase('tr').replace(/[^a-zçğıöşüâîû]/g, '');
+    const unlu = (k.match(/[aeıioöuüâîû]/g) || ['e']).pop();
+    return a + '’' + (/[aeıioöuüâîû]$/.test(k) ? 'y' : '') + (/[aıouâû]/.test(unlu) ? 'a' : 'e');
+  }
   const GORUNUS = 'lifeos.king.gorunus';
   const GORUNUSLER = ['mavi', 'pembe'];
   const GORUNUS_AD = { mavi:'Mavi', pembe:'Pembe' };
@@ -5555,7 +5571,7 @@ window.LIFEOS.KING = (function(){
     const bekliyor = akis.some(m => m.bekliyor);
     deste = Math.max(0, Math.min(deste, Math.max(0, kingler.length - 1)));
     const ekran = ekranAdi();
-    const bas = '<div class="king__bas">' + yuzHtml() + '<b>King</b>'
+    const bas = '<div class="king__bas">' + yuzHtml() + '<b>' + kac(ad()) + '</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + (ekran ? ' · ' + kac(ekran) : '') + '</span>'
       + isRozet()
       + '<button type="button" class="king__kapat king__buyut" data-king="buyut" aria-label="Genişlet" title="Genişlet (Ctrl iki kez)">' + SVG_BUYUT + '</button>'
@@ -5586,7 +5602,7 @@ window.LIFEOS.KING = (function(){
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>' + yelpazeHtml() + '</div>'
       + '<input type="file" accept="image/*" data-king-dosya class="sr-only"/>'
       + '<input type="file" accept="application/pdf,.pdf" data-king-pdf class="sr-only"/>'
-      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
+      + '<input class="king__girdi" type="text" aria-label="' + kac(adYonelme()) + ' yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : kac(adYonelme()) + ' yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
       + mik + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>';
   }
@@ -5619,7 +5635,7 @@ window.LIFEOS.KING = (function(){
        kip seçici, küçült, kapat. Bağlantı durumu Ayarlar'da; liste düğmesi
        listenin içinde ve kenardaki çıkıntıda. */
     const bas = '<div class="king__bas">'
-      + yuzHtml() + '<b>King</b>'
+      + yuzHtml() + '<b>' + kac(ad()) + '</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + '</span>'
       + isRozet() + odakHtml() + kipHtml()
       + '<button type="button" class="king__kapat king__kucult" data-king="kucult" aria-label="Küçült" title="Küçült: sayfayı kullanırken açık kalır">'
@@ -5694,7 +5710,7 @@ window.LIFEOS.KING = (function(){
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>' + (aracSayfa === 'isler' ? aracMenu() : yelpazeHtml()) + '</div>'
       + '<input type="file" accept="image/*" data-king-dosya class="sr-only"/>'
       + '<input type="file" accept="application/pdf,.pdf" data-king-pdf class="sr-only"/>'
-      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : kip() === 'ekran' ? 'Ekran hakkında sor…' : kip() === 'kamera' ? 'Kameradakini sor…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
+      + '<input class="king__girdi" type="text" aria-label="' + kac(adYonelme()) + ' yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : kip() === 'ekran' ? 'Ekran hakkında sor…' : kip() === 'kamera' ? 'Kameradakini sor…' : kac(adYonelme()) + ' yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
       + mik
       + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form></div>' + baglamHtml(vitrin) + alan;
@@ -6763,7 +6779,7 @@ window.LIFEOS.KING = (function(){
   }
 
   return {
-    kur, ac, kapat, kucult, buyut, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
+    kur, ac, kapat, kucult, buyut, ad, adYonelme, AD_ANAHTAR, PAKET_AD, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
     isDurumYaz:d => { isDurum = d; }, arkadasHal, arkadasPoz, arkadasEsya, ARKADAS_UYKU, yazimSuresi,
     GORUNUS_ANAHTAR:GORUNUS, gorunus, gorunusAyarla, gorunusSeciciHtml, _sesSec:sesSec, isRozet, isYokla, ekipAc, ekipHtml, gorevHtml, isZamanli:() => !!isZaman,
     beceriAc, beceriPanelHtml, bekleyenAl, eylemleriCalistir, k2Html, ODAK_SON,

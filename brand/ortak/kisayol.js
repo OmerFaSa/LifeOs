@@ -141,7 +141,7 @@ window.LIFEOS.KISAYOL = (function(){
     const L = window.LIFEOS;
     if(L.DEFTER && L.DEFTER.kuruluMu && L.DEFTER.kuruluMu()) l.push({ ad:'Notlarım', is:() => L.DEFTER.ac() });
     else if(L.NOTUM && L.NOTUM.kuruluMu && L.NOTUM.kuruluMu()) l.push({ ad:'Notlarım', is:() => L.NOTUM.panelAc() });
-    if(L.KING && L.KING.ac) l.push({ ad:'King’e sor', is:() => L.KING.ac() });
+    if(L.KING && L.KING.ac) l.push({ ad:(L.KING.adYonelme ? L.KING.adYonelme() : 'King’e') + ' sor', simge:'king', is:() => L.KING.ac() });
     return l;
   }
 
@@ -183,7 +183,7 @@ window.LIFEOS.KISAYOL = (function(){
     tikBagla();
     return '<nav class="kisayol" aria-label="Kısa yollar">'
       + sonDugmeler.map((d, i) => '<button type="button" class="kisayol__d" data-kisayol="' + i + '">'
-        + simge(d.ad) + '<span class="kisayol__ad">' + kac(d.ad) + '</span>'
+        + simge(d.simge || d.ad) + '<span class="kisayol__ad">' + kac(d.ad) + '</span>'
         + (typeof d.sayi === 'number' && d.sayi > 0 ? '<span class="kisayol__sayi">' + kac(d.sayi) + '</span>' : '')
         + '</button>').join('')
       + '</nav>';

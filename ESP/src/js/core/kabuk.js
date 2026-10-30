@@ -402,7 +402,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="kenar__grup">'
       /* King (brand/ortak/king.js): her yerden sade sohbet; Ctrl iki kez. */
       + '<button class="ust__king kenar__arac" type="button" data-king-ac aria-haspopup="dialog"'
-      +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket('King') + kisayol('Ctrl Ctrl') + '</button>'
+      +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket(window.LIFEOS.KING && window.LIFEOS.KING.ad ? window.LIFEOS.KING.ad() : 'King') + kisayol('Ctrl Ctrl') + '</button>'
       + '<button class="ust__ayarlar kenar__arac" type="button" data-act="open-appearance" aria-haspopup="dialog"'
       +   ' aria-label="Ayarlar" title="Ayarlar">' + simge('ayarlar') + etiket('Ayarlar') + '</button>'
       + '</div><div class="kenar__benler">'
