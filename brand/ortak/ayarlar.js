@@ -37,7 +37,38 @@ window.LIFEOS = window.LIFEOS || {};
     { id:'manrope', ad:'Manrope',   not:'yuvarlak, yumuşak' },
     { id:'sistem',  ad:'Cihazın',   not:'işletim sisteminin yazısı' },
     { id:'kitap',   ad:'Newsreader', not:'kitap gibi, serif' },
+    /* Ek aileler (kullanıcı, 2026-10-30: «çok daha güzel fontlar; kullanıcının
+       gözüne birçok şey hitap edebilir»; OFL, src/fonts/ek/KUNYE.md). Gömülmez:
+       yalnız seçilince ya da seçici açılınca yüklenir (yaziYukle). */
+    { id:'fraunces',  ad:'Fraunces',   not:'sıcak serif, şık başlık', aile:'Fraunces',         dosya:'fraunces',         agirlik:'300 700' },
+    { id:'nunito',    ad:'Nunito',     not:'yuvarlak, dost canlısı',  aile:'Nunito',           dosya:'nunito',           agirlik:'400 800' },
+    { id:'grotesk',   ad:'Space Grotesk', not:'modern, teknik',       aile:'Space Grotesk',    dosya:'space-grotesk',    agirlik:'400 700' },
+    { id:'dmsans',    ad:'DM Sans',    not:'temiz, geometrik',        aile:'DM Sans',          dosya:'dm-sans',          agirlik:'400 700' },
+    { id:'playfair',  ad:'Playfair',   not:'zarif, dergi gibi',       aile:'Playfair Display', dosya:'playfair-display', agirlik:'400 800' },
+    { id:'lora',      ad:'Lora',       not:'okunaklı kitap serifi',   aile:'Lora',             dosya:'lora',             agirlik:'400 700' },
+    { id:'quicksand', ad:'Quicksand',  not:'yuvarlak, oyunsu',        aile:'Quicksand',        dosya:'quicksand',        agirlik:'400 700' },
+    { id:'comfortaa', ad:'Comfortaa',  not:'yumuşak, tatlı',          aile:'Comfortaa',        dosya:'comfortaa',        agirlik:'400 700' },
   ]);
+  const ARALIK = { latin:'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD',
+    'latin-ext':'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF' };
+  const yuklenen = {};
+  /* Dosya adresi ayarlar.js'in yerine göre (kaynak ve test sayfası); tek dosyada belgenin yanı (dist/fonts/ek). */
+  function ekYol(dosya){
+    const b = typeof document !== 'undefined' ? document.querySelector('script[src*="core/ayarlar.js"]') : null;
+    return new URL(b ? '../../fonts/ek/' + dosya : 'fonts/ek/' + dosya, b ? b.src : document.baseURI).href;
+  }
+  function yaziYukle(id){
+    const y = YAZILAR.find(x => x.id === id);
+    if(!y || !y.dosya || yuklenen[id] || typeof FontFace === 'undefined' || typeof document === 'undefined' || !document.fonts) return false;
+    yuklenen[id] = true;
+    Object.keys(ARALIK).forEach(alt => {
+      try{
+        const f = new FontFace(y.aile, 'url("' + ekYol(y.dosya + '-' + alt + '.woff2') + '") format("woff2")', { weight:y.agirlik, display:'swap', unicodeRange:ARALIK[alt] });
+        f.load().then(ff => document.fonts.add(ff)).catch(() => { /* dosya yok: sistem yazısına düşer */ });
+      }catch(e){ /* eski tarayıcı */ }
+    });
+    return true;
+  }
   function yazi(){
     let v = null;
     try{ v = localStorage.getItem(YAZI_ANAHTAR); }catch(e){}
@@ -47,6 +78,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(typeof document === 'undefined') return;
     const kok = document.documentElement;
     if(k === 'inter') kok.removeAttribute('data-yazi'); else kok.setAttribute('data-yazi', k);
+    yaziYukle(k);
   }
   function yaziAyarla(k){
     if(!YAZILAR.some(y => y.id === k)) return false;
@@ -63,6 +95,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   function yaziSeciciHtml(){
     const s = yazi();
+    YAZILAR.forEach(y => yaziYukle(y.id));   // örnek «Aa»lar kendi yazısıyla görünsün
     return '<div class="ayarlar__yazilar" role="radiogroup" aria-label="Yazı tipi">' + YAZILAR.map(y =>
       '<button type="button" class="ayarlar__yazi' + (y.id === s ? ' is-on' : '') + '" role="radio" aria-checked="' + (y.id === s) + '"'
       + ' data-yazi-sec="' + y.id + '" data-yazi-ornek="' + y.id + '">'
@@ -507,6 +540,6 @@ window.LIFEOS = window.LIFEOS || {};
     });
   }
 
-  L.AYARLAR = Object.freeze({ html, BOLUMLER, YAZILAR, yazi, yaziAyarla, HESAP_SAYFALARI, BAGLANTI_SAYFALARI, ODEME_ANAHTAR, odemeAcik, odemeAyarla,
+  L.AYARLAR = Object.freeze({ html, BOLUMLER, YAZILAR, yazi, yaziAyarla, yaziYukle, HESAP_SAYFALARI, BAGLANTI_SAYFALARI, ODEME_ANAHTAR, odemeAcik, odemeAyarla,
     SECIMLER, secim, secimAyarla, SIFIRLANAN, ara, _sec:id => { secili = id; } });
 })();

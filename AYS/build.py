@@ -108,6 +108,19 @@ def copy_service_worker() -> None:
         shutil.copy2(kaynak, DIST / "sw.js")
 
 
+def copy_fonts_ek() -> None:
+    """Ek yazi tipleri (Ayarlar › Yazi tipi) METNE gomulmez: yalniz secilince
+    dist/ yanindaki fonts/ek/'ten yuklenir (ayarlar.js yaziYukle)."""
+    src_dir = SRC / "fonts" / "ek"
+    if not src_dir.exists():
+        return
+    dst_dir = DIST / "fonts" / "ek"
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    for f in src_dir.iterdir():
+        if f.is_file():
+            shutil.copy2(f, dst_dir / f.name)
+
+
 def copy_brand_assets() -> None:
     """Marka gorselleri/videosu METNE gomulmez — HTML'e kopyalanirsa dosya
     boyutu megabaytlarca sisiyor (video ~1.8MB). Bunun yerine dist/ yaninda
@@ -295,6 +308,7 @@ def build(denetle: bool = False):
     out_path.write_text(output, encoding="utf-8")
     (DIST / "kaynak.json").write_text(liste, encoding="utf-8")
     copy_brand_assets()
+    copy_fonts_ek()
     copy_level_assets()
     copy_service_worker()
 

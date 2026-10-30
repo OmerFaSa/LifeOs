@@ -7,6 +7,14 @@
 html[data-yazi="manrope"]{ --font-body:'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
 html[data-yazi="sistem"]{ --font-body:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
 html[data-yazi="kitap"]{ --font-body:'Newsreader', ui-serif, Georgia, serif; }
+html[data-yazi="fraunces"]{ --font-body:'Fraunces', ui-serif, Georgia, serif; }
+html[data-yazi="nunito"]{ --font-body:'Nunito', ui-rounded, system-ui, sans-serif; }
+html[data-yazi="grotesk"]{ --font-body:'Space Grotesk', ui-sans-serif, system-ui, sans-serif; }
+html[data-yazi="dmsans"]{ --font-body:'DM Sans', ui-sans-serif, system-ui, sans-serif; }
+html[data-yazi="playfair"]{ --font-body:'Playfair Display', ui-serif, Georgia, serif; }
+html[data-yazi="lora"]{ --font-body:'Lora', ui-serif, Georgia, serif; }
+html[data-yazi="quicksand"]{ --font-body:'Quicksand', ui-rounded, system-ui, sans-serif; }
+html[data-yazi="comfortaa"]{ --font-body:'Comfortaa', ui-rounded, system-ui, sans-serif; }
 
 .ayarlar{ display:flex; flex-direction:column; padding:0; overflow:hidden; }
 /* Yan sayfanın 380 px genişliğini (bildirimler) aşar: iki sütun sığsın. */
@@ -47,6 +55,14 @@ html[data-yazi="kitap"]{ --font-body:'Newsreader', ui-serif, Georgia, serif; }
 .ayarlar__yazi[data-yazi-ornek="manrope"] b{ font-family:'Manrope', sans-serif; }
 .ayarlar__yazi[data-yazi-ornek="sistem"] b{ font-family:system-ui, -apple-system, 'Segoe UI', sans-serif; }
 .ayarlar__yazi[data-yazi-ornek="kitap"] b{ font-family:'Newsreader', Georgia, serif; font-weight:500; }
+.ayarlar__yazi[data-yazi-ornek="fraunces"] b{ font-family:'Fraunces', ui-serif, Georgia, serif; }
+.ayarlar__yazi[data-yazi-ornek="nunito"] b{ font-family:'Nunito', ui-rounded, system-ui, sans-serif; }
+.ayarlar__yazi[data-yazi-ornek="grotesk"] b{ font-family:'Space Grotesk', ui-sans-serif, system-ui, sans-serif; }
+.ayarlar__yazi[data-yazi-ornek="dmsans"] b{ font-family:'DM Sans', ui-sans-serif, system-ui, sans-serif; }
+.ayarlar__yazi[data-yazi-ornek="playfair"] b{ font-family:'Playfair Display', ui-serif, Georgia, serif; }
+.ayarlar__yazi[data-yazi-ornek="lora"] b{ font-family:'Lora', ui-serif, Georgia, serif; }
+.ayarlar__yazi[data-yazi-ornek="quicksand"] b{ font-family:'Quicksand', ui-rounded, system-ui, sans-serif; }
+.ayarlar__yazi[data-yazi-ornek="comfortaa"] b{ font-family:'Comfortaa', ui-rounded, system-ui, sans-serif; }
 
 .ayarlar__profil{ display:flex; align-items:center; gap:12px; padding:12px 0 14px; }
 .ayarlar__profil > span{ flex:1; min-width:0; display:flex; flex-direction:column; }

@@ -46,6 +46,9 @@ window.LIFEOS.MUZIK = (function(){
   const LISTELER = Object.freeze(['genel', 'calisma', 'spor', 'arka']);
   const LISTE_AD = Object.freeze({ genel:'Genel', calisma:'Çalışırken', spor:'Sporda', arka:'Arka plan' });
   const ACILIS_GUN = 'lifeos.muzik.acilis.gun';
+  /* Sunucuda parça var mı (son okumadan): yoksa açılışta sunucuya hiç gidilmez
+     (telefon, eski sunucu, denetim sunucusu 404 vermesin). Taşınır. */
+  const VAR_ANAHTAR = 'lifeos.muzik.var';
   const kac = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
   const VARSAYILAN_ORTAM = {
     sunucu:() => typeof location !== 'undefined' && /^https?:$/.test(location.protocol),
@@ -65,8 +68,10 @@ window.LIFEOS.MUZIK = (function(){
   function yukle(){
     if(!ortam.sunucu()) return Promise.resolve(null);
     return ortam.fetch('/api/muzik', { cache:'no-store' }).then(r => r.ok ? r.json() : null)
-      .then(v => { dizin = v || null; guncelle(); return dizin; }).catch(() => null);
+      .then(v => { dizin = v || null; isaretle(); guncelle(); return dizin; }).catch(() => null);
   }
+  function isaretle(){ try{ if(dizin && dizin.parcalar && dizin.parcalar.length) localStorage.setItem(VAR_ANAHTAR, '1'); else localStorage.removeItem(VAR_ANAHTAR); }catch(e){ /* depo yok */ } }
+  const isaretVar = () => { try{ return localStorage.getItem(VAR_ANAHTAR) === '1'; }catch(e){ return false; } };
   function ayarKaydet(degisen){
     const v = Object.assign({ listeler:d().listeler, acilis:d().acilis, arka:d().arka }, degisen);
     return ortam.fetch('/api/muzik/ayar', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-LifeOS':'muzik' }, body:JSON.stringify(v) })
@@ -227,7 +232,9 @@ window.LIFEOS.MUZIK = (function(){
   }
 
   /* ------------------------------------------------------ Ayarlar › Ses › Müzik */
+  let ayarOkundu = false;
   function ayarHtml(){
+    if(ortam.sunucu() && !dizin && !ayarOkundu){ ayarOkundu = true; setTimeout(() => yukle().then(() => guncelle(true)), 0); }   // Ayarlar › Ses açılınca bir kez
     if(!ortam.sunucu()) return '<div data-muzik-ayar><p class="ayarlar__bos">Müzik dosyaları bu bilgisayardaki LifeOS sunucusunda durur; telefonda ve tek dosya sürümünde yoktur.</p></div>';
     const x = d(), a = x.acilis, k = x.arka;
     const parcalar = x.parcalar.length ? '<ul class="muzik__liste">' + x.parcalar.map(p => '<li class="muzik__parca"><button type="button" class="muzik__dinle" data-muzik-tek="' + p.id + '" aria-label="' + kac(p.ad) + ' çal">'
@@ -332,6 +339,7 @@ window.LIFEOS.MUZIK = (function(){
 
   function acilis(){
     bagla();
+    if(!isaretVar()) return Promise.resolve(null);
     return yukle().then(v => { if(v && !acilisCal()) arkaBaslat(); });
   }
   if(typeof document !== 'undefined' && typeof window !== 'undefined' && !window.__LIFEOS_TEST__){
@@ -341,6 +349,6 @@ window.LIFEOS.MUZIK = (function(){
 
   function _ortam(o){ ortam = Object.assign({}, VARSAYILAN_ORTAM, o || {}); }
   function _sifirla(v){ durdur(); dizin = v || null; kuyruk = []; sira = 0; susturuldu = false; mesajMetni = ''; }
-  return Object.freeze({ LISTELER, LISTE_AD, ACILIS_GUN, yukle, cal, sonraki, durdur, acilisCal, arkaBaslat, susturAc, oturum, durum,
+  return Object.freeze({ LISTELER, LISTE_AD, ACILIS_GUN, VAR_ANAHTAR, yukle, cal, sonraki, durdur, acilisCal, arkaBaslat, susturAc, oturum, durum,
     panelHtml, ayarHtml, liste, bagla, _ortam, _sifirla, _ses:() => oge() });
 })();
