@@ -679,6 +679,7 @@ SP.Screens.analytics = (function(){
     const bugun = SP.Screens.today && SP.Screens.today.ozet ? SP.Screens.today.ozet() : '';
     return String(html`${raw(bugun)}${K.Kutu({ ad:'Bu hafta', yuva:'kayıttan · son 7 gün', govde:ozetHtml() })}
       <div class="mt-16">${yolHaritasi()}</div>
+      ${raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('spi') : ''))}
       <div class="mt-16">${K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri', bolumler })}</div>
       <h2 class="analiz-ara-baslik">Kategoriler</h2>
       ${kategorilerHtml()}

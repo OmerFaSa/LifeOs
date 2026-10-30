@@ -270,6 +270,7 @@ R.Screens.progress = (function(){
     return String(K.Grid([
       K.Span(12, raw(ozet)),
       K.Span(12, yolHaritasi()),
+      K.Span(12, raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('ays') : ''))),
       K.Span(12, DonenGidisat()),
       K.Span(6, K.Stack([ trendCard() ])),
       K.Span(4, K.Stack([ gateCard() ])),

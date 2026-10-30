@@ -258,7 +258,8 @@ window.LIFEOS = window.LIFEOS || {};
         + H('Satın alma ve kart işlemleri', odemeAcik() ? 'Açık; yine de LifeOS’ta ödeme yapan bir araç yok'
             : 'Kapalı: King ve ajanlar ödeme, sipariş ya da kart işine girmez', odemeSecici());
     }
-    if(id === 'baglanti') return H('Google ve YouTube', 'Hesap bağlanmaz: King’in bulduğu bağlantılar senin tarayıcında, kendi oturumunla açılır; LifeOS Google’a veri göndermez', '')
+    if(id === 'baglanti') return G('Google’dan veri', 'Takvim ve Takeout dosyası; hesap bağlanmaz, veri bu bilgisayarda kalır', cagir(L.ICE, 'ayarHtml'))
+      + H('Google ve YouTube', 'Hesap bağlanmaz: King’in bulduğu bağlantılar senin tarayıcında, kendi oturumunla açılır; LifeOS Google’a veri göndermez', '')
       + (hesapVar() ? sayfaSatirlari(BAGLANTI_SAYFALARI) : hesapYok());
     if(id === 'sistem') return '<h4 class="plan__baslik">Sistem planlaması</h4><div class="plan" data-plan-kok><p class="ayarlar__bos">Yükleniyor…</p></div>';
     if(id === 'modul') return (o.modul || []).map(m => H(m.ad, m.not || '',

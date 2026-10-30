@@ -197,6 +197,11 @@ jobs:
       - name: Müzik dosyaları ve listeleri yalnız bu bilgisayardan
         run: python3 tools/muzik_test.py
 
+      # İÇE AKTARMA (2026-10-30). Google verisi hesap bağlanmadan: takvimin gizli
+      # iCal adresi ve Takeout özeti; yalnız bu bilgisayardan, adres dışarı verilmez.
+      - name: Google verisi hesap bağlanmadan, yalnız bu bilgisayardan
+        run: python3 tools/ice_test.py
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç

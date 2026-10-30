@@ -731,6 +731,7 @@ ESP.Screens.analytics = (function(){
       ${map(ESP.Screens.today.analizOzeti(), x => K.Span(12, raw(x)))}
       ${K.Span(12, alanKarolari())}
       ${K.Span(12, yolHaritasi())}
+      ${K.Span(12, raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('esp') : '')))}
       ${K.Span(12, raw('<div class="pk-izgara pk-izgara--iki">' + isiHaritasi() + '</div>'))}
       ${K.Span(12, raw(panoAnaliz()))}
       ${K.Span(12, analizBasi())}

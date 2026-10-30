@@ -267,6 +267,9 @@ DOSYALAR = {
     "agharita.js":    "js/core",
     "agharita.test.js": "tests",
     "muzik.test.js":  "tests",
+    # ICE — Google verisi hesap baglamadan (sistem/ice.py, 2026-10-30).
+    "ice.js":         "js/core",
+    "ice.test.js":    "tests",
     "ses.css":        "css",
     "radyo.test.js":  "tests",
     # HESAP — PC sunucusuyla giris ve esitleme (sistem/hesap.py, 2026-10-04).
