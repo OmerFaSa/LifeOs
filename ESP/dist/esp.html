@@ -7121,31 +7121,48 @@ body.is-dragging .drop.is-over{
 
 /* ================================================================
    AĞ HARİTASI (2026-10-30; agharita.js): ilerlemenin yol haritası.
-   Renk ölçüyü ayırır: dolu = tamam, halka = yolda, soluk = bekliyor.
+   İkinci tur (aynı gün: «daha güzel, daha profesyonel»): ince kılavuz
+   halkalar, eğri bağlar, ortada genel oran, kümede kendi oranı; bir
+   kümenin üstüne gelince öbürleri solar. Renk ölçüyü ayırır: dolu =
+   tamam, halka = yolda, küçük boş nokta = bekliyor. Hareket yok.
    ================================================================ */
-.agh{ display:grid; gap:8px; }
+.agh{ display:grid; gap:12px; }
 .agh--bos p{ margin:0; font-size:13px; color:var(--text-2); }
-.agh__svg{ width:100%; height:auto; max-height:540px; display:block; }
-.agh__bag{ stroke:color-mix(in oklab, var(--text) 18%, transparent); stroke-width:1.1; stroke-dasharray:3 4; }
-.agh__bag.is-dolu{ stroke:var(--mod, var(--primary)); stroke-dasharray:none; stroke-width:1.8; stroke-opacity:.65; }
-.agh__merkez circle{ fill:var(--mod, var(--primary)); }
-.agh__merkez text{ fill:#fff; font-size:11.5px; font-weight:700; }
-.agh__kume > circle:first-of-type{ fill:var(--surface); stroke:color-mix(in oklab, var(--mod, var(--primary)) 55%, transparent); stroke-width:2; }
-.agh__ilerleme{ fill:none; stroke:var(--mod, var(--primary)); stroke-width:3; stroke-linecap:round; }
-.agh__dugum > circle:first-of-type{ transition:r .15s ease; }
-.agh__dugum--bitti > circle:first-of-type{ fill:var(--mod, var(--primary)); }
-.agh__dugum--suruyor > circle:first-of-type{ fill:var(--surface); stroke:var(--mod, var(--primary)); stroke-width:2; }
-.agh__dugum--sirada > circle:first-of-type{ fill:color-mix(in oklab, var(--mod, var(--primary)) 22%, var(--surface)); stroke:var(--mod, var(--primary)); stroke-width:3; }
-.agh__dugum--bekliyor > circle:first-of-type{ fill:color-mix(in oklab, var(--text) 24%, transparent); }
-.agh__dugum:hover > circle:first-of-type{ stroke:var(--text); stroke-width:2.5; }
+.agh__svg{ width:100%; height:auto; max-height:560px; display:block; overflow:visible; }
+.agh__kilavuz circle{ fill:none; stroke:color-mix(in oklab, var(--text) 7%, transparent); stroke-width:1; }
+.agh__bag{ fill:none; stroke:color-mix(in oklab, var(--text) 16%, transparent); stroke-width:1; }
+.agh__bag.is-dolu{ stroke:var(--mod, var(--primary)); stroke-width:1.6; stroke-opacity:.55; }
+.agh__bag--kok{ stroke-dasharray:2 4; }
+.agh__bag--kok.is-dolu{ stroke-dasharray:none; stroke-opacity:.35; }
+.agh__merkez > circle:first-child{ fill:var(--surface); stroke:color-mix(in oklab, var(--mod, var(--primary)) 25%, transparent); stroke-width:1; }
+.agh__merkez-oran{ fill:var(--text); font-size:17px; font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+.agh__merkez-ad{ fill:var(--text-2); font-size:9.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
+.agh__ilerleme{ fill:none; stroke:var(--mod, var(--primary)); stroke-width:2.4; stroke-linecap:round; }
+.agh__ilerleme--merkez{ stroke-width:3.5; }
+.agh__kume > circle:first-of-type{ fill:var(--surface); stroke:color-mix(in oklab, var(--text) 12%, transparent); stroke-width:3; }
+.agh__oran{ fill:var(--text); font-size:10px; font-weight:700; font-variant-numeric:tabular-nums; }
+.agh__dugum--bitti > circle{ fill:var(--mod, var(--primary)); }
+.agh__dugum--suruyor > circle:not(.agh__ilerleme){ fill:var(--surface); stroke:var(--mod, var(--primary)); stroke-width:1.6; }
+.agh__dugum--sirada > circle:not(.agh__hale){ fill:var(--surface); stroke:var(--mod, var(--primary)); stroke-width:2.6; }
+.agh__hale{ fill:color-mix(in oklab, var(--mod, var(--primary)) 14%, transparent); stroke:none; }
+.agh__dugum--bekliyor > circle{ fill:var(--surface); stroke:color-mix(in oklab, var(--text) 26%, transparent); stroke-width:1.2; }
 .agh__yazi{ fill:var(--text-2); font-size:10.5px; }
-.agh__yazi--kume{ fill:var(--text); font-size:12.5px; font-weight:650; }
-.agh__ozet{ display:flex; align-items:center; flex-wrap:wrap; gap:4px 6px; margin:0; font-size:12.5px; color:var(--text-2); }
-.agh__lejant{ display:inline-block; width:10px; height:10px; margin-left:10px; border-radius:50%; }
+.agh__yazi.is-sirada{ fill:var(--text); font-weight:600; }
+.agh__yazi--kume{ fill:var(--text); font-size:12px; font-weight:650; }
+.agh__k{ transition:opacity .2s ease; outline:none; }
+.agh__svg:has(.agh__k:is(:hover, :focus-visible)) .agh__k:not(:hover):not(:focus-visible){ opacity:.22; }
+.agh__k:focus-visible .agh__kume > circle:first-of-type{ stroke:var(--mod, var(--primary)); }
+.agh__alt{ display:grid; gap:8px; }
+.agh__cubuk{ display:flex; height:6px; border-radius:3px; overflow:hidden; background:color-mix(in oklab, var(--text) 9%, transparent); }
+.agh__p--bitti{ background:var(--mod, var(--primary)); }
+.agh__p--suruyor{ background:color-mix(in oklab, var(--mod, var(--primary)) 40%, transparent); }
+.agh__ozet{ display:flex; align-items:center; flex-wrap:wrap; gap:4px 6px; margin:0; font-size:12.5px; color:var(--text-2); font-variant-numeric:tabular-nums; }
+.agh__lejant{ display:inline-block; width:9px; height:9px; margin-left:12px; border-radius:50%; }
 .agh__lejant:first-child{ margin-left:0; }
 .agh__lejant--bitti{ background:var(--mod, var(--primary)); }
-.agh__lejant--suruyor{ box-shadow:inset 0 0 0 2px var(--mod, var(--primary)); }
-.agh__lejant--bekliyor{ background:color-mix(in oklab, var(--text) 24%, transparent); }
+.agh__lejant--suruyor{ background:color-mix(in oklab, var(--mod, var(--primary)) 40%, transparent); }
+.agh__lejant--bekliyor{ box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--text) 30%, transparent); }
+@media (prefers-reduced-motion:reduce){ .agh__k{ transition:none; } }
 
 /* ICE (2026-10-30): Analiz'de «Google'dan gelen» — takvim, adım, YouTube özeti. */
 [data-ice-kart]:empty{ display:none; }
@@ -17115,6 +17132,61 @@ html[data-boyut="kucuk"] body{ zoom:.92; }
 html[data-boyut="buyuk"] body{ zoom:1.08; }
 html[data-boyut="enbuyuk"] body{ zoom:1.16; }
 
+/* ALANLAR (kullanıcı, 2026-10-30: «sistem ile yalnız o modül arasındaki ayrımı daha
+   güzel yap; ayarları daha minimalist, anlaşılır yap»). Başlığın altında üç alan:
+   Sistem (her yerde) · modül (yalnız burada, modülün renginde) · Hesap. Solda
+   yalnız seçili alanın bölümleri; grup başlıkları kalktı. */
+.ayarlar__alanlar{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:6px; margin:0 18px 12px; padding:4px; border-radius:14px;
+  background:color-mix(in oklab, var(--text) 5%, transparent); }
+.ayarlar__alan{ display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; column-gap:9px; align-items:center; min-height:46px; padding:6px 12px;
+  border:0; border-radius:11px; background:transparent; color:var(--text-2); font:inherit; text-align:left; cursor:pointer; }
+.ayarlar__alan svg{ grid-row:1 / 3; width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.ayarlar__alan b{ font-size:13.5px; font-weight:600; color:var(--text); line-height:1.15; }
+.ayarlar__alan small{ font-size:11.5px; color:var(--text-3); line-height:1.2; }
+.ayarlar__alan:hover{ background:color-mix(in oklab, var(--text) 5%, transparent); }
+.ayarlar__alan.is-on{ background:var(--surface); color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,.06), 0 0 0 1px var(--border-soft); }
+.ayarlar__alan--modul.is-on{ background:color-mix(in oklab, var(--mod, var(--primary)) 12%, var(--surface)); color:var(--mod, var(--primary));
+  box-shadow:0 0 0 1px color-mix(in oklab, var(--mod, var(--primary)) 35%, transparent); }
+.ayarlar__alan--modul.is-on small{ color:color-mix(in oklab, var(--mod, var(--primary)) 70%, var(--text-2)); }
+.ayarlar__alan:focus-visible{ outline:2px solid var(--mod, var(--primary)); outline-offset:1px; }
+.ayarlar__grup{ display:none; }
+.ayarlar.is-aranir .ayarlar__alanlar{ opacity:.5; }
+.ayarlar.is-aranir .ayarlar__sekme[hidden]{ display:flex; }
+@media (max-width:679px){
+  .ayarlar__alanlar{ margin:0 12px 10px; }
+  .ayarlar__alan{ grid-template-columns:1fr; padding:6px 8px; min-height:40px; }
+  .ayarlar__alan svg, .ayarlar__alan small{ display:none; }
+}
+/* VURGU RENGİ (Ayarlar › Görünüm): seçili hâllerin rengi (cam.css --secili-* --vurgu'yu okur). */
+.vurgu{ display:flex; flex-wrap:wrap; gap:8px; }
+.vurgu__renk{ width:28px; height:28px; padding:0; border:0; border-radius:50%; cursor:pointer; background:var(--v);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08); }
+.vurgu__renk.is-on{ box-shadow:0 0 0 2px var(--surface), 0 0 0 4px var(--v); }
+.vurgu__renk:focus-visible{ outline:2px solid var(--text); outline-offset:3px; }
+html[data-vurgu="mavi"]{ --vurgu:#2f6bff; } html[data-vurgu="yesil"]{ --vurgu:#1f9d6b; } html[data-vurgu="mor"]{ --vurgu:#7a5af5; }
+html[data-vurgu="turuncu"]{ --vurgu:#e2761f; } html[data-vurgu="pembe"]{ --vurgu:#e2558f; } html[data-vurgu="grafit"]{ --vurgu:#4a4f5a; }
+html[data-vurgu]:not([data-vurgu="modul"]){ --vurgu-ink:color-mix(in oklab, var(--vurgu) 72%, #000); }
+/* KING (Ayarlar › King): canlı önizleme + tercihler. */
+.kingayar{ display:grid; gap:4px; }
+.kingayar__onizle{ display:flex; align-items:center; gap:16px; margin:4px 0 10px; padding:16px; border-radius:16px;
+  background:color-mix(in oklab, var(--surface) 75%, transparent); box-shadow:inset 0 0 0 1px var(--border-soft); }
+.kingayar__onizle .king__yuz{ flex:none; width:64px; height:64px; display:grid; place-items:center; }
+.kingayar__metin{ flex:1; min-width:0; display:grid; gap:2px; }
+.kingayar__metin b{ font-size:16px; }
+.kingayar__metin p{ margin:0; font-size:14px; color:var(--text); }
+.kingayar__metin small{ font-size:12px; color:var(--text-3); }
+.kingayar__satir{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; min-height:44px; padding:6px 0; border-top:1px solid var(--border-soft); }
+.kingayar__ad{ display:flex; flex-direction:column; font-size:13.5px; color:var(--text); }
+.kingayar__ad small{ font-size:12px; color:var(--text-3); }
+@media (max-width:679px){ .kingayar__onizle{ flex-wrap:wrap; } }
+/* Katlanır satır (yazı tipi): seçili değer görünür, ızgara basınca açılır (2026-10-30: «daha minimalist»). */
+.ayarlar__acilir > summary{ list-style:none; cursor:pointer; }
+.ayarlar__acilir > summary::-webkit-details-marker{ display:none; }
+.ayarlar__acilir-deger{ display:inline-flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; color:var(--text); }
+.ayarlar__acilir-deger::after{ content:'›'; color:var(--text-3); transition:transform var(--dur) var(--ease); }
+.ayarlar__acilir[open] .ayarlar__acilir-deger::after{ transform:rotate(90deg); }
+.ayarlar__acilir > .ayarlar__yazilar{ margin:4px 0 12px; }
+
 /* ==== css/ofissohbet.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/ofissohbet.css içine yazılır; burası bir sonraki
@@ -17329,11 +17401,11 @@ html[data-boyut="enbuyuk"] body{ zoom:1.16; }
      kaydet, menü çok katı, sistemle uyumsuz»). Dolu koyu blok yerine modül
      renginde hafif boyanmış cam: ince renkli kenar, üstte 1 px ışık, yazı
      modülün koyu/açık tonu. Seçili çekmece, menü bölümü ve ana düğme aynı dil. */
-  --secili-zemin:color-mix(in oklab, var(--mod) 14%, rgba(255,255,255,.62));
-  --secili-yazi:var(--mod-ink, var(--mod));
-  --secili-golge:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px color-mix(in oklab, var(--mod) 26%, transparent), 0 6px 16px -12px color-mix(in oklab, var(--mod) 60%, transparent);
-  --ana-zemin:color-mix(in oklab, var(--mod) 22%, rgba(255,255,255,.55));
-  --ana-zemin-ust:color-mix(in oklab, var(--mod) 30%, rgba(255,255,255,.6));
+  --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 14%, rgba(255,255,255,.62));
+  --secili-yazi:var(--vurgu-ink, var(--mod-ink, var(--mod)));
+  --secili-golge:inset 0 1px 0 rgba(255,255,255,.9), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 26%, transparent), 0 6px 16px -12px color-mix(in oklab, var(--vurgu, var(--mod)) 60%, transparent);
+  --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 22%, rgba(255,255,255,.55));
+  --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 30%, rgba(255,255,255,.6));
 }
 :root[data-theme="dark"]{
   --sicak-zemin:.6; --sicak-cizgi:.5; --sicak-yansima:.3; --ray:rgba(255,255,255,.08);
@@ -17351,9 +17423,9 @@ html[data-boyut="enbuyuk"] body{ zoom:1.16; }
   --cam-ust:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.03);
   --cam-golge:0 1px 2px rgba(0,0,0,.25), 0 14px 34px -18px rgba(0,0,0,.55);
   --cam-girdi:rgba(0,0,0,.22);
-    --secili-zemin:color-mix(in oklab, var(--mod) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--mod) 28%, #fff);
-    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent);
-    --ana-zemin:color-mix(in oklab, var(--mod) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--mod) 44%, rgba(255,255,255,.08));
+    --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--vurgu, var(--mod)) 28%, #fff);
+    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent);
+    --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 44%, rgba(255,255,255,.08));
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -17373,9 +17445,9 @@ html[data-boyut="enbuyuk"] body{ zoom:1.16; }
     --cam-ust:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.03);
     --cam-golge:0 1px 2px rgba(0,0,0,.25), 0 14px 34px -18px rgba(0,0,0,.55);
     --cam-girdi:rgba(0,0,0,.22);
-    --secili-zemin:color-mix(in oklab, var(--mod) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--mod) 28%, #fff);
-    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent);
-    --ana-zemin:color-mix(in oklab, var(--mod) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--mod) 44%, rgba(255,255,255,.08));
+    --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 24%, rgba(255,255,255,.05)); --secili-yazi:color-mix(in oklab, var(--vurgu, var(--mod)) 28%, #fff);
+    --secili-golge:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent);
+    --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 34%, rgba(255,255,255,.06)); --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 44%, rgba(255,255,255,.08));
   }
 }
 
@@ -18888,11 +18960,11 @@ html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk:ha
 html[data-theme="dark"]{ --kenar-tek:rgba(255,255,255,.075);
   --levha-ic:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.05);
   --cam-ust:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.03);
-  --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent); }
+  --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent); }
 @media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --kenar-tek:rgba(255,255,255,.075);
   --levha-ic:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.05);
   --cam-ust:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.03);
-  --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--mod) 38%, transparent); } }
+  --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent); } }
 html[data-zemin="yumusak"] .site--v5 .sayfa--kapakli .bugun__alan::before,
 html[data-zemin="yumusak"] .kutu::before,
 html[data-zemin="yumusak"] .card:not(.card--flat)::before,
@@ -19806,7 +19878,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.muzik.var', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.king.ad', 'lifeos.boyut', 'lifeos.tema.secim', 'lifeos.zemin.video', 'lifeos.minik.kapali', 'lifeos.profiller', 'lifeos.profil.etkin', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.muzik.var', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.king.ad', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.tema.secim', 'lifeos.zemin.video', 'lifeos.minik.kapali', 'lifeos.profiller', 'lifeos.profil.etkin', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -19842,7 +19914,7 @@ window.LIFEOS = window.LIFEOS || {};
      (yalnız değişen anahtar; iki modül açıksa birbirini ezmez). Sunucu
      yoksa (telefon, tek dosya, denetim sunucusu) hiçbir şey olmaz.
      Hangi anahtarın sistem ayarı olduğu: sistem/ayar.py ANAHTAR ile aynı. */
-  const ORTAK = /^lifeos\.(yazi|boyut|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|minik|minik\.[a-z]+|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun)|profiller|profil\.etkin)$/;
+  const ORTAK = /^lifeos\.(yazi|boyut|vurgu|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|minik|minik\.[a-z]+|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun)|profiller|profil\.etkin)$/;
   function ortakAnlik(){
     const o = {};
     try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(ORTAK.test(k)) o[k] = localStorage.getItem(k); } }catch(e){ /* depo kapalı */ }
@@ -20999,7 +21071,8 @@ window.LIFEOS = window.LIFEOS || {};
     { id:'zemin',    ad:'Arka plan',        grup:'Sistem' },
     { id:'ses',      ad:'Ses ve müzik',     grup:'Sistem' },
     { id:'hareket',  ad:'Animasyon',        grup:'Sistem' },
-    { id:'ekip',     ad:'Minikler ve King', grup:'Sistem' },
+    { id:'king',     ad:'King',             grup:'Sistem' },
+    { id:'ekip',     ad:'Minikler',         grup:'Sistem' },
     { id:'bildirim', ad:'Bildirimler',      grup:'Sistem' },
     { id:'sistem',   ad:'Planlama',         grup:'Sistem' },
     { id:'modul',    ad:'Modül ayarları',   grup:'Bu modül' },
@@ -21007,6 +21080,18 @@ window.LIFEOS = window.LIFEOS || {};
     { id:'baglanti', ad:'Bağlantılar',      grup:'Hesap' },
   ]);
   const MODUL_AD = Object.freeze({ ays:'AYS', spi:'SPİ', esp:'ESP' });
+  /* ALANLAR (kullanıcı, 2026-10-30: «sistem ile yalnız o modül arasındaki ayrımı
+     daha güzel yap; ayarları daha minimalist, anlaşılır yap»). Üstte üç alan;
+     solda yalnız seçili alanın bölümleri. Modül alanı modülün renginde. */
+  const ALANLAR = Object.freeze(['Sistem', 'Bu modül', 'Hesap']);
+  const alanOf = id => (BOLUMLER.find(b => b.id === id) || {}).grup || 'Sistem';
+  function alanlarHtml(){
+    const m = MODUL_AD[modulAdi()] || 'Bu modül', simdi = alanOf(secili);
+    const bilgi = { 'Sistem':['Sistem', 'her yerde'], 'Bu modül':[m, 'yalnız burada'], 'Hesap':['Hesap', 'hesabın'] };
+    return '<div class="ayarlar__alanlar" role="group" aria-label="Ayar alanı">' + ALANLAR.map(a => '<button type="button" class="ayarlar__alan ayarlar__alan--'
+      + (a === 'Bu modül' ? 'modul' : a === 'Hesap' ? 'hesap' : 'sistem') + (a === simdi ? ' is-on' : '') + '" aria-pressed="' + (a === simdi) + '" data-ayar-alan="' + kac(a) + '">'
+      + SIMGE_KAPSAM[a === 'Bu modül' ? 'modul' : a === 'Hesap' ? 'hesap' : 'sistem'] + '<b>' + kac(bilgi[a][0]) + '</b><small>' + bilgi[a][1] + '</small></button>').join('') + '</div>';
+  }
   const SIMGE_KAPSAM = {
     sistem:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
     modul:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 9h16"/></svg>',
@@ -21029,6 +21114,9 @@ window.LIFEOS = window.LIFEOS || {};
     /* «Hiç» (kullanıcı, 2026-10-30: «az var ama hiç seçeneği yok; arka planda öyle bir şey olmasın»):
        fotoğraf da kartların arkası da bulanmaz (cam.css §51). «Net» yalnız fotoğrafı bulandırmaz. */
     bulanik: { anahtar:'lifeos.zemin.bulanik', kok:'data-bulanik',  vars:'yok',   sira:['hic', 'yok', 'hafif', 'cok'], ad:{ hic:'Hiç', yok:'Net', hafif:'Hafif', cok:'Yumuşak' } },
+    /* Vurgu rengi (2026-10-30, yeni): seçili düğme, sekme ve anahtarın rengi; ölçü renkleri değişmez (§1.10). */
+    vurgu:   { anahtar:'lifeos.vurgu',         kok:'data-vurgu',    vars:'modul', sira:['modul', 'mavi', 'yesil', 'mor', 'turuncu', 'pembe', 'grafit'],
+      ad:{ modul:'Modülün', mavi:'Mavi', yesil:'Yeşil', mor:'Mor', turuncu:'Turuncu', pembe:'Pembe', grafit:'Grafit' } },
     /* Yazı boyutu (2026-10-30, yeni): bütün arayüz birlikte büyür ya da küçülür (ayarlar.css «boyut»). */
     boyut:   { anahtar:'lifeos.boyut',         kok:'data-boyut',    vars:'normal', sira:['kucuk', 'normal', 'buyuk', 'enbuyuk'], ad:{ kucuk:'Küçük', normal:'Normal', buyuk:'Büyük', enbuyuk:'En büyük' } },
     rozet:   { anahtar:'lifeos.rozet',         kok:'data-rozet',    vars:'acik',  sira:['acik', 'kapali'],     ad:{ acik:'Göster', kapali:'Gizle' } },
@@ -21057,6 +21145,11 @@ window.LIFEOS = window.LIFEOS || {};
     const on = v === secim(k);
     return '<button type="button" class="' + (on ? 'is-on' : '') + '" data-secim="' + k + ':' + v + '" aria-pressed="' + on + '">' + SECIMLER[k].ad[v] + '</button>';
   }).join('') + '</div>';
+  const VURGU_RENK = Object.freeze({ modul:'var(--mod, var(--primary))', mavi:'#2f6bff', yesil:'#1f9d6b', mor:'#7a5af5', turuncu:'#e2761f', pembe:'#e2558f', grafit:'#4a4f5a' });
+  const vurguHtml = () => '<div class="vurgu" role="group" aria-label="Vurgu rengi">' + SECIMLER.vurgu.sira.map(v => {
+    const on = v === secim('vurgu');
+    return '<button type="button" class="vurgu__renk' + (on ? ' is-on' : '') + '" data-secim="vurgu:' + v + '" aria-pressed="' + on + '" title="' + SECIMLER.vurgu.ad[v] + '"'
+      + ' aria-label="' + SECIMLER.vurgu.ad[v] + '" style="--v:' + VURGU_RENK[v] + '"></button>'; }).join('') + '</div>';
   Object.keys(SECIMLER).forEach(secimUygula);
   /* Tema paketleri kalktı (kullanıcı, 2026-10-30: «o kısımları kaldır; kastım ayar
      profilleri»): eski seçim depoda kalmasın. */
@@ -21072,7 +21165,7 @@ window.LIFEOS = window.LIFEOS || {};
      profil oraya da uygulanır ve sayfa bir kez yenilenir. */
   const PROFIL_ANAHTAR = 'lifeos.profiller', ETKIN_ANAHTAR = 'lifeos.profil.etkin', GORDU_ANAHTAR = 'lifeos.profil.gordu', TEMA_BEKLE = 'lifeos.profil.tema';
   const PROFIL_EN = 8;
-  const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
+  const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
     'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.zemin.video', 'lifeos.zemin.onizle.sade',
     'lifeos.yuzey.ays', 'lifeos.yuzey.spi', 'lifeos.yuzey.esp',
     'lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.ses.duzey', 'lifeos.sessiz',
@@ -21198,7 +21291,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* «Görünümü varsayılana döndür»: yalnız görünüş tercihleri; veri değil. İki adım. */
   const SIFIRLANAN = Object.freeze(['lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik',
-    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet', 'lifeos.boyut', 'lifeos.kenar.yuzey']);
+    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.kenar.yuzey']);
 
   /* Arka plan önizlemesi zemin.js'te: seçim ve yüklemede kendini yeniler. */
   const onizleHtml = yuva => L.ZEMIN && L.ZEMIN.onizleHtml ? L.ZEMIN.onizleHtml(yuva) : '';
@@ -21255,8 +21348,10 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'profil') return profilHtml();
     if(id === 'gorunum') return H('Tema', 'Sistem: cihazın açık/koyu tercihi', o.tema)
       + H('Saate göre tema', '07:00–19:00 açık, sonra koyu', cagir(L.ZEMIN, 'otoSeciciHtml'))
-      + H('Yazı tipi', '', yaziSeciciHtml())
-      + H('Yazı boyutu', 'Bütün arayüz birlikte büyür', secimHtml('boyut', 'Yazı boyutu'))
+      + '<details class="ayarlar__acilir"><summary class="ayarlar__satir"><span class="ayarlar__ad">Yazı tipi<small>Bütün modüllerde aynı</small></span>'
+      + '<span class="ayarlar__acilir-deger" data-yazi-ad>' + kac((YAZILAR.find(y => y.id === yazi()) || YAZILAR[0]).ad) + '</span></summary>' + yaziSeciciHtml() + '</details>'
+      + G('Yazı boyutu', 'Bütün arayüz birlikte büyür', secimHtml('boyut', 'Yazı boyutu'))
+      + H('Vurgu rengi', 'Seçili düğme ve sekmelerin rengi', vurguHtml())
       + H('Cam yoğunluğu', 'Kartların ne kadar saydam olduğu', secimHtml('cam', 'Cam yoğunluğu'))
       + H('Kontrast', 'Yüksek: soluk yazılar koyulaşır, kartlar dolar', secimHtml('kontrast', 'Kontrast'))
       + H('Sol menü', 'Cam: arkadaki fotoğraf görünür', secimHtml('kenar', 'Sol menü'))
@@ -21288,11 +21383,11 @@ window.LIFEOS = window.LIFEOS || {};
       + '<button type="button" class="skart skart--bag" data-ayarlar-git="zemin">' + SIMGE_VIDEO
       + '<span class="skart__baslik"><b>Arka plan videosunun sesi</b><small>Arka plan bölümünde: ses, kesit ve hız</small></span><span aria-hidden="true">›</span></button>'
       + '</div>';
-    if(id === 'ekip') return H('King’in adı', 'Boş bırakırsan King',
+    if(id === 'king') return H('Adı', 'Boş bırakırsan King',
         '<input class="ayarlar__girdi" type="text" maxlength="20" data-king-ad placeholder="King"'
         + ' value="' + kac((() => { try{ return localStorage.getItem('lifeos.king.ad') || ''; }catch(e){ return ''; } })()) + '" aria-label="King’in adı">')
-      + H('King’in görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml'))
-      + H('Minikler', 'Sayfada en çok kaç minik', cagir(L.MINIK, 'seciciHtml'))
+      + (L.KING && L.KING.ayarHtml ? cagir(L.KING, 'ayarHtml') : H('Görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml')));
+    if(id === 'ekip') return H('Minikler', 'Sayfada en çok kaç minik', cagir(L.MINIK, 'seciciHtml'))
       + H('Minik boyu', '', cagir(L.MINIK, 'boySeciciHtml'))
       + G('Kimler gezsin', 'Basınca sayfadan çıkar ya da gelir; yeni minikler açık gelir', cagir(L.MINIK, 'galeriHtml'));
     if(id === 'hesap'){
@@ -21320,10 +21415,8 @@ window.LIFEOS = window.LIFEOS || {};
     o = o || {};
     if(!BOLUMLER.some(b => b.id === secili)) secili = 'gorunum';
     if(secili === 'sistem' && typeof setTimeout === 'function') setTimeout(() => planYukle(), 0);
-    const grupAd = g => g === 'Bu modül' ? (MODUL_AD[modulAdi()] || 'Bu modül') : g;
-    const nav = BOLUMLER.map((b, i) => (b.grup && (!i || BOLUMLER[i - 1].grup !== b.grup) ? '<span class="ayarlar__grup" role="presentation">' + kac(grupAd(b.grup))
-        + '<small>' + (b.grup === 'Sistem' ? 'her yerde' : b.grup === 'Bu modül' ? 'yalnız burada' : '') + '</small></span>' : '')
-      + '<button type="button" class="ayarlar__sekme' + (b.grup ? ' ayarlar__sekme--grupta' : '') + (b.id === secili ? ' is-on' : '') + '" role="tab"'
+    const alan = alanOf(secili);
+    const nav = BOLUMLER.map(b => '<button type="button" class="ayarlar__sekme' + (b.id === secili ? ' is-on' : '') + '" role="tab"' + (b.grup === alan ? '' : ' hidden')
       + ' id="ayarlar-sekme-' + b.id + '" aria-selected="' + (b.id === secili) + '" aria-controls="ayarlar-bolum-' + b.id + '"'
       + ' data-ayar-bolum="' + b.id + '">' + kac(b.ad) + '</button>').join('');
     const govde = BOLUMLER.map(b => '<section class="ayarlar__bolum" role="tabpanel" id="ayarlar-bolum-' + b.id + '" data-baslik="' + kac(b.ad) + '"'
@@ -21333,6 +21426,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<header class="ayarlar__bas"><b>Ayarlar</b>'
       + '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Ayarları kapat">'
       + (L.KABUK ? L.KABUK.simge('kapat') : '×') + '</button></header>'
+      + alanlarHtml()
       + '<div class="ayarlar__govde"><nav class="ayarlar__nav" role="tablist" aria-label="Ayar bölümleri" aria-orientation="vertical">'
       + '<input type="search" class="ayarlar__ara" data-ayarlar-ara placeholder="Ayarlarda ara" aria-label="Ayarlarda ara" autocomplete="off">' + nav + '</nav>'
       + '<div class="ayarlar__icerik">' + govde + '</div></div></div>';
@@ -21368,6 +21462,9 @@ window.LIFEOS = window.LIFEOS || {};
       b.classList.toggle('is-on', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
     });
     panel.querySelectorAll('.ayarlar__bolum').forEach(s => { s.hidden = s.id !== 'ayarlar-bolum-' + id; });
+    const alan = alanOf(id);
+    panel.querySelectorAll('[data-ayar-bolum]').forEach(b => { b.hidden = alanOf(b.getAttribute('data-ayar-bolum')) !== alan; });
+    panel.querySelectorAll('[data-ayar-alan]').forEach(b => { const on = b.getAttribute('data-ayar-alan') === alan; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     if(id === 'sistem') planYukle();
   }
 
@@ -21566,6 +21663,8 @@ window.LIFEOS = window.LIFEOS || {};
         /* Elle tema seçmek «Saate göre»yi kapatır: yoksa düğme işe yaramıyor gibi görünüyordu. */
         if(L.ZEMIN && L.ZEMIN.oto && L.ZEMIN.oto() === 'saat') L.ZEMIN.otoAyarla('kapali');
       }
+      const al = t.closest('[data-ayar-alan]');
+      if(al){ const ilk = BOLUMLER.find(b => b.grup === al.getAttribute('data-ayar-alan')); if(ilk) sekmeSec(al.closest('.ayarlar'), ilk.id); return; }
       const git = t.closest('[data-ayarlar-git]');
       if(git){ e.preventDefault(); sekmeSec(git.closest('.ayarlar'), git.getAttribute('data-ayarlar-git')); return; }
       const pg = t.closest('[data-profil-gec], [data-profil-guncelle], [data-profil-sil]');
@@ -21584,6 +21683,8 @@ window.LIFEOS = window.LIFEOS || {};
       const yz = t.closest('[data-yazi-sec]');
       if(yz){
         yaziAyarla(yz.getAttribute('data-yazi-sec'));
+        const yad = (YAZILAR.find(y => y.id === yz.getAttribute('data-yazi-sec')) || {}).ad;
+        document.querySelectorAll('[data-yazi-ad]').forEach(x => { x.textContent = yad || ''; });
         const g = yz.closest('.ayarlar__yazilar');
         if(g) g.querySelectorAll('[data-yazi-sec]').forEach(b => {
           const on = b === yz; b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
@@ -22666,7 +22767,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'e5ca74e5', at:'2026-10-30 17:21', dirty:false };
+ESP.BUILD = { id:'4f8c560b', at:'2026-10-30 19:13', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -33440,19 +33541,22 @@ window.LIFEOS.ICE = (function(){
    Kullanıcı (2026-10-30): «modüllerin istatistik bölümünde nöral ağ
    haritası olsun: neyi başardığımızı, hangi konularda ilerlediğimizi;
    SPİ'de koyduğumuz hedefler dahilinde, AYS ve ESP'de öğrendiğimiz
-   konular hedefinde; bize yol haritası gibi olsun».
+   konular hedefinde; bize yol haritası gibi olsun». İkinci tur (aynı gün):
+   «nöral ağ haritasını daha güzel, daha profesyonel tasarla».
 
    Çizim yalnız GÖSTERİR; sayıyı modül verir (AYS konu durumu, ESP merdiven
-   basamağı, SPİ hedefin durumu). Ortada hedef; çevresinde kümeler
-   (ders, alan, hedef türü); her kümenin düğümleri merkezden dışarı doğru
-   bir yol çizer — sıra, yürünecek yoldur. Düğüm:
+   basamağı, SPİ hedefin durumu). Ortada hedef ve genel oran; çevresinde
+   kümeler (ders, alan, hedef türü) eşit dilimlerde; her kümenin düğümleri
+   merkezden dışarı kıvrılarak giden bir yoldur (sıra, yürünecek yol).
+   Bağlar eğri; ince kılavuz halkalar yolun nerede olduğunu söyler.
      bitti     dolu, modülün renginde
      suruyor   halka; ilerlemesi biliniyorsa halkanın o kadarı dolu
-     sirada    kümenin sıradaki adımı: kalın halka
-     bekliyor  soluk nokta
-   Bağ: iki ucu da bittiyse dolu çizgi, yoksa ince kesik çizgi.
+     sirada    kümenin sıradaki adımı: kalın halka ve hafif hâle
+     bekliyor  küçük boş nokta
+   Kalabalıkta yalnız süren ve sıradaki adımların adı yazılır; öbürleri
+   üstüne gelince. Bir kümenin üstüne gelince öbürleri solar (CSS).
    Veri yoksa harita çizilmez, ne yapılırsa belireceği söylenir (§1.2:
-   eksik veri sıfır değildir). Hareket yok; parıltı yok (§1.10). */
+   eksik veri sıfır değildir). Hareket yok; süs deseni yok (§1.10). */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -33462,7 +33566,8 @@ window.LIFEOS.AGHARITA = (function(){
   const kac = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
   const DURUMLAR = Object.freeze(['bitti', 'suruyor', 'sirada', 'bekliyor']);
   const DURUM_AD = Object.freeze({ bitti:'tamam', suruyor:'sürüyor', sirada:'sıradaki', bekliyor:'bekliyor' });
-  const G = 900, Y = 700, CX = G / 2, CY = Y / 2;
+  const G = 900, Y = 720, CX = G / 2, CY = Y / 2;
+  const f = n => n.toFixed(1);
 
   /* Kümenin «sırada»sı: ilk bitmemiş düğüm (zaten süren yoksa). */
   function siraIsaretle(dugumler){
@@ -33479,59 +33584,95 @@ window.LIFEOS.AGHARITA = (function(){
     kumeler.forEach(k => k.dugumler.forEach(d => { s[d.durum]++; s.toplam++; }));
     return s;
   }
+  /* İlerleme halkası: çevrenin `oran`ı kadar yay, saat 12'den. */
+  const halka = (x, y, r, oran, sinif) => {
+    const c = 2 * Math.PI * r;
+    return '<circle class="' + sinif + '" cx="' + f(x) + '" cy="' + f(y) + '" r="' + r + '" stroke-dasharray="' + f(c * oran) + ' ' + f(c) + '" transform="rotate(-90 ' + f(x) + ' ' + f(y) + ')"/>';
+  };
+  /* İki nokta arası eğri: kontrol noktası merkezden uzaklaşan yönde (dallar dışa doğru kıvrılır). */
+  function egri(x1, y1, x2, y2, bukum){
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1, u = Math.hypot(dx, dy) || 1;
+    const kx = mx - dy / u * bukum, ky = my + dx / u * bukum;
+    return 'M' + f(x1) + ' ' + f(y1) + 'Q' + f(kx) + ' ' + f(ky) + ' ' + f(x2) + ' ' + f(y2);
+  }
 
   /* veri = { merkez:'Sınav', kumeler:[{ ad, dugumler:[{ ad, durum, ilerleme? }] }], bos? }
-     Döner: HTML (SVG + kısa özet). */
+     Döner: HTML (SVG + yığılmış dağılım çubuğu + kısa özet). */
   function html(veri){
     const v = veri || {};
     const kumeler = (v.kumeler || []).filter(k => k && k.dugumler && k.dugumler.length)
       .map(k => Object.assign({}, k, { dugumler:siraIsaretle(k.dugumler) }));
     if(!kumeler.length) return '<div class="agh agh--bos"><p>' + kac(v.bos || 'Henüz haritada gösterilecek bir şey yok.') + '</p></div>';
     const s = sayim(kumeler);
-    const etiketli = s.toplam <= 48;
-    const n = kumeler.length;
-    const R1 = n === 1 ? 0 : Math.min(165, 80 + n * 11), R2 = Y / 2 - 34;
-    let bag = '', dug = '', yazi = '';
+    const hepsiEtiket = s.toplam <= 24;
+    const n = kumeler.length, dilim = 2 * Math.PI / n;
+    const RH = n === 1 ? 0 : Math.min(150, 92 + n * 7), RMAX = Y / 2 - 40;
+    /* Kılavuz halkalar düğümlerin durduğu halkalardır; çizim içeriğe göre yakınlaşır (az veride boşluk kalmaz). */
+    const halkalar = {};
+    let rEn = RH + 40, govde = '';
     kumeler.forEach((k, ki) => {
-      const aci = (-90 + ki * 360 / n) * Math.PI / 180;
-      const hx = CX + Math.cos(aci) * R1, hy = CY + Math.sin(aci) * R1;
-      const m = k.dugumler.length, bitenOran = k.dugumler.filter(d => d.durum === 'bitti').length / m;
-      bag += '<line class="agh__bag' + (bitenOran >= 1 ? ' is-dolu' : '') + '" x1="' + CX + '" y1="' + CY + '" x2="' + hx.toFixed(1) + '" y2="' + hy.toFixed(1) + '"/>';
-      /* Düğümler: kümenin yönünde merkezden dışarı açılan bir dal. Az düğüm
-         tek sıra yay; kalabalıkta satır satır yelpaze, sıra zikzakla yürür
-         (yol okunur kalsın, dış halkaya yığılmasın). */
-      const yay = Math.min(2.2, (2 * Math.PI / n) * .8) * (n === 1 ? 1.6 : 1);
-      const sutun = m <= 6 ? m : Math.ceil(Math.sqrt(m * 1.3)), satir = Math.ceil(m / sutun);
-      let onceki = [hx, hy, 'bitti'];
+      const aci = -Math.PI / 2 + ki * dilim;
+      const hx = CX + Math.cos(aci) * RH, hy = CY + Math.sin(aci) * RH;
+      const m = k.dugumler.length, biten = k.dugumler.filter(d => d.durum === 'bitti').length, oran = biten / m;
+      let bag = '', dug = '', yazi = '';
+      if(n > 1) bag += '<path class="agh__bag agh__bag--kok' + (oran > 0 ? ' is-dolu' : '') + '" d="' + egri(CX, CY, hx, hy, 0) + '"/>';
+      /* Yol: düğümler kümenin diliminde yay yay dizilir; yol bir yay boyunca
+         gider, sonraki halkaya geçince yön değiştirir (okunur, düzenli). */
+      let ox = hx, oy = hy, od = 'bitti', oSatir = -1, oAci = aci;
+      const etiketlenen = [];
+      const ic = n === 1 ? 110 : RH + 46, aralik = n === 1 ? 2 * Math.PI * .8 : Math.min(dilim * .7, 1.25);
+      const sutun = Math.max(1, Math.min(m, Math.floor(ic * aralik / 30) + 1)), satir = Math.ceil(m / sutun);
+      const adim = satir === 1 ? 0 : Math.min(50, (RMAX - ic) / (satir - 1));
       k.dugumler.forEach((d, i) => {
-        const sa = Math.floor(i / sutun), su0 = i % sutun, su = sa % 2 ? sutun - 1 - su0 : su0;
-        const r = satir === 1 ? R1 + 52 + (m === 1 ? 0 : (i / (m - 1)) * (R2 - R1 - 52) * .6) : R1 + 46 + sa * (R2 - R1 - 46) / Math.max(1, satir - 1);
-        const a = aci + (sutun === 1 ? 0 : (su / (sutun - 1) - .5) * yay * Math.min(1, (r - R1 * .4) / (R2 * .9)));
+        const sa = Math.floor(i / sutun), c0 = i % sutun, c = sa % 2 ? sutun - 1 - c0 : c0;
+        const r = ic + sa * adim;
+        const a = aci + (sutun === 1 ? 0 : (c / (sutun - 1) - .5) * aralik);
         const x = CX + Math.cos(a) * r, y = CY + Math.sin(a) * r;
-        const dolu = onceki[2] === 'bitti' && d.durum === 'bitti';
-        bag += '<line class="agh__bag agh__bag--yol' + (dolu ? ' is-dolu' : '') + '" x1="' + onceki[0].toFixed(1) + '" y1="' + onceki[1].toFixed(1) + '" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '"/>';
-        const yc = d.durum === 'bekliyor' ? 3.6 : d.durum === 'bitti' ? 6 : 6.5;
+        halkalar[Math.round(r)] = 1; rEn = Math.max(rEn, r);
+        const yol = sa === oSatir
+          ? 'M' + f(ox) + ' ' + f(oy) + 'A' + f(r) + ' ' + f(r) + ' 0 0 ' + (a > oAci ? 1 : 0) + ' ' + f(x) + ' ' + f(y)
+          : egri(ox, oy, x, y, 0);
+        const dolu = od === 'bitti' && d.durum === 'bitti';
+        bag += '<path class="agh__bag' + (dolu ? ' is-dolu' : '') + '" d="' + yol + '"/>';
+        const yc = d.durum === 'bekliyor' ? 3.4 : d.durum === 'bitti' ? 5.6 : 6.4;
         const il = typeof d.ilerleme === 'number' && d.ilerleme > 0 && d.ilerleme < 1 ? d.ilerleme : null;
-        const cevre = 2 * Math.PI * (yc + 2.2);
         dug += '<g class="agh__dugum agh__dugum--' + d.durum + '"><title>' + kac(k.ad + ' · ' + d.ad + ' — ' + DURUM_AD[d.durum] + (il != null ? ' %' + Math.round(il * 100) : '')) + '</title>'
-          + '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + yc + '"/>'
-          + (il != null ? '<circle class="agh__ilerleme" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (yc + 2.2) + '" stroke-dasharray="' + (cevre * il).toFixed(1) + ' ' + cevre.toFixed(1)
-            + '" transform="rotate(-90 ' + x.toFixed(1) + ' ' + y.toFixed(1) + ')"/>' : '') + '</g>';
-        if(etiketli) yazi += '<text class="agh__yazi agh__yazi--dugum" x="' + x.toFixed(1) + '" y="' + (y + yc + 12).toFixed(1) + '" text-anchor="middle">' + kac(String(d.ad).slice(0, 18)) + '</text>';
-        onceki = [x, y, d.durum];
+          + (d.durum === 'sirada' ? '<circle class="agh__hale" cx="' + f(x) + '" cy="' + f(y) + '" r="' + (yc + 7) + '"/>' : '')
+          + '<circle cx="' + f(x) + '" cy="' + f(y) + '" r="' + yc + '"/>'
+          + (il != null ? halka(x, y, yc + 2.4, il, 'agh__ilerleme') : '') + '</g>';
+        if(hepsiEtiket || d.durum === 'sirada' || (d.durum === 'suruyor' && etiketlenen.length < 2)){
+          etiketlenen.push(i);
+          const sag = Math.cos(a) >= 0;
+          yazi += '<text class="agh__yazi agh__yazi--dugum' + (d.durum === 'sirada' ? ' is-sirada' : '') + '" x="' + f(x + (sag ? yc + 6 : -yc - 6)) + '" y="' + f(y + 3.5) + '" text-anchor="' + (sag ? 'start' : 'end') + '">'
+            + kac(String(d.ad).slice(0, 22)) + '</text>';
+        }
+        ox = x; oy = y; od = d.durum; oSatir = sa; oAci = a;
       });
-      dug += '<g class="agh__kume"><title>' + kac(k.ad + ' · %' + Math.round(bitenOran * 100) + ' tamam') + '</title><circle cx="' + hx.toFixed(1) + '" cy="' + hy.toFixed(1) + '" r="15"/>'
-        + '<circle class="agh__ilerleme" cx="' + hx.toFixed(1) + '" cy="' + hy.toFixed(1) + '" r="19" stroke-dasharray="' + (2 * Math.PI * 19 * bitenOran).toFixed(1) + ' ' + (2 * Math.PI * 19).toFixed(1)
-        + '" transform="rotate(-90 ' + hx.toFixed(1) + ' ' + hy.toFixed(1) + ')"/></g>';
-      yazi += '<text class="agh__yazi agh__yazi--kume" x="' + hx.toFixed(1) + '" y="' + (hy - 25).toFixed(1) + '" text-anchor="middle">' + kac(k.ad) + '</text>';
+      if(n > 1){
+        dug += '<g class="agh__kume"><title>' + kac(k.ad + ' · ' + biten + '/' + m + ' tamam') + '</title><circle cx="' + f(hx) + '" cy="' + f(hy) + '" r="17"/>'
+          + halka(hx, hy, 17, oran, 'agh__ilerleme agh__ilerleme--kume')
+          + '<text class="agh__oran" x="' + f(hx) + '" y="' + f(hy + 3.5) + '" text-anchor="middle">' + Math.round(oran * 100) + '</text></g>';
+        const ust = Math.sin(aci) < -.3;
+        yazi += '<text class="agh__yazi agh__yazi--kume" x="' + f(hx) + '" y="' + f(ust ? hy + 32 : hy - 25) + '" text-anchor="middle">' + kac(String(k.ad).slice(0, 18)) + '</text>';
+      }
+      govde += '<g class="agh__k" tabindex="0" aria-label="' + kac(k.ad + ': ' + biten + '/' + m + ' tamam') + '">' + bag + dug + yazi + '</g>';
     });
+    const genel = Math.round(s.bitti / s.toplam * 100);
     const ozet = s.bitti + ' tamam · ' + (s.suruyor + s.sirada) + ' yolda · ' + s.bekliyor + ' bekliyor';
-    return '<div class="agh"><svg class="agh__svg" viewBox="0 0 ' + G + ' ' + Y + '" role="img" aria-label="' + kac((v.merkez || 'Hedef') + ' yol haritası: ' + s.toplam + ' adımdan ' + ozet) + '">'
-      + '<g class="agh__baglar">' + bag + '</g>'
-      + '<g class="agh__merkez"><circle cx="' + CX + '" cy="' + CY + '" r="26"/><text x="' + CX + '" y="' + (CY + 4) + '" text-anchor="middle">' + kac(String(v.merkez || 'Hedef').slice(0, 12)) + '</text></g>'
-      + '<g class="agh__dugumler">' + dug + '</g><g class="agh__yazilar">' + yazi + '</g></svg>'
+    const pay = x => (x / s.toplam * 100).toFixed(2) + '%';
+    const kilavuz = Object.keys(halkalar).map(Number).sort((a, b) => a - b).filter((r, i, l) => l.length <= 6 || i % Math.ceil(l.length / 6) === 0)
+      .map(r => '<circle cx="' + CX + '" cy="' + CY + '" r="' + r + '"/>').join('');
+    const yG = rEn + 120, yY = rEn + 34;   // yanlarda düğüm adlarına yer
+    return '<div class="agh"><svg class="agh__svg" viewBox="' + f(CX - yG) + ' ' + f(CY - yY) + ' ' + f(2 * yG) + ' ' + f(2 * yY) + '" role="img" aria-label="' + kac((v.merkez || 'Hedef') + ' yol haritası: ' + s.toplam + ' adımdan ' + ozet) + '">'
+      + '<g class="agh__kilavuz">' + kilavuz + '</g>'
+      + govde
+      + '<g class="agh__merkez"><circle cx="' + CX + '" cy="' + CY + '" r="36"/>' + halka(CX, CY, 42, s.bitti / s.toplam, 'agh__ilerleme agh__ilerleme--merkez')
+      + '<text class="agh__merkez-oran" x="' + CX + '" y="' + (CY + 2) + '" text-anchor="middle">%' + genel + '</text>'
+      + '<text class="agh__merkez-ad" x="' + CX + '" y="' + (CY + 17) + '" text-anchor="middle">' + kac(String(v.merkez || 'Hedef').slice(0, 12)) + '</text></g></svg>'
+      + '<div class="agh__alt"><span class="agh__cubuk" aria-hidden="true"><i class="agh__p agh__p--bitti" style="width:' + pay(s.bitti) + '"></i>'
+      + '<i class="agh__p agh__p--suruyor" style="width:' + pay(s.suruyor + s.sirada) + '"></i></span>'
       + '<p class="agh__ozet"><i class="agh__lejant agh__lejant--bitti"></i>' + s.bitti + ' tamam <i class="agh__lejant agh__lejant--suruyor"></i>' + (s.suruyor + s.sirada)
-      + ' yolda <i class="agh__lejant agh__lejant--bekliyor"></i>' + s.bekliyor + ' bekliyor</p></div>';
+      + ' yolda <i class="agh__lejant agh__lejant--bekliyor"></i>' + s.bekliyor + ' bekliyor</p></div></div>';
   }
 
   return Object.freeze({ html, DURUMLAR, DURUM_AD, _sayim:sayim, _sira:siraIsaretle });
@@ -48217,6 +48358,38 @@ window.LIFEOS.KING = (function(){
     gorunus:{ ad:'Görünüş', degerler:GORUNUSLER, oku:() => gorunus(), yaz:v => gorunusAyarla(v), adlar:GORUNUS_AD },
     ses:{ ad:'Ses', degerler:SES_TERCIH, oku:() => sesTercihi(), yaz:v => sesTercihSec(v), adlar:SES_AD },
   };
+  /* AYARLAR › KING (kullanıcı, 2026-10-30: «King kısmında güzel şeyler yap; tasarım
+     ve özellik bakımından»). Üstte canlı önizleme: King'in yüzü, adı ve seçilen
+     tarzda bir selam; «Sesini dene» seçilen sesle okur. Altında King'in kendi
+     tercihleri (KING_AYAR) ve okuma hızı: King penceresindekilerle aynı kayıt. */
+  const AYAR_SELAM = Object.freeze({ samimi:'Selam! Bugün neye bakalım?', resmi:'Merhaba. Size nasıl yardımcı olabilirim?', kisa:'Hazırım.' });
+  const AYAR_SIRA = ['tarz', 'derinlik', 'cevap', 'ses', 'gorunus'];
+  const AYAR_NOT = { tarz:'Nasıl konuşsun', derinlik:'Ne kadar düşünsün', cevap:'Yazıyla mı, sesle mi', ses:'Hangi ses okusun', gorunus:'Rengi' };
+  function ayarHtml(){
+    const seg = (ad, liste, simdi, veri, adlar) => '<div class="seg" role="group" aria-label="' + kac(ad) + '">' + liste.map(d => {
+      const on = String(d) === String(simdi);
+      return '<button type="button" class="' + (on ? 'is-on' : '') + '" aria-pressed="' + on + '" data-king-tercih="' + veri + ':' + d + '">' + kac(adlar ? adlar[d] : d) + '</button>'; }).join('') + '</div>';
+    return '<div class="kingayar" data-king-tercih-kok>'
+      + '<div class="kingayar__onizle">' + yuzHtml(true)
+      + '<div class="kingayar__metin"><b>' + kac(ad()) + '</b><p>«' + kac(AYAR_SELAM[tarz()]) + '»</p><small>' + kac(DERIN_IP[derinlik()]) + '</small></div>'
+      + '<button type="button" class="btn btn--sm btn--ghost" data-king-tercih="dene:1">Sesini dene</button></div>'
+      + AYAR_SIRA.map(k => { const x = KING_AYAR[k];
+        return '<div class="kingayar__satir"><span class="kingayar__ad">' + kac(x.ad) + '<small>' + kac(AYAR_NOT[k]) + '</small></span>' + seg(x.ad, x.degerler, x.oku(), k, x.adlar) + '</div>'; }).join('')
+      + '<div class="kingayar__satir"><span class="kingayar__ad">Okuma hızı<small>Sesli okurken</small></span>'
+      + seg('Okuma hızı', HIZLAR, hiz(), 'hiz', HIZLAR.reduce((o, v) => { o[v] = String(v).replace('.', ',') + '×'; return o; }, {})) + '</div>'
+      + '</div>';
+  }
+  function ayarYenile(){ if(typeof document !== 'undefined') document.querySelectorAll('[data-king-tercih-kok]').forEach(el => { el.outerHTML = ayarHtml(); }); }
+  if(typeof document !== 'undefined') document.addEventListener('click', e => {
+    const b = e.target && e.target.closest ? e.target.closest('[data-king-tercih]') : null;
+    if(!b) return;
+    e.preventDefault();
+    const [k, v] = b.getAttribute('data-king-tercih').split(':');
+    if(k === 'dene'){ try{ seslendir(ad() + '. ' + AYAR_SELAM[tarz()]); }catch(x){ /* ses yok */ } return; }
+    if(k === 'hiz'){ const n = Number(v); if(HIZLAR.indexOf(n) >= 0){ if(n === 1) ortam.depo.sil(HIZ); else ortam.depo.yaz(HIZ, n); } }
+    else if(KING_AYAR[k] && KING_AYAR[k].degerler.indexOf(v) >= 0) KING_AYAR[k].yaz(v);
+    ayarYenile();
+  });
   /* Kendi akışını çizen araç (kart, öncelik, not arama…): kullanıcının mesajı
      zaten sohbette; akış onu yeniden ekler, iki kez görünmesin. */
   async function akisla(fn){
@@ -49777,7 +49950,7 @@ window.LIFEOS.KING = (function(){
   }
 
   return {
-    kur, ac, kapat, kucult, buyut, ad, adYonelme, AD_ANAHTAR, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
+    kur, ac, kapat, kucult, buyut, ad, adYonelme, AD_ANAHTAR, ayarHtml, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
     isDurumYaz:d => { isDurum = d; }, arkadasHal, arkadasPoz, arkadasEsya, ARKADAS_UYKU, yazimSuresi,
     GORUNUS_ANAHTAR:GORUNUS, gorunus, gorunusAyarla, gorunusSeciciHtml, _sesSec:sesSec, isRozet, isYokla, ekipAc, ekipHtml, gorevHtml, isZamanli:() => !!isZaman,
     beceriAc, beceriPanelHtml, bekleyenAl, eylemleriCalistir, k2Html, ODAK_SON,
