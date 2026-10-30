@@ -18693,6 +18693,49 @@ html[data-zemin="yumusak"] .king__yelpaze-oge:not(:hover):not(:focus-visible){ b
   html[data-zemin="yumusak"] .king.king.is-yan-dar:not(.is-mini) .king__yan{ box-shadow:none !important; }
 }
 
+/* 7) ESKİ DÜZENİN CİLASI (kullanıcı, 2026-10-30: «eski tasarımda kal, sadece onu
+   geliştir»; önceki şikâyet: «sistemle aynı, sıkıcı, boğucu»). Düzen aynı
+   (ray · liste · sohbet · Bağlam); değişen yüzey:
+   · Tepedeki King'in arkasında düz beyaz şerit vardı (pencerenin tonlu
+     zemininin üstünde leke): zemin kalktı, yüz akışla birlikte kayar.
+   · Ray: simgenin altında kısa ad; seçili bölüm King renginde dolgu.
+   · Eski cevaplar yarı saydam ve küçültülmüş değil; okunur, yalnız biraz sakin.
+   · Son cevap: King renginde çok hafif tonlu kart (soldaki zaman çizgisi aynı).
+   · Senin mesajın: King renginde tonlu balon (gri değil).
+   · Yazı alanı: odakta King renginde ince halka. */
+.king:not(.is-mini) .king__sahne{ position:relative !important; background:none !important; margin-bottom:0 !important; padding:4px 0 2px !important; }
+
+.king{ --k-ray:68px; }
+.king:not(.is-mini) .king__ray{ gap:6px !important; padding-top:14px !important; }
+.king:not(.is-mini) .king__ray-is{ width:56px !important; height:52px !important; display:flex !important; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; border-radius:14px !important; color:var(--text-2); }
+.king:not(.is-mini) .king__ray-is svg{ width:19px !important; height:19px !important; }
+.king__ray-ad{ display:none; }
+.king:not(.is-mini) .king__ray-ad{ display:block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-size:10px; font-weight:600; letter-spacing:.01em; line-height:1; }
+.king:not(.is-mini) .king__ray-is::after{ display:none !important; }
+.king:not(.is-mini) .king__ray-is:hover{ background:color-mix(in oklab, var(--king-vurgu) 8%, transparent) !important; color:var(--text) !important; }
+html .king:not(.is-mini) .king__ray .king__ray-is.is-secili, html .king:not(.is-mini) .king__ray [aria-current="true"]{
+  background:color-mix(in oklab, var(--king-vurgu) 14%, var(--surface)) !important; color:color-mix(in oklab, var(--king-vurgu) 78%, var(--text)) !important;
+  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 26%, transparent) !important; }
+@media (max-width:679px){ .king:not(.is-mini) .king__ray-is{ width:52px !important; height:48px !important; } }
+
+.king:not(.is-mini) .king__akis{ gap:18px !important; }
+.king:not(.is-mini) .king__akis > .king__balon:not(.is-son):not(:nth-last-child(-n+2)){ opacity:.82 !important; transform:none !important; }
+.king:not(.is-mini) .king__balon--king p{ color:var(--text); }
+
+.king:not(.is-mini) .king__akis > .king__balon--king.is-son > div{ position:relative; padding:18px 22px !important; border-radius:22px !important;
+  background:linear-gradient(160deg, color-mix(in oklab, var(--king-vurgu) 7%, var(--surface)), var(--surface)) !important;
+  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 18%, var(--border)), 0 14px 30px -24px color-mix(in oklab, var(--king-vurgu) 60%, transparent) !important; }
+html .king:not(.is-mini) .king__balon--sen{ background:color-mix(in oklab, var(--king-vurgu) 13%, var(--surface)) !important;
+  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 16%, transparent) !important; }
+html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--king-vurgu) 55%, var(--text)); }
+
+html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz:focus-within{
+  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 45%, transparent), 0 0 0 4px color-mix(in oklab, var(--king-vurgu) 12%, transparent) !important; }
+.king:not(.is-mini) .king__yaz:not(:has(.king__girdi:placeholder-shown)) .king__gonder{ transform:scale(1.04); }
+@media (prefers-reduced-motion:reduce){ .king:not(.is-mini) .king__gonder{ transform:none !important; } }
+
 /* ==== css/minik-cam.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/minik-cam.css içine yazılır; burası bir sonraki
@@ -22228,7 +22271,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'4b90ed2d', at:'2026-10-30 20:16', dirty:false };
+SP.BUILD = { id:'64bd3ef5', at:'2026-10-30 20:54', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -45184,7 +45227,8 @@ window.LIFEOS.KING = (function(){
     const gorunur = listeGorunur(), is = isDurum && isDurum.acik > 0 ? Number(isDurum.acik) : 0;
     const dugme = (eylem, ad, svg, secili, ek, nokta) => '<button type="button" class="king__ray-is' + (secili ? ' is-secili' : '') + '" data-king="' + eylem + '"'
       + ' aria-label="' + kac(ad) + '" data-ipucu="' + kac(ad) + '"' + (secili ? ' aria-current="true"' : '') + (ek || '') + '>'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true">' + svg + '</svg>' + (nokta ? '<i class="king__ray-nokta" aria-hidden="true"></i>' : '') + '</button>';
+      + '<svg viewBox="0 0 24 24" aria-hidden="true">' + svg + '</svg><span class="king__ray-ad" aria-hidden="true">' + kac(String(ad).split(' · ')[0]) + '</span>'
+      + (nokta ? '<i class="king__ray-nokta" aria-hidden="true"></i>' : '') + '</button>';
     return '<nav class="king__ray" aria-label="King bölümleri">'
       + BOLUMLER.map(b => dugme('bolum:' + b.id, b.ad + (b.id === 'gorev' && is ? ' · ' + is + ' iş çalışıyor' : ''), b.svg,
         menu !== 'menu' && (gorunur || (bolum === 'araclar' || bolum === 'kutuphane') ? bolum === b.id : b.id === 'sohbet'), '', b.id === 'gorev' && is)).join('')
