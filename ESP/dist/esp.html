@@ -20050,6 +20050,18 @@ window.LIFEOS = window.LIFEOS || {};
     try{ fetch('/api/ayar', { method:'POST', keepalive:!!cikis, headers:{ 'Content-Type':'application/json', 'X-LifeOS':'ayar' }, body:JSON.stringify({ ayar:fark }) }).catch(() => {}); }catch(e){ return false; }
     return true;
   }
+  /* Sayfa yenilenmeden önce değişiklik sunucuya yazılır ve beklenir (2026-10-31, uçtan
+     uca denemede bulundu): yoksa yenilenen sayfa sunucudaki eski kopyayla açılıp profil
+     geçişini, içe aktarılan yedeği ve «Görünümü sıfırla»yı geri alıyordu. */
+  function ortakYenile(sonra){
+    const git = typeof sonra === 'function' ? sonra : () => { try{ location.reload(); }catch(e){ /* yok */ } };
+    const fark = ortakFark();
+    if(!Object.keys(fark).length || typeof fetch !== 'function') return git();
+    Object.keys(fark).forEach(k => { if(fark[k] == null) delete ortakSon[k]; else ortakSon[k] = fark[k]; });
+    const zaman = setTimeout(git, 2000);                     // sunucu yanıt vermezse yine yenilenir
+    fetch('/api/ayar', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-LifeOS':'ayar' }, body:JSON.stringify({ ayar:fark }) })
+      .catch(() => {}).then(() => { clearTimeout(zaman); git(); });
+  }
   if(typeof window !== 'undefined' && window.__LIFEOS_AYAR__ && typeof window.__LIFEOS_AYAR__ === 'object'){
     ortakAl(window.__LIFEOS_AYAR__);
     simdiki = oku();
@@ -20388,7 +20400,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
     dinlenSure,
-    ANAHTAR, KIPLER, TASINAN, ORTAK, ortakAl, ortakFark,
+    ANAHTAR, KIPLER, TASINAN, ORTAK, ortakAl, ortakFark, ortakYenile,
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
     HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,
@@ -21285,6 +21297,8 @@ window.LIFEOS = window.LIFEOS || {};
      Modüller ayrı kökende: liste ve etkin profil taşınır (animasyon.js
      TASINAN). Öbür modül açılınca etkin profilin damgası orada görülmemişse
      profil oraya da uygulanır ve sayfa bir kez yenilenir. */
+  /* Yenilemeden önce ortak ayarı sunucuya yaz (animasyon.js ortakYenile). */
+  function yenileKaydet(){ if(L.ANIMASYON && L.ANIMASYON.ortakYenile) L.ANIMASYON.ortakYenile(); else try{ location.reload(); }catch(e){ /* yok */ } }
   const PROFIL_ANAHTAR = 'lifeos.profiller', ETKIN_ANAHTAR = 'lifeos.profil.etkin', GORDU_ANAHTAR = 'lifeos.profil.gordu', TEMA_BEKLE = 'lifeos.profil.tema';
   const PROFIL_EN = 8;
   const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
@@ -21335,7 +21349,7 @@ window.LIFEOS = window.LIFEOS || {};
     const damga = String(Date.now());
     depoKoy(ETKIN_ANAHTAR, JSON.stringify({ ad:p.ad, damga }));
     depoKoy(GORDU_ANAHTAR, damga);
-    if(yenile !== false) try{ location.reload(); }catch(e){ /* yok */ }
+    if(yenile !== false) yenileKaydet();
     return true;
   }
   function profilSil(ad){
@@ -21380,7 +21394,7 @@ window.LIFEOS = window.LIFEOS || {};
     return true;
   }
   if(typeof document !== 'undefined' && typeof location !== 'undefined' && !/\/tests\//.test(String(location.pathname || ''))){
-    if(profilEsitle()) try{ location.reload(); }catch(e){ /* yok */ }
+    if(profilEsitle()) yenileKaydet();
     else{
       const bekle = () => setTimeout(temaBekleyen, 1200);   // modül ilk çizimini bitirsin
       if(document.readyState === 'complete') bekle(); else window.addEventListener('load', bekle, { once:true });
@@ -21652,7 +21666,7 @@ window.LIFEOS = window.LIFEOS || {};
       const n = ayarUygula(m);
       if(!n){ yedekDurum('Bu dosya bir LifeOS ayar yedeği değil.'); return; }
       yedekDurum(n + ' tercih uygulandı; sayfa yenileniyor…');
-      setTimeout(() => { try{ location.reload(); }catch(e){ /* yok */ } }, 600);
+      setTimeout(yenileKaydet, 600);
     }).catch(() => yedekDurum('Dosya okunamadı.'));
   }
   function sessizYaz(degisen){
@@ -21879,7 +21893,7 @@ window.LIFEOS = window.LIFEOS || {};
         if(sf.getAttribute('data-onay') !== '1'){ sf.setAttribute('data-onay', '1'); sf.textContent = 'Emin misin? Sıfırla'; return; }
         SIFIRLANAN.forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
         try{ if(L.ZEMIN && L.ZEMIN.yuzeyAnahtar) localStorage.removeItem(L.ZEMIN.yuzeyAnahtar()); }catch(e){}   // Yüzey modüle özel
-        try{ location.reload(); }catch(e){}
+        yenileKaydet();
         return;
       }
       const su = t.closest('[data-sustur]');
@@ -23012,7 +23026,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'5d888830', at:'2026-10-30 21:25', dirty:false };
+ESP.BUILD = { id:'7df749a4', at:'2026-10-30 22:01', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -33245,7 +33259,7 @@ window.LIFEOS.MUZIK = (function(){
   function yukle(){
     if(!ortam.sunucu()) return Promise.resolve(null);
     return ortam.fetch('/api/muzik', { cache:'no-store' }).then(r => r.ok ? r.json() : null)
-      .then(v => { dizin = v || null; isaretle(); guncelle(); return dizin; }).catch(() => null);
+      .then(v => { dizin = v || null; isaretle(); guncelle(true); return dizin; }).catch(() => null);   // açık Ayarlar da tazelenir
   }
   function isaretle(){ try{ if(dizin && dizin.parcalar && dizin.parcalar.length) localStorage.setItem(VAR_ANAHTAR, '1'); else localStorage.removeItem(VAR_ANAHTAR); }catch(e){ /* depo yok */ } }
   const isaretVar = () => { try{ return localStorage.getItem(VAR_ANAHTAR) === '1'; }catch(e){ return false; } };
