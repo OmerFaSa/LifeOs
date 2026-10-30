@@ -428,10 +428,14 @@ window.LIFEOS.MUZIK = (function(){
     window.addEventListener('lifeos:ses', e => { const h = e.detail && e.detail.hal; if((h === 'caliyor' || h === 'baglaniyor') && kip) durdur(); });
   }
 
+  /* Açılış müziği seçim sayfasında (giriş, 4180) çalar (kullanıcı, 2026-10-30:
+     «AYS, SPİ, ESP'yi seçmediğimiz yerde bile başlasın»); oradan açılan
+     modülde ikinci kez çalmaz, arka plan müziğiyle sürer. */
+  const giristen = () => typeof document !== 'undefined' && /^https?:\/\/[^/]+:4180(\/|$)/.test(String(document.referrer || ''));
   function acilis(){
     bagla();
     if(!isaretVar()) return Promise.resolve(null);
-    return yukle().then(v => { if(v && !acilisCal()) arkaBaslat(); });
+    return yukle().then(v => { if(v && (giristen() || !acilisCal())) arkaBaslat(); });
   }
   if(typeof document !== 'undefined' && typeof window !== 'undefined' && !window.__LIFEOS_TEST__){
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', acilis, { once:true });

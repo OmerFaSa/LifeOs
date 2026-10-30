@@ -379,3 +379,22 @@ html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--ca
   .skart__kaydir{ grid-template-columns:minmax(0, 1fr) 44px; }
   .skart__kaydir .skart__etiket{ grid-column:1 / -1; }
 }
+
+/* KAPSAM (kullanıcı, 2026-10-30: «hangi ayar yalnız AYS'de, hangisi bütün
+   sistemde belli değil»). Grup başlığının yanında kısa kapsam; her bölümün
+   başında tek satır, simgeli. Sistem: modül rengi değil nötr; Bu modül: modülün rengi. */
+.ayarlar__grup{ display:flex; align-items:baseline; gap:6px; }
+.ayarlar__grup small{ font-size:10.5px; font-weight:450; letter-spacing:0; color:var(--text-3); opacity:.85; }
+.ayarlar__kapsam{ display:flex; align-items:center; gap:8px; margin:0 0 14px; padding:8px 12px; border-radius:10px; font-size:12.5px; color:var(--text-2);
+  background:color-mix(in oklab, var(--text) 5%, transparent); }
+.ayarlar__kapsam svg{ flex:none; width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.ayarlar__kapsam--modul{ color:var(--mod, var(--primary)); background:color-mix(in oklab, var(--mod, var(--primary)) 10%, transparent); }
+/* Bölümler arası bağlantı kartı (Ses › arka plan videosunun sesi). */
+.skart--bag{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:0; font:inherit; color:var(--text); cursor:pointer; }
+.skart--bag > svg{ flex:none; width:18px; height:18px; fill:none; stroke:var(--mod, var(--primary)); stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.skart--bag > span:last-child{ font-size:18px; color:var(--text-3); }
+.skart--bag:hover{ background:color-mix(in oklab, var(--surface) 90%, transparent); }
+/* YAZI BOYUTU (Ayarlar › Görünüm, 2026-10-30): bütün arayüz birlikte ölçeklenir. */
+html[data-boyut="kucuk"] body{ zoom:.92; }
+html[data-boyut="buyuk"] body{ zoom:1.08; }
+html[data-boyut="enbuyuk"] body{ zoom:1.16; }

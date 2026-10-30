@@ -437,7 +437,15 @@ window.LIFEOS = window.LIFEOS || {};
     if(typeof document === 'undefined') return;
     const kok = document.documentElement;
     if(otoSimdi !== 'saat'){
-      if(otoOnceki !== null){ if(otoOnceki) kok.setAttribute('data-theme', otoOnceki); else kok.removeAttribute('data-theme'); otoOnceki = null; }
+      /* Kapanınca kullanıcının tema seçimine döner (ayarlar.js lifeos.tema.secim); yoksa
+         açılmadan önceki hâle. Eskiden hep öncekine dönüyordu: arada seçilen tema kayboluyordu. */
+      if(otoOnceki !== null){
+        let secim = null;
+        try{ secim = localStorage.getItem('lifeos.tema.secim'); }catch(e){ /* yok */ }
+        const t = secim === 'light' || secim === 'dark' ? secim : secim === 'system' ? '' : otoOnceki;
+        if(t) kok.setAttribute('data-theme', t); else kok.removeAttribute('data-theme');
+        otoOnceki = null;
+      }
       return;
     }
     const t = otoTema();
@@ -451,9 +459,17 @@ window.LIFEOS = window.LIFEOS || {};
     otoUygula();
     manzaraUygula();
   }
+  /* Kullanıcı (2026-10-30: «resim ile beyaz/siyah tema seçiminde bozukluk var»):
+     gündüze kendi fotoğrafını koyunca gece yuvası «Renk»te kalıyor, koyu
+     temaya geçince fotoğraf kayboluyordu. Gündüz «Kendi» olunca gece
+     hiç seçilmemişse (Renk) gündüzün görselini alır; kullanıcı yine değiştirebilir. */
   function manzaraAyarla(k){
     if(MANZARALAR.indexOf(k) < 0) return false;
-    depoYaz(MANZARA_ANAHTAR, k); manzaraSimdi = k; manzaraUygula();
+    depoYaz(MANZARA_ANAHTAR, k); manzaraSimdi = k;
+    let geceSecildi = null;
+    try{ geceSecildi = localStorage.getItem(GECE_ANAHTAR); }catch(e){ /* yok */ }
+    if(k === 'kendi' && !geceSecildi){ depoYaz(GECE_ANAHTAR, 'ayni'); geceSimdi = 'ayni'; }
+    manzaraUygula();
     return true;
   }
   function geceAyarla(k){

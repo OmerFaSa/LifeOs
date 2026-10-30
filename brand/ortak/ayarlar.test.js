@@ -28,17 +28,24 @@
       const d = koy();
       try{
         const sek = Array.from(d.querySelectorAll('[data-ayar-bolum]'));
-        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Minikler ve King', 'Ses', 'Animasyon', 'Bildirimler', 'Planlama',
-          'Güvenlik', 'Bağlantılar', 'Bu modül']);
-        /* Sistem ve Hesap sekme değil, grup başlığı (2026-10-29: «görünüm ve minikleri de Sistem'in içine koy»). */
-        expect(Array.from(d.querySelectorAll('.ayarlar__grup')).map(g => g.textContent)).toEqual(['Sistem', 'Hesap']);
+        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Ses ve müzik', 'Animasyon', 'Minikler ve King', 'Bildirimler', 'Planlama',
+          'Modül ayarları', 'Güvenlik', 'Bağlantılar']);
+        /* Üç grup: Sistem (her yerde), modülün kendisi (yalnız burada), Hesap (2026-10-30: «sistem ayarları, modül ayarları diye ayırın»). */
+        const gruplar = Array.from(d.querySelectorAll('.ayarlar__grup')).map(g => g.firstChild.textContent);
+        expect(gruplar.length).toBe(3);
+        expect([gruplar[0], gruplar[2]]).toEqual(['Sistem', 'Hesap']);
         expect(d.querySelector('.ayarlar__grup').nextElementSibling.textContent).toBe('Profiller');
         const gorunen = () => Array.from(d.querySelectorAll('.ayarlar__bolum')).filter(s => !s.hidden).map(s => s.id);
         expect(gorunen()).toEqual(['ayarlar-bolum-gorunum']);
-        sek[4].click();
+        sek[3].click();
         expect(gorunen()).toEqual(['ayarlar-bolum-ses']);
-        expect(sek[4].getAttribute('aria-selected')).toBe('true');
+        expect(sek[3].getAttribute('aria-selected')).toBe('true');
         expect(sek[1].getAttribute('aria-selected')).toBe('false');
+        /* Her bölüm kapsamını söyler. */
+        expect(d.querySelector('#ayarlar-bolum-ses .ayarlar__kapsam').textContent).toContain('Bütün sistemde');
+        expect(d.querySelector('#ayarlar-bolum-modul .ayarlar__kapsam').textContent).toContain('Yalnız');
+        expect(!!d.querySelector('#ayarlar-bolum-modul [data-yuzey-sec]')).toBe(true);
+        expect(!!d.querySelector('#ayarlar-bolum-gorunum [data-yuzey-sec]')).toBe(false);
       }finally{ d.remove(); A._sec('gorunum'); }
     });
 
@@ -156,7 +163,7 @@
         h.querySelector('[data-odeme="kapali"]').click();
         expect(A.odemeAcik()).toBe(false);
         expect(d.querySelector('#ayarlar-bolum-baglanti').textContent.indexOf('LifeOS Google’a veri göndermez') >= 0).toBe(true);
-        if(window.LIFEOS.KILIT) expect(!!h.querySelector('[data-kilit-ayar]')).toBe(true);
+        if(window.LIFEOS.KILIT) expect(!!d.querySelector('#ayarlar-bolum-modul [data-kilit-ayar]')).toBe(true);   // kilit modülün kendisinde
         expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(A.ODEME_ANAHTAR) >= 0).toBe(true);
       }finally{ d.remove(); try{ if(eski == null) localStorage.removeItem(A.ODEME_ANAHTAR); else localStorage.setItem(A.ODEME_ANAHTAR, eski); }catch(e){} }
     });

@@ -76,6 +76,7 @@ import hesap  # noqa: E402
 import zemin  # noqa: E402  (kullanicinin arka plan dosyasi, sistem/zemin.py)
 import muzik  # noqa: E402  (kullanicinin muzik dosyalari ve listeleri, sistem/muzik.py)
 import ice  # noqa: E402  (Google verisini hesap baglamadan getirmek, sistem/ice.py)
+import ayar  # noqa: E402  (sistem ayarlarinin tek kopyasi, sistem/ayar.py)
 import planlama  # noqa: E402  (Sistem planlamasi, sistem/planlama.py)
 import telefon  # noqa: E402
 
@@ -315,6 +316,8 @@ class Sunucu(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if self.path.split("?", 1)[0] == "/api/ayar":
+            return ayar.isle(self)
         if self.path.startswith("/api/ice"):
             return ice.isle(self)
         if self.path.startswith("/api/muzik"):
@@ -328,7 +331,7 @@ class Sunucu(SimpleHTTPRequestHandler):
             dist = _guncel_dist(self.repo)
             if dist:
                 sayfa, betik, surum = _dist_bol(dist)
-                govde = betik if clean == DIST_BETIK else sayfa
+                govde = betik if clean == DIST_BETIK else ayar.sayfaya_ekle(sayfa)
                 if govde is not None:
                     tur = "text/javascript" if clean == DIST_BETIK else "text/html"
                     # Yalniz surumu tutan adres saklanir; yaris aninda eski
@@ -340,11 +343,28 @@ class Sunucu(SimpleHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(govde)
                     return
+            elif clean != DIST_BETIK:
+                return self._src_sayfa()
         return super().do_GET()
+
+    def _src_sayfa(self):
+        """Kaynak (src) sayfasi da ortak ayarlarla verilir (sistem/ayar.py)."""
+        yol = super().translate_path("/index.html")
+        if not os.path.isfile(yol):
+            return super().do_GET()
+        with open(yol, "rb") as f:
+            govde = ayar.sayfaya_ekle(f.read())
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(govde)))
+        self.end_headers()
+        self.wfile.write(govde)
 
     def do_POST(self):
         if self.path.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if self.path.split("?", 1)[0] == "/api/ayar":
+            return ayar.isle(self)
         if self.path.startswith("/api/ice"):
             return ice.isle(self)
         if self.path.startswith("/api/muzik"):
@@ -709,12 +729,40 @@ body{ min-height:100vh; }
   html:not([data-kendi]) body::before{ background:none; } }
 html[data-kendi="foto"] body{ background-image:var(--kendi); }
 video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; pointer-events:none; }
+/* GIRIS AYARLARI (kullanici, 2026-10-30: «uc kartin durdugu yerde de ayarlar
+   olsun, o kismi da ayarlayabilelim; karmasik yapma»). Sagdan acilan sade
+   bir levha: tema, acilinca, muzik, arka plan. Tema ve arka plan sistem
+   ayaridir (sistem/ayar.py): modullerle ayni. */
+.ust__ayar{ width:36px; height:36px; display:grid; place-items:center; padding:0; border:0; border-radius:50%; cursor:pointer;
+  background:var(--cam, rgba(255,255,255,.7)); color:var(--fg); box-shadow:inset 0 0 0 1px var(--cam-kenar, var(--cizgi)); }
+.ust__ayar svg, .gayar svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.ust__ayar:focus-visible, .gayar button:focus-visible, .gayar select:focus-visible{ outline:2px solid var(--ays); outline-offset:2px; }
+.gayar{ position:fixed; z-index:20; top:12px; right:12px; bottom:12px; width:min(380px, calc(100vw - 24px)); overflow:auto;
+  padding:18px 18px 22px; border-radius:20px; background:var(--yuzey); color:var(--fg); box-shadow:0 20px 60px -20px rgba(10,14,30,.45), inset 0 0 0 1px var(--cizgi); }
+.gayar__bas{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.gayar__bas b{ font-size:17px; }
+.gayar__kapat{ width:32px; height:32px; display:grid; place-items:center; border:0; border-radius:50%; background:var(--yuzey-2); color:var(--fg); cursor:pointer; }
+.gayar__not{ margin:0 0 14px; font-size:12.5px; line-height:1.45; color:var(--fg-3); }
+.gayar__bolum{ display:grid; gap:8px; padding:14px 0; border-top:1px solid var(--cizgi); }
+.gayar__bolum > b{ font-size:13.5px; }
+.gayar__bolum > small{ font-size:12px; color:var(--fg-3); line-height:1.4; }
+.gayar__seg{ display:flex; gap:3px; padding:3px; border-radius:11px; background:var(--yuzey-2); }
+.gayar__seg button{ flex:1; min-height:30px; padding:0 8px; border:0; border-radius:8px; background:transparent; color:var(--fg-2); font:inherit; font-size:12.5px; cursor:pointer; }
+.gayar__seg button.is-on{ background:var(--yuzey); color:var(--fg); font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,.08); }
+.gayar select{ height:34px; padding:0 10px; border-radius:10px; border:1px solid var(--cizgi-2); background:var(--yuzey); color:var(--fg); font:inherit; font-size:13px; }
+.gayar__satir{ display:flex; gap:8px; flex-wrap:wrap; }
+.gayar__dugme{ display:inline-flex; align-items:center; gap:6px; min-height:32px; padding:0 12px; border:0; border-radius:10px; background:var(--yuzey-2); color:var(--fg); font:inherit; font-size:12.5px; cursor:pointer; }
+.gayar__durum{ font-size:12px; color:var(--fg-2); min-height:1em; }
+.gacilis{ position:fixed; z-index:15; left:50%; bottom:24px; transform:translateX(-50%); display:flex; align-items:center; gap:12px;
+  padding:10px 10px 10px 16px; border-radius:999px; background:var(--yuzey); color:var(--fg); box-shadow:0 10px 30px -12px rgba(10,14,30,.4), inset 0 0 0 1px var(--cizgi); font-size:13.5px; }
+@media (prefers-color-scheme:dark){ .gayar, .gacilis{ background:#1b1e26; } .gayar__seg button.is-on{ background:#2a2e38; } .gayar select{ background:#1b1e26; } }
 </style></head><body>
 <main class="sarmal">
   <header class="ust" style="--sira:0">
     <span class="isaret" aria-hidden="true"><b></b><b></b><b></b><b></b></span>
     <h1>LifeOS<span>Kontrol paneli</span></h1>
     <button type="button" class="hesap-cip" data-hesap-cip hidden></button>
+    <button type="button" class="ust__ayar" id="ayar-ac" aria-label="Giriş ayarları" aria-haspopup="dialog" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
   </header>
   __YAY__
 
@@ -742,10 +790,20 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 </main>
 <script>
 (function(){
-  /* Kendi arka planin: koyu temada gece yuvasi, acikta gunduz; yoksa varsayilan. */
+  /* Kendi arka planin: koyu temada gece yuvasi, acikta gunduz; yoksa varsayilan.
+     Sistem ayarlari (sistem/ayar.py) varsa onlara uyar: tema secimi ve
+     modullerde secilen yuva (Gece: Renk / Gunduzun / Kendi). */
   try{
-    var gece = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
-    var adres = '/api/zemin/' + (gece ? 'gece' : 'gunduz');
+    var A = window.__LIFEOS_AYAR__ || {};
+    var tema = A['lifeos.tema.secim'];
+    var gece = tema === 'dark' || (tema !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+    var yuva = gece ? 'gece' : 'gunduz';
+    if('lifeos.manzara' in A || 'lifeos.manzara.gece' in A){
+      var gm = A['lifeos.manzara'] || 'acik', gg = A['lifeos.manzara.gece'] || 'renk';
+      yuva = !gece ? (gm === 'kendi' ? 'gunduz' : '') : gg === 'kendi' ? 'gece' : (gg === 'ayni' && gm === 'kendi') ? 'gunduz' : '';
+    }
+    if(!yuva) throw 0;
+    var adres = '/api/zemin/' + yuva + (A['lifeos.manzara.surum'] ? '?v=' + A['lifeos.manzara.surum'] : '');
     var iptal = new AbortController();
     fetch(adres, { signal:iptal.signal, cache:'no-store' }).then(function(r){
       if(!r.ok) return;
@@ -757,11 +815,129 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
         var v = document.createElement('video');
         v.className = 'giris-video'; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
         v.setAttribute('aria-hidden', 'true'); v.src = adres;
+        /* Videonun kendi sesi (Ayarlar › Arka plan videosu): tarayici izin vermezse ilk dokunusta. */
+        try{
+          var va = JSON.parse(A['lifeos.zemin.video'] || '{}');
+          if(va.hiz) v.playbackRate = va.hiz;
+          if(va.ses === true){
+            v.volume = Math.max(0, Math.min(1, typeof va.duzey === 'number' ? va.duzey : .6)); v.muted = false;
+            v.play().catch(function(){ v.muted = true; v.play().catch(function(){});
+              document.addEventListener('pointerdown', function(){ v.muted = false; }, { once:true, capture:true }); });
+          }
+          if(va.bas || va.bit) v.addEventListener('timeupdate', function(){ if((va.bit && v.currentTime >= va.bit) || (va.bas && v.currentTime < va.bas - .3)) v.currentTime = va.bas || 0; });
+        }catch(e){}
         document.body.insertBefore(v, document.body.firstChild);
         kok.setAttribute('data-kendi', 'video');
       }
     }).catch(function(){});
   }catch(e){}
+})();
+(function(){
+  /* GIRIS AYARLARI ve ACILIS MUZIGI (kullanici, 2026-10-30). Muzik betigi
+     (brand/ortak/muzik.js) burada da calisir: acilis muzigi modulu secmeden
+     baslar; buradan acilan modulde ikinci kez calmaz. */
+  var ac = document.getElementById('ayar-ac');
+  if(!ac) return;
+  ac.hidden = false;
+  var mz = document.createElement('script'); mz.src = '/muzik.js'; document.body.appendChild(mz);
+  var A = window.__LIFEOS_AYAR__ || {};
+  var al = function(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } };
+  var koy = function(k, v){ try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} };
+  var kac = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); };
+  var AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+  /* Son acilan modul ve «Acilinca: son modul» (bu sayfanin kendi tercihi). */
+  document.querySelectorAll('.kart[data-modul]').forEach(function(k){
+    if(k.getAttribute('data-modul') !== 'hkm') k.addEventListener('click', function(){ koy('lifeos.giris.son', k.getAttribute('data-modul')); });
+  });
+  var son = al('lifeos.giris.son');
+  if(al('lifeos.giris.ac') === 'son' && AD[son] && !document.referrer && location.search.indexOf('sec') < 0){
+    var kart = document.querySelector('.kart[data-modul="' + son + '"]');
+    if(kart){
+      var bant = document.createElement('div');
+      bant.className = 'gacilis'; bant.setAttribute('role', 'status');
+      bant.innerHTML = '<span>' + AD[son] + ' açılıyor…</span><button type="button" class="gayar__dugme">Vazgeç</button>';
+      document.body.appendChild(bant);
+      var zaman = setTimeout(function(){ bant.remove(); kart.click(); }, 1800);
+      bant.querySelector('button').addEventListener('click', function(){ clearTimeout(zaman); bant.remove(); });
+    }
+  }
+  function post(yol, govde, baslik){
+    return fetch(yol, { method:'POST', headers:{ 'Content-Type':'application/json', 'X-LifeOS':baslik }, body:JSON.stringify(govde) }).then(function(r){ return r.json(); });
+  }
+  function seg(ad, liste, simdi, veri){
+    return '<div class="gayar__seg" role="group" aria-label="' + ad + '">' + liste.map(function(x){
+      var on = String(x[0]) === String(simdi);
+      return '<button type="button" class="' + (on ? 'is-on' : '') + '" aria-pressed="' + on + '" ' + veri + '="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  }
+  var panel = null, muzik = null, durum = '';
+  function ciz(){
+    var tema = A['lifeos.tema.secim'] || 'system', m = muzik || { parcalar:[], acilis:{ ne:'kapali' }, arka:{ acik:false } };
+    var parcalar = m.parcalar || [];
+    panel.innerHTML = '<div class="gayar__bas"><b>Ayarlar</b><button type="button" class="gayar__kapat" data-g="kapat" aria-label="Kapat">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+      + '<p class="gayar__not">Tema, arka plan ve müzik sistem ayarıdır: AYS, SPİ ve ESP’de de aynı. Öbür her şey modüllerin Ayarlar’ında.</p>'
+      + '<div class="gayar__bolum"><b>Tema</b>' + seg('Tema', [['system', 'Sistem'], ['light', 'Açık'], ['dark', 'Koyu']], tema, 'data-g-tema') + '</div>'
+      + '<div class="gayar__bolum"><b>Açılınca</b>' + seg('Açılınca', [['sec', 'Bu sayfa'], ['son', 'Son açtığım modül']], al('lifeos.giris.ac') || 'sec', 'data-g-acilis')
+      + '<small>' + (AD[son] ? 'Son açtığın: ' + AD[son] + '. ' : '') + 'Son modül seçiliyse LifeOS açılınca iki saniye içinde ona geçer; «Vazgeç» ile burada kalırsın.</small></div>'
+      + '<div class="gayar__bolum"><b>Açılış müziği</b>'
+      + (parcalar.length ? seg('Açılış müziği', [['kapali', 'Kapalı'], ['her', 'Her açılışta'], ['gunde', 'Günde bir']], m.acilis.ne, 'data-g-ne')
+          + '<select data-g-parca aria-label="Açılış parçası"><option value="">Parça seç</option>' + parcalar.map(function(p){ return '<option value="' + kac(p.id) + '"' + (m.acilis.id === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>'; }).join('') + '</select>'
+          + '<small>Kesit ve ses: bir modülde Ayarlar › Ses ve müzik.</small>'
+        : '<small>Henüz parça yok. Bir modülde Ayarlar › Ses ve müzik › Müzik ekle.</small>') + '</div>'
+      + (parcalar.length ? '<div class="gayar__bolum"><b>Arka plan müziği</b>' + seg('Arka plan müziği', [['false', 'Kapalı'], ['true', 'Açık']], String(!!m.arka.acik), 'data-g-arka') + '</div>' : '')
+      + '<div class="gayar__bolum"><b>Arka plan</b><small>Fotoğraf ya da video (en çok 600 MB). Gündüz açık temada, gece koyu temada görünür.</small>'
+      + '<div class="gayar__satir"><label class="gayar__dugme">Gündüz için seç<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/x-m4v,.mov,.m4v" data-g-dosya="gunduz" hidden></label>'
+      + '<label class="gayar__dugme">Gece için seç<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/x-m4v,.mov,.m4v" data-g-dosya="gece" hidden></label></div>'
+      + '<span class="gayar__durum" role="status">' + kac(durum) + '</span></div>';
+  }
+  function muzikOku(){ return fetch('/api/muzik', { cache:'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(v){ muzik = v; ciz(); }).catch(function(){}); }
+  function acKapa(acik){
+    if(acik && !panel){
+      panel = document.createElement('div');
+      panel.className = 'gayar'; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Giriş ayarları');
+      document.body.appendChild(panel);
+      ciz(); muzikOku();
+      panel.addEventListener('click', tikla);
+      panel.addEventListener('change', degisti);
+    }
+    if(panel) panel.hidden = !acik;
+    ac.setAttribute('aria-expanded', acik ? 'true' : 'false');
+    if(acik){ var b = panel.querySelector('button'); if(b) b.focus(); } else ac.focus();
+  }
+  ac.addEventListener('click', function(){ acKapa(!panel || panel.hidden); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && panel && !panel.hidden) acKapa(false); });
+  function ayarYaz(degisen){ Object.keys(degisen).forEach(function(k){ if(degisen[k] == null) delete A[k]; else A[k] = degisen[k]; koy(k, degisen[k]); });
+    return post('/api/ayar', { ayar:degisen }, 'ayar'); }
+  function muzikYaz(degisen){
+    if(!muzik) return;
+    var v = { listeler:muzik.listeler, acilis:muzik.acilis, arka:muzik.arka };
+    Object.keys(degisen).forEach(function(k){ v[k] = Object.assign({}, v[k], degisen[k]); });
+    post('/api/muzik/ayar', v, 'muzik').then(function(x){ if(x && x.parcalar){ muzik = x; ciz(); } });
+  }
+  function tikla(e){
+    var t = e.target.closest('button');
+    if(!t) return;
+    if(t.getAttribute('data-g') === 'kapat') return acKapa(false);
+    if(t.hasAttribute('data-g-tema')) return ayarYaz({ 'lifeos.tema.secim':t.getAttribute('data-g-tema') }).then(function(){ location.reload(); });
+    if(t.hasAttribute('data-g-acilis')){ koy('lifeos.giris.ac', t.getAttribute('data-g-acilis') === 'son' ? 'son' : null); return ciz(); }
+    if(t.hasAttribute('data-g-ne')) return muzikYaz({ acilis:{ ne:t.getAttribute('data-g-ne') } });
+    if(t.hasAttribute('data-g-arka')) return muzikYaz({ arka:{ acik:t.getAttribute('data-g-arka') === 'true' } });
+  }
+  function degisti(e){
+    var t = e.target;
+    if(t.hasAttribute('data-g-parca')) return muzikYaz({ acilis:{ id:t.value || null, ne:t.value ? (muzik.acilis.ne === 'kapali' ? 'her' : muzik.acilis.ne) : 'kapali' } });
+    if(t.hasAttribute('data-g-dosya') && t.files && t.files[0]){
+      var yuva = t.getAttribute('data-g-dosya'), f = t.files[0], tur = f.type || '';
+      durum = /^video/.test(tur) ? 'Video yükleniyor… büyük dosya biraz sürer.' : 'Yükleniyor…'; ciz();
+      fetch('/api/zemin/' + yuva, { method:'POST', headers:{ 'Content-Type':tur, 'X-LifeOS':'zemin' }, body:f }).then(function(r){
+        if(!r.ok) return r.text().then(function(x){ throw new Error(x || 'Yüklenemedi.'); });
+        var d = { 'lifeos.manzara.surum':String(Date.now()) };
+        d['lifeos.manzara.tur.' + yuva] = /^video/.test(tur) ? 'video' : 'foto';
+        if(yuva === 'gece') d['lifeos.manzara.gece'] = 'kendi'; else { d['lifeos.manzara'] = 'kendi'; if(!A['lifeos.manzara.gece']) d['lifeos.manzara.gece'] = 'ayni'; }
+        return ayarYaz(d).then(function(){ location.reload(); });
+      }).catch(function(x){ durum = String(x && x.message || 'Yüklenemedi.').slice(0, 160); ciz(); });
+    }
+  }
 })();
 (function(){
   var IKON = {
@@ -917,7 +1093,7 @@ def _kac(t):
 _OK = ('<svg class="kart__ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6.5L15 12l-5.5 5.5"/></svg>')
 
 
-def giris_html(telefon=False):
+def giris_html(telefon=False, tema=None):
     """Giris sayfasi. telefon=True: iPhone uygulamasinin acilis sayfasi
     (uygulama/ios/hazirla.py derlemede uretir) — ayni stil ve kartlar; HKM
     karti, guncelleme kutusu ve bilgisayarin API'lerine giden betik yok
@@ -969,6 +1145,11 @@ def giris_html(telefon=False):
     sayfa = GIRIS_SAYFASI
     if telefon:
         sayfa = _telefon_iskeleti(sayfa)
+    if tema in ("light", "dark"):
+        # Sistem ayarindaki tema (sistem/ayar.py, lifeos.tema.secim): sayfa
+        # cihazin tercihine degil secime uyar. Koyu kurallar ya hep ya hic.
+        sayfa = (sayfa.replace("@media (prefers-color-scheme:dark)", "@media all" if tema == "dark" else "@media not all")
+                 .replace("color-scheme:light dark;", "color-scheme:%s;" % tema))
     return (sayfa.replace("__KARTLAR__", "\n  ".join(kartlar)).replace("__YAY__", yay)
             .replace("__SURUM__", _kac(surum)).replace("__IKON__", _IKON))
 
@@ -1204,7 +1385,8 @@ class Giris(SimpleHTTPRequestHandler):
         sayfasi (brand/ortak); kapali liste. qr.js: hesap sayfasinin iki
         adim kurulumu ve kodla cihaz baglama QR'i (hesap.js soz 17-18)."""
         tur = {"hesap.js": "text/javascript; charset=utf-8", "hesap.css": "text/css; charset=utf-8",
-               "animasyon.js": "text/javascript; charset=utf-8", "qr.js": "text/javascript; charset=utf-8"}[ad]
+               "animasyon.js": "text/javascript; charset=utf-8", "qr.js": "text/javascript; charset=utf-8",
+               "muzik.js": "text/javascript; charset=utf-8"}[ad]
         with open(os.path.join(KOK, "brand", "ortak", ad), "rb") as f:
             govde = f.read()
         self.send_response(200)
@@ -1218,6 +1400,8 @@ class Giris(SimpleHTTPRequestHandler):
         yol = self.path.split("?", 1)[0]
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if yol == "/api/ayar":
+            return ayar.isle(self)
         if yol.startswith("/api/ice"):
             return ice.isle(self)
         if yol.startswith("/api/muzik"):
@@ -1251,6 +1435,8 @@ class Giris(SimpleHTTPRequestHandler):
         yol = self.path.split("?", 1)[0]
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
+        if yol == "/api/ayar":
+            return ayar.isle(self)
         if yol.startswith("/api/ice"):
             return ice.isle(self)
         if yol.startswith("/api/muzik"):
@@ -1259,7 +1445,7 @@ class Giris(SimpleHTTPRequestHandler):
             return zemin.isle(self)
         if yol.startswith("/api/planlama"):
             return plan_isle(self)
-        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js"):
+        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js"):
             return self._hesap_dosyasi(yol[1:])
         if yol == "/api/guncelleme":
             return self._json(200, guncelleme_durumu(taze="taze=1" in self.path))
@@ -1270,7 +1456,7 @@ class Giris(SimpleHTTPRequestHandler):
             return self._logo(yol[len("/logo/"):])
         if yol.startswith("/marka/"):
             return self._marka(yol[len("/marka/"):])
-        govde = giris_html().encode("utf-8")
+        govde = ayar.sayfaya_ekle(giris_html(tema=ayar.oku()["ayar"].get("lifeos.tema.secim"))).encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(govde)))

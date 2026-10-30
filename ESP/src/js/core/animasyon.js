@@ -243,7 +243,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.muzik.var', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.king.ad', 'lifeos.zemin.video', 'lifeos.minik.kapali', 'lifeos.profiller', 'lifeos.profil.etkin', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.muzik.var', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.king.ad', 'lifeos.boyut', 'lifeos.tema.secim', 'lifeos.zemin.video', 'lifeos.minik.kapali', 'lifeos.profiller', 'lifeos.profil.etkin', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -269,6 +269,55 @@ window.LIFEOS = window.LIFEOS || {};
       try{ localStorage.setItem(k, v); n++; }catch(e){}
     });
     return n;
+  }
+  /* ORTAK AYARLAR (kullanıcı, 2026-10-30: «ses tüm sisteme vuruyor ama duvar
+     kâğıdı yalnız AYS için oluyor»). Sistem ayarları PC'de tek kopyadır
+     (sistem/ayar.py); kapı sayfayı verirken kopyayı `window.__LIFEOS_AYAR__`
+     olarak başa koyar. Burada: önce sunucudaki değer depoya iner (ilk
+     çizim doğru), sonra taşınan parça (daha yeni gezinme) üstüne gelir;
+     sayfa değiştirdiğini iki saniyede bir ve sayfadan çıkarken geri yazar
+     (yalnız değişen anahtar; iki modül açıksa birbirini ezmez). Sunucu
+     yoksa (telefon, tek dosya, denetim sunucusu) hiçbir şey olmaz.
+     Hangi anahtarın sistem ayarı olduğu: sistem/ayar.py ANAHTAR ile aynı. */
+  const ORTAK = /^lifeos\.(yazi|boyut|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|minik|minik\.[a-z]+|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun)|profiller|profil\.etkin)$/;
+  function ortakAnlik(){
+    const o = {};
+    try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(ORTAK.test(k)) o[k] = localStorage.getItem(k); } }catch(e){ /* depo kapalı */ }
+    return o;
+  }
+  let ortakSon = null;
+  /* Döner: depoda değişen anahtar sayısı. */
+  function ortakAl(sunucu){
+    if(!sunucu || typeof sunucu !== 'object') return 0;
+    /* İlk kez (sunucu boş): bu sayfanın ayarları silinmez, sunucuya ilk kopya olarak gider. */
+    if(!Object.keys(sunucu).length){ ortakSon = {}; return 0; }
+    const yerel = ortakAnlik();
+    let n = 0;
+    Object.keys(sunucu).forEach(k => { if(ORTAK.test(k) && typeof sunucu[k] === 'string' && yerel[k] !== sunucu[k]){ try{ localStorage.setItem(k, sunucu[k]); n++; }catch(e){} } });
+    Object.keys(yerel).forEach(k => { if(!(k in sunucu)){ try{ localStorage.removeItem(k); n++; }catch(e){} } });
+    ortakSon = Object.assign({}, sunucu);
+    return n;
+  }
+  /* Döner: sunucuya giden fark ({} ise gönderilmez). */
+  function ortakFark(){
+    if(!ortakSon) return {};
+    const simdi = ortakAnlik(), fark = {};
+    Object.keys(simdi).forEach(k => { if(ortakSon[k] !== simdi[k]) fark[k] = simdi[k]; });
+    Object.keys(ortakSon).forEach(k => { if(!(k in simdi)) fark[k] = null; });
+    return fark;
+  }
+  function ortakGonder(cikis){
+    const fark = ortakFark();
+    if(!Object.keys(fark).length || typeof fetch !== 'function') return false;
+    Object.keys(fark).forEach(k => { if(fark[k] == null) delete ortakSon[k]; else ortakSon[k] = fark[k]; });
+    try{ fetch('/api/ayar', { method:'POST', keepalive:!!cikis, headers:{ 'Content-Type':'application/json', 'X-LifeOS':'ayar' }, body:JSON.stringify({ ayar:fark }) }).catch(() => {}); }catch(e){ return false; }
+    return true;
+  }
+  if(typeof window !== 'undefined' && window.__LIFEOS_AYAR__ && typeof window.__LIFEOS_AYAR__ === 'object'){
+    ortakAl(window.__LIFEOS_AYAR__);
+    simdiki = oku();
+    if(typeof setInterval === 'function') setInterval(() => ortakGonder(false), 2000);
+    window.addEventListener('pagehide', () => ortakGonder(true));
   }
   if(typeof location !== 'undefined' && typeof location.hash === 'string' && location.hash.indexOf(ISARET) === 0){
     tasimaAl(location.hash);
@@ -602,7 +651,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
     dinlenSure,
-    ANAHTAR, KIPLER, TASINAN,
+    ANAHTAR, KIPLER, TASINAN, ORTAK, ortakAl, ortakFark,
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
     HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,

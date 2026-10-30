@@ -107,19 +107,37 @@ window.LIFEOS = window.LIFEOS || {};
      animasyon, plan; sonra Hesap: güvenlik, bağlantılar, Google»; «görünüm ve
      minik ve King'i de Sistem'in içine koy; seçenekleri arttır; arka plan
      fotoğrafını değiştirebilmeyi göremedim»). Grup adı başlıktır, sekme değil. */
+  /* KAPSAM (kullanıcı, 2026-10-30: «hangi ayar sadece AYS'de, hangisi bütün
+     sistemde belli değil; sol tarafa sistem ayarları ve modül ayarları diye
+     ayırın; karmaşık yapma, sadeleştir»). Sistem ayarları PC'de tek kopya
+     (sistem/ayar.py) ve her modülde, giriş sayfasında aynıdır; «Bu modül»
+     yalnız açık modülü değiştirir. Her bölümün başında kapsamı tek satır. */
   const BOLUMLER = Object.freeze([
     { id:'profil',   ad:'Profiller',        grup:'Sistem' },
     { id:'gorunum',  ad:'Görünüm',          grup:'Sistem' },
     { id:'zemin',    ad:'Arka plan',        grup:'Sistem' },
-    { id:'ekip',     ad:'Minikler ve King', grup:'Sistem' },
-    { id:'ses',      ad:'Ses',              grup:'Sistem' },
+    { id:'ses',      ad:'Ses ve müzik',     grup:'Sistem' },
     { id:'hareket',  ad:'Animasyon',        grup:'Sistem' },
+    { id:'ekip',     ad:'Minikler ve King', grup:'Sistem' },
     { id:'bildirim', ad:'Bildirimler',      grup:'Sistem' },
     { id:'sistem',   ad:'Planlama',         grup:'Sistem' },
+    { id:'modul',    ad:'Modül ayarları',   grup:'Bu modül' },
     { id:'hesap',    ad:'Güvenlik',         grup:'Hesap' },
     { id:'baglanti', ad:'Bağlantılar',      grup:'Hesap' },
-    { id:'modul',    ad:'Bu modül' },
   ]);
+  const MODUL_AD = Object.freeze({ ays:'AYS', spi:'SPİ', esp:'ESP' });
+  const SIMGE_KAPSAM = {
+    sistem:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+    modul:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 9h16"/></svg>',
+    hesap:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>',
+  };
+  function kapsamHtml(grup){
+    const m = MODUL_AD[modulAdi()] || 'Bu modül';
+    const [tur, yazi] = grup === 'Sistem' ? ['sistem', 'Bütün sistemde geçerli: AYS, SPİ, ESP ve giriş sayfası']
+      : grup === 'Bu modül' ? ['modul', 'Yalnız ' + m + '’de geçerli; öbür modüller değişmez']
+      : ['hesap', 'Hesabın: bu bilgisayardaki LifeOS sunucusunda'];
+    return '<p class="ayarlar__kapsam ayarlar__kapsam--' + tur + '">' + SIMGE_KAPSAM[tur] + '<span>' + yazi + '</span></p>';
+  }
 
   /* SEÇİMLER: tek anahtarlı, kökte niteliği olan tercihler (biçimi cam.css §45).
      Nitelik hep yazılır (varsayılan da): CSS özgüllüğü buna dayanır. */
@@ -130,6 +148,8 @@ window.LIFEOS = window.LIFEOS || {};
     /* «Hiç» (kullanıcı, 2026-10-30: «az var ama hiç seçeneği yok; arka planda öyle bir şey olmasın»):
        fotoğraf da kartların arkası da bulanmaz (cam.css §51). «Net» yalnız fotoğrafı bulandırmaz. */
     bulanik: { anahtar:'lifeos.zemin.bulanik', kok:'data-bulanik',  vars:'yok',   sira:['hic', 'yok', 'hafif', 'cok'], ad:{ hic:'Hiç', yok:'Net', hafif:'Hafif', cok:'Yumuşak' } },
+    /* Yazı boyutu (2026-10-30, yeni): bütün arayüz birlikte büyür ya da küçülür (ayarlar.css «boyut»). */
+    boyut:   { anahtar:'lifeos.boyut',         kok:'data-boyut',    vars:'normal', sira:['kucuk', 'normal', 'buyuk', 'enbuyuk'], ad:{ kucuk:'Küçük', normal:'Normal', buyuk:'Büyük', enbuyuk:'En büyük' } },
     rozet:   { anahtar:'lifeos.rozet',         kok:'data-rozet',    vars:'acik',  sira:['acik', 'kapali'],     ad:{ acik:'Göster', kapali:'Gizle' } },
     /* 2026-10-30 (kullanıcı: «sol taraftaki menüyü de camsı yapabilelim ayarlarda»). */
     kenar:   { anahtar:'lifeos.kenar.yuzey',   kok:'data-kenar',    vars:'buzlu', sira:['buzlu', 'cam'],       ad:{ buzlu:'Buzlu', cam:'Cam' } },
@@ -171,7 +191,7 @@ window.LIFEOS = window.LIFEOS || {};
      profil oraya da uygulanır ve sayfa bir kez yenilenir. */
   const PROFIL_ANAHTAR = 'lifeos.profiller', ETKIN_ANAHTAR = 'lifeos.profil.etkin', GORDU_ANAHTAR = 'lifeos.profil.gordu', TEMA_BEKLE = 'lifeos.profil.tema';
   const PROFIL_EN = 8;
-  const PROFIL_KAPSAR = Object.freeze(['lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
+  const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
     'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.zemin.video', 'lifeos.zemin.onizle.sade',
     'lifeos.yuzey.ays', 'lifeos.yuzey.spi', 'lifeos.yuzey.esp',
     'lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.ses.duzey', 'lifeos.sessiz',
@@ -240,11 +260,21 @@ window.LIFEOS = window.LIFEOS || {};
     profilYaz(p);
     return true;
   }
-  /* Tema modülün kendi kaydındadır: modülün kendi «set-theme» eylemi yapar. */
+  /* TEMA SİSTEM AYARIDIR (2026-10-30): seçim `lifeos.tema.secim`'de (ortak
+     kopya); modül kendi kaydında tutar, bu yüzden açılışta farklıysa modülün
+     kendi «set-theme» eylemiyle eşitlenir. Saate göre tema açıkken dokunulmaz. */
+  const TEMA_SECIM = 'lifeos.tema.secim';
+  const TEMALAR = ['system', 'light', 'dark'];
   function temaBekleyen(){
-    const t = depoAl(TEMA_BEKLE);
-    if(!t || typeof document === 'undefined' || !document.body) return false;
+    if(typeof document === 'undefined' || !document.body) return false;
+    let t = depoAl(TEMA_BEKLE);
     depoKoy(TEMA_BEKLE, null);
+    if(!t){
+      t = depoAl(TEMA_SECIM);
+      if(depoAl('lifeos.tema.oto') === 'acik') return false;
+      if(!t || (document.documentElement.getAttribute('data-theme') || 'system') === t) return false;
+    }
+    if(TEMALAR.indexOf(t) < 0) return false;
     const b = document.createElement('button');
     b.type = 'button'; b.hidden = true;
     b.setAttribute('data-act', 'set-theme'); b.setAttribute('data-theme', t); b.setAttribute('data-value', t);
@@ -287,7 +317,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* «Görünümü varsayılana döndür»: yalnız görünüş tercihleri; veri değil. İki adım. */
   const SIFIRLANAN = Object.freeze(['lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik',
-    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet']);
+    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet', 'lifeos.boyut', 'lifeos.kenar.yuzey']);
 
   /* Arka plan önizlemesi zemin.js'te: seçim ve yüklemede kendini yeniler. */
   const onizleHtml = yuva => L.ZEMIN && L.ZEMIN.onizleHtml ? L.ZEMIN.onizleHtml(yuva) : '';
@@ -342,24 +372,21 @@ window.LIFEOS = window.LIFEOS || {};
   /* o = { tema:'<tema seçici HTML>', profil:{ ad, alt, route }, modul:[{ ad, route, not }] } */
   function icerik(id, o){
     if(id === 'profil') return profilHtml();
-    if(id === 'gorunum') return H('Tema', 'Sistem seçiliyken cihazın açık/koyu tercihi izlenir', o.tema)
-      + H('Yazı tipi', 'Bütün modüllerde aynı', yaziSeciciHtml())
+    if(id === 'gorunum') return H('Tema', 'Sistem: cihazın açık/koyu tercihi', o.tema)
+      + H('Saate göre tema', '07:00–19:00 açık, sonra koyu', cagir(L.ZEMIN, 'otoSeciciHtml'))
+      + H('Yazı tipi', '', yaziSeciciHtml())
+      + H('Yazı boyutu', 'Bütün arayüz birlikte büyür', secimHtml('boyut', 'Yazı boyutu'))
       + H('Cam yoğunluğu', 'Kartların ne kadar saydam olduğu', secimHtml('cam', 'Cam yoğunluğu'))
-      + H('Sol menü', 'Cam: arkadaki fotoğraf görünür', secimHtml('kenar', 'Sol menü'))
-      + H('King’in adı', 'Boş bırakırsan King',
-        '<input class="ayarlar__girdi" type="text" maxlength="20" data-king-ad placeholder="King"'
-        + ' value="' + kac((() => { try{ return localStorage.getItem('lifeos.king.ad') || ''; }catch(e){ return ''; } })()) + '" aria-label="King’in adı">')
       + H('Kontrast', 'Yüksek: soluk yazılar koyulaşır, kartlar dolar', secimHtml('kontrast', 'Kontrast'))
-      + H('Yüzey', 'Yalnız bu modül', cagir(L.ZEMIN, 'yuzeySeciciHtml'))
-      + H('Varsayılana dön', 'Tema dışındaki görünüş tercihleri ilk hâline döner; verin değişmez',
+      + H('Sol menü', 'Cam: arkadaki fotoğraf görünür', secimHtml('kenar', 'Sol menü'))
+      + H('Varsayılana dön', 'Görünüş tercihleri ilk hâline döner; verin değişmez',
         '<button type="button" class="btn btn--sm" data-ayarlar-sifirla>Görünümü sıfırla</button>');
-    if(id === 'zemin') return '<div class="zemin-yuvalar">'
+    if(id === 'zemin') return H('Arka plan', 'Sade: fotoğraf ve cam yok, düz zemin', cagir(L.ZEMIN, 'seciciHtml'))
+      + '<div class="zemin-yuvalar">'
       + '<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>Gündüz</b><small>Açık tema</small></div>' + onizleHtml('gunduz') + cagir(L.ZEMIN, 'manzaraSeciciHtml') + '</div>'
       + '<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>Gece</b><small>Koyu tema</small></div>' + onizleHtml('gece') + cagir(L.ZEMIN, 'geceSeciciHtml') + '</div></div>'
-      + H('Okunaklık perdesi', 'Fotoğrafın üstündeki örtü: az olunca fotoğraf canlı, çok olunca yazı rahat', secimHtml('perde', 'Okunaklık perdesi'))
-      + H('Bulanıklık', 'Hiç: fotoğraf da kartların arkası da net · Net: yalnız kartlar buzlu', secimHtml('bulanik', 'Bulanıklık'))
-      + H('Zemin', 'Sade: fotoğraf ve cam yok, düz zemin', cagir(L.ZEMIN, 'seciciHtml'))
-      + H('Saate göre tema', '07:00–19:00 açık, sonra koyu', cagir(L.ZEMIN, 'otoSeciciHtml'))
+      + H('Okunaklık perdesi', 'Az: fotoğraf canlı · Çok: yazı rahat', secimHtml('perde', 'Okunaklık perdesi'))
+      + H('Bulanıklık', 'Hiç: hiçbir şey bulanmaz · Net: yalnız kartlar buzlu', secimHtml('bulanik', 'Bulanıklık'))
       + G('Arka plan videosu', 'Ses, kesit ve hız; yalnız video seçiliyken', cagir(L.ZEMIN, 'videoAyarHtml'));
     if(id === 'bildirim'){
       const ss = L.SES && L.SES.sessiz ? L.SES.sessiz() : null;
@@ -377,20 +404,23 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'ses') return '<div class="skartlar">'
       + kart(SIMGE_SES, 'Ses düzeyleri', 'Genel hepsini birlikte kısar; Ayrıntı grubun içindekileri tek tek', cagir(L.SES, 'duzeySeciciHtml'))
       + cagir(L.MUZIK, 'ayarHtml')
-      + kart(SIMGE_VIDEO, 'Arka plan videosu', 'Videonun kendi sesi; müzikle birlikte ya da onun yerine', cagir(L.ZEMIN, 'videoAyarHtml'))
+      + '<button type="button" class="skart skart--bag" data-ayarlar-git="zemin">' + SIMGE_VIDEO
+      + '<span class="skart__baslik"><b>Arka plan videosunun sesi</b><small>Arka plan bölümünde: ses, kesit ve hız</small></span><span aria-hidden="true">›</span></button>'
       + '</div>';
-    if(id === 'ekip') return G('Kimler gezsin', 'Basınca sayfadan çıkar ya da gelir; yeni minikler açık gelir', cagir(L.MINIK, 'galeriHtml'))
+    if(id === 'ekip') return H('King’in adı', 'Boş bırakırsan King',
+        '<input class="ayarlar__girdi" type="text" maxlength="20" data-king-ad placeholder="King"'
+        + ' value="' + kac((() => { try{ return localStorage.getItem('lifeos.king.ad') || ''; }catch(e){ return ''; } })()) + '" aria-label="King’in adı">')
+      + H('King’in görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml'))
       + H('Minikler', 'Sayfada en çok kaç minik', cagir(L.MINIK, 'seciciHtml'))
       + H('Minik boyu', '', cagir(L.MINIK, 'boySeciciHtml'))
-      + H('King’in görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml'));
+      + G('Kimler gezsin', 'Basınca sayfadan çıkar ya da gelir; yeni minikler açık gelir', cagir(L.MINIK, 'galeriHtml'));
     if(id === 'hesap'){
       const p = o.profil || {};
       return '<div class="ayarlar__profil"><i class="ayarlar__avatar" aria-hidden="true">' + kac(((p.ad || 'Ben').trim().charAt(0) || 'B').toLocaleUpperCase('tr-TR')) + '</i>'
         + '<span><b>' + kac(p.ad || 'Profil') + '</b><small>' + kac(p.alt || '') + '</small></span>'
         + (p.route ? '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(p.route) + '">Profili aç</button>' : '') + '</div>'
         + (hesapVar() ? sayfaSatirlari(HESAP_SAYFALARI) : hesapYok())
-        + '<h5 class="plan__alt">Bu cihaz ve kilitler</h5>'
-        + (L.KILIT && L.KILIT.ayarHtml ? H('Gizlilik kilidi', 'Bu modül açılırken dört haneli kod sorar', L.KILIT.ayarHtml(modulAdi(), { govde:true })) : '')
+        + '<h5 class="plan__alt">Kilitler</h5>'
         + H('Satın alma ve kart işlemleri', odemeAcik() ? 'Açık; yine de LifeOS’ta ödeme yapan bir araç yok'
             : 'Kapalı: King ve ajanlar ödeme, sipariş ya da kart işine girmez', odemeSecici());
     }
@@ -398,9 +428,10 @@ window.LIFEOS = window.LIFEOS || {};
       + H('Google ve YouTube', 'Hesap bağlanmaz: King’in bulduğu bağlantılar senin tarayıcında, kendi oturumunla açılır; LifeOS Google’a veri göndermez', '')
       + (hesapVar() ? sayfaSatirlari(BAGLANTI_SAYFALARI) : hesapYok());
     if(id === 'sistem') return '<h4 class="plan__baslik">Sistem planlaması</h4><div class="plan" data-plan-kok><p class="ayarlar__bos">Yükleniyor…</p></div>';
-    if(id === 'modul') return (o.modul || []).map(m => H(m.ad, m.not || '',
-      '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(m.route) + '">Aç</button>')).join('')
-      || '<p class="ayarlar__bos">Bu modülün ayrı ayar ekranı yok.</p>';
+    if(id === 'modul') return H('Yüzey', 'Kartların bu modüldeki düzeni', cagir(L.ZEMIN, 'yuzeySeciciHtml'))
+      + (L.KILIT && L.KILIT.ayarHtml ? H('Gizlilik kilidi', 'Bu modül açılırken dört haneli kod sorar', L.KILIT.ayarHtml(modulAdi(), { govde:true })) : '')
+      + ((o.modul || []).length ? '<h5 class="plan__alt">' + kac(MODUL_AD[modulAdi()] || 'Modül') + ' ekranları</h5>' + o.modul.map(m => H(m.ad, m.not || '',
+        '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(m.route) + '">Aç</button>')).join('') : '');
     return '';
   }
 
@@ -408,13 +439,15 @@ window.LIFEOS = window.LIFEOS || {};
     o = o || {};
     if(!BOLUMLER.some(b => b.id === secili)) secili = 'gorunum';
     if(secili === 'sistem' && typeof setTimeout === 'function') setTimeout(() => planYukle(), 0);
-    const nav = BOLUMLER.map((b, i) => (b.grup && (!i || BOLUMLER[i - 1].grup !== b.grup) ? '<span class="ayarlar__grup" role="presentation">' + kac(b.grup) + '</span>' : '')
+    const grupAd = g => g === 'Bu modül' ? (MODUL_AD[modulAdi()] || 'Bu modül') : g;
+    const nav = BOLUMLER.map((b, i) => (b.grup && (!i || BOLUMLER[i - 1].grup !== b.grup) ? '<span class="ayarlar__grup" role="presentation">' + kac(grupAd(b.grup))
+        + '<small>' + (b.grup === 'Sistem' ? 'her yerde' : b.grup === 'Bu modül' ? 'yalnız burada' : '') + '</small></span>' : '')
       + '<button type="button" class="ayarlar__sekme' + (b.grup ? ' ayarlar__sekme--grupta' : '') + (b.id === secili ? ' is-on' : '') + '" role="tab"'
       + ' id="ayarlar-sekme-' + b.id + '" aria-selected="' + (b.id === secili) + '" aria-controls="ayarlar-bolum-' + b.id + '"'
       + ' data-ayar-bolum="' + b.id + '">' + kac(b.ad) + '</button>').join('');
     const govde = BOLUMLER.map(b => '<section class="ayarlar__bolum" role="tabpanel" id="ayarlar-bolum-' + b.id + '" data-baslik="' + kac(b.ad) + '"'
       + ' aria-labelledby="ayarlar-sekme-' + b.id + '"' + (b.id === secili ? '' : ' hidden') + '>'
-      + icerik(b.id, o) + '</section>').join('');
+      + kapsamHtml(b.grup) + icerik(b.id, o) + '</section>').join('');
     return '<div class="katman kmenu kmenu--yan ayarlar" role="dialog" aria-label="Ayarlar">'
       + '<header class="ayarlar__bas"><b>Ayarlar</b>'
       + '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Ayarları kapat">'
@@ -646,6 +679,14 @@ window.LIFEOS = window.LIFEOS || {};
       }
       const sa = t.closest('[data-sessiz-ac]');
       if(sa){ sessizYaz({ acik:sa.getAttribute('aria-checked') !== 'true' }); sa.classList.toggle('is-on'); sa.setAttribute('aria-checked', String(sa.classList.contains('is-on'))); return; }
+      const ts = t.closest('[data-act="set-theme"][data-theme]');
+      if(ts && TEMALAR.indexOf(ts.getAttribute('data-theme')) >= 0 && !ts.hidden){   // modül de kendi işini yapar
+        depoKoy(TEMA_SECIM, ts.getAttribute('data-theme'));
+        /* Elle tema seçmek «Saate göre»yi kapatır: yoksa düğme işe yaramıyor gibi görünüyordu. */
+        if(L.ZEMIN && L.ZEMIN.oto && L.ZEMIN.oto() === 'saat') L.ZEMIN.otoAyarla('kapali');
+      }
+      const git = t.closest('[data-ayarlar-git]');
+      if(git){ e.preventDefault(); sekmeSec(git.closest('.ayarlar'), git.getAttribute('data-ayarlar-git')); return; }
       const pg = t.closest('[data-profil-gec], [data-profil-guncelle], [data-profil-sil]');
       if(pg){
         e.preventDefault();

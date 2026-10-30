@@ -426,4 +426,46 @@
       }finally{ d.remove(); }
     }));
   });
+
+  /* 2026-10-30 (kullanıcı: «ses tüm sisteme vuruyor ama duvar kâğıdı yalnız AYS'de»). */
+  describe('Ortak ayarlar (sistem/ayar.py)', () => {
+    const A = () => window.LIFEOS.ANIMASYON;
+    /* Bütün depo saklanır: ortakAl sunucuda olmayan ortak anahtarları siler. */
+    const sakla = fn => {
+      const once = {};
+      for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); once[k] = localStorage.getItem(k); }
+      try{ return fn(); }finally{
+        Object.keys(Object.assign({}, localStorage)).forEach(k => { if(!(k in once)) localStorage.removeItem(k); });
+        Object.keys(once).forEach(k => localStorage.setItem(k, once[k]));
+      }
+    };
+    it('yalnız sistem ayarları ortaktır; kilit, modül yüzeyi ve King hafızası değil', () => {
+      ['lifeos.cam', 'lifeos.manzara', 'lifeos.manzara.tur.gunduz', 'lifeos.zemin.video', 'lifeos.ses.duzey', 'lifeos.tema.secim', 'lifeos.profiller', 'lifeos.muzik.var']
+        .forEach(k => expect(A().ORTAK.test(k)).toBe(true));
+      ['lifeos.kilit.odeme', 'lifeos.yuzey.ays', 'lifeos.king.kartlarim', 'lifeos.kisi.izin', 'lifeos.tema']
+        .forEach(k => expect(A().ORTAK.test(k)).toBe(false));
+    });
+    it('sunucudaki değer depoya iner, sunucuda olmayan ortak anahtar silinir; ortak olmayana dokunulmaz; fark yalnız değişeni gönderir', () => sakla(() => {
+      localStorage.setItem('lifeos.cam', 'az');
+      localStorage.setItem('lifeos.perde', 'cok');
+      localStorage.setItem('lifeos.kilit.odeme', 'acik');
+      expect(A().ortakAl({ 'lifeos.cam':'cok', 'lifeos.manzara':'kendi' }) >= 3).toBe(true);
+      expect(localStorage.getItem('lifeos.cam')).toBe('cok');
+      expect(localStorage.getItem('lifeos.manzara')).toBe('kendi');
+      expect(localStorage.getItem('lifeos.perde')).toBe(null);
+      expect(localStorage.getItem('lifeos.kilit.odeme')).toBe('acik');
+      localStorage.setItem('lifeos.tema.secim', 'dark');
+      localStorage.removeItem('lifeos.manzara');
+      const f = A().ortakFark();
+      expect(f['lifeos.tema.secim']).toBe('dark');
+      expect(f['lifeos.manzara']).toBe(null);
+      expect('lifeos.cam' in f).toBe(false);
+    }));
+    it('sunucu boşsa (ilk kez) bu sayfanın ayarları silinmez, ilk kopya olarak gider', () => sakla(() => {
+      localStorage.setItem('lifeos.cam', 'az');
+      expect(A().ortakAl({})).toBe(0);
+      expect(localStorage.getItem('lifeos.cam')).toBe('az');
+      expect(A().ortakFark()['lifeos.cam']).toBe('az');
+    }));
+  });
 })();

@@ -202,6 +202,11 @@ jobs:
       - name: Google verisi hesap bağlanmadan, yalnız bu bilgisayardan
         run: python3 tools/ice_test.py
 
+      # ORTAK AYARLAR (2026-10-30). Sistem ayarları PC'de tek kopya; her kapı sayfanın
+      # başına koyar. Yalnız tercih anahtarları; kilit, veri ve modül yüzeyi yazılamaz.
+      - name: Sistem ayarları tek kopya, yalnız tercih
+        run: python3 tools/ayar_test.py
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç
