@@ -395,9 +395,10 @@ html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--ca
 .skart--bag > span:last-child{ font-size:18px; color:var(--text-3); }
 .skart--bag:hover{ background:color-mix(in oklab, var(--surface) 90%, transparent); }
 /* YAZI BOYUTU (Ayarlar › Görünüm, 2026-10-30): bütün arayüz birlikte ölçeklenir. */
-html[data-boyut="kucuk"] body{ zoom:.92; }
-html[data-boyut="buyuk"] body{ zoom:1.08; }
-html[data-boyut="enbuyuk"] body{ zoom:1.16; }
+/* Yalnız içerik ölçeklenir; sol menü ve sabit katmanlar yerinde kalır (2026-10-30: «yazı boyutunu değiştirince soldaki kartın oranı bozuluyor»). */
+html[data-boyut="kucuk"] .site__body{ zoom:.92; }
+html[data-boyut="buyuk"] .site__body{ zoom:1.08; }
+html[data-boyut="enbuyuk"] .site__body{ zoom:1.16; }
 
 /* ALANLAR (kullanıcı, 2026-10-30: «sistem ile yalnız o modül arasındaki ayrımı daha
    güzel yap; ayarları daha minimalist, anlaşılır yap»). Başlığın altında üç alan:
@@ -453,3 +454,17 @@ html[data-vurgu]:not([data-vurgu="modul"]){ --vurgu-ink:color-mix(in oklab, var(
 .ayarlar__acilir-deger::after{ content:'›'; color:var(--text-3); transition:transform var(--dur) var(--ease); }
 .ayarlar__acilir[open] .ayarlar__acilir-deger::after{ transform:rotate(90deg); }
 .ayarlar__acilir > .ayarlar__yazilar{ margin:4px 0 12px; }
+/* Kart içinde satırlar (2026-10-30: «her şeyi yerli yerinde yap»): ilk satırın üst çizgisi yok, satırlar kartın içinde nefes alır. */
+.skart .ayarlar__satir{ padding:10px 0; }
+.skart .skart__govde > .ayarlar__satir:first-child, .skart .skart__govde > .ayarlar__acilir:first-child > summary{ border-top:0; padding-top:2px; }
+.skart .zemin-yuvalar{ margin:4px 0 2px; }
+.ayarlar__dip{ display:flex; align-items:center; gap:10px; padding:2px 4px; }
+.ayarlar__dip small{ font-size:12px; color:var(--text-3); }
+/* Kart kendi genişliğine göre dizilir (pencere dar ya da yazı büyükse): yuvalar alt alta, denetim adın altına iner, hiçbir şey kartın dışına taşmaz. */
+.skart__govde{ container-type:inline-size; min-width:0; }
+@container (max-width:560px){
+  .zemin-yuvalar{ grid-template-columns:1fr; }
+  .skart .ayarlar__satir{ flex-wrap:wrap; gap:8px 16px; }
+  .skart .ayarlar__deger{ flex:1 1 100%; justify-content:flex-start; }
+}
+.skart .seg{ max-width:100%; flex-wrap:wrap; }

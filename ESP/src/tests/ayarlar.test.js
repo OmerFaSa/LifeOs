@@ -295,17 +295,32 @@
         [A.PROFIL_ANAHTAR, A.ETKIN_ANAHTAR].forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); });
       }
     });
-    it('tema paketi kalktı; bulanıklıkta «Hiç» var ve köke yazılır', () => {
+    /* 2026-10-30 (kullanıcı: «bulanıklık ayrı ayrı olsun: duvar kâğıdı, kartlar, menü, ayarlar»; «perdede yok olsun»). */
+    it('tema paketi kalktı; bulanıklık katman katman: duvar kâğıdı seçimi, kartlar/menü/pencereler aç-kapa anahtarı; perdede «Yok»', () => {
       expect(A.SECIMLER.paket).toBe(undefined);
       expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf('lifeos.tema.paket')).toBe(-1);
-      expect(A.SECIMLER.bulanik.sira[0]).toBe('hic');
-      const once = localStorage.getItem('lifeos.zemin.bulanik');
+      expect(A.SECIMLER.bulanik.sira).toEqual(['yok', 'hafif', 'cok']);
+      expect(A.SECIMLER.perde.sira[0]).toBe('yok');
+      const anahtarlar = ['lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere'], once = anahtarlar.map(k => localStorage.getItem(k));
+      A._sec('zemin');
+      const d = koy();
       try{
-        expect(A.secimAyarla('bulanik', 'hic')).toBe(true);
-        expect(document.documentElement.getAttribute('data-bulanik')).toBe('hic');
+        anahtarlar.forEach(k => localStorage.removeItem(k));
+        ['buzluKart', 'buzluMenu', 'buzluPencere'].forEach(k => A.secimAyarla(k, 'acik'));
+        const s = d.querySelector('[data-anahtar="buzluPencere"]');
+        expect(s.getAttribute('aria-checked')).toBe('true');
+        s.click();
+        expect(document.documentElement.getAttribute('data-buzlu-pencere')).toBe('kapali');
+        expect(localStorage.getItem('lifeos.buzlu.pencere')).toBe('kapali');
+        expect(s.getAttribute('aria-checked')).toBe('false');
+        expect(document.documentElement.getAttribute('data-buzlu-kart')).toBe('acik');   // öbür katmanlar değişmez
+        s.click();
+        expect(localStorage.getItem('lifeos.buzlu.pencere')).toBe(null);
+        anahtarlar.forEach(k => expect(window.LIFEOS.ANIMASYON.ORTAK.test(k)).toBe(true));
       }finally{
-        if(once == null) localStorage.removeItem('lifeos.zemin.bulanik'); else localStorage.setItem('lifeos.zemin.bulanik', once);
-        A.secimAyarla('bulanik', A.secim('bulanik'));
+        d.remove(); A._sec('gorunum');
+        anahtarlar.forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); });
+        ['buzluKart', 'buzluMenu', 'buzluPencere'].forEach(k => A.secimAyarla(k, A.secim(k)));
       }
     });
     it('hesap sunucusu yokken düğme yok, durum söylenir', () => {

@@ -1806,6 +1806,22 @@ html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 > .kenar :is(.kenar__a
   html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar.kenar--tutulu{
     background:linear-gradient(160deg, rgba(20,22,30,.74), rgba(14,16,22,.66)) !important; }
 }
-/* «Hiç»: fotoğraf bulanmaz, kartların arkası da bulanmaz (buzlu cam yok, renk tabanı kalır). */
-html[data-bulanik="hic"] :is(*, *::before, *::after){ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
-html[data-bulanik="hic"] body::before, html[data-bulanik="hic"] video.zemin-video{ filter:none !important; }
+/* 52) KATMAN KATMAN BULANIKLIK (kullanıcı, 2026-10-30: «bulanıklık ayrı ayrı olsun:
+   duvar kâğıdı, sistem kartları, menü, ayarlar»; «ayarlar arka planla hafif
+   karışıyor, buzul etkiyi bozmadan akıllıca çöz»). Duvar kâğıdı: data-bulanik.
+   Öbür üç katman aç/kapa; kapalı katmanın camı kalkar ama yerine DOLU bir
+   zemin gelir (okunaklık bulanıklığa bağlı kalmaz).
+   Pencereler (Ayarlar, bildirim, çekmeceler): camın altında temanın zemininden
+   bir taban var; buzlu açıkken bile arkadaki sayfa yazısı içeriğe karışmaz. */
+html[data-perde="yok"]{ --perde:0; }
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  .kmenu--yan:not(.is-alttan){ background:var(--cam), color-mix(in oklab, var(--bg) 78%, transparent) !important;
+    -webkit-backdrop-filter:saturate(150%) blur(40px) !important; backdrop-filter:saturate(150%) blur(40px) !important; }
+}
+html[data-buzlu-pencere="kapali"] :is(.katman, .kmenu--yan:not(.is-alttan)){ -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+  background:var(--surface) !important; }
+html[data-buzlu-menu="kapali"] .site--v5 > .kenar, html[data-buzlu-menu="kapali"] .site--v5 > .kenar :is(*, *::before, *::after),
+html[data-buzlu-menu="kapali"] .site--v5 > .kenar::before, html[data-buzlu-menu="kapali"] .site--v5 > .kenar::after{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+html[data-buzlu-menu="kapali"] .site--v5 > .kenar{ background:color-mix(in oklab, var(--surface) 97%, transparent) !important; }
+html[data-buzlu-kart="kapali"] .site__body{ --cam:color-mix(in oklab, var(--surface) 94%, transparent); --cam-ince:color-mix(in oklab, var(--surface) 90%, transparent); }
+html[data-buzlu-kart="kapali"] .site__body :is(*, *::before, *::after):not(.katman):not(.katman *){ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }

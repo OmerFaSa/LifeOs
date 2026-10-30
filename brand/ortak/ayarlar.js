@@ -157,10 +157,16 @@ window.LIFEOS = window.LIFEOS || {};
   const SECIMLER = Object.freeze({
     cam:     { anahtar:'lifeos.cam',           kok:'data-cam',      vars:'orta',  sira:['az', 'orta', 'cok'],  ad:{ az:'Dolu', orta:'Orta', cok:'Saydam' } },
     kontrast:{ anahtar:'lifeos.kontrast',      kok:'data-kontrast', vars:'normal', sira:['normal', 'yuksek'], ad:{ normal:'Normal', yuksek:'Yüksek' } },
-    perde:   { anahtar:'lifeos.perde',         kok:'data-perde',    vars:'orta',  sira:['az', 'orta', 'cok'],  ad:{ az:'Az', orta:'Orta', cok:'Çok' } },
+    perde:   { anahtar:'lifeos.perde',         kok:'data-perde',    vars:'orta',  sira:['yok', 'az', 'orta', 'cok'],  ad:{ yok:'Yok', az:'Az', orta:'Orta', cok:'Çok' } },
     /* «Hiç» (kullanıcı, 2026-10-30: «az var ama hiç seçeneği yok; arka planda öyle bir şey olmasın»):
        fotoğraf da kartların arkası da bulanmaz (cam.css §51). «Net» yalnız fotoğrafı bulandırmaz. */
-    bulanik: { anahtar:'lifeos.zemin.bulanik', kok:'data-bulanik',  vars:'yok',   sira:['hic', 'yok', 'hafif', 'cok'], ad:{ hic:'Hiç', yok:'Net', hafif:'Hafif', cok:'Yumuşak' } },
+    bulanik: { anahtar:'lifeos.zemin.bulanik', kok:'data-bulanik',  vars:'yok',   sira:['yok', 'hafif', 'cok'], ad:{ yok:'Yok', hafif:'Hafif', cok:'Yumuşak' } },
+    /* KATMAN KATMAN BULANIKLIK (kullanıcı, 2026-10-30: «bulanıklık ayrı ayrı olsun:
+       ayarların, sistem kartlarının, duvar kâğıdının, menünün bulanıklığını aç ya
+       da kapat»). Kapalı katman buzlu cam yerine dolu ve okunur (cam.css §51). */
+    buzluKart:{ anahtar:'lifeos.buzlu.kart',   kok:'data-buzlu-kart',    vars:'acik', sira:['acik', 'kapali'], ad:{ acik:'Buzlu', kapali:'Dolu' } },
+    buzluMenu:{ anahtar:'lifeos.buzlu.menu',   kok:'data-buzlu-menu',    vars:'acik', sira:['acik', 'kapali'], ad:{ acik:'Buzlu', kapali:'Dolu' } },
+    buzluPencere:{ anahtar:'lifeos.buzlu.pencere', kok:'data-buzlu-pencere', vars:'acik', sira:['acik', 'kapali'], ad:{ acik:'Buzlu', kapali:'Dolu' } },
     /* Vurgu rengi (2026-10-30, yeni): seçili düğme, sekme ve anahtarın rengi; ölçü renkleri değişmez (§1.10). */
     vurgu:   { anahtar:'lifeos.vurgu',         kok:'data-vurgu',    vars:'modul', sira:['modul', 'mavi', 'yesil', 'mor', 'turuncu', 'pembe', 'grafit'],
       ad:{ modul:'Modülün', mavi:'Mavi', yesil:'Yeşil', mor:'Mor', turuncu:'Turuncu', pembe:'Pembe', grafit:'Grafit' } },
@@ -197,7 +203,13 @@ window.LIFEOS = window.LIFEOS || {};
     const on = v === secim('vurgu');
     return '<button type="button" class="vurgu__renk' + (on ? ' is-on' : '') + '" data-secim="vurgu:' + v + '" aria-pressed="' + on + '" title="' + SECIMLER.vurgu.ad[v] + '"'
       + ' aria-label="' + SECIMLER.vurgu.ad[v] + '" style="--v:' + VURGU_RENK[v] + '"></button>'; }).join('') + '</div>';
+  /* Göç (bir kez): eski «Hiç» bulanıklık = hiçbir katman bulanmaz. */
+  try{ if(localStorage.getItem('lifeos.zemin.bulanik') === 'hic'){ localStorage.removeItem('lifeos.zemin.bulanik');
+    ['lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere'].forEach(k => localStorage.setItem(k, 'kapali')); } }catch(e){ /* depo kapalı */ }
   Object.keys(SECIMLER).forEach(secimUygula);
+  /* Aç/kapa anahtarı (iki değerli seçim için; Ses'teki anahtarla aynı biçim). */
+  const anahtarHtml = (k, ad) => { const on = secim(k) === SECIMLER[k].vars;
+    return '<button type="button" class="plan__anahtar' + (on ? ' is-on' : '') + '" role="switch" aria-checked="' + on + '" aria-label="' + kac(ad) + '" data-anahtar="' + k + '"><i aria-hidden="true"></i></button>'; };
   /* Tema paketleri kalktı (kullanıcı, 2026-10-30: «o kısımları kaldır; kastım ayar
      profilleri»): eski seçim depoda kalmasın. */
   try{ localStorage.removeItem('lifeos.tema.paket'); if(typeof document !== 'undefined') document.documentElement.removeAttribute('data-paket'); }catch(e){ /* depo kapalı */ }
@@ -212,7 +224,7 @@ window.LIFEOS = window.LIFEOS || {};
      profil oraya da uygulanır ve sayfa bir kez yenilenir. */
   const PROFIL_ANAHTAR = 'lifeos.profiller', ETKIN_ANAHTAR = 'lifeos.profil.etkin', GORDU_ANAHTAR = 'lifeos.profil.gordu', TEMA_BEKLE = 'lifeos.profil.tema';
   const PROFIL_EN = 8;
-  const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
+  const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
     'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.zemin.video', 'lifeos.zemin.onizle.sade',
     'lifeos.yuzey.ays', 'lifeos.yuzey.spi', 'lifeos.yuzey.esp',
     'lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.ses.duzey', 'lifeos.sessiz',
@@ -338,7 +350,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* «Görünümü varsayılana döndür»: yalnız görünüş tercihleri; veri değil. İki adım. */
   const SIFIRLANAN = Object.freeze(['lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik',
-    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.kenar.yuzey']);
+    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.kenar.yuzey', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere']);
 
   /* Arka plan önizlemesi zemin.js'te: seçim ve yüklemede kendini yeniler. */
   const onizleHtml = yuva => L.ZEMIN && L.ZEMIN.onizleHtml ? L.ZEMIN.onizleHtml(yuva) : '';
@@ -387,41 +399,65 @@ window.LIFEOS = window.LIFEOS || {};
   const SVG = d => '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>';
   const kart = (simge, ad, not, govde) => '<section class="skart"><header class="skart__bas"><span class="skart__simge">' + simge + '</span>'
     + '<span class="skart__baslik"><b>' + kac(ad) + '</b>' + (not ? '<small>' + kac(not) + '</small>' : '') + '</span></header><div class="skart__govde">' + govde + '</div></section>';
+  const SIMGE = {
+    tema:SVG('M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z'),
+    yazi:SVG('M5 19L10 5h1l5 14M7 14h7M17 19l2-6 2 6M17.6 17h2.8'),
+    renk:SVG('M12 3a9 9 0 1 0 0 18c1 0 1.5-.8 1.2-1.7-.4-1 .3-2.3 1.5-2.3H17a4 4 0 0 0 4-4c0-5.5-4-10-9-10zM7.5 11h.01M10 7.5h.01M14 7.5h.01'),
+    resim:SVG('M4 5h16v14H4zM4 15l4.5-4.5 4 4 2.5-2.5L20 17'),
+    bulanik:SVG('M12 3c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11z'),
+    zil:SVG('M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0'),
+    hareket:SVG('M4 12h4l3-7 4 14 3-7h2'),
+    king:SVG('M4 18h16M5 18l-1-10 5 4 3-6 3 6 5-4-1 10'),
+    minik:SVG('M12 4a6 6 0 0 1 6 6v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6a6 6 0 0 1 6-6zM9.5 11h.01M14.5 11h.01'),
+    kilit:SVG('M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3'),
+    yuzey:SVG('M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z'),
+    ekran:SVG('M4 5h16v11H4zM9 20h6M12 16v4'),
+  };
   const SIMGE_SES = SVG('M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12');
   const SIMGE_VIDEO = SVG('M4 6h12v12H4zM16 10l4-2.5v9L16 14');
 
   /* o = { tema:'<tema seçici HTML>', profil:{ ad, alt, route }, modul:[{ ad, route, not }] } */
   function icerik(id, o){
     if(id === 'profil') return profilHtml();
-    if(id === 'gorunum') return H('Tema', 'Sistem: cihazın açık/koyu tercihi', o.tema)
-      + H('Saate göre tema', '07:00–19:00 açık, sonra koyu', cagir(L.ZEMIN, 'otoSeciciHtml'))
-      + '<details class="ayarlar__acilir"><summary class="ayarlar__satir"><span class="ayarlar__ad">Yazı tipi<small>Bütün modüllerde aynı</small></span>'
-      + '<span class="ayarlar__acilir-deger" data-yazi-ad>' + kac((YAZILAR.find(y => y.id === yazi()) || YAZILAR[0]).ad) + '</span></summary>' + yaziSeciciHtml() + '</details>'
-      + G('Yazı boyutu', 'Bütün arayüz birlikte büyür', secimHtml('boyut', 'Yazı boyutu'))
-      + H('Vurgu rengi', 'Seçili düğme ve sekmelerin rengi', vurguHtml())
-      + H('Cam yoğunluğu', 'Kartların ne kadar saydam olduğu', secimHtml('cam', 'Cam yoğunluğu'))
-      + H('Kontrast', 'Yüksek: soluk yazılar koyulaşır, kartlar dolar', secimHtml('kontrast', 'Kontrast'))
-      + H('Sol menü', 'Cam: arkadaki fotoğraf görünür', secimHtml('kenar', 'Sol menü'))
-      + H('Varsayılana dön', 'Görünüş tercihleri ilk hâline döner; verin değişmez',
-        '<button type="button" class="btn btn--sm" data-ayarlar-sifirla>Görünümü sıfırla</button>');
-    if(id === 'zemin') return H('Arka plan', 'Sade: fotoğraf ve cam yok, düz zemin', cagir(L.ZEMIN, 'seciciHtml'))
-      + '<div class="zemin-yuvalar">'
-      + '<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>Gündüz</b><small>Açık tema</small></div>' + onizleHtml('gunduz') + cagir(L.ZEMIN, 'manzaraSeciciHtml') + '</div>'
-      + '<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>Gece</b><small>Koyu tema</small></div>' + onizleHtml('gece') + cagir(L.ZEMIN, 'geceSeciciHtml') + '</div></div>'
-      + H('Okunaklık perdesi', 'Az: fotoğraf canlı · Çok: yazı rahat', secimHtml('perde', 'Okunaklık perdesi'))
-      + H('Bulanıklık', 'Hiç: hiçbir şey bulanmaz · Net: yalnız kartlar buzlu', secimHtml('bulanik', 'Bulanıklık'))
-      + G('Arka plan videosu', 'Ses, kesit ve hız; yalnız video seçiliyken', cagir(L.ZEMIN, 'videoAyarHtml'));
+    /* YERLİ YERİNDE (kullanıcı, 2026-10-30: «ayarlar karman çorman oldu; her şeyi yerli
+       yerinde yap»): her bölüm Ses'teki gibi başlıklı kartlardan oluşur; bir kart
+       tek bir konuyu toplar. */
+    if(id === 'gorunum') return '<div class="skartlar">'
+      + kart(SIMGE.tema, 'Tema', 'Açık, koyu ya da cihazınki', H('Tema', '', o.tema) + H('Saate göre', '07:00–19:00 açık, sonra koyu', cagir(L.ZEMIN, 'otoSeciciHtml')))
+      + kart(SIMGE.yazi, 'Yazı', 'Bütün modüllerde aynı',
+        '<details class="ayarlar__acilir"><summary class="ayarlar__satir"><span class="ayarlar__ad">Yazı tipi</span>'
+        + '<span class="ayarlar__acilir-deger" data-yazi-ad>' + kac((YAZILAR.find(y => y.id === yazi()) || YAZILAR[0]).ad) + '</span></summary>' + yaziSeciciHtml() + '</details>'
+        + G('Boyut', 'İçerik birlikte büyür; menü yerinde kalır', secimHtml('boyut', 'Yazı boyutu')))
+      + kart(SIMGE.renk, 'Renk ve cam', '', H('Vurgu rengi', 'Seçili düğme ve sekmeler', vurguHtml())
+        + H('Cam yoğunluğu', 'Kartların ne kadar saydam olduğu', secimHtml('cam', 'Cam yoğunluğu'))
+        + H('Sol menü', 'Cam: arkadaki fotoğraf görünür', secimHtml('kenar', 'Sol menü'))
+        + H('Kontrast', 'Yüksek: soluk yazılar koyulaşır', secimHtml('kontrast', 'Kontrast')))
+      + '<div class="ayarlar__dip"><button type="button" class="btn btn--sm btn--ghost" data-ayarlar-sifirla>Görünümü sıfırla</button><small>Verin değişmez</small></div>'
+      + '</div>';
+    if(id === 'zemin') return '<div class="skartlar">'
+      + kart(SIMGE.resim, 'Duvar kâğıdı', 'Gündüz açık temada, gece koyu temada', H('Zemin', 'Sade: fotoğraf ve cam yok', cagir(L.ZEMIN, 'seciciHtml'))
+        + '<div class="zemin-yuvalar">'
+        + '<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>Gündüz</b><small>Açık tema</small></div>' + onizleHtml('gunduz') + cagir(L.ZEMIN, 'manzaraSeciciHtml') + '</div>'
+        + '<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>Gece</b><small>Koyu tema</small></div>' + onizleHtml('gece') + cagir(L.ZEMIN, 'geceSeciciHtml') + '</div></div>')
+      + kart(SIMGE.bulanik, 'Bulanıklık ve okunaklık', 'Her katman ayrı; kapalı katman dolu ve okunur',
+        H('Duvar kâğıdı', 'Fotoğrafın kendisi', secimHtml('bulanik', 'Duvar kâğıdının bulanıklığı'))
+        + H('Perde', 'Fotoğrafın üstündeki örtü', secimHtml('perde', 'Okunaklık perdesi'))
+        + H('Kartlar', 'Sayfadaki kartlar buzlu cam', anahtarHtml('buzluKart', 'Kartlar buzlu'))
+        + H('Sol menü', 'Menü buzlu cam', anahtarHtml('buzluMenu', 'Sol menü buzlu'))
+        + H('Pencereler', 'Ayarlar, bildirimler, çekmeceler', anahtarHtml('buzluPencere', 'Pencereler buzlu')))
+      + kart(SIMGE_VIDEO, 'Arka plan videosu', 'Yalnız video seçiliyken', cagir(L.ZEMIN, 'videoAyarHtml'))
+      + '</div>';
     if(id === 'bildirim'){
       const ss = L.SES && L.SES.sessiz ? L.SES.sessiz() : null;
-      return (ss ? H('Sessiz saatler', 'Bu aralıkta bütün sesler ve King’in sesli okuması susar; radyo susmaz',
+      return '<div class="skartlar">' + kart(SIMGE.zil, 'Bildirimler', '', (ss ? H('Sessiz saatler', 'Sesler ve King’in sesli okuması susar; radyo susmaz',
           '<div class="sessiz">' + '<button type="button" class="plan__anahtar' + (ss.acik ? ' is-on' : '') + '" role="switch" aria-checked="' + ss.acik + '" data-sessiz-ac>'
           + '<i aria-hidden="true"></i><span class="sr-only">' + (ss.acik ? 'Açık' : 'Kapalı') + '</span></button>'
           + '<input type="time" class="plan__saat" data-sessiz="bas" value="' + kac(ss.bas) + '" aria-label="Başlangıç">'
           + '<span aria-hidden="true">–</span><input type="time" class="plan__saat" data-sessiz="bit" value="' + kac(ss.bit) + '" aria-label="Bitiş"></div>') : '')
-        + H('Sayaçlar ve noktalar', 'Kenardaki bildirim sayısı ve kırmızı nokta', secimHtml('rozet', 'Sayaçlar ve noktalar'));
+        + H('Sayaçlar ve noktalar', 'Kenardaki bildirim sayısı ve kırmızı nokta', secimHtml('rozet', 'Sayaçlar ve noktalar'))) + '</div>';
     }
-    if(id === 'hareket') return H('Animasyonlar', 'Az: yalnız gerekli geçişler', cagir(L.ANIMASYON, 'seciciHtml'))
-      + G('Hız', 'Arayüz ve ajanlar ayrı; Ayrıntı içindekileri tek tek ayarlar', cagir(L.ANIMASYON, 'hizSeciciHtml'));
+    if(id === 'hareket') return '<div class="skartlar">' + kart(SIMGE.hareket, 'Animasyon', 'Az: yalnız gerekli geçişler',
+      H('Animasyonlar', '', cagir(L.ANIMASYON, 'seciciHtml')) + G('Hız', 'Arayüz ve ajanlar ayrı; Ayrıntı içindekileri tek tek', cagir(L.ANIMASYON, 'hizSeciciHtml'))) + '</div>';
     /* Ses (kullanıcı, 2026-10-30: «ses kısmında bayağı eksiklik, amatörlük ve tasarımda kötülük var»):
        kartlar; düzeyler, müzik kitaplığı, açılış, arka plan müziği, arka plan videosu. */
     if(id === 'ses') return '<div class="skartlar">'
@@ -430,31 +466,32 @@ window.LIFEOS = window.LIFEOS || {};
       + '<button type="button" class="skart skart--bag" data-ayarlar-git="zemin">' + SIMGE_VIDEO
       + '<span class="skart__baslik"><b>Arka plan videosunun sesi</b><small>Arka plan bölümünde: ses, kesit ve hız</small></span><span aria-hidden="true">›</span></button>'
       + '</div>';
-    if(id === 'king') return H('Adı', 'Boş bırakırsan King',
-        '<input class="ayarlar__girdi" type="text" maxlength="20" data-king-ad placeholder="King"'
+    if(id === 'king') return '<div class="skartlar">' + kart(SIMGE.king, 'King', 'Adı, konuşması ve sesi',
+        H('Adı', 'Boş bırakırsan King', '<input class="ayarlar__girdi" type="text" maxlength="20" data-king-ad placeholder="King"'
         + ' value="' + kac((() => { try{ return localStorage.getItem('lifeos.king.ad') || ''; }catch(e){ return ''; } })()) + '" aria-label="King’in adı">')
-      + (L.KING && L.KING.ayarHtml ? cagir(L.KING, 'ayarHtml') : H('Görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml')));
-    if(id === 'ekip') return H('Minikler', 'Sayfada en çok kaç minik', cagir(L.MINIK, 'seciciHtml'))
-      + H('Minik boyu', '', cagir(L.MINIK, 'boySeciciHtml'))
-      + G('Kimler gezsin', 'Basınca sayfadan çıkar ya da gelir; yeni minikler açık gelir', cagir(L.MINIK, 'galeriHtml'));
+      + (L.KING && L.KING.ayarHtml ? cagir(L.KING, 'ayarHtml') : H('Görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml')))) + '</div>';
+    if(id === 'ekip') return '<div class="skartlar">' + kart(SIMGE.minik, 'Minikler', 'Sayfada gezen küçük yardımcılar',
+        H('Kaç minik', 'Sayfada en çok', cagir(L.MINIK, 'seciciHtml')) + H('Boy', '', cagir(L.MINIK, 'boySeciciHtml')))
+      + kart(SIMGE.minik, 'Kimler gezsin', 'Basınca sayfadan çıkar ya da gelir', cagir(L.MINIK, 'galeriHtml')) + '</div>';
     if(id === 'hesap'){
       const p = o.profil || {};
-      return '<div class="ayarlar__profil"><i class="ayarlar__avatar" aria-hidden="true">' + kac(((p.ad || 'Ben').trim().charAt(0) || 'B').toLocaleUpperCase('tr-TR')) + '</i>'
+      return '<div class="skartlar"><div class="ayarlar__profil"><i class="ayarlar__avatar" aria-hidden="true">' + kac(((p.ad || 'Ben').trim().charAt(0) || 'B').toLocaleUpperCase('tr-TR')) + '</i>'
         + '<span><b>' + kac(p.ad || 'Profil') + '</b><small>' + kac(p.alt || '') + '</small></span>'
         + (p.route ? '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(p.route) + '">Profili aç</button>' : '') + '</div>'
-        + (hesapVar() ? sayfaSatirlari(HESAP_SAYFALARI) : hesapYok())
-        + '<h5 class="plan__alt">Kilitler</h5>'
-        + H('Satın alma ve kart işlemleri', odemeAcik() ? 'Açık; yine de LifeOS’ta ödeme yapan bir araç yok'
-            : 'Kapalı: King ve ajanlar ödeme, sipariş ya da kart işine girmez', odemeSecici());
+        + kart(SIMGE.kilit, 'Güvenlik', '', hesapVar() ? sayfaSatirlari(HESAP_SAYFALARI) : hesapYok())
+        + kart(SIMGE.kilit, 'Satın alma ve kart işlemleri', '', H('Durum', odemeAcik() ? 'Açık; yine de LifeOS’ta ödeme yapan bir araç yok'
+            : 'Kapalı: King ve ajanlar ödeme, sipariş ya da kart işine girmez', odemeSecici())) + '</div>';
     }
     if(id === 'baglanti') return G('Google’dan veri', 'Hesap bağlanmaz; veri bu bilgisayarda kalır, ölçüm kendiliğinden kayda yazılmaz', cagir(L.ICE, 'ayarHtml'))
       + H('Google ve YouTube', 'Hesap bağlanmaz: King’in bulduğu bağlantılar senin tarayıcında, kendi oturumunla açılır; LifeOS Google’a veri göndermez', '')
       + (hesapVar() ? sayfaSatirlari(BAGLANTI_SAYFALARI) : hesapYok());
     if(id === 'sistem') return '<h4 class="plan__baslik">Sistem planlaması</h4><div class="plan" data-plan-kok><p class="ayarlar__bos">Yükleniyor…</p></div>';
-    if(id === 'modul') return H('Yüzey', 'Kartların bu modüldeki düzeni', cagir(L.ZEMIN, 'yuzeySeciciHtml'))
-      + (L.KILIT && L.KILIT.ayarHtml ? H('Gizlilik kilidi', 'Bu modül açılırken dört haneli kod sorar', L.KILIT.ayarHtml(modulAdi(), { govde:true })) : '')
-      + ((o.modul || []).length ? '<h5 class="plan__alt">' + kac(MODUL_AD[modulAdi()] || 'Modül') + ' ekranları</h5>' + o.modul.map(m => H(m.ad, m.not || '',
-        '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(m.route) + '">Aç</button>')).join('') : '');
+    if(id === 'modul') return '<div class="skartlar">'
+      + kart(SIMGE.yuzey, 'Yüzey', 'Kartların bu modüldeki düzeni', H('Düzen', '', cagir(L.ZEMIN, 'yuzeySeciciHtml')))
+      + (L.KILIT && L.KILIT.ayarHtml ? kart(SIMGE.kilit, 'Gizlilik kilidi', 'Bu modül açılırken dört haneli kod sorar', L.KILIT.ayarHtml(modulAdi(), { govde:true })) : '')
+      + ((o.modul || []).length ? kart(SIMGE.ekran, (MODUL_AD[modulAdi()] || 'Modül') + ' ekranları', 'Modülün kendi ayar sayfaları', o.modul.map(m => H(m.ad, m.not || '',
+        '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(m.route) + '">Aç</button>')).join('')) : '')
+      + '</div>';
     return '';
   }
 
@@ -700,6 +737,13 @@ window.LIFEOS = window.LIFEOS || {};
         SIFIRLANAN.forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
         try{ if(L.ZEMIN && L.ZEMIN.yuzeyAnahtar) localStorage.removeItem(L.ZEMIN.yuzeyAnahtar()); }catch(e){}   // Yüzey modüle özel
         try{ location.reload(); }catch(e){}
+        return;
+      }
+      const an = t.closest('[data-anahtar]');
+      if(an){
+        const k = an.getAttribute('data-anahtar'), x = SECIMLER[k];
+        if(x){ const ac = secim(k) !== x.vars; secimAyarla(k, ac ? x.vars : x.sira.find(v => v !== x.vars));
+          an.classList.toggle('is-on', ac); an.setAttribute('aria-checked', ac ? 'true' : 'false'); }
         return;
       }
       const sa = t.closest('[data-sessiz-ac]');
