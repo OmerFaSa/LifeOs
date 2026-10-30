@@ -71,7 +71,7 @@ window.LIFEOS.MUZIK = (function(){
   function yukle(){
     if(!ortam.sunucu()) return Promise.resolve(null);
     return ortam.fetch('/api/muzik', { cache:'no-store' }).then(r => r.ok ? r.json() : null)
-      .then(v => { dizin = v || null; isaretle(); guncelle(); return dizin; }).catch(() => null);
+      .then(v => { dizin = v || null; isaretle(); guncelle(true); return dizin; }).catch(() => null);   // açık Ayarlar da tazelenir
   }
   function isaretle(){ try{ if(dizin && dizin.parcalar && dizin.parcalar.length) localStorage.setItem(VAR_ANAHTAR, '1'); else localStorage.removeItem(VAR_ANAHTAR); }catch(e){ /* depo yok */ } }
   const isaretVar = () => { try{ return localStorage.getItem(VAR_ANAHTAR) === '1'; }catch(e){ return false; } };

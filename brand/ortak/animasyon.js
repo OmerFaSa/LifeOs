@@ -310,6 +310,18 @@ window.LIFEOS = window.LIFEOS || {};
     try{ fetch('/api/ayar', { method:'POST', keepalive:!!cikis, headers:{ 'Content-Type':'application/json', 'X-LifeOS':'ayar' }, body:JSON.stringify({ ayar:fark }) }).catch(() => {}); }catch(e){ return false; }
     return true;
   }
+  /* Sayfa yenilenmeden önce değişiklik sunucuya yazılır ve beklenir (2026-10-31, uçtan
+     uca denemede bulundu): yoksa yenilenen sayfa sunucudaki eski kopyayla açılıp profil
+     geçişini, içe aktarılan yedeği ve «Görünümü sıfırla»yı geri alıyordu. */
+  function ortakYenile(sonra){
+    const git = typeof sonra === 'function' ? sonra : () => { try{ location.reload(); }catch(e){ /* yok */ } };
+    const fark = ortakFark();
+    if(!Object.keys(fark).length || typeof fetch !== 'function') return git();
+    Object.keys(fark).forEach(k => { if(fark[k] == null) delete ortakSon[k]; else ortakSon[k] = fark[k]; });
+    const zaman = setTimeout(git, 2000);                     // sunucu yanıt vermezse yine yenilenir
+    fetch('/api/ayar', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-LifeOS':'ayar' }, body:JSON.stringify({ ayar:fark }) })
+      .catch(() => {}).then(() => { clearTimeout(zaman); git(); });
+  }
   if(typeof window !== 'undefined' && window.__LIFEOS_AYAR__ && typeof window.__LIFEOS_AYAR__ === 'object'){
     ortakAl(window.__LIFEOS_AYAR__);
     simdiki = oku();
@@ -648,7 +660,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
     dinlenSure,
-    ANAHTAR, KIPLER, TASINAN, ORTAK, ortakAl, ortakFark,
+    ANAHTAR, KIPLER, TASINAN, ORTAK, ortakAl, ortakFark, ortakYenile,
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
     HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,

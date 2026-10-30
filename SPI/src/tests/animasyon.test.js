@@ -461,6 +461,22 @@
       expect(f['lifeos.manzara']).toBe(null);
       expect('lifeos.cam' in f).toBe(false);
     }));
+    it('yenilemeden önce değişiklik sunucuya gider ve beklenir (yoksa yenilenen sayfa eski kopyayla açılıp geri alırdı)', () => sakla(() => {
+      const eskiFetch = window.fetch, giden = [];
+      let cozul = null, yenilendi = false;
+      window.fetch = (u, o) => { giden.push([u, o]); return new Promise(r => { cozul = r; }); };
+      try{
+        A().ortakAl({ 'lifeos.cam':'orta' });
+        localStorage.setItem('lifeos.cam', 'az');
+        A().ortakYenile(() => { yenilendi = true; });
+        expect(giden.length).toBe(1);
+        expect(giden[0][0]).toBe('/api/ayar');
+        expect(JSON.parse(giden[0][1].body).ayar['lifeos.cam']).toBe('az');
+        expect(yenilendi).toBe(false);                                   // sunucu yanıtlamadan yenilenmez
+        cozul({});
+        return Promise.resolve().then(() => Promise.resolve()).then(() => { expect(yenilendi).toBe(true); });
+      }finally{ window.fetch = eskiFetch; }
+    }));
     it('sunucu boşsa (ilk kez) bu sayfanın ayarları silinmez, ilk kopya olarak gider', () => sakla(() => {
       localStorage.setItem('lifeos.cam', 'az');
       expect(A().ortakAl({})).toBe(0);

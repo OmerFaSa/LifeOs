@@ -68,6 +68,10 @@ with tempfile.TemporaryDirectory() as d:
     s = A.sayfaya_ekle("<head></head>", d)
     bekle("betik kapanisi kacirilir", "</script><b>" not in s.split("</script>", 1)[0] + "</script>" and s.count("</script>") == 1)
     bekle("head yoksa dokunulmaz", A.sayfaya_ekle(b"<p>x</p>", d) == b"<p>x</p>")
+    dist = "<html lang=\"tr\"><meta charset=\"utf-8\"><body>" + "x" * 5000 + "<!-- yorum: <head>'de betik --></body></html>"
+    s2 = A.sayfaya_ekle(dist, d)
+    bekle("derlenmis sayfa (head yok): html etiketinin ardina, yorumun icine degil",
+          s2.startswith('<html lang="tr"><script>window.__LIFEOS_AYAR__=') and "<head><script>" not in s2)
 
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")

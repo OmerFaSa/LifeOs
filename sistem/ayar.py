@@ -97,10 +97,14 @@ def sayfaya_ekle(govde, kok=None):
     metin = govde if yazi else govde.decode("utf-8")
     veri = json.dumps(oku(kok)["ayar"], ensure_ascii=False).replace("</", "<\\/")
     etiket = "<script>window.__LIFEOS_AYAR__=%s;</script>" % veri
-    i = metin.find("<head>")
-    if i < 0:
+    # Yalniz sayfanin BASINDAKI gercek etiket: derlenmis sayfada (dist) <head> yok,
+    # «<head>» ancak sondaki bir yorumun icinde geciyordu; ayar oraya dusup hic
+    # okunmuyordu (2026-10-31, uctan uca denemede bulundu). <head> yoksa <html>'in ardi.
+    bas = metin[:4000]
+    m = re.search(r"<head(\s[^>]*)?>", bas, re.I) or re.search(r"<html(\s[^>]*)?>", bas, re.I)
+    if not m:
         return govde
-    metin = metin[:i + 6] + etiket + metin[i + 6:]
+    metin = metin[:m.end()] + etiket + metin[m.end():]
     return metin if yazi else metin.encode("utf-8")
 
 
