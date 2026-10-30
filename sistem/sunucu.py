@@ -331,7 +331,7 @@ class Sunucu(SimpleHTTPRequestHandler):
             dist = _guncel_dist(self.repo)
             if dist:
                 sayfa, betik, surum = _dist_bol(dist)
-                govde = betik if clean == DIST_BETIK else ayar.sayfaya_ekle(sayfa)
+                govde = betik if clean == DIST_BETIK else self._ayarli(sayfa)
                 if govde is not None:
                     tur = "text/javascript" if clean == DIST_BETIK else "text/html"
                     # Yalniz surumu tutan adres saklanir; yaris aninda eski
@@ -347,13 +347,22 @@ class Sunucu(SimpleHTTPRequestHandler):
                 return self._src_sayfa()
         return super().do_GET()
 
+    def _ayarli(self, govde):
+        """Ortak ayar yalniz bu bilgisayardan acilan sayfaya konur (sistem/ayar.py
+        soz 1). Ev agindan baglanan tablet ayni Sunucu sinifiyla sunulur; ona da
+        konunca kendi ayarlari her yenilemede bilgisayarinkiyle eziliyor, yazmasi
+        ise reddediliyordu (2026-10-31, hata analizi)."""
+        if self.client_address[0] in ("127.0.0.1", "::1"):
+            return ayar.sayfaya_ekle(govde)
+        return govde
+
     def _src_sayfa(self):
         """Kaynak (src) sayfasi da ortak ayarlarla verilir (sistem/ayar.py)."""
         yol = super().translate_path("/index.html")
         if not os.path.isfile(yol):
             return super().do_GET()
         with open(yol, "rb") as f:
-            govde = ayar.sayfaya_ekle(f.read())
+            govde = self._ayarli(f.read())
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(govde)))

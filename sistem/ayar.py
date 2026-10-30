@@ -29,7 +29,7 @@ import time
 
 ANAHTAR = re.compile(r"^lifeos\.(yazi|boyut|vurgu|odak|altcizgi|satir|isik|buzlu\.[a-z]+|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+"
                      r"|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|sessiz\.bitis|minik|minik\.[a-z]+"
-                     r"|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun)|profiller|profil\.etkin)$")
+                     r"|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun)|ice\.var|profiller|profil\.etkin)$")
 EN_COK = 120
 _kilit = threading.Lock()
 

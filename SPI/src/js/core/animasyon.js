@@ -243,7 +243,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.muzik.var', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.king.ad', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik', 'lifeos.sessiz.bitis', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere', 'lifeos.tema.secim', 'lifeos.zemin.video', 'lifeos.minik.kapali', 'lifeos.profiller', 'lifeos.profil.etkin', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.muzik.var', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.king.ad', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik', 'lifeos.sessiz.bitis', 'lifeos.ice.var', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere', 'lifeos.tema.secim', 'lifeos.zemin.video', 'lifeos.minik.kapali', 'lifeos.profiller', 'lifeos.profil.etkin', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -279,7 +279,7 @@ window.LIFEOS = window.LIFEOS || {};
      (yalnız değişen anahtar; iki modül açıksa birbirini ezmez). Sunucu
      yoksa (telefon, tek dosya, denetim sunucusu) hiçbir şey olmaz.
      Hangi anahtarın sistem ayarı olduğu: sistem/ayar.py ANAHTAR ile aynı. */
-  const ORTAK = /^lifeos\.(yazi|boyut|vurgu|odak|altcizgi|satir|isik|buzlu\.[a-z]+|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|sessiz\.bitis|minik|minik\.[a-z]+|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun)|profiller|profil\.etkin)$/;
+  const ORTAK = /^lifeos\.(yazi|boyut|vurgu|odak|altcizgi|satir|isik|buzlu\.[a-z]+|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|sessiz\.bitis|minik|minik\.[a-z]+|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun)|ice\.var|profiller|profil\.etkin)$/;
   function ortakAnlik(){
     const o = {};
     try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(ORTAK.test(k)) o[k] = localStorage.getItem(k); } }catch(e){ /* depo kapalı */ }
@@ -287,14 +287,21 @@ window.LIFEOS = window.LIFEOS || {};
   }
   let ortakSon = null;
   /* Döner: depoda değişen anahtar sayısı. */
+  /* Bu kökende ilk eşitleme yapıldı mı (ortak değil, taşınmaz). İlk eşitlemede bu
+     sayfada olup sunucuda olmayan ayar SİLİNMEZ, sunucuya eklenir (2026-10-31, hata
+     analizi: güncellemeden sonra ilk açılan sayfanın — çoğu kez giriş sayfası — az
+     sayıdaki ayarı sunucuya gidince, sonra açılan modülün bütün ayarları siliniyordu). */
+  const ILK_ESIT = 'lifeos.ortak.esit';
   function ortakAl(sunucu){
     if(!sunucu || typeof sunucu !== 'object') return 0;
-    /* İlk kez (sunucu boş): bu sayfanın ayarları silinmez, sunucuya ilk kopya olarak gider. */
+    let ilk = false;
+    try{ ilk = localStorage.getItem(ILK_ESIT) !== '1'; localStorage.setItem(ILK_ESIT, '1'); }catch(e){ /* depo kapalı */ }
+    /* Sunucu boş: bu sayfanın ayarları silinmez, sunucuya ilk kopya olarak gider. */
     if(!Object.keys(sunucu).length){ ortakSon = {}; return 0; }
     const yerel = ortakAnlik();
     let n = 0;
     Object.keys(sunucu).forEach(k => { if(ORTAK.test(k) && typeof sunucu[k] === 'string' && yerel[k] !== sunucu[k]){ try{ localStorage.setItem(k, sunucu[k]); n++; }catch(e){} } });
-    Object.keys(yerel).forEach(k => { if(!(k in sunucu)){ try{ localStorage.removeItem(k); n++; }catch(e){} } });
+    if(!ilk) Object.keys(yerel).forEach(k => { if(!(k in sunucu)){ try{ localStorage.removeItem(k); n++; }catch(e){} } });
     ortakSon = Object.assign({}, sunucu);
     return n;
   }
@@ -663,7 +670,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
     dinlenSure,
-    ANAHTAR, KIPLER, TASINAN, ORTAK, ortakAl, ortakFark, ortakYenile,
+    ANAHTAR, KIPLER, TASINAN, ORTAK, ILK_ESIT, ortakAl, ortakFark, ortakYenile,
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
     HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,

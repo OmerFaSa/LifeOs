@@ -271,9 +271,14 @@ window.LIFEOS = window.LIFEOS || {};
     return { ok:true, mesaj:i >= 0 ? '«' + p.ad + '» güncellendi.' : '«' + p.ad + '» kaydedildi.' };
   }
   /* Profilin ayarlarını depoya yazar (profilde olmayan anahtar varsayılana döner). */
+  /* Döner: depoda değişen anahtar sayısı (profil zaten uygulanmışsa 0: sayfa boşuna yenilenmez). */
   function profilYaz(p){
-    PROFIL_KAPSAR.forEach(k => depoKoy(k, Object.prototype.hasOwnProperty.call(p.ayar, k) ? String(p.ayar[k]) : null));
-    if(p.tema) depoKoy(TEMA_BEKLE, p.tema);
+    let n = 0;
+    PROFIL_KAPSAR.forEach(k => { const v = Object.prototype.hasOwnProperty.call(p.ayar, k) ? String(p.ayar[k]) : null;
+      if(depoAl(k) !== v){ depoKoy(k, v); n++; } });
+    /* Profilin teması ortak tema seçimi olur (öbür modüller de geçer); modül kendi eylemiyle uygular. */
+    if(p.tema){ if(depoAl('lifeos.tema.secim') !== p.tema){ depoKoy('lifeos.tema.secim', p.tema); n++; } depoKoy(TEMA_BEKLE, p.tema); }
+    return n;
   }
   function profilUygula(ad, yenile){
     const p = profiller().find(x => ayni(x.ad, String(ad || '')));
@@ -300,8 +305,7 @@ window.LIFEOS = window.LIFEOS || {};
     depoKoy(GORDU_ANAHTAR, String(e.damga));
     const p = profiller().find(x => ayni(x.ad, e.ad));
     if(!p) return false;
-    profilYaz(p);
-    return true;
+    return profilYaz(p) > 0;
   }
   /* TEMA SİSTEM AYARIDIR (2026-10-30): seçim `lifeos.tema.secim`'de (ortak
      kopya); modül kendi kaydında tutar, bu yüzden açılışta farklıysa modülün

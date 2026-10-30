@@ -73,6 +73,24 @@ with tempfile.TemporaryDirectory() as d:
     bekle("derlenmis sayfa (head yok): html etiketinin ardina, yorumun icine degil",
           s2.startswith('<html lang="tr"><script>window.__LIFEOS_AYAR__=') and "<head><script>" not in s2)
 
+# Ev agindan (tablet) acilan sayfaya ortak ayar konmaz (yazmasi zaten reddediliyor;
+# konunca kendi ayarlari her yenilemede eziliyordu). 2026-10-31 hata analizi.
+with tempfile.TemporaryDirectory() as d:
+    import os
+    os.environ["LIFEOS_AYAR_KLASOR"] = d
+    sys.path.insert(0, str(KOK / "sistem"))
+    import sunucu  # noqa: E402
+    sunucu.ayar.birlestir({"lifeos.cam": "cok"})
+
+    class Yerel:
+        client_address = ("127.0.0.1", 5000)
+
+    class Ag:
+        client_address = ("192.168.1.20", 5000)
+    sayfa = b"<!doctype html><html><head><title>x</title></head></html>"
+    bekle("bu bilgisayardan acilan sayfaya ortak ayar konur", b"__LIFEOS_AYAR__" in sunucu.Sunucu._ayarli(Yerel(), sayfa))
+    bekle("ev agindan acilan sayfaya konmaz", sunucu.Sunucu._ayarli(Ag(), sayfa) == sayfa)
+
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")
     sys.exit(1)

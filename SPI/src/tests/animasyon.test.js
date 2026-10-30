@@ -446,6 +446,7 @@
         .forEach(k => expect(A().ORTAK.test(k)).toBe(false));
     });
     it('sunucudaki değer depoya iner, sunucuda olmayan ortak anahtar silinir; ortak olmayana dokunulmaz; fark yalnız değişeni gönderir', () => sakla(() => {
+      localStorage.setItem(A().ILK_ESIT, '1');                         // bu kökende ilk eşitleme çoktan yapıldı
       localStorage.setItem('lifeos.cam', 'az');
       localStorage.setItem('lifeos.perde', 'cok');
       localStorage.setItem('lifeos.kilit.odeme', 'acik');
@@ -476,6 +477,20 @@
         cozul({});
         return Promise.resolve().then(() => Promise.resolve()).then(() => { expect(yenilendi).toBe(true); });
       }finally{ window.fetch = eskiFetch; }
+    }));
+    /* 2026-10-31 hata analizi: güncellemeden sonra ilk açılan sayfanın az sayıdaki ayarı sunucuya gidince
+       sonra açılan modülün bütün ayarları siliniyordu. */
+    it('ilk eşitlemede bu sayfanın sunucuda olmayan ayarları silinmez, sunucuya eklenir; sonrakinde silme kuralı geçerli', () => sakla(() => {
+      localStorage.removeItem(A().ILK_ESIT);
+      localStorage.setItem('lifeos.cam', 'az');
+      localStorage.setItem('lifeos.perde', 'cok');
+      A().ortakAl({ 'lifeos.cam':'orta' });
+      expect(localStorage.getItem('lifeos.cam')).toBe('orta');            // sunucudaki değer kazanır
+      expect(localStorage.getItem('lifeos.perde')).toBe('cok');           // yalnız burada olan silinmez
+      expect(A().ortakFark()['lifeos.perde']).toBe('cok');                // sunucuya eklenir
+      expect(localStorage.getItem(A().ILK_ESIT)).toBe('1');
+      A().ortakAl({ 'lifeos.cam':'orta' });
+      expect(localStorage.getItem('lifeos.perde')).toBe(null);            // artık sunucu kopyası esas
     }));
     it('sunucu boşsa (ilk kez) bu sayfanın ayarları silinmez, ilk kopya olarak gider', () => sakla(() => {
       localStorage.setItem('lifeos.cam', 'az');
