@@ -20,6 +20,10 @@ Sozler:
      kaydedilince yazilir, kapaninca silinir. Baska isletim sisteminde yok
      ve bu soylenir. Kapanis'i sunucu kendisi uygular.
   6. KAYIT DEPONUN DISINDA: %LOCALAPPDATA%\\LifeOS\\planlama.json.
+  7. ESNEK (kullanici, 2026-10-30: «her gun ayni saat olmak zorunda degil;
+     daha degisik planlar»): acilis ve kapanisin her gunun kendi saati var
+     (saatler[gun] ya da None = o gun yok); bir is birden cok gunde calisir.
+     Eski bicim (gunler + tek saat, isde tek gun) okunurken cevrilir.
 """
 
 import datetime
@@ -58,9 +62,9 @@ def klasor():
 
 def varsayilan():
     return {
-        "acilis": {"acik": False, "gunler": [0, 1, 2, 3, 4, 5, 6], "saat": "07:00"},
-        "kapanis": {"acik": False, "gunler": [0, 1, 2, 3, 4, 5, 6], "saat": "23:30"},
-        "isler": {i: {"acik": False, "gun": 5, "saat": "07:00", "kacarsa": "hemen", "kur": False, "acildi": 0}
+        "acilis": {"acik": False, "saatler": ["07:00"] * 7},
+        "kapanis": {"acik": False, "saatler": ["23:30"] * 7},
+        "isler": {i: {"acik": False, "gunler": [5], "saat": "07:00", "kacarsa": "hemen", "kur": False, "acildi": 0}
                   for i in IS_IDLER},
         "son": {},
         "bekleyen": [],
@@ -108,6 +112,18 @@ def _saat(v):
     return v
 
 
+def _saatler(x, vars_saat):
+    """Gunun saatleri: yeni bicim saatler[7]; eski bicim gunler + saat (soz 7)."""
+    if "saatler" in x:
+        l = x["saatler"]
+        if not isinstance(l, list) or len(l) != 7:
+            raise ValueError((400, "Her gün için bir saat ya da boş olmalı (7 gün)."))
+        return [None if g in (None, "") else _saat(g) for g in l]
+    gunler = _gunler(x.get("gunler", list(range(7))))
+    saat = _saat(x.get("saat", vars_saat))
+    return [saat if g in gunler else None for g in range(7)]
+
+
 def dogrula(v, onceki=None, simdi=None, sakla_durum=False):
     """Gelen plani dogrular ve tamamlar. Yeni acilan isin «acildi» zamani
     simdi olur (soz 2). sakla_durum: dosyadan okunuyorsa son/bekleyen kalir."""
@@ -118,21 +134,22 @@ def dogrula(v, onceki=None, simdi=None, sakla_durum=False):
     p = varsayilan()
     for ad in ("acilis", "kapanis"):
         x = v.get(ad) or {}
-        p[ad] = {"acik": bool(x.get("acik")), "gunler": _gunler(x.get("gunler", p[ad]["gunler"])),
-                 "saat": _saat(x.get("saat", p[ad]["saat"]))}
+        saatler = _saatler(x, p[ad]["saatler"][0])
+        p[ad] = {"acik": bool(x.get("acik")) and any(saatler), "saatler": saatler}
     gelen = v.get("isler") or {}
     for i in IS_IDLER:
         x = gelen.get(i) or {}
         o = onceki["isler"].get(i) or {}
         gun = x.get("gun", 5)
-        if not isinstance(gun, int) or not 0 <= gun <= 6:
+        if "gunler" not in x and (not isinstance(gun, int) or not 0 <= gun <= 6):
             raise ValueError((400, "Gün 0 (Pazartesi) ile 6 (Pazar) arasında olmalı."))
+        gunler = _gunler(x["gunler"]) if "gunler" in x else [gun]
         kacarsa = x.get("kacarsa", "hemen")
         if kacarsa not in ("hemen", "onay"):
             raise ValueError((400, "Kaçarsa «hemen» ya da «onay» olmalı."))
         acik = bool(x.get("acik"))
         acildi = x.get("acildi", 0) if sakla_durum else (o.get("acildi", 0) if o.get("acik") and acik else (simdi if acik else 0))
-        p["isler"][i] = {"acik": acik, "gun": gun, "saat": _saat(x.get("saat", "07:00")), "kacarsa": kacarsa,
+        p["isler"][i] = {"acik": acik, "gunler": gunler, "saat": _saat(x.get("saat", "07:00")), "kacarsa": kacarsa,
                          "kur": bool(x.get("kur")) if i == "guncelleme" else False, "acildi": acildi or 0}
     if sakla_durum:
         p["son"] = v.get("son") if isinstance(v.get("son"), dict) else {}
@@ -152,6 +169,11 @@ def son_vade(gun, saat, simdi):
     return aday
 
 
+def is_vadesi(x, simdi):
+    """Isin gunlerinden `simdi`ye en yakin gecmis vade."""
+    return max(son_vade(g, x["saat"], simdi) for g in x["gunler"])
+
+
 def vadesi_gelenler(plan, simdi):
     """[(is, «saatinde» | «kacti»)] — calisilmasi ya da sorulmasi gerekenler."""
     l = []
@@ -159,8 +181,7 @@ def vadesi_gelenler(plan, simdi):
         x = plan["isler"][i]
         if not x["acik"] or i in plan["bekleyen"]:
             continue
-        v = son_vade(x["gun"], x["saat"], simdi)
-        vz = v.timestamp()
+        vz = is_vadesi(x, simdi).timestamp()
         if vz < (x.get("acildi") or 0):
             continue                                    # acilmadan onceki vade sayilmaz (soz 2)
         son = (plan["son"].get(i) or {}).get("vade", 0)
@@ -172,9 +193,10 @@ def vadesi_gelenler(plan, simdi):
 
 def kapanis_vakti(plan, simdi, son_kapanis):
     k = plan["kapanis"]
-    if not k["acik"] or simdi.weekday() not in k["gunler"]:
+    saat = k["saatler"][simdi.weekday()]
+    if not k["acik"] or not saat:
         return False
-    v = son_vade(simdi.weekday(), k["saat"], simdi)
+    v = son_vade(simdi.weekday(), saat, simdi)
     return v.date() == simdi.date() and 0 <= (simdi - v).total_seconds() <= ZAMANINDA_SN and son_kapanis < v.timestamp()
 
 
@@ -204,19 +226,32 @@ def veri_denetimi(db_yolu):
     return True, "Temiz: %d kayıt okundu, bütünlük sağlam." % toplam
 
 
+def gorev_adi(n):
+    """Ayni saatteki gunler tek gorev: 1. «LifeOS\\Acilis», sonrakiler «LifeOS\\Acilis 2» ..."""
+    return GOREV_ADI if n == 1 else "%s %d" % (GOREV_ADI, n)
+
+
 def acilis_gorevi(acilis, bat, isletim=None, calistir=subprocess.run):
-    """Windows Gorev Zamanlayici'ya acilis gorevini yazar ya da siler (soz 5)."""
+    """Windows Gorev Zamanlayici'ya acilis gorevlerini yazar ya da siler (soz 5, 7).
+    Her farkli saat bir gorevdir; eskiler once silinir (en cok 7)."""
     if (isletim or os.name) != "nt":
         return False, "Kendiliğinden açılış yalnız Windows'ta; bu bilgisayarda LifeOS'u elle aç."
+    silinen = [calistir(["schtasks", "/Delete", "/F", "/TN", gorev_adi(n)], capture_output=True, text=True).returncode == 0
+               for n in range(1, 8)]
     if not acilis["acik"]:
-        r = calistir(["schtasks", "/Delete", "/F", "/TN", GOREV_ADI], capture_output=True, text=True)
-        return True, "Açılış görevi kaldırıldı." if r.returncode == 0 else "Kayıtlı açılış görevi yoktu."
-    gunler = ",".join(SCHTASKS_GUN[g] for g in acilis["gunler"])
-    r = calistir(["schtasks", "/Create", "/F", "/SC", "WEEKLY", "/D", gunler, "/ST", acilis["saat"],
-                  "/TN", GOREV_ADI, "/TR", '"%s"' % bat], capture_output=True, text=True)
-    if r.returncode != 0:
-        return False, "Windows açılış görevini kaydetmedi: %s" % ((r.stderr or r.stdout or "").strip()[:160] or "bilinmeyen hata")
-    return True, "Açılış Windows'a kaydedildi: %s, %s." % (", ".join(GUN_KISA[g] for g in acilis["gunler"]), acilis["saat"])
+        return True, "Açılış görevi kaldırıldı." if any(silinen) else "Kayıtlı açılış görevi yoktu."
+    gruplar = {}
+    for g, saat in enumerate(acilis["saatler"]):
+        if saat:
+            gruplar.setdefault(saat, []).append(g)
+    ozet = []
+    for n, (saat, gunler) in enumerate(sorted(gruplar.items()), 1):
+        r = calistir(["schtasks", "/Create", "/F", "/SC", "WEEKLY", "/D", ",".join(SCHTASKS_GUN[g] for g in gunler), "/ST", saat,
+                      "/TN", gorev_adi(n), "/TR", '"%s"' % bat], capture_output=True, text=True)
+        if r.returncode != 0:
+            return False, "Windows açılış görevini kaydetmedi: %s" % ((r.stderr or r.stdout or "").strip()[:160] or "bilinmeyen hata")
+        ozet.append("%s %s" % (", ".join(GUN_KISA[g] for g in gunler), saat))
+    return True, "Açılış Windows'a kaydedildi: %s." % "; ".join(ozet)
 
 
 class Zamanlayici:
@@ -255,7 +290,7 @@ class Zamanlayici:
     def atla(self, i):
         with self.kilit:
             p = oku(self.kok)
-            vade = son_vade(p["isler"][i]["gun"], p["isler"][i]["saat"], self.saat()).timestamp()
+            vade = is_vadesi(p["isler"][i], self.saat()).timestamp()
             p["son"][i] = dict(p["son"].get(i) or {}, vade=vade)
             p["bekleyen"] = [b for b in p["bekleyen"] if b != i]
             yaz(p, self.kok)
@@ -265,7 +300,7 @@ class Zamanlayici:
         simdi = self.saat()
         p = oku(self.kok)
         for i, hal in vadesi_gelenler(p, simdi):
-            vade = son_vade(p["isler"][i]["gun"], p["isler"][i]["saat"], simdi).timestamp()
+            vade = is_vadesi(p["isler"][i], simdi).timestamp()
             if hal == "kacti" and p["isler"][i]["kacarsa"] == "onay":
                 with self.kilit:
                     q = oku(self.kok)

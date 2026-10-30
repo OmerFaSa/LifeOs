@@ -227,7 +227,7 @@ window.LIFEOS = window.LIFEOS || {};
   const GECELER = Object.freeze(['renk', 'ayni', 'kendi']);
   const OTOLAR = Object.freeze(['kapali', 'saat']);
   const MANZARA_AD = { acik:'Modülün', kendi:'Kendi', kapali:'Kapalı' };
-  const GECE_AD = { renk:'Gece rengi', ayni:'Gündüzle aynı', kendi:'Kendi' };
+  const GECE_AD = { renk:'Renk', ayni:'Gündüzün', kendi:'Kendi' };   // yuva başlığı «Gece»: kısa ad kutuya sığar
   const OTO_AD = { kapali:'Kapalı', saat:'Saate göre' };
   const depoOku = (k, liste, vars) => { let v = null; try{ v = localStorage.getItem(k); }catch(e){} return liste.indexOf(v) >= 0 ? v : vars; };
   const depoYaz = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){ /* depo kapalı: bu sayfada geçerli */ } };
@@ -254,10 +254,31 @@ window.LIFEOS = window.LIFEOS || {};
     if(secim === 'kendi'){
       const t = dosyaTuru(kendiYuva);
       if(t && sunucuVar()) return { tur:t, adres:dosyaAdresi(kendiYuva) };
-      return { tur:'modul', adres:modul() };
+      return { tur:'modul', adres:modul(), eksik:true };   // dosya yok: gerçekte modülün fotoğrafı görünür
     }
     if(secim === 'acik') return { tur:'modul', adres:modul() };
     return { tur:'renk', adres:'' };
+  }
+  /* Önizleme (kullanıcı, 2026-10-30: «aydınlık temadayken karanlık temaya
+     görsel eklediğimde önizlemede gözükmüyor; önizlemede minik sistem
+     kartları olsun, istersen kaldırıp yalnız görseli görebileyim»). Her
+     seçimde ve yüklemede manzaraUygula yeniden çizer. Kartlar yuvanın
+     temasında: gece yuvası koyu cam, gündüz açık cam. */
+  const ONIZLE_SADE = 'lifeos.zemin.onizle.sade';
+  const onizleSade = () => { try{ return localStorage.getItem(ONIZLE_SADE) === '1'; }catch(e){ return false; } };
+  const kacir = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  function onizleHtml(yuva){
+    const o = onizle(yuva), sade = onizleSade();
+    const etiket = o.eksik ? 'Dosya yok · modülün fotoğrafı'
+      : { modul:'Modülün fotoğrafı', foto:'Kendi fotoğrafın', video:'Kendi videon', renk:yuva === 'gece' ? 'Gece rengi' : 'Düz renk' }[o.tur];
+    return '<div class="zemin-onizle zemin-onizle--' + o.tur + ' zemin-onizle--' + (yuva === 'gece' ? 'gece' : 'gunduz') + (sade ? ' is-sade' : '') + '" data-zemin-onizle="' + kacir(yuva) + '"'
+      + (o.tur === 'modul' || o.tur === 'foto' ? ' style="background-image:url(&quot;' + kacir(o.adres) + '&quot;)"' : '') + '>'
+      + (o.tur === 'video' ? '<video src="' + kacir(o.adres) + '" muted playsinline preload="metadata" aria-hidden="true"></video>' : '')
+      + '<span class="zemin-onizle__ui" aria-hidden="true"><i class="zo-kenar"></i><i class="zo-kart"><b></b><b></b></i><i class="zo-kart zo-kart--iki"><b></b></i></span>'
+      + '<small>' + kacir(etiket) + '</small>'
+      + '<button type="button" class="zemin-onizle__goz" data-zemin-onizle-sade aria-pressed="' + (sade ? 'true' : 'false') + '" aria-label="' + (sade ? 'Kartları göster' : 'Yalnız görsel') + '">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true">' + (sade ? '<rect x="4" y="5" width="16" height="14" rx="2.5"/><path d="M8 10h8M8 14h5"/>'
+        : '<rect x="4" y="5" width="16" height="14" rx="2.5"/><path d="M4 15l4.5-4.5 4 4 2.5-2.5 5 5"/>') + '</svg></button></div>';
   }
   /* Şu an geçerli olan: { tur:'modul'|'foto'|'video'|'yok', yuva } */
   function etkinZemin(){
@@ -317,6 +338,7 @@ window.LIFEOS = window.LIFEOS || {};
     isaretle('data-manzara-sec', manzaraSimdi);
     isaretle('data-gece-sec', geceSimdi);
     isaretle('data-oto-sec', otoSimdi);
+    document.querySelectorAll('[data-zemin-onizle]').forEach(el => { el.outerHTML = onizleHtml(el.getAttribute('data-zemin-onizle')); });
   }
   /* Saate göre tema: 07:00–19:00 açık, öbür saatler koyu. Açıkken modülün
      tema seçimi yerine saat geçerlidir; kapatınca seçim geri gelir. */
@@ -396,6 +418,8 @@ window.LIFEOS = window.LIFEOS || {};
       if(mz){ e.preventDefault(); manzaraAyarla(mz.getAttribute('data-manzara-sec')); return; }
       const gc = e.target && e.target.closest ? e.target.closest('[data-gece-sec]') : null;
       if(gc){ e.preventDefault(); geceAyarla(gc.getAttribute('data-gece-sec')); return; }
+      const sd = e.target && e.target.closest ? e.target.closest('[data-zemin-onizle-sade]') : null;
+      if(sd){ e.preventDefault(); depoYaz(ONIZLE_SADE, onizleSade() ? '0' : '1'); manzaraUygula(); return; }
       const ot = e.target && e.target.closest ? e.target.closest('[data-oto-sec]') : null;
       if(ot){ e.preventDefault(); otoAyarla(ot.getAttribute('data-oto-sec')); return; }
       const b = e.target && e.target.closest ? e.target.closest('[data-zemin-sec]') : null;
@@ -470,7 +494,7 @@ window.LIFEOS = window.LIFEOS || {};
     YUZEYLER, yuzey:() => yuzeySimdi, yuzeyAyarla, yuzeySeciciHtml, yuzeyAnahtar,
     MANZARA_ANAHTAR, manzara:() => manzaraSimdi, manzaraAyarla, manzaraYenile, manzaraSeciciHtml,
     GECE_ANAHTAR, OTO_ANAHTAR, gece:() => geceSimdi, geceAyarla, geceSeciciHtml, oto:() => otoSimdi, otoAyarla, otoSeciciHtml,
-    otoTema, etkinZemin, karanlik, dosyaYukle, onizle });
+    otoTema, etkinZemin, karanlik, dosyaYukle, onizle, onizleHtml, ONIZLE_SADE });
   /* Gövde hazır olunca, ilk çizimden biraz sonra: açılış animasyonuyla çakışmasın. */
   if(typeof document !== 'undefined' && typeof setTimeout === 'function'
       && !/\/tests\//.test(String(location.pathname || ''))){   // test sayfasında kendiliğinden oynamaz

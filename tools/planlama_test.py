@@ -40,10 +40,25 @@ for ad, v in [("bos gun", {"acilis": {"gunler": []}}), ("kotu saat", {"kapanis":
         hata.append("dogrula reddetmedi: " + ad)
     except ValueError as e:
         bekle("dogrula 400: " + ad, e.args[0][0] == 400)
+try:
+    P.dogrula({"acilis": {"saatler": ["07:00"] * 6}})
+    hata.append("dogrula reddetmedi: 6 gunluk saatler")
+except ValueError as e:
+    bekle("dogrula 400: 6 gunluk saatler", e.args[0][0] == 400)
 p = P.dogrula({"isler": {"yedek": {"acik": True, "gun": 5, "saat": "07:00", "kacarsa": "onay"}}}, simdi=1000.0)
+bekle("eski tek gun yeni gunler olur", p["isler"]["yedek"]["gunler"] == [5])
 bekle("isler kapali baslar", all(not p["isler"][i]["acik"] for i in P.IS_IDLER if i != "yedek"))
 bekle("acilan isin acildi zamani", p["isler"]["yedek"]["acildi"] == 1000.0)
 bekle("kur yalniz guncellemede", P.dogrula({"isler": {"yedek": {"kur": True}}})["isler"]["yedek"]["kur"] is False)
+# 2b) Esneklik (soz 7): eski acilis bicimi cevrilir; her gunun kendi saati; hepsi bos ise kapali
+eski = P.dogrula({"acilis": {"acik": True, "gunler": [0, 5], "saat": "08:15"}})
+bekle("eski acilis saatlere cevrilir", eski["acilis"]["saatler"] == ["08:15", None, None, None, None, "08:15", None] and eski["acilis"]["acik"])
+yeni = P.dogrula({"acilis": {"acik": True, "saatler": ["07:00", "07:00", None, "07:30", "07:00", "10:00", None]}})
+bekle("gun gun saat", yeni["acilis"]["saatler"][5] == "10:00" and yeni["acilis"]["saatler"][2] is None)
+bekle("hepsi bos ise acilis kapali", P.dogrula({"acilis": {"acik": True, "saatler": [None] * 7}})["acilis"]["acik"] is False)
+x = {"gunler": [0, 2, 4], "saat": "06:00"}
+bekle("cok gunlu isin vadesi en yakin gecmis gun", P.is_vadesi(x, D(2026, 11, 4, 7, 0)) == D(2026, 11, 4, 6, 0)
+      and P.is_vadesi(x, D(2026, 11, 3, 7, 0)) == D(2026, 11, 2, 6, 0))
 
 # 3) Vadesi gelenler: acilmadan onceki vade sayilmaz; saatinde / kacti
 plan = P.varsayilan()
@@ -57,10 +72,11 @@ bekle("yapilan vade tekrar gelmez", P.vadesi_gelenler(plan, D(2026, 11, 1, 9, 0)
 
 # 4) Kapanis vakti
 plan = P.varsayilan()
-plan["kapanis"].update(acik=True, gunler=[5], saat="23:30")
+plan["kapanis"].update(acik=True, saatler=[None, None, None, None, None, "23:30", "22:00"])
 bekle("kapanis saatinde", P.kapanis_vakti(plan, D(2026, 10, 31, 23, 31), 0))
 bekle("kapanis bir kez", not P.kapanis_vakti(plan, D(2026, 10, 31, 23, 31), D(2026, 10, 31, 23, 30, 30).timestamp()))
-bekle("kapanis baska gun yok", not P.kapanis_vakti(plan, D(2026, 11, 1, 23, 31), 0))
+bekle("kapanis baska gun yok", not P.kapanis_vakti(plan, D(2026, 11, 2, 23, 31), 0))
+bekle("pazar kendi saatinde kapanir", P.kapanis_vakti(plan, D(2026, 11, 1, 22, 2), 0) and not P.kapanis_vakti(plan, D(2026, 11, 1, 23, 31), 0))
 bekle("kapanis gec kalinca yok (acilista kapatmaz)", not P.kapanis_vakti(plan, D(2026, 10, 31, 23, 59), 0))
 
 # 5) Windows acilis gorevi: komut ve kaldirma; baska isletimde soylenir
@@ -77,12 +93,17 @@ def sahte(arg, **k):
     return R(0)
 
 
-ok, m = P.acilis_gorevi({"acik": True, "gunler": [0, 5], "saat": "07:00"}, r"C:\LifeOS\BASLAT.bat", isletim="nt", calistir=sahte)
+ok, m = P.acilis_gorevi({"acik": True, "saatler": ["07:00", None, None, None, None, "07:00", None]}, r"C:\LifeOS\BASLAT.bat", isletim="nt", calistir=sahte)
 bekle("schtasks olusturur", ok and cagri[-1][:2] == ["schtasks", "/Create"] and "MON,SAT" in cagri[-1] and "07:00" in cagri[-1]
       and P.GOREV_ADI in cagri[-1] and '"C:\\LifeOS\\BASLAT.bat"' in cagri[-1])
-ok, m = P.acilis_gorevi({"acik": False, "gunler": [0], "saat": "07:00"}, "x", isletim="nt", calistir=sahte)
+cagri.clear()
+ok, m = P.acilis_gorevi({"acik": True, "saatler": ["07:00", "07:00", None, None, None, "10:00", None]}, "x", isletim="nt", calistir=sahte)
+olusan = [c for c in cagri if c[1] == "/Create"]
+bekle("farkli saatler ayri gorev; eskiler once silinir", ok and len(olusan) == 2 and "MON,TUE" in olusan[0] and "SAT" in olusan[1]
+      and P.gorev_adi(2) in olusan[1] and sum(c[1] == "/Delete" for c in cagri) == 7 and cagri.index(olusan[0]) > 6)
+ok, m = P.acilis_gorevi({"acik": False, "saatler": ["07:00"] * 7}, "x", isletim="nt", calistir=sahte)
 bekle("schtasks siler", cagri[-1][:2] == ["schtasks", "/Delete"])
-ok, m = P.acilis_gorevi({"acik": True, "gunler": [0], "saat": "07:00"}, "x", isletim="posix", calistir=sahte)
+ok, m = P.acilis_gorevi({"acik": True, "saatler": ["07:00"] * 7}, "x", isletim="posix", calistir=sahte)
 bekle("windows disinda soylenir", not ok and "Windows" in m)
 
 with tempfile.TemporaryDirectory() as d:

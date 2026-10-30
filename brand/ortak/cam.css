@@ -1687,3 +1687,39 @@ html[data-bulanik="hafif"] video.zemin-video{ filter:blur(6px); transform:scale(
 html[data-bulanik="cok"] video.zemin-video{ filter:blur(14px); transform:scale(1.08); }
 /* Sayaçlar ve noktalar gizli. */
 html[data-rozet="kapali"] .kenar__sayi, html[data-rozet="kapali"] .kenar__sayac, html[data-rozet="kapali"] .ust__zil-nokta{ display:none !important; }
+
+/* 46) FOTOĞRAF ÜSTÜNDE SÜT CAM (kullanıcı, 2026-10-30: «arka plandaki
+   bulanıklık ve yazılar kötü gözüküyor; ayarları değiştirsek de
+   değiştirmesek de; farklı bir çare bul»). Eski: ince beyaz cam, 22 px
+   bulanıklık, %140 doygunluk; fotoğrafın renkleri kartın içinde leke gibi
+   akıyor, gri yazı lekenin üstünde kayboluyordu. Yeni: kart fotoğrafı süt
+   cam gibi süzer: çok bulanık, doygunluk neredeyse yok, dolgu tek düze.
+   Saydamlık ayarı yalnız dolgunun yoğunluğunu değiştirir; «Saydam» bile
+   okunaklılık tabanının altına inmez. */
+html[data-zemin="yumusak"][data-manzara="acik"]{
+  --cam:linear-gradient(160deg, rgba(255,255,255,.8), rgba(250,250,252,.72));
+  --cam-ince:linear-gradient(160deg, rgba(255,255,255,.74), rgba(250,250,252,.64)); }
+html[data-zemin="yumusak"][data-manzara="acik"][data-cam="az"]{
+  --cam:linear-gradient(160deg, rgba(255,255,255,.9), rgba(252,252,253,.86)); --cam-ince:linear-gradient(160deg, rgba(255,255,255,.86), rgba(252,252,253,.8)); }
+html[data-zemin="yumusak"][data-manzara="acik"][data-cam="cok"]{
+  --cam:linear-gradient(160deg, rgba(255,255,255,.64), rgba(250,250,252,.56)); --cam-ince:linear-gradient(160deg, rgba(255,255,255,.58), rgba(250,250,252,.5)); }
+html[data-zemin="yumusak"][data-manzara="acik"][data-theme="dark"]{
+  --cam:linear-gradient(160deg, rgba(24,26,34,.8), rgba(18,20,28,.74)); --cam-ince:linear-gradient(160deg, rgba(24,26,34,.74), rgba(18,20,28,.66)); }
+html[data-zemin="yumusak"][data-manzara="acik"][data-theme="dark"][data-cam="cok"]{
+  --cam:linear-gradient(160deg, rgba(24,26,34,.66), rgba(18,20,28,.58)); --cam-ince:linear-gradient(160deg, rgba(24,26,34,.6), rgba(18,20,28,.52)); }
+@media (prefers-color-scheme:dark){
+  html[data-zemin="yumusak"][data-manzara="acik"]:not([data-theme="light"]){
+    --cam:linear-gradient(160deg, rgba(24,26,34,.8), rgba(18,20,28,.74)); --cam-ince:linear-gradient(160deg, rgba(24,26,34,.74), rgba(18,20,28,.66)); }
+}
+html[data-zemin="yumusak"][data-manzara="acik"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .donen, .site--v5 .nextup,
+  .site--v5 .ledger .lrow:not(.kahraman), .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard, .site--v5 .rehber__konular, .site--v5 .bolumcubugu){
+  -webkit-backdrop-filter:blur(56px) saturate(105%); backdrop-filter:blur(56px) saturate(105%); }
+@media (min-width:680px){
+  html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 > .kenar{
+    -webkit-backdrop-filter:blur(56px) saturate(105%) !important; backdrop-filter:blur(56px) saturate(105%) !important; }
+}
+/* Bölüm çubuğu fotoğrafın üstünde: kendi süt camı, seçili olmayan ad tam okunur. */
+html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .bolumcubugu{ background:var(--cam-ince); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
+html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .bolumcubugu__ad:not(.is-on){ color:var(--text-2); opacity:1; }
+html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .bolumcubugu--kabuk{ width:fit-content; max-width:calc(100% - 24px); margin-inline:auto;
+  padding:0 8px; border-radius:16px; -webkit-mask-image:none; mask-image:none; }

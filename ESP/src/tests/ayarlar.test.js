@@ -88,6 +88,37 @@
       }finally{ window.fetch = eski; d.remove(); A._sec('gorunum'); }
     });
 
+    /* 2026-10-30 (kullanıcı: «her gün aynı saat olmak zorunda değil; arayüz çok karmaşık»). */
+    it('Planlama: her günün kendi saati; boş gün eklenir, saat kaldırılır; iş birden çok günde; tek kayıt', async () => {
+      const d = koy();
+      const eski = window.fetch, giden = [];
+      const plan = { acilis:{ acik:true, saatler:['07:00', '07:00', '07:00', '07:00', '07:00', '10:00', null] }, kapanis:{ acik:false, saatler:Array(7).fill('23:30') },
+        isler:{ yedek:{ acik:true, gunler:[5], saat:'07:00', kacarsa:'hemen', kur:false, acildi:0 } }, son:{}, bekleyen:[] };
+      window.fetch = (u, o) => {
+        if(o && o.method === 'POST'){ giden.push(JSON.parse(o.body)); return Promise.resolve(new Response(JSON.stringify({ plan:JSON.parse(o.body) }), { status:200 })); }
+        return Promise.resolve(new Response(JSON.stringify({ plan, isler:[{ id:'yedek', ad:'Yedek', not:'n' }], gunler:['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'], windows:true, calisan:[] }), { status:200 }));
+      };
+      try{
+        d.querySelector('[data-ayar-bolum="sistem"]').click();
+        await new Promise(r => setTimeout(r, 40));
+        const k = d.querySelector('[data-plan-kok]');
+        expect(k.querySelectorAll('.plan__tablo [data-plan-gunsaat^="acilis|"]').length).toBe(6);
+        expect(k.querySelector('[data-plan-gunsaat="acilis|5"]').value).toBe('10:00');
+        k.querySelector('[data-plan-gunac="acilis|6"]').click();
+        k.querySelector('[data-plan-gunkapa="acilis|0"]').click();
+        k.querySelector('[data-plan-gunac="kapanis|4"]').click();
+        k.querySelector('[data-plan-duzen="yedek"]').click();
+        k.querySelector('[data-plan-kume="yedek|ici"]').click();
+        expect(k.querySelector('.plan__is small').textContent.indexOf('Hafta içi · 07:00') === 0).toBe(true);
+        await new Promise(r => setTimeout(r, 450));
+        expect(giden.length).toBe(1);                                  // art arda değişiklik tek kayıt
+        const g = giden[0];
+        expect(g.acilis.saatler).toEqual([null, '07:00', '07:00', '07:00', '07:00', '10:00', '07:00']);
+        expect(g.kapanis).toEqual({ acik:true, saatler:[null, null, null, null, '23:30', null, null] });
+        expect(g.isler.yedek.gunler).toEqual([0, 1, 2, 3, 4]);
+      }finally{ window.fetch = eski; d.remove(); A._sec('gorunum'); }
+    });
+
     /* 2026-10-29 (kullanıcı: «satın alma ve kart işlemlerini açıp kapatabilelim; güvenlik
        ve sistem hakkında birçok şeyi ayarlayabilelim»; Google: «kendi tarayıcımda açsın»). */
     it('Hesap: satın alma ve kart kilidi varsayılan kapalı, basınca değişir; Google bağlanmaz yazar; gizlilik kilidi burada', () => {

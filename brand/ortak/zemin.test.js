@@ -380,6 +380,37 @@
       ['lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.surum'].forEach(k =>
         expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(k) >= 0).toBe(true));
     }));
+    /* 2026-10-30 (kullanıcı: «aydınlık temadayken karanlık temaya görsel eklediğimde önizlemede gözükmüyor; önizlemede
+       minik sistem kartları olsun, istersen kaldırıp yalnız görseli görebileyim»). */
+    it('önizleme seçimle kendini yeniler; gece yuvası koyu kartlı; dosyasız «Kendi» bunu söyler; yalnız görsel düğmesi kalıcı', () => temizle((Z, kok) => {
+      const onceSade = localStorage.getItem(Z.ONIZLE_SADE);
+      const d = document.createElement('div');
+      d.innerHTML = Z.onizleHtml('gunduz') + Z.onizleHtml('gece');
+      document.body.appendChild(d);
+      try{
+        localStorage.removeItem(Z.ONIZLE_SADE);
+        kok.setAttribute('data-theme', 'light'); Z.manzaraYenile();
+        const gece = () => d.querySelector('[data-zemin-onizle="gece"]');
+        expect(gece().classList.contains('zemin-onizle--gece')).toBe(true);
+        expect(gece().classList.contains('zemin-onizle--renk')).toBe(true);
+        expect(gece().querySelectorAll('.zemin-onizle__ui .zo-kart').length).toBe(2);
+        Z.geceAyarla('kendi');                                       // aydınlık temadayken gece yuvası
+        expect(gece().querySelector('small').textContent).toBe('Dosya yok · modülün fotoğrafı');
+        if(/^https?:$/.test(location.protocol)){
+          localStorage.setItem('lifeos.manzara.tur.gece', 'foto');
+          Z.geceAyarla('kendi');
+          expect(gece().getAttribute('style')).toContain('/api/zemin/gece');
+          expect(gece().querySelector('small').textContent).toBe('Kendi fotoğrafın');
+        }
+        gece().querySelector('[data-zemin-onizle-sade]').click();
+        expect(d.querySelectorAll('.zemin-onizle.is-sade').length).toBe(2);
+        expect(localStorage.getItem(Z.ONIZLE_SADE)).toBe('1');
+        expect(gece().querySelector('[data-zemin-onizle-sade]').getAttribute('aria-pressed')).toBe('true');
+      }finally{
+        d.remove();
+        if(onceSade == null) localStorage.removeItem(Z.ONIZLE_SADE); else localStorage.setItem(Z.ONIZLE_SADE, onceSade);
+      }
+    }));
     it('saate göre tema: 07–19 açık, öbür saatler koyu; kapatınca önceki tema geri gelir', () => temizle((Z, kok) => {
       const g = h => { const d = new Date(2026, 9, 29, h, 30); return d; };
       expect(Z.otoTema(g(6))).toBe('dark');

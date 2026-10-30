@@ -243,7 +243,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -493,9 +493,14 @@ window.LIFEOS = window.LIFEOS || {};
      yürüyüşü) oranı `hizOrani` ile okur. Kip (Tam/Az/Sistem) üstte kalır:
      Az'da hareket zaten kısalmıştır. Tercih `lifeos.hareket.hiz`, taşınır. */
   const HIZ_ANAHTAR = 'lifeos.hareket.hiz';
-  const HIZLAR = Object.freeze(['kapali', 'yavas', 'orta', 'hizli']);
-  const HIZ_AD = Object.freeze({ kapali:'Kapalı', yavas:'Yavaş', orta:'Orta', hizli:'Hızlı' });
-  const HIZ_ORAN = Object.freeze({ kapali:0, yavas:.6, orta:1, hizli:1.6 });
+  /* Katsayı (kullanıcı, 2026-10-30: «hızı x'li değiştirebilelim; yavaş hızlı
+     dediğimizde değere göre yazsın»): düğme katsayıyı yazar, ipucu adını;
+     ayrıntı satırı grup × alanın etkin değerini gösterir. */
+  const HIZLAR = Object.freeze(['kapali', 'yavas', 'orta', 'hizli', 'cok']);
+  const HIZ_AD = Object.freeze({ kapali:'Kapalı', yavas:'0,5×', orta:'1×', hizli:'1,5×', cok:'2×' });
+  const HIZ_IP = Object.freeze({ kapali:'Kapalı', yavas:'Yavaş', orta:'Normal', hizli:'Hızlı', cok:'Çok hızlı' });
+  const HIZ_ORAN = Object.freeze({ kapali:0, yavas:.5, orta:1, hizli:1.5, cok:2 });
+  const oranYaz = r => r === 0 ? 'kapalı' : String(Math.round(r * 100) / 100).replace('.', ',') + '×';
   const HIZ_GRUP = Object.freeze({ dugme:'ui', sayfa:'ui', panel:'ui', gosterge:'ui', minik:'ajan', king:'ajan' });
   const HIZ_ADLAR = Object.freeze({ ui:'Arayüz', ajan:'Ajanlar', dugme:'Düğme ve dokunuş', sayfa:'Sayfa geçişi',
     panel:'Panel ve menü', gosterge:'Gösterge ve sayı', minik:'Minikler', king:'King' });
@@ -559,11 +564,12 @@ window.LIFEOS = window.LIFEOS || {};
   function hizSeg(alan){
     const h = hizlar()[alan];
     return '<div class="seg anihiz" role="group" aria-label="' + HIZ_ADLAR[alan] + ' hızı">' + HIZLAR.map(k =>
-      '<button type="button" class="' + (k === h ? 'is-on' : '') + '" data-anihiz="' + alan + '" data-hiz="' + k + '" aria-pressed="' + (k === h) + '">'
-      + HIZ_AD[k] + '</button>').join('') + '</div>';
+      '<button type="button" class="' + (k === h ? 'is-on' : '') + '" data-anihiz="' + alan + '" data-hiz="' + k + '" aria-pressed="' + (k === h) + '"'
+      + ' title="' + HIZ_IP[k] + '" aria-label="' + HIZ_IP[k] + (k === 'kapali' ? '' : ' ' + HIZ_AD[k]) + '">' + HIZ_AD[k] + '</button>').join('') + '</div>';
   }
   function hizSeciciHtml(){
-    const satir = alan => '<div class="anihiz__satir"><span class="anihiz__ad">' + HIZ_ADLAR[alan] + '</span>' + hizSeg(alan) + '</div>';
+    const satir = alan => '<div class="anihiz__satir"><span class="anihiz__ad">' + HIZ_ADLAR[alan]
+      + (alan in HIZ_GRUP ? '<small class="anihiz__oran" data-anihiz-oran="' + alan + '">etkin ' + oranYaz(hizOrani(alan)) + '</small>' : '') + '</span>' + hizSeg(alan) + '</div>';
     const grup = g => '<div class="anihiz__grup">' + satir(g) + '<details class="anihiz__ayrinti"><summary>Ayrıntı</summary>'
       + Object.keys(HIZ_GRUP).filter(k => HIZ_GRUP[k] === g).map(satir).join('') + '</details></div>';
     return '<div class="anihiz__kok">' + grup('ui') + grup('ajan') + '</div>';
@@ -577,6 +583,7 @@ window.LIFEOS = window.LIFEOS || {};
       b.parentElement.querySelectorAll('[data-anihiz]').forEach(x => {
         const on = x === b; x.classList.toggle('is-on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false');
       });
+      document.querySelectorAll('[data-anihiz-oran]').forEach(x => { x.textContent = 'etkin ' + oranYaz(hizOrani(x.getAttribute('data-anihiz-oran'))); });
     });
   }
 
@@ -586,7 +593,7 @@ window.LIFEOS = window.LIFEOS || {};
     ANAHTAR, KIPLER, TASINAN,
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
-    HIZ_ANAHTAR, HIZLAR, HIZ_GRUP, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,
+    HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_GRUP, oranYaz, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,
     gecis, gecisVaris, gecisOnyukle, gecisBitir, logoAdresi, GECIS_CEREZ, GECIS_MS,
     _yonlendir:fn => { const eski = yonlendir; if(typeof fn === 'function') yonlendir = fn; return eski; },
   });

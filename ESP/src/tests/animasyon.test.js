@@ -374,7 +374,9 @@
       expect(A.hizOrani('dugme')).toBe(1);
       expect(A.hizAyarla('ui', 'yavas')).toBe(true);
       expect(A.hizAyarla('dugme', 'hizli')).toBe(true);
-      expect(Math.abs(A.hizOrani('dugme') - .96) < 1e-9).toBe(true);
+      expect(Math.abs(A.hizOrani('dugme') - .75) < 1e-9).toBe(true);
+      expect(A.oranYaz(A.hizOrani('dugme'))).toBe('0,75×');           // 2026-10-30: değer katsayıyla yazılır
+      expect(A.HIZ_AD.cok).toBe('2×');
       expect(A.hizOrani('minik')).toBe(1);
       expect(A.hizAyarla('ajan', 'kapali')).toBe(true);
       expect(A.hizOrani('king')).toBe(0);
@@ -395,7 +397,7 @@
       const sahte = (son) => ({ playbackRate:1, durum:'', effect:{ getComputedTiming:() => ({ endTime:son }) },
         finish(){ this.durum = 'bitti'; }, cancel(){ this.durum = 'iptal'; } });
       A.hizAyarla('ui', 'yavas');
-      const a = sahte(400); A.hizUygula(a, 'panel'); expect(a.playbackRate).toBe(.6);
+      const a = sahte(400); A.hizUygula(a, 'panel'); expect(a.playbackRate).toBe(.5);
       A.hizAyarla('ui', 'kapali');
       const b = sahte(400); A.hizUygula(b, 'panel'); expect(b.durum).toBe('bitti');
       const c = sahte(Infinity); A.hizUygula(c, 'dugme'); expect(c.durum).toBe('iptal');
