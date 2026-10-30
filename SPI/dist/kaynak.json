@@ -2,7 +2,7 @@
 "dosya": "spi.html",
 "kaynak": {
 "css/ayar.css": "4e073209ae0e8d926ba9a100d8cbfe4d312ce0e7abf44e5f61134818599a2ad7",
-"css/ayarlar.css": "fd429233ff899cc7ac3e846bcc060220f6a25fff981eaedb582869f5e278b836",
+"css/ayarlar.css": "b7d20aacd4954afae4763b0214b2197511545b086657c1116bdd40663ea4ba00",
 "css/base.css": "1a3961cd57116d8a23e05ff28dcfbd3d92de72152ccde193e0c0f153af5aae8d",
 "css/cam.css": "b4535369cb98132d363566d2f81c2bdf80f9e24570c84cc9376446a88b63dad0",
 "css/components.css": "b49a3856a90b506d3711d772f00527f15e3cee92cf971ebde96c3f123f96ba14",
@@ -175,7 +175,7 @@
 "js/data/agents.js": "fbf341ed470a8cefa54207dac929c2e832df1107b7ca17f99c1f128cc0dc8d0e",
 "js/data/basarimlar.js": "3aa43feb6cfa75db2788fa9a20e0152c0c4918e7871004b340f2d78657713c40",
 "js/data/biomarkers.js": "6742a46d86d71301d40faa0a25bd4298e7553f89d2c1baad9dfdb9ffe641fe04",
-"js/data/build.js": "1fe1252de53faefd5b43750c36212b4087a4ff9a86fbeff8580531f023984698",
+"js/data/build.js": "6a9a9da7ebdf0aecc8a0168a9af2abe8fab0324688557793791d6cb2602ff109",
 "js/data/designs.js": "87ac27ffe1c78d5f84e9c6d74540d04ab8b2f5cd295ea21669fdc561762975c9",
 "js/data/egzersizkatalog.js": "d3805e013df03e032bdc22336fe104f71c4c10499da8f7e677a8c7fe745bfa20",
 "js/data/evidence.js": "7f2324b28ab65844cc42e6f8635756505234b4f3f9d2173648454efb8072ba25",

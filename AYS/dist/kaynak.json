@@ -2,7 +2,7 @@
 "dosya": "rota.html",
 "kaynak": {
 "css/ayar.css": "4e073209ae0e8d926ba9a100d8cbfe4d312ce0e7abf44e5f61134818599a2ad7",
-"css/ayarlar.css": "fd429233ff899cc7ac3e846bcc060220f6a25fff981eaedb582869f5e278b836",
+"css/ayarlar.css": "b7d20aacd4954afae4763b0214b2197511545b086657c1116bdd40663ea4ba00",
 "css/base.css": "1a3961cd57116d8a23e05ff28dcfbd3d92de72152ccde193e0c0f153af5aae8d",
 "css/cam.css": "b4535369cb98132d363566d2f81c2bdf80f9e24570c84cc9376446a88b63dad0",
 "css/components.css": "5d1d12653f4375f8287b4ebc67a5171f59784e321a82f4440f2b94d6b7c19342",
@@ -184,7 +184,7 @@
 "js/data/anlatim-ts.js": "cd9e6c1ff0f943d090112f40f1f2f9001d15a227e33c12129b63fb6ca5332a50",
 "js/data/anlatim.js": "2a5dd33c4951432a2bda3497b3b3d3b634fd57a6bec99d3bd55aa5b769283d02",
 "js/data/basarimlar.js": "3aa43feb6cfa75db2788fa9a20e0152c0c4918e7871004b340f2d78657713c40",
-"js/data/build.js": "42f2e42b6086b70e3e6919f3ca462c8fd0769bd04c1d5ac233f8898306f2202e",
+"js/data/build.js": "138a1b3851bbb5b1030c84b6be284c766549c5b7d928bc0544845a439ec208ce",
 "js/data/curriculum.js": "3b8a1fa51ec979cde5cd1437e0ba7016cb30727fecb1f196bc9f43dbf7e09102",
 "js/data/derin-ab.js": "1d349df4f717afc4396b7bcccc340b16616d6680cb16fa4a6418290f575c5f3d",
 "js/data/derin-af.js": "b0c26d2d5a402395030dd0c23a60e1dda0cd1507f5a5d2e32c1d56e622c888f9",
