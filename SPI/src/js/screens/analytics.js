@@ -652,6 +652,25 @@ SP.Screens.analytics = (function(){
      kavram ve dürüstlük okumaları isteyene açılır (anlaşılması emek
      isteyen, her gün bakılmayan şeyler). */
   const ONDE = ['capraz', 'hafta', 'seri', 'denetim'];
+  /* YOL HARİTASI (kullanıcı, 2026-10-30: «istatistiklerde nöral ağ haritası;
+     SPİ'de koyduğumuz hedefler dahilinde; yol haritası gibi»). Hedef türü
+     kümeleri; hedefin durumu kendi kaydından (tamam / aktif / taslak).
+     SPİ'nin ilerlemesi oran değil cümledir: oran uydurulmaz, halka boş. */
+  function yolHaritasi(){
+    const A = window.LIFEOS.AGHARITA;
+    if(!A || !SP.Hedefler) return '';
+    const TUR = { kilo:'Kilo', aliskanlik:'Alışkanlık' };
+    const gruplar = {};
+    SP.Hedefler.liste().filter(h => h.durum !== 'birakildi').forEach(h => {
+      const ad = TUR[h.paket] || 'Diğer';
+      (gruplar[ad] = gruplar[ad] || []).push({ ad:SP.Hedefler.ozet ? SP.Hedefler.ozet(h) : (h.cumle || 'Hedef'),
+        durum:h.durum === 'tamam' ? 'bitti' : h.durum === 'aktif' || h.durum === 'askida' ? 'suruyor' : 'bekliyor' });
+    });
+    const kumeler = Object.keys(gruplar).map(ad => ({ ad, dugumler:gruplar[ad] }));
+    return K.Kutu({ ad:'Yol haritası', yuva:'hedeflerin · tamam dolu, süren halka',
+      govde:raw(A.html({ merkez:'Sağlık', kumeler, bos:'Plan › Hedefler’de bir hedef koyunca yol haritası burada belirir.' })) });
+  }
+
   async function render(){
     const acik = !!S.ui.spiAnalizAyrinti;
     const bolumler = TABS.filter(t => acik || ONDE.indexOf(t.id) >= 0).map(t => ({ id:t.id, ad:t.label, govde:govde(t) }));
@@ -659,6 +678,7 @@ SP.Screens.analytics = (function(){
        pano kartları, Durum ve Öneri (screens/today.js ozet). */
     const bugun = SP.Screens.today && SP.Screens.today.ozet ? SP.Screens.today.ozet() : '';
     return String(html`${raw(bugun)}${K.Kutu({ ad:'Bu hafta', yuva:'kayıttan · son 7 gün', govde:ozetHtml() })}
+      <div class="mt-16">${yolHaritasi()}</div>
       <div class="mt-16">${K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri', bolumler })}</div>
       <h2 class="analiz-ara-baslik">Kategoriler</h2>
       ${kategorilerHtml()}

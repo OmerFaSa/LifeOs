@@ -706,6 +706,23 @@ ESP.Screens.analytics = (function(){
     </div>`;
   }
 
+  /* YOL HARİTASI (kullanıcı, 2026-10-30: «istatistiklerde nöral ağ haritası;
+     öğrendiğimiz konular hedefinde; yol haritası gibi»). Açık alanların
+     merdiveni: basamak durumu ve yüzdesi müfredat motorundan (geçilmeyen
+     kapı ilerleme sayılmaz). */
+  function yolHaritasi(){
+    const A = window.LIFEOS.AGHARITA;
+    if(!A || !ESP.Curriculum || !ESP.Curriculum.roadmap) return '';
+    const kumeler = ESP.Mod.active().map(d => {
+      const y = ESP.Curriculum.roadmap(d.id);
+      return { ad:d.short || d.label, dugumler:y ? y.steps.map(s => ({ ad:s.title, durum:s.state === 'done' ? 'bitti' : s.state === 'current' ? (s.pct > 0 ? 'suruyor' : 'sirada') : 'bekliyor',
+        ilerleme:s.state === 'current' && s.pct > 0 ? s.pct / 100 : undefined })) : [] };
+    });
+    return html`<section class="kutu" aria-label="Yol haritası"><h2 class="kutu__ad">Yol haritası</h2>
+      <p class="tiny dim">Her alanın merdiveni; geçilen basamak dolu, içinde olduğun basamak halka</p>
+      ${raw(A.html({ merkez:'Gelişim', kumeler, bos:'Bir alan açınca merdiveni burada belirir.' }))}</section>`;
+  }
+
   function render(){
     const acik = !!S.ui.analizAyrinti;
     /* KOLAY Faz 2 (2026-10-26): Bugün'ün karoları, pano ve dönen kartları,
@@ -713,6 +730,7 @@ ESP.Screens.analytics = (function(){
     return K.Grid(html`
       ${map(ESP.Screens.today.analizOzeti(), x => K.Span(12, raw(x)))}
       ${K.Span(12, alanKarolari())}
+      ${K.Span(12, yolHaritasi())}
       ${K.Span(12, raw('<div class="pk-izgara pk-izgara--iki">' + isiHaritasi() + '</div>'))}
       ${K.Span(12, raw(panoAnaliz()))}
       ${K.Span(12, analizBasi())}

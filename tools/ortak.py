@@ -264,6 +264,8 @@ DOSYALAR = {
     # testleri o adi tasir ve yayim onlarin ustune yazardi.
     "ses.js":         "js/core",
     "muzik.js":       "js/core",
+    "agharita.js":    "js/core",
+    "agharita.test.js": "tests",
     "muzik.test.js":  "tests",
     "ses.css":        "css",
     "radyo.test.js":  "tests",

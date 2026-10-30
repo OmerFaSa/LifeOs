@@ -241,6 +241,21 @@ R.Screens.progress = (function(){
 
   /* ---------- ekran ---------- */
 
+  /* YOL HARİTASI (kullanıcı, 2026-10-30: «istatistiklerde nöral ağ haritası;
+     neyi başardığımızı, hangi konularda ilerlediğimizi; yol haritası gibi»).
+     Ders kümeleri, konular müfredat sırasıyla yol; durum konunun kendi
+     kaydından (kapandı / çalışılıyor / başlamadı), sayı uydurulmaz. */
+  function yolHaritasi(){
+    const A = window.LIFEOS.AGHARITA;
+    if(!A) return '';
+    const kumeler = R.SUBJECTS.map(s => ({ ad:s.name, dugumler:s.topics.slice().sort((a, b) => (a.order || 0) - (b.order || 0)).map(t => {
+      const st = M.topicState(s.id, t.id).state;
+      return { ad:t.name, durum:st === 'closed' ? 'bitti' : st === 'not_started' ? 'bekliyor' : 'suruyor' };
+    }) }));
+    return K.Card({ title:'Yol haritası', sub:'Konular ders ders; kapanan dolu, çalışılan halka, sıradaki kalın',
+      body:raw(A.html({ merkez:'Sınav', kumeler, bos:'Konular yüklenince harita belirir.' })) });
+  }
+
   async function render(){
     const pareto = C.errorPareto();
     const history = C.completionHistory(8).map(h => ({ label:'H'+h.n, value:h.value }));
@@ -254,6 +269,7 @@ R.Screens.progress = (function(){
        şeritler altta; gizli başvuru kartları en sonda (iPhone Faz 3). */
     return String(K.Grid([
       K.Span(12, raw(ozet)),
+      K.Span(12, yolHaritasi()),
       K.Span(12, DonenGidisat()),
       K.Span(6, K.Stack([ trendCard() ])),
       K.Span(4, K.Stack([ gateCard() ])),
