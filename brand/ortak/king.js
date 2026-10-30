@@ -5663,6 +5663,11 @@ window.LIFEOS.KING = (function(){
       + '<div class="king__bos-araclar kv-izgara' + (kvGiris ? ' is-giris' : '') + '" role="group" aria-label="Kartlarım">' + oneCikanlar().map((x, i) => miniKutu(x, i)).join('')
       + '<button type="button" class="kv-mini kv-mini--tumu" style="--i:' + oneCikanlar().length + '" data-king="bolum:araclar" title="Bütün araçlar" aria-label="Bütün araçlar">'
       + '<span class="kv-mini-simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + GRUP_SVG_MODUL + '</svg></span><span class="kv-mini-ad">Tümü</span></button></div></div>';
+    /* SAHNE (kullanıcı, 2026-10-30: «King arayüzünde hâlâ devrimsel bir değişiklik;
+       sistemin alışılmışlarından çık, sürekli aynı tasarım kullanıcıyı boğuyor»):
+       sohbet listesi değil sahne. Tepede büyük, canlı King; son cevabı onun
+       altında büyük konuşma kartı; eskiler yukarı doğru küçülüp solar. */
+    const sonKing = (() => { for(let j = satirlar.length - 1; j >= 0; j--) if(satirlar[j].kim === 'king' && !satirlar[j].bekliyor) return j; return -1; })();
     const balonlar = satirlar.map((m, i) => m.kim === 'sen'
       ? (m.foto ? '<div class="king__balon king__balon--sen king__balon--foto"><img class="king__foto" src="' + kac(m.foto) + '" alt="Gönderdiğin fotoğraf"/></div>'
         : '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p>'
@@ -5670,7 +5675,7 @@ window.LIFEOS.KING = (function(){
       : m.bekliyor
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
-      : '<div class="king__balon king__balon--king' + (m.yeni && !m.yazildi ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '" style="--yazim:' + yazimSuresi(m.metin) + 'ms"><div><p>' + bicimli(m.metin) + '</p>'
+      : '<div class="king__balon king__balon--king' + (i === sonKing ? ' is-son' : '') + (m.yeni && !m.yazildi ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '" style="--yazim:' + yazimSuresi(m.metin) + 'ms"><div><p>' + bicimli(m.metin) + '</p>'
         + kartlarHtml(m) + yapHtml(m) + nefesHtml(m) + yasaHtml(m, ilkSira + i) + gunKartHtml(m, ilkSira + i) + dersHtml(m, ilkSira + i) + soruHtml(m, ilkSira + i) + siraliHtml(m, ilkSira + i) + bulunanHtml(m, ilkSira + i) + arastirmaHtml(m, ilkSira + i) + k2Html(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
@@ -5698,7 +5703,8 @@ window.LIFEOS.KING = (function(){
     return yan + bas
       /* Hazır cevaplar son cevabın hemen altında, küçük (2026-10-19,
          kullanıcı: «çok aşağıda; daha minimalist bir yere»). */
-      + '<div class="king__akis" aria-live="polite">' + (vitrin ? (bolum === 'kutuphane' ? kutuphaneHtml() : vitrinHtml()) : akis.length ? balonlar : bos)
+      + '<div class="king__akis" aria-live="polite">' + (vitrin ? (bolum === 'kutuphane' ? kutuphaneHtml() : vitrinHtml())
+        : akis.length ? '<div class="king__sahne" aria-hidden="true">' + yuzHtml(true) + '</div>' + balonlar : bos)
       + (cip && !vitrin ? '<div class="king__cipler king__cipler--akis" role="group" aria-label="Hazır cevaplar">' + cip + '</div>' : '') + '</div>'
       + kipPanel()
       + '<form class="king__yaz" data-king-form data-ayar-disi>' + arkadasHtml()
