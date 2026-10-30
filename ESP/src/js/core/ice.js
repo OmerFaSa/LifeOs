@@ -101,7 +101,6 @@ window.LIFEOS.ICE = (function(){
     if(!veri && !ayarOkundu){ ayarOkundu = true; setTimeout(() => yukle(true).then(() => guncelle(true)), 0); }   // Bağlantılar açılınca bir kez
     const t = veri ? veri.takvim : { var:false, olaylar:[] }, v = (veri && veri.veri) || {};
     return '<div class="ice" data-ice-ayar>'
-      + '<p class="plan__not">Hesap bağlanmaz: veri yalnız bu bilgisayarda kalır. Ölçüm kendiliğinden kayda yazılmaz.</p>'
       + '<h5 class="plan__alt">1 · Google Takvim</h5>'
       + '<p class="plan__not">Google Takvim › Ayarlar › takvimin adı › «Gizli adres, iCal biçiminde» bağlantısını kopyala, buraya yapıştır. Yarım saatte bir okunur.</p>'
       + '<div class="ice__satir"><input class="ayarlar__girdi" type="url" data-ice-adres placeholder="' + (t.var ? 'Kayıtlı · değiştirmek için yeni adres' : 'https://calendar.google.com/…/basic.ics') + '" aria-label="Takvimin gizli iCal adresi">'
