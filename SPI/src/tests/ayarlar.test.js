@@ -119,6 +119,30 @@
       }finally{ window.fetch = eski; d.remove(); A._sec('gorunum'); }
     });
 
+    /* 2026-10-30 (kullanıcı ekranı: güncellemeden sonra sunucu yeniden başlatılmadan Planlama «sunucu yok» diyordu). */
+    it('Planlama: eski sunucunun biçimi gösterilir, kaydedilmez, yeniden başlat denir', async () => {
+      const d = koy();
+      const eski = window.fetch, giden = [];
+      window.fetch = (u, o) => {
+        if(o && o.method === 'POST'){ giden.push(o.body); return Promise.resolve(new Response('{}', { status:200 })); }
+        return Promise.resolve(new Response(JSON.stringify({ plan:{ acilis:{ acik:true, gunler:[5], saat:'07:00' }, kapanis:{ acik:false, gunler:[0], saat:'23:30' },
+          isler:{ yedek:{ acik:true, gun:2, saat:'08:00', kacarsa:'hemen' } }, son:{}, bekleyen:[] },
+          isler:[{ id:'yedek', ad:'Yedek', not:'n' }], gunler:['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'], windows:true, calisan:[] }), { status:200 }));
+      };
+      try{
+        d.querySelector('[data-ayar-bolum="sistem"]').click();
+        await new Promise(r => setTimeout(r, 40));
+        const k = d.querySelector('[data-plan-kok]');
+        expect(k.textContent).toContain('eski sürümle çalışıyor');
+        expect(k.querySelector('[data-plan-gunsaat="acilis|5"]').value).toBe('07:00');
+        expect(k.querySelector('.plan__is small').textContent.indexOf('Çar · 08:00') === 0).toBe(true);
+        k.querySelector('[data-plan-gunac="acilis|0"]').click();
+        await new Promise(r => setTimeout(r, 450));
+        expect(giden.length).toBe(0);
+        expect(k.querySelector('.plan__mesaj').textContent).toContain('yeniden aç');
+      }finally{ window.fetch = eski; d.remove(); A._sec('gorunum'); }
+    });
+
     /* 2026-10-29 (kullanıcı: «satın alma ve kart işlemlerini açıp kapatabilelim; güvenlik
        ve sistem hakkında birçok şeyi ayarlayabilelim»; Google: «kendi tarayıcımda açsın»). */
     it('Hesap: satın alma ve kart kilidi varsayılan kapalı, basınca değişir; Google bağlanmaz yazar; gizlilik kilidi burada', () => {

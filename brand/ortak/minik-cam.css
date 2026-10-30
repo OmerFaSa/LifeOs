@@ -74,13 +74,20 @@
 /* ==================================================================
    MİNİK TAKIMLARI (kullanıcı, 2026-10-30: «şekillerden oluşan minikler var;
    bir de hayvanlardan oluşan grup olsun; ateş, su emojisi gibi insan
-   özelliği olmayan ama yüz ekleyince tatlı duran emojiler; ayarlardan
-   seçelim, istersek karma»; minik.js TAKIMLAR). Emojide gövdenin kendisi
-   şekildir (maske); hayvanda süs
-   kulak, desen yüz. Renk kişinin kendisinin (--g1..--g3 satır içi).
-   ================================================================== */
-.minik[data-bicim="alev"] .minik__deri{ --maske:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 3C58 16 70 22 78 36C86 49 88 62 85 74C81 89 67 98 50 98C33 98 19 89 15 74C12 62 15 51 22 42C25 50 30 54 36 55C31 42 34 28 42 18C44 26 47 30 52 31C50 22 49 12 50 3Z'/%3E%3C/svg%3E"); }
-.minik[data-bicim="alev"] .minik__goz{ top:56%; width:15%; height:20%; }
+   özelliği olmayan ama yüz ekleyince tatlı duran emojiler»; ikinci tur:
+   «hayvanları kare üçgen tasarlama; ayının boyu uzun olur, tavşanı biraz
+   küçük, köpeği orta boy; emojiler daha kaliteli, minik pofuduk»;
+   minik.js TAKIMLAR). Hayvanın kendi yumuşak gövdesi (hayvan maskesi) ve
+   eni (--en) var; yüzü ağızlık, burun ve kulakla çizilir. Emojide gövdenin
+   kendisi şekildir. Renk kişinin kendisinin (--g1..--g3 satır içi).
+   ================================================================== */
+.minik{ width:calc(var(--boy) * var(--en, 1)); left:calc(var(--boy) * var(--en, 1) / -2); }
+.minik[data-bicim="hayvan"] .minik__deri{ --maske:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5C71 5 85 19 86 38C87 48 92 58 93 70C94 88 76 98 50 98C24 98 6 88 7 70C8 58 13 48 14 38C15 19 29 5 50 5Z'/%3E%3C/svg%3E"); }
+.minik[data-bicim="hayvan"] .minik__goz{ top:35%; width:15%; height:20%; }
+.minik[data-bicim="hayvan"] .minik__goz:nth-of-type(2){ left:28%; } .minik[data-bicim="hayvan"] .minik__goz:nth-of-type(3){ right:28%; }
+.minik[data-bicim="hayvan"] .minik__agiz{ top:61%; } .minik[data-bicim="hayvan"] .minik__kol{ top:58%; }
+.minik[data-bicim="alev"] .minik__deri{ --maske:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M52 2C56 14 66 20 74 30C79 24 80 18 79 12C88 22 92 36 90 54C88 80 72 98 50 98C28 98 12 82 11 60C10 46 16 36 24 28C24 36 27 42 33 45C30 30 38 14 52 2Z'/%3E%3C/svg%3E"); }
+.minik[data-bicim="alev"] .minik__goz{ top:57%; width:15%; height:20%; }
 .minik[data-bicim="alev"] .minik__goz:nth-of-type(2){ left:31%; } .minik[data-bicim="alev"] .minik__goz:nth-of-type(3){ right:31%; }
 .minik[data-bicim="alev"] .minik__agiz{ top:76%; } .minik[data-bicim="alev"] .minik__kol{ top:70%; }
 .minik[data-bicim="damla"] .minik__deri{ --maske:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 4C60 20 84 42 86 64C88 84 71 98 50 98C29 98 12 84 14 64C16 42 40 20 50 4Z'/%3E%3C/svg%3E"); }
@@ -91,65 +98,91 @@
 .minik[data-bicim="bulut"] .minik__goz{ top:55%; width:15%; height:20%; }
 .minik[data-bicim="bulut"] .minik__goz:nth-of-type(2){ left:31%; } .minik[data-bicim="bulut"] .minik__goz:nth-of-type(3){ right:31%; }
 .minik[data-bicim="bulut"] .minik__agiz{ top:74%; } .minik[data-bicim="bulut"] .minik__kol{ top:66%; }
-.minik[data-bicim="yildiz"] .minik__deri{ --maske:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50.0 16.0 L61.2 40.6 L88.0 43.6 L68.1 61.9 L73.5 88.4 L50.0 75.0 L26.5 88.4 L31.9 61.9 L12.0 43.6 L38.8 40.6 Z' stroke='black' stroke-width='14' stroke-linejoin='round'/%3E%3C/svg%3E"); }
-.minik[data-bicim="yildiz"] .minik__goz{ top:47%; width:12%; height:16%; }
+.minik[data-bicim="yildiz"] .minik__deri{ --maske:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50.0 20.0 L61.8 40.8 L85.2 45.6 L69.0 63.2 L71.7 86.9 L50.0 77.0 L28.3 86.9 L31.0 63.2 L14.8 45.6 L38.2 40.8 Z' stroke='black' stroke-width='22' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.minik[data-bicim="yildiz"] .minik__goz{ top:48%; width:12%; height:16%; }
 .minik[data-bicim="yildiz"] .minik__goz:nth-of-type(2){ left:35%; } .minik[data-bicim="yildiz"] .minik__goz:nth-of-type(3){ right:35%; }
-.minik[data-bicim="yildiz"] .minik__agiz{ top:64%; } .minik[data-bicim="yildiz"] .minik__kol{ top:58%; }
-.minik[data-bicim="yaprak"] .minik__deri{ --maske:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 4C74 14 92 38 90 64C88 86 70 98 50 98C30 98 12 86 10 64C8 38 26 14 50 4Z'/%3E%3C/svg%3E"); }
-.minik[data-bicim="yaprak"] .minik__goz{ top:50%; width:16%; height:21%; }
+.minik[data-bicim="yildiz"] .minik__agiz{ top:65%; } .minik[data-bicim="yildiz"] .minik__kol{ top:58%; }
+.minik[data-bicim="yaprak"] .minik__deri{ --maske:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 6C74 16 91 40 89 65C87 86 70 98 50 98C30 98 13 86 11 65C9 40 26 16 50 6Z'/%3E%3C/svg%3E"); }
+.minik[data-bicim="yaprak"] .minik__goz{ top:52%; width:16%; height:21%; }
 .minik[data-bicim="yaprak"] .minik__goz:nth-of-type(2){ left:29%; } .minik[data-bicim="yaprak"] .minik__goz:nth-of-type(3){ right:29%; }
-.minik[data-bicim="yaprak"] .minik__agiz{ top:70%; } .minik[data-bicim="yaprak"] .minik__kol{ top:64%; }
+.minik[data-bicim="yaprak"] .minik__agiz{ top:72%; } .minik[data-bicim="yaprak"] .minik__kol{ top:64%; }
 .minik[data-bicim="kalp"] .minik__deri{ --maske:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 95C36 85 5 68 5 40C5 22 17 10 31 10C40 10 46 15 50 22C54 15 60 10 69 10C83 10 95 22 95 40C95 68 64 85 50 95Z'/%3E%3C/svg%3E"); }
 .minik[data-bicim="kalp"] .minik__goz{ top:36%; width:16%; height:21%; }
 .minik[data-bicim="kalp"] .minik__goz:nth-of-type(2){ left:27%; } .minik[data-bicim="kalp"] .minik__goz:nth-of-type(3){ right:27%; }
 .minik[data-bicim="kalp"] .minik__agiz{ top:56%; } .minik[data-bicim="kalp"] .minik__kol{ top:50%; }
-/* Alev: içte daha açık bir çekirdek; yaprak: orta damar; buz: köşede parıltı. */
-.minik[data-bicim="alev"] .minik__deri::before{ background:radial-gradient(34% 30% at 50% 74%, rgba(255,250,210,.85), rgba(255,240,170,0) 100%); }
-.minik[data-desen="damar"] .minik__deri::before{ background:linear-gradient(rgba(50,110,40,.32), rgba(50,110,40,.32)) 50% 100% / 2px 24% no-repeat; }
-.minik[data-desen="buz"] .minik__deri::before{ background:linear-gradient(135deg, rgba(255,255,255,.85) 0 9%, transparent 9% 15%, rgba(255,255,255,.55) 15% 19%, transparent 19%); }
-/* Güneş: gövdenin arkasında ışın halkası (duran, oynamaz). */
-.minik[data-tip="isin"] .minik__sus{ z-index:-1; left:-24%; top:-24%; width:148%; height:148%;
-  background:repeating-conic-gradient(var(--g2) 0 11deg, transparent 11deg 30deg);
-  -webkit-mask:radial-gradient(circle, transparent 51%, #000 52% 69%, transparent 70%); mask:radial-gradient(circle, transparent 51%, #000 52% 69%, transparent 70%); }
+/* Pofuduk emoji: üstte geniş yumuşak ışık, altta kendi renginde gölge; alevin
+   içinde açık çekirdek, damla ve kalpte parıltı, yaprakta damar ve sap, buzda
+   parlak kenar. */
+.minik[data-aile="emoji"] .minik__deri{ background:radial-gradient(52% 40% at 38% 24%, rgba(255,255,255,.75), rgba(255,255,255,.18) 58%, rgba(255,255,255,0) 80%),
+  radial-gradient(17% 11% at 26% 70%, rgba(255,110,150,.5), transparent), radial-gradient(17% 11% at 74% 70%, rgba(255,110,150,.5), transparent),
+  radial-gradient(80% 60% at 50% 100%, var(--g3), transparent 70%), linear-gradient(172deg, var(--g1), var(--g2) 62%, var(--g3)); }
+.minik[data-bicim="alev"] .minik__deri::before{ background:radial-gradient(30% 34% at 50% 76%, rgba(255,252,220,.95), rgba(255,240,170,0) 100%); }
+.minik[data-desen="parilti"] .minik__deri::before{ background:radial-gradient(ellipse 7% 11% at 30% 40%, rgba(255,255,255,.95) 85%, transparent 100%),
+  radial-gradient(circle at 37% 30%, rgba(255,255,255,.9) 0 2.6%, transparent 3.4%); }
+.minik[data-desen="damar"] .minik__deri::before{ background:linear-gradient(rgba(50,110,40,.3), rgba(50,110,40,.3)) 50% 100% / 2px 26% no-repeat,
+  linear-gradient(35deg, transparent 47%, rgba(50,110,40,.22) 48% 51%, transparent 52%) 30% 92% / 22% 14% no-repeat,
+  linear-gradient(-35deg, transparent 47%, rgba(50,110,40,.22) 48% 51%, transparent 52%) 70% 92% / 22% 14% no-repeat; }
+.minik[data-tip="sap"] .minik__sus{ z-index:-1; left:47%; width:6%; top:-10%; height:18%; border-radius:3px; background:#6b9b3e; rotate:8deg; }
+.minik[data-desen="buz"] .minik__deri::before{ background:linear-gradient(135deg, rgba(255,255,255,.95) 0 10%, transparent 10% 16%, rgba(255,255,255,.6) 16% 20%, transparent 20%),
+  radial-gradient(70% 70% at 50% 50%, transparent 70%, rgba(120,200,235,.45) 100%); }
+/* Güneş: gövdenin arkasında kısa, yuvarlak uçlu ışınlar (duran, oynamaz). */
+.minik[data-tip="isin"] .minik__sus{ z-index:-1; left:-20%; top:-20%; width:140%; height:140%;
+  background:repeating-conic-gradient(from 6deg, var(--g2) 0 12deg, transparent 12deg 30deg);
+  -webkit-mask:radial-gradient(circle, transparent 54%, #000 55% 66%, transparent 67%); mask:radial-gradient(circle, transparent 54%, #000 55% 66%, transparent 67%); }
 
-/* Hayvanlar. */
-.minik:is([data-tip="kedi"], [data-tip="tilki"]) .minik__sus{ z-index:-1; left:6%; right:6%; top:-17%; height:38%; }
+/* Hayvanlar: kulaklar (süs, gövdenin arkasında). */
+.minik:is([data-tip="kedi"], [data-tip="tilki"]) .minik__sus{ z-index:-1; left:8%; right:8%; top:-15%; height:36%; }
 .minik:is([data-tip="kedi"], [data-tip="tilki"]) .minik__sus::before, .minik:is([data-tip="kedi"], [data-tip="tilki"]) .minik__sus::after{
   content:''; position:absolute; top:0; width:36%; height:100%; clip-path:polygon(50% 0, 100% 100%, 0 100%); border-radius:30%;
   background:radial-gradient(ellipse 26% 42% at 50% 72%, #ffb8c9 90%, transparent 100%), var(--g2); }
+.minik[data-tip="tilki"] .minik__sus{ top:-20%; height:42%; }
 .minik[data-tip="tilki"] .minik__sus::before, .minik[data-tip="tilki"] .minik__sus::after{
   background:radial-gradient(ellipse 26% 42% at 50% 72%, #fff2e2 90%, transparent 100%), linear-gradient(180deg, #4a2a1c 0 24%, var(--g2) 24%); }
-.minik:is([data-tip="kedi"], [data-tip="tilki"]) .minik__sus::before{ left:0; rotate:-14deg; }
-.minik:is([data-tip="kedi"], [data-tip="tilki"]) .minik__sus::after{ right:0; rotate:14deg; }
-.minik[data-tip="kopek"] .minik__sus{ z-index:-1; left:-9%; right:-9%; top:6%; height:50%; }
+.minik:is([data-tip="kedi"], [data-tip="tilki"]) .minik__sus::before{ left:0; rotate:-12deg; }
+.minik:is([data-tip="kedi"], [data-tip="tilki"]) .minik__sus::after{ right:0; rotate:12deg; }
+.minik[data-tip="kopek"] .minik__sus{ z-index:-1; left:-10%; right:-10%; top:4%; height:52%; }
 .minik[data-tip="kopek"] .minik__sus::before, .minik[data-tip="kopek"] .minik__sus::after{ content:''; position:absolute; top:0; width:30%; height:100%;
   border-radius:50% 50% 46% 46% / 36% 36% 64% 64%; background:linear-gradient(var(--g3), color-mix(in oklab, var(--g3) 80%, #000)); }
 .minik[data-tip="kopek"] .minik__sus::before{ left:0; rotate:16deg; } .minik[data-tip="kopek"] .minik__sus::after{ right:0; rotate:-16deg; }
-.minik[data-tip="panda"] .minik__sus{ z-index:-1; left:0; right:0; top:-12%; height:36%; }
-.minik[data-tip="panda"] .minik__sus::before, .minik[data-tip="panda"] .minik__sus::after{ content:''; position:absolute; top:0; height:100%; aspect-ratio:1; border-radius:50%; background:#2c2d36; }
-.minik[data-tip="panda"] .minik__sus::before{ left:2%; } .minik[data-tip="panda"] .minik__sus::after{ right:2%; }
-.minik[data-tip="kurbaga"] .minik__sus{ z-index:-1; left:12%; right:12%; top:-16%; height:40%; }
+.minik:is([data-tip="panda"], [data-tip="ayi"])[data-aile="hayvan"] .minik__sus{ z-index:-1; left:4%; right:4%; top:-10%; height:32%; }
+.minik:is([data-tip="panda"], [data-tip="ayi"])[data-aile="hayvan"] .minik__sus::before, .minik:is([data-tip="panda"], [data-tip="ayi"])[data-aile="hayvan"] .minik__sus::after{
+  content:''; position:absolute; top:0; height:100%; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle, var(--g1) 0 38%, var(--g3) 42%); }
+.minik[data-tip="panda"] .minik__sus::before, .minik[data-tip="panda"] .minik__sus::after{ background:#2c2d36 !important; }
+.minik:is([data-tip="panda"], [data-tip="ayi"])[data-aile="hayvan"] .minik__sus::before{ left:0; }
+.minik:is([data-tip="panda"], [data-tip="ayi"])[data-aile="hayvan"] .minik__sus::after{ right:0; }
+.minik[data-tip="tavsan"][data-aile="hayvan"] .minik__sus{ left:22%; right:22%; top:-62%; height:74%; }
+.minik[data-tip="kurbaga"] .minik__sus{ z-index:-1; left:12%; right:12%; top:-14%; height:40%; }
 .minik[data-tip="kurbaga"] .minik__sus::before, .minik[data-tip="kurbaga"] .minik__sus::after{ content:''; position:absolute; top:0; height:100%; aspect-ratio:1; border-radius:50%;
   background:radial-gradient(circle at 40% 35%, var(--g1), var(--g2) 70%); }
 .minik[data-tip="kurbaga"] .minik__sus::before{ left:0; } .minik[data-tip="kurbaga"] .minik__sus::after{ right:0; }
-.minik[data-tip="kurbaga"] .minik__goz{ top:-4%; }
-.minik[data-tip="kurbaga"] .minik__agiz{ left:30%; width:40%; top:52%; }
-.minik[data-tip="baykus"] .minik__sus{ z-index:-1; left:4%; right:4%; top:-12%; height:28%; }
+.minik[data-tip="kurbaga"] .minik__goz{ top:-2%; }
+.minik[data-tip="kurbaga"] .minik__agiz{ left:30%; width:40%; top:50%; }
+.minik[data-tip="baykus"] .minik__sus{ z-index:-1; left:6%; right:6%; top:-10%; height:26%; }
 .minik[data-tip="baykus"] .minik__sus::before, .minik[data-tip="baykus"] .minik__sus::after{ content:''; position:absolute; top:0; width:28%; height:100%; background:var(--g3); }
 .minik[data-tip="baykus"] .minik__sus::before{ left:0; clip-path:polygon(0 0, 100% 100%, 0 100%); } .minik[data-tip="baykus"] .minik__sus::after{ right:0; clip-path:polygon(100% 0, 100% 100%, 0 100%); }
-.minik[data-tip="penguen"] .minik__agiz{ left:43%; width:14%; height:9%; border:0; border-radius:0; opacity:1; background:#ffa53d; clip-path:polygon(0 0, 100% 0, 50% 100%); }
+/* Gaga: penguen ve baykuş. */
+.minik:is([data-tip="penguen"], [data-tip="baykus"]) .minik__agiz{ left:43%; width:14%; height:9%; top:52%; border:0; border-radius:0 0 40% 40%; opacity:1;
+  background:#ffa53d; clip-path:polygon(0 0, 100% 0, 50% 100%); }
 .minik[data-tip="penguen"] .minik__ayak{ background:#ffa53d; }
-/* Yüz desenleri (deri içinde, maskeyle kırpılır). */
-.minik[data-desen="biyik"] .minik__deri::before{
-  background:linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 6% 62% / 15% 1.6px no-repeat, linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 6% 69% / 15% 1.6px no-repeat,
-    linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 94% 62% / 15% 1.6px no-repeat, linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 94% 69% / 15% 1.6px no-repeat; }
-.minik[data-desen="panda"] .minik__deri::before{
-  background:radial-gradient(ellipse 14% 17% at 35% 51%, #2c2d36 92%, transparent 100%), radial-gradient(ellipse 14% 17% at 65% 51%, #2c2d36 92%, transparent 100%); }
-.minik[data-desen="penguen"] .minik__deri::before{ background:radial-gradient(ellipse 34% 40% at 50% 66%, #fdfdff 95%, transparent 100%); }
-.minik[data-desen="tilki"] .minik__deri::before{ background:radial-gradient(ellipse 34% 24% at 50% 82%, #fff4e8 92%, transparent 100%),
-  radial-gradient(ellipse 18% 14% at 18% 66%, #fff4e8 90%, transparent 100%), radial-gradient(ellipse 18% 14% at 82% 66%, #fff4e8 90%, transparent 100%); }
-.minik[data-desen="baykus"] .minik__deri::before{ background:radial-gradient(circle at 35% 52%, #fff3df 0 15%, transparent 16%), radial-gradient(circle at 65% 52%, #fff3df 0 15%, transparent 16%),
-  radial-gradient(ellipse 26% 20% at 50% 86%, rgba(255,240,215,.75) 90%, transparent 100%); }
+/* Hayvan yüzleri (deri içinde): ağızlık, burun, bıyık, yama. */
+.minik[data-desen="ayi"] .minik__deri::before{ background:radial-gradient(ellipse 7% 5% at 50% 54%, #3a2a22 90%, transparent 100%),
+  radial-gradient(ellipse 21% 15% at 50% 60%, #f6e5cf 94%, transparent 100%); }
+.minik[data-desen="kopek"] .minik__deri::before{ background:radial-gradient(ellipse 8% 5.5% at 50% 54%, #2d2422 90%, transparent 100%),
+  radial-gradient(ellipse 23% 16% at 50% 60%, #fff4e6 94%, transparent 100%), radial-gradient(ellipse 13% 15% at 64% 43%, rgba(150,95,55,.35) 90%, transparent 100%); }
+.minik[data-desen="kedi"] .minik__deri::before{ background:radial-gradient(ellipse 5% 3.6% at 50% 55%, #ff8fab 90%, transparent 100%),
+  linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 8% 60% / 16% 1.6px no-repeat, linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 8% 67% / 16% 1.6px no-repeat,
+  linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 92% 60% / 16% 1.6px no-repeat, linear-gradient(rgba(60,40,30,.42), rgba(60,40,30,.42)) 92% 67% / 16% 1.6px no-repeat; }
+.minik[data-desen="tavsan"] .minik__deri::before{ background:radial-gradient(ellipse 5% 3.6% at 50% 54%, #ff8fab 90%, transparent 100%),
+  radial-gradient(ellipse 18% 13% at 50% 59%, #ffffff 92%, transparent 100%); }
+.minik[data-desen="panda"] .minik__deri::before{ background:radial-gradient(ellipse 6% 4% at 50% 56%, #2c2d36 90%, transparent 100%),
+  radial-gradient(ellipse 13% 16% at 36% 44%, #2c2d36 92%, transparent 100%), radial-gradient(ellipse 13% 16% at 64% 44%, #2c2d36 92%, transparent 100%); }
+.minik[data-desen="penguen"] .minik__deri::before{ background:radial-gradient(ellipse 33% 42% at 50% 64%, #fdfdff 95%, transparent 100%); }
+.minik[data-desen="tilki"] .minik__deri::before{ background:radial-gradient(ellipse 6% 4% at 50% 55%, #2d2422 90%, transparent 100%),
+  radial-gradient(ellipse 30% 24% at 50% 70%, #fff4e8 92%, transparent 100%),
+  radial-gradient(ellipse 17% 13% at 18% 62%, #fff4e8 90%, transparent 100%), radial-gradient(ellipse 17% 13% at 82% 62%, #fff4e8 90%, transparent 100%); }
+.minik[data-desen="kurbaga"] .minik__deri::before{ background:radial-gradient(ellipse 34% 26% at 50% 84%, rgba(250,255,225,.6) 90%, transparent 100%); }
+.minik[data-desen="baykus"] .minik__deri::before{ background:radial-gradient(circle at 35.5% 44%, #fff3df 0 14%, transparent 15%), radial-gradient(circle at 64.5% 44%, #fff3df 0 14%, transparent 15%),
+  radial-gradient(ellipse 26% 22% at 50% 84%, rgba(255,240,215,.75) 90%, transparent 100%); }
 /* Galeri: takım seçicisi üstte, tam satır. */
 .minikgal__takim{ grid-column:1 / -1; justify-self:start; margin-bottom:4px; }
 

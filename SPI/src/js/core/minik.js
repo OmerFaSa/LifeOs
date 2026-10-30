@@ -63,8 +63,8 @@ window.LIFEOS.MINIK = (function(){
     { ad:'Ponpon',   bicim:'yuvarlak', tip:'kurdele', huy:'neseli',   desen:'karin', boy:38, ton:-12, perde:1.25 },
     { ad:'Bulut',    bicim:'ucgen',    tip:'percem',  huy:'hayalci',  desen:'yok',   boy:40, ton:14,  perde:1 },
     { ad:'Bilge',    bicim:'kare',     tip:'kas',     huy:'bilge',    desen:'karin', boy:41, ton:40,  perde:0.8 },
-    { ad:'Tavşi',    bicim:'yuvarlak', tip:'tavsan',  huy:'utangac',  desen:'karin', boy:38, ton:60,  perde:1.2, aile:'hayvan', renk:['#ffffff', '#f4eef2', '#dccfd8'] },
-    { ad:'Ayıcık',   bicim:'kare',     tip:'ayi',     huy:'tembel',   desen:'karin', boy:43, ton:-40, perde:0.85, aile:'hayvan', renk:['#e9c9a4', '#c08d5e', '#93643e'] },
+    { ad:'Tavşi',    bicim:'hayvan',   tip:'tavsan',  huy:'utangac',  desen:'tavsan',  boy:31, en:.9,  ton:60,  perde:1.2, aile:'hayvan', renk:['#ffffff', '#f6eff3', '#ddd0da'] },
+    { ad:'Ayıcık',   bicim:'hayvan',   tip:'ayi',     huy:'tembel',   desen:'ayi',     boy:50, en:.84, ton:-40, perde:0.85, aile:'hayvan', renk:['#eccca6', '#c48f5f', '#94653f'] },
     { ad:'Çiçek',    bicim:'ucgen',    tip:'cicek',   huy:'sarkici',  desen:'cil',   boy:39, ton:80,  perde:1.15 },
     { ad:'Boncuk',   bicim:'yuvarlak', tip:'boynuz',  huy:'oyuncu',   desen:'cil',   boy:36, ton:-60, perde:1.3 },
     { ad:'Yıldız',   bicim:'kare',     tip:'yildiz',  huy:'cesur',    desen:'yok',   boy:40, ton:100, perde:1.1 },
@@ -81,21 +81,21 @@ window.LIFEOS.MINIK = (function(){
        olmayan ama yüz ekleyince tatlı duran emojiler; ayarlardan şekil mi,
        hayvan mı, emoji mi seçelim, istersek karma»). Hayvan ve emojilerin
        rengi kendinedir (renk: açık, orta, koyu); şekiller modülün tonunu alır. */
-    { ad:'Mırnav',   bicim:'yuvarlak', tip:'kedi',    huy:'oyuncu',   desen:'biyik',   boy:39, ton:0, perde:1.2,  aile:'hayvan', renk:['#ffe0b8', '#ffb067', '#ea8238'] },
-    { ad:'Pati',     bicim:'yuvarlak', tip:'kopek',   huy:'sevecen',  desen:'karin',   boy:41, ton:0, perde:1.05, aile:'hayvan', renk:['#f6e3c9', '#dcae7f', '#b5814f'] },
-    { ad:'Bambu',    bicim:'yuvarlak', tip:'panda',   huy:'sakin',    desen:'panda',   boy:43, ton:0, perde:0.9,  aile:'hayvan', renk:['#ffffff', '#f3f3f6', '#d8d9e2'] },
-    { ad:'Penpen',   bicim:'yuvarlak',    tip:'penguen', huy:'sakar',    desen:'penguen', boy:40, ton:0, perde:1.15, aile:'hayvan', renk:['#5a6888', '#36425e', '#222a3f'] },
-    { ad:'Kızıl',    bicim:'yuvarlak', tip:'tilki',   huy:'merakli',  desen:'tilki',   boy:39, ton:0, perde:1.1,  aile:'hayvan', renk:['#ffcf9a', '#ff9447', '#e2632a'] },
-    { ad:'Vırak',    bicim:'yuvarlak', tip:'kurbaga', huy:'neseli',   desen:'karin',   boy:38, ton:0, perde:1.25, aile:'hayvan', renk:['#d4f7a8', '#8edb63', '#57ad3e'] },
-    { ad:'Gececi',   bicim:'kare',     tip:'baykus',  huy:'bilge',    desen:'baykus',  boy:41, ton:0, perde:0.82, aile:'hayvan', renk:['#e5cfac', '#b38c62', '#86633f'] },
-    { ad:'Çıtır',    bicim:'alev',     tip:'yok',     huy:'enerjik',  desen:'yok',     boy:40, ton:0, perde:1.2,  aile:'emoji', renk:['#fff1a8', '#ffb03a', '#ff6a2b'] },
-    { ad:'Şıpşıp',   bicim:'damla',    tip:'yok',     huy:'telasli',  desen:'yok',     boy:39, ton:0, perde:1.15, aile:'emoji', renk:['#e2f4ff', '#86c8ff', '#4a8fe6'] },
-    { ad:'Pufpuf',   bicim:'bulut',    tip:'yok',     huy:'hayalci',  desen:'yok',     boy:44, ton:0, perde:0.95, aile:'emoji', renk:['#ffffff', '#eef3fb', '#c9d6ea'] },
-    { ad:'Parıltı',  bicim:'yildiz',   tip:'yok',     huy:'cesur',    desen:'yok',     boy:43, ton:0, perde:1.2,  aile:'emoji', renk:['#fff6c2', '#ffd34d', '#f2a51f'] },
-    { ad:'Yeşilcik', bicim:'yaprak',   tip:'yok',     huy:'merakli',  desen:'damar',   boy:40, ton:0, perde:1.1,  aile:'emoji', renk:['#dcf8bf', '#93d865', '#549f3a'] },
-    { ad:'Gönül',    bicim:'kalp',     tip:'yok',     huy:'nazik',    desen:'yok',     boy:40, ton:0, perde:1.22, aile:'emoji', renk:['#ffd3de', '#ff86a6', '#e5507c'] },
-    { ad:'Işıl',     bicim:'yuvarlak', tip:'isin',    huy:'neseli',   desen:'yok',     boy:38, ton:0, perde:1.25, aile:'emoji', renk:['#fff5b8', '#ffd042', '#ffa01c'] },
-    { ad:'Buzcuk',   bicim:'kare',     tip:'yok',     huy:'sakin',    desen:'buz',     boy:38, ton:0, perde:0.95, aile:'emoji', renk:['#f2fcff', '#c6eefc', '#8fd2ec'] }
+    { ad:'Mırnav',   bicim:'hayvan',   tip:'kedi',    huy:'oyuncu',   desen:'kedi',    boy:37, en:.94, ton:0, perde:1.2,  aile:'hayvan', renk:['#ffe0b8', '#ffb067', '#ea8238'] },
+    { ad:'Pati',     bicim:'hayvan',   tip:'kopek',   huy:'sevecen',  desen:'kopek',   boy:42, en:.96, ton:0, perde:1.05, aile:'hayvan', renk:['#f6e3c9', '#dcae7f', '#b5814f'] },
+    { ad:'Bambu',    bicim:'hayvan',   tip:'panda',   huy:'sakin',    desen:'panda',   boy:46, en:1,   ton:0, perde:0.9,  aile:'hayvan', renk:['#ffffff', '#f3f3f6', '#d8d9e2'] },
+    { ad:'Penpen',   bicim:'hayvan',   tip:'penguen', huy:'sakar',    desen:'penguen', boy:41, en:.8,  ton:0, perde:1.15, aile:'hayvan', renk:['#5a6888', '#36425e', '#222a3f'] },
+    { ad:'Kızıl',    bicim:'hayvan',   tip:'tilki',   huy:'merakli',  desen:'tilki',   boy:38, en:.9,  ton:0, perde:1.1,  aile:'hayvan', renk:['#ffcf9a', '#ff9447', '#e2632a'] },
+    { ad:'Vırak',    bicim:'hayvan',   tip:'kurbaga', huy:'neseli',   desen:'kurbaga', boy:32, en:1.2, ton:0, perde:1.25, aile:'hayvan', renk:['#d4f7a8', '#8edb63', '#57ad3e'] },
+    { ad:'Gececi',   bicim:'hayvan',   tip:'baykus',  huy:'bilge',    desen:'baykus',  boy:42, en:.86, ton:0, perde:0.82, aile:'hayvan', renk:['#e5cfac', '#b38c62', '#86633f'] },
+    { ad:'Çıtır',    bicim:'alev',     tip:'yok',     huy:'enerjik',  desen:'yok',     boy:36, ton:0, perde:1.2,  aile:'emoji', renk:['#fff3b0', '#ffb23e', '#ff6b2c'] },
+    { ad:'Şıpşıp',   bicim:'damla',    tip:'yok',     huy:'telasli',  desen:'parilti', boy:35, ton:0, perde:1.15, aile:'emoji', renk:['#e6f6ff', '#8ccdff', '#4d92e8'] },
+    { ad:'Pufpuf',   bicim:'bulut',    tip:'yok',     huy:'hayalci',  desen:'yok',     boy:40, ton:0, perde:0.95, aile:'emoji', renk:['#ffffff', '#f1f5fc', '#cdd9ec'] },
+    { ad:'Parıltı',  bicim:'yildiz',   tip:'yok',     huy:'cesur',    desen:'yok',     boy:39, ton:0, perde:1.2,  aile:'emoji', renk:['#fff7c9', '#ffd54f', '#f2a51f'] },
+    { ad:'Yeşilcik', bicim:'yaprak',   tip:'sap',     huy:'merakli',  desen:'damar',   boy:36, ton:0, perde:1.1,  aile:'emoji', renk:['#dcf8bf', '#93d865', '#549f3a'] },
+    { ad:'Gönül',    bicim:'kalp',     tip:'yok',     huy:'nazik',    desen:'parilti', boy:36, ton:0, perde:1.22, aile:'emoji', renk:['#ffd6e1', '#ff88a8', '#e5507c'] },
+    { ad:'Işıl',     bicim:'yuvarlak', tip:'isin',    huy:'neseli',   desen:'yok',     boy:34, ton:0, perde:1.25, aile:'emoji', renk:['#fff6bf', '#ffd145', '#ffa21e'] },
+    { ad:'Buzcuk',   bicim:'kare',     tip:'yok',     huy:'sakin',    desen:'buz',     boy:34, ton:0, perde:0.95, aile:'emoji', renk:['#f4fdff', '#c9effd', '#8fd2ec'] }
   ]);
   const TAKIMLAR = Object.freeze(['sekil', 'hayvan', 'emoji', 'karma']);
   const TAKIM_AD = Object.freeze({ sekil:'Şekiller', hayvan:'Hayvanlar', emoji:'Emojiler', karma:'Karma' });
@@ -327,7 +327,7 @@ window.LIFEOS.MINIK = (function(){
     return true;
   }
   /* Kişinin rengi: hayvan ve emojide kendi üç tonu; şekilde modülün tonu. */
-  const renkStil = x => '--ton:' + x.ton + (x.renk ? ';--g1:' + x.renk[0] + ';--g2:' + x.renk[1] + ';--g3:' + x.renk[2] : '');
+  const renkStil = x => '--ton:' + x.ton + (x.en ? ';--en:' + x.en : '') + (x.renk ? ';--g1:' + x.renk[0] + ';--g2:' + x.renk[1] + ';--g3:' + x.renk[2] : '');
   function kadroAyarla(ad, acik){
     const k = kapalilar();
     if(acik) k.delete(ad); else k.add(ad);
@@ -480,6 +480,7 @@ window.LIFEOS.MINIK = (function(){
     mk.el.dataset.aile = k.aile || 'sekil';
     mk.tabanBoy = k.boy;
     mk.el.style.setProperty('--boy', boyPx(k.boy) + 'px');
+    if(k.en) mk.el.style.setProperty('--en', String(k.en)); else mk.el.style.removeProperty('--en');   // hayvanın eni: ayı uzun, kurbağa basık
     mk.el.style.setProperty('--ton', String(k.ton));   // birimsiz: oklch'nin h'si sayı
     ['--g1', '--g2', '--g3'].forEach((v, i) => { if(k.renk) mk.el.style.setProperty(v, k.renk[i]); else mk.el.style.removeProperty(v); });
     ruhUygula(mk);

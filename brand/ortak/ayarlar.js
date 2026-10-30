@@ -95,6 +95,8 @@ window.LIFEOS = window.LIFEOS || {};
     perde:   { anahtar:'lifeos.perde',         kok:'data-perde',    vars:'orta',  sira:['az', 'orta', 'cok'],  ad:{ az:'Az', orta:'Orta', cok:'Çok' } },
     bulanik: { anahtar:'lifeos.zemin.bulanik', kok:'data-bulanik',  vars:'yok',   sira:['yok', 'hafif', 'cok'], ad:{ yok:'Net', hafif:'Hafif', cok:'Yumuşak' } },
     rozet:   { anahtar:'lifeos.rozet',         kok:'data-rozet',    vars:'acik',  sira:['acik', 'kapali'],     ad:{ acik:'Göster', kapali:'Gizle' } },
+    /* 2026-10-30 (kullanıcı: «sol taraftaki menüyü de camsı yapabilelim ayarlarda»). */
+    kenar:   { anahtar:'lifeos.kenar.yuzey',   kok:'data-kenar',    vars:'buzlu', sira:['buzlu', 'cam'],       ad:{ buzlu:'Buzlu', cam:'Cam' } },
   });
   function secim(k){
     const x = SECIMLER[k];
@@ -173,6 +175,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'gorunum') return H('Tema', 'Sistem seçiliyken cihazın açık/koyu tercihi izlenir', o.tema)
       + H('Yazı tipi', 'Bütün modüllerde aynı', yaziSeciciHtml())
       + H('Cam yoğunluğu', 'Kartların ne kadar saydam olduğu', secimHtml('cam', 'Cam yoğunluğu'))
+      + H('Sol menü', 'Cam: arkadaki fotoğraf görünür', secimHtml('kenar', 'Sol menü'))
       + H('Kontrast', 'Yüksek: soluk yazılar koyulaşır, kartlar dolar', secimHtml('kontrast', 'Kontrast'))
       + H('Yüzey', 'Yalnız bu modül', cagir(L.ZEMIN, 'yuzeySeciciHtml'))
       + H('Varsayılana dön', 'Tema dışındaki görünüş tercihleri ilk hâline döner; verin değişmez',
@@ -288,8 +291,23 @@ window.LIFEOS = window.LIFEOS || {};
     if(!kok || typeof fetch !== 'function') return;
     if(!/^https?:$/.test(location.protocol)){ kok.innerHTML = planYok(); return; }
     fetch('/api/planlama', { cache:'no-store' }).then(r => r.ok ? r.json() : Promise.reject())
-      .then(v => { plan = v; planCiz(); })
-      .catch(() => { const k = planKok(); if(k) k.innerHTML = planYok(); });
+      .then(v => {
+        plan = planUyumla(v);
+        try{ planCiz(); }catch(e){ const k = planKok(); if(k) k.innerHTML = '<p class="ayarlar__bos">Plan okundu ama çizilemedi; sayfayı yenile.</p>'; }
+      }, () => { const k = planKok(); if(k) k.innerHTML = planYok(); });
+  }
+  /* Güncellemeden sonra sunucu yeniden başlatılmadıysa eski biçim gelir (açılışta
+     gunler + saat, işte tek gun; 2026-10-30'da bu yüzden «sunucu yok» yazıyordu).
+     Gösterilir ama kaydedilmez: eski sunucu yeni biçimi anlamaz. */
+  function planUyumla(v){
+    const p = v && v.plan;
+    if(!p) return v;
+    ['acilis', 'kapanis'].forEach(k => {
+      const x = p[k];
+      if(x && !Array.isArray(x.saatler)){ v.eski = true; x.saatler = [0, 1, 2, 3, 4, 5, 6].map(g => (x.gunler || []).indexOf(g) >= 0 ? x.saat : null); }
+    });
+    Object.keys(p.isler || {}).forEach(id => { const x = p.isler[id]; if(x && !Array.isArray(x.gunler)){ v.eski = true; x.gunler = [typeof x.gun === 'number' ? x.gun : 5]; } });
+    return v;
   }
   const planYok = () => '<p class="ayarlar__bos">Sistem planlaması LifeOS sunucusunun bu bilgisayarda açık olmasını ister; telefonda ve tek dosya sürümünde yoktur.</p>';
   /* Esnek plan (kullanıcı, 2026-10-30: «planlama çok eksik ve çok karmaşık;
@@ -360,7 +378,8 @@ window.LIFEOS = window.LIFEOS || {};
         + '<div class="plan__son">' + (son && son.zaman ? '<span class="' + (son.ok ? 'is-ok' : 'is-sorun') + '">' + (son.ok ? '✓ ' : '✕ ') + kac(saatAd(son.zaman)) + ' · ' + kac(son.mesaj || '') + '</span>' : '<span>Henüz yapılmadı</span>')
         + (plan.calisan.indexOf(x.id) >= 0 ? '<span>Çalışıyor…</span>' : '<button type="button" class="plan__simdi" data-plan-yap="' + x.id + '">Şimdi yap</button>') + '</div></div>';
     }).join('');
-    kok.innerHTML = bekleyen + cizgi()
+    kok.innerHTML = (plan.eski ? '<div class="plan__bekleyen" role="status"><b>LifeOS sunucusu eski sürümle çalışıyor</b><span>Güncelleme sunucu dosyalarını da değiştirdi; LifeOS’u kapatıp yeniden açınca plan kaydedilebilir.</span></div>' : '')
+      + bekleyen + cizgi()
       + '<h5 class="plan__alt">Açılış ve kapanış</h5>'
       + '<p class="plan__not">' + (plan.windows ? 'Açılışı Windows yapar (bilgisayar açık olmalı); kapanışı LifeOS kendisi. Boş gün: o gün yok.' : 'Kendiliğinden açılış yalnız Windows’ta.') + '</p>'
       + saatTablosu()
@@ -368,6 +387,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<p class="plan__mesaj" role="status">' + kac(planMesaj) + '</p>';
   }
   function planKaydet(){
+    if(plan.eski){ planMesaj = 'Kaydedilmedi: LifeOS sunucusu eski sürümle çalışıyor. LifeOS’u kapatıp yeniden aç.'; planCiz(); return; }
     clearTimeout(planZaman);
     planZaman = setTimeout(() => {
       fetch('/api/planlama', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-LifeOS':'planlama' }, body:JSON.stringify(plan.plan) })

@@ -378,6 +378,13 @@
       expect(A.hizAyarla('ajan', 'kapali')).toBe(true);
       expect(A.hizOrani('king')).toBe(0);
       expect(A.hizAyarla('dugme', 'cok-hizli')).toBe(false);
+      /* 2026-10-30: kaydırıcı; yüzde bir adım, 0..2, 1'e yakın 1'e yapışır */
+      expect(A.hizAyarla('dugme', .76)).toBe(true);
+      expect(A.hizlar().dugme).toBe(.76);
+      expect(A.hizAyarla('dugme', 0.987654)).toBe(true);
+      expect(A.hizlar().dugme).toBe(1);
+      expect(A.hizAyarla('dugme', 2.5)).toBe(false);
+      expect(A.hizAyarla('dugme', -0.1)).toBe(false);
       expect(A.TASINAN.indexOf('lifeos.hareket.hiz') >= 0).toBe(true);
     }));
     it('öğe alanını bulur: minik, panel, düğme', () => {
@@ -399,15 +406,20 @@
       const b = sahte(400); A.hizUygula(b, 'panel'); expect(b.durum).toBe('bitti');
       const c = sahte(Infinity); A.hizUygula(c, 'dugme'); expect(c.durum).toBe('iptal');
     }));
-    it('seçici: iki grup, alanları kapalı Ayrıntı içinde; basınca kaydedilir', () => ile(() => {
+    it('seçici: iki grup, alanları kapalı Ayrıntı içinde; kaydırınca kaydedilir, değer yazılır', () => ile(() => {
       const d = document.createElement('div'); d.innerHTML = A.hizSeciciHtml(); document.body.appendChild(d);
       try{
         const ayr = Array.from(d.querySelectorAll('details.anihiz__ayrinti')).map(x =>
           Array.from(x.querySelectorAll('.anihiz__satir')).map(r => r.querySelector('[data-anihiz]').getAttribute('data-anihiz')));
         expect(ayr).toEqual([['dugme', 'sayfa', 'panel', 'gosterge'], ['minik', 'king']]);
-        d.querySelector('[data-anihiz="ajan"][data-hiz="hizli"]').click();
-        expect(A.hizlar().ajan).toBe('hizli');
-        expect(d.querySelector('[data-anihiz="ajan"][data-hiz="hizli"]').getAttribute('aria-pressed')).toBe('true');
+        const c = d.querySelector('input[data-anihiz="ajan"]');
+        expect([c.min, c.max, c.step]).toEqual(['0', '2', '0.01']);
+        c.value = '0.76'; c.dispatchEvent(new Event('input', { bubbles:true }));
+        expect(A.hizlar().ajan).toBe(.76);
+        expect(d.querySelector('[data-anihiz-deger="ajan"]').textContent).toBe('0,76×');
+        expect(d.querySelector('[data-anihiz-oran="king"]').textContent).toBe('etkin 0,76×');
+        c.value = '0'; c.dispatchEvent(new Event('input', { bubbles:true }));
+        expect(d.querySelector('[data-anihiz-deger="ajan"]').textContent).toBe('Kapalı');
       }finally{ d.remove(); }
     }));
   });

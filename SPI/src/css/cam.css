@@ -1731,3 +1731,50 @@ html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .bolumcubugu--kabuk{ w
    düğmenin kendisi hap değil (§3'teki «.kisayol > button» camı burada geri alınır). */
 html[data-zemin="yumusak"] .giris .kisayol > button{ background:transparent; box-shadow:none; border-color:transparent; }
 html[data-zemin="yumusak"] .giris .kisayol__simge{ background:var(--cam); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), 0 6px 14px -9px rgba(20,24,40,.32); }
+
+/* 48) KAYDIRMA ÇUBUĞUNUN YOLU (kullanıcı, 2026-10-30, AYS ekran görüntüsü:
+   sağ kenarda ince açık şerit). Masaüstünde sayfanın kaydırma çubuğu kendi
+   yolunu açar; fotoğraf (body::before) yalnız görünür alanı kapladığı için
+   yolun altında kökün açık gri zemini kalıyordu. Kök zemin de aynı fotoğraf
+   ve perdeyi taşır (döşenir: yol fotoğrafın devamını gösterir); yol saydam,
+   tutamak ince cam. */
+html[data-zemin="yumusak"][data-manzara="acik"]{
+  background:var(--manzara-okuma), var(--manzara-sis), var(--manzara) center / cover repeat, linear-gradient(175deg, var(--zm-1), var(--zm-2));   /* fixed yok: kaydırmada yeniden boyama olmasın */
+  scrollbar-color:rgba(255,255,255,.55) transparent; }
+html[data-zemin="yumusak"][data-manzara="acik"]::-webkit-scrollbar-track{ background:transparent; }
+html[data-zemin="yumusak"][data-manzara="acik"]::-webkit-scrollbar-thumb{ border-radius:8px; border:2px solid transparent; background:rgba(255,255,255,.55) padding-box; }
+
+/* 49) FERAH YÜZEY FOTOĞRAFTA (kullanıcı, 2026-10-30: «bazı kartlar şeffafa
+   geçince iğrenç görünüyor, bazıları geçmiyor»). Ferah kartın dolgusunu
+   siler (zemin.css), §46 ise bulanıklık verir: dolgusuz bulanıklık koyu
+   fotoğrafta çamur gibi görünüyordu; küçük kartlar (pk) ise camda kalıyordu.
+   Fotoğraflı zeminde Ferah da aynı süt camdır: kenarsız, gölgesiz, ayırıcı
+   çizgi yok; iç içe kartta yalnız dıştaki boyanır. */
+html[data-zemin="yumusak"][data-manzara="acik"][data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card, .donen, .bugun__alan):not(html){
+  background:var(--cam) !important; border-radius:18px !important; border-top:0 !important; padding-left:var(--kp, 20px); padding-right:var(--kp, 20px); }
+html[data-zemin="yumusak"][data-manzara="acik"][data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card, .donen, .bugun__alan) :is(section.kutu, section.lrow, .card, .donen):not(html){
+  background:transparent !important; -webkit-backdrop-filter:none; backdrop-filter:none; padding-left:2px; padding-right:2px; }
+
+/* 50) SOL MENÜ CAM (kullanıcı, 2026-10-30: «sol taraftaki menüyü de camsı
+   yapabilelim ayarlarda»; Ayarlar › Görünüm › Sol menü). Buzlu (varsayılan)
+   dolu yaprak; Cam arkasını gösterir, yazı yine okunur (dolgu tabanı %40). */
+@media (min-width:680px){
+  html[data-zemin="yumusak"][data-kenar="cam"] .site--v5 > .kenar,
+  html[data-zemin="yumusak"][data-kenar="cam"] .site--v5 > .kenar:hover,
+  html[data-zemin="yumusak"][data-kenar="cam"] .site--v5 > .kenar:focus-within,
+  html[data-zemin="yumusak"][data-kenar="cam"] .site--v5 > .kenar.kenar--tutulu{
+    background:linear-gradient(160deg, rgba(255,255,255,.5), rgba(255,255,255,.36)) !important;
+    -webkit-backdrop-filter:blur(20px) saturate(140%) !important; backdrop-filter:blur(20px) saturate(140%) !important; }
+  html[data-zemin="yumusak"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar,
+  html[data-zemin="yumusak"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar:hover,
+  html[data-zemin="yumusak"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar:focus-within,
+  html[data-zemin="yumusak"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar.kenar--tutulu{
+    background:linear-gradient(160deg, rgba(26,28,38,.52), rgba(18,20,28,.4)) !important; }
+}
+@media (min-width:680px) and (prefers-color-scheme:dark){
+  html[data-zemin="yumusak"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar,
+  html[data-zemin="yumusak"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar:hover,
+  html[data-zemin="yumusak"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar:focus-within,
+  html[data-zemin="yumusak"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar.kenar--tutulu{
+    background:linear-gradient(160deg, rgba(26,28,38,.52), rgba(18,20,28,.4)) !important; }
+}

@@ -220,7 +220,7 @@
       const sekil = C.KISILER.filter(k => (k.aile || 'sekil') === 'sekil');
       expect(new Set(sekil.map(k => k.tip)).size).toBe(sekil.length);
       C.KISILER.forEach(k => {
-        expect(['yok', 'karin', 'cil', 'biyik', 'panda', 'penguen', 'tilki', 'baykus', 'damar', 'buz'].indexOf(k.desen) >= 0).toBe(true);
+        expect(['yok', 'karin', 'cil', 'kedi', 'kopek', 'ayi', 'tavsan', 'panda', 'penguen', 'tilki', 'kurbaga', 'baykus', 'damar', 'buz', 'parilti'].indexOf(k.desen) >= 0).toBe(true);
         expect(typeof C.HUY_AD[k.huy]).toBe('string');
       });
       ['karin', 'cil'].forEach(d => expect(C.KISILER.some(k => k.desen === d)).toBe(true));

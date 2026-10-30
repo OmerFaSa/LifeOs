@@ -243,7 +243,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -493,14 +493,23 @@ window.LIFEOS = window.LIFEOS || {};
      yürüyüşü) oranı `hizOrani` ile okur. Kip (Tam/Az/Sistem) üstte kalır:
      Az'da hareket zaten kısalmıştır. Tercih `lifeos.hareket.hiz`, taşınır. */
   const HIZ_ANAHTAR = 'lifeos.hareket.hiz';
-  /* Katsayı (kullanıcı, 2026-10-30: «hızı x'li değiştirebilelim; yavaş hızlı
-     dediğimizde değere göre yazsın»): düğme katsayıyı yazar, ipucu adını;
-     ayrıntı satırı grup × alanın etkin değerini gösterir. */
+  /* Kaydırıcı (kullanıcı, 2026-10-30: «hız bir çubuk olsun, üzerinde
+     kaydırarak seçelim; 0,75 de olabilir 0,76 da, göze hangisi hitap
+     ediyorsa»): her alan 0 ile 2 arasında yüzde bir adımla bir katsayıdır;
+     0 kapalıdır. Eski adlar (yavas, orta…) okunur ve katsayıya çevrilir.
+     Ayrıntı satırı grup × alanın etkin değerini gösterir. */
   const HIZLAR = Object.freeze(['kapali', 'yavas', 'orta', 'hizli', 'cok']);
   const HIZ_AD = Object.freeze({ kapali:'Kapalı', yavas:'0,5×', orta:'1×', hizli:'1,5×', cok:'2×' });
-  const HIZ_IP = Object.freeze({ kapali:'Kapalı', yavas:'Yavaş', orta:'Normal', hizli:'Hızlı', cok:'Çok hızlı' });
   const HIZ_ORAN = Object.freeze({ kapali:0, yavas:.5, orta:1, hizli:1.5, cok:2 });
+  const HIZ_EN = 2;
   const oranYaz = r => r === 0 ? 'kapalı' : String(Math.round(r * 100) / 100).replace('.', ',') + '×';
+  /* Sayı ya da eski ad -> 0..2 katsayı; tanınmayan null. 1'e çok yakın değer 1'e yapışır. */
+  function katsayi(v){
+    const n = typeof v === 'string' && v in HIZ_ORAN ? HIZ_ORAN[v] : typeof v === 'number' || (typeof v === 'string' && v.trim() !== '') ? Number(v) : NaN;
+    if(!isFinite(n) || n < 0 || n > HIZ_EN) return null;
+    const y = Math.round(n * 100) / 100;
+    return Math.abs(y - 1) <= .02 ? 1 : y;
+  }
   const HIZ_GRUP = Object.freeze({ dugme:'ui', sayfa:'ui', panel:'ui', gosterge:'ui', minik:'ajan', king:'ajan' });
   const HIZ_ADLAR = Object.freeze({ ui:'Arayüz', ajan:'Ajanlar', dugme:'Düğme ve dokunuş', sayfa:'Sayfa geçişi',
     panel:'Panel ve menü', gosterge:'Gösterge ve sayı', minik:'Minikler', king:'King' });
@@ -508,19 +517,20 @@ window.LIFEOS = window.LIFEOS || {};
     let v = null;
     try{ v = JSON.parse(localStorage.getItem(HIZ_ANAHTAR) || 'null'); }catch(e){ v = null; }
     const o = {};
-    Object.keys(HIZ_ADLAR).forEach(k => { o[k] = v && HIZLAR.indexOf(v[k]) >= 0 ? v[k] : 'orta'; });
+    Object.keys(HIZ_ADLAR).forEach(k => { const x = v ? katsayi(v[k]) : null; o[k] = x == null ? 1 : x; });
     return o;
   }
   function hizAyarla(alan, h){
-    if(!(alan in HIZ_ADLAR) || HIZLAR.indexOf(h) < 0) return false;
-    const o = hizlar(); o[alan] = h;
+    const x = katsayi(h);
+    if(!(alan in HIZ_ADLAR) || x == null) return false;
+    const o = hizlar(); o[alan] = x;
     try{ localStorage.setItem(HIZ_ANAHTAR, JSON.stringify(o)); }catch(e){ /* depo kapalı */ }
     return true;
   }
   /* Alanın etkin oranı: grup × alan (ikisinden biri kapalıysa 0). */
   function hizOrani(alan){
-    const o = hizlar(), g = HIZ_GRUP[alan] || (alan in HIZ_ORAN ? null : alan);
-    return (g ? HIZ_ORAN[o[g]] : 1) * (alan in HIZ_GRUP ? HIZ_ORAN[o[alan]] : 1);
+    const o = hizlar(), g = HIZ_GRUP[alan] || (alan in HIZ_ADLAR ? alan : null);
+    return Math.round((g ? o[g] : 1) * (alan in HIZ_GRUP ? o[alan] : 1) * 10000) / 10000;
   }
   /* Öğenin hangi alana düştüğü: önce ajanlar, sonra kabuk katmanları. */
   function hizAlani(el, ad){
@@ -562,10 +572,10 @@ window.LIFEOS = window.LIFEOS || {};
   }
   /* Ayarlar paneli: kip ve iki grup; her grubun alanları «Ayrıntı»da. */
   function hizSeg(alan){
-    const h = hizlar()[alan];
-    return '<div class="seg anihiz" role="group" aria-label="' + HIZ_ADLAR[alan] + ' hızı">' + HIZLAR.map(k =>
-      '<button type="button" class="' + (k === h ? 'is-on' : '') + '" data-anihiz="' + alan + '" data-hiz="' + k + '" aria-pressed="' + (k === h) + '"'
-      + ' title="' + HIZ_IP[k] + '" aria-label="' + HIZ_IP[k] + (k === 'kapali' ? '' : ' ' + HIZ_AD[k]) + '">' + HIZ_AD[k] + '</button>').join('') + '</div>';
+    const h = hizlar()[alan], ad = HIZ_ADLAR[alan];
+    return '<div class="anihiz"><input type="range" class="anihiz__cubuk" min="0" max="' + HIZ_EN + '" step="0.01" value="' + h + '"'
+      + ' data-anihiz="' + alan + '" aria-label="' + ad + ' hızı" aria-valuetext="' + oranYaz(h) + '" style="--dolu:' + (h / HIZ_EN * 100) + '%">'
+      + '<output class="anihiz__deger" data-anihiz-deger="' + alan + '">' + (h === 0 ? 'Kapalı' : oranYaz(h)) + '</output></div>';
   }
   function hizSeciciHtml(){
     const satir = alan => '<div class="anihiz__satir"><span class="anihiz__ad">' + HIZ_ADLAR[alan]
@@ -575,14 +585,16 @@ window.LIFEOS = window.LIFEOS || {};
     return '<div class="anihiz__kok">' + grup('ui') + grup('ajan') + '</div>';
   }
   if(typeof document !== 'undefined' && document.addEventListener){
-    document.addEventListener('click', e => {
-      const b = e.target && e.target.closest ? e.target.closest('[data-anihiz]') : null;
+    document.addEventListener('input', e => {
+      const b = e.target && e.target.matches && e.target.matches('input[data-anihiz]') ? e.target : null;
       if(!b) return;
       const alan = b.getAttribute('data-anihiz');
-      if(!hizAyarla(alan, b.getAttribute('data-hiz'))) return;
-      b.parentElement.querySelectorAll('[data-anihiz]').forEach(x => {
-        const on = x === b; x.classList.toggle('is-on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
+      if(!hizAyarla(alan, Number(b.value))) return;
+      const h = hizlar()[alan];
+      if(Number(b.value) !== h) b.value = String(h);              // 1'e yapışma
+      b.style.setProperty('--dolu', (h / HIZ_EN * 100) + '%');
+      b.setAttribute('aria-valuetext', oranYaz(h));
+      document.querySelectorAll('[data-anihiz-deger="' + alan + '"]').forEach(x => { x.textContent = h === 0 ? 'Kapalı' : oranYaz(h); });
       document.querySelectorAll('[data-anihiz-oran]').forEach(x => { x.textContent = 'etkin ' + oranYaz(hizOrani(x.getAttribute('data-anihiz-oran'))); });
     });
   }
@@ -593,7 +605,7 @@ window.LIFEOS = window.LIFEOS || {};
     ANAHTAR, KIPLER, TASINAN,
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
-    HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_GRUP, oranYaz, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,
+    HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,
     gecis, gecisVaris, gecisOnyukle, gecisBitir, logoAdresi, GECIS_CEREZ, GECIS_MS,
     _yonlendir:fn => { const eski = yonlendir; if(typeof fn === 'function') yonlendir = fn; return eski; },
   });
