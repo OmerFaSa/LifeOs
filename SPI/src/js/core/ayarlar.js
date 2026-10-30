@@ -121,6 +121,7 @@ window.LIFEOS = window.LIFEOS || {};
     { id:'zemin',    ad:'Arka plan',        grup:'Sistem' },
     { id:'ses',      ad:'Ses ve müzik',     grup:'Sistem' },
     { id:'hareket',  ad:'Animasyon',        grup:'Sistem' },
+    { id:'erisim',   ad:'Erişilebilirlik',  grup:'Sistem' },
     { id:'king',     ad:'King',             grup:'Sistem' },
     { id:'ekip',     ad:'Minikler',         grup:'Sistem' },
     { id:'bildirim', ad:'Bildirimler',      grup:'Sistem' },
@@ -147,12 +148,14 @@ window.LIFEOS = window.LIFEOS || {};
     modul:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 9h16"/></svg>',
     hesap:'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>',
   };
-  function kapsamHtml(grup){
+  /* Bölümün başı (2026-10-31: «daha kaliteli»): büyük başlık ve altında kapsam rozeti. */
+  function kapsamHtml(grup, ad){
     const m = MODUL_AD[modulAdi()] || 'Bu modül';
     const [tur, yazi] = grup === 'Sistem' ? ['sistem', 'Bütün sistemde geçerli: AYS, SPİ, ESP ve giriş sayfası']
       : grup === 'Bu modül' ? ['modul', 'Yalnız ' + m + '’de geçerli; öbür modüller değişmez']
       : ['hesap', 'Hesabın: bu bilgisayardaki LifeOS sunucusunda'];
-    return '<p class="ayarlar__kapsam ayarlar__kapsam--' + tur + '">' + SIMGE_KAPSAM[tur] + '<span>' + yazi + '</span></p>';
+    return '<header class="ayarlar__bolum-bas">' + (ad ? '<h3>' + kac(ad) + '</h3>' : '')
+      + '<p class="ayarlar__kapsam ayarlar__kapsam--' + tur + '">' + SIMGE_KAPSAM[tur] + '<span>' + yazi + '</span></p></header>';
   }
 
   /* SEÇİMLER: tek anahtarlı, kökte niteliği olan tercihler (biçimi cam.css §45).
@@ -176,6 +179,11 @@ window.LIFEOS = window.LIFEOS || {};
     /* Yazı boyutu (2026-10-30, yeni): bütün arayüz birlikte büyür ya da küçülür (ayarlar.css «boyut»). */
     boyut:   { anahtar:'lifeos.boyut',         kok:'data-boyut',    vars:'normal', sira:['kucuk', 'normal', 'buyuk', 'enbuyuk'], ad:{ kucuk:'Küçük', normal:'Normal', buyuk:'Büyük', enbuyuk:'En büyük' } },
     rozet:   { anahtar:'lifeos.rozet',         kok:'data-rozet',    vars:'acik',  sira:['acik', 'kapali'],     ad:{ acik:'Göster', kapali:'Gizle' } },
+    /* ERİŞİLEBİLİRLİK ve ORTAM (2026-10-31, kullanıcı: «ayarların özelliklerini çok arttır»). */
+    odak:    { anahtar:'lifeos.odak',          kok:'data-odak',     vars:'normal', sira:['normal', 'belirgin'], ad:{ normal:'Normal', belirgin:'Belirgin' } },
+    altcizgi:{ anahtar:'lifeos.altcizgi',      kok:'data-altcizgi', vars:'hayir', sira:['hayir', 'evet'],      ad:{ hayir:'Hayır', evet:'Evet' } },
+    satir:   { anahtar:'lifeos.satir',         kok:'data-satir',    vars:'normal', sira:['normal', 'genis'],   ad:{ normal:'Normal', genis:'Geniş' } },
+    isik:    { anahtar:'lifeos.isik',          kok:'data-isik',     vars:'acik',  sira:['acik', 'kapali'],     ad:{ acik:'Açık', kapali:'Kapalı' } },
     /* 2026-10-30 (kullanıcı: «sol taraftaki menüyü de camsı yapabilelim ayarlarda»). */
     kenar:   { anahtar:'lifeos.kenar.yuzey',   kok:'data-kenar',    vars:'buzlu', sira:['buzlu', 'cam'],       ad:{ buzlu:'Buzlu', cam:'Cam' } },
   });
@@ -227,7 +235,7 @@ window.LIFEOS = window.LIFEOS || {};
      profil oraya da uygulanır ve sayfa bir kez yenilenir. */
   const PROFIL_ANAHTAR = 'lifeos.profiller', ETKIN_ANAHTAR = 'lifeos.profil.etkin', GORDU_ANAHTAR = 'lifeos.profil.gordu', TEMA_BEKLE = 'lifeos.profil.tema';
   const PROFIL_EN = 8;
-  const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
+  const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
     'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.zemin.video', 'lifeos.zemin.onizle.sade',
     'lifeos.yuzey.ays', 'lifeos.yuzey.spi', 'lifeos.yuzey.esp',
     'lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.ses.duzey', 'lifeos.sessiz',
@@ -353,7 +361,8 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* «Görünümü varsayılana döndür»: yalnız görünüş tercihleri; veri değil. İki adım. */
   const SIFIRLANAN = Object.freeze(['lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik',
-    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.kenar.yuzey', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere']);
+    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.kenar.yuzey', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere',
+    'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik']);
 
   /* Arka plan önizlemesi zemin.js'te: seçim ve yüklemede kendini yeniler. */
   const onizleHtml = yuva => L.ZEMIN && L.ZEMIN.onizleHtml ? L.ZEMIN.onizleHtml(yuva) : '';
@@ -414,6 +423,13 @@ window.LIFEOS = window.LIFEOS || {};
     minik:SVG('M12 4a6 6 0 0 1 6 6v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6a6 6 0 0 1 6-6zM9.5 11h.01M14.5 11h.01'),
     kilit:SVG('M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3'),
     yuzey:SVG('M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z'),
+    indir:SVG('M12 4v11M7 10l5 5 5-5M5 20h14'),
+    goz:SVG('M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z'),
+    klavye:SVG('M3 6h18v12H3zM7 10h.01M11 10h.01M15 10h.01M7 14h10'),
+    profil:SVG('M5 6h14M5 12h14M5 18h9M18 16.5l1.5 1.5 3-3'),
+    ses:SVG('M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7'),
+    plan:SVG('M4 6h16v14H4zM4 10h16M9 3v4M15 3v4'),
+    bag:SVG('M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'),
     ekran:SVG('M4 5h16v11H4zM9 20h6M12 16v4'),
   };
   const SIMGE_SES = SVG('M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12');
@@ -421,7 +437,11 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* o = { tema:'<tema seçici HTML>', profil:{ ad, alt, route }, modul:[{ ad, route, not }] } */
   function icerik(id, o){
-    if(id === 'profil') return profilHtml();
+    if(id === 'profil') return profilHtml() + '<div class="skartlar" style="margin-top:14px">'
+      + kart(SIMGE.indir, 'Yedek', 'Bütün tercihlerin tek dosyada; başka bir bilgisayara ya da sonraya',
+        H('Dışa aktar', 'Görünüş, ses, King, profiller; verin girmez', '<button type="button" class="btn btn--sm" data-ayar-disa>Dosya indir</button>')
+        + H('İçe aktar', 'Dosyadaki tercihler uygulanır, sayfa yenilenir', '<label class="btn btn--sm btn--ghost">Dosya seç<input type="file" accept=".json,application/json" data-ayar-ice hidden></label>')
+        + '<p class="skart__durum" role="status" data-ayar-yedek-durum></p>') + '</div>';
     /* YERLİ YERİNDE (kullanıcı, 2026-10-30: «ayarlar karman çorman oldu; her şeyi yerli
        yerinde yap»): her bölüm Ses'teki gibi başlıklı kartlardan oluşur; bir kart
        tek bir konuyu toplar. */
@@ -434,7 +454,7 @@ window.LIFEOS = window.LIFEOS || {};
       + kart(SIMGE.renk, 'Renk ve cam', '', H('Vurgu rengi', 'Seçili düğme ve sekmeler', vurguHtml())
         + H('Cam yoğunluğu', 'Kartların ne kadar saydam olduğu', secimHtml('cam', 'Cam yoğunluğu'))
         + H('Sol menü', 'Cam: arkadaki fotoğraf görünür', secimHtml('kenar', 'Sol menü'))
-        + H('Kontrast', 'Yüksek: soluk yazılar koyulaşır', secimHtml('kontrast', 'Kontrast')))
+        + H('Ortam ışığı', 'İmlecin peşindeki hafif ışık', anahtarHtml('isik', 'Ortam ışığı')))
       + '<div class="ayarlar__dip"><button type="button" class="btn btn--sm btn--ghost" data-ayarlar-sifirla>Görünümü sıfırla</button><small>Verin değişmez</small></div>'
       + '</div>';
     if(id === 'zemin') return '<div class="skartlar">'
@@ -452,7 +472,12 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div>';
     if(id === 'bildirim'){
       const ss = L.SES && L.SES.sessiz ? L.SES.sessiz() : null;
-      return '<div class="skartlar">' + kart(SIMGE.zil, 'Bildirimler', '', (ss ? H('Sessiz saatler', 'Sesler ve King’in sesli okuması susar; radyo susmaz',
+      const sb = L.SES && L.SES.susturBitis ? L.SES.susturBitis() : 0;
+      const sustur = L.SES && L.SES.sustur ? H('Şimdi sustur', sb ? saatYazi(sb) + '’e kadar susturuldu' : 'Sesler ve King’in sesli okuması bir süre susar',
+        '<div class="seg" role="group" aria-label="Şimdi sustur">' + [['60', '1 saat'], ['sabah', 'Sabaha kadar'], ['0', 'Kapalı']].map(([v, ad]) => {
+          const on = v === '0' ? !sb : false;
+          return '<button type="button" class="' + (on ? 'is-on' : '') + '" aria-pressed="' + on + '" data-sustur="' + v + '">' + ad + '</button>'; }).join('') + '</div>') : '';
+      return '<div class="skartlar">' + kart(SIMGE.zil, 'Bildirimler', '', sustur + (ss ? H('Sessiz saatler', 'Sesler ve King’in sesli okuması susar; radyo susmaz',
           '<div class="sessiz">' + '<button type="button" class="plan__anahtar' + (ss.acik ? ' is-on' : '') + '" role="switch" aria-checked="' + ss.acik + '" data-sessiz-ac>'
           + '<i aria-hidden="true"></i><span class="sr-only">' + (ss.acik ? 'Açık' : 'Kapalı') + '</span></button>'
           + '<input type="time" class="plan__saat" data-sessiz="bas" value="' + kac(ss.bas) + '" aria-label="Başlangıç">'
@@ -461,6 +486,15 @@ window.LIFEOS = window.LIFEOS || {};
     }
     if(id === 'hareket') return '<div class="skartlar">' + kart(SIMGE.hareket, 'Animasyon', 'Az: yalnız gerekli geçişler',
       H('Animasyonlar', '', cagir(L.ANIMASYON, 'seciciHtml')) + G('Hız', 'Arayüz ve ajanlar ayrı; Ayrıntı içindekileri tek tek', cagir(L.ANIMASYON, 'hizSeciciHtml'))) + '</div>';
+    /* ERİŞİLEBİLİRLİK (2026-10-31): okumayı ve gezinmeyi kolaylaştıran ayarlar tek yerde. */
+    if(id === 'erisim') return '<div class="skartlar">'
+      + kart(SIMGE.goz, 'Okuma', 'Yazı ve renk', G('Yazı boyutu', 'İçerik birlikte büyür', secimHtml('boyut', 'Yazı boyutu'))
+        + H('Satır aralığı', 'Geniş: paragraflar daha rahat okunur', secimHtml('satir', 'Satır aralığı'))
+        + H('Kontrast', 'Yüksek: soluk yazılar koyulaşır, kartlar dolar', secimHtml('kontrast', 'Kontrast')))
+      + kart(SIMGE.klavye, 'Gezinme', 'Klavye ve bağlantılar', H('Odak çerçevesi', 'Klavyeyle gezerken seçili öğe kalın çerçeveyle', secimHtml('odak', 'Odak çerçevesi'))
+        + H('Bağlantıların altı çizili', 'Bağlantılar renk dışında da ayırt edilir', secimHtml('altcizgi', 'Bağlantıların altı çizili')))
+      + kart(SIMGE.hareket, 'Hareket', '', H('Animasyonlar', 'Az: kayma yok, yalnız solma', cagir(L.ANIMASYON, 'seciciHtml')))
+      + '</div>';
     /* Ses (kullanıcı, 2026-10-30: «ses kısmında bayağı eksiklik, amatörlük ve tasarımda kötülük var»):
        kartlar; düzeyler, müzik kitaplığı, açılış, arka plan müziği, arka plan videosu. */
     if(id === 'ses') return '<div class="skartlar">'
@@ -503,12 +537,14 @@ window.LIFEOS = window.LIFEOS || {};
     if(!BOLUMLER.some(b => b.id === secili)) secili = 'gorunum';
     if(secili === 'sistem' && typeof setTimeout === 'function') setTimeout(() => planYukle(), 0);
     const alan = alanOf(secili);
+    const NAV_SIMGE = { profil:SIMGE.profil, gorunum:SIMGE.tema, zemin:SIMGE.resim, ses:SIMGE.ses, hareket:SIMGE.hareket, erisim:SIMGE.goz, king:SIMGE.king,
+      ekip:SIMGE.minik, bildirim:SIMGE.zil, sistem:SIMGE.plan, modul:SIMGE.yuzey, hesap:SIMGE.kilit, baglanti:SIMGE.bag };
     const nav = BOLUMLER.map(b => '<button type="button" class="ayarlar__sekme' + (b.id === secili ? ' is-on' : '') + '" role="tab"' + (b.grup === alan ? '' : ' hidden')
       + ' id="ayarlar-sekme-' + b.id + '" aria-selected="' + (b.id === secili) + '" aria-controls="ayarlar-bolum-' + b.id + '"'
-      + ' data-ayar-bolum="' + b.id + '">' + kac(b.ad) + '</button>').join('');
+      + ' data-ayar-bolum="' + b.id + '">' + (NAV_SIMGE[b.id] || '') + kac(b.ad) + '</button>').join('');
     const govde = BOLUMLER.map(b => '<section class="ayarlar__bolum" role="tabpanel" id="ayarlar-bolum-' + b.id + '" data-baslik="' + kac(b.ad) + '"'
       + ' aria-labelledby="ayarlar-sekme-' + b.id + '"' + (b.id === secili ? '' : ' hidden') + '>'
-      + kapsamHtml(b.grup) + icerik(b.id, o) + '</section>').join('');
+      + kapsamHtml(b.grup, b.ad) + icerik(b.id, o) + '</section>').join('');
     return '<div class="katman kmenu kmenu--yan ayarlar" role="dialog" aria-label="Ayarlar">'
       + '<header class="ayarlar__bas"><b>Ayarlar</b>'
       + '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Ayarları kapat">'
@@ -519,6 +555,54 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="ayarlar__icerik">' + govde + '</div></div></div>';
   }
 
+  const saatYazi = t => { try{ return new Date(t).toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }); }catch(e){ return ''; } };
+  /* Bir bölümü yerinde yeniden çizer (kaydırma yerinde kalır). */
+  function bolumYenile(panel, id){
+    const sec = panel && panel.querySelector('#ayarlar-bolum-' + id);
+    if(!sec) return;
+    const b = BOLUMLER.find(x => x.id === id), ic = panel.querySelector('.ayarlar__icerik'), y = ic ? ic.scrollTop : 0;
+    sec.innerHTML = kapsamHtml(b.grup, b.ad) + icerik(id, {});
+    if(ic) ic.scrollTop = y;
+  }
+  /* YEDEK (2026-10-31): tercihleri dosyaya yazar / dosyadan okur. Yalnız ortak tercih
+     anahtarları (animasyon.js ORTAK; sistem/ayar.py ile aynı); veri, hesap ve kilit girmez. */
+  function yedekDurum(m){ if(typeof document !== 'undefined') document.querySelectorAll('[data-ayar-yedek-durum]').forEach(x => { x.textContent = m; }); }
+  function ayarAnlik(){
+    const R = L.ANIMASYON && L.ANIMASYON.ORTAK, o = {};
+    try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(R && R.test(k)) o[k] = localStorage.getItem(k); } }catch(e){ /* depo kapalı */ }
+    return o;
+  }
+  function ayarDisa(){
+    try{
+      const veri = JSON.stringify({ lifeos:'ayarlar', surum:1, tarih:new Date().toISOString(), ayar:ayarAnlik() }, null, 2);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([veri], { type:'application/json' }));
+      a.download = 'lifeos-ayarlar-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+      yedekDurum('İndirildi: ' + Object.keys(JSON.parse(veri).ayar).length + ' tercih.');
+    }catch(e){ yedekDurum('İndirilemedi.'); }
+  }
+  /* Döner: uygulanan anahtar sayısı (dosya bozuksa 0, hiçbir şey değişmez). */
+  function ayarUygula(metin){
+    let v = null;
+    try{ v = JSON.parse(metin); }catch(e){ return 0; }
+    const R = L.ANIMASYON && L.ANIMASYON.ORTAK;
+    if(!v || v.lifeos !== 'ayarlar' || !v.ayar || typeof v.ayar !== 'object' || !R) return 0;
+    let n = 0;
+    Object.keys(v.ayar).forEach(k => { const x = v.ayar[k];
+      if(R.test(k) && typeof x === 'string' && x.length <= (k === 'lifeos.profiller' ? 60000 : 4000)){ depoKoy(k, x); n++; } });
+    return n;
+  }
+  function ayarIce(dosya){
+    if(!dosya || !dosya.text) return;
+    dosya.text().then(m => {
+      const n = ayarUygula(m);
+      if(!n){ yedekDurum('Bu dosya bir LifeOS ayar yedeği değil.'); return; }
+      yedekDurum(n + ' tercih uygulandı; sayfa yenileniyor…');
+      setTimeout(() => { try{ location.reload(); }catch(e){ /* yok */ } }, 600);
+    }).catch(() => yedekDurum('Dosya okunamadı.'));
+  }
   function sessizYaz(degisen){
     if(!(L.SES && L.SES.sessiz)) return;
     const v = Object.assign(L.SES.sessiz(), degisen);
@@ -543,6 +627,10 @@ window.LIFEOS = window.LIFEOS || {};
   }
   function sekmeSec(panel, id){
     if(!panel || !BOLUMLER.some(b => b.id === id)) return;
+    /* Yeni bölüm en üstten açılır (2026-10-31: «ayarlarda kaydırma bazen buga giriyor»:
+       bölüm değişince öncekinin kaydırma yerinde, ortadan açılıyordu). */
+    const ic = panel.querySelector('.ayarlar__icerik');
+    if(ic && secili !== id) ic.scrollTop = 0;
     secili = id;
     panel.querySelectorAll('[data-ayar-bolum]').forEach(b => {
       const on = b.getAttribute('data-ayar-bolum') === id;
@@ -742,6 +830,15 @@ window.LIFEOS = window.LIFEOS || {};
         try{ location.reload(); }catch(e){}
         return;
       }
+      const su = t.closest('[data-sustur]');
+      if(su && L.SES && L.SES.sustur){
+        const v = su.getAttribute('data-sustur'), d = new Date();
+        if(v === 'sabah'){ const s = new Date(d); s.setDate(d.getDate() + (d.getHours() >= 7 ? 1 : 0)); s.setHours(7, 0, 0, 0); L.SES.sustur(s.getTime()); }
+        else L.SES.sustur(v === '0' ? 0 : d.getTime() + Number(v) * 60000);
+        bolumYenile(su.closest('.ayarlar'), 'bildirim');
+        return;
+      }
+      if(t.closest('[data-ayar-disa]')){ ayarDisa(); return; }
       const an = t.closest('[data-anahtar]');
       if(an){
         const k = an.getAttribute('data-anahtar'), x = SECIMLER[k];
@@ -797,6 +894,7 @@ window.LIFEOS = window.LIFEOS || {};
     document.addEventListener('change', e => {
       if(!(e.target && e.target.matches)) return;
       if(e.target.matches('[data-sessiz]') && /^\d\d:\d\d$/.test(e.target.value)) sessizYaz({ [e.target.getAttribute('data-sessiz')]:e.target.value });
+      else if(e.target.matches('[data-ayar-ice]') && e.target.files && e.target.files[0]){ ayarIce(e.target.files[0]); e.target.value = ''; }
       else if(e.target.matches('[data-king-ad]')){
         const v = String(e.target.value || '').replace(/[<>"]/g, '').trim().slice(0, 20);
         try{ if(v) localStorage.setItem('lifeos.king.ad', v); else localStorage.removeItem('lifeos.king.ad'); }catch(x){ /* depo kapalı */ }
@@ -829,5 +927,6 @@ window.LIFEOS = window.LIFEOS || {};
 
   L.AYARLAR = Object.freeze({ html, BOLUMLER, YAZILAR, yazi, yaziAyarla, yaziYukle, HESAP_SAYFALARI, BAGLANTI_SAYFALARI, ODEME_ANAHTAR, odemeAcik, odemeAyarla,
     SECIMLER, secim, secimAyarla, SIFIRLANAN, ara, _sec:id => { secili = id; },
+    ayarAnlik, ayarUygula,
     PROFIL_ANAHTAR, ETKIN_ANAHTAR, GORDU_ANAHTAR, TEMA_BEKLE, PROFIL_KAPSAR, PROFIL_EN, profiller, etkinProfil, profilKaydet, profilUygula, profilSil, profilEsitle, profilHtml });
 })();

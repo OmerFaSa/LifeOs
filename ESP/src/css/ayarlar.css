@@ -473,3 +473,26 @@ html[data-vurgu]:not([data-vurgu="modul"]){ --vurgu-ink:color-mix(in oklab, var(
 .skart .ayarlar__satir--genis .ayarlar__deger{ flex:none !important; width:100%; }
 .skart .ayarlar__satir--genis .seg{ width:100%; }
 .skart .ayarlar__satir--genis .seg button{ flex:1 1 0; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+/* KALİTE TURU (2026-10-31, kullanıcı: «ayarlarda kaydırma bazen buga giriyor; daha kaliteli yap,
+   özellikleri çok arttır»). Kaydırma yalnız içerikte kalır (sonuna gelince arkadaki sayfa kaymaz);
+   sekmelerde simge; her bölümün başında büyük başlık ve kapsam rozeti; bölüm yumuşakça belirir. */
+.ayarlar__icerik, .ayarlar__nav{ overscroll-behavior:contain; scroll-behavior:auto; }
+.ayarlar__icerik{ scrollbar-gutter:stable; }
+.ayarlar__sekme{ gap:10px; }
+.ayarlar__sekme svg{ flex:none; width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; opacity:.8; }
+.ayarlar__sekme.is-on svg{ opacity:1; }
+.ayarlar__bolum-bas{ display:grid; gap:8px; margin:4px 0 16px; }
+.ayarlar__bolum-bas h3{ margin:0; font-size:20px; font-weight:650; letter-spacing:-.015em; color:var(--text); }
+.ayarlar__bolum-bas .ayarlar__kapsam{ justify-self:start; margin:0; padding:5px 10px; border-radius:999px; font-size:12px; }
+@media (prefers-reduced-motion:no-preference){
+  .ayarlar__bolum:not([hidden]){ animation:ayar-bolum .22s cubic-bezier(.2,.8,.2,1); }
+  @keyframes ayar-bolum{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
+}
+@media (max-width:679px){ .ayarlar__sekme svg{ display:none; } .ayarlar__bolum-bas h3{ font-size:18px; } }
+/* ERİŞİLEBİLİRLİK (Ayarlar › Erişilebilirlik). */
+html[data-odak="belirgin"] :focus-visible{ outline:3px solid var(--vurgu, var(--mod, var(--primary))) !important; outline-offset:2px !important;
+  box-shadow:0 0 0 6px color-mix(in oklab, var(--vurgu, var(--mod, var(--primary))) 22%, transparent) !important; }
+html[data-altcizgi="evet"] .site__body a:not(.btn):not([class*="kart"]), html[data-altcizgi="evet"] .linkbtn{ text-decoration:underline !important; text-underline-offset:3px; }
+html[data-satir="genis"] .site__body p, html[data-satir="genis"] .site__body li{ line-height:1.75; }
+/* Ortam ışığı kapalı. */
+html[data-isik="kapali"] .ortam-isik{ display:none !important; }

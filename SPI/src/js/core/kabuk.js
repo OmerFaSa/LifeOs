@@ -1065,9 +1065,19 @@ window.LIFEOS = window.LIFEOS || {};
     kap.innerHTML = String(htmlMetin);
     const yeni = kap.firstElementChild;
     yeni.id = id;
-    yeni.style.left = el.style.left; yeni.style.top = el.style.top;
+    /* Bütün satır içi ölçüler taşınır (capaYerlestir: left, right, top, bottom). Eskiden
+       yalnız left/top kopyalanıyordu: yan çekmecenin «bottom»u düşünce Ayarlar ekrandan
+       uzadı, içerik kaydırılamadı (2026-10-31, «kaydırma bazen buga giriyor»). */
+    yeni.style.cssText = el.style.cssText;
     if(el.classList.contains('is-alttan')) yeni.classList.add('is-alttan');
+    /* Yeniden çizim kaydırmayı başa atmaz, açılış animasyonunu yeniden oynatmaz
+       (2026-10-31, kullanıcı: «ayarlarda kaydırma bazen buga giriyor»: tema
+       değişince Ayarlar baştan çiziliyordu). Kaydırılmış öğeler sınıf adıyla eşlenir. */
+    const kayan = Array.from(el.querySelectorAll('*')).filter(x => x.scrollTop > 0 && typeof x.className === 'string' && x.className)
+      .map(x => [x.className.split(' ')[0], x.scrollTop]);
+    yeni.style.animation = 'none';
     el.replaceWith(yeni);
+    kayan.forEach(([sinif, y]) => { const x = yeni.querySelector('.' + sinif); if(x) x.scrollTop = y; });
     return true;
   }
 

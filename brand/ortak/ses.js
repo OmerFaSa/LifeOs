@@ -592,7 +592,20 @@ window.LIFEOS = window.LIFEOS || {};
     const saat = x => typeof x === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(x);
     return { acik:!!(v && v.acik), bas:v && saat(v.bas) ? v.bas : '22:00', bit:v && saat(v.bit) ? v.bit : '07:00' };
   }
+  /* ŞİMDİ SUSTUR (2026-10-31, Ayarlar › Bildirimler): bir an seçilir, o ana kadar
+     sessiz saatler gibi davranılır. 0 = kapalı. Geçmiş an kendiliğinden düşer. */
+  const SUSTUR_ANAHTAR = 'lifeos.sessiz.bitis';
+  function susturBitis(){
+    let v = 0;
+    try{ v = Number(localStorage.getItem(SUSTUR_ANAHTAR)) || 0; }catch(e){ v = 0; }
+    return v > Date.now() ? v : 0;
+  }
+  function sustur(bitis){
+    try{ if(bitis > Date.now()) localStorage.setItem(SUSTUR_ANAHTAR, String(Math.round(bitis))); else localStorage.removeItem(SUSTUR_ANAHTAR); }catch(e){ /* depo kapalı */ }
+    return susturBitis();
+  }
   function sessizMi(tarih){
+    if(!tarih && susturBitis()) return true;
     const s = sessiz();
     if(!s.acik) return false;
     const d = tarih || new Date(), dk = d.getHours() * 60 + d.getMinutes();
@@ -1076,7 +1089,7 @@ window.LIFEOS = window.LIFEOS || {};
     tercih:() => JSON.parse(JSON.stringify(tercih)),
     durum, dugme, panelHtml,
     cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret, SESLER, KAYITLI,
-    AILE, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml, SESSIZ_ANAHTAR, sessiz, sessizMi,
+    AILE, DUZEY_ANAHTAR, KAYIT_TAVAN, duzey, duzeyAyarla, duzeyler, duzeySeciciHtml, SESSIZ_ANAHTAR, sessiz, sessizMi, SUSTUR_ANAHTAR, sustur, susturBitis,
     chime:ad => tik(/bitti|kapa|dur/i.test(String(ad || '')) ? 'kapa' : 'ac'),
     _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik, _onKur:onKur,
   });

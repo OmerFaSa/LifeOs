@@ -31,14 +31,14 @@
       const d = koy();
       try{
         const sek = Array.from(d.querySelectorAll('[data-ayar-bolum]'));
-        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Ses ve müzik', 'Animasyon', 'King', 'Minikler', 'Bildirimler', 'Planlama',
+        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Ses ve müzik', 'Animasyon', 'Erişilebilirlik', 'King', 'Minikler', 'Bildirimler', 'Planlama',
           'Modül ayarları', 'Güvenlik', 'Bağlantılar']);
         /* Üç alan üstte: Sistem (her yerde), modülün kendisi (yalnız burada), Hesap; solda yalnız seçili alanın bölümleri
            (2026-10-30: «sistem ile yalnız o modül arasındaki ayrımı daha güzel yap»). */
         const alanlar = Array.from(d.querySelectorAll('[data-ayar-alan]'));
         expect(alanlar.map(a => a.getAttribute('data-ayar-alan'))).toEqual(['Sistem', 'Bu modül', 'Hesap']);
         expect(alanlar[0].getAttribute('aria-pressed')).toBe('true');
-        expect(sek.filter(s => !s.hidden).length).toBe(9);
+        expect(sek.filter(s => !s.hidden).length).toBe(10);
         alanlar[1].click();
         expect(sek.filter(s => !s.hidden).map(s => s.textContent)).toEqual(['Modül ayarları']);
         expect(alanlar[1].getAttribute('aria-pressed')).toBe('true');
@@ -322,6 +322,60 @@
         anahtarlar.forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); });
         ['buzluKart', 'buzluMenu', 'buzluPencere'].forEach(k => A.secimAyarla(k, A.secim(k)));
       }
+    });
+    /* 2026-10-31 (kullanıcı: «ayarlarda kaydırma bazen buga giriyor; özellikleri çok arttır»). */
+    it('yedek: yalnız ortak tercihler dışa çıkar; içe aktarma yalnız LifeOS yedeğini ve tercih anahtarlarını kabul eder', () => {
+      const anahtarlar = ['lifeos.cam', 'lifeos.kilit.odeme', 'lifeos.odak'], once = anahtarlar.map(k => localStorage.getItem(k));
+      try{
+        localStorage.setItem('lifeos.cam', 'cok'); localStorage.setItem('lifeos.kilit.odeme', 'acik');
+        const a = A.ayarAnlik();
+        expect(a['lifeos.cam']).toBe('cok');
+        expect('lifeos.kilit.odeme' in a).toBe(false);
+        expect(A.ayarUygula('bozuk')).toBe(0);
+        expect(A.ayarUygula(JSON.stringify({ ayar:{ 'lifeos.odak':'belirgin' } }))).toBe(0);           // imzasız dosya
+        expect(A.ayarUygula(JSON.stringify({ lifeos:'ayarlar', ayar:{ 'lifeos.odak':'belirgin', 'lifeos.kilit.odeme':'kapali', 'lifeos.cam':7 } }))).toBe(1);
+        expect(localStorage.getItem('lifeos.odak')).toBe('belirgin');
+        expect(localStorage.getItem('lifeos.kilit.odeme')).toBe('acik');                               // kilit yedekten değişmez
+      }finally{ anahtarlar.forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); }); }
+    });
+    it('şimdi sustur: seçilen ana kadar sessiz, geçmiş an düşer', () => {
+      const S = window.LIFEOS.SES;
+      if(!S || !S.sustur) return;
+      const once = localStorage.getItem(S.SUSTUR_ANAHTAR);
+      try{
+        S.sustur(Date.now() + 60000);
+        expect(S.susturBitis() > Date.now()).toBe(true);
+        expect(S.sessizMi()).toBe(true);
+        S.sustur(0);
+        expect(S.susturBitis()).toBe(0);
+        localStorage.setItem(S.SUSTUR_ANAHTAR, String(Date.now() - 1000));
+        expect(S.susturBitis()).toBe(0);
+      }finally{ if(once == null) localStorage.removeItem(S.SUSTUR_ANAHTAR); else localStorage.setItem(S.SUSTUR_ANAHTAR, once); }
+    });
+    it('katman yeniden çizilince kaydırma yeri korunur ve açılış animasyonu yeniden oynamaz', () => {
+      const K = window.LIFEOS.KABUK;
+      if(!K || !K.katmanTazele) return;
+      const ic = '<div class="tst-kat"><div class="tst-kay" style="height:40px;overflow:auto"><div style="height:400px"></div></div></div>';
+      const d = document.createElement('div'); d.innerHTML = ic; const el = d.firstElementChild; el.id = 'tst-kat'; document.body.appendChild(el);
+      try{
+        el.style.top = '12px'; el.style.bottom = '12px';                                     // yan çekmecenin ölçüleri (capaYerlestir)
+        el.querySelector('.tst-kay').scrollTop = 120;
+        expect(K.katmanTazele('tst-kat', ic)).toBe(true);
+        const yeni = document.getElementById('tst-kat');
+        expect(yeni.querySelector('.tst-kay').scrollTop).toBe(120);
+        expect(yeni.style.animation.indexOf('none') >= 0).toBe(true);
+        expect(yeni.style.bottom).toBe('12px');                                               // eskiden düşüyordu: Ayarlar kaydırılamıyordu
+      }finally{ const x = document.getElementById('tst-kat'); if(x) x.remove(); }
+    });
+    it('erişilebilirlik bölümü: satır aralığı, odak çerçevesi, altı çizili bağlantılar köke yazılır', () => {
+      ['satir', 'odak', 'altcizgi'].forEach(k => {
+        const x = A.SECIMLER[k], once = localStorage.getItem(x.anahtar);
+        try{
+          expect(A.secimAyarla(k, x.sira[1])).toBe(true);
+          expect(document.documentElement.getAttribute(x.kok)).toBe(x.sira[1]);
+          expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(x.anahtar) >= 0).toBe(true);
+        }finally{ if(once == null) localStorage.removeItem(x.anahtar); else localStorage.setItem(x.anahtar, once); A.secimAyarla(k, A.secim(k)); }
+      });
     });
     it('hesap sunucusu yokken düğme yok, durum söylenir', () => {
       const d = koy();
