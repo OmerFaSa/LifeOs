@@ -2516,7 +2516,8 @@ window.LIFEOS.KING = (function(){
     const gorunur = listeGorunur(), is = isDurum && isDurum.acik > 0 ? Number(isDurum.acik) : 0;
     const dugme = (eylem, ad, svg, secili, ek, nokta) => '<button type="button" class="king__ray-is' + (secili ? ' is-secili' : '') + '" data-king="' + eylem + '"'
       + ' aria-label="' + kac(ad) + '" data-ipucu="' + kac(ad) + '"' + (secili ? ' aria-current="true"' : '') + (ek || '') + '>'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true">' + svg + '</svg>' + (nokta ? '<i class="king__ray-nokta" aria-hidden="true"></i>' : '') + '</button>';
+      + '<svg viewBox="0 0 24 24" aria-hidden="true">' + svg + '</svg><span class="king__ray-ad" aria-hidden="true">' + kac(String(ad).split(' · ')[0]) + '</span>'
+      + (nokta ? '<i class="king__ray-nokta" aria-hidden="true"></i>' : '') + '</button>';
     return '<nav class="king__ray" aria-label="King bölümleri">'
       + BOLUMLER.map(b => dugme('bolum:' + b.id, b.ad + (b.id === 'gorev' && is ? ' · ' + is + ' iş çalışıyor' : ''), b.svg,
         menu !== 'menu' && (gorunur || (bolum === 'araclar' || bolum === 'kutuphane') ? bolum === b.id : b.id === 'sohbet'), '', b.id === 'gorev' && is)).join('')
