@@ -66,7 +66,9 @@ async function measure(p){
     const zemin = el => {
       for(let e = el; e; e = e.parentElement){
         const st = getComputedStyle(e);
-        if(st.backgroundImage && st.backgroundImage !== 'none') return null;
+        /* Kök: cam.css §48 fotoğrafı kaydırma çubuğunun yolu için köke de koyar;
+           aynı fotoğraf body::before'da da vardı ve ölçülmüyordu. Kökün rengi sayılır. */
+        if(e !== document.documentElement && st.backgroundImage && st.backgroundImage !== 'none') return null;
         const d = pxa(st.backgroundColor);
         if(d[3] > 250) return [d[0], d[1], d[2]];
       }

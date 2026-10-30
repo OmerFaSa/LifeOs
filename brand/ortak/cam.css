@@ -1737,6 +1737,7 @@ html[data-zemin="yumusak"] .giris .kisayol__simge{ background:var(--cam); box-sh
    tutamak ince cam. */
 html[data-zemin="yumusak"][data-manzara="acik"]{
   background:var(--manzara-okuma), var(--manzara-sis), var(--manzara) center / cover repeat, linear-gradient(175deg, var(--zm-1), var(--zm-2));   /* fixed yok: kaydırmada yeniden boyama olmasın */
+  background-color:var(--bg);   /* kısaltma rengi siliyordu: düz zemin rengi yerinde kalır (kontrast ölçümü ona bakar) */
   scrollbar-color:rgba(255,255,255,.55) transparent; }
 html[data-zemin="yumusak"][data-manzara="acik"]::-webkit-scrollbar-track{ background:transparent; }
 html[data-zemin="yumusak"][data-manzara="acik"]::-webkit-scrollbar-thumb{ border-radius:8px; border:2px solid transparent; background:rgba(255,255,255,.55) padding-box; }
