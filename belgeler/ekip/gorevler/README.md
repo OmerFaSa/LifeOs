@@ -60,6 +60,8 @@ python tools/ajan.py baslat 001 --efor yuksek   efor dosyayı ezer; --yeni yeni 
 python tools/ajan.py sor "…"                    Araştırmacı (varsayılan efor düşük)
 python tools/ajan.py gozden 004                 Denetçi (kanca teslimde kendisi çağırır)
 python tools/ajan.py durum                      ekip ve açık işler
+python tools/ajan.py bekle [ad …]               hazır olana dek bekler (arka planda koş; tek bildirim)
+python tools/ajan.py rapor 004                  inceleme paketi: Sonuç, Denetçi, diff tek çıktıda
 python tools/ajan.py cevap 004                  bu işin son cevabı
 python tools/ajan.py mesaj 004 "…"              işe ek talimat (aynı sohbet)
 python tools/ajan.py kapat 004                  klasörü kaldırır, dal kalır

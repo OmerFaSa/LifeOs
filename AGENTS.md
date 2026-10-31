@@ -217,6 +217,8 @@ portları `47n1–47n3`), Denetçi (teslim edilen dalı önce inceler), Araştı
 Efor modeli seçer (düşük `flash_lite`, orta `flash`, yüksek `pro`). Koruma
 kancası (`tools/ajan_kanca.py`) ajanı klasörüne ve izinli araçlara bağlar.
 Ayrıntı ve izleme: `belgeler/ekip/gorevler/README.md`, Görev Takibi.
+**Claude Code: ofisi kullanmadan önce `belgeler/ekip/OFIS.md`'yi oku** (tek
+sayfa: ne ofise gider, en az çağrılı akış, kalite kuralları, tuzaklar).
 
 - `main`'e doğrudan push **yalnız** depo sahibinin oturumundan yapılır.
 - **Çalışan kopyada geliştirme yapılmaz.** Masaüstü uygulaması (LifeOS.exe)

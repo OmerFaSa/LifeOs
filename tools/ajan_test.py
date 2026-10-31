@@ -221,6 +221,17 @@ with tempfile.TemporaryDirectory() as t:
     if len(u) != 1 or u[0]["isler"] != ["s-1", "s-2"] or u[0]["is"] != "s-2" or u[0]["token"] != {"giris": 11, "cikis": 22, "onbellek": 33}:
         hata.append("uyeler: %r" % u)
 
+    # bekle: gorev Denetci bitmeden hazir sayilmaz; soru cevapla hazir
+    simdi = time.time()
+    g = {"ad": "007", "tur": "gorev", "asama": "inceleme", "denetim": "d-007", "canli": {"son_degisim": simdi}}
+    for dn_asama, beklenen in (("çalışıyor", False), ("inceleme", True)):
+        if A.hazir_mi(g, {"d-007": {"asama": dn_asama}}, simdi)[0] != beklenen:
+            hata.append("hazir_mi denetci %s -> %s olmali" % (dn_asama, beklenen))
+    if A.hazir_mi(dict(g, denetim="istendi"), {}, simdi)[0] or not A.hazir_mi(dict(g, denetim=None), {}, simdi + 600)[0]:
+        hata.append("istenen denetci beklenmeli; hic gelmeyen 3 dakikadan sonra beklenmemeli")
+    if A.hazir_mi({"tur": "gorev", "asama": "çalışıyor"}, {})[0] or not A.hazir_mi({"tur": "soru", "asama": "inceleme"}, {})[0]:
+        hata.append("calisan is hazir degil, cevaplanan soru hazir")
+
     # kanca: ayni konusmada en son is verilen isin klasoru gecerli; teslimde Denetci kendiliginden
     A.yaz_durum({"003": {"tur": "gorev", "konusma": ana, "worktree": WT, "acik": True, "gorev": "003-olu-css.md", "etkin": 1},
                  "004": {"tur": "gorev", "konusma": ana, "worktree": WT.replace("003", "004"), "acik": True, "etkin": 2}})

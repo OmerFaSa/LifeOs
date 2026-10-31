@@ -11,6 +11,8 @@ calisir, iki ajan birbirinin dalini ya da sunucusunu bozmaz.
   python tools/ajan.py gozden 001 [--efor ...]             Denetci dali inceler (kanca bitince kendisi ister)
   python tools/ajan.py mesaj <ad> "<metin>"                 konusmaya yeni mesaj
   python tools/ajan.py durum [--json]                       butun ajanlar
+  python tools/ajan.py bekle [ad ...]                       isler (ve Denetci) hazir olana dek bekler (arka planda kos)
+  python tools/ajan.py rapor <ad>                           inceleme paketi: Sonuc, Denetci, diff tek ciktida
   python tools/ajan.py cevap <ad>                           son cevabin tam metni
   python tools/ajan.py kapat <ad> [--zorla]                 worktree'yi kaldirir (dal kalir)
   python tools/ajan.py kur [--kaldir]                       Antigravity kancasini (hooks.json) kurar/kaldirir
@@ -742,6 +744,71 @@ def uyeler(isler, simdi=None):
     return sorted(secilen, key=lambda u: (sira[u["rol"]], u["hal"] != "çalışıyor", u["model"]))
 
 
+# ---------- tasarruf: tek cagrida bekle, tek cagrida incele ----------
+# Claude Code'un maliyeti «cagri sayisi x baglam». Yoklama turu ve parca parca inceleme
+# en pahali kisim: bekle bir arka plan komutudur (bitince tek bildirim), rapor incelemenin
+# ihtiyac duydugu her seyi tek ciktida verir.
+
+def hazir_mi(x, ada, simdi=None):
+    """Is Claude Code'un incelemesine hazir mi: (hazir, neden). Gorevde Denetci de beklenir."""
+    simdi = simdi or time.time()
+    if x.get("asama") in ("sorun", "kapandı"):
+        return True, x.get("asama")
+    if x.get("asama") != "inceleme":
+        return False, "çalışıyor"
+    if x.get("tur") != "gorev":
+        return True, "cevap hazır"
+    dn = ada.get(x.get("denetim") or "")
+    if dn:
+        return (dn.get("asama") != "çalışıyor"), "denetçi " + ("bitti" if dn.get("asama") != "çalışıyor" else "inceliyor")
+    son = (x.get("canli") or {}).get("son_degisim") or 0
+    if x.get("denetim") == "istendi" or simdi - son < 180:     # kanca Denetci'yi birkac saniyede acar
+        return False, "denetçi bekleniyor"
+    return True, "denetçi yok (görev bitti değil ya da push edilmedi)"
+
+
+def bekle(adlar, azami=3600, aralik=15):
+    """Verilen isler (bos: butun acik isler) hazir olana kadar bekler, sonra kisa ozet basar."""
+    bas = time.time()
+    while True:
+        h = hepsi()
+        ada = {x["ad"]: x for x in h}
+        hedef = [ada[a] for a in adlar if a in ada] if adlar else [x for x in h if x.get("acik") and x.get("tur") != "denetim"]
+        durum = [(x, hazir_mi(x, ada)) for x in hedef]
+        if all(d[0] for _, d in durum) or time.time() - bas > azami:
+            break
+        time.sleep(aralik)
+    for x, (hazir, neden) in durum:
+        print("%-8s %-10s %s" % (x["ad"], "HAZIR" if hazir else "BEKLİYOR", neden))
+    print("Sonraki adım: python tools/ajan.py rapor <ad>")
+
+
+def rapor(ad, satir_siniri=250):
+    """Inceleme paketi tek ciktida: Sonuc, Denetci karari ve bulgulari, diff ozeti, kucukse diff."""
+    h = {x["ad"]: x for x in hepsi()}
+    x = h.get(ad)
+    if not x:
+        raise SystemExit("Böyle bir iş yok: " + ad)
+    c = x.get("canli") or {}
+    if x.get("tur") != "gorev":
+        print(c.get("cevap") or "Henüz cevap yok.")
+        return
+    dal = x["dal"]
+    print("== %s · %s · %s · %d adım · token %d bin/%d bin" % (ad, x["asama"], x.get("model"), c.get("adim") or 0,
+          (c.get("token") or {}).get("giris", 0) // 1000, (c.get("token") or {}).get("cikis", 0) // 1000))
+    dn = h.get(x.get("denetim") or "")
+    if dn:
+        print("== Denetçi (%s): %s" % (dn.get("model"), (dn["canli"].get("cevap") or "cevap yok").strip()[:3000]))
+    else:
+        print("== Denetçi: yok")
+    gorev = git("show", "%s:%s/%s" % (dal, GOREVLER, x["gorev"]), kontrol=False) or ""
+    print("== Sonuç:\n" + (gorev.split("## Sonuç", 1)[-1].strip()[:2000] if "## Sonuç" in gorev else "(yok)"))
+    print("== Diff özeti (main...%s):\n%s" % (dal, git("diff", "--stat", "main..." + dal, kontrol=False)))
+    fark = git("diff", "main..." + dal, kontrol=False) or ""
+    n = fark.count("\n")
+    print(fark if n <= satir_siniri else "== Diff %d satır; tamamı için: git diff main...%s" % (n, dal))
+
+
 def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
@@ -766,6 +833,10 @@ def main(argv):
         kapat(argv[0], "--zorla" in argv)
     elif k == "kur":
         kur("--kaldir" in argv)
+    elif k == "bekle":
+        bekle(argv)
+    elif k == "rapor" and argv:
+        rapor(argv[0])
     elif k == "cevap" and argv:
         h = {x["ad"]: x for x in hepsi()}
         print((h.get(argv[0]) or {}).get("canli", {}).get("cevap") or "Henüz cevap yok.")
