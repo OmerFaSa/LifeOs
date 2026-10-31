@@ -237,8 +237,8 @@ def adim(x, dn, s, o):
         if son < s["mesaj_t"]:
             return ("birak", "düzeltme mesajına 15 dakikada tepki yok") if simdi - s["mesaj_t"] > 900 \
                 else ("bekle", "düzeltme bekleniyor")
-        if o["commit"] == s.get("mesaj_commit"):
-            return "hazir", "düzeltme commit'i gelmedi"
+        if o["commit"] == s.get("mesaj_commit"):      # kanca «push et» deyip devam ettirirken araya kisa durma girer
+            return ("hazir", "düzeltme commit'i gelmedi") if simdi - son > 300 else ("bekle", "düzeltme commit'i bekleniyor")
     if not o["teslim"]:
         if o.get("gorev_durum") == "takıldı":
             return "hazir", "Uygulayıcı takıldı"
