@@ -33,6 +33,11 @@ describe('Türkçe sayı ve süre — süre', () => {
     expect(T().dakika('5 sayfa')).toBe(null);
     expect(T().dakika('birlikte koştuk 30 dk')).toBe(30);
   });
+  it('birim: saatle mi dakikayla mı söylendi', () => {
+    expect(T().sure('yarım saat').birim).toBe('saat');
+    expect(T().sure('1 saat 20 dk').birim).toBe('saat');
+    expect(T().sure('30 dk').birim).toBe('dk');
+  });
   it('yer bilgisi: eşleşen parça çıkarılabilir', () => {
     const s = T().sure('bugün 1 saat 20 dk koştum');
     expect('bugün 1 saat 20 dk koştum'.slice(s.bas, s.son)).toBe('1 saat 20 dk');

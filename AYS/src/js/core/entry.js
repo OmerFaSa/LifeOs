@@ -118,73 +118,19 @@ R.Entry = (function(){
 
   /* --------------------------------------------------------- süre */
 
-  const SAYI_PAT = '\\d+(?:[.,]\\d+)?|' + Object.keys(RAKAM).join('|');
-  const YARIM_CEYREK_RE = new RegExp('\\b(yarim|ceyrek)\\s*(?:saat|sa)\\b', 'i');
-  const BUCUK_RE        = new RegExp('(?:\\b(' + SAYI_PAT + ')\\s+)?bucuk\\s*(?:saat|sa)\\b', 'i');
-  const BILESIK_RE      = new RegExp('(?:^|\\s)(' + SAYI_PAT + ')\\s*(?:saat|sa)\\b\\s*(?:ve\\s*)?(' + SAYI_PAT + ')\\s*(?:dakika|dk)\\b', 'i');
-  const TEK_SAAT_RE     = new RegExp('(?:^|\\s)(' + SAYI_PAT + ')\\s*(?:saat|sa)\\b', 'i');
-  const TEK_DK_RE       = new RegExp('(?:^|\\s)(' + SAYI_PAT + ')\\s*(?:dakika|dk)\\b', 'i');
-
-  /* Cümledeki süreyi (dakika ve saat) okur. Tek yardımcı:
-     - yarım (30 dk / 0.5 sa), çeyrek (15 dk / 0.25 sa)
-     - buçuk: «7 buçuk saat» (7.5 sa / 450 dk), «bir buçuk saat» (1.5 sa / 90 dk)
-     - bileşik: «7 saat 30 dk» (7.5 sa / 450 dk), «1 saat 15 dk» (75 dk)
-     - tek saat: «8 saat», «7,5 saat», «2 saat»
-     - tek dakika: «45 dakika», «30 dk» */
+  /* Ortak okuyucu (brand/ortak/turkcesayi.js): «7 saat 30 dk», «yedi buçuk saat», «yarım saat»
+     dört modülde aynı kuralla okunur. */
   function sureOku(text){
-    if(!text) return null;
-    const n = U.norm ? U.norm(text) : String(text).toLowerCase();
-
-    const yc = n.match(YARIM_CEYREK_RE);
-    if(yc){
-      return yc[1].toLowerCase() === 'yarim'
-        ? { minutes:30, hours:0.5 }
-        : { minutes:15, hours:0.25 };
-    }
-
-    const buc = n.match(BUCUK_RE);
-    if(buc){
-      const s = buc[1] ? sayi(buc[1]) : 0;
-      if(s == null) return null;
-      const hours = s + 0.5;
-      return { minutes:Math.round(hours * 60), hours };
-    }
-
-    const bil = n.match(BILESIK_RE);
-    if(bil){
-      const h = sayi(bil[1]);
-      const m = sayi(bil[2]);
-      if(h != null && m != null){
-        const minutes = Math.round(h * 60 + m);
-        const hours = h + m / 60;
-        return { minutes, hours };
-      }
-    }
-
-    const ts = n.match(TEK_SAAT_RE);
-    if(ts){
-      const h = sayi(ts[1]);
-      if(h != null){
-        return { minutes:Math.round(h * 60), hours:h };
-      }
-    }
-
-    const td = n.match(TEK_DK_RE);
-    if(td){
-      const m = sayi(td[1]);
-      if(m != null){
-        const minutes = Math.round(m);
-        return { minutes, hours:minutes / 60 };
-      }
-    }
-
-    return null;
+    const T = window.LIFEOS && window.LIFEOS.TurkceSayi;
+    const s = T ? T.sure(text) : null;
+    return s ? { minutes:Math.round(s.dakika), hours:s.dakika / 60, birim:s.birim } : null;
   }
 
   function parseUyku(text){
     if(!/uyu/i.test(text)) return null;
     const s = sureOku(text);
-    if(!s || s.hours <= 0 || s.hours > 24) return null;
+    /* gece uykusu saatle söylenir: «30 dk uyudum» şekerlemedir, uyku verisine yazılmaz */
+    if(!s || s.birim !== 'saat' || s.hours <= 0 || s.hours > 24) return null;
     return { kind:'uyku', hours:s.hours };
   }
 

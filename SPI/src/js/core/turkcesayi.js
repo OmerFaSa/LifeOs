@@ -70,7 +70,7 @@ LIFEOS.TurkceSayi = (function(){
   const SURE_RE = new RegExp('(?:' + SAYI_KAYNAK + ')\\s*(?:' + SAAT + '|' + DAKIKA + ')'
     + '(?:\\s*(?:ve\\s+)?(?:(\\d+)|(' + YAZI + '(?:\\s+' + YAZI + ')?))\\s*' + DAKIKA + ')?');
 
-  /* Metindeki İLK süre, DAKİKA olarak: { dakika, bas, son } ya da null.
+  /* Metindeki İLK süre, DAKİKA olarak: { dakika, birim:'saat'|'dk', bas, son } ya da null.
      «1 saat 20 dk» → 80 · «yarım saat» → 30 · «bir buçuk saat» → 90 · «45 dk» → 45. */
   function sure(metin){
     const t = kucuk(metin);
@@ -84,7 +84,7 @@ LIFEOS.TurkceSayi = (function(){
       if(ek == null) return null;
       dk += ek;
     }
-    return { dakika:Math.round(dk * 100) / 100, bas:m.index, son:m.index + m[0].length };
+    return { dakika:Math.round(dk * 100) / 100, birim:m[5] ? 'saat' : 'dk', bas:m.index, son:m.index + m[0].length };
   }
 
   /* Kısayol: yalnız dakika (ya da null). */

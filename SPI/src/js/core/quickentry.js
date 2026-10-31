@@ -90,9 +90,6 @@ SP.Quick = (function(){
      tek sabittir: Bugün'deki bardak düğmesi de bunu okur. */
   const BARDAK_ML = 250;
 
-  /* Sure birimleri — «45 dk yuruyus» ve «1 saat kosu» ayni sey. */
-  const SURE_RE = /(\d+(?:[.,]\d+)?)\s*(dk|dakika|dakka|sa|saat|s)\b/i;
-
   function sayi(x){
     if(x == null) return null;
     const n = Number(String(x).replace(',', '.'));
@@ -102,104 +99,14 @@ SP.Quick = (function(){
   /* U.norm «â/î/û»yu katlamaz: «şikâyet» → «sikâyet». */
   function katla(s){ return U.norm(s).replace(/â/g, 'a').replace(/î/g, 'i').replace(/û/g, 'u'); }
 
-  /* Rakam ya da yazıyla sayı (bir…on). */
-  const YAZI_SAYI = {
-    bir: 1, iki: 2, uc: 3, dort: 4, bes: 5,
-    alti: 6, yedi: 7, sekiz: 8, dokuz: 9, on: 10
-  };
-
-  function sayiVeyaYazi(x){
-    if(x == null) return null;
-    const s = String(x).trim().toLowerCase();
-    if(Object.prototype.hasOwnProperty.call(YAZI_SAYI, s)) return YAZI_SAYI[s];
-    return sayi(s);
-  }
-
-  /* Sure ayristirma yardimcisi: bilesik («1 saat 20 dk»), yarim («yarim saat»),
-     ceyrek («ceyrek saat»), bucuk («1 bucuk saat», «bir bucuk saat»),
-     tek saat («1 saat», «iki saat», «2,5 saat») ve dakika («45 dk», «90 dakika»). */
-  const SURE_SAYI = '(\\d+(?:[.,]\\d+)?|bir|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on)';
-  const BILESIK_SURE_RE = new RegExp(
-    '(?:^|[^a-z0-9])' + SURE_SAYI + '\\s*(bucuk\\s*)?(?:saat|sa)\\s*(?:(?:ve|,)\\s*)?' + SURE_SAYI + '\\s*(?:dk|dakika|dakka)(?![a-z0-9])',
-    'i'
-  );
-  const YARIM_SAAT_RE = /(?:^|[^a-z0-9])yarim\s*(?:saat|sa)\b/i;
-  const CEYREK_SAAT_RE = /(?:^|[^a-z0-9])ceyrek\s*(?:saat|sa)\b/i;
-  const BUCUK_SAAT_RE = new RegExp(
-    '(?:^|[^a-z0-9])' + SURE_SAYI + '\\s+bucuk\\s*(?:saat|sa)\\b',
-    'i'
-  );
-  const TEK_SAAT_RE = new RegExp(
-    '(?:^|[^a-z0-9])' + SURE_SAYI + '\\s*(saat|sa|s)\\b',
-    'i'
-  );
-  const TEK_DK_RE = new RegExp(
-    '(?:^|[^a-z0-9])' + SURE_SAYI + '\\s*(?:dk|dakika|dakka)(?![a-z0-9])',
-    'i'
-  );
-
+  /* Süre: ortak okuyucu (brand/ortak/turkcesayi.js) — «1 saat 20 dk», «yarım saat», «bir buçuk saat»
+     dört modülde aynı kuralla okunur. birim: saatle mi dakikayla mı söylendi (kestirme bunu ister). */
   function parseSure(text){
-    if(!text) return null;
-    const n = katla(text);
-
-    /* 1. Bilesik: «1 saat 20 dk», «2 saat 15 dakika» */
-    const mb = n.match(BILESIK_SURE_RE);
-    if(mb){
-      let sa = sayiVeyaYazi(mb[1]);
-      if(sa != null){
-        if(mb[2]) sa += 0.5;
-        const dk = sayiVeyaYazi(mb[3]);
-        if(dk != null && sa >= 0 && dk >= 0){
-          const top = Math.round(sa * 60 + dk);
-          return { minutes: top, dk: top, birim: 'saat' };
-        }
-      }
-    }
-
-    /* 2. Yarim saat: 30 dk */
-    if(YARIM_SAAT_RE.test(n)){
-      return { minutes: 30, dk: 30, birim: 'saat' };
-    }
-
-    /* 3. Ceyrek saat: 15 dk */
-    if(CEYREK_SAAT_RE.test(n)){
-      return { minutes: 15, dk: 15, birim: 'saat' };
-    }
-
-    /* 4. Bucuk saat: «1 bucuk saat», «bir bucuk saat» */
-    const mbc = n.match(BUCUK_SAAT_RE);
-    if(mbc){
-      const sa = sayiVeyaYazi(mbc[1]);
-      if(sa != null && sa >= 0){
-        const top = Math.round((sa + 0.5) * 60);
-        return { minutes: top, dk: top, birim: 'saat' };
-      }
-    }
-
-    /* 5. Tek saat: «1 saat», «bir saat», «iki saat», «2,5 saat», «1 sa», «1 s» */
-    const ms = n.match(TEK_SAAT_RE);
-    if(ms){
-      const birim = ms[2].toLowerCase();
-      if(birim !== 's' || /^\d/.test(ms[1])){
-        const sa = sayiVeyaYazi(ms[1]);
-        if(sa != null && sa >= 0){
-          const top = Math.round(sa * 60);
-          return { minutes: top, dk: top, birim: 'saat' };
-        }
-      }
-    }
-
-    /* 6. Tek dakika: «45 dk», «90 dakika», «on dakika» */
-    const md = n.match(TEK_DK_RE);
-    if(md){
-      const dk = sayiVeyaYazi(md[1]);
-      if(dk != null && dk >= 0){
-        const top = Math.round(dk);
-        return { minutes: top, dk: top, birim: 'dk' };
-      }
-    }
-
-    return null;
+    const T = window.LIFEOS && window.LIFEOS.TurkceSayi;
+    const s = T ? T.sure(text) : null;
+    if(!s) return null;
+    const dk = Math.round(s.dakika);
+    return { minutes:dk, dk, birim:s.birim };
   }
 
   /* ------------------------------------------------------- gun sozu

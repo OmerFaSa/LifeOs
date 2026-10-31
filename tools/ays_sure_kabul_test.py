@@ -9,13 +9,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import kabul_js as J  # noqa: E402
 
-DOSYALAR = ["src/js/core/utils.js", "src/js/data/subjects.js", "src/js/core/entry.js"]
+DOSYALAR = ["src/js/core/utils.js", "src/js/core/turkcesayi.js", "src/js/data/subjects.js", "src/js/core/entry.js"]
 UYKU = [("7 saat 30 dk uyudum", 7.5), ("7 buçuk saat uyudum", 7.5), ("yedi buçuk saat uyudum", 7.5),
         ("6 saat 45 dakika uyudum", 6.75), ("8 saat uyudum", 8), ("7,5 saat uyudum", 7.5), ("5 saat uyuyabildim", 5)]
 SURE = [("1 saat 15 dk matematik çalıştım", 75, "tyt-matematik"), ("yarım saat fizik çalıştım", 30, "ayt-fizik"),
         ("bir buçuk saat matematik", 90, "tyt-matematik"), ("45 dakika matematik çalıştım", 45, "tyt-matematik"),
         ("2 saat matematik", 120, "tyt-matematik"), ("çeyrek saat matematik", 15, "tyt-matematik")]
-BOS = ["30 soru matematik 45 dakika", "matematik çalıştım", "uyudum"]
+BOS = ["30 soru matematik 45 dakika", "matematik çalıştım", "uyudum", "30 dakika uyudum"]  # sonuncu sekerleme, uyku degil
 
 hata = []
 u = J.calistir("AYS", DOSYALAR, "[%s].map(t => { const r = R.Entry.parseUyku(t); return r && r.hours; })" % ", ".join(repr(t) for t, _ in UYKU))

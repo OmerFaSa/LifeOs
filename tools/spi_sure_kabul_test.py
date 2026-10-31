@@ -9,7 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import kabul_js as J  # noqa: E402
 
-DOSYALAR = ["src/js/core/utils.js", "src/js/data/movement.js", "src/js/core/quickentry.js"]
+DOSYALAR = ["src/js/core/utils.js", "src/js/core/turkcesayi.js", "src/js/data/movement.js", "src/js/core/quickentry.js"]
 BEKLENEN = [
     # yeni: bilesik, kesirli ve yaziyla
     ("1 saat 20 dk yürüyüş", 80, "Tempolu yürüyüş"),
