@@ -29,6 +29,12 @@ Antigravity yapar; Claude Code görevi yazar, gözden geçirir, `main`'e alır.
 
 ## Değişmez kurallar (özet; asıl metin AGENTS.md)
 
+- **Yasak bölge:** görsel (CSS, HTML, görseller, `brand/`), animasyon ve tema
+  JS'i, modül çekirdeği ve derleme, `sistem/` sunucu-başlatma-güncelleme, HKM
+  çekirdeği, `uygulama/`, ofisin kendi araçları, AGENTS.md ve CI ofisin değil
+  (`tools/ajan.py` `YASAK_BOLGE`). Kanca bu dosyalara yazmayı engeller; gerekiyorsa
+  «Sonuç»a ne yapılması gerektiğini yaz, Claude Code yapar.
+
 - Sıfır bağımlılık: paket, çerçeve, derleyici eklenmez. Python'da yalnız
   standart kütüphane.
 - Ekranda görünen metin düzgün Türkçe. Kod yorumu ASCII olabilir.

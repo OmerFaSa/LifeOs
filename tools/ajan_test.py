@@ -122,7 +122,7 @@ for (arac, args, mini), (karar, ust) in (
         (("run_command", {"CommandLine": r"cd C:\Users\ASUS\LifeOs; git commit -m x"}, False), ("deny", False)),
         (("run_command", {"CommandLine": "cd %s; git commit -m x" % WT}, True), ("deny", False)),
         (("write_file", {"TargetFile": r"C:\Users\ASUS\LifeOs\brand\ortak\cam.css"}, False), ("deny", False)),
-        (("write_file", {"TargetFile": WT + r"\brand\ortak\cam.css"}, False), ("allow", False)),
+        (("write_file", {"TargetFile": WT + r"\sistem\ice.py"}, False), ("allow", False)),
         (("write_file", {"TargetFile": WT + r"\x.md"}, True), ("deny", False)),
         (("mcp_hkm-sqlite_write_query", {}, False), ("deny", False)),
         (("mcp_notion_notion_notion-create-pages", {}, False), ("deny", False)),
@@ -135,6 +135,24 @@ for (arac, args, mini), (karar, ust) in (
         hata.append("kanca %s %r -> %s %r" % (arac, args, k, u))
     if u and not u["CommandLine"].startswith("Set-Location -LiteralPath '%s'; " % WT):
         hata.append("yonlendirme Set-Location ile baslamali: %r" % u)
+# yasak bolge: gorsel, animasyon ve altyapi ofisin degil (depo sahibinin karari)
+izinli = ["sistem/ice.py", "tools/ice_test.py", "AYS/src/js/screens/takvim.js", "veri/taslak/spi/besin_tema_x.jsonl",
+          "belgeler/TEKNIK.md", "HKM/motor/x.py", "AYS/src/tests/takvim.test.js"]
+yasak = ["brand/ortak/cam.css", "AYS/src/css/a.css", "AYS/src/index.html", "AYS/src/img/x.png", "AYS/src/js/core/animasyon.js",
+         "brand/ortak/hareket.js", "SPI/build.py", "AYS/src/sw.js", "sistem/sunucu.py", "sistem/baslat.sh", "HKM/daemon.py",
+         "uygulama/ios/App.swift", "GUNCELLE.bat", "tools/ajan.py", "tools/ortak.py", "AGENTS.md", ".github/workflows/ci.yml",
+         "./AYS/src/css/b.css", "AYS\\src\\js\\core\\x.js"]
+if A.yasak_bolge(izinli):
+    hata.append("izinli yol yasak sayildi: %r" % A.yasak_bolge(izinli))
+if [y for y in yasak if not A.yasak_bolge([y])]:
+    hata.append("yasak yol kacti: %r" % [y for y in yasak if not A.yasak_bolge([y])])
+gm = "# 9\n## Dokunulacak dosyalar\n- `sistem/ice.py` — x\n- `brand/ortak/cam.css`\n\n## Dokunma\n- `AGENTS.md`\n"
+if A.gorev_yollari(gm) != ["sistem/ice.py", "brand/ortak/cam.css"]:
+    hata.append("gorev_yollari: %r" % A.gorev_yollari(gm))
+for yol, beklenen in ((WT + r"\brand\ortak\cam.css", "deny"), (WT + r"\AYS\src\js\core\animasyon.js", "deny"),
+                      (WT + r"\sistem\ice.py", "allow")):
+    if K.arac_karari("write_to_file", {"TargetFile": yol}, WT, False)[0] != beklenen:
+        hata.append("kanca yasak bolge %s -> %s olmali" % (yol, beklenen))
 for yol, beklenen in ((WT + r"\tools\k_test.py", "deny"), (WT + "/tools/k_test.py", "deny"), (WT + r"\tools\k.py", "allow")):
     if K.arac_karari("replace_file_content", {"TargetFile": yol}, WT, False, ["tools/k_test.py"])[0] != beklenen:
         hata.append("kanca kabul testi %s -> %s olmali" % (yol, beklenen))

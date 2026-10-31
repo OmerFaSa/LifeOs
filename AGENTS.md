@@ -219,6 +219,9 @@ kancası (`tools/ajan_kanca.py`) ajanı klasörüne ve izinli araçlara bağlar.
 Ayrıntı ve izleme: `belgeler/ekip/gorevler/README.md`, Görev Takibi.
 **Claude Code: ofisi kullanmadan önce `belgeler/ekip/OFIS.md`'yi oku** (tek
 sayfa: ne ofise gider, en az çağrılı akış, kalite kuralları, tuzaklar).
+Depo sahibinin kararı (2026-10-31): görsel, animasyon ve asıl altyapı dışındaki,
+tanımı yazılabilen işlerde **varsayılan ofistir** (token tasarrufu); yasak bölge
+`tools/ajan.py` `YASAK_BOLGE` listesinde kodla korunur (OFIS.md §3).
 
 - `main`'e doğrudan push **yalnız** depo sahibinin oturumundan yapılır.
 - **Çalışan kopyada geliştirme yapılmaz.** Masaüstü uygulaması (LifeOS.exe)

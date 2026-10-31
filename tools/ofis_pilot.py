@@ -244,6 +244,8 @@ def adim(x, dn, s, o):
             return "hazir", "Uygulayıcı takıldı"
         return ("birak", "teslim edilmedi (bitti, commit ya da push yok)") if simdi - son > 300 \
             else ("bekle", "teslim bekleniyor")
+    if o.get("yasak"):
+        return "hazir", "yasak bölgeye dokundu: " + ", ".join(o["yasak"])
     if o.get("kabul_degisti"):
         return "hazir", "kabul testi dalda değiştirildi: " + ", ".join(o["kabul_degisti"])
     if o.get("sonuc_eksik") and not s.get("bicim_tur"):
@@ -443,7 +445,8 @@ def tur(p, simdi=None):
              "teslim": x.get("asama") == "inceleme" and _teslim(x), "gorev_durum": gorev_durumu(x),
              "test": T.son_ozet(no), "denetci_mesgul": mesgul, "test_mesgul": T.kilit_sahibi() is not None,
              "kabul_degisti": [k for k in x.get("kabul") or () if A.git("diff", "--name-only", "main..." + x["dal"], "--", k, kontrol=False)],
-             "sonuc_eksik": gorev_sonuc_eksik(x)}
+             "sonuc_eksik": gorev_sonuc_eksik(x),
+             "yasak": [y for y, _ in A.yasak_bolge((A.git("diff", "--name-only", "main..." + x["dal"], kontrol=False) or "").splitlines())]}
         if dn and dn.get("asama") not in ("çalışıyor", "sorun") and dn.get("commit") == o["commit"] and "ilk_karar" not in s:
             k = (dn.get("canli") or {}).get("karar")
             s["ilk_karar"] = k[0] if k else "kararsız"

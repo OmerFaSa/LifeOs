@@ -113,6 +113,10 @@ def arac_karari(ad_arac, args, wt, mini, kabul=()):
             return "deny", "Mini ajan salt okunur: dosya yazmaz.", None
         if yol and any(Path(yol).resolve() == (Path(wt) / k).resolve() for k in kabul):
             return "deny", "Kabul testi Claude Code'un; değiştirme. Kod onu geçmeli; yanlışsa nedenini «Sonuç»a yaz.", None
+        if yol and A._icinde(yol, wt):
+            yasak = A.yasak_bolge([Path(yol).resolve().relative_to(Path(wt).resolve())])
+            if yasak:
+                return "deny", "%s: %s ofisin değil; dokunma, gerekiyorsa «Sonuç»a yaz." % (yasak[0][1], yasak[0][0]), None
         if yol and not A._icinde(yol, wt) and not A._icinde(yol, str(Path.home() / ".gemini" / "antigravity" / "brain")):
             return "deny", "Yalnız kendi klasörüne yaz: %s" % wt, None
     return "allow", "", None

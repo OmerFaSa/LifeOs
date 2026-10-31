@@ -36,11 +36,32 @@ yapmak ~6 tutardı. Takvim tekrarı (001, 355 satır) gibi bir işte ofis
 
 ## 3. Ne ofise, ne sende
 
-**Sende kalır:** tasarım ve görsel her şey; `brand/ortak/`, `sistem/`, King,
-AGENTS.md §1'e dokunan karar; ~20 satırın altındaki iş (ofis daha pahalı);
-son inceleme, tam denetimler (§2), birleştirme, derleme, push.
+**Depo sahibinin kararı (2026-10-31):** «Antigravity'yi ordun gibi kullan,
+token'dan büyük tasarruf et; ama animasyon, görsel ve asıl altyapı çalışması
+ona dokunmasın, onları senin kalitende yapamaz; yaratıcılıkta sen daha iyisin.»
+Bu yüzden **varsayılan ofistir**: her işe başlamadan önce sor: «Görsel,
+animasyon ya da altyapı mı?» Değilse ve tanımı yazılabiliyorsa görev yaz.
 
-**Ofise gider:** tanımı net, ölçütü yazılabilen orta ve büyük işler; ve
+**Yasak bölge (kodda, pazarlık yok):** `ajan.py` içindeki `YASAK_BOLGE`
+listesi: CSS, HTML, görseller, yazı tipleri, `brand/`, `css|img|fonts|medya`
+klasörleri, animasyon/hareket/geçiş/tema JS'i, modül çekirdeği (`src/js/core`,
+`build.py`, `devserver.py`, `sw.js`), `sistem/` sunucu-başlatma-güncelleme-hesap,
+HKM çekirdeği, `uygulama/`, başlatıcılar, `tools/ortak.py` ve ofisin kendi
+araçları, AGENTS.md, CI. Üç kat korunur: «Dokunulacak dosyalar»da yasak yol olan
+görevi `baslat` reddeder; kanca o dosyalara yazmayı engeller; pilot dalın
+diff'inde yasak yol görürse işi durdurur. Listeyi yalnız depo sahibi genişletir
+ya da daraltır.
+
+**Sende kalır:** yasak bölgenin hepsi; tasarım ve yaratıcı kararlar; King;
+AGENTS.md §1'e dokunan karar; ~20 satırın altındaki iş (ofis daha pahalı);
+görev yazımı ve kabul testi; son inceleme, tam denetimler (§2), birleştirme,
+derleme, push. Bir işin içinde hem mantık hem görsel varsa **böl**: mantığı
+(veri, hesap, ekran dışı JS, test) ofise ver, görsel katmanı kendin yap.
+
+**Ofise gider (varsayılan):** tanımı net, ölçütü yazılabilen orta ve büyük
+işler: ekran mantığı (`src/js/screens`, CSS'siz), veri ve hesap modülleri,
+`sistem/` altındaki özellik modülleri (ice, müzik, planlama…), araç betikleri,
+testler, belgeler, veri üretimi; ve
 **döngü işleri**, yani senin bağlamını tur tur şişirecek olanlar:
 - kırmızı testi düzelt, koş, tekrar düzelt döngüsü (görev: «şu testler yeşil
   olsun, şu dosyalara dokunma»);
@@ -48,6 +69,14 @@ son inceleme, tam denetimler (§2), birleştirme, derleme, push.
 - veri ya da belge üretimi, uzun tarama ve listeleme (`sor`);
 - uzun süren, çıktısı tek satırla özetlenebilen koşular.
 Tek bir grep ya da okuma ile çözülecek soruyu `sor`'a verme; kendin yap.
+
+**Token tasarrufu, kaliteyi düşürmeden:**
+- Pahalı olan senin bağlamındır: geniş okuma, tarama, deneme-yanılma döngüsü.
+  Bunları ofise ver; sen yalnız görevi, kabul testini ve son incelemeyi yaz.
+- Görevi kısa ama kesin yaz: dosyalar, «Dokunma», kabul testi. Uzun açıklama
+  yerine kabul testi; ajan ne yapacağını testten okur.
+- İncelemede `rapor NNN` tek çağrı; diff'i oku, bütün dosyaları yeniden açma.
+- Pilotu aç, birden çok görevi birlikte kuyruğa koy, sonuçları toplu incele.
 
 ## 4. Akış (en az çağrıyla)
 

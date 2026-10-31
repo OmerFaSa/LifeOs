@@ -465,6 +465,39 @@ def gorev_bilgi(metin):
             "kabul": re.findall(r"`([^`]+)`", kabul.group(1)) if kabul else []}
 
 
+# Depo sahibinin karari (2026-10-31): gorsel, animasyon ve asil altyapi ofisin degil, Claude Code'un.
+# Yol desenleri depo-goreli (/ ile); kanca yazmayi, baslat gorevi, pilot dali bunlarla durdurur.
+YASAK_BOLGE = [
+    (re.compile(r"\.(css|svg|png|jpe?g|webp|gif|ico|woff2?|ttf|otf|html?)$", re.I), "görsel"),
+    (re.compile(r"^brand/|/brand/", re.I), "görsel (marka, ortak çekirdek)"),
+    (re.compile(r"(^|/)(css|img|fonts|medya)/", re.I), "görsel"),
+    (re.compile(r"(^|/)[^/]*(anim|gecis|hareket|tema)[^/]*\.js$", re.I), "animasyon / tema"),
+    (re.compile(r"^(AYS|SPI|ESP)/(build\.py|devserver\.py|src/sw\.js|src/js/core/)", re.I), "altyapı (derleme, çekirdek)"),
+    (re.compile(r"^sistem/(sunucu|baslat|guncelle|hesap)", re.I), "altyapı (sunucu, başlatma, güncelleme)"),
+    (re.compile(r"^HKM/(hkm|daemon|kur|baslat)\.|^HKM/core/", re.I), "altyapı (HKM çekirdeği)"),
+    (re.compile(r"^uygulama/|^[^/]+\.(bat|command)$", re.I), "altyapı (masaüstü/telefon kabuğu, başlatıcı)"),
+    (re.compile(r"^tools/(ortak|ajan|ajan_kanca|ofis_pilot|ofis_test|gorev_takip)\.py$", re.I), "altyapı (ortak araç, ofisin kendisi)"),
+    (re.compile(r"^AGENTS\.md$|^\.github/", re.I), "altyapı (sözleşme, CI)"),
+]
+
+
+def yasak_bolge(yollar):
+    """[(yol, neden)] — ofisin dokunamayacagi yollar. Saf islev."""
+    out = []
+    for y in yollar:
+        y = re.sub(r"^(\./)+", "", str(y).replace("\\", "/"))
+        neden = next((n for d, n in YASAK_BOLGE if d.search(y)), None)
+        if neden:
+            out.append((y, neden))
+    return out
+
+
+def gorev_yollari(metin):
+    """Gorev dosyasinin «Dokunulacak dosyalar» bolumundeki `yol`lar."""
+    b = re.search(r"## Dokunulacak dosyalar\s*\n(.*?)(?=\n## |\Z)", metin, re.S)
+    return re.findall(r"`([^`\s]+)`", b.group(1)) if b else []
+
+
 DERSLER = GOREVLER + "/DERSLER.md"
 SONUC_ALAN = ("Ne değişti", "Koşan testler", "Kabul testi", "Açık kalan")
 
@@ -611,7 +644,12 @@ def _secenek(argv, ad, varsayilan=None):
 
 def baslat(no, efor=None, ek="", yeni=False):
     dosya = gorev_dosyasi(no)
-    bilgi = gorev_bilgi(dosya.read_text(encoding="utf-8"))
+    metin = dosya.read_text(encoding="utf-8")
+    bilgi = gorev_bilgi(metin)
+    yasak = yasak_bolge(gorev_yollari(metin))
+    if yasak:
+        raise SystemExit("Bu görev ofisin değil (görsel/altyapı Claude Code'da): "
+                         + "; ".join("%s (%s)" % y for y in yasak))
     efor = efor_cevir(efor) or bilgi["efor"] or "orta"
     d = oku_durum()
     if d.get(no, {}).get("acik"):
