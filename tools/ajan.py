@@ -704,7 +704,7 @@ def baslat(no, efor=None, ek="", yeni=False):
     worktree_kur(wt, bilgi["dal"])
     p = portlar(yuva)
     args = (str(wt), bilgi["dal"], dosya, p, efor, ek)
-    kimlik, bas, yeni_mi = gonder(d, "uygulayici", EFOR[efor], "LF Uygulayıcı · " + EFOR[efor],
+    kimlik, bas, yeni_mi = gonder(d, "uygulayici", EFOR[efor], "LF Uygulayıcı %s · %s" % (no, EFOR[efor]),
                                   gorev_istemi(*args), gorev_devam_istemi(*args), yeni)
     d = oku_durum()
     d[no] = {"tur": "gorev", "gorev": dosya.name, "dal": bilgi["dal"], "efor": efor, "model": EFOR[efor],
@@ -737,7 +737,7 @@ def sor(soru, efor=None, ad=None, yeni=False):
     if d.get(ad, {}).get("acik"):
         raise SystemExit("%s zaten açık." % ad)
     wt = _ofis_klasoru("arastirmaci", "main")
-    kimlik, bas, yeni_mi = gonder(d, "arastirmaci", EFOR[efor], "LF Araştırmacı · " + EFOR[efor],
+    kimlik, bas, yeni_mi = gonder(d, "arastirmaci", EFOR[efor], "LF Araştırmacı %s · %s" % (ad, EFOR[efor]),
                                   soru_istemi(str(wt), soru), soru_devam_istemi(str(wt), soru), yeni)
     d = oku_durum()
     _ayni_konusmayi_kapat(d, kimlik, ad)
@@ -757,7 +757,7 @@ def gozden(no, efor=None, yeni=False):
     efor = efor_cevir(efor) or DENETCI_EFOR.get(a.get("efor"), "orta")
     wt = _ofis_klasoru("denetci", a["dal"], no)
     dosya = gorev_dosyasi(no)
-    kimlik, bas, yeni_mi = gonder(d, "denetci", EFOR[efor], "LF Denetçi · " + EFOR[efor],
+    kimlik, bas, yeni_mi = gonder(d, "denetci", EFOR[efor], "LF Denetçi %s · %s" % (no, EFOR[efor]),
                                   denetim_istemi(str(wt), no, a["dal"], dosya),
                                   denetim_govde(str(wt), no, a["dal"], dosya), yeni)
     ad = "d-" + no
