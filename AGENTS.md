@@ -203,6 +203,13 @@ kırmızı değil); o bitince yeniden koşulur.
 |---|---|---|
 | Claude Code (bu oturum) | `main` | doğrudan commit + push |
 | Diğer ajanlar (Codex vb.) | `gpt/<konu>` dalı | **pull request** |
+| Antigravity | `C:\Users\ASUS\LifeOs-ag` klasöründe `ag/<görev>` dalı | dalı push eder; Claude Code gözden geçirip `main`'e alır |
+
+**Antigravity görev düzeni (2026-10-31, depo sahibinin kararı):** Antigravity
+yalnız `belgeler/ekip/gorevler/` kuyruğundaki görevleri yapar; akış, sınırlar ve
+şablon `belgeler/ekip/gorevler/README.md`'dedir. Asıl klasöre
+(`C:\Users\ASUS\LifeOs`) ve çalışan kopyaya dokunmaz; tasarım, `brand/ortak/`,
+`sistem/`, King ve §1'e dokunan işler görevde açıkça yazmıyorsa onun değildir.
 
 - `main`'e doğrudan push **yalnız** depo sahibinin oturumundan yapılır.
 - **Çalışan kopyada geliştirme yapılmaz.** Masaüstü uygulaması (LifeOS.exe)
