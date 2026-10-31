@@ -1,6 +1,6 @@
 # 009 · SPİ hızlı girişte günlük Türkçe süreler
 
-**Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
+**Durum:** bitti   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/009-spi-sure`
 **Efor:** orta   <!-- düşük (flash_lite = Gemini 3.8 Flash) | orta (flash) | yüksek (pro; flash ile aynı model) -->
 **Kabul testi:** `tools/spi_sure_kabul_test.py`
@@ -33,7 +33,10 @@ düşüyor. Kullanıcı konuştuğu gibi yazar; ölçülen dakika doğru yazılm
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:**
+- **Ne değişti:** SPI/src/js/core/quickentry.js içinde tek süre ayrıştırıcı parseSure eklendi; bileşik («1 saat 20 dk»), buçuk («1 buçuk saat», «bir buçuk saat»), yarım («yarım saat»), çeyrek («çeyrek saat»), yazıyla sayılar (bir…on) ve tek saat/dakika kalıpları («1 saat», «1 s», «45 dk») desteklendi; Denetçi bulgusu doğrultusunda tek saatte «s» birimi için regex literalindeki çift ters slash (/^\d/) düzeltildi (/^\d/); parseMove ve parseNap bu yardımcıya bağlandı; SPI/src/tests/oneri.test.js dosyasına «1 s yürüyüş» ve «2 s koşu» dahil yeni süre kenar durumları testleri eklendi.
 - **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+  - python tools/spi_sure_kabul_test.py -> spi sure kabul: bilesik, yarim, bucuk, ceyrek, yaziyla sayi; eski bicimler; sure olmayan.
+  - python tools/yazi.py --denetle -> Yazı denetimi: temiz
+  - cd SPI; node tools/runtests.js 4712 -> 2881/2882 gecti  ·  1 kaldi
+- **Kabul testi:** tools/spi_sure_kabul_test.py yeşil (bilesik, yarim, bucuk, ceyrek, yaziyla sayi; eski bicimler; sure olmayan).
+- **Açık kalan:** King 3.0 — doğal konuşma (K3) uyanma testi (king.test.js:3076) sesli sohbet zamanlaması nedeniyle [true,false,true] dönüyor; dokunulmayan King modülüyle ilgilidir, ana klasörde doğrulanmalı.
