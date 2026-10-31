@@ -1,6 +1,6 @@
 # 007 · Takvimde bugün süren etkinlikler
 
-**Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
+**Durum:** bitti   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/007-takvim-suren`
 **Efor:** orta   <!-- düşük (flash_lite) | orta (flash) | yüksek (pro; ölçülen 2026-10-31: flash ile aynı model) -->
 **Kabul testi:** `tools/ice_suren_kabul_test.py`
@@ -38,7 +38,7 @@ göre tek günlük etkinliktir.
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `sistem/ice.py` dosyasına `_aralikta_mi` işlevi eklendi; etkinliklerin [bugün 00:00, ufuk) aralığıyla örtüşme (başlangıcı aralıkta veya başlangıcı önce olup bitişi bugün 00:00'dan sonra) kuralı uygulandı. `_rrule_ac` içinde tekrarlı etkinliklerde (DAILY, WEEKLY, MONTHLY, YEARLY) dün başlayıp bugün süren örneklerin yakalanabilmesi için `esik_basi = gun_basi - sure` eşiği getirildi. `ics_coz` içinde DTEND bulunmayan tüm gün etkinliklerin bitişi başlangıç + 1 gün (ertesi gün 00:00) olarak ayarlandı. `tools/ice_test.py` dosyasına haftalık/aylık tekrarda süren örnekler, EXDATE ile dışlanan süren örnek ve ufuk sınırı testleri eklendi.
+- **Koşan testler:** `python tools/ice_test.py` -> Ice aktarma temiz: ics, rrule, exdate, recurrence-id, ufuk, yalniz bu bilgisayar, ozel baslik, adres gizli, onbellek, ozet suzgeci, ag hatasi. · `python tools/yazi.py --denetle` -> Yazı denetimi: temiz
+- **Kabul testi:** `python tools/ice_suren_kabul_test.py` -> ice suren kabul: cok gunluk, gece yarisi, DTEND'siz tum gun, bitmis elenir, tekrarlayan gece.
+- **Açık kalan:** yok

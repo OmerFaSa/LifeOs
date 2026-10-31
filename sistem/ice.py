@@ -111,6 +111,15 @@ def _yil_ekle(dt, n):
 GUN_KODLARI = {"MO": 0, "TU": 1, "WE": 2, "TH": 3, "FR": 4, "SA": 5, "SU": 6}
 
 
+def _aralikta_mi(bas, bit, gun_basi, son):
+    """Etkinlik [gun_basi, son) ile ortusuyor mu: baslangici aralikta ya da baslangici once ama bitisi bugun 00:00'dan sonra."""
+    if gun_basi <= bas < son:
+        return True
+    if bas < gun_basi and bit is not None and bit > gun_basi:
+        return True
+    return False
+
+
 def _rrule_ac(o, gun_basi, son):
     """Tekrarlayan etkinligi ufuk icindeki orneklerine acar."""
     bas = o["bas"]
@@ -122,7 +131,7 @@ def _rrule_ac(o, gun_basi, son):
     rrule_str = o.get("rrule")
 
     if not rrule_str:
-        if gun_basi <= bas < son and not _haric_mi(bas, tum_gun, exdates):
+        if _aralikta_mi(bas, bit, gun_basi, son) and not _haric_mi(bas, tum_gun, exdates):
             return [{"bas": bas, "bit": bit, "tum_gun": tum_gun, "ad": ad}]
         return []
 
@@ -135,7 +144,7 @@ def _rrule_ac(o, gun_basi, son):
     freq = kurallar.get("FREQ", "").upper()
     if freq not in ("DAILY", "WEEKLY", "MONTHLY", "YEARLY"):
         # Taninmayan RRULE: yalniz ilk ornegi ufuktaysa kalir
-        if gun_basi <= bas < son and not _haric_mi(bas, tum_gun, exdates):
+        if _aralikta_mi(bas, bit, gun_basi, son) and not _haric_mi(bas, tum_gun, exdates):
             return [{"bas": bas, "bit": bit, "tum_gun": tum_gun, "ad": ad}]
         return []
 
@@ -161,7 +170,8 @@ def _rrule_ac(o, gun_basi, son):
         if u_dt:
             until_dt = u_dt.replace(hour=23, minute=59, second=59) if u_tum else u_dt
 
-    if count == 0 or (until_dt and until_dt < gun_basi):
+    esik_basi = (gun_basi - sure) if sure else gun_basi
+    if count == 0 or (until_dt and until_dt < esik_basi):
         return []
 
     cikti = []
@@ -170,8 +180,8 @@ def _rrule_ac(o, gun_basi, son):
 
     if freq == "DAILY":
         cur = bas
-        if count is None and cur < gun_basi:
-            fark_gun = (gun_basi - cur).days
+        if count is None and cur < esik_basi:
+            fark_gun = (esik_basi - cur).days
             atla = (fark_gun // interval) * interval
             if atla > 0:
                 cur += datetime.timedelta(days=atla)
@@ -184,8 +194,9 @@ def _rrule_ac(o, gun_basi, son):
                 break
             if cur >= son:
                 break
-            if cur >= gun_basi and not _haric_mi(cur, tum_gun, exdates):
-                cikti.append({"bas": cur, "bit": (cur + sure) if sure else None, "tum_gun": tum_gun, "ad": ad})
+            cur_bit = (cur + sure) if sure else None
+            if _aralikta_mi(cur, cur_bit, gun_basi, son) and not _haric_mi(cur, tum_gun, exdates):
+                cikti.append({"bas": cur, "bit": cur_bit, "tum_gun": tum_gun, "ad": ad})
             toplam += 1
             cur += datetime.timedelta(days=interval)
 
@@ -205,8 +216,8 @@ def _rrule_ac(o, gun_basi, son):
         w_basi = bas.replace(hour=bas.hour, minute=bas.minute, second=bas.second, microsecond=0)
         w_basi = w_basi - datetime.timedelta(days=bas.weekday())
 
-        if count is None and w_basi + datetime.timedelta(days=7) < gun_basi:
-            fark_hafta = (gun_basi - w_basi).days // 7
+        if count is None and w_basi + datetime.timedelta(days=7) < esik_basi:
+            fark_hafta = (esik_basi - w_basi).days // 7
             atla_hafta = (fark_hafta // interval) * interval
             if atla_hafta > 0:
                 w_basi += datetime.timedelta(weeks=atla_hafta)
@@ -227,15 +238,16 @@ def _rrule_ac(o, gun_basi, son):
                 if cur >= son:
                     bitti = True
                     break
-                if cur >= gun_basi and not _haric_mi(cur, tum_gun, exdates):
-                    cikti.append({"bas": cur, "bit": (cur + sure) if sure else None, "tum_gun": tum_gun, "ad": ad})
+                cur_bit = (cur + sure) if sure else None
+                if _aralikta_mi(cur, cur_bit, gun_basi, son) and not _haric_mi(cur, tum_gun, exdates):
+                    cikti.append({"bas": cur, "bit": cur_bit, "tum_gun": tum_gun, "ad": ad})
                 toplam += 1
             w_basi += datetime.timedelta(weeks=interval)
 
     elif freq == "MONTHLY":
         adim = 0
         if count is None:
-            fark_ay = (gun_basi.year - bas.year) * 12 + (gun_basi.month - bas.month)
+            fark_ay = (esik_basi.year - bas.year) * 12 + (esik_basi.month - bas.month)
             if fark_ay > interval:
                 adim = ((fark_ay - 1) // interval) * interval
 
@@ -248,15 +260,16 @@ def _rrule_ac(o, gun_basi, son):
                 break
             if cur >= son:
                 break
-            if cur >= gun_basi and not _haric_mi(cur, tum_gun, exdates):
-                cikti.append({"bas": cur, "bit": (cur + sure) if sure else None, "tum_gun": tum_gun, "ad": ad})
+            cur_bit = (cur + sure) if sure else None
+            if _aralikta_mi(cur, cur_bit, gun_basi, son) and not _haric_mi(cur, tum_gun, exdates):
+                cikti.append({"bas": cur, "bit": cur_bit, "tum_gun": tum_gun, "ad": ad})
             toplam += 1
             adim += interval
 
     elif freq == "YEARLY":
         adim = 0
         if count is None:
-            fark_yil = gun_basi.year - bas.year
+            fark_yil = esik_basi.year - bas.year
             if fark_yil > interval:
                 adim = ((fark_yil - 1) // interval) * interval
 
@@ -269,8 +282,9 @@ def _rrule_ac(o, gun_basi, son):
                 break
             if cur >= son:
                 break
-            if cur >= gun_basi and not _haric_mi(cur, tum_gun, exdates):
-                cikti.append({"bas": cur, "bit": (cur + sure) if sure else None, "tum_gun": tum_gun, "ad": ad})
+            cur_bit = (cur + sure) if sure else None
+            if _aralikta_mi(cur, cur_bit, gun_basi, son) and not _haric_mi(cur, tum_gun, exdates):
+                cikti.append({"bas": cur, "bit": cur_bit, "tum_gun": tum_gun, "ad": ad})
             toplam += 1
             adim += interval
 
@@ -292,6 +306,8 @@ def ics_coz(metin, simdi, ufuk=UFUK_GUN):
             o = {}
         elif s == "END:VEVENT" and o is not None:
             if o.get("bas"):
+                if o.get("tum_gun") and not o.get("bit"):
+                    o["bit"] = o["bas"] + datetime.timedelta(days=1)
                 olaylar.append(o)
             o = None
         elif o is not None and ":" in s:
