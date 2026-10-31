@@ -435,8 +435,11 @@ def gonder(d, rol_, model, baslik, ilk, devam, yeni=False):
     """Isi uygun konusmaya mesajla verir ya da yeni konusma acar: (kimlik, bas, yeni_mi)."""
     s = None if yeni else devam_edilebilir(d, rol_, model)
     if s:
-        agentapi(["send-message", s[0], devam])
-        return s[0], s[1], False
+        try:
+            agentapi(["send-message", s[0], devam])
+            return s[0], s[1], False
+        except SystemExit:                              # kullanici konusmayi silmis olabilir: yenisini ac
+            pass
     y = agentapi(["new-conversation", "--model=" + model, "--title=" + baslik, ilk])
     kimlik = (y.get("newConversation") or {}).get("conversationId")
     if not kimlik:
