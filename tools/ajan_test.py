@@ -150,6 +150,11 @@ if [y for y in yasak if not A.yasak_bolge([y])]:
     hata.append("yasak yol kacti: %r" % [y for y in yasak if not A.yasak_bolge([y])])
 if A.modul_belgeleri(["SPI/src/js/screens/a.js", "SPI/src/js/b.js", "tools/x.py", "HKM/motor/y.py"]) != ["SPI/src/MIMARI.md", "HKM/MIMARI.md"]:
     hata.append("modul_belgeleri: %r" % A.modul_belgeleri(["SPI/src/js/screens/a.js", "HKM/motor/y.py"]))
+if A.sari_bolge(["SPI/src/js/core/quickentry.js", "AYS/src/js/screens/today.js", "sistem/ice.py", "HKM/motor/a.py",
+                  "tools/veri_dogrula.py", "veri/taslak/x.jsonl", "tools/paket.py", "belgeler/TEKNIK.md", "tools/ice_test.py"]) \
+        != ["SPI/src/js/core/quickentry.js", "AYS/src/js/screens/today.js", "sistem/ice.py", "HKM/motor/a.py",
+            "tools/veri_dogrula.py", "veri/taslak/x.jsonl"]:
+    hata.append("sari bolge: veriye dokunan mantik secilmeli, arac/test/belge secilmemeli")
 g1 = "# 9\r\n**Durum:** bekliyor\r\n## Kabul ölçütü\r\n- mcg ile µg aynı  \r\n## Sonuç\r\n- **Ne değişti:**\r\n"
 g2 = g1.replace("bekliyor", "bitti").replace("\r\n", "\n").replace("- **Ne değişti:**", "- **Ne değişti:** x")
 if A.gorev_govdesi(g1) != A.gorev_govdesi(g2):

@@ -52,6 +52,16 @@ görevi `baslat` reddeder; kanca o dosyalara yazmayı engeller; pilot dalın
 diff'inde yasak yol görürse işi durdurur. Listeyi yalnız depo sahibi genişletir
 ya da daraltır.
 
+**Üç kademe (depo sahibi, 2026-11-01: «tasarruf, hız ve profesyonellik birlikte»):**
+
+| Kademe | Ne | Kim | Kapı |
+|---|---|---|---|
+| Kırmızı | yasak bölge: görsel, animasyon, çekirdek altyapı, veri katmanı; mimari ve yeni özellik tasarımı | sen | kodda kilit (`YASAK_BOLGE`) |
+| Sarı | veriye dokunan mantık: modül `core/` ve `screens/` mantığı, `sistem/` özellik modülleri, `HKM/motor`, `tools/veri_*`, `veri/` | ofis | **kabul testi zorunlu** (`SARI_BOLGE`: `baslat` ve `birlestir` testsizi durdurur), Denetçi turu, satır satır son inceleme |
+| Yeşil | araçlar, testler, belgeler, tarama, veri üretimi | ofis | Testçi + diff okuma |
+
+Ağır kodlama ekipte kalır (tasarruf, hız); doğruluğu ajanın sözü değil senin yazdığın test belirler.
+
 **Sende kalır:** yasak bölgenin hepsi; tasarım ve yaratıcı kararlar; King;
 AGENTS.md §1'e dokunan karar; ~20 satırın altındaki iş (ofis daha pahalı);
 görev yazımı ve kabul testi; son inceleme, tam denetimler (§2), birleştirme,

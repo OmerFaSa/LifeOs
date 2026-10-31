@@ -502,6 +502,16 @@ def yasak_bolge(yollar):
     return out
 
 
+# SARI KADEME (depo sahibi, 2026-11-01: «tasarruf, hiz ve profesyonellik birlikte»): veriye dokunan mantik
+# ofiste yapilir ama kabul testi (Claude Code yazar) zorunludur; baslat ve birlestir testsiz isi durdurur.
+SARI_BOLGE = re.compile(r"^(AYS|SPI|ESP)/src/js/(core|screens)/|^sistem/|^HKM/motor/|^tools/veri_|^veri/", re.I)
+
+
+def sari_bolge(yollar):
+    """Kabul testi zorunlu (veriye dokunan) yollar. Saf islev."""
+    return [y for y in (str(x).replace("\\", "/") for x in yollar) if SARI_BOLGE.search(y)]
+
+
 def gorev_govdesi(metin):
     """Gorev dosyasinin ajanin degistiremeyecegi kismi: Sonuc'tan once, Durum satiri haric (satir sonu duzgun)."""
     bas = re.sub(r"\*\*Durum:\*\*[^\n]*", "", (metin or "").replace("\r\n", "\n").split("## Sonuç", 1)[0])
@@ -695,6 +705,9 @@ def baslat(no, efor=None, ek="", yeni=False):
     if yasak:
         raise SystemExit("Bu görev ofisin değil (görsel/altyapı Claude Code'da): "
                          + "; ".join("%s (%s)" % y for y in yasak))
+    sari = sari_bolge(gorev_yollari(metin))
+    if sari and not bilgi["kabul"]:
+        raise SystemExit("Veriye dokunan mantık (%s): «**Kabul testi:**» zorunlu; önce testi yaz." % ", ".join(sari))
     efor = efor_cevir(efor) or bilgi["efor"] or "orta"
     d = oku_durum()
     if d.get(no, {}).get("acik"):
@@ -1007,6 +1020,7 @@ def birlestir(no, ders=None, push=False, zorla=False):
     sorun += ["yasak bölge: %s" % y for y, _ in yasak_bolge(adlar)]
     sorun += ["kabul testi değişti: %s" % k for k in a.get("kabul") or () if k in adlar]
     sorun += ["görev dosyası Durum ve Sonuç dışında değişti (ölçüt)"] if gorev_degisti(dal, a["gorev"]) else []
+    sorun += ["veriye dokunan mantık kabul testsiz: %s" % ", ".join(sari_bolge(adlar))] if sari_bolge(adlar) and not a.get("kabul") else []
     if sorun and not zorla:
         raise SystemExit("Birleştirmedim: " + "; ".join(sorun) + " (bakıp yine de almak için --zorla).")
     baslik = re.sub(r"^#\s*", "", (g("show", "%s:%s/%s" % (dal, GOREVLER, a["gorev"]), kontrol=False) or "#").splitlines()[0])
