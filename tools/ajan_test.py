@@ -46,6 +46,22 @@ cevap = alan(1, alan(2, "bot-64dd2089-a4c0-4e00-a594-0761c4b5cb6b") + alan(3, "T
 if A.adim_ozet(15, 3, cevap)["metin"] != "Testler geçti, dal push edildi.":
     hata.append("model cevabi: %r" % A.adim_ozet(15, 3, cevap))
 
+# klasor disi: Antigravity'nin kabugu ana klasorde acilir; cd'siz komut ve disari yazilan dosya yakalanir
+wt = r"C:\Users\ASUS\LifeOs-ajan\003"
+bos = {"komut": "", "cwd": "", "yol": "", "arac": ""}
+for a, beklenen in ((dict(bos, komut="git commit -m x"), "komut"),
+                    (dict(bos, komut=r"cd C:\Users\ASUS\LifeOs-ajan\003; git status"), None),
+                    (dict(bos, komut="git status", cwd="C:/Users/ASUS/LifeOs-ajan/003/AYS"), None),
+                    (dict(bos, komut="git status", cwd=r"C:\Users\ASUS\LifeOs-ajan\0031"), "komut"),
+                    (dict(bos, arac="write_file", yol=r"C:\Users\ASUS\LifeOs\brand\ortak\cam.css"), "dosya"),
+                    (dict(bos, arac="write_file", yol=r"C:\Users\ASUS\LifeOs-ajan\003\x.md"), None),
+                    (dict(bos, arac="read_file", yol=r"C:\Users\ASUS\LifeOs\AGENTS.md"), None)):
+    d = A.klasor_disi(a, wt)
+    if (d and d[0]) != beklenen:
+        hata.append("klasor_disi(%r) = %r" % (a, d))
+if "AÇILMAZ" not in A.gorev_istemi(wt, "d", A.gorev_dosyasi("003"), A.portlar(1)) or "cd x; " not in A.mini_istemi("x", "i"):
+    hata.append("istem kabugun klasorunu acikca soylemeli")
+
 # efor
 for g, b in (("düşük", "dusuk"), ("Orta", "orta"), ("yüksek", "yuksek"), ("YUKSEK", "yuksek"), ("pro", None), ("", None)):
     if A.efor_cevir(g) != b:

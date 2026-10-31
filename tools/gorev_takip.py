@@ -152,6 +152,7 @@ ol.adim li{ display:grid; grid-template-columns:34px 86px 1fr; gap:6px; padding:
 ol.adim li span:first-child{ color:var(--ikinci); text-align:right; } ol.adim li span:nth-child(2){ color:var(--ikinci); }
 ol.adim li span:last-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .altajan{ margin-top:6px; padding:8px 10px; border-left:2px solid var(--cizgi); font-size:12.5px; }
+.uyari summary{ color:var(--takildi); font-weight:600; }
 .komut{ font:12px ui-monospace, Consolas, monospace; color:var(--ikinci); margin-top:6px; }
 .bos{ color:var(--ikinci); padding:4px 0 8px; margin:0; font-size:13px; }
 </style></head><body>
@@ -184,6 +185,8 @@ function ajanHtml(a){
     + (a.tur === 'gorev' && c.commit != null ? '<span>commit <b>' + c.commit + '</b></span><span>kaydedilmemiş <b>' + (c.degisen || 0) + '</b></span>' : '')
     + ((c.alt || []).length ? '<span>alt ajan <b>' + c.alt.length + '</b></span>' : '') + '</div>'
     + (araclar.length ? '<div class="cip">' + araclar.map(([k, v]) => '<span>' + kac(k) + ' ' + v + '</span>').join('') + '</div>' : '')
+    + ((c.disari || []).length ? '<details class="uyari"><summary>Klasör dışında ' + c.disari.length + ' iş (ana klasöre bak)</summary><ol class="adim">'
+      + c.disari.map(x => '<li><span>' + x.idx + '</span><span>' + kac(x.tur) + '</span><span title="' + kac(x.metin) + '">' + kac(x.metin.split('\\n')[0]) + '</span></li>').join('') + '</ol></details>' : '')
     + (a.acik && son.idx != null ? '<div class="simdi">' + (c.hal === 'turu bitti' ? 'Tur bitti, sıra Claude Code’da.' : 'Şu an: ')
       + (c.hal === 'turu bitti' ? '' : (son.arac ? '<b>' + kac(son.arac) + '</b> ' + kac(son.ozet) : kac(son.tur))) + '</div>' : '')
     + '<div class="alt"><code>' + kac(a.worktree) + '</code>' + (a.dal ? ' · <code>' + kac(a.dal) + '</code>' : '')

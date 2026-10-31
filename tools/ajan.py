@@ -134,13 +134,17 @@ KIMLIK = re.compile(r"^[\s\"$:(]*(bot-)?[0-9a-f-]{20,}[\s\"]*$|^call_\d+$|^type\
 def adim_ozet(tur, durum, govde):
     """Bir adimi okunur bir satira cevirir: tur, arac, ozet, metin."""
     m = [t for t in (pb_metinler(govde or b"") or []) if not KIMLIK.match(t)]
-    o = {"tur": ADIM.get(tur, "adım %d" % tur), "durum": durum, "arac": "", "ozet": "", "metin": ""}
+    o = {"tur": ADIM.get(tur, "adım %d" % tur), "durum": durum, "arac": "", "ozet": "", "metin": "",
+         "komut": "", "cwd": "", "yol": ""}
     for j, t in enumerate(m):
         if re.fullmatch(r"[a-z_]{3,40}", t) and j + 1 < len(m) and m[j + 1].lstrip().startswith("{"):
             o["arac"] = t
             try:
                 a = json.loads(m[j + 1])
                 o["ozet"] = str(a.get("toolSummary") or a.get("CommandLine") or a.get("Path") or a.get("AbsolutePath") or "")[:160]
+                o["komut"] = str(a.get("CommandLine") or "")
+                o["cwd"] = str(a.get("Cwd") or "")
+                o["yol"] = str(a.get("TargetFile") or a.get("Path") or a.get("AbsolutePath") or "")
             except ValueError:
                 o["ozet"] = m[j + 1][:160]
             break
@@ -155,8 +159,32 @@ def adim_ozet(tur, durum, govde):
     return o
 
 
-def konusma_oku(kimlik, son=10):
-    """Konusma kaydindan adimlar, son eylem ve cevap. Kayit yoksa None."""
+def _icinde(yol, kok):
+    n = lambda s: s.replace("/", "\\").rstrip("\\").lower()
+    return n(yol) == n(kok) or n(yol).startswith(n(kok) + "\\")
+
+
+YAZAN = re.compile(r"write|replace|edit|delete|move", re.I)
+
+
+def klasor_disi(a, wt):
+    """Ajanin kendi klasoru disinda calisan komutu ya da yazdigi dosya: (tur, metin) ya da None.
+    Antigravity'nin kabugu ajanin klasorunde acilmaz (2026-10-31: 003 butun isi ana klasorde yapti)."""
+    if a["komut"]:
+        if a["cwd"] and _icinde(a["cwd"], wt):
+            return None
+        if wt.lower() in a["komut"].lower().replace("/", "\\"):
+            return None
+        return ("komut", a["komut"][:200])
+    if a["yol"] and YAZAN.search(a["arac"]) and not _icinde(a["yol"], wt) \
+            and not _icinde(a["yol"], str(Path.home() / ".gemini")):
+        return ("dosya", a["yol"][:200])
+    return None
+
+
+def konusma_oku(kimlik, son=10, wt=None):
+    """Konusma kaydindan adimlar, son eylem ve cevap. Kayit yoksa None.
+    wt verilirse o klasorun disinda calisan komut ve yazilan dosyalar 'disari'da listelenir."""
     yol = KONUSMALAR / (kimlik + ".db")
     if not yol.exists():
         return None
@@ -186,7 +214,10 @@ def konusma_oku(kimlik, son=10):
         hal = "turu bitti"
     else:
         hal = "çalışıyor" if time.time() - degisti < 600 else "sessiz"
+    disari = [dict(idx=a["idx"], tur=d[0], metin=d[1]) for a in adimlar if a["tur"] == "model" and wt
+              for d in [klasor_disi(a, wt)] if d]
     return {"adim": len(adimlar), "hal": hal, "son_degisim": int(degisti), "cevap": cevap, "araclar": araclar,
+            "disari": disari,
             "son_adimlar": [{k: a[k] for k in ("idx", "tur", "arac", "ozet", "metin")} for a in adimlar[-son:]]}
 
 
@@ -318,6 +349,8 @@ def gorev_istemi(wt, dal, dosya, p, efor="orta", ek=""):
         "Çalışma klasörün: %(wt)s — yalnız bu klasörde çalış. C:\\Users\\ASUS\\LifeOs, "
         "C:\\Users\\ASUS\\LifeOs-ag ve C:\\Users\\ASUS\\LifeOS-Sistem açılmaz, değiştirilmez.\n"
         "Dalın hazır ve seçili: %(dal)s (main'den açıldı). Dal değiştirme, yeni dal açma, main'e merge ya da push etme.\n"
+        "DİKKAT: komut kabuğun bu klasörde AÇILMAZ (varsayılanı C:\\Users\\ASUS\\LifeOs, orası yasak). Her komutu "
+        "'cd %(wt)s; ' ile başlat; git komutundan önce 'git rev-parse --show-toplevel' çıktısı bu klasör olmalı.\n"
         "1. Önce %(wt)s\\AGENTS.md ve %(wt)s\\belgeler\\ekip\\gorevler\\README.md dosyalarını oku; kurallar sözleşmedir.\n"
         "2. Görevin: %(wt)s\\%(gorev)s. Yazanı yap, yazmayanı yapma; belirsizse tahmin etme, «Sonuç»a soru olarak yaz.\n"
         "3. Tarayıcı testlerinde README'deki portlar yerine YALNIZ şunlar: "
@@ -337,8 +370,9 @@ def gorev_istemi(wt, dal, dosya, p, efor="orta", ek=""):
 
 def mini_istemi(wt, istem):
     return ("LifeOS deposunda kısa bir iş; seni Claude Code başlattı. Klasör: %s (main'in salt okunur kopyası).\n"
+            "Komut kabuğun bu klasörde açılmaz: her komutu 'cd %s; ' ile başlat.\n"
             "Dosya değiştirme, commit etme, sunucu açma; yalnız oku, ara ve komutla incele. "
-            "Cevabını kısa ve kanıtlı ver (dosya:satır).\n\nİş: %s" % (wt, istem))
+            "Cevabını kısa ve kanıtlı ver (dosya:satır).\n\nİş: %s" % (wt, wt, istem))
 
 
 # ---------- komutlar ----------
@@ -437,7 +471,7 @@ def hepsi():
     for ad, a in d.items():
         if ad.startswith("_"):
             continue
-        k = konusma_oku(a["konusma"]) or {"hal": "kayıt yok"}
+        k = konusma_oku(a["konusma"], wt=a["worktree"]) or {"hal": "kayıt yok"}
         k["alt"] = alt_ajanlar(a["konusma"], a.get("baslangic", 0)) if a.get("acik") else []
         if a["tur"] == "gorev" and a.get("acik") and Path(a["worktree"]).exists():
             k["degisen"] = len((git("status", "--porcelain", kok=Path(a["worktree"]), kontrol=False) or "").splitlines())
