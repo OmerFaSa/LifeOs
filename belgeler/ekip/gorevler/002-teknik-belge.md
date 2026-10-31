@@ -2,6 +2,7 @@
 
 **Durum:** bekliyor
 **Dal:** `ag/002-teknik-belge`
+**Efor:** orta
 
 ## Amaç
 `belgeler/TEKNIK.md` 2026-10-30/31'de eklenen sistemleri anlatmıyor. Kodu

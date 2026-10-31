@@ -210,6 +210,11 @@ jobs:
       - name: Görev takip okuyucusu
         run: python3 tools/gorev_takip_test.py
 
+      # AJANLAR (2026-10-31). Claude Code Antigravity'yi surer; konusma kaydi okuyucu,
+      # efor -> model, yuva -> port (carpismaz), istem. Antigravity CI'da yok: sahte kayitla.
+      - name: Ajan okuyucusu ve istemi
+        run: python3 tools/ajan_test.py
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç

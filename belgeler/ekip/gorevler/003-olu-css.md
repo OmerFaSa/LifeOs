@@ -2,6 +2,7 @@
 
 **Durum:** bekliyor
 **Dal:** `ag/003-olu-css`
+**Efor:** düşük
 
 ## Amaç
 `python tools/olucss.py` hiçbir öğeye uyamayan 13 seçici buluyor

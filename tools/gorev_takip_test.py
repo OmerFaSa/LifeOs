@@ -13,6 +13,8 @@ m = "# 001 · Takvim\n\n**Durum:** bitti\n**Dal:** `ag/001-takvim`\n\n## Amaç\n
 g = G.gorev_oku(m)
 if (g["baslik"], g["durum"], g["dal"], g["sonuc"]) != ("001 · Takvim", "bitti", "ag/001-takvim", "Testler geçti."):
     hata.append("okuma: %r" % g)
+if G.gorev_oku("# x\n**Efor:** yüksek\n")["efor"] != "yuksek" or G.gorev_oku("# x\n")["efor"] is not None:
+    hata.append("efor okunmali, yoksa None")
 if G.gorev_oku("# x\n**Durum:** uydurma   <!-- a | b -->\n")["durum"] != "bekliyor":
     hata.append("bilinmeyen durum bekliyor sayilmali")
 if G.gorev_oku("# x\n**Durum:** bekliyor   <!-- bekliyor | sürüyor -->\n")["durum"] != "bekliyor":

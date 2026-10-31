@@ -42,11 +42,43 @@ Antigravity yapar; Claude Code görevi yazar, gözden geçirir, `main`'e alır.
   commit'e girmez.
 - Düzeltilen her hata için önce o hatayı yakalayan test yazılır.
 
+## Claude Code'un ajanları (`tools/ajan.py`)
+
+Depo sahibinin kararı (2026-10-31): Antigravity'yi Claude Code sürer. Her ajan
+Antigravity'de ayrı bir konuşmadır ve **kendi** klasöründe çalışır
+(`C:\Users\ASUS\LifeOs-ajan\<numara>`, dal hazır seçili); test portları da
+kendinedir (yuva n: AYS `47n1`, SPİ `47n2`, ESP `47n3`). Ajanın istemi
+yukarıdaki akışı ve o portları söyler; README'deki 4378/4388/4398 yalnız
+`LifeOs-ag`'de elle çalışırken geçerlidir.
+
+```
+python tools/ajan.py baslat 003                 görev ajanı; efor görev dosyasından
+python tools/ajan.py baslat 001 --efor yuksek   efor dosyayı ezer
+python tools/ajan.py mini css-ara "…"          salt okunur kısa iş, cevap verir
+python tools/ajan.py durum                      hepsinin hâli, son adımı
+python tools/ajan.py cevap 003                  son cevabın tam metni
+python tools/ajan.py mesaj 003 "…"              konuşmaya ek talimat
+python tools/ajan.py kapat 003                  klasörü kaldırır, dal kalır
+```
+
+- **Efor modeli seçer:** düşük → `flash_lite`, orta → `flash`, yüksek → `pro`.
+  Görev dosyasındaki «**Efor:**» satırı varsayılandır. Efor alt ajan sınırını
+  da belirler: düşükte alt ajan yok, ortada en çok 2, yüksekte en çok 3.
+- **Mini ajan:** main'in ayrık bir kopyasında (`LifeOs-ajan\m-<ad>`) okur,
+  arar, cevap verir; dosya değiştirmez, commit etmez. Varsayılan efor düşük.
+- Ajan bitince dalını push eder; birleştirme yine Claude Code'dadır (akış 8).
+- Antigravity'nin adresi ve CSRF anahtarı çalışan dil sunucusundan okunur;
+  hiçbir dosyaya yazılmaz. Durum `LifeOs-ajan\ajanlar.json`'dadır (depoda değil).
+
 ## İzleme
 
-Masaüstündeki **Görev Takibi** (`tools/gorev_takip.py`) kuyruğu, her görevin
-dalını ve Antigravity'nin o an hangi dalda çalıştığını gösterir; on saniyede
-bir yenilenir. Yalnız okur, hiçbir şeyi değiştirmez.
+Masaüstündeki **Görev Takibi** (`tools/gorev_takip.py`) beş saniyede bir
+yenilenir ve şunları gösterir: Antigravity açık mı, kaç ajan çalışıyor, dolu
+yuvalar; her ajanın türü, eforu ve modeli, hâli (başlıyor · çalışıyor · turu
+bitti · sessiz · hata), süresi, adım sayısı, kullandığı araçlar, şu an ne
+yaptığı, son adımları, son cevabı, alt ajanları, klasörü, dalı, portları,
+commit ve kaydedilmemiş dosya sayısı; altında kuyruk (durum, efor, dal,
+Sonuç). Yalnız okur, hiçbir şeyi değiştirmez.
 
 ## Görev dosyası şablonu
 

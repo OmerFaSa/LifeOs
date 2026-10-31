@@ -210,6 +210,10 @@ yalnız `belgeler/ekip/gorevler/` kuyruğundaki görevleri yapar; akış, sını
 şablon `belgeler/ekip/gorevler/README.md`'dedir. Asıl klasöre
 (`C:\Users\ASUS\LifeOs`) ve çalışan kopyaya dokunmaz; tasarım, `brand/ortak/`,
 `sistem/`, King ve §1'e dokunan işler görevde açıkça yazmıyorsa onun değildir.
+Aynı gün: Antigravity'yi Claude Code `tools/ajan.py` ile sürer; her ajan ayrı
+konuşma, ayrı klasör (`C:\Users\ASUS\LifeOs-ajan\<görev>`) ve ayrı test
+portlarıdır (yuva n: `47n1–47n3`); efor modeli seçer (düşük `flash_lite`, orta
+`flash`, yüksek `pro`). İzleme: Görev Takibi (`tools/gorev_takip.py`).
 
 - `main`'e doğrudan push **yalnız** depo sahibinin oturumundan yapılır.
 - **Çalışan kopyada geliştirme yapılmaz.** Masaüstü uygulaması (LifeOS.exe)

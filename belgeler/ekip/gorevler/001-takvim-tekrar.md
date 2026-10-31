@@ -2,6 +2,7 @@
 
 **Durum:** bekliyor
 **Dal:** `ag/001-takvim-tekrar`
+**Efor:** yüksek
 
 ## Amaç
 Google Takvim'in gizli iCal adresinden okunan etkinliklerde tekrarlayanlar

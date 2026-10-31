@@ -2,6 +2,7 @@
 
 **Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/NNN-kisa-ad`
+**Efor:** orta   <!-- düşük (flash_lite) | orta (flash) | yüksek (pro) -->
 
 ## Amaç
 Ne yapılacak ve neden (kullanıcının sözü varsa tırnakla).
