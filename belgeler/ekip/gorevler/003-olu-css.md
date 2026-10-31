@@ -1,6 +1,6 @@
 # 003 · Ölü CSS temizliği
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/003-olu-css`
 **Efor:** düşük
 
@@ -31,3 +31,6 @@
 - `cd ESP && node tools/runtests.js 4398`
 
 ## Sonuç
+- `python tools/olucss.py` ile ölü seçiciler tespit edildi ve `python tools/olucss.py --sil` ile temizlendi.
+- `python tools/ortak.py --yay` ile modüllere yayıldı, `python tools/ortak.py --denetle` temiz çıktı.
+- Testler başarıyla koştu: AYS (3121/3121), SPI (2880/2880), ESP (2587/2587).

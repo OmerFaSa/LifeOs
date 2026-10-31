@@ -155,7 +155,6 @@ html[data-zemin="yumusak"] .ayarlar .themebtn.is-on{ border-color:transparent; b
 .plan__olay time{ font-size:10.5px; font-variant-numeric:tabular-nums; color:var(--text-2); }
 .plan__olay--acilis, .plan__olay--kapanis{ background:transparent; box-shadow:inset 0 0 0 1px var(--border-strong); }
 .plan__alt{ margin:14px 0 2px; font-size:12px; font-weight:600; color:var(--text-3); }
-.plan__satir{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:8px 12px; padding:12px 0; border-top:1px solid var(--border-soft); }
 .plan__ad{ font-size:14px; font-weight:550; color:var(--text); }
 .plan__ad small{ display:block; font-size:12px; font-weight:450; color:var(--text-3); }
 .plan__ayar{ grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
