@@ -7,7 +7,7 @@ modele birakilmis bir sozdu. Bu kanca sozu koda cevirir. `python tools/ajan.py k
 ~/.gemini/config/hooks.json'a «lifeos-ajan» adiyla yazar (kullanicinin onayiyla).
 
 Yalniz ajanlar.json'daki konusmalara (ve onlarin alt ajanlarina) dokunur; kullanicinin
-kendi Antigravity konusmalarina bos cevap ({}) doner, davranislarini degistirmez.
+kendi Antigravity konusmalarina notr cevap doner (notr() bakiniz), davranislarini degistirmez.
 
   PreToolUse  komut ajanin klasorunde degilse basina Set-Location eklenir; ana klasore,
               calisan kopyaya, main'e dokunan git komutu ve klasor disina yazma reddedilir;
@@ -136,10 +136,17 @@ def dur_karari(a, girdi, onceki):
     return False, ""
 
 
+def notr(olay):
+    """Bizim olmayan konusmaya karismayan cevap. PreToolUse'ta bos cevap ({}) Antigravity'de
+    REDDETMEK sayilir (2026-10-31 denemesi: kullanicinin konusmasinda git --version engellendi);
+    "ask" normal izin akisina birakir."""
+    return {"decision": "ask"} if olay == "PreToolUse" else {}
+
+
 def isle(olay, girdi):
     bulgu = ajan_bul(girdi.get("conversationId"))
     if not bulgu:
-        return {}
+        return notr(olay)
     ad, a = bulgu
     wt = a["worktree"]
     if olay == "PreToolUse":
@@ -169,12 +176,12 @@ def main():
         girdi = json.loads(sys.stdin.buffer.read().decode("utf-8") or "{}")
         out = isle(olay, girdi)
     except Exception as e:  # kanca asla ajani kilitlememeli: hata -> karar yok
-        out = {}
+        out = notr(olay)
         try:
             olay_yaz("_kanca", {"olay": "hata", "neden": repr(e)[:300]})
         except OSError:
             pass
-    sys.stdout.write(json.dumps(out, ensure_ascii=False))
+    sys.stdout.write(json.dumps(out))  # ASCII kacisli: Windows boru kodlamasindan bagimsiz
 
 
 if __name__ == "__main__":

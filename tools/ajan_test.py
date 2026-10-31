@@ -149,8 +149,9 @@ with tempfile.TemporaryDirectory() as t:
 
     # kanca: yalniz bizim konusmalarimiz; ana ve alt ajan bulunur, olay yazilir
     A.yaz_durum({"003": {"tur": "gorev", "konusma": ana, "worktree": WT, "acik": True, "gorev": "003-olu-css.md"}})
-    if K.isle("PreToolUse", {"conversationId": "baskasi", "toolCall": {"name": "ask_question"}}) != {}:
-        hata.append("kanca kullanicinin kendi konusmasina bos donmeli")
+    # bos cevap Antigravity'de reddetmek sayilir: kullanicinin konusmasi "ask" ile normal izin akisina kalir
+    if K.isle("PreToolUse", {"conversationId": "baskasi", "toolCall": {"name": "ask_question"}}) != {"decision": "ask"}             or K.isle("Stop", {"conversationId": "baskasi"}) != {}:
+        hata.append("kanca kullanicinin kendi konusmasina notr donmeli")
     o = K.isle("PreToolUse", {"conversationId": alt, "toolCall": {"name": "run_command", "args": {"CommandLine": '"git status"'}}})
     if o.get("decision") != "allow" or "Set-Location" not in o.get("overwrite", {}).get("CommandLine", ""):
         hata.append("alt ajanin cd'siz komutu da yonlendirilmeli: %r" % o)

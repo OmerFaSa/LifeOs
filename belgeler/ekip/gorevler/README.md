@@ -83,7 +83,10 @@ sözdür; kanca onu koda çevirir. `python tools/ajan.py kur` kancayı
 diğer kancalarına dokunmaz; `--kaldir` yalnız kendisini siler).
 
 - Yalnız `ajanlar.json`'daki açık konuşmalara ve onların alt ajanlarına
-  dokunur; kullanıcının kendi Antigravity konuşmalarına boş karar döner.
+  dokunur; kullanıcının kendi Antigravity konuşmalarına `ask` döner ve
+  Antigravity'nin normal izin akışı geçerli kalır. Boş cevap (`{}`)
+  Antigravity'de «reddet» sayılır: ilk kurulumda kayıtsız bir konuşmada
+  `git --version` engellendi, kanca kaldırılıp bu düzeltildi.
 - **Komut:** ajanın klasöründe değilse başına `Set-Location` eklenir. Ana
   klasöre, çalışan kopyaya, `LifeOs-ag`'ye dokunan komut; main'e push, merge,
   rebase, dal değiştirme, `reset --hard`, worktree reddedilir. Mini ajan

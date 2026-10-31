@@ -257,7 +257,9 @@ KANCA_AD = "lifeos-ajan"
 
 
 def kanca_tanimi(python=None):
-    komut = '"%s" "%s" ' % (python or sys.executable, KOK / "tools" / "ajan_kanca.py")
+    # cmd /c birden cok tirnakta ilk ve son tirnagi siler: tirnak yalniz bosluklu yolda
+    t = lambda s: '"%s"' % s if " " in str(s) else str(s)
+    komut = "%s %s " % (t(python or sys.executable), t(KOK / "tools" / "ajan_kanca.py"))
     return {"PreToolUse": [{"matcher": "*", "hooks": [{"type": "command", "command": komut + "PreToolUse", "timeout": 10}]}],
             "Stop": [{"type": "command", "command": komut + "Stop", "timeout": 20}]}
 
