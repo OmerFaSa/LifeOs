@@ -201,7 +201,85 @@ with tempfile.TemporaryDirectory() as t:
     if not P.canli_mi() or P.canli_mi(time.time() + 10 * P.TUR_SN):
         hata.append("nabiz: taze canli, eski degil")
 
+    # ---------- is istekleri ----------
+    # dosya yoksa bos liste
+    esit("istekler dosya yok", P.istekler(), [])
+
+    # dosya: 1 gecerli yeni, 1 bozuk json, 1 gecerli planlandi, 1 bos satir, 1 gecerli yeni (uzun metin)
+    istek_dosyasi = P.yol("istekler.jsonl")
+    uzun_metin = "X" * 150
+    istek_icerik = (
+        '{"metin": "İstek 1", "durum": "yeni", "t": 1700000000}\n'
+        'bu bir bozuk json satiridir\n'
+        '{"metin": "İstek 3", "durum": "planlandı", "gorev": "001", "t": 1700000100}\n'
+        '\n'
+        '{"metin": "%s", "durum": "yeni", "t": 1700000200}\n' % uzun_metin
+    )
+    istek_dosyasi.write_text(istek_icerik, encoding="utf-8")
+
+    ist = P.istekler()
+    esit("istek sayisi", len(ist), 3)
+    esit("istek siralar", [x["sira"] for x in ist], [1, 3, 5])
+    esit("istek metinler", [x["metin"] for x in ist], ["İstek 1", "İstek 3", uzun_metin])
+
+    # istek_isle: 5. sirayi planlandi yap
+    P.istek_isle(5, "006")
+    ist_sonra = P.istekler()
+    esit("5 planlandi", (ist_sonra[-1]["durum"], ist_sonra[-1].get("gorev")), ("planlandı", "006"))
+
+    # obur satirlar (bozuk olan dahil) bayt bayt ayni kalmali
+    yeni_satirlar = istek_dosyasi.read_text(encoding="utf-8").splitlines(keepends=True)
+    esit("1. satir ayni", yeni_satirlar[0], '{"metin": "İstek 1", "durum": "yeni", "t": 1700000000}\n')
+    esit("2. satir ayni (bozuk)", yeni_satirlar[1], 'bu bir bozuk json satiridir\n')
+    esit("3. satir ayni", yeni_satirlar[2], '{"metin": "İstek 3", "durum": "planlandı", "gorev": "001", "t": 1700000100}\n')
+    esit("4. satir ayni (bos)", yeni_satirlar[3], '\n')
+    esit("5. satir guncellendi", json.loads(yeni_satirlar[4]), {"metin": uzun_metin, "durum": "planlandı", "t": 1700000200, "gorev": "006"})
+
+    # gecersiz sira ve gorev: SystemExit vermeli, dosya degismemeli
+    dosya_once = istek_dosyasi.read_text(encoding="utf-8")
+    for s, g in ((0, "006"), (10, "006"), (2, "006"), (4, "006"), (1, "6"), (1, "06"), (1, "0006"), (1, "abc")):
+        try:
+            P.istek_isle(s, g)
+            hata.append("istek_isle(%r, %r) SystemExit vermeli" % (s, g))
+        except SystemExit:
+            pass
+    esit("gecersiz islemlerde dosya degismez", istek_dosyasi.read_text(encoding="utf-8"), dosya_once)
+
+    # ajan.py CLI: istekler ve istek komutlari
+    import io
+    eski_stdout = sys.stdout
+
+    # ajan.py istekler: yalniz yeni olanlar basilmali, metin ilk 100 karaktere kirpilmali
+    buf = io.StringIO()
+    sys.stdout = buf
+    try:
+        A.main(["istekler"])
+    finally:
+        sys.stdout = eski_stdout
+    out = buf.getvalue().strip().splitlines()
+    esit("istekler ciktisi satir sayisi", len(out), 1)
+    if out:
+        esit("istek 1 ciktisi", out[0], "1  %s  İstek 1" % time.strftime("%d.%m %H:%M", time.localtime(1700000000)))
+
+    # ajan.py istek 1 007
+    buf = io.StringIO()
+    sys.stdout = buf
+    try:
+        A.main(["istek", "1", "007"])
+    finally:
+        sys.stdout = eski_stdout
+    esit("istek komutu basari", buf.getvalue().strip(), "1. istek planlandı: görev 007.")
+
+    # hepsi planlandi olunca 'Yeni istek yok.'
+    buf = io.StringIO()
+    sys.stdout = buf
+    try:
+        A.main(["istekler"])
+    finally:
+        sys.stdout = eski_stdout
+    esit("yeni istek yok ciktisi", buf.getvalue().strip(), "Yeni istek yok.")
+
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")
     sys.exit(1)
-print("Ofis pilotu temiz: karar tablosu, sinirlar, kota dususu, mesajlar, olcum, Testci kilidi ve tablosu, pilot turu.")
+print("Ofis pilotu temiz: karar tablosu, sinirlar, kota dususu, mesajlar, olcum, Testci kilidi ve tablosu, pilot turu, is istekleri.")

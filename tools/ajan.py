@@ -18,6 +18,8 @@ calisir, iki ajan birbirinin dalini ya da sunucusunu bozmaz.
   python tools/ajan.py kur [--kaldir]                       Antigravity kancasini (hooks.json) kurar/kaldirir
   python tools/ajan.py pilot baslat|dur|durum               otomatik pilot (tools/ofis_pilot.py): kuyruk, Denetci turu, Testci
   python tools/ajan.py testler <no>                         Testci'nin tablosu ve kirmizilarin son satirlari (tools/ofis_test.py)
+  python tools/ajan.py istekler                             bekleyen iş istekleri (LifeOs-ajan/istekler.jsonl)
+  python tools/ajan.py istek <sıra> <görev-no>              isteği «planlandı» diye işaretler
 
 Ofis: Uygulayici, Arastirmaci, Denetci rolleri. Bir rolun konusmasi bos, kisa ve bagli
 oldugu surece sonraki is ayni konusmaya mesajla gider (--yeni zorla yenisini acar).
@@ -852,6 +854,20 @@ def main(argv):
     elif k == "testler" and argv:
         import ofis_test
         print(ofis_test.tablo(ofis_test.son_ozet(argv[0])))
+    elif k == "istekler":
+        import ofis_pilot
+        yeni = [x for x in ofis_pilot.istekler() if x.get("durum") == "yeni"]
+        if not yeni:
+            print("Yeni istek yok.")
+        else:
+            for x in yeni:
+                zaman = time.strftime("%d.%m %H:%M", time.localtime(x.get("t") or time.time()))
+                metin = (x.get("metin") or "").replace("\r\n", " ").replace("\n", " ").replace("\r", " ")[:100]
+                print("%d  %s  %s" % (x["sira"], zaman, metin))
+    elif k == "istek" and len(argv) == 2:
+        import ofis_pilot
+        ofis_pilot.istek_isle(argv[0], argv[1])
+        print("%s. istek planlandı: görev %s." % (argv[0], argv[1]))
     elif k == "durum":
         h = hepsi()
         if "--json" in argv:
