@@ -42,6 +42,12 @@ Antigravity yapar; Claude Code görevi yazar, gözden geçirir, `main`'e alır.
   commit'e girmez.
 - Düzeltilen her hata için önce o hatayı yakalayan test yazılır.
 
+## İzleme
+
+Masaüstündeki **Görev Takibi** (`tools/gorev_takip.py`) kuyruğu, her görevin
+dalını ve Antigravity'nin o an hangi dalda çalıştığını gösterir; on saniyede
+bir yenilenir. Yalnız okur, hiçbir şeyi değiştirmez.
+
 ## Görev dosyası şablonu
 
 `_SABLON.md`'yi kopyala: `NNN-kisa-ad.md`.
