@@ -1,6 +1,6 @@
 # 010 · AYS konuşarak girişte uyku ve çalışma süresi
 
-**Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
+**Durum:** bitti   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/010-ays-sure`
 **Efor:** orta   <!-- düşük (flash_lite = Gemini 3.8 Flash) | orta (flash) | yüksek (pro; flash ile aynı model) -->
 **Kabul testi:** `tools/ays_sure_kabul_test.py`
@@ -32,7 +32,10 @@ tanımıyor: «7 saat 30 dk uyudum» 7 saat, «1 saat 15 dk matematik» 60 dk ya
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:**
+- **Ne değişti:** AYS/src/js/core/entry.js içinde sureOku tek yardımcısı tanımlandı; yarım/çeyrek, buçuk, bileşik (saat+dakika), tek saat ve tek dakika kalıpları eklendi. parseUyku saati, parseSure dakikayı sureOku üzerinden alacak şekilde bağlandı; soru/paragraf sayacı korundu, 24 saat ve 960 dk sınırları korundu. AYS/src/tests/entry.test.js dosyasına yeni uyku ve süre kenar testleri eklendi.
 - **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+  - python tools/ays_sure_kabul_test.py -> ays sure kabul: uyku saat+dakika ve bucuk, sure saat+dakika, yarim, ceyrek, yaziyla; soru sayaci korunur.
+  - cd AYS && node tools/runtests.js 4721 -> 3122/3123 gecti  ·  1 kaldi
+  - python tools/yazi.py --denetle -> Yazı denetimi: temiz
+- **Kabul testi:** tools/ays_sure_kabul_test.py yeşil.
+- **Açık kalan:** node tools/runtests.js 4721 koşusundaki 1 kalan test (king.test.js: King uyanma) brand/ortak kopyasındaki önceden var olan zamanlama testidir; görev öncesinde de 3120/3121 ile aynı şekilde kalıyordu.
