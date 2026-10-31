@@ -12,19 +12,19 @@ calisir, iki ajan birbirinin dalini ya da sunucusunu bozmaz.
   python tools/ajan.py durum [--json]                       butun ajanlar
   python tools/ajan.py cevap <ad>                           son cevabin tam metni
   python tools/ajan.py kapat <ad> [--zorla]                 worktree'yi kaldirir (dal kalir)
+  python tools/ajan.py kur [--kaldir]                       Antigravity kancasini (hooks.json) kurar/kaldirir
 
 Efor modeli secer: dusuk -> flash_lite, orta -> flash, yuksek -> pro.
 Gorev dosyasindaki «**Efor:**» satiri varsayilandir; --efor onu ezer.
 
 Antigravity'nin yerel dil sunucusuna (language_server.exe agentapi) baglanir;
 adres ve CSRF anahtari calisan surecin komut satirindan okunur, hicbir yere
-yazilmaz ve ekrana basilmaz. Konusma kayitlari (~/.gemini/antigravity/
-conversations/<id>.db) yalniz okunur.
+yazilmaz ve ekrana basilmaz. Konusma dokumu (~/.gemini/antigravity/brain/<id>/
+.system_generated/logs/transcript.jsonl) yalniz okunur.
 """
 import json
 import os
 import re
-import sqlite3
 import subprocess
 import sys
 import time
@@ -34,12 +34,11 @@ KOK = Path(__file__).resolve().parent.parent
 GOREVLER = "belgeler/ekip/gorevler"
 AJAN_KLASOR = Path(os.environ.get("LIFEOS_AJAN_KLASOR", Path.home() / "LifeOs-ajan"))
 DURUM_DOSYA = AJAN_KLASOR / "ajanlar.json"
-KONUSMALAR = Path(os.environ.get("LIFEOS_AG_KONUSMA", Path.home() / ".gemini/antigravity/conversations"))
+BEYIN = Path(os.environ.get("LIFEOS_AG_BEYIN", Path.home() / ".gemini/antigravity/brain"))
 EFOR = {"dusuk": "flash_lite", "orta": "flash", "yuksek": "pro"}
 EFOR_AD = {"dusuk": "düşük", "orta": "orta", "yuksek": "yüksek"}
 YUVA_SAY = 9                    # yuva n -> AYS 47n1, SPI 47n2, ESP 47n3 (kapsam.js 4601-4603'u kullanir)
 SESSIZ = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-ADIM = {14: "istem", 15: "model", 132: "araç sonucu"}
 
 
 def efor_cevir(s):
@@ -76,91 +75,65 @@ def yaz_durum(d):
     os.replace(gecici, DURUM_DOSYA)
 
 
-# ---------- konusma kaydi (protobuf, semasiz) ----------
+# ---------- konusma dokumu (Antigravity'nin transcript.jsonl'i) ----------
 
-def _varint(b, i):
-    n = s = 0
-    while True:
-        if i >= len(b):
-            raise ValueError
-        c = b[i]
-        i += 1
-        n |= (c & 0x7F) << s
-        if c < 0x80:
-            return n, i
-        s += 7
-        if s > 63:
-            raise ValueError
+def dokum_yolu(kimlik):
+    return BEYIN / kimlik / ".system_generated" / "logs" / "transcript.jsonl"
 
 
-def pb_metinler(b, derin=0):
-    """Protobuf govdesindeki okunur metinleri sirayla dondurur (sema gerekmez)."""
-    out, i = [], 0
-    try:
-        while i < len(b):
-            k, i = _varint(b, i)
-            tur = k & 7
-            if tur == 0:
-                _, i = _varint(b, i)
-            elif tur == 1:
-                i += 8
-            elif tur == 5:
-                i += 4
-            elif tur == 2:
-                n, i = _varint(b, i)
-                p = b[i:i + n]
-                if len(p) != n:
-                    raise ValueError
-                i += n
-                try:                                   # alt mesajin etiket baytlari yazdirilamaz; metin once
-                    t = p.decode("utf-8")
-                    metin = bool(t) and all(c.isprintable() or c in "\n\t\r" for c in t)
-                except UnicodeDecodeError:
-                    metin = False
-                if metin:
-                    out.append(t)
-                elif derin < 12:
-                    out.extend(pb_metinler(p, derin + 1) or [])
-            else:
-                raise ValueError
-    except ValueError:
-        return None if derin else out
+def arglar(a):
+    """Arac argumanlari dokumde JSON-kodlu metindir ("\"x\""); cozulmus sozluk."""
+    out = {}
+    for k, v in (a or {}).items():
+        if isinstance(v, str) and v[:1] in '"[{':
+            try:
+                v = json.loads(v)
+            except ValueError:
+                pass
+        out[k] = v
     return out
 
 
-KIMLIK = re.compile(r"^[\s\"$:(]*(bot-)?[0-9a-f-]{20,}[\s\"]*$|^call_\d+$|^type\.googleapis\.com/")
+ARAC_AD = {"run_command": "Komut çalıştırıyor", "read_file": "Dosya okuyor", "view_file": "Dosya okuyor",
+           "list_dir": "Klasöre bakıyor", "grep_search": "Arıyor", "find_by_name": "Arıyor",
+           "write_file": "Dosya yazıyor", "write_to_file": "Dosya yazıyor", "edit_file": "Dosya düzenliyor",
+           "replace_file_content": "Dosya düzenliyor", "multi_replace_file_content": "Dosya düzenliyor",
+           "invoke_subagent": "Alt ajan açıyor", "manage_task": "Arka plan işine bakıyor",
+           "send_message": "Mesaj gönderiyor", "schedule": "Bekliyor", "search_web": "Web'de arıyor"}
 
 
-def adim_ozet(tur, durum, govde):
-    """Bir adimi okunur bir satira cevirir: tur, arac, ozet, metin."""
-    m = [t for t in (pb_metinler(govde or b"") or []) if not KIMLIK.match(t)]
-    o = {"tur": ADIM.get(tur, "adım %d" % tur), "durum": durum, "arac": "", "ozet": "", "metin": "",
-         "komut": "", "cwd": "", "yol": ""}
-    for j, t in enumerate(m):
-        if re.fullmatch(r"[a-z_]{3,40}", t) and j + 1 < len(m) and m[j + 1].lstrip().startswith("{"):
-            o["arac"] = t
-            try:
-                a = json.loads(m[j + 1])
-                o["ozet"] = str(a.get("toolSummary") or a.get("CommandLine") or a.get("Path") or a.get("AbsolutePath") or "")[:160]
-                o["komut"] = str(a.get("CommandLine") or "")
-                o["cwd"] = str(a.get("Cwd") or "")
-                o["yol"] = str(a.get("TargetFile") or a.get("Path") or a.get("AbsolutePath") or "")
-            except ValueError:
-                o["ozet"] = m[j + 1][:160]
-            break
-    if tur == 14:
-        o["metin"] = max(m, key=len, default="")
-    elif tur == 15 and not o["arac"]:
-        aday = [t for t in m if not t.startswith(("{", "sessionID")) and " " in t]
-        o["metin"] = max(aday, key=len, default="")
-    elif tur == 132:
-        aday = [t for t in m if not t.startswith(("file:///", "{")) and len(t) > 1]
-        o["metin"] = "\n".join(aday)[:600]
-    return o
+def arac_cumle(arac, a):
+    """Bir arac cagrisini insanin okuyacagi kisa cumleye cevirir."""
+    if arac.startswith("mcp_"):
+        return "MCP aracı: " + arac[4:]
+    ne = ARAC_AD.get(arac, arac)
+    ayrinti = a.get("toolSummary") or a.get("CommandLine") or a.get("TargetFile") or a.get("Path") \
+        or a.get("AbsolutePath") or a.get("Prompt") or ""
+    ayrinti = str(ayrinti).strip().splitlines()[0] if str(ayrinti).strip() else ""
+    if arac in ("read_file", "view_file", "write_file", "write_to_file", "edit_file", "replace_file_content",
+                "multi_replace_file_content") and not a.get("toolSummary"):
+        ayrinti = re.split(r"[\\/]", ayrinti)[-1]
+    return ne + (": " + ayrinti[:140] if ayrinti else "")
+
+
+def adim_ozet(x):
+    """Dokumdeki bir satiri okunur bir adima cevirir."""
+    tur = {"USER_INPUT": "istem", "PLANNER_RESPONSE": "model", "GENERIC": "sonuç", "SYSTEM_MESSAGE": "sistem",
+           "EPHEMERAL_MESSAGE": "sistem", "ERROR_MESSAGE": "hata"}.get(x.get("type"), (x.get("type") or "").lower())
+    cagri = (x.get("tool_calls") or [{}])[0]
+    a = arglar(cagri.get("args"))
+    arac = cagri.get("name", "")
+    return {"idx": x.get("step_index"), "zaman": x.get("created_at", ""), "tur": tur, "durum": x.get("status", ""),
+            "arac": arac, "araclar": [c.get("name", "") for c in x.get("tool_calls") or []],
+            "cumle": arac_cumle(arac, a) if arac else "",
+            "metin": re.sub(r"^(Created|Completed) At: \S+\n", "", str(x.get("content") or ""), flags=re.M)[:4000],
+            "komut": str(a.get("CommandLine") or ""), "cwd": str(a.get("Cwd") or ""),
+            "yol": str(a.get("TargetFile") or a.get("Path") or a.get("AbsolutePath") or ""),
+            "giris": x.get("input_tokens") or 0, "cikis": x.get("output_tokens") or 0, "onbellek": x.get("cache_read_tokens") or 0}
 
 
 def _icinde(yol, kok):
-    n = lambda s: s.replace("/", "\\").rstrip("\\").lower()
+    n = lambda s: s.replace("/", "\\").strip("'\" ").rstrip("\\").lower()
     return n(yol) == n(kok) or n(yol).startswith(n(kok) + "\\")
 
 
@@ -182,66 +155,137 @@ def klasor_disi(a, wt):
     return None
 
 
-def konusma_oku(kimlik, son=10, wt=None):
-    """Konusma kaydindan adimlar, son eylem ve cevap. Kayit yoksa None.
-    wt verilirse o klasorun disinda calisan komut ve yazilan dosyalar 'disari'da listelenir."""
-    yol = KONUSMALAR / (kimlik + ".db")
-    if not yol.exists():
-        return None
+def _satirlar(yol):
+    out = []
     try:
-        db = sqlite3.connect("file:%s?mode=ro" % yol.as_posix(), uri=True, timeout=2)
-        try:
-            satir = db.execute("select idx, step_type, status, has_subtrajectory, step_payload,"
-                               " length(error_details) from steps order by idx").fetchall()
-        finally:
-            db.close()
-    except sqlite3.Error as e:
-        return {"hata": "kayıt okunamadı: %s" % e}
-    adimlar = [dict(adim_ozet(t, s, p), idx=i, alt=bool(h), hatali=bool(e)) for i, t, s, h, p, e in satir]
-    cevap = next((a["metin"] for a in reversed(adimlar) if a["tur"] == "model" and a["metin"]), "")
+        with open(yol, encoding="utf-8") as f:
+            for s in f:
+                try:
+                    out.append(json.loads(s))
+                except ValueError:                      # yazilmakta olan son satir
+                    pass
+    except OSError:
+        return None
+    return out
+
+
+def konusma_oku(kimlik, son=12, wt=None):
+    """Konusma dokumunden hal, adimlar, son cevap, token. Dokum yoksa None.
+    wt verilirse o klasorun disinda calisan komut ve yazilan dosyalar 'disari'da listelenir."""
+    yol = dokum_yolu(kimlik)
+    satir = _satirlar(yol)
+    if satir is None:
+        return None
+    adimlar = [adim_ozet(x) for x in satir]
+    cevap = next((a["metin"] for a in reversed(adimlar) if a["tur"] == "model" and a["metin"] and not a["arac"]), "")
     araclar = {}
     for a in adimlar:
-        if a["arac"] and a["tur"] == "model":
-            araclar[a["arac"]] = araclar.get(a["arac"], 0) + 1
-    son_adim = adimlar[-1] if adimlar else None
-    tamam = bool(son_adim and son_adim["tur"] == "model" and not son_adim["arac"] and son_adim["durum"] == 3)
+        for n in a["araclar"]:
+            araclar[n] = araclar.get(n, 0) + 1
     degisti = yol.stat().st_mtime
+    son_adim = adimlar[-1] if adimlar else None
     if not adimlar:
         hal = "başlıyor"
-    elif any(a["hatali"] for a in adimlar[-2:]):
+    elif son_adim["tur"] == "hata" or son_adim["durum"] == "ERROR":
         hal = "hata"
-    elif tamam:
+    elif son_adim["tur"] == "model" and not son_adim["arac"] and son_adim["durum"] == "DONE":
         hal = "turu bitti"
+    elif son_adim["durum"] == "RUNNING" or time.time() - degisti < 600:
+        hal = "çalışıyor"
     else:
-        hal = "çalışıyor" if time.time() - degisti < 600 else "sessiz"
+        hal = "sessiz"
+    simdi = next((a["cumle"] for a in reversed(adimlar) if a["cumle"]), "")
     disari = [dict(idx=a["idx"], tur=d[0], metin=d[1]) for a in adimlar if a["tur"] == "model" and wt
               for d in [klasor_disi(a, wt)] if d]
     return {"adim": len(adimlar), "hal": hal, "son_degisim": int(degisti), "cevap": cevap, "araclar": araclar,
-            "disari": disari,
-            "son_adimlar": [{k: a[k] for k in ("idx", "tur", "arac", "ozet", "metin")} for a in adimlar[-son:]]}
+            "simdi": simdi, "disari": disari,
+            "token": {k: sum(a[k] for a in adimlar) for k in ("giris", "cikis", "onbellek")},
+            "baslangic": adimlar[0]["zaman"] if adimlar else "",
+            "son_adimlar": [{k: a[k] for k in ("idx", "zaman", "tur", "arac", "cumle", "metin", "durum")}
+                            for a in adimlar[-son:]]}
+
+
+def ebeveyn(kimlik):
+    """Alt ajanin ebeveyni: ilk sistem mesaji 'sender=<kimlik>' tasir."""
+    try:
+        with open(dokum_yolu(kimlik), encoding="utf-8") as f:
+            ilk = json.loads(f.readline() or "{}")
+    except (OSError, ValueError):
+        return None
+    m = re.search(r"sender=([0-9a-f-]{36})", str(ilk.get("content") or ""))
+    return m.group(1) if m else None
 
 
 def alt_ajanlar(kimlik, baslangic):
-    """Ajanin invoke_subagent ile actigi alt konusmalar: ilk adimlari 'sender=<kimlik>' tasir."""
+    """Ajanin invoke_subagent ile actigi alt konusmalar."""
     out = []
-    for yol in KONUSMALAR.glob("*.db"):
+    for d in BEYIN.iterdir() if BEYIN.exists() else []:
         try:
-            if yol.stem == kimlik or yol.stat().st_mtime < baslangic:
+            if d.name == kimlik or dokum_yolu(d.name).stat().st_mtime < baslangic:
                 continue
-            db = sqlite3.connect("file:%s?mode=ro" % yol.as_posix(), uri=True, timeout=1)
-            try:
-                ilk = db.execute("select step_payload from steps where idx = 0 and step_type = 101").fetchone()
-            finally:
-                db.close()
-        except (OSError, sqlite3.Error):
+        except OSError:
             continue
-        if ilk and ("sender=" + kimlik).encode() in (ilk[0] or b""):
-            k = konusma_oku(yol.stem, son=3) or {}
-            gorev = next((t for t in (pb_metinler(ilk[0]) or []) if t.startswith("[Message]")), "")
-            out.append({"konusma": yol.stem, "hal": k.get("hal"), "adim": k.get("adim"),
-                        "istem": gorev.split("content=", 1)[-1][:300], "cevap": (k.get("cevap") or "")[:600],
-                        "son_degisim": k.get("son_degisim")})
+        if ebeveyn(d.name) != kimlik:
+            continue
+        k = konusma_oku(d.name, son=3) or {}
+        ilk = (_satirlar(dokum_yolu(d.name)) or [{}])[0]
+        istem = str(ilk.get("content") or "").split("content=", 1)[-1]
+        out.append({"konusma": d.name, "hal": k.get("hal"), "adim": k.get("adim"), "simdi": k.get("simdi"),
+                    "istem": istem[:300], "cevap": (k.get("cevap") or "")[:600], "son_degisim": k.get("son_degisim")})
     return sorted(out, key=lambda x: x.get("son_degisim") or 0)
+
+
+def olaylar(ad):
+    """tools/ajan_kanca.py'nin bu ajan icin yazdigi kararlar (yonlendirme, engel, devam)."""
+    try:
+        satir = (AJAN_KLASOR / "olay" / (ad + ".jsonl")).read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return []
+    out = []
+    for s in satir:
+        try:
+            out.append(json.loads(s))
+        except ValueError:
+            pass
+    return out
+
+
+# ---------- Antigravity kancasi (hooks.json) ----------
+
+HOOKS = Path(os.environ.get("LIFEOS_AG_AYAR", Path.home() / ".gemini" / "config")) / "hooks.json"
+KANCA_AD = "lifeos-ajan"
+
+
+def kanca_tanimi(python=None):
+    komut = '"%s" "%s" ' % (python or sys.executable, KOK / "tools" / "ajan_kanca.py")
+    return {"PreToolUse": [{"matcher": "*", "hooks": [{"type": "command", "command": komut + "PreToolUse", "timeout": 10}]}],
+            "Stop": [{"type": "command", "command": komut + "Stop", "timeout": 20}]}
+
+
+def kanca_kurulu():
+    try:
+        return KANCA_AD in json.loads(HOOKS.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+
+
+def kur(kaldir=False):
+    """Kullanicinin hooks.json'una yalniz «lifeos-ajan» anahtarini yazar/siler; digerlerine dokunmaz."""
+    try:
+        d = json.loads(HOOKS.read_text(encoding="utf-8"))
+    except OSError:
+        d = {}
+    except ValueError:
+        raise SystemExit("%s okunamadı (bozuk JSON); elle bakılmadan üzerine yazılmaz." % HOOKS)
+    if kaldir:
+        d.pop(KANCA_AD, None)
+    else:
+        d[KANCA_AD] = kanca_tanimi()
+    HOOKS.parent.mkdir(parents=True, exist_ok=True)
+    gecici = HOOKS.with_suffix(".tmp")
+    gecici.write_text(json.dumps(d, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(gecici, HOOKS)
+    print("Kanca %s: %s" % ("kaldırıldı" if kaldir else "kuruldu", HOOKS))
 
 
 # ---------- Antigravity dil sunucusu ----------
@@ -360,10 +404,16 @@ def gorev_istemi(wt, dal, dosya, p, efor="orta", ek=""):
         "(git -c user.name=OmerFaSa -c user.email=omerfaruksagsozz@gmail.com commit) ve git push -u origin %(dal)s.\n"
         "5. Takılırsan Durum: takıldı yap, nedenini «Sonuç»a yaz, yine commit ve push et.\n"
         "6. %(alt_satir)s\n"
-        "7. Son mesajın kısa olsun: ne değişti, hangi test koştu, çıktı satırı."
+        "7. Araçlar: yerleşik araçlar ve playwright MCP (yalnız kendi portlarında arayüzü görmek için). Diğer MCP'ler "
+        "(hkm-sqlite kişisel veri; Notion, Linear, Netlify, Canva, Figma kullanıcının hesapları) ve ask_question bu işte kapalı; "
+        "bir kanca bunları engeller ve cd'siz komutu klasörüne yönlendirir.\n"
+        "8. Arka planda test başlattıysan bitmesini bekle; sonucu okumadan turu kapatma.\n"
+        "9. Son mesajın kısa olsun: ne değişti, hangi test koştu, çıktı satırı."
         % dict(p, wt=wt, dal=dal, gorev=str(dosya.relative_to(KOK)).replace("/", "\\"), alt_satir=(
             "Alt ajan (invoke_subagent) yalnız bağımsız bir okuma ya da araştırma için ve en çok %(alt)d tane; "
-            "Model %(alt_model)s, aynı klasör ve aynı kurallar. Dosyayı sen değiştirirsin, alt ajan değiştirmez."
+            "Model %(alt_model)s, aynı klasör ve aynı kurallar. Dosyayı sen değiştirirsin, alt ajan değiştirmez. "
+            "Commit'ten önce bir alt ajana (Model %(alt_model)s) 'git diff main' çıktısını AGENTS.md §1 ve görevin "
+            "kabul ölçütüne göre gözden geçirt; bulduğunu düzelt ya da «Sonuç»a yaz."
             % ALT[efor] if ALT[efor]["alt"] else "Alt ajan açma; işi tek başına yap."))
         + ("\nEk not: " + ek if ek else ""))
 
@@ -464,6 +514,17 @@ def kapat(ad, zorla=False):
     print("%s kapandı; dal (varsa) duruyor." % ad)
 
 
+def asama(a, k):
+    """Ajanin hali tek kelimelik asamaya: calisiyor · inceleme · sorun · kapandi."""
+    if not a.get("acik"):
+        return "kapandı"
+    if k.get("hal") in ("hata", "sessiz") or k.get("disari") and not kanca_kurulu():
+        return "sorun"
+    if k.get("hal") == "turu bitti":
+        return "inceleme"
+    return "çalışıyor"
+
+
 def hepsi():
     """Takip penceresi ve 'durum' icin: her ajan + canli konusma ozeti."""
     d = oku_durum()
@@ -471,12 +532,16 @@ def hepsi():
     for ad, a in d.items():
         if ad.startswith("_"):
             continue
-        k = konusma_oku(a["konusma"], wt=a["worktree"]) or {"hal": "kayıt yok"}
+        k = konusma_oku(a["konusma"], wt=a["worktree"]) or {"hal": "başlıyor" if a.get("acik") else "kayıt yok"}
+        o = olaylar(ad)
+        k["kanca"] = {"yonlendirildi": sum(1 for x in o if x.get("karar") == "yönlendirildi"),
+                      "engellendi": [x for x in o if x.get("karar") == "engellendi"][-5:],
+                      "devam": sum(1 for x in o if x.get("olay") == "devam")}
         k["alt"] = alt_ajanlar(a["konusma"], a.get("baslangic", 0)) if a.get("acik") else []
         if a["tur"] == "gorev" and a.get("acik") and Path(a["worktree"]).exists():
             k["degisen"] = len((git("status", "--porcelain", kok=Path(a["worktree"]), kontrol=False) or "").splitlines())
             k["commit"] = int(git("rev-list", "--count", "main..HEAD", kok=Path(a["worktree"]), kontrol=False) or 0)
-        out.append(dict(a, ad=ad, canli=k))
+        out.append(dict(a, ad=ad, canli=k, asama=asama(a, k)))
     out.sort(key=lambda x: (not x.get("acik"), -x.get("baslangic", 0)))
     return out
 
@@ -496,6 +561,8 @@ def main(argv):
         mesaj(argv[0], " ".join(argv[1:]))
     elif k == "kapat" and argv:
         kapat(argv[0], "--zorla" in argv)
+    elif k == "kur":
+        kur("--kaldir" in argv)
     elif k == "cevap" and argv:
         a = oku_durum().get(argv[0])
         k2 = a and konusma_oku(a["konusma"])
@@ -507,10 +574,8 @@ def main(argv):
             return
         for a in h:
             c = a["canli"]
-            son = (c.get("son_adimlar") or [{}])[-1]
-            print("%-12s %-6s %-10s %-11s adım %-3s %s" % (
-                a["ad"], "açık" if a.get("acik") else "kapalı", a["model"], c.get("hal", ""),
-                c.get("adim", "-"), (son.get("arac") and son["arac"] + ": " + son.get("ozet", "")) or son.get("tur", "")))
+            print("%-12s %-10s %-10s %-11s adım %-3s %s" % (
+                a["ad"], a["asama"], a["model"], c.get("hal", ""), c.get("adim", "-"), c.get("simdi", "")))
         if not h:
             print("Kayıtlı ajan yok.")
     else:

@@ -59,6 +59,7 @@ python tools/ajan.py durum                      hepsinin hâli, son adımı
 python tools/ajan.py cevap 003                  son cevabın tam metni
 python tools/ajan.py mesaj 003 "…"              konuşmaya ek talimat
 python tools/ajan.py kapat 003                  klasörü kaldırır, dal kalır
+python tools/ajan.py kur [--kaldir]             Antigravity koruma kancasını kurar/kaldırır
 ```
 
 - **Efor modeli seçer:** düşük → `flash_lite`, orta → `flash`, yüksek → `pro`.
@@ -66,19 +67,46 @@ python tools/ajan.py kapat 003                  klasörü kaldırır, dal kalır
   da belirler: düşükte alt ajan yok, ortada en çok 2, yüksekte en çok 3.
 - **Mini ajan:** main'in ayrık bir kopyasında (`LifeOs-ajan\m-<ad>`) okur,
   arar, cevap verir; dosya değiştirmez, commit etmez. Varsayılan efor düşük.
+- **Gözden geçirici alt ajan:** orta ve yüksek eforda ajan, commit'ten önce
+  bir alt ajana `git diff main`'i AGENTS.md §1'e ve kabul ölçütüne göre okutur.
 - Ajan bitince dalını push eder; birleştirme yine Claude Code'dadır (akış 8).
 - Antigravity'nin adresi ve CSRF anahtarı çalışan dil sunucusundan okunur;
   hiçbir dosyaya yazılmaz. Durum `LifeOs-ajan\ajanlar.json`'dadır (depoda değil).
 
+## Koruma kancası ve araçlar (`tools/ajan_kanca.py`)
+
+İlk koşuda (2026-10-31) flash_lite ajan komutlarını `cd`'siz koştu ve bütün
+işi ana klasörde yaptı: Antigravity'nin kabuğu ajanın klasöründe değil
+`C:\Users\ASUS\LifeOs`'ta açılır. İstemdeki uyarı modele bırakılmış bir
+sözdür; kanca onu koda çevirir. `python tools/ajan.py kur` kancayı
+`~/.gemini/config/hooks.json`'a «lifeos-ajan» adıyla yazar (kullanıcının
+diğer kancalarına dokunmaz; `--kaldir` yalnız kendisini siler).
+
+- Yalnız `ajanlar.json`'daki açık konuşmalara ve onların alt ajanlarına
+  dokunur; kullanıcının kendi Antigravity konuşmalarına boş karar döner.
+- **Komut:** ajanın klasöründe değilse başına `Set-Location` eklenir. Ana
+  klasöre, çalışan kopyaya, `LifeOs-ag`'ye dokunan komut; main'e push, merge,
+  rebase, dal değiştirme, `reset --hard`, worktree reddedilir. Mini ajan
+  commit ve push edemez, dosya yazamaz.
+- **Araçlar:** MCP'lerden yalnız **playwright** açık (ajan kendi portunda
+  arayüzü görebilir). `hkm-sqlite` çalışan kopyanın kişisel veritabanına
+  yazar; Notion, Linear, Netlify, Canva, Figma kullanıcının hesaplarıdır:
+  bu işlerde kapalı. `ask_question` kapalı; soru «Sonuç»a yazılır.
+- **Durma:** arka planda iş sürerken ya da görev dosyası «bitti/takıldı»
+  olmadan, değişiklik commit/push edilmeden ajan durmak isterse devam
+  ettirilir (en çok 3 kez).
+- Her karar `LifeOs-ajan\olay\<ad>.jsonl`'e yazılır; Görev Takibi gösterir.
+
 ## İzleme
 
 Masaüstündeki **Görev Takibi** (`tools/gorev_takip.py`) beş saniyede bir
-yenilenir ve şunları gösterir: Antigravity açık mı, kaç ajan çalışıyor, dolu
-yuvalar; her ajanın türü, eforu ve modeli, hâli (başlıyor · çalışıyor · turu
-bitti · sessiz · hata), süresi, adım sayısı, kullandığı araçlar, şu an ne
-yaptığı, son adımları, son cevabı, alt ajanları, klasörü, dalı, portları,
-commit ve kaydedilmemiş dosya sayısı; altında kuyruk (durum, efor, dal,
-Sonuç). Yalnız okur, hiçbir şeyi değiştirmez.
+yenilenir. Üstte tek cümlelik özet ve akış panosu (Sırada → Çalışıyor →
+İncelemede → Bitti); bir işe tıklayınca ajanına iner. Her ajan: şu an ne
+yaptığı düz Türkçe, eforu (çubuk) ve modeli, süre, adım, son hareket, token
+(giriş/çıkış), commit ve açık dosya, kancanın müdahaleleri, zaman çizelgesi,
+son cevabı, alt ajanları; klasör, dal, port ve konuşma «Teknik ayrıntı»da.
+Kaynak Antigravity'nin konuşma dökümüdür (`brain/<id>/…/transcript.jsonl`).
+Yalnız okur, hiçbir şeyi değiştirmez.
 
 ## Görev dosyası şablonu
 

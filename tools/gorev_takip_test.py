@@ -19,6 +19,25 @@ if G.gorev_oku("# x\n**Durum:** uydurma   <!-- a | b -->\n")["durum"] != "bekliy
     hata.append("bilinmeyen durum bekliyor sayilmali")
 if G.gorev_oku("# x\n**Durum:** bekliyor   <!-- bekliyor | sürüyor -->\n")["durum"] != "bekliyor":
     hata.append("sablondaki yorum durumu bozmamali")
+# pano: her is dort kolondan birinde; ajan hali kolonu belirler
+gor = [{"dosya": "001-a.md", "baslik": "001 · A", "efor": "orta", "main_de": True},
+       {"dosya": "002-b.md", "baslik": "002 · B", "efor": "orta"},
+       {"dosya": "003-c.md", "baslik": "003 · C", "efor": "dusuk"},
+       {"dosya": "004-d.md", "baslik": "004 · D", "dal_var": True, "ileri": 2},
+       {"dosya": "005-e.md", "baslik": "005 · E"}]
+aj = [{"ad": "002", "tur": "gorev", "gorev": "002-b.md", "acik": True, "asama": "çalışıyor", "efor": "yuksek", "canli": {"simdi": "Dosya okuyor: x.py"}},
+      {"ad": "003", "tur": "gorev", "gorev": "003-c.md", "acik": True, "asama": "sorun", "canli": {}},
+      {"ad": "005", "tur": "gorev", "gorev": "005-e.md", "acik": False, "asama": "kapandı", "canli": {}},
+      {"ad": "ara", "tur": "mini", "istem": "CSS ara", "acik": True, "asama": "inceleme", "canli": {}},
+      {"ad": "eski", "tur": "mini", "acik": False, "asama": "kapandı", "canli": {}}]
+p = {x["ad"]: x for x in G.pano(gor, aj)}
+beklenen = {"001": "bitti", "002": "calisiyor", "003": "calisiyor", "004": "inceleme", "005": "sira", "ara": "inceleme"}
+if {k: v["kolon"] for k, v in p.items()} != beklenen:
+    hata.append("pano kolonlari: %r" % {k: v["kolon"] for k, v in p.items()})
+if p["002"]["cumle"] != "Dosya okuyor: x.py" or p["002"]["efor"] != "yuksek" or p["002"]["baslik"] != "B":
+    hata.append("pano calisan is: %r" % p["002"])
+if not p["003"]["sorun"] or p["002"]["sorun"]:
+    hata.append("sorun isareti yalniz sorunlu ajanda")
 for s in sorted((KOK / G.GOREVLER).glob("[0-9][0-9][0-9]-*.md")):
     g = G.gorev_oku(s.read_text(encoding="utf-8"))
     if not (g["baslik"] and g["dal"].startswith("ag/")):

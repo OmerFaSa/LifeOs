@@ -3,9 +3,11 @@
 
 Kullanici (2026-10-31): «bununla alakali takip etmek amacli bir masaustu
 uygulamasi»; sonra «model efor degistirip minik ajanlar … gorev takibi ona gore
-detayli». tools/ajan.py'nin baslattigi her ajani (efor, model, konusma, klasor,
-portlar, adim adim ne yaptigi, son cevabi, alt ajanlari) ve
-belgeler/ekip/gorevler/ kuyrugunu (dal, commit, Sonuc) gosterir; Edge'i
+detayli», «daha anlasilir». Ustte akis panosu (Sirada, Calisiyor, Incelemede,
+Bitti), altinda her ajan: su an ne yaptigi duz Turkce, sure, adim, token,
+commit, koruma kancasinin mudahaleleri, zaman cizelgesi, son cevabi, alt
+ajanlari; teknik ayrinti katlanir. Kaynak: tools/ajan.py (Antigravity'nin
+konusma dokumu) ve belgeler/ekip/gorevler/ kuyrugu. Edge'i
 uygulama penceresinde acar. Pencere kapaninca (60 sn nabiz yok) kendisi de
 kapanir. Yalniz 127.0.0.1; hicbir seyi degistirmez, yalniz okur.
 
@@ -71,6 +73,35 @@ def sunucu_acik():
     return _sunucu["acik"]
 
 
+def pano(gorevler, ajanlar):
+    """Her isi dort kolondan birine koyar: sira, calisiyor, inceleme, bitti (saf islev, testli)."""
+    out = []
+    for g in gorevler:
+        a = next((x for x in ajanlar if x.get("gorev") == g["dosya"] and x.get("acik")), None)
+        k = (a or {}).get("canli") or {}
+        if g.get("main_de"):
+            kolon, cumle = "bitti", "main'e alındı"
+        elif a and a.get("asama") in ("çalışıyor", "sorun"):
+            kolon, cumle = "calisiyor", k.get("simdi") or "Başlıyor"
+        elif a and a.get("asama") == "inceleme":
+            kolon, cumle = "inceleme", "Ajan bitirdi; gözden geçirme bekliyor"
+        elif g.get("dal_var") and g.get("ileri"):
+            kolon, cumle = "inceleme", "Dalda %d commit; birleştirilmedi" % g["ileri"]
+        else:
+            kolon, cumle = "sira", "Henüz başlamadı"
+        out.append({"tur": "görev", "ad": g["dosya"][:3], "baslik": re.sub(r"^\d{3}\s*·\s*", "", g["baslik"]),
+                    "kolon": kolon, "cumle": cumle, "efor": (a or {}).get("efor") or g.get("efor"),
+                    "sorun": bool(a and a.get("asama") == "sorun"), "ajan": (a or {}).get("ad", "")})
+    for a in ajanlar:
+        if a.get("tur") == "mini" and a.get("acik"):
+            k = a.get("canli") or {}
+            out.append({"tur": "mini", "ad": a["ad"], "baslik": (a.get("istem") or "")[:80],
+                        "kolon": "inceleme" if a.get("asama") == "inceleme" else "calisiyor",
+                        "cumle": "Cevap hazır" if a.get("asama") == "inceleme" else (k.get("simdi") or "Başlıyor"),
+                        "efor": a.get("efor"), "sorun": a.get("asama") == "sorun", "ajan": a["ad"]})
+    return out
+
+
 def durum():
     ag_dal = git("rev-parse", "--abbrev-ref", "HEAD", kok=AG) if AG.exists() else None
     ag_degisen = git("status", "--porcelain", kok=AG) if AG.exists() else None
@@ -110,7 +141,8 @@ def durum():
         else:
             g["dal_var"] = False
         gorevler.append(g)
-    return {"zaman": int(time.time()), "gorevler": gorevler, "ajanlar": ajanlar,
+    return {"zaman": int(time.time()), "gorevler": gorevler, "ajanlar": ajanlar, "pano": pano(gorevler, ajanlar),
+            "kanca": AJAN.kanca_kurulu(),
             "yuva": {"dolu": sum(1 for a in ajanlar if a.get("acik")), "toplam": AJAN.YUVA_SAY},
             "antigravity": {"acik": sunucu_acik(), "klasor": str(AG), "var": AG.exists(), "dal": ag_dal,
                             "degisen": len(ag_degisen.splitlines()) if ag_degisen else 0}}
@@ -119,110 +151,155 @@ def durum():
 SAYFA = """<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Görev takibi</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-:root{ color-scheme:light dark; --bg:#f5f6f8; --kart:#fff; --yazi:#16181d; --ikinci:#5b616b; --cizgi:#e3e5ea; --zayif:#eef0f3;
-  --bekliyor:#8a8f99; --suruyor:#2f6bff; --bitti:#1a8a5a; --takildi:#c2410c; --mor:#5b4bff; }
-@media (prefers-color-scheme:dark){ :root{ --bg:#14161a; --kart:#1d2026; --yazi:#eceef2; --ikinci:#a2a7b0; --cizgi:#2c3038; --zayif:#252930; } }
+:root{ color-scheme:light dark; --bg:#f4f5f7; --kart:#fff; --yazi:#15171c; --ikinci:#5d636d; --ucuncu:#8a909a; --cizgi:#e2e4e9; --zayif:#eef0f3;
+  --vurgu:#2f6bff; --iyi:#178553; --uyari:#b45309; --kotu:#c2410c; }
+@media (prefers-color-scheme:dark){ :root{ --bg:#121418; --kart:#1b1e24; --yazi:#eceef2; --ikinci:#a4a9b2; --ucuncu:#7c828c; --cizgi:#2b2f37; --zayif:#23272e; } }
 *{ box-sizing:border-box; } body{ margin:0; font:14px/1.5 system-ui, "Segoe UI", sans-serif; background:var(--bg); color:var(--yazi); }
-header{ display:flex; align-items:center; gap:12px; padding:16px 20px 8px; }
-h1{ margin:0; font-size:18px; font-weight:650; } h2{ margin:14px 20px 8px; font-size:13px; font-weight:650; color:var(--ikinci); }
-.zaman{ margin-left:auto; color:var(--ikinci); font-size:12px; }
-.ag{ display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; margin:0 20px 4px; padding:10px 14px; border-radius:12px;
-  background:var(--kart); box-shadow:inset 0 0 0 1px var(--cizgi); font-size:13px; }
-.nokta{ display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--bekliyor); margin-right:6px; vertical-align:1px; }
-.nokta.acik{ background:var(--bitti); }
-.yuva{ display:inline-flex; gap:3px; vertical-align:-1px; } .yuva i{ width:9px; height:9px; border-radius:2px; background:var(--zayif); box-shadow:inset 0 0 0 1px var(--cizgi); }
-.yuva i.dolu{ background:var(--suruyor); box-shadow:none; }
-main{ display:grid; gap:10px; padding:0 20px 8px; }
-.g{ padding:14px 16px; border-radius:14px; background:var(--kart); box-shadow:inset 0 0 0 1px var(--cizgi); }
-.g-bas{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; } .g-bas b{ font-size:15px; }
-.rozet{ padding:2px 10px; border-radius:999px; font-size:12px; font-weight:600; color:#fff; background:var(--bekliyor); }
-.sag{ margin-left:auto; }
-.rozet.sürüyor, .rozet.çalışıyor, .rozet.başlıyor{ background:var(--suruyor); } .rozet.bitti, .rozet.turu-bitti{ background:var(--bitti); }
-.rozet.takıldı, .rozet.hata{ background:var(--takildi); } .rozet.main{ background:var(--mor); }
-.efor{ padding:2px 8px; border-radius:999px; font-size:11.5px; box-shadow:inset 0 0 0 1px var(--cizgi); color:var(--ikinci); }
-.efor b{ font-weight:650; color:var(--yazi); }
-.alt{ margin-top:6px; color:var(--ikinci); font-size:12.5px; } .alt code{ font-size:12px; }
-.olcu{ display:flex; flex-wrap:wrap; gap:4px 16px; margin-top:8px; font-size:12.5px; color:var(--ikinci); } .olcu b{ color:var(--yazi); font-weight:600; }
-.cip{ display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; } .cip span{ padding:1px 8px; border-radius:6px; background:var(--zayif); font-size:11.5px; }
-.simdi{ margin-top:8px; padding:8px 10px; border-radius:10px; background:var(--zayif); font-size:12.5px; }
-details{ margin-top:8px; } summary{ cursor:pointer; font-size:12.5px; color:var(--ikinci); }
-pre{ white-space:pre-wrap; word-break:break-word; margin:6px 0 0; font:12.5px/1.5 ui-monospace, Consolas, monospace; max-height:360px; overflow:auto; }
-ol.adim{ margin:6px 0 0; padding-left:0; list-style:none; font-size:12.5px; }
-ol.adim li{ display:grid; grid-template-columns:34px 86px 1fr; gap:6px; padding:3px 0; border-top:1px solid var(--cizgi); }
-ol.adim li span:first-child{ color:var(--ikinci); text-align:right; } ol.adim li span:nth-child(2){ color:var(--ikinci); }
-ol.adim li span:last-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.altajan{ margin-top:6px; padding:8px 10px; border-left:2px solid var(--cizgi); font-size:12.5px; }
-.uyari summary{ color:var(--takildi); font-weight:600; }
-.komut{ font:12px ui-monospace, Consolas, monospace; color:var(--ikinci); margin-top:6px; }
-.bos{ color:var(--ikinci); padding:4px 0 8px; margin:0; font-size:13px; }
+header{ padding:18px 20px 6px; } h1{ margin:0; font-size:19px; font-weight:650; }
+.cumle{ margin:4px 0 0; color:var(--ikinci); font-size:13.5px; } .cumle b{ color:var(--yazi); font-weight:600; }
+.durumcuk{ display:flex; flex-wrap:wrap; gap:6px 14px; padding:8px 20px 4px; font-size:12.5px; color:var(--ikinci); }
+.nokta{ display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; vertical-align:1px; background:var(--ucuncu); }
+.nokta.iyi{ background:var(--iyi); } .nokta.kotu{ background:var(--kotu); }
+h2{ margin:18px 20px 8px; font-size:12px; font-weight:650; letter-spacing:.02em; color:var(--ikinci); text-transform:uppercase; }
+.pano{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; padding:0 20px; }
+.kolon{ background:var(--zayif); border-radius:12px; padding:8px; min-height:72px; }
+.kolon h3{ display:flex; justify-content:space-between; margin:2px 4px 8px; font-size:12.5px; font-weight:600; color:var(--ikinci); }
+.is{ display:block; width:100%; text-align:left; font:inherit; color:inherit; background:var(--kart); border:0; border-radius:9px;
+  padding:8px 10px; margin-bottom:6px; box-shadow:inset 0 0 0 1px var(--cizgi); cursor:pointer; }
+.is:hover{ box-shadow:inset 0 0 0 1px var(--ucuncu); } .is:focus-visible{ outline:2px solid var(--vurgu); outline-offset:1px; }
+.is.sorun{ box-shadow:inset 3px 0 0 var(--kotu), inset 0 0 0 1px var(--cizgi); }
+.is b{ display:block; font-size:13px; font-weight:600; } .is small{ display:block; color:var(--ikinci); font-size:12px; margin-top:2px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.etiket{ display:inline-block; font-size:11px; color:var(--ikinci); margin-right:6px; }
+.efor{ display:inline-flex; gap:2px; vertical-align:-1px; margin-right:6px; } .efor i{ width:6px; height:10px; border-radius:2px; background:var(--cizgi); }
+.efor i.dolu{ background:var(--vurgu); }
+.bos{ color:var(--ucuncu); font-size:12px; margin:4px; }
+main{ display:grid; gap:12px; padding:0 20px 8px; }
+.ajan{ background:var(--kart); border-radius:14px; box-shadow:inset 0 0 0 1px var(--cizgi); padding:14px 16px; scroll-margin-top:12px; }
+.ajan-bas{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; } .ajan-bas b{ font-size:15.5px; font-weight:650; }
+.asama{ margin-left:auto; font-size:12px; font-weight:600; padding:2px 10px; border-radius:999px; background:var(--zayif); color:var(--ikinci); }
+.asama.calisiyor{ background:var(--vurgu); color:#fff; } .asama.inceleme{ background:var(--iyi); color:#fff; } .asama.sorun{ background:var(--kotu); color:#fff; }
+.simdi{ margin:10px 0 0; font-size:14.5px; } .simdi span{ color:var(--ikinci); }
+.olcu{ display:grid; grid-template-columns:repeat(auto-fit, minmax(96px, 1fr)); gap:8px; margin-top:12px; }
+.olcu div{ background:var(--zayif); border-radius:9px; padding:6px 10px; } .olcu small{ display:block; font-size:11px; color:var(--ikinci); }
+.olcu b{ font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; }
+.koruma{ margin-top:10px; font-size:12.5px; color:var(--ikinci); } .koruma b{ color:var(--yazi); font-weight:600; }
+.koruma.uyari{ color:var(--kotu); }
+details{ margin-top:10px; } summary{ cursor:pointer; font-size:12.5px; color:var(--ikinci); }
+ol.cizelge{ list-style:none; margin:8px 0 0; padding:0 0 0 14px; border-left:2px solid var(--cizgi); }
+ol.cizelge li{ position:relative; padding:3px 0 5px 4px; font-size:12.5px; display:grid; grid-template-columns:44px 1fr; gap:8px; }
+ol.cizelge li::before{ content:""; position:absolute; left:-20px; top:9px; width:8px; height:8px; border-radius:50%; background:var(--cizgi); }
+ol.cizelge li.model::before{ background:var(--vurgu); } ol.cizelge li.hata::before{ background:var(--kotu); }
+ol.cizelge time{ color:var(--ucuncu); font-variant-numeric:tabular-nums; } ol.cizelge span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+pre{ white-space:pre-wrap; word-break:break-word; margin:8px 0 0; font:12.5px/1.55 ui-monospace, Consolas, monospace; max-height:340px; overflow:auto;
+  background:var(--zayif); border-radius:9px; padding:10px 12px; }
+.alt{ margin-top:6px; padding:6px 10px; border-left:2px solid var(--cizgi); font-size:12.5px; }
+dl{ display:grid; grid-template-columns:auto 1fr; gap:3px 12px; margin:8px 0 0; font-size:12.5px; } dt{ color:var(--ikinci); } dd{ margin:0; word-break:break-all; }
+code{ font:12px ui-monospace, Consolas, monospace; }
+.rehber{ margin:18px 20px 22px; font-size:12.5px; color:var(--ikinci); } .rehber p{ margin:4px 0; }
 </style></head><body>
-<header><h1>Görev takibi</h1><span class="zaman" id="zaman">yükleniyor…</span></header>
-<div class="ag" id="ag"></div>
-<h2>Ajanlar</h2><main id="ajanlar"></main>
-<h2>Görev kuyruğu</h2><main id="liste"></main>
+<header><h1>Görev takibi</h1><p class="cumle" id="cumle">Yükleniyor…</p></header>
+<div class="durumcuk" id="durumcuk"></div>
+<h2>Akış</h2><div class="pano" id="pano"></div>
+<h2 id="ajan-baslik">Ajanlar</h2><main id="ajanlar"></main>
+<details class="rehber"><summary>Nasıl okunur</summary>
+<p><b>Akış:</b> Sırada → Çalışıyor → İncelemede (ajan bitirdi, Claude Code gözden geçirip birleştirir) → Bitti (main'de).</p>
+<p><b>Efor:</b> bir çubuk düşük (flash_lite, hızlı ve ucuz), iki çubuk orta (flash), üç çubuk yüksek (pro, en dikkatli).</p>
+<p><b>Koruma:</b> Antigravity kancası ajanın komutunu kendi klasörüne yönlendirir; ana klasöre, main'e ve kişisel veriye dokunan aracı engeller; arka planda iş sürerken erken durmasını önler.</p>
+<p><b>Token:</b> modele giden ve modelden gelen metin miktarı; önbellekten okunan ayrıca sayılır.</p></details>
 <script>
 const kac = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
-const once = t => { if(!t) return ''; const f = Math.round(Date.now() / 1000 - t);
+const once = t => { if(!t) return '–'; const f = Math.round(Date.now() / 1000 - t);
   return f < 60 ? 'az önce' : f < 3600 ? Math.round(f / 60) + ' dk önce' : f < 86400 ? Math.round(f / 3600) + ' sa önce' : Math.round(f / 86400) + ' gün önce'; };
 const sure = (a, b) => { const f = Math.max(0, Math.round((b || Date.now() / 1000) - a));
-  return f < 3600 ? Math.round(f / 60) + ' dk' : Math.floor(f / 3600) + ' sa ' + Math.round(f % 3600 / 60) + ' dk'; };
-const EFOR = { dusuk:'düşük', orta:'orta', yuksek:'yüksek' };
-const sinif = s => kac(String(s || '').replace(/ /g, '-'));
-const eforHtml = (e, m) => e ? '<span class="efor">efor <b>' + kac(EFOR[e] || e) + '</b>' + (m ? ' · ' + kac(m) : '') + '</span>' : '';
-const adimHtml = a => '<li><span>' + a.idx + '</span><span>' + kac(a.tur) + '</span><span title="' + kac(a.ozet || a.metin) + '">'
-  + (a.arac ? '<b>' + kac(a.arac) + '</b> ' + kac(a.ozet) : kac((a.metin || '').split('\\n')[0])) + '</span></li>';
-function ajanHtml(a){
-  const c = a.canli || {}, son = (c.son_adimlar || []).slice(-1)[0] || {};
-  const hal = a.acik ? (c.hal || '?') : 'kapalı';
-  const araclar = Object.entries(c.araclar || {}).sort((x, y) => y[1] - x[1]);
-  return '<section class="g"><div class="g-bas"><b>' + kac(a.ad) + '</b>'
-    + '<span class="efor">' + (a.tur === 'mini' ? 'mini ajan' : 'görev ' + kac(a.gorev || '')) + '</span>' + eforHtml(a.efor, a.model)
-    + '<span class="rozet sag ' + sinif(hal) + '">' + kac(hal) + '</span></div>'
-    + '<div class="olcu"><span>süre <b>' + sure(a.baslangic, a.acik ? null : a.kapanis) + '</b></span>'
-    + '<span>adım <b>' + (c.adim == null ? '–' : c.adim) + '</b></span>'
-    + '<span>son hareket <b>' + (once(c.son_degisim) || '–') + '</b></span>'
-    + '<span>mesaj <b>' + (a.mesajlar || 1) + '</b></span>'
-    + (a.tur === 'gorev' && c.commit != null ? '<span>commit <b>' + c.commit + '</b></span><span>kaydedilmemiş <b>' + (c.degisen || 0) + '</b></span>' : '')
-    + ((c.alt || []).length ? '<span>alt ajan <b>' + c.alt.length + '</b></span>' : '') + '</div>'
-    + (araclar.length ? '<div class="cip">' + araclar.map(([k, v]) => '<span>' + kac(k) + ' ' + v + '</span>').join('') + '</div>' : '')
-    + ((c.disari || []).length ? '<details class="uyari"><summary>Klasör dışında ' + c.disari.length + ' iş (ana klasöre bak)</summary><ol class="adim">'
-      + c.disari.map(x => '<li><span>' + x.idx + '</span><span>' + kac(x.tur) + '</span><span title="' + kac(x.metin) + '">' + kac(x.metin.split('\\n')[0]) + '</span></li>').join('') + '</ol></details>' : '')
-    + (a.acik && son.idx != null ? '<div class="simdi">' + (c.hal === 'turu bitti' ? 'Tur bitti, sıra Claude Code’da.' : 'Şu an: ')
-      + (c.hal === 'turu bitti' ? '' : (son.arac ? '<b>' + kac(son.arac) + '</b> ' + kac(son.ozet) : kac(son.tur))) + '</div>' : '')
-    + '<div class="alt"><code>' + kac(a.worktree) + '</code>' + (a.dal ? ' · <code>' + kac(a.dal) + '</code>' : '')
-    + (a.portlar ? ' · portlar ' + Object.entries(a.portlar).map(([k, v]) => k + ' ' + v).join(', ') : '')
-    + ' · konuşma <code title="' + kac(a.konusma) + '">' + kac(String(a.konusma).slice(0, 8)) + '</code></div>'
-    + (a.istem ? '<details><summary>İstem</summary><pre>' + kac(a.istem) + '</pre></details>' : '')
-    + (c.son_adimlar && c.son_adimlar.length ? '<details' + (a.acik && c.hal !== 'turu bitti' ? ' open' : '') + '><summary>Son adımlar</summary><ol class="adim">'
-      + c.son_adimlar.map(adimHtml).join('') + '</ol></details>' : '')
-    + (c.cevap ? '<details' + (c.hal === 'turu bitti' ? ' open' : '') + '><summary>Son cevap</summary><pre>' + kac(c.cevap) + '</pre></details>' : '')
-    + ((c.alt || []).length ? '<details><summary>Alt ajanlar</summary>' + c.alt.map(s => '<div class="altajan"><span class="rozet ' + sinif(s.hal) + '">'
-        + kac(s.hal) + '</span> adım ' + kac(s.adim) + ' · ' + kac(s.istem.split('\\n')[0]) + (s.cevap ? '<pre>' + kac(s.cevap) + '</pre>' : '') + '</div>').join('') + '</details>' : '')
-    + (a.acik ? '<div class="komut">python tools/ajan.py mesaj ' + kac(a.ad) + ' "…" · cevap ' + kac(a.ad) + ' · kapat ' + kac(a.ad) + '</div>' : '')
-    + '</section>';
+  return f < 3600 ? Math.max(1, Math.round(f / 60)) + ' dk' : Math.floor(f / 3600) + ' sa ' + Math.round(f % 3600 / 60) + ' dk'; };
+const bin = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.', ',') + ' mn' : n >= 1e3 ? Math.round(n / 1e3) + ' bin' : String(n || 0);
+const saat = z => { const d = new Date(z); return isNaN(d) ? '' : d.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }); };
+const EFOR = { dusuk:[1, 'düşük'], orta:[2, 'orta'], yuksek:[3, 'yüksek'] };
+const eforHtml = (e, model) => { const x = EFOR[e]; if(!x) return '';
+  return '<span class="efor" role="img" aria-label="efor ' + x[1] + (model ? ', model ' + kac(model) : '') + '" title="efor ' + x[1] + (model ? ' · ' + kac(model) : '') + '">'
+    + [1, 2, 3].map(i => '<i class="' + (i <= x[0] ? 'dolu' : '') + '"></i>').join('') + '</span>'; };
+const ASAMA = { 'çalışıyor':['calisiyor', 'Çalışıyor'], inceleme:['inceleme', 'İncelemede'], sorun:['sorun', 'Dikkat'], 'kapandı':['', 'Kapandı'] };
+const KOLON = [['sira', 'Sırada'], ['calisiyor', 'Çalışıyor'], ['inceleme', 'İncelemede'], ['bitti', 'Bitti']];
+const kimlik = ad => 'ajan-' + String(ad).replace(/[^a-z0-9-]/gi, '');
+
+function panoHtml(p){
+  return KOLON.map(([k, ad]) => { const l = p.filter(x => x.kolon === k);
+    return '<section class="kolon" aria-label="' + ad + ', ' + l.length + ' iş"><h3><span>' + ad + '</span><span>' + l.length + '</span></h3>'
+      + (l.length ? l.map(x => '<button class="is' + (x.sorun ? ' sorun' : '') + '"' + (x.ajan ? ' data-git="' + kimlik(x.ajan) + '"' : ' disabled')
+        + '><b>' + (x.tur === 'mini' ? 'Mini · ' : kac(x.ad) + ' · ') + kac(x.baslik) + '</b><small>' + eforHtml(x.efor) + kac(x.cumle) + '</small></button>').join('')
+        : '<p class="bos">Boş</p>') + '</section>'; }).join('');
 }
-function gorevHtml(g){
-  const no = g.dosya.slice(0, 3);
-  return '<section class="g"><div class="g-bas"><b>' + kac(g.baslik) + '</b>' + eforHtml(g.efor)
-    + '<span class="rozet sag ' + (g.main_de ? 'main' : kac(g.durum)) + '">' + (g.main_de ? 'main’de' : kac(g.durum)) + '</span></div>'
-    + '<div class="alt">' + (g.dal_var ? '<code>' + kac(g.dal) + '</code> · main’den ' + g.ileri + ' commit ileri · son: ' + kac(g.son_mesaj) + ' (' + once(g.son_zaman) + ')'
-      : 'dal henüz yok (<code>' + kac(g.dal) + '</code>)') + ' · okunan: ' + kac(g.kaynak) + (g.ajan ? ' · ajan <b>' + kac(g.ajan) + '</b>' : '') + '</div>'
-    + (g.sonuc ? '<details' + (g.durum === 'bitti' || g.durum === 'takıldı' ? ' open' : '') + '><summary>Sonuç</summary><pre>' + kac(g.sonuc) + '</pre></details>' : '')
-    + (!g.ajan && g.durum === 'bekliyor' ? '<div class="komut">python tools/ajan.py baslat ' + kac(no) + (g.efor ? '' : ' --efor orta') + '</div>' : '')
-    + '</section>';
+
+function korumaHtml(c, kanca){
+  const k = c.kanca || {}, eng = k.engellendi || [];
+  if(!kanca && (c.disari || []).length) return '<p class="koruma uyari">Koruma kancası kurulu değil · ajan klasörü dışında <b>' + c.disari.length + '</b> iş yaptı; ana klasöre bak.</p>';
+  if(!kanca) return '<p class="koruma">Koruma kancası kurulu değil; kurallar yalnız istemde.</p>';
+  const parca = [];
+  if(k.yonlendirildi) parca.push('<b>' + k.yonlendirildi + '</b> komut klasörüne yönlendirildi');
+  if(eng.length) parca.push('<b>' + eng.length + '</b> araç engellendi');
+  if(k.devam) parca.push('<b>' + k.devam + '</b> kez erken durması önlendi');
+  return '<p class="koruma">Koruma: ' + (parca.length ? parca.join(' · ') : 'müdahale gerekmedi') + '</p>'
+    + (eng.length ? '<details><summary>Engellenenler</summary><ol class="cizelge">' + eng.map(x => '<li class="hata"><time>' + saat(x.t * 1000) + '</time><span title="'
+      + kac(x.ozet) + '">' + kac(x.arac) + ': ' + kac(x.neden) + '</span></li>').join('') + '</ol></details>' : '');
 }
+
+function cizelgeHtml(l){
+  return '<ol class="cizelge">' + l.filter(a => a.tur !== 'sonuç' || a.durum === 'RUNNING').map(a => {
+    const yazi = a.cumle || (a.tur === 'istem' ? 'Görev verildi' : a.tur === 'sonuç' ? 'Araç çalışıyor…' : (a.metin || '').split('\\n')[0]);
+    return '<li class="' + (a.tur === 'hata' ? 'hata' : a.tur === 'model' ? 'model' : '') + '"><time>' + saat(a.zaman) + '</time><span title="' + kac(yazi) + '">' + kac(yazi) + '</span></li>';
+  }).join('') + '</ol>';
+}
+
+function ajanHtml(a, kanca){
+  const c = a.canli || {}, s = ASAMA[a.asama] || ['', a.asama], t = c.token || {};
+  const simdi = a.asama === 'inceleme' ? (a.tur === 'mini' ? 'Cevap hazır.' : 'Ajan işini bitirdi; gözden geçirme ve birleştirme bekliyor.')
+    : a.asama === 'kapandı' ? 'Kapandı.' : a.asama === 'sorun' ? 'Dikkat: ' + (c.hal === 'sessiz' ? 'on dakikadır hareket yok.' : c.hal === 'hata' ? 'Antigravity hata verdi.' : 'klasör dışında iş yaptı.')
+    : (c.simdi || 'Başlıyor…');
+  return '<section class="ajan" id="' + kimlik(a.ad) + '"><div class="ajan-bas"><b>' + (a.tur === 'mini' ? 'Mini ajan · ' + kac(a.ad) : kac(a.gorev || a.ad).replace(/\\.md$/, '')) + '</b>'
+    + eforHtml(a.efor, a.model) + '<span class="etiket">' + kac(a.model) + '</span><span class="asama ' + s[0] + '">' + s[1] + '</span></div>'
+    + '<p class="simdi">' + (a.asama === 'çalışıyor' ? '<span>Şu an:</span> ' : '') + kac(simdi) + '</p>'
+    + '<div class="olcu">'
+    + '<div><small>Süre</small><b>' + sure(a.baslangic, a.acik ? null : a.kapanis) + '</b></div>'
+    + '<div><small>Adım</small><b>' + (c.adim == null ? '–' : c.adim) + '</b></div>'
+    + '<div><small>Son hareket</small><b>' + once(c.son_degisim) + '</b></div>'
+    + '<div><small>Token giriş / çıkış</small><b>' + bin(t.giris) + ' / ' + bin(t.cikis) + '</b></div>'
+    + (a.tur === 'gorev' && c.commit != null ? '<div><small>Commit / açık dosya</small><b>' + c.commit + ' / ' + (c.degisen || 0) + '</b></div>' : '')
+    + ((c.alt || []).length ? '<div><small>Alt ajan</small><b>' + c.alt.length + '</b></div>' : '') + '</div>'
+    + (a.acik ? korumaHtml(c, kanca) : '')
+    + (c.son_adimlar && c.son_adimlar.length ? '<details' + (a.asama === 'çalışıyor' ? ' open' : '') + '><summary>Zaman çizelgesi</summary>' + cizelgeHtml(c.son_adimlar) + '</details>' : '')
+    + (c.cevap ? '<details' + (a.asama === 'inceleme' ? ' open' : '') + '><summary>Son cevabı</summary><pre>' + kac(c.cevap) + '</pre></details>' : '')
+    + ((c.alt || []).length ? '<details><summary>Alt ajanlar</summary>' + c.alt.map(x => '<div class="alt"><b>' + kac(x.hal) + '</b> · ' + kac(x.simdi || '')
+        + '<br><span>' + kac((x.istem || '').split('\\n')[0]) + '</span>' + (x.cevap ? '<pre>' + kac(x.cevap) + '</pre>' : '') + '</div>').join('') + '</details>' : '')
+    + '<details><summary>Teknik ayrıntı</summary><dl>'
+    + '<dt>Klasör</dt><dd><code>' + kac(a.worktree) + '</code></dd>' + (a.dal ? '<dt>Dal</dt><dd><code>' + kac(a.dal) + '</code></dd>' : '')
+    + (a.portlar ? '<dt>Portlar</dt><dd>' + Object.entries(a.portlar).map(([k, v]) => k + ' ' + v).join(' · ') + '</dd>' : '')
+    + '<dt>Konuşma</dt><dd><code>' + kac(a.konusma) + '</code></dd><dt>Mesaj</dt><dd>' + (a.mesajlar || 1) + '</dd>'
+    + '<dt>Araçlar</dt><dd>' + Object.entries(c.araclar || {}).sort((x, y) => y[1] - x[1]).map(([k, v]) => kac(k) + ' ' + v).join(' · ') + '</dd>'
+    + (a.acik ? '<dt>Komut</dt><dd><code>python tools/ajan.py mesaj ' + kac(a.ad) + ' "…"</code> · <code>cevap ' + kac(a.ad) + '</code> · <code>kapat ' + kac(a.ad) + '</code></dd>' : '')
+    + (a.istem ? '<dt>İstem</dt><dd>' + kac(a.istem) + '</dd>' : '') + '</dl></details></section>';
+}
+
 async function tazele(){
-  let d; try{ d = await (await fetch('/api/durum', { cache:'no-store' })).json(); }catch(e){ document.getElementById('zaman').textContent = 'okunamadı'; return; }
-  const a = d.antigravity, y = d.yuva, calisan = d.ajanlar.filter(x => x.acik && (x.canli || {}).hal === 'çalışıyor').length;
-  document.getElementById('ag').innerHTML = '<span><span class="nokta' + (a.acik ? ' acik' : '') + '"></span>Antigravity ' + (a.acik ? 'açık' : (a.acik === false ? 'kapalı' : 'yoklanıyor')) + '</span>'
-    + '<span>' + calisan + ' ajan çalışıyor</span>'
-    + '<span aria-label="' + y.dolu + ' / ' + y.toplam + ' yuva dolu">yuva <span class="yuva">' + Array.from({ length:y.toplam }, (_, i) => '<i class="' + (i < y.dolu ? 'dolu' : '') + '"></i>').join('') + '</span> ' + y.dolu + '/' + y.toplam + '</span>'
-    + (a.var ? '<span>elle çalışma klasörü: <b>' + kac(a.dal || '?') + '</b>' + (a.degisen ? ' · ' + a.degisen + ' değişiklik' : '') + '</span>' : '');
-  document.getElementById('ajanlar').innerHTML = d.ajanlar.length ? d.ajanlar.map(ajanHtml).join('')
-    : '<p class="bos">Henüz ajan yok. Başlatmak için: <code>python tools/ajan.py baslat 001</code></p>';
-  document.getElementById('liste').innerHTML = d.gorevler.length ? d.gorevler.map(gorevHtml).join('') : '<p class="bos">Kuyrukta görev yok.</p>';
-  document.getElementById('zaman').textContent = 'güncellendi ' + new Date().toLocaleTimeString('tr-TR');
+  let d; try{ d = await (await fetch('/api/durum', { cache:'no-store' })).json(); }catch(e){ document.getElementById('cumle').textContent = 'Durum okunamadı; takip sunucusu kapanmış olabilir.'; return; }
+  const ag = d.antigravity, acik = d.ajanlar.filter(a => a.acik), say = k => d.pano.filter(x => x.kolon === k).length;
+  const parca = [];
+  if(say('calisiyor')) parca.push('<b>' + say('calisiyor') + '</b> iş çalışıyor');
+  if(say('inceleme')) parca.push('<b>' + say('inceleme') + '</b> iş incelemeyi bekliyor');
+  if(say('sira')) parca.push('<b>' + say('sira') + '</b> iş sırada');
+  const sorun = d.pano.filter(x => x.sorun).length;
+  if(sorun) parca.push('<b>' + sorun + '</b> işte dikkat gereken bir durum var');
+  document.getElementById('cumle').innerHTML = parca.length ? parca.join(', ') + '.' : 'Şu an çalışan ya da bekleyen iş yok.';
+  document.getElementById('durumcuk').innerHTML = '<span><span class="nokta ' + (ag.acik ? 'iyi' : ag.acik === false ? 'kotu' : '') + '"></span>Antigravity ' + (ag.acik ? 'açık' : ag.acik === false ? 'kapalı' : 'yoklanıyor') + '</span>'
+    + '<span><span class="nokta ' + (d.kanca ? 'iyi' : 'kotu') + '"></span>Koruma kancası ' + (d.kanca ? 'kurulu' : 'kurulu değil') + '</span>'
+    + '<span>Yuva ' + d.yuva.dolu + ' / ' + d.yuva.toplam + '</span><span>Güncellendi ' + new Date().toLocaleTimeString('tr-TR') + '</span>';
+  document.getElementById('pano').innerHTML = panoHtml(d.pano);
+  const kapali = d.ajanlar.filter(a => !a.acik);
+  document.getElementById('ajanlar').innerHTML = (acik.length ? acik.map(a => ajanHtml(a, d.kanca)).join('') : '<p class="bos">Açık ajan yok. Başlatmak için: <code>python tools/ajan.py baslat 004</code></p>')
+    + (kapali.length ? '<details><summary>Geçmiş (' + kapali.length + ' ajan)</summary>' + kapali.map(a => ajanHtml(a, d.kanca)).join('') + '</details>' : '');
 }
+document.addEventListener('click', e => { const b = e.target.closest('[data-git]'); if(!b) return;
+  const h = document.getElementById(b.dataset.git); if(h){ const g = h.closest('details'); if(g) g.open = true; h.scrollIntoView({ behavior:'smooth' }); } });
 tazele(); setInterval(tazele, 5000);
 setInterval(() => fetch('/nabiz', { method:'POST' }).catch(() => {}), 10000);
 </script></body></html>"""
