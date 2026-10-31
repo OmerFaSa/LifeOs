@@ -152,6 +152,13 @@ with tempfile.TemporaryDirectory() as t:
     dokum_yaz(A.BEYIN, "hatali", [satir(0, "USER_INPUT", content="x"), satir(1, "ERROR_MESSAGE", content="kota")])
     if A.konusma_oku("hatali")["hal"] != "hata" or A.konusma_oku("yok") is not None:
         hata.append("hata hali ya da kaydi olmayan konusma yanlis")
+    dokum_yaz(A.BEYIN, "aracHata", [satir(0, "USER_INPUT", content="x"), satir(1, "PLANNER_RESPONSE", tool_calls=arac),
+                                    satir(2, "GENERIC", "ERROR", content="target content not found")])
+    if A.konusma_oku("aracHata")["hal"] != "çalışıyor":
+        hata.append("taze arac hatasi calisiyor sayilmali (ajan tepki verecek)")
+    os.utime(A.dokum_yolu("aracHata"), (time.time() - 600, time.time() - 600))
+    if A.konusma_oku("aracHata")["hal"] != "hata":
+        hata.append("tepkisiz kalan arac hatasi hata sayilmali")
     eski = time.time() - 3600
     os.utime(A.dokum_yolu(ana), (eski, eski))
     dokum_yaz(A.BEYIN, "sessiz", [satir(0, "USER_INPUT", content="x"), satir(1, "PLANNER_RESPONSE", tool_calls=arac)])

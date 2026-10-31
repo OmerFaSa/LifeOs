@@ -42,34 +42,49 @@ Antigravity yapar; Claude Code görevi yazar, gözden geçirir, `main`'e alır.
   commit'e girmez.
 - Düzeltilen her hata için önce o hatayı yakalayan test yazılır.
 
-## Claude Code'un ajanları (`tools/ajan.py`)
+## Ofis: Claude Code'un Antigravity ekibi (`tools/ajan.py`)
 
-Depo sahibinin kararı (2026-10-31): Antigravity'yi Claude Code sürer. Her ajan
-Antigravity'de ayrı bir konuşmadır ve **kendi** klasöründe çalışır
-(`C:\Users\ASUS\LifeOs-ajan\<numara>`, dal hazır seçili); test portları da
-kendinedir (yuva n: AYS `47n1`, SPİ `47n2`, ESP `47n3`). Ajanın istemi
-yukarıdaki akışı ve o portları söyler; README'deki 4378/4388/4398 yalnız
-`LifeOs-ag`'de elle çalışırken geçerlidir.
+Depo sahibinin kararı (2026-10-31): Antigravity'yi Claude Code bir ofis gibi
+yönetir. Tasarım, `brand/ortak/` ve `sistem/` gibi kritik işler, son gözden
+geçirme ve birleştirme Claude Code'da kalır; ekip tanımı net işleri yapar.
+
+| Rol | Ne yapar | Klasör |
+|---|---|---|
+| **Uygulayıcı** | Görev dosyasını yapar, test koşar, dalını push eder | `LifeOs-ajan\<numara>` (dal hazır) |
+| **Denetçi** | Teslim edilen dalı Claude Code'dan önce inceler: `KARAR: temiz` ya da §4 biçiminde bulgular | `LifeOs-ajan\ofis-denetim` (dala ayrık, salt okunur) |
+| **Araştırmacı** | Sorulara kanıtla (dosya:satır) cevap verir | `LifeOs-ajan\ofis-arastirma` (main'e ayrık, salt okunur) |
 
 ```
-python tools/ajan.py baslat 003                 görev ajanı; efor görev dosyasından
-python tools/ajan.py baslat 001 --efor yuksek   efor dosyayı ezer
-python tools/ajan.py mini css-ara "…"          salt okunur kısa iş, cevap verir
-python tools/ajan.py durum                      hepsinin hâli, son adımı
-python tools/ajan.py cevap 003                  son cevabın tam metni
-python tools/ajan.py mesaj 003 "…"              konuşmaya ek talimat
-python tools/ajan.py kapat 003                  klasörü kaldırır, dal kalır
+python tools/ajan.py baslat 004                 Uygulayıcı; efor görev dosyasından
+python tools/ajan.py baslat 001 --efor yuksek   efor dosyayı ezer; --yeni yeni sohbet açtırır
+python tools/ajan.py sor "…"                    Araştırmacı (varsayılan efor düşük)
+python tools/ajan.py gozden 004                 Denetçi (kanca teslimde kendisi çağırır)
+python tools/ajan.py durum                      ekip ve açık işler
+python tools/ajan.py cevap 004                  bu işin son cevabı
+python tools/ajan.py mesaj 004 "…"              işe ek talimat (aynı sohbet)
+python tools/ajan.py kapat 004                  klasörü kaldırır, dal kalır
 python tools/ajan.py kur [--kaldir]             Antigravity koruma kancasını kurar/kaldırır
 ```
 
+- **Aynı sohbette devam:** bir rolün sohbeti boşsa, içinde 3'ten az iş varsa
+  ve bağlamı 200 bin token'ın altındaysa yeni iş aynı sohbete mesajla gider:
+  ajan AGENTS.md'yi yeniden okumaz, önbellek işler. Biri tutmazsa yeni sohbet
+  açılır (uzun bağlam kaliteyi düşürür). Aynı sohbetteki işler adım
+  aralığıyla ayrılır; kanca her an en son iş verilenin klasörünü uygular.
+- **Teslim → Denetçi:** Uygulayıcı durduğunda görev dosyası «bitti», klasör
+  temiz ve dal push edilmişse kanca Denetçi'yi kendiliğinden çağırır (bir
+  kez). Denetçi'nin «temiz» demesi birleştirme izni değildir: Claude Code
+  yine diff'i okur ve tam denetimleri koşar.
 - **Efor modeli seçer:** düşük → `flash_lite`, orta → `flash`, yüksek → `pro`.
   Görev dosyasındaki «**Efor:**» satırı varsayılandır. Efor alt ajan sınırını
   da belirler: düşükte alt ajan yok, ortada en çok 2, yüksekte en çok 3.
-- **Mini ajan:** main'in ayrık bir kopyasında (`LifeOs-ajan\m-<ad>`) okur,
-  arar, cevap verir; dosya değiştirmez, commit etmez. Varsayılan efor düşük.
-- **Gözden geçirici alt ajan:** orta ve yüksek eforda ajan, commit'ten önce
-  bir alt ajana `git diff main`'i AGENTS.md §1'e ve kabul ölçütüne göre okutur.
-- Ajan bitince dalını push eder; birleştirme yine Claude Code'dadır (akış 8).
+  Denetçi orta eforla (yüksek görevde yüksekle) çalışır.
+- **Portlar:** Uygulayıcı yuva n (1–8): AYS `47n1`, SPİ `47n2`, ESP `47n3`;
+  yuva 9 Denetçi'nindir. README'deki 4378/4388/4398 yalnız `LifeOs-ag`'de elle
+  çalışırken geçerlidir.
+- **Ucuz modelin cevabı doğrulanır:** Araştırmacı'nın (flash_lite) cevabı kanıtla
+  gelir ama Claude Code onu iş vermeden önce kontrol eder (ilk soruda bir
+  aracın testi «yok» denmişti, vardı).
 - Antigravity'nin adresi ve CSRF anahtarı çalışan dil sunucusundan okunur;
   hiçbir dosyaya yazılmaz. Durum `LifeOs-ajan\ajanlar.json`'dadır (depoda değil).
 
@@ -103,11 +118,13 @@ diğer kancalarına dokunmaz; `--kaldir` yalnız kendisini siler).
 ## İzleme
 
 Masaüstündeki **Görev Takibi** (`tools/gorev_takip.py`) beş saniyede bir
-yenilenir. Üstte tek cümlelik özet ve akış panosu (Sırada → Çalışıyor →
+yenilenir. Üstte tek cümlelik özet, ekip kartları (rol, model, şu an ne
+yaptığı, kaçıncı işte, bağlam doluluğu, token) ve akış panosu (Sırada → Çalışıyor →
 İncelemede → Bitti); bir işe tıklayınca ajanına iner. Her ajan: şu an ne
 yaptığı düz Türkçe, eforu (çubuk) ve modeli, süre, adım, son hareket, token
 (giriş/çıkış), commit ve açık dosya, kancanın müdahaleleri, zaman çizelgesi,
-son cevabı, alt ajanları; klasör, dal, port ve konuşma «Teknik ayrıntı»da.
+Denetçi raporu, son mesajı, alt ajanları; klasör, dal, port ve konuşma
+«Teknik ayrıntı»da. Araştırmacı'nın soruları ve cevapları ayrı bölümde.
 Kaynak Antigravity'nin konuşma dökümüdür (`brain/<id>/…/transcript.jsonl`).
 Yalnız okur, hiçbir şeyi değiştirmez.
 

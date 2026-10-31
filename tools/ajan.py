@@ -193,8 +193,8 @@ def konusma_oku(kimlik, son=12, wt=None, bas=0, bit=None):
         hal = "turu bitti"                                 # konusma sonraki ise gecti
     elif not adimlar:
         hal = "başlıyor"
-    elif son_adim["tur"] == "hata" or son_adim["durum"] == "ERROR":
-        hal = "hata"
+    elif son_adim["tur"] == "hata" or son_adim["durum"] == "ERROR" and time.time() - degisti > 120:
+        hal = "hata"                                       # arac hatasi olagandir; ajan iki dakikada tepki vermezse hata
     elif son_adim["tur"] == "model" and not son_adim["arac"] and son_adim["durum"] == "DONE":
         hal = "turu bitti"
     elif son_adim["durum"] == "RUNNING" or time.time() - degisti < 600:
