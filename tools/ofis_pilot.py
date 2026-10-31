@@ -247,7 +247,7 @@ def adim(x, dn, s, o):
     if o.get("yasak"):
         return "hazir", "yasak bölgeye dokundu: " + ", ".join(o["yasak"])
     if o.get("kabul_degisti"):
-        return "hazir", "kabul testi dalda değiştirildi: " + ", ".join(o["kabul_degisti"])
+        return "hazir", "kabul ölçütü dalda değiştirildi: " + ", ".join(o["kabul_degisti"])
     if o.get("sonuc_eksik") and not s.get("bicim_tur"):
         return "bicim", "Sonuç eksik: " + ", ".join(o["sonuc_eksik"])
     if not dn or dn.get("commit") != o["commit"]:
@@ -444,7 +444,8 @@ def tur(p, simdi=None):
         o = {"commit": A.git("rev-parse", "--short", x["dal"], kontrol=False), "simdi": simdi,
              "teslim": x.get("asama") == "inceleme" and _teslim(x), "gorev_durum": gorev_durumu(x),
              "test": T.son_ozet(no), "denetci_mesgul": mesgul, "test_mesgul": T.kilit_sahibi() is not None,
-             "kabul_degisti": [k for k in x.get("kabul") or () if A.git("diff", "--name-only", "main..." + x["dal"], "--", k, kontrol=False)],
+             "kabul_degisti": [k for k in x.get("kabul") or () if A.git("diff", "--name-only", "main..." + x["dal"], "--", k, kontrol=False)]
+             + (["görev dosyasının ölçütü"] if A.gorev_degisti(x["dal"], x.get("gorev", "")) else []),
              "sonuc_eksik": gorev_sonuc_eksik(x),
              "yasak": [y for y, _ in A.yasak_bolge((A.git("diff", "--name-only", "main..." + x["dal"], kontrol=False) or "").splitlines())]}
         if dn and dn.get("asama") not in ("çalışıyor", "sorun") and dn.get("commit") == o["commit"] and "ilk_karar" not in s:

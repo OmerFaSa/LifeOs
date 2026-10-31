@@ -150,6 +150,12 @@ if [y for y in yasak if not A.yasak_bolge([y])]:
     hata.append("yasak yol kacti: %r" % [y for y in yasak if not A.yasak_bolge([y])])
 if A.modul_belgeleri(["SPI/src/js/screens/a.js", "SPI/src/js/b.js", "tools/x.py", "HKM/motor/y.py"]) != ["SPI/src/MIMARI.md", "HKM/MIMARI.md"]:
     hata.append("modul_belgeleri: %r" % A.modul_belgeleri(["SPI/src/js/screens/a.js", "HKM/motor/y.py"]))
+g1 = "# 9\r\n**Durum:** bekliyor\r\n## Kabul ölçütü\r\n- mcg ile µg aynı  \r\n## Sonuç\r\n- **Ne değişti:**\r\n"
+g2 = g1.replace("bekliyor", "bitti").replace("\r\n", "\n").replace("- **Ne değişti:**", "- **Ne değişti:** x")
+if A.gorev_govdesi(g1) != A.gorev_govdesi(g2):
+    hata.append("Durum, Sonuc ve satir sonu degisikligi govde sayilmamali")
+if A.gorev_govdesi(g1) == A.gorev_govdesi(g1.replace("µg", "g")):
+    hata.append("olcut degisikligi govde degisikligi sayilmali")
 ci = "jobs:\n" + A.CI_ADIM + "          python3 tools/a_kabul_test.py\n      - name: x\n        run: python3 tools/b_test.py\n"
 m, e = A.ci_ekle(ci, ["tools/a_kabul_test.py", "tools/b_test.py", "tools/c_test.py", "tools/a_test.py"])
 if e != ["tools/c_test.py", "tools/a_test.py"] or m.count("python3 tools/c_test.py") != 1 or m.index("c_test") > m.index("a_kabul"):

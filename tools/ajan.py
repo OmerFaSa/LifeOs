@@ -499,6 +499,19 @@ def yasak_bolge(yollar):
     return out
 
 
+def gorev_govdesi(metin):
+    """Gorev dosyasinin ajanin degistiremeyecegi kismi: Sonuc'tan once, Durum satiri haric (satir sonu duzgun)."""
+    bas = re.sub(r"\*\*Durum:\*\*[^\n]*", "", (metin or "").replace("\r\n", "\n").split("## Sonuç", 1)[0])
+    return "\n".join(s.rstrip() for s in bas.splitlines()).strip()
+
+
+def gorev_degisti(dal, gorev):
+    """Ajan gorev dosyasinda Durum ve Sonuc disina dokundu mu (2026-11-01: flash_lite kabul olcutunu kolaylastirdi)."""
+    yol = "%s/%s" % (GOREVLER, gorev)
+    return gorev_govdesi(git("show", "main:" + yol, kok=KOK, kontrol=False)) != gorev_govdesi(
+        git("show", "%s:%s" % (dal, yol), kok=KOK, kontrol=False))
+
+
 def gorev_yollari(metin):
     """Gorev dosyasinin «Dokunulacak dosyalar» bolumundeki `yol`lar."""
     b = re.search(r"## Dokunulacak dosyalar\s*\n(.*?)(?=\n## |\Z)", metin, re.S)
@@ -687,7 +700,7 @@ def baslat(no, efor=None, ek="", yeni=False):
     worktree_kur(wt, bilgi["dal"])
     p = portlar(yuva)
     args = (str(wt), bilgi["dal"], dosya, p, efor, ek)
-    kimlik, bas, yeni_mi = gonder(d, "uygulayici", EFOR[efor], "LifeOS Uygulayıcı " + EFOR[efor],
+    kimlik, bas, yeni_mi = gonder(d, "uygulayici", EFOR[efor], "LF Uygulayıcı · " + EFOR[efor],
                                   gorev_istemi(*args), gorev_devam_istemi(*args), yeni)
     d = oku_durum()
     d[no] = {"tur": "gorev", "gorev": dosya.name, "dal": bilgi["dal"], "efor": efor, "model": EFOR[efor],
@@ -699,9 +712,10 @@ def baslat(no, efor=None, ek="", yeni=False):
              "/".join(map(str, p.values()))))
 
 
-def _ofis_klasoru(rol_, hedef):
-    """Arastirmaci ve denetcinin kalici salt okunur klasoru; her iste hedefe (main ya da dal) ayrik."""
-    wt = AJAN_KLASOR / OFIS[rol_]
+def _ofis_klasoru(rol_, hedef, ek=""):
+    """Arastirmaci ve denetcinin salt okunur klasoru; her iste hedefe (main ya da dal) ayrik. Denetci'de is basina
+    ayri klasor (ek=gorev no): 2026-11-01'de iki Denetci ayni klasoru paylasti, biri otekinin dalina gecti."""
+    wt = AJAN_KLASOR / (OFIS[rol_] + ("-" + ek if ek else ""))
     worktree_kur(wt, None)
     if git("status", "--porcelain", kok=wt, kontrol=False):
         raise SystemExit("%s klasöründe değişiklik var (salt okunur olmalıydı); elle bak." % wt)
@@ -719,7 +733,7 @@ def sor(soru, efor=None, ad=None, yeni=False):
     if d.get(ad, {}).get("acik"):
         raise SystemExit("%s zaten açık." % ad)
     wt = _ofis_klasoru("arastirmaci", "main")
-    kimlik, bas, yeni_mi = gonder(d, "arastirmaci", EFOR[efor], "LifeOS Araştırmacı " + EFOR[efor],
+    kimlik, bas, yeni_mi = gonder(d, "arastirmaci", EFOR[efor], "LF Araştırmacı · " + EFOR[efor],
                                   soru_istemi(str(wt), soru), soru_devam_istemi(str(wt), soru), yeni)
     d = oku_durum()
     _ayni_konusmayi_kapat(d, kimlik, ad)
@@ -737,9 +751,9 @@ def gozden(no, efor=None, yeni=False):
     if not a or a.get("tur") != "gorev":
         raise SystemExit("Böyle bir görev ajanı yok: %s" % no)
     efor = efor_cevir(efor) or DENETCI_EFOR.get(a.get("efor"), "orta")
-    wt = _ofis_klasoru("denetci", a["dal"])
+    wt = _ofis_klasoru("denetci", a["dal"], no)
     dosya = gorev_dosyasi(no)
-    kimlik, bas, yeni_mi = gonder(d, "denetci", EFOR[efor], "LifeOS Denetçi " + EFOR[efor],
+    kimlik, bas, yeni_mi = gonder(d, "denetci", EFOR[efor], "LF Denetçi · " + EFOR[efor],
                                   denetim_istemi(str(wt), no, a["dal"], dosya),
                                   denetim_govde(str(wt), no, a["dal"], dosya), yeni)
     ad = "d-" + no
@@ -771,6 +785,14 @@ def mesaj(ad, metin):
     print("%s: mesaj gönderildi." % ad)
 
 
+def _klasor_kaldir(wt):
+    for m in ("AYS", "SPI", "ESP"):                    # once baglantilar: remove hedefe inmesin
+        j = wt / m / "node_modules"
+        if j.exists():
+            subprocess.run(["cmd", "/c", "rmdir", str(j)], capture_output=True, creationflags=SESSIZ)
+    git("worktree", "remove", "--force", str(wt), kok=KOK)
+
+
 def kapat(ad, zorla=False):
     d = oku_durum()
     a = d.get(ad)
@@ -783,15 +805,16 @@ def kapat(ad, zorla=False):
         kirli = git("status", "--porcelain", kok=wt, kontrol=False)
         if kirli and not zorla and a["tur"] == "gorev":
             raise SystemExit("%s klasöründe kaydedilmemiş değişiklik var; bakmadan silmem (--zorla)." % wt)
-        for m in ("AYS", "SPI", "ESP"):                # once baglantilar: remove hedefe inmesin
-            j = wt / m / "node_modules"
-            if j.exists():
-                subprocess.run(["cmd", "/c", "rmdir", str(j)], capture_output=True, creationflags=SESSIZ)
-        git("worktree", "remove", "--force", str(wt))
+        _klasor_kaldir(wt)
     a["acik"] = False
     a["kapanis"] = int(time.time())
-    if a.get("denetim") in d and d[a["denetim"]].get("acik"):
-        d[a["denetim"]].update(acik=False, kapanis=int(time.time()))
+    dn = d.get(a.get("denetim") or "")
+    if dn:
+        if dn.get("acik"):
+            dn.update(acik=False, kapanis=int(time.time()))
+        dwt = Path(dn.get("worktree") or "")
+        if dwt.name.startswith(OFIS["denetci"] + "-") and dwt.exists():   # isin kendi denetim klasoru
+            _klasor_kaldir(dwt)
     yaz_durum(d)
     print("%s kapandı; dal (varsa) duruyor." % ad)
 
@@ -979,6 +1002,7 @@ def birlestir(no, ders=None, push=False, zorla=False):
     adlar = (g("diff", "--name-only", "main..." + dal, kontrol=False) or "").splitlines()
     sorun += ["yasak bölge: %s" % y for y, _ in yasak_bolge(adlar)]
     sorun += ["kabul testi değişti: %s" % k for k in a.get("kabul") or () if k in adlar]
+    sorun += ["görev dosyası Durum ve Sonuç dışında değişti (ölçüt)"] if gorev_degisti(dal, a["gorev"]) else []
     if sorun and not zorla:
         raise SystemExit("Birleştirmedim: " + "; ".join(sorun) + " (bakıp yine de almak için --zorla).")
     baslik = re.sub(r"^#\s*", "", (g("show", "%s:%s/%s" % (dal, GOREVLER, a["gorev"]), kontrol=False) or "#").splitlines()[0])
