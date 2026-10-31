@@ -1,6 +1,6 @@
 # 006 · Veri denetleyicisini sağlamlaştır
 
-**Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
+**Durum:** bitti   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/006-veri-denetle`
 **Efor:** orta   <!-- düşük (flash_lite) | orta (flash) | yüksek (pro; ölçülen 2026-10-31: flash ile aynı model) -->
 **Kabul testi:** `tools/veri_denetle_kabul_test.py`
@@ -35,7 +35,7 @@ aynı dosyada birebir tekrarlanan kayıt yakalanmaz. Üçü de ihlal olarak rapo
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `tools/veri_denetle.py` dosyasına `denetle_dosya(katman, ad, metin)` işlevi eklendi; nesne olmayan satırlar için «nesne değil» ihlali üretilerek çökme önlendi, URL denetimi yalnız `http://` ve `https://` ile başlayacak şekilde sıkılaştırıldı ve dosya içi yinelenen kayıtlar «yinelenen kayıt (satır N ile aynı)» olarak yakalandı. `main()` işlevi `denetle_dosya` kullanacak şekilde güncellendi. Kenar durumları sınayan `tools/veri_denetle_test.py` birim testleri yazıldı.
+- **Koşan testler:** `python tools/veri_denetle_test.py` -> Ran 14 tests in 0.003s OK · `python tools/veri_denetle.py` -> veri/DENETIM.md yazildi; ihlal: 33 · `python tools/yazi.py --denetle` -> Yazı denetimi: temiz
+- **Kabul testi:** `python tools/veri_denetle_kabul_test.py` -> veri_denetle kabul: nesne olmayan satir, siki URL, yinelenen kayit, eski kurallar.
+- **Açık kalan:** Gerçek veride 1 yeni ihlal bulundu: `veri/temiz/esp/ansiklopedi_genel.jsonl:91: yinelenen kayıt (satır 16 ile aynı)` (ayrıca `veri/temiz/ays/ipuclari.jsonl` dosyasındaki 32 eski kural ihlali devam ediyor; veri dosyalarına dokunulmadı).

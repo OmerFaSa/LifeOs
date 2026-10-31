@@ -24,10 +24,19 @@ KANIT = ("alinti", "tatoeba_id")
 
 
 def kaynak_gecerli(k):
-    return isinstance(k, str) and (k.startswith("http") or (VERI / "ham" / f"{k}.meta.json").exists())
+    if not isinstance(k, str) or not k:
+        return False
+    if k.lower().startswith(("http://", "https://")):
+        return True
+    try:
+        return (VERI / "ham" / f"{k}.meta.json").exists()
+    except (OSError, ValueError):
+        return False
 
 
 def denetle_kayit(katman, ad, r):
+    if not isinstance(r, dict):
+        return ["nesne değil"]
     if ad == "reddedilen.jsonl":
         return [] if r.get("neden") else ["neden yok"]
     e = r.get("etiket")
@@ -44,23 +53,48 @@ def denetle_kayit(katman, ad, r):
     return []
 
 
+def denetle_dosya(katman, ad, metin):
+    ihlaller = []
+    gorulen = {}
+    for no, line in enumerate(metin.splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            r = json.loads(line)
+        except json.JSONDecodeError as ex:
+            ihlaller.append((no, [f"JSON: {ex.msg}"]))
+            continue
+        if not isinstance(r, dict):
+            ihlaller.append((no, ["nesne değil"]))
+            continue
+
+        hata = denetle_kayit(katman, ad, r)
+        try:
+            canonical = json.dumps(r, sort_keys=True, ensure_ascii=False)
+        except (TypeError, ValueError):
+            canonical = None
+
+        if canonical is not None:
+            if canonical in gorulen:
+                hata.append(f"yinelenen kayıt (satır {gorulen[canonical]} ile aynı)")
+            else:
+                gorulen[canonical] = no
+
+        if hata:
+            ihlaller.append((no, hata))
+    return ihlaller
+
+
 def main():
     satirlar, toplam_ihlal = [], 0
     for katman in ("temiz", "taslak"):
         satirlar += [f"\n## {katman}/\n", "| Dosya | Kayıt | İhlal | İlk ihlal |", "| :--- | ---: | ---: | :--- |"]
         for yol in sorted((VERI / katman).glob("*/*.jsonl")):
-            n, ihlal, ilk = 0, 0, ""
-            for no, line in enumerate(yol.read_text(encoding="utf-8").splitlines(), 1):
-                if not line.strip():
-                    continue
-                n += 1
-                try:
-                    hata = denetle_kayit(katman, yol.name, json.loads(line))
-                except json.JSONDecodeError as ex:
-                    hata = [f"JSON: {ex.msg}"]
-                if hata:
-                    ihlal += 1
-                    ilk = ilk or f"{no}: {'; '.join(hata)}"
+            metin = yol.read_text(encoding="utf-8")
+            n = sum(1 for line in metin.splitlines() if line.strip())
+            ihlalli_satirlar = denetle_dosya(katman, yol.name, metin)
+            ihlal = len(ihlalli_satirlar)
+            ilk = f"{ihlalli_satirlar[0][0]}: {'; '.join(ihlalli_satirlar[0][1])}" if ihlalli_satirlar else ""
             toplam_ihlal += ihlal
             satirlar.append(f"| {yol.relative_to(VERI).as_posix()} | {n:,} | {ihlal} | {ilk} |")
     rapor = [
