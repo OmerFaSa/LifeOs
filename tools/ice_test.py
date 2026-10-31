@@ -47,6 +47,136 @@ l = I.ics_coz(ICS, SIMDI)
 bekle("ufuktakiler, sirali", [x["ad"] for x in l] == ["Matematik dersi, sınıf", "Doğum günü"])
 bekle("tum gun ve saat", l[1]["tum_gun"] and l[0]["bas"] == "2026-10-31T09:00" and l[0]["bit"] == "2026-10-31T10:00")
 
+# RRULE ve EXDATE testleri (001-takvim-tekrar)
+ICS_HAFTALIK = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20261026T090000\r
+DTEND:20261026T103000\r
+RRULE:FREQ=WEEKLY;BYDAY=MO,WE\r
+SUMMARY:Haftalık ders\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_haftalik = I.ics_coz(ICS_HAFTALIK, SIMDI)
+bekle("haftalik ders 14 gunde 4 kez", len(l_haftalik) == 4 and [x["bas"] for x in l_haftalik] == [
+    "2026-11-02T09:00", "2026-11-04T09:00", "2026-11-09T09:00", "2026-11-11T09:00"
+] and all(x["bit"].endswith("T10:30") for x in l_haftalik))
+
+ICS_COUNT = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20261031T100000\r
+DTEND:20261031T110000\r
+RRULE:FREQ=DAILY;COUNT=2\r
+SUMMARY:İki günlük seminer\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_count = I.ics_coz(ICS_COUNT, SIMDI)
+bekle("COUNT=2 iki kez", len(l_count) == 2 and [x["bas"] for x in l_count] == ["2026-10-31T10:00", "2026-11-01T10:00"])
+
+ICS_UNTIL = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20261001T090000\r
+DTEND:20261001T100000\r
+RRULE:FREQ=DAILY;UNTIL=20261020T180000Z\r
+SUMMARY:Geçmiş kurs\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_until = I.ics_coz(ICS_UNTIL, SIMDI)
+bekle("UNTIL gecmiste biten tekrar hic", len(l_until) == 0)
+
+ICS_UNTIL_TARIH = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20261031T090000\r
+RRULE:FREQ=DAILY;UNTIL=20261102\r
+SUMMARY:Tarihli bitiş\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_u_tar = I.ics_coz(ICS_UNTIL_TARIH, SIMDI)
+bekle("UNTIL tarih degeri gun sonuna kadar kapsar", [x["bas"] for x in l_u_tar] == ["2026-10-31T09:00", "2026-11-01T09:00", "2026-11-02T09:00"])
+
+ICS_EXDATE = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20261101T140000\r
+DTEND:20261101T150000\r
+RRULE:FREQ=DAILY;COUNT=3\r
+EXDATE:20261102T140000\r
+SUMMARY:İstisnalı toplantı\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_exdate = I.ics_coz(ICS_EXDATE, SIMDI)
+bekle("bir EXDATE atlanir", len(l_exdate) == 2 and [x["bas"] for x in l_exdate] == ["2026-11-01T14:00", "2026-11-03T14:00"])
+
+ICS_EXDATE_VIRGUL = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20261101T140000\r
+RRULE:FREQ=DAILY;COUNT=4\r
+EXDATE:20261102T140000,20261103T140000\r
+SUMMARY:Çoklu istisna\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_ex_virgul = I.ics_coz(ICS_EXDATE_VIRGUL, SIMDI)
+bekle("virgullu EXDATE atlanir", len(l_ex_virgul) == 2 and [x["bas"] for x in l_ex_virgul] == ["2026-11-01T14:00", "2026-11-04T14:00"])
+
+ICS_GUNLUK = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART;VALUE=DATE:20261031\r
+RRULE:FREQ=DAILY\r
+SUMMARY:Günlük rutin\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_gunluk = I.ics_coz(ICS_GUNLUK, SIMDI)
+bekle("gunluk tum gun etkinligi her gun", len(l_gunluk) == 14 and all(x["tum_gun"] for x in l_gunluk) and l_gunluk[0]["bas"] == "2026-10-31T00:00" and l_gunluk[-1]["bas"] == "2026-11-13T00:00")
+
+ICS_SECONDLY = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20261031T160000\r
+RRULE:FREQ=SECONDLY\r
+SUMMARY:Saniyelik etkinlik\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_secondly = I.ics_coz(ICS_SECONDLY, SIMDI)
+bekle("taninmayan FREQ=SECONDLY yalniz ilk ornek", len(l_secondly) == 1 and l_secondly[0]["bas"] == "2026-10-31T16:00")
+
+ICS_INTERVAL = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20261031T080000\r
+RRULE:FREQ=DAILY;INTERVAL=2\r
+SUMMARY:İki günde bir\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_int = I.ics_coz(ICS_INTERVAL, SIMDI)
+bekle("INTERVAL=2 iki gunde bir", [x["bas"] for x in l_int][:3] == ["2026-10-31T08:00", "2026-11-02T08:00", "2026-11-04T08:00"])
+
+ICS_AYLIK = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20260905T100000\r
+RRULE:FREQ=MONTHLY\r
+SUMMARY:Aylık kontrol\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_aylik = I.ics_coz(ICS_AYLIK, SIMDI)
+bekle("aylik tekrar", len(l_aylik) == 1 and l_aylik[0]["bas"] == "2026-11-05T10:00")
+
+ICS_YILLIK = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20241103T110000\r
+RRULE:FREQ=YEARLY\r
+SUMMARY:Yıllık anma\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_yillik = I.ics_coz(ICS_YILLIK, SIMDI)
+bekle("yillik tekrar", len(l_yillik) == 1 and l_yillik[0]["bas"] == "2026-11-03T11:00")
+
 
 class Sahte:
     def __init__(self, komut, yol, ip="127.0.0.1", govde=None, baslik=True):
@@ -109,4 +239,4 @@ with tempfile.TemporaryDirectory() as d:
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")
     sys.exit(1)
-print("Ice aktarma temiz: ics, ufuk, yalniz bu bilgisayar, ozel baslik, adres gizli, onbellek, ozet suzgeci, ag hatasi.")
+print("Ice aktarma temiz: ics, rrule, exdate, ufuk, yalniz bu bilgisayar, ozel baslik, adres gizli, onbellek, ozet suzgeci, ag hatasi.")
