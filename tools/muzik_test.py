@@ -75,6 +75,9 @@ with tempfile.TemporaryDirectory() as d:
     v = h.json()
     bekle("listede yalniz var olan", v["listeler"]["calisma"] == [p1["id"]] and v["listeler"]["spor"] == [p2["id"]])
     bekle("acilis araligi ve ses sinirlanir", v["acilis"]["bas"] == 5 and v["acilis"]["bit"] == 6 and v["acilis"]["ses"] == 1 and v["acilis"]["ne"] == "her")
+    for bas, bit in ((600, 600), (700, 0), (599.5, 600)):        # sinirda aralik 0 sn kalmaz (bas 600 -> bit 600 idi)
+        a = M.dogrula(dict(ayar, acilis=dict(ayar["acilis"], bas=bas, bit=bit)), M.oku())["acilis"]
+        bekle("acilis sinirda bit > bas (%s, %s): %r" % (bas, bit, a), a["bit"] > a["bas"] and a["bit"] <= 600)
     bekle("arka plan kaydedilir", v["arka"] == {"acik": True, "ses": .2, "karistir": True})
 
     h = Sahte("GET", "/api/muzik/parca/" + p1["id"])

@@ -625,7 +625,8 @@ def soru_istemi(wt, soru):
             "Klasör: %s (main'in salt okunur kopyası; her sorudan önce main'e güncellenir).\n" % wt
             + KABUK % wt + ARACLAR
             + "Dosya değiştirme, commit etme, sunucu açma; oku, ara, komutla incele. Cevabın kısa ve kanıtlı olsun "
-              "(dosya:satır). Emin değilsen «göremedim» yaz, «yok» yazma (AGENTS.md §4).\n\nSoru: " + soru)
+              "(dosya:satır). Emin değilsen «göremedim» yaz, «yok» yazma (AGENTS.md §4). Cevap 3500 karakteri "
+              "geçmesin (Antigravity dökümü uzun cevabın ortasını keser).\n\nSoru: " + soru)
 
 
 def soru_devam_istemi(wt, soru):
@@ -1044,7 +1045,8 @@ ADAY_ISTEMI = ("LifeOS ofisi için görev adayları çıkar (salt okunur; dosya 
                "güncelleme, HKM çekirdeği, uygulama/, tools/ajan*, ofis_*, ortak.py, AGENTS.md, .github. "
                "Her aday tam bu biçimde, kanıtlı (dosya:satır):\n"
                "ADAY: başlık\nDOSYALAR: `yol`, `yol`\nNEDEN: bir cümle, kanıt dosya:satır\nÖLÇÜT: «şu girdiyle şu çıktı» 2-4 madde\n"
-               "BOYUT: tahmini satır · EFOR: düşük|orta\nEmin olmadığını yazma.%s")
+               "BOYUT: tahmini satır · EFOR: düşük|orta\nEmin olmadığını yazma. Bütün cevap 3500 karakteri geçmesin "
+               "(Antigravity dökümü uzun cevabın ortasını keser); gerekirse aday sayısını azalt.%s")
 
 
 def main(argv):

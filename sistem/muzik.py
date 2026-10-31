@@ -130,7 +130,7 @@ def dogrula(v, onceki):
         ham = gelen.get(l, onceki["listeler"].get(l, []))
         d["listeler"][l] = [i for i in (ham if isinstance(ham, list) else []) if i in var][:500]
     a = v.get("acilis") if isinstance(v.get("acilis"), dict) else onceki["acilis"]
-    bas = _sayi(a.get("bas"), 0, 600, 0)
+    bas = _sayi(a.get("bas"), 0, 599, 0)                 # 600 olsaydi bit de 600'de kalir, aralik 0 sn olurdu
     bit = _sayi(a.get("bit"), 0, 600, bas + 10)
     if bit <= bas:
         bit = min(600, bas + 1)
