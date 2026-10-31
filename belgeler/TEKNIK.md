@@ -371,6 +371,42 @@ komut seti küçük ve kapalıdır (`durum`, `kabul`, `ret`, `neden`, `capraz`,
 gövdesi imzası doğrulanmadan ayrıştırılmaz bile. Sunucu, systemd, tünel ve
 kanal kurulumu: [`HKM/KURULUM.md`](../HKM/KURULUM.md).
 
+## Ortak ayarlar
+
+Modüller ayrı kapılarda (4173/4183/4193 ve giriş 4180) açıldığı için tarayıcı depoları paylaşılamaz; sistem ayarları (görünüş, arka plan, ses, animasyon, minikler, King, profiller) bu bilgisayarda tek kopya olarak tutulur (`sistem/ayar.py`). Sayfa sunulurken güncel durum `<head>` içine `window.__LIFEOS_AYAR__` olarak eklenir ve ilk çizim doğru ayarlarla başlar; sayfadaki değişiklikler iki saniyede bir ve sayfa kapanırken `POST /api/ayar` ile sunucuya yazılır (`brand/ortak/animasyon.js`). İlk eşitlemede sayfada olup sunucuda olmayan ayarlar silinmez, sunucuya eklenir; sayfa yenilenmeden önce `ortakYenile` değişikliği sunucuya yazar ve bekler.
+Yeni bir tercih anahtarı eklenirken altı yere birden dokunulur:
+1. `brand/ortak/ayarlar.js`: `SECIMLER` (seçim tanımı ve varsayılan değeri)
+2. `brand/ortak/animasyon.js`: `TASINAN` (modül geçiş hash'inde taşınan liste)
+3. `brand/ortak/animasyon.js`: `ORTAK` (istemcide sunucuya yazılacak anahtar deseni)
+4. `sistem/ayar.py`: `ANAHTAR` (sunucu kabul regex deseni)
+5. `brand/ortak/ayarlar.js`: `PROFIL_KAPSAR` (profil kaydına giren anahtarlar)
+6. `brand/ortak/ayarlar.js`: `SIFIRLANAN` (görünümü sıfırlarken varsayılana dönenler)
+Sözler: Yalnız bu bilgisayar (`127.0.0.1`), yazma `X-LifeOS: ayar` başlığı ister. Yalnız tercihler tutulur; veri, hesap, kilit ve King hafızası buraya giremez. En çok 120 anahtar, değer başına 4 KB (yalnız `profiller` için 60 KB) sınırı vardır. Sunucu kapalıyken sayfa kendi yerel deposuyla çalışır.
+
+## Müzik
+
+Kullanıcının yerel müzik dosyalarını yüklemesini ve listeler (`calisma`, `spor`, `arka`, `genel`) hâlinde dinlemesini sağlar (`sistem/muzik.py` ve `brand/ortak/muzik.js`). Sistem açılışında seçilen bir parçanın belirli bir saniye kesitinin (`bas`–`bit`, `ses`) çalmasını sağlar; tarayıcı engellerse kesit ilk dokunuşta çalar. Arka plan listesi açıksa oturum boyunca karışık çalar; çalışma veya spor oturumunda ilgili listeye geçer, bitince arka plana döner. Giriş sayfasında ve modüllerin radyo/ayarlar panelinde çalışır; radyo başlayınca müzik otomatik durur.
+Nerede durur: Parçalar ve dizin deponun dışında `%LOCALAPPDATA%\LifeOS\muzik` (ya da `~/.lifeos/muzik`) altında saklanır; yazılım güncellemeleri dosyalara dokunmaz.
+Sözler: Yalnız bu bilgisayardan erişilir (`127.0.0.1`), yazma `X-LifeOS: muzik` başlığı ister. Yalnız ses formatları kabul edilir (mp3, m4a, aac, ogg, webm, wav, flac; uzantı ve bayt imzası denetlenir), dosya başına üst sınır 80 MB'tır. Listelerde yalnızca var olan parçalar kalır, silinen parça tüm listelerden düşer. Ses düzeyi 0–1, açılış aralığı 0–600 saniye ile sınırlıdır.
+
+## Google'dan veri
+
+Kullanıcının Google takvimini ve Takeout özetlerini hiçbir hesap bağlamadan sisteme getirir (`sistem/ice.py` ve `brand/ortak/ice.js`). Google Takvim'in gizli iCal adresinden önümüzdeki 14 günün etkinliklerini çeker. Google Takeout'tan indirilen Fit adım verisi (`Daily activity metrics.csv`) ve YouTube izleme geçmişi (`watch-history.json`) dosyalarını doğrudan tarayıcıda çözümler; sunucuya dosya değil, yalnızca gün başına adım ve video özetleri aktarılır. Modüller Analiz ekranında veriyi gösterir: takvim üçünde; adım SPİ'de, YouTube ESP'de.
+Nerede durur: Özetler `%LOCALAPPDATA%\LifeOS\ice\ice.json` (ya da `~/.lifeos/ice/ice.json`) dosyasında tutulur.
+Sözler: Google hesabı sisteme bağlanmaz; parola veya jeton istenmez. iCal adresi dışarıya sızdırılmaz (GET sorgusu yalnızca «var» der) ve yarım saatte bir yerelden taranır. Takeout dosyası sunucuya gönderilmez, tarayıcıda okunur. Hiçbir ölçüm modül defterlerine kendiliğinden yazılmaz (§1.4); yalnızca gösterilir, kayda aktarma kullanıcının onayına bağlıdır.
+
+## Ayarlar paneli
+
+Kenardaki düğmeyle açılan ve tüm tercihleri tek çatı altında toplayan yan paneldir (`brand/ortak/ayarlar.js`, `ayarlar.css`). Üç alana ayrılır: Sistem (her yerde geçerli: profiller, görünüm, arka plan, ses, animasyon, erişilebilirlik, King, minikler, bildirimler, planlama), Bu modül (açık modüle özgü düzen, kilit ve modül ekranları) ve Hesap (güvenlik, iki adım, cihazlar, bağlantılar). 8 adede kadar ayar profili kaydedilebilir; profiller arası geçiş anında uygulanır. Yedek kartından tercihler JSON olarak dışa aktarılabilir ve içe aktarılabilir. Duvar kâğıdı, kartlar, menü ve pencereler için katman katman bağımsız bulanıklık ve buğulu/dolu cam seçeneği sunar. Erişilebilirlik alanında yazı boyutu, satır aralığı, kontrast, kalın odak çerçevesi ve altı çizili bağlantılar yer alır.
+Nerede durur: Kod `brand/ortak/ayarlar.js`, stiller `ayarlar.css`; tercihler tarayıcı deposunda ve `sistem/ayar.py` üzerinden ortak ayar dosyasında tutulur.
+Sözler: Kullanıcı verisi, hesap parolaları, gizlilik kilitleri ve King hafızası profillere veya ayar yedeğine dahil edilmez; yalnızca tercihler saklanır. Modül alanındaki tercihler diğer modülleri etkilemez. Profil geçişi ve görünüm sıfırlamada `ortakYenile` ile önce sunucu güncellenir, böylece yenilenen sayfada eski ayarlar geri gelmez.
+
+## Giriş sayfası ayarları
+
+Giriş sayfasında (`127.0.0.1:4180`) sağ üstteki ayar düğmesiyle açılan sade yönetim levhasıdır (`sistem/sunucu.py` içindeki şablon). Dört ana tercihi yönetir: Tema (Sistem, Açık, Koyu), Açılınca davranışı (bu sayfa ya da son açılan modüle 2 saniyede otomatik geçiş; iptal için «Vazgeç» butonu), Açılış ve arka plan müziği (parça seçimi, çalma sıklığı) ve Arka plan (gündüz/gece için ayrı fotoğraf veya video yükleme).
+Nerede durur: `sistem/sunucu.py` giriş sayfası bileşeninde yer alır; tema `/api/ayar`, müzik `/api/muzik/ayar`, arka plan `/api/zemin/` uçlarına bağlanır.
+Sözler: Tema, arka plan ve müzik sistem ayarıdır (`sistem/ayar.py`); burada yapılan değişiklikler AYS, SPİ ve ESP'de de aynı şekilde geçerlidir. Sayfa sade ve minimalist tutulur; ayrıntılı modül ve ses ayarları modüllerin kendi Ayarlar paneline bırakılır. Yüklenen arka plan videoları ve fotoğrafları için üst sınır 600 MB'tır.
+
 ## Sınırlar
 
 Her sistemin ne YAPMADIĞI, ne yaptığı kadar tanımlıdır ve `validate()`

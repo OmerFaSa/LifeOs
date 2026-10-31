@@ -1,6 +1,6 @@
 # 002 · Teknik belgeye son eklenenler
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/002-teknik-belge`
 **Efor:** orta
 
@@ -36,3 +36,9 @@ Her bölüm 5–15 satır, «ne yapar · nerede durur · hangi sözü tutar» d�
 - `python tools/yazi.py --denetle` (belge başlıkları da denetlenir; çıkış 0)
 
 ## Sonuç
+- **Ne değişti:** `belgeler/TEKNIK.md` dosyasına var olan metin korunarak beş yeni bölüm eklendi: Ortak ayarlar, Müzik, Google'dan veri, Ayarlar paneli ve Giriş sayfası ayarları. Her bölüm 5–15 satır kuralına, «ne yapar · nerede durur · hangi sözü tutar» düzenine ve başlık yazım kurallarına uygun olarak yazıldı.
+- **Hangi test koştu:** `python tools/yazi.py --denetle` ve `node tools/runtests.js 4731` (AYS).
+- **Çıktısı:**
+  - `python tools/yazi.py --denetle` -> `Yazı denetimi: temiz` (çıkış kodu 0)
+  - `AYS/tools/runtests.js 4731` -> `3121/3121 gecti` (çıkış kodu 0)
+- **Açık kalan:** Yok. Kodla çelişen bir durum görülmedi.
