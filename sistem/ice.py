@@ -279,7 +279,7 @@ def _rrule_ac(o, gun_basi, son):
 
 def ics_coz(metin, simdi, ufuk=UFUK_GUN):
     """Onumuzdeki `ufuk` gunun etkinlikleri, saate gore sirali.
-    RRULE ve EXDATE ile tekrarlayan etkinlikler cozulur."""
+    RRULE, EXDATE ve RECURRENCE-ID ile tekrarlayan etkinlikler cozulur."""
     satirlar = []
     for s in metin.replace("\r\n", "\n").split("\n"):
         if s.startswith((" ", "\t")) and satirlar:
@@ -312,6 +312,23 @@ def ics_coz(metin, simdi, ufuk=UFUK_GUN):
                         t, tum = _tarih(p)
                         if t:
                             o.setdefault("exdate", []).append((t, tum))
+            elif anahtar == "UID":
+                o["uid"] = deger.strip()
+            elif anahtar == "RECURRENCE-ID":
+                t, tum = _tarih(deger)
+                if t:
+                    o["recurrence_id"] = (t, tum)
+
+    rec_ids_by_uid = {}
+    for o in olaylar:
+        uid = o.get("uid")
+        if uid and o.get("recurrence_id"):
+            rec_ids_by_uid.setdefault(uid, []).append(o["recurrence_id"])
+
+    for o in olaylar:
+        if o.get("rrule") and not o.get("recurrence_id") and o.get("uid") and o["uid"] in rec_ids_by_uid:
+            o.setdefault("exdate", []).extend(rec_ids_by_uid[o["uid"]])
+
     son = simdi + datetime.timedelta(days=ufuk)
     gun_basi = simdi.replace(hour=0, minute=0, second=0, microsecond=0)
     l = []

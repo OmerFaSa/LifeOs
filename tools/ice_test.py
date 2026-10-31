@@ -177,6 +177,28 @@ END:VCALENDAR\r
 l_yillik = I.ics_coz(ICS_YILLIK, SIMDI)
 bekle("yillik tekrar", len(l_yillik) == 1 and l_yillik[0]["bas"] == "2026-11-03T11:00")
 
+# RECURRENCE-ID ile tasinmis etkinlik testi
+ICS_RECURRENCE_ID = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+UID:ders-42@google.com\r
+DTSTART:20261026T090000\r
+DTEND:20261026T103000\r
+RRULE:FREQ=WEEKLY;BYDAY=MO,WE\r
+SUMMARY:Haftalık ders\r
+END:VEVENT\r
+BEGIN:VEVENT\r
+UID:ders-42@google.com\r
+RECURRENCE-ID:20261104T090000\r
+DTSTART:20261104T150000\r
+DTEND:20261104T163000\r
+SUMMARY:Haftalık ders (taşındı)\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+l_rec_id = I.ics_coz(ICS_RECURRENCE_ID, SIMDI)
+bekle("haftalik ders + bir haftasi tasinmis tek gorunur ve tasindigi saatte",
+      [x["bas"] for x in l_rec_id] == ["2026-11-02T09:00", "2026-11-04T15:00", "2026-11-09T09:00", "2026-11-11T09:00"])
+
 
 class Sahte:
     def __init__(self, komut, yol, ip="127.0.0.1", govde=None, baslik=True):
@@ -239,4 +261,4 @@ with tempfile.TemporaryDirectory() as d:
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")
     sys.exit(1)
-print("Ice aktarma temiz: ics, rrule, exdate, ufuk, yalniz bu bilgisayar, ozel baslik, adres gizli, onbellek, ozet suzgeci, ag hatasi.")
+print("Ice aktarma temiz: ics, rrule, exdate, recurrence-id, ufuk, yalniz bu bilgisayar, ozel baslik, adres gizli, onbellek, ozet suzgeci, ag hatasi.")
