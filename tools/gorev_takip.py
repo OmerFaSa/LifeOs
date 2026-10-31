@@ -427,7 +427,8 @@ function testHtml(t){
     + (t.durum === 'çakışma' ? '<pre>' + kac(t.birlesme) + '</pre>' : '<table class="tablo"><thead><tr><th scope="col">Modül</th>' + DENETIM.map(d => '<th scope="col">' + d[1] + '</th>').join('') + '</tr></thead><tbody>'
       + ['AYS', 'SPI', 'ESP'].map(m => '<tr><th scope="row">' + m + '</th>' + DENETIM.map(d => hucre(m, d[0], d[1])).join('') + '</tr>').join('')
       + '<tr><th scope="row">Uçtan uca</th>' + hucre('kök', 'entegre', 'uçtan uca') + '<td colspan="6"></td></tr>'
-      + (bul('kök', 'kabul') ? '<tr><th scope="row">Kabul testi</th>' + hucre('kök', 'kabul', 'kabul testi') + '<td colspan="6"></td></tr>' : '') + '</tbody></table>')
+      + [['kabul', 'Kabul testi'], ['python', 'Python testleri']].map(([ad, etiket]) => bul('kök', ad)
+        ? '<tr><th scope="row">' + etiket + '</th>' + hucre('kök', ad, etiket) + '<td colspan="6"></td></tr>' : '').join('') + '</tbody></table>')
     + '<p class="koruma">Ham çıktı: <code>python tools/ajan.py testler ' + kac(t.no) + '</code></p></section>';
 }
 function olcumHtml(o){

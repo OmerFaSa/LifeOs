@@ -131,6 +131,12 @@ if "Açık kalan" not in P.bicim_metni(["Açık kalan"]) or "push" not in P.bici
 ad = [(m_, a) for m_, a, _, _ in T.adimlar("py")]
 if ad[:3] != [("AYS", "derle"), ("SPI", "derle"), ("ESP", "derle")] or ad[-1] != ("kök", "entegre") or len(ad) != 3 + 3 * len(T.DENETIM) + 1:
     hata.append("testci adim sirasi: %r" % ad)
+ci = ("steps:\n  # python3 tools/yorum.py\n  - name: a\n    run: python3 tools/a_test.py\n  - name: b\n    run: python3 tools/b.py --denetle && python3 tools/c_test.py\n"
+      "  - name: c\n    working-directory: HKM\n    run: python3 tools/perf.py\n  - name: d\n    run: |\n      python3 tools/a_test.py\n      python3 tools/d_test.py\n")
+esit("ci python komutlari", T.ci_python(ci), ["tools/a_test.py", "tools/b.py --denetle", "tools/c_test.py", "tools/d_test.py"])
+p_ad = T.adimlar("py", [], ["tools/a_test.py", "tools/b.py --denetle"])
+if p_ad[0][:2] != ("kök", "python") or p_ad[0][2][-1] != "tools/b.py --denetle":
+    hata.append("testci python adimi: %r" % (p_ad[0],))
 k_ad = T.adimlar("py", ["tools/k_test.py", "AYS/x.test.js"])
 if k_ad[0][:2] != ("kök", "kabul") or k_ad[0][2][-1] != "tools/k_test.py" or "AYS/x.test.js" in k_ad[0][2] or len(k_ad) != len(ad) + 1:
     hata.append("testci kabul adimi once ve yalniz .py: %r" % (k_ad[0],))

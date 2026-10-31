@@ -3,7 +3,7 @@
 **Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/NNN-kisa-ad`
 **Efor:** orta   <!-- düşük (flash_lite) | orta (flash) | yüksek (pro; ölçülen 2026-10-31: flash ile aynı model) -->
-**Kabul testi:** `tools/ornek_kabul_test.py`   <!-- Claude Code yazar, görevle commit eder; şu an kırmızı. Yeni dosya (CI listesinde değil); birleştirirken CI'a eklenir. Kanca değiştirtmez. Yoksa satırı sil. -->
+**Kabul testi:** `tools/ornek_kabul_test.py`   <!-- Claude Code yazar, görevle commit eder; şu an kırmızı. Yeni dosya (CI listesinde değil); birleştirirken CI'a eklenir. Kanca değiştirtmez. Modül JS mantığı tools/kabul_js.py ile Node'da sınanır. Yoksa satırı sil. -->
 
 ## Amaç
 Ne yapılacak ve neden (kullanıcının sözü varsa tırnakla).

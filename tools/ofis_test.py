@@ -18,6 +18,7 @@ push edilmez; klasor her kosuda sifirlanir.
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -39,12 +40,35 @@ def klasor(no=None):
     return k / no if no else k
 
 
-def adimlar(py="python", kabul=()):
-    """(modul, ad, komut, calisma klasoru goreli) — sira onemli: once kabul ve derleme, entegre en sonda."""
-    # shortcut: kabul testi yalniz .py; JS kabul testi gerekirse buraya node ile eklenir
+HEPSI = ("import shlex,subprocess,sys; sys.exit(max([0] + [subprocess.call([sys.executable] + shlex.split(k)) "
+         "for k in sys.argv[1:]]))")
+
+
+def ci_python(metin):
+    """CI'daki 'python3 tools/<ad>.py [argumanlar]' komutlari (yorum satirlari haric, sirali, tekrarsiz). Saf islev."""
+    out, baska_klasor = [], False
+    for satir in metin.splitlines():
+        if satir.strip().startswith("#"):
+            continue
+        if satir.strip().startswith("- name:") or satir.strip().startswith("- uses:"):
+            baska_klasor = False
+        if "working-directory:" in satir:                # HKM/tools/perf.py gibi: kok degil
+            baska_klasor = True
+        if baska_klasor:
+            continue
+        for parca in satir.split("&&"):
+            m = re.search(r"python3 (tools/[\w]+\.py(?: [\w=.-]+)*)\s*$", parca.strip())
+            if m and m.group(1) not in out:
+                out.append(m.group(1))
+    return out
+
+
+def adimlar(py="python", kabul=(), python_testleri=()):
+    """(modul, ad, komut, calisma klasoru goreli) — sira onemli: once kabul, Python testleri ve derleme, entegre en sonda.
+    Kabul testi .py'dir; modul JS mantigini tools/kabul_js.py ile Node'da sinar."""
     kabul = [k for k in kabul if k.endswith(".py")]
-    out = [("kök", "kabul", [py, "-c", "import subprocess,sys; sys.exit(max(subprocess.call([sys.executable, f]) "
-                                       "for f in sys.argv[1:]))"] + kabul, ".")] if kabul else []
+    out = [("kök", "kabul", [py, "-c", HEPSI] + kabul, ".")] if kabul else []
+    out += [("kök", "python", [py, "-c", HEPSI] + list(python_testleri), ".")] if python_testleri else []
     out += [(m, "derle", [py, "build.py"], m) for m in MODUL]
     out += [(m, d, ["node", "tools/%s.js" % d], m) for m in MODUL for d in DENETIM]
     return out + [("kök", "entegre", ["node", "tools/entegre.js"], ".")]
@@ -139,7 +163,9 @@ def kos(no):
             return o
         py = str(Path(sys.executable).with_name("python.exe")) if Path(sys.executable).name.lower() == "pythonw.exe" else sys.executable
         ortam = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
-        for modul, ad, komut, cwd in adimlar(py, a.get("kabul") or ()):
+        ci = wt / ".github" / "workflows" / "ci.yml"
+        pyt = ci_python(ci.read_text(encoding="utf-8")) if ci.exists() else []
+        for modul, ad, komut, cwd in adimlar(py, a.get("kabul") or (), pyt):
             log = k / ("%s-%s.log" % ("kok" if modul == "kök" else modul, ad))
             bas = time.time()
             try:

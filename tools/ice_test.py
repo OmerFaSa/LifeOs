@@ -222,6 +222,18 @@ class Sahte:
         return json.loads(self.wfile.getvalue().decode("utf-8"))
 
 
+class _SabitSaat(datetime.datetime):
+    """Uc nokta testi gercek saatle kosunca ICS'teki 31 Ekim olayi 1 Kasim'da dustu (2026-11-01): saat sabit."""
+    @classmethod
+    def now(cls, tz=None):
+        return cls(2026, 10, 31, 8, 0)
+
+
+class _Saat:
+    datetime, timedelta, timezone = _SabitSaat, datetime.timedelta, datetime.timezone
+
+
+I.datetime = _Saat
 with tempfile.TemporaryDirectory() as d:
     istek = []
     getir = lambda u: (istek.append(u), ICS)[1]

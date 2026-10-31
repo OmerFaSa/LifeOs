@@ -475,11 +475,12 @@ YASAK_BOLGE = [
     (re.compile(r"^brand/|/brand/", re.I), "görsel (marka, ortak çekirdek)"),
     (re.compile(r"(^|/)(css|img|fonts|medya)/", re.I), "görsel"),
     (re.compile(r"(^|/)[^/]*(anim|gecis|hareket|tema)[^/]*\.js$", re.I), "animasyon / tema"),
-    (re.compile(r"^(AYS|SPI|ESP)/(build\.py|devserver\.py|src/sw\.js|src/js/core/)", re.I), "altyapı (derleme, çekirdek)"),
+    (re.compile(r"^(AYS|SPI|ESP)/(build\.py|devserver\.py|src/sw\.js|src/js/app\.js|tools/)", re.I), "altyapı (derleme, açılış, denetim)"),
+    (re.compile(r"^(AYS|SPI|ESP)/src/js/core/(state|storage|store|ui|components|perde|h)\.js$", re.I), "altyapı (modülün veri ve arayüz katmanı)"),
     (re.compile(r"^sistem/(sunucu|baslat|guncelle|hesap)", re.I), "altyapı (sunucu, başlatma, güncelleme)"),
     (re.compile(r"^HKM/(hkm|daemon|kur|baslat)\.|^HKM/core/", re.I), "altyapı (HKM çekirdeği)"),
     (re.compile(r"^uygulama/|^[^/]+\.(bat|command)$", re.I), "altyapı (masaüstü/telefon kabuğu, başlatıcı)"),
-    (re.compile(r"^tools/(ortak|ajan|ajan_kanca|ofis_pilot|ofis_test|gorev_takip)\.py$", re.I), "altyapı (ortak araç, ofisin kendisi)"),
+    (re.compile(r"^tools/(ortak|ajan|ajan_kanca|ofis_pilot|ofis_test|gorev_takip|kabul_js)\.py$", re.I), "altyapı (ortak araç, ofisin kendisi)"),
     (re.compile(r"^AGENTS\.md$|^\.github/", re.I), "altyapı (sözleşme, CI)"),
 ]
 
@@ -487,9 +488,12 @@ YASAK_BOLGE = [
 def yasak_bolge(yollar):
     """[(yol, neden)] — ofisin dokunamayacagi yollar. Saf islev."""
     out = []
+    ortak = {p.name for p in (KOK / "brand" / "ortak").glob("*.js")}   # modullerdeki kopyalari ortak.py --yay yazar
     for y in yollar:
         y = re.sub(r"^(\./)+", "", str(y).replace("\\", "/"))
         neden = next((n for d, n in YASAK_BOLGE if d.search(y)), None)
+        if not neden and re.match(r"(AYS|SPI|ESP)/src/(js/core|tests)/", y) and y.rsplit("/", 1)[-1] in ortak:
+            neden = "ortak kopya (brand/ortak'tan yayılır; elle düzenlenmez)"
         if neden:
             out.append((y, neden))
     return out
@@ -1004,10 +1008,14 @@ def birlestir(no, ders=None, push=False, zorla=False):
 
 
 ADAY_ISTEMI = ("LifeOS ofisi için görev adayları çıkar (salt okunur; dosya değiştirme). En çok %d aday. Uygun iş: tanımı net, "
-               "50 satırdan büyük, ölçütü bir Python testiyle yazılabilen mantık işi (veri, hesap, araç, ekran mantığı, test "
-               "eksiği, 'shortcut:' borcu, açık hata). UYGUN DEĞİL: CSS, HTML, görseller, brand/, animasyon/hareket/tema JS'i, "
-               "src/js/core, build.py, sistem/ sunucu-başlatma-güncelleme, HKM çekirdeği, uygulama/, tools/ajan*, ofis_*, "
-               "ortak.py, AGENTS.md, .github. Her aday tam bu biçimde, kanıtlı (dosya:satır):\n"
+               "50 satırdan büyük mantık işi; ölçütü bir testle yazılabilir (Python; modül JS'i tools/kabul_js.py ile Node'da "
+               "sınanır). ÖNCELİK SIRASI (üsttekini bulamazsan alta in): 1) kullanıcının göreceği açık hata, kodda kanıtıyla "
+               "(AYS/SPI/ESP src/js/core ve screens mantığı, sistem/ özellik modülleri, HKM/motor); 2) belgeler/ekip/*PLAN*.md ve "
+               "HATALAR.md'de açık kalmış mantık maddesi; 3) 'shortcut:' borcu; 4) yalnız test eksiği (en çok bir aday, yalnız riskli "
+               "koda). UYGUN DEĞİL: CSS, HTML, görseller, brand/, animasyon/hareket/tema JS'i, brand/ortak'ta adaşı olan modül "
+               "kopyaları, core/state|storage|store|ui|components|perde|h.js, app.js, build.py, modül tools/, sistem/ sunucu-başlatma-"
+               "güncelleme, HKM çekirdeği, uygulama/, tools/ajan*, ofis_*, ortak.py, AGENTS.md, .github. "
+               "Her aday tam bu biçimde, kanıtlı (dosya:satır):\n"
                "ADAY: başlık\nDOSYALAR: `yol`, `yol`\nNEDEN: bir cümle, kanıt dosya:satır\nÖLÇÜT: «şu girdiyle şu çıktı» 2-4 madde\n"
                "BOYUT: tahmini satır · EFOR: düşük|orta\nEmin olmadığını yazma.%s")
 

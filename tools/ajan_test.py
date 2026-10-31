@@ -137,11 +137,13 @@ for (arac, args, mini), (karar, ust) in (
         hata.append("yonlendirme Set-Location ile baslamali: %r" % u)
 # yasak bolge: gorsel, animasyon ve altyapi ofisin degil (depo sahibinin karari)
 izinli = ["sistem/ice.py", "tools/ice_test.py", "AYS/src/js/screens/takvim.js", "veri/taslak/spi/besin_tema_x.jsonl",
-          "belgeler/TEKNIK.md", "HKM/motor/x.py", "AYS/src/tests/takvim.test.js"]
+          "belgeler/TEKNIK.md", "HKM/motor/x.py", "SPI/src/js/core/quickentry.js", "AYS/src/js/core/palette.js",
+          "SPI/src/tests/dunku.test.js"]
 yasak = ["brand/ortak/cam.css", "AYS/src/css/a.css", "AYS/src/index.html", "AYS/src/img/x.png", "AYS/src/js/core/animasyon.js",
          "brand/ortak/hareket.js", "SPI/build.py", "AYS/src/sw.js", "sistem/sunucu.py", "sistem/baslat.sh", "HKM/daemon.py",
          "uygulama/ios/App.swift", "GUNCELLE.bat", "tools/ajan.py", "tools/ortak.py", "AGENTS.md", ".github/workflows/ci.yml",
-         "./AYS/src/css/b.css", "AYS\\src\\js\\core\\x.js"]
+         "./AYS/src/css/b.css", "AYS\\src\\js\\core\\state.js", "SPI/src/js/core/king.js", "ESP/src/tests/hedef.test.js",
+         "AYS/src/js/app.js", "AYS/tools/runtests.js", "tools/kabul_js.py"]
 if A.yasak_bolge(izinli):
     hata.append("izinli yol yasak sayildi: %r" % A.yasak_bolge(izinli))
 if [y for y in yasak if not A.yasak_bolge([y])]:

@@ -136,7 +136,10 @@ girer: var olan kalıbı izler.
   değil; birleştirirken `.github/workflows/ci.yml`'e eklersin). Kanca ajanın onu
   değiştirmesini engeller, Denetçi diff'te değişmediğini doğrular, Testçi önce
   onu koşar, pilot dalda değiştiyse işi «hazır» yapıp söyler. Ölçütü ajan değil
-  test belirler; ajanın kendi testi ek güvencedir. (Şimdilik yalnız `.py`.)
+  test belirler; ajanın kendi testi ek güvencedir. Kabul testi `.py`'dir; modül JS
+  mantığını `tools/kabul_js.py` ile Node'da (tarayıcısız) sınar:
+  `J.calistir("SPI", ["src/js/core/utils.js", "src/js/core/x.js"], "SP.X.f(...)")`.
+  Testçi ayrıca CI'daki bütün Python test komutlarını koşar (`python` satırı).
 - **Denetçi bir üst kademede ve bozmaya çalışır:** düşük işi orta, ortayı yüksek
   denetler; en az iki kenar girdiyi gerçekten çalıştırıp `DENEME:` satırı
   yazmak zorunda. Denemesiz «temiz»e pilot bir kez geri sorar.
