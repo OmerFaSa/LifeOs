@@ -29,6 +29,9 @@ Olculen (2026-10-31): agentapi «pro» ve «flash»i ayni modele (M322) acar; ar
 model (Gemini 4 Argon, M417) agentapi'den secilemez. Yani pratikte iki kademe var.
 
   python tools/ajan.py ders <no> temiz|"<ders>"            son incelemenin sonucu; ders DERSLER.md'ye, istemlere girer
+  python tools/ajan.py birlestir <no> [--not "<ders>"] [--push]   denetimli merge, testler CI'a, ders, kapat (tek komut)
+  python tools/ajan.py aday [N] [odak]                      Arastirmaci gorev adaylari cikarir (kanitli, ofise uygun)
+  python tools/ajan.py rapor <no> [<no> …]                  toplu inceleme paketi
 
 Antigravity'nin yerel dil sunucusuna (language_server.exe agentapi) baglanir;
 adres ve CSRF anahtari calisan surecin komut satirindan okunur, hicbir yere
@@ -498,6 +501,20 @@ def gorev_yollari(metin):
     return re.findall(r"`([^`\s]+)`", b.group(1)) if b else []
 
 
+MODUL_BELGE = {"AYS": ("AYS/src/DURUSTLUK.md",), "SPI": ("SPI/src/MIMARI.md",), "ESP": ("ESP/src/MIMARI.md",),
+               "HKM": ("HKM/MIMARI.md",), "sistem": ("belgeler/TEKNIK.md",), "veri": ("veri/DENETIM.md",)}
+
+
+def modul_belgeleri(yollar):
+    """Gorevin dokundugu modullerin mimari belgeleri (sirali, tekrarsiz). Saf islev: var olup olmadigina bakmaz."""
+    out = []
+    for y in yollar:
+        for b in MODUL_BELGE.get(str(y).replace("\\", "/").split("/")[0], ()):
+            if b not in out:
+                out.append(b)
+    return out
+
+
 DERSLER = GOREVLER + "/DERSLER.md"
 SONUC_ALAN = ("Ne değişti", "Koşan testler", "Kabul testi", "Açık kalan")
 
@@ -539,6 +556,12 @@ def kabul_satiri(kabul):
             % ", ".join(kabul))
 
 
+def belge_satiri(dosya):
+    b = [x for x in modul_belgeleri(gorev_yollari(dosya.read_text(encoding="utf-8"))) if (KOK / x).exists()]
+    return ("Koda dokunmadan önce oku (modülün düzeni ve sözleri): %s. Var olan kalıbı izle, yenisini icat etme.\n"
+            % ", ".join(b)) if b else ""
+
+
 def _gorev_govde(wt, dal, dosya, p, efor, ek):
     return (
         "Görevin: %(wt)s\\%(gorev)s. Yazanı yap, yazmayanı yapma; belirsizse tahmin etme, «Sonuç»a soru olarak yaz.\n"
@@ -554,7 +577,8 @@ def _gorev_govde(wt, dal, dosya, p, efor, ek):
         "%(alt_satir)s\n"
         "Son mesajın kısa olsun: ne değişti, hangi test koştu, çıktı satırı."
         % dict(p, wt=wt, dal=dal, gorev=str(dosya.relative_to(KOK)).replace("/", "\\"),
-               kabul=kabul_satiri(gorev_bilgi(dosya.read_text(encoding="utf-8"))["kabul"]), dersler=dersler(), alt_satir=(
+               kabul=kabul_satiri(gorev_bilgi(dosya.read_text(encoding="utf-8"))["kabul"]) + belge_satiri(dosya),
+               dersler=dersler(), alt_satir=(
             "Alt ajan (invoke_subagent) yalnız bağımsız bir okuma ya da araştırma için ve en çok %(alt)d tane; "
             "Model %(alt_model)s, aynı klasör ve aynı kurallar; dosyayı yalnız sen değiştirirsin." % ALT[efor]
             if ALT[efor]["alt"] else "Alt ajan açma; işi tek başına yap."))
@@ -598,7 +622,7 @@ def denetim_govde(wt, hedef, dal, dosya):
             "tekrarlı…) gerçekten çalıştır (python -c, node -e ya da geçici bir test; dosya bırakma) ve her birini "
             "'DENEME: komut -> çıktı' satırı olarak yaz. Deneme satırı olmayan «temiz» geçersizdir.\n"
             % ((hedef, dal, wt, wt, wt, str(dosya.relative_to(KOK)).replace("/", "\\")) + tuple(portlar(DENETCI_YUVA).values()))
-            + kabul_denetim_satiri(gorev_bilgi(dosya.read_text(encoding="utf-8"))["kabul"]) + dersler()
+            + kabul_denetim_satiri(gorev_bilgi(dosya.read_text(encoding="utf-8"))["kabul"]) + belge_satiri(dosya) + dersler()
             + "Cevap biçimi: ilk satır tam olarak 'KARAR: temiz' ya da 'KARAR: N bulgu'. Sonra her bulgu bir satır: "
               "dosya:satır · ne yanlış · hangi girdide bozulur · nasıl doğrulanır. Sonra DENEME satırları. "
               "«Şu daha iyi olurdu» bulgu değildir; emin değilsen «göremedim» yaz.")
@@ -914,6 +938,80 @@ def rapor(ad, satir_siniri=250):
     print(fark if n <= satir_siniri else "== Diff %d satır; tamamı için: git diff main...%s" % (n, dal))
 
 
+CI = ".github/workflows/ci.yml"
+CI_ADIM = "      - name: Ofis kabul ve birim testleri\n        run: |\n"
+
+
+def ci_ekle(metin, testler):
+    """CI'daki «Ofis kabul ve birim testleri» adimina eksik testleri ekler: (yeni metin, eklenenler). Saf islev."""
+    if CI_ADIM not in metin:
+        raise SystemExit("CI'da «Ofis kabul ve birim testleri» adımı yok; %s'e bak." % CI)
+    yeni = [t for t in testler if re.search(r"(^|\s)%s(\s|$)" % re.escape(t), metin) is None]
+    satir = "".join("          python3 %s\n" % t for t in yeni)
+    return metin.replace(CI_ADIM, CI_ADIM + satir, 1), yeni
+
+
+def birlestir(no, ders=None, push=False, zorla=False):
+    """Hazir isi main'e alir: Testci'nin denedigi commit mi, yasak bolge ve kabul testi temiz mi; merge --no-ff,
+    kabul ve yeni testleri CI'a, son incelemeyi ders defterine, klasoru kapatir; istenirse push."""
+    import ofis_test
+    g = lambda *x, **k: git(*x, kok=KOK, **k)        # KOK cagri aninda okunur (test gecici depo verir)
+    d = oku_durum()
+    a = d.get(no)
+    if not a or a.get("tur") != "gorev":
+        raise SystemExit("Böyle bir görev ajanı yok: %s" % no)
+    dal = a["dal"]
+    if g("rev-parse", "--abbrev-ref", "HEAD", kontrol=False) != "main":
+        raise SystemExit("Ana klasör main'de değil.")
+    if [s for s in (g("status", "--porcelain", "--untracked-files=no", kontrol=False) or "").splitlines() if s.strip()]:
+        raise SystemExit("Ana klasörde commit'lenmemiş değişiklik var; önce onu bitir.")
+    commit = g("rev-parse", "--short", dal)
+    t = ofis_test.son_ozet(no) or {}
+    sorun = []
+    if t.get("commit") != commit or t.get("durum") != "bitti":
+        sorun.append("Testçi bu commit'i (%s) denemedi" % commit)
+    elif any(x.get("sonuc") != "yeşil" for x in t.get("adimlar") or []):
+        sorun.append("Testçi'de yeşil olmayan adım var")
+    adlar = (g("diff", "--name-only", "main..." + dal, kontrol=False) or "").splitlines()
+    sorun += ["yasak bölge: %s" % y for y, _ in yasak_bolge(adlar)]
+    sorun += ["kabul testi değişti: %s" % k for k in a.get("kabul") or () if k in adlar]
+    if sorun and not zorla:
+        raise SystemExit("Birleştirmedim: " + "; ".join(sorun) + " (bakıp yine de almak için --zorla).")
+    baslik = re.sub(r"^#\s*", "", (g("show", "%s:%s/%s" % (dal, GOREVLER, a["gorev"]), kontrol=False) or "#").splitlines()[0])
+    yesil = sum(1 for x in t.get("adimlar") or [] if x.get("sonuc") == "yeşil")
+    g("-c", "user.name=OmerFaSa", "-c", "user.email=omerfaruksagsozz@gmail.com", "merge", "-q", "--no-ff", dal, "-m",
+        "Birlestir %s: %s (ofis; Testci %d/%d yesil)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+        % (dal, baslik, yesil, len(t.get("adimlar") or [])))
+    ileri = t.get("main") and g("rev-parse", "--short", "HEAD^1") != t["main"]
+    testler = list(a.get("kabul") or ()) + [y for y in adlar if re.fullmatch(r"tools/[\w]+_test\.py", y)]
+    metin, eklenen = ci_ekle((KOK / CI).read_text(encoding="utf-8"), testler)
+    if eklenen:
+        (KOK / CI).write_text(metin, encoding="utf-8")
+        g("add", CI)
+        g("-c", "user.name=OmerFaSa", "-c", "user.email=omerfaruksagsozz@gmail.com", "commit", "-q", "-m",
+            "CI: %s testleri (%s)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" % (no, ", ".join(eklenen)))
+    ders_ekle(no, ders or "temiz")
+    if ders:
+        g("add", DERSLER)
+        g("-c", "user.name=OmerFaSa", "-c", "user.email=omerfaruksagsozz@gmail.com", "commit", "-q", "-m",
+            "Ders %s: %s\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" % (no, ders[:60]))
+    kapat(no)
+    if push:
+        g("push", "-q", "origin", "main")
+    print("%s birleşti%s · CI'a eklenen: %s · son inceleme: %s%s" % (
+        no, " ve push edildi" if push else " (push edilmedi)", ", ".join(eklenen) or "yok", "ders" if ders else "temiz",
+        " · main Testçi'den sonra ilerledi: §2'yi main'de koş" if ileri else ""))
+
+
+ADAY_ISTEMI = ("LifeOS ofisi için görev adayları çıkar (salt okunur; dosya değiştirme). En çok %d aday. Uygun iş: tanımı net, "
+               "50 satırdan büyük, ölçütü bir Python testiyle yazılabilen mantık işi (veri, hesap, araç, ekran mantığı, test "
+               "eksiği, 'shortcut:' borcu, açık hata). UYGUN DEĞİL: CSS, HTML, görseller, brand/, animasyon/hareket/tema JS'i, "
+               "src/js/core, build.py, sistem/ sunucu-başlatma-güncelleme, HKM çekirdeği, uygulama/, tools/ajan*, ofis_*, "
+               "ortak.py, AGENTS.md, .github. Her aday tam bu biçimde, kanıtlı (dosya:satır):\n"
+               "ADAY: başlık\nDOSYALAR: `yol`, `yol`\nNEDEN: bir cümle, kanıt dosya:satır\nÖLÇÜT: «şu girdiyle şu çıktı» 2-4 madde\n"
+               "BOYUT: tahmini satır · EFOR: düşük|orta\nEmin olmadığını yazma.%s")
+
+
 def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
@@ -944,7 +1042,14 @@ def main(argv):
         ders_ekle(argv[0], " ".join(argv[1:]))
         print("%s: son inceleme kaydedildi%s." % (argv[0], "" if argv[1].lower() == "temiz" else "; ders DERSLER.md'de"))
     elif k == "rapor" and argv:
-        rapor(argv[0])
+        for a in argv:                                  # toplu inceleme: tek cagri
+            rapor(a)
+    elif k == "birlestir" and argv:
+        birlestir(argv[0], ek or None, "--push" in argv, "--zorla" in argv)
+    elif k == "aday":
+        sor(ADAY_ISTEMI % (int(argv[0]) if argv and argv[0].isdigit() else 5,
+                           (" Odak: " + " ".join(a for a in argv if not a.isdigit())) if [a for a in argv if not a.isdigit()] else ""),
+            efor or "orta", ad, yeni)
     elif k == "cevap" and argv:
         h = {x["ad"]: x for x in hepsi()}
         print((h.get(argv[0]) or {}).get("canli", {}).get("cevap") or "Henüz cevap yok.")

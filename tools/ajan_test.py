@@ -146,6 +146,19 @@ if A.yasak_bolge(izinli):
     hata.append("izinli yol yasak sayildi: %r" % A.yasak_bolge(izinli))
 if [y for y in yasak if not A.yasak_bolge([y])]:
     hata.append("yasak yol kacti: %r" % [y for y in yasak if not A.yasak_bolge([y])])
+if A.modul_belgeleri(["SPI/src/js/screens/a.js", "SPI/src/js/b.js", "tools/x.py", "HKM/motor/y.py"]) != ["SPI/src/MIMARI.md", "HKM/MIMARI.md"]:
+    hata.append("modul_belgeleri: %r" % A.modul_belgeleri(["SPI/src/js/screens/a.js", "HKM/motor/y.py"]))
+ci = "jobs:\n" + A.CI_ADIM + "          python3 tools/a_kabul_test.py\n      - name: x\n        run: python3 tools/b_test.py\n"
+m, e = A.ci_ekle(ci, ["tools/a_kabul_test.py", "tools/b_test.py", "tools/c_test.py", "tools/a_test.py"])
+if e != ["tools/c_test.py", "tools/a_test.py"] or m.count("python3 tools/c_test.py") != 1 or m.index("c_test") > m.index("a_kabul"):
+    hata.append("ci_ekle eksikleri adimin basina eklemeli, var olani yinelememeli: %r %r" % (e, m))
+try:
+    A.ci_ekle("jobs:\n", ["x"])
+    hata.append("ci_ekle adim yoksa durmali")
+except SystemExit:
+    pass
+if "UYGUN DEĞİL" not in A.ADAY_ISTEMI or "brand/" not in A.ADAY_ISTEMI or "%d" not in A.ADAY_ISTEMI:
+    hata.append("aday istemi yasak bolgeyi ve sayiyi icermeli")
 gm = "# 9\n## Dokunulacak dosyalar\n- `sistem/ice.py` — x\n- `brand/ortak/cam.css`\n\n## Dokunma\n- `AGENTS.md`\n"
 if A.gorev_yollari(gm) != ["sistem/ice.py", "brand/ortak/cam.css"]:
     hata.append("gorev_yollari: %r" % A.gorev_yollari(gm))
@@ -329,6 +342,56 @@ with tempfile.TemporaryDirectory() as t:
             hata.append("ders istemi: %r" % A.dersler())
     finally:
         A.KOK, A.AJAN_KLASOR = eski_kok, eski_ajan
+
+# birlestir: gecici depoda uctan uca (Testci'nin denedigi commit, merge, CI, ders, kapat; reddetme yollari)
+import subprocess  # noqa: E402
+with tempfile.TemporaryDirectory() as t:
+    t, eski_kok, eski_ajan = Path(t), A.KOK, A.AJAN_KLASOR
+    A.KOK, A.AJAN_KLASOR = t / "depo", t / "ajan"
+    A.DURUM_DOSYA = A.AJAN_KLASOR / "ajanlar.json"
+    G = lambda *x: subprocess.run(["git", "-C", str(A.KOK), "-c", "user.name=t", "-c", "user.email=t@t"] + list(x),
+                                  capture_output=True, text=True, encoding="utf-8").stdout.strip()
+    try:
+        (A.KOK / A.GOREVLER).mkdir(parents=True)
+        (A.KOK / ".github/workflows").mkdir(parents=True)
+        (A.KOK / "tools").mkdir()
+        (A.KOK / A.CI).write_text("jobs:\n" + A.CI_ADIM + "          python3 tools/eski_test.py\n", encoding="utf-8")
+        (A.KOK / A.GOREVLER / "009-x.md").write_text("# 009 · Deneme işi\n", encoding="utf-8")
+        (A.KOK / "tools/k_kabul_test.py").write_text("print(1)\n", encoding="utf-8")
+        G("init", "-q", "-b", "main"); G("add", "-A"); G("commit", "-q", "-m", "ilk")
+        G("switch", "-q", "-c", "ag/009-x")
+        (A.KOK / "tools/z_test.py").write_text("print(2)\n", encoding="utf-8")
+        G("add", "-A"); G("commit", "-q", "-m", "is")
+        G("switch", "-q", "main")
+        A.AJAN_KLASOR.mkdir()
+        A.yaz_durum({"009": {"tur": "gorev", "gorev": "009-x.md", "dal": "ag/009-x", "worktree": str(t / "yok"), "acik": True,
+                             "kabul": ["tools/k_kabul_test.py"], "konusma": "k"}})
+        ozet = A.AJAN_KLASOR / "test/009/ozet.json"
+        ozet.parent.mkdir(parents=True)
+        yaz = lambda commit, sonuc="yeşil": ozet.write_text(json.dumps({"commit": commit, "durum": "bitti", "main": G("rev-parse", "--short", "main"),
+                                                                         "adimlar": [{"sonuc": sonuc}]}), encoding="utf-8")
+        for neden, hazirla in (("Testçi bu commit", lambda: yaz("eski")), ("yeşil olmayan", lambda: yaz(G("rev-parse", "--short", "ag/009-x"), "kırmızı"))):
+            hazirla()
+            try:
+                A.birlestir("009")
+                hata.append("birlestir reddetmeliydi: " + neden)
+            except SystemExit as e:
+                if neden not in str(e):
+                    hata.append("birlestir red nedeni %r: %s" % (neden, e))
+        yaz(G("rev-parse", "--short", "ag/009-x"))
+        A.birlestir("009", "Boş girdide çöktü")
+        log = G("log", "--format=%s", "-4").splitlines()
+        if not log[2].startswith("Birlestir ag/009-x: 009 · Deneme işi (ofis; Testci 1/1 yesil)") or not log[1].startswith("CI: 009") \
+                or not log[0].startswith("Ders 009"):
+            hata.append("birlestir commit'leri: %r" % log)
+        ci = (A.KOK / A.CI).read_text(encoding="utf-8")
+        if "python3 tools/k_kabul_test.py" not in ci or "python3 tools/z_test.py" not in ci or ci.count("eski_test") != 1:
+            hata.append("birlestir CI: %r" % ci)
+        if A.oku_durum()["009"]["acik"] or "- 009 (" not in A.dersler() or G("status", "--porcelain"):
+            hata.append("birlestir kapat/ders/temiz klasor")
+    finally:
+        A.KOK, A.AJAN_KLASOR = eski_kok, eski_ajan
+        A.DURUM_DOSYA = A.AJAN_KLASOR / "ajanlar.json"
 
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")

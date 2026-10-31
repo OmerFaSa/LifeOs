@@ -80,18 +80,23 @@ Tek bir grep ya da okuma ile çözülecek soruyu `sor`'a verme; kendin yap.
 
 ## 4. Akış (en az çağrıyla)
 
+**Standart tur (2026-10-31, en az çağrı):**
 ```
-# 1) görev dosyalarını yaz (şablon: belgeler/ekip/gorevler/_SABLON.md), commit + push
-python tools/ajan.py baslat 005 && python tools/ajan.py baslat 006   # toplu ver
-# 2) TEK arka plan çağrısı; bitince tek bildirim gelir. Yoklama yapma.
-python tools/ajan.py bekle 005 006        # run_in_background ile
-# 3) her iş için tek çağrı: Sonuç + Denetçi + diff
-python tools/ajan.py rapor 005
-# 4) bulgu varsa aynı sohbete gönder, sonra yine bekle
-python tools/ajan.py mesaj 005 "Denetçi bulgusu: … düzelt, testi önce yaz"
-# 5) birleştir (git merge --no-ff, -c kimlik), AGENTS.md §2 denetimleri, push
-python tools/ajan.py kapat 005
+# 0) adayları sen tarama; Araştırmacı tarasın (kanıtlı, ofise uygun, biçimli)
+python tools/ajan.py aday 5 [odak]   →  python tools/ajan.py cevap s-N
+# 1) 3–4 adayı seç; her biri için kabul testi + görev dosyası; tek commit + push
+python tools/ajan.py pilot baslat
+# 2) TEK arka plan çağrısı (pilot.json'da hepsi «hazır» olana dek); yoklama yapma
+# 3) toplu inceleme, tek çağrı
+python tools/ajan.py rapor 007 008 009
+# 4) her iş tek komut: Testçi'nin denediği commit mi, yasak bölge, kabul testi
+#    değişmedi mi → merge --no-ff, kabul ve yeni testler CI'a, ders, kapat, push
+python tools/ajan.py birlestir 007 --push
+python tools/ajan.py birlestir 008 --not "kısa ders" --push
+python tools/ajan.py pilot dur
 ```
+`birlestir` main Testçi'den sonra ilerlediyse söyler: o zaman §2'yi main'de koş.
+Bulgu varsa birleştirme yerine `mesaj NNN "…"` ve yeniden bekle.
 
 - **Toplu ver, toplu incele:** 3–4 görevi birlikte başlat; tek `bekle`, tek
   inceleme turu. İş başına sabit maliyet ~10 çağrıdan ~4'e iner.
@@ -113,7 +118,10 @@ python tools/ajan.py kapat 005
 bulgusunu geri gönderir, Testçi'yi koşturur; iş «hazır» olunca tek çağrı:
 `python tools/ajan.py rapor NNN` (Sonuç, Denetçi, Testçi tablosu, diff).
 Kırmızı varsa `testler NNN` ham çıktının son satırlarını verir. Gerisi aynı:
-diff'i oku, birleştir, §2'yi main'de koş, push, `kapat`.
+diff'i oku, `birlestir NNN --push`.
+Uygulayıcı'nın istemine görevin dokunduğu modülün belgesi (`SPI/src/MIMARI.md`,
+`ESP/src/MIMARI.md`, `AYS/src/DURUSTLUK.md`, `HKM/MIMARI.md`…) kendiliğinden
+girer: var olan kalıbı izler.
 
 ## 5. Kalite kuralları (pazarlık yok)
 

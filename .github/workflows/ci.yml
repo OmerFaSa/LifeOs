@@ -220,10 +220,12 @@ jobs:
       - name: Ofis pilotu ve Testçi
         run: python3 tools/ofis_pilot_test.py
 
-      # VERI DENETIMI (2026-10-31, ofis gorevi 006). Nesne olmayan satir cokertmez, URL siki,
-      # ayni dosyada yinelenen kayit ihlal. Kabul testi Claude Code'un, birim testi Uygulayici'nin.
-      - name: Veri denetleyicisi
-        run: python3 tools/veri_denetle_kabul_test.py && python3 tools/veri_denetle_test.py
+      # OFIS (2026-10-31). Antigravity islerinin kabul testleri (Claude Code yazar) ve
+      # Uygulayici'nin birim testleri. «ajan.py birlestir» satir ekler; elle silme.
+      - name: Ofis kabul ve birim testleri
+        run: |
+          python3 tools/veri_denetle_kabul_test.py
+          python3 tools/veri_denetle_test.py
 
       - name: Ölü CSS aracının sınaması
         run: python3 tools/olucss.py --sina
