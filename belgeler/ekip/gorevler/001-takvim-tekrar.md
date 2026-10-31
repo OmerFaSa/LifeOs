@@ -1,6 +1,6 @@
 # 001 · Takvimde tekrarlayan etkinlikler
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/001-takvim-tekrar`
 **Efor:** yüksek
 
@@ -37,3 +37,13 @@ düşen bütün tekrarları göster.
 - `python tools/ice_test.py` (çıkış 0)
 
 ## Sonuç
+- **Ne değişti:**
+  - `sistem/ice.py`: `ics_coz` ve yardımcıları (`_rrule_ac`, `_haric_mi`, `_ay_ekle`, `_yil_ekle`) eklendi. `RRULE` (`FREQ=DAILY|WEEKLY|MONTHLY|YEARLY`, `INTERVAL`, `COUNT`, `UNTIL`, `BYDAY`) ve `EXDATE` desteği sağlandı; `shortcut:` yorumu kaldırıldı. Tanınmayan `FREQ` (örn. `SECONDLY`) durumunda etkinlik ilk tarihiyle bırakıldı.
+  - `sistem/ice.py` (ek): `UID` ve `RECURRENCE-ID` desteği eklendi. Taşınan veya değiştirilen tekil `RECURRENCE-ID` örnekleri kendi tarihinde aynen korunurken, aynı `UID`'ye sahip `RRULE` açılımının o anı çift kayıt oluşturmadan atlaması sağlandı.
+  - `tools/ice_test.py`: Haftalık ders (BYDAY=MO,WE 14 günde 4 kez), `COUNT=2`, geçmişte biten `UNTIL`, tarihli `UNTIL`, tekil ve virgüllü `EXDATE`, günlük tüm gün, tanınmayan `FREQ=SECONDLY` ve `RECURRENCE-ID` ile taşınan haftalık ders testi eklendi.
+- **Koşan testler:**
+  - `python tools/ice_test.py` -> Çıkış: 0 (`Ice aktarma temiz: ics, rrule, exdate, recurrence-id, ufuk, yalniz bu bilgisayar, ozel baslik, adres gizli, onbellek, ozet suzgeci, ag hatasi.`)
+  - `cd AYS && node tools/runtests.js 4721` -> 3121/3121 geçti
+  - `cd SPI && node tools/runtests.js 4722` -> 2880/2880 geçti
+  - `cd ESP && node tools/runtests.js 4723` -> 2587/2587 geçti
+- **Açık kalan / soru:** Yok.
