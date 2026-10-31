@@ -1,6 +1,6 @@
 # 005 · İş isteklerini listele ve planlandı işaretle
 
-**Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
+**Durum:** bitti   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/005-istek-listesi`
 **Efor:** orta   <!-- düşük (flash_lite) | orta (flash) | yüksek (pro) -->
 
@@ -41,4 +41,12 @@ Claude Code bu istekleri tek komutla görmeli ve görev dosyasını yazınca ist
 - `python tools/ajan_test.py`
 
 ## Sonuç
-<!-- Antigravity doldurur: ne değişti, hangi testler koştu (çıktı satırı), açık kalan / sorular. -->
+- **Ne değişti:**
+  - `tools/ofis_pilot.py`: `istekler()` (boş olmayan satırları sıra numarasıyla döndürme, dosya yoksa `[]`) ve `istek_isle(sira, gorev)` (belirtilen satırın durumunu «planlandı» ve gorev'i ilgili no yapıp diğer satırları bayt bayt koruyarak geçici dosya + atomic `os.replace` ile yazma; geçersiz sıra ve görev no için `SystemExit`) işlevleri eklendi.
+  - `tools/ajan.py`: Kullanım metnine `istekler` ve `istek` komutları eklendi; `main()` içine `istekler` (yalnız durumu «yeni» olanları `sıra  GG.AA SS:DD  metin` formatında basma, yoksa `Yeni istek yok.` basma) ve `istek <sıra> <görev-no>` (`%s. istek planlandı: görev %s.` basma) eklendi.
+  - `tools/ofis_pilot_test.py`: Geçici klasörde dosya yokluğu, bozuk/boş satırlı dosyada sıra numaralandırma, `istek_isle` ile durum güncelleme, diğer satırların bayt bayt korunumu, geçersiz sıra/görev no `SystemExit` kontrolleri ve `ajan.py istekler` / `ajan.py istek` CLI uçtan uca testleri eklendi.
+- **Hangi testler koştu:**
+  - `python tools/ofis_pilot_test.py` -> `Ofis pilotu temiz: karar tablosu, sinirlar, kota dususu, mesajlar, olcum, Testci kilidi ve tablosu, pilot turu, is istekleri.` (çıkış: 0)
+  - `python tools/ajan_test.py` -> `Ajan temiz: dokum okuyucu, arac cumlesi, klasor disi, efor, yuva ve port, istem, kanca kararlari, Stop siniri, kurulum.` (çıkış: 0)
+  - `python tools/yazi.py --denetle` -> `Yazı denetimi: temiz` (çıkış: 0)
+- **Açık kalan:** Yok.

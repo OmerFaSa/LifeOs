@@ -88,6 +88,74 @@ def canli_mi(simdi=None):
     return n if (simdi or time.time()) - n.get("t", 0) < 3 * TUR_SN + 10 else None
 
 
+# ---------- is istekleri ----------
+
+def istekler():
+    p = yol("istekler.jsonl")
+    try:
+        with open(p, "r", encoding="utf-8") as f:
+            satirlar = f.readlines()
+    except OSError:
+        return []
+    out = []
+    for sira, s in enumerate(satirlar, 1):
+        s_temiz = s.strip()
+        if not s_temiz:
+            continue
+        try:
+            d = json.loads(s_temiz)
+        except (ValueError, TypeError):
+            continue
+        if isinstance(d, dict):
+            out.append(dict(d, sira=sira))
+    return out
+
+
+def istek_isle(sira, gorev):
+    try:
+        sira_no = int(sira)
+    except (ValueError, TypeError):
+        raise SystemExit("Geçersiz istek sırası: %s." % sira)
+    if sira_no < 1:
+        raise SystemExit("Geçersiz istek sırası: %d." % sira_no)
+    gorev_str = str(gorev) if isinstance(gorev, (str, int)) else ""
+    if not re.fullmatch(r"\d{3}", gorev_str):
+        raise SystemExit("Geçersiz görev numarası (üç basamaklı olmalı): %s." % gorev)
+
+    p = yol("istekler.jsonl")
+    try:
+        with open(p, "r", encoding="utf-8", newline="") as f:
+            satirlar = f.readlines()
+    except OSError:
+        raise SystemExit("İstek dosyası bulunamadı: %s." % p)
+
+    if sira_no > len(satirlar):
+        raise SystemExit("Geçersiz istek sırası (%d satır var): %d." % (len(satirlar), sira_no))
+
+    hedef = satirlar[sira_no - 1]
+    s_temiz = hedef.strip()
+    if not s_temiz:
+        raise SystemExit("Bu sıradaki istek boş, işlenemez: %d." % sira_no)
+    try:
+        d = json.loads(s_temiz)
+        if not isinstance(d, dict):
+            raise ValueError
+    except (ValueError, TypeError):
+        raise SystemExit("Bu sıradaki istek bozuk, işlenemez: %d." % sira_no)
+
+    d["durum"] = "planlandı"
+    d["gorev"] = gorev_str
+    son_ek = "\r\n" if hedef.endswith("\r\n") else "\n"
+    satirlar[sira_no - 1] = json.dumps(d, ensure_ascii=False) + son_ek
+
+    A.AJAN_KLASOR.mkdir(parents=True, exist_ok=True)
+    gecici = yol("istekler.jsonl.tmp")
+    with open(gecici, "w", encoding="utf-8", newline="") as f:
+        f.writelines(satirlar)
+    os.replace(gecici, p)
+    return d
+
+
 # ---------- saf kararlar (testli) ----------
 
 def kota_hatasi(canli):
