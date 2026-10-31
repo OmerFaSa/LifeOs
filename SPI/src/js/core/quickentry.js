@@ -102,6 +102,106 @@ SP.Quick = (function(){
   /* U.norm «â/î/û»yu katlamaz: «şikâyet» → «sikâyet». */
   function katla(s){ return U.norm(s).replace(/â/g, 'a').replace(/î/g, 'i').replace(/û/g, 'u'); }
 
+  /* Rakam ya da yazıyla sayı (bir…on). */
+  const YAZI_SAYI = {
+    bir: 1, iki: 2, uc: 3, dort: 4, bes: 5,
+    alti: 6, yedi: 7, sekiz: 8, dokuz: 9, on: 10
+  };
+
+  function sayiVeyaYazi(x){
+    if(x == null) return null;
+    const s = String(x).trim().toLowerCase();
+    if(Object.prototype.hasOwnProperty.call(YAZI_SAYI, s)) return YAZI_SAYI[s];
+    return sayi(s);
+  }
+
+  /* Sure ayristirma yardimcisi: bilesik («1 saat 20 dk»), yarim («yarim saat»),
+     ceyrek («ceyrek saat»), bucuk («1 bucuk saat», «bir bucuk saat»),
+     tek saat («1 saat», «iki saat», «2,5 saat») ve dakika («45 dk», «90 dakika»). */
+  const SURE_SAYI = '(\\d+(?:[.,]\\d+)?|bir|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on)';
+  const BILESIK_SURE_RE = new RegExp(
+    '(?:^|[^a-z0-9])' + SURE_SAYI + '\\s*(bucuk\\s*)?(?:saat|sa)\\s*(?:(?:ve|,)\\s*)?' + SURE_SAYI + '\\s*(?:dk|dakika|dakka)(?![a-z0-9])',
+    'i'
+  );
+  const YARIM_SAAT_RE = /(?:^|[^a-z0-9])yarim\s*(?:saat|sa)\b/i;
+  const CEYREK_SAAT_RE = /(?:^|[^a-z0-9])ceyrek\s*(?:saat|sa)\b/i;
+  const BUCUK_SAAT_RE = new RegExp(
+    '(?:^|[^a-z0-9])' + SURE_SAYI + '\\s+bucuk\\s*(?:saat|sa)\\b',
+    'i'
+  );
+  const TEK_SAAT_RE = new RegExp(
+    '(?:^|[^a-z0-9])' + SURE_SAYI + '\\s*(saat|sa|s)\\b',
+    'i'
+  );
+  const TEK_DK_RE = new RegExp(
+    '(?:^|[^a-z0-9])' + SURE_SAYI + '\\s*(?:dk|dakika|dakka)(?![a-z0-9])',
+    'i'
+  );
+
+  function parseSure(text){
+    if(!text) return null;
+    const n = katla(text);
+
+    /* 1. Bilesik: «1 saat 20 dk», «2 saat 15 dakika» */
+    const mb = n.match(BILESIK_SURE_RE);
+    if(mb){
+      let sa = sayiVeyaYazi(mb[1]);
+      if(sa != null){
+        if(mb[2]) sa += 0.5;
+        const dk = sayiVeyaYazi(mb[3]);
+        if(dk != null && sa >= 0 && dk >= 0){
+          const top = Math.round(sa * 60 + dk);
+          return { minutes: top, dk: top, birim: 'saat' };
+        }
+      }
+    }
+
+    /* 2. Yarim saat: 30 dk */
+    if(YARIM_SAAT_RE.test(n)){
+      return { minutes: 30, dk: 30, birim: 'saat' };
+    }
+
+    /* 3. Ceyrek saat: 15 dk */
+    if(CEYREK_SAAT_RE.test(n)){
+      return { minutes: 15, dk: 15, birim: 'saat' };
+    }
+
+    /* 4. Bucuk saat: «1 bucuk saat», «bir bucuk saat» */
+    const mbc = n.match(BUCUK_SAAT_RE);
+    if(mbc){
+      const sa = sayiVeyaYazi(mbc[1]);
+      if(sa != null && sa >= 0){
+        const top = Math.round((sa + 0.5) * 60);
+        return { minutes: top, dk: top, birim: 'saat' };
+      }
+    }
+
+    /* 5. Tek saat: «1 saat», «bir saat», «iki saat», «2,5 saat», «1 sa», «1 s» */
+    const ms = n.match(TEK_SAAT_RE);
+    if(ms){
+      const birim = ms[2].toLowerCase();
+      if(birim !== 's' || /^\\d/.test(ms[1])){
+        const sa = sayiVeyaYazi(ms[1]);
+        if(sa != null && sa >= 0){
+          const top = Math.round(sa * 60);
+          return { minutes: top, dk: top, birim: 'saat' };
+        }
+      }
+    }
+
+    /* 6. Tek dakika: «45 dk», «90 dakika», «on dakika» */
+    const md = n.match(TEK_DK_RE);
+    if(md){
+      const dk = sayiVeyaYazi(md[1]);
+      if(dk != null && dk >= 0){
+        const top = Math.round(dk);
+        return { minutes: top, dk: top, birim: 'dk' };
+      }
+    }
+
+    return null;
+  }
+
   /* ------------------------------------------------------- gun sozu
 
      «dün 2 bardak su» bugüne yaziliyordu (2026-10-25). Gun sozu kaydin
@@ -307,12 +407,9 @@ SP.Quick = (function(){
   /* ------------------------------------------------------------ hareket */
 
   function parseMove(text){
-    const m = String(text).match(SURE_RE);
-    if(!m) return null;
-    let dk = sayi(m[1]);
-    if(dk == null) return null;
-    if(/^s(a|aat)?$/i.test(m[2])) dk = dk * 60;
-    if(dk <= 0 || dk > 600) return null;
+    const su = parseSure(text);
+    if(!su) return null;
+    if(su.dk <= 0 || su.dk > 600) return null;
 
     /* Hangi hareket?
 
@@ -334,7 +431,7 @@ SP.Quick = (function(){
       if(a.length >= 3 && n.indexOf(a) >= 0){ ex = x.ex; return true; }
       return false;
     });
-    return { minutes:Math.round(dk), exercise:ex };
+    return { minutes:Math.round(su.dk), exercise:ex };
   }
 
   /* ------------------------------------------------------------ kestirme
@@ -350,19 +447,13 @@ SP.Quick = (function(){
     const soz = KESTIRME_RE.test(n);
     /* Kelime BAŞINDA: «yuruyus» içinde de «uyu» geçer. */
     if(!soz && !/(^|[^a-z])(uyu|uyku)/.test(n)) return null;
-    let dk = null, birim = null;
-    const m = n.match(/(\d+(?:[.,]\d+)?)\s*(dk|dakika|dakka|sa|saat)\b/);
-    if(m){
-      birim = /^s/.test(m[2]) ? 'saat' : 'dk';
-      const x = sayi(m[1]);
-      dk = x == null ? null : birim === 'saat' ? x * 60 : x;
-    }else if(/yarim saat/.test(n)){ dk = 30; birim = 'saat'; }
-    if(dk == null) return null;
-    if(!soz && birim !== 'dk') return null;
-    if(dk <= 0 || dk > 240) return null;
+    const su = parseSure(text);
+    if(!su) return null;
+    if(!soz && su.birim !== 'dk') return null;
+    if(su.dk <= 0 || su.dk > 240) return null;
     const s = String(text).match(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/);
     const bas = s ? (s[1].length === 1 ? '0' + s[1] : s[1]) + ':' + s[2] : null;
-    return { dk:Math.round(dk), bas };
+    return { dk:Math.round(su.dk), bas };
   }
 
   /* ------------------------------------------------------------ sikayet
@@ -615,6 +706,6 @@ SP.Quick = (function(){
 
   const SIDDET_YOK = 'Şiddet belirtilmedi: «hafif», «orta» ya da «şiddetli» diye ekle.';
 
-  return { parse, parseHam, apply, parseVital, vitalBol, parseMove, parseNap, parseSymptom, VITAL_FIELDS,
+  return { parse, parseHam, apply, parseVital, vitalBol, parseMove, parseNap, parseSymptom, parseSure, VITAL_FIELDS,
     BARDAK_ML, gunSozu, ogunSozu, tarih, onizleme, olcumEngeli, uyusmazNotu, SIDDET_YOK };
 })();

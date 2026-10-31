@@ -357,6 +357,48 @@
       expect(SP.Quick.parseMove('1,5 saat koştum').minutes).toBe(90);
     });
 
+    it('günlük Türkçe süreler doğru dakikaya çevrilir (bileşik, buçuk, yarım, çeyrek, yazıyla sayı)', () => {
+      /* Bileşik: saat + dakika */
+      expect(SP.Quick.parseMove('1 saat 20 dk yürüyüş').minutes).toBe(80);
+      expect(SP.Quick.parseMove('1 saat 20 dakika koşu').minutes).toBe(80);
+      expect(SP.Quick.parseMove('2 saat 15 dk bisiklet').minutes).toBe(135);
+
+      /* Yarım ve çeyrek */
+      expect(SP.Quick.parseMove('yarım saat yürüyüş').minutes).toBe(30);
+      expect(SP.Quick.parseMove('çeyrek saat koşu').minutes).toBe(15);
+
+      /* Buçuk saat (rakam ve yazıyla) */
+      expect(SP.Quick.parseMove('1 buçuk saat koşu').minutes).toBe(90);
+      expect(SP.Quick.parseMove('bir buçuk saat bisiklet').minutes).toBe(90);
+      expect(SP.Quick.parseMove('iki buçuk saat bisiklet').minutes).toBe(150);
+
+      /* Yazıyla saat ve dakika */
+      expect(SP.Quick.parseMove('bir saat yürüyüş').minutes).toBe(60);
+      expect(SP.Quick.parseMove('iki saat yürüyüş').minutes).toBe(120);
+      expect(SP.Quick.parseMove('üç saat yürüyüş').minutes).toBe(180);
+
+      /* Eski biçimler */
+      expect(SP.Quick.parseMove('45 dk yürüyüş').minutes).toBe(45);
+      expect(SP.Quick.parseMove('1 saat koşu').minutes).toBe(60);
+      expect(SP.Quick.parseMove('2,5 saat bisiklet').minutes).toBe(150);
+      expect(SP.Quick.parseMove('90 dakika yürüyüş').minutes).toBe(90);
+
+      /* Süre sınırı (600 dk) ve süresiz */
+      expect(SP.Quick.parseMove('11 saat 70 dk yürüyüş')).toBeNull();
+      expect(SP.Quick.parseMove('yürüyüş yaptım')).toBeNull();
+      expect(SP.Quick.parseMove('bugün koştum')).toBeNull();
+    });
+
+    it('kestirme günlük Türkçe süreleri doğru tanır', () => {
+      expect(SP.Quick.parseNap('yarım saat şekerleme').dk).toBe(30);
+      expect(SP.Quick.parseNap('çeyrek saat kestirdim').dk).toBe(15);
+      expect(SP.Quick.parseNap('1 buçuk saat kestirme').dk).toBe(90);
+      expect(SP.Quick.parseNap('bir buçuk saat kestirdim').dk).toBe(90);
+      expect(SP.Quick.parseNap('45 dk kestirdim').dk).toBe(45);
+      /* Söz olmadan yalnız saat kestirme değildir (gece uykusudur) */
+      expect(SP.Quick.parseNap('1 saat uyudum')).toBeNull();
+    });
+
     it('her hareketin takma adı vardır', () => {
       SP.EXERCISES.forEach(e => {
         expect(Array.isArray(e.aliases) && e.aliases.length > 0).toBeTruthy();
