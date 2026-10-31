@@ -153,5 +153,7 @@ yereldir: modülün web kodu telefonda `BildirimKoprusu.swift` ile
 telefona itme yolu (APNs vb.) yoktur; gelen kutusu ters yönlüdür (telefon →
 PC). Uydurma kurulmadı; «hazır» Görev Takibi'nde ve `bildirim.jsonl`'dedir.
 
-**Oturum açılışında kendiliğinden başlatma** (zamanlanmış görev ya da
-Başlangıç klasörü) kalıcı bir ayardır: kullanıcı açıkça istemeden kurulmaz.
+**Oturum açılışında kendiliğinden başlatma YOK** (2026-10-31, depo sahibinin
+kararı: «bizim kararımız ile başlasın»): zamanlanmış görev ya da Başlangıç
+klasörü kurulmaz; pilotu Claude Code gerektiğinde `pilot baslat` ile açar, iş
+bitince `pilot dur` ile kapatır.
