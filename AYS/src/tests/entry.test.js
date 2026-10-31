@@ -105,6 +105,30 @@
       expect(R.Entry.parseOne('2 saat fizik çalıştım').minutes).toBe(120);
     });
 
+    it('uyku saat+dakika, buçuk ve yazıyla sayı tanınır', () => {
+      expect(R.Entry.parseOne('7 saat 30 dk uyudum').hours).toBe(7.5);
+      expect(R.Entry.parseOne('7 buçuk saat uyudum').hours).toBe(7.5);
+      expect(R.Entry.parseOne('yedi buçuk saat uyudum').hours).toBe(7.5);
+      expect(R.Entry.parseOne('6 saat 45 dakika uyudum').hours).toBe(6.75);
+      expect(R.Entry.parseOne('5 saat uyuyabildim').hours).toBe(5);
+      expect(R.Entry.parseUyku('uyudum')).toBeNull();
+    });
+
+    it('çalışma süresinde bileşik, yarım, çeyrek ve buçuk tanınır', () => {
+      const b1 = R.Entry.parseOne('1 saat 15 dk matematik çalıştım');
+      expect([b1.kind, b1.minutes, b1.subject.id]).toEqual(['sure', 75, 'tyt-matematik']);
+      const y = R.Entry.parseOne('yarım saat fizik çalıştım');
+      expect([y.kind, y.minutes, y.subject.id]).toEqual(['sure', 30, 'ayt-fizik']);
+      const buc = R.Entry.parseOne('bir buçuk saat matematik');
+      expect([buc.kind, buc.minutes, buc.subject.id]).toEqual(['sure', 90, 'tyt-matematik']);
+      const c = R.Entry.parseOne('çeyrek saat matematik');
+      expect([c.kind, c.minutes, c.subject.id]).toEqual(['sure', 15, 'tyt-matematik']);
+      expect(R.Entry.parseSure('matematik çalıştım')).toBeNull();
+      /* Sayaç içeren cümle süre sayılmaz: soru kaydına gider. */
+      expect(R.Entry.parseSure('30 soru matematik 45 dakika')).toBeNull();
+      expect(R.Entry.parseOne('30 soru matematik 45 dakika').kind).toBe('soru');
+    });
+
     it('veri taşımayan cümle öneri üretmez', () => {
       const r = R.Entry.fromText('bugün hava çok güzeldi', { date:'2026-03-01' });
       expect(r.oneriler).toHaveLength(0);

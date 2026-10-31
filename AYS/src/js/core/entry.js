@@ -97,7 +97,6 @@ R.Entry = (function(){
      birimi olmamalı: «soru 40 dakika» bir sayaç değildir. */
   const SONRA = '\\s+(\\d+)(?![\\d.,]|\\s*(?:dk|dakika|saat|sa)\\b)';
   const sayac = ad => new RegExp('(\\d+|[a-zçğıöşü]+)\\s*(?:tane\\s*)?' + ad + '|' + ad + SONRA, 'i');
-  const UYKU_RE  = /(\d+(?:[.,]\d+)?)\s*(saat|sa)\b[^.]*uyu/i;
   const PARAGRAF_RE = sayac('paragraf');
   const PROBLEM_RE  = sayac('problem');
   const SORU_RE     = sayac('soru');
@@ -116,14 +115,77 @@ R.Entry = (function(){
      AÇIKÇA yazar (bosVarsayim) — kullanıcı onaylamadan yazılmaz. */
   const YANLIS_RE   = /(\d+)\s*(?:'?[sy]?[iıuü]\s*)?(?:tane\s*)?(?:yanlış|yanlis)/i;
   const BOS_RE      = /(\d+)\s*(?:'?[sy]?[iıuü]\s*)?(?:tane\s*)?(?:boş|bos)(?![a-zçğıöşü])/i;
-  const DAKIKA_RE   = /(\d+(?:[.,]\d+)?)\s*(dakika|dk|saat|sa)\b/i;
+
+  /* --------------------------------------------------------- süre */
+
+  const SAYI_PAT = '\\d+(?:[.,]\\d+)?|' + Object.keys(RAKAM).join('|');
+  const YARIM_CEYREK_RE = new RegExp('\\b(yarim|ceyrek)\\s*(?:saat|sa)\\b', 'i');
+  const BUCUK_RE        = new RegExp('(?:\\b(' + SAYI_PAT + ')\\s+)?bucuk\\s*(?:saat|sa)\\b', 'i');
+  const BILESIK_RE      = new RegExp('(?:^|\\s)(' + SAYI_PAT + ')\\s*(?:saat|sa)\\b\\s*(?:ve\\s*)?(' + SAYI_PAT + ')\\s*(?:dakika|dk)\\b', 'i');
+  const TEK_SAAT_RE     = new RegExp('(?:^|\\s)(' + SAYI_PAT + ')\\s*(?:saat|sa)\\b', 'i');
+  const TEK_DK_RE       = new RegExp('(?:^|\\s)(' + SAYI_PAT + ')\\s*(?:dakika|dk)\\b', 'i');
+
+  /* Cümledeki süreyi (dakika ve saat) okur. Tek yardımcı:
+     - yarım (30 dk / 0.5 sa), çeyrek (15 dk / 0.25 sa)
+     - buçuk: «7 buçuk saat» (7.5 sa / 450 dk), «bir buçuk saat» (1.5 sa / 90 dk)
+     - bileşik: «7 saat 30 dk» (7.5 sa / 450 dk), «1 saat 15 dk» (75 dk)
+     - tek saat: «8 saat», «7,5 saat», «2 saat»
+     - tek dakika: «45 dakika», «30 dk» */
+  function sureOku(text){
+    if(!text) return null;
+    const n = U.norm ? U.norm(text) : String(text).toLowerCase();
+
+    const yc = n.match(YARIM_CEYREK_RE);
+    if(yc){
+      return yc[1].toLowerCase() === 'yarim'
+        ? { minutes:30, hours:0.5 }
+        : { minutes:15, hours:0.25 };
+    }
+
+    const buc = n.match(BUCUK_RE);
+    if(buc){
+      const s = buc[1] ? sayi(buc[1]) : 0;
+      if(s == null) return null;
+      const hours = s + 0.5;
+      return { minutes:Math.round(hours * 60), hours };
+    }
+
+    const bil = n.match(BILESIK_RE);
+    if(bil){
+      const h = sayi(bil[1]);
+      const m = sayi(bil[2]);
+      if(h != null && m != null){
+        const minutes = Math.round(h * 60 + m);
+        const hours = h + m / 60;
+        return { minutes, hours };
+      }
+    }
+
+    const ts = n.match(TEK_SAAT_RE);
+    if(ts){
+      const h = sayi(ts[1]);
+      if(h != null){
+        return { minutes:Math.round(h * 60), hours:h };
+      }
+    }
+
+    const td = n.match(TEK_DK_RE);
+    if(td){
+      const m = sayi(td[1]);
+      if(m != null){
+        const minutes = Math.round(m);
+        return { minutes, hours:minutes / 60 };
+      }
+    }
+
+    return null;
+  }
 
   function parseUyku(text){
-    const m = String(text).match(UYKU_RE);
-    if(!m) return null;
-    const s = sayi(m[1]);
-    if(s == null || s <= 0 || s > 24) return null;
-    return { kind:'uyku', hours:s };
+    if(!/uyu/i.test(text)) return null;
+    const s = sureOku(text);
+    if(!s || s.hours <= 0 || s.hours > 24) return null;
+    return { kind:'uyku', hours:s.hours };
   }
 
   function parseParagraf(text){
@@ -173,15 +235,11 @@ R.Entry = (function(){
     /* «45 dakika matematik çalıştım» — soru sayısı yoksa süre kaydı. */
     if(SORU_RE.test(text) || PARAGRAF_RE.test(text) || PROBLEM_RE.test(text)) return null;
     if(/uyu/i.test(text)) return null;
-    const m = String(text).match(DAKIKA_RE);
-    if(!m) return null;
-    let dk = sayi(m[1]);
-    if(dk == null) return null;
-    if(/^s(a|aat)?$/i.test(m[2])) dk = dk * 60;
-    if(dk <= 0 || dk > 960) return null;
+    const s = sureOku(text);
+    if(!s || s.minutes <= 0 || s.minutes > 960) return null;
     const subject = dersBul(text);
     if(!subject) return null;          /* dersi bilinmeyen süre nereye yazılır? */
-    return { kind:'sure', minutes:Math.round(dk), subject };
+    return { kind:'sure', minutes:Math.round(s.minutes), subject };
   }
 
   /* Sıra: özgülden genele. */
@@ -265,5 +323,5 @@ R.Entry = (function(){
   }
 
   return { fromText, parseOne, yanCumleler, dersBul, konuBul, sayi, ilkSayi,
-    parseSoru, parseUyku, parseParagraf, parseProblem, parseSure };
+    parseSoru, parseUyku, parseParagraf, parseProblem, parseSure, sureOku };
 })();
