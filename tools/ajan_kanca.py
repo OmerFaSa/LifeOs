@@ -14,11 +14,13 @@ kendi Antigravity konusmalarina notr cevap doner (notr() bakiniz), davranislarin
               MCP'lerden yalniz playwright acik (hkm-sqlite kisisel veri, Notion/Linear/
               Netlify/Canva/Figma kullanicinin hesaplari); ask_question kapali.
   Stop        arka planda is surerken ya da gorev dosyasi «bitti/takildi» olmadan, degisiklik
-              commit/push edilmeden durmak yerine devam ettirir (en cok 3 kez).
+              commit/push edilmeden durmak yerine devam ettirir (en cok 3 kez). Uygulayici
+              teslim edince (bitti, temiz, push) Denetci'yi kendiliginden calistirir.
 Her karar LifeOs-ajan/olay/<ad>.jsonl'e yazilir; Gorev Takibi oradan okur.
 """
 import json
 import re
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -41,6 +43,7 @@ YASAK_GIT = [
     (re.compile(r"\bgit\b.*\bworktree\b", re.I), "Worktree'leri Claude Code yönetir."),
 ]
 STOP_SINIR = 3
+SPAWN = lambda ad: denetime_gonder(ad)                   # testler sahtesiyle degistirir
 
 
 def arg(a, k):
@@ -59,14 +62,16 @@ def ajan_bul(kimlik):
     if not kimlik:
         return None
     d = A.oku_durum()
-    for ad, a in d.items():
-        if not ad.startswith("_") and a.get("acik") and a.get("konusma") == kimlik:
-            return ad, a
+
+    def etkin(k):                                       # ayni konusmada birden cok is: en son is verilen
+        l = [(ad, a) for ad, a in d.items() if not ad.startswith("_") and a.get("acik") and a.get("konusma") == k]
+        return max(l, key=lambda x: x[1].get("etkin") or x[1].get("baslangic", 0)) if l else None
+    bulgu = etkin(kimlik)
+    if bulgu:
+        return bulgu
     ebeveyn = A.ebeveyn(kimlik)
-    for ad, a in d.items():
-        if not ad.startswith("_") and a.get("acik") and ebeveyn and a.get("konusma") == ebeveyn:
-            return ad, dict(a, alt=True)
-    return None
+    bulgu = etkin(ebeveyn) if ebeveyn else None
+    return (bulgu[0], dict(bulgu[1], alt=True)) if bulgu else None
 
 
 def olay_yaz(ad, kayit):
@@ -136,6 +141,33 @@ def dur_karari(a, girdi, onceki):
     return False, ""
 
 
+def teslim_edildi(a):
+    """Gorev dosyasi «bitti», klasor temiz, dal push edilmis: Denetci'ye gidebilir."""
+    wt = Path(a["worktree"])
+    try:
+        durum = re.search(r"\*\*Durum:\*\*\s*([^\s<]+)", (wt / A.GOREVLER / a.get("gorev", "")).read_text(encoding="utf-8"))
+    except OSError:
+        return False
+    return bool(durum and durum.group(1).lower() == "bitti" and not A.git("status", "--porcelain", kok=wt, kontrol=False)
+                and A.git("rev-list", "--count", "@{u}..HEAD", kok=wt, kontrol=False) == "0")
+
+
+def denetime_gonder(ad):
+    """Ofis akisi: Uygulayici teslim edince Denetci kendiliginden inceler (kanca beklemesin: ayrik surec)."""
+    d = A.oku_durum()
+    if d.get(ad, {}).get("denetim"):
+        return False
+    d[ad]["denetim"] = "istendi"
+    A.yaz_durum(d)
+    bayrak = 0
+    for n in ("DETACHED_PROCESS", "CREATE_NEW_PROCESS_GROUP", "CREATE_NO_WINDOW"):
+        bayrak |= getattr(subprocess, n, 0)
+    subprocess.Popen([sys.executable, str(Path(__file__).resolve().parent / "ajan.py"), "gozden", ad],
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     close_fds=True, creationflags=bayrak)
+    return True
+
+
 def notr(olay):
     """Bizim olmayan konusmaya karismayan cevap. PreToolUse'ta bos cevap ({}) Antigravity'de
     REDDETMEK sayilir (2026-10-31 denemesi: kullanicinin konusmasinda git --version engellendi);
@@ -152,7 +184,7 @@ def isle(olay, girdi):
     if olay == "PreToolUse":
         cagri = girdi.get("toolCall") or {}
         ad_arac, args = cagri.get("name", ""), cagri.get("args") or {}
-        karar, neden, ust = arac_karari(ad_arac, args, wt, a.get("tur") == "mini")
+        karar, neden, ust = arac_karari(ad_arac, args, wt, a.get("tur") in A.OKUR)
         if karar != "allow" or ust:
             olay_yaz(ad, {"olay": "arac", "arac": ad_arac, "karar": "yönlendirildi" if ust else "engellendi", "neden": neden,
                           "ozet": str(arg(args, "CommandLine") or arg(args, "TargetFile") or arg(args, "Path") or "")[:200]})
@@ -166,7 +198,11 @@ def isle(olay, girdi):
         onceki = sum(1 for o in A.olaylar(ad) if o.get("olay") == "devam")
         devam, neden = dur_karari(a, girdi, onceki)
         olay_yaz(ad, {"olay": "devam" if devam else "durdu", "neden": neden or girdi.get("terminationReason", "")})
-        return {"decision": "continue", "reason": neden} if devam else {}
+        if devam:
+            return {"decision": "continue", "reason": neden}
+        if a.get("tur") == "gorev" and not a.get("alt") and teslim_edildi(a) and SPAWN(ad):
+            olay_yaz(ad, {"olay": "denetim", "neden": "Denetçi'ye gönderildi"})
+        return {}
     return {}
 
 

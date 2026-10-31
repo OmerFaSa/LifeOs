@@ -3,8 +3,9 @@
 
 Kullanici (2026-10-31): «bununla alakali takip etmek amacli bir masaustu
 uygulamasi»; sonra «model efor degistirip minik ajanlar … gorev takibi ona gore
-detayli», «daha anlasilir». Ustte akis panosu (Sirada, Calisiyor, Incelemede,
-Bitti), altinda her ajan: su an ne yaptigi duz Turkce, sure, adim, token,
+detayli», «daha anlasilir», «ofis gibi yonet». Ustte ekip (Uygulayici, Denetci,
+Arastirmaci: su an ne yapiyor, kacinci iste, baglam dolulugu, token), akis panosu
+(Sirada, Calisiyor, Incelemede, Bitti), altinda her gorev (Denetci raporu dahil): su an ne yaptigi duz Turkce, sure, adim, token,
 commit, koruma kancasinin mudahaleleri, zaman cizelgesi, son cevabi, alt
 ajanlari; teknik ayrinti katlanir. Kaynak: tools/ajan.py (Antigravity'nin
 konusma dokumu) ve belgeler/ekip/gorevler/ kuyrugu. Edge'i
@@ -73,29 +74,45 @@ def sunucu_acik():
     return _sunucu["acik"]
 
 
+def denetci_cumle(dn):
+    """Gorev kartinda Denetci'nin durumu tek cumle."""
+    if not dn:
+        return ""
+    if dn.get("asama") == "çalışıyor":
+        return "Denetçi inceliyor"
+    k = dn.get("karar")
+    if k and k[0] == "temiz":
+        return "Denetçi: temiz"
+    if k:
+        return "Denetçi: %d bulgu" % k[1]
+    return "Denetçi cevap verdi"
+
+
 def pano(gorevler, ajanlar):
     """Her isi dort kolondan birine koyar: sira, calisiyor, inceleme, bitti (saf islev, testli)."""
     out = []
     for g in gorevler:
         a = next((x for x in ajanlar if x.get("gorev") == g["dosya"] and x.get("acik")), None)
         k = (a or {}).get("canli") or {}
+        dn = (a or {}).get("denetci")
         if g.get("main_de"):
             kolon, cumle = "bitti", "main'e alındı"
         elif a and a.get("asama") in ("çalışıyor", "sorun"):
             kolon, cumle = "calisiyor", k.get("simdi") or "Başlıyor"
         elif a and a.get("asama") == "inceleme":
-            kolon, cumle = "inceleme", "Ajan bitirdi; gözden geçirme bekliyor"
+            kolon, cumle = "inceleme", denetci_cumle(dn) or "Uygulayıcı bitirdi; Denetçi bekleniyor"
         elif g.get("dal_var") and g.get("ileri"):
             kolon, cumle = "inceleme", "Dalda %d commit; birleştirilmedi" % g["ileri"]
         else:
             kolon, cumle = "sira", "Henüz başlamadı"
         out.append({"tur": "görev", "ad": g["dosya"][:3], "baslik": re.sub(r"^\d{3}\s*·\s*", "", g["baslik"]),
                     "kolon": kolon, "cumle": cumle, "efor": (a or {}).get("efor") or g.get("efor"),
-                    "sorun": bool(a and a.get("asama") == "sorun"), "ajan": (a or {}).get("ad", "")})
+                    "sorun": bool(a and a.get("asama") == "sorun") or bool(dn and dn.get("karar") and dn["karar"][0] == "bulgu"),
+                    "ajan": (a or {}).get("ad", "")})
     for a in ajanlar:
-        if a.get("tur") == "mini" and a.get("acik"):
+        if a.get("tur") in ("mini", "soru") and a.get("acik"):
             k = a.get("canli") or {}
-            out.append({"tur": "mini", "ad": a["ad"], "baslik": (a.get("istem") or "")[:80],
+            out.append({"tur": "soru", "ad": a["ad"], "baslik": (a.get("istem") or "")[:80],
                         "kolon": "inceleme" if a.get("asama") == "inceleme" else "calisiyor",
                         "cumle": "Cevap hazır" if a.get("asama") == "inceleme" else (k.get("simdi") or "Başlıyor"),
                         "efor": a.get("efor"), "sorun": a.get("asama") == "sorun", "ajan": a["ad"]})
@@ -142,6 +159,7 @@ def durum():
             g["dal_var"] = False
         gorevler.append(g)
     return {"zaman": int(time.time()), "gorevler": gorevler, "ajanlar": ajanlar, "pano": pano(gorevler, ajanlar),
+            "ofis": AJAN.uyeler(ajanlar), "sinir": {"is": AJAN.MAX_IS, "baglam": AJAN.BAGLAM_SINIR},
             "kanca": AJAN.kanca_kurulu(),
             "yuva": {"dolu": sum(1 for a in ajanlar if a.get("acik")), "toplam": AJAN.YUVA_SAY},
             "antigravity": {"acik": sunucu_acik(), "klasor": str(AG), "var": AG.exists(), "dal": ag_dal,
@@ -151,40 +169,63 @@ def durum():
 SAYFA = """<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Görev takibi</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-:root{ color-scheme:light dark; --bg:#f4f5f7; --kart:#fff; --yazi:#15171c; --ikinci:#5d636d; --ucuncu:#8a909a; --cizgi:#e2e4e9; --zayif:#eef0f3;
-  --vurgu:#2f6bff; --iyi:#178553; --uyari:#b45309; --kotu:#c2410c; }
-@media (prefers-color-scheme:dark){ :root{ --bg:#121418; --kart:#1b1e24; --yazi:#eceef2; --ikinci:#a4a9b2; --ucuncu:#7c828c; --cizgi:#2b2f37; --zayif:#23272e; } }
+:root{ color-scheme:light dark; --bg:#f3f4f6; --kart:#fff; --yazi:#14161b; --ikinci:#5b616b; --ucuncu:#8b919b; --cizgi:#e1e3e8; --zayif:#eef0f3;
+  --vurgu:#2f6bff; --vurgu-zayif:rgba(47,107,255,.12); --iyi:#15803d; --uyari:#b45309; --kotu:#c2410c; }
+@media (prefers-color-scheme:dark){ :root{ --bg:#111317; --kart:#1a1d23; --yazi:#eceef2; --ikinci:#a3a8b1; --ucuncu:#7b818b; --cizgi:#2a2e36; --zayif:#22262d;
+  --vurgu-zayif:rgba(47,107,255,.22); } }
 *{ box-sizing:border-box; } body{ margin:0; font:14px/1.5 system-ui, "Segoe UI", sans-serif; background:var(--bg); color:var(--yazi); }
-header{ padding:18px 20px 6px; } h1{ margin:0; font-size:19px; font-weight:650; }
-.cumle{ margin:4px 0 0; color:var(--ikinci); font-size:13.5px; } .cumle b{ color:var(--yazi); font-weight:600; }
-.durumcuk{ display:flex; flex-wrap:wrap; gap:6px 14px; padding:8px 20px 4px; font-size:12.5px; color:var(--ikinci); }
+.sayfa{ max-width:1080px; margin:0 auto; padding:20px 20px 28px; }
+header{ display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; }
+h1{ margin:0; font-size:20px; font-weight:650; letter-spacing:-.01em; }
+.cumle{ margin:2px 0 0; color:var(--ikinci); font-size:13.5px; } .cumle b{ color:var(--yazi); font-weight:600; }
+.durumcuk{ margin-left:auto; display:flex; gap:14px; font-size:12px; color:var(--ikinci); flex-wrap:wrap; }
 .nokta{ display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; vertical-align:1px; background:var(--ucuncu); }
-.nokta.iyi{ background:var(--iyi); } .nokta.kotu{ background:var(--kotu); }
-h2{ margin:18px 20px 8px; font-size:12px; font-weight:650; letter-spacing:.02em; color:var(--ikinci); text-transform:uppercase; }
-.pano{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; padding:0 20px; }
-.kolon{ background:var(--zayif); border-radius:12px; padding:8px; min-height:72px; }
-.kolon h3{ display:flex; justify-content:space-between; margin:2px 4px 8px; font-size:12.5px; font-weight:600; color:var(--ikinci); }
+.nokta.iyi{ background:var(--iyi); } .nokta.kotu{ background:var(--kotu); } .nokta.canli{ background:var(--vurgu); }
+h2{ display:flex; align-items:baseline; gap:8px; margin:26px 0 10px; font-size:13px; font-weight:650; color:var(--yazi); }
+h2 small{ font-weight:450; color:var(--ucuncu); font-size:12px; }
+.ekip{ display:grid; grid-template-columns:repeat(auto-fill, minmax(232px, 1fr)); gap:10px; }
+.uye{ background:var(--kart); border-radius:14px; box-shadow:inset 0 0 0 1px var(--cizgi); padding:14px; display:grid; gap:10px; }
+.uye-bas{ display:flex; align-items:center; gap:10px; }
+.avatar{ flex:none; width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-size:12.5px; font-weight:650;
+  background:var(--zayif); color:var(--ikinci); position:relative; }
+.avatar.calisiyor{ background:var(--vurgu-zayif); color:var(--vurgu); }
+.avatar.calisiyor::after{ content:""; position:absolute; right:-1px; bottom:-1px; width:10px; height:10px; border-radius:50%; background:var(--vurgu);
+  box-shadow:0 0 0 2px var(--kart); }
+.uye-ad b{ display:block; font-size:14px; font-weight:600; } .uye-ad small{ color:var(--ikinci); font-size:12px; }
+.uye-simdi{ font-size:12.5px; color:var(--ikinci); min-height:36px; } .uye-simdi b{ color:var(--yazi); font-weight:550; }
+.olcek{ display:grid; gap:6px; font-size:11.5px; color:var(--ikinci); }
+.olcek-satir{ display:grid; grid-template-columns:52px 1fr auto; gap:8px; align-items:center; }
+.cubuk{ height:4px; border-radius:2px; background:var(--zayif); overflow:hidden; } .cubuk i{ display:block; height:100%; background:var(--ucuncu); border-radius:2px; }
+.cubuk i.dolu{ background:var(--uyari); }
+.tik{ display:flex; gap:3px; } .tik i{ width:14px; height:4px; border-radius:2px; background:var(--zayif); } .tik i.on{ background:var(--ucuncu); }
+.pano{ display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; }
+@media (max-width:760px){ .pano{ grid-template-columns:repeat(2, minmax(0, 1fr)); } }
+.kolon{ background:var(--zayif); border-radius:12px; padding:8px; min-height:84px; }
+.kolon h3{ display:flex; justify-content:space-between; margin:2px 4px 8px; font-size:12px; font-weight:600; color:var(--ikinci); }
 .is{ display:block; width:100%; text-align:left; font:inherit; color:inherit; background:var(--kart); border:0; border-radius:9px;
-  padding:8px 10px; margin-bottom:6px; box-shadow:inset 0 0 0 1px var(--cizgi); cursor:pointer; }
+  padding:9px 10px; margin-bottom:6px; box-shadow:inset 0 0 0 1px var(--cizgi); cursor:pointer; }
 .is:hover{ box-shadow:inset 0 0 0 1px var(--ucuncu); } .is:focus-visible{ outline:2px solid var(--vurgu); outline-offset:1px; }
-.is.sorun{ box-shadow:inset 3px 0 0 var(--kotu), inset 0 0 0 1px var(--cizgi); }
-.is b{ display:block; font-size:13px; font-weight:600; } .is small{ display:block; color:var(--ikinci); font-size:12px; margin-top:2px;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.etiket{ display:inline-block; font-size:11px; color:var(--ikinci); margin-right:6px; }
-.efor{ display:inline-flex; gap:2px; vertical-align:-1px; margin-right:6px; } .efor i{ width:6px; height:10px; border-radius:2px; background:var(--cizgi); }
+.is:disabled{ cursor:default; } .is.sorun{ box-shadow:inset 3px 0 0 var(--kotu), inset 0 0 0 1px var(--cizgi); }
+.is b{ display:block; font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.is small{ display:flex; align-items:center; color:var(--ikinci); font-size:12px; margin-top:3px; overflow:hidden; white-space:nowrap; }
+.is small span{ overflow:hidden; text-overflow:ellipsis; }
+.efor{ flex:none; display:inline-flex; gap:2px; margin-right:7px; } .efor i{ width:5px; height:10px; border-radius:1.5px; background:var(--cizgi); }
 .efor i.dolu{ background:var(--vurgu); }
-.bos{ color:var(--ucuncu); font-size:12px; margin:4px; }
-main{ display:grid; gap:12px; padding:0 20px 8px; }
-.ajan{ background:var(--kart); border-radius:14px; box-shadow:inset 0 0 0 1px var(--cizgi); padding:14px 16px; scroll-margin-top:12px; }
-.ajan-bas{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; } .ajan-bas b{ font-size:15.5px; font-weight:650; }
-.asama{ margin-left:auto; font-size:12px; font-weight:600; padding:2px 10px; border-radius:999px; background:var(--zayif); color:var(--ikinci); }
+.bos{ color:var(--ucuncu); font-size:12px; margin:6px 4px; }
+.isler{ display:grid; gap:12px; }
+.ajan{ background:var(--kart); border-radius:14px; box-shadow:inset 0 0 0 1px var(--cizgi); padding:16px 18px; scroll-margin-top:12px; }
+.ajan-bas{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; } .ajan-bas b{ font-size:15.5px; font-weight:650; }
+.etiket{ font-size:12px; color:var(--ikinci); }
+.asama{ margin-left:auto; font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; background:var(--zayif); color:var(--ikinci); }
 .asama.calisiyor{ background:var(--vurgu); color:#fff; } .asama.inceleme{ background:var(--iyi); color:#fff; } .asama.sorun{ background:var(--kotu); color:#fff; }
 .simdi{ margin:10px 0 0; font-size:14.5px; } .simdi span{ color:var(--ikinci); }
-.olcu{ display:grid; grid-template-columns:repeat(auto-fit, minmax(96px, 1fr)); gap:8px; margin-top:12px; }
-.olcu div{ background:var(--zayif); border-radius:9px; padding:6px 10px; } .olcu small{ display:block; font-size:11px; color:var(--ikinci); }
+.olcu{ display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:8px; margin-top:12px; }
+.olcu div{ background:var(--zayif); border-radius:9px; padding:7px 10px; } .olcu small{ display:block; font-size:11px; color:var(--ikinci); }
 .olcu b{ font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; }
-.koruma{ margin-top:10px; font-size:12.5px; color:var(--ikinci); } .koruma b{ color:var(--yazi); font-weight:600; }
-.koruma.uyari{ color:var(--kotu); }
+.rapor{ margin-top:12px; border-radius:10px; padding:10px 12px; background:var(--zayif); }
+.rapor-bas{ display:flex; gap:8px; align-items:center; font-size:13px; } .rapor-bas b{ font-weight:600; }
+.rapor.temiz .rapor-bas b{ color:var(--iyi); } .rapor.bulgu .rapor-bas b{ color:var(--kotu); }
+.koruma{ margin-top:10px; font-size:12.5px; color:var(--ikinci); } .koruma b{ color:var(--yazi); font-weight:600; } .koruma.uyari{ color:var(--kotu); }
 details{ margin-top:10px; } summary{ cursor:pointer; font-size:12.5px; color:var(--ikinci); }
 ol.cizelge{ list-style:none; margin:8px 0 0; padding:0 0 0 14px; border-left:2px solid var(--cizgi); }
 ol.cizelge li{ position:relative; padding:3px 0 5px 4px; font-size:12.5px; display:grid; grid-template-columns:44px 1fr; gap:8px; }
@@ -193,20 +234,24 @@ ol.cizelge li.model::before{ background:var(--vurgu); } ol.cizelge li.hata::befo
 ol.cizelge time{ color:var(--ucuncu); font-variant-numeric:tabular-nums; } ol.cizelge span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 pre{ white-space:pre-wrap; word-break:break-word; margin:8px 0 0; font:12.5px/1.55 ui-monospace, Consolas, monospace; max-height:340px; overflow:auto;
   background:var(--zayif); border-radius:9px; padding:10px 12px; }
-.alt{ margin-top:6px; padding:6px 10px; border-left:2px solid var(--cizgi); font-size:12.5px; }
+.rapor pre{ background:var(--kart); }
+.soru{ background:var(--kart); border-radius:12px; box-shadow:inset 0 0 0 1px var(--cizgi); padding:12px 14px; scroll-margin-top:12px; }
+.soru p{ margin:0; font-size:13.5px; } .soru small{ color:var(--ikinci); font-size:12px; }
 dl{ display:grid; grid-template-columns:auto 1fr; gap:3px 12px; margin:8px 0 0; font-size:12.5px; } dt{ color:var(--ikinci); } dd{ margin:0; word-break:break-all; }
 code{ font:12px ui-monospace, Consolas, monospace; }
-.rehber{ margin:18px 20px 22px; font-size:12.5px; color:var(--ikinci); } .rehber p{ margin:4px 0; }
-</style></head><body>
-<header><h1>Görev takibi</h1><p class="cumle" id="cumle">Yükleniyor…</p></header>
-<div class="durumcuk" id="durumcuk"></div>
-<h2>Akış</h2><div class="pano" id="pano"></div>
-<h2 id="ajan-baslik">Ajanlar</h2><main id="ajanlar"></main>
+.rehber{ margin-top:22px; font-size:12.5px; color:var(--ikinci); } .rehber p{ margin:6px 0; }
+</style></head><body><div class="sayfa">
+<header><div><h1>Görev takibi</h1><p class="cumle" id="cumle">Yükleniyor…</p></div><div class="durumcuk" id="durumcuk"></div></header>
+<h2>Ekip <small>Antigravity'de Claude Code için çalışan roller</small></h2><div class="ekip" id="ekip"></div>
+<h2>İş akışı</h2><div class="pano" id="pano"></div>
+<h2 id="isler-baslik">İşler</h2><div class="isler" id="isler"></div>
+<div id="sorular"></div>
 <details class="rehber"><summary>Nasıl okunur</summary>
-<p><b>Akış:</b> Sırada → Çalışıyor → İncelemede (ajan bitirdi, Claude Code gözden geçirip birleştirir) → Bitti (main'de).</p>
-<p><b>Efor:</b> bir çubuk düşük (flash_lite, hızlı ve ucuz), iki çubuk orta (flash), üç çubuk yüksek (pro, en dikkatli).</p>
-<p><b>Koruma:</b> Antigravity kancası ajanın komutunu kendi klasörüne yönlendirir; ana klasöre, main'e ve kişisel veriye dokunan aracı engeller; arka planda iş sürerken erken durmasını önler.</p>
-<p><b>Token:</b> modele giden ve modelden gelen metin miktarı; önbellekten okunan ayrıca sayılır.</p></details>
+<p><b>Ekip:</b> Uygulayıcı görevi yapar ve dalını push eder; Denetçi o dalı Claude Code'dan önce inceler ve «temiz» ya da bulgu yazar; Araştırmacı soruları kanıtla cevaplar. Tasarım ve kritik işler Claude Code'da kalır, birleştirmeyi o yapar.</p>
+<p><b>Aynı sohbet:</b> bir rolün sohbeti boşsa, içinde üçten az iş varsa ve bağlamı sınırın altındaysa yeni iş aynı sohbete gider (kuralları yeniden okumaz, önbellek işler). Kartın altındaki çubuk bağlamın ne kadarının dolduğunu, tikler kaçıncı işte olduğunu gösterir; dolunca yeni sohbet açılır.</p>
+<p><b>Efor:</b> bir çubuk düşük (flash_lite), iki orta (flash), üç yüksek (pro).</p>
+<p><b>Koruma:</b> kanca komutu ajanın klasörüne yönlendirir; ana klasöre, main'e, kişisel veriye ve dış hesaplara dokunan aracı engeller; iş bitmeden ya da push edilmeden durmasına izin vermez.</p></details>
+</div>
 <script>
 const kac = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
 const once = t => { if(!t) return '–'; const f = Math.round(Date.now() / 1000 - t);
@@ -217,24 +262,38 @@ const bin = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.', ',') + ' mn' : n >
 const saat = z => { const d = new Date(z); return isNaN(d) ? '' : d.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }); };
 const EFOR = { dusuk:[1, 'düşük'], orta:[2, 'orta'], yuksek:[3, 'yüksek'] };
 const eforHtml = (e, model) => { const x = EFOR[e]; if(!x) return '';
-  return '<span class="efor" role="img" aria-label="efor ' + x[1] + (model ? ', model ' + kac(model) : '') + '" title="efor ' + x[1] + (model ? ' · ' + kac(model) : '') + '">'
-    + [1, 2, 3].map(i => '<i class="' + (i <= x[0] ? 'dolu' : '') + '"></i>').join('') + '</span>'; };
-const ASAMA = { 'çalışıyor':['calisiyor', 'Çalışıyor'], inceleme:['inceleme', 'İncelemede'], sorun:['sorun', 'Dikkat'], 'kapandı':['', 'Kapandı'] };
+  const ad = 'efor ' + x[1] + (model ? ', ' + model : '');
+  return '<span class="efor" role="img" aria-label="' + kac(ad) + '" title="' + kac(ad) + '">' + [1, 2, 3].map(i => '<i class="' + (i <= x[0] ? 'dolu' : '') + '"></i>').join('') + '</span>'; };
+const ASAMA = { 'çalışıyor':['calisiyor', 'Çalışıyor'], inceleme:['inceleme', 'Hazır'], sorun:['sorun', 'Dikkat'], 'kapandı':['', 'Kapandı'] };
 const KOLON = [['sira', 'Sırada'], ['calisiyor', 'Çalışıyor'], ['inceleme', 'İncelemede'], ['bitti', 'Bitti']];
-const kimlik = ad => 'ajan-' + String(ad).replace(/[^a-z0-9-]/gi, '');
+const BAS = { uygulayici:'UY', denetci:'DE', arastirmaci:'AR' };
+const kimlik = ad => 'is-' + String(ad).replace(/[^a-z0-9-]/gi, '');
+
+function uyeHtml(u, s){
+  const calisiyor = u.hal === 'çalışıyor' || u.hal === 'başlıyor', oran = Math.min(1, (u.baglam || 0) / (s.baglam || 1));
+  const simdi = calisiyor ? '<b>' + kac(u.simdi || 'Başlıyor') + '</b>' : u.acik.length ? 'Boşta · son iş ' + kac(u.is) + ' hazır' : 'Boşta';
+  return '<article class="uye"><div class="uye-bas"><span class="avatar' + (calisiyor ? ' calisiyor' : '') + '" aria-hidden="true">' + BAS[u.rol] + '</span>'
+    + '<div class="uye-ad"><b>' + kac(u.rol_ad) + '</b><small>' + eforHtml(u.efor, u.model) + kac(u.model) + '</small></div></div>'
+    + '<div class="uye-simdi">' + simdi + '</div>'
+    + '<div class="olcek"><div class="olcek-satir"><span>İş</span><span class="tik" role="img" aria-label="' + u.isler.length + ' / ' + s.is + ' iş">'
+    + Array.from({ length:s.is }, (_, i) => '<i class="' + (i < u.isler.length ? 'on' : '') + '"></i>').join('') + '</span><span>' + u.isler.length + ' / ' + s.is + '</span></div>'
+    + '<div class="olcek-satir"><span>Bağlam</span><span class="cubuk" role="img" aria-label="bağlam ' + bin(u.baglam) + ', sınır ' + bin(s.baglam) + '"><i class="' + (oran > .8 ? 'dolu' : '')
+    + '" style="width:' + Math.round(oran * 100) + '%"></i></span><span>' + bin(u.baglam) + '</span></div>'
+    + '<div class="olcek-satir"><span>Token</span><span></span><span>' + bin(u.token.giris) + ' / ' + bin(u.token.cikis) + '</span></div></div></article>';
+}
 
 function panoHtml(p){
   return KOLON.map(([k, ad]) => { const l = p.filter(x => x.kolon === k);
     return '<section class="kolon" aria-label="' + ad + ', ' + l.length + ' iş"><h3><span>' + ad + '</span><span>' + l.length + '</span></h3>'
       + (l.length ? l.map(x => '<button class="is' + (x.sorun ? ' sorun' : '') + '"' + (x.ajan ? ' data-git="' + kimlik(x.ajan) + '"' : ' disabled')
-        + '><b>' + (x.tur === 'mini' ? 'Mini · ' : kac(x.ad) + ' · ') + kac(x.baslik) + '</b><small>' + eforHtml(x.efor) + kac(x.cumle) + '</small></button>').join('')
+        + '><b>' + (x.tur === 'soru' ? 'Soru · ' : kac(x.ad) + ' · ') + kac(x.baslik) + '</b><small>' + eforHtml(x.efor) + '<span>' + kac(x.cumle) + '</span></small></button>').join('')
         : '<p class="bos">Boş</p>') + '</section>'; }).join('');
 }
 
 function korumaHtml(c, kanca){
   const k = c.kanca || {}, eng = k.engellendi || [];
-  if(!kanca && (c.disari || []).length) return '<p class="koruma uyari">Koruma kancası kurulu değil · ajan klasörü dışında <b>' + c.disari.length + '</b> iş yaptı; ana klasöre bak.</p>';
-  if(!kanca) return '<p class="koruma">Koruma kancası kurulu değil; kurallar yalnız istemde.</p>';
+  if(!kanca && (c.disari || []).length) return '<p class="koruma uyari">Koruma kancası kurulu değil · ajan klasörü dışında <b>' + c.disari.length + '</b> iş yaptı.</p>';
+  if(!kanca) return '<p class="koruma">Koruma kancası kurulu değil.</p>';
   const parca = [];
   if(k.yonlendirildi) parca.push('<b>' + k.yonlendirildi + '</b> komut klasörüne yönlendirildi');
   if(eng.length) parca.push('<b>' + eng.length + '</b> araç engellendi');
@@ -246,60 +305,81 @@ function korumaHtml(c, kanca){
 
 function cizelgeHtml(l){
   return '<ol class="cizelge">' + l.filter(a => a.tur !== 'sonuç' || a.durum === 'RUNNING').map(a => {
-    const yazi = a.cumle || (a.tur === 'istem' ? 'Görev verildi' : a.tur === 'sonuç' ? 'Araç çalışıyor…' : (a.metin || '').split('\\n')[0]);
+    const yazi = a.cumle || (a.tur === 'istem' ? 'Görev verildi' : a.tur === 'sistem' ? 'Mesaj geldi' : a.tur === 'sonuç' ? 'Araç çalışıyor…' : (a.metin || '').split('\\n')[0]);
     return '<li class="' + (a.tur === 'hata' ? 'hata' : a.tur === 'model' ? 'model' : '') + '"><time>' + saat(a.zaman) + '</time><span title="' + kac(yazi) + '">' + kac(yazi) + '</span></li>';
   }).join('') + '</ol>';
 }
 
-function ajanHtml(a, kanca){
+function raporHtml(dn){
+  if(!dn) return '';
+  if(dn.asama === 'çalışıyor') return '<div class="rapor"><div class="rapor-bas"><span class="nokta canli"></span><b>Denetçi inceliyor</b></div></div>';
+  const k = dn.karar, sinif = k ? (k[0] === 'temiz' ? 'temiz' : 'bulgu') : '';
+  const baslik = !k ? 'Denetçi cevap verdi' : k[0] === 'temiz' ? 'Denetçi: temiz' : 'Denetçi: ' + k[1] + ' bulgu';
+  return '<div class="rapor ' + sinif + '"><div class="rapor-bas"><b>' + baslik + '</b><span class="etiket">' + (dn.commit ? 'commit ' + kac(dn.commit) : '') + '</span></div>'
+    + (dn.cevap ? '<details' + (sinif === 'bulgu' ? ' open' : '') + '><summary>Raporu</summary><pre>' + kac(dn.cevap) + '</pre></details>' : '') + '</div>';
+}
+
+function isHtml(a, kanca){
   const c = a.canli || {}, s = ASAMA[a.asama] || ['', a.asama], t = c.token || {};
-  const simdi = a.asama === 'inceleme' ? (a.tur === 'mini' ? 'Cevap hazır.' : 'Ajan işini bitirdi; gözden geçirme ve birleştirme bekliyor.')
-    : a.asama === 'kapandı' ? 'Kapandı.' : a.asama === 'sorun' ? 'Dikkat: ' + (c.hal === 'sessiz' ? 'on dakikadır hareket yok.' : c.hal === 'hata' ? 'Antigravity hata verdi.' : 'klasör dışında iş yaptı.')
+  const simdi = a.asama === 'inceleme' ? 'Uygulayıcı bitirdi ve dalını push etti.' : a.asama === 'kapandı' ? 'Kapandı.'
+    : a.asama === 'sorun' ? 'Dikkat: ' + (c.hal === 'sessiz' ? 'on dakikadır hareket yok.' : c.hal === 'hata' ? 'Antigravity hata verdi.' : 'klasör dışında iş yaptı.')
     : (c.simdi || 'Başlıyor…');
-  return '<section class="ajan" id="' + kimlik(a.ad) + '"><div class="ajan-bas"><b>' + (a.tur === 'mini' ? 'Mini ajan · ' + kac(a.ad) : kac(a.gorev || a.ad).replace(/\\.md$/, '')) + '</b>'
-    + eforHtml(a.efor, a.model) + '<span class="etiket">' + kac(a.model) + '</span><span class="asama ' + s[0] + '">' + s[1] + '</span></div>'
+  return '<section class="ajan" id="' + kimlik(a.ad) + '"><div class="ajan-bas"><b>' + kac(a.gorev || a.ad).replace(/\\.md$/, '') + '</b>'
+    + eforHtml(a.efor, a.model) + '<span class="etiket">Uygulayıcı · ' + kac(a.model) + '</span><span class="asama ' + s[0] + '">' + s[1] + '</span></div>'
     + '<p class="simdi">' + (a.asama === 'çalışıyor' ? '<span>Şu an:</span> ' : '') + kac(simdi) + '</p>'
-    + '<div class="olcu">'
-    + '<div><small>Süre</small><b>' + sure(a.baslangic, a.acik ? null : a.kapanis) + '</b></div>'
+    + '<div class="olcu"><div><small>Süre</small><b>' + sure(a.baslangic, a.acik ? null : a.kapanis) + '</b></div>'
     + '<div><small>Adım</small><b>' + (c.adim == null ? '–' : c.adim) + '</b></div>'
     + '<div><small>Son hareket</small><b>' + once(c.son_degisim) + '</b></div>'
     + '<div><small>Token giriş / çıkış</small><b>' + bin(t.giris) + ' / ' + bin(t.cikis) + '</b></div>'
-    + (a.tur === 'gorev' && c.commit != null ? '<div><small>Commit / açık dosya</small><b>' + c.commit + ' / ' + (c.degisen || 0) + '</b></div>' : '')
+    + (c.commit != null ? '<div><small>Commit / açık dosya</small><b>' + c.commit + ' / ' + (c.degisen || 0) + '</b></div>' : '')
     + ((c.alt || []).length ? '<div><small>Alt ajan</small><b>' + c.alt.length + '</b></div>' : '') + '</div>'
+    + raporHtml(a.denetci)
     + (a.acik ? korumaHtml(c, kanca) : '')
     + (c.son_adimlar && c.son_adimlar.length ? '<details' + (a.asama === 'çalışıyor' ? ' open' : '') + '><summary>Zaman çizelgesi</summary>' + cizelgeHtml(c.son_adimlar) + '</details>' : '')
-    + (c.cevap ? '<details' + (a.asama === 'inceleme' ? ' open' : '') + '><summary>Son cevabı</summary><pre>' + kac(c.cevap) + '</pre></details>' : '')
-    + ((c.alt || []).length ? '<details><summary>Alt ajanlar</summary>' + c.alt.map(x => '<div class="alt"><b>' + kac(x.hal) + '</b> · ' + kac(x.simdi || '')
-        + '<br><span>' + kac((x.istem || '').split('\\n')[0]) + '</span>' + (x.cevap ? '<pre>' + kac(x.cevap) + '</pre>' : '') + '</div>').join('') + '</details>' : '')
+    + (c.cevap ? '<details><summary>Uygulayıcının son mesajı</summary><pre>' + kac(c.cevap) + '</pre></details>' : '')
+    + ((c.alt || []).length ? '<details><summary>Alt ajanlar</summary>' + c.alt.map(x => '<div class="rapor"><b>' + kac(x.hal) + '</b> · ' + kac(x.simdi || '')
+        + (x.cevap ? '<pre>' + kac(x.cevap) + '</pre>' : '') + '</div>').join('') + '</details>' : '')
     + '<details><summary>Teknik ayrıntı</summary><dl>'
     + '<dt>Klasör</dt><dd><code>' + kac(a.worktree) + '</code></dd>' + (a.dal ? '<dt>Dal</dt><dd><code>' + kac(a.dal) + '</code></dd>' : '')
     + (a.portlar ? '<dt>Portlar</dt><dd>' + Object.entries(a.portlar).map(([k, v]) => k + ' ' + v).join(' · ') + '</dd>' : '')
-    + '<dt>Konuşma</dt><dd><code>' + kac(a.konusma) + '</code></dd><dt>Mesaj</dt><dd>' + (a.mesajlar || 1) + '</dd>'
+    + '<dt>Konuşma</dt><dd><code>' + kac(a.konusma) + '</code>' + (a.adim_bas ? ' (adım ' + a.adim_bas + '’ten)' : '') + '</dd>'
     + '<dt>Araçlar</dt><dd>' + Object.entries(c.araclar || {}).sort((x, y) => y[1] - x[1]).map(([k, v]) => kac(k) + ' ' + v).join(' · ') + '</dd>'
-    + (a.acik ? '<dt>Komut</dt><dd><code>python tools/ajan.py mesaj ' + kac(a.ad) + ' "…"</code> · <code>cevap ' + kac(a.ad) + '</code> · <code>kapat ' + kac(a.ad) + '</code></dd>' : '')
-    + (a.istem ? '<dt>İstem</dt><dd>' + kac(a.istem) + '</dd>' : '') + '</dl></details></section>';
+    + (a.acik ? '<dt>Komut</dt><dd><code>python tools/ajan.py mesaj ' + kac(a.ad) + ' "…"</code> · <code>gozden ' + kac(a.ad) + '</code> · <code>kapat ' + kac(a.ad) + '</code></dd>' : '')
+    + '</dl></details></section>';
+}
+
+function soruHtml(a){
+  const c = a.canli || {}, hazir = a.asama === 'inceleme';
+  return '<article class="soru" id="' + kimlik(a.ad) + '"><p>' + kac(a.istem) + '</p><small>' + eforHtml(a.efor, a.model)
+    + (hazir ? 'Araştırmacı cevapladı' : a.asama === 'kapandı' ? 'Kapandı' : 'Araştırmacı: ' + kac(c.simdi || 'başlıyor')) + ' · ' + once(c.son_degisim) + '</small>'
+    + (c.cevap ? '<details' + (hazir ? ' open' : '') + '><summary>Cevap</summary><pre>' + kac(c.cevap) + '</pre></details>' : '') + '</article>';
 }
 
 async function tazele(){
   let d; try{ d = await (await fetch('/api/durum', { cache:'no-store' })).json(); }catch(e){ document.getElementById('cumle').textContent = 'Durum okunamadı; takip sunucusu kapanmış olabilir.'; return; }
-  const ag = d.antigravity, acik = d.ajanlar.filter(a => a.acik), say = k => d.pano.filter(x => x.kolon === k).length;
+  const ag = d.antigravity, say = k => d.pano.filter(x => x.kolon === k).length;
   const parca = [];
   if(say('calisiyor')) parca.push('<b>' + say('calisiyor') + '</b> iş çalışıyor');
-  if(say('inceleme')) parca.push('<b>' + say('inceleme') + '</b> iş incelemeyi bekliyor');
+  if(say('inceleme')) parca.push('<b>' + say('inceleme') + '</b> iş incelemede');
   if(say('sira')) parca.push('<b>' + say('sira') + '</b> iş sırada');
   const sorun = d.pano.filter(x => x.sorun).length;
   if(sorun) parca.push('<b>' + sorun + '</b> işte dikkat gereken bir durum var');
-  document.getElementById('cumle').innerHTML = parca.length ? parca.join(', ') + '.' : 'Şu an çalışan ya da bekleyen iş yok.';
+  document.getElementById('cumle').innerHTML = parca.length ? parca.join(', ') + '.' : 'Ofis boşta; çalışan ya da bekleyen iş yok.';
   document.getElementById('durumcuk').innerHTML = '<span><span class="nokta ' + (ag.acik ? 'iyi' : ag.acik === false ? 'kotu' : '') + '"></span>Antigravity ' + (ag.acik ? 'açık' : ag.acik === false ? 'kapalı' : 'yoklanıyor') + '</span>'
-    + '<span><span class="nokta ' + (d.kanca ? 'iyi' : 'kotu') + '"></span>Koruma kancası ' + (d.kanca ? 'kurulu' : 'kurulu değil') + '</span>'
-    + '<span>Yuva ' + d.yuva.dolu + ' / ' + d.yuva.toplam + '</span><span>Güncellendi ' + new Date().toLocaleTimeString('tr-TR') + '</span>';
+    + '<span><span class="nokta ' + (d.kanca ? 'iyi' : 'kotu') + '"></span>Koruma ' + (d.kanca ? 'açık' : 'kurulu değil') + '</span>'
+    + '<span>' + new Date().toLocaleTimeString('tr-TR') + '</span>';
+  document.getElementById('ekip').innerHTML = d.ofis.length ? d.ofis.map(u => uyeHtml(u, d.sinir)).join('') : '<p class="bos">Ekipte şu an kimse yok; ilk iş verilince roller açılır.</p>';
   document.getElementById('pano').innerHTML = panoHtml(d.pano);
-  const kapali = d.ajanlar.filter(a => !a.acik);
-  document.getElementById('ajanlar').innerHTML = (acik.length ? acik.map(a => ajanHtml(a, d.kanca)).join('') : '<p class="bos">Açık ajan yok. Başlatmak için: <code>python tools/ajan.py baslat 004</code></p>')
-    + (kapali.length ? '<details><summary>Geçmiş (' + kapali.length + ' ajan)</summary>' + kapali.map(a => ajanHtml(a, d.kanca)).join('') + '</details>' : '');
+  const gorev = d.ajanlar.filter(a => a.tur === 'gorev'), acik = gorev.filter(a => a.acik), kapali = gorev.filter(a => !a.acik);
+  document.getElementById('isler').innerHTML = (acik.length ? acik.map(a => isHtml(a, d.kanca)).join('') : '<p class="bos">Açık görev yok.</p>')
+    + (kapali.length ? '<details><summary>Geçmiş (' + kapali.length + ' görev)</summary>' + kapali.map(a => isHtml(a, d.kanca)).join('') + '</details>' : '');
+  const sorular = d.ajanlar.filter(a => a.tur === 'soru' || a.tur === 'mini');
+  const acikSoru = sorular.filter(a => a.acik), eskiSoru = sorular.filter(a => !a.acik);
+  document.getElementById('sorular').innerHTML = sorular.length ? '<h2>Sorular <small>Araştırmacı</small></h2><div class="isler">' + acikSoru.map(soruHtml).join('')
+    + (eskiSoru.length ? '<details><summary>Önceki sorular (' + eskiSoru.length + ')</summary><div class="isler">' + eskiSoru.map(soruHtml).join('') + '</div></details>' : '') + '</div>' : '';
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-git]'); if(!b) return;
-  const h = document.getElementById(b.dataset.git); if(h){ const g = h.closest('details'); if(g) g.open = true; h.scrollIntoView({ behavior:'smooth' }); } });
+  const h = document.getElementById(b.dataset.git); if(h){ let g = h.parentElement.closest('details'); while(g){ g.open = true; g = g.parentElement.closest('details'); } h.scrollIntoView({ behavior:'smooth' }); } });
 tazele(); setInterval(tazele, 5000);
 setInterval(() => fetch('/nabiz', { method:'POST' }).catch(() => {}), 10000);
 </script></body></html>"""

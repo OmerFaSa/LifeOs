@@ -24,18 +24,23 @@ gor = [{"dosya": "001-a.md", "baslik": "001 · A", "efor": "orta", "main_de": Tr
        {"dosya": "002-b.md", "baslik": "002 · B", "efor": "orta"},
        {"dosya": "003-c.md", "baslik": "003 · C", "efor": "dusuk"},
        {"dosya": "004-d.md", "baslik": "004 · D", "dal_var": True, "ileri": 2},
-       {"dosya": "005-e.md", "baslik": "005 · E"}]
+       {"dosya": "005-e.md", "baslik": "005 · E"},
+       {"dosya": "006-f.md", "baslik": "006 · F"}]
 aj = [{"ad": "002", "tur": "gorev", "gorev": "002-b.md", "acik": True, "asama": "çalışıyor", "efor": "yuksek", "canli": {"simdi": "Dosya okuyor: x.py"}},
       {"ad": "003", "tur": "gorev", "gorev": "003-c.md", "acik": True, "asama": "sorun", "canli": {}},
       {"ad": "005", "tur": "gorev", "gorev": "005-e.md", "acik": False, "asama": "kapandı", "canli": {}},
       {"ad": "ara", "tur": "mini", "istem": "CSS ara", "acik": True, "asama": "inceleme", "canli": {}},
+      {"ad": "006", "tur": "gorev", "gorev": "006-f.md", "acik": True, "asama": "inceleme", "canli": {},
+       "denetci": {"asama": "inceleme", "karar": ["bulgu", 2]}},
       {"ad": "eski", "tur": "mini", "acik": False, "asama": "kapandı", "canli": {}}]
 p = {x["ad"]: x for x in G.pano(gor, aj)}
-beklenen = {"001": "bitti", "002": "calisiyor", "003": "calisiyor", "004": "inceleme", "005": "sira", "ara": "inceleme"}
+beklenen = {"001": "bitti", "002": "calisiyor", "003": "calisiyor", "004": "inceleme", "005": "sira", "ara": "inceleme", "006": "inceleme"}
 if {k: v["kolon"] for k, v in p.items()} != beklenen:
     hata.append("pano kolonlari: %r" % {k: v["kolon"] for k, v in p.items()})
 if p["002"]["cumle"] != "Dosya okuyor: x.py" or p["002"]["efor"] != "yuksek" or p["002"]["baslik"] != "B":
     hata.append("pano calisan is: %r" % p["002"])
+if p["006"]["cumle"] != "Denetçi: 2 bulgu" or not p["006"]["sorun"] or G.denetci_cumle({"karar": ["temiz", 0]}) != "Denetçi: temiz":
+    hata.append("denetci karari panoda: %r" % p["006"])
 if not p["003"]["sorun"] or p["002"]["sorun"]:
     hata.append("sorun isareti yalniz sorunlu ajanda")
 for s in sorted((KOK / G.GOREVLER).glob("[0-9][0-9][0-9]-*.md")):

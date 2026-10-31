@@ -73,10 +73,22 @@ for parca in (r"C:\x\003\belgeler\ekip\gorevler\003-olu-css.md", "ag/003-olu-css
     if parca not in ist:
         hata.append("istemde yok: " + parca)
 yuksek = A.gorev_istemi("w", "d", d, A.portlar(1), "yuksek")
-if "en çok 3 tane" not in yuksek or "gözden geçirt" not in yuksek:
-    hata.append("yuksek eforda 3 alt ajan ve gozden gecirici olmali")
-if "cd x; " not in A.mini_istemi("x", "i"):
-    hata.append("mini istem kabugun klasorunu soylemeli")
+if "en çok 3 tane" not in yuksek or "Denetçi" not in yuksek:
+    hata.append("yuksek eforda 3 alt ajan olmali ve Denetci'nin inceleyecegi soylenmeli")
+if "cd x; " not in A.soru_istemi("x", "i") or "AGENTS.md'yi yeniden okumana gerek yok" not in A.gorev_devam_istemi("w", "d", d, A.portlar(1)):
+    hata.append("arastirmaci istemi kabugu, devam istemi kurallarin bilindigini soylemeli")
+if "KARAR:" not in A.denetim_istemi("w", "003", "ag/003", d) or "4791" not in A.denetim_govde("w", "003", "ag/003", d):
+    hata.append("denetim istemi KARAR bicimini ve denetci portlarini soylemeli")
+for metin, beklenen in (("KARAR: temiz\nx", ("temiz", 0)), ("**KARAR: 2 bulgu**", ("bulgu", 2)), ("hic", None)):
+    if A.karar_oku(metin) != beklenen:
+        hata.append("karar_oku(%r) = %r" % (metin, A.karar_oku(metin)))
+if A.yuva_sec({str(n): {"acik": True, "yuva": n} for n in range(1, A.YUVA_SAY - 1)}) != A.YUVA_SAY - 1:
+    hata.append("uygulayici son bos yuvayi almali")
+try:
+    A.yuva_sec({str(n): {"acik": True, "yuva": n} for n in range(1, A.YUVA_SAY)})
+    hata.append("denetci yuvasi uygulayiciya verilmemeli")
+except SystemExit:
+    pass
 for s in sorted((KOK / "belgeler/ekip/gorevler").glob("[0-9][0-9][0-9]-*.md")):
     b = A.gorev_bilgi(s.read_text(encoding="utf-8"))
     if not b["dal"] or b["efor"] is None:
@@ -167,6 +179,66 @@ with tempfile.TemporaryDirectory() as t:
         K.isle("Stop", {"conversationId": ana, "fullyIdle": False})
     if K.isle("Stop", {"conversationId": ana, "fullyIdle": False}) != {}:
         hata.append("Stop en cok %d kez devam ettirmeli" % K.STOP_SINIR)
+
+    # ofis: ayni konusmada iki is adim araligiyla ayrilir; bos, kisa ve bagli konusma yeniden kullanilir
+    ofis = "aaaaaaaa-2222-3333-4444-555555555555"
+    dokum_yaz(A.BEYIN, ofis, [satir(0, "USER_INPUT", content="soru 1"),
+                              satir(1, "PLANNER_RESPONSE", content="cevap 1", input_tokens=1000, cache_read_tokens=500),
+                              satir(2, "SYSTEM_MESSAGE", content="soru 2"),
+                              satir(3, "PLANNER_RESPONSE", content="cevap 2", input_tokens=2000, cache_read_tokens=1000)])
+    k1, k2 = A.konusma_oku(ofis, bas=0, bit=2), A.konusma_oku(ofis, bas=2)
+    if (k1["cevap"], k1["adim"], k1["hal"], k2["cevap"], k2["adim"], k2["baglam"]) != ("cevap 1", 2, "turu bitti", "cevap 2", 2, 3000):
+        hata.append("is araligi: %r %r" % ({x: k1[x] for x in ("cevap", "adim")}, {x: k2[x] for x in ("cevap", "adim", "baglam")}))
+    dd = {"s-1": {"tur": "soru", "model": "flash_lite", "konusma": ofis, "baslangic": 1}}
+    if A.devam_edilebilir(dd, "arastirmaci", "flash_lite") != (ofis, 4):
+        hata.append("bos konusma yeniden kullanilmali: %r" % (A.devam_edilebilir(dd, "arastirmaci", "flash_lite"),))
+    if A.devam_edilebilir(dd, "arastirmaci", "pro") or A.devam_edilebilir(dd, "uygulayici", "flash_lite"):
+        hata.append("baska model ya da rol ayni konusmayi almamali")
+    dolu = {"s-%d" % i: dict(dd["s-1"]) for i in range(A.MAX_IS)}
+    if A.devam_edilebilir(dolu, "arastirmaci", "flash_lite"):
+        hata.append("MAX_IS dolunca yeni konusma acilmali")
+    eski_sinir, A.BAGLAM_SINIR = A.BAGLAM_SINIR, 2000
+    if A.devam_edilebilir(dd, "arastirmaci", "flash_lite"):
+        hata.append("bagluk siniri asilinca yeni konusma acilmali")
+    A.BAGLAM_SINIR = eski_sinir
+    if A.devam_edilebilir({"s-1": dict(dd["s-1"], konusma=alt)}, "arastirmaci", "flash_lite"):
+        hata.append("calisan konusmaya yeni is verilmemeli")
+    u = A.uyeler([dict(ad="s-1", rol="arastirmaci", model="flash_lite", konusma=ofis, adim_bas=0, acik=False,
+                       canli={"son_degisim": time.time(), "token": {"giris": 1, "cikis": 2, "onbellek": 3}}),
+                  dict(ad="s-2", rol="arastirmaci", model="flash_lite", konusma=ofis, adim_bas=2, acik=True,
+                       canli={"hal": "turu bitti", "baglam": 3000, "son_degisim": time.time(), "token": {"giris": 10, "cikis": 20, "onbellek": 30}}),
+                  dict(ad="eski", rol="uygulayici", model="pro", konusma="x", adim_bas=0, acik=False,
+                       canli={"son_degisim": time.time() - 86400}),
+                  dict(ad="onceki", rol="arastirmaci", model="flash_lite", konusma="y", adim_bas=0, acik=False, baslangic=-1,
+                       canli={"son_degisim": time.time()})])
+    if len(u) != 1 or u[0]["isler"] != ["s-1", "s-2"] or u[0]["is"] != "s-2" or u[0]["token"] != {"giris": 11, "cikis": 22, "onbellek": 33}:
+        hata.append("uyeler: %r" % u)
+
+    # kanca: ayni konusmada en son is verilen isin klasoru gecerli; teslimde Denetci kendiliginden
+    A.yaz_durum({"003": {"tur": "gorev", "konusma": ana, "worktree": WT, "acik": True, "gorev": "003-olu-css.md", "etkin": 1},
+                 "004": {"tur": "gorev", "konusma": ana, "worktree": WT.replace("003", "004"), "acik": True, "etkin": 2}})
+    if K.ajan_bul(ana)[0] != "004":
+        hata.append("ayni konusmada en son is verilen is secilmeli")
+    A.yaz_durum({"005": {"tur": "gorev", "konusma": "c5", "worktree": WT, "acik": True, "gorev": "005.md"}})
+    istenen = []
+    eski_teslim, eski_spawn, eski_dur = K.teslim_edildi, K.SPAWN, K.dur_karari
+    K.teslim_edildi, K.SPAWN = (lambda a: True), (lambda ad: istenen.append(ad) or True)
+    K.dur_karari = lambda a, g, o: (False, "")
+    if K.isle("Stop", {"conversationId": "c5", "fullyIdle": True}) != {} or istenen != ["005"]:
+        hata.append("teslimde Denetci istenmeli: %r" % istenen)
+    K.teslim_edildi = lambda a: False
+    K.isle("Stop", {"conversationId": "c5", "fullyIdle": True})
+    if istenen != ["005"]:
+        hata.append("teslim yokken Denetci istenmemeli")
+    K.teslim_edildi, K.SPAWN, K.dur_karari = eski_teslim, eski_spawn, eski_dur
+    A.yaz_durum({"005": {"tur": "gorev", "konusma": "c5", "worktree": WT, "acik": True, "denetim": "d-005"}})
+    if K.denetime_gonder("005"):
+        hata.append("ikinci kez Denetci istenmemeli")
+    o = K.isle("PreToolUse", {"conversationId": "c6", "toolCall": {"name": "write_file", "args": {}}})
+    A.yaz_durum({"d-005": {"tur": "denetim", "konusma": "c6", "worktree": WT, "acik": True}})
+    o = K.isle("PreToolUse", {"conversationId": "c6", "toolCall": {"name": "write_file", "args": {"TargetFile": WT + r"\x"}}})
+    if o.get("decision") != "deny":
+        hata.append("Denetci dosya yazamamali: %r" % o)
 
     # kur: yalniz kendi anahtarini yazar/siler, kullanicinin diger kancalarina dokunmaz
     A.HOOKS = t / "config" / "hooks.json"

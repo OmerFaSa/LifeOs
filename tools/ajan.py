@@ -6,14 +6,17 @@ efor degistirip minik ajanlar ayarlayabileceksin». Her ajan Antigravity'de
 ayri bir konusmadir; her biri KENDI worktree'sinde ve KENDI test portlarinda
 calisir, iki ajan birbirinin dalini ya da sunucusunu bozmaz.
 
-  python tools/ajan.py baslat 001 [--efor dusuk|orta|yuksek] [--not "..."]
-  python tools/ajan.py mini <ad> "<istem>" [--efor ...]   salt okuma, cevap verir
+  python tools/ajan.py baslat 001 [--efor dusuk|orta|yuksek] [--not "..."] [--yeni]
+  python tools/ajan.py sor "<soru>" [--efor ...] [--ad x]  Arastirmaci (salt okunur) cevaplar
+  python tools/ajan.py gozden 001 [--efor ...]             Denetci dali inceler (kanca bitince kendisi ister)
   python tools/ajan.py mesaj <ad> "<metin>"                 konusmaya yeni mesaj
   python tools/ajan.py durum [--json]                       butun ajanlar
   python tools/ajan.py cevap <ad>                           son cevabin tam metni
   python tools/ajan.py kapat <ad> [--zorla]                 worktree'yi kaldirir (dal kalir)
   python tools/ajan.py kur [--kaldir]                       Antigravity kancasini (hooks.json) kurar/kaldirir
 
+Ofis: Uygulayici, Arastirmaci, Denetci rolleri. Bir rolun konusmasi bos, kisa ve bagli
+oldugu surece sonraki is ayni konusmaya mesajla gider (--yeni zorla yenisini acar).
 Efor modeli secer: dusuk -> flash_lite, orta -> flash, yuksek -> pro.
 Gorev dosyasindaki «**Efor:**» satiri varsayilandir; --efor onu ezer.
 
@@ -53,10 +56,10 @@ def portlar(yuva):
 
 def yuva_sec(ajanlar):
     dolu = {a.get("yuva") for a in ajanlar.values() if a.get("acik")}
-    for n in range(1, YUVA_SAY + 1):
+    for n in range(1, YUVA_SAY):                       # son yuva Denetci'nin
         if n not in dolu:
             return n
-    raise SystemExit("Bütün yuvalar dolu (%d ajan açık); önce birini kapat." % YUVA_SAY)
+    raise SystemExit("Bütün yuvalar dolu (%d uygulayıcı açık); önce birini kapat." % (YUVA_SAY - 1))
 
 
 # ---------- durum dosyasi ----------
@@ -169,14 +172,16 @@ def _satirlar(yol):
     return out
 
 
-def konusma_oku(kimlik, son=12, wt=None):
+def konusma_oku(kimlik, son=12, wt=None, bas=0, bit=None):
     """Konusma dokumunden hal, adimlar, son cevap, token. Dokum yoksa None.
+    bas/bit: ayni konusmada birden cok is varsa yalniz bu isin adimlari [bas, bit).
     wt verilirse o klasorun disinda calisan komut ve yazilan dosyalar 'disari'da listelenir."""
     yol = dokum_yolu(kimlik)
     satir = _satirlar(yol)
     if satir is None:
         return None
-    adimlar = [adim_ozet(x) for x in satir]
+    hepsi_ = [adim_ozet(x) for x in satir]
+    adimlar = [a for a in hepsi_ if (a["idx"] or 0) >= bas and (bit is None or (a["idx"] or 0) < bit)]
     cevap = next((a["metin"] for a in reversed(adimlar) if a["tur"] == "model" and a["metin"] and not a["arac"]), "")
     araclar = {}
     for a in adimlar:
@@ -184,7 +189,9 @@ def konusma_oku(kimlik, son=12, wt=None):
             araclar[n] = araclar.get(n, 0) + 1
     degisti = yol.stat().st_mtime
     son_adim = adimlar[-1] if adimlar else None
-    if not adimlar:
+    if bit is not None:
+        hal = "turu bitti"                                 # konusma sonraki ise gecti
+    elif not adimlar:
         hal = "başlıyor"
     elif son_adim["tur"] == "hata" or son_adim["durum"] == "ERROR":
         hal = "hata"
@@ -197,9 +204,11 @@ def konusma_oku(kimlik, son=12, wt=None):
     simdi = next((a["cumle"] for a in reversed(adimlar) if a["cumle"]), "")
     disari = [dict(idx=a["idx"], tur=d[0], metin=d[1]) for a in adimlar if a["tur"] == "model" and wt
               for d in [klasor_disi(a, wt)] if d]
+    model_adim = [a for a in hepsi_ if a["tur"] == "model"]
     return {"adim": len(adimlar), "hal": hal, "son_degisim": int(degisti), "cevap": cevap, "araclar": araclar,
-            "simdi": simdi, "disari": disari,
+            "simdi": simdi, "disari": disari, "toplam_adim": len(hepsi_),
             "token": {k: sum(a[k] for a in adimlar) for k in ("giris", "cikis", "onbellek")},
+            "baglam": (model_adim[-1]["giris"] + model_adim[-1]["onbellek"]) if model_adim else 0,
             "baslangic": adimlar[0]["zaman"] if adimlar else "",
             "son_adimlar": [{k: a[k] for k in ("idx", "zaman", "tur", "arac", "cumle", "metin", "durum")}
                             for a in adimlar[-son:]]}
@@ -370,6 +379,64 @@ def worktree_kur(yol, dal):
             subprocess.run(["cmd", "/c", "mklink", "/J", str(hedef), str(kaynak)], capture_output=True, creationflags=SESSIZ)
 
 
+# ---------- ofis: roller ve konusma yeniden kullanimi ----------
+# Kullanici (2026-10-31): «surekli yeni sohbet acma, bir sohbet icinde de kalabilirsin; hangisi
+# verimliyse; Antigravity'yi senin icin calisan bir ofis gibi yonet; kaliteden odun yok».
+# Her rol bir konusmadir; bos, kisa (MAX_IS) ve bagli (BAGLAM_SINIR) olduğu surece sonraki is
+# ayni konusmaya mesajla gider: AGENTS.md'yi yeniden okumaz, onbellek isler. Sinir asilinca yenisi.
+
+ROL = {"gorev": "uygulayici", "mini": "arastirmaci", "soru": "arastirmaci", "denetim": "denetci"}
+ROL_AD = {"uygulayici": "Uygulayıcı", "arastirmaci": "Araştırmacı", "denetci": "Denetçi"}
+OKUR = ("mini", "soru", "denetim")                 # salt okunur isler (kanca yazmayi reddeder)
+MAX_IS = 3
+BAGLAM_SINIR = 200_000                              # uzun baglam kaliteyi dusurur; onbellek ucuzlatir ama sinirsiz degil
+DENETCI_YUVA = YUVA_SAY                             # denetci testleri hep son yuvada kosar
+OFIS = {"arastirmaci": "ofis-arastirma", "denetci": "ofis-denetim"}
+
+
+def rol(a):
+    return ROL.get(a.get("tur"), "uygulayici")
+
+
+def _isler(d):
+    return {k: v for k, v in d.items() if not k.startswith("_")}
+
+
+def devam_edilebilir(d, rol_, model):
+    """Bu rol ve modelde yeni isi alabilecek konusma: (kimlik, baslangic_adimi) ya da None."""
+    gruplar = {}
+    for a in _isler(d).values():
+        if rol(a) == rol_ and a.get("model") == model and a.get("konusma"):
+            gruplar.setdefault(a["konusma"], []).append(a)
+    for kimlik, isler in sorted(gruplar.items(), key=lambda g: -max(x.get("baslangic", 0) for x in g[1])):
+        if len(isler) >= MAX_IS:
+            continue
+        k = konusma_oku(kimlik, son=1)
+        if k and k["hal"] == "turu bitti" and k["baglam"] < BAGLAM_SINIR:
+            return kimlik, k["toplam_adim"]
+    return None
+
+
+def gonder(d, rol_, model, baslik, ilk, devam, yeni=False):
+    """Isi uygun konusmaya mesajla verir ya da yeni konusma acar: (kimlik, bas, yeni_mi)."""
+    s = None if yeni else devam_edilebilir(d, rol_, model)
+    if s:
+        agentapi(["send-message", s[0], devam])
+        return s[0], s[1], False
+    y = agentapi(["new-conversation", "--model=" + model, "--title=" + baslik, ilk])
+    kimlik = (y.get("newConversation") or {}).get("conversationId")
+    if not kimlik:
+        raise SystemExit("Antigravity konuşma kimliği dönmedi: %r" % y)
+    return kimlik, 0, True
+
+
+def _ayni_konusmayi_kapat(d, kimlik, haric):
+    """Ayni konusmadaki onceki salt okunur isler bitmistir; yeni soru gelince kapanir."""
+    for ad, a in _isler(d).items():
+        if ad != haric and a.get("konusma") == kimlik and a.get("tur") in OKUR and a.get("acik"):
+            a["acik"], a["kapanis"] = False, int(time.time())
+
+
 # ---------- istemler ----------
 
 def gorev_dosyasi(no):
@@ -387,44 +454,82 @@ def gorev_bilgi(metin):
 
 ALT = {"dusuk": {"alt": 0, "alt_model": "flash_lite"}, "orta": {"alt": 2, "alt_model": "flash_lite"},
        "yuksek": {"alt": 3, "alt_model": "flash"}}
+KABUK = ("DİKKAT: komut kabuğun bu klasörde AÇILMAZ (varsayılanı C:\\Users\\ASUS\\LifeOs, orası yasak). Her komutu "
+         "'cd %s; ' ile başlat. Bir kanca cd'siz komutu klasörüne yönlendirir, yasak yolu ve aracı engeller.\n")
+ARACLAR = ("Araçlar: yerleşik araçlar ve playwright MCP (yalnız kendi portlarında arayüzü görmek için). Diğer MCP'ler "
+           "(hkm-sqlite kişisel veri; Notion, Linear, Netlify, Canva, Figma kullanıcının hesapları) ve ask_question kapalı.\n")
 
 
-def gorev_istemi(wt, dal, dosya, p, efor="orta", ek=""):
+def _gorev_govde(wt, dal, dosya, p, efor, ek):
     return (
-        "LifeOS deposunda bir görev yapacaksın; seni Claude Code başlattı ve izliyor.\n"
-        "Çalışma klasörün: %(wt)s — yalnız bu klasörde çalış. C:\\Users\\ASUS\\LifeOs, "
-        "C:\\Users\\ASUS\\LifeOs-ag ve C:\\Users\\ASUS\\LifeOS-Sistem açılmaz, değiştirilmez.\n"
-        "Dalın hazır ve seçili: %(dal)s (main'den açıldı). Dal değiştirme, yeni dal açma, main'e merge ya da push etme.\n"
-        "DİKKAT: komut kabuğun bu klasörde AÇILMAZ (varsayılanı C:\\Users\\ASUS\\LifeOs, orası yasak). Her komutu "
-        "'cd %(wt)s; ' ile başlat; git komutundan önce 'git rev-parse --show-toplevel' çıktısı bu klasör olmalı.\n"
-        "1. Önce %(wt)s\\AGENTS.md ve %(wt)s\\belgeler\\ekip\\gorevler\\README.md dosyalarını oku; kurallar sözleşmedir.\n"
-        "2. Görevin: %(wt)s\\%(gorev)s. Yazanı yap, yazmayanı yapma; belirsizse tahmin etme, «Sonuç»a soru olarak yaz.\n"
-        "3. Tarayıcı testlerinde README'deki portlar yerine YALNIZ şunlar: "
-        "cd AYS && node tools/runtests.js %(AYS)d · cd SPI && node tools/runtests.js %(SPI)d · "
-        "cd ESP && node tools/runtests.js %(ESP)d. Başka sunucu ya da port açma.\n"
-        "4. Bitince görev dosyasında Durum: bitti yap, «Sonuç»u doldur; commit et "
-        "(git -c user.name=OmerFaSa -c user.email=omerfaruksagsozz@gmail.com commit) ve git push -u origin %(dal)s.\n"
-        "5. Takılırsan Durum: takıldı yap, nedenini «Sonuç»a yaz, yine commit ve push et.\n"
-        "6. %(alt_satir)s\n"
-        "7. Araçlar: yerleşik araçlar ve playwright MCP (yalnız kendi portlarında arayüzü görmek için). Diğer MCP'ler "
-        "(hkm-sqlite kişisel veri; Notion, Linear, Netlify, Canva, Figma kullanıcının hesapları) ve ask_question bu işte kapalı; "
-        "bir kanca bunları engeller ve cd'siz komutu klasörüne yönlendirir.\n"
-        "8. Arka planda test başlattıysan bitmesini bekle; sonucu okumadan turu kapatma.\n"
-        "9. Son mesajın kısa olsun: ne değişti, hangi test koştu, çıktı satırı."
+        "Görevin: %(wt)s\\%(gorev)s. Yazanı yap, yazmayanı yapma; belirsizse tahmin etme, «Sonuç»a soru olarak yaz.\n"
+        "Dalın hazır ve seçili: %(dal)s (main'den açıldı). Dal değiştirme, main'e merge ya da push etme.\n"
+        "Tarayıcı testlerinde YALNIZ şu portlar: cd AYS && node tools/runtests.js %(AYS)d · "
+        "cd SPI && node tools/runtests.js %(SPI)d · cd ESP && node tools/runtests.js %(ESP)d.\n"
+        "Arka planda test başlattıysan bitmesini bekle; sonucu okumadan turu kapatma.\n"
+        "Bitince görev dosyasında Durum: bitti yap, «Sonuç»u doldur; commit et "
+        "(git -c user.name=OmerFaSa -c user.email=omerfaruksagsozz@gmail.com commit) ve git push -u origin %(dal)s. "
+        "Takılırsan Durum: takıldı yap, nedenini yaz, yine commit ve push et. İşin bitince ofisin Denetçisi dalını inceler.\n"
+        "%(alt_satir)s\n"
+        "Son mesajın kısa olsun: ne değişti, hangi test koştu, çıktı satırı."
         % dict(p, wt=wt, dal=dal, gorev=str(dosya.relative_to(KOK)).replace("/", "\\"), alt_satir=(
             "Alt ajan (invoke_subagent) yalnız bağımsız bir okuma ya da araştırma için ve en çok %(alt)d tane; "
-            "Model %(alt_model)s, aynı klasör ve aynı kurallar. Dosyayı sen değiştirirsin, alt ajan değiştirmez. "
-            "Commit'ten önce bir alt ajana (Model %(alt_model)s) 'git diff main' çıktısını AGENTS.md §1 ve görevin "
-            "kabul ölçütüne göre gözden geçirt; bulduğunu düzelt ya da «Sonuç»a yaz."
-            % ALT[efor] if ALT[efor]["alt"] else "Alt ajan açma; işi tek başına yap."))
+            "Model %(alt_model)s, aynı klasör ve aynı kurallar; dosyayı yalnız sen değiştirirsin." % ALT[efor]
+            if ALT[efor]["alt"] else "Alt ajan açma; işi tek başına yap."))
         + ("\nEk not: " + ek if ek else ""))
 
 
-def mini_istemi(wt, istem):
-    return ("LifeOS deposunda kısa bir iş; seni Claude Code başlattı. Klasör: %s (main'in salt okunur kopyası).\n"
-            "Komut kabuğun bu klasörde açılmaz: her komutu 'cd %s; ' ile başlat.\n"
-            "Dosya değiştirme, commit etme, sunucu açma; yalnız oku, ara ve komutla incele. "
-            "Cevabını kısa ve kanıtlı ver (dosya:satır).\n\nİş: %s" % (wt, wt, istem))
+def gorev_istemi(wt, dal, dosya, p, efor="orta", ek=""):
+    return ("Sen LifeOS ofisinin Uygulayıcısısın; Claude Code sana görev verir ve işini izler.\n"
+            "Çalışma klasörün: %s — yalnız bu klasörde çalış. C:\\Users\\ASUS\\LifeOs, "
+            "C:\\Users\\ASUS\\LifeOs-ag ve C:\\Users\\ASUS\\LifeOS-Sistem açılmaz, değiştirilmez.\n" % wt
+            + KABUK % wt + ARACLAR
+            + "Önce %s\\AGENTS.md ve %s\\belgeler\\ekip\\gorevler\\README.md dosyalarını oku; kurallar sözleşmedir.\n" % (wt, wt)
+            + _gorev_govde(wt, dal, dosya, p, efor, ek))
+
+
+def gorev_devam_istemi(wt, dal, dosya, p, efor="orta", ek=""):
+    return ("Yeni görev; önceki işin kapandı, kurallar aynı (AGENTS.md'yi yeniden okumana gerek yok).\n"
+            "Çalışma klasörün ARTIK: %s — önceki klasöre dokunma.\n" % wt + KABUK % wt
+            + _gorev_govde(wt, dal, dosya, p, efor, ek))
+
+
+def soru_istemi(wt, soru):
+    return ("Sen LifeOS ofisinin Araştırmacısısın. Claude Code sana sorular gönderir; her soru ayrı mesajla gelir.\n"
+            "Klasör: %s (main'in salt okunur kopyası; her sorudan önce main'e güncellenir).\n" % wt
+            + KABUK % wt + ARACLAR
+            + "Dosya değiştirme, commit etme, sunucu açma; oku, ara, komutla incele. Cevabın kısa ve kanıtlı olsun "
+              "(dosya:satır). Emin değilsen «göremedim» yaz, «yok» yazma (AGENTS.md §4).\n\nSoru: " + soru)
+
+
+def soru_devam_istemi(wt, soru):
+    return "Yeni soru (klasör %s main'e güncellendi; kurallar aynı):\n%s" % (wt, soru)
+
+
+def denetim_govde(wt, hedef, dal, dosya):
+    return ("İnceleme: görev %s, dal %s. Klasör %s bu dala hazırlandı (salt okunur).\n"
+            "Bak: 'cd %s; git diff main...HEAD' ve görev dosyası %s\\%s (kabul ölçütü, Sonuç).\n"
+            "Ölç: kabul ölçütü karşılanıyor mu; AGENTS.md §1 kırılıyor mu; yeni davranışın testi var mı; ekranda "
+            "görünen metin düzgün Türkçe mi; dokunulmaması gereken dosyaya dokunulmuş mu. Gerekirse görevdeki testleri koş "
+            "(portlar: AYS %d, SPİ %d, ESP %d).\n"
+            "Cevap biçimi: ilk satır tam olarak 'KARAR: temiz' ya da 'KARAR: N bulgu'. Sonra her bulgu bir satır: "
+            "dosya:satır · ne yanlış · hangi girdide bozulur · nasıl doğrulanır. «Şu daha iyi olurdu» bulgu değildir; "
+            "emin değilsen «göremedim» yaz."
+            % ((hedef, dal, wt, wt, wt, str(dosya.relative_to(KOK)).replace("/", "\\")) + tuple(portlar(DENETCI_YUVA).values())))
+
+
+def denetim_istemi(wt, hedef, dal, dosya):
+    return ("Sen LifeOS ofisinin Denetçisisin: Uygulayıcıların dallarını Claude Code'dan önce incelersin; dosya "
+            "değiştirmez, commit etmezsin. Önce %s\\AGENTS.md'yi oku (§1 sözleşme, §4 bulgu biçimi).\n" % wt
+            + KABUK % wt + ARACLAR + denetim_govde(wt, hedef, dal, dosya))
+
+
+def karar_oku(metin):
+    """Denetci cevabinin ilk KARAR satiri: ('temiz', 0) / ('bulgu', n) / None."""
+    m = re.search(r"KARAR:\s*(temiz|(\d+)\s*bulgu)", metin or "", re.I)
+    if not m:
+        return None
+    return ("temiz", 0) if m.group(1).lower() == "temiz" else ("bulgu", int(m.group(2)))
 
 
 # ---------- komutlar ----------
@@ -439,49 +544,82 @@ def _secenek(argv, ad, varsayilan=None):
     return varsayilan
 
 
-def baslat(no, efor=None, ek=""):
+def baslat(no, efor=None, ek="", yeni=False):
     dosya = gorev_dosyasi(no)
     bilgi = gorev_bilgi(dosya.read_text(encoding="utf-8"))
     efor = efor_cevir(efor) or bilgi["efor"] or "orta"
     d = oku_durum()
     if d.get(no, {}).get("acik"):
         raise SystemExit("%s zaten açık (konuşma %s). Mesaj için: ajan.py mesaj %s \"...\"" % (no, d[no]["konusma"], no))
-    yuva = yuva_sec({k: v for k, v in d.items() if not k.startswith("_")})
+    yuva = yuva_sec({k: v for k, v in _isler(d).items() if v.get("tur") == "gorev"})
     wt = AJAN_KLASOR / no
     worktree_kur(wt, bilgi["dal"])
     p = portlar(yuva)
-    y = agentapi(["new-conversation", "--model=" + EFOR[efor], "--title=LifeOS " + dosya.stem,
-                  gorev_istemi(str(wt), bilgi["dal"], dosya, p, efor, ek)])
-    kimlik = (y.get("newConversation") or {}).get("conversationId")
-    if not kimlik:
-        raise SystemExit("Antigravity konuşma kimliği dönmedi: %r" % y)
+    args = (str(wt), bilgi["dal"], dosya, p, efor, ek)
+    kimlik, bas, yeni_mi = gonder(d, "uygulayici", EFOR[efor], "LifeOS Uygulayıcı " + EFOR[efor],
+                                  gorev_istemi(*args), gorev_devam_istemi(*args), yeni)
     d = oku_durum()
     d[no] = {"tur": "gorev", "gorev": dosya.name, "dal": bilgi["dal"], "efor": efor, "model": EFOR[efor],
-             "konusma": kimlik, "worktree": str(wt), "yuva": yuva, "portlar": p,
-             "baslangic": int(time.time()), "acik": True, "mesajlar": 1}
+             "konusma": kimlik, "adim_bas": bas, "worktree": str(wt), "yuva": yuva, "portlar": p,
+             "baslangic": int(time.time()), "etkin": time.time(), "acik": True, "mesajlar": 1}
     yaz_durum(d)
-    print("%s başladı · efor %s (%s) · konuşma %s · klasör %s · portlar %s"
-          % (no, EFOR_AD[efor], EFOR[efor], kimlik, wt, "/".join(map(str, p.values()))))
+    print("%s başladı · %s · efor %s (%s) · %s · klasör %s · portlar %s"
+          % (no, "yeni konuşma" if yeni_mi else "aynı konuşmada devam", EFOR_AD[efor], EFOR[efor], kimlik, wt,
+             "/".join(map(str, p.values()))))
 
 
-def mini(ad, istem, efor=None):
-    if not re.fullmatch(r"[a-z0-9-]{2,30}", ad):
-        raise SystemExit("Mini ajan adı küçük harf, rakam ve tire olmalı (2-30).")
+def _ofis_klasoru(rol_, hedef):
+    """Arastirmaci ve denetcinin kalici salt okunur klasoru; her iste hedefe (main ya da dal) ayrik."""
+    wt = AJAN_KLASOR / OFIS[rol_]
+    worktree_kur(wt, None)
+    if git("status", "--porcelain", kok=wt, kontrol=False):
+        raise SystemExit("%s klasöründe değişiklik var (salt okunur olmalıydı); elle bak." % wt)
+    git("checkout", "-q", "--detach", hedef, kok=wt)
+    return wt
+
+
+def sor(soru, efor=None, ad=None, yeni=False):
     efor = efor_cevir(efor) or "dusuk"
     d = oku_durum()
+    if ad is None:
+        ad = "s-%d" % (1 + sum(1 for a in _isler(d).values() if a.get("tur") in ("soru", "mini")))
+    if not re.fullmatch(r"[a-z0-9-]{2,30}", ad):
+        raise SystemExit("Ad küçük harf, rakam ve tire olmalı (2-30).")
     if d.get(ad, {}).get("acik"):
-        raise SystemExit("%s zaten açık; mesaj gönder ya da kapat." % ad)
-    wt = AJAN_KLASOR / ("m-" + ad)
-    worktree_kur(wt, None)
-    y = agentapi(["new-conversation", "--model=" + EFOR[efor], "--title=LifeOS mini " + ad, mini_istemi(str(wt), istem)])
-    kimlik = (y.get("newConversation") or {}).get("conversationId")
-    if not kimlik:
-        raise SystemExit("Antigravity konuşma kimliği dönmedi: %r" % y)
+        raise SystemExit("%s zaten açık." % ad)
+    wt = _ofis_klasoru("arastirmaci", "main")
+    kimlik, bas, yeni_mi = gonder(d, "arastirmaci", EFOR[efor], "LifeOS Araştırmacı " + EFOR[efor],
+                                  soru_istemi(str(wt), soru), soru_devam_istemi(str(wt), soru), yeni)
     d = oku_durum()
-    d[ad] = {"tur": "mini", "istem": istem[:400], "efor": efor, "model": EFOR[efor], "konusma": kimlik,
-             "worktree": str(wt), "baslangic": int(time.time()), "acik": True, "mesajlar": 1}
+    _ayni_konusmayi_kapat(d, kimlik, ad)
+    d[ad] = {"tur": "soru", "istem": soru[:400], "efor": efor, "model": EFOR[efor], "konusma": kimlik,
+             "adim_bas": bas, "worktree": str(wt), "baslangic": int(time.time()), "etkin": time.time(),
+             "acik": True, "mesajlar": 1}
     yaz_durum(d)
-    print("mini %s başladı · efor %s (%s) · konuşma %s" % (ad, EFOR_AD[efor], EFOR[efor], kimlik))
+    print("soru %s · %s · %s (%s)" % (ad, "yeni konuşma" if yeni_mi else "aynı konuşmada", EFOR_AD[efor], EFOR[efor]))
+
+
+def gozden(no, efor=None, yeni=False):
+    """Denetci: uygulayicinin dalini Claude Code'dan once inceler (KARAR + bulgu satirlari)."""
+    d = oku_durum()
+    a = d.get(no)
+    if not a or a.get("tur") != "gorev":
+        raise SystemExit("Böyle bir görev ajanı yok: %s" % no)
+    efor = efor_cevir(efor) or ("yuksek" if a.get("efor") == "yuksek" else "orta")
+    wt = _ofis_klasoru("denetci", a["dal"])
+    dosya = gorev_dosyasi(no)
+    kimlik, bas, yeni_mi = gonder(d, "denetci", EFOR[efor], "LifeOS Denetçi " + EFOR[efor],
+                                  denetim_istemi(str(wt), no, a["dal"], dosya),
+                                  denetim_govde(str(wt), no, a["dal"], dosya), yeni)
+    ad = "d-" + no
+    d = oku_durum()
+    _ayni_konusmayi_kapat(d, kimlik, ad)
+    d[ad] = {"tur": "denetim", "hedef": no, "dal": a["dal"], "efor": efor, "model": EFOR[efor], "konusma": kimlik,
+             "adim_bas": bas, "worktree": str(wt), "baslangic": int(time.time()), "etkin": time.time(),
+             "acik": True, "mesajlar": 1, "commit": git("rev-parse", "--short", a["dal"], kontrol=False)}
+    d[no]["denetim"] = ad
+    yaz_durum(d)
+    print("denetim %s · %s · %s (%s)" % (ad, "yeni konuşma" if yeni_mi else "aynı konuşmada", EFOR_AD[efor], EFOR[efor]))
 
 
 def mesaj(ad, metin):
@@ -489,8 +627,15 @@ def mesaj(ad, metin):
     a = d.get(ad)
     if not a:
         raise SystemExit("Böyle bir ajan yok: " + ad)
+    sonraki = [x for k, x in _isler(d).items() if k != ad and x.get("konusma") == a["konusma"]
+               and x.get("adim_bas", 0) > a.get("adim_bas", 0)]
+    if sonraki:
+        k = konusma_oku(a["konusma"], son=1) or {}
+        if k.get("hal") != "turu bitti":
+            raise SystemExit("Bu konuşma şu an başka bir işte çalışıyor; bitince gönder.")
     agentapi(["send-message", a["konusma"], metin])
     a["mesajlar"] = a.get("mesajlar", 1) + 1
+    a["etkin"] = time.time()
     yaz_durum(d)
     print("%s: mesaj gönderildi." % ad)
 
@@ -501,7 +646,9 @@ def kapat(ad, zorla=False):
     if not a:
         raise SystemExit("Böyle bir ajan yok: " + ad)
     wt = Path(a["worktree"])
-    if wt.exists():
+    paylasilan = wt.name in OFIS.values() or any(
+        k != ad and x.get("acik") and x.get("worktree") == a["worktree"] for k, x in _isler(d).items())
+    if wt.exists() and not paylasilan:
         kirli = git("status", "--porcelain", kok=wt, kontrol=False)
         if kirli and not zorla and a["tur"] == "gorev":
             raise SystemExit("%s klasöründe kaydedilmemiş değişiklik var; bakmadan silmem (--zorla)." % wt)
@@ -512,12 +659,14 @@ def kapat(ad, zorla=False):
         git("worktree", "remove", "--force", str(wt))
     a["acik"] = False
     a["kapanis"] = int(time.time())
+    if a.get("denetim") in d and d[a["denetim"]].get("acik"):
+        d[a["denetim"]].update(acik=False, kapanis=int(time.time()))
     yaz_durum(d)
     print("%s kapandı; dal (varsa) duruyor." % ad)
 
 
 def asama(a, k):
-    """Ajanin hali tek kelimelik asamaya: calisiyor · inceleme · sorun · kapandi."""
+    """Isin hali tek kelimelik asamaya: calisiyor · inceleme · sorun · kapandi."""
     if not a.get("acik"):
         return "kapandı"
     if k.get("hal") in ("hata", "sessiz") or k.get("disari") and not kanca_kurulu():
@@ -528,24 +677,69 @@ def asama(a, k):
 
 
 def hepsi():
-    """Takip penceresi ve 'durum' icin: her ajan + canli konusma ozeti."""
+    """Takip penceresi ve 'durum' icin: her is + canli konusma ozeti (ayni konusmadaki isler adim araligiyla ayrilir)."""
     d = oku_durum()
+    isler = _isler(d)
     out = []
-    for ad, a in d.items():
-        if ad.startswith("_"):
-            continue
-        k = konusma_oku(a["konusma"], wt=a["worktree"]) or {"hal": "başlıyor" if a.get("acik") else "kayıt yok"}
+    for ad, a in isler.items():
+        bas = a.get("adim_bas", 0)
+        sonraki = [x.get("adim_bas", 0) for k, x in isler.items() if k != ad and x.get("konusma") == a.get("konusma")
+                   and x.get("adim_bas", 0) > bas]
+        k = konusma_oku(a["konusma"], wt=a["worktree"], bas=bas, bit=min(sonraki) if sonraki else None) \
+            or {"hal": "başlıyor" if a.get("acik") else "kayıt yok"}
         o = olaylar(ad)
         k["kanca"] = {"yonlendirildi": sum(1 for x in o if x.get("karar") == "yönlendirildi"),
                       "engellendi": [x for x in o if x.get("karar") == "engellendi"][-5:],
                       "devam": sum(1 for x in o if x.get("olay") == "devam")}
-        k["alt"] = alt_ajanlar(a["konusma"], a.get("baslangic", 0)) if a.get("acik") else []
+        k["alt"] = alt_ajanlar(a["konusma"], a.get("baslangic", 0)) if a.get("acik") and a.get("tur") == "gorev" else []
         if a["tur"] == "gorev" and a.get("acik") and Path(a["worktree"]).exists():
             k["degisen"] = len((git("status", "--porcelain", kok=Path(a["worktree"]), kontrol=False) or "").splitlines())
             k["commit"] = int(git("rev-list", "--count", "main..HEAD", kok=Path(a["worktree"]), kontrol=False) or 0)
-        out.append(dict(a, ad=ad, canli=k, asama=asama(a, k)))
+        if a.get("tur") == "denetim":
+            k["karar"] = karar_oku(k.get("cevap"))
+        out.append(dict(a, ad=ad, rol=rol(a), canli=k, asama=asama(a, k)))
+    ada = {x["ad"]: x for x in out}
+    for x in out:                                     # gorev kartina denetcinin karari
+        dn = ada.get(x.get("denetim") or "")
+        if dn:
+            x["denetci"] = {"ad": dn["ad"], "asama": dn["asama"], "karar": dn["canli"].get("karar"),
+                            "cevap": dn["canli"].get("cevap", ""), "commit": dn.get("commit")}
     out.sort(key=lambda x: (not x.get("acik"), -x.get("baslangic", 0)))
     return out
+
+
+def uyeler(isler, simdi=None):
+    """Ofis uyeleri: her konusma bir uye (rol, model, isler, bagluk). Acik isi olmayanlardan her rol ve
+    modelde yalniz en sonuncusu (sonraki isi alacak olan) gosterilir; 12 saattir sessiz olan hic."""
+    simdi = simdi or time.time()
+    g = {}
+    for x in isler:
+        g.setdefault(x["konusma"], []).append(x)
+    out = []
+    for kimlik, l in g.items():
+        l.sort(key=lambda x: x.get("adim_bas", 0))
+        son = l[-1]
+        c = son.get("canli") or {}
+        acik = [x["ad"] for x in l if x.get("acik")]
+        sessiz = simdi - max(x.get("canli", {}).get("son_degisim") or x.get("baslangic", 0) for x in l)
+        if not acik and sessiz > 12 * 3600:
+            continue
+        out.append({"_son": max(x.get("baslangic", 0) for x in l), "konusma": kimlik, "rol": son["rol"], "rol_ad": ROL_AD[son["rol"]], "model": son.get("model"),
+                    "efor": son.get("efor"), "hal": c.get("hal"), "simdi": c.get("simdi", ""), "is": son["ad"],
+                    "isler": [x["ad"] for x in l], "acik": acik, "baglam": c.get("baglam", 0), "sinir": BAGLAM_SINIR,
+                    "max_is": MAX_IS, "token": {k: sum((x.get("canli", {}).get("token") or {}).get(k, 0) for x in l)
+                                                for k in ("giris", "cikis", "onbellek")}})
+    out.sort(key=lambda u: -u["_son"])
+    gorulen, secilen = set(), []
+    for u in out:
+        anahtar = (u["rol"], u["model"])
+        if u["acik"] or anahtar not in gorulen:
+            secilen.append(u)
+        gorulen.add(anahtar)
+    sira = {"uygulayici": 0, "denetci": 1, "arastirmaci": 2}
+    for u in secilen:
+        u.pop("_son")
+    return sorted(secilen, key=lambda u: (sira[u["rol"]], u["hal"] != "çalışıyor", u["model"]))
 
 
 def main(argv):
@@ -555,10 +749,17 @@ def main(argv):
     k, argv = argv[0], argv[1:]
     efor = _secenek(argv, "--efor")
     ek = _secenek(argv, "--not", "")
+    ad = _secenek(argv, "--ad")
+    yeni = "--yeni" in argv
+    argv = [x for x in argv if x != "--yeni"]
     if k == "baslat" and argv:
-        baslat(argv[0], efor, ek)
-    elif k == "mini" and len(argv) >= 2:
-        mini(argv[0], " ".join(argv[1:]), efor)
+        baslat(argv[0], efor, ek, yeni)
+    elif k == "sor" and argv:
+        sor(" ".join(argv), efor, ad, yeni)
+    elif k == "mini" and len(argv) >= 2:                # eski ad: sor --ad <ad>
+        sor(" ".join(argv[1:]), efor, argv[0], yeni)
+    elif k == "gozden" and argv:
+        gozden(argv[0], efor, yeni)
     elif k == "mesaj" and len(argv) >= 2:
         mesaj(argv[0], " ".join(argv[1:]))
     elif k == "kapat" and argv:
@@ -566,18 +767,20 @@ def main(argv):
     elif k == "kur":
         kur("--kaldir" in argv)
     elif k == "cevap" and argv:
-        a = oku_durum().get(argv[0])
-        k2 = a and konusma_oku(a["konusma"])
-        print((k2 or {}).get("cevap") or "Henüz cevap yok.")
+        h = {x["ad"]: x for x in hepsi()}
+        print((h.get(argv[0]) or {}).get("canli", {}).get("cevap") or "Henüz cevap yok.")
     elif k == "durum":
         h = hepsi()
         if "--json" in argv:
             print(json.dumps(h, ensure_ascii=False, indent=2))
             return
+        for u in uyeler(h):
+            print("%-12s %-10s %-11s bağlam %3d bin  iş %s  %s" % (
+                u["rol_ad"], u["model"], u["hal"] or "", u["baglam"] // 1000, ",".join(u["isler"]), u["simdi"]))
         for a in h:
-            c = a["canli"]
-            print("%-12s %-10s %-10s %-11s adım %-3s %s" % (
-                a["ad"], a["asama"], a["model"], c.get("hal", ""), c.get("adim", "-"), c.get("simdi", "")))
+            if a.get("acik"):
+                c = a["canli"]
+                print("  %-10s %-10s %-11s adım %-3s %s" % (a["ad"], a["asama"], c.get("hal", ""), c.get("adim", "-"), c.get("simdi", "")))
         if not h:
             print("Kayıtlı ajan yok.")
     else:
