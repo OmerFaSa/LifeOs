@@ -23586,7 +23586,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'ae6fe5ee', at:'2026-10-31 22:40', dirty:false };
+R.BUILD = { id:'38e0826b', at:'2026-10-31 23:09', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -23779,7 +23779,7 @@ LIFEOS.TurkceSayi = (function(){
   const SURE_RE = new RegExp('(?:' + SAYI_KAYNAK + ')\\s*(?:' + SAAT + '|' + DAKIKA + ')'
     + '(?:\\s*(?:ve\\s+)?(?:(\\d+)|(' + YAZI + '(?:\\s+' + YAZI + ')?))\\s*' + DAKIKA + ')?');
 
-  /* Metindeki İLK süre, DAKİKA olarak: { dakika, bas, son } ya da null.
+  /* Metindeki İLK süre, DAKİKA olarak: { dakika, birim:'saat'|'dk', bas, son } ya da null.
      «1 saat 20 dk» → 80 · «yarım saat» → 30 · «bir buçuk saat» → 90 · «45 dk» → 45. */
   function sure(metin){
     const t = kucuk(metin);
@@ -23793,7 +23793,7 @@ LIFEOS.TurkceSayi = (function(){
       if(ek == null) return null;
       dk += ek;
     }
-    return { dakika:Math.round(dk * 100) / 100, bas:m.index, son:m.index + m[0].length };
+    return { dakika:Math.round(dk * 100) / 100, birim:m[5] ? 'saat' : 'dk', bas:m.index, son:m.index + m[0].length };
   }
 
   /* Kısayol: yalnız dakika (ya da null). */
@@ -106812,7 +106812,6 @@ R.Entry = (function(){
      birimi olmamalı: «soru 40 dakika» bir sayaç değildir. */
   const SONRA = '\\s+(\\d+)(?![\\d.,]|\\s*(?:dk|dakika|saat|sa)\\b)';
   const sayac = ad => new RegExp('(\\d+|[a-zçğıöşü]+)\\s*(?:tane\\s*)?' + ad + '|' + ad + SONRA, 'i');
-  const UYKU_RE  = /(\d+(?:[.,]\d+)?)\s*(saat|sa)\b[^.]*uyu/i;
   const PARAGRAF_RE = sayac('paragraf');
   const PROBLEM_RE  = sayac('problem');
   const SORU_RE     = sayac('soru');
@@ -106831,14 +106830,23 @@ R.Entry = (function(){
      AÇIKÇA yazar (bosVarsayim) — kullanıcı onaylamadan yazılmaz. */
   const YANLIS_RE   = /(\d+)\s*(?:'?[sy]?[iıuü]\s*)?(?:tane\s*)?(?:yanlış|yanlis)/i;
   const BOS_RE      = /(\d+)\s*(?:'?[sy]?[iıuü]\s*)?(?:tane\s*)?(?:boş|bos)(?![a-zçğıöşü])/i;
-  const DAKIKA_RE   = /(\d+(?:[.,]\d+)?)\s*(dakika|dk|saat|sa)\b/i;
+
+  /* --------------------------------------------------------- süre */
+
+  /* Ortak okuyucu (brand/ortak/turkcesayi.js): «7 saat 30 dk», «yedi buçuk saat», «yarım saat»
+     dört modülde aynı kuralla okunur. */
+  function sureOku(text){
+    const T = window.LIFEOS && window.LIFEOS.TurkceSayi;
+    const s = T ? T.sure(text) : null;
+    return s ? { minutes:Math.round(s.dakika), hours:s.dakika / 60, birim:s.birim } : null;
+  }
 
   function parseUyku(text){
-    const m = String(text).match(UYKU_RE);
-    if(!m) return null;
-    const s = sayi(m[1]);
-    if(s == null || s <= 0 || s > 24) return null;
-    return { kind:'uyku', hours:s };
+    if(!/uyu/i.test(text)) return null;
+    const s = sureOku(text);
+    /* gece uykusu saatle söylenir: «30 dk uyudum» şekerlemedir, uyku verisine yazılmaz */
+    if(!s || s.birim !== 'saat' || s.hours <= 0 || s.hours > 24) return null;
+    return { kind:'uyku', hours:s.hours };
   }
 
   function parseParagraf(text){
@@ -106888,15 +106896,11 @@ R.Entry = (function(){
     /* «45 dakika matematik çalıştım» — soru sayısı yoksa süre kaydı. */
     if(SORU_RE.test(text) || PARAGRAF_RE.test(text) || PROBLEM_RE.test(text)) return null;
     if(/uyu/i.test(text)) return null;
-    const m = String(text).match(DAKIKA_RE);
-    if(!m) return null;
-    let dk = sayi(m[1]);
-    if(dk == null) return null;
-    if(/^s(a|aat)?$/i.test(m[2])) dk = dk * 60;
-    if(dk <= 0 || dk > 960) return null;
+    const s = sureOku(text);
+    if(!s || s.minutes <= 0 || s.minutes > 960) return null;
     const subject = dersBul(text);
     if(!subject) return null;          /* dersi bilinmeyen süre nereye yazılır? */
-    return { kind:'sure', minutes:Math.round(dk), subject };
+    return { kind:'sure', minutes:Math.round(s.minutes), subject };
   }
 
   /* Sıra: özgülden genele. */
@@ -106980,7 +106984,7 @@ R.Entry = (function(){
   }
 
   return { fromText, parseOne, yanCumleler, dersBul, konuBul, sayi, ilkSayi,
-    parseSoru, parseUyku, parseParagraf, parseProblem, parseSure };
+    parseSoru, parseUyku, parseParagraf, parseProblem, parseSure, sureOku };
 })();
 
 /* ==== js/core/komut.js ==== */
