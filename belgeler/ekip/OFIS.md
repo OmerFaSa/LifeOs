@@ -70,7 +70,12 @@ python tools/ajan.py kapat 005
   varsa ve bağlamı <200 bin ise yeni iş oraya gider (kuralları yeniden okumaz).
 - **Efor = model:** düşük `flash_lite` (mekanik iş), orta `flash` (çoğu iş),
   yüksek `pro` (mantık ağır, ör. takvim tekrar kuralları). Görev dosyasında
-  `**Efor:**` satırı.
+  `**Efor:**` satırı. **Ölçülen (2026-10-31):** agentapi `pro` ile `flash`'ı
+  aynı modele açıyor (meta veride ikisi de M322); Antigravity arayüzünde seçili
+  Gemini 4 Argon (M417) agentapi'den seçilemiyor. Pratikte iki kademe var:
+  `flash_lite` (M198) ve `flash`/`pro` (M322). Mantık ağır iş için yüksek
+  efor yine yazılır (Antigravity eşlemeyi değiştirirse kendiliğinden güçlenir)
+  ama asıl güvence kabul testidir.
 - **Kendi oturumun uzadıysa** (bağlam >~200 bin) kullanıcıya yeni oturum öner:
   her şey dosyada ve hafızada, taze oturum aynı işi ~10 kat ucuza yapar.
 
@@ -88,6 +93,22 @@ diff'i oku, birleştir, §2'yi main'de koş, push, `kapat`.
 - Görev dosyası: «şu girdiyle şu çıktı» biçiminde kabul ölçütü, «Dokunma»
   listesi, koşulacak testler. Belirsiz görev yazma; ajan tahmin eder.
 - Bulguyu aynı sohbete geri gönder (001'de RECURRENCE-ID böyle düzeldi).
+- **Kabul testi önce (2026-10-31):** mantığı olan her görevde kabul testini
+  SEN yazarsın, görevle birlikte commit edersin; kırmızıdır. Görev dosyasında
+  `**Kabul testi:** \`tools/x_kabul_test.py\``. Yeni dosya olsun (CI listesinde
+  değil; birleştirirken `.github/workflows/ci.yml`'e eklersin). Kanca ajanın onu
+  değiştirmesini engeller, Denetçi diff'te değişmediğini doğrular, Testçi önce
+  onu koşar, pilot dalda değiştiyse işi «hazır» yapıp söyler. Ölçütü ajan değil
+  test belirler; ajanın kendi testi ek güvencedir. (Şimdilik yalnız `.py`.)
+- **Denetçi bir üst kademede ve bozmaya çalışır:** düşük işi orta, ortayı yüksek
+  denetler; en az iki kenar girdiyi gerçekten çalıştırıp `DENEME:` satırı
+  yazmak zorunda. Denemesiz «temiz»e pilot bir kez geri sorar.
+- **Sonuç biçimi:** dört alan (Ne değişti · Koşan testler · Kabul testi · Açık
+  kalan) dolu olmalı; pilot eksiği Denetçi'den önce bir kez geri gönderir.
+- **Ders defteri:** her birleştirmede son incelemeni kaydet:
+  `python tools/ajan.py ders NNN temiz` ya da `ders NNN "kısa kural"`. Ders
+  `gorevler/DERSLER.md`'ye düşer (commit et); son 10 madde Uygulayıcı'nın ve
+  Denetçi'nin istemine girer. Ölçüm «son incelemede temiz» oranını gösterir.
 
 ## 6. Bilinen tuzaklar
 

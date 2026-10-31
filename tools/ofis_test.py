@@ -8,6 +8,7 @@ smoke, a11ycheck, layoutcheck, palettecheck, perfcheck; sonra entegre kosar.
 Her denetimin ham ciktisi ve cikis kodu LifeOs-ajan/test/<no>/'ya yazilir;
 Claude ajan ozetine degil bu ham ciktiya bakar (python tools/ajan.py testler <no>).
 
+Gorevde «Kabul testi» varsa (Claude Code'un yazdigi, dalda degismemesi gereken test) once o kosar.
 Denetim portlari sabittir: ayni anda tek kosu (kilit dosyasi). Cikis 2 = port
 dolu ya da arac eksik: «kosulamadi», kirmizi degil. Birlesme main'e gitmez,
 push edilmez; klasor her kosuda sifirlanir.
@@ -38,9 +39,13 @@ def klasor(no=None):
     return k / no if no else k
 
 
-def adimlar(py="python"):
-    """(modul, ad, komut, calisma klasoru goreli) — sira onemli: once derleme, entegre en sonda."""
-    out = [(m, "derle", [py, "build.py"], m) for m in MODUL]
+def adimlar(py="python", kabul=()):
+    """(modul, ad, komut, calisma klasoru goreli) — sira onemli: once kabul ve derleme, entegre en sonda."""
+    # shortcut: kabul testi yalniz .py; JS kabul testi gerekirse buraya node ile eklenir
+    kabul = [k for k in kabul if k.endswith(".py")]
+    out = [("kök", "kabul", [py, "-c", "import subprocess,sys; sys.exit(max(subprocess.call([sys.executable, f]) "
+                                       "for f in sys.argv[1:]))"] + kabul, ".")] if kabul else []
+    out += [(m, "derle", [py, "build.py"], m) for m in MODUL]
     out += [(m, d, ["node", "tools/%s.js" % d], m) for m in MODUL for d in DENETIM]
     return out + [("kök", "entegre", ["node", "tools/entegre.js"], ".")]
 
@@ -134,7 +139,7 @@ def kos(no):
             return o
         py = str(Path(sys.executable).with_name("python.exe")) if Path(sys.executable).name.lower() == "pythonw.exe" else sys.executable
         ortam = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
-        for modul, ad, komut, cwd in adimlar(py):
+        for modul, ad, komut, cwd in adimlar(py, a.get("kabul") or ()):
             log = k / ("%s-%s.log" % ("kok" if modul == "kök" else modul, ad))
             bas = time.time()
             try:

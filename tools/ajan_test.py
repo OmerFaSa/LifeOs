@@ -79,6 +79,20 @@ if "cd x; " not in A.soru_istemi("x", "i") or "AGENTS.md'yi yeniden okumana gere
     hata.append("arastirmaci istemi kabugu, devam istemi kurallarin bilindigini soylemeli")
 if "KARAR:" not in A.denetim_istemi("w", "003", "ag/003", d) or "4791" not in A.denetim_govde("w", "003", "ag/003", d):
     hata.append("denetim istemi KARAR bicimini ve denetci portlarini soylemeli")
+den = A.denetim_govde("w", "003", "ag/003", d)
+if "DENEME:" not in den or "bozmaya" not in den:
+    hata.append("denetim istemi bozma denemesini zorunlu kilmali")
+if not A.deneme_var("KARAR: temiz\n- DENEME: x -> y") or A.deneme_var("KARAR: temiz\nDeneme yapmadim"):
+    hata.append("deneme_var DENEME satirini tanimali")
+if A.DENETCI_EFOR != {"dusuk": "orta", "orta": "yuksek", "yuksek": "yuksek"}:
+    hata.append("denetci bir ust kademede calismali")
+g = "# 9\n**Dal:** `ag/9-x`\n**Efor:** orta\n**Kabul testi:** `tools/a_test.py`, `tools/b_test.py`  <!-- n -->\n## Sonuç\n- **Kabul testi:** `tools/c.py`\n"
+if A.gorev_bilgi(g)["kabul"] != ["tools/a_test.py", "tools/b_test.py"]:
+    hata.append("gorev_bilgi kabul: %r" % A.gorev_bilgi(g)["kabul"])
+if A.gorev_bilgi(g.replace("**Kabul testi:** `tools/a_test.py`, `tools/b_test.py`", ""))["kabul"] != []:
+    hata.append("Sonuc'taki «Kabul testi» satiri kabul testi sayilmamali")
+if "DEĞİŞTİRME" not in A.kabul_satiri(["tools/a_test.py"]) or A.kabul_satiri([]) or "git diff" not in A.kabul_denetim_satiri(["x"]):
+    hata.append("kabul satirlari")
 for metin, beklenen in (("KARAR: temiz\nx", ("temiz", 0)), ("**KARAR: 2 bulgu**", ("bulgu", 2)), ("hic", None)):
     if A.karar_oku(metin) != beklenen:
         hata.append("karar_oku(%r) = %r" % (metin, A.karar_oku(metin)))
@@ -121,6 +135,9 @@ for (arac, args, mini), (karar, ust) in (
         hata.append("kanca %s %r -> %s %r" % (arac, args, k, u))
     if u and not u["CommandLine"].startswith("Set-Location -LiteralPath '%s'; " % WT):
         hata.append("yonlendirme Set-Location ile baslamali: %r" % u)
+for yol, beklenen in ((WT + r"\tools\k_test.py", "deny"), (WT + "/tools/k_test.py", "deny"), (WT + r"\tools\k.py", "allow")):
+    if K.arac_karari("replace_file_content", {"TargetFile": yol}, WT, False, ["tools/k_test.py"])[0] != beklenen:
+        hata.append("kanca kabul testi %s -> %s olmali" % (yol, beklenen))
 
 # dokum: hal, cevap, araclar, token, alt ajan, kanca isleme (gecici klasorlerle)
 with tempfile.TemporaryDirectory() as t:
@@ -276,7 +293,27 @@ with tempfile.TemporaryDirectory() as t:
     except SystemExit:
         pass
 
+# ders defteri: son inceleme olcume, ders DERSLER.md'ye ve istemlere (gecici kok ve ajan klasoru)
+with tempfile.TemporaryDirectory() as t:
+    t, eski_kok, eski_ajan = Path(t), A.KOK, A.AJAN_KLASOR
+    A.KOK, A.AJAN_KLASOR = t, t / "ajan"
+    try:
+        (t / A.GOREVLER).mkdir(parents=True)
+        A.AJAN_KLASOR.mkdir()
+        if A.dersler():
+            hata.append("ders dosyasi yokken istem bos olmali")
+        A.ders_ekle("007", "temiz")
+        A.ders_ekle("008", "Boş   listede\nçöküyordu", simdi=1793448416)
+        kayit = [json.loads(s) for s in (A.AJAN_KLASOR / "olcum.jsonl").read_text(encoding="utf-8").splitlines()]
+        if [(k["no"], k["son"]) for k in kayit] != [("007", "temiz"), ("008", "bulgu")]:
+            hata.append("ders olcum kaydi: %r" % kayit)
+        if "- 008 (" not in A.dersler() or "Boş listede çöküyordu" not in A.dersler() or "007" in A.dersler():
+            hata.append("ders istemi: %r" % A.dersler())
+    finally:
+        A.KOK, A.AJAN_KLASOR = eski_kok, eski_ajan
+
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")
     sys.exit(1)
-print("Ajan temiz: dokum okuyucu, arac cumlesi, klasor disi, efor, yuva ve port, istem, kanca kararlari, Stop siniri, kurulum.")
+print("Ajan temiz: dokum okuyucu, arac cumlesi, klasor disi, efor, yuva ve port, istem, kanca kararlari, Stop siniri, kurulum, "
+      "kabul testi, bozma denemesi, ders defteri.")

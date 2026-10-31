@@ -195,6 +195,27 @@ def test_duzelt_metni(test, portlar=None):
     return "\n".join(satir)
 
 
+def sonuc_eksik(metin):
+    """Gorev dosyasinin «Sonuc» bolumunde bos ya da hic olmayan alanlar (SONUC_ALAN sirasiyla). Saf islev."""
+    bolum = re.sub(r"<!--.*?-->", "", metin.split("## Sonuç", 1)[1] if "## Sonuç" in metin else "", flags=re.S)
+    eksik = []
+    for ad in A.SONUC_ALAN:
+        m = re.search(r"\*\*%s:\*\*(.*?)(?=\n\s*-\s*\*\*|\Z)" % re.escape(ad), bolum, re.S)
+        if not m or not m.group(1).strip():
+            eksik.append(ad)
+    return eksik
+
+
+def bicim_metni(eksik):
+    return ("Görev dosyasının «Sonuç» bölümü eksik: %s. Şablondaki dört satırı doldur (- **Ne değişti:** · "
+            "- **Koşan testler:** komut -> çıktı satırı · - **Kabul testi:** · - **Açık kalan:**; yoksa «yok»). "
+            "Commit et ve dalını push et." % ", ".join(eksik))
+
+
+DENEME_METNI = ("Cevabında DENEME satırı yok. Kabul ölçütü dışındaki en az iki kenar girdiyi gerçekten çalıştır, "
+                "her birini 'DENEME: komut -> çıktı' diye yaz; sonra KARAR satırını yeniden ver.")
+
+
 def adim(x, dn, s, o):
     """Bir pilot isinin sonraki adimi: (eylem, neden). Saf islev.
     x: ajan.hepsi() kaydi; dn: Denetci kaydi (ya da None); s: pilotun bu isle ilgili durumu;
@@ -223,6 +244,10 @@ def adim(x, dn, s, o):
             return "hazir", "Uygulayıcı takıldı"
         return ("birak", "teslim edilmedi (bitti, commit ya da push yok)") if simdi - son > 300 \
             else ("bekle", "teslim bekleniyor")
+    if o.get("kabul_degisti"):
+        return "hazir", "kabul testi dalda değiştirildi: " + ", ".join(o["kabul_degisti"])
+    if o.get("sonuc_eksik") and not s.get("bicim_tur"):
+        return "bicim", "Sonuç eksik: " + ", ".join(o["sonuc_eksik"])
     if not dn or dn.get("commit") != o["commit"]:
         if x.get("denetim") == "istendi" and simdi - son < 180 or o["denetci_mesgul"]:
             return "bekle", "Denetçi sırası"
@@ -232,6 +257,8 @@ def adim(x, dn, s, o):
     if dn.get("asama") == "sorun":
         return "birak", "Denetçi hata verdi"
     karar = (dn.get("canli") or {}).get("karar")
+    if karar and karar[0] == "temiz" and not A.deneme_var((dn.get("canli") or {}).get("cevap")) and not s.get("deneme_istendi"):
+        return "deneme", "Denetçi denemesiz «temiz» dedi"
     if karar and karar[0] == "bulgu" and s.get("tur", 0) < MAX_TUR:
         return "duzelt", "Denetçi: %d bulgu; tur %d" % (karar[1], s.get("tur", 0) + 1)
     t = o.get("test")
@@ -266,8 +293,14 @@ def sonuc_cumle(karar, s, t):
 def olcum_ozet(kayitlar):
     """Model basina: is sayisi, ilk turda temiz orani, ortalama sure ve token (yalniz oneri)."""
     out = {}
+    son = {k["no"]: k["son"] for k in kayitlar if k.get("son")}   # ajan.py ders: Claude Code'un son incelemesi
     for k in kayitlar:
-        m = out.setdefault(k.get("model") or "?", {"is": 0, "ilk_temiz": 0, "sure": 0, "token": 0, "tur": 0})
+        if k.get("son"):
+            continue
+        m = out.setdefault(k.get("model") or "?", {"is": 0, "ilk_temiz": 0, "sure": 0, "token": 0, "tur": 0, "son": 0, "son_temiz": 0})
+        if k.get("no") in son:
+            m["son"] += 1
+            m["son_temiz"] += son[k["no"]] == "temiz"
         m["is"] += 1
         m["ilk_temiz"] += k.get("ilk_karar") == "temiz"
         m["sure"] += k.get("sure") or 0
@@ -296,6 +329,13 @@ def bekleyen_gorevler():
 
 def gorev_efor(no):
     return A.gorev_bilgi(A.gorev_dosyasi(no).read_text(encoding="utf-8"))["efor"] or "orta"
+
+
+def gorev_sonuc_eksik(a):
+    try:
+        return sonuc_eksik((Path(a["worktree"]) / A.GOREVLER / a.get("gorev", "")).read_text(encoding="utf-8"))
+    except OSError:
+        return []
 
 
 def gorev_durumu(a):
@@ -345,6 +385,13 @@ def uygula(no, eylem, neden, x, dn, s, o):
         s["tur"] = s.get("tur", 0) + 1
         A.mesaj(no, duzelt_metni(s["tur"], (dn.get("canli") or {}).get("cevap")))
         s.update(mesaj_t=time.time(), mesaj_commit=o["commit"])
+    elif eylem == "bicim":
+        s["bicim_tur"] = 1
+        A.mesaj(no, bicim_metni(o["sonuc_eksik"]))
+        s.update(mesaj_t=time.time(), mesaj_commit=o["commit"])
+    elif eylem == "deneme":
+        s["deneme_istendi"] = True
+        A.mesaj(x.get("denetim") or "d-" + no, DENEME_METNI)
     elif eylem == "test":
         s.setdefault("test_istek", {})[o["commit"]] = (s.get("test_istek") or {}).get(o["commit"], 0) + 1
         s["test_t"] = time.time()
@@ -394,7 +441,9 @@ def tur(p, simdi=None):
         dn = ada.get(x.get("denetim") or "")
         o = {"commit": A.git("rev-parse", "--short", x["dal"], kontrol=False), "simdi": simdi,
              "teslim": x.get("asama") == "inceleme" and _teslim(x), "gorev_durum": gorev_durumu(x),
-             "test": T.son_ozet(no), "denetci_mesgul": mesgul, "test_mesgul": T.kilit_sahibi() is not None}
+             "test": T.son_ozet(no), "denetci_mesgul": mesgul, "test_mesgul": T.kilit_sahibi() is not None,
+             "kabul_degisti": [k for k in x.get("kabul") or () if A.git("diff", "--name-only", "main..." + x["dal"], "--", k, kontrol=False)],
+             "sonuc_eksik": gorev_sonuc_eksik(x)}
         if dn and dn.get("asama") not in ("çalışıyor", "sorun") and dn.get("commit") == o["commit"] and "ilk_karar" not in s:
             k = (dn.get("canli") or {}).get("karar")
             s["ilk_karar"] = k[0] if k else "kararsız"

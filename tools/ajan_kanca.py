@@ -81,8 +81,8 @@ def olay_yaz(ad, kayit):
         f.write(json.dumps(dict(kayit, t=int(time.time())), ensure_ascii=False) + "\n")
 
 
-def arac_karari(ad_arac, args, wt, mini):
-    """(karar, neden, ust_yazim) — saf islev; testler bunu dogrudan cagirir."""
+def arac_karari(ad_arac, args, wt, mini, kabul=()):
+    """(karar, neden, ust_yazim) — saf islev; testler bunu dogrudan cagirir. kabul: korunan dosyalar (depo-goreli)."""
     if ad_arac in KAPALI_ARAC:
         return "deny", KAPALI_ARAC[ad_arac], None
     sunucu = None
@@ -111,6 +111,8 @@ def arac_karari(ad_arac, args, wt, mini):
         yol = str(arg(args, "TargetFile") or arg(args, "Path") or arg(args, "AbsolutePath") or arg(args, "FilePath") or "")
         if mini:
             return "deny", "Mini ajan salt okunur: dosya yazmaz.", None
+        if yol and any(Path(yol).resolve() == (Path(wt) / k).resolve() for k in kabul):
+            return "deny", "Kabul testi Claude Code'un; değiştirme. Kod onu geçmeli; yanlışsa nedenini «Sonuç»a yaz.", None
         if yol and not A._icinde(yol, wt) and not A._icinde(yol, str(Path.home() / ".gemini" / "antigravity" / "brain")):
             return "deny", "Yalnız kendi klasörüne yaz: %s" % wt, None
     return "allow", "", None
@@ -184,7 +186,7 @@ def isle(olay, girdi):
     if olay == "PreToolUse":
         cagri = girdi.get("toolCall") or {}
         ad_arac, args = cagri.get("name", ""), cagri.get("args") or {}
-        karar, neden, ust = arac_karari(ad_arac, args, wt, a.get("tur") in A.OKUR)
+        karar, neden, ust = arac_karari(ad_arac, args, wt, a.get("tur") in A.OKUR, a.get("kabul") or ())
         if karar != "allow" or ust:
             olay_yaz(ad, {"olay": "arac", "arac": ad_arac, "karar": "yönlendirildi" if ust else "engellendi", "neden": neden,
                           "ozet": str(arg(args, "CommandLine") or arg(args, "TargetFile") or arg(args, "Path") or "")[:200]})

@@ -82,7 +82,12 @@ python tools/ajan.py testler 004                Testçi tablosu ve kırmızılar
 - **Efor modeli seçer:** düşük → `flash_lite`, orta → `flash`, yüksek → `pro`.
   Görev dosyasındaki «**Efor:**» satırı varsayılandır. Efor alt ajan sınırını
   da belirler: düşükte alt ajan yok, ortada en çok 2, yüksekte en çok 3.
-  Denetçi orta eforla (yüksek görevde yüksekle) çalışır.
+  Denetçi bir üst kademede çalışır (düşük → orta, orta ve yüksek → yüksek) ve
+  en az iki bozma denemesini `DENEME:` satırıyla yazar. Ölçülen: `pro` ile
+  `flash` aynı modele açılıyor (OFIS.md §4).
+- **Kabul testi:** görevde `**Kabul testi:**` varsa o dosya Claude Code'undur;
+  Uygulayıcı onu değiştirmez (kanca engeller), kodu onu geçecek şekilde yazar.
+  «Sonuç»taki dört alan dolu olmalı; geçmiş hatalar `DERSLER.md`'de.
 - **Portlar:** Uygulayıcı yuva n (1–8): AYS `47n1`, SPİ `47n2`, ESP `47n3`;
   yuva 9 Denetçi'nindir. README'deki 4378/4388/4398 yalnız `LifeOs-ag`'de elle
   çalışırken geçerlidir.

@@ -426,14 +426,15 @@ function testHtml(t){
     + '<span class="asama ' + durum[0] + '">' + durum[1] + '</span></div>'
     + (t.durum === 'çakışma' ? '<pre>' + kac(t.birlesme) + '</pre>' : '<table class="tablo"><thead><tr><th scope="col">Modül</th>' + DENETIM.map(d => '<th scope="col">' + d[1] + '</th>').join('') + '</tr></thead><tbody>'
       + ['AYS', 'SPI', 'ESP'].map(m => '<tr><th scope="row">' + m + '</th>' + DENETIM.map(d => hucre(m, d[0], d[1])).join('') + '</tr>').join('')
-      + '<tr><th scope="row">Uçtan uca</th>' + hucre('kök', 'entegre', 'uçtan uca') + '<td colspan="6"></td></tr></tbody></table>')
+      + '<tr><th scope="row">Uçtan uca</th>' + hucre('kök', 'entegre', 'uçtan uca') + '<td colspan="6"></td></tr>'
+      + (bul('kök', 'kabul') ? '<tr><th scope="row">Kabul testi</th>' + hucre('kök', 'kabul', 'kabul testi') + '<td colspan="6"></td></tr>' : '') + '</tbody></table>')
     + '<p class="koruma">Ham çıktı: <code>python tools/ajan.py testler ' + kac(t.no) + '</code></p></section>';
 }
 function olcumHtml(o){
   const l = Object.entries(o || {}); if(!l.length) return '';
   return '<h2>Model ölçümü <small>yalnız öneri; efor kararı Claude Code’da</small></h2><section class="ajan">' + l.map(([m, v]) => { const y = Math.round(v.oran * 100);
     return '<div class="model"><b>' + kac(m) + '</b><span class="olcek-satir"><span class="cubuk" role="img" aria-label="ilk turda temiz yüzde ' + y + ', ' + v.is + ' iş"><i style="width:' + y + '%"></i></span>'
-    + '<span>ilk turda temiz %' + y + '</span></span><small>' + v.is + ' iş · ort. ' + v.ort_tur.toFixed(1).replace('.', ',') + ' tur · ' + Math.max(1, Math.round(v.ort_sure / 60)) + ' dk · ' + bin(v.ort_token) + ' token</small></div>'; }).join('') + '</section>';
+    + '<span>ilk turda temiz %' + y + '</span></span><small>' + v.is + ' iş · ort. ' + v.ort_tur.toFixed(1).replace('.', ',') + ' tur · ' + Math.max(1, Math.round(v.ort_sure / 60)) + ' dk · ' + bin(v.ort_token) + ' token' + (v.son ? ' · son incelemede temiz ' + v.son_temiz + '/' + v.son : '') + '</small></div>'; }).join('') + '</section>';
 }
 
 async function tazele(){

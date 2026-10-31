@@ -28,7 +28,7 @@ def is_(asama="inceleme", son=S - 100, efor="orta", **k):
                  "canli": {"son_degisim": son, "hal": "turu bitti", "son_adimlar": []}, "denetim": "d-007"}, **k)
 
 
-def dn(asama="inceleme", karar=("temiz", 0), commit="c1", cevap="KARAR: temiz"):
+def dn(asama="inceleme", karar=("temiz", 0), commit="c1", cevap="KARAR: temiz\nDENEME: python -c x -> 1"):
     return {"asama": asama, "commit": commit, "canli": {"karar": karar, "cevap": cevap}}
 
 
@@ -77,6 +77,11 @@ for ad, args, beklenen in (
         ("kosulamadi tekrar", (is_(), dn(), {"test_istek": {"c1": 1}, "test_t": S - 400}, o(test=test(smoke="koşulamadı"))), "test"),
         ("kosulamadi 3 kez", (is_(), dn(), {"test_istek": {"c1": 3}, "test_t": S - 400}, o(test=test(smoke="koşulamadı"))), "hazir"),
         ("cakisma", (is_(), dn(), {}, o(test=dict(test(), durum="çakışma"))), "hazir"),
+        ("kabul testi degisti", (is_(), None, {}, o(kabul_degisti=["tools/k_test.py"])), "hazir"),
+        ("sonuc eksik", (is_(), None, {}, o(sonuc_eksik=["Açık kalan"])), "bicim"),
+        ("sonuc eksik bir kez", (is_(), None, {"bicim_tur": 1}, o(sonuc_eksik=["Açık kalan"])), "gozden"),
+        ("denemesiz temiz", (is_(), dn(cevap="KARAR: temiz"), {}, o()), "deneme"),
+        ("deneme istendi", (is_(), dn(cevap="KARAR: temiz"), {"deneme_istendi": True}, o()), "hazir"),
         ("hepsi yesil", (is_(), dn(), {}, o()), "hazir")):
     esit("adim " + ad, P.adim(*args)[0], beklenen)
 esit("hazir cumlesi", P.adim(is_(), dn(), {"tur": 1}, o())[1], "Denetçi temiz (1 tur) · Testçi 1 yeşil, 0 kırmızı, 0 koşulamadı")
@@ -108,11 +113,26 @@ oz = P.olcum_ozet([{"model": "flash", "ilk_karar": "temiz", "sure": 600, "token"
 esit("olcum flash", {k: oz["flash"][k] for k in ("is", "ilk_temiz", "oran", "ort_sure", "ort_token", "ort_tur")},
      {"is": 2, "ilk_temiz": 1, "oran": 0.5, "ort_sure": 900, "ort_token": 2100, "ort_tur": 1.0})
 esit("olcum pro", oz["pro"]["oran"], 1.0)
+oz = P.olcum_ozet([{"no": "1", "model": "flash", "ilk_karar": "temiz"}, {"no": "2", "model": "flash", "ilk_karar": "temiz"},
+                   {"no": "1", "son": "bulgu", "ders": "x"}, {"no": "2", "son": "temiz"}])
+esit("olcum son inceleme", {k: oz["flash"][k] for k in ("is", "son", "son_temiz")}, {"is": 2, "son": 2, "son_temiz": 1})
+
+# ---------- Sonuc bicimi ----------
+tam = "# x\n## Sonuç\n<!-- a -->\n- **Ne değişti:** a\n  - `b`\n- **Koşan testler:** `python t.py` -> temiz\n- **Kabul testi:** yeşil\n- **Açık kalan:** yok\n"
+esit("sonuc tam", P.sonuc_eksik(tam), [])
+esit("sonuc bos alan", P.sonuc_eksik(tam.replace("yeşil", "")), ["Kabul testi"])
+esit("sonuc sablon", P.sonuc_eksik((KOK / "belgeler/ekip/gorevler/_SABLON.md").read_text(encoding="utf-8")), list(A.SONUC_ALAN))
+esit("sonuc yok", P.sonuc_eksik("# x\n**Kabul testi:** `a`"), list(A.SONUC_ALAN))
+if "Açık kalan" not in P.bicim_metni(["Açık kalan"]) or "push" not in P.bicim_metni(["x"]):
+    hata.append("bicim metni eksik alani ve push'u soylemeli")
 
 # ---------- Testci ----------
 ad = [(m_, a) for m_, a, _, _ in T.adimlar("py")]
 if ad[:3] != [("AYS", "derle"), ("SPI", "derle"), ("ESP", "derle")] or ad[-1] != ("kök", "entegre") or len(ad) != 3 + 3 * len(T.DENETIM) + 1:
     hata.append("testci adim sirasi: %r" % ad)
+k_ad = T.adimlar("py", ["tools/k_test.py", "AYS/x.test.js"])
+if k_ad[0][:2] != ("kök", "kabul") or k_ad[0][2][-1] != "tools/k_test.py" or "AYS/x.test.js" in k_ad[0][2] or len(k_ad) != len(ad) + 1:
+    hata.append("testci kabul adimi once ve yalniz .py: %r" % (k_ad[0],))
 for den in ("runtests", "smoke", "a11ycheck", "layoutcheck", "palettecheck", "perfcheck"):
     if not (KOK / "AYS" / "tools" / (den + ".js")).exists():
         hata.append("AGENTS.md denetimi yok: " + den)
@@ -140,7 +160,7 @@ with tempfile.TemporaryDirectory() as t:
 
     # guvenlik: kanca yoksa ya da Antigravity kapaliysa tur durur, hicbir sey baslatmaz
     eski = {n: getattr(A, n) for n in ("kanca_kurulu", "sunucu", "hepsi", "baslat", "gozden", "mesaj", "git", "oku_durum")}
-    eski_p = {n: getattr(P, n) for n in ("bekleyen_gorevler", "ayrik", "_teslim", "gorev_durumu", "gorev_efor")}
+    eski_p = {n: getattr(P, n) for n in ("bekleyen_gorevler", "ayrik", "_teslim", "gorev_durumu", "gorev_efor", "gorev_sonuc_eksik")}
     cagri = []
     A.kanca_kurulu = lambda: False
     esit("kanca yok", P.tur({}), "koruma kancası kurulu değil")
@@ -158,6 +178,7 @@ with tempfile.TemporaryDirectory() as t:
     A.git = lambda *a, **k: "c1"
     P._teslim = lambda x: True
     P.gorev_durumu = lambda x: "bitti"
+    P.gorev_sonuc_eksik = lambda x: []
     P.ayrik = lambda argv: cagri.append(("ayrik", argv[-1]))
     A.hepsi = lambda: [dict(is_(), ad="007", denetim="d-007"), dict(dn(karar=("bulgu", 1)), ad="d-007", tur="denetim"),
                        dict(is_(), ad="008", denetim="d-008"), dict(dn(), ad="d-008", tur="denetim")]

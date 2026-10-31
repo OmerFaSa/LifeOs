@@ -25,6 +25,10 @@ Ofis: Uygulayici, Arastirmaci, Denetci rolleri. Bir rolun konusmasi bos, kisa ve
 oldugu surece sonraki is ayni konusmaya mesajla gider (--yeni zorla yenisini acar).
 Efor modeli secer: dusuk -> flash_lite, orta -> flash, yuksek -> pro.
 Gorev dosyasindaki «**Efor:**» satiri varsayilandir; --efor onu ezer.
+Olculen (2026-10-31): agentapi «pro» ve «flash»i ayni modele (M322) acar; arayuzde secili
+model (Gemini 4 Argon, M417) agentapi'den secilemez. Yani pratikte iki kademe var.
+
+  python tools/ajan.py ders <no> temiz|"<ders>"            son incelemenin sonucu; ders DERSLER.md'ye, istemlere girer
 
 Antigravity'nin yerel dil sunucusuna (language_server.exe agentapi) baglanir;
 adres ve CSRF anahtari calisan surecin komut satirindan okunur, hicbir yere
@@ -397,6 +401,7 @@ OKUR = ("mini", "soru", "denetim")                 # salt okunur isler (kanca ya
 MAX_IS = 3
 BAGLAM_SINIR = 200_000                              # uzun baglam kaliteyi dusurur; onbellek ucuzlatir ama sinirsiz degil
 DENETCI_YUVA = YUVA_SAY                             # denetci testleri hep son yuvada kosar
+DENETCI_EFOR = {"dusuk": "orta", "orta": "yuksek", "yuksek": "yuksek"}  # ayni model ayni kor noktayi tasir: bir ust kademe
 OFIS = {"arastirmaci": "ofis-arastirma", "denetci": "ofis-denetim"}
 
 
@@ -455,7 +460,34 @@ def gorev_dosyasi(no):
 def gorev_bilgi(metin):
     dal = re.search(r"\*\*Dal:\*\*\s*`([^`]+)`", metin)
     efor = re.search(r"\*\*Efor:\*\*\s*([^\s<]+)", metin)
-    return {"dal": dal.group(1) if dal else "", "efor": efor_cevir(efor.group(1)) if efor else None}
+    kabul = re.search(r"\*\*Kabul testi:\*\*([^\n]*)", metin.split("\n## ", 1)[0])   # baslik; «Sonuc»taki ayni ad degil
+    return {"dal": dal.group(1) if dal else "", "efor": efor_cevir(efor.group(1)) if efor else None,
+            "kabul": re.findall(r"`([^`]+)`", kabul.group(1)) if kabul else []}
+
+
+DERSLER = GOREVLER + "/DERSLER.md"
+SONUC_ALAN = ("Ne değişti", "Koşan testler", "Kabul testi", "Açık kalan")
+
+
+def dersler(n=10):
+    """DERSLER.md'nin son n maddesi (main'deki kopya); istemlere girer ki ayni hata tekrarlanmasin."""
+    try:
+        l = [s for s in (KOK / DERSLER).read_text(encoding="utf-8").splitlines() if s.startswith("- ")]
+    except OSError:
+        return ""
+    return ("Geçmiş incelemelerden dersler (aynısını yapma):\n" + "\n".join(l[-n:]) + "\n") if l else ""
+
+
+def ders_ekle(no, metin, simdi=None):
+    """Son incelemenin sonucu: olcum.jsonl'e kayit; metin varsa DERSLER.md'ye madde."""
+    import ofis_pilot
+    temiz = metin.strip().lower() == "temiz"
+    ofis_pilot.jsonl_ekle("olcum.jsonl", {"no": no, "son": "temiz" if temiz else "bulgu", "ders": "" if temiz else metin.strip()})
+    if not temiz:
+        y = KOK / DERSLER
+        tarih = time.strftime("%d.%m.%Y", time.localtime(simdi or time.time()))
+        with open(y, "a", encoding="utf-8") as f:
+            f.write("- %s (%s): %s\n" % (no, tarih, " ".join(metin.split())))
 
 
 ALT = {"dusuk": {"alt": 0, "alt_model": "flash_lite"}, "orta": {"alt": 2, "alt_model": "flash_lite"},
@@ -466,19 +498,30 @@ ARACLAR = ("Araçlar: yerleşik araçlar ve playwright MCP (yalnız kendi portla
            "(hkm-sqlite kişisel veri; Notion, Linear, Netlify, Canva, Figma kullanıcının hesapları) ve ask_question kapalı.\n")
 
 
+def kabul_satiri(kabul):
+    if not kabul:
+        return ""
+    return ("Kabul testi: %s — Claude Code yazdı, şu an kırmızı. Önce koş ve kırmızıyı gör; işin onu yeşile çevirmek. "
+            "Bu dosyayı DEĞİŞTİRME (kanca engeller, Testçi diff'e bakar); yanlış olduğunu düşünüyorsan nedenini «Sonuç»a yaz.\n"
+            % ", ".join(kabul))
+
+
 def _gorev_govde(wt, dal, dosya, p, efor, ek):
     return (
         "Görevin: %(wt)s\\%(gorev)s. Yazanı yap, yazmayanı yapma; belirsizse tahmin etme, «Sonuç»a soru olarak yaz.\n"
+        "%(kabul)s%(dersler)s"
         "Dalın hazır ve seçili: %(dal)s (main'den açıldı). Dal değiştirme, main'e merge ya da push etme.\n"
         "Tarayıcı testlerinde YALNIZ şu portlar: cd AYS && node tools/runtests.js %(AYS)d · "
         "cd SPI && node tools/runtests.js %(SPI)d · cd ESP && node tools/runtests.js %(ESP)d.\n"
         "Arka planda test başlattıysan bitmesini bekle; sonucu okumadan turu kapatma.\n"
-        "Bitince görev dosyasında Durum: bitti yap, «Sonuç»u doldur; commit et "
+        "Bitince görev dosyasında Durum: bitti yap, «Sonuç»u şablondaki dört satırla doldur (Ne değişti · Koşan testler: "
+        "komut -> çıktı satırı · Kabul testi · Açık kalan; boş bırakma, yoksa «yok» yaz); commit et "
         "(git -c user.name=OmerFaSa -c user.email=omerfaruksagsozz@gmail.com commit) ve git push -u origin %(dal)s. "
         "Takılırsan Durum: takıldı yap, nedenini yaz, yine commit ve push et. İşin bitince ofisin Denetçisi dalını inceler.\n"
         "%(alt_satir)s\n"
         "Son mesajın kısa olsun: ne değişti, hangi test koştu, çıktı satırı."
-        % dict(p, wt=wt, dal=dal, gorev=str(dosya.relative_to(KOK)).replace("/", "\\"), alt_satir=(
+        % dict(p, wt=wt, dal=dal, gorev=str(dosya.relative_to(KOK)).replace("/", "\\"),
+               kabul=kabul_satiri(gorev_bilgi(dosya.read_text(encoding="utf-8"))["kabul"]), dersler=dersler(), alt_satir=(
             "Alt ajan (invoke_subagent) yalnız bağımsız bir okuma ya da araştırma için ve en çok %(alt)d tane; "
             "Model %(alt_model)s, aynı klasör ve aynı kurallar; dosyayı yalnız sen değiştirirsin." % ALT[efor]
             if ALT[efor]["alt"] else "Alt ajan açma; işi tek başına yap."))
@@ -518,10 +561,26 @@ def denetim_govde(wt, hedef, dal, dosya):
             "Ölç: kabul ölçütü karşılanıyor mu; AGENTS.md §1 kırılıyor mu; yeni davranışın testi var mı; ekranda "
             "görünen metin düzgün Türkçe mi; dokunulmaması gereken dosyaya dokunulmuş mu. Gerekirse görevdeki testleri koş "
             "(portlar: AYS %d, SPİ %d, ESP %d).\n"
-            "Cevap biçimi: ilk satır tam olarak 'KARAR: temiz' ya da 'KARAR: N bulgu'. Sonra her bulgu bir satır: "
-            "dosya:satır · ne yanlış · hangi girdide bozulur · nasıl doğrulanır. «Şu daha iyi olurdu» bulgu değildir; "
-            "emin değilsen «göremedim» yaz."
-            % ((hedef, dal, wt, wt, wt, str(dosya.relative_to(KOK)).replace("/", "\\")) + tuple(portlar(DENETCI_YUVA).values())))
+            "Zorunlu: kodu bozmaya çalış. Kabul ölçütünün dışında kalan en az iki kenar girdiyi (boş, sınırda, bozuk, "
+            "tekrarlı…) gerçekten çalıştır (python -c, node -e ya da geçici bir test; dosya bırakma) ve her birini "
+            "'DENEME: komut -> çıktı' satırı olarak yaz. Deneme satırı olmayan «temiz» geçersizdir.\n"
+            % ((hedef, dal, wt, wt, wt, str(dosya.relative_to(KOK)).replace("/", "\\")) + tuple(portlar(DENETCI_YUVA).values()))
+            + kabul_denetim_satiri(gorev_bilgi(dosya.read_text(encoding="utf-8"))["kabul"]) + dersler()
+            + "Cevap biçimi: ilk satır tam olarak 'KARAR: temiz' ya da 'KARAR: N bulgu'. Sonra her bulgu bir satır: "
+              "dosya:satır · ne yanlış · hangi girdide bozulur · nasıl doğrulanır. Sonra DENEME satırları. "
+              "«Şu daha iyi olurdu» bulgu değildir; emin değilsen «göremedim» yaz.")
+
+
+def kabul_denetim_satiri(kabul):
+    if not kabul:
+        return ""
+    return ("Kabul testi (%s) Claude Code'undur: 'git diff --stat main...HEAD -- <dosya>' ile değişmediğini doğrula "
+            "(değiştiyse bulgu) ve koş; kırmızıysa bulgu.\n" % ", ".join(kabul))
+
+
+def deneme_var(metin):
+    """Denetci cevabinda en az bir 'DENEME:' satiri (bozma denemesi yapildi mi)."""
+    return bool(re.search(r"^\W*DENEME:", metin or "", re.M))
 
 
 def denetim_istemi(wt, hedef, dal, dosya):
@@ -567,7 +626,7 @@ def baslat(no, efor=None, ek="", yeni=False):
     d = oku_durum()
     d[no] = {"tur": "gorev", "gorev": dosya.name, "dal": bilgi["dal"], "efor": efor, "model": EFOR[efor],
              "konusma": kimlik, "adim_bas": bas, "worktree": str(wt), "yuva": yuva, "portlar": p,
-             "baslangic": int(time.time()), "etkin": time.time(), "acik": True, "mesajlar": 1}
+             "baslangic": int(time.time()), "etkin": time.time(), "acik": True, "mesajlar": 1, "kabul": bilgi["kabul"]}
     yaz_durum(d)
     print("%s başladı · %s · efor %s (%s) · %s · klasör %s · portlar %s"
           % (no, "yeni konuşma" if yeni_mi else "aynı konuşmada devam", EFOR_AD[efor], EFOR[efor], kimlik, wt,
@@ -611,7 +670,7 @@ def gozden(no, efor=None, yeni=False):
     a = d.get(no)
     if not a or a.get("tur") != "gorev":
         raise SystemExit("Böyle bir görev ajanı yok: %s" % no)
-    efor = efor_cevir(efor) or ("yuksek" if a.get("efor") == "yuksek" else "orta")
+    efor = efor_cevir(efor) or DENETCI_EFOR.get(a.get("efor"), "orta")
     wt = _ofis_klasoru("denetci", a["dal"])
     dosya = gorev_dosyasi(no)
     kimlik, bas, yeni_mi = gonder(d, "denetci", EFOR[efor], "LifeOS Denetçi " + EFOR[efor],
@@ -843,6 +902,9 @@ def main(argv):
         kur("--kaldir" in argv)
     elif k == "bekle":
         bekle(argv)
+    elif k == "ders" and len(argv) >= 2:
+        ders_ekle(argv[0], " ".join(argv[1:]))
+        print("%s: son inceleme kaydedildi%s." % (argv[0], "" if argv[1].lower() == "temiz" else "; ders DERSLER.md'de"))
     elif k == "rapor" and argv:
         rapor(argv[0])
     elif k == "cevap" and argv:
