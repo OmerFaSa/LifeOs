@@ -1548,7 +1548,6 @@ html[data-zemin="yumusak"] .site--v5 #main .agenttabs .agenttab.is-on,
 html[data-zemin="yumusak"] .site--v5 #main .iconbtn.is-on{
   background:var(--secili-zemin); color:var(--secili-yazi); border-color:transparent; box-shadow:var(--secili-golge); }
 html[data-zemin="yumusak"] .site--v5 #main .listitem.is-on small,
-html[data-zemin="yumusak"] .site--v5 #main .listitem.is-on .listitem__sub,
 html[data-zemin="yumusak"] .site--v5 #main .listitem.is-on .muted{ color:inherit; opacity:.75; }
 /* Sayfa içi seçiciler: oyuk cam ray, seçili hap parlak cam. */
 html[data-zemin="yumusak"] .site--v5 #main .seg{ background:var(--ray); border-color:var(--cam-kenar); }
