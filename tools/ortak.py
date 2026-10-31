@@ -148,6 +148,10 @@ DOSYALAR = {
     "kesinlik.js":   "js/core",
     "kesinlik.css":  "css",
     "kesinlik.test.js": "tests",
+    # TURKCE SAYI VE SURE — «1 saat 20 dk», «yarim saat», «1 bucuk porsiyon» tek yerde okunur
+    # (2026-11-01: dort modul ayri ayri yanlis okuyordu; olculen dakika XP'ye gider).
+    "turkcesayi.js":      "js/core",
+    "turkcesayi.test.js": "tests",
     # TANITIM ŞERİDİ — ilk kurulumun üç adımı. Sorular üçünde de aynı;
     # ayrı ayrı yazılsalardı bir gün birinde İKİNCİ adım düşerdi ve
     # düşecek olan, sistemin sınırını söyleyen adımdır.
