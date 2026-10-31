@@ -188,13 +188,17 @@ başlatır (paralel işler aynı sohbeti paylaşmaz). Her işte karar tablosu
 |---|---|
 | Uygulayıcı çalışıyor | bekler |
 | «sorun» (hata, sessiz) | bırakır → hazır («bırakıldı: …») |
-| kota/RESOURCE_EXHAUSTED hatası | bir kez alt modelle yeniden (pro→flash→flash_lite); klasördeki yarım iş kalır |
+| kota hatası (RESOURCE_EXHAUSTED, 429, usage limit…) | bir kez alt modelle yeniden (flash/pro → flash_lite; pro ile flash aynı model); klasördeki yarım iş kalır |
+| alt model de kotada | **iş bırakılmaz**: «kota bekliyor»; `kota.json` yazılır, yeni iş başlatılmaz, bildirim düşer; açılış metinde yazıyorsa («resets in 2h») o saatte, yoksa 30 dk'da bir yoklar (duran ajana «devam et»; doluysa kota harcamaz); 6 saati aşarsa **haftalık** sayılır, 6 saatte bir yoklar; devam eden iş ilerleyince kota kalkar |
 | teslim (bitti + commit + push) bu commit'te denetlenmedi | `gozden` (Denetçi aynı anda tek iş: ortak klasör) |
 | Denetçi bulgu, tur < 2 | bulguyu `mesaj` ile Uygulayıcı'ya; yeni commit gelince yeniden `gozden` |
 | temiz ya da tur bitti, bu commit test edilmedi | Testçi (kilit boşsa) |
 | Testçi kırmızı, test turu < 1 | ham log yolu ve son satırlarla düzeltme mesajı |
 | koşulamadı (port dolu) | en çok 3 kez yeniden |
 | geri kalan | **hazır**: `pilot.json`, `bildirim.jsonl`, `olcum.jsonl` |
+
+**Kota doluyken sen:** `pilot durum` «KOTA DOLU» der. Beklemek ucuzdur; acil olan sarı işi kendin yap (kabul testi hazırsa
+kodu yazmak kısa sürer), yeşil işleri kuyrukta bırak.
 
 Pilot ASLA birleştirmez, push etmez, görev yazmaz; işi kapatmaz (klasör
 `kapat`'a kadar durur). Her kararı `pilot.jsonl`'dedir; `pilot durum`

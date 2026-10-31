@@ -406,7 +406,9 @@ function pilotHtml(p){
   return '<section class="ajan"><div class="ajan-bas"><b>' + (p.canli ? 'Çalışıyor' : 'Durmuş') + '</b>'
     + '<span class="tik" role="img" aria-label="bugün ' + p.bugun + ' / ' + p.gunluk + ' iş başlattı">' + Array.from({ length:p.gunluk }, (_, i) => '<i class="' + (i < p.bugun ? 'on' : '') + '"></i>').join('') + '</span>'
     + '<span class="etiket">bugün ' + p.bugun + ' / ' + p.gunluk + ' iş · en çok ' + p.paralel + ' paralel</span>'
-    + '<span class="asama' + (p.canli ? ' calisiyor' : '') + '">' + (p.canli ? 'Canlı' : 'Kapalı') + '</span></div>'
+    + '<span class="asama' + (p.kota ? ' sorun' : p.canli ? ' calisiyor' : '') + '">' + (p.kota ? 'Kota dolu' : p.canli ? 'Canlı' : 'Kapalı') + '</span></div>'
+    + (p.kota ? '<p class="koruma uyari">Antigravity kotası doldu (<b>' + kac(p.kota.tur) + '</b>) · ' + once(p.kota.ilk) + ' · yarım işler bekliyor, yeni iş başlatılmıyor · yoklama '
+      + saat(p.kota.sonraki * 1000) + '</p>' : '')
     + (isler.length ? '<dl>' + isler.slice(0, 8).map(([no, s]) => '<dt>' + kac(no) + '</dt><dd>' + (s.hazir ? '<b>Hazır</b> · ' : '') + kac(s.sonuc || s.son || 'başladı') + '</dd>').join('') + '</dl>' : '')
     + (p.kararlar.length ? '<details' + (p.canli ? ' open' : '') + '><summary>Son kararlar</summary><ol class="cizelge">' + p.kararlar.slice().reverse().map(k => '<li class="'
       + (k.eylem === 'hata' || k.eylem === 'birak' ? 'hata' : 'model') + '"><time>' + saat(k.t * 1000) + '</time><span title="' + kac(k.neden) + '">'

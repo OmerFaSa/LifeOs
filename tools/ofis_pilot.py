@@ -35,8 +35,14 @@ MAX_TUR = 2                      # Denetci bulgusunu geri gonderme
 MAX_TEST_TUR = 1                 # Testci kirmizisini geri gonderme
 MAX_TEST_ISTEK = 3               # ayni commit icin Testci cagrisi (kosulamadi dahil)
 TUR_SN = 30
-ALT_EFOR = {"yuksek": "orta", "orta": "dusuk"}
-KOTA = re.compile(r"RESOURCE_EXHAUSTED|quota|rate.?limit|\b429\b|kota", re.I)
+ALT_EFOR = {"yuksek": "dusuk", "orta": "dusuk"}  # pro ve flash ayni model (M322): gercek alt kademe flash_lite
+KOTA = re.compile(r"RESOURCE_EXHAUSTED|quota|rate.?limit|\b429\b|kota|usage limit|limit (?:reached|exceeded)"
+                  r"|exhausted|try again (?:in|after|later)|resets? (?:in|at)", re.I)
+# KOTA SENARYOSU (depo sahibi, 2026-11-01: «5 saatlik ya da haftalik limit bitince sistem anlasin»):
+# alt modele dus; o da doluysa is BIRAKILMAZ, «kota bekliyor» olur, pilot yeni is baslatmaz ve yoklar.
+KOTA_YOKLA = 30 * 60              # 5 saatlik pencerede yoklama araligi (duran ajana «devam et»; doluysa kota harcamaz)
+KOTA_HAFTALIK = 6 * 3600          # bu kadar suredir doluysa ya da acilis bundan uzaksa haftalik limit sayilir
+KOTA_HAFTALIK_YOKLA = 6 * 3600
 
 
 def yol(ad):
@@ -164,6 +170,39 @@ def kota_hatasi(canli):
                if a.get("tur") == "hata" or a.get("durum") == "ERROR")
 
 
+def kota_acilis(metin, simdi):
+    """Hata metnindeki acilis zamani (epoch) ya da None: «resets in 2h 15m», «try again in 45 minutes», «at 14:30»."""
+    t = metin or ""
+    m = re.search(r"\b(?:in|after)\s+(?=\d)((?:\d+\s*(?:h|hr|hours?|saat|sa)\b\s*)?(?:\d+\s*(?:m|min|minutes?|dakika|dk)\b)?)", t, re.I)
+    if m and m.group(1).strip():
+        s = re.search(r"(\d+)\s*(?:h|hr|hours?|saat|sa)\b", m.group(1), re.I)
+        d = re.search(r"(\d+)\s*(?:m|min|minutes?|dakika|dk)\b", m.group(1), re.I)
+        return int(simdi + (int(s.group(1)) * 3600 if s else 0) + (int(d.group(1)) * 60 if d else 0))
+    m = re.search(r"\bat\s+(\d{1,2}):(\d{2})", t, re.I)
+    if m:
+        y = time.localtime(simdi)
+        hedef = time.mktime((y.tm_year, y.tm_mon, y.tm_mday, int(m.group(1)), int(m.group(2)), 0, 0, 0, -1))
+        return int(hedef if hedef > simdi else hedef + 86400)
+    return None
+
+
+def kota_karari(k, metin, simdi):
+    """Kota durumunu gunceller (saf): {ilk, sayi, tur: '5 saatlik'|'haftalık', sonraki (yoklama zamani), metin}."""
+    k = dict(k or {"ilk": int(simdi), "sayi": 0})
+    k["sayi"] += 1
+    acilis = kota_acilis(metin, simdi)
+    haftalik = simdi - k["ilk"] >= KOTA_HAFTALIK or (acilis is not None and acilis - simdi > KOTA_HAFTALIK)
+    sonraki = acilis + 60 if acilis else simdi + (KOTA_HAFTALIK_YOKLA if haftalik else KOTA_YOKLA)
+    k.update(tur="haftalık" if haftalik else "5 saatlik", sonraki=int(sonraki), metin=(metin or "")[:240])
+    return k
+
+
+def kota_metni(c):
+    """Dokumdeki son kota hatasinin metni."""
+    return next((a.get("metin") or "" for a in reversed((c or {}).get("son_adimlar") or [])
+                 if (a.get("tur") == "hata" or a.get("durum") == "ERROR") and KOTA.search(a.get("metin") or "")), "")
+
+
 def bugun_baslatilan(kayitlar, simdi=None):
     gun = time.strftime("%Y-%m-%d", time.localtime(simdi or time.time()))
     return sum(1 for k in kayitlar if k.get("eylem") == "baslat"
@@ -212,6 +251,41 @@ def bicim_metni(eksik):
             "Commit et ve dalını push et." % ", ".join(eksik))
 
 
+KOTA_DEVAM_METNI = ("Antigravity kotası yenilendi. Kaldığın yerden devam et: klasördeki yarım işi incele, işi bitir, "
+                    "testleri koş; Uygulayıcıysan commit et ve dalını push et, Denetçiysen KARAR satırını ver.")
+
+
+def kota_dosya():
+    return yol("kota.json")
+
+
+def kota_oku():
+    try:
+        return json.loads(kota_dosya().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def kota_yaz(k):
+    A.AJAN_KLASOR.mkdir(parents=True, exist_ok=True)
+    if k is None:
+        kota_dosya().unlink(missing_ok=True)
+    else:
+        kota_dosya().write_text(json.dumps(k, ensure_ascii=False), encoding="utf-8")
+
+
+def kota_isaretle(metin, simdi):
+    """Kota doldu: durumu gunceller; ilk kez ya da haftaliga donunce bildirir."""
+    once = kota_oku()
+    k = kota_karari(once, metin, simdi)
+    kota_yaz(k)
+    if not once or once.get("tur") != k["tur"]:
+        jsonl_ekle("bildirim.jsonl", {"no": "-", "metin": "Antigravity kotası doldu (%s). Yeni iş başlatılmıyor; yarım işler bekliyor, "
+                                      "yoklama %s. Acil kritik işi Claude Code kendisi yapar." % (k["tur"], time.strftime("%d.%m %H:%M", time.localtime(k["sonraki"])))})
+        kaydet("-", "kota", "kota doldu (%s); yoklama %s" % (k["tur"], time.strftime("%H:%M", time.localtime(k["sonraki"]))))
+    return k
+
+
 DENEME_METNI = ("Cevabında DENEME satırı yok. Kabul ölçütü dışındaki en az iki kenar girdiyi gerçekten çalıştır, "
                 "her birini 'DENEME: komut -> çıktı' diye yaz; sonra KARAR satırını yeniden ver.")
 
@@ -224,10 +298,19 @@ def adim(x, dn, s, o):
     simdi = o["simdi"]
     if x.get("asama") == "kapandı":
         return "birak", "iş kapatıldı"
+    k = o.get("kota")
+    if s.get("kota_bekliyor"):
+        if k and simdi < k["sonraki"]:
+            return "bekle", "kota dolu (%s); yoklama %s" % (k["tur"], time.strftime("%H:%M", time.localtime(k["sonraki"])))
+        return "kota_devam", "kota yoklaması: kaldığı yerden devam"
+    if k and simdi < k["sonraki"]:
+        return "bekle", "kota dolu (%s); yeni adım yok" % k["tur"]
+    if s.get("kota_devam_t") and simdi - s["kota_devam_t"] < 180:
+        return "bekle", "kota sonrası devam bekleniyor"
     if c.get("hal") == "hata" and kota_hatasi(c):
-        if not s.get("dusuruldu") and ALT_EFOR.get(x.get("efor")):
+        if not s.get("dusuruldu") and ALT_EFOR.get(x.get("efor")) and A.EFOR[ALT_EFOR[x["efor"]]] != x.get("model"):
             return "kota", "kota hatası: %s ile yeniden" % A.EFOR[ALT_EFOR[x["efor"]]]
-        return "birak", "kota hatası (daha alt model yok ya da bir kez denendi)"
+        return "kota_bekle", "kota doldu (alt model de); iş bırakılmaz, açılınca devam"
     if x.get("asama") == "sorun":
         return "birak", "Uygulayıcı: " + (c.get("hal") or "sorun")
     if x.get("asama") != "inceleme":
@@ -257,6 +340,8 @@ def adim(x, dn, s, o):
     if dn.get("asama") == "çalışıyor":
         return "bekle", "Denetçi inceliyor"
     if dn.get("asama") == "sorun":
+        if kota_hatasi(dn.get("canli")):
+            return "kota_bekle", "Denetçi kotaya takıldı; açılınca devam"
         return "birak", "Denetçi hata verdi"
     karar = (dn.get("canli") or {}).get("karar")
     if karar and karar[0] == "temiz" and not A.deneme_var((dn.get("canli") or {}).get("cevap")) and not s.get("deneme_istendi"):
@@ -411,6 +496,12 @@ def uygula(no, eylem, neden, x, dn, s, o):
         A.baslat(no, yeni, "Önceki model (%s) kota hatası verdi; klasördeki yarım işi incele ve görevi bitir." % x.get("model"),
                  yeni=True)
         s.pop("mesaj_t", None)
+    elif eylem == "kota_bekle":
+        s.update(kota_bekliyor=True, kota_hedef="denetci" if "Denetçi" in neden else "uygulayici")
+    elif eylem == "kota_devam":
+        hedef = (x.get("denetim") or "d-" + no) if s.get("kota_hedef") == "denetci" else no
+        A.mesaj(hedef, KOTA_DEVAM_METNI)
+        s.update(kota_bekliyor=False, kota_devam_t=time.time())
     elif eylem in ("hazir", "birak"):
         s.update(hazir=True, sonuc=("bırakıldı: " if eylem == "birak" else "") + neden, hazir_t=int(time.time()))
         olcum_yaz(no, x, s, s["sonuc"])
@@ -424,7 +515,9 @@ def tur(p, simdi=None):
     if not A.sunucu():
         return "Antigravity kapalı"
     d = A.oku_durum()
-    for no in baslatilacaklar(bekleyen_gorevler(), p, A._isler(d), bugun_baslatilan(jsonl_oku("pilot.jsonl"), simdi)):
+    kota = kota_oku()
+    bekleyen = [] if kota and simdi < kota["sonraki"] else bekleyen_gorevler()       # kota doluyken yeni is yok
+    for no in baslatilacaklar(bekleyen, p, A._isler(d), bugun_baslatilan(jsonl_oku("pilot.jsonl"), simdi)):
         try:
             efor = gorev_efor(no)
             ayni = any(not s.get("hazir") and d.get(n, {}).get("model") == A.EFOR[efor] for n, s in p.items())
@@ -432,6 +525,9 @@ def tur(p, simdi=None):
             p[no] = {"baslangic": int(time.time())}
             kaydet(no, "baslat", "kuyrukta bekliyordu", model=A.EFOR[efor])
         except SystemExit as e:
+            if KOTA.search(str(e)):                      # baslatirken kota: is kuyrukta kalir, sonra denenir
+                kota = kota_isaretle(str(e), simdi)
+                break
             p[no] = {"hazir": True, "sonuc": "başlatılamadı: %s" % e}
             kaydet(no, "hata", "başlatılamadı: %s" % e)
     ada = {x["ad"]: x for x in A.hepsi()}
@@ -447,11 +543,19 @@ def tur(p, simdi=None):
              "kabul_degisti": [k for k in x.get("kabul") or () if A.git("diff", "--name-only", "main..." + x["dal"], "--", k, kontrol=False)]
              + (["görev dosyasının ölçütü"] if A.gorev_degisti(x["dal"], x.get("gorev", "")) else []),
              "sonuc_eksik": gorev_sonuc_eksik(x),
-             "yasak": [y for y, _ in A.yasak_bolge((A.git("diff", "--name-only", "main..." + x["dal"], kontrol=False) or "").splitlines())]}
+             "yasak": [y for y, _ in A.yasak_bolge((A.git("diff", "--name-only", "main..." + x["dal"], kontrol=False) or "").splitlines())],
+             "kota": kota}
         if dn and dn.get("asama") not in ("çalışıyor", "sorun") and dn.get("commit") == o["commit"] and "ilk_karar" not in s:
             k = (dn.get("canli") or {}).get("karar")
             s["ilk_karar"] = k[0] if k else "kararsız"
         eylem, neden = adim(x, dn, s, o)
+        if eylem == "kota_bekle":
+            kota = kota_isaretle(kota_metni(x.get("canli")) or kota_metni((dn or {}).get("canli")) or neden, simdi)
+        elif kota and s.get("kota_devam_t") and simdi - s["kota_devam_t"] > 180 and (x.get("canli") or {}).get("hal") != "hata":
+            kota_yaz(None)                               # devam ettirilen is ilerliyor: kota acildi
+            kota = None
+            jsonl_ekle("bildirim.jsonl", {"no": "-", "metin": "Antigravity kotası açıldı; ofis kaldığı yerden sürüyor."})
+            kaydet("-", "kota", "kota açıldı")
         if eylem == "bekle":
             if s.get("son") != neden:
                 kaydet(no, "bekle", neden)
@@ -533,12 +637,16 @@ def ozet(son=12):
     return {"canli": bool(n), "nabiz": (n or {}).get("t"), "isler": durum_oku(),
             "kararlar": [k for k in jsonl_oku("pilot.jsonl", son * 4) if k.get("eylem") != "bekle"][-son:],
             "bugun": bugun_baslatilan(jsonl_oku("pilot.jsonl")), "gunluk": GUNLUK, "paralel": PARALEL,
-            "olcum": olcum_ozet(jsonl_oku("olcum.jsonl"))}
+            "olcum": olcum_ozet(jsonl_oku("olcum.jsonl")), "kota": kota_oku()}
 
 
 def durum_metni():
     o = ozet()
     sat = ["Pilot: %s · bugün %d/%d iş · paralel %d" % ("ÇALIŞIYOR" if o["canli"] else "durmuş", o["bugun"], o["gunluk"], o["paralel"])]
+    if o["kota"]:
+        sat.append("KOTA DOLU · %s · %s'den beri · yoklama %s · %s" % (
+            o["kota"]["tur"], time.strftime("%d.%m %H:%M", time.localtime(o["kota"]["ilk"])),
+            time.strftime("%d.%m %H:%M", time.localtime(o["kota"]["sonraki"])), o["kota"].get("metin", "")[:80]))
     for no, s in sorted(o["isler"].items()):
         sat.append("  %-6s %-8s %s" % (no, "HAZIR" if s.get("hazir") else "aktif", s.get("sonuc") or s.get("son") or ""))
     sat.append("Son kararlar:")

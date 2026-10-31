@@ -50,8 +50,13 @@ for ad, args, beklenen in (
         ("kapandi", (is_("kapandı"), None, {}, o()), "birak"),
         ("sorun", (is_("sorun"), None, {}, o()), "birak"),
         ("kota orta->dusuk", (is_("sorun", canli=kota), None, {}, o()), "kota"),
-        ("kota bir kez", (is_("sorun", canli=kota), None, {"dusuruldu": "flash→flash_lite"}, o()), "birak"),
-        ("kota alt model yok", (is_("sorun", efor="dusuk", canli=kota), None, {}, o()), "birak"),
+        ("kota bir kez -> bekle", (is_("sorun", canli=kota), None, {"dusuruldu": "flash→flash_lite"}, o()), "kota_bekle"),
+        ("kota alt model yok -> bekle", (is_("sorun", efor="dusuk", canli=kota), None, {}, o()), "kota_bekle"),
+        ("kota bekliyor, vakit gelmedi", (is_("sorun", canli=kota), None, {"kota_bekliyor": True}, o(kota={"tur": "5 saatlik", "sonraki": S + 600})), "bekle"),
+        ("kota bekliyor, yoklama vakti", (is_("sorun", canli=kota), None, {"kota_bekliyor": True}, o(kota={"tur": "5 saatlik", "sonraki": S - 1})), "kota_devam"),
+        ("kota doluyken yeni adim yok", (is_(), None, {}, o(kota={"tur": "haftalık", "sonraki": S + 600})), "bekle"),
+        ("devamdan hemen sonra eski hata sayilmaz", (is_("sorun", canli=kota), None, {"kota_devam_t": S - 60}, o()), "bekle"),
+        ("denetci kotaya takildi", (is_(), dict(dn("sorun"), canli={"son_adimlar": kota["son_adimlar"]}), {}, o()), "kota_bekle"),
         ("eski kota hatasi gecti", (is_("çalışıyor", canli=dict(kota, hal="çalışıyor")), None, {}, o()), "bekle"),
         ("teslim bekleniyor", (is_(son=S - 60), None, {}, o(teslim=False)), "bekle"),
         ("teslim yok 5 dk", (is_(son=S - 400), None, {}, o(teslim=False)), "birak"),
@@ -87,7 +92,19 @@ for ad, args, beklenen in (
         ("hepsi yesil", (is_(), dn(), {}, o()), "hazir")):
     esit("adim " + ad, P.adim(*args)[0], beklenen)
 esit("hazir cumlesi", P.adim(is_(), dn(), {"tur": 1}, o())[1], "Denetçi temiz (1 tur) · Testçi 1 yeşil, 0 kırmızı, 0 koşulamadı")
-esit("kota yeni model", P.adim(is_("sorun", efor="yuksek", canli=kota), None, {}, o())[1], "kota hatası: flash ile yeniden")
+esit("kota yeni model", P.adim(is_("sorun", efor="yuksek", canli=kota), None, {}, o())[1], "kota hatası: flash_lite ile yeniden")
+# kota zamani: metinden acilis; yoksa 5 saatlik pencerede 30 dk, 6 saati asinca haftalik
+esit("acilis resets in", P.kota_acilis("Quota exceeded. Resets in 2h 15m.", S), S + 2 * 3600 + 15 * 60)
+esit("acilis try again", P.kota_acilis("RESOURCE_EXHAUSTED: try again in 45 minutes", S), S + 45 * 60)
+esit("acilis yok", P.kota_acilis("429 Too Many Requests", S), None)
+k1 = P.kota_karari(None, "429", S)
+esit("ilk kota 5 saatlik", (k1["tur"], k1["sonraki"], k1["sayi"]), ("5 saatlik", S + P.KOTA_YOKLA, 1))
+k2 = P.kota_karari(k1, "429", S + 7 * 3600)
+esit("6 saati asan kota haftalik", (k2["tur"], k2["sonraki"], k2["ilk"]), ("haftalık", S + 7 * 3600 + P.KOTA_HAFTALIK_YOKLA, S))
+esit("uzak acilis haftalik", P.kota_karari(None, "usage limit reached, resets in 50h", S)["tur"], "haftalık")
+esit("kota metni", P.kota_metni(kota), "429 RESOURCE_EXHAUSTED: quota")
+if not P.KOTA.search("You have reached your usage limit") or P.KOTA.search("limit degeri 5"):
+    hata.append("KOTA kalibi: usage limit tanınmalı, sıradan «limit» kelimesi tanınmamalı")
 if P.kota_hatasi({"son_adimlar": [{"tur": "model", "metin": "quota hakkinda konustuk"}]}):
     hata.append("model metnindeki kelime kota hatasi sayilmamali")
 
@@ -219,6 +236,20 @@ with tempfile.TemporaryDirectory() as t:
     esit("hata sonrasi tur", P.tur(p), None)
     if not p["009"].get("hazir") or "gozden başarısız" not in p["009"]["sonuc"]:
         hata.append("basarisiz eylem isi birakmali: %r" % p["009"])
+    # kota: baslatirken kota hatasi isi kuyrukta birakir, kota.json yazilir, sonraki tur yeni is baslatmaz
+    A.hepsi = lambda: []
+    P.bekleyen_gorevler = lambda: ["011", "012"]
+    A.baslat = lambda no, efor=None, ek="", yeni=False: (_ for _ in ()).throw(SystemExit("Antigravity yanıtı: 429 RESOURCE_EXHAUSTED"))
+    p = {}
+    P.tur(p)
+    k = P.kota_oku()
+    if p or not k or k["tur"] != "5 saatlik" or not any("kotası doldu" in b.get("metin", "") for b in P.jsonl_oku("bildirim.jsonl")):
+        hata.append("baslatirken kota: is kuyrukta kalmali, kota yazilmali, bildirilmeli: %r %r" % (p, k))
+    A.baslat = lambda no, efor=None, ek="", yeni=False: cagri.append(("baslat-kota", no))
+    P.tur(p)
+    if any(c[0] == "baslat-kota" for c in cagri):
+        hata.append("kota doluyken yeni is baslatilmamali")
+    P.kota_yaz(None)
     for n, f in eski.items():
         setattr(A, n, f)
     for n, f in eski_p.items():
