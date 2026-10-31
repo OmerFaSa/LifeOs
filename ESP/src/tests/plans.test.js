@@ -406,6 +406,8 @@
       expect(K().anla('günlük taban 45 dakika olsun').oneriler[0])
         .toEqual({ kind:'base', payload:{ minutes:45 }, metin:'günlük taban 45 dakika olsun' });
       expect(K().anla('günde 1 saat çalışacağım').oneriler[0].payload).toEqual({ minutes:60 });
+      expect(K().anla('günlük taban 1 buçuk saat olsun').oneriler[0].payload).toEqual({ minutes:90 });
+      expect(K().anla('günde yarım saat çalışacağım').oneriler[0].payload).toEqual({ minutes:30 });
     });
 
     it('hangi bölüm olduğu belli değilse sorulur', () => {
