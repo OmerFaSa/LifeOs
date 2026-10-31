@@ -439,6 +439,7 @@ function olcumHtml(o){
 async function tazele(){
   let d; try{ d = await (await fetch('/api/durum', { cache:'no-store' })).json(); }catch(e){ document.getElementById('cumle').textContent = 'Durum okunamadı; takip sunucusu kapanmış olabilir.'; return; }
   const ag = d.antigravity, say = k => d.pano.filter(x => x.kolon === k).length;
+  const acikMi = {}; document.querySelectorAll('details').forEach(x => { acikMi[ayrAnahtar(x)] = x.open; });
   const parca = [];
   if(say('calisiyor')) parca.push('<b>' + say('calisiyor') + '</b> iş çalışıyor');
   if(say('inceleme')) parca.push('<b>' + say('inceleme') + '</b> iş incelemede');
@@ -462,7 +463,10 @@ async function tazele(){
   const acikSoru = sorular.filter(a => a.acik), eskiSoru = sorular.filter(a => !a.acik);
   document.getElementById('sorular').innerHTML = sorular.length ? '<h2>Sorular <small>Araştırmacı</small></h2><div class="isler">' + acikSoru.map(soruHtml).join('')
     + (eskiSoru.length ? '<details><summary>Önceki sorular (' + eskiSoru.length + ')</summary><div class="isler">' + eskiSoru.map(soruHtml).join('') + '</div></details>' : '') + '</div>' : '';
+  document.querySelectorAll('details').forEach(x => { const k = ayrAnahtar(x); if(k in acikMi) x.open = acikMi[k]; });
 }
+// yeniden cizim acilan/kapatilan bolumleri sifirlamasin: bolum kimligi + baslik (sayilar haric) ile hatirlanir
+const ayrAnahtar = x => ((x.parentElement.closest('[id]') || {}).id || '') + '|' + ((x.querySelector('summary') || {}).textContent || '').replace(/\\d+/g, '');
 document.addEventListener('click', e => { const b = e.target.closest('[data-git]'); if(!b) return;
   const h = document.getElementById(b.dataset.git); if(h){ let g = h.parentElement.closest('details'); while(g){ g.open = true; g = g.parentElement.closest('details'); } h.scrollIntoView({ behavior:'smooth' }); } });
 document.getElementById('iste').addEventListener('submit', async e => { e.preventDefault();
@@ -512,6 +516,7 @@ class Isleyici(BaseHTTPRequestHandler):
 
 def main():
     if "--durum" in sys.argv:
+        sys.stdout.reconfigure(encoding="utf-8")       # yonlendirilince cp1254 Turkce disi karakterde cokuyordu
         print(json.dumps(durum(), ensure_ascii=False, indent=2))
         return
     adres = "http://127.0.0.1:%d/" % PORT
