@@ -10,7 +10,9 @@ commit, koruma kancasinin mudahaleleri, zaman cizelgesi, son cevabi, alt
 ajanlari; teknik ayrinti katlanir. Kaynak: tools/ajan.py (Antigravity'nin
 konusma dokumu) ve belgeler/ekip/gorevler/ kuyrugu. Edge'i
 uygulama penceresinde acar. Pencere kapaninca (60 sn nabiz yok) kendisi de
-kapanir. Yalniz 127.0.0.1; hicbir seyi degistirmez, yalniz okur.
+kapanir. Yalniz 127.0.0.1. Otomatik pilotun paneli, Testci tablosu ve model
+olcumu de buradadir. Tek yazdigi sey «is iste» kutusudur: istek
+LifeOs-ajan/istekler.jsonl'e satir olarak duser, gorevi Claude Code planlar.
 
   python tools/gorev_takip.py            pencereyi acar
   python tools/gorev_takip.py --durum    durumu JSON olarak yazar (pencere yok)
@@ -36,6 +38,9 @@ DURUMLAR = ("bekliyor", "sürüyor", "bitti", "takıldı")
 _spec = importlib.util.spec_from_file_location("ajan", Path(__file__).resolve().parent / "ajan.py")
 AJAN = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(AJAN)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import ofis_pilot as PILOT  # noqa: E402
+import ofis_test as TESTCI  # noqa: E402
 _sunucu = {"zaman": 0, "acik": None}
 
 
@@ -119,6 +124,21 @@ def pano(gorevler, ajanlar):
     return out
 
 
+def istek_gecerli(baslik, govde, istemci):
+    """Is iste kutusu: (metin, hata). Yalniz bu bilgisayardan, ozel baslikla (baska site gonderemez)."""
+    if istemci != "127.0.0.1" or baslik.get("Host") != "127.0.0.1:%d" % PORT:
+        return None, "Yalnız bu bilgisayardan."
+    if baslik.get("X-LifeOS-Ofis") != "1":
+        return None, "Başlık eksik."
+    try:
+        metin = str(json.loads(govde or "{}").get("metin") or "").strip()
+    except (ValueError, AttributeError):
+        return None, "İstek okunamadı."
+    if not 3 <= len(metin) <= 2000:
+        return None, "İstek 3 ile 2000 karakter arasında olmalı."
+    return metin, None
+
+
 def durum():
     ag_dal = git("rev-parse", "--abbrev-ref", "HEAD", kok=AG) if AG.exists() else None
     ag_degisen = git("status", "--porcelain", kok=AG) if AG.exists() else None
@@ -160,7 +180,10 @@ def durum():
         gorevler.append(g)
     return {"zaman": int(time.time()), "gorevler": gorevler, "ajanlar": ajanlar, "pano": pano(gorevler, ajanlar),
             "ofis": AJAN.uyeler(ajanlar), "sinir": {"is": AJAN.MAX_IS, "baglam": AJAN.BAGLAM_SINIR},
-            "kanca": AJAN.kanca_kurulu(),
+            "kanca": AJAN.kanca_kurulu(), "pilot": PILOT.ozet(),
+            "testler": [t for t in (TESTCI.son_ozet(k.name) for k in sorted(TESTCI.klasor().glob("*"), reverse=True)
+                                    if k.is_dir()) if t][:4],
+            "istekler": PILOT.jsonl_oku("istekler.jsonl", 5),
             "yuva": {"dolu": sum(1 for a in ajanlar if a.get("acik")), "toplam": AJAN.YUVA_SAY},
             "antigravity": {"acik": sunucu_acik(), "klasor": str(AG), "var": AG.exists(), "dal": ag_dal,
                             "degisen": len(ag_degisen.splitlines()) if ag_degisen else 0}}
@@ -239,16 +262,37 @@ pre{ white-space:pre-wrap; word-break:break-word; margin:8px 0 0; font:12.5px/1.
 .soru p{ margin:0; font-size:13.5px; } .soru small{ color:var(--ikinci); font-size:12px; }
 dl{ display:grid; grid-template-columns:auto 1fr; gap:3px 12px; margin:8px 0 0; font-size:12.5px; } dt{ color:var(--ikinci); } dd{ margin:0; word-break:break-all; }
 code{ font:12px ui-monospace, Consolas, monospace; }
+.tablo{ width:100%; border-collapse:collapse; font-size:12px; margin-top:10px; } .tablo th{ font-weight:500; color:var(--ikinci); text-align:center; padding:4px 2px; }
+.tablo th:first-child{ text-align:left; } .tablo td{ text-align:center; padding:5px 2px; border-top:1px solid var(--cizgi); } .tablo tbody th{ text-align:left; border-top:1px solid var(--cizgi); }
+.hucre{ display:inline-block; width:9px; height:9px; border-radius:50%; box-shadow:inset 0 0 0 1.5px var(--cizgi); }
+.hucre.yesil{ background:var(--iyi); box-shadow:none; } .hucre.kirmizi{ background:var(--kotu); box-shadow:none; } .hucre.kosulamadi{ background:var(--ucuncu); box-shadow:none; }
+.model{ display:grid; grid-template-columns:90px 1fr auto; gap:12px; align-items:center; font-size:12.5px; padding:7px 0; border-top:1px solid var(--cizgi); }
+.model:first-child{ border-top:0; } .model b{ font-weight:600; } .model small{ color:var(--ikinci); }
+.model .olcek-satir{ grid-template-columns:1fr auto; color:var(--ikinci); }
+.iste{ display:grid; gap:8px; } .iste textarea{ font:inherit; color:inherit; background:var(--kart); border:0; border-radius:10px; padding:10px 12px; min-height:64px;
+  resize:vertical; box-shadow:inset 0 0 0 1px var(--cizgi); } .iste textarea:focus-visible{ outline:2px solid var(--vurgu); outline-offset:1px; }
+.iste-alt{ display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--ikinci); }
+.iste button{ font:inherit; font-weight:600; color:#fff; background:var(--vurgu); border:0; border-radius:999px; padding:6px 16px; cursor:pointer; min-height:32px; }
+.iste button:focus-visible{ outline:2px solid var(--vurgu); outline-offset:2px; }
 .rehber{ margin-top:22px; font-size:12.5px; color:var(--ikinci); } .rehber p{ margin:6px 0; }
 </style></head><body><div class="sayfa">
 <header><div><h1>Görev takibi</h1><p class="cumle" id="cumle">Yükleniyor…</p></div><div class="durumcuk" id="durumcuk"></div></header>
+<h2>Otomatik pilot <small>kuyruğu yürütür; birleştirmez, push etmez</small></h2><div id="pilot"></div>
 <h2>Ekip <small>Antigravity'de Claude Code için çalışan roller</small></h2><div class="ekip" id="ekip"></div>
 <h2>İş akışı</h2><div class="pano" id="pano"></div>
 <h2 id="isler-baslik">İşler</h2><div class="isler" id="isler"></div>
+<div id="testler"></div>
+<div id="olcum"></div>
 <div id="sorular"></div>
+<h2>İş iste <small>görev dosyasını Claude Code yazar</small></h2>
+<form class="iste" id="iste"><label for="iste-metin" class="etiket">Ne yapılsın? Kısa yaz; ölçütü ve görevi Claude Code planlar.</label>
+<textarea id="iste-metin" maxlength="2000" required></textarea><div class="iste-alt"><button type="submit">Gönder</button><span id="iste-sonuc" role="status"></span></div>
+<div id="istekler"></div></form>
 <details class="rehber"><summary>Nasıl okunur</summary>
 <p><b>Ekip:</b> Uygulayıcı görevi yapar ve dalını push eder; Denetçi o dalı Claude Code'dan önce inceler ve «temiz» ya da bulgu yazar; Araştırmacı soruları kanıtla cevaplar. Tasarım ve kritik işler Claude Code'da kalır, birleştirmeyi o yapar.</p>
 <p><b>Aynı sohbet:</b> bir rolün sohbeti boşsa, içinde üçten az iş varsa ve bağlamı sınırın altındaysa yeni iş aynı sohbete gider (kuralları yeniden okumaz, önbellek işler). Kartın altındaki çubuk bağlamın ne kadarının dolduğunu, tikler kaçıncı işte olduğunu gösterir; dolunca yeni sohbet açılır.</p>
+<p><b>Pilot:</b> sıradaki görevleri en çok üç paralel başlatır; Denetçi bulgu yazarsa Uygulayıcı'ya geri gönderir (en çok iki tur), Testçi'yi koşturur, sonra işi «hazır» yapar. Birleştirmeyi ve son incelemeyi Claude Code yapar.</p>
+<p><b>Testçi:</b> model değil, betiktir: main ile dalın deneme birleşmesinde üç modülün tam denetimlerini ve uçtan uca denetimi koşar. Yeşil geçti, kırmızı kaldı, gri koşulamadı (port doluydu), boş halka sırada.</p>
 <p><b>Efor:</b> bir çubuk düşük (flash_lite), iki orta (flash), üç yüksek (pro).</p>
 <p><b>Koruma:</b> kanca komutu ajanın klasörüne yönlendirir; ana klasöre, main'e, kişisel veriye ve dış hesaplara dokunan aracı engeller; iş bitmeden ya da push edilmeden durmasına izin vermez.</p></details>
 </div>
@@ -355,6 +399,43 @@ function soruHtml(a){
     + (c.cevap ? '<details' + (hazir ? ' open' : '') + '><summary>Cevap</summary><pre>' + kac(c.cevap) + '</pre></details>' : '') + '</article>';
 }
 
+const EYLEM = { baslat:'başlattı', gozden:'Denetçi istedi', duzelt:'düzeltme gönderdi', test:'Testçi istedi', test_duzelt:'test düzeltmesi gönderdi',
+  kota:'alt modele geçti', hazir:'hazır', birak:'bıraktı', hata:'hata', basla:'başladı', dur:'durdu' };
+function pilotHtml(p){
+  const isler = Object.entries(p.isler || {}).sort((a, b) => (a[1].hazir ? 1 : 0) - (b[1].hazir ? 1 : 0));
+  return '<section class="ajan"><div class="ajan-bas"><b>' + (p.canli ? 'Çalışıyor' : 'Durmuş') + '</b>'
+    + '<span class="tik" role="img" aria-label="bugün ' + p.bugun + ' / ' + p.gunluk + ' iş başlattı">' + Array.from({ length:p.gunluk }, (_, i) => '<i class="' + (i < p.bugun ? 'on' : '') + '"></i>').join('') + '</span>'
+    + '<span class="etiket">bugün ' + p.bugun + ' / ' + p.gunluk + ' iş · en çok ' + p.paralel + ' paralel</span>'
+    + '<span class="asama' + (p.canli ? ' calisiyor' : '') + '">' + (p.canli ? 'Canlı' : 'Kapalı') + '</span></div>'
+    + (isler.length ? '<dl>' + isler.slice(0, 8).map(([no, s]) => '<dt>' + kac(no) + '</dt><dd>' + (s.hazir ? '<b>Hazır</b> · ' : '') + kac(s.sonuc || s.son || 'başladı') + '</dd>').join('') + '</dl>' : '')
+    + (p.kararlar.length ? '<details' + (p.canli ? ' open' : '') + '><summary>Son kararlar</summary><ol class="cizelge">' + p.kararlar.slice().reverse().map(k => '<li class="'
+      + (k.eylem === 'hata' || k.eylem === 'birak' ? 'hata' : 'model') + '"><time>' + saat(k.t * 1000) + '</time><span title="' + kac(k.neden) + '">'
+      + kac((k.no === '-' ? 'Pilot' : k.no) + ' ' + (EYLEM[k.eylem] || k.eylem) + ': ' + k.neden) + '</span></li>').join('') + '</ol></details>' : '')
+    + '<p class="koruma">' + (p.canli ? 'Durdurmak' : 'Başlatmak') + ' için: <code>python tools/ajan.py pilot ' + (p.canli ? 'dur' : 'baslat') + '</code></p></section>';
+}
+const DENETIM = [['derle', 'Derle'], ['runtests', 'Birim'], ['smoke', 'Duman'], ['a11ycheck', 'Erişim'], ['layoutcheck', 'Yerleşim'], ['palettecheck', 'Palet'], ['perfcheck', 'Başarım']];
+const SONUC = { 'yeşil':'yesil', 'kırmızı':'kirmizi', 'koşulamadı':'kosulamadi' };
+function testHtml(t){
+  const bul = (m, ad) => t.adimlar.find(a => a.modul === m && a.ad === ad);
+  const hucre = (m, ad, etiket) => { const a = bul(m, ad);
+    return '<td><span class="hucre ' + (a ? SONUC[a.sonuc] : '') + '" role="img" aria-label="' + kac(m + ' ' + etiket + ': ' + (a ? a.sonuc + ', çıkış ' + a.kod : 'sırada')) + '"'
+      + (a ? ' title="' + kac(a.log) + '"' : '') + '></span></td>'; };
+  const kirmizi = t.adimlar.filter(a => a.sonuc === 'kırmızı').length;
+  const durum = t.durum === 'koşuyor' ? ['calisiyor', 'Koşuyor'] : t.durum === 'çakışma' ? ['sorun', 'Çakışma'] : kirmizi ? ['sorun', kirmizi + ' kırmızı'] : ['inceleme', 'Yeşil'];
+  return '<section class="ajan"><div class="ajan-bas"><b>' + kac(t.no) + '</b><span class="etiket">' + kac(t.dal) + ' @ ' + kac(t.commit) + ' + main ' + kac(t.main) + '</span>'
+    + '<span class="asama ' + durum[0] + '">' + durum[1] + '</span></div>'
+    + (t.durum === 'çakışma' ? '<pre>' + kac(t.birlesme) + '</pre>' : '<table class="tablo"><thead><tr><th scope="col">Modül</th>' + DENETIM.map(d => '<th scope="col">' + d[1] + '</th>').join('') + '</tr></thead><tbody>'
+      + ['AYS', 'SPI', 'ESP'].map(m => '<tr><th scope="row">' + m + '</th>' + DENETIM.map(d => hucre(m, d[0], d[1])).join('') + '</tr>').join('')
+      + '<tr><th scope="row">Uçtan uca</th>' + hucre('kök', 'entegre', 'uçtan uca') + '<td colspan="6"></td></tr></tbody></table>')
+    + '<p class="koruma">Ham çıktı: <code>python tools/ajan.py testler ' + kac(t.no) + '</code></p></section>';
+}
+function olcumHtml(o){
+  const l = Object.entries(o || {}); if(!l.length) return '';
+  return '<h2>Model ölçümü <small>yalnız öneri; efor kararı Claude Code’da</small></h2><section class="ajan">' + l.map(([m, v]) => { const y = Math.round(v.oran * 100);
+    return '<div class="model"><b>' + kac(m) + '</b><span class="olcek-satir"><span class="cubuk" role="img" aria-label="ilk turda temiz yüzde ' + y + ', ' + v.is + ' iş"><i style="width:' + y + '%"></i></span>'
+    + '<span>ilk turda temiz %' + y + '</span></span><small>' + v.is + ' iş · ort. ' + v.ort_tur.toFixed(1).replace('.', ',') + ' tur · ' + Math.max(1, Math.round(v.ort_sure / 60)) + ' dk · ' + bin(v.ort_token) + ' token</small></div>'; }).join('') + '</section>';
+}
+
 async function tazele(){
   let d; try{ d = await (await fetch('/api/durum', { cache:'no-store' })).json(); }catch(e){ document.getElementById('cumle').textContent = 'Durum okunamadı; takip sunucusu kapanmış olabilir.'; return; }
   const ag = d.antigravity, say = k => d.pano.filter(x => x.kolon === k).length;
@@ -370,6 +451,10 @@ async function tazele(){
     + '<span>' + new Date().toLocaleTimeString('tr-TR') + '</span>';
   document.getElementById('ekip').innerHTML = d.ofis.length ? d.ofis.map(u => uyeHtml(u, d.sinir)).join('') : '<p class="bos">Ekipte şu an kimse yok; ilk iş verilince roller açılır.</p>';
   document.getElementById('pano').innerHTML = panoHtml(d.pano);
+  document.getElementById('pilot').innerHTML = pilotHtml(d.pilot);
+  document.getElementById('testler').innerHTML = d.testler.length ? '<h2>Testçi <small>main + dal; üç modül ve uçtan uca</small></h2><div class="isler">' + d.testler.map(testHtml).join('') + '</div>' : '';
+  document.getElementById('olcum').innerHTML = olcumHtml(d.pilot.olcum);
+  document.getElementById('istekler').innerHTML = d.istekler.length ? '<ol class="cizelge">' + d.istekler.slice().reverse().map(x => '<li><time>' + saat(x.t * 1000) + '</time><span title="' + kac(x.metin) + '">' + kac(x.metin) + '</span></li>').join('') + '</ol>' : '';
   const gorev = d.ajanlar.filter(a => a.tur === 'gorev'), acik = gorev.filter(a => a.acik), kapali = gorev.filter(a => !a.acik);
   document.getElementById('isler').innerHTML = (acik.length ? acik.map(a => isHtml(a, d.kanca)).join('') : '<p class="bos">Açık görev yok.</p>')
     + (kapali.length ? '<details><summary>Geçmiş (' + kapali.length + ' görev)</summary>' + kapali.map(a => isHtml(a, d.kanca)).join('') + '</details>' : '');
@@ -380,6 +465,11 @@ async function tazele(){
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-git]'); if(!b) return;
   const h = document.getElementById(b.dataset.git); if(h){ let g = h.parentElement.closest('details'); while(g){ g.open = true; g = g.parentElement.closest('details'); } h.scrollIntoView({ behavior:'smooth' }); } });
+document.getElementById('iste').addEventListener('submit', async e => { e.preventDefault();
+  const alan = document.getElementById('iste-metin'), sonuc = document.getElementById('iste-sonuc');
+  try{ const r = await fetch('/api/istek', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-LifeOS-Ofis':'1' }, body:JSON.stringify({ metin:alan.value }) });
+    const j = await r.json(); sonuc.textContent = j.tamam ? 'Kaydedildi; Claude Code planlayacak.' : j.hata; if(j.tamam){ alan.value = ''; tazele(); }
+  }catch(_){ sonuc.textContent = 'Gönderilemedi; takip sunucusu kapanmış olabilir.'; } });
 tazele(); setInterval(tazele, 5000);
 setInterval(() => fetch('/nabiz', { method:'POST' }).catch(() => {}), 10000);
 </script></body></html>"""
@@ -407,6 +497,13 @@ class Isleyici(BaseHTTPRequestHandler):
     def do_POST(self):
         global son_nabiz
         son_nabiz = time.time()
+        if self.path == "/api/istek":
+            n = min(int(self.headers.get("Content-Length") or 0), 16000)
+            metin, hata = istek_gecerli(self.headers, self.rfile.read(n).decode("utf-8", "replace"), self.client_address[0])
+            if hata:
+                return self._yaz(400, json.dumps({"hata": hata}, ensure_ascii=False), "application/json")
+            PILOT.jsonl_ekle("istekler.jsonl", {"metin": metin, "durum": "yeni"})
+            return self._yaz(200, json.dumps({"tamam": True}), "application/json")
         self._yaz(204, "", "text/plain")
 
     def log_message(self, *a):

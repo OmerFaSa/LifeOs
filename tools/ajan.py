@@ -16,6 +16,8 @@ calisir, iki ajan birbirinin dalini ya da sunucusunu bozmaz.
   python tools/ajan.py cevap <ad>                           son cevabin tam metni
   python tools/ajan.py kapat <ad> [--zorla]                 worktree'yi kaldirir (dal kalir)
   python tools/ajan.py kur [--kaldir]                       Antigravity kancasini (hooks.json) kurar/kaldirir
+  python tools/ajan.py pilot baslat|dur|durum               otomatik pilot (tools/ofis_pilot.py): kuyruk, Denetci turu, Testci
+  python tools/ajan.py testler <no>                         Testci'nin tablosu ve kirmizilarin son satirlari (tools/ofis_test.py)
 
 Ofis: Uygulayici, Arastirmaci, Denetci rolleri. Bir rolun konusmasi bos, kisa ve bagli
 oldugu surece sonraki is ayni konusmaya mesajla gider (--yeni zorla yenisini acar).
@@ -801,6 +803,10 @@ def rapor(ad, satir_siniri=250):
         print("== Denetçi (%s): %s" % (dn.get("model"), (dn["canli"].get("cevap") or "cevap yok").strip()[:3000]))
     else:
         print("== Denetçi: yok")
+    import ofis_test                                   # Testci'nin ham tablosu (varsa): ajan ozeti degil
+    t = ofis_test.son_ozet(ad)
+    if t:
+        print("== " + ofis_test.tablo(t))
     gorev = git("show", "%s:%s/%s" % (dal, GOREVLER, x["gorev"]), kontrol=False) or ""
     print("== Sonuç:\n" + (gorev.split("## Sonuç", 1)[-1].strip()[:2000] if "## Sonuç" in gorev else "(yok)"))
     print("== Diff özeti (main...%s):\n%s" % (dal, git("diff", "--stat", "main..." + dal, kontrol=False)))
@@ -840,6 +846,12 @@ def main(argv):
     elif k == "cevap" and argv:
         h = {x["ad"]: x for x in hepsi()}
         print((h.get(argv[0]) or {}).get("canli", {}).get("cevap") or "Henüz cevap yok.")
+    elif k == "pilot":
+        import ofis_pilot
+        ofis_pilot.komut(argv)
+    elif k == "testler" and argv:
+        import ofis_test
+        print(ofis_test.tablo(ofis_test.son_ozet(argv[0])))
     elif k == "durum":
         h = hepsi()
         if "--json" in argv:

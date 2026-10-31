@@ -215,6 +215,11 @@ jobs:
       - name: Ajan okuyucusu ve istemi
         run: python3 tools/ajan_test.py
 
+      # OFIS PILOTU (2026-10-31). Pilot kuyrugu yurutur (Denetci turu, Testci, kota dususu);
+      # birlestirmez, push etmez. Karar tablosu saf islevdir; tur sahte ajanlarla sinanir.
+      - name: Ofis pilotu ve Testçi
+        run: python3 tools/ofis_pilot_test.py
+
       - name: Ölü CSS aracının sınaması
         run: python3 tools/olucss.py --sina
 

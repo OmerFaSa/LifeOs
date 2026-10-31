@@ -43,6 +43,19 @@ if p["006"]["cumle"] != "Denetçi: 2 bulgu" or not p["006"]["sorun"] or G.denetc
     hata.append("denetci karari panoda: %r" % p["006"])
 if not p["003"]["sorun"] or p["002"]["sorun"]:
     hata.append("sorun isareti yalniz sorunlu ajanda")
+# is iste kutusu: yalniz bu bilgisayardan, ozel baslikla; baska site (baslik yok) ya da DNS yeniden baglama (Host) reddedilir
+iyi = {"Host": "127.0.0.1:%d" % G.PORT, "X-LifeOS-Ofis": "1"}
+for ad, (b, g, ip), beklenen in (
+        ("gecerli", (iyi, '{"metin": " Takvime tatil ekle "}', "127.0.0.1"), ("Takvime tatil ekle", None)),
+        ("baslik yok", ({"Host": iyi["Host"]}, '{"metin": "abc"}', "127.0.0.1"), (None, "Başlık eksik.")),
+        ("baska host", (dict(iyi, Host="kotu.site:%d" % G.PORT), '{"metin": "abc"}', "127.0.0.1"), (None, "Yalnız bu bilgisayardan.")),
+        ("disaridan", (iyi, '{"metin": "abc"}', "192.168.1.5"), (None, "Yalnız bu bilgisayardan.")),
+        ("json degil", (iyi, "metin=abc", "127.0.0.1"), (None, "İstek okunamadı.")),
+        ("dizi", (iyi, "[1]", "127.0.0.1"), (None, "İstek okunamadı.")),
+        ("kisa", (iyi, '{"metin": "a"}', "127.0.0.1"), (None, "İstek 3 ile 2000 karakter arasında olmalı.")),
+        ("uzun", (iyi, '{"metin": "%s"}' % ("a" * 2001), "127.0.0.1"), (None, "İstek 3 ile 2000 karakter arasında olmalı."))):
+    if G.istek_gecerli(b, g, ip) != beklenen:
+        hata.append("istek %s: %r" % (ad, G.istek_gecerli(b, g, ip)))
 for s in sorted((KOK / G.GOREVLER).glob("[0-9][0-9][0-9]-*.md")):
     g = G.gorev_oku(s.read_text(encoding="utf-8"))
     if not (g["baslik"] and g["dal"].startswith("ag/")):

@@ -66,6 +66,8 @@ python tools/ajan.py cevap 004                  bu işin son cevabı
 python tools/ajan.py mesaj 004 "…"              işe ek talimat (aynı sohbet)
 python tools/ajan.py kapat 004                  klasörü kaldırır, dal kalır
 python tools/ajan.py kur [--kaldir]             Antigravity koruma kancasını kurar/kaldırır
+python tools/ajan.py pilot baslat|dur|durum     otomatik pilot: sırayı yürütür, birleştirmez
+python tools/ajan.py testler 004                Testçi tablosu ve kırmızıların son satırları
 ```
 
 - **Aynı sohbette devam:** bir rolün sohbeti boşsa, içinde 3'ten az iş varsa
@@ -89,6 +91,20 @@ python tools/ajan.py kur [--kaldir]             Antigravity koruma kancasını k
   aracın testi «yok» denmişti, vardı).
 - Antigravity'nin adresi ve CSRF anahtarı çalışan dil sunucusundan okunur;
   hiçbir dosyaya yazılmaz. Durum `LifeOs-ajan\ajanlar.json`'dadır (depoda değil).
+
+## Otomatik pilot ve Testçi
+
+Pilot (`tools/ofis_pilot.py`) Claude Code beklemeden kuyruğu yürütür: «bekliyor»
+görevleri (en çok 3 paralel, günde 8) başlatır, Denetçi bulgusunu Uygulayıcı'ya
+geri gönderir (en çok 2 tur), Testçi'yi koşturur, kırmızıyı bir kez geri
+gönderir, sonra işi «hazır» yapar. Kota hatasında işi bir kez alt modelle
+yeniden dener. Birleştirmez, push etmez, görev yazmaz. Testçi
+(`tools/ofis_test.py`) bir model değil, betiktir: main + dal birleşmesinde
+AGENTS.md §2 tam denetimlerini koşar, ham çıktıyı `LifeOs-ajan/test/<no>/`'ya
+yazar. Karar tablosu ve ayrıntı: `belgeler/ekip/OFIS.md` §7.
+
+Uygulayıcı'ya Testçi'den düzeltme gelirse: ham çıktıyı oku, aynı denetimi
+**kendi yuva portunla** koş (ör. `cd AYS && node tools/smoke.js 4711`).
 
 ## Koruma kancası ve araçlar (`tools/ajan_kanca.py`)
 

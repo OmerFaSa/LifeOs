@@ -16,6 +16,8 @@ sürer. Üç rol, her biri bir Antigravity sohbeti:
 | Uygulayıcı | `baslat NNN` | `belgeler/ekip/gorevler/NNN-*.md`'yi kendi klasöründe yapar, test koşar, `ag/NNN-…` dalını push eder |
 | Denetçi | `gozden NNN` (teslimde kendiliğinden) | Dalı senden önce inceler: `KARAR: temiz` ya da AGENTS.md §4 biçiminde bulgu |
 | Araştırmacı | `sor "…"` | Salt okunur; kanıtla (dosya:satır) cevap |
+| Testçi (betik, model değil) | `tools/ofis_test.py NNN` | main + dalın deneme birleşmesinde §2 tam denetimleri; ham çıktı `LifeOs-ajan/test/NNN/` |
+| Pilot (arka plan süreci) | `pilot baslat` | Kuyruğu yürütür: başlatır, Denetçi turu, Testçi, «hazır» işareti (§7) |
 
 Koruma kancası (`tools/ajan_kanca.py`, kullanıcı onayıyla kurulu) ajanı
 klasörüne kilitler, main'e, ana klasöre, kişisel veriye ve kullanıcının dış
@@ -72,6 +74,13 @@ python tools/ajan.py kapat 005
 - **Kendi oturumun uzadıysa** (bağlam >~200 bin) kullanıcıya yeni oturum öner:
   her şey dosyada ve hafızada, taze oturum aynı işi ~10 kat ucuza yapar.
 
+**Pilotla (önerilen, 2026-10-31):** görev dosyalarını yaz, commit + push,
+`python tools/ajan.py pilot baslat`. Pilot sıradakileri başlatır, Denetçi
+bulgusunu geri gönderir, Testçi'yi koşturur; iş «hazır» olunca tek çağrı:
+`python tools/ajan.py rapor NNN` (Sonuç, Denetçi, Testçi tablosu, diff).
+Kırmızı varsa `testler NNN` ham çıktının son satırlarını verir. Gerisi aynı:
+diff'i oku, birleştir, §2'yi main'de koş, push, `kapat`.
+
 ## 5. Kalite kuralları (pazarlık yok)
 
 - Denetçi'nin «temiz»i birleştirme izni değildir: diff'i oku, §2 denetimlerini koş.
@@ -91,3 +100,58 @@ python tools/ajan.py kapat 005
   ettirir. «turu bitti» ≠ teslim; `rapor` dalı gösterir.
 - Ajan worktree'sinde `olucss.py` güvenilmez (derleme dosyası yok); main'de ölç.
 - Antigravity kapalıysa komutlar «Antigravity açık değil» der; kullanıcıdan aç.
+- Testçi'nin portları senin denetimlerinle aynıdır (sabit): o koşarken sen
+  §2'yi koşarsan ikiniz de «koşulamadı» (çıkış 2) alırsınız. `LifeOs-ajan/test/kilit`
+  varsa bekle.
+
+## 7. Otomatik pilot, Testçi, ölçüm
+
+**Pilot** (`tools/ofis_pilot.py`, `ajan.py pilot baslat|dur|durum`): pythonw ile
+ayrık çalışır, 30 sn'de bir tur atar, nabzını `LifeOs-ajan/pilot.nabiz`'e yazar.
+Her tur: koruma kancası kurulu değilse ya da Antigravity kapalıysa **durur**;
+main'e commit edilmiş «bekliyor» görevlerden en çok 3 paralel, günde en çok 8
+başlatır (paralel işler aynı sohbeti paylaşmaz). Her işte karar tablosu
+(`adim()`, saf işlev, testli):
+
+| Durum | Pilotun adımı |
+|---|---|
+| Uygulayıcı çalışıyor | bekler |
+| «sorun» (hata, sessiz) | bırakır → hazır («bırakıldı: …») |
+| kota/RESOURCE_EXHAUSTED hatası | bir kez alt modelle yeniden (pro→flash→flash_lite); klasördeki yarım iş kalır |
+| teslim (bitti + commit + push) bu commit'te denetlenmedi | `gozden` (Denetçi aynı anda tek iş: ortak klasör) |
+| Denetçi bulgu, tur < 2 | bulguyu `mesaj` ile Uygulayıcı'ya; yeni commit gelince yeniden `gozden` |
+| temiz ya da tur bitti, bu commit test edilmedi | Testçi (kilit boşsa) |
+| Testçi kırmızı, test turu < 1 | ham log yolu ve son satırlarla düzeltme mesajı |
+| koşulamadı (port dolu) | en çok 3 kez yeniden |
+| geri kalan | **hazır**: `pilot.json`, `bildirim.jsonl`, `olcum.jsonl` |
+
+Pilot ASLA birleştirmez, push etmez, görev yazmaz; işi kapatmaz (klasör
+`kapat`'a kadar durur). Her kararı `pilot.jsonl`'dedir; `pilot durum`
+özetler. **Pilotun «hazır»ı birleştirme izni değildir**: §5 aynen geçerli.
+
+**Testçi** (`tools/ofis_test.py NNN`, LLM yok): `LifeOs-ajan/ofis-test`
+(ayrık) klasörünü main + dalın `merge --no-ff` birleşmesine getirir (push yok,
+dal yok), üç modülü derler, her modülde runtests, smoke, a11ycheck,
+layoutcheck, palettecheck, perfcheck; sonra entegre (~20–30 dk). Her adımın ham
+çıktısı `LifeOs-ajan/test/NNN/<modül>-<ad>.log`, tablo `ozet.json`. Aynı anda
+tek koşu (`test/kilit`); çıkış 2 «koşulamadı»dır, kırmızı değildir. Elle de
+koşulur (arka planda): `python tools/ofis_test.py NNN`.
+
+**Ölçüm:** her hazır iş `olcum.jsonl`'e efor, model, Denetçi'nin ilk kararı,
+tur, token, süre ve sonucu yazar. Görev Takibi model başına «ilk turda temiz»
+oranını gösterir; yalnız öneridir, eforu sen seçersin.
+
+**Görev Takibi:** pilot paneli (canlı mı, son kararlar, başlat/durdur komutu),
+Testçi tablosu (renk: yeşil geçti, kırmızı kaldı, gri koşulamadı), model
+ölçümü ve «iş iste» kutusu. Kutu yalnız 127.0.0.1'den ve `X-LifeOS-Ofis`
+başlığıyla yazar (başka site gönderemez); istek `LifeOs-ajan/istekler.jsonl`'e
+düşer, görevi sen planlarsın.
+
+**Telefon bildirimi: yok (2026-10-31 bakıldı).** iPhone'daki bildirimler
+yereldir: modülün web kodu telefonda `BildirimKoprusu.swift` ile
+`UNUserNotificationCenter`'a kurar. PC sunucusundan (`sistem/hesap.py`)
+telefona itme yolu (APNs vb.) yoktur; gelen kutusu ters yönlüdür (telefon →
+PC). Uydurma kurulmadı; «hazır» Görev Takibi'nde ve `bildirim.jsonl`'dedir.
+
+**Oturum açılışında kendiliğinden başlatma** (zamanlanmış görev ya da
+Başlangıç klasörü) kalıcı bir ayardır: kullanıcı açıkça istemeden kurulmaz.
