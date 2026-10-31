@@ -1,6 +1,6 @@
 # 012 · SPİ öğün girişinde buçuklu porsiyon
 
-**Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
+**Durum:** bitti   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/012-spi-porsiyon`
 **Efor:** orta   <!-- düşük (flash_lite = Gemini 3.8 Flash) | orta (flash) | yüksek (pro; flash ile aynı model) -->
 **Kabul testi:** `tools/spi_porsiyon_kabul_test.py`
@@ -31,7 +31,10 @@ okuyucudan gelir: `LIFEOS.TurkceSayi.miktar(metin)` → `{ sayi, bas, son }` (br
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:**
+- **Ne değişti:** SPI/src/js/core/parse.js içinde miktar yardımcısı eklendi; parseMeal miktarı çağrı anında window.LIFEOS.TurkceSayi.miktar ile okuyor, okuyucu yoksa bugünkü kurala (rakam ve sayı sözcüğü) dönüyor. SPI/src/tests/parse.test.js dosyasına buçuklu/çeyrek porsiyon ve yedek kural testleri eklendi.
 - **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+  - python tools/spi_porsiyon_kabul_test.py -> spi porsiyon kabul: bucuklu ve ceyrek miktar, gram ve kalori olceklenir; eski bicimler.
+  - cd SPI && node tools/runtests.js 4742 -> 2888/2889 gecti  ·  1 kaldi
+  - python tools/yazi.py --denetle -> Yazı denetimi: temiz
+- **Kabul testi:** tools/spi_porsiyon_kabul_test.py -> spi porsiyon kabul: bucuklu ve ceyrek miktar, gram ve kalori olceklenir; eski bicimler. (geçti)
+- **Açık kalan:** SPI runtests çıktısındaki 1 kalan ('king.test.js' sesli sohbet uyanma), görev öncesinde de aynı şekilde kırmızıydı ve dokunulmayan brand/ortak bölgesine aittir; bu görev kapsamına giren bir açık yoktur.
