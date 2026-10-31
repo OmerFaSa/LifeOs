@@ -1,6 +1,6 @@
 # 004 · Ölü CSS aracının sınaması CI'da
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/004-olucss-sinama`
 **Efor:** düşük
 
@@ -32,3 +32,6 @@ sınamaya kat.
 - `python tools/olucss.py` (davranış değişmedi: «Toplam: 0 olu secici»)
 
 ## Sonuç
+- `tools/olucss.py` içerisindeki `sina()` işlevine `ust_virgulle_bol` testleri (`.a, .b`, `:is(.a, .b), .c`, `[data-x="a,b"], .c`, `.a`) eklendi.
+- `.github/workflows/ci.yml` dosyasına «Ölü CSS aracının sınaması» (`python3 tools/olucss.py --sina`) adımı eklendi.
+- `python tools/olucss.py --sina` çalıştırıldı ve `olucss sinama: temiz` çıktısı alındı.
