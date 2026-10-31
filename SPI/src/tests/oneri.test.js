@@ -380,6 +380,8 @@
       /* Eski biçimler */
       expect(SP.Quick.parseMove('45 dk yürüyüş').minutes).toBe(45);
       expect(SP.Quick.parseMove('1 saat koşu').minutes).toBe(60);
+      expect(SP.Quick.parseMove('1 s yürüyüş').minutes).toBe(60);
+      expect(SP.Quick.parseMove('2 s koşu').minutes).toBe(120);
       expect(SP.Quick.parseMove('2,5 saat bisiklet').minutes).toBe(150);
       expect(SP.Quick.parseMove('90 dakika yürüyüş').minutes).toBe(90);
 

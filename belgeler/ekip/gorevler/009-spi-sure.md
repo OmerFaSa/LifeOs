@@ -33,7 +33,7 @@ düşüyor. Kullanıcı konuştuğu gibi yazar; ölçülen dakika doğru yazılm
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:** SPI/src/js/core/quickentry.js içinde tek süre ayrıştırıcı parseSure eklendi; bileşik («1 saat 20 dk»), buçuk («1 buçuk saat», «bir buçuk saat»), yarım («yarım saat»), çeyrek («çeyrek saat»), yazıyla sayılar (bir…on) ve tek saat/dakika kalıpları desteklendi; parseMove ve parseNap bu yardımcıya bağlandı; SPI/src/tests/oneri.test.js dosyasına yeni süre kenar durumları testleri eklendi.
+- **Ne değişti:** SPI/src/js/core/quickentry.js içinde tek süre ayrıştırıcı parseSure eklendi; bileşik («1 saat 20 dk»), buçuk («1 buçuk saat», «bir buçuk saat»), yarım («yarım saat»), çeyrek («çeyrek saat»), yazıyla sayılar (bir…on) ve tek saat/dakika kalıpları («1 saat», «1 s», «45 dk») desteklendi; Denetçi bulgusu doğrultusunda tek saatte «s» birimi için regex literalindeki çift ters slash (/^\d/) düzeltildi (/^\d/); parseMove ve parseNap bu yardımcıya bağlandı; SPI/src/tests/oneri.test.js dosyasına «1 s yürüyüş» ve «2 s koşu» dahil yeni süre kenar durumları testleri eklendi.
 - **Koşan testler:**
   - python tools/spi_sure_kabul_test.py -> spi sure kabul: bilesik, yarim, bucuk, ceyrek, yaziyla sayi; eski bicimler; sure olmayan.
   - python tools/yazi.py --denetle -> Yazı denetimi: temiz

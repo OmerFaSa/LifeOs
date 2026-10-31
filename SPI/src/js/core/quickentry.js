@@ -180,7 +180,7 @@ SP.Quick = (function(){
     const ms = n.match(TEK_SAAT_RE);
     if(ms){
       const birim = ms[2].toLowerCase();
-      if(birim !== 's' || /^\\d/.test(ms[1])){
+      if(birim !== 's' || /^\d/.test(ms[1])){
         const sa = sayiVeyaYazi(ms[1]);
         if(sa != null && sa >= 0){
           const top = Math.round(sa * 60);
