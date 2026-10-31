@@ -199,6 +199,75 @@ l_rec_id = I.ics_coz(ICS_RECURRENCE_ID, SIMDI)
 bekle("haftalik ders + bir haftasi tasinmis tek gorunur ve tasindigi saatte",
       [x["bas"] for x in l_rec_id] == ["2026-11-02T09:00", "2026-11-04T15:00", "2026-11-09T09:00", "2026-11-11T09:00"])
 
+# Suren etkinlik testleri (007-takvim-suren)
+ICS_SUREN_HAFTALIK = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20261023T220000\r
+DTEND:20261024T040000\r
+RRULE:FREQ=WEEKLY;BYDAY=FR\r
+SUMMARY:Cuma gecesi nöbeti\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+# SIMDI = 2026-10-31 10:00 (Cumartesi), dun geceki cuma nobeti (30 Ekim 22:00 -> 31 Ekim 04:00) bugun suruyor
+l_sur_haf = I.ics_coz(ICS_SUREN_HAFTALIK, datetime.datetime(2026, 10, 31, 10, 0), ufuk=7)
+bekle("haftalik tekrarda dun baslayip bugun suren ornek",
+      len(l_sur_haf) >= 1 and l_sur_haf[0]["bas"] == "2026-10-30T22:00" and l_sur_haf[0]["bit"] == "2026-10-31T04:00")
+
+ICS_SUREN_AYLIK = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20260929T100000\r
+DTEND:20261002T100000\r
+RRULE:FREQ=MONTHLY\r
+SUMMARY:Aylık 3 günlük kamp\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+# 31 Ekim'de kosunca, 29 Ekim'de baslayip 1 Kasim'a dek suren ornek gelir
+l_sur_ay = I.ics_coz(ICS_SUREN_AYLIK, datetime.datetime(2026, 10, 31, 10, 0), ufuk=14)
+bekle("aylik tekrarda suren cok gunluk ornek",
+      len(l_sur_ay) >= 1 and l_sur_ay[0]["bas"] == "2026-10-29T10:00" and l_sur_ay[0]["bit"] == "2026-11-01T10:00")
+
+ICS_SUREN_EXDATE = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20261025T230000\r
+DTEND:20261026T010000\r
+RRULE:FREQ=DAILY\r
+EXDATE:20261030T230000\r
+SUMMARY:Gece çalışması\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+# 30 Ekim gecesi ornegi EXDATE ile dislanmis -> 31 Ekim'de gorunmez, 31 Ekim gecesi gelir
+l_sur_ex = I.ics_coz(ICS_SUREN_EXDATE, datetime.datetime(2026, 10, 31, 10, 0), ufuk=2)
+bekle("EXDATE ile dislanan suren ornek gelmez",
+      "2026-10-30T23:00" not in [x["bas"] for x in l_sur_ex] and "2026-10-31T23:00" in [x["bas"] for x in l_sur_ex])
+
+ICS_UFUK_SINIRI = """BEGIN:VCALENDAR\r
+BEGIN:VEVENT\r
+DTSTART:20261102T100000\r
+DTEND:20261102T110000\r
+SUMMARY:Tam ufuk bitisi\r
+END:VEVENT\r
+BEGIN:VEVENT\r
+DTSTART:20261102T090000\r
+DTEND:20261102T120000\r
+SUMMARY:Ufuk sonunu asan\r
+END:VEVENT\r
+BEGIN:VEVENT\r
+DTSTART:20261030T100000\r
+DTEND:20261031T000000\r
+SUMMARY:Gece yarisinda bitmis\r
+END:VEVENT\r
+END:VCALENDAR\r
+"""
+# simdi = 31 Eki 10:00, ufuk = 2 gun -> son = 2 Kasim 10:00.
+l_ufuk = I.ics_coz(ICS_UFUK_SINIRI, datetime.datetime(2026, 10, 31, 10, 0), ufuk=2)
+adlar = [x["ad"] for x in l_ufuk]
+bekle("ufuk sonunu asan gelir", "Ufuk sonunu asan" in adlar)
+bekle("tam ufuk bitisinde baslayan gelmez", "Tam ufuk bitisi" not in adlar)
+bekle("bugun 00:00'da biten gelmez", "Gece yarisinda bitmis" not in adlar)
+
 
 class Sahte:
     def __init__(self, komut, yol, ip="127.0.0.1", govde=None, baslik=True):
