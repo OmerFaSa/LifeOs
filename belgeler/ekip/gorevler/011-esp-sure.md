@@ -1,6 +1,6 @@
 # 011 · ESP serbest oturumda günlük Türkçe süreler
 
-**Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
+**Durum:** bitti   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/011-esp-sure`
 **Efor:** orta   <!-- düşük (flash_lite = Gemini 3.8 Flash) | orta (flash) | yüksek (pro; flash ile aynı model) -->
 **Kabul testi:** `tools/esp_sure_kabul_test.py`
@@ -33,7 +33,7 @@ ESP Bugün'deki serbest giriş (`ESP.Parse.parseSession`) «yarım saat İspanyo
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** ESP.Parse.parseSession ve ESP.Komut.dakika süre okuması için window.LIFEOS.TurkceSayi'ye bağlandı (çağrı anında erişim; okuyucu yoksa yerel SURE kuralı yedek); ESP/src/tests/parse.test.js ve plans.test.js içine yeni süre kenar durumları eklendi.
+- **Koşan testler:** python tools/esp_sure_kabul_test.py -> esp sure kabul: yarim, bucuk, ceyrek, yaziyla; bilesik ve eski bicimler; sayim korunur. · python tools/yazi.py --denetle -> Yazı denetimi: temiz · cd ESP && node tools/runtests.js 4733 -> 2596/2597 gecti  ·  1 kaldi
+- **Kabul testi:** python tools/esp_sure_kabul_test.py -> esp sure kabul: yarim, bucuk, ceyrek, yaziyla; bilesik ve eski bicimler; sayim korunur.
+- **Açık kalan:** runtests.js 4733'teki 1 kaldi (King 3.0 uyanma asenkron zamanlayıcı testi; dokunulmayan ortak kod).

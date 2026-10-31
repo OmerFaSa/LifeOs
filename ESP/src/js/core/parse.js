@@ -99,16 +99,21 @@ ESP.Parse = (function(){
       /* Disiplin — uzundan kisaya ilk eslesme. */
       const hit = INDEX.find(x => n.indexOf(x.alias) >= 0);
 
-      /* Sure — saat once, dakika sonra. Ikisi de varsa toplanir
-         ("1 saat 20 dakika"). */
+      /* Sure — ortak TurkceSayi okuyucusu (cagri aninda); yoksa yerel kural yedek. */
       let dakika = null;
-      SURE.forEach(s => {
-        const m = parca.match(s.re);
-        if(m){
-          const v = sayi(m[1]);
-          if(v != null) dakika = (dakika || 0) + v * s.carpan;
-        }
-      });
+      const ts = window.LIFEOS && window.LIFEOS.TurkceSayi;
+      const sBul = ts && typeof ts.sure === 'function' ? ts.sure(parca) : null;
+      if(sBul && sBul.dakika != null){
+        dakika = sBul.dakika;
+      } else {
+        SURE.forEach(s => {
+          const m = parca.match(s.re);
+          if(m){
+            const v = sayi(m[1]);
+            if(v != null) dakika = (dakika || 0) + v * s.carpan;
+          }
+        });
+      }
 
       /* Ikinci sayi — kelime / kart / sayfa / tekrar. */
       let count = null, countWhat = null;

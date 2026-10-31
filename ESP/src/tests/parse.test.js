@@ -53,6 +53,47 @@
       expect(r.rows[0].count).toBe(600);
     });
 
+    it('günlük Türkçe süreler (TurkceSayi): yarım, buçuk, çeyrek, yazıyla ve bileşik', () => {
+      const ornekler = [
+        ['yarım saat İspanyolca', 'lang', 30],
+        ['bir buçuk saat İspanyolca', 'lang', 90],
+        ['1 buçuk saat gitar', 'music', 90],
+        ['çeyrek saat gitar', 'music', 15],
+        ['iki saat İngilizce', 'lang', 120],
+        ['1 saat 20 dk gitar', 'music', 80],
+        ['30 dk İspanyolca', 'lang', 30],
+        ['45 dakika kitap okudum', 'reading', 45],
+      ];
+      ornekler.forEach(([metin, disc, dk]) => {
+        const r = P.parseSession(metin);
+        expect(r.rows.length).toBe(1);
+        expect(r.rows[0].disc).toBe(disc);
+        expect(r.rows[0].minutes).toBe(dk);
+      });
+    });
+
+    it('süre ve sayım birlikte korunur', () => {
+      const r = P.parseSession('30 dk İspanyolca 20 kelime');
+      expect(r.rows.length).toBe(1);
+      expect(r.rows[0].disc).toBe('lang');
+      expect(r.rows[0].minutes).toBe(30);
+      expect(r.rows[0].count).toBe(20);
+      expect(r.rows[0].countWhat).toBe('kelime');
+    });
+
+    it('okuyucu yoksa bugünkü SURE kuralı yedek olarak çalışır', () => {
+      const yedek = window.LIFEOS && window.LIFEOS.TurkceSayi;
+      try {
+        if(window.LIFEOS) delete window.LIFEOS.TurkceSayi;
+        const r = P.parseSession('45 dakika gitar');
+        expect(r.rows.length).toBe(1);
+        expect(r.rows[0].disc).toBe('music');
+        expect(r.rows[0].minutes).toBe(45);
+      } finally {
+        if(window.LIFEOS && yedek) window.LIFEOS.TurkceSayi = yedek;
+      }
+    });
+
     it('anlasilmayan satir ATILMAZ — «eşleşmedi» olarak doner', () => {
       const r = P.parseSession('bugün hava çok güzeldi');
       expect(r.rows.length).toBe(0);

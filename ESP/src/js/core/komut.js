@@ -63,6 +63,11 @@ ESP.Komut = (function(){
   const SAYI = { yarım:0.5, bir:1, iki:2, 'üç':3, 'dört':4, 'beş':5 };
 
   function dakika(t){
+    const ts = window.LIFEOS && window.LIFEOS.TurkceSayi;
+    if(ts && typeof ts.sure === 'function'){
+      const s = ts.sure(t);
+      if(s && s.dakika != null) return Math.round(s.dakika);
+    }
     const m = t.match(SURE_RE);
     if(!m) return null;
     let n = SAYI[m[1]] != null ? SAYI[m[1]] : Number(String(m[1]).replace(',', '.'));
