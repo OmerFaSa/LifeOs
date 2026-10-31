@@ -8,3 +8,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 001 (31.10.2026): Bir kaydın kopyalarını üreten kodda (tekrar kuralı, açılım) aynı kimlikle gelen istisna kaydı (RECURRENCE-ID gibi) açılımdan çıkarılmalı; yoksa aynı an iki kez görünür. Testte istisnalı bir örnek bulunsun.
 - 003 (31.10.2026): «Sonuç»ta test çıktısı satırı ve «Açık kalan» boş bırakılmaz; komut -> çıktı satırı aynen yazılır.
 - 006 (31.10.2026): veri/ham/ git'e girmez (gitignore), ajan klasöründe yoktur: 'kaynak dogrulanamaz' ihlalleri orada sahte çıkar; böyle sayıları «Açık kalan»a «ana klasörde doğrulanmalı» diye yaz, «eski ihlal» deme.
+- 008 (01.11.2026): Test yazarken kodun bugünkü çıktısını beklenen değer yapma: beklenen değer ölçütten ve docstring'den gelir; kod uymuyorsa testi kırmızı bırakıp hatayı düzelt ya da «Açık kalan»a yaz. Görev dosyasında yalnız Durum ve Sonuç değişir.

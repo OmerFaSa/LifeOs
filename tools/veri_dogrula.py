@@ -91,7 +91,7 @@ def sayi_govde(x):
 
 def birim_kalip(birim):
     """(once, sonra): sayinin onunde ve ardinda gecmesi gereken birim."""
-    b = kucuk(str(birim or ""))
+    b = kucuk(str(birim or "")).replace("μ", "µ")   # Yunan mu (U+03BC) da mikro isareti (U+00B5) sayilir
     if b.startswith("%"):
         return r"%\s*", ""
     if b.startswith("mg"):
@@ -126,6 +126,7 @@ def parcalar(satirlar):
 
 YAKIN = 80                      # ad ile sayi arasi en cok bu kadar karakter
 BASKA_GRUP = re.compile(r"(bebek|çocuk|gebe|emzik|ergen|okul öncesi|yaşlı)")
+DIGER_CINSIYET = {"erkek": "kadın", "kadın": "erkek"}
 
 
 def bul(satirlar, anahtarlar, sayi_l, birim, cinsiyet=None):
@@ -140,9 +141,12 @@ def bul(satirlar, anahtarlar, sayi_l, birim, cinsiyet=None):
         for j, p in sutun[i].items():
             if "....." in p:
                 continue
-            for aday in (p, p + " " + sutun.get(i + 1, {}).get(j, "")):
+            # alt satirla birlestirme tasan hucre icindir: ad bu satirda yoksa baslik satiri sayiyi kendine yazar
+            birlesik = [p + " " + sutun.get(i + 1, {}).get(j, "")] if any(a.search(kucuk(p)) for a in an) else []
+            for aday in [p] + birlesik:
                 k = kucuk(aday)
-                if BASKA_GRUP.search(k) or (cinsiyet and cinsiyet not in k):
+                # parca obur cinsiyetinse alt satirdaki ad onu aklamaz (kadin satirinin degeri erkege yaziliyordu)
+                if BASKA_GRUP.search(k) or (cinsiyet and (cinsiyet not in k or DIGER_CINSIYET.get(cinsiyet, "\0") in kucuk(p))):
                     continue
                 ad_yer = [m.start() for a in an for m in a.finditer(k)]
                 for sr in secenekler:
