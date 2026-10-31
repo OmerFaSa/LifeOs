@@ -215,6 +215,9 @@ jobs:
       - name: Ajan okuyucusu ve istemi
         run: python3 tools/ajan_test.py
 
+      - name: Ölü CSS aracının sınaması
+        run: python3 tools/olucss.py --sina
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç

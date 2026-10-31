@@ -154,6 +154,10 @@ def temizle(css, metin, rapor):
 
 
 def sina():
+    assert ust_virgulle_bol(".a, .b") == [".a", " .b"]
+    assert ust_virgulle_bol(":is(.a, .b), .c") == [":is(.a, .b)", " .c"]
+    assert ust_virgulle_bol('[data-x="a,b"], .c') == ['[data-x="a,b"]', " .c"]
+    assert ust_virgulle_bol(".a") == [".a"]
     metin = "el.className = 'kart kart--' + tur; `ozet${x}__ad`; q('.canli'); 'is-' + a; 'pk-renk' + n"
     css = ("/* c */\n.canli{a:b}\n.olu{a:b}\n.canli, .olu2{a:b}\n.kart--mavi{a:b}\n.pk-renk2{a:b}\n"
            ".x__ad{a:b}\n.is-acik{a:b}\n@media (x){.olu3{a:b}}\n@media (y){.canli{a:b} .olu4{c:d}}\n"
