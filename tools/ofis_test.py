@@ -68,8 +68,9 @@ def adimlar(py="python", kabul=(), python_testleri=()):
     Kabul testi .py'dir; modul JS mantigini tools/kabul_js.py ile Node'da sinar."""
     kabul = [k for k in kabul if k.endswith(".py")]
     out = [("kök", "kabul", [py, "-c", HEPSI] + kabul, ".")] if kabul else []
-    out += [("kök", "python", [py, "-c", HEPSI] + list(python_testleri), ".")] if python_testleri else []
     out += [(m, "derle", [py, "build.py"], m) for m in MODUL]
+    # derlemeden SONRA: dist_sun_test dist'in kaynakla ayni oldugunu ister (2026-11-01, 010'da sahte kirmizi)
+    out += [("kök", "python", [py, "-c", HEPSI] + list(python_testleri), ".")] if python_testleri else []
     out += [(m, d, ["node", "tools/%s.js" % d], m) for m in MODUL for d in DENETIM]
     return out + [("kök", "entegre", ["node", "tools/entegre.js"], ".")]
 

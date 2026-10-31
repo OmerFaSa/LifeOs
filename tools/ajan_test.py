@@ -143,7 +143,7 @@ yasak = ["brand/ortak/cam.css", "AYS/src/css/a.css", "AYS/src/index.html", "AYS/
          "brand/ortak/hareket.js", "SPI/build.py", "AYS/src/sw.js", "sistem/sunucu.py", "sistem/baslat.sh", "HKM/daemon.py",
          "uygulama/ios/App.swift", "GUNCELLE.bat", "tools/ajan.py", "tools/ortak.py", "AGENTS.md", ".github/workflows/ci.yml",
          "./AYS/src/css/b.css", "AYS\\src\\js\\core\\state.js", "SPI/src/js/core/king.js", "ESP/src/tests/hedef.test.js",
-         "AYS/src/js/app.js", "AYS/tools/runtests.js", "tools/kabul_js.py"]
+         "AYS/src/js/app.js", "AYS/tools/runtests.js", "tools/kabul_js.py", "SPI/dist/spi.html", "ESP/src/js/data/build.js"]
 if A.yasak_bolge(izinli):
     hata.append("izinli yol yasak sayildi: %r" % A.yasak_bolge(izinli))
 if [y for y in yasak if not A.yasak_bolge([y])]:

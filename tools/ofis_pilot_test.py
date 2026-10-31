@@ -136,8 +136,9 @@ ci = ("steps:\n  # python3 tools/yorum.py\n  - name: a\n    run: python3 tools/a
       "  - name: c\n    working-directory: HKM\n    run: python3 tools/perf.py\n  - name: d\n    run: |\n      python3 tools/a_test.py\n      python3 tools/d_test.py\n")
 esit("ci python komutlari", T.ci_python(ci), ["tools/a_test.py", "tools/b.py --denetle", "tools/c_test.py", "tools/d_test.py"])
 p_ad = T.adimlar("py", [], ["tools/a_test.py", "tools/b.py --denetle"])
-if p_ad[0][:2] != ("kök", "python") or p_ad[0][2][-1] != "tools/b.py --denetle":
-    hata.append("testci python adimi: %r" % (p_ad[0],))
+p_i = [a[:2] for a in p_ad].index(("kök", "python"))
+if p_i <= max(i for i, a in enumerate(p_ad) if a[1] == "derle") or p_ad[p_i][2][-1] != "tools/b.py --denetle":
+    hata.append("testci python adimi derlemeden sonra olmali: %r" % [a[:2] for a in p_ad][:6])
 k_ad = T.adimlar("py", ["tools/k_test.py", "AYS/x.test.js"])
 if k_ad[0][:2] != ("kök", "kabul") or k_ad[0][2][-1] != "tools/k_test.py" or "AYS/x.test.js" in k_ad[0][2] or len(k_ad) != len(ad) + 1:
     hata.append("testci kabul adimi once ve yalniz .py: %r" % (k_ad[0],))
