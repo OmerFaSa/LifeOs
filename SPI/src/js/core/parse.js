@@ -354,6 +354,29 @@ SP.Parse = (function(){
     return null;
   }
 
+  /* Metindeki miktari okur: ortak TurkceSayi okuyucusu varsa onunla (cagri
+     aninda erisilir), yoksa bugunku kural (rakam, sayi sozcugu) yedektir. */
+  function miktar(chunk){
+    if(!chunk) return null;
+    const okuyucu = typeof window !== 'undefined' && window.LIFEOS && window.LIFEOS.TurkceSayi && window.LIFEOS.TurkceSayi.miktar;
+    if(typeof okuyucu === 'function'){
+      try{
+        const m = okuyucu(chunk);
+        if(m && m.sayi != null && isFinite(m.sayi)) return m.sayi;
+      }catch(_e){}
+    }
+    const digit = chunk.match(/(\d+(?:[.,]\d+)?)/);
+    if(digit){
+      const v = num(digit[1]);
+      if(v != null) return v;
+    }
+    const words = U.norm(chunk).split(/\s+/);
+    for(let i = 0; i < words.length; i++){
+      if(WORD_NUM[words[i]] != null) return WORD_NUM[words[i]];
+    }
+    return null;
+  }
+
   function parseMeal(text){
     const raw = String(text || '').trim();
     if(!raw) return { items:[], unmatched:[], note:'Metin boş.' };
@@ -382,16 +405,8 @@ SP.Parse = (function(){
       if(!foodId){ unmatched.push(chunk); return; }
       const food = SP.FOOD_BY_ID[foodId];
 
-      /* miktar: once rakam, yoksa sayi sozcugu, yoksa 1 */
-      let qty = null;
-      const digit = chunk.match(/(\d+(?:[.,]\d+)?)/);
-      if(digit) qty = num(digit[1]);
-      if(qty == null){
-        const words = U.norm(chunk).split(/\s+/);
-        for(let i = 0; i < words.length; i++){
-          if(WORD_NUM[words[i]] != null){ qty = WORD_NUM[words[i]]; break; }
-        }
-      }
+      /* miktar: ortak TurkceSayi okuyucusu, yoksa bugunku kural, yoksa 1 */
+      let qty = miktar(chunk);
       if(qty == null) qty = 1;
 
       /* Dogrudan gram yazilmis mi? "150 g", "200 gram", "0,3 kg" */
@@ -512,7 +527,7 @@ SP.Parse = (function(){
     return rec;
   }
 
-  return { num, parseLab, parseMeal, matchMarker, matchFood, matchPortion,
+  return { num, miktar, parseLab, parseMeal, matchMarker, matchFood, matchPortion,
     convert, toLabRecord, pastePlan, rowsToSave, findDate, bindLine,
     ALIAS_INDEX, WORD_NUM, rebuildFoodIndex,
     get FOOD_ALIAS(){ return FOOD_ALIAS; } };

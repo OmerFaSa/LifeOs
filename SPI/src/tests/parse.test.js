@@ -207,6 +207,36 @@
       expect(r.items[0].g).toBe(90);
     });
 
+    it('buçuklu ve çeyrek miktar ortak okuyucuyla okunur ve gramaj ölçeklenir', () => {
+      const a = SP.Parse.parseMeal('1 buçuk porsiyon pilav');
+      expect(a.items[0].qty).toBe(1.5);
+      expect(a.items[0].g).toBe(270);
+      const b = SP.Parse.parseMeal('bir buçuk tabak pilav');
+      expect(b.items[0].qty).toBe(1.5);
+      expect(b.items[0].g).toBe(270);
+      const c = SP.Parse.parseMeal('iki buçuk dilim ekmek');
+      expect(c.items[0].qty).toBe(2.5);
+      expect(c.items[0].g).toBe(75);
+      const d = SP.Parse.parseMeal('çeyrek porsiyon pilav');
+      expect(d.items[0].qty).toBe(0.25);
+      expect(d.items[0].g).toBe(45);
+    });
+
+    it('ortak okuyucu yokken bugünkü yedek kural çalışır', () => {
+      const eski = window.LIFEOS;
+      try{
+        delete window.LIFEOS;
+        expect(SP.Parse.miktar('2 yumurta')).toBe(2);
+        expect(SP.Parse.miktar('yarım ekmek')).toBe(0.5);
+        expect(SP.Parse.miktar('pilav')).toBe(null);
+        const r = SP.Parse.parseMeal('2 yumurta');
+        expect(r.items[0].qty).toBe(2);
+        expect(r.items[0].g).toBe(110);
+      }finally{
+        window.LIFEOS = eski;
+      }
+    });
+
     it('miktar yoksa bir varsayılır', () => {
       const r = SP.Parse.parseMeal('elma');
       expect(r.items[0].g).toBe(180);
