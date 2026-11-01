@@ -312,10 +312,8 @@
       expect(pGec1.to).toBeDefined();
       expect(pGec1.dakika).toBe(180);
 
-      const pGec2 = byAd.ays_gecici_sure.kural('bugün çalışma süresini kısalt', 'bugün çalışma süresini kısalt');
-      expect(pGec2).toBeDefined();
-      expect(pGec2.from).toBe(R.U.todayISO());
-      expect(pGec2.to).toBe(R.U.todayISO());
+      /* Miktarsız «kısalt» uydurulmaz (§1.7): King sorar. */
+      expect(byAd.ays_gecici_sure.kural('bugün çalışma süresini kısalt', 'bugün çalışma süresini kısalt')).toBeNull();
 
       /* 4. ays_ara_ver */
       expect(byAd.ays_ara_ver.kural).toBeDefined();
@@ -326,10 +324,10 @@
 
       /* 5. ays_bolum_ac_kapa */
       expect(byAd.ays_bolum_ac_kapa.kural).toBeDefined();
-      const pBol = byAd.ays_bolum_ac_kapa.kural('kartlar bölümünü tekrar aç', 'kartlar bölümünü tekrar aç');
-      expect(pBol).toBeDefined();
-      expect(pBol.bolum).toBe('cards');
-      expect(pBol.acik).toBe(1);
+      const pBol = byAd.ays_bolum_ac_kapa.kural('analiz bölümünü tekrar aç', 'analiz bölümünü tekrar aç');
+      expect([pBol.bolum, pBol.acik]).toEqual(['analytics', 1]);
+      /* Kartlar gizlenebilir bölüm değil (bolum.js GIZLENEBILIR): öneri yok. */
+      expect(byAd.ays_bolum_ac_kapa.kural('kartlar bölümünü tekrar aç', 'kartlar bölümünü tekrar aç')).toBeNull();
 
       /* Ekran/sayfa açma bölüm gizleme değildir */
       expect(byAd.ays_bolum_ac_kapa.kural('soru çözüm ekranını aç', 'soru çözüm ekranını aç')).toBeNull();
@@ -347,10 +345,15 @@
 
       /* 8. ays_decision_close */
       expect(byAd.ays_decision_close.kural).toBeDefined();
+      /* Tek açık karar varsa o; yoksa ya da birden çoksa tahmin yok (sahte kimlik yok). */
+      const acik = R.Office.openDecisions();
       const pDec = byAd.ays_decision_close.kural('toplantı kararını yapıldı işaretle', 'toplantı kararını yapıldı işaretle');
-      expect(pDec).toBeDefined();
-      expect(pDec.decisionId).toBeDefined();
-      expect(pDec.state).toBe('yapildi');
+      expect(acik.length === 1 ? [pDec.decisionId, pDec.state] : pDec).toEqual(acik.length === 1 ? [acik[0].id, 'yapildi'] : null);
+
+      /* Okuma hızlı yolu kayıt ve başka okuma cümlesini kapmaz. */
+      expect(A().kuralla('bugün 10 dakika mola verdim')).toBeNull();
+      expect((A().kuralla('geçen haftanın denemeleri nasıldı') || {}).ad === 'ays_haftalar').toBe(false);
+      expect(A().kuralla('türev konusu nasıl seyrediyor')).toBeNull();
 
       A()._sifirla();
     });
@@ -370,7 +373,8 @@
       /* 3. ays_gecici_sure: from ve to zorunlu */
       expect(A().dogrula('ays_gecici_sure', {}).ok).toBe(false);
       expect(A().dogrula('ays_gecici_sure', { from:'2026-11-01' }).ok).toBe(false);
-      expect(A().dogrula('ays_gecici_sure', { from:'2026-11-01', to:'2026-11-01' }).ok).toBe(true);
+      expect(A().dogrula('ays_gecici_sure', { from:'2026-11-01', to:'2026-11-01' }).ok).toBe(false);
+      expect(A().dogrula('ays_gecici_sure', { from:'2026-11-01', to:'2026-11-01', dakika:120 }).ok).toBe(true);
 
       /* 4. ays_ara_ver: from ve to zorunlu */
       expect(A().dogrula('ays_ara_ver', {}).ok).toBe(false);

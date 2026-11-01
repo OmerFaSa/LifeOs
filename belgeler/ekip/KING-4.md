@@ -453,8 +453,8 @@ saatsiz, ESP planı gezinme sırası); olayların uçtan uca sınaması süreç 
 
 ## Tur 3a · Niyet çözücü, «King ne yaptı», harcama kartı (2026-11-01/02)
 
-**Sınav: 209 → 279/300 (%93).** AYS 77/95, SPİ 89/90, ESP 69/70, genel 44/45; yerel karar
-ortanca 1 ms. Gerileme yok (her adımda önceki koşuyla cümle cümle karşılaştırıldı).
+**Sınav: 209 → 293/300 (%98).** AYS 91/95, SPİ 89/90, ESP 69/70, genel 44/45; yerel karar
+ortanca 2 ms. Gerileme yok (her adımda önceki koşuyla cümle cümle karşılaştırıldı).
 
 | Adım | Puan | Ne |
 |---|---|---|
@@ -463,18 +463,24 @@ ortanca 1 ms. Gerileme yok (her adımda önceki koşuyla cümle cümle karşıla
 | Ölçüm düzeltmesi | −2 | sınav, zorunlu parametresi eksik yazma seçimini artık karar saymaz (gerçek `aracIsle` gibi doğrular) |
 | Eksik parametreyi sorma, kelime sonu | 256 | «kitap ekle» → «Kitap ekle için kitabın adı ne olsun?» (§1.7; tek zorunlu metin parametresi); sayfa fiili kelime olarak («ses açma», «gitar», «geçmiş» komut değil); açıklamadaki başka aracın adı puana girmez |
 | Ofis 032 (SPİ), 033 (ESP) | 279 | `anahtar`, `es` ve `kural` (besin, barkodlu öğün, bölüm aç/kapa `SP.Bolum` kataloğundan), kilo takma adları, «buçuk»/«çeyrek» süre, sayfa sayısıyla okuma oturumu (dakika «veri yok») |
+| Ofis 031 (AYS) | 293 | okuma araçlarına `anahtar`/`es`; Onaylar eylemlerine zorunlu parametre ve `komut.js` üzerinden `kural`; «buçuk» süre |
 
 Beklentisi düzeltilen dört cümle (gerekçe `king_sinav.json`'da `not`): «4-7-8 nefes tekniği başlat»
 (araç yalnız kutu nefesi yapar; Merkez anlatır), «bugün kendimi çok halsiz hissediyorum» (SPİ'de his
 kaydı da doğru), «tahlil bölümünü aç» ve «kartlar bölümünü tekrar aç» (gizlenebilir bölüm değiller;
-sayfa komutu doğru). Kalan 21'in çoğu AYS: ofis 031 (anahtar, Onaylar eylemlerine zorunlu parametre ve
-`komut.js` üzerinden `kural`) incelemede geri gönderildi: takvimde bayram yokken tarih, açık karar
-yokken kimlik ve miktarsız «kısalt»ta süre **uyduruyordu**; dar `es` ifadeleri kayıt cümlelerini
-(«10 dk mola verdim») okumaya çekiyordu. Düzeltilince birleşir (kabul testi `king_sinav_ays_kabul_test.py`).
+sayfa komutu doğru). Kalan 7: AYS'de miktarsız «çalışma süresini kısalt» ve takvimde bayram yokken «bayram günleri için mola
+tanımla» (ikisi de bilerek sorulur, uydurulmaz), «toplantı kararını yapıldı işaretle» (toplantı eylemine
+gidiyor; tek açık karar yoksa zaten sorulmalı), «deneme çözerken süreyi yetiştiremiyorum» (sayfa açıyor,
+Merkez beklenir); SPİ «gece geç saatte yemek yemek uykuyu bozar mı» (sayfa açıyor) ve «King'in konuşma
+hızını ayarla» (King ayarlarında hız yok); ESP «Almanca gramer hakkında soru sor» (soru kartı bulunamadı;
+karar doğru, sınav `kart-yok`u ayırt etmiyor).
 
 **Ofis.** 031–033 elle başlatıldı (pilotun günlük sınırı doluydu); Denetçi 032 ve 033'e «temiz» dedi,
-son incelemede 032'de elle yazılmış ve 8'i gizlenemeyen 13 bölüm kimliği, 031'de üç uydurma çıktı
-(ders defterinde). Testçi oturum kesintisinde yarıda kaldı; §2 denetimleri birleşik main'de elle koşuldu.
+son incelemede 032'de elle yazılmış ve 8'i gizlenemeyen 13 bölüm kimliği, 031'de üç uydurma (takvimde
+bayram yokken bugünden 2 gün, açık karar yokken sahte kimlik, miktarsız «kısalt»ta bugün) ve kayıt
+cümlelerini okumaya çeken geniş `es` ifadeleri çıktı. 031'in ajanı takıldı; bulguları Claude düzeltti,
+ayrıca «10 dk mola verdim» gibi geçmiş zamanlı kayıt cümlesinin `ara_ver` önerisine dönmesini kapattı
+(eylem kuralları kayıt cümlesini almaz). Dersler defterde. Testçi oturum kesintisinde yarıda kaldı; §2 denetimleri birleşik main'de elle koşuldu.
 
 **«King ne yaptı» zaman çizgisi (F).** Rayda «Eylemler» bölümü: bu oturumun yazmaları ve HKM'nin
 eylem defteri (`GET /api/eylem`) tek çizgide, güne göre, modül noktası, saat ve kaynakla. Onaylı her

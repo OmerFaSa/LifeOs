@@ -99,7 +99,6 @@ R.Komut = (function(){
     const l = (R.Bolum ? R.Bolum.GIZLENEBILIR : []);
     const bulunan = [];
     l.forEach(b => { if(b.takma.some(a => t.indexOf(a) >= 0)) bulunan.push(b.id); });
-    if(/kart/.test(t) && !bulunan.includes('cards')) bulunan.push('cards');
     return bulunan;
   }
 
@@ -150,8 +149,8 @@ R.Komut = (function(){
       bulunan.push({ from:bugun, to:ekle(bugun, 6 - haftaGunu(bugun)) });
     }else if(/bayram/.test(t)){
       const c = (R.S && R.S.calendar || []).find(x => /bayram|tatil/i.test(x.note || x.kind || ''));
+      /* Takvimde yoksa tarih uydurulmaz; «ne zaman?» sorulur (§1.7). */
       if(c && c.from) bulunan.push({ from:c.from, to:c.to || c.from });
-      else bulunan.push({ from:bugun, to:ekle(bugun, 2) });
     }
 
     const ng = t.match(N_GUN_RE);

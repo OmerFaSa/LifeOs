@@ -38,9 +38,9 @@ R.KingArac = (function(){
     gunun_akisi:/(günün akışı|bugünün akışı)/,
     durum_ozeti:/(sınava (?:kaç gün|ne kadar)|durum özet|genel durum)/,
     kartlar:/((?:tekrar etmem gereken|sırası gelen|geciken) kart|kart borcu)/,
-    haftalar:/(?:haftanın|haftalık) review|hafta metni|geçen haftanın/,
-    mesgaleler:/(?:kaç (?:kez|defa)|verilen) mola|mola sayısı|mola verdim/,
-    enerji_durumu:/enerji (?:seviye|durum)|seyrediyor/,
+    haftalar:/(?:haftanın|haftalık) review|hafta metni/,
+    mesgaleler:/(?:kaç (?:kez|defa)|verilen) mola|mola sayısı/,
+    enerji_durumu:/enerji (?:seviye|durum)/,
   };
 
   const ANAHTAR_OKU = {
@@ -63,7 +63,7 @@ R.KingArac = (function(){
   const REQUIRED = {
     'week-target':['questionTarget'],
     'gunluk-sure':['dakika'],
-    'gecici-sure':['from', 'to'],
+    'gecici-sure':['from', 'to', 'dakika'],
     'ara-ver':['from', 'to'],
     'bolum-ac-kapa':['bolum', 'acik'],
     'topic-review':['topicId'],
@@ -84,6 +84,11 @@ R.KingArac = (function(){
     'hedef-plan':'hedef plan uygula başlat',
   };
 
+  /* Geçmiş zamanlı kayıt cümlesi («10 dk mola verdim») plan komutu değildir (komut.js ZAMAN KİPİ). */
+  const kayitDegilse = f => (t, metin) => {
+    const A = window.LIFEOS && window.LIFEOS.ARAC;
+    return A && A.niyetSinif && A.niyetSinif(metin) === null ? null : f(t, metin);
+  };
   const KURAL_EYLEM = {
     'week-target':(t, metin) => {
       const r = R.Komut ? R.Komut.anla(metin) : null;
@@ -98,13 +103,7 @@ R.KingArac = (function(){
     'gecici-sure':(t, metin) => {
       const r = R.Komut ? R.Komut.anla(metin) : null;
       const o = r && (r.oneriler || []).find(x => x.action === 'gecici-sure');
-      if(o) return o.params;
-      if(/(kısalt|azalt|düşür)/.test(t) && /(çalışma süresi|süreyi|süre)/.test(t)){
-        const bugun = R.U ? R.U.todayISO() : new Date().toISOString().slice(0, 10);
-        const tr = (R.Komut && R.Komut.tarih ? R.Komut.tarih(t, bugun) : null) || { from:bugun, to:bugun };
-        return tr && tr.from ? { from:tr.from, to:tr.to || tr.from } : null;
-      }
-      return null;
+      return o ? o.params : null;   // miktarsız «kısalt» uydurulmaz; King sorar
     },
     'ara-ver':(t, metin) => {
       const r = R.Komut ? R.Komut.anla(metin) : null;
@@ -133,10 +132,10 @@ R.KingArac = (function(){
     },
     'decision-close':(t) => {
       if(/(toplantı\s+)?karar[ıi]n[ıi]\s*(?:yapıldı|devredildi|kapandı)?\s*(?:olarak\s*)?işaretle|kararı kapat/.test(t)){
-        const d = (R.Office && R.Office.pendingDecision && R.Office.pendingDecision())
-          || (R.Office && R.Office.openDecisions && R.Office.openDecisions()[0]);
-        const state = /devredildi/.test(t) ? 'devredildi' : 'yapildi';
-        return { decisionId:(d && d.id) || 'karar', state };
+        /* Yalnız TEK açık karar varsa o; yoksa ya da birden çoksa tahmin yok. */
+        const acik = R.Office && R.Office.openDecisions ? R.Office.openDecisions() : [];
+        if(acik.length !== 1) return null;
+        return { decisionId:acik[0].id, state:/devredildi/.test(t) ? 'devredildi' : 'yapildi' };
       }
       return null;
     },
@@ -198,7 +197,7 @@ R.KingArac = (function(){
         aciklama:def.title + '. ' + def.summary + ' (Onaylar’daki öneriyle aynı eylem; önizlenir, onayla uygulanır.)',
         parametreler,
         anahtar:ANAHTAR_YAZ[def.id] || undefined,
-        kural:KURAL_EYLEM[def.id] || undefined,
+        kural:KURAL_EYLEM[def.id] ? kayitDegilse(KURAL_EYLEM[def.id]) : undefined,
         onizle:p => {
           const pr = R.Proposals.preview({ action:def.id, params:p, agent:def.agents[0] });
           if(!pr.ok) return { hata:pr.why || 'uygulanamaz' };

@@ -23621,7 +23621,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'517f8d17', at:'2026-11-01 21:10', dirty:false };
+R.BUILD = { id:'8fbc1048', at:'2026-11-01 21:23', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -41025,16 +41025,117 @@ R.KingArac = (function(){
      tablosunun sözcüğünü taşıyan cümle («denemelerim» → Deneme sayfası) o
      yoldan gider; burada yalnız sayfası olmayan sorular durur. */
   const ES = {
-    puan_tahmini:/(puan tahmin|sıralama tahmin|kaç puan alırım|tahmini puan)/,
-    hatalar:/(yanlış defterim|hatalar[ıi]m(?:ı| neler)?$)/,
+    puan_tahmini:/(puan tahmin|sıralama tahmin|kaç puan alırım|tahmini puan|kaç bine|sıralamam ne)/,
+    hatalar:/(yanlış defterim|hatalar[ıi]m(?:ı| neler)?$|(?:hangi derste|en çok).*yanlış)/,
     /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz, araçla cevaplanır. */
     denemeler:/(denemelerim|son deneme|deneme(?:de|lerde|m)? (?:kaç|nasıl)|kaç net)/,
-    konu_riski:/(risk altında|riskli konu|konu riski)/,
-    gunler:/((?:bugün|dün) kaç (?:dakika|saat|soru)|kaç (?:dakika|saat) çalıştım)/,
-    konular:/(kapanış yüzde|kapanışım|konularımın durumu)/,
+    konu_riski:/(risk altında|riskli konu|konu riski|net (?:kayb|kaçır))/,
+    gunler:/((?:bugün|dün) kaç (?:dakika|saat|soru)|kaç (?:dakika|saat) çalıştım|(?:hangi gün|hangi günler) kaç)/,
+    konular:/(kapanış yüzde|kapanışım|konularımın durumu|kaç konu|bitirilen konu)/,
     gunun_akisi:/(günün akışı|bugünün akışı)/,
-    durum_ozeti:/(sınava kaç gün|sınava ne kadar)/,
+    durum_ozeti:/(sınava (?:kaç gün|ne kadar)|durum özet|genel durum)/,
     kartlar:/((?:tekrar etmem gereken|sırası gelen|geciken) kart|kart borcu)/,
+    haftalar:/(?:haftanın|haftalık) review|hafta metni/,
+    mesgaleler:/(?:kaç (?:kez|defa)|verilen) mola|mola sayısı/,
+    enerji_durumu:/enerji (?:seviye|durum)/,
+  };
+
+  const ANAHTAR_OKU = {
+    durum_ozeti:'durum özet ilerleme tablo seviye genel görünüm',
+    denemeler:'deneme sınav denemeler net netler puan',
+    hatalar:'hata yanlış kusur eksik defter soru fire',
+    konular:'konu tamamlama bitirme müfredat liste başlık ünite',
+    haftalar:'hafta haftalık review değerlendirme bülten geriye dönük',
+    gunler:'gün günlük çözülen süre saat dakika soru',
+    hedef_ve_net_matrisi:'hedef net matris tablo karşılaştırma ders',
+    kartlar:'kart tekrar srs aralıklı ezber hatırlama',
+    video_notlari:'video not izleme ders notu kayıt',
+    mesgaleler:'meşgale mola kesinti ara duraklama dinlenme',
+    enerji_durumu:'enerji yorgunluk zindelik seviye durum güç canlılık',
+    gunun_akisi:'akış gün akışı program sıra plan çizelge',
+    konu_riski:'risk tehlike net kayıp zayıf açık tehdit',
+    puan_tahmini:'puan sıralama derece başarı sıra bant tahmin',
+  };
+
+  const REQUIRED = {
+    'week-target':['questionTarget'],
+    'gunluk-sure':['dakika'],
+    'gecici-sure':['from', 'to', 'dakika'],
+    'ara-ver':['from', 'to'],
+    'bolum-ac-kapa':['bolum', 'acik'],
+    'topic-review':['topicId'],
+    'decision-close':['decisionId'],
+  };
+
+  const ANAHTAR_YAZ = {
+    'week-target':'haftalık soru hedefi güncelle sayı hafta hedef',
+    'gunluk-sure':'günlük temel çalışma süresi dakika saat süre hedef',
+    'gecici-sure':'geçici günlük süre kısalt düşür saat dakika',
+    'ara-ver':'ara mola tatil dinlenme ver tanımla izin',
+    'bolum-ac-kapa':'bölüm gizle aç göster kapat kaldır modül',
+    'topic-review':'konu tekrar gözden geçirme çalışılacak pekiştirme',
+    'cards-due-today':'vade geciken geçmiş kart tekrar srs borç',
+    'decision-close':'toplantı karar kapat yapıldı devredildi ofis patron',
+    'block-add':'blok ekle çalışma oturum süre bugün',
+    'card-from-error':'yanlış hata kart üret çıkar',
+    'hedef-plan':'hedef plan uygula başlat',
+  };
+
+  /* Geçmiş zamanlı kayıt cümlesi («10 dk mola verdim») plan komutu değildir (komut.js ZAMAN KİPİ). */
+  const kayitDegilse = f => (t, metin) => {
+    const A = window.LIFEOS && window.LIFEOS.ARAC;
+    return A && A.niyetSinif && A.niyetSinif(metin) === null ? null : f(t, metin);
+  };
+  const KURAL_EYLEM = {
+    'week-target':(t, metin) => {
+      const r = R.Komut ? R.Komut.anla(metin) : null;
+      const o = r && (r.oneriler || []).find(x => x.action === 'week-target');
+      return o ? o.params : null;
+    },
+    'gunluk-sure':(t, metin) => {
+      const r = R.Komut ? R.Komut.anla(metin) : null;
+      const o = r && (r.oneriler || []).find(x => x.action === 'gunluk-sure');
+      return o ? o.params : null;
+    },
+    'gecici-sure':(t, metin) => {
+      const r = R.Komut ? R.Komut.anla(metin) : null;
+      const o = r && (r.oneriler || []).find(x => x.action === 'gecici-sure');
+      return o ? o.params : null;   // miktarsız «kısalt» uydurulmaz; King sorar
+    },
+    'ara-ver':(t, metin) => {
+      const r = R.Komut ? R.Komut.anla(metin) : null;
+      const o = r && (r.oneriler || []).find(x => x.action === 'ara-ver');
+      return o ? o.params : null;
+    },
+    'bolum-ac-kapa':(t, metin) => {
+      if(/ekran|sayfa/.test(t)) return null;
+      if(/aç|göster/.test(t) && !/bölüm|bolum|tekrar|geri/.test(t)) return null;
+      const r = R.Komut ? R.Komut.anla(metin) : null;
+      const o = r && (r.oneriler || []).find(x => x.action === 'bolum-ac-kapa');
+      return o ? o.params : null;
+    },
+    'topic-review':(t, metin) => {
+      if(/(tekrar(?:a|\s+çalışılacaklar[ae]|\s+listesine)?\s*(?:al|ekle)|tekrara)/.test(t)){
+        const k = R.Entry && R.Entry.konuBul ? R.Entry.konuBul(metin) : null;
+        if(k) return { subjectId:(k.s && k.s.id) || '', topicId:(k.t && k.t.id) || '' };
+      }
+      return null;
+    },
+    'cards-due-today':(t) => {
+      if(/(vadesi geçmiş|geciken|vadesi dolan).*kart.*(?:bugüne|aktar|çek)|kartları bugüne (?:aktar|çek)/.test(t)){
+        return { limit:20 };
+      }
+      return null;
+    },
+    'decision-close':(t) => {
+      if(/(toplantı\s+)?karar[ıi]n[ıi]\s*(?:yapıldı|devredildi|kapandı)?\s*(?:olarak\s*)?işaretle|kararı kapat/.test(t)){
+        /* Yalnız TEK açık karar varsa o; yoksa ya da birden çoksa tahmin yok. */
+        const acik = R.Office && R.Office.openDecisions ? R.Office.openDecisions() : [];
+        if(acik.length !== 1) return null;
+        return { decisionId:acik[0].id, state:/devredildi/.test(t) ? 'devredildi' : 'yapildi' };
+      }
+      return null;
+    },
   };
   const n2 = v => v == null ? 'veri yok' : String(v).replace('.', ',');
   const kucuk = s => String(s || '').toLocaleLowerCase('tr-TR').trim();
@@ -41063,6 +41164,7 @@ R.KingArac = (function(){
     if(!T || !Array.isArray(T.TOOLS)) return [];
     return T.TOOLS.map(t => ({
       ad:'ays_' + t.name, tur:'oku', aciklama:t.description, es:ES[t.name] || undefined,
+      anahtar:ANAHTAR_OKU[t.name] || undefined,
       parametreler:t.inputSchema && Object.keys(t.inputSchema.properties || {}).length ? t.inputSchema : undefined,
       calistir:p => {
         const ham = t.execute(p || {});
@@ -41085,10 +41187,14 @@ R.KingArac = (function(){
         props[k] = Object.assign({ type:tip }, PARAM_ACIKLAMA[k] ? { description:PARAM_ACIKLAMA[k] } : {},
           k === 'acik' ? { enum:[0, 1] } : {}, k === 'state' ? { enum:['yapildi', 'devredildi'] } : {});
       });
+      const parametreler = Object.keys(props).length ? { type:'object', properties:props } : undefined;
+      if(parametreler && REQUIRED[def.id]) parametreler.required = REQUIRED[def.id].slice();
       return {
         ad:'ays_' + def.id.replace(/-/g, '_'), tur:'yaz', seviye:def.level, ozetAd:def.title,
         aciklama:def.title + '. ' + def.summary + ' (Onaylar’daki öneriyle aynı eylem; önizlenir, onayla uygulanır.)',
-        parametreler:Object.keys(props).length ? { type:'object', properties:props } : undefined,
+        parametreler,
+        anahtar:ANAHTAR_YAZ[def.id] || undefined,
+        kural:KURAL_EYLEM[def.id] ? kayitDegilse(KURAL_EYLEM[def.id]) : undefined,
         onizle:p => {
           const pr = R.Proposals.preview({ action:def.id, params:p, agent:def.agents[0] });
           if(!pr.ok) return { hata:pr.why || 'uygulanamaz' };
@@ -108810,17 +108916,27 @@ R.Entry = (function(){
     'altmis':60, 'yetmiş':70, 'yetmis':70, 'seksen':80, 'doksan':90, 'yüz':100, 'yuz':100,
   };
 
+  const KESIR = { 'yarım':0.5, 'yarim':0.5, 'çeyrek':0.25, 'ceyrek':0.25 };
+
   function sayi(x){
     if(x == null) return null;
     const t = String(x).trim().replace(',', '.');
     if(/^\d+(\.\d+)?$/.test(t)) return Number(t);
     const k = U.norm ? U.norm(t) : t.toLocaleLowerCase('tr-TR');
-    return RAKAM[k] != null ? RAKAM[k] : null;
+    if(KESIR[k] != null) return KESIR[k];
+    if(RAKAM[k] != null) return RAKAM[k];
+    const bm = k.match(/^(.+?)\s+(?:buçuk|bucuk)$/);
+    if(bm){
+      const kok = sayi(bm[1]);
+      if(kok != null) return kok + 0.5;
+    }
+    return null;
   }
 
   /* Metindeki ilk sayıyı bulur — yazıyla da olabilir. */
   const SAYI_RE = new RegExp(
-    '(\\d+(?:[.,]\\d+)?|' + Object.keys(RAKAM).join('|') + ')', 'i');
+    '(\\d+(?:[.,]\\d+)?(?:\\s+(?:buçuk|bucuk))?|'
+    + Object.keys(RAKAM).join('|') + '(?:\\s+(?:buçuk|bucuk))?|yarım|yarim|çeyrek|ceyrek)', 'i');
 
   function ilkSayi(text){
     const m = String(text).match(SAYI_RE);
@@ -108837,6 +108953,10 @@ R.Entry = (function(){
       if(a.length >= 3 && n.indexOf(a) >= 0){ bulunan = x.subject; return true; }
       return false;
     });
+    if(!bulunan && /geometri/i.test(n)){
+      const sid = /ayt/i.test(n) ? 'ayt-matematik' : 'tyt-matematik';
+      bulunan = (R.SUBJECTS || []).find(s => s.id === sid) || null;
+    }
     return bulunan;
   }
 
@@ -109092,7 +109212,7 @@ R.Komut = (function(){
      kipinde: «tatilden döndüm» bir rapordur. */
   const ARA_RE = new RegExp(
     '(çalışmayacağım|çalışmayacam|çalışmıyorum|çalışamayacağım|çalışamam|'
-    + 'ara ver|mola ver|tatildeyim|tatile (?:gidiyorum|gideceğim|çıkıyorum)|'
+    + 'ara ver|mola ver|mola tanımla|tatildeyim|tatile (?:gidiyorum|gideceğim|çıkıyorum)|'
     + 'izinliyim|izin alıyorum|dinleneceğim|'
     + SINIR_ONCE + 'ara(?=\\s*[.!]?\\s*$))');
   /* Ara komutunun KENDİSİ olan olumsuz sözler: «bugün çalışmayacağım» bir
@@ -109106,7 +109226,7 @@ R.Komut = (function(){
 
   /* Süre: «4 saat», «3 buçuk saat», «yarım saat», «dört saat», «150 dakika». */
   const SURE_RE = new RegExp('(\\d+(?:[.,]\\d+)?|yarım|[' + HARF + ']+)\\s*(buçuk\\s*)?'
-    + '(saat|sa|dakika|dk)' + SINIR_SONRA, 'g');
+    + '(saat(?:[ae]|in)?|sa|dakika(?:[ny]?[ae])?|dakka|dk)' + SINIR_SONRA, 'g');
 
   function sureler(t){
     const out = [];
@@ -109116,7 +109236,7 @@ R.Komut = (function(){
       let n = m[1] === 'yarım' ? 0.5 : R.Entry.sayi(m[1]);
       if(n == null) continue;
       if(m[2]) n += 0.5;
-      const dk = /^(saat|sa)$/.test(m[3]) ? n * 60 : n;
+      const dk = /^(saat|sa)/.test(m[3]) ? n * 60 : n;
       out.push({ dk:Math.round(dk), at:m.index });
     }
     return out;
@@ -109193,6 +109313,10 @@ R.Komut = (function(){
       bulunan.push({ from:pzt, to:ekle(pzt, 6) });
     }else if(/bu hafta/.test(t)){
       bulunan.push({ from:bugun, to:ekle(bugun, 6 - haftaGunu(bugun)) });
+    }else if(/bayram/.test(t)){
+      const c = (R.S && R.S.calendar || []).find(x => /bayram|tatil/i.test(x.note || x.kind || ''));
+      /* Takvimde yoksa tarih uydurulmaz; «ne zaman?» sorulur (§1.7). */
+      if(c && c.from) bulunan.push({ from:c.from, to:c.to || c.from });
     }
 
     const ng = t.match(N_GUN_RE);
