@@ -124,28 +124,49 @@ def _kokler(metin):
     return {w[:5] for w in _re.findall(r"\w+", k) if len(w) >= 4}
 
 
-def context(con, user="ben", scope="king", limit=12, ilgili=None, sozler=False):
+def context(con, user="ben", scope="king", limit=12, ilgili=None, sozler=False,
+            cfg=None, butce=None, soru=None, gonder=None):
     """Modelin baglamina girecek hafiza satirlari.
 
-    `ilgili` verilirse (mesaj metni) yalniz o mesajla KOK paylasan kayitlar
-    gider — ihtiyaci kadar veri (core/motor.py, alt/orta seviye).
+    `ilgili` verilirse (mesaj metni) yalniz o mesajla ilgili kayitlar
+    gider — ihtiyaci kadar veri (core/motor.py, alt/orta seviye). `cfg`
+    varsa ilgi gommeyle olculur (KING-4 B); motor yoksa KOK paylasimi.
+    `soru`: ilgili verilmese de King'e o mesajla ilgili «olanlar» girer (gommede).
     `sozler`: ilgili olmasa da kullanicinin KENDI sozleri (katman «soz»)
-    eklenir; orta seviye bunu kullanir."""
+    eklenir; orta seviye bunu kullanir.
+    `butce`: tahmini jeton tavani; asan en az ilgili satir duser."""
     rows = list_active(con, user, scope, limit=50 if ilgili is not None else limit)
+    sorgu = ilgili if ilgili is not None else soru
+    a = ara(con, cfg, sorgu, k=50, user=user, scope=scope, gonder=gonder) if cfg is not None and sorgu else None
+    gomme = bool(a and a["yontem"] == "gomme")
+    uygun = [s for s in a["sonuclar"] if s["benzerlik"] >= ESIK] if gomme else []
+    olanlar = [s for s in uygun if s["katman"] == "olanlar"][:EN_COK_OLAN]
     if ilgili is not None:
-        kok = _kokler(ilgili)
-        puanli = [(len(kok & _kokler(r["text"])), r) for r in rows]
-        secili = [r for p, r in sorted(puanli, key=lambda x: -x[0]) if p > 0]
+        if gomme:
+            sira = [s["id"] for s in uygun if s["tur"] == "bilgi"]
+            secili = sorted((r for r in rows if r["id"] in sira), key=lambda r: sira.index(r["id"]))
+        else:
+            kok = _kokler(ilgili)
+            puanli = [(len(kok & _kokler(r["text"])), r) for r in rows]
+            secili = [r for p, r in sorted(puanli, key=lambda x: -x[0]) if p > 0]
         if sozler:
             secili += [r for r in rows if r["katman"] == "soz" and r not in secili]
         rows = secili[:limit]
-    if not rows:
+    # Butce sondan keser: ilgili bilgi > ilgili olan > yalniz yeni oldugu icin gelen bilgi.
+    bilgi = [("- [hafıza #%d · %s] %s" % (r["id"], etiket(r), r["text"]), r["id"]) for r in rows]
+    olan = [("- [olan · %s] %s" % (str(s["at"] or "")[:10], s["metin"]), None) for s in olanlar]
+    satir = bilgi + olan if ilgili is not None else olan + bilgi
+    if butce:
+        from core import ai
+        while satir and ai._jeton_tahmini(*[x[0] for x in satir]) > butce:
+            satir.pop()
+    if not satir:
         return ""
-    ids = [r["id"] for r in rows]
-    con.execute("UPDATE memories SET last_used_at=? WHERE id IN (%s)" %
-                ",".join("?" * len(ids)), (_simdi(),) + tuple(ids))
-    return "\n".join("- [hafıza #%d · %s] %s" % (r["id"], etiket(r), r["text"])
-                     for r in reversed(rows))
+    ids = [i for _, i in satir if i is not None]
+    if ids:
+        con.execute("UPDATE memories SET last_used_at=? WHERE id IN (%s)" %
+                    ",".join("?" * len(ids)), (_simdi(),) + tuple(ids))
+    return "\n".join(x[0] for x in reversed(satir))
 
 
 EKLE_ONEK = ("bunu hatırla:", "hatırla:", "bunu hatirla:", "hatirla:", "unutma:",
@@ -240,6 +261,7 @@ def aday_reddet(con, id_, user="ben", now=None):
 
 
 ADAY_LISTE = ("adaylar", "hafıza adayları", "hafiza adaylari")
+DUZELT = re.compile(r"^#?(\d+)\s+d[üu]zelt\s*:\s*(.+)$", re.I | re.S)
 
 
 def command(con, text, user="ben"):
@@ -267,6 +289,10 @@ def command(con, text, user="ben"):
         metin = "\n".join("#%d · %s · %s" % (r["id"], etiket(r), r["text"])
                            for r in reversed(rows))
         return {"handled": True, "text": metin or "Etkin hafıza kaydı yok."}
+    m = DUZELT.match(ham)
+    if m:
+        r = duzelt(con, int(m.group(1)), m.group(2), user)
+        return {"handled": True, "text": r["note"], "result": r}
     parca = kucuk.split()
     if len(parca) == 2 and parca[1] in ("unut", "sil") and parca[0].lstrip("#").isdigit():
         r = forget(con, int(parca[0].lstrip("#")), user)
@@ -380,3 +406,140 @@ def esitle(con, modul, kayitlar, user="ben", now=None, oturum=None, sira=None):
         raise
     return {"ok": True, "modul": modul, "eklenen": eklenen, "guncellenen": guncellenen,
             "dusen": dusen, "dirilen": dirilen, "reddedilen": reddedilen}
+
+
+# ------------------------------------------------------- uc katman (KING-4 B)
+#
+# Yeni bir hafiza sistemi YOK; var olan kayitlar uc katmanda okunur:
+#   bilgiler   memories (kaynak ve tarihiyle; yukaridaki kurallar aynen)
+#   olanlar    eylem defteri (King ne yazdi) + king_olaylar (moduller ne bildirdi)
+#   beceriler  king_beceriler (core/beceri.py)
+# Arama gomme ile (core/ollama.py gomme, qwen3-embedding); vektorler
+# hafiza_gomme onbelleginde durur, yedege girmez. Motor yoksa kaba kok
+# eslesmesine duser (AGENTS §1.1: model kapaliyken sistem kapanmaz).
+
+ESIK = 0.35                # Olcum 3b: dogru eslesme ortancasi 0,45, en dusugu 0,26
+EN_COK_OLAN = 3            # baglama girecek en cok «olan» satiri
+GOMME_PARTI = 64
+
+
+def _derlem(con, user="ben", scope="king"):
+    """(tur, id, metin, at) — aranan butun satirlar. Gorevli olanlari ve becerileri gormez."""
+    out = [("bilgi", r["id"], r["text"], r["created_at"]) for r in list_active(con, user, scope, limit=200)]
+    if _kapsamlar(scope) is None:
+        out += [("olan", r[0], r[1], r[2]) for r in con.execute(
+            "SELECT id, ozet, created_at FROM eylem WHERE durum='uygulandi' ORDER BY id DESC LIMIT 100")]
+        out += [("olay", r[0], "%s: %s%s" % (MODUL_ADI.get(r[1], r[1]), r[2].replace("_", " "),
+                                             " · " + r[3] if r[3] else ""), r[4]) for r in con.execute(
+            "SELECT id, modul, tur, konu, at FROM king_olaylar WHERE karar='basla' ORDER BY id DESC LIMIT 100")]
+        out += [("beceri", r[0], r[1], r[2]) for r in con.execute(
+            "SELECT id, ad, created_at FROM king_beceriler WHERE acik=1 ORDER BY id DESC LIMIT 40")]
+    return out
+
+
+def _ozet(metin):
+    import hashlib
+    return hashlib.sha1(metin.encode("utf-8")).hexdigest()
+
+
+def _birim(v):
+    import array
+    n = sum(x * x for x in v) ** 0.5 or 1.0
+    return array.array("f", [x / n for x in v])
+
+
+def _vektorler(con, cfg, ogeler, gonder=None):
+    """{(tur, id): vektor} ya da None (motor yok). Eksik ya da metni degismis
+    olanlar parti parti uretilir ve onbellege yazilir."""
+    import array
+    from core import ollama
+    model = ollama.gomme_modeli(cfg)
+    var = {(r[0], r[1]): (r[2], r[3]) for r in con.execute(
+        "SELECT tur, kaynak_id, ozet, vektor FROM hafiza_gomme WHERE model=?", (model,))}
+    out, eksik = {}, []
+    for o in ogeler:
+        v = var.get(o[:2])
+        if v and v[0] == _ozet(o[2]):
+            out[o[:2]] = array.array("f", v[1])
+        else:
+            eksik.append(o)
+    for i in range(0, len(eksik), GOMME_PARTI):
+        parti = eksik[i:i + GOMME_PARTI]
+        vs = ollama.gomme(cfg, [o[2] for o in parti], gonder)
+        if vs is None:
+            return None
+        for o, v in zip(parti, vs):
+            out[o[:2]] = b = _birim(v)
+            con.execute("INSERT OR REPLACE INTO hafiza_gomme(tur, kaynak_id, ozet, model, vektor) "
+                        "VALUES (?,?,?,?,?)", (o[0], o[1], _ozet(o[2]), model, b.tobytes()))
+    if eksik:
+        con.commit()
+    return out
+
+
+SORGU_ONEK = "Instruct: Given a user message, retrieve the user's facts and past events relevant to it\nQuery: "
+
+
+def ara(con, cfg, sorgu, k=8, user="ben", scope="king", gonder=None):
+    """{yontem: gomme|kok, sonuclar: [{katman, tur, id, metin, at, benzerlik}]}.
+    Gommede ESIK alti dusmez; cagiran secer."""
+    from core import ollama
+    katman = {"bilgi": "bilgiler", "olan": "olanlar", "olay": "olanlar", "beceri": "beceriler"}
+    ogeler = _derlem(con, user, scope)
+    q = " ".join(str(sorgu or "").split())[:500]
+    puan, yontem = {}, "kok"
+    if q and ogeler and cfg is not None:
+        vs = _vektorler(con, cfg, ogeler, gonder)
+        qv = vs is not None and ollama.gomme(cfg, [SORGU_ONEK + q], gonder)
+        if qv:
+            qb = _birim(qv[0])
+            puan = {o[:2]: sum(a * b for a, b in zip(qb, vs[o[:2]])) for o in ogeler}
+            yontem = "gomme"
+    if yontem == "kok":
+        kq = _kokler(q)
+        puan = {o[:2]: len(kq & _kokler(o[2])) / (len(kq) or 1) for o in ogeler}
+    sirali = sorted(ogeler, key=lambda o: -puan[o[:2]])[:max(1, min(int(k), 50))]
+    return {"yontem": yontem, "sonuclar": [
+        {"katman": katman[o[0]], "tur": o[0], "id": o[1], "metin": o[2], "at": o[3],
+         "benzerlik": round(puan[o[:2]], 3)} for o in sirali]}
+
+
+def bildiklerim(con, user="ben", limit=30):
+    """«Benim hakkımda ne biliyorsun»: uc katman, her satir kaynagi ve tarihiyle."""
+    from core import eylem
+    bilgiler = [{"id": r["id"], "metin": r["text"], "etiket": etiket(r), "kaynak": r["source"],
+                 "katman": r["katman"], "modul": r["modul"], "alan": r["alan"], "tarih": r["created_at"],
+                 "onaylandi_at": r["onaylandi_at"]} for r in list_active(con, user, limit=200)]
+    olanlar = [{"tur": "eylem", "id": e["id"], "metin": e["ozet"], "at": e["created_at"], "modul": e["modul"],
+                "geri_alinabilir": e["geri_alinabilir"]} for e in eylem.listele(con, limit)]
+    olanlar += [{"tur": "olay", "id": r["id"], "metin": "%s: %s" % (MODUL_ADI.get(r["modul"], r["modul"]),
+                                                                    r["tur"].replace("_", " ")),
+                 "at": r["at"], "modul": r["modul"], "karar": r["karar"]} for r in con.execute(
+        "SELECT id, modul, tur, at, karar FROM king_olaylar ORDER BY id DESC LIMIT ?", (int(limit),))]
+    olanlar.sort(key=lambda x: x["at"] or "", reverse=True)
+    beceriler = [{"id": r["id"], "ad": r["ad"], "acik": bool(r["acik"]), "kaynak": r["kaynak"],
+                  "tarih": r["created_at"]} for r in con.execute(
+        "SELECT id, ad, acik, kaynak, created_at FROM king_beceriler ORDER BY id DESC")]
+    return {"bilgiler": bilgiler, "olanlar": olanlar[:int(limit)], "beceriler": beceriler,
+            "adaylar": adaylar(con, user)}
+
+
+def duzelt(con, id_, text, user="ben", now=None):
+    """Kullanici bir bilgiyi duzeltir; duzeltilen satir «senin sözün» olur.
+    Modulden gelen kayit yerinde duzeltilmez (modulun sonraki goruntusu ezerdi):
+    eskisi unutulur, duzeltilmisi HKM'ye yazilir."""
+    metin = str(text or "").strip()
+    if not metin or len(metin) > MAX_TEXT:
+        return {"ok": False, "note": "Düzeltme boş ya da fazla uzun."}
+    r = con.execute("SELECT * FROM memories WHERE id=? AND user=? AND state='active'",
+                    (int(id_), user)).fetchone()
+    if not r:
+        return {"ok": False, "id": int(id_), "note": "Etkin hafıza bulunamadı."}
+    if r["modul"]:
+        forget(con, r["id"], user, now)
+        y = add(con, metin, user, scope=r["scope"], source="kullanici", now=now)
+        con.commit()
+        return dict(y, eski=r["id"], note="Düzeltildi (#%d → #%d)." % (r["id"], y["id"]))
+    con.execute("UPDATE memories SET text=?, source='kullanici', katman='soz' WHERE id=?", (metin, r["id"]))
+    con.commit()
+    return {"ok": True, "id": r["id"], "text": metin, "note": "Düzeltildi (#%d)." % r["id"]}

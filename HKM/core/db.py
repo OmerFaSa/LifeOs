@@ -730,6 +730,35 @@ CREATE TABLE IF NOT EXISTS king_bekleyen (
   cevap_at    TEXT
 );
 CREATE INDEX IF NOT EXISTS ix_king_bekleyen_al ON king_bekleyen(alindi_at, id);
+
+-- KING-4 C: modullerin yolladigi olay ve kural motorunun karari
+-- (core/kendiliginden.py, belgeler/ekip/KING-OLAY.md). «Olanlar» hafizasinin parcasi.
+CREATE TABLE IF NOT EXISTS king_olaylar (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  modul       TEXT NOT NULL,
+  tur         TEXT NOT NULL,
+  kimlik      TEXT NOT NULL UNIQUE,
+  at          TEXT NOT NULL,                      -- olayin olustugu an
+  sayilar     TEXT NOT NULL DEFAULT '{}',         -- JSON: {ad: {deger, birim, etiket}}
+  konu        TEXT,
+  karar       TEXT NOT NULL DEFAULT 'yeni',       -- yeni|bekliyor|basla|butce|tekrar|esik_alti|eksik_veri|kural_yok|bayat
+  kural       TEXT,
+  bekleyen_id INTEGER,                            -- karar «basla» ise king_bekleyen satiri
+  created_at  TEXT NOT NULL,
+  karar_at    TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_king_olaylar_karar ON king_olaylar(karar, id);
+
+/* KING-4 B: hafiza aramasinin gomme onbellegi (core/memory.py). Turetilmistir:
+   yedege girmez; metin degisirse (ozet) yeniden uretilir. */
+CREATE TABLE IF NOT EXISTS hafiza_gomme (
+  tur         TEXT NOT NULL,                      -- bilgi|olan|beceri
+  kaynak_id   INTEGER NOT NULL,
+  ozet        TEXT NOT NULL,                      -- metnin sha1'i
+  model       TEXT NOT NULL,
+  vektor      BLOB NOT NULL,                      -- array('f'), birim uzunlukta
+  PRIMARY KEY (tur, kaynak_id)
+);
 """
 
 
@@ -801,6 +830,8 @@ MIGRATIONS = [
     # gorebilen modul ajanlari («ays,spi»; bos = yalniz King; NULL = eski kayit).
     ("memories", "alan", "TEXT"),
     ("memories", "gorenler", "TEXT"),
+    # KING-4 C: kendiliginden mesajin «neden simdi?» bilgisi (JSON).
+    ("king_bekleyen", "neden", "TEXT"),
 ]
 
 
@@ -1041,6 +1072,8 @@ BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
                  "is_emirleri", "bildirimler", "hedef_ozet", "zaman_butcesi", "para",
                  "meydan_deste", "meydan_isaret", "meydan_not", "meydan_yanit",
                  "king_isler", "king_gorevler", "king_beceriler", "king_sozler", "king_bekleyen",
+                 # KING-4 B/C: «olanlar» hafizasi (eylem defteri ve modul olaylari).
+                 "eylem", "king_olaylar",
                  # Kullanicinin kendi yazisi; 2026-10-26'ya dek yedekte yoktu.
                  "motto_nodes", "motto_versions", "motto_links", "motto_tags", "susturmalar")
 BACKUP_SCHEMA = 4

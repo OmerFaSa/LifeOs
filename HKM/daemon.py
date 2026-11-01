@@ -91,6 +91,11 @@ Ucnoktalar:
                                     (modul King'i o zaman cihazin kendi sesine duser; core/ses.py)
     POST /api/ses/akis              ayni govde -> akan 16 bit tek kanal PCM (X-Ses-Hz); EMA ilk parcayla baslar
     GET  /api/eylem                 King'in yazdigi eylemler, yeniden eskiye (core/eylem.py)
+    GET  /api/hafiza                «benim hakkımda ne biliyorsun»: bilgiler, olanlar, beceriler (core/memory.py)
+    GET  /api/hafiza/ara?q=&k=      gommeyle arama (motor yoksa kok); {yontem, sonuclar}
+    POST /api/hafiza/<id>/duzelt    {text} bilgiyi duzeltir · POST /api/hafiza/<id>/unut unutturur
+    POST /api/olay                  modul olayi (belgeler/ekip/KING-OLAY.md) -> kural motoru (core/kendiliginden.py)
+    GET  /api/king/kendiliginden    bekleyen kendiliginden mesajlar (neden alaniyla), butce, sessiz saat, kararlar
     POST /api/eylem                 {arac, ozet, param?, geri?:{ad,param}, modul?} modulun uyguladigi yazma
     POST /api/eylem/<id>/geri       geri alir; istemci turunde tersi {istemci:{ad,param}} doner
     GET  /api/dinle/durum           ses algilama: Whisper var mi, Gemini hazir mi (core/dinle.py)
@@ -119,7 +124,7 @@ from urllib.parse import parse_qs, quote, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import arastir, kutu, motor, tarife  # noqa: E402
-from core import beceri, eylem, soz  # noqa: E402
+from core import beceri, eylem, kendiliginden, soz  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, gorev, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, models, motto, ofismodel, ollama, outbox, patron,
@@ -963,6 +968,9 @@ class Handler(BaseHTTPRequestHandler):
         if ek is None:
             # Beceriler, sozler ve King'in bekleyen mesajlari (core/beceri.py, K2).
             ek = beceri.uc(self.con, self.server.config, "GET", u.path, q)
+        if ek is None:
+            # Kendiliginden King: bekleyen mesajlar ve kararlar (core/kendiliginden.py).
+            ek = kendiliginden.uc(self.con, self.server.config, "GET", u.path, q)
         if ek is not None:
             return self._send(*ek)
         if u.path == "/api/aktif":
@@ -1164,6 +1172,14 @@ class Handler(BaseHTTPRequestHandler):
         if u.path.startswith("/api/kanal/"):
             r = kanal.modul_icin(self.con, u.path.rsplit("/", 1)[-1], date)
             return self._send(200 if r.get("ok") else 422, r)
+        if u.path == "/api/hafiza":
+            return self._send(200, memory.bildiklerim(self.con))
+        if u.path == "/api/hafiza/ara":
+            try:
+                k = int((q.get("k") or ["8"])[0])
+            except ValueError:
+                k = 8
+            return self._send(200, memory.ara(self.con, self.server.config, (q.get("q") or [""])[0], k))
         if u.path == "/api/memory":
             user = (q.get("user") or ["ben"])[0]
             scope = (q.get("scope") or [None])[0]
@@ -1349,7 +1365,7 @@ class Handler(BaseHTTPRequestHandler):
 
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
-        if gorev.bizim_mi(u.path) or beceri.bizim_mi(u.path):
+        if gorev.bizim_mi(u.path) or beceri.bizim_mi(u.path) or kendiliginden.bizim_mi(u.path):
             ham, hata = self._read_body()
             if hata:
                 return self._send(413, {"error": hata})
@@ -1359,6 +1375,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "govde JSON nesnesi olmali"})
             if beceri.bizim_mi(u.path):
                 return self._send(*beceri.uc(self.con, self.server.config, "POST", u.path, {}, govde))
+            if kendiliginden.bizim_mi(u.path):
+                # Modul olayi (belgeler/ekip/KING-OLAY.md) -> kural motoru.
+                return self._send(*kendiliginden.uc(self.con, self.server.config, "POST", u.path, {}, govde))
             return self._send(*gorev.uc(self.con, self.server.config, "POST", u.path, {}, govde))
         if u.path in ("/api/conversation/temizle", "/api/conversation/geri",
                       "/api/conversation/arsiv-sil"):
@@ -1656,6 +1675,18 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, IndexError):
                 return self._send(400, {"error": "aday kimliği sayı olmalı"})
             r = (memory.aday_onayla if parca[4] == "onayla" else memory.aday_reddet)(self.con, id_)
+            return self._send(200 if r.get("ok") else 404, r)
+        m = re.match(r"^/api/hafiza/(\d+)/(duzelt|unut)$", u.path)
+        if m:
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = _nesne(ham) or {}
+            except ValueError:
+                body = {}
+            r = (memory.duzelt(self.con, int(m.group(1)), body.get("text")) if m.group(2) == "duzelt"
+                 else memory.forget(self.con, int(m.group(1))))
             return self._send(200 if r.get("ok") else 404, r)
         if u.path.startswith("/api/memory/") and u.path.endswith("/forget"):
             parca = u.path.strip("/").split("/")
@@ -2155,6 +2186,8 @@ def _ritim(srv, aralik=60):
             # King'in becerileri ve sozleri (K2): saati gelen eylem, vadesi gelen soru.
             beceri.tik(con)
             soz.tik(con)
+            # Kendiliginden King: sessiz saati biten olaylar (KING-4 C).
+            kendiliginden.tik(con, srv.config)
             # Aktif kip: kayit, yeni gun ya da nabiz geldiyse bir tur (kapaliysa hic).
             aktif.tick(con, srv.config, th=srv.thresholds)
             # Ollama: acilista ve bes dakikada bir; bulunca kendiliginden baglar.

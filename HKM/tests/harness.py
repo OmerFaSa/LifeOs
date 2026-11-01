@@ -21,6 +21,7 @@ try:
     from core import ollama as _ollama
     _ollama.VARSAYILAN_GETIR = _ag_kapali
     _ollama.VARSAYILAN_GONDER = _ag_kapali
+    _ollama.VARSAYILAN_GOMME = _ag_kapali
 except ImportError:                                  # pragma: no cover
     pass
 # Ayni istek onbellegi (core/ai.py) testler arasinda cevap tasimasin;

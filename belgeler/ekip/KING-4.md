@@ -384,3 +384,23 @@ HKM testleri 992/992 (yeni: `test_dongu` 7, sıcak Whisper 1). Açık: istemci
 bırakmıyor; 2a'nın araçları `geriAl` döndürüyor, bağlantı istemci işi. Ofis görevi
 030 (`tools/hkm_olcum.py`, kabul testi kırmızı) kuyrukta; pilot durmuş ve bugünkü
 8/8 iş sınırı dolu. Ölçüm betikleri depoda değil (030 bunu kalıcı yapar).
+
+## Ölçüm 3b · Hafıza ve kendiliğinden King (2026-11-01, tur 3b)
+
+Yeni sistem kurulmadı: hafıza var olan tabloları üç katmanda okur, kural motoru
+`kendiliginden.py`'de büyüdü, mesaj bugünkü `king_bekleyen` yolundan gider.
+
+| Madde | Önce | Sonra | Ne değişti |
+|---|---|---|---|
+| Hafıza katmanları | yalnız `memories` (bilgiler); olanlar ve beceriler ayrı yerlerde, «benim hakkımda» yalnız bilgileri listeliyor | `GET /api/hafiza`: bilgiler (kaynak, tarih), olanlar (eylem defteri + modül olayları), beceriler, adaylar | `memory.bildiklerim`; düzelt `POST /api/hafiza/<id>/duzelt` ve sohbette «#N düzelt: …» (modül kaydı: eskisi unutulur, düzeltilmiş HKM'ye yazılır, modülün sonraki görüntüsü diriltemez), unut `POST /api/hafiza/<id>/unut` |
+| Arama (20 bilgi, kelimesini tekrar etmeyen 20 soru, gerçek qwen3-embedding) | kök eşlemesi: ilk sırada 6/20, ilk üçte 7/20 | gömme: ilk sırada 13/20, ilk üçte 18/20 | `memory.ara` (`GET /api/hafiza/ara?q=`); vektörler `hafiza_gomme` önbelleğinde (metin değişince yeniden), yedeğe girmez; motor yoksa köke düşer |
+| Gömme süresi | — | sorgu ortanca 223 ms; ilk arama (20 bilgi gömülür) 3,4 sn; soğuk yükleme CPU 3,4 sn, GPU 31,9 sn | model CPU'da (`num_gpu: 0`, VRAM 0, RAM 1,3 GB) ve 60 dk sıcak: 6 GB'ta Gemma'yı itmez. Zaman aşımı 5 sn; hatadan sonra 60 sn denenmez, sohbet beklemez |
+| İlgi eşiği | — | 0,35 | doğru eşleşmenin benzerlik ortancası 0,448 (en düşük 0,262), en yakın yanlışın 0,379 (en yüksek 0,635): eşik tek başına ayırmaz, bağlamda sıra + bütçe ayırır |
+| A4 bağlamına hafıza | son 12 kayıt ya da kök eşleşmesi; boyut sınırı yok | ilgili bilgiler + King'e ilgili «olanlar» (en çok 3); rol bütçesinin beşte biri (`king` 700 jeton) aşılmaz | `memory.context(cfg, butce, soru)`; kesme sırası: ilgili bilgi > ilgili olan > yalnız yeni olduğu için gelen bilgi |
+| Yedek | `eylem` defteri yedekte yok | `eylem` ve `king_olaylar` `BACKUP_TABLES`'ta (`yedek.py` tek dosya paketi dahil) | gömme önbelleği türetilmiş: yedeğe girmez |
+| Kendiliğinden King | `kendiliginden.py` 18 satır, yalnız model anahtarı | kural motoru: `POST /api/olay` → karar (`basla · bekliyor · butce · tekrar · esik_alti · eksik_veri · kural_yok · bayat`) | sözleşme `belgeler/ekip/KING-OLAY.md` (3c buna uyar); 4 kural (sınav 30/14/7/3/1 gün, uyku 7 gün ≤ 28 gün − 0,75 ya da < 6 sa, plan ≥ 30 dk gecikme, tekrar ≥ 1); günde 3 mesaj (`king.kendiliginden_butce`), önce öncelikli olay; sessiz saat bildirim ayarından, boşsa 23:00–08:00 (arada gelen olay bekler, dakikalık tik sonra bakar); aynı modül+tür 20 saatte bir; mesajın `neden` alanı `{olay, kural, sayilar, cumle}`; `GET /api/king/kendiliginden` bekleyenler, bütçe, kararlar |
+
+HKM testleri 1000/1000 (yeni `test_hafiza3` 8). Ofis: 050 (`tools/hafiza_olcum.py`, bu tablonun
+tekrar ölçümü) ve 051 (uç nokta testleri + `HKM/MIMARI.md` bölümü) kabul testleriyle kuyrukta;
+bugün pilot 8/8 dolu ve Antigravity kapalıydı. Açık: istemci `neden` alanını «neden şimdi?» satırı
+olarak henüz göstermiyor (king.js, 3a/F alanı); «benim hakkımda» ekranı (F); modül olay yayıncıları 3c'de.

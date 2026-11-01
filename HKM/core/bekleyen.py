@@ -38,21 +38,24 @@ def _satir(r):
     except ValueError:
         d["eylemler"] = []
     d["soru"] = bool(d.get("soru"))
+    # Kendiliginden mesajin «neden simdi?» satiri (core/kendiliginden.py).
+    d["neden"] = json.loads(d["neden"]) if d.get("neden") else None
     return d
 
 
 def teslim(con, tur, kaynak_id, metin, modul=None, kanal="local", hedef=None, eylemler=None,
-           soru=False, now=None, dogrudan=False):
+           soru=False, now=None, dogrudan=False, neden=None):
     """Bekleyen mesaji birakir; konusma akisina ve (varsa) metin kanalina
     yazar. `dogrudan`: mesaj zaten sohbet cevabinda gidiyor (söz tetigi);
     satir yalniz cevabi baglamak icin «alindi» dogar. Doner: satir."""
     now = _simdi(now)
     metin = " ".join(str(metin or "").split())[:600]
     cur = con.execute(
-        "INSERT INTO king_bekleyen(modul, kanal, tur, kaynak_id, metin, soru, eylemler, created_at, alindi_at) "
-        "VALUES (?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO king_bekleyen(modul, kanal, tur, kaynak_id, metin, soru, eylemler, created_at, alindi_at, neden) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?)",
         (modul, kanal or "local", tur, int(kaynak_id), metin, 1 if soru else 0,
-         json.dumps(eylemler or [], ensure_ascii=False), now, now if dogrudan else None))
+         json.dumps(eylemler or [], ensure_ascii=False), now, now if dogrudan else None,
+         json.dumps(neden, ensure_ascii=False) if neden else None))
     con.commit()
     bid = cur.lastrowid
     if metin and not dogrudan:

@@ -46,6 +46,7 @@
 import datetime
 import json
 import re
+import time
 import urllib.request
 
 from core import kendiliginden as _kendi  # ayni adli fonksiyon asagida (bulunca bagla)
@@ -275,6 +276,51 @@ def _gonder(url, govde, timeout):
 
 # Testler AGA CIKMAZ (tests/harness.py).
 VARSAYILAN_GONDER = _gonder
+
+
+# --------------------------------------------------------------- gomme
+
+# Hafiza aramasi (core/memory.py, KING-4 B). Gomme modeli CPU'da kosar:
+# 6 GB'ta sohbet ve Whisper GPU'dayken ikinci bir model Gemma'yi itiyordu (Olcum 1b).
+GOMME_SECENEK = {"num_gpu": 0}
+GOMME_ZAMAN = 5                     # Olcum 3b: CPU soguk yukleme 3,4 sn
+GOMME_ARA = 60                      # hatadan sonra bu kadar sn denenmez (sohbet beklemesin)
+_gomme_hata = [0.0]
+
+
+def _gomme_gonder(url, govde, timeout):
+    istek = urllib.request.Request(url, data=json.dumps(govde).encode("utf-8"),
+                                   headers={"Content-Type": "application/json"}, method="POST")
+    with urllib.request.urlopen(istek, timeout=timeout) as y:      # noqa: S310 — yerel motor
+        return json.loads(y.read().decode("utf-8"))
+
+
+VARSAYILAN_GOMME = _gomme_gonder
+
+
+def gomme_modeli(cfg):
+    return models.yerel_of(cfg).get("gomme") or GOMME_TERCIH[0]
+
+
+def gomme(cfg, metinler, gonder=None):
+    """Metinlerin gomme vektorleri (sirayla) ya da None (motor yok, model yok).
+    Firlatmaz; hata bir sure yeniden denenmez."""
+    if not metinler:
+        return []
+    if gonder is None and time.monotonic() - _gomme_hata[0] < GOMME_ARA and _gomme_hata[0]:
+        return None
+    try:
+        r = (gonder or VARSAYILAN_GOMME)(models.yerel_kok(cfg) + "/api/embed",
+                                         {"model": gomme_modeli(cfg), "input": list(metinler),
+                                          "options": GOMME_SECENEK, "keep_alive": "60m"}, GOMME_ZAMAN)
+        v = r.get("embeddings") if isinstance(r, dict) else None
+        if not isinstance(v, list) or len(v) != len(metinler):
+            raise ValueError("gomme cevabi eksik")
+        return v
+    except Exception:                           # noqa: BLE001 — kapali motor bir durumdur
+        if gonder is None:
+            _gomme_hata[0] = time.monotonic()
+        return None
 
 
 def isit(cfg, tarama, gonder=None):

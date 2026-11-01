@@ -1167,11 +1167,15 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         bg += "\n" + arac.sonuc_baglami(sonuclar)
     if uzun or LIFEOS_SOZ.search(str(metin or "")):
         bg += "\n" + LIFEOS_BILGI
+    # Hafiza (KING-4 B): ilgi gommeyle olculur, King'e ilgili «olanlar» da girer;
+    # rol butcesinin beste biri asilmaz (core/ai.py butceye_sigdir sistemi kirpmaz).
+    hbutce = ai.baglam_butcesi(rol) // 5
     if sinir:
         hb = memory.context(con, user=user, scope=gorevli, limit=sinir["hafiza"],
-                            ilgili=metin if sinir["ilgili"] else None, sozler=sinir["sozler"])
+                            ilgili=metin if sinir["ilgili"] else None, sozler=sinir["sozler"],
+                            cfg=cfg, butce=hbutce, soru=metin)
     else:
-        hb = memory.context(con, user=user, scope=gorevli)
+        hb = memory.context(con, user=user, scope=gorevli, cfg=cfg, butce=hbutce, soru=metin)
     if hb:
         veri.add("hafiza")
         bg += ("\nKullanıcı hakkında hatırlananlar (etiketiyle; «tahmin» kesin "
