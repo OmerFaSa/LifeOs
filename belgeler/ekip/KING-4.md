@@ -351,3 +351,25 @@ araç kayıtta var mı. Yeni yazma işlevi ya da ekran eşlemesiz kalırsa kırm
 (ESP, 19); kabul testleri `tools/king_kapsam_<modül>_kabul_test.py` (kapsam tam ve
 her yeni araç modülün `kingarac.test.js`'inde sınanmış). Yazan her araç `geriAl`
 döner (A4'ün «geri al» ölçüsü).
+
+## Ölçüm 2b · HKM tarafı (2026-11-01)
+
+Aynı düzen: canlı veritabanının kopyası, bu makinedeki Ollama 0.40.9 (RTX 4050, 6 GB)
+ve whisper.cpp CUDA. Görsel ölçümde 3 sentetik fiş ve 3 ekran görüntüsü, her istekten
+önce gemma4 sohbet modeli sıcak (gerçek sıra: sohbet → görsel → sesli giriş).
+
+| Madde | Önce | Sonra | Ne değişti |
+|---|---|---|---|
+| Fiş okuma (`para.fis`, toplam doğru) | qwen3-vl:4b 0/3 (hepsi boş cevap), 34–46 sn | gemma4:e2b 3/3, 0,9–2,2 sn | `ollama.GORSEL_TERCIH` önce gemma4:e2b; canlı ayarda `models.yerel.gorsel` = gemma4:e2b. qwen3-vl silinmedi |
+| Ekran okuma (`ays.gorsel`) | 3/3, 11–20 sn | 2/3, 0,4–2,3 sn | kaçan: görseldeki denklemi çözme sorusu (C dedi, doğrusu B); okuma soruları doğru |
+| Görselden sonra sesli giriş | 11–19 sn (qwen3-vl gemma4'ü bellekten atıyor) | 0,22–0,42 sn | GPU'da tek model kalıyor |
+| Whisper, model sıcak | `whisper-cli` her kayıtta modeli yükler: 1,8–2,9 sn | 0,18–0,29 sn | `whisper-server` mikrofon açılınca (`/api/dinle/durum`) ya da ilk Whisper kaydında arka planda açılır, HKM yaşadıkça modeli GPU'da tutar (~1 GB); hazır değilse cli |
+| Sesli giriş, Gemma soğuk | ~2,5 sn (1b) | 0,24–0,62 sn | soğuk Gemma'da kayıt sıcak Whisper'a gider, Gemma arka planda ısınır |
+| A4 · araç adımı | soru başına 1 okuma turu | en çok 4 adım, 30 sn | sonuç turunda katalog yeniden sunulur (`dongu: {adim, gecen_ms}`); aynı (ad, param) ikinci kez çağrılamaz; sınırda son tur araçsız cevap. `dongu` yollamayan istemci bugünkü tek turu görür |
+| A4 · geri alınabilen yazma | HKM'nin yazdığı para ve söz kaydı deftere girmiyor; geri alma yalnız «para geri al» (son kayıt) | para ve söz kaydı `eylem` defterinde, kayıt başına geri alınır | `core/eylem.py`; `GET /api/eylem` zaman çizgisi, `POST /api/eylem` modülün uyguladığı yazma ve tersi, `POST /api/eylem/<id>/geri` (HKM kaydını kendi geri alır, modül kaydında tersini döner) |
+
+HKM testleri 992/992 (yeni: `test_dongu` 7, sıcak Whisper 1). Açık: istemci
+(`king-arac.js`) henüz `dongu` yollamıyor ve uyguladığı yazmayı `/api/eylem`'e
+bırakmıyor; 2a'nın araçları `geriAl` döndürüyor, bağlantı istemci işi. Ofis görevi
+030 (`tools/hkm_olcum.py`, kabul testi kırmızı) kuyrukta; pilot durmuş ve bugünkü
+8/8 iş sınırı dolu. Ölçüm betikleri depoda değil (030 bunu kalıcı yapar).
