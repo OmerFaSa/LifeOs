@@ -21,6 +21,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [KISI-PLANI](ekip/KISI-PLANI.md) — King'in 14 yaşam alanında kullanıcıyı tanıyan kişi modeli ve hafıza yapısı; durumu: tamamlandı (2026-10-17)
 - [NOT-PLANI](ekip/NOT-PLANI.md) — Zengin içerikli, iki yönlü bağlantılı yerel defter ve not sistemi mimarisi; durumu: tamamlandı (2026-10-17)
 - [KING-4](ekip/KING-4.md) — Tek ajan üzerinden bütün sistemi yöneten King 4.0 vizyonu ve yol haritası; durumu: sürüyor (2026-11-01)
+- [KING-OLAY](ekip/KING-OLAY.md) — Modül olay bildirimleri ve King kendiliğinden konuşma sözleşmesi; durumu: güncel (2026-11-01)
 - [KING-DEVRIM](ekip/KING-DEVRIM.md) — Kişisel yasalar, kendi kendini süren gün ve her şeyi derse çevirme devrimi; durumu: tamamlandı (2026-10-22)
 - [KING-EKIP](ekip/KING-EKIP.md) — King'in çok adımlı arka plan görevleri ve alt ajan koordinasyon mimarisi; durumu: tamamlandı (2026-10-21)
 - [KING-BECERI](ekip/KING-BECERI.md) — Kullanıcının King'e öğrettiği beceriler ve geleceğe yönelik söz takibi; durumu: tamamlandı (2026-10-21)

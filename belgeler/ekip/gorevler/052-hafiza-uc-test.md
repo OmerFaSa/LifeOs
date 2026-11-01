@@ -47,7 +47,7 @@ var (`HKM/tests/test_hafiza3.py`); uçların HTTP üzerinden testi ve HKM belges
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). -->
-- **Ne değişti:** `HKM/tests/test_hafiza_uc.py` oluşturuldu (`run()` ile 6 adet HTTP uç testi: `/api/hafiza`, `/api/hafiza/ara`, `/duzelt`, `/unut`, `/api/olay`, `/api/king/kendiliginden`, `/api/king/bekleyen`). `HKM/tests/run.py` dosyasına `test_hafiza_uc` içe aktarımı ve `test_hafiza_uc.run()` çağrısı eklendi. `HKM/MIMARI.md`'ye hafıza üç katmanı ve kendiliğinden King kural motoru özeti eklendi.
-- **Koşan testler:** `python tools/hafiza_uc_kabul_test.py` -> `hafiza uc kabul: 6 test yesil, 7 yol cagriliyor.` · `cd HKM && python -X utf8 -m tests.run` -> `1006/1006 test gecti`
+- **Ne değişti:** `HKM/tests/test_hafiza_uc.py` oluşturuldu (`run()` ile 6 adet HTTP uç testi: `/api/hafiza`, `/api/hafiza/ara`, `/duzelt`, `/unut`, `/api/olay`, `/api/king/kendiliginden`, `/api/king/bekleyen`). `HKM/tests/run.py` dosyasına `test_hafiza_uc` içe aktarımı ve `test_hafiza_uc.run()` çağrısı eklendi. `HKM/MIMARI.md`'ye hafıza üç katmanı ve kendiliğinden King kural motoru özeti eklendi. `belgeler/DIZIN.md`'ye `KING-OLAY.md` eklendi.
+- **Koşan testler:** `python tools/hafiza_uc_kabul_test.py` -> `hafiza uc kabul: 6 test yesil, 7 yol cagriliyor.` · `cd HKM && python -X utf8 -m tests.run` -> `1006/1006 test gecti` · `python tools/belge_dizin_kabul_test.py` -> `belge dizin kabul: 33 belge, her biri bir kez, baglantilar calisiyor, arsiv ayri.`
 - **Kabul testi:** `tools/hafiza_uc_kabul_test.py` yeşil (6 test yeşil, 7 yol çağrılıyor)
 - **Açık kalan:** yok
