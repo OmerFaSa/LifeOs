@@ -1,6 +1,6 @@
 # 033 · ESP King sınavı kayıpları: anahtar, kural, giriş (KING-4 3a)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/033-esp-sinav`
 **Efor:** orta
 **Kabul testi:** `tools/king_sinav_esp_kabul_test.py`
@@ -36,7 +36,7 @@ Elle dene: `node tools/king_sinav.js --modul=esp` (kalan cümleleri ve gelen kar
 - `cd ESP && node tools/runtests.js <senin portun>`
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `ESP/src/js/core/kingarac.js` içinde okuma araçlarına (`esp_gun`, `esp_hafta`, `esp_kitaplar`) eş anlamlı `anahtar` kelimeler eklendi, ezberi önlemek için `ornek` alanları güncellendi, `KURAL` içindeki `esp_kitap_bitir`, `esp_alinti_ekle` ve `esp_hafta` kuralları genişletildi. `ESP/src/js/core/parse.js` içinde `ALIASES`'a `history` ve diksiyon varyantları eklendi, «ve» ile bölünen diksiyon parçaları birleştirildi, `SURE` için çeyrek/yarım saat yedekleri ve süresiz sayım kayıtları (`minutes: null`) sağlandı. `ESP/src/tests/kingarac.test.js` dosyasına kural ve `dogrula` reddi testleri eklendi.
+- **Koşan testler:** `python tools/king_sinav_esp_kabul_test.py` -> `king sinav esp kabul: 79/84 gecti, 13 hedeften 3 kaldi, gerileme yok.` · `cd ESP && node tools/runtests.js 4743` -> `2615/2615 gecti`
+- **Kabul testi:** `king sinav esp kabul: 79/84 gecti, 13 hedeften 3 kaldi, gerileme yok.`
+- **Açık kalan:** «kitap ekle» ve «okunacaklar listesine kitap ekle» (adsız kitap ekleme King çekirdeğinin işi); «çeyrek saat ses açma egzersizi yaptım» (parseSession doğru oturum önizlemesi üretse de King çekirdeğindeki sayfa arama regex'i «ses açma» içindeki «aç» kökünü sayfa açma emri sayıp «egzersiz» kelimesiyle `git:spi:move` rotasına yönlendiriyor; `brand/ortak/king.js` içinde çözülmeli).
