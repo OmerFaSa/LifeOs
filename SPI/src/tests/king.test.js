@@ -105,6 +105,9 @@
       expect(h('   ')).toBe('bos');
       expect(k.yorumla('antrenman yapacağım').hedef.ek.sekme).toBe('kuvvet');
       expect(k.yorumla('koşuya çıkıyorum').hedef.ek.sekme).toBe('kardiyo');
+      /* 3a: komut fiili kelimedir; «ses açma egzersizi» sayfa açma emri değil. */
+      expect(k.yorumla('hareket sayfasını açar mısın').kaynak).toBe('komut');
+      expect(['ses açma egzersizi yaptım', 'geçmiş antrenmanlarım', 'gitar çaldım'].map(m => k.yorumla(m).kaynak === 'komut')).toEqual([false, false, false]);
     }));
 
     it('eşit adda bulunulan modülün sayfası seçilir', () => sahneyle(async () => {

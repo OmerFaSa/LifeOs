@@ -995,7 +995,8 @@ window.LIFEOS.KING_IC = {};
     if(/(özet|nasıl gid|bugün ne|durumum|durum ne)/.test(t)) return { tur:'ozet' };
     /* «notlarım», «notlarımı aç», «bütün notlar»: ortak Notlarım paneli (notum.js). */
     if(/^(bütün |tüm )?notlar(ım|ımı|ımı aç|ımı göster)?( aç| göster)?$/.test(t) && L.NOTUM && L.NOTUM.kuruluMu && L.NOTUM.kuruluMu()) return { tur:'notlar' };
-    const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim|dön)').test(t);
+    /* Fiil kelime olarak: «açma», «gitar», «geçmiş», «dönem» komut değildir (3a). */
+    const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim|dön)(?:[ıi]n|[ae]l[ıi]m|[ae]r m[ıi]s[ıi]n)?(?=$|[\\s.,!?])').test(t);
     if(gitMi){
       const s = sayfaBul(t);
       if(s) return { tur:'git', hedef:s, cevap:'Tamam.', kaynak:'komut' };
