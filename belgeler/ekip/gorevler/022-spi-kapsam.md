@@ -1,6 +1,6 @@
 # 022 · SPI ekran işlerinin tamamı King aracı (KING-4 A2)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/022-spi-kapsam`
 **Efor:** orta
 **Kabul testi:** `tools/king_kapsam_spi_kabul_test.py`
@@ -48,7 +48,9 @@ KING-4 §A2: «her modül ekranındaki her okuma ve yazma işi tipli bir araç o
 - `cd SPI && node tools/runtests.js <senin portun>`
 
 ## Sonuç
-- **Ne değişti:**
+- **Ne değişti:** SPI/src/js/core/kingarac.js'e eksik 14 King aracı (spi_antrenman_sil, spi_butce, spi_gida, spi_hane, spi_hane_oku, spi_hedefler, spi_ilac, spi_karar_kapat, spi_market, spi_mutfak, spi_ogun_sil, spi_planlar, spi_profil, spi_tahlil_sil) eklendi; SPI/src/tests/kingarac.test.js'e her yeni aracın okuma, önizleme, uygulama ve geri alma davranışını sınayan birim testleri eklendi.
 - **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+  - `node tools/king_kapsam.js --modul=spi` -> `spi: 23 yazma işlevi (21 araçla), 19 rota, 40 araç` / `King kapsamı: tam`
+  - `cd SPI && node tools/runtests.js 4742` -> `2917/2917 gecti`
+- **Kabul testi:** `python tools/king_kapsam_spi_kabul_test.py` -> `king kapsam spi kabul: ekran islerinin tamami arac, 14 yeni arac sinanmis.`
+- **Açık kalan:** yok
