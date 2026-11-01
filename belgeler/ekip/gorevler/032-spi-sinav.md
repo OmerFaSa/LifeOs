@@ -1,6 +1,6 @@
 # 032 · SPI King sınavı kayıpları: anahtar, kural, giriş (KING-4 3a)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/032-spi-sinav`
 **Efor:** orta
 **Kabul testi:** `tools/king_sinav_spi_kabul_test.py`
@@ -35,7 +35,7 @@ Elle dene: `node tools/king_sinav.js --modul=spi` (kalan cümleleri ve gelen kar
 - `cd SPI && node tools/runtests.js <senin portun>`
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** quickentry.js'e kilo takma adları (kilom, agirligim, tarti, tartildim) ve suda buçuk desteği eklendi. kingarac.js'te spi_gun_kaydi, spi_uyku ve spi_antrenmanlar araçlarına anahtar ve es iyileştirmesi yapıldı; spi_besin, spi_barkod_ogun ve spi_bolum_ac_kapa kuralları eklendi; sınav cümlesi içeren 4 örnek genel ifadelerle değiştirildi (ezber temizlendi). kingarac.test.js'e kural ve zorunlu parametre testleri eklendi.
+- **Koşan testler:** cd SPI && node tools/runtests.js 4742 -> 2922/2922 gecti
+- **Kabul testi:** python tools/king_sinav_spi_kabul_test.py -> king sinav spi kabul: 103/105 gecti, 15 hedeften 0 kaldi, gerileme yok.
+- **Açık kalan:** yok
