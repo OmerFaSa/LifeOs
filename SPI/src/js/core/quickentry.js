@@ -48,7 +48,7 @@ SP.Quick = (function(){
     hrv:{ id:'hrv', label:'HRV', unit:'ms', min:1, max:300,
       aliases:['hrv', 'rmssd'] },
     weight:{ id:'weight', label:'Kilo', unit:'kg', min:20, max:300,
-      aliases:['kilo', 'agirlik', 'weight'] },
+      aliases:['kilo', 'kilom', 'agirlik', 'agirligim', 'tarti', 'tartildim', 'weight'] },
     /* `ekle`: yazilan deger gunun toplamina EKLENIR (asagida BARDAK_ML). */
     water:{ id:'water', label:'Su', unit:'ml', min:0, max:10000, ekle:true,
       aliases:['su', 'water'] },
@@ -190,14 +190,15 @@ SP.Quick = (function(){
 
   function suMiktari(n, at, alias){
     const sonra = n.slice(at + alias.length)
-      .match(new RegExp('^\\s*(\\d+(?:[.,]\\d+)?)\\s*' + SU_BIRIM_RE + '?(?![a-z])'));
+      .match(new RegExp('^\\s*(\\d+(?:[.,]\\d+)?)\\s*(?:(bucuk|buçuk)\\s*)?' + SU_BIRIM_RE + '?(?![a-z])'));
     const once = n.slice(0, at)
-      .match(new RegExp('(\\d+(?:[.,]\\d+)?)\\s*' + SU_BIRIM_RE + '\\s+(?:[a-z]+\\s+)?$'));
+      .match(new RegExp('(\\d+(?:[.,]\\d+)?)\\s*(?:(bucuk|buçuk)\\s*)?' + SU_BIRIM_RE + '\\s+(?:[a-z]+\\s+)?$'));
     const m = sonra || once;
     if(!m) return null;
-    const v = sayi(m[1]);
+    let v = sayi(m[1]);
     if(v == null || v <= 0) return null;
-    if(m[2]) return Math.round(v * SU_BIRIM[m[2]]);
+    if(m[2]) v += 0.5;
+    if(m[3]) return Math.round(v * SU_BIRIM[m[3]]);
     if(v < 20) return Math.round(v * 1000);
     return v >= 50 ? Math.round(v) : null;
   }

@@ -475,5 +475,59 @@
 
       A()._sifirla();
     });
+    /* 032 · King sınavı SPI kuralları ve doğrulama denetimleri */
+    it('kural çözümleme ve zorunlu parametre doğrulamaları (032)', () => {
+      kur();
+      // 1. spi_besin kural ve doğrulama
+      const bes = A().kuralla('zeytinyağının kalori ve yağ değeri');
+      expect(bes).toEqual({ ad:'spi_besin', param:{ besin:'zeytinyağı' } });
+      expect(A().dogrula('spi_besin', {}).ok).toBe(false);
+      expect(A().dogrula('spi_besin', { besin:'zeytinyağı' }).ok).toBe(true);
+
+      // 2. spi_barkod_ogun kural ve doğrulama
+      const b1 = A().kuralla('4006381333931 barkodlu ürünü kahvaltıya 100 gram ekle');
+      expect(b1).toEqual({ ad:'spi_barkod_ogun', param:{ kod:'4006381333931', gram:100, ogun:'kahvaltı' } });
+      const b2 = A().kuralla('8690504033324 barkodlu yoğurttan 200 gram yedim');
+      expect(b2).toEqual({ ad:'spi_barkod_ogun', param:{ kod:'8690504033324', gram:200 } });
+      expect(A().dogrula('spi_barkod_ogun', {}).ok).toBe(false);
+      expect(A().dogrula('spi_barkod_ogun', { kod:'8690504033324' }).ok).toBe(true);
+
+      // 3. spi_bolum_ac_kapa kural ve doğrulama
+      const bl1 = A().kuralla('market sepeti bölümünü kapat');
+      expect(bl1).toEqual({ ad:'spi_bolum_ac_kapa', param:{ bolum:'basket', acik:0 } });
+      const bl2 = A().kuralla('tahlil bölümünü aç');
+      expect(bl2).toBeNull();
+      const bl3 = A().kuralla('mutfak kileri bölümünü gizle');
+      expect(bl3).toEqual({ ad:'spi_bolum_ac_kapa', param:{ bolum:'kitchen', acik:0 } });
+      const blBilinmeyen = A().kuralla('bilinmeyen bölümünü kapat');
+      expect(blBilinmeyen).toBeNull();
+      expect(A().dogrula('spi_bolum_ac_kapa', {}).ok).toBe(false);
+      expect(A().dogrula('spi_bolum_ac_kapa', { bolum:'basket' }).ok).toBe(false);
+      expect(A().dogrula('spi_bolum_ac_kapa', { acik:0 }).ok).toBe(false);
+      expect(A().dogrula('spi_bolum_ac_kapa', { bolum:'basket', acik:0 }).ok).toBe(true);
+
+      // 4. QuickEntry kilo ve su ayrıştırması
+      const q1 = SP.Quick.parse('kilom 78.4');
+      expect(q1.kind).toBe('vital');
+      expect(q1.data.field.id).toBe('weight');
+      expect(q1.data.value).toBe(78.4);
+
+      const q2 = SP.Quick.parse('1 buçuk litre su içtim');
+      expect(q2.kind).toBe('vital');
+      expect(q2.data.field.id).toBe('water');
+      expect(q2.data.value).toBe(1500);
+
+      const q3 = SP.Quick.parse('sabah aç karnına tartıldım kilom 76.8');
+      expect(q3.kind).toBe('vital');
+      expect(q3.data.field.id).toBe('weight');
+      expect(q3.data.value).toBe(76.8);
+
+      const q4 = SP.Quick.parse('kilom bu sabah 77.2 geldi');
+      expect(q4.kind).toBe('vital');
+      expect(q4.data.field.id).toBe('weight');
+      expect(q4.data.value).toBe(77.2);
+
+      A()._sifirla();
+    });
   });
 })();
