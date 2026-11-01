@@ -317,5 +317,25 @@
 
       A()._sifirla();
     });
+
+    it('yeni kural cümleleri ve parametre çıkarımı', () => {
+      kur();
+      expect(A().kuralla("Sefiller'i okumayı tamamladım")).toEqual({ ad:'esp_kitap_bitir', param:{ kitap:'Sefiller' } });
+      expect(A().kuralla("Dönüşüm kitabını bitirdim")).toEqual({ ad:'esp_kitap_bitir', param:{ kitap:'Dönüşüm' } });
+      expect(A().kuralla("kitaptan alıntı ekle: Bilgi güçtür")).toEqual({ ad:'esp_alinti_ekle', param:{ metin:'Bilgi güçtür' } });
+      expect(A().kuralla("alıntı: Zaman bir nehir")).toEqual({ ad:'esp_alinti_ekle', param:{ metin:'Zaman bir nehir' } });
+      expect(A().kuralla("bu hafta toplam gitar ve dil çalışma saatim")).toEqual({ ad:'esp_hafta', param:{} });
+      A()._sifirla();
+    });
+
+    it('her required için eksik parametrede dogrula reddi', () => {
+      kur();
+      const reqList = ['esp_kart_ekle', 'esp_alinti_ekle', 'esp_kitap_bitir', 'esp_oturum', 'esp_arguman', 'esp_dosya', 'esp_eser', 'esp_hatirlatma', 'esp_hedef', 'esp_kaynak', 'esp_kitap', 'esp_olay', 'esp_ses_kaydi', 'esp_taslak', 'esp_zincir'];
+      reqList.forEach(ad => {
+        expect(A().dogrula(ad, {}).ok).toBe(false);
+      });
+      expect(A().dogrula('esp_kart_ekle', { on:'test' }).ok).toBe(false);
+      A()._sifirla();
+    });
   });
 })();

@@ -231,13 +231,13 @@ ESP.KingArac = (function(){
 
   function liste(){
     return [
-      { ad:'esp_gun', tur:'oku', aciklama:'Bir günün ESP çalışma oturumları (alan ve dakika).', ornek:'bugün ne çalıştım',
+      { ad:'esp_gun', tur:'oku', aciklama:'Bir günün ESP çalışma oturumları (alan ve dakika).', ornek:'günün oturumları', anahtar:'entelektüel pratik süresi seans oturum gündelik günlük',
         parametreler:{ type:'object', properties:{ tarih:{ type:'string', maxLength:10, description:'gün (YYYY-AA-GG); boşsa bugün' } } }, calistir:gun },
-      { ad:'esp_hafta', tur:'oku', aciklama:'Son günlerde hangi alanda kaç dakika çalışıldığı.', ornek:'bu hafta ne kadar çalıştım',
+      { ad:'esp_hafta', tur:'oku', aciklama:'Son günlerde hangi alanda kaç dakika çalışıldığı.', ornek:'haftalık süre', anahtar:'haftalık disiplin vakit dağılımı toplam süre saat',
         parametreler:{ type:'object', properties:{ gun:{ type:'integer', minimum:1, maximum:60 } } }, calistir:hafta },
-      { ad:'esp_kitaplar', tur:'oku', aciklama:'Kütüphanedeki kitaplar ve durumları (okunuyor, bitti, başlanmadı).', ornek:'kitaplarım',
+      { ad:'esp_kitaplar', tur:'oku', aciklama:'Kütüphanedeki kitaplar ve durumları (okunuyor, bitti, başlanmadı).', ornek:'kütüphanedeki eserler', anahtar:'okuduklarım bitirdiklerim liste kütüphanemdeki eserler',
         calistir:kitaplar },
-      { ad:'esp_kartlar', tur:'oku', aciklama:'Dil kartları: toplam, bugün sırası gelen, dillere göre.', ornek:'kaç kelime kartım var',
+      { ad:'esp_kartlar', tur:'oku', aciklama:'Dil kartları: toplam, bugün sırası gelen, dillere göre.', ornek:'kartlarımın durumu',
         calistir:kartlar },
       { ad:'esp_yazilar', tur:'oku', aciklama:'Yazı taslakları ve kelime sayıları.', ornek:'yazı taslaklarım', calistir:yazilar },
       { ad:'esp_merdiven', tur:'oku', aciklama:'ESP merdiveni: yedi disiplinin kademesi, ustalık yüzdesi ve ölçülen disiplinler.', ornek:'seviyem nedir',
@@ -249,7 +249,7 @@ ESP.KingArac = (function(){
       { ad:'esp_repertuvar', tur:'oku', aciklama:'Müzik stüdyosundaki parça ve teknikler (temiz BPM eşikleri).', ornek:'repertuarım',
         parametreler:{ type:'object', properties:{ tur:{ type:'string', enum:['piece', 'technique'], description:'parça veya teknik' } } }, calistir:repertuvar },
 
-      { ad:'esp_kart_ekle', tur:'yaz', ozetAd:'Dil kartı ekle', ornek:'serendipity kelimesini kart yap: tesadüfen güzel bir şey bulmak',
+      { ad:'esp_kart_ekle', tur:'yaz', ozetAd:'Dil kartı ekle', ornek:'pragmatik kelimesini kart yap: faydacı',
         aciklama:'Dil destesine yeni kelime kartı ekler (ön yüz ve karşılığı).',
         parametreler:{ type:'object', properties:{ on:{ type:'string', maxLength:120, description:'kelime ya da ifade' },
           arka:{ type:'string', maxLength:240, description:'karşılığı' }, dil:{ type:'string', enum:['en', 'de', 'fr', 'es', 'it', 'ru', 'ar', 'ja'] } },
@@ -260,7 +260,7 @@ ESP.KingArac = (function(){
           render();
           return { metin:'Kartı ekledim.', geriAl:c && c.id ? async () => { await M().deleteCard(c.id); render(); } : null };
         } },
-      { ad:'esp_alinti_ekle', tur:'yaz', ozetAd:'Alıntı kaydet', ornek:'alıntı: Bir insanın değeri, sevdiği şeylerin değeridir',
+      { ad:'esp_alinti_ekle', tur:'yaz', ozetAd:'Alıntı kaydet', ornek:'alıntı: Düşünüyorum öyleyse varım',
         aciklama:'Bir kitaptan alıntıyı ya da kitap notunu kaydeder; kitap verilmezse okunmakta olan tek kitaba bağlanır.',
         parametreler:{ type:'object', properties:{ metin:{ type:'string', maxLength:1000, description:'alıntının metni, aynen' },
           kitap:{ type:'string', maxLength:120, description:'kitabın adı ya da adının bir parçası' } }, required:['metin'] },
@@ -1039,8 +1039,8 @@ ESP.KingArac = (function(){
   /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz; kart, alıntı ve bitirme cümleden okunur
      (yazan araç yine önizlenir, onayla yazılır). */
   const KURAL = {
-    esp_gun:{ es:/^bugün (?:ne|neler) çalıştım/ },
-    esp_hafta:{ es:/((?:bu hafta|son bir hafta|haftada) ne kadar çalıştım)/ },
+    esp_gun:{ es:/^bugün (?:neler|ne) çalıştım/ },
+    esp_hafta:{ es:/(?:bu hafta|son bir hafta|haftada).*(?:çalış|vakit|saat)/ },
     esp_kitaplar:{ es:/(^kitaplarım|kütüphanemde ne var|hangi kitapları okuyorum)/ },
     esp_kartlar:{ es:/(kaç (?:kelime )?kart|kelime kartlarım)/ },
     esp_yazilar:{ es:/(yazı taslak|taslaklarım|yazılarım)/ },
@@ -1050,8 +1050,8 @@ ESP.KingArac = (function(){
     esp_repertuvar:{ es:/(repertuvar|çaldığım|parçalarım|tekniklerim)/ },
     esp_kart_ekle:{ kural:(t, m) => { const x = /^(.+?)\s+kelimesini karta? (?:yap|ekle)\s*[:,]\s*(.+)$/i.exec(m);
       return x && x[1].length <= 120 && x[2].length <= 240 ? { on:x[1].trim(), arka:x[2].trim() } : null; } },
-    esp_alinti_ekle:{ kural:(t, m) => { const x = /^alıntı\s*[:,]\s*(\S[\s\S]{0,999})$/i.exec(m); return x ? { metin:x[1].trim() } : null; } },
-    esp_kitap_bitir:{ kural:(t, m) => { const x = /^(.+?)['’]?(?:y[ıiuü])? bitirdim[.!]?$/i.exec(m);
+    esp_alinti_ekle:{ kural:(t, m) => { const x = /^(?:kitaptan\s+)?alıntı(?:\s+ekle)?\s*[:,]\s*(\S[\s\S]{0,999})$/i.exec(m); return x ? { metin:x[1].trim() } : null; } },
+    esp_kitap_bitir:{ kural:(t, m) => { const x = /^(.+?)(?:['’](?:[yn]?[ıiuü]|[ıiuü]))?(?:\s+kitab(?:ı|ını|i|ini))?\s*(?:okumay[ıi])?\s+(?:bitirdim|tamamladım)[.!]?$/i.exec(m);
       const k = x && x[1].trim();
       return k && !/^(kitab[ıi]?|onu|bunu|şunu)$/i.test(k) && k.length <= 120 ? { kitap:k } : null; } },
   };

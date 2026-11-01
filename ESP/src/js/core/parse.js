@@ -42,11 +42,15 @@ ESP.Parse = (function(){
     music:['gitar çalıştım', 'gitar çaldım', 'metronomla çalıştım', 'gam çalıştım',
       'parça çalıştım', 'enstrüman çalıştım', 'gitar', 'müzik'],
     diction:['diksiyon çalıştım', 'tekerleme söyledim', 'nefes çalıştım',
-      'sunum provası yaptım', 'yüksek sesle okudum', 'diksiyon', 'tekerleme'],
+      'sunum provası yaptım', 'yüksek sesle okudum', 'diksiyon', 'tekerleme',
+      'ses açma egzersizi yaptım', 'ses açma çalıştım', 'ses açma egzersizi', 'ses açma',
+      'artikülasyon ve nefes çalıştım', 'artikülasyon çalıştım', 'artikülasyon ve nefes', 'artikülasyon'],
     reading:['derin okuma yaptım', 'kitap okudum', 'not çıkardım', 'okuma yaptım',
       'derin okuma', 'okudum', 'okuma'],
     writing:['yazı yazdım', 'taslak yazdım', 'deneme yazdım', 'revize ettim',
       'yazdım', 'yazı'],
+    history:['tarih çalıştım', 'kronoloji çalıştım', 'tarih okudum', 'kronoloji okudum',
+      'tarih', 'kronoloji'],
   };
 
   /* Uzundan kisaya: "derin okuma" once denenir, "okuma" sonra.
@@ -63,6 +67,8 @@ ESP.Parse = (function(){
   const SURE = [
     { re:/(\d+(?:[.,]\d+)?)\s*(?:saat|sa)\b/i, carpan:60 },
     { re:/(\d+(?:[.,]\d+)?)\s*(?:dakika|dk|dak)\b/i, carpan:1 },
+    { re:/(?:çeyrek\s+saat)\b/i, carpan:15, sabit:true },
+    { re:/(?:yarım\s+saat)\b/i, carpan:30, sabit:true },
   ];
 
   const SAYIM = [
@@ -90,7 +96,17 @@ ESP.Parse = (function(){
 
     /* Tek kaynak: brand/ortak/giris.js bol() (2026-10-19); yoksa yerel kural. */
     const G = window.LIFEOS && window.LIFEOS.GIRIS;
-    const parcalar = G && typeof G.bol === 'function' ? G.bol(ham) : ham.split(AYRAC).map(p => p.trim()).filter(Boolean);
+    let parcalar = G && typeof G.bol === 'function' ? G.bol(ham) : ham.split(AYRAC).map(p => p.trim()).filter(Boolean);
+    const birlestir = [];
+    for(let i = 0; i < parcalar.length; i++){
+      if(i < parcalar.length - 1 && /artikülasyon/i.test(parcalar[i]) && /^nefes\b/i.test(parcalar[i + 1])){
+        birlestir.push(parcalar[i] + ' ve ' + parcalar[i + 1]);
+        i++;
+      } else {
+        birlestir.push(parcalar[i]);
+      }
+    }
+    parcalar = birlestir;
     const rows = [], unmatched = [];
 
     parcalar.forEach(parca => {
@@ -109,6 +125,7 @@ ESP.Parse = (function(){
         SURE.forEach(s => {
           const m = parca.match(s.re);
           if(m){
+            if(s.sabit){ dakika = (dakika || 0) + s.carpan; return; }
             const v = sayi(m[1]);
             if(v != null) dakika = (dakika || 0) + v * s.carpan;
           }
@@ -147,7 +164,7 @@ ESP.Parse = (function(){
         const dk = Number(kisa[2]);
         if(dk > 0 && dk <= 600) dakika = dk;
       }
-      if(dakika == null){
+      if(dakika == null && count == null){
         /* Disiplin taniniyor ama sure yok: satir ATILMAZ, suresi eksik bir
            oneri olarak doner. Kullanici sureyi yazar. */
         unmatched.push({ text:parca, why:'Disiplin tanındı ama süre girilmemiş.',
@@ -157,7 +174,7 @@ ESP.Parse = (function(){
 
       rows.push({
         disc:hit.disc,
-        minutes:Math.round(dakika),
+        minutes:dakika != null ? Math.round(dakika) : null,
         count, countWhat,
         note:parca,
       });
