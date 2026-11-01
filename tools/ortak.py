@@ -157,6 +157,8 @@ DOSYALAR = {
     # BICIM CEKIRDEGI — sayi, net, sure (uc utils.js'te birebir kopyaydi; AYS/ESP her cagrida Intl kuruyordu).
     "bicim.js":           "js/core",
     "bicim.test.js":      "tests",
+    # DEPO — kalici depolama katmani; modulun store.js'i yalniz ayarlarini verir (2026-11-01, Olcum 2c).
+    "depo.js":            "js/core",
     "turkcesayi.js":      "js/core",
     "turkcesayi.test.js": "tests",
     # TANITIM ŞERİDİ — ilk kurulumun üç adımı. Sorular üçünde de aynı;
