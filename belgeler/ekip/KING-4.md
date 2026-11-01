@@ -405,6 +405,8 @@ tekrar ölçümü) ve 051 (uç nokta testleri + `HKM/MIMARI.md` bölümü) kabul
 bugün pilot 8/8 dolu ve Antigravity kapalıydı. Açık: istemci `neden` alanını «neden şimdi?» satırı
 olarak henüz göstermiyor (king.js, 3a/F alanı); «benim hakkımda» ekranı (F); modül olay yayıncıları 3c'de.
 
+Tekrar ölçmek için: `python tools/hafiza_olcum.py`.
+
 ## Tur 3c · Olay yayıncıları, yardım verisi, kalan optimizasyon (2026-11-01)
 
 Sayıyı modül kodu üretir (AGENTS §1); taşıyıcı yalnız biçimi denetler, kararı HKM verir
