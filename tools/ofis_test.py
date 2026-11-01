@@ -4,7 +4,8 @@
 Kullanici (2026-10-31): «Testci istenir ama sonucu Claude dogrular». Testci bir
 model degil, bu betiktir: ayri bir klasorde (LifeOs-ajan/ofis-test, ayrik) main
 ile dalin deneme birlesmesini kurar, uc modulu derler, her modulde runtests,
-smoke, a11ycheck, layoutcheck, palettecheck, perfcheck; sonra entegre kosar.
+smoke, a11ycheck, layoutcheck, palettecheck, perfcheck (uc modul paralel, evreler());
+sonra entegre kosar.
 Her denetimin ham ciktisi ve cikis kodu LifeOs-ajan/test/<no>/'ya yazilir;
 Claude ajan ozetine degil bu ham ciktiya bakar (python tools/ajan.py testler <no>).
 
@@ -21,6 +22,7 @@ import os
 import re
 import shutil
 import subprocess
+import threading
 import sys
 import time
 from pathlib import Path
@@ -73,6 +75,24 @@ def adimlar(py="python", kabul=(), python_testleri=()):
     out += [("kök", "python", [py, "-c", HEPSI] + list(python_testleri), ".")] if python_testleri else []
     out += [(m, d, ["node", "tools/%s.js" % d], m) for m in MODUL for d in DENETIM]
     return out + [("kök", "entegre", ["node", "tools/entegre.js"], ".")]
+
+
+def evreler(adim):
+    """[[adim, ...], ...]: her evre bitince sonraki baslar; bir evrenin icindeki listeler (modul zincirleri) PARALEL
+    kosar. Modul denetimlerinin portlari moduller arasinda ayridir (AYS 4176-4189/4292, SPI 4182-4191/4291,
+    ESP 4186-4198/4295); sirali kosu Testci'nin ~6 dk'sini yiyordu (013: 7,3 dk). Saf islev."""
+    out, zincir = [], {}
+    for x in adim:
+        if x[1] in DENETIM:
+            zincir.setdefault(x[0], []).append(x)
+            continue
+        if zincir:
+            out.append(list(zincir.values()))
+            zincir = {}
+        out.append([[x]])
+    if zincir:
+        out.append(list(zincir.values()))
+    return out
 
 
 def sonuc_adi(kod):
@@ -166,22 +186,45 @@ def kos(no):
         ortam = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
         ci = wt / ".github" / "workflows" / "ci.yml"
         pyt = ci_python(ci.read_text(encoding="utf-8")) if ci.exists() else []
-        for modul, ad, komut, cwd in adimlar(py, a.get("kabul") or (), pyt):
-            log = k / ("%s-%s.log" % ("kok" if modul == "kök" else modul, ad))
-            bas = time.time()
-            try:
-                with open(log, "w", encoding="utf-8", errors="replace") as f:
-                    kod = subprocess.run(komut, cwd=str(wt / cwd), stdout=f, stderr=subprocess.STDOUT, env=ortam,
-                                         timeout=ZAMAN_ASIMI, creationflags=A.SESSIZ).returncode
-            except subprocess.TimeoutExpired:
-                kod = -1
-            except OSError as e:
-                log.write_text(repr(e), encoding="utf-8")
-                kod = -2
-            metin = log.read_text(encoding="utf-8", errors="replace")
-            o["adimlar"].append({"modul": modul, "ad": ad, "kod": kod, "sonuc": sonuc_adi(kod), "sure": round(time.time() - bas),
-                                 "log": str(log), "son": son_satirlar(metin) if kod else []})
-            ozet_yaz(o)
+        tum = adimlar(py, a.get("kabul") or (), pyt)
+        sira = {id(x): n for n, x in enumerate(tum)}
+        kilit_o = threading.Lock()
+
+        def adim_kos(zincir):
+            for x in zincir:
+                modul, ad, komut, cwd = x
+                log = k / ("%s-%s.log" % ("kok" if modul == "kök" else modul, ad))
+                bas = time.time()
+                try:
+                    with open(log, "w", encoding="utf-8", errors="replace") as f:
+                        kod = subprocess.run(komut, cwd=str(wt / cwd), stdout=f, stderr=subprocess.STDOUT, env=ortam,
+                                             timeout=ZAMAN_ASIMI, creationflags=A.SESSIZ).returncode
+                except subprocess.TimeoutExpired:
+                    kod = -1
+                except OSError as e:
+                    log.write_text(repr(e), encoding="utf-8")
+                    kod = -2
+                metin = log.read_text(encoding="utf-8", errors="replace")
+                with kilit_o:
+                    o["adimlar"].append({"modul": modul, "ad": ad, "kod": kod, "sonuc": sonuc_adi(kod), "sure": round(time.time() - bas),
+                                         "log": str(log), "son": son_satirlar(metin) if kod else [], "_sira": sira[id(x)]})
+                    o["adimlar"].sort(key=lambda y: y.get("_sira", 0))
+                    ozet_yaz(o)
+
+        sirali = os.environ.get("OFIS_TEST_SIRALI") == "1"   # geri donus: eski sirali kosu
+        for evre in ([[x] for x in tum] if sirali else evreler(tum)):
+            if sirali or len(evre) == 1:
+                for z in evre:
+                    adim_kos(z)
+                continue
+            iplik = [threading.Thread(target=adim_kos, args=(z,)) for z in evre]
+            for th in iplik:
+                th.start()
+            for th in iplik:
+                th.join()
+        for x in o["adimlar"]:
+            x.pop("_sira", None)
+        ozet_yaz(o)
         o.update(durum="bitti", bitis=int(time.time()))
         ozet_yaz(o)
         return o

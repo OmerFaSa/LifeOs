@@ -162,6 +162,13 @@ if k_ad[0][:2] != ("kök", "kabul") or k_ad[0][2][-1] != "tools/k_test.py" or "A
 for den in ("runtests", "smoke", "a11ycheck", "layoutcheck", "palettecheck", "perfcheck"):
     if not (KOK / "AYS" / "tools" / (den + ".js")).exists():
         hata.append("AGENTS.md denetimi yok: " + den)
+ev = T.evreler(T.adimlar("py", ["tools/k_test.py"], ["tools/a_test.py"]))
+ev_ad = [[[x[:2] for x in z] for z in e] for e in ev]
+if (ev_ad[0] != [[("kök", "kabul")]] or ev_ad[-1] != [[("kök", "entegre")]] or [("kök", "python")] not in [e[0] for e in ev_ad]
+        or len(ev[-2]) != 3 or [z[0][0] for z in ev[-2]] != ["AYS", "SPI", "ESP"]
+        or any(len(z) != len(T.DENETIM) or {x[0] for x in z} != {z[0][0]} for z in ev[-2])
+        or sum(len(z) for e in ev for z in e) != len(T.adimlar("py", ["tools/k_test.py"], ["tools/a_test.py"]))):
+    hata.append("testci evreleri: once kabul/derle/python sirali, sonra uc modul zinciri paralel, en son entegre: %r" % ev_ad)
 esit("sonuc adi", [T.sonuc_adi(k) for k in (0, 1, 2, -1)], ["yeşil", "kırmızı", "koşulamadı", "kırmızı"])
 esit("son satirlar", T.son_satirlar("a\r\n\n b\nc\n", 2), [" b", "c"])
 tb = T.tablo({"no": "007", "dal": "ag/007-x", "commit": "c1", "main": "m1", "durum": "bitti", "baslangic": 1, "bitis": 121,
