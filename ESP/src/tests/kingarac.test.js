@@ -70,6 +70,19 @@
       }finally{ ESP.S.books = eski; A()._sifirla(); }
     });
 
+    it('tek kayıtlı listede adsız silme reddedilir (ad veya id şart)', async () => {
+      kur();
+      const eskiBooks = ESP.S.books;
+      ESP.S.books = [{ id:'b1', title:'Tek Başına', author:'Yazar', startedAt:'2026-10-01' }];
+      try {
+        const o = await A().onizle('esp_kitap', { islem:'sil' });
+        expect(o.ok).toBe(false);
+      } finally {
+        ESP.S.books = eskiBooks;
+        A()._sifirla();
+      }
+    });
+
     /* Yeni okuma araçları: merdiven, argumanlar, olaylar, repertuvar */
     it('okuma araçları: boşken veri yok, doluyken doğru sayı', async () => {
       kur();
@@ -151,6 +164,8 @@
       expect(ESP.S.args.length).toBe(nArg);
 
       /* 3. 'esp_dosya' */
+      const oDosyaHata = await A().onizle('esp_dosya', { islem:'ekle', baslik:'Gramer Notu' });
+      expect(oDosyaHata.ok).toBe(false);
       const oDosya = await A().onizle('esp_dosya', { islem:'ekle', baslik:'Gramer Notu', metin:'İçerik', alan:'lang' });
       expect(oDosya.ok).toBe(true);
       const nDosya = (ESP.S.assets || []).length;
@@ -171,6 +186,8 @@
       expect(ESP.S.pieces.length).toBe(nEser);
 
       /* 5. 'esp_hatirlatma' */
+      const oHatirHata = await A().onizle('esp_hatirlatma', { islem:'ekle', metin:'Kelime tekrarı yap' });
+      expect(oHatirHata.ok).toBe(false);
       const oHatir = await A().onizle('esp_hatirlatma', { islem:'ekle', metin:'Kelime tekrarı yap', alan:'lang' });
       expect(oHatir.ok).toBe(true);
       const nHatir = (ESP.S.reminders || []).length;
@@ -181,6 +198,8 @@
       expect(ESP.S.reminders.length).toBe(nHatir);
 
       /* 6. 'esp_hedef' */
+      const oHedefHata = await A().onizle('esp_hedef', { islem:'ekle', hedef:'İspanyolca B2' });
+      expect(oHedefHata.ok).toBe(false);
       const oHedef = await A().onizle('esp_hedef', { islem:'ekle', hedef:'İspanyolca B2', alan:'lang' });
       expect(oHedef.ok).toBe(true);
       const nHedef = (ESP.S.goals || []).length;
@@ -225,14 +244,22 @@
       expect(ESP.S.sources.length).toBe(nKaynak);
 
       /* 10. 'esp_kitap' */
-      const oKitap = await A().onizle('esp_kitap', { islem:'ekle', ad:'Denemeler', yazar:'Montaigne' });
+      const oKitapEkle = await A().onizle('esp_kitap', { islem:'ekle', ad:'Denemeler', yazar:'Montaigne' });
+      expect(oKitapEkle.ok).toBe(false);
+      const b0 = await ESP.Model.saveBook(ESP.Model.newBook({ title:'Denemeler', author:'Montaigne' }));
+      const oKitap = await A().onizle('esp_kitap', { islem:'guncelle', id:b0.id, yazar:'Michel de Montaigne' });
       expect(oKitap.ok).toBe(true);
-      const nKitap = (ESP.S.books || []).length;
-      const uKitap = await A().uygula({ arac:true, ad:'esp_kitap', param:{ islem:'ekle', ad:'Denemeler', yazar:'Montaigne' } });
+      const uKitap = await A().uygula({ arac:true, ad:'esp_kitap', param:{ islem:'guncelle', id:b0.id, yazar:'Michel de Montaigne' } });
       expect(uKitap.ok).toBe(true);
-      expect(ESP.S.books.length).toBe(nKitap + 1);
+      expect(ESP.S.books.find(x => x.id === b0.id).author).toBe('Michel de Montaigne');
       await uKitap.geriAl();
-      expect(ESP.S.books.length).toBe(nKitap);
+      expect(ESP.S.books.find(x => x.id === b0.id).author).toBe('Montaigne');
+      const uKitapSil = await A().uygula({ arac:true, ad:'esp_kitap', param:{ islem:'sil', id:b0.id } });
+      expect(uKitapSil.ok).toBe(true);
+      expect(ESP.S.books.find(x => x.id === b0.id)).toBeUndefined();
+      await uKitapSil.geriAl();
+      expect(ESP.S.books.find(x => x.id === b0.id).title).toBe('Denemeler');
+      await ESP.Model.deleteBook(b0.id);
 
       /* 11. 'esp_not_sil' */
       const nSil = await ESP.Model.saveNote(ESP.Model.newNote({ text:'Silinecek felsefi not' }));

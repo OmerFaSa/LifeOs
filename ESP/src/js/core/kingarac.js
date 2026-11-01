@@ -30,92 +30,81 @@ ESP.KingArac = (function(){
   const render = () => { if(ESP.App && ESP.App.render) ESP.App.render(); };
   function gunler(n){ const l = []; for(let i = 0; i < n; i++) l.push(U().iso(U().addDays(U().today(), -i))); return l; }
   const kucuk = s => String(s || '').toLocaleLowerCase('tr-TR').trim();
+  const DISCIPLINE_IDS = ['lang', 'philo', 'music', 'diction', 'reading', 'writing', 'history'];
 
-  function tekBul(liste, filtre, ad){
-    const es = (liste || []).filter(filtre);
-    if(es.length === 0) return { hata: (ad || 'kayıt') + ' bulunamadı' };
-    if(es.length > 1) return { hata: 'birden çok eşleşen ' + (ad || 'kayıt') + ' bulundu; id belirtmelisin' };
-    return { oge: es[0] };
+  function adlaBul(liste, id, alan, aranan, ad){
+    const l = liste || [];
+    if(id){
+      const x = l.find(it => it.id === id);
+      return x ? { oge:x } : { hata:(ad || 'kayıt') + ' bulunamadı (ID: ' + id + ')' };
+    }
+    const temiz = String(aranan || '').trim();
+    if(!temiz) return { hata:'hangi ' + (ad || 'kayıt') + '? id ya da ad söyle' };
+    const k = kucuk(temiz);
+    const es = l.filter(it => kucuk(it[alan] || '').indexOf(k) >= 0);
+    if(es.length === 0) return { hata:(ad || 'kayıt') + ' bulunamadı' };
+    if(es.length > 1) return { hata:'birden çok eşleşen ' + (ad || 'kayıt') + ' bulundu; id belirtmelisin' };
+    return { oge:es[0] };
+  }
+
+  function oturumBul(d, p){
+    const list = M().sessionsOf(d);
+    if(p && p.id){
+      const s = list.find(x => x.id === p.id);
+      return s ? { oge:s } : { hata:'oturum bulunamadı (ID: ' + p.id + ')' };
+    }
+    if(!p || !p.alan) return { hata:'hangi oturum? id ya da alan söyle' };
+    const es = list.filter(s => s.disc === p.alan);
+    if(es.length === 0) return { hata:'bu alanda oturum bulunamadı' };
+    if(es.length > 1) return { hata:'bu alanda birden çok oturum var; id belirtmelisin' };
+    return { oge:es[0] };
   }
 
   function kararBul(p){
     const aciklar = (S().decisions || []).filter(d => !d.closedAt);
     if(p && p.id){
       const d = aciklar.find(x => x.id === p.id);
-      return d ? { oge: d } : { hata: 'açık karar bulunamadı (ID: ' + p.id + ')' };
+      return d ? { oge:d } : { hata:'açık karar bulunamadı (ID: ' + p.id + ')' };
     }
-    if(p && p.metin){
-      const aranan = kucuk(p.metin);
-      const es = aciklar.filter(d => kucuk(d.text).indexOf(aranan) >= 0);
-      if(es.length === 0) return { hata: 'açık karar bulunamadı' };
-      if(es.length > 1) return { hata: 'birden çok eşleşen açık karar bulundu; id belirtmelisin' };
-      return { oge: es[0] };
-    }
-    if(aciklar.length === 1) return { oge: aciklar[0] };
-    if(aciklar.length === 0) return { hata: 'açık karar yok' };
-    return { hata: 'birden çok açık karar var; kapatılacak kararın metni ya da id belirtilmeli' };
-  }
-
-  function kartBul(p){
-    const list = S().cards || [];
-    if(p && p.id){
-      const c = list.find(x => x.id === p.id);
-      return c ? { oge: c } : { hata: 'kart bulunamadı (ID: ' + p.id + ')' };
-    }
-    if(!p || !p.on) return { hata: 'silinecek kartın ön yüzü ya da id belirtilmeli' };
-    const aranan = kucuk(p.on);
-    const es = list.filter(c => kucuk(c.front) === aranan || kucuk(c.front).indexOf(aranan) >= 0);
-    if(es.length === 0) return { hata: 'kart bulunamadı' };
-    if(es.length > 1) return { hata: 'birden çok eşleşen kart bulundu; id belirtmelisin' };
-    return { oge: es[0] };
-  }
-
-  function notBul(p){
-    const list = S().notes || [];
-    if(p && p.id){
-      const n = list.find(x => x.id === p.id);
-      return n ? { oge: n } : { hata: 'not bulunamadı (ID: ' + p.id + ')' };
-    }
-    if(!p || !p.metin) return { hata: 'silinecek notun metni ya da id belirtilmeli' };
-    const aranan = kucuk(p.metin);
-    const es = list.filter(n => kucuk(n.text).indexOf(aranan) >= 0);
-    if(es.length === 0) return { hata: 'not bulunamadı' };
-    if(es.length > 1) return { hata: 'birden çok eşleşen not bulundu; id belirtmelisin' };
-    return { oge: es[0] };
+    const temiz = String((p && p.metin) || '').trim();
+    if(!temiz) return { hata:'hangi karar? id ya da metin söyle' };
+    const aranan = kucuk(temiz);
+    const es = aciklar.filter(d => kucuk(d.text).indexOf(aranan) >= 0);
+    if(es.length === 0) return { hata:'açık karar bulunamadı' };
+    if(es.length > 1) return { hata:'birden çok eşleşen açık karar bulundu; id belirtmelisin' };
+    return { oge:es[0] };
   }
 
   function zincirBul(p){
     const list = S().chains || [];
     if(p && p.id){
       const c = list.find(x => x.id === p.id);
-      return c ? { oge: c } : { hata: 'neden zinciri bulunamadı (ID: ' + p.id + ')' };
+      return c ? { oge:c } : { hata:'neden zinciri bulunamadı (ID: ' + p.id + ')' };
     }
     let evId = p && p.olay_id;
     if(!evId && p && p.olay_baslik){
-      const aranan = kucuk(p.olay_baslik);
-      const evler = (S().events || []).filter(e => kucuk(e.title).indexOf(aranan) >= 0);
-      if(evler.length === 1) evId = evler[0].id;
-      else if(evler.length > 1) return { hata: 'birden çok eşleşen olay bulundu; olay_id belirtmelisin' };
-      else return { hata: '«' + p.olay_baslik + '» adıyla olay bulunamadı' };
+      const evRes = adlaBul(S().events, null, 'title', p.olay_baslik, 'olay');
+      if(evRes.hata) return evRes;
+      evId = evRes.oge.id;
     }
-    if(!evId) return { hata: 'zincir id veya olay belirtilmeli' };
+    if(!evId) return { hata:'hangi zincir? id ya da olay söyle' };
     const es = list.filter(c => c.eventId === evId);
-    if(es.length === 0) return { hata: 'bu olaya bağlı zincir bulunamadı' };
-    if(es.length > 1) return { hata: 'bu olaya bağlı birden çok zincir var; id belirtmelisin' };
-    return { oge: es[0] };
+    if(es.length === 0) return { hata:'bu olaya bağlı zincir bulunamadı' };
+    if(es.length > 1) return { hata:'bu olaya bağlı birden çok zincir var; id belirtmelisin' };
+    return { oge:es[0] };
   }
 
   function kayitBul(p){
     const list = S().recordings || [];
     if(p && p.id){
       const r = list.find(x => x.id === p.id);
-      return r ? { oge: r } : { hata: 'kayıt bulunamadı (ID: ' + p.id + ')' };
+      return r ? { oge:r } : { hata:'kayıt bulunamadı (ID: ' + p.id + ')' };
     }
-    const d = p && p.tarih ? p.tarih : U().todayISO();
-    const es = list.filter(r => r.date === d);
-    if(es.length === 0) return { hata: d + ' tarihinde ses ölçüm kaydı bulunamadı' };
-    if(es.length > 1) return { hata: d + ' tarihinde birden çok kayıt var; id belirtmelisin' };
-    return { oge: es[0] };
+    if(!p || !p.tarih) return { hata:'hangi kayıt? id ya da tarih söyle' };
+    const es = list.filter(r => r.date === p.tarih);
+    if(es.length === 0) return { hata:p.tarih + ' tarihinde ses ölçüm kaydı bulunamadı' };
+    if(es.length > 1) return { hata:p.tarih + ' tarihinde birden çok kayıt var; id belirtmelisin' };
+    return { oge:es[0] };
   }
 
   function gun(p){
@@ -214,7 +203,9 @@ ESP.KingArac = (function(){
   }
 
   function kitapBul(ad){
-    const k = kucuk(ad);
+    const temiz = String(ad || '').trim();
+    if(!temiz) return null;
+    const k = kucuk(temiz);
     const l = (S().books || []).filter(b => kucuk(b.title).indexOf(k) >= 0);
     return l.length === 1 ? l[0] : null;
   }
@@ -306,13 +297,12 @@ ESP.KingArac = (function(){
           id:{ type:'string', maxLength:40, description:'oturum kimliği' },
           tarih:{ type:'string', maxLength:10, description:'oturum günü (YYYY-AA-GG; boşsa bugün)' },
           dakika:{ type:'number', minimum:1, maximum:600, description:'dakika' },
-          alan:{ type:'string', maxLength:20, description:'çalışılan alan' },
+          alan:{ type:'string', enum:DISCIPLINE_IDS, description:'çalışılan alan' },
           not:{ type:'string', maxLength:200, description:'not' }
         }, required:['islem'] },
         onizle:p => {
           const d = tarihMi(p.tarih) ? p.tarih : U().todayISO();
-          const list = M().sessionsOf(d);
-          const bul = p.id ? tekBul(list, s => s.id === p.id, 'oturum') : (p.alan ? tekBul(list, s => s.disc === p.alan, 'oturum') : tekBul(list, () => true, 'oturum'));
+          const bul = oturumBul(d, p);
           if(bul.hata) return bul;
           const s = bul.oge;
           if(p.islem === 'sil'){
@@ -323,8 +313,7 @@ ESP.KingArac = (function(){
         },
         uygula:async p => {
           const d = tarihMi(p.tarih) ? p.tarih : U().todayISO();
-          const list = M().sessionsOf(d);
-          const bul = p.id ? tekBul(list, s => s.id === p.id, 'oturum') : (p.alan ? tekBul(list, s => s.disc === p.alan, 'oturum') : tekBul(list, () => true, 'oturum'));
+          const bul = oturumBul(d, p);
           if(bul.hata) return { ok:false, metin: bul.hata };
           const s = bul.oge;
           const eski = Object.assign({}, s);
@@ -371,7 +360,7 @@ ESP.KingArac = (function(){
             if(!p.tez) return { hata: 'tez cümlesi gerekir' };
             return { metin: 'Yeni tez eklenecek: «' + p.tez + '»' };
           }
-          const bul = p.id ? tekBul(S().args, a => a.id === p.id, 'tez') : tekBul(S().args, a => kucuk(a.thesis).indexOf(kucuk(p.tez)) >= 0, 'tez');
+          const bul = adlaBul(S().args, p.id, 'thesis', p.tez, 'tez');
           if(bul.hata) return bul;
           const a = bul.oge;
           if(p.islem === 'sil') return { metin: 'Tez silinecek: «' + a.thesis + '»' };
@@ -391,7 +380,7 @@ ESP.KingArac = (function(){
               geriAl:async () => { await M().deleteArgument(a.id); render(); }
             };
           }
-          const bul = p.id ? tekBul(S().args, x => x.id === p.id, 'tez') : tekBul(S().args, x => kucuk(x.thesis).indexOf(kucuk(p.tez)) >= 0, 'tez');
+          const bul = adlaBul(S().args, p.id, 'thesis', p.tez, 'tez');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const a = bul.oge;
           const eski = JSON.parse(JSON.stringify(a));
@@ -421,7 +410,7 @@ ESP.KingArac = (function(){
         parametreler:{ type:'object', properties:{
           islem:{ type:'string', enum:['ekle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'dosya kimliği' },
-          alan:{ type:'string', maxLength:20, description:'bölüm/disiplin' },
+          alan:{ type:'string', enum:DISCIPLINE_IDS, description:'bölüm/disiplin' },
           tur:{ type:'string', enum:['note', 'doc', 'link', 'audio'], description:'dosya türü' },
           baslik:{ type:'string', maxLength:120, description:'başlık' },
           metin:{ type:'string', maxLength:1000, description:'metin veya özet' },
@@ -430,17 +419,19 @@ ESP.KingArac = (function(){
         }, required:['islem'] },
         onizle:p => {
           if(p.islem === 'ekle'){
+            if(!p.alan) return { hata: 'bölüm (alan) belirtmelisin' };
             if(!p.baslik && !p.metin) return { hata: 'başlık ya da metin gerekir' };
-            return { metin: 'Ek dosya kaydedilecek: «' + (p.baslik || p.metin) + '»' };
+            return { metin: 'Ek dosya kaydedilecek: «' + (p.baslik || p.metin) + '» (' + alanAd(p.alan) + ').' };
           }
-          const bul = p.id ? tekBul(S().assets, a => a.id === p.id, 'dosya') : tekBul(S().assets, a => kucuk(a.title).indexOf(kucuk(p.baslik)) >= 0, 'dosya');
+          const bul = adlaBul(S().assets, p.id, 'title', p.baslik, 'dosya');
           if(bul.hata) return bul;
           return { metin: 'Ek dosya silinecek: «' + bul.oge.title + '»' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
+            if(!p.alan) return { ok:false, metin:'Bölüm (alan) belirtmelisin.' };
             const res = await M().saveAsset(M().newAsset({
-              disc: p.alan || 'lang',
+              disc: p.alan,
               kind: p.tur || 'note',
               title: p.baslik || '',
               text: p.metin || '',
@@ -455,7 +446,7 @@ ESP.KingArac = (function(){
               geriAl:async () => { await M().deleteAsset(a.id); render(); }
             };
           }
-          const bul = p.id ? tekBul(S().assets, a => a.id === p.id, 'dosya') : tekBul(S().assets, a => kucuk(a.title).indexOf(kucuk(p.baslik)) >= 0, 'dosya');
+          const bul = adlaBul(S().assets, p.id, 'title', p.baslik, 'dosya');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const a = bul.oge;
           const eski = Object.assign({}, a);
@@ -482,7 +473,7 @@ ESP.KingArac = (function(){
             if(!p.ad) return { hata: 'eser adı gerekir' };
             return { metin: 'Yeni parça/teknik eklenecek: «' + p.ad + '»' + (p.hedef_bpm ? ' (Hedef: ' + p.hedef_bpm + ' BPM)' : '') + '.' };
           }
-          const bul = p.id ? tekBul(S().pieces, x => x.id === p.id, 'eser') : tekBul(S().pieces, x => kucuk(x.name).indexOf(kucuk(p.ad)) >= 0, 'eser');
+          const bul = adlaBul(S().pieces, p.id, 'name', p.ad, 'eser');
           if(bul.hata) return bul;
           const pc = bul.oge;
           if(p.islem === 'sil') return { metin: 'Parça/teknik silinecek: «' + pc.name + '»' };
@@ -502,7 +493,7 @@ ESP.KingArac = (function(){
               geriAl:async () => { await M().deletePiece(pc.id); render(); }
             };
           }
-          const bul = p.id ? tekBul(S().pieces, x => x.id === p.id, 'eser') : tekBul(S().pieces, x => kucuk(x.name).indexOf(kucuk(p.ad)) >= 0, 'eser');
+          const bul = adlaBul(S().pieces, p.id, 'name', p.ad, 'eser');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const pc = bul.oge;
           const eski = JSON.parse(JSON.stringify(pc));
@@ -533,24 +524,26 @@ ESP.KingArac = (function(){
           islem:{ type:'string', enum:['ekle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'hatırlatıcı kimliği' },
           metin:{ type:'string', maxLength:200, description:'hatırlatma metni' },
-          alan:{ type:'string', maxLength:20, description:'disiplin' },
+          alan:{ type:'string', enum:DISCIPLINE_IDS, description:'disiplin' },
           tarih:{ type:'string', maxLength:10, description:'vade tarihi (YYYY-AA-GG)' },
           tekrar:{ type:'string', enum:['none', 'daily', 'weekly', 'monthly'], description:'tekrar sıklığı' }
         }, required:['islem'] },
         onizle:p => {
           if(p.islem === 'ekle'){
+            if(!p.alan) return { hata: 'bölüm (alan) belirtmelisin' };
             if(!p.metin) return { hata: 'hatırlatma metni gerekir' };
-            return { metin: 'Hatırlatıcı eklenecek: «' + p.metin + '»' + (p.tarih ? ' (' + p.tarih + ')' : '') + '.' };
+            return { metin: 'Hatırlatıcı eklenecek: «' + p.metin + '» (' + alanAd(p.alan) + (p.tarih ? ', ' + p.tarih : '') + ').' };
           }
-          const bul = p.id ? tekBul(S().reminders, r => r.id === p.id, 'hatırlatıcı') : tekBul(S().reminders, r => kucuk(r.text).indexOf(kucuk(p.metin)) >= 0, 'hatırlatıcı');
+          const bul = adlaBul(S().reminders, p.id, 'text', p.metin, 'hatırlatıcı');
           if(bul.hata) return bul;
           return { metin: 'Hatırlatıcı silinecek: «' + bul.oge.text + '»' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
+            if(!p.alan) return { ok:false, metin:'Bölüm (alan) belirtmelisin.' };
             const res = await M().saveReminder(M().newReminder({
+              disc: p.alan,
               text: p.metin,
-              disc: p.alan || 'lang',
               due: p.tarih || U().todayISO(),
               repeat: p.tekrar || 'none'
             }));
@@ -562,7 +555,7 @@ ESP.KingArac = (function(){
               geriAl:async () => { await M().deleteReminder(r.id); render(); }
             };
           }
-          const bul = p.id ? tekBul(S().reminders, r => r.id === p.id, 'hatırlatıcı') : tekBul(S().reminders, r => kucuk(r.text).indexOf(kucuk(p.metin)) >= 0, 'hatırlatıcı');
+          const bul = adlaBul(S().reminders, p.id, 'text', p.metin, 'hatırlatıcı');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const r = bul.oge;
           const eski = Object.assign({}, r);
@@ -580,24 +573,26 @@ ESP.KingArac = (function(){
           islem:{ type:'string', enum:['ekle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'hedef kimliği' },
           hedef:{ type:'string', maxLength:120, description:'hedef tanımı' },
-          alan:{ type:'string', maxLength:20, description:'disiplin' },
+          alan:{ type:'string', enum:DISCIPLINE_IDS, description:'disiplin' },
           tarih:{ type:'string', maxLength:10, description:'hedef tarihi (YYYY-AA-GG)' },
           not:{ type:'string', maxLength:200, description:'açıklama' }
         }, required:['islem'] },
         onizle:p => {
           if(p.islem === 'ekle'){
+            if(!p.alan) return { hata: 'bölüm (alan) belirtmelisin' };
             if(!p.hedef) return { hata: 'hedef tanımı gerekir' };
-            return { metin: 'Hedef eklenecek: «' + p.hedef + '»' + (p.tarih ? ' (' + p.tarih + ')' : '') + '.' };
+            return { metin: 'Hedef eklenecek: «' + p.hedef + '» (' + alanAd(p.alan) + (p.tarih ? ', ' + p.tarih : '') + ').' };
           }
-          const bul = p.id ? tekBul(S().goals, g => g.id === p.id, 'hedef') : tekBul(S().goals, g => kucuk(g.label).indexOf(kucuk(p.hedef)) >= 0, 'hedef');
+          const bul = adlaBul(S().goals, p.id, 'label', p.hedef, 'hedef');
           if(bul.hata) return bul;
           return { metin: 'Hedef silinecek: «' + bul.oge.label + '»' };
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
+            if(!p.alan) return { ok:false, metin:'Bölüm (alan) belirtmelisin.' };
             const g = await M().saveGoal(M().newGoal({
+              disc: p.alan,
               label: p.hedef,
-              disc: p.alan || 'lang',
               date: p.tarih || null,
               note: p.not || ''
             }));
@@ -607,7 +602,7 @@ ESP.KingArac = (function(){
               geriAl:async () => { await M().deleteGoal(g.id); render(); }
             };
           }
-          const bul = p.id ? tekBul(S().goals, g => g.id === p.id, 'hedef') : tekBul(S().goals, g => kucuk(g.label).indexOf(kucuk(p.hedef)) >= 0, 'hedef');
+          const bul = adlaBul(S().goals, p.id, 'label', p.hedef, 'hedef');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const g = bul.oge;
           const eski = Object.assign({}, g);
@@ -653,13 +648,13 @@ ESP.KingArac = (function(){
           on:{ type:'string', maxLength:120, description:'kartın ön yüzü (kelime)' }
         } },
         onizle:p => {
-          const bul = kartBul(p);
+          const bul = adlaBul(S().cards, p && p.id, 'front', p && p.on, 'kart');
           if(bul.hata) return bul;
           const c = bul.oge;
           return { metin: 'Dil kartı silinecek: «' + c.front + '» → «' + c.back + '»' + (c.lang ? ' (' + c.lang + ')' : '') + '.' };
         },
         uygula:async p => {
-          const bul = kartBul(p);
+          const bul = adlaBul(S().cards, p && p.id, 'front', p && p.on, 'kart');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const c = bul.oge;
           const eski = JSON.parse(JSON.stringify(c));
@@ -686,7 +681,7 @@ ESP.KingArac = (function(){
             if(!p.baslik) return { hata: 'kaynak başlığı gerekir' };
             return { metin: 'Tarih kaynağı eklenecek: «' + p.baslik + '»' + (p.yazar ? ' — ' + p.yazar : '') + '.' };
           }
-          const bul = p.id ? tekBul(S().sources, s => s.id === p.id, 'kaynak') : tekBul(S().sources, s => kucuk(s.title).indexOf(kucuk(p.baslik)) >= 0, 'kaynak');
+          const bul = adlaBul(S().sources, p.id, 'title', p.baslik, 'kaynak');
           if(bul.hata) return bul;
           return { metin: 'Tarih kaynağı silinecek: «' + bul.oge.title + '»' };
         },
@@ -706,7 +701,7 @@ ESP.KingArac = (function(){
               geriAl:async () => { await M().deleteSource(s.id); render(); }
             };
           }
-          const bul = p.id ? tekBul(S().sources, s => s.id === p.id, 'kaynak') : tekBul(S().sources, s => kucuk(s.title).indexOf(kucuk(p.baslik)) >= 0, 'kaynak');
+          const bul = adlaBul(S().sources, p.id, 'title', p.baslik, 'kaynak');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const s = bul.oge;
           const eski = JSON.parse(JSON.stringify(s));
@@ -718,40 +713,26 @@ ESP.KingArac = (function(){
           };
         } },
 
-      { ad:'esp_kitap', tur:'yaz', ozetAd:'Kitap ekle, güncelle veya sil',
-        aciklama:'Kütüphaneye kitap ekler, günceller ya da siler.',
+      { ad:'esp_kitap', tur:'yaz', ozetAd:'Kitabı güncelle veya sil',
+        aciklama:'Kütüphanedeki kitabı günceller ya da siler (eklemek için eylem_kitap_ekle eylemini kullan).',
         parametreler:{ type:'object', properties:{
-          islem:{ type:'string', enum:['ekle', 'guncelle', 'sil'], description:'yapılacak işlem' },
+          islem:{ type:'string', enum:['guncelle', 'sil'], description:'yapılacak işlem' },
           id:{ type:'string', maxLength:40, description:'kitap kimliği' },
           ad:{ type:'string', maxLength:120, description:'kitap adı' },
           yazar:{ type:'string', maxLength:100, description:'yazar' },
           tur:{ type:'string', enum:['primary', 'secondary'], description:'primer ya da sekonder metin' }
         }, required:['islem'] },
         onizle:p => {
-          if(p.islem === 'ekle'){
-            if(!p.ad) return { hata: 'kitap adı gerekir' };
-            return { metin: 'Kitap eklenecek: «' + p.ad + '»' + (p.yazar ? ' — ' + p.yazar : '') + '.' };
-          }
-          const bul = p.id ? tekBul(S().books, b => b.id === p.id, 'kitap') : tekBul(S().books, b => kucuk(b.title).indexOf(kucuk(p.ad)) >= 0, 'kitap');
+          if(p.islem === 'ekle') return { hata:'kitap eklemek için eylem_kitap_ekle eylemi kullanılmalı' };
+          const bul = adlaBul(S().books, p.id, 'title', p.ad, 'kitap');
           if(bul.hata) return bul;
           const b = bul.oge;
           if(p.islem === 'sil') return { metin: 'Kitap silinecek: «' + b.title + '»' };
           return { metin: 'Kitap güncellenecek: «' + b.title + '»' };
         },
         uygula:async p => {
-          if(p.islem === 'ekle'){
-            const b = await M().saveBook(M().newBook({
-              title: p.ad,
-              author: p.yazar || '',
-              kind: p.tur || 'primary'
-            }));
-            render();
-            return {
-              metin: 'Kitabı ekledim: «' + b.title + '».',
-              geriAl:async () => { await M().deleteBook(b.id); render(); }
-            };
-          }
-          const bul = p.id ? tekBul(S().books, b => b.id === p.id, 'kitap') : tekBul(S().books, b => kucuk(b.title).indexOf(kucuk(p.ad)) >= 0, 'kitap');
+          if(p.islem === 'ekle') return { ok:false, metin:'Kitap eklemek için eylem_kitap_ekle eylemi kullanılmalı.' };
+          const bul = adlaBul(S().books, p.id, 'title', p.ad, 'kitap');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const b = bul.oge;
           const eski = Object.assign({}, b);
@@ -783,13 +764,13 @@ ESP.KingArac = (function(){
           metin:{ type:'string', maxLength:120, description:'not metninin bir parçası' }
         } },
         onizle:p => {
-          const bul = notBul(p);
+          const bul = adlaBul(S().notes, p && p.id, 'text', p && p.metin, 'not');
           if(bul.hata) return bul;
           const n = bul.oge;
           return { metin: 'Not silinecek: «' + n.text.slice(0, 100) + (n.text.length > 100 ? '…' : '') + '»' };
         },
         uygula:async p => {
-          const bul = notBul(p);
+          const bul = adlaBul(S().notes, p && p.id, 'text', p && p.metin, 'not');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const n = bul.oge;
           const eski = JSON.parse(JSON.stringify(n));
@@ -818,7 +799,7 @@ ESP.KingArac = (function(){
             if(p.yil == null) return { hata: 'olay yılı gerekir' };
             return { metin: 'Tarih olayı eklenecek: «' + p.baslik + '» (' + p.yil + ').' };
           }
-          const bul = p.id ? tekBul(S().events, e => e.id === p.id, 'olay') : tekBul(S().events, e => kucuk(e.title).indexOf(kucuk(p.baslik)) >= 0, 'olay');
+          const bul = adlaBul(S().events, p.id, 'title', p.baslik, 'olay');
           if(bul.hata) return bul;
           const e = bul.oge;
           if(p.islem === 'sil') return { metin: 'Tarih olayı silinecek: «' + e.title + '»' };
@@ -841,7 +822,7 @@ ESP.KingArac = (function(){
               geriAl:async () => { await M().deleteEvent(e.id); render(); }
             };
           }
-          const bul = p.id ? tekBul(S().events, e => e.id === p.id, 'olay') : tekBul(S().events, e => kucuk(e.title).indexOf(kucuk(p.baslik)) >= 0, 'olay');
+          const bul = adlaBul(S().events, p.id, 'title', p.baslik, 'olay');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const e = bul.oge;
           const eski = JSON.parse(JSON.stringify(e));
@@ -931,7 +912,7 @@ ESP.KingArac = (function(){
             if(!p.baslik) return { hata: 'taslak başlığı gerekir' };
             return { metin: 'Yazı taslağı eklenecek: «' + p.baslik + '»' };
           }
-          const bul = p.id ? tekBul(S().drafts, d => d.id === p.id, 'taslak') : tekBul(S().drafts, d => kucuk(d.title).indexOf(kucuk(p.baslik)) >= 0, 'taslak');
+          const bul = adlaBul(S().drafts, p.id, 'title', p.baslik, 'taslak');
           if(bul.hata) return bul;
           const d = bul.oge;
           if(p.islem === 'sil') return { metin: 'Yazı taslağı silinecek: «' + d.title + '»' };
@@ -949,7 +930,7 @@ ESP.KingArac = (function(){
               geriAl:async () => { await M().deleteDraft(d.id); render(); }
             };
           }
-          const bul = p.id ? tekBul(S().drafts, d => d.id === p.id, 'taslak') : tekBul(S().drafts, d => kucuk(d.title).indexOf(kucuk(p.baslik)) >= 0, 'taslak');
+          const bul = adlaBul(S().drafts, p.id, 'title', p.baslik, 'taslak');
           if(bul.hata) return { ok:false, metin: bul.hata };
           const d = bul.oge;
           const eski = Object.assign({}, d);
@@ -986,8 +967,14 @@ ESP.KingArac = (function(){
         }, required:['islem'] },
         onizle:p => {
           if(p.islem === 'ekle'){
-            const ev = S().events.find(e => e.id === p.olay_id || (p.olay_baslik && kucuk(e.title).indexOf(kucuk(p.olay_baslik)) >= 0));
-            if(!ev && !p.olay_id) return { hata: 'zincirin bağlanacağı olay bulunamadı' };
+            let ev = null;
+            if(p.olay_id) ev = S().events.find(e => e.id === p.olay_id);
+            else if(p.olay_baslik){
+              const evRes = adlaBul(S().events, null, 'title', p.olay_baslik, 'olay');
+              if(evRes.hata) return evRes;
+              ev = evRes.oge;
+            }
+            if(!ev && !p.olay_id) return { hata: 'zincirin bağlanacağı olay belirtilmeli (olay_id veya olay_baslik)' };
             return { metin: 'Neden zinciri eklenecek: «' + (ev ? ev.title : p.olay_id) + '» için.' };
           }
           const bul = zincirBul(p);
@@ -998,7 +985,13 @@ ESP.KingArac = (function(){
         },
         uygula:async p => {
           if(p.islem === 'ekle'){
-            const ev = S().events.find(e => e.id === p.olay_id || (p.olay_baslik && kucuk(e.title).indexOf(kucuk(p.olay_baslik)) >= 0));
+            let ev = null;
+            if(p.olay_id) ev = S().events.find(e => e.id === p.olay_id);
+            else if(p.olay_baslik){
+              const evRes = adlaBul(S().events, null, 'title', p.olay_baslik, 'olay');
+              if(evRes.hata) return { ok:false, metin:evRes.hata };
+              ev = evRes.oge;
+            }
             const eventId = p.olay_id || (ev ? ev.id : null);
             if(!eventId) return { ok:false, metin: 'Zincir bir olaya bağlanmadan kaydedilmez.' };
             const links = p.halka ? [{ id: U().uid('l'), kind: p.halka_tur || 'yapisal', text: p.halka, sourceId: null }] : [];
