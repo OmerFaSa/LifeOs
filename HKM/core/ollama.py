@@ -62,7 +62,9 @@ GOMME = re.compile(r"embed|bge|minilm|rerank", re.I)
 GORSEL = re.compile(r"(?:^|[-_/.])vl(?:[-_:.]|$)|vision|llava|moondream|minicpm-v", re.I)
 # Ekonomik sinifta once bunlar (sira onemli); yoksa kural 3.
 EKONOMIK_TERCIH = ("gemma4:e2b",)
-GORSEL_TERCIH = ("qwen3-vl:4b",)
+# gemma4 gorseli de okur ve sohbet icin zaten GPU'da durur; 6 GB'ta ikinci model onu atiyordu.
+# Olcum 2b (2026-11-01): fis qwen3-vl 0/3 (bos cevap, dusunme kapanmiyor), gemma4 2/3.
+GORSEL_TERCIH = ("gemma4:e2b", "qwen3-vl:4b")
 GOMME_TERCIH = ("qwen3-embedding:0.6b",)
 ROL_ADI = {"ekonomik": "Ekonomik", "standart": "Standart", "gorsel": "Görsel", "gomme": "Gömme"}
 GOMME_AILE = ("bert", "nomic-bert", "xlm-roberta")
@@ -158,8 +160,9 @@ def oneri(liste, gomme=()):
     """{ekonomik, standart?, gorsel?, gomme?}. Liste bossa {} (gomme yine)."""
     out = {}
     gorsel = [m for m in liste if m.get("gorsel")]
-    if gorsel:
-        out["gorsel"] = _tercih(gorsel, GORSEL_TERCIH) or gorsel[0]["ad"]
+    g = _tercih(liste, GORSEL_TERCIH) or (gorsel[0]["ad"] if gorsel else None)
+    if g:
+        out["gorsel"] = g
     if gomme:
         out["gomme"] = _tercih(gomme, GOMME_TERCIH) or gomme[0]["ad"]
     # Gorsel uzman metin sinifina onerilmez; baska model yoksa yine o.

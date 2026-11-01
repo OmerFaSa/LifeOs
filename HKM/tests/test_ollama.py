@@ -186,7 +186,8 @@ def run():
         eq([m["ad"] for m in liste if m["gorsel"]], ["qwen3-vl:4b", "qwen3-vl:8b"])
         eq([m["ad"] for m in ollama.gommeler(ham)], ["qwen3-embedding:0.6b"])
         eq(ollama.oneri(liste, ollama.gommeler(ham)),
-           {"gorsel": "qwen3-vl:4b", "gomme": "qwen3-embedding:0.6b", "ekonomik": "gemma4:e2b"})
+           {"gorsel": "gemma4:e2b", "gomme": "qwen3-embedding:0.6b", "ekonomik": "gemma4:e2b"})
+        eq(ollama.oneri(yok := [m for m in liste if m["ad"] != "gemma4:e2b"])["gorsel"], "qwen3-vl:4b")
         # Tercih yoksa kural 3; gorsel uzman metin sinifina girmez.
         yok = [m for m in liste if m["ad"] != "gemma4:e2b"]
         eq(ollama.oneri(yok)["ekonomik"], "gemma3:4b")
@@ -195,19 +196,19 @@ def run():
         g = _sahte(ham)
         t = ollama.tara({}, getir=g)
         secim, hata = ollama.secim_denetle(t, {})
-        eq((hata, secim["gomme"], secim["gorsel"]), (None, "qwen3-embedding:0.6b", "qwen3-vl:4b"))
+        eq((hata, secim["gomme"], secim["gorsel"]), (None, "qwen3-embedding:0.6b", "gemma4:e2b"))
         y = ollama.yama({}, secim)
         ok(settings.validate(y)[0], settings.validate(y))
         cfg = settings.apply({}, y)
         eq((models.yerel_of(cfg), models.yerel_ek_of(cfg)),
-           ({"ekonomik": "gemma4:e2b"}, {"gorsel": "qwen3-vl:4b", "gomme": "qwen3-embedding:0.6b"}))
+           ({"ekonomik": "gemma4:e2b"}, {"gorsel": "gemma4:e2b", "gomme": "qwen3-embedding:0.6b"}))
         eq(ollama.tara(cfg, getir=g)["durum"], "bagli")
         no(ollama.tara(cfg, getir=g)["oneri_farkli"], "oneri ayni")
         # Elle gemma3 baglanmis: oneri SOYLENIR, kendiliginden yazilmaz.
         eski = {"models": {"yer": "yerel", "yerel": {"ekonomik": "gemma3:4b"}}}
         e = ollama.tara(eski, getir=g)
         eq((e["durum"], e["oneri_farkli"]), ("bagli", True))
-        ok("Önerilen: Ekonomik gemma4:e2b" in e["metin"] and "Görsel qwen3-vl:4b" in e["metin"], e["metin"])
+        ok("Önerilen: Ekonomik gemma4:e2b" in e["metin"] and "Görsel gemma4:e2b" in e["metin"], e["metin"])
         eq(ollama.kendiliginden(eski, e), None)
         no(ollama.secim_denetle(t, {"gomme": "yok:1b", "ekonomik": "gemma4:e2b"})[0], "olmayan gomme")
 
