@@ -21,3 +21,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 040 (01.11.2026): Kullanıcıdan gelen tarihle döngü kurma: sabit sayıda adım say; while(true) bozuk girdide asılır. Depo yazması hata verirse bellekteki değeri geri al.
 - 041 (01.11.2026): Eksik dakika 0 değildir: toplamı yalnız değeri olan kayıtlardan kur, hiç yoksa null/veri yok; geri alma null'ı null olarak geri yazar.
 - 033 (02.11.2026): Testçi oturum kesilince yarıda kaldı; denetimler main'de elle koşuldu. Kayıt ayrıştırıcısına eklenen kısa takma ad («tarih») başka anlamla çakışabilir; takma ad bağlamla sınansın
+- 032 (02.11.2026): Bölüm kimliğini elle listeleme; modülün kataloğunu (SP.Bolum.liste) kullan: gizlenemeyen bölüm önizlemede patlar
