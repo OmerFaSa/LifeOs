@@ -1,6 +1,6 @@
 # 017 · `tools/` dizini (DIZIN.md)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/017-tools-dizin`
 **Efor:** orta
 **Kabul testi:** `tools/tools_dizin_kabul_test.py`
@@ -22,7 +22,7 @@ Depo sahibi (2026-11-01): «optimizasyon ve organizasyonla sistemi düzenli hale
 - `python tools/tools_dizin_kabul_test.py`
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `tools/DIZIN.md` yazıldı. `tools/` altındaki 74 izlenen dosya kendi başlık/docstring açıklamalarıyla sekiz bölümde (`Denetim`, `Yayın`, `Ofis`, `Veri`, `Ölçüm`, `Kabul testleri`, `Testler`, `Diğer`) listelendi.
+- **Koşan testler:** `python tools/tools_dizin_kabul_test.py` -> `tools dizin kabul: 74 dosya, sekiz bolum, her biri bir kez ve aciklamali.`
+- **Kabul testi:** `python tools/tools_dizin_kabul_test.py` -> `tools dizin kabul: 74 dosya, sekiz bolum, her biri bir kez ve aciklamali.` (çıkış 0)
+- **Açık kalan:** yok
