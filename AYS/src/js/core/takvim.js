@@ -103,29 +103,6 @@ R.Takvim = (function(){
     return { iso, saatli:!!m[4], saat:m[4] ? Number(m[4]) * 60 + Number(m[5]) : 0 };
   }
 
-  function pad2(n){ return String(n).padStart(2, '0'); }
-
-  function ayinGunSayisi(yil, ay){
-    if(ay === 2){
-      return (yil % 4 === 0 && (yil % 100 !== 0 || yil % 400 === 0)) ? 29 : 28;
-    }
-    if(ay === 4 || ay === 6 || ay === 9 || ay === 11) return 30;
-    return 31;
-  }
-
-  function untilGecti(curISO, basSaatli, basSaat, untilStr){
-    if(!untilStr) return false;
-    const u = tarihOku(untilStr);
-    if(!u) return false;
-    if(!u.saatli){
-      return curISO > u.iso;
-    }
-    const eSaat = basSaatli ? basSaat : 0;
-    if(curISO > u.iso) return true;
-    if(curISO === u.iso && eSaat > u.saat) return true;
-    return false;
-  }
-
   function oku(metin, bugunISO){
     const ham = String(metin || '');
     if(!/BEGIN:VCALENDAR/i.test(ham)) return { ok:false, why:'Bu bir .ics takvim dosyası değil.' };
@@ -141,11 +118,8 @@ R.Takvim = (function(){
       const ad = sol.split(';')[0].toUpperCase();
       if(ad === 'BEGIN' && /^VEVENT$/i.test(deger.trim())){ e = {}; continue; }
       if(ad === 'END' && /^VEVENT$/i.test(deger.trim())){
-        if(e && e.bas){
-          veventler.push(e);
-        }else if(e){ bozuk++; }
-        e = null;
-        continue;
+        if(e && e.bas) veventler.push(e); else if(e) bozuk++;
+        e = null; continue;
       }
       if(!e) continue;
       if(ad === 'UID') e.uid = coz(deger).slice(0, 200);
@@ -200,56 +174,22 @@ R.Takvim = (function(){
     for(const o of veventler){
       if(etkinlikler.length >= EN_COK) break;
 
-      // RECURRENCE-ID varsa doğrudan tekil etkinlik olarak eklenir
-      if(o.recurrence_id){
-        etkinlikler.push({
-          uid: o.uid,
-          baslik: o.baslik,
-          aciklama: o.aciklama,
-          bas: o.bas,
-          bit: o.bit,
-          basSaatli: o.basSaatli,
-          tekrar: false
-        });
-        continue;
-      }
+      const tekil = tekrar => etkinlikler.push({
+        uid: o.uid, baslik: o.baslik, aciklama: o.aciklama,
+        bas: o.bas, bit: o.bit, basSaatli: o.basSaatli, tekrar: !!tekrar
+      });
 
-      // Tekrarsız etkinlik
-      if(!o.rrule){
-        etkinlikler.push({
-          uid: o.uid,
-          baslik: o.baslik,
-          aciklama: o.aciklama,
-          bas: o.bas,
-          bit: o.bit,
-          basSaatli: o.basSaatli,
-          tekrar: false
-        });
-        continue;
-      }
+      if(o.recurrence_id || !o.rrule){ tekil(false); continue; }
 
-      // RRULE var: kuralları ayrıştır
       const kurallar = {};
       o.rrule.split(';').forEach(p => {
         const es = p.indexOf('=');
-        if(es > 0){
-          kurallar[p.slice(0, es).trim().toUpperCase()] = p.slice(es + 1).trim();
-        }
+        if(es > 0) kurallar[p.slice(0, es).trim().toUpperCase()] = p.slice(es + 1).trim();
       });
 
       const freq = (kurallar.FREQ || '').toUpperCase();
       if(freq !== 'DAILY' && freq !== 'WEEKLY' && freq !== 'MONTHLY'){
-        taninmayanTekrar++;
-        etkinlikler.push({
-          uid: o.uid,
-          baslik: o.baslik,
-          aciklama: o.aciklama,
-          bas: o.bas,
-          bit: o.bit,
-          basSaatli: o.basSaatli,
-          tekrar: true
-        });
-        continue;
+        taninmayanTekrar++; tekil(true); continue;
       }
 
       let interval = parseInt(kurallar.INTERVAL, 10);
@@ -261,49 +201,48 @@ R.Takvim = (function(){
         if(isNaN(count) || count < 0) count = 0;
       }
 
-      const untilStr = kurallar.UNTIL || null;
+      const u = kurallar.UNTIL ? tarihOku(kurallar.UNTIL) : null;
       const sureGun = Math.max(0, U.diffDays(o.bas, o.bit));
       const esikBasi = U.iso(U.addDays(U.parse(bugun), -sureGun));
 
       const exdateSet = new Set();
-      (o.exdates || []).forEach(p => {
-        const t = tarihOku(p);
-        if(t) exdateSet.add(t.iso);
-      });
-      if(recIdsByUid[o.uid]){
-        recIdsByUid[o.uid].forEach(iso => exdateSet.add(iso));
+      (o.exdates || []).forEach(p => { const t = tarihOku(p); if(t) exdateSet.add(t.iso); });
+      if(recIdsByUid[o.uid]) recIdsByUid[o.uid].forEach(iso => exdateSet.add(iso));
+
+      let toplam = 0;
+      function aday(cur){
+        if(u){
+          if(!u.saatli && cur > u.iso) return true;
+          if(u.saatli){
+            const eSaat = o.basSaatli ? (o.basSaat || 0) : 0;
+            if(cur > u.iso || (cur === u.iso && eSaat > u.saat)) return true;
+          }
+        }
+        if(count != null && toplam >= count) return true;
+        if(cur >= bitisSinir) return true;
+
+        const cur_bit = sureGun === 0 ? cur : U.iso(U.addDays(U.parse(cur), sureGun));
+        toplam++;
+
+        if(cur_bit >= bugun && !exdateSet.has(cur)){
+          etkinlikler.push({
+            uid: o.uid + '@' + cur, baslik: o.baslik, aciklama: o.aciklama,
+            bas: cur, bit: cur_bit, basSaatli: o.basSaatli, tekrar: true
+          });
+          if(etkinlikler.length >= EN_COK) return true;
+        }
+        return false;
       }
 
       if(freq === 'DAILY'){
         let cur = o.bas;
         if(count == null && cur < esikBasi){
-          const farkGun = U.diffDays(cur, esikBasi);
-          const atla = Math.floor(farkGun / interval) * interval;
+          const atla = Math.floor(U.diffDays(cur, esikBasi) / interval) * interval;
           if(atla > 0) cur = U.iso(U.addDays(U.parse(cur), atla));
         }
-
         let dongu = 50000;
-        let toplam = 0;
         while(dongu-- > 0){
-          if(untilGecti(cur, o.basSaatli, o.basSaat || 0, untilStr)) break;
-          if(count != null && toplam >= count) break;
-          if(cur >= bitisSinir) break;
-
-          const cur_bit = sureGun === 0 ? cur : U.iso(U.addDays(U.parse(cur), sureGun));
-          toplam++;
-
-          if(cur_bit >= bugun && !exdateSet.has(cur)){
-            etkinlikler.push({
-              uid: o.uid + '@' + cur,
-              baslik: o.baslik,
-              aciklama: o.aciklama,
-              bas: cur,
-              bit: cur_bit,
-              basSaatli: o.basSaatli,
-              tekrar: true
-            });
-            if(etkinlikler.length >= EN_COK) break;
-          }
+          if(aday(cur)) break;
           cur = U.iso(U.addDays(U.parse(cur), interval));
         }
       }else if(freq === 'WEEKLY'){
@@ -311,103 +250,45 @@ R.Takvim = (function(){
         if(kurallar.BYDAY){
           kurallar.BYDAY.toUpperCase().split(',').forEach(g => {
             const kod = g.trim().slice(-2);
-            if(kod in GUN_KODLARI && byday.indexOf(GUN_KODLARI[kod]) < 0){
-              byday.push(GUN_KODLARI[kod]);
-            }
+            if(kod in GUN_KODLARI && byday.indexOf(GUN_KODLARI[kod]) < 0) byday.push(GUN_KODLARI[kod]);
           });
           byday.sort((a, b) => a - b);
         }
-        if(!byday.length){
-          byday = [U.weekdayIndex(o.bas)];
-        }
+        if(!byday.length) byday = [U.weekdayIndex(o.bas)];
 
         let wBasi = U.iso(U.addDays(U.parse(o.bas), -U.weekdayIndex(o.bas)));
-        if(count == null){
-          const wSonu = U.iso(U.addDays(U.parse(wBasi), 7));
-          if(wSonu < esikBasi){
-            const farkHafta = Math.floor(U.diffDays(wBasi, esikBasi) / 7);
-            const atlaHafta = Math.floor(farkHafta / interval) * interval;
-            if(atlaHafta > 0){
-              wBasi = U.iso(U.addDays(U.parse(wBasi), atlaHafta * 7));
-            }
-          }
+        if(count == null && U.iso(U.addDays(U.parse(wBasi), 7)) < esikBasi){
+          const atla = Math.floor(Math.floor(U.diffDays(wBasi, esikBasi) / 7) / interval) * interval;
+          if(atla > 0) wBasi = U.iso(U.addDays(U.parse(wBasi), atla * 7));
         }
 
-        let dongu = 50000;
-        let toplam = 0;
-        let bitti = false;
+        let dongu = 50000, bitti = false;
         while(dongu-- > 0 && !bitti){
           for(const gunIdx of byday){
             const cur = U.iso(U.addDays(U.parse(wBasi), gunIdx));
             if(cur < o.bas) continue;
-            if(untilGecti(cur, o.basSaatli, o.basSaat || 0, untilStr)){ bitti = true; break; }
-            if(count != null && toplam >= count){ bitti = true; break; }
-            if(cur >= bitisSinir){ bitti = true; break; }
-
-            const cur_bit = sureGun === 0 ? cur : U.iso(U.addDays(U.parse(cur), sureGun));
-            toplam++;
-
-            if(cur_bit >= bugun && !exdateSet.has(cur)){
-              etkinlikler.push({
-                uid: o.uid + '@' + cur,
-                baslik: o.baslik,
-                aciklama: o.aciklama,
-                bas: cur,
-                bit: cur_bit,
-                basSaatli: o.basSaatli,
-                tekrar: true
-              });
-              if(etkinlikler.length >= EN_COK){ bitti = true; break; }
-            }
+            if(aday(cur)){ bitti = true; break; }
           }
           wBasi = U.iso(U.addDays(U.parse(wBasi), interval * 7));
         }
       }else if(freq === 'MONTHLY'){
         const basD = U.parse(o.bas);
-        const basGun = basD.getDate();
-        const basYil = basD.getFullYear();
-        const basAy = basD.getMonth() + 1;
-
+        const basGun = basD.getDate(), basYil = basD.getFullYear(), basAy = basD.getMonth() + 1;
         let adimAy = 0;
         if(count == null){
           const bugunD = U.parse(bugun);
           const farkAy = (bugunD.getFullYear() - basYil) * 12 + ((bugunD.getMonth() + 1) - basAy);
-          if(farkAy > interval){
-            adimAy = Math.floor((farkAy - 1) / interval) * interval;
-          }
+          if(farkAy > interval) adimAy = Math.floor((farkAy - 1) / interval) * interval;
         }
-
         let dongu = 50000;
-        let toplam = 0;
         while(dongu-- > 0){
           const toplamAy = (basYil * 12 + (basAy - 1)) + adimAy;
-          const hYil = Math.floor(toplamAy / 12);
-          const hAy = (toplamAy % 12) + 1;
-          const ayBasi = hYil + '-' + pad2(hAy) + '-01';
-          if(ayBasi >= bitisSinir) break;
-
-          const maxGun = ayinGunSayisi(hYil, hAy);
+          const hYil = Math.floor(toplamAy / 12), hAy = (toplamAy % 12) + 1;
+          if(U.iso(new Date(hYil, hAy - 1, 1)) >= bitisSinir) break;
+          const maxGun = new Date(hYil, hAy, 0).getDate();
           if(basGun <= maxGun){
-            const cur = hYil + '-' + pad2(hAy) + '-' + pad2(basGun);
-            if(untilGecti(cur, o.basSaatli, o.basSaat || 0, untilStr)) break;
-            if(count != null && toplam >= count) break;
-            if(cur >= bitisSinir) break;
-
-            const cur_bit = sureGun === 0 ? cur : U.iso(U.addDays(U.parse(cur), sureGun));
-            toplam++;
-
-            if(cur_bit >= bugun && !exdateSet.has(cur)){
-              etkinlikler.push({
-                uid: o.uid + '@' + cur,
-                baslik: o.baslik,
-                aciklama: o.aciklama,
-                bas: cur,
-                bit: cur_bit,
-                basSaatli: o.basSaatli,
-                tekrar: true
-              });
-              if(etkinlikler.length >= EN_COK) break;
-            }
+            const cur = U.iso(new Date(hYil, hAy - 1, basGun));
+            if(aday(cur)) break;
           }
           adimAy += interval;
         }
@@ -484,6 +365,20 @@ R.Takvim = (function(){
 
   /* ------------------------------------------------------------ telefon */
 
+  /* TELEFON BİLDİRİMİ (iOS kabuğu, brand/ortak/bildirim.js; 2026-10-09).
+     Ofis › Telefon bildirimi açıksa önümüzdeki PLAN_GUN gün içinde:
+       · her gün kullanıcının seçtiği saatte «Bugünün planı» — yükü sıfır
+         olan istisna günü (tatil, izin) atlanır; okul sınavı ve yoğun gün
+         planı küçültür, kaldırmaz;
+       · etkin hedefin son günü 09:00'da, bir gün önce 20:00'de (askıdaki
+         hedef dürtmez);
+       · sınav gününden bir gün önce 20:00'de — YALNIZ kullanıcı tarihi
+         profilde değiştirdiyse: planın varsayılan tarihi ÖSYM duyurusuna
+         kadar TAHMİNDİR (data/curriculum.js; screens/plan.js aynı kural),
+         tahmin edilmiş bir güne «yarın sınav» denmez (AGENTS §1.2).
+     Sessiz saat ve tür ayarı (brand/ortak/pwa.js) burada da geçerlidir.
+     Her seferinde listenin tamamı gider; kapalıysa boş liste (kabuk
+     bekleyenleri siler). */
   const PLAN_GUN = 7;
   const SAAT_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
   function bildirimAyari(){

@@ -37,7 +37,7 @@ Tekrarlar açılsın, her tekrar önizlemede ayrı satır olsun.
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:** `AYS/src/js/core/takvim.js` içinde `oku(metin, bugunISO)` tekrarlayan etkinlikleri (DAILY, WEEKLY BYDAY/INTERVAL, MONTHLY) açacak şekilde güncellendi; COUNT, UNTIL, EXDATE ve RECURRENCE-ID desteklendi; `onizle` bugünü `oku`'ya geçirdi ve başlık yorumundaki değişmez 5 güncellendi. `AYS/src/tests/takvim.test.js` içindeki test güncellendi ve tekrar açılımını doğrulayan 5 yeni test eklendi.
-- **Koşan testler:** `cd AYS; node tools/runtests.js 4731` -> `3135/3136 gecti  ·  1 kaldi`
+- **Ne değişti:** `AYS/src/js/core/takvim.js` içinde `oku(metin, bugunISO)` tekrarlayan etkinlikleri (DAILY, WEEKLY BYDAY/INTERVAL, MONTHLY) açacak şekilde tek bir iç işlevle (`aday`) ~100 satır altında yeniden düzenlendi; UNTIL tek seferde çözüldü; COUNT, EXDATE ve RECURRENCE-ID desteklendi; telefon bildirimi yorum bloğu aynen korundu. `AYS/src/tests/takvim.test.js` içinde eski test güncellendi ve tekrar açılımını doğrulayan 5 yeni test eklendi.
+- **Koşan testler:** `cd AYS && node tools/runtests.js 4731` -> `3135/3136 gecti  ·  1 kaldi` (kalan: «King 3.0 — doğal konuşma (K3) › «King» uyanma»; mikrofon/ses testi, takvimle ilgisiz ve değişiklik öncesinde de mevcuttu)
 - **Kabul testi:** `python tools/ays_takvim_tekrar_kabul_test.py` -> `ays takvim tekrar kabul: daily, weekly byday/interval, monthly, count/until, exdate, recurrence-id, 365 gun ve 500 sinir.`
 - **Açık kalan:** yok
