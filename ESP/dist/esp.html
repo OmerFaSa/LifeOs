@@ -23042,7 +23042,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'ff9c80fd', at:'2026-11-01 11:37', dirty:true };
+ESP.BUILD = { id:'f5c1c99d', at:'2026-11-01 12:46', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -70934,22 +70934,47 @@ ESP.MODEL_TIERS = {
   analiz:{ label:'Derin',   note:'Toplantı ve kök neden için' },
 };
 
-/* ==== js/core/utils.js ==== */
-/* Tarih, sayi ve metin yardimcilari. */
+/* ==== js/core/tarih.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/tarih.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* TARİH ÇEKİRDEĞİ — yerel gün, ISO dize, gün farkı. Üç arayüzün tek tarih kaynağı.
 
-window.ESP = window.ESP || {};
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/tarih.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Kopyayı elle
+   düzenleme: bir sonraki yayında kaybolur.
 
-ESP.U = (function(){
+   ------------------------------------------------------------------
+   NEDEN BU DOSYA VAR
+
+   2026-11-01 kopya taraması (KING-4 «Ölçüm 1c»): üç `core/utils.js` aynı
+   tarih işlevlerini ayrı ayrı yaşatıyordu ve ayrışmışlardı. AYS ve SPİ'de
+   `parse('2026-02-31')` sessizce 3 Mart'a kayıyor, `parse('yarın')` geçersiz
+   ama TRUTHY bir Date döndürüyor, `diffDays` NaN yayıyordu; ESP aynı
+   tuzakları önbellekli ve null dönen sürümle kapatmıştı. Doğru olan
+   sürüm burada BİR KEZ yazılır, modüllerin `U` nesnesi buna bağlanır.
+
+   Sözler:
+     1. Gün YEREL gündür (Türkiye UTC+3): `toISOString()` gece 00–03 arası
+        kaydı düne düşürür; burada kullanılmaz.
+     2. Çözülemeyen tarih `null`dır — geçersiz Date ya da NaN değil
+        (AGENTS §1.2: eksik veri sıfır değildir; sessiz NaN her
+        karşılaştırmayı false yapar).
+     3. Takvimde olmayan gün («2026-02-31») geçersizdir; kaydırılmaz.
+     4. Dönen Date nesnesi paylaşılmaz: çağıran onu değiştirebilir. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.TARIH = (function(){
   const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
   const MONTHS_SHORT = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
   const DAY_MS = 86400000;
 
   function pad2(n){ return String(n).padStart(2,'0'); }
-
   function iso(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
-  /* Zaman damgasından YEREL gün. `new Date().toISOString()` UTC'dir; ilk on
-     karakteri UTC günüdür ve Türkiye'de (UTC+3) gece 00:00–03:00 arası
-     kayıt DÜNE düşer. Yalnız tarih («2026-09-24») olduğu gibi döner. */
+
+  /* Zaman damgasından yerel gün; yalnız tarih («2026-09-24») olduğu gibi döner. */
   function gunOf(ts){
     const s = ts == null ? '' : String(ts);
     if(/^\d{4}-\d{2}-\d{2}$/.test(s) || !/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0, 10);
@@ -70957,17 +70982,7 @@ ESP.U = (function(){
     return isNaN(d.getTime()) ? s.slice(0, 10) : iso(d);
   }
 
-  /* Bir ISO tarihi (YYYY-MM-DD) gecerli mi?
-
-     Bu fonksiyon bir tuzaktan dogdu: `parse('yarın')` gecersiz bir Date
-     uretiyordu ve gecersiz Date NESNESI TRUTHY'dir. Yani `if(U.parse(x))`
-     yazan her denetim, bozuk bir tarihte de "gecerli" diyordu — sessizce.
-     Sonra o tarihle yapilan her hesap NaN uretiyor, her karsilastirma false
-     donuyor ve hicbir yerde hata gorunmuyordu.
-
-     Bicim denetimi burada, ayri ve acik. Yalnizca "sayi sayi sayi" degil,
-     takvimde gercekten var olan gun aranir: 2026-02-31 gecerli bir dize
-     ama gecersiz bir gundur. */
+  /* Geçerli ISO gün mü? İlk on karakter bakılır («2026-05-15T10:00» de gündür). */
   function isISO(s){
     if(typeof s !== 'string') return false;
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s.slice(0, 10));
@@ -70978,18 +70993,15 @@ ESP.U = (function(){
     return d.getFullYear() === y && d.getMonth() === ay - 1 && d.getDate() === g;
   }
 
-  /* Cozulemeyen tarih icin `null` doner — gecersiz bir Date DEGIL.
-     Cagiran taraf ikisini ayirt edebilmeli. */
-  /* Önbellek: dize -> zaman damgası (ya da geçersiz için NaN). Ofis notları
-     her çizimde aynı tarihleri binlerce kez çözüyordu (~25 ms). Date
-     nesnesi paylaşılmaz: her çağrı yeni nesne alır. */
+  /* Önbellek: dize -> yerel gece yarısı damgası (geçersizse NaN). Çizimler
+     aynı tarihleri binlerce kez çözer (ESP ofis notları ~25 ms). */
   const PARSE = new Map();
   function parse(s){
     if(s instanceof Date) return isFinite(s.getTime()) ? s : null;
     let t = typeof s === 'string' ? PARSE.get(s) : undefined;
     if(t === undefined){
       if(!isISO(s)) t = NaN;
-      else { const parts = String(s).slice(0,10).split('-').map(Number); t = new Date(parts[0], parts[1]-1, parts[2]).getTime(); }
+      else { const p = String(s).slice(0, 10).split('-').map(Number); t = new Date(p[0], p[1] - 1, p[2]).getTime(); }
       if(typeof s === 'string'){ if(PARSE.size > 20000) PARSE.clear(); PARSE.set(s, t); }
     }
     return isNaN(t) ? null : new Date(t);
@@ -70999,57 +71011,62 @@ ESP.U = (function(){
     const n = new Date();
     return new Date(n.getFullYear(), n.getMonth(), n.getDate());
   }
-
   function todayISO(){ return iso(today()); }
 
-  /* Gun ekler. Cozulemeyen bir tarih gelirse BUGUNDEN sayar: burada
-     patlamak, kullanicinin bozuk tek bir kaydi yuzunden butun ekrani
-     kapatmak olurdu. */
+  /* Gün ekler. Date ya da ISO dize alır; çözülemezse BUGÜNDEN sayar
+     (bozuk tek kayıt bütün ekranı kapatmasın). */
   function addDays(d, n){
-    const t = (d instanceof Date && isFinite(d.getTime())) ? d : today();
-    const r = new Date(t.getFullYear(), t.getMonth(), t.getDate());
-    r.setDate(r.getDate()+n);
+    const x = parse(d) || today();
+    const r = new Date(x.getFullYear(), x.getMonth(), x.getDate());
+    r.setDate(r.getDate() + n);
     return r;
   }
 
-  /* Iki ISO tarih arasindaki gun farki. Biri cozulemiyorsa sonuc NaN degil
-     `null` olur: NaN sessizce yayilir ve her karsilastirmayi false yapar;
-     null cagirani durmaya zorlar. */
+  /* b - a gün; biri çözülemezse null. */
   function diffDays(a, b){
     const x = parse(a), y = parse(b);
     if(!x || !y) return null;
     return Math.round((y - x) / DAY_MS);
   }
 
-  /* 0 = Pazartesi ... 6 = Pazar */
-  function weekdayIndex(d){ return (parse(d).getDay()+6)%7; }
+  /* 0 = Pazartesi ... 6 = Pazar; çözülemezse null. */
+  function weekdayIndex(d){ const x = parse(d); return x ? (x.getDay() + 6) % 7 : null; }
 
-  function fmtDate(d){
-    const x = parse(d);
-    return x.getDate()+' '+MONTHS[x.getMonth()]+' '+x.getFullYear();
-  }
-  function fmtShort(d){
-    const x = parse(d);
-    return x.getDate()+' '+MONTHS_SHORT[x.getMonth()];
-  }
-  function fmtRange(a, b){
-    const x = parse(a), y = parse(b);
-    if(x.getMonth() === y.getMonth()) return x.getDate()+'–'+y.getDate()+' '+MONTHS_SHORT[y.getMonth()];
-    return fmtShort(x)+' – '+fmtShort(y);
-  }
-  function monthName(d){ return MONTHS[parse(d).getMonth()]; }
-  function monthKey(d){ const x = parse(d); return x.getFullYear()+'-'+pad2(x.getMonth()+1); }
+  /* Biçimler: çözülemeyen tarih boş metindir, «NaN Ocak» değil. */
+  function fmtDate(d){ const x = parse(d); return x ? x.getDate()+' '+MONTHS[x.getMonth()]+' '+x.getFullYear() : ''; }
+  function fmtShort(d){ const x = parse(d); return x ? x.getDate()+' '+MONTHS_SHORT[x.getMonth()] : ''; }
+  function monthName(d){ const x = parse(d); return x ? MONTHS[x.getMonth()] : ''; }
+  function monthKey(d){ const x = parse(d); return x ? x.getFullYear()+'-'+pad2(x.getMonth()+1) : ''; }
 
-  function relativeDay(dateISO){
-    const n = diffDays(bugunISO(), dateISO);
-    if(n === 0) return 'bugün';
-    if(n === 1) return 'yarın';
-    if(n === -1) return 'dün';
-    if(n < 0) return Math.abs(n)+' gün gecikmiş';
-    return n+' gün sonra';
-  }
+  return Object.freeze({ MONTHS, MONTHS_SHORT, DAY_MS, pad2, iso, gunOf, isISO, parse, today, todayISO,
+    addDays, diffDays, weekdayIndex, fmtDate, fmtShort, monthName, monthKey });
+})();
 
-  /* --- sayi --- */
+/* ==== js/core/bicim.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/bicim.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* BİÇİM ÇEKİRDEĞİ — sayı, net, süre ve küçük sayı yardımcıları. Üç arayüzün tek kaynağı.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/bicim.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Kopyayı elle
+   düzenleme: bir sonraki yayında kaybolur.
+
+   NEDEN: 2026-11-01 kopya taraması (KING-4 «Ölçüm 1c»): `median, round,
+   clamp, sum, pct, fmtMin, fmtClock` üç `core/utils.js`'te birebir aynıydı;
+   `fmtNet/fmtNum`'u yalnız SPİ paylaşılan biçimleyiciyle yazıyordu. AYS ve
+   ESP her çağrıda `toLocaleString('tr-TR')` ile yeni bir Intl.NumberFormat
+   kuruyordu (ölçülen: çağrı başına ~11,8 µs, paylaşılanla ~0,7 µs). Çıktı
+   aynıdır: toLocaleString tanım gereği aynı biçimleyiciyi kullanır. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.BICIM = (function(){
+  const SAYI = new Intl.NumberFormat('tr-TR');
+  const NET = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const pad2 = n => String(n).padStart(2, '0');
+
   function median(arr){
     const s = arr.filter(v => typeof v === 'number' && !isNaN(v)).sort((a,b)=>a-b);
     if(!s.length) return null;
@@ -71070,14 +71087,14 @@ ESP.U = (function(){
 
   function fmtNet(x){
     if(x == null || (typeof x === 'number' && !isFinite(x))) return '—';
-    return (Math.round(x*100)/100).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    return NET.format(Math.round(x*100)/100);
   }
   function fmtNum(x){
     if(x == null || (typeof x === 'number' && !isFinite(x))) return '—';
-    return Number(x).toLocaleString('tr-TR');
+    return SAYI.format(Number(x));
   }
   function fmtMin(mins){
-    /* HATALAR D-8: once toplam yuvarlanir; 119,6 «1 sa 60 dk» yaziliyordu. */
+    /* HATALAR D-8: önce toplam yuvarlanır; 119,6 «1 sa 60 dk» yazılıyordu. */
     if(mins == null || !isFinite(mins)) return '—';
     const t = Math.round(mins);
     const h = Math.floor(t/60), m = t%60;
@@ -71089,6 +71106,39 @@ ESP.U = (function(){
     const m = Math.floor(seconds/60), s = Math.floor(seconds%60);
     return pad2(m)+':'+pad2(s);
   }
+
+  return Object.freeze({ median, round, clamp, sum, pct, fmtNet, fmtNum, fmtMin, fmtClock });
+})();
+
+/* ==== js/core/utils.js ==== */
+/* Tarih, sayi ve metin yardimcilari. */
+
+window.ESP = window.ESP || {};
+
+ESP.U = (function(){
+  const T = (typeof window !== 'undefined' && window.LIFEOS && window.LIFEOS.TARIH) || (typeof LIFEOS !== 'undefined' && LIFEOS.TARIH) || {};
+  const { MONTHS, MONTHS_SHORT, DAY_MS, pad2, iso, gunOf, isISO, parse, today, todayISO, addDays, diffDays, weekdayIndex, fmtDate, fmtShort, monthName, monthKey } = T;
+
+  function fmtRange(a, b){
+    const x = parse(a), y = parse(b);
+    if(!x || !y) return '';
+    if(x.getMonth() === y.getMonth()) return x.getDate()+'–'+y.getDate()+' '+MONTHS_SHORT[y.getMonth()];
+    return fmtShort(x)+' – '+fmtShort(y);
+  }
+
+  function relativeDay(dateISO){
+    const n = diffDays(bugunISO(), dateISO);
+    if(n == null) return '';
+    if(n === 0) return 'bugün';
+    if(n === 1) return 'yarın';
+    if(n === -1) return 'dün';
+    if(n < 0) return Math.abs(n)+' gün gecikmiş';
+    return n+' gün sonra';
+  }
+
+  /* --- sayi --- */
+  /* Sayi ve sure bicimleri ortak cekirdekten (brand/ortak/bicim.js). */
+  const { median, round, clamp, sum, pct, fmtNet, fmtNum, fmtMin, fmtClock } = LIFEOS.BICIM;
 
   /* --- metin --- */
   function esc(s){
