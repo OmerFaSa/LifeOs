@@ -224,6 +224,7 @@ jobs:
       # Uygulayici'nin birim testleri. «ajan.py birlestir» satir ekler; elle silme.
       - name: Ofis kabul ve birim testleri
         run: |
+          python3 tools/ays_takvim_tekrar_kabul_test.py
           python3 tools/spi_porsiyon_kabul_test.py
           python3 tools/esp_sure_kabul_test.py
           python3 tools/ays_sure_kabul_test.py
