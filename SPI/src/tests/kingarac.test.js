@@ -412,5 +412,68 @@
         A()._sifirla();
       }
     });
+
+    it('mutfak denetimleri: \'spi_mutfak\' bilinmeyen yemekte veya eksik gramda uydurmaz, veri yok döner', async () => {
+      SP.Test.resetState();
+      kur();
+      SP.S.profile = { id:'ben', name:'Ben', heightCm:175, weightKg:70, birthYear:1990, sex:'male' };
+      localStorage.setItem('spi.household', JSON.stringify([SP.S.profile]));
+      SP.S.ui = { kitchenDish:null, kitchenGrams:null };
+
+      // 1) Bilinmeyen yemek sorulduğunda kuru fasulyeye ya da kitchenDish'e düşmez, veri yok döner
+      const bilmeyen = await A().calistir('spi_mutfak', { yemek:'olmayan-yemek-xyz', gram:500 });
+      expect(bilmeyen.sonuc.etiket).toBe('veri yok');
+
+      // 2) Yemek hiç verilmediğinde ve ui.kitchenDish yokken kuru fasulye uydurmaz, veri yok döner
+      const yemeksiz = await A().calistir('spi_mutfak', { gram:500 });
+      expect(yemeksiz.sonuc.etiket).toBe('veri yok');
+
+      // 3) Gram verilmediğinde ve ui.kitchenGrams yokken 1000g uydurmaz, veri yok döner
+      const gramsiz = await A().calistir('spi_mutfak', { yemek:'kuru-fasulye-etli' });
+      expect(gramsiz.sonuc.etiket).toBe('veri yok');
+      A()._sifirla();
+    });
+
+    it('market denetimleri: \'spi_market\' kg verilmezse sepet_ekle hata döner', async () => {
+      SP.Test.resetState();
+      kur();
+      const oKgsiz = await A().onizle('spi_market', { islem:'sepet_ekle', gida:'yumurta' });
+      expect(oKgsiz.ok).toBe(false);
+      expect(oKgsiz.hata).toContain('kg');
+      A()._sifirla();
+    });
+
+    it('silme yardımcıları tanımlayıcı yokken uydurmaz: parametresiz çağrıda hata döner', async () => {
+      SP.Test.resetState();
+      kur();
+      // SP.S.workouts tek elemanlı olsa bile parametresiz onizle o tek elemanı seçmemeli
+      SP.S.workouts = [{ id:'w1', date:'2026-11-01', name:'Koşu', minutes:30 }];
+      const oAnt = await A().onizle('spi_antrenman_sil', {});
+      expect(oAnt.ok).toBe(false);
+
+      // Öğün: tek öğün olsa bile parametresiz onizle seçmemeli
+      const d = SP.U.todayISO();
+      SP.S.meals = { [d]:[{ id:'m1', slot:'ogle', items:[] }] };
+      const oOgun = await A().onizle('spi_ogun_sil', {});
+      expect(oOgun.ok).toBe(false);
+
+      // Tahlil
+      const oLab = await A().onizle('spi_tahlil_sil', {});
+      expect(oLab.ok).toBe(false);
+
+      // İlaç
+      const oIlac = await A().onizle('spi_ilac', { islem:'sil' });
+      expect(oIlac.ok).toBe(false);
+
+      // Gıda
+      const oGida = await A().onizle('spi_gida', { islem:'sil' });
+      expect(oGida.ok).toBe(false);
+
+      // Hane
+      const oHane = await A().onizle('spi_hane', { islem:'sil' });
+      expect(oHane.ok).toBe(false);
+
+      A()._sifirla();
+    });
   });
 })();

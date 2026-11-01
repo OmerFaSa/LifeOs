@@ -211,6 +211,7 @@ SP.KingArac = (function(){
   /* ---------- yeni king araçları (022 · KING-4 A2) ---------- */
   function antrenmanSilAraci(){
     function bulAnt(p){
+      if(!p.id && !p.tarih && !p.ad) return { eksik:true };
       if(p.id) return (SP.S.workouts || []).find(x => x.id === p.id) || null;
       let l = (SP.S.workouts || []);
       if(p.tarih) l = l.filter(x => x.date === p.tarih);
@@ -230,6 +231,7 @@ SP.KingArac = (function(){
       onizle:p => {
         const w = bulAnt(p);
         if(!w) return { hata:'Silinecek antrenman kaydı bulunamadı.' };
+        if(w.eksik) return { hata:'Hangi antrenman? Tarih ya da ad söyleyin.' };
         if(w.cok) return { hata:'Birden çok antrenman eşleşti (' + w.sayi + ' adet); id belirtin.' };
         const ad = w.name || egzersizAdi(w);
         return { metin:'«' + ad + '» antrenmanı silinecek (' + w.date + (w.minutes ? ', ' + w.minutes + ' dk' : '') + ').',
@@ -237,7 +239,7 @@ SP.KingArac = (function(){
       },
       uygula:async p => {
         const w = bulAnt(p);
-        if(!w || w.cok) return { ok:false, metin:(w && w.cok) ? 'Birden çok antrenman eşleşti; id belirtin.' : 'Antrenman bulunamadı.' };
+        if(!w || w.eksik || w.cok) return { ok:false, metin:(w && w.eksik) ? 'Hangi antrenman? Tarih ya da ad söyleyin.' : ((w && w.cok) ? 'Birden çok antrenman eşleşti; id belirtin.' : 'Antrenman bulunamadı.') };
         const silinen = Object.assign({}, w, { items:(w.items || []).map(it => Object.assign({}, it)) });
         await M().deleteWorkout(silinen.id);
         render();
@@ -249,6 +251,7 @@ SP.KingArac = (function(){
 
   function ogunSilAraci(){
     function bulOgun(p){
+      if(!p.id && !p.ogun) return { eksik:true };
       const d = tarihMi(p.tarih) ? p.tarih : (p.id ? Object.keys(SP.S.meals || {}).find(g => (SP.S.meals[g] || []).some(m => m.id === p.id)) || U().todayISO() : U().todayISO());
       const meals = M().mealsOf(d);
       if(p.id){
@@ -262,9 +265,7 @@ SP.KingArac = (function(){
         if(l.length > 1) return { cok:true, sayi:l.length };
         return { m:l[0], d };
       }
-      if(!meals.length) return null;
-      if(meals.length > 1) return { cok:true, sayi:meals.length };
-      return { m:meals[0], d };
+      return null;
     }
     return {
       ad:'spi_ogun_sil', tur:'yaz', ozetAd:'Öğün kaydı sil',
@@ -277,6 +278,7 @@ SP.KingArac = (function(){
       onizle:p => {
         const r = bulOgun(p);
         if(!r) return { hata:'Silinecek öğün bulunamadı.' };
+        if(r.eksik) return { hata:'Hangi öğün? Öğün türü ya da id belirtin.' };
         if(r.cok) return { hata:'Birden çok öğün eşleşti (' + r.sayi + ' adet); id belirtin.' };
         const b = (r.m.items || []).map(yemekAdi);
         return { metin:r.d + ' tarihindeki «' + r.m.slot + '» öğünü silinecek (' + b.length + ' besin).',
@@ -284,7 +286,7 @@ SP.KingArac = (function(){
       },
       uygula:async p => {
         const r = bulOgun(p);
-        if(!r || r.cok) return { ok:false, metin:(r && r.cok) ? 'Birden çok öğün eşleşti; id belirtin.' : 'Öğün bulunamadı.' };
+        if(!r || r.eksik || r.cok) return { ok:false, metin:(r && r.eksik) ? 'Hangi öğün? Öğün türü ya da id belirtin.' : ((r && r.cok) ? 'Birden çok öğün eşleşti; id belirtin.' : 'Öğün bulunamadı.') };
         const silinen = Object.assign({}, r.m, { items:(r.m.items || []).map(it => Object.assign({}, it)) });
         await M().deleteMeal(r.d, silinen.id);
         render();
@@ -296,6 +298,7 @@ SP.KingArac = (function(){
 
   function tahlilSilAraci(){
     function bulLab(p){
+      if(!p.id && !p.tarih) return { eksik:true };
       if(p.id) return (SP.S.labs || []).find(x => x.id === p.id) || null;
       if(p.tarih){
         const l = (SP.S.labs || []).filter(x => x.date === p.tarih);
@@ -315,6 +318,7 @@ SP.KingArac = (function(){
       onizle:p => {
         const l = bulLab(p);
         if(!l) return { hata:'Silinecek tahlil oturumu bulunamadı.' };
+        if(l.eksik) return { hata:'Hangi tahlil? Tarih ya da id belirtin.' };
         if(l.cok) return { hata:'Bu tarihte birden çok tahlil var (' + l.sayi + ' adet); id belirtin.' };
         const sayi = Object.keys(l.values || {}).length;
         return { metin:l.date + ' tarihli tahlil oturumu silinecek (' + sayi + ' değer).',
@@ -322,7 +326,7 @@ SP.KingArac = (function(){
       },
       uygula:async p => {
         const l = bulLab(p);
-        if(!l || l.cok) return { ok:false, metin:(l && l.cok) ? 'Birden çok tahlil eşleşti; id belirtin.' : 'Tahlil bulunamadı.' };
+        if(!l || l.eksik || l.cok) return { ok:false, metin:(l && l.eksik) ? 'Hangi tahlil? Tarih ya da id belirtin.' : ((l && l.cok) ? 'Birden çok tahlil eşleşti; id belirtin.' : 'Tahlil bulunamadı.') };
         const silinen = Object.assign({}, l, { values:Object.assign({}, l.values) });
         await M().deleteLab(silinen.id);
         render();
@@ -334,6 +338,7 @@ SP.KingArac = (function(){
 
   function ilacAraci(){
     function bulIlac(p){
+      if(!p.id && !p.ad) return { eksik:true };
       if(p.id) return (SP.S.meds || []).find(m => m.id === p.id) || null;
       if(p.ad){
         const k = kucuk(p.ad);
@@ -361,6 +366,7 @@ SP.KingArac = (function(){
         if(p.islem === 'sil'){
           const m = bulIlac(p);
           if(!m) return { hata:'Silinecek ilaç bulunamadı.' };
+          if(m.eksik) return { hata:'Hangi ilaç? Ad ya da id belirtin.' };
           if(m.cok) return { hata:'Birden çok ilaç eşleşti (' + m.sayi + ' adet); id belirtin.' };
           return { metin:'«' + m.name + '» ilacı/takviyesi silinecek.', satirlar:[m.name + (m.dose ? ' · ' + m.dose : '') + ' · Başlangıç: ' + (m.startDate || '—')] };
         }
@@ -371,6 +377,7 @@ SP.KingArac = (function(){
         if(p.islem === 'guncelle'){
           const m = bulIlac(p);
           if(!m) return { hata:'Güncellenecek ilaç bulunamadı.' };
+          if(m.eksik) return { hata:'Hangi ilaç? Ad ya da id belirtin.' };
           if(m.cok) return { hata:'Birden çok ilaç eşleşti (' + m.sayi + ' adet); id belirtin.' };
           return { metin:'«' + m.name + '» ilacı/takviyesi güncellenecek.', satirlar:[m.name + ' → ' + (p.ad || m.name) + (p.doz ? ' · doz: ' + p.doz : '')] };
         }
@@ -379,7 +386,7 @@ SP.KingArac = (function(){
       uygula:async p => {
         if(p.islem === 'sil'){
           const m = bulIlac(p);
-          if(!m || m.cok) return { ok:false, metin:(m && m.cok) ? 'Birden çok ilaç eşleşti; id belirtin.' : 'İlaç bulunamadı.' };
+          if(!m || m.eksik || m.cok) return { ok:false, metin:(m && m.eksik) ? 'Hangi ilaç? Ad ya da id belirtin.' : ((m && m.cok) ? 'Birden çok ilaç eşleşti; id belirtin.' : 'İlaç bulunamadı.') };
           const eski = Object.assign({}, m);
           await M().deleteMed(m.id);
           render();
@@ -400,7 +407,7 @@ SP.KingArac = (function(){
         }
         if(p.islem === 'guncelle'){
           const m = bulIlac(p);
-          if(!m || m.cok) return { ok:false, metin:(m && m.cok) ? 'Birden çok ilaç eşleşti; id belirtin.' : 'İlaç bulunamadı.' };
+          if(!m || m.eksik || m.cok) return { ok:false, metin:(m && m.eksik) ? 'Hangi ilaç? Ad ya da id belirtin.' : ((m && m.cok) ? 'Birden çok ilaç eşleşti; id belirtin.' : 'İlaç bulunamadı.') };
           const eski = Object.assign({}, m);
           const guncel = Object.assign({}, m);
           if(p.ad) guncel.name = p.ad;
@@ -420,6 +427,7 @@ SP.KingArac = (function(){
 
   function gidaAraci(){
     function bulGida(p){
+      if(!p.id && !p.ad) return { eksik:true };
       if(p.id) return (SP.S.foods || []).find(f => f.id === p.id) || null;
       if(p.ad){
         const k = kucuk(p.ad);
@@ -455,6 +463,7 @@ SP.KingArac = (function(){
         if(p.islem === 'sil'){
           const f = bulGida(p);
           if(!f) return { hata:'Silinecek kullanıcı gıdası bulunamadı.' };
+          if(f.eksik) return { hata:'Hangi gıda? Ad ya da id belirtin.' };
           if(f.cok) return { hata:'Birden çok gıda eşleşti (' + f.sayi + ' adet); id belirtin.' };
           return { metin:'«' + f.name + '» gıdası tablodan silinecek.', satirlar:[degerSatiri(f)] };
         }
@@ -465,6 +474,7 @@ SP.KingArac = (function(){
         if(p.islem === 'guncelle'){
           const f = bulGida(p);
           if(!f) return { hata:'Güncellenecek kullanıcı gıdası bulunamadı.' };
+          if(f.eksik) return { hata:'Hangi gıda? Ad ya da id belirtin.' };
           if(f.cok) return { hata:'Birden çok gıda eşleşti (' + f.sayi + ' adet); id belirtin.' };
           return { metin:'«' + f.name + '» gıdası güncellenecek.' };
         }
@@ -478,7 +488,7 @@ SP.KingArac = (function(){
         }
         if(p.islem === 'sil'){
           const f = bulGida(p);
-          if(!f || f.cok) return { ok:false, metin:(f && f.cok) ? 'Birden çok gıda eşleşti; id belirtin.' : 'Gıda bulunamadı.' };
+          if(!f || f.eksik || f.cok) return { ok:false, metin:(f && f.eksik) ? 'Hangi gıda? Ad ya da id belirtin.' : ((f && f.cok) ? 'Birden çok gıda eşleşti; id belirtin.' : 'Gıda bulunamadı.') };
           const eski = Object.assign({}, f);
           await M().deleteFood(f.id);
           render();
@@ -500,7 +510,7 @@ SP.KingArac = (function(){
         }
         if(p.islem === 'guncelle'){
           const f = bulGida(p);
-          if(!f || f.cok) return { ok:false, metin:(f && f.cok) ? 'Birden çok gıda eşleşti; id belirtin.' : 'Gıda bulunamadı.' };
+          if(!f || f.eksik || f.cok) return { ok:false, metin:(f && f.eksik) ? 'Hangi gıda? Ad ya da id belirtin.' : ((f && f.cok) ? 'Birden çok gıda eşleşti; id belirtin.' : 'Gıda bulunamadı.') };
           const eski = Object.assign({}, f);
           const guncel = Object.assign({}, f);
           if(p.ad) guncel.name = p.ad;
@@ -521,6 +531,7 @@ SP.KingArac = (function(){
 
   function haneAraclari(){
     function bulUye(p){
+      if(!p.id && !p.ad) return { eksik:true };
       const list = M().householdList();
       if(p.id) return list.find(x => x.id === p.id) || null;
       if(p.ad){
@@ -551,6 +562,7 @@ SP.KingArac = (function(){
         if(p.islem === 'sil'){
           const m = bulUye(p);
           if(!m) return { hata:'Haneden çıkarılacak profil bulunamadı.' };
+          if(m.eksik) return { hata:'Hangi profil? Profil adı ya da id belirtin.' };
           if(m.cok) return { hata:'Birden çok profil eşleşti (' + m.sayi + ' adet); id belirtin.' };
           if(m.id === M().activeProfileId()) return { hata:'Açık olan aktif profil silinemez.' };
           return { metin:'«' + m.name + '» profili haneden çıkarılacak.' };
@@ -567,7 +579,7 @@ SP.KingArac = (function(){
         }
         if(p.islem === 'sil'){
           const m = bulUye(p);
-          if(!m || m.cok) return { ok:false, metin:(m && m.cok) ? 'Birden çok profil eşleşti; id belirtin.' : 'Profil bulunamadı.' };
+          if(!m || m.eksik || m.cok) return { ok:false, metin:(m && m.eksik) ? 'Hangi profil? Profil adı ya da id belirtin.' : ((m && m.cok) ? 'Birden çok profil eşleşti; id belirtin.' : 'Profil bulunamadı.') };
           if(m.id === M().activeProfileId()) return { ok:false, metin:'Aktif profil silinemez.' };
           const eski = Object.assign({}, m);
           const r = M().removeHouseholdMember(m.id);
@@ -616,35 +628,35 @@ SP.KingArac = (function(){
       ad:'spi_market', tur:'yaz', ozetAd:'Sepet ve market fiyatı',
       aciklama:'Haftalık sepete ürün ekler, çıkarır, fiyatını kaydeder ya da haftalık bütçe sınırını ayarlar.',
       parametreler:{ type:'object', properties:{
-        islem:{ type:'string', enum:['sepet_ekle', 'sepet_sil', 'fiyat_gir', 'sinir_koy', 'ekle', 'sil', 'fiyat', 'sinir'], description:'işlem' },
+        islem:{ type:'string', enum:['sepet_ekle', 'sepet_sil', 'fiyat_gir', 'sinir_koy'], description:'işlem' },
         gida:{ type:'string', maxLength:60, description:'gıda adı ya da kimliği' },
         kg:{ type:'number', minimum:0, maximum:50, description:'miktar (kg)' },
         fiyat:{ type:'number', minimum:0, maximum:5000, description:'kullanıcı fiyatı (TL/kg)' },
         sinir:{ type:'number', minimum:0, maximum:50000, description:'haftalık sınır (TL)' }
       }, required:['islem'] },
       onizle:p => {
-        if(p.islem === 'sinir_koy' || p.islem === 'sinir'){
+        if(p.islem === 'sinir_koy'){
           if(p.sinir == null) return { hata:'Sınır değeri (TL) gerekli.' };
           return { metin:'Haftalık market bütçe sınırı ' + p.sinir + ' TL olarak ayarlanacak.' };
         }
         const fid = p.gida && gidaBul(p.gida);
         if(!fid) return { hata:'«' + p.gida + '» gıdası tablolarda bulunamadı.' };
         const fname = (SP.FOOD_BY_ID[fid] || {}).name || fid;
-        if(p.islem === 'sepet_ekle' || p.islem === 'ekle'){
-          const kg = p.kg != null ? p.kg : 1;
-          return { metin:'«' + fname + '» sepete eklenecek: ' + kg + ' kg.' };
+        if(p.islem === 'sepet_ekle'){
+          if(p.kg == null || p.kg <= 0) return { hata:'Kaç kg?' };
+          return { metin:'«' + fname + '» sepete eklenecek: ' + p.kg + ' kg.' };
         }
-        if(p.islem === 'sepet_sil' || p.islem === 'sil'){
+        if(p.islem === 'sepet_sil'){
           return { metin:'«' + fname + '» sepetten çıkarılacak.' };
         }
-        if(p.islem === 'fiyat_gir' || p.islem === 'fiyat'){
+        if(p.islem === 'fiyat_gir'){
           if(p.fiyat == null) return { hata:'Fiyat değeri (TL) gerekli.' };
           return { metin:'«' + fname + '» için kullanıcı fiyatı kaydedilecek: ' + p.fiyat + ' TL/kg.' };
         }
         return { hata:'Bilinmeyen işlem: ' + p.islem };
       },
       uygula:async p => {
-        if(p.islem === 'sinir_koy' || p.islem === 'sinir'){
+        if(p.islem === 'sinir_koy'){
           if(p.sinir == null) return { ok:false, metin:'Sınır gerekli.' };
           const eski = SP.S.basket ? SP.S.basket.weeklyLimit : null;
           await M().saveBasket({ weeklyLimit:p.sinir });
@@ -654,16 +666,16 @@ SP.KingArac = (function(){
         const fid = p.gida && gidaBul(p.gida);
         if(!fid) return { ok:false, metin:'Gıda bulunamadı.' };
         const fname = (SP.FOOD_BY_ID[fid] || {}).name || fid;
-        if(p.islem === 'sepet_ekle' || p.islem === 'ekle'){
+        if(p.islem === 'sepet_ekle'){
+          if(p.kg == null || p.kg <= 0) return { ok:false, metin:'Kaç kg?' };
           const items = (SP.S.basket && SP.S.basket.items) || [];
           const onceki = items.find(x => x.foodId === fid);
           const oncekiKg = onceki ? onceki.kg : 0;
-          const kg = p.kg != null ? p.kg : 1;
-          await M().setBasketItem(fid, kg);
+          await M().setBasketItem(fid, p.kg);
           render();
-          return { metin:'«' + fname + '» sepete eklendi (' + kg + ' kg).', geriAl:async () => { await M().setBasketItem(fid, oncekiKg); render(); } };
+          return { metin:'«' + fname + '» sepete eklendi (' + p.kg + ' kg).', geriAl:async () => { await M().setBasketItem(fid, oncekiKg); render(); } };
         }
-        if(p.islem === 'sepet_sil' || p.islem === 'sil'){
+        if(p.islem === 'sepet_sil'){
           const items = (SP.S.basket && SP.S.basket.items) || [];
           const onceki = items.find(x => x.foodId === fid);
           const oncekiKg = onceki ? onceki.kg : 0;
@@ -671,7 +683,7 @@ SP.KingArac = (function(){
           render();
           return { metin:'«' + fname + '» sepetten çıkarıldı.', geriAl:async () => { if(oncekiKg > 0) await M().setBasketItem(fid, oncekiKg); render(); } };
         }
-        if(p.islem === 'fiyat_gir' || p.islem === 'fiyat'){
+        if(p.islem === 'fiyat_gir'){
           const onceki = SP.S.prices && SP.S.prices[fid] ? SP.S.prices[fid].tl : null;
           await M().setPrice(fid, p.fiyat);
           render();
@@ -863,10 +875,26 @@ SP.KingArac = (function(){
         gram:{ type:'number', minimum:100, maximum:10000, description:'toplam tencere gramı' }
       } },
       calistir:p => {
-        const fid = (p.yemek && (SP.FOOD_BY_ID && SP.FOOD_BY_ID[p.yemek] ? p.yemek : (SP.Parse && SP.Parse.matchFood ? SP.Parse.matchFood(p.yemek) : null))) || (SP.S.ui && SP.S.ui.kitchenDish) || 'kuru-fasulye-etli';
+        let fid = null;
+        if(p.yemek){
+          fid = (SP.FOOD_BY_ID && SP.FOOD_BY_ID[p.yemek]) ? p.yemek : (SP.Parse && SP.Parse.matchFood ? SP.Parse.matchFood(p.yemek) : null);
+          if(!fid){
+            return { sonuc:{ yemek:null, paylar:[], etiket:'veri yok' }, satirlar:['«' + p.yemek + '» gıdası tablolarda bulunamadı (veri yok).'] };
+          }
+        } else {
+          fid = (SP.S.ui && SP.S.ui.kitchenDish) || null;
+          if(!fid){
+            return { sonuc:{ yemek:null, paylar:[], etiket:'veri yok' }, satirlar:['Seçili yemek yok (veri yok).'] };
+          }
+        }
         const f = SP.FOOD_BY_ID && SP.FOOD_BY_ID[fid];
-        if(!f) return { sonuc:{ yemek:null, paylar:[], etiket:'veri yok' }, satirlar:['«' + (p.yemek || '') + '» gıdası bulunamadı (veri yok).'] };
-        const totalGrams = p.gram || (SP.S.ui && SP.S.ui.kitchenGrams) || 1000;
+        if(!f) return { sonuc:{ yemek:null, paylar:[], etiket:'veri yok' }, satirlar:['«' + (p.yemek || fid) + '» gıdası tablolarda bulunamadı (veri yok).'] };
+
+        const totalGrams = p.gram || (SP.S.ui && SP.S.ui.kitchenGrams) || null;
+        if(!totalGrams || totalGrams <= 0){
+          return { sonuc:{ yemek:f.name, toplam_gram:null, paylar:[], etiket:'veri yok' }, satirlar:['Tencere toplam gramı belirtilmemiş (veri yok; kaç gram?).'] };
+        }
+
         const list = M().householdList();
         const me = SP.S.profile;
         const members = list.map(row => row.id === (me && me.id) ? Object.assign({}, me, { self:true, weightKg:(M().kiloOf(me) || {}).kg || null }) : Object.assign({ self:false, weightKg:null, heightCm:null }, row));
