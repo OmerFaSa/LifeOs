@@ -42,6 +42,8 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `veri_topla.py` — Resmi kaynak listesindeki dosyaları indirip metne çevirir, veri hazırlığında koşulur.
 
 ## Ölçüm
+- `king_kapsam.js` — King kapsam testi; her modülün yazma işlevi ve rotası bir King aracına bağlı mı, eksik varsa çıkış 1 (KING-4 A2).
+- `king_kapsam.json` — `king_kapsam.js`'in eşlemesi: Model işlevi ve rota → araç adı ya da «-: neden».
 - `kapsam.js` — Birim testlerinin hangi işlevleri çalıştırdığını V8 precise coverage ile ölçer, CI'da veya elle koşulur.
 - `olcum_modul.js` — Modülün açılış, kapsam, depolama ve rota performansını tek komutla ölçer, optimizasyon turlarında koşulur.
 - `pusula.js` — Kolay LifeOS planının yardımcı ölçülerini (eylem sayıları ve menü karmaşıklığı) hesaplar, birleştirmeden önce koşulur.
@@ -54,7 +56,19 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `belge_dizin_kabul_test.py` — Görev 018 kabul testi; belgeler/DIZIN.md dizininin tamlığını ve bağlantılarını sınar.
 - `esp_sure_kabul_test.py` — Görev 011 kabul testi; ESP serbest oturum süre girişinin Türkçe sayı motoruyla okunmasını sınar, CI'da koşulur.
 - `ice_suren_kabul_test.py` — Görev 007 kabul testi; Google Takvim içe aktarımında süren etkinliklerin doğru çözümlenmesini sınar, CI'da koşulur.
+- `hafiza_olcum_kabul_test.py` — Görev 050 kabul testi; HKM hafıza aramasının kök ve gömme ile ölçümünü sınar.
+- `hafiza_uc_kabul_test.py` — Görev 051 kabul testi; hafıza ve kendiliğinden King uçlarını HTTP'den sınar.
+- `hkm_olcum_kabul_test.py` — Görev 030 kabul testi; test HKM'sini açıp başlangıç ve GET uçlarını ölçen aracı sınar.
+- `king_kapsam_ays_kabul_test.py` — Görev 021 kabul testi; AYS ekran işlerinin tamamının King aracı olduğunu sınar, CI'da koşulur.
+- `king_kapsam_esp_kabul_test.py` — Görev 023 kabul testi; ESP ekran işlerinin tamamının King aracı olduğunu sınar, CI'da koşulur.
+- `king_kapsam_spi_kabul_test.py` — Görev 022 kabul testi; SPİ ekran işlerinin tamamının King aracı olduğunu sınar, CI'da koşulur.
+- `king_sinav_ays_kabul_test.py` — Görev 031 kabul testi; King sınavının AYS kayıplarını sınar.
+- `king_sinav_esp_kabul_test.py` — Görev 033 kabul testi; King sınavının ESP kayıplarını sınar.
+- `king_sinav_spi_kabul_test.py` — Görev 032 kabul testi; King sınavının SPİ kayıplarını sınar.
 - `king_sinav_300_kabul_test.py` — Görev 020 kabul testi; King sınavı en az 300 cümle, ilk 100 cümle değişmemiş, biçim geçerli.
+- `kingveri_ays_kabul_test.py` — Görev 040 kabul testi; AYS King verisini (olaylar, hafta, hatırlatma, son kaydı düzeltme) sınar, CI'da koşulur.
+- `kingveri_esp_kabul_test.py` — Görev 042 kabul testi; ESP King verisini (olaylar, hafta, hatırlatma, son kaydı düzeltme) sınar, CI'da koşulur.
+- `kingveri_spi_kabul_test.py` — Görev 041 kabul testi; SPİ King verisini (olaylar, hafta, hatırlatma, son kaydı düzeltme) sınar, CI'da koşulur.
 - `olcum_modul_kabul_test.py` — Görev 016 kabul testi; tek komutla modül ölçüm aracının çıktı alanlarını ve aralıklarını sınar.
 - `perde_test_hiz_kabul_test.py` — Görev 015 kabul testi; perde takımlarının gerçek zaman beklemeden (≤ 800 ms) ve eksiksiz koştuğunu sınar, CI'da koşulur.
 - `spi_porsiyon_kabul_test.py` — Görev 012 kabul testi; SPI serbest öğün porsiyon ve miktar ayrıştırmasını sınar, CI'da koşulur.
