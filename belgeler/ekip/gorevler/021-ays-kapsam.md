@@ -1,6 +1,6 @@
 # 021 · AYS ekran işlerinin tamamı King aracı (KING-4 A2)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/021-ays-kapsam`
 **Efor:** orta
 **Kabul testi:** `tools/king_kapsam_ays_kabul_test.py`
@@ -48,7 +48,7 @@ KING-4 §A2: «her modül ekranındaki her okuma ve yazma işi tipli bir araç o
 - `cd AYS && node tools/runtests.js <senin portun>`
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** AYS/src/js/core/kingarac.js içine 14 yeni King aracı eklendi; ays_deneme eklemede doğru/yanlış/boş zorunlu kılındı (netten veri uydurma engellendi), ays_etkinlik güncellemesinde Object.assign sırası düzeltildi, 10 ayrı arama işlevi tek bir bul() yardımcısında birleştirildi. AYS/src/tests/kingarac.test.js içine her yeni araç için önizleme, uygulama, geri alma ve sınır durum sınamaları eklendi.
+- **Koşan testler:** python tools/king_kapsam_ays_kabul_test.py -> king kapsam ays kabul: ekran islerinin tamami arac, 14 yeni arac sinanmis. · cd AYS && node tools/runtests.js 4711 -> 3162/3162 gecti · node tools/king_kapsam.js --modul=ays --port=4441 -> King kapsamı: tam
+- **Kabul testi:** python tools/king_kapsam_ays_kabul_test.py -> king kapsam ays kabul: ekran islerinin tamami arac, 14 yeni arac sinanmis. (çıkış 0)
+- **Açık kalan:** yok
