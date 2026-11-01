@@ -344,13 +344,24 @@ modelin araç seçimiyle de koşmak (Merkez çağrısı yakalanmadan), yerel ve 
 puan. Ayrıştırıcı açıkları (kilo, «1 buçuk saat», «45 dakika tarih çalıştım»)
 modüllerin giriş işidir.
 
-**A2 · yetenek kaydı.** `node tools/king_kapsam.js` (eşleme `tools/king_kapsam.json`):
-modülün `Model`'indeki her yazma işlevi ve gezinmedeki her rota bir araca bağlı mı,
-araç kayıtta var mı. Yeni yazma işlevi ya da ekran eşlemesiz kalırsa kırmızı. Bugün
-72 eksik, 47 yeni araç: ofis görevleri 021 (AYS, 14 araç), 022 (SPİ, 14), 023
-(ESP, 19); kabul testleri `tools/king_kapsam_<modül>_kabul_test.py` (kapsam tam ve
-her yeni araç modülün `kingarac.test.js`'inde sınanmış). Yazan her araç `geriAl`
-döner (A4'ün «geri al» ölçüsü).
+**A2 · yetenek kaydı: kapsam tam.** `node tools/king_kapsam.js` (eşleme
+`tools/king_kapsam.json`): modülün `Model`'indeki her yazma işlevi ve gezinmedeki her
+rota bir araca bağlı mı, araç kayıtta var mı; yeni yazma işlevi ya da ekran eşlemesiz
+kalırsa kırmızı. Başlangıçta 72 eksik vardı; ofis 021 (AYS, 14 araç), 022 (SPİ, 14),
+023 (ESP, 19) ile **47 yeni araç** girdi, test yeşil. Araç sayısı: AYS 58, SPİ 40,
+ESP 46. «-: neden» ile dışarıda kalanlar yalnız iç işlevler (yedek zamanı, tercihler,
+süreli deneme oturumu) ve içerik/ofis sayfaları. Yazan her araç önizler, onayla
+uygular, `geriAl` döner ve modülün `kingarac.test.js`'inde geri almasıyla sınanır.
+
+İncelemede (Denetçi «temiz» dediği hâlde) düzeltilen: tek net sayısından uydurulan
+deneme testi, eski değeri yeninin üstüne yazan güncelleme, adı söylenmeden tek kaydı
+silen arama (ESP'de 18 yer, SPİ'de antrenman), varsayılan uydurma (1 kg, «Dil» bölümü,
+kuru fasulye, 1000 g), `eylem_kitap_ekle` ile çakışan ikinci kitap ekleme aracı,
+10 işlevlik kopya arama. Ders: ajanın arama yardımcısı boş aramayı reddetmeli.
+
+Ofisin eklediği okuma kalıbı «market bütçeme bakalım» sayfa komutunu yakaladı (sınav
+1 puan düştü); «… bakalım» sayfa komutu sayıldı, puan geri geldi. Sınav son hâli:
+ilk 100 cümle 95/100, 300 cümle 209/300.
 
 ## Ölçüm 2b · HKM tarafı (2026-11-01)
 

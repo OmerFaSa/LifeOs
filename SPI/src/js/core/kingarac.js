@@ -960,7 +960,7 @@ SP.KingArac = (function(){
     spi_butce:{ es:/(haftalık sepet|market bütçe|bütçem nasıl)/ },
     spi_planlar:{ es:/(haftalık plan|planlarım|haftalık programım)/ },
     spi_hedefler:{ es:/(sağlık hedef|hedeflerim|kilo hedef)/ },
-    spi_hane_oku:{ es:/(hane üyeleri|kimler var|aile profilleri)/ },
+    spi_hane_oku:{ es:/(hane üyeleri|hanede kimler var|aile profilleri)/ },
   };
 
   return { liste, barkodBul };

@@ -250,7 +250,7 @@ window.LIFEOS.ARAC = (function(){
   /* Söz 4: modelsiz yol — `es` taşıyan okuma aracı ya da `kural(t, metin)` ile
      cümleden parametresini çıkaran araç (oku ya da yaz) kuralla çağrılır.
      Yazan araç yine önizlenir ve onay ister (söz 3). */
-  const GIT_SON = /\s(git|aç|götür|geç|gidelim|açar mısın)[.!]?$/;   // «denemeleri aç» sayfa komutudur, okuma değil
+  const GIT_SON = /\s(git|aç|götür|geç|gidelim|bakalım|açar mısın)[.!]?$/;   // «denemeleri aç», «bütçeme bakalım» sayfa komutudur, okuma değil
   function kuralla(metin){
     const t = kucuk(metin);
     if(!t) return null;
