@@ -23586,7 +23586,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'f5c1c99d', at:'2026-11-01 12:46', dirty:false };
+R.BUILD = { id:'04af10f0', at:'2026-11-01 14:56', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -32747,7 +32747,7 @@ window.LIFEOS.SES_KAYIT = Object.freeze({
    düzenleme. Biçimi `brand/ortak/ses.css`, testi `brand/ortak/radyo.test.js`.
    ==================================================================
 
-   KULLANICININ İSTEĞİ (2026-10-02, belgeler/ekip/DEVIR-RADYO.md)
+   KULLANICININ İSTEĞİ (2026-10-02, belgeler/arsiv/DEVIR-RADYO.md)
 
      «İnternet chill radyo — Türkçe pop, Türkçe slow, İngilizce pop,
       İngilizce slow, İngilizce rap, Türkçe rap gibi radyo türleri.»
@@ -40608,7 +40608,7 @@ LIFEOS.YETKI = (function(){
       SAYFALAR kataloğu) ve bu modülün araçları (açıklama + örnek cümle).
 
    Araç tanımı:
-     { ad, aciklama, tur:'oku'|'yaz', parametreler?, ornek?, es?, seviye?,
+     { ad, aciklama, tur:'oku'|'yaz', parametreler?, ornek?, es?, kural?(t, metin):param|true|null, seviye?,
        kullanilir?():bool,
        calistir(param)  (oku) → { sonuc?, cevap?, satirlar?, yerine? }
        onizle(param)    (yaz) → { metin, satirlar? } | { veri } | { yetki } | { hata }
@@ -40822,13 +40822,21 @@ window.LIFEOS.ARAC = (function(){
     }
   }
 
-  /* Söz 4: modelsiz okuma — `es` taşıyan okuma aracı kuralla çağrılır. */
+  /* Söz 4: modelsiz yol — `es` taşıyan okuma aracı ya da `kural(t, metin)` ile
+     cümleden parametresini çıkaran araç (oku ya da yaz) kuralla çağrılır.
+     Yazan araç yine önizlenir ve onay ister (söz 3). */
+  const GIT_SON = /\s(git|aç|götür|geç|gidelim|açar mısın)[.!]?$/;   // «denemeleri aç» sayfa komutudur, okuma değil
   function kuralla(metin){
     const t = kucuk(metin);
     if(!t) return null;
     for(const a of liste()){
-      if(a.tur !== 'oku' || !(a.es instanceof RegExp)) continue;
-      if(a.es.test(t)) return { ad:a.ad, param:{} };
+      if(typeof a.kural === 'function'){
+        let p = null;
+        try{ p = a.kural(t, String(metin).trim()); }catch(e){ p = null; }
+        if(p) return { ad:a.ad, param:p === true ? {} : p };
+        continue;
+      }
+      if(a.tur === 'oku' && a.es instanceof RegExp && a.es.test(t) && !GIT_SON.test(t)) return { ad:a.ad, param:{} };
     }
     return null;
   }
@@ -40927,6 +40935,14 @@ R.KingArac = (function(){
   const ES = {
     puan_tahmini:/(puan tahmin|sıralama tahmin|kaç puan alırım|tahmini puan)/,
     hatalar:/(yanlış defterim|hatalar[ıi]m(?:ı| neler)?$)/,
+    /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz, araçla cevaplanır. */
+    denemeler:/(denemelerim|son deneme|deneme(?:de|lerde|m)? (?:kaç|nasıl)|kaç net)/,
+    konu_riski:/(risk altında|riskli konu|konu riski)/,
+    gunler:/((?:bugün|dün) kaç (?:dakika|saat|soru)|kaç (?:dakika|saat) çalıştım)/,
+    konular:/(kapanış yüzde|kapanışım|konularımın durumu)/,
+    gunun_akisi:/(günün akışı|bugünün akışı)/,
+    durum_ozeti:/(sınava kaç gün|sınava ne kadar)/,
+    kartlar:/((?:tekrar etmem gereken|sırası gelen|geciken) kart|kart borcu)/,
   };
   const n2 = v => v == null ? 'veri yok' : String(v).replace('.', ',');
 
@@ -44437,7 +44453,7 @@ window.LIFEOS.KING_IC = {};
   const SAYFALAR = [
     { modul:'spi', route:'today',     ad:'Bugün',      es:['bugün', 'genel bakış', 'ölçüm'] },
     { modul:'spi', route:'meals',     ad:'Öğün',       es:['öğün', 'besin', 'yemek', 'beslenme'] },
-    { modul:'spi', route:'kitchen',   ad:'Mutfak',     es:['mutfak', 'tarif'] },
+    { modul:'spi', route:'kitchen',   ad:'Mutfak',     es:['mutfak', 'mutfağ', 'tarif'] },
     { modul:'spi', route:'move',      ad:'Hareket',    es:['hareket', 'antrenman', 'egzersiz', 'spor'] },
     { modul:'spi', route:'labs',      ad:'Testler',    es:['tahlil', 'kan testi', 'laboratuvar', 'testler'] },
     { modul:'spi', route:'basket',    ad:'Bütçe',      es:['bütçe', 'market', 'sepet'] },
@@ -48353,8 +48369,8 @@ window.LIFEOS.KING_IC = {};
 
   /* ---------- söz 32: kartlar ---------- */
   const KART_ISTAT = /(istatistik|rakamlar[ıi]m|sayılar[ıi]m|verilerimi göster|kartlar[ıi]? göster|durum kartlar)/;
-  const KART_SORU = /(soru sor|soru ver|soru getir|soru çek|soru çöz(elim|eyim)|beni test et|test et beni|bir soru daha)/;
-  const SORU_DOLGU = /(^|\s)(bana|bir|tane|daha|soru|sor|sorar|ver|getir|çek|lütfen|king|hakkında|konusunda|ile|ilgili|beni|test|et|çözelim|çözeyim|mısın|misin|musun)(?=\s|$)/g;
+  const KART_SORU = /(soru sor|sorusu sor|soru ver|soru getir|soru çek|soru çöz(elim|eyim)|beni test et|test et beni|bir soru daha)/;
+  const SORU_DOLGU = /(^|\s)(bana|bir|tane|daha|soru|sorusu|sor|sorar|ver|getir|çek|lütfen|king|hakkında|konusunda|ile|ilgili|beni|test|et|çözelim|çözeyim|mısın|misin|musun)(?=\s|$)/g;
   const ETIKETLER = ['ölçüldü', 'hesaplandı', 'tahmin', 'veri yok'];
   function kartNiyeti(t){
     if(KART_SORU.test(t)){
@@ -48526,7 +48542,7 @@ window.LIFEOS.KING_IC = {};
 
   /* ---------- söz 34: öncelik, notlar, ritüel, yük, günlük, deney ---------- */
   const D = () => (KI.L.DEFTER && KI.L.DEFTER.kuruluMu && KI.L.DEFTER.kuruluMu()) ? KI.L.DEFTER : null;
-  const ONCELIK_RE = /(neye çalışayım|ne çalışayım|neye çalışmalıyım|öncelikli konu|hangi konuya çalış|puan getir|en çok puan)/;
+  const ONCELIK_RE = /(neye çalışayım|ne çalışayım|neye çalışmalıyım|öncelikli konu|hangi konuya çalış|hangi konuya öncelik|öncelik vermeliyim|puan getir|en çok puan)/;
   async function oncelikIsle(metin){
     KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
     const K = KI.ayar && KI.ayar.kartlar;
@@ -48853,6 +48869,9 @@ window.LIFEOS.KING_IC = {};
   const KELIME_RE = /^(?:kelime say|kelimeleri say|karakter say)\s*:\s*([\s\S]+)$/i;
   const YAS_RE = /^yaş hesapla\s*:?\s*(\d{1,2})[./](\d{1,2})[./](\d{4})\s*$|^(\d{1,2})[./](\d{1,2})[./](\d{4})\s*(?:doğumluyum|doğumlu)?\s*(?:kaç yaşındayım|yaşım kaç)\s*[?.!]*$/;
   const VKI_RE = /^(?:vki|bmi|beden kitle(?: indeksi)?)\s*:?\s*(\d+(?:[.,]\d+)?)\s*kg\s*(\d+(?:[.,]\d+)?)\s*(cm|m)\s*$/;
+  /* «boyum 1.80 kilom 78, vücut kitle indeksim kaç»: aynı hesap, günlük cümleyle. */
+  const VKI_CUMLE = /(?=.*(?:vki|bmi|(?:vücut|beden) kitle))(?=.*boyum\s*(\d+(?:[.,]\d+)?)\s*(cm|m)?(?![a-zçğıöşü]))(?=.*kilom\s*(\d+(?:[.,]\d+)?))/;
+  const vkiCumle = t => { const m = t.match(VKI_CUMLE); return m ? [m[0], m[3], m[1], m[2] || (Number(String(m[1]).replace(',', '.')) > 3 ? 'cm' : 'm')] : null; };
   const SIFRE_RE = /^(?:şifre üret|parola üret|güçlü şifre(?: üret)?)\s*(\d{1,2})?\s*[?.!]*$/;
   const KART_YAP_RE = /^(?:kart yap|karta ekle|kart olarak (?:ekle|kaydet))\s*:\s*([\s\S]+)$/i;
   const sayiNo = x => Number(String(x).replace(',', '.'));
@@ -48965,7 +48984,7 @@ window.LIFEOS.KING_IC = {};
         return { tur:'yas', yas };
       }
     }
-    m = t0.match(VKI_RE);
+    m = t0.match(VKI_RE) || vkiCumle(t0);
     if(m){
       const kg = sayiNo(m[1]), boy = sayiNo(m[2]) / (m[3] === 'cm' ? 100 : 1);
       if(kg > 0 && boy > 0.5 && boy < 2.6){
@@ -49179,6 +49198,7 @@ window.LIFEOS.KING_IC = {};
         parametreler:{ type:'object', properties:{ sorgu:{ type:'string', maxLength:80 } }, required:['sorgu'] },
         kullanilir:() => !!D(), calistir:p => akisla(m => notAra(m || p.sorgu, KI.kucuk(p.sorgu))) },
       { ad:'not_ekle', tur:'yaz', ornek:'deftere not: üslülerde tabanlar aynıysa üsler toplanır', aciklama:'Defter’e yeni bir not yazar.',
+        kural:(t, m) => { const x = /^deftere not\s*[:,]\s*(\S[\s\S]{1,1999})$/i.exec(m); return x ? { metin:x[1].trim() } : null; },
         parametreler:{ type:'object', properties:{ baslik:{ type:'string', maxLength:120 }, metin:{ type:'string', maxLength:2000 } }, required:['metin'] },
         kullanilir:() => !!D(),
         onizle:p => ({ metin:'Defter’e not eklenecek' + (p.baslik ? ': «' + p.baslik + '»' : '') + '.', satirlar:[String(p.metin).slice(0, 160)] }),
@@ -50185,6 +50205,7 @@ window.LIFEOS.KING = (function(){
   }
 
   /* Ödeme cümlesi: satın al, sipariş ver, öde(me yap), kart bilgisi; «ödev» değil. */
+  const YAPILACAK_RE = /^(yapılacak(lar)?|yapilacak|hatırlat|hatirlat)(?![a-zçğıöşü])/;   // «yapılacak: fatura öde» bir hatırlatmadır, ödeme değil
   const ODEME = /\s(satın al|satin al|sipariş ver|siparis ver|ödeme yap|odeme yap|öde\s|öder misin|ödeyebilir misin|kredi kart|banka kart|kart numara|kart bilgi|cvv|abone ol|bilet al)/;
   async function isle(metin){
     KI.gozSonEtkilesim = KI.ortam.simdi().getTime();
@@ -50226,7 +50247,7 @@ window.LIFEOS.KING = (function(){
        açıp kapatabilelim»). Ayarlar › Hesap'taki kilit (lifeos.kilit.odeme,
        varsayılan kapalı). LifeOS'ta ödeme yapan bir araç yoktur: açıkken de King
        bu işi yapmaz, yalnız söyler. Cümle Merkez'e de gitmez (kart bilgisi taşıyabilir). */
-    if(ODEME.test(' ' + t0 + ' ')){
+    if(ODEME.test(' ' + t0 + ' ') && !YAPILACAK_RE.test(t0)){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
       let acik = false;
       try{ acik = localStorage.getItem('lifeos.kilit.odeme') === 'acik'; }catch(e){}
@@ -50343,6 +50364,18 @@ window.LIFEOS.KING = (function(){
     }
     /* Söz 36: «bu sistemde ne var, nerede, nasıl yapılır» — kodun haritası. */
     if(KI.HARITA_RE.test(t0) && !KI.veriGibi(metin)) return KI.haritaIsle(metin);
+    /* A3 hızlı yol (KING-4): cümleden parametresi çıkan araç (arac.js söz 4)
+       sayfa ve veri tahmininden önce; okuma sorusu sayfa açmaz, sistemden
+       cevaplanır. Yazan araç yine önizlenir ve onay ister. */
+    const KA = KI.ARAC() && !KI.paylasim ? KI.ARAC().kuralla(metin) : null;
+    if(KA){
+      const sen = { kim:'sen', metin:String(metin).trim() };
+      KI.akis.push(sen);
+      KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null;
+      const rk = await KI.aracIsle({ arac:[KA] }, metin);
+      if(rk) return rk;
+      KI.akis = KI.akis.filter(m => m !== sen);
+    }
     /* Söz 20: sistem içindeki değişiklik kataloğa (yetki.js). */
     const Y = KI.yetkiKatalog();
     const yn = Y && !KI.paylasim ? Y.anla(metin) : null;
@@ -50410,15 +50443,11 @@ window.LIFEOS.KING = (function(){
       KI.bulunanGoster(bulunan, 'Anlattıklarında şunları buldum; seçtiklerini kaydedeyim:');
       if(!KI.baglanti()) return { tur:'bulunan', n:bulunan.length };
     }
-    /* Söz 36: modelsiz okuma — `es` taşıyan okuma aracı kuralla (arac.js söz 4). */
-    const KA = !bulunan && y.tur === 'bilinmiyor' && KI.ARAC() ? KI.ARAC().kuralla(metin) : null;
-    if(KA){
-      const rk = await KI.aracIsle({ arac:[KA] }, metin);
-      if(rk) return rk;
-    }
-    /* Söz 6: soru, özet ve anlaşılmayan istek HKM'deki King'e. */
+    /* Söz 6: soru, özet ve anlaşılmayan istek HKM'deki King'e. Sayfa adı
+       geçen uzun cümle («bugün için motive edici bir şey söyle») komut
+       değildir; Merkez cevaplar, Merkez yoksa sayfa açılır (KING-4 A3). */
     const merkeze = !!KI.baglanti() && (!!bulunan || y.tur === 'bilinmiyor' || y.tur === 'ozet'
-      || (y.tur === 'git' && y.kaynak !== 'komut' && KI.soruMu(metin)));
+      || (y.tur === 'git' && y.kaynak !== 'komut' && (KI.soruMu(metin) || (y.kaynak === 'sayfa' && KI.kucuk(metin).split(' ').length > 3))));
     let neden = null;
     if(merkeze){
       const bek = { kim:'king', bekliyor:true, metin:'' };
@@ -82027,29 +82056,52 @@ R.h = (function(){
   return { html, raw, isRaw, val, when, cls, attrs, map, esc };
 })();
 
-/* ==== js/core/store.js ==== */
-/* Kalici depolama.
+/* ==== js/core/depo.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/depo.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* DEPO — modüllerin kalıcı depolama katmanı (tek kaynak).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/depo.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Modülün
+   `core/store.js`'i yalnız kendi ayarlarıyla `LIFEOS.Depo.kur(...)` çağırır.
+
+   NEDEN (2026-11-01, KING-4 Ölçüm 2c): üç `store.js` (~520 satır) ad alanı,
+   anahtar ve metin dışında aynıydı ve ayrışmaya başlamıştı: AYS bulut
+   listesini yerel kopyaya satır başına yazıyordu (SPİ ve ESP tek yazma),
+   `activeProfileId` yalnız ESP'deydi.
+
+   Ayarlar (o):
+     ns               modülün ad alanı (SCHEMA_VERSION buradan okunur)
+     profilAnahtari   etkin profilin localStorage anahtarı
+     varsayilanProfil anahtar yoksa profil
+     appId            yedeğin kimliği
+     yerelAnahtar(p)  profilin localStorage anahtarı
+     ad               kullanıcıya görünen ad («SPİ», «Rota», «ESP»)
+     alan             eşitleme alanı öneki («spi», «ays», «esp»)
+     veriYeri         kota uyarısında yedeğin alındığı yer
+
+   Kalıcı depolama:
    Once Artifact "db" yetenegi denenir (cihazlar arasi), yoksa localStorage'a duser.
    Her iki durumda da yerel kopya tutulur; boylece cevrimdisi calisir.
    Hatalar yutulmaz: onError kancasi uzerinden arayuze bildirilir. */
 
-window.R = window.R || {};
+window.LIFEOS = window.LIFEOS || {};
 
-R.SCHEMA_VERSION = 5;
-
-R.Store = (function(){
-  /* Cok kullanicili kullanim: her profil kendi anahtarinda durur.
-     'main' geriye donuk uyum icin eski anahtari kullanmaya devam eder. */
+LIFEOS.Depo = Object.freeze({ kur(o){
+  /* Hane halki: her profil kendi anahtarinda durur. Tahlil ve olcum verisi
+     profiller arasinda karismaz; 'ben' varsayilan birincil profildir. */
   function activeProfile(){
-    try{ return localStorage.getItem('rota.activeProfile') || 'main'; }
-    catch(e){ return 'main'; }
+    try{ return localStorage.getItem(o.profilAnahtari) || o.varsayilanProfil; }
+    catch(e){ return o.varsayilanProfil; }
   }
   const PROFILE = activeProfile();
   /* Yedegin kimligi — disa aktarirken yazilir, geri yuklerken ARANIR.
      Iki yerde ayri ayri yazilan bir kimlik, bir gun ayrisir. */
-  const APP_ID = 'rota-84285';
+  const APP_ID = o.appId;
 
-  const LOCAL_KEY = PROFILE === 'main' ? 'rota84285.v2' : 'rota84285.v2.' + PROFILE;
+  const LOCAL_KEY = o.yerelAnahtar(PROFILE);
   /* Yedekten yukleme ONCESI durumun tek yuvalik kopyasi. LOCAL_KEY'in
      GOVDESINE degil, AYRI bir anahtara yazilir: importAll o anahtari
      ezmedigi icin geri alma imkani import'un kendisinden hayatta kalir. */
@@ -82087,31 +82139,24 @@ R.Store = (function(){
       || /quota|storage.*full/i.test(e.message || '');
   }
 
-  /* ---------- ayristirilmis kopya ----------
+  /* ---------- ayrıştırılmış kopya ----------
 
-     HER YAZMA TUM DEPOYU AYRISTIRIYORDU. `lSet` once `localAll()` ile
-     butun kaydi JSON'dan cozuyor, tek anahtari degistirip yeniden
-     serilestiriyordu; yani bir kayit girmenin maliyeti, o gune kadar
-     girilmis HER SEYIN boyutuyla buyuyordu.
+     HER YAZMA TÜM DEPOYU AYRIŞTIRIYORDU. `lSet` önce `localAll()` ile
+     bütün kaydı JSON'dan çözüyor, tek anahtarı değiştirip yeniden
+     serileştiriyordu; yani bir ölçüm girmenin maliyeti, o güne kadar
+     girilmiş HER ŞEYİN boyutuyla büyüyordu.
 
-     Bu iyilestirme SPI ve ESP'de vardi, AYS'de YOKTU — ve AYS en cok
-     kayit biriktiren sistem (dokuz aylik sinav yilinda gun, blok,
-     deneme, kart, hata). Fark olculdu, yazma basina:
+     Ölçüldü: 50 kayıtta yazma başına 0,17 ms, 1000 kayıtta 5,00 ms —
+     yirmi dokuz kat. Dokuz aylık kullanımda (günde ~10 kayıt) her
+     dokunuş fark edilir bir gecikmeye dönüşürdü.
 
-         kayit    once       sonra     kazanc
-           50   0,067 ms   0,030 ms      %55
-          200   0,177 ms   0,133 ms      %25
-          500   0,590 ms   0,245 ms      %58
-         1000   1,013 ms   0,470 ms      %54
+     Çözüm ayrıştırılmış kopyayı bellekte tutmaktır. Serileştirme
+     KALIR — yazma yine anında diske iner, ertelenmez. Ertelenen bir
+     yazma, sekmesini kapatan kullanıcının verisini kaybeder ve burası
+     verinin kaybolabileceği tek yerdir; hız için o riski almayız.
 
-     Serilestirme KALIR — yazma yine aninda diske iner, ertelenmez.
-     Ertelenen bir yazma, sekmesini kapatan kullanicinin verisini
-     kaybeder ve burasi verinin kaybolabilecegi tek yerdir; hiz icin o
-     riski almayiz.
-
-     Kopya BASKA BIR SEKME yazdiginda gecersizlesir: `storage` olayi
-     yalnizca diger sekmelerde tetiklenir, tam da bize gereken sey.
-     Testle kilitli (`tests/store.test.js`). */
+     Kopya BAŞKA BİR SEKME yazdığında geçersizleşir: `storage` olayı
+     yalnızca diğer sekmelerde tetiklenir, tam da bize gereken şey. */
   let kopya = null;
 
   function localAll(){
@@ -82127,23 +82172,21 @@ R.Store = (function(){
     }
   }
 
-  let onExternalWrite = null;   // app.js tarafindan baglanir
+  let onExternalWrite = null;   // app.js tarafından bağlanır
 
-  /* Baska sekme yazdiysa bellekteki kopya eskimistir.
+  /* Başka sekme yazdıysa bellekteki kopya eskimiştir.
 
-     ONCE YALNIZ `kopya` (bu dosyanin HAM JSON onbellegi) sifirlaniyordu.
-     Ama uygulamanin BELLEKTEKI MODELI (`R.S.days`, `R.S.exams`...) ayri
-     bir katmandir ve `kopya = null` onu HIC etkilemez — yalniz bir
-     SONRAKI `localAll()` cagrisinda diskten yeniden okunacagini
-     saglar. Iki sekme ayni gunu duzenlerse: B sekmesi yazar, A
-     sekmesinin `R.S.days[iso]`si BAYAT KALIR; A sonra kendi (bayat)
-     kopyasini kaydederse B'nin degisikligi SESSIZCE ezilir.
+     ÖNCE YALNIZ `kopya` (bu dosyanın HAM JSON önbelleği) sıfırlanıyordu.
+     Ama uygulamanın BELLEKTEKİ MODELİ (`X.S` gibi)
+     ayrı bir katmandır ve `kopya = null` onu HİÇ etkilemez — yalnız bir
+     SONRAKİ `localAll()` çağrısında diskten yeniden okunacağını sağlar.
+     İki sekme aynı günü düzenlerse: B sekmesi yazar, A sekmesinin
+     bellekteki modeli BAYAT KALIR; A sonra kendi (bayat) kopyasını
+     kaydederse B'nin değişikliği SESSİZCE ezilir.
 
-     Tam bir birlestirme bu katmanda YAPILMAZ: hangi alanin kazanacagina
-     karar vermek uygulamanin isidir, deponun degil. Ama SESSIZCE
-     ezilmesi de kabul edilebilir degil — bu yuzden en azindan SOYLENIR.
-     `onExternalWrite` app.js'te bir uyariya baglanir; kullanici
-     sayfayi yenileyip GUNCEL veriyi gorebilir. */
+     Tam bir birleştirme bu katmanda YAPILMAZ — ama sessizce ezilmesi de
+     kabul edilebilir değil. `onExternalWrite` app.js'te bir uyarıya
+     bağlanır; kullanıcı sayfayı yenileyip GÜNCEL veriyi görebilir. */
   try{
     window.addEventListener('storage', e => {
       if(!e || e.key === null || e.key === LOCAL_KEY){
@@ -82153,8 +82196,7 @@ R.Store = (function(){
         }
       }
     });
-  }catch(e){ /* olay baglanamadiysa kopya yalniz bu sekmede yasar */ }
-
+  }catch(e){ /* olay bağlanamadıysa kopya yalnız bu sekmede yaşar */ }
   function localWrite(all){
     kopya = all;
     try{
@@ -82164,7 +82206,7 @@ R.Store = (function(){
     }catch(e){
       health.local = 'error';
       report('local-write', e, isQuotaError(e)
-        ? 'Tarayıcı depolama alanı doldu. Ayarlar → Veri bölümünden yedek alıp eski kayıtları temizle.'
+        ? 'Tarayıcı depolama alanı doldu. ' + o.veriYeri + ' bölümünden yedek alıp eski kayıtları temizle.'
         : 'Değişiklik bu cihaza kaydedilemedi.');
       return false;
     }
@@ -82184,6 +82226,17 @@ R.Store = (function(){
     delete all[path];
     localWrite(all);
   }
+  /* Birden çok yolu TEK yazmayla kaydeder.
+
+     Bulut listesi geldiğinde her satır ayrı ayrı `lSet` ile yazılıyordu:
+     yüz kayıtlık bir koleksiyon, yüz kez tam serileştirme demekti. */
+  function lSetMany(pairs){
+    if(!pairs.length) return true;
+    const all = localAll();
+    pairs.forEach(([path, data]) => { all[path] = data; });
+    return localWrite(all);
+  }
+
   function lList(prefix){
     const all = localAll();
     const p = prefix.endsWith('/') ? prefix : prefix + '/';
@@ -82265,7 +82318,8 @@ R.Store = (function(){
 
   async function set(path, data){
     const localOk = lSet(path, data);
-    if(localOk) degisti([path]);   // yazılmayan kayda «kaydedildi» denmez
+    /* Yazılamayan kayıt «kaydedildi» olayı üretmez (kota dolu). */
+    if(localOk) degisti([path]);
     if(db){
       health.pendingCloudWrites++;
       try{
@@ -82301,7 +82355,7 @@ R.Store = (function(){
         const snap = await db.collection(collection).get();
         health.cloud = 'ok';
         const rows = snap.docs.map(d => Object.assign({ id:d.id }, d.data()));
-        rows.forEach(r => lSet(collection+'/'+r.id, r));
+        lSetMany(rows.map(r => [collection+'/'+r.id, r]));
         if(rows.length) return rows;
         return lList(collection);
       }catch(e){
@@ -82339,7 +82393,7 @@ R.Store = (function(){
     return {
       __meta:{
         app:APP_ID,
-        schemaVersion:R.SCHEMA_VERSION,
+        schemaVersion:o.ns.SCHEMA_VERSION,
         exportedAt:new Date().toISOString(),
         mode,
       },
@@ -82357,19 +82411,19 @@ R.Store = (function(){
          uygulamanin verisiyle degismesi demekti. */
       if(obj.__meta.app && obj.__meta.app !== APP_ID){
         return { ok:false, error:'Bu yedek başka bir uygulamadan («'
-          + String(obj.__meta.app).slice(0, 32) + '»). Rota yedeği gerekir.' };
+          + String(obj.__meta.app).slice(0, 32) + '»). ' + o.ad + ' yedeği gerekir.' };
       }
       if(typeof obj.data !== 'object' || Array.isArray(obj.data)){
         return { ok:false, error:'Yedek gövdesi okunamadı.' };
       }
-      if(obj.__meta.schemaVersion > R.SCHEMA_VERSION){
+      if(obj.__meta.schemaVersion > o.ns.SCHEMA_VERSION){
         return { ok:false, error:'Bu yedek daha yeni bir sürümle alınmış (şema '+obj.__meta.schemaVersion+'). Önce uygulamayı güncelle.' };
       }
       return { ok:true, data:obj.data, meta:obj.__meta };
     }
     const keys = Object.keys(obj);
     const looksLegacy = keys.some(k => k.indexOf('/') > 0);
-    if(!looksLegacy) return { ok:false, error:'Bu dosya bir Rota yedeği değil.' };
+    if(!looksLegacy) return { ok:false, error:'Bu dosya bir ' + o.ad + ' yedeği değil.' };
     return { ok:true, data:obj, meta:{ schemaVersion:1, legacy:true } };
   }
 
@@ -82474,11 +82528,6 @@ R.Store = (function(){
 
   async function clear(){
     const all = localAll();
-    /* KOPYA DA BOSALIR. `localStorage`'dan silmek yetmez: bellekteki
-       kopya duruyorsa `get` silinmis bir kaydi dondurmeye devam eder
-       ve kullanici «temizledim ama duruyor» goruntusuyle kalir.
-       Testle kilitli (store.test.js, «temizlemeden sonra bellekteki
-       kopya da bosalir»). */
     kopya = {};
     try{ localStorage.removeItem(LOCAL_KEY); }catch(e){}
     /* Hesaba bağlıysa silme sunucuya ve öteki cihazlara da gider (kapı bunu söyler). */
@@ -82539,7 +82588,8 @@ R.Store = (function(){
 
   return {
     init, get, set, remove, list, hepsi, uzaktan,
-    alan:'ays/' + PROFILE,
+    alan:o.alan + '/' + PROFILE,
+    activeProfileId(){ return PROFILE; },
     set onDegisim(fn){ onDegisim = fn; },
     exportAll, importAll, readBackup, importUndoInfo, undoImport, clear, localSize, originSize, localQuota, sizeByCollection,
     health(){ return Object.assign({ mode }, health); },
@@ -82547,7 +82597,26 @@ R.Store = (function(){
     set onExternalWrite(fn){ onExternalWrite = fn; },
     get mode(){ return mode; },
   };
-})();
+} });
+
+/* ==== js/core/store.js ==== */
+/* Kalici depolama: ortak depo katmanina (brand/ortak/depo.js) bu modulun ayarlari.
+   Davranis orada; burada yalniz anahtarlar, ad ve sema surumu durur. */
+
+window.R = window.R || {};
+
+R.SCHEMA_VERSION = 5;
+
+R.Store = LIFEOS.Depo.kur({
+  ns:R,
+  profilAnahtari:'rota.activeProfile',
+  varsayilanProfil:'main',
+  appId:'rota-84285',
+  yerelAnahtar:p => p === 'main' ? 'rota84285.v2' : 'rota84285.v2.' + p,
+  ad:'Rota',
+  alan:'ays',
+  veriYeri:'Ayarlar → Veri',
+});
 
 /* ==== js/core/state.js ==== */
 /* Uygulama durumu, veri modeli ve yukleme/kaydetme islemleri. */

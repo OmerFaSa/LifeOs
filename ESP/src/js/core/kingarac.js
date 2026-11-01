@@ -150,5 +150,22 @@ ESP.KingArac = (function(){
     ];
   }
 
-  return { liste, sayfaOku };
+  /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz; kart, alıntı ve bitirme cümleden okunur
+     (yazan araç yine önizlenir, onayla yazılır). */
+  const KURAL = {
+    esp_gun:{ es:/^bugün (?:ne|neler) çalıştım/ },
+    esp_hafta:{ es:/((?:bu hafta|son bir hafta|haftada) ne kadar çalıştım)/ },
+    esp_kitaplar:{ es:/(^kitaplarım|kütüphanemde ne var|hangi kitapları okuyorum)/ },
+    esp_kartlar:{ es:/(kaç (?:kelime )?kart|kelime kartlarım)/ },
+    esp_yazilar:{ es:/(yazı taslak|taslaklarım|yazılarım)/ },
+    esp_kart_ekle:{ kural:(t, m) => { const x = /^(.+?)\s+kelimesini karta? (?:yap|ekle)\s*[:,]\s*(.+)$/i.exec(m);
+      return x && x[1].length <= 120 && x[2].length <= 240 ? { on:x[1].trim(), arka:x[2].trim() } : null; } },
+    esp_alinti_ekle:{ kural:(t, m) => { const x = /^alıntı\s*[:,]\s*(\S[\s\S]{0,999})$/i.exec(m); return x ? { metin:x[1].trim() } : null; } },
+    esp_kitap_bitir:{ kural:(t, m) => { const x = /^(.+?)['’]?(?:y[ıiuü])? bitirdim[.!]?$/i.exec(m);
+      const k = x && x[1].trim();
+      return k && !/^(kitab[ıi]?|onu|bunu|şunu)$/i.test(k) && k.length <= 120 ? { kitap:k } : null; } },
+  };
+  const listeKural = () => liste().map(a => Object.assign(a, KURAL[a.ad] || {}));
+
+  return { liste:listeKural, sayfaOku };
 })();

@@ -214,14 +214,29 @@ SP.KingArac = (function(){
         ornek:'dün ne yedim',
         parametreler:{ type:'object', properties:{ tarih:gun } }, calistir:gunKaydi },
       { ad:'spi_uyku', tur:'oku', aciklama:'Son günlerin uyku saatleri ve ortalaması (kaydı olmayan gece boş kalır).',
-        es:/(uykum nasıl|uyku ortalamam)/, ornek:'son bir haftada uykum nasıl',
+        es:/(uykum nasıl|uyku ortalamam|kaç saat uyu(?:dum|muşum)|ortalama .*uyu)/, ornek:'son bir haftada uykum nasıl',
         parametreler:{ type:'object', properties:{ gun:sayiGun(60, 7) } }, calistir:uyku },
       { ad:'spi_antrenmanlar', tur:'oku', aciklama:'Son günlerin antrenman kayıtları.', ornek:'son antrenmanlarım',
         parametreler:{ type:'object', properties:{ gun:sayiGun(90, 14) } }, calistir:antrenmanlar },
       { ad:'spi_tahliller', tur:'oku', aciklama:'Son tahlillerin değerleri ve referans aralıkları (yorum ve teşhis yok).', ornek:'son tahlillerim',
         parametreler:{ type:'object', properties:{ limit:{ type:'integer', minimum:1, maximum:10 } } }, calistir:tahliller },
-    ].concat(barkodAraclari(), bolum());
+    ].concat(barkodAraclari(), bolum()).map(a => Object.assign(a, KURAL[a.ad] || {}));
   }
+
+  /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz; besin ve barkod cümleden okunur. */
+  const yemekBul = w => [w, w.replace(/['’]?n?[ıiuü]n$/, ''), w.replace(/['’]?n?[dt][ae]$/, ''), w.replace(/s[ıiuü]n?[dt][ae]$/, '')]
+    .map(x => x.trim()).find(x => x.length >= 2 && SP.Parse && SP.Parse.matchFood && SP.Parse.matchFood(x)) || null;
+  const KURAL = {
+    spi_gun_kaydi:{ es:/((?:dün|bugün|evvelsi gün) ne (?:yedim|yemişim|içtim)|günün kaydı)/ },
+    spi_antrenmanlar:{ es:/(son antrenman|antrenmanlarım|antrenman geçmiş)/ },
+    spi_tahliller:{ es:/(tahlil(?:ler)?im|tahlil sonuç|kaç çıkmış)/ },
+    spi_besin:{ kural:t => {
+      const m = /^(?:100 ?(?:gram|gr|g) )?(.+?) besin değer/.exec(t) || /^(?:100 ?(?:gram|gr|g) )?(.+?) kaç (?:gram )?(?:protein|kalori|kcal|yağ|karbonhidrat)/.exec(t);
+      const ad = m && yemekBul(m[1]);
+      return ad ? { besin:ad } : null; } },
+    spi_barkod:{ kural:t => { const m = /(?:^|\s)(\d{8}|\d{12,13})(?=\s|$)/.exec(t);
+      return m && /barkod/.test(t) && !/(yedim|içtim|ekle)/.test(t) ? { kod:m[1] } : null; } },
+  };
 
   return { liste, barkodBul };
 })();

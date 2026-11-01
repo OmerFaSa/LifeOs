@@ -13,7 +13,7 @@
 
   /* ---------- söz 34: öncelik, notlar, ritüel, yük, günlük, deney ---------- */
   const D = () => (KI.L.DEFTER && KI.L.DEFTER.kuruluMu && KI.L.DEFTER.kuruluMu()) ? KI.L.DEFTER : null;
-  const ONCELIK_RE = /(neye çalışayım|ne çalışayım|neye çalışmalıyım|öncelikli konu|hangi konuya çalış|puan getir|en çok puan)/;
+  const ONCELIK_RE = /(neye çalışayım|ne çalışayım|neye çalışmalıyım|öncelikli konu|hangi konuya çalış|hangi konuya öncelik|öncelik vermeliyim|puan getir|en çok puan)/;
   async function oncelikIsle(metin){
     KI.akis.push({ kim:'sen', metin:String(metin).trim() }); KI.cipler = null;
     const K = KI.ayar && KI.ayar.kartlar;
@@ -340,6 +340,9 @@
   const KELIME_RE = /^(?:kelime say|kelimeleri say|karakter say)\s*:\s*([\s\S]+)$/i;
   const YAS_RE = /^yaş hesapla\s*:?\s*(\d{1,2})[./](\d{1,2})[./](\d{4})\s*$|^(\d{1,2})[./](\d{1,2})[./](\d{4})\s*(?:doğumluyum|doğumlu)?\s*(?:kaç yaşındayım|yaşım kaç)\s*[?.!]*$/;
   const VKI_RE = /^(?:vki|bmi|beden kitle(?: indeksi)?)\s*:?\s*(\d+(?:[.,]\d+)?)\s*kg\s*(\d+(?:[.,]\d+)?)\s*(cm|m)\s*$/;
+  /* «boyum 1.80 kilom 78, vücut kitle indeksim kaç»: aynı hesap, günlük cümleyle. */
+  const VKI_CUMLE = /(?=.*(?:vki|bmi|(?:vücut|beden) kitle))(?=.*boyum\s*(\d+(?:[.,]\d+)?)\s*(cm|m)?(?![a-zçğıöşü]))(?=.*kilom\s*(\d+(?:[.,]\d+)?))/;
+  const vkiCumle = t => { const m = t.match(VKI_CUMLE); return m ? [m[0], m[3], m[1], m[2] || (Number(String(m[1]).replace(',', '.')) > 3 ? 'cm' : 'm')] : null; };
   const SIFRE_RE = /^(?:şifre üret|parola üret|güçlü şifre(?: üret)?)\s*(\d{1,2})?\s*[?.!]*$/;
   const KART_YAP_RE = /^(?:kart yap|karta ekle|kart olarak (?:ekle|kaydet))\s*:\s*([\s\S]+)$/i;
   const sayiNo = x => Number(String(x).replace(',', '.'));
@@ -452,7 +455,7 @@
         return { tur:'yas', yas };
       }
     }
-    m = t0.match(VKI_RE);
+    m = t0.match(VKI_RE) || vkiCumle(t0);
     if(m){
       const kg = sayiNo(m[1]), boy = sayiNo(m[2]) / (m[3] === 'cm' ? 100 : 1);
       if(kg > 0 && boy > 0.5 && boy < 2.6){
@@ -666,6 +669,7 @@
         parametreler:{ type:'object', properties:{ sorgu:{ type:'string', maxLength:80 } }, required:['sorgu'] },
         kullanilir:() => !!D(), calistir:p => akisla(m => notAra(m || p.sorgu, KI.kucuk(p.sorgu))) },
       { ad:'not_ekle', tur:'yaz', ornek:'deftere not: üslülerde tabanlar aynıysa üsler toplanır', aciklama:'Defter’e yeni bir not yazar.',
+        kural:(t, m) => { const x = /^deftere not\s*[:,]\s*(\S[\s\S]{1,1999})$/i.exec(m); return x ? { metin:x[1].trim() } : null; },
         parametreler:{ type:'object', properties:{ baslik:{ type:'string', maxLength:120 }, metin:{ type:'string', maxLength:2000 } }, required:['metin'] },
         kullanilir:() => !!D(),
         onizle:p => ({ metin:'Defter’e not eklenecek' + (p.baslik ? ': «' + p.baslik + '»' : '') + '.', satirlar:[String(p.metin).slice(0, 160)] }),

@@ -119,6 +119,7 @@ window.LIFEOS.KING = (function(){
   }
 
   /* Ödeme cümlesi: satın al, sipariş ver, öde(me yap), kart bilgisi; «ödev» değil. */
+  const YAPILACAK_RE = /^(yapılacak(lar)?|yapilacak|hatırlat|hatirlat)(?![a-zçğıöşü])/;   // «yapılacak: fatura öde» bir hatırlatmadır, ödeme değil
   const ODEME = /\s(satın al|satin al|sipariş ver|siparis ver|ödeme yap|odeme yap|öde\s|öder misin|ödeyebilir misin|kredi kart|banka kart|kart numara|kart bilgi|cvv|abone ol|bilet al)/;
   async function isle(metin){
     KI.gozSonEtkilesim = KI.ortam.simdi().getTime();
@@ -160,7 +161,7 @@ window.LIFEOS.KING = (function(){
        açıp kapatabilelim»). Ayarlar › Hesap'taki kilit (lifeos.kilit.odeme,
        varsayılan kapalı). LifeOS'ta ödeme yapan bir araç yoktur: açıkken de King
        bu işi yapmaz, yalnız söyler. Cümle Merkez'e de gitmez (kart bilgisi taşıyabilir). */
-    if(ODEME.test(' ' + t0 + ' ')){
+    if(ODEME.test(' ' + t0 + ' ') && !YAPILACAK_RE.test(t0)){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
       let acik = false;
       try{ acik = localStorage.getItem('lifeos.kilit.odeme') === 'acik'; }catch(e){}
@@ -277,6 +278,18 @@ window.LIFEOS.KING = (function(){
     }
     /* Söz 36: «bu sistemde ne var, nerede, nasıl yapılır» — kodun haritası. */
     if(KI.HARITA_RE.test(t0) && !KI.veriGibi(metin)) return KI.haritaIsle(metin);
+    /* A3 hızlı yol (KING-4): cümleden parametresi çıkan araç (arac.js söz 4)
+       sayfa ve veri tahmininden önce; okuma sorusu sayfa açmaz, sistemden
+       cevaplanır. Yazan araç yine önizlenir ve onay ister. */
+    const KA = KI.ARAC() && !KI.paylasim ? KI.ARAC().kuralla(metin) : null;
+    if(KA){
+      const sen = { kim:'sen', metin:String(metin).trim() };
+      KI.akis.push(sen);
+      KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null;
+      const rk = await KI.aracIsle({ arac:[KA] }, metin);
+      if(rk) return rk;
+      KI.akis = KI.akis.filter(m => m !== sen);
+    }
     /* Söz 20: sistem içindeki değişiklik kataloğa (yetki.js). */
     const Y = KI.yetkiKatalog();
     const yn = Y && !KI.paylasim ? Y.anla(metin) : null;
@@ -344,15 +357,11 @@ window.LIFEOS.KING = (function(){
       KI.bulunanGoster(bulunan, 'Anlattıklarında şunları buldum; seçtiklerini kaydedeyim:');
       if(!KI.baglanti()) return { tur:'bulunan', n:bulunan.length };
     }
-    /* Söz 36: modelsiz okuma — `es` taşıyan okuma aracı kuralla (arac.js söz 4). */
-    const KA = !bulunan && y.tur === 'bilinmiyor' && KI.ARAC() ? KI.ARAC().kuralla(metin) : null;
-    if(KA){
-      const rk = await KI.aracIsle({ arac:[KA] }, metin);
-      if(rk) return rk;
-    }
-    /* Söz 6: soru, özet ve anlaşılmayan istek HKM'deki King'e. */
+    /* Söz 6: soru, özet ve anlaşılmayan istek HKM'deki King'e. Sayfa adı
+       geçen uzun cümle («bugün için motive edici bir şey söyle») komut
+       değildir; Merkez cevaplar, Merkez yoksa sayfa açılır (KING-4 A3). */
     const merkeze = !!KI.baglanti() && (!!bulunan || y.tur === 'bilinmiyor' || y.tur === 'ozet'
-      || (y.tur === 'git' && y.kaynak !== 'komut' && KI.soruMu(metin)));
+      || (y.tur === 'git' && y.kaynak !== 'komut' && (KI.soruMu(metin) || (y.kaynak === 'sayfa' && KI.kucuk(metin).split(' ').length > 3))));
     let neden = null;
     if(merkeze){
       const bek = { kim:'king', bekliyor:true, metin:'' };

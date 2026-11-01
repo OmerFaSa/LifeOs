@@ -36,7 +36,7 @@
       SAYFALAR kataloğu) ve bu modülün araçları (açıklama + örnek cümle).
 
    Araç tanımı:
-     { ad, aciklama, tur:'oku'|'yaz', parametreler?, ornek?, es?, seviye?,
+     { ad, aciklama, tur:'oku'|'yaz', parametreler?, ornek?, es?, kural?(t, metin):param|true|null, seviye?,
        kullanilir?():bool,
        calistir(param)  (oku) → { sonuc?, cevap?, satirlar?, yerine? }
        onizle(param)    (yaz) → { metin, satirlar? } | { veri } | { yetki } | { hata }
@@ -250,13 +250,21 @@ window.LIFEOS.ARAC = (function(){
     }
   }
 
-  /* Söz 4: modelsiz okuma — `es` taşıyan okuma aracı kuralla çağrılır. */
+  /* Söz 4: modelsiz yol — `es` taşıyan okuma aracı ya da `kural(t, metin)` ile
+     cümleden parametresini çıkaran araç (oku ya da yaz) kuralla çağrılır.
+     Yazan araç yine önizlenir ve onay ister (söz 3). */
+  const GIT_SON = /\s(git|aç|götür|geç|gidelim|açar mısın)[.!]?$/;   // «denemeleri aç» sayfa komutudur, okuma değil
   function kuralla(metin){
     const t = kucuk(metin);
     if(!t) return null;
     for(const a of liste()){
-      if(a.tur !== 'oku' || !(a.es instanceof RegExp)) continue;
-      if(a.es.test(t)) return { ad:a.ad, param:{} };
+      if(typeof a.kural === 'function'){
+        let p = null;
+        try{ p = a.kural(t, String(metin).trim()); }catch(e){ p = null; }
+        if(p) return { ad:a.ad, param:p === true ? {} : p };
+        continue;
+      }
+      if(a.tur === 'oku' && a.es instanceof RegExp && a.es.test(t) && !GIT_SON.test(t)) return { ad:a.ad, param:{} };
     }
     return null;
   }

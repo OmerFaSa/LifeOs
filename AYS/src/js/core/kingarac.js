@@ -30,6 +30,14 @@ R.KingArac = (function(){
   const ES = {
     puan_tahmini:/(puan tahmin|sıralama tahmin|kaç puan alırım|tahmini puan)/,
     hatalar:/(yanlış defterim|hatalar[ıi]m(?:ı| neler)?$)/,
+    /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz, araçla cevaplanır. */
+    denemeler:/(denemelerim|son deneme|deneme(?:de|lerde|m)? (?:kaç|nasıl)|kaç net)/,
+    konu_riski:/(risk altında|riskli konu|konu riski)/,
+    gunler:/((?:bugün|dün) kaç (?:dakika|saat|soru)|kaç (?:dakika|saat) çalıştım)/,
+    konular:/(kapanış yüzde|kapanışım|konularımın durumu)/,
+    gunun_akisi:/(günün akışı|bugünün akışı)/,
+    durum_ozeti:/(sınava kaç gün|sınava ne kadar)/,
+    kartlar:/((?:tekrar etmem gereken|sırası gelen|geciken) kart|kart borcu)/,
   };
   const n2 = v => v == null ? 'veri yok' : String(v).replace('.', ',');
 

@@ -50,9 +50,16 @@ async function sor(c){
     KI.baglanti = () => ({ url:'http://127.0.0.1:1', token:'sinav' });
     const tasima = KI.tasimaYaz;
     KI.tasimaYaz = (x, h) => { S.tasima = h && h.route; return tasima(x, h); };
+    /* Yetki kataloğunun anladığı iş yakalanır, uygulanmaz (tema, eylem). */
+    const yk = KI.yetkiKatalog;
+    KI.yetkiKatalog = () => { const Y = yk(); return Y && Object.assign(Object.create(Y), { anla:m => (S.yetki = Y.anla(m)) }); };
+    KI.yetkiUygula = async () => {};
+    /* Anlatımdaki kayıtlar kartı (söz 35) bir veri önizlemesidir. */
+    const bg = KI.bulunanGoster;
+    KI.bulunanGoster = (o, b) => { S.kayit.push('veri'); return bg(o, b); };
   }
   const S = window.__sinav;
-  S.kayit = []; S.tasima = null;
+  S.kayit = []; S.tasima = null; S.yetki = null;
   k._sifirla();
   Object.assign(KI.ortam, {
     zamanla:fn => fn(), hash:() => '', hashSil:() => {},
@@ -64,16 +71,18 @@ async function sor(c){
   let r = null, hata = null;
   try{ r = await k.isle(c); }catch(e){ hata = String(e && e.message || e); }
   const ms = Math.round(performance.now() - t0);
-  const kayit = S.kayit;
-  const arac = kayit.find(x => x && x.arac);
-  const git = kayit.find(x => typeof x === 'string' && x.startsWith('git:'));
+  /* İlk karar kayıttaki ilk olaydır: Merkez'e sorulup cevap gelmeyince açılan
+     sayfa yedektir, karar değil. */
+  const ilk = S.kayit[0];
+  const arac = ilk && ilk.arac ? ilk : null;
+  const eylem = S.yetki && S.yetki.tur === 'eylem' && 'eylem_' + String(S.yetki.id).replace(/[^a-z0-9]+/g, '_');
   let karar;
   if(arac) karar = 'arac:' + arac.arac;
-  else if(git) karar = git;
+  else if(ilk === 'komut') karar = 'arac:merkez_raporu';   // Merkez'in hafta/çapraz raporu
+  else if(ilk) karar = ilk;                                 // git:… ya da merkez
   else if(KI.bekleyenGit) karar = 'git:' + KI.bekleyenGit.modul + ':' + KI.bekleyenGit.route;
   else if(KI.bekleyen) karar = 'veri';
-  else if(kayit.includes('komut')) karar = 'arac:merkez_raporu';   // Merkez'in hafta/çapraz raporu
-  else if(kayit.includes('merkez')) karar = 'merkez';
+  else if(eylem && LIFEOS.ARAC.liste().some(a => a.ad === eylem)) karar = 'arac:' + eylem;   // yetki eylemi = eylem_ aracı
   else karar = 'tur:' + (r && r.tur || (hata ? 'hata' : 'yok'));
   k._sifirla();
   k.kur(S.ayar);
