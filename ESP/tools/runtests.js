@@ -123,6 +123,11 @@ async function portMuhafizi(portlar, ipucu){
     }
     console.log('\n' + summary.passed + '/' + summary.total + ' gecti'
       + (summary.failed ? '  ·  ' + summary.failed + ' kaldi' : ''));
+    /* En yavas bes takim: test suresi olculur, tahmin edilmez (KING-4 Olcum 1c). */
+    const takim = {};
+    summary.results.forEach(r => { takim[r.suite] = (takim[r.suite] || 0) + (r.ms || 0); });
+    const yavas = Object.entries(takim).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    if(yavas.length && yavas[0][1]) console.log('En yavas takimlar: ' + yavas.map(([s, ms]) => s + ' ' + Math.round(ms) + ' ms').join(' · '));
     code = (summary.failed || consoleErrors.length) ? 1 : 0;
   }catch(err){
     console.error('Kosum hatasi:', err && err.message ? err.message : err);

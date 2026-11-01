@@ -91,15 +91,16 @@ ESP.Test = (function(){
     let passed = 0, failed = 0;
     for(const suite of suites){
       for(const test of suite.tests){
+        const t0 = performance.now();
         try{
           /* Tek test en çok 15 sn: takılan test bütün koşuyu (runtests sınırı) düşürmesin. */
           let saat;
           await Promise.race([test.fn(), new Promise((_, red) => { saat = setTimeout(() => red(new Error('zaman aşımı (15 sn)')), 15000); })])
             .finally(() => clearTimeout(saat));
-          results.push({ suite:suite.name, name:test.name, ok:true });
+          results.push({ suite:suite.name, name:test.name, ok:true, ms:performance.now() - t0 });
           passed++;
         }catch(err){
-          results.push({ suite:suite.name, name:test.name, ok:false, error:err && err.message ? err.message : String(err) });
+          results.push({ suite:suite.name, name:test.name, ok:false, ms:performance.now() - t0, error:err && err.message ? err.message : String(err) });
           failed++;
         }
       }
