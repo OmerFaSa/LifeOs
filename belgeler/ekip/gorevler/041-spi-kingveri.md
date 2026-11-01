@@ -1,6 +1,6 @@
 # 041 · SPİ King verisi: olaylar ve yardım sağlayıcıları (KING-4 §C, §H)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/041-spi-kingveri`
 **Efor:** orta
 **Kabul testi:** `tools/kingveri_spi_kabul_test.py`
@@ -40,7 +40,7 @@ Olay biçimi: `belgeler/ekip/KING-OLAY.md` (oku). Her olay `{ modul:'spi', tur, 
 - `cd SPI && node tools/runtests.js <senin portun>`
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** SP.KingVeri (SPI/src/js/core/kingveri.js) sözleşmesi tamamlandı: uyku_dustu ve plan_kacti olayları, hafta özeti, hatırlatma ortancası ve sonKayit/duzelt uygulandı. Kenar durumları sınayan birim testleri (SPI/src/tests/kingveri.test.js) eklendi.
+- **Koşan testler:** python tools/kingveri_spi_kabul_test.py -> spi king verisi kabul: uyku_dustu, plan_kacti, kimlik, hafta, hatirlat, sonKayit/duzelt. · cd SPI && node tools/runtests.js 4722 -> 2935/2935 gecti
+- **Kabul testi:** python tools/kingveri_spi_kabul_test.py -> spi king verisi kabul: uyku_dustu, plan_kacti, kimlik, hafta, hatirlat, sonKayit/duzelt.
+- **Açık kalan:** yok
