@@ -501,6 +501,9 @@
     const r = n.arac ? await ARAC().uygula(n) : await Y.uygula(n);
     KI.akis = KI.akis.filter(m => m !== bek);
     if(r.ok && typeof r.geriAl === 'function'){ KI.sonGeriAl = r.geriAl; KI.cipler = [{ is:'geri-al', ad:'Geri al' }]; }
+    /* «King ne yaptı» zaman çizgisi (KING-4 §F). */
+    if(r.ok) KI.eylemYaz({ arac:n.arac ? n.ad : 'yetki.' + (n.id || n.tur), ozet:String(r.metin || (n.onizle && n.onizle.metin) || '').replace(/[.!]+$/, ''),
+      param:n.arac ? n.param : undefined, geriAl:r.geriAl });
     KI.soyle(r.metin, r.satirlar && r.satirlar.length ? r.satirlar : null);
     if(r.ok && r.yenile){
       /* Sayfa yeniden yüklenince King aynı sayfada küçük kutu olarak açılır. */
@@ -706,6 +709,11 @@
         calistir:p => { KI.odakBaslat(p.dakika, p.konu || ''); return { cevap:p.dakika + ' dakikalık odak başladı' + (p.konu ? ' (' + p.konu + ')' : '') + '. Süre dolunca haber vereceğim.' }; } },
       { ad:'odak_durdur', tur:'oku', ornek:'sayacı durdur', aciklama:'Çalışan odak sayacını durdurur.',
         calistir:() => { const v = KI.odak(); KI.odakTemizle(); KI.ortam.depo.sil(KI.ODAK); return { cevap:v ? 'Odak sayacını durdurdum.' : 'Çalışan bir odak sayacı yok.' }; } },
+      { ad:'king_harcama', tur:'oku', ornek:'bugün ne harcadın', es:/((?:bugün )?ne (?:kadar )?harcad[ıi]n|harcaman(?:ı| ne)|kaç (?:jeton|token)|model çağrı)/,
+        aciklama:'King’in bugünkü model kullanımı: çağrı, jeton, maliyet ve süre (Merkez’in defterinden; sayıyı HKM ölçer).',
+        kullanilir:() => !!KI.baglanti(),
+        calistir:async () => { await KI.eylemTazele(); const o = KI.harcamaOzet(KI.harcama);
+          return o ? { sonuc:KI.harcama, cevap:o.cumle } : { hata:'Merkez’den harcama okunamadı' }; } },
       { ad:'merkez_raporu', tur:'oku', ornek:'haftalık değerlendirme', aciklama:'Merkez’in raporu: hafta (haftalık değerlendirme) ya da capraz (modüller arası bulgular); sayıları kural motoru yazar.',
         parametreler:{ type:'object', properties:{ tur:{ type:'string', enum:['hafta', 'capraz'] } }, required:['tur'] },
         calistir:p => akisla(m => KI.merkezKomut(m, p.tur, p.tur === 'hafta' ? 'Haftalık değerlendirme' : 'Modüller arası bulgular')) },
@@ -719,6 +727,11 @@
     return l;
   }
 
+  /* Adım satırı için aracın insan adı: açıklamanın ilk parçası. */
+  function aracAdi(ad){
+    const a = ARAC() && ARAC().bul(ad);
+    return a ? String(a.ozetAd || a.aciklama).split(/[.:;(]/)[0].trim().slice(0, 60) : ad;
+  }
   /* Yazan aracın önizlemesi onay kartı olur (model seçimi ve söz 37'nin fotoğraf işi aynı kart). */
   function aracKart(o, onMetin, ekSatir){
     if(o.onizle.veri){
@@ -735,7 +748,7 @@
     KI.cipler = [{ is:'yetki-onay', ad:n.seviye === 'buyuk' ? 'Dönüş noktası al ve uygula' : 'Onayla' }, { is:'vazgec', ad:'Vazgeç' }];
     const satir = (n.onizle.satirlar || []).concat(Array.isArray(ekSatir) ? ekSatir : []);
     KI.soyle((onMetin ? onMetin + ' ' : '') + n.onizle.metin, satir.length ? satir : null, null,
-      n.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?');
+      n.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?', { onay:true });
     return { tur:'arac-yaz', ad:o.ad, seviye:n.seviye };
   }
 
@@ -766,20 +779,66 @@
     }
     dogrudan.forEach(x => KI.soyle(x.cevap, x.satirlar));
     if(sonuclar.length){
-      /* İkinci tur: sonucu kod üretti; model yalnız cümleye çevirir (HKM sayıyı denetler). */
-      const bek = { kim:'king', bekliyor:true, metin:'' };
+      /* İkinci tur: sonucu kod üretti; model yalnız cümleye çevirir (HKM sayıyı denetler).
+         A4: model yine araç isterse (HKM döngüsü, en çok 4 adım) okumalar yapılır,
+         adımlar bekleme balonunda canlı görünür, bütün sonuçlar yeniden yollanır. */
+      const adimlar = sonuclar.map(x => ({ ad:aracAdi(x.ad), durum:'bitti' }));
+      const bek = { kim:'king', bekliyor:true, metin:'', adimlar };
       KI.akis.push(bek); KI.ciz(false);
-      const r2 = await KI.merkezeSor(metin, bek, { arac_sonuclari:sonuclar.map(x => ({ ad:x.ad, param:x.param, sonuc:x.sonuc })) });
+      const t0 = KI.ortam.simdi().getTime();
+      let r2 = await KI.merkezeSor(metin, bek, { arac_sonuclari:sonuclar.map(x => ({ ad:x.ad, param:x.param, sonuc:x.sonuc })), dongu:{ adim:1, gecen_ms:0 } });
+      for(let tur = 0; r2.ok && r2.arac && r2.dongu && tur < 4; tur++){
+        let yeni = 0;
+        for(const c of r2.arac.slice(0, 3)){
+          const d = A.dogrula(c && c.ad, c && c.param);
+          if(!d.ok || d.arac.tur !== 'oku' || sonuclar.some(x => x.ad === d.arac.ad && JSON.stringify(x.param) === JSON.stringify(d.param))) continue;
+          const adim = { ad:aracAdi(d.arac.ad), durum:'calisiyor' };
+          adimlar.push(adim); KI.ciz(false);
+          const x = await A.calistir(d.arac.ad, d.param, { metin });
+          adim.durum = x.ok ? 'bitti' : 'red';
+          if(x.ok){ sonuclar.push(x); yeni++; }
+          KI.ciz(false);
+        }
+        if(!yeni) break;
+        r2 = await KI.merkezeSor(metin, bek, { arac_sonuclari:sonuclar.map(x => ({ ad:x.ad, param:x.param, sonuc:x.sonuc })),
+          dongu:{ adim:Number(r2.dongu.adim) || tur + 2, gecen_ms:KI.ortam.simdi().getTime() - t0 } });
+      }
       KI.akis = KI.akis.filter(m => m !== bek);
       const satir = [].concat.apply([], sonuclar.map(x => x.satirlar || []));
-      if(r2.ok && !r2.arac) KI.soyle(r2.text, satir.length ? satir : null, null, null, r2.akti ? { yeni:false, okunan:r2.okunan } : null);
-      else KI.soyle(satir.length ? 'Sistemden okudum:' : 'Sistemden okudum ama Merkez cümleye çeviremedi; ilgili sayfadan bakabilirsin.', satir.length ? satir : null);
+      const adimEk = adimlar.length > 1 ? { adimlar } : {};
+      if(r2.ok && !r2.arac) KI.soyle(r2.text, satir.length ? satir : null, null, null, Object.assign(adimEk, r2.akti ? { yeni:false, okunan:r2.okunan } : {}));
+      else KI.soyle(satir.length ? 'Sistemden okudum:' : 'Sistemden okudum ama Merkez cümleye çeviremedi; ilgili sayfadan bakabilirsin.', satir.length ? satir : null, null, null, adimEk);
       KI.cipler = KI.oneriListesi(true);
       KI.ciz(false);
       return { tur:'arac-oku', n:sonuclar.length };
     }
     if(yerine || dogrudan.length) return { tur:'arac-oku', n:dogrudan.length };
     return null;
+  }
+
+  /* A3: niyetle seçilen yazma aracının tek zorunlu metin parametresi cümlede
+     yoksa tahmin edilmez, sorulur (AGENTS §1.7): «kitap ekle» → «Hangi kitap?».
+     Sonraki cümle o parametre olur ve araç her zamanki gibi önizlenir. */
+  function niyetSor(N){
+    const a = ARAC() && ARAC().bul(N.ad);
+    const s = a && a.tur === 'yaz' && a.parametreler;
+    const eksik = s ? (s.required || []).filter(k => N.param[k] == null) : [];
+    const p = eksik.length === 1 && s.properties[eksik[0]];
+    if(!p || p.type !== 'string') return null;
+    KI.bekleyenNiyet = { ad:a.ad, param:N.param, k:eksik[0] };
+    KI.cipler = [{ is:'vazgec', ad:'Vazgeç' }];
+    KI.soyle((a.ozetAd || String(a.aciklama).split(/[.:;(]/)[0]).trim() + ' için ' + (p.description || eksik[0]) + ' ne olsun?');
+    return { tur:'arac-sor', ad:a.ad };
+  }
+  async function niyetCevap(metin){
+    const b = KI.bekleyenNiyet;
+    KI.bekleyenNiyet = null;
+    KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+    KI.cipler = null;
+    const r = await aracIsle({ arac:[{ ad:b.ad, param:Object.assign({}, b.param, { [b.k]:String(metin).trim().slice(0, 120) }) }] }, metin);
+    if(r) return r;
+    KI.soyle('Bunu yapamadım; sayfasından ya da tam cümleyle dener misin?');
+    return { tur:'arac-red' };
   }
 
   function gitOnayla(){
@@ -806,5 +865,5 @@
     return (cevap || 'Kolay gelsin.') + (yer ? ' ' + yer + ' açılıyor.' : '');
   }
 
-  Object.assign(KI, { D, ONCELIK_RE, oncelikIsle, siraliHtml, NOT_RE, notPuanla, notAra, RITIM_RE, HEDEF, haftaHedefi, ritimBaslat, ritimIsle, YUK_RE, yukIsle, GUNLUK_RE, gunlukIsle, gunlukBitir, DENEY, DENEY_RE, DENEY_DURUM_RE, deneyOku, deneyBaslat, deneyOlcuSec, deneyHesap, deneyDurum, hesapla, birimCevir, YAP, yapilacaklar, yapYaz, yapHtml, HATIR, hatirlatmalar, hatirYaz, hatirlatKur, rastgele, nefesHtml, aracKutusu, yetkiKatalog, yetkiUygula, ARAC, HARITA_RE, ayarHtml, haritaCevap, haritaIsle, ortakAraclar, aracKart, aracIsle, gitOnayla, hazirSec, eylemCumlesi });
+  Object.assign(KI, { D, ONCELIK_RE, oncelikIsle, siraliHtml, NOT_RE, notPuanla, notAra, RITIM_RE, HEDEF, haftaHedefi, ritimBaslat, ritimIsle, YUK_RE, yukIsle, GUNLUK_RE, gunlukIsle, gunlukBitir, DENEY, DENEY_RE, DENEY_DURUM_RE, deneyOku, deneyBaslat, deneyOlcuSec, deneyHesap, deneyDurum, hesapla, birimCevir, YAP, yapilacaklar, yapYaz, yapHtml, HATIR, hatirlatmalar, hatirYaz, hatirlatKur, rastgele, nefesHtml, aracKutusu, yetkiKatalog, yetkiUygula, ARAC, HARITA_RE, ayarHtml, haritaCevap, haritaIsle, ortakAraclar, aracKart, aracIsle, niyetSor, niyetCevap, gitOnayla, hazirSec, eylemCumlesi });
 })();

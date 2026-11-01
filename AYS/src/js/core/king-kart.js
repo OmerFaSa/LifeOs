@@ -694,5 +694,138 @@
       });
   }
 
-  Object.assign(KI, { yetenekler, GRUP_SVG_MODUL, KART, kartAyar, kartYaz, kartSabitle, kartSus, kartTasi, kartEkle, kartSil, miniKutu, oneCikanlar, vitrinHtml, vitrinDizin, gorevListe, rutinListe, GORSEL, gorseller, gorselSakla, kutuphaneHtml, kutDizin, kartNiyeti, kartTemiz, kartIsle, soruCevapla, LINK_RE, arastirmaVeri, arastirmaHtml, arastirmaEkle, kartlarHtml, soruHtml, bicimli });
+  /* ---------- KING NE YAPTI (KING-4 §F, tur 3a) ----------
+     Her onaylı yazma bu oturumun defterine (KI.eylemler) ve Merkez bağlıysa
+     HKM'nin eylem defterine (POST /api/eylem) düşer. Zaman çizgisi ikisini
+     birleştirir: HKM'nin kendi yazdıkları (para, söz) da görünür. Geri alma
+     tek tık: modülün yazmasını modülün kendi geriAl'ı yapar (yalnız bu
+     oturumda; kapanınca «kalıcı» görünür, sessiz bir geri alma yok),
+     HKM'nin yazmasını HKM. */
+  KI.eylemler = [];
+  KI.eylemHkm = null;         // GET /api/eylem; null = yüklenmedi
+  KI.harcama = null;          // GET /api/ai_olcum
+  let eylemSay = 0;
+  const EYLEM_EN_COK = 60;
+  async function hkmIstek(yol, govde){
+    const k = KI.baglanti();
+    if(!k) return null;
+    try{
+      const o = { headers:{ 'Authorization':'Bearer ' + k.token } };
+      if(govde){ o.method = 'POST'; o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(govde); }
+      const res = await KI.ortam.fetch(k.url + yol, o);
+      return res.status === 200 ? await res.json() : null;
+    }catch(e){ return null; }
+  }
+  function eylemYaz(e){
+    const row = { anahtar:'y' + (++eylemSay), zaman:KI.ortam.simdi().toISOString(), arac:String(e.arac || 'kayit'), ozet:String(e.ozet || '').slice(0, 200),
+      modul:KI.ayar && KI.ayar.modul, kaynak:'istemci', geriAl:typeof e.geriAl === 'function' ? e.geriAl : null, durum:'uygulandi', id:null };
+    KI.eylemler.unshift(row);
+    KI.eylemler = KI.eylemler.slice(0, EYLEM_EN_COK);
+    /* «oturum» tersi: HKM satırı işaretler, tersini bu oturumdaki geriAl yapar. */
+    hkmIstek('/api/eylem', { arac:row.arac, ozet:row.ozet || row.arac, modul:row.modul, param:e.param || undefined,
+      geri:row.geriAl ? { ad:'oturum', param:{} } : undefined }).then(r => { if(r && r.id != null){ row.id = r.id; if(KI.bolum === 'eylem') eylemTazele(); } });
+    return row;
+  }
+  async function eylemTazele(){
+    const [l, h] = await Promise.all([hkmIstek('/api/eylem?limit=40'), hkmIstek('/api/ai_olcum?date=' + KI.bugunISO())]);
+    KI.eylemHkm = l && Array.isArray(l.eylemler) ? l.eylemler : (KI.baglanti() ? [] : null);
+    KI.harcama = h && h.toplam ? h : null;
+    if(KI.acik && KI.bolum === 'eylem') KI.ciz(false);
+  }
+  /* Tek liste: HKM satırı, bu oturumda yazıldıysa yerel satırla eşleşir (geriAl orada). */
+  function eylemListesi(){
+    const yerel = {};
+    KI.eylemler.forEach(r => { if(r.id != null) yerel[r.id] = r; });
+    const hkm = (KI.eylemHkm || []).map(h => {
+      const y = yerel[h.id];
+      const oturum = !!(h.geri && h.geri.istemci && h.geri.istemci.ad === 'oturum');
+      return { anahtar:y ? y.anahtar : 'h' + h.id, id:h.id, zaman:h.created_at, arac:h.arac, ozet:h.ozet, modul:h.modul, kaynak:h.kaynak,
+        durum:y && y.durum === 'geri_alindi' ? 'geri_alindi' : h.durum, geriAl:y ? y.geriAl : null,
+        geriYolu:h.durum === 'uygulandi' && (y ? !!y.geriAl && y.durum === 'uygulandi' : !!h.geri_alinabilir && !oturum) };
+    });
+    const ham = KI.eylemler.filter(r => r.id == null || !hkm.some(h => h.id === r.id))
+      .map(r => Object.assign({}, r, { geriYolu:r.durum === 'uygulandi' && !!r.geriAl }));
+    return hkm.concat(ham).sort((a, b) => String(b.zaman).localeCompare(String(a.zaman)));
+  }
+  async function eylemGeriAl(anahtar){
+    const e = eylemListesi().find(x => x.anahtar === anahtar);
+    if(!e || !e.geriYolu) return false;
+    try{
+      if(e.geriAl) await e.geriAl();
+      const r = e.id != null ? await hkmIstek('/api/eylem/' + e.id + '/geri', {}) : null;
+      if(!e.geriAl){
+        if(!r || !r.ok){ KI.soyle('Geri alamadım: ' + ((r && r.note) || 'Merkez cevap vermedi') + '.'); return false; }
+        /* HKM'nin tersi bir istemci aracıysa (modülün aracı) burada uygulanır. */
+        const t = r.istemci, A = KI.ARAC(), d = t && A ? A.dogrula(t.ad, t.param) : null;
+        if(d && d.ok && d.arac.tur === 'yaz') await d.arac.uygula(d.param);
+      }
+    }catch(x){ KI.soyle('Geri alamadım: ' + ((x && x.message) || 'bilinmeyen hata')); return false; }
+    const y = KI.eylemler.find(x => x.anahtar === anahtar || (e.id != null && x.id === e.id));
+    if(y) y.durum = 'geri_alindi';
+    if(KI.sonGeriAl && KI.sonGeriAl === e.geriAl){ KI.sonGeriAl = null; KI.cipler = null; }
+    KI.soyle('Geri aldım: ' + (e.ozet || e.arac) + '.');
+    eylemTazele();
+    return true;
+  }
+  /* «Geri al» çipi son kaydı geri alınca zaman çizgisi de bilir. */
+  function eylemGeriAlindi(g){
+    const y = KI.eylemler.find(x => x.geriAl && x.geriAl === g && x.durum === 'uygulandi');
+    if(!y) return;
+    y.durum = 'geri_alindi';
+    if(y.id != null) hkmIstek('/api/eylem/' + y.id + '/geri', {});
+  }
+  const saatYaz = z => { const d = new Date(z); return isNaN(d) ? '' : String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+  function gunAdi(z){
+    const d = new Date(z), b = KI.ortam.simdi();
+    if(isNaN(d)) return 'Daha eski';
+    const f = Math.round((new Date(b.getFullYear(), b.getMonth(), b.getDate()) - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 864e5);
+    return f <= 0 ? 'Bugün' : f === 1 ? 'Dün' : d.toLocaleDateString('tr-TR', { day:'numeric', month:'long' });
+  }
+  function eylemSatir(e){
+    const yer = (e.modul ? KI.MODUL_AD[e.modul] : 'Merkez') + (e.kaynak === 'istemci' ? ' · sen onayladın' : '');
+    const sag = e.durum === 'geri_alindi' ? '<span class="king__eylem-durum">geri alındı</span>'
+      : e.geriYolu ? '<button type="button" class="king__eylem-geri" data-king="eylem-geri:' + KI.kac(e.anahtar) + '" aria-label="Geri al: ' + KI.kac(e.ozet || e.arac) + '">Geri al</button>'
+      : '<span class="king__eylem-durum" title="Bu eylemin geri alma yolu yok">kalıcı</span>';
+    return '<li class="king__eylem' + (e.durum === 'geri_alindi' ? ' is-geri' : '') + '"><i class="king__nokta king__nokta--' + (e.modul || 'mer') + '" aria-hidden="true"></i>'
+      + '<div class="king__eylem-ic"><span class="king__eylem-ozet">' + KI.kac(e.ozet || e.arac) + '</span>'
+      + '<small><time datetime="' + KI.kac(e.zaman) + '">' + saatYaz(e.zaman) + '</time> · ' + KI.kac(yer) + '</small></div>' + sag + '</li>';
+  }
+  /* «King bugün ne harcadı»: sayıları HKM'nin defteri verir; dağılım tek yığılmış
+     çubuk, renk modülü ayırır (rolün öneki ays., spi., esp.; gerisi Merkez). */
+  const sayiYaz = n => (Number(n) || 0).toLocaleString('tr-TR');
+  const HARCAMA_AD = { ays:'AYS', spi:'SPİ', esp:'ESP', mer:'Merkez' };
+  function harcamaOzet(h){
+    const t = h && h.toplam;
+    if(!t) return null;
+    const grup = {};
+    (h.satirlar || []).forEach(r => { const m = /^(ays|spi|esp)\./.exec(String(r.rol || '')); const g = m ? m[1] : 'mer'; grup[g] = (grup[g] || 0) + (Number(r.cagri) || 0); });
+    const sira = ['mer', 'ays', 'spi', 'esp'].filter(g => grup[g]);
+    const jeton = (Number(t.giris) || 0) + (Number(t.cikis) || 0) + (Number(t.dusunme) || 0);
+    const usd = Number(t.usd) || 0, cagri = Number(t.cagri) || 0;
+    const cumle = cagri ? 'Bugün ' + cagri + ' model çağrısı, ' + sayiYaz(jeton) + ' jeton' + (usd ? ', ' + usd.toFixed(2).replace('.', ',') + ' dolar' : '')
+      + (t.ort_ms != null ? ', ortalama ' + sayiYaz(t.ort_ms) + ' ms' : '') + '. ' + sira.map(g => HARCAMA_AD[g] + ' ' + grup[g]).join(', ') + '.' : 'Bugün model çağrısı yok.';
+    return { cagri, jeton, usd, ort:t.ort_ms, grup, sira, cumle };
+  }
+  function harcamaHtml(){
+    const o = harcamaOzet(KI.harcama);
+    if(!o) return '';
+    if(!o.cagri) return '<div class="king__harcama"><p class="king__harcama-bos">Bugün model çağrısı yok.</p></div>';
+    const ort = o.ort == null ? '—' : o.ort >= 1000 ? (o.ort / 1000).toFixed(1).replace('.', ',') + ' sn' : o.ort + ' ms';
+    return '<div class="king__harcama" role="group" aria-label="King bugün ne harcadı">'
+      + '<div class="king__harcama-sayilar"><span><b>' + sayiYaz(o.cagri) + '</b><small>çağrı</small></span><span><b>' + sayiYaz(o.jeton) + '</b><small>jeton</small></span>'
+      + '<span><b>$' + o.usd.toFixed(o.usd < 1 ? 3 : 2) + '</b><small>maliyet</small></span><span><b>' + ort + '</b><small>ortalama</small></span></div>'
+      + '<div class="king__harcama-cubuk" role="img" aria-label="' + KI.kac(o.cumle) + '">' + o.sira.map(g => '<i class="king__nokta--' + g + '" style="flex:' + o.grup[g] + '"></i>').join('') + '</div>'
+      + '<ul class="king__harcama-anahtar" aria-hidden="true">' + o.sira.map(g => '<li><i class="king__nokta king__nokta--' + g + '"></i>' + HARCAMA_AD[g] + ' ' + o.grup[g] + '</li>').join('') + '</ul></div>';
+  }
+  function eylemListe(){
+    const l = eylemListesi();
+    const ust = KI.baglanti() ? KI.listeGrup('Bugün harcanan', KI.harcama ? harcamaHtml() : '<p class="king__yan-bos" role="status">Yükleniyor…</p>') : '';
+    if(!l.length) return ust + KI.yanBos(KI.baglanti() && KI.eylemHkm === null ? 'Yükleniyor…'
+      : 'Henüz bir şey yapmadım. Onayladığın her değişiklik burada görünür; çoğu tek dokunuşla geri alınır.');
+    const gruplar = [];
+    l.forEach(e => { const g = gunAdi(e.zaman); const s = gruplar[gruplar.length - 1]; if(s && s.ad === g) s.l.push(e); else gruplar.push({ ad:g, l:[e] }); });
+    return ust + gruplar.map(g => KI.listeGrup(g.ad, '<ol class="king__eylemler">' + g.l.map(eylemSatir).join('') + '</ol>')).join('');
+  }
+
+  Object.assign(KI, { eylemYaz, eylemTazele, eylemListesi, eylemGeriAl, eylemGeriAlindi, eylemListe, harcamaOzet, harcamaHtml, yetenekler, GRUP_SVG_MODUL, KART, kartAyar, kartYaz, kartSabitle, kartSus, kartTasi, kartEkle, kartSil, miniKutu, oneCikanlar, vitrinHtml, vitrinDizin, gorevListe, rutinListe, GORSEL, gorseller, gorselSakla, kutuphaneHtml, kutDizin, kartNiyeti, kartTemiz, kartIsle, soruCevapla, LINK_RE, arastirmaVeri, arastirmaHtml, arastirmaEkle, kartlarHtml, soruHtml, bicimli });
 })();

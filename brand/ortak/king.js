@@ -1085,7 +1085,7 @@ window.LIFEOS.KING_IC = {};
     const g = KI.sonGeriAl;
     KI.sonGeriAl = null; KI.cipler = null;
     if(!g){ KI.soyle('Geri alınacak bir kayıt yok.'); return false; }
-    try{ await g(); KI.soyle('Geri aldım.'); return true; }
+    try{ await g(); if(KI.eylemGeriAlindi) KI.eylemGeriAlindi(g); KI.soyle('Geri aldım.'); return true; }
     catch(e){ KI.soyle('Geri alamadım: ' + ((e && e.message) || 'bilinmeyen hata')); return false; }
   }
 
@@ -1178,6 +1178,7 @@ window.LIFEOS.KING_IC = {};
       const A = ek && (ek.araclar || ek.arac_sonuclari) ? KI.ARAC() : null;
       if(A && A.kuruluMu()) govde.araclar = A.modelIcin();
       if(ek && ek.arac_sonuclari) govde.arac_sonuclari = ek.arac_sonuclari;
+      if(ek && ek.dongu) govde.dongu = ek.dongu;   // A4: çok adımlı araç döngüsü (HKM en çok 4 adım, 30 sn)
       const istek = yol => f(k.url + yol, {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
@@ -1201,7 +1202,7 @@ window.LIFEOS.KING_IC = {};
         try{ g = await res.json(); }catch(e){ g = null; }
       }
       if(res.status === 200 && g && g.ok !== false && g.mode === 'arac' && Array.isArray(g.cagrilar) && g.cagrilar.length){
-        return { ok:true, arac:g.cagrilar, reddedilen:g.reddedilen || [], text:String(g.text || ''), mode:'arac', akti };
+        return { ok:true, arac:g.cagrilar, reddedilen:g.reddedilen || [], text:String(g.text || ''), mode:'arac', akti, dongu:g.dongu || null };
       }
       if(res.status === 200 && g && g.ok !== false && typeof g.text === 'string' && g.text.trim()){
         const ars = g.mode === 'arastirma' ? KI.arastirmaVeri(g.arastirma) : null;

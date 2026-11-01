@@ -323,7 +323,9 @@ window.LIFEOS.ARAC = (function(){
     const sira = niyetKelime(niyetBas(metin)), ws = Array.from(new Set(sira));
     if(!s || !ws.length || NIYET_DANIS.test(kucuk(metin))) return null;
     const l = liste().filter(a => !NIYET_DIS.test(a.ad));
-    const dok = l.map(a => niyetKelime(a.ad.replace(/^(ays|spi|esp)_/, '').replace(/_/g, ' ') + ' ' + a.aciklama + ' ' + (a.ornek || '') + ' ' + (a.anahtar || '')));
+    /* Açıklamadaki başka aracın adı («… için eylem_kitap_ekle'yi kullan») atıftır, anlam değil. */
+    const dok = l.map(a => niyetKelime(a.ad.replace(/^(ays|spi|esp)_/, '').replace(/_/g, ' ') + ' ' + String(a.aciklama).replace(/\w+_\w+/g, ' ')
+      + ' ' + (a.ornek || '') + ' ' + (a.anahtar || '')));
     const agir = ws.map(w => { const f = dok.filter(d => d.some(u => niyetEs(w, u))).length; return f ? Math.log(l.length / f) : 0; });
     const ag = w => agir[ws.indexOf(w)];
     /* Ardışık iki kelime araç metninde de ardışıksa («kitap ekle») yarım puan daha. */

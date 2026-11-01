@@ -19,6 +19,7 @@
     { id:'araclar', ad:'Araçlar', svg:'<path d="M11 3.5l1.7 4.6 4.6 1.7-4.6 1.7L11 16.1l-1.7-4.6-4.6-1.7 4.6-1.7z"/><path d="M18 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>' },
     { id:'gorev', ad:'Görevler', svg:'<path d="M10 7h10M10 12h10M10 17h10"/><path d="M3.8 7l1.4 1.4L7.8 5.6M3.8 12l1.4 1.4 2.6-2.8"/><circle cx="5.5" cy="17" r="1.3"/>' },
     { id:'rutin', ad:'Rutinler', svg:'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v3.8h-3.8"/><path d="M12 8.5V12l2.5 1.6"/>' },
+    { id:'eylem', ad:'Eylemler', baslik:'King ne yaptı', svg:'<circle cx="6" cy="6.5" r="1.6"/><circle cx="6" cy="17.5" r="1.6"/><path d="M6 8.1v7.8M10.5 6.5h9M10.5 17.5h9M10.5 12h6"/>' },
     { id:'kutuphane', ad:'Kütüphane', svg:'<rect x="4" y="4.5" width="4" height="15" rx="1"/><rect x="10" y="4.5" width="4" height="15" rx="1"/><path d="M15.8 6.1l3.4-.9 2.6 13.4-3.4.9z"/>' },
   ];
   const SVG_AYAR = '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>';
@@ -41,6 +42,7 @@
       listeAc(true);
       if(id === 'gorev') KI.isYokla();
       if(id === 'rutin') KI.beceriTazele();
+      if(id === 'eylem') KI.eylemTazele();
     }
     ciz(false);
     return true;
@@ -68,9 +70,9 @@
       : KI.bolum === 'gorev' && KI.baglanti() ? ust('ekip-ac', 'Görev panosu', SVG_PANO)
       : KI.bolum === 'rutin' && KI.baglanti() ? ust('beceri-ac', 'Rutinleri düzenle', SVG_PANO)
       : KI.bolum === 'kutuphane' ? ust('klasor-yeni', 'Yeni klasör', SVG_KLASOR_EKLE) : '';
-    return '<aside class="king__yan" aria-label="' + b.ad + '"><div class="king__yan-ust"><h2 class="king__yan-baslik">' + b.ad + '</h2>'
+    return '<aside class="king__yan" aria-label="' + (b.baslik || b.ad) + '"><div class="king__yan-ust"><h2 class="king__yan-baslik">' + (b.baslik || b.ad) + '</h2>'
       + eylem + KI.yanDugmeHtml('king__yan-kapa') + '</div><div class="king__yan-govde">'
-      + (KI.bolum === 'gorev' ? KI.gorevListe() : KI.bolum === 'rutin' ? KI.rutinListe() : KI.bolum === 'kutuphane' ? KI.kutDizin()
+      + (KI.bolum === 'gorev' ? KI.gorevListe() : KI.bolum === 'rutin' ? KI.rutinListe() : KI.bolum === 'eylem' ? KI.eylemListe() : KI.bolum === 'kutuphane' ? KI.kutDizin()
         : KI.bolum === 'araclar' ? KI.vitrinDizin() : sohbetListe())
       + '</div></aside>';
   }
@@ -297,6 +299,15 @@
     return '';
   }
 
+  /* Birincil düğme: kaydet, ilet, ilk fotoğraf işi ve onay (KING-4 §F: onay tek dokunuş). */
+  const anaCip = c => c.is === 'kaydet' || c.is === 'ilet' || c.is === 'yetki-onay' || /^foto:0$/.test(c.is) || (c.is === 'foto-yorum' && !/foto:0/.test(JSON.stringify(KI.cipler)));
+  /* Plan adımları (A4 ajan döngüsü): çalışırken canlı, bitince cevabın üstünde. */
+  const ADIM_DURUM = { calisiyor:'çalışıyor', bitti:'bitti', red:'olmadı' };
+  function adimHtml(m){
+    if(!m || !Array.isArray(m.adimlar) || !m.adimlar.length) return '';
+    return '<ol class="king__adimlar" aria-label="Adımlar">' + m.adimlar.map(a => '<li class="king__adim is-' + a.durum + '">'
+      + '<i aria-hidden="true"></i><span>' + KI.kac(a.ad) + '</span><small>' + ADIM_DURUM[a.durum] + '</small></li>').join('') + '</ol>';
+  }
   function soyle(metin, satirlar, onizleme, son, ek){
     KI.deste = 0;                                   // ada: yeni cevap destenin önüne
     KI.akis.forEach(m => { m.yeni = false; });
@@ -537,7 +548,7 @@
       + '<button type="button" class="king__deste-ok" data-king="deste:yeni" aria-label="Sonraki cevap"' + (KI.deste ? '' : ' disabled') + '>›</button></div>' : '';
     const desteHtml = '<div class="king__deste">' + arka + '<div class="king__dkart king__dkart--on" data-derinlik="0">' + on + '</div>' + gez + '</div>';
     const cip = KI.cipler && !KI.deste ? '<div class="king__cipler" role="group" aria-label="Cevaplar">' + KI.cipler.map(c => '<button type="button" class="king__cip'
-      + (c.is === 'kaydet' || c.is === 'ilet' || /^foto:0$/.test(c.is) || (c.is === 'foto-yorum' && !/foto:0/.test(JSON.stringify(KI.cipler))) ? ' king__cip--ana' : '') + '" data-king="' + c.is + '">' + KI.kac(c.ad) + '</button>').join('') + '</div>' : '';
+      + (anaCip(c) ? ' king__cip--ana' : '') + '" data-king="' + c.is + '">' + KI.kac(c.ad) + '</button>').join('') + '</div>' : '';
     const mik = KI.konusabilir()
       ? '<button type="button" class="king__mik' + (KI.dinleyen ? ' is-acik' : '') + '" data-king="dinle" aria-pressed="' + (KI.dinleyen ? 'true' : 'false')
         + '" aria-label="' + (KI.dinleyen ? 'Dinlemeyi bitir' : 'Konuşarak sor') + '"><svg viewBox="0 0 24 24" aria-hidden="true">'
@@ -625,8 +636,8 @@
           + (m.sira ? '<small class="king__siradan">sıradan · ' + KI.kac(KI.tarihYaz(m.sira)) + '</small>' : '') + '</div>')
       : m.bekliyor
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
-        + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
-      : '<div class="king__balon king__balon--king' + (i === sonKing ? ' is-son' : '') + (m.yeni && !m.yazildi ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + '" style="--yazim:' + KI.yazimSuresi(m.metin) + 'ms"><div><p>' + KI.bicimli(m.metin) + '</p>'
+        + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div>' + adimHtml(m) + '</div>'
+      : '<div class="king__balon king__balon--king' + (i === sonKing ? ' is-son' : '') + (m.yeni && !m.yazildi ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + (m.onay && i === sonKing && KI.bekleyenYetki ? ' king__balon--onay' : '') + '" style="--yazim:' + KI.yazimSuresi(m.metin) + 'ms"><div>' + adimHtml(m) + '<p>' + KI.bicimli(m.metin) + '</p>'
         + KI.kartlarHtml(m) + KI.yapHtml(m) + KI.nefesHtml(m) + KI.yasaHtml(m, ilkSira + i) + KI.gunKartHtml(m, ilkSira + i) + KI.dersHtml(m, ilkSira + i) + KI.soruHtml(m, ilkSira + i) + KI.siraliHtml(m, ilkSira + i) + KI.bulunanHtml(m, ilkSira + i) + KI.arastirmaHtml(m, ilkSira + i) + KI.k2Html(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
@@ -640,7 +651,7 @@
           + '" aria-label="Cevabı kopyala" title="Kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/>'
           + '<path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg></button>' : '') + '</div>').join('');
     const cip = KI.cipler
-      ? KI.cipler.map(c => '<button type="button" class="king__cip' + (c.is === 'kaydet' || c.is === 'ilet' || /^foto:0$/.test(c.is) || (c.is === 'foto-yorum' && !/foto:0/.test(JSON.stringify(KI.cipler))) ? ' king__cip--ana' : '')
+      ? KI.cipler.map(c => '<button type="button" class="king__cip' + (anaCip(c) ? ' king__cip--ana' : '')
           + '" data-king="' + c.is + '">' + KI.kac(c.ad) + '</button>').join('')
       /* Hazır cevaplar yalnız boş sohbette, ortada (bos). */
       : '';
@@ -850,5 +861,5 @@
     setTimeout(() => el.remove(), 360);
   }
 
-  Object.assign(KI, { BOLUMLER, listeGorunur, bolumSec, listeGrup, yanBos, alanAc, soyle, oneriListesi, AD_ANAHTAR, ad, adYonelme, GORUNUS, GORUNUSLER, GORUNUS_AD, gorunus, gorunusAyarla, gorunusSeciciHtml, cinsiyetPuan, TARZ, TARZLAR, TARZ_AD, tarz, tarzSec, cizgi, selam, KURE, yuzHtml, NOKTA, ekranAdi, nedenSatirlari, ciz, ac, kucult, buyut, ekranDegisti, kapat });
+  Object.assign(KI, { adimHtml, BOLUMLER, listeGorunur, bolumSec, listeGrup, yanBos, alanAc, soyle, oneriListesi, AD_ANAHTAR, ad, adYonelme, GORUNUS, GORUNUSLER, GORUNUS_AD, gorunus, gorunusAyarla, gorunusSeciciHtml, cinsiyetPuan, TARZ, TARZLAR, TARZ_AD, tarz, tarzSec, cizgi, selam, KURE, yuzHtml, NOKTA, ekranAdi, nedenSatirlari, ciz, ac, kucult, buyut, ekranDegisti, kapat });
 })();

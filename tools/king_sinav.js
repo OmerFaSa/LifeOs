@@ -93,6 +93,7 @@ async function sor(c){
   else if(KI.bekleyenGit) karar = 'git:' + KI.bekleyenGit.modul + ':' + KI.bekleyenGit.route;
   else if(KI.bekleyen) karar = 'veri';
   else if(eylem && LIFEOS.ARAC.liste().some(a => a.ad === eylem)) karar = 'arac:' + eylem;   // yetki eylemi = eylem_ aracı
+  else if(r && r.tur === 'arac-sor') karar = 'arac:' + r.ad;   // araç seçildi, eksik parametresi soruldu (§1.7)
   else karar = 'tur:' + (r && r.tur || (hata ? 'hata' : 'yok'));
   k._sifirla();
   k.kur(S.ayar);

@@ -142,6 +142,11 @@ window.LIFEOS.KING = (function(){
       await KI.yetkiUygula();
       return { tur:'yetki' };
     }
+    /* A3: King'in sorduğu eksik parametreye cevap («Hangi kitap?» → «Sefiller»). */
+    if(KI.bekleyenNiyet){
+      if(KI.HAYIR.test(t0) || /^vazge[çc]/.test(t0)){ KI.akis.push({ kim:'sen', metin:String(metin).trim() }); vazgec(); return { tur:'hayir' }; }
+      return KI.niyetCevap(metin);
+    }
     if((KI.bekleyen || KI.bekleyenGit || KI.bekleyenIlet) && (KI.EVET.test(t0) || KI.HAYIR.test(t0))){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
       if(KI.EVET.test(t0)){ if(KI.bekleyen) await kaydet(); else if(KI.bekleyenIlet) await KI.ilet(); else KI.gitOnayla(); }
@@ -305,7 +310,7 @@ window.LIFEOS.KING = (function(){
       KI.bekleyenYetki = yn;
       KI.cipler = [{ is:'yetki-onay', ad:yn.seviye === 'buyuk' ? 'Dönüş noktası al ve uygula' : 'Onayla' }, { is:'vazgec', ad:'Vazgeç' }];
       KI.soyle(yn.onizle.metin, yn.onizle.satirlar || null, null,
-        yn.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?');
+        yn.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?', { onay:true });
       return { tur:'yetki-bekliyor', seviye:yn.seviye };
     }
     /* Söz 22: açık beyan kendiliğinden yazılır. */
@@ -333,7 +338,8 @@ window.LIFEOS.KING = (function(){
     const NA = KI.ARAC() && !KI.paylasim ? KI.ARAC() : null;
     const ns = NA && NA.niyet ? NA.niyetSinif(metin) : null;
     /* Sayfa sözü geçen kısa cümle («haftalık programımı göster») sayfadır; Merkez'e gitme koşuluyla aynı. */
-    const uzun = KI.soruMu(metin) || KI.kucuk(metin).split(' ').length > 3;
+    /* Kısa emir («kitap ekle») ise iş yapar; kısa dilek («diksiyon çalışmak istiyorum») sayfadır. */
+    const uzun = KI.soruMu(metin) || KI.kucuk(metin).split(' ').length > 3 || (ns === 'yaz' && !/istiyorum/.test(KI.kucuk(metin)));
     if(ns && (y.tur === 'bilinmiyor' || y.tur === 'ozet' || (y.tur === 'git' && ((y.kaynak !== 'komut' && uzun) || /bölüm/.test(KI.kucuk(metin))))
       || (y.tur === 'veri' && ns !== 'ad'))){
       const N = NA.niyet(metin, ns);
@@ -341,7 +347,7 @@ window.LIFEOS.KING = (function(){
         const sen = { kim:'sen', metin:String(metin).trim() };
         KI.akis.push(sen);
         KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null;
-        const rn = await KI.aracIsle({ arac:[N], niyet:true }, metin);
+        const rn = await KI.aracIsle({ arac:[N], niyet:true }, metin) || KI.niyetSor(N);
         if(rn) return rn;
         KI.akis = KI.akis.filter(m => m !== sen);
       }
@@ -485,6 +491,7 @@ window.LIFEOS.KING = (function(){
       KI.sonGeriAl = r && typeof r === 'object' && typeof r.geriAl === 'function' ? r.geriAl : null;
       const m = String((metinR && String(metinR)) || 'Ekledim').trim().replace(/[.!]*$/, '.');
       if(KI.sonGeriAl) KI.cipler = [{ ad:'Geri al', is:'geri-al' }];
+      KI.eylemYaz({ arac:'kayit.' + (p.tur || 'veri'), ozet:String(p.metin || metinR || 'Kayıt'), geriAl:KI.sonGeriAl });
       /* Kayıt yazıldı: zeminde tek seferlik ışık (zemin.js nabiz). */
       if(KI.L.ZEMIN && typeof KI.L.ZEMIN.nabiz === 'function'){ try{ KI.L.ZEMIN.nabiz(); }catch(e){ /* süs */ } }
       KI.soyle((onEk ? String(onEk).trim() + ' ' : '') + m + ' Başka bir şey var mı?');
@@ -497,7 +504,7 @@ window.LIFEOS.KING = (function(){
     const git0 = !!KI.bekleyenGit;
     const foto0 = !!KI.bekleyenFoto || KI.fotoHedef != null;
     const yetki0 = !!KI.bekleyenYetki;
-    KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.bekleyenFoto = null; KI.bekleyenYetki = null; KI.cipler = null; KI.fotoHedef = null;
+    KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.bekleyenFoto = null; KI.bekleyenYetki = null; KI.bekleyenNiyet = null; KI.cipler = null; KI.fotoHedef = null;
     KI.soyle(yetki0 ? 'Tamam, hiçbir şeyi değiştirmedim.' : git0 || foto0 ? 'Tamam, buradayım.' : 'Tamam, eklemedim.');
   }
 
@@ -636,6 +643,7 @@ window.LIFEOS.KING = (function(){
         if(is === 'foto-yorum'){ KI.fotoYorumla(); return; }
         if(is === 'sohbet'){ KI.sesliSohbetAc(); KI.ciz(false); return; }
         if(is === 'geri-al'){ KI.geriAlYap(); return; }
+        if(/^eylem-geri:[hy]\d+$/.test(is)){ KI.eylemGeriAl(is.slice(11)); return; }
         if(/^yazma:(yaz|ses):[01]$/.test(is)){ const p = is.split(':'); yazmaSec(p[1], p[2] === '1'); return; }
         if(/^kopyala-mesaj:\d+$/.test(is)){
           const m = KI.akis[Number(is.split(':')[1])];
@@ -893,6 +901,7 @@ window.LIFEOS.KING = (function(){
 
   function _sifirla(){
     KI.paylasimKapat();
+    KI.bekleyenNiyet = null; KI.eylemler = []; KI.eylemHkm = null; KI.harcama = null;
     if(typeof document !== 'undefined'){
       const el = document.querySelector('[data-king]');
       if(el) el.remove();

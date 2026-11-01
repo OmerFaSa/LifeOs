@@ -1936,7 +1936,7 @@
       const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
       const { k } = sahne({ veri });
       k.ac();
-      expect(document.querySelectorAll('.king__ray [data-king^="bolum:"]').length).toBe(5);
+      expect(document.querySelectorAll('.king__ray [data-king^="bolum:"]').length).toBe(6);
       k.bolumSec('kutuphane');
       expect(document.querySelector('.king__yan').getAttribute('aria-label')).toBe('Kütüphane');
       document.querySelector('.king__ray [data-king="menu"]').click();
@@ -2668,7 +2668,10 @@
     const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
     function sira(...cevaplar){
       const istekler = [];
-      const fetch = async (url, o) => { istekler.push({ url, govde:JSON.parse(o.body) }); const c = cevaplar.shift() || { ok:true, mode:'model', text:'Tamam.' }; return { status:200, json:async () => c }; };
+      /* Eylem defteri (POST /api/eylem) sıradaki cevabı tüketmez. */
+      const fetch = async (url, o) => {
+        if(/\/api\/(eylem|ai_olcum)/.test(url)) return { status:200, json:async () => ({ id:1 }) };
+        istekler.push({ url, govde:JSON.parse(o.body) }); const c = cevaplar.shift() || { ok:true, mode:'model', text:'Tamam.' }; return { status:200, json:async () => c }; };
       return { fetch, istekler };
     }
     const calisan = [], uygulanan = [];
@@ -2700,6 +2703,90 @@
       const son = k.akis().slice(-1)[0];
       expect(son.metin).toBe('Son 7 gecede ortalama 7,5 saat uyumuşsun.');
       expect(son.satirlar).toEqual(['Ortalama: 7,5 sa']);
+      temizle();
+    }));
+
+    /* KING-4 §F (3a): «King ne yaptı» zaman çizgisi ve «bugün ne harcadı». */
+    it('zaman çizgisi: onaylı yazma deftere ve Merkez’e düşer, panelde görünür, tek tıkla geri alınır', () => sahneyle(async () => {
+      const istekler = [];
+      const cevap = g => ({ status:200, json:async () => g });
+      const fetch = async (url, o) => {
+        const govde = o && o.body ? JSON.parse(o.body) : null;
+        istekler.push({ url, govde });
+        if(/\/api\/eylem\/7\/geri$/.test(url)) return cevap({ ok:true, istemci:{ ad:'oturum', param:{} } });
+        if(/\/api\/eylem$/.test(url)) return cevap({ id:7 });
+        if(/\/api\/eylem\?/.test(url)) return cevap({ eylemler:[
+          { id:7, created_at:'2026-11-01T10:00:00', kaynak:'istemci', modul:'spi', arac:'spi_bolum_ac_kapa', ozet:'Bölüm gizlendi', durum:'uygulandi', geri:{ istemci:{ ad:'oturum', param:{} } }, geri_alinabilir:true },
+          { id:6, created_at:'2026-11-01T09:00:00', kaynak:'king', modul:null, arac:'soz.ekle', ozet:'Söz: akşam yürüyüş', durum:'uygulandi', geri:{ hkm:'soz', id:3 }, geri_alinabilir:true },
+          { id:5, created_at:'2026-11-01T08:00:00', kaynak:'istemci', modul:'spi', arac:'kayit.su', ozet:'Su 1 L', durum:'uygulandi', geri:{ istemci:{ ad:'oturum', param:{} } }, geri_alinabilir:true }] });
+        if(/\/api\/ai_olcum/.test(url)) return cevap({ gun:'2026-11-01', toplam:{ cagri:12, giris:9000, cikis:1500, dusunme:0, usd:0.0123, ort_ms:840 },
+          satirlar:[{ rol:'king', cagri:9 }, { rol:'spi.sohbet', cagri:3 }] });
+        return cevap({ ok:true, mode:'arac', text:'', cagrilar:[{ ad:'spi_bolum_ac_kapa', param:{ bolum:'butce', acik:0 }, tur:'yaz' }] });
+      };
+      const { k } = aracSahne({ fetch });
+      const KI = window.LIFEOS.KING_IC;
+      await k.isle('şu kısmı artık görmek istemiyorum');
+      expect(KI.akis.slice(-1)[0].onay).toBe(true);                       // onay kartı; «Onayla» birincil düğme
+      await k.isle('evet');
+      expect(uygulanan).toEqual([{ bolum:'butce', acik:0 }]);
+      await new Promise(r => setTimeout(r, 0));
+      expect(istekler.find(x => /\/api\/eylem$/.test(x.url)).govde).toEqual({ arac:'spi_bolum_ac_kapa', ozet:'Bölüm gizlendi', modul:'spi',
+        param:{ bolum:'butce', acik:0 }, geri:{ ad:'oturum', param:{} } });
+      await KI.eylemTazele();
+      /* Bu oturumun yazması geri alınır; HKM'nin sözü HKM'de geri alınır; eski oturumunki kalıcıdır. */
+      expect(KI.eylemListesi().map(e => [e.anahtar.charAt(0), e.ozet, e.geriYolu])).toEqual([['y', 'Bölüm gizlendi', true], ['h', 'Söz: akşam yürüyüş', true], ['h', 'Su 1 L', false]]);
+      expect(KI.harcamaOzet(KI.harcama).cumle).toBe('Bugün 12 model çağrısı, 10.500 jeton, 0,01 dolar, ortalama 840 ms. Merkez 9, SPİ 3.');
+      k.ac();
+      KI.bolumSec('eylem');
+      await KI.eylemTazele();
+      expect(document.querySelector('.king__yan-baslik').textContent).toBe('King ne yaptı');
+      expect(document.querySelectorAll('.king__eylem').length).toBe(3);
+      expect(document.querySelectorAll('.king__eylem-geri').length).toBe(2);
+      expect(document.querySelector('.king__harcama-cubuk').getAttribute('aria-label')).toContain('12 model çağrısı');
+      document.querySelector('.king__eylem-geri').click();
+      await new Promise(r => setTimeout(r, 0)); await new Promise(r => setTimeout(r, 0));
+      expect(uygulanan).toEqual([]);
+      expect(istekler.some(x => /\/api\/eylem\/7\/geri$/.test(x.url))).toBe(true);
+      expect(KI.eylemListesi()[0].durum).toBe('geri_alindi');
+      expect(KI.akis.slice(-1)[0].metin).toBe('Geri aldım: Bölüm gizlendi.');
+      temizle();
+    }));
+
+    it('A4 döngü: model yine okuma isterse okunur, adımlar canlı ve cevapta görünür', () => sahneyle(async () => {
+      const m = sira({ ok:true, mode:'arac', text:'', cagrilar:[{ ad:'spi_uyku', param:{ gun:7 }, tur:'oku' }] },
+        { ok:true, mode:'arac', text:'', cagrilar:[{ ad:'spi_uyku', param:{ gun:30 }, tur:'oku' }], dongu:{ adim:2 } },
+        { ok:true, mode:'model', text:'Son ay daha düzenli uyumuşsun.' });
+      const { k } = aracSahne(m);
+      const r = await k.isle('nasıl dinlendim sence');
+      expect(r.tur).toBe('arac-oku');
+      expect(calisan).toEqual([{ gun:7 }, { gun:30 }]);
+      expect(m.istekler[1].govde.dongu.adim).toBe(1);
+      expect(m.istekler[2].govde.dongu.adim).toBe(2);
+      expect(m.istekler[2].govde.arac_sonuclari.map(x => x.param.gun)).toEqual([7, 30]);
+      const son = k.akis().slice(-1)[0];
+      expect(son.metin).toBe('Son ay daha düzenli uyumuşsun.');
+      expect(son.adimlar.map(a => a.ad + ':' + a.durum)).toEqual(['Son günlerin uyku saatleri:bitti', 'Son günlerin uyku saatleri:bitti']);
+      temizle();
+    }));
+
+    /* A3: niyet çözücü yazma aracını seçti ama zorunlu metin parametresi yok: tahmin yok, sorulur. */
+    it('niyet: eksik zorunlu parametre sorulur; cevap önizlenir, «vazgeç» bırakır', () => sahneyle(async () => {
+      const KITAP = { ad:'spi_kitap_ekle', tur:'yaz', ozetAd:'Kitap ekle', aciklama:'Kütüphaneye yeni kitap ekler.',
+        parametreler:{ type:'object', properties:{ ad:{ type:'string', maxLength:120, description:'kitabın adı' } }, required:['ad'] },
+        onizle:p => ({ metin:'«' + p.ad + '» eklenecek.' }), uygula:async p => { uygulanan.push(p); return { metin:'Eklendi.' }; } };
+      const { k } = sahne({});
+      window.LIFEOS.ARAC.kur({ modul:'spi', araclar:[UYKU, BOLUM, KITAP] });
+      const r = await k.isle('kitap ekle');
+      expect(r).toEqual({ tur:'arac-sor', ad:'spi_kitap_ekle' });
+      expect(k.akis().slice(-1)[0].metin).toBe('Kitap ekle için kitabın adı ne olsun?');
+      const r2 = await k.isle('Sefiller');
+      expect(r2.tur).toBe('arac-yaz');
+      expect(k.bekleyenYetki().onizle.metin).toBe('«Sefiller» eklenecek.');
+      expect(uygulanan).toEqual([]);
+      await k.isle('hayır');
+      await k.isle('kitap ekle');
+      expect((await k.isle('vazgeç')).tur).toBe('hayir');
+      expect(uygulanan).toEqual([]);
       temizle();
     }));
 
