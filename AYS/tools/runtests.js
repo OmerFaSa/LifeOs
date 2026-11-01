@@ -127,6 +127,9 @@ async function portMuhafizi(portlar, ipucu){
     const takim = {};
     summary.results.forEach(r => { takim[r.suite] = (takim[r.suite] || 0) + (r.ms || 0); });
     const yavas = Object.entries(takim).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    /* RUNTESTS_TAKIM=<dosya>: butun takim sureleri ve test sayisi JSON olarak (kabul testleri okur). */
+    if(process.env.RUNTESTS_TAKIM) require('fs').writeFileSync(process.env.RUNTESTS_TAKIM,
+      JSON.stringify({ toplam:summary.total, gecen:summary.passed, takim }));
     if(yavas.length && yavas[0][1]) console.log('En yavas takimlar: ' + yavas.map(([s, ms]) => s + ' ' + Math.round(ms) + ' ms').join(' · '));
     code = (summary.failed || consoleErrors.length) ? 1 : 0;
   }catch(err){
