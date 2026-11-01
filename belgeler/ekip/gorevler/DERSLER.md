@@ -14,3 +14,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 015 (01.11.2026): Değiştirdiğin dosya üretilmiş kopyaysa (başlıkta «ÜRETİLMİŞ KOPYA») kaynağı brand/'dadır; Açık kalan'a yaz, Claude taşır
 - 017 (01.11.2026): Sonradan eklenen dosyalar dizini kırmızı yapar; dizin kabul testi CI'da durur
 - 018 (01.11.2026): Sonradan eklenen dosyalar dizini kırmızı yapar; dizin kabul testi CI'da durur
+- 020 (01.11.2026): Cumle beklentisi sayfa adindan degil isten yazilir: «gelecek haftanin plani» gelecek (puan) sayfasi degil hafta
