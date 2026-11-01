@@ -30,7 +30,7 @@ import ajan as A  # noqa: E402
 import ofis_test as T  # noqa: E402
 
 PARALEL = 3
-GUNLUK = 8                       # bir gunde pilotun baslatabilecegi is
+GUNLUK = 20                      # bir gunde pilotun baslatabilecegi is; kota senaryosu Gemini sinirini ayrica korur
 MAX_TUR = 2                      # Denetci bulgusunu geri gonderme
 MAX_TEST_TUR = 1                 # Testci kirmizisini geri gonderme
 MAX_TEST_ISTEK = 3               # ayni commit icin Testci cagrisi (kosulamadi dahil)
