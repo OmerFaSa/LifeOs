@@ -11,18 +11,19 @@ King sınavı (`node tools/king_sinav.js --modul=spi`) SPI'de kayıp veriyor. Ç
 ## Ne yapılacak
 - Okuma araçlarına `anahtar` (aşağıda): `spi_gun_kaydi` («bugün neler kaydettim», «dünkü günlüğüm»), `spi_uyku`, `spi_antrenmanlar` (koşu, antrenman sayısı).
 - `kural` düzeltmeleri: `spi_besin` «X'in kalori/protein/yağ değeri» de bulsun; `spi_barkod_ogun` «barkodlu … yedim» ve «barkodlu ürünü kahvaltıya 100 gram ekle» (gram ve öğün cümleden); `spi_bolum_ac_kapa` «… bölümünü kapat/gizle/aç» bölüm adını SPİ'nin bölüm kataloğundan bulsun (bulamazsa `null`).
-- Kayıt cümleleri veri önizlemesi olsun (`core/quickentry.js`): «kilom 78.4», «sabah aç karnına tartıldım kilom 76.8», «kilom bu sabah 77.2 geldi», «1 buçuk litre su içtim» (`core/turkcesayi.js` var).
+- Kayıt cümleleri veri önizlemesi olsun (`core/quickentry.js`): «kilom 78.4», «sabah aç karnına tartıldım kilom 76.8», «kilom bu sabah 77.2 geldi», «1 buçuk litre su içtim».
 
 **`anahtar` kuralı:** aracın tanımına `anahtar:'…'` (en çok 10 kelime) eklenir: aracın işini anlatan eş anlamlılar (ör. yanlış defteri → «hata yanlış eksik kaçırdığım»). **Sınav cümlesi kopyalanmaz** (kabul testi denetler). Başka araçla ortak genel kelime («bugün», «son») puanı bölmekten başka işe yaramaz.
 
 Elle dene: `node tools/king_sinav.js --modul=spi` (kalan cümleleri ve gelen kararı yazar).
 
 ## Dokunulacak dosyalar
-- `SPI/src/js/core/kingarac.js`, `SPI/src/js/core/quickentry.js`, `SPI/src/js/core/turkcesayi.js`
+- `SPI/src/js/core/kingarac.js`, `SPI/src/js/core/quickentry.js`
 - `SPI/src/tests/kingarac.test.js`: her yeni `kural` için cümle → parametre sınaması; her `required` için eksik parametrede `dogrula` reddi.
 
 ## Dokunma
 - `brand/`, modüldeki ortak kopyalar (`arac.js`, `king*.js`, `yetki.js` …), `app.js`, `screens/`, `tools/king_sinav.js`, `tools/king_sinav.json`, kabul testi dosyası, dist ve build.js.
+- `core/turkcesayi.js` ve `core/giris.js` ortak kopyadır; eksik sayı sözcüğü («çeyrek») oradaysa Sonuç'a yaz, Claude Code ekler.
 - Yeni Model işlevi ya da depolama anahtarı ekleme. Sayı uydurma (AGENTS §1): çıkarılamayan değer `null`.
 
 ## Kabul ölçütü
