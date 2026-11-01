@@ -1,0 +1,93 @@
+# `tools/` Dizin Rehberi
+
+LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlarında kullanılan araçların fihristidir. Araç yolları CI boru hatlarında ve ofis süreçlerinde sabit olduğundan dosyalar taşınmaz; bu dizin hangi betiğin ne amaçla ve ne zaman çalıştırıldığını açıklar.
+
+## Denetim
+- `entegre.js` — Üç arayüz ile HKM servisinin uçtan uca bütünleşmesini denetler, birleştirmeden önce ve CI'da koşulur.
+- `envanter.js` — Tek tasarıma geçişte ekran eylemleri, giriş alanları ve arayüz özellik kayıplarını denetler, CI'da koşulur.
+- `nerede.js` — Ekranlardaki metin ve düğme kalabalığının (sadelik aşımının) yerini tespit eder, gerektiğinde elle koşulur.
+- `olucss.py` — Arayüzde hiçbir öğeye uymayan ölü CSS kurallarını bulur ve temizler, CI'da denetim olarak koşulur.
+- `tiklama.js` — Bütün ekran ve pencerelerdeki eylem düğmelerine basarak hata ve sızıntı taraması yapar, birleştirmeden önce koşulur.
+- `yazi.py` — Ekran başlıklarının cümle düzenini, Türkçe imlasını ve terim kurallarını denetler, CI'da koşulur.
+
+## Yayın
+- `marka.py` — Marka görsellerini servis edilebilir hâle getirir ve medya künyesini üretir, CI'da denetlenir.
+- `ortak.py` — Üç arayüzün ortak CSS ve çekirdek JS kodlarını tek kaynaktan yayar ve ayrışmayı denetler, CI'da koşulur.
+- `rutbe.py` — Rütbe ve kademe rozet görsellerini kayıpsız işleyerek servis edilebilir hâle getirir, gerektiğinde elle koşulur.
+- `seviye.py` — Seviye ve rütbe sistemini tek kaynaktan üç arayüze yayar ve kopyaların ayrışmadığını denetler, CI'da koşulur.
+- `vitrin.py` — Onaylanmış vitrin kartı biçimini sistem CSS'ine taşır ve güncelliğini denetler, CI'da koşulur.
+
+## Ofis
+- `ajan.py` — Claude Code'un Antigravity alt ajanlarını başlatıp yönettiği ve izlediği ofis aracıdır, geliştirme sırasında kullanılır.
+- `ajan_kanca.py` — Antigravity hook'u; ajanları kendi çalışma klasörlerine ve izinli araçlara bağlar, arka planda otomatik çalışır.
+- `gorev_takip.py` — Antigravity ajanlarını ve görev kuyruğunu izleyen masaüstü durum penceresi aracıdır, geliştirme sırasında çalıştırılır.
+- `kabul_js.py` — Python kabul testlerinin arayüz JS mantığını tarayıcısız (Node vm) çalıştırmasını sağlar, testlerde kullanılır.
+- `ofis_pilot.py` — Claude Code beklemeden görev kuyruğunu yürüten otomatik pilot sürecidir, geliştirme sırasında çalıştırılır.
+
+## Veri
+- `veri_ansiklopedi.py` — KONULAR.json içindeki başlıkları Vikipedi REST API'sinden çekerek kaynak metin toplar, veri hazırlığında koşulur.
+- `veri_ays_siklik.py` — ÖSYM konu dağılımı verilerini AYS soru sıklığı veri dosyasına derler, veri hazırlığında koşulur.
+- `veri_cikar.py` — Ham metin dosyalarından standart kütüphaneyle temiz JSONL kayıtları çıkarır, veri hazırlığında koşulur.
+- `veri_denetle.py` — Veri katmanlarını kurallara göre denetleyip veri/DENETIM.md raporunu üretir, veri hazırlığında koşulur.
+- `veri_devasa.py` — Resmi rehberlerden sıfır bağımlılıkla devasa doğrulanmış veri toplayıp derler, veri hazırlığında koşulur.
+- `veri_devasa_dalga2.py` — Derinlik ve genişletme amaçlı ikinci dalga veri toplayıcı betiktir, veri hazırlığında koşulur.
+- `veri_dogrula.py` — Taslak kayıtları resmi kaynak metinleriyle harfiyen doğrulayarak temiz katmana aktarır, veri hazırlığında koşulur.
+- `veri_ek.py` — Veri toplama sürecinin modelsiz ek aşamalarını (çeviri, anlam, sıklık) yürütür, veri hazırlığında koşulur.
+- `veri_esp_siklik.py` — Dil kelime sıklığı listelerini ESP kelimesiklik.js veri dosyasına derler, veri hazırlığında koşulur.
+- `veri_gece.py` — Kaldığı yerden devam edebilen uzun süreli toplu veri toplama sürecidir, gece veya arka planda koşulur.
+- `veri_gezgin.py` — Yalnızca izinli resmi alan adlarını gezerek sayfa okuyan ve veri toplayan gezgin ajandır, gerektiğinde koşulur.
+- `veri_mega_uretim.py` — Mevcut sistem dosyalarına dokunmadan yeni veri üreten mega derleyici betiktir, veri hazırlığında koşulur.
+- `veri_modelfile.py` — Ana metinden Ollama için Modelfile.lifeos-ana tanımını üretir, metin güncellendiğinde koşulur.
+- `veri_plan.py` — Konu planı metinlerini birleştirir ve dosyaların güncelliğini denetler, CI'da denetim olarak koşulur.
+- `veri_topla.py` — Resmi kaynak listesindeki dosyaları indirip metne çevirir, veri hazırlığında koşulur.
+
+## Ölçüm
+- `kapsam.js` — Birim testlerinin hangi işlevleri çalıştırdığını V8 precise coverage ile ölçer, CI'da veya elle koşulur.
+- `olcum_modul.js` — Modülün açılış, kapsam, depolama ve rota performansını tek komutla ölçer, optimizasyon turlarında koşulur.
+- `pusula.js` — Kolay LifeOS planının yardımcı ölçülerini (eylem sayıları ve menü karmaşıklığı) hesaplar, birleştirmeden önce koşulur.
+- `sadelik.js` — Üç arayüzün bütün ekranlarında görsel kalabalık ve sadelik ölçümü yapar, CI'da denetim olarak koşulur.
+- `sayilar.py` — Depo genelindeki test, satır ve modül sayılarını tek kaynaktan hesaplayıp belgelere yazar, CI'da denetlenir.
+
+## Kabul testleri
+- `ays_sure_kabul_test.py` — Görev 010 kabul testi; AYS konuşarak süre ve uyku girişi ayrıştırmasını sınar, CI'da koşulur.
+- `ays_takvim_tekrar_kabul_test.py` — Görev 013 kabul testi; AYS takvim içe aktarma tekrar kuralı açılımını sınar, CI'da koşulur.
+- `belge_dizin_kabul_test.py` — Görev 018 kabul testi; belgeler/DIZIN.md dizininin tamlığını ve bağlantılarını sınar.
+- `esp_sure_kabul_test.py` — Görev 011 kabul testi; ESP serbest oturum süre girişinin Türkçe sayı motoruyla okunmasını sınar, CI'da koşulur.
+- `ice_suren_kabul_test.py` — Görev 007 kabul testi; Google Takvim içe aktarımında süren etkinliklerin doğru çözümlenmesini sınar, CI'da koşulur.
+- `olcum_modul_kabul_test.py` — Görev 016 kabul testi; tek komutla modül ölçüm aracının çıktı alanlarını ve aralıklarını sınar.
+- `perde_test_hiz_kabul_test.py` — Görev 015 kabul testi; perde birim testlerinin tarayıcısız hızlı koşumunu sınar, CI'da koşulur.
+- `spi_porsiyon_kabul_test.py` — Görev 012 kabul testi; SPI serbest öğün porsiyon ve miktar ayrıştırmasını sınar, CI'da koşulur.
+- `spi_sure_kabul_test.py` — Görev 009 kabul testi; SPI hızlı giriş süre ayrıştırmasını sınar, CI'da koşulur.
+- `tarih_ortak_kabul_test.py` — Görev 014 kabul testi; üç modülün ortak tarih işlevlerinin sözleşme uyumunu sınar, CI'da koşulur.
+- `tools_dizin_kabul_test.py` — Görev 017 kabul testi; tools/DIZIN.md dizininin eksiksizliğini, sekiz bölümünü ve formatını sınar.
+- `veri_denetle_kabul_test.py` — Görev 006 kabul testi; veri denetleme aracının nesne oranlarını ve doğrulama mantığını sınar, CI'da koşulur.
+
+## Testler
+- `ajan_test.py` — tools/ajan.py ve tools/ajan_kanca.py birim testleri; döküm okuyucu, efor, yuva ve kanca kararlarını sınar, CI'da koşulur.
+- `ayar_test.py` — sistem/ayar.py sözleşme testleri; sistem ayarlarının tek kopyasını ve doğrulamasını sınar, CI'da koşulur.
+- `dist_sun_test.py` — Modül kapısının güncel tek dosya (dist) sunma mantığını sınar, CI'da koşulur.
+- `envanter.test.js` — tools/envanter.js ölçü kurallarının (30+ kelimelik tek parça yazı vb.) testi, CI'da koşulur.
+- `envanterhkm.test.js` — Envanter aracının HKM testlerini doğru saydığını sınar, CI'da koşulur.
+- `gorev_takip_test.py` — tools/gorev_takip.py görev dosyası okuyucu mantığının testi, CI'da koşulur.
+- `ice_test.py` — sistem/ice.py sözleşme testleri; Google Takvim verisini hesap bağlamadan getirmeyi sınar, CI'da koşulur.
+- `kabul_js_test.py` — tools/kabul_js.py modül dosyası yükleme ve localStorage ortamı testi, CI'da koşulur.
+- `kuyruk_test.py` — Sunucuların dinleme kuyruğu ve soket sınırları testi, CI'da koşulur.
+- `muzik_test.py` — sistem/muzik.py müzik dosyaları ve çalma listesi sözleşme testleri, CI'da koşulur.
+- `ofis_pilot_test.py` — tools/ofis_pilot.py ve tools/ofis_test.py pilot karar tablosu ve kota testleri, CI'da koşulur.
+- `ofis_test.py` — AGENTS.md §2 tam denetimlerini ajan dalında dil modelsiz koşturan testçi aracıdır, pilot tarafından tetiklenir.
+- `planlama_test.py` — sistem/planlama.py sistem planlama ve kural sözleşme testleri, CI'da koşulur.
+- `playwrightsiz.test.js` — Tarayıcı istemeyen araçların Playwright olmadan da çalıştığını denetler, CI'da koşulur.
+- `portmuhafiz.test.js` — Sabit portlu araçların port doluyken güvenli biçimde başlamadığını (çıkış 2) denetler, CI'da koşulur.
+- `portreonar_test.py` — marka.py --onar görsel onarma mantığının birim testi, Pillow kuruluysa koşulur.
+- `sadelik.test.js` — sadelik.js kaynak kurallarının ve onay penceresi etiketlerinin testi, CI'da koşulur.
+- `sayilar_test.py` — sayilar.py çıktı okuma ve sayı ayrıştırma testi, CI'da koşulur.
+- `telefon_test.py` — Telefon uygulaması (ev ağı ve yerel sunucu) bağlantı ve güvenlik testleri, CI'da koşulur.
+- `veri_denetle_test.py` — tools/veri_denetle.py birim testleri; kenar durumları sınar, CI'da koşulur.
+- `veri_dogrula_test.py` — tools/veri_dogrula.py saf işlevlerinin birim testleri, CI'da koşulur.
+- `veri_test.py` — Veri çıkarma ve gece doğrulama kurallarının testi, CI'da koşulur.
+- `zemin_test.py` — sistem/zemin.py arka plan görseli yükleme ve doğrulama sözleşme testleri, CI'da koşulur.
+
+## Diğer
+- `king_sinav.js` — King doğal dil anlama sınavı; gerçek cümlelere karşı beklenen kararları puanlar, gerektiğinde koşulur.
+- `king_sinav.json` — King sınavı için ilk 100 test cümlesini ve beklenen kararları içeren veri dosyası.
+- `paket.py` — Dış inceleyici için tek dosyalık analiz özeti (PAKET.md) üretir, gerektiğinde elle koşulur.
