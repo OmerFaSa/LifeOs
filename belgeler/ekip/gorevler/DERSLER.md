@@ -15,3 +15,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 017 (01.11.2026): Sonradan eklenen dosyalar dizini kırmızı yapar; dizin kabul testi CI'da durur
 - 018 (01.11.2026): Sonradan eklenen dosyalar dizini kırmızı yapar; dizin kabul testi CI'da durur
 - 020 (01.11.2026): Cumle beklentisi sayfa adindan degil isten yazilir: «gelecek haftanin plani» gelecek (puan) sayfasi degil hafta
+- 021 (01.11.2026): Adsız sil/guncelle tek kaydı sessizce secmesin; varsayilan deger (1 kg, 'lang', kuru fasulye) uydurma sayilir
