@@ -401,7 +401,7 @@ Yeni sistem kurulmadı: hafıza var olan tabloları üç katmanda okur, kural mo
 | Kendiliğinden King | `kendiliginden.py` 18 satır, yalnız model anahtarı | kural motoru: `POST /api/olay` → karar (`basla · bekliyor · butce · tekrar · esik_alti · eksik_veri · kural_yok · bayat`) | sözleşme `belgeler/ekip/KING-OLAY.md` (3c buna uyar); 4 kural (sınav 30/14/7/3/1 gün, uyku 7 gün ≤ 28 gün − 0,75 ya da < 6 sa, plan ≥ 30 dk gecikme, tekrar ≥ 1); günde 3 mesaj (`king.kendiliginden_butce`), önce öncelikli olay; sessiz saat bildirim ayarından, boşsa 23:00–08:00 (arada gelen olay bekler, dakikalık tik sonra bakar); aynı modül+tür 20 saatte bir; mesajın `neden` alanı `{olay, kural, sayilar, cumle}`; `GET /api/king/kendiliginden` bekleyenler, bütçe, kararlar |
 
 HKM testleri 1000/1000 (yeni `test_hafiza3` 8). Ofis: 050 (`tools/hafiza_olcum.py`, bu tablonun
-tekrar ölçümü) ve 051 (uç nokta testleri + `HKM/MIMARI.md` bölümü) kabul testleriyle kuyrukta;
+tekrar ölçümü) ve 052 (uç nokta testleri + `HKM/MIMARI.md` bölümü) kabul testleriyle kuyrukta;
 bugün pilot 8/8 dolu ve Antigravity kapalıydı. Açık: istemci `neden` alanını «neden şimdi?» satırı
 olarak henüz göstermiyor (king.js, 3a/F alanı); «benim hakkımda» ekranı (F); modül olay yayıncıları 3c'de.
 

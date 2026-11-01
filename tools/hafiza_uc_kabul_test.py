@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""051 kabul testi: HKM/tests/test_hafiza_uc.py — hafiza ve kendiliginden King uclari HTTP'den sinanir.
+"""052 kabul testi: HKM/tests/test_hafiza_uc.py — hafiza ve kendiliginden King uclari HTTP'den sinanir.
 Kosu: python tools/hafiza_uc_kabul_test.py"""
 import os
 import sys

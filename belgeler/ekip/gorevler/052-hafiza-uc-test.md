@@ -1,12 +1,14 @@
-# 051 · Hafıza ve kendiliğinden King uç nokta testleri + belge
+# 052 · Hafıza ve kendiliğinden King uç nokta testleri + belge
 
 **Durum:** bekliyor
-**Dal:** `ag/051-hafiza-uc-test`
+**Dal:** `ag/052-hafiza-uc-test`
 **Efor:** orta
 **Kabul testi:** `tools/hafiza_uc_kabul_test.py`
 
 ## Amaç
-KING-4 tur 3b HKM'ye yeni uçlar ekledi (bkz. `HKM/daemon.py` baş belgesi). Çekirdek mantığın birim testleri
+(051 «Dokunulacak dosyalar»da okunacak çekirdek dosyaları andığı için başlatılamadı; aynı iş.)
+KING-4 tur 3b HKM'ye yeni uçlar ekledi (bkz. HKM daemon'unun baş belgesi). Belgenin kaynağı: hafıza ve
+kendiliğinden modüllerinin (HKM çekirdeği, `core` klasörü) baş belgeleri; okunur, değiştirilmez. Çekirdek mantığın birim testleri
 var (`HKM/tests/test_hafiza3.py`); uçların HTTP üzerinden testi ve HKM belgesi eksik.
 
 ## Dokunulacak dosyalar
@@ -27,11 +29,10 @@ var (`HKM/tests/test_hafiza3.py`); uçların HTTP üzerinden testi ve HKM belges
   `test_hafiza_uc.run()` çağrılır.
 - `HKM/MIMARI.md`: «Hafıza (üç katman) ve kendiliğinden King» başlıklı kısa bölüm (≤ 25 satır): katmanlar ve
   kaynakları, gömme önbelleği (`hafiza_gomme`, yedeğe girmez), uçlar, kural motoru kararları, bütçe ve sessiz
-  saat, `belgeler/ekip/KING-OLAY.md` bağlantısı. Bilgiyi `HKM/core/memory.py` ve `HKM/core/kendiliginden.py`
-  baş belgelerinden al; uydurma yok.
+  saat, `belgeler/ekip/KING-OLAY.md` bağlantısı. Bilgiyi Amaç'ta anılan baş belgelerden al; uydurma yok.
 
 ## Dokunma
-- `HKM/core/`, `HKM/daemon.py` (kırmızı bölge). Testte bulduğun hata varsa düzeltme; «Açık kalan»a yaz.
+- HKM çekirdeği ve daemon (kırmızı bölge). Testte bulduğun hata varsa düzeltme; «Açık kalan»a yaz.
 - Kabul testi dosyası.
 
 ## Kabul ölçütü
