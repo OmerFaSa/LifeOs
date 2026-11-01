@@ -157,7 +157,6 @@
     }
   }
 
-  const bekle = ilerlet;
 
   function perdeler(){ return document.querySelectorAll('.perde'); }
   function acikPerde(){ return document.querySelector('.perde'); }
