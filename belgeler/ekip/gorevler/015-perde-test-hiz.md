@@ -1,6 +1,6 @@
 # 015 · Perde testleri gerçek zamanı beklemesin
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/015-perde-test-hiz`
 **Efor:** orta
 **Kabul testi:** `tools/perde_test_hiz_kabul_test.py`
@@ -25,7 +25,7 @@ KING-4 «Ölçüm 1c»: AYS birim testlerinin %54'ü (19,6 / 36,6 sn) 32 testte 
 - `python tools/perde_test_hiz_kabul_test.py` (önce kırmızı, sonra yeşil; üç modülün runtests'ini 4378/4388/4398'de koşar)
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `AYS/src/tests/perde.test.js`, `SPI/src/tests/perde.test.js`, `ESP/src/tests/perde.test.js` içine sahte saat yardımcısı (`saatKur`, `saatKaldir`, `ilerlet`, `saatle`) eklendi. Test süresince `window.setTimeout/clearTimeout`, `setInterval/clearInterval`, `Date.now` ve `performance.now` yönetilip `finally` içinde asılları geri konuyor; gerçek zaman bekleyen 11 test `await saatle` ve `await ilerlet(ms)` ile hızlandırıldı. Test (`it(` 53) ve beklenti (`expect(` 103) sayıları korundu; on takımın süresi modül başına ~8,9 sn'den ~180-260 ms'ye indi.
+- **Koşan testler:** `cd AYS && node tools/runtests.js 4721` -> `3143/3143 gecti` · `python tools/yazi.py --denetle` -> `Yazı denetimi: temiz` · `python tools/ortak.py --denetle` -> `Ortak kaynak: kopyalar kaynakla ayni (179 dosya, 537 kopya).`
+- **Kabul testi:** `python tools/perde_test_hiz_kabul_test.py` -> `AYS: perde takimlari 199 ms · SPI: perde takimlari 191 ms · ESP: perde takimlari 178 ms · perde test hiz kabul: uc modulde perde takimlari <= 800 ms, testler eksiksiz ve yesil.`
+- **Açık kalan:** brand/ klasörü görev gereği dokunulmaz olduğundan `tools/seviye.py --denetle` ayrışma gösterir; testteki sahte saat yardımcısı ana klasörde `brand/seviye/perde.test.js` içine yayılmalı.

@@ -21,7 +21,143 @@
   const P = SP.Perde;
   const L = window.LIFEOS;
 
-  const bekle = ms => new Promise(r => setTimeout(r, ms));
+  /* Sahte saat yardımcısı — KING-4 Ölçüm 1c: perde testleri gerçek zamanı beklemez.
+     Test süresince setTimeout/clearTimeout, setInterval/clearInterval, Date.now ve
+     performance.now'u yönetir; ilerlet(ms) ile zamanlayıcıları sırayla çalıştırır;
+     finally içinde gerçeklerini mutlaka geri koyar. */
+  let saatAktif = false;
+  let sahteSimdi = 0;
+  let sayac = 1;
+  const zamanlayicilar = new Map();
+  const gercek = {
+    setTimeout: window.setTimeout.bind(window),
+    clearTimeout: window.clearTimeout.bind(window),
+    setInterval: window.setInterval.bind(window),
+    clearInterval: window.clearInterval.bind(window),
+    DateNow: Date.now.bind(Date),
+    perfNow: window.performance && window.performance.now ? window.performance.now.bind(window.performance) : null
+  };
+
+  function saatKur(){
+    sahteSimdi = gercek.DateNow();
+    sayac = 1;
+    zamanlayicilar.clear();
+    if(saatAktif) return;
+    saatAktif = true;
+
+    window.setTimeout = function(fn, ms){
+      if(!saatAktif) return gercek.setTimeout.apply(window, arguments);
+      const id = sayac++;
+      const gecikme = Math.max(0, Number(ms) || 0);
+      const args = Array.prototype.slice.call(arguments, 2);
+      zamanlayicilar.set(id, {
+        id,
+        fn,
+        args,
+        zaman: sahteSimdi + gecikme,
+        tekrar: null
+      });
+      return id;
+    };
+
+    window.clearTimeout = function(id){
+      if(!saatAktif) return gercek.clearTimeout.apply(window, arguments);
+      if(zamanlayicilar.has(id)) zamanlayicilar.delete(id);
+      else gercek.clearTimeout(id);
+    };
+
+    window.setInterval = function(fn, ms){
+      if(!saatAktif) return gercek.setInterval.apply(window, arguments);
+      const id = sayac++;
+      const aralik = Math.max(1, Number(ms) || 0);
+      const args = Array.prototype.slice.call(arguments, 2);
+      zamanlayicilar.set(id, {
+        id,
+        fn,
+        args,
+        zaman: sahteSimdi + aralik,
+        tekrar: aralik
+      });
+      return id;
+    };
+
+    window.clearInterval = function(id){
+      if(!saatAktif) return gercek.clearInterval.apply(window, arguments);
+      if(zamanlayicilar.has(id)) zamanlayicilar.delete(id);
+      else gercek.clearInterval(id);
+    };
+
+    Date.now = function(){
+      if(!saatAktif) return gercek.DateNow();
+      return sahteSimdi;
+    };
+
+    if(gercek.perfNow && window.performance){
+      const baslangicPerf = gercek.perfNow();
+      const baslangicSahte = sahteSimdi;
+      window.performance.now = function(){
+        if(!saatAktif) return gercek.perfNow();
+        return baslangicPerf + (sahteSimdi - baslangicSahte);
+      };
+    }
+  }
+
+  function saatKaldir(){
+    saatAktif = false;
+    zamanlayicilar.clear();
+    window.setTimeout = gercek.setTimeout;
+    window.clearTimeout = gercek.clearTimeout;
+    window.setInterval = gercek.setInterval;
+    window.clearInterval = gercek.clearInterval;
+    Date.now = gercek.DateNow;
+    if(gercek.perfNow && window.performance){
+      window.performance.now = gercek.perfNow;
+    }
+  }
+
+  async function ilerlet(ms){
+    const hedefZaman = sahteSimdi + Math.max(0, Number(ms) || 0);
+    let adim = 0;
+    while(adim++ < 10000){
+      let aday = null;
+      for(const z of zamanlayicilar.values()){
+        if(z.zaman <= hedefZaman){
+          if(!aday || z.zaman < aday.zaman || (z.zaman === aday.zaman && z.id < aday.id)){
+            aday = z;
+          }
+        }
+      }
+      if(!aday) break;
+
+      sahteSimdi = aday.zaman;
+      if(aday.tekrar != null){
+        aday.zaman += aday.tekrar;
+      }else{
+        zamanlayicilar.delete(aday.id);
+      }
+
+      try{
+        if(typeof aday.fn === 'function') aday.fn.apply(window, aday.args || []);
+        else if(typeof aday.fn === 'string') (new Function(aday.fn))();
+      }catch(e){
+        console.error('Sahte saat zamanlayici hatasi:', e);
+      }
+      await Promise.resolve();
+    }
+    sahteSimdi = hedefZaman;
+    await Promise.resolve();
+  }
+
+  async function saatle(fn){
+    saatKur();
+    try{
+      await fn(ilerlet);
+    }finally{
+      saatKaldir();
+    }
+  }
+
+  const bekle = ilerlet;
 
   function perdeler(){ return document.querySelectorAll('.perde'); }
   function acikPerde(){ return document.querySelector('.perde'); }
@@ -66,49 +202,59 @@
     });
 
     it('«Geç» tıklaması perdeyi kaldırır', async () => {
-      temiz();
-      P.ac({ banner:banner(1), enAz:60000 });
-      acikPerde().querySelector('.perde__gec').click();
-      await bekle(520);
-      expect(perdeler()).toHaveLength(0);
-      temiz();
+      await saatle(async () => {
+        temiz();
+        P.ac({ banner:banner(1), enAz:60000 });
+        acikPerde().querySelector('.perde__gec').click();
+        await ilerlet(520);
+        expect(perdeler()).toHaveLength(0);
+        temiz();
+      });
     });
 
     it('Esc perdeyi kaldırır', async () => {
-      temiz();
-      P.ac({ banner:banner(1), enAz:60000 });
-      document.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', bubbles:true }));
-      await bekle(520);
-      expect(perdeler()).toHaveLength(0);
-      temiz();
+      await saatle(async () => {
+        temiz();
+        P.ac({ banner:banner(1), enAz:60000 });
+        document.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', bubbles:true }));
+        await ilerlet(520);
+        expect(perdeler()).toHaveLength(0);
+        temiz();
+      });
     });
 
     it('kapanınca `bitti` çağrılır — kutlamayı damgalayan kanca budur', async () => {
-      temiz();
-      let bitti = 0;
-      P.ac({ banner:banner(1), enAz:60000, bitti:() => { bitti++; } });
-      acikPerde().querySelector('.perde__gec').click();
-      await bekle(520);
-      expect(bitti).toBe(1);
-      temiz();
+      await saatle(async () => {
+        temiz();
+        let bitti = 0;
+        P.ac({ banner:banner(1), enAz:60000, bitti:() => { bitti++; } });
+        acikPerde().querySelector('.perde__gec').click();
+        await ilerlet(520);
+        expect(bitti).toBe(1);
+        temiz();
+      });
     });
 
     it('videosuz perde kendi süresini doldurunca kendiliğinden kapanır', async () => {
-      temiz();
-      P.ac({ banner:banner(1), enAz:300 });
-      await bekle(1200);
-      expect(perdeler()).toHaveLength(0);
-      temiz();
+      await saatle(async () => {
+        temiz();
+        P.ac({ banner:banner(1), enAz:300 });
+        await ilerlet(1200);
+        expect(perdeler()).toHaveLength(0);
+        temiz();
+      });
     });
 
     it('perde açıkken sayfa kaymaz, kapanınca serbest kalır', async () => {
-      temiz();
-      P.ac({ banner:banner(1), enAz:60000 });
-      expect(document.documentElement.style.overflow).toBe('hidden');
-      acikPerde().querySelector('.perde__gec').click();
-      await bekle(520);
-      expect(document.documentElement.style.overflow).toBe('');
-      temiz();
+      await saatle(async () => {
+        temiz();
+        P.ac({ banner:banner(1), enAz:60000 });
+        expect(document.documentElement.style.overflow).toBe('hidden');
+        acikPerde().querySelector('.perde__gec').click();
+        await ilerlet(520);
+        expect(document.documentElement.style.overflow).toBe('');
+        temiz();
+      });
     });
   });
 
@@ -137,19 +283,21 @@
     });
 
     it('kapatılan haberci sonradan perde açmaz', async () => {
-      temiz();
-      const eskiMM = window.matchMedia;
-      window.matchMedia = () => ({ matches:false, addListener(){}, removeListener(){},
+      await saatle(async () => {
+        temiz();
+        const eskiMM = window.matchMedia;
+        window.matchMedia = () => ({ matches:false, addListener(){}, removeListener(){},
         addEventListener(){}, removeEventListener(){} });
-      try{
+        try{
         P.kutla({ kademe:3, basamak:1, etiket:'3.1', enAz:60000 });
-      }finally{
+        }finally{
         window.matchMedia = eskiMM;
-      }
-      P.hepsiniKapat();
-      await bekle(P.HABERCI_MS + 300);
-      expect(perdeler()).toHaveLength(0);
-      temiz();
+        }
+        P.hepsiniKapat();
+        await ilerlet(P.HABERCI_MS + 300);
+        expect(perdeler()).toHaveLength(0);
+        temiz();
+      });
     });
   });
 
@@ -166,25 +314,29 @@
     });
 
     it('birincisi kapanınca sıradaki açılır', async () => {
-      temiz();
-      P.ac({ banner:banner(1), enAz:60000 });
-      P.ac({ banner:banner(2), enAz:60000 });
-      acikPerde().querySelector('.perde__gec').click();
-      await bekle(560);
-      expect(perdeler()).toHaveLength(1);
-      expect(acikPerde().querySelector('.perde__banner').textContent).toContain('Gümüş');
-      temiz();
+      await saatle(async () => {
+        temiz();
+        P.ac({ banner:banner(1), enAz:60000 });
+        P.ac({ banner:banner(2), enAz:60000 });
+        acikPerde().querySelector('.perde__gec').click();
+        await ilerlet(560);
+        expect(perdeler()).toHaveLength(1);
+        expect(acikPerde().querySelector('.perde__banner').textContent).toContain('Gümüş');
+        temiz();
+      });
     });
 
     it('sıradaki iptal edilirse hiç açılmaz', async () => {
-      temiz();
-      P.ac({ banner:banner(1), enAz:60000 });
-      const ikinci = P.ac({ banner:banner(2), enAz:60000 });
-      ikinci.kapat();
-      acikPerde().querySelector('.perde__gec').click();
-      await bekle(560);
-      expect(perdeler()).toHaveLength(0);
-      temiz();
+      await saatle(async () => {
+        temiz();
+        P.ac({ banner:banner(1), enAz:60000 });
+        const ikinci = P.ac({ banner:banner(2), enAz:60000 });
+        ikinci.kapat();
+        acikPerde().querySelector('.perde__gec').click();
+        await ilerlet(560);
+        expect(perdeler()).toHaveLength(0);
+        temiz();
+      });
     });
   });
 
@@ -305,43 +457,49 @@
     });
 
     it('SPACE perdeye HİÇ SOKMAZ ama kutlamayı damgalar', async () => {
-      temiz();
-      if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      let damga = 0;
-      P.kutla(yukselme(2), { bitti:() => { damga++; } });
-      document.dispatchEvent(new KeyboardEvent('keydown', { key:' ', bubbles:true }));
-      await bekle(320);
-      /* Perde hiç açılmadı — ve bir daha da açılmayacak. */
-      expect(perdeler()).toHaveLength(0);
-      expect(haberciler()).toHaveLength(0);
-      /* Ama rütbe KAZANILDI: `bitti` çağrılmazsa aynı kutlama her
-         açılışta yeniden çıkardı. */
-      expect(damga).toBe(1);
-      temiz();
+      await saatle(async () => {
+        temiz();
+        if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        let damga = 0;
+        P.kutla(yukselme(2), { bitti:() => { damga++; } });
+        document.dispatchEvent(new KeyboardEvent('keydown', { key:' ', bubbles:true }));
+        await ilerlet(320);
+        /* Perde hiç açılmadı — ve bir daha da açılmayacak. */
+        expect(perdeler()).toHaveLength(0);
+        expect(haberciler()).toHaveLength(0);
+        /* Ama rütbe KAZANILDI: `bitti` çağrılmazsa aynı kutlama her
+        açılışta yeniden çıkardı. */
+        expect(damga).toBe(1);
+        temiz();
+      });
     });
 
     it('«Geç» düğmesi de aynı şeyi yapar — dokunmatikte Space yoktur', async () => {
-      temiz();
-      if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      let damga = 0;
-      P.kutla(yukselme(2), { bitti:() => { damga++; } });
-      document.querySelector('.haberci__gec').click();
-      await bekle(320);
-      expect(perdeler()).toHaveLength(0);
-      expect(damga).toBe(1);
-      temiz();
+      await saatle(async () => {
+        temiz();
+        if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        let damga = 0;
+        P.kutla(yukselme(2), { bitti:() => { damga++; } });
+        document.querySelector('.haberci__gec').click();
+        await ilerlet(320);
+        expect(perdeler()).toHaveLength(0);
+        expect(damga).toBe(1);
+        temiz();
+      });
     });
 
     it('iki kez geçilse bile damga BİR kez vurulur', async () => {
-      temiz();
-      if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      let damga = 0;
-      const r = P.kutla(yukselme(2), { bitti:() => { damga++; } });
-      r.kapat();
-      r.kapat();
-      await bekle(320);
-      expect(damga).toBe(1);
-      temiz();
+      await saatle(async () => {
+        temiz();
+        if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        let damga = 0;
+        const r = P.kutla(yukselme(2), { bitti:() => { damga++; } });
+        r.kapat();
+        r.kapat();
+        await ilerlet(320);
+        expect(damga).toBe(1);
+        temiz();
+      });
     });
 
     it('geri sayım üç saniyedir', () => {
