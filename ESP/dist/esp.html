@@ -23077,7 +23077,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'111b09f5', at:'2026-11-01 20:48', dirty:false };
+ESP.BUILD = { id:'517f8d17', at:'2026-11-01 21:10', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -40684,13 +40684,13 @@ ESP.KingArac = (function(){
 
   function liste(){
     return [
-      { ad:'esp_gun', tur:'oku', aciklama:'Bir günün ESP çalışma oturumları (alan ve dakika).', ornek:'bugün ne çalıştım',
+      { ad:'esp_gun', tur:'oku', aciklama:'Bir günün ESP çalışma oturumları (alan ve dakika).', ornek:'günün oturumları', anahtar:'entelektüel pratik süresi seans oturum gündelik günlük',
         parametreler:{ type:'object', properties:{ tarih:{ type:'string', maxLength:10, description:'gün (YYYY-AA-GG); boşsa bugün' } } }, calistir:gun },
-      { ad:'esp_hafta', tur:'oku', aciklama:'Son günlerde hangi alanda kaç dakika çalışıldığı.', ornek:'bu hafta ne kadar çalıştım',
+      { ad:'esp_hafta', tur:'oku', aciklama:'Son günlerde hangi alanda kaç dakika çalışıldığı.', ornek:'haftalık süre', anahtar:'haftalık disiplin vakit dağılımı toplam süre saat',
         parametreler:{ type:'object', properties:{ gun:{ type:'integer', minimum:1, maximum:60 } } }, calistir:hafta },
-      { ad:'esp_kitaplar', tur:'oku', aciklama:'Kütüphanedeki kitaplar ve durumları (okunuyor, bitti, başlanmadı).', ornek:'kitaplarım',
+      { ad:'esp_kitaplar', tur:'oku', aciklama:'Kütüphanedeki kitaplar ve durumları (okunuyor, bitti, başlanmadı).', ornek:'kütüphanedeki eserler', anahtar:'okuduklarım bitirdiklerim liste kütüphanemdeki eserler',
         calistir:kitaplar },
-      { ad:'esp_kartlar', tur:'oku', aciklama:'Dil kartları: toplam, bugün sırası gelen, dillere göre.', ornek:'kaç kelime kartım var',
+      { ad:'esp_kartlar', tur:'oku', aciklama:'Dil kartları: toplam, bugün sırası gelen, dillere göre.', ornek:'kartlarımın durumu',
         calistir:kartlar },
       { ad:'esp_yazilar', tur:'oku', aciklama:'Yazı taslakları ve kelime sayıları.', ornek:'yazı taslaklarım', calistir:yazilar },
       { ad:'esp_merdiven', tur:'oku', aciklama:'ESP merdiveni: yedi disiplinin kademesi, ustalık yüzdesi ve ölçülen disiplinler.', ornek:'seviyem nedir',
@@ -40702,7 +40702,7 @@ ESP.KingArac = (function(){
       { ad:'esp_repertuvar', tur:'oku', aciklama:'Müzik stüdyosundaki parça ve teknikler (temiz BPM eşikleri).', ornek:'repertuarım',
         parametreler:{ type:'object', properties:{ tur:{ type:'string', enum:['piece', 'technique'], description:'parça veya teknik' } } }, calistir:repertuvar },
 
-      { ad:'esp_kart_ekle', tur:'yaz', ozetAd:'Dil kartı ekle', ornek:'serendipity kelimesini kart yap: tesadüfen güzel bir şey bulmak',
+      { ad:'esp_kart_ekle', tur:'yaz', ozetAd:'Dil kartı ekle', ornek:'pragmatik kelimesini kart yap: faydacı',
         aciklama:'Dil destesine yeni kelime kartı ekler (ön yüz ve karşılığı).',
         parametreler:{ type:'object', properties:{ on:{ type:'string', maxLength:120, description:'kelime ya da ifade' },
           arka:{ type:'string', maxLength:240, description:'karşılığı' }, dil:{ type:'string', enum:['en', 'de', 'fr', 'es', 'it', 'ru', 'ar', 'ja'] } },
@@ -40713,7 +40713,7 @@ ESP.KingArac = (function(){
           render();
           return { metin:'Kartı ekledim.', geriAl:c && c.id ? async () => { await M().deleteCard(c.id); render(); } : null };
         } },
-      { ad:'esp_alinti_ekle', tur:'yaz', ozetAd:'Alıntı kaydet', ornek:'alıntı: Bir insanın değeri, sevdiği şeylerin değeridir',
+      { ad:'esp_alinti_ekle', tur:'yaz', ozetAd:'Alıntı kaydet', ornek:'alıntı: Düşünüyorum öyleyse varım',
         aciklama:'Bir kitaptan alıntıyı ya da kitap notunu kaydeder; kitap verilmezse okunmakta olan tek kitaba bağlanır.',
         parametreler:{ type:'object', properties:{ metin:{ type:'string', maxLength:1000, description:'alıntının metni, aynen' },
           kitap:{ type:'string', maxLength:120, description:'kitabın adı ya da adının bir parçası' } }, required:['metin'] },
@@ -41492,8 +41492,8 @@ ESP.KingArac = (function(){
   /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz; kart, alıntı ve bitirme cümleden okunur
      (yazan araç yine önizlenir, onayla yazılır). */
   const KURAL = {
-    esp_gun:{ es:/^bugün (?:ne|neler) çalıştım/ },
-    esp_hafta:{ es:/((?:bu hafta|son bir hafta|haftada) ne kadar çalıştım)/ },
+    esp_gun:{ es:/^bugün (?:neler|ne) çalıştım/ },
+    esp_hafta:{ es:/(?:bu hafta|son bir hafta|haftada).*(?:çalış|vakit|saat)/ },
     esp_kitaplar:{ es:/(^kitaplarım|kütüphanemde ne var|hangi kitapları okuyorum)/ },
     esp_kartlar:{ es:/(kaç (?:kelime )?kart|kelime kartlarım)/ },
     esp_yazilar:{ es:/(yazı taslak|taslaklarım|yazılarım)/ },
@@ -41503,8 +41503,8 @@ ESP.KingArac = (function(){
     esp_repertuvar:{ es:/(repertuvar|çaldığım|parçalarım|tekniklerim)/ },
     esp_kart_ekle:{ kural:(t, m) => { const x = /^(.+?)\s+kelimesini karta? (?:yap|ekle)\s*[:,]\s*(.+)$/i.exec(m);
       return x && x[1].length <= 120 && x[2].length <= 240 ? { on:x[1].trim(), arka:x[2].trim() } : null; } },
-    esp_alinti_ekle:{ kural:(t, m) => { const x = /^alıntı\s*[:,]\s*(\S[\s\S]{0,999})$/i.exec(m); return x ? { metin:x[1].trim() } : null; } },
-    esp_kitap_bitir:{ kural:(t, m) => { const x = /^(.+?)['’]?(?:y[ıiuü])? bitirdim[.!]?$/i.exec(m);
+    esp_alinti_ekle:{ kural:(t, m) => { const x = /^(?:kitaptan\s+)?alıntı(?:\s+ekle)?\s*[:,]\s*(\S[\s\S]{0,999})$/i.exec(m); return x ? { metin:x[1].trim() } : null; } },
+    esp_kitap_bitir:{ kural:(t, m) => { const x = /^(.+?)(?:['’](?:[yn]?[ıiuü]|[ıiuü]))?(?:\s+kitab(?:ı|ını|i|ini))?\s*(?:okumay[ıi])?\s+(?:bitirdim|tamamladım)[.!]?$/i.exec(m);
       const k = x && x[1].trim();
       return k && !/^(kitab[ıi]?|onu|bunu|şunu)$/i.test(k) && k.length <= 120 ? { kitap:k } : null; } },
   };
@@ -46041,7 +46041,8 @@ window.LIFEOS.KING_IC = {};
     if(/(özet|nasıl gid|bugün ne|durumum|durum ne)/.test(t)) return { tur:'ozet' };
     /* «notlarım», «notlarımı aç», «bütün notlar»: ortak Notlarım paneli (notum.js). */
     if(/^(bütün |tüm )?notlar(ım|ımı|ımı aç|ımı göster)?( aç| göster)?$/.test(t) && L.NOTUM && L.NOTUM.kuruluMu && L.NOTUM.kuruluMu()) return { tur:'notlar' };
-    const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim|dön)').test(t);
+    /* Fiil kelime olarak: «açma», «gitar», «geçmiş», «dönem» komut değildir (3a). */
+    const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim|dön)(?:[ıi]n|[ae]l[ıi]m|[ae]r m[ıi]s[ıi]n)?(?=$|[\\s.,!?])').test(t);
     if(gitMi){
       const s = sayfaBul(t);
       if(s) return { tur:'git', hedef:s, cevap:'Tamam.', kaynak:'komut' };
@@ -85558,11 +85559,15 @@ ESP.Parse = (function(){
     music:['gitar çalıştım', 'gitar çaldım', 'metronomla çalıştım', 'gam çalıştım',
       'parça çalıştım', 'enstrüman çalıştım', 'gitar', 'müzik'],
     diction:['diksiyon çalıştım', 'tekerleme söyledim', 'nefes çalıştım',
-      'sunum provası yaptım', 'yüksek sesle okudum', 'diksiyon', 'tekerleme'],
+      'sunum provası yaptım', 'yüksek sesle okudum', 'diksiyon', 'tekerleme',
+      'ses açma egzersizi yaptım', 'ses açma çalıştım', 'ses açma egzersizi', 'ses açma',
+      'artikülasyon ve nefes çalıştım', 'artikülasyon çalıştım', 'artikülasyon ve nefes', 'artikülasyon'],
     reading:['derin okuma yaptım', 'kitap okudum', 'not çıkardım', 'okuma yaptım',
       'derin okuma', 'okudum', 'okuma'],
     writing:['yazı yazdım', 'taslak yazdım', 'deneme yazdım', 'revize ettim',
       'yazdım', 'yazı'],
+    history:['tarih çalıştım', 'kronoloji çalıştım', 'tarih okudum', 'kronoloji okudum',
+      'tarih', 'kronoloji'],
   };
 
   /* Uzundan kisaya: "derin okuma" once denenir, "okuma" sonra.
@@ -85579,6 +85584,8 @@ ESP.Parse = (function(){
   const SURE = [
     { re:/(\d+(?:[.,]\d+)?)\s*(?:saat|sa)\b/i, carpan:60 },
     { re:/(\d+(?:[.,]\d+)?)\s*(?:dakika|dk|dak)\b/i, carpan:1 },
+    { re:/(?:çeyrek\s+saat)\b/i, carpan:15, sabit:true },
+    { re:/(?:yarım\s+saat)\b/i, carpan:30, sabit:true },
   ];
 
   const SAYIM = [
@@ -85606,7 +85613,17 @@ ESP.Parse = (function(){
 
     /* Tek kaynak: brand/ortak/giris.js bol() (2026-10-19); yoksa yerel kural. */
     const G = window.LIFEOS && window.LIFEOS.GIRIS;
-    const parcalar = G && typeof G.bol === 'function' ? G.bol(ham) : ham.split(AYRAC).map(p => p.trim()).filter(Boolean);
+    let parcalar = G && typeof G.bol === 'function' ? G.bol(ham) : ham.split(AYRAC).map(p => p.trim()).filter(Boolean);
+    const birlestir = [];
+    for(let i = 0; i < parcalar.length; i++){
+      if(i < parcalar.length - 1 && /artikülasyon/i.test(parcalar[i]) && /^nefes\b/i.test(parcalar[i + 1])){
+        birlestir.push(parcalar[i] + ' ve ' + parcalar[i + 1]);
+        i++;
+      } else {
+        birlestir.push(parcalar[i]);
+      }
+    }
+    parcalar = birlestir;
     const rows = [], unmatched = [];
 
     parcalar.forEach(parca => {
@@ -85625,6 +85642,7 @@ ESP.Parse = (function(){
         SURE.forEach(s => {
           const m = parca.match(s.re);
           if(m){
+            if(s.sabit){ dakika = (dakika || 0) + s.carpan; return; }
             const v = sayi(m[1]);
             if(v != null) dakika = (dakika || 0) + v * s.carpan;
           }
@@ -85663,7 +85681,7 @@ ESP.Parse = (function(){
         const dk = Number(kisa[2]);
         if(dk > 0 && dk <= 600) dakika = dk;
       }
-      if(dakika == null){
+      if(dakika == null && count == null){
         /* Disiplin taniniyor ama sure yok: satir ATILMAZ, suresi eksik bir
            oneri olarak doner. Kullanici sureyi yazar. */
         unmatched.push({ text:parca, why:'Disiplin tanındı ama süre girilmemiş.',
@@ -85673,7 +85691,7 @@ ESP.Parse = (function(){
 
       rows.push({
         disc:hit.disc,
-        minutes:Math.round(dakika),
+        minutes:dakika != null ? Math.round(dakika) : null,
         count, countWhat,
         note:parca,
       });

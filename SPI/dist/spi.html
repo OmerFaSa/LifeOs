@@ -22463,7 +22463,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'111b09f5', at:'2026-11-01 20:48', dirty:false };
+SP.BUILD = { id:'517f8d17', at:'2026-11-01 21:10', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -40036,10 +40036,10 @@ SP.KingArac = (function(){
       } };
   }
   const barkodAraclari = () => [
-    { ad:'spi_besin', tur:'oku', aciklama:'SPİ’nin gıda tablosunda bir gıdanın 100 gramlık besin değeri ve ev ölçüleri.', ornek:'yulafın besin değeri',
+    { ad:'spi_besin', tur:'oku', aciklama:'SPİ’nin gıda tablosunda bir gıdanın 100 gramlık besin değeri ve ev ölçüleri.', ornek:'100 gram ceviz kaç kalori',
       parametreler:{ type:'object', properties:{ besin:{ type:'string', maxLength:60 } }, required:['besin'] }, calistir:besin },
     { ad:'spi_barkod', tur:'oku', aciklama:'Barkod numarasıyla ürünün besin değeri: önce kişisel barkod defteri, yoksa Open Food Facts (kaynak etiketiyle).',
-      ornek:'4006381333931 barkodu ne', parametreler:{ type:'object', properties:{ kod:kodSema }, required:['kod'] }, calistir:barkodOku },
+      ornek:'8690504033324 besin değerleri', parametreler:{ type:'object', properties:{ kod:kodSema }, required:['kod'] }, calistir:barkodOku },
     { ad:'spi_barkod_ogun', tur:'yaz', ozetAd:'Barkodlu ürünü öğüne ekle', ornek:'4006381333931 barkodlu üründen 40 gram yedim',
       aciklama:'Barkodlu ürünü bugünün öğününe ekler; gram kullanıcının cümlesinden ya da etiketteki porsiyondan. Ürün tabloda yoksa gıda olarak eklenir ve barkod bağlanır.',
       parametreler:{ type:'object', properties:{ kod:kodSema, gram:{ type:'number', minimum:1, maximum:2000, description:'yenen gram (kullanıcı söylediyse)' },
@@ -40753,12 +40753,14 @@ SP.KingArac = (function(){
   function liste(){
     return [
       { ad:'spi_gun_kaydi', tur:'oku', aciklama:'Bir günün SPİ kaydı: uyku, su, kilo, his, öğünler ve antrenmanlar.',
-        ornek:'dün ne yedim',
+        ornek:'dünün özet kaydı', anahtar:'günlük günlüğüm döküm ajanda kaydettiklerim özet',
         parametreler:{ type:'object', properties:{ tarih:gun } }, calistir:gunKaydi },
       { ad:'spi_uyku', tur:'oku', aciklama:'Son günlerin uyku saatleri ve ortalaması (kaydı olmayan gece boş kalır).',
-        es:/(uykum nasıl|uyku ortalamam|kaç saat uyu(?:dum|muşum)|ortalama .*uyu)/, ornek:'son bir haftada uykum nasıl',
+        es:/(uykum nasıl|uyku ortalamam|kaç saat uyu(?:dum|muşum)|ortalama .*uyu|uyku.*dağılım)/, ornek:'haftalık uyku ortalamam',
+        anahtar:'süre dağılım uykular dinlenme gece saat',
         parametreler:{ type:'object', properties:{ gun:sayiGun(60, 7) } }, calistir:uyku },
       { ad:'spi_antrenmanlar', tur:'oku', aciklama:'Son günlerin antrenman kayıtları.', ornek:'son antrenmanlarım',
+        anahtar:'koşu koşular idman egzersiz seans spor hafta yapılan',
         parametreler:{ type:'object', properties:{ gun:sayiGun(90, 14) } }, calistir:antrenmanlar },
       { ad:'spi_tahliller', tur:'oku', aciklama:'Son tahlillerin değerleri ve referans aralıkları (yorum ve teşhis yok).', ornek:'son tahlillerim',
         parametreler:{ type:'object', properties:{ limit:{ type:'integer', minimum:1, maximum:10 } } }, calistir:tahliller },
@@ -40784,18 +40786,46 @@ SP.KingArac = (function(){
   }
 
   /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz; besin ve barkod cümleden okunur. */
-  const yemekBul = w => [w, w.replace(/['’]?n?[ıiuü]n$/, ''), w.replace(/['’]?n?[dt][ae]$/, ''), w.replace(/s[ıiuü]n?[dt][ae]$/, '')]
+  const yemekBul = w => [w.replace(/['’]?n?[ıiuü]n$/, ''), w.replace(/['’]?n?[dt][ae]$/, ''), w.replace(/s[ıiuü]n?[dt][ae]$/, ''), w]
     .map(x => x.trim()).find(x => x.length >= 2 && SP.Parse && SP.Parse.matchFood && SP.Parse.matchFood(x)) || null;
   const KURAL = {
-    spi_gun_kaydi:{ es:/((?:dün|bugün|evvelsi gün) ne (?:yedim|yemişim|içtim)|günün kaydı)/ },
-    spi_antrenmanlar:{ es:/(son antrenman|antrenmanlarım|antrenman geçmiş)/ },
+    spi_gun_kaydi:{ es:/((?:dün|bugün|evvelsi gün) ne (?:yedim|yemişim|içtim)|günün kaydı|neler kaydet|günlüğüm)/ },
+    spi_antrenmanlar:{ es:/(son antrenman|antrenmanlarım|antrenman geçmiş|kaç antrenman|koşularım|koşu süresi)/ },
     spi_tahliller:{ es:/(tahlil(?:ler)?im|tahlil sonuç|kaç çıkmış)/ },
     spi_besin:{ kural:t => {
-      const m = /^(?:100 ?(?:gram|gr|g) )?(.+?) besin değer/.exec(t) || /^(?:100 ?(?:gram|gr|g) )?(.+?) kaç (?:gram )?(?:protein|kalori|kcal|yağ|karbonhidrat)/.exec(t);
+      const m = /^(?:100 ?(?:gram|gr|g) )?(.+?) (?:besin|kalori|protein|yağ|karbonhidrat)(?: (?:ve|ile) (?:besin|kalori|protein|yağ|karbonhidrat))? değer/.exec(t) || /^(?:100 ?(?:gram|gr|g) )?(.+?) besin değer/.exec(t) || /^(?:100 ?(?:gram|gr|g) )?(.+?) kaç (?:gram )?(?:protein|kalori|kcal|yağ|karbonhidrat)/.exec(t);
       const ad = m && yemekBul(m[1]);
       return ad ? { besin:ad } : null; } },
     spi_barkod:{ kural:t => { const m = /(?:^|\s)(\d{8}|\d{12,13})(?=\s|$)/.exec(t);
       return m && /barkod/.test(t) && !/(yedim|içtim|ekle)/.test(t) ? { kod:m[1] } : null; } },
+    spi_barkod_ogun:{ kural:t => {
+      const bk = /(?:^|\s)(\d{8}|\d{12,13})(?=\s|$)/.exec(t);
+      if(!bk || !/barkod/.test(t) || !/(yedim|içtim|ekle|öğün)/.test(t)) return null;
+      const res = { kod:bk[1] };
+      const gm = /(\d+(?:[.,]\d+)?)\s*(?:gram|gr|g)(?!\w)/.exec(t);
+      if(gm) res.gram = Number(gm[1].replace(',', '.'));
+      const og = /(kahvalt\w*|öğle\w*|ogle\w*|akşam\w*|aksam\w*|ara öğün\w*|ara\w*|gece\w*)/.exec(t);
+      if(og){
+        const o = og[1];
+        if(/kahvalt/.test(o)) res.ogun = 'kahvaltı';
+        else if(/ogle|öğle/.test(o)) res.ogun = 'öğle';
+        else if(/aksam|akşam/.test(o)) res.ogun = 'akşam';
+        else if(/ara/.test(o)) res.ogun = 'ara';
+      }
+      return res;
+    } },
+    spi_bolum_ac_kapa:{ kural:t => {
+      if(!/bölüm|bolum/.test(t)) return null;
+      const kapat = /(kapat|kapansın|gizle|gizlensin|kaldır|kullanmıyorum)/.test(t);
+      const ac = !kapat && /(?:^|\s)(aç|açılsın|göster|geri getir)(?:$|\s)/.test(t);
+      if(!kapat && !ac) return null;
+      const liste = SP.Bolum && SP.Bolum.liste ? SP.Bolum.liste() : [];
+      for(const b of liste){
+        const adlar = [b.id, b.ad].concat(b.takma || []).map(x => String(x).toLowerCase());
+        if(adlar.some(a => t.includes(a))) return { bolum:b.id, acik:kapat ? 0 : 1 };
+      }
+      return null;
+    } },
     spi_butce:{ es:/(haftalık sepet|market bütçe|bütçem nasıl)/ },
     spi_planlar:{ es:/(haftalık plan|planlarım|haftalık programım)/ },
     spi_hedefler:{ es:/(sağlık hedef|hedeflerim|kilo hedef)/ },
@@ -45348,7 +45378,8 @@ window.LIFEOS.KING_IC = {};
     if(/(özet|nasıl gid|bugün ne|durumum|durum ne)/.test(t)) return { tur:'ozet' };
     /* «notlarım», «notlarımı aç», «bütün notlar»: ortak Notlarım paneli (notum.js). */
     if(/^(bütün |tüm )?notlar(ım|ımı|ımı aç|ımı göster)?( aç| göster)?$/.test(t) && L.NOTUM && L.NOTUM.kuruluMu && L.NOTUM.kuruluMu()) return { tur:'notlar' };
-    const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim|dön)').test(t);
+    /* Fiil kelime olarak: «açma», «gitar», «geçmiş», «dönem» komut değildir (3a). */
+    const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim|dön)(?:[ıi]n|[ae]l[ıi]m|[ae]r m[ıi]s[ıi]n)?(?=$|[\\s.,!?])').test(t);
     if(gitMi){
       const s = sayfaBul(t);
       if(s) return { tur:'git', hedef:s, cevap:'Tamam.', kaynak:'komut' };
@@ -86121,7 +86152,7 @@ SP.Quick = (function(){
     hrv:{ id:'hrv', label:'HRV', unit:'ms', min:1, max:300,
       aliases:['hrv', 'rmssd'] },
     weight:{ id:'weight', label:'Kilo', unit:'kg', min:20, max:300,
-      aliases:['kilo', 'agirlik', 'weight'] },
+      aliases:['kilo', 'kilom', 'agirlik', 'agirligim', 'tarti', 'tartildim', 'weight'] },
     /* `ekle`: yazilan deger gunun toplamina EKLENIR (asagida BARDAK_ML). */
     water:{ id:'water', label:'Su', unit:'ml', min:0, max:10000, ekle:true,
       aliases:['su', 'water'] },
@@ -86263,14 +86294,15 @@ SP.Quick = (function(){
 
   function suMiktari(n, at, alias){
     const sonra = n.slice(at + alias.length)
-      .match(new RegExp('^\\s*(\\d+(?:[.,]\\d+)?)\\s*' + SU_BIRIM_RE + '?(?![a-z])'));
+      .match(new RegExp('^\\s*(\\d+(?:[.,]\\d+)?)\\s*(?:(bucuk|buçuk)\\s*)?' + SU_BIRIM_RE + '?(?![a-z])'));
     const once = n.slice(0, at)
-      .match(new RegExp('(\\d+(?:[.,]\\d+)?)\\s*' + SU_BIRIM_RE + '\\s+(?:[a-z]+\\s+)?$'));
+      .match(new RegExp('(\\d+(?:[.,]\\d+)?)\\s*(?:(bucuk|buçuk)\\s*)?' + SU_BIRIM_RE + '\\s+(?:[a-z]+\\s+)?$'));
     const m = sonra || once;
     if(!m) return null;
-    const v = sayi(m[1]);
+    let v = sayi(m[1]);
     if(v == null || v <= 0) return null;
-    if(m[2]) return Math.round(v * SU_BIRIM[m[2]]);
+    if(m[2]) v += 0.5;
+    if(m[3]) return Math.round(v * SU_BIRIM[m[3]]);
     if(v < 20) return Math.round(v * 1000);
     return v >= 50 ? Math.round(v) : null;
   }
@@ -88767,7 +88799,7 @@ SP.Bolum = (function(){
     { id:'meals',   ad:'Öğünler', takma:['öğün', 'beslenme', 'besin'] },
     { id:'kitchen', ad:'Mutfak',  takma:['mutfak', 'tarif'] },
     { id:'move',    ad:'Hareket', takma:['hareket', 'antrenman', 'spor', 'egzersiz'] },
-    { id:'basket',  ad:'Finans',  takma:['finans', 'bütçe', 'para'] },
+    { id:'basket',  ad:'Finans',  takma:['finans', 'bütçe', 'para', 'market', 'sepet'] },
     { id:'rutbe',   ad:'Rütbe',   takma:['rütbe', 'seviye', 'xp'] },
   ];
   const BY_ID = GIZLENEBILIR.reduce((m, b) => { m[b.id] = b; return m; }, {});

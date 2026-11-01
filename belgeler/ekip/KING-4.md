@@ -450,3 +450,47 @@ turlardan kalan 11 eksik araç (dizin kabul testi CI'da kırmızıydı) tamamlan
 
 Açık: kartların görünümü ve «neden şimdi?» satırı (3a); `plan_kacti` yalnız SPİ'de (AYS blokları
 saatsiz, ESP planı gezinme sırası); olayların uçtan uca sınaması süreç içinde (`tools/king_olay_uctan_test.py`: modülün gerçek olayı → `olay.js` biçimi → HKM `POST /api/olay`, CI'da); gerçek HTTP ve sekme turu entegre testinde yok.
+
+## Tur 3a · Niyet çözücü, «King ne yaptı», harcama kartı (2026-11-01/02)
+
+**Sınav: 209 → 279/300 (%93).** AYS 77/95, SPİ 89/90, ESP 69/70, genel 44/45; yerel karar
+ortanca 1 ms. Gerileme yok (her adımda önceki koşuyla cümle cümle karşılaştırıldı).
+
+| Adım | Puan | Ne |
+|---|---|---|
+| Başlangıç | 209 | 2a sonu |
+| Niyet çözücü (`arac.js` söz 6) | 247 | regex'siz araç seçimi: cümle, aracın adı + açıklaması + örneği + yeni `anahtar` alanıyla Türkçe ek payıyla puanlanır (az araçta geçen kelime ağır, ardışık iki kelime artı). Soru ve ad öbeği okuma, emir yazma aracına; kayıt («… çözdüm») ve danışma («ne yapmalıyım», «nasıl korurum», «… nedir») girmez. Eşik altı ya da başa baş: null, model ya da sayfa karar verir |
+| Ölçüm düzeltmesi | −2 | sınav, zorunlu parametresi eksik yazma seçimini artık karar saymaz (gerçek `aracIsle` gibi doğrular) |
+| Eksik parametreyi sorma, kelime sonu | 256 | «kitap ekle» → «Kitap ekle için kitabın adı ne olsun?» (§1.7; tek zorunlu metin parametresi); sayfa fiili kelime olarak («ses açma», «gitar», «geçmiş» komut değil); açıklamadaki başka aracın adı puana girmez |
+| Ofis 032 (SPİ), 033 (ESP) | 279 | `anahtar`, `es` ve `kural` (besin, barkodlu öğün, bölüm aç/kapa `SP.Bolum` kataloğundan), kilo takma adları, «buçuk»/«çeyrek» süre, sayfa sayısıyla okuma oturumu (dakika «veri yok») |
+
+Beklentisi düzeltilen dört cümle (gerekçe `king_sinav.json`'da `not`): «4-7-8 nefes tekniği başlat»
+(araç yalnız kutu nefesi yapar; Merkez anlatır), «bugün kendimi çok halsiz hissediyorum» (SPİ'de his
+kaydı da doğru), «tahlil bölümünü aç» ve «kartlar bölümünü tekrar aç» (gizlenebilir bölüm değiller;
+sayfa komutu doğru). Kalan 21'in çoğu AYS: ofis 031 (anahtar, Onaylar eylemlerine zorunlu parametre ve
+`komut.js` üzerinden `kural`) incelemede geri gönderildi: takvimde bayram yokken tarih, açık karar
+yokken kimlik ve miktarsız «kısalt»ta süre **uyduruyordu**; dar `es` ifadeleri kayıt cümlelerini
+(«10 dk mola verdim») okumaya çekiyordu. Düzeltilince birleşir (kabul testi `king_sinav_ays_kabul_test.py`).
+
+**Ofis.** 031–033 elle başlatıldı (pilotun günlük sınırı doluydu); Denetçi 032 ve 033'e «temiz» dedi,
+son incelemede 032'de elle yazılmış ve 8'i gizlenemeyen 13 bölüm kimliği, 031'de üç uydurma çıktı
+(ders defterinde). Testçi oturum kesintisinde yarıda kaldı; §2 denetimleri birleşik main'de elle koşuldu.
+
+**«King ne yaptı» zaman çizgisi (F).** Rayda «Eylemler» bölümü: bu oturumun yazmaları ve HKM'nin
+eylem defteri (`GET /api/eylem`) tek çizgide, güne göre, modül noktası, saat ve kaynakla. Onaylı her
+yazma (araç, yetki eylemi, kayıt) `POST /api/eylem` ile Merkez'e de düşer. Geri al tek tık: modül
+yazmasını modülün kendi `geriAl`'ı yapar ve HKM satırı işaretlenir; HKM'nin kendi yazması (para, söz)
+HKM'de geri alınır. Sınır: modül `geriAl`'ı bellekteki bir işlevdir, sayfa kapanınca o satır «kalıcı»
+görünür (sessiz geri alma yok); kalıcı geri alma için araçların tersini `{ad, param}` olarak dönmesi
+gerekir (sonraki iş). «Geri al» çipi de çizgiyi günceller.
+
+**Plan canlı, onay tek dokunuş.** İstemci artık `dongu` yollar: model sonuçtan sonra yine okuma
+isterse araç çalışır, adımlar bekleme balonunda canlı («çalışıyor/bitti/olmadı») görünür ve cevabın
+üstünde kalır (en çok 4 tur, aynı çağrı tekrar edilmez). «Onayla» birincil düğme; onay bekleyen cevap
+çerçeveli kart.
+
+**«King bugün ne harcadı».** Eylemler bölümünün başında: çağrı, jeton, maliyet, ortalama süre ve
+modüle göre tek yığılmış çubuk (rol öneki `ays.`/`spi.`/`esp.`, gerisi Merkez); `aria-label` sayıları
+cümleyle söyler. Sohbette «bugün ne harcadın» `king_harcama` aracıyla aynı sayıları verir. Sayı
+HKM defterinden gelir; tarifesi bilinmeyen modelde maliyet HKM'nin tahminidir (`ai_olcum` bu etiketi
+henüz dönmüyor: HKM işi).
