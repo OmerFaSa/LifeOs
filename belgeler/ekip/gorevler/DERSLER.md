@@ -12,3 +12,5 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 013 (01.11.2026): Görevin Dokunma listesindeki koda (yorum dahil) dokunma; aynı denetle-say-ekle bloğunu dallara kopyalama, tek iç işlev yaz.
 - 014 (01.11.2026): Ortak çekirdeğe bağlanan dosyayı tek başına yükleyen kabul testleri ve araçlar (kabul_js, denetle_banka) da güncellenmeli
 - 015 (01.11.2026): Değiştirdiğin dosya üretilmiş kopyaysa (başlıkta «ÜRETİLMİŞ KOPYA») kaynağı brand/'dadır; Açık kalan'a yaz, Claude taşır
+- 017 (01.11.2026): Sonradan eklenen dosyalar dizini kırmızı yapar; dizin kabul testi CI'da durur
+- 018 (01.11.2026): Sonradan eklenen dosyalar dizini kırmızı yapar; dizin kabul testi CI'da durur
