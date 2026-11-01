@@ -67,14 +67,26 @@
 
     /* ---------- Yeni Model araçları (KING-4 A2) ---------- */
 
-    it('deneme aracı: ays_deneme önizleme, uygulama ve geri alma', async () => {
+    it('deneme aracı: ays_deneme doğru/yanlış/boş ile ekleme, önizleme, uygulama ve geri alma', async () => {
       await hazirla();
-      const o = await A().onizle('ays_deneme', { islem:'ekle', tur:'TYT', yayinci:'3D Simülasyon', net:95 });
+      /* 1. Yalnız net verilince hata döner (AGENTS §1 veri uydurulmaz) */
+      const hatali = await A().onizle('ays_deneme', { islem:'ekle', tur:'TYT', yayinci:'3D Simülasyon', net:95 });
+      expect(hatali.ok).toBe(false);
+      expect(hatali.hata).toContain('doğru, yanlış ve boş sayısı belirtilmelidir');
+
+      /* 2. Doğru, yanlış ve boş ile tam kayıt */
+      const o = await A().onizle('ays_deneme', { islem:'ekle', tur:'TYT', yayinci:'3D Simülasyon', testAdi:'Genel', dogru:100, yanlis:20, bos:0 });
       expect(o.ok).toBe(true);
       expect(o.onizle.metin).toContain('3D Simülasyon');
-      const u = await A().uygula({ arac:true, ad:'ays_deneme', param:{ islem:'ekle', tur:'TYT', yayinci:'3D Simülasyon', net:95 } });
+
+      const u = await A().uygula({ arac:true, ad:'ays_deneme', param:{ islem:'ekle', tur:'TYT', yayinci:'3D Simülasyon', testAdi:'Genel', dogru:100, yanlis:20, bos:0 } });
       expect(u.ok).toBe(true);
-      expect(R.S.exams.some(e => e.publisher === '3D Simülasyon')).toBe(true);
+      const ex = R.S.exams.find(e => e.publisher === '3D Simülasyon');
+      expect(ex).toBeDefined();
+      expect(ex.tests[0].correct).toBe(100);
+      expect(ex.tests[0].wrong).toBe(20);
+      expect(ex.tests[0].blank).toBe(0);
+
       await u.geriAl();
       expect(R.S.exams.some(e => e.publisher === '3D Simülasyon')).toBe(false);
       A()._sifirla();
@@ -93,7 +105,7 @@
       A()._sifirla();
     });
 
-    it('etkinlik aracı: ays_etkinlik önizleme, uygulama ve geri alma', async () => {
+    it('etkinlik aracı: ays_etkinlik ekleme, önizleme, uygulama ve geri alma', async () => {
       await hazirla();
       const o = await A().onizle('ays_etkinlik', { ad:'Gitar pratiği', dakika:15, tur:'yaratici' });
       expect(o.ok).toBe(true);
@@ -103,6 +115,32 @@
       expect(R.S.activities.some(a => a.name === 'Gitar pratiği')).toBe(true);
       await u.geriAl();
       expect(R.S.activities.some(a => a.name === 'Gitar pratiği')).toBe(false);
+      A()._sifirla();
+    });
+
+    it('etkinlik aracı: ays_etkinlik güncellemede yeni alanlar eski değerin üstüne yazılır', async () => {
+      await hazirla();
+      // Önce etkinlik ekle
+      const u1 = await A().uygula({ arac:true, ad:'ays_etkinlik', param:{ ad:'Nefes Egzersizi', dakika:5, enerji:'low', tur:'zihin' } });
+      expect(u1.ok).toBe(true);
+      const act = R.S.activities.find(a => a.name === 'Nefes Egzersizi');
+      expect(act).toBeDefined();
+      expect(act.minutes).toBe(5);
+
+      // Aynı id ile dakikayı 15 yap (eski değer yeninin üstüne yazılmamalı)
+      const u2 = await A().uygula({ arac:true, ad:'ays_etkinlik', param:{ id:act.id, dakika:15 } });
+      expect(u2.ok).toBe(true);
+      const guncel = R.S.activities.find(a => a.id === act.id);
+      expect(guncel.minutes).toBe(15);
+      expect(guncel.name).toBe('Nefes Egzersizi');
+
+      // Geri alma ile eski 5 dakikaya dönmeli
+      await u2.geriAl();
+      const eskiHal = R.S.activities.find(a => a.id === act.id);
+      expect(eskiHal.minutes).toBe(5);
+
+      await u1.geriAl();
+      expect(R.S.activities.some(a => a.id === act.id)).toBe(false);
       A()._sifirla();
     });
 

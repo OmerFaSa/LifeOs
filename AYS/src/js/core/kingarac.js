@@ -108,110 +108,28 @@ R.KingArac = (function(){
     });
   }
 
-  /* ---------- Arama / bulma yardımcıları ---------- */
+  /* ---------- Tek yardımcı: arama ve tekil eşleşme denetimi ---------- */
 
-  function denemeBul(p){
-    if(p.id) return (R.S.exams || []).find(e => e.id === p.id) || null;
-    if(p.ad){
-      const k = kucuk(p.ad);
-      const l = (R.S.exams || []).filter(e => kucuk((e.publisher || '') + ' ' + (e.type || '')).indexOf(k) >= 0);
-      return l.length === 1 ? l[0] : null;
+  function bul(liste, p, alanlar, ad){
+    if(!p) return { hata:ad + ' kimliği ya da adı belirtilmedi.' };
+    const l = liste || [];
+    if(p.id){
+      const k = l.find(x => x.id === p.id);
+      if(!k) return { hata:'«' + p.id + '» kimlikli ' + ad + ' bulunamadı.' };
+      return { kayit:k };
     }
-    return null;
-  }
-  function denemeBulHata(p){
-    if(p.id) return '«' + p.id + '» kimlikli deneme bulunamadı.';
-    if(p.ad){
-      const k = kucuk(p.ad);
-      const l = (R.S.exams || []).filter(e => kucuk((e.publisher || '') + ' ' + (e.type || '')).indexOf(k) >= 0);
-      if(!l.length) return '«' + p.ad + '» adıyla deneme bulunamadı.';
-      return 'Birden çok deneme eşleşti (' + l.length + ' adet); lütfen id belirtin.';
-    }
-    return 'Deneme kimliği ya da adı belirtilmedi.';
-  }
-
-  function kartBul(p){
-    if(p.id) return (R.S.cards || []).find(c => c.id === p.id) || null;
-    if(p.on){
-      const k = kucuk(p.on);
-      const l = (R.S.cards || []).filter(c => kucuk(c.front).indexOf(k) >= 0);
-      return l.length === 1 ? l[0] : null;
-    }
-    return null;
-  }
-  function kartBulHata(p){
-    if(p.id) return '«' + p.id + '» kimlikli kart bulunamadı.';
-    if(p.on){
-      const k = kucuk(p.on);
-      const l = (R.S.cards || []).filter(c => kucuk(c.front).indexOf(k) >= 0);
-      if(!l.length) return '«' + p.on + '» ile eşleşen kart bulunamadı.';
-      return 'Birden çok kart eşleşti (' + l.length + ' adet); lütfen id belirtin.';
-    }
-    return 'Kart kimliği ya da ön yüzü belirtilmedi.';
-  }
-
-  function takvimBul(p){
-    if(p.id) return (R.S.calendar || []).find(x => x.id === p.id) || null;
-    const aranan = p.ad || p.not;
+    const aranan = p.ad || p.on || p.baslik || p.not || p.konu || alanlar.map(f => p[f]).filter(Boolean).join(' ');
     if(aranan){
       const k = kucuk(aranan);
-      const l = (R.S.calendar || []).filter(x => kucuk((x.note || '') + ' ' + (x.kind || '')).indexOf(k) >= 0);
-      return l.length === 1 ? l[0] : null;
+      const bulunan = l.filter(x => {
+        const metin = alanlar.map(f => x[f] || '').join(' ');
+        return kucuk(metin).indexOf(k) >= 0;
+      });
+      if(!bulunan.length) return { hata:'«' + aranan + '» ile eşleşen ' + ad + ' bulunamadı.' };
+      if(bulunan.length > 1) return { hata:'Birden çok ' + ad + ' eşleşti (' + bulunan.length + ' adet); lütfen id belirtin.' };
+      return { kayit:bulunan[0] };
     }
-    return null;
-  }
-  function takvimBulHata(p){
-    if(p.id) return '«' + p.id + '» kimlikli takvim kaydı bulunamadı.';
-    const aranan = p.ad || p.not;
-    if(aranan){
-      const k = kucuk(aranan);
-      const l = (R.S.calendar || []).filter(x => kucuk((x.note || '') + ' ' + (x.kind || '')).indexOf(k) >= 0);
-      if(!l.length) return '«' + aranan + '» ile eşleşen takvim kaydı bulunamadı.';
-      return 'Birden çok takvim kaydı eşleşti (' + l.length + ' adet); lütfen id belirtin.';
-    }
-    return 'Takvim kaydı kimliği ya da adı belirtilmedi.';
-  }
-
-  function videoNotuBul(p){
-    if(p.id) return (R.S.videoNotes || []).find(n => n.id === p.id) || null;
-    if(p.baslik){
-      const k = kucuk(p.baslik);
-      const l = (R.S.videoNotes || []).filter(n => kucuk(n.title).indexOf(k) >= 0);
-      return l.length === 1 ? l[0] : null;
-    }
-    return null;
-  }
-  function videoNotuBulHata(p){
-    if(p.id) return '«' + p.id + '» kimlikli video notu bulunamadı.';
-    if(p.baslik){
-      const k = kucuk(p.baslik);
-      const l = (R.S.videoNotes || []).filter(n => kucuk(n.title).indexOf(k) >= 0);
-      if(!l.length) return '«' + p.baslik + '» ile eşleşen video notu bulunamadı.';
-      return 'Birden çok video notu eşleşti (' + l.length + ' adet); lütfen id belirtin.';
-    }
-    return 'Video notu kimliği ya da başlığı belirtilmedi.';
-  }
-
-  function yanlisBul(p){
-    if(p.id) return (R.S.errors || []).find(e => e.id === p.id) || null;
-    const aranan = p.not || p.konu;
-    if(aranan){
-      const k = kucuk(aranan);
-      const l = (R.S.errors || []).filter(e => kucuk((e.note || '') + ' ' + (e.topic || '')).indexOf(k) >= 0);
-      return l.length === 1 ? l[0] : null;
-    }
-    return null;
-  }
-  function yanlisBulHata(p){
-    if(p.id) return '«' + p.id + '» kimlikli yanlış kaydı bulunamadı.';
-    const aranan = p.not || p.konu;
-    if(aranan){
-      const k = kucuk(aranan);
-      const l = (R.S.errors || []).filter(e => kucuk((e.note || '') + ' ' + (e.topic || '')).indexOf(k) >= 0);
-      if(!l.length) return '«' + aranan + '» ile eşleşen yanlış kaydı bulunamadı.';
-      return 'Birden çok yanlış kaydı eşleşti (' + l.length + ' adet); lütfen id belirtin.';
-    }
-    return 'Yanlış kaydı kimliği ya da açıklaması belirtilmedi.';
+    return { hata:ad + ' kimliği ya da adı belirtilmedi.' };
   }
 
   /* ---------- Model işlevlerini doğrudan çağıran araçlar (KING-4 A2) ---------- */
@@ -221,7 +139,7 @@ R.KingArac = (function(){
       /* 1. ays_deneme */
       {
         ad:'ays_deneme', tur:'yaz', seviye:'orta', ozetAd:'Deneme kaydı',
-        aciklama:'Deneme sınavını kaydeder, günceller ya da siler.',
+        aciklama:'Deneme sınavını kaydeder, günceller ya da siler. Eklemede doğru, yanlış ve boş sayısı zorunludur.',
         parametreler:{
           type:'object',
           properties:{
@@ -231,42 +149,59 @@ R.KingArac = (function(){
             tarih:{ type:'string', maxLength:10, description:'tarih (YYYY-AA-GG)' },
             tur:{ type:'string', maxLength:40, description:'sınav türü (TYT, AYT, YDT)' },
             yayinci:{ type:'string', maxLength:80, description:'yayıncı / deneme adı' },
-            net:{ type:'number', minimum:0, maximum:160, description:'toplam net (ekle için)' },
+            testAdi:{ type:'string', maxLength:60, description:'test adı (Türkçe, Matematik vb.)' },
+            dogru:{ type:'integer', minimum:0, maximum:160, description:'doğru sayısı' },
+            yanlis:{ type:'integer', minimum:0, maximum:160, description:'yanlış sayısı' },
+            bos:{ type:'integer', minimum:0, maximum:160, description:'boş sayısı' },
+            net:{ type:'number', minimum:0, maximum:160, description:'net sayısı (eklemede tek başına kabul edilmez)' },
           },
           required:['islem']
         },
         onizle:p => {
           if(p.islem === 'sil'){
-            const ex = denemeBul(p);
-            if(!ex) return { hata:denemeBulHata(p) };
+            const b = bul(R.S.exams, p, ['publisher', 'type'], 'deneme');
+            if(b.hata) return { hata:b.hata };
+            const ex = b.kayit;
             return { metin:'«' + (ex.publisher || ex.type || 'Deneme') + '» denemesi silinecek.',
               satirlar:[ex.date + ' · ' + (ex.type || '') + ' · net: ' + (R.Model.examNet ? R.Model.examNet(ex) : '—')] };
           }
           if(p.islem === 'guncelle'){
-            const ex = denemeBul(p);
-            if(!ex) return { hata:denemeBulHata(p) };
+            const b = bul(R.S.exams, p, ['publisher', 'type'], 'deneme');
+            if(b.hata) return { hata:b.hata };
+            const ex = b.kayit;
             return { metin:'«' + (ex.publisher || ex.type || 'Deneme') + '» denemesi güncellenecek.',
               satirlar:['Tarih: ' + (p.tarih || ex.date), 'Yayıncı: ' + (p.yayinci || ex.publisher || '—')] };
           }
-          return { metin:'Deneme kaydedilecek: ' + (p.yayinci || p.tur || 'TYT'),
-            satirlar:['Tarih: ' + (p.tarih || R.U.todayISO()), 'Tür: ' + (p.tur || 'TYT'), p.net != null ? 'Net: ' + p.net : null].filter(Boolean) };
+          if(p.islem === 'ekle'){
+            if(p.dogru == null || p.yanlis == null || p.bos == null){
+              return { hata:'Deneme eklemek için doğru, yanlış ve boş sayısı belirtilmelidir; net sayısından doğru veya boş uydurulmaz.' };
+            }
+            const testAdi = p.testAdi || 'Genel';
+            const net = Number(p.dogru) - Number(p.yanlis) / 4;
+            return { metin:'Deneme kaydedilecek: ' + (p.yayinci || p.tur || 'TYT'),
+              satirlar:['Tarih: ' + (p.tarih || R.U.todayISO()), 'Tür: ' + (p.tur || 'TYT'),
+                'Test: ' + testAdi + ' (D:' + p.dogru + ' Y:' + p.yanlis + ' B:' + p.bos + ' · net: ' + net + ')'] };
+          }
+          return { hata:'Geçersiz işlem: ' + p.islem };
         },
         uygula:async p => {
           if(p.islem === 'sil'){
-            const ex = denemeBul(p);
-            if(!ex) return { ok:false, metin:denemeBulHata(p) };
+            const b = bul(R.S.exams, p, ['publisher', 'type'], 'deneme');
+            if(b.hata) return { ok:false, metin:b.hata };
+            const ex = b.kayit;
             const bagli = (R.S.errors || []).filter(e => e.examId === ex.id);
             await R.Model.deleteExam(ex.id);
             render();
             return { metin:'Deneme silindi.', geriAl:async () => {
               await R.Model.saveExam(ex);
-              for(const b of bagli) await R.Model.saveError(b);
+              for(const item of bagli) await R.Model.saveError(item);
               render();
             }};
           }
           if(p.islem === 'guncelle'){
-            const ex = denemeBul(p);
-            if(!ex) return { ok:false, metin:denemeBulHata(p) };
+            const b = bul(R.S.exams, p, ['publisher', 'type'], 'deneme');
+            if(b.hata) return { ok:false, metin:b.hata };
+            const ex = b.kayit;
             const eski = JSON.parse(JSON.stringify(ex));
             if(p.tarih) ex.date = p.tarih;
             if(p.tur) ex.type = p.tur;
@@ -275,17 +210,24 @@ R.KingArac = (function(){
             render();
             return { metin:'Deneme güncellendi.', geriAl:async () => { await R.Model.saveExam(eski); render(); } };
           }
-          const exam = {
-            id:p.id || R.U.uid('e'),
-            date:p.tarih || R.U.todayISO(),
-            type:p.tur || 'TYT',
-            publisher:p.yayinci || p.ad || 'Deneme',
-            tests:p.net != null ? [{ name:'Genel', correct:p.net, wrong:0, blank:0, blankCert:'measured' }] : [],
-            createdAt:new Date().toISOString(),
-          };
-          await R.Model.saveExam(exam);
-          render();
-          return { metin:'Deneme kaydedildi.', geriAl:async () => { await R.Model.deleteExam(exam.id); render(); } };
+          if(p.islem === 'ekle'){
+            if(p.dogru == null || p.yanlis == null || p.bos == null){
+              return { ok:false, metin:'Deneme eklemek için doğru, yanlış ve boş sayısı belirtilmelidir; net sayısından doğru veya boş uydurulmaz.' };
+            }
+            const testAdi = p.testAdi || 'Genel';
+            const exam = {
+              id:p.id || R.U.uid('e'),
+              date:p.tarih || R.U.todayISO(),
+              type:p.tur || 'TYT',
+              publisher:p.yayinci || p.ad || 'Deneme',
+              tests:[{ name:testAdi, correct:Number(p.dogru), wrong:Number(p.yanlis), blank:Number(p.bos), blankCert:'measured' }],
+              createdAt:new Date().toISOString(),
+            };
+            await R.Model.saveExam(exam);
+            render();
+            return { metin:'Deneme kaydedildi.', geriAl:async () => { await R.Model.deleteExam(exam.id); render(); } };
+          }
+          return { ok:false, metin:'Geçersiz işlem: ' + p.islem };
         }
       },
 
@@ -335,21 +277,35 @@ R.KingArac = (function(){
             tur:{ type:'string', enum:['beden', 'zihin', 'yaratici', 'sosyal', 'dinlenme'], description:'etkinlik türü' },
             not:{ type:'string', maxLength:200, description:'açıklama / ipucu notu' },
             id:{ type:'string', maxLength:40, description:'etkinlik kimliği' }
-          },
-          required:['ad']
+          }
         },
-        onizle:p => ({
-          metin:'«' + p.ad + '» etkinliği kataloğa kaydedilecek.',
-          satirlar:['Süre: ' + (p.dakika || 10) + ' dk · Enerji: ' + (p.enerji || 'low') + ' · Tür: ' + (p.tur || 'dinlenme')]
-        }),
+        onizle:p => {
+          const id = p && p.id;
+          const eski = id ? (R.S.activities || []).find(a => a.id === id) : null;
+          const ad = (p && p.ad) || (eski && eski.name) || 'Etkinlik';
+          const dk = (p && p.dakika) || (eski && eski.minutes) || 10;
+          const en = (p && p.enerji) || (eski && eski.energy) || 'low';
+          const tur = (p && p.tur) || (eski && eski.kind) || 'dinlenme';
+          return {
+            metin:'«' + ad + '» etkinliği ' + (eski ? 'güncellenecek.' : 'kataloğa kaydedilecek.'),
+            satirlar:['Süre: ' + dk + ' dk · Enerji: ' + en + ' · Tür: ' + tur]
+          };
+        },
         uygula:async p => {
-          const id = p.id || R.U.uid('act');
+          const id = (p && p.id) || R.U.uid('act');
           const i = (R.S.activities || []).findIndex(a => a.id === id);
           const eski = i >= 0 ? Object.assign({}, R.S.activities[i]) : null;
-          const rec = Object.assign({ id, name:p.ad, minutes:p.dakika || 10, energy:p.enerji || 'low', kind:p.tur || 'dinlenme', note:p.not || '', custom:true }, p.id ? (eski || {}) : {});
+          const patch = { custom:true };
+          if(p && p.ad) patch.name = p.ad;
+          if(p && p.dakika) patch.minutes = p.dakika;
+          if(p && p.enerji) patch.energy = p.enerji;
+          if(p && p.tur) patch.kind = p.tur;
+          if(p && p.not != null) patch.note = p.not;
+          const varsayilan = { id, name:(p && p.ad) || 'Yeni Etkinlik', minutes:(p && p.dakika) || 10, energy:(p && p.enerji) || 'low', kind:(p && p.tur) || 'dinlenme', note:(p && p.not) || '' };
+          const rec = Object.assign(varsayilan, eski || {}, patch);
           await R.Model.saveActivity(rec);
           render();
-          return { metin:'Etkinlik kaydedildi: «' + p.ad + '».', geriAl:async () => {
+          return { metin:'Etkinlik kaydedildi: «' + rec.name + '».', geriAl:async () => {
             if(eski) await R.Model.saveActivity(eski);
             else { R.S.activities = (R.S.activities || []).filter(a => a.id !== id); await R.Store.remove('activities/' + id); }
             render();
@@ -408,28 +364,32 @@ R.KingArac = (function(){
         },
         onizle:p => {
           if(p.islem === 'sil'){
-            const c = kartBul(p);
-            if(!c) return { hata:kartBulHata(p) };
+            const b = bul(R.S.cards, p, ['front'], 'kart');
+            if(b.hata) return { hata:b.hata };
+            const c = b.kayit;
             return { metin:'Tekrar kartı silinecek.', satirlar:['Ön: ' + c.front, 'Arka: ' + (c.back || '—')] };
           }
           if(p.islem === 'guncelle'){
-            const c = kartBul(p);
-            if(!c) return { hata:kartBulHata(p) };
+            const b = bul(R.S.cards, p, ['front'], 'kart');
+            if(b.hata) return { hata:b.hata };
+            const c = b.kayit;
             return { metin:'Tekrar kartı güncellenecek.', satirlar:['Ön: ' + (p.on || c.front), 'Arka: ' + (p.arka || c.back || '—')] };
           }
           return { metin:'Tekrar kartı eklenecek: «' + (p.on || '') + '»', satirlar:['Ön: ' + (p.on || '—'), 'Arka: ' + (p.arka || '—')] };
         },
         uygula:async p => {
           if(p.islem === 'sil'){
-            const c = kartBul(p);
-            if(!c) return { ok:false, metin:kartBulHata(p) };
+            const b = bul(R.S.cards, p, ['front'], 'kart');
+            if(b.hata) return { ok:false, metin:b.hata };
+            const c = b.kayit;
             await R.Model.deleteCard(c.id);
             render();
             return { metin:'Kart silindi.', geriAl:async () => { await R.Model.saveCard(c); render(); } };
           }
           if(p.islem === 'guncelle'){
-            const c = kartBul(p);
-            if(!c) return { ok:false, metin:kartBulHata(p) };
+            const b = bul(R.S.cards, p, ['front'], 'kart');
+            if(b.hata) return { ok:false, metin:b.hata };
+            const c = b.kayit;
             const eski = Object.assign({}, c);
             if(p.on) c.front = p.on;
             if(p.arka) c.back = p.arka;
@@ -631,30 +591,34 @@ R.KingArac = (function(){
         },
         onizle:p => {
           if(p.islem === 'sil'){
-            const c = takvimBul(p);
-            if(!c) return { hata:takvimBulHata(p) };
+            const b = bul(R.S.calendar, p, ['note', 'kind'], 'takvim kaydı');
+            if(b.hata) return { hata:b.hata };
+            const c = b.kayit;
             return { metin:'Takvim kaydı silinecek.', satirlar:[c.from + (c.to && c.to !== c.from ? '–' + c.to : '') + ' · ' + c.kind + (c.note ? ' · ' + c.note : '')] };
           }
           if(p.islem === 'guncelle'){
-            const c = takvimBul(p);
-            if(!c) return { hata:takvimBulHata(p) };
+            const b = bul(R.S.calendar, p, ['note', 'kind'], 'takvim kaydı');
+            if(b.hata) return { hata:b.hata };
+            const c = b.kayit;
             return { metin:'Takvim kaydı güncellenecek.', satirlar:['Tarih: ' + (p.baslangic || c.from), 'Tür: ' + (p.tur || c.kind)] };
           }
-          const b = p.baslangic || R.U.todayISO();
+          const bg = p.baslangic || R.U.todayISO();
           return { metin:'Takvim istisnası kaydedilecek.',
-            satirlar:['Tarih: ' + b + (p.bitis && p.bitis !== b ? '–' + p.bitis : ''), 'Tür: ' + (p.tur || 'tatil'), 'Not: ' + (p.not || '—')] };
+            satirlar:['Tarih: ' + bg + (p.bitis && p.bitis !== bg ? '–' + p.bitis : ''), 'Tür: ' + (p.tur || 'tatil'), 'Not: ' + (p.not || '—')] };
         },
         uygula:async p => {
           if(p.islem === 'sil'){
-            const c = takvimBul(p);
-            if(!c) return { ok:false, metin:takvimBulHata(p) };
+            const b = bul(R.S.calendar, p, ['note', 'kind'], 'takvim kaydı');
+            if(b.hata) return { ok:false, metin:b.hata };
+            const c = b.kayit;
             await R.Model.deleteCalendar(c.id);
             render();
             return { metin:'Takvim kaydı silindi.', geriAl:async () => { await R.Model.saveCalendar(c); render(); } };
           }
           if(p.islem === 'guncelle'){
-            const c = takvimBul(p);
-            if(!c) return { ok:false, metin:takvimBulHata(p) };
+            const b = bul(R.S.calendar, p, ['note', 'kind'], 'takvim kaydı');
+            if(b.hata) return { ok:false, metin:b.hata };
+            const c = b.kayit;
             const eski = Object.assign({}, c);
             if(p.tur) c.kind = p.tur;
             if(p.baslangic) c.from = p.baslangic;
@@ -664,8 +628,8 @@ R.KingArac = (function(){
             render();
             return { metin:'Takvim kaydı güncellendi.', geriAl:async () => { await R.Model.saveCalendar(eski); render(); } };
           }
-          const b = p.baslangic || R.U.todayISO();
-          const doc = { id:p.id || R.U.uid('k'), kind:p.tur || 'tatil', from:b, to:p.bitis || b, note:p.not || '' };
+          const bg = p.baslangic || R.U.todayISO();
+          const doc = { id:p.id || R.U.uid('k'), kind:p.tur || 'tatil', from:bg, to:p.bitis || bg, note:p.not || '' };
           const eklenen = await R.Model.saveCalendar(doc);
           render();
           return { metin:'Takvim istisnası kaydedildi.', geriAl:async () => { await R.Model.deleteCalendar(eklenen.id); render(); } };
@@ -742,13 +706,15 @@ R.KingArac = (function(){
         },
         onizle:p => {
           if(p.islem === 'sil'){
-            const n = videoNotuBul(p);
-            if(!n) return { hata:videoNotuBulHata(p) };
+            const b = bul(R.S.videoNotes, p, ['title'], 'video notu');
+            if(b.hata) return { hata:b.hata };
+            const n = b.kayit;
             return { metin:'Video notu silinecek: «' + n.title + '»', satirlar:['Başlık: ' + n.title + (n.url ? ' · ' + n.url : '')] };
           }
           if(p.islem === 'guncelle'){
-            const n = videoNotuBul(p);
-            if(!n) return { hata:videoNotuBulHata(p) };
+            const b = bul(R.S.videoNotes, p, ['title'], 'video notu');
+            if(b.hata) return { hata:b.hata };
+            const n = b.kayit;
             return { metin:'Video notu güncellenecek.', satirlar:['Başlık: ' + (p.baslik || n.title), 'URL: ' + (p.url || n.url || '—')] };
           }
           return { metin:'Video notu kaydedilecek: «' + (p.baslik || 'Başlıksız not') + '»',
@@ -756,15 +722,17 @@ R.KingArac = (function(){
         },
         uygula:async p => {
           if(p.islem === 'sil'){
-            const n = videoNotuBul(p);
-            if(!n) return { ok:false, metin:videoNotuBulHata(p) };
+            const b = bul(R.S.videoNotes, p, ['title'], 'video notu');
+            if(b.hata) return { ok:false, metin:b.hata };
+            const n = b.kayit;
             await R.Model.deleteVideoNote(n.id);
             render();
             return { metin:'Video notu silindi.', geriAl:async () => { await R.Model.saveVideoNote(n); render(); } };
           }
           if(p.islem === 'guncelle'){
-            const n = videoNotuBul(p);
-            if(!n) return { ok:false, metin:videoNotuBulHata(p) };
+            const b = bul(R.S.videoNotes, p, ['title'], 'video notu');
+            if(b.hata) return { ok:false, metin:b.hata };
+            const n = b.kayit;
             const eski = Object.assign({}, n);
             if(p.baslik) n.title = p.baslik;
             if(p.url) n.url = p.url;
@@ -807,13 +775,15 @@ R.KingArac = (function(){
         },
         onizle:p => {
           if(p.islem === 'sil'){
-            const err = yanlisBul(p);
-            if(!err) return { hata:yanlisBulHata(p) };
+            const b = bul(R.S.errors, p, ['note', 'topic'], 'yanlış kaydı');
+            if(b.hata) return { hata:b.hata };
+            const err = b.kayit;
             return { metin:'Yanlış kaydı silinecek.', satirlar:[(err.subjectId || '') + ' · ' + (err.topic || '') + ' · Neden: ' + (err.cause || 'belirtilmedi')] };
           }
           if(p.islem === 'guncelle'){
-            const err = yanlisBul(p);
-            if(!err) return { hata:yanlisBulHata(p) };
+            const b = bul(R.S.errors, p, ['note', 'topic'], 'yanlış kaydı');
+            if(b.hata) return { hata:b.hata };
+            const err = b.kayit;
             return { metin:'Yanlış kaydı güncellenecek.', satirlar:['Ders: ' + (p.dersId || err.subjectId), 'Neden: ' + (p.neden || err.cause || '—')] };
           }
           return { metin:'Yanlış defterine kayıt yazılacak.',
@@ -821,15 +791,17 @@ R.KingArac = (function(){
         },
         uygula:async p => {
           if(p.islem === 'sil'){
-            const err = yanlisBul(p);
-            if(!err) return { ok:false, metin:yanlisBulHata(p) };
+            const b = bul(R.S.errors, p, ['note', 'topic'], 'yanlış kaydı');
+            if(b.hata) return { ok:false, metin:b.hata };
+            const err = b.kayit;
             await R.Model.deleteError(err.id);
             render();
             return { metin:'Yanlış kaydı silindi.', geriAl:async () => { await R.Model.saveError(err); render(); } };
           }
           if(p.islem === 'guncelle'){
-            const err = yanlisBul(p);
-            if(!err) return { ok:false, metin:yanlisBulHata(p) };
+            const b = bul(R.S.errors, p, ['note', 'topic'], 'yanlış kaydı');
+            if(b.hata) return { ok:false, metin:b.hata };
+            const err = b.kayit;
             const eski = Object.assign({}, err);
             if(p.neden) err.cause = p.neden;
             if(p.not) err.note = p.not;
@@ -860,5 +832,5 @@ R.KingArac = (function(){
 
   function liste(){ return okuma().concat(yazma()).concat(modelAraclari()); }
 
-  return { liste, satirlar };
+  return { liste, satirlar, bul };
 })();
