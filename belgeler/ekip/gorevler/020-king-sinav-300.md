@@ -1,6 +1,6 @@
 # 020 · King sınavı 300 cümleye
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/020-king-sinav-300`
 **Efor:** orta
 **Kabul testi:** `tools/king_sinav_300_kabul_test.py`
@@ -44,7 +44,7 @@ Cümleler:
 - `node tools/king_sinav.js` (puanı ve grup puanlarını Sonuç'a yaz)
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `tools/king_sinav.json` sonuna ilk 100 cümleye dokunulmadan 200 yeni cümle eklendi; toplam 300 cümleye ulaşıldı (ays: 95, spi: 90, esp: 70, genel: 45). Tüm modül araçları en az 2 kez kapsandı, rotalar doğrulandı.
+- **Koşan testler:** `python tools/king_sinav_300_kabul_test.py` -> `king sinavi 300 kabul: 300 cumle, bicim ve araclar gecerli, kosucu 138/300.` · `node tools/king_sinav.js` -> `King sınavı: 138/300 (%46)` (ays 31/95 · genel 35/45 · spi 46/90 · esp 26/70)
+- **Kabul testi:** `king sinavi 300 kabul: 300 cumle, bicim ve araclar gecerli, kosucu 138/300.`
+- **Açık kalan:** yok
