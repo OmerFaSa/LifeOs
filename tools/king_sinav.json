@@ -2386,8 +2386,10 @@
       "m": "esp",
       "c": "4-7-8 nefes tekniği başlat",
       "b": [
+        "merkez",
         "tur:nefes"
-      ]
+      ],
+      "not": "nefes aracı yalnız kutu nefesi (4-4-4-4) yapar; 4-7-8 istenince kutu nefesi başlatmak yanlış olur, Merkez anlatır"
     },
     {
       "g": "genel",
@@ -2476,8 +2478,10 @@
       "m": "spi",
       "c": "bugün kendimi çok halsiz hissediyorum",
       "b": [
-        "merkez"
-      ]
+        "merkez",
+        "veri"
+      ],
+      "not": "SPİ günlük kaydında «his» alanı var; onaylı his kaydı önizlemesi de doğru"
     }
   ]
 }

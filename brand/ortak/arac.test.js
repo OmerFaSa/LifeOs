@@ -6,6 +6,7 @@
         ve sınır dışı değer reddedilir; tahminle düzeltilmez.
      3. Yazan araç önce önizlenir; model seçtiği için seviye en az «orta».
      5. Harita ve arama: işler, sayfalar ve araçlar kodun cümlesiyle.
+     6. Niyet çözücü: soru okuma, emir yazma aracına; kayıt ve danışma girmez.
      +  Sayı kullanıcınındır: modelin cümlesindeki sayı kullanıcınınkinde geçmeli. */
 
 (function(){
@@ -90,6 +91,21 @@
       const a = sahne([DENEME, HEDEF]);
       expect(a.kuralla('son denemelerim nasıl')).toEqual({ ad:'ays_denemeler', param:{} });
       expect(a.kuralla('hedefimi değiştir')).toBeNull();
+    }));
+
+    /* Söz 6: niyet çözücü; dolgu araçlar gerçek katalog büyüklüğü içindir (nadir kelime ağır). */
+    it('niyet: soru okuma, emir yazma aracına; kayıt, danışma ve başa baş null', () => sahneyle(async () => {
+      const dolgu = Array.from({ length:30 }, (_, i) => ({ ad:'x_dolgu_' + i, tur:'oku', aciklama:'Başka bir iş ' + i + '.', calistir:() => ({}) }));
+      const a = sahne([DENEME, HEDEF].concat(dolgu));
+      expect(a.niyet('son deneme netlerim nasıl')).toEqual({ ad:'ays_denemeler', param:{}, puan:3.47, sinif:'oku' });
+      expect(a.niyet('bu haftanın soru hedefini 500 yap').ad).toBe('ays_week_target');
+      expect(a.niyet('haftalık hedefimi güncelle: 450').ad).toBe('ays_week_target');
+      expect(a.niyetSinif('kitaptan alıntı ekle: bir insanın değeri ne')).toBe('yaz');
+      expect(a.niyetSinif('matematikten 40 soru çözdüm')).toBeNull();
+      expect(a.niyet('deneme sınavında stresimi nasıl yönetirim')).toBeNull();
+      expect(a.niyet('deneme nedir')).toBeNull();
+      expect(a.niyet('bugün hava güzel')).toBeNull();
+      expect(a.kuralla('denemelerim kötü ne yapmalıyım')).toBeNull();
     }));
   });
 

@@ -6,6 +6,7 @@
      node tools/king_sinav.js --araclar  # modüllerin araç kaydını dök (beklenen yazarken)
      node tools/king_sinav.js --port=4379  # AYS 4379, SPİ 4389, ESP 4399 (ofis portları; varsayılan 4176)
      node tools/king_sinav.js --adlar    # araç adları ve rotalar, JSON { modül: { araclar, rotalar } } (kabul testleri)
+     node tools/king_sinav.js --modul=ays --json   # tek modül; sonuç JSON [{ c, ok, karar }] (kabul testleri)
 
    Cümleler tools/king_sinav.json'da: { m: söylendiği modül, c: cümle, b: kabul
    edilen kararlar, a?: araç argümanlarından beklenen alt küme }. Karar biçimi:
@@ -28,6 +29,8 @@ const PORT = Number((process.argv.find(x => x.startsWith('--port=')) || '').slic
 const MODUL = { ays:['AYS', PORT], spi:['SPI', PORT + 10], esp:['ESP', PORT + 20] };
 const ADLAR = process.argv.includes('--adlar');
 const ARACLAR = ADLAR || process.argv.includes('--araclar');
+const YALNIZ = (process.argv.find(x => x.startsWith('--modul=')) || '').slice(8);
+const JSON_CIKTI = process.argv.includes('--json');
 const adlar = {};
 
 let chromium;
@@ -46,7 +49,14 @@ async function sor(c){
     window.__sinav = { ayar:KI.ayar, kayit:[] };
     const S = window.__sinav;
     KI.merkezeSor = async m => { S.kayit.push(m === 'hafta' || m === 'capraz' ? 'komut' : 'merkez'); return { ok:false, neden:'baglanti' }; };
-    KI.aracIsle = async r => { (r.arac || []).forEach(a => S.kayit.push({ arac:a.ad, a:a.param || a.arg || {} })); return { tur:'arac' }; };
+    /* Gerçek aracIsle gibi: doğrulamayı geçmeyen seçim (eksik parametreli yazma) karar
+       değildir, akış sürer (3a: önceden parametresiz yazma aracı da puan alıyordu). */
+    KI.aracIsle = async r => {
+      const l = (r.arac || []).filter(a => LIFEOS.ARAC.dogrula(a.ad, a.param || a.arg || {}).ok);
+      if(!l.length) return null;
+      l.forEach(a => S.kayit.push({ arac:a.ad, a:a.param || a.arg || {} }));
+      return { tur:'arac' };
+    };
     KI.baglanti = () => ({ url:'http://127.0.0.1:1', token:'sinav' });
     const tasima = KI.tasimaYaz;
     KI.tasimaYaz = (x, h) => { S.tasima = h && h.route; return tasima(x, h); };
@@ -117,6 +127,7 @@ function altKume(a, b){   // a'nın her anahtarı b'de aynı mı (dizgide büyü
   try{
     browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath:process.env.CHROMIUM_PATH } : {});
     for(const [m, [dizin, port]] of Object.entries(MODUL)){
+      if(YALNIZ && YALNIZ !== m) continue;
       const liste = sinav.cumleler.filter(s => s.m === m);
       if(!liste.length && !ARACLAR) continue;
       const sunucu = spawn('python3', [path.join(KOK, dizin, 'devserver.py'), String(port)], { cwd:path.join(KOK, dizin), stdio:'ignore' });
@@ -150,6 +161,7 @@ function altKume(a, b){   // a'nın her anahtarı b'de aynı mı (dizgide büyü
   if(ADLAR) console.log(JSON.stringify(adlar));
   if(ARACLAR) return;
 
+  if(JSON_CIKTI){ console.log(JSON.stringify(sonuc.map(s => ({ c:s.c, ok:s.ok, karar:s.karar })))); return; }
   const gecen = sonuc.filter(s => s.ok).length;
   const grup = {};
   sonuc.forEach(s => { const g = grup[s.g || s.m] = grup[s.g || s.m] || [0, 0]; g[1]++; if(s.ok) g[0]++; });

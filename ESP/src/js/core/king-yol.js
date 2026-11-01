@@ -329,6 +329,26 @@ window.LIFEOS.KING = (function(){
     }
     const y = KI.yorumla(metin);
     if(y.tur === 'bos') return y;
+    /* A3 niyet çözücü (arac.js söz 6): kalıbı tutmayan soru ve emir araç
+       kaydından seçilir. Sayfa komutu ve kayıt kendi yolunda kalır; veri
+       sanılan cümleyi yalnız açık soru ya da emir geçer («… hedefini 500 yap»),
+       «… bölümünü aç» sayfa değil bölüm işidir. */
+    const NA = KI.ARAC() && !KI.paylasim ? KI.ARAC() : null;
+    const ns = NA && NA.niyet ? NA.niyetSinif(metin) : null;
+    /* Sayfa sözü geçen kısa cümle («haftalık programımı göster») sayfadır; Merkez'e gitme koşuluyla aynı. */
+    const uzun = KI.soruMu(metin) || KI.kucuk(metin).split(' ').length > 3;
+    if(ns && (y.tur === 'bilinmiyor' || y.tur === 'ozet' || (y.tur === 'git' && ((y.kaynak !== 'komut' && uzun) || /bölüm/.test(KI.kucuk(metin))))
+      || (y.tur === 'veri' && ns !== 'ad'))){
+      const N = NA.niyet(metin, ns);
+      if(N){
+        const sen = { kim:'sen', metin:String(metin).trim() };
+        KI.akis.push(sen);
+        KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null;
+        const rn = await KI.aracIsle({ arac:[N], niyet:true }, metin);
+        if(rn) return rn;
+        KI.akis = KI.akis.filter(m => m !== sen);
+      }
+    }
     /* Söz 16: paylaşım sürerken soru o anın karesiyle; veri cümlesi yerelde. */
     if(KI.paylasim && y.tur !== 'veri' && !(y.tur === 'git' && y.kaynak === 'komut')){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });

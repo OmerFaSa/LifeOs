@@ -2691,7 +2691,7 @@
       const m = sira({ ok:true, mode:'arac', text:'', cagrilar:[{ ad:'spi_uyku', param:{ gun:7 }, tur:'oku' }] },
         { ok:true, mode:'model', text:'Son 7 gecede ortalama 7,5 saat uyumuşsun.' });
       const { k } = aracSahne(m);
-      const r = await k.isle('son günlerde nasıl dinlendim sence');
+      const r = await k.isle('nasıl dinlendim sence');
       expect(r.tur).toBe('arac-oku');
       expect(m.istekler[0].govde.araclar.map(a => a.ad)).toContain('spi_uyku');
       expect(m.istekler[0].govde.araclar.map(a => a.ad)).toContain('sistem_haritasi');
