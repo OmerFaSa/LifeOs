@@ -54,8 +54,9 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `belge_dizin_kabul_test.py` — Görev 018 kabul testi; belgeler/DIZIN.md dizininin tamlığını ve bağlantılarını sınar.
 - `esp_sure_kabul_test.py` — Görev 011 kabul testi; ESP serbest oturum süre girişinin Türkçe sayı motoruyla okunmasını sınar, CI'da koşulur.
 - `ice_suren_kabul_test.py` — Görev 007 kabul testi; Google Takvim içe aktarımında süren etkinliklerin doğru çözümlenmesini sınar, CI'da koşulur.
+- `king_sinav_300_kabul_test.py` — Görev 020 kabul testi; King sınavı en az 300 cümle, ilk 100 cümle değişmemiş, biçim geçerli.
 - `olcum_modul_kabul_test.py` — Görev 016 kabul testi; tek komutla modül ölçüm aracının çıktı alanlarını ve aralıklarını sınar.
-- `perde_test_hiz_kabul_test.py` — Görev 015 kabul testi; perde birim testlerinin tarayıcısız hızlı koşumunu sınar, CI'da koşulur.
+- `perde_test_hiz_kabul_test.py` — Görev 015 kabul testi; perde takımlarının gerçek zaman beklemeden (≤ 800 ms) ve eksiksiz koştuğunu sınar, CI'da koşulur.
 - `spi_porsiyon_kabul_test.py` — Görev 012 kabul testi; SPI serbest öğün porsiyon ve miktar ayrıştırmasını sınar, CI'da koşulur.
 - `spi_sure_kabul_test.py` — Görev 009 kabul testi; SPI hızlı giriş süre ayrıştırmasını sınar, CI'da koşulur.
 - `tarih_ortak_kabul_test.py` — Görev 014 kabul testi; üç modülün ortak tarih işlevlerinin sözleşme uyumunu sınar, CI'da koşulur.

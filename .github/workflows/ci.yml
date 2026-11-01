@@ -232,6 +232,8 @@ jobs:
           python3 tools/veri_dogrula_test.py
           python3 tools/tarih_ortak_kabul_test.py
           python3 tools/perde_test_hiz_kabul_test.py
+          python3 tools/tools_dizin_kabul_test.py
+          python3 tools/belge_dizin_kabul_test.py
           python3 tools/ice_suren_kabul_test.py
           python3 tools/kabul_js_test.py
           python3 tools/veri_denetle_kabul_test.py
