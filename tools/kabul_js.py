@@ -44,10 +44,25 @@ class JSHatasi(Exception):
     pass
 
 
+# utils.js ortak cekirdeklere dayanir (2026-11-01, KING-4 Olcum 1c): istenince yanindakiler onune eklenir.
+CEKIRDEK = ("tarih.js", "bicim.js")
+
+
+def on_cekirdek(dosyalar):
+    """utils.js'ten once ayni klasordeki ortak cekirdekler (zaten listede olan eklenmez). Saf islev."""
+    out = []
+    for d in dosyalar:
+        if d.replace("\\", "/").endswith("core/utils.js"):
+            klasor = d[:-len("utils.js")]
+            out += [klasor + c for c in CEKIRDEK if klasor + c not in dosyalar and klasor + c not in out]
+        out.append(d)
+    return out
+
+
 def calistir(modul, dosyalar, ifade, hazirlik="", zaman=30):
     """modul: 'AYS' | 'SPI' | 'ESP' (dosyalar ona goreli) ya da '' (depo kokune goreli)."""
     kok = KOK / modul if modul else KOK
-    yollar = [str(kok / d) for d in dosyalar]
+    yollar = [str(kok / d) for d in on_cekirdek(dosyalar)]
     for y in yollar:
         if not Path(y).exists():
             raise JSHatasi("dosya yok: " + y)
