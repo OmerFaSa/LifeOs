@@ -8,7 +8,9 @@
      3. Geçmiş, 60 günden uzun ve zaten kayıtlı etkinlik alınmaz.
      4. İçe alma yalnız kullanıcının tür seçtiği satırı yazar.
      5. Dışa aktarma istisnaları, sınav günlerini ve hedef son günlerini taşır.
-     6. Telefon bildirimi (iOS kabuğu): günün planı seçilen saatte, tatil
+     6. Tekrar kuralı (RRULE) açılır: DAILY, WEEKLY (BYDAY, INTERVAL), MONTHLY;
+        COUNT, UNTIL, EXDATE ve RECURRENCE-ID uygulanır.
+     7. Telefon bildirimi (iOS kabuğu): günün planı seçilen saatte, tatil
         günü yok; hedefin son günü; sınav günü yalnız kullanıcının yazdığı
         tarihse (tahmin edilmiş güne «yarın sınav» denmez); kapalıysa boş. */
 
@@ -51,15 +53,15 @@
       expect(e.bit).toBe('2026-11-14');
     });
 
-    it('saatli etkinlik kendi gününde biter; tekrar kuralı söylenir', () => {
+    it('saatli etkinlik kendi gününde biter; desteklenmeyen tekrar kuralı söylenir', () => {
       const r = T().oku(ics([
         ['UID:s1', 'SUMMARY:Matematik yazılısı', 'DTSTART:20261014T090000', 'DTEND:20261014T103000'],
-        ['UID:s2', 'SUMMARY:Kulüp', 'DTSTART:20261015T150000Z', 'RRULE:FREQ=WEEKLY'],
+        ['UID:s2', 'SUMMARY:Kulüp', 'DTSTART:20261015T150000Z', 'RRULE:FREQ=SECONDLY'],
         ['UID:s3', 'SUMMARY:Bozuk', 'DTSTART:2026-10-15'],
-      ]));
+      ]), '2026-10-14');
       expect(r.etkinlikler.map(e => [e.uid, e.bas, e.bit])).toEqual([
         ['s1', '2026-10-14', '2026-10-14'], ['s2', '2026-10-15', '2026-10-15']]);
-      expect(r.notlar.join(' ')).toContain('tekrar kuralı okunmadı');
+      expect(r.notlar.join(' ')).toContain('tekrar kuralı desteklenmiyor');
       expect(r.notlar.join(' ')).toContain('1 etkinliğin tarihi okunamadı');
     });
 
@@ -74,6 +76,83 @@
       expect(T().turOner('YARIYIL TATİLİ')).toBe('tatil');
       expect(T().turOner('Kimya yazılısı')).toBe('okulSinavi');
       expect(T().turOner('Veli toplantısı')).toBe(null);
+    });
+  });
+
+  describe('Takvim — tekrar kuralı (RRULE) açılımı', () => {
+    it('günlük tekrar COUNT ve UNTIL ile açılır; geçmiştekiler sayıya girer ama gelmez', () => {
+      const bugun = '2026-11-02';
+      const r = T().oku(ics([
+        ['UID:d1', 'SUMMARY:Günlük sayılı', 'DTSTART;VALUE=DATE:20261101', 'RRULE:FREQ=DAILY;COUNT=3'],
+        ['UID:d2', 'SUMMARY:Günlük sonlu', 'DTSTART;VALUE=DATE:20261103', 'RRULE:FREQ=DAILY;UNTIL=20261105'],
+      ]), bugun);
+      expect(r.ok).toBe(true);
+      const d1 = r.etkinlikler.filter(e => e.uid.startsWith('d1@')).map(e => [e.bas, e.bit, e.tekrar]);
+      expect(d1).toEqual([
+        ['2026-11-02', '2026-11-02', true],
+        ['2026-11-03', '2026-11-03', true],
+      ]);
+      const d2 = r.etkinlikler.filter(e => e.uid.startsWith('d2@')).map(e => [e.bas, e.bit]);
+      expect(d2).toEqual([
+        ['2026-11-03', '2026-11-03'],
+        ['2026-11-04', '2026-11-04'],
+        ['2026-11-05', '2026-11-05'],
+      ]);
+      expect(r.notlar.some(n => n.includes('okunmadı'))).toBe(false);
+    });
+
+    it('haftalık tekrar BYDAY, INTERVAL ve EXDATE ile açılır', () => {
+      const bugun = '2026-11-02';
+      const r = T().oku(ics([
+        ['UID:w1', 'SUMMARY:Pazartesi ve Çarşamba', 'DTSTART;VALUE=DATE:20261102', 'RRULE:FREQ=WEEKLY;BYDAY=MO,WE;COUNT=4'],
+        ['UID:w2', 'SUMMARY:İki haftada bir hariçli', 'DTSTART;VALUE=DATE:20261103', 'RRULE:FREQ=WEEKLY;INTERVAL=2;COUNT=3',
+          'EXDATE;VALUE=DATE:20261117'],
+      ]), bugun);
+      const w1 = r.etkinlikler.filter(e => e.uid.startsWith('w1@')).map(e => e.bas);
+      expect(w1).toEqual(['2026-11-02', '2026-11-04', '2026-11-09', '2026-11-11']);
+      const w2 = r.etkinlikler.filter(e => e.uid.startsWith('w2@')).map(e => e.bas);
+      expect(w2).toEqual(['2026-11-03', '2026-12-01']);
+    });
+
+    it('aylık tekrar ayın aynı gününe açılır, 31 çekmeyen ay atlanır', () => {
+      const bugun = '2026-12-01';
+      const r = T().oku(ics([
+        ['UID:m1', 'SUMMARY:Aylık son gün', 'DTSTART;VALUE=DATE:20261231', 'RRULE:FREQ=MONTHLY;COUNT=3'],
+      ]), bugun);
+      const m1 = r.etkinlikler.map(e => e.bas);
+      expect(m1).toEqual(['2026-12-31', '2027-01-31', '2027-03-31']);
+    });
+
+    it('RECURRENCE-ID açılımdan o günü çıkarır, taşınan kayıt tek satır gelir', () => {
+      const bugun = '2026-11-02';
+      const r = T().oku(ics([
+        ['UID:r1', 'SUMMARY:Ders', 'DTSTART;VALUE=DATE:20261102', 'RRULE:FREQ=WEEKLY;COUNT=3'],
+        ['UID:r1', 'SUMMARY:Ders taşındı', 'RECURRENCE-ID;VALUE=DATE:20261109', 'DTSTART;VALUE=DATE:20261110'],
+      ]), bugun);
+      expect(r.etkinlikler.map(e => [e.baslik, e.bas, e.uid, e.tekrar])).toEqual([
+        ['Ders', '2026-11-02', 'r1@2026-11-02', true],
+        ['Ders', '2026-11-16', 'r1@2026-11-16', true],
+        ['Ders taşındı', '2026-11-10', 'r1', false],
+      ]);
+    });
+
+    it('açılan tekrarlar önizlemede ayrı satır olur; kayıtlı olan var, diğerleri yeni gelir', async () => {
+      const bugun = '2026-11-02';
+      await withTodayAsync(bugun, async () => {
+        resetState();
+        const ham = ics([
+          ['UID:w1', 'SUMMARY:Kulüp tatili', 'DTSTART;VALUE=DATE:20261102', 'RRULE:FREQ=WEEKLY;BYDAY=MO,WE;COUNT=3'],
+        ]);
+        const u = T().oku(ham, bugun).etkinlikler.map(e => e.uid);
+        await R.Model.saveCalendar({ kind:'tatil', from:'2026-11-04', to:null, icsUid:u[1] });
+        const o = T().onizle(ham, bugun);
+        expect(o.ok).toBe(true);
+        expect(o.satirlar.map(s => [s.bas, s.durum, s.tekrar])).toEqual([
+          ['2026-11-02', 'yeni', true],
+          ['2026-11-04', 'var', true],
+          ['2026-11-09', 'yeni', true],
+        ]);
+      });
     });
   });
 
