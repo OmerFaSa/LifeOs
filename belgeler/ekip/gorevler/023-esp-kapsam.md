@@ -29,7 +29,7 @@ KING-4 §A2: «her modül ekranındaki her okuma ve yazma işi tipli bir araç o
 - `esp_zincir`
 
 ## Dokunulacak dosyalar
-- `ESP/src/js/core/kingarac.js` — yukarıdaki araçlar, `brand/ortak/arac.js` biçiminde (başındaki «Araç tanımı» yorumu). Örnek: `esp_kitap_bitir`, `esp_alinti_ekle` (onizle/uygula/geriAl), okuma için `esp_kitaplar`.
+- `ESP/src/js/core/kingarac.js` — yukarıdaki araçlar, ortak araç kataloğunun biçiminde (arac.js başındaki «Araç tanımı» yorumu; salt okunur). Örnek: `esp_kitap_bitir`, `esp_alinti_ekle` (onizle/uygula/geriAl), okuma için `esp_kitaplar`.
 - `ESP/src/tests/kingarac.test.js` — her yeni araç için en az bir sınama (araç adı tırnak içinde geçsin).
 
 ## Araç kuralları (AGENTS §1; arac.js sözleri)

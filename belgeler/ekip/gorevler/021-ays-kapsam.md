@@ -24,7 +24,7 @@ KING-4 §A2: «her modül ekranındaki her okuma ve yazma işi tipli bir araç o
 - `ays_yanlis`
 
 ## Dokunulacak dosyalar
-- `AYS/src/js/core/kingarac.js` — yukarıdaki araçlar, `brand/ortak/arac.js` biçiminde (başındaki «Araç tanımı» yorumu). Mevcut yazma araçları `R.ACTIONS` + `R.Proposals.hemen` yolundan gelir (`yazma()`); yeni araçlar `R.Model` işlevlerini doğrudan çağırır, `liste()`'ye eklenir.
+- `AYS/src/js/core/kingarac.js` — yukarıdaki araçlar, ortak araç kataloğunun biçiminde (arac.js başındaki «Araç tanımı» yorumu; salt okunur). Mevcut yazma araçları `R.ACTIONS` + `R.Proposals.hemen` yolundan gelir (`yazma()`); yeni araçlar `R.Model` işlevlerini doğrudan çağırır, `liste()`'ye eklenir.
 - `AYS/src/tests/kingarac.test.js` — her yeni araç için en az bir sınama (araç adı tırnak içinde geçsin).
 
 ## Araç kuralları (AGENTS §1; arac.js sözleri)

@@ -24,7 +24,7 @@ KING-4 §A2: «her modül ekranındaki her okuma ve yazma işi tipli bir araç o
 - `spi_tahlil_sil`
 
 ## Dokunulacak dosyalar
-- `SPI/src/js/core/kingarac.js` — yukarıdaki araçlar, `brand/ortak/arac.js` biçiminde (başındaki «Araç tanımı» yorumu). Örnek: `spi_barkod_ogun` (onizle/uygula/geriAl), okuma için `spi_tahliller`. 2c oturumu SPİ `store.js` üzerinde çalışıyor: `store.js`'e dokunma.
+- `SPI/src/js/core/kingarac.js` — yukarıdaki araçlar, ortak araç kataloğunun biçiminde (arac.js başındaki «Araç tanımı» yorumu; salt okunur). Örnek: `spi_barkod_ogun` (onizle/uygula/geriAl), okuma için `spi_tahliller`. 2c oturumu SPİ `store.js` üzerinde çalışıyor: `store.js`'e dokunma.
 - `SPI/src/tests/kingarac.test.js` — her yeni araç için en az bir sınama (araç adı tırnak içinde geçsin).
 
 ## Araç kuralları (AGENTS §1; arac.js sözleri)
