@@ -1,6 +1,6 @@
 # 018 · `belgeler/` dizini (DIZIN.md)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/018-belge-dizin`
 **Efor:** orta
 **Kabul testi:** `tools/belge_dizin_kabul_test.py`
@@ -25,7 +25,7 @@ Depo sahibi (2026-11-01): «organizasyonla sistemi düzenli hale getir». Biten 
 - `python tools/belge_dizin_kabul_test.py`
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `belgeler/DIZIN.md` oluşturuldu; `belgeler/` altındaki 32 markdown belgesi Teknik, Ekip ve planlar, Ofis ve Arşiv bölümlerinde konu, durum ve tarihleriyle listelendi. `README.md` belgesine `belgeler/DIZIN.md` atfı eklendi.
+- **Koşan testler:** `python tools/belge_dizin_kabul_test.py` -> `belge dizin kabul: 32 belge, her biri bir kez, baglantilar calisiyor, arsiv ayri.`
+- **Kabul testi:** `python tools/belge_dizin_kabul_test.py` -> `belge dizin kabul: 32 belge, her biri bir kez, baglantilar calisiyor, arsiv ayri.`
+- **Açık kalan:** yok

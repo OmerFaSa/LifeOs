@@ -305,6 +305,7 @@ LifeOS/
 
 | | |
 |---|---|
+| Bütün belgelerin dizini | [`belgeler/DIZIN.md`](belgeler/DIZIN.md) |
 | Teknik ayrıntı (çalıştırma, telefon, sınırlar) | [`belgeler/TEKNIK.md`](belgeler/TEKNIK.md) |
 | Sistem mimarileri | [AYS](AYS/src/OFIS.md) · [SPİ](SPI/src/MIMARI.md) · [ESP](ESP/src/MIMARI.md) · [HKM](HKM/MIMARI.md) |
 | Telefon uygulaması | [`belgeler/UYGULAMA.md`](belgeler/UYGULAMA.md) |
