@@ -4,6 +4,8 @@
 
      node tools/king_sinav.js            # üç modül, puan ve kalan cümleler
      node tools/king_sinav.js --araclar  # modüllerin araç kaydını dök (beklenen yazarken)
+     node tools/king_sinav.js --port=4379  # AYS 4379, SPİ 4389, ESP 4399 (ofis portları; varsayılan 4176)
+     node tools/king_sinav.js --adlar    # araç adları ve rotalar, JSON { modül: { araclar, rotalar } } (kabul testleri)
 
    Cümleler tools/king_sinav.json'da: { m: söylendiği modül, c: cümle, b: kabul
    edilen kararlar, a?: araç argümanlarından beklenen alt küme }. Karar biçimi:
@@ -22,8 +24,11 @@ const fs = require('fs');
 const path = require('path');
 
 const KOK = path.resolve(__dirname, '..');
-const MODUL = { ays:['AYS', 4176], spi:['SPI', 4186], esp:['ESP', 4196] };
-const ARACLAR = process.argv.includes('--araclar');
+const PORT = Number((process.argv.find(x => x.startsWith('--port=')) || '').slice(7)) || 4176;   // ofis: --port=4379
+const MODUL = { ays:['AYS', PORT], spi:['SPI', PORT + 10], esp:['ESP', PORT + 20] };
+const ADLAR = process.argv.includes('--adlar');
+const ARACLAR = ADLAR || process.argv.includes('--araclar');
+const adlar = {};
 
 let chromium;
 try{ ({ chromium } = require(path.join(KOK, 'SPI', 'node_modules', 'playwright'))); }
@@ -114,11 +119,13 @@ function altKume(a, b){   // a'nın her anahtarı b'de aynı mı (dizgide büyü
         await page.goto('http://127.0.0.1:' + port + '/', { waitUntil:'load' });
         await page.waitForFunction(() => window.LIFEOS && LIFEOS.KING_IC && LIFEOS.KING_IC.ayar, null, { timeout:60000 })
           .catch(e => { throw new Error(m + ': King kurulmadı (' + e.message.split('\n')[0] + ')' + (hatalar.length ? ' · sayfa hatası: ' + hatalar.slice(0, 3).join(' | ') : '')); });
-        if(ARACLAR) console.log('== ' + m + '\n' + await page.evaluate(() => {
+        if(ADLAR) adlar[m] = await page.evaluate(() => ({ araclar:LIFEOS.ARAC.liste().map(a => a.ad),
+          rotalar:LIFEOS.KING_IC.SAYFALAR.map(s => s.modul + ':' + s.route) }));
+        else if(ARACLAR) console.log('== ' + m + '\n' + await page.evaluate(() => {
           const A = LIFEOS.ARAC, h = A && A.harita ? A.harita([]) : null;
           return typeof h === 'string' ? h : JSON.stringify(h, null, 1);
         }));
-        for(const s of liste){
+        for(const s of ARACLAR ? [] : liste){
           const r = await page.evaluate(sor, s.c);
           r.ham = r.karar; r.karar = esle(r.karar);
           const ok = s.b.includes(r.karar) && (!s.a || altKume(s.a, r.arg));
@@ -131,6 +138,7 @@ function altKume(a, b){   // a'nın her anahtarı b'de aynı mı (dizgide büyü
     console.error('Koşulamadı:', e && e.message || e);
     process.exit(2);
   }finally{ if(browser) await browser.close(); }
+  if(ADLAR) console.log(JSON.stringify(adlar));
   if(ARACLAR) return;
 
   const gecen = sonuc.filter(s => s.ok).length;
