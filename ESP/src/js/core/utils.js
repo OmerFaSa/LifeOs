@@ -3,108 +3,19 @@
 window.ESP = window.ESP || {};
 
 ESP.U = (function(){
-  const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
-  const MONTHS_SHORT = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
-  const DAY_MS = 86400000;
+  const T = (typeof window !== 'undefined' && window.LIFEOS && window.LIFEOS.TARIH) || (typeof LIFEOS !== 'undefined' && LIFEOS.TARIH) || {};
+  const { MONTHS, MONTHS_SHORT, DAY_MS, pad2, iso, gunOf, isISO, parse, today, todayISO, addDays, diffDays, weekdayIndex, fmtDate, fmtShort, monthName, monthKey } = T;
 
-  function pad2(n){ return String(n).padStart(2,'0'); }
-
-  function iso(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
-  /* Zaman damgasından YEREL gün. `new Date().toISOString()` UTC'dir; ilk on
-     karakteri UTC günüdür ve Türkiye'de (UTC+3) gece 00:00–03:00 arası
-     kayıt DÜNE düşer. Yalnız tarih («2026-09-24») olduğu gibi döner. */
-  function gunOf(ts){
-    const s = ts == null ? '' : String(ts);
-    if(/^\d{4}-\d{2}-\d{2}$/.test(s) || !/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0, 10);
-    const d = new Date(s);
-    return isNaN(d.getTime()) ? s.slice(0, 10) : iso(d);
-  }
-
-  /* Bir ISO tarihi (YYYY-MM-DD) gecerli mi?
-
-     Bu fonksiyon bir tuzaktan dogdu: `parse('yarın')` gecersiz bir Date
-     uretiyordu ve gecersiz Date NESNESI TRUTHY'dir. Yani `if(U.parse(x))`
-     yazan her denetim, bozuk bir tarihte de "gecerli" diyordu — sessizce.
-     Sonra o tarihle yapilan her hesap NaN uretiyor, her karsilastirma false
-     donuyor ve hicbir yerde hata gorunmuyordu.
-
-     Bicim denetimi burada, ayri ve acik. Yalnizca "sayi sayi sayi" degil,
-     takvimde gercekten var olan gun aranir: 2026-02-31 gecerli bir dize
-     ama gecersiz bir gundur. */
-  function isISO(s){
-    if(typeof s !== 'string') return false;
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s.slice(0, 10));
-    if(!m) return false;
-    const y = Number(m[1]), ay = Number(m[2]), g = Number(m[3]);
-    if(ay < 1 || ay > 12 || g < 1 || g > 31) return false;
-    const d = new Date(y, ay - 1, g);
-    return d.getFullYear() === y && d.getMonth() === ay - 1 && d.getDate() === g;
-  }
-
-  /* Cozulemeyen tarih icin `null` doner — gecersiz bir Date DEGIL.
-     Cagiran taraf ikisini ayirt edebilmeli. */
-  /* Önbellek: dize -> zaman damgası (ya da geçersiz için NaN). Ofis notları
-     her çizimde aynı tarihleri binlerce kez çözüyordu (~25 ms). Date
-     nesnesi paylaşılmaz: her çağrı yeni nesne alır. */
-  const PARSE = new Map();
-  function parse(s){
-    if(s instanceof Date) return isFinite(s.getTime()) ? s : null;
-    let t = typeof s === 'string' ? PARSE.get(s) : undefined;
-    if(t === undefined){
-      if(!isISO(s)) t = NaN;
-      else { const parts = String(s).slice(0,10).split('-').map(Number); t = new Date(parts[0], parts[1]-1, parts[2]).getTime(); }
-      if(typeof s === 'string'){ if(PARSE.size > 20000) PARSE.clear(); PARSE.set(s, t); }
-    }
-    return isNaN(t) ? null : new Date(t);
-  }
-
-  function today(){
-    const n = new Date();
-    return new Date(n.getFullYear(), n.getMonth(), n.getDate());
-  }
-
-  function todayISO(){ return iso(today()); }
-
-  /* Gun ekler. Cozulemeyen bir tarih gelirse BUGUNDEN sayar: burada
-     patlamak, kullanicinin bozuk tek bir kaydi yuzunden butun ekrani
-     kapatmak olurdu. */
-  function addDays(d, n){
-    const t = (d instanceof Date && isFinite(d.getTime())) ? d : today();
-    const r = new Date(t.getFullYear(), t.getMonth(), t.getDate());
-    r.setDate(r.getDate()+n);
-    return r;
-  }
-
-  /* Iki ISO tarih arasindaki gun farki. Biri cozulemiyorsa sonuc NaN degil
-     `null` olur: NaN sessizce yayilir ve her karsilastirmayi false yapar;
-     null cagirani durmaya zorlar. */
-  function diffDays(a, b){
-    const x = parse(a), y = parse(b);
-    if(!x || !y) return null;
-    return Math.round((y - x) / DAY_MS);
-  }
-
-  /* 0 = Pazartesi ... 6 = Pazar */
-  function weekdayIndex(d){ return (parse(d).getDay()+6)%7; }
-
-  function fmtDate(d){
-    const x = parse(d);
-    return x.getDate()+' '+MONTHS[x.getMonth()]+' '+x.getFullYear();
-  }
-  function fmtShort(d){
-    const x = parse(d);
-    return x.getDate()+' '+MONTHS_SHORT[x.getMonth()];
-  }
   function fmtRange(a, b){
     const x = parse(a), y = parse(b);
+    if(!x || !y) return '';
     if(x.getMonth() === y.getMonth()) return x.getDate()+'–'+y.getDate()+' '+MONTHS_SHORT[y.getMonth()];
     return fmtShort(x)+' – '+fmtShort(y);
   }
-  function monthName(d){ return MONTHS[parse(d).getMonth()]; }
-  function monthKey(d){ const x = parse(d); return x.getFullYear()+'-'+pad2(x.getMonth()+1); }
 
   function relativeDay(dateISO){
     const n = diffDays(bugunISO(), dateISO);
+    if(n == null) return '';
     if(n === 0) return 'bugün';
     if(n === 1) return 'yarın';
     if(n === -1) return 'dün';

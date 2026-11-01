@@ -3,80 +3,19 @@
 window.SP = window.SP || {};
 
 SP.U = (function(){
-  const MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
-  const MONTHS_SHORT = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
-  const DAY_MS = 86400000;
+  const T = (typeof window !== 'undefined' && window.LIFEOS && window.LIFEOS.TARIH) || (typeof LIFEOS !== 'undefined' && LIFEOS.TARIH) || {};
+  const { MONTHS, MONTHS_SHORT, DAY_MS, pad2, iso, gunOf, isISO, parse, today, todayISO, addDays, diffDays, weekdayIndex, fmtDate, fmtShort, monthName, monthKey } = T;
 
-  function pad2(n){ return String(n).padStart(2,'0'); }
-
-  function iso(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
-  /* Zaman damgasından YEREL gün. `new Date().toISOString()` UTC'dir; ilk on
-     karakteri UTC günüdür ve Türkiye'de (UTC+3) gece 00:00–03:00 arası
-     kayıt DÜNE düşer. Yalnız tarih («2026-09-24») olduğu gibi döner. */
-  function gunOf(ts){
-    const s = ts == null ? '' : String(ts);
-    if(/^\d{4}-\d{2}-\d{2}$/.test(s) || !/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0, 10);
-    const d = new Date(s);
-    return isNaN(d.getTime()) ? s.slice(0, 10) : iso(d);
-  }
-
-  function parse(s){
-    if(s instanceof Date) return s;
-    const parts = String(s).slice(0,10).split('-').map(Number);
-    return new Date(parts[0], parts[1]-1, parts[2]);
-  }
-
-
-  /* Gecerli bir ISO tarih dizesi mi? (YYYY-AA-GG ve gercekten var olan gun)
-
-     Sebep: `new Date('2026-02-31')` bazi tarayicilarda gecerli bir tarihe
-     KAYAR, bazilarinda Invalid Date doner; ikisi de sessizdir. Depodan
-     gelen bir tarihi dogrulamadan kullanmak, bozuk tek bir kaydin butun
-     pencereyi kaydirmasina yol acar. */
-  function isISO(s){
-    if(typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
-    const d = parse(s);
-    return !!d && isFinite(d.getTime()) && iso(d) === s;
-  }
-
-  function today(){
-    const n = new Date();
-    return new Date(n.getFullYear(), n.getMonth(), n.getDate());
-  }
-
-  function todayISO(){ return iso(today()); }
-
-  function addDays(d, n){
-    const r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    r.setDate(r.getDate()+n);
-    return r;
-  }
-
-  function diffDays(a, b){
-    return Math.round((parse(b) - parse(a)) / DAY_MS);
-  }
-
-  /* 0 = Pazartesi ... 6 = Pazar */
-  function weekdayIndex(d){ return (parse(d).getDay()+6)%7; }
-
-  function fmtDate(d){
-    const x = parse(d);
-    return x.getDate()+' '+MONTHS[x.getMonth()]+' '+x.getFullYear();
-  }
-  function fmtShort(d){
-    const x = parse(d);
-    return x.getDate()+' '+MONTHS_SHORT[x.getMonth()];
-  }
   function fmtRange(a, b){
     const x = parse(a), y = parse(b);
+    if(!x || !y) return '';
     if(x.getMonth() === y.getMonth()) return x.getDate()+'–'+y.getDate()+' '+MONTHS_SHORT[y.getMonth()];
     return fmtShort(x)+' – '+fmtShort(y);
   }
-  function monthName(d){ return MONTHS[parse(d).getMonth()]; }
-  function monthKey(d){ const x = parse(d); return x.getFullYear()+'-'+pad2(x.getMonth()+1); }
 
   function relativeDay(dateISO){
     const n = diffDays(bugunISO(), dateISO);
+    if(n == null) return '';
     if(n === 0) return 'bugün';
     if(n === 1) return 'yarın';
     if(n === -1) return 'dün';

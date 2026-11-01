@@ -1,6 +1,6 @@
 # 014 · Üç modülün tarih işlevleri ortak tarih çekirdeğine bağlansın
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/014-tarih-ortak`
 **Efor:** orta
 **Kabul testi:** `tools/tarih_ortak_kabul_test.py`
@@ -32,7 +32,12 @@ KING-4 «Ölçüm 1c» kopya taraması: `AYS/SPI/ESP src/js/core/utils.js` aynı
 - `cd AYS && node tools/runtests.js <port>`; `cd SPI && node tools/runtests.js <port>`; `cd ESP && node tools/runtests.js <port>`
 
 ## Sonuç
-- **Ne değişti:**
+- **Ne değişti:** AYS/src/js/core/utils.js, SPI/src/js/core/utils.js ve ESP/src/js/core/utils.js dosyalarındaki ortak tarih işlev ve sabit gövdeleri kaldırılarak LIFEOS.TARIH (const T = ...) üzerinden bağlandı; fmtRange ve relativeDay işlevlerine geçersiz tarih durumunda boş dize ('') dönme koruması eklendi.
 - **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+  - python tools/tarih_ortak_kabul_test.py -> tarih ortak kabul: uc modulun U tarih islevleri LIFEOS.TARIH; bozuk tarih null ya da bos metin.
+  - cd AYS && node tools/runtests.js 4711 -> 3142/3143 gecti  ·  1 kaldi
+  - cd SPI && node tools/runtests.js 4712 -> 2898/2899 gecti  ·  1 kaldi
+  - cd ESP && node tools/runtests.js 4713 -> 2604/2605 gecti  ·  1 kaldi
+  - python tools/yazi.py --denetle -> Yazı denetimi: temiz
+- **Kabul testi:** tools/tarih_ortak_kabul_test.py -> tarih ortak kabul: uc modulun U tarih islevleri LIFEOS.TARIH; bozuk tarih null ya da bos metin. (geçti)
+- **Açık kalan:** Üç modüldeki 1 kalan ('king.test.js' sesli sohbet uyanma), görev öncesinde de kırmızı olan ve dokunulmayan brand/ortak bölgesine ait testtir; tarih ortaklaştırma kapsamındaki tüm testler eksiksiz yeşildir, açık kalan iş yoktur.
