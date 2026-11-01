@@ -1858,6 +1858,11 @@ R.App = (function(){
           /* King'in kartları (king.js söz 32): sayıyı AYS'nin kendi hesabı
              üretir, King yalnız gösterir; soru Öğren bankasından, cevabı Öğren yazar. */
           kartlar:{
+            /* KING-4 §H (3c): yardım verisi modülün kendi kodundan (core/kingveri.js); kartı King çizer.
+               «Unuttuğun ne var?» Günü kapat'ın yazılmamış satırlarıdır. */
+            eksik:g => (R.Screens.today.gunuKapat.satirlar(g) || []).filter(x => x && !x.yazildi).map(x => ({ id:x.id, ad:x.ad, tur:x.tur })),
+            hafta:bitis => R.KingVeri.hafta(bitis), hatirlat:simdi => R.KingVeri.hatirlat(simdi || new Date()),
+            sonKayit:() => R.KingVeri.sonKayit(), duzelt:(id, alan, deger) => R.KingVeri.duzelt(id, alan, deger),
             istatistik:() => {
               let solved = 0, correct = 0;
               (R.SUBJECTS || []).forEach(s => { const p = R.Calc.topicPractice(s.id, null, 45); solved += p.solved || 0; correct += p.correct || 0; });
@@ -2074,6 +2079,11 @@ R.App = (function(){
       /* 120 Haftalık Merkez özeti (brand/ortak/haftaozet.js): pazar 17:00
          sonrası Bugün'de tek kart. HKM kapalıysa ya da eşleşmemişse kart yok.
          Özet hemen konur, ekran kullanıcı yazmıyorken çizilir (cizIste). */
+      /* KENDİLİĞİNDEN KING (KING-4 §C): modülün olayları HKM'ye (brand/ortak/olay.js);
+         sayıyı core/kingveri.js üretir, kararı HKM verir. HKM kapalıysa sessiz. */
+      if(window.LIFEOS && LIFEOS.OLAY && R.KingVeri && R.KingVeri.olaylar){
+        LIFEOS.OLAY.kur({ modul:'ays', hkm:() => R.Beacon, uret:simdi => R.KingVeri.olaylar(simdi) }).baslat();
+      }
       if(window.LIFEOS && LIFEOS.HaftaOzet){
         R.HaftaOzet = LIFEOS.HaftaOzet.kur({ hkm:() => R.Beacon });
         const haftaTazele = R.HaftaOzet.tazeleyici({ al:() => S.ui.haftaOzet,

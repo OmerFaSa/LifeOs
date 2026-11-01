@@ -1853,6 +1853,11 @@ SP.App = (function(){
           },
           /* King'in kartları (king.js söz 32): son 30 gün, SPİ'nin kendi hesabı. */
           kartlar:{
+            /* KING-4 §H (3c): yardım verisi modülün kendi kodundan (core/kingveri.js); kartı King çizer.
+               «Unuttuğun ne var?» Günü kapat'ın yazılmamış satırlarıdır. */
+            eksik:g => (SP.Screens.today.gunuKapat.satirlar(g) || []).filter(x => x && !x.yazildi).map(x => ({ id:x.id, ad:x.ad, tur:x.tur })),
+            hafta:bitis => SP.KingVeri.hafta(bitis), hatirlat:simdi => SP.KingVeri.hatirlat(simdi || new Date()),
+            sonKayit:() => SP.KingVeri.sonKayit(), duzelt:(id, alan, deger) => SP.KingVeri.duzelt(id, alan, deger),
             /* Öğretmen: SPİ kavramı ders olarak (core/kingders.js). */
             ders:konu => SP.KingDers.ders(konu),
             dersOrnek:'set kavramını anlat',
@@ -1947,6 +1952,11 @@ SP.App = (function(){
       if(window.LIFEOS && window.LIFEOS.GIRIS) girisKurucu();
       /* GÜNÜ KAPAT: kapaktaki «Günü kaydet» açar (today.js gunu-kapat). */
       if(window.LIFEOS && window.LIFEOS.GUNUKAPAT) gunuKapatKurucu();
+      /* KENDİLİĞİNDEN KING (KING-4 §C): modülün olayları HKM'ye (brand/ortak/olay.js);
+         sayıyı core/kingveri.js üretir, kararı HKM verir. HKM kapalıysa sessiz. */
+      if(window.LIFEOS && LIFEOS.OLAY && SP.KingVeri && SP.KingVeri.olaylar){
+        LIFEOS.OLAY.kur({ modul:'spi', hkm:() => SP.Beacon, uret:simdi => SP.KingVeri.olaylar(simdi) }).baslat();
+      }
 
       /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).
          Harita çekmecelerden türetilir; her çekmecenin ilk ekranı. */

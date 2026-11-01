@@ -225,6 +225,8 @@ DOSYALAR = {
     # core/merkez.py hafta_ozeti. HKM kapaliyken kart yok.
     "haftaozet.js":      "js/core",
     "haftaozet.test.js": "tests",
+    "olay.js":           "js/core",
+    "olay.test.js":      "tests",
     # ORNEK VERI KIPI (172): ayri profil anahtari, serit, filigran, tek cikis.
     "ornekkip.js":      "js/core",
     "ornekkip.test.js": "tests",

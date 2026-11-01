@@ -117,13 +117,18 @@
         const k = d.querySelector('[data-plan-kok]');
         expect(k.querySelectorAll('.plan__tablo [data-plan-gunsaat^="acilis|"]').length).toBe(6);
         expect(k.querySelector('[data-plan-gunsaat="acilis|5"]').value).toBe('10:00');
-        k.querySelector('[data-plan-gunac="acilis|6"]').click();
-        k.querySelector('[data-plan-gunkapa="acilis|0"]').click();
-        k.querySelector('[data-plan-gunac="kapanis|4"]').click();
-        k.querySelector('[data-plan-duzen="yedek"]').click();
-        k.querySelector('[data-plan-kume="yedek|ici"]').click();
-        expect(k.querySelector('.plan__is small').textContent.indexOf('Hafta içi · 07:00') === 0).toBe(true);
-        await new Promise(r => setTimeout(r, 450));
+        /* Kayıt 350 ms ertelenir: sahte saatle beklenir (KING-4 3c). */
+        await LIFEOS.SahteSaat.saatle(async ilerlet => {
+          k.querySelector('[data-plan-gunac="acilis|6"]').click();
+          k.querySelector('[data-plan-gunkapa="acilis|0"]').click();
+          k.querySelector('[data-plan-gunac="kapanis|4"]').click();
+          k.querySelector('[data-plan-duzen="yedek"]').click();
+          k.querySelector('[data-plan-kume="yedek|ici"]').click();
+          expect(k.querySelector('.plan__is small').textContent.indexOf('Hafta içi · 07:00') === 0).toBe(true);
+          await ilerlet(349);
+          expect(giden.length).toBe(0);
+          await ilerlet(1);
+        });
         expect(giden.length).toBe(1);                                  // art arda değişiklik tek kayıt
         const g = giden[0];
         expect(g.acilis.saatler).toEqual([null, '07:00', '07:00', '07:00', '07:00', '10:00', '07:00']);
@@ -149,8 +154,10 @@
         expect(k.textContent).toContain('eski sürümle çalışıyor');
         expect(k.querySelector('[data-plan-gunsaat="acilis|5"]').value).toBe('07:00');
         expect(k.querySelector('.plan__is small').textContent.indexOf('Çar · 08:00') === 0).toBe(true);
-        k.querySelector('[data-plan-gunac="acilis|0"]').click();
-        await new Promise(r => setTimeout(r, 450));
+        await LIFEOS.SahteSaat.saatle(async ilerlet => {
+          k.querySelector('[data-plan-gunac="acilis|0"]').click();
+          await ilerlet(450);
+        });
         expect(giden.length).toBe(0);
         expect(k.querySelector('.plan__mesaj').textContent).toContain('yeniden aç');
       }finally{ window.fetch = eski; d.remove(); A._sec('gorunum'); }

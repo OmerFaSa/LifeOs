@@ -2008,6 +2008,11 @@ ESP.App = (function(){
           },
           /* King'in kartları (king.js söz 32): son 30 gün, ESP'nin kendi hesabı. */
           kartlar:{
+            /* KING-4 §H (3c): yardım verisi modülün kendi kodundan (core/kingveri.js); kartı King çizer.
+               «Unuttuğun ne var?» Günü kapat'ın yazılmamış satırlarıdır. */
+            eksik:g => (ESP.Screens.today.gunuKapatSatirlari(g) || []).filter(x => x && !x.yazildi).map(x => ({ id:x.id, ad:x.ad, tur:x.tur })),
+            hafta:bitis => ESP.KingVeri.hafta(bitis), hatirlat:simdi => ESP.KingVeri.hatirlat(simdi || new Date()),
+            sonKayit:() => ESP.KingVeri.sonKayit(), duzelt:(id, alan, deger) => ESP.KingVeri.duzelt(id, alan, deger),
             /* Öğretmen (King, 2026-10-22): ESP'nin öğrenme kartı ders olarak. Kartın
                kendi sınırı («öğretmen incelemesi bekliyor») etikette durur. */
             ders:konu => ESP.Lesson.kingDers(konu),
@@ -2162,6 +2167,11 @@ ESP.App = (function(){
       /* 120 Haftalık Merkez özeti (brand/ortak/haftaozet.js): pazar 17:00
          sonrası Bugün'de tek kart. HKM kapalıysa ya da eşleşmemişse kart yok.
          Özet hemen konur, ekran kullanıcı yazmıyorken çizilir (cizIste). */
+      /* KENDİLİĞİNDEN KING (KING-4 §C): modülün olayları HKM'ye (brand/ortak/olay.js);
+         sayıyı core/kingveri.js üretir, kararı HKM verir. HKM kapalıysa sessiz. */
+      if(window.LIFEOS && LIFEOS.OLAY && ESP.KingVeri && ESP.KingVeri.olaylar){
+        LIFEOS.OLAY.kur({ modul:'esp', hkm:() => ESP.Beacon, uret:simdi => ESP.KingVeri.olaylar(simdi) }).baslat();
+      }
       if(window.LIFEOS && LIFEOS.HaftaOzet){
         ESP.HaftaOzet = LIFEOS.HaftaOzet.kur({ hkm:() => ESP.Beacon });
         const haftaTazele = ESP.HaftaOzet.tazeleyici({ al:() => S.ui.haftaOzet,
