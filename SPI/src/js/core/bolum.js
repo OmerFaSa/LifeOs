@@ -24,7 +24,7 @@ SP.Bolum = (function(){
     { id:'meals',   ad:'Öğünler', takma:['öğün', 'beslenme', 'besin'] },
     { id:'kitchen', ad:'Mutfak',  takma:['mutfak', 'tarif'] },
     { id:'move',    ad:'Hareket', takma:['hareket', 'antrenman', 'spor', 'egzersiz'] },
-    { id:'basket',  ad:'Finans',  takma:['finans', 'bütçe', 'para'] },
+    { id:'basket',  ad:'Finans',  takma:['finans', 'bütçe', 'para', 'market', 'sepet'] },
     { id:'rutbe',   ad:'Rütbe',   takma:['rütbe', 'seviye', 'xp'] },
   ];
   const BY_ID = GIZLENEBILIR.reduce((m, b) => { m[b.id] = b; return m; }, {});

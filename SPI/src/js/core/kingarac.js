@@ -949,21 +949,6 @@ SP.KingArac = (function(){
   /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz; besin ve barkod cümleden okunur. */
   const yemekBul = w => [w.replace(/['’]?n?[ıiuü]n$/, ''), w.replace(/['’]?n?[dt][ae]$/, ''), w.replace(/s[ıiuü]n?[dt][ae]$/, ''), w]
     .map(x => x.trim()).find(x => x.length >= 2 && SP.Parse && SP.Parse.matchFood && SP.Parse.matchFood(x)) || null;
-  const BOLUMLER = [
-    { id:'basket', adlar:['market sepeti', 'sepet', 'finans', 'bütçe', 'butce', 'para'] },
-    { id:'labs', adlar:['tahlil', 'tahliller', 'test', 'testler', 'laboratuvar'] },
-    { id:'kitchen', adlar:['mutfak kileri', 'mutfak', 'kiler', 'tarif'] },
-    { id:'meals', adlar:['öğünler', 'öğün', 'ogunler', 'ogun', 'beslenme', 'besin'] },
-    { id:'move', adlar:['hareket', 'antrenman', 'spor', 'egzersiz', 'koşu'] },
-    { id:'rutbe', adlar:['rütbe', 'rutbe', 'seviye', 'xp'] },
-    { id:'planlar', adlar:['planlar', 'plan'] },
-    { id:'hedefler', adlar:['hedefler', 'hedef'] },
-    { id:'today', adlar:['genel bakış', 'bugün', 'bugun'] },
-    { id:'office', adlar:['masalar', 'masa', 'ofis'] },
-    { id:'guide', adlar:['genel', 'rehber'] },
-    { id:'family', adlar:['profil', 'hane', 'aile'] },
-    { id:'analytics', adlar:['analiz'] },
-  ];
   const KURAL = {
     spi_gun_kaydi:{ es:/((?:dün|bugün|evvelsi gün) ne (?:yedim|yemişim|içtim)|günün kaydı|neler kaydet|günlüğüm)/ },
     spi_antrenmanlar:{ es:/(son antrenman|antrenmanlarım|antrenman geçmiş|kaç antrenman|koşularım|koşu süresi)/ },
@@ -995,8 +980,10 @@ SP.KingArac = (function(){
       const kapat = /(kapat|kapansın|gizle|gizlensin|kaldır|kullanmıyorum)/.test(t);
       const ac = !kapat && /(?:^|\s)(aç|açılsın|göster|geri getir)(?:$|\s)/.test(t);
       if(!kapat && !ac) return null;
-      for(const b of BOLUMLER){
-        if(b.adlar.some(a => t.includes(a))) return { bolum:b.id, acik:kapat ? 0 : 1 };
+      const liste = SP.Bolum && SP.Bolum.liste ? SP.Bolum.liste() : [];
+      for(const b of liste){
+        const adlar = [b.id, b.ad].concat(b.takma || []).map(x => String(x).toLowerCase());
+        if(adlar.some(a => t.includes(a))) return { bolum:b.id, acik:kapat ? 0 : 1 };
       }
       return null;
     } },

@@ -496,7 +496,7 @@
       const bl1 = A().kuralla('market sepeti bölümünü kapat');
       expect(bl1).toEqual({ ad:'spi_bolum_ac_kapa', param:{ bolum:'basket', acik:0 } });
       const bl2 = A().kuralla('tahlil bölümünü aç');
-      expect(bl2).toEqual({ ad:'spi_bolum_ac_kapa', param:{ bolum:'labs', acik:1 } });
+      expect(bl2).toBeNull();
       const bl3 = A().kuralla('mutfak kileri bölümünü gizle');
       expect(bl3).toEqual({ ad:'spi_bolum_ac_kapa', param:{ bolum:'kitchen', acik:0 } });
       const blBilinmeyen = A().kuralla('bilinmeyen bölümünü kapat');
