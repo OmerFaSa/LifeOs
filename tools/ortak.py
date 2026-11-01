@@ -154,6 +154,9 @@ DOSYALAR = {
     # ayrismisti; AYS/SPI parse('2026-02-31')'i 3 Mart'a kaydiriyordu).
     "tarih.js":           "js/core",
     "tarih.test.js":      "tests",
+    # BICIM CEKIRDEGI — sayi, net, sure (uc utils.js'te birebir kopyaydi; AYS/ESP her cagrida Intl kuruyordu).
+    "bicim.js":           "js/core",
+    "bicim.test.js":      "tests",
     "turkcesayi.js":      "js/core",
     "turkcesayi.test.js": "tests",
     # TANITIM ŞERİDİ — ilk kurulumun üç adımı. Sorular üçünde de aynı;

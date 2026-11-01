@@ -24,45 +24,8 @@ R.U = (function(){
   }
 
   /* --- sayi --- */
-  function median(arr){
-    const s = arr.filter(v => typeof v === 'number' && !isNaN(v)).sort((a,b)=>a-b);
-    if(!s.length) return null;
-    const m = Math.floor(s.length/2);
-    return s.length % 2 ? s[m] : (s[m-1]+s[m])/2;
-  }
-  function round(x, digits){
-    if(!isFinite(x)) return 0;
-    const f = Math.pow(10, digits==null?1:digits);
-    return Math.round(x*f)/f;
-  }
-  function clamp(x, lo, hi){ return Math.max(lo, Math.min(hi, x)); }
-  function sum(arr){ return arr.reduce((a,b)=>a+(Number(b)||0), 0); }
-  function pct(part, whole){
-    if(!whole || !isFinite(whole) || !isFinite(part)) return 0;
-    return round(100*part/whole, 0);
-  }
-
-  function fmtNet(x){
-    if(x == null || (typeof x === 'number' && !isFinite(x))) return '—';
-    return (Math.round(x*100)/100).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
-  }
-  function fmtNum(x){
-    if(x == null || (typeof x === 'number' && !isFinite(x))) return '—';
-    return Number(x).toLocaleString('tr-TR');
-  }
-  function fmtMin(mins){
-    /* HATALAR D-8: once toplam yuvarlanir; 119,6 «1 sa 60 dk» yaziliyordu. */
-    if(mins == null || !isFinite(mins)) return '—';
-    const t = Math.round(mins);
-    const h = Math.floor(t/60), m = t%60;
-    if(h && m) return h+' sa '+m+' dk';
-    if(h) return h+' sa';
-    return m+' dk';
-  }
-  function fmtClock(seconds){
-    const m = Math.floor(seconds/60), s = Math.floor(seconds%60);
-    return pad2(m)+':'+pad2(s);
-  }
+  /* Sayi ve sure bicimleri ortak cekirdekten (brand/ortak/bicim.js). */
+  const { median, round, clamp, sum, pct, fmtNet, fmtNum, fmtMin, fmtClock } = LIFEOS.BICIM;
 
   /* --- metin --- */
   function esc(s){

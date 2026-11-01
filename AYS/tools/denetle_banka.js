@@ -4,10 +4,12 @@
 const fs = require('fs');
 const path = require('path');
 
-global.window = {};
+global.window = global;   // tarayicidaki gibi: ortak cekirdekler (LIFEOS.*) ciplak adla okunur
 global.R = {};
 
 const files = [
+  'src/js/core/tarih.js',
+  'src/js/core/bicim.js',
   'src/js/core/utils.js',
   'src/js/data/subjects.js',
   'src/js/data/curriculum.js',
