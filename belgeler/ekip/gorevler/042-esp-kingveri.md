@@ -1,6 +1,6 @@
 # 042 · ESP King verisi: olaylar ve yardım sağlayıcıları (KING-4 §C, §H)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/042-esp-kingveri`
 **Efor:** orta
 **Kabul testi:** `tools/kingveri_esp_kabul_test.py`
@@ -40,7 +40,7 @@ Olay biçimi: `belgeler/ekip/KING-OLAY.md` (oku). Her olay `{ modul:'esp', tur, 
 - `cd ESP && node tools/runtests.js <senin portun>`
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** ESP.KingVeri (ESP/src/js/core/kingveri.js) tamamlandı: tekrar_gunu olayı, hafta özeti (tahmin/ölçüldü ayrımı, oturum ve gün sayısı), hatırlatma ortancası ve sonKayit/duzelt uygulandı (duzelt sonrası geriAl eski dakikayı ve eski kesinliği geri yükler). Kenar durumları sınayan birim testleri (ESP/src/tests/kingveri.test.js) eklendi.
+- **Koşan testler:** python tools/kingveri_esp_kabul_test.py -> esp king verisi kabul: tekrar_gunu, kimlik, hafta, hatirlat, sonKayit/duzelt. · cd ESP && node tools/runtests.js 4773 -> 2624/2624 gecti
+- **Kabul testi:** python tools/kingveri_esp_kabul_test.py -> esp king verisi kabul: tekrar_gunu, kimlik, hafta, hatirlat, sonKayit/duzelt.
+- **Açık kalan:** yok
