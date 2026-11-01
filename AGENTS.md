@@ -10,7 +10,8 @@
 Dört bağımsız sistem: **AYS** (sınav), **SPİ** (sağlık), **ESP** (gelişim)
 tarayıcıda çalışan sıfır bağımlılıklı tek sayfa uygulamalarıdır; **HKM**
 onların yanında duran isteğe bağlı bir Python servisidir. Ayrıntı:
-`README.md` (kısa), `belgeler/TEKNIK.md` (ayrıntı) ve her sistemin `MIMARI.md`'si. Dış inceleme için hazır özet
+`README.md` (kısa), `belgeler/TEKNIK.md` (ayrıntı), her sistemin `MIMARI.md`'si;
+bütün belgelerin dizini `belgeler/DIZIN.md`, araçlarınki `tools/DIZIN.md`. Dış inceleme için hazır özet
 `python3 tools/paket.py` ile ÜRETİLİR (`PAKET.md`); depoda durmaz, çünkü
 üretilmiş bir dosya bir gün kaynağıyla ayrışır.
 
