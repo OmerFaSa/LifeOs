@@ -1,6 +1,6 @@
 # 023 · ESP ekran işlerinin tamamı King aracı (KING-4 A2)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/023-esp-kapsam`
 **Efor:** orta
 **Kabul testi:** `tools/king_kapsam_esp_kabul_test.py`
@@ -53,7 +53,7 @@ KING-4 §A2: «her modül ekranındaki her okuma ve yazma işi tipli bir araç o
 - `cd ESP && node tools/runtests.js <senin portun>`
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `ESP/src/js/core/kingarac.js` içine 19 yeni King aracı (4 okuma: `esp_merdiven`, `esp_argumanlar`, `esp_olaylar`, `esp_repertuvar`; 15 yazma: `esp_oturum`, `esp_arguman`, `esp_dosya`, `esp_eser`, `esp_hatirlatma`, `esp_hedef`, `esp_karar_kapat`, `esp_kart_sil`, `esp_kaynak`, `esp_kitap`, `esp_not_sil`, `esp_olay`, `esp_ses_kaydi`, `esp_taslak`, `esp_zincir`) eklendi. `ESP/src/tests/kingarac.test.js` içine her yeni araç için okuma ve yazma (önizleme, uygulama, geri alma) testleri eklendi.
+- **Koşan testler:** `node tools/king_kapsam.js --modul=esp` -> `King kapsamı: tam` · `cd ESP && node tools/runtests.js 4733` -> `2611/2611 gecti`
+- **Kabul testi:** `python tools/king_kapsam_esp_kabul_test.py` -> `king kapsam esp kabul: ekran islerinin tamami arac, 19 yeni arac sinanmis.`
+- **Açık kalan:** yok
