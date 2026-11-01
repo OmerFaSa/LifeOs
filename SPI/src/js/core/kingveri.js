@@ -188,9 +188,9 @@ SP.KingVeri = (function(){
     const hareketSatir = {
       id: 'hareket_dk',
       ad: 'Hareket süresi',
-      deger: wBu.length > 0 ? dkTop : null,
+      deger: hasDk ? dkTop : null,
       birim: 'dk',
-      etiket: wBu.length > 0 ? 'ölçüldü' : 'veri yok',
+      etiket: hasDk ? 'ölçüldü' : 'veri yok',
       onceki: hareketOnceki
     };
 
@@ -327,7 +327,7 @@ SP.KingVeri = (function(){
       gun: enYeni.date,
       ad: enYeni.name || 'Antrenman',
       alanlar: [
-        { ad:'dk', deger:typeof enYeni.minutes === 'number' ? enYeni.minutes : 0, birim:'dk' }
+        { ad:'dk', deger:typeof enYeni.minutes === 'number' && !isNaN(enYeni.minutes) ? enYeni.minutes : null, birim:'dk' }
       ]
     };
   }
@@ -346,7 +346,7 @@ SP.KingVeri = (function(){
       return { ok:false, why:'Antrenman kaydı bulunamadı.' };
     }
 
-    const once = typeof w.minutes === 'number' ? w.minutes : 0;
+    const once = typeof w.minutes === 'number' && !isNaN(w.minutes) ? w.minutes : null;
     const guncel = Object.assign({}, w, { minutes:deger });
 
     if(SP.Model && typeof SP.Model.saveWorkout === 'function'){
@@ -367,6 +367,14 @@ SP.KingVeri = (function(){
         const eski = Object.assign({}, guncel, { minutes:once });
         if(SP.Model && typeof SP.Model.saveWorkout === 'function'){
           await SP.Model.saveWorkout(eski);
+          if(once === null){
+            eski.minutes = null;
+            const wInS = SP.S && SP.S.workouts && SP.S.workouts.find(x => x && x.id === id);
+            if(wInS) wInS.minutes = null;
+            if(SP.Store && typeof SP.Store.set === 'function'){
+              await SP.Store.set('workouts/' + id, eski);
+            }
+          }
         } else {
           const idx = workouts.findIndex(x => x.id === id);
           if(idx >= 0) workouts[idx] = eski;

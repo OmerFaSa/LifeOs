@@ -212,6 +212,30 @@
         resetState();
       }
     });
+
+    it('hafta: dakikası null antrenman varken hareket_dk veri yok kalır, antrenman adedi sayılır', () => {
+      resetState();
+      SP.S.vitals = {};
+      SP.S.workouts = [];
+      SP.S.meals = {};
+      try{
+        const bit = U.todayISO();
+        SP.S.workouts = [
+          { id:'w_null', date:bit, minutes:null }
+        ];
+        const h = SP.KingVeri.hafta(bit);
+        const sMap = {};
+        h.satirlar.forEach(s => { sMap[s.id] = s; });
+
+        expect(sMap.antrenman.deger).toBe(1);
+        expect(sMap.antrenman.etiket).toBe('ölçüldü');
+
+        expect(sMap.hareket_dk.deger).toBeNull();
+        expect(sMap.hareket_dk.etiket).toBe('veri yok');
+      }finally{
+        resetState();
+      }
+    });
   });
 
   describe('King verisi — hatirlat', () => {
@@ -304,6 +328,39 @@
         expect(s.id).toBe('w2');
         expect(s.ad).toBe('Yeni');
         expect(s.alanlar[0]).toEqual({ ad:'dk', deger:45, birim:'dk' });
+      }finally{
+        resetState();
+      }
+    });
+
+    it('sonKayit: dakikası null antrenmanda alanlar[0].deger null olmalı (0 değil)', () => {
+      resetState();
+      SP.S.workouts = [
+        { id:'w_null', name:'Süresiz', minutes:null, createdAt:'2026-10-02T10:00:00Z', date:U.todayISO() }
+      ];
+      try{
+        const s = SP.KingVeri.sonKayit();
+        expect(s.id).toBe('w_null');
+        expect(s.alanlar[0].deger).toBeNull();
+      }finally{
+        resetState();
+      }
+    });
+
+    it('duzelt: eski dakika null ise once null döner ve geriAl minutes:null geri yazar (0 değil)', async () => {
+      resetState();
+      SP.S.workouts = [
+        { id:'w_null', name:'Dakikasız', minutes:null, date:U.todayISO() }
+      ];
+      try{
+        const res = await SP.KingVeri.duzelt('w_null', 'dk', 45);
+        expect(res.ok).toBe(true);
+        expect(res.once).toBeNull();
+        expect(res.sonra).toBe(45);
+        expect(SP.S.workouts.find(w => w.id === 'w_null').minutes).toBe(45);
+
+        await res.geriAl();
+        expect(SP.S.workouts.find(w => w.id === 'w_null').minutes).toBeNull();
       }finally{
         resetState();
       }
