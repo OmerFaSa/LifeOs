@@ -146,3 +146,39 @@ Her tur **yeni oturumda** başlar ve bu belgeden yürür.
 - Yazan eylemlerin %100'ü geri alınabiliyor.
 - İlk söz 1 saniyenin altında.
 - king.js'te tek dosya 1.500 satırı geçmiyor.
+
+## Tur 1a sonuçları (2026-11-01)
+
+**A1 · bölme (2eb223f4).** `brand/ortak/king.js` sekiz parça: `king.js` (çekirdek,
+1.263 satır), `king-ses`, `king-kayit`, `king-gorunum`, `king-kart`, `king-arac`,
+`king-devrim`, `king-yol` (son yüklenir; `kur` ve dışa açılan nesne). En büyük
+dosya 1.263 satır. Parçalar arası okunan adlar ve ortak durum
+`window.LIFEOS.KING_IC`'te (`KI.ad`); kural `king.js` başında. Dışa açılan King
+nesnesi aynı (193 anahtar). Testler: AYS 3136, SPI 2892, ESP 2598, hepsi yeşil.
+
+**A5 · King sınavı, ilk 100 cümle.** `node tools/king_sinav.js` (cümleler
+`tools/king_sinav.json`). Her modülün kendi sayfası tarayıcıda açılır, cümle
+`KING.isle`'ye verilir ve **ilk karar** yakalanır: sayfaya gitme, veri önizleme,
+araç seçimi, Merkez'e sorma ya da yerel araç kutusu. Hiçbir şey yazılmaz;
+HKM bağlı sayılır ama Merkez çağrısı yakalanır. Yani bu puan **istemcinin
+yerel yönlendirmesini** ölçer; modelin araç seçimi (HKM) henüz ölçülmüyor.
+
+Bugünkü puan: **59/100 (%59)**. AYS 19/32, SPİ 15/30, ESP 11/22, genel 14/16.
+Yerel karar süresi ortanca 1 ms. Hedef ≥ %90. İki koşuda aynı sonuç çıktı.
+
+Kayıpların dökümü (41):
+
+| Kayıp türü | Sayı | Örnek |
+|---|---|---|
+| Okuma sorusu sayfaya götürülüyor (araç var) | 17 | «son denemelerim nasıl» → Deneme sayfası; `ays_denemeler` beklenir |
+| Merkez'e düşüyor; yerelde araç ya da kayıt var | 9 | «kilom 78.4», «Suç ve Ceza'yı bitirdim», «4006381333931 barkodu ne» |
+| Yanlış modüle gidiyor | 6 | SPİ'de «son bir haftada uykum nasıl» → AYS Hafta; ESP'de «… kart yap» → AYS Tekrar |
+| Okuma sorusu kayıt sanılıyor | 3 | «yulafın besin değeri» öğün önizlemesi oluyor |
+| Sohbet cümlesi sayfaya gidiyor | 3 | «bana motive edici bir şey söyle» → Bugün |
+| Ödeme kilidi yanlış alarm | 1 | «yapılacak: fatura öde» ödeme sanılıyor |
+| Diğer | 2 | «bana bir integral sorusu sor» sorma komutu sanılıyor |
+
+Merkez'e düşen 9 cümleyi HKM'deki model doğru araca götürebilir; o zaman
+tavan %68. A3 (niyet çözücü) bu tabloyu hedef alır: sayfa adı içeren soru
+cümlesi önce araç kaydına, sonra sayfaya; modül adı geçmeyen cümle bulunduğu
+modülde kalır.
