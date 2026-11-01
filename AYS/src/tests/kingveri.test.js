@@ -208,5 +208,83 @@
         resetState();
       }
     });
+
+    it('hafta: bozuk veya gecersiz ISO girisinde hata vermeden hepsi veri yok satirlariyla doner', () => {
+      hazirla();
+      try{
+        const hBozuk = R.KingVeri.hafta('bozuk');
+        expect(hBozuk).toBeTruthy();
+        expect(hBozuk.bas).toBeNull();
+        expect(hBozuk.bit).toBeNull();
+        expect(Array.isArray(hBozuk.satirlar)).toBe(true);
+        expect(hBozuk.satirlar.length).toBe(3);
+        hBozuk.satirlar.forEach(s => {
+          expect(s.deger).toBeNull();
+          expect(s.etiket).toBe('veri yok');
+          expect(s.onceki).toBeNull();
+        });
+
+        const hGecersiz = R.KingVeri.hafta('2026-13-40');
+        expect(hGecersiz).toBeTruthy();
+        expect(hGecersiz.bas).toBeNull();
+        expect(hGecersiz.bit).toBeNull();
+        expect(Array.isArray(hGecersiz.satirlar)).toBe(true);
+        expect(hGecersiz.satirlar.length).toBe(3);
+        hGecersiz.satirlar.forEach(s => {
+          expect(s.deger).toBeNull();
+          expect(s.etiket).toBe('veri yok');
+          expect(s.onceki).toBeNull();
+        });
+      }finally{
+        resetState();
+      }
+    });
+
+    it('duzelt: saveDay hata verirse bellek eski degere doner ve { ok:false, why: Kaydedilemedi... } doner; geriAl icin de ayni', async () => {
+      hazirla();
+      const eskiSaveDay = R.Model.saveDay;
+      try{
+        const bugun = G(0);
+        R.S.days[bugun] = {
+          date: bugun,
+          blocks: [
+            { id: 'b20', slot: 'Ana ders', subject: 'Matematik', topic: 'Türev', status: 'done', actualMin: 40, actualQ: 15 }
+          ]
+        };
+
+        // 1) saveDay hata fırlatırsa duzelt başarısız olmalı ve bellek eski değerde kalmalı
+        R.Model.saveDay = async () => {
+          throw new Error('Depolama kotası doldu');
+        };
+
+        const resHata = await R.KingVeri.duzelt(bugun + '/b20', 'dk', 60);
+        expect(resHata.ok).toBe(false);
+        expect(resHata.why.startsWith('Kaydedilemedi:')).toBe(true);
+        // Bellek 40 olarak korunmalı
+        expect(R.S.days[bugun].blocks[0].actualMin).toBe(40);
+
+        // 2) Başarılı düzeltme, ardından geriAl sırasında saveDay hata fırlatırsa
+        let kaydetSayisi = 0;
+        R.Model.saveDay = async () => {
+          kaydetSayisi++;
+          if(kaydetSayisi > 1){
+            throw new Error('Geri alma sırasında ağ hatası');
+          }
+        };
+
+        const resBasarili = await R.KingVeri.duzelt(bugun + '/b20', 'dk', 80);
+        expect(resBasarili.ok).toBe(true);
+        expect(R.S.days[bugun].blocks[0].actualMin).toBe(80);
+
+        // geriAl çağrıldığında saveDay patlar: bellek 80'e geri dönmeli ve hata dönmeli
+        const resGeriAlHata = await resBasarili.geriAl();
+        expect(resGeriAlHata.ok).toBe(false);
+        expect(resGeriAlHata.why.startsWith('Kaydedilemedi:')).toBe(true);
+        expect(R.S.days[bugun].blocks[0].actualMin).toBe(80);
+      }finally{
+        R.Model.saveDay = eskiSaveDay;
+        resetState();
+      }
+    });
   });
 })();

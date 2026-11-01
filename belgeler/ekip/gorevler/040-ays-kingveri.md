@@ -40,7 +40,7 @@ Olay biçimi: `belgeler/ekip/KING-OLAY.md` (oku). Her olay `{ modul:'ays', tur, 
 - `cd AYS && node tools/runtests.js <senin portun>`
 
 ## Sonuç
-- **Ne değişti:** AYS/src/js/core/kingveri.js içinde R.KingVeri (olaylar, hafta, hatirlat, sonKayit, duzelt) işlevleri sözleşmeye uygun şekilde tamamlandı; AYS/src/tests/kingveri.test.js içine boş veri, ms sayısı kayitAt, 600/601 dk sınırları, duzelt ve geri al durumlarını sınayan birim testleri eklendi.
-- **Koşan testler:** cd AYS && node tools/runtests.js 4731 -> 3167/3167 gecti
+- **Ne değişti:** AYS/src/js/core/kingveri.js içinde R.KingVeri (olaylar, hafta, hatirlat, sonKayit, duzelt) tamamlandı; hafta geçersiz ISO koruması (sabit 7 gün sayımı, veri yok satırları) ve duzelt/geriAl saveDay hata koruması (bellek geri alma, {ok:false, why}) eklendi; AYS/src/tests/kingveri.test.js içine bu durumları sınayan testler yazıldı.
+- **Koşan testler:** cd AYS && node tools/runtests.js 4731 -> 3169/3169 gecti
 - **Kabul testi:** python tools/kingveri_ays_kabul_test.py -> ays king verisi kabul: sinav_yaklasti, tekrar_gunu, kimlik, hafta, hatirlat, sonKayit/duzelt.
 - **Açık kalan:** yok

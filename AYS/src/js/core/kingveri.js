@@ -12,15 +12,11 @@ R.KingVeri = (function(){
       'T' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
   }
 
-  function gunAraligi(basISO, bitISO){
+  function gunAraligi(basDate, count){
     const U = R.U;
     const list = [];
-    let cur = U.parse(basISO);
-    while(true){
-      const s = U.iso(cur);
-      list.push(s);
-      if(s === bitISO) break;
-      cur = U.addDays(cur, 1);
+    for(let i = 0; i < count; i++){
+      list.push(U.iso(U.addDays(basDate, i)));
     }
     return list;
   }
@@ -77,14 +73,45 @@ R.KingVeri = (function(){
   // 2) Hafta raporu (KING-4 §H)
   function hafta(bitisISO){
     const U = R.U;
+    if(!bitisISO || typeof bitisISO !== 'string' || !U || !U.isISO || !U.isISO(bitisISO)){
+      return {
+        bas: null,
+        bit: null,
+        satirlar: [
+          {
+            id: 'calisma_dk',
+            ad: 'Çalışma süresi',
+            deger: null,
+            birim: 'dk',
+            etiket: 'veri yok',
+            onceki: null
+          },
+          {
+            id: 'soru',
+            ad: 'Soru sayısı',
+            deger: null,
+            etiket: 'veri yok',
+            onceki: null
+          },
+          {
+            id: 'blok',
+            ad: 'Tamamlanan blok',
+            deger: null,
+            etiket: 'veri yok',
+            onceki: null
+          }
+        ]
+      };
+    }
+
     const bit = bitisISO;
     const bitDate = U.parse(bitisISO);
-    const bas = U.iso(U.addDays(bitDate, -6));
+    const basDate = U.addDays(bitDate, -6);
+    const bas = U.iso(basDate);
 
-    const buGunler = gunAraligi(bas, bit);
-    const oncekiBit = U.iso(U.addDays(bitDate, -7));
-    const oncekiBas = U.iso(U.addDays(bitDate, -13));
-    const onceGunler = gunAraligi(oncekiBas, oncekiBit);
+    const buGunler = gunAraligi(basDate, 7);
+    const oncekiBasDate = U.addDays(bitDate, -13);
+    const onceGunler = gunAraligi(oncekiBasDate, 7);
 
     function olc(gList){
       const days = (R.S && R.S.days) || {};
@@ -364,7 +391,17 @@ R.KingVeri = (function(){
     }
 
     if(R.Model && R.Model.saveDay){
-      await R.Model.saveDay(gun);
+      try{
+        await R.Model.saveDay(gun);
+      }catch(err){
+        if(alan === 'dk'){
+          block.actualMin = once;
+        }else if(alan === 'soru'){
+          block.actualQ = once;
+        }
+        const msg = (err && err.message) ? err.message : String(err);
+        return { ok: false, why: 'Kaydedilemedi: ' + msg };
+      }
     }
 
     async function geriAl(){
@@ -374,7 +411,17 @@ R.KingVeri = (function(){
         block.actualQ = once;
       }
       if(R.Model && R.Model.saveDay){
-        await R.Model.saveDay(gun);
+        try{
+          await R.Model.saveDay(gun);
+        }catch(err){
+          if(alan === 'dk'){
+            block.actualMin = deger;
+          }else if(alan === 'soru'){
+            block.actualQ = deger;
+          }
+          const msg = (err && err.message) ? err.message : String(err);
+          return { ok: false, why: 'Kaydedilemedi: ' + msg };
+        }
       }
       return { ok: true };
     }
