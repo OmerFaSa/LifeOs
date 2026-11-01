@@ -292,7 +292,14 @@ DOSYALAR = {
     "bildirim.test.js": "tests",
     # KING — her yerden sade sohbet (2026-10-05): ayni katalog, ayni isik,
     # ayni baloncuk uc arayuzde.
-    "king.js":        "js/core",
+    "king.js":        "js/core",   # parca 1/8; sira: king.js, sonra asagidakiler (KING-4 A1)
+    "king-ses.js":    "js/core",
+    "king-kayit.js":  "js/core",
+    "king-gorunum.js":"js/core",
+    "king-kart.js":   "js/core",
+    "king-arac.js":   "js/core",
+    "king-devrim.js": "js/core",
+    "king-yol.js":    "js/core",
     "king.css":       "css",
     "king.test.js":   "tests",
     # GIRIS — tek satirda veri girme kapisi (2026-10-15): ayni kutu, ayni
