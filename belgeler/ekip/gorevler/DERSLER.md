@@ -17,3 +17,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 020 (01.11.2026): Cumle beklentisi sayfa adindan degil isten yazilir: «gelecek haftanin plani» gelecek (puan) sayfasi degil hafta
 - 021 (01.11.2026): Adsız sil/guncelle tek kaydı sessizce secmesin; varsayilan deger (1 kg, 'lang', kuru fasulye) uydurma sayilir
 - 022 (01.11.2026): Adsız sil/guncelle tek kaydı sessizce secmesin; varsayilan deger (1 kg, 'lang', kuru fasulye) uydurma sayilir
+- 023 (01.11.2026): Adsız sil/guncelle tek kaydı sessizce secmesin; varsayilan deger (1 kg, 'lang', kuru fasulye) uydurma sayilir
