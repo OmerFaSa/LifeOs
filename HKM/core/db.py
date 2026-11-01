@@ -418,6 +418,22 @@ CREATE TABLE IF NOT EXISTS model_tarife (
   tarih     TEXT NOT NULL
 );
 
+-- KING-4 A4: King'in yazdigi her eylem ve geri alma bilgisi (core/eylem.py).
+CREATE TABLE IF NOT EXISTS eylem (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at  TEXT NOT NULL,
+  kaynak      TEXT NOT NULL,            -- king | istemci
+  kanal       TEXT NOT NULL DEFAULT 'local',
+  modul       TEXT,
+  arac        TEXT NOT NULL,            -- para.yaz | soz.ekle | spi_kayit ...
+  param       TEXT,                     -- JSON
+  ozet        TEXT NOT NULL,
+  geri        TEXT,                     -- JSON: {"hkm": tur, ...} ya da {"istemci": {ad, param}}; NULL = geri alinamaz
+  durum       TEXT NOT NULL DEFAULT 'uygulandi',   -- uygulandi | geri_alindi
+  geri_at     TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_eylem_zaman ON eylem(created_at);
+
 CREATE TABLE IF NOT EXISTS usage (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at  TEXT NOT NULL,

@@ -305,6 +305,49 @@ SONUC_TALIMATI = ("\n\nAŞAĞIDAKİ ARAÇ SONUÇLARINI KOD ÜRETTİ (kullanıcı
                   "ve JSON'u kullanıcıya gösterme.")
 
 
+# AJAN DONGUSU (KING-4 A4, 2026-11-01): anla -> planla -> arac cagir -> sonucu
+# gozle -> dogrula -> yanitla. Istemci okuma sonuclarini `dongu: {adim,
+# gecen_ms}` ile yollarsa sonuc turunde katalog yeniden sunulur; model bir
+# arac daha cagirabilir. Sinir adim ve suredir; asilinca son tur araclarsizdir
+# (cevap). Ayni (ad, param) ikinci kez cagrilamaz: dongu kirici. Yazma araci
+# her adimda yine onizleme ve onaya gider (kural 3). `dongu` yollamayan
+# istemci bugunku tek turu gorur.
+EN_COK_ADIM = 4
+SURE_SINIRI_MS = 30000
+DONGU_TALIMATI = ("\n\nBu sonuçlar soruyu cevaplamaya yetmiyorsa, eksik olanı okuyan BİR araç daha "
+                  "çağırabilirsin; yetiyorsa araç çağırma, cevabı yaz. Aynı aracı aynı parametreyle "
+                  "yeniden çağırma.")
+
+
+def dongu_of(ham):
+    """{adim, gecen_ms} ya da None (dongu yok ya da sinir asildi: son tur)."""
+    if not isinstance(ham, dict):
+        return None
+    try:
+        adim, gecen = int(ham.get("adim")), int(ham.get("gecen_ms") or 0)
+    except (TypeError, ValueError):
+        return None
+    if not 1 <= adim < EN_COK_ADIM or not 0 <= gecen < SURE_SINIRI_MS:
+        return None
+    return {"adim": adim, "gecen_ms": gecen}
+
+
+def _anahtar(ad, param):
+    return str(ad), json.dumps(param if isinstance(param, dict) else {}, ensure_ascii=False, sort_keys=True)
+
+
+def tekrarlari_ayir(cagrilar, onceki):
+    """(yeni, red): onceki turlarda calismis cagri yeniden calismaz."""
+    goruldu = {_anahtar(s.get("ad"), s.get("param")) for s in (onceki or []) if isinstance(s, dict)}
+    yeni, red = [], []
+    for c in cagrilar:
+        if _anahtar(c["ad"], c.get("param")) in goruldu:
+            red.append({"ad": c["ad"], "neden": "aynı çağrı önceki adımda yapıldı"})
+        else:
+            yeni.append(c)
+    return yeni, red
+
+
 def sonuc_baglami(sonuclar):
     if not sonuclar:
         return ""

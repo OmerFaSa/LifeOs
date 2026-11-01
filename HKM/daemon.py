@@ -90,6 +90,9 @@ Ucnoktalar:
     POST /api/ses                   {metin, tercih: oto|gemini|piper} -> audio/wav; uretilemezse 503 + notlar
                                     (modul King'i o zaman cihazin kendi sesine duser; core/ses.py)
     POST /api/ses/akis              ayni govde -> akan 16 bit tek kanal PCM (X-Ses-Hz); EMA ilk parcayla baslar
+    GET  /api/eylem                 King'in yazdigi eylemler, yeniden eskiye (core/eylem.py)
+    POST /api/eylem                 {arac, ozet, param?, geri?:{ad,param}, modul?} modulun uyguladigi yazma
+    POST /api/eylem/<id>/geri       geri alir; istemci turunde tersi {istemci:{ad,param}} doner
     GET  /api/dinle/durum           ses algilama: Whisper var mi, Gemini hazir mi (core/dinle.py)
     POST /api/dinle                 {wav: base64 16 kHz WAV} -> {ok, metin, motor}; olmazsa 503 + notlar
     POST /api/aktif/baslat          aktif kip: turun «yapilabilir» isi {id} -> King (kullanici yolu, modul hkm)
@@ -116,7 +119,7 @@ from urllib.parse import parse_qs, quote, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import arastir, kutu, motor, tarife  # noqa: E402
-from core import beceri, soz  # noqa: E402
+from core import beceri, eylem, soz  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, gorev, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, models, motto, ofismodel, ollama, outbox, patron,
@@ -1270,6 +1273,13 @@ class Handler(BaseHTTPRequestHandler):
             # Butce paketleri (A · A+ · S · S+): onizleme, hicbir sey yazmaz.
             # Aylik tahmin defterdeki OLCUMDEN hesaplanir.
             return self._send(200, motor.onizleme(self.server.config, con=self.con))
+        if u.path == "/api/eylem":
+            # «King ne yaptı» zaman çizgisi (KING-4 A4, core/eylem.py).
+            try:
+                n = int((q.get("limit") or [50])[0])
+            except ValueError:
+                n = 50
+            return self._send(200, {"eylemler": eylem.listele(self.con, n)})
         if u.path == "/api/ai_olcum":
             # «King bugün ne harcadı»: her model cagrisinin suresi ve jetonu (KING-4).
             return self._send(200, butce.ai_olcum(self.con, date))
@@ -1849,6 +1859,8 @@ class Handler(BaseHTTPRequestHandler):
                 ek["araclar"] = govde["araclar"]
             if isinstance((govde or {}).get("arac_sonuclari"), list):
                 ek["arac_sonuclari"] = govde["arac_sonuclari"]
+            if isinstance((govde or {}).get("dongu"), dict):
+                ek["dongu"] = govde["dongu"]
             if u.path == "/api/chat/akis":
                 # Akan cevap: NDJSON satirlari; once denetlenmis cumleler, sonda tam cevap.
                 self._akis_baslat()
@@ -1936,6 +1948,20 @@ class Handler(BaseHTTPRequestHandler):
             if n:
                 _ayar_yaz(self.server, yeni)
             return self._send(200, {"ok": True, "n": n, "okunamayan": okunamayan, "durum": kasa.durum(self.server.config)})
+        if u.path == "/api/eylem" or re.match(r"^/api/eylem/\d+/geri$", u.path):
+            # Eylem defteri: modulun uyguladigi yazma ve geri alma (core/eylem.py).
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = _nesne(ham)
+            except ValueError:
+                body = {}
+            if u.path == "/api/eylem":
+                eid, hata = eylem.istemciden(self.con, body)
+                return self._send(200, {"ok": True, "id": eid}) if eid else self._send(400, {"error": hata})
+            r = eylem.geri_al(self.con, int(u.path.split("/")[3]))
+            return self._send(200 if r["ok"] else 409, r)
         if u.path == "/api/kutu":
             ham, hata = self._read_body()
             if hata:

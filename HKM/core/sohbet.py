@@ -25,7 +25,7 @@
 
 import re
 
-from core import (ai, arac, arastir, butce, cross, dil, manager, memory, models, motto, patron, program,
+from core import (ai, arac, arastir, butce, cross, dil, eylem, manager, memory, models, motto, patron, program,
                   seviye, streak, urunler)
 
 # Kademeler: kullanici kiminle konusuyor.
@@ -907,7 +907,9 @@ def _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, t
         else:
             b = para.tani(metin)
             if b:
-                pk = para.cevap(con, para.yaz(con, b, kanal, metin, date), date)
+                yazilan = para.yaz(con, b, kanal, metin, date)
+                eylem.para_yazildi(con, yazilan, kanal, metin)
+                pk = para.cevap(con, yazilan, date)
                 if b.get("anlasilmayan"):
                     pk += " Anlamadığım kısım: «%s» — tutarı ve ne olduğunu ayrı yazarsan eklerim." % (
                         "», «".join(b["anlasilmayan"]))
@@ -1064,6 +1066,7 @@ def _k2_ek(con, metin, r, kanal, hedef, modul, gorevli):
             r = dict(r, cevap=c, k2_not=not_ + ". Değilse «o cevap değil» de.")
         else:
             s = soz.yakala(con, metin, modul=modul, kanal=kanal or "local", hedef=hedef)
+            eylem.soz_yazildi(con, s, kanal or "local", modul)
             if s:
                 r = dict(r, soz=s["soz"], k2_not=s["not"])
     except Exception as e:                      # noqa: BLE001 — not, cevabi bozamaz
@@ -1077,24 +1080,28 @@ def _k2_ek(con, metin, r, kanal, hedef, modul, gorevli):
 
 def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
           user="ben", transport=None, kayit=True, kanal="local", hedef=None,
-          derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None):
+          derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None, dongu=None):
     """Bir mesaja cevap (bkz. `_konus`); King'in cevabina söz ve soru
     cevabi notu eklenir (`_k2_ek`)."""
     r = _konus(con, cfg, metin, date, gorevli=gorevli, gecmis=gecmis, th=th, user=user, transport=transport,
                kayit=kayit, kanal=kanal, hedef=hedef, derinlik=derinlik, uslup=uslup, akis=akis,
-               araclar=araclar, arac_sonuclari=arac_sonuclari, modul=modul)
+               araclar=araclar, arac_sonuclari=arac_sonuclari, modul=modul, dongu=dongu)
     return _k2_ek(con, metin, r, kanal, hedef, modul, gorevli)
 
 
 def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
            user="ben", transport=None, kayit=True, kanal="local", hedef=None,
-           derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None):
+           derinlik=None, uslup=None, akis=None, araclar=None, arac_sonuclari=None, modul=None,
+           dongu=None):
     """Bir mesaja cevap. Once komut, sonra model, sonra durust bir «yok».
     `derinlik`: hizli | dengeli | derin | None (seviyeyi kod secer).
     `araclar`: istemcinin arac katalogu (core/arac.py); model bir arac
     secerse cevap mode=arac ve DOGRULANMIS `cagrilar` tasir, araci istemci
     calistirir. `arac_sonuclari`: ikinci tur — okuma araclarinin kodla
     uretilmis sonuclari baglama girer, kural yolu atlanir.
+    `dongu`: {adim, gecen_ms} — ajan dongusu (core/arac.py EN_COK_ADIM):
+    sinir icindeyse sonuc turunde katalog yeniden sunulur, model bir arac
+    daha cagirabilir; ayni cagri tekrar edilemez. Yoksa tek tur (eski istemci).
 
     Doner: {"mode": komut|model|arac|yok, "text": ..., ...}
     """
@@ -1103,6 +1110,7 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                 "note": "Bilinmeyen görevli."}
     katalog = arac.katalog_temizle(araclar)[0] if araclar else []
     sonuclar = arac.sonuclari_temizle(arac_sonuclari, katalog) if arac_sonuclari is not None else None
+    devam = arac.dongu_of(dongu) if sonuclar and katalog else None
 
     if arac_sonuclari is None:
         kr = _kural_yolu(con, cfg, metin, date, gorevli, th, user, kayit, kanal, hedef, transport, modul, katalog)
@@ -1173,7 +1181,8 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
         + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else "")
         + USLUP_TALIMAT.get(uslup_of(uslup), "")
-        + (arac.SONUC_TALIMATI if sonuclar else ARAC_TALIMATI if aracli and sonuclar is None else "")))
+        + (arac.SONUC_TALIMATI + (arac.DONGU_TALIMATI if devam and aracli else "") if sonuclar
+           else ARAC_TALIMATI if aracli and sonuclar is None else "")))
     onceki = [m if m.get("role") != "assistant" else dict(m, content=kalipsiz(m.get("content")))
               for m in (gecmis or []) if not (m.get("role") == "assistant" and yanki_mi(m.get("content")))]
     onceki = [m for m in onceki if m.get("content")]
@@ -1182,11 +1191,12 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     mesajlar = onceki + [{"role": "user", "content": metin}]
 
     ilk_tur = bool(katalog) and sonuclar is None
+    arac_turu = ilk_tur or bool(devam and aracli)
     r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
                user=user, transport=transport, veri=veri, seviye=sv["seviye"],
                jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None,
-               akis=CumleAkisi(akis, bg, serbest) if akis and not ilk_tur else None,
-               araclar=katalog if ilk_tur else None)
+               akis=CumleAkisi(akis, bg, serbest) if akis and not arac_turu else None,
+               araclar=katalog if arac_turu else None)
     motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"], derinlik=derinlik or "oto", uzun=uzun,
                        baglam={"gecmis": len(onceki), "hafiza": len(hb.splitlines()) if hb else 0,
                                "sistem_harf": len(sistem)})
@@ -1204,6 +1214,9 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         # KAPALI KATALOG (core/arac.py): bilinmeyen arac ve gecersiz
         # parametre burada duser; araci istemci calistirir.
         gecerli, red = arac.cagri_dogrula(r["cagrilar"], katalog)
+        if devam:
+            gecerli, tekrar = arac.tekrarlari_ayir(gecerli, arac_sonuclari)
+            red += tekrar
         if gecerli:
             if kayit and all(c["tur"] == "yaz" for c in gecerli):
                 # Yazma cagrisinin ikinci turu yok: konusma burada deftere girer.
@@ -1211,13 +1224,15 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                 patron.log(con, kanal, "manager", "(Önizleme hazırlandı, onayını bekliyor: %s)"
                            % ", ".join(c["ad"] for c in gecerli), agent=gorevli)
             return {"ok": True, "mode": "arac", "cagrilar": gecerli, "reddedilen": red,
+                    "adim": devam["adim"] + 1 if devam else 1,
                     "text": r.get("text") or "", "agent": gorevli, "model": r.get("model"),
                     "usd": r.get("usd"), "seconds": r.get("seconds"),
                     "motor": motor_bilgi}
-    if ilk_tur and r.get("ok") and (r.get("cagrilar") or not (r.get("text") or "").strip()):
+    if arac_turu and r.get("ok") and (r.get("cagrilar") or not (r.get("text") or "").strip()):
         # Model yalniz gecersiz cagri yapti: araclarsiz bir kez daha sorulur,
         # cevap olagan denetimden gecer. Reddedilen cagrilar cevapta durur.
-        r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem.replace(ARAC_TALIMATI, ""),
+        r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg,
+                   sistem=sistem.replace(ARAC_TALIMATI, "").replace(arac.DONGU_TALIMATI, ""),
                    user=user, transport=transport, veri=veri, seviye=sv["seviye"],
                    jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None)
         if r.get("ok") and ARAC_IDDIA.search(r.get("text") or ""):
