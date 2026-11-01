@@ -79,7 +79,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `planlama_test.py` — sistem/planlama.py sistem planlama ve kural sözleşme testleri, CI'da koşulur.
 - `playwrightsiz.test.js` — Tarayıcı istemeyen araçların Playwright olmadan da çalıştığını denetler, CI'da koşulur.
 - `portmuhafiz.test.js` — Sabit portlu araçların port doluyken güvenli biçimde başlamadığını (çıkış 2) denetler, CI'da koşulur.
-- `portreonar_test.py` — marka.py --onar görsel onarma mantığının birim testi, Pillow kuruluysa koşulur.
+- `portreonar_test.py` — marka.py --onar görsel onarma mantığının birim testi; Pillow yoksa atlanır, CI'da koşar.
 - `sadelik.test.js` — sadelik.js kaynak kurallarının ve onay penceresi etiketlerinin testi, CI'da koşulur.
 - `sayilar_test.py` — sayilar.py çıktı okuma ve sayı ayrıştırma testi, CI'da koşulur.
 - `telefon_test.py` — Telefon uygulaması (ev ağı ve yerel sunucu) bağlantı ve güvenlik testleri, CI'da koşulur.
