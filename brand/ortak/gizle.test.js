@@ -236,7 +236,7 @@
       }finally{ temizle(kok); }
     });
 
-    it('telefonda küçük bölüme basılı tutmak önizlemeyi açar; kısa dokunuş açmaz', async () => {
+    it('telefonda küçük bölüme basılı tutmak önizlemeyi açar; kısa dokunuş açmaz', () => LIFEOS.SahteSaat.saatle(async ilerlet => {
       const kok = kur();
       const bekle = ms => new Promise(r => setTimeout(r, ms));
       const bas = (el, tur) => el.dispatchEvent(new PointerEvent(tur, { bubbles:true, pointerType:'touch', clientX:5, clientY:5 }));
@@ -244,15 +244,15 @@
         const b = G().bolumler(kok)[0];
         G().kucult(b.anahtar, true);
         const el = G().bolumler(kok)[0].el.querySelector('.lrow__side');
-        bas(el, 'pointerdown'); await bekle(100); bas(el, 'pointerup'); await bekle(500);
+        bas(el, 'pointerdown'); await ilerlet(100); bas(el, 'pointerup'); await ilerlet(500);
         expect(G().onizlemeVar()).toBe(false);                 // kısa dokunuş
-        bas(el, 'pointerdown'); await bekle(600);
+        bas(el, 'pointerdown'); await ilerlet(600);
         expect(G().onizlemeVar()).toBe(true);                  // basılı tutma
         bas(el, 'pointerup');
         bas(document.body, 'pointerdown');
         expect(G().onizlemeVar()).toBe(false);                 // sonraki dokunuş kapatır
       }finally{ temizle(kok); }
-    });
+    }));
 
     /* ---------- Sayfa düzeni 2: sıra, üç konum, geri al, varsayılan ---------- */
     function ikiSutun(){

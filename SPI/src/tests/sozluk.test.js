@@ -81,20 +81,20 @@ describe('016 · Terim ipucu', () => {
     }finally{ k.remove(); }
   });
 
-  it('oz-016 dokunmatikte basılı tutmak açar, başka yere dokunmak kapatır (köken kartıyla aynı)', async () => {
+  it('oz-016 dokunmatikte basılı tutmak açar, başka yere dokunmak kapatır (köken kartıyla aynı)', () => LIFEOS.SahteSaat.saatle(async ilerlet => {
     const k = sahne(Z().html('seri') + '<i class="bos">x</i>');
     try{
       expect(Z().bagla(k)).toBeTruthy();
       expect(Z().bagla(k)).toBeFalsy();
       const t = k.querySelector('.terim');
       t.dispatchEvent(new PointerEvent('pointerdown', { bubbles:true, pointerType:'touch' }));
-      await bekle(Z().BASILI_MS + 60);
+      await ilerlet(Z().BASILI_MS + 60);
       expect(t.classList.contains('terim--acik')).toBeTruthy();
       k.querySelector('.bos').dispatchEvent(new PointerEvent('pointerdown', { bubbles:true, pointerType:'touch' }));
       expect(t.classList.contains('terim--acik')).toBeFalsy();
       expect(Z().BASILI_MS).toBe(window.LIFEOS.SAYI.BASILI_MS);
     }finally{ k.remove(); }
-  });
+  }));
 });
 
 describe('139 · Model kapalı kipi', () => {

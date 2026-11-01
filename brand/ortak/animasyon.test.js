@@ -267,7 +267,7 @@
 
     /* 2026-10-18 (kullanıcı: «geçerken logo yerine italik hoş geldin»): geçişte logo YOK;
        selam ve not modülün perdesindedir (brand/ortak/karsilama.js). */
-    it('geçiş: kart yerinden büyür (logosuz), çerez yazılır, sonra sayfa değişir', async () => {
+    it('geçiş: kart yerinden büyür (logosuz), çerez yazılır, sonra sayfa değişir', () => LIFEOS.SahteSaat.saatle(async ilerlet => {
       let eskiKip = null;
       try{ eskiKip = localStorage.getItem(A.ANAHTAR); }catch(e){}
       A.ayarla('tam');
@@ -286,7 +286,7 @@
         a.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true, button:0 }));
         expect(document.querySelectorAll('.lifeos-gecis').length).toBe(1);
         expect(gidilen.length).toBe(0);                                            // önce yer, sonra sayfa
-        await bekle(A.GECIS_MS + 120);
+        await ilerlet(A.GECIS_MS + 120);
         expect(gidilen).toEqual(['http://127.0.0.1:4183/']);
         expect(/^spi\.\d{13}$/.test(gecisCerezi())).toBe(true);
         /* Ctrl ile tık (yeni sekme) dokunulmadan geçer. */
@@ -300,7 +300,7 @@
         try{ if(eskiKip == null) localStorage.removeItem(A.ANAHTAR); else localStorage.setItem(A.ANAHTAR, eskiKip); }catch(e){}
         A.yenile();
       }
-    });
+    }));
 
     it('geçiş: Merkez kartına ve görünmeyen kaynağa dokunmaz; ölçüsüz kaynakta perde ortadan açılır', async () => {
       let eskiKip = null;

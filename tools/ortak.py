@@ -159,6 +159,8 @@ DOSYALAR = {
     "bicim.test.js":      "tests",
     # DEPO — kalici depolama katmani; modulun store.js'i yalniz ayarlarini verir (2026-11-01, Olcum 2c).
     "depo.js":            "js/core",
+    # SAHTE SAAT — testlerin zamanlayici yardimcisi (tests/, harness'tan hemen sonra yuklenir).
+    "sahtesaat.js":       "tests",
     "turkcesayi.js":      "js/core",
     "turkcesayi.test.js": "tests",
     # TANITIM ŞERİDİ — ilk kurulumun üç adımı. Sorular üçünde de aynı;

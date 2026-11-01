@@ -196,19 +196,19 @@ describe('025 · Köken kartı', () => {
     }finally{ k.remove(); }
   });
 
-  it('oz-025 dokunmatikte basılı tutmak kartı açar; başka yere dokunmak kapatır', async () => {
+  it('oz-025 dokunmatikte basılı tutmak kartı açar; başka yere dokunmak kapatır', () => LIFEOS.SahteSaat.saatle(async ilerlet => {
     const k = sahne(S().html({ deger:1, kesinlik:'measured' }) + '<i class="bos">x</i>');
     try{
       expect(S().bagla(k)).toBeTruthy();
       expect(S().bagla(k)).toBeFalsy();   // ikinci bağlama yok sayılır
       const s = k.querySelector('.sayi');
       s.dispatchEvent(new PointerEvent('pointerdown', { bubbles:true, pointerType:'touch' }));
-      await bekle(S().BASILI_MS + 60);
+      await ilerlet(S().BASILI_MS + 60);
       expect(s.classList.contains('sayi--acik')).toBeTruthy();
       k.querySelector('.bos').dispatchEvent(new PointerEvent('pointerdown', { bubbles:true, pointerType:'touch' }));
       expect(s.classList.contains('sayi--acik')).toBeFalsy();
     }finally{ k.remove(); }
-  });
+  }));
 
   it('oz-025 Esc açık kartı kapatır', async () => {
     /* Kendi belgesinde sınanır: test sayfasında başka bir katman (perde)
@@ -234,17 +234,17 @@ describe('025 · Köken kartı', () => {
     }finally{ f.remove(); }
   });
 
-  it('oz-025 kısa dokunuş kartı AÇMAZ (kaydırma ile basılı tutma ayrılır)', async () => {
+  it('oz-025 kısa dokunuş kartı AÇMAZ (kaydırma ile basılı tutma ayrılır)', () => LIFEOS.SahteSaat.saatle(async ilerlet => {
     const k = sahne(S().html({ deger:1, kesinlik:'measured' }));
     try{
       S().bagla(k);
       const s = k.querySelector('.sayi');
       s.dispatchEvent(new PointerEvent('pointerdown', { bubbles:true, pointerType:'touch' }));
       s.dispatchEvent(new PointerEvent('pointerup', { bubbles:true, pointerType:'touch' }));
-      await bekle(S().BASILI_MS + 60);
+      await ilerlet(S().BASILI_MS + 60);
       expect(s.classList.contains('sayi--acik')).toBeFalsy();
     }finally{ k.remove(); }
-  });
+  }));
 
   it('oz-025 { koken:false } yoğun tabloda kartı ve odak durağını koymaz', () => {
     const h = S().html({ deger:1, kesinlik:'measured' }, { koken:false });

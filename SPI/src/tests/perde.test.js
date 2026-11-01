@@ -21,141 +21,8 @@
   const P = SP.Perde;
   const L = window.LIFEOS;
 
-  /* Sahte saat yardımcısı — KING-4 Ölçüm 1c: perde testleri gerçek zamanı beklemez.
-     Test süresince setTimeout/clearTimeout, setInterval/clearInterval, Date.now ve
-     performance.now'u yönetir; ilerlet(ms) ile zamanlayıcıları sırayla çalıştırır;
-     finally içinde gerçeklerini mutlaka geri koyar. */
-  let saatAktif = false;
-  let sahteSimdi = 0;
-  let sayac = 1;
-  const zamanlayicilar = new Map();
-  const gercek = {
-    setTimeout: window.setTimeout.bind(window),
-    clearTimeout: window.clearTimeout.bind(window),
-    setInterval: window.setInterval.bind(window),
-    clearInterval: window.clearInterval.bind(window),
-    DateNow: Date.now.bind(Date),
-    perfNow: window.performance && window.performance.now ? window.performance.now.bind(window.performance) : null
-  };
+  const saatle = LIFEOS.SahteSaat.saatle;   // ortak sahte saat (brand/ortak/sahtesaat.js)
 
-  function saatKur(){
-    sahteSimdi = gercek.DateNow();
-    sayac = 1;
-    zamanlayicilar.clear();
-    if(saatAktif) return;
-    saatAktif = true;
-
-    window.setTimeout = function(fn, ms){
-      if(!saatAktif) return gercek.setTimeout.apply(window, arguments);
-      const id = sayac++;
-      const gecikme = Math.max(0, Number(ms) || 0);
-      const args = Array.prototype.slice.call(arguments, 2);
-      zamanlayicilar.set(id, {
-        id,
-        fn,
-        args,
-        zaman: sahteSimdi + gecikme,
-        tekrar: null
-      });
-      return id;
-    };
-
-    window.clearTimeout = function(id){
-      if(!saatAktif) return gercek.clearTimeout.apply(window, arguments);
-      if(zamanlayicilar.has(id)) zamanlayicilar.delete(id);
-      else gercek.clearTimeout(id);
-    };
-
-    window.setInterval = function(fn, ms){
-      if(!saatAktif) return gercek.setInterval.apply(window, arguments);
-      const id = sayac++;
-      const aralik = Math.max(1, Number(ms) || 0);
-      const args = Array.prototype.slice.call(arguments, 2);
-      zamanlayicilar.set(id, {
-        id,
-        fn,
-        args,
-        zaman: sahteSimdi + aralik,
-        tekrar: aralik
-      });
-      return id;
-    };
-
-    window.clearInterval = function(id){
-      if(!saatAktif) return gercek.clearInterval.apply(window, arguments);
-      if(zamanlayicilar.has(id)) zamanlayicilar.delete(id);
-      else gercek.clearInterval(id);
-    };
-
-    Date.now = function(){
-      if(!saatAktif) return gercek.DateNow();
-      return sahteSimdi;
-    };
-
-    if(gercek.perfNow && window.performance){
-      const baslangicPerf = gercek.perfNow();
-      const baslangicSahte = sahteSimdi;
-      window.performance.now = function(){
-        if(!saatAktif) return gercek.perfNow();
-        return baslangicPerf + (sahteSimdi - baslangicSahte);
-      };
-    }
-  }
-
-  function saatKaldir(){
-    saatAktif = false;
-    zamanlayicilar.clear();
-    window.setTimeout = gercek.setTimeout;
-    window.clearTimeout = gercek.clearTimeout;
-    window.setInterval = gercek.setInterval;
-    window.clearInterval = gercek.clearInterval;
-    Date.now = gercek.DateNow;
-    if(gercek.perfNow && window.performance){
-      window.performance.now = gercek.perfNow;
-    }
-  }
-
-  async function ilerlet(ms){
-    const hedefZaman = sahteSimdi + Math.max(0, Number(ms) || 0);
-    let adim = 0;
-    while(adim++ < 10000){
-      let aday = null;
-      for(const z of zamanlayicilar.values()){
-        if(z.zaman <= hedefZaman){
-          if(!aday || z.zaman < aday.zaman || (z.zaman === aday.zaman && z.id < aday.id)){
-            aday = z;
-          }
-        }
-      }
-      if(!aday) break;
-
-      sahteSimdi = aday.zaman;
-      if(aday.tekrar != null){
-        aday.zaman += aday.tekrar;
-      }else{
-        zamanlayicilar.delete(aday.id);
-      }
-
-      try{
-        if(typeof aday.fn === 'function') aday.fn.apply(window, aday.args || []);
-        else if(typeof aday.fn === 'string') (new Function(aday.fn))();
-      }catch(e){
-        console.error('Sahte saat zamanlayici hatasi:', e);
-      }
-      await Promise.resolve();
-    }
-    sahteSimdi = hedefZaman;
-    await Promise.resolve();
-  }
-
-  async function saatle(fn){
-    saatKur();
-    try{
-      await fn(ilerlet);
-    }finally{
-      saatKaldir();
-    }
-  }
 
 
   function perdeler(){ return document.querySelectorAll('.perde'); }
@@ -201,7 +68,7 @@
     });
 
     it('«Geç» tıklaması perdeyi kaldırır', async () => {
-      await saatle(async () => {
+      await saatle(async ilerlet => {
         temiz();
         P.ac({ banner:banner(1), enAz:60000 });
         acikPerde().querySelector('.perde__gec').click();
@@ -212,7 +79,7 @@
     });
 
     it('Esc perdeyi kaldırır', async () => {
-      await saatle(async () => {
+      await saatle(async ilerlet => {
         temiz();
         P.ac({ banner:banner(1), enAz:60000 });
         document.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', bubbles:true }));
@@ -223,7 +90,7 @@
     });
 
     it('kapanınca `bitti` çağrılır — kutlamayı damgalayan kanca budur', async () => {
-      await saatle(async () => {
+      await saatle(async ilerlet => {
         temiz();
         let bitti = 0;
         P.ac({ banner:banner(1), enAz:60000, bitti:() => { bitti++; } });
@@ -235,7 +102,7 @@
     });
 
     it('videosuz perde kendi süresini doldurunca kendiliğinden kapanır', async () => {
-      await saatle(async () => {
+      await saatle(async ilerlet => {
         temiz();
         P.ac({ banner:banner(1), enAz:300 });
         await ilerlet(1200);
@@ -245,7 +112,7 @@
     });
 
     it('perde açıkken sayfa kaymaz, kapanınca serbest kalır', async () => {
-      await saatle(async () => {
+      await saatle(async ilerlet => {
         temiz();
         P.ac({ banner:banner(1), enAz:60000 });
         expect(document.documentElement.style.overflow).toBe('hidden');
@@ -282,7 +149,7 @@
     });
 
     it('kapatılan haberci sonradan perde açmaz', async () => {
-      await saatle(async () => {
+      await saatle(async ilerlet => {
         temiz();
         const eskiMM = window.matchMedia;
         window.matchMedia = () => ({ matches:false, addListener(){}, removeListener(){},
@@ -313,7 +180,7 @@
     });
 
     it('birincisi kapanınca sıradaki açılır', async () => {
-      await saatle(async () => {
+      await saatle(async ilerlet => {
         temiz();
         P.ac({ banner:banner(1), enAz:60000 });
         P.ac({ banner:banner(2), enAz:60000 });
@@ -326,7 +193,7 @@
     });
 
     it('sıradaki iptal edilirse hiç açılmaz', async () => {
-      await saatle(async () => {
+      await saatle(async ilerlet => {
         temiz();
         P.ac({ banner:banner(1), enAz:60000 });
         const ikinci = P.ac({ banner:banner(2), enAz:60000 });
@@ -456,7 +323,7 @@
     });
 
     it('SPACE perdeye HİÇ SOKMAZ ama kutlamayı damgalar', async () => {
-      await saatle(async () => {
+      await saatle(async ilerlet => {
         temiz();
         if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         let damga = 0;
@@ -474,7 +341,7 @@
     });
 
     it('«Geç» düğmesi de aynı şeyi yapar — dokunmatikte Space yoktur', async () => {
-      await saatle(async () => {
+      await saatle(async ilerlet => {
         temiz();
         if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         let damga = 0;
@@ -488,7 +355,7 @@
     });
 
     it('iki kez geçilse bile damga BİR kez vurulur', async () => {
-      await saatle(async () => {
+      await saatle(async ilerlet => {
         temiz();
         if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         let damga = 0;
