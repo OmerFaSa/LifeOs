@@ -107,6 +107,38 @@ def run():
     test("soguk Gemma: kayit Whisper'la, Gemma isinir", t_soguk_gemma)
     test("sema surec basina bir kez, silinen dosya yeniden kurulur", t_sema_bir_kez)
 
+    def t_sicak_whisper():
+        d = tempfile.mkdtemp(prefix="hkm-wsrv-")
+        exe, srv = os.path.join(d, "whisper-cli.exe"), os.path.join(d, "whisper-server.exe")
+        for f in (exe, srv):
+            open(f, "wb").close()
+        w = {"bulundu": True, "yollar": [{"exe": exe, "model": "m.bin", "cuda": True}]}
+        cli = []
+
+        def calistir(e, m, wav, t, ng=False):
+            cli.append(m)
+            return "cli metni"
+        # Hazir sunucu: cli hic calismaz.
+        eski = dinle.VARSAYILAN_CALISTIR
+        dinle.VARSAYILAN_CALISTIR = calistir
+        acilan = []
+        eski_ac, dinle.ACICI = dinle.ACICI, lambda arg, **k: acilan.append(arg)
+        try:
+            eq(dinle.whisper(b"RIFF", bul=w, sunucu=lambda wav: " Merhaba. "), ("Merhaba.", ""))
+            eq((cli, acilan), ([], []))
+            # Sunucu yok: bu kayit cli'yla, sunucu arka planda acilir (GPU yolu).
+            eq(dinle.whisper(b"RIFF", bul=w, sunucu=lambda wav: None), ("cli metni", ""))
+            eq(len(cli), 1)
+            eq((acilan[0][0], acilan[0][-1]), (srv, str(dinle.SUNUCU_KAPI)))
+            # CPU yolu sunucu acmaz.
+            acilan.clear()
+            dinle.sunucu_ac({"yollar": [{"exe": exe, "model": "m.bin", "cuda": False}]})
+            eq(acilan, [])
+        finally:
+            dinle.VARSAYILAN_CALISTIR, dinle.ACICI = eski, eski_ac
+
+    test("sicak Whisper: hazir sunucu once, yoksa cli ve sunucu acilir", t_sicak_whisper)
+
 
 def run_daemon():
     from tests.test_daemon import _Server

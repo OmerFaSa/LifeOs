@@ -56,6 +56,7 @@ try:
                                      + ["/yok/ema-tts"] * 4)
     from core import dinle as _dinle
     _dinle.VARSAYILAN_CALISTIR = _piper_yok
+    _dinle.ACICI = lambda *a, **k: None         # whisper-server acilmaz
 except ImportError:                                  # pragma: no cover
     pass
 

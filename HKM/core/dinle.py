@@ -32,9 +32,15 @@
       durdugu icin ek yuk yoktur. Sahada: ayni Turkce cumle Gemma 4'te
       0,3-0,6 sn ve kusursuz, Whisper turbo'da 2,2 sn. Uzun kayitta (> 30 sn)
       Gemma'ya guvenilmez (sahadan raporlar: dongu, eksik kelime): o zaman
-      Whisper. «oto»: Gemma 4 (bagliysa) -> Whisper -> Gemini."""
+      Whisper. «oto»: Gemma 4 (bagliysa) -> Whisper -> Gemini.
+   8. SICAK WHISPER (Olcum 2b, 2026-11-01). whisper-cli her kayitta modeli
+      yeniden yukluyordu (1,8-2,9 sn). Yanindaki whisper-server, mikrofon
+      acilinca (durum) ya da ilk Whisper kaydinda arka planda acilir ve HKM
+      yasadikca modeli GPU'da tutar: kayit 0,4-0,8 sn. Hazir degilse cli."""
+import atexit
 import base64
 import glob
+import io
 import re
 import os
 import shutil
@@ -42,6 +48,8 @@ import subprocess
 import tempfile
 import threading
 import time
+import urllib.request
+import wave
 
 from core import butce, models, ollama, ses
 
@@ -172,10 +180,98 @@ def _temiz(metin):
     return t
 
 
-def whisper(wav, calistir=None, bul=None):
+SUNUCU_KAPI = 4207
+ACICI = subprocess.Popen
+_SUNUCU = {"p": None, "hazir": False}
+_SUNUCU_KILIT = threading.Lock()
+
+
+def _sessiz_wav(sn=0.5):
+    b = io.BytesIO()
+    with wave.open(b, "wb") as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(16000)
+        w.writeframes(bytes(2) * int(16000 * sn))
+    return b.getvalue()
+
+
+def _gonder(wav, timeout):
+    """whisper-server'a multipart istek; metin ya da None."""
+    sinir = "hkm" + os.urandom(8).hex()
+    govde = (("--%s\r\nContent-Disposition: form-data; name=\"response_format\"\r\n\r\ntext\r\n"
+              "--%s\r\nContent-Disposition: form-data; name=\"file\"; filename=\"k.wav\"\r\n"
+              "Content-Type: audio/wav\r\n\r\n") % (sinir, sinir)).encode() + wav + ("\r\n--%s--\r\n" % sinir).encode()
+    istek = urllib.request.Request("http://127.0.0.1:%d/inference" % SUNUCU_KAPI, data=govde, method="POST",
+                                   headers={"Content-Type": "multipart/form-data; boundary=" + sinir})
+    try:
+        with urllib.request.urlopen(istek, timeout=timeout) as r:
+            return r.read().decode("utf-8", "replace")
+    except Exception:                           # noqa: BLE001 — sunucu yoksa cli
+        return None
+
+
+def _hazirla(p):
+    """Sunucu modeli yukleyene kadar bekler; ilk (bos) istek CUDA'yi da isitir."""
+    sessiz = _sessiz_wav()
+    for _ in range(240):
+        if p.poll() is not None:
+            return
+        if _gonder(sessiz, 10) is not None:
+            _SUNUCU["hazir"] = True
+            return
+        time.sleep(0.25)
+
+
+def sunucu_ac(w):
+    """Kural 8: GPU yolu varsa whisper-server'i arka planda acar (bir kez)."""
+    y = (w.get("yollar") or [{}])[0]
+    if not y.get("cuda"):
+        return False
+    s = os.path.join(os.path.dirname(y["exe"]), "whisper-server" + (".exe" if y["exe"].lower().endswith(".exe") else ""))
+    if not os.path.isfile(s):
+        return False
+    with _SUNUCU_KILIT:
+        p = _SUNUCU["p"]
+        if p is not None and p.poll() is None:
+            return True
+        try:
+            p = ACICI([s, "-m", y["model"], "-l", "tr", "-nt", "-sns", "--host", "127.0.0.1", "--port", str(SUNUCU_KAPI)],
+                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                      creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        except OSError:
+            return False
+        _SUNUCU.update(p=p, hazir=False)
+    if p is not None:
+        threading.Thread(target=_hazirla, args=(p,), daemon=True).start()
+    return True
+
+
+def _sunucuya(wav):
+    p = _SUNUCU["p"]
+    if not _SUNUCU["hazir"] or p is None or p.poll() is not None:
+        return None
+    return _gonder(wav, WHISPER_ZAMAN)
+
+
+VARSAYILAN_SUNUCU = _sunucuya
+
+
+@atexit.register
+def _kapat():
+    # shortcut: HKM zorla oldurulurse sunucu yetim kalir (kapi 4207 dolu, yeni sunucu acilamaz, cli calisir); sorun olursa is nesnesine bagla.
+    p = _SUNUCU["p"]
+    if p is not None and p.poll() is None:
+        p.terminate()
+
+
+def whisper(wav, calistir=None, bul=None, sunucu=None):
     w = bul or whisper_bul()
     if not w["bulundu"]:
         return None, w["metin"]
+    if calistir is None:
+        t = (sunucu or VARSAYILAN_SUNUCU)(wav)
+        if t is not None:
+            return _temiz(t), ""
+        sunucu_ac(w)
     hata = None
     for y in w.get("yollar") or [{"exe": w["exe"], "model": w["model"]}]:
         try:
@@ -325,6 +421,8 @@ def yaziya(con, cfg, wav, post=None, calistir=None, bul=None, tercih="oto", geti
 def durum(con, cfg):
     g_ok, g_not = ses.gemini_hazir(con, cfg)
     w = whisper_bul()
+    if w["bulundu"]:
+        sunucu_ac(w)                            # mikrofon aciliyor: kural 8
     gm = gemma_model(cfg)
     return {"whisper": w, "gemini": {"hazir": g_ok, "not": g_not or "Gemini hazır (internet gerekir, ücretli)."},
             "gemma": {"hazir": bool(gm), "model": gm or "",
