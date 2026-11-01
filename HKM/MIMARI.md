@@ -1715,3 +1715,17 @@ kartında **Sistemi başlat** denince (`aktif.enabled`) HKM kendi turunu atar.
 yüzdeki düğme ve `tools/perf.py` ölçümleri kalktı. `meydan_*` tabloları
 kullanıcının izi (not, deste) olduğu için şemada ve yedekte durur;
 `tests/test_meydan.py` artık kaldırıldığını sınar.
+
+
+## Hafıza (üç katman) ve kendiliğinden King
+
+Kullanıcı hafızası üç katmanda okunur (`core/memory.py`): `bilgiler` (kullanıcı/kural; model yazamaz, §1.1),
+`olanlar` (eylem defteri + onaylı olaylar) ve `beceriler` (`core/beceri.py`). Arama gömmeyle yapılır; vektörler
+`hafiza_gomme` önbelleğinde tutulur ve yedeğe girmez, motor yoksa kaba köke düşer. Uçlar: `GET /api/hafiza`,
+`GET /api/hafiza/ara`, `POST /api/hafiza/<id>/duzelt`, `POST /api/hafiza/<id>/unut`.
+
+Modüller olay bildirimlerini `POST /api/olay` ile iletir (`belgeler/ekip/KING-OLAY.md` sözleşmesi; `core/kendiliginden.py`).
+Kural motoru modeli çağırmadan ve uydurmadan olayı karara bağlar: `basla`, `bekliyor`, `butce`, `tekrar`, `esik_alti`,
+`eksik_veri`, `kural_yok`, `bayat`. Günde en çok 3 mesajlık bölme bütçesi (`king.kendiliginden_butce`, 0 = kapalı)
+ve sessiz saat (23:00–08:00) işletilir. «basla» kararı `king_bekleyen`e düşer; durum `GET /api/king/kendiliginden` ve
+mesajlar `GET /api/king/bekleyen` ile alınır.
