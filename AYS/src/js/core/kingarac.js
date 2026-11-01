@@ -28,16 +28,118 @@ R.KingArac = (function(){
      tablosunun sözcüğünü taşıyan cümle («denemelerim» → Deneme sayfası) o
      yoldan gider; burada yalnız sayfası olmayan sorular durur. */
   const ES = {
-    puan_tahmini:/(puan tahmin|sıralama tahmin|kaç puan alırım|tahmini puan)/,
-    hatalar:/(yanlış defterim|hatalar[ıi]m(?:ı| neler)?$)/,
+    puan_tahmini:/(puan tahmin|sıralama tahmin|kaç puan alırım|tahmini puan|kaç bine|sıralamam ne)/,
+    hatalar:/(yanlış defterim|hatalar[ıi]m(?:ı| neler)?$|(?:hangi derste|en çok).*yanlış)/,
     /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz, araçla cevaplanır. */
     denemeler:/(denemelerim|son deneme|deneme(?:de|lerde|m)? (?:kaç|nasıl)|kaç net)/,
-    konu_riski:/(risk altında|riskli konu|konu riski)/,
-    gunler:/((?:bugün|dün) kaç (?:dakika|saat|soru)|kaç (?:dakika|saat) çalıştım)/,
-    konular:/(kapanış yüzde|kapanışım|konularımın durumu)/,
+    konu_riski:/(risk altında|riskli konu|konu riski|net (?:kayb|kaçır))/,
+    gunler:/((?:bugün|dün) kaç (?:dakika|saat|soru)|kaç (?:dakika|saat) çalıştım|(?:hangi gün|hangi günler) kaç)/,
+    konular:/(kapanış yüzde|kapanışım|konularımın durumu|kaç konu|bitirilen konu)/,
     gunun_akisi:/(günün akışı|bugünün akışı)/,
-    durum_ozeti:/(sınava kaç gün|sınava ne kadar)/,
+    durum_ozeti:/(sınava (?:kaç gün|ne kadar)|durum özet|genel durum)/,
     kartlar:/((?:tekrar etmem gereken|sırası gelen|geciken) kart|kart borcu)/,
+    haftalar:/(?:haftanın|haftalık) review|hafta metni|geçen haftanın/,
+    mesgaleler:/(?:kaç (?:kez|defa)|verilen) mola|mola sayısı|mola verdim/,
+    enerji_durumu:/enerji (?:seviye|durum)|seyrediyor/,
+  };
+
+  const ANAHTAR_OKU = {
+    durum_ozeti:'durum özet ilerleme tablo seviye genel görünüm',
+    denemeler:'deneme sınav denemeler net netler puan',
+    hatalar:'hata yanlış kusur eksik defter soru fire',
+    konular:'konu tamamlama bitirme müfredat liste başlık ünite',
+    haftalar:'hafta haftalık review değerlendirme bülten geriye dönük',
+    gunler:'gün günlük çözülen süre saat dakika soru',
+    hedef_ve_net_matrisi:'hedef net matris tablo karşılaştırma ders',
+    kartlar:'kart tekrar srs aralıklı ezber hatırlama',
+    video_notlari:'video not izleme ders notu kayıt',
+    mesgaleler:'meşgale mola kesinti ara duraklama dinlenme',
+    enerji_durumu:'enerji yorgunluk zindelik seviye durum güç canlılık',
+    gunun_akisi:'akış gün akışı program sıra plan çizelge',
+    konu_riski:'risk tehlike net kayıp zayıf açık tehdit',
+    puan_tahmini:'puan sıralama derece başarı sıra bant tahmin',
+  };
+
+  const REQUIRED = {
+    'week-target':['questionTarget'],
+    'gunluk-sure':['dakika'],
+    'gecici-sure':['from', 'to'],
+    'ara-ver':['from', 'to'],
+    'bolum-ac-kapa':['bolum', 'acik'],
+    'topic-review':['topicId'],
+    'decision-close':['decisionId'],
+  };
+
+  const ANAHTAR_YAZ = {
+    'week-target':'haftalık soru hedefi güncelle sayı hafta hedef',
+    'gunluk-sure':'günlük temel çalışma süresi dakika saat süre hedef',
+    'gecici-sure':'geçici günlük süre kısalt düşür saat dakika',
+    'ara-ver':'ara mola tatil dinlenme ver tanımla izin',
+    'bolum-ac-kapa':'bölüm gizle aç göster kapat kaldır modül',
+    'topic-review':'konu tekrar gözden geçirme çalışılacak pekiştirme',
+    'cards-due-today':'vade geciken geçmiş kart tekrar srs borç',
+    'decision-close':'toplantı karar kapat yapıldı devredildi ofis patron',
+    'block-add':'blok ekle çalışma oturum süre bugün',
+    'card-from-error':'yanlış hata kart üret çıkar',
+    'hedef-plan':'hedef plan uygula başlat',
+  };
+
+  const KURAL_EYLEM = {
+    'week-target':(t, metin) => {
+      const r = R.Komut ? R.Komut.anla(metin) : null;
+      const o = r && (r.oneriler || []).find(x => x.action === 'week-target');
+      return o ? o.params : null;
+    },
+    'gunluk-sure':(t, metin) => {
+      const r = R.Komut ? R.Komut.anla(metin) : null;
+      const o = r && (r.oneriler || []).find(x => x.action === 'gunluk-sure');
+      return o ? o.params : null;
+    },
+    'gecici-sure':(t, metin) => {
+      const r = R.Komut ? R.Komut.anla(metin) : null;
+      const o = r && (r.oneriler || []).find(x => x.action === 'gecici-sure');
+      if(o) return o.params;
+      if(/(kısalt|azalt|düşür)/.test(t) && /(çalışma süresi|süreyi|süre)/.test(t)){
+        const bugun = R.U ? R.U.todayISO() : new Date().toISOString().slice(0, 10);
+        const tr = (R.Komut && R.Komut.tarih ? R.Komut.tarih(t, bugun) : null) || { from:bugun, to:bugun };
+        return tr && tr.from ? { from:tr.from, to:tr.to || tr.from } : null;
+      }
+      return null;
+    },
+    'ara-ver':(t, metin) => {
+      const r = R.Komut ? R.Komut.anla(metin) : null;
+      const o = r && (r.oneriler || []).find(x => x.action === 'ara-ver');
+      return o ? o.params : null;
+    },
+    'bolum-ac-kapa':(t, metin) => {
+      if(/ekran|sayfa/.test(t)) return null;
+      if(/aç|göster/.test(t) && !/bölüm|bolum|tekrar|geri/.test(t)) return null;
+      const r = R.Komut ? R.Komut.anla(metin) : null;
+      const o = r && (r.oneriler || []).find(x => x.action === 'bolum-ac-kapa');
+      return o ? o.params : null;
+    },
+    'topic-review':(t, metin) => {
+      if(/(tekrar(?:a|\s+çalışılacaklar[ae]|\s+listesine)?\s*(?:al|ekle)|tekrara)/.test(t)){
+        const k = R.Entry && R.Entry.konuBul ? R.Entry.konuBul(metin) : null;
+        if(k) return { subjectId:(k.s && k.s.id) || '', topicId:(k.t && k.t.id) || '' };
+      }
+      return null;
+    },
+    'cards-due-today':(t) => {
+      if(/(vadesi geçmiş|geciken|vadesi dolan).*kart.*(?:bugüne|aktar|çek)|kartları bugüne (?:aktar|çek)/.test(t)){
+        return { limit:20 };
+      }
+      return null;
+    },
+    'decision-close':(t) => {
+      if(/(toplantı\s+)?karar[ıi]n[ıi]\s*(?:yapıldı|devredildi|kapandı)?\s*(?:olarak\s*)?işaretle|kararı kapat/.test(t)){
+        const d = (R.Office && R.Office.pendingDecision && R.Office.pendingDecision())
+          || (R.Office && R.Office.openDecisions && R.Office.openDecisions()[0]);
+        const state = /devredildi/.test(t) ? 'devredildi' : 'yapildi';
+        return { decisionId:(d && d.id) || 'karar', state };
+      }
+      return null;
+    },
   };
   const n2 = v => v == null ? 'veri yok' : String(v).replace('.', ',');
   const kucuk = s => String(s || '').toLocaleLowerCase('tr-TR').trim();
@@ -66,6 +168,7 @@ R.KingArac = (function(){
     if(!T || !Array.isArray(T.TOOLS)) return [];
     return T.TOOLS.map(t => ({
       ad:'ays_' + t.name, tur:'oku', aciklama:t.description, es:ES[t.name] || undefined,
+      anahtar:ANAHTAR_OKU[t.name] || undefined,
       parametreler:t.inputSchema && Object.keys(t.inputSchema.properties || {}).length ? t.inputSchema : undefined,
       calistir:p => {
         const ham = t.execute(p || {});
@@ -88,10 +191,14 @@ R.KingArac = (function(){
         props[k] = Object.assign({ type:tip }, PARAM_ACIKLAMA[k] ? { description:PARAM_ACIKLAMA[k] } : {},
           k === 'acik' ? { enum:[0, 1] } : {}, k === 'state' ? { enum:['yapildi', 'devredildi'] } : {});
       });
+      const parametreler = Object.keys(props).length ? { type:'object', properties:props } : undefined;
+      if(parametreler && REQUIRED[def.id]) parametreler.required = REQUIRED[def.id].slice();
       return {
         ad:'ays_' + def.id.replace(/-/g, '_'), tur:'yaz', seviye:def.level, ozetAd:def.title,
         aciklama:def.title + '. ' + def.summary + ' (Onaylar’daki öneriyle aynı eylem; önizlenir, onayla uygulanır.)',
-        parametreler:Object.keys(props).length ? { type:'object', properties:props } : undefined,
+        parametreler,
+        anahtar:ANAHTAR_YAZ[def.id] || undefined,
+        kural:KURAL_EYLEM[def.id] || undefined,
         onizle:p => {
           const pr = R.Proposals.preview({ action:def.id, params:p, agent:def.agents[0] });
           if(!pr.ok) return { hata:pr.why || 'uygulanamaz' };

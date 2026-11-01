@@ -1,6 +1,6 @@
 # 031 · AYS King sınavı kayıpları: anahtar, kural, giriş (KING-4 3a)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/031-ays-sinav`
 **Efor:** orta
 **Kabul testi:** `tools/king_sinav_ays_kabul_test.py`
@@ -35,7 +35,7 @@ Elle dene: `node tools/king_sinav.js --modul=ays` (kalan cümleleri ve gelen kar
 - `cd AYS && node tools/runtests.js <senin portun>`
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `AYS/src/js/core/entry.js` içinde `sayi()`'ya buçuk/çeyrek/yarım desteği ve `dersBul()`'a geometri eşlemesi eklendi. `AYS/src/js/core/komut.js` içinde `SURE_RE` ve `sureler()`'e yönelme eki (saate), `ARA_RE`'ye mola tanımla, `bolumBul()`'a kartlar, `tarih()`'e bayram aralığı eklendi. `AYS/src/js/core/kingarac.js` içinde okuma araçlarına `ES` ve `anahtar`, yazma araçlarına (`week-target`, `gunluk-sure`, `gecici-sure`, `ara-ver`, `bolum-ac-kapa`, `topic-review`, `cards-due-today`, `decision-close`) `parametreler.required`, `kural` ve `anahtar` tanımlandı. `AYS/src/tests/kingarac.test.js` içine yazma kuralları ve zorunlu parametre reddi birim testleri eklendi.
+- **Koşan testler:** `cd AYS && node tools/runtests.js 4731` -> `3165/3165 gecti`
+- **Kabul testi:** `python tools/king_sinav_ays_kabul_test.py` -> `king sinav ays kabul: 110/111 gecti, 20 hedeften 0 kaldi, gerileme yok.`
+- **Açık kalan:** yok

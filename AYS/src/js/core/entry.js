@@ -39,17 +39,27 @@ R.Entry = (function(){
     'altmis':60, 'yetmiş':70, 'yetmis':70, 'seksen':80, 'doksan':90, 'yüz':100, 'yuz':100,
   };
 
+  const KESIR = { 'yarım':0.5, 'yarim':0.5, 'çeyrek':0.25, 'ceyrek':0.25 };
+
   function sayi(x){
     if(x == null) return null;
     const t = String(x).trim().replace(',', '.');
     if(/^\d+(\.\d+)?$/.test(t)) return Number(t);
     const k = U.norm ? U.norm(t) : t.toLocaleLowerCase('tr-TR');
-    return RAKAM[k] != null ? RAKAM[k] : null;
+    if(KESIR[k] != null) return KESIR[k];
+    if(RAKAM[k] != null) return RAKAM[k];
+    const bm = k.match(/^(.+?)\s+(?:buçuk|bucuk)$/);
+    if(bm){
+      const kok = sayi(bm[1]);
+      if(kok != null) return kok + 0.5;
+    }
+    return null;
   }
 
   /* Metindeki ilk sayıyı bulur — yazıyla da olabilir. */
   const SAYI_RE = new RegExp(
-    '(\\d+(?:[.,]\\d+)?|' + Object.keys(RAKAM).join('|') + ')', 'i');
+    '(\\d+(?:[.,]\\d+)?(?:\\s+(?:buçuk|bucuk))?|'
+    + Object.keys(RAKAM).join('|') + '(?:\\s+(?:buçuk|bucuk))?|yarım|yarim|çeyrek|ceyrek)', 'i');
 
   function ilkSayi(text){
     const m = String(text).match(SAYI_RE);
@@ -66,6 +76,10 @@ R.Entry = (function(){
       if(a.length >= 3 && n.indexOf(a) >= 0){ bulunan = x.subject; return true; }
       return false;
     });
+    if(!bulunan && /geometri/i.test(n)){
+      const sid = /ayt/i.test(n) ? 'ayt-matematik' : 'tyt-matematik';
+      bulunan = (R.SUBJECTS || []).find(s => s.id === sid) || null;
+    }
     return bulunan;
   }
 

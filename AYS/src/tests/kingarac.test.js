@@ -284,5 +284,113 @@
       expect(R.S.errors.some(e => e.note === 'İşlem hatası')).toBe(false);
       A()._sifirla();
     });
+
+    /* ---------- Görev 031: Yazma kuralları ve zorunlu parametreler ---------- */
+
+    it('yazma kuralları: cümleden parametre çıkarma', async () => {
+      await hazirla();
+      const ham = R.KingArac.liste();
+      const byAd = ham.reduce((m, a) => { m[a.ad] = a; return m; }, {});
+
+      /* 1. ays_week_target */
+      expect(byAd.ays_week_target.kural).toBeDefined();
+      const pWT = byAd.ays_week_target.kural('haftalık soru hedefi 600 olsun', 'haftalık soru hedefi 600 olsun');
+      expect(pWT).toBeDefined();
+      expect(pWT.questionTarget).toBe(600);
+
+      /* 2. ays_gunluk_sure */
+      expect(byAd.ays_gunluk_sure.kural).toBeDefined();
+      const pGS = byAd.ays_gunluk_sure.kural('günde 4 saat çalışacağım', 'günde 4 saat çalışacağım');
+      expect(pGS).toBeDefined();
+      expect(pGS.dakika).toBe(240);
+
+      /* 3. ays_gecici_sure */
+      expect(byAd.ays_gecici_sure.kural).toBeDefined();
+      const pGec1 = byAd.ays_gecici_sure.kural('bu hafta çalışma süresini 3 saat yap', 'bu hafta çalışma süresini 3 saat yap');
+      expect(pGec1).toBeDefined();
+      expect(pGec1.from).toBeDefined();
+      expect(pGec1.to).toBeDefined();
+      expect(pGec1.dakika).toBe(180);
+
+      const pGec2 = byAd.ays_gecici_sure.kural('bugün çalışma süresini kısalt', 'bugün çalışma süresini kısalt');
+      expect(pGec2).toBeDefined();
+      expect(pGec2.from).toBe(R.U.todayISO());
+      expect(pGec2.to).toBe(R.U.todayISO());
+
+      /* 4. ays_ara_ver */
+      expect(byAd.ays_ara_ver.kural).toBeDefined();
+      const pAra = byAd.ays_ara_ver.kural('yarın ara ver', 'yarın ara ver');
+      expect(pAra).toBeDefined();
+      expect(pAra.from).toBeDefined();
+      expect(pAra.to).toBeDefined();
+
+      /* 5. ays_bolum_ac_kapa */
+      expect(byAd.ays_bolum_ac_kapa.kural).toBeDefined();
+      const pBol = byAd.ays_bolum_ac_kapa.kural('kartlar bölümünü tekrar aç', 'kartlar bölümünü tekrar aç');
+      expect(pBol).toBeDefined();
+      expect(pBol.bolum).toBe('cards');
+      expect(pBol.acik).toBe(1);
+
+      /* Ekran/sayfa açma bölüm gizleme değildir */
+      expect(byAd.ays_bolum_ac_kapa.kural('soru çözüm ekranını aç', 'soru çözüm ekranını aç')).toBeNull();
+
+      /* 6. ays_topic_review */
+      expect(byAd.ays_topic_review.kural).toBeDefined();
+      const pTop = byAd.ays_topic_review.kural('optik konusunu tekrara al', 'optik konusunu tekrara al');
+      expect(pTop).toBeDefined();
+      expect(pTop.topicId).toBe('tf-f12');
+
+      /* 7. ays_cards_due_today */
+      expect(byAd.ays_cards_due_today.kural).toBeDefined();
+      const pCard = byAd.ays_cards_due_today.kural('vadesi geçmiş kartları bugüne aktar', 'vadesi geçmiş kartları bugüne aktar');
+      expect(pCard).toBeDefined();
+
+      /* 8. ays_decision_close */
+      expect(byAd.ays_decision_close.kural).toBeDefined();
+      const pDec = byAd.ays_decision_close.kural('toplantı kararını yapıldı işaretle', 'toplantı kararını yapıldı işaretle');
+      expect(pDec).toBeDefined();
+      expect(pDec.decisionId).toBeDefined();
+      expect(pDec.state).toBe('yapildi');
+
+      A()._sifirla();
+    });
+
+    it('zorunlu parametreler: eksik parametrede dogrula reddeder', async () => {
+      await hazirla();
+
+      /* 1. ays_week_target: questionTarget zorunlu */
+      expect(A().dogrula('ays_week_target', {}).ok).toBe(false);
+      expect(A().dogrula('ays_week_target', { weekN:1 }).ok).toBe(false);
+      expect(A().dogrula('ays_week_target', { questionTarget:500 }).ok).toBe(true);
+
+      /* 2. ays_gunluk_sure: dakika zorunlu */
+      expect(A().dogrula('ays_gunluk_sure', {}).ok).toBe(false);
+      expect(A().dogrula('ays_gunluk_sure', { dakika:180 }).ok).toBe(true);
+
+      /* 3. ays_gecici_sure: from ve to zorunlu */
+      expect(A().dogrula('ays_gecici_sure', {}).ok).toBe(false);
+      expect(A().dogrula('ays_gecici_sure', { from:'2026-11-01' }).ok).toBe(false);
+      expect(A().dogrula('ays_gecici_sure', { from:'2026-11-01', to:'2026-11-01' }).ok).toBe(true);
+
+      /* 4. ays_ara_ver: from ve to zorunlu */
+      expect(A().dogrula('ays_ara_ver', {}).ok).toBe(false);
+      expect(A().dogrula('ays_ara_ver', { from:'2026-11-01' }).ok).toBe(false);
+      expect(A().dogrula('ays_ara_ver', { from:'2026-11-01', to:'2026-11-02' }).ok).toBe(true);
+
+      /* 5. ays_bolum_ac_kapa: bolum ve acik zorunlu */
+      expect(A().dogrula('ays_bolum_ac_kapa', {}).ok).toBe(false);
+      expect(A().dogrula('ays_bolum_ac_kapa', { bolum:'cards' }).ok).toBe(false);
+      expect(A().dogrula('ays_bolum_ac_kapa', { bolum:'cards', acik:1 }).ok).toBe(true);
+
+      /* 6. ays_topic_review: topicId zorunlu */
+      expect(A().dogrula('ays_topic_review', {}).ok).toBe(false);
+      expect(A().dogrula('ays_topic_review', { topicId:'tm-24' }).ok).toBe(true);
+
+      /* 7. ays_decision_close: decisionId zorunlu */
+      expect(A().dogrula('ays_decision_close', {}).ok).toBe(false);
+      expect(A().dogrula('ays_decision_close', { decisionId:'dec-1', state:'yapildi' }).ok).toBe(true);
+
+      A()._sifirla();
+    });
   });
 })();

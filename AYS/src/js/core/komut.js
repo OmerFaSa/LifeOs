@@ -46,7 +46,7 @@ R.Komut = (function(){
      kipinde: «tatilden döndüm» bir rapordur. */
   const ARA_RE = new RegExp(
     '(çalışmayacağım|çalışmayacam|çalışmıyorum|çalışamayacağım|çalışamam|'
-    + 'ara ver|mola ver|tatildeyim|tatile (?:gidiyorum|gideceğim|çıkıyorum)|'
+    + 'ara ver|mola ver|mola tanımla|tatildeyim|tatile (?:gidiyorum|gideceğim|çıkıyorum)|'
     + 'izinliyim|izin alıyorum|dinleneceğim|'
     + SINIR_ONCE + 'ara(?=\\s*[.!]?\\s*$))');
   /* Ara komutunun KENDİSİ olan olumsuz sözler: «bugün çalışmayacağım» bir
@@ -60,7 +60,7 @@ R.Komut = (function(){
 
   /* Süre: «4 saat», «3 buçuk saat», «yarım saat», «dört saat», «150 dakika». */
   const SURE_RE = new RegExp('(\\d+(?:[.,]\\d+)?|yarım|[' + HARF + ']+)\\s*(buçuk\\s*)?'
-    + '(saat|sa|dakika|dk)' + SINIR_SONRA, 'g');
+    + '(saat(?:[ae]|in)?|sa|dakika(?:[ny]?[ae])?|dakka|dk)' + SINIR_SONRA, 'g');
 
   function sureler(t){
     const out = [];
@@ -70,7 +70,7 @@ R.Komut = (function(){
       let n = m[1] === 'yarım' ? 0.5 : R.Entry.sayi(m[1]);
       if(n == null) continue;
       if(m[2]) n += 0.5;
-      const dk = /^(saat|sa)$/.test(m[3]) ? n * 60 : n;
+      const dk = /^(saat|sa)/.test(m[3]) ? n * 60 : n;
       out.push({ dk:Math.round(dk), at:m.index });
     }
     return out;
@@ -99,6 +99,7 @@ R.Komut = (function(){
     const l = (R.Bolum ? R.Bolum.GIZLENEBILIR : []);
     const bulunan = [];
     l.forEach(b => { if(b.takma.some(a => t.indexOf(a) >= 0)) bulunan.push(b.id); });
+    if(/kart/.test(t) && !bulunan.includes('cards')) bulunan.push('cards');
     return bulunan;
   }
 
@@ -147,6 +148,10 @@ R.Komut = (function(){
       bulunan.push({ from:pzt, to:ekle(pzt, 6) });
     }else if(/bu hafta/.test(t)){
       bulunan.push({ from:bugun, to:ekle(bugun, 6 - haftaGunu(bugun)) });
+    }else if(/bayram/.test(t)){
+      const c = (R.S && R.S.calendar || []).find(x => /bayram|tatil/i.test(x.note || x.kind || ''));
+      if(c && c.from) bulunan.push({ from:c.from, to:c.to || c.from });
+      else bulunan.push({ from:bugun, to:ekle(bugun, 2) });
     }
 
     const ng = t.match(N_GUN_RE);
