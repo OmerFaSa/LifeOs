@@ -1,6 +1,6 @@
 # 040 · AYS King verisi: olaylar ve yardım sağlayıcıları (KING-4 §C, §H)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/040-ays-kingveri`
 **Efor:** orta
 **Kabul testi:** `tools/kingveri_ays_kabul_test.py`
@@ -40,7 +40,7 @@ Olay biçimi: `belgeler/ekip/KING-OLAY.md` (oku). Her olay `{ modul:'ays', tur, 
 - `cd AYS && node tools/runtests.js <senin portun>`
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** AYS/src/js/core/kingveri.js içinde R.KingVeri (olaylar, hafta, hatirlat, sonKayit, duzelt) tamamlandı; hafta geçersiz ISO koruması (sabit 7 gün sayımı, veri yok satırları) ve duzelt/geriAl saveDay hata koruması (bellek geri alma, {ok:false, why}) eklendi; AYS/src/tests/kingveri.test.js içine bu durumları sınayan testler yazıldı.
+- **Koşan testler:** cd AYS && node tools/runtests.js 4731 -> 3169/3169 gecti
+- **Kabul testi:** python tools/kingveri_ays_kabul_test.py -> ays king verisi kabul: sinav_yaklasti, tekrar_gunu, kimlik, hafta, hatirlat, sonKayit/duzelt.
+- **Açık kalan:** yok
