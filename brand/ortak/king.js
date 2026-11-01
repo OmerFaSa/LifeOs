@@ -418,7 +418,7 @@ window.LIFEOS.KING_IC = {};
     { modul:'spi', route:'basket',    ad:'Bütçe',      es:['bütçe', 'market', 'sepet'] },
     { modul:'ays', route:'today',     ad:'Bugün',      es:['bugün', 'genel bakış'] },
     { modul:'ays', route:'week',      ad:'Hafta',      es:['hafta'] },
-    { modul:'ays', route:'plan',      ad:'Program',    es:['program'] },
+    { modul:'ays', route:'plan',      ad:'Program',    es:['program', 'plan'] },
     { modul:'ays', route:'gelecek',   ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] },
     { modul:'ays', route:'subjects',  ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] },
     { modul:'ays', route:'solve',     ad:'Soru çöz',   es:['soru çöz', 'soru', 'test çöz'] },
@@ -426,12 +426,12 @@ window.LIFEOS.KING_IC = {};
     { modul:'ays', route:'cards',     ad:'Tekrar',     es:['tekrar', 'kart'] },
     { modul:'ays', route:'progress',  ad:'İlerleme',   es:['ilerleme'] },
     { modul:'esp', route:'today',     ad:'Bugün',      es:['bugün', 'genel bakış'] },
-    { modul:'esp', route:'lang',      ad:'Dil',        es:['dil', 'ingilizce', 'almanca', 'kelime'] },
-    { modul:'esp', route:'library',   ad:'Okuma',      es:['okuma', 'kitap'] },
-    { modul:'esp', route:'writing',   ad:'Yazı',       es:['yazı', 'yazma'] },
-    { modul:'esp', route:'symposium', ad:'Felsefe',    es:['felsefe'] },
-    { modul:'esp', route:'history',   ad:'Tarih',      es:['tarih'] },
-    { modul:'esp', route:'studio',    ad:'Ses',        es:['müzik', 'diksiyon'] },
+    { modul:'esp', route:'lang',      ad:'Dil',        es:['dil', 'dil stüdyo', 'ingilizce', 'almanca', 'kelime'] },
+    { modul:'esp', route:'library',   ad:'Okuma',      es:['okuma', 'kitap', 'kütüphane'] },
+    { modul:'esp', route:'writing',   ad:'Yazı',       es:['yazı', 'yazma', 'yazı laboratuvar'] },
+    { modul:'esp', route:'symposium', ad:'Felsefe',    es:['felsefe', 'sempozyum'] },
+    { modul:'esp', route:'history',   ad:'Tarih',      es:['tarih', 'kronoloji'] },
+    { modul:'esp', route:'studio',    ad:'Ses',        es:['müzik', 'diksiyon', 'stüdyo'] },
   ];
 
   /* Hazır cevaplar — kullanıcının örnekleri, sırasıyla. */
@@ -975,9 +975,12 @@ window.LIFEOS.KING_IC = {};
 
   /* ------------------------------------------------------- anlama */
 
+  /* «SPİ tahlil sayfasını aç», «AYS bugün ekranına git»: modül adı geçiyorsa yalnız o modülün sayfaları. */
+  const MODUL_SOZ = /(?:^|\s)(ays|spi|esp)(?=$|[\s'’.,!?])/g;
   function sayfaBul(t){
     let en = null, uzun = 0;
-    SAYFALAR.forEach(s => s.es.forEach(e => {
+    const adli = (String(t).match(MODUL_SOZ) || []).map(x => x.trim()).filter((m, i, a) => a.indexOf(m) === i);
+    SAYFALAR.forEach(s => (adli.length === 1 && s.modul !== adli[0] ? [] : s.es).forEach(e => {
       if(!new RegExp(B + e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(t)) return;
       const puan = e.length + (KI.ayar && s.modul === KI.ayar.modul ? 0.5 : 0);   // eşitlikte bulunulan modül
       if(puan > uzun){ uzun = puan; en = s; }
@@ -992,7 +995,7 @@ window.LIFEOS.KING_IC = {};
     if(/(özet|nasıl gid|bugün ne|durumum|durum ne)/.test(t)) return { tur:'ozet' };
     /* «notlarım», «notlarımı aç», «bütün notlar»: ortak Notlarım paneli (notum.js). */
     if(/^(bütün |tüm )?notlar(ım|ımı|ımı aç|ımı göster)?( aç| göster)?$/.test(t) && L.NOTUM && L.NOTUM.kuruluMu && L.NOTUM.kuruluMu()) return { tur:'notlar' };
-    const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim)').test(t);
+    const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim|dön)').test(t);
     if(gitMi){
       const s = sayfaBul(t);
       if(s) return { tur:'git', hedef:s, cevap:'Tamam.', kaynak:'komut' };

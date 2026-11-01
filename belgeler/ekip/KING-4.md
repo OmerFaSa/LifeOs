@@ -279,3 +279,75 @@ terim ipucu 0,5 sn; modül başına ~5 sn); `store.js` üçlüsünün ortak depo
 fabrikasına taşınması; CSS hacmi (%86 kullanılmıyor; akıcılık ölçümünde
 yeniden yapılanma kararı depo sahibinde).
 
+
+## Ölçüm 2c · Düzen ve kalan darboğazlar (2026-11-01, tur 2c)
+
+Ortam: bu PC, Playwright Chromium (başsız). Açılış bu kez **gerçek kapıdan**
+(`sistem/sunucu.py`'nin kendi sunucu sınıfı: bölünmüş betik, V8 önbelleği)
+ölçüldü. 1c'deki 941 ms düz `http.server` içindi; gerçek yolda sıcak açılış
+AYS 698, SPİ 413, ESP 526 ms. Milisaniyeler diğer oturumların yüküyle ±%30
+oynar; bayt ve sayı (olay, test) oynamaz.
+
+### Düzen
+
+| İş | Önce | Sonra |
+|---|---|---|
+| Depolama katmanı | üç `store.js` (~520 satır, ad alanı ve metin dışında aynı; ayrışmaya başlamıştı) | `brand/ortak/depo.js` tek kaynak; her modülün `store.js`'i 18 satırlık ayar (anahtarlar, şema, yedek kimliği aynı) |
+| Test saati | `perde.test.js` içinde 130 satırlık sahte saat | `brand/ortak/sahtesaat.js` (`LIFEOS.SahteSaat.saatle`), perde ve dört ortak test kullanır |
+| Belgeler | 8 biten devir/plan belgesi güncellerin arasında | `belgeler/arsiv/`; atıflar yeni yolda; `belgeler/DIZIN.md` (32 belge, ofis 018) |
+| `tools/` | 75 dosya tek düzlemde | `tools/DIZIN.md` sekiz bölüm (ofis 017); iki dizin kabul testi CI'da: sonradan eklenen dosya dizini kırmızı yapar |
+| Kök çöpler | `sunucu.log` (eski kök sunucunun çökme günlüğü), `AYS/debug.log` (Chromium) | silindi (izlenmiyordu, kullanıcı verisi yok); `.gitignore`: `debug.log`, `HKM/config.json.*` (yerel anahtar taşır: **silinmedi**, yok sayılır) |
+| Ölü dosya taraması (ofis `olu`) | | gerçekten ölü dosya çıkmadı. Ofisin «0 atıf» dediği `portreonar_test.py` `brand/medya/OKU.md`'de anılıyordu ve çalışıyor: CI'a eklendi. Üç modüldeki aynı yazı tipleri, `fonts.css`, `package.json` bilinçli (her modül tek başına derlenir); `SPI/tasarim/` tasarım geçmişi, `tools/veri_*` veri üretim betikleri: dokunulmadı |
+
+### Kalan beş darboğaz (1c'den sonra)
+
+| # | Darboğaz | Ölçüldü | Ne yapıldı | Sonra |
+|---|---|---|---|---|
+| 1 | Her açılışta satır içi CSS yeniden iniyor ve ayrıştırılıyor (kök sayfa `no-store`) | kök HTML 1 337–1 376 KB; sıcak HTML ayrıştırma SPİ 49, ESP 47, AYS 90 ms | `sistem/sunucu.py` büyük `<style>`'ı da sürümlü, kalıcı önbellekli `/dist-stil.css`'e ayırır (küçük stil yerinde; kaskad aynı) | kök HTML 35–39 KB; ayrıştırma SPİ 4, ESP 4, AYS 61 ms; AYS sıcak açılış 698 → 609 ms |
+| 2 | Ortak testler gerçek zamanı bekliyor | modül başına gizle 1 212, köken kartı ~1 560, animasyon 703, terim ipucu 512 ms | ortak sahte saat | ~200 / ~550 / ~210 / ~3 ms (iframe'li köken testi ve ağ bekleyen ayarlar testleri gerçek saatte) |
+| 3 | CSS hacmi | modül başına 1,30–1,34 MB, %86–87'si hiç kullanılmıyor; rota başına ~10 stil hesabı, 6–7 yerleşim (`tools/olcum_modul.js`) | aktarım ve ayrıştırma 1 numarayla önbelleğe alındı; stil hesabı yükü kaldı | ekran başına CSS bölme yeniden yapılanmadır (akıcılık ölçümü: on özellik CSS'ini kapatmak geçiş stilini yalnız %16 azaltıyordu); karar depo sahibinde |
+| 4 | İlk ses bağlamı | `new AudioContext()` bir kez 314 ms, açılıştan sonra boşta | **düzeltilmedi**: dokunuşa ertelemek ilk tıkı 470–700 ms yapıyordu (2026-10-29 kararı); telefonda dokunuştan önce işaret yok | — |
+| 5 | Her kayıt bütün profili yazar | SPİ 270 gün: 157 KB, kayıt başı 0,32 → 4,7 ms | **düzeltilmedi**: anında yazma sözü (veri kaybı yok); yol başına anahtar veri göçü ister. Depo artık tek dosya (`depo.js`): değişiklik bir yerde yapılır | — |
+
+Ek: etkin profili doğrudan okuyan altı satır (`beacon.js` ×3, `canli.js`,
+`foto.js`, `sorufoto.js`) artık `Store.activeProfileId()` ile okunabilir; işi
+ölçülemeyecek kadar küçük, sonraki dokunuşta yapılır.
+
+## Tur 2a · King sınavı ve yetenek kaydı (2026-11-01)
+
+**Sınav, ilk 100 cümle: 59 → 95/100** (AYS 30/32, SPİ 29/30, ESP 20/22, genel 16/16;
+yerel karar ortanca 1–2 ms). Yapılan (e98fad92 ve bu tur):
+- **Hızlı araç yolu (A3'ün ilk adımı).** `arac.js`'te araç `kural(t, metin)` ile
+  cümleden kendi parametresini çıkarabilir (besin, barkod, kelime kartı, alıntı,
+  kitap bitirme, deftere not); `es` taşıyan okuma aracı «… aç» sayfa komutunu almaz.
+  `king-yol.js` bu yolu sayfa ve veri tahmininden önce dener: okuma sorusu sayfa
+  açmaz, sistemden cevaplanır; yazan araç yine önizlenir ve onay ister.
+- Sayfa sözü geçen uzun cümle komut değildir: Merkez cevaplar, Merkez yoksa sayfa.
+- Modül adı geçen sayfa komutu yalnız o modülde aranır («SPİ tahlil sayfasını aç»);
+  «… ekranına dön» de komut. Sayfa eş sözleri: sempozyum, kronoloji, stüdyo, kütüphane, plan.
+- «yapılacak: fatura öde» ödeme kilidine girmez; günlük cümleyle VKİ; «… sorusu sor».
+- Koşucu düzeltmesi: karar **ilk olaydır** (Merkez'e sorulup cevap gelmeyince açılan
+  sayfa yedektir); yetki eylemi yakalanır, uygulanmaz (sınav temayı değiştiriyordu);
+  anlatımdaki kayıtlar kartı veri sayılır.
+
+Kalan 5 (ilk 100): «bu hafta ara ver» AYS'nin kendi komut yolundan doğru öneriyi
+önizliyor ama önizleme hangi eylem olduğunu taşımıyor (`veri` sayılıyor); «çalışma
+süresini kısalt» dakikasız (sorulmalı); «kilom 78.4» ve «30 sayfa kitap okudum»
+modül ayrıştırıcısının işi; «kitap ekle» adsız (sorulmalı).
+
+**Sınav 300 cümle (ofis 020): 209/300 (%70).** AYS 44/95, SPİ 70/90, ESP 54/70,
+genel 41/45. Yeni 200 cümle bilerek kalıp dışı yazıldı; kayıpların çoğu Merkez'e
+düşen okuma ve plan cümleleri («hedef netlerime ne kadar yaklaştım», «bu haftanın
+soru hedefini 500 yap»). Bunlar regex'le değil **modelin araç seçimiyle** çözülür:
+cümle başına kalıp yazmak sınavı ezberlemek olur. Sonraki adım (tur 3): sınavı HKM'deki
+modelin araç seçimiyle de koşmak (Merkez çağrısı yakalanmadan), yerel ve bulut ayrı
+puan. Ayrıştırıcı açıkları (kilo, «1 buçuk saat», «45 dakika tarih çalıştım»)
+modüllerin giriş işidir.
+
+**A2 · yetenek kaydı.** `node tools/king_kapsam.js` (eşleme `tools/king_kapsam.json`):
+modülün `Model`'indeki her yazma işlevi ve gezinmedeki her rota bir araca bağlı mı,
+araç kayıtta var mı. Yeni yazma işlevi ya da ekran eşlemesiz kalırsa kırmızı. Bugün
+72 eksik, 47 yeni araç: ofis görevleri 021 (AYS, 14 araç), 022 (SPİ, 14), 023
+(ESP, 19); kabul testleri `tools/king_kapsam_<modül>_kabul_test.py` (kapsam tam ve
+her yeni araç modülün `kingarac.test.js`'inde sınanmış). Yazan her araç `geriAl`
+döner (A4'ün «geri al» ölçüsü).

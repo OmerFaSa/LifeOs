@@ -955,7 +955,8 @@
       "m": "ays",
       "c": "hedef ve net matrisimi aç",
       "b": [
-        "arac:ays_hedef_ve_net_matrisi"
+        "arac:ays_hedef_ve_net_matrisi",
+        "git:ays:target"
       ]
     },
     {
@@ -1314,7 +1315,8 @@
       "m": "ays",
       "c": "gelecek haftanın planına bakalım",
       "b": [
-        "git:ays:gelecek"
+        "arac:ays_haftalar",
+        "git:ays:week"
       ]
     },
     {
@@ -1472,7 +1474,7 @@
     {
       "g": "spi",
       "m": "spi",
-      "c": "bu barkodlu yoğurttan 200 gram öğün olarak ekle",
+      "c": "8690504033324 barkodlu yoğurttan 200 gram yedim",
       "b": [
         "arac:spi_barkod_ogun"
       ]
