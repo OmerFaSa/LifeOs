@@ -23586,7 +23586,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'db784624', at:'2026-11-01 15:42', dirty:true };
+R.BUILD = { id:'5daeda5e', at:'2026-11-01 19:54', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -40608,7 +40608,7 @@ LIFEOS.YETKI = (function(){
       SAYFALAR kataloğu) ve bu modülün araçları (açıklama + örnek cümle).
 
    Araç tanımı:
-     { ad, aciklama, tur:'oku'|'yaz', parametreler?, ornek?, es?, kural?(t, metin):param|true|null, seviye?,
+     { ad, aciklama, tur:'oku'|'yaz', parametreler?, ornek?, anahtar?, es?, kural?(t, metin):param|true|null, seviye?,
        kullanilir?():bool,
        calistir(param)  (oku) → { sonuc?, cevap?, satirlar?, yerine? }
        onizle(param)    (yaz) → { metin, satirlar? } | { veri } | { yetki } | { hata }
@@ -40836,7 +40836,7 @@ window.LIFEOS.ARAC = (function(){
         if(p) return { ad:a.ad, param:p === true ? {} : p };
         continue;
       }
-      if(a.tur === 'oku' && a.es instanceof RegExp && a.es.test(t) && !GIT_SON.test(t)) return { ad:a.ad, param:{} };
+      if(a.tur === 'oku' && a.es instanceof RegExp && a.es.test(t) && !GIT_SON.test(t) && !NIYET_DANIS.test(t)) return { ad:a.ad, param:{} };
     }
     return null;
   }
@@ -40851,6 +40851,61 @@ window.LIFEOS.ARAC = (function(){
       const metin2 = kucuk(a.aciklama + ' ' + (a.ornek || '') + ' ' + a.ad.replace(/_/g, ' '));
       return { a, p:k.filter(w => metin2.indexOf(w) >= 0).length };
     }).filter(x => x.p > 0).sort((x, y) => y.p - x.p).slice(0, en || 4).map(x => x.a);
+  }
+
+  /* Söz 6 (KING-4 A3): niyet çözücü. Kalıbı olmayan cümle de araç kaydından
+     seçilir: cümlenin kelimeleri araçların adı, açıklaması, örneği ve
+     `anahtar`ıyla (Türkçe ek payıyla; az araçta geçen kelime ağır) puanlanır.
+     Soru ve ad cümlesi okuma, emir yazma aracına gider; kayıt cümlesi
+     («… çözdüm») girmez, o giriş kapısının işi. Eşiğin altı ya da başa baş
+     null döner: model ya da sayfa karar verir. Yazan araç yine önizlenir ve
+     onay ister (söz 3). */
+  const NIYET_DIS = /^(sayfa_ac|kayit_gir|odak_baslat|odak_durdur)$/;
+  /* Danışma ve bilgi sorusu («ne yesem», «nasıl korurum», «… nedir») araç değil, Merkez'in işi. */
+  const NIYET_DANIS = /(\S(?:ay[ıi]m|ey[ıi]m|mal[ıi]y[ıi]m|mel[ıi]y[ıi]m|s[ae]m)(?=$|\s|[?.!])|ne önerirsin|nasıl .*(?:[ae]b[iı]l[iı]r[iı]m|r[ıiuü]m|n[ıiuü]r)(?=$|\s|[?.!])|nedir|tavsiye|bir şey söyle)/;
+  const NIYET_DOLGU = new Set(('ve ile veya bu şu o bir de da ne neler nasıl kaç hangi hangileri için gibi daha en çok az şey '
+    + 'ben benim bana beni sen king lütfen olarak olan var yok mi mı mu mü misin mısın bakalım acaba şimdi artık hep tüm bütün her kadar').split(' '));
+  const NIYET_SORU = /\?|(?:^|\s)(ne|neden|niye|nasıl|hangi|hangileri|kaç|kim|nerede|niçin|m[ıiuü](?:s[ıiuü]n(?:[ıiuü]z)?|y[ıiuü][mz]|d[ıiuü]r)?)(?=$|\s|[.,!])/;
+  const NIYET_OKU = /\s(göster|getir|sırala|listele|özetle)[.!]?$/;
+  const NIYET_IKI = /\s(aç|çıkar)[.!]?$/;
+  const NIYET_EMIR = /\s(yap|ekle|kapat|al|koy|çek|aktar|üret|oluştur|güncelle|işaretle|tanımla|düşür|kısalt|gizle|ver|sil|başlat|kaydet|değiştir|ayarla|bitir|tamamla|istiyorum)[.!]?$/;
+  const NIYET_KAYIT = /(d[ıiuü]m|t[ıiuü]m|d[ıiuü]k|t[ıiuü]k)[.!]?$/;
+  const NIYET_ESIK = 3, NIYET_FARK = 0.5;
+  /* 'oku' | 'yaz' | 'iki' | 'ad' (fiilsiz ad öbeği, okuma) | null (kayıt). */
+  /* «alıntı ekle: …» gibi cümlede iki noktadan sonrası içeriktir, niyet baştadır. */
+  const niyetBas = m => String(m || '').split(':')[0];
+  function niyetSinif(metin){
+    const t = kucuk(niyetBas(metin));
+    if(NIYET_SORU.test(t) || NIYET_OKU.test(t)) return 'oku';
+    if(NIYET_IKI.test(t)) return 'iki';
+    if(NIYET_EMIR.test(t)) return 'yaz';
+    return NIYET_KAYIT.test(t) ? null : 'ad';
+  }
+  const niyetKelime = m => kucuk(m).replace(/[’'`]/g, ' ').replace(/[^0-9a-zçğıöşü\s]/g, ' ').split(/\s+/)
+    .filter(w => w.length >= 3 && !NIYET_DOLGU.has(w));
+  /* Ortak kök: en az 4 harf, ya da kısa kelimenin tamamı («net» ~ «netlerim»). */
+  function niyetEs(w, u){
+    const n = Math.min(w.length, u.length);
+    let i = 0;
+    while(i < n && w[i] === u[i]) i++;
+    return i >= Math.min(n, 5) && (i >= 4 || i === n);
+  }
+  function niyet(metin, sinif){
+    const s = sinif === undefined ? niyetSinif(metin) : sinif;
+    const sira = niyetKelime(niyetBas(metin)), ws = Array.from(new Set(sira));
+    if(!s || !ws.length || NIYET_DANIS.test(kucuk(metin))) return null;
+    const l = liste().filter(a => !NIYET_DIS.test(a.ad));
+    const dok = l.map(a => niyetKelime(a.ad.replace(/^(ays|spi|esp)_/, '').replace(/_/g, ' ') + ' ' + a.aciklama + ' ' + (a.ornek || '') + ' ' + (a.anahtar || '')));
+    const agir = ws.map(w => { const f = dok.filter(d => d.some(u => niyetEs(w, u))).length; return f ? Math.log(l.length / f) : 0; });
+    const ag = w => agir[ws.indexOf(w)];
+    /* Ardışık iki kelime araç metninde de ardışıksa («kitap ekle») yarım puan daha. */
+    const ikili = d => sira.slice(1).reduce((t, w, j) => t + (d.some((u, k) => k > 0 && niyetEs(w, u) && niyetEs(sira[j], d[k - 1])) ? (ag(w) + ag(sira[j])) / 2 : 0), 0);
+    const puan = l.map((a, i) => ({ a, p:ws.reduce((t, w, j) => t + (dok[i].some(u => niyetEs(w, u)) ? agir[j] : 0), 0) + ikili(dok[i]) }))
+      .filter(x => x.p > 0 && (s === 'iki' || (s === 'yaz') === (x.a.tur === 'yaz')))
+      .sort((x, y) => y.p - x.p);
+    const [b, c] = puan;
+    if(!b || b.p < NIYET_ESIK || (c && b.p - c.p < NIYET_FARK)) return null;
+    return { ad:b.a.ad, param:{}, puan:Math.round(b.p * 100) / 100, sinif:s };
   }
 
   /* Sistem haritası: modüller, bu modülün sayfaları ve araçları. */
@@ -40898,7 +40953,7 @@ window.LIFEOS.ARAC = (function(){
   function _sifirla(){ modul = null; modulAraclar = []; ortak = []; }
 
   const api = { kur, ortakKur, modulSec, liste, bul, dogrula, paramDogrula, modelIcin, calistir, onizle, uygula,
-    kuralla, ara, harita, isler, isAra, ISLER, GRUP_AD, sayilar, sayiKorunur, HARITA, MODUL_AD, kuruluMu:() => liste().length > 0, _sifirla };
+    kuralla, ara, niyet, niyetSinif, harita, isler, isAra, ISLER, GRUP_AD, sayilar, sayiKorunur, HARITA, MODUL_AD, kuruluMu:() => liste().length > 0, _sifirla };
   return api;
 })();
 
@@ -41739,6 +41794,12 @@ R.KingArac = (function(){
 
   return { liste, satirlar, bul };
 })();
+
+/* ==== js/core/kingveri.js ==== */
+/* KING VERISI — KING-4 §C olaylari ve §H yardim saglayicilari (gorev 040, belgeler/ekip/gorevler).
+   Olay bicimi belgeler/ekip/KING-OLAY.md; tasiyici brand/ortak/olay.js. Yer tutucu: ofis doldurur. */
+
+window.R = window.R || {};
 
 /* ==== js/core/kisi.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -49925,7 +49986,7 @@ window.LIFEOS.KING_IC = {};
         parametreler:{ type:'object', properties:{ sorgu:{ type:'string', maxLength:80 } }, required:['sorgu'] },
         kullanilir:() => !!D(), calistir:p => akisla(m => notAra(m || p.sorgu, KI.kucuk(p.sorgu))) },
       { ad:'not_ekle', tur:'yaz', ornek:'deftere not: üslülerde tabanlar aynıysa üsler toplanır', aciklama:'Defter’e yeni bir not yazar.',
-        kural:(t, m) => { const x = /^deftere not\s*[:,]\s*(\S[\s\S]{1,1999})$/i.exec(m); return x ? { metin:x[1].trim() } : null; },
+        kural:(t, m) => { const x = /^(?:\S+ )?defter(?:e|ine) not\s*[:,]\s*(\S[\s\S]{1,1999})$/i.exec(m); return x ? { metin:x[1].trim() } : null; },
         parametreler:{ type:'object', properties:{ baslik:{ type:'string', maxLength:120 }, metin:{ type:'string', maxLength:2000 } }, required:['metin'] },
         kullanilir:() => !!D(),
         onizle:p => ({ metin:'Defter’e not eklenecek' + (p.baslik ? ': «' + p.baslik + '»' : '') + '.', satirlar:[String(p.metin).slice(0, 160)] }),
@@ -49969,7 +50030,7 @@ window.LIFEOS.KING_IC = {};
     /* Modülün yetki eylemleri (toplantı, inceleme, kitap ekle; yetki.js söz 8–9). */
     const y = Y();
     (y && y.ekKatalog ? y.ekKatalog() : []).forEach(e => {
-      l.push({ ad:'eylem_' + e.id.replace(/[^a-z0-9]+/g, '_'), tur:'yaz', aciklama:e.aciklama || e.ad + '.', ornek:e.ad.toLocaleLowerCase('tr'),
+      l.push({ ad:'eylem_' + e.id.replace(/[^a-z0-9]+/g, '_'), tur:'yaz', aciklama:e.aciklama || e.ad + '.', ornek:e.ad.toLocaleLowerCase('tr'), anahtar:e.anahtar,
         parametreler:e.parametreler || undefined, onizle:p => yetkiNiyet(e.id, p), uygula:() => ({ ok:false }) });
     });
     return l;
@@ -51142,6 +51203,26 @@ window.LIFEOS.KING = (function(){
     }
     const y = KI.yorumla(metin);
     if(y.tur === 'bos') return y;
+    /* A3 niyet çözücü (arac.js söz 6): kalıbı tutmayan soru ve emir araç
+       kaydından seçilir. Sayfa komutu ve kayıt kendi yolunda kalır; veri
+       sanılan cümleyi yalnız açık soru ya da emir geçer («… hedefini 500 yap»),
+       «… bölümünü aç» sayfa değil bölüm işidir. */
+    const NA = KI.ARAC() && !KI.paylasim ? KI.ARAC() : null;
+    const ns = NA && NA.niyet ? NA.niyetSinif(metin) : null;
+    /* Sayfa sözü geçen kısa cümle («haftalık programımı göster») sayfadır; Merkez'e gitme koşuluyla aynı. */
+    const uzun = KI.soruMu(metin) || KI.kucuk(metin).split(' ').length > 3;
+    if(ns && (y.tur === 'bilinmiyor' || y.tur === 'ozet' || (y.tur === 'git' && ((y.kaynak !== 'komut' && uzun) || /bölüm/.test(KI.kucuk(metin))))
+      || (y.tur === 'veri' && ns !== 'ad'))){
+      const N = NA.niyet(metin, ns);
+      if(N){
+        const sen = { kim:'sen', metin:String(metin).trim() };
+        KI.akis.push(sen);
+        KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null;
+        const rn = await KI.aracIsle({ arac:[N], niyet:true }, metin);
+        if(rn) return rn;
+        KI.akis = KI.akis.filter(m => m !== sen);
+      }
+    }
     /* Söz 16: paylaşım sürerken soru o anın karesiyle; veri cümlesi yerelde. */
     if(KI.paylasim && y.tur !== 'veri' && !(y.tur === 'git' && y.kaynak === 'komut')){
       KI.akis.push({ kim:'sen', metin:String(metin).trim() });
