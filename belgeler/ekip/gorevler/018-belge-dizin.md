@@ -10,7 +10,7 @@ Depo sahibi (2026-11-01): «organizasyonla sistemi düzenli hale getir». Biten 
 
 ## Dokunulacak dosyalar
 - `belgeler/DIZIN.md` (yeni) — başlık, iki cümle «nereden başlanır» (önce `AGENTS.md`, `README.md`, `belgeler/TEKNIK.md`), sonra bölümler: `## Teknik`, `## Ekip ve planlar`, `## Ofis`, `## Arşiv`. Her belge tek satır: `- [AD](göreli/yol.md) — ne anlatır, durumu (güncel / tamamlandı / sürüyor) ve tarihi`. Açıklama belgenin kendi başlığından ve ilk paragrafından; uydurma yok. Göreli yollar `belgeler/`'e göredir (`ekip/OFIS.md`, `arsiv/T-DEVIR.md`). Görev dosyaları (`ekip/gorevler/NNN-*.md`) tek tek yazılmaz; `ekip/gorevler/README.md` ve `DERSLER.md` yazılır.
-- `README.md` — belgelerin anlatıldığı yere tek satır: `belgeler/DIZIN.md` (bütün belgelerin dizini). (`AGENTS.md`'ye Claude ekledi; dokunma.)
+- `README.md` — belgelerin anlatıldığı yere tek satır: `belgeler/DIZIN.md` (bütün belgelerin dizini). (AGENTS.md'ye Claude ekledi.)
 
 ## Dokunma
 - `AGENTS.md` (yasak bölge).
