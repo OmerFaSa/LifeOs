@@ -46,3 +46,9 @@ veri/gunluk/
 veri/temiz/spi/besin_usda.jsonl
 veri/temiz/esp/kelime_sikligi.jsonl
 veri/temiz/esp/cumle_ciftleri*.jsonl
+
+# Chromium/Electron hata gunlugu (denetim tarayicisi calisma klasorune yazar).
+debug.log
+# HKM ayarinin elle alinmis kopyalari (entegre testi oncesi yedek vb.): yerel
+# erisim anahtari tasir, kullanicinin verisidir; depoya girmez, silinmez.
+HKM/config.json.*

@@ -1,11 +1,11 @@
 # Talimat raporu — sıradaki Claude için
 
 > Son güncelleme: 2026-09-23 gece · yalnız «şimdi + sıradaki». Bitmiş işlerin ayrıntısı,
-> eski sorular ve eski özetler: `belgeler/ekip/arsiv/DEVIR-2026-09.md` (tam metin).
+> eski sorular ve eski özetler: `belgeler/arsiv/DEVIR-2026-09.md` (tam metin).
 > Her madde bitince bu dosya güncellenir; limit ortada biterse sonraki oturum buradan sürer.
 >
 > **2026-09-24 · Part 9 (tek tasarım + 183 katalog özelliği) artık üç rollü ekiple yürür:**
-> `belgeler/ekip/EKIP-PLANI.md` (KARTLAR · TASARIM · HATA) ve canlı pano `belgeler/ekip/EKIP-DURUM.md`.
+> `belgeler/ekip/EKIP-PLANI.md` (KARTLAR · TASARIM · HATA) ve canlı pano `belgeler/arsiv/EKIP-DURUM.md`.
 > Bu dosyadaki diğer açık işler (HKM tarafı) o ekibin kapsamında değildir.
 
 ## ⚡ HIZ KURALLARI (2026-09-23, kullanıcı: «sürenin kısalması için tüm koşulları uygula»)

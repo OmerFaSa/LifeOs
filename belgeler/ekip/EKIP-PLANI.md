@@ -1,7 +1,7 @@
 # Ekip hareket planı — tek tasarım + 183 özellik (Part 9)
 
 > 2026-09-24 · Üç Claude, tek `main`. Bu dosya **sabittir**: yalnız kullanıcı kararıyla
-> değişir. Canlı durum `belgeler/ekip/EKIP-DURUM.md`'dedir. DEVIR Part 9 bu planla yürür.
+> değişir. Canlı durum `belgeler/arsiv/EKIP-DURUM.md`'dedir. DEVIR Part 9 bu planla yürür.
 >
 > Kaynaklar (hepsi `belgeler/ekip/` altında):
 > `TASARIM-OZELLIKLERI.md` (katalog v4: 183 özellik, P1'lerin kabul ölçütleriyle) ·
@@ -239,7 +239,7 @@ kanıtlar.
 | `tools/*`, `*/tools/*`, `.github/*` | **H** | Yeni denetim isteği H'ye yazılır |
 | `*/src/tests/*` | Yeni dosyayı yazan; var olan dosyada sona ekleme serbest | Var olan testi değiştirmek ya da silmek yalnız H yapar, gerekçesiyle |
 | `*/dist/*`, `*/src/js/data/build.js` | Herkes kendi commit'inde üretir | Çakışma kuralı §7 |
-| `belgeler/ekip/EKIP-DURUM.md` | Herkes yalnız **kendi bölümüne** yazar | Teslim tablosuna T, bulgu özetine H yazar |
+| `belgeler/arsiv/EKIP-DURUM.md` | Herkes yalnız **kendi bölümüne** yazar | Teslim tablosuna T, bulgu özetine H yazar |
 | `belgeler/ekip/HATALAR.md` | **H** (Tur 2 bulguları en üste, `T2-` koduyla) | Tur 1 kapalı; kodda ona bağlantı var, silinmez |
 | `belgeler/ekip/CEKMECE-HARITASI.md`, `*/src/STIL.md` | **T** | |
 | `README.md`, `belgeler/NOTLAR.md` | **H** | Sayılar elle yazılmaz |
@@ -353,7 +353,7 @@ Cevaplar (kullanıcı, 2026-09-24: «önerilerini uygula»): **sekizi de öneri 
 > LifeOS deposunda üç Claude'luk bir ekip kuruldu; sen **KARTLAR (K)** rolündesin. Diğer
 > ikisi TASARIM (T) ve HATA (H). `git fetch origin main` ile main'i al ve sırayla oku:
 > `AGENTS.md`, `belgeler/ekip/EKIP-PLANI.md` (tamamı; senin bölümün §4.1, özellik listen Ek A'da
-> sahibi K olanlar), `belgeler/ekip/TASARIM-OZELLIKLERI.md`, `belgeler/ekip/EKIP-DURUM.md`.
+> sahibi K olanlar), `belgeler/ekip/TASARIM-OZELLIKLERI.md`, `belgeler/arsiv/EKIP-DURUM.md`.
 > `belgeler/ekip/vitrin.html`'i tarayıcıda açıp kartların canlı örneklerine, `belgeler/ekip/tasarim/`
 > görsellerine bak. K1 ile başla: ekran dosyalarına dokunmadan P1 ortak bileşenler.
 > §5'teki dosya sahipliğinin dışına çıkma. Her teslimden sonra EKIP-DURUM'daki kendi
@@ -364,7 +364,7 @@ Cevaplar (kullanıcı, 2026-09-24: «önerilerini uygula»): **sekizi de öneri 
 > LifeOS deposunda üç Claude'luk bir ekip kuruldu; sen **TASARIM (T)** rolündesin. Diğer
 > ikisi KARTLAR (K) ve HATA (H). `git fetch origin main` ile main'i al ve sırayla oku:
 > `AGENTS.md`, `belgeler/ekip/EKIP-PLANI.md` (tamamı; senin bölümün §4.2), `belgeler/ekip/CEKMECE-HARITASI.md`,
-> `belgeler/ekip/EKIP-DURUM.md`. Hedef görünüm `belgeler/ekip/tasarim/v4-*.png` ve `v4-ornek.css`'tedir;
+> `belgeler/arsiv/EKIP-DURUM.md`. Hedef görünüm `belgeler/ekip/tasarim/v4-*.png` ve `v4-ornek.css`'tedir;
 > `belgeler/ekip/vitrin.html` kartların örnekleridir. İlk iş T0: §8'deki kararları bana tek mesajda
 > sor. Cevabı beklerken T1 temeli kur. T2 ve T3 için H'nin taban envanterini bekle
 > (Kapı 1). Her modül bitince EKIP-DURUM'daki teslim tablosuna yaz ve main'e push et.
@@ -373,7 +373,7 @@ Cevaplar (kullanıcı, 2026-09-24: «önerilerini uygula»): **sekizi de öneri 
 
 > LifeOS deposunda üç Claude'luk bir ekip kuruldu; sen **HATA (H)** rolündesin. Diğer ikisi
 > KARTLAR (K) ve TASARIM (T). `git fetch origin main` ile main'i al ve sırayla oku:
-> `AGENTS.md`, `belgeler/ekip/EKIP-PLANI.md` (tamamı; senin bölümün §4.3), `belgeler/ekip/EKIP-DURUM.md`,
+> `AGENTS.md`, `belgeler/ekip/EKIP-PLANI.md` (tamamı; senin bölümün §4.3), `belgeler/arsiv/EKIP-DURUM.md`,
 > `belgeler/ekip/HATALAR.md` (Tur 1 kapalı, biçim için). İlk iş **H0 taban envanteri**: T'nin menü
 > değişikliği onu bekliyor. Sonra H0b işleyici testleri ve H1 sadelik denetimi. Ardından
 > K ve T'nin her push'unu denetle; kırmızıyı sahibine yaz, sahipsiz hatayı kendin düzelt.

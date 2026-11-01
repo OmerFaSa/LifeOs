@@ -54,7 +54,7 @@ doğrular — ve HKM kapalıyken hiçbir arayüzün bozulmadığını. Bu deneti
 yazıldığı gün, iki tarafın da kendi testlerinde geçip birbiriyle
 konuşamadığı bir boşluğu buldu (tarayıcının CORS ön-isteği).
 
-> **Sırada ne var:** [`belgeler/GELISTIRME_RAPORU.md`](../belgeler/GELISTIRME_RAPORU.md) —
+> **Sırada ne var:** [`belgeler/arsiv/GELISTIRME_RAPORU.md`](../belgeler/arsiv/GELISTIRME_RAPORU.md) —
 > ölçülmüş bulgular, öncelik sırası ve bilinçli olarak yapılmayacaklar.
 > Açık teknik borçlar `belgeler/NOTLAR.md` §19'da.
 
@@ -281,7 +281,7 @@ ekranındaki «Bu içe aktarmayı geri al».
 (`sistem/sunucu.py`). Dışarı açmak verinin şifresiz servis edilmesi ve yerel ağ
 güvenliğinin kullanıcıya geçmesi demektir; «ara sıra bakıyorum» bu bedeli
 karşılamaz. Telefon birincil cihaz hâline gelirse doğru cevap bu bölüm
-değil, `sistem/baslat.py --ag` bayrağıdır (belgeler/GELISTIRME_RAPORU.md İP-4, Seçenek A).
+değil, `sistem/baslat.py --ag` bayrağıdır (belgeler/arsiv/GELISTIRME_RAPORU.md İP-4, Seçenek A).
 
 Tek tek çalıştırmak da mümkün — her proje kendi klasöründen:
 

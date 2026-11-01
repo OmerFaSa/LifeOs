@@ -59,13 +59,13 @@ Ortam: `CHROMIUM_PATH=/opt/pw-browsers/chromium NODE_PATH=<modül>/node_modules`
 ---
 
 > 2026-09-24. Bu belgeyi T rolünü devralan çalışan okur. Kaynak plan `belgeler/ekip/EKIP-PLANI.md`
-> §4.2 (T'nin adımları), düzen `belgeler/ekip/CEKMECE-HARITASI.md`, canlı durum `belgeler/ekip/EKIP-DURUM.md`.
+> §4.2 (T'nin adımları), düzen `belgeler/ekip/CEKMECE-HARITASI.md`, canlı durum `belgeler/arsiv/EKIP-DURUM.md`.
 > Hedef görünüm `belgeler/ekip/tasarim/v4-*.png`.
 
 ## 0 · Başlarken
 
 1. `git fetch origin main && git rebase origin/main`; sırayla oku: `AGENTS.md`, `belgeler/ekip/EKIP-PLANI.md`
-   (§1, §3, §4.2, §5, §6, §7), `belgeler/ekip/CEKMECE-HARITASI.md`, `belgeler/ekip/EKIP-DURUM.md` (TASARIM bölümü).
+   (§1, §3, §4.2, §5, §6, §7), `belgeler/ekip/CEKMECE-HARITASI.md`, `belgeler/arsiv/EKIP-DURUM.md` (TASARIM bölümü).
 2. Doğrudan `main`'de çalışılır; her iş ayrı commit, `[T] …` başlığıyla. Push öncesi
    `git fetch && git rebase origin/main`, sonra `git push origin HEAD:main`. **Force-push yok, PR yok.**
    dist/build.js çakışırsa: `git checkout --ours`, `python3 build.py`, testler, `git add`, devam.

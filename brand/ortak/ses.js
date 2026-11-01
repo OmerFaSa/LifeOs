@@ -6,7 +6,7 @@
    düzenleme. Biçimi `brand/ortak/ses.css`, testi `brand/ortak/radyo.test.js`.
    ==================================================================
 
-   KULLANICININ İSTEĞİ (2026-10-02, belgeler/ekip/DEVIR-RADYO.md)
+   KULLANICININ İSTEĞİ (2026-10-02, belgeler/arsiv/DEVIR-RADYO.md)
 
      «İnternet chill radyo — Türkçe pop, Türkçe slow, İngilizce pop,
       İngilizce slow, İngilizce rap, Türkçe rap gibi radyo türleri.»
