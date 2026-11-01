@@ -92,5 +92,388 @@
       expect(A().dogrula('spi_tahliller', { teshis:true }).ok).toBe(false);
       A()._sifirla();
     });
+
+    /* ==================== 022 · Yeni King Araçları Testleri ==================== */
+
+    it('antrenman sil: \'spi_antrenman_sil\' önizler, uygular ve geri alır', async () => {
+      SP.Test.resetState();
+      kur();
+      const w = SP.Model.newWorkout(SP.U.todayISO());
+      w.name = 'Kuvvet Antrenmanı';
+      w.minutes = 45;
+      await SP.Model.saveWorkout(w);
+      expect((SP.S.workouts || []).find(x => x.id === w.id)).toBeDefined();
+
+      const o = await A().onizle('spi_antrenman_sil', { id:w.id });
+      expect(o.ok).toBe(true);
+      expect(o.onizle.metin).toContain('Kuvvet Antrenmanı');
+
+      const r = await A().uygula({ arac:true, ad:'spi_antrenman_sil', param:{ id:w.id } });
+      expect(r.ok).toBe(true);
+      expect((SP.S.workouts || []).find(x => x.id === w.id)).toBeUndefined();
+
+      await r.geriAl();
+      const restored = (SP.S.workouts || []).find(x => x.id === w.id);
+      expect(restored).toBeDefined();
+      expect(restored.minutes).toBe(45);
+      A()._sifirla();
+    });
+
+    it('öğün sil: \'spi_ogun_sil\' önizler, uygular ve geri alır', async () => {
+      SP.Test.resetState();
+      kur();
+      const d = SP.U.todayISO();
+      const m = SP.Model.newMeal('ogle');
+      m.items = [{ foodId:'yumurta', g:100, cert:'measured' }];
+      await SP.Model.addMeal(d, m);
+      expect(SP.Model.mealsOf(d).some(x => x.id === m.id)).toBe(true);
+
+      const o = await A().onizle('spi_ogun_sil', { id:m.id, tarih:d });
+      expect(o.ok).toBe(true);
+      expect(o.onizle.metin).toContain('ogle');
+
+      const r = await A().uygula({ arac:true, ad:'spi_ogun_sil', param:{ id:m.id, tarih:d } });
+      expect(r.ok).toBe(true);
+      expect(SP.Model.mealsOf(d).some(x => x.id === m.id)).toBe(false);
+
+      await r.geriAl();
+      expect(SP.Model.mealsOf(d).some(x => x.id === m.id)).toBe(true);
+      A()._sifirla();
+    });
+
+    it('tahlil sil: \'spi_tahlil_sil\' önizler, uygular ve geri alır', async () => {
+      SP.Test.resetState();
+      kur();
+      const d = SP.U.todayISO();
+      const l = SP.Model.newLab(d);
+      l.lab = 'Klinik A';
+      l.values = { ferritin:{ v:40, cert:'measured' } };
+      await SP.Model.saveLab(l);
+      expect((SP.S.labs || []).find(x => x.id === l.id)).toBeDefined();
+
+      const o = await A().onizle('spi_tahlil_sil', { id:l.id });
+      expect(o.ok).toBe(true);
+      expect(o.onizle.metin).toContain(d);
+
+      const r = await A().uygula({ arac:true, ad:'spi_tahlil_sil', param:{ id:l.id } });
+      expect(r.ok).toBe(true);
+      expect((SP.S.labs || []).find(x => x.id === l.id)).toBeUndefined();
+
+      await r.geriAl();
+      expect((SP.S.labs || []).find(x => x.id === l.id)).toBeDefined();
+      A()._sifirla();
+    });
+
+    it('ilaç yönetimi: \'spi_ilac\' ekler, günceller, siler ve geri alır', async () => {
+      SP.Test.resetState();
+      kur();
+      const oEkle = await A().onizle('spi_ilac', { islem:'ekle', ad:'Magnezyum', doz:'200 mg' });
+      expect(oEkle.ok).toBe(true);
+
+      const rEkle = await A().uygula({ arac:true, ad:'spi_ilac', param:{ islem:'ekle', ad:'Magnezyum', doz:'200 mg' } });
+      expect(rEkle.ok).toBe(true);
+      const m = (SP.S.meds || []).find(x => x.name === 'Magnezyum');
+      expect(m).toBeDefined();
+      expect(m.dose).toBe('200 mg');
+
+      const oSil = await A().onizle('spi_ilac', { islem:'sil', id:m.id });
+      expect(oSil.ok).toBe(true);
+      const rSil = await A().uygula({ arac:true, ad:'spi_ilac', param:{ islem:'sil', id:m.id } });
+      expect(rSil.ok).toBe(true);
+      expect((SP.S.meds || []).find(x => x.id === m.id)).toBeUndefined();
+
+      await rSil.geriAl();
+      expect((SP.S.meds || []).find(x => x.id === m.id)).toBeDefined();
+      A()._sifirla();
+    });
+
+    it('gıda ve sabitleme: \'spi_gida\' ekler, siler, geri alır ve sabitlemeyi yönetir', async () => {
+      SP.Test.resetState();
+      kur();
+      const oEkle = await A().onizle('spi_gida', { islem:'ekle', ad:'Ev Yapımı Granola', kalori:380, protein:10 });
+      expect(oEkle.ok).toBe(true);
+
+      const rEkle = await A().uygula({ arac:true, ad:'spi_gida', param:{ islem:'ekle', ad:'Ev Yapımı Granola', kalori:380, protein:10 } });
+      expect(rEkle.ok).toBe(true);
+      const f = (SP.S.foods || []).find(x => x.name === 'Ev Yapımı Granola');
+      expect(f).toBeDefined();
+
+      const oSil = await A().onizle('spi_gida', { islem:'sil', id:f.id });
+      expect(oSil.ok).toBe(true);
+      const rSil = await A().uygula({ arac:true, ad:'spi_gida', param:{ islem:'sil', id:f.id } });
+      expect(rSil.ok).toBe(true);
+      expect((SP.S.foods || []).find(x => x.id === f.id)).toBeUndefined();
+
+      await rSil.geriAl();
+      expect((SP.S.foods || []).find(x => x.id === f.id)).toBeDefined();
+
+      const oPin = await A().onizle('spi_gida', { islem:'sabitle', id:'weight' });
+      expect(oPin.ok).toBe(true);
+      const rPin = await A().uygula({ arac:true, ad:'spi_gida', param:{ islem:'sabitle', id:'weight' } });
+      expect(rPin.ok).toBe(true);
+      expect(SP.Model.isPinned('weight')).toBe(true);
+      await rPin.geriAl();
+      expect(SP.Model.isPinned('weight')).toBe(false);
+      A()._sifirla();
+    });
+
+    it('hane yönetimi: \'spi_hane\' üye ekler, siler ve geri alır', async () => {
+      SP.Test.resetState();
+      kur();
+      const oEkle = await A().onizle('spi_hane', { islem:'ekle', ad:'Elif', rol:'family', dogumYili:2005 });
+      expect(oEkle.ok).toBe(true);
+
+      const rEkle = await A().uygula({ arac:true, ad:'spi_hane', param:{ islem:'ekle', ad:'Elif', rol:'family', dogumYili:2005 } });
+      expect(rEkle.ok).toBe(true);
+      const list = SP.Model.householdList();
+      const m = list.find(x => x.name === 'Elif');
+      expect(m).toBeDefined();
+
+      const oSil = await A().onizle('spi_hane', { islem:'sil', id:m.id });
+      expect(oSil.ok).toBe(true);
+      const rSil = await A().uygula({ arac:true, ad:'spi_hane', param:{ islem:'sil', id:m.id } });
+      expect(rSil.ok).toBe(true);
+      expect(SP.Model.householdList().find(x => x.id === m.id)).toBeUndefined();
+
+      await rSil.geriAl();
+      expect(SP.Model.householdList().find(x => x.id === m.id)).toBeDefined();
+      A()._sifirla();
+    });
+
+    it('hane okuma: \'spi_hane_oku\' profilleri okur, boşta veri yok döner', async () => {
+      SP.Test.resetState();
+      kur();
+      const eski = localStorage.getItem('spi.household');
+      try{
+        localStorage.setItem('spi.household', '[]');
+        SP.S.profiles = [];
+        const e = await A().calistir('spi_hane_oku', {});
+        expect(e.sonuc.etiket).toBe('veri yok');
+
+        SP.Model.addHouseholdMember('Mert', { role:'family' });
+        const f = await A().calistir('spi_hane_oku', {});
+        expect(f.ok).toBe(true);
+        expect(f.sonuc.toplam_uye).toBe(1);
+        expect(f.satirlar[0]).toContain('Mert');
+      }finally{
+        if(eski) localStorage.setItem('spi.household', eski); else localStorage.removeItem('spi.household');
+        A()._sifirla();
+      }
+    });
+
+    it('market ve sepet: \'spi_market\' sepete ekler, fiyat girer, sınır koyar ve geri alır', async () => {
+      SP.Test.resetState();
+      kur();
+      const oEkle = await A().onizle('spi_market', { islem:'sepet_ekle', gida:'yumurta', kg:2 });
+      expect(oEkle.ok).toBe(true);
+
+      const rEkle = await A().uygula({ arac:true, ad:'spi_market', param:{ islem:'sepet_ekle', gida:'yumurta', kg:2 } });
+      expect(rEkle.ok).toBe(true);
+      expect(((SP.S.basket && SP.S.basket.items) || []).find(x => x.foodId === 'yumurta').kg).toBe(2);
+
+      const oFiyat = await A().onizle('spi_market', { islem:'fiyat_gir', gida:'yumurta', fiyat:80 });
+      expect(oFiyat.ok).toBe(true);
+      const rFiyat = await A().uygula({ arac:true, ad:'spi_market', param:{ islem:'fiyat_gir', gida:'yumurta', fiyat:80 } });
+      expect(rFiyat.ok).toBe(true);
+      expect(SP.S.prices['yumurta'].tl).toBe(80);
+      await rFiyat.geriAl();
+      expect(SP.S.prices['yumurta']).toBeUndefined();
+
+      const oSinir = await A().onizle('spi_market', { islem:'sinir_koy', sinir:2000 });
+      expect(oSinir.ok).toBe(true);
+      const rSinir = await A().uygula({ arac:true, ad:'spi_market', param:{ islem:'sinir_koy', sinir:2000 } });
+      expect(rSinir.ok).toBe(true);
+      expect(SP.S.basket.weeklyLimit).toBe(2000);
+      await rSinir.geriAl();
+      expect(SP.S.basket.weeklyLimit).toBeNull();
+
+      const oSil = await A().onizle('spi_market', { islem:'sepet_sil', gida:'yumurta' });
+      expect(oSil.ok).toBe(true);
+      const rSil = await A().uygula({ arac:true, ad:'spi_market', param:{ islem:'sepet_sil', gida:'yumurta' } });
+      expect(rSil.ok).toBe(true);
+      expect(((SP.S.basket && SP.S.basket.items) || []).find(x => x.foodId === 'yumurta')).toBeUndefined();
+      await rSil.geriAl();
+      expect(((SP.S.basket && SP.S.basket.items) || []).find(x => x.foodId === 'yumurta').kg).toBe(2);
+      await rEkle.geriAl();
+      A()._sifirla();
+    });
+
+    it('bütçe okuma: \'spi_butce\' sepet toplamını ve durumunu okur, boşken veri yok döner', async () => {
+      SP.Test.resetState();
+      kur();
+      SP.S.basket = { items:[], weeklyLimit:null };
+      const bos = await A().calistir('spi_butce', {});
+      expect(bos.sonuc.etiket).toBe('veri yok');
+
+      SP.S.basket = { items:[{ foodId:'yumurta', kg:2 }], weeklyLimit:200 };
+      SP.S.prices['yumurta'] = { tl:50, at:'2026-11-01', source:'user' };
+      const dolu = await A().calistir('spi_butce', {});
+      expect(dolu.ok).toBe(true);
+      expect(dolu.sonuc.sepet_kalem).toBe(1);
+      expect(dolu.sonuc.haftalik_toplam_tl).toBe(100);
+      A()._sifirla();
+    });
+
+    it('karar kapatma: \'spi_karar_kapat\' açık kararı kapatır ve geri alır', async () => {
+      SP.Test.resetState();
+      kur();
+      const d = await SP.Model.saveDecision({ topic:'Omega 3 desteği', text:'Haftada 2 gün balık' });
+      expect(d.status).toBe('open');
+
+      const o = await A().onizle('spi_karar_kapat', { id:d.id, sonuc:'Uygulandı' });
+      expect(o.ok).toBe(true);
+
+      const r = await A().uygula({ arac:true, ad:'spi_karar_kapat', param:{ id:d.id, sonuc:'Uygulandı' } });
+      expect(r.ok).toBe(true);
+      expect(SP.S.decisions.find(x => x.id === d.id).status).toBe('closed');
+
+      await r.geriAl();
+      expect(SP.S.decisions.find(x => x.id === d.id).status).toBe('open');
+      A()._sifirla();
+    });
+
+    it('profil yönetimi: \'spi_profil\' profil ve merdiven seviyesini günceller ve geri alır', async () => {
+      SP.Test.resetState();
+      kur();
+      const eskiBoy = SP.S.profile && SP.S.profile.heightCm;
+      const o = await A().onizle('spi_profil', { boy:180, kilo:75 });
+      expect(o.ok).toBe(true);
+
+      const r = await A().uygula({ arac:true, ad:'spi_profil', param:{ boy:180, kilo:75 } });
+      expect(r.ok).toBe(true);
+      expect(SP.S.profile.heightCm).toBe(180);
+      expect(SP.S.profile.weightKg).toBe(75);
+
+      await r.geriAl();
+      expect(SP.S.profile.heightCm).toBe(eskiBoy);
+
+      const oSev = await A().onizle('spi_profil', { islem:'seviye', hareketId:'pushup', seviyeId:'p2' });
+      expect(oSev.ok).toBe(true);
+
+      const rSev = await A().uygula({ arac:true, ad:'spi_profil', param:{ islem:'seviye', hareketId:'pushup', seviyeId:'p2' } });
+      expect(rSev.ok).toBe(true);
+      expect(SP.S.progress['pushup'].levelId).toBe('p2');
+
+      await rSev.geriAl();
+      expect(SP.S.progress['pushup']).toBeUndefined();
+      A()._sifirla();
+    });
+
+    it('haftalık planlar: \'spi_planlar\' planları ve uyumu okur, boşken veri yok döner', async () => {
+      SP.Test.resetState();
+      kur();
+      SP.S.haftaplan = [];
+      const bos = await A().calistir('spi_planlar', {});
+      expect(bos.sonuc.etiket).toBe('veri yok');
+
+      SP.S.haftaplan = [{ id:'p1', tur:'su', ad:'Günlük Su Planı', maddeler:[] }];
+      const dolu = await A().calistir('spi_planlar', {});
+      expect(dolu.ok).toBe(true);
+      expect(dolu.sonuc.toplam).toBe(1);
+      expect(dolu.satirlar[0]).toContain('Günlük Su Planı');
+      A()._sifirla();
+    });
+
+    it('sağlık hedefleri: \'spi_hedefler\' hedefleri okur, boşken veri yok döner', async () => {
+      SP.Test.resetState();
+      kur();
+      SP.S.hedefler = [];
+      const bos = await A().calistir('spi_hedefler', {});
+      expect(bos.sonuc.etiket).toBe('veri yok');
+
+      SP.S.hedefler = [{ id:'hd1', durum:'aktif', cumle:'70 kiloya ulaş', paket:'kilo' }];
+      const dolu = await A().calistir('spi_hedefler', {});
+      expect(dolu.ok).toBe(true);
+      expect(dolu.sonuc.toplam).toBe(1);
+      expect(dolu.satirlar[0]).toContain('70 kiloya ulaş');
+      A()._sifirla();
+    });
+
+    it('mutfak paylaşımı: \'spi_mutfak\' tencere paylaşımını hesaplar, profil eksikse veri yok döner', async () => {
+      SP.Test.resetState();
+      kur();
+      const eskiProf = SP.S.profile;
+      const eskiHouse = localStorage.getItem('spi.household');
+      try{
+        SP.S.profile = { id:'ben', name:'Ben', heightCm:null, birthYear:null };
+        localStorage.setItem('spi.household', JSON.stringify([{ id:'ben', name:'Ben' }]));
+        const eksik = await A().calistir('spi_mutfak', { yemek:'kuru-fasulye-etli', gram:1000 });
+        expect(eksik.sonuc.etiket).toBe('veri yok');
+
+        SP.S.profile = { id:'ben', name:'Ben', heightCm:175, weightKg:70, birthYear:1990, sex:'male' };
+        localStorage.setItem('spi.household', JSON.stringify([SP.S.profile]));
+        const dolu = await A().calistir('spi_mutfak', { yemek:'kuru-fasulye-etli', gram:1000 });
+        expect(dolu.ok).toBe(true);
+        expect(dolu.sonuc.paylar.length).toBe(1);
+        expect(dolu.sonuc.paylar[0].gram).toBe(1000);
+      }finally{
+        SP.S.profile = eskiProf;
+        if(eskiHouse) localStorage.setItem('spi.household', eskiHouse); else localStorage.removeItem('spi.household');
+        A()._sifirla();
+      }
+    });
+
+    it('mutfak denetimleri: \'spi_mutfak\' bilinmeyen yemekte veya eksik gramda uydurmaz, veri yok döner', async () => {
+      SP.Test.resetState();
+      kur();
+      SP.S.profile = { id:'ben', name:'Ben', heightCm:175, weightKg:70, birthYear:1990, sex:'male' };
+      localStorage.setItem('spi.household', JSON.stringify([SP.S.profile]));
+      SP.S.ui = { kitchenDish:null, kitchenGrams:null };
+
+      // 1) Bilinmeyen yemek sorulduğunda kuru fasulyeye ya da kitchenDish'e düşmez, veri yok döner
+      const bilmeyen = await A().calistir('spi_mutfak', { yemek:'olmayan-yemek-xyz', gram:500 });
+      expect(bilmeyen.sonuc.etiket).toBe('veri yok');
+
+      // 2) Yemek hiç verilmediğinde ve ui.kitchenDish yokken kuru fasulye uydurmaz, veri yok döner
+      const yemeksiz = await A().calistir('spi_mutfak', { gram:500 });
+      expect(yemeksiz.sonuc.etiket).toBe('veri yok');
+
+      // 3) Gram verilmediğinde ve ui.kitchenGrams yokken 1000g uydurmaz, veri yok döner
+      const gramsiz = await A().calistir('spi_mutfak', { yemek:'kuru-fasulye-etli' });
+      expect(gramsiz.sonuc.etiket).toBe('veri yok');
+      A()._sifirla();
+    });
+
+    it('market denetimleri: \'spi_market\' kg verilmezse sepet_ekle hata döner', async () => {
+      SP.Test.resetState();
+      kur();
+      const oKgsiz = await A().onizle('spi_market', { islem:'sepet_ekle', gida:'yumurta' });
+      expect(oKgsiz.ok).toBe(false);
+      expect(oKgsiz.hata).toContain('kg');
+      A()._sifirla();
+    });
+
+    it('silme yardımcıları tanımlayıcı yokken uydurmaz: parametresiz çağrıda hata döner', async () => {
+      SP.Test.resetState();
+      kur();
+      // SP.S.workouts tek elemanlı olsa bile parametresiz onizle o tek elemanı seçmemeli
+      SP.S.workouts = [{ id:'w1', date:'2026-11-01', name:'Koşu', minutes:30 }];
+      const oAnt = await A().onizle('spi_antrenman_sil', {});
+      expect(oAnt.ok).toBe(false);
+
+      // Öğün: tek öğün olsa bile parametresiz onizle seçmemeli
+      const d = SP.U.todayISO();
+      SP.S.meals = { [d]:[{ id:'m1', slot:'ogle', items:[] }] };
+      const oOgun = await A().onizle('spi_ogun_sil', {});
+      expect(oOgun.ok).toBe(false);
+
+      // Tahlil
+      const oLab = await A().onizle('spi_tahlil_sil', {});
+      expect(oLab.ok).toBe(false);
+
+      // İlaç
+      const oIlac = await A().onizle('spi_ilac', { islem:'sil' });
+      expect(oIlac.ok).toBe(false);
+
+      // Gıda
+      const oGida = await A().onizle('spi_gida', { islem:'sil' });
+      expect(oGida.ok).toBe(false);
+
+      // Hane
+      const oHane = await A().onizle('spi_hane', { islem:'sil' });
+      expect(oHane.ok).toBe(false);
+
+      A()._sifirla();
+    });
   });
 })();
