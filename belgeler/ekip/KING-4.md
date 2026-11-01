@@ -211,3 +211,71 @@ Açık kalanlar:
 - Whisper'ı sıcak tutmak (`whisper-server.exe` klasörde var): yükleme payı 0,93 sn gider, soğuk kayıt ~1 sn'ye iner.
 - qwen3-vl kararı (yukarıda).
 - Kısa komutları modelsiz yerelde ayrıştırmak («45 dk yürüdüm») istemci tarafı, bu turda yapılmadı.
+
+## Ölçüm 1c · Modüller ve `sistem/` (2026-11-01, tur 1c)
+
+Ortam: bu PC, Playwright Chromium (başsız), modülün `dist/` tek dosyası yerel
+`http.server`'dan (açılış) ya da `src/` (profil, iz). Gürültü: aynı anda iki
+oturum daha test koşuyordu; milisaniye farkları ±%30–40 oynar, **sayılar
+(olay, çağrı, test) oynamaz**. Tekrar: `node tools/olcum_modul.js <MOD>` (016).
+
+### Bugün (ölçüldü)
+
+| Ölçü | AYS | SPİ | ESP | Okuma |
+|---|---|---|---|---|
+| Açılış: ilk dolu çizim (dist, medyan 5) | 941 ms | 482 ms | 669 ms | `sistem/` kapısı dist'i bölüp arka planda derletir, gerçek açılış daha kısa |
+| Açılış: HTML ayrıştırma / betik değerlendirme (iz) | 348 / 271 ms | 224 / 172 ms | 289 / 241 ms | betik = derleme + çalışma |
+| JS / CSS hacmi (dist) | 6 230 / 1 320 KB | 4 597 / 1 280 KB | 4 911 / 1 302 KB | |
+| Kullanılmayan: CSS (açılış + bütün rotalar) | %86 | %86 | %87 | bilinen «CSS hacmi» açığı (akıcılık ölçümü) |
+| Kullanılmayan: adlı JS işlevi hiç koşmayan | %70 | %70 | %67 | |
+| Büyük veri dosyalarının açılış payı | 22 ms (1,7 MB) | 6 ms | 14 ms | tembel yükleme **değmez** |
+| Ekran çizimi, dokuz aylık veri (perfcheck, en ağır) | 15,8 ms office | 19,1 ms analytics | 20,4 ms office | bütçenin ≤ %23'ü: çizim JS'i darboğaz değil |
+| Rota geçişi: stil hesabı / yerleşim (iz, AYS) | 7,1 / 5,3 olay, 11 / 3,9 ms | | | ilk zorlama `kabuk.esle`, ikinci `hareket.raf`; ikisi de yeni sayfanın zaten ödenecek ilk hesabı |
+| Depolama: rota başına `getItem` / `JSON.parse` | 36 / 27 | 50 / 25 | 51 / 26 | en çok: `lifeos.hesap.sira.*` 9, `*.activeProfile` 5–6, `lifeos.hareket.hiz` 4–6 kez; toplam ayrıştırma 27 rotada ~3 ms → **darboğaz değil**, düzeltilmedi |
+| Kayıt (SPİ, 270 gün): her kayıt bütün profili yazar | | 157 KB; 0,32 → 4,7 ms | | veriyle doğrusal büyür; anında yazma sözü (store.js) yüzünden bilinçli |
+| Yerel biçim: `toLocaleString('tr-TR')` | 231 çağrı/tur | 116 (paylaşılan Intl) | 190 çağrı/tur | çağrı başına 11,8 µs; paylaşılan `Intl.NumberFormat` 0,7 µs |
+| Ses bağlamı (ilk `AudioContext`) | 314 ms, bir kez | | | boşta önceden kurulur (2026-10-29 kararı: ilk tık 470–700 ms'ydi) |
+| Birim testleri (runtests) | 46,5 sn | ~40 sn | 39,7 sn | AYS'de 32 test (> 300 ms) sürenin %54'ü: gerçek zaman beklemesi |
+| Perde takımları (`perde.test.js`, 10 takım) | 8,9 sn | 8,9 sn | 8,9 sn | `bekle(520)`, haberci 3,3 sn |
+| Testçi (ofis), iş başına | 7,3 dk (013) | | | üç modülün denetimleri sırayla 5,9 dk |
+| `sistem/` testleri (8 betik) | 6,9 sn toplam | | | en uzun `telefon_test` 3,2 sn |
+| `sistem/` kapı denetimi (`_guncel_dist`) | 0,9 ms/istek | | | imza önbellekli; darboğaz değil |
+| Bir kez gözlendi | ESP «Defter Faz 1c» 25,7 sn, «Ses — radyo» 20,8 sn, 3 kırmızı | | | yük altında; ağ sahte, yeniden üretilemedi (sonraki iki koşu yeşil) |
+
+### Kopya kod (ofis taraması `kopya` + elle doğrulama)
+
+| Aile | Nerede | Fark | Karar |
+|---|---|---|---|
+| Tarih: `parse, isISO, diffDays, addDays, today, weekdayIndex, fmtDate…` (14 işlev) | üç `core/utils.js` | AYS/SPİ `parse('2026-02-31')` 3 Mart'a kayar, `relativeDay('bozuk')` «NaN gün sonra»; ESP önbellekli ve null döner, ama `fmtRange` bozukta istisna | **`brand/ortak/tarih.js`** (`LIFEOS.TARIH`), modüller ona bağlı (014) |
+| Biçim: `median, round, clamp, sum, pct, fmtNet, fmtNum, fmtMin, fmtClock` | üç `core/utils.js` | birebir; yalnız SPİ paylaşılan Intl kullanıyordu | **`brand/ortak/bicim.js`** (`LIFEOS.BICIM`) |
+| Depo: `store.js` (~500 satır) | üç modül | ad alanı ve yorum dışında aynı | sonraki tur: ortak depo fabrikası (veri katmanı; ayrı, testli tur) |
+| `perde.js`, `harness.js` | üç modül | ad alanı | sonraki tur |
+| `activeProfile` doğrudan okuma | `beacon.js`, `canli.js`, `foto.js`, `store.js` | aynı satır dört yerde | ucuz; `Store` üzerinden tek okuma önerisi |
+| Ofisin iddiası «`sayi.js` `SAYI.sure()` aynı işi yapar» | | **yanlış**: `sayi.js`'te yok (kesinlik etiketi modülü) | elendi |
+
+Katman düzeni: üç modül zaten `data/` (salt veri), `core/` (durum, depo, kural,
+ortak kopyalar), `screens/` (ekran) düzeninde; yeni ortak çekirdekler
+`core/`'a yayılır ve `utils.js`'ten önce yüklenir.
+
+### Beş optimizasyon (önce → sonra)
+
+| # | Darboğaz | Düzeltme | Önce | Sonra | Kim |
+|---|---|---|---|---|---|
+| 1 | Tarih işlevleri her çağrıda yeniden ayrıştırıyor (AYS, SPİ) | ortak önbellekli `tarih.js` | 300 bin `diffDays` + `weekdayIndex`: 1 050 ms | 600 ms | ofis 014 |
+| 2 | Perde testleri gerçek zamanı bekliyor | test içi sahte saat | 8,9 sn/modül (26,8 sn) | 0,20 / 0,18 / 0,19 sn (0,57 sn) | ofis 015 |
+| 3 | Testçi modülleri sırayla koşuyor | üç modül zinciri paralel (`evreler()`) | 7 dk (014, modül evresi ~6 dk) | 3,9 dk (016, modül evresi ~2,1 dk) | Claude |
+| 4 | AYS/ESP her sayıda yeni `Intl.NumberFormat` | ortak `bicim.js`, paylaşılan biçimleyici | 11,8 µs/çağrı | 0,7 µs/çağrı | Claude |
+| 5 | Toast testleri şeridin kendiliğinden kalkmasını bekliyor | doğrudan kaldır | «Geri al şeridi» 1 251 ms | 132 ms | Claude |
+
+Toplam etki: AYS birim testleri 36,6 → 29,7 sn (test sayısı 3 143 → 3 147),
+SPİ 29,8 sn, ESP 26,3 sn (2 903 ve 2 609 test); hepsi yeşil, entegre temiz.
+Ortak altyapı: `brand/ortak/tarih.js` ve `brand/ortak/bicim.js` (üç `utils.js`'ten
+23 işlev tek kaynağa; `tools/ortak.py --yay`), `tools/kabul_js.py` `utils.js`
+istendiğinde çekirdekleri önüne ekler. Testçi'de geri dönüş: `OFIS_TEST_SIRALI=1`.
+
+**Sonraki iş (ölçüldü, bu turda yapılmadı):** ortak testlerde kalan gerçek
+beklemeler (gizle 1,2 sn, ayarlar 0,9 sn, animasyon 0,7 sn, köken kartı 3×0,5 sn,
+terim ipucu 0,5 sn; modül başına ~5 sn); `store.js` üçlüsünün ortak depo
+fabrikasına taşınması; CSS hacmi (%86 kullanılmıyor; akıcılık ölçümünde
+yeniden yapılanma kararı depo sahibinde).
+
