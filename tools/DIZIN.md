@@ -78,6 +78,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `veri_denetle_kabul_test.py` — Görev 006 kabul testi; veri denetleme aracının nesne oranlarını ve doğrulama mantığını sınar, CI'da koşulur.
 
 ## Testler
+- `king_olay_uctan_test.py` — KING-4 3c uçtan uca; modüllerin ürettiği olaylar taşıyıcının biçim denetiminden ve HKM kural motorundan geçer mi, CI'da koşulur.
 - `ajan_test.py` — tools/ajan.py ve tools/ajan_kanca.py birim testleri; döküm okuyucu, efor, yuva ve kanca kararlarını sınar, CI'da koşulur.
 - `ayar_test.py` — sistem/ayar.py sözleşme testleri; sistem ayarlarının tek kopyasını ve doğrulamasını sınar, CI'da koşulur.
 - `dist_sun_test.py` — Modül kapısının güncel tek dosya (dist) sunma mantığını sınar, CI'da koşulur.

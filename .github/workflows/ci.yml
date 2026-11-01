@@ -227,6 +227,7 @@ jobs:
           python3 tools/kingveri_ays_kabul_test.py
           python3 tools/kingveri_spi_kabul_test.py
           python3 tools/kingveri_esp_kabul_test.py
+          python3 tools/king_olay_uctan_test.py
           python3 tools/king_kapsam_esp_kabul_test.py
           python3 tools/king_kapsam_spi_kabul_test.py
           python3 tools/king_kapsam_ays_kabul_test.py

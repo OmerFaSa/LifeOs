@@ -404,3 +404,49 @@ HKM testleri 1000/1000 (yeni `test_hafiza3` 8). Ofis: 050 (`tools/hafiza_olcum.p
 tekrar ölçümü) ve 051 (uç nokta testleri + `HKM/MIMARI.md` bölümü) kabul testleriyle kuyrukta;
 bugün pilot 8/8 dolu ve Antigravity kapalıydı. Açık: istemci `neden` alanını «neden şimdi?» satırı
 olarak henüz göstermiyor (king.js, 3a/F alanı); «benim hakkımda» ekranı (F); modül olay yayıncıları 3c'de.
+
+## Tur 3c · Olay yayıncıları, yardım verisi, kalan optimizasyon (2026-11-01)
+
+Sayıyı modül kodu üretir (AGENTS §1); taşıyıcı yalnız biçimi denetler, kararı HKM verir
+(`kendiliginden.py`, 3b). Kartların görünümü 3a'nın; bu tur yalnız veri ve taşıma.
+
+| Parça | Ne | Nerede | Test |
+|---|---|---|---|
+| Taşıyıcı | `LIFEOS.OLAY.kur({ modul, hkm, uret }).baslat()`: açılışta boşta, 15 dk'da bir (gizli sekmede değil); biçime uymayan olay yola çıkmaz; kabul edilen kimlik iki gün cihazda tutulur, kabul edilmeyen sonraki turda yeniden; 4 sn zaman aşımı, HKM kapalıysa sessiz | `brand/ortak/olay.js` (yeni ortak dosya) | `olay.test.js` 5 sınama, üç modülde |
+| Olaylar | SPİ `uyku_dustu` (ort7/ort28, yetersiz 28 gün «veri yok»), `plan_kacti` (saatli, tamamlanmamış, ≥ 30 dk); AYS `sinav_yaklasti` (`kalan_gun`), `tekrar_gunu` (vadeli kart); ESP `tekrar_gunu` | `X/src/js/core/kingveri.js` → `olaylar(simdi)` | kabul `tools/kingveri_{ays,spi,esp}_kabul_test.py`, modül `kingveri.test.js` |
+| «Unuttuğun ne var?» | `kartlar.eksik(gun)`: Günü kapat'ın yazılmamış satırları `{ id, ad, tur }` | üç `app.js` (King kurulumu) | — (Günü kapat'ın kendi testleri) |
+| Haftalık rapor | `kartlar.hafta(bitis)` → `{ bas, bit, satirlar:[{ id, ad, deger, birim, etiket, onceki }] }`; SPİ uyku/antrenman/hareket dk/öğün, AYS çalışma dk/soru/blok, ESP çalışma dk/oturum/gün; kaydı yok = «veri yok», tahmin dakika = «tahmin» | `kingveri.js` | kabul + modül |
+| Akıllı hatırlatma | `kartlar.hatirlat(simdi)` → `{ anahtar, ad, kurulu, gercek, n, etiket, dun }`: son 14 günün gerçek saatlerinin ortancası (en az 3), dün yapıldı mı; SPİ hatırlatma işaretleri (ilaç adı gizli), AYS blok başlangıcı, ESP oturum anı | `kingveri.js` | kabul + modül |
+| «Onu 30 dk yap» | `kartlar.sonKayit()` + `kartlar.duzelt(id, alan, deger)` → `{ ok, once, sonra, geriAl }`; modülün kendi kayıt işleviyle, sınırlı (1–600 dk), geri alınır | `kingveri.js` | kabul + modül |
+
+İstemci sözleşmesi (3a için): `KI.ayar.kartlar.{eksik, hafta, hatirlat, sonKayit, duzelt}`; yazan tek
+işlev `duzelt`, King onu önizleyip onayla çağırmalı ve `geriAl`'ı «Geri al»a bağlamalı.
+
+**Kayıt maliyeti (2c'den ertelenen, ölçüldü, değiştirilmedi).** SPİ, gerçek yol (`Store.set`), dist:
+
+| Veri | Depo | Yazma | Serileştirme | `setItem` |
+|---|---|---|---|---|
+| 270 gün (dokuz ay) | 125 KB | 1,1 ms (yük altında 3,5) | 0,6 ms | 0,45 ms |
+| ~5 yıl (aynı kayıtlar ×7) | 861 KB | 38 ms (yük altında) | 16 ms | 18 ms |
+
+2c'deki «4,7 ms» yük altındaydı. Dokuz aylık ufukta (AGENTS §5.3) yazma bir karenin %7–20'si: darboğaz
+değil. Beş yılda yarısı serileştirme, yarısı `setItem`; yol başına serileştirme önbelleği yalnız ilk
+yarıyı keser ve bellekte yerinde değiştirilip kaydedilmemiş nesnenin sonraki yazmada diske inmesi
+davranışını değiştirir (veri katmanı riski); ikinci yarı ancak yol başına anahtar göçüyle gider.
+Karar: dokunulmadı; `loadcheck` haftalık işinde izlenir.
+
+**Test beklemeleri.** Ortak `ayarlar.test.js`'te Planlama'nın iki testi kayıt ertelemesini (350 ms)
+gerçek zamanda 450 ms bekliyordu: sahte saat (erteleme sınırı da sınanıyor: 349 ms'de kayıt yok,
+350'de tek kayıt). Modül başına ~0,9 sn. Kalan en yavaş takımlar King'in (SPİ: «sohbette kalır» 7,3 sn,
+«düşünme derinliği» 6,1 sn): king.test.js 3a'nın alanı, ona bırakıldı. Hesap'taki 400 ms perde beklemesi
+gerçek zamanda kurulan yoklamaya bağlı: sahte saate alınamaz, kaldı.
+
+**Ofis.** 040 (AYS), 041 (SPİ), 042 (ESP), üçü `flash`, kabul testleri önceden yazıldı (kırmızıydı),
+CI'da. 041'de Denetçi iki bulgu buldu (süresiz antrenman «0 dk ölçüldü», geri alma `null` yerine 0
+yazıyordu), son incelemede bir üçüncüsü (son kayıt 0 dk); 040'ta Denetçi «temiz» dedi ama son
+incelemede iki bulgu çıktı (bozuk bitiş tarihinde `while(true)` sonsuz döngü, kayıt hatasında bellek
+geri alınmıyordu); 042 temiz. Üçü düzeltildi, sınandı, birleşti. Yan iş: `tools/DIZIN.md`'de önceki
+turlardan kalan 11 eksik araç (dizin kabul testi CI'da kırmızıydı) tamamlandı.
+
+Açık: kartların görünümü ve «neden şimdi?» satırı (3a); `plan_kacti` yalnız SPİ'de (AYS blokları
+saatsiz, ESP planı gezinme sırası); olayların uçtan uca sınaması süreç içinde (`tools/king_olay_uctan_test.py`: modülün gerçek olayı → `olay.js` biçimi → HKM `POST /api/olay`, CI'da); gerçek HTTP ve sekme turu entegre testinde yok.
