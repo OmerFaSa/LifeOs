@@ -40,8 +40,10 @@ import os
 import shutil
 import subprocess
 import tempfile
+import threading
+import time
 
-from core import butce, models, ses
+from core import butce, models, ollama, ses
 
 GEMINI_MODEL = "gemini-2.5-flash"
 EN_COK_BAYT = 4 * 1024 * 1024          # ~2 dakika 16 kHz tek kanal
@@ -223,7 +225,7 @@ def _wav_sn(wav):
         return 0
 
 
-def gemma(cfg, wav, post=None):
+def gemma(cfg, wav, post=None, con=None):
     m = gemma_model(cfg)
     if not m:
         return None, "Gemma 4 yerel model olarak bağlı değil."
@@ -234,25 +236,82 @@ def gemma(cfg, wav, post=None):
                  {"type": "text", "text": GEMMA_ISTEM},
                  {"type": "input_audio", "input_audio": {"data": base64.b64encode(wav).decode("ascii"),
                                                           "format": "wav"}}]}]}
+    t0 = time.perf_counter()
     try:
         y = (post or ses.VARSAYILAN_POST)(models.yerel_uclari(cfg)[0], {"Content-Type": "application/json"},
                                           govde, GEMMA_ZAMAN)
         metin = (((y.get("choices") or [{}])[0].get("message") or {}).get("content")) or ""
     except Exception as e:                      # noqa: BLE001 — kural 5
+        _olcum(con, m, t0, ok=False, note="dinle: %s" % type(e).__name__)
         return None, "Gemma 4 sesi yazıya dökemedi (%s)." % type(e).__name__
+    k = y.get("usage") or {}
+    _olcum(con, m, t0, gir=k.get("prompt_tokens") or 0, cik=k.get("completion_tokens") or 0)
     return _temiz(metin), ""
 
 
-def yaziya(con, cfg, wav, post=None, calistir=None, bul=None, tercih="oto"):
-    """{ok, metin?, motor?, notlar}. Sira kural 1 ve 7; tercih: oto | gemma | whisper | ai."""
+def _olcum(con, model, t0, gir=0, cik=0, ok=True, note="dinle"):
+    """Yerel ses cagrisi da ai_olcum'a yazilir (ucretsiz; sure olculur)."""
+    if con is None:
+        return
+    try:
+        butce.record(con, role="dinle", task="stt", provider="yerel", model=model, in_tok=gir,
+                     out_tok=cik, ok=ok, note=note, ms=int((time.perf_counter() - t0) * 1000))
+    except Exception:                           # noqa: BLE001 — olcum yazilamasa da metin doner
+        pass
+
+
+def gemma_sicak(cfg, getir=None):
+    """Gemma 4 su an Ollama'nin belleginde mi (/api/ps). Bilinmiyorsa True:
+    eski sira bozulmaz. Soguk Gemma'da ilk ses 14-20 sn bekliyordu (Olcum 1b)."""
+    m = gemma_model(cfg)
+    try:
+        ham = (getir or ollama.VARSAYILAN_GETIR)(models.yerel_kok(cfg) + "/api/ps", 1)
+    except Exception:                           # noqa: BLE001
+        return True
+    return any(str(x.get("name") or x.get("model")) == m for x in (ham or {}).get("models") or [])
+
+
+_ISINIYOR = threading.Event()
+
+
+def _isit(cfg, gonder=None):
+    """Gemma'yi arka planda bellege alir; bu kayit Whisper'la yazilirken.
+    Once gorsel model bosaltilir: 6 GB VRAM'de ikisi birlikte duramiyor,
+    Gemma CPU'ya tasiyor (2,3 sn) ve yukleme Whisper'i 25 sn'ye uzatiyordu."""
+    if _ISINIYOR.is_set():
+        return
+    _ISINIYOR.set()
+    kok, g = models.yerel_kok(cfg) + "/api/generate", gonder or ollama.VARSAYILAN_GONDER
+    gorsel = models.yerel_ek_of(cfg).get("gorsel")
+
+    def is_():
+        try:
+            if gorsel and gorsel != gemma_model(cfg):
+                g(kok, {"model": gorsel, "keep_alive": 0}, 30)
+            g(kok, {"model": gemma_model(cfg), "keep_alive": ollama.ISIT_SURE}, 120)
+        except Exception:                       # noqa: BLE001
+            pass
+        finally:
+            _ISINIYOR.clear()
+    threading.Thread(target=is_, daemon=True).start()
+
+
+def yaziya(con, cfg, wav, post=None, calistir=None, bul=None, tercih="oto", getir=None, gonder=None):
+    """{ok, metin?, motor?, notlar}. Sira kural 1 ve 7; tercih: oto | gemma | whisper | ai.
+    «oto»da Gemma bellekte degilse (gorsel model onu VRAM'den itmisse) bu kayit
+    Whisper'la yazilir ve Gemma arka planda isinir: 14-20 sn yerine ~2,5 sn."""
     if not wav or len(wav) > EN_COK_BAYT or wav[:4] != b"RIFF":
         return {"ok": False, "notlar": ["Ses kaydı geçersiz ya da çok uzun."]}
     notlar = []
     oto = (("gemma",) if gemma_model(cfg) else ()) + ("whisper", "gemini")
+    if oto[0] == "gemma" and tercih not in ("gemma", "whisper", "ai") and not gemma_sicak(cfg, getir) \
+            and (bul or whisper_bul())["bulundu"]:
+        oto = ("whisper", "gemma", "gemini")
+        _isit(cfg, gonder)
     sira = {"gemma": ("gemma", "whisper"), "whisper": ("whisper",), "ai": ("gemini",)}.get(tercih, oto)
     for motor in sira:
         if motor == "gemma":
-            metin, neden = gemma(cfg, wav, post)
+            metin, neden = gemma(cfg, wav, post, con)
         elif motor == "whisper":
             metin, neden = whisper(wav, calistir, bul)
         else:

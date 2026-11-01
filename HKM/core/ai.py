@@ -39,8 +39,11 @@
 
 import base64
 import datetime
+import hashlib
 import json
 import re
+import threading
+import time
 import urllib.error
 import urllib.request
 
@@ -57,6 +60,62 @@ UZAK_ZAMAN_ASIMI = 120
 YEREL_GEC = "yerel-gec"
 EN_COK_MESAJ = 12          # gecmisin tamami her turda gonderilmez
 EN_COK_JETON = 1200        # cevap uzunlugu sinirlari
+
+# AYNI ISTEK ONBELLEGI (KING-4 Olcum 1b). Ayni rol, model, sistem metni,
+# baglam ve mesajlar ONBELLEK_SN icinde ikinci kez modele gitmez (cift
+# gonderim, yeniden deneme, ayni analizi isteyen iki ekran). Yalniz basarili
+# duz metin saklanir; arac, gorsel ve medya cagrisi hic saklanmaz. Baglam
+# olculeri tasidigi icin veri degisince anahtar da degisir.
+ONBELLEK_SN = 120
+ONBELLEK_EN_COK = 64
+_ONBELLEK = {}
+_ONBELLEK_KILIT = threading.Lock()
+
+# ROL BASINA BAGLAM BUTCESI (tahmini jeton: sistem metni + gecmis). Asilirsa
+# EN ESKI gecmis mesaji duser; sistem metni (olculer) ve son kullanici mesaji
+# kirpilmaz. Ollama baglami 8K: 1200 jetonluk cevaba ve arac katalogu payina
+# yer kalir. Anahtar: tam rol, sonra on ek (bam.*), sonra son ek (*.sohbet).
+BAGLAM_BUTCE = {"king": 3500, "sohbet": 3000, "gorsel": 2000, "bam": 6000}
+BAGLAM_VARSAYILAN = 4000
+
+
+def baglam_butcesi(role):
+    r = str(role or "")
+    return (BAGLAM_BUTCE.get(r) or BAGLAM_BUTCE.get(r.split(".")[0])
+            or BAGLAM_BUTCE.get(r.rsplit(".", 1)[-1]) or BAGLAM_VARSAYILAN)
+
+
+def butceye_sigdir(role, sistem, mesajlar):
+    """Butceyi asan gecmisin en eskisinden atar; kirpilan bas asistan
+    mesajiyla baslamaz. Doner: (mesajlar, atilan_sayi)."""
+    m = list(mesajlar or [])
+    sinir, n = baglam_butcesi(role), len(m)
+    while len(m) > 1 and _jeton_tahmini(sistem, *[x.get("content") for x in m]) > sinir:
+        m.pop(0)
+    while len(m) < n and len(m) > 1 and m[0].get("role") != "user":
+        m.pop(0)
+    return m, n - len(m)
+
+
+def _onbellek_anahtari(*parca):
+    return hashlib.sha256(json.dumps(parca, ensure_ascii=False, sort_keys=True,
+                                     default=str).encode("utf-8")).hexdigest()
+
+
+def _onbellek_al(anahtar):
+    with _ONBELLEK_KILIT:
+        k = _ONBELLEK.get(anahtar)
+        if k and time.monotonic() - k[0] <= ONBELLEK_SN:
+            return dict(k[1])
+        _ONBELLEK.pop(anahtar, None)
+        return None
+
+
+def _onbellek_koy(anahtar, r):
+    with _ONBELLEK_KILIT:
+        if len(_ONBELLEK) >= ONBELLEK_EN_COK:
+            _ONBELLEK.pop(min(_ONBELLEK, key=lambda x: _ONBELLEK[x][0]))
+        _ONBELLEK[anahtar] = (time.monotonic(), dict(r))
 
 
 # --------------------------------------------------------------- saglayici
@@ -632,6 +691,19 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         return {"ok": False, "reason": plan.get("reason"), "text": None,
                 "note": plan.get("note")}
     basamaklar = list(plan["basamaklar"])      # soguk baslangicta yeniden dizilir
+    anahtar = None
+    if ONBELLEK_SN and transport is None and not (gorseller or medya or araclar):
+        anahtar = _onbellek_anahtari(role, task, sistem, baglam, mesajlar, denetim, seviye, jeton, user,
+                                     [b["atama"].get("model") for b in basamaklar])
+        r = _onbellek_al(anahtar)
+        if r:
+            if callable(akis):
+                for p in (r["text"], None):
+                    try:
+                        akis(p)
+                    except Exception:           # noqa: BLE001 — ekran kopsa da cevap doner
+                        pass
+            return dict(r, onbellek=True, usd=0.0, in_tok=0, out_tok=0, seconds=0.0)
     r = None
     for i, b in enumerate(basamaklar):
         ust_var = i < len(basamaklar) - 1
@@ -666,6 +738,8 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         if not r["text"]:
             return dict(r, ok=False, reason="dropped", text=None,
                         note="Model yalnızca yükseltme istedi; üst basamak kalmadı.")
+    if anahtar and r.get("ok") and r.get("text") and not r.get("cagrilar"):
+        _onbellek_koy(anahtar, r)
     return r
 
 
@@ -707,7 +781,7 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
     # Harcama, anahtarin SAHIBININ defterine yazilir: iki kisi ayni
     # sistemi kullaniyorsa harcamalari da ayri gorunmeli.
     user = a.get("key_user") or user
-    mesajlar = list(mesajlar or [])[-EN_COK_MESAJ:]
+    mesajlar = butceye_sigdir(role, sistem, list(mesajlar or [])[-EN_COK_MESAJ:])[0]
     if gorseller is not None:
         # Gorsel SON kullanici mesajina eklenir; dogrulanmayan hic gitmez.
         temiz, hata = gorsel_dogrula(gorseller)
@@ -760,6 +834,7 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
         jeton_tahmini = False
         ek = {}
         gec = False
+        t_cagri = time.perf_counter()
         try:
             cagir = transport if transport is not None else _cagir
             # Ayar (efor, cevap siniri) yalniz VARSA gecer: eski tasiyicilar
@@ -781,6 +856,7 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
             hata = "%s: %s" % (type(e).__name__, e)
             if a.get("provider") == "yerel" and _zaman_asimi_mi(e):
                 gec = True
+        sure_ms = int((time.perf_counter() - t_cagri) * 1000)
         if hata is None and (gir is None or cik is None):
             # HATALAR D-16: saglayici kullanim bilgisi dondurmedi. 0 yazmak
             # «0 USD, olculdu» demekti ve tavan hic dolmazdi. Metinden
@@ -805,7 +881,7 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
                      usd=usd, rate=float(b.get("usd_try") or 0),
                      ok=(hata is None), escalated=escalated,
                      cached=bool((ek or {}).get("cached")), cached_tok=int((ek or {}).get("cached") or 0),
-                     reason_tok=int((ek or {}).get("reasoning") or 0),
+                     reason_tok=int((ek or {}).get("reasoning") or 0), ms=sure_ms,
                      note=(hata or ",".join(
                          n for n, var in (("tahmini-fiyat", tahmini),
                                           ("tahmini-jeton", jeton_tahmini),

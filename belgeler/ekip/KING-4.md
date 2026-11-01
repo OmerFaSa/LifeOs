@@ -182,3 +182,32 @@ Merkez'e düşen 9 cümleyi HKM'deki model doğru araca götürebilir; o zaman
 tavan %68. A3 (niyet çözücü) bu tabloyu hedef alır: sayfa adı içeren soru
 cümlesi önce araç kaydına, sonra sayfaya; modül adı geçmeyen cümle bulunduğu
 modülde kalır.
+
+## Ölçüm 1b · HKM tarafı (2026-11-01)
+
+Ölçümler canlı HKM'ye dokunmadan yapıldı: canlı veritabanının kopyası, 4299
+portunda test HKM'si (Telegram, zamanlayıcı ve bulut anahtarları kapalı), bu
+makinedeki Ollama 0.40.9 (RTX 4050, 6 GB) ve Whisper. «Önce» sütunu HEAD kodudur
+(`ff9c80fd`); karşılaştırmalar aynı anda, yan yana koşuldu.
+
+| Madde | Önce | Sonra | Ne değişti |
+|---|---|---|---|
+| 1 · `ai_olcum` günlüğü | 74 çağrının 0'ında süre var; yerel ses çağrısı deftere hiç yazılmıyor | her çağrıda `usage.ms`; Gemma ses çağrısı da yazılıyor | `butce.record(ms=)`, `ai._gonder` süreyi ölçer; `GET /api/ai_olcum?date=` (toplam + rol/model kırılımı: çağrı, giriş/çıkış/düşünme jetonu, USD, toplam/ortalama/en uzun ms) |
+| 2a · aynı istek önbelleği | aynı istek ikinci kez 0,69 sn, yeni model çağrısı | 0,000 sn, 0 jeton | `ai.ask` içinde 120 sn, 64 kayıt; anahtar rol + model + sistem + bağlam + mesajlar; araç, görsel ve medya çağrısı saklanmaz |
+| 2b · rol başına bağlam bütçesi | sınır yok (yalnız son 12 mesaj); en büyük `king` çağrısı 4.717 jeton, ortalama 2.295 | `king` 3.500 · `*.sohbet` 3.000 · `*.gorsel` 2.000 · `bam.*` 6.000 · diğer 4.000 (sistem + geçmiş, tahmini jeton) | `ai.butceye_sigdir`: en eski geçmiş düşer; sistem metni (ölçüler) ve son kullanıcı mesajı kırpılmaz |
+| 2c · sabit sistem metni önce | araç turunda değişen hafıza satırının ardında 726 sabit harf; ikinci mesajda gemma4 istem süresi 152–161 ms | 0 harf; 41 ms | `sohbet.sistem_metni(ek=)`: hafıza adayı, derinlik, üslup ve araç talimatı değişen bağlamın önüne geçti. Düz sohbette kazanç küçük (ortak önek 1.082 → 1.228 harf); bulutta aynı önek Anthropic/Gemini önbelleğine girer |
+| 2d · `think` · gemma4:e2b | bayrak verilmezse 275 çıktı jetonu, 2,35 sn | `reasoning_effort=none` ile 23 jeton, 0,30 sn, düşünme 0 | kod bunu zaten yapıyordu; canlı ölçümle doğrulandı |
+| 2d · `think` · qwen3-vl:4b | 400 jeton düşünme, 8,4 sn, **boş cevap**; defterde `ays.gorsel` 4 çağrının 1'i başarılı | değişmedi | 4 yol denendi (`reasoning_effort`, `/v1` ve `/api/chat`'te `think:false`, `/no_think`); bu model düşünmeyi kapatmıyor. **Karar depo sahibinin:** görseli gemma4:e2b'ye vermek (görsel yeteneği var, zaten bellekte) ya da qwen3-vl'in instruct sürümünü indirmek |
+| 3 · ses → metin (sıcak) | Gemma 4: 0,18–0,58 sn · Whisper turbo GPU: 1,8–2,9 sn (iç süre 1,44 sn'nin 0,93'ü model yükleme) | Gemma 4: 0,23–0,31 sn | değişmedi; hedef 1,5 sn altı sağlanıyor |
+| 3 · ses → metin (soğuk) **darboğaz** | görsel model Gemma'yı VRAM'den itince ilk kayıt 13,9–20,1 sn | 1,85–3,9 sn; Gemma ısınınca yine 0,23–0,31 sn | `dinle.gemma_sicak` (`/api/ps`): Gemma bellekte değilse kayıt Whisper'la yazılır; arka planda önce görsel model boşaltılır, sonra Gemma ısıtılır (ikisi birlikte 6 GB'a sığmıyor; boşaltmadan denenince Gemma CPU'ya taştı, ikinci kayıt 25 sn sürdü) |
+| 4 · başlangıç | 0,51–1,04 sn (iki tepeli) | 0,51–1,04 sn | darboğaz yok; dokunulmadı. İçe aktarmalar 0,67 sn |
+| 4 · veritabanı indeksleri | 48 tablo, 24 indeks; en büyük tablo 78 satır; sık sorgular indeksli | aynı | ölçülebilir kazanç yok, indeks eklenmedi |
+| 4 · yavaş uçlar (günlükteki sıklık × süre) | ilk üç: `teklifler/ays` (×3.612), `king/isler` (×2.392), `teklifler/esp`·`spi`: 3,4–5,0 ms; ortak neden: her istek yeni iş parçacığı → `db.connect` tüm şemayı yeniden kuruyor (3,55 ms) | `db.connect` 1,80 ms; bu uçlar 2,4–2,8 ms | `db.connect` şemayı süreç başına bir kez kurar; dosya silinmişse yeniden kurar. En yavaş tek uç `/api/ollama` 35–58 ms (Ollama'nın kendi listesi), dokunulmadı |
+
+Testler: HKM 984/984 yeşil; 7'si yeni (`tests/test_olcum.py`).
+
+Açık kalanlar:
+- İstemci yoklaması: `teklifler/ays` tek günlükte 3.612 istek; sıklığı king.js tarafında düşürmek, sunucuyu hızlandırmaktan büyük kazanç (1a'nın alanı).
+- Whisper'ı sıcak tutmak (`whisper-server.exe` klasörde var): yükleme payı 0,93 sn gider, soğuk kayıt ~1 sn'ye iner.
+- qwen3-vl kararı (yukarıda).
+- Kısa komutları modelsiz yerelde ayrıştırmak («45 dk yürüdüm») istemci tarafı, bu turda yapılmadı.

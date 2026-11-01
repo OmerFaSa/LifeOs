@@ -80,7 +80,7 @@ Kesin kurallar:
 - Sen bir şey uygulayamazsın. Kullanıcı bir değişiklik isterse, bunun bir
   TEKLİF olarak bırakılacağını ve onun onayıyla uygulanacağını söyle.
 - Selamlaşma, soru sorma, konuşma serbesttir: her cevabın ölçüm raporu
-  olmak zorunda değil.
+  olmak zorunda değil.%(ek)s
 
 Bugünün ölçümleri:
 %(baglam)s"""
@@ -104,14 +104,14 @@ KISA_KIMLIK = """Adın %(ad)s. LifeOS'un merkezi HKM'de (Hayat Kontrol Merkezi) 
 Her konuda sohbet edebilirsin: günün nasıl geçtiği, hobiler, merak edilen bir bilgi, espri, dertleşmek. Kendin hakkında uydurma: bir yapay zekâ asistanısın; uyumaz, yemez, yorulmazsın ve sistemde kendiliğinden bir şey yapmış gibi anlatmazsın. Her cevabı sisteme bağlamak zorunda değilsin; LifeOS'tan (AYS sınav hazırlığı, SPİ sağlık, ESP kişisel gelişim) yalnız konu oraya gelirse söz et.
 Kurallar: Ölçülen bir şeyden (uyku, net, öğün gibi) sayı söyleyeceksen aşağıdaki listede geçmeli; listede yoksa ölçülmediğini kısaca söyle, sayı uydurma. Emir kipi kullanma. Doğal ve kısa yaz (çoğunlukla bir üç cümle); kullanıcıya «sen» diye hitap et. Bir şey uygulayamazsın; değişiklik isteğini teklif olarak bırakacağını söyle."""
 
-SISTEM_KISA = KISA_KIMLIK + """
+SISTEM_KISA = KISA_KIMLIK + """%(ek)s
 
 Bugünün ölçümleri:
 %(baglam)s"""
 
 # Serbest sohbette (mesaj sisteme degmiyor) olcum listesi HIC gitmez:
 # bos liste bile «bugün ölçüm yok» cumlesini selama ekletiyordu.
-SISTEM_SERBEST = KISA_KIMLIK + """
+SISTEM_SERBEST = KISA_KIMLIK + """%(ek)s
 
 %(baglam)s"""
 
@@ -166,12 +166,15 @@ BAGLAM_SINIRI = {
 }
 
 
-def sistem_metni(gorevli, bg, kisa=False, serbest=False):
+def sistem_metni(gorevli, bg, kisa=False, serbest=False, ek=""):
+    """`ek`: sabit talimatlar (hafiza adayi, derinlik, uslup, arac). Degisen
+    baglamin ONUNE girer: sabit onek bulutta prompt onbelleginden, Ollama'da
+    KV onbelleginden okunur (KING-4 Olcum 1b)."""
     g = GOREVLILER[gorevli]
     if kisa:
-        return (SISTEM_SERBEST if serbest else SISTEM_KISA) % {"ad": g["ad"], "baglam": bg}
+        return (SISTEM_SERBEST if serbest else SISTEM_KISA) % {"ad": g["ad"], "baglam": bg, "ek": ek}
     return SISTEM_METNI % {"ad": g["ad"], "is": g["is"], "konum": KONUM[gorevli],
-                           "baglam": bg}
+                           "baglam": bg, "ek": ek}
 
 
 def baglam(con, date, gorevli="king", th=None, veri=None, kisa=False):
@@ -1166,10 +1169,11 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         bg += ("\nKullanıcı hakkında hatırlananlar (etiketiyle; «tahmin» kesin "
                "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
                "sen yazamazsın):\n" + hb)
-    sistem = (sistem_metni(gorevli, bg, kisa=kisa, serbest=serbest) + (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
-              + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else "")
-              + USLUP_TALIMAT.get(uslup_of(uslup), "")
-              + (arac.SONUC_TALIMATI if sonuclar else ARAC_TALIMATI if aracli and sonuclar is None else ""))
+    sistem = sistem_metni(gorevli, bg, kisa=kisa, serbest=serbest, ek=(
+        (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
+        + DERINLIK_TALIMAT.get(derinlik, "") + (UZUN_TALIMAT if uzun else "")
+        + USLUP_TALIMAT.get(uslup_of(uslup), "")
+        + (arac.SONUC_TALIMATI if sonuclar else ARAC_TALIMATI if aracli and sonuclar is None else "")))
     onceki = [m if m.get("role") != "assistant" else dict(m, content=kalipsiz(m.get("content")))
               for m in (gecmis or []) if not (m.get("role") == "assistant" and yanki_mi(m.get("content")))]
     onceki = [m for m in onceki if m.get("content")]

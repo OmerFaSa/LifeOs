@@ -1270,6 +1270,9 @@ class Handler(BaseHTTPRequestHandler):
             # Butce paketleri (A · A+ · S · S+): onizleme, hicbir sey yazmaz.
             # Aylik tahmin defterdeki OLCUMDEN hesaplanir.
             return self._send(200, motor.onizleme(self.server.config, con=self.con))
+        if u.path == "/api/ai_olcum":
+            # «King bugün ne harcadı»: her model cagrisinin suresi ve jetonu (KING-4).
+            return self._send(200, butce.ai_olcum(self.con, date))
         if u.path == "/api/budget":
             # Harcama OLCUMDUR: defterdeki satirlardan gelir, tahminden degil.
             return self._send(200, {

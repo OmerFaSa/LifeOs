@@ -23,6 +23,13 @@ try:
     _ollama.VARSAYILAN_GONDER = _ag_kapali
 except ImportError:                                  # pragma: no cover
     pass
+# Ayni istek onbellegi (core/ai.py) testler arasinda cevap tasimasin;
+# onbellek testi kendisi acar.
+try:
+    from core import ai as _ai
+    _ai.ONBELLEK_SN = 0
+except ImportError:                                  # pragma: no cover
+    pass
 try:
     from core import kasa as _kasa
     _BELLEK_KASA = {}

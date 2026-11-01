@@ -730,6 +730,7 @@ MIGRATIONS = [
     # Onbellekten okunan giris jetonu (core/ai.py, OpenRouter): onbellegin
     # kazanci tahminle degil bu sayiyla olculur.
     ("usage", "cached_tok", "INTEGER"),
+    ("usage", "ms", "INTEGER"),              # ai_olcum: cagrinin duvar saati suresi
     # BAM isinin eforu (dusuk|yuksek|en_yuksek; bos = paketin kendisi).
     ("bam_isler", "efor", "TEXT"),
     ("decisions", "key", "TEXT"),          # oncelik kurali kimligi
@@ -845,10 +846,15 @@ PRAGMALAR = (
 )
 
 
+_KURULU = set()     # bu surecte semasi kurulmus dosyalar
+
+
 def connect(path=None):
     p = path or DB_PATH
+    yeni = True
     if p != ":memory:":
         os.makedirs(os.path.dirname(p), exist_ok=True)
+        yeni = p not in _KURULU or not os.path.exists(p)
     # isolation_level=None: OTOMATIK COMMIT.
     #
     # Python'un varsayilaninda her INSERT/UPDATE sessizce bir islem acar ve
@@ -873,8 +879,14 @@ def connect(path=None):
         except sqlite3.Error:
             # Bellek veritabani WAL kabul etmez; bu bir ariza degildir.
             pass
-    con.executescript(SCHEMA)
-    _migrate(con)
+    # SEMA SUREC BASINA BIR KEZ (Olcum 1b): ThreadingHTTPServer her istege
+    # yeni is parcacigi, dolayisiyla yeni baglanti acar; tam sema + tasima
+    # her istekte ~3 ms ekliyordu. Dosya silinmisse yeniden kurulur.
+    if yeni:
+        con.executescript(SCHEMA)
+        _migrate(con)
+        if p != ":memory:":
+            _KURULU.add(p)
     return con
 
 
