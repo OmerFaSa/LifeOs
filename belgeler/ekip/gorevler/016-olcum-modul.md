@@ -1,6 +1,6 @@
 # 016 · Tek komutla modül ölçümü (`tools/olcum_modul.js`)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/016-olcum-modul`
 **Efor:** orta
 **Kabul testi:** `tools/olcum_modul_kabul_test.py`
@@ -27,7 +27,7 @@ KING-4 §O: «ölçmeden düzeltme yok». «Ölçüm 1c» sayıları elle, geçi
 - `python tools/olcum_modul_kabul_test.py`
 
 ## Sonuç
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `tools/olcum_modul.js` yazıldı. Belirtilen parametrelerle (`<AYS|SPI|ESP> [--port N] [--json yol] [--tekrar 3]`) modülün `src/` klasörünü `http.server` ile açıp port muhafızı denetimi yapar; Playwright ile açılış (çizim, betik, stil, yerleşim ms medyanı), kapsam (CSS KB, CSS kullanılan %, JS adlı işlev sayısı ve koşan %), depolama (rota başına Storage okuma/yazma, JSON.parse ve en çok okunan 5 anahtar) ve rotaları (ısınma sonrası DevTools tracing ile UpdateLayoutTree ve Layout sayıları, en yavaş 5 rota) ölçüp JSON çıktısı yazar ve konsola özet tablo basar.
+- **Koşan testler:** `python tools/olcum_modul_kabul_test.py` -> `olcum modul kabul: acilis, kapsam, depo, rota alanlari dolu ve akla yatkin.` | `node tools/olcum_modul.js AYS --port 4731` -> çıkış 0 | `node tools/olcum_modul.js ESP --port 4733` -> çıkış 0
+- **Kabul testi:** `python tools/olcum_modul_kabul_test.py` -> `olcum modul kabul: acilis, kapsam, depo, rota alanlari dolu ve akla yatkin.` (çıkış 0)
+- **Açık kalan:** yok
