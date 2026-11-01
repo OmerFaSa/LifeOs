@@ -11,3 +11,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 008 (01.11.2026): Test yazarken kodun bugünkü çıktısını beklenen değer yapma: beklenen değer ölçütten ve docstring'den gelir; kod uymuyorsa testi kırmızı bırakıp hatayı düzelt ya da «Açık kalan»a yaz. Görev dosyasında yalnız Durum ve Sonuç değişir.
 - 013 (01.11.2026): Görevin Dokunma listesindeki koda (yorum dahil) dokunma; aynı denetle-say-ekle bloğunu dallara kopyalama, tek iç işlev yaz.
 - 014 (01.11.2026): Ortak çekirdeğe bağlanan dosyayı tek başına yükleyen kabul testleri ve araçlar (kabul_js, denetle_banka) da güncellenmeli
+- 015 (01.11.2026): Değiştirdiğin dosya üretilmiş kopyaysa (başlıkta «ÜRETİLMİŞ KOPYA») kaynağı brand/'dadır; Açık kalan'a yaz, Claude taşır
