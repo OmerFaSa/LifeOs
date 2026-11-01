@@ -9,7 +9,7 @@
 Depo sahibi (2026-11-01): «organizasyonla sistemi düzenli hale getir». Biten planlar `belgeler/arsiv/`'e taşındı (b38d7eaa). Hangi belgenin güncel olduğunu ve ne anlattığını tek sayfada gösteren bir dizin yok.
 
 ## Dokunulacak dosyalar
-- `belgeler/DIZIN.md` (yeni) — başlık, iki cümle «nereden başlanır» (önce `AGENTS.md`, `README.md`, `belgeler/TEKNIK.md`), sonra bölümler: `## Teknik`, `## Ekip ve planlar`, `## Ofis`, `## Arşiv`. Her belge tek satır: `- [AD](göreli/yol.md) — ne anlatır, durumu (güncel / tamamlandı / sürüyor) ve tarihi`. Açıklama belgenin kendi başlığından ve ilk paragrafından; uydurma yok. Göreli yollar `belgeler/`'e göredir (`ekip/OFIS.md`, `arsiv/T-DEVIR.md`). Görev dosyaları (`ekip/gorevler/NNN-*.md`) tek tek yazılmaz; `ekip/gorevler/README.md` ve `DERSLER.md` yazılır.
+- `belgeler/DIZIN.md` (yeni) — başlık, iki cümle «nereden başlanır» (önce AGENTS.md, README.md, belgeler/TEKNIK.md), sonra bölümler: `## Teknik`, `## Ekip ve planlar`, `## Ofis`, `## Arşiv`. Her belge tek satır: `- [AD](göreli/yol.md) — ne anlatır, durumu (güncel / tamamlandı / sürüyor) ve tarihi`. Açıklama belgenin kendi başlığından ve ilk paragrafından; uydurma yok. Göreli yollar `belgeler/`'e göredir (`ekip/OFIS.md`, `arsiv/T-DEVIR.md`). Görev dosyaları (`ekip/gorevler/NNN-*.md`) tek tek yazılmaz; `ekip/gorevler/README.md` ve `DERSLER.md` yazılır.
 - `README.md` — belgelerin anlatıldığı yere tek satır: `belgeler/DIZIN.md` (bütün belgelerin dizini). (AGENTS.md'ye Claude ekledi.)
 
 ## Dokunma
