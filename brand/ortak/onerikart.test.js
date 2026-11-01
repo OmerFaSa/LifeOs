@@ -432,7 +432,7 @@ describe('150 · Geri al şeridi (ui.js toast)', () => {
       /* Geri alması olmayan şerit çizgi taşımaz. */
       const d = UI().toast('Kaydedildi', { life:50 });
       expect(d.querySelector('.gerial__sure')).toBeNull();
-      await bekle(400);
+      d.remove(); el.remove();   // kalkışı beklemek gerekmez (2026-11-01: test süresi)
     }finally{ if(kurdum) kok.remove(); }
   });
 
@@ -454,7 +454,6 @@ describe('150 · Geri al şeridi (ui.js toast)', () => {
       expect(kok.children.length <= enCok).toBeTruthy();
       expect(geri.parentNode).toBe(kok);
       expect(son.parentNode).toBe(kok);
-      await bekle(700);
     }finally{
       Array.from(kok.children).forEach(x => x.remove());
       if(kurdum) kok.remove();
