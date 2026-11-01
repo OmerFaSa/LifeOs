@@ -63,7 +63,7 @@ try:
     (repo / 'dist').mkdir()
     (repo / 'src' / 'index.html').write_bytes(b'<script src="js/a.js"></script>\n')
     (repo / 'src' / 'js' / 'a.js').write_bytes(b'var a = 1;\r\nvar b = 2;\r\n')   # CRLF: Windows kopyasi
-    (repo / 'dist' / 'mod.html').write_text('<p>tek dosya</p><script>var kucuk = 1;</script><script>var buyuk = "çok uzun betik";</script><p>son</p>', encoding='utf-8')
+    (repo / 'dist' / 'mod.html').write_text('<style>.k{}</style><style>' + '.b{color:red}' * 2000 + '</style><p>tek dosya</p><script>var kucuk = 1;</script><script>var buyuk = "çok uzun betik";</script><p>son</p>', encoding='utf-8')
     liste = {'dosya': 'mod.html', 'kaynak': {'index.html': imza('<script src="js/a.js"></script>\n'),
                                              'js/a.js': imza('var a = 1;\nvar b = 2;\n')}}   # LF ile derlenmis
     (repo / 'dist' / 'kaynak.json').write_text(json.dumps(liste), encoding='utf-8')
@@ -102,6 +102,14 @@ try:
         dogru('buyuk betik ayni yerde ayri adrese tasinir', '<script>var kucuk = 1;</script><script src="/dist-betik.js?v=' in govde
               and '"></script><p>son</p>' in govde and 'buyuk' not in govde, govde)
         surum = govde.split('dist-betik.js?v=', 1)[-1].split('"', 1)[0]
+        dogru('buyuk stil ayni yerde surumlu adrese tasinir, kucuk stil yerinde', govde.startswith('<style>.k{}</style><link rel="stylesheet" href="/dist-stil.css?v=')
+              and '.b{color:red}' not in govde, govde[:120])
+        s_surum = govde.split('dist-stil.css?v=', 1)[-1].split('"', 1)[0]
+        with urllib.request.urlopen(adres + 'dist-stil.css?v=' + s_surum, timeout=5) as r:
+            stil, tur, onbellek = r.read().decode('utf-8'), r.headers.get('Content-Type', ''), r.headers.get('Cache-Control', '')
+        dogru('stil adresi buyuk govdeyi sunar (css), saklanir', stil == '.b{color:red}' * 2000 and 'text/css' in tur and 'immutable' in onbellek, (tur, onbellek))
+        with urllib.request.urlopen(adres + 'dist-stil.css?v=eski', timeout=5) as r:
+            dogru('eski stil surumu saklanmaz', 'no-store' in r.headers.get('Cache-Control', ''), r.headers.get('Cache-Control', ''))
         with urllib.request.urlopen(adres + 'dist-betik.js?v=' + surum, timeout=5) as r:
             betik, tur, onbellek = r.read().decode('utf-8'), r.headers.get('Content-Type', ''), r.headers.get('Cache-Control', '')
         dogru('betik adresi buyuk govdeyi sunar (UTF-8, js)', betik == 'var buyuk = "çok uzun betik";' and 'javascript' in tur, (betik, tur))

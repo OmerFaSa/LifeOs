@@ -247,12 +247,18 @@ def _guncel_dist(repo):
 # acilista DOMContentLoaded ~440 -> ~330 ms, ilk acilis ~1450 -> ~780 ms.
 # Dist dosyasi degismez; yalniz sunulurken bolunur. Test: tools/dist_sun_test.py
 DIST_BETIK = "/dist-betik.js"
+# Ayni yol stil icin (2026-11-01, KING-4 Olcum 2c): kok sayfa no-store'dur; AYS'de
+# 1,41 MB'nin ~1,3 MB'i satir ici CSS'ti ve her acilista yeniden iniyor, yeniden
+# ayristiriliyordu. Surumlu adresteki stil saklanir; kucuk stil satir icinde kalir.
+DIST_STIL = "/dist-stil.css"
+STIL_ESIK = 20000
 _BOLUK = {}
 
 
 def _dist_bol(yol):
-    """(html, betik, surum). En buyuk <script> govdesi betige tasinir ve HTML'de
-    ayni yerde <script src> kalir (sira ve engelleme ayni); betik yoksa None.
+    """(html, betik, surum, stil, stil_surum). En buyuk <script> govdesi betige,
+    en buyuk <style> (>= STIL_ESIK) stile tasinir; HTML'de ayni yerde <script src> ve
+    <link rel=stylesheet> kalir (sira, kaskad ve engelleme ayni); yoksa None.
     Surum adreste durur: tutan istek onbellege girer, V8 derlemeyi de saklar."""
     st = os.stat(yol)
     anahtar = (st.st_mtime_ns, st.st_size)
@@ -263,13 +269,23 @@ def _dist_bol(yol):
         metin = f.read()
     en = max(re.finditer(r"<script>(.*?)</script>", metin, re.S),
              key=lambda m: len(m.group(1)), default=None)
-    if en is None:
-        sonuc = (metin.encode("utf-8"), None, None)
-    else:
+    stil = max(re.finditer(r"<style>(.*?)</style>", metin, re.S),
+               key=lambda m: len(m.group(1)), default=None)
+    if stil is not None and len(stil.group(1)) < STIL_ESIK:
+        stil = None
+    betik = surum = stil_govde = stil_surum = None
+    parcalar = []                                   # (bas, son, yerine) — sondan basa uygulanir
+    if en is not None:
         betik = en.group(1).encode("utf-8")
         surum = hashlib.sha256(betik).hexdigest()[:12]
-        etiket = '<script src="%s?v=%s"></script>' % (DIST_BETIK, surum)
-        sonuc = ((metin[:en.start()] + etiket + metin[en.end():]).encode("utf-8"), betik, surum)
+        parcalar.append((en.start(), en.end(), '<script src="%s?v=%s"></script>' % (DIST_BETIK, surum)))
+    if stil is not None:
+        stil_govde = stil.group(1).encode("utf-8")
+        stil_surum = hashlib.sha256(stil_govde).hexdigest()[:12]
+        parcalar.append((stil.start(), stil.end(), '<link rel="stylesheet" href="%s?v=%s">' % (DIST_STIL, stil_surum)))
+    for bas, son, yerine in sorted(parcalar, reverse=True):
+        metin = metin[:bas] + yerine + metin[son:]
+    sonuc = (metin.encode("utf-8"), betik, surum, stil_govde, stil_surum)
     _BOLUK[yol] = (anahtar, sonuc)
     return sonuc
 
@@ -327,23 +343,24 @@ class Sunucu(SimpleHTTPRequestHandler):
         if self.path.startswith("/api/planlama"):
             return plan_isle(self)
         clean = self.path.split("?", 1)[0].split("#", 1)[0]
-        if clean in ("/", "/index.html", DIST_BETIK):
+        if clean in ("/", "/index.html", DIST_BETIK, DIST_STIL):
             dist = _guncel_dist(self.repo)
             if dist:
-                sayfa, betik, surum = _dist_bol(dist)
-                govde = betik if clean == DIST_BETIK else self._ayarli(sayfa)
+                sayfa, betik, surum, stil, stil_surum = _dist_bol(dist)
+                parca = {DIST_BETIK: (betik, surum, "text/javascript"), DIST_STIL: (stil, stil_surum, "text/css")}.get(clean)
+                govde = parca[0] if parca else self._ayarli(sayfa)
                 if govde is not None:
-                    tur = "text/javascript" if clean == DIST_BETIK else "text/html"
+                    tur = parca[2] if parca else "text/html"
                     # Yalniz surumu tutan adres saklanir; yaris aninda eski
                     # surum adresine yeni govde gittiyse saklanmaz.
-                    self._kalici = clean == DIST_BETIK and self.path.endswith("?v=" + surum)
+                    self._kalici = bool(parca) and self.path.endswith("?v=" + parca[1])
                     self.send_response(200)
                     self.send_header("Content-Type", tur + "; charset=utf-8")
                     self.send_header("Content-Length", str(len(govde)))
                     self.end_headers()
                     self.wfile.write(govde)
                     return
-            elif clean != DIST_BETIK:
+            elif clean not in (DIST_BETIK, DIST_STIL):
                 return self._src_sayfa()
         return super().do_GET()
 
