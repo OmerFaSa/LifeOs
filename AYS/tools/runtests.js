@@ -121,9 +121,7 @@ async function portMuhafizi(portlar, ipucu){
       console.log('\nSayfa hatalari:');
       consoleErrors.forEach(e => console.log('  ! ' + e));
     }
-    console.log('\n' + summary.passed + '/' + summary.total + ' gecti'
-      + (summary.failed ? '  ·  ' + summary.failed + ' kaldi' : ''));
-    /* En yavas bes takim: test suresi olculur, tahmin edilmez (KING-4 Olcum 1c). */
+    /* En yavas bes takim (ozetten ONCE: sayilar.py son satiri belgeye yazar): test suresi olculur, tahmin edilmez (KING-4 Olcum 1c). */
     const takim = {};
     summary.results.forEach(r => { takim[r.suite] = (takim[r.suite] || 0) + (r.ms || 0); });
     const yavas = Object.entries(takim).sort((a, b) => b[1] - a[1]).slice(0, 5);
@@ -131,6 +129,8 @@ async function portMuhafizi(portlar, ipucu){
     if(process.env.RUNTESTS_TAKIM) require('fs').writeFileSync(process.env.RUNTESTS_TAKIM,
       JSON.stringify({ toplam:summary.total, gecen:summary.passed, takim }));
     if(yavas.length && yavas[0][1]) console.log('En yavas takimlar: ' + yavas.map(([s, ms]) => s + ' ' + Math.round(ms) + ' ms').join(' · '));
+    console.log('\n' + summary.passed + '/' + summary.total + ' gecti'
+      + (summary.failed ? '  ·  ' + summary.failed + ' kaldi' : ''));
     code = (summary.failed || consoleErrors.length) ? 1 : 0;
   }catch(err){
     console.error('Kosum hatasi:', err && err.message ? err.message : err);
