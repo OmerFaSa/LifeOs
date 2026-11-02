@@ -1,6 +1,6 @@
 # 050 · Hafıza arama ölçüm aracı (`tools/hafiza_olcum.py`)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/050-hafiza-olcum`
 **Efor:** orta
 **Kabul testi:** `tools/hafiza_olcum_kabul_test.py`
@@ -44,7 +44,7 @@ aynı yolla ölçülsün (AGENTS §1: sayıyı kod üretir).
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). -->
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `tools/hafiza_olcum_kume.json` (24 çift, 21 kökte boş) ve `tools/hafiza_olcum.py` aracı eklendi; `belgeler/ekip/KING-4.md` Ölçüm 3b sonuna ölçüm komutu eklendi; `tools/DIZIN.md` ve `belgeler/DIZIN.md` fihristleri güncellendi.
+- **Koşan testler:** `python tools/tools_dizin_kabul_test.py; python tools/belge_dizin_kabul_test.py` -> temiz; `cd AYS && node tools/runtests.js 4741` -> `3177/3177 gecti`; `cd HKM && python -m tests.run` -> `1000/1000 test gecti`
+- **Kabul testi:** `python tools/hafiza_olcum_kabul_test.py` -> `hafiza olcum kabul: kume 24 (kokte bos 21), kok p1 0.12, sahte gomme p1 0.12.`
+- **Açık kalan:** yok

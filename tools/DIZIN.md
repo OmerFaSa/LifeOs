@@ -42,6 +42,8 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `veri_topla.py` — Resmi kaynak listesindeki dosyaları indirip metne çevirir, veri hazırlığında koşulur.
 
 ## Ölçüm
+- `hafiza_olcum.py` — HKM hafıza aramasını kök eşlemesi ve gömme ile karşılaştırıp süre ve doğruluk ölçer, optimizasyonda koşulur.
+- `hafiza_olcum_kume.json` — Hafıza arama ölçüm aracı için 24 adet Türkçe soru ve bilgi çifti içeren test kümesi verisidir.
 - `king_kapsam.js` — King kapsam testi; her modülün yazma işlevi ve rotası bir King aracına bağlı mı, eksik varsa çıkış 1 (KING-4 A2).
 - `king_kapsam.json` — `king_kapsam.js`'in eşlemesi: Model işlevi ve rota → araç adı ya da «-: neden».
 - `kapsam.js` — Birim testlerinin hangi işlevleri çalıştırdığını V8 precise coverage ile ölçer, CI'da veya elle koşulur.
