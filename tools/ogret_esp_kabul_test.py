@@ -95,8 +95,8 @@ if r and (r[0] != "c3" or not re.match(r"^Tekrar \(3\. tur\)", r[1] or "")):
 # 5) araclar
 r = js("localStorage.setItem('esp.ogret.tekrar', JSON.stringify({ c2:{ n:0, sonraki:'2000-01-01' } })); const l = K().araclar(); [l.map(a => [a.ad, a.tur]), l[0].calistir({}).satirlar]")
 if r:
-    if r[0] != [["esp_tekrarlarim", "oku"], ["esp_neden_yanlis", "oku"]]:
-        hata.append("araclar(): esp_tekrarlarim ve esp_neden_yanlis (oku): %r" % (r[0],))
+    if r[0] != [["esp_tekrarlarim", "oku"], ["esp_yanlis_teshis", "oku"]]:
+        hata.append("araclar(): esp_tekrarlarim ve esp_yanlis_teshis (oku): %r" % (r[0],))
     if r[1] != ["house · 1. tekrar"]:
         hata.append("esp_tekrarlarim satiri kartin on yuzunu vermeli: %r" % (r[1],))
 

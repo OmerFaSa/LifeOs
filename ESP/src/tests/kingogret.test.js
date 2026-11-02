@@ -207,7 +207,7 @@
       }
     });
 
-    it('araçlar: esp_tekrarlarim ve esp_neden_yanlis, kingarac listesinde yer alır', () => {
+    it('araçlar: esp_tekrarlarim ve esp_yanlis_teshis, kingarac listesinde yer alır', () => {
       const eski = ESP.S.cards;
       sifirla();
       try{
@@ -219,7 +219,7 @@
         const araclar = K().araclar();
         expect(araclar.map(a => [a.ad, a.tur])).toEqual([
           ['esp_tekrarlarim', 'oku'],
-          ['esp_neden_yanlis', 'oku']
+          ['esp_yanlis_teshis', 'oku']
         ]);
 
         const resTekrar = araclar[0].calistir({});
@@ -228,7 +228,7 @@
         // KingArac.liste() içinde var mı?
         const liste = ESP.KingArac.liste();
         expect(liste.some(a => a.ad === 'esp_tekrarlarim')).toBe(true);
-        expect(liste.some(a => a.ad === 'esp_neden_yanlis')).toBe(true);
+        expect(liste.some(a => a.ad === 'esp_yanlis_teshis')).toBe(true);
       }finally{
         ESP.S.cards = eski;
         sifirla();

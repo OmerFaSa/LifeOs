@@ -87,10 +87,10 @@
 
     it('King araçları iki okuma aracı döner', () => {
       const araclar = SP.KingDers.araclar();
-      expect(araclar.map(a => a.ad)).toEqual(['spi_tekrarlarim', 'spi_neden_yanlis']);
+      expect(araclar.map(a => a.ad)).toEqual(['spi_tekrarlarim', 'spi_yanlis_teshis']);
       const liste = SP.KingArac.liste();
       expect(liste.some(a => a.ad === 'spi_tekrarlarim')).toBe(true);
-      expect(liste.some(a => a.ad === 'spi_neden_yanlis')).toBe(true);
+      expect(liste.some(a => a.ad === 'spi_yanlis_teshis')).toBe(true);
     });
   });
 })();

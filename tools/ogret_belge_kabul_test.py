@@ -12,7 +12,7 @@ BELGE = {
     "ESP/src/MIMARI.md": ["esp.ogret.tekrar", "esp.ogret.son", "kingogret.js", "srs.js"],
     "brand/ortak/OKU.md": ["ogret.js", "LIFEOS.OGRET"],
 }
-ORTAK = ["ogret.js", "1, 3", "7", "kavram", "işlem", "dikkat", "bilmiyor", "_tekrarlarim", "_neden_yanlis"]
+ORTAK = ["ogret.js", "1, 3", "7", "kavram", "işlem", "dikkat", "bilmiyor", "_tekrarlarim", "_yanlis_teshis"]
 hata = []
 for yol, ozel in BELGE.items():
     s = (KOK / yol).read_text(encoding="utf-8")

@@ -98,8 +98,8 @@ if r and (r[0] is not True or r[1] != ""):
 # 5) araclar: motorun iki okuma araci; tekrar araci kavramin adini verir
 r = js("localStorage.setItem('spi.ogret.tekrar', JSON.stringify({ 'concept-set':{ n:0, sonraki:'2000-01-01' } })); const l = K().araclar(); [l.map(a => [a.ad, a.tur]), l[0].calistir({}).satirlar]")
 if r:
-    if r[0] != [["spi_tekrarlarim", "oku"], ["spi_neden_yanlis", "oku"]]:
-        hata.append("araclar(): spi_tekrarlarim ve spi_neden_yanlis (oku): %r" % (r[0],))
+    if r[0] != [["spi_tekrarlarim", "oku"], ["spi_yanlis_teshis", "oku"]]:
+        hata.append("araclar(): spi_tekrarlarim ve spi_yanlis_teshis (oku): %r" % (r[0],))
     if r[1] != ["Set · 1. tekrar"]:
         hata.append("spi_tekrarlarim satiri kavramin adini vermeli: %r" % (r[1],))
 

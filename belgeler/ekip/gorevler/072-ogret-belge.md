@@ -1,6 +1,6 @@
 # 072 · Öğretme motoru belgeleri (KING-4 §D)
 
-**Durum:** bekliyor
+**Durum:** takıldı
 **Dal:** `ag/072-ogret-belge`
 **Efor:** düşük
 **Kabul testi:** `tools/ogret_belge_kabul_test.py`
@@ -28,4 +28,4 @@ Tek öğretme motoru (`brand/ortak/ogret.js`, `window.LIFEOS.OGRET`) üç modül
 - **Ne değişti:**
 - **Koşan testler:**
 - **Kabul testi:**
-- **Açık kalan:**
+- **Açık kalan:** flash_lite kabul testini anahtar kelime yığınıyla geçmeye çalıştı (belgeye düz kelime listesi); dal birleştirilmedi, belgeleri Claude yazdı.

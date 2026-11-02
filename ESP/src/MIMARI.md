@@ -660,6 +660,23 @@ Aynı geçişte her `data-hint` anahtarının karşılığı olup olmadığı da
 
 ---
 
+### Öğretme motoru (KING-4 §D)
+
+King'in kelime sorusu ortak motoru kullanır (`brand/ortak/ogret.js`, adaptör
+`core/kingogret.js`): kartın ön yüzü sorulur, seçenekler öteki kartların arka
+yüzleridir. Kartın kendi SRS'i (`core/srs.js`: kutu, ease, vade) **değişmez**;
+motorun takvimi ayrıdır (`esp.ogret.tekrar`, son yanlış `esp.ogret.son`). Kanıt
+kartın SRS verisidir: hiç tekrar edilmemiş kart «bilmiyor», «Oturuyor» ve üstü kutu
+«dikkat». Teşhis kuralla yapılır ve dört türdür: **kavram** (konuda iki ve üstü yanlış),
+**işlem** (seçilen sayı doğrunun ters işaretlisi, bir fazlası/eksiği, iki katı/yarısı
+ya da basamak kayığı), **dikkat** (önce doğru yapılmış), **bilmiyor** (cevap yok ya da
+hiç öğrenilmemiş); modülün kendi etiketi de kanıttır. Kanıt yoksa tür verilmez,
+«teşhis için veri yetmiyor» denir: uydurulmaz. Kod teşhis satırını ve yönlendiren
+soruyu kurar; «neden yanlış yaptım» sonucu Merkez'e gider, model yalnız cümleyi
+kurar, doğru cevap ve sayılar koddandır. Yanlış yapılan konu 1, 3 ve 7 gün sonra
+yeniden sorulur; üçüncü doğruda kapanır (`bitti`, silinmez). King araçları
+`esp_tekrarlarim` («bugünkü tekrarlarım») ve `esp_yanlis_teshis` («neden yanlış yaptım»).
+
 ## 9. Bilinçli olarak ertelenenler
 
 - **Otomatik transkripsiyon.** Konuşma-metin modeli gerektirir; MVP'de süre ve

@@ -103,7 +103,7 @@ ESP.KingOgret = (function(){
     const soruMetni = (bellek && bellek.soru) || ('«' + kart.front + '» ne demek?');
 
     const kutuObj = (ESP.SRS && ESP.SRS.BOXES && ESP.SRS.BOXES.find(b => b.box === (kart.box || 1)));
-    const kutuAdi = kutuObj ? kutuObj.label : 'Yerleşti';
+    const kutuAdi = kutuObj ? kutuObj.label : String(kart.box || 1) + '. kutu';
 
     const g = {
       id: id,
@@ -118,7 +118,7 @@ ESP.KingOgret = (function(){
       yeni: !kart.reps,
       yeniNeden: 'kart henüz hiç tekrar edilmedi',
       oncekiDogru: (kart.box || 1) >= 3,
-      oncekiNeden: 'kart tekrar kutusunda «' + kutuAdi + '»ye kadar çıkmıştı'
+      oncekiNeden: 'kart tekrar kutusunda «' + kutuAdi + '» düzeyindeydi'
     };
 
     const a = {

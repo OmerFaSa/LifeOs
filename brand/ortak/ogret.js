@@ -222,7 +222,9 @@ window.LIFEOS.OGRET = (function(){
     const bugun = () => o.bugun ? o.bugun() : isoBugun();
     const adi = k => { try{ return (o.ad && o.ad(k)) || k; }catch(e){ return k; } };
     return [
+      /* «bugünkü tekrarlarım» kartlar sayfasını açmasın: dar `es` hızlı yolu sayfa tahmininden önce. */
       { ad:o.modul + '_tekrarlarim', tur:'oku', ozetAd:'Bugünkü tekrarlar', ornek:'bugünkü tekrarlarım',
+        es:/(?:^|\s)tekrarlar[ıi]m[ıi]?(?=\s|[?.!,]|$)/,
         anahtar:'tekrarlarım tekrarlarımı vadesi gelen konular',
         aciklama:'Öğretme motorunun bugünkü tekrarları: yanlış yapılan konular 1, 3 ve 7 gün sonra benzer soruyla sorulur; vadesi gelen ve kapanan konular.',
         calistir:() => {
@@ -233,9 +235,11 @@ window.LIFEOS.OGRET = (function(){
               : 'Bugün vadesi gelen tekrarın yok' + (oz.acik ? ' (' + oz.acik + ' konu takvimde bekliyor).' : '.'),
             satirlar:satirlar.length ? satirlar : null };
         } },
-      { ad:o.modul + '_neden_yanlis', tur:'oku', ozetAd:'Son yanlışın teşhisi', ornek:'neden yanlış yaptım',
-        anahtar:'neden yanlış yanlışımın nedeni nerede hata yaptım',
-        aciklama:'King\'le çözülen son yanlış sorunun teşhisi (kavram, işlem, dikkat ya da bilmiyor) ve kuralı; doğru cevap ve sayılar modülün verisi. Cevabı Sokratik kur: önce yönlendiren soru, doğru cevabı değiştirme.',
+      /* Genel «neden / ne zaman» soruları buraya düşmesin (sınav: «… temel nedenleri nelerdi»):
+         ad, örnek ve anahtar «yanlış» ve «teşhis» üzerine. */
+      { ad:o.modul + '_yanlis_teshis', tur:'oku', ozetAd:'Son yanlışın teşhisi', ornek:'yanlış yaptığım sorunun teşhisi',
+        anahtar:'yanlış yaptım yanlışım yanlışımı teşhis',
+        aciklama:'Son yanlış cevabın teşhisi: kavram, işlem, dikkat ya da bilmiyor; doğru cevap modülün verisi. Sokratik yöntem: önce yönlendiren soru; doğru cevabı değiştirme.',
         calistir:() => {
           const s = o.son.oku();
           if(!s || !s.id) return { cevap:'King\'le çözdüğün yanlış bir soru yok; önce «bana soru sor» de.' };

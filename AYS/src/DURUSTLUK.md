@@ -147,3 +147,24 @@ konur — **ama bu bir nedensellik ölçüsü değildir ve öyle etiketlenmez**:
 iki pencere arasında başka çok şey değişir. Sistem yalnızca sırayı
 kaydeder, yorumu adaya bırakır. Testler bu cümlenin varlığını denetler
 (`durustluk.test.js` → «fayda notu nedensellik iddia etmez»).
+
+## Öğretme motoru (KING-4 §D)
+
+King'in soru kartı Öğren'in bankasını kullanır, karar ortak motordadır
+(`brand/ortak/ogret.js`, `LIFEOS.OGRET`; adaptör `core/ogren.js`: `kingSoru`,
+`kingCevapla`, `tekrarDepo`). Teşhis kuralla yapılır ve dört türdür: **kavram** (konuda iki ve üstü yanlış),
+**işlem** (seçilen sayı doğrunun ters işaretlisi, bir fazlası/eksiği, iki katı/yarısı
+ya da basamak kayığı), **dikkat** (önce doğru yapılmış), **bilmiyor** (cevap yok ya da
+hiç öğrenilmemiş); modülün kendi etiketi de kanıttır. Kanıt yoksa tür verilmez,
+«teşhis için veri yetmiyor» denir: uydurulmaz. Kod teşhis satırını ve yönlendiren
+soruyu kurar; «neden yanlış yaptım» sonucu Merkez'e gider, model yalnız cümleyi
+kurar, doğru cevap ve sayılar koddandır. Yanlış yapılan konu 1, 3 ve 7 gün sonra
+yeniden sorulur; üçüncü doğruda kapanır (`bitti`, silinmez). King araçları
+`ays_tekrarlarim` («bugünkü tekrarlarım») ve `ays_yanlis_teshis` («neden yanlış yaptım»).
+
+Vadesi gelen konuda yanlış yapılan soru değil aynı konunun **benzer** sorusu gelir;
+yeni soruya verilen ilk cevap Öğren'in ölçümüdür, tekrar turu ölçüm değildir.
+Takvim `ays.king.tekrar`'da konu başına (`ders|konu`) durur; eski, soru kimlikli
+kayıt okunurken konuya taşınır, ham değer bir kez `ays.king.tekrar.yedek`'e yazılır,
+soru kimlikleri `ogeler`'de kalır. Son yanlış `ays.ogret.son`'da. Yanlış defterinin
+etiketleri (K, İ, Y, D) teşhise kanıt olur; S (süre) dört türden biri değildir.

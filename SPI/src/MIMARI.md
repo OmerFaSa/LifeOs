@@ -594,6 +594,22 @@ girişini kolaylaştırma (belge, fotoğraf, dikte) ve tasarımı derinleştirme
 
 ---
 
+### Öğretme motoru (KING-4 §D)
+
+SPİ'nin King dersi ve soru kartı ortak motoru kullanır (`brand/ortak/ogret.js`,
+adaptör `core/kingders.js`). Soru, `data/ogrenme.js`'teki bir kavramın tanımını
+verip hangi kavram olduğunu sorar; seçenekler öteki kavramların adlarıdır. SPİ
+teşhis koymaz (AGENTS §1.5): soru yalnız kavram bilgisidir. Teşhis kuralla yapılır ve dört türdür: **kavram** (konuda iki ve üstü yanlış),
+**işlem** (seçilen sayı doğrunun ters işaretlisi, bir fazlası/eksiği, iki katı/yarısı
+ya da basamak kayığı), **dikkat** (önce doğru yapılmış), **bilmiyor** (cevap yok ya da
+hiç öğrenilmemiş); modülün kendi etiketi de kanıttır. Kanıt yoksa tür verilmez,
+«teşhis için veri yetmiyor» denir: uydurulmaz. Kod teşhis satırını ve yönlendiren
+soruyu kurar; «neden yanlış yaptım» sonucu Merkez'e gider, model yalnız cümleyi
+kurar, doğru cevap ve sayılar koddandır. Yanlış yapılan konu 1, 3 ve 7 gün sonra
+yeniden sorulur; üçüncü doğruda kapanır (`bitti`, silinmez). King araçları
+`spi_tekrarlarim` («bugünkü tekrarlarım») ve `spi_yanlis_teshis` («neden yanlış yaptım»).
+Takvim `spi.ogret.tekrar`'da kavram başına, son yanlış `spi.ogret.son`'da.
+
 ## 9. Kardeş proje
 
 Bu depoda iki bağımsız sistem yaşar:

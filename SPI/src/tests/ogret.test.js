@@ -95,7 +95,7 @@ describe('Öğretme motoru — eşleştirme, seçenek, araçlar', () => {
     const r = O().cevap(a, { id:'k|0', kavram:'k', konu:'Türev', soru:'f(x)=x² ise f\'(3)?', secilen:'C', dogru:'B', secMetin:'-6', dogruMetin:'6', cozum:['2x → 6'] });
     expect([r.isabet, r.teshis.tur, r.not]).toEqual([false, 'islem', 'Yarın bu konudan benzer bir soru soracağım.']);
     const [tk, nd] = O().araclar(Object.assign({}, a, { modul:'ays', ad:k => k === 'k' ? 'Türev' : k, bugun:() => '2026-11-03' }));
-    expect([tk.ad, nd.ad, tk.tur, nd.tur]).toEqual(['ays_tekrarlarim', 'ays_neden_yanlis', 'oku', 'oku']);
+    expect([tk.ad, nd.ad, tk.tur, nd.tur]).toEqual(['ays_tekrarlarim', 'ays_yanlis_teshis', 'oku', 'oku']);
     const t = tk.calistir({});
     expect([t.sonuc.vadesi_gelen, t.satirlar]).toEqual([[{ konu:'Türev', tekrar:1 }], ['Türev · 1. tekrar']]);
     const n = nd.calistir({});
