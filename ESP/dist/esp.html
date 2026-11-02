@@ -11451,6 +11451,9 @@ html, body{ background:var(--bg); }
 .kenar__moduller .kenar__modul.is-on{ background:var(--surface-2); color:var(--text); box-shadow:none; }
 .kenar__modul-metin{ display:flex; flex-direction:column; min-width:0; line-height:1.25; }
 .kenar__modul-ad{ font-weight:600; }
+.kenar__modul--kartlarim{ width:100%; border:0; font:inherit; text-align:left; cursor:pointer; margin-top:2px; position:relative; }
+.kenar__modul--kartlarim::before{ content:''; position:absolute; left:10px; right:10px; top:-2px; height:1px; background:var(--border-soft); }
+.kenar__modul-simge{ width:12px; height:12px; flex:none; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin:0 -2px; }
 .kenar__modul-not{ font-size:11.5px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 /* SAYFA BAŞI BİLGİ KARTI (2026-10-02): başlığın sağ üstünde ⓘ; kart
@@ -19034,7 +19037,16 @@ html[data-zemin="yumusak"] .site--v5 .raf-ac{ border:0; border-radius:12px; back
   -webkit-backdrop-filter:blur(16px) saturate(140%); backdrop-filter:blur(16px) saturate(140%); }
 /* Kenar: sistem seçicisi ve açılan listesi cam; seçili sistem seçili cam. */
 html[data-zemin="yumusak"] .site--v5 .kenar__modulsec{ background:var(--cam-ince); box-shadow:var(--cam-ust); }
-html[data-zemin="yumusak"] .site--v5 .kenar__modulliste{ background:var(--cam-katman); box-shadow:var(--cam-ust), var(--cam-golge);
+/* Açılan liste öteki yüzen katmanlar gibi ışıklı levha (kullanıcı, 2026-11-02:
+   «arka plan ışıklandırması yok»): üstte beyaz ışık, altta sıcak yansıma, pervaz.
+   Gölge kısa: kenar çubuğu kırpar. */
+:root{ --liste-isik:rgba(255,255,255,.45); }
+html[data-theme="dark"]{ --liste-isik:rgba(255,255,255,.07); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --liste-isik:rgba(255,255,255,.07); } }
+html[data-zemin="yumusak"] .site--v5 .kenar__modulliste{ background-color:var(--cam-katman);
+  box-shadow:var(--levha-ic), 0 14px 28px -14px rgba(20,24,40,.3), 0 10px 24px -12px rgb(var(--sicak) / .4);
+  background-image:radial-gradient(120% 70% at 22% 0%, var(--liste-isik), transparent 62%),
+    radial-gradient(90% 55% at 50% 112%, rgb(var(--sicak) / .24), transparent 72%);
   -webkit-backdrop-filter:blur(24px) saturate(150%); backdrop-filter:blur(24px) saturate(150%); }
 html[data-zemin="yumusak"] .site--v5 .kenar__moduller .kenar__modul:hover{ background:var(--cam-ince); }
 html[data-zemin="yumusak"] .site--v5 .kenar__moduller .kenar__modul.is-on{ background:var(--secili-zemin); box-shadow:var(--secili-golge); }
@@ -23118,7 +23130,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'b5115742', at:'2026-11-02 08:19', dirty:false };
+ESP.BUILD = { id:'c5916c55', at:'2026-11-02 11:28', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -28570,7 +28582,12 @@ window.LIFEOS = window.LIFEOS || {};
         const url = adres(k, loc);
         return url ? '<a class="kenar__modul" href="' + kac(url) + '" data-modul-gecis="' + k + '">' + satir(k, m) + '</a>'
           : '<span class="kenar__modul is-kapali" title="' + kac(m.ad + ' ayrı dosyada açılır') + '">' + satir(k, m) + '</span>';
-      }).join('') + '</div></div></div>';
+      }).join('')
+      /* Kullanıcı (2026-11-02): «3 kart seçtiğimiz yere dönülebilsin» — King › Kartlarım. */
+      + (window.LIFEOS.KING ? '<button type="button" class="kenar__modul kenar__modul--kartlarim" data-king-kartlarim>'
+        + '<svg class="kenar__modul-simge" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="12.5" height="13" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v11"/></svg>'
+        + '<span class="kenar__modul-metin"><span class="kenar__modul-ad">Kartlarım</span><span class="kenar__modul-not">King’de seçtiğin kartlar</span></span></button>' : '')
+      + '</div></div></div>';
   }
   function modulPencereKapat(haric){
     if(typeof document === 'undefined') return;
@@ -29484,7 +29501,7 @@ window.LIFEOS = window.LIFEOS || {};
         ms.setAttribute('aria-expanded', ac ? 'true' : 'false');
         return;
       }
-      if(!(e.target.closest && e.target.closest('.kenar__modulpencere'))) modulPencereKapat();
+      if(!(e.target.closest && e.target.closest('.kenar__modulpencere')) || (e.target.closest && e.target.closest('[data-king-kartlarim]'))) modulPencereKapat();
       /* Profil: araç penceresini açar/kapatır; dışarısı (açık katman hariç) kapatır. */
       const bs = e.target.closest && e.target.closest('.kenar__bensec');
       if(bs){
@@ -52651,6 +52668,8 @@ window.LIFEOS.KING = (function(){
     document.addEventListener('click', e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
+      /* Kabuktaki «Kartlarım» (sistem menüsü): büyük King, Araçlar › Düzenle. Yayılım sürer: kabuk menüsünü kapatır. */
+      if(t.closest('[data-king-kartlarim]')){ e.preventDefault(); KI.ac(); KI.kvDuzen = true; if(!(KI.bolum === 'araclar' && KI.listeGorunur())) KI.bolumSec('araclar'); else KI.ciz(false); return; }
       if(t.closest('[data-king-ac]')){ e.preventDefault(); e.stopPropagation(); KI.ac({ mini:true }); return; }   // ada önce
       /* Söz 9: perde ve dışarısı KAPATMAZ, küçültür; küçükken sayfa serbest. */
       if(t.closest('.king-perde')){ e.preventDefault(); e.stopPropagation(); KI.kucult(); return; }
