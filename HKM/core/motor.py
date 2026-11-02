@@ -29,9 +29,11 @@
    Paket secilmemisse sistem eskisi gibi atama/mirasla calisir."""
 
 import contextlib
+import re
 import threading
+import time
 
-from core import butce, models
+from core import butce, models, seviye as seviye_mod
 
 SINIFLAR = ("ekonomik", "standart", "guclu", "uzman")
 SINIF_ADI = {"ekonomik": "Ekonomik", "standart": "Standart", "guclu": "Güçlü", "uzman": "Uzman"}
@@ -174,8 +176,14 @@ def _ekonomi(con, cfg, bas, tavan):
     return bas, tavan, None
 
 
-def merdiven(con, cfg, rol, seviye=None):
-    """Denenecek basamaklar: [{sinif, atama, ayar}]. Cagri yapmaz."""
+def merdiven(con, cfg, rol, seviye=None, adim=0, jeton=0):
+    """Denenecek basamaklar: [{sinif, atama, ayar}] ve `karar` {seviye:
+    yerel|bulut, neden}. Cagri yapmaz. `adim`/`jeton`: zorluk (A6)."""
+    m = _merdiven(con, cfg, rol, seviye)
+    return _yerel_bulut(m, cfg, rol, adim, jeton) if m.get("ok") else m
+
+
+def _merdiven(con, cfg, rol, seviye=None):
     a = models.resolve(cfg, rol)
     paket = models.paket_of(cfg)
     pseviye = politika_seviyesi(rol, seviye) if rol in models.ROLES else None
@@ -291,6 +299,108 @@ def merdiven(con, cfg, rol, seviye=None):
                           "«Sağlayıcılar» bölümüne bir Google anahtarı ekle.") if tur == "ses"
                     else "%s paketi OpenRouter anahtarıyla çalışır; «Sağlayıcılar» bölümüne ekle." % paket)
     return dict(ortak, ok=True, basamaklar=basamaklar)
+
+
+# ------------------------------------------------ yerel / bulut (KING-4 A6)
+# Kota (429/RESOURCE_EXHAUSTED) ofis pilotundaki senaryonun aynisi: saglayici
+# penceresi boyunca denenmez, is yerelde surer; pencere hata metninden okunur
+# («retry in 41s», «try again in 2h»), yoksa 30 dk.
+KOTA = re.compile(r"HTTP 429|RESOURCE_EXHAUSTED|quota", re.I)
+KOTA_PENCERE = 30 * 60
+_KOTA = {}                      # saglayici -> (bitis epoch, metin)
+_KOTA_KILIT = threading.Lock()
+# shortcut: kota penceresi surec belleginde; HKM yeniden baslarsa bir 429 daha
+# yenir (bedelsiz). Coklu surec olursa deftere tasinir.
+
+
+def kota_mi(r):
+    return not r.get("ok") and bool(KOTA.search(r.get("note") or ""))
+
+
+def kota_penceresi(metin):
+    """Hata metnindeki bekleme (sn), 60 sn – 24 sa; yoksa KOTA_PENCERE."""
+    m = re.search(r"(?:retry|try again|resets?)\D{0,12}?(\d+(?:\.\d+)?)\s*(saat|sa|hours?|h|dakika|dk|minutes?|min|m|seconds?|sec|s)\b",
+                  metin or "", re.I)
+    if not m:
+        return KOTA_PENCERE
+    birim = m.group(2).lower()
+    carpan = 3600 if birim in ("saat", "sa", "hour", "hours", "h") else 1 if birim.startswith("s") else 60
+    return max(60, min(86400, int(float(m.group(1)) * carpan)))
+
+
+def kota_isaretle(saglayici, metin, simdi=None):
+    bitis = (simdi or time.time()) + kota_penceresi(metin)
+    with _KOTA_KILIT:
+        _KOTA[saglayici] = (bitis, (metin or "")[:240])
+    return bitis
+
+
+def kota_durumu(simdi=None):
+    """Acik pencereler: {saglayici: bitis epoch}."""
+    t = simdi or time.time()
+    with _KOTA_KILIT:
+        for p in [p for p, (b, _) in _KOTA.items() if b <= t]:
+            del _KOTA[p]
+        return {p: b for p, (b, _) in _KOTA.items()}
+
+
+def kota_sifirla():
+    with _KOTA_KILIT:
+        _KOTA.clear()
+
+
+def kat(basamak):
+    return seviye_mod.YEREL if basamak["atama"].get("provider") == "yerel" else seviye_mod.BULUT
+
+
+def _saat(epoch):
+    return time.strftime("%H:%M", time.localtime(epoch))
+
+
+def _yerel_bulut(m, cfg, rol, adim, jeton):
+    """Merdiveni isin zorluguna ve bulut kotasina gore dizer (yalniz metin):
+    hibritte kolay is yerelden, zor is buluttan baslar; bulut basamagi olan
+    her merdivenin sonuna yerel YEDEK eklenir (kota ya da saglayici hatasi);
+    kotasi dolu saglayici penceresi boyunca denenmez."""
+    bas = list(m["basamaklar"])
+    if not bas or m.get("seviye") in ("gorsel", "ses") or _gorsel_rol(rol) or rol == "medya":
+        return dict(m, karar={"seviye": kat(bas[0]) if bas else None, "neden": m.get("seviye") or "tek atama"})
+    z = seviye_mod.zorluk(m.get("seviye"), adim, jeton)
+    neden = z["neden"]
+    yerel = models.yerel_of(cfg)
+    yerel_m = yerel.get("ekonomik") or next(iter(yerel.values()), None)
+
+    ilk = bas[0]
+
+    def yerel_b():
+        return {"sinif": None, "yedek": True, "atama": dict(
+            ilk["atama"], provider="yerel", provider_label=models.PROVIDERS["yerel"]["label"], model=yerel_m,
+            efor="", key_id="", key_label="", key_missing=False, key_set=True),
+            "ayar": {"jeton": (ilk.get("ayar") or {}).get("jeton") or 1200}}
+
+    kapali = kota_durumu()
+    dolu = [b for b in bas if b["atama"].get("provider") in kapali]
+    if dolu:
+        bas = [b for b in bas if b not in dolu]
+        p = dolu[0]["atama"]["provider"]
+        if not bas and not yerel_m:
+            return dict(m, ok=False, reason="kota", basamaklar=[],
+                        note="Bulut kotası dolu (%s, %s'e kadar) ve yerel model yok: Ayarlar → Yapay zekâ'dan "
+                             "bir yerel model yaz ya da bekle." % (models.PROVIDERS[p]["label"], _saat(kapali[p])))
+        neden = "düşüş: %s kotası dolu, %s'e kadar denenmez" % (p, _saat(kapali[p]))
+    elif models.yer_of(cfg) == "hibrit" and yerel_m:
+        yereller = [b for b in bas if kat(b) == seviye_mod.YEREL]
+        bulutlar = [b for b in bas if kat(b) == seviye_mod.BULUT]
+        if z["seviye"] == seviye_mod.YEREL and bulutlar and not yereller:
+            ilk = dict(yerel_b(), yedek=False, bulut_yedek=bulutlar[0])
+            bas = [ilk] + bulutlar
+        elif z["seviye"] == seviye_mod.BULUT and bulutlar and yereller:
+            bas = bulutlar + [dict(b, yedek=True) for b in yereller]
+    if yerel_m and bas and all(kat(b) == seviye_mod.BULUT for b in bas):
+        bas.append(yerel_b())
+    if not bas:
+        bas = [yerel_b()]
+    return dict(m, basamaklar=bas, karar={"seviye": kat(bas[0]), "neden": neden})
 
 
 # Anahtar reddi (401/403) ve bakiye yok (402) HESABIN sorunudur: ayni

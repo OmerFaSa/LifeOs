@@ -95,3 +95,26 @@ def sinifla(metin):
     if len(k.split()) > UZUN_KELIME:
         return {"seviye": ORTA, "neden": "sinyal yok ama uzun mesaj (%d kelime)" % len(k.split())}
     return {"seviye": ALT, "neden": "düz sohbet: karar ya da öneri sinyali yok"}
+
+
+# MODEL MERDIVENI (KING-4 A6): isin ZORLUGU yerel mi bulut mu sorusunu
+# cevaplar. Kolay is (kisa sohbet, siniflama, tek arac secimi, brifing
+# cumlesi) yerel kucuk modelde ~0,2 sn; zor is (cok adimli plan, uzun
+# baglam, ajan dongusunun 2.+ adimi) buluta. Siniflama yine modelsizdir.
+YEREL, BULUT = "yerel", "bulut"
+# Ollama'nin 6 GB VRAM'de varsayilan baglami 4096 jeton (olculdu, 2026-11-02);
+# cevaba yer kalsin diye istem bunun altinda tutulur.
+UZUN_BAGLAM = 3000
+
+
+def zorluk(seviye=None, adim=0, jeton=0):
+    """{seviye: yerel|bulut, neden}. `seviye`: politika satiri (alt/orta/ust/
+    arastirma...), `adim`: ajan dongusunde yapilacak tur, `jeton`: istemin
+    tahmini boyu. Model cagirmaz."""
+    if adim >= 2:
+        return {"seviye": BULUT, "neden": "döngünün %d. adımı" % adim}
+    if jeton > UZUN_BAGLAM:
+        return {"seviye": BULUT, "neden": "uzun bağlam (~%d jeton)" % jeton}
+    if seviye in (UST, "arastirma"):
+        return {"seviye": BULUT, "neden": "çok adımlı plan/karar (%s)" % seviye}
+    return {"seviye": YEREL, "neden": "kolay iş (%s)" % (seviye or "sohbet")}

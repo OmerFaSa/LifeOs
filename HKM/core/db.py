@@ -776,6 +776,8 @@ MIGRATIONS = [
     # kazanci tahminle degil bu sayiyla olculur.
     ("usage", "cached_tok", "INTEGER"),
     ("usage", "ms", "INTEGER"),              # ai_olcum: cagrinin duvar saati suresi
+    ("usage", "seviye", "TEXT"),             # model merdiveni (A6): yerel | bulut
+    ("usage", "neden", "TEXT"),              # merdivenin karari ya da dususu
     # BAM isinin eforu (dusuk|yuksek|en_yuksek; bos = paketin kendisi).
     ("bam_isler", "efor", "TEXT"),
     ("decisions", "key", "TEXT"),          # oncelik kurali kimligi

@@ -1200,7 +1200,7 @@ def _konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                user=user, transport=transport, veri=veri, seviye=sv["seviye"],
                jeton=UZUN_JETON if uzun else None, sure=UZUN_SURE if uzun else None,
                akis=CumleAkisi(akis, bg, serbest) if akis and not arac_turu else None,
-               araclar=katalog if arac_turu else None)
+               araclar=katalog if arac_turu else None, adim=devam["adim"] + 1 if devam else 1)
     motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"], derinlik=derinlik or "oto", uzun=uzun,
                        baglam={"gecmis": len(onceki), "hafiza": len(hb.splitlines()) if hb else 0,
                                "sistem_harf": len(sistem)})

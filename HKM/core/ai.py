@@ -671,7 +671,7 @@ def _genis(ayar, jeton, sure, akis=None, araclar=None):
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         transport=None, now=None, duzeltme=True, denetim="olcum", veri=None,
         gorseller=None, medya=None, seviye=None, jeton=None, sure=None, akis=None,
-        araclar=None):
+        araclar=None, adim=0):
     """Bir kademe adina model cagirir — MERDIVENLE (core/motor.py).
 
     `araclar`: core/arac.py'nin temiz katalogu. Verilirse model bir arac
@@ -684,9 +684,12 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
 
     `seviye`: sohbette mesajin seviyesi (core/seviye.py): alt/orta/ust.
     `jeton`, `sure`: kullanici acikca uzun metin istediyse (core/sohbet.py
-    uzun_istek) cevap payi en az bu kadar, bekleme en az bu kadar olur."""
+    uzun_istek) cevap payi en az bu kadar, bekleme en az bu kadar olur.
+    `adim`: ajan dongusunde yapilacak tur; 2+ adim ve uzun baglam buluttan
+    baslar, kolay is yerelden (core/seviye.py zorluk, KING-4 A6)."""
     from core import motor
-    plan = motor.merdiven(con, cfg, role, seviye=seviye)
+    plan = motor.merdiven(con, cfg, role, seviye=seviye, adim=adim,
+                          jeton=_jeton_tahmini(sistem, baglam, *[m.get("content") for m in mesajlar or []]))
     if not plan["ok"]:
         return {"ok": False, "reason": plan.get("reason"), "text": None,
                 "note": plan.get("note")}
@@ -705,8 +708,10 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                         pass
             return dict(r, onbellek=True, usd=0.0, in_tok=0, out_tok=0, seconds=0.0)
     r = None
+    neden = (plan.get("karar") or {}).get("neden")
     for i, b in enumerate(basamaklar):
-        ust_var = i < len(basamaklar) - 1
+        # Yerel yedek ust basamak degildir: yalniz bulut olmayinca devralir.
+        ust_var = any(not x.get("yedek") for x in basamaklar[i + 1:])
         not_ek = ",".join(x for x in (
             "paket=%s" % plan["paket"] if plan.get("paket") and b["sinif"] else "",
             "sinif=%s" % b["sinif"] if b["sinif"] else "",
@@ -715,10 +720,11 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                      sistem=sistem + (motor.YUKSELT_KURALI if ust_var else ""),
                      user=user, transport=transport, now=now, duzeltme=duzeltme,
                      denetim=denetim, veri=veri, gorseller=gorseller, medya=medya,
-                     ayar=_genis(b["ayar"], jeton, sure, akis, araclar), escalated=i > 0, not_ek=not_ek)
+                     ayar=_genis(b["ayar"], jeton, sure, akis, araclar), escalated=i > 0, not_ek=not_ek,
+                     karar={"seviye": motor.kat(b), "neden": neden})
         r["motor"] = {"paket": plan.get("paket"), "seviye": plan.get("seviye"),
                       "sinif": b["sinif"], "basamak": i, "yukseldi": i > 0,
-                      "ekonomi": plan.get("ekonomi")}
+                      "ekonomi": plan.get("ekonomi"), "kat": motor.kat(b), "kat_neden": neden}
         if r.get("yerel_gec"):
             # Soguk baslangic: ikinci yerel model de bellege yuklenecekti;
             # kullanici iki kez beklemesin. Kalan yerel basamaklar atlanir;
@@ -730,9 +736,24 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
             if not kalan:
                 break
             basamaklar[i + 1:] = kalan
+            neden = "düşüş: yerel motor geç kaldı"
             continue
-        if not (ust_var and motor.zorlandi(r)):
-            break
+        p = b["atama"].get("provider")
+        if p != "yerel" and motor.kota_mi(r):
+            # Kota: bu saglayici penceresi boyunca denenmez, kalan basamaklar
+            # (yerel yedek dahil) devralir (ofis pilotundaki kota senaryosu).
+            bitis = motor.kota_isaretle(p, r.get("note"))
+            basamaklar[i + 1:] = [x for x in basamaklar[i + 1:] if x["atama"].get("provider") != p]
+            neden = "düşüş: %s kotası dolu, %s'e kadar denenmez" % (p, time.strftime("%H:%M", time.localtime(bitis)))
+            continue
+        if ust_var and motor.zorlandi(r):
+            continue
+        yedek = [x for x in basamaklar[i + 1:] if x.get("yedek")]
+        if not r.get("ok") and yedek:
+            basamaklar[i + 1:] = yedek
+            neden = "düşüş: bulut olmadı (%s)" % str(r.get("note") or r.get("reason"))[:60]
+            continue
+        break
     if r.get("ok") and r.get("text"):
         r["text"] = motor.isaretsiz(r["text"])
         if not r["text"]:
@@ -745,7 +766,7 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
 
 def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben",
              transport=None, now=None, duzeltme=True, denetim="olcum", veri=None,
-             gorseller=None, medya=None, ayar=None, escalated=False, not_ek=""):
+             gorseller=None, medya=None, ayar=None, escalated=False, not_ek="", karar=None):
     """Bir kademe adina model cagirir.
 
     `denetim`: «olcum» (varsayilan) kullaniciya konusan cevaptir: dayanaksiz
@@ -882,6 +903,7 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
                      ok=(hata is None), escalated=escalated,
                      cached=bool((ek or {}).get("cached")), cached_tok=int((ek or {}).get("cached") or 0),
                      reason_tok=int((ek or {}).get("reasoning") or 0), ms=sure_ms,
+                     seviye=(karar or {}).get("seviye"), neden=(karar or {}).get("neden"),
                      note=(hata or ",".join(
                          n for n, var in (("tahmini-fiyat", tahmini),
                                           ("tahmini-jeton", jeton_tahmini),

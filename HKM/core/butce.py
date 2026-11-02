@@ -142,26 +142,27 @@ def is_baglami(is_id):
 def record(con, *, role, task, provider, model, user="ben", in_tok=0, out_tok=0,
            image_tok=0, reason_tok=0, usd=0.0, rate=0.0, cached=False,
            escalated=False, ok=True, note="", now=None, is_id=None, veri=None, cached_tok=0,
-           ms=None):
+           ms=None, seviye=None, neden=None):
     """Bir cagriyi deftere yazar. BASARISIZ CAGRI DA YAZILIR: para, cevap
     alinmadan da harcanmis olabilir. `is_id` verilmezse is parcaciginin
     baglamindaki BAM isi yazilir (is_baglami). `ms`: cagrinin suresi
-    (ai_olcum); olculmediyse bos kalir, 0 yazilmaz."""
+    (ai_olcum); olculmediyse bos kalir, 0 yazilmaz. `seviye` (yerel|bulut) ve
+    `neden`: model merdiveninin karari ya da dususu (KING-4 A6)."""
     t = now or datetime.datetime.now()
     if is_id is None:
         is_id = getattr(_BAGLAM, "is_id", None)
     con.execute(
         "INSERT INTO usage(created_at, day, user, role, task, provider, model,"
         " in_tok, out_tok, image_tok, reason_tok, usd, try_, rate, cached,"
-        " escalated, ok, note, is_id, veri, cached_tok, ms)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        " escalated, ok, note, is_id, veri, cached_tok, ms, seviye, neden)"
+        " VALUES (%s)" % ",".join("?" * 24),
         (t.isoformat(timespec="seconds"), t.date().isoformat(), user, role, task,
          provider, model, int(in_tok), int(out_tok), int(image_tok),
          int(reason_tok), float(usd), float(usd) * float(rate), float(rate),
          1 if cached else 0, 1 if escalated else 0, 1 if ok else 0, note or "",
          int(is_id) if is_id else None,
          ",".join(sorted(set(veri))) if veri else None, int(cached_tok or 0),
-         int(ms) if ms is not None else None))
+         int(ms) if ms is not None else None, seviye, (neden or "")[:160] or None))
     con.commit()
     return {"ok": True}
 
@@ -178,7 +179,13 @@ def ai_olcum(con, gun=None):
     satir = [dict(r) for r in con.execute(
         "SELECT role rol, model, provider, %s FROM usage WHERE day=? "
         "GROUP BY role, model, provider ORDER BY sure_ms DESC, cagri DESC" % sec, (gun,))]
-    return {"gun": gun, "toplam": top, "satirlar": satir}
+    # Model merdiveni (A6): yerel/bulut kirilimi ve dususler (kota, hata).
+    seviyeler = [dict(r) for r in con.execute(
+        "SELECT seviye, %s FROM usage WHERE day=? AND seviye IS NOT NULL GROUP BY seviye" % sec, (gun,))]
+    dusus = [dict(r) for r in con.execute(
+        "SELECT created_at at, role rol, provider, model, seviye, neden FROM usage WHERE day=? "
+        "AND neden LIKE 'düşüş%' ORDER BY id DESC LIMIT 20", (gun,))]
+    return {"gun": gun, "toplam": top, "satirlar": satir, "seviyeler": seviyeler, "dususler": dusus}
 
 
 def is_maliyeti(con, is_id):

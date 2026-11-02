@@ -305,7 +305,9 @@ def run():
            [("yerel", "ekonomik"), ("openrouter", "standart")])
         eq(m["basamaklar"][0]["atama"]["model"], "qwen-kucuk")
         u = motor.merdiven(None, _yer_cfg("hibrit"), "king", seviye="ust")
-        eq([b["atama"]["provider"] for b in u["basamaklar"]], ["openrouter", "openrouter"])
+        # A6: zor is buluttan baslar; sonda yerel YEDEK (kota/hata) durur.
+        eq([b["atama"]["provider"] for b in u["basamaklar"]], ["openrouter", "openrouter", "yerel"])
+        ok(u["basamaklar"][-1]["yedek"])
     test("hibrit: basit yerelde, zor bulutta", t_hybrid_simple_local_hard_cloud)
 
     def t_hybrid_falls_to_cloud_when_local_is_down():
