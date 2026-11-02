@@ -27,3 +27,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 052 (02.11.2026): Denetçi cevapsız kalırsa diff elle okunur; DIZIN satırını iki iş birden eklerse çakışır
 - 072 (02.11.2026): Belge görevinde kabul testi anahtar kelime ararsa düz kelime listesi yazma; bölüm cümlelerle, koddan okunarak yazılır (072 reddedildi)
 - 071 (02.11.2026): Türkçe eki kodla üreten metinde ünlü uyumunu sına (««Oturuyor»ye»); kayıt yoksa uydurma yedek değer yazma
+- 060 (02.11.2026): Testçi kırmızısı ortak sınav kabulüydü (main'de düzeltildi); diff temiz
