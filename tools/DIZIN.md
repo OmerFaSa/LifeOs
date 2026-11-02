@@ -75,6 +75,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `kingveri_brifing_spi_kabul_test.py` — Görev 061 kabul testi; SPİ sabah brifingi verisini (plan, dünün bulgusu, öneri) sınar.
 - `kingveri_brifing_esp_kabul_test.py` — Görev 062 kabul testi; ESP sabah brifingi verisini (dünün bulgusu, öneri) sınar.
 - `merdiven_olcum_kabul_test.py` — Görev 063 kabul testi; A6 model merdiveni ölçüm betiğini kuru koşuyla sınar.
+- `merdiven_uc_kabul_test.py` — Görev 064 kabul testi; A6 merdiveni ve kart cümlesi uçlarının HTTP testini ve HKM belgesini sınar.
 - `ogret_belge_kabul_test.py` — Görev 072 kabul testi; öğretme motorunun üç modül belgesinde ve ortak dizinde anlatıldığını sınar.
 - `ogret_esp_kabul_test.py` — Görev 071 kabul testi; ESP'nin öğretme motoru adaptörünü (kelime sorusu, teşhis, 1/3/7 tekrar, araçlar) sınar.
 - `ogret_spi_kabul_test.py` — Görev 070 kabul testi; SPİ'nin öğretme motoru adaptörünü (kavram sorusu, 1/3/7 tekrar, araçlar) sınar.
