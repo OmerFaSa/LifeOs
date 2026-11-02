@@ -502,3 +502,61 @@ modüle göre tek yığılmış çubuk (rol öneki `ays.`/`spi.`/`esp.`, gerisi 
 cümleyle söyler. Sohbette «bugün ne harcadın» `king_harcama` aracıyla aynı sayıları verir. Sayı
 HKM defterinden gelir; tarifesi bilinmeyen modelde maliyet HKM'nin tahminidir (`ai_olcum` bu etiketi
 henüz dönmüyor: HKM işi).
+
+## Tur 4 · A6 model merdiveni, §H kartları (4a) ve tek öğretme motoru (4b) (2026-11-02)
+
+### 4a · A6 model merdiveni (HKM)
+
+Ölçüm canlı ayarın bellekteki kopyasıyla, geçici defterle (RTX 4050, Ollama 0.40.9). Canlı ayar bugün
+`yer: yerel` ve **26 rolün hepsi elle `yerel gemma3:4b`**: merdiven hiç kurulmuyor, zor iş de fiş de
+gemma3'e gidiyor; gemma3 araç çağıramıyor. Canlı defter boş.
+
+| İş | Önce: gemma3:4b (bugünkü ayar) | Sonra: hibrit (gemma4:e2b + gemini-3.6-flash) |
+|---|---|---|
+| kolay ×4 (selam, teşekkür, sınıflama, brifing cümlesi) | 115–1.121 ms (soğuk 29 sn) | yerel gemma4: 201–549 ms (soğuk 18 sn) |
+| zor: iki haftalık plan | 5,5 sn, cevap «Anlaşıldı. Bu talimatlara uyacağım.» (iş yok) | bulut: 12,1 sn, gerçek plan |
+| zor: karar ver | 0,9 sn, yüzeysel | bulut: 10,3 sn, gerekçeli |
+| bulutta kolay iş (karşılaştırma) | — | gemini 3,8 sn (yerelin ~10 katı) |
+
+- `seviye.zorluk` (modelsiz): döngünün 2.+ adımı, > 3.000 jeton (Ollama'nın 6 GB'ta bağlamı 4.096), üst/araştırma
+  bulut; geri kalan yerel. `motor.merdiven(…, adim, jeton)`: hibritte kolay iş yerelden (elle bulut ataması olsa da),
+  zor iş buluttan; bulut basamaklı her merdivenin sonunda yerel yedek.
+- Kota (429/RESOURCE_EXHAUSTED/quota, ofis pilotunun senaryosu): yerel devralır, sağlayıcı pencere boyunca denenmez
+  (hata metninden, yoksa 30 dk; 60 sn–24 sa); yerel yoksa `reason:"kota"`.
+- Defter `usage.seviye/neden`; `GET /api/ai_olcum` → `seviyeler`, `dususler`. Tekrar ölçüm: `python tools/merdiven_olcum.py [--kuru] [--kota]` (ofis 063).
+- **Karar depo sahibinin:** merdivenin canlıda çalışması için `HKM/config.json` → `yer: hibrit`, `yerel.ekonomik: gemma4:e2b`,
+  elle gemma3 atamaları kalkar, bulut için `king` → `google gemini-3.6-flash`. Dokunulmadı.
+
+### 4a · §H kartları (King istemcisi)
+
+Sayıyı modül verir (`KI.ayar.kartlar`), cümleyi model kurar: yeni `POST /api/king/cumle {tur, satirlar}` (sayılar bağlam,
+uydurma sayı denetimi, kolay iş → yerel); Merkez yoksa kodun şablonu ve «Neden?» hangisi olduğunu söyler.
+
+| Kart | Ne | Veri |
+|---|---|---|
+| Sabah brifingi | Bugün planı · Dün tek ölçü + önceki 7 gün ortalaması · Öneri; «Dinle»; 05–12 ilk açılışta günde bir kez | `brifing(simdi)` (ofis 060–062; ESP planı yok → `[]`) |
+| «Unuttuğun ne var?» | eksik kayıt çipleri; dokununca King sorar, alan «Ad: » ile dolar, mikrofon açılır | `eksik` (Günü kapat) |
+| Haftalık rapor | ızgara, önceki hafta ↑/↓, «veri yok» —; modelin tek cümlesi | `hafta` |
+| Akıllı hatırlatma | kurulu saat üstü çizili → gerçek ortanca; gerçek saatte bildirim, dün kaçtıysa yumuşak dil, günde bir kez | `hatirlat` |
+| «onu 30 dk yap» | önizleme → Onayla → `duzelt`; `geriAl` «Geri al» çipinde ve Eylemler çizgisinde | `sonKayit`, `duzelt` |
+| «neden şimdi?» | kendiliğinden mesajın altında HKM `neden.cumle` | 3b |
+
+Testler: king.test.js +10; SPİ 2971, AYS 3197, ESP 2662; HKM 1017 (test_merdiven 7, test_merdiven_uc 4 ofis 064).
+
+**Ofis 060–064:** beşi Denetçi temiz, son incelemede de temiz. Testçi her işte «1 kırmızı» veriyordu: ortak neden
+`king_sinav_300_kabul_test.py` (3a'nın `not` alanı bilinmeyen sayılıyordu; `git:ays:target` King'in sayfa kataloğunda
+yoktu → Hedefler sayfası eklendi; bir cümlenin düzeltilmesi `ays_bolum_ac_kapa`yı tek cümlede bırakmıştı). Kalan:
+2a'dan beri cümlesiz 53 modül aracı → ofis 065. Pilot iki kez düştü (PowerShell zaman aşımı, sonra OSError 1455:
+8 GB bellek doldu); 063 «bırakıldı» görünse de iş tamamdı, 064'ün 14 kırmızısı çöküş koduydu (0xC0000142), kabul elle koşuldu.
+Ders: bellekte aynı anda Ollama, üç modül testi ve Testçi koşmaz; testler sırayla.
+
+### 4b · Tek öğretme motoru (özet; ayrıntı oturum notu 4b-sonuc)
+
+`brand/ortak/ogret.js` → `LIFEOS.OGRET`: kurallı teşhis (bilmiyor, dikkat, işlem, kavram, modül etiketi), Sokratik iki
+satır, konu başına 1/3/7, ortak `bul` ve `secenek`, araçlar `<m>_tekrarlarim`, `<m>_yanlis_teshis`. Adaptörler: AYS
+`ogren.js`, SPİ `kingders.js` (ofis 070; SPİ'de artık soru var), ESP `kingogret.js` (ofis 071). 072 (belge) reddedildi.
+Açık: King dersleri (`king-devrim.js`) kendi 1/3/7'siyle; AYS `quiz.js` çeldiricisi motora taşınmadı.
+
+**Sınav:** 293/300 (4b'nin geçici `_neden_yanlis` adı 291'e düşürmüştü, ad `_yanlis_teshis` oldu).
+
+**Açık (tur sonu):** ofis 065 (53 araca 2'şer sınav cümlesi) çalışıyor, birleşmedi; dist derlenmedi, entegre koşulmadı.
