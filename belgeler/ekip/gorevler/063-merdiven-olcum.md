@@ -36,4 +36,4 @@ KING-4 A6 (commit 7e526375): kolay iş yerel modelde, zor iş bulutta; bulut kot
   - `python tools/tools_dizin_kabul_test.py` -> `tools dizin kabul: 101 dosya, sekiz bolum, her biri bir kez ve aciklamali.`
   - `cd HKM && python -X utf8 -m tests.run` -> `1013/1013 test gecti`
 - **Kabul testi:** `python tools/merdiven_olcum_kabul_test.py` -> `merdiven olcum kabul: kuru kosu, kolay yerel / zor bulut, kota dususu, canli dokunulmadi.`
-- **Açık kalan:** yok
+- **Açık kalan:** Testçi kök python kırmızısı 060, 061 ve 062 derslerindeki ortak sınav kabulü hatasıdır (main'deki tools/king_sinav.json 149. satırındaki 'not' alanı tools/king_sinav_300_kabul_test.py tarafından reddedilir; dalımızla ve görev 063 ile ilgisizdir). Görev kabul testi ve tüm ilgili denetimler tam yeşildir.
