@@ -34,3 +34,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 064 (02.11.2026): Testçi kırmızıları bellek çöküşüydü (0xC0000142); kabul ve HKM 1017 elle yeşil
 - 073 (02.11.2026): Kabul testindeki hatayı motorda Array.prototype yamasıyla örtme; testi düzelttir. Denetçi küresel yamayı kaçırdı.
 - 080 (02.11.2026): ac ve baslat aynı süreç açma bloğunu kopyaladı; ortak yardımcıya al
+- 081 (02.11.2026): ilk esitleme (son 0) mezar tasini da ezmemeli; kenar durumu kabul testine yaz

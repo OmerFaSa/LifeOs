@@ -32,7 +32,7 @@ import time
 
 ANAHTAR = re.compile(r"^lifeos\.(yazi|boyut|vurgu|odak|altcizgi|satir|isik|buzlu\.[a-z]+|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+"
                      r"|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|sessiz\.bitis|minik|minik\.[a-z]+"
-                     r"|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun)|ice\.var|profiller|profil\.etkin)$")
+                     r"|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun|yer|yer\.[a-z]+)|acilis\.video|ice\.var|profiller|profil\.etkin)$")
 CIHAZ_RE = re.compile(r"^[A-Za-z0-9_-]{4,64}$")
 EN_COK = 120
 _kilit = threading.Lock()
@@ -160,12 +160,7 @@ def esitle(cihaz, cihaz_ad, son, gonder, kok=None, simdi=None):
             if not su_var and not su_iz:
                 uygula = True
             elif son == 0:
-                if su_var:
-                    uygula = False
-                else:
-                    iz_z = su_iz.get("z", 0) if su_iz else 0
-                    iz_c = su_iz.get("c", "") if su_iz else ""
-                    uygula = (z, cihaz) > (iz_z, iz_c)
+                uygula = False      # ilk esitleme ezmez: degeri de, mezar tasini da (silinen geri gelmez)
             else:
                 iz_z = su_iz.get("z", 0) if su_iz else 0
                 iz_c = su_iz.get("c", "") if su_iz else ""

@@ -94,6 +94,16 @@ with tempfile.TemporaryDirectory() as d:
     bekle("giris sayfasi koyu: data-theme ve koyu kurallar", 'data-theme="dark"' in sunucu.giris_html(tema="dark") and "@media all" in sunucu.giris_html(tema="dark"))
     bekle("giris sayfasi secimsiz: cihazin tercihi", "data-theme" not in sunucu.giris_html()[:300])
 
+# Ilk esitleme (son 0) silinmis anahtari diriltmez (081 son inceleme): telefonun eski
+# degeri «simdi» damgasiyla gelir, mezar tasindan yeni gorunur; yine de ezilmemeli.
+with tempfile.TemporaryDirectory() as k:
+    A.birlestir({"lifeos.yazi": "buyuk"}, kok=k, simdi=1000)
+    A.birlestir({"lifeos.yazi": None}, kok=k, simdi=2000)
+    A.esitle("tel-9", "iPhone", 0, {"lifeos.yazi": {"d": "buyuk", "z": 3000}}, kok=k, simdi=3000)
+    bekle("ilk esitleme silineni diriltmez", "lifeos.yazi" not in A.oku(k)["ayar"])
+    bekle("yeni muzik ve video anahtarlari gecerli", A.gecerli("lifeos.muzik.yer", "ayri") and A.gecerli("lifeos.muzik.yer.spi", "x")
+          and A.gecerli("lifeos.acilis.video", "1"))
+
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")
     sys.exit(1)
