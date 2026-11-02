@@ -1,6 +1,6 @@
 # 030 · HKM ölçüm aracı (`tools/hkm_olcum.py`)
 
-**Durum:** bekliyor
+**Durum:** takıldı
 **Dal:** `ag/030-hkm-olcum`
 **Efor:** orta
 **Kabul testi:** `tools/hkm_olcum_kabul_test.py`
