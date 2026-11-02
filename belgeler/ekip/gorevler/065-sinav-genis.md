@@ -1,6 +1,6 @@
 # 065 · King sınavını her modül aracına genişlet (53 araç, 2'şer cümle)
 
-**Durum:** bekliyor
+**Durum:** takıldı — 2026-11-02 11:04 bellek çöküşünde (OSError 1455) Uygulayıcı sessiz kaldı, commit yok; yeniden başlatılmadı. Bellek boşken yeniden .
 **Dal:** `ag/065-sinav-genis`
 **Efor:** yüksek
 **Kabul testi:** `tools/king_sinav_genis_kabul_test.py`
