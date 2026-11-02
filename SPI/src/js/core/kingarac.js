@@ -942,7 +942,8 @@ SP.KingArac = (function(){
         hedeflerAraci(),
         mutfakAraci(),
       ],
-      haneAraclari()
+      haneAraclari(),
+      (SP.KingDers && SP.KingDers.araclar && window.LIFEOS && window.LIFEOS.OGRET ? SP.KingDers.araclar() : [])
     ).map(a => Object.assign(a, KURAL[a.ad] || {}));
   }
 

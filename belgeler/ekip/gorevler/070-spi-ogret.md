@@ -1,6 +1,6 @@
 # 070 · SPİ öğretme motoru adaptörü: kavram sorusu, 1/3/7 tekrar, King araçları (KING-4 §D)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/070-spi-ogret`
 **Efor:** orta
 **Kabul testi:** `tools/ogret_spi_kabul_test.py`
@@ -43,7 +43,10 @@ AGENTS §1: soru, seçenekler ve doğru cevap **koddan ve `data/ogrenme.js`'ten*
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). -->
-- **Ne değişti:**
+- **Ne değişti:** SPI/src/js/core/kingders.js ortak öğretme motoruna (window.LIFEOS.OGRET) bağlandı (ders için OGRET.bul ve soruVar, soru için aday kontrolü, OGRET.vade, OGRET.secenek ve seçenek belleği, cevapla için OGRET.cevap 1/3/7 takvimi ve «Tanım:» çözümü, araclar için OGRET.araclar); SPI/src/js/core/kingarac.js içinde liste() dönüşüne SP.KingDers.araclar() eklendi; SPI/src/tests/kingders.test.js içine soru seçenekleri, 1/3/7 takvim, 3. tekrar kapanış, boş kimlik ve King araçları testleri eklendi.
 - **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+  - python tools/ogret_spi_kabul_test.py -> ogret spi kabul: ders, soru, cevapla (1/3/7), vade, araclar, baglanti.
+  - cd SPI; node tools/runtests.js 4712 -> 2960/2961 gecti  ·  1 kaldi
+  - node tools/king_kapsam.js --modul=spi --port=4712 -> spi: 23 yazma işlevi (21 araçla), 19 rota, 43 araç · King kapsamı: tam
+- **Kabul testi:** tools/ogret_spi_kabul_test.py yeşil (ders, soru, cevapla (1/3/7), vade, araclar, baglanti).
+- **Açık kalan:** King 3.0 — doğal konuşma (K3) uyanma testi (king.test.js:3076) sesli sohbet zamanlaması nedeniyle [true,false,true] dönüyor; dokunulmayan King modülüyle ilgilidir, ana klasörde doğrulanmalı.
