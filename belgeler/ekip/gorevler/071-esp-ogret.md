@@ -1,6 +1,6 @@
 # 071 · ESP öğretme motoru adaptörü: kelime sorusu, teşhis, 1/3/7 tekrar, King araçları (KING-4 §D)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/071-esp-ogret`
 **Efor:** orta
 **Kabul testi:** `tools/ogret_esp_kabul_test.py`
@@ -41,7 +41,7 @@ KING-4 §D: üç modülün öğretme parçaları **tek öğretme motoru** olur (
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). -->
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `ESP/src/js/core/kingogret.js` içinde `ESP.KingOgret` motor adaptörü (`soru`, `cevapla`, `araclar`) yazıldı ve `LIFEOS.OGRET` motoruna bağlandı; `ESP/src/js/core/kingarac.js` dosyasında `liste()` dönüşüne `ESP.KingOgret.araclar()` eklendi; `ESP/src/tests/kingogret.test.js` dosyasına kenar durumlarını sınayan testler yazıldı.
+- **Koşan testler:** `python tools/ogret_esp_kabul_test.py` -> `ogret esp kabul: soru, konu, cevapla (teshis, SRS degismez), vade, araclar, baglanti.` · `cd ESP && node tools/runtests.js 4723` -> `2652/2652 gecti` · `node tools/king_kapsam.js --modul=esp --port=4723` -> `esp: 36 yazma işlevi (31 araçla), 19 rota, 48 araç / King kapsamı: tam`
+- **Kabul testi:** Yeşil (`ogret esp kabul: soru, konu, cevapla (teshis, SRS degismez), vade, araclar, baglanti.`)
+- **Açık kalan:** yok
