@@ -372,11 +372,151 @@ ESP.KingVeri = (function(){
     };
   }
 
+  /* ------------------------------------------------------------ 6. brifing */
+  function brifing(simdi){
+    const now = (simdi instanceof Date && !isNaN(simdi.getTime()))
+      ? simdi
+      : (simdi ? new Date(simdi) : new Date());
+    const validNow = isNaN(now.getTime()) ? new Date() : now;
+    const U = ESP.U;
+    const pad = n => String(n).padStart(2, '0');
+    const toISO = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    const addDays = (d, n) => {
+      if(U && typeof U.addDays === 'function'){
+        return U.addDays(d, n);
+      }
+      const r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      r.setDate(r.getDate() + n);
+      return r;
+    };
+    const isoStr = d => (U && typeof U.iso === 'function') ? U.iso(d) : toISO(d);
+
+    const gun = isoStr(validNow);
+
+    // 1. Plan: ESP'nin günlük planı yok: her zaman [] (uydurma madde yok)
+    const plan = [];
+
+    // 2. Bulgu: Dünün tek ölçüsü
+    function gunOlcumu(isoGun){
+      const list = sessionsOf(isoGun);
+      let toplamDk = 0;
+      let sayilanAdet = 0;
+      let hepsiOlculdu = true;
+
+      for(const s of list){
+        if(!s) continue;
+        if(s.minutesCert === 'missing') continue;
+        if(s.minutes == null) continue;
+        if(typeof s.minutes !== 'number' || isNaN(s.minutes)) continue;
+
+        toplamDk += s.minutes;
+        sayilanAdet++;
+        if(s.minutesCert !== 'measured'){
+          hepsiOlculdu = false;
+        }
+      }
+
+      if(sayilanAdet === 0){
+        return null;
+      }
+
+      return {
+        deger: toplamDk,
+        etiket: hepsiOlculdu ? 'ölçüldü' : 'tahmin'
+      };
+    }
+
+    const dunDate = addDays(validNow, -1);
+    const dunGun = isoStr(dunDate);
+    const dunOlcum = gunOlcumu(dunGun);
+
+    let bulgu = null;
+    if(dunOlcum !== null){
+      let ortToplam = 0;
+      let ortGunSayisi = 0;
+
+      for(let offset = -2; offset >= -8; offset--){
+        const gDate = addDays(validNow, offset);
+        const gISO = isoStr(gDate);
+        const olcum = gunOlcumu(gISO);
+        if(olcum !== null){
+          ortToplam += olcum.deger;
+          ortGunSayisi++;
+        }
+      }
+
+      let ort;
+      if(ortGunSayisi >= 3){
+        ort = {
+          deger: Math.round(ortToplam / ortGunSayisi),
+          etiket: 'hesaplandı'
+        };
+      } else {
+        ort = {
+          deger: null,
+          etiket: 'veri yok'
+        };
+      }
+
+      bulgu = {
+        id: 'calisma_dk',
+        ad: 'Çalışma',
+        deger: dunOlcum.deger,
+        birim: 'dk',
+        etiket: dunOlcum.etiket,
+        ort: ort
+      };
+    }
+
+    // 3. Öneri: olaylar(simdi) içinden öncelikli ilk olay
+    const ONCELIK = ['sinav_yaklasti', 'uyku_dustu', 'plan_kacti', 'tekrar_gunu'];
+    const tumOlaylar = olaylar(validNow) || [];
+    let secilenOlay = null;
+    for(const tur of ONCELIK){
+      const bul = tumOlaylar.find(o => o && o.tur === tur);
+      if(bul){
+        secilenOlay = bul;
+        break;
+      }
+    }
+    if(!secilenOlay && tumOlaylar.length > 0){
+      secilenOlay = tumOlaylar[0];
+    }
+
+    let oneri = null;
+    if(secilenOlay){
+      oneri = {
+        id: secilenOlay.tur,
+        sayilar: secilenOlay.sayilar
+      };
+      if(secilenOlay.konu !== undefined && secilenOlay.konu !== null){
+        oneri.konu = secilenOlay.konu;
+      }
+    } else {
+      const ilk = (plan || []).find(m => m && !m.tamam);
+      if(ilk){
+        oneri = {
+          id: 'ilk_madde',
+          konu: ilk.ad,
+          sayilar: {}
+        };
+      }
+    }
+
+    return {
+      gun,
+      plan,
+      bulgu,
+      oneri
+    };
+  }
+
   return {
     olaylar,
     hafta,
     hatirlat,
     sonKayit,
-    duzelt
+    duzelt,
+    brifing
   };
 })();
