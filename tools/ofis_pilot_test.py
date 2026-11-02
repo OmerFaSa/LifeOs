@@ -191,6 +191,15 @@ with tempfile.TemporaryDirectory() as t:
         hata.append("eskimis kilit kirilmali")
     T.kilit_birak()
 
+    # gecici hata (8 GB bellek: OSError 1455; PowerShell zaman asimi) turu atlar, kaydeder; beklenmeyen ya da cok tekrar durdurur
+    import subprocess
+    esit("bellek dolu atlanir", P.tur_hatasi(OSError(22, "sayfa dosyasi kucuk", None, 1455), 0), (None, 1))
+    esit("zaman asimi atlanir", P.tur_hatasi(subprocess.TimeoutExpired(["powershell"], 30), 3), (None, 4))
+    esit("atlama kaydedilir", [k["eylem"] for k in P.jsonl_oku("pilot.jsonl")][-2:], ["atla", "atla"])
+    esit("beklenmeyen durdurur", P.tur_hatasi(ValueError("x"), 0)[0], "beklenmeyen hata: ValueError('x')")
+    esit("ust uste sinir durdurur", (P.tur_hatasi(OSError("x"), P.GECICI_SINIR - 1)[0] or "")[:8], "üst üste")
+    P.yol("pilot.jsonl").unlink()
+
     # guvenlik: kanca yoksa ya da Antigravity kapaliysa tur durur, hicbir sey baslatmaz
     eski = {n: getattr(A, n) for n in ("kanca_kurulu", "sunucu", "hepsi", "baslat", "gozden", "mesaj", "git", "oku_durum")}
     eski_p = {n: getattr(P, n) for n in ("bekleyen_gorevler", "ayrik", "_teslim", "gorev_durumu", "gorev_efor", "gorev_sonuc_eksik")}

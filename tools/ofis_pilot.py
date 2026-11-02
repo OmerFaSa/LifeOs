@@ -35,6 +35,7 @@ MAX_TUR = 2                      # Denetci bulgusunu geri gonderme
 MAX_TEST_TUR = 1                 # Testci kirmizisini geri gonderme
 MAX_TEST_ISTEK = 3               # ayni commit icin Testci cagrisi (kosulamadi dahil)
 TUR_SN = 30
+GECICI_SINIR = 10                # ust uste bu kadar gecici hata kalici sayilir: pilot durur
 ALT_EFOR = {"yuksek": "dusuk", "orta": "dusuk"}  # pro ve flash ayni model (M322): gercek alt kademe flash_lite
 KOTA = re.compile(r"RESOURCE_EXHAUSTED|quota|rate.?limit|\b429\b|kota|usage limit|limit (?:reached|exceeded)"
                   r"|exhausted|try again (?:in|after|later)|resets? (?:in|at)", re.I)
@@ -585,19 +586,32 @@ def bildir(no, sonuc):
     jsonl_ekle("bildirim.jsonl", {"no": no, "metin": "%s Claude'un incelemesine hazır: %s" % (no, sonuc)})
 
 
+def tur_hatasi(e, ust_uste):
+    """Turdaki hata. Gecici olan (bellek dolu: OSError 1455, PowerShell TimeoutExpired) turu atlar, pilot surer;
+    beklenmeyen ya da ust uste GECICI_SINIR'inci gecici hata durma nedenidir. (neden|None, yeni ust_uste)"""
+    ust_uste += 1
+    if not isinstance(e, (OSError, MemoryError, subprocess.TimeoutExpired)):
+        return "beklenmeyen hata: %r" % e, ust_uste
+    if ust_uste >= GECICI_SINIR:
+        return "üst üste %d geçici hata: %r" % (ust_uste, e), ust_uste
+    kaydet("-", "atla", "geçici hata, tur atlandı: %r" % e)
+    return None, ust_uste
+
+
 def calis():
     if canli_mi():
         raise SystemExit("Pilot zaten çalışıyor.")
     yol("pilot.dur").unlink(missing_ok=True)
     kaydet("-", "basla", "pilot başladı (paralel %d, günlük %d)" % (PARALEL, GUNLUK))
-    neden = None
+    neden, ust_uste = None, 0
     while not neden:
         yol("pilot.nabiz").write_text(json.dumps({"t": int(time.time()), "pid": os.getpid()}), encoding="utf-8")
         p = durum_oku()
         try:
             neden = tur(p)
-        except Exception as e:  # beklenmeyen hata pilotu sessizce oldurmesin: kaydet ve dur
-            neden = "beklenmeyen hata: %r" % e
+            ust_uste = 0
+        except Exception as e:  # hata pilotu sessizce oldurmesin: gecicide tur atlanir, gerisinde kaydet ve dur
+            neden, ust_uste = tur_hatasi(e, ust_uste)
         durum_yaz(p)
         for _ in range(TUR_SN // 5):
             if yol("pilot.dur").exists():
