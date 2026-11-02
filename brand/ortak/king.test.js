@@ -38,6 +38,159 @@
   function birak(){ const k = K(); k._sifirla(); if(yedek) Object.assign(k._ortam, yedek); }
   async function sahneyle(fn){ try{ await fn(); } finally{ birak(); } }
 
+  /* KING-4 §H (tur 4): yardım kartları. Sayıyı modül verir, cümleyi HKM'nin modeli
+     kurar (/api/king/cumle; yoksa kodun şablonu); yazan tek iş önizle → onay → duzelt. */
+  describe('King 4 — §H yardım kartları', () => {
+    const bekle = () => new Promise(ok => setTimeout(ok, 0));
+    async function bitsin(){ for(let i = 0; i < 15; i++) await bekle(); }
+    const BRIFING = () => ({ gun:'2026-10-05', plan:[{ ad:'Sabah yürüyüşü', saat:'08:30', tamam:true }, { ad:'Esneme', saat:'09:45', tamam:false }],
+      bulgu:{ id:'uyku', ad:'Uyku', deger:6.2, birim:'saat', etiket:'ölçüldü', ort:{ deger:7.3, etiket:'hesaplandı' } },
+      oneri:{ id:'uyku_dustu', sayilar:{ ort7:{ deger:5.9, birim:'saat', etiket:'hesaplandı' }, ort28:{ deger:7.1, birim:'saat', etiket:'hesaplandı' } } } });
+    function yardimSahnesi(kartlar, o){
+      o = o || {};
+      const istekler = [];
+      const fetch = async (url, x) => {
+        const yol = url.replace('http://127.0.0.1:4200', ''), govde = x && x.body ? JSON.parse(x.body) : null;
+        istekler.push({ yol, govde });
+        const g = yol === '/api/king/cumle' ? (o.cumle || { ok:false }) : /^\/api\/king\/bekleyen\?/.test(yol) ? { mesajlar:o.mesajlar || [] } : { ok:true, id:7 };
+        return { status:200, headers:{ get:() => null }, json:async () => g };
+      };
+      const { k } = sahne(o.hkm ? { fetch } : {});
+      k.kur(Object.assign({ modul:'spi', git:() => {}, ozet:() => [], kartlar, acilis:false },
+        o.hkm ? { hkm:() => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true }) } : {}));
+      return { k, istekler };
+    }
+    const temizle = k => ['lifeos.king.brifing-gun', 'lifeos.king.aliskanlik'].forEach(a => k._ortam.depo.sil(a));
+
+    it('niyet kuraldır: brifing, unuttuğun, haftalık rapor, alışkanlık saati, «onu 30 dk yap»', () => sahneyle(async () => {
+      const { k } = sahne();
+      expect(k.yardimNiyeti('sabah brifingi')).toEqual({ tur:'brifing' });
+      expect(k.yardimNiyeti('unuttuğum ne var')).toEqual({ tur:'eksik' });
+      expect(k.yardimNiyeti('haftalık rapor')).toEqual({ tur:'hafta' });
+      expect(k.yardimNiyeti('akıllı hatırlatma')).toEqual({ tur:'hatirlat' });
+      expect(k.yardimNiyeti('onu 30 dk yap')).toEqual({ tur:'duzelt', deger:30 });
+      expect(k.yardimNiyeti('son kaydı 45 dakika yap')).toEqual({ tur:'duzelt', deger:45 });
+      expect(k.yardimNiyeti('bugün nasılsın')).toBe(null);
+      expect(k.yardimNiyeti('30 dk koştum')).toBe(null);
+    }));
+    it('brifing Merkez kapalıyken: kodun cümlesi, plan / dün / öneri kartı, neden söylenir', () => sahneyle(async () => {
+      const { k } = yardimSahnesi({ brifing:BRIFING });
+      try{
+        k.ac();
+        const r = await k.isle('sabah brifingi');
+        expect(r).toEqual({ tur:'yardim-brifing', model:false });
+        const m = k.akis().filter(x => x.yardim).pop();
+        expect(m.metin).toContain('Bugün 2 madde var; ilki Esneme, 09:45.');
+        expect(m.metin).toContain('6,2 saat');
+        const b = document.querySelector('.king__brifing');
+        expect([...b.querySelectorAll('.king__plan li')].map(x => x.textContent)).toEqual(['08:30Sabah yürüyüşü', '09:45Esneme']);
+        expect(b.querySelector('.king__plan li').classList.contains('is-tamam')).toBe(true);
+        expect(b.querySelector('.king__kart-deger').textContent).toBe('6,2 saat');
+        expect(b.querySelector('.king__brifing-oneri p').textContent).toBe('7 günlük uyku ortalaman 5,9 saat, 28 günlük 7,1');
+        expect(m.neden[0]).toContain('kodun şablonundan');
+      }finally{ temizle(k); }
+    }));
+    it('brifing Merkez açıkken: sayılar etiketiyle /api/king/cumle bağlamına gider, cümle modelden', () => sahneyle(async () => {
+      const s = yardimSahnesi({ brifing:BRIFING }, { hkm:true, cumle:{ ok:true, text:'Günaydın! Dün 6,2 saat uyudun.' } });
+      try{
+        s.k.ac();
+        const r = await s.k.isle('sabah brifingi');
+        expect(r.model).toBe(true);
+        const c = s.istekler.find(x => x.yol === '/api/king/cumle');
+        expect(c.govde.tur).toBe('brifing');
+        expect(c.govde.satirlar.some(x => x.indexOf('6,2 saat (ölçüldü)') >= 0 && x.indexOf('7,3 saat (hesaplandı)') >= 0)).toBe(true);
+        expect(s.k.akis().filter(x => x.yardim).pop().metin).toBe('Günaydın! Dün 6,2 saat uyudun.');
+      }finally{ temizle(s.k); }
+    }));
+    it('sabah ilk açılışta brifing kendiliğinden gelir, günde bir kez', () => sahneyle(async () => {
+      const { k } = yardimSahnesi({ brifing:BRIFING });
+      try{
+        temizle(k);
+        k.ac();
+        await bitsin();
+        expect(k.akis().filter(x => x.yardim && x.yardim.tur === 'brifing').length).toBe(1);
+        expect(k.sabahYokla()).toBe(false);
+      }finally{ temizle(k); }
+    }));
+    it('«Unuttuğun ne var?»: eksikler düğme; dokununca King sorar, cevap alanı hazırlanır', () => sahneyle(async () => {
+      const { k } = yardimSahnesi({ eksik:() => [{ id:'ogle', ad:'Öğle yemeği', tur:'ogun' }, { id:'uyku', ad:'Uyku', tur:'olcu' }] });
+      k.ac();
+      expect(await k.isle('unuttuğum ne var')).toEqual({ tur:'yardim-eksik', n:2 });
+      const d = [...document.querySelectorAll('.king__eksik button')];
+      expect(d.map(x => x.textContent)).toEqual(['Öğle yemeği', 'Uyku']);
+      d[0].click();
+      await bitsin();
+      expect(k.akis().pop().metin).toContain('«Öğle yemeği» için');
+      expect(document.querySelector('.king__girdi').value).toBe('Öğle yemeği: ');
+    }));
+    it('haftalık rapor: tek sayfa kart, önceki hafta farkı, «veri yok» sıfır yazılmaz', () => sahneyle(async () => {
+      const { k } = yardimSahnesi({ hafta:() => ({ bas:'2026-09-29', bit:'2026-10-05', satirlar:[
+        { id:'uyku', ad:'Uyku', deger:7.1, birim:'saat', etiket:'hesaplandı', onceki:6.8 }, { id:'ogun', ad:'Öğün', deger:null, etiket:'veri yok', onceki:null }] }) });
+      k.ac();
+      expect(await k.isle('haftalık rapor')).toEqual({ tur:'yardim-hafta', model:false });
+      const kart = [...document.querySelectorAll('.king__hafta .king__kart')];
+      expect(kart[0].querySelector('.king__kart-deger').textContent).toBe('7,1 saat');
+      expect(kart[0].querySelector('.king__fark').classList.contains('is-art')).toBe(true);
+      expect(kart[1].querySelector('.king__kart-deger').textContent).toBe('—');
+      expect(kart[1].querySelector('.king__kart-etiket').textContent).toBe('veri yok');
+    }));
+    it('«onu 30 dk yap»: önce önizleme, onayla modülün duzelt’i; Geri al ve Eylemler çizgisi', () => sahneyle(async () => {
+      const yazilan = [], geri = [];
+      const { k } = yardimSahnesi({ sonKayit:() => ({ id:'w1', tur:'antrenman', gun:'2026-10-05', ad:'Koşu', alanlar:[{ ad:'dk', deger:45, birim:'dk' }] }),
+        duzelt:async (id, alan, deger) => { yazilan.push([id, alan, deger]); return { ok:true, once:45, sonra:deger, geriAl:async () => { geri.push(id); } }; } });
+      k.ac();
+      expect(await k.isle('onu 30 dk yap')).toEqual({ tur:'yardim-duzelt' });
+      expect(yazilan.length).toBe(0);
+      expect(document.querySelector('.king__duzelt p').textContent).toBe('45 dk30 dk');
+      document.querySelector('[data-king^="yardim:duzelt-onay:"]').click();
+      await bitsin();
+      expect(yazilan).toEqual([['w1', 'dk', 30]]);
+      expect(k.cipler().some(c => c.is === 'geri-al')).toBe(true);
+      expect(k.eylemListesi().some(e => e.arac === 'duzelt' && e.ozet === 'Koşu 45 → 30 dk' && e.geriYolu)).toBe(true);
+      await k.isle('geri al');
+      expect(geri).toEqual(['w1']);
+      expect(k.eylemListesi().find(e => e.arac === 'duzelt').durum).toBe('geri_alindi');
+    }));
+    it('«onu 30 dk yap» sınır dışı ve vazgeç: modül hiç çağrılmaz', () => sahneyle(async () => {
+      const yazilan = [];
+      const { k } = yardimSahnesi({ sonKayit:() => ({ id:'w1', ad:'Koşu', alanlar:[{ ad:'dk', deger:45 }] }), duzelt:async (...a) => { yazilan.push(a); return { ok:true }; } });
+      k.ac();
+      await k.isle('onu 900 dk yap');
+      expect(k.akis().pop().metin).toContain('1 ile 600');
+      await k.isle('onu 20 dk yap');
+      document.querySelector('[data-king^="yardim:duzelt-vazgec:"]').click();
+      await bitsin();
+      expect(yazilan.length).toBe(0);
+      expect(document.querySelector('.king__duzelt-dugme')).toBe(null);
+    }));
+    it('akıllı hatırlatma: gerçek saatin ortancasında, dün kaçtıysa yumuşak; günde bir kez', () => sahneyle(async () => {
+      const { k } = yardimSahnesi({ hatirlat:() => [{ anahtar:'yuru@08:00', ad:'Yürüyüş', kurulu:'08:00', gercek:'08:40', n:5, etiket:'hesaplandı', dun:'isaretlenmedi' },
+        { anahtar:'su@20:00', ad:'Su', kurulu:'20:00', gercek:'20:10', n:4, etiket:'hesaplandı', dun:'yapildi' },
+        { anahtar:'ilac@07:00', ad:'İlaç / takviye', kurulu:'07:00', gercek:null, n:1, etiket:'veri yok', dun:'yapildi' }] });
+      try{
+        temizle(k);
+        expect(k.aliskanlikKur()).toBe(1);
+        expect(k.akis().pop().metin).toBe('Dün «Yürüyüş» kaçtı, sorun değil. Genelde 08:40’de yapıyorsun; bugün bir dene?');
+        expect(k.aliskanlikKur()).toBe(0);
+        k.ac();
+        await k.isle('akıllı hatırlatma');
+        const l = [...document.querySelectorAll('.king__aliskanlik li')];
+        expect(l[0].querySelector('s').textContent).toBe('08:00');
+        expect(l[0].querySelector('b').textContent).toBe('08:40');
+        expect(l[2].querySelector('small').textContent).toBe('veri yok · dün yapıldı');
+      }finally{ temizle(k); }
+    }));
+    it('kendiliğinden mesajın altında «neden şimdi?» satırı (HKM neden.cumle)', () => sahneyle(async () => {
+      const s = yardimSahnesi({}, { hkm:true, mesajlar:[{ id:20, tur:'kendiliginden', metin:'Uykun son hafta düştü.',
+        neden:{ olay:'spi.uyku_dustu.2026-10-05', kural:'uyku', cumle:'spi.uyku_dustu · 7 günlük ortalama 5,9 saat (ölçüldü)' } }] });
+      s.k.ac();
+      await s.k.bekleyenAl();
+      expect(s.k.akis().pop().nedenSimdi).toBe('spi.uyku_dustu · 7 günlük ortalama 5,9 saat (ölçüldü)');
+      const p = document.querySelector('.king__neden-simdi');
+      expect(p.textContent).toBe('neden şimdi? spi.uyku_dustu · 7 günlük ortalama 5,9 saat (ölçüldü)');
+    }));
+  });
+
   /* 2026-10-30 (kullanıcı: «King kısmında güzel şeyler yap»): Ayarlar › King. */
   describe('King — Ayarlar bölümü', () => {
     it('canlı önizleme adı ve tarzı söyler; seçim King\'in kendi kaydına yazılır ve önizleme değişir', () => {

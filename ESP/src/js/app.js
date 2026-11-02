@@ -2012,6 +2012,8 @@ ESP.App = (function(){
                «Unuttuğun ne var?» Günü kapat'ın yazılmamış satırlarıdır. */
             eksik:g => (ESP.Screens.today.gunuKapatSatirlari(g) || []).filter(x => x && !x.yazildi).map(x => ({ id:x.id, ad:x.ad, tur:x.tur })),
             hafta:bitis => ESP.KingVeri.hafta(bitis), hatirlat:simdi => ESP.KingVeri.hatirlat(simdi || new Date()),
+            /* Sabah brifingi verisi (KING-4 §H, ofis 060-062). */
+            brifing:simdi => typeof ESP.KingVeri.brifing === 'function' ? ESP.KingVeri.brifing(simdi || new Date()) : null,
             sonKayit:() => ESP.KingVeri.sonKayit(), duzelt:(id, alan, deger) => ESP.KingVeri.duzelt(id, alan, deger),
             /* Öğretmen (King, 2026-10-22): ESP'nin öğrenme kartı ders olarak. Kartın
                kendi sınırı («öğretmen incelemesi bekliyor») etikette durur. */

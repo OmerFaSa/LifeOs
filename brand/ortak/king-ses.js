@@ -775,7 +775,9 @@
     const l = KI.akis.filter(m => !m.bekliyor).slice(-KI.GUNLUK_EN_COK).map(m => Object.assign({ kim:m.kim, metin:m.foto ? '(fotoğraf)' : (m.metin || ''),
       satirlar:m.satirlar || null, son:m.son || null }, m.arastirma ? { arastirma:m.arastirma } : {},
       /* DEVRİM: ders, yasa ve gün kartları da gün boyu kalır (yeniden açınca başlık tek kalmasın). */
-      m.ders ? { ders:m.ders } : {}, m.yasa ? { yasa:m.yasa } : {}, m.gun ? { gun:m.gun } : {}, m.yap ? { yap:true } : {}));
+      m.ders ? { ders:m.ders } : {}, m.yasa ? { yasa:m.yasa } : {}, m.gun ? { gun:m.gun } : {}, m.yap ? { yap:true } : {},
+      /* KING-4 §H: yardım kartı (bekleyen düzeltme hariç: geri alması bu oturumda) ve «neden şimdi?» satırı. */
+      m.yardim && m.yardim.tur !== 'duzelt' ? { yardim:m.yardim } : {}, m.nedenSimdi ? { nedenSimdi:m.nedenSimdi } : {}));
     KI.ortam.depo.yaz(depoAnahtar(), { gun:KI.bugunISO(), akis:l });
     tasimaYaz(l);
   }

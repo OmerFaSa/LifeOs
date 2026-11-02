@@ -1585,3 +1585,44 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 .king__adim small{ font-size:var(--fs-xs); color:var(--text-3); }
 .king__balon--onay > div{ border:1px solid var(--border-strong); border-radius:var(--r-md); padding:var(--sp-3); }
 @media (prefers-reduced-motion:reduce){ .king__adim.is-calisiyor i{ animation:none; } }
+
+/* KING-4 §H yardım kartları: brifing, eksik kayıt, haftalık rapor, alışkanlık saati, düzeltme.
+   Mevcut kart dili (yüzey 2, etiket hapı, tabular rakam); renk yok, hiyerarşi boyut ve ağırlıkla. */
+.king__yardim{ margin-top:10px; }
+.king__brifing{ display:grid; grid-template-columns:minmax(0, 1.4fr) minmax(0, 1fr); gap:8px; }
+.king__brifing section{ display:grid; align-content:start; gap:3px; padding:10px 12px; border-radius:14px; background:var(--surface-2); min-width:0; }
+.king__brifing h4{ margin:0 0 2px; font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--text-2); }
+.king__brifing .king__brifing-oneri{ grid-column:1 / -1; }
+.king__brifing .king__brifing-oneri p{ margin:0; font-size:14px; font-weight:550; color:var(--text); }
+.king__brifing .king__yardim-dinle{ grid-column:1 / -1; justify-self:start; }
+.king__plan{ display:grid; gap:4px; margin:0; padding:0; list-style:none; }
+.king__plan li{ display:grid; grid-template-columns:3.2em minmax(0, 1fr); gap:6px; font-size:13.5px; color:var(--text); }
+.king__plan time{ font-variant-numeric:tabular-nums; color:var(--text-2); }
+.king__plan span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.king__plan li.is-tamam span{ color:var(--text-3, var(--text-2)); text-decoration:line-through; text-decoration-thickness:1px; }
+.king__yardim-bos{ margin:0; font-size:13px; color:var(--text-2); }
+.king__eksik{ display:flex; flex-wrap:wrap; gap:6px; }
+.king__eksik i{ display:inline-block; width:6px; height:6px; margin-right:7px; border-radius:50%; box-shadow:inset 0 0 0 1.5px var(--text-2); vertical-align:1px; }
+.king__fark.is-art::before{ content:'↑ '; }
+.king__fark.is-az::before{ content:'↓ '; }
+.king__aliskanlik{ display:grid; gap:1px; margin:10px 0 0; padding:0; list-style:none; border-radius:14px; overflow:hidden; }
+.king__aliskanlik li{ display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:0 10px; padding:9px 12px; background:var(--surface-2); font-size:13.5px; }
+.king__aliskanlik li small{ grid-column:1 / -1; font-size:11.5px; color:var(--text-2); }
+.king__aliskanlik-saat{ font-variant-numeric:tabular-nums; }
+.king__aliskanlik-saat s{ margin-right:6px; color:var(--text-2); }
+.king__aliskanlik-saat b{ font-weight:650; }
+.king__duzelt{ display:grid; gap:4px; padding:12px 14px; border-radius:16px; background:var(--surface-2); }
+.king__duzelt p{ display:flex; align-items:baseline; gap:10px; margin:0; font-variant-numeric:tabular-nums; }
+.king__duzelt s{ font-size:15px; color:var(--text-2); }
+.king__duzelt b{ font-size:22px; font-weight:650; letter-spacing:-.01em; }
+.king__duzelt p s::after{ content:'→'; display:inline-block; margin-left:10px; text-decoration:none; }
+.king__duzelt-dugme{ display:flex; gap:6px; margin-top:4px; }
+.king__duzelt.is-yazildi b::after{ content:' ✓'; font-size:15px; color:var(--text-2); }
+.king__duzelt.is-vazgecildi{ opacity:.55; }
+.king .king__yardim .king__cip{ background:transparent; box-shadow:inset 0 0 0 1px var(--border); color:var(--text); }
+.king .king__yardim .king__cip:hover{ background:var(--surface-2); }
+/* cam.css (yumuşak zemin) çipin zeminini camlaştırır; birincil düğme okunur kalsın. */
+.king .king__yardim .king__cip.king__cip--ana{ background:var(--text); color:var(--surface); box-shadow:none; }
+.king__neden-simdi{ margin:6px 0 0; font-size:12px; color:var(--text-2); }
+.king__neden-simdi span{ margin-right:4px; font-weight:600; }
+@media (max-width:420px){ .king__brifing{ grid-template-columns:1fr; } }

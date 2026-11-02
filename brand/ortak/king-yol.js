@@ -208,6 +208,9 @@ window.LIFEOS.KING = (function(){
     if(KI.GUN_RE.test(t0)) return KI.gunIsle(metin, false);
     { const AK = KI.aracKutusu(metin, t0); if(AK) return AK; }
     /* Söz 32: kartlar (istatistik, soru); «sorma» komutundan önce. */
+    /* KING-4 §H: brifing, «unuttuğun ne var?», haftalık rapor, alışkanlık saati, «onu 30 dk yap». */
+    const YN = KI.yardimNiyeti(t0);
+    if(YN) return KI.yardimIsle(YN, metin);
     const KN = KI.kartNiyeti(t0);
     if(KN) return KI.kartIsle(KN, metin);
     /* Söz 33: King'in kendi ayarları, odak sayacı, Merkez komutları. */
@@ -643,6 +646,7 @@ window.LIFEOS.KING = (function(){
         if(is === 'foto-yorum'){ KI.fotoYorumla(); return; }
         if(is === 'sohbet'){ KI.sesliSohbetAc(); KI.ciz(false); return; }
         if(is === 'geri-al'){ KI.geriAlYap(); return; }
+        if(/^yardim:[a-z-]+:\d+(:\d+)?$/.test(is)){ KI.yardimTikla(is.slice(7)); return; }
         if(/^eylem-geri:[hy]\d+$/.test(is)){ KI.eylemGeriAl(is.slice(11)); return; }
         if(/^yazma:(yaz|ses):[01]$/.test(is)){ const p = is.split(':'); yazmaSec(p[1], p[2] === '1'); return; }
         if(/^kopyala-mesaj:\d+$/.test(is)){
@@ -868,7 +872,7 @@ window.LIFEOS.KING = (function(){
     KI.uyanKur();
     /* Söz 36: King'in kendi araçları kataloğa (her çağrıda güncel kurulur). */
     if(KI.L.ARAC){ KI.L.ARAC.modulSec(KI.ayar.modul); KI.L.ARAC.ortakKur(KI.ortakAraclar); }
-    if(typeof window !== 'undefined') setTimeout(() => { try{ if(odak()) odakKur(); KI.hatirlatKur(); }catch(e){ /* yok */ } }, 0);
+    if(typeof window !== 'undefined') setTimeout(() => { try{ if(odak()) odakKur(); KI.hatirlatKur(); KI.aliskanlikKur(); }catch(e){ /* yok */ } }, 0);
     bagla();
     KI.disKisi = [];
     if(KI.hafiza()) KI.disKisiTazele();              // söz 22: öbür modüllerde öğrenilen
@@ -951,7 +955,7 @@ window.LIFEOS.KING = (function(){
     cikarimAdaylari:KI.cikarimAdaylari, cikarimKarti:KI.cikarimKarti, cikarimOnayla:KI.cikarimOnayla, SORMA:KI.SORMA, sormaKomutu:KI.sormaKomutu, sormaMi:KI.sormaMi, sormaListesi:KI.sormaListesi,
     USLUP:KI.USLUP, envanterVar:() => !!KI.envanter,
     yetkiUygula:KI.yetkiUygula, bekleyenYetki:() => KI.bekleyenYetki,
-    CEVAP:KI.CEVAP, cevapBicimi:KI.cevapBicimi, cevapSec:KI.cevapSec, SES:KI.SES, sesTercihi:KI.sesTercihi, sesTercihSec:KI.sesTercihSec, sesParcalari:KI.sesParcalari, seslendir:KI.seslendir, sus:KI.sus, wavYap:KI.wavYap, sonMotor:() => KI.sonMotor, sonNot:() => KI.sonNot, YAN:KI.YAN, yanDar:KI.yanDar, yanDarSec:KI.yanDarSec, DERIN:KI.DERIN, derinlik:KI.derinlik, derinlikSec:KI.derinlikSec, kartNiyeti:KI.kartNiyeti, soruCevapla:KI.soruCevapla, bicimli:KI.bicimli, tarz:KI.tarz, tarzSec:KI.tarzSec, TARZ:KI.TARZ, odak, ODAK, sohbetBas:KI.sohbetBas, BAS:KI.BAS, ayarKomutu, oneriListesi:KI.oneriListesi, cizgi:KI.cizgi, haftaHedefi:KI.haftaHedefi, HEDEF:KI.HEDEF, DENEY:KI.DENEY, deneyOku:KI.deneyOku, notPuanla:KI.notPuanla, parcalaGunluk:KI.parcalaGunluk, sohbettenBul:KI.sohbettenBul, bulunanKaydet:KI.bulunanKaydet, BEKLEYEN_KAYIT:KI.BEKLEYEN_KAYIT,
+    CEVAP:KI.CEVAP, cevapBicimi:KI.cevapBicimi, cevapSec:KI.cevapSec, SES:KI.SES, sesTercihi:KI.sesTercihi, sesTercihSec:KI.sesTercihSec, sesParcalari:KI.sesParcalari, seslendir:KI.seslendir, sus:KI.sus, wavYap:KI.wavYap, sonMotor:() => KI.sonMotor, sonNot:() => KI.sonNot, YAN:KI.YAN, yanDar:KI.yanDar, yanDarSec:KI.yanDarSec, DERIN:KI.DERIN, derinlik:KI.derinlik, derinlikSec:KI.derinlikSec, kartNiyeti:KI.kartNiyeti, yardimNiyeti:KI.yardimNiyeti, aliskanlikKur:KI.aliskanlikKur, sabahYokla:KI.sabahYokla, eylemListesi:KI.eylemListesi, soruCevapla:KI.soruCevapla, bicimli:KI.bicimli, tarz:KI.tarz, tarzSec:KI.tarzSec, TARZ:KI.TARZ, odak, ODAK, sohbetBas:KI.sohbetBas, BAS:KI.BAS, ayarKomutu, oneriListesi:KI.oneriListesi, cizgi:KI.cizgi, haftaHedefi:KI.haftaHedefi, HEDEF:KI.HEDEF, DENEY:KI.DENEY, deneyOku:KI.deneyOku, notPuanla:KI.notPuanla, parcalaGunluk:KI.parcalaGunluk, sohbettenBul:KI.sohbettenBul, bulunanKaydet:KI.bulunanKaydet, BEKLEYEN_KAYIT:KI.BEKLEYEN_KAYIT,
     MIK:KI.MIK, mikSecili:KI.mikSecili, mikSec:KI.mikSec, mikTazele:KI.mikTazele, mikDene:KI.mikDene, algila:KI.algila,
     sohbetiKaydet:KI.sohbetiKaydet, sohbetiTemizle:KI.sohbetiTemizle, sohbetiGeriGetir:KI.sohbetiGeriGetir, kayitlar:KI.arsivOku, kayitIndir:KI.kayitIndir,
     kayitKopyala:KI.kayitKopyala, kayitSil:KI.kayitSil, kayitMetni:KI.kayitMetni, menuAc:KI.menuAc, menuDurum:() => KI.menu,

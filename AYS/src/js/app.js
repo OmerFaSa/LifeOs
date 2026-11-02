@@ -1862,6 +1862,8 @@ R.App = (function(){
                «Unuttuğun ne var?» Günü kapat'ın yazılmamış satırlarıdır. */
             eksik:g => (R.Screens.today.gunuKapat.satirlar(g) || []).filter(x => x && !x.yazildi).map(x => ({ id:x.id, ad:x.ad, tur:x.tur })),
             hafta:bitis => R.KingVeri.hafta(bitis), hatirlat:simdi => R.KingVeri.hatirlat(simdi || new Date()),
+            /* Sabah brifingi verisi (KING-4 §H, ofis 060-062). */
+            brifing:simdi => typeof R.KingVeri.brifing === 'function' ? R.KingVeri.brifing(simdi || new Date()) : null,
             sonKayit:() => R.KingVeri.sonKayit(), duzelt:(id, alan, deger) => R.KingVeri.duzelt(id, alan, deger),
             istatistik:() => {
               let solved = 0, correct = 0;

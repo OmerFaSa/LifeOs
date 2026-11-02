@@ -1857,6 +1857,8 @@ SP.App = (function(){
                «Unuttuğun ne var?» Günü kapat'ın yazılmamış satırlarıdır. */
             eksik:g => (SP.Screens.today.gunuKapat.satirlar(g) || []).filter(x => x && !x.yazildi).map(x => ({ id:x.id, ad:x.ad, tur:x.tur })),
             hafta:bitis => SP.KingVeri.hafta(bitis), hatirlat:simdi => SP.KingVeri.hatirlat(simdi || new Date()),
+            /* Sabah brifingi verisi (KING-4 §H, ofis 060-062). */
+            brifing:simdi => typeof SP.KingVeri.brifing === 'function' ? SP.KingVeri.brifing(simdi || new Date()) : null,
             sonKayit:() => SP.KingVeri.sonKayit(), duzelt:(id, alan, deger) => SP.KingVeri.duzelt(id, alan, deger),
             /* Öğretmen: SPİ kavramı ders olarak; soru ve 1/3/7 tekrar öğretme motorundan
                (core/kingders.js → brand/ortak/ogret.js). */

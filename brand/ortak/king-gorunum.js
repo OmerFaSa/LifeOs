@@ -638,7 +638,8 @@
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div>' + adimHtml(m) + '</div>'
       : '<div class="king__balon king__balon--king' + (i === sonKing ? ' is-son' : '') + (m.yeni && !m.yazildi ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + (m.onay && i === sonKing && KI.bekleyenYetki ? ' king__balon--onay' : '') + '" style="--yazim:' + KI.yazimSuresi(m.metin) + 'ms"><div>' + adimHtml(m) + '<p>' + KI.bicimli(m.metin) + '</p>'
-        + KI.kartlarHtml(m) + KI.yapHtml(m) + KI.nefesHtml(m) + KI.yasaHtml(m, ilkSira + i) + KI.gunKartHtml(m, ilkSira + i) + KI.dersHtml(m, ilkSira + i) + KI.soruHtml(m, ilkSira + i) + KI.siraliHtml(m, ilkSira + i) + KI.bulunanHtml(m, ilkSira + i) + KI.arastirmaHtml(m, ilkSira + i) + KI.k2Html(m, ilkSira + i)
+        + (m.nedenSimdi ? '<p class="king__neden-simdi"><span>neden şimdi?</span> ' + KI.kac(m.nedenSimdi) + '</p>' : '')
+        + KI.kartlarHtml(m) + KI.yardimHtml(m, ilkSira + i) + KI.yapHtml(m) + KI.nefesHtml(m) + KI.yasaHtml(m, ilkSira + i) + KI.gunKartHtml(m, ilkSira + i) + KI.dersHtml(m, ilkSira + i) + KI.soruHtml(m, ilkSira + i) + KI.siraliHtml(m, ilkSira + i) + KI.bulunanHtml(m, ilkSira + i) + KI.arastirmaHtml(m, ilkSira + i) + KI.k2Html(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
             + (m.onizleme.liste ? '<ul class="king__liste">' + m.onizleme.liste.map(x => '<li><b>' + KI.kac(x) + '</b></li>').join('') + '</ul>'
@@ -767,7 +768,7 @@
       : KI.geriGetir();
     KI.cipler = null; KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.bekleyenFoto = null; KI.sesli = false;
     if(o && o.mesaj) KI.akis.push({ kim:'king', metin:o.mesaj });
-    else if(!KI.mini){ KI.bekleyenleriSun(); KI.tanismaHazirla(); KI.kutuyuSun(); }   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
+    else if(!KI.mini){ KI.bekleyenleriSun(); KI.tanismaHazirla(); KI.kutuyuSun(); KI.ortam.zamanla(KI.sabahYokla, 0); }   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
     const el = document.createElement('div');
     el.className = 'king';
     el.setAttribute('data-king', '');

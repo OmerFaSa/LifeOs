@@ -94,6 +94,7 @@ Ucnoktalar:
     GET  /api/hafiza                «benim hakkımda ne biliyorsun»: bilgiler, olanlar, beceriler (core/memory.py)
     GET  /api/hafiza/ara?q=&k=      gommeyle arama (motor yoksa kok); {yontem, sonuclar}
     POST /api/hafiza/<id>/duzelt    {text} bilgiyi duzeltir · POST /api/hafiza/<id>/unut unutturur
+    POST /api/king/cumle            {tur: brifing|hafta, satirlar} -> King'in kisa cumlesi (sayi modulden)
     POST /api/olay                  modul olayi (belgeler/ekip/KING-OLAY.md) -> kural motoru (core/kendiliginden.py)
     GET  /api/king/kendiliginden    bekleyen kendiliginden mesajlar (neden alaniyla), butce, sessiz saat, kararlar
     POST /api/eylem                 {arac, ozet, param?, geri?:{ad,param}, modul?} modulun uyguladigi yazma
@@ -1993,6 +1994,16 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, {"ok": True, "id": eid}) if eid else self._send(400, {"error": hata})
             r = eylem.geri_al(self.con, int(u.path.split("/")[3]))
             return self._send(200 if r["ok"] else 409, r)
+        if u.path == "/api/king/cumle":
+            # KING-4 §H kartlari: sayiyi modul verir, cumleyi model kurar (yerelde, A6).
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = _nesne(ham)
+            except ValueError:
+                body = {}
+            return self._send(200, kendiliginden.kart_cumlesi(self.con, self.server.config, body))
         if u.path == "/api/kutu":
             ham, hata = self._read_body()
             if hata:

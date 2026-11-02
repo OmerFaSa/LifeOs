@@ -725,7 +725,9 @@
     if(!l.length || !KI.acik) return 0;
     for(const x of l){
       KI.akis.forEach(m => { m.yeni = false; });
-      KI.akis.push({ kim:'king', metin:String(x.metin), yeni:true });
+      /* 3b: kendiliğinden mesajın «neden şimdi?» satırı (HKM neden.cumle). */
+      const ns = x.neden && typeof x.neden === 'object' && x.neden.cumle ? String(x.neden.cumle).slice(0, 240) : '';
+      KI.akis.push(Object.assign({ kim:'king', metin:String(x.metin), yeni:true }, ns ? { nedenSimdi:ns } : {}));
       KI.akis = KI.akis.slice(-KI.GUNLUK_EN_COK);
       KI.sakla();
       KI.ciz(false);

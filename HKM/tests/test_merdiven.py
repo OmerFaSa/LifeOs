@@ -134,3 +134,16 @@ def run():
         eq(motor.kota_penceresi("HTTP 429"), motor.KOTA_PENCERE)
         eq(motor.kota_penceresi("retry in 99 hours"), 86400)
     test("kota penceresi hata metninden", t_pencere)
+
+    def t_kart_cumlesi():
+        from core import kendiliginden
+        motor.kota_sifirla()
+        t = _tas()
+        r = kendiliginden.kart_cumlesi(db.connect(":memory:"), _cfg(), {"tur": "brifing", "satirlar": ["Uyku: 6,2 saat (ölçüldü)"]},
+                                       transport=t)
+        ok(r["ok"])
+        eq(r["kat"], "yerel")
+        eq(t.kayit, ["yerel"])
+        no(kendiliginden.kart_cumlesi(None, _cfg(), {"tur": "x", "satirlar": ["a"]})["ok"])
+        no(kendiliginden.kart_cumlesi(None, _cfg(), {"tur": "hafta", "satirlar": []})["ok"])
+    test("kart cümlesi: kolay iş yerelde, biçim denetlenir", t_kart_cumlesi)
