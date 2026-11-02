@@ -456,12 +456,9 @@ ESP.Lesson = (function(){
   /* Öğretmen (King, 2026-10-22): ESP'nin öğrenme kartı ders olarak. Metin
      kartın kendisidir; kartın sınırı («öğretmen incelemesi bekliyor») etikette. */
   function kingDers(konu){
-    const t = String(konu || '').toLocaleLowerCase('tr').trim();
-    if(t.length < 3) return null;
-    const ad = c => String(c.title || '').toLocaleLowerCase('tr');
-    const ic = c => (c.original_topic_items || []).map(x => String(x).toLocaleLowerCase('tr'));
-    const c = (ESP.OGRENME_KARTLARI || []).find(k => ad(k) === t) || (ESP.OGRENME_KARTLARI || []).find(k => t.includes(ad(k)) || ad(k).includes(t))
-      || (ESP.OGRENME_KARTLARI || []).find(k => ic(k).some(x => x.includes(t) || t.includes(x)));
+    /* Konu eşleştirme öğretme motorunda (core/ogret.js): başlık, sonra kartın konu maddeleri. */
+    const c = window.LIFEOS && window.LIFEOS.OGRET
+      ? window.LIFEOS.OGRET.bul(ESP.OGRENME_KARTLARI || [], konu, k => [k.title].concat(k.original_topic_items || [])) : null;
     if(!c) return null;
     const disc = ESP.DISCIPLINE_BY_ID && ESP.DISCIPLINE_BY_ID[c.discipline];
     const p = c.practice || {};

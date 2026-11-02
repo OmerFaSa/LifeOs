@@ -71,20 +71,24 @@
         expect([q.id, q.soru, q.sec.length, q.not]).toEqual([s.id + '|' + t.id + '|0', 'Birinci soru?', 5, '']);
         try{ localStorage.removeItem(O().TEKRAR); }catch(e){ /* yok */ }
         const r = await O().kingCevapla(q.id, 'C');
-        expect([r.dogru, r.cozum, r.not]).toEqual(['B', ['Çözüm bir.'], 'Yarın bu soruyu yeniden soracağım.']);
+        /* «3» seçildi, doğrusu «2»: bir fazlası → işlem hatası (öğretme motoru, kanıtıyla). */
+        expect([r.dogru, r.cozum.slice(-1), r.not]).toEqual(['B', ['Çözüm bir.'], 'Yarın bu konudan benzer bir soru soracağım.']);
+        expect(/^Teşhis: işlem hatası/.test(r.cozum[0])).toBe(true);
         expect(O().cevaplar(s.id, t.id)[0].h).toBe('C');                     // ölçüm Öğren'in kaydında
         expect(O().kingSoru(t.name).id).toBe(s.id + '|' + t.id + '|1');       // sıradaki
-        /* Tekrar: doğru → 3 gün, sonra 7 gün, sonra takvimden çıkar; ilk cevap değişmez. */
+        /* Tekrar: doğru → 3 gün, sonra 7 gün, sonra konu kapanır; ilk cevap değişmez. */
         expect((await O().kingCevapla(q.id, 'B')).not).toBe('3 gün sonra bir kez daha soracağım.');
         expect((await O().kingCevapla(q.id, 'B')).not).toBe('7 gün sonra bir kez daha soracağım.');
-        expect((await O().kingCevapla(q.id, 'B')).not).toBe('Tekrarları tamamladın; bu soru artık sorulmayacak.');
+        expect((await O().kingCevapla(q.id, 'B')).not).toBe('Tekrarları tamamladın; bu konu kapandı.');
         expect(O().cevaplar(s.id, t.id)[0].h).toBe('C');
-        /* Vadesi gelen tekrar konusuz soruda önce gelir. */
+        /* Vadesi gelen tekrar konusuz soruda önce gelir; eski (soru kimlikli) kayıt konuya
+           taşınır ve yanlış yapılan değil aynı konunun BENZER sorusu gelir. */
         const tk = {}; tk[q.id] = { n:0, sonraki:'2000-01-01' };
         localStorage.setItem(O().TEKRAR, JSON.stringify(tk));
         const tq = O().kingSoru('');
-        expect([tq.id, /^Tekrar \(1\. tur\)/.test(tq.not)]).toEqual([q.id, true]);
-        localStorage.removeItem(O().TEKRAR);
+        expect([tq.id, /^Tekrar \(1\. tur\): aynı konudan benzer/.test(tq.not)]).toEqual([s.id + '|' + t.id + '|1', true]);
+        expect(JSON.parse(localStorage.getItem(O().TEKRAR))[s.id + '|' + t.id].ogeler).toEqual([q.id]);
+        localStorage.removeItem(O().TEKRAR); localStorage.removeItem(O().TEKRAR + '.yedek');
         expect(O().kingSoru('olmayan bir konu adı xyz')).toBe(null);
       });
     });

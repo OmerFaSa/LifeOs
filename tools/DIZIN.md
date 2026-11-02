@@ -71,6 +71,9 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `kingveri_ays_kabul_test.py` — Görev 040 kabul testi; AYS King verisini (olaylar, hafta, hatırlatma, son kaydı düzeltme) sınar, CI'da koşulur.
 - `kingveri_esp_kabul_test.py` — Görev 042 kabul testi; ESP King verisini (olaylar, hafta, hatırlatma, son kaydı düzeltme) sınar, CI'da koşulur.
 - `kingveri_spi_kabul_test.py` — Görev 041 kabul testi; SPİ King verisini (olaylar, hafta, hatırlatma, son kaydı düzeltme) sınar, CI'da koşulur.
+- `ogret_belge_kabul_test.py` — Görev 072 kabul testi; öğretme motorunun üç modül belgesinde ve ortak dizinde anlatıldığını sınar.
+- `ogret_esp_kabul_test.py` — Görev 071 kabul testi; ESP'nin öğretme motoru adaptörünü (kelime sorusu, teşhis, 1/3/7 tekrar, araçlar) sınar.
+- `ogret_spi_kabul_test.py` — Görev 070 kabul testi; SPİ'nin öğretme motoru adaptörünü (kavram sorusu, 1/3/7 tekrar, araçlar) sınar.
 - `olcum_modul_kabul_test.py` — Görev 016 kabul testi; tek komutla modül ölçüm aracının çıktı alanlarını ve aralıklarını sınar.
 - `perde_test_hiz_kabul_test.py` — Görev 015 kabul testi; perde takımlarının gerçek zaman beklemeden (≤ 800 ms) ve eksiksiz koştuğunu sınar, CI'da koşulur.
 - `spi_porsiyon_kabul_test.py` — Görev 012 kabul testi; SPI serbest öğün porsiyon ve miktar ayrıştırmasını sınar, CI'da koşulur.

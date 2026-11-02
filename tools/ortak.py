@@ -369,6 +369,9 @@ DOSYALAR = {
     # SORU KARTI — Bugun'deki «Bir soru», uc arayuzde ayni sade kart (2026-10-16).
     "sorukart.js":    "js/core",
     "sorukart.css":   "css",
+    # OGRETME MOTORU (KING-4 §D, tur 4b) — teshis, Sokratik satir, 1/3/7 gun tekrar; uc modulun tek ogretmeni.
+    "ogret.js":       "js/core",
+    "ogret.test.js":  "tests",
     # ZEMIN (kullanici, 2026-10-02) — yumusak renk zemini ve icerigin
     # arkasinda buzlu yuzey; <head>'de animasyon.js'ten SONRA (tasinan
     # tercihi okur), ilk cizimden once <html data-zemin> koyar.

@@ -360,11 +360,25 @@ R.Ogren = (function(){
      Konu verilmişse adı eşleşen konunun cevaplanmamış ilk sorusu. Verilmemişse
      sıra: (1) vadesi gelen tekrar (yanlış yaptığın soru 1, 3, 7 gün sonra),
      (2) öncelikli konuların cevaplanmamış sorusu, (3) son açılan konu. Tekrar
-     turu ölçüm değildir (söz 3: ilk cevap kalır); tekrar takvimi bu cihazda. */
-  const TEKRAR = 'ays.king.tekrar', TEKRAR_ARALIK = [1, 3, 7];
-  function tekrarlar(){ try{ const v = JSON.parse(localStorage.getItem(TEKRAR) || '{}'); return v && typeof v === 'object' ? v : {}; }catch(e){ return {}; } }
-  function tekrarYaz(v){ try{ localStorage.setItem(TEKRAR, JSON.stringify(v)); }catch(e){ /* yer yok */ } }
-  function gunEkle(n){ return R.U.iso(R.U.addDays(R.U.today(), n)); }
+     turu ölçüm değildir (söz 3: ilk cevap kalır); tekrar takvimi bu cihazda.
+     Takvim, teşhis ve benzer soru öğretme motorunun (core/ogret.js, KING-4 §D):
+     kayıt konu başına (ders|konu); eski soru kimlikli kayıt okunurken taşınır. */
+  const TEKRAR = 'ays.king.tekrar', SON = 'ays.ogret.son';
+  const OG = () => window.LIFEOS.OGRET;
+  const kavramOf = id => String(id).split('|').slice(0, 2).join('|');
+  function tekrarDepo(){ const d = OG().depo(TEKRAR); OG().tasi(d, kavramOf); return d; }
+  const ETIKET_TUR = { K:'kavram', 'İ':'islem', Y:'dikkat', D:'dikkat' };
+  /* Yanlış defterinde bu konunun en sık etiketi (S «süre» dört türden biri değil). */
+  function konuEtiketi(topicId){
+    const say = {};
+    ((R.S && R.S.errors) || []).forEach(e => { if(e && e.topicId === topicId && ETIKET_TUR[e.tag]) say[e.tag] = (say[e.tag] || 0) + 1; });
+    const t = Object.keys(say).sort((a, b) => say[b] - say[a])[0];
+    return t ? { etiket:ETIKET_TUR[t], etiketNeden:'yanlış defterinde bu konuda en sık etiket ' + ((R.ERROR_TAGS || {})[t] || { name:t }).name + ', ' + say[t] + ' kayıt' } : {};
+  }
+  function ogretAraclar(){
+    return OG().araclar({ modul:'ays', tekrar:tekrarDepo(), son:OG().depo(SON), bugun:() => R.U.todayISO(),
+      ad:k => { const x = konuyuBul(k.split('|')[1]); return x.topic ? x.topic.name : k; } });
+  }
   function soruNesnesi(x, i, not){
     const q = sorular(x.topic.id)[i];
     if(!q) return null;
@@ -382,27 +396,24 @@ R.Ogren = (function(){
     const t = String(konuMetni || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
     const adaylar = konular().filter(x => sorular(x.topic.id).length);
     if(!adaylar.length) return null;
-    const ad = x => String(x.topic.name || '').toLocaleLowerCase('tr');
     if(t){
-      const x = adaylar.find(k => t.includes(ad(k)) || ad(k).includes(t))
-        || adaylar.find(k => t.split(' ').some(w => w.length > 4 && !/^(konu|soru|hakkında|ilgili|konusunda)/.test(w) && ad(k).includes(w)));
+      const x = OG().bul(adaylar, t, k => [k.topic.name], { gevsek:true });
       return x ? ilkCevapsiz(x) : null;
     }
-    const tk = tekrarlar(), bugun = R.U.todayISO();
-    /* Öğren'de yanlış verilmiş ama takvime girmemiş eski cevaplar da vadesi gelmiş sayılır. */
+    const tk = tekrarDepo().oku(), bugun = R.U.todayISO();
+    /* Öğren'de yanlış verilmiş ama takvime girmemiş eski cevaplar da vadesi gelmiş sayılır (yazılmaz). */
     adaylar.forEach(x => {
-      const c = cevaplar(x.subject.id, x.topic.id);
-      Object.keys(c).forEach(k => {
-        const id = x.subject.id + '|' + x.topic.id + '|' + k;
-        if(c[k] && c[k].d === false && !tk[id] && String(c[k].at || '').slice(0, 10) < bugun) tk[id] = { n:0, sonraki:bugun, eski:true };
-      });
+      const kv = x.subject.id + '|' + x.topic.id, c = cevaplar(x.subject.id, x.topic.id);
+      const og = Object.keys(c).filter(k => c[k] && c[k].d === false && String(c[k].at || '').slice(0, 10) < bugun).map(k => kv + '|' + k);
+      if(og.length && !tk[kv]) tk[kv] = { n:0, sonraki:bugun, eski:true, ogeler:og };
     });
-    const vade = Object.keys(tk).filter(k => tk[k] && String(tk[k].sonraki) <= bugun)
-      .sort((a, b) => String(tk[a].sonraki).localeCompare(String(tk[b].sonraki)));
-    for(const k of vade){
-      const p = k.split('|');
+    /* Vadesi gelen konuda yanlış yapılan değil, aynı konunun benzer sorusu (motor seçer). */
+    for(const v of OG().vade({ oku:() => tk }, bugun)){
+      const p = v.kavram.split('|');
       const x = adaylar.find(a => a.subject.id === p[0] && a.topic.id === p[1]);
-      const s = x ? soruNesnesi(x, Number(p[2]), 'Tekrar (' + (tk[k].n + 1) + '. tur): ilk cevabın ölçümde kaldı; bu tur hafızan için.') : null;
+      const id = x ? OG().benzer(sorular(x.topic.id).map((q, i) => q ? v.kavram + '|' + i : null), v) : null;
+      const s = id ? soruNesnesi(x, Number(id.split('|')[2]), 'Tekrar (' + (v.n + 1) + '. tur): '
+        + ((v.ogeler || []).indexOf(id) >= 0 ? 'yanlış yaptığın soru; ilk cevabın ölçümde kaldı, bu tur hafızan için.' : 'aynı konudan benzer bir soru.')) : null;
       if(s) return s;
     }
     for(const o of oncelikler(10)){
@@ -421,11 +432,7 @@ R.Ogren = (function(){
     if(t.length < 3) return null;
     const OZ = R.KONU_OZET || {};
     const adaylar = konular().filter(x => anlatim(x.topic.id) || OZ[x.topic.id]);
-    const ad = x => String(x.topic.name || '').toLocaleLowerCase('tr');
-    const kok = w => w.slice(0, Math.max(4, w.length - 2));
-    const x = adaylar.find(k => ad(k) === t) || adaylar.find(k => t.includes(ad(k)))
-      || adaylar.find(k => ad(k).includes(t))
-      || adaylar.find(k => t.split(' ').filter(w => w.length > 3).every(w => ad(k).includes(kok(w))));
+    const x = OG().bul(adaylar, t, k => [k.topic.name]);
     if(!x) return null;
     const a = anlatim(x.topic.id), oz = OZ[x.topic.id];
     const bol = b => ({ baslik:b.baslik || '', metin:b.metin ? duzMetin(b.metin) : '',
@@ -435,31 +442,27 @@ R.Ogren = (function(){
     return { id:x.topic.id, baslik:x.topic.name, alt:x.subject.name, giris:a && a.giris ? duzMetin(a.giris) : '',
       bolumler, etiket:'elle yazıldı · doğrulanmadı', sorgu:x.topic.name, soruVar:sorular(x.topic.id).length > 0 };
   }
-  /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). Yanlışsa
-     soru yarın yeniden gelir; tekrarda doğruysa 3 ve 7 gün sonra; üç doğru
-     turdan sonra takvimden çıkar. */
+  /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). Takvim ve
+     teşhis motorun (core/ogret.js): yanlışsa konu yarın benzer soruyla gelir,
+     tekrarda doğruysa 3 ve 7 gün sonra; üçüncü doğruda konu kapanır. Yanlışta
+     teşhis satırları (kanıt varsa) çözümün önünde durur. */
   async function kingCevapla(id, harf){
     const p = String(id || '').split('|'), i = Number(p[2]);
     const q = sorular(p[1])[i];
     if(!q) return null;
-    const r = await cevapla(p[0], p[1], i, harf, false, 0);
-    const isabet = String(harf || '').toUpperCase() === q.dogru;
-    const tk = tekrarlar(), kayit = tk[id];
-    let not = '';
-    if(!isabet){
-      tk[id] = { n:0, sonraki:gunEkle(1) };
-      not = 'Yarın bu soruyu yeniden soracağım.';
-    }else if(kayit){
-      const n = kayit.n + 1;
-      if(n >= TEKRAR_ARALIK.length){ delete tk[id]; not = 'Tekrarları tamamladın; bu soru artık sorulmayacak.'; }
-      else{ tk[id] = { n, sonraki:gunEkle(TEKRAR_ARALIK[n]) }; not = TEKRAR_ARALIK[n] + ' gün sonra bir kez daha soracağım.'; }
-    }else if(r && r.neden === 'kilitli'){
-      not = 'Bu soruyu daha önce cevaplamıştın; ilk cevabın ölçüm olarak kaldı.';
-    }
-    tekrarYaz(tk);
-    return { dogru:q.dogru, cozum:[].concat(q.cozum || []).map(duzMetin), not };
+    const H = String(harf || '').toUpperCase(), onceki = cevaplar(p[0], p[1])[i];
+    const r = await cevapla(p[0], p[1], i, H, false, 0);
+    const c = cevaplar(p[0], p[1]), x = konuyuBul(p[1]);
+    const metin = h => { const m = (q.sec || [])[HARFLER.indexOf(h)]; return m == null ? '' : duzMetin(m); };
+    const cozum = [].concat(q.cozum || []).map(duzMetin);
+    const o = OG().cevap({ tekrar:tekrarDepo(), son:OG().depo(SON), bugun:() => R.U.todayISO() }, Object.assign({
+      id, kavram:kavramOf(id), konu:x.topic ? x.topic.name : '', soru:duzMetin(q.soru), secilen:H, dogru:q.dogru,
+      secMetin:metin(H), dogruMetin:metin(q.dogru), oncekiDogru:!!(onceki && onceki.d === true),
+      konuYanlis:Object.keys(c).filter(k => c[k] && c[k].d === false && !c[k].bak).length, cozum }, konuEtiketi(p[1])));
+    const not = o.not || (o.isabet && r && r.neden === 'kilitli' ? 'Bu soruyu daha önce cevaplamıştın; ilk cevabın ölçüm olarak kaldı.' : '');
+    return { dogru:q.dogru, cozum:o.satirlar.concat(cozum), not };
   }
-  return { HARFLER, SEVIYE, kingSoru, kingCevapla, kingDers, oncelikler, TEKRAR, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
+  return { HARFLER, SEVIYE, kingSoru, kingCevapla, kingDers, oncelikler, TEKRAR, tekrarDepo, ogretAraclar, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
     derin, tabanSorular, seviye, gecerli, ekMetni, soru,
     anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle,
     kavramlar, akilliNot, kaynaklar, stratejiler };

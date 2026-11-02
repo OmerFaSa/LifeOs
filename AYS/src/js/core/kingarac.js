@@ -936,7 +936,9 @@ R.KingArac = (function(){
     ];
   }
 
-  function liste(){ return okuma().concat(yazma()).concat(modelAraclari()); }
+  /* Öğretme motorunun araçları (core/ogret.js): «bugünkü tekrarlarım», «neden yanlış yaptım». */
+  const ogret = () => R.Ogren && R.Ogren.ogretAraclar && window.LIFEOS && window.LIFEOS.OGRET ? R.Ogren.ogretAraclar() : [];
+  function liste(){ return okuma().concat(yazma()).concat(modelAraclari()).concat(ogret()); }
 
   return { liste, satirlar, bul };
 })();
