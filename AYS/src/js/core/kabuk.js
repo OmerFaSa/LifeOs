@@ -270,7 +270,12 @@ window.LIFEOS = window.LIFEOS || {};
         const url = adres(k, loc);
         return url ? '<a class="kenar__modul" href="' + kac(url) + '" data-modul-gecis="' + k + '">' + satir(k, m) + '</a>'
           : '<span class="kenar__modul is-kapali" title="' + kac(m.ad + ' ayrı dosyada açılır') + '">' + satir(k, m) + '</span>';
-      }).join('') + '</div></div></div>';
+      }).join('')
+      /* Kullanıcı (2026-11-02): «3 kart seçtiğimiz yere dönülebilsin» — King › Kartlarım. */
+      + (window.LIFEOS.KING ? '<button type="button" class="kenar__modul kenar__modul--kartlarim" data-king-kartlarim>'
+        + '<svg class="kenar__modul-simge" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="12.5" height="13" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v11"/></svg>'
+        + '<span class="kenar__modul-metin"><span class="kenar__modul-ad">Kartlarım</span><span class="kenar__modul-not">King’de seçtiğin kartlar</span></span></button>' : '')
+      + '</div></div></div>';
   }
   function modulPencereKapat(haric){
     if(typeof document === 'undefined') return;
@@ -1184,7 +1189,7 @@ window.LIFEOS = window.LIFEOS || {};
         ms.setAttribute('aria-expanded', ac ? 'true' : 'false');
         return;
       }
-      if(!(e.target.closest && e.target.closest('.kenar__modulpencere'))) modulPencereKapat();
+      if(!(e.target.closest && e.target.closest('.kenar__modulpencere')) || (e.target.closest && e.target.closest('[data-king-kartlarim]'))) modulPencereKapat();
       /* Profil: araç penceresini açar/kapatır; dışarısı (açık katman hariç) kapatır. */
       const bs = e.target.closest && e.target.closest('.kenar__bensec');
       if(bs){

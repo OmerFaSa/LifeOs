@@ -2159,6 +2159,17 @@
       expect(gorunen).toContain('Kişisel yasalar');
       expect(gorunen.indexOf('Araştır')).toBe(-1);
     }));
+    it('kabuktaki «Kartlarım» satırı King’i Araçlar › Düzenle’de açar', () => sahneyle(async () => {
+      aracSahnesi();
+      const b = document.createElement('button'); b.setAttribute('data-king-kartlarim', ''); document.body.appendChild(b);
+      try{
+        b.click();
+        expect(document.querySelector('.king__ray [data-king="bolum:araclar"]').getAttribute('aria-current')).toBe('true');
+        expect(!!document.querySelector('.king__vitrin .kv-ipucu')).toBe(true);        // düzenle açık
+        b.click();                                                                     // ikinci kez: liste kapanmaz
+        expect(document.querySelector('.king__ray [data-king="bolum:araclar"]').getAttribute('aria-current')).toBe('true');
+      }finally{ b.remove(); }
+    }));
     it('Kartlarım: düzenle ile ekle ve çıkar, renk ve emoji, yeni kart; «kart yap:» sohbetten ekler', () => sahneyle(async () => {
       const k = aracSahnesi();
       k.ac();

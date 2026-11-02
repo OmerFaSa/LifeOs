@@ -548,6 +548,8 @@ window.LIFEOS.KING = (function(){
     document.addEventListener('click', e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
+      /* Kabuktaki «Kartlarım» (sistem menüsü): büyük King, Araçlar › Düzenle. Yayılım sürer: kabuk menüsünü kapatır. */
+      if(t.closest('[data-king-kartlarim]')){ e.preventDefault(); KI.ac(); KI.kvDuzen = true; if(!(KI.bolum === 'araclar' && KI.listeGorunur())) KI.bolumSec('araclar'); else KI.ciz(false); return; }
       if(t.closest('[data-king-ac]')){ e.preventDefault(); e.stopPropagation(); KI.ac({ mini:true }); return; }   // ada önce
       /* Söz 9: perde ve dışarısı KAPATMAZ, küçültür; küçükken sayfa serbest. */
       if(t.closest('.king-perde')){ e.preventDefault(); e.stopPropagation(); KI.kucult(); return; }

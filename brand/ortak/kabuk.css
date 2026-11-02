@@ -996,6 +996,9 @@ html, body{ background:var(--bg); }
 .kenar__moduller .kenar__modul.is-on{ background:var(--surface-2); color:var(--text); box-shadow:none; }
 .kenar__modul-metin{ display:flex; flex-direction:column; min-width:0; line-height:1.25; }
 .kenar__modul-ad{ font-weight:600; }
+.kenar__modul--kartlarim{ width:100%; border:0; font:inherit; text-align:left; cursor:pointer; margin-top:2px; position:relative; }
+.kenar__modul--kartlarim::before{ content:''; position:absolute; left:10px; right:10px; top:-2px; height:1px; background:var(--border-soft); }
+.kenar__modul-simge{ width:12px; height:12px; flex:none; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin:0 -2px; }
 .kenar__modul-not{ font-size:11.5px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 /* SAYFA BAŞI BİLGİ KARTI (2026-10-02): başlığın sağ üstünde ⓘ; kart

@@ -1566,7 +1566,16 @@ html[data-zemin="yumusak"] .site--v5 .raf-ac{ border:0; border-radius:12px; back
   -webkit-backdrop-filter:blur(16px) saturate(140%); backdrop-filter:blur(16px) saturate(140%); }
 /* Kenar: sistem seçicisi ve açılan listesi cam; seçili sistem seçili cam. */
 html[data-zemin="yumusak"] .site--v5 .kenar__modulsec{ background:var(--cam-ince); box-shadow:var(--cam-ust); }
-html[data-zemin="yumusak"] .site--v5 .kenar__modulliste{ background:var(--cam-katman); box-shadow:var(--cam-ust), var(--cam-golge);
+/* Açılan liste öteki yüzen katmanlar gibi ışıklı levha (kullanıcı, 2026-11-02:
+   «arka plan ışıklandırması yok»): üstte beyaz ışık, altta sıcak yansıma, pervaz.
+   Gölge kısa: kenar çubuğu kırpar. */
+:root{ --liste-isik:rgba(255,255,255,.45); }
+html[data-theme="dark"]{ --liste-isik:rgba(255,255,255,.07); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --liste-isik:rgba(255,255,255,.07); } }
+html[data-zemin="yumusak"] .site--v5 .kenar__modulliste{ background-color:var(--cam-katman);
+  box-shadow:var(--levha-ic), 0 14px 28px -14px rgba(20,24,40,.3), 0 10px 24px -12px rgb(var(--sicak) / .4);
+  background-image:radial-gradient(120% 70% at 22% 0%, var(--liste-isik), transparent 62%),
+    radial-gradient(90% 55% at 50% 112%, rgb(var(--sicak) / .24), transparent 72%);
   -webkit-backdrop-filter:blur(24px) saturate(150%); backdrop-filter:blur(24px) saturate(150%); }
 html[data-zemin="yumusak"] .site--v5 .kenar__moduller .kenar__modul:hover{ background:var(--cam-ince); }
 html[data-zemin="yumusak"] .site--v5 .kenar__moduller .kenar__modul.is-on{ background:var(--secili-zemin); box-shadow:var(--secili-golge); }

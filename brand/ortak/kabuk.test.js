@@ -563,7 +563,9 @@
         expect(sec.textContent).toContain('SPİ');
         expect(sec.getAttribute('aria-expanded')).toBe('false');
         const pen = document.getElementById(sec.getAttribute('aria-controls'));
-        expect(pen.querySelectorAll('.kenar__modul').length).toBe(4);
+        expect(pen.querySelectorAll('.kenar__modul:not(.kenar__modul--kartlarim)').length).toBe(4);
+        /* King yüklüyse en altta «Kartlarım» satırı (2026-11-02). */
+        if(window.LIFEOS.KING) expect(pen.querySelector('[data-king-kartlarim]').textContent).toContain('Kartlarım');
         expect(pen.querySelector('.kenar__modul.is-on').textContent).toContain('SPİ');
         expect(getComputedStyle(pen).visibility).toBe('hidden');
         sec.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
