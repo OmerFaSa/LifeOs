@@ -1,5 +1,7 @@
 # ESP — Entelektüel Seviye Planlayıcı
 
+ogret.js esp.ogret.tekrar esp.ogret.son kingogret.js srs.js 1, 3 7 kavram işlem dikkat bilmiyor _tekrarlarim _neden_yanlis uydur
+
 > «Ölçülmeyen gelişmez; ama her şey ölçülebilir gibi de gösterilmez.»
 
 LifeOS ekosisteminin üçüncü sacayağı. AYS sınav performansını, SPİ bedensel

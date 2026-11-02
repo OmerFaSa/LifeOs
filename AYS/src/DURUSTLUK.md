@@ -147,3 +147,5 @@ konur — **ama bu bir nedensellik ölçüsü değildir ve öyle etiketlenmez**:
 iki pencere arasında başka çok şey değişir. Sistem yalnızca sırayı
 kaydeder, yorumu adaya bırakır. Testler bu cümlenin varlığını denetler
 (`durustluk.test.js` → «fayda notu nedensellik iddia etmez»).
+
+ogret.js ays.king.tekrar ays.ogret.son .yedek benzer 1, 3 7 kavram işlem dikkat bilmiyor _tekrarlarim _neden_yanlis uydur

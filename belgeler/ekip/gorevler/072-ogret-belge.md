@@ -1,6 +1,6 @@
 # 072 · Öğretme motoru belgeleri (KING-4 §D)
 
-**Durum:** bekliyor
+**Durum:** takıldı
 **Dal:** `ag/072-ogret-belge`
 **Efor:** düşük
 **Kabul testi:** `tools/ogret_belge_kabul_test.py`

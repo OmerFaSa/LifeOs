@@ -1,5 +1,7 @@
 # SPİ — Sağlık Performans İzleyicisi
 
+ogret.js spi.ogret.tekrar spi.ogret.son kingders.js 1, 3 7 kavram işlem dikkat bilmiyor _tekrarlarim _neden_yanlis uydur
+
 > «Sağlıklı güçlü beden, sarsılmaz ve güçlü irade»
 
 Kişisel ve aile odaklı bütüncül sağlık yönetim sistemi. Beş ajanlı bir ofis,
