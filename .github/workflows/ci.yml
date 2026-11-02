@@ -219,6 +219,10 @@ jobs:
       # birlestirmez, push etmez. Karar tablosu saf islevdir; tur sahte ajanlarla sinanir.
       - name: Ofis pilotu ve Testçi
         run: python3 tools/ofis_pilot_test.py
+      - name: Bilgisayar platform katmani kabul (ofis 080, KING-4 §E)
+        run: python3 tools/bilgisayar_kabul_test.py
+      - name: King guven kurallari (KING-4 §G)
+        run: node tools/king_guven.js
 
       # OFIS (2026-10-31). Antigravity islerinin kabul testleri (Claude Code yazar) ve
       # Uygulayici'nin birim testleri. «ajan.py birlestir» satir ekler; elle silme.

@@ -157,6 +157,21 @@ def calistir(argv, zaman=30):
         return -2, str(e)
 
 
+def _surec_ac(yol, calistir):
+    """Start-Process ile açar (yol tek tırnaklı literal: ' → ''); pid BASLATILAN'a girer."""
+    yol_literal = yol.replace("'", "''")
+    cmd = f"(Start-Process -FilePath '{yol_literal}' -PassThru).Id"
+    kod, cikti = calistir(["powershell", "-NoProfile", "-NonInteractive", "-Command", cmd], 15)
+    if kod != 0:
+        return {"ok": False, "hata": cikti or f"Açılamadı (kod {kod})"}
+    m = re.search(r"\b\d+\b", cikti)
+    if not m:
+        return {"ok": False, "hata": f"PID okunamadı: {cikti}"}
+    pid = int(m.group(0))
+    BASLATILAN.add(pid)
+    return {"ok": True, "pid": pid}
+
+
 def ac(yol, calistir=calistir):
     """Mutlak ve var olan bir dosya veya klasörü varsayılan uygulamasıyla açar.
 
@@ -173,19 +188,8 @@ def ac(yol, calistir=calistir):
     if uzanti in CALISTIRILABILIR:
         return {"ok": False, "hata": f"Çalıştırılabilir dosya açılamaz: {uzanti}"}
 
-    yol_literal = yol.replace("'", "''")
-    cmd = f"(Start-Process -FilePath '{yol_literal}' -PassThru).Id"
-    argv = ["powershell", "-NoProfile", "-NonInteractive", "-Command", cmd]
-    kod, cikti = calistir(argv, 15)
-    if kod != 0:
-        return {"ok": False, "hata": cikti or f"Açılamadı (çıkış kodu {kod})"}
-
-    m = re.search(r"\b\d+\b", cikti)
-    if not m:
-        return {"ok": False, "hata": f"PID okunamadı: {cikti}"}
-    pid = int(m.group(0))
-    BASLATILAN.add(pid)
-    return {"ok": True, "pid": pid, "yol": yol}
+    r = _surec_ac(yol, calistir)
+    return dict(r, yol=yol) if r["ok"] else r
 
 
 def varsayilan_kokler():
@@ -270,19 +274,8 @@ def baslat(ad, kokler=None, calistir=calistir):
         else:
             return {"ok": False, "hata": f"Uygulama bulunamadı: {ad}"}
 
-    yol_literal = hedef["yol"].replace("'", "''")
-    cmd = f"(Start-Process -FilePath '{yol_literal}' -PassThru).Id"
-    argv = ["powershell", "-NoProfile", "-NonInteractive", "-Command", cmd]
-    kod, cikti = calistir(argv, 15)
-    if kod != 0:
-        return {"ok": False, "hata": cikti or f"Başlatılamadı (kod {kod})"}
-
-    m = re.search(r"\b\d+\b", cikti)
-    if not m:
-        return {"ok": False, "hata": f"PID okunamadı: {cikti}"}
-    pid = int(m.group(0))
-    BASLATILAN.add(pid)
-    return {"ok": True, "pid": pid, "ad": hedef["ad"]}
+    r = _surec_ac(hedef["yol"], calistir)
+    return dict(r, ad=hedef["ad"]) if r["ok"] else r
 
 
 def kapat(pid, calistir=calistir):
