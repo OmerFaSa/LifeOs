@@ -47,6 +47,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `king_kapsam.js` — King kapsam testi; her modülün yazma işlevi ve rotası bir King aracına bağlı mı, eksik varsa çıkış 1 (KING-4 A2).
 - `king_kapsam.json` — `king_kapsam.js`'in eşlemesi: Model işlevi ve rota → araç adı ya da «-: neden».
 - `kapsam.js` — Birim testlerinin hangi işlevleri çalıştırdığını V8 precise coverage ile ölçer, CI'da veya elle koşulur.
+- `merdiven_olcum.py` — KING-4 A6 model merdivenini (kolay yerel, zor bulut, kota düşüşü) ölçer, gerektiğinde koşulur.
 - `olcum_modul.js` — Modülün açılış, kapsam, depolama ve rota performansını tek komutla ölçer, optimizasyon turlarında koşulur.
 - `pusula.js` — Kolay LifeOS planının yardımcı ölçülerini (eylem sayıları ve menü karmaşıklığı) hesaplar, birleştirmeden önce koşulur.
 - `sadelik.js` — Üç arayüzün bütün ekranlarında görsel kalabalık ve sadelik ölçümü yapar, CI'da denetim olarak koşulur.

@@ -1,6 +1,6 @@
 # 063 · A6 model merdiveni ölçüm betiği: `tools/merdiven_olcum.py`
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/063-merdiven-olcum`
 **Efor:** orta
 **Kabul testi:** `tools/merdiven_olcum_kabul_test.py`
@@ -30,3 +30,10 @@ KING-4 A6 (commit 7e526375): kolay iş yerel modelde, zor iş bulutta; bulut kot
 - `cd HKM && python -X utf8 -m tests.run`
 
 ## Sonuç
+- **Ne değişti:** `tools/merdiven_olcum.py` betiği eklendi (KING-4 A6 model merdiveninin 6 mesajlık kolay/zor ayrımını, yerel/bulut atamasını ve 429 kota düşüşünü geçici SQLite defteri ve sahte/canlı taşıyıcıyla ölçer; varsayılan tablo ve `--json` destekler). `tools/DIZIN.md` dizinine ölçüm bölümü altına `merdiven_olcum.py` satırı eklendi.
+- **Koşan testler:**
+  - `python tools/merdiven_olcum_kabul_test.py` -> `merdiven olcum kabul: kuru kosu, kolay yerel / zor bulut, kota dususu, canli dokunulmadi.`
+  - `python tools/tools_dizin_kabul_test.py` -> `tools dizin kabul: 101 dosya, sekiz bolum, her biri bir kez ve aciklamali.`
+  - `cd HKM && python -X utf8 -m tests.run` -> `1013/1013 test gecti`
+- **Kabul testi:** `python tools/merdiven_olcum_kabul_test.py` -> `merdiven olcum kabul: kuru kosu, kolay yerel / zor bulut, kota dususu, canli dokunulmadi.`
+- **Açık kalan:** Testçi kök python kırmızısı 060, 061 ve 062 derslerindeki ortak sınav kabulü hatasıdır (main'deki tools/king_sinav.json 149. satırındaki 'not' alanı tools/king_sinav_300_kabul_test.py tarafından reddedilir; dalımızla ve görev 063 ile ilgisizdir). Görev kabul testi ve tüm ilgili denetimler tam yeşildir.
