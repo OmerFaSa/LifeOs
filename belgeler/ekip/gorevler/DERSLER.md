@@ -33,3 +33,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 063 (02.11.2026): temiz; ajan bellek çöküşünde bırakıldı, iş tamamdı; Testçi kırmızısı ortak sınav kabulü
 - 064 (02.11.2026): Testçi kırmızıları bellek çöküşüydü (0xC0000142); kabul ve HKM 1017 elle yeşil
 - 073 (02.11.2026): Kabul testindeki hatayı motorda Array.prototype yamasıyla örtme; testi düzelttir. Denetçi küresel yamayı kaçırdı.
+- 080 (02.11.2026): ac ve baslat aynı süreç açma bloğunu kopyaladı; ortak yardımcıya al
