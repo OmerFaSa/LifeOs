@@ -560,3 +560,44 @@ Açık: King dersleri (`king-devrim.js`) kendi 1/3/7'siyle; AYS `quiz.js` çeldi
 **Sınav:** 293/300 (4b'nin geçici `_neden_yanlis` adı 291'e düşürmüştü, ad `_yanlis_teshis` oldu).
 
 **Açık (tur sonu):** ofis 065 (53 araca 2'şer sınav cümlesi) çalışıyor, birleşmedi; dist derlenmedi, entegre koşulmadı.
+
+## Tur 5 · §E bilgisayar ve telefon, §F onay kartı, §G güven kademesi (2026-11-02)
+
+**0. Pilot** (`f83098c2`): geçici hata (OSError 1455 bellek, PowerShell `TimeoutExpired`) turu atlar ve `atla`
+olarak kaydeder; pilot sürer. Üst üste 10 geçici hata ya da beklenmeyen hata yine durdurur. `ofis_pilot_test.py`.
+
+**§E dış dünya** (HKM `core/disdunya.py`, Claude; platform `sistem/bilgisayar.py`, ofis 080):
+
+| Araç (King) | Ne | İzin | Geri al |
+|---|---|---|---|
+| `pc_dosya_ac` | dosya ya da klasörü varsayılan programla açar; çalıştırılabilir dosya açılmaz | `dosya` | açılan süreç zorlamasız kapanır (`taskkill` /F yok, yalnız bizim başlattığımız) |
+| `pc_uygulama_baslat` | Başlat menüsü kısayolunu adıyla (Türkçe harf, tek ön ek; belirsizse adaylar) | `uygulama` | aynı |
+| `pc_ekran_oku` | birincil ekran + Windows OCR | `ekran` | yok (bir şey değiştirmez; defterde «kalıcı») |
+| `telefona_gonder` | Telegram'a mesaj ya da sesli özet (`ozet:true` = K4 «günümü özetle» cümleleri) | `telefon` | 60 sn giden kutusunda bekler; o sürede geri alınırsa hiç gitmez, sonra «gitti» der |
+| `dis_izin` | izinlerden birini açar/kapatır | — | — (yeniden kapat) |
+
+- İzinler `config.dis_dunya`, hepsi varsayılan **kapalı**; HKM her çağrıda yeniden denetler. Uçlar: `GET /api/dis`,
+  `POST /api/dis/izin`, `POST /api/dis/<ac|baslat|ekran|telefon>`. Her eylem `eylem` defterine HKM'nin kendisi yazar
+  (`HKM_GERI` bilgisayar/telefon); istemci çift yazmaz (`hkmEylem`). Sesli özet giden kutusunda gönderim anında
+  `ses.seslendir` → `king-ozet.wav`; ses üretilemezse metin gider.
+- Dış araçlar sözcük tahmininden (niyet çözücü) çıkarıldı: açık kalıp («… uygulamasını aç», «ekranda ne yazıyor»,
+  «günün özetini telefonuma sesli gönder») ya da model seçer. Yoksa «nefes tekniği başlat» uygulama başlatıyordu (sınav 292).
+- Gerçek makinede ölçüldü: `pc_ekran_oku` HKM üzerinden 854 harf okudu. `ac`/`baslat` gerçek pencere açtığı için yalnız sahteyle sınandı.
+
+**§F:** tek giriş kutusu, sonuç kartları, canlı plan adımları (`king__adimlar`) ve «King ne yaptı» önceki turlardan vardı.
+Kalan: onay kartı tek dokunuş — dış dünya kartında düğme «Onaylıyorum» (önceden yanlışlıkla «Dönüş noktası al»), soru
+«Bilgisayarına ya da telefonuna dokunur». Yeni görsel yok.
+
+**§G güven:** `arac.js` `kademe(a)` = oku | yaz | dis; `dis:true` araç hep «yaz» akışı + «buyuk» seviye; `dis` işaretli okuma
+aracı katalogdan düşer; `liste(true)` kullanılamayanları da verir. Denetim `tools/king_guven.js` (kurallar + kendi sınaması,
+CI) ve `king_kapsam.js` her modülün sayfasında koşar: AYS/SPİ/ESP temiz (SPİ 26 oku · 19 yaz · 5 dış, ESP 24 · 27 · 5).
+
+**Ölçü:** King sınavı 293/300; AYS 3204/3204; HKM 1025/1025 (`test_disdunya` 8); `bilgisayar_kabul_test` yeşil;
+dist_sun_test ve entegre temiz (derleme `1bb3e7b0`, temiz worktree).
+
+**Ofis:** 080 pro, Denetçi turu sürerken Claude diff'i tam okuyup elle birleştirdi (bulgu: `ac`/`baslat`'ta kopya
+Start-Process bloğu → `_surec_ac`; ders yazıldı). 065 (53 araca sınav cümlesi) yeniden kuyruğa kondu, başlamadı;
+`king_sinav_300_kabul_test` bu yüzden hâlâ kırmızı (önceden de).
+
+**Açık:** 065; izin değişikliğinin defter satırı «kalıcı» (geri yolu yeniden kapatmak); WhatsApp'ta ses dosyası yok (metin gider);
+King derslerinin (king-devrim.js) kendi 1/3/7'si; canlı HKM ayarı hâlâ gemma3 (sahibin kararı).
