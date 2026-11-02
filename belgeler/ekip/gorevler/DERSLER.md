@@ -24,3 +24,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 032 (02.11.2026): Bölüm kimliğini elle listeleme; modülün kataloğunu (SP.Bolum.liste) kullan: gizlenemeyen bölüm önizlemede patlar
 - 031 (02.11.2026): Ajan takıldı; bulgular Claude'da düzeltildi. Çıkarılamayan değer (tarih, karar kimliği, süre) uydurulmaz, null döner; geçmiş zamanlı kayıt cümlesi plan komutu değildir
 - 050 (02.11.2026): Testçi kırmızısı port çakışmasıydı (SPI 4388); perde kabul main'de elle yeşil
+- 052 (02.11.2026): Denetçi cevapsız kalırsa diff elle okunur; DIZIN satırını iki iş birden eklerse çakışır
