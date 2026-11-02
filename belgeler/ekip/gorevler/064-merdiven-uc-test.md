@@ -1,6 +1,6 @@
 # 064 · A6 merdiveni ve kart cümlesi uç nokta testleri + HKM belgesi
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/064-merdiven-uc-test`
 **Efor:** orta
 **Kabul testi:** `tools/merdiven_uc_kabul_test.py`
@@ -41,3 +41,7 @@ uçların HTTP üzerinden testi ve HKM belgesi eksik.
 - `cd HKM && python -X utf8 -m tests.run`
 
 ## Sonuç
+- **Ne değişti:** `HKM/tests/test_merdiven_uc.py` oluşturuldu (`run()` ile 4 adet HTTP uç testi: `GET /api/ai_olcum` yetki ve `toplam`, `satirlar`, `seviyeler`, `dususler` anahtarları, `butce.record` sonrası `seviyeler` ve `dususler` kırılımı, `POST /api/king/cumle` yetki ve geçersiz girdi denetimi, modelsiz kurulumda `ok:false` ve sunucu ayakta kontrolü). `HKM/tests/run.py`'ye `test_merdiven_uc` aktarımı ve `test_merdiven_uc.run()` çağrısı eklendi. `HKM/MIMARI.md`'ye «Model merdiveni (A6) ve kart cümlesi» bölümü eklendi (`seviye.zorluk`, hibrit diziliş, 429/`RESOURCE_EXHAUSTED`, pencere, `reason:"kota"`, `usage.seviye`, `usage.neden`, `ai_olcum`, `POST /api/king/cumle`).
+- **Koşan testler:** `python tools/merdiven_uc_kabul_test.py` -> `merdiven uc kabul: 4 test yesil.` · `cd HKM && python -X utf8 -m tests.run` -> `1017/1017 test gecti`
+- **Kabul testi:** `tools/merdiven_uc_kabul_test.py` yeşil (4 test yeşil)
+- **Açık kalan:** yok
