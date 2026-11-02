@@ -17,7 +17,7 @@ from tests import (harness, test_aktif, test_arac, test_arastir, test_seviye, te
                    test_manager, test_media, test_memory, test_models, test_motto,
                    test_precedence, test_profil, test_ritim,
                    test_sohbet, test_streak, test_sync, test_twin,
-                   test_vps, test_yoklama, test_yuz, test_ollama, test_ses, test_dinle, test_kasa, test_ofismodel, test_olcum, test_dongu, test_hafiza3, test_hafiza_uc)
+                   test_vps, test_yoklama, test_yuz, test_ollama, test_ses, test_dinle, test_kasa, test_ofismodel, test_olcum, test_dongu, test_hafiza3, test_hafiza_uc, test_merdiven_uc)
 
 
 # SAAT DILIMI SIZMAZ: `hkm.main` ve daemon sureci saat dilimini kurar
@@ -67,6 +67,7 @@ def main():
     test_olcum.run_daemon()
     test_dongu.run_daemon()
     test_hafiza_uc.run()
+    test_merdiven_uc.run()
     test_kasa.run_daemon()
 
     suite = None

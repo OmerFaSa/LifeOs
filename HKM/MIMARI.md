@@ -1729,3 +1729,26 @@ Kural motoru modeli çağırmadan ve uydurmadan olayı karara bağlar: `basla`, 
 `eksik_veri`, `kural_yok`, `bayat`. Günde en çok 3 mesajlık bölme bütçesi (`king.kendiliginden_butce`, 0 = kapalı)
 ve sessiz saat (23:00–08:00) işletilir. «basla» kararı `king_bekleyen`e düşer; durum `GET /api/king/kendiliginden` ve
 mesajlar `GET /api/king/bekleyen` ile alınır.
+
+
+## Model merdiveni (A6) ve kart cümlesi
+
+Gereken zekayı gereken yerde en düşük maliyetle kullanmak için model merdiveni
+kurulur (`core/motor.py`). İsin zorluğu modelsiz ölçülür (`seviye.zorluk`):
+ajan döngüsünün 2.+ adımı, > 3.000 jeton uzun bağlam ve üst/araştırma bulut;
+karar gerektirmeyen kolay işler (alt/orta seviye, brifing cümlesi) yerel modele gider.
+
+Hibrit modda kolay iş yerelden başlar, bulut sonda yedektir; zor iş buluttan başlar,
+yerel sonda yedektir. Bulut kotası dolduğunda (429/`RESOURCE_EXHAUSTED`), yerel model
+işi devralır ve hata metninden okunan bekleme penceresi boyunca (60 sn - 24 sa; varsayılan
+30 dk) bulut hiç denenmez. Yerel model yoksa sessiz beklenmez, `reason:"kota"` ile
+durum bildirilir.
+
+Her çağrının kararı ve varsa düşüşü deftere yazılır (`usage.seviye` [yerel|bulut] ve
+`usage.neden`). `GET /api/ai_olcum` bu kayıtları `seviyeler` (yerel/bulut çağrı, jeton ve
+süre toplamları) ve `dususler` (nedeni «düşüş» ile başlayan son 20 olay) listeleriyle sunar.
+
+`POST /api/king/cumle` (§H kartları: brifing ve hafta): sayıyı modül kuralı üretir (§1.1),
+model yalnız verilen satırlardan tek cümlelik sakin yorum kurar (`core/kendiliginden.py`).
+İş kolay kabul edilip yerel modelde denenir; model yoksa `ok:false` döner ve istemci kodun
+cümlesini kullanır.
