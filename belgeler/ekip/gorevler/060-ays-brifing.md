@@ -1,6 +1,6 @@
 # 060 · AYS sabah brifingi verisi: `brifing(simdi)` (KING-4 §H)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/060-ays-brifing`
 **Efor:** orta
 **Kabul testi:** `tools/kingveri_brifing_ays_kabul_test.py`
@@ -34,3 +34,8 @@ KING-4 §H «60 saniyelik sabah brifingi: bugünün planı, dünün tek bulgusu,
 - `cd AYS && node tools/runtests.js <senin portun>`
 
 ## Sonuç
+<!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). -->
+- **Ne değişti:** `AYS/src/js/core/kingveri.js` içine `R.KingVeri.brifing` fonksiyonu eklendi (saf okuma: bugünün planı, dünün çalışma süresi bulgusu ve önceki 7 günün ortalaması, öncelikli olay ya da ilk tamamlanmamış madde önerisi); `AYS/src/tests/kingveri.test.js` içine plan/bulgu/öneri testleri ile dün ölçüsü olup önceki 7 gün boş ve gece yarısına yakın (23:59) dünün doğru günü kenar testleri yazıldı.
+- **Koşan testler:** `python tools/kingveri_brifing_ays_kabul_test.py` -> `ays brifing kabul: bos, plan, bulgu+ort, ort veri yok, oneri onceligi, ilk madde, saf.` · `python tools/kingveri_ays_kabul_test.py` -> `ays king verisi kabul: sinav_yaklasti, tekrar_gunu, kimlik, hafta, hatirlat, sonKayit/duzelt.` · `cd AYS && node tools/runtests.js 4741` -> `3190/3190 gecti`
+- **Kabul testi:** Yeşil (`ays brifing kabul: bos, plan, bulgu+ort, ort veri yok, oneri onceligi, ilk madde, saf.`)
+- **Açık kalan:** yok
