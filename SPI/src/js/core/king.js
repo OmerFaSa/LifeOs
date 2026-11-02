@@ -422,6 +422,7 @@ window.LIFEOS.KING_IC = {};
     { modul:'ays', route:'today',     ad:'Bugün',      es:['bugün', 'genel bakış'] },
     { modul:'ays', route:'week',      ad:'Hafta',      es:['hafta'] },
     { modul:'ays', route:'plan',      ad:'Program',    es:['program', 'plan'] },
+    { modul:'ays', route:'target',    ad:'Hedefler',   es:['hedefler', 'hedeflerim'] },
     { modul:'ays', route:'gelecek',   ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] },
     { modul:'ays', route:'subjects',  ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] },
     { modul:'ays', route:'solve',     ad:'Soru çöz',   es:['soru çöz', 'soru', 'test çöz'] },

@@ -68,6 +68,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `king_sinav_esp_kabul_test.py` — Görev 033 kabul testi; King sınavının ESP kayıplarını sınar.
 - `king_sinav_spi_kabul_test.py` — Görev 032 kabul testi; King sınavının SPİ kayıplarını sınar.
 - `king_sinav_300_kabul_test.py` — Görev 020 kabul testi; King sınavı en az 300 cümle, ilk 100 cümle değişmemiş, biçim geçerli.
+- `king_sinav_genis_kabul_test.py` — Görev 065 kabul testi; sınav her modül aracını en az 2 cümleyle sınar, ilk 300 ve puanı korunur.
 - `kingveri_ays_kabul_test.py` — Görev 040 kabul testi; AYS King verisini (olaylar, hafta, hatırlatma, son kaydı düzeltme) sınar, CI'da koşulur.
 - `kingveri_esp_kabul_test.py` — Görev 042 kabul testi; ESP King verisini (olaylar, hafta, hatırlatma, son kaydı düzeltme) sınar, CI'da koşulur.
 - `kingveri_spi_kabul_test.py` — Görev 041 kabul testi; SPİ King verisini (olaylar, hafta, hatırlatma, son kaydı düzeltme) sınar, CI'da koşulur.

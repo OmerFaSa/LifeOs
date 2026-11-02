@@ -1226,11 +1226,10 @@
     {
       "g": "ays",
       "m": "ays",
-      "c": "kartlar bölümünü tekrar aç",
+      "c": "telafi bölümünü tekrar aç",
       "b": [
-        "git:ays:cards"
-      ],
-      "not": "Kartlar AYS’de gizlenebilir bölüm değil (core/bolum.js GIZLENEBILIR: öğrenme, sınama, soru çöz, telafi, analiz, rütbe); «… bölümünü aç» sayfa komutudur"
+        "arac:ays_bolum_ac_kapa"
+      ]
     },
     {
       "g": "ays",

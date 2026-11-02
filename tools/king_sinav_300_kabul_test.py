@@ -50,9 +50,11 @@ def main():
         if g[k] < n:
             hata("grup %s: %d cumle < %d" % (k, g[k], n))
     gorulen = {}
+    ALANLAR = {"g", "m", "c", "b", "a", "not"}
     for i, x in enumerate(l):
-        if set(x) - {"g", "m", "c", "b", "a"}:
-            hata("%d: bilinmeyen alan %s" % (i, sorted(set(x) - {"g", "m", "c", "b", "a"})))
+        # «not»: beklentisi duzeltilen cumlenin gerekcesi (3a, KING-4 «Tur 3a»).
+        if set(x) - ALANLAR:
+            hata("%d: bilinmeyen alan %s" % (i, sorted(set(x) - ALANLAR)))
         if x.get("m") not in ("ays", "spi", "esp") or x.get("g") not in EN_AZ:
             hata("%d: m/g gecersiz: %r" % (i, x))
         c = x.get("c")
