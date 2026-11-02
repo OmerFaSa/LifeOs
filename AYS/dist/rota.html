@@ -23674,7 +23674,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'c5916c55', at:'2026-11-02 11:28', dirty:false };
+R.BUILD = { id:'cfb6e0e0', at:'2026-11-02 11:54', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -93432,6 +93432,209 @@ R.Gelecek = (function(){
   return { MIN_DENEME, MIN_GUN, MIN_ARALIK, MAX_NET, UFUK_KAT, theilSen, izdusum, hacimEtkisi, senaryo, siraya, araliklar, hesapla };
 })();
 
+/* ==== js/core/deney.js ==== */
+/* DENEY — kişisel deney motoru: hesap çekirdeği (KOLAY-PLANI Faz 5).
+   Kullanıcının kendi verisinde iki koşulu rastlantısallaştırılmış sırayla
+   deneyip sonucu fark ve güven aralığıyla veren çekirdek.
+
+   Sözler:
+     1. KOD HESAPLAR, MODEL YOK (AGENTS §1.1). Koşul ataması ve sonuç hesabı
+        tamamen belirlenimci kural ve istatistik kodudur; dil modeli yer almaz.
+     2. EKSİK VERİ SIFIR DEĞİLDİR (AGENTS §1.2). Kaydı olmayan veya null/NaN
+        ölçümler sıfır sayılmaz; n yalnızca geçerli ölçüm günlerini sayar.
+        Kol başına en az MIN_KOL (5) geçerli değer yoksa durum 'yetersiz'dir,
+        fark ve güven aralığı hesaplanmaz.
+     3. «ETKİ» YALNIZ TAMAMLANAN KENDİ DENEYİNDEN (AGENTS §1.1, KOLAY §Faz 5).
+        Yalnızca baştan sona tamamlanan deneyin sonucu 'etki' etiketi alır
+        ve simülatör sürgüsünü açar; süren deney 'ara sonuç'tur ve sürgü kapalıdır.
+        Öteki tüm bulgular 'ilişki'dir.
+     4. SPİ TEŞHİS VE DOZ ALANINA GİRMEZ (AGENTS §1.5). Sayı uydurulmaz,
+        tıbbi hüküm ve garanti verilmez.
+     5. GÜVEN ARALIĞI WELCH %95. Varyansların eşitliği varsayılmaz
+        (Welch–Satterthwaite serbestlik derecesi ve t tablosu); aralık sıfırı
+        içermiyorsa sonuç 'anlamli'dır.
+*/
+
+window.R = window.R || {};
+
+R.Deney = (function(){
+  const MIN_KOL = 5;
+  const U = () => R.U;
+
+  /* %95 iki kuyruklu t tablosu (df 1-30). df > 30 için 1.96. */
+  const T_TABLO_95 = [
+    null,
+    12.7062, // 1
+    4.3027,  // 2
+    3.1824,  // 3
+    2.7764,  // 4
+    2.5706,  // 5
+    2.4469,  // 6
+    2.3646,  // 7
+    2.3060,  // 8
+    2.2622,  // 9
+    2.2281,  // 10
+    2.2010,  // 11
+    2.1788,  // 12
+    2.1604,  // 13
+    2.1448,  // 14
+    2.1314,  // 15
+    2.1199,  // 16
+    2.1098,  // 17
+    2.1009,  // 18
+    2.0930,  // 19
+    2.0860,  // 20
+    2.0796,  // 21
+    2.0739,  // 22
+    2.0687,  // 23
+    2.0639,  // 24
+    2.0595,  // 25
+    2.0555,  // 26
+    2.0518,  // 27
+    2.0484,  // 28
+    2.0452,  // 29
+    2.0423   // 30
+  ];
+
+  /* Basit 32-bit karma (djb2 varyantı). Rastgele sayı yok, belirlenimci. */
+  function karma(str){
+    let h = 0;
+    const s = String(str || '');
+    for(let i = 0; i < s.length; i++){
+      h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    }
+    return Math.abs(h);
+  }
+
+  /* SAF. Belirlenimci atama: iki günlük bloklarda bir a bir b. */
+  function ata(deney, tarih){
+    if(!deney || !deney.baslangic || !deney.gun || !Array.isArray(deney.kosullar) || deney.kosullar.length < 2){
+      return null;
+    }
+    const gunFark = U().diffDays(deney.baslangic, tarih);
+    if(gunFark == null || gunFark < 0 || gunFark >= deney.gun){
+      return null;
+    }
+    const blokNo = Math.floor(gunFark / 2);
+    const gunBlokIci = gunFark % 2;
+    const anahtar = String(deney.id || '') + ':' + blokNo;
+    const h = karma(anahtar);
+    const ilkKosul = (h % 2 === 0) ? 0 : 1;
+    const kosulIdx = gunBlokIci === 0 ? ilkKosul : (1 - ilkKosul);
+    return deney.kosullar[kosulIdx];
+  }
+
+  function ortalama(dizi){
+    let top = 0;
+    for(let i = 0; i < dizi.length; i++) top += dizi[i];
+    return top / dizi.length;
+  }
+
+  function varyans(dizi, ort){
+    let top = 0;
+    for(let i = 0; i < dizi.length; i++){
+      const f = dizi[i] - ort;
+      top += f * f;
+    }
+    return top / (dizi.length - 1);
+  }
+
+  /* SAF. Ölçümleri analiz eder; fark, Welch %95 güven aralığı ve etiket üretir. */
+  function sonuc(deney, olcumler, bugun){
+    if(!deney || !Array.isArray(deney.kosullar) || deney.kosullar.length < 2){
+      return { durum:'yetersiz', n:{}, fark:null, aralik:null, anlamli:false, etiket:null, neden:'Geçersiz deney tanımı.' };
+    }
+    const a = deney.kosullar[0];
+    const b = deney.kosullar[1];
+
+    const valsA = [];
+    const valsB = [];
+
+    if(Array.isArray(olcumler)){
+      for(let i = 0; i < olcumler.length; i++){
+        const o = olcumler[i];
+        if(!o || o.deger == null || typeof o.deger !== 'number' || isNaN(o.deger)) continue;
+        const kosul = ata(deney, o.tarih);
+        if(kosul === a) valsA.push(o.deger);
+        else if(kosul === b) valsB.push(o.deger);
+      }
+    }
+
+    const n = { [a]: valsA.length, [b]: valsB.length };
+
+    if(valsA.length < MIN_KOL || valsB.length < MIN_KOL){
+      return {
+        durum: 'yetersiz',
+        n,
+        fark: null,
+        aralik: null,
+        anlamli: false,
+        etiket: null,
+        neden: 'Her koşul için en az ' + MIN_KOL + ' geçerli ölçüm gerekir.'
+      };
+    }
+
+    const ortA = ortalama(valsA);
+    const ortB = ortalama(valsB);
+    const fark = ortB - ortA;
+
+    const varA = varyans(valsA, ortA);
+    const varB = varyans(valsB, ortB);
+
+    const nA = valsA.length;
+    const nB = valsB.length;
+
+    const vA = varA / nA;
+    const vB = varB / nB;
+    const se = Math.sqrt(vA + vB);
+
+    let df;
+    const payda = (Math.pow(vA, 2) / (nA - 1)) + (Math.pow(vB, 2) / (nB - 1));
+    if(payda === 0 || !isFinite(payda)){
+      df = nA + nB - 2;
+    } else {
+      df = Math.pow(vA + vB, 2) / payda;
+    }
+
+    const dfYuvarlak = Math.max(1, Math.round(df));
+    const t = dfYuvarlak <= 30 ? T_TABLO_95[dfYuvarlak] : 1.96;
+
+    const yariGenislik = t * se;
+    const alt = fark - yariGenislik;
+    const ust = fark + yariGenislik;
+    const aralik = [alt, ust];
+
+    const anlamli = Boolean(alt > 0 || ust < 0);
+
+    const gunFarkBugun = U().diffDays(deney.baslangic, bugun);
+    const tamam = gunFarkBugun != null && gunFarkBugun >= deney.gun;
+
+    const durum = tamam ? 'tamam' : 'suruyor';
+    const etiket = tamam ? 'etki' : 'ara sonuç';
+
+    return {
+      durum,
+      n,
+      fark,
+      aralik,
+      anlamli,
+      etiket,
+      neden: null
+    };
+  }
+
+  function surguAcik(res){
+    return Boolean(res && res.durum === 'tamam');
+  }
+
+  return {
+    MIN_KOL,
+    ata,
+    sonuc,
+    surguAcik
+  };
+})();
+
 /* ==== js/core/analytics.js ==== */
 /* Derin analiz katmanı.
 
@@ -122976,6 +123179,55 @@ R.Screens.gelecek = (function(){
           ${U.fmtNet(e.alt * 100)}–${U.fmtNet(e.ust * 100)} kaydırıyor. Bu bir ilişkidir; kesin neden-sonuç değildir.</p>` });
   }
 
+  /* ---------- kişisel deney (KOLAY Faz 5, core/deney.js) ----------
+     Tek şablon: sabah mı akşam mı? Kod her güne bir koşul yazar (iki
+     günde bir ikisi de); ölçü günün sorusu. Kaydı olmayan gün ve bugün
+     (gün bitmedi) sayılmaz. «Etki» ve sürgü yalnız biten deneyde. */
+  const DENEY = { gun:14, kosullar:['sabah', 'aksam'] };
+  const KOSUL = { sabah:'sabah', aksam:'akşam' };
+  const bir = v => (Math.round(v * 10) / 10).toLocaleString('tr-TR');
+
+  function deneyOlcumleri(d, bugun){
+    return Array.from({ length:d.gun }, (_, i) => U.iso(U.addDays(d.baslangic, i))).filter(t => t < bugun)
+      .map(t => ({ tarih:t, deger:S.days[t] ? R.Calc.gunSorusu(S.days[t]) : null }));
+  }
+  function deneyKarti(){
+    if(!R.Deney) return '';
+    const d = S.profile && S.profile.deney, bugun = U.todayISO();
+    if(!d){
+      return K.Card({ title:'Kişisel deney', sub:'sabah mı akşam mı?', body:html`
+        <p class="small">${DENEY.gun} gün boyunca kod her güne <b>sabah</b> ya da <b>akşam</b> yazar; o gün çalışmanı o saatte yaparsın.
+          Sonunda günlük soru sayın iki koşulda karşılaştırılır. Kaydı olmayan gün sayılmaz.</p>
+        <div class="row mt-8"><button class="btn btn--primary" data-act="deney-baslat">Yarın başlat</button></div>` });
+    }
+    const s = R.Deney.sonuc(d, deneyOlcumleri(d, bugun), bugun);
+    const bugunKosul = R.Deney.ata(d, bugun), gecen = Math.max(0, Math.min(d.gun, U.diffDays(d.baslangic, bugun)));
+    const ust = s.durum === 'tamam' ? 'Bitti' : bugunKosul ? html`Bugün <b>${KOSUL[bugunKosul]}</b> çalış · ${gecen + 1}/${d.gun}. gün`
+      : html`Yarın başlıyor: <b>${KOSUL[R.Deney.ata(d, U.iso(U.addDays(bugun, 1)))]}</b>`;
+    let govde;
+    if(s.durum === 'yetersiz') govde = html`<p class="small mt-8">${s.neden} Şu an sabah ${s.n.sabah}, akşam ${s.n.aksam} gün.</p>`;
+    else{
+      const iyi = s.fark >= 0 ? 'akşam' : 'sabah', f = Math.abs(s.fark);
+      const [a, b] = s.fark >= 0 ? s.aralik : [-s.aralik[1], -s.aralik[0]];
+      govde = html`<p class="small mt-8">${s.durum === 'tamam' ? 'Sonuç (etki)' : 'Ara sonuç'}: ${s.anlamli
+          ? html`<b>${iyi}</b> günlerinde ortalama <b>${bir(f)}</b> soru fazla` : 'iki koşul arasında ayırt edilir bir fark yok'};
+          %95 aralık ${bir(a)} – ${bir(b)} (sabah ${s.n.sabah}, akşam ${s.n.aksam} gün).</p>
+        ${when(R.Deney.surguAcik(s) && s.anlamli, () => deneySurgu(iyi, f, a, b))}`;
+    }
+    return K.Card({ title:'Kişisel deney', sub:'sabah mı akşam mı?', body:html`
+      <p class="small">${ust}</p>${govde}
+      <div class="row mt-8"><button class="btn" data-act="deney-bitir">${s.durum === 'tamam' ? 'Yeni deney' : 'Deneyi bırak'}</button></div>` });
+  }
+  /* Sürgü yalnız biten ve ayırt edilen deneyle (Faz 5 kabulü): etki ölçülenle çarpılır, uydurma katsayı yok. */
+  function deneySurgu(iyi, f, a, b){
+    const g = Math.max(0, Math.min(7, Number(S.ui.deneyGun) || 0));
+    return html`<label class="gel-surgu mt-8">
+        <span class="small">Haftada <b>${g}</b> gün ${iyi} çalışırsam</span>
+        <input type="range" min="0" max="7" step="1" value="${g}" data-change="deney-gun" aria-label="Haftada kaç gün ${iyi}"/>
+      </label>
+      ${when(g, () => html`<p class="small mt-8">Haftalık soru, hiç ${iyi} çalışmadığın haftaya göre yaklaşık <b>+${bir(f * g)}</b> (${bir(a * g)} – ${bir(b * g)}; tahmin).</p>`)}`;
+  }
+
   /* ---------- nasıl hesaplandı ---------- */
   function yontem(r){
     const k = R.Calc.buHizla ? R.Calc.buHizla() : null;
@@ -122991,10 +123243,19 @@ R.Screens.gelecek = (function(){
 
   async function render(){
     const r = R.Gelecek.hesapla({ ekSoru:Number(S.ui.gelecekEkSoru) || 0 });
-    return String(html`${sinavKarti(r)}${raw(String(grafik(r)))}${neOlursa(r)}${yontem(r)}`);
+    return String(html`${sinavKarti(r)}${raw(String(grafik(r)))}${neOlursa(r)}${deneyKarti()}${yontem(r)}`);
   }
 
+  const handle = {
+    async 'deney-baslat'(){
+      S.profile.deney = Object.assign({ id:'sabah-aksam-' + U.todayISO(), baslangic:U.iso(U.addDays(U.todayISO(), 1)) }, DENEY);
+      await R.Model.saveProfile(); R.App.render();
+    },
+    async 'deney-bitir'(){ delete S.profile.deney; await R.Model.saveProfile(); R.App.render(); },
+  };
+
   const change = {
+    async 'deney-gun'(el){ S.ui.deneyGun = Math.max(0, Math.min(7, Number(el.value) || 0)); R.App.render(); },
     async 'gelecek-ek'(el){
       const v = Math.max(SURGU.min, Math.min(SURGU.max, Number(el.value) || 0));
       S.ui.gelecekEkSoru = v;
@@ -123008,7 +123269,7 @@ R.Screens.gelecek = (function(){
     title:'Gelecek',
     subtitle(){ return 'Sınav gününe kadar bu gidişle, ve ne olursa'; },
     actions(){ return ''; },
-    render, handle:{}, change,
+    render, handle, change,
   };
 })();
 
