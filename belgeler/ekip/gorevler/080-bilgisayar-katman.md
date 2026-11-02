@@ -1,6 +1,6 @@
 # 080 · Bilgisayar araçlarının platform katmanı (KING-4 §E)
 
-**Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
+**Durum:** bitti   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/080-bilgisayar-katman`
 **Efor:** yüksek
 **Kabul testi:** `tools/bilgisayar_kabul_test.py`
@@ -60,7 +60,8 @@ denetimi. İzin, onay kartı ve eylem defteri HKM'de (Claude Code yazar, `HKM/co
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `sistem/bilgisayar.py` eklendi. Başta doktrin sözleri tanımlandı (dış çağrı yalnız `calistir`'dan geçer, `shell=True` yok, `argv` liste, çalıştırılabilir dosya doğrudan `ac` ile açılmaz, kapatma zorlamasız ve yalnız bu katmanın başlattığı süreçler). `calistir`, `ac`, `uygulamalar`, `baslat`, `kapat`, `ekran_oku`, `BASLATILAN`, `EN_COK_METIN` (4000) ve `CALISTIRILABILIR` dışa aktarıldı.
+- **Koşan testler:** `python tools/bilgisayar_kabul_test.py` -> `bilgisayar kabul: ac, uygulamalar, baslat, kapat, ekran_oku, calistir temiz.`
+- **Kabul testi:** `tools/bilgisayar_kabul_test.py` yeşil.
+  DENEME: `RIOT\nGAMES\n2020-2026 Riot Games, Inc. Riot Games, VALORANT ve ilgili`
+- **Açık kalan:** yok
