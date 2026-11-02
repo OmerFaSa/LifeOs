@@ -387,11 +387,134 @@ SP.KingVeri = (function(){
     };
   }
 
+  /* ------------------------------------------------------------ 6. brifing */
+  function brifing(simdi){
+    const now = simdi instanceof Date ? simdi : new Date(simdi || Date.now());
+    const gun = U().iso(now);
+
+    /* a) plan */
+    const hamPlan = [];
+    if(SP.HaftaPlan && typeof SP.HaftaPlan.liste === 'function'){
+      const planlar = SP.HaftaPlan.liste() || [];
+      for(const p of planlar){
+        const maddeler = (typeof SP.HaftaPlan.bugunMaddeleri === 'function' ? SP.HaftaPlan.bugunMaddeleri(p, gun) : []) || [];
+        for(const m of maddeler){
+          if(!m) continue;
+          const ad = String(m.metin || '').slice(0, 80);
+          let zy = '';
+          if(typeof SP.HaftaPlan.zamanYaz === 'function'){
+            zy = SP.HaftaPlan.zamanYaz(m.zaman) || '';
+          } else if(typeof m.zaman === 'string'){
+            zy = m.zaman;
+          }
+          const saat = /^\d{2}:\d{2}$/.test(zy) ? zy : null;
+          const say = (typeof SP.HaftaPlan.sayim === 'function' ? SP.HaftaPlan.sayim(p, m, gun) : {}) || {};
+          const tamam = say.tamam != null ? !!say.tamam : !!m.bitti;
+          hamPlan.push({ ad, saat, tamam });
+        }
+      }
+    }
+
+    const saatliler = hamPlan.filter(x => x.saat !== null);
+    saatliler.sort((a, b) => (a.saat < b.saat ? -1 : (a.saat > b.saat ? 1 : 0)));
+    const saatsizler = hamPlan.filter(x => x.saat === null);
+    const plan = saatliler.concat(saatsizler).slice(0, 8);
+
+    /* b) bulgu */
+    const vitals = (SP.S && SP.S.vitals) || {};
+    const dunDate = U().addDays(now, -1);
+    const dunISO = U().iso(dunDate);
+    const dunVital = vitals[dunISO];
+
+    let bulgu = null;
+    if(dunVital && typeof dunVital.sleep === 'number' && !isNaN(dunVital.sleep)){
+      const deger = dunVital.sleep;
+      let nOrt = 0;
+      let sumOrt = 0;
+      for(let i = -8; i <= -2; i++){
+        const g = U().iso(U().addDays(now, i));
+        const v = vitals[g];
+        if(v && typeof v.sleep === 'number' && !isNaN(v.sleep)){
+          nOrt++;
+          sumOrt += v.sleep;
+        }
+      }
+
+      let ort;
+      if(nOrt >= 3){
+        const ortDeger = Math.round((sumOrt / nOrt) * 10) / 10;
+        ort = { deger: ortDeger, etiket: 'hesaplandı' };
+      } else {
+        ort = { deger: null, etiket: 'veri yok' };
+      }
+
+      bulgu = {
+        id: 'uyku',
+        ad: 'Uyku',
+        deger: deger,
+        birim: 'saat',
+        etiket: 'ölçüldü',
+        ort: ort
+      };
+    }
+
+    /* c) oneri */
+    const ONCELIK = ['sinav_yaklasti', 'uyku_dustu', 'plan_kacti', 'tekrar_gunu'];
+    let olayListesi = [];
+    try {
+      if(typeof olaylar === 'function'){
+        olayListesi = olaylar(now) || [];
+      }
+    } catch(e){
+      olayListesi = [];
+    }
+
+    let secilenOlay = null;
+    for(const tur of ONCELIK){
+      const bulunan = olayListesi.find(o => o && o.tur === tur);
+      if(bulunan){
+        secilenOlay = bulunan;
+        break;
+      }
+    }
+    if(!secilenOlay && olayListesi.length > 0){
+      secilenOlay = olayListesi[0];
+    }
+
+    let oneri = null;
+    if(secilenOlay){
+      oneri = {
+        id: secilenOlay.tur,
+        sayilar: secilenOlay.sayilar || {}
+      };
+      if(secilenOlay.konu !== undefined && secilenOlay.konu !== null && secilenOlay.konu !== ''){
+        oneri.konu = secilenOlay.konu;
+      }
+    } else {
+      const ilkMadde = plan.find(m => !m.tamam);
+      if(ilkMadde){
+        oneri = {
+          id: 'ilk_madde',
+          konu: ilkMadde.ad,
+          sayilar: {}
+        };
+      }
+    }
+
+    return {
+      gun,
+      plan,
+      bulgu,
+      oneri
+    };
+  }
+
   return {
     olaylar,
     hafta,
     hatirlat,
     sonKayit,
-    duzelt
+    duzelt,
+    brifing
   };
 })();
