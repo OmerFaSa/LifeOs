@@ -230,7 +230,7 @@ ESP.KingArac = (function(){
   }
 
   function liste(){
-    return [
+    const temel = [
       { ad:'esp_gun', tur:'oku', aciklama:'Bir günün ESP çalışma oturumları (alan ve dakika).', ornek:'günün oturumları', anahtar:'entelektüel pratik süresi seans oturum gündelik günlük',
         parametreler:{ type:'object', properties:{ tarih:{ type:'string', maxLength:10, description:'gün (YYYY-AA-GG); boşsa bugün' } } }, calistir:gun },
       { ad:'esp_hafta', tur:'oku', aciklama:'Son günlerde hangi alanda kaç dakika çalışıldığı.', ornek:'haftalık süre', anahtar:'haftalık disiplin vakit dağılımı toplam süre saat',
@@ -1034,6 +1034,8 @@ ESP.KingArac = (function(){
           };
         } },
     ];
+    const ogret = (ESP.KingOgret && ESP.KingOgret.araclar) ? ESP.KingOgret.araclar() : [];
+    return temel.concat(ogret);
   }
 
   /* KING-4 A3 hızlı yol: okuma sorusu sayfa açmaz; kart, alıntı ve bitirme cümleden okunur
