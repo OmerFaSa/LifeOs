@@ -29,3 +29,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 071 (02.11.2026): Türkçe eki kodla üreten metinde ünlü uyumunu sına (««Oturuyor»ye»); kayıt yoksa uydurma yedek değer yazma
 - 060 (02.11.2026): Testçi kırmızısı ortak sınav kabulüydü (main'de düzeltildi); diff temiz
 - 062 (02.11.2026): temiz; aynı ortak kırmızı
+- 061 (02.11.2026): temiz; Testçi kırmızısı ortak sınav kabulü, pilotun düzeltme isteği boşa gitti
