@@ -1,6 +1,6 @@
 # 073 · Kişisel deney motoru: hesap çekirdeği (KOLAY Faz 5a)
 
-**Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
+**Durum:** bitti   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/073-deney-cekirdek`
 **Efor:** yüksek
 **Kabul testi:** `tools/ays_deney_kabul_test.py`
@@ -47,7 +47,7 @@ Kalıp için `AYS/src/js/core/gelecek.js`'i oku (sözler başlığı, `R.X = (fu
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** `AYS/src/js/core/deney.js` eklendi (`R.Deney`). Başta doktrin sözleri tanımlandı. Belirlenimci bloklu koşul atama (`ata`), eksik veriyi sıfır saymayan ve kol başına en az 5 geçerli ölçüm arayan Welch %95 güven aralıklı sonuç motoru (`sonuc`), `surguAcik` ve `MIN_KOL` dışa aktarıldı; kabul testindeki Date/String `includes` uyumu için tolerans sağlandı.
+- **Koşan testler:** `python tools/ays_deney_kabul_test.py` -> `ays deney kabul: bloklu atama, eksik veri, yetersiz veride sonuc yok, Welch araligi, etki yalniz tamamlanan deneyde.` · `python tools/kabul_js_test.py` -> `kabul_js temiz: ifade, promise, window, localStorage, hazirlik, gercek modul dosyasi, hatalar.`
+- **Kabul testi:** `tools/ays_deney_kabul_test.py` yeşil.
+- **Açık kalan:** yok
