@@ -10,9 +10,10 @@
     parcalar:[{ id:'aaaaaaaaaaa1', ad:'Odak', tur:'audio/mpeg' }, { id:'aaaaaaaaaaa2', ad:'Koşu', tur:'audio/mpeg' }, { id:'aaaaaaaaaaa3', ad:'Sakin', tur:'audio/ogg' }],
     listeler:{ genel:['aaaaaaaaaaa1'], calisma:['aaaaaaaaaaa1'], spor:['aaaaaaaaaaa2'], arka:['aaaaaaaaaaa3', 'aaaaaaaaaaa1'] },
     acilis:{ id:'aaaaaaaaaaa2', bas:5, bit:12, ses:.5, ne:'her' }, arka:{ acik:true, ses:.3, karistir:false } });
+  let yer = 'giris';
   function sahne(d, fn){
     const giden = [];
-    M()._ortam({ sunucu:() => true, simdi:() => new Date(2026, 9, 30, 9),
+    M()._ortam({ sunucu:() => true, simdi:() => new Date(2026, 9, 30, 9), yer:() => yer,
       fetch:(u, o) => { giden.push([u, o]); return Promise.resolve(new Response(JSON.stringify(d), { status:200 })); } });
     M()._sifirla(d);
     const a = M()._ses();
@@ -45,6 +46,47 @@
         localStorage.removeItem(M().ACILIS_GUN);
         expect(M().acilisCal()).toBe(false);
       }finally{ if(once == null) localStorage.removeItem(M().ACILIS_GUN); else localStorage.setItem(M().ACILIS_GUN, once); }
+    }));
+    it('açılış nerede: yalnız ilk giriş, her modül, yer başına ayrı parça', () => sahne(DIZIN(), (g, a) => {
+      const anahtarlar = [M().YER].concat(M().YERLER.map(y => M().YER + '.' + y)), once = anahtarlar.map(k => localStorage.getItem(k));
+      try{
+        anahtarlar.forEach(k => localStorage.removeItem(k));
+        expect(!!M().yerKesiti('giris')).toBe(true);           // varsayılan: yalnız kartlar
+        expect(M().yerKesiti('ays')).toBe(null);
+        localStorage.setItem(M().YER, 'her');
+        expect(M().yerKesiti('giris')).toBe(null);
+        expect(M().yerKesiti('spi').id).toBe('aaaaaaaaaaa2');
+        localStorage.setItem(M().YER, 'ayri');
+        localStorage.setItem(M().YER + '.esp', 'aaaaaaaaaaa3');
+        localStorage.setItem(M().YER + '.ays', 'aaaaaaaaaaa2');
+        const e = M().yerKesiti('esp');
+        expect(e.id).toBe('aaaaaaaaaaa3');
+        expect(e.bas).toBe(0);
+        expect(e.bit).toBe(7);                                  // başka parça: baştan, kesit uzunluğu
+        expect(M().yerKesiti('ays').bas).toBe(5);               // açılışın parçası: kendi kesiti
+        expect(M().yerKesiti('spi')).toBe(null);                // seçilmemiş yer çalmaz
+        localStorage.setItem(M().YER + '.spi', 'silinmis-parca');
+        expect(M().yerKesiti('spi')).toBe(null);
+        yer = 'esp';
+        expect(M().acilisCal()).toBe(true);
+        expect(a.src).toContain('aaaaaaaaaaa3');
+        const d = DIZIN(); d.acilis.ne = 'kapali';
+        M()._sifirla(d);
+        expect(M().yerKesiti('esp')).toBe(null);                // «Kapalı» her yerde kapatır
+      }finally{ yer = 'giris'; anahtarlar.forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); }); }
+    }));
+    it('ayarda «Nerede» seçimi; yer başına seçilince dört yer görünür', () => sahne(DIZIN(), () => {
+      const once = localStorage.getItem(M().YER);
+      try{
+        localStorage.removeItem(M().YER);
+        const kap = document.createElement('div');
+        kap.innerHTML = M().ayarHtml();
+        expect(kap.querySelector('[data-muzik-yer="giris"]').getAttribute('aria-pressed')).toBe('true');
+        expect(kap.querySelectorAll('[data-muzik-yerparca]').length).toBe(0);
+        localStorage.setItem(M().YER, 'ayri');
+        kap.innerHTML = M().ayarHtml();
+        expect(kap.querySelectorAll('[data-muzik-yerparca]').length).toBe(4);
+      }finally{ if(once == null) localStorage.removeItem(M().YER); else localStorage.setItem(M().YER, once); }
     }));
     it('arka plan: açıksa kendi sesiyle çalar; sustur bu oturumda durdurur, yeniden açınca sürer', () => sahne(DIZIN(), (g, a) => {
       expect(M().arkaBaslat()).toBe(true);

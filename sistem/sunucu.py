@@ -811,7 +811,81 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 .yay__uc{ padding:0 6px; }
 .dip{ display:none; }
 @media (max-width:760px){ .izgara .kart{ min-height:0; } .izgara .kart__alt{ top:50%; transform:translateY(-50%); } }
+/* ACILIS VIDEOSU (kullanici, 2026-11-02: «sistem ilk acildiginda kartlardan once
+   sectigim video oynasin; ekran siyahken animasyonla gelsin, bitince animasyonla
+   gitsin; atlanabilsin»). Siyah perde ilk cizimden once kurulur, kartlar hic
+   gorunmez; video yavasca belirip hafifce yerine oturur, sonuna yaklasinca
+   kararir, perde kartlarin ustunden cekilir. Yalniz opaklik ve olcek (8 GB PC'de
+   tam ekran bulaniklik pahali); parilti yok. Atla dugmesi cam hap. */
+.avideo{ position:fixed; inset:0; z-index:2147483000; display:grid; place-items:center; background:#000; transition:opacity .85s cubic-bezier(.4,0,.2,1); }
+.avideo__v{ width:100%; height:100%; object-fit:cover; opacity:0; transform:scale(1.04);
+  transition:opacity 1.2s cubic-bezier(.2,.7,.2,1), transform 2.6s cubic-bezier(.16,.84,.24,1); }
+.avideo.is-oynuyor .avideo__v{ opacity:1; transform:none; }
+.avideo.is-bitiyor .avideo__v{ opacity:0; transform:scale(.99); transition-duration:.6s, .8s; }
+.avideo.is-gidiyor{ opacity:0; pointer-events:none; }
+.avideo__atla{ position:absolute; right:clamp(16px, 3vw, 32px); bottom:clamp(18px, 3.2vw, 34px); display:inline-flex; align-items:center; gap:8px;
+  min-height:36px; padding:0 14px 0 16px; border:0; border-radius:999px; background:rgba(255,255,255,.12); color:#fff; font:inherit; font-size:13px;
+  cursor:pointer; -webkit-backdrop-filter:blur(14px) saturate(1.4); backdrop-filter:blur(14px) saturate(1.4); box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
+  opacity:0; transform:translateY(6px); transition:opacity .5s ease .9s, transform .5s ease .9s, background .2s ease; }
+.avideo.is-oynuyor .avideo__atla{ opacity:1; transform:none; }
+.avideo.is-bitiyor .avideo__atla{ opacity:0; transition-delay:0s; }
+.avideo__atla:hover{ background:rgba(255,255,255,.2); }
+.avideo__atla:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
+.avideo__atla svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.avideo__cizgi{ position:absolute; left:0; bottom:0; width:100%; height:2px; background:rgba(255,255,255,.5); transform-origin:left; transform:scaleX(var(--ilerle, 0)); opacity:0; transition:opacity .5s ease .9s; }
+.avideo.is-oynuyor .avideo__cizgi{ opacity:1; }
+.avideo.is-bitiyor .avideo__cizgi{ opacity:0; transition-delay:0s; }
+@media (prefers-reduced-motion:reduce){ .avideo, .avideo__v, .avideo__atla, .avideo__cizgi{ transition-duration:.25s; transition-delay:0s; } .avideo__v{ transform:none; } }
+.gayar__yer{ display:grid; grid-template-columns:64px 1fr; align-items:center; gap:8px; font-size:12.5px; color:var(--fg-2); }
 </style></head><body>
+<script data-acilis>
+/* ACILIS VIDEOSU (.avideo): yalniz sistem ilk acildiginda (onceki sayfa yok, bu
+   oturumda oynamadi) ve ayar aciksa; «?video» Ayarlar'daki «Simdi izle»dir.
+   Bitince, atlaninca, hatada ya da 4 sn baslamazsa __LIFEOS_ACILIS_VIDEO__
+   cozulur: acilis muzigi (muzik.js) ve «son modul» onu bekler. data-acilis:
+   telefon iskeleti ilk duz <script>'i keser (_telefon_iskeleti), bu o degil. */
+(function(){
+  var zorla = /[?&]video(&|$)/.test(location.search);
+  try{
+    var A = window.__LIFEOS_AYAR__ || {};
+    if(!zorla && (A['lifeos.acilis.video'] !== '1' || document.referrer || /[?&]sec/.test(location.search) || sessionStorage.getItem('lifeos.acilis.oynadi'))) return;
+    sessionStorage.setItem('lifeos.acilis.oynadi', '1');
+  }catch(e){ if(!zorla) return; }
+  var cozul, kutu = document.createElement('div'), v = document.createElement('video'), gitti = false, basladi = false;
+  window.__LIFEOS_ACILIS_VIDEO__ = new Promise(function(c){ cozul = c; });
+  kutu.className = 'avideo'; kutu.setAttribute('role', 'dialog'); kutu.setAttribute('aria-label', 'Açılış videosu');
+  kutu.innerHTML = '<button type="button" class="avideo__atla">Atla<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l8 6-8 6zM18 6v12"/></svg></button><i class="avideo__cizgi" aria-hidden="true"></i>';
+  v.className = 'avideo__v'; v.playsInline = true; v.preload = 'auto'; v.setAttribute('aria-hidden', 'true'); v.src = '/api/zemin/acilis';
+  kutu.insertBefore(v, kutu.firstChild);
+  document.body.appendChild(kutu);
+  var atla = kutu.querySelector('button');
+  function bitir(){
+    if(gitti) return;
+    gitti = true;
+    document.removeEventListener('keydown', tus, true);
+    kutu.classList.add('is-bitiyor');
+    setTimeout(function(){
+      kutu.classList.add('is-gidiyor'); cozul();
+      setTimeout(function(){ try{ v.pause(); v.removeAttribute('src'); v.load(); }catch(e){} kutu.remove(); }, 900);
+    }, basladi ? 600 : 0);
+  }
+  function tus(e){ if(e.key === 'Escape' || e.key === 'Enter' || e.key === ' '){ e.preventDefault(); e.stopPropagation(); bitir(); } }
+  document.addEventListener('keydown', tus, true);
+  atla.addEventListener('click', bitir);
+  v.addEventListener('playing', function(){ if(basladi) return; basladi = true; kutu.classList.add('is-oynuyor'); try{ atla.focus({ preventScroll:true }); }catch(e){} });
+  v.addEventListener('timeupdate', function(){
+    if(!v.duration) return;
+    kutu.style.setProperty('--ilerle', String(v.currentTime / v.duration));
+    if(v.duration - v.currentTime < .6) bitir();     // son kareye gelmeden kararmaya baslar
+  });
+  v.addEventListener('ended', bitir);
+  v.addEventListener('error', bitir);
+  setTimeout(function(){ if(!basladi) bitir(); }, 4000);
+  v.volume = .8;
+  var p = v.play();
+  if(p && p.catch) p.catch(function(){ v.muted = true; var q = v.play(); if(q && q.catch) q.catch(bitir); });   // sesli acilisa izin yoksa sessiz
+})();
+</script>
 <main class="sarmal">
   <header class="ust" style="--sira:0">
     <span class="isaret" aria-hidden="true"><b></b><b></b><b></b><b></b></span>
@@ -905,7 +979,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
     if(k.getAttribute('data-modul') !== 'hkm') k.addEventListener('click', function(){ koy('lifeos.giris.son', k.getAttribute('data-modul')); });
   });
   var son = al('lifeos.giris.son');
-  if(al('lifeos.giris.ac') === 'son' && AD[son] && !document.referrer && location.search.indexOf('sec') < 0){
+  if(al('lifeos.giris.ac') === 'son' && AD[son] && !document.referrer && location.search.indexOf('sec') < 0) Promise.resolve(window.__LIFEOS_ACILIS_VIDEO__).then(function(){
     var kart = document.querySelector('.kart[data-modul="' + son + '"]');
     if(kart){
       var bant = document.createElement('div');
@@ -915,7 +989,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
       var zaman = setTimeout(function(){ bant.remove(); kart.click(); }, 1800);
       bant.querySelector('button').addEventListener('click', function(){ clearTimeout(zaman); bant.remove(); });
     }
-  }
+  });
   function post(yol, govde, baslik){
     return fetch(yol, { method:'POST', headers:{ 'Content-Type':'application/json', 'X-LifeOS':baslik }, body:JSON.stringify(govde) }).then(function(r){ return r.json(); });
   }
@@ -924,7 +998,8 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
       var on = String(x[0]) === String(simdi);
       return '<button type="button" class="' + (on ? 'is-on' : '') + '" aria-pressed="' + on + '" ' + veri + '="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>';
   }
-  var panel = null, muzik = null, durum = '';
+  var panel = null, muzik = null, durum = '', videoVar = false;
+  var YAD = { giris:'Kartlar', ays:'AYS', spi:'SPİ', esp:'ESP' };
   function ciz(){
     var tema = A['lifeos.tema.secim'] || 'system', m = muzik || { parcalar:[], acilis:{ ne:'kapali' }, arka:{ acik:false } };
     var parcalar = m.parcalar || [];
@@ -937,9 +1012,17 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
       + '<div class="gayar__bolum"><b>Açılış müziği</b>'
       + (parcalar.length ? seg('Açılış müziği', [['kapali', 'Kapalı'], ['her', 'Her açılışta'], ['gunde', 'Günde bir']], m.acilis.ne, 'data-g-ne')
           + '<select data-g-parca aria-label="Açılış parçası"><option value="">Parça seç</option>' + parcalar.map(function(p){ return '<option value="' + kac(p.id) + '"' + (m.acilis.id === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>'; }).join('') + '</select>'
+          + seg('Nerede', [['giris', 'İlk girişte'], ['her', 'Her modülde'], ['ayri', 'Yer başına']], al('lifeos.muzik.yer') || 'giris', 'data-g-yer')
+          + (al('lifeos.muzik.yer') === 'ayri' ? ['giris', 'ays', 'spi', 'esp'].map(function(y){ var v = al('lifeos.muzik.yer.' + y) || '';
+              return '<label class="gayar__yer"><span>' + YAD[y] + '</span><select data-g-yerparca="' + y + '" aria-label="' + YAD[y] + ' açılış parçası"><option value="">Çalmasın</option>'
+                + parcalar.map(function(p){ return '<option value="' + kac(p.id) + '"' + (v === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>'; }).join('') + '</select></label>'; }).join('') : '')
           + '<small>Kesit ve ses: bir modülde Ayarlar › Ses ve müzik.</small>'
         : '<small>Henüz parça yok. Bir modülde Ayarlar › Ses ve müzik › Müzik ekle.</small>') + '</div>'
       + (parcalar.length ? '<div class="gayar__bolum"><b>Arka plan müziği</b>' + seg('Arka plan müziği', [['false', 'Kapalı'], ['true', 'Açık']], String(!!m.arka.acik), 'data-g-arka') + '</div>' : '')
+      + '<div class="gayar__bolum"><b>Açılış videosu</b>' + seg('Açılış videosu', [['0', 'Kapalı'], ['1', 'Açık']], A['lifeos.acilis.video'] === '1' ? '1' : '0', 'data-g-video')
+      + '<small>' + (videoVar ? 'LifeOS ilk açıldığında kartlardan önce oynar; «Atla» ya da Esc ile geçilir.' : 'Henüz video yok: önce bir video seç (en çok 600 MB).') + '</small>'
+      + '<div class="gayar__satir"><label class="gayar__dugme">' + (videoVar ? 'Videoyu değiştir' : 'Video seç') + '<input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,.mov,.m4v" data-g-dosya="acilis" hidden></label>'
+      + (videoVar ? '<button type="button" class="gayar__dugme" data-g="video-izle">Şimdi izle</button>' : '') + '</div></div>'
       + '<div class="gayar__bolum"><b>Arka plan</b><small>Fotoğraf ya da video (en çok 600 MB). Gündüz açık temada, gece koyu temada görünür.</small>'
       + '<div class="gayar__satir"><label class="gayar__dugme">Gündüz için seç<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/x-m4v,.mov,.m4v" data-g-dosya="gunduz" hidden></label>'
       + '<label class="gayar__dugme">Gece için seç<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/x-m4v,.mov,.m4v" data-g-dosya="gece" hidden></label></div>'
@@ -952,6 +1035,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
       panel.className = 'gayar'; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Giriş ayarları');
       document.body.appendChild(panel);
       ciz(); muzikOku();
+      fetch('/api/zemin/acilis', { headers:{ Range:'bytes=0-0' }, cache:'no-store' }).then(function(r){ videoVar = r.ok; ciz(); }).catch(function(){});
       panel.addEventListener('click', tikla);
       panel.addEventListener('change', degisti);
     }
@@ -973,6 +1057,12 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
     var t = e.target.closest('button');
     if(!t) return;
     if(t.getAttribute('data-g') === 'kapat') return acKapa(false);
+    if(t.getAttribute('data-g') === 'video-izle'){ location.href = '/?video'; return; }
+    if(t.hasAttribute('data-g-video')){
+      if(t.getAttribute('data-g-video') === '1' && !videoVar){ durum = 'Önce bir video seç.'; return ciz(); }
+      return ayarYaz({ 'lifeos.acilis.video':t.getAttribute('data-g-video') === '1' ? '1' : null }).then(ciz, ciz);
+    }
+    if(t.hasAttribute('data-g-yer')){ var yv = t.getAttribute('data-g-yer'); ayarYaz({ 'lifeos.muzik.yer':yv === 'giris' ? null : yv }); return ciz(); }
     if(t.hasAttribute('data-g-tema')) return ayarYaz({ 'lifeos.tema.secim':t.getAttribute('data-g-tema') }).then(function(){ location.reload(); });
     if(t.hasAttribute('data-g-acilis')){ koy('lifeos.giris.ac', t.getAttribute('data-g-acilis') === 'son' ? 'son' : null); return ciz(); }
     if(t.hasAttribute('data-g-ne')) return muzikYaz({ acilis:{ ne:t.getAttribute('data-g-ne') } });
@@ -981,11 +1071,17 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
   function degisti(e){
     var t = e.target;
     if(t.hasAttribute('data-g-parca')) return muzikYaz({ acilis:{ id:t.value || null, ne:t.value ? (muzik.acilis.ne === 'kapali' ? 'her' : muzik.acilis.ne) : 'kapali' } });
+    if(t.hasAttribute('data-g-yerparca')){
+      var yd = {}; yd['lifeos.muzik.yer.' + t.getAttribute('data-g-yerparca')] = t.value || null; ayarYaz(yd);
+      if(t.value && muzik && !muzik.acilis.id) return muzikYaz({ acilis:{ id:t.value, ne:'her' } });   // sunucu parcasiz acilisi kapatir
+      return ciz();
+    }
     if(t.hasAttribute('data-g-dosya') && t.files && t.files[0]){
       var yuva = t.getAttribute('data-g-dosya'), f = t.files[0], tur = f.type || '';
       durum = /^video/.test(tur) ? 'Video yükleniyor… büyük dosya biraz sürer.' : 'Yükleniyor…'; ciz();
       fetch('/api/zemin/' + yuva, { method:'POST', headers:{ 'Content-Type':tur, 'X-LifeOS':'zemin' }, body:f }).then(function(r){
         if(!r.ok) return r.text().then(function(x){ throw new Error(x || 'Yüklenemedi.'); });
+        if(yuva === 'acilis') return ayarYaz({ 'lifeos.acilis.video':'1' }).then(function(){ videoVar = true; durum = 'Açılış videosu hazır.'; ciz(); });
         var d = { 'lifeos.manzara.surum':String(Date.now()) };
         d['lifeos.manzara.tur.' + yuva] = /^video/.test(tur) ? 'video' : 'foto';
         if(yuva === 'gece') d['lifeos.manzara.gece'] = 'kendi'; else { d['lifeos.manzara'] = 'kendi'; if(!A['lifeos.manzara.gece']) d['lifeos.manzara.gece'] = 'ayni'; }

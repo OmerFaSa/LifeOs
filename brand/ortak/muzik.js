@@ -29,6 +29,10 @@
      hiçbir ekran bozulmaz.
    · Radyo ile müzik aynı anda çalmaz: biri başlayınca öteki durur.
    · Açılış kesiti: «Her açılışta» ya da «Günde bir» (modül başına).
+     Nerede çalar (kullanıcı, 2026-11-02): yalnız ilk girişte (kartlar,
+     varsayılan), her modül açılışında ya da yer başına ayrı parça (kartlarda
+     A, AYS'de B…). Seçim ortak ayardır (`lifeos.muzik.yer*`): telefonla da
+     eşitlenir. Giriş sayfasında açılış videosu varsa müzik onun ardından.
      Tarayıcı kendiliğinden çalmayı reddederse kesit ilk dokunuşta çalar
      (açılıştan 15 sn içinde); sonra hiç.
    · Arka plan listesi açıksa açılıştan sonra (ya da hemen) karışık çalar;
@@ -55,7 +59,25 @@ window.LIFEOS.MUZIK = (function(){
     fetch:(u, o) => fetch(u, o),
     simdi:() => new Date(),
     karistir:l => l.slice().sort(() => Math.random() - .5),
+    yer:() => typeof location === 'undefined' ? null : ({ 4180:'giris', 4173:'ays', 4183:'spi', 4193:'esp' })[location.port] || null,
   };
+  const YER = 'lifeos.muzik.yer', YERLER = Object.freeze(['giris', 'ays', 'spi', 'esp']);
+  const YER_AD = Object.freeze({ giris:'Kartlar', ays:'AYS', spi:'SPİ', esp:'ESP' });
+  const depoAl = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
+  function yerKipi(){ const v = depoAl(YER); return v === 'her' || v === 'ayri' ? v : 'giris'; }
+  /* Bu yerde çalacak kesit ya da null. Ayrı parçada kesit, parça açılışınkiyse onunki;
+     değilse baştan, aynı uzunlukta (shortcut: yer başına kesit yok; istenirse yer başına bas/bit). */
+  function yerKesiti(yer){
+    const a = d().acilis, k = yerKipi();
+    if(!yer || !a.id || a.ne === 'kapali') return null;
+    if(k !== 'ayri'){
+      if(k === 'giris' ? yer !== 'giris' : yer === 'giris') return null;
+      return parca(a.id) ? { id:a.id, bas:a.bas, bit:a.bit, gun:ACILIS_GUN } : null;
+    }
+    const id = depoAl(YER + '.' + yer);
+    if(!id || !parca(id)) return null;
+    return id === a.id ? { id, bas:a.bas, bit:a.bit, gun:ACILIS_GUN + '.' + yer } : { id, bas:0, bit:Math.max(1, a.bit - a.bas), gun:ACILIS_GUN + '.' + yer };
+  }
   let ortam = Object.assign({}, VARSAYILAN_ORTAM);
   let dizin = null, ses = null, kuyruk = [], sira = 0, kip = null, kesitSonu = null, susturuldu = false, mesajMetni = '';
 
@@ -147,24 +169,20 @@ window.LIFEOS.MUZIK = (function(){
   /* Açılış kesiti. Döner: çalmaya başladı mı. dinle: Ayarlar'daki «Kesiti dinle»
      (ne/gün kuralına bakmaz, günü işaretlemez). */
   function acilisCal(dinle){
-    const a = d().acilis;
-    if(!a.id || (a.ne === 'kapali' && !dinle) || !parca(a.id)) return false;
+    const a = d().acilis, x = dinle ? (a.id && parca(a.id) ? { id:a.id, bas:a.bas, bit:a.bit } : null) : yerKesiti(ortam.yer());
+    if(!x) return false;
     const gun = ortam.simdi().toISOString().slice(0, 10);
-    if(a.ne === 'gunde' && !dinle){
-      let son = null;
-      try{ son = localStorage.getItem(ACILIS_GUN); }catch(e){ /* depo yok */ }
-      if(son === gun) return false;
-    }
-    if(!dinle) try{ localStorage.setItem(ACILIS_GUN, gun); }catch(e){ /* depo yok */ }
+    if(a.ne === 'gunde' && !dinle && depoAl(x.gun) === gun) return false;
+    if(!dinle) try{ localStorage.setItem(x.gun, gun); }catch(e){ /* depo yok */ }
     const s = oge();
     if(!s) return false;
     radyoSustur();
     kip = 'acilis';
-    kuyruk = [a.id]; sira = 0;
-    s.src = '/api/muzik/parca/' + a.id;
+    kuyruk = [x.id]; sira = 0;
+    s.src = '/api/muzik/parca/' + x.id;
     s.volume = a.ses;
-    kesitSonu = a.bit;
-    const basla = () => { try{ s.currentTime = a.bas; }catch(e){ /* yok */ } };
+    kesitSonu = x.bit;
+    const basla = () => { try{ s.currentTime = x.bas; }catch(e){ /* yok */ } };
     if(s.readyState >= 1) basla(); else s.addEventListener('loadedmetadata', basla, { once:true });
     oynat();
     guncelle();
@@ -302,6 +320,9 @@ window.LIFEOS.MUZIK = (function(){
     const ust = Math.min(600, Math.max(1, Math.ceil(sureler[a.id] || 600)));
     const acilis = (x.parcalar.length ? '<label class="skart__satir"><span class="skart__etiket">Parça</span><select class="ayarlar__girdi skart__secim" data-muzik-acilis="id" aria-label="Açılış parçası">'
         + '<option value="">Seçilmedi</option>' + x.parcalar.map(p => '<option value="' + p.id + '"' + (a.id === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>').join('') + '</select></label>' : '')
+      + (x.parcalar.length ? '<div class="skart__satir"><span class="skart__etiket">Nerede</span>' + seg('Nerede', [['giris', 'İlk girişte'], ['her', 'Her modülde'], ['ayri', 'Yer başına']], yerKipi(), 'data-muzik-yer') + '</div>'
+        + (yerKipi() === 'ayri' ? YERLER.map(y => { const v = depoAl(YER + '.' + y) || ''; return '<label class="skart__satir"><span class="skart__etiket">' + YER_AD[y] + '</span><select class="ayarlar__girdi skart__secim" data-muzik-yerparca="' + y + '" aria-label="' + YER_AD[y] + ' açılış parçası">'
+          + '<option value="">Çalmasın</option>' + x.parcalar.map(p => '<option value="' + p.id + '"' + (v === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>').join('') + '</select></label>'; }).join('') : '') : '')
       + '<div class="skart__satir"><span class="skart__etiket">Ne zaman</span>' + seg('Ne zaman', [['kapali', 'Kapalı'], ['her', 'Her açılışta'], ['gunde', 'Günde bir']], a.ne, 'data-muzik-acilis-ne', v => !a.id && v !== 'kapali') + '</div>'
       + (a.id ? '<details class="skart__ayrinti" data-muzik-ayrinti' + (ayrintiAcik ? ' open' : '') + '><summary>Kesit ve ses <small>' + kac(kesitYaz(a)) + ' · %' + Math.round(a.ses * 100) + '</small></summary>'
         + '<div class="skart__satir skart__satir--ust"><span class="skart__etiket">Kesit<small data-muzik-kesit-yazi>' + kac(kesitYaz(a)) + '</small></span><div class="skart__kesit">'
@@ -376,6 +397,8 @@ window.LIFEOS.MUZIK = (function(){
       }
       const an = t.closest('[data-muzik-acilis-ne]');
       if(an){ e.preventDefault(); ayarKaydet({ acilis:Object.assign({}, d().acilis, { ne:an.getAttribute('data-muzik-acilis-ne') }) }); return; }
+      const yr = t.closest('[data-muzik-yer]');
+      if(yr){ e.preventDefault(); yerYaz(YER, yr.getAttribute('data-muzik-yer') === 'giris' ? null : yr.getAttribute('data-muzik-yer')); guncelle(true); return; }
       const lsec = t.closest('[data-muzik-listesec]');
       if(lsec){ e.preventDefault(); seciliListe = lsec.getAttribute('data-muzik-listesec'); guncelle(true); return; }
       const ks = t.closest('[data-muzik-karistir]');
@@ -392,6 +415,12 @@ window.LIFEOS.MUZIK = (function(){
         const alan = t.getAttribute('data-muzik-acilis'), n = Number(t.value), a = d().acilis;
         const v = alan === 'id' ? (t.value || null) : alan === 'ses' ? n / 100 : alan === 'bas' ? Math.min(n, a.bit - 1) : Math.max(n, a.bas + 1);
         ayarKaydet({ acilis:Object.assign({}, a, { [alan]:v }, alan === 'id' && !v ? { ne:'kapali' } : {}) });
+        return;
+      }
+      if(t.matches('[data-muzik-yerparca]')){
+        yerYaz(YER + '.' + t.getAttribute('data-muzik-yerparca'), t.value || null);
+        const a = d().acilis;   // ilk yer parçası açılışın parçası olur: «Ne zaman» açılabilsin (sunucu parçasızı kapatır)
+        if(t.value && !a.id) ayarKaydet({ acilis:Object.assign({}, a, { id:t.value, ne:'her' }) }); else guncelle(true);
         return;
       }
       if(t.matches('[data-muzik-arka-ses]')){ const v = Number(t.value) / 100; ayarKaydet({ arka:Object.assign({}, d().arka, { ses:v }) }); if(kip === 'arka' && ses) ses.volume = v; }
@@ -428,14 +457,14 @@ window.LIFEOS.MUZIK = (function(){
     window.addEventListener('lifeos:ses', e => { const h = e.detail && e.detail.hal; if((h === 'caliyor' || h === 'baglaniyor') && kip) durdur(); });
   }
 
-  /* Açılış müziği seçim sayfasında (giriş, 4180) çalar (kullanıcı, 2026-10-30:
-     «AYS, SPİ, ESP'yi seçmediğimiz yerde bile başlasın»); oradan açılan
-     modülde ikinci kez çalmaz, arka plan müziğiyle sürer. */
-  const giristen = () => typeof document !== 'undefined' && /^https?:\/\/[^/]+:4180(\/|$)/.test(String(document.referrer || ''));
+  function yerYaz(k, v){ try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){ /* depo yok */ } }
+  /* Açılış müziği nerede çalar: yerKesiti (kullanıcı, 2026-11-02). Giriş sayfasının
+     açılış videosu (sunucu.py) varsa müzik onun bitmesini bekler. */
   function acilis(){
     bagla();
     if(!isaretVar()) return Promise.resolve(null);
-    return yukle().then(v => { if(v && (giristen() || !acilisCal())) arkaBaslat(); });
+    const video = typeof window !== 'undefined' && window.__LIFEOS_ACILIS_VIDEO__;
+    return Promise.resolve(video).then(yukle).then(v => { if(v && !acilisCal()) arkaBaslat(); });
   }
   if(typeof document !== 'undefined' && typeof window !== 'undefined' && !window.__LIFEOS_TEST__){
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', acilis, { once:true });
@@ -444,6 +473,6 @@ window.LIFEOS.MUZIK = (function(){
 
   function _ortam(o){ ortam = Object.assign({}, VARSAYILAN_ORTAM, o || {}); }
   function _sifirla(v){ durdur(); dizin = v || null; kuyruk = []; sira = 0; susturuldu = false; mesajMetni = ''; }
-  return Object.freeze({ LISTELER, LISTE_AD, ACILIS_GUN, VAR_ANAHTAR, yukle, cal, sonraki, durdur, acilisCal, arkaBaslat, susturAc, oturum, durum,
+  return Object.freeze({ LISTELER, LISTE_AD, ACILIS_GUN, VAR_ANAHTAR, YER, YERLER, yukle, yerKesiti, cal, sonraki, durdur, acilisCal, arkaBaslat, susturAc, oturum, durum,
     panelHtml, ayarHtml, liste, bagla, _ortam, _sifirla, _ses:() => oge() });
 })();

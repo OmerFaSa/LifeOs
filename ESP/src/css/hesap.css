@@ -55,6 +55,11 @@
 .hesap__durum.is-hata, .hesap__durum.is-baska{ color:var(--bad-ink, var(--bad)); }
 .hesap__mesaj{ margin:2px 2px 10px; font-size:13px; color:var(--text); }
 .hesap__not{ margin:12px 2px 0; font-size:12.5px; line-height:1.5; color:var(--text-2); }
+/* Ayar çakışması (hesap.js cakismaHtml): son üç satır; ayar adı, kazanan, saat. */
+.hesap__cakisma ul{ list-style:none; margin:6px 0 0; padding:0; display:grid; gap:2px; }
+.hesap__cakisma li{ display:grid; grid-template-columns:auto 1fr auto; align-items:baseline; gap:8px; padding:6px 2px; border-top:1px solid var(--border-soft, var(--border)); font-size:12.5px; }
+.hesap__cakisma li span{ color:var(--text-2); }
+.hesap__cakisma li small{ color:var(--text-3, var(--text-2)); font-variant-numeric:tabular-nums; }
 .hesap__not code{ font-size:12px; }
 
 .hesap__form{ display:flex; flex-direction:column; gap:12px; margin:4px 0 0; }

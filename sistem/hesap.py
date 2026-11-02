@@ -2425,6 +2425,18 @@ def isle(h):
                 return _cevap(h, 200, d.esitle(k, v.get("alan"), cihaz, son if isinstance(son, int) else -1,
                                                v.get("gonder") or [], v.get("sinir") or SINIR, _jeton(h),
                                                v.get("yalniz_gonder") is True))
+            if yol == "/api/hesap/ayar-esitle":
+                # Ortak ayarlar telefonla iki yonlu (sistem/ayar.py soz 5): PC'deki tek
+                # kopya, son yazan kazanir. Sistem ayari bilgisayarin sahibinindir.
+                if k.get("rol") != "admin":
+                    raise Hata(403, "Sistem ayarları yalnız bilgisayarın sahibinin hesabıyla eşitlenir.")
+                import ayar
+                son = v.get("son", 0)
+                try:
+                    return _cevap(h, 200, ayar.esitle(cihaz, cihaz_ad or "Telefon", son, v.get("gonder") or {}))
+                except ValueError as e:
+                    kod, cumle = e.args[0] if e.args and isinstance(e.args[0], tuple) else (400, "Ayar okunamadı.")
+                    raise Hata(kod, cumle)
             if yol == "/api/hesap/cikis":
                 d.cikis(_jeton(h), ip)
                 return _cevap(h, 200, {"ok": True})

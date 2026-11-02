@@ -13,7 +13,7 @@ durur ve her kapidan ayni adresle okunur:
   POST   /api/zemin/<yuva>    govde = dosya, Content-Type = turu
   DELETE /api/zemin/<yuva>    siler
 
-Yuvalar: gunduz, gece. Sozler:
+Yuvalar: gunduz, gece, acilis (giris sayfasinin acilis videosu, 2026-11-02). Sozler:
   1. YALNIZ BU BILGISAYAR. Okuma da yazma da yalniz 127.0.0.1'den: kisisel
      fotograf ev agindan (telefon, tablet) okunamaz. Telefon modulun kendi
      fotografini gorur.
@@ -31,7 +31,7 @@ import io
 import os
 import re
 
-YUVALAR = ("gunduz", "gece")
+YUVALAR = ("gunduz", "gece", "acilis")
 TURLER = {
     "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp",
     "video/mp4": ".mp4", "video/webm": ".webm", "video/x-m4v": ".m4v", "video/quicktime": ".mov",

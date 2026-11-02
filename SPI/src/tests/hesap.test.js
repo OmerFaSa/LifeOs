@@ -2396,4 +2396,44 @@
       }
     });
   });
+  describe('Hesap — ortak ayarlar telefonla (2026-11-02)', () => {
+    it('değişeni gönderir, sunucunun hâlini uygular, kazananı panelde gösterir; ikinci turda yalnız değişen gider', async () => {
+      const h = H(), eski = Object.assign({}, h._ortam), ls = {}, giden = [];
+      const tut = ['lifeos.tema.secim', 'lifeos.muzik.yer'], once = tut.map(k => localStorage.getItem(k));
+      const pcAyar = window.__LIFEOS_AYAR__;
+      try{
+        delete window.__LIFEOS_AYAR__;
+        localStorage.setItem('lifeos.tema.secim', 'dark');
+        localStorage.removeItem('lifeos.muzik.yer');
+        Object.assign(h._ortam, { simdi:() => 5000, zamanla:() => 0, iptal:() => {},
+          depo:{ oku:k => (ls[k] === undefined ? null : JSON.parse(ls[k])), yaz:(k, v) => { ls[k] = JSON.stringify(v); return true; }, sil:k => { delete ls[k]; } },
+          fetch:(u, o) => { giden.push([u, JSON.parse(o.body), o.headers]);
+            return Promise.resolve(new Response(JSON.stringify({ ayar:{ 'lifeos.tema.secim':'light', 'lifeos.muzik.yer':'ayri' }, iz:{}, son:9000, kabul:0, red:[],
+              cakisma:giden.length === 1 ? [{ k:'lifeos.tema.secim', z:9000, kazanan:'Bu bilgisayar', kaybeden:'iPhone' }] : [] }), { status:200 })); } });
+        h._ayarSifirla();
+        const c = await h._ayarTur({ j:'jeton', a:'omer' }, 'https://pc:5173');
+        expect(!!c).toBe(true);
+        expect(giden[0][0]).toBe('https://pc:5173/api/hesap/ayar-esitle');
+        expect(giden[0][2].Authorization).toBe('Bearer jeton');
+        expect(giden[0][1].son).toBe(0);                                   // ilk eşitleme: sunucudakini ezmez
+        expect(giden[0][1].gonder['lifeos.tema.secim'].d).toBe('dark');
+        expect(localStorage.getItem('lifeos.tema.secim')).toBe('light');
+        expect(localStorage.getItem('lifeos.muzik.yer')).toBe('ayri');
+        const html = h._cakismaHtml();
+        expect(html).toContain('Tema');
+        expect(html).toContain('Bu bilgisayar kazandı');
+        localStorage.setItem('lifeos.muzik.yer', 'her');
+        h._ayarSifirla();
+        await h._ayarTur({ j:'jeton', a:'omer' }, 'https://pc:5173');
+        expect(giden[1][1].son).toBe(9000);
+        expect(Object.keys(giden[1][1].gonder).join(',')).toBe('lifeos.muzik.yer');
+        expect(giden[1][1].gonder['lifeos.muzik.yer'].d).toBe('her');
+      }finally{
+        Object.assign(h._ortam, eski);
+        h._ayarSifirla();
+        if(pcAyar !== undefined) window.__LIFEOS_AYAR__ = pcAyar;
+        tut.forEach((k, j) => { if(once[j] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[j]); });
+      }
+    });
+  });
 })();

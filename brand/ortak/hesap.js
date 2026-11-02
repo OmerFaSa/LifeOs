@@ -565,6 +565,7 @@ window.LIFEOS.HESAP = (function(){
       }
       durumYaz('tamam', '');
       ekTur(o, base);                                  // söz 20: arkada, beklenmez
+      ayarTur(o, base);                                // ortak ayarlar: arkada, beklenmez
     }catch(e){
       if(e.kod === 401){
         cerezSil(CEREZ);
@@ -615,6 +616,77 @@ window.LIFEOS.HESAP = (function(){
         cihaz:cihazKimligi() }, o.j, DURUM_ZAMAN_ASIMI);
     }
   }
+  /* ORTAK AYARLAR TELEFONLA (kullanıcı, 2026-11-02: «ayarlar telefonla aynı Wi-Fi
+     üzerinden iki yönlü eşitlensin; çakışmada son yazan kazansın ama hangisinin
+     kazandığı görünür olsun»). Sistem ayarlarının tek kopyası PC'dedir (sistem/
+     ayar.py). PC'nin kendi sayfası onu zaten doğrudan okur ve yazar
+     (animasyon.js); bu yol yalnız ÖTEKİ cihazlar için: değişen anahtarlar
+     `/api/hesap/ayar-esitle`'ye gider, sunucunun hâli iner. İnen anahtar için
+     sayfaya `storage` olayı atılır: görünüş, arka plan ve minikler yeniden
+     uygulanır. Sunucunun söylediği çakışmalar (kazanan, kaybeden) burada
+     saklanır ve Hesap panelinde görünür; PC sayfası onları /api/ayar'dan okur.
+     shortcut: değişikliğin zamanı fark edildiği an (tur dakikada bir); çevrimdışı
+     uzun beklemiş bir değişiklik geç sayılabilir. Gerekirse animasyon.js yazarken
+     zaman damgası tutar. */
+  const AYAR_ARALIK = 15000;
+  let ayarAktif = false, sonAyar = -Infinity;
+  function ortakDuzen(){ return L.ANIMASYON && L.ANIMASYON.ORTAK; }
+  function ortakAnlik(re){
+    const o = {};
+    try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(re.test(k)) o[k] = localStorage.getItem(k); } }catch(e){ /* depo yok */ }
+    return o;
+  }
+  function cakismaEkle(liste){
+    if(!Array.isArray(liste) || !liste.length) return;
+    const eski = ortam.depo.oku(anahtar('ayar', 'cakisma')) || [];
+    ortam.depo.yaz(anahtar('ayar', 'cakisma'), liste.concat(Array.isArray(eski) ? eski : []).slice(0, 20));
+  }
+  async function ayarTur(o, base){
+    const re = ortakDuzen(), simdi = ortam.simdi();
+    if(ayarAktif || !re || simdi - sonAyar < AYAR_ARALIK || typeof localStorage === 'undefined') return null;
+    ayarAktif = true; sonAyar = simdi;
+    try{
+      if(typeof window !== 'undefined' && window.__LIFEOS_AYAR__){
+        /* PC sayfası: yalnız çakışma listesi (yazmayı animasyon.js yapar). */
+        const r = await ortam.fetch('/api/ayar', { cache:'no-store' });
+        const v = r && r.ok ? await r.json() : null;
+        if(v && Array.isArray(v.cakisma)) ortam.depo.yaz(anahtar('ayar', 'cakisma'), v.cakisma.slice(0, 20));
+        return null;
+      }
+      const st = ortam.depo.oku(anahtar('ayar', 'esit')) || {}, yerel = ortakAnlik(re), gonder = {};
+      const once = st.onceki && typeof st.onceki === 'object' ? st.onceki : null;
+      Object.keys(yerel).forEach(k => { if(!once || once[k] !== yerel[k]) gonder[k] = { d:yerel[k], z:simdi }; });
+      if(once) Object.keys(once).forEach(k => { if(!(k in yerel)) gonder[k] = { d:null, z:simdi }; });
+      const c = await istek(base, '/api/hesap/ayar-esitle', { cihaz:cihazKimligi(), cihaz_ad:cihazAdi(),
+        son:once ? (Number(st.son) || 0) : 0, gonder }, o.j, DURUM_ZAMAN_ASIMI);
+      if(!c || !c.ayar || typeof c.ayar !== 'object') return null;
+      const degisen = [];
+      Object.keys(c.ayar).forEach(k => { if(re.test(k) && typeof c.ayar[k] === 'string' && yerel[k] !== c.ayar[k]){ try{ localStorage.setItem(k, c.ayar[k]); degisen.push(k); }catch(e){} } });
+      Object.keys(yerel).forEach(k => { if(!(k in c.ayar) && c.iz && c.iz[k]){ try{ localStorage.removeItem(k); degisen.push(k); }catch(e){} } });
+      ortam.depo.yaz(anahtar('ayar', 'esit'), { son:c.son, onceki:ortakAnlik(re), zaman:simdi });
+      cakismaEkle(c.cakisma);
+      if(typeof window !== 'undefined' && typeof StorageEvent === 'function') degisen.forEach(k => { try{ window.dispatchEvent(new StorageEvent('storage', { key:k })); }catch(e){} });
+      if(degisen.length || (c.cakisma && c.cakisma.length)) panelTazele();
+      return c;
+    }catch(e){ return null; /* sessiz: sonraki turda yeniden (403: sahibin hesabı değil) */ }
+    finally{ ayarAktif = false; }
+  }
+  /* Ayar adı ekranda iç terim olmadan (AGENTS kural 8). */
+  function ayarAdi(k){
+    const t = [[/^lifeos\.tema/, 'Tema'], [/^lifeos\.(zemin|manzara)/, 'Arka plan'], [/^lifeos\.acilis\.video/, 'Açılış videosu'],
+      [/^lifeos\.muzik/, 'Açılış müziği'], [/^lifeos\.(ses|sessiz)/, 'Ses'], [/^lifeos\.minik/, 'Minikler'], [/^lifeos\.king/, 'King'],
+      [/^lifeos\.profil/, 'Profil'], [/^lifeos\.(hareket)/, 'Hareket'], [/^lifeos\.(yazi|boyut|satir)/, 'Yazı']].find(x => x[0].test(k));
+    return t ? t[1] : 'Görünüm';
+  }
+  function cakismaHtml(){
+    const l = ortam.depo.oku(anahtar('ayar', 'cakisma'));
+    if(!Array.isArray(l) || !l.length) return '';
+    const saat = z => { const d = new Date(Number(z) || 0); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); };
+    return '<div class="hesap__cakisma" role="group" aria-label="Ayar çakışmaları"><p class="hesap__not">Ayar çakışması: son yazan kazanır</p><ul>'
+      + l.slice(0, 3).map(x => '<li><b>' + kac(ayarAdi(String(x.k || ''))) + '</b><span>' + kac(String(x.kazanan || '')) + ' kazandı</span><small>' + saat(x.z) + '</small></li>').join('')
+      + '</ul></div>';
+  }
+
   /* İçerik imzası: takvim damgası (DTSTAMP, her üretimde değişir) sayılmaz. */
   function imza(metin){
     const s = String(metin).replace(/^DTSTAMP:.*$/gm, '');
@@ -2887,7 +2959,7 @@ window.LIFEOS.HESAP = (function(){
       + '<div class="hesap__eylem">'
       +   '<button type="button" class="hesap__ana" data-hesap="esitle">Şimdi eşitle</button>'
       +   '<button type="button" class="hesap__ikinci" data-hesap="cikis">Çıkış yap</button>'
-      + '</div>';
+      + '</div>' + cakismaHtml();
   }
 
   function panelHtml(){
@@ -3502,7 +3574,7 @@ window.LIFEOS.HESAP = (function(){
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
     bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
-    _ortam:ortam, _sifirla, _istek:istek, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
+    _ortam:ortam, _sifirla, _istek:istek, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,
   };
 })();
