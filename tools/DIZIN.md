@@ -46,6 +46,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `hafiza_olcum_kume.json` — Hafıza arama ölçüm aracı için 24 adet Türkçe soru ve bilgi çifti içeren test kümesi verisidir.
 - `king_kapsam.js` — King kapsam testi; her modülün yazma işlevi ve rotası bir King aracına bağlı mı, eksik varsa çıkış 1 (KING-4 A2).
 - `king_kapsam.json` — `king_kapsam.js`'in eşlemesi: Model işlevi ve rota → araç adı ya da «-: neden».
+- `king_guven.js` — King güven denetimi (KING-4 §G); izin kademeleri (oku, yaz, dış) bütün araçlarda tutarlı mı, değilse çıkış 1.
 - `kapsam.js` — Birim testlerinin hangi işlevleri çalıştırdığını V8 precise coverage ile ölçer, CI'da veya elle koşulur.
 - `merdiven_olcum.py` — KING-4 A6 model merdivenini (kolay yerel, zor bulut, kota düşüşü) ölçer, gerektiğinde koşulur.
 - `olcum_modul.js` — Modülün açılış, kapsam, depolama ve rota performansını tek komutla ölçer, optimizasyon turlarında koşulur.
@@ -57,7 +58,9 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `ays_sure_kabul_test.py` — Görev 010 kabul testi; AYS konuşarak süre ve uyku girişi ayrıştırmasını sınar, CI'da koşulur.
 - `ays_deney_kabul_test.py` — Görev 073 kabul testi; AYS kişisel deney motoru (R.Deney) atama ve sonucunu sınar, CI'da koşulur.
 - `ays_takvim_tekrar_kabul_test.py` — Görev 013 kabul testi; AYS takvim içe aktarma tekrar kuralı açılımını sınar, CI'da koşulur.
+- `ayar_esit_kabul_test.py` — Görev 081 kabul testi; ortak ayarların telefonla eşitlenmesini (son yazan kazanır, çakışma kaydı, mezar taşı, kapılar) sınar, CI'da koşulur.
 - `belge_dizin_kabul_test.py` — Görev 018 kabul testi; belgeler/DIZIN.md dizininin tamlığını ve bağlantılarını sınar.
+- `bilgisayar_kabul_test.py` — Görev 080 kabul testi; King'in bilgisayar araçlarının platform katmanını (sistem/bilgisayar.py) sahte çağrılarla sınar, CI'da koşulur.
 - `esp_sure_kabul_test.py` — Görev 011 kabul testi; ESP serbest oturum süre girişinin Türkçe sayı motoruyla okunmasını sınar, CI'da koşulur.
 - `ice_suren_kabul_test.py` — Görev 007 kabul testi; Google Takvim içe aktarımında süren etkinliklerin doğru çözümlenmesini sınar, CI'da koşulur.
 - `hafiza_olcum_kabul_test.py` — Görev 050 kabul testi; HKM hafıza aramasının kök ve gömme ile ölçümünü sınar.
