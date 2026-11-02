@@ -111,6 +111,55 @@ R.Screens.gelecek = (function(){
           ${U.fmtNet(e.alt * 100)}–${U.fmtNet(e.ust * 100)} kaydırıyor. Bu bir ilişkidir; kesin neden-sonuç değildir.</p>` });
   }
 
+  /* ---------- kişisel deney (KOLAY Faz 5, core/deney.js) ----------
+     Tek şablon: sabah mı akşam mı? Kod her güne bir koşul yazar (iki
+     günde bir ikisi de); ölçü günün sorusu. Kaydı olmayan gün ve bugün
+     (gün bitmedi) sayılmaz. «Etki» ve sürgü yalnız biten deneyde. */
+  const DENEY = { gun:14, kosullar:['sabah', 'aksam'] };
+  const KOSUL = { sabah:'sabah', aksam:'akşam' };
+  const bir = v => (Math.round(v * 10) / 10).toLocaleString('tr-TR');
+
+  function deneyOlcumleri(d, bugun){
+    return Array.from({ length:d.gun }, (_, i) => U.iso(U.addDays(d.baslangic, i))).filter(t => t < bugun)
+      .map(t => ({ tarih:t, deger:S.days[t] ? R.Calc.gunSorusu(S.days[t]) : null }));
+  }
+  function deneyKarti(){
+    if(!R.Deney) return '';
+    const d = S.profile && S.profile.deney, bugun = U.todayISO();
+    if(!d){
+      return K.Card({ title:'Kişisel deney', sub:'sabah mı akşam mı?', body:html`
+        <p class="small">${DENEY.gun} gün boyunca kod her güne <b>sabah</b> ya da <b>akşam</b> yazar; o gün çalışmanı o saatte yaparsın.
+          Sonunda günlük soru sayın iki koşulda karşılaştırılır. Kaydı olmayan gün sayılmaz.</p>
+        <div class="row mt-8"><button class="btn btn--primary" data-act="deney-baslat">Yarın başlat</button></div>` });
+    }
+    const s = R.Deney.sonuc(d, deneyOlcumleri(d, bugun), bugun);
+    const bugunKosul = R.Deney.ata(d, bugun), gecen = Math.max(0, Math.min(d.gun, U.diffDays(d.baslangic, bugun)));
+    const ust = s.durum === 'tamam' ? 'Bitti' : bugunKosul ? html`Bugün <b>${KOSUL[bugunKosul]}</b> çalış · ${gecen + 1}/${d.gun}. gün`
+      : html`Yarın başlıyor: <b>${KOSUL[R.Deney.ata(d, U.iso(U.addDays(bugun, 1)))]}</b>`;
+    let govde;
+    if(s.durum === 'yetersiz') govde = html`<p class="small mt-8">${s.neden} Şu an sabah ${s.n.sabah}, akşam ${s.n.aksam} gün.</p>`;
+    else{
+      const iyi = s.fark >= 0 ? 'akşam' : 'sabah', f = Math.abs(s.fark);
+      const [a, b] = s.fark >= 0 ? s.aralik : [-s.aralik[1], -s.aralik[0]];
+      govde = html`<p class="small mt-8">${s.durum === 'tamam' ? 'Sonuç (etki)' : 'Ara sonuç'}: ${s.anlamli
+          ? html`<b>${iyi}</b> günlerinde ortalama <b>${bir(f)}</b> soru fazla` : 'iki koşul arasında ayırt edilir bir fark yok'};
+          %95 aralık ${bir(a)} – ${bir(b)} (sabah ${s.n.sabah}, akşam ${s.n.aksam} gün).</p>
+        ${when(R.Deney.surguAcik(s) && s.anlamli, () => deneySurgu(iyi, f, a, b))}`;
+    }
+    return K.Card({ title:'Kişisel deney', sub:'sabah mı akşam mı?', body:html`
+      <p class="small">${ust}</p>${govde}
+      <div class="row mt-8"><button class="btn" data-act="deney-bitir">${s.durum === 'tamam' ? 'Yeni deney' : 'Deneyi bırak'}</button></div>` });
+  }
+  /* Sürgü yalnız biten ve ayırt edilen deneyle (Faz 5 kabulü): etki ölçülenle çarpılır, uydurma katsayı yok. */
+  function deneySurgu(iyi, f, a, b){
+    const g = Math.max(0, Math.min(7, Number(S.ui.deneyGun) || 0));
+    return html`<label class="gel-surgu mt-8">
+        <span class="small">Haftada <b>${g}</b> gün ${iyi} çalışırsam</span>
+        <input type="range" min="0" max="7" step="1" value="${g}" data-change="deney-gun" aria-label="Haftada kaç gün ${iyi}"/>
+      </label>
+      ${when(g, () => html`<p class="small mt-8">Haftalık soru, hiç ${iyi} çalışmadığın haftaya göre yaklaşık <b>+${bir(f * g)}</b> (${bir(a * g)} – ${bir(b * g)}; tahmin).</p>`)}`;
+  }
+
   /* ---------- nasıl hesaplandı ---------- */
   function yontem(r){
     const k = R.Calc.buHizla ? R.Calc.buHizla() : null;
@@ -126,10 +175,19 @@ R.Screens.gelecek = (function(){
 
   async function render(){
     const r = R.Gelecek.hesapla({ ekSoru:Number(S.ui.gelecekEkSoru) || 0 });
-    return String(html`${sinavKarti(r)}${raw(String(grafik(r)))}${neOlursa(r)}${yontem(r)}`);
+    return String(html`${sinavKarti(r)}${raw(String(grafik(r)))}${neOlursa(r)}${deneyKarti()}${yontem(r)}`);
   }
 
+  const handle = {
+    async 'deney-baslat'(){
+      S.profile.deney = Object.assign({ id:'sabah-aksam-' + U.todayISO(), baslangic:U.iso(U.addDays(U.todayISO(), 1)) }, DENEY);
+      await R.Model.saveProfile(); R.App.render();
+    },
+    async 'deney-bitir'(){ delete S.profile.deney; await R.Model.saveProfile(); R.App.render(); },
+  };
+
   const change = {
+    async 'deney-gun'(el){ S.ui.deneyGun = Math.max(0, Math.min(7, Number(el.value) || 0)); R.App.render(); },
     async 'gelecek-ek'(el){
       const v = Math.max(SURGU.min, Math.min(SURGU.max, Number(el.value) || 0));
       S.ui.gelecekEkSoru = v;
@@ -143,6 +201,6 @@ R.Screens.gelecek = (function(){
     title:'Gelecek',
     subtitle(){ return 'Sınav gününe kadar bu gidişle, ve ne olursa'; },
     actions(){ return ''; },
-    render, handle:{}, change,
+    render, handle, change,
   };
 })();

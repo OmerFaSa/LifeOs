@@ -12,7 +12,7 @@ import kabul_js as J  # noqa: E402
 
 DOSYALAR = ["src/js/core/utils.js", "src/js/core/deney.js"]
 D = "({ id:'sabah-aksam-mat', baslangic:'2026-11-03', gun:14, kosullar:['sabah','aksam'] })"
-GUNLER = "Array.from({ length:14 }, (_, i) => R.U.addDays('2026-11-03', i))"
+GUNLER = "Array.from({ length:14 }, (_, i) => R.U.iso(R.U.addDays('2026-11-03', i)))"
 A = [10, 12, 11, 13, 9, 10, 11]
 B = [x + 2 for x in A]   # fark tam 2; ortak varyans 1.8095, df 12, t=2.1788 -> yari genislik 1.5666
 

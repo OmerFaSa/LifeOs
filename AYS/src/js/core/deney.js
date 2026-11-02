@@ -188,19 +188,6 @@ R.Deney = (function(){
     };
   }
 
-  /* Tarih nesnesi ile ISO dize karşılaştırma toleransı (kabul testinde bos.includes(t) için). */
-  if(typeof Array !== 'undefined' && Array.prototype && Array.prototype.includes){
-    const _eskiIncludes = Array.prototype.includes;
-    Array.prototype.includes = function(aranan, baslangic){
-      if(_eskiIncludes.call(this, aranan, baslangic)) return true;
-      if(aranan instanceof Date && typeof U === 'function' && U() && U().iso){
-        const isoDize = U().iso(aranan);
-        if(_eskiIncludes.call(this, isoDize, baslangic)) return true;
-      }
-      return false;
-    };
-  }
-
   function surguAcik(res){
     return Boolean(res && res.durum === 'tamam');
   }

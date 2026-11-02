@@ -248,7 +248,7 @@ korunur ama kolaylık fazlarının arkasına geçer; simülatör yapıldı.
 | 2 · Basit görünüm | bekliyor | — | |
 | 3 · Telefonda tek dokunuş | bekliyor | — | |
 | 4 · Otopilot 2–3 | bekliyor | — | |
-| 5 · Deney motoru | sürüyor | — | 5a hesap çekirdeği ofiste (görev 073, `tools/ays_deney_kabul_test.py`); 5b kart ve sürgü (Claude), 5c modüller arası sonra |
+| 5 · Deney motoru | 5a+5b yapıldı | `R.Deney` (073), Gelecek kartı | AYS Analiz › Gelecek › Kişisel deney: sabah mı akşam mı (14 gün, günün sorusu); sürgü yalnız biten ve ayırt edilen deneyde. Açık: 5c modüller arası (SPİ uyku → AYS net, ESP odak), başka şablonlar |
 | 6 · Kendini sadeleştiren arayüz | bekliyor | — | |
 | 7 · Görünmez giriş, hayat pusulası | bekliyor | — | |
 | 8 · Haftalık değerlendirme | bekliyor | — | |

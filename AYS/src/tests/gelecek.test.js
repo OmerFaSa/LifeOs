@@ -97,5 +97,26 @@
       expect(h).toContain('en az 4');
       expect(h.indexOf('NaN') < 0).toBe(true);
     });
+    it('kişisel deney: başlamamışsa başlat; biten deneyde etki ve sürgü (KOLAY Faz 5)', async () => {
+      resetState();
+      let h = String(await R.Screens.gelecek.render());
+      expect(h).toContain('data-act="deney-baslat"');
+      const bas = R.U.iso(R.U.addDays(R.U.todayISO(), -15));
+      const d = { id:'t', baslangic:bas, gun:14, kosullar:['sabah', 'aksam'] };
+      R.S.profile.deney = d;
+      for(let i = 0; i < 14; i++){
+        const t = R.U.iso(R.U.addDays(bas, i));
+        R.S.days[t] = { freeQ:(R.Deney.ata(d, t) === 'aksam' ? 50 : 30) + i % 3 };
+      }
+      h = String(await R.Screens.gelecek.render());
+      expect(h).toContain('Sonuç (etki)');
+      expect(h).toContain('data-change="deney-gun"');
+      expect(h.indexOf('NaN') < 0).toBe(true);
+      R.S.profile.deney = Object.assign({}, d, { baslangic:R.U.todayISO() });   // süren deney: sürgü yok
+      h = String(await R.Screens.gelecek.render());
+      expect(h).toContain('Bugün');
+      expect(h.indexOf('deney-gun') < 0).toBe(true);
+      delete R.S.profile.deney;
+    });
   });
 })();
