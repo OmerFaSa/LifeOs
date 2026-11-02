@@ -16194,6 +16194,47 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 .king__balon--onay > div{ border:1px solid var(--border-strong); border-radius:var(--r-md); padding:var(--sp-3); }
 @media (prefers-reduced-motion:reduce){ .king__adim.is-calisiyor i{ animation:none; } }
 
+/* KING-4 §H yardım kartları: brifing, eksik kayıt, haftalık rapor, alışkanlık saati, düzeltme.
+   Mevcut kart dili (yüzey 2, etiket hapı, tabular rakam); renk yok, hiyerarşi boyut ve ağırlıkla. */
+.king__yardim{ margin-top:10px; }
+.king__brifing{ display:grid; grid-template-columns:minmax(0, 1.4fr) minmax(0, 1fr); gap:8px; }
+.king__brifing section{ display:grid; align-content:start; gap:3px; padding:10px 12px; border-radius:14px; background:var(--surface-2); min-width:0; }
+.king__brifing h4{ margin:0 0 2px; font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--text-2); }
+.king__brifing .king__brifing-oneri{ grid-column:1 / -1; }
+.king__brifing .king__brifing-oneri p{ margin:0; font-size:14px; font-weight:550; color:var(--text); }
+.king__brifing .king__yardim-dinle{ grid-column:1 / -1; justify-self:start; }
+.king__plan{ display:grid; gap:4px; margin:0; padding:0; list-style:none; }
+.king__plan li{ display:grid; grid-template-columns:3.2em minmax(0, 1fr); gap:6px; font-size:13.5px; color:var(--text); }
+.king__plan time{ font-variant-numeric:tabular-nums; color:var(--text-2); }
+.king__plan span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.king__plan li.is-tamam span{ color:var(--text-3, var(--text-2)); text-decoration:line-through; text-decoration-thickness:1px; }
+.king__yardim-bos{ margin:0; font-size:13px; color:var(--text-2); }
+.king__eksik{ display:flex; flex-wrap:wrap; gap:6px; }
+.king__eksik i{ display:inline-block; width:6px; height:6px; margin-right:7px; border-radius:50%; box-shadow:inset 0 0 0 1.5px var(--text-2); vertical-align:1px; }
+.king__fark.is-art::before{ content:'↑ '; }
+.king__fark.is-az::before{ content:'↓ '; }
+.king__aliskanlik{ display:grid; gap:1px; margin:10px 0 0; padding:0; list-style:none; border-radius:14px; overflow:hidden; }
+.king__aliskanlik li{ display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:0 10px; padding:9px 12px; background:var(--surface-2); font-size:13.5px; }
+.king__aliskanlik li small{ grid-column:1 / -1; font-size:11.5px; color:var(--text-2); }
+.king__aliskanlik-saat{ font-variant-numeric:tabular-nums; }
+.king__aliskanlik-saat s{ margin-right:6px; color:var(--text-2); }
+.king__aliskanlik-saat b{ font-weight:650; }
+.king__duzelt{ display:grid; gap:4px; padding:12px 14px; border-radius:16px; background:var(--surface-2); }
+.king__duzelt p{ display:flex; align-items:baseline; gap:10px; margin:0; font-variant-numeric:tabular-nums; }
+.king__duzelt s{ font-size:15px; color:var(--text-2); }
+.king__duzelt b{ font-size:22px; font-weight:650; letter-spacing:-.01em; }
+.king__duzelt p s::after{ content:'→'; display:inline-block; margin-left:10px; text-decoration:none; }
+.king__duzelt-dugme{ display:flex; gap:6px; margin-top:4px; }
+.king__duzelt.is-yazildi b::after{ content:' ✓'; font-size:15px; color:var(--text-2); }
+.king__duzelt.is-vazgecildi{ opacity:.55; }
+.king .king__yardim .king__cip{ background:transparent; box-shadow:inset 0 0 0 1px var(--border); color:var(--text); }
+.king .king__yardim .king__cip:hover{ background:var(--surface-2); }
+/* cam.css (yumuşak zemin) çipin zeminini camlaştırır; birincil düğme okunur kalsın. */
+.king .king__yardim .king__cip.king__cip--ana{ background:var(--text); color:var(--surface); box-shadow:none; }
+.king__neden-simdi{ margin:6px 0 0; font-size:12px; color:var(--text-2); }
+.king__neden-simdi span{ margin-right:4px; font-weight:600; }
+@media (max-width:420px){ .king__brifing{ grid-template-columns:1fr; } }
+
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/giris.css içine yazılır; burası bir sonraki
@@ -23621,7 +23662,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'8fbc1048', at:'2026-11-01 21:23', dirty:true };
+R.BUILD = { id:'b5115742', at:'2026-11-02 08:19', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -41933,7 +41974,9 @@ R.KingArac = (function(){
     ];
   }
 
-  function liste(){ return okuma().concat(yazma()).concat(modelAraclari()); }
+  /* Öğretme motorunun araçları (core/ogret.js): «bugünkü tekrarlarım», «neden yanlış yaptım». */
+  const ogret = () => R.Ogren && R.Ogren.ogretAraclar && window.LIFEOS && window.LIFEOS.OGRET ? R.Ogren.ogretAraclar() : [];
+  function liste(){ return okuma().concat(yazma()).concat(modelAraclari()).concat(ogret()); }
 
   return { liste, satirlar, bul };
 })();
@@ -42499,12 +42542,135 @@ R.KingVeri = (function(){
     };
   }
 
+  // 6) Sabah brifingi (KING-4 §H)
+  function brifing(simdi){
+    simdi = simdi || (R.U ? R.U.today() : new Date());
+    const U = R.U;
+    const gun = U.iso(simdi);
+    const days = (R.S && R.S.days) || {};
+
+    // 1) plan: bugünün maddeleri [{ ad, saat, tamam }], en çok 8
+    const bugunDay = days[gun];
+    const plan = [];
+    if(bugunDay && Array.isArray(bugunDay.blocks)){
+      for(let i = 0; i < bugunDay.blocks.length && plan.length < 8; i++){
+        const b = bugunDay.blocks[i];
+        if(!b) continue;
+        const subj = String(b.subject || '').trim();
+        const top = String(b.topic || '').trim();
+        let ad = top ? (subj ? subj + ' · ' + top : top) : subj;
+        if(!ad) ad = String(b.slot || 'Ders').trim();
+        plan.push({
+          ad: ad.slice(0, 80),
+          saat: null,
+          tamam: b.status === 'done'
+        });
+      }
+    }
+
+    // 2) bulgu: dünün tek ölçüsü
+    const dunDate = U.addDays(simdi, -1);
+    const dunISO = U.iso(dunDate);
+    const dunDay = days[dunISO];
+    let bulgu = null;
+
+    if(dunDay && Array.isArray(dunDay.blocks)){
+      let dunToplam = 0;
+      let dunOlculenVar = false;
+      for(const b of dunDay.blocks){
+        if(b && typeof b.actualMin === 'number' && !isNaN(b.actualMin)){
+          dunToplam += b.actualMin;
+          dunOlculenVar = true;
+        }
+      }
+
+      if(dunOlculenVar){
+        // ort: dünden önceki 7 gün (dün-7 .. dün-1, yani simdi-8 .. simdi-2)
+        const kayitliGunler = [];
+        for(let i = 2; i <= 8; i++){
+          const gISO = U.iso(U.addDays(simdi, -i));
+          const day = days[gISO];
+          if(!day || !Array.isArray(day.blocks)) continue;
+          let gToplam = 0;
+          let gVar = false;
+          for(const b of day.blocks){
+            if(b && typeof b.actualMin === 'number' && !isNaN(b.actualMin)){
+              gToplam += b.actualMin;
+              gVar = true;
+            }
+          }
+          if(gVar){
+            kayitliGunler.push(gToplam);
+          }
+        }
+
+        let ort;
+        if(kayitliGunler.length >= 3){
+          const ortVal = Math.round(kayitliGunler.reduce((a, b) => a + b, 0) / kayitliGunler.length);
+          ort = { deger: ortVal, etiket: 'hesaplandı' };
+        }else{
+          ort = { deger: null, etiket: 'veri yok' };
+        }
+
+        bulgu = {
+          id: 'calisma_dk',
+          ad: 'Çalışma',
+          deger: dunToplam,
+          birim: 'dk',
+          etiket: 'ölçüldü',
+          ort: ort
+        };
+      }
+    }
+
+    // 3) oneri: olaylar(simdi) içinden öncelikli ilk olay
+    const tumOlaylar = olaylar(simdi);
+    const ONCELIK = ['sinav_yaklasti', 'uyku_dustu', 'plan_kacti', 'tekrar_gunu'];
+    let secilenOlay = null;
+    for(const tur of ONCELIK){
+      const f = tumOlaylar.find(o => o && o.tur === tur);
+      if(f){
+        secilenOlay = f;
+        break;
+      }
+    }
+
+    let oneri = null;
+    if(secilenOlay){
+      oneri = {
+        id: secilenOlay.tur,
+        sayilar: secilenOlay.sayilar || {}
+      };
+      if(secilenOlay.konu != null){
+        oneri.konu = secilenOlay.konu;
+      }
+    }else{
+      // Olay yoksa plan'daki ilk tamamlanmamış madde
+      const ilkMadde = plan.find(m => !m.tamam);
+      if(ilkMadde){
+        oneri = {
+          id: 'ilk_madde',
+          konu: ilkMadde.ad,
+          sayilar: {}
+        };
+      }
+    }
+
+    return {
+      gun,
+      plan,
+      bulgu,
+      oneri
+    };
+  }
+
   return {
     olaylar,
     hafta,
     hatirlat,
     sonKayit,
-    duzelt
+    duzelt,
+    brifing
   };
 })();
 
@@ -45527,6 +45693,266 @@ window.LIFEOS.SORUKART = (function(){
   return { kartHtml };
 })();
 
+/* ==== js/core/ogret.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/ogret.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ÖĞRETME MOTORU — AYS, SPİ ve ESP'nin tek öğretmeni (KING-4 §D, tur 4b).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/ogret.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Testi `ogret.test.js`.
+   ==================================================================
+
+   Önce: her modül kendi soru kartını, konu eşleştiricisini, çeldiricisini ve
+   (yalnız AYS'de) 1/3/7 gün takvimini yazıyordu. Şimdi modül yalnız kendi
+   verisini verir (sorular, kavramlar, geçmiş); karar burada.
+
+   Sözler:
+   1. TEŞHİS KURALLA, UYDURMA YOK (AGENTS §1). Yanlış cevabın türü dört
+      tanedir: kavram, işlem, dikkat, bilmiyor. Her tür bir kurala ve
+      modülün verdiği kanıta dayanır (önce doğru yapmıştın → dikkat; seçtiğin
+      sayı doğrunun ters işaretlisi, bir fazlası/eksiği, iki katı/yarısı ya
+      da bir basamak kayığı → işlem; konuda iki ve üstü
+      yanlış → kavram; kart hiç bilinmemiş → bilmiyor; modülün kendi etiketi).
+      Kanıt yoksa tür null ve «teşhis için veri yetmiyor»: tahmin edilmez.
+   2. SOKRATİK ANLATIM. Kod teşhis satırını ve yönlendiren soruyu kurar;
+      doğru cevap ve sayılar modülün verisidir. Model yalnız cümleyi
+      güzelleştirir (`neden_yanlis` aracı sonucu Merkez'e gider, HKM sayıyı
+      denetler); model yoksa kodun satırları aynen gösterilir.
+   3. 1/3/7 GÜN, KAVRAM KAPANIR. Yanlış → kavram yarın; tekrarda doğru → 3,
+      sonra 7 gün; üçüncü doğruda kavram kapanır (`bitti`, silinmez). Vadesi
+      gelen kavramda AYNI soru değil BENZERİ sorulur (`benzer`).
+   4. ESKİ VERİ KAYBOLMAZ. Kayıt biçimi AYS'nin `ays.king.tekrar`ı ve King
+      derslerinin `{ n, sonraki | bitti }` biçimiyle aynıdır. Soru kimliğiyle
+      tutulan eski kayıt `tasi` ile kavram kimliğine toplanır; ilk göçten önce
+      ham değer `<anahtar>.yedek`'e bir kez yazılır, soru kimlikleri
+      `ogeler`'de kalır.
+
+   Kayıt: { [kavram]: { n, sonraki:'YYYY-AA-GG' | bitti:'YYYY-AA-GG', ogeler?:[soruId], y?:yanlış sayısı, eski? } } */
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.OGRET = (function(){
+  'use strict';
+
+  const ARALIK = [1, 3, 7];
+  const TURLER = { kavram:'kavram yanılgısı', islem:'işlem hatası', dikkat:'dikkat hatası', bilmiyor:'henüz bilmiyordun' };
+  const HARF = 'ABCDE';
+  const DOLGU = /^(konu|konusu|konusunda|konudan|soru|sorusu|hakkında|ilgili|bana|bir|biraz)$/;
+
+  const kucuk = s => String(s == null ? '' : s).toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
+  function gunEkle(iso, n){
+    const p = String(iso).split('-').map(Number), d = new Date(p[0], p[1] - 1, p[2] + n);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  /* ---------- konu eşleştirme (önce üç kingDers'te ve kingSoru'da ayrı ayrıydı) ----------
+     adlar(x): öğenin adları, ilki başlık. Sıra: başlık aynen → metin adı içerir → ad metni içerir →
+     metnin her anlamlı kelimesinin kökü başlıkta → (gevsek) uzun bir kelime bir adda. */
+  function bul(liste, metin, adlar, o){
+    const t = kucuk(metin).replace(/[.,!?;:«»"']/g, ' ').replace(/\s+/g, ' ').trim();
+    if(t.length < 3 || !Array.isArray(liste)) return null;
+    const ad = x => (adlar(x) || []).map(kucuk).filter(Boolean);
+    const kok = w => w.slice(0, Math.max(4, w.length - 2));
+    const kelime = t.split(' ').filter(w => w.length > 3 && !DOLGU.test(w));
+    return liste.find(x => ad(x)[0] === t)
+      || liste.find(x => ad(x).some(a => t.includes(a))) || liste.find(x => ad(x).some(a => a.includes(t)))
+      || (kelime.length ? liste.find(x => kelime.every(w => (ad(x)[0] || '').includes(kok(w)))) : null)
+      || (o && o.gevsek ? liste.find(x => kelime.some(w => w.length > 4 && ad(x).some(a => a.includes(w)))) : null)
+      || null;
+  }
+
+  /* ---------- çoktan seçmeli: doğru + farklı çeldiriciler, karışık ----------
+     Çeldirici yetmezse null (açık uçlu kalır, uydurulmaz). */
+  function secenek(dogru, havuz, o){
+    o = o || {};
+    const n = o.n || 3, rastgele = o.rastgele || Math.random, d = String(dogru == null ? '' : dogru).trim();
+    if(!d) return null;
+    const cel = [];
+    karistir((havuz || []).map(x => String(x == null ? '' : x).trim()), rastgele)
+      .forEach(x => { if(x && x !== d && cel.length < n && cel.indexOf(x) < 0) cel.push(x); });
+    if(cel.length < (o.enAz || n)) return null;
+    const sec = karistir(cel.concat([d]), rastgele);
+    return { sec, dogru:HARF[sec.indexOf(d)] };
+  }
+  function karistir(l, rastgele){
+    const a = l.slice();
+    for(let i = a.length - 1; i > 0; i--){ const j = Math.floor((rastgele || Math.random)() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  /* ---------- yanılgı teşhisi (söz 1) ----------
+     g: { secilen, dogru, secMetin, dogruMetin, oncekiDogru, oncekiNeden, konuYanlis, yeni, yeniNeden, etiket, etiketNeden } */
+  function sayi(s){
+    const m = String(s == null ? '' : s).replace(/\s+/g, '').match(/^[^\d-]*(-?\d+(?:[.,]\d+)?)(?:\/(\d+))?[^\d]*$/);
+    if(!m) return null;
+    const v = Number(m[1].replace(',', '.')) / (m[2] ? Number(m[2]) : 1);
+    return isFinite(v) ? v : null;
+  }
+  function islemMi(a, b){
+    const x = sayi(a), y = sayi(b);
+    if(x == null || y == null || x === y) return false;
+    if(x === -y || Math.abs(x - y) === 1) return true;              // işaret, bir eksik/fazla
+    const o = x / y;
+    return [2, 0.5, 10, 0.1].some(k => Math.abs(o - k) < 1e-9);     // iki kat, yarım, basamak kayması
+  }
+  function teshis(g){
+    g = g || {};
+    const t = (tur, neden) => ({ tur, ad:tur ? TURLER[tur] : '', neden });
+    if(g.secilen == null || String(g.secilen).trim() === '') return t('bilmiyor', 'cevap verilmedi');
+    if(String(g.secilen).toUpperCase() === String(g.dogru).toUpperCase()) return t(null, 'cevap doğru');
+    if(g.oncekiDogru) return t('dikkat', g.oncekiNeden || 'bu soruyu daha önce doğru yapmıştın');
+    if(islemMi(g.secMetin, g.dogruMetin)) return t('islem', 'seçtiğin «' + String(g.secMetin).trim() + '» doğru sonuca yakın; yöntem tutuyor, işlem kaymış');
+    if(Number(g.konuYanlis) >= 2) return t('kavram', 'bu konuda ' + Number(g.konuYanlis) + ' yanlışın var');
+    if(g.yeni) return t('bilmiyor', g.yeniNeden || 'bunu henüz hiç doğru cevaplamadın');
+    if(TURLER[g.etiket]) return t(g.etiket, g.etiketNeden || 'modülün kaydındaki etiket');
+    return t(null, 'teşhis için veri yetmiyor');
+  }
+
+  /* ---------- Sokratik satırlar (söz 2): yalnız verilen bilgiden ---------- */
+  function sokratik(g, ts){
+    ts = ts || teshis(g);
+    if(!ts.tur) return [];
+    const konu = String(g.konu || 'bu konu').trim(), sec = String(g.secMetin == null ? '' : g.secMetin).trim();
+    const soru = {
+      kavram:'Kendine sor: «' + konu + '» konusunun temel kuralı bu soruda neyi söylüyor?',
+      islem:'İşlemi adım adım yeniden yap: hangi adımda' + (sec ? ' «' + sec + '»' : ' farklı bir sonuç') + ' çıktı?',
+      dikkat:'Soru kökünü yeniden oku: ne soruluyor, sen neyi cevapladın?',
+      bilmiyor:'Önce konunun özetine kısaca bak, sonra benzer soruyu yeniden dene.',
+    }[ts.tur];
+    return ['Teşhis: ' + ts.ad + ' (' + ts.neden + ').', soru];
+  }
+
+  /* ---------- kayıt (söz 3, 4) ---------- */
+  function depo(anahtar, ls){
+    const L = () => ls || (typeof localStorage !== 'undefined' ? localStorage : null);
+    return {
+      anahtar,
+      oku(){ try{ const v = JSON.parse(L().getItem(anahtar) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }catch(e){ return {}; } },
+      yaz(v){ try{ L().setItem(anahtar, JSON.stringify(v)); return true; }catch(e){ return false; } },
+      yedekle(v){ try{ if(L().getItem(anahtar + '.yedek') == null) L().setItem(anahtar + '.yedek', JSON.stringify(v)); }catch(e){ /* yer yok */ } },
+    };
+  }
+  const birlesim = (a, b) => (a || []).concat(b || []).filter((x, i, l) => x != null && l.indexOf(x) === i);
+  function birlestir(a, b){
+    if(!a) return b;
+    const og = birlesim(a.ogeler, b.ogeler);
+    if(a.bitti && b.bitti) return Object.assign({}, a, { bitti:a.bitti > b.bitti ? a.bitti : b.bitti, ogeler:og });
+    if(a.bitti || b.bitti) return Object.assign({}, a.bitti ? b : a, { ogeler:og });
+    const r = { n:Math.min(a.n || 0, b.n || 0), sonraki:String(a.sonraki) < String(b.sonraki) ? a.sonraki : b.sonraki, ogeler:og };
+    if(a.y || b.y) r.y = (a.y || 0) + (b.y || 0);
+    if(a.eski && b.eski) r.eski = true;
+    return r;
+  }
+  /* Soru kimliğiyle tutulan eski kaydı kavram kimliğine toplar. Değişiklik
+     varsa önce ham değer yedeklenir. Dönüş: yeni kayıt. */
+  function tasi(d, kavramOf){
+    const v = d.oku(), yeni = {};
+    let degisti = false;
+    Object.keys(v).forEach(k => {
+      const x = v[k];
+      if(!x || typeof x !== 'object') return;
+      const kv = kavramOf ? kavramOf(k) : k;
+      if(!kv || kv === k){ yeni[k] = birlestir(yeni[k], x); return; }
+      degisti = true;
+      yeni[kv] = birlestir(yeni[kv], Object.assign({}, x, { ogeler:birlesim([k], x.ogeler) }));
+    });
+    if(degisti){ d.yedekle(v); d.yaz(yeni); }
+    return degisti ? yeni : v;
+  }
+  function isle(d, kavram, isabet, bugun, oge){
+    const v = d.oku(), k = v[kavram];
+    let not = '', kapandi = false;
+    if(!isabet){
+      v[kavram] = { n:0, sonraki:gunEkle(bugun, ARALIK[0]), ogeler:birlesim(k && k.ogeler, oge == null ? [] : [oge]), y:((k && k.y) || 0) + 1 };
+      not = 'Yarın bu konudan benzer bir soru soracağım.';
+    }else if(k && !k.bitti){
+      const n = (k.n || 0) + 1;
+      const ek = Object.assign({ ogeler:k.ogeler || [] }, k.y ? { y:k.y } : {});
+      if(n >= ARALIK.length){ v[kavram] = Object.assign({ n, bitti:bugun }, ek); kapandi = true; not = 'Tekrarları tamamladın; bu konu kapandı.'; }
+      else{ v[kavram] = Object.assign({ n, sonraki:gunEkle(bugun, ARALIK[n]) }, ek); not = ARALIK[n] + ' gün sonra bir kez daha soracağım.'; }
+    }else return { kayit:k || null, not, kapandi };
+    d.yaz(v);
+    return { kayit:v[kavram], not, kapandi };
+  }
+  function vade(d, bugun){
+    const v = d.oku();
+    return Object.keys(v).filter(k => v[k] && !v[k].bitti && v[k].sonraki && String(v[k].sonraki) <= bugun)
+      .sort((a, b) => String(v[a].sonraki).localeCompare(String(v[b].sonraki)))
+      .map(k => Object.assign({ kavram:k }, v[k]));
+  }
+  function ozet(d, bugun){
+    const v = d.oku(), l = Object.keys(v).map(k => v[k]).filter(Boolean);
+    return { vade:vade(d, bugun).length, acik:l.filter(x => !x.bitti).length, kapanan:l.filter(x => x.bitti).length };
+  }
+  /* Vadesi gelen kavramda sorulacak soru: yanlış yapılanlardan değil, aynı
+     kavramın başka bir sorusu; yoksa yanlış yapılanlardan sırayla. */
+  function benzer(adaylar, kayit){
+    const l = (adaylar || []).filter(x => x != null);
+    if(!l.length) return null;
+    const og = (kayit && kayit.ogeler) || [], n = (kayit && kayit.n) || 0;
+    const yeni = l.filter(x => og.indexOf(x) < 0), eski = l.filter(x => og.indexOf(x) >= 0);
+    return yeni.length ? yeni[n % yeni.length] : eski[n % eski.length];
+  }
+
+  /* ---------- tek cevap akışı: kayıt + teşhis + son yanlış ----------
+     a: { tekrar:depo, son:depo, bugun?:()=>iso }; g: teshis girdisi + { id, kavram, konu, soru, cozum } */
+  function cevap(a, g){
+    const bugun = a.bugun ? a.bugun() : isoBugun();
+    const isabet = g.secilen != null && String(g.secilen).toUpperCase() === String(g.dogru).toUpperCase();
+    /* Kaydın kendisi de kanıttır: tekrarda doğru yapılmış ya da kapanmış konu → dikkat; birikmiş yanlış → kavram. */
+    const k = a.tekrar.oku()[g.kavram];
+    if(k && !g.oncekiDogru && (k.bitti || k.n > 0)) g = Object.assign({}, g, { oncekiDogru:true, oncekiNeden:k.bitti ? 'bu konuyu tekrarlarla kapatmıştın' : 'bu konunun tekrarında ' + k.n + ' kez doğru yapmıştın' });
+    if(k && k.y) g = Object.assign({}, g, { konuYanlis:Math.max(Number(g.konuYanlis) || 0, k.y + 1) });
+    const r = isle(a.tekrar, g.kavram, isabet, bugun, g.id);
+    if(isabet) return { isabet, not:r.not, kapandi:r.kapandi, teshis:null, satirlar:[] };
+    const ts = teshis(g), satirlar = sokratik(g, ts);
+    if(a.son) a.son.yaz({ id:g.id, kavram:g.kavram, konu:g.konu || '', soru:String(g.soru || '').slice(0, 400),
+      secilen:g.secilen, secMetin:g.secMetin == null ? '' : String(g.secMetin), dogru:g.dogru, dogruMetin:g.dogruMetin == null ? '' : String(g.dogruMetin),
+      tur:ts.tur, neden:ts.neden, cozum:(g.cozum || []).map(String).slice(0, 4), satirlar, gun:bugun });
+    return { isabet, not:r.not, kapandi:false, teshis:ts, satirlar };
+  }
+  function isoBugun(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
+  /* ---------- King araçları (arac.js biçimi): «bugünkü tekrarlarım», «neden yanlış yaptım» ----------
+     o: { modul, tekrar:depo, son:depo, ad:kavram=>okunur ad, bugun?:()=>iso } */
+  function araclar(o){
+    const bugun = () => o.bugun ? o.bugun() : isoBugun();
+    const adi = k => { try{ return (o.ad && o.ad(k)) || k; }catch(e){ return k; } };
+    return [
+      /* «bugünkü tekrarlarım» kartlar sayfasını açmasın: dar `es` hızlı yolu sayfa tahmininden önce. */
+      { ad:o.modul + '_tekrarlarim', tur:'oku', ozetAd:'Bugünkü tekrarlar', ornek:'bugünkü tekrarlarım',
+        es:/(?:^|\s)tekrarlar[ıi]m[ıi]?(?=\s|[?.!,]|$)/,
+        anahtar:'tekrarlarım tekrarlarımı vadesi gelen konular',
+        aciklama:'Öğretme motorunun bugünkü tekrarları: yanlış yapılan konular 1, 3 ve 7 gün sonra benzer soruyla sorulur; vadesi gelen ve kapanan konular.',
+        calistir:() => {
+          const b = bugun(), l = vade(o.tekrar, b), oz = ozet(o.tekrar, b);
+          const satirlar = l.slice(0, 8).map(x => adi(x.kavram) + ' · ' + (x.n + 1) + '. tekrar');
+          return { sonuc:{ bugun:b, vadesi_gelen:l.map(x => ({ konu:adi(x.kavram), tekrar:x.n + 1 })), acik:oz.acik, kapanan:oz.kapanan },
+            cevap:l.length ? 'Bugün ' + l.length + ' konunun tekrarı var; «bana soru sor» dersen sırayla sorarım.'
+              : 'Bugün vadesi gelen tekrarın yok' + (oz.acik ? ' (' + oz.acik + ' konu takvimde bekliyor).' : '.'),
+            satirlar:satirlar.length ? satirlar : null };
+        } },
+      /* Genel «neden / ne zaman» soruları buraya düşmesin (sınav: «… temel nedenleri nelerdi»):
+         ad, örnek ve anahtar «yanlış» ve «teşhis» üzerine. */
+      { ad:o.modul + '_yanlis_teshis', tur:'oku', ozetAd:'Son yanlışın teşhisi', ornek:'yanlış yaptığım sorunun teşhisi',
+        anahtar:'yanlış yaptım yanlışım yanlışımı teşhis',
+        aciklama:'Son yanlış cevabın teşhisi: kavram, işlem, dikkat ya da bilmiyor; doğru cevap modülün verisi. Sokratik yöntem: önce yönlendiren soru; doğru cevabı değiştirme.',
+        calistir:() => {
+          const s = o.son.oku();
+          if(!s || !s.id) return { cevap:'King\'le çözdüğün yanlış bir soru yok; önce «bana soru sor» de.' };
+          const satirlar = [s.konu ? s.konu + ': ' + s.soru : s.soru, 'Senin cevabın ' + s.secilen + (s.secMetin ? ' («' + s.secMetin + '»)' : '') + ', doğrusu ' + s.dogru + (s.dogruMetin ? ' («' + s.dogruMetin + '»)' : '') + '.']
+            .concat(s.satirlar && s.satirlar.length ? s.satirlar : ['Teşhis: ' + s.neden + '.']).concat(s.cozum || []);
+          return { sonuc:{ konu:s.konu, soru:s.soru, senin_cevabin:s.secilen, dogru_cevap:s.dogru, tur:s.tur, neden:s.neden, cozum:s.cozum, gun:s.gun,
+            yontem:'Sokratik: önce bir yönlendiren soru, sonra kısa açıklama; doğru cevabı ve sayıları aynen kullan' }, satirlar };
+        } },
+    ];
+  }
+
+  return { ARALIK, TURLER, bul, secenek, karistir, sayi, teshis, sokratik, depo, tasi, isle, vade, ozet, benzer, cevap, araclar, gunEkle };
+})();
+
 /* ==== js/core/king.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/king.js içine yazılır; burası bir sonraki
@@ -45952,6 +46378,7 @@ window.LIFEOS.KING_IC = {};
     { modul:'ays', route:'today',     ad:'Bugün',      es:['bugün', 'genel bakış'] },
     { modul:'ays', route:'week',      ad:'Hafta',      es:['hafta'] },
     { modul:'ays', route:'plan',      ad:'Program',    es:['program', 'plan'] },
+    { modul:'ays', route:'target',    ad:'Hedefler',   es:['hedefler', 'hedeflerim'] },
     { modul:'ays', route:'gelecek',   ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] },
     { modul:'ays', route:'subjects',  ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] },
     { modul:'ays', route:'solve',     ad:'Soru çöz',   es:['soru çöz', 'soru', 'test çöz'] },
@@ -47581,7 +48008,9 @@ window.LIFEOS.KING_IC = {};
     const l = KI.akis.filter(m => !m.bekliyor).slice(-KI.GUNLUK_EN_COK).map(m => Object.assign({ kim:m.kim, metin:m.foto ? '(fotoğraf)' : (m.metin || ''),
       satirlar:m.satirlar || null, son:m.son || null }, m.arastirma ? { arastirma:m.arastirma } : {},
       /* DEVRİM: ders, yasa ve gün kartları da gün boyu kalır (yeniden açınca başlık tek kalmasın). */
-      m.ders ? { ders:m.ders } : {}, m.yasa ? { yasa:m.yasa } : {}, m.gun ? { gun:m.gun } : {}, m.yap ? { yap:true } : {}));
+      m.ders ? { ders:m.ders } : {}, m.yasa ? { yasa:m.yasa } : {}, m.gun ? { gun:m.gun } : {}, m.yap ? { yap:true } : {},
+      /* KING-4 §H: yardım kartı (bekleyen düzeltme hariç: geri alması bu oturumda) ve «neden şimdi?» satırı. */
+      m.yardim && m.yardim.tur !== 'duzelt' ? { yardim:m.yardim } : {}, m.nedenSimdi ? { nedenSimdi:m.nedenSimdi } : {}));
     KI.ortam.depo.yaz(depoAnahtar(), { gun:KI.bugunISO(), akis:l });
     tasimaYaz(l);
   }
@@ -49108,7 +49537,8 @@ window.LIFEOS.KING_IC = {};
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div>' + adimHtml(m) + '</div>'
       : '<div class="king__balon king__balon--king' + (i === sonKing ? ' is-son' : '') + (m.yeni && !m.yazildi ? ' is-yeni' : '') + (m.akiyor ? ' is-akiyor' : '') + (m.bulgu ? ' king__balon--bulgu' : '') + (m.onay && i === sonKing && KI.bekleyenYetki ? ' king__balon--onay' : '') + '" style="--yazim:' + KI.yazimSuresi(m.metin) + 'ms"><div>' + adimHtml(m) + '<p>' + KI.bicimli(m.metin) + '</p>'
-        + KI.kartlarHtml(m) + KI.yapHtml(m) + KI.nefesHtml(m) + KI.yasaHtml(m, ilkSira + i) + KI.gunKartHtml(m, ilkSira + i) + KI.dersHtml(m, ilkSira + i) + KI.soruHtml(m, ilkSira + i) + KI.siraliHtml(m, ilkSira + i) + KI.bulunanHtml(m, ilkSira + i) + KI.arastirmaHtml(m, ilkSira + i) + KI.k2Html(m, ilkSira + i)
+        + (m.nedenSimdi ? '<p class="king__neden-simdi"><span>neden şimdi?</span> ' + KI.kac(m.nedenSimdi) + '</p>' : '')
+        + KI.kartlarHtml(m) + KI.yardimHtml(m, ilkSira + i) + KI.yapHtml(m) + KI.nefesHtml(m) + KI.yasaHtml(m, ilkSira + i) + KI.gunKartHtml(m, ilkSira + i) + KI.dersHtml(m, ilkSira + i) + KI.soruHtml(m, ilkSira + i) + KI.siraliHtml(m, ilkSira + i) + KI.bulunanHtml(m, ilkSira + i) + KI.arastirmaHtml(m, ilkSira + i) + KI.k2Html(m, ilkSira + i)
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
             + (m.onizleme.liste ? '<ul class="king__liste">' + m.onizleme.liste.map(x => '<li><b>' + KI.kac(x) + '</b></li>').join('') + '</ul>'
@@ -49237,7 +49667,7 @@ window.LIFEOS.KING_IC = {};
       : KI.geriGetir();
     KI.cipler = null; KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.bekleyenFoto = null; KI.sesli = false;
     if(o && o.mesaj) KI.akis.push({ kim:'king', metin:o.mesaj });
-    else if(!KI.mini){ KI.bekleyenleriSun(); KI.tanismaHazirla(); KI.kutuyuSun(); }   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
+    else if(!KI.mini){ KI.bekleyenleriSun(); KI.tanismaHazirla(); KI.kutuyuSun(); KI.ortam.zamanla(KI.sabahYokla, 0); }   // söz 22: günde en çok bir soru (çıkarım Onaylar'da, söz 23)
     const el = document.createElement('div');
     el.className = 'king';
     el.setAttribute('data-king', '');
@@ -50164,7 +50594,192 @@ window.LIFEOS.KING_IC = {};
     return ust + gruplar.map(g => KI.listeGrup(g.ad, '<ol class="king__eylemler">' + g.l.map(eylemSatir).join('') + '</ol>')).join('');
   }
 
-  Object.assign(KI, { eylemYaz, eylemTazele, eylemListesi, eylemGeriAl, eylemGeriAlindi, eylemListe, harcamaOzet, harcamaHtml, yetenekler, GRUP_SVG_MODUL, KART, kartAyar, kartYaz, kartSabitle, kartSus, kartTasi, kartEkle, kartSil, miniKutu, oneCikanlar, vitrinHtml, vitrinDizin, gorevListe, rutinListe, GORSEL, gorseller, gorselSakla, kutuphaneHtml, kutDizin, kartNiyeti, kartTemiz, kartIsle, soruCevapla, LINK_RE, arastirmaVeri, arastirmaHtml, arastirmaEkle, kartlarHtml, soruHtml, bicimli });
+  /* ---------- §H yardım kartları (KING-4 tur 4) ----------
+     Sayıyı modülün kodu verir (KI.ayar.kartlar, core/kingveri.js), cümleyi King'in
+     modeli kurar (POST /api/king/cumle; HKM yoksa kodun cümlesi, AGENTS §1). Yazan
+     tek iş «onu 30 dk yap»: önizlenir, onayla modülün duzelt'i çalışır, geri alması
+     «Geri al» çipine ve Eylemler çizgisine bağlanır. */
+  const YARDIM_RE = { brifing:/(brifing|güne başla|bugün(ü)? (ne var|planım ne)|sabah özeti)/, eksik:/(unuttu[ğg]u[mn]? ne|unuttu[ğg]um (kayıt|bir şey)|eksik kayıt|neyi unuttum)/,
+    hafta:/(haftalık rapor|haftamı (özetle|anlat)|bu hafta nasıl ?(geçti|gitti)?)/, hatirlat:/(alışkanlık saat|akıllı hatırlatma|gerçekte ne zaman yapıyorum)/ };
+  const DUZELT_RE = /^(?:onu|son kayd[ıi]|sonuncuyu)\s+(\d{1,3})\s*(?:dk|dakika)\s*(?:yap|olsun|olarak düzelt|düzelt)(?=\s|$|[.!])/;
+  function yardimNiyeti(t){
+    const d = DUZELT_RE.exec(t);
+    if(d) return { tur:'duzelt', deger:Number(d[1]) };
+    return Object.keys(YARDIM_RE).filter(k => YARDIM_RE[k].test(t)).map(k => ({ tur:k }))[0] || null;
+  }
+  function yardimK(ad, ...a){
+    const K = (KI.ayar && KI.ayar.kartlar) || {};
+    try{ return typeof K[ad] === 'function' ? K[ad](...a) : undefined; }catch(e){ return undefined; }
+  }
+  const sayiTr = v => typeof v === 'number' ? String(Math.round(v * 10) / 10).replace('.', ',') : String(v);
+  const olcuYaz = x => x && x.deger != null ? sayiTr(x.deger) + (x.birim ? ' ' + x.birim : '') : '—';
+  function oneriYaz(o){
+    if(!o) return '';
+    const s = o.sayilar || {}, d = k => s[k] && s[k].deger != null ? sayiTr(s[k].deger) : null;
+    if(o.id === 'sinav_yaklasti' && d('kalan_gun') != null) return 'Sınava ' + d('kalan_gun') + ' gün var';
+    if(o.id === 'uyku_dustu' && d('ort7') != null) return '7 günlük uyku ortalaman ' + d('ort7') + ' saat' + (d('ort28') != null ? ', 28 günlük ' + d('ort28') : '');
+    if(o.id === 'plan_kacti') return (o.konu ? '«' + o.konu + '» ' : 'Bir plan maddesi ') + (d('gecikme_dk') != null ? d('gecikme_dk') + ' dk gecikti' : 'gecikti');
+    if(o.id === 'tekrar_gunu' && d('adet') != null) return d('adet') + ' tekrar kartı bugün vadeli';
+    if(o.id === 'ilk_madde' && o.konu) return 'İlk iş: ' + o.konu;
+    return '';
+  }
+  /* Modelin bağlamı: her sayı etiketiyle tek satır; kodun cümlesi yedek. */
+  function brifingSatirlari(b){
+    const l = [], acik = (b.plan || []).filter(x => !x.tamam);
+    l.push('Bugünün planı: ' + (b.plan && b.plan.length ? b.plan.length + ' madde, ' + acik.length + ' açık' + (acik[0] ? '; ilki ' + acik[0].ad + (acik[0].saat ? ' ' + acik[0].saat : '') : '') : 'plan yok'));
+    if(b.bulgu) l.push('Dün ' + b.bulgu.ad + ': ' + olcuYaz(b.bulgu) + ' (' + b.bulgu.etiket + ')' + (b.bulgu.ort && b.bulgu.ort.deger != null
+      ? '; önceki 7 günün ortalaması ' + olcuYaz({ deger:b.bulgu.ort.deger, birim:b.bulgu.birim }) + ' (' + b.bulgu.ort.etiket + ')' : ''));
+    const o = oneriYaz(b.oneri);
+    if(o) l.push('Öneri konusu: ' + o);
+    return l;
+  }
+  function brifingKodCumlesi(b){
+    const acik = (b.plan || []).filter(x => !x.tamam);
+    const p = b.plan && b.plan.length ? 'Bugün ' + b.plan.length + ' madde var' + (acik[0] ? '; ilki ' + acik[0].ad + (acik[0].saat ? ', ' + acik[0].saat : '') : ', hepsi tamam') + '.' : 'Bugün için plan yok.';
+    const d = b.bulgu ? ' Dün ' + String(b.bulgu.ad).toLocaleLowerCase('tr') + ' ' + olcuYaz(b.bulgu)
+      + (b.bulgu.ort && b.bulgu.ort.deger != null ? ', önceki haftanın ortalaması ' + olcuYaz({ deger:b.bulgu.ort.deger, birim:b.bulgu.birim }) : '') + '.' : '';
+    const o = oneriYaz(b.oneri);
+    return p + d + (o ? ' ' + o + '.' : '');
+  }
+  async function modelCumlesi(tur, satirlar){
+    if(!KI.baglanti()) return null;
+    const r = await Promise.race([hkmIstek('/api/king/cumle', { tur, satirlar }), new Promise(c => typeof setTimeout === 'function' ? setTimeout(() => c(null), 9000) : c(null))]);
+    return r && r.ok && r.text ? String(r.text).slice(0, 600) : null;
+  }
+  const modulAd = () => KI.MODUL_AD[KI.ayar && KI.ayar.modul] || 'Modül';
+  const BRIFING_GUN = 'lifeos.king.brifing-gun';
+  async function brifingGoster(istendi){
+    const b = yardimK('brifing', KI.ortam.simdi());
+    if(!b){ if(istendi) KI.soyle('Bu modülde sabah brifingi verisi henüz yok.'); return { tur:'yardim-yok' }; }
+    KI.ortam.depo.yaz(BRIFING_GUN, KI.bugunISO());
+    const kod = brifingKodCumlesi(b), model = await modelCumlesi('brifing', brifingSatirlari(b));
+    KI.soyle(model || kod, null, null, null, { yardim:{ tur:'brifing', plan:(b.plan || []).slice(0, 8), bulgu:b.bulgu || null, oneri:oneriYaz(b.oneri) },
+      neden:['Sayıları ' + modulAd() + ' kendi koduyla hesapladı; cümle ' + (model ? 'King’in modelinden.' : 'kodun şablonundan.')] });
+    return { tur:'yardim-brifing', model:!!model };
+  }
+  /* Sabah ilk açılışta günde bir kez (05–12). */
+  function sabahYokla(){
+    const s = KI.ortam.simdi().getHours();
+    if(s < 5 || s >= 12 || KI.ortam.depo.oku(BRIFING_GUN) === KI.bugunISO() || typeof ((KI.ayar && KI.ayar.kartlar) || {}).brifing !== 'function') return false;
+    brifingGoster(false);
+    return true;
+  }
+  async function yardimIsle(n, metin){
+    KI.akis.push({ kim:'sen', metin:String(metin).trim() });
+    KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null;
+    if(n.tur === 'brifing') return brifingGoster(true);
+    if(n.tur === 'eksik'){
+      const l = (yardimK('eksik', KI.bugunISO()) || []).filter(x => x && x.ad).slice(0, 8).map(x => ({ id:String(x.id || x.ad), ad:String(x.ad) }));
+      if(!l.length){ KI.soyle('Bugün eksik kayıt görünmüyor.'); return { tur:'yardim-eksik', n:0 }; }
+      KI.soyle('Bugün ' + l.length + ' kayıt eksik. Birine dokun, söyle; ben yazayım.', null, null, null, { yardim:{ tur:'eksik', l } });
+      return { tur:'yardim-eksik', n:l.length };
+    }
+    if(n.tur === 'hafta'){
+      const h = yardimK('hafta', KI.bugunISO());
+      const l = h && Array.isArray(h.satirlar) ? h.satirlar.filter(x => x && x.ad) : [];
+      if(!l.length){ KI.soyle('Bu hafta için rapor verisi yok.'); return { tur:'yardim-yok' }; }
+      const satir = l.map(x => x.ad + ': ' + (x.deger == null ? 'veri yok' : olcuYaz(x) + ' (' + x.etiket + ')') + (x.onceki != null ? '; önceki hafta ' + sayiTr(x.onceki) : ''));
+      const model = await modelCumlesi('hafta', satir);
+      KI.soyle(model || 'Haftan tek sayfada; sayılar ' + modulAd() + '’nin kendi hesabı.', null, null, null,
+        { yardim:{ tur:'hafta', bas:h.bas, bit:h.bit, l:l.slice(0, 8) }, neden:['Sayıları ' + modulAd() + ' hesapladı; ' + (model ? 'yorum King’in modelinden.' : 'Merkez kapalı, yorum yok.')] });
+      return { tur:'yardim-hafta', model:!!model };
+    }
+    if(n.tur === 'hatirlat'){
+      const l = (yardimK('hatirlat', KI.ortam.simdi()) || []).filter(x => x && x.ad).slice(0, 8);
+      if(!l.length){ KI.soyle('Takip ettiğim bir alışkanlık hatırlatması yok.'); return { tur:'yardim-yok' }; }
+      KI.soyle('Hatırlatmayı alışkanlığının gerçek saatine göre yaparım; dün kaçtıysa bugün yumuşakça yinelerim.', null, null, null, { yardim:{ tur:'hatirlat', l } });
+      return { tur:'yardim-hatirlat', n:l.length };
+    }
+    const k = yardimK('sonKayit');
+    const a = k && Array.isArray(k.alanlar) ? k.alanlar.find(x => x && x.ad === 'dk') : null;
+    if(!a){ KI.soyle('Düzeltebileceğim süreli bir son kayıt yok.'); return { tur:'yardim-yok' }; }
+    if(!(n.deger >= 1 && n.deger <= 600)){ KI.soyle('Süre 1 ile 600 dakika arasında olmalı.'); return { tur:'yardim-yok' }; }
+    KI.soyle('Şunu düzelteyim mi?', null, null, null, { yardim:{ tur:'duzelt', id:k.id, ad:k.ad || k.tur, gun:k.gun, once:a.deger, sonra:n.deger, durum:'bekliyor' } });
+    return { tur:'yardim-duzelt' };
+  }
+  async function yardimTikla(is){
+    const p = is.split(':'), m = KI.akis[Number(p[1])], y = m && m.yardim;
+    if(!y) return;
+    if(p[0] === 'dinle'){ KI.seslendir(m.metin); return; }
+    if(p[0] === 'eksik'){
+      const x = y.l && y.l[Number(p[2])];
+      if(!x) return;
+      KI.doldurulacak = x.ad + ': ';
+      KI.soyle('«' + x.ad + '» için ne yazayım? Söyle ya da yaz.');
+      if(typeof KI.dinle === 'function' && KI.konusabilir() && !KI.dinleyen) KI.dinle();
+      return;
+    }
+    if(y.tur !== 'duzelt' || y.durum !== 'bekliyor') return;
+    if(p[0] === 'duzelt-vazgec'){ y.durum = 'vazgecildi'; KI.soyle('Tamam, dokunmadım.'); return; }
+    y.durum = 'yaziliyor'; KI.ciz(false);
+    let r = null;
+    try{ r = await yardimK('duzelt', y.id, 'dk', y.sonra); }catch(e){ r = null; }
+    if(!r || !r.ok){ y.durum = 'bekliyor'; KI.soyle('Düzeltemedim: ' + ((r && r.why) || 'modül cevap vermedi') + '.'); return; }
+    y.durum = 'yazildi';
+    const ozet = (y.ad || 'Kayıt') + ' ' + sayiTr(r.once) + ' → ' + sayiTr(r.sonra) + ' dk';
+    if(typeof r.geriAl === 'function'){ KI.sonGeriAl = r.geriAl; KI.cipler = [{ is:'geri-al', ad:'Geri al' }]; }
+    eylemYaz({ arac:'duzelt', ozet, geriAl:r.geriAl, param:{ id:y.id, alan:'dk', deger:y.sonra } });
+    KI.soyle('Düzelttim: ' + ozet + '.');
+  }
+  /* Akıllı hatırlatma: alışkanlığın 14 günlük gerçek saat ortancası (modül
+     hesaplar); dün işaretlenmediyse dil yumuşar. Günde anahtar başına bir kez,
+     gerçek saatten sonraki bir saat içinde (geç açılışta bayat hatırlatma yok). */
+  const ALISKANLIK = 'lifeos.king.aliskanlik';
+  const dakika = s => /^\d\d:\d\d$/.test(String(s)) ? Number(s.slice(0, 2)) * 60 + Number(s.slice(3)) : null;
+  function aliskanlikMetni(x){
+    return x.dun === 'isaretlenmedi' ? 'Dün «' + x.ad + '» kaçtı, sorun değil. Genelde ' + x.gercek + '’de yapıyorsun; bugün bir dene?'
+      : '«' + x.ad + '» zamanı: son günlerde genelde ' + x.gercek + '’de yapıyorsun.';
+  }
+  function aliskanlikKur(){
+    if(KI.aliskanlikSaat){ try{ clearTimeout(KI.aliskanlikSaat); }catch(e){ /* yok */ } KI.aliskanlikSaat = null; }
+    const now = KI.ortam.simdi(), gun = KI.bugunISO(), dk = now.getHours() * 60 + now.getMinutes();
+    const kayit = KI.ortam.depo.oku(ALISKANLIK), atilan = kayit && kayit.gun === gun && Array.isArray(kayit.l) ? kayit.l : [];
+    const l = (yardimK('hatirlat', now) || []).filter(x => x && x.anahtar && dakika(x.gercek) != null && atilan.indexOf(x.anahtar) < 0);
+    const gelen = l.filter(x => dakika(x.gercek) <= dk && dk - dakika(x.gercek) <= 60);
+    if(gelen.length){
+      KI.ortam.depo.yaz(ALISKANLIK, { gun, l:atilan.concat(gelen.map(x => x.anahtar)) });
+      gelen.forEach(x => {
+        const t = aliskanlikMetni(x);
+        KI.ortam.bildir('LifeOS · hatırlatma', t);
+        if(KI.acik) KI.soyle(t); else{ KI.akis.push({ kim:'king', metin:t }); KI.sakla(); }
+      });
+    }
+    const sonraki = l.map(x => dakika(x.gercek)).filter(d => d > dk).sort((a, b) => a - b)[0];
+    if(sonraki != null && typeof setTimeout === 'function') KI.aliskanlikSaat = setTimeout(aliskanlikKur, (sonraki - dk) * 60000 - now.getSeconds() * 1000 + 500);
+    return gelen.length;
+  }
+  function yardimHtml(m, n){
+    const y = m.yardim;
+    if(!y) return '';
+    const et = e => '<span class="king__kart-etiket' + (e === 'veri yok' ? ' is-yok' : e === 'tahmin' ? ' is-tahmin' : '') + '">' + KI.kac(e) + '</span>';
+    const deger = x => x.deger == null ? '—' : KI.kac(sayiTr(x.deger)) + (x.birim ? '<small> ' + KI.kac(x.birim) + '</small>' : '');
+    if(y.tur === 'brifing'){
+      const b = y.bulgu;
+      return '<div class="king__yardim king__brifing" role="group" aria-label="Sabah brifingi">'
+        + '<section><h4>Bugün</h4>' + (y.plan.length ? '<ol class="king__plan">' + y.plan.map(x => '<li' + (x.tamam ? ' class="is-tamam"' : '') + '><time>' + KI.kac(x.saat || '·') + '</time><span>' + KI.kac(x.ad) + '</span></li>').join('') + '</ol>' : '<p class="king__yardim-bos">Plan yok</p>') + '</section>'
+        + '<section><h4>Dün</h4>' + (b ? '<b class="king__kart-deger">' + deger(b) + '</b><small class="king__kart-alt">' + KI.kac(b.ad)
+          + (b.ort && b.ort.deger != null ? ' · 7 gün ort. ' + KI.kac(sayiTr(b.ort.deger)) : '') + '</small>' + et(b.etiket) : '<p class="king__yardim-bos">Dün kayıt yok</p>') + '</section>'
+        + (y.oneri ? '<section class="king__brifing-oneri"><h4>Öneri</h4><p>' + KI.kac(y.oneri) + '</p></section>' : '')
+        + '<button type="button" class="king__cip king__yardim-dinle" data-king="yardim:dinle:' + n + '" aria-label="Brifingi sesli dinle">Dinle</button></div>';
+    }
+    if(y.tur === 'eksik') return '<div class="king__yardim king__eksik" role="list" aria-label="Eksik kayıtlar">' + y.l.map((x, i) => '<button type="button" class="king__cip" role="listitem" data-king="yardim:eksik:' + n + ':' + i + '"><i aria-hidden="true"></i>' + KI.kac(x.ad) + '</button>').join('') + '</div>';
+    if(y.tur === 'hafta'){
+      const fark = x => x.deger == null || x.onceki == null ? '' : x.deger > x.onceki ? ' is-art' : x.deger < x.onceki ? ' is-az' : '';
+      return '<div class="king__yardim king__hafta" role="group" aria-label="Haftalık rapor ' + KI.kac(y.bas || '') + ' – ' + KI.kac(y.bit || '') + '"><div class="king__kartlar">'
+        + y.l.map(x => '<div class="king__kart"><span class="king__kart-ad">' + KI.kac(x.ad) + '</span><b class="king__kart-deger">' + deger(x) + '</b>'
+          + (x.onceki != null ? '<small class="king__kart-alt king__fark' + fark(x) + '">önceki hafta ' + KI.kac(sayiTr(x.onceki)) + '</small>' : '') + et(x.etiket) + '</div>').join('') + '</div></div>';
+    }
+    if(y.tur === 'hatirlat') return '<ul class="king__yardim king__aliskanlik">' + y.l.map(x => {
+      const kay = dakika(x.kurulu) != null && dakika(x.gercek) != null ? dakika(x.gercek) - dakika(x.kurulu) : null;
+      return '<li><span>' + KI.kac(x.ad) + '</span><span class="king__aliskanlik-saat">' + (kay != null && Math.abs(kay) >= 30 ? '<s>' + KI.kac(x.kurulu) + '</s>' : '') + '<b>' + KI.kac(x.gercek || '—') + '</b></span>'
+        + '<small>' + (x.gercek ? x.n + ' kaydın ortancası' : 'veri yok') + (x.dun === 'isaretlenmedi' ? ' · dün kaçtı' : x.dun === 'yapildi' ? ' · dün yapıldı' : '') + '</small></li>'; }).join('') + '</ul>';
+    if(y.tur === 'duzelt') return '<div class="king__yardim king__duzelt' + (y.durum !== 'bekliyor' ? ' is-' + y.durum : '') + '"><span class="king__onizle-ad">' + KI.kac(y.ad || 'Son kayıt') + (y.gun ? ' · ' + KI.kac(gunAdi(y.gun + 'T12:00')) : '') + '</span>'
+      + '<p><s>' + KI.kac(sayiTr(y.once)) + ' dk</s><b>' + KI.kac(sayiTr(y.sonra)) + ' dk</b></p>'
+      + (y.durum === 'bekliyor' ? '<div class="king__duzelt-dugme"><button type="button" class="king__cip king__cip--ana" data-king="yardim:duzelt-onay:' + n + '">Onayla</button><button type="button" class="king__cip" data-king="yardim:duzelt-vazgec:' + n + '">Vazgeç</button></div>' : '') + '</div>';
+    return '';
+  }
+
+  Object.assign(KI, { yardimNiyeti, yardimIsle, yardimTikla, yardimHtml, brifingGoster, brifingSatirlari, brifingKodCumlesi, sabahYokla, aliskanlikKur, aliskanlikMetni, eylemYaz, eylemTazele, eylemListesi, eylemGeriAl, eylemGeriAlindi, eylemListe, harcamaOzet, harcamaHtml, yetenekler, GRUP_SVG_MODUL, KART, kartAyar, kartYaz, kartSabitle, kartSus, kartTasi, kartEkle, kartSil, miniKutu, oneCikanlar, vitrinHtml, vitrinDizin, gorevListe, rutinListe, GORSEL, gorseller, gorselSakla, kutuphaneHtml, kutDizin, kartNiyeti, kartTemiz, kartIsle, soruCevapla, LINK_RE, arastirmaVeri, arastirmaHtml, arastirmaEkle, kartlarHtml, soruHtml, bicimli });
 })();
 
 /* ==== js/core/king-arac.js ==== */
@@ -51769,7 +52384,9 @@ window.LIFEOS.KING_IC = {};
     if(!l.length || !KI.acik) return 0;
     for(const x of l){
       KI.akis.forEach(m => { m.yeni = false; });
-      KI.akis.push({ kim:'king', metin:String(x.metin), yeni:true });
+      /* 3b: kendiliğinden mesajın «neden şimdi?» satırı (HKM neden.cumle). */
+      const ns = x.neden && typeof x.neden === 'object' && x.neden.cumle ? String(x.neden.cumle).slice(0, 240) : '';
+      KI.akis.push(Object.assign({ kim:'king', metin:String(x.metin), yeni:true }, ns ? { nedenSimdi:ns } : {}));
       KI.akis = KI.akis.slice(-KI.GUNLUK_EN_COK);
       KI.sakla();
       KI.ciz(false);
@@ -51997,6 +52614,9 @@ window.LIFEOS.KING = (function(){
     if(KI.GUN_RE.test(t0)) return KI.gunIsle(metin, false);
     { const AK = KI.aracKutusu(metin, t0); if(AK) return AK; }
     /* Söz 32: kartlar (istatistik, soru); «sorma» komutundan önce. */
+    /* KING-4 §H: brifing, «unuttuğun ne var?», haftalık rapor, alışkanlık saati, «onu 30 dk yap». */
+    const YN = KI.yardimNiyeti(t0);
+    if(YN) return KI.yardimIsle(YN, metin);
     const KN = KI.kartNiyeti(t0);
     if(KN) return KI.kartIsle(KN, metin);
     /* Söz 33: King'in kendi ayarları, odak sayacı, Merkez komutları. */
@@ -52432,6 +53052,7 @@ window.LIFEOS.KING = (function(){
         if(is === 'foto-yorum'){ KI.fotoYorumla(); return; }
         if(is === 'sohbet'){ KI.sesliSohbetAc(); KI.ciz(false); return; }
         if(is === 'geri-al'){ KI.geriAlYap(); return; }
+        if(/^yardim:[a-z-]+:\d+(:\d+)?$/.test(is)){ KI.yardimTikla(is.slice(7)); return; }
         if(/^eylem-geri:[hy]\d+$/.test(is)){ KI.eylemGeriAl(is.slice(11)); return; }
         if(/^yazma:(yaz|ses):[01]$/.test(is)){ const p = is.split(':'); yazmaSec(p[1], p[2] === '1'); return; }
         if(/^kopyala-mesaj:\d+$/.test(is)){
@@ -52657,7 +53278,7 @@ window.LIFEOS.KING = (function(){
     KI.uyanKur();
     /* Söz 36: King'in kendi araçları kataloğa (her çağrıda güncel kurulur). */
     if(KI.L.ARAC){ KI.L.ARAC.modulSec(KI.ayar.modul); KI.L.ARAC.ortakKur(KI.ortakAraclar); }
-    if(typeof window !== 'undefined') setTimeout(() => { try{ if(odak()) odakKur(); KI.hatirlatKur(); }catch(e){ /* yok */ } }, 0);
+    if(typeof window !== 'undefined') setTimeout(() => { try{ if(odak()) odakKur(); KI.hatirlatKur(); KI.aliskanlikKur(); }catch(e){ /* yok */ } }, 0);
     bagla();
     KI.disKisi = [];
     if(KI.hafiza()) KI.disKisiTazele();              // söz 22: öbür modüllerde öğrenilen
@@ -52740,7 +53361,7 @@ window.LIFEOS.KING = (function(){
     cikarimAdaylari:KI.cikarimAdaylari, cikarimKarti:KI.cikarimKarti, cikarimOnayla:KI.cikarimOnayla, SORMA:KI.SORMA, sormaKomutu:KI.sormaKomutu, sormaMi:KI.sormaMi, sormaListesi:KI.sormaListesi,
     USLUP:KI.USLUP, envanterVar:() => !!KI.envanter,
     yetkiUygula:KI.yetkiUygula, bekleyenYetki:() => KI.bekleyenYetki,
-    CEVAP:KI.CEVAP, cevapBicimi:KI.cevapBicimi, cevapSec:KI.cevapSec, SES:KI.SES, sesTercihi:KI.sesTercihi, sesTercihSec:KI.sesTercihSec, sesParcalari:KI.sesParcalari, seslendir:KI.seslendir, sus:KI.sus, wavYap:KI.wavYap, sonMotor:() => KI.sonMotor, sonNot:() => KI.sonNot, YAN:KI.YAN, yanDar:KI.yanDar, yanDarSec:KI.yanDarSec, DERIN:KI.DERIN, derinlik:KI.derinlik, derinlikSec:KI.derinlikSec, kartNiyeti:KI.kartNiyeti, soruCevapla:KI.soruCevapla, bicimli:KI.bicimli, tarz:KI.tarz, tarzSec:KI.tarzSec, TARZ:KI.TARZ, odak, ODAK, sohbetBas:KI.sohbetBas, BAS:KI.BAS, ayarKomutu, oneriListesi:KI.oneriListesi, cizgi:KI.cizgi, haftaHedefi:KI.haftaHedefi, HEDEF:KI.HEDEF, DENEY:KI.DENEY, deneyOku:KI.deneyOku, notPuanla:KI.notPuanla, parcalaGunluk:KI.parcalaGunluk, sohbettenBul:KI.sohbettenBul, bulunanKaydet:KI.bulunanKaydet, BEKLEYEN_KAYIT:KI.BEKLEYEN_KAYIT,
+    CEVAP:KI.CEVAP, cevapBicimi:KI.cevapBicimi, cevapSec:KI.cevapSec, SES:KI.SES, sesTercihi:KI.sesTercihi, sesTercihSec:KI.sesTercihSec, sesParcalari:KI.sesParcalari, seslendir:KI.seslendir, sus:KI.sus, wavYap:KI.wavYap, sonMotor:() => KI.sonMotor, sonNot:() => KI.sonNot, YAN:KI.YAN, yanDar:KI.yanDar, yanDarSec:KI.yanDarSec, DERIN:KI.DERIN, derinlik:KI.derinlik, derinlikSec:KI.derinlikSec, kartNiyeti:KI.kartNiyeti, yardimNiyeti:KI.yardimNiyeti, aliskanlikKur:KI.aliskanlikKur, sabahYokla:KI.sabahYokla, eylemListesi:KI.eylemListesi, soruCevapla:KI.soruCevapla, bicimli:KI.bicimli, tarz:KI.tarz, tarzSec:KI.tarzSec, TARZ:KI.TARZ, odak, ODAK, sohbetBas:KI.sohbetBas, BAS:KI.BAS, ayarKomutu, oneriListesi:KI.oneriListesi, cizgi:KI.cizgi, haftaHedefi:KI.haftaHedefi, HEDEF:KI.HEDEF, DENEY:KI.DENEY, deneyOku:KI.deneyOku, notPuanla:KI.notPuanla, parcalaGunluk:KI.parcalaGunluk, sohbettenBul:KI.sohbettenBul, bulunanKaydet:KI.bulunanKaydet, BEKLEYEN_KAYIT:KI.BEKLEYEN_KAYIT,
     MIK:KI.MIK, mikSecili:KI.mikSecili, mikSec:KI.mikSec, mikTazele:KI.mikTazele, mikDene:KI.mikDene, algila:KI.algila,
     sohbetiKaydet:KI.sohbetiKaydet, sohbetiTemizle:KI.sohbetiTemizle, sohbetiGeriGetir:KI.sohbetiGeriGetir, kayitlar:KI.arsivOku, kayitIndir:KI.kayitIndir,
     kayitKopyala:KI.kayitKopyala, kayitSil:KI.kayitSil, kayitMetni:KI.kayitMetni, menuAc:KI.menuAc, menuDurum:() => KI.menu,
@@ -90387,11 +91008,25 @@ R.Ogren = (function(){
      Konu verilmişse adı eşleşen konunun cevaplanmamış ilk sorusu. Verilmemişse
      sıra: (1) vadesi gelen tekrar (yanlış yaptığın soru 1, 3, 7 gün sonra),
      (2) öncelikli konuların cevaplanmamış sorusu, (3) son açılan konu. Tekrar
-     turu ölçüm değildir (söz 3: ilk cevap kalır); tekrar takvimi bu cihazda. */
-  const TEKRAR = 'ays.king.tekrar', TEKRAR_ARALIK = [1, 3, 7];
-  function tekrarlar(){ try{ const v = JSON.parse(localStorage.getItem(TEKRAR) || '{}'); return v && typeof v === 'object' ? v : {}; }catch(e){ return {}; } }
-  function tekrarYaz(v){ try{ localStorage.setItem(TEKRAR, JSON.stringify(v)); }catch(e){ /* yer yok */ } }
-  function gunEkle(n){ return R.U.iso(R.U.addDays(R.U.today(), n)); }
+     turu ölçüm değildir (söz 3: ilk cevap kalır); tekrar takvimi bu cihazda.
+     Takvim, teşhis ve benzer soru öğretme motorunun (core/ogret.js, KING-4 §D):
+     kayıt konu başına (ders|konu); eski soru kimlikli kayıt okunurken taşınır. */
+  const TEKRAR = 'ays.king.tekrar', SON = 'ays.ogret.son';
+  const OG = () => window.LIFEOS.OGRET;
+  const kavramOf = id => String(id).split('|').slice(0, 2).join('|');
+  function tekrarDepo(){ const d = OG().depo(TEKRAR); OG().tasi(d, kavramOf); return d; }
+  const ETIKET_TUR = { K:'kavram', 'İ':'islem', Y:'dikkat', D:'dikkat' };
+  /* Yanlış defterinde bu konunun en sık etiketi (S «süre» dört türden biri değil). */
+  function konuEtiketi(topicId){
+    const say = {};
+    ((R.S && R.S.errors) || []).forEach(e => { if(e && e.topicId === topicId && ETIKET_TUR[e.tag]) say[e.tag] = (say[e.tag] || 0) + 1; });
+    const t = Object.keys(say).sort((a, b) => say[b] - say[a])[0];
+    return t ? { etiket:ETIKET_TUR[t], etiketNeden:'yanlış defterinde bu konuda en sık etiket ' + ((R.ERROR_TAGS || {})[t] || { name:t }).name + ', ' + say[t] + ' kayıt' } : {};
+  }
+  function ogretAraclar(){
+    return OG().araclar({ modul:'ays', tekrar:tekrarDepo(), son:OG().depo(SON), bugun:() => R.U.todayISO(),
+      ad:k => { const x = konuyuBul(k.split('|')[1]); return x.topic ? x.topic.name : k; } });
+  }
   function soruNesnesi(x, i, not){
     const q = sorular(x.topic.id)[i];
     if(!q) return null;
@@ -90409,27 +91044,24 @@ R.Ogren = (function(){
     const t = String(konuMetni || '').toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim();
     const adaylar = konular().filter(x => sorular(x.topic.id).length);
     if(!adaylar.length) return null;
-    const ad = x => String(x.topic.name || '').toLocaleLowerCase('tr');
     if(t){
-      const x = adaylar.find(k => t.includes(ad(k)) || ad(k).includes(t))
-        || adaylar.find(k => t.split(' ').some(w => w.length > 4 && !/^(konu|soru|hakkında|ilgili|konusunda)/.test(w) && ad(k).includes(w)));
+      const x = OG().bul(adaylar, t, k => [k.topic.name], { gevsek:true });
       return x ? ilkCevapsiz(x) : null;
     }
-    const tk = tekrarlar(), bugun = R.U.todayISO();
-    /* Öğren'de yanlış verilmiş ama takvime girmemiş eski cevaplar da vadesi gelmiş sayılır. */
+    const tk = tekrarDepo().oku(), bugun = R.U.todayISO();
+    /* Öğren'de yanlış verilmiş ama takvime girmemiş eski cevaplar da vadesi gelmiş sayılır (yazılmaz). */
     adaylar.forEach(x => {
-      const c = cevaplar(x.subject.id, x.topic.id);
-      Object.keys(c).forEach(k => {
-        const id = x.subject.id + '|' + x.topic.id + '|' + k;
-        if(c[k] && c[k].d === false && !tk[id] && String(c[k].at || '').slice(0, 10) < bugun) tk[id] = { n:0, sonraki:bugun, eski:true };
-      });
+      const kv = x.subject.id + '|' + x.topic.id, c = cevaplar(x.subject.id, x.topic.id);
+      const og = Object.keys(c).filter(k => c[k] && c[k].d === false && String(c[k].at || '').slice(0, 10) < bugun).map(k => kv + '|' + k);
+      if(og.length && !tk[kv]) tk[kv] = { n:0, sonraki:bugun, eski:true, ogeler:og };
     });
-    const vade = Object.keys(tk).filter(k => tk[k] && String(tk[k].sonraki) <= bugun)
-      .sort((a, b) => String(tk[a].sonraki).localeCompare(String(tk[b].sonraki)));
-    for(const k of vade){
-      const p = k.split('|');
+    /* Vadesi gelen konuda yanlış yapılan değil, aynı konunun benzer sorusu (motor seçer). */
+    for(const v of OG().vade({ oku:() => tk }, bugun)){
+      const p = v.kavram.split('|');
       const x = adaylar.find(a => a.subject.id === p[0] && a.topic.id === p[1]);
-      const s = x ? soruNesnesi(x, Number(p[2]), 'Tekrar (' + (tk[k].n + 1) + '. tur): ilk cevabın ölçümde kaldı; bu tur hafızan için.') : null;
+      const id = x ? OG().benzer(sorular(x.topic.id).map((q, i) => q ? v.kavram + '|' + i : null), v) : null;
+      const s = id ? soruNesnesi(x, Number(id.split('|')[2]), 'Tekrar (' + (v.n + 1) + '. tur): '
+        + ((v.ogeler || []).indexOf(id) >= 0 ? 'yanlış yaptığın soru; ilk cevabın ölçümde kaldı, bu tur hafızan için.' : 'aynı konudan benzer bir soru.')) : null;
       if(s) return s;
     }
     for(const o of oncelikler(10)){
@@ -90448,11 +91080,7 @@ R.Ogren = (function(){
     if(t.length < 3) return null;
     const OZ = R.KONU_OZET || {};
     const adaylar = konular().filter(x => anlatim(x.topic.id) || OZ[x.topic.id]);
-    const ad = x => String(x.topic.name || '').toLocaleLowerCase('tr');
-    const kok = w => w.slice(0, Math.max(4, w.length - 2));
-    const x = adaylar.find(k => ad(k) === t) || adaylar.find(k => t.includes(ad(k)))
-      || adaylar.find(k => ad(k).includes(t))
-      || adaylar.find(k => t.split(' ').filter(w => w.length > 3).every(w => ad(k).includes(kok(w))));
+    const x = OG().bul(adaylar, t, k => [k.topic.name]);
     if(!x) return null;
     const a = anlatim(x.topic.id), oz = OZ[x.topic.id];
     const bol = b => ({ baslik:b.baslik || '', metin:b.metin ? duzMetin(b.metin) : '',
@@ -90462,31 +91090,27 @@ R.Ogren = (function(){
     return { id:x.topic.id, baslik:x.topic.name, alt:x.subject.name, giris:a && a.giris ? duzMetin(a.giris) : '',
       bolumler, etiket:'elle yazıldı · doğrulanmadı', sorgu:x.topic.name, soruVar:sorular(x.topic.id).length > 0 };
   }
-  /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). Yanlışsa
-     soru yarın yeniden gelir; tekrarda doğruysa 3 ve 7 gün sonra; üç doğru
-     turdan sonra takvimden çıkar. */
+  /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). Takvim ve
+     teşhis motorun (core/ogret.js): yanlışsa konu yarın benzer soruyla gelir,
+     tekrarda doğruysa 3 ve 7 gün sonra; üçüncü doğruda konu kapanır. Yanlışta
+     teşhis satırları (kanıt varsa) çözümün önünde durur. */
   async function kingCevapla(id, harf){
     const p = String(id || '').split('|'), i = Number(p[2]);
     const q = sorular(p[1])[i];
     if(!q) return null;
-    const r = await cevapla(p[0], p[1], i, harf, false, 0);
-    const isabet = String(harf || '').toUpperCase() === q.dogru;
-    const tk = tekrarlar(), kayit = tk[id];
-    let not = '';
-    if(!isabet){
-      tk[id] = { n:0, sonraki:gunEkle(1) };
-      not = 'Yarın bu soruyu yeniden soracağım.';
-    }else if(kayit){
-      const n = kayit.n + 1;
-      if(n >= TEKRAR_ARALIK.length){ delete tk[id]; not = 'Tekrarları tamamladın; bu soru artık sorulmayacak.'; }
-      else{ tk[id] = { n, sonraki:gunEkle(TEKRAR_ARALIK[n]) }; not = TEKRAR_ARALIK[n] + ' gün sonra bir kez daha soracağım.'; }
-    }else if(r && r.neden === 'kilitli'){
-      not = 'Bu soruyu daha önce cevaplamıştın; ilk cevabın ölçüm olarak kaldı.';
-    }
-    tekrarYaz(tk);
-    return { dogru:q.dogru, cozum:[].concat(q.cozum || []).map(duzMetin), not };
+    const H = String(harf || '').toUpperCase(), onceki = cevaplar(p[0], p[1])[i];
+    const r = await cevapla(p[0], p[1], i, H, false, 0);
+    const c = cevaplar(p[0], p[1]), x = konuyuBul(p[1]);
+    const metin = h => { const m = (q.sec || [])[HARFLER.indexOf(h)]; return m == null ? '' : duzMetin(m); };
+    const cozum = [].concat(q.cozum || []).map(duzMetin);
+    const o = OG().cevap({ tekrar:tekrarDepo(), son:OG().depo(SON), bugun:() => R.U.todayISO() }, Object.assign({
+      id, kavram:kavramOf(id), konu:x.topic ? x.topic.name : '', soru:duzMetin(q.soru), secilen:H, dogru:q.dogru,
+      secMetin:metin(H), dogruMetin:metin(q.dogru), oncekiDogru:!!(onceki && onceki.d === true),
+      konuYanlis:Object.keys(c).filter(k => c[k] && c[k].d === false && !c[k].bak).length, cozum }, konuEtiketi(p[1])));
+    const not = o.not || (o.isabet && r && r.neden === 'kilitli' ? 'Bu soruyu daha önce cevaplamıştın; ilk cevabın ölçüm olarak kaldı.' : '');
+    return { dogru:q.dogru, cozum:o.satirlar.concat(cozum), not };
   }
-  return { HARFLER, SEVIYE, kingSoru, kingCevapla, kingDers, oncelikler, TEKRAR, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
+  return { HARFLER, SEVIYE, kingSoru, kingCevapla, kingDers, oncelikler, TEKRAR, tekrarDepo, ogretAraclar, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
     derin, tabanSorular, seviye, gecerli, ekMetni, soru,
     anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle,
     kavramlar, akilliNot, kaynaklar, stratejiler };
@@ -131091,6 +131715,8 @@ R.App = (function(){
                «Unuttuğun ne var?» Günü kapat'ın yazılmamış satırlarıdır. */
             eksik:g => (R.Screens.today.gunuKapat.satirlar(g) || []).filter(x => x && !x.yazildi).map(x => ({ id:x.id, ad:x.ad, tur:x.tur })),
             hafta:bitis => R.KingVeri.hafta(bitis), hatirlat:simdi => R.KingVeri.hatirlat(simdi || new Date()),
+            /* Sabah brifingi verisi (KING-4 §H, ofis 060-062). */
+            brifing:simdi => typeof R.KingVeri.brifing === 'function' ? R.KingVeri.brifing(simdi || new Date()) : null,
             sonKayit:() => R.KingVeri.sonKayit(), duzelt:(id, alan, deger) => R.KingVeri.duzelt(id, alan, deger),
             istatistik:() => {
               let solved = 0, correct = 0;
