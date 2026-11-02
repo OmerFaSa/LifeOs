@@ -13979,6 +13979,11 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
 .hesap__durum.is-hata, .hesap__durum.is-baska{ color:var(--bad-ink, var(--bad)); }
 .hesap__mesaj{ margin:2px 2px 10px; font-size:13px; color:var(--text); }
 .hesap__not{ margin:12px 2px 0; font-size:12.5px; line-height:1.5; color:var(--text-2); }
+/* Ayar çakışması (hesap.js cakismaHtml): son üç satır; ayar adı, kazanan, saat. */
+.hesap__cakisma ul{ list-style:none; margin:6px 0 0; padding:0; display:grid; gap:2px; }
+.hesap__cakisma li{ display:grid; grid-template-columns:auto 1fr auto; align-items:baseline; gap:8px; padding:6px 2px; border-top:1px solid var(--border-soft, var(--border)); font-size:12.5px; }
+.hesap__cakisma li span{ color:var(--text-2); }
+.hesap__cakisma li small{ color:var(--text-3, var(--text-2)); font-variant-numeric:tabular-nums; }
 .hesap__not code{ font-size:12px; }
 
 .hesap__form{ display:flex; flex-direction:column; gap:12px; margin:4px 0 0; }
@@ -20005,6 +20010,71 @@ html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz:focus-within{
 .king:not(.is-mini) .king__yaz:not(:has(.king__girdi:placeholder-shown)) .king__gonder{ transform:scale(1.04); }
 @media (prefers-reduced-motion:reduce){ .king:not(.is-mini) .king__gonder{ transform:none !important; } }
 
+/* 8) YUMUŞAK CAM (kullanıcı, 2026-11-02: «King arayüzü daha soft, güzel ve
+   kullanışlı olsun: minimalist, sade, glass temalı»). Yön: tek cam levha,
+   içinde kutu yok; ayrımı boşluk ve saç teli çizgi yapar.
+   · Büyük pencere opak kalır (king.css «OPAK PENCERE»: 40 px bulanıklık ilk
+     açılışta ~0,5 sn'lik kare yapıyordu); cam, pencerenin içinde: zeminde King
+     ve modül renginde iki yumuşak ışık alanı, üstünde yarı saydam tül. Küçük
+     King gerçek buzlu cam (yarı saydam yüzey, 28 px bulanıklık; küçük alan,
+     ucuz). Tek ince kenar, tek gölge; doku deseni kalktı.
+   · Ray, sohbet listesi ve Bağlam ayrı kart değil, levhanın parçası.
+   · Karşılama kartları, çipler, cevap kartı, «sen» balonu ince cam tül: dolgu
+     ve sert kenar yok, saç teli çizgi ve üst ışık.
+   · Yazı alanı yüzen cam kapsül; küçük King de aynı camdan.
+   · «Sade» zeminde bu katman çalışmaz (AGENTS kural 10). */
+html[data-zemin="yumusak"] .king{
+  --kc-levha:rgba(250,251,253,.72); --kc-tul:rgba(255,255,255,.5); --kc-tul-2:rgba(255,255,255,.78);
+  --kc-hat:rgba(20,24,40,.08); --kc-isik:rgba(255,255,255,.9); --kc-cizgi:rgba(20,24,40,.07);
+  --kc-golge:0 32px 80px -36px rgba(20,24,40,.4); }
+html[data-theme="dark"][data-zemin="yumusak"] .king{
+  --kc-levha:rgba(22,23,28,.66); --kc-tul:rgba(255,255,255,.05); --kc-tul-2:rgba(255,255,255,.085);
+  --kc-hat:rgba(255,255,255,.08); --kc-isik:rgba(255,255,255,.07); --kc-cizgi:rgba(255,255,255,.06);
+  --kc-golge:0 32px 80px -30px rgba(0,0,0,.72); }
+@media (prefers-color-scheme:dark){
+  html:not([data-theme="light"])[data-zemin="yumusak"] .king{
+    --kc-levha:rgba(22,23,28,.66); --kc-tul:rgba(255,255,255,.05); --kc-tul-2:rgba(255,255,255,.085);
+    --kc-hat:rgba(255,255,255,.08); --kc-isik:rgba(255,255,255,.07); --kc-cizgi:rgba(255,255,255,.06);
+    --kc-golge:0 32px 80px -30px rgba(0,0,0,.72); }
+}
+/* Levha: küçükte buzlu cam, büyükte opak zemin üstünde ışık alanları. */
+html[data-zemin="yumusak"] .king.king .king__kutu{ box-shadow:inset 0 1px 0 var(--kc-isik), inset 0 0 0 1px var(--kc-hat), var(--kc-golge) !important; }
+html[data-zemin="yumusak"] .king.king.is-mini .king__kutu{
+  background:radial-gradient(90% 70% at 0% 0%, color-mix(in oklab, var(--king-vurgu) 8%, transparent), transparent 72%), var(--kc-levha) !important;
+  -webkit-backdrop-filter:blur(28px) saturate(160%); backdrop-filter:blur(28px) saturate(160%); }
+html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__kutu{ border-radius:28px !important;
+  background:radial-gradient(60% 55% at 8% 0%, color-mix(in oklab, var(--king-vurgu) 16%, transparent), transparent 70%),
+    radial-gradient(55% 50% at 100% 100%, color-mix(in oklab, var(--mod, var(--king-vurgu)) 11%, transparent), transparent 70%),
+    var(--surface, #fff) !important; }
+/* İç kartlar kalkar: ray, liste, Bağlam ve başlık levhanın parçası. */
+html[data-zemin="yumusak"] .king.king:not(.is-mini) :is(.king__ray, .king__yan, .king__baglam, .king__bas){ background:transparent !important; box-shadow:none !important; border-color:transparent !important; }
+html[data-zemin="yumusak"] .king.king:not(.is-mini):not(.is-yan-dar) .king__yan{ box-shadow:inset -1px 0 0 var(--kc-cizgi) !important; }
+html[data-zemin="yumusak"] .king.king:not(.is-mini).is-alan-acik .king__baglam{ box-shadow:inset 1px 0 0 var(--kc-cizgi) !important; }
+html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray .king__ray-is.is-secili,
+html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray [aria-current="true"]{
+  background:color-mix(in oklab, var(--king-vurgu) 15%, transparent) !important; color:color-mix(in oklab, var(--king-vurgu) 70%, var(--text)) !important; box-shadow:none !important; }
+html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray .king__ray-is:not(.is-secili):hover{ background:var(--kc-tul) !important; }
+/* Tül: kartlar, karolar, çipler. */
+html[data-zemin="yumusak"] .king.king .king__kutu :is(.king__kart, .king__ars, .king__onizle, .king__soru, .king__sira, .king__bulunan,
+  .king__alan .king__gorev, .king__ders, .king__yasa-s, .king__gunum, .kt-kart, .kv-mini, .king__cip:not(.king__cip--ana)){
+  background:var(--kc-tul) !important; border:0 !important; box-shadow:inset 0 0 0 1px var(--kc-hat), inset 0 1px 0 var(--kc-isik) !important;
+  transition:background .2s ease, transform .2s cubic-bezier(.2,.7,.2,1); }
+html[data-zemin="yumusak"] .king.king .king__kutu :is(.kv-mini, .king__cip:not(.king__cip--ana)):hover{ background:var(--kc-tul-2) !important; transform:translateY(-1px); }
+html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__kutu .kv-mini{ border-radius:18px !important; }
+/* Cevap kartı ve senin balonun. */
+html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__akis > .king__balon--king.is-son > div{
+  background:linear-gradient(160deg, color-mix(in oklab, var(--king-vurgu) 7%, transparent), transparent 62%), var(--kc-tul) !important;
+  box-shadow:inset 0 0 0 1px var(--kc-hat), inset 0 1px 0 var(--kc-isik) !important; }
+html[data-zemin="yumusak"] .king.king .king__kutu .king__balon--sen{ background:color-mix(in oklab, var(--king-vurgu) 15%, transparent) !important;
+  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 18%, transparent) !important; }
+/* Yazı alanı: yüzen cam kapsül. */
+html[data-zemin="yumusak"] .king.king .king__yaz{ background:var(--kc-tul-2) !important; border-radius:26px !important;
+  box-shadow:inset 0 0 0 1px var(--kc-hat), inset 0 1px 0 var(--kc-isik) !important; }
+html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
+  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 42%, transparent), 0 0 0 4px color-mix(in oklab, var(--king-vurgu) 12%, transparent) !important; }
+@media (prefers-reduced-motion:reduce){ html[data-zemin="yumusak"] .king.king .king__kutu :is(.kv-mini, .king__cip):hover{ transform:none; } }
+@media (prefers-reduced-transparency:reduce){ html[data-zemin="yumusak"] .king.king.is-mini .king__kutu{ background:var(--surface) !important; -webkit-backdrop-filter:none; backdrop-filter:none; } }
+
 /* ==== css/minik-cam.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/minik-cam.css içine yazılır; burası bir sonraki
@@ -20643,7 +20713,7 @@ window.LIFEOS = window.LIFEOS || {};
      (yalnız değişen anahtar; iki modül açıksa birbirini ezmez). Sunucu
      yoksa (telefon, tek dosya, denetim sunucusu) hiçbir şey olmaz.
      Hangi anahtarın sistem ayarı olduğu: sistem/ayar.py ANAHTAR ile aynı. */
-  const ORTAK = /^lifeos\.(yazi|boyut|vurgu|odak|altcizgi|satir|isik|buzlu\.[a-z]+|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|sessiz\.bitis|minik|minik\.[a-z]+|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun)|ice\.var|profiller|profil\.etkin)$/;
+  const ORTAK = /^lifeos\.(yazi|boyut|vurgu|odak|altcizgi|satir|isik|buzlu\.[a-z]+|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|sessiz\.bitis|minik|minik\.[a-z]+|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun|yer|yer\.[a-z]+)|acilis\.video|ice\.var|profiller|profil\.etkin)$/;
   function ortakAnlik(){
     const o = {};
     try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(ORTAK.test(k)) o[k] = localStorage.getItem(k); } }catch(e){ /* depo kapalı */ }
@@ -23674,7 +23744,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'6724eb7f', at:'2026-11-02 13:22', dirty:false };
+R.BUILD = { id:'650745a8', at:'2026-11-02 14:00', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -33969,6 +34039,10 @@ window.LIFEOS = window.LIFEOS || {};
      hiçbir ekran bozulmaz.
    · Radyo ile müzik aynı anda çalmaz: biri başlayınca öteki durur.
    · Açılış kesiti: «Her açılışta» ya da «Günde bir» (modül başına).
+     Nerede çalar (kullanıcı, 2026-11-02): yalnız ilk girişte (kartlar,
+     varsayılan), her modül açılışında ya da yer başına ayrı parça (kartlarda
+     A, AYS'de B…). Seçim ortak ayardır (`lifeos.muzik.yer*`): telefonla da
+     eşitlenir. Giriş sayfasında açılış videosu varsa müzik onun ardından.
      Tarayıcı kendiliğinden çalmayı reddederse kesit ilk dokunuşta çalar
      (açılıştan 15 sn içinde); sonra hiç.
    · Arka plan listesi açıksa açılıştan sonra (ya da hemen) karışık çalar;
@@ -33995,7 +34069,25 @@ window.LIFEOS.MUZIK = (function(){
     fetch:(u, o) => fetch(u, o),
     simdi:() => new Date(),
     karistir:l => l.slice().sort(() => Math.random() - .5),
+    yer:() => typeof location === 'undefined' ? null : ({ 4180:'giris', 4173:'ays', 4183:'spi', 4193:'esp' })[location.port] || null,
   };
+  const YER = 'lifeos.muzik.yer', YERLER = Object.freeze(['giris', 'ays', 'spi', 'esp']);
+  const YER_AD = Object.freeze({ giris:'Kartlar', ays:'AYS', spi:'SPİ', esp:'ESP' });
+  const depoAl = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
+  function yerKipi(){ const v = depoAl(YER); return v === 'her' || v === 'ayri' ? v : 'giris'; }
+  /* Bu yerde çalacak kesit ya da null. Ayrı parçada kesit, parça açılışınkiyse onunki;
+     değilse baştan, aynı uzunlukta (shortcut: yer başına kesit yok; istenirse yer başına bas/bit). */
+  function yerKesiti(yer){
+    const a = d().acilis, k = yerKipi();
+    if(!yer || !a.id || a.ne === 'kapali') return null;
+    if(k !== 'ayri'){
+      if(k === 'giris' ? yer !== 'giris' : yer === 'giris') return null;
+      return parca(a.id) ? { id:a.id, bas:a.bas, bit:a.bit, gun:ACILIS_GUN } : null;
+    }
+    const id = depoAl(YER + '.' + yer);
+    if(!id || !parca(id)) return null;
+    return id === a.id ? { id, bas:a.bas, bit:a.bit, gun:ACILIS_GUN + '.' + yer } : { id, bas:0, bit:Math.max(1, a.bit - a.bas), gun:ACILIS_GUN + '.' + yer };
+  }
   let ortam = Object.assign({}, VARSAYILAN_ORTAM);
   let dizin = null, ses = null, kuyruk = [], sira = 0, kip = null, kesitSonu = null, susturuldu = false, mesajMetni = '';
 
@@ -34087,24 +34179,20 @@ window.LIFEOS.MUZIK = (function(){
   /* Açılış kesiti. Döner: çalmaya başladı mı. dinle: Ayarlar'daki «Kesiti dinle»
      (ne/gün kuralına bakmaz, günü işaretlemez). */
   function acilisCal(dinle){
-    const a = d().acilis;
-    if(!a.id || (a.ne === 'kapali' && !dinle) || !parca(a.id)) return false;
+    const a = d().acilis, x = dinle ? (a.id && parca(a.id) ? { id:a.id, bas:a.bas, bit:a.bit } : null) : yerKesiti(ortam.yer());
+    if(!x) return false;
     const gun = ortam.simdi().toISOString().slice(0, 10);
-    if(a.ne === 'gunde' && !dinle){
-      let son = null;
-      try{ son = localStorage.getItem(ACILIS_GUN); }catch(e){ /* depo yok */ }
-      if(son === gun) return false;
-    }
-    if(!dinle) try{ localStorage.setItem(ACILIS_GUN, gun); }catch(e){ /* depo yok */ }
+    if(a.ne === 'gunde' && !dinle && depoAl(x.gun) === gun) return false;
+    if(!dinle) try{ localStorage.setItem(x.gun, gun); }catch(e){ /* depo yok */ }
     const s = oge();
     if(!s) return false;
     radyoSustur();
     kip = 'acilis';
-    kuyruk = [a.id]; sira = 0;
-    s.src = '/api/muzik/parca/' + a.id;
+    kuyruk = [x.id]; sira = 0;
+    s.src = '/api/muzik/parca/' + x.id;
     s.volume = a.ses;
-    kesitSonu = a.bit;
-    const basla = () => { try{ s.currentTime = a.bas; }catch(e){ /* yok */ } };
+    kesitSonu = x.bit;
+    const basla = () => { try{ s.currentTime = x.bas; }catch(e){ /* yok */ } };
     if(s.readyState >= 1) basla(); else s.addEventListener('loadedmetadata', basla, { once:true });
     oynat();
     guncelle();
@@ -34242,6 +34330,9 @@ window.LIFEOS.MUZIK = (function(){
     const ust = Math.min(600, Math.max(1, Math.ceil(sureler[a.id] || 600)));
     const acilis = (x.parcalar.length ? '<label class="skart__satir"><span class="skart__etiket">Parça</span><select class="ayarlar__girdi skart__secim" data-muzik-acilis="id" aria-label="Açılış parçası">'
         + '<option value="">Seçilmedi</option>' + x.parcalar.map(p => '<option value="' + p.id + '"' + (a.id === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>').join('') + '</select></label>' : '')
+      + (x.parcalar.length ? '<div class="skart__satir"><span class="skart__etiket">Nerede</span>' + seg('Nerede', [['giris', 'İlk girişte'], ['her', 'Her modülde'], ['ayri', 'Yer başına']], yerKipi(), 'data-muzik-yer') + '</div>'
+        + (yerKipi() === 'ayri' ? YERLER.map(y => { const v = depoAl(YER + '.' + y) || ''; return '<label class="skart__satir"><span class="skart__etiket">' + YER_AD[y] + '</span><select class="ayarlar__girdi skart__secim" data-muzik-yerparca="' + y + '" aria-label="' + YER_AD[y] + ' açılış parçası">'
+          + '<option value="">Çalmasın</option>' + x.parcalar.map(p => '<option value="' + p.id + '"' + (v === p.id ? ' selected' : '') + '>' + kac(p.ad) + '</option>').join('') + '</select></label>'; }).join('') : '') : '')
       + '<div class="skart__satir"><span class="skart__etiket">Ne zaman</span>' + seg('Ne zaman', [['kapali', 'Kapalı'], ['her', 'Her açılışta'], ['gunde', 'Günde bir']], a.ne, 'data-muzik-acilis-ne', v => !a.id && v !== 'kapali') + '</div>'
       + (a.id ? '<details class="skart__ayrinti" data-muzik-ayrinti' + (ayrintiAcik ? ' open' : '') + '><summary>Kesit ve ses <small>' + kac(kesitYaz(a)) + ' · %' + Math.round(a.ses * 100) + '</small></summary>'
         + '<div class="skart__satir skart__satir--ust"><span class="skart__etiket">Kesit<small data-muzik-kesit-yazi>' + kac(kesitYaz(a)) + '</small></span><div class="skart__kesit">'
@@ -34316,6 +34407,8 @@ window.LIFEOS.MUZIK = (function(){
       }
       const an = t.closest('[data-muzik-acilis-ne]');
       if(an){ e.preventDefault(); ayarKaydet({ acilis:Object.assign({}, d().acilis, { ne:an.getAttribute('data-muzik-acilis-ne') }) }); return; }
+      const yr = t.closest('[data-muzik-yer]');
+      if(yr){ e.preventDefault(); yerYaz(YER, yr.getAttribute('data-muzik-yer') === 'giris' ? null : yr.getAttribute('data-muzik-yer')); guncelle(true); return; }
       const lsec = t.closest('[data-muzik-listesec]');
       if(lsec){ e.preventDefault(); seciliListe = lsec.getAttribute('data-muzik-listesec'); guncelle(true); return; }
       const ks = t.closest('[data-muzik-karistir]');
@@ -34332,6 +34425,12 @@ window.LIFEOS.MUZIK = (function(){
         const alan = t.getAttribute('data-muzik-acilis'), n = Number(t.value), a = d().acilis;
         const v = alan === 'id' ? (t.value || null) : alan === 'ses' ? n / 100 : alan === 'bas' ? Math.min(n, a.bit - 1) : Math.max(n, a.bas + 1);
         ayarKaydet({ acilis:Object.assign({}, a, { [alan]:v }, alan === 'id' && !v ? { ne:'kapali' } : {}) });
+        return;
+      }
+      if(t.matches('[data-muzik-yerparca]')){
+        yerYaz(YER + '.' + t.getAttribute('data-muzik-yerparca'), t.value || null);
+        const a = d().acilis;   // ilk yer parçası açılışın parçası olur: «Ne zaman» açılabilsin (sunucu parçasızı kapatır)
+        if(t.value && !a.id) ayarKaydet({ acilis:Object.assign({}, a, { id:t.value, ne:'her' }) }); else guncelle(true);
         return;
       }
       if(t.matches('[data-muzik-arka-ses]')){ const v = Number(t.value) / 100; ayarKaydet({ arka:Object.assign({}, d().arka, { ses:v }) }); if(kip === 'arka' && ses) ses.volume = v; }
@@ -34368,14 +34467,14 @@ window.LIFEOS.MUZIK = (function(){
     window.addEventListener('lifeos:ses', e => { const h = e.detail && e.detail.hal; if((h === 'caliyor' || h === 'baglaniyor') && kip) durdur(); });
   }
 
-  /* Açılış müziği seçim sayfasında (giriş, 4180) çalar (kullanıcı, 2026-10-30:
-     «AYS, SPİ, ESP'yi seçmediğimiz yerde bile başlasın»); oradan açılan
-     modülde ikinci kez çalmaz, arka plan müziğiyle sürer. */
-  const giristen = () => typeof document !== 'undefined' && /^https?:\/\/[^/]+:4180(\/|$)/.test(String(document.referrer || ''));
+  function yerYaz(k, v){ try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){ /* depo yok */ } }
+  /* Açılış müziği nerede çalar: yerKesiti (kullanıcı, 2026-11-02). Giriş sayfasının
+     açılış videosu (sunucu.py) varsa müzik onun bitmesini bekler. */
   function acilis(){
     bagla();
     if(!isaretVar()) return Promise.resolve(null);
-    return yukle().then(v => { if(v && (giristen() || !acilisCal())) arkaBaslat(); });
+    const video = typeof window !== 'undefined' && window.__LIFEOS_ACILIS_VIDEO__;
+    return Promise.resolve(video).then(yukle).then(v => { if(v && !acilisCal()) arkaBaslat(); });
   }
   if(typeof document !== 'undefined' && typeof window !== 'undefined' && !window.__LIFEOS_TEST__){
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', acilis, { once:true });
@@ -34384,7 +34483,7 @@ window.LIFEOS.MUZIK = (function(){
 
   function _ortam(o){ ortam = Object.assign({}, VARSAYILAN_ORTAM, o || {}); }
   function _sifirla(v){ durdur(); dizin = v || null; kuyruk = []; sira = 0; susturuldu = false; mesajMetni = ''; }
-  return Object.freeze({ LISTELER, LISTE_AD, ACILIS_GUN, VAR_ANAHTAR, yukle, cal, sonraki, durdur, acilisCal, arkaBaslat, susturAc, oturum, durum,
+  return Object.freeze({ LISTELER, LISTE_AD, ACILIS_GUN, VAR_ANAHTAR, YER, YERLER, yukle, yerKesiti, cal, sonraki, durdur, acilisCal, arkaBaslat, susturAc, oturum, durum,
     panelHtml, ayarHtml, liste, bagla, _ortam, _sifirla, _ses:() => oge() });
 })();
 
@@ -35916,6 +36015,7 @@ window.LIFEOS.HESAP = (function(){
       }
       durumYaz('tamam', '');
       ekTur(o, base);                                  // söz 20: arkada, beklenmez
+      ayarTur(o, base);                                // ortak ayarlar: arkada, beklenmez
     }catch(e){
       if(e.kod === 401){
         cerezSil(CEREZ);
@@ -35966,6 +36066,77 @@ window.LIFEOS.HESAP = (function(){
         cihaz:cihazKimligi() }, o.j, DURUM_ZAMAN_ASIMI);
     }
   }
+  /* ORTAK AYARLAR TELEFONLA (kullanıcı, 2026-11-02: «ayarlar telefonla aynı Wi-Fi
+     üzerinden iki yönlü eşitlensin; çakışmada son yazan kazansın ama hangisinin
+     kazandığı görünür olsun»). Sistem ayarlarının tek kopyası PC'dedir (sistem/
+     ayar.py). PC'nin kendi sayfası onu zaten doğrudan okur ve yazar
+     (animasyon.js); bu yol yalnız ÖTEKİ cihazlar için: değişen anahtarlar
+     `/api/hesap/ayar-esitle`'ye gider, sunucunun hâli iner. İnen anahtar için
+     sayfaya `storage` olayı atılır: görünüş, arka plan ve minikler yeniden
+     uygulanır. Sunucunun söylediği çakışmalar (kazanan, kaybeden) burada
+     saklanır ve Hesap panelinde görünür; PC sayfası onları /api/ayar'dan okur.
+     shortcut: değişikliğin zamanı fark edildiği an (tur dakikada bir); çevrimdışı
+     uzun beklemiş bir değişiklik geç sayılabilir. Gerekirse animasyon.js yazarken
+     zaman damgası tutar. */
+  const AYAR_ARALIK = 15000;
+  let ayarAktif = false, sonAyar = -Infinity;
+  function ortakDuzen(){ return L.ANIMASYON && L.ANIMASYON.ORTAK; }
+  function ortakAnlik(re){
+    const o = {};
+    try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(re.test(k)) o[k] = localStorage.getItem(k); } }catch(e){ /* depo yok */ }
+    return o;
+  }
+  function cakismaEkle(liste){
+    if(!Array.isArray(liste) || !liste.length) return;
+    const eski = ortam.depo.oku(anahtar('ayar', 'cakisma')) || [];
+    ortam.depo.yaz(anahtar('ayar', 'cakisma'), liste.concat(Array.isArray(eski) ? eski : []).slice(0, 20));
+  }
+  async function ayarTur(o, base){
+    const re = ortakDuzen(), simdi = ortam.simdi();
+    if(ayarAktif || !re || simdi - sonAyar < AYAR_ARALIK || typeof localStorage === 'undefined') return null;
+    ayarAktif = true; sonAyar = simdi;
+    try{
+      if(typeof window !== 'undefined' && window.__LIFEOS_AYAR__){
+        /* PC sayfası: yalnız çakışma listesi (yazmayı animasyon.js yapar). */
+        const r = await ortam.fetch('/api/ayar', { cache:'no-store' });
+        const v = r && r.ok ? await r.json() : null;
+        if(v && Array.isArray(v.cakisma)) ortam.depo.yaz(anahtar('ayar', 'cakisma'), v.cakisma.slice(0, 20));
+        return null;
+      }
+      const st = ortam.depo.oku(anahtar('ayar', 'esit')) || {}, yerel = ortakAnlik(re), gonder = {};
+      const once = st.onceki && typeof st.onceki === 'object' ? st.onceki : null;
+      Object.keys(yerel).forEach(k => { if(!once || once[k] !== yerel[k]) gonder[k] = { d:yerel[k], z:simdi }; });
+      if(once) Object.keys(once).forEach(k => { if(!(k in yerel)) gonder[k] = { d:null, z:simdi }; });
+      const c = await istek(base, '/api/hesap/ayar-esitle', { cihaz:cihazKimligi(), cihaz_ad:cihazAdi(),
+        son:once ? (Number(st.son) || 0) : 0, gonder }, o.j, DURUM_ZAMAN_ASIMI);
+      if(!c || !c.ayar || typeof c.ayar !== 'object') return null;
+      const degisen = [];
+      Object.keys(c.ayar).forEach(k => { if(re.test(k) && typeof c.ayar[k] === 'string' && yerel[k] !== c.ayar[k]){ try{ localStorage.setItem(k, c.ayar[k]); degisen.push(k); }catch(e){} } });
+      Object.keys(yerel).forEach(k => { if(!(k in c.ayar) && c.iz && c.iz[k]){ try{ localStorage.removeItem(k); degisen.push(k); }catch(e){} } });
+      ortam.depo.yaz(anahtar('ayar', 'esit'), { son:c.son, onceki:ortakAnlik(re), zaman:simdi });
+      cakismaEkle(c.cakisma);
+      if(typeof window !== 'undefined' && typeof StorageEvent === 'function') degisen.forEach(k => { try{ window.dispatchEvent(new StorageEvent('storage', { key:k })); }catch(e){} });
+      if(degisen.length || (c.cakisma && c.cakisma.length)) panelTazele();
+      return c;
+    }catch(e){ return null; /* sessiz: sonraki turda yeniden (403: sahibin hesabı değil) */ }
+    finally{ ayarAktif = false; }
+  }
+  /* Ayar adı ekranda iç terim olmadan (AGENTS kural 8). */
+  function ayarAdi(k){
+    const t = [[/^lifeos\.tema/, 'Tema'], [/^lifeos\.(zemin|manzara)/, 'Arka plan'], [/^lifeos\.acilis\.video/, 'Açılış videosu'],
+      [/^lifeos\.muzik/, 'Açılış müziği'], [/^lifeos\.(ses|sessiz)/, 'Ses'], [/^lifeos\.minik/, 'Minikler'], [/^lifeos\.king/, 'King'],
+      [/^lifeos\.profil/, 'Profil'], [/^lifeos\.(hareket)/, 'Hareket'], [/^lifeos\.(yazi|boyut|satir)/, 'Yazı']].find(x => x[0].test(k));
+    return t ? t[1] : 'Görünüm';
+  }
+  function cakismaHtml(){
+    const l = ortam.depo.oku(anahtar('ayar', 'cakisma'));
+    if(!Array.isArray(l) || !l.length) return '';
+    const saat = z => { const d = new Date(Number(z) || 0); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); };
+    return '<div class="hesap__cakisma" role="group" aria-label="Ayar çakışmaları"><p class="hesap__not">Ayar çakışması: son yazan kazanır</p><ul>'
+      + l.slice(0, 3).map(x => '<li><b>' + kac(ayarAdi(String(x.k || ''))) + '</b><span>' + kac(String(x.kazanan || '')) + ' kazandı</span><small>' + saat(x.z) + '</small></li>').join('')
+      + '</ul></div>';
+  }
+
   /* İçerik imzası: takvim damgası (DTSTAMP, her üretimde değişir) sayılmaz. */
   function imza(metin){
     const s = String(metin).replace(/^DTSTAMP:.*$/gm, '');
@@ -38238,7 +38409,7 @@ window.LIFEOS.HESAP = (function(){
       + '<div class="hesap__eylem">'
       +   '<button type="button" class="hesap__ana" data-hesap="esitle">Şimdi eşitle</button>'
       +   '<button type="button" class="hesap__ikinci" data-hesap="cikis">Çıkış yap</button>'
-      + '</div>';
+      + '</div>' + cakismaHtml();
   }
 
   function panelHtml(){
@@ -38853,7 +39024,7 @@ window.LIFEOS.HESAP = (function(){
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
     bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
-    _ortam:ortam, _sifirla, _istek:istek, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
+    _ortam:ortam, _sifirla, _istek:istek, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,
   };
 })();
