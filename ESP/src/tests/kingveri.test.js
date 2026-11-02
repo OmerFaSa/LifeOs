@@ -386,4 +386,149 @@
       }
     });
   });
+
+  describe('King verisi — brifing', () => {
+    it('boş depoda plan:[], bulgu:null, oneri:null döner ve iki çağrı aynı sonucu verir', () => {
+      resetState();
+      ESP.S.days = {};
+      ESP.S.cards = [];
+      try{
+        const simdi = yerelTarih(10, 0);
+        const b1 = ESP.KingVeri.brifing(simdi);
+        const b2 = ESP.KingVeri.brifing(simdi);
+        expect(b1.gun).toBe(U.iso(simdi));
+        expect(b1.plan).toEqual([]);
+        expect(b1.bulgu).toBeNull();
+        expect(b1.oneri).toBeNull();
+        expect(b1).toEqual(b2);
+      }finally{
+        resetState();
+      }
+    });
+
+    it('kenar: dün ölçüsü olup önceki 7 gün boşken bulgu döner ve ort «veri yok» olur', () => {
+      resetState();
+      ESP.S.days = {};
+      const simdi = yerelTarih(8, 0);
+      const dun = U.iso(U.addDays(simdi, -1));
+
+      ESP.S.days[dun] = {
+        date: dun,
+        sessions: [
+          { id:'s1', disc:'lang', minutes:40, minutesCert:'measured', at:zamanStr(simdi, -1, 14, 0) }
+        ]
+      };
+
+      try{
+        const b = ESP.KingVeri.brifing(simdi);
+        expect(b.bulgu).toEqual({
+          id: 'calisma_dk',
+          ad: 'Çalışma',
+          deger: 40,
+          birim: 'dk',
+          etiket: 'ölçüldü',
+          ort: { deger: null, etiket: 'veri yok' }
+        });
+      }finally{
+        resetState();
+      }
+    });
+
+    it('kenar: simdi gece yarısına yakın (23:59) iken dünün doğru günü seçilir', () => {
+      resetState();
+      ESP.S.days = {};
+      // 23:59 yerel zamanı
+      const simdi = new Date(2026, 4, 15, 23, 59, 30);
+      const bugun = U.iso(simdi); // '2026-05-15'
+      const dun = U.iso(U.addDays(simdi, -1)); // '2026-05-14'
+
+      ESP.S.days[dun] = {
+        date: dun,
+        sessions: [
+          { id:'s_dun', disc:'philo', minutes:60, minutesCert:'measured', at:'2026-05-14T15:00:00' }
+        ]
+      };
+      ESP.S.days[bugun] = {
+        date: bugun,
+        sessions: [
+          { id:'s_bugun', disc:'philo', minutes:30, minutesCert:'measured', at:'2026-05-15T10:00:00' }
+        ]
+      };
+
+      try{
+        const b = ESP.KingVeri.brifing(simdi);
+        expect(b.gun).toBe('2026-05-15');
+        expect(b.bulgu).toBeDefined();
+        expect(b.bulgu.deger).toBe(60); // Bugünü değil, dünü (2026-05-14) okumalı
+        expect(b.bulgu.etiket).toBe('ölçüldü');
+      }finally{
+        resetState();
+      }
+    });
+
+    it('tahmin dakikası olan dünün oturumları etiket:tahmin üretir ve ort >= 3 günde hesaplanır', () => {
+      resetState();
+      ESP.S.days = {};
+      const simdi = yerelTarih(9, 30);
+      const dun = U.iso(U.addDays(simdi, -1));
+      const g2 = U.iso(U.addDays(simdi, -2));
+      const g4 = U.iso(U.addDays(simdi, -4));
+      const g6 = U.iso(U.addDays(simdi, -6));
+      const g9 = U.iso(U.addDays(simdi, -9)); // 7 gün dışı
+
+      ESP.S.days[dun] = {
+        date: dun,
+        sessions: [
+          { id:'s1', disc:'lang', minutes:25, minutesCert:'measured', at:zamanStr(simdi, -1, 10, 0) },
+          { id:'s2', disc:'music', minutes:20, minutesCert:'estimated', at:zamanStr(simdi, -1, 15, 0) },
+          { id:'s3', disc:'philo', minutes:null, minutesCert:'missing', at:zamanStr(simdi, -1, 16, 0) }
+        ]
+      };
+      ESP.S.days[g2] = { date: g2, sessions: [{ id:'x', disc:'lang', minutes:30, minutesCert:'measured' }] };
+      ESP.S.days[g4] = { date: g4, sessions: [{ id:'y', disc:'lang', minutes:45, minutesCert:'measured' }] };
+      ESP.S.days[g6] = { date: g6, sessions: [{ id:'z', disc:'lang', minutes:50, minutesCert:'measured' }] };
+      ESP.S.days[g9] = { date: g9, sessions: [{ id:'w', disc:'lang', minutes:200, minutesCert:'measured' }] };
+
+      try{
+        const b = ESP.KingVeri.brifing(simdi);
+        expect(b.bulgu).toEqual({
+          id: 'calisma_dk',
+          ad: 'Çalışma',
+          deger: 45,
+          birim: 'dk',
+          etiket: 'tahmin',
+          ort: {
+            deger: 42, // (30 + 45 + 50) / 3 = 41.666 -> Math.round = 42
+            etiket: 'hesaplandı'
+          }
+        });
+      }finally{
+        resetState();
+      }
+    });
+
+    it('öneri önceliği: olaylar içinden öncelikli olay seçilir', () => {
+      resetState();
+      ESP.S.cards = [];
+      const simdi = yerelTarih(10, 0);
+      const bugun = U.iso(simdi);
+
+      // Tekrar günü kartı
+      ESP.S.cards = [
+        { id:'c1', front:'1', back:'1', due:bugun, box:1 }
+      ];
+
+      try{
+        const b = ESP.KingVeri.brifing(simdi);
+        expect(b.oneri).toEqual({
+          id: 'tekrar_gunu',
+          sayilar: {
+            adet: { deger:1, birim:'kart', etiket:'hesaplandı' }
+          }
+        });
+      }finally{
+        resetState();
+      }
+    });
+  });
 })();

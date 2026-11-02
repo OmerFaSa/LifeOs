@@ -1,6 +1,6 @@
 # 062 · ESP sabah brifingi verisi: `brifing(simdi)` (KING-4 §H)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/062-esp-brifing`
 **Efor:** orta
 **Kabul testi:** `tools/kingveri_brifing_esp_kabul_test.py`
@@ -34,3 +34,7 @@ KING-4 §H «60 saniyelik sabah brifingi: bugünün planı, dünün tek bulgusu,
 - `cd ESP && node tools/runtests.js <senin portun>`
 
 ## Sonuç
+- **Ne değişti:** ESP.KingVeri (ESP/src/js/core/kingveri.js) modülüne brifing(simdi) işlevi eklendi: günün tarihi, boş plan ([]), dünün çalışma süresi toplamı (calisma_dk, measured ise ölçüldü, aksi halde tahmin), dünden önceki 7 günün kaydı olan günlerinin ortalaması (ort, >= 3 gün ise hesaplandı, azsa veri yok) ve olaylar önceliğine göre (sinav_yaklasti > uyku_dustu > plan_kacti > tekrar_gunu) öneri üretimi saf okuma olarak uygulandı. ESP/src/tests/kingveri.test.js dosyasına dün ölçüsü olup önceki 7 gün boş olması, 23:59 gece yarısı dünün seçimi, tahmin kesinliği ve öneri önceliği birim testleri eklendi.
+- **Koşan testler:** python tools/kingveri_brifing_esp_kabul_test.py -> esp brifing kabul: bos, plan, bulgu+ort, ort veri yok, oneri onceligi, ilk madde, saf. · python tools/kingveri_esp_kabul_test.py -> esp king verisi kabul: tekrar_gunu, kimlik, hafta, hatirlat, sonKayit/duzelt. · cd ESP && node tools/runtests.js 4763 -> 2648/2648 gecti
+- **Kabul testi:** python tools/kingveri_brifing_esp_kabul_test.py -> esp brifing kabul: bos, plan, bulgu+ort, ort veri yok, oneri onceligi, ilk madde, saf.
+- **Açık kalan:** Testçi 23/24 yeşil (ESP derle, runtests, smoke, a11y, layout, palette, perf ve kök entegre dahil hepsi temiz). Kök-python içindeki tek kırmızı (tools/king_sinav_300_kabul_test.py: 149: bilinmeyen alan ['not']), görev 062'den bağımsız olarak main dalındaki (commit 91091b7c) tools/king_sinav.json 149. satırındaki 'not' alanından kaynaklanan ve değişikliksiz HEAD'de de var olan kırmızılıktır.
