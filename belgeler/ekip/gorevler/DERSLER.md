@@ -26,3 +26,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 050 (02.11.2026): Testçi kırmızısı port çakışmasıydı (SPI 4388); perde kabul main'de elle yeşil
 - 052 (02.11.2026): Denetçi cevapsız kalırsa diff elle okunur; DIZIN satırını iki iş birden eklerse çakışır
 - 072 (02.11.2026): Belge görevinde kabul testi anahtar kelime ararsa düz kelime listesi yazma; bölüm cümlelerle, koddan okunarak yazılır (072 reddedildi)
+- 071 (02.11.2026): Türkçe eki kodla üreten metinde ünlü uyumunu sına (««Oturuyor»ye»); kayıt yoksa uydurma yedek değer yazma
