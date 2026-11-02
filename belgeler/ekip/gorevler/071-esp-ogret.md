@@ -22,12 +22,11 @@ KING-4 §D: üç modülün öğretme parçaları **tek öğretme motoru** olur (
   - `soru(konu)` → `{ id:'<kart id>|<doğru harf>', konu:'Kelime kartı', soru:'«<front>» ne demek?', sec(4), kaynak:'ESP · senin dil kartların', not }` ya da null. Adaylar: `ESP.S.cards` içinde `front` ve `back` dolu kartlar (< 4 ise null). Konu `O.bul(adaylar, konu, c => [c.front, c.back])` ile bir karta uyarsa o kart; uymazsa konu yok sayılır (bugünkü davranış). Konusuz: önce `O.vade(depo('esp.ogret.tekrar'), bugün)`'ün ilk geçerli kartı, not `'Tekrar (' + (n+1) + '. tur): aynı kart.'`; yoksa takvimde olmayan kartlardan rastgele (hepsi takvimdeyse bütün adaylardan), not `''`. Seçenekler `O.secenek(c.back, öteki arka yüzler)`; sorulan sorunun seçenekleri bellekte (`id → sec`).
   - `cevapla(id, harf)` → `{ dogru, cozum, not }`; `dogru` = kimliğin son harfi (bugünkü gibi). Kart yoksa `{ dogru, cozum:[], not:'' }`. Kart varsa `O.cevap({ tekrar:depo('esp.ogret.tekrar'), son:depo('esp.ogret.son'), bugun:() => ESP.U.todayISO() }, { id, kavram:kart.id, konu:kart.front, soru, secilen, dogru, secMetin, dogruMetin:kart.back, cozum:[…], yeni:!kart.reps, yeniNeden:'kart henüz hiç tekrar edilmedi', oncekiDogru:(kart.box || 1) >= 3, oncekiNeden:'kart tekrar kutusunda «Yerleşti»ye kadar çıkmıştı' })` (kutu adı `ESP.SRS` varsa ondan). `cozum = satirlar.concat(['«' + front + '» = ' + back])`. `not`: motorun notu varsa o + `' Kartın kendi tekrar takvimi değişmez.'`; yoksa `'Bu cevap kartın tekrar takvimine yazılmaz.'`. Kart nesnesi değiştirilmez.
   - `araclar()` → `O.araclar({ modul:'esp', … ad:id => kartın front'u })`.
-- `ESP/src/js/app.js` — `kartlar.soru` ve `kartlar.cevapla` satır içi kodu silinir; yerine `soru:konu => ESP.KingOgret.soru(konu)`, `cevapla:(id, harf) => ESP.KingOgret.cevapla(id, harf)`. Başka satıra dokunma.
 - `ESP/src/js/core/kingarac.js` — `liste()` dönüşüne `ESP.KingOgret.araclar()` (yoksa boş dizi).
 - `ESP/src/tests/kingogret.test.js` — yer tutucu; kenarlar: 4'ten az kart null, seçenekler farklı, yanlış → takvim, kart nesnesi değişmez, üçüncü tekrar doğrusu `bitti`.
 
 ## Dokunma
-- `brand/`, `ESP/src/js/core/ogret.js` (üretilmiş kopya), `core/srs.js`, `core/lesson.js`, `index.html` dosyaları, `screens/`, `state.js`, `store.js`, `data/`, `HKM/`, dist ve build.js, kabul testi dosyası.
+- `brand/`, `ESP/src/js/app.js` (Claude bağladı: satır içi kod silindi, `kartlar.soru`/`cevapla` → `ESP.KingOgret`), `ESP/src/js/core/ogret.js` (üretilmiş kopya), `core/srs.js`, `core/lesson.js`, `index.html` dosyaları, `screens/`, `state.js`, `store.js`, `data/`, `HKM/`, dist ve build.js, kabul testi dosyası.
 - Kendi 1/3/7 takvimini, çeldiricisini ya da eşleştiricisini yazma: motorunkini çağır.
 - Kartın SRS alanlarını (box, ease, due, reps, lapses) yazmak.
 

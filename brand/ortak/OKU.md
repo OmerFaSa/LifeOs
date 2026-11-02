@@ -21,6 +21,7 @@ python3 tools/ortak.py --denetle   # kopyalar kaynakla aynı mı
 | `designs.css` | `src/css/` | beş tasarım dilinin ortak gövdesi |
 | `kesinlik.*` | `js/core`, `css`, `tests` | dört kesinlik etiketi (ölçüldü / tahmin / hesaplandı / veri yok) |
 | `tanitim.*` | `js/core`, `css`, `tests` | ilk kurulumun üç adımı; `KURULUM_HTML`/`KURULUM_GIT` (171): her adım tek soru, ilerleme üstte, yeniden çizmeden |
+| `ogret.*` | `js/core`, `tests` | öğretme motoru `LIFEOS.OGRET` (KING-4 §D): kurallı yanılgı teşhisi (kavram, işlem, dikkat, bilmiyor; kanıt yoksa tür yok), Sokratik satır, 1/3/7 gün konu tekrarı ve benzer soru, eski kaydın kayıpsız göçü, King araçları `<modül>_tekrarlarim`, `<modül>_neden_yanlis` |
 | `simge.*` | `js/core`, `css`, `tests` | kimlikten görsel adına giden tek kural |
 | `medya.js` | `js/core` | **üretilmiş** künye — hangi görsel gerçekten var (`tools/marka.py --kunye`) |
 | `quota.js` | `js/core` | ücretsiz modelin istek sınırı — **kalıp** |

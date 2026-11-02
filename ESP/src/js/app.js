@@ -2028,24 +2028,10 @@ ESP.App = (function(){
               }), not:r.note || '' };
             },
             istatistik:() => kralIstatistik(),
-            /* Kelime soru kartı: senin dil kartlarından (ön yüz → doğru arka yüz,
-               üç çeldirici başka kartlardan). Cevap tekrar takvimine yazılmaz. */
-            soru:() => {
-              const l = (S.cards || []).filter(c => String(c.front || '').trim() && String(c.back || '').trim());
-              if(l.length < 4) return null;
-              const q = l[Math.floor(Math.random() * l.length)], dogruMetin = String(q.back).trim();
-              const cel = [];
-              l.slice().sort(() => Math.random() - 0.5).forEach(c => {
-                const b = String(c.back).trim();
-                if(cel.length < 3 && b !== dogruMetin && cel.indexOf(b) < 0) cel.push(b);
-              });
-              if(cel.length < 3) return null;
-              const sec = cel.concat([dogruMetin]).sort(() => Math.random() - 0.5);
-              const dogru = 'ABCDE'[sec.indexOf(dogruMetin)];
-              return { id:String(q.id || q.front) + '|' + dogru, konu:'Kelime kartı', soru:'«' + String(q.front).trim() + '» ne demek?', sec,
-                kaynak:'ESP · senin dil kartların', not:'Bu cevap kartın tekrar takvimine yazılmaz.' };
-            },
-            cevapla:(id, harf) => ({ dogru:String(id).split('|').pop(), cozum:[], not:'' }),
+            /* Kelime soru kartı ve 1/3/7 tekrar: öğretme motorunun ESP adaptörü
+               (core/kingogret.js, brand/ortak/ogret.js). Kartın kendi SRS'i değişmez. */
+            soru:konu => ESP.KingOgret.soru(konu),
+            cevapla:(id, harf) => ESP.KingOgret.cevapla(id, harf),
             /* Söz 34: deney ölçüsü (günlük çalışma dakikası; ESP'nin kaydı). */
             olcu:{
               liste:[{ id:'sure', ad:'Çalışma süresi', birim:'dk' }],

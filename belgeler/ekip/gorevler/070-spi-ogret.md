@@ -23,13 +23,12 @@ AGENTS §1: soru, seçenekler ve doğru cevap **koddan ve `data/ogrenme.js`'ten*
   - `soru(konu)` → `{ id:'<kavram id>|<doğru harf>', konu:c.title, soru:'Hangi kavramın tanımı: «<c.definition>»', sec(4), kaynak, not }` ya da null. Adaylar: `title` ve `definition` dolu kavramlar (< 4 ise null). Konu varsa `O.bul`; bulunmazsa null. Konu yoksa: önce `O.vade(depo('spi.ogret.tekrar'), bugün)`'ün ilk geçerli kavramı, not `'Tekrar (' + (n+1) + '. tur): aynı kavram.'`; yoksa takvimde hiç olmayan ilk kavram (liste sırası), not `''`; o da yoksa ilk aday. Seçenekler `O.secenek(c.title, öteki başlıklar)`. `kaynak`: `'SPİ · öğrenme kavramı'`, `ready_for_app` değilse sonuna `' · doğrulanmadı, uzman incelemesi bekliyor'`. Sorulan sorunun seçenekleri bellekte (`id → sec`) tutulur ki `cevapla` seçilen metni bilsin.
   - `cevapla(id, harf)` → `{ dogru, cozum, not }` ya da (bilinmeyen kavram/boş kimlik) null. `O.cevap({ tekrar:depo('spi.ogret.tekrar'), son:depo('spi.ogret.son'), bugun:() => SP.U.todayISO() }, …)`; `cozum = satirlar.concat(['Tanım: ' + c.definition])`; `not` motorun notu.
   - `araclar()` → `O.araclar({ modul:'spi', … ad:id => kavramın başlığı })`.
-- `SPI/src/js/app.js` — `kartlar` içine (ders satırının yanına) `soru:konu => SP.KingDers.soru(konu)`, `cevapla:(id, harf) => SP.KingDers.cevapla(id, harf)`. Başka satıra dokunma.
 - `SPI/src/js/core/kingarac.js` — `liste()` dönüşüne `SP.KingDers.araclar()` eklenir (motor ya da KingDers yoksa boş dizi).
 - `SPI/src/tests/kingders.test.js` — kenarlar: soru seçenekleri farklı, yanlış → takvim, üçüncü tekrar doğrusu kavramı kapatır (`bitti`), boş kimlik null.
 - `tools/king_kapsam.json` yalnız kapsam testi isterse.
 
 ## Dokunma
-- `brand/` (motor ve King dosyaları), `SPI/src/js/core/ogret.js` (üretilmiş kopya), `index.html` dosyaları, `screens/`, `state.js`, `store.js`, `data/`, `HKM/`, dist ve build.js, kabul testi dosyası.
+- `brand/` (motor ve King dosyaları), `SPI/src/js/app.js` (Claude bağladı: `kartlar.soru`/`cevapla` → `SP.KingDers`), `SPI/src/js/core/ogret.js` (üretilmiş kopya), `index.html` dosyaları, `screens/`, `state.js`, `store.js`, `data/`, `HKM/`, dist ve build.js, kabul testi dosyası.
 - Kendi 1/3/7 takvimini, çeldiricisini ya da eşleştiricisini yazma: motorunkini çağır.
 - Yeni Model işlevi, yeni ekran metni.
 

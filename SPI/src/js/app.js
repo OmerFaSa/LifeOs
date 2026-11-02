@@ -1858,8 +1858,11 @@ SP.App = (function(){
             eksik:g => (SP.Screens.today.gunuKapat.satirlar(g) || []).filter(x => x && !x.yazildi).map(x => ({ id:x.id, ad:x.ad, tur:x.tur })),
             hafta:bitis => SP.KingVeri.hafta(bitis), hatirlat:simdi => SP.KingVeri.hatirlat(simdi || new Date()),
             sonKayit:() => SP.KingVeri.sonKayit(), duzelt:(id, alan, deger) => SP.KingVeri.duzelt(id, alan, deger),
-            /* Öğretmen: SPİ kavramı ders olarak (core/kingders.js). */
+            /* Öğretmen: SPİ kavramı ders olarak; soru ve 1/3/7 tekrar öğretme motorundan
+               (core/kingders.js → brand/ortak/ogret.js). */
             ders:konu => SP.KingDers.ders(konu),
+            soru:konu => SP.KingDers.soru(konu),
+            cevapla:(id, harf) => SP.KingDers.cevapla(id, harf),
             dersOrnek:'set kavramını anlat',
             /* DEVRİM «Günüm»: haftalık planların bugünkü maddeleri, saatine göre;
                bitti mi plan modülünün kendi sayımından (kayıt ya da işaret). */
