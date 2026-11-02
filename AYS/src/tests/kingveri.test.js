@@ -286,5 +286,106 @@
         resetState();
       }
     });
+
+    it('brifing: bos depo, plan, bulgu+ort ve oneri ilk madde', () => {
+      hazirla();
+      const eskiPlan = R.PLAN;
+      try{
+        R.PLAN = Object.assign({}, eskiPlan, { examTytISO: null });
+        const simdi = new Date();
+        simdi.setHours(8, 0, 0, 0);
+        const bugun = R.U.iso(simdi);
+
+        // 1) Bos depo
+        const bBos = R.KingVeri.brifing(simdi);
+        expect(bBos.gun).toBe(bugun);
+        expect(bBos.plan).toEqual([]);
+        expect(bBos.bulgu).toBeNull();
+        expect(bBos.oneri).toBeNull();
+
+        // 2) Plan maddeleri (ad, saat null, tamam) ve en cok 8 siniri
+        const bloklar = [];
+        for(let i = 0; i < 10; i++){
+          bloklar.push({
+            id: 'b' + i,
+            subject: 'Ders' + i,
+            topic: i === 0 ? '' : 'Konu' + i,
+            status: i % 2 === 0 ? 'done' : 'pending'
+          });
+        }
+        R.S.days[bugun] = { date: bugun, blocks: bloklar };
+
+        const bPlan = R.KingVeri.brifing(simdi);
+        expect(bPlan.plan.length).toBe(8);
+        expect(bPlan.plan[0]).toEqual({ ad: 'Ders0', saat: null, tamam: true });
+        expect(bPlan.plan[1]).toEqual({ ad: 'Ders1 · Konu1', saat: null, tamam: false });
+
+        // Olay yoksa oneri ilk tamamlanmamis madde (Ders1 · Konu1)
+        expect(bPlan.oneri).toEqual({ id: 'ilk_madde', konu: 'Ders1 · Konu1', sayilar: {} });
+      }finally{
+        R.PLAN = eskiPlan;
+        resetState();
+      }
+    });
+
+    it('brifing kenar 1: dun olcusu olup onceki 7 gun bosken ort «veri yok» olur', () => {
+      hazirla();
+      const eskiPlan = R.PLAN;
+      try{
+        R.PLAN = Object.assign({}, eskiPlan, { examTytISO: null });
+        const simdi = new Date();
+        simdi.setHours(9, 0, 0, 0);
+        const dun = R.U.iso(R.U.addDays(simdi, -1));
+
+        // Dunde calisma dk var (45 + 30 = 75 dk)
+        R.S.days[dun] = {
+          date: dun,
+          blocks: [
+            { id: 'b1', slot: 'A', actualMin: 45 },
+            { id: 'b2', slot: 'B', actualMin: 30 }
+          ]
+        };
+        // Onceki 7 gun (simdi-8 .. simdi-2) tamamen bos
+
+        const b = R.KingVeri.brifing(simdi);
+        expect(b.bulgu !== null).toBe(true);
+        expect(b.bulgu.deger).toBe(75);
+        expect(b.bulgu.etiket).toBe('ölçüldü');
+        expect(b.bulgu.ort).toEqual({ deger: null, etiket: 'veri yok' });
+      }finally{
+        R.PLAN = eskiPlan;
+        resetState();
+      }
+    });
+
+    it('brifing kenar 2: simdi gece yarisina yakin (23:59:50) iken dunun dogru gunu hesaplanir', () => {
+      hazirla();
+      const eskiPlan = R.PLAN;
+      try{
+        R.PLAN = Object.assign({}, eskiPlan, { examTytISO: null });
+        // Gece yarisina 10 saniye kala
+        const simdiGece = new Date(2026, 10, 5, 23, 59, 50);
+        const bugunISO = R.U.iso(simdiGece);
+        const dunISO = R.U.iso(R.U.addDays(simdiGece, -1));
+
+        expect(bugunISO).toBe('2026-11-05');
+        expect(dunISO).toBe('2026-11-04');
+
+        // Düne ölçüm gir
+        R.S.days[dunISO] = {
+          date: dunISO,
+          blocks: [{ id: 'bGece', slot: 'Gece', actualMin: 55 }]
+        };
+
+        const b = R.KingVeri.brifing(simdiGece);
+        expect(b.gun).toBe('2026-11-05');
+        expect(b.bulgu !== null).toBe(true);
+        expect(b.bulgu.deger).toBe(55);
+        expect(b.bulgu.id).toBe('calisma_dk');
+      }finally{
+        R.PLAN = eskiPlan;
+        resetState();
+      }
+    });
   });
 })();

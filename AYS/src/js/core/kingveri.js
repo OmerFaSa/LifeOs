@@ -434,11 +434,134 @@ R.KingVeri = (function(){
     };
   }
 
+  // 6) Sabah brifingi (KING-4 §H)
+  function brifing(simdi){
+    simdi = simdi || (R.U ? R.U.today() : new Date());
+    const U = R.U;
+    const gun = U.iso(simdi);
+    const days = (R.S && R.S.days) || {};
+
+    // 1) plan: bugünün maddeleri [{ ad, saat, tamam }], en çok 8
+    const bugunDay = days[gun];
+    const plan = [];
+    if(bugunDay && Array.isArray(bugunDay.blocks)){
+      for(let i = 0; i < bugunDay.blocks.length && plan.length < 8; i++){
+        const b = bugunDay.blocks[i];
+        if(!b) continue;
+        const subj = String(b.subject || '').trim();
+        const top = String(b.topic || '').trim();
+        let ad = top ? (subj ? subj + ' · ' + top : top) : subj;
+        if(!ad) ad = String(b.slot || 'Ders').trim();
+        plan.push({
+          ad: ad.slice(0, 80),
+          saat: null,
+          tamam: b.status === 'done'
+        });
+      }
+    }
+
+    // 2) bulgu: dünün tek ölçüsü
+    const dunDate = U.addDays(simdi, -1);
+    const dunISO = U.iso(dunDate);
+    const dunDay = days[dunISO];
+    let bulgu = null;
+
+    if(dunDay && Array.isArray(dunDay.blocks)){
+      let dunToplam = 0;
+      let dunOlculenVar = false;
+      for(const b of dunDay.blocks){
+        if(b && typeof b.actualMin === 'number' && !isNaN(b.actualMin)){
+          dunToplam += b.actualMin;
+          dunOlculenVar = true;
+        }
+      }
+
+      if(dunOlculenVar){
+        // ort: dünden önceki 7 gün (dün-7 .. dün-1, yani simdi-8 .. simdi-2)
+        const kayitliGunler = [];
+        for(let i = 2; i <= 8; i++){
+          const gISO = U.iso(U.addDays(simdi, -i));
+          const day = days[gISO];
+          if(!day || !Array.isArray(day.blocks)) continue;
+          let gToplam = 0;
+          let gVar = false;
+          for(const b of day.blocks){
+            if(b && typeof b.actualMin === 'number' && !isNaN(b.actualMin)){
+              gToplam += b.actualMin;
+              gVar = true;
+            }
+          }
+          if(gVar){
+            kayitliGunler.push(gToplam);
+          }
+        }
+
+        let ort;
+        if(kayitliGunler.length >= 3){
+          const ortVal = Math.round(kayitliGunler.reduce((a, b) => a + b, 0) / kayitliGunler.length);
+          ort = { deger: ortVal, etiket: 'hesaplandı' };
+        }else{
+          ort = { deger: null, etiket: 'veri yok' };
+        }
+
+        bulgu = {
+          id: 'calisma_dk',
+          ad: 'Çalışma',
+          deger: dunToplam,
+          birim: 'dk',
+          etiket: 'ölçüldü',
+          ort: ort
+        };
+      }
+    }
+
+    // 3) oneri: olaylar(simdi) içinden öncelikli ilk olay
+    const tumOlaylar = olaylar(simdi);
+    const ONCELIK = ['sinav_yaklasti', 'uyku_dustu', 'plan_kacti', 'tekrar_gunu'];
+    let secilenOlay = null;
+    for(const tur of ONCELIK){
+      const f = tumOlaylar.find(o => o && o.tur === tur);
+      if(f){
+        secilenOlay = f;
+        break;
+      }
+    }
+
+    let oneri = null;
+    if(secilenOlay){
+      oneri = {
+        id: secilenOlay.tur,
+        sayilar: secilenOlay.sayilar || {}
+      };
+      if(secilenOlay.konu != null){
+        oneri.konu = secilenOlay.konu;
+      }
+    }else{
+      // Olay yoksa plan'daki ilk tamamlanmamış madde
+      const ilkMadde = plan.find(m => !m.tamam);
+      if(ilkMadde){
+        oneri = {
+          id: 'ilk_madde',
+          konu: ilkMadde.ad,
+          sayilar: {}
+        };
+      }
+    }
+
+    return {
+      gun,
+      plan,
+      bulgu,
+      oneri
+    };
+  }
+
   return {
     olaylar,
     hafta,
     hatirlat,
     sonKayit,
-    duzelt
+    duzelt,
+    brifing
   };
 })();
