@@ -496,7 +496,14 @@
   }
   function disAraclar(){
     const k = () => !!KI.baglanti();
-    const dis = (ad, ornek, aciklama, parametreler, onizle, uygula) => ({ ad, tur:'yaz', dis:true, seviye:'buyuk', ornek, aciklama, parametreler, kullanilir:k, onizle, uygula });
+    /* Açık kalıp (modelsiz yol); sözcük tahmini dış dünyaya gitmez (arac.js niyet). */
+    const KURAL = {
+      pc_dosya_ac:(t, m) => { const x = /^(?:bilgisayarda )?([a-z]:\\[^«»]*?)\s+(?:dosyasını |klasörünü )?aç[.!]?$/i.exec(m); return x ? { yol:x[1] } : null; },
+      pc_uygulama_baslat:(t, m) => { const x = /^(?:bilgisayarda )?(.{2,60}?) (?:uygulamasını|programını) (?:aç|başlat)[.!]?$/i.exec(m); return x ? { ad:x[1] } : null; },
+      pc_ekran_oku:t => /^(ekranda ne yazıyor|ekranı oku|ekrandaki (?:metni|yazıyı) oku)\??$/.test(t) || null,
+      telefona_gonder:t => /^(günün|bugünün) özetini telefonuma (sesli )?gönder$/.test(t) ? { ozet:true, sesli:/sesli/.test(t) } : null,
+    };
+    const dis = (ad, ornek, aciklama, parametreler, onizle, uygula) => ({ ad, tur:'yaz', dis:true, seviye:'buyuk', ornek, aciklama, parametreler, kullanilir:k, onizle, uygula, kural:KURAL[ad] });
     return [
       dis('pc_dosya_ac', 'masaüstündeki rapor.pdf dosyasını aç', 'Bilgisayarda bir dosyayı ya da klasörü varsayılan programıyla açar. yol: tam yol (C:\…). Çalıştırılabilir dosya açılmaz. Geri al pencereyi kapatır.',
         { type:'object', properties:{ yol:{ type:'string', maxLength:400 } }, required:['yol'] },
@@ -768,6 +775,10 @@
     return a ? String(a.ozetAd || a.aciklama).split(/[.:;(]/)[0].trim().slice(0, 60) : ad;
   }
   /* Yazan aracın önizlemesi onay kartı olur (model seçimi ve söz 37'nin fotoğraf işi aynı kart). */
+  /* Onay kartı tek dokunuş (KING-4 §F); dış dünya (§G) dönüş noktası değil, dışarıya dokunur. */
+  const onayAdi = n => n.dis ? 'Onaylıyorum' : n.seviye === 'buyuk' ? 'Dönüş noktası al ve uygula' : 'Onayla';
+  const onaySorusu = n => n.dis ? 'Bilgisayarına ya da telefonuna dokunur: düğmeye dokun ya da «Onaylıyorum» yaz.'
+    : n.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?';
   function aracKart(o, onMetin, ekSatir){
     if(o.onizle.veri){
       /* Kayıt: yerel veri önizlemesiyle aynı kart (söz 3, 8). */
@@ -778,12 +789,11 @@
       KI.soyle(s.selam, null, { metin:p.metin, liste:(p.parcalar || []).length > 1 ? p.parcalar.map(x => x.metin) : null, ipucu:p.ipucu || '' }, s.soru);
       return { tur:'arac-veri', ad:o.ad };
     }
-    const n = o.onizle.yetki ? o.onizle.yetki : { tur:'eylem', arac:true, ad:o.ad, param:o.param, seviye:o.seviye, onizle:o.onizle };
+    const n = o.onizle.yetki ? o.onizle.yetki : { tur:'eylem', arac:true, ad:o.ad, param:o.param, seviye:o.seviye, dis:o.dis, onizle:o.onizle };
     KI.bekleyenYetki = n;
-    KI.cipler = [{ is:'yetki-onay', ad:n.seviye === 'buyuk' ? 'Dönüş noktası al ve uygula' : 'Onayla' }, { is:'vazgec', ad:'Vazgeç' }];
+    KI.cipler = [{ is:'yetki-onay', ad:onayAdi(n) }, { is:'vazgec', ad:'Vazgeç' }];
     const satir = (n.onizle.satirlar || []).concat(Array.isArray(ekSatir) ? ekSatir : []);
-    KI.soyle((onMetin ? onMetin + ' ' : '') + n.onizle.metin, satir.length ? satir : null, null,
-      n.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?', { onay:true });
+    KI.soyle((onMetin ? onMetin + ' ' : '') + n.onizle.metin, satir.length ? satir : null, null, onaySorusu(n), { onay:true });
     return { tur:'arac-yaz', ad:o.ad, seviye:n.seviye };
   }
 
@@ -900,5 +910,5 @@
     return (cevap || 'Kolay gelsin.') + (yer ? ' ' + yer + ' açılıyor.' : '');
   }
 
-  Object.assign(KI, { D, ONCELIK_RE, oncelikIsle, siraliHtml, NOT_RE, notPuanla, notAra, RITIM_RE, HEDEF, haftaHedefi, ritimBaslat, ritimIsle, YUK_RE, yukIsle, GUNLUK_RE, gunlukIsle, gunlukBitir, DENEY, DENEY_RE, DENEY_DURUM_RE, deneyOku, deneyBaslat, deneyOlcuSec, deneyHesap, deneyDurum, hesapla, birimCevir, YAP, yapilacaklar, yapYaz, yapHtml, HATIR, hatirlatmalar, hatirYaz, hatirlatKur, rastgele, nefesHtml, aracKutusu, yetkiKatalog, yetkiUygula, ARAC, HARITA_RE, ayarHtml, haritaCevap, haritaIsle, ortakAraclar, aracKart, aracIsle, niyetSor, niyetCevap, gitOnayla, hazirSec, eylemCumlesi });
+  Object.assign(KI, { onayAdi, onaySorusu, D, ONCELIK_RE, oncelikIsle, siraliHtml, NOT_RE, notPuanla, notAra, RITIM_RE, HEDEF, haftaHedefi, ritimBaslat, ritimIsle, YUK_RE, yukIsle, GUNLUK_RE, gunlukIsle, gunlukBitir, DENEY, DENEY_RE, DENEY_DURUM_RE, deneyOku, deneyBaslat, deneyOlcuSec, deneyHesap, deneyDurum, hesapla, birimCevir, YAP, yapilacaklar, yapYaz, yapHtml, HATIR, hatirlatmalar, hatirYaz, hatirlatKur, rastgele, nefesHtml, aracKutusu, yetkiKatalog, yetkiUygula, ARAC, HARITA_RE, ayarHtml, haritaCevap, haritaIsle, ortakAraclar, aracKart, aracIsle, niyetSor, niyetCevap, gitOnayla, hazirSec, eylemCumlesi });
 })();

@@ -311,9 +311,9 @@ window.LIFEOS.KING = (function(){
       }
       if(yn.seviye === 'kucuk'){ await KI.yetkiUygula(yn); return { tur:'yetki', seviye:'kucuk' }; }
       KI.bekleyenYetki = yn;
-      KI.cipler = [{ is:'yetki-onay', ad:yn.seviye === 'buyuk' ? 'Dönüş noktası al ve uygula' : 'Onayla' }, { is:'vazgec', ad:'Vazgeç' }];
+      KI.cipler = [{ is:'yetki-onay', ad:KI.onayAdi(yn) }, { is:'vazgec', ad:'Vazgeç' }];
       KI.soyle(yn.onizle.metin, yn.onizle.satirlar || null, null,
-        yn.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?', { onay:true });
+        KI.onaySorusu(yn), { onay:true });
       return { tur:'yetki-bekliyor', seviye:yn.seviye };
     }
     /* Söz 22: açık beyan kendiliğinden yazılır. */

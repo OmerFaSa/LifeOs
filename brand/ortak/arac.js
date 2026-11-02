@@ -235,7 +235,7 @@ window.LIFEOS.ARAC = (function(){
     if(!o || o.hata) return { ok:false, ad, hata:(o && o.hata) || 'önizlenemedi' };
     /* Söz 3: model seçtiği için küçük de sorulur. */
     const seviye = d.arac.seviye === 'buyuk' || d.arac.dis ? 'buyuk' : 'orta';
-    return { ok:true, tur:'yaz', ad:d.arac.ad, param:d.param, seviye, onizle:o, aracAd:String(d.arac.ozetAd || d.arac.aciklama).split(/[.:;]/)[0] };
+    return { ok:true, tur:'yaz', ad:d.arac.ad, param:d.param, seviye, dis:!!d.arac.dis, onizle:o, aracAd:String(d.arac.ozetAd || d.arac.aciklama).split(/[.:;]/)[0] };
   }
 
   /* Onaydan sonra: aynı araç, aynı parametre (yeniden doğrulanır). */
@@ -324,7 +324,7 @@ window.LIFEOS.ARAC = (function(){
     const s = sinif === undefined ? niyetSinif(metin) : sinif;
     const sira = niyetKelime(niyetBas(metin)), ws = Array.from(new Set(sira));
     if(!s || !ws.length || NIYET_DANIS.test(kucuk(metin))) return null;
-    const l = liste().filter(a => !NIYET_DIS.test(a.ad));
+    const l = liste().filter(a => !NIYET_DIS.test(a.ad) && !a.dis);   // dış dünya tahminle seçilmez: kural ya da model
     /* Açıklamadaki başka aracın adı («… için eylem_kitap_ekle'yi kullan») atıftır, anlam değil. */
     const dok = l.map(a => niyetKelime(a.ad.replace(/^(ays|spi|esp)_/, '').replace(/_/g, ' ') + ' ' + String(a.aciklama).replace(/\w+_\w+/g, ' ')
       + ' ' + (a.ornek || '') + ' ' + (a.anahtar || '')));
