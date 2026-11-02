@@ -43,6 +43,7 @@
    ama mesaj uretilmiyor»). Bu yuzden kart, yerel modelin defterdeki SON
    GERCEK sohbet cagrisini da yazar (son_cagri): ne zaman, cevap geldi mi,
    gelmediyse neden — adiyla."""
+import atexit
 import datetime
 import json
 import re
@@ -336,7 +337,22 @@ def isit(cfg, tarama, gonder=None):
                                       {"model": model, "keep_alive": ISIT_SURE}, 120)
     except Exception:                           # noqa: BLE001 — kapali motor bir durumdur
         return None
+    if gonder is None:
+        _ISITILAN.update(kok=models.yerel_kok(cfg), model=model)
     return model
+
+
+_ISITILAN = {}
+
+
+@atexit.register
+def _bosalt():
+    """HKM kapaninca isitilan model GPU'dan iner; zorla oldurulmede ISIT_SURE dolunca Ollama kendisi indirir."""
+    if _ISITILAN:
+        try:
+            VARSAYILAN_GONDER(_ISITILAN["kok"] + "/api/generate", {"model": _ISITILAN["model"], "keep_alive": 0}, 5)
+        except Exception:                       # noqa: BLE001 — kapali motor bir durumdur
+            pass
 
 
 def _oneri_yaz(o):

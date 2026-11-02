@@ -44,6 +44,7 @@ import io
 import re
 import os
 import shutil
+import socket
 import subprocess
 import tempfile
 import threading
@@ -221,6 +222,43 @@ def _hazirla(p):
         time.sleep(0.25)
 
 
+def _hkm_ile_olsun(p):
+    """Sunucuyu bir Windows is nesnesine baglar: HKM zorla oldurulse de Windows sunucuyu kapatir. Tutamak ya da None."""
+    if os.name != "nt":
+        return None
+    import ctypes
+    from ctypes import wintypes
+
+    class _Temel(ctypes.Structure):
+        _fields_ = [("a", ctypes.c_int64), ("b", ctypes.c_int64), ("bayrak", wintypes.DWORD),
+                    ("c", ctypes.c_size_t), ("d", ctypes.c_size_t), ("e", wintypes.DWORD),
+                    ("f", ctypes.c_size_t), ("g", wintypes.DWORD), ("h", wintypes.DWORD)]
+
+    class _Genis(ctypes.Structure):
+        _fields_ = [("temel", _Temel), ("io", ctypes.c_uint64 * 6), ("bellek", ctypes.c_size_t * 4)]
+
+    k = ctypes.WinDLL("kernel32", use_last_error=True)
+    k.CreateJobObjectW.restype = wintypes.HANDLE
+    k.SetInformationJobObject.argtypes = [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD]
+    k.AssignProcessToJobObject.argtypes = [wintypes.HANDLE, wintypes.HANDLE]
+    h = k.CreateJobObjectW(None, None)
+    bilgi = _Genis()
+    bilgi.temel.bayrak = 0x2000                 # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+    if not h or not k.SetInformationJobObject(h, 9, ctypes.byref(bilgi), ctypes.sizeof(bilgi)) \
+            or not k.AssignProcessToJobObject(h, int(p._handle)):
+        return None
+    return h                                    # kapatilmaz: HKM olunce Windows kapatir, sunucu da gider
+
+
+def _kapi_dolu():
+    with socket.socket() as s:
+        s.settimeout(0.3)
+        return s.connect_ex(("127.0.0.1", SUNUCU_KAPI)) == 0
+
+
+KAPI_DOLU = _kapi_dolu
+
+
 def sunucu_ac(w):
     """Kural 8: GPU yolu varsa whisper-server'i arka planda acar (bir kez)."""
     y = (w.get("yollar") or [{}])[0]
@@ -233,12 +271,17 @@ def sunucu_ac(w):
         p = _SUNUCU["p"]
         if p is not None and p.poll() is None:
             return True
+        if KAPI_DOLU():
+            _SUNUCU.update(p=None, hazir=True)  # kapida bir sunucu var: ikinci kopya acilmaz, o kullanilir
+            return True
         try:
             p = ACICI([s, "-m", y["model"], "-l", "tr", "-nt", "-sns", "--host", "127.0.0.1", "--port", str(SUNUCU_KAPI)],
                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                       creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         except OSError:
             return False
+        if p is not None:
+            _SUNUCU["is"] = _hkm_ile_olsun(p)
         _SUNUCU.update(p=p, hazir=False)
     if p is not None:
         threading.Thread(target=_hazirla, args=(p,), daemon=True).start()
@@ -247,9 +290,12 @@ def sunucu_ac(w):
 
 def _sunucuya(wav):
     p = _SUNUCU["p"]
-    if not _SUNUCU["hazir"] or p is None or p.poll() is not None:
+    if not _SUNUCU["hazir"] or (p is not None and p.poll() is not None):
         return None
-    return _gonder(wav, WHISPER_ZAMAN)
+    t = _gonder(wav, WHISPER_ZAMAN)
+    if t is None and p is None:
+        _SUNUCU["hazir"] = False                # kapidaki sunucu gitti: sonraki kayit kendi sunucusunu acar
+    return t
 
 
 VARSAYILAN_SUNUCU = _sunucuya
@@ -257,7 +303,7 @@ VARSAYILAN_SUNUCU = _sunucuya
 
 @atexit.register
 def _kapat():
-    # shortcut: HKM zorla oldurulurse sunucu yetim kalir (kapi 4207 dolu, yeni sunucu acilamaz, cli calisir); sorun olursa is nesnesine bagla.
+    # Zorla oldurulmede atexit calismaz; o durumu _hkm_ile_olsun'daki is nesnesi kapatir.
     p = _SUNUCU["p"]
     if p is not None and p.poll() is None:
         p.terminate()

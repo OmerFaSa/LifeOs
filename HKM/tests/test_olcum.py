@@ -3,6 +3,8 @@
    onbellegi, rol basina baglam butcesi, sabit sistem metni once, soguk
    Gemma'da ses Whisper'a, sema surec basina bir kez."""
 import os
+import subprocess
+import sys
 import tempfile
 
 from core import ai, butce, db, dinle, models, ses, sohbet
@@ -138,6 +140,62 @@ def run():
             dinle.VARSAYILAN_CALISTIR, dinle.ACICI = eski, eski_ac
 
     test("sicak Whisper: hazir sunucu once, yoksa cli ve sunucu acilir", t_sicak_whisper)
+
+    def t_sunucu_yetim_kalmaz():
+        if os.name != "nt":
+            return
+        import ctypes
+        p = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+        try:
+            h = dinle._hkm_ile_olsun(p)
+            ok(h)
+            ctypes.windll.kernel32.CloseHandle(ctypes.c_void_p(h))   # HKM olunce olan bu
+            p.wait(5)                               # kapanmazsa TimeoutExpired: test duser
+        finally:
+            if p.poll() is None:
+                p.kill()
+
+    test("HKM olunce whisper-server de kapanir (is nesnesi)", t_sunucu_yetim_kalmaz)
+
+    def t_tek_whisper():
+        d = tempfile.mkdtemp(prefix="hkm-wsrv-")
+        exe, srv = os.path.join(d, "whisper-cli.exe"), os.path.join(d, "whisper-server.exe")
+        for f in (exe, srv):
+            open(f, "wb").close()
+        acilan = []
+        eski = dinle.ACICI, dinle.KAPI_DOLU, dinle._gonder, dict(dinle._SUNUCU)
+        dinle.ACICI, dinle.KAPI_DOLU = lambda arg, **k: acilan.append(arg), lambda: True
+        try:
+            dinle._SUNUCU.update(p=None, hazir=False)
+            ok(dinle.sunucu_ac({"yollar": [{"exe": exe, "model": "m.bin", "cuda": True}]}))
+            eq((acilan, dinle._SUNUCU["hazir"]), ([], True))      # kapi dolu: ikinci kopya yok
+            dinle._gonder = lambda wav, t: " Selam. "
+            eq(dinle._sunucuya(b"RIFF"), " Selam. ")
+            dinle._gonder = lambda wav, t: None                    # kapidaki sunucu gitti
+            eq((dinle._sunucuya(b"RIFF"), dinle._SUNUCU["hazir"]), (None, False))
+        finally:
+            dinle.ACICI, dinle.KAPI_DOLU, dinle._gonder = eski[:3]
+            dinle._SUNUCU.clear(); dinle._SUNUCU.update(eski[3])
+
+    test("whisper-server tek kopya: kapida sunucu varsa o kullanilir", t_tek_whisper)
+
+    def t_gemma_iner():
+        from core import ollama
+        giden = []
+        eski = ollama.VARSAYILAN_GONDER, dict(ollama._ISITILAN)
+        ollama.VARSAYILAN_GONDER = lambda url, govde, t: giden.append(govde)
+        try:
+            ollama._ISITILAN.clear()
+            ollama._bosalt()
+            eq(giden, [])                                          # isitilmadiysa bir sey gitmez
+            ollama._ISITILAN.update(kok="http://127.0.0.1:11434", model="gemma")
+            ollama._bosalt()
+            eq(giden, [{"model": "gemma", "keep_alive": 0}])
+        finally:
+            ollama.VARSAYILAN_GONDER = eski[0]
+            ollama._ISITILAN.clear(); ollama._ISITILAN.update(eski[1])
+
+    test("HKM kapaninca isitilan Gemma GPU'dan iner", t_gemma_iner)
 
 
 def run_daemon():
