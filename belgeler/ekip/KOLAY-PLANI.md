@@ -248,7 +248,7 @@ korunur ama kolaylık fazlarının arkasına geçer; simülatör yapıldı.
 | 2 · Basit görünüm | bekliyor | — | |
 | 3 · Telefonda tek dokunuş | bekliyor | — | |
 | 4 · Otopilot 2–3 | bekliyor | — | |
-| 5 · Deney motoru | bekliyor | — | |
+| 5 · Deney motoru | sürüyor | — | 5a hesap çekirdeği ofiste (görev 073, `tools/ays_deney_kabul_test.py`); 5b kart ve sürgü (Claude), 5c modüller arası sonra |
 | 6 · Kendini sadeleştiren arayüz | bekliyor | — | |
 | 7 · Görünmez giriş, hayat pusulası | bekliyor | — | |
 | 8 · Haftalık değerlendirme | bekliyor | — | |
