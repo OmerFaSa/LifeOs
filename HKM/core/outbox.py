@@ -40,6 +40,16 @@ def _belge_gonder(con, cfg, row, transport):
         ek = json.loads(row["ek"])
     except (TypeError, ValueError):
         ek = {}
+    if isinstance(ek, dict) and ek.get("ses"):
+        # King'in sesli ozeti (KING-4 §E): ses gonderim aninda uretilir; uretilemezse metin gider.
+        from core import ses
+        r = ses.seslendir(con, cfg, row["text"])
+        if r.get("ok"):
+            g = channels.send_document(cfg, row["channel"], "king-ozet.wav", r["wav"], "audio/wav",
+                                       caption=row["text"][:1000], to=row["target"], transport=transport)
+            if g.get("ok") or g.get("reason") not in ("unsupported", "too-large"):
+                return g
+        return channels.send(cfg, row["channel"], row["text"], to=row["target"], transport=transport)
     if isinstance(ek, dict) and ek.get("haftalik"):
         from core import weekly
         bayt, mime, ad = weekly.dosya(con, ek["haftalik"], ek.get("bicim") or "pdf")

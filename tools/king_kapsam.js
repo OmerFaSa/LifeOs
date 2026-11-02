@@ -16,6 +16,7 @@
 
 const { spawn } = require('child_process');
 const fs = require('fs');
+const GUVEN = require('./king_guven');
 const path = require('path');
 
 const KOK = path.resolve(__dirname, '..');
@@ -59,6 +60,9 @@ function topla([ns, re]){
         await page.goto('http://127.0.0.1:' + port + '/', { waitUntil:'load' });
         await page.waitForFunction(() => window.LIFEOS && LIFEOS.ARAC && LIFEOS.KING_IC && LIFEOS.KING_IC.ayar, null, { timeout:60000 });
         const d = await page.evaluate(topla, [ns, YAZMA_RE]);
+        const gv = await page.evaluate(GUVEN.sayfadanTopla);                                      // KING-4 §G
+        GUVEN.denetle(gv).forEach(b => eksik.push(m + ' güven ' + b));
+        console.log(m + ' güven: ' + ['oku', 'yaz', 'dis'].map(k => gv.filter(a => (a.dis ? 'dis' : a.tur) === k).length + ' ' + k).join(', '));
         await page.close();
         if(ISKELET){ iskelet[m] = { yazma:d.yazma, rotalar:d.rotalar }; continue; }
         const e = esleme[m] || {}, yz = e.yazma || {}, rt = e.rotalar || {};

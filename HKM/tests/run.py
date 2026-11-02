@@ -13,7 +13,7 @@ from tests import (harness, test_aktif, test_arac, test_arastir, test_seviye, te
                    test_depo, test_kaynakli, test_kitap, test_mufredat, test_pdf, test_program,
                    test_spibilgi, test_tani, test_unite, test_espbelge, test_para, test_kapi, test_fis,
                    test_urun, test_guncelle, test_hesap,
-                   test_web, test_hedefag, test_teklif, test_yedek, test_izin, test_saat,
+                   test_web, test_hedefag, test_teklif, test_yedek, test_izin, test_disdunya, test_saat,
                    test_manager, test_media, test_memory, test_models, test_motto,
                    test_precedence, test_profil, test_ritim,
                    test_sohbet, test_streak, test_sync, test_twin,
@@ -48,7 +48,7 @@ def main():
                 test_cross, test_impact, test_dil, test_intents,
                 test_manager, test_profil, test_ritim, test_streak, test_channels,
                 test_daemon, test_models, test_butce, test_media, test_memory,
-                test_motto, test_yoklama, test_kanal, test_bam, test_king, test_mufredat, test_kitap, test_web, test_kaynakli, test_urun, test_pdf, test_depo, test_program, test_hedefag, test_teklif, test_yedek, test_izin, test_saat, test_spibilgi, test_tani,
+                test_motto, test_yoklama, test_kanal, test_bam, test_king, test_mufredat, test_kitap, test_web, test_kaynakli, test_urun, test_pdf, test_depo, test_program, test_hedefag, test_teklif, test_yedek, test_izin, test_disdunya, test_saat, test_spibilgi, test_tani,
                 test_unite, test_espbelge, test_para, test_kapi, test_fis, test_cozumle, test_cakisma, test_bildirim,
                 test_sohbet, test_seviye, test_motor, test_merdiven, test_baslat, test_guncelle, test_hesap, test_yuz, test_meydan, test_merkez, test_aktif, test_ollama, test_ses, test_dinle, test_kasa, test_ofismodel, test_arac, test_arastir, test_ekip, test_beceri, test_olcum, test_dongu, test_hafiza3):
         mod.run()

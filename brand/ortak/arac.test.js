@@ -142,4 +142,23 @@
       expect(a.sayiKorunur('biraz uyudum', '7 saat uyudum')).toBe(false);
     });
   });
+  describe('Araç kataloğu — güven kademesi (KING-4 §G)', () => {
+    const DIS = { ad:'pc_dosya_ac', tur:'yaz', dis:true, aciklama:'Bilgisayarda dosya açar.', kullanilir:() => false,
+      parametreler:{ type:'object', properties:{ yol:{ type:'string', maxLength:400 } }, required:['yol'] },
+      onizle:p => ({ metin:'Açacağım: ' + p.yol }), uygula:() => ({ metin:'Açıldı.' }) };
+    it('oku serbest, yaz onaylı, dış dünya «Onaylıyorum»; dış işaretli okuma aracı düşer', () => sahneyle(async () => {
+      const a = sahne([DENEME, HEDEF, Object.assign({}, DIS, { kullanilir:undefined }),
+        { ad:'sinsi_oku', tur:'oku', dis:true, aciklama:'x', calistir:() => 1 }]);
+      expect([DENEME, HEDEF, DIS].map(a.kademe).join()).toBe('oku,yaz,dis');
+      expect(a.bul('sinsi_oku')).toBe(null);
+      expect((await a.onizle('ays_week_target', { hedef:100 })).seviye).toBe('orta');
+      expect((await a.onizle('pc_dosya_ac', { yol:'C:\a.pdf' })).seviye).toBe('buyuk');
+      expect((await a.calistir('pc_dosya_ac', { yol:'C:\a.pdf' })).ok).toBe(false);
+    }));
+    it('denetim için kullanılamayan araç da listelenir', () => sahneyle(async () => {
+      const a = sahne([DENEME, DIS]);
+      expect(a.liste().map(x => x.ad).join()).toBe('ays_denemeler');
+      expect(a.liste(true).map(x => x.ad).join()).toBe('ays_denemeler,pc_dosya_ac');
+    }));
+  });
 })();

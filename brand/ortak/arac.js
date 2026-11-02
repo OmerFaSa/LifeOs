@@ -21,6 +21,9 @@
       DAHA doğrulanır: bilinmeyen araç, tanımsız ya da eksik parametre,
       yanlış tip, enum dışı değer reddedilir ve tahminle düzeltilmez.
       Sayıyı ve kararı aracın kodu üretir.
+      Güven kademesi (KING-4 §G): «oku» serbest, «yaz» onaylı, `dis:true`
+      (bilgisayar, telefon; dış dünya) ayrıca izinli: hep «yaz» akışından ve
+      «Onaylıyorum» kartından geçer, izni HKM ayrıca denetler. `kademe(a)`.
    3. YAZAN ARAÇ ONAYSIZ UYGULANMAZ. «yaz» aracı önce `onizle` verir; King
       onu mevcut onay kartıyla gösterir (Onayla / Vazgeç; büyükte
       «Onaylıyorum»). Model seçtiği için küçük eylem de sorulur: seviye en az
@@ -127,21 +130,23 @@ window.LIFEOS.ARAC = (function(){
   function tanimGecerli(a){
     if(!a || !AD_RE.test(String(a.ad || '')) || TURLER.indexOf(a.tur) < 0) return false;
     if(!String(a.aciklama || '').trim() || !semaGecerli(a.parametreler)) return false;
-    if(a.tur === 'oku') return typeof a.calistir === 'function';
+    if(a.tur === 'oku') return !a.dis && typeof a.calistir === 'function';
     return typeof a.onizle === 'function' && typeof a.uygula === 'function';
   }
+  const kademe = a => a.dis ? 'dis' : a.tur === 'yaz' ? 'yaz' : 'oku';
   function kullanilir(a){
     if(typeof a.kullanilir !== 'function') return true;
     try{ return !!a.kullanilir(); }catch(e){ return false; }
   }
-  function liste(){
+  /* hepsi: kullanılamayanlar da (bağlantısız Merkez aracı); güven denetimi (tools/king_guven.js) için. */
+  function liste(hepsi){
     let m = modulAraclar;
     if(typeof m === 'function'){ try{ m = m(); }catch(e){ m = []; } }
     let o = ortak;
     if(typeof o === 'function'){ try{ o = o(); }catch(e){ o = []; } }
     const gorulen = {};
     return (Array.isArray(o) ? o : []).concat(Array.isArray(m) ? m : []).filter(a => {
-      if(!tanimGecerli(a) || gorulen[a.ad] || !kullanilir(a)) return false;
+      if(!tanimGecerli(a) || gorulen[a.ad] || (!hepsi && !kullanilir(a))) return false;
       gorulen[a.ad] = true;
       return true;
     });
@@ -229,7 +234,7 @@ window.LIFEOS.ARAC = (function(){
     try{ o = await d.arac.onizle(d.param, baglam || {}); }catch(e){ return { ok:false, ad, hata:'önizlenemedi: ' + ((e && e.message) || 'bilinmeyen hata') }; }
     if(!o || o.hata) return { ok:false, ad, hata:(o && o.hata) || 'önizlenemedi' };
     /* Söz 3: model seçtiği için küçük de sorulur. */
-    const seviye = d.arac.seviye === 'buyuk' ? 'buyuk' : 'orta';
+    const seviye = d.arac.seviye === 'buyuk' || d.arac.dis ? 'buyuk' : 'orta';
     return { ok:true, tur:'yaz', ad:d.arac.ad, param:d.param, seviye, onizle:o, aracAd:String(d.arac.ozetAd || d.arac.aciklama).split(/[.:;]/)[0] };
   }
 
@@ -380,6 +385,6 @@ window.LIFEOS.ARAC = (function(){
   function _sifirla(){ modul = null; modulAraclar = []; ortak = []; }
 
   const api = { kur, ortakKur, modulSec, liste, bul, dogrula, paramDogrula, modelIcin, calistir, onizle, uygula,
-    kuralla, ara, niyet, niyetSinif, harita, isler, isAra, ISLER, GRUP_AD, sayilar, sayiKorunur, HARITA, MODUL_AD, kuruluMu:() => liste().length > 0, _sifirla };
+    kademe, kuralla, ara, niyet, niyetSinif, harita, isler, isAra, ISLER, GRUP_AD, sayilar, sayiKorunur, HARITA, MODUL_AD, kuruluMu:() => liste().length > 0, _sifirla };
   return api;
 })();

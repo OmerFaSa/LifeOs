@@ -83,7 +83,12 @@ def _soz(con, g):
     return soz.sil(con, g.get("id"))["ok"]
 
 
-HKM_GERI = {"para": _para, "soz": _soz}
+def _dis(con, g):
+    from core import disdunya   # bilgisayar ve telefon (KING-4 §E); True ya da neden
+    return disdunya.geri(con, g)
+
+
+HKM_GERI = {"para": _para, "soz": _soz, "bilgisayar": _dis, "telefon": _dis}
 
 
 def geri_al(con, eid, now=None):
@@ -99,8 +104,9 @@ def geri_al(con, eid, now=None):
     istemci = e["geri"].get("istemci")
     if not istemci:
         isle = HKM_GERI.get(e["geri"].get("hkm"))
-        if not isle or not isle(con, e["geri"]):
-            return {"ok": False, "note": "Geri alınamadı: kayıt artık yok."}
+        r = isle(con, e["geri"]) if isle else False
+        if r is not True:
+            return {"ok": False, "note": r if isinstance(r, str) and r else "Geri alınamadı: kayıt artık yok."}
     con.execute("UPDATE eylem SET durum='geri_alindi', geri_at=? WHERE id=?", (_simdi(now), eid))
     con.commit()
     out = {"ok": True, "eylem": _satir(con.execute("SELECT * FROM eylem WHERE id=?", (eid,)).fetchone())}

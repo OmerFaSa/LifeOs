@@ -99,6 +99,9 @@ Ucnoktalar:
     GET  /api/king/kendiliginden    bekleyen kendiliginden mesajlar (neden alaniyla), butce, sessiz saat, kararlar
     POST /api/eylem                 {arac, ozet, param?, geri?:{ad,param}, modul?} modulun uyguladigi yazma
     POST /api/eylem/<id>/geri       geri alir; istemci turunde tersi {istemci:{ad,param}} doner
+    GET  /api/dis                   dis dunya izinleri (dosya, uygulama, ekran, telefon) ve yetenekler
+    POST /api/dis/izin              {ad, acik} izni verir ya da kapatir (deftere yazilir)
+    POST /api/dis/<ac|baslat|ekran|telefon>  izinliyse uygular, deftere yazar (core/disdunya.py)
     GET  /api/dinle/durum           ses algilama: Whisper var mi, Gemini hazir mi (core/dinle.py)
     POST /api/dinle                 {wav: base64 16 kHz WAV} -> {ok, metin, motor}; olmazsa 503 + notlar
     POST /api/aktif/baslat          aktif kip: turun «yapilabilir» isi {id} -> King (kullanici yolu, modul hkm)
@@ -125,7 +128,7 @@ from urllib.parse import parse_qs, quote, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import arastir, kutu, motor, tarife  # noqa: E402
-from core import beceri, eylem, kendiliginden, soz  # noqa: E402
+from core import beceri, disdunya, eylem, kendiliginden, soz  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, gorev, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, models, motto, ofismodel, ollama, outbox, patron,
@@ -1290,6 +1293,9 @@ class Handler(BaseHTTPRequestHandler):
             # Butce paketleri (A · A+ · S · S+): onizleme, hicbir sey yazmaz.
             # Aylik tahmin defterdeki OLCUMDEN hesaplanir.
             return self._send(200, motor.onizleme(self.server.config, con=self.con))
+        if u.path == "/api/dis":
+            # Dis dunya izinleri ve yetenekleri (KING-4 §E/§G, core/disdunya.py).
+            return self._send(200, disdunya.durum(self.server.config))
         if u.path == "/api/eylem":
             # «King ne yaptı» zaman çizgisi (KING-4 A4, core/eylem.py).
             try:
@@ -1994,6 +2000,24 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, {"ok": True, "id": eid}) if eid else self._send(400, {"error": hata})
             r = eylem.geri_al(self.con, int(u.path.split("/")[3]))
             return self._send(200 if r["ok"] else 409, r)
+        if u.path == "/api/dis/izin" or re.match(r"^/api/dis/(ac|baslat|ekran|telefon)$", u.path):
+            # Dis dunya: ayri izin, onayli eylem, defterde geri al (core/disdunya.py).
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = _nesne(ham)
+            except ValueError:
+                body = {}
+            if u.path.endswith("/izin"):
+                yeni, hata = disdunya.izin_ver(self.server.config, body.get("ad"), body.get("acik"))
+                if hata:
+                    return self._send(400, {"error": hata})
+                _ayar_yaz(self.server, yeni)
+                eylem.kaydet(self.con, "dis.izin", "%s izni %s" % (disdunya.IZINLER[body["ad"]],
+                             "verildi" if body["acik"] else "kapatıldı"))
+                return self._send(200, dict(disdunya.durum(yeni), ok=True))
+            return self._send(200, disdunya.uygula(self.con, self.server.config, u.path.rsplit("/", 1)[1], body))
         if u.path == "/api/king/cumle":
             # KING-4 §H kartlari: sayiyi modul verir, cumleyi model kurar (yerelde, A6).
             ham, hata = self._read_body()

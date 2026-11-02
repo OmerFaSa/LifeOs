@@ -486,6 +486,38 @@
     const Y = KI.L.YETKI;
     return Y && typeof Y.kuruluMu === 'function' && Y.kuruluMu() ? Y : null;
   }
+  /* ---------- KING-4 §E: bilgisayar ve telefon (dış dünya kademesi) ---------- */
+  const DIS_IZIN = { dosya:'dosya ve klasör açma', uygulama:'uygulama başlatma', ekran:'ekrandaki metni okuma', telefon:'telefona mesaj ve sesli özet' };
+  async function disIstek(is, govde){
+    const r = await KI.hkmIstek('/api/dis/' + is, govde);
+    if(!r) return { ok:false, metin:'Merkez’e ulaşamadım; bilgisayar ve telefon işleri Merkez’den yapılır.' };
+    return r.ok ? { metin:r.metin, hkmEylem:r.eylem, satirlar:is === 'ekran' ? String(r.metin).split('\n').slice(0, 12) : null }
+      : { ok:false, metin:r.note || r.error || 'Olmadı.' };
+  }
+  function disAraclar(){
+    const k = () => !!KI.baglanti();
+    const dis = (ad, ornek, aciklama, parametreler, onizle, uygula) => ({ ad, tur:'yaz', dis:true, seviye:'buyuk', ornek, aciklama, parametreler, kullanilir:k, onizle, uygula });
+    return [
+      dis('pc_dosya_ac', 'masaüstündeki rapor.pdf dosyasını aç', 'Bilgisayarda bir dosyayı ya da klasörü varsayılan programıyla açar. yol: tam yol (C:\…). Çalıştırılabilir dosya açılmaz. Geri al pencereyi kapatır.',
+        { type:'object', properties:{ yol:{ type:'string', maxLength:400 } }, required:['yol'] },
+        p => ({ metin:'Bilgisayarda açacağım: ' + p.yol }), p => disIstek('ac', { yol:p.yol })),
+      dis('pc_uygulama_baslat', 'hesap makinesini başlat', 'Bilgisayarda Başlat menüsündeki bir uygulamayı adıyla başlatır. Geri al zorlamadan kapatır.',
+        { type:'object', properties:{ ad:{ type:'string', maxLength:80 } }, required:['ad'] },
+        p => ({ metin:'Bilgisayarda başlatacağım: ' + p.ad }), p => disIstek('baslat', { ad:p.ad })),
+      dis('pc_ekran_oku', 'ekranda ne yazıyor', 'Bilgisayarın ekranındaki metni okur (Windows OCR). Hiçbir şeyi değiştirmez ama ekran içeriği King’e girer.',
+        undefined, () => ({ metin:'Bilgisayarın ekranını okuyacağım.' }), () => disIstek('ekran', {})),
+      dis('telefona_gonder', 'günün özetini telefonuma sesli gönder', 'Telefona (Telegram) mesaj ya da sesli özet gönderir; 60 sn içinde geri alınırsa gitmez. ozet: true ise metin bugünün özetidir (sesli özet). sesli: ses dosyası olarak.',
+        { type:'object', properties:{ metin:{ type:'string', maxLength:1500 }, sesli:{ type:'boolean' }, ozet:{ type:'boolean' } } },
+        p => { const m = p.ozet ? KI.ozetSatirlari().join(' ') : String(p.metin || '').trim();
+          return m ? { metin:'Telefona ' + (p.sesli ? 'sesli ' : '') + (p.ozet ? 'özet' : 'mesaj') + ' göndereceğim.', satirlar:[m.slice(0, 160)] } : { hata:p.ozet ? 'bugün için özet yok' : 'gönderilecek metin yok' }; },
+        p => disIstek('telefon', { metin:p.ozet ? KI.ozetSatirlari().join(' ') : p.metin, sesli:p.sesli === true })),
+      dis('dis_izin', 'dosya açma iznini ver', 'Dış dünya izinlerinden birini açar ya da kapatır: dosya (dosya ve klasör açma), uygulama, ekran (ekran okuma), telefon. Her izin ayrıdır.',
+        { type:'object', properties:{ izin:{ type:'string', enum:Object.keys(DIS_IZIN) }, acik:{ type:'boolean' } }, required:['izin', 'acik'] },
+        p => ({ metin:'«' + DIS_IZIN[p.izin] + '» izni ' + (p.acik ? 'verilecek: King bunu her seferinde yine onayınla yapar.' : 'kapatılacak.') }),
+        async p => { const r = await KI.hkmIstek('/api/dis/izin', { ad:p.izin, acik:p.acik });
+          return r && r.ok ? { metin:'«' + DIS_IZIN[p.izin] + '» izni ' + (p.acik ? 'açık.' : 'kapalı.'), hkmEylem:true } : { ok:false, metin:'İzin değişmedi: Merkez’e ulaşamadım.' }; }),
+    ];
+  }
   async function yetkiUygula(n){
     n = n || KI.bekleyenYetki;
     KI.bekleyenYetki = null; KI.cipler = null;
@@ -499,7 +531,9 @@
     KI.akis = KI.akis.filter(m => m !== bek);
     if(r.ok && typeof r.geriAl === 'function'){ KI.sonGeriAl = r.geriAl; KI.cipler = [{ is:'geri-al', ad:'Geri al' }]; }
     /* «King ne yaptı» zaman çizgisi (KING-4 §F). */
-    if(r.ok) KI.eylemYaz({ arac:n.arac ? n.ad : 'yetki.' + (n.id || n.tur), ozet:String(r.metin || (n.onizle && n.onizle.metin) || '').replace(/[.!]+$/, ''),
+    /* Dış dünya eylemini (§E) HKM deftere kendisi yazar; çizgi yalnız tazelenir. */
+    if(r.ok && r.hkmEylem != null) KI.eylemTazele();
+    else if(r.ok) KI.eylemYaz({ arac:n.arac ? n.ad : 'yetki.' + (n.id || n.tur), ozet:String(r.metin || (n.onizle && n.onizle.metin) || '').replace(/[.!]+$/, ''),
       param:n.arac ? n.param : undefined, geriAl:r.geriAl });
     KI.soyle(r.metin, r.satirlar && r.satirlar.length ? r.satirlar : null);
     if(r.ok && r.yenile){
@@ -711,6 +745,10 @@
         kullanilir:() => !!KI.baglanti(),
         calistir:async () => { await KI.eylemTazele(); const o = KI.harcamaOzet(KI.harcama);
           return o ? { sonuc:KI.harcama, cevap:o.cumle } : { hata:'Merkez’den harcama okunamadı' }; } },
+      /* KING-4 §E dış dünya: her yetenek ayrı izinli (HKM `dis_dunya`, varsayılan kapalı), her eylem onaylı
+         («Onaylıyorum»), HKM deftere yazar ve geri alır (core/disdunya.py). Ekran okuma bir şey değiştirmese de
+         ekran içeriği dışarı çıktığı için bu kapıdan geçer (§G kademesi «dış»). */
+      ...disAraclar(),
       { ad:'merkez_raporu', tur:'oku', ornek:'haftalık değerlendirme', aciklama:'Merkez’in raporu: hafta (haftalık değerlendirme) ya da capraz (modüller arası bulgular); sayıları kural motoru yazar.',
         parametreler:{ type:'object', properties:{ tur:{ type:'string', enum:['hafta', 'capraz'] } }, required:['tur'] },
         calistir:p => akisla(m => KI.merkezKomut(m, p.tur, p.tur === 'hafta' ? 'Haftalık değerlendirme' : 'Modüller arası bulgular')) },

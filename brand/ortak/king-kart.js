@@ -1009,5 +1009,5 @@
     return '';
   }
 
-  Object.assign(KI, { yardimNiyeti, yardimIsle, yardimTikla, yardimHtml, brifingGoster, brifingSatirlari, brifingKodCumlesi, sabahYokla, aliskanlikKur, aliskanlikMetni, eylemYaz, eylemTazele, eylemListesi, eylemGeriAl, eylemGeriAlindi, eylemListe, harcamaOzet, harcamaHtml, yetenekler, GRUP_SVG_MODUL, KART, kartAyar, kartYaz, kartSabitle, kartSus, kartTasi, kartEkle, kartSil, miniKutu, oneCikanlar, vitrinHtml, vitrinDizin, gorevListe, rutinListe, GORSEL, gorseller, gorselSakla, kutuphaneHtml, kutDizin, kartNiyeti, kartTemiz, kartIsle, soruCevapla, LINK_RE, arastirmaVeri, arastirmaHtml, arastirmaEkle, kartlarHtml, soruHtml, bicimli });
+  Object.assign(KI, { hkmIstek, yardimNiyeti, yardimIsle, yardimTikla, yardimHtml, brifingGoster, brifingSatirlari, brifingKodCumlesi, sabahYokla, aliskanlikKur, aliskanlikMetni, eylemYaz, eylemTazele, eylemListesi, eylemGeriAl, eylemGeriAlindi, eylemListe, harcamaOzet, harcamaHtml, yetenekler, GRUP_SVG_MODUL, KART, kartAyar, kartYaz, kartSabitle, kartSus, kartTasi, kartEkle, kartSil, miniKutu, oneCikanlar, vitrinHtml, vitrinDizin, gorevListe, rutinListe, GORSEL, gorseller, gorselSakla, kutuphaneHtml, kutDizin, kartNiyeti, kartTemiz, kartIsle, soruCevapla, LINK_RE, arastirmaVeri, arastirmaHtml, arastirmaEkle, kartlarHtml, soruHtml, bicimli });
 })();
