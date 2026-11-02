@@ -1,6 +1,6 @@
 # 061 · SPİ sabah brifingi verisi: `brifing(simdi)` (KING-4 §H)
 
-**Durum:** bekliyor
+**Durum:** bitti
 **Dal:** `ag/061-spi-brifing`
 **Efor:** orta
 **Kabul testi:** `tools/kingveri_brifing_spi_kabul_test.py`
@@ -34,3 +34,10 @@ KING-4 §H «60 saniyelik sabah brifingi: bugünün planı, dünün tek bulgusu,
 - `cd SPI && node tools/runtests.js <senin portun>`
 
 ## Sonuç
+- **Ne değişti:** SP.KingVeri.brifing(simdi) eklendi; bugünün plan maddeleri (saatli/saatsiz sıralı, en çok 8), dünün uyku ölçüsü ve önceki 7 günün ortalaması (en az 3 günde hesaplandı, azsa veri yok), öncelikli olay önerisi veya ilk tamamlanmamış madde saf okuma olarak üretildi. kingveri.test.js'e brifing testleri ve iki kenar durum (dün ölçüsü olup önceki 7 gün boş; 23:59 gece yarısı dünün tespiti) eklendi.
+- **Koşan testler:**
+  - python tools/kingveri_brifing_spi_kabul_test.py -> spi brifing kabul: bos, plan, bulgu+ort, ort veri yok, oneri onceligi, ilk madde, saf.
+  - python tools/kingveri_spi_kabul_test.py -> spi king verisi kabul: uyku_dustu, plan_kacti, kimlik, hafta, hatirlat, sonKayit/duzelt.
+  - cd SPI && node tools/runtests.js 4752 -> 2961/2961 gecti
+- **Kabul testi:** yeşil (python tools/kingveri_brifing_spi_kabul_test.py)
+- **Açık kalan:** yok

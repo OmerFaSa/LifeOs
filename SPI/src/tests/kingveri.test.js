@@ -401,4 +401,185 @@
       }
     });
   });
+
+  describe('King verisi — brifing (sabah brifingi verisi)', () => {
+    it('boş depoda plan boş, bulgu ve öneri null; gun bugün; saf okuma', () => {
+      resetState();
+      SP.S.vitals = {};
+      const eskiListe = SP.HaftaPlan ? SP.HaftaPlan.liste : null;
+      if(SP.HaftaPlan) SP.HaftaPlan.liste = () => [];
+      try{
+        const simdi = yerelTarih(8, 0);
+        const bugun = U.iso(simdi);
+        const b1 = SP.KingVeri.brifing(simdi);
+        const b2 = SP.KingVeri.brifing(simdi);
+        expect(b1).toEqual({ gun: bugun, plan: [], bulgu: null, oneri: null });
+        expect(b2).toEqual(b1);
+      }finally{
+        if(SP.HaftaPlan) SP.HaftaPlan.liste = eskiListe;
+        resetState();
+      }
+    });
+
+    it('plan: saatliler saat sırasına, saatsizler sonra; tamam bayrağı; en çok 8', () => {
+      resetState();
+      const simdi = yerelTarih(8, 0);
+      const eskiListe = SP.HaftaPlan ? SP.HaftaPlan.liste : null;
+      const eskiBugun = SP.HaftaPlan ? SP.HaftaPlan.bugunMaddeleri : null;
+      const eskiSayim = SP.HaftaPlan ? SP.HaftaPlan.sayim : null;
+      const eskiZamanYaz = SP.HaftaPlan ? SP.HaftaPlan.zamanYaz : null;
+
+      if(SP.HaftaPlan){
+        SP.HaftaPlan.liste = () => [{ id:'p1' }];
+        SP.HaftaPlan.bugunMaddeleri = () => [
+          { id:'m1', metin:'Esneme', zaman:'09:45' },
+          { id:'m2', metin:'Su iç', zaman:'akşam' },
+          { id:'m3', metin:'Sabah yürüyüşü', zaman:'08:30', bitti:true },
+          { id:'m4', metin:'Kitap', zaman:'' },
+          { id:'m5', metin:'M5', zaman:'' },
+          { id:'m6', metin:'M6', zaman:'' },
+          { id:'m7', metin:'M7', zaman:'' },
+          { id:'m8', metin:'M8', zaman:'' },
+          { id:'m9', metin:'M9 (taşan)', zaman:'' }
+        ];
+        SP.HaftaPlan.sayim = (p, m) => ({ tamam: m.id === 'm3' });
+        SP.HaftaPlan.zamanYaz = z => (/^\d\d:\d\d$/.test(z || '') ? z : '');
+      }
+
+      try{
+        const b = SP.KingVeri.brifing(simdi);
+        expect(b.plan.length).toBe(8);
+        expect(b.plan[0]).toEqual({ ad: 'Sabah yürüyüşü', saat: '08:30', tamam: true });
+        expect(b.plan[1]).toEqual({ ad: 'Esneme', saat: '09:45', tamam: false });
+        expect(b.plan[2]).toEqual({ ad: 'Su iç', saat: null, tamam: false });
+      }finally{
+        if(SP.HaftaPlan){
+          SP.HaftaPlan.liste = eskiListe;
+          SP.HaftaPlan.bugunMaddeleri = eskiBugun;
+          SP.HaftaPlan.sayim = eskiSayim;
+          SP.HaftaPlan.zamanYaz = eskiZamanYaz;
+        }
+        resetState();
+      }
+    });
+
+    it('kenar durum: dün ölçüsü olup önceki 7 gün boşken ort veri yok döner', () => {
+      resetState();
+      SP.S.vitals = {};
+      const simdi = yerelTarih(8, 0);
+      const dunISO = U.iso(U.addDays(simdi, -1));
+      SP.S.vitals[dunISO] = { date: dunISO, sleep: 7.2 };
+
+      try{
+        const b = SP.KingVeri.brifing(simdi);
+        expect(b.bulgu).toEqual({
+          id: 'uyku',
+          ad: 'Uyku',
+          deger: 7.2,
+          birim: 'saat',
+          etiket: 'ölçüldü',
+          ort: { deger: null, etiket: 'veri yok' }
+        });
+      }finally{
+        resetState();
+      }
+    });
+
+    it('kenar durum: simdi gece yarısına yakın (23:59) iken dünün doğru günü bulunur', () => {
+      resetState();
+      SP.S.vitals = {};
+      const simdi = new Date(2026, 9, 15, 23, 59, 45); // 15 Ekim 2026 23:59:45
+      const dunISO = '2026-10-14';
+      SP.S.vitals[dunISO] = { date: dunISO, sleep: 6.8 };
+
+      try{
+        const b = SP.KingVeri.brifing(simdi);
+        expect(b.gun).toBe('2026-10-15');
+        expect(b.bulgu.deger).toBe(6.8);
+      }finally{
+        resetState();
+      }
+    });
+
+    it('oneri: olay yoksa planın ilk tamamlanmamış maddesini önerir', () => {
+      resetState();
+      SP.S.vitals = {};
+      const simdi = yerelTarih(8, 0);
+      const eskiListe = SP.HaftaPlan ? SP.HaftaPlan.liste : null;
+      const eskiBugun = SP.HaftaPlan ? SP.HaftaPlan.bugunMaddeleri : null;
+      const eskiSayim = SP.HaftaPlan ? SP.HaftaPlan.sayim : null;
+      const eskiZamanYaz = SP.HaftaPlan ? SP.HaftaPlan.zamanYaz : null;
+
+      if(SP.HaftaPlan){
+        SP.HaftaPlan.liste = () => [{ id:'p1' }];
+        SP.HaftaPlan.bugunMaddeleri = () => [
+          { id:'m1', metin:'Sabah yürüyüşü', zaman:'08:00' },
+          { id:'m2', metin:'Esneme', zaman:'09:00' }
+        ];
+        SP.HaftaPlan.sayim = (p, m) => ({ tamam: m.id === 'm1' });
+        SP.HaftaPlan.zamanYaz = z => z;
+      }
+
+      try{
+        const b = SP.KingVeri.brifing(simdi);
+        expect(b.oneri).toEqual({
+          id: 'ilk_madde',
+          konu: 'Esneme',
+          sayilar: {}
+        });
+      }finally{
+        if(SP.HaftaPlan){
+          SP.HaftaPlan.liste = eskiListe;
+          SP.HaftaPlan.bugunMaddeleri = eskiBugun;
+          SP.HaftaPlan.sayim = eskiSayim;
+          SP.HaftaPlan.zamanYaz = eskiZamanYaz;
+        }
+        resetState();
+      }
+    });
+
+    it('oneri: uyku_dustu olayı varsa ilk maddeyi ezer ve sayılar aynen aktarılır', () => {
+      resetState();
+      SP.S.vitals = {};
+      const simdi = yerelTarih(8, 0);
+      for(let i = -27; i <= -7; i++){
+        const g = U.iso(U.addDays(simdi, i));
+        SP.S.vitals[g] = { date: g, sleep: 7.5 };
+      }
+      for(let i = -6; i <= 0; i++){
+        const g = U.iso(U.addDays(simdi, i));
+        SP.S.vitals[g] = { date: g, sleep: 5.5 };
+      }
+
+      const eskiListe = SP.HaftaPlan ? SP.HaftaPlan.liste : null;
+      const eskiBugun = SP.HaftaPlan ? SP.HaftaPlan.bugunMaddeleri : null;
+      const eskiSayim = SP.HaftaPlan ? SP.HaftaPlan.sayim : null;
+      const eskiZamanYaz = SP.HaftaPlan ? SP.HaftaPlan.zamanYaz : null;
+
+      if(SP.HaftaPlan){
+        SP.HaftaPlan.liste = () => [{ id:'p1' }];
+        SP.HaftaPlan.bugunMaddeleri = () => [
+          { id:'m1', metin:'Esneme', zaman:'09:00' }
+        ];
+        SP.HaftaPlan.sayim = () => ({ tamam: false });
+        SP.HaftaPlan.zamanYaz = z => z;
+      }
+
+      try{
+        const b = SP.KingVeri.brifing(simdi);
+        expect(b.oneri.id).toBe('uyku_dustu');
+        expect(b.oneri.sayilar.ort7).toBeDefined();
+        expect(b.oneri.konu).toBeUndefined();
+      }finally{
+        if(SP.HaftaPlan){
+          SP.HaftaPlan.liste = eskiListe;
+          SP.HaftaPlan.bugunMaddeleri = eskiBugun;
+          SP.HaftaPlan.sayim = eskiSayim;
+          SP.HaftaPlan.zamanYaz = eskiZamanYaz;
+        }
+        resetState();
+      }
+    });
+  });
+
 })();
