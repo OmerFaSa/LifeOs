@@ -1,6 +1,6 @@
 # 081 · Ortak ayarların telefonla iki yönlü eşitlenmesi (sunucu mantığı)
 
-**Durum:** bekliyor   <!-- bekliyor | sürüyor | bitti | takıldı -->
+**Durum:** bitti   <!-- bekliyor | sürüyor | bitti | takıldı -->
 **Dal:** `ag/081-ayar-esitle`
 **Efor:** yüksek
 **Kabul testi:** `tools/ayar_esit_kabul_test.py`
@@ -57,7 +57,7 @@ kazansın ama hangisinin kazandığı görünür olsun». Ortak ayarların PC'de
 
 ## Sonuç
 <!-- Antigravity doldurur; dört satır da dolu olmalı (yoksa «yok»). Pilot eksik bırakılanı bir kez geri gönderir. -->
-- **Ne değişti:**
-- **Koşan testler:**
-- **Kabul testi:**
-- **Açık kalan:**
+- **Ne değişti:** sistem/ayar.py'ye Söz 5 (ESITLEME) eklendi; ayar.json'a iz ve en çok 20 kayıtlık cakisma listesi eklendi; oku() iz ve cakisma dönecek şekilde güncellendi; birlestir() kabul edilen her anahtar için iz yazacak şekilde genişletildi; esitle() iki yönlü eşitleme fonksiyonu (son yazan kazanır, ilk eşitlemede ezmeme, mezar taşı silme, çakışma kaydı) eklendi; isle() POST /api/ayar/esitle kapısı ve uzak_izin doğrulaması ile güncellendi.
+- **Koşan testler:** python tools/ayar_esit_kabul_test.py -> temiz: ayar esitleme kabul testi; python tools/ayar_test.py -> Ortak ayarlar temiz: yalniz bu bilgisayar, ozel baslik, yalniz tercih, silme, sinir, sayfa basi, kacirma.; python tools/telefon_test.py -> temiz
+- **Kabul testi:** python tools/ayar_esit_kabul_test.py önce kırmızı (TypeError: birlestir() got an unexpected keyword argument 'simdi'), sonra yeşil (temiz: ayar esitleme kabul testi).
+- **Açık kalan:** yok
