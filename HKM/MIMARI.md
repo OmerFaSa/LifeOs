@@ -1749,6 +1749,6 @@ Her çağrının kararı ve varsa düşüşü deftere yazılır (`usage.seviye` 
 süre toplamları) ve `dususler` (nedeni «düşüş» ile başlayan son 20 olay) listeleriyle sunar.
 
 `POST /api/king/cumle` (§H kartları: brifing ve hafta): sayıyı modül kuralı üretir (§1.1),
-model yalnız verilen satırlardan tek cümlelik sakin yorum kurar (`core/kendiliginden.py`).
+model yalnız verilen satırlardan kısa cümleyi kurar (brifing en çok üç, hafta tek cümle) (`core/kendiliginden.py`).
 İş kolay kabul edilip yerel modelde denenir; model yoksa `ok:false` döner ve istemci kodun
 cümlesini kullanır.
