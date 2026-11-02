@@ -23200,7 +23200,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'650745a8', at:'2026-11-02 14:00', dirty:false };
+ESP.BUILD = { id:'ba7bce69', at:'2026-11-02 17:43', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -28523,6 +28523,13 @@ window.LIFEOS = window.LIFEOS || {};
     return null;
   }
 
+  /* Giriş sayfası (sistem/sunucu.py GIRIS_PORT): yalnız LifeOS kapılarında. */
+  function girisAdres(loc){
+    loc = loc || window.location;
+    if(!loc || !/^https?:$/.test(loc.protocol || '') || !SIRA.some(x => MODULLER[x].kapi === Number(loc.port))) return null;
+    return loc.protocol + '//' + loc.hostname + ':4180/';
+  }
+
   /* Şimdi çizgisinin yeri: günün uyanık diliminde (varsayılan 06–24) oran. */
   function simdiOrani(d, bas, son){
     d = d || new Date();
@@ -28638,6 +28645,7 @@ window.LIFEOS = window.LIFEOS || {};
     const satir = (k, m) => '<i class="kenar__nokta kenar__nokta--' + k + '" aria-hidden="true"></i>'
       + '<span class="kenar__modul-metin"><span class="kenar__modul-ad">' + kac(m.ad) + '</span>'
       + '<span class="kenar__modul-not">' + kac(m.not) + '</span></span>';
+    const giris = girisAdres(loc);
     return '<div class="kenar__moduller" data-oz="008 155">'
       + '<button type="button" class="kenar__modulsec" aria-expanded="false" aria-controls="' + pid + '"'
       +   ' aria-label="' + kac('Sistem: ' + su.ad + ' — değiştir') + '" title="Sistem değiştir">'
@@ -28653,10 +28661,10 @@ window.LIFEOS = window.LIFEOS || {};
         return url ? '<a class="kenar__modul" href="' + kac(url) + '" data-modul-gecis="' + k + '">' + satir(k, m) + '</a>'
           : '<span class="kenar__modul is-kapali" title="' + kac(m.ad + ' ayrı dosyada açılır') + '">' + satir(k, m) + '</span>';
       }).join('')
-      /* Kullanıcı (2026-11-02): «3 kart seçtiğimiz yere dönülebilsin» — King › Kartlarım. */
-      + (window.LIFEOS.KING ? '<button type="button" class="kenar__modul kenar__modul--kartlarim" data-king-kartlarim>'
+      /* Kullanıcı (2026-11-02): «3 kart seçtiğimiz yere dönülebilsin» — giriş sayfası (ESP·SPİ·AYS kartları, :4180). */
+      + (giris ? '<a class="kenar__modul kenar__modul--kartlarim" href="' + kac(giris) + '">'
         + '<svg class="kenar__modul-simge" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="12.5" height="13" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v11"/></svg>'
-        + '<span class="kenar__modul-metin"><span class="kenar__modul-ad">Kartlarım</span><span class="kenar__modul-not">King’de seçtiğin kartlar</span></span></button>' : '')
+        + '<span class="kenar__modul-metin"><span class="kenar__modul-ad">Kartlarım</span><span class="kenar__modul-not">ESP · SPİ · AYS kartları</span></span></a>' : '')
       + '</div></div></div>';
   }
   function modulPencereKapat(haric){

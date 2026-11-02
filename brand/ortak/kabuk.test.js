@@ -564,8 +564,10 @@
         expect(sec.getAttribute('aria-expanded')).toBe('false');
         const pen = document.getElementById(sec.getAttribute('aria-controls'));
         expect(pen.querySelectorAll('.kenar__modul:not(.kenar__modul--kartlarim)').length).toBe(4);
-        /* King yüklüyse en altta «Kartlarım» satırı (2026-11-02). */
-        if(window.LIFEOS.KING) expect(pen.querySelector('[data-king-kartlarim]').textContent).toContain('Kartlarım');
+        /* «Kartlarım» satırı giriş sayfasına (:4180) gider; yalnız LifeOS kapılarında (2026-11-02). */
+        const kl = K.kenarCubugu({ modul:'spi', cekmeceler:[], loc:{ protocol:'http:', hostname:'127.0.0.1', port:'4183' } });
+        expect(kl).toContain('href="http://127.0.0.1:4180/"');
+        expect(kl).toContain('Kartlarım');
         expect(pen.querySelector('.kenar__modul.is-on').textContent).toContain('SPİ');
         expect(getComputedStyle(pen).visibility).toBe('hidden');
         sec.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
