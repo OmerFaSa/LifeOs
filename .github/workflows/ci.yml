@@ -225,6 +225,7 @@ jobs:
       - name: Ofis kabul ve birim testleri
         run: |
           python3 tools/hafiza_olcum_kabul_test.py
+          python3 tools/hafiza_uc_kabul_test.py
           python3 tools/king_sinav_ays_kabul_test.py
           python3 tools/king_sinav_spi_kabul_test.py
           python3 tools/king_sinav_esp_kabul_test.py
