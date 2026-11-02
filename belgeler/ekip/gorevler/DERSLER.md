@@ -31,3 +31,4 @@ eklenebilir; her madde `- ` ile başlayan tek satır).
 - 062 (02.11.2026): temiz; aynı ortak kırmızı
 - 061 (02.11.2026): temiz; Testçi kırmızısı ortak sınav kabulü, pilotun düzeltme isteği boşa gitti
 - 063 (02.11.2026): temiz; ajan bellek çöküşünde bırakıldı, iş tamamdı; Testçi kırmızısı ortak sınav kabulü
+- 064 (02.11.2026): Testçi kırmızıları bellek çöküşüydü (0xC0000142); kabul ve HKM 1017 elle yeşil
