@@ -23934,7 +23934,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'0f9df25e', at:'2026-11-03 19:24', dirty:true };
+R.BUILD = { id:'a10fcc29', at:'2026-11-03 20:41', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -37431,6 +37431,16 @@ window.LIFEOS.HESAP = (function(){
       icerik:JSON.stringify({ niyet:x.niyet || '', enerji:x.enerji == null ? null : x.enerji, hava:x.hava || null,
         bloklar:Array.isArray(x.bloklar) ? x.bloklar : [] }) });
   }
+  /* Sunucu sözü 27: Gün › Sen (kendi söz, veren/çalan, deste, enerji izi). */
+  async function gunSen(){
+    try{ return await api('/api/hesap/gunsen'); }
+    catch(e){ if(e && e.kod === 401) return null; throw e; }
+  }
+  async function gunSenYaz(v){
+    const x = v || {};
+    return api('/api/hesap/yayin', { ad:'gun/sen', icerik:JSON.stringify({ soz:x.soz || '', veren:x.veren || [], calan:x.calan || [],
+      deste:x.deste || [], iz:x.iz || {} }) });
+  }
   /* Sunucu sözü 25: üç modülün günlük sayısal özeti (SPİ'nin ruh hâli modeli için). */
   async function gunluk(){
     try{ return await api('/api/hesap/gunluk'); }
@@ -39234,7 +39244,7 @@ window.LIFEOS.HESAP = (function(){
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
-    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gunKayit, gunKayitYaz, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
+    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gunKayit, gunKayitYaz, gunSen, gunSenYaz,gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
     _ortam:ortam, _sifirla, _istek:istek, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,
@@ -51187,6 +51197,173 @@ window.LIFEOS.KING_IC = {};
   Object.assign(KI, { hkmIstek, yardimNiyeti, yardimIsle, yardimTikla, yardimHtml, brifingGoster, brifingSatirlari, brifingKodCumlesi, sabahYokla, aliskanlikKur, aliskanlikMetni, eylemYaz, eylemTazele, eylemListesi, eylemGeriAl, eylemGeriAlindi, eylemListe, harcamaOzet, harcamaHtml, yetenekler, GRUP_SVG_MODUL, KART, kartAyar, kartYaz, kartSabitle, kartSus, kartTasi, kartEkle, kartSil, miniKutu, oneCikanlar, vitrinHtml, vitrinDizin, gorevListe, rutinListe, GORSEL, gorseller, gorselSakla, kutuphaneHtml, kutDizin, kartNiyeti, kartTemiz, kartIsle, soruCevapla, LINK_RE, arastirmaVeri, arastirmaHtml, arastirmaEkle, kartlarHtml, soruHtml, bicimli });
 })();
 
+/* ==== js/core/gunveri.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/gunveri.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GÜN VERİSİ — Gün sayfasının saf veri katmanı (Gün planı F3a).
+
+   Hesap sunucusunun iki cevabını çizilecek biçime çevirir; hiçbir şey
+   uydurmaz. Kabul testi: tools/gunveri_kabul_test.py
+     serit(tekgun, simdi)    GET /api/hesap/tekgun → günün şeridi (07–23)
+     siradaki(serit, simdi)  «Şimdi ne yapsam?» için sıradaki blok
+     karne(gunluk, bugun)    GET /api/hesap/gunluk → haftanın hayat karnesi
+   Sözler: saat uydurulmaz (tekgun.js söz 2); bayat plan çizilmez, söylenir;
+   karnede «kayıt yok» (modül yayınladı, o gün iş yok) ile «veri yok» (modülden
+   bilgi yok) ayrıdır; tarih yerel saatle. */
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.GunVeri = (function(){
+  'use strict';
+
+  const SIRA = ['ays', 'spi', 'esp'];
+  const AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+  const DILIM = ['sabah', 'ogle', 'aksam', 'gece', 'gun'];
+  const DURUM = ['bekliyor', 'bitti', 'atlandi', 'vakti'];
+  const SAAT_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+  const SATIRLAR = [['uyku', 'Uyku', 'spi'], ['beslenme', 'Beslenme', 'spi'], ['hareket', 'Hareket', 'spi'],
+    ['calisma', 'Çalışma', 'ays'], ['gelisim', 'Gelişim', 'esp']];
+  const dk = s => Number(s.slice(0, 2)) * 60 + Number(s.slice(3, 5));
+  const iki = n => String(n).padStart(2, '0');
+  const iso = d => d.getFullYear() + '-' + iki(d.getMonth() + 1) + '-' + iki(d.getDate());
+  const tarih = s => { const p = String(s).slice(0, 10).split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); };
+  const simdiDk = s => { const m = String(s).match(/T(\d\d):(\d\d)/); return m ? Number(m[1]) * 60 + Number(m[2]) : 0; };
+
+  function blok(m, b){
+    if(!b || typeof b !== 'object' || !b.ad) return null;
+    const saat = SAAT_RE.test(b.saat || '') ? b.saat : null;
+    return {
+      modul:m, ad:String(b.ad).slice(0, 80), alt:b.alt ? String(b.alt).slice(0, 80) : '', saat,
+      dilim:DILIM.indexOf(b.dilim) >= 0 && b.dilim !== 'gun' ? b.dilim : 'gun',
+      durum:DURUM.indexOf(b.durum) >= 0 ? b.durum : 'bekliyor',
+      rota:typeof b.rota === 'string' && /^[a-z]+$/.test(b.rota) ? b.rota : null,
+      yuzde:saat ? Math.max(0, Math.min(100, (dk(saat) - 420) / 960 * 100)) : null,
+    };
+  }
+
+  function serit(tekgun){
+    if(!tekgun || typeof tekgun !== 'object') return { baglanti:false, bloklar:[], saatsiz:[], notlar:[], bos:true };
+    const liste = Array.isArray(tekgun.moduller) ? tekgun.moduller : [];
+    const hepsi = [], notlar = [];
+    SIRA.forEach(m => {
+      const x = liste.find(y => y && y.modul === m);
+      if(!x){ notlar.push(AD[m] + ' henüz plan yayınlamadı.'); return; }
+      if(x.bayat || x.gun !== tekgun.tarih){ notlar.push(AD[m] + ' bugün henüz açılmadı.'); return; }
+      let v;
+      try{ v = JSON.parse(x.icerik); }catch(e){ notlar.push(AD[m] + ' planı okunamadı.'); return; }
+      (v && Array.isArray(v.bloklar) ? v.bloklar : []).forEach(b => { const t = blok(m, b); if(t) hepsi.push(t); });
+    });
+    const bloklar = hepsi.filter(b => b.saat).sort((a, b) => dk(a.saat) - dk(b.saat));
+    const saatsiz = hepsi.filter(b => !b.saat).map((b, i) => ({ b, i }))
+      .sort((a, b) => (DILIM.indexOf(a.b.dilim) - DILIM.indexOf(b.b.dilim)) || a.i - b.i).map(x => x.b);
+    return { baglanti:true, bloklar, saatsiz, notlar, bos:!bloklar.length && !saatsiz.length };
+  }
+
+  function siradaki(s, simdi){
+    if(!s) return null;
+    const su = simdiDk(simdi), acik = b => b.durum === 'bekliyor' || b.durum === 'vakti';
+    return s.bloklar.find(b => acik(b) && dk(b.saat) >= su)
+      || s.saatsiz.find(b => b.durum === 'vakti')
+      || s.bloklar.find(acik)
+      || s.saatsiz.find(b => b.durum === 'bekliyor')
+      || null;
+  }
+
+  /* Karne ve donemin ortak cekirdegi: gun listesi icin bes satir, uc hal. */
+  function satirKur(gunluk, gunler, bugunIso){
+    const liste = gunluk && Array.isArray(gunluk.moduller) ? gunluk.moduller : [];
+    const etkin = (m, g) => m === 'ays' ? (g.dakika > 0 || g.soru > 0) : g.toplam > 0;
+    const deger = (m, g) => m === 'ays' ? (typeof g.dakika === 'number' ? g.dakika : null) : (typeof g.toplam === 'number' ? g.toplam : null);
+    return SATIRLAR.map(([alan, ad, modul]) => {
+      const x = modul === 'spi' ? null : liste.find(y => y && y.modul === modul);
+      const kadar = x && typeof x.zaman === 'number' ? iso(new Date(x.zaman)) : null;
+      const kayit = x && x.gunler && typeof x.gunler === 'object' ? x.gunler : {};
+      const hucreler = [], degerler = [];
+      gunler.forEach(d => {
+        const g = kayit[d];
+        degerler.push(x && g && typeof g === 'object' ? deger(modul, g) : null);
+        if(d > bugunIso) hucreler.push('gelecek');
+        else if(!x) hucreler.push('veri-yok');
+        else if(g && typeof g === 'object' && etkin(modul, g)) hucreler.push('yapildi');
+        else if(kadar && d > kadar) hucreler.push('veri-yok');
+        else hucreler.push('kayit-yok');
+      });
+      return { alan, ad, modul, hucreler, degerler };
+    });
+  }
+
+  function karne(gunluk, bugun){
+    const b = tarih(bugun), pzt = new Date(b.getFullYear(), b.getMonth(), b.getDate() - ((b.getDay() + 6) % 7));
+    const gunler = [0, 1, 2, 3, 4, 5, 6].map(i => iso(new Date(pzt.getFullYear(), pzt.getMonth(), pzt.getDate() + i)));
+    const bugunIso = iso(b), satirlar = satirKur(gunluk, gunler, bugunIso);
+    const i = gunler.indexOf(bugunIso), bugunOzet = {};
+    satirlar.forEach(s => { bugunOzet[s.alan] = s.degerler[i]; });
+    return { gunler, bugun:i, satirlar, bugunOzet };
+  }
+
+  const sonGunler = (bugun, n) => { const b = tarih(bugun);
+    return Array.from({ length:n }, (_, i) => iso(new Date(b.getFullYear(), b.getMonth(), b.getDate() - (n - 1 - i)))); };
+
+  /* Gecmis: son n gun. «kayit yok» bilinen sifirdir; «veri yok» toplama da ortalamaya da girmez.
+     sekil: haftanin gunlerine gore ortalama (Pzt..Paz), bilinen gun yoksa null. */
+  function donem(gunluk, bugun, n){
+    const gunler = sonGunler(bugun, n);
+    const satirlar = satirKur(gunluk, gunler, iso(tarih(bugun))).map(s => {
+      const bil = s.hucreler.map(h => h === 'yapildi' || h === 'kayit-yok');
+      const olcu = s.degerler.map((v, i) => bil[i] ? (v == null ? 0 : v) : null);
+      const top = [0, 0, 0, 0, 0, 0, 0], say = [0, 0, 0, 0, 0, 0, 0];
+      olcu.forEach((v, i) => { if(v == null) return; const g = (tarih(gunler[i]).getDay() + 6) % 7; top[g] += v; say[g]++; });
+      const bilinen = bil.filter(Boolean).length;
+      return Object.assign(s, { bilinen, etkin:s.hucreler.filter(h => h === 'yapildi').length,
+        toplam:bilinen ? olcu.reduce((a, v) => a + (v || 0), 0) : null,
+        sekil:top.map((t, g) => say[g] ? Math.round(t / say[g]) : null) });
+    });
+    return { gunler, satirlar };
+  }
+
+  /* Bugunun plani ve gercegi: modul basina plan, bitti, atlandi, acik. */
+  function planGercek(s){
+    if(!s) return [];
+    const hep = (s.bloklar || []).concat(s.saatsiz || []);
+    return SIRA.concat(['gun']).map(m => {
+      const l = hep.filter(b => b.modul === m), bitti = l.filter(b => b.durum === 'bitti').length, atlandi = l.filter(b => b.durum === 'atlandi').length;
+      return { modul:m, plan:l.length, bitti, atlandi, acik:l.length - bitti - atlandi };
+    }).filter(x => x.plan);
+  }
+
+  /* Senin girdigin enerji ve ic hava, gun gun; girilmemis gun null. */
+  function izDizi(iz, bugun, n){
+    const z = iz && typeof iz === 'object' ? iz : {};
+    const gunler = sonGunler(bugun, n).map(g => {
+      const x = z[g] || {};
+      return { gun:g, enerji:Number.isInteger(x.enerji) && x.enerji >= 1 && x.enerji <= 5 ? x.enerji : null, hava:x.hava || null };
+    });
+    const e = gunler.map(g => g.enerji).filter(v => v != null);
+    return { gunler, girilen:e.length, ortalama:e.length ? Math.round(e.reduce((a, v) => a + v, 0) / e.length * 10) / 10 : null };
+  }
+
+  /* «Ne yapsam?» destesi. Kural secer (rastgele degil): Laplace orani (evet+1)/(evet+gec+2);
+     enerji 1-2 ise az enerjili kart 1,5 kat, cok enerjili yari; 4-5 ise tersi. Esitlikte destedeki sira. */
+  const BASLANGIC = [['On dakika yürü', 'az'], ['Bir bardak su iç', 'az'], ['Pencereyi aç, beş derin nefes', 'az'],
+    ['Masanı topla', 'az'], ['Birine iyi bir mesaj yaz', 'az'], ['Yirmi dakika kitap oku', null],
+    ['Yarım saat odaklı çalış', 'cok'], ['Kısa bir antrenman yap', 'cok']].map(([ad, enerji]) => ({ ad, enerji, evet:0, gec:0 }));
+  function kartCek(deste, enerji, haric){
+    const h = haric || [];
+    let en = null;
+    (Array.isArray(deste) ? deste : []).forEach((k, i) => {
+      if(!k || !k.ad || h.indexOf(k.ad) >= 0) return;
+      const ev = k.evet || 0, ge = k.gec || 0;
+      let p = (ev + 1) / (ev + ge + 2), neden = ev ? 'Sık yaptığın bir kart' : ge ? 'Bir kez daha denemeye değer' : 'Henüz denemediğin bir kart';
+      if(enerji && enerji <= 2 && k.enerji){ p *= k.enerji === 'az' ? 1.5 : 0.5; if(k.enerji === 'az') neden = 'Enerjin düşük; az enerji isteyen bir kart'; }
+      if(enerji && enerji >= 4 && k.enerji){ p *= k.enerji === 'cok' ? 1.5 : 0.5; if(k.enerji === 'cok') neden = 'Enerjin yüksek; hareketli bir kart'; }
+      if(!en || p > en.puan) en = { kart:k, sira:i, puan:Math.round(p * 1000) / 1000, neden };
+    });
+    return en;
+  }
+
+  return { serit, siradaki, karne, donem, planGercek, izDizi, kartCek, BASLANGIC };
+})();
+
 /* ==== js/core/king-arac.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/king-arac.js içine yazılır; burası bir sonraki
@@ -51892,6 +52069,85 @@ window.LIFEOS.KING_IC = {};
           const yeni = Object.assign({}, once, ...['niyet', 'enerji', 'hava'].filter(k => p[k] != null && p[k] !== '').map(k => ({ [k]:p[k] })));
           await H.gunKayitYaz(yeni);
           return { metin:'Gün’e yazdım: ' + gunKaydiMetin(yeni) + '.', geriAl:async () => { await H.gunKayitYaz(once); } };
+        } },
+      ...senAraclari(),
+    ];
+  }
+  /* Gun › Gecmis ve Sen (§2b): sozun, veren / calan, deste (sunucu sozu 27), karne. Sayilari GunVeri hesaplar. */
+  const SEN_OKU_RE = /^(?:kendi |kendime )?sözüm (?:ne|neydi|nedir)\s*\??$|^(?:beni )?ne(?:ler)? (?:besliyor|enerji veriyor)\s*\??$|^enerjimi ne(?:ler)? (?:çalıyor|alıyor)\s*\??$|^destemde ne(?:ler)? var\s*\??$/;
+  const KART_RE = /^(?:bir |desteden (?:bir )?)?kart çek\s*[.!?]?$/;
+  const KARNE_RE = /^(?:bu )?(hafta|ay)(?:ki|lık)? (?:hayat )?karnem(?: nasıl)?\s*\??$|^hayat karnem(?: nasıl)?\s*\??$|^(?:bu )?(hafta|ay) nasıl (?:geçti|gidiyor)\s*\??$/;
+  const senOturum = () => gunOturum() && !!KI.L.HESAP.gunSen;
+  const GV = () => KI.L.GunVeri;
+  const bugunIso = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  function senCoz(t, ham){
+    const sonra = () => String(ham).replace(/^[^:]*:\s*/, '').replace(/\s+/g, ' ').trim();
+    if(/^(?:kendi |kendime )?söz(?:üm)?\s*:/.test(t)){ const s = sonra().slice(0, 160); return s ? { soz:s } : null; }
+    if(/^(?:enerji veren|beni besleyen|enerji verir)\s*:/.test(t)){ const s = sonra().slice(0, 40); return s ? { veren:s } : null; }
+    if(/^(?:enerji çalan|enerjimi çalan|beni yoran)\s*:/.test(t)){ const s = sonra().slice(0, 40); return s ? { calan:s } : null; }
+    if(/^desteye(?: kart)? ekle\s*:/.test(t)){ const s = sonra().slice(0, 60); return s ? { kart:s } : null; }
+    return null;
+  }
+  const senMetin = p => [p.soz ? 'kendi sözün «' + p.soz + '»' : '', p.veren ? 'enerji veren: ' + p.veren : '', p.calan ? 'enerji çalan: ' + p.calan : '',
+    p.kart ? 'desteye kart: ' + p.kart + (p.kart_enerji ? ' (' + (p.kart_enerji === 'az' ? 'az' : 'çok') + ' enerji)' : '') : ''].filter(Boolean).join(', ');
+  const dk = m => m >= 60 ? Math.floor(m / 60) + ' sa' + (m % 60 ? ' ' + (m % 60) + ' dk' : '') : m + ' dk';
+  function senAraclari(){
+    return [
+      { ad:'gun_sen', tur:'oku', ornek:'beni ne besliyor', aciklama:'Gün › Sen kaydını okur: kullanıcının kendine koyduğu ilke, onu besleyen ve yoran şeyler, destedeki kartlar (Gün sayfasıyla aynı kayıt).',
+        kural:t => SEN_OKU_RE.test(t),
+        calistir:async () => {
+          if(!senOturum()) return { cevap:'Sen kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.' };
+          const v = await KI.L.HESAP.gunSen() || {};
+          const l = [v.soz ? 'Kendi sözün: «' + v.soz + '».' : '', (v.veren || []).length ? 'Enerji veren: ' + v.veren.join(', ') + '.' : '',
+            (v.calan || []).length ? 'Enerji çalan: ' + v.calan.join(', ') + '.' : '', (v.deste || []).length ? 'Destende ' + v.deste.length + ' kart var.' : ''].filter(Boolean);
+          return { sonuc:v, cevap:l.length ? l.join(' ') : 'Sen bölümü boş: «sözüm: …», «enerji veren: …» ya da «desteye ekle: …» yazabilirsin.' };
+        } },
+      { ad:'gun_sen_yaz', tur:'yaz', ornek:'enerji veren: akşam yürüyüşü', aciklama:'Gün › Sen kaydına yazar: kendi söz (en çok 160 karakter), enerji veren ya da çalan bir şey (en çok 40, listede en çok 12), desteye kart (en çok 60, destede en çok 30; enerjisi az ya da cok). Var olanlar silinmez.',
+        parametreler:{ type:'object', properties:{ soz:{ type:'string', maxLength:160 }, veren:{ type:'string', maxLength:40 }, calan:{ type:'string', maxLength:40 },
+          kart:{ type:'string', maxLength:60 }, kart_enerji:{ type:'string', enum:['az', 'cok'] } } },
+        kural:(t, ham) => senCoz(t, ham),
+        onizle:p => {
+          if(!senOturum()) return { hata:'Sen kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış' };
+          const m = senMetin(p || {});
+          return m ? { metin:'Gün › Sen’e yazılacak: ' + m + '.' } : { hata:'yazılacak bir şey yok' };
+        },
+        uygula:async p => {
+          const H = KI.L.HESAP, e = await H.gunSen() || {};
+          const once = { soz:e.soz || '', veren:e.veren || [], calan:e.calan || [], deste:e.deste || [], iz:e.iz || {} };
+          const yeni = Object.assign({}, once, { veren:once.veren.slice(), calan:once.calan.slice(),
+            deste:(once.deste.length ? once.deste : ((GV() && GV().BASLANGIC) || [])).map(k => Object.assign({}, k)) });
+          if(p.soz) yeni.soz = String(p.soz).slice(0, 160);
+          ['veren', 'calan'].forEach(k => { if(p[k] && yeni[k].indexOf(p[k]) < 0){ if(yeni[k].length >= 12) throw new Error('listede en çok 12 satır olur'); yeni[k].push(String(p[k]).slice(0, 40)); } });
+          if(p.kart && !yeni.deste.some(k => k.ad === p.kart)){
+            if(yeni.deste.length >= 30) throw new Error('destede en çok 30 kart olur');
+            yeni.deste.push({ ad:String(p.kart).slice(0, 60), enerji:p.kart_enerji === 'az' || p.kart_enerji === 'cok' ? p.kart_enerji : null, evet:0, gec:0 });
+          }
+          await H.gunSenYaz(yeni);
+          return { metin:'Gün › Sen’e yazdım: ' + senMetin(p) + '.', geriAl:async () => { await H.gunSenYaz(once); } };
+        } },
+      { ad:'gun_kart_cek', tur:'oku', ornek:'bir kart çek', aciklama:'«Ne yapsam?» destesinden kuralla bir kart çeker: sık yapılan ve bugünkü enerjiye uyan öne çıkar. Kayıt yazmaz.',
+        kural:t => KART_RE.test(t),
+        calistir:async () => {
+          if(!senOturum() || !GV()) return { cevap:'Deste hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.' };
+          const H = KI.L.HESAP, v = await H.gunSen() || {}, g = await H.gunKayit();
+          const enerji = g && !g.bayat ? g.enerji || null : null, d = (v.deste || []).length ? v.deste : GV().BASLANGIC;
+          const c = GV().kartCek(d, enerji, []);
+          if(!c) return { cevap:'Deste boş.' };
+          return { sonuc:c, cevap:'Kartın: «' + c.kart.ad + '». ' + c.neden + (enerji ? ' (enerjin ' + enerji + '/5)' : '') + '. Yaptıysan Gün › Sen’de «Yaptım» de; deste öğrenir.' };
+        } },
+      { ad:'gun_karne', tur:'oku', ornek:'bu hafta karnem nasıl', aciklama:'Hayat karnesi: son 7 ya da 30 günde çalışma (AYS) ve gelişim (ESP) dakikaları ve etkin gün sayısı (ölçüldü); SPİ alanları veri yok.',
+        parametreler:{ type:'object', properties:{ gun:{ type:'integer', enum:[7, 30] } } },
+        kural:t => { const m = t.match(KARNE_RE); return m ? { gun:(m[1] || m[2]) === 'ay' ? 30 : 7 } : null; },
+        calistir:async p => {
+          if(!gunOturum() || !GV() || !KI.L.HESAP.gunluk) return { cevap:'Karne hesap sunucusundaki günlük özetten gelir; bu cihazda hesapla giriş yapılmamış.' };
+          const n = p && p.gun === 30 ? 30 : 7, H = KI.L.HESAP, d = GV().donem(await H.gunluk(), bugunIso(), n);
+          const s = H.gunSen ? await H.gunSen() : null, z = GV().izDizi(s && s.iz, bugunIso(), n);
+          const a = {}; d.satirlar.forEach(x => { a[x.alan] = x; });
+          const satir = (x, ad, kaynak) => x.toplam == null ? ad + ': veri yok' : ad + ' ' + x.etkin + '/' + n + ' gün, ' + dk(x.toplam) + ' (ölçüldü, ' + kaynak + ')';
+          const l = [satir(a.calisma, 'Çalışma', 'AYS'), satir(a.gelisim, 'Gelişim', 'ESP'),
+            z.ortalama == null ? 'enerji: veri yok' : 'enerji ortalaması ' + String(z.ortalama).replace('.', ',') + '/5 (senin girdiğin, ' + z.girilen + ' gün)', 'uyku, beslenme, hareket: veri yok'];
+          return { sonuc:{ gun:n, satirlar:d.satirlar.map(x => ({ alan:x.alan, toplam:x.toplam, etkin:x.etkin, bilinen:x.bilinen })), enerji:z.ortalama },
+            cevap:'Son ' + n + ' gün: ' + l.join('; ') + '.' };
         } },
     ];
   }
