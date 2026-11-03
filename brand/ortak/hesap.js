@@ -1782,6 +1782,16 @@ window.LIFEOS.HESAP = (function(){
       icerik:JSON.stringify({ niyet:x.niyet || '', enerji:x.enerji == null ? null : x.enerji, hava:x.hava || null,
         bloklar:Array.isArray(x.bloklar) ? x.bloklar : [] }) });
   }
+  /* Sunucu sözü 27: Gün › Sen (kendi söz, veren/çalan, deste, enerji izi). */
+  async function gunSen(){
+    try{ return await api('/api/hesap/gunsen'); }
+    catch(e){ if(e && e.kod === 401) return null; throw e; }
+  }
+  async function gunSenYaz(v){
+    const x = v || {};
+    return api('/api/hesap/yayin', { ad:'gun/sen', icerik:JSON.stringify({ soz:x.soz || '', veren:x.veren || [], calan:x.calan || [],
+      deste:x.deste || [], iz:x.iz || {} }) });
+  }
   /* Sunucu sözü 25: üç modülün günlük sayısal özeti (SPİ'nin ruh hâli modeli için). */
   async function gunluk(){
     try{ return await api('/api/hesap/gunluk'); }
@@ -3585,7 +3595,7 @@ window.LIFEOS.HESAP = (function(){
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
-    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gunKayit, gunKayitYaz, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
+    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gunKayit, gunKayitYaz, gunSen, gunSenYaz,gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
     _ortam:ortam, _sifirla, _istek:istek, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,

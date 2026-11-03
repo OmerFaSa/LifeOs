@@ -2540,6 +2540,104 @@
       "b": [
         "arac:gun_kaydi"
       ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "bu hafta karnem nasıl",
+      "b": [
+        "arac:gun_karne"
+      ],
+      "a": {
+        "gun": 7
+      }
+    },
+    {
+      "g": "genel",
+      "m": "esp",
+      "c": "bu ayki karnem nasıl",
+      "b": [
+        "arac:gun_karne"
+      ],
+      "a": {
+        "gun": 30
+      }
+    },
+    {
+      "g": "genel",
+      "m": "spi",
+      "c": "bir kart çek",
+      "b": [
+        "arac:gun_kart_cek"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "desteden kart çek",
+      "b": [
+        "arac:gun_kart_cek"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "esp",
+      "c": "beni ne besliyor",
+      "b": [
+        "arac:gun_sen"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "spi",
+      "c": "enerjimi ne çalıyor",
+      "b": [
+        "arac:gun_sen"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "sözüm: her gün biraz",
+      "b": [
+        "arac:gun_sen_yaz"
+      ],
+      "a": {
+        "soz": "her gün biraz"
+      }
+    },
+    {
+      "g": "genel",
+      "m": "esp",
+      "c": "enerji veren: akşam yürüyüşü",
+      "b": [
+        "arac:gun_sen_yaz"
+      ],
+      "a": {
+        "veren": "akşam yürüyüşü"
+      }
+    },
+    {
+      "g": "genel",
+      "m": "spi",
+      "c": "enerji çalan: gece telefon",
+      "b": [
+        "arac:gun_sen_yaz"
+      ],
+      "a": {
+        "calan": "gece telefon"
+      }
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "desteye ekle: bir şarkı aç",
+      "b": [
+        "arac:gun_sen_yaz"
+      ],
+      "a": {
+        "kart": "bir şarkı aç"
+      }
     }
   ]
 }

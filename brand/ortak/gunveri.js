@@ -66,14 +66,12 @@ LIFEOS.GunVeri = (function(){
       || null;
   }
 
-  function karne(gunluk, bugun){
-    const b = tarih(bugun), pzt = new Date(b.getFullYear(), b.getMonth(), b.getDate() - ((b.getDay() + 6) % 7));
-    const gunler = [0, 1, 2, 3, 4, 5, 6].map(i => iso(new Date(pzt.getFullYear(), pzt.getMonth(), pzt.getDate() + i)));
-    const bugunIso = iso(b);
+  /* Karne ve donemin ortak cekirdegi: gun listesi icin bes satir, uc hal. */
+  function satirKur(gunluk, gunler, bugunIso){
     const liste = gunluk && Array.isArray(gunluk.moduller) ? gunluk.moduller : [];
     const etkin = (m, g) => m === 'ays' ? (g.dakika > 0 || g.soru > 0) : g.toplam > 0;
     const deger = (m, g) => m === 'ays' ? (typeof g.dakika === 'number' ? g.dakika : null) : (typeof g.toplam === 'number' ? g.toplam : null);
-    const satirlar = SATIRLAR.map(([alan, ad, modul]) => {
+    return SATIRLAR.map(([alan, ad, modul]) => {
       const x = modul === 'spi' ? null : liste.find(y => y && y.modul === modul);
       const kadar = x && typeof x.zaman === 'number' ? iso(new Date(x.zaman)) : null;
       const kayit = x && x.gunler && typeof x.gunler === 'object' ? x.gunler : {};
@@ -89,10 +87,76 @@ LIFEOS.GunVeri = (function(){
       });
       return { alan, ad, modul, hucreler, degerler };
     });
+  }
+
+  function karne(gunluk, bugun){
+    const b = tarih(bugun), pzt = new Date(b.getFullYear(), b.getMonth(), b.getDate() - ((b.getDay() + 6) % 7));
+    const gunler = [0, 1, 2, 3, 4, 5, 6].map(i => iso(new Date(pzt.getFullYear(), pzt.getMonth(), pzt.getDate() + i)));
+    const bugunIso = iso(b), satirlar = satirKur(gunluk, gunler, bugunIso);
     const i = gunler.indexOf(bugunIso), bugunOzet = {};
     satirlar.forEach(s => { bugunOzet[s.alan] = s.degerler[i]; });
     return { gunler, bugun:i, satirlar, bugunOzet };
   }
 
-  return { serit, siradaki, karne };
+  const sonGunler = (bugun, n) => { const b = tarih(bugun);
+    return Array.from({ length:n }, (_, i) => iso(new Date(b.getFullYear(), b.getMonth(), b.getDate() - (n - 1 - i)))); };
+
+  /* Gecmis: son n gun. «kayit yok» bilinen sifirdir; «veri yok» toplama da ortalamaya da girmez.
+     sekil: haftanin gunlerine gore ortalama (Pzt..Paz), bilinen gun yoksa null. */
+  function donem(gunluk, bugun, n){
+    const gunler = sonGunler(bugun, n);
+    const satirlar = satirKur(gunluk, gunler, iso(tarih(bugun))).map(s => {
+      const bil = s.hucreler.map(h => h === 'yapildi' || h === 'kayit-yok');
+      const olcu = s.degerler.map((v, i) => bil[i] ? (v == null ? 0 : v) : null);
+      const top = [0, 0, 0, 0, 0, 0, 0], say = [0, 0, 0, 0, 0, 0, 0];
+      olcu.forEach((v, i) => { if(v == null) return; const g = (tarih(gunler[i]).getDay() + 6) % 7; top[g] += v; say[g]++; });
+      const bilinen = bil.filter(Boolean).length;
+      return Object.assign(s, { bilinen, etkin:s.hucreler.filter(h => h === 'yapildi').length,
+        toplam:bilinen ? olcu.reduce((a, v) => a + (v || 0), 0) : null,
+        sekil:top.map((t, g) => say[g] ? Math.round(t / say[g]) : null) });
+    });
+    return { gunler, satirlar };
+  }
+
+  /* Bugunun plani ve gercegi: modul basina plan, bitti, atlandi, acik. */
+  function planGercek(s){
+    if(!s) return [];
+    const hep = (s.bloklar || []).concat(s.saatsiz || []);
+    return SIRA.concat(['gun']).map(m => {
+      const l = hep.filter(b => b.modul === m), bitti = l.filter(b => b.durum === 'bitti').length, atlandi = l.filter(b => b.durum === 'atlandi').length;
+      return { modul:m, plan:l.length, bitti, atlandi, acik:l.length - bitti - atlandi };
+    }).filter(x => x.plan);
+  }
+
+  /* Senin girdigin enerji ve ic hava, gun gun; girilmemis gun null. */
+  function izDizi(iz, bugun, n){
+    const z = iz && typeof iz === 'object' ? iz : {};
+    const gunler = sonGunler(bugun, n).map(g => {
+      const x = z[g] || {};
+      return { gun:g, enerji:Number.isInteger(x.enerji) && x.enerji >= 1 && x.enerji <= 5 ? x.enerji : null, hava:x.hava || null };
+    });
+    const e = gunler.map(g => g.enerji).filter(v => v != null);
+    return { gunler, girilen:e.length, ortalama:e.length ? Math.round(e.reduce((a, v) => a + v, 0) / e.length * 10) / 10 : null };
+  }
+
+  /* «Ne yapsam?» destesi. Kural secer (rastgele degil): Laplace orani (evet+1)/(evet+gec+2);
+     enerji 1-2 ise az enerjili kart 1,5 kat, cok enerjili yari; 4-5 ise tersi. Esitlikte destedeki sira. */
+  const BASLANGIC = [['On dakika yürü', 'az'], ['Bir bardak su iç', 'az'], ['Pencereyi aç, beş derin nefes', 'az'],
+    ['Masanı topla', 'az'], ['Birine iyi bir mesaj yaz', 'az'], ['Yirmi dakika kitap oku', null],
+    ['Yarım saat odaklı çalış', 'cok'], ['Kısa bir antrenman yap', 'cok']].map(([ad, enerji]) => ({ ad, enerji, evet:0, gec:0 }));
+  function kartCek(deste, enerji, haric){
+    const h = haric || [];
+    let en = null;
+    (Array.isArray(deste) ? deste : []).forEach((k, i) => {
+      if(!k || !k.ad || h.indexOf(k.ad) >= 0) return;
+      const ev = k.evet || 0, ge = k.gec || 0;
+      let p = (ev + 1) / (ev + ge + 2), neden = ev ? 'Sık yaptığın bir kart' : ge ? 'Bir kez daha denemeye değer' : 'Henüz denemediğin bir kart';
+      if(enerji && enerji <= 2 && k.enerji){ p *= k.enerji === 'az' ? 1.5 : 0.5; if(k.enerji === 'az') neden = 'Enerjin düşük; az enerji isteyen bir kart'; }
+      if(enerji && enerji >= 4 && k.enerji){ p *= k.enerji === 'cok' ? 1.5 : 0.5; if(k.enerji === 'cok') neden = 'Enerjin yüksek; hareketli bir kart'; }
+      if(!en || p > en.puan) en = { kart:k, sira:i, puan:Math.round(p * 1000) / 1000, neden };
+    });
+    return en;
+  }
+
+  return { serit, siradaki, karne, donem, planGercek, izDizi, kartCek, BASLANGIC };
 })();

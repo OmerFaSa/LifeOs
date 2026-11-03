@@ -2232,6 +2232,44 @@
         expect(k.akis().slice(-1)[0].metin).toContain('yağmurlu');
       }finally{ Object.assign(H, eski); }
     }));
+    /* Gün › Geçmiş ve Sen (§2b): sunucu sözü 27; karne ve deste GunVeri'nin kuralıyla. */
+    it('Gün › Sen: King okur, yazar (önizler, onaylanınca birleştirir, geri alır), kart çeker, karneyi söyler', () => sahneyle(async () => {
+      const H = window.LIFEOS.HESAP, eski = { durum:H.durum, gunSen:H.gunSen, gunSenYaz:H.gunSenYaz, gunKayit:H.gunKayit, gunluk:H.gunluk };
+      let sen = { soz:'', veren:['yürüyüş'], calan:[], deste:[], iz:{} };
+      const yazilan = [], bekle = async () => { for(let i = 0; i < 8; i++) await new Promise(r => setTimeout(r, 0)); };
+      try{
+        const k = aracSahnesi();
+        k.ac();
+        H.durum = () => ({ oturum:null });
+        await k.isle('beni ne besliyor');
+        expect(k.akis().slice(-1)[0].metin).toContain('giriş yapılmamış');
+        H.durum = () => ({ oturum:{ a:'ben' } });
+        H.gunSen = async () => sen;
+        H.gunSenYaz = async v => { yazilan.push(v); sen = v; return { ok:true }; };
+        H.gunKayit = async () => ({ bayat:false, enerji:2 });
+        H.gunluk = async () => ({ moduller:[] });
+        await k.isle('enerji veren: akşam çayı');
+        expect(yazilan.length).toBe(0);
+        expect(k.akis().slice(-1)[0].metin).toContain('akşam çayı');
+        await k.isle('evet');
+        await bekle();
+        expect(yazilan[0].veren).toEqual(['yürüyüş', 'akşam çayı']);
+        expect(yazilan[0].deste.length).toBe(window.LIFEOS.GunVeri.BASLANGIC.length);   // başlangıç destesi kalıcılaşır
+        await k.isle('sözüm: Her gün biraz');
+        await k.isle('evet');
+        await bekle();
+        expect(yazilan[1].soz).toBe('Her gün biraz');
+        expect(yazilan[1].veren).toEqual(['yürüyüş', 'akşam çayı']);
+        await k.isle('sözüm ne');
+        expect(k.akis().slice(-1)[0].metin).toContain('«Her gün biraz»');
+        await k.isle('bir kart çek');
+        expect(k.akis().slice(-1)[0].metin).toContain('Enerjin düşük');                 // enerji 2: az enerjili kart
+        await k.isle('bu hafta karnem nasıl');
+        const c = k.akis().slice(-1)[0].metin;
+        expect(c).toContain('Son 7 gün');
+        expect(c).toContain('Çalışma: veri yok');                                          // eksik veri sıfır değil
+      }finally{ Object.assign(H, eski); }
+    }));
     it('Araçlar: bankası olmayan modülde soru satırı yok; olan modülde var', () => sahneyle(async () => {
       const { k } = sahne();
       const adlar = () => k.yetenekler().reduce((a, g) => a.concat(g.l.map(x => x.ad)), []);

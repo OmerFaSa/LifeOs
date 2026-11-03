@@ -164,6 +164,14 @@
       sunucu ANLAMAZ, yalniz bicim ve boyut. Uc modulunku birlikte verilir
       (`GET /api/hesap/gunluk`, oturumla): SPI'nin ruh hali modeli oteki
       modullerin gununu de girdi olarak alir. Sunucu hicbir module yazmaz.
+  26. GUN KAYDI (2026-11-03, Gun plani F3a). Gun'un bugunku kaydi (`gun/kayit`:
+      niyet, enerji, ic hava, kendi plani); sunucu bunu ANLAR ve her alanini
+      denetler. Dunku kayit bugunun degildir: bayat ve bos doner.
+  27. GUN · SEN (2026-11-03, Gun plani §2 «Sen»). Kullanicinin kendi sozu,
+      enerji veren ve calan seyler, «Ne yapsam?» destesi ve gunluk enerji / ic
+      hava izi (`gun/sen`; okuma `GET /api/hesap/gunsen`). Kullanicinin girdigi
+      deger; sunucu her alani denetler, sayi uydurmaz. Adi bilerek `/bugun`,
+      `/gun`, `/gunluk` ile bitmez: o sonekleri ozet, tek gun ve gunluk toplar.
 
    Yalniz Python standart kutuphanesi (AGENTS §1.3).
 """
@@ -254,6 +262,15 @@ GUNKAYIT_RE = re.compile(r"^gun/kayit$")
 HAVALAR = ("gunes", "parcali", "bulut", "yagmur", "firtina")
 NIYET_EN_UZUN = 120
 GUN_BLOK_EN_COK = 20
+# Soz 27: Gun › Sen. Liste tavanlari kucuk: bu bir defter degil, birkac satir.
+GUNSEN_RE = re.compile(r"^gun/sen$")
+SOZ_EN_UZUN = 160
+SEN_SATIR_EN_UZUN = 40
+SEN_LISTE_EN_COK = 12
+DESTE_EN_COK = 30
+KART_EN_UZUN = 60
+KART_ENERJI = ("az", "cok")
+SEN_IZ_EN_COK = 90
 SAAT_RE = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
 GUN_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 YAYIN_EN_BUYUK = 512 * 1024
@@ -1591,9 +1608,16 @@ class Depo:
         """Modulun yayini: takvim (.ics) ya da gunluk ozet (soz 21; duz
         metin ve hangi gunun oldugu). Sunucu icerigi anlamaz."""
         if not isinstance(ad, str) or not (YAYIN_RE.match(ad) or BUGUN_RE.match(ad) or GUNPLAN_RE.match(ad)
-                                           or KISI_RE.match(ad) or GUNLUK_RE.match(ad) or GUNKAYIT_RE.match(ad)):
+                                           or KISI_RE.match(ad) or GUNLUK_RE.match(ad) or GUNKAYIT_RE.match(ad)
+                                           or GUNSEN_RE.match(ad)):
             raise Hata(400, "Geçersiz yayın.")
-        if GUNKAYIT_RE.match(ad):
+        if GUNSEN_RE.match(ad):
+            try:
+                v = json.loads(icerik) if isinstance(icerik, str) else None
+            except ValueError:
+                v = None
+            icerik, gun = json.dumps(gun_sen_temiz(v), ensure_ascii=False), None
+        elif GUNKAYIT_RE.match(ad):
             # Soz 26: bu kayit ANLASILIR (Gun'un kendisi): uc alan, her biri denetlenir.
             try:
                 v = json.loads(icerik) if isinstance(icerik, str) else None
@@ -1783,6 +1807,19 @@ class Depo:
             return bos
         return {"tarih": bugun, "gun": x["gun"], "bayat": False, "niyet": v.get("niyet") or "",
                 "enerji": v.get("enerji"), "hava": v.get("hava"), "bloklar": v.get("bloklar") or [], "zaman": int(x["zaman"] * 1000)}
+
+    def gun_sen(self, kullanici):
+        """Soz 27: Gun › Sen kaydi; yoksa bos (sifir degil, bos liste)."""
+        with self._islem() as c:
+            x = c.execute("SELECT icerik, zaman FROM yayin WHERE kullanici=? AND ad='gun/sen'",
+                          (kullanici["id"],)).fetchone()
+        if x is None:
+            return dict(SEN_BOS, zaman=None)
+        try:
+            v = gun_sen_temiz(json.loads(x["icerik"]))
+        except (ValueError, Hata):
+            v = dict(SEN_BOS)
+        return dict(v, zaman=int(x["zaman"] * 1000))
 
     def kisi(self, kullanici):
         """Soz 24: uc modulun kisi kayitlari, AYS, SPI, ESP sirasiyla; oldugu gibi."""
@@ -2358,6 +2395,56 @@ def _metin_cevap(h, metin, kod=200):
     h.wfile.write(govde)
 
 
+SEN_BOS = {"soz": "", "veren": [], "calan": [], "deste": [], "iz": {}}
+
+
+def gun_sen_temiz(v):
+    """Soz 27: `gun/sen` icerigini denetler, bosluklari toplar; bozuksa Hata(400)."""
+    if not isinstance(v, dict) or set(v) - set(SEN_BOS):
+        raise Hata(400, "Sen kaydı okunamadı.")
+    tek = lambda s: " ".join(s.split())
+    soz = v.get("soz") or ""
+    if not isinstance(soz, str) or len(tek(soz)) > SOZ_EN_UZUN:
+        raise Hata(400, "Kendi sözün en çok %d karakter." % SOZ_EN_UZUN)
+    temiz = {"soz": tek(soz), "deste": [], "iz": {}}
+    for alan in ("veren", "calan"):
+        l = v.get(alan) or []
+        if not isinstance(l, list) or len(l) > SEN_LISTE_EN_COK:
+            raise Hata(400, "Bir listede en çok %d satır olur." % SEN_LISTE_EN_COK)
+        if any(not isinstance(x, str) or not tek(x) or len(tek(x)) > SEN_SATIR_EN_UZUN for x in l):
+            raise Hata(400, "Her satır 1–%d karakter olmalı." % SEN_SATIR_EN_UZUN)
+        temiz[alan] = [tek(x) for x in l]
+    deste = v.get("deste") or []
+    if not isinstance(deste, list) or len(deste) > DESTE_EN_COK:
+        raise Hata(400, "Destede en çok %d kart olur." % DESTE_EN_COK)
+    for k in deste:
+        if not isinstance(k, dict) or set(k) - {"ad", "enerji", "evet", "gec"} or not isinstance(k.get("ad"), str):
+            raise Hata(400, "Destedeki kart okunamadı.")
+        ad = tek(k["ad"])
+        if not ad or len(ad) > KART_EN_UZUN:
+            raise Hata(400, "Kartın adı 1–%d karakter olmalı." % KART_EN_UZUN)
+        if k.get("enerji") is not None and k["enerji"] not in KART_ENERJI:
+            raise Hata(400, "Kartın enerjisi az ya da çok olmalı.")
+        say = [k.get(x, 0) for x in ("evet", "gec")]
+        if any(isinstance(n, bool) or not isinstance(n, int) or not 0 <= n <= 999 for n in say):
+            raise Hata(400, "Kartın sayacı 0–999 olmalı.")
+        temiz["deste"].append({"ad": ad, "enerji": k.get("enerji"), "evet": say[0], "gec": say[1]})
+    iz = v.get("iz") or {}
+    if not isinstance(iz, dict) or len(iz) > SEN_IZ_EN_COK:
+        raise Hata(400, "İz en çok %d gün tutar." % SEN_IZ_EN_COK)
+    for g, x in iz.items():
+        if not GUN_RE.match(g) or not isinstance(x, dict) or set(x) - {"enerji", "hava"}:
+            raise Hata(400, "İzdeki gün okunamadı.")
+        e, h = x.get("enerji"), x.get("hava")
+        if e is not None and (isinstance(e, bool) or not isinstance(e, int) or not 1 <= e <= 5):
+            raise Hata(400, "Enerji 1 ile 5 arasında olmalı.")
+        if h is not None and h not in HAVALAR:
+            raise Hata(400, "İç hava bilinmiyor.")
+        if e is not None or h is not None:          # bos gun saklanmaz: girilmemis gun «veri yok»tur
+            temiz["iz"][g] = {"enerji": e, "hava": h}
+    return temiz
+
+
 def gunluk_maskele(satir):
     """Sunucu gunlugune yazilacak istek satiri: takvim adresinin gizli
     kismi atilir (soz 17; o adres bir anahtardir)."""
@@ -2599,6 +2686,8 @@ def isle(h):
                 return _cevap(h, 200, d.gunluk(k))
             if yol == "/api/hesap/gunkayit":
                 return _cevap(h, 200, d.gun_kayit(k))
+            if yol == "/api/hesap/gunsen":
+                return _cevap(h, 200, d.gun_sen(k))
             if yol == "/api/hesap/uyarilar":
                 return _cevap(h, 200, {"uyarilar": d.uyarilar(k, _jeton(h))})
             if yol == "/api/hesap/baglantilar":

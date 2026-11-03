@@ -700,6 +700,85 @@
           await H.gunKayitYaz(yeni);
           return { metin:'Gün’e yazdım: ' + gunKaydiMetin(yeni) + '.', geriAl:async () => { await H.gunKayitYaz(once); } };
         } },
+      ...senAraclari(),
+    ];
+  }
+  /* Gun › Gecmis ve Sen (§2b): sozun, veren / calan, deste (sunucu sozu 27), karne. Sayilari GunVeri hesaplar. */
+  const SEN_OKU_RE = /^(?:kendi |kendime )?sözüm (?:ne|neydi|nedir)\s*\??$|^(?:beni )?ne(?:ler)? (?:besliyor|enerji veriyor)\s*\??$|^enerjimi ne(?:ler)? (?:çalıyor|alıyor)\s*\??$|^destemde ne(?:ler)? var\s*\??$/;
+  const KART_RE = /^(?:bir |desteden (?:bir )?)?kart çek\s*[.!?]?$/;
+  const KARNE_RE = /^(?:bu )?(hafta|ay)(?:ki|lık)? (?:hayat )?karnem(?: nasıl)?\s*\??$|^hayat karnem(?: nasıl)?\s*\??$|^(?:bu )?(hafta|ay) nasıl (?:geçti|gidiyor)\s*\??$/;
+  const senOturum = () => gunOturum() && !!KI.L.HESAP.gunSen;
+  const GV = () => KI.L.GunVeri;
+  const bugunIso = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  function senCoz(t, ham){
+    const sonra = () => String(ham).replace(/^[^:]*:\s*/, '').replace(/\s+/g, ' ').trim();
+    if(/^(?:kendi |kendime )?söz(?:üm)?\s*:/.test(t)){ const s = sonra().slice(0, 160); return s ? { soz:s } : null; }
+    if(/^(?:enerji veren|beni besleyen|enerji verir)\s*:/.test(t)){ const s = sonra().slice(0, 40); return s ? { veren:s } : null; }
+    if(/^(?:enerji çalan|enerjimi çalan|beni yoran)\s*:/.test(t)){ const s = sonra().slice(0, 40); return s ? { calan:s } : null; }
+    if(/^desteye(?: kart)? ekle\s*:/.test(t)){ const s = sonra().slice(0, 60); return s ? { kart:s } : null; }
+    return null;
+  }
+  const senMetin = p => [p.soz ? 'kendi sözün «' + p.soz + '»' : '', p.veren ? 'enerji veren: ' + p.veren : '', p.calan ? 'enerji çalan: ' + p.calan : '',
+    p.kart ? 'desteye kart: ' + p.kart + (p.kart_enerji ? ' (' + (p.kart_enerji === 'az' ? 'az' : 'çok') + ' enerji)' : '') : ''].filter(Boolean).join(', ');
+  const dk = m => m >= 60 ? Math.floor(m / 60) + ' sa' + (m % 60 ? ' ' + (m % 60) + ' dk' : '') : m + ' dk';
+  function senAraclari(){
+    return [
+      { ad:'gun_sen', tur:'oku', ornek:'beni ne besliyor', aciklama:'Gün › Sen kaydını okur: kullanıcının kendine koyduğu ilke, onu besleyen ve yoran şeyler, destedeki kartlar (Gün sayfasıyla aynı kayıt).',
+        kural:t => SEN_OKU_RE.test(t),
+        calistir:async () => {
+          if(!senOturum()) return { cevap:'Sen kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.' };
+          const v = await KI.L.HESAP.gunSen() || {};
+          const l = [v.soz ? 'Kendi sözün: «' + v.soz + '».' : '', (v.veren || []).length ? 'Enerji veren: ' + v.veren.join(', ') + '.' : '',
+            (v.calan || []).length ? 'Enerji çalan: ' + v.calan.join(', ') + '.' : '', (v.deste || []).length ? 'Destende ' + v.deste.length + ' kart var.' : ''].filter(Boolean);
+          return { sonuc:v, cevap:l.length ? l.join(' ') : 'Sen bölümü boş: «sözüm: …», «enerji veren: …» ya da «desteye ekle: …» yazabilirsin.' };
+        } },
+      { ad:'gun_sen_yaz', tur:'yaz', ornek:'enerji veren: akşam yürüyüşü', aciklama:'Gün › Sen kaydına yazar: kendi söz (en çok 160 karakter), enerji veren ya da çalan bir şey (en çok 40, listede en çok 12), desteye kart (en çok 60, destede en çok 30; enerjisi az ya da cok). Var olanlar silinmez.',
+        parametreler:{ type:'object', properties:{ soz:{ type:'string', maxLength:160 }, veren:{ type:'string', maxLength:40 }, calan:{ type:'string', maxLength:40 },
+          kart:{ type:'string', maxLength:60 }, kart_enerji:{ type:'string', enum:['az', 'cok'] } } },
+        kural:(t, ham) => senCoz(t, ham),
+        onizle:p => {
+          if(!senOturum()) return { hata:'Sen kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış' };
+          const m = senMetin(p || {});
+          return m ? { metin:'Gün › Sen’e yazılacak: ' + m + '.' } : { hata:'yazılacak bir şey yok' };
+        },
+        uygula:async p => {
+          const H = KI.L.HESAP, e = await H.gunSen() || {};
+          const once = { soz:e.soz || '', veren:e.veren || [], calan:e.calan || [], deste:e.deste || [], iz:e.iz || {} };
+          const yeni = Object.assign({}, once, { veren:once.veren.slice(), calan:once.calan.slice(),
+            deste:(once.deste.length ? once.deste : ((GV() && GV().BASLANGIC) || [])).map(k => Object.assign({}, k)) });
+          if(p.soz) yeni.soz = String(p.soz).slice(0, 160);
+          ['veren', 'calan'].forEach(k => { if(p[k] && yeni[k].indexOf(p[k]) < 0){ if(yeni[k].length >= 12) throw new Error('listede en çok 12 satır olur'); yeni[k].push(String(p[k]).slice(0, 40)); } });
+          if(p.kart && !yeni.deste.some(k => k.ad === p.kart)){
+            if(yeni.deste.length >= 30) throw new Error('destede en çok 30 kart olur');
+            yeni.deste.push({ ad:String(p.kart).slice(0, 60), enerji:p.kart_enerji === 'az' || p.kart_enerji === 'cok' ? p.kart_enerji : null, evet:0, gec:0 });
+          }
+          await H.gunSenYaz(yeni);
+          return { metin:'Gün › Sen’e yazdım: ' + senMetin(p) + '.', geriAl:async () => { await H.gunSenYaz(once); } };
+        } },
+      { ad:'gun_kart_cek', tur:'oku', ornek:'bir kart çek', aciklama:'«Ne yapsam?» destesinden kuralla bir kart çeker: sık yapılan ve bugünkü enerjiye uyan öne çıkar. Kayıt yazmaz.',
+        kural:t => KART_RE.test(t),
+        calistir:async () => {
+          if(!senOturum() || !GV()) return { cevap:'Deste hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.' };
+          const H = KI.L.HESAP, v = await H.gunSen() || {}, g = await H.gunKayit();
+          const enerji = g && !g.bayat ? g.enerji || null : null, d = (v.deste || []).length ? v.deste : GV().BASLANGIC;
+          const c = GV().kartCek(d, enerji, []);
+          if(!c) return { cevap:'Deste boş.' };
+          return { sonuc:c, cevap:'Kartın: «' + c.kart.ad + '». ' + c.neden + (enerji ? ' (enerjin ' + enerji + '/5)' : '') + '. Yaptıysan Gün › Sen’de «Yaptım» de; deste öğrenir.' };
+        } },
+      { ad:'gun_karne', tur:'oku', ornek:'bu hafta karnem nasıl', aciklama:'Hayat karnesi: son 7 ya da 30 günde çalışma (AYS) ve gelişim (ESP) dakikaları ve etkin gün sayısı (ölçüldü); SPİ alanları veri yok.',
+        parametreler:{ type:'object', properties:{ gun:{ type:'integer', enum:[7, 30] } } },
+        kural:t => { const m = t.match(KARNE_RE); return m ? { gun:(m[1] || m[2]) === 'ay' ? 30 : 7 } : null; },
+        calistir:async p => {
+          if(!gunOturum() || !GV() || !KI.L.HESAP.gunluk) return { cevap:'Karne hesap sunucusundaki günlük özetten gelir; bu cihazda hesapla giriş yapılmamış.' };
+          const n = p && p.gun === 30 ? 30 : 7, H = KI.L.HESAP, d = GV().donem(await H.gunluk(), bugunIso(), n);
+          const s = H.gunSen ? await H.gunSen() : null, z = GV().izDizi(s && s.iz, bugunIso(), n);
+          const a = {}; d.satirlar.forEach(x => { a[x.alan] = x; });
+          const satir = (x, ad, kaynak) => x.toplam == null ? ad + ': veri yok' : ad + ' ' + x.etkin + '/' + n + ' gün, ' + dk(x.toplam) + ' (ölçüldü, ' + kaynak + ')';
+          const l = [satir(a.calisma, 'Çalışma', 'AYS'), satir(a.gelisim, 'Gelişim', 'ESP'),
+            z.ortalama == null ? 'enerji: veri yok' : 'enerji ortalaması ' + String(z.ortalama).replace('.', ',') + '/5 (senin girdiğin, ' + z.girilen + ' gün)', 'uyku, beslenme, hareket: veri yok'];
+          return { sonuc:{ gun:n, satirlar:d.satirlar.map(x => ({ alan:x.alan, toplam:x.toplam, etkin:x.etkin, bilinen:x.bilinen })), enerji:z.ortalama },
+            cevap:'Son ' + n + ' gün: ' + l.join('; ') + '.' };
+        } },
     ];
   }
   function ortakAraclar(){

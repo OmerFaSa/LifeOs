@@ -1592,6 +1592,35 @@ def run():
     test("Gun kaydi: niyet, enerji (1-5), ic hava denetlenir; dunku kayit bayat ve bos; oteki yayinlara karismaz",
          t_gun_kayit)
 
+    def t_gun_sen():
+        with _Depo() as r:
+            k, j = _admin(r)
+            eq(r.d.gun_sen(k), {"soz": "", "veren": [], "calan": [], "deste": [], "iz": {}, "zaman": None})
+            _hata(lambda: r.d.yayinla(k, "gun/sen", "{bozuk"), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/sen", '{"sifre":"x"}'), 400)                     # bilinmeyen alan
+            _hata(lambda: r.d.yayinla(k, "gun/sen", json.dumps({"soz": "a" * 161})), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/sen", json.dumps({"veren": ["x"] * 13})), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/sen", json.dumps({"calan": [" "]})), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/sen", json.dumps({"deste": [{"ad": "x", "enerji": "orta"}]})), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/sen", json.dumps({"deste": [{"ad": "x", "evet": True}]})), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/sen", json.dumps({"deste": [{"ad": "x", "evet": -1}]})), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/sen", json.dumps({"iz": {"dün": {"enerji": 3}}})), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/sen", json.dumps({"iz": {"2026-11-01": {"enerji": 0}}})), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/sen", json.dumps({"iz": {"2026-11-01": {"hava": "kar"}}})), 400)
+            r.d.yayinla(k, "gun/sen", json.dumps({"soz": "  Her gün  biraz ", "veren": [" yürüyüş "], "calan": ["telefon"],
+                                                  "deste": [{"ad": "Çay demle", "enerji": "az", "evet": 2}],
+                                                  "iz": {"2026-11-01": {"enerji": 3, "hava": None}, "2026-11-02": {}}}))
+            v = r.d.gun_sen(k)
+            eq((v["soz"], v["veren"], v["calan"]), ("Her gün biraz", ["yürüyüş"], ["telefon"]))
+            eq(v["deste"], [{"ad": "Çay demle", "enerji": "az", "evet": 2, "gec": 0}])
+            eq(v["iz"], {"2026-11-01": {"enerji": 3, "hava": None}})                         # bos gun saklanmaz
+            # Ozete, tek gune, gunluge ve Gun kaydina karismaz.
+            eq(r.d.tek_gun(k)["moduller"], [])
+            eq(r.d.gunluk(k)["moduller"], [])
+            eq(r.d.gun_kayit(k)["gun"], None)
+    test("Gun · Sen: soz, veren/calan, deste ve iz denetlenir; bos gun saklanmaz; oteki yayinlara karismaz",
+         t_gun_sen)
+
     # ------------------------------------------- Kisi modeli (soz 24)
 
     def t_kisi():

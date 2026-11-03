@@ -312,6 +312,7 @@ DOSYALAR = {
     "king-kayit.js":  "js/core",
     "king-gorunum.js":"js/core",
     "king-kart.js":   "js/core",
+    "gunveri.js":     "js/core",   # Gun'un saf veri katmani; King'in karne ve deste araclari da kullanir
     "king-arac.js":   "js/core",
     "king-devrim.js": "js/core",
     "king-yol.js":    "js/core",

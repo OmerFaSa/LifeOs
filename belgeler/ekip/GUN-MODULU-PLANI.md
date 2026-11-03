@@ -330,3 +330,27 @@ modelle, daha işlevli yap; sormadan sıra sıra yap».
   yazma aracı planı silmez.
 - **Açık:** Motto, Para ve ofis ekranlarının kalıcı yeri (Gün › Sen ve
   Ayarlar › Merkez adayları); SPİ günlük özeti; King'e «plana iş ekle» aracı.
+
+## 14. Geçmiş ve Sen kuruldu (2026-11-03)
+
+- **Geçmiş:** Hafta / Ay geçişi. Üç ölçü kutusu (Çalışma · AYS, Gelişim · ESP:
+  toplam, etkin gün, mini sütun; Enerji: senin girdiğin ortalama), hayat karnesi
+  (hafta Pazartesi'den, ay son 30 gün), haftanın şekli (son 30 günde gün başına
+  ortalama), bugünün plan ve gerçeği (modül modül yığılmış çubuk), enerji ve iç
+  hava izi. Mini sütunda «kayıt yok» ince taban (bilinen sıfır), «veri yok» boşluk.
+- **Sen:** kendi sözün, enerji veren / çalan (en çok 12), «Ne yapsam?» destesi
+  (en çok 30 kart; boşken 8 kartlık başlangıç destesi). Kartı kural seçer:
+  (evet+1)/(evet+geç+2), enerji 1–2'de az enerjili, 4–5'te çok enerjili kart
+  1,5 kat. «Yaptım» ve «Başka kart» sayaçları desteyi öğretir.
+- **Sunucu sözü 27:** `gun/sen` (okuma `GET /api/hesap/gunsen`); sunucu her alanı
+  denetler, boş gün izde saklanmaz. Enerji izi Gün sayfasında enerji ya da iç
+  hava değişince yazılır (King'in yazdığı da Gün açılınca ize girer).
+- **Saf katman:** `gunveri.js`'e `donem`, `planGercek`, `izDizi`, `kartCek`,
+  `BASLANGIC` (kabul `tools/gunveri_gecmis_kabul_test.py`); dosya artık üç modüle
+  de yayılır (`tools/ortak.py`), King aynı kuralı kullanır.
+- **King (§2b):** `gun_sen` (oku), `gun_sen_yaz` (yaz; önizlenir, onaylanır, geri
+  alınır, var olanı silmez), `gun_kart_cek` (oku), `gun_karne` (oku, 7/30 gün).
+  Sınava 10 cümle.
+- **Açık:** SPİ günlük özeti (uyku, beslenme, hareket hâlâ «veri yok»); ayın
+  dokuması ve defter (yapışkan not, ses notu, zaman kapsülü); King'den kartı
+  «yaptım» diye işaretlemek.
