@@ -1782,7 +1782,8 @@ window.LIFEOS.HESAP = (function(){
     const d = new Date(ortam.simdi()), gun = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     const x = v || {};
     return api('/api/hesap/yayin', { ad:'gun/kayit', gun,
-      icerik:JSON.stringify({ niyet:x.niyet || '', enerji:x.enerji == null ? null : x.enerji, hava:x.hava || null }) });
+      icerik:JSON.stringify({ niyet:x.niyet || '', enerji:x.enerji == null ? null : x.enerji, hava:x.hava || null,
+        bloklar:Array.isArray(x.bloklar) ? x.bloklar : [] }) });
   }
   /* Sunucu sözü 25: üç modülün günlük sayısal özeti (SPİ'nin ruh hâli modeli için). */
   async function gunluk(){

@@ -262,6 +262,9 @@ KART_TALIMAT = {
     "brifing": ("60 saniyelik sabah brifingi: bugünün planını, dünün tek bulgusunu ve tek öneriyi "
                 "en çok üç kısa cümleyle söyle. Yalnız verilen sayıları kullan."),
     "hafta": "Bu haftanın sayılarına tek cümlelik sakin bir yorum yaz. Yalnız verilen sayıları kullan.",
+    # Gun bolumu (2026-11-03): gunun durumu tek cumle; satirlar Gun'un kodundan, sayi uydurulmaz.
+    "gun": ("Kullanıcının bugününe tek cümlelik, sıcak ve kısa bir bakış yaz: ne bitti, sırada ne var. "
+            "Yalnız verilen sayıları ve adları kullan; yeni sayı, saat ya da öneri ekleme."),
 }
 KART_SISTEM = "Sen King'sin. Türkçe, kısa ve sıcak konuş; buyurgan kip kullanma, madde listesi yazma."
 
@@ -273,7 +276,7 @@ def kart_cumlesi(con, cfg, govde, transport=None):
     tur = govde.get("tur")
     satirlar = [str(x)[:160] for x in (govde.get("satirlar") or []) if str(x or "").strip()][:16]
     if tur not in KART_TALIMAT or not satirlar:
-        return {"ok": False, "note": "tur (brifing|hafta) ve satirlar gerekli"}
+        return {"ok": False, "note": "tur (brifing|hafta|gun) ve satirlar gerekli"}
     r = ai.ask(con, cfg, "king", "kart." + tur, [{"role": "user", "content": KART_TALIMAT[tur]}],
                baglam="\n".join(satirlar), sistem=KART_SISTEM, seviye="alt", transport=transport)
     ok = bool(r.get("ok") and (r.get("text") or "").strip())

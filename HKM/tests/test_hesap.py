@@ -1565,7 +1565,8 @@ def run():
             k, j = _admin(r)
             bugun = time.strftime("%Y-%m-%d", time.localtime(r.saat()))
             dun = time.strftime("%Y-%m-%d", time.localtime(r.saat() - 86400))
-            eq(r.d.gun_kayit(k), {"tarih": bugun, "gun": None, "bayat": False, "niyet": "", "enerji": None, "hava": None, "zaman": None})
+            eq(r.d.gun_kayit(k), {"tarih": bugun, "gun": None, "bayat": False, "niyet": "", "enerji": None, "hava": None,
+                                  "bloklar": [], "zaman": None})
             _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"niyet":"x"}'), 400)                       # gun yok
             _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"enerji":6}', gun=bugun), 400)            # aralik
             _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"enerji":true}', gun=bugun), 400)         # bool sayi degil
@@ -1574,7 +1575,14 @@ def run():
             _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"niyet":"' + "a" * 121 + '"}', gun=bugun), 400)
             r.d.yayinla(k, "gun/kayit", '{"niyet":"  Türev   bitsin ","enerji":4,"hava":"gunes"}', gun=bugun)
             v = r.d.gun_kayit(k)
-            eq((v["niyet"], v["enerji"], v["hava"], v["bayat"]), ("Türev bitsin", 4, "gunes", False))
+            eq((v["niyet"], v["enerji"], v["hava"], v["bayat"], v["bloklar"]), ("Türev bitsin", 4, "gunes", False, []))
+            # Gun'un kendi plani: ad, saat, bitti; bicim denetlenir.
+            _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"bloklar":[{"ad":""}]}', gun=bugun), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"bloklar":[{"ad":"x","saat":"9"}]}', gun=bugun), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"bloklar":[{"ad":"x","renk":1}]}', gun=bugun), 400)
+            _hata(lambda: r.d.yayinla(k, "gun/kayit", json.dumps({"bloklar": [{"ad": "x"}] * 21}), gun=bugun), 400)
+            r.d.yayinla(k, "gun/kayit", '{"niyet":"a","bloklar":[{"ad":" Kitap  oku ","saat":"21:00"},{"ad":"Yürü","bitti":true}]}', gun=bugun)
+            eq(r.d.gun_kayit(k)["bloklar"], [{"ad": "Kitap oku", "saat": "21:00", "bitti": False}, {"ad": "Yürü", "saat": None, "bitti": True}])
             # Siri ozetine, tek gune, gunluge karismaz.
             eq(r.d.tek_gun(k)["moduller"], [])
             eq(r.d.gunluk(k)["moduller"], [])

@@ -1,6 +1,6 @@
 # Gün modülü planı: HKM arayüzü yerine yaşayan bir merkez
 
-> Durum: **F0, F1, F2, F3a tamam** (2026-11-03); açık: SPİ günlük özeti (§12), sonra F3b. Antigravity kotası bittiği
+> Durum: **F0, F1, F2, F3a, F7 tamam** (2026-11-03; F7 öne alındı, §13); açık: SPİ günlük özeti, Motto/Para/Ofis'in yeni yeri. Antigravity kotası bittiği
 > için fazları Claude yapar; geniş okuma Kod Asistanı'na (`arastir`) gider.
 > Kararlar 2026-11-03: §9. İlk durum: plan (2026-11-02). Fikirlerin hepsinin görsel
 > örnekleri tuvalde: https://claude.ai/artifact/7ipZ98otKnCdEHtzJLwcy4
@@ -308,3 +308,25 @@ Sol menü, dört grup, iç içelik en çok iki kat:
   ESP); uyku, beslenme, hareket satırları bu yüzden «veri yok».
 - **Ofis notu:** ofis, çalışma ağacı kirliyken görevi başlatmadan bekledi
   (söylemeden). Ofise görev vermeden önce ağaç temiz olmalı.
+
+## 13. HKM arayüzü kalktı, Gün güçlendi (2026-11-03)
+
+Kullanıcı: «HKM'yi komple kaldır, ayarlara taşı; günü daha güzel, profesyonel,
+modelle, daha işlevli yap; sormadan sıra sıra yap».
+
+- **F7 öne alındı:** kabukta Merkez satırı, giriş şeridindeki Merkez ucu ve
+  hesap kapısındaki Merkez kutusu kalktı. `:4200/` kısa bir bilgi sayfası
+  (`HKM/web/merkez.html`); eski yüz yalnız `/atolye`'de **arşiv** (Motto,
+  Para, ofis ekranları yeni yer bulana dek; verileri yerinde). Motor aynen.
+- **Ayarlar › Merkez:** eski HKM Ayarlar'ının hepsi altı sekmede, açık şemayla
+  (`MerkezAyar.sekmeler`, `alanYama`); sır okunmaz. Merkez'i başlatma ve
+  bağlama da burada (`POST /api/merkez/ac`, modül sunucusu, yalnız kendi sayfası).
+- **Gün:** üst kartta günün cümlesi — satırları Gün'ün kodu kurar, cümleyi
+  Merkez'deki model yazar (`/api/gun/cumle` → HKM `/api/king/cumle`, tür
+  «gun»); model yoksa kodun cümlesi, etiketiyle; aynı satırlar için bir kez
+  sorulur. İlerleme halkası (biten/toplam, hesaplandı). **Gün planım:** kendi
+  işlerin (ad, isteğe bağlı saat, bitti) `gun/kayit` içinde (en çok 20);
+  şeritte dördüncü sıra; «Şimdi ne yapsam?» onları da görür; King okur ve
+  yazma aracı planı silmez.
+- **Açık:** Motto, Para ve ofis ekranlarının kalıcı yeri (Gün › Sen ve
+  Ayarlar › Merkez adayları); SPİ günlük özeti; King'e «plana iş ekle» aracı.

@@ -253,6 +253,8 @@ GUNLUK_EN_BUYUK = 256 * 1024
 GUNKAYIT_RE = re.compile(r"^gun/kayit$")
 HAVALAR = ("gunes", "parcali", "bulut", "yagmur", "firtina")
 NIYET_EN_UZUN = 120
+GUN_BLOK_EN_COK = 20
+SAAT_RE = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
 GUN_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 YAYIN_EN_BUYUK = 512 * 1024
 TAKVIM_YOL_RE = re.compile(r"^/api/hesap/takvim/([A-Za-z0-9_\-]{20,64})\.ics$")
@@ -1597,8 +1599,25 @@ class Depo:
                 v = json.loads(icerik) if isinstance(icerik, str) else None
             except ValueError:
                 v = None
-            if not isinstance(v, dict) or set(v) - {"niyet", "enerji", "hava"}:
+            if not isinstance(v, dict) or set(v) - {"niyet", "enerji", "hava", "bloklar"}:
                 raise Hata(400, "Gün kaydı okunamadı.")
+            # Gun'un kendi plani (2026-11-03): en cok 20 is; ad, istege bagli saat, bitti.
+            bloklar = v.get("bloklar") or []
+            if not isinstance(bloklar, list) or len(bloklar) > GUN_BLOK_EN_COK:
+                raise Hata(400, "Gün planında en çok %d iş olur." % GUN_BLOK_EN_COK)
+            temiz = []
+            for b in bloklar:
+                if not isinstance(b, dict) or set(b) - {"ad", "saat", "bitti"}:
+                    raise Hata(400, "Gün planındaki iş okunamadı.")
+                ad_ = " ".join(str(b.get("ad") or "").split())
+                saat_ = b.get("saat") or None
+                if not ad_ or len(ad_) > 80 or not isinstance(b.get("ad"), str):
+                    raise Hata(400, "İşin adı 1–80 karakter olmalı.")
+                if saat_ is not None and (not isinstance(saat_, str) or not SAAT_RE.match(saat_)):
+                    raise Hata(400, "İşin saati SS:DD olmalı.")
+                if not isinstance(b.get("bitti", False), bool):
+                    raise Hata(400, "İşin durumu açık ya da kapalı olmalı.")
+                temiz.append({"ad": ad_, "saat": saat_, "bitti": bool(b.get("bitti"))})
             niyet = " ".join(str(v.get("niyet") or "").split())
             enerji, hava = v.get("enerji"), v.get("hava")
             if not isinstance(v.get("niyet", ""), str) or len(niyet) > NIYET_EN_UZUN:
@@ -1609,7 +1628,7 @@ class Depo:
                 raise Hata(400, "İç hava bilinmiyor.")
             if not isinstance(gun, str) or not GUN_RE.match(gun):
                 raise Hata(400, "Kaydın günü yazılmalı (YYYY-AA-GG).")
-            icerik = json.dumps({"niyet": niyet, "enerji": enerji, "hava": hava}, ensure_ascii=False)
+            icerik = json.dumps({"niyet": niyet, "enerji": enerji, "hava": hava, "bloklar": temiz}, ensure_ascii=False)
         elif GUNLUK_RE.match(ad):
             # Soz 25: icerik anlasilmaz; JSON nesnesi, `gunler` sozlugu, boyut.
             if not isinstance(icerik, str) or len(icerik.encode("utf-8")) > GUNLUK_EN_BUYUK:
@@ -1753,7 +1772,7 @@ class Depo:
         with self._islem() as c:
             x = c.execute("SELECT icerik, gun, zaman FROM yayin WHERE kullanici=? AND ad='gun/kayit'",
                           (kullanici["id"],)).fetchone()
-        bos = {"tarih": bugun, "gun": None, "bayat": False, "niyet": "", "enerji": None, "hava": None, "zaman": None}
+        bos = {"tarih": bugun, "gun": None, "bayat": False, "niyet": "", "enerji": None, "hava": None, "bloklar": [], "zaman": None}
         if x is None:
             return bos
         if x["gun"] != bugun:
@@ -1763,7 +1782,7 @@ class Depo:
         except ValueError:
             return bos
         return {"tarih": bugun, "gun": x["gun"], "bayat": False, "niyet": v.get("niyet") or "",
-                "enerji": v.get("enerji"), "hava": v.get("hava"), "zaman": int(x["zaman"] * 1000)}
+                "enerji": v.get("enerji"), "hava": v.get("hava"), "bloklar": v.get("bloklar") or [], "zaman": int(x["zaman"] * 1000)}
 
     def kisi(self, kullanici):
         """Soz 24: uc modulun kisi kayitlari, AYS, SPI, ESP sirasiyla; oldugu gibi."""

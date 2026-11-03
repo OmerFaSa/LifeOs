@@ -1495,6 +1495,26 @@ def merkez_izinli(basliklar, kapi):
     return koken in (None, "http://%s:%d" % (HOST, kapi), "http://localhost:%d" % kapi)
 
 
+def gun_cumlesi(govde):
+    """Gun sayfasinin cumlesi (2026-11-03): satirlari Gun'un kodu verir, cumleyi HKM'deki model
+    kurar (/api/king/cumle, tur «gun»). Gun HKM'nin jetonunu bilmez; bu sunucu ayni bilgisayarda
+    HKM'nin yapilandirmasindan okur ve yalniz bu cagriyi iletir. HKM kapaliysa ok:false."""
+    try:
+        satirlar = [str(x)[:160] for x in (govde or {}).get("satirlar") or [] if str(x or "").strip()][:12]
+        if not satirlar:
+            return {"ok": False, "note": "satır yok"}
+        with open(os.path.join(KOK, "HKM", "config.json"), encoding="utf-8") as f:
+            jeton = (json.load(f) or {}).get("local_token") or ""
+        istek = urllib.request.Request("http://%s:%d/api/king/cumle" % (HOST, HKM_PORT),
+                                       data=json.dumps({"tur": "gun", "satirlar": satirlar}).encode("utf-8"),
+                                       headers={"Content-Type": "application/json", "Authorization": "Bearer " + jeton})
+        with urllib.request.urlopen(istek, timeout=25) as r:
+            v = json.loads(r.read().decode("utf-8") or "{}")
+        return {"ok": bool(v.get("ok")), "text": v.get("text"), "model": v.get("model")}
+    except Exception:
+        return {"ok": False, "note": "Merkez kapalı"}
+
+
 def guncelleme_izinli(basliklar):
     """POST /api/guncelle yalniz giris sayfasinin kendisinden gelir.
 
@@ -1562,6 +1582,17 @@ class Giris(SimpleHTTPRequestHandler):
             return zemin.isle(self)
         if yol.startswith("/api/planlama"):
             return plan_isle(self)
+        if yol == "/api/gun/cumle":
+            # Yalniz Gun sayfasindan (X-LifeOS: gun, ayni koken); govde kucuk.
+            koken = self.headers.get("Origin")
+            if self.headers.get("X-LifeOS") != "gun" or koken not in (None, "http://%s:%d" % (HOST, GIRIS_PORT), "http://localhost:%d" % GIRIS_PORT):
+                return self._json(403, {"ok": False})
+            try:
+                n = min(int(self.headers.get("Content-Length") or 0), 8192)
+                govde = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
+            except (ValueError, UnicodeDecodeError):
+                govde = {}
+            return self._json(200, gun_cumlesi(govde))
         if yol not in ("/api/guncelle", "/api/hkm", "/api/hkm/yeniden", "/api/yeniden"):
             return self.send_error(404)
         if not guncelleme_izinli(self.headers):

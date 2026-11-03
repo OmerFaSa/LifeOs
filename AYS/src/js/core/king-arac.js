@@ -681,8 +681,10 @@
         calistir:async () => {
           if(!gunOturum()) return { cevap:'Gün kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.' };
           const v = await KI.L.HESAP.gunKayit();
-          if(!v || v.bayat || !(v.niyet || v.enerji || v.hava)) return { sonuc:v, cevap:'Bugün için niyet, enerji ya da iç hava girilmemiş. «bugünün niyeti: …» ya da «enerjim 4» yazabilirsin.' };
-          return { sonuc:v, cevap:'Bugün senin girdiğin: ' + gunKaydiMetin(v) + '.' };
+          if(!v || v.bayat || !(v.niyet || v.enerji || v.hava || (v.bloklar || []).length)) return { sonuc:v, cevap:'Bugün için niyet, enerji ya da iç hava girilmemiş. «bugünün niyeti: …» ya da «enerjim 4» yazabilirsin.' };
+          const b = Array.isArray(v.bloklar) ? v.bloklar : [];
+          return { sonuc:v, cevap:'Bugün senin girdiğin: ' + gunKaydiMetin(v) + '.'
+            + (b.length ? ' Gün planında ' + b.length + ' iş, ' + b.filter(x => x.bitti).length + ' tanesi bitti.' : '') };
         } },
       { ad:'gun_kaydi_yaz', tur:'yaz', ornek:'bugünün niyeti: türevi bitirmek', aciklama:'Gün’ün bugünkü kaydını yazar: niyet (en çok 120 karakter), enerji (1–5), iç hava (gunes, parcali, bulut, yagmur, firtina). Verilmeyen alan değişmez.',
         parametreler:{ type:'object', properties:{ niyet:{ type:'string', maxLength:120 }, enerji:{ type:'integer', minimum:1, maximum:5 },
@@ -695,7 +697,8 @@
         },
         uygula:async p => {
           const H = KI.L.HESAP, eski = await H.gunKayit();
-          const once = eski && !eski.bayat ? { niyet:eski.niyet || '', enerji:eski.enerji || null, hava:eski.hava || null } : { niyet:'', enerji:null, hava:null };
+          const once = eski && !eski.bayat ? { niyet:eski.niyet || '', enerji:eski.enerji || null, hava:eski.hava || null, bloklar:eski.bloklar || [] }
+            : { niyet:'', enerji:null, hava:null, bloklar:[] };           // Gün'ün planı (bloklar) aynen korunur
           const yeni = Object.assign({}, once, ...['niyet', 'enerji', 'hava'].filter(k => p[k] != null && p[k] !== '').map(k => ({ [k]:p[k] })));
           await H.gunKayitYaz(yeni);
           return { metin:'Gün’e yazdım: ' + gunKaydiMetin(yeni) + '.', geriAl:async () => { await H.gunKayitYaz(once); } };

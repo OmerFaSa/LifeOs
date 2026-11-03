@@ -2218,15 +2218,15 @@
         expect(k.akis().slice(-1)[0].metin).toContain('enerji 4/5');
         await k.isle('evet');
         await bekle();
-        expect(yazilan).toEqual([{ niyet:'', enerji:4, hava:null }]);
+        expect(yazilan).toEqual([{ niyet:'', enerji:4, hava:null, bloklar:[] }]);
         await k.isle('bugünün niyeti: Türevi bitirmek');
         await k.isle('evet');
         await bekle();
-        expect(yazilan[1]).toEqual({ niyet:'Türevi bitirmek', enerji:4, hava:null });
+        expect(yazilan[1]).toEqual({ niyet:'Türevi bitirmek', enerji:4, hava:null, bloklar:[] });
         await k.isle('iç havam yağmurlu');
         await k.isle('evet');
         await bekle();
-        expect(yazilan[2]).toEqual({ niyet:'Türevi bitirmek', enerji:4, hava:'yagmur' });
+        expect(yazilan[2]).toEqual({ niyet:'Türevi bitirmek', enerji:4, hava:'yagmur', bloklar:[] });
         await k.isle('bugünkü niyetim ne');
         expect(k.akis().slice(-1)[0].metin).toContain('«Türevi bitirmek»');
         expect(k.akis().slice(-1)[0].metin).toContain('yağmurlu');
