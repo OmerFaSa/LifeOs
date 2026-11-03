@@ -1619,6 +1619,20 @@ class Giris(SimpleHTTPRequestHandler):
             self.send_header("Content-Length", "0")
             self.end_headers()
             return None
+        if yol.startswith("/gun/ortak/"):
+            ad = yol[len("/gun/ortak/"):]
+            tur = gun.ORTAK.get(ad)            # kapali liste: URL'den yol kurulmaz
+            if not tur:
+                return self.send_error(404)
+            with open(os.path.join(KOK, "brand", "ortak", ad), "rb") as f:
+                govde = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", tur)
+            self.send_header("Content-Length", str(len(govde)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(govde)
+            return None
         if yol == "/gun/":
             govde = ayar.sayfaya_ekle(gun.gun_html(tema=ayar.oku()["ayar"].get("lifeos.tema.secim"), host=HOST)).encode("utf-8")
             self.send_response(200)
