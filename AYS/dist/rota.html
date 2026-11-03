@@ -4374,6 +4374,7 @@ body.is-dragging .drop.is-over{
 .modis--spi{ background:var(--spi-ink); border-radius:50%; }
 .modis--esp{ background:var(--esp-ink); clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
 .modis--mer{ background:var(--mer-ink); clip-path:polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0 50%); }
+.modis--gun{ background:var(--mer-ink); border-radius:50% 50% 3px 3px; }
 
 /* ---------- ayrıntı (D katmanı): kısa cümle + bir dokunuşla gerekçe ---------- */
 .ayrinti{ font-size:var(--fs-sm); color:var(--text-2); }
@@ -11639,6 +11640,7 @@ a.kenar__modul:hover{ color:var(--text); }
 .kenar__nokta--spi{ background:var(--spi); border-radius:50%; }
 .kenar__nokta--esp{ background:var(--esp); transform:rotate(45deg) scale(.85); }
 .kenar__nokta--mer{ background:var(--mer); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+.kenar__nokta--gun{ background:var(--mer); border-radius:50% 50% 1px 1px; }
 .kenar__baglam{ margin:-10px 0 0; font-size:12px; color:var(--text-3); padding:0 6px; }
 .kenar__nav{ display:flex; flex-direction:column; gap:2px; }
 .kenar__cekmece{ width:100%; display:flex; align-items:center; gap:10px; height:34px; padding:0 10px; border:0;
@@ -23835,7 +23837,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'f4d6f050', at:'2026-11-03 17:36', dirty:true };
+R.BUILD = { id:'5d17aea7', at:'2026-11-03 17:46', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -29087,9 +29089,10 @@ window.LIFEOS = window.LIFEOS || {};
     ays:{ harf:'A', ad:'AYS',    uzun:'Akademik Yol Sistemi',      not:'sınav hazırlığı',        kapi:4173 },
     spi:{ harf:'S', ad:'SPİ',    uzun:'Sağlık Performans İzleyicisi', not:'uyku, beslenme, hareket', kapi:4183 },
     esp:{ harf:'E', ad:'ESP',    uzun:'Entelektüel Seviye Planlayıcı', not:'dil, felsefe, müzik',    kapi:4193 },
-    mer:{ harf:'M', ad:'Merkez', uzun:'Hayat Kontrol Merkezi',     not:'üçünün özeti',            kapi:4200 },
+    gun:{ harf:'G', ad:'Gün',    uzun:'Günü kur, gidişi gör',      not:'günün planı ve gidişi',   kapi:4180, yol:'gun/' },
+  mer:{ harf:'M', ad:'Merkez', uzun:'Hayat Kontrol Merkezi',     not:'üçünün özeti',            kapi:4200 },
   });
-  const SIRA = ['ays', 'spi', 'esp', 'mer'];
+  const SIRA = ['ays', 'spi', 'esp', 'gun', 'mer'];
 
   /* Kabuğun kendi simge takımı. Modüllerin simge kümeleri farklı; kabuk
      üçünde aynı görünsün diye simgesini kendisi taşır. */
@@ -29153,7 +29156,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(!m || !loc || !/^https?:$/.test(loc.protocol || '')) return null;
     const kapi = Number(loc.port);
     const kok = loc.protocol + '//' + loc.hostname + ':';
-    if(SIRA.some(x => MODULLER[x].kapi === kapi)) return kok + m.kapi + '/';
+    if(SIRA.some(x => MODULLER[x].kapi === kapi)) return kok + m.kapi + '/' + (m.yol || '');
     if(Object.keys(EV_AGI).some(x => EV_AGI[x] === kapi)) return EV_AGI[k] ? kok + EV_AGI[k] + '/' : null;
     return null;
   }
@@ -29779,7 +29782,7 @@ window.LIFEOS = window.LIFEOS || {};
     let baska = 0;
     const satir = SIRA.map(k => {
       if(k === o.modul) return '<span class="menusayfa__sistem is-on" aria-current="true">' + oge(k) + '</span>';
-      if(k === 'mer' && yerel) return '';
+      if((k === 'mer' || k === 'gun') && yerel) return '';
       const url = adres(k, o.loc);
       if(!url) return '';
       baska++;
