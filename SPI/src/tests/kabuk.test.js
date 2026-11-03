@@ -159,6 +159,7 @@
       const tek = { protocol:'http:', hostname:'127.0.0.1', port:'4173' };
       expect(K.adres('spi', tek)).toBe('http://127.0.0.1:4183/');
       expect(K.adres('mer', tek)).toBe('http://127.0.0.1:4200/');
+      expect(K.adres('gun', tek)).toBe('http://127.0.0.1:4180/gun/');
       /* Tek dosya (file://) ya da bilinmeyen bir sunucu: adres YOK. */
       expect(K.adres('spi', { protocol:'file:', hostname:'', port:'' })).toBe(null);
       expect(K.adres('spi', { protocol:'https:', hostname:'ornek.com', port:'' })).toBe(null);
@@ -169,11 +170,12 @@
       expect(K.adres('ays', ev)).toBe('https://192.168.0.10:5173/');
       expect(K.adres('esp', ev)).toBe('https://192.168.0.10:5193/');
       expect(K.adres('mer', ev)).toBe(null);
+      expect(K.adres('gun', ev)).toBe(null);
 
       const d = yerlestir(K.modulMenusu({ modul:'ays', loc:tek }));
       const satir = Array.from(d.querySelectorAll('.kmenu__satir'));
-      expect(satir.length).toBe(4);
-      expect(satir.map(s => s.querySelector('.modis').textContent).join('')).toBe('ASEM');
+      expect(satir.length).toBe(5);
+      expect(satir.map(s => s.querySelector('.modis').textContent).join('')).toBe('ASEGM');
       expect(satir[0].classList.contains('is-bu')).toBe(true);
       expect(satir[1].getAttribute('href')).toBe('http://127.0.0.1:4183/');
       expect(satir[1].getAttribute('data-modul-gecis')).toBe('spi');
@@ -447,7 +449,7 @@
       const tek = { protocol:'http:', hostname:'127.0.0.1', port:'4173' };
       const d = yerlestir(K.menuSayfasi({ modul:'ays', loc:tek, yerel:false, cekmeceler:[] }));
       const s = Array.from(d.querySelectorAll('.menusayfa__sistem'));
-      expect(s.map(x => x.textContent.trim())).toEqual(['AYS', 'SPİ', 'ESP', 'Merkez']);
+      expect(s.map(x => x.textContent.trim())).toEqual(['AYS', 'SPİ', 'ESP', 'Gün', 'Merkez']);
       expect(s[0].getAttribute('aria-current')).toBe('true');
       expect(s[0].tagName).toBe('SPAN');
       expect(s[1].getAttribute('href')).toBe('http://127.0.0.1:4183/');
@@ -566,7 +568,7 @@
         expect(sec.textContent).toContain('SPİ');
         expect(sec.getAttribute('aria-expanded')).toBe('false');
         const pen = document.getElementById(sec.getAttribute('aria-controls'));
-        expect(pen.querySelectorAll('.kenar__modul:not(.kenar__modul--kartlarim)').length).toBe(4);
+        expect(pen.querySelectorAll('.kenar__modul:not(.kenar__modul--kartlarim)').length).toBe(5);
         /* «Kartlarım» satırı giriş sayfasına (:4180) gider; yalnız LifeOS kapılarında (2026-11-02). */
         const kl = K.kenarCubugu({ modul:'spi', cekmeceler:[], loc:{ protocol:'http:', hostname:'127.0.0.1', port:'4183' } });
         expect(kl).toContain('href="http://127.0.0.1:4180/"');

@@ -1,6 +1,6 @@
 # Gün modülü planı: HKM arayüzü yerine yaşayan bir merkez
 
-> Durum: **F0 tamam** (2026-11-03), sıradaki F1. Antigravity kotası bittiği
+> Durum: **F0, F1, F2 tamam** (2026-11-03), sıradaki F3a. Antigravity kotası bittiği
 > için fazları Claude yapar; geniş okuma Kod Asistanı'na (`arastir`) gider.
 > Kararlar 2026-11-03: §9. İlk durum: plan (2026-11-02). Fikirlerin hepsinin görsel
 > örnekleri tuvalde: https://claude.ai/artifact/7ipZ98otKnCdEHtzJLwcy4
@@ -270,3 +270,21 @@ Sol menü, dört grup, iç içelik en çok iki kat:
   (290, 331).
 - `uygulama/ios/LifeOS/Web/giris/index.html` (HKM kartı).
 - Telefon iskeleti (`sistem/telefon.py`) HKM'yi zaten içermiyor.
+
+## 11. F1 ve F2 notları (2026-11-03)
+
+- **F1:** Modül › Ayarlar › «King ve bağlantılar». Veri katmanı
+  `brand/ortak/merkezayar.js` (kabul: `tools/merkezayar_kabul_test.py`).
+  Yalnız `/api/config`'in görünen alanları; sır yok, aralık dışı HKM'ye
+  gitmez. Gerçek HKM'ye yazma henüz elle denenmedi.
+- **F2:** Gün, giriş sunucusunda `/gun/` (`sistem/gun.py`; kabul:
+  `tools/gun_iskelet_kabul_test.py`). Yeni port yok. Giriş şeridinin ortası
+  Gün; HKM'yi başlatan düğme «M · Merkez» ucu oldu. Kabukta `MODULLER.gun`
+  (harf G, Merkez'in rengi, kubbe şekli), `SIRA` beş sistem.
+- **F3 için kritik:** Gün 4180 kökenindedir; AYS, SPİ ve ESP'nin
+  `localStorage`'ını OKUYAMAZ (kök = port; `sistem/sunucu.py` başındaki not).
+  Merkez kapalıyken «yerel özet», giriş kartlarının minik özetiyle aynı yoldan
+  gelmeli (`hesap.js` söz 16, `data-ozet`): modül özetini sunucuya bırakır,
+  Gün oradan okur. Yeni bir depo icat edilmez.
+- **F7 listesine ek:** hesap kapısındaki tanıtım kutularında da «Merkez ·
+  Günün özeti» yazıyor (`brand/ortak/hesap.js`).

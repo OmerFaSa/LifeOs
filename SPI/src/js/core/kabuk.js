@@ -70,9 +70,10 @@ window.LIFEOS = window.LIFEOS || {};
     ays:{ harf:'A', ad:'AYS',    uzun:'Akademik Yol Sistemi',      not:'sınav hazırlığı',        kapi:4173 },
     spi:{ harf:'S', ad:'SPİ',    uzun:'Sağlık Performans İzleyicisi', not:'uyku, beslenme, hareket', kapi:4183 },
     esp:{ harf:'E', ad:'ESP',    uzun:'Entelektüel Seviye Planlayıcı', not:'dil, felsefe, müzik',    kapi:4193 },
-    mer:{ harf:'M', ad:'Merkez', uzun:'Hayat Kontrol Merkezi',     not:'üçünün özeti',            kapi:4200 },
+    gun:{ harf:'G', ad:'Gün',    uzun:'Günü kur, gidişi gör',      not:'günün planı ve gidişi',   kapi:4180, yol:'gun/' },
+  mer:{ harf:'M', ad:'Merkez', uzun:'Hayat Kontrol Merkezi',     not:'üçünün özeti',            kapi:4200 },
   });
-  const SIRA = ['ays', 'spi', 'esp', 'mer'];
+  const SIRA = ['ays', 'spi', 'esp', 'gun', 'mer'];
 
   /* Kabuğun kendi simge takımı. Modüllerin simge kümeleri farklı; kabuk
      üçünde aynı görünsün diye simgesini kendisi taşır. */
@@ -136,7 +137,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(!m || !loc || !/^https?:$/.test(loc.protocol || '')) return null;
     const kapi = Number(loc.port);
     const kok = loc.protocol + '//' + loc.hostname + ':';
-    if(SIRA.some(x => MODULLER[x].kapi === kapi)) return kok + m.kapi + '/';
+    if(SIRA.some(x => MODULLER[x].kapi === kapi)) return kok + m.kapi + '/' + (m.yol || '');
     if(Object.keys(EV_AGI).some(x => EV_AGI[x] === kapi)) return EV_AGI[k] ? kok + EV_AGI[k] + '/' : null;
     return null;
   }
@@ -762,7 +763,7 @@ window.LIFEOS = window.LIFEOS || {};
     let baska = 0;
     const satir = SIRA.map(k => {
       if(k === o.modul) return '<span class="menusayfa__sistem is-on" aria-current="true">' + oge(k) + '</span>';
-      if(k === 'mer' && yerel) return '';
+      if((k === 'mer' || k === 'gun') && yerel) return '';
       const url = adres(k, o.loc);
       if(!url) return '';
       baska++;

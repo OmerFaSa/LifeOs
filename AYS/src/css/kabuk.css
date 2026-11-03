@@ -643,6 +643,7 @@ a.kenar__modul:hover{ color:var(--text); }
 .kenar__nokta--spi{ background:var(--spi); border-radius:50%; }
 .kenar__nokta--esp{ background:var(--esp); transform:rotate(45deg) scale(.85); }
 .kenar__nokta--mer{ background:var(--mer); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+.kenar__nokta--gun{ background:var(--mer); border-radius:50% 50% 1px 1px; }
 .kenar__baglam{ margin:-10px 0 0; font-size:12px; color:var(--text-3); padding:0 6px; }
 .kenar__nav{ display:flex; flex-direction:column; gap:2px; }
 .kenar__cekmece{ width:100%; display:flex; align-items:center; gap:10px; height:34px; padding:0 10px; border:0;
