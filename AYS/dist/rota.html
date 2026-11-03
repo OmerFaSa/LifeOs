@@ -17866,6 +17866,22 @@ html[data-isik="kapali"] .ortam-isik{ display:none !important; }
 .merkezayar__durum{ margin:6px 0 0; min-height:1.2em; font-size:12px; color:var(--text-2); }
 .plan__anahtar[disabled]{ opacity:.4; cursor:not-allowed; }
 
+/* Ayarlar › Merkez (Gün planı, 2026-11-03) */
+.merkezayar__ust{ display:flex; align-items:center; gap:12px; padding:14px 16px; margin-bottom:12px; border-radius:16px;
+  background:color-mix(in oklab, var(--mer, #7453D4) 8%, var(--surface)); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--mer, #7453D4) 22%, var(--border)); }
+.merkezayar__ust > div{ flex:1; min-width:0; display:grid; gap:2px; }
+.merkezayar__ust b{ font-size:14.5px; }
+.merkezayar__ust small{ font-size:12.5px; color:var(--text-2); }
+.merkezayar__isaret{ flex:none; width:22px; height:22px; background:var(--text-3); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+.merkezayar__isaret.is-acik{ background:var(--mer, #7453D4); }
+.merkezayar__sekmeler{ margin-bottom:12px; overflow-x:auto; }
+.merkezayar__sir{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.merkezayar__sir .ayarlar__girdi{ width:180px; }
+.merkezayar__rozet{ font-size:11.5px; font-weight:600; padding:3px 8px; border-radius:99px; background:var(--surface-2); color:var(--text-2); white-space:nowrap; }
+.merkezayar__rozet.is-kurulu{ background:color-mix(in oklab, var(--ok, #30a46c) 14%, var(--surface)); color:var(--ok-ink, var(--ok, #1a7f5a)); }
+.merkezayar__sayi{ width:110px; }
+.merkezayar__arsiv{ margin:12px 2px 0; font-size:12px; color:var(--text-3); }
+
 /* ==== css/ofissohbet.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/ofissohbet.css içine yazılır; burası bir sonraki
@@ -21909,6 +21925,7 @@ window.LIFEOS = window.LIFEOS || {};
     { id:'hareket',  ad:'Animasyon',        grup:'Sistem' },
     { id:'erisim',   ad:'Erişilebilirlik',  grup:'Sistem' },
     { id:'king',     ad:'King ve bağlantılar', grup:'Sistem' },
+    { id:'merkez',   ad:'Merkez',           grup:'Sistem' },
     { id:'ekip',     ad:'Minikler',         grup:'Sistem' },
     { id:'bildirim', ad:'Bildirimler',      grup:'Sistem' },
     { id:'sistem',   ad:'Planlama',         grup:'Sistem' },
@@ -22225,6 +22242,7 @@ window.LIFEOS = window.LIFEOS || {};
     profil:SVG('M5 6h14M5 12h14M5 18h9M18 16.5l1.5 1.5 3-3'),
     ses:SVG('M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7'),
     plan:SVG('M4 6h16v14H4zM4 10h16M9 3v4M15 3v4'),
+    merkez:SVG('M12 4.3 18.8 8.2v7.6L12 19.7 5.2 15.8V8.2zM12 9v6M9 12h6'),
     bag:SVG('M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'),
     ekran:SVG('M4 5h16v11H4zM9 20h6M12 16v4'),
   };
@@ -22320,6 +22338,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'baglanti') return G('Google’dan veri', 'Hesap bağlanmaz; veri bu bilgisayarda kalır, ölçüm kendiliğinden kayda yazılmaz', cagir(L.ICE, 'ayarHtml'))
       + H('Google ve YouTube', 'Hesap bağlanmaz: King’in bulduğu bağlantılar senin tarayıcında, kendi oturumunla açılır; LifeOS Google’a veri göndermez', '')
       + (hesapVar() ? sayfaSatirlari(BAGLANTI_SAYFALARI) : hesapYok());
+    if(id === 'merkez') return '<div class="merkezayar merkezayar--tam" data-merkez-tam-kok><p class="ayarlar__bos">Yükleniyor…</p></div>';
     if(id === 'sistem') return '<h4 class="plan__baslik">Sistem planlaması</h4><div class="plan" data-plan-kok><p class="ayarlar__bos">Yükleniyor…</p></div>';
     if(id === 'modul') return '<div class="skartlar">'
       + kart(SIMGE.yuzey, 'Yüzey', 'Kartların bu modüldeki düzeni', H('Düzen', '', cagir(L.ZEMIN, 'yuzeySeciciHtml')))
@@ -22336,8 +22355,9 @@ window.LIFEOS = window.LIFEOS || {};
     if(secili === 'sistem' && typeof setTimeout === 'function') setTimeout(() => planYukle(), 0);
     if(o.hkm) merkezHkm = o.hkm;
     if(secili === 'king' && typeof setTimeout === 'function') setTimeout(() => merkezYukle(), 0);
+    if(secili === 'merkez' && typeof setTimeout === 'function') setTimeout(() => merkezTamYukle(), 0);
     const alan = alanOf(secili);
-    const NAV_SIMGE = { profil:SIMGE.profil, gorunum:SIMGE.tema, zemin:SIMGE.resim, ses:SIMGE.ses, hareket:SIMGE.hareket, erisim:SIMGE.goz, king:SIMGE.king,
+    const NAV_SIMGE = { profil:SIMGE.profil, merkez:SIMGE.merkez, gorunum:SIMGE.tema, zemin:SIMGE.resim, ses:SIMGE.ses, hareket:SIMGE.hareket, erisim:SIMGE.goz, king:SIMGE.king,
       ekip:SIMGE.minik, bildirim:SIMGE.zil, sistem:SIMGE.plan, modul:SIMGE.yuzey, hesap:SIMGE.kilit, baglanti:SIMGE.bag };
     const nav = BOLUMLER.map(b => '<button type="button" class="ayarlar__sekme' + (b.id === secili ? ' is-on' : '') + '" role="tab"' + (b.grup === alan ? '' : ' hidden')
       + ' id="ayarlar-sekme-' + b.id + '" aria-selected="' + (b.id === secili) + '" aria-controls="ayarlar-bolum-' + b.id + '"'
@@ -22442,6 +22462,7 @@ window.LIFEOS = window.LIFEOS || {};
     panel.querySelectorAll('[data-ayar-alan]').forEach(b => { const on = b.getAttribute('data-ayar-alan') === alan; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     if(id === 'sistem') planYukle();
     if(id === 'king') merkezYukle();
+    if(id === 'merkez') merkezTamYukle();
   }
 
   /* KING VE BAĞLANTILAR (Gün planı F1, 2026-11-03): HKM'nin ayarlarından yalnız
@@ -22460,7 +22481,8 @@ window.LIFEOS = window.LIFEOS || {};
   }
   const merkezYok = neden => '<p class="ayarlar__bos">' + (neden === 'baglanti'
     ? 'Merkez bu profilde bağlı değil. King yine çalışır; model, bütçe ve kanallar Merkez bağlanınca burada görünür.'
-    : 'Merkez şu an yanıt vermiyor; ayarların yerinde. Biraz sonra yeniden aç.') + '</p>';
+    : 'Merkez şu an yanıt vermiyor; ayarların yerinde.') + '</p>'
+    + '<button type="button" class="btn btn--sm" data-merkez-baslat>Merkez’i başlat ve bağla</button>';
   const para = (v, b) => v == null ? 'veri yok' : (b === 'try' ? '₺' : '$') + String(v).replace('.', ',');
   function merkezCiz(g){
     const paket = '<div class="seg seg--block" role="group" aria-label="Model paketi">' + g.paket.liste.map(p => {
@@ -22472,31 +22494,102 @@ window.LIFEOS = window.LIFEOS || {};
       + ' value="' + (g.tavan.deger == null ? '' : kac(g.tavan.deger)) + '" placeholder="veri yok" aria-label="Aylık tavan">'
       + '<div class="seg" role="group" aria-label="Para birimi">' + [['usd', 'USD'], ['try', 'TL']].map(([v, a]) =>
         '<button type="button" class="' + (v === birim ? 'is-on' : '') + '" aria-pressed="' + (v === birim) + '" data-merkez="birim:' + v + '">' + a + '</button>').join('') + '</div></div>';
-    const kanal = g.kanallar.map(k => H(k.baslik, k.hazir ? (k.acik ? 'Açık: King buradan yazabilir' : 'Kapalı') : 'Kurulu değil; jetonu Atölye’de kurulur',
+    const kanal = g.kanallar.map(k => H(k.baslik, k.hazir ? (k.acik ? 'Açık: King buradan yazabilir' : 'Kapalı') : 'Kurulu değil; jetonu Ayarlar › Merkez › Kanallar’da',
       '<button type="button" class="plan__anahtar' + (k.acik ? ' is-on' : '') + '" role="switch" aria-checked="' + k.acik + '" aria-label="' + kac(k.baslik) + '"'
       + (k.hazir || k.acik ? '' : ' disabled') + ' data-merkez="kanal:' + k.ad + ':' + (!k.acik) + '"><i aria-hidden="true"></i></button>')).join('');
     const esik = g.esikler.map(e => G(e.etiket, e.min + '–' + e.max + ' arası',
       '<div class="merkezayar__esik"><input type="range" min="' + e.min + '" max="' + e.max + '" step="' + (e.max - e.min > 50 ? 1 : 0.5) + '" value="' + e.deger + '"'
       + ' data-merkez-esik="' + kac(e.grup + ':' + e.ad) + '" aria-label="' + kac(e.etiket) + '"><output>' + String(e.deger).replace('.', ',') + '</output></div>')).join('');
-    const atolye = (() => { try{ const b = merkezHkm && merkezHkm(); const a = b && b.settings ? b.settings() : null; return a && a.url ? String(a.url).replace(/\/$/, '') : ''; }catch(e){ return ''; } })();
     return G('Model paketi', 'Aylık tutar son 30 günün ölçülen kullanımından tahmindir', paket)
       + H('Aylık tavan', 'Tavana varınca ücretli model çağrısı durur', tavan)
       + kanal + esik
-      + (atolye ? H('Gelişmiş', 'Anahtarlar, kanal jetonları, ofis ve sunucu: yalnız bu cihazın sahibi',
-        '<a class="btn btn--sm btn--ghost" href="' + kac(atolye) + '/" target="_blank" rel="noopener">Atölye’yi aç</a>') : '')
+      + H('Bütün Merkez ayarları', 'Anahtarlar, kanallar, zamanlama, bildirim, bütün eşikler',
+        '<button type="button" class="btn btn--sm btn--ghost" data-ayarlar-git="merkez">Merkez’i aç ›</button>')
       + '<p class="merkezayar__durum" role="status">' + kac(merkezMesaj) + '</p>';
+  }
+  /* AYARLAR › MERKEZ (Gün planı, 2026-11-03: «HKM'yi komple kaldır, ayarlara taşı»).
+     HKM'nin eski Ayarlar ekranının hepsi burada, sekmelerle (MerkezAyar.sekmeler: açık
+     şema; yalnız şemadaki alan yazılır, HKM ayrıca denetler). Sır okunmaz: «kurulu ••xy»
+     ve yeni değer kutusu. Merkez kapalıysa tek düğme: başlat ve bu modülü bağla. */
+  let merkezSekme = 'genel';
+  function merkezTamKok(){ return typeof document !== 'undefined' ? document.querySelector('[data-merkez-tam-kok]') : null; }
+  function merkezTamYukle(){
+    const kok = merkezTamKok(), m = merkezIstemci();
+    if(!kok) return;
+    if(!m){ kok.innerHTML = merkezDurumKart(false, 'baglanti'); return; }
+    m.oku().then(r => { if(r.ok) merkezSon = r; const k = merkezTamKok(); if(k) k.innerHTML = r.ok ? merkezTamCiz(r.cfg) : merkezDurumKart(false, r.neden); });
+  }
+  function merkezDurumKart(acik, neden){
+    return '<div class="merkezayar__ust"><i class="merkezayar__isaret' + (acik ? ' is-acik' : '') + '" aria-hidden="true"></i><div><b>'
+      + (acik ? 'Merkez çalışıyor ve bağlı' : neden === 'baglanti' ? 'Merkez bu profilde bağlı değil' : 'Merkez yanıt vermiyor') + '</b><small>'
+      + (acik ? 'King’in hafızası, modelleri ve kuralları. Arayüzü yok; ayarları burada.' : 'King yine çalışır. Merkez açılınca model, bütçe, kanallar ve zamanlama burada ayarlanır.')
+      + '</small></div>' + (acik ? '' : '<button type="button" class="btn btn--sm" data-merkez-baslat>Başlat ve bağla</button>') + '</div>'
+      + '<p class="merkezayar__durum" role="status">' + kac(merkezMesaj) + '</p>';
+  }
+  function merkezDenetim(a){
+    const id = 'mz-' + a.yol.replace(/\./g, '-'), ortak = ' id="' + id + '" data-merkez-alan="' + kac(a.yol) + '" data-tur="' + a.tur + '"';
+    if(a.tur === 'bool') return '<button type="button" class="plan__anahtar' + (a.deger ? ' is-on' : '') + '" role="switch" aria-checked="' + !!a.deger + '" aria-label="' + kac(a.ad) + '"' + ortak + '><i aria-hidden="true"></i></button>';
+    if(a.tur === 'sir') return '<div class="merkezayar__sir"><span class="merkezayar__rozet' + (a.deger && a.deger.kurulu ? ' is-kurulu' : '') + '">'
+      + (a.deger && a.deger.kurulu ? 'Kurulu ••' + kac(a.deger.ipucu) : 'Kurulu değil') + '</span>'
+      + '<input class="ayarlar__girdi" type="password" autocomplete="off" placeholder="' + (a.deger && a.deger.kurulu ? 'Yenisiyle değiştir' : 'Yapıştır') + '" aria-label="' + kac(a.ad) + '"' + ortak + '>'
+      + '<button type="button" class="btn btn--sm btn--ghost" data-merkez-sir="' + id + '">Kaydet</button></div>';
+    if(a.tur === 'secim') return '<select class="ayarlar__girdi" aria-label="' + kac(a.ad) + '"' + ortak + '>' + (a.secenek || []).map(x =>
+      '<option value="' + kac(x[0]) + '"' + (x[0] === (a.deger || '') ? ' selected' : '') + '>' + kac(x[1]) + '</option>').join('') + '</select>';
+    const tip = a.tur === 'sayi' ? 'number' : a.tur === 'saat' ? 'time' : 'text';
+    const deger = Array.isArray(a.deger) ? a.deger.join(', ') : a.deger == null ? '' : a.deger;
+    return '<input class="ayarlar__girdi' + (a.tur === 'sayi' ? ' merkezayar__sayi' : '') + '" type="' + tip + '" value="' + kac(deger) + '" aria-label="' + kac(a.ad) + '"'
+      + (a.tur === 'sayi' ? ' min="' + a.min + '" max="' + a.max + '" step="' + (a.adim || (a.max - a.min <= 2 ? 0.01 : a.max - a.min <= 20 ? 0.5 : 1)) + '" inputmode="decimal"' : '') + ortak + '>';
+  }
+  function merkezTamCiz(cfg){
+    const l = L.MerkezAyar.sekmeler(cfg);
+    if(!l.some(x => x.id === merkezSekme)) merkezSekme = 'genel';
+    const s = l.find(x => x.id === merkezSekme);
+    const not = a => [a.not, a.tur === 'sayi' && a.min != null ? a.min + '–' + a.max : ''].filter(Boolean).join(' · ');
+    return merkezDurumKart(true)
+      + '<div class="seg seg--block merkezayar__sekmeler" role="tablist" aria-label="Merkez ayarları">' + l.map(x => '<button type="button" role="tab" class="'
+        + (x.id === merkezSekme ? 'is-on' : '') + '" aria-selected="' + (x.id === merkezSekme) + '" data-merkez-sekme="' + x.id + '">' + kac(x.ad) + '</button>').join('') + '</div>'
+      + '<div class="skartlar">' + s.gruplar.map(g => kart(SIMGE.merkez, g.ad, g.not, g.alanlar.map(a => H(a.ad, not(a), merkezDenetim(a))).join(''))).join('') + '</div>'
+      + (merkezSekme === 'genel' ? '<p class="merkezayar__arsiv">Eski Merkez ekranları (Motto, Para, Ofis) taşınana dek arşivde: '
+        + '<a href="http://127.0.0.1:4200/atolye" target="_blank" rel="noopener">aç</a>. Verileri yerinde.</p>' : '');
+  }
+  async function merkezBaslat(dugme){
+    if(dugme){ dugme.disabled = true; dugme.textContent = 'Başlatılıyor…'; }
+    merkezMesaj = '';
+    try{
+      const r = await fetch('/api/merkez/ac', { method:'POST', headers:{ 'X-LifeOS':'merkez' }, cache:'no-store' }).then(x => x.json());
+      if(!r || !r.ok) merkezMesaj = (r && r.mesaj) || 'Merkez açılamadı.';
+      else{
+        const b = merkezHkm && merkezHkm();
+        const e = b && b.kendiBaglan ? await b.kendiBaglan() : { ok:false };
+        merkezMesaj = e && e.ok ? 'Merkez açıldı ve bu modül bağlandı.' : 'Merkez açıldı; bağlanamadı: ' + ((e && e.note) || 'eşleme penceresi kapandı, yeniden dene') + '.';
+      }
+    }catch(er){ merkezMesaj = 'Merkez yalnız LifeOS sunucusu bu bilgisayarda açıkken başlatılabilir.'; }
+    merkezYukle(); merkezTamYukle();
   }
   function merkezYaz(d){
     const m = merkezIstemci();
     if(!m) return;
     merkezMesaj = 'Kaydediliyor…';
-    const k0 = merkezKok(), s0 = k0 && k0.querySelector('.merkezayar__durum'); if(s0) s0.textContent = merkezMesaj;
+    document.querySelectorAll('.merkezayar__durum').forEach(x => { x.textContent = merkezMesaj; });
     m.oku().then(() => m.yaz(d)).then(r => {
       merkezMesaj = r.ok ? 'Kaydedildi.' : (r.hata || (r.neden === 'baglanti' ? 'Merkez bağlı değil.' : 'Kaydedilemedi; Merkez yanıt vermedi.'));
-      merkezYukle();
+      merkezYukle(); merkezTamYukle();
     });
   }
   if(typeof document !== 'undefined'){
+    document.addEventListener('click', e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      const bs = t.closest('[data-merkez-baslat]');
+      if(bs){ e.preventDefault(); merkezBaslat(bs); return; }
+      const sk = t.closest('[data-merkez-sekme]');
+      if(sk){ merkezSekme = sk.getAttribute('data-merkez-sekme'); const k = merkezTamKok(); if(k && merkezSon) k.innerHTML = merkezTamCiz(merkezSon.cfg); return; }
+      const al = t.closest('[data-merkez-alan][data-tur="bool"]');
+      if(al){ merkezYaz({ tur:'alan', yol:al.getAttribute('data-merkez-alan'), deger:al.getAttribute('aria-checked') !== 'true' }); return; }
+      const sr = t.closest('[data-merkez-sir]');
+      if(sr){ const i = document.getElementById(sr.getAttribute('data-merkez-sir')); if(i && i.value.trim()){ const v = i.value; i.value = '';
+        merkezYaz({ tur:'alan', yol:i.getAttribute('data-merkez-alan'), deger:v }); } return; }
+    });
     document.addEventListener('click', e => {
       const b = e.target && e.target.closest ? e.target.closest('[data-merkez]') : null;
       if(!b || b.disabled) return;
@@ -22514,7 +22607,11 @@ window.LIFEOS = window.LIFEOS || {};
     document.addEventListener('change', e => {
       const t = e.target;
       if(!t || !t.matches) return;
-      if(t.matches('[data-merkez-esik]')){ const [g, a] = t.getAttribute('data-merkez-esik').split(':'); merkezYaz({ tur:'esik', grup:g, ad:a, deger:Number(t.value) }); }
+      if(t.matches('[data-merkez-alan]') && ['sayi', 'saat', 'secim', 'metin', 'liste'].indexOf(t.getAttribute('data-tur')) >= 0){
+        const tur = t.getAttribute('data-tur');
+        merkezYaz({ tur:'alan', yol:t.getAttribute('data-merkez-alan'), deger:tur === 'sayi' ? (t.value === '' ? NaN : Number(t.value)) : t.value });
+      }
+      else if(t.matches('[data-merkez-esik]')){ const [g, a] = t.getAttribute('data-merkez-esik').split(':'); merkezYaz({ tur:'esik', grup:g, ad:a, deger:Number(t.value) }); }
       else if(t.matches('[data-merkez-tavan]') && t.value !== ''){ const b = document.querySelector('[data-merkez^="birim:"].is-on');
         merkezYaz({ tur:'tavan', birim:b ? b.getAttribute('data-merkez').slice(6) : 'usd', deger:Number(t.value) }); }
     });
@@ -23837,7 +23934,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'5e7250be', at:'2026-11-03 19:04', dirty:true };
+R.BUILD = { id:'140a6d38', at:'2026-11-03 19:14', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -29092,7 +29189,7 @@ window.LIFEOS = window.LIFEOS || {};
     gun:{ harf:'G', ad:'Gün',    uzun:'Günü kur, gidişi gör',      not:'günün planı ve gidişi',   kapi:4180, yol:'gun/' },
   mer:{ harf:'M', ad:'Merkez', uzun:'Hayat Kontrol Merkezi',     not:'üçünün özeti',            kapi:4200 },
   });
-  const SIRA = ['ays', 'spi', 'esp', 'gun', 'mer'];
+  const SIRA = ['ays', 'spi', 'esp', 'gun'];   // Merkez menude yok (arayuzu kalkti); kimligi bildirimler icin durur
 
   /* Kabuğun kendi simge takımı. Modüllerin simge kümeleri farklı; kabuk
      üçünde aynı görünsün diye simgesini kendisi taşır. */
@@ -36849,7 +36946,7 @@ window.LIFEOS.HESAP = (function(){
     ['AYS', 'Sınav hazırlığı', '<rect x="5" y="5" width="14" height="14" rx="3.5"/>', '#4F86FF'],
     ['SPİ', 'Sağlık ve toparlanma', '<circle cx="12" cy="12" r="7.5"/>', '#2EC4A9'],
     ['ESP', 'Dil, müzik, okuma', '<rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.4" transform="rotate(45 12 12)"/>', '#F2A93B'],
-    ['Merkez', 'Günün özeti', '<path d="M12 4.3 18.8 8.2v7.6L12 19.7 5.2 15.8V8.2z"/>', '#9A86FF'],
+    ['Gün', 'Günü kur, gidişi gör', '<path d="M5 18.5a7 7 0 0 1 14 0z"/>', '#9A86FF'],
   ];
   const SOZLER = ['PC, telefon ve tablet aynı hesapla', 'Verin hiçbir şirketin sunucusuna gitmez',
     'Bilgisayar kapalıyken de çalışır'];
@@ -56384,6 +56481,113 @@ LIFEOS.MerkezAyar = (function(){
     };
   }
 
+  /* AYARLAR › MERKEZ (Gün planı, 2026-11-03: «HKM'yi komple kaldır, ayarlara taşı»).
+     HKM'nin eski Ayarlar ekranının bütün ayarları, açık bir şemayla: yalnız şemadaki
+     alan yazılabilir; tür burada, aralık ve anlam HKM'de denetlenir (422 iletilir).
+     Sır (jeton, anahtar) okunmaz: yalnız «kurulu» bilgisi; yazmak yeni değer yollar.
+     Alan: [yol, ad, tür, not, ek] — tür: bool, sayi, metin, saat, secim, liste, sir. */
+  const GUNLER = [['', 'Kapalı'], ['pazartesi', 'Pazartesi'], ['sali', 'Salı'], ['carsamba', 'Çarşamba'], ['persembe', 'Perşembe'],
+    ['cuma', 'Cuma'], ['cumartesi', 'Cumartesi'], ['pazar', 'Pazar']];
+  const SAGLAYICILAR = [['openrouter', 'OpenRouter'], ['anthropic', 'Anthropic (Claude)'], ['google', 'Google (Gemini)'], ['openai', 'OpenAI']];
+  const SEKMELER = [
+    { id:'genel', ad:'Genel', gruplar:[
+      { ad:'King', alanlar:[
+        ['king.kendiliginden', 'Kendiliğinden haber ver', 'bool', 'Kural motoru bir şey görünce King söyler'],
+        ['king.sormadan_dusuk', 'Düşük riskli işi sormadan yap', 'bool', 'Orta ve üstü her zaman sorar'] ] },
+      { ad:'Aktif kip', alanlar:[
+        ['aktif.enabled', 'Merkez kendi turunu atsın', 'bool', 'Belli aralıkla verileri gözden geçirir'],
+        ['aktif.aralik_dk', 'Tur aralığı', 'sayi', 'dakika', { min:5, max:1440 }] ] } ] },
+    { id:'yz', ad:'Yapay zekâ', gruplar:[
+      { ad:'Sağlayıcı anahtarları', not:'Anahtar okunmaz; yalnız kurulu olup olmadığı görünür. Yeni anahtar eskisinin yerine geçer.',
+        alanlar:SAGLAYICILAR.map(([id, ad]) => ['models.keys.' + id, ad, 'sir']) },
+      { ad:'Bütçe', alanlar:[
+        ['budget.usd_try', 'Kur (1 USD kaç TL)', 'sayi', 'TL tavan için; elle girilir', { min:0, max:1000, adim:0.01 }],
+        ['budget.stop_at_pct', 'Durdurma eşiği', 'sayi', 'tavanın yüzde kaçında ücretli çağrı durur', { min:10, max:100 }] ] },
+      { ad:'Yerel model ve ses', alanlar:[
+        ['ollama.kendiligi', 'Ollama bulununca bağlan', 'bool'],
+        ['ollama.sicak', 'Yerel model hazır beklesin', 'bool', 'Bellekte sıcak tutar; 8 GB’ta dikkat'],
+        ['ses.gemini_ses', 'Gemini sesi', 'metin', 'ör. Kore'] ] },
+      { ad:'Web araması', alanlar:[
+        ['web.acik', 'King web’de arayabilsin', 'bool'],
+        ['web.gunluk_sinir', 'Günlük arama sınırı', 'sayi', '', { min:0, max:10000 }] ] } ] },
+    { id:'kanallar', ad:'Kanallar', gruplar:[
+      { ad:'WhatsApp', alanlar:[
+        ['channels.whatsapp.enabled', 'Açık', 'bool'],
+        ['channels.whatsapp.phone_number_id', 'Telefon numarası kimliği', 'metin'],
+        ['channels.whatsapp.token', 'Erişim jetonu', 'sir'],
+        ['channels.whatsapp.app_secret', 'Uygulama sırrı', 'sir'],
+        ['channels.whatsapp.verify_token', 'Doğrulama jetonu', 'sir'],
+        ['channels.whatsapp.allow_from', 'İzinli numaralar', 'liste', 'virgülle ayır'] ] },
+      { ad:'Telegram', alanlar:[
+        ['channels.telegram.enabled', 'Açık', 'bool'],
+        ['channels.telegram.bot_token', 'Bot jetonu', 'sir'],
+        ['channels.telegram.webhook_secret', 'Webhook sırrı', 'sir'],
+        ['channels.telegram.polling', 'Yoklama (webhook yerine)', 'bool'],
+        ['channels.telegram.allow_from', 'İzinli kullanıcılar', 'liste', 'virgülle ayır'] ] } ] },
+    { id:'zaman', ad:'Zamanlama', gruplar:[
+      { ad:'Mesajlar', alanlar:[
+        ['schedule.enabled', 'Zamanlanmış mesajlar', 'bool'],
+        ['schedule.channel', 'Kanal', 'secim', '', { secenek:[['', 'Açık olan'], ['whatsapp', 'WhatsApp'], ['telegram', 'Telegram']] }],
+        ['schedule.morning', 'Sabah', 'saat'], ['schedule.evening', 'Akşam', 'saat'], ['schedule.checkin', 'Gün içi yoklama', 'saat'],
+        ['schedule.weekly_day', 'Haftalık rapor günü', 'secim', '', { secenek:GUNLER }], ['schedule.weekly_time', 'Haftalık rapor saati', 'saat'],
+        ['schedule.monthly', 'Aylık rapor', 'bool'], ['schedule.tolerance_minutes', 'Hoşgörü', 'sayi', 'dakika', { min:0, max:720 }] ] },
+      { ad:'Bakım', alanlar:[
+        ['schedule.maintenance', 'Gece bakımı', 'bool'], ['schedule.maintenance_time', 'Bakım saati', 'saat'],
+        ['schedule.keep_days', 'Kayıt saklama', 'sayi', 'gün', { min:7, max:3650 }] ] } ] },
+    { id:'bildirim', ad:'Bildirim', gruplar:[
+      { ad:'Sessiz saatler ve sınırlar', alanlar:[
+        ['bildirim.sessiz_bas', 'Sessiz başlangıç', 'saat'], ['bildirim.sessiz_bit', 'Sessiz bitiş', 'saat'],
+        ['bildirim.gunluk_en_cok', 'Günde en çok', 'sayi', '0 = sınırsız', { min:0, max:100 }],
+        ['bildirim.teklif_omru_gun', 'Önerinin ömrü', 'sayi', 'gün', { min:1, max:60 }],
+        ['bildirim.yarin', 'Akşam «yarın şunlar var»', 'bool'] ] } ] },
+  ];
+  const SAAT_RE = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+  const al = (o, yol) => yol.split('.').reduce((x, k) => (x && typeof x === 'object' ? x[k] : undefined), o);
+  function alanBul(yol, cfg){
+    for(const s of SEKMELER) for(const g of s.gruplar) for(const a of g.alanlar) if(a[0] === yol) return a;
+    if(/^thresholds\.[a-z]+\.[a-z_]+$/.test(yol)){
+      const p = yol.split('.'), r = nesne(nesne(nesne(cfg).ranges)[p[1]])[p[2]];
+      if(Array.isArray(r)) return [yol, p[2], 'sayi', '', { min:r[0], max:r[1] }];
+    }
+    return null;
+  }
+  /* Saf: sekmeler ve şu anki değerler (sır yalnız «kurulu» ve son iki işaret). */
+  function sekmeler(cfg){
+    cfg = nesne(cfg);
+    const deger = yol => {
+      if(/^models\.keys\./.test(yol)){ const p = (nesne(cfg.models).providers || []).find(x => x && x.id === yol.split('.')[2]) || {};
+        return { kurulu:!!p.key_set, ipucu:p.key_set ? String(p.key_hint || '').slice(-2) : '' }; }
+      const v = al(cfg, yol);
+      if(v && typeof v === 'object' && !Array.isArray(v) && 'set' in v) return { kurulu:!!v.set, ipucu:v.set ? String(v.value || '').slice(-2) : '' };
+      return v === undefined ? null : v;
+    };
+    const ad = nesne(cfg.threshold_names), ar = nesne(cfg.ranges);
+    const esik = { id:'esikler', ad:'Eşikler', gruplar:Object.keys(ar).map(g => ({ ad:{ bio:'Sağlık', academic:'Sınav', intellect:'Gelişim' }[g] || g,
+      alanlar:Object.keys(nesne(ar[g])).map(a => ['thresholds.' + g + '.' + a, nesne(ad[g])[a] || a, 'sayi', '', { min:ar[g][a][0], max:ar[g][a][1] }]) })) };
+    return SEKMELER.concat(Object.keys(ar).length ? [esik] : []).map(s => ({ id:s.id, ad:s.ad, gruplar:s.gruplar.map(g => ({ ad:g.ad, not:g.not || '',
+      alanlar:g.alanlar.map(a => Object.assign({ yol:a[0], ad:a[1], tur:a[2], not:a[3] || '', deger:deger(a[0]) }, a[4] || {})) })) }));
+  }
+  /* Saf: bir alanın yaması. Şemada olmayan yol yazılmaz. */
+  function alanYama(yol, deger, cfg){
+    const a = alanBul(String(yol || ''), cfg);
+    if(!a) return { ok:false, hata:'Bu ayar buradan değiştirilmez.' };
+    const ad = a[1], tur = a[2], s = a[4] || {};
+    let v = deger;
+    if(tur === 'bool'){ if(typeof v !== 'boolean') return { ok:false, hata:ad + ': açık ya da kapalı olmalı.' }; }
+    else if(tur === 'sayi'){ if(!sayi(v) || (s.min != null && v < s.min) || (s.max != null && v > s.max))
+      return { ok:false, hata:ad + (s.min != null ? ' ' + s.min + '–' + s.max + ' arasında' : '') + ' bir sayı olmalı.' }; }
+    else if(tur === 'saat'){ if(typeof v !== 'string' || (v && !SAAT_RE.test(v))) return { ok:false, hata:ad + ' SS:DD biçiminde olmalı.' }; }
+    else if(tur === 'secim'){ if(!(s.secenek || []).some(x => x[0] === v)) return { ok:false, hata:ad + ': bilinmeyen seçim.' }; }
+    else if(tur === 'liste'){ if(typeof v === 'string') v = v.split(',').map(x => x.trim()).filter(Boolean);
+      if(!Array.isArray(v) || v.some(x => typeof x !== 'string')) return { ok:false, hata:ad + ': virgülle ayrılmış liste olmalı.' }; }
+    else if(tur === 'sir'){ if(typeof v !== 'string' || !v.trim() || v.length > 400) return { ok:false, hata:ad + ': boş olamaz.' }; v = v.trim(); }
+    else if(typeof v !== 'string' || v.length > 200) return { ok:false, hata:ad + ' bir metin olmalı.' };
+    const p = {}; let o = p; const k = a[0].split('.');
+    k.slice(0, -1).forEach(x => { o[x] = {}; o = o[x]; });
+    o[k[k.length - 1]] = v;
+    return { ok:true, yama:p };
+  }
+
   function yama(d, cfg){
     d = nesne(d);
     const red = hata => ({ ok:false, hata });
@@ -56450,7 +56654,7 @@ LIFEOS.MerkezAyar = (function(){
       }
     }
     async function yaz(d){
-      const y = yama(d, son || {});
+      const y = d && d.tur === 'alan' ? alanYama(d.yol, d.deger, son || {}) : yama(d, son || {});
       if(!y.ok) return y;
       const k = baglanti();
       if(!k) return { ok:false, neden:'baglanti' };
@@ -56466,7 +56670,7 @@ LIFEOS.MerkezAyar = (function(){
     return { oku, yaz };
   }
 
-  return { gorunum, yama, kur };
+  return { gorunum, yama, sekmeler, alanYama, kur };
 })();
 
 /* ==== js/core/yedekag.js ==== */
