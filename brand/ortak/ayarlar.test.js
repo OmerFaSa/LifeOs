@@ -28,7 +28,7 @@
       const d = koy();
       try{
         const sek = Array.from(d.querySelectorAll('[data-ayar-bolum]'));
-        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Ses ve müzik', 'Animasyon', 'Erişilebilirlik', 'King', 'Minikler', 'Bildirimler', 'Planlama',
+        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Ses ve müzik', 'Animasyon', 'Erişilebilirlik', 'King ve bağlantılar', 'Minikler', 'Bildirimler', 'Planlama',
           'Modül ayarları', 'Güvenlik', 'Bağlantılar']);
         /* Üç alan üstte: Sistem (her yerde), modülün kendisi (yalnız burada), Hesap; solda yalnız seçili alanın bölümleri
            (2026-10-30: «sistem ile yalnız o modül arasındaki ayrımı daha güzel yap»). */

@@ -461,7 +461,7 @@ R.App = (function(){
     const ad = (p.name || '').trim();
     /* AYARLAR (kullanıcı, 2026-10-29): eski «Görünüm» paneli bölüm bölüm ortak
        Ayarlar panelidir (brand/ortak/ayarlar.js); kenardaki «Ayarlar» açar. */
-    if(window.LIFEOS && LIFEOS.AYARLAR) return LIFEOS.AYARLAR.html({
+    if(window.LIFEOS && LIFEOS.AYARLAR) return LIFEOS.AYARLAR.html({ hkm:() => R.Beacon,
       tema:String(R.C.TemaSecici({ value:theme, act:'set-theme' })),
       profil:{ ad, alt:brandLine(), route:'profiles' },
       modul:safe(() => (NAV.find(g => g.id === 'ayarlar') || { items:[] }).items.filter(i => !gizliMi(i.id)).map(i => ({ ad:i.label, route:i.id })), []) || [] });

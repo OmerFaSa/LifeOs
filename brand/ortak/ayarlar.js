@@ -119,7 +119,7 @@ window.LIFEOS = window.LIFEOS || {};
     { id:'ses',      ad:'Ses ve müzik',     grup:'Sistem' },
     { id:'hareket',  ad:'Animasyon',        grup:'Sistem' },
     { id:'erisim',   ad:'Erişilebilirlik',  grup:'Sistem' },
-    { id:'king',     ad:'King',             grup:'Sistem' },
+    { id:'king',     ad:'King ve bağlantılar', grup:'Sistem' },
     { id:'ekip',     ad:'Minikler',         grup:'Sistem' },
     { id:'bildirim', ad:'Bildirimler',      grup:'Sistem' },
     { id:'sistem',   ad:'Planlama',         grup:'Sistem' },
@@ -513,7 +513,9 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'king') return '<div class="skartlar">' + kart(SIMGE.king, 'King', 'Adı, konuşması ve sesi',
         H('Adı', 'Boş bırakırsan King', '<input class="ayarlar__girdi" type="text" maxlength="20" data-king-ad placeholder="King"'
         + ' value="' + kac((() => { try{ return localStorage.getItem('lifeos.king.ad') || ''; }catch(e){ return ''; } })()) + '" aria-label="King’in adı">')
-      + (L.KING && L.KING.ayarHtml ? cagir(L.KING, 'ayarHtml') : H('Görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml')))) + '</div>';
+      + (L.KING && L.KING.ayarHtml ? cagir(L.KING, 'ayarHtml') : H('Görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml'))))
+      + kart(SIMGE.bag, 'Bağlantılar', 'Merkez üzerinden: model, aylık tavan, kanallar ve hatırlatma eşikleri',
+        '<div class="merkezayar" data-merkez-kok><p class="ayarlar__bos">Yükleniyor…</p></div>') + '</div>';
     if(id === 'ekip') return '<div class="skartlar">' + kart(SIMGE.minik, 'Minikler', 'Sayfada gezen küçük yardımcılar',
         H('Kaç minik', 'Sayfada en çok', cagir(L.MINIK, 'seciciHtml')) + H('Boy', '', cagir(L.MINIK, 'boySeciciHtml')))
       + kart(SIMGE.minik, 'Kimler gezsin', 'Basınca sayfadan çıkar ya da gelir', cagir(L.MINIK, 'galeriHtml')) + '</div>';
@@ -543,6 +545,8 @@ window.LIFEOS = window.LIFEOS || {};
     o = o || {};
     if(!BOLUMLER.some(b => b.id === secili)) secili = 'gorunum';
     if(secili === 'sistem' && typeof setTimeout === 'function') setTimeout(() => planYukle(), 0);
+    if(o.hkm) merkezHkm = o.hkm;
+    if(secili === 'king' && typeof setTimeout === 'function') setTimeout(() => merkezYukle(), 0);
     const alan = alanOf(secili);
     const NAV_SIMGE = { profil:SIMGE.profil, gorunum:SIMGE.tema, zemin:SIMGE.resim, ses:SIMGE.ses, hareket:SIMGE.hareket, erisim:SIMGE.goz, king:SIMGE.king,
       ekip:SIMGE.minik, bildirim:SIMGE.zil, sistem:SIMGE.plan, modul:SIMGE.yuzey, hesap:SIMGE.kilit, baglanti:SIMGE.bag };
@@ -648,6 +652,83 @@ window.LIFEOS = window.LIFEOS || {};
     panel.querySelectorAll('[data-ayar-bolum]').forEach(b => { b.hidden = alanOf(b.getAttribute('data-ayar-bolum')) !== alan; });
     panel.querySelectorAll('[data-ayar-alan]').forEach(b => { const on = b.getAttribute('data-ayar-alan') === alan; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     if(id === 'sistem') planYukle();
+    if(id === 'king') merkezYukle();
+  }
+
+  /* KING VE BAĞLANTILAR (Gün planı F1, 2026-11-03): HKM'nin ayarlarından yalnız
+     görünen kısım (model paketi, aylık tavan, kanal aç-kapa, üç eşik); veri
+     katmanı LIFEOS.MerkezAyar. Anahtar, jeton ve sunucu ayarları burada yok:
+     yalnız cihazın sahibine «Atölye» bağlantısı (HKM'nin kendi sayfası).
+     Merkez bağlı değilse ya da bu profil sahibi değilse tek cümle söyler. */
+  let merkezHkm = null, merkezSon = null, merkezMesaj = '';
+  function merkezKok(){ return typeof document !== 'undefined' ? document.querySelector('[data-merkez-kok]') : null; }
+  function merkezIstemci(){ return L.MerkezAyar && merkezHkm ? L.MerkezAyar.kur({ hkm:merkezHkm }) : null; }
+  function merkezYukle(){
+    const kok = merkezKok(), m = merkezIstemci();
+    if(!kok) return;
+    if(!m){ kok.innerHTML = merkezYok('baglanti'); return; }
+    m.oku().then(r => { merkezSon = r.ok ? r : null; const k = merkezKok(); if(k) k.innerHTML = r.ok ? merkezCiz(r.gorunum) : merkezYok(r.neden); });
+  }
+  const merkezYok = neden => '<p class="ayarlar__bos">' + (neden === 'baglanti'
+    ? 'Merkez bu profilde bağlı değil. King yine çalışır; model, bütçe ve kanallar Merkez bağlanınca burada görünür.'
+    : 'Merkez şu an yanıt vermiyor; ayarların yerinde. Biraz sonra yeniden aç.') + '</p>';
+  const para = (v, b) => v == null ? 'veri yok' : (b === 'try' ? '₺' : '$') + String(v).replace('.', ',');
+  function merkezCiz(g){
+    const paket = '<div class="seg seg--block" role="group" aria-label="Model paketi">' + g.paket.liste.map(p => {
+      const on = p.id === g.paket.secili;
+      return '<button type="button" class="' + (on ? 'is-on' : '') + '" aria-pressed="' + on + '" data-merkez="paket:' + kac(p.id) + '">'
+        + kac(p.id) + '<small class="merkezayar__alt">' + (p.aylik == null ? 'veri yok' : '≈ ' + para(p.aylik, 'usd') + '/ay · tahmin') + '</small></button>'; }).join('') + '</div>';
+    const birim = g.tavan.birim === 'try' ? 'try' : 'usd';
+    const tavan = '<div class="merkezayar__tavan"><input class="ayarlar__girdi" type="number" min="0" step="1" inputmode="decimal" data-merkez-tavan'
+      + ' value="' + (g.tavan.deger == null ? '' : kac(g.tavan.deger)) + '" placeholder="veri yok" aria-label="Aylık tavan">'
+      + '<div class="seg" role="group" aria-label="Para birimi">' + [['usd', 'USD'], ['try', 'TL']].map(([v, a]) =>
+        '<button type="button" class="' + (v === birim ? 'is-on' : '') + '" aria-pressed="' + (v === birim) + '" data-merkez="birim:' + v + '">' + a + '</button>').join('') + '</div></div>';
+    const kanal = g.kanallar.map(k => H(k.baslik, k.hazir ? (k.acik ? 'Açık: King buradan yazabilir' : 'Kapalı') : 'Kurulu değil; jetonu Atölye’de kurulur',
+      '<button type="button" class="plan__anahtar' + (k.acik ? ' is-on' : '') + '" role="switch" aria-checked="' + k.acik + '" aria-label="' + kac(k.baslik) + '"'
+      + (k.hazir || k.acik ? '' : ' disabled') + ' data-merkez="kanal:' + k.ad + ':' + (!k.acik) + '"><i aria-hidden="true"></i></button>')).join('');
+    const esik = g.esikler.map(e => G(e.etiket, e.min + '–' + e.max + ' arası',
+      '<div class="merkezayar__esik"><input type="range" min="' + e.min + '" max="' + e.max + '" step="' + (e.max - e.min > 50 ? 1 : 0.5) + '" value="' + e.deger + '"'
+      + ' data-merkez-esik="' + kac(e.grup + ':' + e.ad) + '" aria-label="' + kac(e.etiket) + '"><output>' + String(e.deger).replace('.', ',') + '</output></div>')).join('');
+    const atolye = (() => { try{ const b = merkezHkm && merkezHkm(); const a = b && b.settings ? b.settings() : null; return a && a.url ? String(a.url).replace(/\/$/, '') : ''; }catch(e){ return ''; } })();
+    return G('Model paketi', 'Aylık tutar son 30 günün ölçülen kullanımından tahmindir', paket)
+      + H('Aylık tavan', 'Tavana varınca ücretli model çağrısı durur', tavan)
+      + kanal + esik
+      + (atolye ? H('Gelişmiş', 'Anahtarlar, kanal jetonları, ofis ve sunucu: yalnız bu cihazın sahibi',
+        '<a class="btn btn--sm btn--ghost" href="' + kac(atolye) + '/" target="_blank" rel="noopener">Atölye’yi aç</a>') : '')
+      + '<p class="merkezayar__durum" role="status">' + kac(merkezMesaj) + '</p>';
+  }
+  function merkezYaz(d){
+    const m = merkezIstemci();
+    if(!m) return;
+    merkezMesaj = 'Kaydediliyor…';
+    const k0 = merkezKok(), s0 = k0 && k0.querySelector('.merkezayar__durum'); if(s0) s0.textContent = merkezMesaj;
+    m.oku().then(() => m.yaz(d)).then(r => {
+      merkezMesaj = r.ok ? 'Kaydedildi.' : (r.hata || (r.neden === 'baglanti' ? 'Merkez bağlı değil.' : 'Kaydedilemedi; Merkez yanıt vermedi.'));
+      merkezYukle();
+    });
+  }
+  if(typeof document !== 'undefined'){
+    document.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-merkez]') : null;
+      if(!b || b.disabled) return;
+      const [t, a, c] = b.getAttribute('data-merkez').split(':');
+      if(t === 'paket') merkezYaz({ tur:'paket', deger:a });
+      else if(t === 'kanal') merkezYaz({ tur:'kanal', ad:a, acik:c === 'true' });
+      else if(t === 'birim'){ const g = merkezSon && merkezSon.gorunum; const i = document.querySelector('[data-merkez-tavan]');
+        const v = i && i.value !== '' ? Number(i.value) : (g && g.tavan.deger) || 0; merkezYaz({ tur:'tavan', birim:a, deger:v }); }
+    });
+    document.addEventListener('input', e => {
+      const r = e.target && e.target.matches && e.target.matches('[data-merkez-esik]') ? e.target : null;
+      const o = r && r.nextElementSibling;
+      if(o) o.textContent = String(r.value).replace('.', ',');
+    });
+    document.addEventListener('change', e => {
+      const t = e.target;
+      if(!t || !t.matches) return;
+      if(t.matches('[data-merkez-esik]')){ const [g, a] = t.getAttribute('data-merkez-esik').split(':'); merkezYaz({ tur:'esik', grup:g, ad:a, deger:Number(t.value) }); }
+      else if(t.matches('[data-merkez-tavan]') && t.value !== ''){ const b = document.querySelector('[data-merkez^="birim:"].is-on');
+        merkezYaz({ tur:'tavan', birim:b ? b.getAttribute('data-merkez').slice(6) : 'usd', deger:Number(t.value) }); }
+    });
   }
 
   /* SİSTEM PLANLAMASI (kullanıcı, 2026-10-29: «sistemin kendini ne zaman

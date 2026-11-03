@@ -214,6 +214,8 @@ DOSYALAR = {
     # HEDEF AGI — etkin hedeflerin ozeti HKM'ye, zaman butcesi geri
     # (HKM core/hedefag.py). Ozetin alanlari uc arayuzde ayni olmali.
     "hedefag.js":      "js/core",
+    # King ve bağlantılar veri katmanı (Gün planı F1): HKM /api/config'in görünen kısmı.
+    "merkezayar.js":   "js/core",
     "hedefag.test.js": "tests",
     # Otomatik yedek istemcisi (HKM core/yedek.py): HKM acikken gunde bir.
     "yedekag.js":      "js/core",
