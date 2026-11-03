@@ -101,7 +101,7 @@ if k:
     bekle("bes satir, sirali", [x["alan"] for x in k["satirlar"]] == ["uyku", "beslenme", "hareket", "calisma", "gelisim"])
     bekle("satir modulleri", [x["modul"] for x in k["satirlar"]] == ["spi", "spi", "spi", "ays", "esp"])
     bekle("calisma: pzt yapildi, sali kayit yok, gelecek", alan["calisma"]["hucreler"] == ["yapildi", "kayit-yok", "gelecek", "gelecek", "gelecek", "gelecek", "gelecek"])
-    bekle("calisma degeri dakika", alan["calisma"]["degerler"][:2] == [45, None])
+    bekle("calisma degeri dakika (kayit varsa 0 da deger)", alan["calisma"]["degerler"][:2] == [45, 0])
     bekle("gelisim: pzt kayit yok, sali yapildi", alan["gelisim"]["hucreler"][:2] == ["kayit-yok", "yapildi"] and alan["gelisim"]["degerler"][1] == 25)
     bekle("SPI yayini yok: veri yok", alan["uyku"]["hucreler"][:2] == ["veri-yok", "veri-yok"])
     bekle("bugun ozeti", k["bugunOzet"] == {"uyku": None, "beslenme": None, "hareket": None, "calisma": 0, "gelisim": 25})

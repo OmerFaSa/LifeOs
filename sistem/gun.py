@@ -19,6 +19,7 @@ ORTAK = {
     "layout.css": "text/css; charset=utf-8", "temel.css": "text/css; charset=utf-8",
     "kabuk.css": "text/css; charset=utf-8", "kabuk.js": "text/javascript; charset=utf-8",
     "cam.css": "text/css; charset=utf-8", "hareket.css": "text/css; charset=utf-8",
+    "gunveri.js": "text/javascript; charset=utf-8",
 }
 
 
@@ -155,6 +156,31 @@ GUN_SAYFASI = r"""<!doctype html>
 .gun-lejant{ display:flex; gap:14px; margin-top:12px; font-size:11.5px; color:var(--text-3); flex-wrap:wrap; }
 .gun-lejant i{ display:inline-block; width:10px; height:10px; margin-right:5px; border-radius:3px; vertical-align:-1px; }
 
+/* seritteki bloklar (F3a: hesap sunucusundaki «tek gun», sunucu sozu 22) */
+.gun-blok{ position:absolute; left:var(--x); top:calc(8px + var(--serit, 0) * 34px); transform:translateX(-6px); display:inline-flex; align-items:center; gap:6px;
+  max-width:24%; height:28px; padding:0 10px 0 8px; border-radius:9px; font-size:12px; font-weight:600; color:var(--text); text-decoration:none; white-space:nowrap;
+  background:color-mix(in oklab, var(--renk) 10%, var(--surface)); box-shadow:inset 3px 0 0 var(--renk), inset 0 0 0 1px color-mix(in oklab, var(--renk) 30%, transparent);
+  animation:gun-gel .45s cubic-bezier(.22,1,.36,1) both; animation-delay:calc(var(--i, 0) * 50ms); transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s; z-index:1; }
+.gun-blok span{ overflow:hidden; text-overflow:ellipsis; }
+.gun-blok small{ color:var(--text-3); font-weight:500; font-variant-numeric:tabular-nums; }
+.gun-blok:hover{ transform:translate(-6px, -2px); z-index:2; }
+.gun-blok[data-durum="bitti"]{ background:color-mix(in oklab, var(--renk) 22%, var(--surface)); }
+.gun-blok[data-durum="bitti"]::before{ content:"✓"; color:var(--renk); font-weight:800; }
+.gun-blok[data-durum="atlandi"]{ opacity:.55; text-decoration:line-through; }
+.gun-blok[data-durum="vakti"]{ box-shadow:inset 3px 0 0 var(--renk), 0 0 0 2px color-mix(in oklab, var(--renk) 45%, transparent); }
+.gun-saatsiz{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.gun-saatsiz > span{ font-size:11.5px; font-weight:650; color:var(--text-3); align-self:center; margin-right:2px; }
+.gun-saatsiz .gun-blok{ position:static; transform:none; max-width:none; animation-delay:0s; }
+.gun-saatsiz .gun-blok:hover{ transform:translateY(-2px); }
+.gun-notlar{ margin:10px 0 0; padding:0; list-style:none; font-size:12px; color:var(--text-3); }
+.gun-alan__cubuk.is-dolu{ background:var(--renk); box-shadow:none; }
+.gun-alan__cubuk.is-kayitsiz{ background:transparent; box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--renk) 45%, transparent); }
+.gun-alan small b{ color:var(--text); font-weight:650; }
+.gun-kare.is-yapildi{ background:var(--renk); box-shadow:none; }
+.gun-kare.is-kayit-yok{ background:transparent; box-shadow:inset 0 0 0 1.5px color-mix(in oklab, var(--renk) 40%, transparent); }
+.gun-kare.is-gelecek{ background:transparent; box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--text) 8%, transparent); }
+.gun-kare.is-bugun{ outline:2px solid var(--mod); outline-offset:1px; }
+
 /* Gecmis ve Sen */
 .gun-bos{ display:grid; justify-items:center; gap:10px; padding:56px 24px; text-align:center; }
 .gun-bos svg{ width:40px; height:40px; fill:none; stroke:var(--mod); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
@@ -176,13 +202,31 @@ GUN_SAYFASI = r"""<!doctype html>
 <div id="app"></div>
 <div id="overlay-root"></div>
 <script src="/gun/ortak/kabuk.js"></script>
+<script src="/gun/ortak/gunveri.js"></script>
 <script>
 (function(){
   'use strict';
   var L = window.LIFEOS || {}, K = L.KABUK;
   var HOST = '__HOST__';
   var BOLUM = [{ id:'bugun', ad:'Bugün' }, { id:'analiz', ad:'Geçmiş' }, { id:'calisma', ad:'Sen' }];
-  var ALANLAR = [['uyku', 'Uyku', 'SPİ'], ['beslenme', 'Beslenme', 'SPİ'], ['hareket', 'Hareket', 'SPİ'], ['calisma', 'Çalışma', 'AYS'], ['okuma', 'Okuma', 'ESP']];
+  var ALANLAR = [['uyku', 'Uyku', 'spi'], ['beslenme', 'Beslenme', 'spi'], ['hareket', 'Hareket', 'spi'], ['calisma', 'Çalışma', 'ays'], ['gelisim', 'Gelişim', 'esp']];
+  var MAD = { ays:'AYS', spi:'SPİ', esp:'ESP' }, MPORT = { ays:4173, spi:4183, esp:4193 }, SERIT_SIRA = { ays:0, spi:1, esp:2 };
+  var DILIM_AD = { sabah:'Sabah', ogle:'Öğle', aksam:'Akşam', gece:'Gece', gun:'Gün içinde' };
+  function adres(m, rota){ return 'http://' + HOST + ':' + MPORT[m] + '/' + (rota ? '#king=' + rota : ''); }
+  function oturum(){ var m = document.cookie.match(/(?:^|;\s*)lifeos_hesap=([^;]*)/); if(!m) return null;
+    try{ var o = JSON.parse(decodeURIComponent(m[1])); return o && o.j ? o : null; }catch(e){ return null; } }
+  function api(yol){ var o = oturum(); if(!o) return Promise.reject({ kod:401 });
+    return fetch((o.s || '') + yol, { headers:{ Authorization:'Bearer ' + o.j }, cache:'no-store', credentials:'omit' })
+      .then(function(r){ if(r.status === 401) throw { kod:401 }; if(!r.ok) throw { kod:r.status }; return r.json(); }); }
+  function simdiISO(){ var d = new Date(); return bugun() + 'T' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':00'; }
+  function yukle(){
+    if(!GV){ veri.durum = 'hata'; return; }
+    if(!oturum()){ veri.durum = 'girisyok'; veri.karne = GV.karne(null, bugun()); ciz(); return; }
+    Promise.all([api('/api/hesap/tekgun').catch(function(e){ return e && e.kod === 401 ? Promise.reject(e) : null; }),
+                 api('/api/hesap/gunluk').catch(function(e){ return e && e.kod === 401 ? Promise.reject(e) : null; })])
+      .then(function(r){ veri.serit = GV.serit(r[0], simdiISO()); veri.karne = GV.karne(r[1], bugun()); veri.durum = 'hazir'; ciz(); })
+      .catch(function(){ veri.durum = 'girisyok'; veri.karne = GV.karne(null, bugun()); ciz(); });
+  }
   var HAVA = [['gunes', 'Güneşli', '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>'],
     ['parcali', 'Parçalı', '<path d="M8 6.5a3.5 3.5 0 0 1 6.3-1"/><path d="M7 18h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6 1.5A3.3 3.3 0 0 0 7 18z"/>'],
     ['bulut', 'Bulutlu', '<path d="M7 18h10a4 4 0 0 0 0-8 5 5 0 0 0-9.6 1.5A3.3 3.3 0 0 0 7 18z"/>'],
@@ -191,6 +235,9 @@ GUN_SAYFASI = r"""<!doctype html>
   var PIL = ['', 'Bitkin', 'Düşük', 'Orta', 'İyi', 'Dolu'];
   var GUN = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
   var gorunum = 'yaptim', secAlan = null, merkez = null, ilk = true;
+  /* F3a: hesap sunucusundan uc modulun bugunu ve gunluk ozeti (oturum cerezi, giris sayfasiyla ortak). */
+  var veri = { durum:'bekle', serit:null, karne:null };
+  var GV = L.GunVeri;
   function kac(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
   function bugun(){ var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   /* Senin girdigin: bu tarayicida, gun basina (F3a'da King ve modullerle paylasilacak). */
@@ -203,6 +250,9 @@ GUN_SAYFASI = r"""<!doctype html>
   function selam(){ var s = new Date().getHours(); return s < 5 ? 'İyi geceler' : s < 12 ? 'Günaydın' : s < 18 ? 'İyi günler' : 'İyi akşamlar'; }
   /* Simdi ne yapsam? — YALNIZ saate bakar (veri yok); bunu kartta soyler. */
   function oneri(){
+    var x = veri.serit && GV ? GV.siradaki(veri.serit, simdiISO()) : null;
+    if(x) return { bas:x.ad, ne:'Sıradaki: ' + MAD[x.modul] + (x.saat ? ' · ' + x.saat : ' · ' + DILIM_AD[x.dilim]) + (x.alt ? ' · ' + x.alt : '') + '. Modül kendi planından verdi.',
+      ad:MAD[x.modul] + '’de aç', href:adres(x.modul, x.rota), kaynak:'planından' };
     var s = new Date().getHours(), v = oku();
     if(!v.niyet && s >= 5 && s < 12) return { bas:'Günün niyetini yaz', ne:'Sabah: bugün neyi bitirirsen gün iyi geçmiş olur? Tek cümle yeter.', ad:'Niyete git', href:'#bugun', odak:true };
     if(s < 7 || s >= 23) return { bas:'Dinlen', ne:'Gece: yarına enerji bırak. Uykunu SPİ’de kaydedebilirsin.', ad:'SPİ’yi aç', href:'http://' + HOST + ':4183/' };
@@ -226,8 +276,22 @@ GUN_SAYFASI = r"""<!doctype html>
           return '<button type="button" data-hava="' + h[0] + '" aria-pressed="' + on + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + h[2] + '</svg>' + h[1] + '</button>'; }).join('')
       + '</div><p class="gun-senin">Senin girdiğin</p></section></div>';
   }
+  function blokHtml(x, i){
+    return '<a class="gun-blok" href="' + kac(adres(x.modul, x.rota)) + '" data-durum="' + x.durum + '" style="--renk:var(--' + x.modul + ');--serit:' + SERIT_SIRA[x.modul]
+      + (x.yuzde == null ? '' : ';--x:' + x.yuzde.toFixed(2) + '%') + ';--i:' + i + '" title="' + kac(MAD[x.modul] + ' · ' + x.ad + (x.alt ? ' · ' + x.alt : '') + (x.saat ? ' · ' + x.saat : '')) + '">'
+      + '<span>' + kac(x.ad) + '</span>' + (x.saat ? '<small>' + x.saat + '</small>' : '') + '</a>';
+  }
+  function gorunsun(x){
+    if(secAlan){ var m = ALANLAR.filter(function(a){ return a[0] === secAlan; })[0][2]; if(x.modul !== m) return false; }
+    return gorunum === 'yaptim' ? (x.durum === 'bitti' || x.durum === 'atlandi') : (x.durum === 'bekliyor' || x.durum === 'vakti');
+  }
   function seritHtml(){
     var saatler = []; for(var h = 7; h <= 22; h++) saatler.push(h);
+    var sr = veri.serit, saatli = sr ? sr.bloklar.filter(gorunsun) : [], saatsiz = sr ? sr.saatsiz.filter(gorunsun) : [];
+    var bos = veri.durum === 'bekle' ? 'Üç modülün bugünü getiriliyor…<small>&nbsp;</small>'
+      : veri.durum === 'girisyok' ? 'Hesabınla giriş yapılmamış: veri yok<small>Giriş sayfasından hesabına girince AYS, SPİ ve ESP’nin bugünkü blokları burada dizilir</small>'
+      : veri.durum === 'hata' ? 'Veri katmanı yüklenemedi<small>Sayfayı yenile</small>'
+      : (gorunum === 'yaptim' ? 'Bugün biten blok yok' : 'Bekleyen blok yok') + '<small>' + (secAlan ? 'Bu alanda; alanı yeniden seçince hepsi döner' : 'Modüller bugün için plan yayınladıkça burada belirir') + '</small>';
     return '<section class="gun-kart gun-serit" style="--i:4"><div class="gun-serit__ust"><h2>Günün şeridi</h2>'
       + '<div class="gun-gecis" role="group" aria-label="Şerit">'
       + '<button type="button" data-gorunum="yaptim" aria-pressed="' + (gorunum === 'yaptim') + '">Yaptıklarım</button>'
@@ -236,28 +300,38 @@ GUN_SAYFASI = r"""<!doctype html>
       + '<div class="gun-saat__izgara" aria-hidden="true">' + saatler.map(function(){ return '<span></span>'; }).join('') + '</div>'
       + '<div class="gun-saat__gecmis" aria-hidden="true"></div>'
       + '<div class="gun-saat__simdi" aria-hidden="true"><b id="gun-simdi">' + saatMetni() + '</b></div>'
-      + '<div class="gun-saat__bos">' + (gorunum === 'yaptim'
-          ? 'Bugün kaydedilmiş iş: veri yok<small>AYS, SPİ ve ESP’de kaydettiklerin burada bloklar olarak dizilecek' + (secAlan ? ' (' + kac(ALANLAR.filter(function(a){ return a[0] === secAlan; })[0][1]) + ')' : '') + '</small>'
-          : 'Planlanmış blok: veri yok<small>Yapacaklarını buraya sürükleyerek yerleştireceksin</small>') + '</div>'
+      + (saatli.length ? saatli.map(blokHtml).join('') : (saatsiz.length ? '' : '<div class="gun-saat__bos">' + bos + '</div>'))
       + '<div class="gun-saat__etiket" aria-hidden="true">' + saatler.map(function(h){ return '<span>' + ('0' + h).slice(-2) + '</span>'; }).join('') + '</div>'
-      + '</div></section>';
+      + '</div>'
+      + (saatsiz.length ? '<div class="gun-saatsiz"><span>Saati yok</span>' + saatsiz.map(function(x, i){ return blokHtml(x, i).replace('<span>', '<span>' + kac(DILIM_AD[x.dilim]) + ' · '); }).join('') + '</div>' : '')
+      + (sr && sr.notlar.length ? '<ul class="gun-notlar">' + sr.notlar.map(function(n){ return '<li>' + kac(n) + '</li>'; }).join('') + '</ul>' : '')
+      + '</section>';
   }
   function alanlarHtml(){
+    var oz = veri.karne ? veri.karne.bugunOzet : {};
+    var hal = function(a){ var k = veri.karne && veri.karne.satirlar.filter(function(x){ return x.alan === a[0]; })[0]; return k ? k.hucreler[veri.karne.bugun] : 'veri-yok'; };
     return '<div class="gun-alanlar" role="group" aria-label="Alanlar" style="--i:5">' + ALANLAR.map(function(a){
-      var renk = a[2] === 'AYS' ? 'var(--ays)' : a[2] === 'ESP' ? 'var(--esp)' : 'var(--spi)';
-      return '<button type="button" class="gun-alan" data-alan="' + a[0] + '" aria-pressed="' + (secAlan === a[0]) + '" style="--renk:' + renk + '">'
-        + '<b><i aria-hidden="true"></i>' + a[1] + '</b><span class="gun-alan__cubuk" aria-hidden="true"></span><small>veri yok · ' + a[2] + '</small></button>'; }).join('') + '</div>';
+      var h = hal(a), v = oz[a[0]];
+      var alt = h === 'yapildi' ? '<b>' + v + ' dk</b> · ölçüldü · ' + MAD[a[2]] : h === 'kayit-yok' ? 'bugün kayıt yok · ' + MAD[a[2]] : 'veri yok · ' + MAD[a[2]];
+      return '<button type="button" class="gun-alan" data-alan="' + a[0] + '" aria-pressed="' + (secAlan === a[0]) + '" style="--renk:var(--' + a[2] + ')">'
+        + '<b><i aria-hidden="true"></i>' + a[1] + '</b><span class="gun-alan__cubuk' + (h === 'yapildi' ? ' is-dolu' : h === 'kayit-yok' ? ' is-kayitsiz' : '') + '" aria-hidden="true"></span><small>' + alt + '</small></button>'; }).join('') + '</div>';
   }
   function altHtml(){
-    var o = oneri(), bugunNo = (new Date().getDay() + 6) % 7;
-    return '<div class="gun-alt"><section class="gun-kart gun-oneri" style="--i:6"><h2 class="gun-kart__ad">Şimdi ne yapsam?<small>saate göre</small></h2>'
+    var o = oneri(), k = veri.karne, bugunNo = k ? k.bugun : (new Date().getDay() + 6) % 7;
+    var HAL_AD = { 'yapildi':'yapıldı', 'kayit-yok':'kayıt yok', 'veri-yok':'veri yok', 'gelecek':'henüz gelmedi' };
+    var dolu = k && k.satirlar.some(function(x){ return x.hucreler.indexOf('yapildi') >= 0 || x.hucreler.indexOf('kayit-yok') >= 0; });
+    return '<div class="gun-alt"><section class="gun-kart gun-oneri" style="--i:6"><h2 class="gun-kart__ad">Şimdi ne yapsam?<small>' + (o.kaynak || 'saate göre') + '</small></h2>'
       + '<h3>' + kac(o.bas) + '</h3><p>' + kac(o.ne) + '</p><a href="' + kac(o.href) + '"' + (o.odak ? ' data-odak-niyet' : '') + '>' + kac(o.ad) + ' →</a></section>'
-      + '<section class="gun-kart gun-karne" style="--i:7"><h2 class="gun-kart__ad">Haftanın hayat karnesi<small>veri yok</small></h2>'
-      + '<div class="gun-karne__izgara" role="img" aria-label="Hayat karnesi: bu hafta için veri yok"><b></b>'
+      + '<section class="gun-kart gun-karne" style="--i:7"><h2 class="gun-kart__ad">Haftanın hayat karnesi<small>' + (dolu ? 'modüllerin günlük özetinden' : 'veri yok') + '</small></h2>'
+      + '<div class="gun-karne__izgara"><b></b>'
       + GUN.map(function(g, i){ return '<span' + (i === bugunNo ? ' class="is-bugun"' : '') + '>' + g + '</span>'; }).join('')
-      + ALANLAR.map(function(a){ return '<b>' + a[1] + '</b>' + GUN.map(function(g, i){ return '<i class="gun-kare' + (i === bugunNo ? ' is-bugun' : '') + '"></i>'; }).join(''); }).join('')
-      + '</div><div class="gun-lejant"><span><i style="background:var(--ok, #30a46c)"></i>yapıldı</span><span><i style="background:#e5484d"></i>eksik</span>'
-      + '<span><i class="gun-kare" style="display:inline-block;width:10px;height:10px"></i>veri yok</span></div></section></div>';
+      + ALANLAR.map(function(a, r){ var sat = k ? k.satirlar[r] : null;
+          return '<b>' + a[1] + '</b>' + GUN.map(function(g, i){ var h = sat ? sat.hucreler[i] : 'veri-yok', d = sat ? sat.degerler[i] : null;
+            return '<i class="gun-kare is-' + h + (i === bugunNo ? ' is-bugun' : '') + '" style="--renk:var(--' + a[2] + ')" title="' + a[1] + ' · ' + g + ': ' + HAL_AD[h] + (d != null && h === 'yapildi' ? ' (' + d + ' dk)' : '') + '" role="img" aria-label="' + a[1] + ' ' + g + ': ' + HAL_AD[h] + '"></i>'; }).join(''); }).join('')
+      + '</div><div class="gun-lejant"><span><i style="background:var(--mod)"></i>yapıldı</span>'
+      + '<span><i style="box-shadow:inset 0 0 0 1.5px var(--text-3)"></i>kayıt yok</span>'
+      + '<span><i class="gun-kare" style="display:inline-block;width:10px;height:10px"></i>veri yok</span></div>'
+      + '<p class="gun-senin">Uyku, beslenme ve hareket: SPİ henüz günlük özet yayınlamıyor.</p></section></div>';
   }
   function bosHtml(b){
     var t = b === 'analiz'
@@ -305,6 +379,9 @@ GUN_SAYFASI = r"""<!doctype html>
   }, 30000);
   if(K && K.kur) try{ K.kur(); }catch(e){}
   ciz();
+  yukle();
+  setInterval(yukle, 120000);
+  window.addEventListener('focus', yukle);           // sekmeye donunce taze
   fetch('/api/durum').then(function(r){ return r.json(); }).then(function(d){ merkez = !!d.hkm; ciz(); }).catch(function(){ merkez = false; ciz(); });
 })();
 </script>

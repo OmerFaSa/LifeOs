@@ -1,6 +1,6 @@
 # Gün modülü planı: HKM arayüzü yerine yaşayan bir merkez
 
-> Durum: **F0, F1, F2 tamam** (2026-11-03), sıradaki F3a. Antigravity kotası bittiği
+> Durum: **F0, F1, F2 tamam; F3a veri adımı tamam** (2026-11-03); sıradaki F3a King adımı (§12). Antigravity kotası bittiği
 > için fazları Claude yapar; geniş okuma Kod Asistanı'na (`arastir`) gider.
 > Kararlar 2026-11-03: §9. İlk durum: plan (2026-11-02). Fikirlerin hepsinin görsel
 > örnekleri tuvalde: https://claude.ai/artifact/7ipZ98otKnCdEHtzJLwcy4
@@ -288,3 +288,21 @@ Sol menü, dört grup, iç içelik en çok iki kat:
   Gün oradan okur. Yeni bir depo icat edilmez.
 - **F7 listesine ek:** hesap kapısındaki tanıtım kutularında da «Merkez ·
   Günün özeti» yazıyor (`brand/ortak/hesap.js`).
+
+## 12. F3a (2026-11-03)
+
+- **Veri yolu:** Gün, giriş sayfasıyla ortak oturum çerezinden (`lifeos_hesap`,
+  host'a bağlı, port'a değil) hesap sunucusunu okur: `GET /api/hesap/tekgun`
+  (sunucu sözü 22, modüllerin bugünkü blokları) ve `GET /api/hesap/gunluk`
+  (söz 25, günlük özet). Yeni depo yok, yeni port yok.
+- **Saf katman:** `brand/ortak/gunveri.js` (`serit`, `siradaki`, `karne`;
+  kabul `tools/gunveri_kabul_test.py`). Karnede üç hal: yapıldı, kayıt yok
+  (modül yayınladı, o gün iş yok), veri yok (modülden bilgi yok).
+- **Açık 1 · King aracı (§2b):** niyet, enerji ve iç hava Gün'ün tarayıcısında;
+  modüllerdeki King okuyamaz. Sistem ayarı (`sistem/ayar.py`) yalnız tercih
+  içindir, buraya yazılmaz. Yol: hesap sunucusuna `gun/bugun` yayını
+  (`GUNPLAN_RE` yanına) + King'in okuyan/yazan aracı + sınav cümleleri.
+- **Açık 2 · SPİ günlük özeti:** SPİ `gunluk` yayınlamıyor (yalnız AYS ve
+  ESP); uyku, beslenme, hareket satırları bu yüzden «veri yok».
+- **Ofis notu:** ofis, çalışma ağacı kirliyken görevi başlatmadan bekledi
+  (söylemeden). Ofise görev vermeden önce ağaç temiz olmalı.
