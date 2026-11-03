@@ -1,6 +1,8 @@
 # Gün modülü planı: HKM arayüzü yerine yaşayan bir merkez
 
-> Durum: **plan**, koda geçilmedi (2026-11-02). Fikirlerin hepsinin görsel
+> Durum: **F0 tamam** (2026-11-03), sıradaki F1. Antigravity kotası bittiği
+> için fazları Claude yapar; geniş okuma Kod Asistanı'na (`arastir`) gider.
+> Kararlar 2026-11-03: §9. İlk durum: plan (2026-11-02). Fikirlerin hepsinin görsel
 > örnekleri tuvalde: https://claude.ai/artifact/7ipZ98otKnCdEHtzJLwcy4
 > (sayfalar: Cep, 30 taze fikir, 20 fikir · gün modülü ve modüllerin içi).
 
@@ -43,7 +45,7 @@ ve iç hava.
 
 | Bölüm | Sorusu | İçindekiler (cepten) |
 |---|---|---|
-| **Bugün** | Ne yaptım, ne yapacağım? | Günün şeridi, sabah kurulumu, günün niyeti, enerji pili, ruh hali ve iç hava, kendi sözün, akıllı boşluk, mola menüsü, yorgun gün modu; plan araçları: zaman blokları, haftanın terazisi, iş borcu defteri, üç büyük taş, hayır listesi |
+| **Bugün** (F3a önce, §9.3) | Ne yaptım, ne yapacağım? | Günün şeridi, sabah kurulumu, günün niyeti, enerji pili, ruh hali ve iç hava, kendi sözün, akıllı boşluk, mola menüsü, yorgun gün modu; plan araçları: zaman blokları, haftanın terazisi, iş borcu defteri, üç büyük taş, hayır listesi |
 | **Geçmiş** | Nasıl gidiyor? | Hayat karnesi, günün şekli, ayın dokuması, plan ve gerçek, AYS/SPİ/ESP'den taşınan özetler (§2a); defter: gün sayacı defteri, kayıtlı yapışkan notlar, ses notları, zaman kapsülleri |
 | **Sen** | Ne beni besliyor? | Işık ipliği, kendi bağını kur (bağ güçlendikçe büyüyen enerji), enerji veren / çalan, kök salan alışkanlık (ayrıca derin tasarlanacak), «Ne yapsam?» destesi (öğrenen deste), soru kutusu |
 
@@ -152,9 +154,11 @@ Claude); veri ve mantık parçaları kabul testiyle ofise gider.
 - **F2 · Gün iskeleti (kırmızı):** yeni modül, yeni sunucu açmadan (§2c);
   kabukta yeri, giriş sayfasında HKM kartının yerine Gün kartı, üç boş
   bölüm.
-- **F3 · Bugün (sarı + kırmızı):** günün şeridi, sabah kurulumu, niyet,
-  enerji pili, ruh hali / iç hava, plan araçları. Her parça King aracıyla
-  birlikte (§2b).
+- **F3a · Bugün çekirdeği:** günün şeridi, günün niyeti, tek dokunuşla
+  enerji ve ruh hali, «Şimdi ne yapsam?». Bir hafta kullanılır, pusulayla
+  ölçülür.
+- **F3b · Bugün geri kalanı:** sabah kurulumu, iç hava, plan araçları; yalnız
+  F3a'nın ölçümü yer bırakıyorsa. Her parça King aracıyla birlikte (§2b).
 - **F4 · Geçmiş, sonra Sen:** iki ayrı tur, yine her parça King aracıyla.
 - **F5 · Sistem geneli dokunuşlar:** akışkan menü, damlanın izi, sağ tıkla
   not, ses notu, zaman kapsülü (giriş sayfası).
@@ -162,8 +166,9 @@ Claude); veri ve mantık parçaları kabul testiyle ofise gider.
   envanteri (yeşil, ofis); her birinin Gün'deki karşılığı hazır olunca kart
   kalkar, yerine §4'teki yaşayan görsel gelir (kırmızı). Pusulayla önce ve
   sonra ölçülür.
-- **F7 · HKM web'i kapat:** her şey taşındıktan sonra `:4200` arayüzü
-  yönlendirmeye döner, kabuktaki Merkez satırı kalkar, belgeler güncellenir.
+- **F7 · HKM web'i kullanıcıdan kaldır:** her şey taşındıktan sonra kabuktaki
+  Merkez satırı ve giriş sayfasındaki HKM kartı kalkar; `:4200` kapanmaz,
+  yalnız sahibe açık **Atölye** olur (§9.4). Belgeler güncellenir.
 
 ## 6. Kabul
 
@@ -191,3 +196,77 @@ Claude); veri ve mantık parçaları kabul testiyle ofise gider.
 
 - Modülün kesin adı (çalışma adı «Gün»).
 - `#/para` (bütçe) nereye gidecek?
+
+## 9. Kararlar (2026-11-03)
+
+1. **Antigravity kotası bitti:** fazları Claude yapar. Geniş okuma ve envanter
+   Kod Asistanı'na (`arastir`, ücretsiz modeller) gider; bulgu satırı kendi
+   okunmadan plana girmez (F0'da bir cevap tamamen uydurmaydı).
+2. **Modüllerde bir satır durum kalır (§2a'ya ek):** statik kartlar kalksa da
+   her modülün ana ekranında «bugün ne durumdayım» tek satırı kalır; Gün'e
+   gitmeden görülür.
+3. **Dürüstlük:** hayat karnesi üç hal: *yapıldı*, *eksik*, *veri yok*.
+   Kayıt girilmemiş gün «eksik» boyanmaz. Ruh hali ve enerji «senin girdiğin»
+   diye etiketlenir. «Şimdi ne yapsam?» kuralla seçer, model yalnız cümle
+   kurar. F3, F3a ve F3b'ye bölündü.
+4. **Ofis ve sahip araçları → Atölye:** `#/ofis` bir Ayarlar bölümüne
+   sıkıştırılmaz. HKM web, F7'de **Atölye** olur: yalnız sahip, `:4200`'de,
+   düzenli bir sol menüyle (§10.3). Modüllerin Ayarlar'ındaki «Gelişmiş»
+   yalnız Atölye'ye bir bağlantıdır, ayarları kopyalamaz.
+
+## 10. F0 envanteri (2026-11-03)
+
+Kaynak: `HKM/web/index.html` (7873 satır; `GORUNUMLER` 5344, `AYAR_SEKMELERI`
+5357), `brand/ortak/ayarlar.js`, `brand/ortak/hkmbag.js`, `brand/ortak/kabuk.js`.
+
+### 10.1 Ekranlar ve kartlar → yeni yer
+
+| HKM ekranı | Kartlar (`id`) | Yeni yeri |
+|---|---|---|
+| `#/bugun` Bugün | `serit` (üç sistemin durumu), `onay`, `aktif` (aktif kip, `/api/aktif`), `brifing`, `bugun-sohbet` (King), `konsey` (üç patron), `seri`, `capraz` (Dayanağı göster) | `serit` → Gün › Bugün üst şerit; `brifing` → Gün › Bugün; `bugun-sohbet` → King (zaten var); `konsey`, `capraz` → Gün › Geçmiş; `aktif` → Atölye; `onay` → King Onaylar |
+| `#/sohbet` Sohbet | `gorevliler`, `konusma` (yedekle, temizle) | King (her modülde) + King › Kütüphane › Sohbetler; `gorevliler` → Atölye |
+| `#/profil` Profil | `profil-kimlik`, `profil-hafiza`, `profil-onur`, `profil-kademe`, `profil-rozet`, `profil-muhur` | Gün › Sen (kademe, rozet, mühür, onur); `profil-hafiza` → King «Beni nasıl tanıyorsun» (zaten var) |
+| `#/para` Para (`core/para.py`, Telegram «market 450 TL») | `para-ozet`, `para-vitrin`, `para-ekle`, `para-liste` | **Açık:** kişisel para takibi; Gün'ün işi değil. F7'ye kadar Atölye'de kalır, veri kaybolmaz |
+| `#/sistemler` Sistemler | `tani`, `sistemler`, `hafta`, `ikiz`, `etki`, `gecmis` | `sistemler`, `hafta` → Gün › Geçmiş; `ikiz`, `etki`, `gecmis`, `tani` → Atölye |
+| `#/motto` Hayat Mottosu | `motto-ilkeler`, sekmeler Ağaç / Harita / Ara, `motto-detay` | Gün › Sen («kendi sözün» + düşünce ağacı); ölçmez kuralı aynen |
+| `#/ofis` Ofis | `ofis-katlar`, `ofis-king` (emir onay/iptal), `ofis-is-ver` (`/api/bam/is`), `ofis-isler`, `ofis-kayit`, `ofis-kayitlar`, `ofis-depo-tara`, `ofis-depo`, `ofis-bam` | Atölye › Ofis |
+| `#/hedefler` Hedefler (`core/hedefag.py`) | `hedef-butce`, `hedef-zaman`, `hedef-liste` | Gün › Bugün plan araçları (haftanın terazisi = zaman bütçesi) |
+| `#/teklifler` Onaylar | `teklif-liste`, `teklif-form` | King Onaylar (`yetki`) + Gün › Sen «Ne yapsam?» |
+| `#/ayarlar` Ayarlar | §10.2 | §10.2 |
+
+### 10.2 Ayarlar → yeni yer
+
+| HKM ayar bölümü | Kartlar | Yeni yeri |
+|---|---|---|
+| Yapay zekâ ve bütçe (`yapayzeka`, `butce`, `web`) | `baslarken`, `saglayicilar` (anahtarlar), `gorevler` (görev → model), `butce` (aylık tavan, kur; `/api/budget`), `king-ayar`, `web-ayar`, `web-dene` | Modül › Ayarlar › **King ve bağlantılar**: model seçimi, aylık tavan. Anahtarlar, görev ataması, web araması → Atölye › Yapay zekâ |
+| Kanallar ve cihazlar (`kanallar`, `cihazlar`) | `kanallar` (WhatsApp, Telegram, SMS; `/api/channels`), `ucbag`, `esle`, `cikis`, `esleme` | King ve bağlantılar: kanal aç-kapa, «Bu cihazı bağla». Jetonlar ve webhook → Atölye › Kanallar |
+| Eşikler (`esikler`) | `esikler` (`/api/thresholds`) | King ve bağlantılar: birkaç kaydırıcı. Ham anahtarlar → Atölye |
+| Sunucu (`sunucu`) | `ritim`, `kutu`, `bakim`, `modul-yedek`, `gizlilik` | Atölye › Sunucu; `modul-yedek` modülün Hesap › yedeklerinde zaten var |
+
+Modüllerin Ayarlar'ı bugün (`ayarlar.js` `BOLUMLER`, 13 bölüm): Profiller,
+Görünüm, Arka plan, Ses ve müzik, Animasyon, Erişilebilirlik, King, Minikler,
+Bildirimler, Planlama (`/api/planlama`), Modül ayarları, Güvenlik,
+Bağlantılar. HKM, model, bütçe, kanal ve eşik hiçbirinde yok. **F1:** «King»
+bölümü «King ve bağlantılar» olur; sahiplik `hkmbag.js`'deki cihaz sahibi
+(`lifeos.hkm.sahip.<modül>`) ile belirlenir, yeni bir kimlik kurulmaz.
+
+### 10.3 Atölye menüsü (F7, yalnız sahip)
+
+Sol menü, dört grup, iç içelik en çok iki kat:
+- **Ofis:** Kat şeması · King kuyruğu · İş ver · İşler · Kayıtlar · Bilgi deposu
+- **Yapay zekâ:** Sağlayıcılar ve anahtarlar · Görev → model · Web araması
+- **Kanallar:** WhatsApp · Telegram · SMS · Cihaz eşleme
+- **Sunucu:** Ritim · Kutu · Bakım · Gizlilik · Tanı · Dijital ikiz · Karar geçmişi · Para (açık soru çözülene kadar)
+
+### 10.4 F7'de birlikte değişecek yerler
+
+- `brand/ortak/kabuk.js` 66-72 (`MODULLER.mer`, `SIRA`), 758-811 (sistem
+  seçici, modül menüsü).
+- `sistem/sunucu.py` 449-454 (`KARTLAR`, HKM kartı), 1197-1258 (giriş
+  sayfası HKM durumu).
+- `HKM/daemon.py` 817, 940 (web/index.html servis; Atölye'de kalır).
+- Testler: `HKM/tests/test_web.py`, `test_daemon.py` (355), `test_baslat.py`
+  (73); `tools/entegre.js` (HKM yüzü adımları); `.github/workflows/ci.yml`
+  (290, 331).
+- `uygulama/ios/LifeOS/Web/giris/index.html` (HKM kartı).
+- Telefon iskeleti (`sistem/telefon.py`) HKM'yi zaten içermiyor.
