@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Merkez — LifeOS</title>
+<style>
+/* Merkez artık arayüzü olmayan motordur (Gün plani, 2026-11-03: «HKM'yi komple kaldır,
+   ayarlara taşı»). Bu sayfa yalnız nereye gidileceğini söyler; veri ve jeton yoktur. */
+:root{ color-scheme:light dark; --bg:#f5f6f8; --yuzey:#fff; --fg:#15171a; --fg-2:#4a4f57; --fg-3:#6b717b; --cizgi:#e4e6ea; --mer:#7453D4; }
+@media (prefers-color-scheme:dark){ :root{ --bg:#121214; --yuzey:#1C1C1F; --fg:#ECECEF; --fg-2:#ABABB3; --fg-3:#909099; --cizgi:#2C2C31; --mer:#9A86FF; } }
+*{ box-sizing:border-box; }
+body{ margin:0; min-height:100vh; display:grid; place-items:center; padding:24px 16px; background:var(--bg); color:var(--fg);
+  font:15px/1.55 "Segoe UI Variable Text","Segoe UI",ui-sans-serif,system-ui,-apple-system,Roboto,sans-serif; }
+main{ width:min(520px, 100%); padding:32px 28px; border-radius:20px; background:var(--yuzey); box-shadow:inset 0 0 0 1px var(--cizgi), 0 20px 50px -30px rgba(16,24,40,.35); }
+.isaret{ width:36px; height:36px; background:var(--mer); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+h1{ margin:16px 0 6px; font-size:24px; letter-spacing:-.02em; }
+p{ margin:0 0 14px; color:var(--fg-2); }
+ul{ margin:0 0 18px; padding:0; list-style:none; display:grid; gap:8px; }
+li{ padding:10px 12px; border-radius:12px; box-shadow:inset 0 0 0 1px var(--cizgi); font-size:14px; }
+li b{ display:block; }
+li small{ color:var(--fg-3); }
+a{ color:var(--mer); font-weight:600; }
+.durum{ font-size:12.5px; color:var(--fg-3); }
+</style>
+</head>
+<body>
+<main>
+  <div class="isaret" aria-hidden="true"></div>
+  <h1>Merkez arka planda çalışıyor</h1>
+  <p>King’in hafızası, modelleri ve kuralları burada döner; ayrı bir ekranı artık yok.</p>
+  <ul>
+    <li><b>Ayarlar</b><small>AYS, SPİ ya da ESP › Ayarlar › Merkez: model, bütçe, kanallar, eşikler, zamanlama</small></li>
+    <li><b>Günün özeti ve planı</b><small>Gün bölümü (giriş sayfasının ortası)</small></li>
+    <li><b>Sohbet</b><small>King, her modülde</small></li>
+  </ul>
+  <p><a href="http://127.0.0.1:4180/">LifeOS giriş sayfasına git →</a></p>
+  <p class="durum">Bu adres yalnız bu bilgisayarda açılır.</p>
+</main>
+</body>
+</html>

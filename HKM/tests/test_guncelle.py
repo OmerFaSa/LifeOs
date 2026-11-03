@@ -354,7 +354,7 @@ def run():
         ok('id="guncel"' in h and 'id="surum"' in h)
         for y in ("__KARTLAR__", "__SURUM__", "__IKON__"):
             ok(y not in h)                              # yer tutucu kalmadi
-        ok('data-hkm="1"' in h)
+        no('data-hkm="1"' in h)                         # HKM'nin arayuzu kalkti (Gun plani)
         ok("Yedekle ve güncelle" in h and "yedekle=1" in h)   # ayrismis kopyanin cikisi
         # 2026-10-27 sadelik: gelistirici metni yok (durdurma komutu, commit kodu);
         # guncel sistemde kutu surum etiketine katlanir, etiket yeniden kontrol eder.
@@ -366,7 +366,7 @@ def run():
         # 2026-10-29 (kullanicinin cizimi): ustte kavisli serit G · HKM · S; kutu G ile
         # acilir (bastan kapali); moduller ESP · SPI · AYS sirasiyla dikey kart.
         yay = h[h.index('<nav class="yay"'):h.index("</nav>", h.index('<nav class="yay"'))]
-        ok(yay.index('id="yay-g"') < yay.index('data-hkm="1"') < yay.index('id="surum"'))
+        ok(yay.index('id="yay-g"') < yay.index('data-modul="gun"') < yay.index('id="surum"'))
         ok('aria-controls="guncel"' in yay)
         ok('<section class="guncel" id="guncel"' in h and 'style="--sira:1" hidden>' in h)
         izgara = h[h.index('<div class="izgara">'):]
@@ -442,7 +442,7 @@ def run():
         pc, tel = sunucu.giris_html(), sunucu.giris_html(telefon=True)
         eq(tel.count('class="kart__ok"'), 3)                                    # telefonda «Ac» yerine ok
         no('<span class="dugme">Aç</span>' in tel)
-        ok('<span class="dugme">Aç</span>' in pc and 'data-hkm="1"' in pc)       # PC'de durum ve dugme kalir
+        ok('<span class="dugme">Aç</span>' in pc and 'data-modul="gun"' in pc)   # PC'de dugme ve Gun
     test("secim sayfasi: karar gelene dek gizli, belirme, ozet yuvalari, telefonda ok", t_secim_sayfasi)
 
     # 2026-10-26 denetim: uc modul bu sayfayla AYNI surecte; no-cors yoklamasi
@@ -451,10 +451,10 @@ def run():
     def t_modul_durumu():
         pc = sunucu.giris_html()
         eq(pc.count('<span class="durum" data-hal="bekle" hidden>'), 3)
-        # Gun plani F2 (2026-11-03): HKM karti seridin «M · Merkez» ucu oldu; durumu ucun
-        # kendi noktasinda (data-hal), kartta durum satiri yok.
+        # Gun plani (2026-11-03): HKM karti once «M · Merkez» ucu oldu, sonra arayuzle
+        # birlikte kalkti; Merkez Ayarlar › Merkez'den baslatilir.
         eq(pc.count('<span class="durum" data-hal="bekle">'), 0)
-        ok('id="yay-m" data-hkm="1" data-hal="bekle"' in pc)
+        no('id="yay-m"' in pc)                                                  # Merkez ucu da kalkti; baslatma Ayarlar'da
         no("then(function(){ yak(k, true); })" in pc)
         ok(".catch(function(){ yak(k, false); })" in pc)
     test("giris kartlari: modul durumu yalniz kapaliyken gorunur", t_modul_durumu)

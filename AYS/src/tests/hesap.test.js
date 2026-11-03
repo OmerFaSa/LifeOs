@@ -1175,7 +1175,7 @@
       sahne(c);
       await hazir();
       const t = kapi().querySelector('.hesap-kapi__tanitim');
-      ['AYS', 'SPİ', 'ESP', 'Merkez'].forEach(x => expect(t.textContent).toContain(x));
+      ['AYS', 'SPİ', 'ESP', 'Gün'].forEach(x => expect(t.textContent).toContain(x));
       expect(t.querySelectorAll('.hesap-kapi__sozler li').length).toBe(3);
       expect(kapi().querySelector('h1').textContent).toBe('Hoş geldin');
       expect(kapi().classList.contains('is-form')).toBe(false);

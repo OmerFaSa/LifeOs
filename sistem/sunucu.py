@@ -400,6 +400,18 @@ class Sunucu(SimpleHTTPRequestHandler):
             return zemin.isle(self)
         if self.path.startswith("/api/planlama"):
             return plan_isle(self)
+        if self.path.split("?", 1)[0] == "/api/merkez/ac":
+            # Gun plani (2026-11-03): HKM'nin arayuzu kalkti; Merkez modulun Ayarlar › Merkez'inden
+            # baslatilir. Yalniz bu kapinin kendi sayfasindan (ozel baslik + Origin).
+            izin = merkez_izinli(self.headers, self.server.server_address[1])
+            govde = json.dumps(hkm_ac() if izin else {"ok": False, "mesaj": "İzin yok."}, ensure_ascii=False).encode("utf-8")
+            self.send_response(200 if izin else 403)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(govde)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(govde)
+            return None
         return self.send_error(405)
 
     def do_DELETE(self):
@@ -1202,40 +1214,6 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
   document.querySelectorAll('.kart[data-yokla]').forEach(function(k){
     fetch(k.getAttribute('data-yokla'), { mode:'no-cors' }).catch(function(){ yak(k, false); });
   });
-  /* Merkez ucu (Gun plani F2): eski HKM kartinin isi; durum noktada, eylem metinde. */
-  var hkm = document.getElementById('yay-m');
-  if(!hkm) return;                                    // telefon sayfasinda Merkez ucu yok
-  var hkmDugme = { set textContent(t){ document.getElementById('yay-m-metin').textContent = t; },
-                   get disabled(){ return hkm.disabled; }, set disabled(v){ hkm.disabled = v; } };
-  function hkmCiz(acik, eski){
-    hkm.setAttribute('data-hal', acik ? (eski ? 'eski' : 'acik') : 'kapali');
-    hkmDugme.textContent = acik ? (eski ? 'Merkez · yeniden başlat' : 'Merkez · aç') : 'Merkez · başlat';
-    hkmDugme.disabled = false;
-    hkm.dataset.eski = eski ? '1' : '';
-    hkm.title = eski ? 'HKM eski sürümle çalışıyor; yeni kod için yeniden başlat.' : (acik ? 'Merkez çalışıyor' : 'Merkez kapalı');
-  }
-  fetch('/api/durum').then(function(r){ return r.json(); }).then(function(d){ hkmCiz(!!d.hkm, !!d.hkm_eski); }).catch(function(){ hkmCiz(false); });
-  hkm.addEventListener('click', function(e){
-    e.preventDefault();
-    if(hkmDugme.disabled) return;
-    /* Sekme tiklamayla ayni anda acilir (acilir pencere engeline takilmaz);
-       HKM hazir olunca adrese gider. Eslesme penceresi acildigi icin
-       anahtar sorulmaz. */
-    if(hkm.dataset.eski === '1'){
-      hkmDugme.disabled = true; hkmDugme.textContent = 'Yeniden başlatılıyor…';
-      post('/api/hkm/yeniden').then(function(){ hkmCiz(true, false); }).catch(function(){ hkmCiz(true, true); });
-      return;
-    }
-    var sekme = window.open('', '_blank');
-    hkmDugme.disabled = true; hkmDugme.textContent = 'Açılıyor…';
-    post('/api/hkm').then(function(s){
-      hkmCiz(!!s.ok);
-      /* Gecis (animasyon.js): Merkez'in yuzu yeni sekmede yumusakca belirir. */
-      if(s.ok){ try{ document.cookie = 'lifeos_gecis=hkm.' + Date.now() + '; Path=/; Max-Age=15; SameSite=Strict'; }catch(e){} }
-      if(s.ok){ if(sekme) sekme.location = s.adres; else location.href = s.adres; }
-      else { if(sekme) sekme.close(); hkm.title = s.mesaj || 'HKM açılamadı.'; hkmDugme.textContent = 'Merkez · açılamadı'; }
-    }).catch(function(){ if(sekme) sekme.close(); hkmCiz(false); });
-  });
 })();
 </script>
 <script src="/qr.js"></script>
@@ -1287,14 +1265,12 @@ def giris_html(telefon=False, tema=None):
                 '<span class="dugme">%s</span></div></a>' % ("" if hkm else " hidden", "Başlat" if hkm else "Aç"))
         if not hkm:
             kartlar.append(kart)
-    # Gun plani F2 (2026-11-03): seridin ortasi Gun bolumu (/gun/, ayni sunucu);
-    # HKM'yi baslatan dugme kaybolmaz, seritte «M · Merkez» ucu olur.
+    # Gun plani (2026-11-03): seridin ortasi Gun bolumu (/gun/, ayni sunucu). HKM'nin
+    # arayuzu kalkti; Merkez'i baslatmak modulun Ayarlar › Merkez'inde (/api/merkez/ac).
     gun_kart = ('<a class="kart kart--orta" href="/gun/" data-modul="gun" title="Gün · günü kur, gidişi gör" style="--renk:var(--hkm);--renk-t:var(--hkm-t);--sira:3">'
                 '<div class="kart__ust"><span class="logo" aria-hidden="true"><i class="sekil sekil--gun"></i></span>'
                 '<div class="kart__metin"><div class="kart__ad">Gün</div></div></div>'
                 '<div class="kart__alt"><span class="dugme">Aç</span></div></a>')
-    m_dugme = ('<button type="button" class="yay__uc yay__m" id="yay-m" data-hkm="1" data-hal="bekle" title="Merkez (HKM): King’in hafızası ve motoru">'
-               '<b aria-hidden="true">M</b><span id="yay-m-metin">Merkez</span><i class="yay__nokta" aria-hidden="true"></i></button>')
     s = guncelle.surum()
     surum = ("sürüm %s" % s["tarih"]) if s else "zip sürümü"
     # KAVISLI SERIT: G (guncelleme) · HKM · S (surum). Telefonda yalniz S.
@@ -1306,7 +1282,7 @@ def giris_html(telefon=False, tema=None):
         yay = ('<nav class="yay" aria-label="Güncelleme, Merkez ve sürüm" style="--sira:1">'
                '<button type="button" class="yay__uc yay__g" id="yay-g" aria-expanded="false" aria-controls="guncel" title="Güncelleme">'
                '<b aria-hidden="true">G</b><span>Güncelleme</span><i class="yay__nokta" aria-hidden="true"></i></button>'
-               + gun_kart + m_dugme + s_dugme + '</nav>')
+               + gun_kart + s_dugme + '</nav>')
     sayfa = GIRIS_SAYFASI
     if telefon:
         sayfa = _telefon_iskeleti(sayfa)
@@ -1508,6 +1484,15 @@ def guncelleme_durumu(taze=False, durum=None):
         veri = durum()
         _GUNCEL.update(zaman=time.time(), veri=veri)
         return veri
+
+
+def merkez_izinli(basliklar, kapi):
+    """POST /api/merkez/ac yalniz modulun kendi sayfasindan: X-LifeOS: merkez basligi
+    tarayiciyi on-kontrole zorlar (bu sunucu izin vermez); Origin varsa ayni kapi olmali."""
+    if basliklar.get("X-LifeOS") != "merkez":
+        return False
+    koken = basliklar.get("Origin")
+    return koken in (None, "http://%s:%d" % (HOST, kapi), "http://localhost:%d" % kapi)
 
 
 def guncelleme_izinli(basliklar):

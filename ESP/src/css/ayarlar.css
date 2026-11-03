@@ -505,3 +505,19 @@ html[data-isik="kapali"] .ortam-isik{ display:none !important; }
 .merkezayar__esik output{ min-width:3ch; text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
 .merkezayar__durum{ margin:6px 0 0; min-height:1.2em; font-size:12px; color:var(--text-2); }
 .plan__anahtar[disabled]{ opacity:.4; cursor:not-allowed; }
+
+/* Ayarlar › Merkez (Gün planı, 2026-11-03) */
+.merkezayar__ust{ display:flex; align-items:center; gap:12px; padding:14px 16px; margin-bottom:12px; border-radius:16px;
+  background:color-mix(in oklab, var(--mer, #7453D4) 8%, var(--surface)); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--mer, #7453D4) 22%, var(--border)); }
+.merkezayar__ust > div{ flex:1; min-width:0; display:grid; gap:2px; }
+.merkezayar__ust b{ font-size:14.5px; }
+.merkezayar__ust small{ font-size:12.5px; color:var(--text-2); }
+.merkezayar__isaret{ flex:none; width:22px; height:22px; background:var(--text-3); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+.merkezayar__isaret.is-acik{ background:var(--mer, #7453D4); }
+.merkezayar__sekmeler{ margin-bottom:12px; overflow-x:auto; }
+.merkezayar__sir{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.merkezayar__sir .ayarlar__girdi{ width:180px; }
+.merkezayar__rozet{ font-size:11.5px; font-weight:600; padding:3px 8px; border-radius:99px; background:var(--surface-2); color:var(--text-2); white-space:nowrap; }
+.merkezayar__rozet.is-kurulu{ background:color-mix(in oklab, var(--ok, #30a46c) 14%, var(--surface)); color:var(--ok-ink, var(--ok, #1a7f5a)); }
+.merkezayar__sayi{ width:110px; }
+.merkezayar__arsiv{ margin:12px 2px 0; font-size:12px; color:var(--text-3); }

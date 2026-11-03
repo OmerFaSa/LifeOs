@@ -28,14 +28,14 @@
       const d = koy();
       try{
         const sek = Array.from(d.querySelectorAll('[data-ayar-bolum]'));
-        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Ses ve müzik', 'Animasyon', 'Erişilebilirlik', 'King ve bağlantılar', 'Minikler', 'Bildirimler', 'Planlama',
+        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Ses ve müzik', 'Animasyon', 'Erişilebilirlik', 'King ve bağlantılar', 'Merkez', 'Minikler', 'Bildirimler', 'Planlama',
           'Modül ayarları', 'Güvenlik', 'Bağlantılar']);
         /* Üç alan üstte: Sistem (her yerde), modülün kendisi (yalnız burada), Hesap; solda yalnız seçili alanın bölümleri
            (2026-10-30: «sistem ile yalnız o modül arasındaki ayrımı daha güzel yap»). */
         const alanlar = Array.from(d.querySelectorAll('[data-ayar-alan]'));
         expect(alanlar.map(a => a.getAttribute('data-ayar-alan'))).toEqual(['Sistem', 'Bu modül', 'Hesap']);
         expect(alanlar[0].getAttribute('aria-pressed')).toBe('true');
-        expect(sek.filter(s => !s.hidden).length).toBe(10);
+        expect(sek.filter(s => !s.hidden).length).toBe(11);
         alanlar[1].click();
         expect(sek.filter(s => !s.hidden).map(s => s.textContent)).toEqual(['Modül ayarları']);
         expect(alanlar[1].getAttribute('aria-pressed')).toBe('true');

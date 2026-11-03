@@ -1300,7 +1300,7 @@ window.LIFEOS.HESAP = (function(){
     ['AYS', 'Sınav hazırlığı', '<rect x="5" y="5" width="14" height="14" rx="3.5"/>', '#4F86FF'],
     ['SPİ', 'Sağlık ve toparlanma', '<circle cx="12" cy="12" r="7.5"/>', '#2EC4A9'],
     ['ESP', 'Dil, müzik, okuma', '<rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.4" transform="rotate(45 12 12)"/>', '#F2A93B'],
-    ['Merkez', 'Günün özeti', '<path d="M12 4.3 18.8 8.2v7.6L12 19.7 5.2 15.8V8.2z"/>', '#9A86FF'],
+    ['Gün', 'Günü kur, gidişi gör', '<path d="M5 18.5a7 7 0 0 1 14 0z"/>', '#9A86FF'],
   ];
   const SOZLER = ['PC, telefon ve tablet aynı hesapla', 'Verin hiçbir şirketin sunucusuna gitmez',
     'Bilgisayar kapalıyken de çalışır'];

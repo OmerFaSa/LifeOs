@@ -814,7 +814,11 @@ class Handler(BaseHTTPRequestHandler):
         veri /api/* uzerinden gelir ve orasi bearer ister. Kullanici jetonu
         sayfaya girer, sayfa da kendi tarayicisinda saklar. Ad sabittir,
         istekten gelmez (Meydan sayfasi 2026-10-18'de kaldirildi)."""
-        yol = os.path.join(ROOT, "web", "index.html")
+        # Gun plani (2026-11-03, «HKM'yi komple kaldir, ayarlara tasi»): kok artik
+        # kisa bir bilgi sayfasi; eski yuz yalniz /atolye'de (sahibin arsivi:
+        # Motto, Para, ofis ekranlari baska yere tasinana dek).
+        ad = "index.html" if getattr(self, "_atolye", False) else "merkez.html"
+        yol = os.path.join(ROOT, "web", ad)
         if not os.path.exists(yol):
             return self._send(404, {"error": "yuz kurulu degil"})
         with open(yol, "rb") as f:
@@ -938,6 +942,10 @@ class Handler(BaseHTTPRequestHandler):
     def _get(self):
         u = urlparse(self.path)
         if u.path in ("/", "/index.html"):
+            self._atolye = False
+            return self._send_page()
+        if u.path in ("/atolye", "/atolye/"):
+            self._atolye = True
             return self._send_page()
         if u.path.startswith("/img/seviye/") or u.path.startswith("/img/marka/"):
             return self._send_seviye(u.path)

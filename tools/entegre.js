@@ -985,7 +985,7 @@ async function main(){
     /* Pencere açıkken yüz jetonu kendisi alır (baslat.py yolu); elle jeton
        yolu kapalı pencerede sınanır. */
     if(!await pencereKapansin()) hatalar.push('yuz: esleme penceresi kapanmadi');
-    await yuz.goto('http://127.0.0.1:' + HKM_PORT + '/', { waitUntil:'load' });
+    await yuz.goto('http://127.0.0.1:' + HKM_PORT + '/atolye', { waitUntil:'load' });   // eski yuz arsivde (Gun plani)
     await yuz.waitForSelector('#giris', { timeout:10000 });
     await yuz.fill('#token', TOKEN);
     await yuz.click('#gir');

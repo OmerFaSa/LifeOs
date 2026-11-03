@@ -149,6 +149,37 @@ r = js("""(function(){ var a = %s.kur({ hkm:function(){ return beacon(true); }, 
   return Promise.all([a.oku(), a.yaz({ tur:'paket', deger:'A' })]); })()""" % M, SAHTE)
 bekle("ağ hatası çökertmez", r == [{"ok": False, "neden": "hata"}, {"ok": False, "neden": "hata"}])
 
+# 4. Ayarlar › Merkez: sema, degerler, alan yamasi (2026-11-03)
+CFG2 = dict(CFG, king={"kendiliginden": True, "sormadan_dusuk": False}, schedule={"morning": "08:00", "weekly_day": ""},
+            models={"providers": [{"id": "openrouter", "key_set": True, "key_hint": "••••••xy"}, {"id": "google", "key_set": False, "key_hint": ""}]})
+C2 = json.dumps(CFG2, ensure_ascii=False)
+sk = js("%s.sekmeler(%s)" % (M, C2))
+if sk:
+    bekle("sekmeler sirasi", [x["id"] for x in sk] == ["genel", "yz", "kanallar", "zaman", "bildirim", "esikler"])
+    alan = {a["yol"]: a for s in sk for g in s["gruplar"] for a in g["alanlar"]}
+    bekle("bool degeri", alan["king.kendiliginden"]["deger"] is True and alan["king.kendiliginden"]["tur"] == "bool")
+    bekle("saglayici anahtari yalniz kurulu bilgisi", alan["models.keys.openrouter"]["deger"] == {"kurulu": True, "ipucu": "xy"}
+          and alan["models.keys.google"]["deger"] == {"kurulu": False, "ipucu": ""})
+    bekle("kanal sirri maskeli kalir", alan["channels.whatsapp.token"]["deger"] == {"kurulu": True, "ipucu": "ab"})
+    bekle("esikler araliktan, butun alanlar", "thresholds.bio.hrv_drop_pct" in alan and alan["thresholds.bio.hrv_drop_pct"]["min"] == 1.0)
+    bekle("esik adi", alan["thresholds.bio.sleep_hours_min"]["ad"] == "Uyku tabanı (saat)")
+    bekle("sekmelerde sir degeri yok", "••••" not in json.dumps(sk, ensure_ascii=False))
+
+def ay(yol, deger):
+    return js("%s.alanYama(%s, %s, %s)" % (M, json.dumps(yol), json.dumps(deger, ensure_ascii=False), C2))
+
+bekle("bool alan", ay("king.kendiliginden", False) == {"ok": True, "yama": {"king": {"kendiliginden": False}}})
+bekle("saat alan", ay("schedule.morning", "07:30") == {"ok": True, "yama": {"schedule": {"morning": "07:30"}}})
+bekle("bos saat kapatir", (ay("schedule.evening", "") or {}).get("ok") is True)
+bekle("bozuk saat", (ay("schedule.morning", "25:00") or {}).get("ok") is False)
+bekle("secim", (ay("schedule.weekly_day", "pazar") or {}).get("ok") is True and (ay("schedule.weekly_day", "x") or {}).get("ok") is False)
+bekle("liste virgulden", ay("channels.telegram.allow_from", "a, b ,") == {"ok": True, "yama": {"channels": {"telegram": {"allow_from": ["a", "b"]}}}})
+bekle("sir yazilir", ay("models.keys.google", " AIza-1 ") == {"ok": True, "yama": {"models": {"keys": {"google": "AIza-1"}}}})
+bekle("bos sir yazilmaz", (ay("models.keys.google", "  ") or {}).get("ok") is False)
+bekle("esik aralik", (ay("thresholds.bio.hrv_drop_pct", 95) or {}).get("ok") is False and (ay("thresholds.bio.hrv_drop_pct", 20) or {}).get("ok") is True)
+bekle("sema disi yol yazilmaz", (ay("local_token", "x") or {}).get("ok") is False and (ay("channels.whatsapp.yeni", 1) or {}).get("ok") is False)
+bekle("aralik disi sayi", (ay("aktif.aralik_dk", 1) or {}).get("ok") is False)
+
 if hata:
     print("KIRMIZI (%d):" % len(hata))
     for h in hata:

@@ -37,8 +37,9 @@ for ad in gun.ORTAK:
 
 s = sunucu.giris_html()
 bekle("giriste Gun karti /gun/", 'href="/gun/"' in s and 'data-modul="gun"' in s)
-bekle("HKM karti yerine M ucu", 'id="yay-m"' in s and "kart--hkm" not in s)
-bekle("HKM baslatma betigi duruyor", "post('/api/hkm')" in s and "/api/hkm/yeniden" in s)
+# HKM'nin arayuzu kalkti (2026-11-03): giriste ne HKM karti ne Merkez ucu; baslatma Ayarlar › Merkez'de.
+bekle("giriste HKM yok", 'id="yay-m"' not in s and "kart--hkm" not in s and "post('/api/hkm')" not in s)
+bekle("modul sunucusunda Merkez'i baslatma yolu", "/api/merkez/ac" in (KOK / "sistem" / "sunucu.py").read_text(encoding="utf-8"))
 t = sunucu.giris_html(telefon=True)
 bekle("telefonda Gun ve M yok", 'href="/gun/"' not in t and 'id="yay-m"' not in t)
 portlar = sorted(p for *_, p in sunucu.KARTLAR)
