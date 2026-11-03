@@ -1772,6 +1772,18 @@ window.LIFEOS.HESAP = (function(){
     try{ return await api('/api/hesap/kisi'); }
     catch(e){ if(e && e.kod === 401) return null; throw e; }
   }
+  /* Sunucu sözü 26 (Gün planı F3a): Gün'ün kaydı — niyet, enerji (1–5), iç hava.
+     Gün sayfası ve her modülün King'i okur ve yazar; yazma önceki kaydın üstüne. */
+  async function gunKayit(){
+    try{ return await api('/api/hesap/gunkayit'); }
+    catch(e){ if(e && e.kod === 401) return null; throw e; }
+  }
+  async function gunKayitYaz(v){
+    const d = new Date(ortam.simdi()), gun = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const x = v || {};
+    return api('/api/hesap/yayin', { ad:'gun/kayit', gun,
+      icerik:JSON.stringify({ niyet:x.niyet || '', enerji:x.enerji == null ? null : x.enerji, hava:x.hava || null }) });
+  }
   /* Sunucu sözü 25: üç modülün günlük sayısal özeti (SPİ'nin ruh hâli modeli için). */
   async function gunluk(){
     try{ return await api('/api/hesap/gunluk'); }
@@ -3575,7 +3587,7 @@ window.LIFEOS.HESAP = (function(){
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
-    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
+    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gunKayit, gunKayitYaz, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
     _ortam:ortam, _sifirla, _istek:istek, _ayarTur:ayarTur, _ayarSifirla:() => { sonAyar = -Infinity; ayarAktif = false; }, _cakismaHtml:cakismaHtml, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,

@@ -348,8 +348,9 @@ def run():
     def t_sayfa():
         """Giris sayfasi: dort sistemin KENDI logosu, surum, guncelleme kutusu."""
         h = sunucu.giris_html()
-        for a in ("ays", "spi", "esp", "hkm"):
-            ok('class="sekil sekil--%s"' % a in h)
+        # Gun plani F2: seridin ortasi Gun (kubbe); HKM «M · Merkez» ucu, logosuz.
+        for a in ("ays", "spi", "esp", "gun"):
+            ok('class="sekil sekil--%s"' % a in h, a)
         ok('id="guncel"' in h and 'id="surum"' in h)
         for y in ("__KARTLAR__", "__SURUM__", "__IKON__"):
             ok(y not in h)                              # yer tutucu kalmadi
@@ -405,9 +406,13 @@ def run():
         for a, port in (("ays", 4173), ("spi", 4183), ("esp", 4193)):
             ok('class="sekil sekil--%s"' % a in h, a)
             ok('href="http://127.0.0.1:%d/"' % port in h, a)
-        no(any(x in h for x in ('/logo/hkm.png', 'data-hkm', 'id="guncel"', "<script>", "/api/")),
+        # Acilis videosu betigi (data-acilis, 2026-11-02) telefonda da kalir ve kendi
+        # /api/zemin/acilis adresini dener (yoksa 4 sn'de vazgecer); onun disinda /api/ yok.
+        a = h.index("<script data-acilis>")
+        govde = h[:a] + h[h.index("</script>", a):]
+        no(any(x in govde for x in ('/logo/hkm.png', 'data-hkm', 'id="guncel"', "<script>", "/api/")),
            "telefonda HKM, guncelleme ve bilgisayarin betigi yok")
-        eq(h.count("<script"), 3)                         # giris ekrani (hesap.js) + Animasyonlar ayari + QR
+        eq(h.count("<script"), 4)                         # giris ekrani (hesap.js) + Animasyonlar + QR + acilis videosu
         ok('<script src="/hesap.js" data-giris></script>' in h)
         ok('<script src="/animasyon.js"></script>' in h)
         ok('<script src="/qr.js"></script>' in h)         # hesap sayfasinin QR'i (2026-10-08)
@@ -446,7 +451,10 @@ def run():
     def t_modul_durumu():
         pc = sunucu.giris_html()
         eq(pc.count('<span class="durum" data-hal="bekle" hidden>'), 3)
-        eq(pc.count('<span class="durum" data-hal="bekle">'), 1)                # HKM
+        # Gun plani F2 (2026-11-03): HKM karti seridin «M · Merkez» ucu oldu; durumu ucun
+        # kendi noktasinda (data-hal), kartta durum satiri yok.
+        eq(pc.count('<span class="durum" data-hal="bekle">'), 0)
+        ok('id="yay-m" data-hkm="1" data-hal="bekle"' in pc)
         no("then(function(){ yak(k, true); })" in pc)
         ok(".catch(function(){ yak(k, false); })" in pc)
     test("giris kartlari: modul durumu yalniz kapaliyken gorunur", t_modul_durumu)

@@ -224,7 +224,13 @@ GUN_SAYFASI = r"""<!doctype html>
     if(!oturum()){ veri.durum = 'girisyok'; veri.karne = GV.karne(null, bugun()); ciz(); return; }
     Promise.all([api('/api/hesap/tekgun').catch(function(e){ return e && e.kod === 401 ? Promise.reject(e) : null; }),
                  api('/api/hesap/gunluk').catch(function(e){ return e && e.kod === 401 ? Promise.reject(e) : null; })])
-      .then(function(r){ veri.serit = GV.serit(r[0], simdiISO()); veri.karne = GV.karne(r[1], bugun()); veri.durum = 'hazir'; ciz(); })
+      .then(function(r){ veri.serit = GV.serit(r[0], simdiISO()); veri.karne = GV.karne(r[1], bugun()); veri.durum = 'hazir';
+        return api('/api/hesap/gunkayit').then(function(g){
+          var y = oku();
+          if(g && !g.bayat && (g.niyet || g.enerji || g.hava)) yazYerel({ niyet:g.niyet || undefined, enerji:g.enerji || undefined, hava:g.hava || undefined });
+          else if(y.niyet || y.enerji || y.hava) gonder();      // girişten önce girilen yukarı çıkar
+        }).catch(function(){}); })
+      .then(function(){ if(veri.durum === 'hazir') ciz(); })
       .catch(function(){ veri.durum = 'girisyok'; veri.karne = GV.karne(null, bugun()); ciz(); });
   }
   var HAVA = [['gunes', 'Güneşli', '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>'],
@@ -243,7 +249,21 @@ GUN_SAYFASI = r"""<!doctype html>
   /* Senin girdigin: bu tarayicida, gun basina (F3a'da King ve modullerle paylasilacak). */
   var ANAHTAR = 'lifeos.gun.' + bugun();
   function oku(){ try{ return JSON.parse(localStorage.getItem(ANAHTAR) || '{}') || {}; }catch(e){ return {}; } }
-  function yaz(k, v){ var o = oku(); if(v === null || v === '') delete o[k]; else o[k] = v; try{ localStorage.setItem(ANAHTAR, JSON.stringify(o)); }catch(e){} }
+  function yazYerel(o){ try{ localStorage.setItem(ANAHTAR, JSON.stringify(o)); }catch(e){} }
+  /* Niyet, enerji, ic hava hesap sunucusunda da durur (sunucu sozu 26): King her modulde okur ve yazar. */
+  var gonderSaat = null;
+  function gonder(){
+    clearTimeout(gonderSaat);
+    gonderSaat = setTimeout(function(){
+      var o = oturum(), v = oku();
+      if(!o) return;
+      fetch((o.s || '') + '/api/hesap/yayin', { method:'POST', cache:'no-store', credentials:'omit',
+        headers:{ 'Content-Type':'application/json', 'X-LifeOS':'hesap', Authorization:'Bearer ' + o.j },
+        body:JSON.stringify({ ad:'gun/kayit', gun:bugun(), icerik:JSON.stringify({ niyet:v.niyet || '', enerji:v.enerji || null, hava:v.hava || null }) }) })
+        .catch(function(){ /* sunucu yok: yerelde kalir, sonraki degisiklikte yeniden denenir */ });
+    }, 500);
+  }
+  function yaz(k, v){ var o = oku(); if(v === null || v === '') delete o[k]; else o[k] = v; yazYerel(o); gonder(); }
   function bolum(){ var h = (location.hash || '').slice(1); return BOLUM.some(function(b){ return b.id === h; }) ? h : 'bugun'; }
   function simdiYuzde(){ var d = new Date(), s = d.getHours() + d.getMinutes() / 60; return Math.max(0, Math.min(100, (s - 7) / 16 * 100)); }
   function saatMetni(){ var d = new Date(); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
@@ -341,6 +361,7 @@ GUN_SAYFASI = r"""<!doctype html>
       + '<p style="font-size:13px;color:var(--text-3)">Henüz kurulmadı · veriler AYS, SPİ ve ESP’den gelecek</p></section>';
   }
   function ciz(){
+    if(document.activeElement && document.activeElement.id === 'gun-niyet') return;   // yazarken tazeleme kutuyu silmez
     var b = bolum(), v = oku();
     var cek = BOLUM.map(function(x){ return { id:x.id, ad:x.ad, route:x.id, on:x.id === b, bolumler:[] }; });
     var tarih = new Date().toLocaleDateString('tr-TR', { weekday:'long', day:'numeric', month:'long' });

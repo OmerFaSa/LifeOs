@@ -850,7 +850,8 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
    oturumda oynamadi) ve ayar aciksa; «?video» Ayarlar'daki «Simdi izle»dir.
    Bitince, atlaninca, hatada ya da 4 sn baslamazsa __LIFEOS_ACILIS_VIDEO__
    cozulur: acilis muzigi (muzik.js) ve «son modul» onu bekler. data-acilis:
-   telefon iskeleti ilk duz <script>'i keser (_telefon_iskeleti), bu o degil. */
+   telefon iskeleti ilk duz betik etiketini keser (_telefon_iskeleti), bu o degil;
+   bu yorumda o etiket yazilmaz: kesici onu gercek etiket sanardi. */
 (function(){
   var zorla = /[?&]video(&|$)/.test(location.search);
   try{
@@ -1292,7 +1293,7 @@ def giris_html(telefon=False, tema=None):
                 '<div class="kart__ust"><span class="logo" aria-hidden="true"><i class="sekil sekil--gun"></i></span>'
                 '<div class="kart__metin"><div class="kart__ad">Gün</div></div></div>'
                 '<div class="kart__alt"><span class="dugme">Aç</span></div></a>')
-    m_dugme = ('<button type="button" class="yay__uc yay__m" id="yay-m" data-hal="bekle" title="Merkez (HKM): King’in hafızası ve motoru">'
+    m_dugme = ('<button type="button" class="yay__uc yay__m" id="yay-m" data-hkm="1" data-hal="bekle" title="Merkez (HKM): King’in hafızası ve motoru">'
                '<b aria-hidden="true">M</b><span id="yay-m-metin">Merkez</span><i class="yay__nokta" aria-hidden="true"></i></button>')
     s = guncelle.surum()
     surum = ("sürüm %s" % s["tarih"]) if s else "zip sürümü"

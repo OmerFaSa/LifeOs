@@ -1,6 +1,6 @@
 # Gün modülü planı: HKM arayüzü yerine yaşayan bir merkez
 
-> Durum: **F0, F1, F2 tamam; F3a veri adımı tamam** (2026-11-03); sıradaki F3a King adımı (§12). Antigravity kotası bittiği
+> Durum: **F0, F1, F2, F3a tamam** (2026-11-03); açık: SPİ günlük özeti (§12), sonra F3b. Antigravity kotası bittiği
 > için fazları Claude yapar; geniş okuma Kod Asistanı'na (`arastir`) gider.
 > Kararlar 2026-11-03: §9. İlk durum: plan (2026-11-02). Fikirlerin hepsinin görsel
 > örnekleri tuvalde: https://claude.ai/artifact/7ipZ98otKnCdEHtzJLwcy4
@@ -298,10 +298,12 @@ Sol menü, dört grup, iç içelik en çok iki kat:
 - **Saf katman:** `brand/ortak/gunveri.js` (`serit`, `siradaki`, `karne`;
   kabul `tools/gunveri_kabul_test.py`). Karnede üç hal: yapıldı, kayıt yok
   (modül yayınladı, o gün iş yok), veri yok (modülden bilgi yok).
-- **Açık 1 · King aracı (§2b):** niyet, enerji ve iç hava Gün'ün tarayıcısında;
-  modüllerdeki King okuyamaz. Sistem ayarı (`sistem/ayar.py`) yalnız tercih
-  içindir, buraya yazılmaz. Yol: hesap sunucusuna `gun/bugun` yayını
-  (`GUNPLAN_RE` yanına) + King'in okuyan/yazan aracı + sınav cümleleri.
+- **King aracı (§2b) tamam:** niyet, enerji (1–5), iç hava hesap sunucusunda
+  `gun/kayit` (sunucu sözü 26; ad bilerek `/bugun` ile bitmez, Siri özeti o
+  soneki toplar). Okuma `GET /api/hesap/gunkayit`; dünkü kayıt bayat ve boş.
+  King: `gun_kaydi` (oku) ve `gun_kaydi_yaz` (yaz; önizlenir, onaylanır, geri
+  alınır; verilmeyen alan değişmez), kuralla da çağrılır. Gün sayfası aynı
+  kaydı okur ve yazar. Sınava 6 cümle (306 cümle, 299 geçti; 6 yeni cümle yeşil).
 - **Açık 2 · SPİ günlük özeti:** SPİ `gunluk` yayınlamıyor (yalnız AYS ve
   ESP); uyku, beslenme, hareket satırları bu yüzden «veri yok».
 - **Ofis notu:** ofis, çalışma ağacı kirliyken görevi başlatmadan bekledi

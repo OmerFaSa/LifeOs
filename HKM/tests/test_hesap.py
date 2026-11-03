@@ -1558,6 +1558,32 @@ def run():
     test("Tek gun: modulun JSON plani; bicim ve boyut denetlenir, icerik anlasilmaz; dunku plan bayat; sabit sira",
          t_tek_gun)
 
+    # ------------------------------------------- Gun kaydi (soz 26)
+
+    def t_gun_kayit():
+        with _Depo() as r:
+            k, j = _admin(r)
+            bugun = time.strftime("%Y-%m-%d", time.localtime(r.saat()))
+            dun = time.strftime("%Y-%m-%d", time.localtime(r.saat() - 86400))
+            eq(r.d.gun_kayit(k), {"tarih": bugun, "gun": None, "bayat": False, "niyet": "", "enerji": None, "hava": None, "zaman": None})
+            _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"niyet":"x"}'), 400)                       # gun yok
+            _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"enerji":6}', gun=bugun), 400)            # aralik
+            _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"enerji":true}', gun=bugun), 400)         # bool sayi degil
+            _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"hava":"kar"}', gun=bugun), 400)          # bilinmeyen hava
+            _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"sifre":"x"}', gun=bugun), 400)           # bilinmeyen alan
+            _hata(lambda: r.d.yayinla(k, "gun/kayit", '{"niyet":"' + "a" * 121 + '"}', gun=bugun), 400)
+            r.d.yayinla(k, "gun/kayit", '{"niyet":"  Türev   bitsin ","enerji":4,"hava":"gunes"}', gun=bugun)
+            v = r.d.gun_kayit(k)
+            eq((v["niyet"], v["enerji"], v["hava"], v["bayat"]), ("Türev bitsin", 4, "gunes", False))
+            # Siri ozetine, tek gune, gunluge karismaz.
+            eq(r.d.tek_gun(k)["moduller"], [])
+            eq(r.d.gunluk(k)["moduller"], [])
+            r.d.yayinla(k, "gun/kayit", '{"niyet":"dün"}', gun=dun)
+            v = r.d.gun_kayit(k)
+            eq((v["bayat"], v["niyet"], v["gun"]), (True, "", dun))
+    test("Gun kaydi: niyet, enerji (1-5), ic hava denetlenir; dunku kayit bayat ve bos; oteki yayinlara karismaz",
+         t_gun_kayit)
+
     # ------------------------------------------- Kisi modeli (soz 24)
 
     def t_kisi():

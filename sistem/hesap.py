@@ -247,6 +247,12 @@ KISI_RE = re.compile(r"^(ays|spi|esp)/kisi$")         # soz 24: modulun kisi kay
 KISI_EN_BUYUK = 128 * 1024
 GUNLUK_RE = re.compile(r"^(ays|spi|esp)/gunluk$")     # soz 25: modulun gunluk sayisal ozeti (JSON)
 GUNLUK_EN_BUYUK = 256 * 1024
+# Soz 26 (Gun plani F3a): Gun'un kendi kaydi — niyet, enerji, ic hava. Kullanicinin
+# girdigi deger; Gun sayfasi ve her modulun King'i okur ve yazar. Adi bilerek
+# «/bugun» ile bitmez: gun_ozeti (Siri) o soneki toplar.
+GUNKAYIT_RE = re.compile(r"^gun/kayit$")
+HAVALAR = ("gunes", "parcali", "bulut", "yagmur", "firtina")
+NIYET_EN_UZUN = 120
 GUN_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 YAYIN_EN_BUYUK = 512 * 1024
 TAKVIM_YOL_RE = re.compile(r"^/api/hesap/takvim/([A-Za-z0-9_\-]{20,64})\.ics$")
@@ -1583,9 +1589,28 @@ class Depo:
         """Modulun yayini: takvim (.ics) ya da gunluk ozet (soz 21; duz
         metin ve hangi gunun oldugu). Sunucu icerigi anlamaz."""
         if not isinstance(ad, str) or not (YAYIN_RE.match(ad) or BUGUN_RE.match(ad) or GUNPLAN_RE.match(ad)
-                                           or KISI_RE.match(ad) or GUNLUK_RE.match(ad)):
+                                           or KISI_RE.match(ad) or GUNLUK_RE.match(ad) or GUNKAYIT_RE.match(ad)):
             raise Hata(400, "Geçersiz yayın.")
-        if GUNLUK_RE.match(ad):
+        if GUNKAYIT_RE.match(ad):
+            # Soz 26: bu kayit ANLASILIR (Gun'un kendisi): uc alan, her biri denetlenir.
+            try:
+                v = json.loads(icerik) if isinstance(icerik, str) else None
+            except ValueError:
+                v = None
+            if not isinstance(v, dict) or set(v) - {"niyet", "enerji", "hava"}:
+                raise Hata(400, "Gün kaydı okunamadı.")
+            niyet = " ".join(str(v.get("niyet") or "").split())
+            enerji, hava = v.get("enerji"), v.get("hava")
+            if not isinstance(v.get("niyet", ""), str) or len(niyet) > NIYET_EN_UZUN:
+                raise Hata(400, "Niyet en çok %d karakter." % NIYET_EN_UZUN)
+            if enerji is not None and (isinstance(enerji, bool) or not isinstance(enerji, int) or not 1 <= enerji <= 5):
+                raise Hata(400, "Enerji 1 ile 5 arasında olmalı.")
+            if hava is not None and hava not in HAVALAR:
+                raise Hata(400, "İç hava bilinmiyor.")
+            if not isinstance(gun, str) or not GUN_RE.match(gun):
+                raise Hata(400, "Kaydın günü yazılmalı (YYYY-AA-GG).")
+            icerik = json.dumps({"niyet": niyet, "enerji": enerji, "hava": hava}, ensure_ascii=False)
+        elif GUNLUK_RE.match(ad):
             # Soz 25: icerik anlasilmaz; JSON nesnesi, `gunler` sozlugu, boyut.
             if not isinstance(icerik, str) or len(icerik.encode("utf-8")) > GUNLUK_EN_BUYUK:
                 raise Hata(400, "Günlük özet boş ya da çok büyük.")
@@ -1720,6 +1745,25 @@ class Depo:
                 gunler = {}
             moduller.append({"modul": modul, "gunler": gunler, "zaman": int(x["zaman"] * 1000)})
         return {"moduller": moduller}
+
+    def gun_kayit(self, kullanici):
+        """Soz 26: Gun'un bugunku kaydi (niyet, enerji, ic hava). Dunku kayit bugunun
+        degildir: bayat diye isaretlenir ve alanlari bos doner."""
+        bugun = time.strftime("%Y-%m-%d", time.localtime(self.saat()))
+        with self._islem() as c:
+            x = c.execute("SELECT icerik, gun, zaman FROM yayin WHERE kullanici=? AND ad='gun/kayit'",
+                          (kullanici["id"],)).fetchone()
+        bos = {"tarih": bugun, "gun": None, "bayat": False, "niyet": "", "enerji": None, "hava": None, "zaman": None}
+        if x is None:
+            return bos
+        if x["gun"] != bugun:
+            return dict(bos, gun=x["gun"], bayat=True, zaman=int(x["zaman"] * 1000))
+        try:
+            v = json.loads(x["icerik"])
+        except ValueError:
+            return bos
+        return {"tarih": bugun, "gun": x["gun"], "bayat": False, "niyet": v.get("niyet") or "",
+                "enerji": v.get("enerji"), "hava": v.get("hava"), "zaman": int(x["zaman"] * 1000)}
 
     def kisi(self, kullanici):
         """Soz 24: uc modulun kisi kayitlari, AYS, SPI, ESP sirasiyla; oldugu gibi."""
@@ -2534,6 +2578,8 @@ def isle(h):
                 return _cevap(h, 200, d.kisi(k))
             if yol == "/api/hesap/gunluk":
                 return _cevap(h, 200, d.gunluk(k))
+            if yol == "/api/hesap/gunkayit":
+                return _cevap(h, 200, d.gun_kayit(k))
             if yol == "/api/hesap/uyarilar":
                 return _cevap(h, 200, {"uyarilar": d.uyarilar(k, _jeton(h))})
             if yol == "/api/hesap/baglantilar":

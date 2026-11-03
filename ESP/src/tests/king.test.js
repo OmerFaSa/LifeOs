@@ -2199,6 +2199,39 @@
       expect(r.tur).toBe('kart');
       expect(k.oneCikanlar().map(x => x.ad)).toContain('türev çalışalım');
     }));
+    /* Gün planı F3a (§2b): Gün'ün kaydı King'de de; hesap sunucusu (sunucu sözü 26). */
+    it('Gün kaydı: King okur ve yazar; yazma önizlenir, onaysız yazılmaz, alanlar birleşir; oturum yoksa söyler', () => sahneyle(async () => {
+      const H = window.LIFEOS.HESAP, eski = { durum:H.durum, gunKayit:H.gunKayit, gunKayitYaz:H.gunKayitYaz };
+      let kayit = { tarih:'t', gun:'t', bayat:false, niyet:'', enerji:null, hava:null };
+      const yazilan = [], bekle = async () => { for(let i = 0; i < 8; i++) await new Promise(r => setTimeout(r, 0)); };
+      try{
+        const k = aracSahnesi();
+        k.ac();
+        H.durum = () => ({ oturum:null });
+        await k.isle('enerjim kaç');
+        expect(k.akis().slice(-1)[0].metin).toContain('giriş yapılmamış');
+        H.durum = () => ({ oturum:{ a:'ben' } });
+        H.gunKayit = async () => kayit;
+        H.gunKayitYaz = async v => { yazilan.push(v); kayit = Object.assign({}, kayit, v); return { ok:true }; };
+        await k.isle('enerjim 4');
+        expect(yazilan.length).toBe(0);
+        expect(k.akis().slice(-1)[0].metin).toContain('enerji 4/5');
+        await k.isle('evet');
+        await bekle();
+        expect(yazilan).toEqual([{ niyet:'', enerji:4, hava:null }]);
+        await k.isle('bugünün niyeti: Türevi bitirmek');
+        await k.isle('evet');
+        await bekle();
+        expect(yazilan[1]).toEqual({ niyet:'Türevi bitirmek', enerji:4, hava:null });
+        await k.isle('iç havam yağmurlu');
+        await k.isle('evet');
+        await bekle();
+        expect(yazilan[2]).toEqual({ niyet:'Türevi bitirmek', enerji:4, hava:'yagmur' });
+        await k.isle('bugünkü niyetim ne');
+        expect(k.akis().slice(-1)[0].metin).toContain('«Türevi bitirmek»');
+        expect(k.akis().slice(-1)[0].metin).toContain('yağmurlu');
+      }finally{ Object.assign(H, eski); }
+    }));
     it('Araçlar: bankası olmayan modülde soru satırı yok; olan modülde var', () => sahneyle(async () => {
       const { k } = sahne();
       const adlar = () => k.yetenekler().reduce((a, g) => a.concat(g.l.map(x => x.ad)), []);

@@ -654,6 +654,54 @@
     KI.soyle(r.cevap, r.satirlar);
     return { tur:'harita', konu:r.sonuc.konu || '' };
   }
+  /* GÜN KAYDI (Gün planı F3a, §2b «her özellik King'e de araç olarak gelir»): niyet,
+     enerji (1–5) ve iç hava hesap sunucusunda (sunucu sözü 26); Gün sayfasıyla aynı
+     kayıt. Kullanıcının girdiği değerdir; King yorum katmaz. Yazmak önizlenir ve
+     onaylanır, geri alınır. Kuralla da çağrılır (Merkez kapalıyken). */
+  const HAVA_AD = Object.freeze({ gunes:'güneşli', parcali:'parçalı bulutlu', bulut:'bulutlu', yagmur:'yağmurlu', firtina:'fırtınalı' });
+  const HAVA_ES = [[/fırtına/, 'firtina'], [/yağmur/, 'yagmur'], [/parçalı/, 'parcali'], [/bulut/, 'bulut'], [/güneş/, 'gunes']];
+  const PIL_AD = ['', 'bitkin', 'düşük', 'orta', 'iyi', 'dolu'];
+  const GUN_OKU_RE = /^(?:bugünkü |bugünün |günün )?(?:niyetim|niyet) (?:ne|neydi|nedir)\s*\??$|^enerjim (?:kaç|ne|nasıl)\s*\??$|^iç havam (?:ne|nasıl)\s*\??$|^gün kaydım\s*\??$/;
+  function gunKaydiCoz(t, ham){
+    let m = t.match(/^(?:bugünün |günün )?niyet(?:im|i)?\s*:\s*(.+)$/);
+    if(m){ const n = String(ham).replace(/^[^:]*:\s*/, '').trim().slice(0, 120); return n ? { niyet:n } : null; }
+    m = t.match(/^enerji(?:m)?\s*:?\s*([1-5])(?:\s*\/\s*5)?\s*[.!]?$/);
+    if(m) return { enerji:Number(m[1]) };
+    m = t.match(/^iç hava(?:m)?\s*:?\s*(.+?)\s*[.!]?$/);
+    if(m){ const h = HAVA_ES.find(x => x[0].test(m[1])); return h ? { hava:h[1] } : null; }
+    return null;
+  }
+  const gunKaydiMetin = v => [v.niyet ? 'niyet «' + v.niyet + '»' : '', v.enerji ? 'enerji ' + v.enerji + '/5 (' + PIL_AD[v.enerji] + ')' : '',
+    v.hava ? 'iç hava ' + HAVA_AD[v.hava] : ''].filter(Boolean).join(', ');
+  const gunOturum = () => !!(KI.L.HESAP && KI.L.HESAP.durum && KI.L.HESAP.durum().oturum && KI.L.HESAP.gunKayit);
+  function gunAraclari(){
+    return [
+      { ad:'gun_kaydi', tur:'oku', ornek:'bugünkü niyetim ne', aciklama:'Gün’ün bugünkü kaydı: kullanıcının yazdığı niyet, enerji (1–5) ve iç hava (Gün sayfasıyla aynı kayıt).',
+        kural:t => GUN_OKU_RE.test(t),
+        calistir:async () => {
+          if(!gunOturum()) return { cevap:'Gün kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış.' };
+          const v = await KI.L.HESAP.gunKayit();
+          if(!v || v.bayat || !(v.niyet || v.enerji || v.hava)) return { sonuc:v, cevap:'Bugün için niyet, enerji ya da iç hava girilmemiş. «bugünün niyeti: …» ya da «enerjim 4» yazabilirsin.' };
+          return { sonuc:v, cevap:'Bugün senin girdiğin: ' + gunKaydiMetin(v) + '.' };
+        } },
+      { ad:'gun_kaydi_yaz', tur:'yaz', ornek:'bugünün niyeti: türevi bitirmek', aciklama:'Gün’ün bugünkü kaydını yazar: niyet (en çok 120 karakter), enerji (1–5), iç hava (gunes, parcali, bulut, yagmur, firtina). Verilmeyen alan değişmez.',
+        parametreler:{ type:'object', properties:{ niyet:{ type:'string', maxLength:120 }, enerji:{ type:'integer', minimum:1, maximum:5 },
+          hava:{ type:'string', enum:Object.keys(HAVA_AD) } } },
+        kural:(t, ham) => gunKaydiCoz(t, ham),
+        onizle:p => {
+          if(!gunOturum()) return { hata:'Gün kaydı hesap sunucusunda; bu cihazda hesapla giriş yapılmamış' };
+          const m = gunKaydiMetin(p || {});
+          return m ? { metin:'Gün’e yazılacak: ' + m + '.' } : { hata:'yazılacak bir şey yok' };
+        },
+        uygula:async p => {
+          const H = KI.L.HESAP, eski = await H.gunKayit();
+          const once = eski && !eski.bayat ? { niyet:eski.niyet || '', enerji:eski.enerji || null, hava:eski.hava || null } : { niyet:'', enerji:null, hava:null };
+          const yeni = Object.assign({}, once, ...['niyet', 'enerji', 'hava'].filter(k => p[k] != null && p[k] !== '').map(k => ({ [k]:p[k] })));
+          await H.gunKayitYaz(yeni);
+          return { metin:'Gün’e yazdım: ' + gunKaydiMetin(yeni) + '.', geriAl:async () => { await H.gunKayitYaz(once); } };
+        } },
+    ];
+  }
   function ortakAraclar(){
     const rotalar = KI.SAYFALAR.map(s => s.route).filter((v, i, a) => a.indexOf(v) === i);
     const Y = () => yetkiKatalog();
@@ -759,6 +807,7 @@
          («Onaylıyorum»), HKM deftere yazar ve geri alır (core/disdunya.py). Ekran okuma bir şey değiştirmese de
          ekran içeriği dışarı çıktığı için bu kapıdan geçer (§G kademesi «dış»). */
       ...disAraclar(),
+      ...gunAraclari(),
       { ad:'merkez_raporu', tur:'oku', ornek:'haftalık değerlendirme', aciklama:'Merkez’in raporu: hafta (haftalık değerlendirme) ya da capraz (modüller arası bulgular); sayıları kural motoru yazar.',
         parametreler:{ type:'object', properties:{ tur:{ type:'string', enum:['hafta', 'capraz'] } }, required:['tur'] },
         calistir:p => akisla(m => KI.merkezKomut(m, p.tur, p.tur === 'hafta' ? 'Haftalık değerlendirme' : 'Modüller arası bulgular')) },

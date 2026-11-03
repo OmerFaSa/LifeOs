@@ -2483,6 +2483,63 @@
         "veri"
       ],
       "not": "SPİ günlük kaydında «his» alanı var; onaylı his kaydı önizlemesi de doğru"
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "bugünün niyeti: türevi bitirmek",
+      "b": [
+        "arac:gun_kaydi_yaz"
+      ],
+      "a": {
+        "niyet": "türevi bitirmek"
+      }
+    },
+    {
+      "g": "genel",
+      "m": "spi",
+      "c": "enerjim 3",
+      "b": [
+        "arac:gun_kaydi_yaz"
+      ],
+      "a": {
+        "enerji": 3
+      }
+    },
+    {
+      "g": "genel",
+      "m": "esp",
+      "c": "iç havam bulutlu",
+      "b": [
+        "arac:gun_kaydi_yaz"
+      ],
+      "a": {
+        "hava": "bulut"
+      }
+    },
+    {
+      "g": "genel",
+      "m": "ays",
+      "c": "bugünkü niyetim ne",
+      "b": [
+        "arac:gun_kaydi"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "spi",
+      "c": "enerjim kaç",
+      "b": [
+        "arac:gun_kaydi"
+      ]
+    },
+    {
+      "g": "genel",
+      "m": "esp",
+      "c": "gün kaydım",
+      "b": [
+        "arac:gun_kaydi"
+      ]
     }
   ]
 }
