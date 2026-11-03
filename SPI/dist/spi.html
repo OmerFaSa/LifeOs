@@ -16460,6 +16460,16 @@ html[data-satir="genis"] .site__body p, html[data-satir="genis"] .site__body li{
 /* Ortam ışığı kapalı. */
 html[data-isik="kapali"] .ortam-isik{ display:none !important; }
 
+/* King ve bağlantılar (Gün planı F1) */
+.merkezayar .seg button{ display:grid; gap:1px; justify-items:center; }
+.merkezayar__alt{ font-size:11px; font-weight:500; opacity:.7; font-variant-numeric:tabular-nums; }
+.merkezayar__tavan{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.merkezayar__tavan .ayarlar__girdi{ width:110px; }
+.merkezayar__esik{ display:flex; align-items:center; gap:12px; }
+.merkezayar__esik output{ min-width:3ch; text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
+.merkezayar__durum{ margin:6px 0 0; min-height:1.2em; font-size:12px; color:var(--text-2); }
+.plan__anahtar[disabled]{ opacity:.4; cursor:not-allowed; }
+
 /* ==== css/rota.css ==== */
 /* ROTA — Hareket › Kardiyo'daki rota kartı ve kağıtları (core/rota.js,
    core/harita.js). Sade kalır: harita, bir satır özet, iki hayalet düğme.
@@ -20738,7 +20748,7 @@ window.LIFEOS = window.LIFEOS || {};
     { id:'ses',      ad:'Ses ve müzik',     grup:'Sistem' },
     { id:'hareket',  ad:'Animasyon',        grup:'Sistem' },
     { id:'erisim',   ad:'Erişilebilirlik',  grup:'Sistem' },
-    { id:'king',     ad:'King',             grup:'Sistem' },
+    { id:'king',     ad:'King ve bağlantılar', grup:'Sistem' },
     { id:'ekip',     ad:'Minikler',         grup:'Sistem' },
     { id:'bildirim', ad:'Bildirimler',      grup:'Sistem' },
     { id:'sistem',   ad:'Planlama',         grup:'Sistem' },
@@ -21132,7 +21142,9 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'king') return '<div class="skartlar">' + kart(SIMGE.king, 'King', 'Adı, konuşması ve sesi',
         H('Adı', 'Boş bırakırsan King', '<input class="ayarlar__girdi" type="text" maxlength="20" data-king-ad placeholder="King"'
         + ' value="' + kac((() => { try{ return localStorage.getItem('lifeos.king.ad') || ''; }catch(e){ return ''; } })()) + '" aria-label="King’in adı">')
-      + (L.KING && L.KING.ayarHtml ? cagir(L.KING, 'ayarHtml') : H('Görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml')))) + '</div>';
+      + (L.KING && L.KING.ayarHtml ? cagir(L.KING, 'ayarHtml') : H('Görünüşü', '', cagir(L.KING, 'gorunusSeciciHtml'))))
+      + kart(SIMGE.bag, 'Bağlantılar', 'Merkez üzerinden: model, aylık tavan, kanallar ve hatırlatma eşikleri',
+        '<div class="merkezayar" data-merkez-kok><p class="ayarlar__bos">Yükleniyor…</p></div>') + '</div>';
     if(id === 'ekip') return '<div class="skartlar">' + kart(SIMGE.minik, 'Minikler', 'Sayfada gezen küçük yardımcılar',
         H('Kaç minik', 'Sayfada en çok', cagir(L.MINIK, 'seciciHtml')) + H('Boy', '', cagir(L.MINIK, 'boySeciciHtml')))
       + kart(SIMGE.minik, 'Kimler gezsin', 'Basınca sayfadan çıkar ya da gelir', cagir(L.MINIK, 'galeriHtml')) + '</div>';
@@ -21162,6 +21174,8 @@ window.LIFEOS = window.LIFEOS || {};
     o = o || {};
     if(!BOLUMLER.some(b => b.id === secili)) secili = 'gorunum';
     if(secili === 'sistem' && typeof setTimeout === 'function') setTimeout(() => planYukle(), 0);
+    if(o.hkm) merkezHkm = o.hkm;
+    if(secili === 'king' && typeof setTimeout === 'function') setTimeout(() => merkezYukle(), 0);
     const alan = alanOf(secili);
     const NAV_SIMGE = { profil:SIMGE.profil, gorunum:SIMGE.tema, zemin:SIMGE.resim, ses:SIMGE.ses, hareket:SIMGE.hareket, erisim:SIMGE.goz, king:SIMGE.king,
       ekip:SIMGE.minik, bildirim:SIMGE.zil, sistem:SIMGE.plan, modul:SIMGE.yuzey, hesap:SIMGE.kilit, baglanti:SIMGE.bag };
@@ -21267,6 +21281,83 @@ window.LIFEOS = window.LIFEOS || {};
     panel.querySelectorAll('[data-ayar-bolum]').forEach(b => { b.hidden = alanOf(b.getAttribute('data-ayar-bolum')) !== alan; });
     panel.querySelectorAll('[data-ayar-alan]').forEach(b => { const on = b.getAttribute('data-ayar-alan') === alan; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     if(id === 'sistem') planYukle();
+    if(id === 'king') merkezYukle();
+  }
+
+  /* KING VE BAĞLANTILAR (Gün planı F1, 2026-11-03): HKM'nin ayarlarından yalnız
+     görünen kısım (model paketi, aylık tavan, kanal aç-kapa, üç eşik); veri
+     katmanı LIFEOS.MerkezAyar. Anahtar, jeton ve sunucu ayarları burada yok:
+     yalnız cihazın sahibine «Atölye» bağlantısı (HKM'nin kendi sayfası).
+     Merkez bağlı değilse ya da bu profil sahibi değilse tek cümle söyler. */
+  let merkezHkm = null, merkezSon = null, merkezMesaj = '';
+  function merkezKok(){ return typeof document !== 'undefined' ? document.querySelector('[data-merkez-kok]') : null; }
+  function merkezIstemci(){ return L.MerkezAyar && merkezHkm ? L.MerkezAyar.kur({ hkm:merkezHkm }) : null; }
+  function merkezYukle(){
+    const kok = merkezKok(), m = merkezIstemci();
+    if(!kok) return;
+    if(!m){ kok.innerHTML = merkezYok('baglanti'); return; }
+    m.oku().then(r => { merkezSon = r.ok ? r : null; const k = merkezKok(); if(k) k.innerHTML = r.ok ? merkezCiz(r.gorunum) : merkezYok(r.neden); });
+  }
+  const merkezYok = neden => '<p class="ayarlar__bos">' + (neden === 'baglanti'
+    ? 'Merkez bu profilde bağlı değil. King yine çalışır; model, bütçe ve kanallar Merkez bağlanınca burada görünür.'
+    : 'Merkez şu an yanıt vermiyor; ayarların yerinde. Biraz sonra yeniden aç.') + '</p>';
+  const para = (v, b) => v == null ? 'veri yok' : (b === 'try' ? '₺' : '$') + String(v).replace('.', ',');
+  function merkezCiz(g){
+    const paket = '<div class="seg seg--block" role="group" aria-label="Model paketi">' + g.paket.liste.map(p => {
+      const on = p.id === g.paket.secili;
+      return '<button type="button" class="' + (on ? 'is-on' : '') + '" aria-pressed="' + on + '" data-merkez="paket:' + kac(p.id) + '">'
+        + kac(p.id) + '<small class="merkezayar__alt">' + (p.aylik == null ? 'veri yok' : '≈ ' + para(p.aylik, 'usd') + '/ay · tahmin') + '</small></button>'; }).join('') + '</div>';
+    const birim = g.tavan.birim === 'try' ? 'try' : 'usd';
+    const tavan = '<div class="merkezayar__tavan"><input class="ayarlar__girdi" type="number" min="0" step="1" inputmode="decimal" data-merkez-tavan'
+      + ' value="' + (g.tavan.deger == null ? '' : kac(g.tavan.deger)) + '" placeholder="veri yok" aria-label="Aylık tavan">'
+      + '<div class="seg" role="group" aria-label="Para birimi">' + [['usd', 'USD'], ['try', 'TL']].map(([v, a]) =>
+        '<button type="button" class="' + (v === birim ? 'is-on' : '') + '" aria-pressed="' + (v === birim) + '" data-merkez="birim:' + v + '">' + a + '</button>').join('') + '</div></div>';
+    const kanal = g.kanallar.map(k => H(k.baslik, k.hazir ? (k.acik ? 'Açık: King buradan yazabilir' : 'Kapalı') : 'Kurulu değil; jetonu Atölye’de kurulur',
+      '<button type="button" class="plan__anahtar' + (k.acik ? ' is-on' : '') + '" role="switch" aria-checked="' + k.acik + '" aria-label="' + kac(k.baslik) + '"'
+      + (k.hazir || k.acik ? '' : ' disabled') + ' data-merkez="kanal:' + k.ad + ':' + (!k.acik) + '"><i aria-hidden="true"></i></button>')).join('');
+    const esik = g.esikler.map(e => G(e.etiket, e.min + '–' + e.max + ' arası',
+      '<div class="merkezayar__esik"><input type="range" min="' + e.min + '" max="' + e.max + '" step="' + (e.max - e.min > 50 ? 1 : 0.5) + '" value="' + e.deger + '"'
+      + ' data-merkez-esik="' + kac(e.grup + ':' + e.ad) + '" aria-label="' + kac(e.etiket) + '"><output>' + String(e.deger).replace('.', ',') + '</output></div>')).join('');
+    const atolye = (() => { try{ const b = merkezHkm && merkezHkm(); const a = b && b.settings ? b.settings() : null; return a && a.url ? String(a.url).replace(/\/$/, '') : ''; }catch(e){ return ''; } })();
+    return G('Model paketi', 'Aylık tutar son 30 günün ölçülen kullanımından tahmindir', paket)
+      + H('Aylık tavan', 'Tavana varınca ücretli model çağrısı durur', tavan)
+      + kanal + esik
+      + (atolye ? H('Gelişmiş', 'Anahtarlar, kanal jetonları, ofis ve sunucu: yalnız bu cihazın sahibi',
+        '<a class="btn btn--sm btn--ghost" href="' + kac(atolye) + '/" target="_blank" rel="noopener">Atölye’yi aç</a>') : '')
+      + '<p class="merkezayar__durum" role="status">' + kac(merkezMesaj) + '</p>';
+  }
+  function merkezYaz(d){
+    const m = merkezIstemci();
+    if(!m) return;
+    merkezMesaj = 'Kaydediliyor…';
+    const k0 = merkezKok(), s0 = k0 && k0.querySelector('.merkezayar__durum'); if(s0) s0.textContent = merkezMesaj;
+    m.oku().then(() => m.yaz(d)).then(r => {
+      merkezMesaj = r.ok ? 'Kaydedildi.' : (r.hata || (r.neden === 'baglanti' ? 'Merkez bağlı değil.' : 'Kaydedilemedi; Merkez yanıt vermedi.'));
+      merkezYukle();
+    });
+  }
+  if(typeof document !== 'undefined'){
+    document.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-merkez]') : null;
+      if(!b || b.disabled) return;
+      const [t, a, c] = b.getAttribute('data-merkez').split(':');
+      if(t === 'paket') merkezYaz({ tur:'paket', deger:a });
+      else if(t === 'kanal') merkezYaz({ tur:'kanal', ad:a, acik:c === 'true' });
+      else if(t === 'birim'){ const g = merkezSon && merkezSon.gorunum; const i = document.querySelector('[data-merkez-tavan]');
+        const v = i && i.value !== '' ? Number(i.value) : (g && g.tavan.deger) || 0; merkezYaz({ tur:'tavan', birim:a, deger:v }); }
+    });
+    document.addEventListener('input', e => {
+      const r = e.target && e.target.matches && e.target.matches('[data-merkez-esik]') ? e.target : null;
+      const o = r && r.nextElementSibling;
+      if(o) o.textContent = String(r.value).replace('.', ',');
+    });
+    document.addEventListener('change', e => {
+      const t = e.target;
+      if(!t || !t.matches) return;
+      if(t.matches('[data-merkez-esik]')){ const [g, a] = t.getAttribute('data-merkez-esik').split(':'); merkezYaz({ tur:'esik', grup:g, ad:a, deger:Number(t.value) }); }
+      else if(t.matches('[data-merkez-tavan]') && t.value !== ''){ const b = document.querySelector('[data-merkez^="birim:"].is-on');
+        merkezYaz({ tur:'tavan', birim:b ? b.getAttribute('data-merkez').slice(6) : 'usd', deger:Number(t.value) }); }
+    });
   }
 
   /* SİSTEM PLANLAMASI (kullanıcı, 2026-10-29: «sistemin kendini ne zaman
@@ -22586,7 +22677,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'ba7bce69', at:'2026-11-02 17:43', dirty:true };
+SP.BUILD = { id:'f4d6f050', at:'2026-11-03 17:36', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -55031,6 +55122,136 @@ LIFEOS.HedefAg = (function(){
   }
 
   return { ozet, kur };
+})();
+
+/* ==== js/core/merkezayar.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/merkezayar.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* MERKEZ AYARI — Ayarlar › King ve bağlantılar'ın veri katmanı (Gün planı F1).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/merkezayar.js`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   ==================================================================
+
+   HKM'nin /api/config ayarlarından yalnız GÖRÜNEN kısım: model paketi, aylık
+   tavan, kanal aç-kapa ve modül başına bir eşik. Sözler:
+   1. SIR YOK. Anahtar, jeton, sunucu burada okunmaz ve yazılmaz (Atölye'de).
+   2. Yama yalnız izinli alanı taşır; aralık dışı değer HKM'ye hiç gitmez.
+   3. Ölçülmemiş aylık tutar «veri yok»tur, sıfır değil.
+   Kabul testi: tools/merkezayar_kabul_test.py */
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.MerkezAyar = (function(){
+  'use strict';
+
+  const PAKETLER = ['A', 'A+', 'S', 'S+'];
+  const KANALLAR = [['whatsapp', 'WhatsApp'], ['telegram', 'Telegram']];
+  const ESIKLER = [['bio', 'sleep_hours_min'], ['academic', 'study_minutes_min'], ['intellect', 'practice_minutes_min']];
+  const TAVAN = { usd:[0, 5000], try:[0, 100000] };
+  const sayi = v => typeof v === 'number' && isFinite(v);
+  const nesne = v => v && typeof v === 'object' ? v : {};
+
+  function gorunum(cfg, paketler){
+    cfg = nesne(cfg);
+    const p = nesne(paketler), b = nesne(cfg.budget), birim = b.ceiling_currency === 'try' ? 'try' : 'usd';
+    const deger = birim === 'try' ? b.monthly_try : b.monthly_usd;
+    const th = nesne(cfg.thresholds), ar = nesne(cfg.ranges), ad = nesne(cfg.threshold_names);
+    return {
+      paket:{ secili:p.aktif || null, liste:(Array.isArray(p.paketler) ? p.paketler : []).map(x => ({
+        id:x.id, ad:x.ad, aylik:sayi(x.aylik) ? x.aylik : null, etiket:sayi(x.aylik) ? 'tahmin' : 'veri yok' })) },
+      tavan:{ birim, deger:sayi(deger) ? deger : null },
+      kanallar:KANALLAR.map(([k, baslik]) => { const c = nesne(nesne(cfg.channels)[k]);
+        return { ad:k, baslik, acik:c.enabled === true, hazir:c.ready === true }; }),
+      esikler:ESIKLER.filter(([g, a]) => sayi(nesne(th[g])[a]) && Array.isArray(nesne(ar[g])[a])).map(([g, a]) => ({
+        grup:g, ad:a, etiket:nesne(ad[g])[a] || a, deger:th[g][a], min:ar[g][a][0], max:ar[g][a][1] })),
+    };
+  }
+
+  function yama(d, cfg){
+    d = nesne(d);
+    const red = hata => ({ ok:false, hata });
+    if(d.tur === 'paket') return PAKETLER.indexOf(d.deger) >= 0 ? { ok:true, yama:{ models:{ paket:d.deger } } } : red('Bilinmeyen model paketi.');
+    if(d.tur === 'tavan'){
+      const s = TAVAN[d.birim];
+      if(!s) return red('Para birimi USD ya da TL olmalı.');
+      if(!sayi(d.deger) || d.deger < s[0] || d.deger > s[1]) return red('Aylık tavan ' + s[0] + '–' + s[1] + ' arasında bir sayı olmalı.');
+      return { ok:true, yama:{ budget:{ ceiling_currency:d.birim, [d.birim === 'try' ? 'monthly_try' : 'monthly_usd']:d.deger } } };
+    }
+    if(d.tur === 'kanal'){
+      if(!KANALLAR.some(([k]) => k === d.ad)) return red('Bilinmeyen kanal.');
+      if(typeof d.acik !== 'boolean') return red('Kanal açık ya da kapalı olmalı.');
+      return { ok:true, yama:{ channels:{ [d.ad]:{ enabled:d.acik } } } };
+    }
+    if(d.tur === 'esik'){
+      const r = nesne(nesne(nesne(cfg).ranges)[d.grup])[d.ad];
+      if(!Array.isArray(r)) return red('Bilinmeyen eşik.');
+      if(!sayi(d.deger) || d.deger < r[0] || d.deger > r[1]) return red('Eşik ' + r[0] + '–' + r[1] + ' arasında olmalı.');
+      return { ok:true, yama:{ thresholds:{ [d.grup]:{ [d.ad]:d.deger } } } };
+    }
+    return red('Bu ayar buradan değiştirilmez.');
+  }
+
+  function kur(ortam){
+    ortam = ortam || {};
+    let son = null;
+    function baglanti(){
+      const b = ortam.hkm ? ortam.hkm() : null;
+      if(!b || typeof b.settings !== 'function') return null;
+      const a = b.settings() || {};
+      if(!a.enabled || !a.token || !(b.urlOk ? b.urlOk(a.url) : a.url)) return null;
+      const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
+      return f ? { url:String(a.url).replace(/\/$/, ''), token:a.token, f } : null;
+    }
+    async function istek(k, yol, govde){
+      const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      const t = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;
+      try{
+        const f = k.f;                       // yöntem olarak çağrılmaz («Illegal invocation»)
+        const res = await f(k.url + yol, {
+          method:govde === undefined ? 'GET' : 'POST',
+          headers:Object.assign({ 'Authorization':'Bearer ' + k.token }, govde === undefined ? {} : { 'Content-Type':'application/json' }),
+          body:govde === undefined ? undefined : JSON.stringify(govde),
+          signal:ctrl ? ctrl.signal : undefined,
+        });
+        let veri = null;
+        try{ veri = await res.json(); }catch(e){ /* gövdesiz */ }
+        return { durum:res.status, veri };
+      }finally{
+        if(t) clearTimeout(t);
+      }
+    }
+    async function oku(){
+      const k = baglanti();
+      if(!k) return { ok:false, neden:'baglanti' };
+      try{
+        const [c, p] = await Promise.all([istek(k, '/api/config'), istek(k, '/api/models/paketler')]);
+        if(c.durum !== 200 || p.durum !== 200) return { ok:false, neden:'hata' };
+        son = c.veri;
+        return { ok:true, cfg:c.veri, paketler:p.veri, gorunum:gorunum(c.veri, p.veri) };
+      }catch(e){
+        return { ok:false, neden:'hata' };
+      }
+    }
+    async function yaz(d){
+      const y = yama(d, son || {});
+      if(!y.ok) return y;
+      const k = baglanti();
+      if(!k) return { ok:false, neden:'baglanti' };
+      try{
+        const r = await istek(k, '/api/config', y.yama);
+        if(r.durum === 200) return { ok:true };
+        if(r.durum === 422) return { ok:false, hata:(nesne(r.veri).errors || []).join('; ') || 'Merkez değeri kabul etmedi.' };
+        return { ok:false, neden:'hata' };
+      }catch(e){
+        return { ok:false, neden:'hata' };
+      }
+    }
+    return { oku, yaz };
+  }
+
+  return { gorunum, yama, kur };
 })();
 
 /* ==== js/core/yedekag.js ==== */
@@ -106884,7 +107105,7 @@ SP.App = (function(){
     const ad = (p.name || '').trim();
     /* AYARLAR (kullanıcı, 2026-10-29): eski «Görünüm» paneli bölüm bölüm ortak
        Ayarlar panelidir (brand/ortak/ayarlar.js); kenardaki «Ayarlar» açar. */
-    if(window.LIFEOS && LIFEOS.AYARLAR) return LIFEOS.AYARLAR.html({
+    if(window.LIFEOS && LIFEOS.AYARLAR) return LIFEOS.AYARLAR.html({ hkm:() => SP.Beacon,
       tema:String(SP.C.TemaSecici({ value:theme, act:'set-theme' })),
       profil:{ ad, alt:brandLine(), route:'family' },
       modul:safe(() => (SECTIONS.find(s => s.id === 'ayarlar') || { views:[] }).views.map(v => ({ ad:v.label, route:v.route })), []) || [] });
