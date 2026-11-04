@@ -47395,7 +47395,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'752c4568', at:'2026-11-04 15:50', dirty:false };
+R.BUILD = { id:'7040c193', at:'2026-11-04 16:13', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -52942,46 +52942,6 @@ window.LIFEOS = window.LIFEOS || {};
    Açılır paneller (modül menüsü, bildirimler, hızlı ekle, görünüm) tek
    katman yöneticisinden geçer: dışarı tıklayınca, Esc'de ve pencere
    boyutu değişince kapanır. */
-window.LIFEOS.PARCA.yazilar({
-  'ortak.kabuk.akademik-yol-sistemi':'Akademik Yol Sistemi',
-  'ortak.kabuk.saglik-performans-i-zleyicis':'Sağlık Performans İzleyicisi',
-  'ortak.kabuk.entelektuel-seviye-planlayic':'Entelektüel Seviye Planlayıcı',
-  'ortak.kabuk.gunu-kur-gidisi-gor':'Günü kur, gidişi gör',
-  'ortak.kabuk.hayat-kontrol-merkezi':'Hayat Kontrol Merkezi',
-  'ortak.kabuk.merkez-bagli':'Merkez bağlı',
-  'ortak.kabuk.merkeze-ulasilamadi':'Merkeze ulaşılamadı',
-  'ortak.kabuk.merkez-acik-henuz-gonderim-o':'Merkez açık, henüz gönderim olmadı — her şey çalışıyor',
-  'ortak.kabuk.merkez-kapali-her-sey':'Merkez kapalı — her şey çalışıyor',
-  'ortak.kabuk.rutbe':'Rütbe ',
-  'ortak.kabuk.ara':'Ara',
-  'ortak.kabuk.ctrl-k':'Ctrl K',
-  'ortak.kabuk.bildirimler':'Bildirimler, ',
-  'ortak.kabuk.bildirimler-yok':'Bildirimler, yok',
-  'ortak.kabuk.profil-ve-gorunum':'Profil ve görünüm',
-  'ortak.kabuk.sistem':'Sistem: ',
-  'ortak.kabuk.kartlarim':'Kartlarım',
-  'ortak.kabuk.esp-spi-ays':'ESP · SPİ · AYS kartları',
-  'ortak.kabuk.menu':'Menü',
-  'ortak.kabuk.lifeos':'LifeOS',
-  'ortak.kabuk.ctrl-ctrl':'Ctrl Ctrl',
-  'ortak.kabuk.sayfa-duzeni':'Sayfa düzeni',
-  'ortak.kabuk.radyo-ve-sesler':'Radyo ve sesler',
-  'ortak.kabuk.radyo':'Radyo',
-  'ortak.kabuk.is-kaldi':'iş kaldı',
-  'ortak.kabuk.gunun':'Günün ',
-  'ortak.kabuk.sayfabasi-sayfabasi-bilgi-bi':'.sayfabasi .sayfabasi__bilgi .bilgikart',
-  'ortak.kabuk.bu-ekran-nasil-okunur':'Bu ekran nasıl okunur',
-  'ortak.kabuk.merkez-onerileri':'Merkez önerileri',
-  'ortak.kabuk.acil':'Acil',
-  'ortak.kabuk.bekleyen-bir-sey-yok':'Bekleyen bir şey yok.',
-  'ortak.kabuk.yeni-bir-sey-olunca-burada':'Yeni bir şey olunca burada görünür.',
-  'ortak.kabuk.bildirimler-2':'Bildirimler',
-  'ortak.kabuk.hepsini-gordum':'Hepsini gördüm',
-  'ortak.kabuk.temizle':'Temizle',
-  'ortak.kabuk.geri-al':'Geri al',
-  'ortak.kabuk.kenar-cubugunu':'Kenar çubuğunu ',
-});
-
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -53013,11 +52973,11 @@ window.LIFEOS = window.LIFEOS || {};
      (tek sunucuyla açılınca sistemler bu kapılardadır). Başka bir yoldan
      açılmış sayfada öteki sistemin adresi BİLİNMEZ ve uydurulmaz. */
   const MODULLER = Object.freeze({
-    ays:{ harf:'A', ad:'AYS',    uzun:yz('ortak.kabuk.akademik-yol-sistemi'),      not:'sınav hazırlığı',        kapi:4173 },
-    spi:{ harf:'S', ad:'SPİ',    uzun:yz('ortak.kabuk.saglik-performans-i-zleyicis'), not:'uyku, beslenme, hareket', kapi:4183 },
-    esp:{ harf:'E', ad:'ESP',    uzun:yz('ortak.kabuk.entelektuel-seviye-planlayic'), not:'dil, felsefe, müzik',    kapi:4193 },
-    gun:{ harf:'G', ad:'Gün',    uzun:yz('ortak.kabuk.gunu-kur-gidisi-gor'),      not:'günün planı ve gidişi',   kapi:4180, yol:'gun/' },
-  mer:{ harf:'M', ad:'Merkez', uzun:yz('ortak.kabuk.hayat-kontrol-merkezi'),     not:'üçünün özeti',            kapi:4200 },
+    ays:{ harf:'A', ad:'AYS',    uzun:'Akademik Yol Sistemi',      not:'sınav hazırlığı',        kapi:4173 },
+    spi:{ harf:'S', ad:'SPİ',    uzun:'Sağlık Performans İzleyicisi', not:'uyku, beslenme, hareket', kapi:4183 },
+    esp:{ harf:'E', ad:'ESP',    uzun:'Entelektüel Seviye Planlayıcı', not:'dil, felsefe, müzik',    kapi:4193 },
+    gun:{ harf:'G', ad:'Gün',    uzun:'Günü kur, gidişi gör',      not:'günün planı ve gidişi',   kapi:4180, yol:'gun/' },
+  mer:{ harf:'M', ad:'Merkez', uzun:'Hayat Kontrol Merkezi',     not:'üçünün özeti',            kapi:4200 },
   });
   const SIRA = ['ays', 'spi', 'esp', 'gun'];   // Merkez menude yok (arayuzu kalkti); kimligi bildirimler icin durur
 
@@ -53123,10 +53083,10 @@ window.LIFEOS = window.LIFEOS || {};
   function baglantiNoktasi(b){
     b = b || {};
     const d = b.durum || 'kapali';
-    const metin = d === 'bagli' ? yz('ortak.kabuk.merkez-bagli') + (b.saat ? ' · ' + b.saat : '')
-      : d === 'ulasilamadi' ? yz('ortak.kabuk.merkeze-ulasilamadi') + (b.saat ? ' · son deneme ' + b.saat : '') + ' — her şey çalışıyor'
-      : d === 'bekliyor' ? yz('ortak.kabuk.merkez-acik-henuz-gonderim-o')
-      : yz('ortak.kabuk.merkez-kapali-her-sey');
+    const metin = d === 'bagli' ? 'Merkez bağlı' + (b.saat ? ' · ' + b.saat : '')
+      : d === 'ulasilamadi' ? 'Merkeze ulaşılamadı' + (b.saat ? ' · son deneme ' + b.saat : '') + ' — her şey çalışıyor'
+      : d === 'bekliyor' ? 'Merkez açık, henüz gönderim olmadı — her şey çalışıyor'
+      : 'Merkez kapalı — her şey çalışıyor';
     return '<button class="ust__bag ust__bag--' + kac(d) + '" data-oz="118" data-act="go" data-route="'
       + kac(b.route || 'guide') + '" title="' + kac(metin) + '" aria-label="' + kac(metin) + '">'
       + '<i aria-hidden="true"></i>'
@@ -53141,7 +53101,7 @@ window.LIFEOS = window.LIFEOS || {};
       + (r.renk ? ' style="--kademe-renk:' + kac(r.renk) + (r.gorsel ? ';--kademe-gorsel:url(&quot;' + kac(r.gorsel) + '&quot;)' : '') + '"' : '')
       + '><span>' + kac(r.kademe == null ? '' : r.kademe) + '</span></span>';
     const ayrinti = r.tamam ? 'en üst basamak' : (r.icindeMetin || r.icinde) + '/' + (r.gerekenMetin || r.gereken);
-    const etiket = yz('ortak.kabuk.rutbe') + (r.ad || '') + ' ' + r.etiket + ', ' + ayrinti;
+    const etiket = 'Rütbe ' + (r.ad || '') + ' ' + r.etiket + ', ' + ayrinti;
     return '<button class="ust__rutbe" data-oz="140" data-act="go" data-route="' + kac(r.route || 'rutbe') + '"'
       + ' aria-label="' + kac(etiket) + '" title="' + kac(etiket) + '">'
       + muhur
@@ -53176,14 +53136,14 @@ window.LIFEOS = window.LIFEOS || {};
       +     ' aria-label="' + kac(onay.sayi + ' öneri onay bekliyor') + '">' + simge('onaylar')
       +     '<span class="ust__sayac" data-h-sayi="onay">' + kac(onay.sayi) + '</span></button>' : '')
       +   '<button class="ust__ara" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)">'
-      +     simge('ara') + ('<span class="ust__ara-yazi">' + yz('ortak.kabuk.ara') + '</span><kbd>' + yz('ortak.kabuk.ctrl-k') + '</kbd></button>')
+      +     simge('ara') + '<span class="ust__ara-yazi">Ara</span><kbd>Ctrl K</kbd></button>'
       +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
-      +     ' aria-label="' + kac(bil.sayi ? yz('ortak.kabuk.bildirimler') + bil.sayi + ' tane' : yz('ortak.kabuk.bildirimler-yok')) + '">'
+      +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
       +     simge('zil') + (bil.acil ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'
       +   baglantiNoktasi(o.baglanti)
       +   rutbeCipi(o.rutbe)
       +   '<button class="ust__profil" data-act="open-appearance" aria-haspopup="dialog"'
-      +     ' aria-label="' + kac(yz('ortak.kabuk.profil-ve-gorunum') + (prof.ad ? ' — ' + prof.ad : '')) + '">' + kac(harf) + '</button>'
+      +     ' aria-label="' + kac('Profil ve görünüm' + (prof.ad ? ' — ' + prof.ad : '')) + '">' + kac(harf) + '</button>'
       +   '<button class="ust__menu" data-act="toggle-sidebar" aria-label="Menü">' + simge('menu') + '</button>'
       + '</div></div></header>';
   }
@@ -53213,7 +53173,7 @@ window.LIFEOS = window.LIFEOS || {};
     const giris = girisAdres(loc);
     return '<div class="kenar__moduller" data-oz="008 155">'
       + '<button type="button" class="kenar__modulsec" aria-expanded="false" aria-controls="' + pid + '"'
-      +   ' aria-label="' + kac(yz('ortak.kabuk.sistem') + su.ad + ' — değiştir') + '" title="Sistem değiştir">'
+      +   ' aria-label="' + kac('Sistem: ' + su.ad + ' — değiştir') + '" title="Sistem değiştir">'
       +   '<i class="kenar__nokta kenar__nokta--' + kac(modul || 'ays') + '" aria-hidden="true"></i>'
       +   '<span class="kenar__modulsec-ad">' + kac(su.ad) + '</span>'
       +   '<svg class="kenar__modulsec-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>'
@@ -53229,7 +53189,7 @@ window.LIFEOS = window.LIFEOS || {};
       /* Kullanıcı (2026-11-02): «3 kart seçtiğimiz yere dönülebilsin» — giriş sayfası (ESP·SPİ·AYS kartları, :4180). */
       + (giris ? '<a class="kenar__modul kenar__modul--kartlarim" href="' + kac(giris) + '">'
         + '<svg class="kenar__modul-simge" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="12.5" height="13" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v11"/></svg>'
-        + ('<span class="kenar__modul-metin"><span class="kenar__modul-ad">' + yz('ortak.kabuk.kartlarim') + '</span><span class="kenar__modul-not">' + yz('ortak.kabuk.esp-spi-ays') + '</span></span></a>') : '')
+        + '<span class="kenar__modul-metin"><span class="kenar__modul-ad">Kartlarım</span><span class="kenar__modul-not">ESP · SPİ · AYS kartları</span></span></a>' : '')
       + '</div></div></div>';
   }
   function modulPencereKapat(haric){
@@ -53303,7 +53263,7 @@ window.LIFEOS = window.LIFEOS || {};
     const menuSayac = tum.filter(c => gorunen.indexOf(c) < 0).reduce((a, c) => a + (Number(c.sayac) || 0), 0);
     const menu = tum.length ? '<div class="kenar__cekmece-kap"><button class="kenar__cekmece" data-act="toggle-sidebar" data-cekmece="menu" title="Menü"'
       + ' aria-label="' + kac('Menü' + (menuSayac ? ', ' + menuSayac + ' bekleyen' : '')) + '">'
-      + simge('menu') + ('<span class="kenar__ad">' + yz('ortak.kabuk.menu') + '</span>')
+      + simge('menu') + '<span class="kenar__ad">Menü</span>'
       + (menuSayac ? '<span class="kenar__sayac" data-oz="115" aria-hidden="true">' + menuSayac + '</span>' : '') + '</button></div>' : '';
     const cek = gorunen.map(cekHtml).join('') + menu;
     /* Kenar açıkken (fare üstünde ya da odak içinde) yeniden çizilirse —
@@ -53318,7 +53278,7 @@ window.LIFEOS = window.LIFEOS || {};
     const tutulu = kenarTutuluMu();
     return '<aside class="kenar' + (acikKaldi ? ' kenar--acik-kaldi' : '') + (tutulu ? ' kenar--tutulu' : '') + '" id="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
       + '<button class="kenar__marka" data-act="modul-menu" aria-haspopup="dialog" aria-label="LifeOS — sistemler arası geçiş">'
-      +   ('<i class="kenar__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></i><span>' + yz('ortak.kabuk.lifeos') + '</span></button>')
+      +   '<i class="kenar__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></i><span>LifeOS</span></button>'
       + modulGecisi(o.modul, o.loc)
       + (o.baglam ? '<p class="kenar__baglam">' + kac(o.baglam) + '</p>' : '')
       + '<nav class="kenar__nav" aria-label="Çekmeceler">' + cek + '</nav>'
@@ -53362,22 +53322,22 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="kenar__grup">'
       /* King (brand/ortak/king.js): her yerden sade sohbet; Ctrl iki kez. */
       + '<button class="ust__king kenar__arac" type="button" data-king-ac aria-haspopup="dialog"'
-      +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket(window.LIFEOS.KING && window.LIFEOS.KING.ad ? window.LIFEOS.KING.ad() : 'King') + kisayol(yz('ortak.kabuk.ctrl-ctrl')) + '</button>'
+      +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket(window.LIFEOS.KING && window.LIFEOS.KING.ad ? window.LIFEOS.KING.ad() : 'King') + kisayol('Ctrl Ctrl') + '</button>'
       + '<button class="ust__ayarlar kenar__arac" type="button" data-act="open-appearance" aria-haspopup="dialog"'
       +   ' aria-label="Ayarlar" title="Ayarlar">' + simge('ayarlar') + etiket('Ayarlar') + '</button>'
       + '</div><div class="kenar__benler">'
       + '<div class="kenar__benpencere" id="' + pid + '" role="group" aria-label="Araçlar"><div class="kenar__benliste">'
       + '<button class="ust__ara kenar__arac" type="button" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)" title="Ara (Ctrl K)">'
-      +   simge('ara') + etiket('Ara') + kisayol(yz('ortak.kabuk.ctrl-k')) + '</button>'
+      +   simge('ara') + etiket('Ara') + kisayol('Ctrl K') + '</button>'
       + '<button class="ust__zil kenar__arac" type="button" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
-      +   ' aria-label="' + kac(bil.sayi ? yz('ortak.kabuk.bildirimler') + bil.sayi + ' tane' : yz('ortak.kabuk.bildirimler-yok')) + '">'
+      +   ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
       +   simge('zil') + (zil ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler')
       +   (bil.sayi ? '<span class="kenar__sayi' + (bil.acil ? ' is-acil' : '') + '" aria-hidden="true">' + kac(bil.sayi) + '</span>' : '')
       + '</button>'
       + ustSes(true)
       + '<button class="ust__gizli kenar__arac" type="button" aria-haspopup="dialog" aria-expanded="false"'
       +   ' aria-label="Sayfa düzeni" title="Sayfa düzeni: sırala, küçült, gizle">'
-      +   simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i>' + etiket(yz('ortak.kabuk.sayfa-duzeni')) + '</button>'
+      +   simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i>' + etiket('Sayfa düzeni') + '</button>'
       + '</div></div>'
       + '<div class="kenar__ben">'
       + '<button class="ust__profil kenar__arac kenar__arac--profil kenar__bensec" type="button" aria-expanded="false" aria-controls="' + pid + '"'
@@ -53439,26 +53399,26 @@ window.LIFEOS = window.LIFEOS || {};
       +   ustSes()
       +   ustHesap()
       +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
-      +     ' aria-label="' + kac(bil.sayi ? yz('ortak.kabuk.bildirimler') + bil.sayi + ' tane' : yz('ortak.kabuk.bildirimler-yok')) + '">'
+      +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
       +     simge('zil') + (zilNoktaVar(bil) ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'
       +   (r && r.etiket && r.etiket !== '—' ? '<button class="ust__madalya ust--telefon" data-act="go" data-route="' + kac(r.route || 'rutbe') + '"'
-      +     ' aria-label="' + kac(yz('ortak.kabuk.rutbe') + (r.ad || '') + ' ' + r.etiket) + '">'
+      +     ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '">'
       +     simge('rutbe') + '</button>' : '')   /* SADE (2026-10-05): renkli daire değil, çizgi madalya */
       +   '<button class="ust__profil" data-act="open-appearance" aria-haspopup="dialog"'
-      +     ' aria-label="' + kac(yz('ortak.kabuk.profil-ve-gorunum') + (prof.ad ? ' — ' + prof.ad : '')) + '">' + kac(harf) + '</button>'
+      +     ' aria-label="' + kac('Profil ve görünüm' + (prof.ad ? ' — ' + prof.ad : '')) + '">' + kac(harf) + '</button>'
       +   '<button class="ust__menu" data-act="toggle-sidebar" aria-label="Menü">' + simge('menu') + '</button>'
       + '</div></div></header>';
   }
 
   function ustSes(kenarda){
     const S = L.SES;
-    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:yz('ortak.kabuk.radyo-ve-sesler'), ipucu:'Radyo', ad:'' };
+    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Radyo ve sesler', ipucu:'Radyo', ad:'' };
     return '<button class="ust__ses' + (kenarda ? ' kenar__arac' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
       + ' aria-expanded="' + (katmanAcik('kabuk-ses') ? 'true' : 'false') + '"'
       + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
       + simge('muzik') + '<i class="ust__ses-nokta" aria-hidden="true"></i>'
       /* Kenarda çalan istasyonun adı (ses.js guncelle yerinde tazeler). */
-      + (kenarda ? ('<span class="kenar__ad">' + yz('ortak.kabuk.radyo') + '</span><span class="kenar__ek" data-ses-ad aria-hidden="true">') + kac(d.ad || '') + '</span>' : '')
+      + (kenarda ? '<span class="kenar__ad">Radyo</span><span class="kenar__ek" data-ses-ad aria-hidden="true">' + kac(d.ad || '') + '</span>' : '')
       + '</button>';
   }
 
@@ -53506,7 +53466,7 @@ window.LIFEOS = window.LIFEOS || {};
         + (s.ozet ? '<span class="gunserit__ozet">' + kac(s.ozet) + '</span>' : '')
         + '</div>';
     }).join('');
-    const kalan = o.kalan == null ? '' : '<span class="gunserit__kalan"><b>' + kac(o.kalan) + ('</b> ' + yz('ortak.kabuk.is-kaldi') + '</span>');
+    const kalan = o.kalan == null ? '' : '<span class="gunserit__kalan"><b>' + kac(o.kalan) + '</b> iş kaldı</span>';
     const acik = !!o.haftaAcik;
     const hafta = acik && o.hafta ? haftaSeridi(o.hafta) : '';
     return '<div class="gunserit' + (acik ? ' is-acik' : '') + '">'
@@ -53515,7 +53475,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<button class="gunserit__etiket" data-oz="163 005" data-act="hafta-ac" aria-expanded="' + (acik ? 'true' : 'false') + '"'
       +   ' aria-label="' + kac((o.tarih || 'Bugün') + ' — haftayı ' + (acik ? 'kapat' : 'aç')) + '">'
       +   '<span>' + kac(o.tarih || 'Gün') + '</span>' + simge('asagi') + '</button>'
-      + '<div class="gunserit__iz" data-oz="151" role="img" aria-label="' + kac(yz('ortak.kabuk.gunun') + bas + '–' + son + ' dilimi, şimdi ' + saat) + '">'
+      + '<div class="gunserit__iz" data-oz="151" role="img" aria-label="' + kac('Günün ' + bas + '–' + son + ' dilimi, şimdi ' + saat) + '">'
       +   '<span class="gunserit__gecmis" style="width:' + yuzde + '%"></span>'
       +   '<span class="gunserit__eksen"></span>'
       +   saatler
@@ -53591,7 +53551,7 @@ window.LIFEOS = window.LIFEOS || {};
     /* Sayfa başı #main'in kardeşidir (aynı .sayfa içinde); başka sayfanın
        bilgi kartına taşınmasın diye yalnız orada aranır. */
     const kap = kok.parentElement;
-    const kart = kap && kap.querySelector((':scope > ' + yz('ortak.kabuk.sayfabasi-sayfabasi-bilgi-bi')));
+    const kart = kap && kap.querySelector(':scope > .sayfabasi .sayfabasi__bilgi .bilgikart');
     const serit = Array.from(kok.querySelectorAll('section.rail'));
     if(!kart || !serit.length) return false;
     let tasindi = false;
@@ -53601,7 +53561,7 @@ window.LIFEOS = window.LIFEOS || {};
       let liste = kart.querySelector('.bilgikart__terimler');
       if(!liste){
         const ad = r.querySelector('.rail__label');
-        const etiket = (ad && ad.textContent.trim()) || yz('ortak.kabuk.bu-ekran-nasil-okunur');
+        const etiket = (ad && ad.textContent.trim()) || 'Bu ekran nasıl okunur';
         liste = document.createElement('div');
         liste.className = 'bilgikart__terimler';
         liste.setAttribute('role', 'group');
@@ -53732,7 +53692,7 @@ window.LIFEOS = window.LIFEOS || {};
         + ' data-route="' + kac(b.route) + '"' + (b.on ? ' aria-current="page"' : '') + '>' + kac(b.ad) + '</button>').join('')
       + '</div></section>').join('');
     return '<div class="menusayfa" role="dialog" aria-modal="true" aria-label="Menü">'
-      + ('<div class="menusayfa__bas"><b>' + yz('ortak.kabuk.menu') + '</b>')
+      + '<div class="menusayfa__bas"><b>Menü</b>'
       + '<button class="menusayfa__kapat" data-act="toggle-sidebar" aria-label="Menüyü kapat">' + simge('kapat') + '</button></div>'
       + sistemSecici(o)
       + '<nav class="menusayfa__govde" aria-label="Bütün çekmeceler">' + govde + '</nav>'
@@ -53757,7 +53717,7 @@ window.LIFEOS = window.LIFEOS || {};
       return '<a class="kmenu__satir" href="' + kac(url) + '" data-modul-gecis="' + k + '">' + ic + '</a>';
     };
     return '<div class="katman kmenu" role="dialog" aria-label="Sistemler">'
-      + ('<p class="kmenu__bas">' + yz('ortak.kabuk.lifeos') + '</p>')
+      + '<p class="kmenu__bas">LifeOS</p>'
       + SIRA.map(satir).join('')
       + '</div>';
   }
@@ -53848,7 +53808,7 @@ window.LIFEOS = window.LIFEOS || {};
       }
       const say = b.querySelector('.kenar__sayi');
       if(say){ if(d.sayi) say.textContent = String(d.sayi); else say.remove(); }
-      b.setAttribute('aria-label', d.sayi ? yz('ortak.kabuk.bildirimler') + d.sayi + ' tane' : yz('ortak.kabuk.bildirimler-yok'));
+      b.setAttribute('aria-label', d.sayi ? 'Bildirimler, ' + d.sayi + ' tane' : 'Bildirimler, yok');
     });
     /* Profil (pencere kapalıyken bildirimi o söyler). */
     document.querySelectorAll('.kenar__bensec .kenar__avatar').forEach(av => {
@@ -53875,14 +53835,14 @@ window.LIFEOS = window.LIFEOS || {};
     const govde = sirali.length ? sirali.map(g => {
       const m = MODULLER[g.modul] || { ad:g.modul };
       return '<section class="kmenu__grup kmenu__grup--' + kac(g.modul) + '">'
-        + '<h2 class="kmenu__grup-bas">' + modulIsareti(g.modul) + '<span>' + kac(g.modul === 'mer' ? yz('ortak.kabuk.merkez-onerileri') : m.ad) + '</span>'
+        + '<h2 class="kmenu__grup-bas">' + modulIsareti(g.modul) + '<span>' + kac(g.modul === 'mer' ? 'Merkez önerileri' : m.ad) + '</span>'
         + '<small class="bildirim__grup-sayi">' + g.satirlar.length + '</small></h2>'
         + g.satirlar.map(s => {
           const veri = Object.keys(s.data || {}).map(a => ' ' + kac(a) + '="' + kac(s.data[a]) + '"').join('');
           const hedef = s.route ? ' data-act="go" data-route="' + kac(s.route) + '"' : ' data-act="' + kac(s.act) + '"';
           const satir = '<button class="kmenu__bildirim' + (s.acil ? ' is-acil' : '') + '"' + hedef + veri + '>'
             + '<span class="bildirim__metin">' + kac(s.metin) + '</span>'
-            + (s.acil ? ('<span class="bildirim__acil">' + yz('ortak.kabuk.acil') + '</span>') : '')
+            + (s.acil ? '<span class="bildirim__acil">Acil</span>' : '')
             + simge('ileri') + '</button>';
           /* Acil satır ertelenemez. */
           return '<div class="bildirim__satir">' + satir + (s.acil ? ''
@@ -53892,18 +53852,18 @@ window.LIFEOS = window.LIFEOS || {};
         }).join('')
         + '</section>';
     }).join('') : '<div class="kmenu__bos bildirim__bos"><span class="bildirim__bos-simge" aria-hidden="true">' + simge('zil') + '</span>'
-      + ('<b>' + yz('ortak.kabuk.bekleyen-bir-sey-yok') + '</b><small>' + yz('ortak.kabuk.yeni-bir-sey-olunca-burada') + '</small></div>');
+      + '<b>Bekleyen bir şey yok.</b><small>Yeni bir şey olunca burada görünür.</small></div>';
     return '<div class="katman kmenu kmenu--bildirim kmenu--yan" role="dialog" aria-label="Bildirimler">'
-      + ('<header class="bildirim__bas"><b>' + yz('ortak.kabuk.bildirimler-2') + '</b>')
+      + '<header class="bildirim__bas"><b>Bildirimler</b>'
       +   (toplam ? '<span class="bildirim__sayi" aria-label="' + toplam + ' bildirim">' + toplam + '</span>' : '')
-      +   (z.yeni ? ('<button type="button" class="bildirim__gordu" data-zil="gordu">' + yz('ortak.kabuk.hepsini-gordum') + '</button>') : '')
-      +   (sirali.some(g => g.satirlar.some(s => !s.acil)) ? ('<button type="button" class="bildirim__temizle" data-zil="temizle">' + yz('ortak.kabuk.temizle') + '</button>') : '')
+      +   (z.yeni ? '<button type="button" class="bildirim__gordu" data-zil="gordu">Hepsini gördüm</button>' : '')
+      +   (sirali.some(g => g.satirlar.some(s => !s.acil)) ? '<button type="button" class="bildirim__temizle" data-zil="temizle">Temizle</button>' : '')
       +   '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Bildirimleri kapat">' + simge('kapat') + '</button>'
       + '</header>'
       + '<div class="bildirim__liste">' + govde + '</div>'
       + (z.ertelenen || z.temizlenen ? '<p class="bildirim__ertelenen">'
         + [z.temizlenen ? z.temizlenen + ' bildirim temizlendi.' : '', z.ertelenen ? z.ertelenen + ' bildirim yarına ertelendi.' : ''].filter(Boolean).join(' ')
-        + ('<button type="button" data-zil="geri">' + yz('ortak.kabuk.geri-al') + '</button></p>') : '')
+        + '<button type="button" data-zil="geri">Geri al</button></p>' : '')
       + '</div>';
   }
 
@@ -54090,7 +54050,7 @@ window.LIFEOS = window.LIFEOS || {};
     try{ if(dar) localStorage.removeItem(KENAR_ANAHTAR); else localStorage.setItem(KENAR_ANAHTAR, 'acik'); }catch(e){}
     document.querySelectorAll('[data-kenar-ac]').forEach(b => {
       b.setAttribute('aria-expanded', dar ? 'false' : 'true');
-      b.setAttribute('aria-label', yz('ortak.kabuk.kenar-cubugunu') + (dar ? 'aç' : 'daralt'));
+      b.setAttribute('aria-label', 'Kenar çubuğunu ' + (dar ? 'aç' : 'daralt'));
     });
     return dar;
   }
@@ -70455,276 +70415,6 @@ LIFEOS.DEFTER = (function(){
      4. KAPAK sayfanın başında, levhanın üstünde: italik selam, kural
         cümlesi (h1), en çok dört sayı (kesinliğiyle; ölçülmemiş «—»), tek
         eylem. Tarih yazmaz (kullanıcı, 2026-10-02: «böyle tarih yazmasın»). */
-window.LIFEOS.PARCA.yazilar({
-  'ortak.karsilama.hos-geldin':'Hoş geldin',
-  'ortak.karsilama.tekrar-hos-geldin':'Tekrar hoş geldin',
-  'ortak.karsilama.seni-gormek-guzel':'Seni görmek güzel',
-  'ortak.karsilama.bugun-zinde-misin':'Bugün zinde misin?',
-  'ortak.karsilama.hazirsan-baslayalim':'Hazırsan başlayalım',
-  'ortak.karsilama.yeniden-merhaba':'Yeniden merhaba',
-  'ortak.karsilama.kaldigin-yerden-devam':'Kaldığın yerden devam',
-  'ortak.karsilama.hadi-bakalim':'Hadi bakalım',
-  'ortak.karsilama.bir-adim-daha':'Bir adım daha',
-  'ortak.karsilama.sakin-ve-odakli':'Sakin ve odaklı',
-  'ortak.karsilama.yavas-ama-duzenli':'Yavaş ama düzenli',
-  'ortak.karsilama.az-ama-her-gun':'Az ama her gün',
-  'ortak.karsilama.kucuk-bir-adim-yeter':'Küçük bir adım yeter',
-  'ortak.karsilama.nefes-al-baslayalim':'Nefes al, başlayalım',
-  'ortak.karsilama.ne-guzel-geldin':'Ne güzel, geldin',
-  'ortak.karsilama.bugune-birlikte-bakalim':'Bugüne birlikte bakalım',
-  'ortak.karsilama.gun-senin':'Gün senin',
-  'ortak.karsilama.bir-bakalim-neler-var':'Bir bakalım neler var',
-  'ortak.karsilama.kisa-bir-tur-atalim':'Kısa bir tur atalım',
-  'ortak.karsilama.odak-zamani':'Odak zamanı',
-  'ortak.karsilama.her-gun-biraz':'Her gün biraz',
-  'ortak.karsilama.kapi-acik-buyur':'Kapı açık, buyur',
-  'ortak.karsilama.yine-buradasin-ne-guzel':'Yine buradasın, ne güzel',
-  'ortak.karsilama.duzen-kuruluyor':'Düzen kuruluyor',
-  'ortak.karsilama.bugun-de-buradayiz':'Bugün de buradayız',
-  'ortak.karsilama.sade-bir-gun-olsun':'Sade bir gün olsun',
-  'ortak.karsilama.adim-adim':'Adım adım',
-  'ortak.karsilama.guzel-bir-sabah':'Güzel bir sabah',
-  'ortak.karsilama.gunaydin-bugun-zinde-misin':'Günaydın, bugün zinde misin?',
-  'ortak.karsilama.sabahin-hayirli-olsun':'Sabahın hayırlı olsun',
-  'ortak.karsilama.erken-kalkmissin':'Erken kalkmışsın',
-  'ortak.karsilama.kahven-hazir-mi':'Kahven hazır mı?',
-  'ortak.karsilama.taze-bir-gun':'Taze bir gün',
-  'ortak.karsilama.gunaydin-yeni-bir-sayfa':'Günaydın, yeni bir sayfa',
-  'ortak.karsilama.gune-yumusak-bir-baslangic':'Güne yumuşak bir başlangıç',
-  'ortak.karsilama.aydinlik-bir-sabah':'Aydınlık bir sabah',
-  'ortak.karsilama.sabahin-sakin-saati':'Sabahın sakin saati',
-  'ortak.karsilama.i-yi-gunler':'İyi günler',
-  'ortak.karsilama.gunun-nasil-geciyor':'Günün nasıl geçiyor?',
-  'ortak.karsilama.gunun-ortasindayiz':'Günün ortasındayız',
-  'ortak.karsilama.kisa-bir-mola-mi':'Kısa bir mola mı?',
-  'ortak.karsilama.gunun-yarisi-geride':'Günün yarısı geride',
-  'ortak.karsilama.oglen-molasi-mi':'Öğlen molası mı?',
-  'ortak.karsilama.gunun-geri-kalanina-bakalim':'Günün geri kalanına bakalım',
-  'ortak.karsilama.i-yi-bir-ogleden-sonra':'İyi bir öğleden sonra',
-  'ortak.karsilama.i-yi-aksamlar':'İyi akşamlar',
-  'ortak.karsilama.aksamin-hayirli-olsun':'Akşamın hayırlı olsun',
-  'ortak.karsilama.gunu-toparlama-vakti':'Günü toparlama vakti',
-  'ortak.karsilama.aksam-sakinligi':'Akşam sakinliği',
-  'ortak.karsilama.gunun-sonuna-yaklasiyoruz':'Günün sonuna yaklaşıyoruz',
-  'ortak.karsilama.aksama-merhaba':'Akşama merhaba',
-  'ortak.karsilama.gunu-kapatmadan-once':'Günü kapatmadan önce',
-  'ortak.karsilama.hos-bir-aksam':'Hoş bir akşam',
-  'ortak.karsilama.aksam-serinliginde':'Akşam serinliğinde',
-  'ortak.karsilama.gec-saatlere-kaldin':'Geç saatlere kaldın',
-  'ortak.karsilama.sakin-bir-gece':'Sakin bir gece',
-  'ortak.karsilama.i-yi-geceler':'İyi geceler',
-  'ortak.karsilama.gece-kusu':'Gece kuşu',
-  'ortak.karsilama.gece-sessizligi':'Gece sessizliği',
-  'ortak.karsilama.uyku-vakti-yaklasiyor':'Uyku vakti yaklaşıyor',
-  'ortak.karsilama.bu-saatte-de-buradasin':'Bu saatte de buradasın',
-  'ortak.karsilama.kisa-tutalim-gece-oldu':'Kısa tutalım, gece oldu',
-  'ortak.karsilama.yeni-hafta-yeni-sayfa':'Yeni hafta, yeni sayfa',
-  'ortak.karsilama.pazartesiye-merhaba':'Pazartesiye merhaba',
-  'ortak.karsilama.haftanin-ilk-gunu':'Haftanın ilk günü',
-  'ortak.karsilama.haftaya-yumusak-bir-giris':'Haftaya yumuşak bir giriş',
-  'ortak.karsilama.cuma-geldi':'Cuma geldi',
-  'ortak.karsilama.haftanin-son-duzlugu':'Haftanın son düzlüğü',
-  'ortak.karsilama.hafta-sonu-kapida':'Hafta sonu kapıda',
-  'ortak.karsilama.hayirli-cumalar':'Hayırlı cumalar',
-  'ortak.karsilama.i-yi-hafta-sonlari':'İyi hafta sonları',
-  'ortak.karsilama.hafta-sonu-ritmi':'Hafta sonu ritmi',
-  'ortak.karsilama.hafta-sonuna-merhaba':'Hafta sonuna merhaba',
-  'ortak.karsilama.hafta-sonu-sakinligi':'Hafta sonu sakinliği',
-  'ortak.karsilama.bugun-hangi-konu':'Bugün hangi konu?',
-  'ortak.karsilama.calismaya-hazir-misin':'Çalışmaya hazır mısın?',
-  'ortak.karsilama.masaya-hos-geldin':'Masaya hoş geldin',
-  'ortak.karsilama.kalem-kagit-hazir-mi':'Kalem kâğıt hazır mı?',
-  'ortak.karsilama.bugun-neyi-bitiriyoruz':'Bugün neyi bitiriyoruz?',
-  'ortak.karsilama.bir-konu-daha-kapanabilir':'Bir konu daha kapanabilir',
-  'ortak.karsilama.soru-cozme-vakti':'Soru çözme vakti',
-  'ortak.karsilama.defterini-ac':'Defterini aç',
-  'ortak.karsilama.calisma-masasina-merhaba':'Çalışma masasına merhaba',
-  'ortak.karsilama.sinav-yolunda-bir-gun-daha':'Sınav yolunda bir gün daha',
-  'ortak.karsilama.bugunun-blogu-hazir-mi':'Bugünün bloğu hazır mı?',
-  'ortak.karsilama.formuller-yerinde-mi':'Formüller yerinde mi?',
-  'ortak.karsilama.paragraf-mi-problem-mi':'Paragraf mı, problem mi?',
-  'ortak.karsilama.bir-deneme-bir-analiz':'Bir deneme, bir analiz',
-  'ortak.karsilama.konular-sirada':'Konular sırada',
-  'ortak.karsilama.yavas-yavas-konu-konu':'Yavaş yavaş, konu konu',
-  'ortak.karsilama.sessizce-calisalim':'Sessizce çalışalım',
-  'ortak.karsilama.tekrar-kartlari-bekliyor-ola':'Tekrar kartları bekliyor olabilir',
-  'ortak.karsilama.bugun-kac-soru':'Bugün kaç soru?',
-  'ortak.karsilama.odak-masasi-hazir':'Odak masası hazır',
-  'ortak.karsilama.bugun-ne-yapmayi-planliyorsu':'Bugün ne yapmayı planlıyorsun?',
-  'ortak.karsilama.bugun-kendine-nasil-bakacaks':'Bugün kendine nasıl bakacaksın?',
-  'ortak.karsilama.bedenine-merhaba':'Bedenine merhaba',
-  'ortak.karsilama.su-ictin-mi':'Su içtin mi?',
-  'ortak.karsilama.biraz-hareket-iyi-gelir':'Biraz hareket iyi gelir',
-  'ortak.karsilama.uykun-nasildi':'Uykun nasıldı?',
-  'ortak.karsilama.nefesine-bir-bak':'Nefesine bir bak',
-  'ortak.karsilama.esneme-vakti-mi':'Esneme vakti mi?',
-  'ortak.karsilama.bir-bardak-suyla-basla':'Bir bardak suyla başla',
-  'ortak.karsilama.yuruyus-havasi-mi':'Yürüyüş havası mı?',
-  'ortak.karsilama.bugun-ne-yiyeceksin':'Bugün ne yiyeceksin?',
-  'ortak.karsilama.kendine-iyi-bak':'Kendine iyi bak',
-  'ortak.karsilama.dinlenmek-de-plana-dahil':'Dinlenmek de plana dahil',
-  'ortak.karsilama.bugunun-ritmi-ne':'Bugünün ritmi ne?',
-  'ortak.karsilama.bedeninin-sesini-dinle':'Bedeninin sesini dinle',
-  'ortak.karsilama.bugun-antrenman-var-mi':'Bugün antrenman var mı?',
-  'ortak.karsilama.hafif-bir-gun-mu-yogun':'Hafif bir gün mü, yoğun bir gün mü?',
-  'ortak.karsilama.hareket-zamani':'Hareket zamanı',
-  'ortak.karsilama.ogunlerine-bir-bakalim':'Öğünlerine bir bakalım',
-  'ortak.karsilama.omuzlarini-gevset':'Omuzlarını gevşet',
-  'ortak.karsilama.bugun-ne-dusunuyorsun':'Bugün ne düşünüyorsun?',
-  'ortak.karsilama.bugun-neyi-merak-ediyorsun':'Bugün neyi merak ediyorsun?',
-  'ortak.karsilama.yeni-bir-sey-ogrenelim-mi':'Yeni bir şey öğrenelim mi?',
-  'ortak.karsilama.merakin-nerede-bugun':'Merakın nerede bugün?',
-  'ortak.karsilama.bir-sayfa-bir-fikir':'Bir sayfa, bir fikir',
-  'ortak.karsilama.bugun-hangi-alan':'Bugün hangi alan?',
-  'ortak.karsilama.gitar-mi-kitap-mi':'Gitar mı, kitap mı?',
-  'ortak.karsilama.biraz-yazi-biraz-okuma':'Biraz yazı, biraz okuma',
-  'ortak.karsilama.kelimeler-seni-bekliyor':'Kelimeler seni bekliyor',
-  'ortak.karsilama.bugun-neyi-derinlestiriyoruz':'Bugün neyi derinleştiriyoruz?',
-  'ortak.karsilama.kucuk-bir-alistirma':'Küçük bir alıştırma?',
-  'ortak.karsilama.zihnine-merhaba':'Zihnine merhaba',
-  'ortak.karsilama.okuma-kosesine-hos-geldin':'Okuma köşesine hoş geldin',
-  'ortak.karsilama.fikirler-icin-bir-yer':'Fikirler için bir yer',
-  'ortak.karsilama.bugun-neyi-kesfedeceksin':'Bugün neyi keşfedeceksin?',
-  'ortak.karsilama.bir-aliskanlik-daha':'Bir alışkanlık daha',
-  'ortak.karsilama.yavas-ogren-derin-ogren':'Yavaş öğren, derin öğren',
-  'ortak.karsilama.not-defterin-hazir':'Not defterin hazır',
-  'ortak.karsilama.bugun-kimi-okuyorsun':'Bugün kimi okuyorsun?',
-  'ortak.karsilama.bir-soru-bir-cevap':'Bir soru, bir cevap',
-  'ortak.karsilama.merkeze-hos-geldin':'Merkeze hoş geldin',
-  'ortak.karsilama.merkez-hazir':'Merkez hazır',
-  'ortak.karsilama.uc-modul-tek-bakis':'Üç modül, tek bakış',
-  'ortak.karsilama.her-sey-tek-yerde':'Her şey tek yerde',
-  'ortak.karsilama.genel-tabloya-bakalim':'Genel tabloya bakalım',
-  'ortak.karsilama.kumanda-masasina-hos-geldin':'Kumanda masasına hoş geldin',
-  'ortak.karsilama.bugunun-ozeti-burada':'Bugünün özeti burada',
-  'ortak.karsilama.hepsine-birden-bakalim':'Hepsine birden bakalım',
-  'ortak.karsilama.merkeze-merhaba':'Merkeze merhaba',
-  'ortak.karsilama.buyuk-resme-bakalim':'Büyük resme bakalım',
-  'ortak.karsilama.butun-iplikler-burada':'Bütün iplikler burada',
-  'ortak.karsilama.sakin-bir-kontrol-turu':'Sakin bir kontrol turu',
-  'ortak.karsilama.bir-goz-atalim':'Bir göz atalım',
-  'ortak.karsilama.duzenin-kalbi':'Düzenin kalbi',
-  'ortak.karsilama.hepsi-yerinde-mi':'Hepsi yerinde mi?',
-  'ortak.karsilama.bugun-neyi-yonetiyoruz':'Bugün neyi yönetiyoruz?',
-  'ortak.karsilama.haftanin-tablosu-burada':'Haftanın tablosu burada',
-  'ortak.karsilama.kusbakisi-bir-gun':'Kuşbakışı bir gün',
-  'ortak.karsilama.welcome-back':'Welcome back',
-  'ortak.karsilama.hi-there':'Hi there',
-  'ortak.karsilama.good-to-see-you':'Good to see you',
-  'ortak.karsilama.ready-for-today':'Ready for today?',
-  'ortak.karsilama.let-s-begin':'Let’s begin',
-  'ortak.karsilama.one-step-at-a-time':'One step at a time',
-  'ortak.karsilama.little-and-often':'Little and often',
-  'ortak.karsilama.back-again-nice':'Back again, nice',
-  'ortak.karsilama.calm-and-focused':'Calm and focused',
-  'ortak.karsilama.pick-up-where-you-left':'Pick up where you left off',
-  'ortak.karsilama.here-we-go':'Here we go',
-  'ortak.karsilama.good-morning':'Good morning',
-  'ortak.karsilama.a-fresh-day':'A fresh day',
-  'ortak.karsilama.coffee-ready':'Coffee ready?',
-  'ortak.karsilama.morning-a-new-page':'Morning, a new page',
-  'ortak.karsilama.good-afternoon':'Good afternoon',
-  'ortak.karsilama.how-s-your-day-going':'How’s your day going?',
-  'ortak.karsilama.halfway-there':'Halfway there',
-  'ortak.karsilama.good-evening':'Good evening',
-  'ortak.karsilama.time-to-wind-down':'Time to wind down',
-  'ortak.karsilama.a-calm-evening':'A calm evening',
-  'ortak.karsilama.working-late':'Working late?',
-  'ortak.karsilama.a-quiet-night':'A quiet night',
-  'ortak.karsilama.night-owl':'Night owl',
-  'ortak.karsilama.new-week-new-page':'New week, new page',
-  'ortak.karsilama.friday-at-last':'Friday at last',
-  'ortak.karsilama.happy-weekend':'Happy weekend',
-  'ortak.karsilama.what-are-we-studying-today':'What are we studying today?',
-  'ortak.karsilama.ready-to-study':'Ready to study?',
-  'ortak.karsilama.which-topic-today':'Which topic today?',
-  'ortak.karsilama.time-for-some-questions':'Time for some questions',
-  'ortak.karsilama.what-s-your-plan-for-today':'What’s your plan for today?',
-  'ortak.karsilama.had-some-water':'Had some water?',
-  'ortak.karsilama.how-did-you-sleep':'How did you sleep?',
-  'ortak.karsilama.a-little-movement-helps':'A little movement helps',
-  'ortak.karsilama.what-s-on-your-mind-today':'What’s on your mind today?',
-  'ortak.karsilama.what-are-you-curious-about':'What are you curious about?',
-  'ortak.karsilama.learn-something-new':'Learn something new?',
-  'ortak.karsilama.guitar-or-book':'Guitar or book?',
-  'ortak.karsilama.welcome-to-the-hub':'Welcome to the hub',
-  'ortak.karsilama.everything-in-one-place':'Everything in one place',
-  'ortak.karsilama.the-big-picture':'The big picture',
-  'ortak.karsilama.three-modules-one-view':'Three modules, one view',
-  'ortak.karsilama.willkommen-zuruck':'Willkommen zurück',
-  'ortak.karsilama.schon-dich-zu-sehen':'Schön, dich zu sehen',
-  'ortak.karsilama.bereit-fur-heute':'Bereit für heute?',
-  'ortak.karsilama.los-geht-s':'Los geht’s',
-  'ortak.karsilama.schritt-fur-schritt':'Schritt für Schritt',
-  'ortak.karsilama.ruhig-und-fokussiert':'Ruhig und fokussiert',
-  'ortak.karsilama.guten-morgen':'Guten Morgen',
-  'ortak.karsilama.ein-frischer-tag':'Ein frischer Tag',
-  'ortak.karsilama.guten-tag':'Guten Tag',
-  'ortak.karsilama.wie-l-uft-dein-tag':'Wie läuft dein Tag?',
-  'ortak.karsilama.guten-abend':'Guten Abend',
-  'ortak.karsilama.ein-ruhiger-abend':'Ein ruhiger Abend',
-  'ortak.karsilama.noch-wach':'Noch wach?',
-  'ortak.karsilama.eine-stille-nacht':'Eine stille Nacht',
-  'ortak.karsilama.neue-woche-neue-seite':'Neue Woche, neue Seite',
-  'ortak.karsilama.endlich-freitag':'Endlich Freitag',
-  'ortak.karsilama.schones-wochenende':'Schönes Wochenende',
-  'ortak.karsilama.was-lernen-wir-heute':'Was lernen wir heute?',
-  'ortak.karsilama.welches-thema-heute':'Welches Thema heute?',
-  'ortak.karsilama.was-hast-du-heute-vor':'Was hast du heute vor?',
-  'ortak.karsilama.schon-wasser-getrunken':'Schon Wasser getrunken?',
-  'ortak.karsilama.was-besch-ftigt-dich-heute':'Was beschäftigt dich heute?',
-  'ortak.karsilama.etwas-neues-lernen':'Etwas Neues lernen?',
-  'ortak.karsilama.willkommen-in-der-zentrale':'Willkommen in der Zentrale',
-  'ortak.karsilama.alles-an-einem-ort':'Alles an einem Ort',
-  'ortak.karsilama.bon-retour':'Bon retour',
-  'ortak.karsilama.content-de-te-revoir':'Content de te revoir',
-  'ortak.karsilama.pr-t-pour-aujourd-hui':'Prêt pour aujourd’hui ?',
-  'ortak.karsilama.on-y-va':'On y va',
-  'ortak.karsilama.pas-pas':'Pas à pas',
-  'ortak.karsilama.calme-et-concentr':'Calme et concentré',
-  'ortak.karsilama.une-nouvelle-journ-e':'Une nouvelle journée',
-  'ortak.karsilama.bon-apr-s-midi':'Bon après-midi',
-  'ortak.karsilama.comment-se-passe-ta-journ-e':'Comment se passe ta journée ?',
-  'ortak.karsilama.une-soir-e-calme':'Une soirée calme',
-  'ortak.karsilama.encore-debout':'Encore debout ?',
-  'ortak.karsilama.une-nuit-tranquille':'Une nuit tranquille',
-  'ortak.karsilama.nouvelle-semaine-nouvelle-pa':'Nouvelle semaine, nouvelle page',
-  'ortak.karsilama.enfin-vendredi':'Enfin vendredi',
-  'ortak.karsilama.bon-week-end':'Bon week-end',
-  'ortak.karsilama.on-tudie-quoi-aujourd-hui':'On étudie quoi aujourd’hui ?',
-  'ortak.karsilama.quel-sujet-aujourd-hui':'Quel sujet aujourd’hui ?',
-  'ortak.karsilama.qu-as-tu-pr-vu-aujourd-hui':'Qu’as-tu prévu aujourd’hui ?',
-  'ortak.karsilama.tu-as-bu-de-l-eau':'Tu as bu de l’eau ?',
-  'ortak.karsilama.apprendre-quelque-chose':'Apprendre quelque chose ?',
-  'ortak.karsilama.bienvenue-au-centre':'Bienvenue au centre',
-  'ortak.karsilama.tout-au-m-me-endroit':'Tout au même endroit',
-  'ortak.karsilama.bienvenido-de-nuevo':'Bienvenido de nuevo',
-  'ortak.karsilama.qu-bueno-verte':'Qué bueno verte',
-  'ortak.karsilama.vamos-all':'Vamos allá',
-  'ortak.karsilama.paso-a-paso':'Paso a paso',
-  'ortak.karsilama.con-calma-y-foco':'Con calma y foco',
-  'ortak.karsilama.buenos-d-as':'Buenos días',
-  'ortak.karsilama.un-d-a-nuevo':'Un día nuevo',
-  'ortak.karsilama.buenas-tardes':'Buenas tardes',
-  'ortak.karsilama.una-tarde-tranquila':'Una tarde tranquila',
-  'ortak.karsilama.una-noche-tranquila':'Una noche tranquila',
-  'ortak.karsilama.nueva-semana-nueva-p-gina':'Nueva semana, nueva página',
-  'ortak.karsilama.por-fin-viernes':'Por fin viernes',
-  'ortak.karsilama.buen-fin-de-semana':'Buen fin de semana',
-  'ortak.karsilama.bienvenido-al-centro':'Bienvenido al centro',
-  'ortak.karsilama.todo-en-un-lugar':'Todo en un lugar',
-  'ortak.karsilama.karsilama-dili':'Karşılama dili',
-  'ortak.karsilama.selam':'Selam',
-  'ortak.karsilama.turlu-turlu':'Türlü türlü',
-  'ortak.karsilama.kendi-selamlarim':'Kendi selamlarım',
-  'ortak.karsilama.kendi-selamlarin':'Kendi selamların',
-  'ortak.karsilama.her-satira-bir-tane':'her satıra bir tane',
-  'ortak.karsilama.altindaki-not':'Altındaki not',
-  'ortak.karsilama.sistemin-notu':'Sistemin notu',
-  'ortak.karsilama.kendi-notlarim':'Kendi notlarım',
-  'ortak.karsilama.bu-bolum-icin-kendi-notlarin':'Bu bölüm için kendi notların',
-});
-
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -70749,45 +70439,45 @@ LIFEOS.KARSILAMA = (function(){
      bu listeyi kopyalar; HKM/tests/test_yuz.py ikisinin aynı olduğunu sınar. */
   const HAVUZ = {
     tr:{
-      genel:[yz('ortak.karsilama.hos-geldin'), 'Merhaba', 'Merhabalar', yz('ortak.karsilama.tekrar-hos-geldin'), yz('ortak.karsilama.seni-gormek-guzel'), yz('ortak.karsilama.bugun-zinde-misin'),
-        yz('ortak.karsilama.hazirsan-baslayalim'), 'Selam', yz('ortak.karsilama.yeniden-merhaba'), yz('ortak.karsilama.kaldigin-yerden-devam'), yz('ortak.karsilama.hadi-bakalim'), yz('ortak.karsilama.bir-adim-daha'),
-        yz('ortak.karsilama.sakin-ve-odakli'), yz('ortak.karsilama.yavas-ama-duzenli'), yz('ortak.karsilama.az-ama-her-gun'), yz('ortak.karsilama.kucuk-bir-adim-yeter'), yz('ortak.karsilama.nefes-al-baslayalim'),
-        yz('ortak.karsilama.ne-guzel-geldin'), yz('ortak.karsilama.bugune-birlikte-bakalim'), yz('ortak.karsilama.gun-senin'), yz('ortak.karsilama.bir-bakalim-neler-var'), yz('ortak.karsilama.kisa-bir-tur-atalim'),
-        yz('ortak.karsilama.odak-zamani'), yz('ortak.karsilama.her-gun-biraz'), yz('ortak.karsilama.kapi-acik-buyur'), yz('ortak.karsilama.yine-buradasin-ne-guzel'), yz('ortak.karsilama.duzen-kuruluyor'),
-        yz('ortak.karsilama.bugun-de-buradayiz'), yz('ortak.karsilama.sade-bir-gun-olsun'), yz('ortak.karsilama.adim-adim')],
-      sabah:['Günaydın', yz('ortak.karsilama.guzel-bir-sabah'), yz('ortak.karsilama.gunaydin-bugun-zinde-misin'), yz('ortak.karsilama.sabahin-hayirli-olsun'), yz('ortak.karsilama.erken-kalkmissin'),
-        yz('ortak.karsilama.kahven-hazir-mi'), yz('ortak.karsilama.taze-bir-gun'), yz('ortak.karsilama.gunaydin-yeni-bir-sayfa'), yz('ortak.karsilama.gune-yumusak-bir-baslangic'), yz('ortak.karsilama.aydinlik-bir-sabah'),
-        yz('ortak.karsilama.sabahin-sakin-saati')],
-      gun:[yz('ortak.karsilama.i-yi-gunler'), yz('ortak.karsilama.gunun-nasil-geciyor'), yz('ortak.karsilama.gunun-ortasindayiz'), 'Tünaydın', yz('ortak.karsilama.kisa-bir-mola-mi'), yz('ortak.karsilama.gunun-yarisi-geride'),
-        yz('ortak.karsilama.oglen-molasi-mi'), yz('ortak.karsilama.gunun-geri-kalanina-bakalim'), yz('ortak.karsilama.i-yi-bir-ogleden-sonra')],
-      aksam:[yz('ortak.karsilama.i-yi-aksamlar'), yz('ortak.karsilama.aksamin-hayirli-olsun'), yz('ortak.karsilama.gunu-toparlama-vakti'), yz('ortak.karsilama.aksam-sakinligi'), yz('ortak.karsilama.gunun-sonuna-yaklasiyoruz'),
-        yz('ortak.karsilama.aksama-merhaba'), yz('ortak.karsilama.gunu-kapatmadan-once'), yz('ortak.karsilama.hos-bir-aksam'), yz('ortak.karsilama.aksam-serinliginde')],
-      gece:[yz('ortak.karsilama.gec-saatlere-kaldin'), yz('ortak.karsilama.sakin-bir-gece'), yz('ortak.karsilama.i-yi-geceler'), yz('ortak.karsilama.gece-kusu'), yz('ortak.karsilama.gece-sessizligi'), yz('ortak.karsilama.uyku-vakti-yaklasiyor'),
-        yz('ortak.karsilama.bu-saatte-de-buradasin'), yz('ortak.karsilama.kisa-tutalim-gece-oldu')],
-      pzt:[yz('ortak.karsilama.yeni-hafta-yeni-sayfa'), yz('ortak.karsilama.pazartesiye-merhaba'), yz('ortak.karsilama.haftanin-ilk-gunu'), yz('ortak.karsilama.haftaya-yumusak-bir-giris')],
-      cuma:[yz('ortak.karsilama.cuma-geldi'), yz('ortak.karsilama.haftanin-son-duzlugu'), yz('ortak.karsilama.hafta-sonu-kapida'), yz('ortak.karsilama.hayirli-cumalar')],
-      hs:[yz('ortak.karsilama.i-yi-hafta-sonlari'), yz('ortak.karsilama.hafta-sonu-ritmi'), yz('ortak.karsilama.hafta-sonuna-merhaba'), yz('ortak.karsilama.hafta-sonu-sakinligi')],
-      ays:[yz('ortak.karsilama.bugun-hangi-konu'), yz('ortak.karsilama.calismaya-hazir-misin'), yz('ortak.karsilama.masaya-hos-geldin'), yz('ortak.karsilama.kalem-kagit-hazir-mi'), yz('ortak.karsilama.bugun-neyi-bitiriyoruz'),
-        yz('ortak.karsilama.bir-konu-daha-kapanabilir'), yz('ortak.karsilama.soru-cozme-vakti'), yz('ortak.karsilama.defterini-ac'), yz('ortak.karsilama.calisma-masasina-merhaba'), yz('ortak.karsilama.sinav-yolunda-bir-gun-daha'),
-        yz('ortak.karsilama.bugunun-blogu-hazir-mi'), yz('ortak.karsilama.formuller-yerinde-mi'), yz('ortak.karsilama.paragraf-mi-problem-mi'), yz('ortak.karsilama.bir-deneme-bir-analiz'),
-        yz('ortak.karsilama.konular-sirada'), yz('ortak.karsilama.yavas-yavas-konu-konu'), yz('ortak.karsilama.sessizce-calisalim'), yz('ortak.karsilama.tekrar-kartlari-bekliyor-ola'),
-        yz('ortak.karsilama.bugun-kac-soru'), yz('ortak.karsilama.odak-masasi-hazir')],
-      spi:[yz('ortak.karsilama.bugun-ne-yapmayi-planliyorsu'), yz('ortak.karsilama.bugun-kendine-nasil-bakacaks'), yz('ortak.karsilama.bedenine-merhaba'), yz('ortak.karsilama.su-ictin-mi'),
-        yz('ortak.karsilama.biraz-hareket-iyi-gelir'), yz('ortak.karsilama.uykun-nasildi'), yz('ortak.karsilama.nefesine-bir-bak'), yz('ortak.karsilama.esneme-vakti-mi'), yz('ortak.karsilama.bir-bardak-suyla-basla'),
-        yz('ortak.karsilama.yuruyus-havasi-mi'), yz('ortak.karsilama.bugun-ne-yiyeceksin'), yz('ortak.karsilama.kendine-iyi-bak'), yz('ortak.karsilama.dinlenmek-de-plana-dahil'), yz('ortak.karsilama.bugunun-ritmi-ne'),
-        yz('ortak.karsilama.bedeninin-sesini-dinle'), yz('ortak.karsilama.bugun-antrenman-var-mi'), yz('ortak.karsilama.hafif-bir-gun-mu-yogun'), yz('ortak.karsilama.hareket-zamani'),
-        yz('ortak.karsilama.ogunlerine-bir-bakalim'), yz('ortak.karsilama.omuzlarini-gevset')],
-      esp:[yz('ortak.karsilama.bugun-ne-dusunuyorsun'), yz('ortak.karsilama.bugun-neyi-merak-ediyorsun'), yz('ortak.karsilama.yeni-bir-sey-ogrenelim-mi'), yz('ortak.karsilama.merakin-nerede-bugun'),
-        yz('ortak.karsilama.bir-sayfa-bir-fikir'), yz('ortak.karsilama.bugun-hangi-alan'), yz('ortak.karsilama.gitar-mi-kitap-mi'), yz('ortak.karsilama.biraz-yazi-biraz-okuma'), yz('ortak.karsilama.kelimeler-seni-bekliyor'),
-        yz('ortak.karsilama.bugun-neyi-derinlestiriyoruz'), yz('ortak.karsilama.kucuk-bir-alistirma'), yz('ortak.karsilama.zihnine-merhaba'), yz('ortak.karsilama.okuma-kosesine-hos-geldin'),
-        yz('ortak.karsilama.fikirler-icin-bir-yer'), yz('ortak.karsilama.bugun-neyi-kesfedeceksin'), yz('ortak.karsilama.bir-aliskanlik-daha'), yz('ortak.karsilama.yavas-ogren-derin-ogren'),
-        yz('ortak.karsilama.not-defterin-hazir'), yz('ortak.karsilama.bugun-kimi-okuyorsun'), yz('ortak.karsilama.bir-soru-bir-cevap')],
-      hkm:[yz('ortak.karsilama.merkeze-hos-geldin'), yz('ortak.karsilama.merkez-hazir'), yz('ortak.karsilama.uc-modul-tek-bakis'), yz('ortak.karsilama.her-sey-tek-yerde'), yz('ortak.karsilama.genel-tabloya-bakalim'),
-        yz('ortak.karsilama.kumanda-masasina-hos-geldin'), yz('ortak.karsilama.bugunun-ozeti-burada'), yz('ortak.karsilama.hepsine-birden-bakalim'), yz('ortak.karsilama.merkeze-merhaba'),
-        yz('ortak.karsilama.buyuk-resme-bakalim'), yz('ortak.karsilama.butun-iplikler-burada'), yz('ortak.karsilama.sakin-bir-kontrol-turu'), yz('ortak.karsilama.bir-goz-atalim'), yz('ortak.karsilama.duzenin-kalbi'),
-        yz('ortak.karsilama.hepsi-yerinde-mi'), yz('ortak.karsilama.bugun-neyi-yonetiyoruz'), yz('ortak.karsilama.haftanin-tablosu-burada'), yz('ortak.karsilama.kusbakisi-bir-gun')],
-      on:{ genel:['Merhaba', 'Selam', yz('ortak.karsilama.hos-geldin'), yz('ortak.karsilama.tekrar-hos-geldin')], sabah:['Günaydın'], gun:[yz('ortak.karsilama.i-yi-gunler'), 'Tünaydın'],
-        aksam:[yz('ortak.karsilama.i-yi-aksamlar')], gece:[yz('ortak.karsilama.i-yi-geceler')] },
+      genel:['Hoş geldin', 'Merhaba', 'Merhabalar', 'Tekrar hoş geldin', 'Seni görmek güzel', 'Bugün zinde misin?',
+        'Hazırsan başlayalım', 'Selam', 'Yeniden merhaba', 'Kaldığın yerden devam', 'Hadi bakalım', 'Bir adım daha',
+        'Sakin ve odaklı', 'Yavaş ama düzenli', 'Az ama her gün', 'Küçük bir adım yeter', 'Nefes al, başlayalım',
+        'Ne güzel, geldin', 'Bugüne birlikte bakalım', 'Gün senin', 'Bir bakalım neler var', 'Kısa bir tur atalım',
+        'Odak zamanı', 'Her gün biraz', 'Kapı açık, buyur', 'Yine buradasın, ne güzel', 'Düzen kuruluyor',
+        'Bugün de buradayız', 'Sade bir gün olsun', 'Adım adım'],
+      sabah:['Günaydın', 'Güzel bir sabah', 'Günaydın, bugün zinde misin?', 'Sabahın hayırlı olsun', 'Erken kalkmışsın',
+        'Kahven hazır mı?', 'Taze bir gün', 'Günaydın, yeni bir sayfa', 'Güne yumuşak bir başlangıç', 'Aydınlık bir sabah',
+        'Sabahın sakin saati'],
+      gun:['İyi günler', 'Günün nasıl geçiyor?', 'Günün ortasındayız', 'Tünaydın', 'Kısa bir mola mı?', 'Günün yarısı geride',
+        'Öğlen molası mı?', 'Günün geri kalanına bakalım', 'İyi bir öğleden sonra'],
+      aksam:['İyi akşamlar', 'Akşamın hayırlı olsun', 'Günü toparlama vakti', 'Akşam sakinliği', 'Günün sonuna yaklaşıyoruz',
+        'Akşama merhaba', 'Günü kapatmadan önce', 'Hoş bir akşam', 'Akşam serinliğinde'],
+      gece:['Geç saatlere kaldın', 'Sakin bir gece', 'İyi geceler', 'Gece kuşu', 'Gece sessizliği', 'Uyku vakti yaklaşıyor',
+        'Bu saatte de buradasın', 'Kısa tutalım, gece oldu'],
+      pzt:['Yeni hafta, yeni sayfa', 'Pazartesiye merhaba', 'Haftanın ilk günü', 'Haftaya yumuşak bir giriş'],
+      cuma:['Cuma geldi', 'Haftanın son düzlüğü', 'Hafta sonu kapıda', 'Hayırlı cumalar'],
+      hs:['İyi hafta sonları', 'Hafta sonu ritmi', 'Hafta sonuna merhaba', 'Hafta sonu sakinliği'],
+      ays:['Bugün hangi konu?', 'Çalışmaya hazır mısın?', 'Masaya hoş geldin', 'Kalem kâğıt hazır mı?', 'Bugün neyi bitiriyoruz?',
+        'Bir konu daha kapanabilir', 'Soru çözme vakti', 'Defterini aç', 'Çalışma masasına merhaba', 'Sınav yolunda bir gün daha',
+        'Bugünün bloğu hazır mı?', 'Formüller yerinde mi?', 'Paragraf mı, problem mi?', 'Bir deneme, bir analiz',
+        'Konular sırada', 'Yavaş yavaş, konu konu', 'Sessizce çalışalım', 'Tekrar kartları bekliyor olabilir',
+        'Bugün kaç soru?', 'Odak masası hazır'],
+      spi:['Bugün ne yapmayı planlıyorsun?', 'Bugün kendine nasıl bakacaksın?', 'Bedenine merhaba', 'Su içtin mi?',
+        'Biraz hareket iyi gelir', 'Uykun nasıldı?', 'Nefesine bir bak', 'Esneme vakti mi?', 'Bir bardak suyla başla',
+        'Yürüyüş havası mı?', 'Bugün ne yiyeceksin?', 'Kendine iyi bak', 'Dinlenmek de plana dahil', 'Bugünün ritmi ne?',
+        'Bedeninin sesini dinle', 'Bugün antrenman var mı?', 'Hafif bir gün mü, yoğun bir gün mü?', 'Hareket zamanı',
+        'Öğünlerine bir bakalım', 'Omuzlarını gevşet'],
+      esp:['Bugün ne düşünüyorsun?', 'Bugün neyi merak ediyorsun?', 'Yeni bir şey öğrenelim mi?', 'Merakın nerede bugün?',
+        'Bir sayfa, bir fikir', 'Bugün hangi alan?', 'Gitar mı, kitap mı?', 'Biraz yazı, biraz okuma', 'Kelimeler seni bekliyor',
+        'Bugün neyi derinleştiriyoruz?', 'Küçük bir alıştırma?', 'Zihnine merhaba', 'Okuma köşesine hoş geldin',
+        'Fikirler için bir yer', 'Bugün neyi keşfedeceksin?', 'Bir alışkanlık daha', 'Yavaş öğren, derin öğren',
+        'Not defterin hazır', 'Bugün kimi okuyorsun?', 'Bir soru, bir cevap'],
+      hkm:['Merkeze hoş geldin', 'Merkez hazır', 'Üç modül, tek bakış', 'Her şey tek yerde', 'Genel tabloya bakalım',
+        'Kumanda masasına hoş geldin', 'Bugünün özeti burada', 'Hepsine birden bakalım', 'Merkeze merhaba',
+        'Büyük resme bakalım', 'Bütün iplikler burada', 'Sakin bir kontrol turu', 'Bir göz atalım', 'Düzenin kalbi',
+        'Hepsi yerinde mi?', 'Bugün neyi yönetiyoruz?', 'Haftanın tablosu burada', 'Kuşbakışı bir gün'],
+      on:{ genel:['Merhaba', 'Selam', 'Hoş geldin', 'Tekrar hoş geldin'], sabah:['Günaydın'], gun:['İyi günler', 'Tünaydın'],
+        aksam:['İyi akşamlar'], gece:['İyi geceler'] },
       ek:{
         ays:['bugün hangi konu?', 'çalışmaya hazır mısın?', 'bugün neyi bitiriyoruz?', 'soru çözme vakti', 'defterini aç',
           'tekrar zamanı olabilir', 'bugün kaç soru?', 'masa hazır', 'konular sırada', 'bir konu daha kapanabilir'],
@@ -70799,30 +70489,30 @@ LIFEOS.KARSILAMA = (function(){
         hkm:['merkez hazır', 'genel tabloya bakalım', 'kuşbakışı bir gün', 'bugünün özeti burada', 'büyük resme bakalım',
           'bir göz atalım', 'hepsi yerinde mi?', 'bugün neyi yönetiyoruz?'],
       } },
-    en:{ genel:[yz('ortak.karsilama.welcome-back'), 'Hello', yz('ortak.karsilama.hi-there'), yz('ortak.karsilama.good-to-see-you'), yz('ortak.karsilama.ready-for-today'), yz('ortak.karsilama.let-s-begin'), yz('ortak.karsilama.one-step-at-a-time'),
-        yz('ortak.karsilama.little-and-often'), yz('ortak.karsilama.back-again-nice'), yz('ortak.karsilama.calm-and-focused'), yz('ortak.karsilama.pick-up-where-you-left'), yz('ortak.karsilama.here-we-go')],
-      sabah:[yz('ortak.karsilama.good-morning'), yz('ortak.karsilama.a-fresh-day'), yz('ortak.karsilama.coffee-ready'), yz('ortak.karsilama.morning-a-new-page')], gun:[yz('ortak.karsilama.good-afternoon'), yz('ortak.karsilama.how-s-your-day-going'), yz('ortak.karsilama.halfway-there')],
-      aksam:[yz('ortak.karsilama.good-evening'), yz('ortak.karsilama.time-to-wind-down'), yz('ortak.karsilama.a-calm-evening')], gece:[yz('ortak.karsilama.working-late'), yz('ortak.karsilama.a-quiet-night'), yz('ortak.karsilama.night-owl')],
-      pzt:[yz('ortak.karsilama.new-week-new-page')], cuma:[yz('ortak.karsilama.friday-at-last')], hs:[yz('ortak.karsilama.happy-weekend')],
-      ays:[yz('ortak.karsilama.what-are-we-studying-today'), yz('ortak.karsilama.ready-to-study'), yz('ortak.karsilama.which-topic-today'), yz('ortak.karsilama.time-for-some-questions')],
-      spi:[yz('ortak.karsilama.what-s-your-plan-for-today'), yz('ortak.karsilama.had-some-water'), yz('ortak.karsilama.how-did-you-sleep'), yz('ortak.karsilama.a-little-movement-helps')],
-      esp:[yz('ortak.karsilama.what-s-on-your-mind-today'), yz('ortak.karsilama.what-are-you-curious-about'), yz('ortak.karsilama.learn-something-new'), yz('ortak.karsilama.guitar-or-book')],
-      hkm:[yz('ortak.karsilama.welcome-to-the-hub'), yz('ortak.karsilama.everything-in-one-place'), yz('ortak.karsilama.the-big-picture'), yz('ortak.karsilama.three-modules-one-view')] },
-    de:{ genel:[yz('ortak.karsilama.willkommen-zuruck'), 'Hallo', yz('ortak.karsilama.schon-dich-zu-sehen'), yz('ortak.karsilama.bereit-fur-heute'), yz('ortak.karsilama.los-geht-s'), yz('ortak.karsilama.schritt-fur-schritt'), yz('ortak.karsilama.ruhig-und-fokussiert')],
-      sabah:[yz('ortak.karsilama.guten-morgen'), yz('ortak.karsilama.ein-frischer-tag')], gun:[yz('ortak.karsilama.guten-tag'), yz('ortak.karsilama.wie-l-uft-dein-tag')], aksam:[yz('ortak.karsilama.guten-abend'), yz('ortak.karsilama.ein-ruhiger-abend')],
-      gece:[yz('ortak.karsilama.noch-wach'), yz('ortak.karsilama.eine-stille-nacht')], pzt:[yz('ortak.karsilama.neue-woche-neue-seite')], cuma:[yz('ortak.karsilama.endlich-freitag')], hs:[yz('ortak.karsilama.schones-wochenende')],
-      ays:[yz('ortak.karsilama.was-lernen-wir-heute'), yz('ortak.karsilama.welches-thema-heute')], spi:[yz('ortak.karsilama.was-hast-du-heute-vor'), yz('ortak.karsilama.schon-wasser-getrunken')],
-      esp:[yz('ortak.karsilama.was-besch-ftigt-dich-heute'), yz('ortak.karsilama.etwas-neues-lernen')], hkm:[yz('ortak.karsilama.willkommen-in-der-zentrale'), yz('ortak.karsilama.alles-an-einem-ort')] },
-    fr:{ genel:[yz('ortak.karsilama.bon-retour'), 'Bonjour', yz('ortak.karsilama.content-de-te-revoir'), yz('ortak.karsilama.pr-t-pour-aujourd-hui'), yz('ortak.karsilama.on-y-va'), yz('ortak.karsilama.pas-pas'), yz('ortak.karsilama.calme-et-concentr')],
-      sabah:['Bonjour', yz('ortak.karsilama.une-nouvelle-journ-e')], gun:[yz('ortak.karsilama.bon-apr-s-midi'), yz('ortak.karsilama.comment-se-passe-ta-journ-e')], aksam:['Bonsoir', yz('ortak.karsilama.une-soir-e-calme')],
-      gece:[yz('ortak.karsilama.encore-debout'), yz('ortak.karsilama.une-nuit-tranquille')], pzt:[yz('ortak.karsilama.nouvelle-semaine-nouvelle-pa')], cuma:[yz('ortak.karsilama.enfin-vendredi')], hs:[yz('ortak.karsilama.bon-week-end')],
-      ays:[yz('ortak.karsilama.on-tudie-quoi-aujourd-hui'), yz('ortak.karsilama.quel-sujet-aujourd-hui')], spi:[yz('ortak.karsilama.qu-as-tu-pr-vu-aujourd-hui'), yz('ortak.karsilama.tu-as-bu-de-l-eau')],
-      esp:['À quoi penses-tu aujourd’hui ?', yz('ortak.karsilama.apprendre-quelque-chose')], hkm:[yz('ortak.karsilama.bienvenue-au-centre'), yz('ortak.karsilama.tout-au-m-me-endroit')] },
-    es:{ genel:[yz('ortak.karsilama.bienvenido-de-nuevo'), 'Hola', yz('ortak.karsilama.qu-bueno-verte'), '¿Listo para hoy?', yz('ortak.karsilama.vamos-all'), yz('ortak.karsilama.paso-a-paso'), yz('ortak.karsilama.con-calma-y-foco')],
-      sabah:[yz('ortak.karsilama.buenos-d-as'), yz('ortak.karsilama.un-d-a-nuevo')], gun:[yz('ortak.karsilama.buenas-tardes'), '¿Qué tal tu día?'], aksam:[yz('ortak.karsilama.buenas-tardes'), yz('ortak.karsilama.una-tarde-tranquila')],
-      gece:['¿Trasnochando?', yz('ortak.karsilama.una-noche-tranquila')], pzt:[yz('ortak.karsilama.nueva-semana-nueva-p-gina')], cuma:[yz('ortak.karsilama.por-fin-viernes')], hs:[yz('ortak.karsilama.buen-fin-de-semana')],
+    en:{ genel:['Welcome back', 'Hello', 'Hi there', 'Good to see you', 'Ready for today?', 'Let’s begin', 'One step at a time',
+        'Little and often', 'Back again, nice', 'Calm and focused', 'Pick up where you left off', 'Here we go'],
+      sabah:['Good morning', 'A fresh day', 'Coffee ready?', 'Morning, a new page'], gun:['Good afternoon', 'How’s your day going?', 'Halfway there'],
+      aksam:['Good evening', 'Time to wind down', 'A calm evening'], gece:['Working late?', 'A quiet night', 'Night owl'],
+      pzt:['New week, new page'], cuma:['Friday at last'], hs:['Happy weekend'],
+      ays:['What are we studying today?', 'Ready to study?', 'Which topic today?', 'Time for some questions'],
+      spi:['What’s your plan for today?', 'Had some water?', 'How did you sleep?', 'A little movement helps'],
+      esp:['What’s on your mind today?', 'What are you curious about?', 'Learn something new?', 'Guitar or book?'],
+      hkm:['Welcome to the hub', 'Everything in one place', 'The big picture', 'Three modules, one view'] },
+    de:{ genel:['Willkommen zurück', 'Hallo', 'Schön, dich zu sehen', 'Bereit für heute?', 'Los geht’s', 'Schritt für Schritt', 'Ruhig und fokussiert'],
+      sabah:['Guten Morgen', 'Ein frischer Tag'], gun:['Guten Tag', 'Wie läuft dein Tag?'], aksam:['Guten Abend', 'Ein ruhiger Abend'],
+      gece:['Noch wach?', 'Eine stille Nacht'], pzt:['Neue Woche, neue Seite'], cuma:['Endlich Freitag'], hs:['Schönes Wochenende'],
+      ays:['Was lernen wir heute?', 'Welches Thema heute?'], spi:['Was hast du heute vor?', 'Schon Wasser getrunken?'],
+      esp:['Was beschäftigt dich heute?', 'Etwas Neues lernen?'], hkm:['Willkommen in der Zentrale', 'Alles an einem Ort'] },
+    fr:{ genel:['Bon retour', 'Bonjour', 'Content de te revoir', 'Prêt pour aujourd’hui ?', 'On y va', 'Pas à pas', 'Calme et concentré'],
+      sabah:['Bonjour', 'Une nouvelle journée'], gun:['Bon après-midi', 'Comment se passe ta journée ?'], aksam:['Bonsoir', 'Une soirée calme'],
+      gece:['Encore debout ?', 'Une nuit tranquille'], pzt:['Nouvelle semaine, nouvelle page'], cuma:['Enfin vendredi'], hs:['Bon week-end'],
+      ays:['On étudie quoi aujourd’hui ?', 'Quel sujet aujourd’hui ?'], spi:['Qu’as-tu prévu aujourd’hui ?', 'Tu as bu de l’eau ?'],
+      esp:['À quoi penses-tu aujourd’hui ?', 'Apprendre quelque chose ?'], hkm:['Bienvenue au centre', 'Tout au même endroit'] },
+    es:{ genel:['Bienvenido de nuevo', 'Hola', 'Qué bueno verte', '¿Listo para hoy?', 'Vamos allá', 'Paso a paso', 'Con calma y foco'],
+      sabah:['Buenos días', 'Un día nuevo'], gun:['Buenas tardes', '¿Qué tal tu día?'], aksam:['Buenas tardes', 'Una tarde tranquila'],
+      gece:['¿Trasnochando?', 'Una noche tranquila'], pzt:['Nueva semana, nueva página'], cuma:['Por fin viernes'], hs:['Buen fin de semana'],
       ays:['¿Qué estudiamos hoy?', '¿Qué tema hoy?'], spi:['¿Qué planeas hoy?', '¿Ya tomaste agua?'],
-      esp:['¿Qué tienes en mente hoy?', '¿Aprender algo nuevo?'], hkm:[yz('ortak.karsilama.bienvenido-al-centro'), yz('ortak.karsilama.todo-en-un-lugar')] },
+      esp:['¿Qué tienes en mente hoy?', '¿Aprender algo nuevo?'], hkm:['Bienvenido al centro', 'Todo en un lugar'] },
   };
   const HATIRA = 40;
 
@@ -71020,13 +70710,13 @@ LIFEOS.KARSILAMA = (function(){
       + secenek.map(([v, y]) => '<button type="button" class="' + (v === deger ? 'is-on' : '') + '" data-karsilama="' + kac(ad) + '" data-deger="' + kac(v) + '"'
         + ' aria-pressed="' + (v === deger ? 'true' : 'false') + '">' + kac(y) + '</button>').join('') + '</div>';
     return '<div class="karsilama-ayar" data-karsilama-ayar="' + kac(modul || '') + '">'
-      + ('<label class="field"><span>' + yz('ortak.karsilama.karsilama-dili') + '</span><select class="input" data-karsilama-alan="dil">')
+      + '<label class="field"><span>Karşılama dili</span><select class="input" data-karsilama-alan="dil">'
       + DILLER.map(d => '<option value="' + d.id + '"' + (d.id === a.dil ? ' selected' : '') + '>' + kac(d.ad) + '</option>').join('') + '</select></label>'
-      + ('<div class="field"><span>' + yz('ortak.karsilama.selam') + '</span>') + sec_('selam', a.selam, [['karisik', yz('ortak.karsilama.turlu-turlu')], ['kendi', yz('ortak.karsilama.kendi-selamlarim')]]) + '</div>'
-      + ('<label class="field"><span>' + yz('ortak.karsilama.kendi-selamlarin') + ' <small>' + yz('ortak.karsilama.her-satira-bir-tane') + '</small></span><textarea class="input" rows="3" data-karsilama-alan="kendi" placeholder="Selam&#10;Hadi bakalım">')
+      + '<div class="field"><span>Selam</span>' + sec_('selam', a.selam, [['karisik', 'Türlü türlü'], ['kendi', 'Kendi selamlarım']]) + '</div>'
+      + '<label class="field"><span>Kendi selamların <small>her satıra bir tane</small></span><textarea class="input" rows="3" data-karsilama-alan="kendi" placeholder="Selam&#10;Hadi bakalım">'
       + kac(a.kendi.join('\n')) + '</textarea></label>'
-      + ('<div class="field"><span>' + yz('ortak.karsilama.altindaki-not') + '</span>') + sec_('not', a.not, [['sistem', yz('ortak.karsilama.sistemin-notu')], ['kendi', yz('ortak.karsilama.kendi-notlarim')], ['ikisi', 'İkisi'], ['kapali', 'Kapalı']]) + '</div>'
-      + (modul ? ('<label class="field"><span>' + yz('ortak.karsilama.bu-bolum-icin-kendi-notlarin') + ' <small>' + yz('ortak.karsilama.her-satira-bir-tane') + '</small></span><textarea class="input" rows="3" data-karsilama-alan="notlar" placeholder="Matematiği ihmal etme">')
+      + '<div class="field"><span>Altındaki not</span>' + sec_('not', a.not, [['sistem', 'Sistemin notu'], ['kendi', 'Kendi notlarım'], ['ikisi', 'İkisi'], ['kapali', 'Kapalı']]) + '</div>'
+      + (modul ? '<label class="field"><span>Bu bölüm için kendi notların <small>her satıra bir tane</small></span><textarea class="input" rows="3" data-karsilama-alan="notlar" placeholder="Matematiği ihmal etme">'
         + kac((a.notlar[modul] || []).join('\n')) + '</textarea></label>' : '')
       + '<p class="karsilama-ayar__ornek" aria-live="polite"><em>' + kac(selam({ ayar:a, modul:modul || 'ays', simdi:new Date(), tohum:1 })) + '</em></p>'
       + '</div>';
@@ -84235,26 +83925,6 @@ R.OrnekVeri = (function(){
    `TANITIM_ADIM` doğrudan DOM'a dokunur. Sihirbazı yeniden çizmek,
    kullanıcının o ana kadar yazdığı ad, boy ve kiloyu silmek olurdu —
    bir süsü değiştirmek için formu sıfırlamak. */
-window.LIFEOS.PARCA.yazilar({
-  'ortak.tanitim.ne-olcuyoruz':'Ne ölçüyoruz?',
-  'ortak.tanitim.neye-karar-vermiyoruz':'Neye karar vermiyoruz?',
-  'ortak.tanitim.nasil-basliyoruz':'Nasıl başlıyoruz?',
-  'ortak.tanitim.bilgiyi-gorur-gelisimi-olcer':'Bilgiyi görür, gelişimi ölçeriz.',
-  'ortak.tanitim.senin-yerine-karar-vermeyiz':'Senin yerine karar vermeyiz: meslek seçmeyiz, üniversite önermeyiz, hayat planı kurmayız.',
-  'ortak.tanitim.kucuk-adimlarla-buyuk-sonucl':'Küçük adımlarla büyük sonuçlara — hesabını kur, verini gir, yola çık.',
-  'ortak.tanitim.gercek-saglik-veride-gorunur':'Gerçek sağlık veride görünür.',
-  'ortak.tanitim.teshis-koymayiz-tedavi-onerm':'Teşhis koymayız, tedavi önermeyiz, ilaç tavsiye etmeyiz, acil müdahale sağlamayız.',
-  'ortak.tanitim.kucuk-adimlarla-buyuk-bir-se':'Küçük adımlarla büyük bir sen — verini bağla, profilini kur, yola çık.',
-  'ortak.tanitim.gorunmeyeni-gorur-gelisimini':'Görünmeyeni görür, gelişimini ölçeriz.',
-  'ortak.tanitim.teshis-koymayiz-sertifika-ve':'Teşhis koymayız, sertifika vermeyiz, etiketlemeyiz, senin yerine karar almayız.',
-  'ortak.tanitim.verini-paylas-kesfetmeye-bas':'Verini paylaş, keşfetmeye başla — bağla, çözümle, sonucu gör.',
-  'ortak.tanitim.veri-karara-donusur':'Veri, karara dönüşür.',
-  'ortak.tanitim.her-seye-degil-dogru-seye':'Her şeye değil, doğru şeye karar veririz: teşhis koymaz, sertifika vermez, mutlak doğru sunmaz.',
-  'ortak.tanitim.verini-bagla-seceneklerini-k':'Verini bağla, seçeneklerini keşfet, uygulamaya başla.',
-  'ortak.tanitim.adim-1':'Adım 1 /',
-  'ortak.tanitim.adim':'Adım ',
-});
-
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -84262,16 +83932,16 @@ window.LIFEOS = window.LIFEOS || {};
    üzerinde yazan cümlelerin aynısıdır: resim ile yazı ayrışırsa
    kullanıcı iki farklı şey okur. */
 LIFEOS.TANITIM = {
-  sorular:[yz('ortak.tanitim.ne-olcuyoruz'), yz('ortak.tanitim.neye-karar-vermiyoruz'), yz('ortak.tanitim.nasil-basliyoruz')],
+  sorular:['Ne ölçüyoruz?', 'Neye karar vermiyoruz?', 'Nasıl başlıyoruz?'],
   ays:[
-    yz('ortak.tanitim.bilgiyi-gorur-gelisimi-olcer'),
-    yz('ortak.tanitim.senin-yerine-karar-vermeyiz'),
-    yz('ortak.tanitim.kucuk-adimlarla-buyuk-sonucl'),
+    'Bilgiyi görür, gelişimi ölçeriz.',
+    'Senin yerine karar vermeyiz: meslek seçmeyiz, üniversite önermeyiz, hayat planı kurmayız.',
+    'Küçük adımlarla büyük sonuçlara — hesabını kur, verini gir, yola çık.',
   ],
   spi:[
-    yz('ortak.tanitim.gercek-saglik-veride-gorunur'),
-    yz('ortak.tanitim.teshis-koymayiz-tedavi-onerm'),
-    yz('ortak.tanitim.kucuk-adimlarla-buyuk-bir-se'),
+    'Gerçek sağlık veride görünür.',
+    'Teşhis koymayız, tedavi önermeyiz, ilaç tavsiye etmeyiz, acil müdahale sağlamayız.',
+    'Küçük adımlarla büyük bir sen — verini bağla, profilini kur, yola çık.',
   ],
   esp:[
     /* «Potansiyeli keşfederiz» bir yetenek YARGISIDIR — bir sonraki
@@ -84281,14 +83951,14 @@ LIFEOS.TANITIM = {
        yalniz OLCUYOR. ESP'ninki de oyle olmali: gorunmeyen sey
        potansiyel degil, ILERLEME — ve ilerleme olculur, tahmin
        edilmez. */
-    yz('ortak.tanitim.gorunmeyeni-gorur-gelisimini'),
-    yz('ortak.tanitim.teshis-koymayiz-sertifika-ve'),
-    yz('ortak.tanitim.verini-paylas-kesfetmeye-bas'),
+    'Görünmeyeni görür, gelişimini ölçeriz.',
+    'Teşhis koymayız, sertifika vermeyiz, etiketlemeyiz, senin yerine karar almayız.',
+    'Verini paylaş, keşfetmeye başla — bağla, çözümle, sonucu gör.',
   ],
   hkm:[
-    yz('ortak.tanitim.veri-karara-donusur'),
-    yz('ortak.tanitim.her-seye-degil-dogru-seye'),
-    yz('ortak.tanitim.verini-bagla-seceneklerini-k'),
+    'Veri, karara dönüşür.',
+    'Her şeye değil, doğru şeye karar veririz: teşhis koymaz, sertifika vermez, mutlak doğru sunmaz.',
+    'Verini bağla, seçeneklerini keşfet, uygulamaya başla.',
   ],
 };
 
@@ -84394,7 +84064,7 @@ LIFEOS.KURULUM_HTML = function(mod, o){
     + '<div class="kurulum__ilerleme" role="progressbar" aria-label="Kurulum adımı"'
     +   ' aria-valuemin="1" aria-valuemax="' + n + '" aria-valuenow="1" aria-valuetext="Adım 1 / ' + n + '">'
     +   '<ol class="kurulum__adimlar">' + adimlar_ + '</ol>'
-    +   ('<span class="kurulum__sayac" data-kurulum-sayac>' + yz('ortak.tanitim.adim-1') + ' ') + n + '</span>'
+    +   '<span class="kurulum__sayac" data-kurulum-sayac>Adım 1 / ' + n + '</span>'
     + '</div>'
     + '<div class="kurulum__bas">'
     +   '<h2 class="kurulum__soru" data-kurulum-soru tabindex="-1">' + kac(sorular[0]) + '</h2>'
@@ -84432,11 +84102,11 @@ LIFEOS.KURULUM_GIT = function(dugme, yon){
   var yazi = kok.querySelector('[data-kurulum-yazi]');
   if(yazi) yazi.textContent = cevaplar[no - 1] || '';
   var sayac = kok.querySelector('[data-kurulum-sayac]');
-  if(sayac) sayac.textContent = yz('ortak.tanitim.adim') + no + ' / ' + n;
+  if(sayac) sayac.textContent = 'Adım ' + no + ' / ' + n;
   var cubuk = kok.querySelector('[data-kurulum-cubuk]');
   if(cubuk) cubuk.style.width = Math.round(100 * no / n) + '%';
   var il = kok.querySelector('[role="progressbar"]');
-  if(il){ il.setAttribute('aria-valuenow', String(no)); il.setAttribute('aria-valuetext', yz('ortak.tanitim.adim') + no + ' / ' + n); }
+  if(il){ il.setAttribute('aria-valuenow', String(no)); il.setAttribute('aria-valuetext', 'Adım ' + no + ' / ' + n); }
 
   /* Pencerenin alt çubuğu kökün DIŞINDA: aynı pencerede aranır. */
   var pencere = kok.closest('.sheet, .overlay, [role="dialog"]') || belge;
