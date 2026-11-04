@@ -109,14 +109,15 @@ SP.Screens.planlar = (function(){
     </div>`;
   }
 
-  function render(){
-    if(!HP()) return String(K.Kutu({ ad:'Planlar', govde:raw('<p class="small muted">Plan modülü yüklenemedi.</p>') }));
+  LIFEOS.PARCA.blok({ id:'planlar.kapali', sayfa:'planlar', yer:'ana', ad:'Planlar', kosul:() => !HP(), ciz:() => String(K.Kutu({ ad:'Planlar', govde:raw('<p class="small muted">Plan modülü yüklenemedi.</p>') })) });
+  LIFEOS.PARCA.blok({ id:'planlar.liste', sayfa:'planlar', yer:'ana', ad:'Planların', kosul:() => !!HP(), ciz(){
     const yerlesik = HP().TURLER.filter(t => t.tek).map(t => satir(t.id, HP().bul(t.id)));
     const serbest = HP().liste().filter(p => p.tur === 'serbest').map(p => satir('serbest', p));
     return String(K.Kutu({ ad:'Planların',
       govde:html`<div class="hp-liste" data-raf-tam>${yerlesik}${serbest}</div>`,
       ayak:K.Button({ label:'Plan ekle', icon:'plus', size:'sm', tone:'ghost', act:'hp-ac', data:{ 'data-tur':'serbest' } }) }));
-  }
+  } });
+  function render(){ return LIFEOS.PARCA.yer('planlar', 'ana', K); }
 
   /* ---------------------------------------------------------- takip penceresi
 

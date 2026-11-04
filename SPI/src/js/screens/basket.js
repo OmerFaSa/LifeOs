@@ -507,10 +507,11 @@ SP.Screens.basket = (function(){
     }
   }
 
+  TABS.forEach(t => LIFEOS.PARCA.blok({ id:'basket.' + t.id, sayfa:'basket', yer:t.id, ad:t.label, ciz:() => govde(t) }));
   async function render(){
     const n = ((S.basket && S.basket.items) || []).length;
     return String(K.SayfaBolumleri({ act:'basket-tab', aria:'Sepet bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t),
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:LIFEOS.PARCA.yer('basket', t.id, K),
         sayi:t.id === 'sepet' && n ? n : null })) }));
   }
 

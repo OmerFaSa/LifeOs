@@ -323,10 +323,9 @@ R.Screens.learn = (function(){
     ]);
   }
 
-  async function render(){
-    const note = openNote();
-    return String(note ? detailView(note) : listView());
-  }
+  LIFEOS.PARCA.blok({ id:'learn.detay', sayfa:'learn', yer:'ana', ad:'Ders notu', kosul:() => !!openNote(), ciz:() => detailView(openNote()) });
+  LIFEOS.PARCA.blok({ id:'learn.liste', sayfa:'learn', yer:'ana', ad:'Ders notları', kosul:() => !openNote(), ciz:() => listView() });
+  async function render(){ return String(LIFEOS.PARCA.yer('learn', 'ana', R.C)); }
 
   const handle = {
     async 'learn-filter'(el){ S.ui.learnFilter = el.dataset.value; S.ui.learnPage = 1; R.App.render(); },

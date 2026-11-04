@@ -862,10 +862,11 @@ R.Screens.exams = (function(){
     return '<div class="pk-ust">' + P.izgara([netKart, rekor, dersKart, borcKart], 'pk-izgara--iki') + '</div>';
   }
 
-  async function render(){
-    if(R.ExamRun.active()) return String(runView());
-    return String(S.ui.examOpen ? detailView(S.ui.examOpen) : PanoDeneme() + listView());
-  }
+  LIFEOS.PARCA.blok({ id:'exams.kosu', sayfa:'exams', yer:'ana', ad:'Deneme akışı', kosul:() => R.ExamRun.active(), ciz:() => runView() });
+  LIFEOS.PARCA.blok({ id:'exams.detay', sayfa:'exams', yer:'ana', ad:'Deneme ayrıntısı', kosul:() => !R.ExamRun.active() && S.ui.examOpen, ciz:() => detailView(S.ui.examOpen) });
+  LIFEOS.PARCA.blok({ id:'exams.pano', sayfa:'exams', yer:'ana', sira:10, ad:'Deneme özeti', kosul:() => !R.ExamRun.active() && !S.ui.examOpen, ciz:() => PanoDeneme() });
+  LIFEOS.PARCA.blok({ id:'exams.liste', sayfa:'exams', yer:'ana', sira:20, ad:'Deneme listesi', kosul:() => !R.ExamRun.active() && !S.ui.examOpen, ciz:() => listView() });
+  async function render(){ return String(LIFEOS.PARCA.yer('exams', 'ana', R.C)); }
 
   function afterRender(){
     if(R.ExamRun.active()) startTick(); else stopTick();

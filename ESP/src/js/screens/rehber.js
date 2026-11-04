@@ -17,11 +17,12 @@ ESP.Screens.rehber = (function(){
       ciz:() => ESP.App.render(), git:() => ESP.App.go('rehber') });
     return r;
   }
-  function render(){
+  LIFEOS.PARCA.blok({ id:'rehber.okuyucu', sayfa:'rehber', yer:'ana', ad:'Anlatımlar', ciz(){
     const r = hazirla();
     if(!r) return '<p class="small muted">Anlatımlar bu açılışta yüklenemedi.</p>';
     return r.html();
-  }
+  } });
+  function render(){ return LIFEOS.PARCA.yer('rehber', 'ana', ESP.C); }
   /* Çalışma bölümünün sonundaki kart (disc: 'lang' ya da ['music', 'diction']). */
   function alanKarti(disc){
     const r = hazirla();

@@ -58,17 +58,15 @@ R.Screens.kutuphane = (function(){
       })}</div>` });
   }
 
-  async function render(){
-    const kart = kitapKarti();
-    if(!kart){
-      /* Boş durum (10): yalnız veri yokken; tek eylem. */
-      return String(c.Grid([c.Span(12, c.Kutu({ ad:'Kütüphanen henüz boş', govde:html`
+  /* Boş durum (10): yalnız veri yokken; tek eylem. */
+  LIFEOS.PARCA.blok({ id:'kutuphane.bos', sayfa:'kutuphane', yer:'ana', ad:'Kütüphanen henüz boş', kosul:b => !b.kart, ciz:() => c.Kutu({ ad:'Kütüphanen henüz boş', govde:html`
         <p class="small muted">BAM bir test kitabı ürettiğinde burada durur: kaynağı, maliyeti
           ve ne kadarını çözdüğün.</p>
         <div class="mt-10">${c.Button({ label:'Ofis\u2019e sor', size:'sm', act:'go',
-          data:{ 'data-route':'team' } })}</div>` }))]));
-    }
-    return String(c.Grid([c.Span(12, kart)]));
+          data:{ 'data-route':'team' } })}</div>` }) });
+  LIFEOS.PARCA.blok({ id:'kutuphane.kitap', sayfa:'kutuphane', yer:'ana', ad:'Test kitapları', kosul:b => !!b.kart, ciz:b => b.kart });
+  async function render(){
+    return String(c.Grid([c.Span(12, LIFEOS.PARCA.yer('kutuphane', 'ana', c, { kart:kitapKarti() }))]));
   }
 
   /* Çözme Sınama'da olur: önce oraya geçilir, sonra onun işleyicisi. */
@@ -106,11 +104,13 @@ R.Screens.notlar = (function(){
   const { raw } = R.h;
   const D = () => (window.LIFEOS || {}).DEFTER;
   const hazir = () => !!(D() && D().kuruluMu && D().kuruluMu());
-  function render(){
-    if(!hazir()) return String(K.Kutu({ ad:'Notlar', govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') }));
-    return '<div data-defter-pano>' + (D().panoHtml ? D().panoHtml() : '') + '</div>'
-      + String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') }));
-  }
+  LIFEOS.PARCA.blok({ id:'notlar.kapali', sayfa:'notlar', yer:'ana', ad:'Notlar', kosul:() => !hazir(),
+    ciz:() => String(K.Kutu({ ad:'Notlar', govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') })) });
+  LIFEOS.PARCA.blok({ id:'notlar.pano', sayfa:'notlar', yer:'ana', sira:10, ad:'Defter özeti', kosul:() => hazir(),
+    ciz:() => '<div data-defter-pano>' + (D().panoHtml ? D().panoHtml() : '') + '</div>' });
+  LIFEOS.PARCA.blok({ id:'notlar.raf', sayfa:'notlar', yer:'ana', sira:20, ad:'Notlar ve belgeler', kosul:() => hazir(),
+    ciz:() => String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') })) });
+  function render(){ return LIFEOS.PARCA.yer('notlar', 'ana', K); }
   function afterRender(){
     const el = document.querySelector('[data-defter-raf-yer]');
     if(el && hazir()) D().rafBagla(el);

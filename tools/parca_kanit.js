@@ -100,6 +100,7 @@ function durum(){
     const k = path.join(KOK, m, 'src', 'js', 'screens');
     fs.readdirSync(k).filter(f => f.endsWith('.js')).forEach(f => {
       const s = fs.readFileSync(path.join(k, f), 'utf8');
+      if(!/\.Screens\.\w+ *=/.test(s)) return;   // yardimci dosya (fotoui, hatirlatui)
       ekran++;
       sayfa += (s.match(/\.sayfa\(\{/g) || []).length;
       const b = (s.match(/\b(?:P|PARCA)\.blok\(/g) || []).length;

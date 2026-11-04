@@ -1300,10 +1300,12 @@ SP.Screens.move = (function(){
         + P.not('son 7 gün ÷ son ayın ortalaması · denge ' + v(r.low) + '–' + v(r.high)) });
   }
 
+  LIFEOS.PARCA.blok({ id:'move.pano', sayfa:'move', yer:'ust', ad:'Hareket özeti', ciz:() => PanoHareket() });
+  TABS.forEach(t => LIFEOS.PARCA.blok({ id:'move.' + t.id, sayfa:'move', yer:t.id, ad:t.label, ciz:() => govde(t) }));
   async function render(){
     const done = M.workoutsOf(U.todayISO()).length;
-    return String(PanoHareket() + K.SayfaBolumleri({ act:'move-tab', aria:'Hareket bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t),
+    return String(LIFEOS.PARCA.yer('move', 'ust', K) + K.SayfaBolumleri({ act:'move-tab', aria:'Hareket bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:LIFEOS.PARCA.yer('move', t.id, K),
         sayi:t.id === 'bugun' && done ? done : null })) }));
   }
 

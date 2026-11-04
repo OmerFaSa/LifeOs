@@ -531,9 +531,12 @@ SP.Screens.onaylar = (function(){
       <p class="small muted">King’in senin hakkındaki tahminleri. Doğruysa kaydedilir; yanlışsa bir daha sorulmaz.</p>${raw(h)}` }));
   }
 
+  LIFEOS.PARCA.blok({ id:'onaylar.cikarim', sayfa:'onaylar', yer:'cikarim', ad:'Sana sorulacaklar', ciz:() => cikarimKutusu() });
+  LIFEOS.PARCA.blok({ id:'onaylar.bekleyen', sayfa:'onaylar', yer:'ana', ad:'Bekleyen öneriler', ciz:b => b.ana });
   async function render(){
-    const ana = String(await onayRender());
-    const ck = cikarimKutusu();
+    const parcaB = { ana:String(await onayRender()) };
+    const ana = LIFEOS.PARCA.yer('onaylar', 'ana', SP.C, parcaB);
+    const ck = LIFEOS.PARCA.yer('onaylar', 'cikarim', SP.C);
     return ck ? String(html`<div data-oz="cikarim">${raw(ck)}</div><div class="mt-16">${raw(ana)}</div>`) : ana;
   }
 

@@ -19,11 +19,12 @@ SP.Screens.rehber = (function(){
       ciz:() => SP.App.render() });
     return r;
   }
-  function render(){
+  LIFEOS.PARCA.blok({ id:'rehber.okuyucu', sayfa:'rehber', yer:'ana', ad:'Anlatımlar', ciz(){
     const r = hazirla();
     if(!r) return '<p class="small muted">Anlatımlar bu açılışta yüklenemedi.</p>';
     return r.html();
-  }
+  } });
+  function render(){ return LIFEOS.PARCA.yer('rehber', 'ana', SP.C); }
   return {
     id:'rehber',
     title:'Kütüphanem',

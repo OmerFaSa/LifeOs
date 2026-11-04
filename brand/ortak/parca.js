@@ -14,6 +14,7 @@
      blok   sayfanın bir bölümü. Hangi sayfanın hangi yerine takıldığını
             kendi söyler; sayfa dosyasına dokunmadan başka bir dosyadan da
             eklenir. Olay işleyicisi bloğun içinde durur.
+            `kosul` verilirse yalnız o durumda çizilir (görünüm seçen ekranlar).
      yazı   ekranda görünen cümle kimlikle durur (`yazi`); çizim kodu metin taşımaz.
      bilgi  bir sayı ya da değer: nasıl okunduğu ve kesinlik etiketi (§1.2).
             Etiketsiz bilgi kaydedilmez. King, Gün ve başka parça buradan okur.
@@ -94,13 +95,15 @@ window.LIFEOS = window.LIFEOS || {};
     const s = SAYFA.get(sayfaId);
     if(!s) throw new Error('PARCA: sayfa yok: ' + sayfaId);
     return K.Grid(s.izgara.map(z => {
-      const l = bloklar(sayfaId, z.yer).map(b => ciz1(b, K, baglam));
+      const l = liste(sayfaId, z.yer, K, baglam);
       return K.Span(z.alan, z.tek ? (l.length === 1 ? l[0] : l.join('')) : K.Stack(l));
     }));
   }
 
   /* Bir yerin bloklarını sırayla çizer; ekranın kendi şablonu bu parçaları dizer. */
-  function liste(sayfaId, yerAd, K, baglam){ return bloklar(sayfaId, yerAd).map(b => ciz1(b, K, baglam)); }
+  function liste(sayfaId, yerAd, K, baglam){
+    return bloklar(sayfaId, yerAd).filter(b => !b.kosul || b.kosul(baglam)).map(b => ciz1(b, K, baglam));
+  }
   function yer(sayfaId, yerAd, K, baglam, raw){
     const l = liste(sayfaId, yerAd, K, baglam);
     if(l.length === 1) return l[0];

@@ -60,8 +60,10 @@ ESP.Screens.kutuphane = (function(){
     },
   };
 
+  LIFEOS.PARCA.blok({ id:'kutuphane.urunler', sayfa:'kutuphane', yer:'ana', sira:10, ad:'Ürünler', ciz:() => urunlerKart() });
+  LIFEOS.PARCA.blok({ id:'kutuphane.unite', sayfa:'kutuphane', yer:'ana', sira:20, ad:'Üniteler', ciz:() => uniteKart() });
   function render(){
-    const kartlar = [urunlerKart(), uniteKart()].filter(Boolean);
+    const kartlar = LIFEOS.PARCA.liste('kutuphane', 'ana', K).filter(Boolean);
     if(!kartlar.length){
       return K.Kutu({ ad:'Kütüphanen henüz boş', govde:html`
         <p class="small muted">BAM bir özet, rapor ya da ünite ürettiğinde burada durur.</p>
@@ -91,11 +93,13 @@ ESP.Screens.notlar = (function(){
   const { raw } = ESP.h;
   const D = () => (window.LIFEOS || {}).DEFTER;
   const hazir = () => !!(D() && D().kuruluMu && D().kuruluMu());
-  function render(){
-    if(!hazir()) return String(K.Kutu({ ad:'Notlar', govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') }));
-    return '<div data-defter-pano>' + (D().panoHtml ? D().panoHtml() : '') + '</div>'
-      + String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') }));
-  }
+  LIFEOS.PARCA.blok({ id:'notlar.kapali', sayfa:'notlar', yer:'ana', ad:'Notlar', kosul:() => !hazir(),
+    ciz:() => String(K.Kutu({ ad:'Notlar', govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') })) });
+  LIFEOS.PARCA.blok({ id:'notlar.pano', sayfa:'notlar', yer:'ana', sira:10, ad:'Defter özeti', kosul:() => hazir(),
+    ciz:() => '<div data-defter-pano>' + (D().panoHtml ? D().panoHtml() : '') + '</div>' });
+  LIFEOS.PARCA.blok({ id:'notlar.raf', sayfa:'notlar', yer:'ana', sira:20, ad:'Notlar ve belgeler', kosul:() => hazir(),
+    ciz:() => String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') })) });
+  function render(){ return LIFEOS.PARCA.yer('notlar', 'ana', K); }
   function afterRender(){
     const el = document.querySelector('[data-defter-raf-yer]');
     if(el && hazir()) D().rafBagla(el);

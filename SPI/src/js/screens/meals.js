@@ -1044,10 +1044,12 @@ SP.Screens.meals = (function(){
     return '<div class="pk-ust">' + P.izgara([ogunKart, makro, suKart, prKart, sikKart, saatKart]) + '</div>';
   }
 
+  LIFEOS.PARCA.blok({ id:'meals.pano', sayfa:'meals', yer:'ust', ad:'Öğün özeti', ciz:() => PanoOgun() });
+  TABS.forEach(t => LIFEOS.PARCA.blok({ id:'meals.' + t.id, sayfa:'meals', yer:t.id, ad:t.label, ciz:() => govde(t) }));
   async function render(){
     const n = M.mealsOf(shownDate()).length;
-    return String(PanoOgun() + K.SayfaBolumleri({ act:'meal-tab', aria:'Besin bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t),
+    return String(LIFEOS.PARCA.yer('meals', 'ust', K) + K.SayfaBolumleri({ act:'meal-tab', aria:'Besin bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:LIFEOS.PARCA.yer('meals', t.id, K),
         sayi:t.id === 'gunluk' && n ? n : null })) }));
   }
 

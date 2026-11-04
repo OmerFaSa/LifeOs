@@ -36,6 +36,14 @@
       expect(P.yer('_t.y', 'bos', K, {})).toBe('');
       temiz(['_t.y', '_t.y1', '_t.y2']);
     });
+    it('kosul: blok yalnız o durumda çizilir', () => {
+      P.sayfa({ id:'_t.k2', modul:'_t' });
+      P.blok({ id:'_t.k3', sayfa:'_t.k2', yer:'a', ad:'A', kosul:b => b.ac, ciz:() => 'a' });
+      P.blok({ id:'_t.k4', sayfa:'_t.k2', yer:'a', ad:'B', kosul:b => !b.ac, ciz:() => 'b' });
+      expect(P.yer('_t.k2', 'a', K, { ac:true })).toBe('a');
+      expect(P.yer('_t.k2', 'a', K, { ac:false })).toBe('b');
+      temiz(['_t.k2', '_t.k3', '_t.k4']);
+    });
     it('hata veren parça sayfayı düşürmez, adıyla söyler', () => {
       P.sayfa({ id:'_t.h', modul:'_t', izgara:[{ alan:6, yer:'a' }] });
       P.blok({ id:'_t.k', sayfa:'_t.h', yer:'a', ad:'Bozuk', ciz:() => { throw new Error('x'); } });

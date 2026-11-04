@@ -320,12 +320,13 @@ R.Screens.quiz = (function(){
     ]))]);
   }
 
-  async function render(){
-    if(TK() && TK().aktif()) return String(kitapView());
-    const oz = TK() ? TK().sonOzet() : null;
-    if(oz && !Q.active()) return String(kitapSonucView(oz));
-    return String(Q.active() ? runView() : setupView());
-  }
+  const kitapta = () => !!(TK() && TK().aktif());
+  const sonOzet = () => (TK() ? TK().sonOzet() : null);
+  LIFEOS.PARCA.blok({ id:'quiz.kitap', sayfa:'quiz', yer:'ana', ad:'Test kitabı', kosul:kitapta, ciz:() => kitapView() });
+  LIFEOS.PARCA.blok({ id:'quiz.sonuc', sayfa:'quiz', yer:'ana', ad:'Test sonucu', kosul:() => !kitapta() && sonOzet() && !Q.active(), ciz:() => kitapSonucView(sonOzet()) });
+  LIFEOS.PARCA.blok({ id:'quiz.kosu', sayfa:'quiz', yer:'ana', ad:'Sınama', kosul:() => !kitapta() && Q.active(), ciz:() => runView() });
+  LIFEOS.PARCA.blok({ id:'quiz.kurulum', sayfa:'quiz', yer:'ana', ad:'Sınama kurulumu', kosul:() => !kitapta() && !sonOzet() && !Q.active(), ciz:() => setupView() });
+  async function render(){ return String(LIFEOS.PARCA.yer('quiz', 'ana', R.C)); }
 
   const handle = {
     async 'quiz-size'(el){ S.ui.quizSize = Number(el.dataset.value); R.App.render(); },
