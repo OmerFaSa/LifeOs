@@ -152,6 +152,9 @@ jobs:
       - name: Ortak CSS kaynakla aynı mı
         run: python3 tools/ortak.py --denetle
 
+      - name: Parca kaydi ve blok adlari
+        run: python3 tools/parca_test.py
+
       # MARKA ADLANDIRMASI VE YOL MUHAFIZI. Bu denetim bir suredir
       # yalnizca `tools/sayilar.py --tam` icinden kosuyordu, yani
       # birinin elle koşturmasina bagliydi. Sinadigi sey onemli:
@@ -326,6 +329,9 @@ jobs:
 
       - name: Panonun yüzü (erişilebilirlik, telefon, kontrast)
         run: node HKM/tools/yuz.js
+
+      - name: Giriş ve Gün sayfası açılıyor mu
+        run: node tools/giris_sayfa_test.js
 
   butunlesme:
     name: Üç arayüz + HKM uçtan uca

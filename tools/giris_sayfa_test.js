@@ -9,7 +9,7 @@
 const path = require('path'), { spawn } = require('child_process');
 const KOK = path.resolve(__dirname, '..');
 const anaKok = path.resolve(KOK, require('child_process').execSync('git rev-parse --git-common-dir', { cwd:KOK, encoding:'utf8' }).trim(), '..');
-const { chromium } = require(path.join(anaKok, 'AYS', 'node_modules', 'playwright'));
+const { chromium } = require(path.join(anaKok, 'ESP', 'node_modules', 'playwright'));
 const PORT = 4179;
 
 const PY = `
