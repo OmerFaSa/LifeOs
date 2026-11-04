@@ -111,6 +111,45 @@
       expect(s.getAttribute('viewBox')).toBe('0 0 20 20');
       d.remove();
     });
+    it('simgeler toplu çevrilir: bütün boylar okunmadan hiçbiri yazılmaz (yerleşim sarsıntısı yok)', () => {
+      const P = window.LIFEOS.PIKSEL, kok = document.documentElement, eskiZemin = kok.getAttribute('data-zemin'), d = document.createElement('div');
+      kok.setAttribute('data-zemin', 'piksel');
+      d.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" style="fill:none;stroke:currentColor;stroke-width:2"><path d="M4 12h16"/></svg>'.repeat(3);
+      document.body.appendChild(d);
+      const eski = window.getComputedStyle;
+      let yazildiktanSonraOkuma = 0;
+      window.getComputedStyle = function(e, s){
+        if(e.tagName.toLowerCase() === 'svg' && d.querySelector('svg[shape-rendering]')) yazildiktanSonraOkuma++;
+        return eski.call(window, e, s);
+      };
+      try{
+        P.simgeleriTara(d);
+        expect(yazildiktanSonraOkuma).toBe(0);
+        d.querySelectorAll('svg').forEach(s => expect(s.getAttribute('shape-rendering')).toBe('crispEdges'));
+      }finally{
+        window.getComputedStyle = eski;
+        d.remove();
+        if(eskiZemin) kok.setAttribute('data-zemin', eskiZemin); else kok.removeAttribute('data-zemin');
+      }
+    });
+    it('hareket akıcı: tema adımlı eğri dayatmaz, «bütün özellikleri geçişli» öğe üretmez', async () => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet'; link.href = '../css/piksel.css';
+      await new Promise((ok, ret) => { link.onload = ok; link.onerror = ret; document.head.appendChild(link); });
+      const kok = document.documentElement, eskiZemin = kok.getAttribute('data-zemin'), d = document.createElement('div');
+      kok.setAttribute('data-zemin', 'piksel');
+      document.body.appendChild(d);
+      try{
+        const s = getComputedStyle(d);
+        expect(s.animationTimingFunction.indexOf('steps')).toBe(-1);
+        expect(s.transitionTimingFunction.indexOf('steps')).toBe(-1);
+        expect(getComputedStyle(kok).getPropertyValue('--ease').indexOf('steps')).toBe(-1);
+      }finally{
+        d.remove();
+        link.remove();
+        if(eskiZemin) kok.setAttribute('data-zemin', eskiZemin); else kok.removeAttribute('data-zemin');
+      }
+    });
     it('elle çizilen simgeler 12×12, takma adlar çizime gider', () => {
       const G = window.LIFEOS.PIKSEL_SIMGE;
       Object.keys(G.S).forEach(ad => { expect(G.S[ad].length).toBe(12); G.S[ad].forEach(r => expect(r.length).toBe(12)); });

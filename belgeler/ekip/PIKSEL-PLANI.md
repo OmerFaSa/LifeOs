@@ -25,14 +25,14 @@ Kurallar: tek tema jetonla ve kabuk yüzeyleriyle değişir, ekran tema bilmez. 
 - [x] Anahtar, açılır liste oku, «i» düğmesi
 - [x] Rozet ve etiket: çıkartma
 - [x] Fare imleci: piksel ok ve el
-- [x] Yükleniyor iskeleti: adımlı yanıp sönme
+- [x] Yükleniyor iskeleti: yumuşak solup gelme
 - [x] Küçük tepki: bardak dolunca zıplar
 - [x] Küçük tepki: tik basılınca iner, kayıtta kalp
 
 ## Efektler (2026-11-05: «efektlerin kalitesini arttır, tüm sayfalarda»)
 
-- [x] Bütün hareket adım adım: yumuşak eğri yok, süreler kısa (Rütbe ve geri sayım hariç)
-- [x] Sayfa, pencere, sekme, menü ve bildirim tek giriş hareketi; kenar menü hızlı açılır
+- [x] Hareket kısa ve yumuşak: görünüm piksel, geçiş akıcı. Adımlı dil 2026-11-05'te geri alındı («kasıyor, az fps vibe veriyor»); bilerek adımlı kalanlar: kıvılcım, oda, kedi, yazı imleci. Ölçüm (AYS, Edge + GPU, öncesi → sonrası): animasyon başına görünen kare sayfa 2,2 → 31,8, kenar 8,4 → 29,3, pencere 4,3 → 23,8; sayfa geçişinde uzun görev 30 → 15, stil hesabı 96 → 57 ms
+- [x] Sayfa, pencere, sekme, menü ve bildirim tek giriş hareketi; kenar menü 300 ms'de açılır
 - [x] Düğme basılınca iner; menü ve kısayol simgesi üzerine gelince zıplar
 - [x] Kıvılcım: bardak, tik ve gerçek kayıtta sekiz kare; hareket ayarına uyar
 - [x] Açılış karşılaması: bulanık cam yerine duvar, kâğıt ve modül yüzü
