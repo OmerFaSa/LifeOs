@@ -15,6 +15,27 @@
      - oturum özeti konu risk skoruna girdi olur
 
    Karar motoru burada da otoritedir; LLM soru üretebilir ama puanlamaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.quiz.bugunun-kartlari':'Bugünün kartları',
+  'ays.core.quiz.tekrar-takviminde-bugune-dus':'Tekrar takviminde bugüne düşenler',
+  'ays.core.quiz.ders':'Ders',
+  'ays.core.quiz.sectigin-dersin-tum-kartlari':'Seçtiğin dersin tüm kartları',
+  'ays.core.quiz.konu':'Konu',
+  'ays.core.quiz.tek-konuya-odaklan':'Tek konuya odaklan',
+  'ays.core.quiz.yanlis-defteri':'Yanlış defteri',
+  'ays.core.quiz.kapanmamis-yanlislarin-ilkel':'Kapanmamış yanlışların ilkeleri',
+  'ays.core.quiz.ders-notlari':'Ders notları',
+  'ays.core.quiz.video-notlarindan-geri-cagir':'Video notlarından geri çağırma',
+  'ays.core.quiz.karisik':'Karışık',
+  'ays.core.quiz.hepsinden-rastgele-sinav-ben':'Hepsinden rastgele — sınav benzeri',
+  'ays.core.quiz.zayif-konular':'Zayıf konular',
+  'ays.core.quiz.acik-yanlisi-en-cok-olan':'Açık yanlışı en çok olan 3 konu (ölçümden)',
+  'ays.core.quiz.acik-uclu':'Açık uçlu',
+  'ays.core.quiz.cevabi-kendin-uret-en':'Cevabı kendin üret — en zoru, en öğreticisi',
+  'ays.core.quiz.coktan-secmeli':'Çoktan seçmeli',
+  'ays.core.quiz.siklardan-ele-sinav-bicimine':'Şıklardan ele — sınav biçimine yakın',
+});
+
 
 window.R = window.R || {};
 
@@ -22,13 +43,13 @@ R.Quiz = (function(){
   const U = R.U, M = R.Model, S = R.S;
 
   const MODES = {
-    due:      { label:'Bugünün kartları', note:'Tekrar takviminde bugüne düşenler' },
-    subject:  { label:'Ders',             note:'Seçtiğin dersin tüm kartları' },
-    topic:    { label:'Konu',             note:'Tek konuya odaklan' },
-    errors:   { label:'Yanlış defteri',   note:'Kapanmamış yanlışların ilkeleri' },
-    notes:    { label:'Ders notları',     note:'Video notlarından geri çağırma' },
-    mixed:    { label:'Karışık',          note:'Hepsinden rastgele — sınav benzeri' },
-    zayif:    { label:'Zayıf konular',    note:'Açık yanlışı en çok olan 3 konu (ölçümden)' },
+    due:      { label:yz('ays.core.quiz.bugunun-kartlari'), note:yz('ays.core.quiz.tekrar-takviminde-bugune-dus') },
+    subject:  { label:yz('ays.core.quiz.ders'),             note:yz('ays.core.quiz.sectigin-dersin-tum-kartlari') },
+    topic:    { label:yz('ays.core.quiz.konu'),             note:yz('ays.core.quiz.tek-konuya-odaklan') },
+    errors:   { label:yz('ays.core.quiz.yanlis-defteri'),   note:yz('ays.core.quiz.kapanmamis-yanlislarin-ilkel') },
+    notes:    { label:yz('ays.core.quiz.ders-notlari'),     note:yz('ays.core.quiz.video-notlarindan-geri-cagir') },
+    mixed:    { label:yz('ays.core.quiz.karisik'),          note:yz('ays.core.quiz.hepsinden-rastgele-sinav-ben') },
+    zayif:    { label:yz('ays.core.quiz.zayif-konular'),    note:yz('ays.core.quiz.acik-yanlisi-en-cok-olan') },
   };
 
   /* Zayıf konu ÖLÇÜMDEN gelir (fikir 23): açık yanlışı en çok olan konular.
@@ -48,8 +69,8 @@ R.Quiz = (function(){
   /* Sınama biçimi: açık uçlu (üret) ya da çoktan seçmeli (tanı + ele).
      ÖSYM çoktan seçmelidir; ikisi farklı beceri ölçer, ikisi de gerekir. */
   const FORMATS = {
-    open:   { id:'open',   name:'Açık uçlu', note:'Cevabı kendin üret — en zoru, en öğreticisi' },
-    choice: { id:'choice', name:'Çoktan seçmeli', note:'Şıklardan ele — sınav biçimine yakın' },
+    open:   { id:'open',   name:yz('ays.core.quiz.acik-uclu'), note:yz('ays.core.quiz.cevabi-kendin-uret-en') },
+    choice: { id:'choice', name:yz('ays.core.quiz.coktan-secmeli'), note:yz('ays.core.quiz.siklardan-ele-sinav-bicimine') },
   };
 
   /* Süre baskısı: bildiğin ama yetiştiremediğin konuyu ayırır. */

@@ -1,6 +1,18 @@
 /* KING · devrim ve King 3.0: yasalar, günüm, derse çevir, Merkez sırası, öğretmen, K1 ekip, K2 beceriler.
    Parça 7/8; yükleme sırası: king.js, king-ses.js, king-kayit.js, king-gorunum.js, king-kart.js, king-arac.js, king-devrim.js, king-yol.js.
    Dosyalar arası ortak adlar ve ortak durum window.LIFEOS.KING_IC'tedir (KI.ad). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.king-devrim.moduller-arasi':'Modüller arası',
+  'ortak.king-devrim.sesli-ozet':'Sesli özet',
+  'ortak.king-devrim.bugun':'Bugün · ',
+  'ortak.king-devrim.kaynak':'Kaynak: ',
+  'ortak.king-devrim.merkez-yazdi-her-bolum':'Merkez yazdı · her bölüm kaynaktan alıntıyla doğrulandı',
+  'ortak.king-devrim.bu-dersten-soru-sor':'Bu dersten soru sor',
+  'ortak.king-devrim.yeniden-dinle':'Yeniden dinle',
+  'ortak.king-devrim.yap':'Yap',
+  'ortak.king-devrim.gerek-yok':'Gerek yok',
+});
+
 
 (function(){
   'use strict';
@@ -72,7 +84,7 @@
     KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null;
     const K = KI.ayar && KI.ayar.kartlar, ad = KI.MODUL_AD[KI.ayar && KI.ayar.modul] || 'Bu modül';
     const r = yasaHesapla(K && K.olcu);
-    const capraz = KI.baglanti() ? [{ ad:'Modüller arası', is:'oner-metin:çapraz bulgu' }] : [];
+    const capraz = KI.baglanti() ? [{ ad:yz('ortak.king-devrim.moduller-arasi'), is:'oner-metin:çapraz bulgu' }] : [];
     if(!r.var){
       KI.cipler = capraz.length ? capraz : null;
       KI.soyle(r.neden === 'tek-olcu' ? ad + '’de tek bir günlük ölçü var; yasa için en az iki ölçü gerekir.' + (capraz.length ? ' Modüller arası bulguyu Merkez’den getirebilirim.' : '')
@@ -129,8 +141,8 @@
     /* Uyarlama kuraldır: akşam çok madde bekliyorsa modülün sırasıyla öne alınacak tek madde. */
     const not = kapat ? (bekleyenN ? bekleyenN + ' madde kaldı; yarına kalırlar, modülün planı onları yeniden dağıtır.' : 'Bugünün bütün maddeleri tamam.')
       : saat >= 18 && bekleyenN >= 3 ? 'Akşam oldu ve ' + bekleyenN + ' madde bekliyor; önce «' + ogeler[siradaki].ad + '».' : (g && g.not ? yazi(g.not, 160) : '');
-    if(kapat) KI.cipler = [{ ad:'Sesli özet', is:'oner-metin:sesli özet' }];
-    KI.soyle(kapat ? 'Günün kapanışı · ' + ad : 'Bugün · ' + ad, null, null, null, { gun:{ ogeler, siradaki:kapat ? -1 : siradaki, not, modul:KI.ayar.modul } });
+    if(kapat) KI.cipler = [{ ad:yz('ortak.king-devrim.sesli-ozet'), is:'oner-metin:sesli özet' }];
+    KI.soyle(kapat ? 'Günün kapanışı · ' + ad : yz('ortak.king-devrim.bugun') + ad, null, null, null, { gun:{ ogeler, siradaki:kapat ? -1 : siradaki, not, modul:KI.ayar.modul } });
     return { tur:'gun', n:ogeler.length, siradaki };
   }
   const GUN_DURUM_AD = { bitti:'bitti', simdi:'şimdi', sirada:'sırada', atlandi:'atlandı' };
@@ -184,7 +196,7 @@
       bolumler, sorular, tekrar:{} }, atilan };
   }
   function kdDersMesaji(d){
-    return { id:d.id, baslik:d.baslik, alt:'Kaynak: ' + d.kaynak, giris:'', etiket:'Merkez yazdı · her bölüm kaynaktan alıntıyla doğrulandı',
+    return { id:d.id, baslik:d.baslik, alt:yz('ortak.king-devrim.kaynak') + d.kaynak, giris:'', etiket:yz('ortak.king-devrim.merkez-yazdi-her-bolum'),
       sorgu:'kd:' + d.id, soruVar:d.sorular.length > 0, acilir:false, bolumler:d.bolumler, adim:0, kd:true };
   }
   async function derseCevir(metin, kaynakAd){
@@ -203,7 +215,7 @@
     const k = kdKur(kdJson(r.text), kaynak, kaynakAd || 'yapıştırılan metin');
     if(k.hata){ KI.soyle(k.hata); return { tur:'kd', n:0 }; }
     kdYaz([k.ders].concat(kdDersler()));
-    KI.cipler = k.ders.sorular.length ? [{ ad:'Bu dersten soru sor', is:'oner-metin:derslerimden soru sor' }] : null;
+    KI.cipler = k.ders.sorular.length ? [{ ad:yz('ortak.king-devrim.bu-dersten-soru-sor'), is:'oner-metin:derslerimden soru sor' }] : null;
     KI.soyle(k.ders.baslik + ' · ders' + (k.atilan > 0 ? ' (' + k.atilan + ' bölüm kaynakta doğrulanamadığı için atıldı)' : ''), null, null, null, { ders:kdDersMesaji(k.ders) });
     return { tur:'kd', n:k.ders.bolumler.length, soru:k.ders.sorular.length };
   }
@@ -308,7 +320,7 @@
     if(!satirlar.length){ KI.soyle(ad + ' için bugün özetlenecek bir şey yok.'); return { tur:'sesli-ozet', n:0 }; }
     const x = { zaman:KI.ortam.simdi().toISOString(), modul:KI.ayar.modul, satirlar };
     KI.ortam.depo.yaz(SOZET, [x].concat(sozetler()).slice(0, 20));
-    KI.cipler = [{ ad:'Yeniden dinle', is:'sozet-dinle:0' }];
+    KI.cipler = [{ ad:yz('ortak.king-devrim.yeniden-dinle'), is:'sozet-dinle:0' }];
     const okunacak = !KI.sesleMi();
     KI.soyle(ad + '’de bugün:', satirlar);
     if(okunacak) KI.seslendir(sozetMetni(x));                 // yazı kipinde de: istenen şey sesli özet
@@ -690,7 +702,7 @@
         if(d && d.ok && d.arac.tur !== 'yaz' && e.yaz){
           KI.bekleyenArac = { ad:d.arac.ad, param:d.param };
           KI.soyle('Beceri «' + d.arac.ad + '» aracını çalıştırmak istiyor. Yapayım mı?');
-          KI.cipler = [{ ad:'Yap', is:'beceri-arac' }, { ad:'Gerek yok', is:'vazgec' }];
+          KI.cipler = [{ ad:yz('ortak.king-devrim.yap'), is:'beceri-arac' }, { ad:yz('ortak.king-devrim.gerek-yok'), is:'vazgec' }];
           KI.ciz(false);
         }else await KI.aracIsle({ arac:[{ ad:e.ad, param:e.param || {} }] }, '');
       }

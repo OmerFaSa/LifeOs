@@ -539,6 +539,7 @@ def elle_yazilmis(hedef: Path) -> bool:
 
 
 def yay() -> int:
+    parca.rehber_yaz()
     if not KAYNAK.is_dir():
         print("HATA: %s yok" % KAYNAK)
         return 1

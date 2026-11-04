@@ -37,6 +37,17 @@
 
    Çizim SVG'dir ve dize olarak üretilir: çerçeve yok, tuval yok,
    bağımlılık yok (AGENTS.md §1.3). Renk yazılmaz; sınıf yazılır. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.grafik.egilim-icin':'Eğilim için ',
+  'ortak.grafik.hedef-yazilmamis':'Hedef yazılmamış',
+  'ortak.grafik.tahmin-icin':'Tahmin için ',
+  'ortak.grafik.olcumler-tek-gune-dusuyor-hi':'Ölçümler tek güne düşüyor; hız hesaplanamaz',
+  'ortak.grafik.hedefe-ulasildi':'Hedefe ulaşıldı',
+  'ortak.grafik.dagilim-icin':'Dağılım için ',
+  'ortak.grafik.plan-da-kayit-da-yok':'Plan da kayıt da yok',
+  'ortak.grafik.kayitli-toplam':'Kayıtlı toplam ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -379,7 +390,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(nk.length < enAz){
       const eksik = enAz - nk.length;
       return { yeterli:false, n:nk.length, eksik:eksik,
-        metin:'Eğilim için ' + eksik + ' ölçüm daha gerekli' };
+        metin:yz('ortak.grafik.egilim-icin') + eksik + ' ölçüm daha gerekli' };
     }
     const ort = a => a.reduce((t, v) => t + v, 0) / a.length;
     const mx = ort(nk.map(p => p[0])), my = ort(nk.map(p => p[1]));
@@ -607,9 +618,9 @@ window.LIFEOS = window.LIFEOS || {};
     o = o || {};
     const nk = (noktalar || []).map(n => ({ t:gunISO(n && n.tarih), v:n && n.deger }))
       .filter(n => n.t && sayiMi(n.v)).sort((a, b) => a.t < b.t ? -1 : 1);
-    if(!sayiMi(hedef)) return { yeterli:false, neden:'hedef-yok', metin:'Hedef yazılmamış' };
+    if(!sayiMi(hedef)) return { yeterli:false, neden:'hedef-yok', metin:yz('ortak.grafik.hedef-yazilmamis') };
     if(nk.length < EGILIM_EN_AZ){
-      return { yeterli:false, eksik:EGILIM_EN_AZ - nk.length, metin:'Tahmin için ' + (EGILIM_EN_AZ - nk.length) + ' ölçüm daha gerekli' };
+      return { yeterli:false, eksik:EGILIM_EN_AZ - nk.length, metin:yz('ortak.grafik.tahmin-icin') + (EGILIM_EN_AZ - nk.length) + ' ölçüm daha gerekli' };
     }
     const t0 = nk[0].t;
     const xs = nk.map(n => gunFarki(t0, n.t)), ys = nk.map(n => n.v);
@@ -617,7 +628,7 @@ window.LIFEOS = window.LIFEOS || {};
     const mx = ort(xs), my = ort(ys);
     let sxx = 0, sxy = 0;
     xs.forEach((x, i) => { sxx += (x - mx) * (x - mx); sxy += (x - mx) * (ys[i] - my); });
-    if(!sxx) return { yeterli:false, neden:'tek-gun', metin:'Ölçümler tek güne düşüyor; hız hesaplanamaz' };
+    if(!sxx) return { yeterli:false, neden:'tek-gun', metin:yz('ortak.grafik.olcumler-tek-gune-dusuyor-hi') };
     const egim = sxy / sxx, kesen = my - egim * mx;
     let sse = 0;
     xs.forEach((x, i) => { const r = ys[i] - (kesen + egim * x); sse += r * r; });
@@ -632,7 +643,7 @@ window.LIFEOS = window.LIFEOS || {};
        görünürdü. */
     const yukari = hedef >= nk[0].v;
     const ulasti = yukari ? son.v >= hedef : son.v <= hedef;
-    if(ulasti) return { yeterli:true, ulasti:true, metin:'Hedefe ulaşıldı' };
+    if(ulasti) return { yeterli:true, ulasti:true, metin:yz('ortak.grafik.hedefe-ulasildi') };
     const yaklasan = h => yukari ? h > 0 : h < 0;
     const gunSay = h => yaklasan(h) ? Math.ceil(kalan / h) : null;
     const eh = egim, hizli = yukari ? egim + 2 * se : egim - 2 * se, yavas = yukari ? egim - 2 * se : egim + 2 * se;
@@ -728,7 +739,7 @@ window.LIFEOS = window.LIFEOS || {};
     const gece = d.gece || 'gece';
     if(vs.length < DAGILIM_EN_AZ){
       return { yeterli:false, n:vs.length, toplam:hepsi.length,
-        metin:'Dağılım için ' + (DAGILIM_EN_AZ - vs.length) + ' ' + gece + ' daha gerekli' };
+        metin:yz('ortak.grafik.dagilim-icin') + (DAGILIM_EN_AZ - vs.length) + ' ' + gece + ' daha gerekli' };
     }
     const md = medyan(vs);
     return {
@@ -778,7 +789,7 @@ window.LIFEOS = window.LIFEOS || {};
     (gunluk || []).forEach(g => { const t2 = gunISO(g && g.tarih); if(t2 && sayiMi(g.deger)) G[t2] = g.deger; });
     (plan || []).forEach(g => { const t2 = gunISO(g && g.tarih); if(t2 && sayiMi(g.deger)) P[t2] = g.deger; });
     const tar = Object.keys(G).concat(Object.keys(P)).sort();
-    if(!tar.length) return { var:false, metin:'Plan da kayıt da yok' };
+    if(!tar.length) return { var:false, metin:yz('ortak.grafik.plan-da-kayit-da-yok') };
     const bas = tar[0], bit = tar[tar.length - 1] > bugun ? tar[tar.length - 1] : bugun;
     const gun = [];
     let g = 0, pl = 0, kayitsiz = 0;
@@ -797,7 +808,7 @@ window.LIFEOS = window.LIFEOS || {};
     return {
       var:true, gunler:gun, bugun:bugun, kayitsiz:kayitsiz, gercek:bu.gercek, plan:bu.plan, fark:fark,
       anlam:fark < 0 ? 'kotu' : fark > 0 ? 'iyi' : 'notr',
-      metin:'Kayıtlı toplam ' + b(bu.gercek) + '; plan ' + b(bu.plan) + '; '
+      metin:yz('ortak.grafik.kayitli-toplam') + b(bu.gercek) + '; plan ' + b(bu.plan) + '; '
         + (fark === 0 ? 'planla aynı' : b(Math.abs(fark)) + (fark < 0 ? ' geride' : ' önde'))
         + (kayitsiz ? ' (' + kayitsiz + ' gün kayıtsız)' : ''),
     };

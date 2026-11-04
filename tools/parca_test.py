@@ -11,7 +11,7 @@ k = parca.kayit_oku("""# yorum
 [bas]
 css/a.css
 css/b.css ays
-[perde]
+[govde]
 [govde]
 js/core/x.js
 js/core/y.js spi esp  # satir sonu yorum
@@ -48,5 +48,14 @@ for bozuk in ["[yanlis]\na.js", "a.js", "[bas]\na.js xyz"]:
     raise AssertionError("gecti: " + bozuk)
 
 # gercek depo: sayfalar kayitla ayni
+# King rehberi sayfalardan uretilir, sira ve alanlar korunur
+_r = parca.rehber_uret()
+assert "{ modul:'spi', route:'today', ad:'Bugün'" in _r and _r.index("modul:'spi'") < _r.index("modul:'ays'") < _r.index("modul:'esp'")
+assert parca.KING_ALANI.search("sayfa({ id:'x', modul:'ays', king:{ sira:5, ad:'X', es:['a', 'b'] }, ad:'Y' })").group(5) == "'a', 'b'"
+# Blok adi ekranda gorunur (hata satiri): kod adi ya da gecici ad olamaz
+import re as _re
+for _f in parca.KOK.glob("*/src/js/screens/*.js"):
+    for _m in _re.finditer(r"PARCA\.blok\(\{ id:'([^']+)',[^\n]*?ad:'([^']*)'", _f.read_text(encoding="utf-8")):
+        assert not _re.fullmatch(r"[a-z]\w*|\w+[a-z][A-Z]\w*|Bölüm \d+", _m.group(2)), (_f.name, _m.group(1), _m.group(2))
 assert parca.denetle() == 0
 print("parca_test: tamam")

@@ -4,6 +4,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:190, group:'Git', label:'Telafi protokolleri', icon:'shield', route:'protocols', run(){ R.App.go('protocols'); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.protocols.hazir':'hazır',
   'ays.protocols.sure':'· süre',
@@ -117,7 +118,7 @@ R.Screens.protocols = (function(){
     });
   }
 
-  LIFEOS.PARCA.blok({ id:'protocols.bolum-1', sayfa:'protocols', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ triggers, active, triggerMap, activeMap }){
+  LIFEOS.PARCA.blok({ id:'protocols.etkin-tetikleyiciler', sayfa:'protocols', yer:'y1', sira:10, ad:'Etkin tetikleyiciler', ciz({ triggers, active, triggerMap, activeMap }){
     return triggers.length
         ? K.Notice({ tone:'warn', title:triggers.length+' tetikleyici aktif.',
             body:triggers.map(t => t.detail).join(' · ')+' — aşağıdaki protokoller öneriliyor.' })
@@ -126,22 +127,22 @@ R.Screens.protocols = (function(){
   LIFEOS.PARCA.blok({ id:'protocols.telafi-protokolleri', sayfa:'protocols', yer:'y2', sira:10, ad:'Telafi protokolleri', ciz({ triggers, active, triggerMap, activeMap }){
     return K.SectionTitle('Telafi protokolleri');
   } });
-  LIFEOS.PARCA.blok({ id:'protocols.protocolcard', sayfa:'protocols', yer:'y2', sira:20, ad:'protocolCard', ciz({ triggers, active, triggerMap, activeMap }){
+  LIFEOS.PARCA.blok({ id:'protocols.protocolcard', sayfa:'protocols', yer:'y2', sira:20, ad:'Protokol', ciz({ triggers, active, triggerMap, activeMap }){
     return map(R.RECOVERY_PROTOCOLS, def => protocolCard(def, triggerMap[def.id], activeMap[def.id]));
   } });
-  LIFEOS.PARCA.blok({ id:'protocols.historycard', sayfa:'protocols', yer:'y2', sira:30, ad:'historyCard', ciz({ triggers, active, triggerMap, activeMap }){
+  LIFEOS.PARCA.blok({ id:'protocols.historycard', sayfa:'protocols', yer:'y2', sira:30, ad:'Geçmiş', ciz({ triggers, active, triggerMap, activeMap }){
     return historyCard();
   } });
-  LIFEOS.PARCA.blok({ id:'protocols.minimumdaycard', sayfa:'protocols', yer:'y3', sira:10, ad:'minimumDayCard', ciz({ triggers, active, triggerMap, activeMap }){
+  LIFEOS.PARCA.blok({ id:'protocols.minimumdaycard', sayfa:'protocols', yer:'y3', sira:10, ad:'Minimum gün', ciz({ triggers, active, triggerMap, activeMap }){
     return minimumDayCard();
   } });
-  LIFEOS.PARCA.blok({ id:'protocols.sleepcard', sayfa:'protocols', yer:'y3', sira:20, ad:'sleepCard', ciz({ triggers, active, triggerMap, activeMap }){
+  LIFEOS.PARCA.blok({ id:'protocols.sleepcard', sayfa:'protocols', yer:'y3', sira:20, ad:'Uyku', ciz({ triggers, active, triggerMap, activeMap }){
     return sleepCard();
   } });
-  LIFEOS.PARCA.blok({ id:'protocols.routinecard', sayfa:'protocols', yer:'y3', sira:30, ad:'routineCard', ciz({ triggers, active, triggerMap, activeMap }){
+  LIFEOS.PARCA.blok({ id:'protocols.routinecard', sayfa:'protocols', yer:'y3', sira:30, ad:'Rutin', ciz({ triggers, active, triggerMap, activeMap }){
     return routineCard('Motivasyon ve dalgalanma', R.ROUTINES.motivation, 'motivation');
   } });
-  LIFEOS.PARCA.blok({ id:'protocols.routinecard-2', sayfa:'protocols', yer:'y3', sira:40, ad:'routineCard', ciz({ triggers, active, triggerMap, activeMap }){
+  LIFEOS.PARCA.blok({ id:'protocols.routinecard-2', sayfa:'protocols', yer:'y3', sira:40, ad:'Rutin', ciz({ triggers, active, triggerMap, activeMap }){
     return routineCard('Sınav kaygısı', R.ROUTINES.anxiety, 'anxiety');
   } });
   LIFEOS.PARCA.blok({ id:'protocols.aciklamalar', sayfa:'protocols', yer:'y4', sira:10, ad:'Açıklamalar', ciz({ triggers, active, triggerMap, activeMap }){

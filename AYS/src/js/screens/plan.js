@@ -4,6 +4,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:130, group:'Git', label:'40 haftalık plan', icon:'map', route:'plan', run(){ R.App.go('plan'); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.plan.simdi':'şimdi',
   'ays.plan.imzali':'imzalı',
@@ -58,7 +59,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.plan.calisildi-koyuluk-yuku-goste':'çalışıldı — koyuluk yükü gösterir',
   'ays.plan.kayit-yok':'kayıt yok',
 });
-window.LIFEOS.PARCA.sayfa({ id:'plan', modul:'ays', cekmece:'plan', ad:'Program', ikon:'map', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'plan', modul:'ays', king:{ sira:90, ad:'Program', es:['program', 'plan'] }, cekmece:'plan', ad:'Program', ikon:'map', sira:20 });
 
 R.Screens.plan = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -279,13 +280,13 @@ R.Screens.plan = (function(){
     });
   }
 
-  LIFEOS.PARCA.blok({ id:'plan.donenprogram', sayfa:'plan', yer:'y1', sira:10, ad:'DonenProgram', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
+  LIFEOS.PARCA.blok({ id:'plan.donenprogram', sayfa:'plan', yer:'y1', sira:10, ad:'Dönen program', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
     return DonenProgram(cur, totalQ, doneQ);
   } });
-  LIFEOS.PARCA.blok({ id:'plan.plancard', sayfa:'plan', yer:'y2', sira:10, ad:'planCard', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
+  LIFEOS.PARCA.blok({ id:'plan.plancard', sayfa:'plan', yer:'y2', sira:10, ad:'Plan', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
     return planCard();
   } });
-  LIFEOS.PARCA.blok({ id:'plan.droppedcard', sayfa:'plan', yer:'y3', sira:10, ad:'droppedCard', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
+  LIFEOS.PARCA.blok({ id:'plan.droppedcard', sayfa:'plan', yer:'y3', sira:10, ad:'Bırakılanlar', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
     return droppedCard();
   } });
   LIFEOS.PARCA.blok({ id:'plan.calisma-yogunlugu', sayfa:'plan', yer:'y4', sira:10, ad:'Çalışma yoğunluğu', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
@@ -300,7 +301,7 @@ R.Screens.plan = (function(){
           ]))}`,
       });
   } });
-  LIFEOS.PARCA.blok({ id:'plan.zamancizgisi', sayfa:'plan', yer:'y5', sira:10, ad:'zamanCizgisi', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
+  LIFEOS.PARCA.blok({ id:'plan.zamancizgisi', sayfa:'plan', yer:'y5', sira:10, ad:'Zaman çizgisi', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
     return zamanCizgisi(gateWeeks);
   } });
   async function render(){

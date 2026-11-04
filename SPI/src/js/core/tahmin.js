@@ -25,6 +25,11 @@
         «Neden» değildir; King bunu sana SORAR (cikarim.js).
      5. TAHMİN ETİKETLİ. Her çıktı «tahmin»dir; ölçümün yerine geçmez,
         hiçbir kayda yazılmaz, hiçbir kararı vermez (§1.1). */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.tahmin.ruh-hali-modelini-egitmek-ic':'Ruh hâli modelini eğitmek için en az ',
+  'spi.core.tahmin.sinamak-icin-en-az-5':'Sınamak için en az 5 gün ayrılamadı.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -191,11 +196,11 @@ SP.Tahmin = (function(){
   function egit(veri, o){
     const opt = o || {};
     const l = (veri || []).filter(r => r && r.x && typeof r.y === 'number');
-    if(l.length < ASGARI_GUN) return { ok:false, n:l.length, why:'Ruh hâli modelini eğitmek için en az ' + ASGARI_GUN + ' gün «Günün hissi» gerekir (şimdi ' + l.length + ').' };
+    if(l.length < ASGARI_GUN) return { ok:false, n:l.length, why:yz('spi.core.tahmin.ruh-hali-modelini-egitmek-ic') + ASGARI_GUN + ' gün «Günün hissi» gerekir (şimdi ' + l.length + ').' };
     const adlar = Object.keys(l[0].x).filter(k => l.some(r => r.x[k] != null));
     const kes = Math.max(ASGARI_GUN - 5, Math.floor(l.length * 0.75));
     const egitim = l.slice(0, kes), sinav = l.slice(kes);
-    if(sinav.length < 5) return { ok:false, n:l.length, why:'Sınamak için en az 5 gün ayrılamadı.' };
+    if(sinav.length < 5) return { ok:false, n:l.length, why:yz('spi.core.tahmin.sinamak-icin-en-az-5') };
     const hz = hazirla(egitim, adlar);
     const X = egitim.map(r => hz.vek(r.x)), y = egitim.map(r => r.y);
     const Xs = sinav.map(r => hz.vek(r.x)), ys = sinav.map(r => r.y);

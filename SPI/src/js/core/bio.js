@@ -13,6 +13,37 @@
         araligin disina cikmis tek bir olcumden daha cok sey soyler.
         Bu, PDF'teki "tekil referans araliklari yerine bireysel trend"
         ilkesinin kod karsiligidir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.bio.referans-alti':'referans altı',
+  'spi.core.bio.referans-ustu':'referans üstü',
+  'spi.core.bio.hedefin-alti':'hedefin altı',
+  'spi.core.bio.hedefin-ustu':'hedefin üstü',
+  'spi.core.bio.veri-yok':'veri yok',
+  'spi.core.bio.son-olcumlerde-belirgin-bir':'Son ölçümlerde belirgin bir yön yok.',
+  'spi.core.bio.olcum':'Ölçüm ',
+  'spi.core.bio.hedef-bandin-ortasina-yaklas':'Hedef bandın ortasına yaklaşıyor (',
+  'spi.core.bio.hedef-bandin-ortasindan-uzak':'Hedef bandın ortasından uzaklaşıyor (',
+  'spi.core.bio.i-stenen-yonde':'İstenen yönde ',
+  'spi.core.bio.ters-yonde':'Ters yönde ',
+  'spi.core.bio.hic-olculmemis':'Hiç ölçülmemiş.',
+  'spi.core.bio.tok-olcum':'tok ölçüm',
+  'spi.core.bio.bu-deger-tok-karnina-alinmis':'Bu değer tok karnına alınmış. ',
+  'spi.core.bio.aclik-bilinmiyor':'açlık bilinmiyor',
+  'spi.core.bio.bu-oturumda-aclik-durumu-kay':'Bu oturumda açlık durumu kaydedilmemiş. ',
+  'spi.core.bio.kisisel-taban-cizgi-icin-en':'Kişisel taban çizgi için en az ',
+  'spi.core.bio.anlamli-degisim-esigi-icin-e':'Anlamlı değişim eşiği için en az ',
+  'spi.core.bio.onceki-butun-olcumler-ayniyd':'Önceki bütün ölçümler aynıydı.',
+  'spi.core.bio.ferritin-bu-tabloda-demir-de':'Ferritin bu tabloda demir deposunu olduğundan yüksek gösterir',
+  'spi.core.bio.ferritin-ayni-zamanda-bir-ak':'Ferritin aynı zamanda bir akut faz proteinidir: yangı varken ',
+  'spi.core.bio.demir-eksikligi-oruntusu':'Demir eksikliği örüntüsü',
+  'spi.core.bio.tsh-tek-basina-tiroit-durumu':'TSH tek başına tiroit durumunu söylemez',
+  'spi.core.bio.aclik-glukozu-ile-hba1c-ayni':'Açlık glukozu ile HbA1c aynı şeyi söylemiyor',
+  'spi.core.bio.yuksek-kreatinin-normal-suzm':'Yüksek kreatinin, normal süzme hızı',
+  'spi.core.bio.alt-yuksek-ve-ast-alt-orani':'ALT yüksek ve AST/ALT oranı 1 altında',
+  'spi.core.bio.b12-dusuk-ve-mcv-buyuk':'B12 düşük ve MCV büyük',
+  'spi.core.bio.d-vitamini-dusukken-kalsiyum':'D vitamini düşükken kalsiyum da alt sınırda',
+});
+
 
 window.SP = window.SP || {};
 
@@ -61,12 +92,12 @@ SP.Bio = (function(){
 
   const STATUS = {
     red:      { id:'red',      tone:'danger', label:'kritik' },
-    low:      { id:'low',      tone:'warn',   label:'referans altı' },
-    high:     { id:'high',     tone:'warn',   label:'referans üstü' },
-    belowOpt: { id:'belowOpt', tone:'info',   label:'hedefin altı' },
-    aboveOpt: { id:'aboveOpt', tone:'info',   label:'hedefin üstü' },
+    low:      { id:'low',      tone:'warn',   label:yz('spi.core.bio.referans-alti') },
+    high:     { id:'high',     tone:'warn',   label:yz('spi.core.bio.referans-ustu') },
+    belowOpt: { id:'belowOpt', tone:'info',   label:yz('spi.core.bio.hedefin-alti') },
+    aboveOpt: { id:'aboveOpt', tone:'info',   label:yz('spi.core.bio.hedefin-ustu') },
     ok:       { id:'ok',       tone:'ok',     label:'hedefte' },
-    unknown:  { id:'unknown',  tone:'muted',  label:'veri yok' },
+    unknown:  { id:'unknown',  tone:'muted',  label:yz('spi.core.bio.veri-yok') },
   };
 
   /* Bir degeri sinifa oturtur. Sira onemlidir: kritik esik her seyi yener,
@@ -172,7 +203,7 @@ SP.Bio = (function(){
   function trendVerdict(markerId, trend, profile){
     const b = SP.BIO_BY_ID[markerId];
     if(!b || !trend || !trend.ok) return { tone:'muted', label:'—', text:'' };
-    if(trend.dir === 'flat') return { tone:'muted', label:'yatay', text:'Son ölçümlerde belirgin bir yön yok.' };
+    if(trend.dir === 'flat') return { tone:'muted', label:'yatay', text:yz('spi.core.bio.son-olcumlerde-belirgin-bir') };
 
     const goodDir = b.dir === 'low' ? 'down' : b.dir === 'high' ? 'up' : null;
     const st = statusOf(markerId, trend.last, profile);
@@ -184,21 +215,21 @@ SP.Bio = (function(){
       /* Bandin ortasi iyi olan olcumler: hedefe yaklasiyorsa iyi, uzaklasiyorsa kotu. */
       const r = refFor(markerId, profile);
       const band = (r && r.optimal) || (r && r.ref);
-      if(!band) return { tone:'info', label:word, text:'Ölçüm ' + word + ' (' + amount + ').' };
+      if(!band) return { tone:'info', label:word, text:yz('spi.core.bio.olcum') + word + ' (' + amount + ').' };
       const mid = (band[0] + band[1]) / 2;
       const closer = Math.abs(trend.last - mid) < Math.abs(trend.first - mid);
       return closer
-        ? { tone:'ok', label:word, text:'Hedef bandın ortasına yaklaşıyor (' + amount + ').' }
-        : { tone:'warn', label:word, text:'Hedef bandın ortasından uzaklaşıyor (' + amount + ').' };
+        ? { tone:'ok', label:word, text:yz('spi.core.bio.hedef-bandin-ortasina-yaklas') + amount + ').' }
+        : { tone:'warn', label:word, text:yz('spi.core.bio.hedef-bandin-ortasindan-uzak') + amount + ').' };
     }
 
     if(trend.dir === goodDir){
-      return { tone:'ok', label:word, text:'İstenen yönde ' + word + ' (' + amount + ').' };
+      return { tone:'ok', label:word, text:yz('spi.core.bio.i-stenen-yonde') + word + ' (' + amount + ').' };
     }
     /* Ters yonde: hedefteyse bilgi, hedefin disindaysa uyari. */
     return st.id === 'ok'
-      ? { tone:'info', label:word, text:'Ters yönde ' + word + ' ama hâlâ hedefte (' + amount + ').' }
-      : { tone:'warn', label:word, text:'Ters yönde ' + word + ' ve hedefin dışında (' + amount + ').' };
+      ? { tone:'info', label:word, text:yz('spi.core.bio.ters-yonde') + word + ' ama hâlâ hedefte (' + amount + ').' }
+      : { tone:'warn', label:word, text:yz('spi.core.bio.ters-yonde') + word + ' ve hedefin dışında (' + amount + ').' };
   }
 
   /* --------------------------------------------------------------- ozetler */
@@ -285,7 +316,7 @@ SP.Bio = (function(){
       const markers = SP.BIOMARKERS.filter(b => b.panel === p.id);
       const dates = markers.map(b => SP.Model.latestOf(b.id)).filter(Boolean).map(x => x.date);
       if(!dates.length){
-        out.push({ panel:p, days:null, note:'Hiç ölçülmemiş.' });
+        out.push({ panel:p, days:null, note:yz('spi.core.bio.hic-olculmemis') });
         return;
       }
       const newest = dates.sort()[dates.length - 1];
@@ -339,15 +370,15 @@ SP.Bio = (function(){
     const st = fastingState || fastingOf(markerId);
     if(st === 'no'){
       return { ok:false, state:'no',
-        label:'tok ölçüm',
-        note:'Bu değer tok karnına alınmış. ' + FASTING_MARKERS[markerId]
+        label:yz('spi.core.bio.tok-olcum'),
+        note:yz('spi.core.bio.bu-deger-tok-karnina-alinmis') + FASTING_MARKERS[markerId]
           + ' Tok ölçümde durum etiketi basılmaz; sayı doğru olabilir ama '
           + 'gösterdiği şey değildir.' };
     }
     if(st === 'unknown'){
       return { ok:true, state:'unknown',
-        label:'açlık bilinmiyor',
-        note:'Bu oturumda açlık durumu kaydedilmemiş. ' + FASTING_MARKERS[markerId]
+        label:yz('spi.core.bio.aclik-bilinmiyor'),
+        note:yz('spi.core.bio.bu-oturumda-aclik-durumu-kay') + FASTING_MARKERS[markerId]
           + ' Değer aç karnına alınmış varsayılarak yorumlandı.' };
     }
     return { ok:true, state:'yes' };
@@ -375,7 +406,7 @@ SP.Bio = (function(){
     const pts = SP.Model.seriesOf(markerId);
     if(pts.length < BASELINE_MIN){
       return { ok:false, n:pts.length,
-        note:'Kişisel taban çizgi için en az ' + BASELINE_MIN + ' ölçüm gerekir; '
+        note:yz('spi.core.bio.kisisel-taban-cizgi-icin-en') + BASELINE_MIN + ' ölçüm gerekir; '
           + pts.length + ' var.' };
     }
     const ys = pts.map(p => p.v);
@@ -403,11 +434,11 @@ SP.Bio = (function(){
 
     if(!base.ok){
       return Object.assign(out, { ok:false, meaningful:null,
-        note:'Anlamlı değişim eşiği için en az ' + BASELINE_MIN + ' ölçüm gerekir.' });
+        note:yz('spi.core.bio.anlamli-degisim-esigi-icin-e') + BASELINE_MIN + ' ölçüm gerekir.' });
     }
     if(base.sd === 0){
       return Object.assign(out, { ok:true, sd:0, meaningful:diff !== 0,
-        note:'Önceki bütün ölçümler aynıydı.' });
+        note:yz('spi.core.bio.onceki-butun-olcumler-ayniyd') });
     }
     const kat = Math.abs(diff) / base.sd;
     const anlamli = kat >= 1;
@@ -437,8 +468,8 @@ SP.Bio = (function(){
       needs:['ferritin', 'crp'],
       test:function(v){ return v.crp >= 5; },
       tone:'warn',
-      title:'Ferritin bu tabloda demir deposunu olduğundan yüksek gösterir',
-      text:'Ferritin aynı zamanda bir akut faz proteinidir: yangı varken '
+      title:yz('spi.core.bio.ferritin-bu-tabloda-demir-de'),
+      text:yz('spi.core.bio.ferritin-ayni-zamanda-bir-ak')
         + 'yükselir. hs-CRP {crp} mg/L iken ferritin {ferritin} ng/mL değeri '
         + 'demir deposunun gerçek ölçüsü sayılmaz — «normal ferritin» demir '
         + 'eksikliğini dışlamaz.',
@@ -448,7 +479,7 @@ SP.Bio = (function(){
       needs:['ferritin', 'mcv'],
       test:function(v){ return v.ferritin < 30 && v.mcv < 82; },
       tone:'warn',
-      title:'Demir eksikliği örüntüsü',
+      title:yz('spi.core.bio.demir-eksikligi-oruntusu'),
       text:'Ferritin {ferritin} ng/mL ile düşük ve MCV {mcv} fL ile küçük — '
         + 'ikisi birlikte demir eksikliğinin klasik örüntüsüdür. Tek başına '
         + 'düşük ferritinden daha güçlü bir bulgudur.',
@@ -459,7 +490,7 @@ SP.Bio = (function(){
       absent:['ft4'],
       test:function(v){ return v.tsh < 0.5 || v.tsh > 4; },
       tone:'info',
-      title:'TSH tek başına tiroit durumunu söylemez',
+      title:yz('spi.core.bio.tsh-tek-basina-tiroit-durumu'),
       text:'TSH {tsh} mIU/L bandın dışında ama serbest T4 ölçülmemiş. '
         + 'TSH hipofizin isteğidir, tiroidin ürettiği hormon değildir; '
         + 'ikisi birlikte okunur.',
@@ -469,7 +500,7 @@ SP.Bio = (function(){
       needs:['glucose', 'hba1c'],
       test:function(v){ return (v.glucose >= 100) !== (v.hba1c >= 5.7); },
       tone:'info',
-      title:'Açlık glukozu ile HbA1c aynı şeyi söylemiyor',
+      title:yz('spi.core.bio.aclik-glukozu-ile-hba1c-ayni'),
       text:'Açlık glukozu {glucose} mg/dL, HbA1c %{hba1c}. Biri bandın '
         + 'içinde diğeri dışında; biri o anı, diğeri son üç ayı ölçer. '
         + 'Tek bir günün kanı yanıltabilir, ortalama yanıltmaz.',
@@ -479,7 +510,7 @@ SP.Bio = (function(){
       needs:['creat', 'egfr'],
       test:function(v){ return v.creat > 1.2 && v.egfr >= 60; },
       tone:'info',
-      title:'Yüksek kreatinin, normal süzme hızı',
+      title:yz('spi.core.bio.yuksek-kreatinin-normal-suzm'),
       text:'Kreatinin {creat} mg/dL yüksek ama eGFR {egfr} normal sınırda. '
         + 'Kreatinin kas kütlesinden ve sıvı durumundan etkilenir; kas '
         + 'kütlesi fazla olanda ya da susuz kalındığında yüksek çıkar.',
@@ -489,7 +520,7 @@ SP.Bio = (function(){
       needs:['deritis', 'alt'],
       test:function(v){ return v.deritis < 1 && v.alt > 40; },
       tone:'info',
-      title:'ALT yüksek ve AST/ALT oranı 1 altında',
+      title:yz('spi.core.bio.alt-yuksek-ve-ast-alt-orani'),
       text:'ALT {alt} U/L yüksek, AST/ALT oranı {deritis}. Bu ikisi '
         + 'birlikte en sık yağlanmayla giden karaciğer tablosunda görülür. '
         + 'Tek başına hiçbiri tanı değildir.',
@@ -499,7 +530,7 @@ SP.Bio = (function(){
       needs:['b12', 'mcv'],
       test:function(v){ return v.b12 < 300 && v.mcv > 96; },
       tone:'warn',
-      title:'B12 düşük ve MCV büyük',
+      title:yz('spi.core.bio.b12-dusuk-ve-mcv-buyuk'),
       text:'B12 {b12} pg/mL sınırda düşük ve MCV {mcv} fL büyük. İkisi '
         + 'birlikte B12 eksikliğinin kan tablosuna yansımış hâlidir.',
     },
@@ -508,7 +539,7 @@ SP.Bio = (function(){
       needs:['vitd', 'ca_corr'],
       test:function(v){ return v.vitd < 20 && v.ca_corr < 9; },
       tone:'info',
-      title:'D vitamini düşükken kalsiyum da alt sınırda',
+      title:yz('spi.core.bio.d-vitamini-dusukken-kalsiyum'),
       text:'D vitamini {vitd} ng/mL ile eksik, düzeltilmiş kalsiyum '
         + '{ca_corr} mg/dL ile alt sınırda. D vitamini kalsiyum emilimini '
         + 'düzenler; ikisi birlikte okunur.',

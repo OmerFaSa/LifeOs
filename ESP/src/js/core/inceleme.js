@@ -18,6 +18,24 @@
         gün daha gerektiği söylenir. Az veriden fikir uydurulmaz.
      3. BİRLİKTELİK, NEDEN DEĞİL. Her fikir bunu söyler.
      4. KARAR KURAL MOTORUNDAN. Model yalnız istenirse özetler. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.inceleme.hesaplandi':'hesaplandı',
+  'esp.core.inceleme.birden-cok-alan-acilan-gunle':'Birden çok alan açılan günler',
+  'esp.core.inceleme.iki-ve-daha-cok-alan':'iki ve daha çok alan',
+  'esp.core.inceleme.tek-alan':'tek alan',
+  'esp.core.inceleme.hafta-sonu-ve-hafta-ici':'Hafta sonu ve hafta içi',
+  'esp.core.inceleme.hafta-sonu':'hafta sonu',
+  'esp.core.inceleme.hafta-ici':'hafta içi',
+  'esp.core.inceleme.uzun-gunun-ertesi':'Uzun günün ertesi',
+  'esp.core.inceleme.daha-kisa-gunlerin-ertesi-ca':'daha kısa günlerin ertesi çalışılan',
+  'esp.core.inceleme.toplam-sure':'Toplam süre',
+  'esp.core.inceleme.calisilan-gun':'Çalışılan gün',
+  'esp.core.inceleme.olculdu':'ölçüldü',
+  'esp.core.inceleme.oturum':'Oturum',
+  'esp.core.inceleme.kart-hatirlama':'Kart hatırlama',
+  'esp.core.inceleme.seri':'Seri',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -52,7 +70,7 @@ ESP.Inceleme = (function(){
     const ma = ort(o.a.l), mb = ort(o.b.l);
     const fark = ma - mb;
     const yaz = x => (o.birim === '%' ? '%' + sayi(x) : sayi(x) + ' ' + o.birim);
-    return { id:o.id, baslik:o.baslik, acik:true, etiket:'hesaplandı',
+    return { id:o.id, baslik:o.baslik, acik:true, etiket:yz('esp.core.inceleme.hesaplandi'),
       a:{ ad:o.a.ad, ort:ma, n:na }, b:{ ad:o.b.ad, ort:mb, n:nb }, fark, birim:o.birim,
       metin:o.a.ad + ' ' + yaz(ma) + ' (' + na + ' gün), ' + o.b.ad + ' ' + yaz(mb) + ' (' + nb + ' gün)'
         + '; fark ' + (fark >= 0 ? '+' : '−') + (o.birim === '%' ? sayi(Math.abs(fark)) + ' puan' : yaz(Math.abs(fark))) + '.',
@@ -69,8 +87,8 @@ ESP.Inceleme = (function(){
         if(m == null) continue;
         (alanSayisi(d) >= 2 ? a : b).push(m);
       }
-      out.push(karsilastir({ id:'cok-alan', baslik:'Birden çok alan açılan günler',
-        a:{ ad:'iki ve daha çok alan', l:a }, b:{ ad:'tek alan', l:b }, birim:'dk' }));
+      out.push(karsilastir({ id:'cok-alan', baslik:yz('esp.core.inceleme.birden-cok-alan-acilan-gunle'),
+        a:{ ad:yz('esp.core.inceleme.iki-ve-daha-cok-alan'), l:a }, b:{ ad:yz('esp.core.inceleme.tek-alan'), l:b }, birim:'dk' }));
     }
     /* 2 — Hafta içi / hafta sonu → günlük süre (yalnız kayıtlı günler) */
     {
@@ -80,8 +98,8 @@ ESP.Inceleme = (function(){
         if(m == null) continue;
         (haftaSonu(d) ? a : b).push(m);
       }
-      out.push(karsilastir({ id:'hafta-sonu', baslik:'Hafta sonu ve hafta içi',
-        a:{ ad:'hafta sonu', l:a }, b:{ ad:'hafta içi', l:b }, birim:'dk' }));
+      out.push(karsilastir({ id:'hafta-sonu', baslik:yz('esp.core.inceleme.hafta-sonu-ve-hafta-ici'),
+        a:{ ad:yz('esp.core.inceleme.hafta-sonu'), l:a }, b:{ ad:yz('esp.core.inceleme.hafta-ici'), l:b }, birim:'dk' }));
     }
     /* 3 — Uzun günden sonra ertesi gün sürüyor mu (kayıt var mı) */
     {
@@ -91,9 +109,9 @@ ESP.Inceleme = (function(){
         if(m == null) continue;
         (m >= UZUN_GUN ? a : b).push(dakika(ertesi(d)) != null ? 100 : 0);
       }
-      out.push(karsilastir({ id:'ertesi-gun', baslik:'Uzun günün ertesi',
+      out.push(karsilastir({ id:'ertesi-gun', baslik:yz('esp.core.inceleme.uzun-gunun-ertesi'),
         a:{ ad:UZUN_GUN + ' dk ve üstü günlerin ertesi çalışılan', l:a },
-        b:{ ad:'daha kısa günlerin ertesi çalışılan', l:b }, birim:'%' }));
+        b:{ ad:yz('esp.core.inceleme.daha-kisa-gunlerin-ertesi-ca'), l:b }, birim:'%' }));
     }
     return out;
   }
@@ -108,11 +126,11 @@ ESP.Inceleme = (function(){
     const r = ESP.SRS.retention();
     const tamam = r && r.cert !== 'missing' && r.value != null;
     return [
-      { ad:'Toplam süre', deger:dk.length ? dk.reduce((a, b) => a + b, 0) : null, birim:'dk', n:dk.length, etiket:!dk.length ? 'veri yok' : tahminli ? 'tahmin' : 'ölçüldü' },
-      { ad:'Çalışılan gün', deger:dk.length, birim:'/7', n:null, etiket:'ölçüldü' },
-      { ad:'Oturum', deger:oturum, birim:'oturum', n:null, etiket:'ölçüldü' },
-      { ad:'Kart hatırlama', deger:tamam ? Math.round(r.value * 100) : null, birim:'%', n:tamam ? r.n : null, nBirim:'kart', etiket:tamam ? 'hesaplandı' : 'veri yok' },
-      { ad:'Seri', deger:ESP.Model.streak(), birim:'gün', n:null, etiket:'hesaplandı' },
+      { ad:yz('esp.core.inceleme.toplam-sure'), deger:dk.length ? dk.reduce((a, b) => a + b, 0) : null, birim:'dk', n:dk.length, etiket:!dk.length ? 'veri yok' : tahminli ? 'tahmin' : 'ölçüldü' },
+      { ad:yz('esp.core.inceleme.calisilan-gun'), deger:dk.length, birim:'/7', n:null, etiket:yz('esp.core.inceleme.olculdu') },
+      { ad:yz('esp.core.inceleme.oturum'), deger:oturum, birim:'oturum', n:null, etiket:yz('esp.core.inceleme.olculdu') },
+      { ad:yz('esp.core.inceleme.kart-hatirlama'), deger:tamam ? Math.round(r.value * 100) : null, birim:'%', n:tamam ? r.n : null, nBirim:'kart', etiket:tamam ? 'hesaplandı' : 'veri yok' },
+      { ad:yz('esp.core.inceleme.seri'), deger:ESP.Model.streak(), birim:'gün', n:null, etiket:yz('esp.core.inceleme.hesaplandi') },
     ];
   }
 

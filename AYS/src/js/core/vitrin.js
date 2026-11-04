@@ -24,6 +24,33 @@
    4. Her kartın kökü `<div class="vk" data-oz="NNN">`: katalog numarası
       envanterin «ekranda» sayımıdır.
    5. Ekranda görünen her metin düzgün Türkçedir; büyük harf `tr-TR`. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.vitrin.olculdu':'Ölçüldü',
+  'ortak.vitrin.hesaplandi':'Hesaplandı',
+  'ortak.vitrin.tahmin':'Tahmin',
+  'ortak.vitrin.veri-yok':'Veri yok',
+  'ortak.vitrin.onkosul-sirasi':'Önkoşul sırası: ',
+  'ortak.vitrin.etkilenen-haftalar':'Etkilenen haftalar: ',
+  'ortak.vitrin.geri-al':'Geri al',
+  'ortak.vitrin.basla':'Başla',
+  'ortak.vitrin.tekrar-araliklari':'Tekrar aralıkları ',
+  'ortak.vitrin.cevap-dugmeleri':'Cevap düğmeleri',
+  'ortak.vitrin.bugun':'Bugün ',
+  'ortak.vitrin.soru-zinciri':'Soru zinciri, ',
+  'ortak.vitrin.kademe':'Kademe ',
+  'ortak.vitrin.bosta':'boşta',
+  'ortak.vitrin.raporu-ac':'Raporu aç',
+  'ortak.vitrin.soru-sor':'Soru sor',
+  'ortak.vitrin.patron-gunun-toplantisi':'Patron · günün toplantısı',
+  'ortak.vitrin.gune-basla':'Güne başla',
+  'ortak.vitrin.don':'Dön',
+  'ortak.vitrin.veri-bu-cihazda-yedek-senin':'Veri bu cihazda; yedek senin seçtiğin yerde; Merkez isteğe bağlı ve modüle yazmaz',
+  'ortak.vitrin.disa-aktar':'Dışa aktar',
+  'ortak.vitrin.vazgec':'Vazgeç',
+  'ortak.vitrin.yerlestir':'Yerleştir',
+  'ortak.vitrin.bildirim-tercihi-bu-surumde':'Bildirim tercihi bu sürümde yok.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -76,8 +103,8 @@ window.LIFEOS = window.LIFEOS || {};
      y yok). Başka bir etiket YOKTUR; «beyan» gibi bir ad yalnız METİNDİR,
      kesinliği ölçülmüştür (kullanıcı söyledi, kod saydı). */
   const KES = {
-    measured:{ g:'o', ad:'Ölçüldü' }, computed:{ g:'h', ad:'Hesaplandı' },
-    estimated:{ g:'t', ad:'Tahmin' }, missing:{ g:'y', ad:'Veri yok' },
+    measured:{ g:'o', ad:yz('ortak.vitrin.olculdu') }, computed:{ g:'h', ad:yz('ortak.vitrin.hesaplandi') },
+    estimated:{ g:'t', ad:yz('ortak.vitrin.tahmin') }, missing:{ g:'y', ad:yz('ortak.vitrin.veri-yok') },
   };
   function et(kesinlik, metin){
     const k = KES[kesinlik] || KES.missing;
@@ -311,7 +338,7 @@ window.LIFEOS = window.LIFEOS || {};
     return kok('050', 'y14', h.map((x, i) => (i ? ikon('ok') : '')
       + '<div class="dg' + (x.eksik ? ' ek' : '') + '">' + hl(x.p) + '<b>' + kac(x.ad) + '</b><span>'
       + (x.eksik ? 'önce bu' : sayiMi(x.p) ? '%' + Math.round(x.p) : '—') + '</span></div>').join(''),
-      { ek:renk(o.modul || 'ays'), etiket:'Önkoşul sırası: ' + h.map(x => x.ad + (x.eksik ? ' (eksik önkoşul)' : '')).join(', ') });
+      { ek:renk(o.modul || 'ays'), etiket:yz('ortak.vitrin.onkosul-sirasi') + h.map(x => x.ad + (x.eksik ? ' (eksik önkoşul)' : '')).join(', ') });
   }
 
   /* 051 40 HAFTA ÇİZGİSİ — sınava kadar her hafta bir tik; ara haftaları
@@ -361,7 +388,7 @@ window.LIFEOS = window.LIFEOS || {};
       + h.map(x => '<div' + (x.durum ? ' class="' + x.durum + '"' : '') + '>' + kac(x.ad) + '</div>').join('') + '</div>'
       + '<div class="on"><span class="mod c-mer">' + kac(buyuk(o.seviye || 'orta')) + '</span><span>' + kac(o.ozet || '') + '</span>'
       + (o.act ? dugme({ metin:o.dugme || 'Onayla', ton:'p', act:o.act, data:o.data }) : '') + '</div>',
-      { etiket:'Etkilenen haftalar: ' + h.filter(x => x.durum === 'a').map(x => x.ad).join(', ') });
+      { etiket:yz('ortak.vitrin.etkilenen-haftalar') + h.filter(x => x.durum === 'a').map(x => x.ad).join(', ') });
   }
 
   /* 054 TAŞIMA GÖLGESİ — taşınan blok havada, eski yeri hayalet çizgi;
@@ -371,7 +398,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(!b.length) return '';
     return kok('054', 'x29', b.map(x => '<div class="bl' + (x.hayalet ? ' hy' : '') + (x.tasinan ? ' ts' : '') + '">'
       + kac(x.ad) + (x.not ? '<em>' + kac(x.not) + '</em>' : '') + '</div>').join('')
-      + (o.act ? dugme({ metin:'Geri al', ton:'g ga', act:o.act, data:o.data }) : ''));
+      + (o.act ? dugme({ metin:yz('ortak.vitrin.geri-al'), ton:'g ga', act:o.act, data:o.data }) : ''));
   }
 
   /* 055 TEK SATIR SORU EKLE — ders · konu · sonuç üç seçim; Enter ile
@@ -462,7 +489,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="uc">' + hucre(sayi(o.soru), 'soru') + hucre(o.dogru == null ? '—' : sayi(o.dogru) + '·' + sayi(o.digerleri), 'D · Y/B')
       + hucre(dkMetni(o.dk), o.planDk ? 'plan ' + o.planDk : 'süre') + '</div>'
       + (o.sonraki ? '<div class="sr">Sıradaki <b>' + kac(o.sonraki.ad) + (o.sonraki.dk ? ' · ' + dkMetni(o.sonraki.dk) : '') + '</b>'
-        + (o.sonraki.act ? dugme({ metin:'Başla', ton:'m', act:o.sonraki.act, data:o.sonraki.data }) : '') + '</div>' : ''),
+        + (o.sonraki.act ? dugme({ metin:yz('ortak.vitrin.basla'), ton:'m', act:o.sonraki.act, data:o.sonraki.data }) : '') + '</div>' : ''),
       { ek:'kt', etiket:o.ad + ' bloğu bitti' });
   }
 
@@ -537,7 +564,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="tr" style="--ilerleme:' + px(ilerleme) + '">' + a.map((g, i) => '<span class="nk' + (i < o.asama ? ' b' : i === o.asama ? ' y' : '')
         + '" style="left:' + px(yer(g)) + '"><i></i><em>+' + g + (i === a.length - 1 ? ' gün' : '') + '</em></span>').join('') + '</div>'
       + '<div class="lg">' + et('computed', 'aralık koddan') + '<span>' + kac(o.not || '') + '</span></div>',
-      { etiket:'Tekrar aralıkları ' + a.map(g => '+' + g).join(', ') + ' gün; ' + o.asama + ' tekrar geçti' });
+      { etiket:yz('ortak.vitrin.tekrar-araliklari') + a.map(g => '+' + g).join(', ') + ' gün; ' + o.asama + ' tekrar geçti' });
   }
 
   /* 066 HEDEFE KALAN — hedef, bugünkü değer ve haftada gereken artış;
@@ -906,7 +933,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(!d.length) return '';
     return kok('090', 'x41', d.map(x => '<button type="button" class="' + (x.on ? 'on' : '') + '" data-act="' + kac(o.act) + '"' + nitelik(x.data)
       + (x.not ? ' title="' + kac(x.not) + '"' : '') + '>' + kac(x.ad) + '<span>' + kac(x.sure) + '</span></button>').join(''),
-      { etiket:'Cevap düğmeleri' });
+      { etiket:yz('ortak.vitrin.cevap-dugmeleri') });
   }
 
   /* 091 DAKİKA HALKASI — günlük ölçüt halkası; rengi değişmez, yalnız dolar.
@@ -920,7 +947,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '</svg><div><b>' + sayi(Math.round(top)) + '</b><span class="cap">/ ' + sayi(o.hedef) + ' DK</span></div></div>'
       + '<div class="ls">' + (o.satirlar || []).map(x => '<div><i' + (sayiMi(x.dk) ? '' : ' class="b"') + '></i>' + kac(x.ad) + '<em>' + (sayiMi(x.dk) ? sayi(Math.round(x.dk)) + ' dk' : '—') + '</em></div>').join('')
       + '<div class="top"><span></span>Kalan<em>' + sayi(Math.max(0, Math.round(o.hedef - top))) + ' dk</em></div></div>',
-      { etiket:'Bugün ' + Math.round(top) + ' / ' + o.hedef + ' dakika' });
+      { etiket:yz('ortak.vitrin.bugun') + Math.round(top) + ' / ' + o.hedef + ' dakika' });
   }
 
   /* 092 UNUTMA EĞRİSİ — hatırlama düşer, tekrar yükseltir; «bugün» noktası
@@ -1017,10 +1044,10 @@ window.LIFEOS = window.LIFEOS || {};
     const y1 = Math.ceil((Math.max.apply(null, e.map(x => x.yil)) + 1) / 100) * 100;
     const yer = y => 2 + 96 * (y - y0) / Math.max(100, y1 - y0);
     const ROMA = n => { const r = [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]; let s = ''; r.forEach(([v, h]) => { while(n >= v){ s += h; n -= v; } }); return s; };
-    const yz = [];
-    for(let y = y0; y < y1; y += 100) yz.push('<span style="left:' + px(yer(y + 50)) + '">' + (y >= 0 ? ROMA(y / 100 + 1) : 'MÖ') + '</span>');
+    const yzYerel = [];
+    for(let y = y0; y < y1; y += 100) yzYerel.push('<span style="left:' + px(yer(y + 50)) + '">' + (y >= 0 ? ROMA(y / 100 + 1) : 'MÖ') + '</span>');
     const sec = e.find(x => x.on) || e[e.length - 1];
-    return kok('100', 'y24', '<div class="ek">' + (yz.length <= 12 ? yz.join('') : '') + e.map(x => '<i class="' + (x === sec ? 'on' : '') + '" style="left:' + px(yer(x.yil)) + '" title="'
+    return kok('100', 'y24', '<div class="ek">' + (yzYerel.length <= 12 ? yzYerel.join('') : '') + e.map(x => '<i class="' + (x === sec ? 'on' : '') + '" style="left:' + px(yer(x.yil)) + '" title="'
       + kac(x.yil + ' · ' + x.ad) + '"></i>').join('') + '</div><span class="ip"><b>' + sec.yil + '</b>' + kac(sec.ad) + (sec.yil >= 0 ? ' · ' + ROMA(Math.floor(sec.yil / 100) + 1) + '. yüzyıl' : '') + '</span>',
       { etiket:e.length + ' olay, ' + e[0].yil + '–' + e[e.length - 1].yil });
   }
@@ -1106,7 +1133,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(!h.length) return '';
     return kok('108', 'w24', h.map(x => x.soru
       ? '<div class="r"><span class="av" aria-hidden="true"><b>' + kac(o.harf || '?') + '</b>' + (o.gorsel ? '<img src="' + kac(o.gorsel) + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '</span><p>' + kac(x.metin) + '</p></div>'
-      : '<div class="r b"><p>' + kac(x.metin) + '</p></div>').join(''), { etiket:'Soru zinciri, ' + h.filter(x => x.soru).length + ' soru' });
+      : '<div class="r b"><p>' + kac(x.metin) + '</p></div>').join(''), { etiket:yz('ortak.vitrin.soru-zinciri') + h.filter(x => x.soru).length + ' soru' });
   }
 
   /* 109 ÜÇ MADDE ÖZETİ — özet MODELİNDİR ve öyle etiketlenir. */
@@ -1144,7 +1171,7 @@ window.LIFEOS = window.LIFEOS || {};
     return kok('142', 'y32', '<div class="yl" style="--ilerleme-oran:' + (ilerleme / 100).toFixed(3) + ';--yol-renk:' + rr(o.simdi) + '">'
       + k.map(x => '<div class="' + (x.no === o.simdi ? 'on' : x.no > o.simdi ? 'kl' : '') + '" style="--r:' + rr(x.no) + '"><span class="rn" aria-hidden="true"></span><span>' + kac(buyukHarf(x.ad)) + '</span></div>').join('')
       + '</div>' + (o.etiket ? '<div class="bs"><span class="pil">' + kac(o.etiket) + '</span></div>' : ''),
-      { etiket:'Kademe ' + o.simdi + ' / ' + k.length + (o.etiket ? ': ' + o.etiket : '') });
+      { etiket:yz('ortak.vitrin.kademe') + o.simdi + ' / ' + k.length + (o.etiket ? ': ' + o.etiket : '') });
   }
 
   /* 144 SİSTEM BAŞINA RÜTBE — her sistemin kendi rütbesi. Bilinmeyen
@@ -1259,7 +1286,7 @@ window.LIFEOS = window.LIFEOS || {};
   function durumHalkasi(o){
     const a = (o && o.ajanlar || []).filter(Boolean);
     if(!a.length) return '';
-    const AD = { cal:'çalışıyor', bos:'boşta', kap:'kapalı' };
+    const AD = { cal:'çalışıyor', bos:yz('ortak.vitrin.bosta'), kap:'kapalı' };
     return kok('132', 'x56', a.map(x => '<div><span class="hl2 ' + (AD[x.durum] ? x.durum : 'kap') + '">' + av(x) + '</span><span class="cap">'
       + kac(x.ad) + ' · ' + (AD[x.durum] || 'kapalı') + '</span></div>').join(''), { ek:renk(o.modul),
       etiket:a.map(x => x.ad + ' ' + (AD[x.durum] || 'kapalı').toLocaleLowerCase('tr-TR')).join(', ') });
@@ -1325,8 +1352,8 @@ window.LIFEOS = window.LIFEOS || {};
       durum:durumHalkasi({ modul:o.modul, ajanlar:a.map(x => ({ ad:x.ad, harf:x.harf, gorsel:x.gorsel, durum:x.hazir ? 'bos' : 'kap' })) }),
       balon:patron.cumle ? sayiBalonu({ modul:o.modul, metin:tekCumle(patron.cumle), kaynak:'kural motoru hesapladı' }) : '',
       hazir:uzman[0] && uzman[0].cumle && ac ? hazirCevap({ modul:o.modul, soru:uzman[0].ad + ': ' + tekCumle(uzman[0].cumle), kaynak:'kural motoru hesapladı',
-        cevaplar:[{ metin:'Raporu aç', act:ac, data:{ 'data-id':uzman[0].id, 'data-agent':uzman[0].id } }].concat(sor ? [{ metin:'Soru sor', act:sor, data:{ 'data-agent':uzman[0].id } }] : []) }) : '',
-      toplanti:gununToplantisi({ modul:o.modul, kaynak:'kural motoru hesapladı', baslik:'Patron · günün toplantısı',
+        cevaplar:[{ metin:yz('ortak.vitrin.raporu-ac'), act:ac, data:{ 'data-id':uzman[0].id, 'data-agent':uzman[0].id } }].concat(sor ? [{ metin:yz('ortak.vitrin.soru-sor'), act:sor, data:{ 'data-agent':uzman[0].id } }] : []) }) : '',
+      toplanti:gununToplantisi({ modul:o.modul, kaynak:'kural motoru hesapladı', baslik:yz('ortak.vitrin.patron-gunun-toplantisi'),
         satirlar:uzman.map(x => ({ ad:x.ad, harf:x.harf, gorsel:x.gorsel, cumle:tekCumle(x.cumle) })) }),
       sinir:acik ? ajanSinir(Object.assign({ modul:o.modul }, acik)) : '',
       devir:o.devir ? devirGostergesi(Object.assign({ modul:o.modul }, o.devir, { metin:tekCumle(o.devir.metin) })) : '',
@@ -1349,7 +1376,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="sl"><b>' + o.is + ' iş</b><span>' + kac(dkMetni(o.dk) + (o.not ? ' · ' + o.not : '')) + '</span></div>'
       + (o.ilk ? '<div class="il"><span class="mod ' + (renk(o.modul) || 'c-ays') + '">' + kac(buyukHarf(o.sistem || o.modul || '')) + '</span><span>' + kac(o.ilk.ad) + '</span>'
         + (o.ilk.not ? '<span class="cap">' + kac(o.ilk.not) + '</span>' : '') + '</div>' : '')
-      + '<div class="alt">' + et('computed', 'kod üretir') + (o.act ? dugme({ metin:'Güne başla', ton:'w', act:o.act, data:o.data }) : '') + '</div>', { ek:'kt' });
+      + '<div class="alt">' + et('computed', 'kod üretir') + (o.act ? dugme({ metin:yz('ortak.vitrin.gune-basla'), ton:'w', act:o.act, data:o.data }) : '') + '</div>', { ek:'kt' });
   }
 
   /* 007 GÜN KAPANIŞI — üç sayı ve yarının ilk işi. */
@@ -1394,7 +1421,7 @@ window.LIFEOS = window.LIFEOS || {};
     const r = (o && o.noktalar || []).filter(Boolean);
     if(!r.length) return '';
     return kok('117', 'y28', r.map(x => '<div class="r"><div><b>' + kac(x.ad) + '</b><span>' + kac(buyuk(x.not || '')) + '</span></div>'
-      + (x.act ? dugme({ metin:'Dön', act:x.act, data:x.data, aria:x.ad + ' — geri dön' }) : '') + '</div>').join(''));
+      + (x.act ? dugme({ metin:yz('ortak.vitrin.don'), act:x.act, data:x.data, aria:x.ad + ' — geri dön' }) : '') + '</div>').join(''));
   }
 
   /* 174 VERİ NEREDE? — tek şema: cihaz asıl kayıt, yedek senin seçtiğin
@@ -1405,7 +1432,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="bg2" aria-hidden="true"><i></i><i class="k"></i></div>'
       + '<div class="sag2"><div class="n"><b>Yedek dosyası</b><span>senin seçtiğin yer</span></div>'
       + '<div class="n c" data-merkez><b>Merkez</b><span>' + kac(o.merkezNot || 'isteğe bağlı · teklif yazar, modüle yazmaz') + '</span></div></div>',
-      { etiket:'Veri bu cihazda; yedek senin seçtiğin yerde; Merkez isteğe bağlı ve modüle yazmaz' });
+      { etiket:yz('ortak.vitrin.veri-bu-cihazda-yedek-senin') });
   }
 
   /* 175 DIŞA AKTAR — biçim ve ilk satırların önizlemesi. Yalnız VAR OLAN
@@ -1417,7 +1444,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="sg">' + (o.bicimler || ['JSON']).map((b, i) => '<span' + (i === 0 ? ' class="on"' : '') + '>' + kac(b) + '</span>').join('') + '</div>'
       + (o.onizleme ? '<pre>' + kac(o.onizleme) + '</pre>' : '')
       + '<div class="alt"><span class="cap">' + (sayiMi(o.kayit) ? sayi(o.kayit) + ' kayıt' : '') + (sayiMi(o.kb) ? ' · ' + sayi(o.kb) + ' kB' : '') + '</span>'
-      + dugme({ metin:'Dışa aktar', ton:'w', act:o.act }) + '</div>');
+      + dugme({ metin:yz('ortak.vitrin.disa-aktar'), ton:'w', act:o.act }) + '</div>');
   }
 
   /* 178'in modeli: yedek mevcut verinin TAMAMINI değiştirir; kod dört
@@ -1444,7 +1471,7 @@ window.LIFEOS = window.LIFEOS || {};
     return kok('178', 'w42', '<div class="fl"><span class="ik3" aria-hidden="true">{ }</span><div><b>' + kac(o.dosya) + '</b><span>' + kac(o.alt || '') + '</span></div></div>'
       + '<div class="sn3" style="grid-template-columns:repeat(4,1fr)">' + h(o.ayni, 'aynı') + h(o.yeni, 'yeni') + h(o.degisen, 'değişen', o.degisen ? 'ck4' : '')
       + h(o.silinen, 'silinecek', o.silinen ? 'ck4' : '') + '</div>'
-      + '<div class="alt">' + (o.vazgec ? dugme({ metin:'Vazgeç', act:o.vazgec }) : '<span></span>')
+      + '<div class="alt">' + (o.vazgec ? dugme({ metin:yz('ortak.vitrin.vazgec'), act:o.vazgec }) : '<span></span>')
       + (o.act ? dugme({ metin:o.dugme || 'Yedeği yükle', ton:'w', act:o.act }) : '') + '</div>');
   }
 
@@ -1470,7 +1497,7 @@ window.LIFEOS = window.LIFEOS || {};
     return kok('125', 'w27', '<div class="gn4">' + r.map(x => '<span class="sa">' + kac(x.saat || '') + '</span>'
       + (x.hayalet ? '<i class="hy2">+ ' + kac(x.ad) + '</i>' : x.ad ? '<i class="bk ' + (renk(x.modul) || 'c-ays') + '">' + kac(x.ad) + '</i>' : '<i class="bos2"></i>')).join('') + '</div>'
       + '<div class="alt"><span class="cap" style="color:var(--mer-ink, var(--mer))">Onaysız yerleşmez</span>'
-      + (o.act ? dugme({ metin:'Yerleştir', ton:'p', act:o.act, data:o.data }) : '') + '</div>');
+      + (o.act ? dugme({ metin:yz('ortak.vitrin.yerlestir'), ton:'p', act:o.act, data:o.data }) : '') + '</div>');
   }
 
   /* 134 AJAN SEÇİCİ — «@» ile; rol ve modül yanında, eşleşen harf renkli. */
@@ -1616,7 +1643,7 @@ window.LIFEOS = window.LIFEOS || {};
   /* Eylem çözücü: { ok, metin } döner; yazma Pwa'da. */
   function bildirimEylem(modul, ad, el){
     const P = L.Pwa;
-    if(!P || !P.bildirimAyari) return { ok:false, metin:'Bildirim tercihi bu sürümde yok.' };
+    if(!P || !P.bildirimAyari) return { ok:false, metin:yz('ortak.vitrin.bildirim-tercihi-bu-surumde') };
     const a = P.bildirimAyari(modul);
     if(ad === 'bildirim-tur'){
       const tur = el && el.dataset.tur;

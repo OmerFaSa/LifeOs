@@ -12,6 +12,10 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:110, id:'act:practice-history', kind:'Eylem', label:'Tarih pratiği başlat',
+  hint:'Tarih', run:() => { ESP.S.ui.histTab = 'ogren'; ESP.App.go('history'); } });
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:120, id:'act:timeline', kind:'Eylem', label:'Kronolojiye olay ekle',
+  hint:'Tarih', run:() => { ESP.S.ui.histTab = 'olaylar'; ESP.App.go('history'); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.history.serit':'Şerit',
   'esp.history.olaylar':'Olaylar',
@@ -128,7 +132,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.history.donem-2':'dönem',
   'esp.history.birincil-kaynak':'birincil kaynak',
 });
-window.LIFEOS.PARCA.sayfa({ id:'history', modul:'esp', cekmece:'calisma', ad:'Tarih', ikon:'book', ek:{ disc:'history' }, sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'history', modul:'esp', king:{ sira:220, ad:'Tarih', es:['tarih', 'kronoloji'] }, cekmece:'calisma', ad:'Tarih', ikon:'book', ek:{ disc:'history' }, sira:30 });
 
 ESP.Screens.history = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
@@ -676,7 +680,7 @@ ESP.Screens.history = (function(){
   const GOVDE = { serit:seritRows, olaylar:olayRows, kaynaklar:kaynakRows, zincir:zincirRows,
     ogren:learnRows, calisma:calismaRows };
 
-  LIFEOS.PARCA.blok({ id:'history.bolum-1', sayfa:'history', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+  LIFEOS.PARCA.blok({ id:'history.tarih-sekmeleri', sayfa:'history', yer:'y1', sira:10, ad:'Tarih sekmeleri', ciz(){
     return K.Span(12, ESP.Parts.bolumler('history', { act:'pick-tab', aria:yz('esp.history.tarih-bolumleri'), tabs:TABS,
         govde:GOVDE }));
   } });

@@ -7,6 +7,39 @@
    Ikinci iddia: laboratuvar beslenmeyi degistirir. Ferritin dusukse demir
    hedefi kendiliginden yukselir ve C vitamini eslesmesi zorunlu hale gelir.
    Bu, Modul 1 ile Modul 2 arasindaki tek yonlu bagdir (labAdjust). */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.nutri.hesaplandi':'hesaplandı',
+  'spi.core.nutri.ferritin-referans-araliginin':'Ferritin referans aralığının altında — demir deposu boşalmış.',
+  'spi.core.nutri.ferritin-hedef-bandin-altind':'Ferritin hedef bandın altında.',
+  'spi.core.nutri.hemoglobin-dusuk':'Hemoglobin düşük.',
+  'spi.core.nutri.d-vitamini-referans-altinda':'D vitamini referans altında — yağlı öğünle eşleştirme gerekir.',
+  'spi.core.nutri.d-vitamini-hedef-bandin-alti':'D vitamini hedef bandın altında.',
+  'spi.core.nutri.b12-referans-altinda':'B12 referans altında.',
+  'spi.core.nutri.b12-hedef-bandin-altinda-400':'B12 hedef bandın altında (400 pg/mL altı belirti verebilir).',
+  'spi.core.nutri.folat-referans-altinda':'Folat referans altında.',
+  'spi.core.nutri.ldl-referans-ustunde-cozunur':'LDL referans üstünde — çözünür lif doğrudan etkiler.',
+  'spi.core.nutri.ldl-hedef-bandin-ustunde':'LDL hedef bandın üstünde.',
+  'spi.core.nutri.trigliserit-referans-ustunde':'Trigliserit referans üstünde.',
+  'spi.core.nutri.hs-crp-yuksek-sistemik-yangi':'hs-CRP yüksek — sistemik yangı.',
+  'spi.core.nutri.hba1c-hedef-bandin-ustunde':'HbA1c hedef bandın üstünde.',
+  'spi.core.nutri.aclik-glukozu-referans-ustun':'Açlık glukozu referans üstünde.',
+  'spi.core.nutri.potasyum-referans-altinda':'Potasyum referans altında.',
+  'spi.core.nutri.kalsiyum-referans-altinda':'Kalsiyum referans altında.',
+  'spi.core.nutri.magnezyum-referans-altinda':'Magnezyum referans altında.',
+  'spi.core.nutri.cinko-referans-altinda':'Çinko referans altında.',
+  'spi.core.nutri.tsh-yuksek-iyot-ve':'TSH yüksek — iyot ve selenyum tiroid için gerekli.',
+  'spi.core.nutri.tsh-yuksek':'TSH yüksek.',
+  'spi.core.nutri.sistolik-tansiyon-referans-u':'Sistolik tansiyon referans üstünde — sodyum sınırı daralır.',
+  'spi.core.nutri.albumin-dusuk-uzun-vadeli':'Albümin düşük — uzun vadeli protein durumu zayıf.',
+  'spi.core.nutri.ogunde':'Öğünde ',
+  'spi.core.nutri.ogunde-cay-ya-da-kahve':'Öğünde çay ya da kahve var — demir emilimi yarıya indi. Bir saat sonraya bırakmak farkı geri getirir.',
+  'spi.core.nutri.tam-tahil-ve-bakliyattaki-fi':'Tam tahıl ve bakliyattaki fitat mineral emilimini düşürüyor. Islatmak ve mayalamak kaybı azaltır.',
+  'spi.core.nutri.ogunde-d-vitamini-var':'Öğünde D vitamini var — kalsiyum emilimi arttı.',
+  'spi.core.nutri.ogun-yag-iceriyor-d':'Öğün yağ içeriyor — D vitamini yağda çözünür, taşınabiliyor.',
+  'spi.core.nutri.ogunde-neredeyse-hic-yag-yok':'Öğünde neredeyse hiç yağ yok — D vitamini yeterince emilemiyor.',
+  'spi.core.nutri.bu-porsiyon':'Bu porsiyon ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -98,7 +131,7 @@ SP.Nutri = (function(){
     if(b == null) return null;
     const h = moveEnergy(dateISO, profile);
     const hk = h.kcal || 0;
-    return { date:h.date, bmr:b, hareket:hk, toplam:Math.round(b + hk), etiket:'hesaplandı', seanslar:h.seanslar,
+    return { date:h.date, bmr:b, hareket:hk, toplam:Math.round(b + hk), etiket:yz('spi.core.nutri.hesaplandi'), seanslar:h.seanslar,
       eksik:h.eksik, dakika:h.dakika, hareketYok:!h.seanslar.length };
   }
 
@@ -117,49 +150,49 @@ SP.Nutri = (function(){
      saklamayiz. */
   const LAB_LINKS = [
     { when:['ferritin', 'low'],    nutrient:'iron',      mult:1.6,
-      why:'Ferritin referans aralığının altında — demir deposu boşalmış.' },
+      why:yz('spi.core.nutri.ferritin-referans-araliginin') },
     { when:['ferritin', 'belowOpt'], nutrient:'iron',    mult:1.3,
-      why:'Ferritin hedef bandın altında.' },
+      why:yz('spi.core.nutri.ferritin-hedef-bandin-altind') },
     { when:['hgb', 'low'],         nutrient:'iron',      mult:1.5,
-      why:'Hemoglobin düşük.' },
+      why:yz('spi.core.nutri.hemoglobin-dusuk') },
     { when:['vitd', 'low'],        nutrient:'vitd',      mult:2.0,
-      why:'D vitamini referans altında — yağlı öğünle eşleştirme gerekir.' },
+      why:yz('spi.core.nutri.d-vitamini-referans-altinda') },
     { when:['vitd', 'belowOpt'],   nutrient:'vitd',      mult:1.5,
-      why:'D vitamini hedef bandın altında.' },
+      why:yz('spi.core.nutri.d-vitamini-hedef-bandin-alti') },
     { when:['b12', 'low'],         nutrient:'b12',       mult:2.0,
-      why:'B12 referans altında.' },
+      why:yz('spi.core.nutri.b12-referans-altinda') },
     { when:['b12', 'belowOpt'],    nutrient:'b12',       mult:1.4,
-      why:'B12 hedef bandın altında (400 pg/mL altı belirti verebilir).' },
+      why:yz('spi.core.nutri.b12-hedef-bandin-altinda-400') },
     { when:['folate', 'low'],      nutrient:'folate',    mult:1.5,
-      why:'Folat referans altında.' },
+      why:yz('spi.core.nutri.folat-referans-altinda') },
     { when:['ldl', 'high'],        nutrient:'fiber',     mult:1.25,
-      why:'LDL referans üstünde — çözünür lif doğrudan etkiler.' },
+      why:yz('spi.core.nutri.ldl-referans-ustunde-cozunur') },
     { when:['ldl', 'aboveOpt'],    nutrient:'fiber',     mult:1.15,
-      why:'LDL hedef bandın üstünde.' },
+      why:yz('spi.core.nutri.ldl-hedef-bandin-ustunde') },
     { when:['trig', 'high'],       nutrient:'omega3',    mult:1.6,
-      why:'Trigliserit referans üstünde.' },
+      why:yz('spi.core.nutri.trigliserit-referans-ustunde') },
     { when:['crp', 'high'],        nutrient:'omega3',    mult:1.3,
-      why:'hs-CRP yüksek — sistemik yangı.' },
+      why:yz('spi.core.nutri.hs-crp-yuksek-sistemik-yangi') },
     { when:['hba1c', 'aboveOpt'],  nutrient:'fiber',     mult:1.2,
-      why:'HbA1c hedef bandın üstünde.' },
+      why:yz('spi.core.nutri.hba1c-hedef-bandin-ustunde') },
     { when:['glucose', 'high'],    nutrient:'fiber',     mult:1.25,
-      why:'Açlık glukozu referans üstünde.' },
+      why:yz('spi.core.nutri.aclik-glukozu-referans-ustun') },
     { when:['k', 'low'],           nutrient:'potassium', mult:1.25,
-      why:'Potasyum referans altında.' },
+      why:yz('spi.core.nutri.potasyum-referans-altinda') },
     { when:['ca', 'low'],          nutrient:'calcium',   mult:1.2,
-      why:'Kalsiyum referans altında.' },
+      why:yz('spi.core.nutri.kalsiyum-referans-altinda') },
     { when:['mg', 'low'],          nutrient:'magnesium', mult:1.3,
-      why:'Magnezyum referans altında.' },
+      why:yz('spi.core.nutri.magnezyum-referans-altinda') },
     { when:['zinc', 'low'],        nutrient:'zinc',      mult:1.3,
-      why:'Çinko referans altında.' },
+      why:yz('spi.core.nutri.cinko-referans-altinda') },
     { when:['tsh', 'high'],        nutrient:'iodine',    mult:1.2,
-      why:'TSH yüksek — iyot ve selenyum tiroid için gerekli.' },
+      why:yz('spi.core.nutri.tsh-yuksek-iyot-ve') },
     { when:['tsh', 'high'],        nutrient:'selenium',  mult:1.2,
-      why:'TSH yüksek.' },
+      why:yz('spi.core.nutri.tsh-yuksek') },
     { when:['sbp', 'high'],        nutrient:'sodium',    mult:0.8,
-      why:'Sistolik tansiyon referans üstünde — sodyum sınırı daralır.' },
+      why:yz('spi.core.nutri.sistolik-tansiyon-referans-u') },
     { when:['alb', 'low'],         nutrient:'protein',   mult:1.15,
-      why:'Albümin düşük — uzun vadeli protein durumu zayıf.' },
+      why:yz('spi.core.nutri.albumin-dusuk-uzun-vadeli') },
   ];
 
   function labAdjust(profile){
@@ -383,22 +416,22 @@ SP.Nutri = (function(){
     if(raw.micro.vitc >= 25){
       nonHemeFactor *= 3;
       notes.push({ kind:'boost', key:'vitc',
-        text:'Öğünde ' + Math.round(raw.micro.vitc) + ' mg C vitamini var — bitkisel demir emilimi 3 katına çıktı.' });
+        text:yz('spi.core.nutri.ogunde') + Math.round(raw.micro.vitc) + ' mg C vitamini var — bitkisel demir emilimi 3 katına çıktı.' });
     }
     if(flags.tannin){
       nonHemeFactor *= 0.5;
       notes.push({ kind:'block', key:'tannin',
-        text:'Öğünde çay ya da kahve var — demir emilimi yarıya indi. Bir saat sonraya bırakmak farkı geri getirir.' });
+        text:yz('spi.core.nutri.ogunde-cay-ya-da-kahve') });
     }
     if(raw.micro.calcium >= 300){
       nonHemeFactor *= 0.7;
       notes.push({ kind:'block', key:'calcium',
-        text:'Öğünde ' + Math.round(raw.micro.calcium) + ' mg kalsiyum var — demir ve çinko emilimini düşürüyor.' });
+        text:yz('spi.core.nutri.ogunde') + Math.round(raw.micro.calcium) + ' mg kalsiyum var — demir ve çinko emilimini düşürüyor.' });
     }
     if(flags.phytate){
       nonHemeFactor *= 0.85;
       notes.push({ kind:'block', key:'phytate',
-        text:'Tam tahıl ve bakliyattaki fitat mineral emilimini düşürüyor. Islatmak ve mayalamak kaybı azaltır.' });
+        text:yz('spi.core.nutri.tam-tahil-ve-bakliyattaki-fi') });
     }
     nonHemeFactor = U.clamp(nonHemeFactor, 0.01, 0.20);
 
@@ -407,17 +440,17 @@ SP.Nutri = (function(){
     if(raw.micro.vitd >= 2){
       caFactor *= 1.4;
       notes.push({ kind:'boost', key:'vitd',
-        text:'Öğünde D vitamini var — kalsiyum emilimi arttı.' });
+        text:yz('spi.core.nutri.ogunde-d-vitamini-var') });
     }
     let vitdFactor = ABSORB_BASE.vitd;
     if(raw.fat >= 10){
       vitdFactor *= 1.4;
       notes.push({ kind:'boost', key:'fat',
-        text:'Öğün yağ içeriyor — D vitamini yağda çözünür, taşınabiliyor.' });
+        text:yz('spi.core.nutri.ogun-yag-iceriyor-d') });
     }else if(raw.micro.vitd > 0){
       vitdFactor *= 0.6;
       notes.push({ kind:'block', key:'fat',
-        text:'Öğünde neredeyse hiç yağ yok — D vitamini yeterince emilemiyor.' });
+        text:yz('spi.core.nutri.ogunde-neredeyse-hic-yag-yok') });
     }
 
     /* --- cinko --- */
@@ -604,7 +637,7 @@ SP.Nutri = (function(){
         const pShare = r.targets.protein.min * MEAL_SHARE;
         if(c && c.protein < pShare * 0.8){
           r.addons.push({ need:'protein',
-            text:'Bu porsiyon ' + Math.round(pShare) + ' g protein hedefinin altında kalıyor — '
+            text:yz('spi.core.nutri.bu-porsiyon') + Math.round(pShare) + ' g protein hedefinin altında kalıyor — '
                + 'yanına yoğurt ya da bir yumurta.' });
         }
       }

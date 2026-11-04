@@ -31,6 +31,32 @@
    3. TEKLİF GERİ ALINABİLİR OLMALIDIR. Uygulanan her teklif ne yaptığını
       (`applied`) kaydeder; geri alınamayacak bir iş teklif edilmez. Bu
       yüzden hiçbir teklif SİLME işlemi önermez. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.plans.hatirlatici-kur':'Hatırlatıcı kur',
+  'esp.core.plans.bir-tarihe-bagli-hatirlatma':'Bir tarihe bağlı hatırlatma. Kaçırılırsa ceza üretmez.',
+  'esp.core.plans.zamana-bagli-hedef':'Zamana bağlı hedef',
+  'esp.core.plans.takvimde-tarihi-olan-bir-hed':'Takvimde tarihi olan bir hedef. Öncelik sırasında ikinci sıraya girer.',
+  'esp.core.plans.unite-ekle':'Ünite ekle',
+  'esp.core.plans.bir-ogrenme-unitesini-destey':'Bir öğrenme ünitesini desteye ekler. Kartlar «tohum» etiketiyle gelir.',
+  'esp.core.plans.egzersiz-isle':'Egzersiz işle',
+  'esp.core.plans.bugunun-recetesindeki-bir-eg':'Bugünün reçetesindeki bir egzersizi gün kaydına yazar.',
+  'esp.core.plans.haftalik-plan':'Haftalık plan',
+  'esp.core.plans.haftanin-kalan-gunlerine-dis':'Haftanın kalan günlerine disiplin dağıtır. Takvim değil sıradır.',
+  'esp.core.plans.odagi-degistir':'Odağı değiştir',
+  'esp.core.plans.esit-skorlu-iki-is-cikarsa':'Eşit skorlu iki iş çıkarsa hangisinin öne geçeceğini değiştirir.',
+  'esp.core.plans.gunluk-tabani-degistir':'Günlük tabanı değiştir',
+  'esp.core.plans.planin-sigdigi-dakika-alt-si':'Planın sığdığı dakika: alt sınır, hedef değil.',
+  'esp.core.plans.bolumu-ac-kapat':'Bölümü aç / kapat',
+  'esp.core.plans.disiplin-gezinmeden-ve-denge':'Disiplin gezinmeden ve denge hesabından çıkar ya da geri gelir; verisi silinmez.',
+  'esp.core.plans.hedef-plani':'Hedef planı',
+  'esp.core.plans.hedefin-disiplini-odaga-alin':'Hedefin disiplini odağa alınır, taban vakte göre yükselir, tarihli hedef ve kontrol noktaları kurulur.',
+  'esp.core.plans.oturumu-yaz':'Oturumu yaz',
+  'esp.core.plans.disaridan-gonderdigin-sure-o':'Dışarıdan gönderdiğin süre o günün oturumu olur; onaylayınca yazılır, geri alınır.',
+  'esp.core.plans.kademenin-kapanis-isi':'Kademenin kapanış işi.',
+  'esp.core.plans.kisayollar':'Kısayollar',
+  'esp.core.plans.kisayollar-dan':'Kısayollar’dan',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -43,37 +69,37 @@ ESP.Plans = (function(){
      demektir. `scope:'coach'` yalnızca koç ve Patron içindir: merdiven ve
      tekrar bütün disiplinlerin ortak işi. */
   const KINDS = [
-    { id:'reminder', level:'kucuk', label:'Hatırlatıcı kur', scope:'own',
-      note:'Bir tarihe bağlı hatırlatma. Kaçırılırsa ceza üretmez.' },
-    { id:'goal', level:'kucuk', label:'Zamana bağlı hedef', scope:'own',
-      note:'Takvimde tarihi olan bir hedef. Öncelik sırasında ikinci sıraya girer.' },
-    { id:'unit', level:'orta', label:'Ünite ekle', scope:'own',
-      note:'Bir öğrenme ünitesini desteye ekler. Kartlar «tohum» etiketiyle gelir.' },
-    { id:'drill', level:'kucuk', label:'Egzersiz işle', scope:'own',
-      note:'Bugünün reçetesindeki bir egzersizi gün kaydına yazar.' },
-    { id:'weekplan', level:'orta', label:'Haftalık plan', scope:'coach',
-      note:'Haftanın kalan günlerine disiplin dağıtır. Takvim değil sıradır.' },
-    { id:'focus', level:'kucuk', label:'Odağı değiştir', scope:'coach',
-      note:'Eşit skorlu iki iş çıkarsa hangisinin öne geçeceğini değiştirir.' },
-    { id:'base', level:'orta', label:'Günlük tabanı değiştir', scope:'coach',
-      note:'Planın sığdığı dakika: alt sınır, hedef değil.' },
+    { id:'reminder', level:'kucuk', label:yz('esp.core.plans.hatirlatici-kur'), scope:'own',
+      note:yz('esp.core.plans.bir-tarihe-bagli-hatirlatma') },
+    { id:'goal', level:'kucuk', label:yz('esp.core.plans.zamana-bagli-hedef'), scope:'own',
+      note:yz('esp.core.plans.takvimde-tarihi-olan-bir-hed') },
+    { id:'unit', level:'orta', label:yz('esp.core.plans.unite-ekle'), scope:'own',
+      note:yz('esp.core.plans.bir-ogrenme-unitesini-destey') },
+    { id:'drill', level:'kucuk', label:yz('esp.core.plans.egzersiz-isle'), scope:'own',
+      note:yz('esp.core.plans.bugunun-recetesindeki-bir-eg') },
+    { id:'weekplan', level:'orta', label:yz('esp.core.plans.haftalik-plan'), scope:'coach',
+      note:yz('esp.core.plans.haftanin-kalan-gunlerine-dis') },
+    { id:'focus', level:'kucuk', label:yz('esp.core.plans.odagi-degistir'), scope:'coach',
+      note:yz('esp.core.plans.esit-skorlu-iki-is-cikarsa') },
+    { id:'base', level:'orta', label:yz('esp.core.plans.gunluk-tabani-degistir'), scope:'coach',
+      note:yz('esp.core.plans.planin-sigdigi-dakika-alt-si') },
     /* Bölüm açma–kapama (core/modules.js). Orta seviye: bir disiplinin
        bütün ekranlarını, masasını ve denge hesabını etkiler. Veri silinmez. */
-    { id:'bolum', level:'orta', label:'Bölümü aç / kapat', scope:'coach',
-      note:'Disiplin gezinmeden ve denge hesabından çıkar ya da geri gelir; verisi silinmez.' },
+    { id:'bolum', level:'orta', label:yz('esp.core.plans.bolumu-ac-kapat'), scope:'coach',
+      note:yz('esp.core.plans.disiplin-gezinmeden-ve-denge') },
     /* Hedef planı (core/hedefplan.js). BÜYÜK aksiyon (AGENTS.md §1.9):
        odak, günlük taban, gerekirse bölüm ve tarihli hedef birlikte
        değişir. Ayrıntılı önizleme + onay + geri dönüş noktası. Yalnız
        kullanıcının Hedeflerim'deki düğmesinden gelir; kural motoru bu
        türü kendiliğinden üretmez, model hiç öneremez. */
-    { id:'hedefplan', level:'buyuk', label:'Hedef planı', scope:'coach', modelYok:true,
-      note:'Hedefin disiplini odağa alınır, taban vakte göre yükselir, tarihli hedef ve kontrol noktaları kurulur.' },
+    { id:'hedefplan', level:'buyuk', label:yz('esp.core.plans.hedef-plani'), scope:'coach', modelYok:true,
+      note:yz('esp.core.plans.hedefin-disiplini-odaga-alin') },
     /* Dışarıdan gelen oturum (hesap gelen kutusu: iPhone Kısayollar «30 dk
        gitar»). ÖLÇÜMDÜR: küçük olsa da hiçbir ayarda sormadan yazılmaz
        (AYS ve SPİ'deki olcum:true ile aynı kural, HATALAR KR-1). Yalnız
        gelen satırdan doğar; ajan ve model öneremez. */
-    { id:'oturum', level:'kucuk', olcum:true, label:'Oturumu yaz', scope:'coach', modelYok:true,
-      note:'Dışarıdan gönderdiğin süre o günün oturumu olur; onaylayınca yazılır, geri alınır.' },
+    { id:'oturum', level:'kucuk', olcum:true, label:yz('esp.core.plans.oturumu-yaz'), scope:'coach', modelYok:true,
+      note:yz('esp.core.plans.disaridan-gonderdigin-sure-o') },
   ];
 
   const KIND_BY_ID = KINDS.reduce(function(m, k){ m[k.id] = k; return m; }, {});
@@ -369,7 +395,7 @@ ESP.Plans = (function(){
     }else if(p.kind === 'goal'){
       const g = await ESP.Model.saveGoal(ESP.Model.newGoal({
         label:p.payload.label, disc:p.disc, date:p.payload.date,
-        note:'Kademenin kapanış işi.' }));
+        note:yz('esp.core.plans.kademenin-kapanis-isi') }));
       uygulanan = { kind:'goal', id:g.id };
 
     }else if(p.kind === 'unit'){
@@ -554,9 +580,9 @@ ESP.Plans = (function(){
       const x = r.rows[i], anahtar = 'gelen:' + oge.id + ':' + i;
       if((S.proposals || []).some(function(q){ return q.payload && q.payload.key === anahtar; })){ n++; continue; }
       const y = { disc:x.disc, minutes:x.minutes, count:x.count == null ? null : x.count,
-        countWhat:x.countWhat || null, date:gun, key:anahtar, note:'Kısayollar' + (kaynak ? ' (' + kaynak + ')' : '') };
+        countWhat:x.countWhat || null, date:gun, key:anahtar, note:yz('esp.core.plans.kisayollar') + (kaynak ? ' (' + kaynak + ')' : '') };
       const p = { id:'i:' + U.uid('t'), agentId:'patron', kind:'oturum', disc:x.disc, title:baslik('oturum', y),
-        why:'Kısayollar’dan' + (kaynak ? ' (' + kaynak + ')' : '') + ': «' + metin.slice(0, 120) + '»'
+        why:yz('esp.core.plans.kisayollar-dan') + (kaynak ? ' (' + kaynak + ')' : '') + ': «' + metin.slice(0, 120) + '»'
           + (gun !== bugun ? ' · ' + gun : ''),
         payload:y, at:bugun, source:'istek', level:'kucuk' };
       const v = dogrula(p);

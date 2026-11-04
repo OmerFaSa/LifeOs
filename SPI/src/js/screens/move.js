@@ -20,6 +20,10 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'spi', sira:50, id:'act:session', kind:'Eylem', label:'Antrenman seansı ekle', route:'move',
+  hint:'Modül 3', run:() => { SP.App.go('move'); setTimeout(() => {
+    const fn = SP.Screens.move.handle['start-session'];
+    if(fn) fn({ dataset:{ id:'' } }); }, 120); } });
 window.LIFEOS.PARCA.yazilar({
   'spi.move.bugun':'Bugün',
   'spi.move.i-lerleme':'İlerleme',
@@ -195,7 +199,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.move.haftalik-yuk':'haftalık yük',
   'spi.move.hafta-ay':'hafta / ay',
 });
-window.LIFEOS.PARCA.sayfa({ id:'move', modul:'spi', cekmece:'calisma', ad:'Hareket', sira:40 });
+window.LIFEOS.PARCA.sayfa({ id:'move', modul:'spi', king:{ sira:40, ad:'Hareket', es:['hareket', 'antrenman', 'egzersiz', 'spor'] }, cekmece:'calisma', ad:'Hareket', sira:40 });
 
 SP.Screens.move = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

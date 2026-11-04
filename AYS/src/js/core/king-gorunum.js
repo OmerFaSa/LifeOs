@@ -4,6 +4,24 @@
 /* KING · görünüm: ray, liste, çalışma alanı, menü, öneriler, görünüş, tarz, karşılama, gövde, aç/kapat.
    Parça 4/8; yükleme sırası: king.js, king-ses.js, king-kayit.js, king-gorunum.js, king-kart.js, king-arac.js, king-devrim.js, king-yol.js.
    Dosyalar arası ortak adlar ve ortak durum window.LIFEOS.KING_IC'tedir (KI.ad). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.king-gorunum.sohbet':'Sohbet',
+  'ortak.king-gorunum.araclar':'Araçlar',
+  'ortak.king-gorunum.gorevler':'Görevler',
+  'ortak.king-gorunum.rutinler':'Rutinler',
+  'ortak.king-gorunum.eylemler':'Eylemler',
+  'ortak.king-gorunum.king-ne-yapti':'King ne yaptı',
+  'ortak.king-gorunum.kutuphane':'Kütüphane',
+  'ortak.king-gorunum.ayarlar':'Ayarlar',
+  'ortak.king-gorunum.gorevler-ve-isler':'Görevler ve işler',
+  'ortak.king-gorunum.beceriler-ve-sozler':'Beceriler ve sözler',
+  'ortak.king-gorunum.beni-nasil-taniyorsun':'Beni nasıl tanıyorsun',
+  'ortak.king-gorunum.kayitli-sohbetler':'Kayıtlı sohbetler',
+  'ortak.king-gorunum.arastirma':'Araştırma',
+  'ortak.king-gorunum.genislet':'Genişlet',
+  'ortak.king-gorunum.haftalik-gozden-gecirme':'Haftalık gözden geçirme',
+});
+
 
 (function(){
   'use strict';
@@ -18,12 +36,12 @@
      (eski «···» paneli, `menu`): sohbet kapanmadan yanında açılır.
      ====================================================================== */
   const BOLUMLER = [
-    { id:'sohbet', ad:'Sohbet', svg:'<path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 16.5h-7.5L7 20v-3.5H5A1.5 1.5 0 0 1 3.5 15V6.5A1.5 1.5 0 0 1 5 5z"/>' },
-    { id:'araclar', ad:'Araçlar', svg:'<path d="M11 3.5l1.7 4.6 4.6 1.7-4.6 1.7L11 16.1l-1.7-4.6-4.6-1.7 4.6-1.7z"/><path d="M18 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>' },
-    { id:'gorev', ad:'Görevler', svg:'<path d="M10 7h10M10 12h10M10 17h10"/><path d="M3.8 7l1.4 1.4L7.8 5.6M3.8 12l1.4 1.4 2.6-2.8"/><circle cx="5.5" cy="17" r="1.3"/>' },
-    { id:'rutin', ad:'Rutinler', svg:'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v3.8h-3.8"/><path d="M12 8.5V12l2.5 1.6"/>' },
-    { id:'eylem', ad:'Eylemler', baslik:'King ne yaptı', svg:'<circle cx="6" cy="6.5" r="1.6"/><circle cx="6" cy="17.5" r="1.6"/><path d="M6 8.1v7.8M10.5 6.5h9M10.5 17.5h9M10.5 12h6"/>' },
-    { id:'kutuphane', ad:'Kütüphane', svg:'<rect x="4" y="4.5" width="4" height="15" rx="1"/><rect x="10" y="4.5" width="4" height="15" rx="1"/><path d="M15.8 6.1l3.4-.9 2.6 13.4-3.4.9z"/>' },
+    { id:'sohbet', ad:yz('ortak.king-gorunum.sohbet'), svg:'<path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 16.5h-7.5L7 20v-3.5H5A1.5 1.5 0 0 1 3.5 15V6.5A1.5 1.5 0 0 1 5 5z"/>' },
+    { id:'araclar', ad:yz('ortak.king-gorunum.araclar'), svg:'<path d="M11 3.5l1.7 4.6 4.6 1.7-4.6 1.7L11 16.1l-1.7-4.6-4.6-1.7 4.6-1.7z"/><path d="M18 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>' },
+    { id:'gorev', ad:yz('ortak.king-gorunum.gorevler'), svg:'<path d="M10 7h10M10 12h10M10 17h10"/><path d="M3.8 7l1.4 1.4L7.8 5.6M3.8 12l1.4 1.4 2.6-2.8"/><circle cx="5.5" cy="17" r="1.3"/>' },
+    { id:'rutin', ad:yz('ortak.king-gorunum.rutinler'), svg:'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v3.8h-3.8"/><path d="M12 8.5V12l2.5 1.6"/>' },
+    { id:'eylem', ad:yz('ortak.king-gorunum.eylemler'), baslik:yz('ortak.king-gorunum.king-ne-yapti'), svg:'<circle cx="6" cy="6.5" r="1.6"/><circle cx="6" cy="17.5" r="1.6"/><path d="M6 8.1v7.8M10.5 6.5h9M10.5 17.5h9M10.5 12h6"/>' },
+    { id:'kutuphane', ad:yz('ortak.king-gorunum.kutuphane'), svg:'<rect x="4" y="4.5" width="4" height="15" rx="1"/><rect x="10" y="4.5" width="4" height="15" rx="1"/><path d="M15.8 6.1l3.4-.9 2.6 13.4-3.4.9z"/>' },
   ];
   const SVG_AYAR = '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>';
   KI.bolum = 'sohbet';
@@ -104,13 +122,13 @@
   }
   /* Çalışma alanı: eski «···» paneli sohbetin yanında. Başlıkta geri, ad, kapat. */
   function alanBilgi(){
-    if(KI.menu === 'menu') return { ad:'Ayarlar' };
-    if(KI.menu === 'ekip') return { ad:'Görevler ve işler' };
-    if(KI.menu === 'beceri') return { ad:'Beceriler ve sözler' };
-    if(KI.menu === 'kisi') return { ad:'Beni nasıl tanıyorsun', geri:'menu' };
-    if(KI.menu === 'kayitlar') return { ad:'Kayıtlı sohbetler', geri:'menu' };
+    if(KI.menu === 'menu') return { ad:yz('ortak.king-gorunum.ayarlar') };
+    if(KI.menu === 'ekip') return { ad:yz('ortak.king-gorunum.gorevler-ve-isler') };
+    if(KI.menu === 'beceri') return { ad:yz('ortak.king-gorunum.beceriler-ve-sozler') };
+    if(KI.menu === 'kisi') return { ad:yz('ortak.king-gorunum.beni-nasil-taniyorsun'), geri:'menu' };
+    if(KI.menu === 'kayitlar') return { ad:yz('ortak.king-gorunum.kayitli-sohbetler'), geri:'menu' };
     if(KI.menu === 'onizle') return { ad:KI.kameraMi() ? 'Kamera' : 'Ekran' };
-    if(typeof KI.menu === 'string' && /^ars:\d+$/.test(KI.menu)) return { ad:'Araştırma' };
+    if(typeof KI.menu === 'string' && /^ars:\d+$/.test(KI.menu)) return { ad:yz('ortak.king-gorunum.arastirma') };
     if(KI.menu && KI.menu.id){ const k = KI.kayitBul(KI.menu.id); return { ad:k ? KI.kayitBasligi(k) : 'Kayıtlı sohbet', geri:'kayitlar' }; }
     return { ad:'' };
   }
@@ -519,7 +537,7 @@
     if(!KI.aracAcik) return '';
     const l = KI.ARACLAR.filter(a => !(KI.mini && a.is === 'isler') && (() => { try{ return a.kosul(); }catch(e){ return false; } })())
       .map(a => ({ is:KI.mini && /^kip:(kamera|ekran)$/.test(a.is) ? 'ada-' + a.is : a.is, ad:KISA_AD[a.is] || a.ad, uzun:a.ad, ip:a.ip, svg:ARAC_SVG[a.is] || '' }))
-      .concat(KI.mini ? [{ is:'buyut', ad:'Genişlet', uzun:'Genişlet', ip:'Geçmiş, kütüphane ve bütün araçlar', svg:YELPAZE_GENISLET }] : []);
+      .concat(KI.mini ? [{ is:'buyut', ad:yz('ortak.king-gorunum.genislet'), uzun:'Genişlet', ip:'Geçmiş, kütüphane ve bütün araçlar', svg:YELPAZE_GENISLET }] : []);
     const n = l.length, { R, r } = YAPRAK, rm = (R + r) / 2, d = Math.PI / 180;
     return '<div class="king__yelpaze" role="menu" aria-label="Araçlar" style="--n:' + n + '">'
       + '<div class="king__yelpaze-merkez" aria-hidden="true"><b>Araçlar</b><small>Birini seç</small></div>' + l.map((x, i) => {
@@ -611,7 +629,7 @@
     /* Boş sohbet = karşılama (söz 27; 2026-10-19 GPT gibi): ortada küre,
        selam, modülün kartları ve özeti, hazır cevaplar. İlk mesajla gider. */
     const kars = KI.akis.length ? { kartlar:[], satirlar:[] } : karsilama();
-    const oneriler = (KI.ortam.simdi().getDay() === 0 ? [{ ad:'Haftalık gözden geçirme', is:'oner-metin:haftalık gözden geçirme' }] : [])
+    const oneriler = (KI.ortam.simdi().getDay() === 0 ? [{ ad:yz('ortak.king-gorunum.haftalik-gozden-gecirme'), is:'oner-metin:haftalık gözden geçirme' }] : [])
       .concat(oneriListesi(false).filter(o => !(kars.kartlar.length && /istatistiklerim$/.test(o.is)))).slice(0, 2);
     const hazirlar = oneriler.map(o => '<button type="button" class="king__cip king__hazir" data-king="' + o.is + '">' + KI.kac(o.ad) + '</button>').join('')
       + KI.HAZIR.map((h, i) => ({ h, i })).filter(({ h }) => !(h.ozet && kars.satirlar.length)).sort((a, b) => (a.h.ozet - b.h.ozet)

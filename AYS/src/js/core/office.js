@@ -12,6 +12,82 @@
 
    Yetki: her ajan yalnizca kendi brifingini gorur; ham veriye erisemez.
    Gizlilik: LLM'e giden her nesne R.Tools.sanitize'dan gecer. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.office.en-riskli-konu':'En riskli konu ',
+  'ays.core.office.derslere-git':'Derslere git',
+  'ays.core.office.medyan-son-3':'Medyan (son 3)',
+  'ays.core.office.taban':'Taban',
+  'ays.core.office.son-4-denemenin-en-dusugu':'son 4 denemenin en düşüğü',
+  'ays.core.office.henuz-cozum-kaydi-yok-soru':'Henüz çözüm kaydı yok. Soru çöz ekranından bir soru çözdürünce ',
+  'ays.core.office.son-7-gunde':'Son 7 günde ',
+  'ays.core.office.cozdugun-sorularin':'Çözdüğün soruların %',
+  'ays.core.office.soru-coze-git':'Soru çöze git',
+  'ays.core.office.bugunun-konusundan-birkac-so':'Bugünün konusundan birkaç soru çöz ve kaynağını işaretle.',
+  'ays.core.office.i-lk-soruyu-cozdur-konu-ve':'İlk soruyu çözdür: konu ve zorluk kendiliğinden kayda geçer.',
+  'ays.core.office.son-7-gun':'Son 7 gün',
+  'ays.core.office.toplam':'toplam ',
+  'ays.core.office.kendi-cozdugun':'Kendi çözdüğün',
+  'ays.core.office.cozume-baktim-sayilmaz':'"çözüme baktım" sayılmaz',
+  'ays.core.office.ortalama-zorluk':'Ortalama zorluk',
+  'ays.core.office.1-kolay-5-zor':'1 kolay · 5 zor',
+  'ays.core.office.hafta':'Hafta ',
+  'ays.core.office.son-7-gunun-uyku-ortalamasi':'Son 7 günün uyku ortalaması ',
+  'ays.core.office.uyku-ortalamasi':'Uyku ortalaması ',
+  'ays.core.office.bu-hafta-en-sik-atlama':'Bu hafta en sık atlama nedeni "',
+  'ays.core.office.davranis-serisi':'Davranış serisi ',
+  'ays.core.office.enerji-ortalamasi':'Enerji ortalaması ',
+  'ays.core.office.plan-sagligi':'Plan sağlığı: ',
+  'ays.core.office.haftalik-sozlesmeyi-gozden-g':'Haftalık sözleşmeyi gözden geçir: kapasitenin üstünde yük varsa tek konuyu devret.',
+  'ays.core.office.haftaya-git':'Haftaya git',
+  'ays.core.office.bugunun-akisinda-eksik-kalan':'Bugünün akışında eksik kalan adımı tamamla.',
+  'ays.core.office.bugune-git':'Bugüne git',
+  'ays.core.office.plan-tamamlama':'Plan tamamlama',
+  'ays.core.office.hedef-85':'hedef %85',
+  'ays.core.office.uyku-7-gun':'Uyku (7 gün)',
+  'ays.core.office.hedef':'hedef ',
+  'ays.core.office.davranis-serisi-2':'Davranış serisi',
+  'ays.core.office.hata-dagiliminda-ilk-sirada':'Hata dağılımında ilk sırada ',
+  'ays.core.office.yanlis-defterinde-kayit-yok':'Yanlış defterinde kayıt yok; hata dağılımı hesaplanamıyor.',
+  'ays.core.office.tekrar-borcu':'Tekrar borcu %',
+  'ays.core.office.risk-siralamasinin-basinda':'Risk sıralamasının başında ',
+  'ays.core.office.tahmini-sira-bandi':'Tahmini sıra bandı ',
+  'ays.core.office.sira-tahmini-icin-yeterli-ka':'Sıra tahmini için yeterli kayıt yok: ',
+  'ays.core.office.en-eski-analiz-borcunu-kapat':'En eski analiz borcunu kapat; ölçüm ancak analizle değer kazanır.',
+  'ays.core.office.denemelere-git':'Denemelere git',
+  'ays.core.office.gecikmis-kartlari-sadelestir':'Gecikmiş kartları sadeleştir, sonra yeni kart üret.',
+  'ays.core.office.tekrara-git':'Tekrara git',
+  'ays.core.office.hata-dagiliminin-ilk-etiketi':'Hata dağılımının ilk etiketine bir blok ayır.',
+  'ays.core.office.analize-git':'Analize git',
+  'ays.core.office.analiz-borcu':'Analiz borcu',
+  'ays.core.office.tekrar-borcu-2':'Tekrar borcu',
+  'ays.core.office.acik-yanlis':'Açık yanlış',
+  'ays.core.office.hafta-2':'Hafta',
+  'ays.core.office.odak':'Odak',
+  'ays.core.office.sira-bandi':'Sıra bandı',
+  'ays.core.office.simdi-yap':'Şimdi yap',
+  'ays.core.office.bugun':'Bugün',
+  'ays.core.office.bugunun-akisini-tamamla':'Bugünün akışını tamamla',
+  'ays.core.office.olcum-icin-once-duzenli-kayi':'Ölçüm için önce düzenli kayıt gerekir.',
+  'ays.core.office.notlar-json-n':'NOTLAR (JSON):\n',
+  'ays.core.office.hafta-bitiyor-planlanan-ile':'Hafta bitiyor. Planlanan ile gerçekleşen arasındaki farkı ekip birlikte okur.',
+  'ays.core.office.ayda-bir-netlerinin-ortasi-h':'Ayda bir, netlerinin ortası hedef aralığın neresinde ona bakılır ve tek bir değişiklik seçilir.',
+  'ays.core.office.analiz-edilmemis-deneme-olcu':'Analiz edilmemiş deneme ölçüm sayılmaz; ekip bu borcu konuşmadan başka karar veremez.',
+  'ays.core.office.i-ki-hafta-ust-uste-80':'İki hafta üst üste %80 altı telafi tetikler; nedeni davranışta mı yükte mi ayrılmalı.',
+  'ays.core.office.dusus-tek-denemeden-degil-me':'Düşüş tek denemeden değil medyandan geliyor; kaynağı konu mu süre mi diye ayrılmalı.',
+  'ays.core.office.uyku-bellek-pekismesinin-par':'Uyku bellek pekişmesinin parçası; hacim tartışmasından önce bu konuşulur.',
+  'ays.core.office.borc-esigi-asildi-yeni-kart':'Borç eşiği aşıldı; yeni kart üretimi azaltılmadan önce ekip sırayı belirlemeli.',
+  'ays.core.office.alan-derslerinde-dusus-siral':'Alan derslerinde düşüş sıralamaya doğrudan yansır.',
+  'ays.core.office.kapanmamis-konu-net-uretmez':'Kapanmamış konu net üretmez; hangi dersin öne alınacağı ekip kararıdır.',
+  'ays.core.office.risk-siralamasinin-basindaki':'Risk sıralamasının başındaki konu haftanın hedefini belirler.',
+  'ays.core.office.acil-bir-baslik-yok-ekip':'Acil bir başlık yok; ekip düzenli gözden geçirme yapar.',
+  'ays.core.office.durum-tespiti':'Durum tespiti',
+  'ays.core.office.fikir-turu':'Fikir turu',
+  'ays.core.office.i-tiraz-turu':'İtiraz turu',
+  'ays.core.office.oylama-turu':'Oylama turu',
+  'ays.core.office.toparlama-turu':'Toparlama turu',
+  'ays.core.office.sen':'Sen',
+});
+
 
 window.R = window.R || {};
 
@@ -212,14 +288,14 @@ R.Office = (function(){
 
     if(risks.length){
       findings.push({ tone:'warn',
-        text:'En riskli konu ' + risks[0].konu + ' (' + risks[0].ders + ', risk '
+        text:yz('ays.core.office.en-riskli-konu') + risks[0].konu + ' (' + risks[0].ders + ', risk '
           + risks[0].risk + '/100).' });
     }
 
     const suggestion = risks.length
       ? { text:risks[0].konu + ' konusuna dön: ' + risks[0].ders + ' içinde en yüksek riskli başlık.',
-          route:'subjects', label:'Derslere git' }
-      : { text:(weakest ? weakest.ders : family) + ' kapanışını ilerlet.', route:'subjects', label:'Derslere git' };
+          route:'subjects', label:yz('ays.core.office.derslere-git') }
+      : { text:(weakest ? weakest.ders : family) + ' kapanışını ilerlet.', route:'subjects', label:yz('ays.core.office.derslere-git') };
 
     return {
       agent:agent.id, name:agent.name, role:agent.role,
@@ -228,10 +304,10 @@ R.Office = (function(){
       metrics:[
         { label:family + ' kapanış', value:'%' + closure.pct, tone:tone(closure.pct, 70, 40),
           note:closure.closed + '/' + closure.total + ' konu' },
-        { label:'Medyan (son 3)', value:trend.last3 == null ? '—' : U.fmtNet(trend.last3),
+        { label:yz('ays.core.office.medyan-son-3'), value:trend.last3 == null ? '—' : U.fmtNet(trend.last3),
           tone:trend.delta == null ? 'muted' : trend.delta >= 0 ? 'ok' : 'danger',
           note:trend.delta == null ? trend.count + ' deneme' : (trend.delta >= 0 ? '+' : '') + U.fmtNet(trend.delta) },
-        { label:'Taban', value:base == null ? '—' : U.fmtNet(base), tone:'muted', note:'son 4 denemenin en düşüğü' },
+        { label:yz('ays.core.office.taban'), value:base == null ? '—' : U.fmtNet(base), tone:'muted', note:yz('ays.core.office.son-4-denemenin-en-dusugu') },
       ],
       findings,
       suggestion,
@@ -275,15 +351,15 @@ R.Office = (function(){
       const findings = [];
       if(!sum.toplam){
         findings.push({ tone:'muted',
-          text:'Henüz çözüm kaydı yok. Soru çöz ekranından bir soru çözdürünce '
+          text:yz('ays.core.office.henuz-cozum-kaydi-yok-soru')
              + 'bu masa dolmaya başlar.' });
       }else{
         findings.push({ tone:haftalik >= 20 ? 'ok' : 'warn',
-          text:'Son 7 günde ' + haftalik + ' soru çözüldü; toplam ' + sum.toplam + ' kayıt var.' });
+          text:yz('ays.core.office.son-7-gunde') + haftalik + ' soru çözüldü; toplam ' + sum.toplam + ' kayıt var.' });
       }
       if(sum.cozumOrani != null){
         findings.push({ tone:tone(sum.cozumOrani, 60, 40),
-          text:'Çözdüğün soruların %' + sum.cozumOrani + ' tanesini kendin çözdün; '
+          text:yz('ays.core.office.cozdugun-sorularin') + sum.cozumOrani + ' tanesini kendin çözdün; '
              + 'gerisinde çözüme baktın ya da yanlış yaptın.' });
       }
       if(zayif && zayif.yuzde < 50){
@@ -309,12 +385,12 @@ R.Office = (function(){
       const suggestion = zayif && zayif.yuzde < 50
         ? { text:zayif.topicName + ' konusundan çözüme bakmadan 5 soru dene; '
               + 'bakarak çözmek bu konuyu kapatmıyor.',
-            route:'solve', label:'Soru çöze git' }
+            route:'solve', label:yz('ays.core.office.soru-coze-git') }
         : (sum.toplam
-            ? { text:'Bugünün konusundan birkaç soru çöz ve kaynağını işaretle.',
-                route:'solve', label:'Soru çöze git' }
-            : { text:'İlk soruyu çözdür: konu ve zorluk kendiliğinden kayda geçer.',
-                route:'solve', label:'Soru çöze git' });
+            ? { text:yz('ays.core.office.bugunun-konusundan-birkac-so'),
+                route:'solve', label:yz('ays.core.office.soru-coze-git') }
+            : { text:yz('ays.core.office.i-lk-soruyu-cozdur-konu-ve'),
+                route:'solve', label:yz('ays.core.office.soru-coze-git') });
 
       return {
         agent:agent.id, name:agent.name, role:agent.role,
@@ -322,13 +398,13 @@ R.Office = (function(){
           ? sum.toplam + ' soru · %' + (sum.cozumOrani == null ? '—' : sum.cozumOrani) + ' kendi çözümün'
           : 'Henüz çözüm kaydı yok',
         metrics:[
-          { label:'Son 7 gün', value:haftalik + ' soru', tone:haftalik >= 20 ? 'ok' : 'warn',
-            note:'toplam ' + sum.toplam },
-          { label:'Kendi çözdüğün', value:sum.cozumOrani == null ? '—' : '%' + sum.cozumOrani,
+          { label:yz('ays.core.office.son-7-gun'), value:haftalik + ' soru', tone:haftalik >= 20 ? 'ok' : 'warn',
+            note:yz('ays.core.office.toplam') + sum.toplam },
+          { label:yz('ays.core.office.kendi-cozdugun'), value:sum.cozumOrani == null ? '—' : '%' + sum.cozumOrani,
             tone:sum.cozumOrani == null ? 'muted' : tone(sum.cozumOrani, 60, 40),
-            note:'"çözüme baktım" sayılmaz' },
-          { label:'Ortalama zorluk', value:sum.ortZorluk == null ? '—' : sum.ortZorluk,
-            tone:'muted', note:'1 kolay · 5 zor' },
+            note:yz('ays.core.office.cozume-baktim-sayilmaz') },
+          { label:yz('ays.core.office.ortalama-zorluk'), value:sum.ortZorluk == null ? '—' : sum.ortZorluk,
+            tone:'muted', note:yz('ays.core.office.1-kolay-5-zor') },
         ],
         findings,
         suggestion,
@@ -383,42 +459,42 @@ R.Office = (function(){
       const findings = [];
       if(comp != null){
         findings.push({ tone:tone(comp, 85, 70),
-          text:'Hafta ' + n + ' plan tamamlaması %' + comp + (comp < 85 ? ' — hedef %85’in altında.' : '.') });
+          text:yz('ays.core.office.hafta') + n + ' plan tamamlaması %' + comp + (comp < 85 ? ' — hedef %85’in altında.' : '.') });
       }
       if(sleep != null && sleep < target - 0.75){
         findings.push({ tone:'danger',
-          text:'Son 7 günün uyku ortalaması ' + U.fmtNet(sleep) + ' saat; hedefin '
+          text:yz('ays.core.office.son-7-gunun-uyku-ortalamasi') + U.fmtNet(sleep) + ' saat; hedefin '
             + U.fmtNet(target - sleep) + ' saat altında.' });
       }else if(sleep != null){
-        findings.push({ tone:'ok', text:'Uyku ortalaması ' + U.fmtNet(sleep) + ' saat, hedefin içinde.' });
+        findings.push({ tone:'ok', text:yz('ays.core.office.uyku-ortalamasi') + U.fmtNet(sleep) + ' saat, hedefin içinde.' });
       }
       if(topReason){
         findings.push({ tone:'warn',
-          text:'Bu hafta en sık atlama nedeni "' + topReason.neden + '" (' + topReason.adet + ' blok).' });
+          text:yz('ays.core.office.bu-hafta-en-sik-atlama') + topReason.neden + '" (' + topReason.adet + ' blok).' });
       }
       findings.push({ tone:streak.streak >= 3 ? 'ok' : 'warn',
-        text:'Davranış serisi ' + streak.streak + ' gün; bugünün akışında '
+        text:yz('ays.core.office.davranis-serisi') + streak.streak + ' gün; bugünün akışında '
           + flow.done + '/' + flow.total + ' adım tamam.' });
       if(energy != null && energy <= 2.5){
-        findings.push({ tone:'warn', text:'Enerji ortalaması ' + U.fmtNet(energy) + '/5 — yük fazla gelmiş olabilir.' });
+        findings.push({ tone:'warn', text:yz('ays.core.office.enerji-ortalamasi') + U.fmtNet(energy) + '/5 — yük fazla gelmiş olabilir.' });
       }
       if(health && health.status && health.status !== 'ok'){
-        findings.push({ tone:'warn', text:'Plan sağlığı: ' + (health.note || health.status) + '' });
+        findings.push({ tone:'warn', text:yz('ays.core.office.plan-sagligi') + (health.note || health.status) + '' });
       }
 
       const suggestion = (comp != null && comp < 85)
-        ? { text:'Haftalık sözleşmeyi gözden geçir: kapasitenin üstünde yük varsa tek konuyu devret.',
-            route:'week', label:'Haftaya git' }
-        : { text:'Bugünün akışında eksik kalan adımı tamamla.', route:'today', label:'Bugüne git' };
+        ? { text:yz('ays.core.office.haftalik-sozlesmeyi-gozden-g'),
+            route:'week', label:yz('ays.core.office.haftaya-git') }
+        : { text:yz('ays.core.office.bugunun-akisinda-eksik-kalan'), route:'today', label:yz('ays.core.office.bugune-git') };
 
       return {
         agent:agent.id, name:agent.name, role:agent.role,
         headline:'Plan %' + (comp == null ? '—' : comp) + ' · seri ' + streak.streak + ' gün',
         metrics:[
-          { label:'Plan tamamlama', value:comp == null ? '—' : '%' + comp, tone:tone(comp, 85, 70), note:'hedef %85' },
-          { label:'Uyku (7 gün)', value:sleep == null ? '—' : U.fmtNet(sleep) + ' sa',
-            tone:sleep == null ? 'muted' : sleep >= target - 0.75 ? 'ok' : 'danger', note:'hedef ' + U.fmtNet(target) },
-          { label:'Davranış serisi', value:streak.streak + ' gün', tone:streak.streak >= 3 ? 'ok' : 'warn',
+          { label:yz('ays.core.office.plan-tamamlama'), value:comp == null ? '—' : '%' + comp, tone:tone(comp, 85, 70), note:yz('ays.core.office.hedef-85') },
+          { label:yz('ays.core.office.uyku-7-gun'), value:sleep == null ? '—' : U.fmtNet(sleep) + ' sa',
+            tone:sleep == null ? 'muted' : sleep >= target - 0.75 ? 'ok' : 'danger', note:yz('ays.core.office.hedef') + U.fmtNet(target) },
+          { label:yz('ays.core.office.davranis-serisi-2'), value:streak.streak + ' gün', tone:streak.streak >= 3 ? 'ok' : 'warn',
             note:C.minimumDayMet() ? 'bugün tutuldu' : 'bugün henüz yok' },
         ],
         findings,
@@ -464,45 +540,45 @@ R.Office = (function(){
       if(pareto.length){
         const top = pareto[0];
         findings.push({ tone:'warn',
-          text:'Hata dağılımında ilk sırada ' + R.ERROR_TAGS[top.tag].name + ' var: '
+          text:yz('ays.core.office.hata-dagiliminda-ilk-sirada') + R.ERROR_TAGS[top.tag].name + ' var: '
             + top.count + ' kayıt (%' + top.pct + ').' });
       }else{
-        findings.push({ tone:'info', text:'Yanlış defterinde kayıt yok; hata dağılımı hesaplanamıyor.' });
+        findings.push({ tone:'info', text:yz('ays.core.office.yanlis-defterinde-kayit-yok') });
       }
       if(cardDebt > 10){
         findings.push({ tone:'warn',
-          text:'Tekrar borcu %' + cardDebt + ' (' + overdue.length + ' gecikmiş kart); eşik %10.' });
+          text:yz('ays.core.office.tekrar-borcu') + cardDebt + ' (' + overdue.length + ' gecikmiş kart); eşik %10.' });
       }
       if(risks.length){
         findings.push({ tone:'warn',
-          text:'Risk sıralamasının başında ' + risks[0].topicName + ' (' + risks[0].subjectName
+          text:yz('ays.core.office.risk-siralamasinin-basinda') + risks[0].topicName + ' (' + risks[0].subjectName
             + ') var, risk ' + risks[0].score + '/100.' });
       }
       if(est.ok){
         findings.push({ tone:'info',
-          text:'Tahmini sıra bandı ' + U.fmtNum(est.rankBest) + '–' + U.fmtNum(est.rankWorst)
+          text:yz('ays.core.office.tahmini-sira-bandi') + U.fmtNum(est.rankBest) + '–' + U.fmtNum(est.rankWorst)
             + ' (' + est.samples + ' denemeden, koçluk bandı).' });
       }else{
-        findings.push({ tone:'info', text:'Sıra tahmini için yeterli kayıt yok: ' + est.why });
+        findings.push({ tone:'info', text:yz('ays.core.office.sira-tahmini-icin-yeterli-ka') + est.why });
       }
 
       const suggestion = debt.length
-        ? { text:'En eski analiz borcunu kapat; ölçüm ancak analizle değer kazanır.',
-            route:'exams', label:'Denemelere git' }
+        ? { text:yz('ays.core.office.en-eski-analiz-borcunu-kapat'),
+            route:'exams', label:yz('ays.core.office.denemelere-git') }
         : (cardDebt > 10
-          ? { text:'Gecikmiş kartları sadeleştir, sonra yeni kart üret.', route:'cards', label:'Tekrara git' }
-          : { text:'Hata dağılımının ilk etiketine bir blok ayır.', route:'analytics', label:'Analize git' });
+          ? { text:yz('ays.core.office.gecikmis-kartlari-sadelestir'), route:'cards', label:yz('ays.core.office.tekrara-git') }
+          : { text:yz('ays.core.office.hata-dagiliminin-ilk-etiketi'), route:'analytics', label:yz('ays.core.office.analize-git') });
 
       return {
         agent:agent.id, name:agent.name, role:agent.role,
         headline:(debt.length ? debt.length + ' analiz borcu' : 'Analiz borcu yok')
           + ' · kapanış %' + closure.pct,
         metrics:[
-          { label:'Analiz borcu', value:String(debt.length), tone:debt.length ? 'danger' : 'ok',
+          { label:yz('ays.core.office.analiz-borcu'), value:String(debt.length), tone:debt.length ? 'danger' : 'ok',
             note:debt.length ? 'en geç 24 saatte' : 'temiz' },
-          { label:'Tekrar borcu', value:'%' + cardDebt, tone:cardDebt > 10 ? 'warn' : 'ok',
+          { label:yz('ays.core.office.tekrar-borcu-2'), value:'%' + cardDebt, tone:cardDebt > 10 ? 'warn' : 'ok',
             note:due.length + ' kart bugün' },
-          { label:'Açık yanlış', value:String(open.length), tone:open.length >= 10 ? 'warn' : 'muted',
+          { label:yz('ays.core.office.acik-yanlis'), value:String(open.length), tone:open.length >= 10 ? 'warn' : 'muted',
             note:pareto.length ? 'ilk etiket ' + pareto[0].tag : 'kayıt yok' },
         ],
         findings,
@@ -566,16 +642,16 @@ R.Office = (function(){
         agent:agent.id, name:agent.name, role:agent.role,
         headline:action.title,
         metrics:[
-          { label:'Hafta', value:n + '/' + R.PLAN.totalWeeks, tone:'muted',
+          { label:yz('ays.core.office.hafta-2'), value:n + '/' + R.PLAN.totalWeeks, tone:'muted',
             note:U.diffDays(U.todayISO(), R.PLAN.examTytISO) + ' gün kaldı' },
-          { label:'Odak', value:action.label || 'Bugün', tone:action.tone === 'urgent' ? 'danger' : 'ok',
+          { label:yz('ays.core.office.odak'), value:action.label || 'Bugün', tone:action.tone === 'urgent' ? 'danger' : 'ok',
             note:action.title },
-          { label:'Sıra bandı', value:est.ok ? U.fmtNum(est.rankBest) + '–' + U.fmtNum(est.rankWorst) : '—',
+          { label:yz('ays.core.office.sira-bandi'), value:est.ok ? U.fmtNum(est.rankBest) + '–' + U.fmtNum(est.rankWorst) : '—',
             tone:'muted', note:est.ok ? est.meta.label : 'yeterli deneme yok' },
         ],
         findings,
         suggestion:{ text:action.title + ' — ' + action.why, route:action.route || 'today',
-          label:'Şimdi yap' },
+          label:yz('ays.core.office.simdi-yap') },
         data,
       };
     },
@@ -763,8 +839,8 @@ R.Office = (function(){
   /* nextAction() veri yokken null donebilir; ofis her zaman bir is gosterir. */
   function nextAction(){
     return C.nextAction() || {
-      key:'today', icon:'today', label:'Bugün', title:'Bugünün akışını tamamla',
-      why:'Ölçüm için önce düzenli kayıt gerekir.', route:'today', tone:'calm',
+      key:'today', icon:'today', label:yz('ays.core.office.bugun'), title:yz('ays.core.office.bugunun-akisini-tamamla'),
+      why:yz('ays.core.office.olcum-icin-once-duzenli-kayi'), route:'today', tone:'calm',
     };
   }
 
@@ -1137,7 +1213,7 @@ R.Office = (function(){
     const ctx = R.Tools.sanitize(noteContext(noteId));
     const res = await R.LLM.complete(chain, {
       system:cfg.system + '\nEn fazla ' + cfg.max + ' kart üret.',
-      messages:[{ role:'user', text:'NOTLAR (JSON):\n' + JSON.stringify(ctx, null, 1) }],
+      messages:[{ role:'user', text:yz('ays.core.office.notlar-json-n') + JSON.stringify(ctx, null, 1) }],
       maxTokens:BUDGET.cards,
       temperature:0.2,
       signal:o.signal,
@@ -1384,7 +1460,7 @@ R.Office = (function(){
        sozlesme degil GERCEKLESEN konusulur. */
     if(U.weekdayIndex(U.today()) === 6){
       out.push({ score:92, topic:'Haftanın kapanışı',
-        why:'Hafta bitiyor. Planlanan ile gerçekleşen arasındaki farkı ekip birlikte okur.',
+        why:yz('ays.core.office.hafta-bitiyor-planlanan-ile'),
         data:{ hafta:n, tamamlama:comp, soruGerceklesme:C.questionRealization(n),
           atlamaNedenleri:C.skipReasonCounts(n),
           devir:(S.reviews[M.weekId(n)] || {}).carry || null } });
@@ -1392,53 +1468,53 @@ R.Office = (function(){
 
     if(gate && !decided){
       out.push({ score:95, topic:'Bu ayın değerlendirmesi',
-        why:'Ayda bir, netlerinin ortası hedef aralığın neresinde ona bakılır ve tek bir değişiklik seçilir.',
+        why:yz('ays.core.office.ayda-bir-netlerinin-ortasi-h'),
         data:{ ay:gate.month, tytBant:gate.tyt, tytGuvenli:gate.tytSafe, aytBant:gate.ayt,
           kural:gate.note, tytMedyan:num(tyt.last3), aytMedyan:num(ayt.last3) } });
     }
     if(debt.length){
       out.push({ score:90, topic:debt.length + ' denemenin analiz borcu',
-        why:'Analiz edilmemiş deneme ölçüm sayılmaz; ekip bu borcu konuşmadan başka karar veremez.',
+        why:yz('ays.core.office.analiz-edilmemis-deneme-olcu'),
         data:{ borc:debt.length, denemeler:debt.slice(0, 5).map(e => ({ tarih:e.date, tur:e.type })) } });
     }
     if(comp != null && comp < 80){
       out.push({ score:85, topic:'Plan tamamlaması %' + comp + ' — hedefin altında',
-        why:'İki hafta üst üste %80 altı telafi tetikler; nedeni davranışta mı yükte mi ayrılmalı.',
+        why:yz('ays.core.office.i-ki-hafta-ust-uste-80'),
         data:{ hafta:n, tamamlama:comp, atlamaNedenleri:C.skipReasonCounts(n) } });
     }
     if(tyt.delta != null && tyt.delta <= -1.5){
       out.push({ score:80, topic:'TYT medyanında ' + U.fmtNet(Math.abs(tyt.delta)) + ' net düşüş',
-        why:'Düşüş tek denemeden değil medyandan geliyor; kaynağı konu mu süre mi diye ayrılmalı.',
+        why:yz('ays.core.office.dusus-tek-denemeden-degil-me'),
         data:{ son3:num(tyt.last3), onceki3:num(tyt.prev3), fark:num(tyt.delta), taban:num(C.examBase('TYT')) } });
     }
     if(sleep != null && sleep < target - 1){
       out.push({ score:78, topic:'Uyku ortalaması ' + U.fmtNet(sleep) + ' saate düştü',
-        why:'Uyku bellek pekişmesinin parçası; hacim tartışmasından önce bu konuşulur.',
+        why:yz('ays.core.office.uyku-bellek-pekismesinin-par'),
         data:{ ortalama:num(sleep), hedef:target } });
     }
     if(cardDebt > 10){
       out.push({ score:70, topic:'Tekrar borcu %' + cardDebt,
-        why:'Borç eşiği aşıldı; yeni kart üretimi azaltılmadan önce ekip sırayı belirlemeli.',
+        why:yz('ays.core.office.borc-esigi-asildi-yeni-kart'),
         data:{ borc:cardDebt, gecikmis:C.overdueCards().length, due:C.dueCards().length } });
     }
     if(ayt.delta != null && ayt.delta <= -1.5){
       out.push({ score:68, topic:'AYT medyanında ' + U.fmtNet(Math.abs(ayt.delta)) + ' net düşüş',
-        why:'Alan derslerinde düşüş sıralamaya doğrudan yansır.',
+        why:yz('ays.core.office.alan-derslerinde-dusus-siral'),
         data:{ son3:num(ayt.last3), onceki3:num(ayt.prev3), fark:num(ayt.delta) } });
     }
     if(closure.pct < 55){
       out.push({ score:60, topic:'Konu kapanışı %' + closure.pct,
-        why:'Kapanmamış konu net üretmez; hangi dersin öne alınacağı ekip kararıdır.',
+        why:yz('ays.core.office.kapanmamis-konu-net-uretmez'),
         data:{ kapanan:closure.closed, toplam:closure.total, yuzde:closure.pct } });
     }
     if(risks.length){
       out.push({ score:50, topic:'En riskli konu: ' + risks[0].topicName,
-        why:'Risk sıralamasının başındaki konu haftanın hedefini belirler.',
+        why:yz('ays.core.office.risk-siralamasinin-basindaki'),
         data:{ ders:risks[0].subjectName, konu:risks[0].topicName, risk:risks[0].score,
           durum:risks[0].state, acikYanlis:risks[0].errors } });
     }
     out.push({ score:10, topic:'Haftanın genel durumu',
-      why:'Acil bir başlık yok; ekip düzenli gözden geçirme yapar.',
+      why:yz('ays.core.office.acil-bir-baslik-yok-ekip'),
       data:{ hafta:n, kapanis:closure.pct, planTamamlama:comp } });
 
     return out.sort((a, b) => b.score - a.score);
@@ -1460,18 +1536,18 @@ R.Office = (function(){
      `sentences` her turun uzunluk tavanidir. Toplanti sohbetten KISADIR:
      bes kisi sirayla dort cumle kurunca toplanti okunmaz hâle geliyordu. */
   const ROUNDS = [
-    { key:'durum',  title:'Durum tespiti', sentences:2,
+    { key:'durum',  title:yz('ays.core.office.durum-tespiti'), sentences:2,
       ask:'Kendi alanında bu konuyla ilgili gördüğün tek şeyi söyle.' },
-    { key:'fikir',  title:'Fikir turu', sentences:2,
+    { key:'fikir',  title:yz('ays.core.office.fikir-turu'), sentences:2,
       ask:'Ne yapılmasını öneriyorsun? Tek bir somut şey söyle — '
         + 'senden öncekilerin söylediğini tekrarlama.' },
-    { key:'itiraz', title:'İtiraz turu', sentences:2,
+    { key:'itiraz', title:yz('ays.core.office.i-tiraz-turu'), sentences:2,
       ask:'Masadaki fikirlerden biri senin alanında tutmuyorsa söyle, nedenini de. '
         + 'İtirazın yoksa hangisini desteklediğini bir cümlede söyle.' },
-    { key:'oylama', title:'Oylama turu', vote:true, sentences:2,
+    { key:'oylama', title:yz('ays.core.office.oylama-turu'), vote:true, sentences:2,
       ask:'Fikirlerden birini seç. Cümleye o fikrin NUMARASIYLA başla, sonra tek '
         + 'cümlede neden onu seçtiğini söyle. Kendi fikrini de seçebilirsin.' },
-    { key:'sentez', title:'Toparlama turu', sentences:2,
+    { key:'sentez', title:yz('ays.core.office.toparlama-turu'), sentences:2,
       ask:'Bu işin sana düşen kısmı ne? Tek cümlede söyle.' },
   ];
 
@@ -1736,7 +1812,7 @@ R.Office = (function(){
   /* Kullanici soz alir: konusma kaydina girer, sonraki ajanlar bunu gorur. */
   function userTurn(session, text){
     const turn = {
-      agent:'aday', name:'Sen', role:'aday', text:String(text || '').trim(),
+      agent:'aday', name:yz('ays.core.office.sen'), role:'aday', text:String(text || '').trim(),
       warnings:[], mode:'kullanici', round:session.round, roundTitle:'Söz aldın',
     };
     if(!turn.text) return null;

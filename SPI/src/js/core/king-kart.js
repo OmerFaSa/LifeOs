@@ -4,6 +4,32 @@
 /* KING · kartlar: araç vitrini, kartlarım, kütüphane, soru kartları, araştırma kartı, biçim.
    Parça 5/8; yükleme sırası: king.js, king-ses.js, king-kayit.js, king-gorunum.js, king-kart.js, king-arac.js, king-devrim.js, king-yol.js.
    Dosyalar arası ortak adlar ve ortak durum window.LIFEOS.KING_IC'tedir (KI.ad). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.king-kart.kart-ve-soru':'Kart ve soru',
+  'ortak.king-kart.arastir-ve-oku':'Araştır ve oku',
+  'ortak.king-kart.gor':'Gör',
+  'ortak.king-kart.planla-ve-takip-et':'Planla ve takip et',
+  'ortak.king-kart.kaydet':'Kaydet',
+  'ortak.king-kart.rutin-ve-hafiza':'Rutin ve hafıza',
+  'ortak.king-kart.arac-kutusu':'Araç kutusu',
+  'ortak.king-kart.yazi-ve-dil':'Yazı ve dil',
+  'ortak.king-kart.sistem':'Sistem',
+  'ortak.king-kart.simdi':'Şimdi',
+  'ortak.king-kart.kendi-kartlarim':'Kendi kartlarım',
+  'ortak.king-kart.sohbetler':'Sohbetler',
+  'ortak.king-kart.derslerim':'Derslerim',
+  'ortak.king-kart.sesli-ozetler':'Sesli özetler',
+  'ortak.king-kart.videolar':'Videolar',
+  'ortak.king-kart.okumalar':'Okumalar',
+  'ortak.king-kart.gorseller':'Görseller',
+  'ortak.king-kart.arastirmalar':'Araştırmalar',
+  'ortak.king-kart.sirada':'Sırada',
+  'ortak.king-kart.tumu':'Tümü',
+  'ortak.king-kart.bir-soru-daha':'Bir soru daha',
+  'ortak.king-kart.konuyu-yeniden-anlat':'Konuyu yeniden anlat',
+  'ortak.king-kart.geri-al':'Geri al',
+});
+
 
 (function(){
   'use strict';
@@ -28,7 +54,7 @@
     const sec = KI.ARACLAR.filter(a => { try{ return a.kosul(); }catch(e){ return false; } });
     const ek = id => { const a = sec.find(x => x.is === id); return a ? s(a.ad, a.ip, { is:a.is }) : null; };
     const gruplar = [
-      { ad:'Kart ve soru', l:[
+      { ad:yz('ortak.king-kart.kart-ve-soru'), l:[
         fn('ders') && s('Konu anlat', 'Modülün anlatımı bölüm bölüm; sonunda soru', { doldur:String(K.dersOrnek || 'bu konuyu anlat') }),
         fn('istatistik') && s('İstatistik kartları', 'Modülün sayıları kart olarak', { calis:'istatistiklerim' }),
         fn('soru') && s('Bana soru sor', 'Modülün bankasından soru kartı; şıklar düğme', { calis:'bana soru sor' }),
@@ -36,7 +62,7 @@
         fn('oncelik') && s('Neye çalışayım', 'Öncelik sırası ve nedeni', { calis:'neye çalışayım' }),
         fn('yuk') && s('Yük durumum', 'Son 7 gün ile önceki 7 gün', { calis:'yük durumum' }),
       ] },
-      { ad:'Araştır ve oku', l:[
+      { ad:yz('ortak.king-kart.arastir-ve-oku'), l:[
         s('Araştır', 'Kaynaklı özet, videolar, okunacaklar', { doldur:'fotosentezi araştır', merkez:true }),
         s('Arka planda araştır', 'Ekibe verilir, sen konuşmaya devam edersin', { doldur:'arka planda yapay zekâ tarihini araştır', merkez:true }),
         ek('pdf-sec'),
@@ -44,8 +70,8 @@
         s('Derse çevir', 'PDF ya da metinden kaynaklı ders ve sorular', { doldur:'derse çevir: ', merkez:true }),
         KI.kdDersler().length && s('Derslerimden soru', 'Kendi derslerinden, tekrar takvimiyle', { calis:'derslerimden soru sor' }),
       ] },
-      { ad:'Gör', l:[ek('foto-sec'), ek('kip:kamera'), ek('kip:ekran'), ek('ekran'), ek('barkod')] },
-      { ad:'Planla ve takip et', l:[
+      { ad:yz('ortak.king-kart.gor'), l:[ek('foto-sec'), ek('kip:kamera'), ek('kip:ekran'), ek('ekran'), ek('barkod')] },
+      { ad:yz('ortak.king-kart.planla-ve-takip-et'), l:[
         s('Bugünün özeti', 'Bu modülde bugün ne var', { hazir:KI.HAZIR.findIndex(h => h.ozet) }),
         s('Odak sayacı', 'Başlıkta kalan süre; bitince kaydet', { doldur:'25 dakika matematik çalışalım' }),
         s('Sesli özet', 'Bugünü sesli dinle; Kütüphane’de kalır', { calis:'sesli özet' }),
@@ -60,18 +86,18 @@
         s('Kişisel deney', 'Bir kuralı dene; önce ve sonra karşılaştırılır', { doldur:'deney başlat: her gün 10 dakika yürüyüş' }),
         KI.yetkiKatalog() && KI.yetkiKatalog().bekleyenler && s('Bekleyen öneriler', 'Onaylar’da bekleyenler', { calis:'bekleyen öneriler' }),
       ] },
-      { ad:'Kaydet', l:[
+      { ad:yz('ortak.king-kart.kaydet'), l:[
         KI.D() && s('Günlük', 'Anlattığın Defter’e günlük olur', { calis:'günlük yazalım' }),
         KI.D() && s('Deftere not', 'Tek satır not', { doldur:'deftere not: ' }),
       ] },
-      { ad:'Rutin ve hafıza', l:[
+      { ad:yz('ortak.king-kart.rutin-ve-hafiza'), l:[
         s('Beceri öğret', 'Tekrarlanan işi King üstlenir', { doldur:'her pazartesi bana deneme hatırlat', merkez:true }),
         s('Söz', 'Zamanı gelince nasıl geçtiğini sorar', { doldur:'yarın fizik sınavım var', merkez:true }),
         s('Ekip ne yapıyor', 'Arka plandaki işler', { calis:'ekip ne yapıyor', merkez:true }),
         s('Beni nasıl tanıyorsun', 'King’in seni tanıdığı her şey; sil ya da ekle', { is:'kisi' }),
         s('Kişilik envanteri', '20 cümle; sonuç senin sözün olur', { calis:'kişilik testi' }),
       ] },
-      { ad:'Araç kutusu', l:[
+      { ad:yz('ortak.king-kart.arac-kutusu'), l:[
         s('Hesapla', 'İşlem, yüzde, üs, parantez', { doldur:'hesapla: 1250*%18+40' }),
         s('Birim çevir', 'Uzunluk, kütle, hacim, süre, sıcaklık', { doldur:'5 km kaç mil' }),
         s('Gün hesapla', 'Kaç gün sonra hangi tarih', { doldur:'45 gün sonra hangi gün' }),
@@ -92,7 +118,7 @@
         s('Şifre üret', 'Güçlü, rastgele; cihazda üretilir', { calis:'şifre üret' }),
         s('Kart yap', 'Bir cümleyi Kartlarım’a ekle', { doldur:'kart yap: bugün ne öğrendim, birlikte değerlendirelim' }),
       ] },
-      { ad:'Yazı ve dil', l:[
+      { ad:yz('ortak.king-kart.yazi-ve-dil'), l:[
         s('Çevir', 'Herhangi bir dile', { doldur:'şunu İngilizceye çevir: ', merkez:true }),
         s('Özetle', 'Uzun metni üç maddede', { doldur:'şunu üç maddede özetle: ', merkez:true }),
         s('Basitçe anlat', 'Karışık bir şeyi sade dille', { doldur:'bunu basitçe açıkla: ', merkez:true }),
@@ -106,7 +132,7 @@
         s('Karşı görüş', 'Bir fikre en güçlü üç itiraz', { doldur:'şu fikre en güçlü üç itirazı yaz: ', merkez:true }),
         s('Soru-cevap kartları', 'Metinden beş soru ve cevabı', { doldur:'şu metinden beş soru-cevap kartı çıkar: ', merkez:true }),
       ] },
-      { ad:'Sistem', l:[
+      { ad:yz('ortak.king-kart.sistem'), l:[
         s('Bu sistemde ne var', 'Modüller, sayfalar ve araçlar', { calis:'bu sistemde ne var' }),
         s('Görünüm', 'Tema ve görünüm', { doldur:'koyu temaya geç' }),
         s('Düşünme', 'Derin, dengeli ya da hızlı', { doldur:'derin düşün', merkez:true }),
@@ -128,7 +154,7 @@
     const sistem = gruplar.pop();               // «Sistem» en sonda kalır
     const ozel = kartAyar().ozel.map(o => s(o.ad, 'Kendi kartın · ' + (o.gonder ? 'dokununca sorar' : 'yazı alanına koyar'),
       Object.assign({ ozel:o.id }, o.gonder ? { calis:o.metin } : { doldur:o.metin })));
-    return (simdi.length ? [{ ad:'Şimdi', l:simdi }] : []).concat(ozel.length ? [{ ad:'Kendi kartlarım', l:ozel }] : [], gruplar, modulGruplari, [sistem]);
+    return (simdi.length ? [{ ad:yz('ortak.king-kart.simdi'), l:simdi }] : []).concat(ozel.length ? [{ ad:yz('ortak.king-kart.kendi-kartlarim'), l:ozel }] : [], gruplar, modulGruplari, [sistem]);
   }
   /* ARAÇLAR SOHBETTE (kullanıcı, 2026-10-23: «araçlar kısmını sohbet ekranına
      gelen minik ikonlarla duran minik kutular şeklinde»). Raydaki Araçlar
@@ -416,10 +442,10 @@
      özetler, araştırmaların videoları ve okumaları (kayıtlı sohbetlerdekiler dahil),
      gönderdiğin fotoğrafların küçük kopyaları, Merkez sırası. Uydurma kayıt yok. */
   const KUT_BOLUM = [
-    { id:'sohbet', ad:'Sohbetler', renk:'mavi' }, { id:'ders', ad:'Derslerim', renk:'mor' },
-    { id:'ses', ad:'Sesli özetler', renk:'pembe' }, { id:'video', ad:'Videolar', renk:'kirmizi' },
-    { id:'okuma', ad:'Okumalar', renk:'turkuaz' }, { id:'gorsel', ad:'Görseller', renk:'turuncu' },
-    { id:'arastirma', ad:'Araştırmalar', renk:'yesil' }, { id:'sira', ad:'Sırada', renk:'gri' } ];
+    { id:'sohbet', ad:yz('ortak.king-kart.sohbetler'), renk:'mavi' }, { id:'ders', ad:yz('ortak.king-kart.derslerim'), renk:'mor' },
+    { id:'ses', ad:yz('ortak.king-kart.sesli-ozetler'), renk:'pembe' }, { id:'video', ad:yz('ortak.king-kart.videolar'), renk:'kirmizi' },
+    { id:'okuma', ad:yz('ortak.king-kart.okumalar'), renk:'turkuaz' }, { id:'gorsel', ad:yz('ortak.king-kart.gorseller'), renk:'turuncu' },
+    { id:'arastirma', ad:yz('ortak.king-kart.arastirmalar'), renk:'yesil' }, { id:'sira', ad:yz('ortak.king-kart.sirada'), renk:'gri' } ];
   const KT_SVG = {
     sohbet:'<path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 16.5h-7.5L7 20v-3.5H5A1.5 1.5 0 0 1 3.5 15V6.5A1.5 1.5 0 0 1 5 5z"/>',
     ders:'<path d="M2.5 9L12 4.5 21.5 9 12 13.5z"/><path d="M6.5 11v4.5c3 2 8 2 11 0V11"/>',
@@ -517,7 +543,7 @@
       + '<input class="king__ara kv-ara" type="search" data-king-ara-girdi placeholder="Kütüphanede ara" aria-label="Kütüphanede ara" autocomplete="off"/>'
       + '<button type="button" class="kv-dugme" data-king="klasor-yeni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Yeni klasör</button></header>'
       + (l.length > 1 ? '<div class="kt-filtre" role="group" aria-label="Süz">'
-        + [{ id:'hepsi', ad:'Tümü', n:toplam }].concat(l.map(b => ({ id:b.id, ad:b.ad, n:say(b.id), renk:b.renk }))).map(c => '<button type="button" class="kt-cip' + (f === c.id ? ' is-secili' : '') + '"'
+        + [{ id:'hepsi', ad:yz('ortak.king-kart.tumu'), n:toplam }].concat(l.map(b => ({ id:b.id, ad:b.ad, n:say(b.id), renk:b.renk }))).map(c => '<button type="button" class="kt-cip' + (f === c.id ? ' is-secili' : '') + '"'
           + (c.renk ? ' data-renk="' + c.renk + '"' : '') + ' data-king="kut-filtre:' + c.id + '" aria-pressed="' + (f === c.id) + '">'
           + (c.renk ? '<i class="kv-grup-nokta" aria-hidden="true"></i>' : '') + c.ad + '<small>' + c.n + '</small></button>').join('') + '</div>' : '')
       + (l.length ? l.filter(b => f === 'hepsi' || f === b.id).map((b, gi) => '<section class="kt-bolum" id="kut-' + b.id + '" data-renk="' + b.renk + '" style="--g:' + gi + '">'
@@ -533,7 +559,7 @@
   function kutDizin(){
     const v = kutVeri(), l = KUT_BOLUM.filter(b => v[b.id].length);
     return '<nav class="kv-dizin" aria-label="Kütüphane bölümleri">' + (l.length
-      ? [{ id:'hepsi', ad:'Tümü' }].concat(l).map(b => '<button type="button" class="kv-dizin-is' + (KI.kutFiltre === b.id ? ' is-secili' : '') + '"' + (b.renk ? ' data-renk="' + b.renk + '"' : '')
+      ? [{ id:'hepsi', ad:yz('ortak.king-kart.tumu') }].concat(l).map(b => '<button type="button" class="kv-dizin-is' + (KI.kutFiltre === b.id ? ' is-secili' : '') + '"' + (b.renk ? ' data-renk="' + b.renk + '"' : '')
         + ' data-king="kut-filtre:' + b.id + '"><i class="kv-grup-nokta" aria-hidden="true"></i><span>' + b.ad + '</span>' + (b.renk ? '<small>' + v[b.id].length + '</small>' : '') + '</button>').join('')
       : KI.yanBos('Henüz bir şey yok.')) + '</nav>';
   }
@@ -590,7 +616,7 @@
     if(m && m.soru && !m.soru.cevap && /^kd:/.test(m.soru.id)){
       const c = KI.kdCevapla(m, harf);
       if(!c) return null;
-      KI.cipler = [{ ad:'Bir soru daha', is:'oner-metin:derslerimden soru sor' }];
+      KI.cipler = [{ ad:yz('ortak.king-kart.bir-soru-daha'), is:'oner-metin:derslerimden soru sor' }];
       KI.sakla(); KI.ciz(false);
       if(KI.sesleMi()) KI.seslendir(c.isabet ? 'Doğru.' : 'Doğru cevap ' + c.dogru + '.');
       return c;
@@ -601,10 +627,10 @@
     if(!r || !r.dogru){ KI.soyle('Cevabı kaydedemedim; soruyu modülün kendi ekranında deneyebilirsin.'); return null; }
     m.soru.cevap = { harf, dogru:String(r.dogru), isabet:harf === r.dogru,
       cozum:(r.cozum || []).map(String).slice(0, 6), not:String(r.not || '') };
-    KI.cipler = [{ ad:'Bir soru daha', is:'soru-yeni:' + n }];
+    KI.cipler = [{ ad:yz('ortak.king-kart.bir-soru-daha'), is:'soru-yeni:' + n }];
     /* Öğretmen: yanlışta, bu konunun dersi sohbetteyse yeniden anlatmayı öner. */
     const dn = m.soru.cevap.isabet ? -1 : KI.dersBul(m.soru.sorgu);
-    if(dn >= 0) KI.cipler.unshift({ ad:'Konuyu yeniden anlat', is:'ders-tekrar:' + dn });
+    if(dn >= 0) KI.cipler.unshift({ ad:yz('ortak.king-kart.konuyu-yeniden-anlat'), is:'ders-tekrar:' + dn });
     KI.sakla();
     KI.ciz(false);
     if(KI.sesleMi()) KI.seslendir(m.soru.cevap.isabet ? 'Doğru.' : 'Doğru cevap ' + m.soru.cevap.dogru + '.');
@@ -950,7 +976,7 @@
     if(!r || !r.ok){ y.durum = 'bekliyor'; KI.soyle('Düzeltemedim: ' + ((r && r.why) || 'modül cevap vermedi') + '.'); return; }
     y.durum = 'yazildi';
     const ozet = (y.ad || 'Kayıt') + ' ' + sayiTr(r.once) + ' → ' + sayiTr(r.sonra) + ' dk';
-    if(typeof r.geriAl === 'function'){ KI.sonGeriAl = r.geriAl; KI.cipler = [{ is:'geri-al', ad:'Geri al' }]; }
+    if(typeof r.geriAl === 'function'){ KI.sonGeriAl = r.geriAl; KI.cipler = [{ is:'geri-al', ad:yz('ortak.king-kart.geri-al') }]; }
     eylemYaz({ arac:'duzelt', ozet, geriAl:r.geriAl, param:{ id:y.id, alan:'dk', deger:y.sonra } });
     KI.soyle('Düzelttim: ' + ozet + '.');
   }

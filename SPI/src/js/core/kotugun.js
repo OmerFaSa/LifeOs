@@ -11,6 +11,12 @@
      3. KÜÇÜK AKSİYONDUR: tek gün, tek kayıt, «Geri al» ile döner
         (AGENTS §1.9). Yalnız bugüne ve geleceğe konur; geçmiş gün
         sonradan «kötüydü» diye yeniden yazılmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.kotugun.gecmis-bir-gun-sonradan-kotu':'Geçmiş bir gün sonradan kötü gün yapılmaz.',
+  'spi.core.kotugun.bugun-zaten-kotu-gun-modunda':'Bugün zaten kötü gün modunda.',
+  'spi.core.kotugun.bu-gun-kotu-gun-modunda':'Bu gün kötü gün modunda değil.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -40,8 +46,8 @@ SP.KotuGun = (function(){
 
   async function ac(gunISO){
     const g = gunISO || U().todayISO();
-    if(g < U().todayISO()) return { ok:false, why:'Geçmiş bir gün sonradan kötü gün yapılmaz.' };
-    if(aktif(g)) return { ok:false, why:'Bugün zaten kötü gün modunda.' };
+    if(g < U().todayISO()) return { ok:false, why:yz('spi.core.kotugun.gecmis-bir-gun-sonradan-kotu') };
+    if(aktif(g)) return { ok:false, why:yz('spi.core.kotugun.bugun-zaten-kotu-gun-modunda') };
     kayit()[g] = { at:new Date().toISOString() };
     await kaydet();
     return { ok:true, gun:g };
@@ -49,7 +55,7 @@ SP.KotuGun = (function(){
 
   async function kapat(gunISO){
     const g = gunISO || U().todayISO();
-    if(!aktif(g)) return { ok:false, why:'Bu gün kötü gün modunda değil.' };
+    if(!aktif(g)) return { ok:false, why:yz('spi.core.kotugun.bu-gun-kotu-gun-modunda') };
     delete kayit()[g];
     await kaydet();
     return { ok:true, gun:g };

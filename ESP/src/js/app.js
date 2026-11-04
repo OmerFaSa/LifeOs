@@ -3,6 +3,69 @@
    Ekranlar birbirini tanımaz; hepsi bu kabuğun içinde yaşar ve yalnızca
    ESP.S'yi okur. Bir ekranın çizilirken hata vermesi diğerlerini kapatmaz:
    hata paneline düşer, kenar çubuğu açılmaya devam eder. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.app.bugunun-pratigi-girilmedi':'Bugünün pratiği girilmedi',
+  'esp.app.yedek-alma-zamani':'Yedek alma zamanı',
+  'esp.app.kayit-sorunu-var':'Kayıt sorunu var',
+  'esp.app.menu':'Menü',
+  'esp.app.sinir':'Sınır',
+  'esp.app.veriler-bu-cihazda-tutulur-h':'Veriler bu cihazda tutulur. Ham ses kaydı ve tam metin taslak hiçbir modele gönderilmez.',
+  'esp.app.derleme':'Derleme',
+  'esp.app.bu-derleme-kaydedilmemis-yer':'Bu derleme kaydedilmemiş yerel değişiklik içeriyor; ',
+  'esp.app.sistem':'Sistem',
+  'esp.app.acik':'Açık',
+  'esp.app.koyu':'Koyu',
+  'esp.app.profil':'Profil',
+  'esp.app.tema':'Tema',
+  'esp.app.animasyonlar':'Animasyonlar',
+  'esp.app.zemin':'Zemin',
+  'esp.app.minikler':'Minikler',
+  'esp.app.minik-boyu':'Minik boyu',
+  'esp.app.king-in-gorunusu':'King’in görünüşü',
+  'esp.app.ses-duzeyleri':'Ses düzeyleri',
+  'esp.app.yuzey-bu-modul':'Yüzey · bu modül',
+  'esp.app.manzara':'Manzara',
+  'esp.app.tema-bu-profile-kaydedilir-s':'Tema bu profile kaydedilir. «Sistem» seçiliyken cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.',
+  'esp.app.i-cerige-atla':'İçeriğe atla',
+  'esp.app.ekran-cizilemedi':'Ekran çizilemedi.',
+  'esp.app.bu-bolum-kapali-ayarlar':'Bu bölüm kapalı. Ayarlar → Bölümler\'den açabilirsin.',
+  'esp.app.seslendirilecek-bir-cevap-yo':'Seslendirilecek bir cevap yok',
+  'esp.app.eklendi-koc-sayisini-ve':'Eklendi — koç sayısını ve başlığını görür, içeriğini görmez',
+  'esp.app.dogrusu':'Doğrusu: ',
+  'esp.app.gun-kaydina-yazildi':'Gün kaydına yazıldı',
+  'esp.app.onaylandi-kural-motoru-uygul':'Onaylandı — kural motoru uyguladı',
+  'esp.app.reddedildi-bu-teklif-tekrar':'Reddedildi — bu teklif tekrar sorulmaz',
+  'esp.app.plan-kuruldu':'Plan kuruldu',
+  'esp.app.i-slendi-gun-kaydina-yazildi':'İşlendi — gün kaydına yazıldı',
+  'esp.app.yazilacak-alan-bulunamadi':'Yazılacak alan bulunamadı',
+  'esp.app.i-saretlendi-kayit-gecmiste':'İşaretlendi — kayıt geçmişte duruyor',
+  'esp.app.kapali':'kapalı',
+  'esp.app.kayit-durumu':'Kayıt durumu',
+  'esp.app.kapat':'Kapat',
+  'esp.app.rehbere-git':'Rehbere git',
+  'esp.app.geri-alindi':'Geri alındı',
+  'esp.app.geri-alinamadi':'Geri alınamadı',
+  'esp.app.yeni-rutbe':'Yeni rütbe — ',
+  'esp.app.bir-seyler-ters-gitti':'Bir şeyler ters gitti',
+  'esp.app.degisiklik-kaydedilemedi':'Değişiklik kaydedilemedi',
+  'esp.app.veriler-baska-bir-sekmede-de':'Veriler başka bir sekmede değişti. Kaybolmasın diye bu sayfayı tazele.',
+  'esp.app.kitap-ekle':'Kitap ekle',
+  'esp.app.kutuphaneye':'Kütüphaneye «',
+  'esp.app.veri-incelemesini-ac':'Veri incelemesini aç',
+  'esp.app.ofis-i-nceleme-acilacak-haft':'Ofis › İnceleme açılacak: haftanın sayıları, kayıttan karşılaştırmalar ve tek karar.',
+  'esp.app.i-ncelemeyi-actim-ofis-i-nce':'İncelemeyi açtım; Ofis › İnceleme ekranındasın.',
+  'esp.app.kitap-sayfasini-oku':'Kitap sayfasını oku',
+  'esp.app.calisma-suresi':'Çalışma süresi',
+  'esp.app.merdiven':'Merdiven',
+  'esp.app.uygulama-acilamadi':'Uygulama açılamadı.',
+  'esp.app.calisilan-gun-30-gun':'Çalışılan gün · 30 gün',
+  'esp.app.olculdu':'ölçüldü',
+  'esp.app.toplam-sure-30-gun':'Toplam süre · 30 gün',
+  'esp.app.en-cok-calisilan-alan':'En çok çalışılan alan',
+  'esp.app.hesaplandi':'hesaplandı',
+  'esp.app.biten-kitap-30-gun':'Biten kitap · 30 gün',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -136,13 +199,13 @@ ESP.App = (function(){
   function bildirimGruplari(){
     const esp = [];
     const d = S.days[U.todayISO()];
-    if(!d || !ESP.Model.dayHasEntry(d)) esp.push({ id:'pratik', metin:'Bugünün pratiği girilmedi', route:'today' });
+    if(!d || !ESP.Model.dayHasEntry(d)) esp.push({ id:'pratik', metin:yz('esp.app.bugunun-pratigi-girilmedi'), route:'today' });
     if(routeOn('lang')){
       const due = safe(() => ESP.SRS.dueCards().length, 0) || 0;
       if(due) esp.push({ id:'kart', metin:due + ' kartın vadesi geldi', route:'lang' });
     }
-    if(ESP.Model.backupDue && ESP.Model.backupDue()) esp.push({ id:'yedek', metin:'Yedek alma zamanı', route:'profile' });
-    if(S.storeHealth && S.storeHealth.error) esp.push({ id:'kayit', metin:'Kayıt sorunu var', act:'show-store-error', acil:true });
+    if(ESP.Model.backupDue && ESP.Model.backupDue()) esp.push({ id:'yedek', metin:yz('esp.app.yedek-alma-zamani'), route:'profile' });
+    if(S.storeHealth && S.storeHealth.error) esp.push({ id:'kayit', metin:yz('esp.app.kayit-sorunu-var'), act:'show-store-error', acil:true });
     const mer = [];
     const onay = onaySayisi();
     if(onay) mer.push({ id:'onay', metin:onay + ' öneri Onaylar’da bekliyor', route:'onaylar' });
@@ -338,7 +401,7 @@ ESP.App = (function(){
     /* Bandın Menü'sü ESP'nin kendi eylem adını taşır (`toggle-menu`):
        üst çubuktaki kabuk düğmesi `toggle-sidebar` der; ikisi aynı işi
        yapar, eski ad kaybolmaz (envanter tabanı). */
-    sekmeler.push({ id:'menu', ad:'Menü', act:'toggle-menu', on:false });
+    sekmeler.push({ id:'menu', ad:yz('esp.app.menu'), act:'toggle-menu', on:false });
     return K.altBant({ sekmeler });
   }
 
@@ -364,8 +427,8 @@ ESP.App = (function(){
     return html`
       <footer class="sayfasonu">
         <div class="wrapc sayfasonu__ic">
-          <p><span class="sitefoot__k">Sınır</span> ${ESP.PEDAGOGIC.disclaimer}</p>
-          <p>Veriler bu cihazda tutulur. Ham ses kaydı ve tam metin taslak hiçbir modele gönderilmez.</p>
+          <p><span class="sitefoot__k">${yz('esp.app.sinir')}</span> ${ESP.PEDAGOGIC.disclaimer}</p>
+          <p>${yz('esp.app.veriler-bu-cihazda-tutulur-h')}</p>
           ${raw(buildStampHtml())}
         </div>
       </footer>`;
@@ -380,9 +443,9 @@ ESP.App = (function(){
     const b = ESP.BUILD || {};
     if(!b.id) return '';
     return String(html`<p class="sitefoot__build">
-      <span class="sitefoot__k">Derleme</span>
+      <span class="sitefoot__k">${yz('esp.app.derleme')}</span>
       <span class="sitefoot__sha"${when(b.dirty, () => attrs({
-        title:'Bu derleme kaydedilmemiş yerel değişiklik içeriyor; '
+        title:yz('esp.app.bu-derleme-kaydedilmemis-yer')
           + 'bir commit\'e birebir karşılık gelmez.' }))}>${b.id}${when(b.dirty,
         () => html`<span aria-label="yerel değişiklikli">+</span>`)}</span>
       ${when(b.at, () => html`<span class="dim"> · ${b.at}</span>`)}
@@ -399,9 +462,9 @@ ESP.App = (function(){
      Seçim profile yazılır; yani cihaz değil KİŞİ hatırlanır ve hane
      profilleri arasında geçerken herkesin kendi görünümü gelir. */
   const THEMES = [
-    { id:'system', icon:'monitor', label:'Sistem' },
-    { id:'light',  icon:'sun',     label:'Açık' },
-    { id:'dark',   icon:'moon2',   label:'Koyu' },
+    { id:'system', icon:'monitor', label:yz('esp.app.sistem') },
+    { id:'light',  icon:'sun',     label:yz('esp.app.acik') },
+    { id:'dark',   icon:'moon2',   label:yz('esp.app.koyu') },
   ];
 
   /* «Animasyonlar» (Tam · Az · Sistem) ve «Zemin» (Yumusak · Sade) satirlari
@@ -422,29 +485,28 @@ ESP.App = (function(){
         <div class="appear__profil">
           <span class="ust__profil" aria-hidden="true">${(ad || 'Ben').charAt(0).toLocaleUpperCase('tr-TR')}</span>
           <span class="minw0"><b>${ad || 'Profil'}</b><small>${brandLine()}</small></span>
-          ${ESP.C.Button({ label:'Profil', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'profile' } })}
+          ${ESP.C.Button({ label:yz('esp.app.profil'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'profile' } })}
         </div>
-        <div class="appear__label">Tema</div>
+        <div class="appear__label">${yz('esp.app.tema')}</div>
         <div class="appear__themes">${ESP.C.TemaSecici({ value:theme, act:'set-theme' })}</div>
-        <div class="appear__label">Animasyonlar</div>
+        <div class="appear__label">${yz('esp.app.animasyonlar')}</div>
         ${raw(window.LIFEOS.ANIMASYON ? LIFEOS.ANIMASYON.seciciHtml() : '')}
-        <div class="appear__label">Zemin</div>
+        <div class="appear__label">${yz('esp.app.zemin')}</div>
         ${raw(window.LIFEOS.ZEMIN ? LIFEOS.ZEMIN.seciciHtml() : '')}
-        <div class="appear__label">Minikler</div>
+        <div class="appear__label">${yz('esp.app.minikler')}</div>
         ${raw(window.LIFEOS.MINIK ? LIFEOS.MINIK.seciciHtml() : '')}
-        <div class="appear__label">Minik boyu</div>
+        <div class="appear__label">${yz('esp.app.minik-boyu')}</div>
         ${raw(window.LIFEOS.MINIK && LIFEOS.MINIK.boySeciciHtml ? LIFEOS.MINIK.boySeciciHtml() : '')}
-        <div class="appear__label">King’in görünüşü</div>
+        <div class="appear__label">${yz('esp.app.king-in-gorunusu')}</div>
         ${raw(window.LIFEOS.KING && LIFEOS.KING.gorunusSeciciHtml ? LIFEOS.KING.gorunusSeciciHtml() : '')}
-        <div class="appear__label">Ses düzeyleri</div>
+        <div class="appear__label">${yz('esp.app.ses-duzeyleri')}</div>
         ${raw(window.LIFEOS.SES && LIFEOS.SES.duzeySeciciHtml ? LIFEOS.SES.duzeySeciciHtml() : '')}
-        <div class="appear__label">Yüzey · bu modül</div>
+        <div class="appear__label">${yz('esp.app.yuzey-bu-modul')}</div>
         ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.yuzeySeciciHtml ? LIFEOS.ZEMIN.yuzeySeciciHtml() : '')}
-        <div class="appear__label">Manzara</div>
+        <div class="appear__label">${yz('esp.app.manzara')}</div>
         ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.manzaraSeciciHtml ? LIFEOS.ZEMIN.manzaraSeciciHtml() : '')}
 
-        <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
-          cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>
+        <p class="appear__note">${yz('esp.app.tema-bu-profile-kaydedilir-s')}</p>
       </div>`);
   }
 
@@ -603,7 +665,7 @@ ESP.App = (function(){
          sayfa başı · bölüm çubuğu · ekran · sayfa sonu; telefonda alt bant
          ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
       const markup = String(html`
-        <a class="skiplink" href="#main">İçeriğe atla</a>
+        <a class="skiplink" href="#main">${yz('esp.app.i-cerige-atla')}</a>
         ${when(ornekAcik(), () => raw(LIFEOS.OrnekKip.filigranHtml()))}
         <div class="site site--v5">
           ${raw(safe(() => ustCubukHtml(sc)))}
@@ -674,7 +736,7 @@ ESP.App = (function(){
       console.error('Render hatası:', err);
       const govde = document.getElementById('app');
       if(govde) govde.innerHTML = String(html`<div class="wrapc content">
-        ${ESP.C.SakinHata({ baslik:'Ekran çizilemedi.', dugme:'Yeniden yükle',
+        ${ESP.C.SakinHata({ baslik:yz('esp.app.ekran-cizilemedi'), dugme:'Yeniden yükle',
           ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }finally{
@@ -688,7 +750,7 @@ ESP.App = (function(){
        kapattığı şeyi geri getirmiş gibi görünür. Sessizce Bugün'e düşer ve
        sebebini söyler. */
     if(ESP.Screens[route] && !routeOn(route)){
-      UI.toast('Bu bölüm kapalı. Ayarlar → Bölümler\'den açabilirsin.');
+      UI.toast(yz('esp.app.bu-bolum-kapali-ayarlar'));
       route = 'today';
     }
 
@@ -851,7 +913,7 @@ ESP.App = (function(){
 
     async 'desk-listen'(el){
       const res = ESP.Desk.speakLast(el.dataset.disc);
-      if(!res.ok) UI.toast('Seslendirilecek bir cevap yok');
+      if(!res.ok) UI.toast(yz('esp.app.seslendirilecek-bir-cevap-yo'));
       render();
     },
 
@@ -883,7 +945,7 @@ ESP.App = (function(){
       }));
       if(!res.ok){ UI.toast(res.error); return; }
       ESP.Memo.bitir();
-      UI.toast('Eklendi — koç sayısını ve başlığını görür, içeriğini görmez');
+      UI.toast(yz('esp.app.eklendi-koc-sayisini-ve'));
       render();
     },
 
@@ -1002,7 +1064,7 @@ ESP.App = (function(){
       const res = await ESP.Lesson.answer(s, '');
       S.ui.practiceShown = true;
       S.ui.practiceOrder = null;
-      if(res.ok) UI.toast('Doğrusu: ' + res.expected);
+      if(res.ok) UI.toast(yz('esp.app.dogrusu') + res.expected);
       render();
     },
 
@@ -1012,7 +1074,7 @@ ESP.App = (function(){
       const res = await ESP.Lesson.log(s);
       if(!res.ok){ UI.toast(res.error); return; }
       S.ui.practice = null;
-      UI.toast('Gün kaydına yazıldı');
+      UI.toast(yz('esp.app.gun-kaydina-yazildi'));
       render();
     },
 
@@ -1027,7 +1089,7 @@ ESP.App = (function(){
       const res = await ESP.Plans.accept(id);
       if(!res.ok){ UI.toast(res.error); return; }
       /* Uygulanan her is geri alinabilir (core/plans.js geriAl). */
-      UI.toast('Onaylandı — kural motoru uyguladı', { undo:async () => {
+      UI.toast(yz('esp.app.onaylandi-kural-motoru-uygul'), { undo:async () => {
         const g = await ESP.Plans.geriAl(id);
         UI.toast(g.ok ? 'Geri alındı' : g.error);
         render();
@@ -1045,13 +1107,13 @@ ESP.App = (function(){
     async 'prop-decline'(el){
       const res = await ESP.Plans.decline(el.dataset.id);
       if(!res.ok){ UI.toast(res.error); return; }
-      UI.toast('Reddedildi — bu teklif tekrar sorulmaz');
+      UI.toast(yz('esp.app.reddedildi-bu-teklif-tekrar'));
       render();
     },
 
     async 'plan-make'(){
       await ESP.Plans.savePlan(ESP.Plans.weekPlan());
-      UI.toast('Plan kuruldu');
+      UI.toast(yz('esp.app.plan-kuruldu'));
       render();
     },
 
@@ -1070,7 +1132,7 @@ ESP.App = (function(){
     async 'log-drill'(el){
       const res = await ESP.Coach.logDrill(el.dataset.id);
       if(!res.ok){ UI.toast(res.error); return; }
-      UI.toast('İşlendi — gün kaydına yazıldı');
+      UI.toast(yz('esp.app.i-slendi-gun-kaydina-yazildi'));
       render();
     },
     /* Menü (telefonda alt bandın dördüncü sekmesi). `toggle-menu` eski
@@ -1112,7 +1174,7 @@ ESP.App = (function(){
     async dictate(el){
       const id = el.dataset.target;
       const field = document.getElementById(id);
-      if(!field){ UI.toast('Yazılacak alan bulunamadı'); return; }
+      if(!field){ UI.toast(yz('esp.app.yazilacak-alan-bulunamadi')); return; }
 
       if(ESP.Voice.isActive() && ESP.Voice.activeTarget() === id){
         ESP.Voice.stop();
@@ -1183,7 +1245,7 @@ ESP.App = (function(){
     },
     async 'flag-ack'(el){
       await M.ackFlag(el.dataset.id);
-      UI.toast('İşaretlendi — kayıt geçmişte duruyor');
+      UI.toast(yz('esp.app.i-saretlendi-kayit-gecmiste'));
       render();
     },
     async 'show-store-error'(){
@@ -1192,11 +1254,11 @@ ESP.App = (function(){
       const h = sh.health || {};
       const K = ESP.C;
       const state = (v, okLabel) => v === 'ok' ? K.Badge({ label:okLabel, tone:'ok' })
-        : v === 'off' ? K.Badge({ label:'kapalı', tone:'muted' })
+        : v === 'off' ? K.Badge({ label:yz('esp.app.kapali'), tone:'muted' })
         : K.Badge({ label:'hata', tone:'danger' });
 
       UI.sheet({
-        title:'Kayıt durumu',
+        title:yz('esp.app.kayit-durumu'),
         body:String(K.Stack([
           K.Notice({ tone:sh.error.scope.indexOf('local') === 0 ? 'danger' : 'warn', body:sh.error.message }),
           K.Table({ tight:true, headers:['Alan', 'Durum'], rows:[
@@ -1208,8 +1270,8 @@ ESP.App = (function(){
           K.Notice({ tone:'info', body:'Verilerin bu cihazda tutulmaya devam ediyor. '
             + 'Güvende olmak için Rehber → Veri bölümünden yedek al.' }),
         ])),
-        footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
-          ${K.Button({ label:'Rehbere git', tone:'primary', act:'go', data:{ 'data-route':'guide' } })}`),
+        footer:String(html`${K.Button({ label:yz('esp.app.kapat'), act:'sheet-close' })}
+          ${K.Button({ label:yz('esp.app.rehbere-git'), tone:'primary', act:'go', data:{ 'data-route':'guide' } })}`),
         noFocus:true,
       });
     },
@@ -1220,8 +1282,8 @@ ESP.App = (function(){
       const u = S.ui.undo;
       S.ui.undo = null;
       if(!u || !u.restore) return;
-      try{ await u.restore(); UI.toast('Geri alındı'); render(); }
-      catch(e){ console.error(e); UI.toast('Geri alınamadı'); }
+      try{ await u.restore(); UI.toast(yz('esp.app.geri-alindi')); render(); }
+      catch(e){ console.error(e); UI.toast(yz('esp.app.geri-alinamadi')); }
     },
     async 'confirm-yes'(){
       const fn = UI._confirm;
@@ -1308,7 +1370,7 @@ ESP.App = (function(){
       const renkAd = (y.kademeBilgi && y.kademeBilgi.id) || '';
       if(!(sonuc.sakin && V && V.sakinGoster && V.sakinGoster({ ust:y.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe',
         ad:ad + ' ' + y.etiket, sistem:'ESP', renk:renkAd })))
-        UI.toast('Yeni rütbe — ' + ad + ' ' + y.etiket);
+        UI.toast(yz('esp.app.yeni-rutbe') + ad + ' ' + y.etiket);
       damgala();
     }
   }
@@ -1359,7 +1421,7 @@ ESP.App = (function(){
       /* Kaydet dokunuşu: yalnız gerçekten kayıt yazıldıysa (hareket.js). */
       if(window.LIFEOS && window.LIFEOS.HAREKET && window.LIFEOS.HAREKET.kaydedildi) window.LIFEOS.HAREKET.kaydedildi(el, act, kayitBas);
     }
-    catch(err){ console.error('Eylem hatası (' + act + '):', err); UI.toast('Bir şeyler ters gitti'); }
+    catch(err){ console.error('Eylem hatası (' + act + '):', err); UI.toast(yz('esp.app.bir-seyler-ters-gitti')); }
     /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
     xpTara();
   });
@@ -1369,7 +1431,7 @@ ESP.App = (function(){
     const fn = (sc.change && sc.change[el.dataset.change]) || globalChange[el.dataset.change];
     if(!fn) return;
     try{ await fn(el, e); }
-    catch(err){ console.error('Değişiklik hatası:', err); UI.toast('Değişiklik kaydedilemedi'); }
+    catch(err){ console.error('Değişiklik hatası:', err); UI.toast(yz('esp.app.degisiklik-kaydedilemedi')); }
     /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
     xpTara();
   }
@@ -1582,7 +1644,7 @@ ESP.App = (function(){
       const now = Date.now();
       if(now - lastExternalToastAt > 8000){
         lastExternalToastAt = now;
-        UI.toast('Veriler başka bir sekmede değişti. Kaybolmasın diye bu sayfayı tazele.', { life:8000 });
+        UI.toast(yz('esp.app.veriler-baska-bir-sekmede-de'), { life:8000 });
       }
     }
     ESP.Store.onExternalWrite = function(){
@@ -1941,23 +2003,23 @@ ESP.App = (function(){
           /* King'in eylem kapısı (yetki.js söz 8). Toplantı İnceleme'ye
              dönüştü (2026-10-20): model çağrısı yok, ekran kendi verisinden
              kurulur; bu yüzden küçük seviye. */
-          eylemler:[{ id:'kitap-ekle', seviye:'kucuk', ad:'Kitap ekle',
+          eylemler:[{ id:'kitap-ekle', seviye:'kucuk', ad:yz('esp.app.kitap-ekle'),
             aciklama:'Kütüphaneye yeni kitap ekler (okunuyor olarak).',
             parametreler:{ type:'object', properties:{ ad:{ type:'string', maxLength:120, description:'kitabın adı' } }, required:['ad'] },
             anla:t => { const m = t.match(/kitap(?:lığa|lara)? ekle\s*:?\s*(.+)$|(.+?)\s+kitabını (?:ekle|okumaya başladım)/); const ad = m ? String(m[1] || m[2] || '').trim() : '';
               return ad.length >= 2 && ad.length <= 120 ? { ad } : null; },
-            onizle:p => ({ metin:'Kütüphaneye «' + p.ad + '» eklenecek.' }),
+            onizle:p => ({ metin:yz('esp.app.kutuphaneye') + p.ad + '» eklenecek.' }),
             uygula:async p => {
               const b = await ESP.Model.saveBook(ESP.Model.newBook({ title:p.ad.replace(/(^|\s)\S/g, x => x.toLocaleUpperCase('tr')), author:'' }));
               render();
               return { metin:'«' + b.title + '» kütüphaneye eklendi.', geriAl:async () => { await ESP.Model.deleteBook(b.id); render(); } };
-            } }, { id:'inceleme', seviye:'kucuk', ad:'Veri incelemesini aç',
+            } }, { id:'inceleme', seviye:'kucuk', ad:yz('esp.app.veri-incelemesini-ac'),
             aciklama:'Ofis › İnceleme’yi açar: haftanın sayıları, kayıttan karşılaştırmalar ve tek karar.',
             anla:t => /(toplant|incele)/.test(t) && /(başlat|başla|aç|yap|topla|kur|göster)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
-            onizle:() => ({ metin:'Ofis › İnceleme açılacak: haftanın sayıları, kayıttan karşılaştırmalar ve tek karar.' }),
+            onizle:() => ({ metin:yz('esp.app.ofis-i-nceleme-acilacak-haft') }),
             uygula:async () => {
               go('meeting');
-              return { metin:'İncelemeyi açtım; Ofis › İnceleme ekranındasın.' };
+              return { metin:yz('esp.app.i-ncelemeyi-actim-ofis-i-nce') };
             } }],
 
           tema:{ oku:() => (S.profile && S.profile.theme) || 'system', yaz:async v => { await M.saveProfile({ theme:v }); applyTheme(); refreshAppearance(); render(); } },
@@ -1989,7 +2051,7 @@ ESP.App = (function(){
         window.LIFEOS.KING.kur({ modul:'esp', ekran:() => S.route, model:() => ESP.LLM, hkm:() => ESP.Beacon, git:route => go(route), hafiza:() => ESP.Hafizam,
           /* King'e gelen fotoğraf ve kamera karesi (king.js söz 11, 37): kitap
              sayfası Merkez'in görsel modeliyle okunur, alıntı onaylı kaydolur. */
-          foto:[{ id:'sayfa', ad:'Kitap sayfasını oku', is:(f, y) => ESP.KingArac.sayfaOku(f, y) }],
+          foto:[{ id:'sayfa', ad:yz('esp.app.kitap-sayfasini-oku'), is:(f, y) => ESP.KingArac.sayfaOku(f, y) }],
           /* King'in çıkarımları için (cikarim.js): son 30 günün disiplin dakikaları, kitaplar, müzik günleri. */
           cikarimVeri:() => {
             const dakika = {};
@@ -2036,7 +2098,7 @@ ESP.App = (function(){
             cevapla:(id, harf) => ESP.KingOgret.cevapla(id, harf),
             /* Söz 34: deney ölçüsü (günlük çalışma dakikası; ESP'nin kaydı). */
             olcu:{
-              liste:[{ id:'sure', ad:'Çalışma süresi', birim:'dk' }],
+              liste:[{ id:'sure', ad:yz('esp.app.calisma-suresi'), birim:'dk' }],
               deger:(id, iso) => { const ss = M.sessionsOf(iso).filter(s => s.minutes > 0); return ss.length ? ss.reduce((a, s) => a + s.minutes, 0) : null; },
             },
           },
@@ -2091,7 +2153,7 @@ ESP.App = (function(){
           /* Açık disiplinlerin tezgâhları: kapalı disiplin düğme olmaz. */
           dugmeler:() => ((ESP.Nav.sections().find(s => s.id === 'calisma') || {}).views || [])
             .slice(0, 4).map(v => ({ ad:v.label, rota:v.route }))
-            .concat([{ ad:'Merdiven', rota:'ladder' }]),
+            .concat([{ ad:yz('esp.app.merdiven'), rota:'ladder' }]),
           cekmeceler:() => ESP.Nav.sections().map(s => ({ id:s.id, rota:s.views[0].route })) });
       }
 
@@ -2230,7 +2292,7 @@ ESP.App = (function(){
     }catch(err){
       console.error('Açılış hatası:', err);
       const markup = String(html`<div class="content">
-        ${ESP.C.SakinHata({ baslik:'Uygulama açılamadı.', dugme:'Yeniden dene',
+        ${ESP.C.SakinHata({ baslik:yz('esp.app.uygulama-acilamadi'), dugme:'Yeniden dene',
           ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }
@@ -2257,11 +2319,11 @@ ESP.App = (function(){
     const sinir = U.iso(U.addDays(U.today(), -29));
     const biten = (S.books || []).filter(b => b.finishedAt && String(b.finishedAt).slice(0, 10) >= sinir).length;
     return [
-      { ad:'Çalışılan gün · 30 gün', deger:gun || null, birim:'/ 30', etiket:'ölçüldü' },
-      { ad:'Toplam süre · 30 gün', deger:top || null, birim:'dk', etiket:tahmin ? 'tahmin' : 'ölçüldü', seri },
-      { ad:'En çok çalışılan alan', deger:enCok ? (ESP.DISCIPLINE_BY_ID[enCok] || {}).label || enCok : null, etiket:'hesaplandı',
+      { ad:yz('esp.app.calisilan-gun-30-gun'), deger:gun || null, birim:'/ 30', etiket:yz('esp.app.olculdu') },
+      { ad:yz('esp.app.toplam-sure-30-gun'), deger:top || null, birim:'dk', etiket:tahmin ? 'tahmin' : 'ölçüldü', seri },
+      { ad:yz('esp.app.en-cok-calisilan-alan'), deger:enCok ? (ESP.DISCIPLINE_BY_ID[enCok] || {}).label || enCok : null, etiket:yz('esp.app.hesaplandi'),
         alt:enCok ? dakika[enCok] + ' dk' : '' },
-      { ad:'Biten kitap · 30 gün', deger:biten || null, etiket:'ölçüldü' },
+      { ad:yz('esp.app.biten-kitap-30-gun'), deger:biten || null, etiket:yz('esp.app.olculdu') },
     ];
   }
 

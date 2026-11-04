@@ -13,6 +13,10 @@
         uydurulmaz (null).
      4. GÜNÜN TOPLAMI HESAPLANIR. gece + kestirmeler; gece girilmediyse
         toplam «veri yok» kalır, kestirmeler ayrıca söylenir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.uyku.bir-gunde-en-cok':'Bir günde en çok ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -37,7 +41,7 @@ SP.Uyku = (function(){
     const hata = dogrula(k);
     if(hata) return { ok:false, why:hata };
     const l = liste(iso);
-    if(l.length >= EN_COK_ADET) return { ok:false, why:'Bir günde en çok ' + EN_COK_ADET + ' kısa uyku yazılır.' };
+    if(l.length >= EN_COK_ADET) return { ok:false, why:yz('spi.core.uyku.bir-gunde-en-cok') + EN_COK_ADET + ' kısa uyku yazılır.' };
     const yeni = { id:'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
       dk:Math.round(Number(k.dk)), bas:k.bas || null, at:new Date().toISOString() };
     await SP.Model.saveVitals(iso, { kestirmeler:l.concat([yeni]) });

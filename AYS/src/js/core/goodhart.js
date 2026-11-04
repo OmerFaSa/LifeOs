@@ -21,6 +21,18 @@
       VERİMSİZ GAYRETİ görmektir.
 
    4. KÜÇÜK HACİMDE GÜRÜLTÜ VARDIR; eşiğin altındaki hacim değerlendirilmez. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.goodhart.bu-parametreler-pedagojik-bi':'Bu parametreler pedagojik bir eşik değil, bu yazılımın ayarıdır.',
+  'ays.core.goodhart.yukselmesi-iyi':'yükselmesi iyi',
+  'ays.core.goodhart.dusmesi-iyi':'düşmesi iyi',
+  'ays.core.goodhart.yonu-sistem-bilmez':'yönü sistem bilmez',
+  'ays.core.goodhart.sonuc-tarafinda-iki-penceren':'Sonuç tarafında iki pencerenin birinde ölçüm yok. Ölçülmemiş ',
+  'ays.core.goodhart.bu-pencerede-hacim-degerlend':'Bu pencerede hacim değerlendirmeye yetmiyor (',
+  'ays.core.goodhart.bu-ciftin-yon-tanimi-yok':'Bu çiftin yön tanımı yok; sonucun hangi yönde iyi olduğu ',
+  'ays.core.goodhart.caba-belirgin-bicimde-artmam':'Çaba belirgin biçimde artmamış; nöbetçi burada bir şey aramaz.',
+  'ays.core.goodhart.caba-da-sonuc-da-dogru':'Çaba da sonuç da doğru yönde arttı. Gösterge hâlâ bir şeyi ',
+});
+
 
 window.R = window.R || {};
 
@@ -44,7 +56,7 @@ R.Goodhart = (function(){
       + 'belirlemesini engelleyecek kadar uzun, mevsimsel değişimi '
       + 'gizleyecek kadar uzun değil. %25\'lik eşik, gürültüyü ayıklamak '
       + 'için seçildi. Başka sayılar da savunulabilirdi.',
-    note:'Bu parametreler pedagojik bir eşik değil, bu yazılımın ayarıdır.',
+    note:yz('ays.core.goodhart.bu-parametreler-pedagojik-bi'),
   };
 
   const PENCERE = POLICY.windowDays;
@@ -69,11 +81,11 @@ R.Goodhart = (function(){
      BUGUN butun ciftler higher_better; yon alani yine de ZORUNLU, cunku
      ilk lower_better cift eklendiginde sessizce yanlis calisirdi. */
   const DIRECTIONS = {
-    higher_better:{ id:'higher_better', label:'yükselmesi iyi',
+    higher_better:{ id:'higher_better', label:yz('ays.core.goodhart.yukselmesi-iyi'),
       improvement:function(d){ return d; } },
-    lower_better:{ id:'lower_better', label:'düşmesi iyi',
+    lower_better:{ id:'lower_better', label:yz('ays.core.goodhart.dusmesi-iyi'),
       improvement:function(d){ return d == null ? null : -d; } },
-    movement_only:{ id:'movement_only', label:'yönü sistem bilmez',
+    movement_only:{ id:'movement_only', label:yz('ays.core.goodhart.yonu-sistem-bilmez'),
       improvement:function(d){ return d == null ? null : Math.abs(d); } },
   };
 
@@ -222,12 +234,12 @@ R.Goodhart = (function(){
 
     if(eS == null || yS == null){
       return Object.assign(base, { status:'unknown', cert:'missing',
-        note:'Sonuç tarafında iki pencerenin birinde ölçüm yok. Ölçülmemiş '
+        note:yz('ays.core.goodhart.sonuc-tarafinda-iki-penceren')
            + 'sonuç, sıfır sonuç değildir.' });
     }
     if(!(yC >= def.minEffort)){
       return Object.assign(base, { status:'idle', cert:'measured',
-        note:'Bu pencerede hacim değerlendirmeye yetmiyor ('
+        note:yz('ays.core.goodhart.bu-pencerede-hacim-degerlend')
            + yC + ' < ' + def.minEffort + ').' });
     }
     const dC = oran(yC, eC);
@@ -238,7 +250,7 @@ R.Goodhart = (function(){
     const yon = DIRECTIONS[def.direction || ''];
     if(!yon){
       return Object.assign(base, { status:'unknown', cert:'missing',
-        note:'Bu çiftin yön tanımı yok; sonucun hangi yönde iyi olduğu '
+        note:yz('ays.core.goodhart.bu-ciftin-yon-tanimi-yok')
            + 'bilinmeden ayrışma değerlendirilemez.' });
     }
     const iyilesme = yon.improvement(dS);
@@ -246,12 +258,12 @@ R.Goodhart = (function(){
     if(dC == null || dC < CABA_ARTIS){
       return Object.assign(base, { status:'idle', cert:'measured',
         direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
-        note:'Çaba belirgin biçimde artmamış; nöbetçi burada bir şey aramaz.' });
+        note:yz('ays.core.goodhart.caba-belirgin-bicimde-artmam') });
     }
     if(iyilesme != null && iyilesme > SONUC_DURGUN){
       return Object.assign(base, { status:'aligned', cert:'measured',
         direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
-        note:'Çaba da sonuç da doğru yönde arttı. Gösterge hâlâ bir şeyi '
+        note:yz('ays.core.goodhart.caba-da-sonuc-da-dogru')
            + 'temsil ediyor.' });
     }
     /* Sonuc TERS yone gittiyse bu "yerinde saymak" degildir. */

@@ -17,6 +17,23 @@
    Bir istisna: antrenman dakikasi GERCEKTEN olculur. O yuzden antrenman
    yapilan gunlerde ikincil bir oran gosterilir ve acikca "yalnizca
    antrenman suresine gore" diye etiketlenir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.friction.surtunme-olculmedi':'Sürtünme ölçülmedi',
+  'spi.core.friction.bu-pencerede-kayit-yok-siste':'Bu pencerede kayıt yok. Sistem kendi maliyetini bilmiyorsa ',
+  'spi.core.friction.takip-isin-onune-geciyor-ola':'Takip, işin önüne geçiyor olabilir',
+  'spi.core.friction.son':'Son ',
+  'spi.core.friction.surtunme-sinira-yakin':'Sürtünme sınıra yakın',
+  'spi.core.friction.tahlil-girilen-ya-da-haftali':'Tahlil girilen ya da haftalık sepet kurulan bir gün doğal ',
+  'spi.core.friction.surtunme-butcede':'Sürtünme bütçede',
+  'spi.core.friction.gunde':'Günde ',
+  'spi.core.friction.karar-bekleyen-her-oneri-her':'Karar bekleyen her öneri her açılışta yeniden okunuyor. ',
+  'spi.core.friction.birakilmis-olanlari-pasife-a':'Bırakılmış olanları pasife almak günlük listeyi kısaltır; ',
+  'spi.core.friction.kendi-gida-listen-buyumus':'Kendi gıda listen büyümüş',
+  'spi.core.friction.sik-kullandiklarini-birakip':'Sık kullandıklarını bırakıp gerisini aramaya güvenmek, ',
+  'spi.core.friction.ziyaretler-uzun':'Ziyaretler uzun',
+  'spi.core.friction.kayit-yuku-makul-gorunuyor-s':'Kayıt yükü makul görünüyor; süre ekranlarda geziniyor. ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -127,14 +144,14 @@ SP.Friction = (function(){
     const w = window_(gunSayisi);
     if(w.cert === 'missing'){
       return { level:'unknown', cert:'missing', window:w,
-        title:'Sürtünme ölçülmedi',
-        note:'Bu pencerede kayıt yok. Sistem kendi maliyetini bilmiyorsa '
+        title:yz('spi.core.friction.surtunme-olculmedi'),
+        note:yz('spi.core.friction.bu-pencerede-kayit-yok-siste')
            + 'onu sıfır saymaz.' };
     }
     if(w.perDay > BUTCE_DK){
       return { level:'high', cert:'measured', window:w,
-        title:'Takip, işin önüne geçiyor olabilir',
-        note:'Son ' + w.days + ' günde günde ' + w.perDay + ' dk bu ekranlarda '
+        title:yz('spi.core.friction.takip-isin-onune-geciyor-ola'),
+        note:yz('spi.core.friction.son') + w.days + ' günde günde ' + w.perDay + ' dk bu ekranlarda '
            + 'geçti; bütçe günde ' + BUTCE_DK + ' dk. Sağlıklı yaşamak bir '
            + 'saat işi değildir: uyumak, doğru yemek ve yürümek uygulamada '
            + 'dakika olarak görünmez. Bu yüzden burada oran değil yalnızca '
@@ -142,13 +159,13 @@ SP.Friction = (function(){
     }
     if(w.perDay > BUTCE_DK * 0.7){
       return { level:'watch', cert:'measured', window:w,
-        title:'Sürtünme sınıra yakın',
-        note:'Tahlil girilen ya da haftalık sepet kurulan bir gün doğal '
+        title:yz('spi.core.friction.surtunme-sinira-yakin'),
+        note:yz('spi.core.friction.tahlil-girilen-ya-da-haftali')
            + 'olarak uzundur; tek gün hüküm değildir.' };
     }
     return { level:'ok', cert:'measured', window:w,
-      title:'Sürtünme bütçede',
-      note:'Günde ' + w.perDay + ' dk takip.' };
+      title:yz('spi.core.friction.surtunme-butcede'),
+      note:yz('spi.core.friction.gunde') + w.perDay + ' dk takip.' };
   }
 
   /* Yuk azaltma onerileri. Hicbiri "daha cok veri gir" demez. */
@@ -159,24 +176,24 @@ SP.Friction = (function(){
     const bekleyen = (S.proposals || []).filter(p => p.status === 'pending').length;
     if(bekleyen > 4){
       out.push({ id:'proposals', label:bekleyen + ' bekleyen öneri',
-        note:'Karar bekleyen her öneri her açılışta yeniden okunuyor. '
+        note:yz('spi.core.friction.karar-bekleyen-her-oneri-her')
            + 'Toplu reddetmek de bir karardır.', route:'onaylar' });
       /* 2026-10-25: 'office'e gidiyordu; bekleyen öneriler Onaylar'dadır. */
     }
     const ilac = (S.meds || []).filter(m => m.active !== false).length;
     if(ilac > 8){
       out.push({ id:'meds', label:ilac + ' aktif ilaç/takviye kaydı',
-        note:'Bırakılmış olanları pasife almak günlük listeyi kısaltır; '
+        note:yz('spi.core.friction.birakilmis-olanlari-pasife-a')
            + 'kayıt silinmez.', route:'today' });
     }
     if((S.foods || []).length > 40){
-      out.push({ id:'foods', label:'Kendi gıda listen büyümüş',
-        note:'Sık kullandıklarını bırakıp gerisini aramaya güvenmek, '
+      out.push({ id:'foods', label:yz('spi.core.friction.kendi-gida-listen-buyumus'),
+        note:yz('spi.core.friction.sik-kullandiklarini-birakip')
            + 'öğün girişini kısaltır.', route:'kitchen' });
     }
     if(!out.length){
-      out.push({ id:'shorter', label:'Ziyaretler uzun',
-        note:'Kayıt yükü makul görünüyor; süre ekranlarda geziniyor. '
+      out.push({ id:'shorter', label:yz('spi.core.friction.ziyaretler-uzun'),
+        note:yz('spi.core.friction.kayit-yuku-makul-gorunuyor-s')
            + 'Günün tek işini yapıp kapatmak yeterli.', route:'today' });
     }
     return out;

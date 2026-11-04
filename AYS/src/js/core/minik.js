@@ -30,6 +30,42 @@
    yamar), Sade zemin ya da King açıkken yoktur. Hareket transform'dur ve Web
    Animations ile zincirlenir; sürekli döngü yok, göz yönü yalnız fare
    kıpırdarken karede bir kez hesaplanır. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.minik.pofuduk':'Pofuduk',
+  'ortak.minik.bicir':'Bıcır',
+  'ortak.minik.filiz':'Filiz',
+  'ortak.minik.ponpon':'Ponpon',
+  'ortak.minik.bulut':'Bulut',
+  'ortak.minik.bilge':'Bilge',
+  'ortak.minik.tavsi':'Tavşi',
+  'ortak.minik.ayicik':'Ayıcık',
+  'ortak.minik.cicek':'Çiçek',
+  'ortak.minik.boncuk':'Boncuk',
+  'ortak.minik.yildiz':'Yıldız',
+  'ortak.minik.pitircik':'Pıtırcık',
+  'ortak.minik.bereli':'Bereli',
+  'ortak.minik.hilal':'Hilal',
+  'ortak.minik.alev':'Alev',
+  'ortak.minik.pamuk':'Pamuk',
+  'ortak.minik.sevgi':'Sevgi',
+  'ortak.minik.damla':'Damla',
+  'ortak.minik.mirnav':'Mırnav',
+  'ortak.minik.pati':'Pati',
+  'ortak.minik.bambu':'Bambu',
+  'ortak.minik.penpen':'Penpen',
+  'ortak.minik.kizil':'Kızıl',
+  'ortak.minik.virak':'Vırak',
+  'ortak.minik.gececi':'Gececi',
+  'ortak.minik.citir':'Çıtır',
+  'ortak.minik.sipsip':'Şıpşıp',
+  'ortak.minik.pufpuf':'Pufpuf',
+  'ortak.minik.parilti':'Parıltı',
+  'ortak.minik.yesilcik':'Yeşilcik',
+  'ortak.minik.gonul':'Gönül',
+  'ortak.minik.isil':'Işıl',
+  'ortak.minik.buzcuk':'Buzcuk',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -57,45 +93,45 @@ window.LIFEOS.MINIK = (function(){
      2026-10-28: «agentlar daha anlaşılır olsun»); perde miniğin ses tonudur
      (ses.js «bla», «gidik»): bilge alçak, neşeli ince konuşur. */
   const KISILER = Object.freeze([
-    { ad:'Pofuduk',  bicim:'yuvarlak', tip:'kulak',   huy:'uykucu',   desen:'karin', boy:42, ton:0,   perde:0.9 },
-    { ad:'Bıcır',    bicim:'kare',     tip:'anten',   huy:'konuskan', desen:'yok',   boy:38, ton:28,  perde:1.15 },
-    { ad:'Filiz',    bicim:'ucgen',    tip:'filiz',   huy:'merakli',  desen:'cil',   boy:44, ton:-26, perde:1.05 },
-    { ad:'Ponpon',   bicim:'yuvarlak', tip:'kurdele', huy:'neseli',   desen:'karin', boy:38, ton:-12, perde:1.25 },
-    { ad:'Bulut',    bicim:'ucgen',    tip:'percem',  huy:'hayalci',  desen:'yok',   boy:40, ton:14,  perde:1 },
-    { ad:'Bilge',    bicim:'kare',     tip:'kas',     huy:'bilge',    desen:'karin', boy:41, ton:40,  perde:0.8 },
-    { ad:'Tavşi',    bicim:'hayvan',   tip:'tavsan',  huy:'utangac',  desen:'tavsan',  boy:31, en:.9,  ton:60,  perde:1.2, aile:'hayvan', renk:['#ffffff', '#f6eff3', '#ddd0da'] },
-    { ad:'Ayıcık',   bicim:'hayvan',   tip:'ayi',     huy:'tembel',   desen:'ayi',     boy:50, en:.84, ton:-40, perde:0.85, aile:'hayvan', renk:['#eccca6', '#c48f5f', '#94653f'] },
-    { ad:'Çiçek',    bicim:'ucgen',    tip:'cicek',   huy:'sarkici',  desen:'cil',   boy:39, ton:80,  perde:1.15 },
-    { ad:'Boncuk',   bicim:'yuvarlak', tip:'boynuz',  huy:'oyuncu',   desen:'cil',   boy:36, ton:-60, perde:1.3 },
-    { ad:'Yıldız',   bicim:'kare',     tip:'yildiz',  huy:'cesur',    desen:'yok',   boy:40, ton:100, perde:1.1 },
-    { ad:'Pıtırcık', bicim:'ucgen',    tip:'mantar',  huy:'sakar',    desen:'cil',   boy:37, ton:-90, perde:1.05 },
+    { ad:yz('ortak.minik.pofuduk'),  bicim:'yuvarlak', tip:'kulak',   huy:'uykucu',   desen:'karin', boy:42, ton:0,   perde:0.9 },
+    { ad:yz('ortak.minik.bicir'),    bicim:'kare',     tip:'anten',   huy:'konuskan', desen:'yok',   boy:38, ton:28,  perde:1.15 },
+    { ad:yz('ortak.minik.filiz'),    bicim:'ucgen',    tip:'filiz',   huy:'merakli',  desen:'cil',   boy:44, ton:-26, perde:1.05 },
+    { ad:yz('ortak.minik.ponpon'),   bicim:'yuvarlak', tip:'kurdele', huy:'neseli',   desen:'karin', boy:38, ton:-12, perde:1.25 },
+    { ad:yz('ortak.minik.bulut'),    bicim:'ucgen',    tip:'percem',  huy:'hayalci',  desen:'yok',   boy:40, ton:14,  perde:1 },
+    { ad:yz('ortak.minik.bilge'),    bicim:'kare',     tip:'kas',     huy:'bilge',    desen:'karin', boy:41, ton:40,  perde:0.8 },
+    { ad:yz('ortak.minik.tavsi'),    bicim:'hayvan',   tip:'tavsan',  huy:'utangac',  desen:'tavsan',  boy:31, en:.9,  ton:60,  perde:1.2, aile:'hayvan', renk:['#ffffff', '#f6eff3', '#ddd0da'] },
+    { ad:yz('ortak.minik.ayicik'),   bicim:'hayvan',   tip:'ayi',     huy:'tembel',   desen:'ayi',     boy:50, en:.84, ton:-40, perde:0.85, aile:'hayvan', renk:['#eccca6', '#c48f5f', '#94653f'] },
+    { ad:yz('ortak.minik.cicek'),    bicim:'ucgen',    tip:'cicek',   huy:'sarkici',  desen:'cil',   boy:39, ton:80,  perde:1.15 },
+    { ad:yz('ortak.minik.boncuk'),   bicim:'yuvarlak', tip:'boynuz',  huy:'oyuncu',   desen:'cil',   boy:36, ton:-60, perde:1.3 },
+    { ad:yz('ortak.minik.yildiz'),   bicim:'kare',     tip:'yildiz',  huy:'cesur',    desen:'yok',   boy:40, ton:100, perde:1.1 },
+    { ad:yz('ortak.minik.pitircik'), bicim:'ucgen',    tip:'mantar',  huy:'sakar',    desen:'cil',   boy:37, ton:-90, perde:1.05 },
     /* 2026-10-29 (kullanıcı: «ajan çeşitliliğini arttırıp kalitesini arttır»). */
-    { ad:'Bereli',   bicim:'yuvarlak', tip:'bere',    huy:'sevecen',  desen:'yok',   boy:40, ton:150, perde:1.15 },
-    { ad:'Hilal',    bicim:'ucgen',    tip:'ay',      huy:'dalgin',   desen:'yok',   boy:41, ton:-120, perde:0.95 },
-    { ad:'Alev',     bicim:'kare',     tip:'alev',    huy:'enerjik',  desen:'cil',   boy:39, ton:-150, perde:1.1 },
-    { ad:'Pamuk',    bicim:'yuvarlak', tip:'bulut',   huy:'sakin',    desen:'karin', boy:43, ton:120, perde:0.88 },
-    { ad:'Sevgi',    bicim:'kare',     tip:'kalp',    huy:'nazik',    desen:'karin', boy:37, ton:170, perde:1.22 },
-    { ad:'Damla',    bicim:'ucgen',    tip:'damla',   huy:'telasli',  desen:'yok',   boy:38, ton:-170, perde:1.12 },
+    { ad:yz('ortak.minik.bereli'),   bicim:'yuvarlak', tip:'bere',    huy:'sevecen',  desen:'yok',   boy:40, ton:150, perde:1.15 },
+    { ad:yz('ortak.minik.hilal'),    bicim:'ucgen',    tip:'ay',      huy:'dalgin',   desen:'yok',   boy:41, ton:-120, perde:0.95 },
+    { ad:yz('ortak.minik.alev'),     bicim:'kare',     tip:'alev',    huy:'enerjik',  desen:'cil',   boy:39, ton:-150, perde:1.1 },
+    { ad:yz('ortak.minik.pamuk'),    bicim:'yuvarlak', tip:'bulut',   huy:'sakin',    desen:'karin', boy:43, ton:120, perde:0.88 },
+    { ad:yz('ortak.minik.sevgi'),    bicim:'kare',     tip:'kalp',    huy:'nazik',    desen:'karin', boy:37, ton:170, perde:1.22 },
+    { ad:yz('ortak.minik.damla'),    bicim:'ucgen',    tip:'damla',   huy:'telasli',  desen:'yok',   boy:38, ton:-170, perde:1.12 },
     /* TAKIMLAR (kullanıcı, 2026-10-30: «şekillerden oluşan minikler var; bir de
        hayvanlardan oluşan grup olsun; ateş, su emojisi gibi insan özelliği
        olmayan ama yüz ekleyince tatlı duran emojiler; ayarlardan şekil mi,
        hayvan mı, emoji mi seçelim, istersek karma»). Hayvan ve emojilerin
        rengi kendinedir (renk: açık, orta, koyu); şekiller modülün tonunu alır. */
-    { ad:'Mırnav',   bicim:'hayvan',   tip:'kedi',    huy:'oyuncu',   desen:'kedi',    boy:37, en:.94, ton:0, perde:1.2,  aile:'hayvan', renk:['#ffe0b8', '#ffb067', '#ea8238'] },
-    { ad:'Pati',     bicim:'hayvan',   tip:'kopek',   huy:'sevecen',  desen:'kopek',   boy:42, en:.96, ton:0, perde:1.05, aile:'hayvan', renk:['#f6e3c9', '#dcae7f', '#b5814f'] },
-    { ad:'Bambu',    bicim:'hayvan',   tip:'panda',   huy:'sakin',    desen:'panda',   boy:46, en:1,   ton:0, perde:0.9,  aile:'hayvan', renk:['#ffffff', '#f3f3f6', '#d8d9e2'] },
-    { ad:'Penpen',   bicim:'hayvan',   tip:'penguen', huy:'sakar',    desen:'penguen', boy:41, en:.8,  ton:0, perde:1.15, aile:'hayvan', renk:['#5a6888', '#36425e', '#222a3f'] },
-    { ad:'Kızıl',    bicim:'hayvan',   tip:'tilki',   huy:'merakli',  desen:'tilki',   boy:38, en:.9,  ton:0, perde:1.1,  aile:'hayvan', renk:['#ffcf9a', '#ff9447', '#e2632a'] },
-    { ad:'Vırak',    bicim:'hayvan',   tip:'kurbaga', huy:'neseli',   desen:'kurbaga', boy:32, en:1.2, ton:0, perde:1.25, aile:'hayvan', renk:['#d4f7a8', '#8edb63', '#57ad3e'] },
-    { ad:'Gececi',   bicim:'hayvan',   tip:'baykus',  huy:'bilge',    desen:'baykus',  boy:42, en:.86, ton:0, perde:0.82, aile:'hayvan', renk:['#e5cfac', '#b38c62', '#86633f'] },
-    { ad:'Çıtır',    bicim:'alev',     tip:'yok',     huy:'enerjik',  desen:'yok',     boy:36, ton:0, perde:1.2,  aile:'emoji', renk:['#fff3b0', '#ffb23e', '#ff6b2c'] },
-    { ad:'Şıpşıp',   bicim:'damla',    tip:'yok',     huy:'telasli',  desen:'parilti', boy:35, ton:0, perde:1.15, aile:'emoji', renk:['#e6f6ff', '#8ccdff', '#4d92e8'] },
-    { ad:'Pufpuf',   bicim:'bulut',    tip:'yok',     huy:'hayalci',  desen:'yok',     boy:40, ton:0, perde:0.95, aile:'emoji', renk:['#ffffff', '#f1f5fc', '#cdd9ec'] },
-    { ad:'Parıltı',  bicim:'yildiz',   tip:'yok',     huy:'cesur',    desen:'yok',     boy:39, ton:0, perde:1.2,  aile:'emoji', renk:['#fff7c9', '#ffd54f', '#f2a51f'] },
-    { ad:'Yeşilcik', bicim:'yaprak',   tip:'sap',     huy:'merakli',  desen:'damar',   boy:36, ton:0, perde:1.1,  aile:'emoji', renk:['#dcf8bf', '#93d865', '#549f3a'] },
-    { ad:'Gönül',    bicim:'kalp',     tip:'yok',     huy:'nazik',    desen:'parilti', boy:36, ton:0, perde:1.22, aile:'emoji', renk:['#ffd6e1', '#ff88a8', '#e5507c'] },
-    { ad:'Işıl',     bicim:'yuvarlak', tip:'isin',    huy:'neseli',   desen:'yok',     boy:34, ton:0, perde:1.25, aile:'emoji', renk:['#fff6bf', '#ffd145', '#ffa21e'] },
-    { ad:'Buzcuk',   bicim:'kare',     tip:'yok',     huy:'sakin',    desen:'buz',     boy:34, ton:0, perde:0.95, aile:'emoji', renk:['#f4fdff', '#c9effd', '#8fd2ec'] }
+    { ad:yz('ortak.minik.mirnav'),   bicim:'hayvan',   tip:'kedi',    huy:'oyuncu',   desen:'kedi',    boy:37, en:.94, ton:0, perde:1.2,  aile:'hayvan', renk:['#ffe0b8', '#ffb067', '#ea8238'] },
+    { ad:yz('ortak.minik.pati'),     bicim:'hayvan',   tip:'kopek',   huy:'sevecen',  desen:'kopek',   boy:42, en:.96, ton:0, perde:1.05, aile:'hayvan', renk:['#f6e3c9', '#dcae7f', '#b5814f'] },
+    { ad:yz('ortak.minik.bambu'),    bicim:'hayvan',   tip:'panda',   huy:'sakin',    desen:'panda',   boy:46, en:1,   ton:0, perde:0.9,  aile:'hayvan', renk:['#ffffff', '#f3f3f6', '#d8d9e2'] },
+    { ad:yz('ortak.minik.penpen'),   bicim:'hayvan',   tip:'penguen', huy:'sakar',    desen:'penguen', boy:41, en:.8,  ton:0, perde:1.15, aile:'hayvan', renk:['#5a6888', '#36425e', '#222a3f'] },
+    { ad:yz('ortak.minik.kizil'),    bicim:'hayvan',   tip:'tilki',   huy:'merakli',  desen:'tilki',   boy:38, en:.9,  ton:0, perde:1.1,  aile:'hayvan', renk:['#ffcf9a', '#ff9447', '#e2632a'] },
+    { ad:yz('ortak.minik.virak'),    bicim:'hayvan',   tip:'kurbaga', huy:'neseli',   desen:'kurbaga', boy:32, en:1.2, ton:0, perde:1.25, aile:'hayvan', renk:['#d4f7a8', '#8edb63', '#57ad3e'] },
+    { ad:yz('ortak.minik.gececi'),   bicim:'hayvan',   tip:'baykus',  huy:'bilge',    desen:'baykus',  boy:42, en:.86, ton:0, perde:0.82, aile:'hayvan', renk:['#e5cfac', '#b38c62', '#86633f'] },
+    { ad:yz('ortak.minik.citir'),    bicim:'alev',     tip:'yok',     huy:'enerjik',  desen:'yok',     boy:36, ton:0, perde:1.2,  aile:'emoji', renk:['#fff3b0', '#ffb23e', '#ff6b2c'] },
+    { ad:yz('ortak.minik.sipsip'),   bicim:'damla',    tip:'yok',     huy:'telasli',  desen:'parilti', boy:35, ton:0, perde:1.15, aile:'emoji', renk:['#e6f6ff', '#8ccdff', '#4d92e8'] },
+    { ad:yz('ortak.minik.pufpuf'),   bicim:'bulut',    tip:'yok',     huy:'hayalci',  desen:'yok',     boy:40, ton:0, perde:0.95, aile:'emoji', renk:['#ffffff', '#f1f5fc', '#cdd9ec'] },
+    { ad:yz('ortak.minik.parilti'),  bicim:'yildiz',   tip:'yok',     huy:'cesur',    desen:'yok',     boy:39, ton:0, perde:1.2,  aile:'emoji', renk:['#fff7c9', '#ffd54f', '#f2a51f'] },
+    { ad:yz('ortak.minik.yesilcik'), bicim:'yaprak',   tip:'sap',     huy:'merakli',  desen:'damar',   boy:36, ton:0, perde:1.1,  aile:'emoji', renk:['#dcf8bf', '#93d865', '#549f3a'] },
+    { ad:yz('ortak.minik.gonul'),    bicim:'kalp',     tip:'yok',     huy:'nazik',    desen:'parilti', boy:36, ton:0, perde:1.22, aile:'emoji', renk:['#ffd6e1', '#ff88a8', '#e5507c'] },
+    { ad:yz('ortak.minik.isil'),     bicim:'yuvarlak', tip:'isin',    huy:'neseli',   desen:'yok',     boy:34, ton:0, perde:1.25, aile:'emoji', renk:['#fff6bf', '#ffd145', '#ffa21e'] },
+    { ad:yz('ortak.minik.buzcuk'),   bicim:'kare',     tip:'yok',     huy:'sakin',    desen:'buz',     boy:34, ton:0, perde:0.95, aile:'emoji', renk:['#f4fdff', '#c9effd', '#8fd2ec'] }
   ]);
   const TAKIMLAR = Object.freeze(['sekil', 'hayvan', 'emoji', 'karma']);
   const TAKIM_AD = Object.freeze({ sekil:'Şekiller', hayvan:'Hayvanlar', emoji:'Emojiler', karma:'Karma' });
@@ -1145,7 +1181,7 @@ window.LIFEOS.MINIK = (function(){
     document.addEventListener('pointercancel', birak, true);
     document.addEventListener('click', sevin, true);
     document.addEventListener('pointermove', fare, { passive:true });
-    window.addEventListener('lifeos:ses', e => radyoUygula(e.detail));
+    window.LIFEOS.PARCA.tepki({ id:'minik.radyo', olay:'ses', ad:'Minikler radyoya uyar', yap(d){ radyoUygula(d); } });
     try{ if(window.LIFEOS.SES && window.LIFEOS.SES.durum) radyoUygula(window.LIFEOS.SES.durum()); }catch(e){}
   }
 

@@ -28,6 +28,15 @@
         `yenilendi` (ISO zaman) yazar. O andan önce verilmiş cevap, yanlış
         defteri kaydı ya da test denemesi başka bir soruya aittir: ölçüm
         sayılmaz, silinmez de (gecerli()). */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.ogren.anlatimi-oku':'Anlatımı oku',
+  'ays.core.ogren.ornek-sorulari-coz':'Örnek soruları çöz',
+  'ays.core.ogren.sonraki-konu':'Sonraki konu: ',
+  'ays.core.ogren.ozet':'Özet',
+  'ays.core.ogren.ornek':'Örnek',
+  'ays.core.ogren.elle-yazildi-dogrulanmadi':'elle yazıldı · doğrulanmadı',
+});
+
 
 window.R = window.R || {};
 
@@ -269,10 +278,10 @@ R.Ogren = (function(){
      bitmediyse sorular, ikisi de tamamsa sonraki konu. Kodla seçilir. */
   function sirada(subjectId, topicId){
     const d = durum(subjectId, topicId);
-    if(!d.okundu) return { route:'anlatim', ad:'Anlatımı oku' };
-    if(d.skor.cevaplanan < d.skor.toplam) return { route:'sorular', ad:'Örnek soruları çöz' };
+    if(!d.okundu) return { route:'anlatim', ad:yz('ays.core.ogren.anlatimi-oku') };
+    if(d.skor.cevaplanan < d.skor.toplam) return { route:'sorular', ad:yz('ays.core.ogren.ornek-sorulari-coz') };
     const k = komsu(subjectId, topicId, 1);
-    return k ? { route:'anlatim', ad:'Sonraki konu: ' + k.topic.name, sonraki:k } : null;
+    return k ? { route:'anlatim', ad:yz('ays.core.ogren.sonraki-konu') + k.topic.name, sonraki:k } : null;
   }
 
   /* Örnek sorudan tekrar kartı: ön yüz düz metin (kart ekranı işaret
@@ -438,9 +447,9 @@ R.Ogren = (function(){
     const bol = b => ({ baslik:b.baslik || '', metin:b.metin ? duzMetin(b.metin) : '',
       liste:(b.liste || []).map(duzMetin), dikkat:b.dikkat ? duzMetin(b.dikkat) : '' });
     const bolumler = a && Array.isArray(a.bolumler) && a.bolumler.length ? a.bolumler.map(bol)
-      : [bol({ baslik:'Özet', liste:oz.ana || [], dikkat:oz.dikkat })].concat(oz.ornek ? [bol({ baslik:'Örnek', metin:oz.ornek })] : []);
+      : [bol({ baslik:yz('ays.core.ogren.ozet'), liste:oz.ana || [], dikkat:oz.dikkat })].concat(oz.ornek ? [bol({ baslik:yz('ays.core.ogren.ornek'), metin:oz.ornek })] : []);
     return { id:x.topic.id, baslik:x.topic.name, alt:x.subject.name, giris:a && a.giris ? duzMetin(a.giris) : '',
-      bolumler, etiket:'elle yazıldı · doğrulanmadı', sorgu:x.topic.name, soruVar:sorular(x.topic.id).length > 0 };
+      bolumler, etiket:yz('ays.core.ogren.elle-yazildi-dogrulanmadi'), sorgu:x.topic.name, soruVar:sorular(x.topic.id).length > 0 };
   }
   /* Cevabı Öğren'in kendi kaydı yazar (cevapla; ilk cevap ölçüm). Takvim ve
      teşhis motorun (core/ogret.js): yanlışsa konu yarın benzer soruyla gelir,

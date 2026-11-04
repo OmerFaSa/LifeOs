@@ -70,13 +70,16 @@ async function modulKayit(t, modul){
   await p.evaluate(DOLDUR_KAYNAK[modul]);
   const dolu = await CEK(p, ns);
   const rota = await p.evaluate(() => Array.from(document.querySelectorAll('[data-route]')).map(e => e.getAttribute('data-route')));
+  /* Komut paleti de parcalardan gelir: sira, ad, grup, hedef ayni kalmali. */
+  const komut = await p.evaluate(n => { const P = window[n].Palette; return P && P.commands ? P.commands().map(c => [c.group || c.kind, String(c.label), c.icon || '', c.hint || '', c.route || '', c.id || '']) : []; }, ns);
   await c.close();
-  return { bos, dolu, rota, hatalar };
+  return { bos, dolu, rota, komut, hatalar };
 }
 
 function fark(a, b){
   const out = [];
   if(JSON.stringify(a.rota) !== JSON.stringify(b.rota)) out.push('menu rotalari degisti');
+  if(JSON.stringify(a.komut) !== JSON.stringify(b.komut)) out.push('komut paleti degisti: ' + JSON.stringify(a.komut).slice(0, 600) + ' >>> ' + JSON.stringify(b.komut).slice(0, 600));
   ['bos', 'dolu'].forEach(d => {
     const ad = new Set(Object.keys(a[d]).concat(Object.keys(b[d])));
     ad.forEach(id => {
@@ -94,7 +97,7 @@ function fark(a, b){
 }
 
 function durum(){
-  let ekran = 0, parcali = 0, sayfa = 0, blok = 0, yazi = 0, bilgi = 0;
+  let ekran = 0, parcali = 0, sayfa = 0, blok = 0, yazi = 0, bilgi = 0, komut = 0;
   const kalan = {};
   MODULLER.forEach(m => {
     const k = path.join(KOK, m, 'src', 'js', 'screens');
@@ -104,13 +107,14 @@ function durum(){
       ekran++;
       sayfa += (s.match(/\.sayfa\(\{/g) || []).length;
       const b = (s.match(/\b(?:P|PARCA)\.blok\(/g) || []).length;
-      blok += b; bilgi += (s.match(/\bP\.bilgi\(/g) || []).length;
+      blok += b; bilgi += (s.match(/\bP\.bilgi\(/g) || []).length; komut += (s.match(/PARCA\.komut\(/g) || []).length;
       const yt = s.match(/(?:P|PARCA)\.yazilar\(\{[\s\S]*?\n\s*\}\);/g) || [];
       yt.forEach(t => { yazi += (t.match(/'[\w.-]+':/g) || []).length; });
       if(b) parcali++; else (kalan[m] = kalan[m] || []).push(f.replace('.js', ''));
     });
   });
-  console.log('Ekran dosyasi ' + ekran + ' · bloklara bolunmus ' + parcali + ' · sayfa kaydi ' + sayfa + ' · blok ' + blok + ' · yazi ' + yazi + ' · bilgi ' + bilgi);
+  MODULLER.forEach(m => { const f = path.join(KOK, m, 'src', 'js', 'core', 'bilgiler.js'); if(fs.existsSync(f)) bilgi += (fs.readFileSync(f, 'utf8').match(/\bP\.bilgi\(/g) || []).length; });
+  console.log('Ekran dosyasi ' + ekran + ' · bloklara bolunmus ' + parcali + ' · sayfa kaydi ' + sayfa + ' · blok ' + blok + ' · yazi ' + yazi + ' · bilgi ' + bilgi + ' · komut ' + komut);
   Object.keys(kalan).forEach(m => console.log('  ' + m + ' kalan (' + kalan[m].length + '): ' + kalan[m].join(' ')));
   return 0;
 }

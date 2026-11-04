@@ -36,6 +36,10 @@
    ayrıştırıcı, ayrı bir istem, ayrı bir kayıt yolu yoktur.
 
    Model kapalıyken de çalışır: kural motorunun cümlesi seslendirilir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.talk.cevap-uretilemedi':'Cevap üretilemedi.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -178,7 +182,7 @@ SP.Talk = (function(){
          aynı kayıt. */
       res = await SP.Office.send(agentId, soru);
     }catch(e){
-      res = { text:'Cevap üretilemedi.', source:'rules', error:String(e && e.message || e) };
+      res = { text:yz('spi.core.talk.cevap-uretilemedi'), source:'rules', error:String(e && e.message || e) };
     }
     if(!oturum || oturum.kapandi) return;
 

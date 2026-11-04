@@ -27,6 +27,25 @@
    4. SİSTEM KENDİ YÜKÜNÜ AZALTMAYI ÖNEREBİLİR, ARTIRMAYI ÖNEREMEZ. Bu
       SPİ'deki antrenman yükü kuralının aynısıdır: kendi lehine karar
       veren bir ölçü, ölçü değildir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.friction.surtunme-olculmedi':'Sürtünme ölçülmedi',
+  'esp.core.friction.bu-pencerede-yeterli-kayit-y':'Bu pencerede yeterli kayıt yok. Sistem kendi maliyetini ',
+  'esp.core.friction.calisma-suresi-girilmemis':'Çalışma süresi girilmemiş',
+  'esp.core.friction.uygulamada':'Uygulamada ',
+  'esp.core.friction.sistem-isin-onune-geciyor-ol':'Sistem, işin önüne geçiyor olabilir',
+  'esp.core.friction.son':'Son ',
+  'esp.core.friction.surtunme-sinira-yakin':'Sürtünme sınıra yakın',
+  'esp.core.friction.i-ki-esikten-biri-asildi-tek':'İki eşikten biri aşıldı. Tek başına aşılması hüküm değildir — ',
+  'esp.core.friction.surtunme-butcede':'Sürtünme bütçede',
+  'esp.core.friction.gunde':'Günde ',
+  'esp.core.friction.ayni-anda':'Aynı anda ',
+  'esp.core.friction.sureyi-elle-yaziyorsun':'Süreyi elle yazıyorsun',
+  'esp.core.friction.zamanlayici-oturum-girisinin':'Zamanlayıcı, oturum girişinin çoğunu ortadan kaldırır: ',
+  'esp.core.friction.karar-bekleyen-her-teklif-he':'Karar bekleyen her teklif, her açılışta yeniden okunuyor. ',
+  'esp.core.friction.ziyaretler-uzun':'Ziyaretler uzun',
+  'esp.core.friction.bolum-sayisi-ve-kayit-yuku':'Bölüm sayısı ve kayıt yükü makul görünüyor; süre ekranlarda ',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -189,35 +208,35 @@ ESP.Friction = (function(){
     const w = window_(gunSayisi);
     if(w.cert === 'missing'){
       return { level:'unknown', cert:'missing', window:w,
-        title:'Sürtünme ölçülmedi',
-        note:'Bu pencerede yeterli kayıt yok. Sistem kendi maliyetini '
+        title:yz('esp.core.friction.surtunme-olculmedi'),
+        note:yz('esp.core.friction.bu-pencerede-yeterli-kayit-y')
            + 'bilmiyorsa, onu sıfır saymaz.' };
     }
     if(w.cert === 'partial'){
       return { level:'unknown', cert:'estimated', window:w,
-        title:'Çalışma süresi girilmemiş',
-        note:'Uygulamada ' + w.perDay + ' dk/gün geçiyor ama bu pencerede '
+        title:yz('esp.core.friction.calisma-suresi-girilmemis'),
+        note:yz('esp.core.friction.uygulamada') + w.perDay + ' dk/gün geçiyor ama bu pencerede '
            + 'hiç oturum kaydı yok. Oran hesaplanamaz: payda veri yok, sıfır değil.' };
     }
     const butceAsti = w.perDay > BUTCE_DK;
     const oranAsti = w.ratio != null && w.ratio > ORAN_ESIK;
     if(butceAsti && oranAsti){
       return { level:'high', cert:'measured', window:w,
-        title:'Sistem, işin önüne geçiyor olabilir',
-        note:'Son ' + w.days + ' günde günde ' + w.perDay + ' dk sistemle, '
+        title:yz('esp.core.friction.sistem-isin-onune-geciyor-ol'),
+        note:yz('esp.core.friction.son') + w.days + ' günde günde ' + w.perDay + ' dk sistemle, '
            + Math.round(w.work / Math.max(1, w.measuredDays)) + ' dk çalışmayla geçti '
            + '(%' + Math.round(w.ratio * 100) + ' yönetim). Bütçe günde '
            + BUTCE_DK + ' dk ve %' + Math.round(ORAN_ESIK * 100) + '.' };
     }
     if(butceAsti || oranAsti){
       return { level:'watch', cert:'measured', window:w,
-        title:'Sürtünme sınıra yakın',
-        note:'İki eşikten biri aşıldı. Tek başına aşılması hüküm değildir — '
+        title:yz('esp.core.friction.surtunme-sinira-yakin'),
+        note:yz('esp.core.friction.i-ki-esikten-biri-asildi-tek')
            + 'kurulum ya da ayar günü olabilir.' };
     }
     return { level:'ok', cert:'measured', window:w,
-      title:'Sürtünme bütçede',
-      note:'Günde ' + w.perDay + ' dk sistem, %'
+      title:yz('esp.core.friction.surtunme-butcede'),
+      note:yz('esp.core.friction.gunde') + w.perDay + ' dk sistem, %'
          + (w.ratio == null ? '—' : Math.round(w.ratio * 100)) + ' yönetim payı.' };
   }
 
@@ -233,24 +252,24 @@ ESP.Friction = (function(){
     const acik = (ESP.Mod && ESP.Mod.active) ? ESP.Mod.active() : [];
     if(acik.length > 3){
       out.push({ id:'fewer-modules', label:acik.length + ' bölüm açık',
-        note:'Aynı anda ' + acik.length + ' disiplin taşımak, her birinin '
+        note:yz('esp.core.friction.ayni-anda') + acik.length + ' disiplin taşımak, her birinin '
            + 'kaydını da taşımak demektir. Kapatılan bölümün verisi silinmez.',
         act:'go-profile' });
     }
     if(ESP.Timer && !ESP.Timer.active()){
-      out.push({ id:'use-timer', label:'Süreyi elle yazıyorsun',
-        note:'Zamanlayıcı, oturum girişinin çoğunu ortadan kaldırır: '
+      out.push({ id:'use-timer', label:yz('esp.core.friction.sureyi-elle-yaziyorsun'),
+        note:yz('esp.core.friction.zamanlayici-oturum-girisinin')
            + 'başlat–bitir, kayıt kendiliğinden düşer.', act:'timer-hint' });
     }
     const bek = (ESP.S.proposals || []).filter(p => p.status === 'pending').length;
     if(bek > 4){
       out.push({ id:'clear-proposals', label:bek + ' bekleyen teklif',
-        note:'Karar bekleyen her teklif, her açılışta yeniden okunuyor. '
+        note:yz('esp.core.friction.karar-bekleyen-her-teklif-he')
            + 'Toplu reddetmek de bir karardır.', act:'go-office' });
     }
     if(!out.length){
-      out.push({ id:'shorter-visits', label:'Ziyaretler uzun',
-        note:'Bölüm sayısı ve kayıt yükü makul görünüyor; süre ekranlarda '
+      out.push({ id:'shorter-visits', label:yz('esp.core.friction.ziyaretler-uzun'),
+        note:yz('esp.core.friction.bolum-sayisi-ve-kayit-yuku')
            + 'geziniyor. Günün tek işini yapıp kapatmak yeterli.', act:'go-today' });
     }
     return out;

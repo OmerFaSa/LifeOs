@@ -11,6 +11,9 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:60, id:'act:note', kind:'Eylem', label:'Atomik not ekle',
+  hint:'Okuma', run:() => { ESP.S.ui.readTab = 'notlar'; ESP.App.go('library');
+    setTimeout(() => { const el = document.getElementById('note-text'); if(el) el.focus(); }, 160); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.library.notlar':'Notlar',
   'esp.library.matris':'Matris',
@@ -95,7 +98,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.library.bagli':'bağlı',
   'esp.library.ssk':'SSK',
 });
-window.LIFEOS.PARCA.sayfa({ id:'library', modul:'esp', cekmece:'calisma', ad:'Okuma', ikon:'book', ek:{ disc:'reading' }, sira:50 });
+window.LIFEOS.PARCA.sayfa({ id:'library', modul:'esp', king:{ sira:190, ad:'Okuma', es:['okuma', 'kitap', 'kütüphane'] }, cekmece:'calisma', ad:'Okuma', ikon:'book', ek:{ disc:'reading' }, sira:50 });
 
 ESP.Screens.library = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
@@ -571,11 +574,11 @@ ESP.Screens.library = (function(){
         + P.sutun({ degerler:ay, yukseklik:40, gunler:ay.map((x, i) => AY[i]), etiket:yil + ' yılında ' + biten.length + ' kitap bitti' }) })], 'pk-izgara--iki');
   }
 
-  LIFEOS.PARCA.blok({ id:'library.bolum-1', sayfa:'library', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+  LIFEOS.PARCA.blok({ id:'library.okuma-sekmeleri', sayfa:'library', yer:'y1', sira:10, ad:'Okuma sekmeleri', ciz(){
     return K.Span(12, ESP.Parts.bolumler('reading', { act:'read-tab', aria:yz('esp.library.okuma-bolumleri'), tabs:TABS,
         govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null } }));
   } });
-  LIFEOS.PARCA.blok({ id:'library.bolum-2', sayfa:'library', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+  LIFEOS.PARCA.blok({ id:'library.okuma-panosu', sayfa:'library', yer:'y2', sira:10, ad:'Okuma panosu', ciz(){
     return K.Span(12, raw(PanoOkuma()));
   } });
   function render(){

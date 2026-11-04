@@ -51,6 +51,18 @@
         DENEMEYE bağlı hatalar girer ve yayın, hatanın değil denemenin
         yayınıdır: Öğren, çıkmış soru ve test kitabı hataları ne bu yayına ne
         «öteki yayınlar»a karışır (bir denemenin yayını «ÖSYM» yazılsa bile). */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.denemeanaliz.konu':'— konu —',
+  'ays.core.denemeanaliz.bu-konu-katalogda-yok':'Bu konu katalogda yok.',
+  'ays.core.denemeanaliz.bu-konu':'Bu konu ',
+  'ays.core.denemeanaliz.once-sorunun-fotografini-ekl':'Önce sorunun fotoğrafını ekle.',
+  'ays.core.denemeanaliz.cozmek-icin-goruntu-okuyabil':'Çözmek için görüntü okuyabilen bir model gerekir (Ayarlar › Model). Konuyu elle seçebilirsin.',
+  'ays.core.denemeanaliz.fotograf-modele-hazirlanamad':'Fotoğraf modele hazırlanamadı.',
+  'ays.core.denemeanaliz.bu-soru-bir-deneme-sinavinda':'Bu soru bir deneme sınavından: ',
+  'ays.core.denemeanaliz.model-cozemedi':'Model çözemedi: ',
+  'ays.core.denemeanaliz.bu-soru-yanlis-ya-da':'Bu soru yanlış ya da boş değil.',
+});
+
 
 window.R = window.R || {};
 
@@ -86,7 +98,7 @@ R.DenemeAnaliz = (function(){
   function konuSecenekleri(exam, testAdi){
     const ids = dersler(testAdi, exam && exam.family);
     const kume = ids.length ? R.SUBJECTS.filter(s => ids.indexOf(s.id) >= 0) : R.SUBJECTS;
-    return [{ value:'', label:'— konu —' }].concat(kume.reduce((acc, s) => acc.concat(s.topics.map(t => ({
+    return [{ value:'', label:yz('ays.core.denemeanaliz.konu') }].concat(kume.reduce((acc, s) => acc.concat(s.topics.map(t => ({
       value:s.id + '::' + t.id, label:(kume.length > 1 ? s.name + ' · ' : '') + t.name }))), []));
   }
 
@@ -339,9 +351,9 @@ R.DenemeAnaliz = (function(){
       delete a.topicRef; delete a.konuKaynak;
     }else{
       const k = konuBul(topicRef);
-      if(!k) return { ok:false, note:'Bu konu katalogda yok.' };
+      if(!k) return { ok:false, note:yz('ays.core.denemeanaliz.bu-konu-katalogda-yok') };
       const ids = dersler(test, exam.family);
-      if(ids.length && ids.indexOf(k.subject.id) < 0) return { ok:false, note:'Bu konu ' + test + ' testinin dersinden değil.' };
+      if(ids.length && ids.indexOf(k.subject.id) < 0) return { ok:false, note:yz('ays.core.denemeanaliz.bu-konu') + test + ' testinin dersinden değil.' };
       a.topicRef = topicRef;
       a.konuKaynak = kaynak === 'tahmin' ? 'tahmin' : 'elle';
     }
@@ -401,19 +413,19 @@ R.DenemeAnaliz = (function(){
     const o = opts || {};
     const [test, no] = bol(key);
     const blob = R.SoruFoto ? await R.SoruFoto.al(sahip(exam, key)) : null;
-    if(!blob) return { ok:false, note:'Önce sorunun fotoğrafını ekle.' };
-    if(!hazir()) return { ok:false, note:'Çözmek için görüntü okuyabilen bir model gerekir (Ayarlar › Model). Konuyu elle seçebilirsin.' };
+    if(!blob) return { ok:false, note:yz('ays.core.denemeanaliz.once-sorunun-fotografini-ekl') };
+    if(!hazir()) return { ok:false, note:yz('ays.core.denemeanaliz.cozmek-icin-goruntu-okuyabil') };
     let im, r;
     try{ im = await R.Solver.prepareImage(blob); }
-    catch(e){ return { ok:false, note:'Fotoğraf modele hazırlanamadı.' }; }
+    catch(e){ return { ok:false, note:yz('ays.core.denemeanaliz.fotograf-modele-hazirlanamad') }; }
     try{
       /* Anahtar modele VERİLMEZ: model anahtarı bilirse çözümü ona uydurur
          ve anahtarla karşılaştırma bir denetim olmaktan çıkar. */
       r = await R.Solver.solve({ image:im,
-        note:'Bu soru bir deneme sınavından: ' + test + ' testi, ' + no + '. soru. Beş şıklı bir sorudur; '
+        note:yz('ays.core.denemeanaliz.bu-soru-bir-deneme-sinavinda') + test + ' testi, ' + no + '. soru. Beş şıklı bir sorudur; '
           + 'cevabını şık harfiyle (A–E) bildir.' }, { signal:o.signal });
     }catch(e){
-      return { ok:false, note:'Model çözemedi: ' + (R.LLM && R.LLM.errorText ? R.LLM.errorText(e && e.code) : 'hata') };
+      return { ok:false, note:yz('ays.core.denemeanaliz.model-cozemedi') + (R.LLM && R.LLM.errorText ? R.LLM.errorText(e && e.code) : 'hata') };
     }
     const m = (r && r.meta) || {};
     const harf = R.Solver.optionLetter ? R.Solver.optionLetter(m.answer || '') : null;
@@ -445,7 +457,7 @@ R.DenemeAnaliz = (function(){
 
   async function hatayaEkle(exam, key){
     const satir = yanlislar(exam).find(x => x.key === key);
-    if(!satir) return { ok:false, note:'Bu soru yanlış ya da boş değil.' };
+    if(!satir) return { ok:false, note:yz('ays.core.denemeanaliz.bu-soru-yanlis-ya-da') };
     const [test, no] = bol(key);
     const a = analizAl(exam, key, true);
     const var_ = hataOf(exam, test, no);

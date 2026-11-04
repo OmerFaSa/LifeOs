@@ -13,6 +13,13 @@
         aranmaz — geçmeyen kavram «geçmedi»dir, «bilinmiyor» değil.
      4. SES CİHAZDA KALIR: dikte tarayıcının kendi tanımasıdır (core/voice),
         kaydedilen yalnız sayılar ve tarihtir, anlatımın metni değil. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.anlat.veri-yok':'veri yok',
+  'esp.core.anlat.bu-kaynagin-notlarinda-en-az':'Bu kaynağın notlarında en az ',
+  'esp.core.anlat.anlatim-cok-kisa-en-az':'Anlatım çok kısa; en az birkaç cümle anlat.',
+  'esp.core.anlat.hesaplandi':'hesaplandı',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -47,15 +54,15 @@ ESP.Anlat = (function(){
   function kapsam(metin, liste){
     const m = U().norm(metin || '');
     if(!liste || liste.length < EN_AZ_KAVRAM){
-      return { ok:false, etiket:'veri yok', why:'Bu kaynağın notlarında en az ' + EN_AZ_KAVRAM
+      return { ok:false, etiket:yz('esp.core.anlat.veri-yok'), why:yz('esp.core.anlat.bu-kaynagin-notlarinda-en-az') + EN_AZ_KAVRAM
         + ' kavram etiketi olmalı; önce notlarına kavram ekle.' };
     }
     if(m.trim().split(/\s+/).length < 15){
-      return { ok:false, etiket:'veri yok', why:'Anlatım çok kısa; en az birkaç cümle anlat.' };
+      return { ok:false, etiket:yz('esp.core.anlat.veri-yok'), why:yz('esp.core.anlat.anlatim-cok-kisa-en-az') };
     }
     const gecen = liste.filter(k => gecer(m, k));
     const gecmeyen = liste.filter(k => gecen.indexOf(k) < 0);
-    return { ok:true, etiket:'hesaplandı', gecen, gecmeyen, toplam:liste.length,
+    return { ok:true, etiket:yz('esp.core.anlat.hesaplandi'), gecen, gecmeyen, toplam:liste.length,
       oran:Math.round(100 * gecen.length / liste.length) };
   }
 

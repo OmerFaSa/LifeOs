@@ -12,6 +12,8 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:70, id:'act:draft', kind:'Eylem', label:'Yeni taslak aç',
+  hint:'Yazı', run:() => { ESP.S.ui.writeTab = 'taslaklar'; ESP.App.go('writing'); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.writing.taslaklar':'Taslaklar',
   'esp.writing.olcum':'Ölçüm',
@@ -68,7 +70,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.writing.yazi-laboratuvari':'Yazı Laboratuvarı',
   'esp.writing.kelime-7g':'kelime / 7g',
 });
-window.LIFEOS.PARCA.sayfa({ id:'writing', modul:'esp', cekmece:'calisma', ad:'Yazı', ikon:'quill', ek:{ disc:'writing' }, sira:60 });
+window.LIFEOS.PARCA.sayfa({ id:'writing', modul:'esp', king:{ sira:200, ad:'Yazı', es:['yazı', 'yazma', 'yazı laboratuvar'] }, cekmece:'calisma', ad:'Yazı', ikon:'quill', ek:{ disc:'writing' }, sira:60 });
 
 ESP.Screens.writing = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
@@ -318,7 +320,7 @@ ESP.Screens.writing = (function(){
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
   const GOVDE = { taslaklar:draftRows, olcum:measureRows, araclar:toolRows, ogren:topicRows };
 
-  LIFEOS.PARCA.blok({ id:'writing.bolum-1', sayfa:'writing', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+  LIFEOS.PARCA.blok({ id:'writing.yazi-sekmeleri', sayfa:'writing', yer:'y1', sira:10, ad:'Yazı sekmeleri', ciz(){
     return K.Span(12, ESP.Parts.bolumler('writing', { act:'write-tab', aria:yz('esp.writing.yazi-bolumleri'), tabs:TABS,
         govde:GOVDE, sayi:{ taslaklar:(S.drafts || []).length || null } }));
   } });

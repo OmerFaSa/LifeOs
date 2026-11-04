@@ -8,6 +8,10 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'spi', sira:90, uret(){
+  return SP.AGENTS.map(a => ({ id:'agent:' + a.id, kind:'Ajan', label:a.name + ' — ' + a.role,
+    hint:a.title, run:() => { SP.S.ui.officeAgent = a.id; SP.App.go('team'); } }));
+} });
 window.LIFEOS.PARCA.yazilar({
   'spi.team.sesli-sohbet':'Sesli sohbet',
   'spi.team.acik':'açık',
@@ -278,22 +282,22 @@ SP.Screens.team = (function(){
   LIFEOS.PARCA.blok({ id:'team.aciklamalar', sayfa:'team', yer:'y1', sira:10, ad:'Açıklamalar', ciz(){
     return raw(UI.rail(['office', 'grounding', 'no-model', 'privacy']));
   } });
-  LIFEOS.PARCA.blok({ id:'team.voicecard', sayfa:'team', yer:'y2', sira:10, ad:'voiceCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'team.voicecard', sayfa:'team', yer:'y2', sira:10, ad:'Ses', ciz(){
     return voiceCard();
   } });
-  LIFEOS.PARCA.blok({ id:'team.scopecard', sayfa:'team', yer:'y2', sira:20, ad:'scopeCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'team.scopecard', sayfa:'team', yer:'y2', sira:20, ad:'Kapsam', ciz(){
     return scopeCard();
   } });
-  LIFEOS.PARCA.blok({ id:'team.suggestcard', sayfa:'team', yer:'y2', sira:30, ad:'suggestCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'team.suggestcard', sayfa:'team', yer:'y2', sira:30, ad:'Öneri', ciz(){
     return suggestCard();
   } });
-  LIFEOS.PARCA.blok({ id:'team.briefcard', sayfa:'team', yer:'y2', sira:40, ad:'briefCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'team.briefcard', sayfa:'team', yer:'y2', sira:40, ad:'Özet', ciz(){
     return briefCard();
   } });
-  LIFEOS.PARCA.blok({ id:'team.bolum-6', sayfa:'team', yer:'y3', sira:10, ad:'Bölüm 6', ciz(){
+  LIFEOS.PARCA.blok({ id:'team.ajan-penceresi', sayfa:'team', yer:'y3', sira:10, ad:'Ajan penceresi', ciz(){
     return when(OS(), () => raw(pencere()));
   } });
-  LIFEOS.PARCA.blok({ id:'team.tabscard', sayfa:'team', yer:'y4', sira:10, ad:'tabsCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'team.tabscard', sayfa:'team', yer:'y4', sira:10, ad:'Sekmeler', ciz(){
     return tabsCard();
   } });
   async function render(){

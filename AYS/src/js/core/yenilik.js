@@ -20,20 +20,31 @@
    YENİ BİR SÜRÜMDE: `surum`u değiştir ve listeyi baştan yaz. Madde
    yalnız KULLANICININ GÖRDÜĞÜ şeyi söyler; «refaktör» madde değildir.
    `moduller` verilmezse madde üç arayüz için de doğrudur. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.yenilik.sekiz-cekmece-bugun-plan-cal':'Sekiz çekmece: Bugün, Plan, Çalışma, Analiz, Onaylar, Ofis, Kütüphanem, Ayarlar. Her ekranın yolu sayfanın başında yazar.',
+  'ortak.yenilik.onaylar-bekleyen-butun-oneri':'Onaylar: bekleyen bütün öneriler tek yerde; Bugün yalnız en öndekini gösterir.',
+  'ortak.yenilik.bugun-uc-alan-simdi-durum':'Bugün üç alan: şimdi, durum ve tek öneri. Geri kalan satırlar «Ayrıntı»da.',
+  'ortak.yenilik.ayarlarda-arama-kaydedilmemi':'Ayarlarda arama, kaydedilmemiş değişiklik şeridi ve «Varsayılana dön».',
+  'ortak.yenilik.her-tiklamada-sayfanin-basta':'Her tıklamada sayfanın baştan kayarak gelmesi: artık yalnız yeni ekranda.',
+  'ortak.yenilik.bir-ekran-cizilemediginde-ci':'Bir ekran çizilemediğinde çıkan kırmızı hata: artık sakin bir kart ve verinin yerinde olduğu.',
+  'ortak.yenilik.yedi-palet-ve-bes-duzen':'Yedi palet ve beş düzen: tek tasarım, tema Açık · Koyu · Sistem.',
+  'ortak.yenilik.ekran-icindeki-sekmeler-bolu':'Ekran içindeki sekmeler: bölümler artık alt alta, bölüm çubuğuyla gezilir.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
 window.LIFEOS.YENILIK = (function(){
   const SURUM = '2026-09-24';
   const MADDELER = [
-    { tur:'yeni', metin:'Sekiz çekmece: Bugün, Plan, Çalışma, Analiz, Onaylar, Ofis, Kütüphanem, Ayarlar. Her ekranın yolu sayfanın başında yazar.' },
-    { tur:'yeni', metin:'Onaylar: bekleyen bütün öneriler tek yerde; Bugün yalnız en öndekini gösterir.' },
-    { tur:'yeni', metin:'Bugün üç alan: şimdi, durum ve tek öneri. Geri kalan satırlar «Ayrıntı»da.' },
-    { tur:'yeni', metin:'Ayarlarda arama, kaydedilmemiş değişiklik şeridi ve «Varsayılana dön».' },
-    { tur:'duzeltilen', metin:'Her tıklamada sayfanın baştan kayarak gelmesi: artık yalnız yeni ekranda.' },
-    { tur:'duzeltilen', metin:'Bir ekran çizilemediğinde çıkan kırmızı hata: artık sakin bir kart ve verinin yerinde olduğu.' },
-    { tur:'kaldirilan', metin:'Yedi palet ve beş düzen: tek tasarım, tema Açık · Koyu · Sistem.' },
-    { tur:'kaldirilan', metin:'Ekran içindeki sekmeler: bölümler artık alt alta, bölüm çubuğuyla gezilir.' },
+    { tur:'yeni', metin:yz('ortak.yenilik.sekiz-cekmece-bugun-plan-cal') },
+    { tur:'yeni', metin:yz('ortak.yenilik.onaylar-bekleyen-butun-oneri') },
+    { tur:'yeni', metin:yz('ortak.yenilik.bugun-uc-alan-simdi-durum') },
+    { tur:'yeni', metin:yz('ortak.yenilik.ayarlarda-arama-kaydedilmemi') },
+    { tur:'duzeltilen', metin:yz('ortak.yenilik.her-tiklamada-sayfanin-basta') },
+    { tur:'duzeltilen', metin:yz('ortak.yenilik.bir-ekran-cizilemediginde-ci') },
+    { tur:'kaldirilan', metin:yz('ortak.yenilik.yedi-palet-ve-bes-duzen') },
+    { tur:'kaldirilan', metin:yz('ortak.yenilik.ekran-icindeki-sekmeler-bolu') },
   ];
   const BASLIK = { yeni:'Yeni', duzeltilen:'Düzeltilen', kaldirilan:'Kaldırılan' };
 

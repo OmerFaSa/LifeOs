@@ -15,6 +15,8 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'spi', sira:40, id:'act:vitals', kind:'Eylem', label:'Günün ölçümünü gir', route:'today',
+  hint:'Toparlanma', run:() => SP.App.go('today') });
 window.LIFEOS.PARCA.yazilar({
   'spi.today.gece-uykusu-saat':'Gece uykusu (saat)',
   'spi.today.i-stirahat-nabzi':'İstirahat nabzı',
@@ -236,7 +238,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.today.kirmizi-bayrak':'kırmızı bayrak',
   'spi.today.hedefler':'Hedefler',
 });
-window.LIFEOS.PARCA.sayfa({ id:'today', modul:'spi', cekmece:'bugun', ad:'Genel bakış', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'today', modul:'spi', king:{ sira:10, ad:'Bugün', es:['bugün', 'genel bakış', 'ölçüm'] }, cekmece:'bugun', ad:'Genel bakış', sira:10 });
 window.LIFEOS.PARCA.sayfa({ id:'hedefler', modul:'spi', cekmece:'plan', ad:'Hedefler', sira:20 });
 
 SP.Screens.today = (function(){
@@ -1722,42 +1724,39 @@ SP.Screens.today = (function(){
        GÜN        en acil uyarı, öğün yuvaları, vakti gelen hatırlatma, günün sorusu
      Kapağın karoları, pano kartları, Durum ve Öneri kalkmadı: Analiz'in
      başındaki «Bugün» özetinde (ozet()). */
-  LIFEOS.PARCA.blok({ id:'today.bolum-1', sayfa:'today', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ acil, vakti, sig, soruKart, soru }){
+  LIFEOS.PARCA.blok({ id:'today.gunun-sorusu', sayfa:'today', yer:'y1', sira:10, ad:'Günün sorusu', ciz({ acil, vakti, sig, soruKart, soru }){
     return when(soru, () => K.Ledger([soru]));
   } });
-  LIFEOS.PARCA.blok({ id:'today.bolum-2', sayfa:'today', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ acil, vakti, sig, soruKart, soru }){
+  LIFEOS.PARCA.blok({ id:'today.soru-karti', sayfa:'today', yer:'y2', sira:10, ad:'Soru kartı', ciz({ acil, vakti, sig, soruKart, soru }){
     return raw(soruKart);
   } });
-  LIFEOS.PARCA.blok({ id:'today.bolum-3', sayfa:'today', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ acil, vakti, sig, soruKart, soru }){
+  LIFEOS.PARCA.blok({ id:'today.zamani-gelen-is', sayfa:'today', yer:'y3', sira:10, ad:'Zamanı gelen iş', ciz({ acil, vakti, sig, soruKart, soru }){
     return when(vakti, () => K.Ledger([vakti]));
   } });
-  LIFEOS.PARCA.blok({ id:'today.gunkutusu', sayfa:'today', yer:'y4', sira:10, ad:'GunKutusu', ciz({ acil, vakti, sig, soruKart, soru }){
+  LIFEOS.PARCA.blok({ id:'today.gunkutusu', sayfa:'today', yer:'y4', sira:10, ad:'Gün', ciz({ acil, vakti, sig, soruKart, soru }){
     return GunKutusu();
   } });
-  LIFEOS.PARCA.blok({ id:'today.bolum-5', sayfa:'today', yer:'y5', sira:10, ad:'Bölüm 5', ciz({ acil, vakti, sig, soruKart, soru }){
+  LIFEOS.PARCA.blok({ id:'today.acil-uyari', sayfa:'today', yer:'y5', sira:10, ad:'Acil uyarı', ciz({ acil, vakti, sig, soruKart, soru }){
     return when(acil, () => acil.kart);
   } });
-  LIFEOS.PARCA.blok({ id:'today.bolum-6', sayfa:'today', yer:'y6', sira:10, ad:'Bölüm 6', ciz({ acil, vakti, sig, soruKart, soru }){
+  LIFEOS.PARCA.blok({ id:'today.ogun-kutusu', sayfa:'today', yer:'y6', sira:10, ad:'Öğün kutusu', ciz({ acil, vakti, sig, soruKart, soru }){
     return (window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu()) ? '' : OgunKutusu();
   } });
-  LIFEOS.PARCA.blok({ id:'today.sukutusu', sayfa:'today', yer:'y7', sira:10, ad:'SuKutusu', ciz({ acil, vakti, sig, soruKart, soru }){
+  LIFEOS.PARCA.blok({ id:'today.sukutusu', sayfa:'today', yer:'y7', sira:10, ad:'Su', ciz({ acil, vakti, sig, soruKart, soru }){
     return SuKutusu();
   } });
-  LIFEOS.PARCA.blok({ id:'today.enerjikutusu', sayfa:'today', yer:'y8', sira:10, ad:'EnerjiKutusu', ciz({ acil, vakti, sig, soruKart, soru }){
+  LIFEOS.PARCA.blok({ id:'today.enerjikutusu', sayfa:'today', yer:'y8', sira:10, ad:'Enerji', ciz({ acil, vakti, sig, soruKart, soru }){
     return EnerjiKutusu();
   } });
-  LIFEOS.PARCA.blok({ id:'today.olcumkutusu', sayfa:'today', yer:'y9', sira:10, ad:'OlcumKutusu', ciz({ acil, vakti, sig, soruKart, soru }){
+  LIFEOS.PARCA.blok({ id:'today.olcumkutusu', sayfa:'today', yer:'y9', sira:10, ad:'Ölçüm', ciz({ acil, vakti, sig, soruKart, soru }){
     return OlcumKutusu();
   } });
-  LIFEOS.PARCA.blok({ id:'today.bolum-10', sayfa:'today', yer:'y10', sira:10, ad:'Bölüm 10', ciz({ acil, vakti, sig, soruKart, soru }){
+  LIFEOS.PARCA.blok({ id:'today.hizli-giris-kutusu', sayfa:'today', yer:'y10', sira:10, ad:'Hızlı giriş kutusu', ciz({ acil, vakti, sig, soruKart, soru }){
     return raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '');
   } });
-  LIFEOS.PARCA.blok({ id:'today.bolum-11', sayfa:'today', yer:'y11', sira:10, ad:'Bölüm 11', ciz({ acil, vakti, sig, soruKart, soru }){
+  LIFEOS.PARCA.blok({ id:'today.onay-bekleyen-teklifler', sayfa:'today', yer:'y11', sira:10, ad:'Onay bekleyen teklifler', ciz({ acil, vakti, sig, soruKart, soru }){
     return (SP.S.ui.kingTeklifler || []).length ? html`<section class="bugun__alan" aria-label="Onay bekliyor">
           ${SP.Screens.onaylar.kingKart()}</section>` : '';
-  } });
-  LIFEOS.PARCA.blok({ id:'today.bolum-12', sayfa:'today', yer:'y12', sira:10, ad:'Bölüm 12', ciz({ acil, vakti, sig, soruKart, soru }){
-    return '';
   } });
   async function render(){
     /* Karşılamanın notu: bugünün kural cümlesi (Siri'ye giden aynı cümle). */
@@ -1776,7 +1775,7 @@ SP.Screens.today = (function(){
     const parcaB = { acil, vakti, sig, soruKart, soru };
     return String(html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
-        ${LIFEOS.PARCA.yer('today', 'y12', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+        
         ${LIFEOS.PARCA.yer('today', 'y11', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         <section class="bugun__alan" aria-label="Ne yaptın?">
           ${LIFEOS.PARCA.yer('today', 'y10', K, parcaB, typeof raw === 'undefined' ? null : raw)}

@@ -18,6 +18,30 @@
       gozlem de her okumada yeniden dogrulanir; artik dogru degilse duser.
 
    Serbest metin hicbir yolda hafizaya giremez. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.journal.plan-tamamlama':'plan tamamlama',
+  'ays.core.journal.uyku-ortalamasi':'uyku ortalaması',
+  'ays.core.journal.enerji-ortalamasi':'enerji ortalaması',
+  'ays.core.journal.davranis-serisi':'davranış serisi',
+  'ays.core.journal.analiz-borcu':'analiz borcu',
+  'ays.core.journal.tekrar-borcu':'tekrar borcu',
+  'ays.core.journal.acik-yanlis':'açık yanlış',
+  'ays.core.journal.konu-kapanisi':'konu kapanışı',
+  'ays.core.journal.tyt-medyani':'TYT medyanı',
+  'ays.core.journal.tyt-kapanisi':'TYT kapanışı',
+  'ays.core.journal.ayt-medyani':'AYT medyanı',
+  'ays.core.journal.ayt-kapanisi':'AYT kapanışı',
+  'ays.core.journal.bilinmeyen-olcut':'bilinmeyen ölçüt',
+  'ays.core.journal.bilinmeyen-karsilastirma':'bilinmeyen karşılaştırma',
+  'ays.core.journal.esik-sayi-degil':'eşik sayı değil',
+  'ays.core.journal.olcut-hesaplanamadi':'ölçüt hesaplanamadı',
+  'ays.core.journal.bu-olcut-icin-henuz-veri':'bu ölçüt için henüz veri yok',
+  'ays.core.journal.son':'Son ',
+  'ays.core.journal.deneme-oncesi-yeterli-uyunan':'Deneme öncesi yeterli uyunan günlerde medyanın ',
+  'ays.core.journal.analiz-edilen-denemelerin':'Analiz edilen denemelerin %',
+  'ays.core.journal.bilinmeyen-ajan':'bilinmeyen ajan',
+});
+
 
 window.R = window.R || {};
 
@@ -31,29 +55,29 @@ R.Journal = (function(){
      Liste kapalidir: ajan yeni olcut uyduramaz. */
 
   const METRICS = {
-    planTamamlama:   { label:'plan tamamlama',   unit:'%',      agent:'rehber',
+    planTamamlama:   { label:yz('ays.core.journal.plan-tamamlama'),   unit:'%',      agent:'rehber',
                        get:() => C.planCompletion(M.currentWeek()) },
-    uykuOrtalamasi:  { label:'uyku ortalaması',  unit:' saat',  agent:'rehber',
+    uykuOrtalamasi:  { label:yz('ays.core.journal.uyku-ortalamasi'),  unit:' saat',  agent:'rehber',
                        get:() => C.sleepAverage(7) },
-    enerjiOrtalamasi:{ label:'enerji ortalaması',unit:'/5',     agent:'rehber',
+    enerjiOrtalamasi:{ label:yz('ays.core.journal.enerji-ortalamasi'),unit:'/5',     agent:'rehber',
                        get:() => M.energyAverage(7) },
-    davranisSerisi:  { label:'davranış serisi',  unit:' gün',   agent:'rehber',
+    davranisSerisi:  { label:yz('ays.core.journal.davranis-serisi'),  unit:' gün',   agent:'rehber',
                        get:() => C.behaviorStreak().streak },
-    analizBorcu:     { label:'analiz borcu',     unit:' deneme',agent:'analist',
+    analizBorcu:     { label:yz('ays.core.journal.analiz-borcu'),     unit:' deneme',agent:'analist',
                        get:() => C.analysisDebt().length },
-    tekrarBorcu:     { label:'tekrar borcu',     unit:'%',      agent:'analist',
+    tekrarBorcu:     { label:yz('ays.core.journal.tekrar-borcu'),     unit:'%',      agent:'analist',
                        get:() => C.cardDebt() },
-    acikYanlis:      { label:'açık yanlış',      unit:' kayıt', agent:'analist',
+    acikYanlis:      { label:yz('ays.core.journal.acik-yanlis'),      unit:' kayıt', agent:'analist',
                        get:() => C.openErrors().length },
-    konuKapanisi:    { label:'konu kapanışı',    unit:'%',      agent:'analist',
+    konuKapanisi:    { label:yz('ays.core.journal.konu-kapanisi'),    unit:'%',      agent:'analist',
                        get:() => C.overallClosure().pct },
-    tytMedyan:       { label:'TYT medyanı',      unit:' net',   agent:'tyt',
+    tytMedyan:       { label:yz('ays.core.journal.tyt-medyani'),      unit:' net',   agent:'tyt',
                        get:() => C.medianTrend('TYT').last3 },
-    tytKapanis:      { label:'TYT kapanışı',     unit:'%',      agent:'tyt',
+    tytKapanis:      { label:yz('ays.core.journal.tyt-kapanisi'),     unit:'%',      agent:'tyt',
                        get:() => C.examClosure('TYT').pct },
-    aytMedyan:       { label:'AYT medyanı',      unit:' net',   agent:'ayt',
+    aytMedyan:       { label:yz('ays.core.journal.ayt-medyani'),      unit:' net',   agent:'ayt',
                        get:() => C.medianTrend('AYT').last3 },
-    aytKapanis:      { label:'AYT kapanışı',     unit:'%',      agent:'ayt',
+    aytKapanis:      { label:yz('ays.core.journal.ayt-kapanisi'),     unit:'%',      agent:'ayt',
                        get:() => C.examClosure('AYT').pct },
   };
 
@@ -70,16 +94,16 @@ R.Journal = (function(){
 
   /* Bir gozlemi veri uzerinde calistirir. */
   function verify(obs){
-    if(!obs || !METRICS[obs.metric]) return { ok:false, why:'bilinmeyen ölçüt' };
+    if(!obs || !METRICS[obs.metric]) return { ok:false, why:yz('ays.core.journal.bilinmeyen-olcut') };
     const op = OPS[obs.op];
-    if(!op) return { ok:false, why:'bilinmeyen karşılaştırma' };
+    if(!op) return { ok:false, why:yz('ays.core.journal.bilinmeyen-karsilastirma') };
     const value = Number(obs.value);
-    if(!Number.isFinite(value)) return { ok:false, why:'eşik sayı değil' };
+    if(!Number.isFinite(value)) return { ok:false, why:yz('ays.core.journal.esik-sayi-degil') };
 
     let actual;
     try{ actual = METRICS[obs.metric].get(); }
-    catch(e){ return { ok:false, why:'ölçüt hesaplanamadı' }; }
-    if(actual == null) return { ok:false, why:'bu ölçüt için henüz veri yok', actual:null };
+    catch(e){ return { ok:false, why:yz('ays.core.journal.olcut-hesaplanamadi') }; }
+    if(actual == null) return { ok:false, why:yz('ays.core.journal.bu-olcut-icin-henuz-veri'), actual:null };
 
     return { ok:op.test(actual, value), actual, metric:METRICS[obs.metric] };
   }
@@ -165,7 +189,7 @@ R.Journal = (function(){
     if(!top || top.adet < 3) return null;
     return {
       id:'repeated-skip', agent:'rehber', tone:'warn',
-      text:'Son ' + weeks + ' haftada en sık atlama nedeni "' + top.neden + '" ('
+      text:yz('ays.core.journal.son') + weeks + ' haftada en sık atlama nedeni "' + top.neden + '" ('
         + top.adet + ' blok) — tek seferlik bir aksama değil, tekrar eden bir kalıp.',
       evidence:{ neden:top.neden, adet:top.adet, hafta:weeks },
     };
@@ -178,7 +202,7 @@ R.Journal = (function(){
     if(!imp || !imp.ok || Math.abs(imp.diff) < 2) return null;
     return {
       id:'sleep-link', agent:'rehber', tone:imp.diff > 0 ? 'warn' : 'info',
-      text:'Deneme öncesi yeterli uyunan günlerde medyanın '
+      text:yz('ays.core.journal.deneme-oncesi-yeterli-uyunan')
         + U.fmtNet(Math.abs(imp.diff)) + ' net ' + (imp.diff > 0 ? 'yüksek' : 'düşük')
         + ' çıkıyor (' + imp.goodCount + ' yeterli, ' + imp.badCount + ' yetersiz uyku kaydı).',
       evidence:{ fark:imp.diff, yeterli:imp.goodCount, yetersiz:imp.badCount },
@@ -194,7 +218,7 @@ R.Journal = (function(){
     if(pct < 50) return null;
     return {
       id:'debt-habit', agent:'analist', tone:'warn',
-      text:'Analiz edilen denemelerin %' + pct + '’i 24 saatten geç çözümlenmiş ('
+      text:yz('ays.core.journal.analiz-edilen-denemelerin') + pct + '’i 24 saatten geç çözümlenmiş ('
         + late.length + '/' + done.length + ') — borç birikmesi tek seferlik değil.',
       evidence:{ yuzde:pct, gec:late.length, toplam:done.length },
     };
@@ -236,7 +260,7 @@ R.Journal = (function(){
   function all(){ return S.journal || {}; }
 
   async function record(agentId, obs){
-    if(!R.AGENT_BY_ID[agentId]) return { ok:false, why:'bilinmeyen ajan' };
+    if(!R.AGENT_BY_ID[agentId]) return { ok:false, why:yz('ays.core.journal.bilinmeyen-ajan') };
     const check = verify(obs);
     if(!check.ok){
       return { ok:false, why:check.why || 'veri bu gözlemi desteklemiyor', actual:check.actual };

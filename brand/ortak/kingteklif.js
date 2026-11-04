@@ -20,6 +20,17 @@
       çizilmez, modül yavaşlamaz.
    4. İSTEK SONRASI TAZELENİR. Modül King'e iş verdiğinde `lifeos:king`
       olayını yayar; kart hemen tazelenir. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.kingteklif.hkm-bagli-degil-teklif-onayl':'HKM bağlı değil; teklif onaylanamadı.',
+  'ortak.kingteklif.onayladin-ama-is-acilamadi':'Onayladın ama iş açılamadı: ',
+  'ortak.kingteklif.onaylandi-is-emri':'Onaylandı: iş emri #',
+  'ortak.kingteklif.gecersiz-cevap':'Geçersiz cevap.',
+  'ortak.kingteklif.hkm-bagli-degil-cevap-iletil':'HKM bağlı değil; cevap iletilemedi.',
+  'ortak.kingteklif.hkm-bagli-degil-teklif-iptal':'HKM bağlı değil; teklif iptal edilemedi.',
+  'ortak.kingteklif.i-ptal-edilemedi':'İptal edilemedi (',
+  'ortak.kingteklif.teklif-iptal-edildi-is-acilm':'Teklif iptal edildi; iş açılmadı.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -75,7 +86,7 @@ LIFEOS.KingTeklif = (function(){
     async function onayla(id, secenek){
       const r = await istek('/api/king/emir/' + encodeURIComponent(id) + '/onayla',
         { secenek:secenek || null });
-      if(!r.baglanti) return { ok:false, metin:'HKM bağlı değil; teklif onaylanamadı.' };
+      if(!r.baglanti) return { ok:false, metin:yz('ortak.kingteklif.hkm-bagli-degil-teklif-onayl') };
       const g = r.govde || {};
       if(r.status !== 200 || !g.ok){
         return { ok:false, metin:g.note || 'Teklif onaylanamadı (' + (r.status || 'bağlantı') + ').' };
@@ -83,9 +94,9 @@ LIFEOS.KingTeklif = (function(){
       son = son.filter(x => String(x.id) !== String(id));
       const e = g.emir || {};
       if(e.durum === 'reddedildi'){
-        return { ok:false, metin:'Onayladın ama iş açılamadı: ' + (g.note || 'imkân kontrolü geçmedi.') };
+        return { ok:false, metin:yz('ortak.kingteklif.onayladin-ama-is-acilamadi') + (g.note || 'imkân kontrolü geçmedi.') };
       }
-      return { ok:true, metin:'Onaylandı: iş emri #' + e.id + ' BAM’da açıldı'
+      return { ok:true, metin:yz('ortak.kingteklif.onaylandi-is-emri') + e.id + ' BAM’da açıldı'
         + (e.tahmin && e.tahmin.metin ? '; tahmini süre ' + e.tahmin.metin + ' (tahmin)' : '')
         + '. Bitince sonuç teklif olarak gelir.' };
     }
@@ -93,9 +104,9 @@ LIFEOS.KingTeklif = (function(){
     /* Ara onay (Part 8b): parça parça üretimde bölüm bitti; «devam» ya da
        «dur». Dur, üretilenle bitirir; hiçbir bölüm kaybolmaz. */
     async function parca(id, karar){
-      if(karar !== 'devam' && karar !== 'dur') return { ok:false, metin:'Geçersiz cevap.' };
+      if(karar !== 'devam' && karar !== 'dur') return { ok:false, metin:yz('ortak.kingteklif.gecersiz-cevap') };
       const r = await istek('/api/king/emir/' + encodeURIComponent(id) + '/' + karar, {});
-      if(!r.baglanti) return { ok:false, metin:'HKM bağlı değil; cevap iletilemedi.' };
+      if(!r.baglanti) return { ok:false, metin:yz('ortak.kingteklif.hkm-bagli-degil-cevap-iletil') };
       const g = r.govde || {};
       if(r.status !== 200 || !g.ok) return { ok:false, metin:g.note || 'İletilemedi.' };
       son = son.filter(x => String(x.id) !== String(id));
@@ -104,10 +115,10 @@ LIFEOS.KingTeklif = (function(){
 
     async function iptal(id){
       const r = await istek('/api/king/emir/' + encodeURIComponent(id) + '/iptal', {});
-      if(!r.baglanti) return { ok:false, metin:'HKM bağlı değil; teklif iptal edilemedi.' };
-      if(r.status !== 200) return { ok:false, metin:'İptal edilemedi (' + (r.status || 'bağlantı') + ').' };
+      if(!r.baglanti) return { ok:false, metin:yz('ortak.kingteklif.hkm-bagli-degil-teklif-iptal') };
+      if(r.status !== 200) return { ok:false, metin:yz('ortak.kingteklif.i-ptal-edilemedi') + (r.status || 'bağlantı') + ').' };
       son = son.filter(x => String(x.id) !== String(id));
-      return { ok:true, metin:'Teklif iptal edildi; iş açılmadı.' };
+      return { ok:true, metin:yz('ortak.kingteklif.teklif-iptal-edildi-is-acilm') };
     }
 
     /* MODÜLÜN YOKLAMASI (app.js: açılışta, King'e iş verilince, dakikada

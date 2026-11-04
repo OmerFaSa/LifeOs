@@ -21,6 +21,28 @@
         doz yok (AGENTS §1.5).
      4. KARAR KURAL MOTORUNDAN. Tek karar Calc.nextAction'dır; model
         yalnız istenirse özetler. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.inceleme.hesaplandi':'hesaplandı',
+  'spi.core.inceleme.kisa-geceden-sonra-toparlanm':'Kısa geceden sonra toparlanma',
+  'spi.core.inceleme.7-saatten-az-uyunan-geceleri':'7 saatten az uyunan gecelerin ertesi',
+  'spi.core.inceleme.7-saat-ve-ustu':'7 saat ve üstü',
+  'spi.core.inceleme.hareketli-gunun-gecesi':'Hareketli günün gecesi',
+  'spi.core.inceleme.hareket-girilen-gunlerin-gec':'hareket girilen günlerin gecesi',
+  'spi.core.inceleme.hareket-girilmeyen-gunlerin':'hareket girilmeyen günlerin gecesi',
+  'spi.core.inceleme.gunduz-kisa-uykusu-ve-gece':'Gündüz kısa uykusu ve gece uykusu',
+  'spi.core.inceleme.onceki-gun-kisa-uyku-olan':'önceki gün kısa uyku olan geceler',
+  'spi.core.inceleme.kisa-uyku-olmayan':'kısa uyku olmayan',
+  'spi.core.inceleme.protein-hedefi-ve-ertesi-gun':'Protein hedefi ve ertesi gün',
+  'spi.core.inceleme.protein-hedefinin-tuttugu-gu':'protein hedefinin tuttuğu günlerin ertesi',
+  'spi.core.inceleme.tutmadigi-gunlerin-ertesi':'tutmadığı günlerin ertesi',
+  'spi.core.inceleme.toparlanma-ortalamasi':'Toparlanma ortalaması',
+  'spi.core.inceleme.gece-uykusu-ortalamasi':'Gece uykusu ortalaması',
+  'spi.core.inceleme.hareket-seansi':'Hareket seansı',
+  'spi.core.inceleme.olculdu':'ölçüldü',
+  'spi.core.inceleme.ogun-girilen-gun':'Öğün girilen gün',
+  'spi.core.inceleme.asgari-gun':'Asgari gün',
+});
+
 
 window.SP = window.SP || {};
 
@@ -64,7 +86,7 @@ SP.Inceleme = (function(){
     const ma = ort(o.a.l), mb = ort(o.b.l);
     const fark = ma - mb;
     const yaz = x => sayi(x, o.birim);
-    return { id:o.id, baslik:o.baslik, acik:true, etiket:'hesaplandı',
+    return { id:o.id, baslik:o.baslik, acik:true, etiket:yz('spi.core.inceleme.hesaplandi'),
       a:{ ad:o.a.ad, ort:ma, n:na }, b:{ ad:o.b.ad, ort:mb, n:nb }, fark, birim:o.birim,
       metin:o.a.ad + ' ' + yaz(ma) + ' ' + o.birim + ' (' + na + ' gün), ' + o.b.ad + ' ' + yaz(mb) + ' ' + o.birim + ' (' + nb + ' gün)'
         + '; fark ' + (fark >= 0 ? '+' : '−') + yaz(Math.abs(fark)) + ' ' + o.birim + '.',
@@ -78,8 +100,8 @@ SP.Inceleme = (function(){
     {
       const a = [], b = [];
       seri(uyku).forEach(x => { const t = toparlanma(ertesi(x.d)); if(t == null) return; (x.v < 7 ? a : b).push(t); });
-      out.push(karsilastir({ id:'uyku-toparlanma', baslik:'Kısa geceden sonra toparlanma',
-        a:{ ad:'7 saatten az uyunan gecelerin ertesi', l:a }, b:{ ad:'7 saat ve üstü', l:b }, birim:'puan', ondalik:0 }));
+      out.push(karsilastir({ id:'uyku-toparlanma', baslik:yz('spi.core.inceleme.kisa-geceden-sonra-toparlanm'),
+        a:{ ad:yz('spi.core.inceleme.7-saatten-az-uyunan-geceleri'), l:a }, b:{ ad:yz('spi.core.inceleme.7-saat-ve-ustu'), l:b }, birim:'puan', ondalik:0 }));
     }
     /* 2 — Hareketli gün → o gecenin uykusu */
     {
@@ -89,15 +111,15 @@ SP.Inceleme = (function(){
         if(u == null) continue;
         (hareketDk(d) ? a : b).push(u);
       }
-      out.push(karsilastir({ id:'hareket-uyku', baslik:'Hareketli günün gecesi',
-        a:{ ad:'hareket girilen günlerin gecesi', l:a }, b:{ ad:'hareket girilmeyen günlerin gecesi', l:b }, birim:'saat' }));
+      out.push(karsilastir({ id:'hareket-uyku', baslik:yz('spi.core.inceleme.hareketli-gunun-gecesi'),
+        a:{ ad:yz('spi.core.inceleme.hareket-girilen-gunlerin-gec'), l:a }, b:{ ad:yz('spi.core.inceleme.hareket-girilmeyen-gunlerin'), l:b }, birim:'saat' }));
     }
     /* 3 — Kısa uyku → gece uykusu */
     {
       const a = [], b = [];
       seri(uyku).forEach(x => { const onceki = U().iso(U().addDays(U().parse(x.d), -1)); (kestirmeVar(onceki) ? a : b).push(x.v); });
-      out.push(karsilastir({ id:'kestirme-gece', baslik:'Gündüz kısa uykusu ve gece uykusu',
-        a:{ ad:'önceki gün kısa uyku olan geceler', l:a }, b:{ ad:'kısa uyku olmayan', l:b }, birim:'saat' }));
+      out.push(karsilastir({ id:'kestirme-gece', baslik:yz('spi.core.inceleme.gunduz-kisa-uykusu-ve-gece'),
+        a:{ ad:yz('spi.core.inceleme.onceki-gun-kisa-uyku-olan'), l:a }, b:{ ad:yz('spi.core.inceleme.kisa-uyku-olmayan'), l:b }, birim:'saat' }));
     }
     /* 4 — Protein hedefi → ertesi gün toparlanma */
     {
@@ -107,8 +129,8 @@ SP.Inceleme = (function(){
         if(p == null || t == null) continue;
         (p ? a : b).push(t);
       }
-      out.push(karsilastir({ id:'protein-toparlanma', baslik:'Protein hedefi ve ertesi gün',
-        a:{ ad:'protein hedefinin tuttuğu günlerin ertesi', l:a }, b:{ ad:'tutmadığı günlerin ertesi', l:b }, birim:'puan', ondalik:0 }));
+      out.push(karsilastir({ id:'protein-toparlanma', baslik:yz('spi.core.inceleme.protein-hedefi-ve-ertesi-gun'),
+        a:{ ad:yz('spi.core.inceleme.protein-hedefinin-tuttugu-gu'), l:a }, b:{ ad:yz('spi.core.inceleme.tutmadigi-gunlerin-ertesi'), l:b }, birim:'puan', ondalik:0 }));
     }
     return out;
   }
@@ -118,11 +140,11 @@ SP.Inceleme = (function(){
     const r = SP.Calc.weeklyReport();
     const uykular = r.days.map(uyku).filter(v => v != null);
     return [
-      { ad:'Toparlanma ortalaması', deger:r.readiness.avg, birim:'/100', n:r.readiness.n, etiket:r.readiness.avg == null ? 'veri yok' : 'hesaplandı' },
-      { ad:'Gece uykusu ortalaması', deger:uykular.length ? U().round(ort(uykular), 1) : null, birim:'sa', n:uykular.length, etiket:uykular.length ? 'hesaplandı' : 'veri yok' },
-      { ad:'Hareket seansı', deger:r.movement.sessions, birim:'seans', n:null, etiket:'ölçüldü' },
-      { ad:'Öğün girilen gün', deger:r.nutrition.loggedDays, birim:'/7', n:null, etiket:'ölçüldü' },
-      { ad:'Asgari gün', deger:r.discipline.minDays, birim:'/7', n:null, etiket:'hesaplandı' },
+      { ad:yz('spi.core.inceleme.toparlanma-ortalamasi'), deger:r.readiness.avg, birim:'/100', n:r.readiness.n, etiket:r.readiness.avg == null ? 'veri yok' : 'hesaplandı' },
+      { ad:yz('spi.core.inceleme.gece-uykusu-ortalamasi'), deger:uykular.length ? U().round(ort(uykular), 1) : null, birim:'sa', n:uykular.length, etiket:uykular.length ? 'hesaplandı' : 'veri yok' },
+      { ad:yz('spi.core.inceleme.hareket-seansi'), deger:r.movement.sessions, birim:'seans', n:null, etiket:yz('spi.core.inceleme.olculdu') },
+      { ad:yz('spi.core.inceleme.ogun-girilen-gun'), deger:r.nutrition.loggedDays, birim:'/7', n:null, etiket:yz('spi.core.inceleme.olculdu') },
+      { ad:yz('spi.core.inceleme.asgari-gun'), deger:r.discipline.minDays, birim:'/7', n:null, etiket:yz('spi.core.inceleme.hesaplandi') },
     ];
   }
 

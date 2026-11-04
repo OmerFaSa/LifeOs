@@ -109,7 +109,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.rutbe.bu-xp-hangi-isten-geldi':'Bu XP hangi işten geldi',
   'esp.rutbe.rutbe-bolumleri':'Rütbe bölümleri',
 });
-window.LIFEOS.PARCA.sayfa({ id:'rutbe', modul:'esp', cekmece:'ayarlar', ad:'Rütbe', ikon:'layers', sira:30 });
+window.LIFEOS.PARCA.sayfa(Object.assign({ id:'rutbe', modul:'esp', cekmece:'ayarlar', ad:'Rütbe', sira:30 }, 'esp' === 'spi' ? {} : { ikon:'layers' }));
 
 ESP.Screens.rutbe = (function(){
   const S = ESP.S, UI = ESP.UI, K = ESP.C;
@@ -1032,7 +1032,7 @@ ESP.Screens.rutbe = (function(){
     }
   }
 
-  LIFEOS.PARCA.blok({ id:'rutbe.bolum-1', sayfa:'rutbe', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+  LIFEOS.PARCA.blok({ id:'rutbe.rutbe-sekmeleri', sayfa:'rutbe', yer:'y1', sira:10, ad:'Rütbe sekmeleri', ciz(){
     return K.SayfaBolumleri({ act:'rutbe-tab', aria:yz('esp.rutbe.rutbe-bolumleri'),
       bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) });
   } });

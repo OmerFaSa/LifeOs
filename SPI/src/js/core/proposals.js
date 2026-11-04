@@ -42,6 +42,25 @@
 
    Uygulama sırası kasıtlıdır: önce anlık görüntü alınır (geri alma),
    sonra değişiklik yazılır. Böylece geri alma her zaman mümkündür. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.proposals.gunluk-olcum':'Günlük ölçüm',
+  'spi.core.proposals.ogun':'Öğün',
+  'spi.core.proposals.antrenman':'Antrenman',
+  'spi.core.proposals.kisa-uyku':'Kısa uyku',
+  'spi.core.proposals.tahlil-olcumu':'Tahlil ölçümü',
+  'spi.core.proposals.bolumu-ac-gizle':'Bölümü aç / gizle',
+  'spi.core.proposals.plani-uygula':'Planı uygula',
+  'spi.core.proposals.haftalik-programi-ekle':'Haftalık programı ekle',
+  'spi.core.proposals.sikayet':'Şikâyet',
+  'spi.core.proposals.hazir-ogun-ya-da-antrenman':'Hazır öğün ya da antrenman',
+  'spi.core.proposals.onizlenemedi':'Önizlenemedi.',
+  'spi.core.proposals.katalog-disi-eylem':'Katalog dışı eylem.',
+  'spi.core.proposals.bu-eylemi-model-oneremez':'Bu eylemi model öneremez.',
+  'spi.core.proposals.bu-oneri-daha-once-islendi':'Bu öneri daha önce işlendi.',
+  'spi.core.proposals.oneri-bulunamadi':'Öneri bulunamadı.',
+  'spi.core.proposals.geri-alinacak-bir-sey-yok':'Geri alınacak bir şey yok.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -136,7 +155,7 @@ SP.Proposals = (function(){
     'vital-yaz':{
       level:'kucuk',
       olcum:true,
-      label:'Günlük ölçüm',
+      label:yz('spi.core.proposals.gunluk-olcum'),
       /* `ekle` (2026-10-25; kullanıcı: «spi için daha işlevli veri girişi,
          sürtünmeyi azaltacak teknikler ile daha güzel yap»): değer günün
          toplamına EKLENİR (su). «2 bardak su içtim» 1000 ml'nin üstüne 400
@@ -192,7 +211,7 @@ SP.Proposals = (function(){
     'ogun-ekle':{
       level:'kucuk',
       olcum:true,
-      label:'Öğün',
+      label:yz('spi.core.proposals.ogun'),
       alanlar:['items', 'slot', 'date'],
       check(p){
         if(!Array.isArray(p.items) || !p.items.length) return fail('Gıda yok.');
@@ -226,7 +245,7 @@ SP.Proposals = (function(){
     'seans-ekle':{
       level:'kucuk',
       olcum:true,
-      label:'Antrenman',
+      label:yz('spi.core.proposals.antrenman'),
       alanlar:['minutes', 'exerciseId', 'date'],
       check(p){
         const dk = Number(p.minutes);
@@ -260,7 +279,7 @@ SP.Proposals = (function(){
     'kestirme-ekle':{
       level:'kucuk',
       olcum:true,
-      label:'Kısa uyku',
+      label:yz('spi.core.proposals.kisa-uyku'),
       alanlar:['dk', 'bas', 'date'],
       check(p){
         const h = SP.Uyku.dogrula({ dk:p.dk, bas:p.bas });
@@ -281,7 +300,7 @@ SP.Proposals = (function(){
     'olcum-gir':{
       level:'orta',
       olcum:true,
-      label:'Tahlil ölçümü',
+      label:yz('spi.core.proposals.tahlil-olcumu'),
       alanlar:['rows', 'date'],
       check(p){
         if(!Array.isArray(p.rows) || !p.rows.length) return fail('Ölçüm yok.');
@@ -331,7 +350,7 @@ SP.Proposals = (function(){
     /* ---------------------------------------------- bölüm aç / gizle */
     'bolum-ac-kapa':{
       level:'orta',
-      label:'Bölümü aç / gizle',
+      label:yz('spi.core.proposals.bolumu-ac-gizle'),
       alanlar:['bolum', 'acik'],
       check(p){
         const b = SP.Bolum && SP.Bolum.BY_ID[p.bolum];
@@ -362,7 +381,7 @@ SP.Proposals = (function(){
        katalog tarifinde yoktur ve modelden gelirse düşer. */
     'plan-uygula':{
       level:'buyuk',
-      label:'Planı uygula',
+      label:yz('spi.core.proposals.plani-uygula'),
       alanlar:['hedefId'],
       modelYok:true,
       check(p){
@@ -388,7 +407,7 @@ SP.Proposals = (function(){
        gösterir. Model öneremez. */
     'program-ekle':{
       level:'orta',
-      label:'Haftalık programı ekle',
+      label:yz('spi.core.proposals.haftalik-programi-ekle'),
       alanlar:['hedefId', 'program'],
       modelYok:true,
       check(p){
@@ -419,7 +438,7 @@ SP.Proposals = (function(){
     'semptom-isaretle':{
       level:'kucuk',
       olcum:true,
-      label:'Şikâyet',
+      label:yz('spi.core.proposals.sikayet'),
       /* 2026-10-25: hızlı girişten de gelir («baş ağrısı orta»). Şiddet
          YALNIZ kullanıcının sözünden; söylenmediyse yazılmaz, «şiddet
          belirtilmedi» denir. `yok:true` = «şikâyetim yok» (Bugün'deki
@@ -486,7 +505,7 @@ SP.Proposals = (function(){
       level:'kucuk',
       olcum:true,
       modelYok:true,
-      label:'Hazır öğün ya da antrenman',
+      label:yz('spi.core.proposals.hazir-ogun-ya-da-antrenman'),
       alanlar:['tur', 'hazirId', 'date', 'slot'],
       check(p){
         if(!SP.Hazir) return fail('Hazır kayıtlar yüklü değil.');
@@ -544,7 +563,7 @@ SP.Proposals = (function(){
   function onizle(p, c){
     if(!c.ok) return { ok:false, why:c.why, rows:[] };
     try{ return { ok:true, rows:eylem(p.action).preview(p.params || {}, c.ctx) || [] }; }
-    catch(err){ return { ok:false, why:'Önizlenemedi.', rows:[] }; }
+    catch(err){ return { ok:false, why:yz('spi.core.proposals.onizlenemedi'), rows:[] }; }
   }
 
   function preview(p){ return onizle(p, check(p)); }
@@ -722,8 +741,8 @@ SP.Proposals = (function(){
     const oneriler = [], dusen = [];
 
     liste.forEach(x => {
-      if(!x || !eylem(x.action)){ dusen.push({ x, why:'Katalog dışı eylem.' }); return; }
-      if(eylem(x.action).modelYok){ dusen.push({ x, why:'Bu eylemi model öneremez.' }); return; }
+      if(!x || !eylem(x.action)){ dusen.push({ x, why:yz('spi.core.proposals.katalog-disi-eylem') }); return; }
+      if(eylem(x.action).modelYok){ dusen.push({ x, why:yz('spi.core.proposals.bu-eylemi-model-oneremez') }); return; }
       const p = { action:x.action,
         params:Object.assign({ date }, x.params || {}),
         kaynak:'model', metin:x.metin || '' };
@@ -849,7 +868,7 @@ SP.Proposals = (function(){
     const c = check(p);
     if(!c.ok) return { row:null, otomatik:false, why:c.why };
     const row = await propose(p);
-    if(!row) return { row:null, otomatik:false, why:'Bu öneri daha önce işlendi.' };
+    if(!row) return { row:null, otomatik:false, why:yz('spi.core.proposals.bu-oneri-daha-once-islendi') };
     if(!otomatikMi(row, ayar())) return { row, otomatik:false, why:null };
     const r = await approve(row.id);
     if(!r.ok) return { row, otomatik:false, why:r.why };
@@ -860,7 +879,7 @@ SP.Proposals = (function(){
 
   async function approve(id){
     const p = liste().find(x => x.id === id);
-    if(!p || p.status !== 'pending') return { ok:false, why:'Öneri bulunamadı.' };
+    if(!p || p.status !== 'pending') return { ok:false, why:yz('spi.core.proposals.oneri-bulunamadi') };
     const c = check(p);
     /* Bekleyen bir oneri arada gecersizlesmis olabilir: veri degismistir. */
     if(!c.ok){
@@ -894,7 +913,7 @@ SP.Proposals = (function(){
 
   async function undo(id){
     const p = liste().find(x => x.id === id);
-    if(!p || p.status !== 'applied' || !p.undo) return { ok:false, why:'Geri alınacak bir şey yok.' };
+    if(!p || p.status !== 'applied' || !p.undo) return { ok:false, why:yz('spi.core.proposals.geri-alinacak-bir-sey-yok') };
     try{
       await eylem(p.action).revert(p.undo, { params:p.params || {}, sonraki:sonrakiler(p) });
       p.status = 'undone';

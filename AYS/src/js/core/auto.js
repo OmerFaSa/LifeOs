@@ -5,6 +5,22 @@
 
    Kural motoru (R.Calc) ve plan üreteci (R.Planner) otoritedir; burası
    yalnız onların çıktısını eyleme çevirir. LLM burada yer almaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.auto.haftalik-sozlesmeyi-doldur':'Haftalık sözleşmeyi doldur',
+  'ays.core.auto.plandaki-konular-ve-risk-sir':'Plandaki konular ve risk sıralaması hazır; taslak tek tıkla yazılır.',
+  'ays.core.auto.bloklari-haftanin-konularina':'Blokları haftanın konularına bağla',
+  'ays.core.auto.plani-yeniden-hesapla':'Planı yeniden hesapla',
+  'ays.core.auto.tek-olcum-kapanis-saymaz-gec':'Tek ölçüm kapanış saymaz; gecikmiş ölçüm konu kapanışını olduğundan iyi gösterir.',
+  'ays.core.auto.telafi-onerisi':'Telafi önerisi: ',
+  'ays.core.auto.not-tek-basina-tekrar-degild':'Not tek başına tekrar değildir; kart olmadan iki haftada unutulur.',
+  'ays.core.auto.ortalama-tamamlama':'Ortalama tamamlama %',
+  'ays.core.auto.haftayi-kapat':'Haftayı kapat',
+  'ays.core.auto.pazar-degerlendirmesi-30-40':'Pazar değerlendirmesi 30–40 dakika. Sistem özeti hazırladı; sen dört sütunu doldur.',
+  'ays.core.auto.sinav-haftasi-modu':'Sınav haftası modu',
+  'ays.core.auto.yedek-al':'Yedek al',
+  'ays.core.auto.son-yedekten-bu-yana-bir':'Son yedekten bu yana bir haftadan fazla geçti; tarayıcı verisi silinirse geçmiş kaybolur.',
+});
+
 
 window.R = window.R || {};
 
@@ -147,8 +163,8 @@ R.Auto = (function(){
 
     if(week && !week.signedAt && !week.mainTopics.some(t => t.name)){
       out.push({
-        id:'draft-week', icon:'week', title:'Haftalık sözleşmeyi doldur',
-        why:'Plandaki konular ve risk sıralaması hazır; taslak tek tıkla yazılır.',
+        id:'draft-week', icon:'week', title:yz('ays.core.auto.haftalik-sozlesmeyi-doldur'),
+        why:yz('ays.core.auto.plandaki-konular-ve-risk-sir'),
         act:'auto-draft-week', tone:'primary',
       });
     }
@@ -157,7 +173,7 @@ R.Auto = (function(){
       const unlinked = day.blocks.filter(b => b.slot !== 'Dinlenme' && b.status === 'pending' && !b.subjectId).length;
       if(unlinked >= 2){
         out.push({
-          id:'sync-blocks', icon:'today', title:'Blokları haftanın konularına bağla',
+          id:'sync-blocks', icon:'today', title:yz('ays.core.auto.bloklari-haftanin-konularina'),
           why:unlinked+' blok derse bağlı değil; bağlanmayan blok konu istatistiğine girmez.',
           act:'auto-sync-blocks',
         });
@@ -166,7 +182,7 @@ R.Auto = (function(){
 
     if(health && health.status === 'geride'){
       out.push({
-        id:'replan', icon:'map', title:'Planı yeniden hesapla',
+        id:'replan', icon:'map', title:yz('ays.core.auto.plani-yeniden-hesapla'),
         why:health.note,
         act:'auto-replan', tone:'primary',
       });
@@ -176,7 +192,7 @@ R.Auto = (function(){
     if(pending.length){
       out.push({
         id:'second-check', icon:'check', title:pending.length+' konuda 2. ölçüm gecikti',
-        why:'Tek ölçüm kapanış saymaz; gecikmiş ölçüm konu kapanışını olduğundan iyi gösterir.',
+        why:yz('ays.core.auto.tek-olcum-kapanis-saymaz-gec'),
         act:'go', data:{ 'data-route':'subjects' },
       });
     }
@@ -185,7 +201,7 @@ R.Auto = (function(){
     triggers.forEach(t => {
       const def = R.RECOVERY_PROTOCOLS.find(p => p.id === t.id);
       out.push({
-        id:'proto-' + t.id, icon:'shield', title:'Telafi önerisi: ' + def.title,
+        id:'proto-' + t.id, icon:'shield', title:yz('ays.core.auto.telafi-onerisi') + def.title,
         why:t.detail, act:'go', data:{ 'data-route':'protocols' },
       });
     });
@@ -195,7 +211,7 @@ R.Auto = (function(){
     if(notesNoCards.length){
       out.push({
         id:'note-cards', icon:'cards', title:notesNoCards.length+' dersin notu karta dönmedi',
-        why:'Not tek başına tekrar değildir; kart olmadan iki haftada unutulur.',
+        why:yz('ays.core.auto.not-tek-basina-tekrar-degild'),
         act:'go', data:{ 'data-route':'learn' },
       });
     }
@@ -205,7 +221,7 @@ R.Auto = (function(){
     if(drift.weeks >= 2){
       out.push({
         id:'drift', icon:'warn', title:drift.weeks + ' hafta üst üste plan sapması',
-        why:'Ortalama tamamlama %' + drift.avg + '. Bu bir irade sorunu değil kapasite sorunu olabilir; '
+        why:yz('ays.core.auto.ortalama-tamamlama') + drift.avg + '. Bu bir irade sorunu değil kapasite sorunu olabilir; '
           + 'hedefi kısmak ya da engeli kaldırmak gerekir.',
         act:'go', data:{ 'data-route':'protocols' }, tone:'primary',
       });
@@ -215,8 +231,8 @@ R.Auto = (function(){
     const dow = U.weekdayIndex(U.today());
     if(dow === 6 && !S.reviews[M.weekId(n)]){
       out.push({
-        id:'close-week', icon:'check', title:'Haftayı kapat',
-        why:'Pazar değerlendirmesi 30–40 dakika. Sistem özeti hazırladı; sen dört sütunu doldur.',
+        id:'close-week', icon:'check', title:yz('ays.core.auto.haftayi-kapat'),
+        why:yz('ays.core.auto.pazar-degerlendirmesi-30-40'),
         act:'auto-close-week', tone:'primary',
       });
     }
@@ -225,7 +241,7 @@ R.Auto = (function(){
     const ew = C.examWeekMode();
     if(ew.active && !S.ui.examWeekAck){
       out.push({
-        id:'exam-week', icon:'flag', title:'Sınav haftası modu',
+        id:'exam-week', icon:'flag', title:yz('ays.core.auto.sinav-haftasi-modu'),
         why:ew.note + ' Kalan ' + ew.daysLeft + ' gün.',
         act:'auto-exam-week',
       });
@@ -233,8 +249,8 @@ R.Auto = (function(){
 
     if(M.backupDue()){
       out.push({
-        id:'backup', icon:'download', title:'Yedek al',
-        why:'Son yedekten bu yana bir haftadan fazla geçti; tarayıcı verisi silinirse geçmiş kaybolur.',
+        id:'backup', icon:'download', title:yz('ays.core.auto.yedek-al'),
+        why:yz('ays.core.auto.son-yedekten-bu-yana-bir'),
         act:'export-data',
       });
     }

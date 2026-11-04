@@ -19,6 +19,12 @@
    SAYILMAZ. Degeri `missing` olan kapi ucuncu bir durumdur ('unknown') ve
    kullaniciya "once bunu olc" der. `Number(x) || 0` yazmak burada butun
    merdiveni yalan yapardi. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.curriculum.bu-basamak-henuz-olculmedi':'Bu basamak henüz ölçülmedi.',
+  'esp.core.curriculum.bu-kapi-senin-isaretlemeleri':'Bu kapı senin işaretlemelerine dayanıyor ve arkasında yalnızca ',
+  'esp.core.curriculum.hedef':'Hedef: ',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -326,7 +332,7 @@ ESP.Curriculum = (function(){
     const o = measure(gate.metric);
     if(o.value == null){
       return { gate:gate, status:'unknown', value:null, cert:'missing',
-        label:gate.label, why:'Bu basamak henüz ölçülmedi.' };
+        label:gate.label, why:yz('esp.core.curriculum.bu-basamak-henuz-olculmedi') };
     }
 
     /* Asgari sinyal: beyana dayalı bir kapı, arkasında yeterli kayıt
@@ -338,7 +344,7 @@ ESP.Curriculum = (function(){
       if(n != null && n < ASGARI_BEYAN){
         return { gate:gate, status:'unknown', value:o.value, cert:'estimated',
           weak:true, declared:n, label:gate.label,
-          why:'Bu kapı senin işaretlemelerine dayanıyor ve arkasında yalnızca '
+          why:yz('esp.core.curriculum.bu-kapi-senin-isaretlemeleri')
             + n + ' kayıt var; değerlendirme için ' + ASGARI_BEYAN + ' gerekir.' };
       }
     }
@@ -552,7 +558,7 @@ ESP.Curriculum = (function(){
       /* Sade dil (2026-10-16): «Son 14 günün 5'inde çalışıldı — önce bunu
          ölç» yeni kullanıcıya olmuş bir şey gibi okunuyordu. Şart HEDEF
          olarak söylenir; ölçülmediği ayrıca. */
-      title:'Hedef: ' + hedef.label,
+      title:yz('esp.core.curriculum.hedef') + hedef.label,
       why:hedef.why || (hedef.status === 'unknown' ? 'Henüz ölçülmedi; kayıt girdikçe görünür.' : 'Bu basamak henüz ölçülmedi.'),
     };
   }

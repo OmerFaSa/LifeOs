@@ -19,6 +19,14 @@
                     doz önermez (AGENTS.md §1.5).
      HEKİM TALİMATI kullanıcının getirdiği talimat en yüksek öncelikli
                     kısıttır (belgeler/ekip/PLAN.md §3.0); plan ona uyar. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.hedefler.kilo':'Kilo',
+  'spi.core.hedefler.hareket':'Hareket',
+  'spi.core.hedefler.talimat-metni-bos':'Talimat metni boş.',
+  'spi.core.hedefler.talimat-2000-karakteri-gecem':'Talimat 2000 karakteri geçemez.',
+  'spi.core.hedefler.hedef-bulunamadi':'Hedef bulunamadı.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -82,7 +90,7 @@ SP.Hedefler = (function(){
   /* ------------------------------------------------------------ paket */
 
   const KILO = {
-    id:'kilo', ad:'Kilo', olcut:{ ad:'kilo', birim:'kg' },
+    id:'kilo', ad:yz('spi.core.hedefler.kilo'), olcut:{ ad:'kilo', birim:'kg' },
     anahtar:/\b(kilo|kg|vki|vücut kitle|bmi)\b/,
     birimler:/(?:kilo|kg)/,
     yonler:['azalt', 'artir', 'ulas', 'koru'],
@@ -160,7 +168,7 @@ SP.Hedefler = (function(){
      gün. Hareket bir yük değil bir süredir; tanı ya da doz söylenmez. */
   const ALISKANLIK = window.LIFEOS && LIFEOS.Aliskanlik ? LIFEOS.Aliskanlik.kur({
     alanlar:[
-      { id:'hareket', ad:'Hareket', kelime:/(spor|egzersiz|antrenman|yürüyüş|yürümek|koşu|koşmak|bisiklet|yüzme|yoga|pilates|hareket|fitness|salon|esneme)/ },
+      { id:'hareket', ad:yz('spi.core.hedefler.hareket'), kelime:/(spor|egzersiz|antrenman|yürüyüş|yürümek|koşu|koşmak|bisiklet|yüzme|yoga|pilates|hareket|fitness|salon|esneme)/ },
     ],
     dakika:(alan, iso) => {
       const l = (SP.S.workouts || []).filter(w => w && w.date === iso);
@@ -200,8 +208,8 @@ SP.Hedefler = (function(){
 
   async function talimatEkle(metin, tarih){
     const m = String(metin || '').trim();
-    if(!m) return { ok:false, why:'Talimat metni boş.' };
-    if(m.length > 2000) return { ok:false, why:'Talimat 2000 karakteri geçemez.' };
+    if(!m) return { ok:false, why:yz('spi.core.hedefler.talimat-metni-bos') };
+    if(m.length > 2000) return { ok:false, why:yz('spi.core.hedefler.talimat-2000-karakteri-gecem') };
     const kayit = { id:SP.U.uid('hk'), metin:m, tarih:SP.U.isISO(tarih) ? tarih : SP.U.todayISO(),
       kaynak:'kullanici', eklenme:new Date().toISOString() };
     SP.S.hekim = (SP.S.hekim || []).concat([kayit]);
@@ -271,7 +279,7 @@ SP.Hedefler = (function(){
      (core/plan.js); bu sessiz değildir, dönen `not` ekranda gösterilir. */
   async function durumDegistir(id, yeni){
     const h = liste().find(x => x.id === id);
-    if(!h) return { ok:false, why:'Hedef bulunamadı.' };
+    if(!h) return { ok:false, why:yz('spi.core.hedefler.hedef-bulunamadi') };
     const r = H().gecis(h, yeni, SP.U.todayISO());
     if(r.ok) await kaydet(r.hedef);
     if(r.ok && (yeni === 'tamam' || yeni === 'birakildi') && SP.Plan){

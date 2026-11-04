@@ -27,6 +27,24 @@
    3. UYARI EYLEME BAGLI OLMALIDIR. "Depo doluyor" demek yetmez; yaninda
       "su kadar yer su kadarda acilir" yazmayan bir uyari, kaygi uretir
       ve cozum uretmez. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.storage.surtunme-gunlugu':'Sürtünme günlüğü',
+  'esp.core.storage.sistemin-kendi-maliyet-olcum':'Sistemin kendi maliyet ölçümü. Silinince geçmiş sürtünme ',
+  'esp.core.storage.ofis-sohbet-gecmisi':'Ofis sohbet geçmişi',
+  'esp.core.storage.koclarla-yapilmis-yazismalar':'Koçlarla yapılmış yazışmalar. Kararlar ve teklifler ayrı ',
+  'esp.core.storage.uretilmis-brifingler':'Üretilmiş brifingler',
+  'esp.core.storage.her-gun-yeniden-uretilebilir':'Her gün yeniden üretilebilir; saklanmaları bir kolaylıktır.',
+  'esp.core.storage.eski-toplanti-tutanaklari':'Eski toplantı tutanakları',
+  'esp.core.storage.toplantidan-cikan-kararlar-a':'Toplantıdan çıkan KARARLAR ayrı saklanır ve silinmez.',
+  'esp.core.storage.kapanmis-denetim-sorulari':'Kapanmış denetim soruları',
+  'esp.core.storage.kapanmis-sinyaller-fayda-olc':'Kapanmış sinyaller. Fayda ölçüsü bu kayıtlardan hesaplandığı ',
+  'esp.core.storage.depo-doldu':'Depo doldu',
+  'esp.core.storage.yeni-kayit-dusmeyebilir-once':'Yeni kayıt düşmeyebilir. Önce yedek al, sonra buda.',
+  'esp.core.storage.depo-doluyor':'Depo doluyor (%',
+  'esp.core.storage.dokuz-ay-sigmayabilir':'Dokuz ay sığmayabilir',
+  'esp.core.storage.depo-rahat':'Depo rahat',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -44,18 +62,18 @@ ESP.Storage = (function(){
   /* Budanabilir koleksiyonlar. Hicbiri kullanicinin girdigi icerik
      DEGILDIR; hepsi sistemin kendi urettigi kayitlardir. */
   const BUDANABILIR = [
-    { collection:'usage', label:'Sürtünme günlüğü',
-      note:'Sistemin kendi maliyet ölçümü. Silinince geçmiş sürtünme '
+    { collection:'usage', label:yz('esp.core.storage.surtunme-gunlugu'),
+      note:yz('esp.core.storage.sistemin-kendi-maliyet-olcum')
          + 'raporu kaybolur, hiçbir çalışma kaydı etkilenmez.' },
-    { collection:'officeChats', label:'Ofis sohbet geçmişi',
-      note:'Koçlarla yapılmış yazışmalar. Kararlar ve teklifler ayrı '
+    { collection:'officeChats', label:yz('esp.core.storage.ofis-sohbet-gecmisi'),
+      note:yz('esp.core.storage.koclarla-yapilmis-yazismalar')
          + 'saklanır; onlar silinmez.' },
-    { collection:'officeBriefings', label:'Üretilmiş brifingler',
-      note:'Her gün yeniden üretilebilir; saklanmaları bir kolaylıktır.' },
-    { collection:'officeMeetings', label:'Eski toplantı tutanakları',
-      note:'Toplantıdan çıkan KARARLAR ayrı saklanır ve silinmez.' },
-    { collection:'signals', label:'Kapanmış denetim soruları',
-      note:'Kapanmış sinyaller. Fayda ölçüsü bu kayıtlardan hesaplandığı '
+    { collection:'officeBriefings', label:yz('esp.core.storage.uretilmis-brifingler'),
+      note:yz('esp.core.storage.her-gun-yeniden-uretilebilir') },
+    { collection:'officeMeetings', label:yz('esp.core.storage.eski-toplanti-tutanaklari'),
+      note:yz('esp.core.storage.toplantidan-cikan-kararlar-a') },
+    { collection:'signals', label:yz('esp.core.storage.kapanmis-denetim-sorulari'),
+      note:yz('esp.core.storage.kapanmis-sinyaller-fayda-olc')
          + 'için silmek o ölçüyü sıfırlar.' },
   ];
 
@@ -251,20 +269,20 @@ ESP.Storage = (function(){
     const h = horizon();
     const q = g.quota || {};
     if(q.full){
-      return { level:'full', title:'Depo doldu',
-        note:'Yeni kayıt düşmeyebilir. Önce yedek al, sonra buda.' };
+      return { level:'full', title:yz('esp.core.storage.depo-doldu'),
+        note:yz('esp.core.storage.yeni-kayit-dusmeyebilir-once') };
     }
     if(q.near){
-      return { level:'near', title:'Depo doluyor (%' + q.pct + ')',
+      return { level:'near', title:yz('esp.core.storage.depo-doluyor') + q.pct + ')',
         note:g.daysLeft != null
           ? 'Bu hızla ' + g.daysLeft + ' gün sonra dolar.'
           : 'Büyüme hızı henüz ölçülmedi.' };
     }
     if(h.cert !== 'missing' && h.willFit === false){
-      return { level:'watch', title:'Dokuz ay sığmayabilir',
+      return { level:'watch', title:yz('esp.core.storage.dokuz-ay-sigmayabilir'),
         note:h.note };
     }
-    return { level:'ok', title:'Depo rahat',
+    return { level:'ok', title:yz('esp.core.storage.depo-rahat'),
       note:g.cert === 'missing' ? g.note : h.note };
   }
 

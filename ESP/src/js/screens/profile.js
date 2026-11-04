@@ -152,7 +152,7 @@ ESP.Screens.profile = (function(){
     });
   }
 
-  LIFEOS.PARCA.blok({ id:'profile.bolum-1', sayfa:'profile', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ p, ayak, yedek, profiller }){
+  LIFEOS.PARCA.blok({ id:'profile.kisi-bilgileri', sayfa:'profile', yer:'y1', sira:10, ad:'Kişi bilgileri', ciz({ p, ayak, yedek, profiller }){
     return K.Span(12, K.Ledger(() => [
 
         K.Entry({

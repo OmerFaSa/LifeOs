@@ -12,6 +12,8 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:50, id:'act:metro', kind:'Eylem', label:'Metronomu aç',
+  hint:'Ses', run:() => { ESP.S.ui.studioTab = 'muzik'; ESP.App.go('studio'); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.studio.muzik':'Müzik',
   'esp.studio.diksiyon':'Diksiyon',
@@ -109,7 +111,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.studio.parca-2':'parça',
   'esp.studio.kayit':'kayıt',
 });
-window.LIFEOS.PARCA.sayfa({ id:'studio', modul:'esp', cekmece:'calisma', ad:'Ses', ikon:'wave', ek:{ disc:['music', 'diction'] }, sira:40 });
+window.LIFEOS.PARCA.sayfa({ id:'studio', modul:'esp', king:{ sira:230, ad:'Ses', es:['müzik', 'diksiyon', 'stüdyo'] }, cekmece:'calisma', ad:'Ses', ikon:'wave', ek:{ disc:['music', 'diction'] }, sira:40 });
 
 ESP.Screens.studio = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
@@ -649,13 +651,13 @@ ESP.Screens.studio = (function(){
         + P.sutun({ degerler:l.map(kdk), yukseklik:48, etiket:yz('esp.studio.son') + l.length + ' kaydın konuşma hızı' }) });
   }
 
-  LIFEOS.PARCA.blok({ id:'studio.bolum-1', sayfa:'studio', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+  LIFEOS.PARCA.blok({ id:'studio.studyo-sekmeleri', sayfa:'studio', yer:'y1', sira:10, ad:'Stüdyo sekmeleri', ciz(){
     return K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:yz('esp.studio.studyo-bolumleri'), tabs:TABS, govde:{
         muzik:musicRows, diksiyon:dictionRows,
         kulak:earRows, ogren:topicRows, ilerleme:progressRows,
         tezgah:() => [ESP.Parts.desk('music'), ESP.Parts.desk('diction')] } }));
   } });
-  LIFEOS.PARCA.blok({ id:'studio.bolum-2', sayfa:'studio', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+  LIFEOS.PARCA.blok({ id:'studio.tempo-panosu', sayfa:'studio', yer:'y2', sira:10, ad:'Tempo panosu', ciz(){
     return K.Span(12, raw(PanoTempo()));
   } });
   function render(){

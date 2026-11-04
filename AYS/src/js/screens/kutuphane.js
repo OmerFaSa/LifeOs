@@ -8,6 +8,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:80, group:'Git', label:'Notlarım — bütün notların', icon:'list', run(){ const L = window.LIFEOS || {}; if(L.DEFTER && L.DEFTER.kuruluMu()) L.DEFTER.ac(); else if(L.NOTUM) L.NOTUM.panelAc(); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.kutuphane.test-kitaplari':'Test kitapları',
   'ays.kutuphane.bam-uretti-her-soru-bagimsiz':'BAM üretti, her soru bağımsız çözümle denetlendi',

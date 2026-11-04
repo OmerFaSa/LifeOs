@@ -446,15 +446,14 @@ window.LIFEOS.MUZIK = (function(){
       if(t.matches('[data-muzik-arka-ses]') && kip === 'arka' && ses) ses.volume = n / 100;
     });
     /* Arka plan videosu sesliyken («Susar») arka plan müziği bekler; video susunca döner. */
-    window.addEventListener('lifeos:zemin-ses', e => {
-      const z = e.detail || {};
+    window.LIFEOS.PARCA.tepki({ id:'muzik.video-bekle', olay:'zemin-ses', ad:'Video sesliyken müzik bekler', yap(z){
       if(z.sesli && z.muzik === 'sus'){ if(kip === 'arka'){ durdur(); videoBekletti = true; } }
       else if(videoBekletti){ videoBekletti = false; if(!kip) arkaBaslat(); }
-    });
-    window.addEventListener('lifeos:calisma', e => oturum('calisma', !!(e.detail && e.detail.acik)));
-    window.addEventListener('lifeos:spor', e => oturum('spor', !!(e.detail && e.detail.acik)));
+    } });
+    window.LIFEOS.PARCA.tepki({ id:'muzik.calisma', olay:'calisma', ad:'Çalışma müziği', yap(d){ oturum('calisma', !!d.acik); } });
+    window.LIFEOS.PARCA.tepki({ id:'muzik.spor', olay:'spor', ad:'Spor müziği', yap(d){ oturum('spor', !!d.acik); } });
     /* Radyo başlarsa müzik susar. */
-    window.addEventListener('lifeos:ses', e => { const h = e.detail && e.detail.hal; if((h === 'caliyor' || h === 'baglaniyor') && kip) durdur(); });
+    window.LIFEOS.PARCA.tepki({ id:'muzik.radyoda-sus', olay:'ses', ad:'Radyo başlarsa müzik susar', yap(d){ if((d.hal === 'caliyor' || d.hal === 'baglaniyor') && kip) durdur(); } });
   }
 
   function yerYaz(k, v){ try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){ /* depo yok */ } }

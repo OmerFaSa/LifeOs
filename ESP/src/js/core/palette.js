@@ -8,8 +8,21 @@
    basmak bir oturum kaydeder. Yazilan sey kullanicinin kendi cumlesidir,
    modelin degil — bu yuzden onay kutusundan gecmez; ama YAZILMADAN ONCE
    ne kaydedilecegi gosterilir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.palette.bugune-yazilacak':'Bugüne yazılacak',
+  'esp.core.palette.eslesmeyen-satir':'Eşleşmeyen satır',
+  'esp.core.palette.kaydet':'Kaydet',
+  'esp.core.palette.vazgec':'Vazgeç',
+  'esp.core.palette.klavye-kisayollari':'Klavye kısayolları',
+  'esp.core.palette.kapat':'Kapat',
+});
+
 
 window.ESP = window.ESP || {};
+
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:150, uret(){
+  return ESP.DISCIPLINES.map(d => ({ id:'disc:' + d.id, kind:'Disiplin', label:d.label, hint:d.short, run:() => ESP.App.go(d.route) }));
+} });
 
 ESP.Palette = (function(){
   const U = ESP.U;
@@ -30,54 +43,8 @@ ESP.Palette = (function(){
       });
     });
 
-    /* hizli eylemler */
-    out.push({ id:'act:notlar', kind:'Eylem', label:'Notlarım — bütün notların', hint:'Notum',
-      run:() => { if(window.LIFEOS && window.LIFEOS.NOTUM) window.LIFEOS.NOTUM.panelAc(); } });
-    out.push({ id:'act:review', kind:'Eylem', label:'Kart çalışmasına başla',
-      hint:'Dil', run:() => { ESP.S.ui.langTab = 'calis'; ESP.App.go('lang'); } });
-    out.push({ id:'act:card', kind:'Eylem', label:'Kelime listesi yapıştır',
-      hint:'Dil', run:() => { ESP.S.ui.langTab = 'ekle'; ESP.App.go('lang');
-        setTimeout(() => { const el = document.getElementById('vocab-text'); if(el) el.focus(); }, 160); } });
-    out.push({ id:'act:arg', kind:'Eylem', label:'Yeni tez yaz',
-      hint:'Felsefe', run:() => { ESP.S.ui.philoTab = 'ekle'; ESP.App.go('symposium');
-        setTimeout(() => { const el = document.getElementById('arg-text'); if(el) el.focus(); }, 160); } });
-    out.push({ id:'act:metro', kind:'Eylem', label:'Metronomu aç',
-      hint:'Ses', run:() => { ESP.S.ui.studioTab = 'muzik'; ESP.App.go('studio'); } });
-    out.push({ id:'act:note', kind:'Eylem', label:'Atomik not ekle',
-      hint:'Okuma', run:() => { ESP.S.ui.readTab = 'notlar'; ESP.App.go('library');
-        setTimeout(() => { const el = document.getElementById('note-text'); if(el) el.focus(); }, 160); } });
-    out.push({ id:'act:draft', kind:'Eylem', label:'Yeni taslak aç',
-      hint:'Yazı', run:() => { ESP.S.ui.writeTab = 'taslaklar'; ESP.App.go('writing'); } });
-    out.push({ id:'act:meeting', kind:'Eylem', label:'Ofis incelemesini aç',
-      hint:'Ofis', run:() => ESP.App.go('meeting') });
-    /* Yeni katmanlarin kisayollari: merdiven, pratik ve tezgah. Komut
-       paleti bir ekran listesi degil bir IS listesidir; is eklenince
-       buraya da eklenir. */
-    out.push({ id:'act:ladder', kind:'Eylem', label:'Merdiveni aç',
-      hint:'Günlük', run:() => { ESP.S.ui.ladderTab = 'ozet'; ESP.App.go('ladder'); } });
-    out.push({ id:'act:practice-lang', kind:'Eylem', label:'Dil pratiği başlat',
-      hint:'Dil', run:() => { ESP.S.ui.langTab = 'ogren'; ESP.App.go('lang'); } });
-    out.push({ id:'act:practice-history', kind:'Eylem', label:'Tarih pratiği başlat',
-      hint:'Tarih', run:() => { ESP.S.ui.histTab = 'ogren'; ESP.App.go('history'); } });
-    out.push({ id:'act:timeline', kind:'Eylem', label:'Kronolojiye olay ekle',
-      hint:'Tarih', run:() => { ESP.S.ui.histTab = 'olaylar'; ESP.App.go('history'); } });
-    out.push({ id:'act:proposals', kind:'Eylem', label:'Bekleyen teklifleri gör',
-      hint:'Ofis', run:() => ESP.App.go('office') });
-
-    out.push({ id:'act:backup', kind:'Eylem', label:'Yedek indir',
-      hint:'Veri', run:() => { ESP.S.ui.guideTab = 'veri'; ESP.App.go('guide'); } });
-
-    /* disiplinler — dogrudan kendi tezgahina */
-    ESP.DISCIPLINES.forEach(d => {
-      out.push({ id:'disc:' + d.id, kind:'Disiplin', label:d.label, hint:d.short,
-        run:() => ESP.App.go(d.route) });
-    });
-
-    /* ajanlar */
-    ESP.AGENTS.forEach(a => {
-      out.push({ id:'agent:' + a.id, kind:'Ajan', label:a.name + ' — ' + a.role,
-        hint:a.title, run:() => { ESP.S.ui.officeAgent = a.id; ESP.App.go('team'); } });
-    });
+    /* Eylemler parcadir: her satir kendi ekran dosyasinda (P.komut). */
+    out.push(...window.LIFEOS.PARCA.komutlar('esp'));
 
     return out;
   }
@@ -127,15 +94,15 @@ ESP.Palette = (function(){
         r.count != null ? U.fmtNum(r.count) + ' ' + (r.countWhat || '') : '—'];
     });
     ESP.UI.sheet({
-      title:'Bugüne yazılacak',
+      title:yz('esp.core.palette.bugune-yazilacak'),
       body:String(K.Table({ tight:true, headers:['Disiplin', 'Süre', 'Sayım'], rows:satirlar }))
         + (res.unmatched.length
-          ? String(K.Notice({ tone:'warn', title:'Eşleşmeyen satır',
+          ? String(K.Notice({ tone:'warn', title:yz('esp.core.palette.eslesmeyen-satir'),
               body:res.unmatched.map(u => u.text + ' — ' + u.why).join('<br/>')
                 + '<br/><br/>Bu satırlar yazılmayacak; elle girebilirsin.' }))
           : ''),
-      footer:String(K.Button({ label:'Kaydet', tone:'primary', act:'quick-save' }))
-        + String(K.Button({ label:'Vazgeç', act:'sheet-close' })),
+      footer:String(K.Button({ label:yz('esp.core.palette.kaydet'), tone:'primary', act:'quick-save' }))
+        + String(K.Button({ label:yz('esp.core.palette.vazgec'), act:'sheet-close' })),
     });
   }
 
@@ -242,7 +209,7 @@ ESP.Palette = (function(){
 
   function showShortcuts(){
     ESP.UI.sheet({
-      title:'Klavye kısayolları',
+      title:yz('esp.core.palette.klavye-kisayollari'),
       body:String(ESP.C.Table({ tight:true, headers:['Tuş', 'İş'], rows:[
         ['Ctrl / ⌘ + K', 'Komut paletini aç'],
         ['?', 'Bu listeyi aç'],
@@ -252,7 +219,7 @@ ESP.Palette = (function(){
         ['j / k', 'Listede satır satır gez'],
         ['45 dk gitar', 'Palete oturum da yazabilirsin'],
       ].concat(window.LIFEOS && window.LIFEOS.KISAYOL ? window.LIFEOS.KISAYOL.metinSatirlari() : []) })),
-      footer:String(ESP.C.Button({ label:'Kapat', act:'sheet-close' })),
+      footer:String(ESP.C.Button({ label:yz('esp.core.palette.kapat'), act:'sheet-close' })),
       noFocus:true,
     });
   }

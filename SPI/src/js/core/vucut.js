@@ -30,6 +30,17 @@
    her değer etiketlidir (hesaplandı / tahmin); teşhis yok, «obez» bir
    DSÖ bant adıdır ve bant olarak gösterilir, kişiye hüküm olarak değil
    (§1.5). */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.vucut.zayif-dso':'Zayıf (DSÖ)',
+  'spi.core.vucut.normal-dso':'Normal (DSÖ)',
+  'spi.core.vucut.fazla-kilolu-dso':'Fazla kilolu (DSÖ)',
+  'spi.core.vucut.obez-bandi-dso':'Obez bandı (DSÖ)',
+  'spi.core.vucut.hesaplandi':'hesaplandı',
+  'spi.core.vucut.egilim-icin-son-28-gunde':'Eğilim için son 28 günde en az 6 tartı gerekir (şimdi ',
+  'spi.core.vucut.tartilar-en-az-14-gune':'Tartılar en az 14 güne yayılmalı (şimdi ',
+  'spi.core.vucut.olculdu':'ölçüldü',
+});
+
 
 window.SP = window.SP || {};
 
@@ -38,24 +49,24 @@ SP.Vucut = (function(){
   const sayi = v => (v == null || v === '' || !isFinite(Number(v)) ? null : Number(v));
 
   const BKI_BANT = [
-    { ust:18.5, ad:'Zayıf (DSÖ)', ton:'warn' },
-    { ust:25, ad:'Normal (DSÖ)', ton:'ok' },
-    { ust:30, ad:'Fazla kilolu (DSÖ)', ton:'warn' },
-    { ust:Infinity, ad:'Obez bandı (DSÖ)', ton:'warn' },
+    { ust:18.5, ad:yz('spi.core.vucut.zayif-dso'), ton:'warn' },
+    { ust:25, ad:yz('spi.core.vucut.normal-dso'), ton:'ok' },
+    { ust:30, ad:yz('spi.core.vucut.fazla-kilolu-dso'), ton:'warn' },
+    { ust:Infinity, ad:yz('spi.core.vucut.obez-bandi-dso'), ton:'warn' },
   ];
   function bki(kg, cm){
     kg = sayi(kg); cm = sayi(cm);
     if(!kg || !cm || cm < 100 || cm > 250) return null;
     const m = cm / 100, v = kg / (m * m);
     const b = BKI_BANT.find(x => v < x.ust);
-    return { deger:yuvarla(v, 1), bant:b.ad, ton:b.ton, etiket:'hesaplandı',
+    return { deger:yuvarla(v, 1), bant:b.ad, ton:b.ton, etiket:yz('spi.core.vucut.hesaplandi'),
       not:'BKİ kas ile yağı ayırmaz; kaslı bedende yüksek çıkabilir.' };
   }
   function belBoy(bel, cm){
     bel = sayi(bel); cm = sayi(cm);
     if(!bel || !cm) return null;
     const v = bel / cm;
-    return { deger:yuvarla(v, 2), dikkat:v >= 0.5, etiket:'hesaplandı',
+    return { deger:yuvarla(v, 2), dikkat:v >= 0.5, etiket:yz('spi.core.vucut.hesaplandi'),
       not:v >= 0.5 ? 'Bel, boyun yarısını geçmiş: yaygın kullanılan dikkat eşiği (teşhis değil).' : 'Bel, boyun yarısının altında.' };
   }
   function navyYag(cins, cm, boyun, bel, kalca){
@@ -91,15 +102,15 @@ SP.Vucut = (function(){
   /* seri: [{ tarih:'YYYY-AA-GG', kg }] (eski → yeni). */
   function egilim(seri){
     const l = (seri || []).filter(x => x && sayi(x.kg));
-    if(l.length < 6) return { ok:false, why:'Eğilim için son 28 günde en az 6 tartı gerekir (şimdi ' + l.length + ').' };
+    if(l.length < 6) return { ok:false, why:yz('spi.core.vucut.egilim-icin-son-28-gunde') + l.length + ').' };
     const t0 = Date.parse(l[0].tarih);
     const n = l.map(x => ({ x:(Date.parse(x.tarih) - t0) / 86400000, y:Number(x.kg) }));
     const yayilim = n[n.length - 1].x - n[0].x;
-    if(yayilim < 14) return { ok:false, why:'Tartılar en az 14 güne yayılmalı (şimdi ' + Math.round(yayilim) + ' gün).' };
+    if(yayilim < 14) return { ok:false, why:yz('spi.core.vucut.tartilar-en-az-14-gune') + Math.round(yayilim) + ' gün).' };
     const e = theilSen(n);
     const son7 = l.slice(-7).map(x => Number(x.kg));
     return { ok:true, haftalik:yuvarla(e * 7, 2), ortalama7:yuvarla(son7.reduce((a, b) => a + b, 0) / son7.length, 1),
-      yon:Math.abs(e * 7) < 0.1 ? 'sabit' : e > 0 ? 'artıyor' : 'azalıyor', etiket:'hesaplandı', tarti:l.length };
+      yon:Math.abs(e * 7) < 0.1 ? 'sabit' : e > 0 ? 'artıyor' : 'azalıyor', etiket:yz('spi.core.vucut.hesaplandi'), tarti:l.length };
   }
   function enerji(ortKcal, gunSayisi, eg){
     if(!eg || !eg.ok || !sayi(ortKcal) || (gunSayisi || 0) < 14) return null;
@@ -116,7 +127,7 @@ SP.Vucut = (function(){
     const b = bki(kg, cm), bb = belBoy(v.waist, cm);
     const navy = navyYag(p.sex, cm, v.neck, v.waist, v.hip);
     const olculenYag = sayi(v.bodyfat);
-    const yag = olculenYag != null ? { deger:olculenYag, etiket:'ölçüldü', yontem:'cihaz ya da senin girdiğin' } : navy;
+    const yag = olculenYag != null ? { deger:olculenYag, etiket:yz('spi.core.vucut.olculdu'), yontem:'cihaz ya da senin girdiğin' } : navy;
     const ys = yag ? yagsiz(kg, yag.deger, cm) : null;
     const eg = egilim(o.kilolar);
     const en = enerji(o.ortKcal, o.ogunGun, eg);

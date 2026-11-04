@@ -27,6 +27,26 @@
    Sistem su an aile ici kullanildigi icin arindirma yapilmiyor; genele
    acilirken PDF'ten kimlik alanlarini kesme ve fotograftan EXIF silme
    adimi TEK BIR YERE, oraya takilir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.extract.fotograf-secilmedi':'Fotoğraf seçilmedi.',
+  'spi.core.extract.fotograf-cok-buyuk-en-fazla':'Fotoğraf çok büyük (en fazla 8 MB).',
+  'spi.core.extract.bu-bir-goruntu-dosyasi-degil':'Bu bir görüntü dosyası değil.',
+  'spi.core.extract.fotograftan-ogun-okumak-icin':'Fotoğraftan öğün okumak için bir model bağlaman gerekiyor. ',
+  'spi.core.extract.fotograf-okunamadi':'Fotoğraf okunamadı.',
+  'spi.core.extract.model-yanit-vermedi':'Model yanıt vermedi: ',
+  'spi.core.extract.fotograftan-yemek-cikarilama':'Fotoğraftan yemek çıkarılamadı. Öğünü yazarak girebilirsin.',
+  'spi.core.extract.fotograftan-beden-analizi-ic':'Fotoğraftan beden analizi için HKM › Modeller’de «SPİ · Görsel» (ya da King) için görüntü okuyan bir model atanmalı.',
+  'spi.core.extract.goruntuden-beden-analizi-cik':'Görüntüden beden analizi çıkarılamadı.',
+  'spi.core.extract.dosya-secilmedi':'Dosya seçilmedi.',
+  'spi.core.extract.dosya-cok-buyuk-en-fazla':'Dosya çok büyük (en fazla 8 MB).',
+  'spi.core.extract.fis-icin-goruntu-ya-da':'Fiş için görüntü ya da metin dosyası ver.',
+  'spi.core.extract.fis-okumak-icin-bir-model':'Fiş okumak için bir model bağlaman gerekiyor. Fiyatları Finans → Fiyat ',
+  'spi.core.extract.goruntu-okunamadi':'Görüntü okunamadı.',
+  'spi.core.extract.fisten-fiyat-cikarilamadi':'Fişten fiyat çıkarılamadı.',
+  'spi.core.extract.etiket-okumak-icin-bir-model':'Etiket okumak için bir model bağlaman gerekiyor. Gıdayı elle de ',
+  'spi.core.extract.etikette-okunabilir-bir-tabl':'Etikette okunabilir bir tablo bulunamadı.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -205,21 +225,21 @@ SP.Extract = (function(){
   }
 
   async function fromMealPhoto(file, hints){
-    if(!file) return { ok:false, items:[], unmatched:[], note:'Fotoğraf seçilmedi.' };
+    if(!file) return { ok:false, items:[], unmatched:[], note:yz('spi.core.extract.fotograf-secilmedi') };
     if(file.size > MAX_BYTES){
-      return { ok:false, items:[], unmatched:[], note:'Fotoğraf çok büyük (en fazla 8 MB).' };
+      return { ok:false, items:[], unmatched:[], note:yz('spi.core.extract.fotograf-cok-buyuk-en-fazla') };
     }
     if(!isImage(file)){
-      return { ok:false, items:[], unmatched:[], note:'Bu bir görüntü dosyası değil.' };
+      return { ok:false, items:[], unmatched:[], note:yz('spi.core.extract.bu-bir-goruntu-dosyasi-degil') };
     }
     if(!modelReady()){
       return { ok:false, items:[], unmatched:[],
-        note:'Fotoğraftan öğün okumak için bir model bağlaman gerekiyor. '
+        note:yz('spi.core.extract.fotograftan-ogun-okumak-icin')
           + 'Öğünü tek satır yazarak modelsiz de girebilirsin.' };
     }
 
     const parts = splitDataUrl(await readDataUrl(file));
-    if(!parts) return { ok:false, items:[], unmatched:[], note:'Fotoğraf okunamadı.' };
+    if(!parts) return { ok:false, items:[], unmatched:[], note:yz('spi.core.extract.fotograf-okunamadi') };
 
     let out;
     try{
@@ -229,13 +249,13 @@ SP.Extract = (function(){
       });
     }catch(e){
       return { ok:false, items:[], unmatched:[],
-        note:'Model yanıt vermedi: ' + (e && e.message ? e.message : 'bilinmeyen hata') };
+        note:yz('spi.core.extract.model-yanit-vermedi') + (e && e.message ? e.message : 'bilinmeyen hata') };
     }
 
     const rows = parseJson(out && out.text);
     if(!Array.isArray(rows) || !rows.length){
       return { ok:false, items:[], unmatched:[],
-        note:'Fotoğraftan yemek çıkarılamadı. Öğünü yazarak girebilirsin.' };
+        note:yz('spi.core.extract.fotograftan-yemek-cikarilama') };
     }
 
     /* Kimlik eslemesi: model uydurursa oraya DUSMEZ, "eslesmedi" olur. */
@@ -320,20 +340,20 @@ SP.Extract = (function(){
   }
 
   async function fromBodyPhoto(file, hints){
-    if(!file) return { ok:false, note:'Fotoğraf seçilmedi.' };
+    if(!file) return { ok:false, note:yz('spi.core.extract.fotograf-secilmedi') };
     if(file.size > MAX_BYTES){
-      return { ok:false, note:'Fotoğraf çok büyük (en fazla 8 MB).' };
+      return { ok:false, note:yz('spi.core.extract.fotograf-cok-buyuk-en-fazla') };
     }
     if(!isImage(file)){
-      return { ok:false, note:'Bu bir görüntü dosyası değil.' };
+      return { ok:false, note:yz('spi.core.extract.bu-bir-goruntu-dosyasi-degil') };
     }
     if(!modelReady()){
       return { ok:false,
-        note:'Fotoğraftan beden analizi için HKM › Modeller’de «SPİ · Görsel» (ya da King) için görüntü okuyan bir model atanmalı.' };
+        note:yz('spi.core.extract.fotograftan-beden-analizi-ic') };
     }
 
     const parts = splitDataUrl(await readDataUrl(file));
-    if(!parts) return { ok:false, note:'Fotoğraf okunamadı.' };
+    if(!parts) return { ok:false, note:yz('spi.core.extract.fotograf-okunamadi') };
 
     let out;
     try{
@@ -342,12 +362,12 @@ SP.Extract = (function(){
         messages:[{ role:'user', text:bodyPrompt(hints), images:[parts] }],
       });
     }catch(e){
-      return { ok:false, note:'Model yanıt vermedi: ' + (e && e.message ? e.message : 'bilinmeyen hata') };
+      return { ok:false, note:yz('spi.core.extract.model-yanit-vermedi') + (e && e.message ? e.message : 'bilinmeyen hata') };
     }
 
     const res = parseJson(out && out.text);
     if(!res || typeof res !== 'object'){
-      return { ok:false, note:'Görüntüden beden analizi çıkarılamadı.' };
+      return { ok:false, note:yz('spi.core.extract.goruntuden-beden-analizi-cik') };
     }
 
     /* 5 Bölütlü Granüler Şema Normalizasyonu */
@@ -425,27 +445,27 @@ SP.Extract = (function(){
     + 'Emin olmadigin satiri atla. Toplam, kdv ve kasa satirlarini yazma.';
 
   async function fromReceipt(file){
-    if(!file) return { ok:false, rows:[], unmatched:[], note:'Dosya seçilmedi.' };
+    if(!file) return { ok:false, rows:[], unmatched:[], note:yz('spi.core.extract.dosya-secilmedi') };
     if(file.size > MAX_BYTES){
-      return { ok:false, rows:[], unmatched:[], note:'Dosya çok büyük (en fazla 8 MB).' };
+      return { ok:false, rows:[], unmatched:[], note:yz('spi.core.extract.dosya-cok-buyuk-en-fazla') };
     }
 
     let userText = null;
     if(isText(file)) userText = await readText(file);
     else if(!isImage(file)){
       return { ok:false, rows:[], unmatched:[],
-        note:'Fiş için görüntü ya da metin dosyası ver.' };
+        note:yz('spi.core.extract.fis-icin-goruntu-ya-da') };
     }
     if(!modelReady()){
       return { ok:false, rows:[], unmatched:[],
-        note:'Fiş okumak için bir model bağlaman gerekiyor. Fiyatları Finans → Fiyat '
+        note:yz('spi.core.extract.fis-okumak-icin-bir-model')
           + 'sayfasından elle de girebilirsin.' };
     }
 
     const msg = { role:'user', text:RECEIPT_PROMPT + (userText ? '\n\n' + userText : '') };
     if(!userText){
       const parts = splitDataUrl(await readDataUrl(file));
-      if(!parts) return { ok:false, rows:[], unmatched:[], note:'Görüntü okunamadı.' };
+      if(!parts) return { ok:false, rows:[], unmatched:[], note:yz('spi.core.extract.goruntu-okunamadi') };
       msg.images = [parts];
     }
 
@@ -455,12 +475,12 @@ SP.Extract = (function(){
         messages:[msg] });
     }catch(e){
       return { ok:false, rows:[], unmatched:[],
-        note:'Model yanıt vermedi: ' + (e && e.message ? e.message : 'bilinmeyen hata') };
+        note:yz('spi.core.extract.model-yanit-vermedi') + (e && e.message ? e.message : 'bilinmeyen hata') };
     }
 
     const parsed = parseJson(out && out.text);
     if(!Array.isArray(parsed) || !parsed.length){
-      return { ok:false, rows:[], unmatched:[], note:'Fişten fiyat çıkarılamadı.' };
+      return { ok:false, rows:[], unmatched:[], note:yz('spi.core.extract.fisten-fiyat-cikarilamadi') };
     }
 
     const rows = [], unmatched = [];
@@ -520,18 +540,18 @@ SP.Extract = (function(){
 
   async function fromFoodLabel(file){
     const bos = { ok:false, food:null, missing:[], note:'' };
-    if(!file) return Object.assign({}, bos, { note:'Fotoğraf seçilmedi.' });
+    if(!file) return Object.assign({}, bos, { note:yz('spi.core.extract.fotograf-secilmedi') });
     if(file.size > MAX_BYTES)
-      return Object.assign({}, bos, { note:'Fotoğraf çok büyük (en fazla 8 MB).' });
+      return Object.assign({}, bos, { note:yz('spi.core.extract.fotograf-cok-buyuk-en-fazla') });
     if(!isImage(file))
-      return Object.assign({}, bos, { note:'Bu bir görüntü dosyası değil.' });
+      return Object.assign({}, bos, { note:yz('spi.core.extract.bu-bir-goruntu-dosyasi-degil') });
     if(!modelReady())
       return Object.assign({}, bos, {
-        note:'Etiket okumak için bir model bağlaman gerekiyor. Gıdayı elle de '
+        note:yz('spi.core.extract.etiket-okumak-icin-bir-model')
           + 'ekleyebilirsin — besin değerlerini ambalajdan yazman yeterli.' });
 
     const parts = splitDataUrl(await readDataUrl(file));
-    if(!parts) return Object.assign({}, bos, { note:'Fotoğraf okunamadı.' });
+    if(!parts) return Object.assign({}, bos, { note:yz('spi.core.extract.fotograf-okunamadi') });
 
     let out;
     try{
@@ -541,13 +561,13 @@ SP.Extract = (function(){
       });
     }catch(e){
       return Object.assign({}, bos, {
-        note:'Model yanıt vermedi: ' + (e && e.message ? e.message : 'bilinmeyen hata') });
+        note:yz('spi.core.extract.model-yanit-vermedi') + (e && e.message ? e.message : 'bilinmeyen hata') });
     }
 
     const j = parseJson(out && out.text);
     const d = Array.isArray(j) ? j[0] : j;
     if(!d || typeof d !== 'object')
-      return Object.assign({}, bos, { note:'Etikette okunabilir bir tablo bulunamadı.' });
+      return Object.assign({}, bos, { note:yz('spi.core.extract.etikette-okunabilir-bir-tabl') });
 
     /* Oranlama: tablo 100 g icin degilse 100'e cevrilir. */
     const per = labelNum(d.per) || 100;

@@ -55,6 +55,14 @@
         { metin, geriAl() } döndürebilir. geriAl varsa sonuçta «Geri al»
         durur (küçük aksiyon, AGENTS §1.9); King de aynı işlevi kullanır.
         Çok kayıtlı cümlede her parçanın geri alması sondan başa koşar. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.giris.kaydedilemedi':'Kaydedilemedi: ',
+  'ortak.giris.mikrofon-izni-verilmedi-yaza':'Mikrofon izni verilmedi; yazarak da girebilirsin.',
+  'ortak.giris.geri-alinacak-bir-kayit-yok':'Geri alınacak bir kayıt yok.',
+  'ortak.giris.geri-alindi':'Geri alındı.',
+  'ortak.giris.geri-alinamadi':'Geri alınamadı: ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -290,7 +298,7 @@ window.LIFEOS.GIRIS = (function(){
       const g = typeof document !== 'undefined' ? document.getElementById('giris-girdi') : null;
       if(g){ g.value = ''; try{ g.focus(); }catch(err){ /* odak yok */ } }
     }catch(e){
-      mesaj = { tur:'uyari', metin:'Kaydedilemedi: ' + ((e && e.message) || 'bilinmeyen hata') };
+      mesaj = { tur:'uyari', metin:yz('ortak.giris.kaydedilemedi') + ((e && e.message) || 'bilinmeyen hata') };
     }
     tazele();
     return mesaj.metin;
@@ -313,7 +321,7 @@ window.LIFEOS.GIRIS = (function(){
     };
     r.onerror = e => {
       if(e && (e.error === 'not-allowed' || e.error === 'service-not-allowed')){
-        mesaj = { tur:'uyari', metin:'Mikrofon izni verilmedi; yazarak da girebilirsin.' };
+        mesaj = { tur:'uyari', metin:yz('ortak.giris.mikrofon-izni-verilmedi-yaza') };
       }
     };
     r.onend = () => { dinleyen = null; tazele(); if(son) gonder(son); };
@@ -360,9 +368,9 @@ window.LIFEOS.GIRIS = (function(){
   async function geriAl(){
     const g = sonGeriAl;
     sonGeriAl = null;
-    if(!g){ mesaj = { tur:'uyari', metin:'Geri alınacak bir kayıt yok.' }; tazele(); return false; }
-    try{ await g(); mesaj = { tur:'ok', metin:'Geri alındı.' }; }
-    catch(e){ mesaj = { tur:'uyari', metin:'Geri alınamadı: ' + ((e && e.message) || 'bilinmeyen hata') }; }
+    if(!g){ mesaj = { tur:'uyari', metin:yz('ortak.giris.geri-alinacak-bir-kayit-yok') }; tazele(); return false; }
+    try{ await g(); mesaj = { tur:'ok', metin:yz('ortak.giris.geri-alindi') }; }
+    catch(e){ mesaj = { tur:'uyari', metin:yz('ortak.giris.geri-alinamadi') + ((e && e.message) || 'bilinmeyen hata') }; }
     tazele();
     return true;
   }

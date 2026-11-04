@@ -25,6 +25,35 @@
    pakette olan yazılar (fonts.css: Inter, Manrope, Newsreader) ve cihazın
    kendi yazısı — hiçbir şey indirilmez. Tercih `lifeos.yazi`, modül geçişinde
    taşınır (animasyon.js TASINAN); <head>'de okunur, ilk çizim doğru yazıyla. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.ayarlar.inter':'Inter',
+  'ortak.ayarlar.manrope':'Manrope',
+  'ortak.ayarlar.cihazin':'Cihazın',
+  'ortak.ayarlar.newsreader':'Newsreader',
+  'ortak.ayarlar.fraunces':'Fraunces',
+  'ortak.ayarlar.nunito':'Nunito',
+  'ortak.ayarlar.space-grotesk':'Space Grotesk',
+  'ortak.ayarlar.dm-sans':'DM Sans',
+  'ortak.ayarlar.playfair':'Playfair',
+  'ortak.ayarlar.lora':'Lora',
+  'ortak.ayarlar.quicksand':'Quicksand',
+  'ortak.ayarlar.comfortaa':'Comfortaa',
+  'ortak.ayarlar.profiller':'Profiller',
+  'ortak.ayarlar.gorunum':'Görünüm',
+  'ortak.ayarlar.arka-plan':'Arka plan',
+  'ortak.ayarlar.ses-ve-muzik':'Ses ve müzik',
+  'ortak.ayarlar.animasyon':'Animasyon',
+  'ortak.ayarlar.erisilebilirlik':'Erişilebilirlik',
+  'ortak.ayarlar.king-ve-baglantilar':'King ve bağlantılar',
+  'ortak.ayarlar.merkez':'Merkez',
+  'ortak.ayarlar.minikler':'Minikler',
+  'ortak.ayarlar.bildirimler':'Bildirimler',
+  'ortak.ayarlar.planlama':'Planlama',
+  'ortak.ayarlar.modul-ayarlari':'Modül ayarları',
+  'ortak.ayarlar.guvenlik':'Güvenlik',
+  'ortak.ayarlar.baglantilar':'Bağlantılar',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -36,21 +65,21 @@ window.LIFEOS = window.LIFEOS || {};
   /* ------------------------------------------------------------ yazı */
   const YAZI_ANAHTAR = 'lifeos.yazi';
   const YAZILAR = Object.freeze([
-    { id:'inter',   ad:'Inter',     not:'varsayılan, sade' },
-    { id:'manrope', ad:'Manrope',   not:'yuvarlak, yumuşak' },
-    { id:'sistem',  ad:'Cihazın',   not:'işletim sisteminin yazısı' },
-    { id:'kitap',   ad:'Newsreader', not:'kitap gibi, serif' },
+    { id:'inter',   ad:yz('ortak.ayarlar.inter'),     not:'varsayılan, sade' },
+    { id:'manrope', ad:yz('ortak.ayarlar.manrope'),   not:'yuvarlak, yumuşak' },
+    { id:'sistem',  ad:yz('ortak.ayarlar.cihazin'),   not:'işletim sisteminin yazısı' },
+    { id:'kitap',   ad:yz('ortak.ayarlar.newsreader'), not:'kitap gibi, serif' },
     /* Ek aileler (kullanıcı, 2026-10-30: «çok daha güzel fontlar; kullanıcının
        gözüne birçok şey hitap edebilir»; OFL, src/fonts/ek/KUNYE.md). Gömülmez:
        yalnız seçilince ya da seçici açılınca yüklenir (yaziYukle). */
-    { id:'fraunces',  ad:'Fraunces',   not:'sıcak serif, şık başlık', aile:'Fraunces',         dosya:'fraunces',         agirlik:'300 700' },
-    { id:'nunito',    ad:'Nunito',     not:'yuvarlak, dost canlısı',  aile:'Nunito',           dosya:'nunito',           agirlik:'400 800' },
-    { id:'grotesk',   ad:'Space Grotesk', not:'modern, teknik',       aile:'Space Grotesk',    dosya:'space-grotesk',    agirlik:'400 700' },
-    { id:'dmsans',    ad:'DM Sans',    not:'temiz, geometrik',        aile:'DM Sans',          dosya:'dm-sans',          agirlik:'400 700' },
-    { id:'playfair',  ad:'Playfair',   not:'zarif, dergi gibi',       aile:'Playfair Display', dosya:'playfair-display', agirlik:'400 800' },
-    { id:'lora',      ad:'Lora',       not:'okunaklı kitap serifi',   aile:'Lora',             dosya:'lora',             agirlik:'400 700' },
-    { id:'quicksand', ad:'Quicksand',  not:'yuvarlak, oyunsu',        aile:'Quicksand',        dosya:'quicksand',        agirlik:'400 700' },
-    { id:'comfortaa', ad:'Comfortaa',  not:'yumuşak, tatlı',          aile:'Comfortaa',        dosya:'comfortaa',        agirlik:'400 700' },
+    { id:'fraunces',  ad:yz('ortak.ayarlar.fraunces'),   not:'sıcak serif, şık başlık', aile:'Fraunces',         dosya:'fraunces',         agirlik:'300 700' },
+    { id:'nunito',    ad:yz('ortak.ayarlar.nunito'),     not:'yuvarlak, dost canlısı',  aile:'Nunito',           dosya:'nunito',           agirlik:'400 800' },
+    { id:'grotesk',   ad:yz('ortak.ayarlar.space-grotesk'), not:'modern, teknik',       aile:'Space Grotesk',    dosya:'space-grotesk',    agirlik:'400 700' },
+    { id:'dmsans',    ad:yz('ortak.ayarlar.dm-sans'),    not:'temiz, geometrik',        aile:'DM Sans',          dosya:'dm-sans',          agirlik:'400 700' },
+    { id:'playfair',  ad:yz('ortak.ayarlar.playfair'),   not:'zarif, dergi gibi',       aile:'Playfair Display', dosya:'playfair-display', agirlik:'400 800' },
+    { id:'lora',      ad:yz('ortak.ayarlar.lora'),       not:'okunaklı kitap serifi',   aile:'Lora',             dosya:'lora',             agirlik:'400 700' },
+    { id:'quicksand', ad:yz('ortak.ayarlar.quicksand'),  not:'yuvarlak, oyunsu',        aile:'Quicksand',        dosya:'quicksand',        agirlik:'400 700' },
+    { id:'comfortaa', ad:yz('ortak.ayarlar.comfortaa'),  not:'yumuşak, tatlı',          aile:'Comfortaa',        dosya:'comfortaa',        agirlik:'400 700' },
   ]);
   const ARALIK = { latin:'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD',
     'latin-ext':'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF' };
@@ -116,20 +145,20 @@ window.LIFEOS = window.LIFEOS || {};
      (sistem/ayar.py) ve her modülde, giriş sayfasında aynıdır; «Bu modül»
      yalnız açık modülü değiştirir. Her bölümün başında kapsamı tek satır. */
   const BOLUMLER = Object.freeze([
-    { id:'profil',   ad:'Profiller',        grup:'Sistem' },
-    { id:'gorunum',  ad:'Görünüm',          grup:'Sistem' },
-    { id:'zemin',    ad:'Arka plan',        grup:'Sistem' },
-    { id:'ses',      ad:'Ses ve müzik',     grup:'Sistem' },
-    { id:'hareket',  ad:'Animasyon',        grup:'Sistem' },
-    { id:'erisim',   ad:'Erişilebilirlik',  grup:'Sistem' },
-    { id:'king',     ad:'King ve bağlantılar', grup:'Sistem' },
-    { id:'merkez',   ad:'Merkez',           grup:'Sistem' },
-    { id:'ekip',     ad:'Minikler',         grup:'Sistem' },
-    { id:'bildirim', ad:'Bildirimler',      grup:'Sistem' },
-    { id:'sistem',   ad:'Planlama',         grup:'Sistem' },
-    { id:'modul',    ad:'Modül ayarları',   grup:'Bu modül' },
-    { id:'hesap',    ad:'Güvenlik',         grup:'Hesap' },
-    { id:'baglanti', ad:'Bağlantılar',      grup:'Hesap' },
+    { id:'profil',   ad:yz('ortak.ayarlar.profiller'),        grup:'Sistem' },
+    { id:'gorunum',  ad:yz('ortak.ayarlar.gorunum'),          grup:'Sistem' },
+    { id:'zemin',    ad:yz('ortak.ayarlar.arka-plan'),        grup:'Sistem' },
+    { id:'ses',      ad:yz('ortak.ayarlar.ses-ve-muzik'),     grup:'Sistem' },
+    { id:'hareket',  ad:yz('ortak.ayarlar.animasyon'),        grup:'Sistem' },
+    { id:'erisim',   ad:yz('ortak.ayarlar.erisilebilirlik'),  grup:'Sistem' },
+    { id:'king',     ad:yz('ortak.ayarlar.king-ve-baglantilar'), grup:'Sistem' },
+    { id:'merkez',   ad:yz('ortak.ayarlar.merkez'),           grup:'Sistem' },
+    { id:'ekip',     ad:yz('ortak.ayarlar.minikler'),         grup:'Sistem' },
+    { id:'bildirim', ad:yz('ortak.ayarlar.bildirimler'),      grup:'Sistem' },
+    { id:'sistem',   ad:yz('ortak.ayarlar.planlama'),         grup:'Sistem' },
+    { id:'modul',    ad:yz('ortak.ayarlar.modul-ayarlari'),   grup:'Bu modül' },
+    { id:'hesap',    ad:yz('ortak.ayarlar.guvenlik'),         grup:'Hesap' },
+    { id:'baglanti', ad:yz('ortak.ayarlar.baglantilar'),      grup:'Hesap' },
   ]);
   const MODUL_AD = Object.freeze({ ays:'AYS', spi:'SPİ', esp:'ESP' });
   /* ALANLAR (kullanıcı, 2026-10-30: «sistem ile yalnız o modül arasındaki ayrımı
@@ -1036,14 +1065,14 @@ window.LIFEOS = window.LIFEOS || {};
       }
       const sk = t.closest('[data-ayar-bolum]');
       if(sk){ sekmeSec(sk.closest('.ayarlar'), sk.getAttribute('data-ayar-bolum')); return; }
-      const yz = t.closest('[data-yazi-sec]');
-      if(yz){
-        yaziAyarla(yz.getAttribute('data-yazi-sec'));
-        const yad = (YAZILAR.find(y => y.id === yz.getAttribute('data-yazi-sec')) || {}).ad;
+      const yzSec = t.closest('[data-yazi-sec]');
+      if(yzSec){
+        yaziAyarla(yzSec.getAttribute('data-yazi-sec'));
+        const yad = (YAZILAR.find(y => y.id === yzSec.getAttribute('data-yazi-sec')) || {}).ad;
         document.querySelectorAll('[data-yazi-ad]').forEach(x => { x.textContent = yad || ''; });
-        const g = yz.closest('.ayarlar__yazilar');
+        const g = yzSec.closest('.ayarlar__yazilar');
         if(g) g.querySelectorAll('[data-yazi-sec]').forEach(b => {
-          const on = b === yz; b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+          const on = b === yzSec; b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
         });
         return;
       }

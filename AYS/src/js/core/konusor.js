@@ -19,6 +19,14 @@
      4. KART KULLANICININ. «Karta çevir» soruyu ön yüze, cevabın başını
         arka yüze yazar (kaynak «konusor»); kart düzeltilir ya da silinir.
    Çağrı soru çözümündeki koç zinciriyle yapılır (core/solver.js talk). */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.konusor.konu-bulunamadi':'Konu bulunamadı.',
+  'ays.core.konusor.neyi-anlamadigini-bir-cumley':'Neyi anlamadığını bir cümleyle yaz.',
+  'ays.core.konusor.model-bagli-degil-ofis':'Model bağlı değil. Ofis › Ofis ayarlarından ücretsiz bir sağlayıcı ',
+  'ays.core.konusor.model-bos-cevap-verdi-yenide':'Model boş cevap verdi; yeniden sor.',
+  'ays.core.konusor.vazgecildi':'Vazgeçildi.',
+});
+
 
 window.R = window.R || {};
 
@@ -54,12 +62,12 @@ R.KonuSor = (function(){
   async function sor(subjectId, topicId, soru, o){
     o = o || {};
     const { subject, topic } = bul(subjectId, topicId);
-    if(!topic) return { ok:false, neden:'konu', metin:'Konu bulunamadı.' };
+    if(!topic) return { ok:false, neden:'konu', metin:yz('ays.core.konusor.konu-bulunamadi') };
     const q = String(soru || '').trim();
-    if(q.length < 3) return { ok:false, neden:'bos', metin:'Neyi anlamadığını bir cümleyle yaz.' };
+    if(q.length < 3) return { ok:false, neden:'bos', metin:yz('ays.core.konusor.neyi-anlamadigini-bir-cumley') };
     const chain = zincir();
     if(!chain.length){
-      return { ok:false, neden:'model', metin:'Model bağlı değil. Ofis › Ofis ayarlarından ücretsiz bir sağlayıcı '
+      return { ok:false, neden:'model', metin:yz('ays.core.konusor.model-bagli-degil-ofis')
         + 'bağlarsan burada anlatır.' };
     }
     const anahtar = subjectId + '/' + topicId;
@@ -71,12 +79,12 @@ R.KonuSor = (function(){
       const res = await R.LLM.complete(chain, { system:SISTEM, messages, maxTokens:BUTCE, temperature:0.3,
         signal:o.signal, onText:o.onText });
       const metin = String((res && res.text) || '').trim();
-      if(!metin) return { ok:false, neden:'bos-cevap', metin:'Model boş cevap verdi; yeniden sor.' };
+      if(!metin) return { ok:false, neden:'bos-cevap', metin:yz('ays.core.konusor.model-bos-cevap-verdi-yenide') };
       konusma[anahtar] = gecmis.concat([{ rol:'user', metin:q }, { rol:'assistant', metin }]);
       return { ok:true, metin, model:res.model };
     }catch(err){
       const kod = err && err.code;
-      if(kod === 'cancelled') return { ok:false, neden:'iptal', metin:'Vazgeçildi.' };
+      if(kod === 'cancelled') return { ok:false, neden:'iptal', metin:yz('ays.core.konusor.vazgecildi') };
       return { ok:false, neden:'hata', metin:R.LLM.errorText ? R.LLM.errorText(kod) : 'Model şu an yanıt veremedi.' };
     }
   }

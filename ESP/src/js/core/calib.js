@@ -40,6 +40,15 @@
    4. AZ SAYIDA KAYIT HÜKÜM VERMEZ. Beşin altında kapanmış tahmin varsa
       puan hesaplanmaz. Üç tahminle kalibrasyon ölçmek, üç soruyla sınav
       yapmaktır. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.calib.kart-hatirlama-oranin':'Kart hatırlama oranın',
+  'esp.core.calib.haftalik-calisma-suren':'Haftalık çalışma süren',
+  'esp.core.calib.haftalik-oturum-sayin':'Haftalık oturum sayın',
+  'esp.core.calib.siradaki-kapi':'Sıradaki kapı',
+  'esp.core.calib.yazinin-okunabilirligi':'Yazının okunabilirliği',
+  'esp.core.calib.yanlilik-icin-en-az':'Yanlılık için en az ',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -62,15 +71,15 @@ ESP.Calib = (function(){
      Böylece defter, neyi ölçtüğünden bağımsız kalır. */
   ESP.CALIB_KINDS = [
     { id:'retention', type:'number', unit:'puan', err:'abs', bands:[5, 12, 25],
-      label:'Kart hatırlama oranın', ask:'Son 30 günde kartlarının yüzde kaçını ilk denemede hatırladın?' },
+      label:yz('esp.core.calib.kart-hatirlama-oranin'), ask:'Son 30 günde kartlarının yüzde kaçını ilk denemede hatırladın?' },
     { id:'minutes', type:'number', unit:'dk', err:'ape',
-      label:'Haftalık çalışma süren', ask:'Bu hafta toplam kaç dakika çalıştın?' },
+      label:yz('esp.core.calib.haftalik-calisma-suren'), ask:'Bu hafta toplam kaç dakika çalıştın?' },
     { id:'sessions', type:'number', unit:'oturum', err:'abs', bands:[1, 2, 4],
-      label:'Haftalık oturum sayın', ask:'Bu hafta kaç oturum kaydettin?' },
+      label:yz('esp.core.calib.haftalik-oturum-sayin'), ask:'Bu hafta kaç oturum kaydettin?' },
     { id:'gate', type:'binary', unit:'', err:'brier',
-      label:'Sıradaki kapı', ask:'Bu ayın sonunda sıradaki kapıyı geçmiş olacak mısın?' },
+      label:yz('esp.core.calib.siradaki-kapi'), ask:'Bu ayın sonunda sıradaki kapıyı geçmiş olacak mısın?' },
     { id:'readability', type:'number', unit:'puan', err:'abs', bands:[5, 12, 25],
-      label:'Yazının okunabilirliği', ask:'Bu taslağın Ateşman puanı kaç çıkar?' },
+      label:yz('esp.core.calib.yazinin-okunabilirligi'), ask:'Bu taslağın Ateşman puanı kaç çıkar?' },
   ];
 
   const KIND_BY_ID = ESP.CALIB_KINDS.reduce((m, k) => { m[k.id] = k; return m; }, {});
@@ -247,7 +256,7 @@ ESP.Calib = (function(){
       .slice(0, PENCERE);
     if(kayitlar.length < ASGARI){
       return { cert:'missing', n:kayitlar.length, value:null, unit:'bant',
-        note:'Yanlılık için en az ' + ASGARI + ' kapanmış sayısal tahmin gerekir.' };
+        note:yz('esp.core.calib.yanlilik-icin-en-az') + ASGARI + ' kapanmış sayısal tahmin gerekir.' };
     }
     const v = kayitlar.reduce((a, f) => {
       const k = kindOf(f.kind);

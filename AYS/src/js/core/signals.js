@@ -29,6 +29,13 @@
    4. NEDENSELLIK IDDIA EDILMEZ. Zincir kaydedilir, "bu soru sayesinde
       duzeldi" denmez. Iki pencere arasinda bir suru sey degisir. Sistem
       yalnizca sirayi gosterir; yorumu kullaniciya birakir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.signals.sistemde-gecen-sure':'Sistemde geçen süre',
+  'ays.core.signals.henuz-yeterli-sinyal-uretilm':'Henüz yeterli sinyal üretilmedi; bu sayfanın gerekliliği ',
+  'ays.core.signals.uretilen':'Üretilen ',
+  'ays.core.signals.sinyaller-goruluyor-ama-hicb':'Sinyaller görülüyor ama hiçbiri cevaplanmıyor. Sorular ',
+});
+
 
 window.R = window.R || {};
 
@@ -146,7 +153,7 @@ R.Signals = (function(){
     if(f.level === 'high' && (sonKapanis('friction') == null
         || sonKapanis('friction') >= SOGUMA_GUN)){
       const sig = norm({ kind:'friction', ref:'friction',
-        title:'Sistemde geçen süre',
+        title:yz('ays.core.signals.sistemde-gecen-sure'),
         question:'Son iki haftada günde ' + f.window.perDay + ' dakika sistemi '
           + 'yönetmekle geçti. Hangi kaydı bırakmak çalışmanı bozmaz?',
         snapshot:{ perDay:f.window.perDay, ratio:f.window.ratio } });
@@ -258,17 +265,17 @@ R.Signals = (function(){
     const e = efficacy();
     if(e.opened < 3){
       return { level:'unknown',
-        text:'Henüz yeterli sinyal üretilmedi; bu sayfanın gerekliliği '
+        text:yz('ays.core.signals.henuz-yeterli-sinyal-uretilm')
            + 'ölçülmemiş durumda.' };
     }
     if(e.seen === 0){
       return { level:'unused',
-        text:'Üretilen ' + e.opened + ' sinyalin hiçbiri görülmemiş. '
+        text:yz('ays.core.signals.uretilen') + e.opened + ' sinyalin hiçbiri görülmemiş. '
            + 'Görülmeyen bir denetim, denetim değildir.' };
     }
     if(e.answered === 0){
       return { level:'ignored',
-        text:'Sinyaller görülüyor ama hiçbiri cevaplanmıyor. Sorular '
+        text:yz('ays.core.signals.sinyaller-goruluyor-ama-hicb')
            + 'yanlış soru olabilir ya da yanlış anda geliyor olabilir.' };
     }
     return { level:'used',

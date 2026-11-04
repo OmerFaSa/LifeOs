@@ -18,6 +18,17 @@
    Sınırlar: AYS puan ya da sıra garantisi vermez; net bir ölçümdür, bir
    söz değildir. Olamayacak hedef (TYT'de 120'den fazla net) karara
    gitmeden söylenir (motorun `dogrula` kancası). */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.hedefler.konu-bitirme':'Konu bitirme',
+  'ays.core.hedefler.kapanan-konu':'kapanan konu',
+  'ays.core.hedefler.ays-mufredatindaki':'AYS müfredatındaki ',
+  'ays.core.hedefler.iki-haftada-bir':'iki haftada bir ',
+  'ays.core.hedefler.net-hedefi':'Net hedefi',
+  'ays.core.hedefler.senin-son':'senin son ',
+  'ays.core.hedefler.ders-calisma':'Ders çalışma',
+  'ays.core.hedefler.hedef-bulunamadi':'Hedef bulunamadı.',
+});
+
 
 window.R = window.R || {};
 
@@ -171,7 +182,7 @@ R.Hedefler = (function(){
   }
 
   const KONU = {
-    id:'konu', ad:'Konu bitirme', olcut:{ ad:'kapanan konu', birim:'konu' },
+    id:'konu', ad:yz('ays.core.hedefler.konu-bitirme'), olcut:{ ad:yz('ays.core.hedefler.kapanan-konu'), birim:'konu' },
     /* Ders ya da sınav adı + bitirme fiili. «kapat» bilerek YOK: «konu
        anlatımını kapatmak istiyorum» bir bölüm isteğidir (core/komut.js). */
     get anahtar(){
@@ -220,7 +231,7 @@ R.Hedefler = (function(){
       const l = h.fark != null ? kalan.slice(0, h.fark) : kalan;
       const saat = yuvarla(l.reduce((a, k) => a + konuSaati(k), 0) + l.length * TEKRAR_SAAT, 1);
       const t = tempo();
-      return { saat, kalan:l.length, dayanak:{ durum:'kaynak_bekliyor', metin:'AYS müfredatındaki '
+      return { saat, kalan:l.length, dayanak:{ durum:'kaynak_bekliyor', metin:yz('ays.core.hedefler.ays-mufredatindaki')
         + 'konu süreleri (günde 3–4 saatlik düzene göre öğretim ve ilk soru; planlama varsayımı, '
         + 'kaynağı bağlanmadı) × seviyen («' + t.ad + '» ×' + sayiYaz(t.kat, 2) + '); başlanmış konu '
         + 'yarım sayıldı; her konuya 2 × 30 dk tekrar eklendi' } };
@@ -230,7 +241,7 @@ R.Hedefler = (function(){
     haftalikEk(h){
       const d = R.HedefPlan && R.HedefPlan.denemeOf ? R.HedefPlan.denemeOf(h.dersler) : null;
       if(!d) return null;
-      return { saat:d.dk / 60 / R.HedefPlan.DENEME_ARALIK, metin:'iki haftada bir ' + d.ad };
+      return { saat:d.dk / 60 / R.HedefPlan.DENEME_ARALIK, metin:yz('ays.core.hedefler.iki-haftada-bir') + d.ad };
     },
   };
 
@@ -293,7 +304,7 @@ R.Hedefler = (function(){
   }
 
   const NET = {
-    id:'net', ad:'Net hedefi', olcut:{ ad:'net', birim:'net' },
+    id:'net', ad:yz('ays.core.hedefler.net-hedefi'), olcut:{ ad:'net', birim:'net' },
     get anahtar(){
       const d = '(tyt|ayt|' + aliasDesen() + ')';
       return new RegExp(ONCE + d + '[^.?!]*?' + ONCE + 'net|' + ONCE + 'net[^.?!]*?' + ONCE + d);
@@ -374,7 +385,7 @@ R.Hedefler = (function(){
           + (h.brans ? ' deneme' : ' tam deneme') + ' ve üç hafta gerekir. Denemelerini girince kararı veririm.' };
       }
       return { tipik:t.hiz, ust:yuvarla(t.hiz * H().ZORLAYICI_KAT, 2), birim:'net/hafta',
-        dayanak:{ durum:'olculdu', metin:'senin son ' + t.deneme + (h.brans ? ' denemendeki ' + h.test + ' netin'
+        dayanak:{ durum:'olculdu', metin:yz('ays.core.hedefler.senin-son') + t.deneme + (h.brans ? ' denemendeki ' + h.test + ' netin'
           : ' tam ' + h.aile + ' denemen') + ', ' + sayiYaz(t.hafta) + ' hafta: haftada +' + sayiYaz(t.hiz, 2)
           + ' net (medyan eğim)' } };
     },
@@ -387,7 +398,7 @@ R.Hedefler = (function(){
      dakikayı tutan gün. Plansız çalışma blok açmadığı için sayılmaz. */
   const ALISKANLIK = window.LIFEOS && LIFEOS.Aliskanlik ? LIFEOS.Aliskanlik.kur({
     alanlar:[
-      { id:'calisma', ad:'Ders çalışma', kelime:/(ders|çalış|soru çöz|matematik|türkçe|fizik|kimya|biyoloji|tarih|coğrafya|geometri|paragraf|tyt|ayt)/ },
+      { id:'calisma', ad:yz('ays.core.hedefler.ders-calisma'), kelime:/(ders|çalış|soru çöz|matematik|türkçe|fizik|kimya|biyoloji|tarih|coğrafya|geometri|paragraf|tyt|ayt)/ },
     ],
     dakika:(alan, iso) => olculenDakika(iso),
   }) : null;
@@ -442,7 +453,7 @@ R.Hedefler = (function(){
 
   async function durumDegistir(id, yeni){
     const h = liste().find(x => x.id === id);
-    if(!h) return { ok:false, why:'Hedef bulunamadı.' };
+    if(!h) return { ok:false, why:yz('ays.core.hedefler.hedef-bulunamadi') };
     const r = H().gecis(h, yeni, U().todayISO());
     if(r.ok) await kaydet(r.hedef);
     if(r.ok && (yeni === 'tamam' || yeni === 'birakildi') && R.HedefPlan){

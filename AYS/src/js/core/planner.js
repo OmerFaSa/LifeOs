@@ -8,6 +8,23 @@
    Böylece plan ekranı, hafta ekranı ve gün üreteci değişmeden çalışır.
 
    Kural motoru otoritedir: plan burada üretilir, LLM plana karışmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.planner.sifirdan':'Sıfırdan',
+  'ays.core.planner.konularin-cogu-yeni-temel-on':'Konuların çoğu yeni. Temel önce, hız sonra.',
+  'ays.core.planner.temeli-var':'Temeli var',
+  'ays.core.planner.konularin-bir-kismi-tanidik':'Konuların bir kısmı tanıdık; tekrar + eksik kapatma.',
+  'ays.core.planner.tekrar-ediyorum':'Tekrar ediyorum',
+  'ays.core.planner.konular-biliniyor-hiz-hata-v':'Konular biliniyor; hız, hata ve deneme ağırlıklı.',
+  'ays.core.planner.kalibrasyon':'Kalibrasyon',
+  'ays.core.planner.tyt-temeli':'TYT temeli',
+  'ays.core.planner.tyt-cekirdegi':'TYT çekirdeği',
+  'ays.core.planner.ayt-koprusu':'AYT köprüsü',
+  'ays.core.planner.cift-kulvar':'Çift kulvar',
+  'ays.core.planner.tamamlama':'Tamamlama',
+  'ays.core.planner.prova':'Prova',
+  'ays.core.planner.sprint-ve-azaltma':'Sprint ve azaltma',
+});
+
 
 window.R = window.R || {};
 
@@ -16,38 +33,38 @@ R.Planner = (function(){
 
   /* Seviye: konu başına gereken süreyi ve soru hacmini ölçekler. */
   const LEVELS = {
-    baslangic: { id:'baslangic', name:'Sıfırdan', pace:1.35, qScale:0.85,
-      note:'Konuların çoğu yeni. Temel önce, hız sonra.' },
-    orta:      { id:'orta', name:'Temeli var', pace:1.0, qScale:1.0,
-      note:'Konuların bir kısmı tanıdık; tekrar + eksik kapatma.' },
-    ileri:     { id:'ileri', name:'Tekrar ediyorum', pace:0.75, qScale:1.2,
-      note:'Konular biliniyor; hız, hata ve deneme ağırlıklı.' },
+    baslangic: { id:'baslangic', name:yz('ays.core.planner.sifirdan'), pace:1.35, qScale:0.85,
+      note:yz('ays.core.planner.konularin-cogu-yeni-temel-on') },
+    orta:      { id:'orta', name:yz('ays.core.planner.temeli-var'), pace:1.0, qScale:1.0,
+      note:yz('ays.core.planner.konularin-bir-kismi-tanidik') },
+    ileri:     { id:'ileri', name:yz('ays.core.planner.tekrar-ediyorum'), pace:0.75, qScale:1.2,
+      note:yz('ays.core.planner.konular-biliniyor-hiz-hata-v') },
   };
 
   /* Faz modeli — takvimin yüzdesine göre yerleşir, hafta sayısından bağımsız. */
   const PHASES = [
-    { key:'kalibrasyon', to:0.08, label:'Kalibrasyon', theme:'Tanı ve sistem kurulumu',
+    { key:'kalibrasyon', to:0.08, label:yz('ays.core.planner.kalibrasyon'), theme:'Tanı ve sistem kurulumu',
       focus:['tyt-turkce', 'tyt-matematik'], exam:'1 tam TYT (tanı) + süresiz AYT denemesi',
       check:'Başlangıç netleri, süreler ve hata envanteri kaydedildi mi?', qFactor:0.55, aytRatio:0 },
-    { key:'tyt-temel', to:0.28, label:'TYT temeli', theme:'Türkçe + Temel Matematik çekirdeği',
+    { key:'tyt-temel', to:0.28, label:yz('ays.core.planner.tyt-temeli'), theme:'Türkçe + Temel Matematik çekirdeği',
       focus:['tyt-turkce', 'tyt-matematik'], exam:'Haftada 1 branş denemesi',
       check:'Konu sonrası doğruluk %60’ın üzerinde mi?', qFactor:0.75, aytRatio:0 },
-    { key:'tyt-cekirdek', to:0.45, label:'TYT çekirdeği', theme:'Problem, geometri ve fen bloğu',
+    { key:'tyt-cekirdek', to:0.45, label:yz('ays.core.planner.tyt-cekirdegi'), theme:'Problem, geometri ve fen bloğu',
       focus:['tyt-matematik', 'tyt-fen', 'tyt-turkce'], exam:'2 haftada 1 tam TYT + branş',
       check:'Problem doğruluğu %55’i geçti mi?', qFactor:0.9, aytRatio:0.1 },
-    { key:'ayt-kopru', to:0.60, label:'AYT köprüsü', theme:'AYT Matematik önkoşulları açılıyor',
+    { key:'ayt-kopru', to:0.60, label:yz('ays.core.planner.ayt-koprusu'), theme:'AYT Matematik önkoşulları açılıyor',
       focus:['ayt-matematik', 'tyt-matematik', 'tyt-fen'], exam:'Haftada 1 tam TYT + AYT branş',
       check:'AYT fonksiyon/polinom temelinde %60 doğruluk var mı?', qFactor:1.0, aytRatio:0.4 },
-    { key:'cift-kulvar', to:0.78, label:'Çift kulvar', theme:'AYT ana blok + TYT koruma',
+    { key:'cift-kulvar', to:0.78, label:yz('ays.core.planner.cift-kulvar'), theme:'AYT ana blok + TYT koruma',
       focus:['ayt-matematik', 'ayt-fizik', 'ayt-kimya', 'ayt-biyoloji'], exam:'Haftada 1 TYT + 1 AYT',
       check:'TYT medyanı düşmeden AYT netleri yükseliyor mu?', qFactor:1.0, aytRatio:0.65 },
-    { key:'tamamlama', to:0.90, label:'Tamamlama', theme:'Kalan konular ve ikinci tur',
+    { key:'tamamlama', to:0.90, label:yz('ays.core.planner.tamamlama'), theme:'Kalan konular ve ikinci tur',
       focus:['ayt-matematik', 'ayt-fizik', 'ayt-kimya', 'ayt-biyoloji', 'tyt-sosyal'], exam:'Haftada 2 tam deneme',
       check:'Konu kapanışı %75’i geçti mi?', qFactor:0.95, aytRatio:0.6 },
-    { key:'prova', to:0.97, label:'Prova', theme:'Sınav koşullarında tekrar',
+    { key:'prova', to:0.97, label:yz('ays.core.planner.prova'), theme:'Sınav koşullarında tekrar',
       focus:[], exam:'Haftada 2 tam deneme + analiz', qFactor:0.7, aytRatio:0.5,
       check:'Süre yönetimi ve taban skor sabitlendi mi?' },
-    { key:'taper', to:1.01, label:'Sprint ve azaltma', theme:'Hacim düşer, ritim korunur',
+    { key:'taper', to:1.01, label:yz('ays.core.planner.sprint-ve-azaltma'), theme:'Hacim düşer, ritim korunur',
       focus:[], exam:'Kısa oturumlar, tam deneme yok', qFactor:0.4, aytRatio:0.4,
       check:'Uyku sınav saatine ayarlandı mı, evrak hazır mı?' },
   ];

@@ -34,6 +34,11 @@
         yazmaz; her satırın yaz()'ı modülün kendi kodudur (KOLAY §2.6).
      6. KALIP ÖLÇÜLÜR, UYDURULMAZ. «Her zamanki» önerisi yalnız son 7 günün
         en az 4'ünde aynı kayıttan gelir (kalip(); KOLAY §2.4). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.gunukapat.bir-kismi-geri-alinamadi':'Bir kısmı geri alınamadı.',
+  'ortak.gunukapat.geri-alindi':'Geri alındı.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -229,7 +234,7 @@ window.LIFEOS.GUNUKAPAT = (function(){
     }
     const geriAl = geri.length ? async () => {
       const bozuk = await hepsiniGeriAl(geri);
-      sonMesaj[gun] = bozuk ? { tur:'uyari', metin:'Bir kısmı geri alınamadı.' } : { tur:'ok', metin:'Geri alındı.' };
+      sonMesaj[gun] = bozuk ? { tur:'uyari', metin:yz('ortak.gunukapat.bir-kismi-geri-alinamadi') } : { tur:'ok', metin:yz('ortak.gunukapat.geri-alindi') };
       if(ayar && typeof ayar.yenile === 'function') ayar.yenile();
     } : null;
     const yazi = 'Gün kapatıldı: ' + yazilan.length + ' kayıt.' + (geriAlinamaz ? ' Bir kısmı geri alınamaz.' : '');

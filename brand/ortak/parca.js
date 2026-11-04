@@ -18,6 +18,9 @@
      yazı   ekranda görünen cümle kimlikle durur (`yazi`); çizim kodu metin taşımaz.
      bilgi  bir sayı ya da değer: nasıl okunduğu ve kesinlik etiketi (§1.2).
             Etiketsiz bilgi kaydedilmez. King, Gün ve başka parça buradan okur.
+     komut  komut paletinin bir satırı; kendi ekran dosyasında durur.
+     tepki  bir olaya verilen ses, hareket ya da minik tepkisi (`katalog.tepkiler()` hepsini dizer).
+            Sayfa kaydındaki `king` alanı sayfayı King'e tanıtır (tools/parca.py rehberi üretir).
 
    Sözler:
      1. TAK, ÇIKAR. Blok silinince sayfa yine çizilir, menü ve olaylar kendini düzeltir.
@@ -27,7 +30,7 @@
 window.LIFEOS = window.LIFEOS || {};
 
 (function(L){
-  const SAYFA = new Map(), BLOK = new Map(), YAZI = new Map(), BILGI = new Map(), hatalar = [];
+  const SAYFA = new Map(), BLOK = new Map(), YAZI = new Map(), BILGI = new Map(), KOMUT = new Map(), TEPKI = new Map(), hatalar = [];
 
   function gerek(o, alanlar, tur){
     alanlar.forEach(a => { if(o == null || o[a] == null || o[a] === '') throw new Error('PARCA: ' + tur + ' için «' + a + '» gerekir'); });
@@ -66,13 +69,26 @@ window.LIFEOS = window.LIFEOS || {};
     ekle(BILGI, o.id, o, 'bilgi');
     return o.id;
   }
-  /* Eksik veri sıfır değildir (§1.2): okunamayan bilgi «veri yok» döner. */
+  /* Eksik veri sıfır değildir (§1.2): okunamayan bilgi «veri yok» döner. Değer kendi
+     etiketini de taşıyabilir: { deger, etiket } (ör. tahmin içeren haftalık toplam). */
   function oku(id){
     const b = BILGI.get(id);
     if(!b) throw new Error('PARCA: bilgi yok: ' + id);
     let d = null;
     try{ d = b.oku(); }catch(e){ d = null; }
-    return d == null ? { deger:null, etiket:'veri yok' } : { deger:d, etiket:b.etiket };
+    if(d == null) return { deger:null, etiket:'veri yok' };
+    if(typeof d === 'object' && 'deger' in d){
+      if(d.deger == null) return { deger:null, etiket:'veri yok' };
+      return { deger:d.deger, etiket:ETIKETLER.indexOf(d.etiket) >= 0 ? d.etiket : b.etiket };
+    }
+    return { deger:d, etiket:b.etiket };
+  }
+  /* Bir önekin bütün bilgileri, okunmuş: King ve başka parça tek çağrıyla alır. */
+  function bilgiler(onek){
+    return Array.from(BILGI.keys()).filter(id => !onek || id.indexOf(onek) === 0).map(id => {
+      const b = BILGI.get(id);
+      return Object.assign({ id, ad:b.ad || id, birim:b.birim || '' }, oku(id));
+    });
   }
 
   function bloklar(sayfaId, yer){
@@ -149,11 +165,46 @@ window.LIFEOS = window.LIFEOS || {};
     }).filter(c => c[o.alan].length);
   }
 
+  /* Komut paletinin bir satiri (run) ya da satir ureten parca (uret). `sira` modulde tektir:
+     palet sirasi budur. Ekran dosyasi silinince komutu da gider. */
+  function komut(o){
+    gerek(o, ['modul', 'sira'], 'komut');
+    if(typeof o.run !== 'function' && typeof o.uret !== 'function') throw new Error('PARCA: komut için «run» ya da «uret» gerekir');
+    ekle(KOMUT, o.modul + ':' + o.sira, o, 'komut');
+    return o.sira;
+  }
+  function komutlar(modul){
+    const out = [];
+    Array.from(KOMUT.values()).filter(k => k.modul === modul).sort((a, b) => a.sira - b.sira).forEach(k => {
+      if(!k.uret){ const { modul:_m, sira:_s, ...satir } = k; out.push(satir); return; }
+      /* Parca duserse palet dusmez (soz 2). */
+      try{ out.push(...k.uret()); }
+      catch(e){ hatalar.push({ id:'komut:' + modul + ':' + k.sira, hata:String(e && e.message || e) }); }
+    });
+    return out;
+  }
+
+  /* Bir olaya verilen tepki (ses, hareket, minik, video): `lifeos:<olay>` dinlenir. Olayı
+     yayan tepkiyi bilmez; parça çıkınca yalnız tepki gider. Yeniden kurulum eskisinin yerine geçer. */
+  function tepki(o){
+    gerek(o, ['id', 'olay', 'ad', 'yap'], 'tepki');
+    const ad = 'lifeos:' + o.olay;
+    if(TEPKI.has(o.id)) window.removeEventListener(ad, TEPKI.get(o.id).dinle);
+    const dinle = e => {
+      try{ o.yap((e && e.detail) || {}, e); }
+      catch(h){ hatalar.push({ id:'tepki:' + o.id, hata:String(h && h.message || h) }); }
+    };
+    TEPKI.set(o.id, Object.assign({}, o, { dinle }));
+    window.addEventListener(ad, dinle);
+    return o.id;
+  }
+
   /* Ekran kodunda kisa ad: yz('kimlik'). */
   window.yz = yazi;
-  L.PARCA = Object.freeze({ sayfa, blok, yazilar, yazi, bilgi, oku, bloklar, liste, yer, ciz, ekran, olaylar, menu, hatalar,
+  L.PARCA = Object.freeze({ sayfa, blok, yazilar, yazi, bilgi, oku, bilgiler, bloklar, liste, yer, ciz, ekran, olaylar, menu, komut, komutlar, tepki, hatalar,
     /* yalnız testler: kaydı geri alır */
-    _sil(id){ [SAYFA, BLOK, YAZI, BILGI].forEach(h => h.delete(id)); },
+    _sil(id){ [SAYFA, BLOK, YAZI, BILGI, KOMUT].forEach(h => h.delete(id)); },
     katalog:Object.freeze({ sayfalar:() => Array.from(SAYFA.keys()), bloklar:() => Array.from(BLOK.keys()),
-      yazilar:() => Array.from(YAZI.keys()), bilgiler:() => Array.from(BILGI.keys()) }) });
+      yazilar:() => Array.from(YAZI.keys()), bilgiler:() => Array.from(BILGI.keys()),
+      tepkiler:() => Array.from(TEPKI.values()).map(t => ({ id:t.id, olay:t.olay, ad:t.ad })) }) });
 })(window.LIFEOS);

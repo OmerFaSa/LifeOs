@@ -11,6 +11,22 @@
      3. ANLAŞILMAYAN MALZEME SÖYLENİR. Yazılan bir kelime hiçbir malzemeye
         eşleşmezse sessizce atılmaz, «tanınmadı» diye geri gösterilir.
      4. Besin değeri yemeğin gıda kaydından (data/foods.js) gelir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.evdeki.sogan':'soğan',
+  'spi.core.evdeki.salca':'salça',
+  'spi.core.evdeki.kirmizi-mercimek':'kırmızı mercimek',
+  'spi.core.evdeki.kuru-fasulye':'kuru fasulye',
+  'spi.core.evdeki.pirinc':'pirinç',
+  'spi.core.evdeki.kiyma':'kıyma',
+  'spi.core.evdeki.patlican':'patlıcan',
+  'spi.core.evdeki.taze-fasulye':'taze fasulye',
+  'spi.core.evdeki.kasar':'kaşar',
+  'spi.core.evdeki.beyaz-peynir':'beyaz peynir',
+  'spi.core.evdeki.sut':'süt',
+  'spi.core.evdeki.ispanak':'ıspanak',
+  'spi.core.evdeki.havuc':'havuç',
+});
+
 
 window.SP = window.SP || {};
 
@@ -22,29 +38,29 @@ SP.Evdeki = (function(){
     yumurta:{ ad:'yumurta', es:['yumurta'] },
     domates:{ ad:'domates', es:['domates'] },
     biber:{ ad:'biber', es:['biber', 'sivri biber', 'yesil biber', 'kapya'] },
-    sogan:{ ad:'soğan', es:['sogan', 'kuru sogan'] },
-    salca:{ ad:'salça', es:['salca', 'domates salcasi', 'biber salcasi'] },
-    mercimek:{ ad:'kırmızı mercimek', es:['mercimek', 'kirmizi mercimek'] },
-    fasulye:{ ad:'kuru fasulye', es:['kuru fasulye', 'fasulye'] },
+    sogan:{ ad:yz('spi.core.evdeki.sogan'), es:['sogan', 'kuru sogan'] },
+    salca:{ ad:yz('spi.core.evdeki.salca'), es:['salca', 'domates salcasi', 'biber salcasi'] },
+    mercimek:{ ad:yz('spi.core.evdeki.kirmizi-mercimek'), es:['mercimek', 'kirmizi mercimek'] },
+    fasulye:{ ad:yz('spi.core.evdeki.kuru-fasulye'), es:['kuru fasulye', 'fasulye'] },
     nohut:{ ad:'nohut', es:['nohut'] },
-    pirinc:{ ad:'pirinç', es:['pirinc'] },
+    pirinc:{ ad:yz('spi.core.evdeki.pirinc'), es:['pirinc'] },
     bulgur:{ ad:'bulgur', es:['bulgur'] },
     makarna:{ ad:'makarna', es:['makarna', 'spagetti', 'eriste'] },
-    kiyma:{ ad:'kıyma', es:['kiyma'] },
+    kiyma:{ ad:yz('spi.core.evdeki.kiyma'), es:['kiyma'] },
     et:{ ad:'et', es:['et', 'dana eti', 'kuzu eti', 'kusbasi'] },
     tavuk:{ ad:'tavuk', es:['tavuk', 'tavuk gogsu', 'but'] },
-    patlican:{ ad:'patlıcan', es:['patlican'] },
+    patlican:{ ad:yz('spi.core.evdeki.patlican'), es:['patlican'] },
     patates:{ ad:'patates', es:['patates'] },
     kabak:{ ad:'kabak', es:['kabak'] },
-    taze_fasulye:{ ad:'taze fasulye', es:['taze fasulye'] },
+    taze_fasulye:{ ad:yz('spi.core.evdeki.taze-fasulye'), es:['taze fasulye'] },
     ekmek:{ ad:'ekmek', es:['ekmek', 'tost ekmegi', 'bayat ekmek'] },
-    kasar:{ ad:'kaşar', es:['kasar', 'kasar peyniri'] },
-    peynir:{ ad:'beyaz peynir', es:['beyaz peynir', 'peynir'] },
+    kasar:{ ad:yz('spi.core.evdeki.kasar'), es:['kasar', 'kasar peyniri'] },
+    peynir:{ ad:yz('spi.core.evdeki.beyaz-peynir'), es:['beyaz peynir', 'peynir'] },
     yufka:{ ad:'yufka', es:['yufka'] },
     un:{ ad:'un', es:['un'] },
-    sut:{ ad:'süt', es:['sut'] },
-    ispanak:{ ad:'ıspanak', es:['ispanak'] },
-    havuc:{ ad:'havuç', es:['havuc'] },
+    sut:{ ad:yz('spi.core.evdeki.sut'), es:['sut'] },
+    ispanak:{ ad:yz('spi.core.evdeki.ispanak'), es:['ispanak'] },
+    havuc:{ ad:yz('spi.core.evdeki.havuc'), es:['havuc'] },
   };
 
   /* Yemek (gıda kimliği) → gerekli / isteğe bağlı malzeme. */

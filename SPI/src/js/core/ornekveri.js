@@ -1,6 +1,12 @@
 /* ÖRNEK VERİ (katalog 172) — yalnız «ornek» profilinde, açılışta BELLEĞE
    yazılır (brand/ortak/ornekkip.js). Kaynak: tools/envanter.js DOLDUR.SPI.
    Aynı gün ya da kimlik varsa dokunulmaz: değişiklik ezilmez, ikilenmez. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.ornekveri.ornek':'Örnek',
+  'spi.core.ornekveri.ornek-seans':'Örnek seans ',
+  'spi.core.ornekveri.ornek-kayit':'Örnek kayıt',
+});
+
 window.SP = window.SP || {};
 
 SP.OrnekVeri = (function(){
@@ -10,7 +16,7 @@ SP.OrnekVeri = (function(){
     const U = SP.U, S = SP.S;
     /* Kurulum sihirbazı örnek profilde açılmasın (Setup.needed). */
     S.profile = S.profile || {};
-    const v = { name:'Örnek', birthYear:1995, heightCm:175, weightKg:78 };
+    const v = { name:yz('spi.core.ornekveri.ornek'), birthYear:1995, heightCm:175, weightKg:78 };
     Object.keys(v).forEach(k => { if(!S.profile[k]) S.profile[k] = v[k]; });
     for(let i = 0; i < 21; i++){
       const d = U.iso(U.addDays(U.today(), -i));
@@ -27,7 +33,7 @@ SP.OrnekVeri = (function(){
         ];
       }
       if(i % 2 === 0){
-        ekle(S.workouts, { id:'ornek-w' + i, date:d, name:'Örnek seans ' + (i / 2 + 1),
+        ekle(S.workouts, { id:'ornek-w' + i, date:d, name:yz('spi.core.ornekveri.ornek-seans') + (i / 2 + 1),
           kind:i % 4 ? 'strength' : 'cardio', items:[], minutes:45,
           rpe:6 + (i % 3), note:'', createdAt:new Date().toISOString() });
       }
@@ -39,7 +45,7 @@ SP.OrnekVeri = (function(){
           ferritin:{ v:50 + i * 2, cert:'measured' },
           glucose:{ v:88 + i, cert:'measured' } } });
     }
-    ekle(S.meds, { id:'ornek-med0', kindId:'diger', name:'Örnek kayıt', dose:'1x1',
+    ekle(S.meds, { id:'ornek-med0', kindId:'diger', name:yz('spi.core.ornekveri.ornek-kayit'), dose:'1x1',
       startDate:U.iso(U.addDays(U.today(), -20)), endDate:null, note:'',
       createdAt:new Date().toISOString() });
   }

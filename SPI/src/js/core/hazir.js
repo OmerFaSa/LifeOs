@@ -23,6 +23,13 @@
         adını içeriyorsa `bul` onu döner; ekleme yine önizleme ve onayla
         (Bugün kutusu ve King, giris.js). Antrenmanın yalnız adı yazılırsa
         («bacak günü») fiil gerekmez (2026-10-25). */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.hazir.bos-ogun-saklanmaz':'Boş öğün saklanmaz.',
+  'spi.core.hazir.hazir-ogun-bulunamadi':'Hazır öğün bulunamadı.',
+  'spi.core.hazir.seans-bulunamadi':'Seans bulunamadı.',
+  'spi.core.hazir.hazir-antrenman-bulunamadi':'Hazır antrenman bulunamadı.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -53,7 +60,7 @@ SP.Hazir = (function(){
   /* ------------------------------------------------------------- öğün */
 
   async function ogunSakla(meal, ad){
-    if(!meal || !(meal.items || []).length) return { ok:false, why:'Boş öğün saklanmaz.' };
+    if(!meal || !(meal.items || []).length) return { ok:false, why:yz('spi.core.hazir.bos-ogun-saklanmaz') };
     const isim = temizAd(ad) || ogunVarsayilanAd(meal);
     const kayit = { id:U().uid('ho'), ad:isim, slot:meal.slot,
       items:meal.items.map(it => Object.assign({}, it)), at:new Date().toISOString() };
@@ -63,14 +70,14 @@ SP.Hazir = (function(){
   }
   async function ogunSil(id){
     const l = ogunler();
-    if(!l.some(x => x.id === id)) return { ok:false, why:'Hazır öğün bulunamadı.' };
+    if(!l.some(x => x.id === id)) return { ok:false, why:yz('spi.core.hazir.hazir-ogun-bulunamadi') };
     await M().saveProfile({ hazirOgunler:l.filter(x => x.id !== id) });
     return { ok:true };
   }
   /* `slot` verilmezse hazır öğünün kendi öğün yeri. */
   async function ogunEkle(id, gun, slot){
     const h = ogunler().find(x => x.id === id);
-    if(!h) return { ok:false, why:'Hazır öğün bulunamadı.' };
+    if(!h) return { ok:false, why:yz('spi.core.hazir.hazir-ogun-bulunamadi') };
     const yeni = Object.assign(M().newMeal(slot || h.slot), { items:h.items.map(it => Object.assign({}, it)), note:h.ad });
     await M().addMeal(gun, yeni);
     return { ok:true, id:yeni.id, ad:h.ad, geriAl:async () => { await M().deleteMeal(gun, yeni.id); } };
@@ -82,7 +89,7 @@ SP.Hazir = (function(){
      geçerse hazır antrenman her eklenişte «plandan» görünürdü. */
   const KOPYALANMAZ = ['id', 'date', 'rpe', 'note', 'createdAt', 'updatedAt', 'rota', 'route', 'gps', 'planId'];
   async function antrenmanSakla(w, ad){
-    if(!w) return { ok:false, why:'Seans bulunamadı.' };
+    if(!w) return { ok:false, why:yz('spi.core.hazir.seans-bulunamadi') };
     const kayit = JSON.parse(JSON.stringify(w));
     KOPYALANMAZ.forEach(k => { delete kayit[k]; });
     const isim = temizAd(ad) || w.name || 'Antrenman';
@@ -93,13 +100,13 @@ SP.Hazir = (function(){
   }
   async function antrenmanSil(id){
     const l = antrenmanlar();
-    if(!l.some(x => x.id === id)) return { ok:false, why:'Hazır antrenman bulunamadı.' };
+    if(!l.some(x => x.id === id)) return { ok:false, why:yz('spi.core.hazir.hazir-antrenman-bulunamadi') };
     await M().saveProfile({ hazirAntrenmanlar:l.filter(x => x.id !== id) });
     return { ok:true };
   }
   async function antrenmanEkle(id, gun){
     const h = antrenmanlar().find(x => x.id === id);
-    if(!h) return { ok:false, why:'Hazır antrenman bulunamadı.' };
+    if(!h) return { ok:false, why:yz('spi.core.hazir.hazir-antrenman-bulunamadi') };
     const yeni = Object.assign(JSON.parse(JSON.stringify(h.kayit)), { id:U().uid('w'), date:gun, rpe:null,
       note:'', createdAt:new Date().toISOString() });
     await M().saveWorkout(yeni);

@@ -111,7 +111,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.basket.haftalik-sepet-tl':'haftalık sepet (TL)',
   'spi.basket.fiyati-yok':'fiyatı yok',
 });
-window.LIFEOS.PARCA.sayfa({ id:'basket', modul:'spi', cekmece:'calisma', ad:'Bütçe', sira:50 });
+window.LIFEOS.PARCA.sayfa({ id:'basket', modul:'spi', king:{ sira:60, ad:'Bütçe', es:['bütçe', 'market', 'sepet'] }, cekmece:'calisma', ad:'Bütçe', sira:50 });
 
 SP.Screens.basket = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

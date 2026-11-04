@@ -8,6 +8,18 @@
    Ikinci kural: butce saglik hedefini indirmez. Sedef'in isi hedefi bozmadan
    en ucuz yolu bulmaktir — hedefi kucultmek degil. Bunun kod karsiligi
    costPerNutrient(): "bu ogeyi en ucuz hangi gidadan alirim" sorusudur. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.money.kendi-fisin':'kendi fişin',
+  'spi.core.money.bam-arastirmasi-tahmin':'BAM araştırması (tahmin)',
+  'spi.core.money.fiyat-yok':'fiyat yok',
+  'spi.core.money.kapsama-hesabi-icin-profilde':'Kapsama hesabı için profilde kilo, boy ve doğum yılı gerekir.',
+  'spi.core.money.sepet-bos':'Sepet boş.',
+  'spi.core.money.gida':'Gıda',
+  'spi.core.money.test':'Test',
+  'spi.core.money.ekipman':'Ekipman',
+  'spi.core.money.liste-icin-son-yedi-gunde':'Liste için son yedi günde en az ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -33,7 +45,7 @@ SP.Money = (function(){
     if(own && own.tl){
       const months = monthsSince(own.at);
       return { tl:own.tl, source:'user', at:own.at, months, age:ageBand(months),
-        cert:'measured', label:'kendi fişin' };
+        cert:'measured', label:yz('spi.core.money.kendi-fisin') };
     }
     /* BAM araştırması (core/bilgi.js): kaynaklı ama yine TAHMİN — fişin
        altında, tohum tablosunun üstünde durur; tarihi kendi araştırmasıdır. */
@@ -41,10 +53,10 @@ SP.Money = (function(){
     if(bam && bam.tl){
       const months = monthsSince(bam.at);
       return { tl:bam.tl, source:'bam', at:bam.at, months, age:ageBand(months),
-        cert:'estimated', label:'BAM araştırması (tahmin)' };
+        cert:'estimated', label:yz('spi.core.money.bam-arastirmasi-tahmin') };
     }
     const seed = SP.PRICE_SEED.perKg[foodId];
-    if(seed == null) return { tl:null, source:'none', cert:'missing', label:'fiyat yok' };
+    if(seed == null) return { tl:null, source:'none', cert:'missing', label:yz('spi.core.money.fiyat-yok') };
     const months = monthsSince(SP.PRICE_SEED.seededAt);
     return { tl:seed, source:'seed', at:SP.PRICE_SEED.seededAt, months, age:ageBand(months),
       cert:'estimated', label:'tahmin' };
@@ -102,10 +114,10 @@ SP.Money = (function(){
      bolunur. %100'un altinda kalan ogeler "sepet bunu karsilamiyor" demektir. */
   function basketCoverage(profile){
     const t = SP.Nutri.targets(profile);
-    if(!t.ok) return { ok:false, note:'Kapsama hesabı için profilde kilo, boy ve doğum yılı gerekir.' };
+    if(!t.ok) return { ok:false, note:yz('spi.core.money.kapsama-hesabi-icin-profilde') };
     const size = (SP.S.prefs && SP.S.prefs.householdSize) || 1;
     const rows = basketRows();
-    if(!rows.length) return { ok:false, note:'Sepet boş.' };
+    if(!rows.length) return { ok:false, note:yz('spi.core.money.sepet-bos') };
 
     const got = {};
     SP.Nutri.MICROS.forEach(id => { got[id] = 0; });
@@ -268,7 +280,7 @@ SP.Money = (function(){
 
     /* --- Nesrin: gida --- */
     rows.push({
-      id:'gida', agent:'nutri', label:'Gıda',
+      id:'gida', agent:'nutri', label:yz('spi.core.money.gida'),
       detail:b.rows.length
         ? b.rows.length + ' kalem haftalık sepet'
         : 'Sepet boş — haftalık alışveriş girilmedi',
@@ -283,7 +295,7 @@ SP.Money = (function(){
     const overdue = SP.Bio.overdue();
     const testFee = SP.S.basket && SP.S.basket.testFee != null ? Number(SP.S.basket.testFee) : null;
     rows.push({
-      id:'test', agent:'lab', label:'Test',
+      id:'test', agent:'lab', label:yz('spi.core.money.test'),
       detail:overdue.length
         ? overdue.length + ' panelin ölçüm borcu var'
         : 'Vadesi geçmiş panel yok',
@@ -303,7 +315,7 @@ SP.Money = (function(){
       if(needed.indexOf(e.equip) < 0 && owned.indexOf(e.equip) < 0) needed.push(e.equip);
     });
     rows.push({
-      id:'ekipman', agent:'move', label:'Ekipman',
+      id:'ekipman', agent:'move', label:yz('spi.core.money.ekipman'),
       detail:needed.length ? 'Eksik: ' + needed.join(', ') : 'Ek ekipman gerekmiyor',
       monthly:needed.length ? null : 0,
       cert:needed.length ? 'missing' : 'measured',
@@ -355,7 +367,7 @@ SP.Money = (function(){
     const nBilinmeyen = Object.keys(bilinmeyen).length;
     if(kayitli < LISTE_EN_AZ){
       return { ok:false, kayitliGun:kayitli, bilinmeyen:nBilinmeyen,
-        note:'Liste için son yedi günde en az ' + LISTE_EN_AZ + ' günlük öğün kaydı gerekir; '
+        note:yz('spi.core.money.liste-icin-son-yedi-gunde') + LISTE_EN_AZ + ' günlük öğün kaydı gerekir; '
           + 'şu an ' + kayitli + ' gün var. Kaydı olmayan gün sıfır sayılmaz.' };
     }
     const olcek = LISTE_GUN / kayitli;

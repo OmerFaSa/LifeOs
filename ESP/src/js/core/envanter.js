@@ -26,6 +26,14 @@
    ÜSLUP: King'e yazdığın mesajlardan sayılır (uzunluk, samimi sözler,
    emoji, soru işareti). Yalnız sayaçtır; metin saklanmaz. King üslubu
    çıkarım olarak SORAR (cikarim.js); onaylarsan model istemine girer. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.envanter.disadonukluk':'Dışadönüklük',
+  'ortak.envanter.uyumluluk':'Uyumluluk',
+  'ortak.envanter.sorumluluk':'Sorumluluk',
+  'ortak.envanter.duygusal-denge':'Duygusal denge',
+  'ortak.envanter.deneyime-aciklik':'Deneyime açıklık',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -55,11 +63,11 @@ LIFEOS.ENVANTER = (function(){
   ]);
   const CEVAPLAR = Object.freeze(['Hiç katılmıyorum', 'Katılmıyorum', 'Kararsızım', 'Katılıyorum', 'Tamamen katılıyorum']);
   const BOYUT = {
-    E:{ ad:'Dışadönüklük', yuksek:'insanlarla olmaktan enerji alıyorsun', dusuk:'sakin ve kendi içine dönük ortamlarda daha rahatsın' },
-    A:{ ad:'Uyumluluk', yuksek:'başkalarının duygularını önemseyen, anlayışlı birisin', dusuk:'doğrudan ve kendi yolunu izleyen birisin' },
-    C:{ ad:'Sorumluluk', yuksek:'düzenli ve işini zamanında bitiren birisin', dusuk:'esnek ve kendiliğinden davranmayı seviyorsun' },
-    D:{ ad:'Duygusal denge', yuksek:'çoğu zaman sakin ve dengelisin', dusuk:'duyguların yoğun ve hızlı değişebiliyor' },
-    O:{ ad:'Deneyime açıklık', yuksek:'hayal gücü güçlü, fikirlere meraklı birisin', dusuk:'somut ve pratik olanı seviyorsun' },
+    E:{ ad:yz('ortak.envanter.disadonukluk'), yuksek:'insanlarla olmaktan enerji alıyorsun', dusuk:'sakin ve kendi içine dönük ortamlarda daha rahatsın' },
+    A:{ ad:yz('ortak.envanter.uyumluluk'), yuksek:'başkalarının duygularını önemseyen, anlayışlı birisin', dusuk:'doğrudan ve kendi yolunu izleyen birisin' },
+    C:{ ad:yz('ortak.envanter.sorumluluk'), yuksek:'düzenli ve işini zamanında bitiren birisin', dusuk:'esnek ve kendiliğinden davranmayı seviyorsun' },
+    D:{ ad:yz('ortak.envanter.duygusal-denge'), yuksek:'çoğu zaman sakin ve dengelisin', dusuk:'duyguların yoğun ve hızlı değişebiliyor' },
+    O:{ ad:yz('ortak.envanter.deneyime-aciklik'), yuksek:'hayal gücü güçlü, fikirlere meraklı birisin', dusuk:'somut ve pratik olanı seviyorsun' },
   };
 
   /* cevaplar: 20 elemanlı, 1–5 (eksik: null). Döner: boyut puanları. */

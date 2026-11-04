@@ -22,6 +22,13 @@
    · Sistem TESHIS KOYMAZ. «Su olcumle birlikte okunur» der.
    · Dongu tahmini bir TAHMINDIR ve oyle etiketlenir: ortalama
      uzunluktan hesaplanir, olculmez. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.symptom.semptom-kaydi-yok':'Semptom kaydı yok.',
+  'spi.core.symptom.kanama-gunu-isaretlenmemis-g':'Kanama günü işaretlenmemiş. Günlükte işaretlersen ferritin ve ',
+  'spi.core.symptom.bu-olcum-dongunun-kanama-don':'Bu ölçüm döngünün kanama dönemine yakın',
+  'spi.core.symptom.kanama':'Kanama ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -83,7 +90,7 @@ SP.Symptom = (function(){
   /* Bir olcumun yaninda okunacak sikayetler. */
   function forMarker(markerId, days){
     const w = window_(days || 30);
-    if(!w.ok) return { ok:false, rows:[], note:'Semptom kaydı yok.' };
+    if(!w.ok) return { ok:false, rows:[], note:yz('spi.core.symptom.semptom-kaydi-yok') };
     const ilgili = (SP.SYMPTOM_FOR_MARKER[markerId] || []).map(s => s.id);
     const rows = w.rows.filter(r => ilgili.indexOf(r.id) >= 0);
     return { ok:rows.length > 0, rows, loggedDays:w.loggedDays, windowDays:w.windowDays };
@@ -115,7 +122,7 @@ SP.Symptom = (function(){
     const d = periods();
     if(!d.length){
       return { ok:false, n:0,
-        note:'Kanama günü işaretlenmemiş. Günlükte işaretlersen ferritin ve '
+        note:yz('spi.core.symptom.kanama-gunu-isaretlenmemis-g')
           + 'hemoglobin yorumu döngüyü hesaba katar.' };
     }
 
@@ -172,8 +179,8 @@ SP.Symptom = (function(){
       if(fark < 0) continue;
       if(fark <= 7){
         return { tone:'info',
-          title:'Bu ölçüm döngünün kanama dönemine yakın',
-          text:'Kanama ' + U.fmtDate(don.start) + ' tarihinde başlamış; ölçüm '
+          title:yz('spi.core.symptom.bu-olcum-dongunun-kanama-don'),
+          text:yz('spi.core.symptom.kanama') + U.fmtDate(don.start) + ' tarihinde başlamış; ölçüm '
             + (fark === 0 ? 'aynı dönemde' : fark + ' gün sonra') + ' alınmış. '
             + 'Bu dönemde ve hemen sonrasında demir deposu ve hemoglobin '
             + 'olduğundan düşük okunabilir.' };

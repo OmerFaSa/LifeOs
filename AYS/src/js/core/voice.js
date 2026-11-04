@@ -21,6 +21,12 @@
         dolarsa konusma bitmis sayilir ve toplanti KILITLENMEZ.
 
    Ses yoksa ya da bozuksa hicbir sey kirilmaz: speak() hemen cozulur. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.voice.hizli':'Hızlı',
+  'ays.core.voice.normal':'Normal',
+  'ays.core.voice.yavas':'Yavaş',
+});
+
 
 window.R = window.R || {};
 
@@ -56,9 +62,9 @@ R.Voice = (function(){
      bununla hesaplanir — sabit bir bekleme, kisa ve uzun konusmaya ayni
      sureyi verirdi. */
   const PACE = {
-    hizli:  { wps:4.2, label:'Hızlı',  min:500,  max:5000 },
-    normal: { wps:2.8, label:'Normal', min:900,  max:9000 },
-    yavas:  { wps:1.8, label:'Yavaş',  min:1400, max:14000 },
+    hizli:  { wps:4.2, label:yz('ays.core.voice.hizli'),  min:500,  max:5000 },
+    normal: { wps:2.8, label:yz('ays.core.voice.normal'), min:900,  max:9000 },
+    yavas:  { wps:1.8, label:yz('ays.core.voice.yavas'),  min:1400, max:14000 },
   };
   const PACE_ORDER = ['hizli', 'normal', 'yavas'];
 

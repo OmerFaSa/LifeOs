@@ -19,6 +19,30 @@
      4. GERİ ALINIR. Kullanıcının üzerinde çalıştığı kayıt (zincir kurulmuş
         olay, desteği/itirazı yazılmış argüman) geri almada KALIR ve bu
         söylenir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.belge.alan-tarih-felsefe-okuma-yaz':'Alan tarih, felsefe, okuma, yazı ya da diksiyon olmalı.',
+  'esp.core.belge.konu-2-80-karakter-olmali':'Konu 2–80 karakter olmalı.',
+  'esp.core.belge.yazi':'Yazı',
+  'esp.core.belge.belgeyi-hkm-deki-arastirma-b':'Belgeyi HKM’deki Araştırma Bürosu kaynaklardan çıkarır ama HKM ',
+  'esp.core.belge.hkm-ye-ulasilamadi-is-emri-a':'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden iste.',
+  'esp.core.belge.king-is-emrini-almadi':'King iş emrini almadı: ',
+  'esp.core.belge.kayit-teklifle-eslesmiyor':'Kayıt teklifle eşleşmiyor.',
+  'esp.core.belge.kayit-esp-belgesi-biciminde':'Kayıt ESP belgesi biçiminde değil.',
+  'esp.core.belge.kaynaksiz-belge-eklenmez-bel':'Kaynaksız belge eklenmez: belge kaynaktır.',
+  'esp.core.belge.bu-belge-zaten-eklenmis':'Bu belge zaten eklenmiş.',
+  'esp.core.belge.bam':'BAM #',
+  'esp.core.belge.belgeden-kronoloji-ye-eklene':'Belgeden Kronoloji’ye eklenecek yeni olay çıkmadı.',
+  'esp.core.belge.belgeden-kutuphane-ye-eklene':'Belgeden Kütüphane’ye eklenecek yeni eser çıkmadı.',
+  'esp.core.belge.belgeden-sempozyum-a-eklenec':'Belgeden Sempozyum’a eklenecek yeni tez çıkmadı.',
+  'esp.core.belge.belgeden-eklenecek-yeni-kura':'Belgeden eklenecek yeni kural ya da parça çıkmadı.',
+  'esp.core.belge.belgede-kaynakli-cefr-saati':'Belgede kaynaklı CEFR saati yok.',
+  'esp.core.belge.kaynakli-saatler-seviye-sira':'Kaynaklı saatler seviye sırasıyla artmıyor; tablo tutarsız, eklenmedi.',
+  'esp.core.belge.cefr-saat-tablosu':'CEFR saat tablosu — ',
+  'esp.core.belge.belgede-kaynakli-okuma-hizi':'Belgede kaynaklı okuma hızı yok.',
+  'esp.core.belge.okuma-hizi-dakikada':'Okuma hızı — dakikada ',
+  'esp.core.belge.belge-hkm-den-alinamadi-hkm':'Belge HKM’den alınamadı; HKM açıkken yeniden dene.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -65,9 +89,9 @@ ESP.Belge = (function(){
 
   function istekTemizle(o){
     const alan = o && o.alan;
-    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi', 'diksiyon'].indexOf(alan) < 0) return { ok:false, why:'Alan tarih, felsefe, okuma, yazı ya da diksiyon olmalı.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi', 'diksiyon'].indexOf(alan) < 0) return { ok:false, why:yz('esp.core.belge.alan-tarih-felsefe-okuma-yaz') };
     const konu = bosluk(o.konu);
-    if(konu.length < 2 || konu.length > 80) return { ok:false, why:'Konu 2–80 karakter olmalı.' };
+    if(konu.length < 2 || konu.length > 80) return { ok:false, why:yz('esp.core.belge.konu-2-80-karakter-olmali') };
     return { ok:true, belge:{ alan, konu } };
   }
 
@@ -75,15 +99,15 @@ ESP.Belge = (function(){
     const t = istekTemizle(o);
     if(!t.ok) return { ok:false, metin:t.why };
     const r = await istek('/api/king/emir', { modul:'esp', tur:'esp.belge', konu:'',
-      neden:'ESP ' + ({ tarih:'Tarih', felsefe:'Sempozyum', okuma:'Okuma', yazi:'Yazı',
+      neden:'ESP ' + ({ tarih:'Tarih', felsefe:'Sempozyum', okuma:'Okuma', yazi:yz('esp.core.belge.yazi'),
         cefr:'Rehber › Dayanak', okuma_hizi:'Rehber › Dayanak', diksiyon:'Stüdyo › Diksiyon' })[t.belge.alan] + ' ekranından belge istendi.',
       govde:{ belge:t.belge } });
-    if(!r.bagli) return { ok:false, metin:'Belgeyi HKM’deki Araştırma Bürosu kaynaklardan çıkarır ama HKM '
+    if(!r.bagli) return { ok:false, metin:yz('esp.core.belge.belgeyi-hkm-deki-arastirma-b')
       + 'bağlı değil. Rehber › HKM’den bağlanınca yeniden iste.' };
-    if(r.ag) return { ok:false, metin:'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden iste.' };
+    if(r.ag) return { ok:false, metin:yz('esp.core.belge.hkm-ye-ulasilamadi-is-emri-a') };
     const g = r.govde || {};
     if(!r.ok || !g.ok){
-      return { ok:false, metin:'King iş emrini almadı: ' + ((g.errors || []).join('; ') || g.note || ('HTTP ' + r.status)) };
+      return { ok:false, metin:yz('esp.core.belge.king-is-emrini-almadi') + ((g.errors || []).join('; ') || g.note || ('HTTP ' + r.status)) };
     }
     if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
     const e = g.emir || {};
@@ -110,14 +134,14 @@ ESP.Belge = (function(){
     const g = kayit && kayit.govde;
     const kid = Number(kayit && kayit.id);
     if(!g || !Number.isInteger(kid) || kid < 1 || kid !== Number(p && p.kayit_id)){
-      return { ok:false, why:'Kayıt teklifle eşleşmiyor.' };
+      return { ok:false, why:yz('esp.core.belge.kayit-teklifle-eslesmiyor') };
     }
-    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi', 'diksiyon'].indexOf(g.tur) < 0) return { ok:false, why:'Kayıt ESP belgesi biçiminde değil.' };
-    if(kayit.dogruluk !== 'kaynakli') return { ok:false, why:'Kaynaksız belge eklenmez: belge kaynaktır.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi', 'diksiyon'].indexOf(g.tur) < 0) return { ok:false, why:yz('esp.core.belge.kayit-esp-belgesi-biciminde') };
+    if(kayit.dogruluk !== 'kaynakli') return { ok:false, why:yz('esp.core.belge.kaynaksiz-belge-eklenmez-bel') };
     if(g.tur === 'cefr' || g.tur === 'okuma_hizi') return dayanakSina(g, kid, kayit);
     if(g.tur === 'diksiyon') return diksiyonSina(g, kid);
     const hepsi = [].concat(ESP.S.events || [], ESP.S.sources || [], ESP.S.books || [], ESP.S.args || []);
-    if(hepsi.some(x => x && x.bam && x.bam.kayitId === kid)) return { ok:false, why:'Bu belge zaten eklenmiş.' };
+    if(hepsi.some(x => x && x.bam && x.bam.kayitId === kid)) return { ok:false, why:yz('esp.core.belge.bu-belge-zaten-eklenmis') };
     const kaynaklar = {};
     (Array.isArray(g.kaynaklar) ? g.kaynaklar : []).forEach(k => { if(k && Number.isInteger(k.n)) kaynaklar[k.n] = k; });
     let dusen = 0, atlanan = 0;
@@ -135,10 +159,10 @@ ESP.Belge = (function(){
         var_[U().norm(title) + '|' + x.yil] = 1;
         if(!kaynakYeni[k.n]) kaynakYeni[k.n] = kaynakKaydi(k, kid);
         events.push(ESP.Model.newEvent({ title, year:x.yil, kind:x.tur, region:x.bolge,
-          why:metin(x.neden, 2, 240) || '', note:'BAM #' + kid + ' · kaynaklı',
+          why:metin(x.neden, 2, 240) || '', note:yz('esp.core.belge.bam') + kid + ' · kaynaklı',
           sourceIds:[kaynakYeni[k.n].id], bam:{ kayitId:kid } }));
       });
-      if(!events.length) return { ok:false, why:'Belgeden Kronoloji’ye eklenecek yeni olay çıkmadı.' };
+      if(!events.length) return { ok:false, why:yz('esp.core.belge.belgeden-kronoloji-ye-eklene') };
       const sources = Object.keys(kaynakYeni).map(n => kaynakYeni[n]);
       const uyari = [];
       if(dusen) uyari.push(dusen + ' olay ESP’nin denetimini geçmedi (yıl, tür, bölge ya da kaynak).');
@@ -168,7 +192,7 @@ ESP.Belge = (function(){
         kitapVar[anahtar] = b;
         yeni.push(b);
       });
-      if(!yeni.length) return { ok:false, why:'Belgeden Kütüphane’ye eklenecek yeni eser çıkmadı.' };
+      if(!yeni.length) return { ok:false, why:yz('esp.core.belge.belgeden-kutuphane-ye-eklene') };
       const uyari = [];
       if(dusen) uyari.push(dusen + ' eser ESP’nin denetimini geçmedi (yazar, ad, yıl ya da kaynak).');
       if(atlanan) uyari.push(atlanan + ' eser Kütüphane’de zaten var; yeniden eklenmeyecek.');
@@ -199,7 +223,7 @@ ESP.Belge = (function(){
       args.push(ESP.Model.newArgument({ thesis:ad + ': ' + tez, sourceId:b.id, concepts:kav,
         status:'open', bam:{ kayitId:kid } }));
     });
-    if(!args.length) return { ok:false, why:'Belgeden Sempozyum’a eklenecek yeni tez çıkmadı.' };
+    if(!args.length) return { ok:false, why:yz('esp.core.belge.belgeden-sempozyum-a-eklenec') };
     const uyari = [];
     if(dusen) uyari.push(dusen + ' düşünür ESP’nin denetimini geçmedi (ad, eser, tez ya da kaynak).');
     if(atlanan) uyari.push(atlanan + ' tez Sempozyum’da zaten var; yeniden eklenmeyecek.');
@@ -232,7 +256,7 @@ ESP.Belge = (function(){
 
   function diksiyonSina(g, kid){
     const d = diksiyon();
-    if(d.kurallar.concat(d.parcalar).some(x => x.bam && x.bam.kayitId === kid)) return { ok:false, why:'Bu belge zaten eklenmiş.' };
+    if(d.kurallar.concat(d.parcalar).some(x => x.bam && x.bam.kayitId === kid)) return { ok:false, why:yz('esp.core.belge.bu-belge-zaten-eklenmis') };
     const var_ = {};
     d.kurallar.forEach(k => { var_[U().norm(k.kural)] = 1; });
     d.parcalar.forEach(p => { var_[U().norm(p.text)] = 1; });
@@ -253,7 +277,7 @@ ESP.Belge = (function(){
       parcalar.push({ id:U().uid('dp'), text:t, words:kelimeSay(t), yazar:metin(x.yazar, 2, 80),
         kaynak:k, bam:{ kayitId:kid } });
     });
-    if(!kurallar.length && !parcalar.length) return { ok:false, why:'Belgeden eklenecek yeni kural ya da parça çıkmadı.' };
+    if(!kurallar.length && !parcalar.length) return { ok:false, why:yz('esp.core.belge.belgeden-eklenecek-yeni-kura') };
     const uyari = [];
     if(dusen) uyari.push(dusen + ' satır ESP’nin denetimini geçmedi (uzunluk ya da kaynak).');
     if(atlanan) uyari.push(atlanan + ' satır zaten var; yeniden eklenmeyecek.');
@@ -296,30 +320,30 @@ ESP.Belge = (function(){
         saat[x.seviye] = x.saat_ust; kaynak[x.seviye] = k;
       });
       const sv = CEFR_SIRA.filter(s => saat[s]);
-      if(!sv.length) return { ok:false, why:'Belgede kaynaklı CEFR saati yok.' };
+      if(!sv.length) return { ok:false, why:yz('esp.core.belge.belgede-kaynakli-cefr-saati') };
       /* Birleşik tablo (kaynaklı + varsayılan) seviye arttıkça artmalı. */
       const tablo = Object.assign({}, ESP.Hedefler ? ESP.Hedefler.CEFR_VARSAYILAN : {}, saat);
       for(let i = 1; i < CEFR_SIRA.length; i++){
         if(tablo[CEFR_SIRA[i]] <= tablo[CEFR_SIRA[i - 1]]){
-          return { ok:false, why:'Kaynaklı saatler seviye sırasıyla artmıyor; tablo tutarsız, eklenmedi.' };
+          return { ok:false, why:yz('esp.core.belge.kaynakli-saatler-seviye-sira') };
         }
       }
       const ilk = kaynak[sv[0]];
       return { ok:true, tur:'dayanak', anahtar:'cefr', kayitId:kid,
         deger:{ saat, kaynak:ilk, at, kayitId:kid },
-        onizleme:{ baslik:'CEFR saat tablosu — ' + sv.length + '/6 seviye kaynaklı',
+        onizleme:{ baslik:yz('esp.core.belge.cefr-saat-tablosu') + sv.length + '/6 seviye kaynaklı',
           satirlar:sv.map(s => s + ': ' + saat[s] + ' saat (kaynağın üst ucu)'),
           uyari:['Kaynak: ' + ilk.baslik + '. Kaynakta olmayan seviyeler varsayılan tabloda kalır. '
             + 'Karar yine «tahmin»dir; değişen dayanaktır.'] } };
     }
     const hizlar = (Array.isArray(g.hizlar) ? g.hizlar : [])
       .filter(x => x && Number.isInteger(x.kelime_dk) && x.kelime_dk >= 50 && x.kelime_dk <= 1000 && kaynakAdi(g, x.kaynak));
-    if(!hizlar.length) return { ok:false, why:'Belgede kaynaklı okuma hızı yok.' };
+    if(!hizlar.length) return { ok:false, why:yz('esp.core.belge.belgede-kaynakli-okuma-hizi') };
     const d = U().median(hizlar.map(x => x.kelime_dk));
     const k = kaynakAdi(g, hizlar[0].kaynak);
     return { ok:true, tur:'dayanak', anahtar:'okumaHizi', kayitId:kid,
       deger:{ kelimeDk:Math.round(d), kaynak:k, at, kayitId:kid },
-      onizleme:{ baslik:'Okuma hızı — dakikada ' + Math.round(d) + ' kelime (kaynaklı, ' + hizlar.length + ' değerin ortancası)',
+      onizleme:{ baslik:yz('esp.core.belge.okuma-hizi-dakikada') + Math.round(d) + ' kelime (kaynaklı, ' + hizlar.length + ' değerin ortancası)',
         satirlar:hizlar.map(x => x.kelime_dk + ' kelime/dk' + (x.ne ? ' — ' + x.ne : '')),
         uyari:['Kitap başına süre bu hızdan hesaplanır; kitap uzunluğu (≈ 80 bin kelime) yine '
           + 'varsayımdır. Birkaç kitap bitirince kendi ölçümün bunun yerine geçer.'] } };
@@ -337,7 +361,7 @@ ESP.Belge = (function(){
   async function onizle(n){
     if(!n || n.kind !== 'belge.add') return null;
     const kayit = await kayitCek(Number(n.payload && n.payload.kayit_id));
-    if(!kayit) return { ok:false, why:'Belge HKM’den alınamadı; HKM açıkken yeniden dene.' };
+    if(!kayit) return { ok:false, why:yz('esp.core.belge.belge-hkm-den-alinamadi-hkm') };
     return sina(kayit, n.payload || {});
   }
 

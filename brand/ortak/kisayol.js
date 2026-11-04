@@ -38,6 +38,10 @@
      4. LİSTE TEK YERDEN. `satirlar()` modülün «?» penceresine eklenir.
      5. ŞERİT HİÇBİR ŞEY YAZMAZ. «doldur» yalnız kutuya metin koyar; kayıt
         her zamanki gibi önizleme + «Kaydet» ile olur (giris.js söz 1). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.kisayol.notlarim':'Notlarım',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -139,8 +143,8 @@ window.LIFEOS.KISAYOL = (function(){
     try{ l = (ayar && ayar.dugmeler) ? (ayar.dugmeler() || []) : []; }catch(e){ l = []; }
     l = l.filter(d => d && d.ad && (d.rota || d.is || d.doldur != null));
     const L = window.LIFEOS;
-    if(L.DEFTER && L.DEFTER.kuruluMu && L.DEFTER.kuruluMu()) l.push({ ad:'Notlarım', is:() => L.DEFTER.ac() });
-    else if(L.NOTUM && L.NOTUM.kuruluMu && L.NOTUM.kuruluMu()) l.push({ ad:'Notlarım', is:() => L.NOTUM.panelAc() });
+    if(L.DEFTER && L.DEFTER.kuruluMu && L.DEFTER.kuruluMu()) l.push({ ad:yz('ortak.kisayol.notlarim'), is:() => L.DEFTER.ac() });
+    else if(L.NOTUM && L.NOTUM.kuruluMu && L.NOTUM.kuruluMu()) l.push({ ad:yz('ortak.kisayol.notlarim'), is:() => L.NOTUM.panelAc() });
     if(L.KING && L.KING.ac) l.push({ ad:(L.KING.adYonelme ? L.KING.adYonelme() : 'King’e') + ' sor', simge:'king', is:() => L.KING.ac() });
     return l;
   }

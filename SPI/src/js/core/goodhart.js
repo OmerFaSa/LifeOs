@@ -16,6 +16,17 @@
 
    Kurallar aynen korunur: nobetci hukum vermez soru sorar; caba dususte
    uyari uretmez; iki tarafta da olcum yoksa 'unknown' doner. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.goodhart.bu-parametreler-bilimsel-bir':'Bu parametreler bilimsel bir eşik değil, bu yazılımın ayarıdır.',
+  'spi.core.goodhart.yukselmesi-iyi':'yükselmesi iyi',
+  'spi.core.goodhart.dusmesi-iyi':'düşmesi iyi',
+  'spi.core.goodhart.yonu-sistem-bilmez':'yönü sistem bilmez',
+  'spi.core.goodhart.sonuc-tarafinda-iki-penceren':'Sonuç tarafında iki pencerenin birinde yeterli ölçüm yok. ',
+  'spi.core.goodhart.bu-pencerede-hacim-degerlend':'Bu pencerede hacim değerlendirmeye yetmiyor (',
+  'spi.core.goodhart.bu-ciftin-yon-tanimi-yok':'Bu çiftin yön tanımı yok; sonucun hangi yönde iyi olduğu ',
+  'spi.core.goodhart.caba-belirgin-bicimde-artmam':'Çaba belirgin biçimde artmamış; nöbetçi burada bir şey aramaz.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -43,7 +54,7 @@ SP.Goodhart = (function(){
       + 'sanmaktır; bu yüzden pencere iki katına çıkarıldı ve çaba artışının '
       + '«belirgin» sayılması için gereken eşik yükseltildi. Başka sayılar da '
       + 'savunulabilirdi.',
-    note:'Bu parametreler bilimsel bir eşik değil, bu yazılımın ayarıdır.',
+    note:yz('spi.core.goodhart.bu-parametreler-bilimsel-bir'),
   };
 
   const PENCERE = POLICY.windowDays;
@@ -65,11 +76,11 @@ SP.Goodhart = (function(){
      bilmedigi bir hedefe yon atfetmesi, olculmemis bir seyi olculmus
      gostermek olurdu. */
   const DIRECTIONS = {
-    higher_better:{ id:'higher_better', label:'yükselmesi iyi',
+    higher_better:{ id:'higher_better', label:yz('spi.core.goodhart.yukselmesi-iyi'),
       improvement:function(d){ return d; } },
-    lower_better:{ id:'lower_better', label:'düşmesi iyi',
+    lower_better:{ id:'lower_better', label:yz('spi.core.goodhart.dusmesi-iyi'),
       improvement:function(d){ return d == null ? null : -d; } },
-    movement_only:{ id:'movement_only', label:'yönü sistem bilmez',
+    movement_only:{ id:'movement_only', label:yz('spi.core.goodhart.yonu-sistem-bilmez'),
       improvement:function(d){ return d == null ? null : Math.abs(d); } },
   };
 
@@ -213,12 +224,12 @@ SP.Goodhart = (function(){
 
     if(eS == null || yS == null){
       return Object.assign(base, { status:'unknown', cert:'missing',
-        note:'Sonuç tarafında iki pencerenin birinde yeterli ölçüm yok. '
+        note:yz('spi.core.goodhart.sonuc-tarafinda-iki-penceren')
            + 'Ölçülmemiş sonuç, sıfır sonuç değildir.' });
     }
     if(!(yC >= def.minEffort)){
       return Object.assign(base, { status:'idle', cert:'measured',
-        note:'Bu pencerede hacim değerlendirmeye yetmiyor ('
+        note:yz('spi.core.goodhart.bu-pencerede-hacim-degerlend')
            + yC + ' < ' + def.minEffort + ').' });
     }
     const dC = oran(yC, eC);
@@ -230,7 +241,7 @@ SP.Goodhart = (function(){
     const yon = DIRECTIONS[def.direction || ''];
     if(!yon){
       return Object.assign(base, { status:'unknown', cert:'missing',
-        note:'Bu çiftin yön tanımı yok; sonucun hangi yönde iyi olduğu '
+        note:yz('spi.core.goodhart.bu-ciftin-yon-tanimi-yok')
            + 'bilinmeden ayrışma değerlendirilemez.' });
     }
     const iyilesme = yon.improvement(dS);
@@ -238,7 +249,7 @@ SP.Goodhart = (function(){
     if(dC == null || dC < CABA_ARTIS){
       return Object.assign(base, { status:'idle', cert:'measured',
         direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
-        note:'Çaba belirgin biçimde artmamış; nöbetçi burada bir şey aramaz.' });
+        note:yz('spi.core.goodhart.caba-belirgin-bicimde-artmam') });
     }
     if(iyilesme != null && iyilesme > SONUC_DURGUN){
       return Object.assign(base, { status:'aligned', cert:'measured',

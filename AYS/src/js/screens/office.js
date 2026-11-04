@@ -805,36 +805,36 @@ R.Screens.office = (function(){
         yapar:[], yapmaz:[] })) });
   }
 
-  LIFEOS.PARCA.blok({ id:'office.bolum-1', sayfa:'office', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.sozluk-seridi', sayfa:'office', yer:'y1', sira:10, ad:'Sözlük şeridi', ciz({ specialists, vo }){
     return (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : '';
   } });
-  LIFEOS.PARCA.blok({ id:'office.bolum-2', sayfa:'office', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.masa', sayfa:'office', yer:'y2', sira:10, ad:'Masa', ciz({ specialists, vo }){
     return when(vo.masa, () => K.Kutu({ ad:yz('ays.office.masa'), yuva:'kim konuşuyor', class:'vkutu',
           govde:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` }));
   } });
-  LIFEOS.PARCA.blok({ id:'office.bolum-3', sayfa:'office', yer:'y2', sira:20, ad:'Bölüm 3', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.gunun-toplantisi', sayfa:'office', yer:'y2', sira:20, ad:'Günün toplantısı', ciz({ specialists, vo }){
     return when(vo.toplanti, () => K.Kutu({ ad:yz('ays.office.gunun-toplantisi'), yuva:'her masadan tek cümle', class:'vkutu',
           govde:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` }));
   } });
-  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:30, ad:'briefingCard', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:30, ad:'Günün özeti', ciz({ specialists, vo }){
     return briefingCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.bosscard', sayfa:'office', yer:'y2', sira:40, ad:'BossCard', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.bosscard', sayfa:'office', yer:'y2', sira:40, ad:'Patron masası', ciz({ specialists, vo }){
     return BossCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.decisionscard', sayfa:'office', yer:'y2', sira:50, ad:'decisionsCard', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.decisionscard', sayfa:'office', yer:'y2', sira:50, ad:'Kararlar', ciz({ specialists, vo }){
     return decisionsCard();
   } });
   LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y2', sira:60, ad:'Uzman masaları', ciz({ specialists, vo }){
     return K.Card({ title:yz('ays.office.uzman-masalari'), body:html`<div class="desks">${map(specialists, Desk)}</div>` });
   } });
-  LIFEOS.PARCA.blok({ id:'office.urunlerkart', sayfa:'office', yer:'y3', sira:10, ad:'urunlerKart', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.urunlerkart', sayfa:'office', yer:'y3', sira:10, ad:'Ürünler', ciz({ specialists, vo }){
     return urunlerKart();
   } });
-  LIFEOS.PARCA.blok({ id:'office.quotacard', sayfa:'office', yer:'y3', sira:20, ad:'quotaCard', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.quotacard', sayfa:'office', yer:'y3', sira:20, ad:'Kota', ciz({ specialists, vo }){
     return quotaCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.lastmeetingcard', sayfa:'office', yer:'y3', sira:30, ad:'lastMeetingCard', ciz({ specialists, vo }){
+  LIFEOS.PARCA.blok({ id:'office.lastmeetingcard', sayfa:'office', yer:'y3', sira:30, ad:'Son toplantı', ciz({ specialists, vo }){
     return lastMeetingCard();
   } });
   LIFEOS.PARCA.blok({ id:'office.aciklamalar', sayfa:'office', yer:'y3', sira:40, ad:'Açıklamalar', ciz({ specialists, vo }){

@@ -17,17 +17,26 @@
 
    Depo: `prefs.ogunler`. SP.MEAL_SLOTS aynı dizi olarak tazelenir: onu
    okuyan bütün ekranlar (öğün kartı, şablon, dünkü) değişmeden yeni adı görür. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.ogun.kahvalti':'Kahvaltı',
+  'spi.core.ogun.ara-ogun':'Ara öğün',
+  'spi.core.ogun.ogle':'Öğle',
+  'spi.core.ogun.i-kindi':'İkindi',
+  'spi.core.ogun.aksam':'Akşam',
+  'spi.core.ogun.gece':'Gece',
+});
+
 
 window.SP = window.SP || {};
 
 SP.Ogun = (function(){
   const YERLESIK = [
-    { id:'kahvalti', label:'Kahvaltı', icon:'today' },
-    { id:'ara1',     label:'Ara öğün', icon:'meal' },
-    { id:'ogle',     label:'Öğle',     icon:'meal' },
-    { id:'ara2',     label:'İkindi',   icon:'meal' },
-    { id:'aksam',    label:'Akşam',    icon:'meal' },
-    { id:'gece',     label:'Gece',     icon:'moon' },
+    { id:'kahvalti', label:yz('spi.core.ogun.kahvalti'), icon:'today' },
+    { id:'ara1',     label:yz('spi.core.ogun.ara-ogun'), icon:'meal' },
+    { id:'ogle',     label:yz('spi.core.ogun.ogle'),     icon:'meal' },
+    { id:'ara2',     label:yz('spi.core.ogun.i-kindi'),   icon:'meal' },
+    { id:'aksam',    label:yz('spi.core.ogun.aksam'),    icon:'meal' },
+    { id:'gece',     label:yz('spi.core.ogun.gece'),     icon:'moon' },
   ];
   const SAAT = /^([01]\d|2[0-3]):[0-5]\d$/;
   const EN_COK = 10, EN_UZUN = 30;

@@ -3,6 +3,52 @@
    Beş adım: kim · hedef · takvim · kapasite · seviye.
    Sonunda plan üretilir; iki farklı aday aynı planı almaz.
    Sonradan Rehber → Ayarlar’dan tek tek değiştirilebilir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.setup.seni-taniyalim':'Seni tanıyalım',
+  'ays.core.setup.bu-bilgiler-cihazda-kalir-ko':'Bu bilgiler cihazda kalır, koça gönderilmez',
+  'ays.core.setup.hedefin-ne':'Hedefin ne?',
+  'ays.core.setup.program-adi-ve-hedef-basari':'Program adı ve hedef başarı sırası',
+  'ays.core.setup.takvimin':'Takvimin',
+  'ays.core.setup.ne-zaman-basliyorsun-sinav-n':'Ne zaman başlıyorsun, sınav ne zaman',
+  'ays.core.setup.haftalik-kapasiten':'Haftalık kapasiten',
+  'ays.core.setup.gercekci-ol-plan-buna':'Gerçekçi ol — plan buna göre kurulur',
+  'ays.core.setup.su-anki-seviyen':'Şu anki seviyen',
+  'ays.core.setup.planin-hizini-belirler':'Planın hızını belirler',
+  'ays.core.setup.ad':'Ad',
+  'ays.core.setup.adin':'adın',
+  'ays.core.setup.sehir':'Şehir',
+  'ays.core.setup.hedef-program':'Hedef program',
+  'ays.core.setup.or-cukurova-universitesi-hem':'ör. Çukurova Üniversitesi Hemşirelik',
+  'ays.core.setup.hedef-basari-sirasi':'Hedef başarı sırası',
+  'ays.core.setup.or-84285':'ör. 84285',
+  'ays.core.setup.diploma-notu':'Diploma notu',
+  'ays.core.setup.gelecek-pazartesi':'Gelecek pazartesi',
+  'ays.core.setup.hemen-bugunden':'Hemen bugünden',
+  'ays.core.setup.hizli-secim':'Hızlı seçim',
+  'ays.core.setup.baslangic':'Başlangıç',
+  'ays.core.setup.tyt-sinav-tarihi':'TYT sınav tarihi',
+  'ays.core.setup.haftalik-saat':'Haftalık saat',
+  'ays.core.setup.calisma-gunu':'Çalışma günü',
+  'ays.core.setup.uyku-hedefi-saat':'Uyku hedefi (saat)',
+  'ays.core.setup.zorlandigin-dersler':'Zorlandığın dersler',
+  'ays.core.setup.sectigin-dersler-plandan-dus':'Seçtiğin dersler plandan düşürülmez, öne alınır.',
+  'ays.core.setup.planin-boyle-olacak':'Planın böyle olacak',
+  'ays.core.setup.hafta':'Hafta',
+  'ays.core.setup.haftada-konu':'Haftada konu',
+  'ays.core.setup.kapsama':'Kapsama',
+  'ays.core.setup.aylik-degerlendirme':'Aylık değerlendirme',
+  'ays.core.setup.i-lk-hafta':'İlk hafta:',
+  'ays.core.setup.geri':'Geri',
+  'ays.core.setup.vazgec':'Vazgeç',
+  'ays.core.setup.devam':'Devam',
+  'ays.core.setup.sinav-tarihi-baslangictan-so':'Sınav tarihi başlangıçtan sonra olmalı',
+  'ays.core.setup.hedef-basari-sirasi-gerekli':'Hedef başarı sırası gerekli — 2. adıma dön',
+  'ays.core.setup.kurulum':'Kurulum',
+  'ays.core.setup.programini-kuralim':'Programını kuralım',
+  'ays.core.setup.bes-kisa-adim-hedef-takvim':'Beş kısa adım: hedef, takvim, kapasite ve seviye. Sonunda plan sana göre üretilir — ',
+  'ays.core.setup.basla':'Başla',
+});
+
 
 window.R = window.R || {};
 
@@ -16,11 +62,11 @@ R.Setup = (function(){
      hedef, takvim, kapasite, seviye). Üçe indirmek adım başına iki soru
      demekti. SPİ/ESP üç adımdır çünkü onlarınki tanıtım · sınır · form. */
   const STEPS = [
-    { id:'kim',      title:'Seni tanıyalım',     note:'Bu bilgiler cihazda kalır, koça gönderilmez' },
-    { id:'hedef',    title:'Hedefin ne?',        note:'Program adı ve hedef başarı sırası' },
-    { id:'takvim',   title:'Takvimin',           note:'Ne zaman başlıyorsun, sınav ne zaman' },
-    { id:'kapasite', title:'Haftalık kapasiten', note:'Gerçekçi ol — plan buna göre kurulur' },
-    { id:'seviye',   title:'Şu anki seviyen',    note:'Planın hızını belirler' },
+    { id:'kim',      title:yz('ays.core.setup.seni-taniyalim'),     note:yz('ays.core.setup.bu-bilgiler-cihazda-kalir-ko') },
+    { id:'hedef',    title:yz('ays.core.setup.hedefin-ne'),        note:yz('ays.core.setup.program-adi-ve-hedef-basari') },
+    { id:'takvim',   title:yz('ays.core.setup.takvimin'),           note:yz('ays.core.setup.ne-zaman-basliyorsun-sinav-n') },
+    { id:'kapasite', title:yz('ays.core.setup.haftalik-kapasiten'), note:yz('ays.core.setup.gercekci-ol-plan-buna') },
+    { id:'seviye',   title:yz('ays.core.setup.su-anki-seviyen'),    note:yz('ays.core.setup.planin-hizini-belirler') },
   ];
 
   let step = 0;
@@ -112,21 +158,21 @@ R.Setup = (function(){
       K.Notice({ tone:'info', body:'Ad ve şehir yalnız bu cihazda tutulur. '
         + 'AI koça gönderilen verilerden bu alanlar otomatik çıkarılır.' }),
       K.Cols(2, [
-        K.Field({ label:'Ad', input:K.Input({ id:'sw-name', value:draft.name, placeholder:'adın' }) }),
-        K.Field({ label:'Şehir', hint:'isteğe bağlı', input:K.Input({ id:'sw-city', value:draft.city }) }),
+        K.Field({ label:yz('ays.core.setup.ad'), input:K.Input({ id:'sw-name', value:draft.name, placeholder:yz('ays.core.setup.adin') }) }),
+        K.Field({ label:yz('ays.core.setup.sehir'), hint:'isteğe bağlı', input:K.Input({ id:'sw-city', value:draft.city }) }),
       ]),
     ]);
   }
 
   function bodyHedef(){
     return K.Stack([
-      K.Field({ label:'Hedef program', hint:'üniversite ve bölüm',
-        input:K.Input({ id:'sw-program', value:draft.program, placeholder:'ör. Çukurova Üniversitesi Hemşirelik' }) }),
+      K.Field({ label:yz('ays.core.setup.hedef-program'), hint:'üniversite ve bölüm',
+        input:K.Input({ id:'sw-program', value:draft.program, placeholder:yz('ays.core.setup.or-cukurova-universitesi-hem') }) }),
       K.Cols(2, [
-        K.Field({ label:'Hedef başarı sırası', hint:'geçen yılın taban sırası',
+        K.Field({ label:yz('ays.core.setup.hedef-basari-sirasi'), hint:'geçen yılın taban sırası',
           input:K.Input({ id:'sw-rank', type:'number', numeric:true, value:draft.targetRank,
-            placeholder:'ör. 84285' }) }),
-        K.Field({ label:'Diploma notu', hint:'OBP hesabı için',
+            placeholder:yz('ays.core.setup.or-84285') }) }),
+        K.Field({ label:yz('ays.core.setup.diploma-notu'), hint:'OBP hesabı için',
           input:K.Input({ id:'sw-diploma', type:'number', numeric:true, min:0, max:100, value:draft.diplomaGrade }) }),
       ]),
       K.Notice({ tone:'info', body:'Sıra hedefi puandan daha güvenilirdir: aynı net farklı yıllarda '
@@ -138,17 +184,17 @@ R.Setup = (function(){
     const todayMon = nextMonday(U.todayISO());
     const picks = [
       { start:todayMon, label:todayMon === U.todayISO() ? 'Bugün' : 'Bu pazartesi' },
-      { start:U.iso(U.addDays(U.parse(todayMon), 7)), label:'Gelecek pazartesi' },
-      { start:U.todayISO(), label:'Hemen bugünden' },
+      { start:U.iso(U.addDays(U.parse(todayMon), 7)), label:yz('ays.core.setup.gelecek-pazartesi') },
+      { start:U.todayISO(), label:yz('ays.core.setup.hemen-bugunden') },
     ];
     return K.Stack([
-      html`<div class="stack-xs"><span class="mono-label">Hızlı seçim</span>
+      html`<div class="stack-xs"><span class="mono-label">${yz('ays.core.setup.hizli-secim')}</span>
         ${K.Row(map(picks, q => K.Button({ label:q.label, size:'sm', act:'setup-quick',
           data:{ 'data-start':q.start } })), { wrap:true })}</div>`,
       K.Cols(2, [
-        K.Field({ label:'Başlangıç', hint:'pazartesi önerilir',
+        K.Field({ label:yz('ays.core.setup.baslangic'), hint:'pazartesi önerilir',
           input:K.Input({ id:'sw-start', type:'date', value:draft.startDate }) }),
-        K.Field({ label:'TYT sınav tarihi', hint:'ÖSYM duyurusuyla güncelle',
+        K.Field({ label:yz('ays.core.setup.tyt-sinav-tarihi'), hint:'ÖSYM duyurusuyla güncelle',
           input:K.Input({ id:'sw-exam', type:'date', value:draft.examTytISO }) }),
       ]),
       html`<div id="su-preview">${previewHtml(draft.startDate, draft.examTytISO)}</div>`,
@@ -160,12 +206,12 @@ R.Setup = (function(){
     const perDay = U.round(cap / (draft.studyDaysPerWeek || 6), 1);
     return K.Stack([
       K.Cols(3, [
-        K.Field({ label:'Haftalık saat', input:K.Input({ id:'sw-cap', type:'number', numeric:true,
+        K.Field({ label:yz('ays.core.setup.haftalik-saat'), input:K.Input({ id:'sw-cap', type:'number', numeric:true,
           step:1, min:4, max:70, value:cap, change:'setup-cap' }) }),
-        K.Field({ label:'Çalışma günü', input:K.Select({ id:'sw-days', change:'setup-cap',
+        K.Field({ label:yz('ays.core.setup.calisma-gunu'), input:K.Select({ id:'sw-days', change:'setup-cap',
           value:draft.studyDaysPerWeek,
           options:[4, 5, 6, 7].map(n => ({ value:n, label:n+' gün' })) }) }),
-        K.Field({ label:'Uyku hedefi (saat)', input:K.Input({ id:'sw-sleep', type:'number',
+        K.Field({ label:yz('ays.core.setup.uyku-hedefi-saat'), input:K.Input({ id:'sw-sleep', type:'number',
           numeric:true, step:0.5, min:5, max:11, value:draft.sleepTarget }) }),
       ]),
       html`<div id="sw-caphint">${capacityHint(cap, draft.studyDaysPerWeek)}</div>`,
@@ -194,8 +240,8 @@ R.Setup = (function(){
           aria-pressed="${draft.level === lv.id ? 'true' : 'false'}">
           <b>${lv.name}</b><span class="tiny dim">${lv.note}</span>
         </button>`)}</div>`,
-      html`<div class="stack-xs mt-12"><span class="mono-label">Zorlandığın dersler</span>
-        <span class="tiny dim">Seçtiğin dersler plandan düşürülmez, öne alınır.</span>
+      html`<div class="stack-xs mt-12"><span class="mono-label">${yz('ays.core.setup.zorlandigin-dersler')}</span>
+        <span class="tiny dim">${yz('ays.core.setup.sectigin-dersler-plandan-dus')}</span>
         ${K.Row(map(R.SUBJECTS, s => K.Chip({
           label:s.name, on:draft.weakSubjects.indexOf(s.id) >= 0,
           act:'setup-weak', data:{ 'data-id':s.id },
@@ -211,14 +257,14 @@ R.Setup = (function(){
     const plan = R.Planner.generate(draft, p.weeks);
     const m = plan.meta;
     return K.Card({ flat:true, pad:'sm', body:html`
-      <span class="mono-label">Planın böyle olacak</span>
+      <span class="mono-label">${yz('ays.core.setup.planin-boyle-olacak')}</span>
       ${K.Cols(4, [
-        K.Stat({ label:'Hafta', value:m.total }),
-        K.Stat({ label:'Haftada konu', value:m.perWeek }),
-        K.Stat({ label:'Kapsama', value:'%'+m.coverage, tone:m.coverage >= 80 ? 'ok' : 'warn' }),
-        K.Stat({ label:'Aylık değerlendirme', value:(m.gates || []).length }),
+        K.Stat({ label:yz('ays.core.setup.hafta'), value:m.total }),
+        K.Stat({ label:yz('ays.core.setup.haftada-konu'), value:m.perWeek }),
+        K.Stat({ label:yz('ays.core.setup.kapsama'), value:'%'+m.coverage, tone:m.coverage >= 80 ? 'ok' : 'warn' }),
+        K.Stat({ label:yz('ays.core.setup.aylik-degerlendirme'), value:(m.gates || []).length }),
       ])}
-      <p class="tiny dim mt-8">İlk hafta: ${plan.weeks[0].topics.join(' · ')}</p>` });
+      <p class="tiny dim mt-8">${yz('ays.core.setup.i-lk-hafta')} ${plan.weeks[0].topics.join(' · ')}</p>` });
   }
 
   const BODIES = { kim:bodyKim, hedef:bodyHedef, takvim:bodyTakvim, kapasite:bodyKapasite, seviye:bodySeviye };
@@ -263,12 +309,12 @@ R.Setup = (function(){
         BODIES[s.id](),
       ])),
       footer:String(html`
-        ${when(!first, () => K.Button({ label:'Geri', act:'setup-back' }))}
-        ${when(first && !isFirstRun, () => K.Button({ label:'Vazgeç', act:'sheet-close' }))}
+        ${when(!first, () => K.Button({ label:yz('ays.core.setup.geri'), act:'setup-back' }))}
+        ${when(first && !isFirstRun, () => K.Button({ label:yz('ays.core.setup.vazgec'), act:'sheet-close' }))}
         ${last
           ? K.Button({ label:isFirstRun ? 'Planı üret ve başla' : 'Kaydet ve planı güncelle',
               tone:'primary', act:'setup-save' })
-          : K.Button({ label:'Devam', tone:'primary', act:'setup-next' })}`),
+          : K.Button({ label:yz('ays.core.setup.devam'), tone:'primary', act:'setup-next' })}`),
       noFocus:true,
     });
 
@@ -292,7 +338,7 @@ R.Setup = (function(){
     capture();
     if(STEPS[step].id === 'takvim'){
       const p = preview(draft.startDate, draft.examTytISO);
-      if(p.days <= 0){ UI.toast('Sınav tarihi başlangıçtan sonra olmalı'); return; }
+      if(p.days <= 0){ UI.toast(yz('ays.core.setup.sinav-tarihi-baslangictan-so')); return; }
     }
     step = Math.min(step + 1, STEPS.length - 1);
     render();
@@ -321,11 +367,11 @@ R.Setup = (function(){
   async function save(){
     capture();
     if(U.diffDays(draft.startDate, draft.examTytISO) <= 0){
-      UI.toast('Sınav tarihi başlangıçtan sonra olmalı');
+      UI.toast(yz('ays.core.setup.sinav-tarihi-baslangictan-so'));
       return;
     }
     if(!draft.targetRank){
-      UI.toast('Hedef başarı sırası gerekli — 2. adıma dön');
+      UI.toast(yz('ays.core.setup.hedef-basari-sirasi-gerekli'));
       step = 1; render();
       return;
     }
@@ -366,10 +412,10 @@ R.Setup = (function(){
   function card(){
     if(!needed()) return '';
     return String(K.NextUp({
-      icon:'flag', label:'Kurulum', title:'Programını kuralım',
-      why:'Beş kısa adım: hedef, takvim, kapasite ve seviye. Sonunda plan sana göre üretilir — '
+      icon:'flag', label:yz('ays.core.setup.kurulum'), title:yz('ays.core.setup.programini-kuralim'),
+      why:yz('ays.core.setup.bes-kisa-adim-hedef-takvim')
         + 'kimsenin planı bir diğerininkiyle aynı olmaz.',
-      action:K.Button({ label:'Başla', tone:'primary', act:'setup-open' }),
+      action:K.Button({ label:yz('ays.core.setup.basla'), tone:'primary', act:'setup-open' }),
     }));
   }
 

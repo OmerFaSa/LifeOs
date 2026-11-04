@@ -14,7 +14,8 @@
 
    `tools/ortak.py --yay` ve `--denetle` bunu kendisi cagirir.
 
-   Bolumler: [bas] [perde] [govde] -> src/index.html, [test] -> src/tests/index.html.
+   Bolumler: [bas] [govde] -> src/index.html, [test] -> src/tests/index.html.
+   Perde betigini brand/seviye/perde.html yazar (tools/seviye.py), bu kayit degil.
    brand/ortak/x.test.js varsa ve [govde]'de js/core/x.js duruyorsa testi
    [test]'e kendiliginden eklenir; yeni parca icin test satiri yazilmaz.
    Sira anlamlidir (kaynak: bas'taki stil sirasi kuralin kendisidir), bu yuzden
@@ -27,7 +28,7 @@ KOK = Path(__file__).resolve().parent.parent
 KAYIT = KOK / "brand" / "parcalar.txt"
 ORTAK = KOK / "brand" / "ortak"
 SISTEMLER = {"AYS": "ays", "SPI": "spi", "ESP": "esp"}
-SAYFA = {"bas": "index.html", "perde": "index.html", "govde": "index.html",
+SAYFA = {"bas": "index.html", "govde": "index.html",
          "test": "tests/index.html"}
 ACIK = '<!-- PARCA:%s · uretilmis (brand/parcalar.txt, tools/parca.py); elle duzenleme -->'
 KAPA = '<!-- /PARCA:%s -->'
@@ -101,7 +102,36 @@ def _oku(yol):
         return f.read()
 
 
+REHBER = ORTAK / "parca-rehber.js"
+KING_ALANI = re.compile(r"sayfa\(\{\s*id:'(\w+)',\s*modul:'(\w+)',\s*king:\{ sira:(\d+), ad:'([^']+)', es:\[([^\]]*)\] \}")
+
+
+def rehber_uret():
+    """King baska modulun ekranini yuklemez; sayfalari bu uretilmis listeden tanir."""
+    satir = []
+    for klasor in SISTEMLER:
+        for f in sorted((KOK / klasor / "src" / "js" / "screens").glob("*.js")):
+            for m in KING_ALANI.finditer(_oku(f)):
+                satir.append((int(m.group(3)), m.group(2), m.group(1), m.group(4), m.group(5)))
+    satir.sort()
+    if len({x[0] for x in satir}) != len(satir):
+        raise SystemExit("King rehberinde ayni sira iki kez: " + str([x[0] for x in satir]))
+    return ("/* URETILDI: tools/parca.py, sayfa kayitlarindaki `king` alanindan. Elle duzenleme. */\n"
+            "window.LIFEOS = window.LIFEOS || {};\n"
+            "window.LIFEOS.PARCA_REHBER = [\n"
+            + "".join("  { modul:'%s', route:'%s', ad:'%s', es:[%s] },\n" % x[1:] for x in satir)
+            + "];\n")
+
+
+def rehber_yaz():
+    yeni = rehber_uret()
+    if not REHBER.exists() or _oku(REHBER) != yeni:
+        with open(REHBER, "w", encoding="utf-8", newline="") as f:
+            f.write(yeni)
+
+
 def yay():
+    rehber_yaz()
     k, degisen = kayit_oku(), 0
     for yol, modul, bolumler in sayfalar():
         eski = _oku(yol)
@@ -116,6 +146,8 @@ def yay():
 
 def denetle():
     k, kotu = kayit_oku(), []
+    if not REHBER.exists() or _oku(REHBER) != rehber_uret():
+        kotu.append("brand/ortak/parca-rehber.js sayfalarla ayni degil (tools/parca.py --yay)")
     for yol, modul, bolumler in sayfalar():
         eski = _oku(yol)
         if sayfa_uret(eski, k, modul, bolumler) != eski:

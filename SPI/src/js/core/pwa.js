@@ -23,6 +23,11 @@
 
    Manifest ayrı dosya değildir: `app.js › installManifest` onu gömülü
    üretir (tek dosya sürümüyle aynı yol). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.pwa.saat-ss-dd-biciminde-olmali':'Saat «SS:DD» biçiminde olmalı.',
+  'ortak.pwa.tercih-bu-cihaza-yazilamadi':'Tercih bu cihaza yazılamadı.',
+});
+
 
 (function(){
   const L = window.LIFEOS = window.LIFEOS || {};
@@ -249,11 +254,11 @@
     if(degisen && degisen.turler) Object.assign(a.turler, degisen.turler);
     if(degisen && degisen.sessiz){
       const ss = Object.assign({}, a.sessiz, degisen.sessiz);
-      if(!SAAT.test(ss.bas) || !SAAT.test(ss.bit)) return { ok:false, why:'Saat «SS:DD» biçiminde olmalı.' };
+      if(!SAAT.test(ss.bas) || !SAAT.test(ss.bit)) return { ok:false, why:yz('ortak.pwa.saat-ss-dd-biciminde-olmali') };
       a.sessiz = ss;
     }
     try{ localStorage.setItem(AYAR_ON + modul, JSON.stringify(a)); }
-    catch(e){ return { ok:false, why:'Tercih bu cihaza yazılamadı.' }; }
+    catch(e){ return { ok:false, why:yz('ortak.pwa.tercih-bu-cihaza-yazilamadi') }; }
     return { ok:true, ayar:a };
   }
   function turAcik(modul, tur){ return bildirimAyari(modul).turler[tur] !== false; }

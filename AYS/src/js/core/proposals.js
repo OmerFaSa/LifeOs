@@ -35,6 +35,42 @@
 
    Uygulama sirasi kasitlidir: once anlik goruntu alinir (undo), sonra
    degisiklik yazilir. Boylece geri alma her zaman mumkundur. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.proposals.konu':'Konu',
+  'ays.core.proposals.durum':'Durum',
+  'ays.core.proposals.eklenecek-blok':'Eklenecek blok',
+  'ays.core.proposals.bugunku-blok-sayisi':'Bugünkü blok sayısı',
+  'ays.core.proposals.bugunku-hedef-sure':'Bugünkü hedef süre',
+  'ays.core.proposals.bugune-cekilecek-kart':'Bugüne çekilecek kart',
+  'ays.core.proposals.en-eski-gecikme':'En eski gecikme',
+  'ays.core.proposals.kartin-on-yuzu':'Kartın ön yüzü',
+  'ays.core.proposals.kartin-arkasi':'Kartın arkası',
+  'ays.core.proposals.i-lk-tekrar':'İlk tekrar',
+  'ays.core.proposals.hafta':'Hafta',
+  'ays.core.proposals.soru-hedefi':'Soru hedefi',
+  'ays.core.proposals.karar':'Karar',
+  'ays.core.proposals.ara':'Ara',
+  'ays.core.proposals.gunun-bloklari':'Günün blokları',
+  'ays.core.proposals.haftalik-soru-hedefi':'Haftalık soru hedefi',
+  'ays.core.proposals.i-lerlemesi-baslamis-gun':'İlerlemesi başlamış gün',
+  'ays.core.proposals.ders-gunu-suresi':'Ders günü süresi',
+  'ays.core.proposals.tarih':'Tarih',
+  'ays.core.proposals.one-alinan-konu':'Öne alınan konu',
+  'ays.core.proposals.deneme-ve-kapanis-gunleri':'Deneme ve kapanış günleri',
+  'ays.core.proposals.tarih-bitince':'Tarih bitince',
+  'ays.core.proposals.haftalik-kapasite':'Haftalık kapasite',
+  'ays.core.proposals.plana-girmeyen-konu':'Plana girmeyen konu',
+  'ays.core.proposals.plan':'Plan',
+  'ays.core.proposals.gecmis-haftalar':'Geçmiş haftalar',
+  'ays.core.proposals.verisi':'Verisi',
+  'ays.core.proposals.dogru':'Doğru',
+  'ays.core.proposals.paragraf':'Paragraf',
+  'ays.core.proposals.problem':'Problem',
+  'ays.core.proposals.uyku':'Uyku',
+  'ays.core.proposals.onizleme-uretilemedi':'Önizleme üretilemedi.',
+  'ays.core.proposals.bu-oneri-zaten-bekliyor-ya':'Bu öneri zaten bekliyor ya da daha önce işlendi.',
+});
+
 
 window.R = window.R || {};
 
@@ -154,8 +190,8 @@ R.Proposals = (function(){
       },
       preview(p, ctx){
         return [
-          { label:'Konu', before:ctx.subject.name, after:ctx.topic.name },
-          { label:'Durum', before:stateLabel(ctx.from), after:stateLabel('reopened') },
+          { label:yz('ays.core.proposals.konu'), before:ctx.subject.name, after:ctx.topic.name },
+          { label:yz('ays.core.proposals.durum'), before:stateLabel(ctx.from), after:stateLabel('reopened') },
         ];
       },
       async apply(p, ctx){
@@ -183,9 +219,9 @@ R.Proposals = (function(){
         const blocks = ctx.day.blocks || [];
         const sum = blocks.reduce((a, b) => a + (Number(b.targetMin) || 0), 0);
         return [
-          { label:'Eklenecek blok', before:'—', after:ctx.subject.name + ' · ' + ctx.topic.name },
-          { label:'Bugünkü blok sayısı', before:String(blocks.length), after:String(blocks.length + 1) },
-          { label:'Bugünkü hedef süre', before:sum + ' dk', after:(sum + ctx.min) + ' dk' },
+          { label:yz('ays.core.proposals.eklenecek-blok'), before:'—', after:ctx.subject.name + ' · ' + ctx.topic.name },
+          { label:yz('ays.core.proposals.bugunku-blok-sayisi'), before:String(blocks.length), after:String(blocks.length + 1) },
+          { label:yz('ays.core.proposals.bugunku-hedef-sure'), before:sum + ' dk', after:(sum + ctx.min) + ' dk' },
         ];
       },
       async apply(p, ctx){
@@ -228,8 +264,8 @@ R.Proposals = (function(){
       preview(p, ctx){
         const oldest = ctx.late[0];
         return [
-          { label:'Bugüne çekilecek kart', before:'—', after:ctx.late.length + ' kart' },
-          { label:'En eski gecikme', before:U.fmtShort(oldest.dueAt), after:'bugün' },
+          { label:yz('ays.core.proposals.bugune-cekilecek-kart'), before:'—', after:ctx.late.length + ' kart' },
+          { label:yz('ays.core.proposals.en-eski-gecikme'), before:U.fmtShort(oldest.dueAt), after:'bugün' },
         ];
       },
       async apply(p, ctx){
@@ -266,9 +302,9 @@ R.Proposals = (function(){
       preview(p, ctx){
         const front = cardFront(ctx.err);
         return [
-          { label:'Kartın ön yüzü', before:'—', after:front },
-          { label:'Kartın arkası', before:'—', after:ctx.back.slice(0, 90) },
-          { label:'İlk tekrar', before:'—', after:'yarın' },
+          { label:yz('ays.core.proposals.kartin-on-yuzu'), before:'—', after:front },
+          { label:yz('ays.core.proposals.kartin-arkasi'), before:'—', after:ctx.back.slice(0, 90) },
+          { label:yz('ays.core.proposals.i-lk-tekrar'), before:'—', after:'yarın' },
         ];
       },
       async apply(p, ctx){
@@ -324,8 +360,8 @@ R.Proposals = (function(){
         /* «Önce» ekranda görülen hedeftir: ara ya da tatil varsa küçülmüş hali. */
         const r = R.Calc ? R.Calc.questionRealization(ctx.n) : null;
         return [
-          { label:'Hafta', before:'—', after:ctx.n + '. hafta' },
-          { label:'Soru hedefi', before:(r ? r.target : ctx.week.questionTarget) + ' soru',
+          { label:yz('ays.core.proposals.hafta'), before:'—', after:ctx.n + '. hafta' },
+          { label:yz('ays.core.proposals.soru-hedefi'), before:(r ? r.target : ctx.week.questionTarget) + ' soru',
             after:ctx.q + ' soru' },
         ];
       },
@@ -369,8 +405,8 @@ R.Proposals = (function(){
       },
       preview(p, ctx){
         return [
-          { label:'Karar', before:'—', after:ctx.d.title },
-          { label:'Durum', before:'açık', after:ctx.state === 'done' ? 'yapıldı' : 'devredildi' },
+          { label:yz('ays.core.proposals.karar'), before:'—', after:ctx.d.title },
+          { label:yz('ays.core.proposals.durum'), before:'açık', after:ctx.state === 'done' ? 'yapıldı' : 'devredildi' },
         ];
       },
       async apply(p, ctx){
@@ -391,12 +427,12 @@ R.Proposals = (function(){
       },
       preview(p, ctx){
         const rows = [
-          { label:'Ara', before:'plan', after:tarihAraligi(p.from, p.to) + ' · ' + ctx.gun + ' gün' },
-          { label:'Günün blokları', before:'plana göre', after:'boş' },
-          { label:'Haftalık soru hedefi', before:'tam', after:'ara günleri oranında küçülür' },
+          { label:yz('ays.core.proposals.ara'), before:'plan', after:tarihAraligi(p.from, p.to) + ' · ' + ctx.gun + ' gün' },
+          { label:yz('ays.core.proposals.gunun-bloklari'), before:'plana göre', after:'boş' },
+          { label:yz('ays.core.proposals.haftalik-soru-hedefi'), before:'tam', after:'ara günleri oranında küçülür' },
         ];
         if(ctx.etki.korunan.length){
-          rows.push({ label:'İlerlemesi başlamış gün', before:'—',
+          rows.push({ label:yz('ays.core.proposals.i-lerlemesi-baslamis-gun'), before:'—',
             after:ctx.etki.korunan.length + ' gün, dokunulmaz' });
         }
         return rows;
@@ -419,21 +455,21 @@ R.Proposals = (function(){
       preview(p, ctx){
         const temel = R.Istisna.temelDakika(p.from) || R.Istisna.sablonDakikasi();
         const rows = [
-          { label:'Ders günü süresi', before:temel + ' dk', after:ctx.dk + ' dk' },
-          { label:'Tarih', before:'—', after:tarihAraligi(p.from, p.to) + ' · ' + ctx.gun + ' gün' },
+          { label:yz('ays.core.proposals.ders-gunu-suresi'), before:temel + ' dk', after:ctx.dk + ' dk' },
+          { label:yz('ays.core.proposals.tarih'), before:'—', after:tarihAraligi(p.from, p.to) + ' · ' + ctx.gun + ' gün' },
         ];
         /* Yogun gun: fazla sure plandaki siradaki konuya blok olur. Hangi
            konunun one alindigi onaydan ONCE adiyla soylenir. */
         if(ctx.oneAlinan && ctx.oneAlinan.length){
           const adlar = ctx.oneAlinan.map(x => x.konu.name);
-          rows.push({ label:'Öne alınan konu', before:'—',
+          rows.push({ label:yz('ays.core.proposals.one-alinan-konu'), before:'—',
             after:adlar.slice(0, 3).join(', ') + (adlar.length > 3 ? ' ve ' + (adlar.length - 3) + ' konu daha' : '') });
         }
         rows.push(
-          { label:'Deneme ve kapanış günleri', before:'olduğu gibi', after:'değişmez' },
-          { label:'Tarih bitince', before:'—', after:'temel plana döner' });
+          { label:yz('ays.core.proposals.deneme-ve-kapanis-gunleri'), before:'olduğu gibi', after:'değişmez' },
+          { label:yz('ays.core.proposals.tarih-bitince'), before:'—', after:'temel plana döner' });
         if(ctx.etki.korunan.length){
-          rows.push({ label:'İlerlemesi başlamış gün', before:'—',
+          rows.push({ label:yz('ays.core.proposals.i-lerlemesi-baslamis-gun'), before:'—',
             after:ctx.etki.korunan.length + ' gün, dokunulmaz' });
         }
         return rows;
@@ -467,16 +503,16 @@ R.Proposals = (function(){
       },
       preview(p, ctx){
         const rows = [
-          { label:'Ders günü süresi', before:ctx.simdi + ' dk', after:ctx.dk + ' dk' },
-          { label:'Haftalık kapasite', before:ctx.eskiKapasite + ' sa', after:ctx.yeniKapasite + ' sa' },
+          { label:yz('ays.core.proposals.ders-gunu-suresi'), before:ctx.simdi + ' dk', after:ctx.dk + ' dk' },
+          { label:yz('ays.core.proposals.haftalik-kapasite'), before:ctx.eskiKapasite + ' sa', after:ctx.yeniKapasite + ' sa' },
         ];
         if(ctx.dusen && (ctx.dusen.once || ctx.dusen.sonra)){
-          rows.push({ label:'Plana girmeyen konu', before:ctx.dusen.once + ' konu',
+          rows.push({ label:yz('ays.core.proposals.plana-girmeyen-konu'), before:ctx.dusen.once + ' konu',
             after:ctx.dusen.sonra + ' konu' });
         }
         return rows.concat([
-          { label:'Plan', before:'eski kapasiteye göre', after:'bu haftadan itibaren yeniden dağıtılır' },
-          { label:'Geçmiş haftalar', before:'—', after:'değişmez' },
+          { label:yz('ays.core.proposals.plan'), before:'eski kapasiteye göre', after:'bu haftadan itibaren yeniden dağıtılır' },
+          { label:yz('ays.core.proposals.gecmis-haftalar'), before:'—', after:'değişmez' },
         ]);
       },
       async apply(p, ctx){
@@ -519,7 +555,7 @@ R.Proposals = (function(){
       preview(p, ctx){
         return [
           { label:ctx.b.ad, before:ctx.acik ? 'gizli' : 'açık', after:ctx.acik ? 'açık' : 'gizli' },
-          { label:'Verisi', before:'duruyor', after:'duruyor — silinmez' },
+          { label:yz('ays.core.proposals.verisi'), before:'duruyor', after:'duruyor — silinmez' },
         ];
       },
       async apply(p, ctx){
@@ -571,7 +607,7 @@ R.Proposals = (function(){
         const rows = [{ label:nereye + ' · soru', before:once, after:sonra }];
         if(ctx.dogru != null){
           const varOlan = ctx.blok ? ctx.blok.correctQ : ctx.day.freeCorrect;
-          rows.push({ label:'Doğru',
+          rows.push({ label:yz('ays.core.proposals.dogru'),
             before:varOlan == null ? 'girilmemiş' : String(varOlan),
             after:String((Number(varOlan) || 0) + ctx.dogru) });
         }
@@ -635,7 +671,7 @@ R.Proposals = (function(){
         return pass({ n:Math.round(n), day });
       },
       preview(p, ctx){
-        return [{ label:'Paragraf', before:ctx.day.paragraphActual == null ? 'girilmemiş' : String(ctx.day.paragraphActual),
+        return [{ label:yz('ays.core.proposals.paragraf'), before:ctx.day.paragraphActual == null ? 'girilmemiş' : String(ctx.day.paragraphActual),
           after:String((ctx.day.paragraphActual || 0) + ctx.n) }];
       },
       async apply(p, ctx){
@@ -663,7 +699,7 @@ R.Proposals = (function(){
         return pass({ n:Math.round(n), day });
       },
       preview(p, ctx){
-        return [{ label:'Problem', before:ctx.day.problemActual == null ? 'girilmemiş' : String(ctx.day.problemActual),
+        return [{ label:yz('ays.core.proposals.problem'), before:ctx.day.problemActual == null ? 'girilmemiş' : String(ctx.day.problemActual),
           after:String((ctx.day.problemActual || 0) + ctx.n) }];
       },
       async apply(p, ctx){
@@ -691,7 +727,7 @@ R.Proposals = (function(){
         return pass({ h, day });
       },
       preview(p, ctx){
-        return [{ label:'Uyku',
+        return [{ label:yz('ays.core.proposals.uyku'),
           before:ctx.day.sleepHours == null ? 'girilmemiş' : ctx.day.sleepHours + ' saat',
           after:ctx.h + ' saat' }];
       },
@@ -811,7 +847,7 @@ R.Proposals = (function(){
     if(!res.ok) return { ok:false, why:res.why, rows:[] };
     const impl = IMPL[p.action];
     try{ return { ok:true, rows:impl.preview(p.params || {}, res.ctx) || [] }; }
-    catch(e){ return { ok:false, why:'Önizleme üretilemedi.', rows:[] }; }
+    catch(e){ return { ok:false, why:yz('ays.core.proposals.onizleme-uretilemedi'), rows:[] }; }
   }
 
   /* 127 KAPSAM (kullanıcı kararı 2026-09-25: «hedef değişikliklerine
@@ -990,7 +1026,7 @@ R.Proposals = (function(){
     const row = await propose(p);
     if(!row){
       return { row:null, otomatik:false,
-        why:'Bu öneri zaten bekliyor ya da daha önce işlendi.' };
+        why:yz('ays.core.proposals.bu-oneri-zaten-bekliyor-ya') };
     }
     if(!otomatikMi(row, ayar())) return { row, otomatik:false, why:null };
     const r = await approve(row.id);

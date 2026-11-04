@@ -69,7 +69,7 @@ window.LIFEOS.PARCA.yazilar({
 });
 /* Gelecek simülatörü (2026-10-16): sınav gününe kadar «bu gidişle»
 ve «ne olursa» (core/gelecek.js). */
-window.LIFEOS.PARCA.sayfa({ id:'gelecek', modul:'ays', cekmece:'analiz', ad:'Gelecek', ikon:'target', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'gelecek', modul:'ays', king:{ sira:110, ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] }, cekmece:'analiz', ad:'Gelecek', ikon:'target', sira:20 });
 
 R.Screens.gelecek = (function(){
   const U = R.U, S = R.S;
@@ -232,16 +232,16 @@ R.Screens.gelecek = (function(){
     </ul>` });
   }
 
-  LIFEOS.PARCA.blok({ id:'gelecek.deneykarti', sayfa:'gelecek', yer:'y1', sira:10, ad:'deneyKarti', ciz({ r }){
+  LIFEOS.PARCA.blok({ id:'gelecek.deneykarti', sayfa:'gelecek', yer:'y1', sira:10, ad:'Deney kartı', ciz({ r }){
     return deneyKarti();
   } });
-  LIFEOS.PARCA.blok({ id:'gelecek.neolursa', sayfa:'gelecek', yer:'y2', sira:10, ad:'neOlursa', ciz({ r }){
+  LIFEOS.PARCA.blok({ id:'gelecek.neolursa', sayfa:'gelecek', yer:'y2', sira:10, ad:'Ne olursa', ciz({ r }){
     return neOlursa(r);
   } });
-  LIFEOS.PARCA.blok({ id:'gelecek.bolum-3', sayfa:'gelecek', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ r }){
+  LIFEOS.PARCA.blok({ id:'gelecek.gelecek-grafigi', sayfa:'gelecek', yer:'y3', sira:10, ad:'Gelecek grafiği', ciz({ r }){
     return raw(String(grafik(r)));
   } });
-  LIFEOS.PARCA.blok({ id:'gelecek.sinavkarti', sayfa:'gelecek', yer:'y4', sira:10, ad:'sinavKarti', ciz({ r }){
+  LIFEOS.PARCA.blok({ id:'gelecek.sinavkarti', sayfa:'gelecek', yer:'y4', sira:10, ad:'Sınav kartı', ciz({ r }){
     return sinavKarti(r);
   } });
   async function render(){

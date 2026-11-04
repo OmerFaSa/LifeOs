@@ -17,6 +17,13 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'spi', sira:20, id:'act:paste', kind:'Eylem', label:'Tahlil raporu yapıştır',
+  hint:'Modül 1', run:() => { SP.App.go('labs'); setTimeout(() => {
+    const fn = SP.Screens.labs.handle['open-paste']; if(fn) fn({ dataset:{} }); }, 120); } });
+window.LIFEOS.PARCA.komut({ modul:'spi', sira:80, uret(){
+  return SP.BIOMARKERS.map(b => ({ id:'bio:' + b.id, kind:'Ölçüm', label:b.name, hint:b.unit,
+    run:() => { SP.S.ui.trendMarker = b.id; SP.S.ui.labTab = 'trend'; SP.App.go('labs'); } }));
+} });
 window.LIFEOS.PARCA.yazilar({
   'spi.labs.sonuclar':'Sonuçlar',
   'spi.labs.test-gir':'Test gir',
@@ -192,7 +199,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.labs.bu-satirda-olcum-adindan-son':'Bu satırda ölçüm adından sonra bir sayı bulunamadı',
   'spi.labs.testler':'Testler',
 });
-window.LIFEOS.PARCA.sayfa({ id:'labs', modul:'spi', cekmece:'calisma', ad:'Testler', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'labs', modul:'spi', king:{ sira:50, ad:'Testler', es:['tahlil', 'kan testi', 'laboratuvar', 'testler'] }, cekmece:'calisma', ad:'Testler', sira:10 });
 
 SP.Screens.labs = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
@@ -1514,11 +1521,11 @@ SP.Screens.labs = (function(){
   LIFEOS.PARCA.blok({ id:'labs.aciklamalar', sayfa:'labs', yer:'y1', sira:10, ad:'Açıklamalar', ciz({ flags }){
     return raw(UI.rail(['ref-range', 'optimal-band', 'trend', 'red-flag', 'derived', 'lab-paste']));
   } });
-  LIFEOS.PARCA.blok({ id:'labs.bolum-2', sayfa:'labs', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ flags }){
+  LIFEOS.PARCA.blok({ id:'labs.test-sekmeleri', sayfa:'labs', yer:'y2', sira:10, ad:'Test sekmeleri', ciz({ flags }){
     return K.SayfaBolumleri({ act:'lab-tab', aria:yz('spi.labs.test-bolumleri'),
         bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t), sayi:rozet(t.id) })) });
   } });
-  LIFEOS.PARCA.blok({ id:'labs.bolum-3', sayfa:'labs', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ flags }){
+  LIFEOS.PARCA.blok({ id:'labs.uyari-kartlari', sayfa:'labs', yer:'y3', sira:10, ad:'Uyarı kartları', ciz({ flags }){
     return when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`);
   } });
   async function render(){

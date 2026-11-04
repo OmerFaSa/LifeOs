@@ -11,6 +11,12 @@
 
    Modele giden sey de sinirlidir (SP.PRIVACY.model): yalnizca sayilar ve
    durum etiketleri. Ad, dogum tarihi ve ham tahlil belgesi gonderilmez. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.office.merkez-modeli-cevap-vermedi':'Merkez modeli cevap vermedi: ',
+  'spi.core.office.model-istemi-geri-yazdi-kura':'Model istemi geri yazdı; kural motorunun cümlesi gösterildi.',
+  'spi.core.office.model-ciktisi-ev-kurallarina':'Model çıktısı ev kurallarına takıldı: ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -696,7 +702,7 @@ SP.Office = (function(){
       if(MM){
         const r = await MM.sor({ sistem:systemPrompt(agentId, b, { selam, tur }), mesajlar, baglam:selam ? '' : JSON.stringify(b) });
         if(r && r.ok && r.text) res = { text:r.text, model:(r.model || '') + ' · Merkez' };
-        else if(!yerel) return Object.assign({}, fallback, { note:'Merkez modeli cevap vermedi: ' + ((r && r.note) || 'sebep bilinmiyor') });
+        else if(!yerel) return Object.assign({}, fallback, { note:yz('spi.core.office.merkez-modeli-cevap-vermedi') + ((r && r.note) || 'sebep bilinmiyor') });
       }
       if(!res) res = await SP.LLM.chat(cfg, {
         system:systemPrompt(agentId, b, { selam, model:cfg.model, tur }),
@@ -707,14 +713,14 @@ SP.Office = (function(){
       /* Selamda brifing gonderilmedi: sayi da ona gore denetlenir. */
       if(LIFEOS.Ofis.yankiMi && LIFEOS.Ofis.yankiMi(res.text)){
         return { text:fallback.text, source:'rules', brief:b,
-          note:'Model istemi geri yazdı; kural motorunun cümlesi gösterildi.' };
+          note:yz('spi.core.office.model-istemi-geri-yazdi-kura') };
       }
       /* Model adindaki rakam («gemma3:4b») uydurma sayi degildir. */
       const havuzEk = { model:String(res.model || cfg.model || '') };
       const check = validate(res.text, { agentId, brief:selam ? havuzEk : Object.assign({}, b, havuzEk) });
       if(!check.ok){
         return { text:fallback.text, source:'rules', brief:b,
-          blocked:check, note:'Model çıktısı ev kurallarına takıldı: ' + check.note };
+          blocked:check, note:yz('spi.core.office.model-ciktisi-ev-kurallarina') + check.note };
       }
       /* Istemdeki tavan («En fazla 4 cümle») kodda da uygulanir. */
       const kisa = SP.LLM.capSentences ? SP.LLM.capSentences(res.text, o.sentences || CUMLE_TAVANI) : res.text.trim();

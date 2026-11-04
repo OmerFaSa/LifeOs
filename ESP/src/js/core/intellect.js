@@ -8,6 +8,39 @@
    olmasi onun guvenilir oldugunu degil, girilmis olculerden turetildigini
    soyler; "veri yok" ise hesabin hic yapilamadigini. Ikisi ayri seydir ve
    ekranda ayri gorunur. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.intellect.bu-disiplinde-olculmus-kalit':'Bu disiplinde ölçülmüş kalite sinyali yok; katsayı 1,0 alındı.',
+  'esp.core.intellect.kart-hatirlama':'Kart hatırlama %',
+  'esp.core.intellect.notlarin':'Notların %',
+  'esp.core.intellect.parcalarin':'Parçaların %',
+  'esp.core.intellect.taslak-basina':'Taslak başına ',
+  'esp.core.intellect.henuz-kaynak-girilmemis-kats':'Henüz kaynak girilmemiş; katsayının paydası kitap sayısıdır.',
+  'esp.core.intellect.kisiye-saldiri':'Kişiye saldırı',
+  'esp.core.intellect.tezin-sahibine-degil-tezin-k':'Tezin sahibine değil tezin kendisine bakılır.',
+  'esp.core.intellect.korkuluk-adam':'Korkuluk adam',
+  'esp.core.intellect.karsi-tezin-en-guclu-hali':'Karşı tezin en güçlü hâli çürütülür, en zayıf hâli değil.',
+  'esp.core.intellect.kaygan-zemin':'Kaygan zemin',
+  'esp.core.intellect.her-adimin-kacinilmaz-oldugu':'Her adımın kaçınılmaz olduğu ayrı ayrı gösterilmeli.',
+  'esp.core.intellect.yanlis-ikilem':'Yanlış ikilem',
+  'esp.core.intellect.ucuncu-bir-secenek-var-mi':'Üçüncü bir seçenek var mı diye sorulur.',
+  'esp.core.intellect.otoriteye-basvuru':'Otoriteye başvuru',
+  'esp.core.intellect.kimin-soyledigi-degil-hangi':'Kimin söylediği değil, hangi gerekçeyle söylediği önemlidir.',
+  'esp.core.intellect.dongusel-akil-yurutme':'Döngüsel akıl yürütme',
+  'esp.core.intellect.sonuc-kendi-onculu-olarak-ku':'Sonuç, kendi öncülü olarak kullanılmış olabilir.',
+  'esp.core.intellect.metin-bos':'Metin boş.',
+  'esp.core.intellect.olcum-icin-en-az-bir':'Ölçüm için en az bir tam cümle gerekir.',
+  'esp.core.intellect.cok-kolay':'Çok kolay',
+  'esp.core.intellect.i-lkokul-duzeyi':'İlkokul düzeyi.',
+  'esp.core.intellect.kolay':'Kolay',
+  'esp.core.intellect.ortaokul-duzeyi':'Ortaokul düzeyi.',
+  'esp.core.intellect.orta-gucluk':'Orta güçlük',
+  'esp.core.intellect.lise-duzeyi-cogu-deneme-bura':'Lise düzeyi; çoğu deneme burada.',
+  'esp.core.intellect.zor':'Zor',
+  'esp.core.intellect.universite-duzeyi-akademik-v':'Üniversite düzeyi; akademik ve felsefi metinler burada.',
+  'esp.core.intellect.cok-zor':'Çok zor',
+  'esp.core.intellect.uzmanlik-metni-kasitli-degil':'Uzmanlık metni. Kasıtlı değilse cümleler kısaltılabilir.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -42,14 +75,14 @@ ESP.Intellect = (function(){
      ezer ve az ama iyi calisan biri cok calisan birinden yuksek hacim
      gosterirdi — oysa olculen sey hacim. */
   function qualityCoef(discId){
-    const yok = { k:1, cert:'missing', why:'Bu disiplinde ölçülmüş kalite sinyali yok; katsayı 1,0 alındı.' };
+    const yok = { k:1, cert:'missing', why:yz('esp.core.intellect.bu-disiplinde-olculmus-kalit') };
 
     if(discId === 'lang'){
       const r = ESP.SRS.retention();
       if(r.cert === 'missing') return yok;
       /* %80 retansiyon notrdur: SRS'in hedefledigi bant odur. */
       return { k:clampK(0.85 + (r.value - 0.5) * 0.6), cert:'derived',
-        why:'Kart hatırlama %' + Math.round(r.value * 100) + ' (' + r.n + ' karttan).' };
+        why:yz('esp.core.intellect.kart-hatirlama') + Math.round(r.value * 100) + ' (' + r.n + ' karttan).' };
     }
 
     if(discId === 'reading'){
@@ -57,21 +90,21 @@ ESP.Intellect = (function(){
       if(ss.cert === 'missing') return yok;
       const oran = ss.linkedRatio;
       return { k:clampK(0.85 + oran * 0.3), cert:'derived',
-        why:'Notların %' + Math.round(oran * 100) + '\'i bağlanmış.' };
+        why:yz('esp.core.intellect.notlarin') + Math.round(oran * 100) + '\'i bağlanmış.' };
     }
 
     if(discId === 'music'){
       const p = ESP.Acoustic ? ESP.Acoustic.progressRatio() : { value:null, cert:'missing' };
       if(p.cert === 'missing') return yok;
       return { k:clampK(0.85 + p.value * 0.3), cert:'derived',
-        why:'Parçaların %' + Math.round(p.value * 100) + '\'i hedef tempoda.' };
+        why:yz('esp.core.intellect.parcalarin') + Math.round(p.value * 100) + '\'i hedef tempoda.' };
     }
 
     if(discId === 'writing'){
       const w = draftRatio();
       if(w.cert === 'missing') return yok;
       return { k:clampK(0.85 + Math.min(1, w.value) * 0.3), cert:'derived',
-        why:'Taslak başına ' + U.fmtNum(Math.round(w.value * 10) / 10) + ' revizyon.' };
+        why:yz('esp.core.intellect.taslak-basina') + U.fmtNum(Math.round(w.value * 10) / 10) + ' revizyon.' };
     }
 
     return yok;
@@ -174,7 +207,7 @@ ESP.Intellect = (function(){
          yapilamadigi soylenir. */
       return { value:null, cert:'missing', linked:baglantili, total:notlar.length,
         books:0, authors:yazarlar.size, linkedRatio:notlar.length ? baglantili / notlar.length : 0,
-        why:'Henüz kaynak girilmemiş; katsayının paydası kitap sayısıdır.' };
+        why:yz('esp.core.intellect.henuz-kaynak-girilmemis-kats') };
     }
 
     const value = (baglantili / kitapSayisi) * Math.log(1 + yazarlar.size);
@@ -305,27 +338,27 @@ ESP.Intellect = (function(){
      vermez. Bir kalibin yakalanmasi argumanin yanlis oldugunu gostermez,
      bakmaya deger oldugunu gosterir. Ekranda bu cumleyle birlikte durur. */
   const FALLACIES = [
-    { id:'ad-hominem', label:'Kişiye saldırı',
+    { id:'ad-hominem', label:yz('esp.core.intellect.kisiye-saldiri'),
       re:ESP.trRe('(cahil|aptal|salak)|zaten[^.!?]{0,20}(bilmiyor|anlamıyor)|sen kimsin'),
-      note:'Tezin sahibine değil tezin kendisine bakılır.' },
-    { id:'straw-man', label:'Korkuluk adam',
+      note:yz('esp.core.intellect.tezin-sahibine-degil-tezin-k') },
+    { id:'straw-man', label:yz('esp.core.intellect.korkuluk-adam'),
       re:ESP.trRe('(yani sen|demek ki sen|yani diyorsun ki)[^.!?]{0,40}'
         + '(diyorsun|savunuyorsun|istiyorsun)'),
-      note:'Karşı tezin en güçlü hâli çürütülür, en zayıf hâli değil.' },
-    { id:'slippery-slope', label:'Kaygan zemin',
+      note:yz('esp.core.intellect.karsi-tezin-en-guclu-hali') },
+    { id:'slippery-slope', label:yz('esp.core.intellect.kaygan-zemin'),
       re:ESP.trRe('(sonunda|eninde sonunda|er geç)[^.!?]{0,50}'
         + '(gider|varır|döner|yol açar)'),
-      note:'Her adımın kaçınılmaz olduğu ayrı ayrı gösterilmeli.' },
-    { id:'false-dilemma', label:'Yanlış ikilem',
+      note:yz('esp.core.intellect.her-adimin-kacinilmaz-oldugu') },
+    { id:'false-dilemma', label:yz('esp.core.intellect.yanlis-ikilem'),
       re:ESP.trRe('ya [^.!?]{1,30} ya da |başka (bir )?(seçenek|yol) yok'),
-      note:'Üçüncü bir seçenek var mı diye sorulur.' },
-    { id:'appeal-authority', label:'Otoriteye başvuru',
+      note:yz('esp.core.intellect.ucuncu-bir-secenek-var-mi') },
+    { id:'appeal-authority', label:yz('esp.core.intellect.otoriteye-basvuru'),
       re:ESP.trRe('[' + ESP.TR_LETTERS + ']+ (böyle )?(dediği|söylediği) için'
         + '|bilim insanları diyor ki|herkes biliyor ki'),
-      note:'Kimin söylediği değil, hangi gerekçeyle söylediği önemlidir.' },
-    { id:'circular', label:'Döngüsel akıl yürütme',
+      note:yz('esp.core.intellect.kimin-soyledigi-degil-hangi') },
+    { id:'circular', label:yz('esp.core.intellect.dongusel-akil-yurutme'),
       re:ESP.trRe('çünkü[^.!?]{0,40}doğru(dur)?[^.!?]{0,20}çünkü'),
-      note:'Sonuç, kendi öncülü olarak kullanılmış olabilir.' },
+      note:yz('esp.core.intellect.sonuc-kendi-onculu-olarak-ku') },
   ];
 
   function checkFallacies(text){
@@ -423,7 +456,7 @@ ESP.Intellect = (function(){
     const s = String(text || '').trim();
     if(!s){
       return { value:null, cert:'missing', words:0, sentences:0, syllables:0,
-        band:null, why:'Metin boş.' };
+        band:null, why:yz('esp.core.intellect.metin-bos') };
     }
     /* Cumle ayraci: nokta, soru, unlem. Sayi icindeki nokta ayrac DEGILDIR
        ("1.500 lira" tek parcadir) — devir notundaki tuzagin ayni. */
@@ -434,7 +467,7 @@ ESP.Intellect = (function(){
     if(!kelimeler.length || !cumleler.length){
       return { value:null, cert:'missing', words:kelimeler.length,
         sentences:cumleler.length, syllables:0, band:null,
-        why:'Ölçüm için en az bir tam cümle gerekir.' };
+        why:yz('esp.core.intellect.olcum-icin-en-az-bir') };
     }
     const hece = kelimeler.reduce((a, w) => a + syllables(w), 0);
     const hkOran = hece / kelimeler.length;
@@ -469,11 +502,11 @@ ESP.Intellect = (function(){
   /* Atesman'in kendi bant tablosu. Bant bir NOT degil bir tarif:
      "zor" kotu demek degildir — felsefi bir metnin zor olmasi beklenir. */
   function bandOf(os){
-    if(os >= 90) return { id:'cok-kolay', label:'Çok kolay',  note:'İlkokul düzeyi.' };
-    if(os >= 70) return { id:'kolay',     label:'Kolay',      note:'Ortaokul düzeyi.' };
-    if(os >= 50) return { id:'orta',      label:'Orta güçlük', note:'Lise düzeyi; çoğu deneme burada.' };
-    if(os >= 30) return { id:'zor',       label:'Zor',        note:'Üniversite düzeyi; akademik ve felsefi metinler burada.' };
-    return { id:'cok-zor', label:'Çok zor', note:'Uzmanlık metni. Kasıtlı değilse cümleler kısaltılabilir.' };
+    if(os >= 90) return { id:'cok-kolay', label:yz('esp.core.intellect.cok-kolay'),  note:yz('esp.core.intellect.i-lkokul-duzeyi') };
+    if(os >= 70) return { id:'kolay',     label:yz('esp.core.intellect.kolay'),      note:yz('esp.core.intellect.ortaokul-duzeyi') };
+    if(os >= 50) return { id:'orta',      label:yz('esp.core.intellect.orta-gucluk'), note:yz('esp.core.intellect.lise-duzeyi-cogu-deneme-bura') };
+    if(os >= 30) return { id:'zor',       label:yz('esp.core.intellect.zor'),        note:yz('esp.core.intellect.universite-duzeyi-akademik-v') };
+    return { id:'cok-zor', label:yz('esp.core.intellect.cok-zor'), note:yz('esp.core.intellect.uzmanlik-metni-kasitli-degil') };
   }
 
   /* Tekrarlanan kelimeler — uslup degil OLCUM. En sik gecen dolu kelimeler.

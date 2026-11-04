@@ -16,6 +16,24 @@
       değişir ve resmi puanlama bağlanmadı.
    4. HATALI SORU İŞARETLENİR ve sonuca sayılmaz: kaynaksız bir sorunun
       yanlış anahtarı, senin yanlışın değildir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.testkitabi.once-sinav-profilini-sec-ya':'Önce sınav profilini seç ya da müfredatını iste.',
+  'ays.core.testkitabi.hkm-bagli-degil-test-kitabi':'HKM bağlı değil; test kitabı istenemedi. Sorular ',
+  'ays.core.testkitabi.hkm-ye-ulasilamadi-hkm-acikk':'HKM’ye ulaşılamadı; HKM açıkken yeniden dene.',
+  'ays.core.testkitabi.king-is-emrini-almadi':'King iş emrini almadı: ',
+  'ays.core.testkitabi.king-bu-kitap-icin-teklif':'King bu kitap için teklif hazırladı (iş emri #',
+  'ays.core.testkitabi.kayit-bir-test-kitabi-degil':'Kayıt bir test kitabı değil.',
+  'ays.core.testkitabi.kayit-kimligi-gecersiz':'Kayıt kimliği geçersiz.',
+  'ays.core.testkitabi.kitabin-hicbir-sorusu-ays-ni':'Kitabın hiçbir sorusu AYS’nin denetimini geçmedi.',
+  'ays.core.testkitabi.yarim-kalmis-bir-bolum-yok':'Yarım kalmış bir bölüm yok.',
+  'ays.core.testkitabi.kitap-bulunamadi':'Kitap bulunamadı.',
+  'ays.core.testkitabi.bolum-bulunamadi':'Bölüm bulunamadı.',
+  'ays.core.testkitabi.bu-bolum-henuz-cozulmedi':'Bu bölüm henüz çözülmedi.',
+  'ays.core.testkitabi.bu-bolumun-sonucu-yok':'Bu bölümün sonucu yok.',
+  'ays.core.testkitabi.soru-bulunamadi':'Soru bulunamadı.',
+  'ays.core.testkitabi.hangi-sinav-icin-kayitli-pro':'Hangi sınav için? Kayıtlı profiller: ',
+});
+
 
 window.R = window.R || {};
 
@@ -60,16 +78,16 @@ R.TestKitabi = (function(){
 
   async function iste(profilId){
     const p = R.SinavProfil && R.SinavProfil.bul(profilId);
-    if(!p) return { ok:false, metin:'Önce sınav profilini seç ya da müfredatını iste.' };
+    if(!p) return { ok:false, metin:yz('ays.core.testkitabi.once-sinav-profilini-sec-ya') };
     const govde = istekGovdesi(p);
     const r = await R.SinavProfil.istek('/api/king/emir', { modul:'ays', tur:'test.kitabi',
       govde:{ kitap:govde }, neden:'Kullanıcı bu profil için test kitabı istedi.' });
-    if(!r.bagli) return { ok:false, metin:'HKM bağlı değil; test kitabı istenemedi. Sorular '
+    if(!r.bagli) return { ok:false, metin:yz('ays.core.testkitabi.hkm-bagli-degil-test-kitabi')
       + 'BAM’da üretilip denetlenir; HKM olmadan kitap kurulmaz.' };
-    if(r.ag) return { ok:false, metin:'HKM’ye ulaşılamadı; HKM açıkken yeniden dene.' };
+    if(r.ag) return { ok:false, metin:yz('ays.core.testkitabi.hkm-ye-ulasilamadi-hkm-acikk') };
     const g = r.govde || {};
     if(!r.ok || !g.ok){
-      return { ok:false, metin:'King iş emrini almadı: '
+      return { ok:false, metin:yz('ays.core.testkitabi.king-is-emrini-almadi')
         + ((g.errors || []).join('; ') || g.note || ('HTTP ' + r.status)) };
     }
     const e = g.emir || {};
@@ -77,7 +95,7 @@ R.TestKitabi = (function(){
     if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
     if(e.durum === 'teklif'){
       return { ok:true, karar:g.karar, emirId:e.id, teklif:true,
-        metin:'King bu kitap için teklif hazırladı (iş emri #' + e.id + '). Bugün’deki King '
+        metin:yz('ays.core.testkitabi.king-bu-kitap-icin-teklif') + e.id + '). Bugün’deki King '
           + 'teklifi kartında maliyeti, süreyi ve seçenekleri (tam kitap ya da yalnız 1. bölüm) '
           + 'görüp onayla; onaylamadan iş açılmaz.' };
     }
@@ -121,10 +139,10 @@ R.TestKitabi = (function(){
   function kayittan(kayit){
     const g = kayit && kayit.govde;
     if(!kayit || kayit.tur !== 'materyal' || !g || g.tur !== 'kitap'){
-      return { ok:false, why:'Kayıt bir test kitabı değil.' };
+      return { ok:false, why:yz('ays.core.testkitabi.kayit-bir-test-kitabi-degil') };
     }
     const kid = Number(kayit.id);
-    if(!Number.isInteger(kid) || kid < 1) return { ok:false, why:'Kayıt kimliği geçersiz.' };
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, why:yz('ays.core.testkitabi.kayit-kimligi-gecersiz') };
     let dusen = 0;
     const bolumler = [];
     (Array.isArray(g.bolumler) ? g.bolumler : []).slice(0, SINIR.bolum).forEach(b => {
@@ -134,7 +152,7 @@ R.TestKitabi = (function(){
       dusen += ham.length - sorular.length;
       if(ad.length >= 2 && sorular.length) bolumler.push({ no:bolumler.length + 1, ad, sorular });
     });
-    if(!bolumler.length) return { ok:false, why:'Kitabın hiçbir sorusu AYS’nin denetimini geçmedi.' };
+    if(!bolumler.length) return { ok:false, why:yz('ays.core.testkitabi.kitabin-hicbir-sorusu-ays-ni') };
     return { ok:true, kitap:{ id:'kitap-' + kid, kayitId:kid,
       baslik:bosluk(g.baslik || kayit.baslik).slice(0, 120) || 'Test kitabı',
       dogruluk:kayit.dogruluk === 'kaynakli' ? 'kaynakli' : 'dogrulanmadi',
@@ -180,7 +198,7 @@ R.TestKitabi = (function(){
 
   function devam(){
     const y = yarim();
-    if(!y) return { ok:false, why:'Yarım kalmış bir bölüm yok.' };
+    if(!y) return { ok:false, why:yz('ays.core.testkitabi.yarim-kalmis-bir-bolum-yok') };
     oturum = { kitapId:yarimK.kitapId, no:yarimK.no, index:yarimK.index,
       cevaplar:yarimK.cevaplar.slice(), basla:Date.now() - (Number(yarimK.gecen_ms) || 0) };
     ozet = null;
@@ -188,7 +206,7 @@ R.TestKitabi = (function(){
   }
 
   async function sil(id){
-    if(!bul(id)) return { ok:false, why:'Kitap bulunamadı.' };
+    if(!bul(id)) return { ok:false, why:yz('ays.core.testkitabi.kitap-bulunamadi') };
     if(oturum && oturum.kitapId === id){ oturum = null; kalici(); }
     if(yarimK && yarimK.kitapId === id){ yarimK = null; kalici(); }
     R.S.testKitaplari = kitaplar().filter(k => k.id !== id);
@@ -219,7 +237,7 @@ R.TestKitabi = (function(){
 
   function baslat(kitapId, no){
     const b = bolumOf(bul(kitapId), Number(no));
-    if(!b) return { ok:false, why:'Bölüm bulunamadı.' };
+    if(!b) return { ok:false, why:yz('ays.core.testkitabi.bolum-bulunamadi') };
     oturum = { kitapId, no:b.no, index:0, cevaplar:b.sorular.map(() => null), basla:Date.now() };
     ozet = null;
     kalici();
@@ -306,7 +324,7 @@ R.TestKitabi = (function(){
   /* Çözdüklerim (Part 8b): kayıtlı bir bölüm sonucunu yeniden gözden geçir. */
   function ozetAc(kitapId, no){
     const k = bul(kitapId);
-    if(!k || !(k.sonuclar || {})[Number(no)]) return { ok:false, why:'Bu bölüm henüz çözülmedi.' };
+    if(!k || !(k.sonuclar || {})[Number(no)]) return { ok:false, why:yz('ays.core.testkitabi.bu-bolum-henuz-cozulmedi') };
     ozet = { kitapId, no:Number(no) };
     return { ok:true };
   }
@@ -343,7 +361,7 @@ R.TestKitabi = (function(){
   async function yanlislariDeftere(kitapId, no){
     const k = bul(kitapId), b = bolumOf(k, Number(no));
     const s = k && (k.sonuclar || {})[Number(no)];
-    if(!b || !s) return { ok:false, why:'Bu bölümün sonucu yok.' };
+    if(!b || !s) return { ok:false, why:yz('ays.core.testkitabi.bu-bolumun-sonucu-yok') };
     const yeni = yanlislar(kitapId, no).filter(x => !deftereEklendi(kitapId, b.no, x.i));
     const ids = [];
     for(const x of yeni){
@@ -371,7 +389,7 @@ R.TestKitabi = (function(){
   /* Hatalı soru: işaret açılıp kapanır; bölümün son sonucu yeniden sayılır. */
   async function hataliIsaretle(kitapId, no, i){
     const k = bul(kitapId), b = bolumOf(k, Number(no));
-    if(!b || !(i >= 0 && i < b.sorular.length)) return { ok:false, why:'Soru bulunamadı.' };
+    if(!b || !(i >= 0 && i < b.sorular.length)) return { ok:false, why:yz('ays.core.testkitabi.soru-bulunamadi') };
     const a = anahtar(b.no, i);
     const hatali = (k.hatali || []).indexOf(a) >= 0 ? k.hatali.filter(x => x !== a)
       : (k.hatali || []).concat([a]);
@@ -398,7 +416,7 @@ R.TestKitabi = (function(){
     const p = l.filter(x => x.kaynak !== 'yerlesik').find(x => k.indexOf(kucuk(x.ad)) >= 0)
       || (/\byks\b|\bsay\b/.test(k) ? l[0] : null);
     if(!p){
-      return { text:'Hangi sınav için? Kayıtlı profiller: ' + l.map(x => x.ad).join(', ')
+      return { text:yz('ays.core.testkitabi.hangi-sinav-icin-kayitli-pro') + l.map(x => x.ad).join(', ')
         + '. Başka bir sınavsa önce «… müfredatını çıkar» de; kitabı onun konularından kurarım.' };
     }
     return { text:(await iste(p.id)).metin };

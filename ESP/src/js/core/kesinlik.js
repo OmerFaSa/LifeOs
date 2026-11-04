@@ -47,6 +47,16 @@
 
    `onerror` düğümü kaldırır ve etiketin YAZISI olduğu gibi görünür.
    Görsel bir ektir; anlamı taşıyan şey hâlâ kelimedir. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.kesinlik.olculdu':'ölçüldü',
+  'ortak.kesinlik.gercekten-olculdu-arkasinda':'Gerçekten ölçüldü — arkasında bir kayıt var.',
+  'ortak.kesinlik.kullanicinin-kendi-kestirimi':'Kullanıcının kendi kestirimi; ölçüm değil.',
+  'ortak.kesinlik.hesaplandi':'hesaplandı',
+  'ortak.kesinlik.baska-sayilardan-turedi-kend':'Başka sayılardan türedi; kendisi ölçülmedi.',
+  'ortak.kesinlik.veri-yok':'veri yok',
+  'ortak.kesinlik.burada-bir-sey-yok-sifir':'Burada bir şey YOK. Sıfır değil, yokluk.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -54,17 +64,17 @@ window.LIFEOS = window.LIFEOS || {};
    ile `certainty.py` bu dört dizeyi bekler. Türkçe olan, ekrana çıkan
    karşılıklarıdır. */
 LIFEOS.KESINLIK = [
-  { id:'measured',  ad:'ölçüldü',
-    ozet:'Gerçekten ölçüldü — arkasında bir kayıt var.',
+  { id:'measured',  ad:yz('ortak.kesinlik.olculdu'),
+    ozet:yz('ortak.kesinlik.gercekten-olculdu-arkasinda'),
     gorsel:'etiket-olculdu' },
   { id:'estimated', ad:'tahmin',
-    ozet:'Kullanıcının kendi kestirimi; ölçüm değil.',
+    ozet:yz('ortak.kesinlik.kullanicinin-kendi-kestirimi'),
     gorsel:'etiket-tahmin' },
-  { id:'computed',  ad:'hesaplandı',
-    ozet:'Başka sayılardan türedi; kendisi ölçülmedi.',
+  { id:'computed',  ad:yz('ortak.kesinlik.hesaplandi'),
+    ozet:yz('ortak.kesinlik.baska-sayilardan-turedi-kend'),
     gorsel:'etiket-hesaplandi' },
-  { id:'missing',   ad:'veri yok',
-    ozet:'Burada bir şey YOK. Sıfır değil, yokluk.',
+  { id:'missing',   ad:yz('ortak.kesinlik.veri-yok'),
+    ozet:yz('ortak.kesinlik.burada-bir-sey-yok-sifir'),
     gorsel:'etiket-veri-yok' },
 ];
 

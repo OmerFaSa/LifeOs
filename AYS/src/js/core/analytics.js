@@ -4,6 +4,19 @@
    var olan kaydı sorgulayıp okunabilir hale getirir. Yeni veri istemezler.
 
    Hepsi saf okuma: hiçbiri state değiştirmez. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.analytics.en-az-4-tam-deneme':'En az 4 tam deneme gerekir.',
+  'ays.core.analytics.sure-kaydi-olan-tam-deneme':'Süre kaydı olan tam deneme gerekir.',
+  'ays.core.analytics.sure-kaydi-olan-test-yok':'Süre kaydı olan test yok.',
+  'ays.core.analytics.deneme-oncesi-uyku-kaydi-yet':'Deneme öncesi uyku kaydı yetersiz.',
+  'ays.core.analytics.karsilastirma-icin-en-az-iki':'Karşılaştırma için en az iki yeterli ve iki yetersiz uykulu deneme gerekir.',
+  'ays.core.analytics.henuz-tamamlanmis-hafta-yok':'Henüz tamamlanmış hafta yok.',
+  'ays.core.analytics.sureli-deneme-oturumu-gereki':'Süreli deneme oturumu gerekir.',
+  'ays.core.analytics.gun-kaydi-yok':'Gün kaydı yok.',
+  'ays.core.analytics.bolunme-sayaci-son':'Bölünme sayacı son ',
+  'ays.core.analytics.ders-ders-okuma-icin-en':'Ders ders okuma için en az 3 tam ',
+});
+
 
 window.R = window.R || {};
 
@@ -191,7 +204,7 @@ R.Analytics = (function(){
   /* ---------- yayın zorluk düzeltmesi ---------- */
   function publisherAdjust(family){
     const list = C().fullExams(family || 'TYT');
-    if(list.length < 4) return { ok:false, why:'En az 4 tam deneme gerekir.' };
+    if(list.length < 4) return { ok:false, why:yz('ays.core.analytics.en-az-4-tam-deneme') };
 
     const nets = list.map(M.examNet);
     const overall = U.median(nets);
@@ -234,7 +247,7 @@ R.Analytics = (function(){
   /* ---------- hız–isabet dengesi ---------- */
   function speedAccuracy(family){
     const list = C().fullExams(family || 'TYT').filter(e => (e.tests || []).some(t => t.minutes != null));
-    if(!list.length) return { ok:false, why:'Süre kaydı olan tam deneme gerekir.' };
+    if(!list.length) return { ok:false, why:yz('ays.core.analytics.sure-kaydi-olan-tam-deneme') };
 
     const byTest = {};
     list.slice(-4).forEach(e => {
@@ -249,7 +262,7 @@ R.Analytics = (function(){
     });
 
     const keys = Object.keys(byTest);
-    if(!keys.length) return { ok:false, why:'Süre kaydı olan test yok.' };
+    if(!keys.length) return { ok:false, why:yz('ays.core.analytics.sure-kaydi-olan-test-yok') };
 
     const rows = keys.map(k => {
       const sec = U.median(byTest[k].sec);
@@ -344,7 +357,7 @@ R.Analytics = (function(){
   /* ---------- uyku ile net ilişkisi ---------- */
   function sleepImpact(){
     const list = C().fullExams('TYT');
-    if(list.length < 4) return { ok:false, why:'En az 4 tam deneme gerekir.' };
+    if(list.length < 4) return { ok:false, why:yz('ays.core.analytics.en-az-4-tam-deneme') };
 
     const points = [];
     list.forEach(e => {
@@ -352,7 +365,7 @@ R.Analytics = (function(){
       if(!prev || prev.sleepHours == null) return;
       points.push({ date:e.date, sleep:Number(prev.sleepHours), net:U.round(M.examNet(e), 2) });
     });
-    if(points.length < 4) return { ok:false, why:'Deneme öncesi uyku kaydı yetersiz.' };
+    if(points.length < 4) return { ok:false, why:yz('ays.core.analytics.deneme-oncesi-uyku-kaydi-yet') };
 
     const target = (S.profile && S.profile.sleepTarget) || 7.5;
     const good = points.filter(p => p.sleep >= target - 0.5);
@@ -361,7 +374,7 @@ R.Analytics = (function(){
        «medyanı» o denemenin kendisidir; 3'e 1'lik bir karşılaştırma
        «bu senin verin» diye sunuluyordu. */
     if(good.length < 2 || bad.length < 2){
-      return { ok:false, why:'Karşılaştırma için en az iki yeterli ve iki yetersiz uykulu deneme gerekir.' };
+      return { ok:false, why:yz('ays.core.analytics.karsilastirma-icin-en-az-iki') };
     }
 
     const gm = U.median(good.map(p => p.net));
@@ -389,7 +402,7 @@ R.Analytics = (function(){
       if(!t.target) continue;
       rows.push({ week:w, planned:t.target, actual:t.actual, pct:t.pct });
     }
-    if(!rows.length) return { ok:false, why:'Henüz tamamlanmış hafta yok.' };
+    if(!rows.length) return { ok:false, why:yz('ays.core.analytics.henuz-tamamlanmis-hafta-yok') };
 
     const claimed = (S.profile && S.profile.capacityHoursPerWeek) || 21;
     const actualAvg = U.round(U.sum(rows.map(r => r.actual)) / rows.length / 60, 1);
@@ -419,7 +432,7 @@ R.Analytics = (function(){
   /* ---------- ilk 20 dakika / ısınma ---------- */
   function warmup(){
     const rows = S.sessions.filter(s => s.earlyRate != null && s.lateRate != null);
-    if(!rows.length) return { ok:false, why:'Süreli deneme oturumu gerekir.' };
+    if(!rows.length) return { ok:false, why:yz('ays.core.analytics.sureli-deneme-oturumu-gereki') };
     const early = U.round(U.sum(rows.map(r => r.earlyRate)) / rows.length, 0);
     const late = U.round(U.sum(rows.map(r => r.lateRate)) / rows.length, 0);
     return {
@@ -461,10 +474,10 @@ R.Analytics = (function(){
       if(!sayildi) continue;
       rows.push({ date:iso, count:Number(d.distractions) || 0 });
     }
-    if(!gunKaydi) return { ok:false, why:'Gün kaydı yok.' };
+    if(!gunKaydi) return { ok:false, why:yz('ays.core.analytics.gun-kaydi-yok') };
     if(rows.length < 3){
       return { ok:false, sayilan:rows.length, gunKaydi,
-        why:'Bölünme sayacı son ' + n + ' günde yalnızca ' + rows.length
+        why:yz('ays.core.analytics.bolunme-sayaci-son') + n + ' günde yalnızca ' + rows.length
           + ' gün kullanıldı. Ortalama üretmek için en az 3 gün gerekir.' };
     }
 
@@ -492,7 +505,7 @@ R.Analytics = (function(){
   function dersAnalizi(family){
     const fam = family || 'TYT';
     const list = C().fullExams(fam);
-    if(list.length < 3) return { ok:false, why:'Ders ders okuma için en az 3 tam ' + fam + ' denemesi gerekir.' };
+    if(list.length < 3) return { ok:false, why:yz('ays.core.analytics.ders-ders-okuma-icin-en') + fam + ' denemesi gerekir.' };
     const tpl = (R.EXAM_TEMPLATES || []).find(t => t.kind === 'full' && t.family === fam);
     const soruSay = ad => { const x = tpl && (tpl.tests || []).find(t => t.name === ad); return x ? x.q : null; };
     const by = {};

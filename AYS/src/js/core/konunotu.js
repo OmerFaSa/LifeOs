@@ -16,6 +16,10 @@
      4. KART YALNIZ İSTENİNCE. «ön :: arka» satırları tekrar kartı ADAYIdır;
         «Kartlara çevir» denince açılır. Aynı konudan aynı ön yüzlü kart ikinci
         kez açılmaz. Not bir ölçüm değildir; hiçbir sayıyı değiştirmez. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.konunotu.not':'Not: ',
+});
+
 
 window.R = window.R || {};
 
@@ -88,7 +92,7 @@ R.KonuNotu = (function(){
     if(!h) return null;
     const satir = m[1].trim();
     return {
-      metin:'Not: ' + satir,
+      metin:yz('ays.core.konunotu.not') + satir,
       ipucu:'«' + h.topic.name + '» konusunun notuna eklenir',
       async kaydet(){
         await ekle(h.subject.id, h.topic.id, satir);

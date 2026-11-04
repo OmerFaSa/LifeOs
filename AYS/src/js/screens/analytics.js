@@ -8,6 +8,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:160, group:'Git', label:'Analiz — karşılaştırma, sıra geçmişi, alışkanlık', icon:'search', route:'analytics', run(){ R.App.go('analytics'); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.analytics.karsilastirma':'Karşılaştırma',
   'ays.analytics.hata-haritasi':'Hata haritası',
@@ -805,14 +806,14 @@ R.Screens.analytics = (function(){
         + '<div class="pk-saat__ad"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>' }) + '</div>';
   }
 
-  LIFEOS.PARCA.blok({ id:'analytics.bolum-1', sayfa:'analytics', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+  LIFEOS.PARCA.blok({ id:'analytics.analiz-sekmeleri', sayfa:'analytics', yer:'y1', sira:10, ad:'Analiz sekmeleri', ciz(){
     return K.SayfaBolumleri({ act:'analytics-tab', aria:yz('ays.analytics.analiz-bolumleri'),
       bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) });
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.bolum-2', sayfa:'analytics', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+  LIFEOS.PARCA.blok({ id:'analytics.calisma-saatleri', sayfa:'analytics', yer:'y2', sira:10, ad:'Çalışma saatleri', ciz(){
     return raw(calismaSaatleri());
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.analizbasi', sayfa:'analytics', yer:'y3', sira:10, ad:'analizBasi', ciz(){
+  LIFEOS.PARCA.blok({ id:'analytics.analizbasi', sayfa:'analytics', yer:'y3', sira:10, ad:'Analiz başlığı', ciz(){
     return analizBasi();
   } });
   async function render(){

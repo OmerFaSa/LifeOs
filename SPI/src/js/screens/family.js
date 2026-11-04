@@ -183,16 +183,16 @@ SP.Screens.family = (function(){
   LIFEOS.PARCA.blok({ id:'family.aciklamalar', sayfa:'family', yer:'y1', sira:10, ad:'Açıklamalar', ciz(){
     return raw(UI.rail(['profiles', 'macro-target', 'lab-linked-food', 'privacy']));
   } });
-  LIFEOS.PARCA.blok({ id:'family.profilecard', sayfa:'family', yer:'y2', sira:10, ad:'profileCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'family.profilecard', sayfa:'family', yer:'y2', sira:10, ad:'Profil', ciz(){
     return profileCard();
   } });
-  LIFEOS.PARCA.blok({ id:'family.targetcard', sayfa:'family', yer:'y2', sira:20, ad:'targetCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'family.targetcard', sayfa:'family', yer:'y2', sira:20, ad:'Hedefler', ciz(){
     return targetCard();
   } });
-  LIFEOS.PARCA.blok({ id:'family.householdcard', sayfa:'family', yer:'y2', sira:30, ad:'householdCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'family.householdcard', sayfa:'family', yer:'y2', sira:30, ad:'Hane', ciz(){
     return householdCard();
   } });
-  LIFEOS.PARCA.blok({ id:'family.prefcard', sayfa:'family', yer:'y2', sira:40, ad:'prefCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'family.prefcard', sayfa:'family', yer:'y2', sira:40, ad:'Tercihler', ciz(){
     return prefCard();
   } });
   LIFEOS.PARCA.blok({ id:'family.gizlilik-kilidi', sayfa:'family', yer:'y2', sira:50, ad:'Gizlilik kilidi', ciz(){

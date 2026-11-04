@@ -1,4 +1,9 @@
 /* Arayuz parcalari: ikonlar, olcum gorselleri, grafikler, alt sayfa ve bildirimler. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.ui.kapat':'Kapat',
+  'ays.core.ui.vazgec':'Vazgeç',
+});
+
 
 window.R = window.R || {};
 
@@ -699,7 +704,7 @@ R.UI = (function(){
       <div class="${opts.wide ? 'sheet sheet--wide' : 'sheet'}" role="dialog" aria-modal="true" aria-label="${opts.title}">
         <div class="sheet__head">
           <div><h3>${opts.title}</h3>${when(opts.subtitle, () => html`<p>${opts.subtitle}</p>`)}</div>
-          ${R.C.IconButton({ icon:'close', plain:true, aria:'Kapat', act:'sheet-close' })}
+          ${R.C.IconButton({ icon:'close', plain:true, aria:yz('ays.core.ui.kapat'), act:'sheet-close' })}
         </div>
         <div class="sheet__body">
           ${when(opts.note, () => html`<p class="sheet__note">${opts.note}</p>`)}
@@ -852,7 +857,7 @@ R.UI = (function(){
     sheet({
       title,
       body:String(R.h.html`<p>${message}</p>`),
-      footer:String(R.h.html`${R.C.Button({ label:'Vazgeç', act:'sheet-close' })}
+      footer:String(R.h.html`${R.C.Button({ label:yz('ays.core.ui.vazgec'), act:'sheet-close' })}
         ${R.C.Button({ label:onay || 'Evet, devam et', tone:danger ? 'danger' : 'primary', act:'confirm-yes' })}`),
       noFocus:true,
     });

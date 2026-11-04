@@ -26,6 +26,13 @@
      · 50 m/sn'yi aşan sıçrama GPS hatasıdır: mesafeye de süreye de girmez.
      · Tırmanış, beş noktalık ortalamayla yumuşatılmış yükseklikte 3 metre
        eşikle sayılır. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.rota.dosya-bos':'Dosya boş.',
+  'spi.core.rota.dosya-okunamadi':'Dosya okunamadı.',
+  'spi.core.rota.bu-bir-gpx-dosyasi-degil':'Bu bir GPX dosyası değil.',
+  'spi.core.rota.dosyada-zaman-bilgisi-yok-su':'Dosyada zaman bilgisi yok; süre ve tempo hesaplanamaz. ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -79,16 +86,16 @@ SP.Rota = (function(){
      ya da { ok:false, why }. `parca` yeni bir izin (trkseg) ilk noktasıdır:
      iki parça arasındaki boşluk mesafe sayılmaz. */
   function gpxOku(metin){
-    if(typeof metin !== 'string' || !metin.trim()) return { ok:false, why:'Dosya boş.' };
+    if(typeof metin !== 'string' || !metin.trim()) return { ok:false, why:yz('spi.core.rota.dosya-bos') };
     /* BOM ve baştaki boşluk: XML bildirimi ilk karakter olmalı, yoksa
        ayrıştırıcı dosyayı reddeder (bazı kayıt uygulamalarının dışa aktarımı). */
     metin = metin.replace(/^[﻿\s]+/, '');
     let doc;
     try{ doc = new DOMParser().parseFromString(metin, 'application/xml'); }
-    catch(e){ return { ok:false, why:'Dosya okunamadı.' }; }
+    catch(e){ return { ok:false, why:yz('spi.core.rota.dosya-okunamadi') }; }
     if(!doc || doc.getElementsByTagName('parsererror').length
       || !doc.documentElement || doc.documentElement.localName !== 'gpx'){
-      return { ok:false, why:'Bu bir GPX dosyası değil.' };
+      return { ok:false, why:yz('spi.core.rota.bu-bir-gpx-dosyasi-degil') };
     }
     const trk = doc.getElementsByTagNameNS('*', 'trk')[0];
     const ad = trk ? metinOf(trk, 'name') : '';
@@ -157,7 +164,7 @@ SP.Rota = (function(){
     /* Zamansız iz ile tek noktalı iz ayrı şeydir: tek nokta «zaman yok»
        değil «hareket yok»tur. */
     if(zamanli.length < tum.length / 2 || (tum.length >= 2 && zamanli.length < 2)){
-      return { ok:false, why:'Dosyada zaman bilgisi yok; süre ve tempo hesaplanamaz. '
+      return { ok:false, why:yz('spi.core.rota.dosyada-zaman-bilgisi-yok-su')
         + 'Planlanmış bir rota değil, kaydedilmiş bir aktivite seç.' };
     }
     if(zamanli.length < 2) return { ok:false, why:HAREKET_YOK };

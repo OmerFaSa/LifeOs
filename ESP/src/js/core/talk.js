@@ -36,6 +36,10 @@
    ayrıştırıcı, ayrı bir istem, ayrı bir kayıt yolu yoktur.
 
    Model kapalıyken de çalışır: kural motorunun cümlesi seslendirilir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.talk.cevap-uretilemedi':'Cevap üretilemedi.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -187,7 +191,7 @@ ESP.Talk = (function(){
          aynı kayıt. */
       res = await ESP.Office.send(agentId, soru);
     }catch(e){
-      res = { text:'Cevap üretilemedi.', source:'rules', error:String(e && e.message || e) };
+      res = { text:yz('esp.core.talk.cevap-uretilemedi'), source:'rules', error:String(e && e.message || e) };
     }
     if(oturum !== kendi || kendi.kapandi) return;
 

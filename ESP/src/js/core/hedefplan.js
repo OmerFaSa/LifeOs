@@ -23,6 +23,22 @@
    geri dönüş noktası. `ESP.Plans` içinde `hedefplan` türü; model bu türü
    öneremez. Geri alma yalnız planın yazdığını geri alır: kullanıcı arada
    odağı ya da tabanı kendisi değiştirdiyse ezilmez. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.hedefplan.hedef-bulunamadi':'Hedef bulunamadı.',
+  'esp.core.hedefplan.bu-hedef-icin-plan-motoru':'Bu hedef için plan motoru henüz yok.',
+  'esp.core.hedefplan.plan-yalniz-aktif-bir-hedef':'Plan yalnız aktif bir hedef için kurulur.',
+  'esp.core.hedefplan.hedefin-son-tarihi-gecmis-ya':'Hedefin son tarihi geçmiş ya da yok.',
+  'esp.core.hedefplan.gunde-ne-kadar-vakit-ayiraca':'Günde ne kadar vakit ayıracağın bilinmeden plan kurulamaz.',
+  'esp.core.hedefplan.kac-kitap-okumak-istedigin-b':'Kaç kitap okumak istediğin bilinmiyor.',
+  'esp.core.hedefplan.su-anki-temiz-tempon-bilinme':'Şu anki temiz tempon bilinmeden plan kurulamaz; ',
+  'esp.core.hedefplan.hedef-tempo-su-anki-temiz':'Hedef tempo şu anki temiz tempondan yüksek olmalı.',
+  'esp.core.hedefplan.hedef-motoru-plani-kontrol':'Hedef motoru planı — kontrol noktaları Bugün › Özet › Hedeflerim’de.',
+  'esp.core.hedefplan.bu-hedefin-uygulanmis-bir-pl':'Bu hedefin uygulanmış bir planı var; önce onu geri al.',
+  'esp.core.hedefplan.hedef-plani':'Hedef planı: ',
+  'esp.core.hedefplan.senin-istegin-hedeflerim-pla':'Senin isteğin: Hedeflerim › Planı uygula.',
+  'esp.core.hedefplan.geri-alinacak-bir-plan-yok':'Geri alınacak bir plan yok.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -98,13 +114,13 @@ ESP.HedefPlan = (function(){
   function kur(hedef, bugunISO){
     const bugun = bugunISO || U().todayISO();
     const h = hedef;
-    if(!h) return { ok:false, why:'Hedef bulunamadı.' };
+    if(!h) return { ok:false, why:yz('esp.core.hedefplan.hedef-bulunamadi') };
     const paket = HD().PAKET_BY_ID[h.paket];
-    if(!paket) return { ok:false, why:'Bu hedef için plan motoru henüz yok.' };
-    if(h.durum !== 'aktif') return { ok:false, why:'Plan yalnız aktif bir hedef için kurulur.' };
-    if(!h.son_tarih || !(h.son_tarih > bugun)) return { ok:false, why:'Hedefin son tarihi geçmiş ya da yok.' };
+    if(!paket) return { ok:false, why:yz('esp.core.hedefplan.bu-hedef-icin-plan-motoru') };
+    if(h.durum !== 'aktif') return { ok:false, why:yz('esp.core.hedefplan.plan-yalniz-aktif-bir-hedef') };
+    if(!h.son_tarih || !(h.son_tarih > bugun)) return { ok:false, why:yz('esp.core.hedefplan.hedefin-son-tarihi-gecmis-ya') };
     const dk = h.kapasite && h.kapasite.gunluk_dk;
-    if(!(dk > 0)) return { ok:false, why:'Günde ne kadar vakit ayıracağın bilinmeden plan kurulamaz.' };
+    if(!(dk > 0)) return { ok:false, why:yz('esp.core.hedefplan.gunde-ne-kadar-vakit-ayiraca') };
     const gunler = (h.kapasite && h.kapasite.haftalik_gun) || 7;
     const disc = paket.disc;
 
@@ -115,13 +131,13 @@ ESP.HedefPlan = (function(){
       hedefDeger = g.saat; birim = 'saat'; saat = g.saat;
     }else if(h.paket === 'okuma'){
       hedefDeger = h.fark != null ? h.fark : h.hedefDeger; birim = 'kitap';
-      if(!(hedefDeger > 0)) return { ok:false, why:'Kaç kitap okumak istediğin bilinmiyor.' };
+      if(!(hedefDeger > 0)) return { ok:false, why:yz('esp.core.hedefplan.kac-kitap-okumak-istedigin-b') };
       saat = paket.gerekenSaat(h, {}).saat;
     }else{
       const s = h.simdi && h.simdi.deger;
-      if(!(s > 0)) return { ok:false, why:'Şu anki temiz tempon bilinmeden plan kurulamaz; '
+      if(!(s > 0)) return { ok:false, why:yz('esp.core.hedefplan.su-anki-temiz-tempon-bilinme')
         + 'Stüdyo’da metronomla ölç.' };
-      if(!(h.hedefDeger > s)) return { ok:false, why:'Hedef tempo şu anki temiz tempondan yüksek olmalı.' };
+      if(!(h.hedefDeger > s)) return { ok:false, why:yz('esp.core.hedefplan.hedef-tempo-su-anki-temiz') };
       bas = s; hedefDeger = h.hedefDeger; birim = 'BPM';
     }
 
@@ -204,7 +220,7 @@ ESP.HedefPlan = (function(){
     if(plan.taban.sonra !== plan.taban.once) patch.dailyMinutes = plan.taban.sonra;
     await ESP.Model.saveProfile(patch);
     const g = await ESP.Model.saveGoal(ESP.Model.newGoal({ label:plan.ozet, disc:plan.disc,
-      date:plan.bitis, note:'Hedef motoru planı — kontrol noktaları Bugün › Özet › Hedeflerim’de.' }));
+      date:plan.bitis, note:yz('esp.core.hedefplan.hedef-motoru-plani-kontrol') }));
     geri.goalId = g.id;
     await kaydet(Object.assign({}, plan, { durum:'uygulandi', goalId:g.id,
       uygulanma:new Date().toISOString() }));
@@ -240,9 +256,9 @@ ESP.HedefPlan = (function(){
     const h = HD().liste().find(x => x.id === hedefId);
     const r = kur(h, U().todayISO());
     if(!r.ok) return { ok:false, why:r.why };
-    if(aktif(hedefId)) return { ok:false, why:'Bu hedefin uygulanmış bir planı var; önce onu geri al.' };
+    if(aktif(hedefId)) return { ok:false, why:yz('esp.core.hedefplan.bu-hedefin-uygulanmis-bir-pl') };
     const p = { id:'h:' + U().uid('hp'), agentId:'patron', kind:'hedefplan', disc:r.plan.disc,
-      title:'Hedef planı: ' + r.plan.ozet, why:'Senin isteğin: Hedeflerim › Planı uygula.',
+      title:yz('esp.core.hedefplan.hedef-plani') + r.plan.ozet, why:yz('esp.core.hedefplan.senin-istegin-hedeflerim-pla'),
       payload:{ hedefId }, at:U().todayISO(), source:'istek', level:'buyuk' };
     const a = await ESP.Plans.accept(p);
     return a.ok ? { ok:true, plan:aktif(hedefId) } : { ok:false, why:a.error };
@@ -250,7 +266,7 @@ ESP.HedefPlan = (function(){
 
   async function geriAlHedef(hedefId){
     const u = uygulamaOf(hedefId);
-    if(!u) return { ok:false, why:'Geri alınacak bir plan yok.' };
+    if(!u) return { ok:false, why:yz('esp.core.hedefplan.geri-alinacak-bir-plan-yok') };
     const r = await ESP.Plans.geriAl(u.id);
     return r.ok ? { ok:true } : { ok:false, why:r.error };
   }

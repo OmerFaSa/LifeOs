@@ -6,6 +6,8 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:140, id:'act:backup', kind:'Eylem', label:'Yedek indir',
+  hint:'Veri', run:() => { ESP.S.ui.guideTab = 'veri'; ESP.App.go('guide'); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.guide.kullanim':'Kullanım',
   'esp.guide.ofis':'Ofis',
@@ -590,10 +592,10 @@ ESP.Screens.guide = (function(){
   /* Sekme yok (EKIP-PLANI §1.2): beş bölüm alt alta. */
   const GOVDE = { kullanim:usageRows, model:modelRows, veri:dataRows, sinirlar:limitRows, kanit:evidenceRows };
 
-  LIFEOS.PARCA.blok({ id:'guide.bolum-1', sayfa:'guide', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+  LIFEOS.PARCA.blok({ id:'guide.rehber-sekmeleri', sayfa:'guide', yer:'y1', sira:10, ad:'Rehber sekmeleri', ciz(){
     return K.Span(12, ESP.Parts.bolumler(null, { act:'guide-tab', aria:yz('esp.guide.rehber-bolumleri'), tabs:TABS, govde:GOVDE }));
   } });
-  LIFEOS.PARCA.blok({ id:'guide.bolum-2', sayfa:'guide', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+  LIFEOS.PARCA.blok({ id:'guide.kolaylik-pusulasi', sayfa:'guide', yer:'y2', sira:10, ad:'Kolaylık pusulası', ciz(){
     return K.Span(12, html`${raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '')}`);
   } });
   function render(){

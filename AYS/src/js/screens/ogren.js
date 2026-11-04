@@ -15,6 +15,11 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:30, group:'Git', label:'Öğren — konu anlatımı, örnek soru, koç', icon:'book', route:'ogren', run(){ R.App.go('ogren'); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:40, group:'Git', label:'Günlük paragraf — bugünün seti', icon:'book', route:'sorular', run(){ R.S.ui.ogrenKip = 'paragraf'; R.S.ui.ogrTekrar = null; R.App.go('sorular'); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:50, group:'Git', label:'Karma test — konular karışık', icon:'zap', route:'sorular', run(){ R.S.ui.ogrenKip = 'karma'; R.S.ui.ogrTekrar = null; R.App.go('sorular'); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:60, group:'Git', label:'Yanlışlarım — yeniden çöz', icon:'list', route:'sorular', run(){ R.S.ui.ogrenKip = 'yanlis'; R.S.ui.ogrTekrar = null; R.App.go('sorular'); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:180, group:'Git', label:'Koç — verine bakarak yanıtlar', icon:'zap', route:'coach', run(){ R.App.go('coach'); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.ogren.ders':'Ders',
   'ays.ogren.konu':'Konu',
@@ -442,10 +447,10 @@ window.LIFEOS.PARCA.sayfa({ id:'koc', modul:'ays', cekmece:'ogren', ad:'Koç', i
           <span class="small dim block">${kisalt(x.not)}</span></span></button>`)}</div>` });
   }
 
-  LIFEOS.PARCA.blok({ id:'ogren.devamkarti', sayfa:'ogren', yer:'ana', sira:10, ad:'devamKarti', ciz({ x, sid, subject, y }){ return devamKarti(y); } });
-LIFEOS.PARCA.blok({ id:'ogren.notlarimkarti', sayfa:'ogren', yer:'ana', sira:20, ad:'notlarimKarti', ciz({ x, sid, subject, y }){ return notlarimKarti(); } });
-LIFEOS.PARCA.blok({ id:'ogren.derslerkarti', sayfa:'ogren', yer:'ana', sira:30, ad:'derslerKarti', ciz({ x, sid, subject, y }){ return derslerKarti(subject.id); } });
-LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, ad:'konularKarti', ciz({ x, sid, subject, y }){ return konularKarti(subject, y); } });
+  LIFEOS.PARCA.blok({ id:'ogren.devamkarti', sayfa:'ogren', yer:'ana', sira:10, ad:'Kaldığın yer', ciz({ x, sid, subject, y }){ return devamKarti(y); } });
+LIFEOS.PARCA.blok({ id:'ogren.notlarimkarti', sayfa:'ogren', yer:'ana', sira:20, ad:'Notlarım', ciz({ x, sid, subject, y }){ return notlarimKarti(); } });
+LIFEOS.PARCA.blok({ id:'ogren.derslerkarti', sayfa:'ogren', yer:'ana', sira:30, ad:'Dersler', ciz({ x, sid, subject, y }){ return derslerKarti(subject.id); } });
+LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, ad:'Konular', ciz({ x, sid, subject, y }){ return konularKarti(subject, y); } });
   R.Screens.ogren = {
     id:'ogren',
     title:yz('ays.ogren.konular'),
@@ -873,13 +878,13 @@ LIFEOS.PARCA.blok({ id:'ogren.konularkarti', sayfa:'ogren', yer:'ana', sira:40, 
     });
   }
 
-  LIFEOS.PARCA.blok({ id:'anlatim.bolum-1', sayfa:'anlatim', yer:'ana', sira:10, ad:'Bölüm 1', ciz({ x }){ return raw(konuCubugu(x)); } });
-LIFEOS.PARCA.blok({ id:'anlatim.anlatimkarti', sayfa:'anlatim', yer:'ana', sira:20, ad:'anlatimKarti', ciz({ x }){ return anlatimKarti(x); } });
-LIFEOS.PARCA.blok({ id:'anlatim.notumkarti', sayfa:'anlatim', yer:'ana', sira:30, ad:'notumKarti', ciz({ x }){ return notumKarti(x.subject, x.topic); } });
-LIFEOS.PARCA.blok({ id:'anlatim.paranlatimkarti', sayfa:'anlatim', yer:'ana', sira:40, ad:'parAnlatimKarti', ciz({ x }){ return parAnlatimKarti(x.topic); } });
-LIFEOS.PARCA.blok({ id:'anlatim.cikmiskarti', sayfa:'anlatim', yer:'ana', sira:50, ad:'cikmisKarti', ciz({ x }){ return cikmisKarti(x.subject, x.topic); } });
-LIFEOS.PARCA.blok({ id:'anlatim.notlarkarti', sayfa:'anlatim', yer:'ana', sira:60, ad:'notlarKarti', ciz({ x }){ return notlarKarti(x.subject, x.topic); } });
-LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:70, ad:'malzemeKarti', ciz({ x }){ return malzemeKarti(x.subject, x.topic); } });
+  LIFEOS.PARCA.blok({ id:'anlatim.konu-cubugu', sayfa:'anlatim', yer:'ana', sira:10, ad:'Konu çubuğu', ciz({ x }){ return raw(konuCubugu(x)); } });
+LIFEOS.PARCA.blok({ id:'anlatim.anlatimkarti', sayfa:'anlatim', yer:'ana', sira:20, ad:'Konu anlatımı', ciz({ x }){ return anlatimKarti(x); } });
+LIFEOS.PARCA.blok({ id:'anlatim.notumkarti', sayfa:'anlatim', yer:'ana', sira:30, ad:'Notum', ciz({ x }){ return notumKarti(x.subject, x.topic); } });
+LIFEOS.PARCA.blok({ id:'anlatim.paranlatimkarti', sayfa:'anlatim', yer:'ana', sira:40, ad:'Paragraf anlatımı', ciz({ x }){ return parAnlatimKarti(x.topic); } });
+LIFEOS.PARCA.blok({ id:'anlatim.cikmiskarti', sayfa:'anlatim', yer:'ana', sira:50, ad:'Çıkmış sorular', ciz({ x }){ return cikmisKarti(x.subject, x.topic); } });
+LIFEOS.PARCA.blok({ id:'anlatim.notlarkarti', sayfa:'anlatim', yer:'ana', sira:60, ad:'Notlar', ciz({ x }){ return notlarKarti(x.subject, x.topic); } });
+LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:70, ad:'Malzemeler', ciz({ x }){ return malzemeKarti(x.subject, x.topic); } });
   R.Screens.anlatim = {
     id:'anlatim',
     /* Sade anlatım: sayfa «Notum»da biter; ara sıra açılan kartlar küçük başlar. */
@@ -1651,9 +1656,9 @@ LIFEOS.PARCA.blok({ id:'anlatim.malzemekarti', sayfa:'anlatim', yer:'ana', sira:
     return l[i] ? { subject:x.subject, topic:x.topic, i, q:l[i] } : null;
   }
 
-  LIFEOS.PARCA.blok({ id:'sorular.bolum-1', sayfa:'sorular', yer:'ana', sira:10, ad:'Bölüm 1', ciz({ kip, sekme, x }){ return sekme; } });
-LIFEOS.PARCA.blok({ id:'sorular.bolum-2', sayfa:'sorular', yer:'ana', sira:20, ad:'Bölüm 2', ciz({ kip, sekme, x }){ return raw(konuCubugu(x)); } });
-LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30, ad:'soruKarti', ciz({ kip, sekme, x }){ return soruKarti(x); } });
+  LIFEOS.PARCA.blok({ id:'sorular.soru-sekmeleri', sayfa:'sorular', yer:'ana', sira:10, ad:'Soru sekmeleri', ciz({ kip, sekme, x }){ return sekme; } });
+LIFEOS.PARCA.blok({ id:'sorular.konu-cubugu', sayfa:'sorular', yer:'ana', sira:20, ad:'Konu çubuğu', ciz({ kip, sekme, x }){ return raw(konuCubugu(x)); } });
+LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30, ad:'Soru kartı', ciz({ kip, sekme, x }){ return soruKarti(x); } });
   R.Screens.sorular = {
     id:'sorular',
     title:yz('ays.ogren.sorular'),
@@ -1948,8 +1953,8 @@ LIFEOS.PARCA.blok({ id:'sorular.sorukarti', sayfa:'sorular', yer:'ana', sira:30,
     R.App.render();
   }
 
-  LIFEOS.PARCA.blok({ id:'koc.bolum-1', sayfa:'koc', yer:'ana', sira:10, ad:'Bölüm 1', ciz({ x }){ return raw(konuCubugu(x)); } });
-LIFEOS.PARCA.blok({ id:'koc.kockarti', sayfa:'koc', yer:'ana', sira:20, ad:'kocKarti', ciz({ x }){ return kocKarti(x); } });
+  LIFEOS.PARCA.blok({ id:'koc.konu-cubugu', sayfa:'koc', yer:'ana', sira:10, ad:'Konu çubuğu', ciz({ x }){ return raw(konuCubugu(x)); } });
+LIFEOS.PARCA.blok({ id:'koc.kockarti', sayfa:'koc', yer:'ana', sira:20, ad:'Koç', ciz({ x }){ return kocKarti(x); } });
   R.Screens.koc = {
     id:'koc',
     title:yz('ays.ogren.koc'),

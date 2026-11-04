@@ -3,6 +3,17 @@
    Her ekran, her hızlı eylem ve her ölçüm tek bir aramadan ulaşılır olsun
    diye vardır. Fare ile gezinmek zorunda kalmadan sistemin herhangi bir
    yerine gitmek, günlük kullanımın sürtünmesini belirgin düşürür. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.palette.bir-sey-sormam-gerek':'Bir şey sormam gerek',
+  'spi.core.palette.geri-alindi':'Geri alındı',
+  'spi.core.palette.bu-satirlar-yorumlandi-kayde':'Bu satırlar yorumlandı, KAYDEDİLMEDİ. Onaylayınca yazılır ve ',
+  'spi.core.palette.cozemedigim-kisim':'Çözemediğim kısım:',
+  'spi.core.palette.olcum-diye-yazmadigim-kisim':'Ölçüm diye yazmadığım kısım:',
+  'spi.core.palette.tarih':'Tarih',
+  'spi.core.palette.klavye-kisayollari':'Klavye kısayolları',
+  'spi.core.palette.kapat':'Kapat',
+});
+
 
 window.SP = window.SP || {};
 
@@ -24,37 +35,8 @@ SP.Palette = (function(){
       });
     });
 
-    /* hizli eylemler */
-    out.push({ id:'act:notlar', kind:'Eylem', label:'Notlarım — bütün notların', hint:'Notum',
-      run:() => { if(window.LIFEOS && window.LIFEOS.NOTUM) window.LIFEOS.NOTUM.panelAc(); } });
-    out.push({ id:'act:paste', kind:'Eylem', label:'Tahlil raporu yapıştır',
-      hint:'Modül 1', run:() => { SP.App.go('labs'); setTimeout(() => {
-        const fn = SP.Screens.labs.handle['open-paste']; if(fn) fn({ dataset:{} }); }, 120); } });
-    out.push({ id:'act:meal', kind:'Eylem', label:'Öğün ekle', route:'meals',
-      hint:'Modül 2', run:() => { SP.App.go('meals'); setTimeout(() => {
-        const el = document.getElementById('meal-text'); if(el) el.focus(); }, 160); } });
-    out.push({ id:'act:vitals', kind:'Eylem', label:'Günün ölçümünü gir', route:'today',
-      hint:'Toparlanma', run:() => SP.App.go('today') });
-    out.push({ id:'act:session', kind:'Eylem', label:'Antrenman seansı ekle', route:'move',
-      hint:'Modül 3', run:() => { SP.App.go('move'); setTimeout(() => {
-        const fn = SP.Screens.move.handle['start-session'];
-        if(fn) fn({ dataset:{ id:'' } }); }, 120); } });
-    out.push({ id:'act:meeting', kind:'Eylem', label:'Veri incelemesini aç',
-      hint:'Ofis', run:() => SP.App.go('meeting') });
-    out.push({ id:'act:backup', kind:'Eylem', label:'Yedek indir',
-      hint:'Veri', run:() => { SP.S.ui.guideTab = 'veri'; SP.App.go('guide'); } });
-
-    /* olcumler — dogrudan egilim ekranina goturur */
-    SP.BIOMARKERS.forEach(b => {
-      out.push({ id:'bio:' + b.id, kind:'Ölçüm', label:b.name, hint:b.unit,
-        run:() => { SP.S.ui.trendMarker = b.id; SP.S.ui.labTab = 'trend'; SP.App.go('labs'); } });
-    });
-
-    /* ajanlar */
-    SP.AGENTS.forEach(a => {
-      out.push({ id:'agent:' + a.id, kind:'Ajan', label:a.name + ' — ' + a.role,
-        hint:a.title, run:() => { SP.S.ui.officeAgent = a.id; SP.App.go('team'); } });
-    });
+    /* Eylemler parcadir: her satir kendi ekran dosyasinda (P.komut). */
+    out.push(...window.LIFEOS.PARCA.komutlar('spi'));
 
     /* Gizlenmis bolumun sayfasi ve eylemi gorunmez (core/bolum.js). */
     return SP.Bolum ? out.filter(c => !(c.route && SP.Bolum.gizli(c.route))) : out;
@@ -95,7 +77,7 @@ SP.Palette = (function(){
     /* Ölçüm olmayan cümle («7 saat uyumadım») yazılmaz ama sessizce de
        düşmez: neden yazılmadığı söylenir (belgeler/ekip/HATALAR.md KR-1). */
     if(!r.oneriler.length && r.engellenen.length){
-      return { id:'quick:sor', kind:'Hızlı giriş', label:'Bir şey sormam gerek',
+      return { id:'quick:sor', kind:'Hızlı giriş', label:yz('spi.core.palette.bir-sey-sormam-gerek'),
         hint:'yazılmadı · nedenini gör', run:() => confirmQuick(r, t) };
     }
     if(!r.oneriler.length) return null;
@@ -134,7 +116,7 @@ SP.Palette = (function(){
       + (dusen ? ' · ' + dusen + ' tanesi onay bekliyor ya da yazılamadı' : ''),
       ids.length ? { undo:async () => {
         for(const id of ids) await SP.Proposals.undo(id);
-        SP.UI.toast('Geri alındı');
+        SP.UI.toast(yz('spi.core.palette.geri-alindi'));
         SP.App.render();
       } } : {});
     if(rota) SP.App.go(rota); else SP.App.render();
@@ -182,18 +164,18 @@ SP.Palette = (function(){
         : r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
         : r.oneriler.length + ' kayıt anladım',
       subtitle:metin, wide:true,
-      note:'Bu satırlar yorumlandı, KAYDEDİLMEDİ. Onaylayınca yazılır ve '
+      note:yz('spi.core.palette.bu-satirlar-yorumlandi-kayde')
         + 'her biri tek tek geri alınabilir.',
       body:String(SP.C.Stack([
         html`<div class="qebloklar">${map(bloklar, b => b)}</div>`,
         when(r.anlasilmayan.length, () => K.Notice({ tone:'warn',
-          title:'Çözemediğim kısım:',
+          title:yz('spi.core.palette.cozemedigim-kisim'),
           body:'«' + r.anlasilmayan.join('», «') + '» — bu kısım kaydedilmeyecek. '
             + 'Anlaşılmayan satır atılmaz, söylenir.' })),
         when(engel.length, () => K.Notice({ tone:'warn',
-          title:'Ölçüm diye yazmadığım kısım:',
+          title:yz('spi.core.palette.olcum-diye-yazmadigim-kisim'),
           body:engel.map(e => '«' + e.metin + '» — ' + e.soru).join(' ') })),
-        when(r.oneriler.length, () => K.Field({ label:'Tarih',
+        when(r.oneriler.length, () => K.Field({ label:yz('spi.core.palette.tarih'),
           input:K.Input({ id:'qe-date', type:'date', value:acilisTarihi }) })),
       ])),
       footer:String(html`${K.Button({ label:r.oneriler.length ? 'Vazgeç' : 'Tamam', act:'sheet-close' })}
@@ -324,7 +306,7 @@ SP.Palette = (function(){
 
   function showShortcuts(){
     SP.UI.sheet({
-      title:'Klavye kısayolları',
+      title:yz('spi.core.palette.klavye-kisayollari'),
       body:String(SP.C.Table({ tight:true, headers:['Tuş', 'İş'], rows:[
         ['Ctrl / ⌘ + K', 'Komut paletini aç'],
         ['?', 'Bu listeyi aç'],
@@ -335,7 +317,7 @@ SP.Palette = (function(){
         ['Enter', 'Odaktaki satırı aç'],
         ['ferritin 26', 'Palete veri de yazabilirsin'],
       ].concat(window.LIFEOS && window.LIFEOS.KISAYOL ? window.LIFEOS.KISAYOL.metinSatirlari() : []) })),
-      footer:String(SP.C.Button({ label:'Kapat', act:'sheet-close' })),
+      footer:String(SP.C.Button({ label:yz('spi.core.palette.kapat'), act:'sheet-close' })),
       noFocus:true,
     });
   }

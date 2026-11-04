@@ -219,7 +219,7 @@ describe('025 · Köken kartı', () => {
        kapanması doğru davranıştır, ama bu testin konusu değildir. */
     const f = document.createElement('iframe');
     f.style.cssText = 'position:absolute;left:-9999px;width:400px;height:200px';
-    f.srcdoc = '<!doctype html><body><script src="../js/core/kesinlik.js"><\/script>'
+    f.srcdoc = '<!doctype html><body><script src="../js/core/parca.js"><\/script><script src="../js/core/kesinlik.js"><\/script>'
       + '<script src="../js/core/sayi.js"><\/script></body>';
     const yuklendi = new Promise(r => f.addEventListener('load', r, { once:true }));
     document.body.appendChild(f);

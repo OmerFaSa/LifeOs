@@ -63,7 +63,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.kitchen.kalori-protein-yag-ve-karbon':'Kalori, protein, yağ ve karbonhidrat zorunlu',
   'spi.kitchen.mutfak':'Mutfak',
 });
-window.LIFEOS.PARCA.sayfa({ id:'kitchen', modul:'spi', cekmece:'calisma', ad:'Mutfak', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'kitchen', modul:'spi', king:{ sira:30, ad:'Mutfak', es:['mutfak', 'mutfağ', 'tarif'] }, cekmece:'calisma', ad:'Mutfak', sira:30 });
 
 SP.Screens.kitchen = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
@@ -295,22 +295,22 @@ SP.Screens.kitchen = (function(){
   LIFEOS.PARCA.blok({ id:'kitchen.aciklamalar', sayfa:'kitchen', yer:'y1', sira:10, ad:'Açıklamalar', ciz(){
     return raw(UI.rail(['household', 'portion', 'profiles']));
   } });
-  LIFEOS.PARCA.blok({ id:'kitchen.setupcard', sayfa:'kitchen', yer:'y2', sira:10, ad:'setupCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'kitchen.setupcard', sayfa:'kitchen', yer:'y2', sira:10, ad:'Kurulum', ciz(){
     return setupCard();
   } });
-  LIFEOS.PARCA.blok({ id:'kitchen.splitcard', sayfa:'kitchen', yer:'y2', sira:20, ad:'splitCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'kitchen.splitcard', sayfa:'kitchen', yer:'y2', sira:20, ad:'Bölüşüm', ciz(){
     return splitCard();
   } });
-  LIFEOS.PARCA.blok({ id:'kitchen.dishinfocard', sayfa:'kitchen', yer:'y2', sira:30, ad:'dishInfoCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'kitchen.dishinfocard', sayfa:'kitchen', yer:'y2', sira:30, ad:'Yemek bilgisi', ciz(){
     return dishInfoCard();
   } });
-  LIFEOS.PARCA.blok({ id:'kitchen.membercard', sayfa:'kitchen', yer:'y2', sira:40, ad:'memberCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'kitchen.membercard', sayfa:'kitchen', yer:'y2', sira:40, ad:'Üye', ciz(){
     return memberCard();
   } });
-  LIFEOS.PARCA.blok({ id:'kitchen.evdekicard', sayfa:'kitchen', yer:'y2', sira:50, ad:'evdekiCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'kitchen.evdekicard', sayfa:'kitchen', yer:'y2', sira:50, ad:'Evdekiler', ciz(){
     return evdekiCard();
   } });
-  LIFEOS.PARCA.blok({ id:'kitchen.customcard', sayfa:'kitchen', yer:'y2', sira:60, ad:'customCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'kitchen.customcard', sayfa:'kitchen', yer:'y2', sira:60, ad:'Özel tarif', ciz(){
     return customCard();
   } });
   async function render(){

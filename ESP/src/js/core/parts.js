@@ -9,6 +9,94 @@
    radar grafigi. Radar `core/ui.js` icinde degil burada cunku eksenleri
    ESP'nin alti disiplinidir — jenerik bir grafik degil, alana bagli bir
    sekildir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.parts.radar-icin-en-az-uc':'Radar için en az üç eksen gerekir.',
+  'esp.core.parts.kesikli-nokta-olculmemis-eks':'Kesikli nokta: ölçülmemiş eksen — sıfır değil.',
+  'esp.core.parts.bu-kademede-tanimli-egzersiz':'Bu kademede tanımlı egzersiz yok.',
+  'esp.core.parts.islendi':'işlendi',
+  'esp.core.parts.i-sle':'İşle',
+  'esp.core.parts.merdiven':'Merdiven',
+  'esp.core.parts.kurallara-takildi':'kurallara takıldı',
+  'esp.core.parts.sorunu-yaz':'Sorunu yaz…',
+  'esp.core.parts.gonder':'Gönder',
+  'esp.core.parts.danisma-ekrani':'Danışma ekranı',
+  'esp.core.parts.gecmisi-temizle':'Geçmişi temizle',
+  'esp.core.parts.bu-tarayici-sesli-sohbeti-de':'Bu tarayıcı sesli sohbeti desteklemiyor; yazarak sorduğun soru aynı yoldan geçer.',
+  'esp.core.parts.bu-bolumun-merdiveni-tanimli':'Bu bölümün merdiveni tanımlı değil.',
+  'esp.core.parts.merdivenin':'merdivenin %',
+  'esp.core.parts.tam-haritayi-ac':'Tam haritayı aç',
+  'esp.core.parts.not':'Not',
+  'esp.core.parts.tur':'Tür',
+  'esp.core.parts.ek-turu':'Ek türü',
+  'esp.core.parts.baslik':'Başlık',
+  'esp.core.parts.ekin-basligi':'Ekin başlığı',
+  'esp.core.parts.baglanti-sure-sn':'Bağlantı / süre (sn)',
+  'esp.core.parts.baglanti-adresi-ya-da-ses':'Bağlantı adresi ya da ses süresi',
+  'esp.core.parts.ekin-metni':'Ekin metni',
+  'esp.core.parts.notun-belgenin-ozeti-ya-da':'Notun, belgenin özeti ya da kaydın hakkında not…',
+  'esp.core.parts.ekle':'Ekle',
+  'esp.core.parts.sn-olculdu':'sn · ölçüldü',
+  'esp.core.parts.sil':'Sil',
+  'esp.core.parts.bu-bolume-henuz-bir-sey':'Bu bölüme henüz bir şey iliştirilmedi.',
+  'esp.core.parts.hatirlatma':'Hatırlatma',
+  'esp.core.parts.hatirlatma-metni':'Hatırlatma metni',
+  'esp.core.parts.persembe-aksami-ikinci-tasla':'Perşembe akşamı ikinci taslağı oku',
+  'esp.core.parts.tarih':'Tarih',
+  'esp.core.parts.hatirlatma-tarihi':'Hatırlatma tarihi',
+  'esp.core.parts.tekrar':'Tekrar',
+  'esp.core.parts.tekrar-araligi':'Tekrar aralığı',
+  'esp.core.parts.hatirlat':'Hatırlat',
+  'esp.core.parts.kapandi':'kapandı',
+  'esp.core.parts.yapildi':'Yapıldı',
+  'esp.core.parts.bu-bolumde-hatirlatma-yok':'Bu bölümde hatırlatma yok.',
+  'esp.core.parts.bu-bolumde-unite-tanimli-deg':'Bu bölümde ünite tanımlı değil.',
+  'esp.core.parts.bam':'BAM ·',
+  'esp.core.parts.dogrulanmadi-yanlis-karti':'· doğrulanmadı — yanlış kartı sil',
+  'esp.core.parts.malzeme-yok':'malzeme yok',
+  'esp.core.parts.gorev':'Görev:',
+  'esp.core.parts.unite-sinavi':'Ünite sınavı',
+  'esp.core.parts.son-unite-sinavi':'Son ünite sınavı',
+  'esp.core.parts.dogru-olculdu':'doğru · ölçüldü',
+  'esp.core.parts.bu-bolumde-konu-haritasi-yok':'Bu bölümde konu haritası yok.',
+  'esp.core.parts.ornek':'Örnek:',
+  'esp.core.parts.sik-yanlis-yorum':'Sık yanlış yorum:',
+  'esp.core.parts.pratik':'Pratik',
+  'esp.core.parts.beklenen-yanit-ve-olcut':'Beklenen yanıt ve ölçüt',
+  'esp.core.parts.aktarim':'Aktarım:',
+  'esp.core.parts.i-saretler-beyandir-hicbir-k':'İşaretler beyandır: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
+  'esp.core.parts.bu-konu-icin-notum':'Bu konu için notum',
+  'esp.core.parts.pratik-bir-sinav-degildir-ce':'Pratik bir sınav değildir: cevabın doğrudan aralıklı tekrara yazılır, ayrı bir kayıt açılmaz.',
+  'esp.core.parts.pratige-basla':'Pratiğe başla',
+  'esp.core.parts.i-sabet-bir-not-degil-bir':'İsabet bir not değil bir ölçümdür: yanlışlar destede başa döndü.',
+  'esp.core.parts.senin-cevabin':'senin cevabın:',
+  'esp.core.parts.gun-kaydina-yaz':'Gün kaydına yaz',
+  'esp.core.parts.yeni-oturum':'Yeni oturum',
+  'esp.core.parts.kapat':'Kapat',
+  'esp.core.parts.unite-sinavi-2':'Ünite sınavı:',
+  'esp.core.parts.dogru':'doğru ·',
+  'esp.core.parts.yanlis':'yanlış',
+  'esp.core.parts.sirayi-temizle':'Sırayı temizle',
+  'esp.core.parts.sirayi-onayla':'Sırayı onayla',
+  'esp.core.parts.cevabin':'Cevabın',
+  'esp.core.parts.cevabini-yaz':'Cevabını yaz…',
+  'esp.core.parts.cevapla':'Cevapla',
+  'esp.core.parts.bilmiyorum':'Bilmiyorum',
+  'esp.core.parts.oturumu-bitir':'Oturumu bitir',
+  'esp.core.parts.onayla':'Onayla',
+  'esp.core.parts.vazgec':'Vazgeç',
+  'esp.core.parts.onaylandi-kural-motoru-uygul':'Onaylandı — kural motoru uyguladı',
+  'esp.core.parts.reddet':'Reddet',
+  'esp.core.parts.bu-bolumde-denetim-bulgusu-y':'Bu bölümde denetim bulgusu yok.',
+  'esp.core.parts.plan-kur':'Plan kur',
+  'esp.core.parts.ac':'Aç',
+  'esp.core.parts.plani-yenile':'Planı yenile',
+  'esp.core.parts.plani-kaldir':'Planı kaldır',
+  'esp.core.parts.tezgah':'TEZGÂH',
+  'esp.core.parts.tezgah-kapali':'Tezgâh kapalı.',
+  'esp.core.parts.ile-konusmak-haritayi-gormek':'ile konuşmak, haritayı görmek, not/belge iliştirmek ve hatırlatma kurmak için aç.',
+  'esp.core.parts.tezgah-2':'Tezgâh',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -73,7 +161,7 @@ ESP.Parts = (function(){
   function radar(rows, opts){
     const o = opts || {};
     const n = (rows || []).length;
-    if(n < 3) return K.Empty({ text:'Radar için en az üç eksen gerekir.' });
+    if(n < 3) return K.Empty({ text:yz('esp.core.parts.radar-icin-en-az-uc') });
 
     const R = 76, cx = 100, cy = 92;
     const nokta = (i, r) => {
@@ -126,7 +214,7 @@ ESP.Parts = (function(){
         <figcaption class="radar__cap">
           ${o.scale || 'Dış halka = penceredeki en yüksek değer.'}
           ${when(rows.some(r => r.cert === 'missing'), () => html`
-            <span class="radar__none">Kesikli nokta: ölçülmemiş eksen — sıfır değil.</span>`)}
+            <span class="radar__none">${yz('esp.core.parts.kesikli-nokta-olculmemis-eks')}</span>`)}
         </figcaption>
       </figure>`;
   }
@@ -155,7 +243,7 @@ ESP.Parts = (function(){
      metnini değil adı arar. */
   function rxList(r){
     const yapilan = r.done || [];
-    if(!r.items.length) return K.Empty({ text:'Bu kademede tanımlı egzersiz yok.' });
+    if(!r.items.length) return K.Empty({ text:yz('esp.core.parts.bu-kademede-tanimli-egzersiz') });
     const acik = ESP.S.ui.rxOpen;
     return html`<ul class="rx">${map(r.items, it => {
       const bitti = yapilan.indexOf(it.drill.id) >= 0;
@@ -168,8 +256,8 @@ ESP.Parts = (function(){
         </button>
         <span class="rx__min num">${it.drill.minutes} dk</span>
         ${bitti
-          ? K.Badge({ label:'işlendi', tone:'ok' })
-          : K.Button({ label:'İşle', size:'sm', act:'log-drill',
+          ? K.Badge({ label:yz('esp.core.parts.islendi'), tone:'ok' })
+          : K.Button({ label:yz('esp.core.parts.i-sle'), size:'sm', act:'log-drill',
               data:{ 'data-id':it.drill.id } })}
         ${when(on, () => html`<span class="rx__task">${it.drill.task}</span>`)}
       </li>`;
@@ -189,7 +277,7 @@ ESP.Parts = (function(){
           tone:r.cert === 'missing' ? 'muted' : 'info', icon:false })}
         ${cert(r.cert)}
         <span class="tiny dim">${U.fmtMin(r.minutes)} / ${U.fmtMin(r.budget)} taban</span>
-        ${K.Button({ label:'Merdiven', size:'sm', act:'go',
+        ${K.Button({ label:yz('esp.core.parts.merdiven'), size:'sm', act:'go',
           data:{ 'data-route':'ladder' } })}
       </div>
       ${rxList(r)}`;
@@ -230,7 +318,7 @@ ESP.Parts = (function(){
                   ${when(m.role !== 'user', () => html`<div class="msg__foot">
                     ${K.Badge({ label:m.source === 'model' ? 'model' : 'kural motoru',
                       tone:m.source === 'model' ? 'info' : 'muted', icon:false })}
-                    ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
+                    ${when(m.blocked, () => K.Badge({ label:yz('esp.core.parts.kurallara-takildi'), tone:'warn' }))}
                   </div>`)}
                 </div>`)
             : html`<p class="small muted">${a.opening}</p>`}
@@ -238,9 +326,9 @@ ESP.Parts = (function(){
 
         <div class="composer mt-10">
           ${K.Textarea({ id:'desk-ask-' + discId, rows:2, class:'composer__input',
-            aria:a.name + ' masasına sor', placeholder:'Sorunu yaz…' })}
+            aria:a.name + ' masasına sor', placeholder:yz('esp.core.parts.sorunu-yaz') })}
           ${K.Mic({ target:'desk-ask-' + discId })}
-          ${K.Button({ label:'Gönder', tone:'primary', act:'desk-send',
+          ${K.Button({ label:yz('esp.core.parts.gonder'), tone:'primary', act:'desk-send',
             data:{ 'data-disc':discId } })}
         </div>
 
@@ -252,17 +340,16 @@ ESP.Parts = (function(){
           ${when(okuyabilir && son, () => K.Button({
             label:ESP.Speak.isSpeaking() ? 'Sesi durdur' : 'Son cevabı dinle', size:'sm',
             act:'desk-listen', data:{ 'data-disc':discId } }))}
-          ${K.Button({ label:'Danışma ekranı', size:'sm', act:'desk-open-team',
+          ${K.Button({ label:yz('esp.core.parts.danisma-ekrani'), size:'sm', act:'desk-open-team',
             data:{ 'data-disc':discId } })}
-          ${when(mesajlar.length, () => K.Button({ label:'Geçmişi temizle', size:'sm',
+          ${when(mesajlar.length, () => K.Button({ label:yz('esp.core.parts.gecmisi-temizle'), size:'sm',
             act:'desk-clear', data:{ 'data-disc':discId } }))}
         </div>
 
         ${when(konusuyor, () => K.Notice({ tone:'info',
           body:'Sesli sohbet açık. Ajan konuşurken mikrofon kapalıdır: sözü '
             + 'boşluk tuşuyla ya da düğmeyle kesersin — sesle kesilemez.' }))}
-        ${when(!sesVar, () => html`<p class="tiny dim mt-8">Bu tarayıcı sesli
-          sohbeti desteklemiyor; yazarak sorduğun soru aynı yoldan geçer.</p>`)}
+        ${when(!sesVar, () => html`<p class="tiny dim mt-8">${yz('esp.core.parts.bu-tarayici-sesli-sohbeti-de')}</p>`)}
       </div>`;
   }
 
@@ -270,7 +357,7 @@ ESP.Parts = (function(){
     const lv = ESP.Curriculum.levelOf(discId);
     const yol = ESP.Curriculum.roadmap(discId);
     const kapi = ESP.Curriculum.nextGate(discId);
-    if(!lv || !yol) return K.Empty({ text:'Bu bölümün merdiveni tanımlı değil.' });
+    if(!lv || !yol) return K.Empty({ text:yz('esp.core.parts.bu-bolumun-merdiveni-tanimli') });
 
     return html`
       <div class="deskmap">
@@ -278,7 +365,7 @@ ESP.Parts = (function(){
           ${K.Badge({ label:lv.level.label + ' · ' + lv.level.short,
             tone:lv.cert === 'missing' ? 'muted' : 'info', icon:false })}
           ${cert(lv.cert)}
-          <span class="tiny dim">merdivenin %${lv.mastery}'i</span>
+          <span class="tiny dim">${yz('esp.core.parts.merdivenin')}${lv.mastery}'i</span>
         </div>
 
         <ol class="steps">${map(yol.steps, st => html`
@@ -298,31 +385,31 @@ ESP.Parts = (function(){
           label:kapi.action === 'measure' ? 'Önce ölç' : 'Sıradaki kapı',
           title:kapi.title, why:kapi.why }))}
 
-        ${K.Button({ label:'Tam haritayı aç', size:'sm', act:'desk-ladder',
+        ${K.Button({ label:yz('esp.core.parts.tam-haritayi-ac'), size:'sm', act:'desk-ladder',
           class:'mt-10', data:{ 'data-disc':discId } })}
       </div>`;
   }
 
-  const ASSET_LABELS = { note:'Not', doc:'Belge', link:'Bağlantı', audio:'Ses' };
+  const ASSET_LABELS = { note:yz('esp.core.parts.not'), doc:'Belge', link:'Bağlantı', audio:'Ses' };
 
   function deskAssets(discId){
     const list = ESP.Desk.assets(discId);
     return html`
       <div class="deskassets">
         <div class="cols-3">
-          ${K.Field({ label:'Tür',
-            input:K.Select({ id:'as-kind-' + discId, value:'note', aria:'Ek türü',
+          ${K.Field({ label:yz('esp.core.parts.tur'),
+            input:K.Select({ id:'as-kind-' + discId, value:'note', aria:yz('esp.core.parts.ek-turu'),
               options:ESP.Model.ASSET_KINDS.map(k => ({ value:k, label:ASSET_LABELS[k] })) }) })}
-          ${K.Field({ label:'Başlık',
-            input:K.Input({ id:'as-title-' + discId, aria:'Ekin başlığı' }) })}
-          ${K.Field({ label:'Bağlantı / süre (sn)', hint:'yalnız bağlantı ve ses için',
-            input:K.Input({ id:'as-url-' + discId, aria:'Bağlantı adresi ya da ses süresi' }) })}
+          ${K.Field({ label:yz('esp.core.parts.baslik'),
+            input:K.Input({ id:'as-title-' + discId, aria:yz('esp.core.parts.ekin-basligi') }) })}
+          ${K.Field({ label:yz('esp.core.parts.baglanti-sure-sn'), hint:'yalnız bağlantı ve ses için',
+            input:K.Input({ id:'as-url-' + discId, aria:yz('esp.core.parts.baglanti-adresi-ya-da-ses') }) })}
         </div>
         ${K.Textarea({ id:'as-text-' + discId, rows:3, class:'mt-10',
-          aria:'Ekin metni', placeholder:'Notun, belgenin özeti ya da kaydın hakkında not…' })}
+          aria:yz('esp.core.parts.ekin-metni'), placeholder:yz('esp.core.parts.notun-belgenin-ozeti-ya-da') })}
         <div class="row wrap mt-10">
           ${K.Mic({ target:'as-text-' + discId })}
-          ${K.Button({ label:'Ekle', tone:'primary', act:'desk-add-asset',
+          ${K.Button({ label:yz('esp.core.parts.ekle'), tone:'primary', act:'desk-add-asset',
             data:{ 'data-disc':discId } })}
         </div>
 
@@ -340,13 +427,13 @@ ESP.Parts = (function(){
                   ${when(a.text, () => html`<span class="asrow__text">${a.text}</span>`)}
                   ${when(a.url, () => html`<span class="tiny dim">${a.url}</span>`)}
                   ${when(a.seconds != null, () => html`<span class="tiny dim">${
-                    Math.round(a.seconds)} sn · ölçüldü</span>`)}
+                    Math.round(a.seconds)} ${yz('esp.core.parts.sn-olculdu')}</span>`)}
                 </span>
                 <span class="tiny dim">${ESP.U.gunOf((a.at || ''))}</span>
-                ${K.Button({ label:'Sil', size:'sm', act:'desk-del-asset',
+                ${K.Button({ label:yz('esp.core.parts.sil'), size:'sm', act:'desk-del-asset',
                   data:{ 'data-id':a.id } })}
               </li>`)}</ul>`
-          : K.Empty({ text:'Bu bölüme henüz bir şey iliştirilmedi.' })}
+          : K.Empty({ text:yz('esp.core.parts.bu-bolume-henuz-bir-sey') })}
       </div>`;
   }
 
@@ -359,18 +446,18 @@ ESP.Parts = (function(){
     return html`
       <div class="deskrem">
         <div class="cols-3">
-          ${K.Field({ label:'Hatırlatma',
-            input:K.Input({ id:'rm-text-' + discId, aria:'Hatırlatma metni',
-              placeholder:'Perşembe akşamı ikinci taslağı oku' }) })}
-          ${K.Field({ label:'Tarih',
+          ${K.Field({ label:yz('esp.core.parts.hatirlatma'),
+            input:K.Input({ id:'rm-text-' + discId, aria:yz('esp.core.parts.hatirlatma-metni'),
+              placeholder:yz('esp.core.parts.persembe-aksami-ikinci-tasla') }) })}
+          ${K.Field({ label:yz('esp.core.parts.tarih'),
             input:K.Input({ id:'rm-due-' + discId, type:'date', value:ESP.U.todayISO(),
-              aria:'Hatırlatma tarihi' }) })}
-          ${K.Field({ label:'Tekrar',
-            input:K.Select({ id:'rm-rep-' + discId, value:'none', aria:'Tekrar aralığı',
+              aria:yz('esp.core.parts.hatirlatma-tarihi') }) })}
+          ${K.Field({ label:yz('esp.core.parts.tekrar'),
+            input:K.Select({ id:'rm-rep-' + discId, value:'none', aria:yz('esp.core.parts.tekrar-araligi'),
               options:Object.keys(ESP.Model.REPEATS).map(k => ({ value:k,
                 label:REPEAT_LABELS[k] })) }) })}
         </div>
-        ${K.Button({ label:'Hatırlat', tone:'primary', act:'desk-add-rem',
+        ${K.Button({ label:yz('esp.core.parts.hatirlat'), tone:'primary', act:'desk-add-rem',
           class:'mt-10', data:{ 'data-disc':discId } })}
 
         ${when(bugun.length, () => K.Notice({ tone:'warn',
@@ -385,13 +472,13 @@ ESP.Parts = (function(){
                 <span class="remrow__text">${r.text}</span>
                 <span class="tiny dim">${REPEAT_LABELS[r.repeat] || ''}</span>
                 ${r.done
-                  ? K.Badge({ label:'kapandı', tone:'ok' })
-                  : K.Button({ label:'Yapıldı', size:'sm', act:'desk-done-rem',
+                  ? K.Badge({ label:yz('esp.core.parts.kapandi'), tone:'ok' })
+                  : K.Button({ label:yz('esp.core.parts.yapildi'), size:'sm', act:'desk-done-rem',
                       data:{ 'data-id':r.id } })}
-                ${K.Button({ label:'Sil', size:'sm', act:'desk-del-rem',
+                ${K.Button({ label:yz('esp.core.parts.sil'), size:'sm', act:'desk-del-rem',
                   data:{ 'data-id':r.id } })}
               </li>`)}</ul>`
-          : K.Empty({ text:'Bu bölümde hatırlatma yok.' })}
+          : K.Empty({ text:yz('esp.core.parts.bu-bolumde-hatirlatma-yok') })}
       </div>`;
   }
 
@@ -405,7 +492,7 @@ ESP.Parts = (function(){
      İlerleme çubuğu SRS'ten okunur; ayrı bir «tamamlandı» bayrağı yoktur. */
   function units(discId, lang){
     const list = ESP.Lesson.units(discId, lang);
-    if(!list.length) return K.Empty({ text:'Bu bölümde ünite tanımlı değil.' });
+    if(!list.length) return K.Empty({ text:yz('esp.core.parts.bu-bolumde-unite-tanimli-deg') });
 
     return html`<div class="units">${map(list, u => {
       const p = ESP.Lesson.progress(u, lang);
@@ -417,12 +504,12 @@ ESP.Parts = (function(){
             <div class="unit__body">
               <b>${u.title}</b>
               <span class="small muted">${u.goal}</span>
-              ${when(u.bam, () => html`<span class="tiny dim">BAM · ${u.band} · doğrulanmadı — yanlış kartı sil</span>`)}
+              ${when(u.bam, () => html`<span class="tiny dim">${yz('esp.core.parts.bam')} ${u.band} ${yz('esp.core.parts.dogrulanmadi-yanlis-karti')}</span>`)}
             </div>
             ${p.total
               ? K.Badge({ label:p.known + '/' + p.total + ' bilinen',
                   tone:p.known >= p.total ? 'ok' : (p.added ? 'info' : 'muted') })
-              : K.Badge({ label:'malzeme yok', tone:'muted', icon:false })}
+              : K.Badge({ label:yz('esp.core.parts.malzeme-yok'), tone:'muted', icon:false })}
             ${K.Button({ label:acik ? 'Kapat' : 'Aç', size:'sm', act:'unit-open',
               data:{ 'data-id':u.id } })}
           </div>
@@ -431,7 +518,7 @@ ESP.Parts = (function(){
           ${when(acik, () => html`
             <div class="unit__detail">
               ${when(p.why, () => K.Notice({ tone:'info', body:p.why }))}
-              ${when(u.task, () => html`<p class="small"><b>Görev:</b> ${u.task}</p>`)}
+              ${when(u.task, () => html`<p class="small"><b>${yz('esp.core.parts.gorev')}</b> ${u.task}</p>`)}
               ${when(u.ask, () => html`<p class="small"><b>Soru:</b> ${u.ask}</p>`)}
               ${when(p.total, () => html`
                 <ul class="unit__items">${map(ESP.Lesson.itemsOf(u, lang).slice(0, 12),
@@ -440,14 +527,14 @@ ESP.Parts = (function(){
                   ${K.Button({ label:p.added ? 'Eksikleri desteye ekle' : 'Desteye ekle',
                     tone:'primary', size:'sm', act:'unit-add',
                     data:{ 'data-id':u.id, 'data-disc':discId } })}
-                  ${when(p.added >= ESP.Lesson.SINAV_EN_AZ, () => K.Button({ label:'Ünite sınavı',
+                  ${when(p.added >= ESP.Lesson.SINAV_EN_AZ, () => K.Button({ label:yz('esp.core.parts.unite-sinavi'),
                     size:'sm', act:'unit-sinav',
                     data:{ 'data-id':u.id, 'data-disc':discId, 'data-lang':lang || '' } }))}
                 </div>
                 ${when(ESP.Lesson.sonSinav(u.id), () => {
                   const sn = ESP.Lesson.sonSinav(u.id);
-                  return html`<p class="tiny dim mt-6">Son ünite sınavı ${U.fmtShort(sn.gun)}:
-                    ${sn.dogru}/${sn.soru} doğru · ölçüldü</p>`;
+                  return html`<p class="tiny dim mt-6">${yz('esp.core.parts.son-unite-sinavi')} ${U.fmtShort(sn.gun)}:
+                    ${sn.dogru}/${sn.soru} ${yz('esp.core.parts.dogru-olculdu')}</p>`;
                 })}`)}
             </div>`)}
         </div>`;
@@ -460,7 +547,7 @@ ESP.Parts = (function(){
      kapıyı açmaz, hiçbir kademeyi değiştirmez: kullanıcının kendi listesi. */
   function topics(discId){
     const list = ESP.Lesson.topics(discId);
-    if(!list.length) return K.Empty({ text:'Bu bölümde konu haritası yok.' });
+    if(!list.length) return K.Empty({ text:yz('esp.core.parts.bu-bolumde-konu-haritasi-yok') });
     const isaret = ESP.Lesson.topicMarks();
     const acik = ESP.S.ui.topicOpen;
 
@@ -487,24 +574,24 @@ ESP.Parts = (function(){
                   <p class="small mb-6" style="line-height:1.45">${card.explanation}</p>
                   ${when(card.worked_example && card.worked_example.text, () => html`
                     <div class="small text-2 mb-4">
-                      <b>Örnek:</b> <i>${card.worked_example.text}</i>
+                      <b>${yz('esp.core.parts.ornek')}</b> <i>${card.worked_example.text}</i>
                     </div>`)}
                   ${when(card.common_misinterpretation, () => html`
                     <div class="ogrenme__dikkat">
-                      <b>Sık yanlış yorum:</b> ${card.common_misinterpretation}
+                      <b>${yz('esp.core.parts.sik-yanlis-yorum')}</b> ${card.common_misinterpretation}
                     </div>`)}
                   ${when(card.practice && card.practice.prompt, () => html`
                     <div class="mt-6 pt-6" style="border-top:1px dashed var(--border)">
-                      <b class="block mb-2">Pratik</b>
+                      <b class="block mb-2">${yz('esp.core.parts.pratik')}</b>
                       <p class="small mb-4">${card.practice.prompt}</p>
                       ${when(card.practice.expected_answer, () => html`
-                        <details class="tiny dim"><summary>Beklenen yanıt ve ölçüt</summary>
+                        <details class="tiny dim"><summary>${yz('esp.core.parts.beklenen-yanit-ve-olcut')}</summary>
                           <p class="mt-4 mb-0">${card.practice.expected_answer}</p>
                         </details>`)}
                     </div>`)}
                   ${when(card.transfer && card.transfer.prompt, () => html`
                     <div class="tiny dim mt-6">
-                      <b>Aktarım:</b> ${card.transfer.prompt}
+                      <b>${yz('esp.core.parts.aktarim')}</b> ${card.transfer.prompt}
                     </div>`)}
                 </div>`)}
               ${map(t.items, (it, i) => html`
@@ -514,11 +601,10 @@ ESP.Parts = (function(){
                 </div>`)}
               <div class="row wrap mt-8">
                 ${cert('estimated')}
-                <span class="tiny dim">İşaretler beyandır: hiçbir kapıyı açmaz,
-                  kademeyi değiştirmez.</span>
+                <span class="tiny dim">${yz('esp.core.parts.i-saretler-beyandir-hicbir-k')}</span>
               </div>
               ${when(t.source, () => html`<p class="tiny dim mt-8">Kaynak: ${t.source}</p>`)}
-              ${raw(window.LIFEOS && window.LIFEOS.NOTUM ? window.LIFEOS.NOTUM.kutuHtml('konu:' + t.id, { baslik:'Bu konu için notum' }) : '')}
+              ${raw(window.LIFEOS && window.LIFEOS.NOTUM ? window.LIFEOS.NOTUM.kutuHtml('konu:' + t.id, { baslik:yz('esp.core.parts.bu-konu-icin-notum') }) : '')}
             </div>`)}
         </div>`;
     })}</div>`;
@@ -528,9 +614,8 @@ ESP.Parts = (function(){
     const s = ESP.S.ui.practice;
     if(!s || s.deck !== deck){
       return html`
-        <p class="small muted">Pratik bir sınav değildir: cevabın doğrudan
-          aralıklı tekrara yazılır, ayrı bir kayıt açılmaz.</p>
-        ${K.Button({ label:'Pratiğe başla', act:'prac-start',
+        <p class="small muted">${yz('esp.core.parts.pratik-bir-sinav-degildir-ce')}</p>
+        ${K.Button({ label:yz('esp.core.parts.pratige-basla'), act:'prac-start',
           class:'mt-10', data:{ 'data-deck':deck } })}`;
     }
 
@@ -540,16 +625,16 @@ ESP.Parts = (function(){
         <div class="pracend">
           ${K.NextUp({ icon:'check', calm:true, sanat:'gorev', label:s.unitId ? 'Ünite sınavı bitti' : 'Oturum bitti',
             title:r.right + '/' + r.asked + ' doğru',
-            why:'İsabet bir not değil bir ölçümdür: yanlışlar destede başa döndü.' })}
+            why:yz('esp.core.parts.i-sabet-bir-not-degil-bir') })}
           ${when(r.missed.length, () => html`
             <ul class="pracmiss">${map(r.missed, m => html`<li>
-              <b>${m.expected}</b><span class="tiny dim">senin cevabın: ${m.given || '—'}</span>
+              <b>${m.expected}</b><span class="tiny dim">${yz('esp.core.parts.senin-cevabin')} ${m.given || '—'}</span>
             </li>`)}</ul>`)}
           <div class="row wrap mt-10">
-            ${K.Button({ label:'Gün kaydına yaz', tone:'primary', act:'prac-log' })}
-            ${K.Button({ label:'Yeni oturum', act:'prac-start',
+            ${K.Button({ label:yz('esp.core.parts.gun-kaydina-yaz'), tone:'primary', act:'prac-log' })}
+            ${K.Button({ label:yz('esp.core.parts.yeni-oturum'), act:'prac-start',
               data:{ 'data-deck':deck } })}
-            ${K.Button({ label:'Kapat', act:'prac-close' })}
+            ${K.Button({ label:yz('esp.core.parts.kapat'), act:'prac-close' })}
           </div>
         </div>`;
     }
@@ -558,12 +643,12 @@ ESP.Parts = (function(){
     const gosterildi = ESP.S.ui.practiceShown;
     return html`
       <div class="prac">
-        ${when(s.unitId, () => html`<p class="small"><b>Ünite sınavı:</b> ${s.unitTitle}</p>`)}
+        ${when(s.unitId, () => html`<p class="small"><b>${yz('esp.core.parts.unite-sinavi-2')}</b> ${s.unitTitle}</p>`)}
         <div class="prac__top">
           <span class="tiny dim">${s.pos + 1} / ${s.questions.length}</span>
           ${K.Badge({ label:(ESP.PRACTICE_BY_ID[q.kind] || {}).label || q.kind,
             tone:'muted', icon:false })}
-          <span class="tiny dim">${s.right} doğru · ${s.wrong} yanlış</span>
+          <span class="tiny dim">${s.right} ${yz('esp.core.parts.dogru')} ${s.wrong} ${yz('esp.core.parts.yanlis')}</span>
         </div>
 
         <p class="prac__q">${q.prompt}</p>
@@ -580,9 +665,9 @@ ESP.Parts = (function(){
                 <div class="prac__opts">${map(kalan, opt => K.Button({ label:opt,
                   act:'prac-pick', data:{ 'data-value':opt }, class:'prac__opt' }))}</div>
                 <div class="row wrap mt-8">
-                  ${when(secilen.length, () => K.Button({ label:'Sırayı temizle',
+                  ${when(secilen.length, () => K.Button({ label:yz('esp.core.parts.sirayi-temizle'),
                     size:'sm', act:'prac-clear-order' }))}
-                  ${when(!kalan.length, () => K.Button({ label:'Sırayı onayla',
+                  ${when(!kalan.length, () => K.Button({ label:yz('esp.core.parts.sirayi-onayla'),
                     tone:'primary', act:'prac-answer',
                     data:{ 'data-value':secilen.join(' | ') } }))}
                 </div>`;
@@ -591,16 +676,16 @@ ESP.Parts = (function(){
           ? html`<div class="prac__opts">${map(q.options, opt => K.Button({ label:opt,
               act:'prac-answer', data:{ 'data-value':opt }, class:'prac__opt' }))}</div>`
           : html`<div class="row mt-10">
-              ${K.Input({ id:'prac-input', aria:'Cevabın', placeholder:'Cevabını yaz…' })}
+              ${K.Input({ id:'prac-input', aria:yz('esp.core.parts.cevabin'), placeholder:yz('esp.core.parts.cevabini-yaz') })}
               ${K.Mic({ target:'prac-input' })}
-              ${K.Button({ label:'Cevapla', tone:'primary', act:'prac-answer' })}
+              ${K.Button({ label:yz('esp.core.parts.cevapla'), tone:'primary', act:'prac-answer' })}
             </div>`}
 
         ${when(gosterildi, () => K.Notice({ tone:'info',
           body:'Doğrusu: ' + q.answer }))}
         <div class="row wrap mt-10">
-          ${K.Button({ label:'Bilmiyorum', size:'sm', act:'prac-skip' })}
-          ${K.Button({ label:'Oturumu bitir', size:'sm', act:'prac-close' })}
+          ${K.Button({ label:yz('esp.core.parts.bilmiyorum'), size:'sm', act:'prac-skip' })}
+          ${K.Button({ label:yz('esp.core.parts.oturumu-bitir'), size:'sm', act:'prac-close' })}
         </div>
       </div>`;
   }
@@ -621,9 +706,9 @@ ESP.Parts = (function(){
     const ids = ((m && m.oneriIds) || []).filter(id => bek.indexOf(id) >= 0);
     if(!ids.length) return '';
     return html`<div class="row gap-8 mt-8" style="flex-wrap:wrap">${map(ids, id => html`
-      ${K.Button({ label:'Onayla', icon:'check', size:'sm', act:'prop-accept',
+      ${K.Button({ label:yz('esp.core.parts.onayla'), icon:'check', size:'sm', act:'prop-accept',
         data:{ 'data-id':id } })}
-      ${K.Button({ label:'Vazgeç', size:'sm', act:'prop-decline', data:{ 'data-id':id } })}`)}</div>`;
+      ${K.Button({ label:yz('esp.core.parts.vazgec'), size:'sm', act:'prop-decline', data:{ 'data-id':id } })}`)}</div>`;
   }
 
   /* Onay düğmesi dolu değildir: liste uzadıkça ekranda tek dolu düğme
@@ -642,7 +727,7 @@ ESP.Parts = (function(){
       uygula:async id => {
         const res = await ESP.Plans.accept(id);
         if(!res.ok){ ESP.UI.toast(res.error); return; }
-        ESP.UI.toast('Onaylandı — kural motoru uyguladı', { undo:async () => {
+        ESP.UI.toast(yz('esp.core.parts.onaylandi-kural-motoru-uygul'), { undo:async () => {
           const g = await ESP.Plans.geriAl(id); ESP.UI.toast(g.ok ? 'Geri alındı' : g.error); ESP.App.render(); } });
         ESP.App.render();
       },
@@ -686,9 +771,9 @@ ESP.Parts = (function(){
           <span class="tiny dim">${kimOf(p, a)}
             · ${SEVIYE_ADI[k.level] || ''} · ${k.note || ''}</span>
         </span>
-        ${K.Button({ label:'Onayla', size:'sm', act:'prop-accept',
+        ${K.Button({ label:yz('esp.core.parts.onayla'), size:'sm', act:'prop-accept',
           data:{ 'data-id':p.id } })}
-        ${K.Button({ label:'Reddet', size:'sm', act:'prop-decline',
+        ${K.Button({ label:yz('esp.core.parts.reddet'), size:'sm', act:'prop-decline',
           data:{ 'data-id':p.id } })}
       </li>`;
     })}</ul>`;
@@ -703,7 +788,7 @@ ESP.Parts = (function(){
   function deskAudit(discId){
     const bulgular = ESP.Audit.of(discId);
     if(!bulgular.length){
-      return K.Empty({ text:'Bu bölümde denetim bulgusu yok.' });
+      return K.Empty({ text:yz('esp.core.parts.bu-bolumde-denetim-bulgusu-y') });
     }
     const ciddi = bulgular.filter(f => f.severity !== 'none');
     return html`
@@ -750,7 +835,7 @@ ESP.Parts = (function(){
         <p class="small muted">Plan bir takvim değildir: «salı 19:00'da gitar»
           demek sistemin işi değil. Haftanın kalan günlerine hangi disiplinin
           düştüğünü söyler ve sırayı haftalık rota verir.</p>
-        ${K.Button({ label:'Plan kur', tone:'primary', act:'plan-make', class:'mt-10' })}`;
+        ${K.Button({ label:yz('esp.core.parts.plan-kur'), tone:'primary', act:'plan-make', class:'mt-10' })}`;
     }
     const bugun = ESP.U.todayISO();
     return html`
@@ -761,12 +846,12 @@ ESP.Parts = (function(){
           <span class="wpday__disc"><b>${d.label}</b>
             <span class="tiny dim">${U.fmtMin(d.minutes)} · ${(d.items || [])
               .map(x => x.label).join(', ') || '—'}</span></span>
-          ${K.Button({ label:'Aç', size:'sm', act:'go',
+          ${K.Button({ label:yz('esp.core.parts.ac'), size:'sm', act:'go',
             data:{ 'data-route':d.route } })}
         </li>`)}</ul>
       <div class="row wrap mt-10">
-        ${K.Button({ label:'Planı yenile', act:'plan-make' })}
-        ${K.Button({ label:'Planı kaldır', act:'plan-clear' })}
+        ${K.Button({ label:yz('esp.core.parts.plani-yenile'), act:'plan-make' })}
+        ${K.Button({ label:yz('esp.core.parts.plani-kaldir'), act:'plan-clear' })}
       </div>`;
   }
 
@@ -781,7 +866,7 @@ ESP.Parts = (function(){
     const teklif = ESP.Desk.proposals(discId).length;
 
     return K.Entry({
-      label:'TEZGÂH', hint:'desk',
+      label:yz('esp.core.parts.tezgah'), hint:'desk',
       meta:a.short || a.name,
       note:ESP.Desk.headline(discId),
       action:K.Button({ label:acik ? 'Kapat' : 'Aç', size:'sm', act:'desk-toggle',
@@ -817,8 +902,7 @@ ESP.Parts = (function(){
               </div>`;
             })}</div>`;
           })()}`
-        : html`<p class="small muted">Tezgâh kapalı. ${a.name} ile konuşmak,
-            haritayı görmek, not/belge iliştirmek ve hatırlatma kurmak için aç.</p>`,
+        : html`<p class="small muted">${yz('esp.core.parts.tezgah-kapali')} ${a.name} ${yz('esp.core.parts.ile-konusmak-haritayi-gormek')}</p>`,
     });
   }
 
@@ -835,7 +919,7 @@ ESP.Parts = (function(){
     };
     const b = o.tabs.map(t => ({ id:t.id, ad:t.label, sayi:(o.sayi || {})[t.id] || null, govde:guvenli(t.id) }));
     /* discId null: tezgâhı olmayan ekran (Analiz, Rehber, Merdiven). */
-    if(discId) b.push({ id:'tezgah', ad:'Tezgâh', govde:K.Ledger(() => [desk(discId)]) });
+    if(discId) b.push({ id:'tezgah', ad:yz('esp.core.parts.tezgah-2'), govde:K.Ledger(() => [desk(discId)]) });
     return K.SayfaBolumleri({ act:o.act, aria:o.aria, bolumler:b });
   }
 

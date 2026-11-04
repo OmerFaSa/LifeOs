@@ -13,6 +13,15 @@
         sayısından «hesaplandı» olur (state.js `blankCertainty`).
      4. KÖR TAHMİN KORUNUR. Form doldurulduktan sonra yazılan net tahmini
         «kör değil» sayılır (screens/exams.js). */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.denemefoto.fotograf-secilmedi':'Fotoğraf seçilmedi.',
+  'ays.core.denemefoto.bu-bir-goruntu-dosyasi-degil':'Bu bir görüntü dosyası değil.',
+  'ays.core.denemefoto.fotograf-cok-buyuk-en-fazla':'Fotoğraf çok büyük (en fazla 8 MB).',
+  'ays.core.denemefoto.fotograf-okumak-icin-goruntu':'Fotoğraf okumak için görüntü okuyabilen bir model gerekir ',
+  'ays.core.denemefoto.model-okuyamadi':'Model okuyamadı: ',
+  'ays.core.denemefoto.fotograftan-sonuc-cikarilama':'Fotoğraftan sonuç çıkarılamadı; sonuçları elle yaz.',
+});
+
 
 window.R = window.R || {};
 
@@ -72,10 +81,10 @@ R.DenemeFoto = (function(){
   function hazir(){ return !!(R.Solver && R.Solver.ready(true)); }
 
   async function oku(file, tmpl){
-    if(!file) return { ok:false, note:'Fotoğraf seçilmedi.' };
-    if(!/^image\//.test(file.type || '')) return { ok:false, note:'Bu bir görüntü dosyası değil.' };
-    if(file.size > MAX_BYTES) return { ok:false, note:'Fotoğraf çok büyük (en fazla 8 MB).' };
-    if(!hazir()) return { ok:false, note:'Fotoğraf okumak için görüntü okuyabilen bir model gerekir '
+    if(!file) return { ok:false, note:yz('ays.core.denemefoto.fotograf-secilmedi') };
+    if(!/^image\//.test(file.type || '')) return { ok:false, note:yz('ays.core.denemefoto.bu-bir-goruntu-dosyasi-degil') };
+    if(file.size > MAX_BYTES) return { ok:false, note:yz('ays.core.denemefoto.fotograf-cok-buyuk-en-fazla') };
+    if(!hazir()) return { ok:false, note:yz('ays.core.denemefoto.fotograf-okumak-icin-goruntu')
       + '(Ayarlar › Model). Sonuçları elle de yazabilirsin.' };
     let res;
     try{
@@ -88,12 +97,12 @@ R.DenemeFoto = (function(){
         maxTokens:600, temperature:0,
       });
     }catch(e){
-      return { ok:false, note:'Model okuyamadı: ' + (R.LLM.errorText ? R.LLM.errorText(e && e.code) : 'hata') };
+      return { ok:false, note:yz('ays.core.denemefoto.model-okuyamadi') + (R.LLM.errorText ? R.LLM.errorText(e && e.code) : 'hata') };
     }
     const metin = String((res && res.text) || '');
     let ham = null;
     try{ const m = metin.match(/\[[\s\S]*\]/); ham = m ? JSON.parse(m[0]) : null; }catch(e){ ham = null; }
-    if(!Array.isArray(ham)) return { ok:false, note:'Fotoğraftan sonuç çıkarılamadı; sonuçları elle yaz.' };
+    if(!Array.isArray(ham)) return { ok:false, note:yz('ays.core.denemefoto.fotograftan-sonuc-cikarilama') };
     const d = dogrula(ham, tmpl);
     return Object.assign({ ok:d.satirlar.length > 0,
       note:d.satirlar.length ? '' : 'Okunan satırların hiçbiri doğrulamadan geçmedi; elle yaz.' }, d);

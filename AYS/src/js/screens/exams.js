@@ -5,6 +5,9 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:90, group:'Git', label:'Deneme', icon:'exam', route:'exams', run(){ R.App.go('exams'); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:210, group:'Kayıt', label:'Deneme ekle', icon:'plus', hint:'Cmt', run(){ R.App.go('exams'); setTimeout(()=>R.Screens.exams.handle['new-exam']({dataset:{}}), 60); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:240, group:'Kayıt', label:'Süreli deneme oturumu', icon:'clock', run(){ R.App.go('exams'); setTimeout(()=>R.Screens.exams.handle['run-open']({dataset:{}}), 60); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.exams.tumu':'Tümü',
   'ays.exams.tyt':'TYT',
@@ -157,7 +160,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.exams.hata-silindi':'Hata silindi',
   'ays.exams.deneme-2':'Deneme',
 });
-window.LIFEOS.PARCA.sayfa({ id:'exams', modul:'ays', cekmece:'calisma', ad:'Deneme', ikon:'exam', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'exams', modul:'ays', king:{ sira:140, ad:'Deneme', es:['deneme', 'sınav'] }, cekmece:'calisma', ad:'Deneme', ikon:'exam', sira:20 });
 
 R.Screens.exams = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;

@@ -17,6 +17,10 @@
      2. SON EKLENEN KAZANIR. Ayni gune iki kayit dusuyorsa sonraki gecerlidir.
      3. AKSIYON SEVIYESI (AGENTS §1.9): tek gun KUCUK (sormadan, «Geri al»),
         birden cok gun ORTA (onizleme + onay). Seviyeyi bu modul soyler. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.gunsure.kayit-bulunamadi':'Kayıt bulunamadı.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -101,7 +105,7 @@ ESP.GunSure = (function(){
   async function kaldir(id){
     const liste = kayitlar();
     const i = liste.findIndex(k => k.id === id);
-    if(i < 0) return { ok:false, why:'Kayıt bulunamadı.' };
+    if(i < 0) return { ok:false, why:yz('esp.core.gunsure.kayit-bulunamadi') };
     const [k] = liste.splice(i, 1);
     await kaydet();
     return { ok:true, kayit:k };

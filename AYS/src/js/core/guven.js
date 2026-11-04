@@ -28,6 +28,16 @@
    Bu dosya depoya dokunmaz ve hiçbir şeyi silmez: durumu okur, kapıyı
    çizer, kararı (düğme açık mı) verir. Silen ve yedek alan modülün kendi
    kodudur. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.guven.sen':'Sen',
+  'ortak.guven.merkez-onerisi':'Merkez önerisi',
+  'ortak.guven.ofis-onerisi':'Ofis önerisi',
+  'ortak.guven.kural-motoru-onerisi':'Kural motoru önerisi',
+  'ortak.guven.plan-motoru':'Plan motoru',
+  'ortak.guven.i-ce-aktarma':'İçe aktarma',
+  'ortak.guven.kaynagi-bilinmiyor':'kaynağı bilinmiyor',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -156,18 +166,18 @@ window.LIFEOS = window.LIFEOS || {};
      Onayı olmayan öneri kaynaklı değişiklik gizlenmez; uyarıyla yazılır —
      çünkü doktrine göre olmaması gereken şeydir (AGENTS.md §1.4). */
   const KAYNAKLAR = Object.freeze({
-    kullanici:{ ad:'Sen', oneri:false },
-    merkez:{ ad:'Merkez önerisi', oneri:true },
-    ofis:{ ad:'Ofis önerisi', oneri:true },
-    kural:{ ad:'Kural motoru önerisi', oneri:true },
-    plan:{ ad:'Plan motoru', oneri:false },
-    'ice-aktarma':{ ad:'İçe aktarma', oneri:false },
+    kullanici:{ ad:yz('ortak.guven.sen'), oneri:false },
+    merkez:{ ad:yz('ortak.guven.merkez-onerisi'), oneri:true },
+    ofis:{ ad:yz('ortak.guven.ofis-onerisi'), oneri:true },
+    kural:{ ad:yz('ortak.guven.kural-motoru-onerisi'), oneri:true },
+    plan:{ ad:yz('ortak.guven.plan-motoru'), oneri:false },
+    'ice-aktarma':{ ad:yz('ortak.guven.i-ce-aktarma'), oneri:false },
   });
 
   /* olay = { zaman, kaynak, alan, eski, yeni, onay:{ tur:'onay'|'ayar', zaman } } */
   function kaynakMetni(olay){
     const k = olay && Object.prototype.hasOwnProperty.call(KAYNAKLAR, olay.kaynak) ? KAYNAKLAR[olay.kaynak] : null;
-    if(!k) return { metin:'kaynağı bilinmiyor', uyari:'bilinmiyor' };
+    if(!k) return { metin:yz('ortak.guven.kaynagi-bilinmiyor'), uyari:'bilinmiyor' };
     if(!k.oneri) return { metin:k.ad, uyari:null };
     const o = olay.onay;
     if(o && o.tur === 'onay') return { metin:k.ad + ' (senin onayınla)', uyari:null };

@@ -12,6 +12,15 @@
    tanima modeli kullanmaz, kayit tutmaz. Olctugu sey kullanicinin kendi
    isaretledigi tekrarlar ve zamanlayicinin verdigi suredir. Bu bir eksiklik
    degil bir karardir: olmayan ses dosyasi sizamaz. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.acoustic.bu-pencerede-hicbir-tempoda':'Bu pencerede hiçbir tempoda ',
+  'esp.core.acoustic.turkce-sunumda-rahat-izlenen':'Türkçe sunumda rahat izlenen bant. Kendi kayıtların bu bandı kaydırabilir.',
+  'esp.core.acoustic.wpm-icin-hem-sure-hem':'WPM için hem süre hem kelime sayısı ölçülmüş olmalı.',
+  'esp.core.acoustic.son':'Son ',
+  'esp.core.acoustic.i-ki-pencerede-de-olcum-gere':'İki pencerede de ölçüm gerekir; karşılaştırma yapılamadı.',
+  'esp.core.acoustic.henuz-parca-ya-da-teknik':'Henüz parça ya da teknik girilmemiş.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -90,7 +99,7 @@ ESP.Acoustic = (function(){
     if(!acilan.length){
       return p.cleanBpm != null
         ? { value:p.cleanBpm, cert:'measured', fresh:false, n:temiz.length,
-            why:'Bu pencerede hiçbir tempoda ' + CLEAN_STREAK + ' temiz tekrar yok.' }
+            why:yz('esp.core.acoustic.bu-pencerede-hicbir-tempoda') + CLEAN_STREAK + ' temiz tekrar yok.' }
         : { value:null, cert:'missing', fresh:false, n:temiz.length,
             why:CLEAN_STREAK + ' temiz tekrar gerekir; ' + temiz.length + ' var.' };
     }
@@ -185,13 +194,13 @@ ESP.Acoustic = (function(){
      degil bir baslangic cizgisidir ve kullanicinin kendi kayitlari onu
      yerine oturtur. */
   const WPM_BAND = { min:120, max:150,
-    note:'Türkçe sunumda rahat izlenen bant. Kendi kayıtların bu bandı kaydırabilir.' };
+    note:yz('esp.core.acoustic.turkce-sunumda-rahat-izlenen') };
 
   function wpmOf(rec){
     const r = rec || {};
     if(r.secondsCert === 'missing' || r.wordsCert === 'missing') {
       return { value:null, cert:'missing',
-        why:'WPM için hem süre hem kelime sayısı ölçülmüş olmalı.' };
+        why:yz('esp.core.acoustic.wpm-icin-hem-sure-hem') };
     }
     if(!r.seconds || r.seconds <= 0) return { value:null, cert:'missing' };
     return { value:Math.round(r.words / (r.seconds / 60)), cert:'derived' };
@@ -222,7 +231,7 @@ ESP.Acoustic = (function(){
     const kayitlar = (S.recordings || []).filter(r => r.date >= sinir);
     if(!kayitlar.length){
       return { cert:'missing', n:0, windowDays:n,
-        why:'Son ' + n + ' günde diksiyon kaydı yok.' };
+        why:yz('esp.core.acoustic.son') + n + ' günde diksiyon kaydı yok.' };
     }
     const wpmler = kayitlar.map(wpmOf).filter(x => x.cert !== 'missing').map(x => x.value);
     const hatalar = kayitlar.map(errorRateOf).filter(x => x.cert !== 'missing').map(x => x.value);
@@ -259,7 +268,7 @@ ESP.Acoustic = (function(){
 
     if(yeni.cert === 'missing' || !yeni.errorRate || yeni.errorRate.cert === 'missing'
        || eski == null){
-      return { cert:'missing', why:'İki pencerede de ölçüm gerekir; karşılaştırma yapılamadı.' };
+      return { cert:'missing', why:yz('esp.core.acoustic.i-ki-pencerede-de-olcum-gere') };
     }
     const fark = yeni.errorRate.value - eski;
     return {
@@ -283,7 +292,7 @@ ESP.Acoustic = (function(){
     const today = todayISO || U.todayISO();
     const parcalar = S.pieces || [];
     if(!parcalar.length){
-      return { cert:'missing', n:0, why:'Henüz parça ya da teknik girilmemiş.' };
+      return { cert:'missing', n:0, why:yz('esp.core.acoustic.henuz-parca-ya-da-teknik') };
     }
     const esikler = parcalar.map(p => ({ piece:p, t:cleanThreshold(p, today) }));
     const olculen = esikler.filter(x => x.t.cert !== 'missing');

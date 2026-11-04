@@ -8,6 +8,19 @@
 
    HRV ve istirahat nabzi mutlak degil KISISEL olcektir: kendi 30 gunluk
    ortalamana gore okunur. Baskasinin HRV'siyle karsilastirma yapilmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.move.bugun-hic-olcum-girilmemis-t':'Bugün hiç ölçüm girilmemiş. Toparlanma skoru için dört ',
+  'spi.core.move.ates':'Ateş ',
+  'spi.core.move.oksijen-saturasyonu':'Oksijen satürasyonu %',
+  'spi.core.move.henuz-antrenman-kaydi-yok':'Henüz antrenman kaydı yok.',
+  'spi.core.move.son-haftayi-son-aya-kiyaslam':'Son haftayı son aya kıyaslamak için en az 3 haftalık geçmiş gerekir; şu an ',
+  'spi.core.move.son-dort-haftada-yeterli-yuk':'Son dört haftada yeterli yük kaydı yok.',
+  'spi.core.move.henuz-seans-kaydi-yok-indirm':'Henüz seans kaydı yok; indirme döngüsü başlamadı.',
+  'spi.core.move.toparlanma-skoru-bugun-yalni':'Toparlanma skoru bugün yalnızca ',
+  'spi.core.move.toparlanma':'Toparlanma ',
+  'spi.core.move.met':'MET: ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -92,7 +105,7 @@ SP.Move = (function(){
          dort girdinin HERHANGI BIRI yeterli. Olmayan bir sarti soyleyen
          bir uyari, kullaniciyi olmayan bir seyi aramaya gonderir. */
       return { ok:false, score:null, band:null, parts, coverage:0, thin:true,
-        note:'Bugün hiç ölçüm girilmemiş. Toparlanma skoru için dört '
+        note:yz('spi.core.move.bugun-hic-olcum-girilmemis-t')
            + 'girdiden en az biri gerekir: uyku, HRV, istirahat nabzı ya '
            + 'da ağrı/enerji.' };
     }
@@ -106,11 +119,11 @@ SP.Move = (function(){
     let override = null;
     if(v.temp != null && v.temp >= 38.5){
       override = { band:SP.READINESS_BANDS[SP.READINESS_BANDS.length - 1],
-        why:'Ateş ' + U.fmtNum(v.temp) + ' °C. Ateşliyken antrenman yapılmaz.' };
+        why:yz('spi.core.move.ates') + U.fmtNum(v.temp) + ' °C. Ateşliyken antrenman yapılmaz.' };
     }
     if(v.spo2 != null && v.spo2 < 92){
       override = { band:SP.READINESS_BANDS[SP.READINESS_BANDS.length - 1],
-        why:'Oksijen satürasyonu %' + U.fmtNum(v.spo2) + '. Bugün yük yok.' };
+        why:yz('spi.core.move.oksijen-saturasyonu') + U.fmtNum(v.spo2) + '. Bugün yük yok.' };
     }
 
     return {
@@ -195,11 +208,11 @@ SP.Move = (function(){
      kisa gecmisten uretilen ACWR yanilticidir. */
   function acwr(endISO){
     const first = SP.S.workouts.length ? SP.S.workouts[0].date : null;
-    if(!first) return { ok:false, note:'Henüz antrenman kaydı yok.' };
+    if(!first) return { ok:false, note:yz('spi.core.move.henuz-antrenman-kaydi-yok') };
     const span = U.diffDays(first, endISO || U.todayISO());
     if(span < 21){
       return { ok:false, span,
-        note:'Son haftayı son aya kıyaslamak için en az 3 haftalık geçmiş gerekir; şu an ' + (span + 1) + ' gün var.' };
+        note:yz('spi.core.move.son-haftayi-son-aya-kiyaslam') + (span + 1) + ' gün var.' };
     }
     /* KRONIK PENCERE VAR OLAN GECMIS KADARDIR.
 
@@ -212,7 +225,7 @@ SP.Move = (function(){
     const kronikGun = Math.min(28, span + 1);
     const acute = loadWindow(7, endISO) / 7;
     const chronic = loadWindow(kronikGun, endISO) / kronikGun;
-    if(!chronic) return { ok:false, note:'Son dört haftada yeterli yük kaydı yok.' };
+    if(!chronic) return { ok:false, note:yz('spi.core.move.son-dort-haftada-yeterli-yuk') };
 
     const unknown = unknownWindow(kronikGun, endISO);
     const ratio = U.round(acute / chronic, 2);
@@ -252,7 +265,7 @@ SP.Move = (function(){
       return { due:false, started:false, week:0, inCycle:0,
         every:SP.LOAD_RULES.deload.everyWeeks,
         factor:SP.LOAD_RULES.deload.factor,
-        note:'Henüz seans kaydı yok; indirme döngüsü başlamadı.' };
+        note:yz('spi.core.move.henuz-seans-kaydi-yok-indirm') };
     }
     const first = SP.S.workouts[0].date;
     const weeks = Math.floor(U.diffDays(first, dateISO || U.todayISO()) / 7);
@@ -307,13 +320,13 @@ SP.Move = (function(){
       if(r.thin && factor > 1){
         factor = 1;
         reasons.push({ id:'thin', kind:'muted',
-          text:'Toparlanma skoru bugün yalnızca ' + r.parts.filter(p => p.score != null)
+          text:yz('spi.core.move.toparlanma-skoru-bugun-yalni') + r.parts.filter(p => p.score != null)
                .map(p => p.label).join(', ') + ' ölçümünden türedi; yükü '
              + 'artırmak için yeterli değil. Planlanan yük olduğu gibi kaldı.',
           short:'Ölçüm ince; yük artırılmadı.' });
       }
       reasons.push({ id:'readiness', kind:r.band.tone,
-        text:'Toparlanma ' + r.score + '/100 — ' + r.band.label + '. ' + r.band.order,
+        text:yz('spi.core.move.toparlanma') + r.score + '/100 — ' + r.band.label + '. ' + r.band.order,
         short:r.band.order });
     }else{
       reasons.push({ id:'no-data', kind:'muted',
@@ -425,7 +438,7 @@ SP.Move = (function(){
     return { id:U.uid('w'), date:gun || U.todayISO(), templateId:null,
       name:x.ad, kind:metTuru(x.kategori, x.ad), minutes:x.dk, rpe:x.rpe == null ? null : x.rpe,
       items:[{ exId:'met', name:x.ad, met:x.met, minutes:x.dk }],
-      note:'MET: ' + x.met + ' (2024 Adult Compendium)', createdAt:new Date().toISOString() };
+      note:yz('spi.core.move.met') + x.met + ' (2024 Adult Compendium)', createdAt:new Date().toISOString() };
   }
 
   /* Son 30 gunun gunluk yuku — grafik icin. */

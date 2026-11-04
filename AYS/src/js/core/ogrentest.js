@@ -48,6 +48,13 @@
         ders ve konu konu. Ölçüm kuralları karma testle aynıdır (söz 3–5):
         ilk işaret kilitlenir, boş yanlış sayılmaz, yanlışlar Yanlışlarım'a
         düşer, plan ve kapanış bu sonuca bakmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.ogrentest.tyt':'TYT',
+  'ays.core.ogrentest.ayt-sayisal':'AYT · sayısal',
+  'ays.core.ogrentest.boyle-bir-sinav-yok':'Böyle bir sınav yok.',
+  'ays.core.ogrentest.bu-prova-icin-yeterli-soru':'Bu prova için yeterli soru yok (',
+});
+
 
 window.R = window.R || {};
 
@@ -58,8 +65,8 @@ R.OgrenTest = (function(){
   const GECMIS = 30;
   /* Söz 7: ÖSYM süreleri ve test sırası (kılavuz); yalnız ölçek için. */
   const PROVA = {
-    TYT:{ ad:'TYT', dk:165, soru:120, sira:['tyt-turkce', 'tyt-sosyal', 'tyt-matematik', 'tyt-fen'] },
-    AYT:{ ad:'AYT · sayısal', dk:180, soru:80, sira:['ayt-matematik', 'ayt-fizik', 'ayt-kimya', 'ayt-biyoloji'] },
+    TYT:{ ad:yz('ays.core.ogrentest.tyt'), dk:165, soru:120, sira:['tyt-turkce', 'tyt-sosyal', 'tyt-matematik', 'tyt-fen'] },
+    AYT:{ ad:yz('ays.core.ogrentest.ayt-sayisal'), dk:180, soru:80, sira:['ayt-matematik', 'ayt-fizik', 'ayt-kimya', 'ayt-biyoloji'] },
   };
   const PROVA_BOY = [20, 40];
   let doc = bos();
@@ -187,7 +194,7 @@ R.OgrenTest = (function(){
   }
   async function provaBaslat(sinav, boy, simdiMs){
     const P = PROVA[sinav];
-    if(!P) return { ok:false, neden:'sinav', metin:'Böyle bir sınav yok.' };
+    if(!P) return { ok:false, neden:'sinav', metin:yz('ays.core.ogrentest.boyle-bir-sinav-yok') };
     const plan = provaPlani(sinav, boy), n = plan.n;
     const kota = plan.dersler.map(d => ({ s:(R.SUBJECTS || []).find(s => s.id === d.id), n:d.n }));
     const secilen = [], eksik = [];
@@ -199,7 +206,7 @@ R.OgrenTest = (function(){
       al.forEach(y => secilen.push(y.k));
     });
     if(secilen.length < Math.ceil(n / 2)){
-      return { ok:false, neden:'az', n:secilen.length, metin:'Bu prova için yeterli soru yok (' + secilen.length + ' / ' + n + ').' };
+      return { ok:false, neden:'az', n:secilen.length, metin:yz('ays.core.ogrentest.bu-prova-icin-yeterli-soru') + secilen.length + ' / ' + n + ').' };
     }
     const sureDk = Math.max(1, Math.round(P.dk * secilen.length / P.soru));
     const bas = typeof simdiMs === 'number' ? simdiMs : Date.now();

@@ -8,6 +8,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:140, group:'Git', label:'Hedef, net matrisi, tercih', icon:'target', route:'target', run(){ R.App.go('target'); } });
 
 R.Screens.target = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -17,7 +18,7 @@ R.Screens.target = (function(){
   /* ---------- sayfa ---------- */
 
   P.sayfa({
-    id:'target', modul:'ays', cekmece:'plan', ad:'Hedefler', ikon:'target', sira:30, baslik:'Hedef',
+    id:'target', modul:'ays', king:{ sira:100, ad:'Hedefler', es:['hedefler', 'hedeflerim'] }, cekmece:'plan', ad:'Hedefler', ikon:'target', sira:30, baslik:'Hedef',
     izgara:[{ alan:12, yer:'ust', tek:true }, { alan:6, yer:'sol' }, { alan:4, yer:'sag' }, { alan:12, yer:'alt', tek:true }],
   });
 
@@ -63,9 +64,9 @@ R.Screens.target = (function(){
 
   /* ---------- bilgiler: King ve Gun buradan okuyabilir ---------- */
 
-  P.bilgi({ id:'ays.tahmini-sira', etiket:'tahmin', oku(){ const e = C.estimateScore(); return e.ok ? e.rank : null; } });
-  P.bilgi({ id:'ays.hedefe-kalan-net', etiket:'tahmin', oku(){ const g = C.netGapToTarget(); return g ? Math.max(0, g.netDiff) : null; } });
-  P.bilgi({ id:'ays.obp-katkisi', etiket:'hesaplandı', oku(){ return C.obp().contribution; } });
+  P.bilgi({ id:'ays.tahmini-sira', ad:'Tahmini sıralama', etiket:'tahmin', oku(){ const e = C.estimateScore(); return e.ok ? e.rank : null; } });
+  P.bilgi({ id:'ays.hedefe-kalan-net', ad:'Hedefe kalan net', etiket:'tahmin', oku(){ const g = C.netGapToTarget(); return g ? Math.max(0, g.netDiff) : null; } });
+  P.bilgi({ id:'ays.obp-katkisi', ad:'OBP katkısı', etiket:'hesaplandı', oku(){ return C.obp().contribution; } });
 
   /* ---------- donen ust kart ---------- */
 

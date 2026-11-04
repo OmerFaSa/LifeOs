@@ -10,6 +10,8 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:80, id:'act:meeting', kind:'Eylem', label:'Ofis incelemesini aç',
+  hint:'Ofis', run:() => ESP.App.go('meeting') });
 window.LIFEOS.PARCA.yazilar({
   'esp.meeting.son-yedi-gun':'Son yedi gün',
   'esp.meeting.gundem':'Gündem',
@@ -158,25 +160,25 @@ ESP.Screens.meeting = (function(){
         </div>`)}`)}</div>` });
   }
 
-  LIFEOS.PARCA.blok({ id:'meeting.tutanakkutusu', sayfa:'meeting', yer:'y1', sira:10, ad:'tutanakKutusu', ciz({ r }){
+  LIFEOS.PARCA.blok({ id:'meeting.tutanakkutusu', sayfa:'meeting', yer:'y1', sira:10, ad:'Tutanak', ciz({ r }){
     return tutanakKutusu();
   } });
-  LIFEOS.PARCA.blok({ id:'meeting.kararlarkutusu', sayfa:'meeting', yer:'y2', sira:10, ad:'kararlarKutusu', ciz({ r }){
+  LIFEOS.PARCA.blok({ id:'meeting.kararlarkutusu', sayfa:'meeting', yer:'y2', sira:10, ad:'Kararlar', ciz({ r }){
     return kararlarKutusu();
   } });
-  LIFEOS.PARCA.blok({ id:'meeting.bulgukutusu', sayfa:'meeting', yer:'y3', sira:10, ad:'bulguKutusu', ciz({ r }){
+  LIFEOS.PARCA.blok({ id:'meeting.bulgukutusu', sayfa:'meeting', yer:'y3', sira:10, ad:'Bulgular', ciz({ r }){
     return bulguKutusu(r);
   } });
-  LIFEOS.PARCA.blok({ id:'meeting.fikirkutusu', sayfa:'meeting', yer:'y4', sira:10, ad:'fikirKutusu', ciz({ r }){
+  LIFEOS.PARCA.blok({ id:'meeting.fikirkutusu', sayfa:'meeting', yer:'y4', sira:10, ad:'Fikirler', ciz({ r }){
     return fikirKutusu(r);
   } });
-  LIFEOS.PARCA.blok({ id:'meeting.gundemkutusu', sayfa:'meeting', yer:'y5', sira:10, ad:'gundemKutusu', ciz({ r }){
+  LIFEOS.PARCA.blok({ id:'meeting.gundemkutusu', sayfa:'meeting', yer:'y5', sira:10, ad:'Gündem', ciz({ r }){
     return gundemKutusu(r);
   } });
-  LIFEOS.PARCA.blok({ id:'meeting.kararkutusu', sayfa:'meeting', yer:'y6', sira:10, ad:'kararKutusu', ciz({ r }){
+  LIFEOS.PARCA.blok({ id:'meeting.kararkutusu', sayfa:'meeting', yer:'y6', sira:10, ad:'Karar', ciz({ r }){
     return kararKutusu(r);
   } });
-  LIFEOS.PARCA.blok({ id:'meeting.haftakutusu', sayfa:'meeting', yer:'y7', sira:10, ad:'haftaKutusu', ciz({ r }){
+  LIFEOS.PARCA.blok({ id:'meeting.haftakutusu', sayfa:'meeting', yer:'y7', sira:10, ad:'Hafta', ciz({ r }){
     return haftaKutusu(r);
   } });
   function render(){

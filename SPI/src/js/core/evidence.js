@@ -23,6 +23,13 @@
 
    3. EKSENLER GIZLENMEZ. Arayuz esigi gosteriyorsa kaynagini, kesinligini,
       uygulanabilirligini ve yetkisini de gosterir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.evidence.kaynak-yok':'kaynak yok',
+  'spi.core.evidence.bu-esigin-kaynagi-yazilmamis':'Bu eşiğin kaynağı yazılmamış. Kaynağı bilinmeyen bir eşik ',
+  'spi.core.evidence.kirmizi-bayrak-esiginin-kayn':'Kırmızı bayrak eşiğinin kaynağı yazılmamış.',
+  'spi.core.evidence.kirmizi-bayrak':'Kırmızı bayrak «',
+});
+
 
 window.SP = window.SP || {};
 
@@ -190,10 +197,10 @@ SP.Ev = (function(){
     const r = of(markerId, field);
     const etkin = effective(r);
     if(!r){
-      return { source:null, label:'kaynak yok', tone:'warn', mayDirect:false,
+      return { source:null, label:yz('spi.core.evidence.kaynak-yok'), tone:'warn', mayDirect:false,
         certainty:'unknown', applicability:null, authority:'observe_only',
         authorityLabel:'Yalnız izler',
-        text:'Bu eşiğin kaynağı yazılmamış. Kaynağı bilinmeyen bir eşik '
+        text:yz('spi.core.evidence.bu-esigin-kaynagi-yazilmamis')
            + 'yönlendirme üretmez.' };
     }
     return {
@@ -292,11 +299,11 @@ SP.Ev = (function(){
       const r = of(b.id, 'red');
       if(!r){
         sorunlar.push({ marker:b.id, name:b.name, kind:'no-source',
-          note:'Kırmızı bayrak eşiğinin kaynağı yazılmamış.' });
+          note:yz('spi.core.evidence.kirmizi-bayrak-esiginin-kayn') });
       } else if(!(effective(r).info || {}).mayDirect){
         sorunlar.push({ marker:b.id, name:b.name, kind:'no-authority',
           authority:effective(r).authority,
-          note:'Kırmızı bayrak «' + (effective(r).info || {}).label
+          note:yz('spi.core.evidence.kirmizi-bayrak') + (effective(r).info || {}).label
              + '» yetkisine dayanıyor; yönlendirme için yetersiz.' });
       }
     });

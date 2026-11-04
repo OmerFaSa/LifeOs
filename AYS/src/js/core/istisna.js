@@ -38,6 +38,12 @@
    ONUNE gecer: «Carsamba 5 saat calisacagim» demek, o gunun takvimdeki
    «yogun gun» isaretinden daha ozgul bir sozdur. Takvim kaydi burada
    SAKLANMAZ; kaydi R.Model.saveCalendar tutar, bu modul yalniz okur. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.istisna.ara':'Ara',
+  'ays.core.istisna.gecici-sure':'Geçici süre',
+  'ays.core.istisna.takvim':'Takvim',
+});
+
 
 window.R = window.R || {};
 
@@ -47,8 +53,8 @@ R.Istisna = (function(){
   const STORE = 'plan/istisnalar';
   const MAX = 60;
   const TURLER = {
-    ara:{ ad:'Ara', maxGun:21 },
-    sure:{ ad:'Geçici süre', maxGun:42 },
+    ara:{ ad:yz('ays.core.istisna.ara'), maxGun:21 },
+    sure:{ ad:yz('ays.core.istisna.gecici-sure'), maxGun:42 },
   };
   const DAKIKA = { min:30, max:720 };
   /* Olceklenmeyen gun turleri — curriculum.js R.WEEKDAYS `ritual`. */
@@ -116,7 +122,7 @@ R.Istisna = (function(){
 
   function takvimTuru(kind){
     const K = (R.Model && R.Model.CALENDAR_KINDS) || {};
-    return K[kind] || K.tatil || { label:'Takvim' };
+    return K[kind] || K.tatil || { label:yz('ays.core.istisna.takvim') };
   }
 
   /* Takvim kaydini istisna bicimine cevirir. Gunluk dakika tarihe

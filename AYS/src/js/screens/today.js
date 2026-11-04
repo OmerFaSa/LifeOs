@@ -9,6 +9,22 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:10, group:'Git', label:'Bugün', icon:'today', route:'today', run(){ R.App.go('today'); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:300, uret(){
+  const day = R.S.days[R.U.todayISO()];
+  if(!day) return [];
+  const running = day.blocks.find(b => b.startedAt);
+  if(running) return [
+    { group:'Odak', label:'Odak moduna dön — '+running.topic, icon:'clock', run(){ R.Palette.openFocus(); } },
+    { group:'Odak', label:'Bloğu bitir', icon:'stop', run(){ R.Screens.today.handle['timer-stop']({ dataset:{ block:running.id } }); } },
+  ];
+  return day.blocks.filter(b => b.status === 'pending' && b.slot !== 'Dinlenme').map(b => ({ group:'Odak', label:'Başlat: '+b.topic, icon:'play', run(){
+    R.App.go('today');
+    setTimeout(()=>R.Screens.today.handle['timer-start']({ dataset:{ block:b.id } }), 60);
+  }}));
+} });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:410, group:'Sistem', label:'Bugün olmuyor — minimum güne in', icon:'moon', run(){ R.Screens.today.handle['bad-day'](); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:420, group:'Sistem', label:'Hafta özetini paylaş', icon:'upload', run(){ R.Screens.today.handle['share-week'](); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.today.paragraf':'Paragraf',
   'ays.today.problem':'Problem',
@@ -258,7 +274,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.today.gunu-duzenle':'Günü düzenle',
   'ays.today.ozeti-paylas':'Özeti paylaş',
 });
-window.LIFEOS.PARCA.sayfa({ id:'today', modul:'ays', cekmece:'bugun', ad:'Genel bakış', ikon:'today', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'today', modul:'ays', king:{ sira:70, ad:'Bugün', es:['bugün', 'genel bakış'] }, cekmece:'bugun', ad:'Genel bakış', ikon:'today', sira:10 });
 
 R.Screens.today = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -1688,21 +1704,18 @@ R.Screens.today = (function(){
     return '<div class="pk-ust">' + P.izgara([tekrar, blokKart, sinavKart, soruKart, kartKart, seriKart]) + '</div>';
   }
 
-  LIFEOS.PARCA.blok({ id:'today.akiskutusu', sayfa:'today', yer:'y1', sira:10, ad:'AkisKutusu', ciz({ dateISO, n, day }){
+  LIFEOS.PARCA.blok({ id:'today.akiskutusu', sayfa:'today', yer:'y1', sira:10, ad:'Akış kutusu', ciz({ dateISO, n, day }){
     return AkisKutusu(day);
   } });
-  LIFEOS.PARCA.blok({ id:'today.bolum-2', sayfa:'today', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ dateISO, n, day }){
+  LIFEOS.PARCA.blok({ id:'today.geri-sayim', sayfa:'today', yer:'y2', sira:10, ad:'Geri sayım', ciz({ dateISO, n, day }){
     return when(runningBlock(), () => html`<div id="geri-sayim" class="bugun__vitrin">${raw(geriSayimHtml(runningBlock()))}</div>`);
   } });
-  LIFEOS.PARCA.blok({ id:'today.bolum-3', sayfa:'today', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ dateISO, n, day }){
+  LIFEOS.PARCA.blok({ id:'today.hizli-giris-kutusu', sayfa:'today', yer:'y3', sira:10, ad:'Hızlı giriş kutusu', ciz({ dateISO, n, day }){
     return raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '');
   } });
-  LIFEOS.PARCA.blok({ id:'today.bolum-4', sayfa:'today', yer:'y4', sira:10, ad:'Bölüm 4', ciz({ dateISO, n, day }){
+  LIFEOS.PARCA.blok({ id:'today.onay-bekleyen-teklifler', sayfa:'today', yer:'y4', sira:10, ad:'Onay bekleyen teklifler', ciz({ dateISO, n, day }){
     return (R.S.ui.kingTeklifler || []).length ? html`<section class="bugun__alan" aria-label="Onay bekliyor">
           ${R.Screens.onaylar.kingKart()}</section>` : '';
-  } });
-  LIFEOS.PARCA.blok({ id:'today.bolum-5', sayfa:'today', yer:'y5', sira:10, ad:'Bölüm 5', ciz({ dateISO, n, day }){
-    return '';
   } });
   async function render(){
     const dateISO = cizilenGun = U.todayISO();
@@ -1717,7 +1730,7 @@ R.Screens.today = (function(){
     const parcaB = { dateISO, n, day };
     return html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
-        ${LIFEOS.PARCA.yer('today', 'y5', R.C, parcaB, typeof raw === 'undefined' ? null : raw)}
+        
         ${LIFEOS.PARCA.yer('today', 'y4', R.C, parcaB, typeof raw === 'undefined' ? null : raw)}
         <section class="bugun__alan" aria-label="Ne yaptın?">
           ${LIFEOS.PARCA.yer('today', 'y3', R.C, parcaB, typeof raw === 'undefined' ? null : raw)}

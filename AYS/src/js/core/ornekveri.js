@@ -2,6 +2,12 @@
    yazılır (brand/ortak/ornekkip.js). Kaynak: tools/envanter.js DOLDUR.AYS.
    Tekrar açılışta aynı kimlikli kayıt varsa dokunulmaz: kullanıcının örnek
    profilde yaptığı değişiklik ezilmez, kayıt da ikilenmez. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.ornekveri.turkce':'Türkçe',
+  'ays.core.ornekveri.matematik':'Matematik',
+  'ays.core.ornekveri.ornek-kok-neden':'Örnek kök neden ',
+});
+
 window.R = window.R || {};
 
 R.OrnekVeri = (function(){
@@ -30,8 +36,8 @@ R.OrnekVeri = (function(){
       ekle(S.exams, { id:'ornek-e' + i, date:U.iso(U.addDays(U.today(), -(i * 7))),
         type:'Tam TYT', family:'TYT', kind:'full', publisher:'345', duration:165,
         tests:[
-          { name:'Türkçe', correct:28 + i, wrong:6, blank:6, minutes:null },
-          { name:'Matematik', correct:18 + i, wrong:8, blank:14, minutes:null },
+          { name:yz('ays.core.ornekveri.turkce'), correct:28 + i, wrong:6, blank:6, minutes:null },
+          { name:yz('ays.core.ornekveri.matematik'), correct:18 + i, wrong:8, blank:14, minutes:null },
         ],
         protocol:{}, createdAt:new Date().toISOString(),
         analysisCompletedAt:i ? new Date().toISOString() : null });
@@ -46,7 +52,7 @@ R.OrnekVeri = (function(){
     for(let i = 0; i < 8; i++){
       ekle(S.errors, { id:'ornek-er' + i, examId:'ornek-e' + (i % 4),
         createdAt:new Date().toISOString(), tag:['K', 'İ', 'Y', 'S', 'D'][i % 5],
-        subject:'TYT Matematik', topic:'Türev', note:'Örnek kök neden ' + (i + 1),
+        subject:'TYT Matematik', topic:'Türev', note:yz('ays.core.ornekveri.ornek-kok-neden') + (i + 1),
         closedAt:i % 3 ? new Date().toISOString() : null });
     }
   }

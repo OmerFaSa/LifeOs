@@ -1,0 +1,27 @@
+/* URETILDI: tools/parca.py, sayfa kayitlarindaki `king` alanindan. Elle duzenleme. */
+window.LIFEOS = window.LIFEOS || {};
+window.LIFEOS.PARCA_REHBER = [
+  { modul:'spi', route:'today', ad:'Bugün', es:['bugün', 'genel bakış', 'ölçüm'] },
+  { modul:'spi', route:'meals', ad:'Öğün', es:['öğün', 'besin', 'yemek', 'beslenme'] },
+  { modul:'spi', route:'kitchen', ad:'Mutfak', es:['mutfak', 'mutfağ', 'tarif'] },
+  { modul:'spi', route:'move', ad:'Hareket', es:['hareket', 'antrenman', 'egzersiz', 'spor'] },
+  { modul:'spi', route:'labs', ad:'Testler', es:['tahlil', 'kan testi', 'laboratuvar', 'testler'] },
+  { modul:'spi', route:'basket', ad:'Bütçe', es:['bütçe', 'market', 'sepet'] },
+  { modul:'ays', route:'today', ad:'Bugün', es:['bugün', 'genel bakış'] },
+  { modul:'ays', route:'week', ad:'Hafta', es:['hafta'] },
+  { modul:'ays', route:'plan', ad:'Program', es:['program', 'plan'] },
+  { modul:'ays', route:'target', ad:'Hedefler', es:['hedefler', 'hedeflerim'] },
+  { modul:'ays', route:'gelecek', ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] },
+  { modul:'ays', route:'subjects', ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] },
+  { modul:'ays', route:'solve', ad:'Soru çöz', es:['soru çöz', 'soru', 'test çöz'] },
+  { modul:'ays', route:'exams', ad:'Deneme', es:['deneme', 'sınav'] },
+  { modul:'ays', route:'cards', ad:'Tekrar', es:['tekrar', 'kart'] },
+  { modul:'ays', route:'progress', ad:'İlerleme', es:['ilerleme'] },
+  { modul:'esp', route:'today', ad:'Bugün', es:['bugün', 'genel bakış'] },
+  { modul:'esp', route:'lang', ad:'Dil', es:['dil', 'dil stüdyo', 'ingilizce', 'almanca', 'kelime'] },
+  { modul:'esp', route:'library', ad:'Okuma', es:['okuma', 'kitap', 'kütüphane'] },
+  { modul:'esp', route:'writing', ad:'Yazı', es:['yazı', 'yazma', 'yazı laboratuvar'] },
+  { modul:'esp', route:'symposium', ad:'Felsefe', es:['felsefe', 'sempozyum'] },
+  { modul:'esp', route:'history', ad:'Tarih', es:['tarih', 'kronoloji'] },
+  { modul:'esp', route:'studio', ad:'Ses', es:['müzik', 'diksiyon', 'stüdyo'] },
+];

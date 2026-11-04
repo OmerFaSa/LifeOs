@@ -27,6 +27,25 @@
    Bu katman bir senkronizasyon değil bir İŞARETTİR: tek yön, en iyi çaba,
    geri dönüşü yok sayılabilir. SPİ'in verisi SPİ'te kalır; HKM'ye giden
    şey günün ÖZETİDİR. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.beacon.ozet':'Özet',
+  'spi.core.beacon.yalniz-yuk-kararini-etkileye':'Yalnız yük kararını etkileyen çekirdek ölçümler.',
+  'spi.core.beacon.gelismis':'Gelişmiş',
+  'spi.core.beacon.bolum-bazinda-ilerleme-de-gi':'Bölüm bazında ilerleme de gider — hâlâ yalnız sayı.',
+  'spi.core.beacon.yerel-olmayan-bir-adresle-es':'Yerel olmayan bir adresle eşleme yapılmaz.',
+  'spi.core.beacon.hkm-ye-ulasilamadi-daemon-ca':'HKM\'ye ulaşılamadı. Daemon çalışıyor mu?',
+  'spi.core.beacon.baglandi-i-saret-acildi-ne-g':'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.',
+  'spi.core.beacon.yerel-olmayan-cagri':'Yerel olmayan çağrı.',
+  'spi.core.beacon.ornek-profil-acik-ornek-prof':'Örnek profil açık; örnek profil HKM\'ye bağlanamaz.',
+  'spi.core.beacon.hkm-isareti-kapali':'HKM işareti kapalı.',
+  'spi.core.beacon.jeton-girilmemis':'Jeton girilmemiş.',
+  'spi.core.beacon.yerel-olmayan-bir-adrese-duz':'Yerel olmayan bir adrese düz http ile gönderim yapılmaz: jeton ',
+  'spi.core.beacon.son-gonderimin-uzerinden-yet':'Son gönderimin üzerinden yeterli süre geçmedi.',
+  'spi.core.beacon.etiketsiz-ya-da-bozuk-alan':'Etiketsiz ya da bozuk alan var; gövde yola çıkmadı.',
+  'spi.core.beacon.tarih-gecersiz-ya-da-ileri':'Tarih geçersiz ya da ileri bir gün; kayıt ancak geçmiş bir güne yazılır.',
+  'spi.core.beacon.goruldu-olarak-isaretlendi-s':'Görüldü olarak işaretlendi. SPİ bunu senin adına uygulamaz: ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -109,10 +128,10 @@ SP.Beacon = (function(){
      Seviye degistirmek yeni bir izin ister gibi davranir: ne gonderilecegi
      yine satir satir gosterilir. */
   const LEVELS = [
-    { id:'ozet', label:'Özet',
-      note:'Yalnız yük kararını etkileyen çekirdek ölçümler.' },
-    { id:'gelismis', label:'Gelişmiş',
-      note:'Bölüm bazında ilerleme de gider — hâlâ yalnız sayı.' },
+    { id:'ozet', label:yz('spi.core.beacon.ozet'),
+      note:yz('spi.core.beacon.yalniz-yuk-kararini-etkileye') },
+    { id:'gelismis', label:yz('spi.core.beacon.gelismis'),
+      note:yz('spi.core.beacon.bolum-bazinda-ilerleme-de-gi') },
   ];
 
   function levelOf(){
@@ -341,13 +360,13 @@ SP.Beacon = (function(){
   async function pair(url){
     const adres = String(url || settings().url || '').replace(/\/$/, '');
     if(!urlOk(adres)){
-      return { ok:false, note:'Yerel olmayan bir adresle eşleme yapılmaz.' };
+      return { ok:false, note:yz('spi.core.beacon.yerel-olmayan-bir-adresle-es') };
     }
     let res;
     try{
       res = await fetch(adres + '/api/pair', { method:'POST' });
     }catch(e){
-      return { ok:false, note:'HKM\'ye ulaşılamadı. Daemon çalışıyor mu?' };
+      return { ok:false, note:yz('spi.core.beacon.hkm-ye-ulasilamadi-daemon-ca') };
     }
     let govde = null;
     try{ govde = await res.json(); }catch(e){ govde = null; }
@@ -358,7 +377,7 @@ SP.Beacon = (function(){
     }
     const son = await save({ url:adres, token:govde.token, enabled:true, lastStatus:null });
     if(son.baskaProfil) return { ok:false, note:LIFEOS.HkmBag.not(son.baskaProfil) };
-    return { ok:true, note:'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.' };
+    return { ok:true, note:yz('spi.core.beacon.baglandi-i-saret-acildi-ne-g') };
   }
 
   /* TEK TIKLA BAĞLAMA — HKM yüzündeki «Üç sistemi bağla» düğmesi.
@@ -388,10 +407,10 @@ SP.Beacon = (function(){
   async function hkmBagla(){
     let ust = '';
     try{ ust = new URL(document.referrer).origin; }catch(e){ ust = ''; }
-    if(!/^http:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(ust)) return { ok:false, note:'Yerel olmayan çağrı.' };
+    if(!/^http:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(ust)) return { ok:false, note:yz('spi.core.beacon.yerel-olmayan-cagri') };
     let sonuc;
     if(profilim() === 'ornek'){
-      sonuc = { ok:false, neden:'ornek', note:'Örnek profil açık; örnek profil HKM\'ye bağlanamaz.' };
+      sonuc = { ok:false, neden:'ornek', note:yz('spi.core.beacon.ornek-profil-acik-ornek-prof') };
     }else{
       const r = await pair(ust);
       sonuc = { ok:!!r.ok, note:r.note };
@@ -431,15 +450,15 @@ SP.Beacon = (function(){
     const o = opts || {};
     const a = settings();
     if(a.baskaProfil) return { ok:false, reason:'baska-profil', note:LIFEOS.HkmBag.not(a.baskaProfil) };
-    if(!a.enabled && !o.force) return { ok:false, reason:'off', note:'HKM işareti kapalı.' };
-    if(!a.token) return { ok:false, reason:'no-token', note:'Jeton girilmemiş.' };
+    if(!a.enabled && !o.force) return { ok:false, reason:'off', note:yz('spi.core.beacon.hkm-isareti-kapali') };
+    if(!a.token) return { ok:false, reason:'no-token', note:yz('spi.core.beacon.jeton-girilmemis') };
     if(!urlOk(a.url)){
       return { ok:false, reason:'unsafe-url',
-        note:'Yerel olmayan bir adrese düz http ile gönderim yapılmaz: jeton '
+        note:yz('spi.core.beacon.yerel-olmayan-bir-adrese-duz')
            + 'ağda açık gider. https ya da yerel adres gerekir.' };
     }
     if(!o.force && !due(Date.now())){
-      return { ok:false, reason:'throttled', note:'Son gönderimin üzerinden yeterli süre geçmedi.' };
+      return { ok:false, reason:'throttled', note:yz('spi.core.beacon.son-gonderimin-uzerinden-yet') };
     }
     const body = payload(o.date);
     const hata = contract(body);
@@ -447,7 +466,7 @@ SP.Beacon = (function(){
       await save({ lastAt:new Date().toISOString(), lastStatus:0,
         lastNote:'Gövde sözleşmeyi geçmedi: ' + hata[0] });
       return { ok:false, reason:'contract', errors:hata,
-        note:'Etiketsiz ya da bozuk alan var; gövde yola çıkmadı.' };
+        note:yz('spi.core.beacon.etiketsiz-ya-da-bozuk-alan') };
     }
     let durum = 0, not = '';
     try{
@@ -765,7 +784,7 @@ SP.Beacon = (function(){
     const metin = String(p.metin || '').trim().slice(0, 400);
     const out = { gun, yazilacak:[], yazilamaz:[], anlasilmayan:[] };
     if(!U.isISO(gun) || gun > U.todayISO()){
-      out.yazilamaz.push({ metin, why:'Tarih geçersiz ya da ileri bir gün; kayıt ancak geçmiş bir güne yazılır.' });
+      out.yazilamaz.push({ metin, why:yz('spi.core.beacon.tarih-gecersiz-ya-da-ileri') });
       return out;
     }
     if(!metin || !SP.Proposals){ out.anlasilmayan.push(metin); return out; }
@@ -817,7 +836,7 @@ SP.Beacon = (function(){
   async function acknowledgeIntent(n){
     if(!n) return { ok:false, error:'Teklif yok.' };
     return { ok:true, acknowledged:true,
-      note:'Görüldü olarak işaretlendi. SPİ bunu senin adına uygulamaz: '
+      note:yz('spi.core.beacon.goruldu-olarak-isaretlendi-s')
          + 'ölçüm de yük de senin kararın.' };
   }
 

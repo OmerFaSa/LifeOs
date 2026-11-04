@@ -12,47 +12,69 @@
         kılavuzunda yazar; bu tablo genel kuraldır ve her satır bunu söyler.
      3. ANA SINAV DEĞİŞMEZ. Önerilen sınav ek profil olur; YKS planına
         dokunmak büyük aksiyondur (madde 10), burada yapılmaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.sinavoneri.ortaokul-7-8-sinif':'Ortaokul (7–8. sınıf)',
+  'ays.core.sinavoneri.lise-ogrencisi':'Lise öğrencisi',
+  'ays.core.sinavoneri.lise-mezunu':'Lise mezunu',
+  'ays.core.sinavoneri.onlisans-ogrencisi-ya-da-mez':'Önlisans öğrencisi ya da mezunu',
+  'ays.core.sinavoneri.lisans-ogrencisi':'Lisans öğrencisi',
+  'ays.core.sinavoneri.lisans-son-sinif-ya-da':'Lisans son sınıf ya da mezunu',
+  'ays.core.sinavoneri.yuksek-lisans-doktora':'Yüksek lisans / doktora',
+  'ays.core.sinavoneri.liseye-yerlesmek':'Liseye yerleşmek',
+  'ays.core.sinavoneri.universiteye-lisansa-yerlesm':'Üniversiteye (lisansa) yerleşmek',
+  'ays.core.sinavoneri.onlisanstan-lisansa-gecmek':'Önlisanstan lisansa geçmek',
+  'ays.core.sinavoneri.kamuda-calismak':'Kamuda çalışmak',
+  'ays.core.sinavoneri.lisansustu-ya-da-akademik-ka':'Lisansüstü ya da akademik kariyer',
+  'ays.core.sinavoneri.yabanci-dil-belgesi':'Yabancı dil belgesi',
+  'ays.core.sinavoneri.lgs':'LGS',
+  'ays.core.sinavoneri.yks':'YKS',
+  'ays.core.sinavoneri.dgs':'DGS',
+  'ays.core.sinavoneri.kpss':'KPSS',
+  'ays.core.sinavoneri.ales':'ALES',
+  'ays.core.sinavoneri.yds':'YDS',
+});
+
 
 window.R = window.R || {};
 
 R.SinavOneri = (function(){
   const EGITIM = [
-    { id:'ortaokul',     ad:'Ortaokul (7–8. sınıf)' },
-    { id:'lise',         ad:'Lise öğrencisi' },
-    { id:'lise-mezun',   ad:'Lise mezunu' },
-    { id:'onlisans',     ad:'Önlisans öğrencisi ya da mezunu' },
-    { id:'lisans',       ad:'Lisans öğrencisi' },
-    { id:'lisans-son',   ad:'Lisans son sınıf ya da mezunu' },
-    { id:'lisansustu',   ad:'Yüksek lisans / doktora' },
+    { id:'ortaokul',     ad:yz('ays.core.sinavoneri.ortaokul-7-8-sinif') },
+    { id:'lise',         ad:yz('ays.core.sinavoneri.lise-ogrencisi') },
+    { id:'lise-mezun',   ad:yz('ays.core.sinavoneri.lise-mezunu') },
+    { id:'onlisans',     ad:yz('ays.core.sinavoneri.onlisans-ogrencisi-ya-da-mez') },
+    { id:'lisans',       ad:yz('ays.core.sinavoneri.lisans-ogrencisi') },
+    { id:'lisans-son',   ad:yz('ays.core.sinavoneri.lisans-son-sinif-ya-da') },
+    { id:'lisansustu',   ad:yz('ays.core.sinavoneri.yuksek-lisans-doktora') },
   ];
   const HEDEF = [
-    { id:'lise',        ad:'Liseye yerleşmek' },
-    { id:'universite',  ad:'Üniversiteye (lisansa) yerleşmek' },
-    { id:'gecis',       ad:'Önlisanstan lisansa geçmek' },
-    { id:'kamu',        ad:'Kamuda çalışmak' },
-    { id:'lisansustu',  ad:'Lisansüstü ya da akademik kariyer' },
-    { id:'dil',         ad:'Yabancı dil belgesi' },
+    { id:'lise',        ad:yz('ays.core.sinavoneri.liseye-yerlesmek') },
+    { id:'universite',  ad:yz('ays.core.sinavoneri.universiteye-lisansa-yerlesm') },
+    { id:'gecis',       ad:yz('ays.core.sinavoneri.onlisanstan-lisansa-gecmek') },
+    { id:'kamu',        ad:yz('ays.core.sinavoneri.kamuda-calismak') },
+    { id:'lisansustu',  ad:yz('ays.core.sinavoneri.lisansustu-ya-da-akademik-ka') },
+    { id:'dil',         ad:yz('ays.core.sinavoneri.yabanci-dil-belgesi') },
   ];
 
   /* Genel kural tablosu. `kimler`: girebilecek eğitim durumları;
      `sonra`: şimdi değil ama ileride girebilecekler. */
   const SINAVLAR = [
-    { id:'lgs', ad:'LGS', kurum:'MEB', hedef:['lise'],
+    { id:'lgs', ad:yz('ays.core.sinavoneri.lgs'), kurum:'MEB', hedef:['lise'],
       kimler:['ortaokul'], sonra:[],
       ne:'8. sınıf sonunda merkezî sınavla lise yerleştirme.' },
-    { id:'yks', ad:'YKS', kurum:'ÖSYM', hedef:['universite'],
+    { id:'yks', ad:yz('ays.core.sinavoneri.yks'), kurum:'ÖSYM', hedef:['universite'],
       kimler:['lise', 'lise-mezun', 'onlisans', 'lisans', 'lisans-son'], sonra:['ortaokul'],
       ne:'Lisans ve önlisans programlarına yerleştirme (TYT + AYT/YDT).' },
-    { id:'dgs', ad:'DGS', kurum:'ÖSYM', hedef:['gecis'],
+    { id:'dgs', ad:yz('ays.core.sinavoneri.dgs'), kurum:'ÖSYM', hedef:['gecis'],
       kimler:['onlisans'], sonra:['lise', 'lise-mezun'],
       ne:'Önlisans son sınıf öğrencisi ya da mezununun lisansın ara sınıfına geçişi.' },
-    { id:'kpss', ad:'KPSS', kurum:'ÖSYM', hedef:['kamu'],
+    { id:'kpss', ad:yz('ays.core.sinavoneri.kpss'), kurum:'ÖSYM', hedef:['kamu'],
       kimler:['lise-mezun', 'onlisans', 'lisans-son', 'lisansustu'], sonra:['lise', 'lisans'],
       ne:'Kamu kadrolarına yerleştirme; ortaöğretim, önlisans ve lisans düzeyleri ayrıdır.' },
-    { id:'ales', ad:'ALES', kurum:'ÖSYM', hedef:['lisansustu'],
+    { id:'ales', ad:yz('ays.core.sinavoneri.ales'), kurum:'ÖSYM', hedef:['lisansustu'],
       kimler:['lisans-son', 'lisansustu'], sonra:['lisans', 'onlisans', 'lise', 'lise-mezun'],
       ne:'Yüksek lisans, doktora ve akademik kadro başvurularında istenir.' },
-    { id:'yds', ad:'YDS', kurum:'ÖSYM', hedef:['dil', 'lisansustu'],
+    { id:'yds', ad:yz('ays.core.sinavoneri.yds'), kurum:'ÖSYM', hedef:['dil', 'lisansustu'],
       kimler:['lise-mezun', 'onlisans', 'lisans', 'lisans-son', 'lisansustu'], sonra:['lise', 'ortaokul'],
       ne:'Yabancı dil belgesi; lisansüstü ve akademik başvurularda dil şartını karşılar.' },
   ];

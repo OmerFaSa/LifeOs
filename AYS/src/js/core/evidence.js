@@ -14,6 +14,14 @@
    1. KAYNAGI OLMAYAN ESIK YONLENDIREMEZ.
    2. PLAN DEGISTIREN HER KURAL YETKI TASIMALIDIR. audit() bunu tarar.
    3. EKSENLER GIZLENMEZ — arayuz esigi gosteriyorsa dayanagini da gosterir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.evidence.kaynak-yok':'kaynak yok',
+  'ays.core.evidence.bu-esigin-kaynagi-yazilmamis':'Bu eşiğin kaynağı yazılmamış. Kaynağı bilinmeyen bir eşik ',
+  'ays.core.evidence.kaynak-turu-cozulemedi':'Kaynak türü çözülemedi.',
+  'ays.core.evidence.atif-metni-yok-ya-da':'Atıf metni yok ya da çok kısa.',
+  'ays.core.evidence.sistem-ayari-olan-esik-neden':'Sistem ayarı olan eşik NEDEN öyle seçildiğini yazmalı; ',
+});
+
 
 window.R = window.R || {};
 
@@ -153,9 +161,9 @@ R.Ev = (function(){
   function line(rule){
     const r = of(rule);
     if(!r){
-      return { source:null, label:'kaynak yok', tone:'warn', mayDirect:false,
+      return { source:null, label:yz('ays.core.evidence.kaynak-yok'), tone:'warn', mayDirect:false,
         authority:'observe_only', authorityLabel:'Yalnız izler',
-        text:'Bu eşiğin kaynağı yazılmamış. Kaynağı bilinmeyen bir eşik '
+        text:yz('ays.core.evidence.bu-esigin-kaynagi-yazilmamis')
            + 'plan değiştirmez.' };
     }
     const etkin = effective(r);
@@ -235,16 +243,16 @@ R.Ev = (function(){
       const r = resolve(e);
       if(!r){
         sorunlar.push({ rule:e.rule, kind:'unresolved',
-          note:'Kaynak türü çözülemedi.' });
+          note:yz('ays.core.evidence.kaynak-turu-cozulemedi') });
         return;
       }
       if(String(e.cite || '').length < 8){
         sorunlar.push({ rule:e.rule, kind:'no-citation',
-          note:'Atıf metni yok ya da çok kısa.' });
+          note:yz('ays.core.evidence.atif-metni-yok-ya-da') });
       }
       if(r.source === 'system_tuning' && String(e.note || '').length < 40){
         sorunlar.push({ rule:e.rule, kind:'no-rationale',
-          note:'Sistem ayarı olan eşik NEDEN öyle seçildiğini yazmalı; '
+          note:yz('ays.core.evidence.sistem-ayari-olan-esik-neden')
              + 'gerekçesiz bir seçim gizlenmiş bir keyfiliktir.' });
       }
     });

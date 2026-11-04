@@ -24,6 +24,47 @@
    "hepsi acik"tir cunku bir sistemin ilk acilista kullaniciya bir seyi
    kapattirmasi, daha kullanmadan bir sey kaybettirmektir. Kapatmak sonra
    da mumkun — ve kapatmak veriyi SILMEZ (bkz. core/modules.js). */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.setup.esp':'ESP',
+  'esp.core.setup.entelektuel-seviye-planlayic':'entelektüel seviye planlayıcı',
+  'esp.core.setup.i-lk-kurulum':'İlk kurulum',
+  'esp.core.setup.uc-alan-yeter-gerisi-calisti':'Üç alan yeter. Gerisi çalıştıkça dolar.',
+  'esp.core.setup.bu-sistem-senin-girdigin-pra':'Bu sistem senin girdiğin pratiği okur ve ondan hesap yapar. Sınav yapmaz, seviye vermez, yetenek yargısı kurmaz — ve bilmediği hiçbir şeyi tahmin etmez.',
+  'esp.core.setup.bu-alanlar-neyi-acar':'Bu alanlar neyi açar',
+  'esp.core.setup.siradaki-tek-is':'Sıradaki tek iş',
+  'esp.core.setup.acik-disiplinler-arasinda-on':'— açık disiplinler arasında önceliği kural motoru seçer',
+  'esp.core.setup.aralikli-tekrar':'Aralıklı tekrar',
+  'esp.core.setup.kart-eklediginde-retansiyon':'— kart eklediğinde retansiyon ölçülmeye başlar',
+  'esp.core.setup.haftalik-rota':'Haftalık rota',
+  'esp.core.setup.hic-acilmayan-disiplin-one':'— hiç açılmayan disiplin öne alınır',
+  'esp.core.setup.dokuz-ajanli-ofis':'Dokuz ajanlı ofis',
+  'esp.core.setup.her-masa-yalnizca-kendi':'— her masa yalnızca kendi ölçümüne bakar',
+  'esp.core.setup.merdiven':'Merdiven',
+  'esp.core.setup.her-bolumde-sifirdan-ustatli':'— her bölümde sıfırdan üstatlığa ölçülebilir basamaklar',
+  'esp.core.setup.girilmemis-gun-sifir-sayilma':'Girilmemiş gün sıfır sayılmaz.',
+  'esp.core.setup.calismadigin-gun-hesaba-0-da':'Çalışmadığın gün hesaba «0 dakika» diye girmez; o gün hiç sayılmaz ve kaç günden hesaplandığı ekranda yazar.',
+  'esp.core.setup.tahmin-olcum-gibi-gosterilme':'Tahmin, ölçüm gibi gösterilmez.',
+  'esp.core.setup.her-sayinin-yaninda-nereden':'Her sayının yanında nereden geldiği durur: ölçüldü, hesaplandı, tahmin.',
+  'esp.core.setup.ses-kaydi-tutulmaz':'Ses kaydı tutulmaz.',
+  'esp.core.setup.diksiyonda-saklanan-sey-sure':'Diksiyonda saklanan şey süre ve kendi işaretlediğin hata sayısıdır; ses dosyası hiç oluşmaz.',
+  'esp.core.setup.sinir':'Sınır:',
+  'esp.core.setup.ad':'Ad',
+  'esp.core.setup.sana-nasil-seslenelim':'Sana nasıl seslenelim?',
+  'esp.core.setup.odak':'Odak',
+  'esp.core.setup.calisilan-dil':'Çalışılan dil',
+  'esp.core.setup.enstruman':'Enstrüman',
+  'esp.core.setup.gunluk-pratik-tabani-dakika':'Günlük pratik tabanı (dakika)',
+  'esp.core.setup.hangi-bolumler-acik-olsun':'Hangi bölümler açık olsun?',
+  'esp.core.setup.secili-olanlar-isaretlidir-d':'Seçili olanlar ✓ işaretlidir. Dokununca açılır ya da kapanır.',
+  'esp.core.setup.simdilik-atla':'Şimdilik atla',
+  'esp.core.setup.geri':'Geri',
+  'esp.core.setup.devam':'Devam',
+  'esp.core.setup.basla':'Başla',
+  'esp.core.setup.eksik-ad':'Eksik: ad',
+  'esp.core.setup.hazir-ilk-oturumu-girince':'Hazır — ilk oturumu girince ölçüm başlar',
+  'esp.core.setup.atlandi-profil-ekranindan-is':'Atlandı — Profil ekranından istediğin zaman doldurabilirsin',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -43,7 +84,7 @@ ESP.Setup = (function(){
     const p = ESP.S.profile || {};
 
     ESP.UI.sheet({
-      title:'ESP', subtitle:'entelektüel seviye planlayıcı',
+      title:yz('esp.core.setup.esp'), subtitle:yz('esp.core.setup.entelektuel-seviye-planlayic'),
       wide:true, noClose:true,
       body:String(html`<div class="setup">
 
@@ -68,21 +109,19 @@ ESP.Setup = (function(){
           /* 1/3 Ne ölçüyoruz? — ne yapar, alanlar neyi açar */
           String(html`
         <div class="setup__hero">
-          <p class="setup__kicker">İlk kurulum</p>
-          <h2 class="setup__h">Üç alan yeter. Gerisi çalıştıkça dolar.</h2>
-          <p class="setup__lede">Bu sistem senin girdiğin pratiği okur ve ondan
-            hesap yapar. Sınav yapmaz, seviye vermez, yetenek yargısı kurmaz —
-            ve bilmediği hiçbir şeyi tahmin etmez.</p>
+          <p class="setup__kicker">${yz('esp.core.setup.i-lk-kurulum')}</p>
+          <h2 class="setup__h">${yz('esp.core.setup.uc-alan-yeter-gerisi-calisti')}</h2>
+          <p class="setup__lede">${yz('esp.core.setup.bu-sistem-senin-girdigin-pra')}</p>
         </div>
 
         <div class="setup__unlock">
-          <p class="setup__kicker">Bu alanlar neyi açar</p>
+          <p class="setup__kicker">${yz('esp.core.setup.bu-alanlar-neyi-acar')}</p>
           <ul class="setup__list">
-            <li><b>Sıradaki tek iş</b> — açık disiplinler arasında önceliği kural motoru seçer</li>
-            <li><b>Aralıklı tekrar</b> — kart eklediğinde retansiyon ölçülmeye başlar</li>
-            <li><b>Haftalık rota</b> — hiç açılmayan disiplin öne alınır</li>
-            <li><b>Dokuz ajanlı ofis</b> — her masa yalnızca kendi ölçümüne bakar</li>
-            <li><b>Merdiven</b> — her bölümde sıfırdan üstatlığa ölçülebilir basamaklar</li>
+            <li><b>${yz('esp.core.setup.siradaki-tek-is')}</b> ${yz('esp.core.setup.acik-disiplinler-arasinda-on')}</li>
+            <li><b>${yz('esp.core.setup.aralikli-tekrar')}</b> ${yz('esp.core.setup.kart-eklediginde-retansiyon')}</li>
+            <li><b>${yz('esp.core.setup.haftalik-rota')}</b> ${yz('esp.core.setup.hic-acilmayan-disiplin-one')}</li>
+            <li><b>${yz('esp.core.setup.dokuz-ajanli-ofis')}</b> ${yz('esp.core.setup.her-masa-yalnizca-kendi')}</li>
+            <li><b>${yz('esp.core.setup.merdiven')}</b> ${yz('esp.core.setup.her-bolumde-sifirdan-ustatli')}</li>
           </ul>
         </div>
 
@@ -91,55 +130,51 @@ ESP.Setup = (function(){
           String(html`
         <div class="setup__rules">
           <div class="setup__rule">
-            <b>Girilmemiş gün sıfır sayılmaz.</b>
-            <span>Çalışmadığın gün hesaba «0 dakika» diye girmez; o gün hiç
-              sayılmaz ve kaç günden hesaplandığı ekranda yazar.</span>
+            <b>${yz('esp.core.setup.girilmemis-gun-sifir-sayilma')}</b>
+            <span>${yz('esp.core.setup.calismadigin-gun-hesaba-0-da')}</span>
           </div>
           <div class="setup__rule">
-            <b>Tahmin, ölçüm gibi gösterilmez.</b>
-            <span>Her sayının yanında nereden geldiği durur: ölçüldü,
-              hesaplandı, tahmin.</span>
+            <b>${yz('esp.core.setup.tahmin-olcum-gibi-gosterilme')}</b>
+            <span>${yz('esp.core.setup.her-sayinin-yaninda-nereden')}</span>
           </div>
           <div class="setup__rule">
-            <b>Ses kaydı tutulmaz.</b>
-            <span>Diksiyonda saklanan şey süre ve kendi işaretlediğin hata
-              sayısıdır; ses dosyası hiç oluşmaz.</span>
+            <b>${yz('esp.core.setup.ses-kaydi-tutulmaz')}</b>
+            <span>${yz('esp.core.setup.diksiyonda-saklanan-sey-sure')}</span>
           </div>
         </div>
 
-        ${K.Notice({ tone:'warn', title:'Sınır:', body:ESP.PEDAGOGIC.disclaimer })}
+        ${K.Notice({ tone:'warn', title:yz('esp.core.setup.sinir'), body:ESP.PEDAGOGIC.disclaimer })}
 `),
           /* 3/3 Nasıl başlıyoruz? — alanlar ve açık bölümler */
           String(html`
         <div class="setup__form">
-          ${K.Field({ label:'Ad', hint:'yalnızca sana seslenmek için — modele gitmez',
+          ${K.Field({ label:yz('esp.core.setup.ad'), hint:'yalnızca sana seslenmek için — modele gitmez',
             input:K.Input({ id:'su-name', value:p.name || '',
-              placeholder:'Sana nasıl seslenelim?' }) })}
-          ${K.Field({ label:'Odak', hint:'eşit skorlu iki iş çıkarsa sırayı belirler',
+              placeholder:yz('esp.core.setup.sana-nasil-seslenelim') }) })}
+          ${K.Field({ label:yz('esp.core.setup.odak'), hint:'eşit skorlu iki iş çıkarsa sırayı belirler',
             input:K.Select({ id:'su-focus', value:p.focus || 'balanced',
               options:ESP.FOCUS.map(f => ({ value:f.id, label:f.label })) }) })}
-          ${K.Field({ label:'Çalışılan dil', hint:'sonradan eklenebilir',
+          ${K.Field({ label:yz('esp.core.setup.calisilan-dil'), hint:'sonradan eklenebilir',
             input:K.Select({ id:'su-lang', value:(p.langs && p.langs[0]) || 'en',
               options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }) })}
-          ${K.Field({ label:'Enstrüman', hint:'metronom ve tempo eşiği bunun için',
+          ${K.Field({ label:yz('esp.core.setup.enstruman'), hint:'metronom ve tempo eşiği bunun için',
             input:K.Input({ id:'su-instrument', value:p.instrument || 'gitar',
               placeholder:'gitar' }) })}
-          ${K.Field({ label:'Günlük pratik tabanı (dakika)',
+          ${K.Field({ label:yz('esp.core.setup.gunluk-pratik-tabani-dakika'),
             hint:'alt sınır, hedef değil: plan bunu en az sayar',
             input:K.Input({ id:'su-minutes', type:'number', numeric:true,
               min:10, max:600, value:p.dailyMinutes || 60, placeholder:'60' }) })}
         </div>
 
         <div class="setup__mods">
-          <p class="setup__kicker">Hangi bölümler açık olsun?</p>
+          <p class="setup__kicker">${yz('esp.core.setup.hangi-bolumler-acik-olsun')}</p>
           <p class="setup__lede">Dokunmazsan hepsi açık kalır. Kapattığın bölüm
             gezinmeden kalkar, reçeteye ve denge hesabına girmez — ama verisi
             silinmez, istediğin zaman Ayarlar'dan geri açarsın.</p>
           <div class="setup__picks">${map(ESP.DISCIPLINES, d => K.PickCard({
             label:d.label, meta:d.covers, on:ESP.Mod.isOn(d.id),
             act:'setup-mod', data:{ 'data-id':d.id } }))}</div>
-          <p class="setup__hintline">Seçili olanlar ✓ işaretlidir. Dokununca
-            açılır ya da kapanır.</p>
+          <p class="setup__hintline">${yz('esp.core.setup.secili-olanlar-isaretlidir-d')}</p>
         </div>
 
 `),
@@ -147,10 +182,10 @@ ESP.Setup = (function(){
       </div>`),
       /* Üç adım (171): «Geri» ilk adımda, «Devam» son adımda, «Başla»
          son adımdan önce gizli — LIFEOS.KURULUM_GIT görünürlüğü değiştirir. */
-      footer:String(html`${K.Button({ label:'Şimdilik atla', act:'setup-skip' })}
-        ${K.Button({ label:'Geri', act:'kurulum-geri', data:{ 'data-kurulum-degil':'1', hidden:true } })}
-        ${K.Button({ label:'Devam', tone:'primary', act:'kurulum-ileri', data:{ 'data-kurulum-degil':'3' } })}
-        ${K.Button({ label:'Başla', tone:'primary', act:'setup-save', data:{ 'data-kurulum-yalniz':'3', hidden:true } })}`),
+      footer:String(html`${K.Button({ label:yz('esp.core.setup.simdilik-atla'), act:'setup-skip' })}
+        ${K.Button({ label:yz('esp.core.setup.geri'), act:'kurulum-geri', data:{ 'data-kurulum-degil':'1', hidden:true } })}
+        ${K.Button({ label:yz('esp.core.setup.devam'), tone:'primary', act:'kurulum-ileri', data:{ 'data-kurulum-degil':'3' } })}
+        ${K.Button({ label:yz('esp.core.setup.basla'), tone:'primary', act:'setup-save', data:{ 'data-kurulum-yalniz':'3', hidden:true } })}`),
     });
   }
 
@@ -174,7 +209,7 @@ ESP.Setup = (function(){
 
     const ad = get('su-name');
     if(!ad){
-      ESP.UI.toast('Eksik: ad');
+      ESP.UI.toast(yz('esp.core.setup.eksik-ad'));
       return false;
     }
 
@@ -193,7 +228,7 @@ ESP.Setup = (function(){
     secim = null;
 
     ESP.UI.closeSheet();
-    ESP.UI.toast('Hazır — ilk oturumu girince ölçüm başlar');
+    ESP.UI.toast(yz('esp.core.setup.hazir-ilk-oturumu-girince'));
     ESP.App.render();
     return true;
   }
@@ -209,7 +244,7 @@ ESP.Setup = (function(){
   async function skip(){
     secim = null;
     ESP.UI.closeSheet();
-    ESP.UI.toast('Atlandı — Profil ekranından istediğin zaman doldurabilirsin');
+    ESP.UI.toast(yz('esp.core.setup.atlandi-profil-ekranindan-is'));
     await ESP.Model.savePrefs({ kurulumAtlandi:true });
   }
 

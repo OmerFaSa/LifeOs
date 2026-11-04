@@ -1,4 +1,9 @@
 /* Arayuz parcalari: ikonlar, olcum gorselleri, grafikler, alt sayfa ve bildirimler. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.ui.kapat':'Kapat',
+  'esp.core.ui.vazgec':'Vazgeç',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -642,7 +647,7 @@ ESP.UI = (function(){
       <div class="${opts.wide ? 'sheet sheet--wide' : 'sheet'}" role="dialog" aria-modal="true" aria-label="${opts.title}">
         <div class="sheet__head">
           <div><h3>${opts.title}</h3>${when(opts.subtitle, () => html`<p>${opts.subtitle}</p>`)}</div>
-          ${ESP.C.IconButton({ icon:'close', plain:true, aria:'Kapat', act:'sheet-close' })}
+          ${ESP.C.IconButton({ icon:'close', plain:true, aria:yz('esp.core.ui.kapat'), act:'sheet-close' })}
         </div>
         <div class="sheet__body">
           ${when(opts.note, () => html`<p class="sheet__note">${opts.note}</p>`)}
@@ -795,7 +800,7 @@ ESP.UI = (function(){
     sheet({
       title,
       body:String(ESP.h.html`<p>${message}</p>`),
-      footer:String(ESP.h.html`${ESP.C.Button({ label:'Vazgeç', act:'sheet-close' })}
+      footer:String(ESP.h.html`${ESP.C.Button({ label:yz('esp.core.ui.vazgec'), act:'sheet-close' })}
         ${ESP.C.Button({ label:onay || 'Evet, devam et', tone:danger ? 'danger' : 'primary', act:'confirm-yes' })}`),
       noFocus:true,
     });

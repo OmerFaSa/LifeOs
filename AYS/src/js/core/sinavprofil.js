@@ -15,6 +15,24 @@
       profilde «puanlama: veri yok» durur.
    4. PROFİL EKLEMEK PLANI DEĞİŞTİRMEZ. Ek profil konu takibi ve materyal
       isteği içindir; YKS planına dokunmaz ve kaldırılabilir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.sinavprofil.yks-say':'YKS · SAY',
+  'ays.core.sinavprofil.kayit-bir-mufredat-raporu-de':'Kayıt bir müfredat raporu değil.',
+  'ays.core.sinavprofil.kayit-kimligi-gecersiz':'Kayıt kimliği geçersiz.',
+  'ays.core.sinavprofil.raporda-sinav-adi-yok':'Raporda sınav adı yok.',
+  'ays.core.sinavprofil.raporun-hicbir-dersi-ays-nin':'Raporun hiçbir dersi AYS’nin denetimini geçmedi.',
+  'ays.core.sinavprofil.profilin-adi-2-80-karakter-o':'Profilin adı 2–80 karakter olmalı.',
+  'ays.core.sinavprofil.metinde-ders-bulunamadi-ders':'Metinde ders bulunamadı. «Ders adı: konu1, konu2» biçiminde yaz.',
+  'ays.core.sinavprofil.yerlesik-profil-kaldirilamaz':'Yerleşik profil kaldırılamaz.',
+  'ays.core.sinavprofil.profil-bulunamadi':'Profil bulunamadı.',
+  'ays.core.sinavprofil.konu-bu-profilde-yok':'Konu bu profilde yok.',
+  'ays.core.sinavprofil.hangi-sinavin-mufredati-kpss':'Hangi sınavın müfredatı? «KPSS genel kültür müfredatını çıkar» gibi yazabilirsin.',
+  'ays.core.sinavprofil.hkm-bagli-degil-mufredat-ist':'HKM bağlı değil; müfredat istenemedi. Müfredatı uydurmam: ',
+  'ays.core.sinavprofil.hkm-ye-ulasilamadi-hkm-acikk':'HKM’ye ulaşılamadı; HKM açıkken yeniden dene.',
+  'ays.core.sinavprofil.king-is-emrini-almadi':'King iş emrini almadı: ',
+  'ays.core.sinavprofil.king-bu-is-icin-teklif':'King bu iş için teklif hazırladı (iş emri #',
+});
+
 
 window.R = window.R || {};
 
@@ -30,7 +48,7 @@ R.SinavProfil = (function(){
   /* ------------------------------------------------------------ liste */
 
   function yerlesik(){
-    return { id:YERLESIK, ad:'YKS · SAY', kaynak:'yerlesik', dogruluk:'yerlesik',
+    return { id:YERLESIK, ad:yz('ays.core.sinavprofil.yks-say'), kaynak:'yerlesik', dogruluk:'yerlesik',
       dersler:(R.SUBJECTS || []).map(s => ({ id:s.id, ad:s.name, soru:s.questions || null,
         konular:s.topics.map(t => ({ id:t.id, ad:t.name })) })),
       puanlama:'Puan ekranındaki yerleşik hesap.', bitenler:null };
@@ -51,14 +69,14 @@ R.SinavProfil = (function(){
   function kayittan(kayit){
     const g = kayit && kayit.govde;
     if(!kayit || kayit.tur !== 'arastirma' || !g || g.tur !== 'mufredat'){
-      return { ok:false, why:'Kayıt bir müfredat raporu değil.' };
+      return { ok:false, why:yz('ays.core.sinavprofil.kayit-bir-mufredat-raporu-de') };
     }
     const kid = Number(kayit.id);
-    if(!Number.isInteger(kid) || kid < 1) return { ok:false, why:'Kayıt kimliği geçersiz.' };
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, why:yz('ays.core.sinavprofil.kayit-kimligi-gecersiz') };
     const ad = bosluk(g.sinav);
-    if(ad.length < 2 || ad.length > 80) return { ok:false, why:'Raporda sınav adı yok.' };
+    if(ad.length < 2 || ad.length > 80) return { ok:false, why:yz('ays.core.sinavprofil.raporda-sinav-adi-yok') };
     const { dersler, dusen } = dersSuz(g.dersler);
-    if(!dersler.length) return { ok:false, why:'Raporun hiçbir dersi AYS’nin denetimini geçmedi.' };
+    if(!dersler.length) return { ok:false, why:yz('ays.core.sinavprofil.raporun-hicbir-dersi-ays-nin') };
     const acik = (Array.isArray(g.acik_kalanlar) ? g.acik_kalanlar : []).map(bosluk)
       .filter(x => x.length >= 2).map(x => x.slice(0, 300)).slice(0, 12);
     return { ok:true, profil:{
@@ -107,7 +125,7 @@ R.SinavProfil = (function(){
      Etiket «kullanıcı beyanı»dır: kaynağı sensin; AYS doğrulamaz, süzer. */
   function metindenProfil(ad, metin){
     const sinav = bosluk(ad);
-    if(sinav.length < 2 || sinav.length > 80) return { ok:false, why:'Profilin adı 2–80 karakter olmalı.' };
+    if(sinav.length < 2 || sinav.length > 80) return { ok:false, why:yz('ays.core.sinavprofil.profilin-adi-2-80-karakter-o') };
     const ham = [];
     let acik = null;
     String(metin || '').split(/\r?\n/).forEach(satir => {
@@ -124,7 +142,7 @@ R.SinavProfil = (function(){
       if(acik) acik.konular.push(t);
     });
     const { dersler, dusen } = dersSuz(ham);
-    if(!dersler.length) return { ok:false, why:'Metinde ders bulunamadı. «Ders adı: konu1, konu2» biçiminde yaz.' };
+    if(!dersler.length) return { ok:false, why:yz('ays.core.sinavprofil.metinde-ders-bulunamadi-ders') };
     return { ok:true, dusen, profil:{
       id:'kul-' + R.U.uid('p').slice(2), ad:sinav, bolum:null, kaynak:'kullanici', kayitId:null,
       dogruluk:'kullanici', dersler, puanlama:null, puanlamaNotu:null, acikKalanlar:[],
@@ -146,8 +164,8 @@ R.SinavProfil = (function(){
   }
 
   async function sil(id){
-    if(id === YERLESIK) return { ok:false, why:'Yerleşik profil kaldırılamaz.' };
-    if(!ekler().some(p => p.id === id)) return { ok:false, why:'Profil bulunamadı.' };
+    if(id === YERLESIK) return { ok:false, why:yz('ays.core.sinavprofil.yerlesik-profil-kaldirilamaz') };
+    if(!ekler().some(p => p.id === id)) return { ok:false, why:yz('ays.core.sinavprofil.profil-bulunamadi') };
     R.S.sinavProfilleri = ekler().filter(p => p.id !== id);
     await R.Store.remove('sinavprofil/' + id);
     return { ok:true };
@@ -157,9 +175,9 @@ R.SinavProfil = (function(){
      durumu Dersler ekranının kendi kapanış ölçümüdür; buradan yazılmaz. */
   async function konuIsaretle(profilId, konuId){
     const p = ekler().find(x => x.id === profilId);
-    if(!p) return { ok:false, why:'Profil bulunamadı.' };
+    if(!p) return { ok:false, why:yz('ays.core.sinavprofil.profil-bulunamadi') };
     if(!p.dersler.some(d => d.konular.some(k => k.id === konuId))){
-      return { ok:false, why:'Konu bu profilde yok.' };
+      return { ok:false, why:yz('ays.core.sinavprofil.konu-bu-profilde-yok') };
     }
     const b = p.bitenler || [];
     const yeni = b.indexOf(konuId) >= 0 ? b.filter(x => x !== konuId) : b.concat([konuId]);
@@ -228,7 +246,7 @@ R.SinavProfil = (function(){
 
   async function iste(sinav, bolum){
     const ad = bosluk(sinav);
-    if(ad.length < 2 || ad.length > 80) return { ok:false, metin:'Hangi sınavın müfredatı? «KPSS genel kültür müfredatını çıkar» gibi yazabilirsin.' };
+    if(ad.length < 2 || ad.length > 80) return { ok:false, metin:yz('ays.core.sinavprofil.hangi-sinavin-mufredati-kpss') };
     if(ekler().some(p => kucuk(p.ad) === kucuk(ad))){
       return { ok:false, metin:'«' + ad + '» profili zaten var; Dersler ekranında duruyor.' };
     }
@@ -236,12 +254,12 @@ R.SinavProfil = (function(){
     if(bosluk(bolum)) mf.bolum = bosluk(bolum).slice(0, 80);
     const r = await istek('/api/king/emir', { modul:'ays', tur:'sinav.mufredat', govde:{ mufredat:mf },
       neden:'Kullanıcı bu sınavın müfredatını istedi.' });
-    if(!r.bagli) return { ok:false, metin:'HKM bağlı değil; müfredat istenemedi. Müfredatı uydurmam: '
+    if(!r.bagli) return { ok:false, metin:yz('ays.core.sinavprofil.hkm-bagli-degil-mufredat-ist')
       + 'BAM çıkarmadan profil kurulmaz. Rehber › HKM’den bağlanınca yeniden iste.' };
-    if(r.ag) return { ok:false, metin:'HKM’ye ulaşılamadı; HKM açıkken yeniden dene.' };
+    if(r.ag) return { ok:false, metin:yz('ays.core.sinavprofil.hkm-ye-ulasilamadi-hkm-acikk') };
     const g = r.govde || {};
     if(!r.ok || !g.ok){
-      return { ok:false, metin:'King iş emrini almadı: '
+      return { ok:false, metin:yz('ays.core.sinavprofil.king-is-emrini-almadi')
         + ((g.errors || []).join('; ') || g.note || ('HTTP ' + r.status)) };
     }
     const e = g.emir || {};
@@ -249,7 +267,7 @@ R.SinavProfil = (function(){
     if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
     if(e.durum === 'teklif'){
       return { ok:true, karar:g.karar, emirId:e.id, teklif:true,
-        metin:'King bu iş için teklif hazırladı (iş emri #' + e.id + '). Bugün’deki King teklifi '
+        metin:yz('ays.core.sinavprofil.king-bu-is-icin-teklif') + e.id + '). Bugün’deki King teklifi '
           + 'kartında maliyeti ve süreyi görüp onayla; onaylamadan iş açılmaz. Rapor gelince '
           + 'Bugün’de teklif olarak görünür; onaylarsan profil eklenir.' };
     }

@@ -18,6 +18,8 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:90, id:'act:ladder', kind:'Eylem', label:'Merdiveni aç',
+  hint:'Günlük', run:() => { ESP.S.ui.ladderTab = 'ozet'; ESP.App.go('ladder'); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.ladder.genel-kademe':'Genel kademe',
   'esp.ladder.olculmus-uretim':'Ölçülmüş üretim',
@@ -414,7 +416,7 @@ ESP.Screens.ladder = (function(){
 
   /* Sekme yok (EKIP-PLANI §1.2): genel, yol ve seviye tespiti alt alta;
      disiplin seçici yol ve tespit içindir, hep görünür. */
-  LIFEOS.PARCA.blok({ id:'ladder.bolum-1', sayfa:'ladder', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ disc }){
+  LIFEOS.PARCA.blok({ id:'ladder.merdiven-sekmeleri', sayfa:'ladder', yer:'y1', sira:10, ad:'Merdiven sekmeleri', ciz({ disc }){
     return K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:yz('esp.ladder.merdiven-bolumleri'), tabs:TABS,
         govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows } }));
   } });

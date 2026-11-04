@@ -5,6 +5,8 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:100, group:'Git', label:'Sınama — kendini test et', icon:'zap', route:'quiz', run(){ R.App.go('quiz'); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:250, group:'Kayıt', label:'Sınamayı başlat', icon:'play', route:'quiz', run(){ R.App.go('quiz'); setTimeout(()=>R.Screens.quiz.handle['quiz-start']({dataset:{}}), 60); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.quiz.bilmiyordum':'Bilmiyordum',
   'ays.quiz.emin-degildim':'Emin değildim',

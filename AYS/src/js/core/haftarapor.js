@@ -16,6 +16,34 @@
    3. BELGE DEĞİL (AGENTS §1.5). Rapor başarı belgesi, yetenek yargısı ya
       da sonuç tahmini değildir; bu sayfada yazar. «Bu hızla» varsa
       «tahmin» etiketiyle ve dayanağıyla durur. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.haftarapor.haftalik-calisma-raporu':'Haftalık çalışma raporu',
+  'ays.core.haftarapor.hafta':'Hafta',
+  'ays.core.haftarapor.tarihinde-hazirlandi':'tarihinde hazırlandı',
+  'ays.core.haftarapor.yks-hazirligi':'YKS hazırlığı',
+  'ays.core.haftarapor.bu-bir-basari-belgesi-degild':'Bu bir başarı belgesi değildir.',
+  'ays.core.haftarapor.yalniz-kayda-gecen-calismani':'Yalnız kayda geçen çalışmanın özetidir; yetenek yargısı ya da sınav sonucu tahmini içermez.',
+  'ays.core.haftarapor.kesinlik-anahtari':'Kesinlik anahtarı —',
+  'ays.core.haftarapor.olculdu':'ölçüldü:',
+  'ays.core.haftarapor.ogrencinin-girdigi-kayit':'öğrencinin girdiği kayıt ·',
+  'ays.core.haftarapor.hesaplandi':'hesaplandı:',
+  'ays.core.haftarapor.kayitlardan-formulle-turetil':'kayıtlardan formülle türetildi ·',
+  'ays.core.haftarapor.veri-yok':'veri yok:',
+  'ays.core.haftarapor.kayit-girilmedi-sifir-sayilm':'kayıt girilmedi; sıfır sayılmaz.',
+  'ays.core.haftarapor.gosterge':'Gösterge',
+  'ays.core.haftarapor.deger':'Değer',
+  'ays.core.haftarapor.kesinlik':'Kesinlik',
+  'ays.core.haftarapor.bu-haftanin-denemeleri':'Bu haftanın denemeleri',
+  'ays.core.haftarapor.tarih':'Tarih',
+  'ays.core.haftarapor.deneme':'Deneme',
+  'ays.core.haftarapor.yayin':'Yayın',
+  'ays.core.haftarapor.net':'Net',
+  'ays.core.haftarapor.netler-olculdu-dogru-yanlis':'Netler ölçüldü: doğru − yanlış / 4.',
+  'ays.core.haftarapor.bu-hafta-deneme-kaydi-yok':'Bu hafta deneme kaydı yok.',
+  'ays.core.haftarapor.bu-hizla':'Bu hızla',
+  'ays.core.haftarapor.ays-kayitlar-ogrencinin-ciha':'AYS · kayıtlar öğrencinin cihazında tutulur; bu sayfa yazdırılınca hiçbir yere gönderilmez.',
+});
+
 
 window.R = window.R || {};
 
@@ -69,45 +97,43 @@ R.HaftaRapor = (function(){
     return String(html`<div id="print-root" class="printdoc" data-oz="Y10">
       <div class="printdoc__head">
         <div>
-          <b class="printdoc__title">Haftalık çalışma raporu</b>
-          <span class="printdoc__sub">Hafta ${v.hafta} · ${U.fmtDate(v.bas)} – ${U.fmtDate(v.son)} ·
-            ${U.fmtDate(U.todayISO())} tarihinde hazırlandı</span>
+          <b class="printdoc__title">${yz('ays.core.haftarapor.haftalik-calisma-raporu')}</b>
+          <span class="printdoc__sub">${yz('ays.core.haftarapor.hafta')} ${v.hafta} · ${U.fmtDate(v.bas)} – ${U.fmtDate(v.son)} ·
+            ${U.fmtDate(U.todayISO())} ${yz('ays.core.haftarapor.tarihinde-hazirlandi')}</span>
         </div>
-        ${when(v.ad, () => html`<div class="printdoc__who"><b>${v.ad}</b><span>YKS hazırlığı</span></div>`)}
+        ${when(v.ad, () => html`<div class="printdoc__who"><b>${v.ad}</b><span>${yz('ays.core.haftarapor.yks-hazirligi')}</span></div>`)}
       </div>
 
-      <p class="printdoc__limit"><b>Bu bir başarı belgesi değildir.</b>
-        Yalnız kayda geçen çalışmanın özetidir; yetenek yargısı ya da sınav sonucu
-        tahmini içermez.</p>
+      <p class="printdoc__limit"><b>${yz('ays.core.haftarapor.bu-bir-basari-belgesi-degild')}</b>
+        ${yz('ays.core.haftarapor.yalniz-kayda-gecen-calismani')}</p>
 
-      <p class="printdoc__key"><b>Kesinlik anahtarı —</b>
-        <b>ölçüldü:</b> öğrencinin girdiği kayıt ·
-        <b>hesaplandı:</b> kayıtlardan formülle türetildi ·
-        <b>veri yok:</b> kayıt girilmedi; sıfır sayılmaz.</p>
+      <p class="printdoc__key"><b>${yz('ays.core.haftarapor.kesinlik-anahtari')}</b>
+        <b>${yz('ays.core.haftarapor.olculdu')}</b> ${yz('ays.core.haftarapor.ogrencinin-girdigi-kayit')}
+        <b>${yz('ays.core.haftarapor.hesaplandi')}</b> ${yz('ays.core.haftarapor.kayitlardan-formulle-turetil')}
+        <b>${yz('ays.core.haftarapor.veri-yok')}</b> ${yz('ays.core.haftarapor.kayit-girilmedi-sifir-sayilm')}</p>
 
-      <h3 class="printdoc__h">Hafta</h3>
+      <h3 class="printdoc__h">${yz('ays.core.haftarapor.hafta')}</h3>
       <table class="table--tight">
-        <thead><tr><th>Gösterge</th><th class="num">Değer</th><th>Kesinlik</th></tr></thead>
+        <thead><tr><th>${yz('ays.core.haftarapor.gosterge')}</th><th class="num">${yz('ays.core.haftarapor.deger')}</th><th>${yz('ays.core.haftarapor.kesinlik')}</th></tr></thead>
         <tbody>${map(v.satirlar, s => html`<tr>
           <td>${s.ad}</td><td class="num">${s.deger}</td><td>${KES(s.kes)}</td></tr>`)}</tbody>
       </table>
 
-      <h3 class="printdoc__h">Bu haftanın denemeleri</h3>
+      <h3 class="printdoc__h">${yz('ays.core.haftarapor.bu-haftanin-denemeleri')}</h3>
       ${v.denemeler.length
         ? html`<table class="table--tight">
-            <thead><tr><th>Tarih</th><th>Deneme</th><th>Yayın</th><th class="num">Net</th></tr></thead>
+            <thead><tr><th>${yz('ays.core.haftarapor.tarih')}</th><th>${yz('ays.core.haftarapor.deneme')}</th><th>${yz('ays.core.haftarapor.yayin')}</th><th class="num">${yz('ays.core.haftarapor.net')}</th></tr></thead>
             <tbody>${map(v.denemeler, d => html`<tr>
               <td>${U.fmtDate(d.tarih)}</td><td>${d.ad}</td><td>${d.yayin || '—'}</td>
               <td class="num">${d.net}</td></tr>`)}</tbody>
           </table>
-          <p class="printdoc__note">Netler ölçüldü: doğru − yanlış / 4.</p>`
-        : html`<p class="printdoc__note">Bu hafta deneme kaydı yok.</p>`}
+          <p class="printdoc__note">${yz('ays.core.haftarapor.netler-olculdu-dogru-yanlis')}</p>`
+        : html`<p class="printdoc__note">${yz('ays.core.haftarapor.bu-hafta-deneme-kaydi-yok')}</p>`}
 
-      <h3 class="printdoc__h">Bu hızla</h3>
+      <h3 class="printdoc__h">${yz('ays.core.haftarapor.bu-hizla')}</h3>
       <p class="printdoc__note">${v.hiz.metin} <b>(${v.hiz.etiket})</b></p>
 
-      <p class="printdoc__foot">AYS · kayıtlar öğrencinin cihazında tutulur; bu sayfa
-        yazdırılınca hiçbir yere gönderilmez.</p>
+      <p class="printdoc__foot">${yz('ays.core.haftarapor.ays-kayitlar-ogrencinin-ciha')}</p>
     </div>`);
   }
 

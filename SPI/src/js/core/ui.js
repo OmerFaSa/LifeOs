@@ -1,4 +1,9 @@
 /* Arayuz parcalari: ikonlar, olcum gorselleri, grafikler, alt sayfa ve bildirimler. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.ui.kapat':'Kapat',
+  'spi.core.ui.vazgec':'Vazgeç',
+});
+
 
 window.SP = window.SP || {};
 
@@ -667,7 +672,7 @@ SP.UI = (function(){
       <div class="${opts.wide ? 'sheet sheet--wide' : 'sheet'}" role="dialog" aria-modal="true" aria-label="${opts.title}">
         <div class="sheet__head">
           <div><h3>${opts.title}</h3>${when(opts.subtitle, () => html`<p>${opts.subtitle}</p>`)}</div>
-          ${SP.C.IconButton({ icon:'close', plain:true, aria:'Kapat', act:'sheet-close' })}
+          ${SP.C.IconButton({ icon:'close', plain:true, aria:yz('spi.core.ui.kapat'), act:'sheet-close' })}
         </div>
         <div class="sheet__body">
           ${when(opts.note, () => html`<p class="sheet__note">${opts.note}</p>`)}
@@ -820,7 +825,7 @@ SP.UI = (function(){
     sheet({
       title,
       body:String(SP.h.html`<p>${message}</p>`),
-      footer:String(SP.h.html`${SP.C.Button({ label:'Vazgeç', act:'sheet-close' })}
+      footer:String(SP.h.html`${SP.C.Button({ label:yz('spi.core.ui.vazgec'), act:'sheet-close' })}
         ${SP.C.Button({ label:onay || 'Evet, devam et', tone:danger ? 'danger' : 'primary', act:'confirm-yes' })}`),
       noFocus:true,
     });

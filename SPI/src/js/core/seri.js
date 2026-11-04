@@ -28,6 +28,17 @@
         değişmez, «çöz» denince seri yeniden hesaplanır.
      5. HKM'YE YALNIZ TATİLİN TARİHİ GİDER (hedefag.js): tatildeyken HKM
         soru sormaz; dönüşte yük azaltma teklifi bırakır. Neden gitmez. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.seri.yillik-tatil-siniri-0-ile':'Yıllık tatil sınırı 0 ile 365 arasında tam gün olmalı.',
+  'ortak.seri.tarih-gecersiz':'Tarih geçersiz.',
+  'ortak.seri.neden-hasta-izin-ya-da':'Neden hasta, izin ya da tatil olmalı.',
+  'ortak.seri.en-cok':'En çok ',
+  'ortak.seri.tek-seferde-en-cok':'Tek seferde en çok ',
+  'ortak.seri.hasta-gunu-tek-seferde-en':'Hasta günü tek seferde en çok 3 gün; daha uzunsa tatil/izin seç.',
+  'ortak.seri.kayit-bulunamadi':'Kayıt bulunamadı.',
+  'ortak.seri.etkin-bir-tatil-yok':'Etkin bir tatil yok.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -78,7 +89,7 @@ LIFEOS.Seri = (function(){
 
     /* Küçük aksiyon: tek ayar, geri alınır (dönen `onceki` ile). */
     async function yillikTatilAyarla(n){
-      if(!gecerliSinir(n)) return { ok:false, why:'Yıllık tatil sınırı 0 ile 365 arasında tam gün olmalı.' };
+      if(!gecerliSinir(n)) return { ok:false, why:yz('ortak.seri.yillik-tatil-siniri-0-ile') };
       const onceki = yillikTatil();
       yillikAyar = n;
       await yaz();
@@ -110,12 +121,12 @@ LIFEOS.Seri = (function(){
     async function dondur(bas, bit, neden){
       const bugun = o.bugun();
       bit = bit || bas;
-      if(!ISO.test(String(bas)) || !ISO.test(String(bit)) || bas > bit) return { ok:false, why:'Tarih geçersiz.' };
-      if(!NEDEN[neden]) return { ok:false, why:'Neden hasta, izin ya da tatil olmalı.' };
-      if(fark(bas, bugun) > GERI_GUN) return { ok:false, why:'En çok ' + GERI_GUN + ' gün geriye işaretlenebilir.' };
+      if(!ISO.test(String(bas)) || !ISO.test(String(bit)) || bas > bit) return { ok:false, why:yz('ortak.seri.tarih-gecersiz') };
+      if(!NEDEN[neden]) return { ok:false, why:yz('ortak.seri.neden-hasta-izin-ya-da') };
+      if(fark(bas, bugun) > GERI_GUN) return { ok:false, why:yz('ortak.seri.en-cok') + GERI_GUN + ' gün geriye işaretlenebilir.' };
       const gun = fark(bas, bit) + 1;
-      if(gun > EN_UZUN) return { ok:false, why:'Tek seferde en çok ' + EN_UZUN + ' gün.' };
-      if(neden !== 'tatil' && neden !== 'izin' && gun > 3) return { ok:false, why:'Hasta günü tek seferde en çok 3 gün; daha uzunsa tatil/izin seç.' };
+      if(gun > EN_UZUN) return { ok:false, why:yz('ortak.seri.tek-seferde-en-cok') + EN_UZUN + ' gün.' };
+      if(neden !== 'tatil' && neden !== 'izin' && gun > 3) return { ok:false, why:yz('ortak.seri.hasta-gunu-tek-seferde-en') };
       for(let d = bas; d <= bit; d = gunEkle(d, 1)) if(donmusMu(d)) return { ok:false, why:d + ' zaten dondurulmuş.' };
       if(neden !== 'tatil'){
         /* Ay dönümünü geçen kayıt dokunduğu HER ayın sınırına bakar (D-19). */
@@ -145,7 +156,7 @@ LIFEOS.Seri = (function(){
 
     async function coz(id){
       const k = liste.find(x => x.id === id);
-      if(!k) return { ok:false, why:'Kayıt bulunamadı.' };
+      if(!k) return { ok:false, why:yz('ortak.seri.kayit-bulunamadi') };
       liste = liste.filter(x => x.id !== id);
       await yaz();
       return { ok:true, kayit:k };
@@ -154,7 +165,7 @@ LIFEOS.Seri = (function(){
     /* Tatili bugün BİTİR: geçmiş günler donmuş kalır, yarın ve sonrası çözülür. */
     async function tatiliBitir(){
       const t = aktifTatil();
-      if(!t) return { ok:false, why:'Etkin bir tatil yok.' };
+      if(!t) return { ok:false, why:yz('ortak.seri.etkin-bir-tatil-yok') };
       const bugun = o.bugun();
       if(t.bas >= bugun) liste = liste.filter(x => x !== t);
       else t.bit = gunEkle(bugun, -1) < t.bas ? t.bas : gunEkle(bugun, -1);

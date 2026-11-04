@@ -6,6 +6,8 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'spi', sira:70, id:'act:backup', kind:'Eylem', label:'Yedek indir',
+  hint:'Veri', run:() => { SP.S.ui.guideTab = 'veri'; SP.App.go('guide'); } });
 window.LIFEOS.PARCA.yazilar({
   'spi.guide.kullanim':'Kullanım',
   'spi.guide.ofis':'Ofis',
@@ -675,11 +677,11 @@ SP.Screens.guide = (function(){
     }
   }
 
-  LIFEOS.PARCA.blok({ id:'guide.bolum-1', sayfa:'guide', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+  LIFEOS.PARCA.blok({ id:'guide.rehber-sekmeleri', sayfa:'guide', yer:'y1', sira:10, ad:'Rehber sekmeleri', ciz(){
     return K.SayfaBolumleri({ act:'guide-tab', aria:yz('spi.guide.rehber-bolumleri'),
       bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) });
   } });
-  LIFEOS.PARCA.blok({ id:'guide.bolum-2', sayfa:'guide', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+  LIFEOS.PARCA.blok({ id:'guide.kolaylik-pusulasi', sayfa:'guide', yer:'y2', sira:10, ad:'Kolaylık pusulası', ciz(){
     return raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '');
   } });
   async function render(){

@@ -28,6 +28,33 @@
    UYGULAMA büyük aksiyondur (AGENTS.md §1.9): ayrıntılı önizleme + onay
    + geri dönüş noktası. Katalogda `plan-uygula` (core/proposals.js);
    model bu eylemi ÖNEREMEZ. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.plan.hedef-bulunamadi':'Hedef bulunamadı.',
+  'spi.core.plan.bu-hedef-icin-plan-motoru':'Bu hedef için plan motoru henüz yok.',
+  'spi.core.plan.plan-yalniz-aktif-bir-hedef':'Plan yalnız aktif bir hedef için kurulur.',
+  'spi.core.plan.hedefin-son-tarihi-gecmis-ya':'Hedefin son tarihi geçmiş ya da yok.',
+  'spi.core.plan.su-anki-kilon-bilinmeden-pla':'Şu anki kilon bilinmeden plan kurulamaz.',
+  'spi.core.plan.hedef-kilo-bilinmiyor':'Hedef kilo bilinmiyor.',
+  'spi.core.plan.su-anki-kilon-zaten-hedefte':'Şu anki kilon zaten hedefte.',
+  'spi.core.plan.bu-tempoyla-plan-kurulamaz':'Bu tempoyla plan kurulamaz: ',
+  'spi.core.plan.plani-uygula':'Planı uygula',
+  'spi.core.plan.plan-onerisi-yazilamadi':'Plan önerisi yazılamadı.',
+  'spi.core.plan.geri-alinacak-bir-plan-yok':'Geri alınacak bir plan yok.',
+  'spi.core.plan.plan-basladigindan-beri-tart':'Plan başladığından beri tartı girilmedi; ',
+  'spi.core.plan.once-plani-uygula-king-e-uyg':'Önce planı uygula; King’e uygulanmış plan iletilir.',
+  'spi.core.plan.hkm-bagli-degil-is-emri':'HKM bağlı değil; iş emri açılmadı. Plan SPİ’de ',
+  'spi.core.plan.hkm-ye-ulasilamadi-is-emri-a':'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden dene.',
+  'spi.core.plan.king-is-emrini-almadi':'King iş emrini almadı: ',
+  'spi.core.plan.kayit-bir-program-degil':'Kayıt bir program değil.',
+  'spi.core.plan.plan-denetcisi-bu-programi-g':'Plan denetçisi bu programı geçirmemiş.',
+  'spi.core.plan.program-baska-bir-hedefe-ait':'Program başka bir hedefe ait.',
+  'spi.core.plan.program-bu-planin-baslangici':'Program bu planın başlangıcına göre kurulmamış.',
+  'spi.core.plan.programin-hafta-sayisi-planl':'Programın hafta sayısı planla tutmuyor.',
+  'spi.core.plan.hkm-bagli-degil':'HKM bağlı değil.',
+  'spi.core.plan.program-hkm-den-alinamadi':'Program HKM’den alınamadı.',
+  'spi.core.plan.planlama-ofisi-programi':'Planlama Ofisi programı',
+});
+
 
 window.SP = window.SP || {};
 
@@ -94,18 +121,18 @@ SP.Plan = (function(){
   function kur(hedef, bugunISO){
     const bugun = bugunISO || U().todayISO();
     const h = hedef;
-    if(!h) return { ok:false, why:'Hedef bulunamadı.' };
-    if(h.paket !== 'kilo') return { ok:false, why:'Bu hedef için plan motoru henüz yok.' };
-    if(h.durum !== 'aktif') return { ok:false, why:'Plan yalnız aktif bir hedef için kurulur.' };
-    if(!h.son_tarih || !(h.son_tarih > bugun)) return { ok:false, why:'Hedefin son tarihi geçmiş ya da yok.' };
+    if(!h) return { ok:false, why:yz('spi.core.plan.hedef-bulunamadi') };
+    if(h.paket !== 'kilo') return { ok:false, why:yz('spi.core.plan.bu-hedef-icin-plan-motoru') };
+    if(h.durum !== 'aktif') return { ok:false, why:yz('spi.core.plan.plan-yalniz-aktif-bir-hedef') };
+    if(!h.son_tarih || !(h.son_tarih > bugun)) return { ok:false, why:yz('spi.core.plan.hedefin-son-tarihi-gecmis-ya') };
     const simdi = SP.Hedefler.sonKilo() || h.simdi;
-    if(!simdi || simdi.deger == null) return { ok:false, why:'Şu anki kilon bilinmeden plan kurulamaz.' };
+    if(!simdi || simdi.deger == null) return { ok:false, why:yz('spi.core.plan.su-anki-kilon-bilinmeden-pla') };
     const hedefKilo = h.hedefDeger != null ? h.hedefDeger
       : h.fark != null ? (h.yon === 'artir' || h.egilim === 'artir'
         ? simdi.deger + h.fark : simdi.deger - h.fark) : null;
-    if(hedefKilo == null) return { ok:false, why:'Hedef kilo bilinmiyor.' };
+    if(hedefKilo == null) return { ok:false, why:yz('spi.core.plan.hedef-kilo-bilinmiyor') };
     const yon = hedefKilo < simdi.deger ? 'azalt' : hedefKilo > simdi.deger ? 'artir' : null;
-    if(!yon) return { ok:false, why:'Şu anki kilon zaten hedefte.' };
+    if(!yon) return { ok:false, why:yz('spi.core.plan.su-anki-kilon-zaten-hedefte') };
 
     const gun = U().diffDays(bugun, h.son_tarih);
     const hafta = Math.max(1, Math.floor(gun / 7));
@@ -117,7 +144,7 @@ SP.Plan = (function(){
        KURULMAZ — güvenli tempoyla hedefi yeniden kurmak kullanıcının işi. */
     const g = SP.Hedefler.KILO.guvenlik(Object.assign({}, h, { simdi, hedefDeger:hedefKilo, yon }),
       {}, { gerekli:tempo, fark, hafta:gun / 7, simdi });
-    if(g && g.red) return { ok:false, why:'Bu tempoyla plan kurulamaz: ' + g.neden };
+    if(g && g.red) return { ok:false, why:yz('spi.core.plan.bu-tempoyla-plan-kurulamaz') + g.neden };
 
     const p = SP.S.profile || {};
     const kisi = Object.assign({}, p, { weightKg:simdi.deger });
@@ -268,15 +295,15 @@ SP.Plan = (function(){
     const c = P.check({ action:'plan-uygula', params:{ hedefId } });
     if(!c.ok) return { ok:false, why:c.why };
     const row = await P.propose({ action:'plan-uygula', params:{ hedefId }, source:'istek',
-      metin:'Planı uygula' });
-    if(!row) return { ok:false, why:'Plan önerisi yazılamadı.' };
+      metin:yz('spi.core.plan.plani-uygula') });
+    if(!row) return { ok:false, why:yz('spi.core.plan.plan-onerisi-yazilamadi') };
     const r = await P.approve(row.id);
     return r.ok ? { ok:true, plan:aktif(hedefId) } : { ok:false, why:r.why };
   }
 
   async function geriAlHedef(hedefId){
     const u = uygulamaOf(hedefId);
-    if(!u) return { ok:false, why:'Geri alınacak bir plan yok.' };
+    if(!u) return { ok:false, why:yz('spi.core.plan.geri-alinacak-bir-plan-yok') };
     return await SP.Proposals.undo(u.id);
   }
 
@@ -314,7 +341,7 @@ SP.Plan = (function(){
       .map(d => ({ tarih:d, deger:(SP.S.vitals[d] || {}).weight }))
       .filter(x => x.deger != null && isFinite(Number(x.deger)));
     if(!tartilar.length){
-      return { durum:'veri_yok', sonraki, metin:'Plan başladığından beri tartı girilmedi; '
+      return { durum:'veri_yok', sonraki, metin:yz('spi.core.plan.plan-basladigindan-beri-tart')
         + 'ilerleme ölçülemiyor.' };
     }
     const son = tartilar[tartilar.length - 1];
@@ -396,14 +423,14 @@ SP.Plan = (function(){
 
   async function kingeIlet(hedefId){
     const plan = aktif(hedefId);
-    if(!plan) return { ok:false, metin:'Önce planı uygula; King’e uygulanmış plan iletilir.' };
+    if(!plan) return { ok:false, metin:yz('spi.core.plan.once-plani-uygula-king-e-uyg') };
     const r = await istek('/api/king/emir', emirGovdesi(plan));
-    if(!r.bagli) return { ok:false, metin:'HKM bağlı değil; iş emri açılmadı. Plan SPİ’de '
+    if(!r.bagli) return { ok:false, metin:yz('spi.core.plan.hkm-bagli-degil-is-emri')
       + 'çalışmaya devam ediyor. Rehber › HKM’den bağlanınca yeniden iletebilirsin.' };
-    if(r.ag) return { ok:false, metin:'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden dene.' };
+    if(r.ag) return { ok:false, metin:yz('spi.core.plan.hkm-ye-ulasilamadi-is-emri-a') };
     const g = r.govde || {};
     if(!r.ok || !g.ok){
-      return { ok:false, metin:'King iş emrini almadı: '
+      return { ok:false, metin:yz('spi.core.plan.king-is-emrini-almadi')
         + ((g.errors || []).join('; ') || g.note || ('HTTP ' + r.status)) };
     }
     const e = g.emir || {};
@@ -454,14 +481,14 @@ SP.Plan = (function(){
   function programSina(plan, kayit){
     const g = kayit && kayit.govde;
     if(!g || kayit.tur !== 'plan' || !g.program || !Array.isArray(g.program.haftalar)){
-      return { ok:false, why:'Kayıt bir program değil.' };
+      return { ok:false, why:yz('spi.core.plan.kayit-bir-program-degil') };
     }
-    if(!g.gecti) return { ok:false, why:'Plan denetçisi bu programı geçirmemiş.' };
+    if(!g.gecti) return { ok:false, why:yz('spi.core.plan.plan-denetcisi-bu-programi-g') };
     const gi = g.girdi || {};
-    if(gi.hedef_id !== plan.hedefId) return { ok:false, why:'Program başka bir hedefe ait.' };
-    if(gi.baslangic !== plan.baslangic) return { ok:false, why:'Program bu planın başlangıcına göre kurulmamış.' };
+    if(gi.hedef_id !== plan.hedefId) return { ok:false, why:yz('spi.core.plan.program-baska-bir-hedefe-ait') };
+    if(gi.baslangic !== plan.baslangic) return { ok:false, why:yz('spi.core.plan.program-bu-planin-baslangici') };
     const hs = g.program.haftalar;
-    if(hs.length !== plan.kontrol.length) return { ok:false, why:'Programın hafta sayısı planla tutmuyor.' };
+    if(hs.length !== plan.kontrol.length) return { ok:false, why:yz('spi.core.plan.programin-hafta-sayisi-planl') };
     for(let i = 0; i < hs.length; i++){
       const k = plan.kontrol[i], x = hs[i] || {};
       if(x.bitis !== k.tarih || Math.abs(Number(x.beklenen) - k.beklenen) > 0.15){
@@ -480,8 +507,8 @@ SP.Plan = (function(){
 
   async function kayitCek(id){
     const r = await istek('/api/bam/kayit/' + encodeURIComponent(id));
-    if(!r.bagli) return { ok:false, why:'HKM bağlı değil.' };
-    if(!r.ok || !r.govde || !r.govde.kayit) return { ok:false, why:'Program HKM’den alınamadı.' };
+    if(!r.bagli) return { ok:false, why:yz('spi.core.plan.hkm-bagli-degil') };
+    if(!r.ok || !r.govde || !r.govde.kayit) return { ok:false, why:yz('spi.core.plan.program-hkm-den-alinamadi') };
     return { ok:true, kayit:r.govde.kayit };
   }
 
@@ -498,7 +525,7 @@ SP.Plan = (function(){
     const P = SP.Proposals;
     const row = await P.propose({ action:'program-ekle', params:{ hedefId:plan.hedefId, program:s.program },
       source:'kural', anahtar:'hkm-program-' + n.id,
-      iz:[{ tur:'niyet', id:n.id }, { tur:'kayit', id:pay.kayit_id }], metin:'Planlama Ofisi programı' });
+      iz:[{ tur:'niyet', id:n.id }, { tur:'kayit', id:pay.kayit_id }], metin:yz('spi.core.plan.planlama-ofisi-programi') });
     if(!row) return { ok:false, error:'Bu program daha önce işlendi.' };
     const r = await P.approve(row.id);
     return r.ok ? { ok:true, note:s.program.haftalar.length + ' haftalık program planına eklendi; '

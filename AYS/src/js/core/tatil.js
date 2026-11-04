@@ -12,6 +12,11 @@
    İkisi de sıradan istisnadır: Rehber › İstisnalar'da görünür, «Bitir»
    ile geri döner, geçmişe yazılmaz (core/istisna.js). Tatil erken
    bitirilirse ara dünde biter, dönüş bugüne kayar. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.tatil.tatil-modu-yuklenmedi':'Tatil modu yüklenmedi.',
+  'ays.core.tatil.tatil-1-21-gun-olabilir':'Tatil 1–21 gün olabilir.',
+});
+
 
 window.R = window.R || {};
 
@@ -34,9 +39,9 @@ R.Tatil = (function(){
   }
 
   async function baslat(n){
-    if(!R.Seri || !R.Istisna) return { ok:false, why:'Tatil modu yüklenmedi.' };
+    if(!R.Seri || !R.Istisna) return { ok:false, why:yz('ays.core.tatil.tatil-modu-yuklenmedi') };
     const gunSayisi = Math.round(Number(n));
-    if(!(gunSayisi >= 1 && gunSayisi <= 21)) return { ok:false, why:'Tatil 1–21 gün olabilir.' };
+    if(!(gunSayisi >= 1 && gunSayisi <= 21)) return { ok:false, why:yz('ays.core.tatil.tatil-1-21-gun-olabilir') };
     const bugun = U().todayISO();
     const bit = gun(bugun, gunSayisi - 1);
     const s = await R.Seri.dondur(bugun, bit, 'tatil');
@@ -48,7 +53,7 @@ R.Tatil = (function(){
   }
 
   async function bitir(){
-    if(!R.Seri || !R.Istisna) return { ok:false, why:'Tatil modu yüklenmedi.' };
+    if(!R.Seri || !R.Istisna) return { ok:false, why:yz('ays.core.tatil.tatil-modu-yuklenmedi') };
     const bugun = U().todayISO();
     const r = await R.Seri.tatiliBitir();
     if(!r.ok) return r;

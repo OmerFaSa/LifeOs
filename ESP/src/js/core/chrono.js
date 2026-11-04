@@ -16,6 +16,20 @@
    Doktrin burada da aynidir: bos bir kronoloji "sifir kapsam" degil "veri
    yok"tur. Hicbir olay girmemis birine "kapsamin %0" demek, olcmedigi bir
    seyi olcmus gibi yapmaktir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.chrono.henuz-kaynak-degerlendirilme':'Henüz kaynak değerlendirilmedi.',
+  'esp.core.chrono.bos-kronoloji':'Boş kronoloji',
+  'esp.core.chrono.zaman-seridinde-hic-olay-yok':'Zaman şeridinde hiç olay yok. Tohum listesi ',
+  'esp.core.chrono.kapsanmayan-donem':'Kapsanmayan dönem',
+  'esp.core.chrono.tek-yonlu-tarih':'Tek yönlü tarih',
+  'esp.core.chrono.yuzyil-boslugu':'Yüzyıl boşluğu',
+  'esp.core.chrono.dengesiz-aciklama':'Dengesiz açıklama',
+  'esp.core.chrono.kaynaksiz-iddia':'Kaynaksız iddia',
+  'esp.core.chrono.kaynak-dengesi':'Kaynak dengesi',
+  'esp.core.chrono.tarih-kartlari-geriliyor':'Tarih kartları geriliyor',
+  'esp.core.chrono.kart-hatirlama':'Kart hatırlama %',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -113,7 +127,7 @@ ESP.Chrono = (function(){
   function sourceBalance(){
     const list = sources();
     if(!list.length) return { cert:'missing', total:0, primary:0, ratio:null,
-      byKind:{}, note:'Henüz kaynak değerlendirilmedi.' };
+      byKind:{}, note:yz('esp.core.chrono.henuz-kaynak-degerlendirilme') };
 
     const tur = {};
     list.forEach(function(s){ tur[s.kind] = (tur[s.kind] || 0) + 1; });
@@ -238,39 +252,39 @@ ESP.Chrono = (function(){
     const out = [];
     const st = status();
     if(!st.events){
-      out.push({ tone:'info', label:'Boş kronoloji',
-        text:'Zaman şeridinde hiç olay yok. Tohum listesi ' 
+      out.push({ tone:'info', label:yz('esp.core.chrono.bos-kronoloji'),
+        text:yz('esp.core.chrono.zaman-seridinde-hic-olay-yok') 
           + (ESP.SEED_EVENTS || []).length + ' dönüm noktası taşıyor.' });
       return out;
     }
     if(st.eras.empty.length){
-      out.push({ tone:'info', label:'Kapsanmayan dönem',
+      out.push({ tone:'info', label:yz('esp.core.chrono.kapsanmayan-donem'),
         text:st.eras.empty.join(', ') + ' dönemlerinden hiç olay yok.' });
     }
     if(st.kinds.empty.length){
-      out.push({ tone:'info', label:'Tek yönlü tarih',
+      out.push({ tone:'info', label:yz('esp.core.chrono.tek-yonlu-tarih'),
         text:st.kinds.empty.join(', ') + ' alanından olay girilmemiş: '
           + 'nedensellik bu eksende kör kalır.' });
     }
     st.gaps.forEach(function(g){
-      out.push({ tone:'info', label:'Yüzyıl boşluğu',
+      out.push({ tone:'info', label:yz('esp.core.chrono.yuzyil-boslugu'),
         text:ESP.centuryLabel(g.from) + ' – ' + ESP.centuryLabel(g.to)
           + ' arası ' + g.length + ' yüzyıl boş.' });
     });
     if(st.chains.unbalanced){
-      out.push({ tone:'warn', label:'Dengesiz açıklama',
+      out.push({ tone:'warn', label:yz('esp.core.chrono.dengesiz-aciklama'),
         text:st.chains.unbalanced + ' zincirde yalnızca kıvılcım var, yapısal koşul yok.' });
     }
     if(st.chains.unsourced){
-      out.push({ tone:'warn', label:'Kaynaksız iddia',
+      out.push({ tone:'warn', label:yz('esp.core.chrono.kaynaksiz-iddia'),
         text:st.chains.unsourced + ' halka hiçbir kaynağa bağlı değil.' });
     }
     if(st.sources.note){
-      out.push({ tone:'info', label:'Kaynak dengesi', text:st.sources.note });
+      out.push({ tone:'info', label:yz('esp.core.chrono.kaynak-dengesi'), text:st.sources.note });
     }
     if(st.retention.cert !== 'missing' && st.retention.value < ESP.Planner.RETENTION_FLOOR){
-      out.push({ tone:'danger', label:'Tarih kartları geriliyor',
-        text:'Kart hatırlama %' + Math.round(st.retention.value * 100)
+      out.push({ tone:'danger', label:yz('esp.core.chrono.tarih-kartlari-geriliyor'),
+        text:yz('esp.core.chrono.kart-hatirlama') + Math.round(st.retention.value * 100)
           + ' — yeni olay eklemeden önce tekrar.' });
     }
     return out;

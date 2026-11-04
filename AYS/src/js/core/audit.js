@@ -20,6 +20,42 @@
 
    4. NÖBETÇİYLE AYNI ŞEY SÖYLENMEZ. O çaba–sonuç ayrışmasını arar;
       bu, birikmiş BAKIM borcunu arar. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.audit.deneme-az':'Deneme az',
+  'ays.core.audit.denetim-icin-en-az':'Denetim için en az ',
+  'ays.core.audit.analiz-edilmeyen-deneme-bir':'Analiz edilmeyen deneme bir ölçüm değil bir yorgunluktur: ',
+  'ays.core.audit.son-denemeler':'Son denemeler ',
+  'ays.core.audit.yayin-adi-olmadan-hangi-dene':'Yayın adı olmadan hangi denemelerin karşılaştırılabilir ',
+  'ays.core.audit.medyan-yerinde-ya-da-yukseli':'Medyan yerinde ya da yükseliyor ama taban (son dört denemenin ',
+  'ays.core.audit.taban':'Taban',
+  'ays.core.audit.konu-kaydi-az':'Konu kaydı az',
+  'ays.core.audit.i-lk-testi-gecmis-ama-tekrar':'İlk testi geçmiş ama tekrar testi hiç yapılmamış konular. ',
+  'ays.core.audit.kapanmis-sayilip-sonradan-bo':'Kapanmış sayılıp sonradan bozulan konular. Bunlar yeni konudan ',
+  'ays.core.audit.kapanis-esigine-az-kalmis-am':'Kapanış eşiğine az kalmış ama üç haftadır tekrar edilmemiş ',
+  'ays.core.audit.kart-az':'Kart az',
+  'ays.core.audit.bu-kartlar':'Bu kartlar ',
+  'ays.core.audit.tekrar-borcu':'Tekrar borcu %',
+  'ays.core.audit.due-kartlarin':'Due kartların %',
+  'ays.core.audit.arka-yuzu-bos-ya-da':'Arka yüzü boş ya da ön yüzüyle aynı olan kartlar her tekrarda ',
+  'ays.core.audit.yanlis-kaydi-az':'Yanlış kaydı az',
+  'ays.core.audit.i-ncelenmeyen-hata-tekrar-ed':'İncelenmeyen hata, tekrar edeceğin hatadır. Hepsini kapatmak ',
+  'ays.core.audit.etiketi-k-i-y-s-d-olmayan-ha':'Etiketi (K/İ/Y/S/D) olmayan hata hiçbir reçeteye bağlanmaz ve ',
+  'ays.core.audit.hatalarin':'Hataların %',
+  'ays.core.audit.gun-kaydi-az':'Gün kaydı az',
+  'ays.core.audit.denetim-icin-en-az-yedi':'Denetim için en az yedi gün kaydı gerekir.',
+  'ays.core.audit.ayni-saatte-tekrarlayan-bosl':'Aynı saatte tekrarlayan boşluk, plan hatasıdır — irade hatası ',
+  'ays.core.audit.gerceklesen-sure-cogu-gun-gi':'Gerçekleşen süre çoğu gün girilmemiş',
+  'ays.core.audit.son':'Son ',
+  'ays.core.audit.uyku-neredeyse-hic-girilmemi':'Uyku neredeyse hiç girilmemiş',
+  'ays.core.audit.uykunun-netine-etkisi-genel':'Uykunun netine etkisi genel bir bulgu olarak biliniyor ama ',
+  'ays.core.audit.deneme':'Deneme',
+  'ays.core.audit.konular':'Konular',
+  'ays.core.audit.tekrar':'Tekrar',
+  'ays.core.audit.yanlis-defteri':'Yanlış defteri',
+  'ays.core.audit.plan':'Plan',
+  'ays.core.audit.bu-alanin-denetimi-bir-hatay':'Bu alanın denetimi bir hatayla durdu: ',
+});
+
 
 window.R = window.R || {};
 
@@ -51,8 +87,8 @@ R.Audit = (function(){
     const denemeler = (S.exams || []);
     if(denemeler.length < ASGARI){
       return [bul('exam-veri', { severity:'none', cert:'missing', route:'exams',
-        title:'Deneme az',
-        note:'Denetim için en az ' + ASGARI + ' deneme gerekir. Ölçülmemiş '
+        title:yz('ays.core.audit.deneme-az'),
+        note:yz('ays.core.audit.denetim-icin-en-az') + ASGARI + ' deneme gerekir. Ölçülmemiş '
            + 'bir deneme geçmişi "temiz" değildir, yalnızca ölçülmemiştir.' })];
     }
 
@@ -64,7 +100,7 @@ R.Audit = (function(){
     if(borc.length >= 2){
       out.push(bul('exam-debt', { severity:'warn', route:'exams',
         title:borc.length + ' deneme analiz edilmemiş',
-        note:'Analiz edilmeyen deneme bir ölçüm değil bir yorgunluktur: '
+        note:yz('ays.core.audit.analiz-edilmeyen-deneme-bir')
            + 'sayıyı büyütür, bilgiyi büyütmez. En eski ikisini kapatmadan '
            + 'yenisini çözmemek hem yükü hem sonucu düzeltir.',
         items:borc.slice(0, 5).map(e => ({ id:e.id,
@@ -86,7 +122,7 @@ R.Audit = (function(){
       if(adlar.length >= 4){
         out.push(bul('exam-mixed-' + fam, { severity:'warn', route:'exams',
           title:fam + ' medyanı karışık yayınlardan',
-          note:'Son denemeler ' + adlar.length + ' farklı yayından. Medyan '
+          note:yz('ays.core.audit.son-denemeler') + adlar.length + ' farklı yayından. Medyan '
              + 'AYNI zorluk ailesinden denemeler ister; farklı yayınların '
              + 'medyanı net değil yayın zorluğu ölçer. Trend okurken bu '
              + 'sayı yanıltır.',
@@ -96,7 +132,7 @@ R.Audit = (function(){
       if(adlar.length === 0){
         out.push(bul('exam-no-publisher-' + fam, { severity:'info', route:'exams',
           title:fam + ' denemelerinde yayın yazılmamış',
-          note:'Yayın adı olmadan hangi denemelerin karşılaştırılabilir '
+          note:yz('ays.core.audit.yayin-adi-olmadan-hangi-dene')
              + 'olduğu bilinemez. Tek kelime, bütün trend okumasını '
              + 'anlamlı kılar.' }));
       }
@@ -114,11 +150,11 @@ R.Audit = (function(){
       if(taban != null && tr.delta >= 0 && taban < oncekiTaban){
         out.push(bul('exam-base-drop-' + fam, { severity:'warn', route:'progress',
           title:fam + ' tabanı düşüyor',
-          note:'Medyan yerinde ya da yükseliyor ama taban (son dört denemenin '
+          note:yz('ays.core.audit.medyan-yerinde-ya-da-yukseli')
              + 'en düşüğü) düştü: ' + U.fmtNet(oncekiTaban) + ' → '
              + U.fmtNet(taban) + '. Taban kötü gün dayanıklılığıdır; '
              + 'sınav bir kötü güne denk gelebilir.',
-          items:[{ id:fam, label:'Taban', meta:U.fmtNet(taban) + ' net' }] }));
+          items:[{ id:fam, label:yz('ays.core.audit.taban'), meta:U.fmtNet(taban) + ' net' }] }));
       }
     });
 
@@ -138,8 +174,8 @@ R.Audit = (function(){
     });
     if(durumlar.length < ASGARI){
       return [bul('topic-veri', { severity:'none', cert:'missing', route:'subjects',
-        title:'Konu kaydı az',
-        note:'Denetim için en az ' + ASGARI + ' konu kaydı gerekir.' })];
+        title:yz('ays.core.audit.konu-kaydi-az'),
+        note:yz('ays.core.audit.denetim-icin-en-az') + ASGARI + ' konu kaydı gerekir.' })];
     }
 
     /* 1 — Gecici kapali kalmis konu: ilk test gecmis, ikincisi hic
@@ -151,7 +187,7 @@ R.Audit = (function(){
     if(asili.length){
       out.push(bul('topic-pending-second', { severity:'warn', route:'subjects',
         title:asili.length + ' konu ikinci testi bekliyor',
-        note:'İlk testi geçmiş ama tekrar testi hiç yapılmamış konular. '
+        note:yz('ays.core.audit.i-lk-testi-gecmis-ama-tekrar')
            + 'Kapanış kuralı yedi gün sonra ikinci bir ölçüm ister; o ölçüm '
            + 'yapılmadıkça konu kapanmaz ve «öğrendim» duygusu ölçülmemiş '
            + 'kalır.',
@@ -164,7 +200,7 @@ R.Audit = (function(){
     if(acilan.length){
       out.push(bul('topic-reopened', { severity:'warn', route:'subjects',
         title:acilan.length + ' konu yeniden açıldı',
-        note:'Kapanmış sayılıp sonradan bozulan konular. Bunlar yeni konudan '
+        note:yz('ays.core.audit.kapanmis-sayilip-sonradan-bo')
            + 'ÖNCE gelir: üstüne kurulan her şey aynı yerden çöker.',
         items:acilan.slice(0, 5).map(t => ({ id:t.topicId,
           label:t.topicId, meta:'yeniden açık' })) }));
@@ -179,7 +215,7 @@ R.Audit = (function(){
     if(takili.length){
       out.push(bul('topic-near-miss', { severity:'info', route:'subjects',
         title:takili.length + ' konu eşiğin hemen altında kaldı',
-        note:'Kapanış eşiğine az kalmış ama üç haftadır tekrar edilmemiş '
+        note:yz('ays.core.audit.kapanis-esigine-az-kalmis-am')
            + 'konular. Bunlar en ucuz kazançtır: sıfırdan çalışılacak bir '
            + 'konudan çok daha az iş ister.',
         items:takili.slice(0, 5).map(t => ({ id:t.topicId,
@@ -196,8 +232,8 @@ R.Audit = (function(){
     const kartlar = (S.cards || []);
     if(kartlar.length < ASGARI){
       return [bul('card-veri', { severity:'none', cert:'missing', route:'cards',
-        title:'Kart az',
-        note:'Denetim için en az ' + ASGARI + ' kart gerekir.' })];
+        title:yz('ays.core.audit.kart-az'),
+        note:yz('ays.core.audit.denetim-icin-en-az') + ASGARI + ' kart gerekir.' })];
     }
 
     /* 1 — Sülük kart: tekrar eden unutma, kartin kendisini sorgulatir. */
@@ -208,7 +244,7 @@ R.Audit = (function(){
     if(suluk.length){
       out.push(bul('card-leech', { severity:'warn', route:'cards',
         title:suluk.length + ' sülük kart',
-        note:'Bu kartlar ' + SULUK + ' kez ya da daha fazla unutuldu. Bu '
+        note:yz('ays.core.audit.bu-kartlar') + SULUK + ' kez ya da daha fazla unutuldu. Bu '
            + 'kadar tekrar eden unutma genelde hafızanın değil KARTIN '
            + 'sorunudur: çok uzun, belirsiz ya da tek kartta iki şey soruyor.',
         items:suluk.slice(0, 5).map(x => ({ id:x.c.id,
@@ -221,8 +257,8 @@ R.Audit = (function(){
     const borc = C.cardDebt();
     if(borc > 10){
       out.push(bul('card-debt', { severity:'warn', route:'cards',
-        title:'Tekrar borcu %' + borc,
-        note:'Due kartların %' + borc + '\'i gecikmiş. Borç %10\'u geçtiğinde '
+        title:yz('ays.core.audit.tekrar-borcu') + borc,
+        note:yz('ays.core.audit.due-kartlarin') + borc + '\'i gecikmiş. Borç %10\'u geçtiğinde '
            + 'yeni kart üretmek, hatırlanmayanın üstüne yenisini koymaktır. '
            + 'Bu eşik bir bulgu değil sistemin seçimidir (Rehber → Eşiklerin '
            + 'dayanağı).' }));
@@ -237,7 +273,7 @@ R.Audit = (function(){
     if(bozuk.length){
       out.push(bul('card-broken', { severity:'warn', route:'cards',
         title:bozuk.length + ' kart eksik',
-        note:'Arka yüzü boş ya da ön yüzüyle aynı olan kartlar her tekrarda '
+        note:yz('ays.core.audit.arka-yuzu-bos-ya-da')
            + 'karşına çıkar ve hiçbir şey öğretmez.',
         items:bozuk.slice(0, 5).map(c => ({ id:c.id,
           label:String(c.front || c.question || '(boş)').slice(0, 40),
@@ -254,8 +290,8 @@ R.Audit = (function(){
     const hatalar = (S.errors || []);
     if(hatalar.length < ASGARI){
       return [bul('error-veri', { severity:'none', cert:'missing', route:'cards',
-        title:'Yanlış kaydı az',
-        note:'Denetim için en az ' + ASGARI + ' yanlış kaydı gerekir.' })];
+        title:yz('ays.core.audit.yanlis-kaydi-az'),
+        note:yz('ays.core.audit.denetim-icin-en-az') + ASGARI + ' yanlış kaydı gerekir.' })];
     }
 
     /* 1 — Kapatilmamis yanlislar: incelenmeyen hata, tekrar edecek hata. */
@@ -265,7 +301,7 @@ R.Audit = (function(){
     if(acik.length >= 5){
       out.push(bul('error-open', { severity:'warn', route:'cards',
         title:acik.length + ' yanlış bir haftadır açık',
-        note:'İncelenmeyen hata, tekrar edeceğin hatadır. Hepsini kapatmak '
+        note:yz('ays.core.audit.i-ncelenmeyen-hata-tekrar-ed')
            + 'gerekmez: en çok tekrar eden etiketten başlamak, listeyi '
            + 'baştan sona gitmekten hızlıdır.',
         items:acik.slice(0, 5).map(e => ({ id:e.id,
@@ -278,7 +314,7 @@ R.Audit = (function(){
     if(etiketsiz.length >= 3){
       out.push(bul('error-untagged', { severity:'info', route:'cards',
         title:etiketsiz.length + ' yanlış etiketsiz',
-        note:'Etiketi (K/İ/Y/S/D) olmayan hata hiçbir reçeteye bağlanmaz ve '
+        note:yz('ays.core.audit.etiketi-k-i-y-s-d-olmayan-ha')
            + 'hata haritasında görünmez. Etiket bir sınıflandırma değil, '
            + 'ne yapılacağının adıdır.',
         items:etiketsiz.slice(0, 5).map(e => ({ id:e.id,
@@ -298,7 +334,7 @@ R.Audit = (function(){
       if(pay >= 0.4){
         const tanim = R.ERROR_TAGS[enCok];
         out.push(bul('error-dominant', { severity:'info', route:'analytics',
-          title:'Hataların %' + Math.round(pay * 100) + '\'i tek türde',
+          title:yz('ays.core.audit.hatalarin') + Math.round(pay * 100) + '\'i tek türde',
           note:(tanim ? tanim.name : enCok) + ' baskın. Bu iyi haberdir: tek '
              + 'bir reçete listenin büyük kısmını kapatır'
              + (tanim ? ' — ' + tanim.recipe + '.' : '.'),
@@ -317,8 +353,8 @@ R.Audit = (function(){
     const gunler = Object.keys(S.days || {}).sort();
     if(gunler.length < 7){
       return [bul('plan-veri', { severity:'none', cert:'missing', route:'week',
-        title:'Gün kaydı az',
-        note:'Denetim için en az yedi gün kaydı gerekir.' })];
+        title:yz('ays.core.audit.gun-kaydi-az'),
+        note:yz('ays.core.audit.denetim-icin-en-az-yedi') })];
     }
 
     const son14 = gunler.slice(-14);
@@ -339,7 +375,7 @@ R.Audit = (function(){
     if(kotu.length){
       out.push(bul('plan-dead-slot', { severity:'warn', route:'plan',
         title:kotu.length + ' zaman dilimi sürekli atlanıyor',
-        note:'Aynı saatte tekrarlayan boşluk, plan hatasıdır — irade hatası '
+        note:yz('ays.core.audit.ayni-saatte-tekrarlayan-bosl')
            + 'değil. O saatte gerçekten müsait olmayabilirsin; planı '
            + 'gerçeğe uydurmak, gerçeği plana uydurmaya çalışmaktan kolaydır.',
         items:kotu.slice(0, 5).map(s => ({ id:s, label:s,
@@ -353,8 +389,8 @@ R.Audit = (function(){
     });
     if(sureli.length <= son14.length / 3){
       out.push(bul('plan-no-minutes', { severity:'info', route:'today',
-        title:'Gerçekleşen süre çoğu gün girilmemiş',
-        note:'Son ' + son14.length + ' günün yalnızca ' + sureli.length
+        title:yz('ays.core.audit.gerceklesen-sure-cogu-gun-gi'),
+        note:yz('ays.core.audit.son') + son14.length + ' günün yalnızca ' + sureli.length
            + '\'inde gerçekleşen süre var. Süre olmadan sürtünme, verim ve '
            + 'kapasite ölçülemez — hiçbiri sıfır sayılmaz, ölçülmemiş kalır.' }));
     }
@@ -363,8 +399,8 @@ R.Audit = (function(){
     const uykulu = son14.filter(d => S.days[d].sleepHours != null);
     if(uykulu.length <= 2){
       out.push(bul('plan-no-sleep', { severity:'info', route:'today',
-        title:'Uyku neredeyse hiç girilmemiş',
-        note:'Uykunun netine etkisi genel bir bulgu olarak biliniyor ama '
+        title:yz('ays.core.audit.uyku-neredeyse-hic-girilmemi'),
+        note:yz('ays.core.audit.uykunun-netine-etkisi-genel')
            + 'SENDE ne kadar olduğu ancak senin verinle ölçülür. İki hafta '
            + 'girmek, bu ilişkiyi görünür kılmaya yeter.' }));
     }
@@ -375,11 +411,11 @@ R.Audit = (function(){
   /* ---------------------------------------------------------- toplama */
 
   const AREAS = [
-    { id:'exams', label:'Deneme', fn:examFindings },
-    { id:'topics', label:'Konular', fn:topicFindings },
-    { id:'cards', label:'Tekrar', fn:cardFindings },
-    { id:'errors', label:'Yanlış defteri', fn:errorFindings },
-    { id:'plan', label:'Plan', fn:planFindings },
+    { id:'exams', label:yz('ays.core.audit.deneme'), fn:examFindings },
+    { id:'topics', label:yz('ays.core.audit.konular'), fn:topicFindings },
+    { id:'cards', label:yz('ays.core.audit.tekrar'), fn:cardFindings },
+    { id:'errors', label:yz('ays.core.audit.yanlis-defteri'), fn:errorFindings },
+    { id:'plan', label:yz('ays.core.audit.plan'), fn:planFindings },
   ];
 
   /* Bir alanin taramasi patlarsa SESSIZCE bos donmez.
@@ -395,7 +431,7 @@ R.Audit = (function(){
     catch(e){
       return [bul('audit-error-' + areaId, { severity:'warn', cert:'missing',
         title:a.label + ' taraması çalışmadı',
-        note:'Bu alanın denetimi bir hatayla durdu: '
+        note:yz('ays.core.audit.bu-alanin-denetimi-bir-hatay')
            + String((e && e.message) || e)
            + '. Bu bir veri sorunu değil bir yazılım hatasıdır; '
            + 'kayıtların etkilenmez.' })];

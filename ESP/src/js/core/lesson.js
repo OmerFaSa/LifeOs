@@ -28,6 +28,16 @@
    `toLocaleLowerCase('tr-TR')` ile yapılır — «I» harfinin karşılığı
    İngilizce'de «i», Türkçe'de «ı»dır ve bu ayrım sessizce yanlış cevap
    üretir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.lesson.bu-unitenin-bu-dilde-malzeme':'Bu ünitenin bu dilde malzemesi yok; kartını kendin yazarsın.',
+  'esp.core.lesson.pratik':'pratik · ',
+  'esp.core.lesson.aciklama':'Açıklama',
+  'esp.core.lesson.ornek':'Örnek',
+  'esp.core.lesson.sik-yanlis':'Sık yanlış',
+  'esp.core.lesson.alistirma':'Alıştırma',
+  'esp.core.lesson.kendini-sina':'Kendini sına',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -110,7 +120,7 @@ ESP.Lesson = (function(){
     const kartlar = cardsOf(unit, lang);
     if(!ogeler.length){
       return { total:0, added:0, known:0, pct:0, cert:'missing',
-        why:'Bu ünitenin bu dilde malzemesi yok; kartını kendin yazarsın.' };
+        why:yz('esp.core.lesson.bu-unitenin-bu-dilde-malzeme') };
     }
     const bilinen = kartlar.filter(function(c){ return (c.box || 1) >= KNOWN_BOX; }).length;
     return {
@@ -447,7 +457,7 @@ ESP.Lesson = (function(){
       minutes:gercekSure ? minutes : Math.max(1, Math.round(r.asked * 0.5)),
       minutesCert:gercekSure ? 'measured' : 'estimated',
       count:r.right,
-      note:'pratik · ' + r.right + '/' + r.asked,
+      note:yz('esp.core.lesson.pratik') + r.right + '/' + r.asked,
     });
     if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
     return { ok:true, result:r };
@@ -465,11 +475,11 @@ ESP.Lesson = (function(){
     return { id:c.id, baslik:c.title, alt:(disc ? disc.label : 'ESP') + (c.original_topic_items && c.original_topic_items.length ? ' · ' + c.original_topic_items.slice(0, 3).join(', ') : ''),
       giris:c.goal || '', etiket:c.ready_for_app ? 'ESP öğrenme kartı' : 'doğrulanmadı · öğretmen incelemesi bekliyor',
       sorgu:c.title, soruVar:false,
-      bolumler:[{ baslik:'Açıklama', metin:c.explanation },
-        { baslik:'Örnek', metin:c.worked_example && c.worked_example.text },
-        { baslik:'Sık yanlış', metin:c.common_misinterpretation },
-        { baslik:'Alıştırma', metin:p.prompt, liste:p.steps || [] },
-        { baslik:'Kendini sına', metin:p.expected_answer ? 'Cevabını yazdıktan sonra bak: ' + p.expected_answer : '' }].filter(b => b.metin) };
+      bolumler:[{ baslik:yz('esp.core.lesson.aciklama'), metin:c.explanation },
+        { baslik:yz('esp.core.lesson.ornek'), metin:c.worked_example && c.worked_example.text },
+        { baslik:yz('esp.core.lesson.sik-yanlis'), metin:c.common_misinterpretation },
+        { baslik:yz('esp.core.lesson.alistirma'), metin:p.prompt, liste:p.steps || [] },
+        { baslik:yz('esp.core.lesson.kendini-sina'), metin:p.expected_answer ? 'Cevabını yazdıktan sonra bak: ' + p.expected_answer : '' }].filter(b => b.metin) };
   }
 
   return { kingDers, units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,

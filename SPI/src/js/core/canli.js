@@ -37,6 +37,13 @@
         şirketin sunucusuna gitmez.
 
    Hâller: (yok) → kayitta ⇄ duraklat → bitti → kaydedilir ya da silinir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.canli.bir-kayit-zaten-var-once':'Bir kayıt zaten var; önce onu bitir ya da sil.',
+  'spi.core.canli.duraklatilmis-bir-kayit-yok':'Duraklatılmış bir kayıt yok.',
+  'spi.core.canli.kayit-yok':'Kayıt yok.',
+  'spi.core.canli.henuz-hic-konum-gelmedi-kayi':'Henüz hiç konum gelmedi; kayıt boş.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -286,7 +293,7 @@ SP.Canli = (function(){
 
   function baslat(tur){
     yukle();
-    if(d) return { ok:false, why:'Bir kayıt zaten var; önce onu bitir ya da sil.' };
+    if(d) return { ok:false, why:yz('spi.core.canli.bir-kayit-zaten-var-once') };
     if(!ortam.guvenli()) return { ok:false, why:GUVENSIZ };
     const k = ortam.kaynak();
     if(!k) return { ok:false, why:KONUM_YOK };
@@ -317,7 +324,7 @@ SP.Canli = (function(){
 
   function surdur(){
     yukle();
-    if(!d || d.hal !== 'duraklat') return { ok:false, why:'Duraklatılmış bir kayıt yok.' };
+    if(!d || d.hal !== 'duraklat') return { ok:false, why:yz('spi.core.canli.duraklatilmis-bir-kayit-yok') };
     if(!ortam.guvenli()) return { ok:false, why:GUVENSIZ };
     const k = ortam.kaynak();
     if(!k) return { ok:false, why:KONUM_YOK };
@@ -333,8 +340,8 @@ SP.Canli = (function(){
   /* Noktalardan kaydedilecek rota (kayıt sürerken de kurulabilir). */
   function rota(){
     yukle();
-    if(!d) return { ok:false, why:'Kayıt yok.' };
-    if(!d.noktalar.length) return { ok:false, why:'Henüz hiç konum gelmedi; kayıt boş.' };
+    if(!d) return { ok:false, why:yz('spi.core.canli.kayit-yok') };
+    if(!d.noktalar.length) return { ok:false, why:yz('spi.core.canli.henuz-hic-konum-gelmedi-kayi') };
     return SP.Rota.noktalardan(d.noktalar, {
       kaynak:'canli', zayif:d.kotu, bosluk:Math.round(d.bosluk / 1000) });
   }
@@ -343,7 +350,7 @@ SP.Canli = (function(){
      sürdürülür ya da elle silinir. */
   function bitir(){
     yukle();
-    if(!d) return { ok:false, why:'Kayıt yok.' };
+    if(!d) return { ok:false, why:yz('spi.core.canli.kayit-yok') };
     if(d.hal === 'kayitta') duraklat();
     const r = rota();
     if(!r.ok) return r;

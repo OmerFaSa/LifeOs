@@ -48,16 +48,14 @@ css/cam.css
 css/king-cam.css
 css/minik-cam.css
 # Animasyonlar (Tam · Az · Sistem): stillerden SONRA, ilk cizimden ONCE. Hareket kosullu medya kurallarini ve matchMedia'yi ayarlar (brand/ortak/animasyon.js).
+# Motor once yuklenir: head betikleri de parca kaydeder.
+js/core/parca.js
 js/core/animasyon.js
 js/core/zemin.js
 js/core/ayarlar.js
 
-[perde]
-js/core/perde.js
-
 [govde]
 js/data/build.js
-js/core/parca.js
 js/core/kesinlik.js
 js/core/turkcesayi.js
 js/core/sayi.js
@@ -92,6 +90,7 @@ js/core/kingogret.js esp
 js/core/kingarac.js
 js/core/olay.js
 js/core/kingveri.js
+js/core/bilgiler.js
 js/core/kisi.js
 js/core/cikarim.js
 js/core/gecmis.js
@@ -103,6 +102,7 @@ js/core/rehber.js
 js/core/pusula.js
 js/core/sorukart.js
 js/core/ogret.js
+js/core/parca-rehber.js
 js/core/king.js
 js/core/king-ses.js
 js/core/king-kayit.js
@@ -388,7 +388,6 @@ js/core/minik.js
 js/app.js
 
 [test]
-../js/core/parca.js
 ../js/data/kademeler.js
 ../js/data/basarimlar.js
 ../js/data/curriculum.js ays
@@ -538,6 +537,7 @@ js/app.js
 ../js/core/kingarac.js
 ../js/core/olay.js
 ../js/core/kingveri.js
+../js/core/bilgiler.js
 ../js/core/kisi.js
 ../js/core/cikarim.js
 ../js/core/gecmis.js
@@ -549,6 +549,7 @@ js/app.js
 ../js/core/pusula.js
 ../js/core/sorukart.js
 ../js/core/ogret.js
+../js/core/parca-rehber.js
 ../js/core/king.js
 ../js/core/king-ses.js
 ../js/core/king-kayit.js
@@ -955,3 +956,4 @@ kingders.test.js ays spi
 prova.test.js ays
 ogungiris.test.js spi
 veri_entegrasyon.test.js esp
+parca.test.js

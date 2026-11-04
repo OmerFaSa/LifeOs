@@ -4,6 +4,19 @@
 /* KING · yönlendirme ve olaylar: isle, Merkez yolu, yerel King, kayıt, ayar komutları, odak, bağla, kur (son yüklenir).
    Parça 8/8; yükleme sırası: king.js, king-ses.js, king-kayit.js, king-gorunum.js, king-kart.js, king-arac.js, king-devrim.js, king-yol.js.
    Dosyalar arası ortak adlar ve ortak durum window.LIFEOS.KING_IC'tedir (KI.ad). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.king-yol.kaydet':'Kaydet',
+  'ortak.king-yol.gerek-yok':'Gerek yok',
+  'ortak.king-yol.hepsini-onayla':'Hepsini onayla',
+  'ortak.king-yol.vazgec':'Vazgeç',
+  'ortak.king-yol.geri-al':'Geri al',
+  'ortak.king-yol.ekip-ve-gorevler':'Ekip ve görevler',
+  'ortak.king-yol.beceriler-ve-sozler':'Beceriler ve sözler',
+  'ortak.king-yol.sirayi-gor':'Sırayı gör',
+  'ortak.king-yol.evet-ekle':'Evet, ekle',
+  'ortak.king-yol.hayir':'Hayır',
+});
+
 
 window.LIFEOS.KING = (function(){
   'use strict';
@@ -75,7 +88,7 @@ window.LIFEOS.KING = (function(){
     KI.ortam.depo.yaz(KI.ODAK_SON, { dk:v.dk, konu:v.konu || '', at:KI.ortam.simdi().getTime() });
     if(KI.ortam.bildir) KI.ortam.bildir('King', 'Odak süresi doldu: ' + v.dk + ' dakika.');
     KI.soyle('Süre doldu: ' + v.dk + ' dakika' + (v.konu ? ' ' + v.konu : '') + ' tamam. Kaydedeyim mi?');
-    KI.cipler = [{ ad:'Kaydet', is:'odak-kaydet:' + v.dk + ':' + encodeURIComponent(v.konu || '') }, { ad:'Gerek yok', is:'vazgec' }];
+    KI.cipler = [{ ad:yz('ortak.king-yol.kaydet'), is:'odak-kaydet:' + v.dk + ':' + encodeURIComponent(v.konu || '') }, { ad:yz('ortak.king-yol.gerek-yok'), is:'vazgec' }];
     KI.ciz(false);
   }
   function odakDur(){
@@ -308,13 +321,13 @@ window.LIFEOS.KING = (function(){
       if(yn.tur === 'olumsuz'){ KI.soyle('Olumsuz bir istek; hiçbir şeyi değiştirmedim. Ne istediğini olumlu söylersen yaparım.'); return { tur:'yetki-olumsuz' }; }
       if(yn.tur === 'baska'){ KI.soyle(yn.metin); return { tur:'yetki-baska', modul:yn.modul }; }
       if(yn.tur === 'liste'){
-        KI.cipler = yn.sayi ? [{ is:'yetki-hepsi', ad:'Hepsini onayla' }] : null;
+        KI.cipler = yn.sayi ? [{ is:'yetki-hepsi', ad:yz('ortak.king-yol.hepsini-onayla') }] : null;
         KI.soyle(yn.metin, yn.satirlar && yn.satirlar.length ? yn.satirlar : null);
         return { tur:'yetki-liste' };
       }
       if(yn.seviye === 'kucuk'){ await KI.yetkiUygula(yn); return { tur:'yetki', seviye:'kucuk' }; }
       KI.bekleyenYetki = yn;
-      KI.cipler = [{ is:'yetki-onay', ad:KI.onayAdi(yn) }, { is:'vazgec', ad:'Vazgeç' }];
+      KI.cipler = [{ is:'yetki-onay', ad:KI.onayAdi(yn) }, { is:'vazgec', ad:yz('ortak.king-yol.vazgec') }];
       KI.soyle(yn.onizle.metin, yn.onizle.satirlar || null, null,
         KI.onaySorusu(yn), { onay:true });
       return { tur:'yetki-bekliyor', seviye:yn.seviye };
@@ -330,7 +343,7 @@ window.LIFEOS.KING = (function(){
         KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.cipler = null;
         const H = KI.hafiza(), id = ogrenilen.id;
         KI.sonGeriAl = async () => { await H.unut(id); };
-        KI.cipler = [{ is:'geri-al', ad:'Geri al' }];
+        KI.cipler = [{ is:'geri-al', ad:yz('ortak.king-yol.geri-al') }];
         KI.soyle('Not ettim: «' + ogrenilen.metin + '». Seni daha iyi tanıyorum.', null, null, KI.KISI().BY_ID[bey.alan] ? KI.KISI().BY_ID[bey.alan].ad : null);
         return { tur:'beyan', alan:bey.alan };
       }
@@ -414,8 +427,8 @@ window.LIFEOS.KING = (function(){
         const ek = Object.assign(r.akti ? { yeni:false, okunan:r.okunan } : {}, r.k2 ? { k2:r.k2 } : {});
         KI.soyle(r.text, null, null, null, Object.keys(ek).length ? ek : null);
         /* K1: görev ya da iş kurulduysa rozet hemen tazelenir; pano bir dokunuşta. */
-        if(r.mode === 'ekip'){ KI.cipler = [{ ad:'Ekip ve görevler', is:'ekip-ac' }]; KI.isYokla(); }
-        else if(r.mode === 'beceri') KI.cipler = [{ ad:'Beceriler ve sözler', is:'beceri-ac' }];
+        if(r.mode === 'ekip'){ KI.cipler = [{ ad:yz('ortak.king-yol.ekip-ve-gorevler'), is:'ekip-ac' }]; KI.isYokla(); }
+        else if(r.mode === 'beceri') KI.cipler = [{ ad:yz('ortak.king-yol.beceriler-ve-sozler'), is:'beceri-ac' }];
         else KI.cipler = KI.oneriListesi(true);                   // söz 33
         KI.ciz(false);
         /* K2: sözün cevabındaki kayıt bu modülün kutusundaysa hemen onaya sunulur. */
@@ -430,7 +443,7 @@ window.LIFEOS.KING = (function(){
       const n = KI.siraEkle(metin);
       /* Sıradan yeniden deneme başarısızsa sohbete hiçbir şey yazılmaz (dakikada bir gürültü olurdu). */
       if(KI.siradanSoru){ KI.akis = KI.akis.filter(m => m !== senMesaj); KI.ciz(false); return { tur:'sira', n, sessiz:true }; }
-      KI.cipler = [{ ad:'Sırayı gör', is:'bolum:kutuphane' }];
+      KI.cipler = [{ ad:yz('ortak.king-yol.sirayi-gor'), is:'bolum:kutuphane' }];
       KI.soyle('Merkeze (HKM) şu an ulaşılamadı. Sorunu sıraya aldım; bağlantı gelince kendim soracağım. Sırada ' + n + ' soru var.');
       KI.siraPlanla();
       return { tur:'sira', n };
@@ -457,7 +470,7 @@ window.LIFEOS.KING = (function(){
       KI.bekleyenGit = y.hedef;
       const giris = !!(KI.L.HESAP && KI.L.HESAP.durum && KI.L.HESAP.durum().oturum && KI.L.HESAP.gelenBirak);
       KI.bekleyenIlet = giris ? { modul:y.hedef.modul, metin:y.metin } : null;
-      KI.cipler = (giris ? [{ ad:ad + '’ye ilet', is:'ilet' }] : []).concat([{ ad:(s ? s.ad : ad) + ' aç', is:'git-onay' }, { ad:'Gerek yok', is:'vazgec' }]);
+      KI.cipler = (giris ? [{ ad:ad + '’ye ilet', is:'ilet' }] : []).concat([{ ad:(s ? s.ad : ad) + ' aç', is:'git-onay' }, { ad:yz('ortak.king-yol.gerek-yok'), is:'vazgec' }]);
       KI.soyle(KI.sohbet({ tur:null }, y.metin, false).selam, null, null,
         giris ? 'Bu ' + ad + '’nin işi. ' + ad + '’ye ileteyim mi? ' + ad + ' açılınca Onaylar’a düşer, sen onaylayınca yazılır.'
           : 'Bu ' + ad + '’nin işi; buradan kaydedemem. ' + ad + '’yi açayım mı? (İletmek için hesaba giriş gerekir.)');
@@ -469,7 +482,7 @@ window.LIFEOS.KING = (function(){
       const s = y.sohbet || KI.sohbet(y.onizleme, '', !!y.gelecek);
       /* Söz 24: bu tür için «sorma» dendiyse doğrudan kaydet («Geri al» kalır). */
       if(!y.gelecek && KI.sormaMi(y.onizleme.tur)) return kaydet(s.selam).then(() => y);
-      KI.cipler = [{ ad:'Evet, ekle', is:'kaydet' }, { ad:'Hayır', is:'vazgec' }];
+      KI.cipler = [{ ad:yz('ortak.king-yol.evet-ekle'), is:'kaydet' }, { ad:yz('ortak.king-yol.hayir'), is:'vazgec' }];
       KI.soyle(s.selam, null,
         { metin:y.onizleme.metin, liste:(y.onizleme.parcalar || []).length > 1 ? y.onizleme.parcalar.map(x => x.metin) : null,
           ipucu:y.gelecek ? 'Henüz yapmadıysan, yaptıktan sonra da söyleyebilirsin.' : (y.onizleme.ipucu || '') },
@@ -496,7 +509,7 @@ window.LIFEOS.KING = (function(){
       const metinR = r && typeof r === 'object' ? r.metin : r;
       KI.sonGeriAl = r && typeof r === 'object' && typeof r.geriAl === 'function' ? r.geriAl : null;
       const m = String((metinR && String(metinR)) || 'Ekledim').trim().replace(/[.!]*$/, '.');
-      if(KI.sonGeriAl) KI.cipler = [{ ad:'Geri al', is:'geri-al' }];
+      if(KI.sonGeriAl) KI.cipler = [{ ad:yz('ortak.king-yol.geri-al'), is:'geri-al' }];
       KI.eylemYaz({ arac:'kayit.' + (p.tur || 'veri'), ozet:String(p.metin || metinR || 'Kayıt'), geriAl:KI.sonGeriAl });
       /* Kayıt yazıldı: zeminde tek seferlik ışık (zemin.js nabiz). */
       if(KI.L.ZEMIN && typeof KI.L.ZEMIN.nabiz === 'function'){ try{ KI.L.ZEMIN.nabiz(); }catch(e){ /* süs */ } }

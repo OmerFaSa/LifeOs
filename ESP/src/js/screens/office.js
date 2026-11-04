@@ -13,6 +13,8 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:130, id:'act:proposals', kind:'Eylem', label:'Bekleyen teklifleri gör',
+  hint:'Ofis', run:() => ESP.App.go('office') });
 window.LIFEOS.PARCA.yazilar({
   'esp.office.ac':'Aç',
   'esp.office.bu-masada-bekleyen-bulgu-yok':'Bu masada bekleyen bulgu yok.',
@@ -105,7 +107,7 @@ ESP.Screens.office = (function(){
       devir:h && kisi(h.from) && kisi(h.to) ? { kaynak:kisi(h.from), hedef:kisi(h.to), metin:h.finding + ' — ' + h.toName + '’a düşüyor.' } : null });
   }
 
-  LIFEOS.PARCA.blok({ id:'office.bolum-1', sayfa:'office', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ vo, patron, uzmanlar, devir, brf, next }){
+  LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y1', sira:10, ad:'Uzman masaları', ciz({ vo, patron, uzmanlar, devir, brf, next }){
     return K.Span(12, K.Ledger(() => [
         when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:yz('esp.office.masa'), meta:'kim konuşuyor',
           body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
@@ -172,7 +174,7 @@ ESP.Screens.office = (function(){
 
       ]));
   } });
-  LIFEOS.PARCA.blok({ id:'office.bolum-2', sayfa:'office', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ vo, patron, uzmanlar, devir, brf, next }){
+  LIFEOS.PARCA.blok({ id:'office.sozluk-seridi', sayfa:'office', yer:'y2', sira:10, ad:'Sözlük şeridi', ciz({ vo, patron, uzmanlar, devir, brf, next }){
     return K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:ESP.Office.ready('patron') })) : '');
   } });
   function render(){

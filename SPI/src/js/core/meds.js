@@ -14,6 +14,11 @@
    Ikincisi kritik: beklenen yonde bir degisim HABER DEGILDIR. Sistem
    onu «basari» diye sunmaz, «beklenen» diye isaretler. Ters yonde bir
    degisim ise haberdir ve oyle yazilir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.meds.bu-degisim-iki-olcum-arasind':'Bu değişim iki ölçüm arasında başlayan ',
+  'spi.core.meds.bu-olcumu-etkileyen-bir-sey':'Bu ölçümü etkileyen bir şey kullanıyorsun',
+});
+
 
 window.SP = window.SP || {};
 
@@ -106,7 +111,7 @@ SP.Meds = (function(){
     const liste = adlar.join(', ');
     if(e.verdict === 'expected'){
       return { tone:'info', expected:true,
-        text:'Bu değişim iki ölçüm arasında başlayan ' + liste + ' ile aynı yönde. '
+        text:yz('spi.core.meds.bu-degisim-iki-olcum-arasind') + liste + ' ile aynı yönde. '
           + 'Beklenen bir sonuç; beslenmenin ya da yaşam düzeninin başarısı '
           + 'olarak okunmamalı.' };
     }
@@ -126,7 +131,7 @@ SP.Meds = (function(){
       : 'değiştirmesi';
     return {
       tone:'info',
-      title:'Bu ölçümü etkileyen bir şey kullanıyorsun',
+      title:yz('spi.core.meds.bu-olcumu-etkileyen-bir-sey'),
       text:adlar + ' bu ölçümü ' + yon + ' beklenir. Değeri yorumlarken bu '
         + 'hesaba katılmalı; sistem doz önermez, yalnızca hatırlatır.',
       kinds:et.map(o => o.kind.id),

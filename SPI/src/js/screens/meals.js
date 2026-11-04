@@ -8,6 +8,9 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'spi', sira:30, id:'act:meal', kind:'Eylem', label:'Öğün ekle', route:'meals',
+  hint:'Modül 2', run:() => { SP.App.go('meals'); setTimeout(() => {
+    const el = document.getElementById('meal-text'); if(el) el.focus(); }, 160); } });
 window.LIFEOS.PARCA.yazilar({
   'spi.meals.geri-alindi':'Geri alındı',
   'spi.meals.ogun-ekle':'Öğün ekle',
@@ -155,7 +158,7 @@ window.LIFEOS.PARCA.yazilar({
   'spi.meals.protein-veri-yok':'protein · veri yok',
   'spi.meals.oneriyi-ac':'Öneriyi aç',
 });
-window.LIFEOS.PARCA.sayfa({ id:'meals', modul:'spi', cekmece:'calisma', ad:'Öğün', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'meals', modul:'spi', king:{ sira:20, ad:'Öğün', es:['öğün', 'besin', 'yemek', 'beslenme'] }, cekmece:'calisma', ad:'Öğün', sira:20 });
 
 SP.Screens.meals = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

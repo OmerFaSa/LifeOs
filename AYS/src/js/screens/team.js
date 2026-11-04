@@ -288,13 +288,13 @@ R.Screens.team = (function(){
     if(m) m.textContent = st.metin || '';
   }
 
-  LIFEOS.PARCA.blok({ id:'team.picker', sayfa:'team', yer:'y1', sira:10, ad:'picker', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.picker', sayfa:'team', yer:'y1', sira:10, ad:'Ajan seçici', ciz({ agent, msgs, ruleMode, G, pencere }){
     return picker();
   } });
-  LIFEOS.PARCA.blok({ id:'team.bolum-2', sayfa:'team', yer:'y1', sira:20, ad:'Bölüm 2', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.ajan-penceresi', sayfa:'team', yer:'y1', sira:20, ad:'Ajan penceresi', ciz({ agent, msgs, ruleMode, G, pencere }){
     return pencere;
   } });
-  LIFEOS.PARCA.blok({ id:'team.bolum-3', sayfa:'team', yer:'y2', sira:10, ad:'Bölüm 3', ciz({ agent, msgs, ruleMode, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.ajan-masasi', sayfa:'team', yer:'y2', sira:10, ad:'Ajan masası', ciz({ agent, msgs, ruleMode, G, pencere }){
     return K.Card({
           body:html`
             <div class="desk__head">

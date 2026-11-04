@@ -72,6 +72,17 @@
        çok bağlı düğümde ya da üstüne gelince yazılır; kaydır, yakınlaştır.
      · BOŞ NOT KALMAZ: başlığı ve metni boş not, başka nota geçince ya da
        Defter kapanınca silinir (iki «Adsız not» birikiyordu). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.defter.ders-notu':'Ders notu',
+  'ortak.defter.gunluk':'Günlük',
+  'ortak.defter.kitap-notu':'Kitap notu',
+  'ortak.defter.plan':'Plan',
+  'ortak.defter.haftanin-notu':'Haftanın notu',
+  'ortak.defter.etiketlerin':'Etiketlerin',
+  'ortak.defter.yazdigin-notlar':'Yazdığın notlar',
+  'ortak.defter.son-14-gunde-acilan-not':'Son 14 günde açılan not sayısı',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -215,10 +226,10 @@ LIFEOS.DEFTER = (function(){
   }
   /* Şablonlar: boş nota tek dokunuşla. */
   const SABLONLAR = Object.freeze([
-    { id:'ders', ad:'Ders notu', govde:'## Konu\n\n## Önemli noktalar\n- \n\n## Örnek\n\n## Sorularım\n- [ ] \n\n## Özet\n' },
-    { id:'gunluk', ad:'Günlük', govde:'## Bugün nasıldım\n\n## Minnettar olduğum üç şey\n1. \n2. \n3. \n\n## Yarın için\n- [ ] \n' },
-    { id:'kitap', ad:'Kitap notu', govde:'## Yazar\n\n## Alıntılar\n> \n\n## Düşüncem\n\n#kitap\n' },
-    { id:'plan', ad:'Plan', govde:'## Amaç\n\n## Adımlar\n- [ ] \n- [ ] \n\n## Engeller\n\n## Tarih\n' },
+    { id:'ders', ad:yz('ortak.defter.ders-notu'), govde:'## Konu\n\n## Önemli noktalar\n- \n\n## Örnek\n\n## Sorularım\n- [ ] \n\n## Özet\n' },
+    { id:'gunluk', ad:yz('ortak.defter.gunluk'), govde:'## Bugün nasıldım\n\n## Minnettar olduğum üç şey\n1. \n2. \n3. \n\n## Yarın için\n- [ ] \n' },
+    { id:'kitap', ad:yz('ortak.defter.kitap-notu'), govde:'## Yazar\n\n## Alıntılar\n> \n\n## Düşüncem\n\n#kitap\n' },
+    { id:'plan', ad:yz('ortak.defter.plan'), govde:'## Amaç\n\n## Adımlar\n- [ ] \n- [ ] \n\n## Engeller\n\n## Tarih\n' },
   ]);
   /* Kelime sayısı ve okuma süresi (dakikada ~200 kelime). */
   function sayim(govde){
@@ -912,7 +923,7 @@ LIFEOS.DEFTER = (function(){
       const n = yeni.slice().sort((a, b) => puan(b) - puan(a))[0];
       const geri = geriBaglantilar(notlar, n.baslik).length;
       const ozet = String(n.govde || '').replace(/!\[\[medya:[^\]]+\]\]/g, '').replace(/[#*=~`>\[\]]/g, '').replace(/\s+/g, ' ').trim();
-      kartlar.push(P.kart({ tur:'haftanin-notu', ad:'Haftanın notu', yildiz:geri ? geri + ' bağlantı' : 'bu hafta',
+      kartlar.push(P.kart({ tur:'haftanin-notu', ad:yz('ortak.defter.haftanin-notu'), yildiz:geri ? geri + ' bağlantı' : 'bu hafta',
         govde:'<p class="pk__soru"><b>' + kac(rafAdi(n)) + '</b>' + (ozet && ozet !== rafAdi(n) ? ' — ' + kac(ozet.slice(0, 140)) + (ozet.length > 140 ? '…' : '') : '') + '</p>'
           + P.not(TUR_AD[turBul(n.tur)] + ' · ' + tarihYaz(n.guncel || n.at)),
         ayak:'<button type="button" class="pk__dugme pk__dugme--ikincil" data-defter-ac="' + kac(n.id) + '">Notu aç</button>' }));
@@ -921,14 +932,14 @@ LIFEOS.DEFTER = (function(){
     notlar.forEach(n => etiketler(n.govde).forEach(e => { say[e] = (say[e] || 0) + 1; }));
     const et = Object.keys(say).sort((a, b) => say[b] - say[a] || a.localeCompare(b, 'tr')).slice(0, 6);
     if(et.length >= 2){
-      kartlar.push(P.kart({ tur:'etiketler', ad:'Etiketlerin', simge:'satir', yuva:Object.keys(say).length + ' etiket',
+      kartlar.push(P.kart({ tur:'etiketler', ad:yz('ortak.defter.etiketlerin'), simge:'satir', yuva:Object.keys(say).length + ' etiket',
         govde:P.cubuklar({ satirlar:et.map(e => ({ ad:'#' + e, oran:say[e] / say[et[0]], metin:say[e] + ' not' })) }) }));
     }
     const gunler = []; for(let i = 13; i >= 0; i--) gunler.push(gunOnce(i));
     const yazilan = gunler.map(g => { const k = notlar.filter(n => gun(n.at) === g).length; return k || null; });
     if(yazilan.some(Boolean)){
-      kartlar.push(P.kart({ tur:'yazilan-not', ad:'Yazdığın notlar', simge:'kalem', yuva:'14 gün · ' + yazilan.reduce((a, b) => a + (b || 0), 0) + ' not',
-        govde:P.sutun({ degerler:yazilan, yukseklik:40, etiket:'Son 14 günde açılan not sayısı' }) + P.not('kesik: o gün not açılmadı') }));
+      kartlar.push(P.kart({ tur:'yazilan-not', ad:yz('ortak.defter.yazdigin-notlar'), simge:'kalem', yuva:'14 gün · ' + yazilan.reduce((a, b) => a + (b || 0), 0) + ' not',
+        govde:P.sutun({ degerler:yazilan, yukseklik:40, etiket:yz('ortak.defter.son-14-gunde-acilan-not') }) + P.not('kesik: o gün not açılmadı') }));
     }
     return kartlar.length ? '<div class="pk-ust">' + P.izgara(kartlar) + '</div>' : '';
   }

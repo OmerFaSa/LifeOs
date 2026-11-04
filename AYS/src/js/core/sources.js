@@ -13,6 +13,10 @@
    cikan bir oran gurultudur. R.SOURCE_MIN_SAMPLE altinda oran HIC
    hesaplanmaz, "henuz yeterli kayit yok" denir. Uydurma bir zorluk
    etiketi, etiketsiz birakmaktan kotudur. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.sources.konu-kapanisin':'Konu kapanışın %',
+});
+
 
 window.R = window.R || {};
 
@@ -178,7 +182,7 @@ R.Sources = (function(){
     return {
       pct:closure.pct,
       adet:ust.length,
-      text:'Konu kapanışın %' + closure.pct + ' iken son ' + recent.length + ' sorunun '
+      text:yz('ays.core.sources.konu-kapanisin') + closure.pct + ' iken son ' + recent.length + ' sorunun '
         + ust.length + ' tanesi üst seviye kaynaktan. Ev kuralı: temel oturmadan üst '
         + 'seviye yayına geçilmez — zor kaynağı bitirmek başarı ölçütü değildir.',
     };

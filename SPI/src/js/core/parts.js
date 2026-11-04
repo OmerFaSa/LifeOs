@@ -7,6 +7,15 @@
 
    Ikisi karistirilmaz: SP.C'ye saglik alani sizmaz, buraya genel bilesen
    girmez. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.parts.veri-yok':'veri yok',
+  'spi.core.parts.goruldu':'görüldü',
+  'spi.core.parts.gordum-hekime-basvuracagim':'Gördüm, hekime başvuracağım',
+  'spi.core.parts.olcumu-ac':'Ölçümü aç',
+  'spi.core.parts.hazir-kurallar':'hazır kurallar',
+  'spi.core.parts.sinir':'Sınır:',
+});
+
 
 window.SP = window.SP || {};
 
@@ -34,7 +43,7 @@ SP.Parts = (function(){
         <div class="markerrow markerrow--empty">
           <div class="markerrow__head">
             <span class="markerrow__name">${b.name}</span>
-            ${K.Badge({ label:'veri yok', tone:'muted', icon:false })}
+            ${K.Badge({ label:yz('spi.core.parts.veri-yok'), tone:'muted', icon:false })}
           </div>
           <div class="markerrow__val num">—<small>${b.unit}</small></div>
         </div>`;
@@ -63,14 +72,14 @@ SP.Parts = (function(){
         <div class="flagcard__head">
           ${raw(SP.UI.icon('warn'))}
           <span class="flagcard__title">${f.label}</span>
-          ${when(f.ack, () => K.Badge({ label:'görüldü', tone:'muted' }))}
+          ${when(f.ack, () => K.Badge({ label:yz('spi.core.parts.goruldu'), tone:'muted' }))}
         </div>
         <p class="flagcard__body">${f.detail}</p>
         <p class="flagcard__body dim mt-2">${SP.RED_FLAGS.lead}</p>
         <div class="flagcard__foot">
-          ${when(!f.ack, () => K.Button({ label:'Gördüm, hekime başvuracağım', size:'sm',
+          ${when(!f.ack, () => K.Button({ label:yz('spi.core.parts.gordum-hekime-basvuracagim'), size:'sm',
             tone:'danger', act:'flag-ack', data:{ 'data-id':f.id } }))}
-          ${K.Button({ label:'Ölçümü aç', size:'sm', act:'go', data:{ 'data-route':'labs' } })}
+          ${K.Button({ label:yz('spi.core.parts.olcumu-ac'), size:'sm', act:'go', data:{ 'data-route':'labs' } })}
         </div>
       </div>`;
   }
@@ -87,7 +96,7 @@ SP.Parts = (function(){
   function sourceBadge(source){
     return source === 'model'
       ? K.Badge({ label:'model', tone:'info' })
-      : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false });
+      : K.Badge({ label:yz('spi.core.parts.hazir-kurallar'), tone:'muted', icon:false });
   }
 
   /* Besin ogesi hucresi — hedefe gore doluluk.
@@ -123,7 +132,7 @@ SP.Parts = (function(){
 
   /* Klinik sinir — hekim olmadigi her ekranda bir kez soylenir. */
   function clinicalNote(){
-    return K.Notice({ tone:'info', title:'Sınır:', body:SP.CLINICAL.disclaimer });
+    return K.Notice({ tone:'info', title:yz('spi.core.parts.sinir'), body:SP.CLINICAL.disclaimer });
   }
 
   /* Emilim notu — ogunun icindeki artiran/bozan etki. */

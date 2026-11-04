@@ -583,8 +583,8 @@ window.LIFEOS = window.LIFEOS || {};
     });
     /* Radyo ya da bir müzik listesi çalınca video kısılır; bitince sesi döner. */
     const kis = k => { if(videoKisik === k) return; videoKisik = k; videoUygula(); sesOlayi(); };
-    window.addEventListener('lifeos:ses', e => { const h = e.detail && e.detail.hal; kis(h === 'caliyor' || h === 'baglaniyor'); });
-    window.addEventListener('lifeos:muzik', e => { const u = e.detail || {}; kis(!!(u.caliyor && u.kip && u.kip !== 'arka')); });
+    window.LIFEOS.PARCA.tepki({ id:'zemin.radyoda-kis', olay:'ses', ad:'Radyo çalınca video kısılır', yap(d){ kis(d.hal === 'caliyor' || d.hal === 'baglaniyor'); } });
+    window.LIFEOS.PARCA.tepki({ id:'zemin.muzikte-kis', olay:'muzik', ad:'Müzik listesi çalınca video kısılır', yap(u){ kis(!!(u.caliyor && u.kip && u.kip !== 'arka')); } });
   }
   if(typeof window !== 'undefined' && window.addEventListener){
     window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); if(e.key === MANZARA_ANAHTAR) manzaraYenile(); if(e.key === yuzeyAnahtar()){ yuzeySimdi = yuzeyOku(); yuzeyUygula(); } });

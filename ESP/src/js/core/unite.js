@@ -23,6 +23,26 @@
    Hedef tempo «referans»tır (`targetRef`); eşik kullanıcının kendi temiz
    tekrarından açılır (core/acoustic.js). Geri almada, üzerinde deneme
    kaydı olan alıştırma kalır: o kayıt kullanıcının ölçümüdür. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.unite.duzey-baslangic-orta-ya-da':'Düzey başlangıç, orta ya da ileri olmalı.',
+  'esp.core.unite.konu-2-80-karakter-olmali':'Konu 2–80 karakter olmalı.',
+  'esp.core.unite.dil-esp-nin-dillerinden-biri':'Dil ESP’nin dillerinden biri olmalı.',
+  'esp.core.unite.duzey-a1-c2-olmali':'Düzey A1–C2 olmalı.',
+  'esp.core.unite.uniteyi-hkm-deki-uretim-buro':'Üniteyi HKM’deki Üretim Bürosu hazırlar ama HKM bağlı değil. ',
+  'esp.core.unite.hkm-ye-ulasilamadi-is-emri-a':'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden iste.',
+  'esp.core.unite.king-is-emrini-almadi':'King iş emrini almadı: ',
+  'esp.core.unite.bu-gitar-paketi-zaten-eklenm':'Bu gitar paketi zaten eklenmiş.',
+  'esp.core.unite.paketten-studyo-ya-eklenecek':'Paketten Stüdyo’ya eklenecek yeni alıştırma çıkmadı.',
+  'esp.core.unite.gitar':'Gitar ',
+  'esp.core.unite.kayit-teklifle-eslesmiyor':'Kayıt teklifle eşleşmiyor.',
+  'esp.core.unite.kayit-unite-biciminde-degil':'Kayıt ünite biçiminde değil.',
+  'esp.core.unite.unitenin-dili-esp-de-yok':'Ünitenin dili ESP’de yok.',
+  'esp.core.unite.unitenin-duzeyi-gecersiz':'Ünitenin düzeyi geçersiz.',
+  'esp.core.unite.bu-unite-zaten-eklenmis':'Bu ünite zaten eklenmiş.',
+  'esp.core.unite.hicbir-unite-esp-nin-denetim':'Hiçbir ünite ESP’nin denetimini geçmedi (en az ',
+  'esp.core.unite.unite-hkm-den-alinamadi-hkm':'Ünite HKM’den alınamadı; HKM açıkken yeniden dene.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -78,17 +98,17 @@ ESP.Unite = (function(){
   function istekTemizle(o){
     if(o && o.alan === 'gitar'){
       const duzey = bosluk(o.duzey).toLocaleLowerCase('tr-TR');
-      if(GITAR_DUZEY.indexOf(duzey) < 0) return { ok:false, why:'Düzey başlangıç, orta ya da ileri olmalı.' };
+      if(GITAR_DUZEY.indexOf(duzey) < 0) return { ok:false, why:yz('esp.core.unite.duzey-baslangic-orta-ya-da') };
       const konu = bosluk(o.konu);
-      if(konu.length < 2 || konu.length > 80) return { ok:false, why:'Konu 2–80 karakter olmalı.' };
+      if(konu.length < 2 || konu.length > 80) return { ok:false, why:yz('esp.core.unite.konu-2-80-karakter-olmali') };
       return { ok:true, unite:{ alan:'gitar', duzey, konu } };
     }
     const dil = o && o.dil;
-    if(!ESP.LANG_BY_ID[dil]) return { ok:false, why:'Dil ESP’nin dillerinden biri olmalı.' };
+    if(!ESP.LANG_BY_ID[dil]) return { ok:false, why:yz('esp.core.unite.dil-esp-nin-dillerinden-biri') };
     const duzey = bosluk(o.duzey).toUpperCase();
-    if(!DUZEY[duzey]) return { ok:false, why:'Düzey A1–C2 olmalı.' };
+    if(!DUZEY[duzey]) return { ok:false, why:yz('esp.core.unite.duzey-a1-c2-olmali') };
     const konu = bosluk(o.konu);
-    if(konu.length < 2 || konu.length > 80) return { ok:false, why:'Konu 2–80 karakter olmalı.' };
+    if(konu.length < 2 || konu.length > 80) return { ok:false, why:yz('esp.core.unite.konu-2-80-karakter-olmali') };
     return { ok:true, unite:{ dil, duzey, konu } };
   }
 
@@ -98,12 +118,12 @@ ESP.Unite = (function(){
     const r = await istek('/api/king/emir', { modul:'esp', tur:'esp.unite', konu:'',
       neden:t.unite.alan === 'gitar' ? 'ESP Stüdyo’dan gitar alıştırma paketi istendi.'
         : 'ESP Dil › Öğren’den ünite istendi.', govde:{ unite:t.unite } });
-    if(!r.bagli) return { ok:false, metin:'Üniteyi HKM’deki Üretim Bürosu hazırlar ama HKM bağlı değil. '
+    if(!r.bagli) return { ok:false, metin:yz('esp.core.unite.uniteyi-hkm-deki-uretim-buro')
       + 'Rehber › HKM’den bağlanınca yeniden iste.' };
-    if(r.ag) return { ok:false, metin:'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden iste.' };
+    if(r.ag) return { ok:false, metin:yz('esp.core.unite.hkm-ye-ulasilamadi-is-emri-a') };
     const g = r.govde || {};
     if(!r.ok || !g.ok){
-      return { ok:false, metin:'King iş emrini almadı: ' + ((g.errors || []).join('; ') || g.note || ('HTTP ' + r.status)) };
+      return { ok:false, metin:yz('esp.core.unite.king-is-emrini-almadi') + ((g.errors || []).join('; ') || g.note || ('HTTP ' + r.status)) };
     }
     if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
     const e = g.emir || {};
@@ -128,7 +148,7 @@ ESP.Unite = (function(){
 
   function gitarSina(g, kid, kayit){
     if((ESP.S.pieces || []).some(x => (x.tags || []).indexOf('bam:' + kid) >= 0)){
-      return { ok:false, why:'Bu gitar paketi zaten eklenmiş.' };
+      return { ok:false, why:yz('esp.core.unite.bu-gitar-paketi-zaten-eklenm') };
     }
     const var_ = {};
     (ESP.S.pieces || []).forEach(x => { var_[U().norm(x.name)] = 1; });
@@ -149,13 +169,13 @@ ESP.Unite = (function(){
         startBpm:bas, progression:il.map(t => t.trim()), note:bosluk(x.not).slice(0, 200) || null,
         tags:['bam', 'bam:' + kid] }));
     });
-    if(!pieces.length) return { ok:false, why:'Paketten Stüdyo’ya eklenecek yeni alıştırma çıkmadı.' };
+    if(!pieces.length) return { ok:false, why:yz('esp.core.unite.paketten-studyo-ya-eklenecek') };
     const uyari = ['Tempolar referanstır: eşik senin temiz tekrarından açılır. Kaynaksız, model bilgisi.'];
     if(dusen) uyari.push(dusen + ' alıştırma ESP’nin denetimini geçmedi (tempo, ton ya da derece).');
     if(atlanan) uyari.push(atlanan + ' alıştırma Stüdyo’da zaten var; yeniden eklenmeyecek.');
     const duzey = GITAR_DUZEY.indexOf(g.duzey) >= 0 ? g.duzey : '';
     return { ok:true, tur:'gitar', pieces, kayitId:kid,
-      onizleme:{ baslik:'Gitar ' + duzey + ' · ' + bosluk(g.konu) + ' — ' + pieces.length + ' alıştırma',
+      onizleme:{ baslik:yz('esp.core.unite.gitar') + duzey + ' · ' + bosluk(g.konu) + ' — ' + pieces.length + ' alıştırma',
         satirlar:pieces.map(x => x.name + ' (' + (x.kind === 'technique' ? 'teknik' : 'parça')
           + (x.key ? ', ' + x.key : '') + ')' + (x.progression.length ? ': ' + x.progression.join('–') : '')
           + ' · ' + x.startBpm + ' → ' + x.targetBpm + ' BPM (referans)'),
@@ -166,16 +186,16 @@ ESP.Unite = (function(){
     const g = kayit && kayit.govde;
     const kid = Number(kayit && kayit.id);
     if(!g || !Number.isInteger(kid) || kid < 1 || kid !== Number(p && p.kayit_id)){
-      return { ok:false, why:'Kayıt teklifle eşleşmiyor.' };
+      return { ok:false, why:yz('esp.core.unite.kayit-teklifle-eslesmiyor') };
     }
     if(g.tur === 'gitar') return gitarSina(g, kid, kayit);
-    if(g.tur !== 'unite') return { ok:false, why:'Kayıt ünite biçiminde değil.' };
+    if(g.tur !== 'unite') return { ok:false, why:yz('esp.core.unite.kayit-unite-biciminde-degil') };
     const dil = g.dil, l = ESP.LANG_BY_ID[dil];
-    if(!l) return { ok:false, why:'Ünitenin dili ESP’de yok.' };
+    if(!l) return { ok:false, why:yz('esp.core.unite.unitenin-dili-esp-de-yok') };
     const duzey = String(g.duzey || '').toUpperCase();
-    if(!DUZEY[duzey]) return { ok:false, why:'Ünitenin düzeyi geçersiz.' };
+    if(!DUZEY[duzey]) return { ok:false, why:yz('esp.core.unite.unitenin-duzeyi-gecersiz') };
     if((ESP.S.bamUnits || []).some(u => u.bam && u.bam.kayitId === kid)){
-      return { ok:false, why:'Bu ünite zaten eklenmiş.' };
+      return { ok:false, why:yz('esp.core.unite.bu-unite-zaten-eklenmis') };
     }
     const gorulen = {};
     let dusen = 0;
@@ -201,7 +221,7 @@ ESP.Unite = (function(){
         bam:{ kayitId:kid, dil, at:String(kayit.created_at || '').slice(0, 10) || U().todayISO(),
           dogruluk:kayit.dogruluk === 'kaynakli' ? 'kaynakli' : 'dogrulanmadi' } });
     });
-    if(!uniteler.length) return { ok:false, why:'Hiçbir ünite ESP’nin denetimini geçmedi (en az '
+    if(!uniteler.length) return { ok:false, why:yz('esp.core.unite.hicbir-unite-esp-nin-denetim')
       + OGE[0] + ' geçerli öğe gerekir).' };
     const toplam = uniteler.reduce((n, u) => n + u.items[dil].length, 0);
     const uyari = ['Kaynaksız, model bilgisi: yanlış bulduğun kartı sil. Pratik sorularını ESP '
@@ -232,7 +252,7 @@ ESP.Unite = (function(){
   async function onizle(n){
     if(!n || n.kind !== 'unite.add') return null;
     const kayit = await kayitCek(Number(n.payload && n.payload.kayit_id));
-    if(!kayit) return { ok:false, why:'Ünite HKM’den alınamadı; HKM açıkken yeniden dene.' };
+    if(!kayit) return { ok:false, why:yz('esp.core.unite.unite-hkm-den-alinamadi-hkm') };
     return sina(kayit, n.payload || {});
   }
 

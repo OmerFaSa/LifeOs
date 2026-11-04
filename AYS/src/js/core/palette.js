@@ -1,7 +1,27 @@
 /* Komut paleti (Ctrl/Cmd+K) ve odak modu.
    Amac: gunluk kullanimda tikla-gezin yerine tek kisayolla is baslatmak. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.palette.hafta':'Hafta ',
+  'ays.core.palette.sec':'seç',
+  'ays.core.palette.geri-alindi':'Geri alındı',
+  'ays.core.palette.tahmin-etmiyorum-soruyorum':'Tahmin etmiyorum, soruyorum:',
+  'ays.core.palette.cozemedigim-kisim':'Çözemediğim kısım:',
+  'ays.core.palette.vazgec':'Vazgeç',
+  'ays.core.palette.tamam':'Tamam',
+  'ays.core.palette.icin-sonuc-yok':'” için sonuç yok.',
+  'ays.core.palette.konu-deneme-yanlis-kart-ve':'Konu, deneme, yanlış, kart ve hafta içinde de aranır.',
+  'ays.core.palette.klavye-kisayollari':'Klavye kısayolları',
+  'ays.core.palette.kapat':'Kapat',
+  'ays.core.palette.calisan-blok-yok':'Çalışan blok yok',
+  'ays.core.palette.odak-modundan-cik':'Odak modundan çık',
+  'ays.core.palette.blogu-bitir':'Bloğu bitir',
+  'ays.core.palette.arkaplana-al':'Arkaplana al',
+});
+
 
 window.R = window.R || {};
+
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:440, group:'Sistem', label:'Kısayolları göster', icon:'guide', run(){ R.Palette.showShortcuts(); } });
 
 R.Palette = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -10,94 +30,12 @@ R.Palette = (function(){
   let items = [];
 
   /* ---------- komut listesi ---------- */
+  /* Komutlar parcadir: her satir kendi ekran dosyasinda (P.komut). */
   function commands(){
-    const M = R.Model, C = R.Calc;
-    const list = [];
-
-    const go = (id, label, icon, group) => ({ group, label, icon, route:id, run(){ R.App.go(id); } });
-
-    list.push(go('today','Bugün','today','Git'));
-    list.push(go('week','Hafta — sözleşme ve değerlendirme','week','Git'));
-    list.push(go('ogren','Öğren — konu anlatımı, örnek soru, koç','book','Git'));
-    /* Öğren › Sorular'ın iki kipi (core/ogrentest.js). */
-    const kip = (tab, label, icon) => ({ group:'Git', label, icon, route:'sorular', run(){
-      R.S.ui.ogrenKip = tab; R.S.ui.ogrTekrar = null; R.App.go('sorular'); } });
-    list.push(kip('paragraf', 'Günlük paragraf — bugünün seti', 'book'));
-    list.push(kip('karma', 'Karma test — konular karışık', 'zap'));
-    list.push(kip('yanlis', 'Yanlışlarım — yeniden çöz', 'list'));
-    list.push(go('learn','Öğrenme — video ve ders notu','play','Git'));
-    list.push({ group:'Git', label:'Notlarım — bütün notların', icon:'list', run(){ const L = window.LIFEOS || {}; if(L.DEFTER && L.DEFTER.kuruluMu()) L.DEFTER.ac(); else if(L.NOTUM) L.NOTUM.panelAc(); } });
-    list.push(go('exams','Deneme','exam','Git'));
-    list.push(go('quiz','Sınama — kendini test et','zap','Git'));
-    list.push(go('cards','Tekrar ve yanlış defteri','cards','Git'));
-    list.push(go('subjects','Dersler — konu kapanışı','book','Git'));
-    list.push(go('plan','40 haftalık plan','map','Git'));
-    list.push(go('target','Hedef, net matrisi, tercih','target','Git'));
-    list.push(go('progress','İlerleme — göstergeler ve aylık değerlendirme','chart','Git'));
-    list.push(go('analytics','Analiz — karşılaştırma, sıra geçmişi, alışkanlık','search','Git'));
-    list.push(go('profiles','Profiller ve gözetmen özeti','shield','Git'));
-    list.push(go('coach','Koç — verine bakarak yanıtlar','zap','Git'));
-    list.push(go('protocols','Telafi protokolleri','shield','Git'));
-    list.push(go('guide','Rehber ve ayarlar','guide','Git'));
-
-    list.push({ group:'Kayıt', label:'Deneme ekle', icon:'plus', hint:'Cmt', run(){ R.App.go('exams'); setTimeout(()=>R.Screens.exams.handle['new-exam']({dataset:{}}), 60); } });
-    list.push({ group:'Kayıt', label:'Tekrar kartı ekle', icon:'plus', run(){ R.App.go('cards'); setTimeout(()=>R.Screens.cards.handle['new-card']({dataset:{}}), 60); } });
-    list.push({ group:'Kayıt', label:'Ders ekle (video / not)', icon:'plus', route:'learn', run(){ R.App.go('learn'); setTimeout(()=>R.Screens.learn.handle['note-new']({dataset:{}}), 60); } });
-    list.push({ group:'Kayıt', label:'Süreli deneme oturumu', icon:'clock', run(){ R.App.go('exams'); setTimeout(()=>R.Screens.exams.handle['run-open']({dataset:{}}), 60); } });
-    list.push({ group:'Kayıt', label:'Sınamayı başlat', icon:'play', route:'quiz', run(){ R.App.go('quiz'); setTimeout(()=>R.Screens.quiz.handle['quiz-start']({dataset:{}}), 60); } });
-    list.push({ group:'Kayıt', label:'Haftalık değerlendirmeyi aç', icon:'check', hint:'Paz', run(){ R.App.go('week'); setTimeout(()=>R.Screens.week.openReview(), 60); } });
-
-    const day = S.days[U.todayISO()];
-    if(day){
-      const running = day.blocks.find(b => b.startedAt);
-      if(running){
-        list.push({ group:'Odak', label:'Odak moduna dön — '+running.topic, icon:'clock', run(){ R.Palette.openFocus(); } });
-        list.push({ group:'Odak', label:'Bloğu bitir', icon:'stop', run(){ R.Screens.today.handle['timer-stop']({ dataset:{ block:running.id } }); } });
-      }else{
-        day.blocks.filter(b => b.status === 'pending' && b.slot !== 'Dinlenme').forEach(b => {
-          list.push({ group:'Odak', label:'Başlat: '+b.topic, icon:'play', run(){
-            R.App.go('today');
-            setTimeout(()=>R.Screens.today.handle['timer-start']({ dataset:{ block:b.id } }), 60);
-          }});
-        });
-      }
-    }
-
-    R.SUBJECTS.forEach(s => {
-      list.push({ group:'Ders', label:s.name, icon:'book', run(){ S.ui.subjectOpen = s.id; R.App.go('subjects'); } });
-    });
-
-    R.Calc.riskRanking(5).forEach(r => {
-      list.push({ group:'Öncelik', label:r.topicName+' — risk '+r.score, icon:'target',
-        keywords:r.subjectName, weight:4,
-        run(){ S.ui.subjectOpen = r.subjectId; R.App.go('subjects');
-          setTimeout(()=>R.Screens.subjects.handle['open-topic']({ dataset:{ subject:r.subjectId, topic:r.topicId } }), 80); } });
-    });
-
-    const cur = M.currentWeek();
-    [cur-1, cur, cur+1].forEach(n => {
-      if(n < 1 || n > R.PLAN.totalWeeks) return;
-      const c = R.Model.curriculumFor(n);
-      list.push({ group:'Hafta', label:'Hafta '+n+' — '+c.title, icon:'week',
-        run(){ S.ui.weekView = n; R.App.go('week'); } });
-    });
-
-    const theme = S.profile ? S.profile.theme : 'system';
-    list.push({ group:'Sistem', label:'Tema: '+(theme === 'dark' ? 'açığa geç' : theme === 'light' ? 'sisteme geç' : 'koyuya geç'), icon:'moon',
-      run(){
-        const next = theme === 'dark' ? 'light' : theme === 'light' ? 'system' : 'dark';
-        S.profile.theme = next;
-        R.Model.saveProfile().then(() => { R.App.applyTheme(); R.App.render(); });
-      }});
-    list.push({ group:'Sistem', label:'Bugün olmuyor — minimum güne in', icon:'moon', run(){ R.Screens.today.handle['bad-day'](); } });
-    list.push({ group:'Sistem', label:'Hafta özetini paylaş', icon:'upload', run(){ R.Screens.today.handle['share-week'](); } });
-    list.push({ group:'Sistem', label:'Yedek al (JSON)', icon:'download', run(){ R.Screens.guide.handle['export-data']({dataset:{}}); } });
-    list.push({ group:'Sistem', label:'Kısayolları göster', icon:'guide', run(){ showShortcuts(); } });
-
+    const list = window.LIFEOS.PARCA.komutlar('ays');
     /* Gizlenmis bolumun «Git» komutu gorunmez (core/bolum.js). */
     return R.Bolum ? list.filter(c => !(c.route && R.Bolum.gizli(c.route))) : list;
   }
-
   /* Turkce karakterleri normalize eder: "ogrenme" ile "öğrenme" eslesir. */
   const norm = R.U.norm;
   const { html, raw, when, cls, map } = R.h;
@@ -208,7 +146,7 @@ R.Palette = (function(){
     for(let n = 1; n <= R.PLAN.totalWeeks; n++){
       const c = M2.curriculumFor(n);
       if(hit(c.title) || c.topics.some(hit)){
-        out.push({ group:'Hafta', label:'Hafta '+n+' — '+c.title, sub:c.topics.join(' · '),
+        out.push({ group:'Hafta', label:yz('ays.core.palette.hafta')+n+' — '+c.title, sub:c.topics.join(' · '),
           icon:'week', weight:2,
           run(){ R.S.ui.weekView = n; R.App.go('week'); } });
       }
@@ -239,7 +177,7 @@ R.Palette = (function(){
         <input class="cmdk__input" id="cmdk-input" placeholder="Ne yapmak istiyorsun?" autocomplete="off"/>
         <div class="cmdk__list" id="cmdk-list"></div>
         <div class="cmdk__foot"><span><kbd>↑</kbd><kbd>↓</kbd> gez</span>
-          <span><kbd>↵</kbd> seç</span><span><kbd>esc</kbd> kapat</span></div>
+          <span><kbd>↵</kbd> ${yz('ays.core.palette.sec')}</span><span><kbd>esc</kbd> kapat</span></div>
       </div>`);
     el.addEventListener('mousedown', e => { if(e.target === el) close(); });
     document.getElementById('overlay-root').appendChild(el);
@@ -304,7 +242,7 @@ R.Palette = (function(){
       : 'Uygulanamadı: ' + (islem.dusen.map(k => k.why).filter(Boolean).join(' · ') || 'geçersiz'),
       ids.length ? { undo:async () => {
         for(const id of ids) await R.Proposals.undo(id);
-        UI.toast('Geri alındı');
+        UI.toast(yz('ays.core.palette.geri-alindi'));
         R.App.render();
       } } : {});
     R.App.render();
@@ -389,19 +327,19 @@ R.Palette = (function(){
       subtitle:metin,
       body:String(html`
         <div class="qebloklar">${map(bloklar, b => b)}</div>
-        ${map(sorular, s => K.Notice({ tone:'warn', title:'Tahmin etmiyorum, soruyorum:', body:s.soru }))}
+        ${map(sorular, s => K.Notice({ tone:'warn', title:yz('ays.core.palette.tahmin-etmiyorum-soruyorum'), body:s.soru }))}
         ${when(r.anlasilmayan.length, () => K.Notice({ tone:'warn',
-          title:'Çözemediğim kısım:',
+          title:yz('ays.core.palette.cozemedigim-kisim'),
           body:'«' + r.anlasilmayan.join('», «') + '» — bu kısım kaydedilmeyecek. '
             + 'Anlaşılmayan satır atılmaz, söylenir.' }))}
         ${when(r.oneriler.length, () => K.Notice({ tone:'info',
           body:'Bu satırlar yorumlandı, KAYDEDİLMEDİ. Onaylayınca yazılır ve '
             + 'her biri tek tek geri alınabilir.' }))}`),
       footer:String(r.oneriler.length
-        ? html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ? html`${K.Button({ label:yz('ays.core.palette.vazgec'), act:'sheet-close' })}
           ${K.Button({ label:r.oneriler.length === 1 ? 'Onayla' : 'Hepsini onayla',
             tone:'primary', act:'veri-kaydet' })}`
-        : K.Button({ label:'Tamam', act:'sheet-close' })),
+        : K.Button({ label:yz('ays.core.palette.tamam'), act:'sheet-close' })),
     });
     bekleyen = Object.assign({}, r, { metin });
   }
@@ -458,8 +396,8 @@ R.Palette = (function(){
 
     const list = document.getElementById('cmdk-list');
     if(!items.length){
-      list.innerHTML = String(html`<div class="cmdk__empty">“${q}” için sonuç yok.<br/>
-        <span class="tiny">Konu, deneme, yanlış, kart ve hafta içinde de aranır.</span></div>`);
+      list.innerHTML = String(html`<div class="cmdk__empty">“${q}${yz('ays.core.palette.icin-sonuc-yok')}<br/>
+        <span class="tiny">${yz('ays.core.palette.konu-deneme-yanlis-kart-ve')}</span></div>`);
       return;
     }
 
@@ -524,12 +462,12 @@ R.Palette = (function(){
 
   function showShortcuts(){
     UI.sheet({
-      title:'Klavye kısayolları',
+      title:yz('ays.core.palette.klavye-kisayollari'),
       body:String(K.Table({ tight:true, headers:['Tuş', 'İşlev'],
         rows:SHORTCUTS.concat(window.LIFEOS && window.LIFEOS.KISAYOL ? window.LIFEOS.KISAYOL.satirlar() : [])
           .map(s => [map(s[0], k => html`<kbd>${k}</kbd> `), s[1]]) })),
       noFocus:true,
-      footer:String(K.Button({ label:'Kapat', act:'sheet-close' })),
+      footer:String(K.Button({ label:yz('ays.core.palette.kapat'), act:'sheet-close' })),
     });
   }
 
@@ -550,23 +488,23 @@ R.Palette = (function(){
 
   function openFocus(){
     const b = runningBlock();
-    if(!b){ UI.toast('Çalışan blok yok'); return; }
+    if(!b){ UI.toast(yz('ays.core.palette.calisan-blok-yok')); return; }
     closeFocus();
     const el = document.createElement('div');
     el.className = 'focusmode';
     el.id = 'focusmode';
     el.setAttribute('data-oz', '014');
     el.innerHTML = String(html`
-      ${K.IconButton({ icon:'close', aria:'Odak modundan çık', act:'focus-close', class:'focusmode__esc' })}
+      ${K.IconButton({ icon:'close', aria:yz('ays.core.palette.odak-modundan-cik'), act:'focus-close', class:'focusmode__esc' })}
       <div class="focusmode__slot">${b.slot}</div>
       <div class="focusmode__topic">${b.topic}</div>
       <div class="focusmode__clock" id="focus-clock">${U.fmtClock(elapsed(b))}</div>
       <div class="focusmode__ring" id="focus-ring"></div>
       <div class="focusmode__target" id="focus-target"></div>
       <div class="focusmode__actions">
-        ${K.Button({ label:'Bloğu bitir', icon:'check', size:'lg', tone:'primary',
+        ${K.Button({ label:yz('ays.core.palette.blogu-bitir'), icon:'check', size:'lg', tone:'primary',
           act:'focus-finish', data:{ 'data-block':b.id } })}
-        ${K.Button({ label:'Arkaplana al', size:'lg', act:'focus-close' })}
+        ${K.Button({ label:yz('ays.core.palette.arkaplana-al'), size:'lg', act:'focus-close' })}
       </div>`);
     document.getElementById('overlay-root').appendChild(el);
     paintFocus();

@@ -32,6 +32,15 @@
       "son 12 tahminin ortalama sapması %18" denir.
 
    4. BEŞİN ALTINDA KAYIT HÜKÜM VERMEZ. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.calib.deneme-netin':'Deneme netin',
+  'ays.core.calib.tek-testin-neti':'Tek testin neti',
+  'ays.core.calib.konu-testi-yuzden':'Konu testi yüzden',
+  'ays.core.calib.haftalik-calisma-suren':'Haftalık çalışma süren',
+  'ays.core.calib.hafta-plani':'Hafta planı',
+  'ays.core.calib.yanlilik-icin-en-az':'Yanlılık için en az ',
+});
+
 
 window.R = window.R || {};
 
@@ -43,19 +52,19 @@ R.Calib = (function(){
 
   R.CALIB_KINDS = [
     { id:'exam-net', type:'number', unit:'net', err:'abs', bands:[3, 7, 14],
-      label:'Deneme netin',
+      label:yz('ays.core.calib.deneme-netin'),
       ask:'Bu denemeyi okumadan önce: kaç net çıkardığını tahmin ediyorsun?' },
     { id:'test-net', type:'number', unit:'net', err:'abs', bands:[1.5, 3, 6],
-      label:'Tek testin neti',
+      label:yz('ays.core.calib.tek-testin-neti'),
       ask:'Bu testte kaç net yaptığını tahmin ediyorsun?' },
     { id:'topic-test', type:'number', unit:'puan', err:'abs', bands:[5, 12, 25],
-      label:'Konu testi yüzden',
+      label:yz('ays.core.calib.konu-testi-yuzden'),
       ask:'Bu konu testinden yüzde kaç çıkaracaksın?' },
     { id:'week-minutes', type:'number', unit:'dk', err:'ape',
-      label:'Haftalık çalışma süren',
+      label:yz('ays.core.calib.haftalik-calisma-suren'),
       ask:'Bu hafta bloklara kaç dakika gerçekleşen süre yazacaksın?' },
     { id:'week-plan', type:'binary', unit:'', err:'brier',
-      label:'Hafta planı',
+      label:yz('ays.core.calib.hafta-plani'),
       ask:'Bu haftanın planını tamamlama olasılığın nedir?' },
   ];
 
@@ -234,7 +243,7 @@ R.Calib = (function(){
       .slice(0, PENCERE);
     if(kayitlar.length < ASGARI){
       return { cert:'missing', n:kayitlar.length, value:null, unit:'bant',
-        note:'Yanlılık için en az ' + ASGARI + ' kapanmış sayısal tahmin gerekir.' };
+        note:yz('ays.core.calib.yanlilik-icin-en-az') + ASGARI + ' kapanmış sayısal tahmin gerekir.' };
     }
     const v = kayitlar.reduce((a, f) => {
       const k = kindOf(f.kind);

@@ -27,6 +27,24 @@
    Bu katman bir senkronizasyon değil bir İŞARETTİR: tek yön, en iyi çaba,
    geri dönüşü yok sayılabilir. AYS'in verisi AYS'te kalır; HKM'ye giden
    şey günün ÖZETİDİR. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.beacon.ozet':'Özet',
+  'ays.core.beacon.yalniz-yuk-kararini-etkileye':'Yalnız yük kararını etkileyen çekirdek ölçümler.',
+  'ays.core.beacon.gelismis':'Gelişmiş',
+  'ays.core.beacon.bolum-bazinda-ilerleme-de-gi':'Bölüm bazında ilerleme de gider — hâlâ yalnız sayı.',
+  'ays.core.beacon.yerel-olmayan-bir-adresle-es':'Yerel olmayan bir adresle eşleme yapılmaz.',
+  'ays.core.beacon.hkm-ye-ulasilamadi-daemon-ca':'HKM\'ye ulaşılamadı. Daemon çalışıyor mu?',
+  'ays.core.beacon.baglandi-i-saret-acildi-ne-g':'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.',
+  'ays.core.beacon.yerel-olmayan-cagri':'Yerel olmayan çağrı.',
+  'ays.core.beacon.ornek-profil-acik-ornek-prof':'Örnek profil açık; örnek profil HKM\'ye bağlanamaz.',
+  'ays.core.beacon.hkm-isareti-kapali':'HKM işareti kapalı.',
+  'ays.core.beacon.jeton-girilmemis':'Jeton girilmemiş.',
+  'ays.core.beacon.yerel-olmayan-bir-adrese-duz':'Yerel olmayan bir adrese düz http ile gönderim yapılmaz: jeton ',
+  'ays.core.beacon.son-gonderimin-uzerinden-yet':'Son gönderimin üzerinden yeterli süre geçmedi.',
+  'ays.core.beacon.etiketsiz-ya-da-bozuk-alan':'Etiketsiz ya da bozuk alan var; gövde yola çıkmadı.',
+  'ays.core.beacon.tarih-gecersiz-ya-da-ileri':'Tarih geçersiz ya da ileri bir gün; kayıt ancak geçmiş bir güne yazılır.',
+});
+
 
 window.R = window.R || {};
 
@@ -109,10 +127,10 @@ R.Beacon = (function(){
      Seviye degistirmek yeni bir izin ister gibi davranir: ne gonderilecegi
      yine satir satir gosterilir. */
   const LEVELS = [
-    { id:'ozet', label:'Özet',
-      note:'Yalnız yük kararını etkileyen çekirdek ölçümler.' },
-    { id:'gelismis', label:'Gelişmiş',
-      note:'Bölüm bazında ilerleme de gider — hâlâ yalnız sayı.' },
+    { id:'ozet', label:yz('ays.core.beacon.ozet'),
+      note:yz('ays.core.beacon.yalniz-yuk-kararini-etkileye') },
+    { id:'gelismis', label:yz('ays.core.beacon.gelismis'),
+      note:yz('ays.core.beacon.bolum-bazinda-ilerleme-de-gi') },
   ];
 
   function levelOf(){
@@ -359,13 +377,13 @@ R.Beacon = (function(){
   async function pair(url){
     const adres = String(url || settings().url || '').replace(/\/$/, '');
     if(!urlOk(adres)){
-      return { ok:false, note:'Yerel olmayan bir adresle eşleme yapılmaz.' };
+      return { ok:false, note:yz('ays.core.beacon.yerel-olmayan-bir-adresle-es') };
     }
     let res;
     try{
       res = await fetch(adres + '/api/pair', { method:'POST' });
     }catch(e){
-      return { ok:false, note:'HKM\'ye ulaşılamadı. Daemon çalışıyor mu?' };
+      return { ok:false, note:yz('ays.core.beacon.hkm-ye-ulasilamadi-daemon-ca') };
     }
     let govde = null;
     try{ govde = await res.json(); }catch(e){ govde = null; }
@@ -376,7 +394,7 @@ R.Beacon = (function(){
     }
     const son = await save({ url:adres, token:govde.token, enabled:true, lastStatus:null });
     if(son.baskaProfil) return { ok:false, note:LIFEOS.HkmBag.not(son.baskaProfil) };
-    return { ok:true, note:'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.' };
+    return { ok:true, note:yz('ays.core.beacon.baglandi-i-saret-acildi-ne-g') };
   }
 
   /* TEK TIKLA BAĞLAMA — HKM yüzündeki «Üç sistemi bağla» düğmesi.
@@ -406,10 +424,10 @@ R.Beacon = (function(){
   async function hkmBagla(){
     let ust = '';
     try{ ust = new URL(document.referrer).origin; }catch(e){ ust = ''; }
-    if(!/^http:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(ust)) return { ok:false, note:'Yerel olmayan çağrı.' };
+    if(!/^http:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(ust)) return { ok:false, note:yz('ays.core.beacon.yerel-olmayan-cagri') };
     let sonuc;
     if(profilim() === 'ornek'){
-      sonuc = { ok:false, neden:'ornek', note:'Örnek profil açık; örnek profil HKM\'ye bağlanamaz.' };
+      sonuc = { ok:false, neden:'ornek', note:yz('ays.core.beacon.ornek-profil-acik-ornek-prof') };
     }else{
       const r = await pair(ust);
       sonuc = { ok:!!r.ok, note:r.note };
@@ -449,15 +467,15 @@ R.Beacon = (function(){
     const o = opts || {};
     const a = settings();
     if(a.baskaProfil) return { ok:false, reason:'baska-profil', note:LIFEOS.HkmBag.not(a.baskaProfil) };
-    if(!a.enabled && !o.force) return { ok:false, reason:'off', note:'HKM işareti kapalı.' };
-    if(!a.token) return { ok:false, reason:'no-token', note:'Jeton girilmemiş.' };
+    if(!a.enabled && !o.force) return { ok:false, reason:'off', note:yz('ays.core.beacon.hkm-isareti-kapali') };
+    if(!a.token) return { ok:false, reason:'no-token', note:yz('ays.core.beacon.jeton-girilmemis') };
     if(!urlOk(a.url)){
       return { ok:false, reason:'unsafe-url',
-        note:'Yerel olmayan bir adrese düz http ile gönderim yapılmaz: jeton '
+        note:yz('ays.core.beacon.yerel-olmayan-bir-adrese-duz')
            + 'ağda açık gider. https ya da yerel adres gerekir.' };
     }
     if(!o.force && !due(Date.now())){
-      return { ok:false, reason:'throttled', note:'Son gönderimin üzerinden yeterli süre geçmedi.' };
+      return { ok:false, reason:'throttled', note:yz('ays.core.beacon.son-gonderimin-uzerinden-yet') };
     }
     const body = payload(o.date);
     const hata = contract(body);
@@ -465,7 +483,7 @@ R.Beacon = (function(){
       await save({ lastAt:new Date().toISOString(), lastStatus:0,
         lastNote:'Gövde sözleşmeyi geçmedi: ' + hata[0] });
       return { ok:false, reason:'contract', errors:hata,
-        note:'Etiketsiz ya da bozuk alan var; gövde yola çıkmadı.' };
+        note:yz('ays.core.beacon.etiketsiz-ya-da-bozuk-alan') };
     }
     let durum = 0, not = '';
     try{
@@ -781,7 +799,7 @@ R.Beacon = (function(){
     const metin = String(p.metin || '').trim().slice(0, 400);
     const out = { gun, yazilacak:[], yazilamaz:[], anlasilmayan:[] };
     if(!U.isISO(gun) || gun > U.todayISO()){
-      out.yazilamaz.push({ metin, why:'Tarih geçersiz ya da ileri bir gün; kayıt ancak geçmiş bir güne yazılır.' });
+      out.yazilamaz.push({ metin, why:yz('ays.core.beacon.tarih-gecersiz-ya-da-ileri') });
       return out;
     }
     if(!metin || !R.Entry || !R.Proposals){ out.anlasilmayan.push(metin); return out; }

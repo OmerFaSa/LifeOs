@@ -11,6 +11,13 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:20, id:'act:review', kind:'Eylem', label:'Kart çalışmasına başla',
+  hint:'Dil', run:() => { ESP.S.ui.langTab = 'calis'; ESP.App.go('lang'); } });
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:30, id:'act:card', kind:'Eylem', label:'Kelime listesi yapıştır',
+  hint:'Dil', run:() => { ESP.S.ui.langTab = 'ekle'; ESP.App.go('lang');
+    setTimeout(() => { const el = document.getElementById('vocab-text'); if(el) el.focus(); }, 160); } });
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:100, id:'act:practice-lang', kind:'Eylem', label:'Dil pratiği başlat',
+  hint:'Dil', run:() => { ESP.S.ui.langTab = 'ogren'; ESP.App.go('lang'); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.lang.calis':'Çalış',
   'esp.lang.kartlar':'Kartlar',
@@ -129,7 +136,7 @@ window.LIFEOS.PARCA.yazilar({
   'esp.lang.dil-studyosu':'Dil Stüdyosu',
   'esp.lang.calisilan-dil':'Çalışılan dil',
 });
-window.LIFEOS.PARCA.sayfa({ id:'lang', modul:'esp', cekmece:'calisma', ad:'Dil', ikon:'cards', ek:{ disc:'lang' }, sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'lang', modul:'esp', king:{ sira:180, ad:'Dil', es:['dil', 'dil stüdyo', 'ingilizce', 'almanca', 'kelime'] }, cekmece:'calisma', ad:'Dil', ikon:'cards', ek:{ disc:'lang' }, sira:10 });
 
 ESP.Screens.lang = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
@@ -945,14 +952,14 @@ ESP.Screens.lang = (function(){
     return P.izgara([kutuKart, zorKart], 'pk-izgara--iki');
   }
 
-  LIFEOS.PARCA.blok({ id:'lang.bolum-1', sayfa:'lang', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ d }){
+  LIFEOS.PARCA.blok({ id:'lang.dil-sekmeleri', sayfa:'lang', yer:'y1', sira:10, ad:'Dil sekmeleri', ciz({ d }){
     return K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:yz('esp.lang.dil-bolumleri'), tabs:TABS,
         govde:GOVDE, sayi:{ calis:d.due || null } }));
   } });
-  LIFEOS.PARCA.blok({ id:'lang.bolum-2', sayfa:'lang', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ d }){
+  LIFEOS.PARCA.blok({ id:'lang.gelecek-yuk', sayfa:'lang', yer:'y2', sira:10, ad:'Gelecek yük', ciz({ d }){
     return K.Span(12, gelecekYuk());
   } });
-  LIFEOS.PARCA.blok({ id:'lang.bolum-3', sayfa:'lang', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ d }){
+  LIFEOS.PARCA.blok({ id:'lang.dil-panosu', sayfa:'lang', yer:'y3', sira:10, ad:'Dil panosu', ciz({ d }){
     return K.Span(12, raw(PanoDil()));
   } });
   function render(){

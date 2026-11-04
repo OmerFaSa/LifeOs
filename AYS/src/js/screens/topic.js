@@ -338,7 +338,7 @@ R.Screens.topic = (function(){
     });
   }
 
-  LIFEOS.PARCA.blok({ id:'topic.bolum-1', sayfa:'topic', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ subject, topic, st, risk }){
+  LIFEOS.PARCA.blok({ id:'topic.konu-basligi-ve-geri-donus', sayfa:'topic', yer:'y1', sira:10, ad:'Konu başlığı ve geri dönüş', ciz({ subject, topic, st, risk }){
     return K.Row([
         K.Button({ label:yz('ays.topic.dersler'), icon:'left', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'subjects' } }),
         K.Row([
@@ -347,31 +347,31 @@ R.Screens.topic = (function(){
         ], { wrap:true }),
       ], { between:true, wrap:true });
   } });
-  LIFEOS.PARCA.blok({ id:'topic.headercard', sayfa:'topic', yer:'y2', sira:10, ad:'headerCard', ciz({ subject, topic, st, risk }){
+  LIFEOS.PARCA.blok({ id:'topic.headercard', sayfa:'topic', yer:'y2', sira:10, ad:'Konu başlığı', ciz({ subject, topic, st, risk }){
     return headerCard(subject, topic, st, risk);
   } });
-  LIFEOS.PARCA.blok({ id:'topic.yolcard', sayfa:'topic', yer:'y2', sira:20, ad:'yolCard', ciz({ subject, topic, st, risk }){
+  LIFEOS.PARCA.blok({ id:'topic.yolcard', sayfa:'topic', yer:'y2', sira:20, ad:'Konu yolu', ciz({ subject, topic, st, risk }){
     return yolCard(subject, topic, st);
   } });
-  LIFEOS.PARCA.blok({ id:'topic.ogrencard', sayfa:'topic', yer:'y2', sira:30, ad:'ogrenCard', ciz({ subject, topic, st, risk }){
+  LIFEOS.PARCA.blok({ id:'topic.ogrencard', sayfa:'topic', yer:'y2', sira:30, ad:'Öğren', ciz({ subject, topic, st, risk }){
     return ogrenCard(subject, topic);
   } });
-  LIFEOS.PARCA.blok({ id:'topic.measurecard', sayfa:'topic', yer:'y2', sira:40, ad:'measureCard', ciz({ subject, topic, st, risk }){
+  LIFEOS.PARCA.blok({ id:'topic.measurecard', sayfa:'topic', yer:'y2', sira:40, ad:'Ölçüm', ciz({ subject, topic, st, risk }){
     return measureCard(subject, topic, st);
   } });
-  LIFEOS.PARCA.blok({ id:'topic.practicecard', sayfa:'topic', yer:'y2', sira:50, ad:'practiceCard', ciz({ subject, topic, st, risk }){
+  LIFEOS.PARCA.blok({ id:'topic.practicecard', sayfa:'topic', yer:'y2', sira:50, ad:'Pratik', ciz({ subject, topic, st, risk }){
     return practiceCard(subject, topic);
   } });
-  LIFEOS.PARCA.blok({ id:'topic.notescard', sayfa:'topic', yer:'y2', sira:60, ad:'notesCard', ciz({ subject, topic, st, risk }){
+  LIFEOS.PARCA.blok({ id:'topic.notescard', sayfa:'topic', yer:'y2', sira:60, ad:'Notlar', ciz({ subject, topic, st, risk }){
     return notesCard(subject, topic);
   } });
-  LIFEOS.PARCA.blok({ id:'topic.riskcard', sayfa:'topic', yer:'y3', sira:10, ad:'riskCard', ciz({ subject, topic, st, risk }){
+  LIFEOS.PARCA.blok({ id:'topic.riskcard', sayfa:'topic', yer:'y3', sira:10, ad:'Risk', ciz({ subject, topic, st, risk }){
     return riskCard(risk);
   } });
-  LIFEOS.PARCA.blok({ id:'topic.cardscard', sayfa:'topic', yer:'y3', sira:20, ad:'cardsCard', ciz({ subject, topic, st, risk }){
+  LIFEOS.PARCA.blok({ id:'topic.cardscard', sayfa:'topic', yer:'y3', sira:20, ad:'Kartlar', ciz({ subject, topic, st, risk }){
     return cardsCard(subject, topic);
   } });
-  LIFEOS.PARCA.blok({ id:'topic.errorscard', sayfa:'topic', yer:'y3', sira:30, ad:'errorsCard', ciz({ subject, topic, st, risk }){
+  LIFEOS.PARCA.blok({ id:'topic.errorscard', sayfa:'topic', yer:'y3', sira:30, ad:'Hatalar', ciz({ subject, topic, st, risk }){
     return errorsCard(subject, topic);
   } });
   LIFEOS.PARCA.blok({ id:'topic.aciklamalar', sayfa:'topic', yer:'y3', sira:40, ad:'Açıklamalar', ciz({ subject, topic, st, risk }){

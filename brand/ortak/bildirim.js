@@ -44,6 +44,11 @@
         modülün kendi anahtarıdır (ekran bunu söyler). «Geri al» silineni
         geri kurar. Silmek işi yapılmış saymaz; hiçbir kayda yazılmaz.
    Model hiçbir aşamada yoktur; metin modülün kural metnidir. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.bildirim.bildirim-yalniz-telefon-uygu':'Bildirim yalnız telefon uygulamasında kurulur.',
+  'ortak.bildirim.telefon-cevap-vermedi':'Telefon cevap vermedi.',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -69,14 +74,14 @@ window.LIFEOS.BILDIRIM = (function(){
   const bekleyen = {};
   function gonder(mesaj){
     const k = kopru();
-    if(!k) return Promise.resolve({ ok:false, why:'Bildirim yalnız telefon uygulamasında kurulur.' });
+    if(!k) return Promise.resolve({ ok:false, why:yz('ortak.bildirim.bildirim-yalniz-telefon-uygu') });
     return new Promise(res => {
       const no = ++sira;
       const bitir = v => { if(bekleyen[no]){ delete bekleyen[no]; clearTimeout(sure); res(v); } };
-      const sure = setTimeout(() => bitir({ ok:false, why:'Telefon cevap vermedi.' }), ZAMAN_ASIMI);
+      const sure = setTimeout(() => bitir({ ok:false, why:yz('ortak.bildirim.telefon-cevap-vermedi') }), ZAMAN_ASIMI);
       bekleyen[no] = bitir;
       try{ k.postMessage(Object.assign({}, mesaj, { istek:no })); }
-      catch(e){ bitir({ ok:false, why:'Telefon cevap vermedi.' }); }
+      catch(e){ bitir({ ok:false, why:yz('ortak.bildirim.telefon-cevap-vermedi') }); }
     });
   }
   function _cevap(no, v){

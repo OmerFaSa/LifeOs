@@ -7,6 +7,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:170, group:'Git', label:'Profiller ve gözetmen özeti', icon:'shield', route:'profiles', run(){ R.App.go('profiles'); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.profiles.cihazdaki-profiller':'Cihazdaki profiller',
   'ays.profiles.her-profilin-verisi-ayri-tut':'Her profilin verisi ayrı tutulur',
@@ -248,16 +249,16 @@ R.Screens.profiles = (function(){
     };
   }
 
-  LIFEOS.PARCA.blok({ id:'profiles.profilecard', sayfa:'profiles', yer:'y1', sira:10, ad:'profileCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'profiles.profilecard', sayfa:'profiles', yer:'y1', sira:10, ad:'Profil', ciz(){
     return profileCard();
   } });
-  LIFEOS.PARCA.blok({ id:'profiles.transfercard', sayfa:'profiles', yer:'y1', sira:20, ad:'transferCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'profiles.transfercard', sayfa:'profiles', yer:'y1', sira:20, ad:'Aktarım', ciz(){
     return transferCard();
   } });
-  LIFEOS.PARCA.blok({ id:'profiles.supervisorcard', sayfa:'profiles', yer:'y2', sira:10, ad:'supervisorCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'profiles.supervisorcard', sayfa:'profiles', yer:'y2', sira:10, ad:'Gözetmen özeti', ciz(){
     return supervisorCard();
   } });
-  LIFEOS.PARCA.blok({ id:'profiles.comparecard', sayfa:'profiles', yer:'y2', sira:20, ad:'compareCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'profiles.comparecard', sayfa:'profiles', yer:'y2', sira:20, ad:'Karşılaştırma', ciz(){
     return compareCard();
   } });
   async function render(){

@@ -9,6 +9,23 @@
 
    Not: eski R.UI yardimcilari bu setin ustune ince sarmalayici olarak durur;
    ekranlar kademeli olarak C.* API'sine gecirilir. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.components.ays':'AYS',
+  'ays.core.components.spi':'SPİ',
+  'ays.core.components.esp':'ESP',
+  'ays.core.components.merkez':'Merkez',
+  'ays.core.components.sistem':'Sistem',
+  'ays.core.components.acik':'Açık',
+  'ays.core.components.koyu':'Koyu',
+  'ays.core.components.varsayilan-sistem':'Varsayılan: Sistem',
+  'ays.core.components.varsayilana-don':'Varsayılana dön',
+  'ays.core.components.verin-yerinde-hicbir-kayit-s':'Verin yerinde; hiçbir kayıt silinmedi.',
+  'ays.core.components.teknik-ayrinti':'Teknik ayrıntı',
+  'ays.core.components.onceki':'Önceki',
+  'ays.core.components.kayit':'kayıt',
+  'ays.core.components.sonraki':'Sonraki',
+});
+
 
 window.R = window.R || {};
 
@@ -170,8 +187,8 @@ R.C = (function(){
   /* ModulIsareti (katalog 165): RENKSİZ DE AYIRT EDİLİR. Modül = renk + harf
      + şekil: AYS kare, SPİ daire, ESP karo, Merkez altıgen. Renk körlüğünde
      ve gri baskıda da hangi modül olduğu okunur. */
-  const MODUL = { ays:{ harf:'A', ad:'AYS' }, spi:{ harf:'S', ad:'SPİ' },
-    esp:{ harf:'E', ad:'ESP' }, mer:{ harf:'M', ad:'Merkez' } };
+  const MODUL = { ays:{ harf:'A', ad:yz('ays.core.components.ays') }, spi:{ harf:'S', ad:yz('ays.core.components.spi') },
+    esp:{ harf:'E', ad:yz('ays.core.components.esp') }, mer:{ harf:'M', ad:yz('ays.core.components.merkez') } };
   function ModulIsareti(o){
     const k = typeof o === 'string' ? o : (o && o.modul);
     const m = MODUL[k];
@@ -233,8 +250,8 @@ R.C = (function(){
      seçiliyken altında varsayılan ve tek düğme durur. `data-theme` ve
      `data-value` ikisi de yazılır: kabuğun ve ekranın işleyicisi farklı
      adı okuyor. */
-  const TEMALAR = [{ id:'system', ad:'Sistem', simge:'monitor' },
-    { id:'light', ad:'Açık', simge:'sun' }, { id:'dark', ad:'Koyu', simge:'moon' }];
+  const TEMALAR = [{ id:'system', ad:yz('ays.core.components.sistem'), simge:'monitor' },
+    { id:'light', ad:yz('ays.core.components.acik'), simge:'sun' }, { id:'dark', ad:yz('ays.core.components.koyu'), simge:'moon' }];
   function TemaSecici(o){
     o = o || {};
     const v = o.value || 'system';
@@ -245,16 +262,16 @@ R.C = (function(){
         <span class="${'tema-ornek tema-ornek--' + t.id}" aria-hidden="true"><i></i><b><i></i><i></i></b></span>
         <span class="temasec__ad">${icon(t.simge)}${t.ad}</span></button>`)}
     </div>
-    ${when(v !== 'system', () => html`<p class="ayar-varsayilan">Varsayılan: Sistem
-      <button type="button" class="linkbtn" data-act="${act}" data-theme="system" data-value="system">Varsayılana dön</button></p>`)}`;
+    ${when(v !== 'system', () => html`<p class="ayar-varsayilan">${yz('ays.core.components.varsayilan-sistem')}
+      <button type="button" class="linkbtn" data-act="${act}" data-theme="system" data-value="system">${yz('ays.core.components.varsayilana-don')}</button></p>`)}`;
   }
 
   function SakinHata(o){
     o = o || {};
     return html`<div class="sakinhata" data-oz="011" role="status">${Kutu({ ad:o.baslik || 'Bu ekran açılamadı.',
-      govde:html`<p class="sakinhata__veri">Verin yerinde; hiçbir kayıt silinmedi.</p>
+      govde:html`<p class="sakinhata__veri">${yz('ays.core.components.verin-yerinde-hicbir-kayit-s')}</p>
         ${when(o.not, () => html`<p class="small muted">${o.not}</p>`)}
-        ${when(o.ayrinti, () => Ayrinti({ etiket:'Teknik ayrıntı',
+        ${when(o.ayrinti, () => Ayrinti({ etiket:yz('ays.core.components.teknik-ayrinti'),
           govde:html`<code class="sakinhata__kod">${o.ayrinti}</code>` }))}
         <div class="sakinhata__eylem">${Button({ label:o.dugme || 'Yeniden yükle', size:'sm', act:'reload' })}</div>` })}</div>`;
   }
@@ -625,11 +642,11 @@ R.C = (function(){
     if(o.pages <= 1) return raw('');
     return html`
       <div class="pager" role="navigation" aria-label="Sayfalama">
-        ${Button({ label:'Önceki', size:'sm', act:o.act, disabled:o.page <= 1,
+        ${Button({ label:yz('ays.core.components.onceki'), size:'sm', act:o.act, disabled:o.page <= 1,
           data:{ 'data-page':o.page-1 } })}
         <span class="pager__info num">${o.page} / ${o.pages}
-          <span class="dim">· ${o.total} kayıt</span></span>
-        ${Button({ label:'Sonraki', size:'sm', act:o.act, disabled:o.page >= o.pages,
+          <span class="dim">· ${o.total} ${yz('ays.core.components.kayit')}</span></span>
+        ${Button({ label:yz('ays.core.components.sonraki'), size:'sm', act:o.act, disabled:o.page >= o.pages,
           data:{ 'data-page':o.page+1 } })}
       </div>`;
   }

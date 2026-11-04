@@ -5,6 +5,12 @@
 
    Kural motoru otoritedir: burada yalnız süre ve işaret toplanır; net,
    medyan ve karar hesabı her zaman R.Calc'te kalır. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.examrun.yaptim':'Yaptım',
+  'ays.core.examrun.zorlandim':'Zorlandım',
+  'ays.core.examrun.atladim':'Atladım',
+});
+
 
 window.R = window.R || {};
 
@@ -12,9 +18,9 @@ R.ExamRun = (function(){
   const U = R.U, M = R.Model;
 
   const MARKS = {
-    ok:   { label:'Yaptım',    tone:'ok',    key:'1' },
-    slow: { label:'Zorlandım', tone:'warn',  key:'2' },
-    skip: { label:'Atladım',   tone:'muted', key:'3' },
+    ok:   { label:yz('ays.core.examrun.yaptim'),    tone:'ok',    key:'1' },
+    slow: { label:yz('ays.core.examrun.zorlandim'), tone:'warn',  key:'2' },
+    skip: { label:yz('ays.core.examrun.atladim'),   tone:'muted', key:'3' },
   };
 
   let run = null;

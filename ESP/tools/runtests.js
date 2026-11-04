@@ -130,7 +130,9 @@ async function portMuhafizi(portlar, ipucu){
       JSON.stringify({ toplam:summary.total, gecen:summary.passed, takim }));
     if(yavas.length && yavas[0][1]) console.log('En yavas takimlar: ' + yavas.map(([s, ms]) => s + ' ' + Math.round(ms) + ' ms').join(' · '));
     console.log('\n' + summary.passed + '/' + summary.total + ' gecti'
-      + (summary.failed ? '  ·  ' + summary.failed + ' kaldi' : ''));
+      + (summary.failed ? '  ·  ' + summary.failed + ' kaldi' : '')
+      /* Yuklenirken patlayan test dosyasi sayilmaz: «hepsi gecti» gibi okunmasin. */
+      + (consoleErrors.length ? '  ·  ' + consoleErrors.length + ' SAYFA HATASI' : ''));
     code = (summary.failed || consoleErrors.length) ? 1 : 0;
   }catch(err){
     console.error('Kosum hatasi:', err && err.message ? err.message : err);

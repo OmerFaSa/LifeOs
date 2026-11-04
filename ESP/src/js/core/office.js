@@ -17,6 +17,13 @@
    bir teze tiklayip "Socrates'e sor" dendiginde tezin metni SORUNUN icinde
    gider, brifingin icinde degil. Fark onemli: brifing her cagride otomatik
    gider, soru yalnizca kullanici istediginde. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.office.merkez-modeli-cevap-vermedi':'Merkez modeli cevap vermedi: ',
+  'esp.core.office.model-istemi-geri-yazdi-kura':'Model istemi geri yazdı; kural motorunun cümlesi gösterildi.',
+  'esp.core.office.model-ciktisi-ev-kurallarina':'Model çıktısı ev kurallarına takıldı: ',
+  'esp.core.office.patron':'Patron',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -648,7 +655,7 @@ ESP.Office = (function(){
       if(MM){
         const r = await MM.sor({ sistem:systemPrompt(agentId, b, { selam }), mesajlar, baglam:selam ? '' : JSON.stringify(b) });
         if(r && r.ok && r.text) res = { text:r.text, model:(r.model || '') + ' · Merkez' };
-        else if(!yerel) return Object.assign({}, fallback, { note:'Merkez modeli cevap vermedi: ' + ((r && r.note) || 'sebep bilinmiyor') });
+        else if(!yerel) return Object.assign({}, fallback, { note:yz('esp.core.office.merkez-modeli-cevap-vermedi') + ((r && r.note) || 'sebep bilinmiyor') });
       }
       if(!res) res = await ESP.LLM.chat(cfg, {
         system:systemPrompt(agentId, b, { selam, model:cfg.model }),
@@ -659,14 +666,14 @@ ESP.Office = (function(){
       /* Selamda brifing gonderilmedi: sayi da ona gore denetlenir. */
       if(LIFEOS.Ofis.yankiMi && LIFEOS.Ofis.yankiMi(res.text)){
         return { text:fallback.text, source:'rules', brief:b,
-          note:'Model istemi geri yazdı; kural motorunun cümlesi gösterildi.' };
+          note:yz('esp.core.office.model-istemi-geri-yazdi-kura') };
       }
       /* Model adindaki rakam («gemma3:4b») uydurma sayi degildir. */
       const havuzEk = { model:String(res.model || cfg.model || '') };
       const check = validate(res.text, { agentId, brief:selam ? havuzEk : Object.assign({}, b, havuzEk) });
       if(!check.ok){
         return { text:fallback.text, source:'rules', brief:b,
-          blocked:check, note:'Model çıktısı ev kurallarına takıldı: ' + check.note };
+          blocked:check, note:yz('esp.core.office.model-ciktisi-ev-kurallarina') + check.note };
       }
       /* Istemdeki tavan («En fazla 3 cümle») kodda da uygulanir. */
       const kisa = ESP.LLM.capSentences ? ESP.LLM.capSentences(res.text, o.sentences || CUMLE_TAVANI) : res.text.trim();
@@ -1008,7 +1015,7 @@ ESP.Office = (function(){
     };
     S.officeMeetings.unshift(rec);
     await ESP.Store.set('meetings/' + rec.id, rec);
-    if(typeof onTurn === 'function') onTurn({ agentId:'patron', name:'Patron',
+    if(typeof onTurn === 'function') onTurn({ agentId:'patron', name:yz('esp.core.office.patron'),
       text:kapanis.text, source:kapanis.source, closing:true });
     return rec;
   }

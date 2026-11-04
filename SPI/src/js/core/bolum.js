@@ -14,6 +14,14 @@
    Açıp kapamak ORTA seviyeli bir aksiyondur (AGENTS.md §1.9,
    core/proposals.js `bolum-ac-kapa`). Konuşarak da istenebilir: «finans
    bölümünü kapat»; hangi bölüm olduğu belli değilse SORULUR. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.bolum.ogunler':'Öğünler',
+  'spi.core.bolum.mutfak':'Mutfak',
+  'spi.core.bolum.hareket':'Hareket',
+  'spi.core.bolum.finans':'Finans',
+  'spi.core.bolum.rutbe':'Rütbe',
+});
+
 
 window.SP = window.SP || {};
 
@@ -21,11 +29,11 @@ SP.Bolum = (function(){
   const STORE = 'meta/bolumler';
 
   const GIZLENEBILIR = [
-    { id:'meals',   ad:'Öğünler', takma:['öğün', 'beslenme', 'besin'] },
-    { id:'kitchen', ad:'Mutfak',  takma:['mutfak', 'tarif'] },
-    { id:'move',    ad:'Hareket', takma:['hareket', 'antrenman', 'spor', 'egzersiz'] },
-    { id:'basket',  ad:'Finans',  takma:['finans', 'bütçe', 'para', 'market', 'sepet'] },
-    { id:'rutbe',   ad:'Rütbe',   takma:['rütbe', 'seviye', 'xp'] },
+    { id:'meals',   ad:yz('spi.core.bolum.ogunler'), takma:['öğün', 'beslenme', 'besin'] },
+    { id:'kitchen', ad:yz('spi.core.bolum.mutfak'),  takma:['mutfak', 'tarif'] },
+    { id:'move',    ad:yz('spi.core.bolum.hareket'), takma:['hareket', 'antrenman', 'spor', 'egzersiz'] },
+    { id:'basket',  ad:yz('spi.core.bolum.finans'),  takma:['finans', 'bütçe', 'para', 'market', 'sepet'] },
+    { id:'rutbe',   ad:yz('spi.core.bolum.rutbe'),   takma:['rütbe', 'seviye', 'xp'] },
   ];
   const BY_ID = GIZLENEBILIR.reduce((m, b) => { m[b.id] = b; return m; }, {});
 

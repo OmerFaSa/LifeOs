@@ -6,6 +6,8 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:10, id:'act:notlar', kind:'Eylem', label:'Notlarım — bütün notların', hint:'Notum',
+  run:() => { if(window.LIFEOS && window.LIFEOS.NOTUM) window.LIFEOS.NOTUM.panelAc(); } });
 window.LIFEOS.PARCA.yazilar({
   'esp.kutuphane.ac':'Aç',
   'esp.kutuphane.sil':'Sil',

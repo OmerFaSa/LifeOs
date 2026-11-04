@@ -1,6 +1,22 @@
 /* KING · ses ve görüntü: fotoğraf, ekran, kamera, göz, ses, mikrofon, araya girme, uyanma.
    Parça 2/8; yükleme sırası: king.js, king-ses.js, king-kayit.js, king-gorunum.js, king-kart.js, king-arac.js, king-devrim.js, king-yol.js.
    Dosyalar arası ortak adlar ve ortak durum window.LIFEOS.KING_IC'tedir (KI.ad). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.king-ses.fotograf':'(fotoğraf)',
+  'ortak.king-ses.ne-gordugunu-soyle':'Ne gördüğünü söyle',
+  'ortak.king-ses.vazgec':'Vazgeç',
+  'ortak.king-ses.pdf':'(PDF) ',
+  'ortak.king-ses.derse-cevir':'Derse çevir',
+  'ortak.king-ses.goruntu-okunamadi':'görüntü okunamadı',
+  'ortak.king-ses.merkez-bagli-degil':'Merkez bağlı değil',
+  'ortak.king-ses.model-bos-dondu':'model boş döndü',
+  'ortak.king-ses.model-yanit-vermedi':'model yanıt vermedi',
+  'ortak.king-ses.kameradan':'(kameradan) ',
+  'ortak.king-ses.kamerayla':'Kamerayla',
+  'ortak.king-ses.fotograf-sec':'Fotoğraf seç',
+  'ortak.king-ses.ekrani-gosterdi':'(ekranı gösterdi)',
+});
+
 
 (function(){
   'use strict';
@@ -14,7 +30,7 @@
     if(!/^image\//.test(file.type || '')){ KI.soyle('Bu bir fotoğraf değil; yalnız görsel alabilirim.'); return false; }
     if(file.size > KI.FOTO_EN_BUYUK){ KI.soyle('Fotoğraf çok büyük (en çok 15 MB). Daha küçük bir kırpma dener misin?'); return false; }
     const fotoUrl = KI.ortam.nesneUrl(file);
-    KI.akis.push({ kim:'sen', foto:fotoUrl, metin:'(fotoğraf)' });
+    KI.akis.push({ kim:'sen', foto:fotoUrl, metin:yz('ortak.king-ses.fotograf') });
     KI.gorselSakla(fotoUrl);
     const l = fotoIsleri();
     /* Söz 37: iş önceden seçildiyse («Tüm işler») doğrudan o işe. */
@@ -28,8 +44,8 @@
     }
     KI.bekleyenFoto = file;
     KI.cipler = l.map((x, i) => ({ ad:x.ad, is:'foto:' + i }))
-      .concat(gorur ? [{ ad:'Ne gördüğünü söyle', is:'foto-yorum' }] : [])
-      .concat([{ ad:'Vazgeç', is:'vazgec' }]);
+      .concat(gorur ? [{ ad:yz('ortak.king-ses.ne-gordugunu-soyle'), is:'foto-yorum' }] : [])
+      .concat([{ ad:yz('ortak.king-ses.vazgec'), is:'vazgec' }]);
     KI.soyle('Fotoğrafı aldım; bu cihazda kalıyor. Ne yapalım?');
     return true;
   }
@@ -40,7 +56,7 @@
     if(!KI.acik || !file) return false;
     if(!/pdf$/i.test(file.type || '') && !/\.pdf$/i.test(file.name || '')){ KI.soyle('Bu bir PDF değil; PDF dosyası seç.'); return false; }
     const ad = String(file.name || 'belge.pdf').slice(0, 120);
-    KI.akis.push({ kim:'sen', metin:'(PDF) ' + ad });
+    KI.akis.push({ kim:'sen', metin:yz('ortak.king-ses.pdf') + ad });
     if(file.size > PDF_EN_BUYUK){ KI.soyle('PDF çok büyük (en çok 8 MB).'); return false; }
     const k = KI.baglanti();
     if(!k){ KI.soyle('PDF’in metnini bilgisayardaki Merkez çıkarır; Merkez bağlı değil. Bağlanınca yeniden dene.'); return false; }
@@ -64,7 +80,7 @@
       + '(en çok beş madde) ve LifeOS’ta işine yarayacak sonraki adımı tek cümleyle öner; metinde olmayan sayıyı yazma.\n\n' + String(g.metin || '').slice(0, PDF_METIN));
     KI.akis = KI.akis.filter(m => m !== bek);
     KI.kaynakMetin = { ad, metin:String(g.metin || '') };
-    KI.cipler = [{ ad:'Derse çevir', is:'derse-cevir' }];
+    KI.cipler = [{ ad:yz('ortak.king-ses.derse-cevir'), is:'derse-cevir' }];
     KI.soyle(r.ok ? r.text : 'PDF’in metnini okudum (' + (Number(g.kelime) || 0) + ' kelime) ama Merkez özetleyemedi.', null, null, null, { neden });
     return true;
   }
@@ -94,15 +110,15 @@
   /* Görüntü okuma (sessiz): Merkez'in görsel kademesi, yoksa modülün zinciri. */
   async function gorselOku(f, soru, yetenek){
     let resim;
-    try{ resim = await KI.ortam.dosyaKare(f); }catch(e){ return { ok:false, note:'görüntü okunamadı' }; }
+    try{ resim = await KI.ortam.dosyaKare(f); }catch(e){ return { ok:false, note:yz('ortak.king-ses.goruntu-okunamadi') }; }
     const k = KI.baglanti(), z = gorselZincir();
     if(k){ const r = await merkezGorsel(k, soru, resim, yetenek || 'gorsel'); if(r.ok || !z.length) return r; }
-    if(!z.length) return { ok:false, note:'Merkez bağlı değil' };
+    if(!z.length) return { ok:false, note:yz('ortak.king-ses.merkez-bagli-degil') };
     try{
       const r = await modelKatmani().complete(z, { system:KI.GORSEL_SISTEM, temperature:0.1, maxTokens:900, messages:[{ role:'user', text:String(soru), images:[resim] }] });
       const t = String((r && r.text) || '').trim();
-      return t ? { ok:true, text:t } : { ok:false, note:'model boş döndü' };
-    }catch(e){ return { ok:false, note:'model yanıt vermedi' }; }
+      return t ? { ok:true, text:t } : { ok:false, note:yz('ortak.king-ses.model-bos-dondu') };
+    }catch(e){ return { ok:false, note:yz('ortak.king-ses.model-yanit-vermedi') }; }
   }
   /* Söz 37: kamera kipinde fotoğraf işi tek düğmeyle — o anki kare dosya olur. */
   function kareDosya(k, ad){
@@ -116,7 +132,7 @@
     if(!x || !KI.kameraMi()) return null;
     let kare;
     try{ kare = KI.paylasim.kare(); }catch(e){ KI.soyle('Kameranın karesi alınamadı: ' + ((e && e.message) || 'bilinmeyen hata')); return null; }
-    KI.akis.push({ kim:'sen', metin:'(kameradan) ' + x.ad });
+    KI.akis.push({ kim:'sen', metin:yz('ortak.king-ses.kameradan') + x.ad });
     return fotoIsle(i, kareDosya(kare, x.id));
   }
   /* «Tüm işler»den foto işi seçildi: kamerayla ya da fotoğrafla. */
@@ -124,8 +140,8 @@
     const i = fotoIsleri().findIndex(f => f.id === x.id);
     if(i < 0){ KI.soyle(x.ad + ' şu an bu sayfada yapılamıyor.'); return; }
     KI.fotoHedef = i; KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null;
-    if(KI.kameraMi()){ KI.cipler = [{ ad:x.ad, is:'kam-is:' + i }, { ad:'Vazgeç', is:'vazgec' }]; KI.soyle(x.ad + ': kamerayı tut, hazır olunca düğmeye dokun.'); return; }
-    KI.cipler = (KI.ortam.kameraDestek() ? [{ ad:'Kamerayla', is:'is-kamera' }] : []).concat([{ ad:'Fotoğraf seç', is:'foto-sec' }, { ad:'Vazgeç', is:'vazgec' }]);
+    if(KI.kameraMi()){ KI.cipler = [{ ad:x.ad, is:'kam-is:' + i }, { ad:yz('ortak.king-ses.vazgec'), is:'vazgec' }]; KI.soyle(x.ad + ': kamerayı tut, hazır olunca düğmeye dokun.'); return; }
+    KI.cipler = (KI.ortam.kameraDestek() ? [{ ad:yz('ortak.king-ses.kamerayla'), is:'is-kamera' }] : []).concat([{ ad:yz('ortak.king-ses.fotograf-sec'), is:'foto-sec' }, { ad:yz('ortak.king-ses.vazgec'), is:'vazgec' }]);
     KI.soyle(x.ad + (x.ne ? ' (' + x.ne + ')' : '') + '. Kamerayla mı, fotoğrafla mı?');
   }
   async function isKamera(){
@@ -135,7 +151,7 @@
     if(!KI.kameraMi()) await kameraAc();
     if(!KI.kameraMi()) return;
     KI.fotoHedef = i;
-    KI.cipler = [{ ad:x.ad, is:'kam-is:' + i }, { ad:'Vazgeç', is:'vazgec' }];
+    KI.cipler = [{ ad:x.ad, is:'kam-is:' + i }, { ad:yz('ortak.king-ses.vazgec'), is:'vazgec' }];
     KI.soyle('Kamera açık. ' + x.ad + ' için hazır olunca düğmeye dokun.');
   }
   /* Söz 37: «Tüm işler»den bir iş. Başka modülün işi o modülde açılır. */
@@ -169,7 +185,7 @@
   }
   async function ekranGoster(){
     const e = ekranOku();
-    KI.akis.push({ kim:'sen', metin:'(ekranı gösterdi)' });
+    KI.akis.push({ kim:'sen', metin:yz('ortak.king-ses.ekrani-gosterdi') });
     KI.cipler = null;
     if(KI.baglanti()){
       const bek = { kim:'king', bekliyor:true, metin:'' };

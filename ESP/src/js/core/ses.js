@@ -51,6 +51,38 @@
    akışları var. Ölü akış (`error`, ya da `stalled`/bağlanma süre aşımı)
    türün sonraki istasyonuna geçer; hepsi düşerse bir kez radio-browser'a
    sorulur, o da vermezse «Bu türde şu an çalan istasyon yok». */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.ses.chill':'Chill',
+  'ortak.ses.somafm-groove-salad':'SomaFM Groove Salad',
+  'ortak.ses.fluxfm-chillhop':'FluxFM Chillhop',
+  'ortak.ses.0r-lo-fi':'0R Lo-Fi',
+  'ortak.ses.turkce-pop':'Türkçe Pop',
+  'ortak.ses.radyo-fenomen':'Radyo Fenomen',
+  'ortak.ses.power-turk':'Power Türk',
+  'ortak.ses.radyo-viva':'Radyo Viva',
+  'ortak.ses.super-fm':'Süper FM',
+  'ortak.ses.turkce-slow':'Türkçe Slow',
+  'ortak.ses.power-turk-slow':'Power Türk Slow',
+  'ortak.ses.joy-turk':'Joy Türk',
+  'ortak.ses.slow-turk':'Slow Türk',
+  'ortak.ses.power-turk-akustik':'Power Türk Akustik',
+  'ortak.ses.turkce-rap':'Türkçe Rap',
+  'ortak.ses.power-turk-rap':'Power Türk Rap',
+  'ortak.ses.number-1-turk-rap':'Number 1 Türk Rap',
+  'ortak.ses.i-ngilizce-pop':'İngilizce Pop',
+  'ortak.ses.metro-fm':'Metro FM',
+  'ortak.ses.power-pop':'Power Pop',
+  'ortak.ses.virgin-radio':'Virgin Radio',
+  'ortak.ses.i-ngilizce-slow':'İngilizce Slow',
+  'ortak.ses.joy-fm':'Joy FM',
+  'ortak.ses.power-love':'Power Love',
+  'ortak.ses.i-ngilizce-rap':'İngilizce Rap',
+  'ortak.ses.90s90s-hip-hop':'90s90s Hip Hop',
+  'ortak.ses.bigfm-us-rap':'bigFM US Rap',
+  'ortak.ses.bigfm-oldschool-rap':'bigFM Oldschool Rap',
+  'ortak.ses.baglaniyor':'Bağlanıyor…',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -78,40 +110,40 @@ window.LIFEOS = window.LIFEOS || {};
      2026-10-29 akış başlıklarıyla (icy-name) denetlendi: bigFM US Rap adresi
      «bigFM 2000er» (pop) veriyordu, SomaFM ice6 403 dönüyordu. */
   const TURLER = Object.freeze([
-    { id:'chill', ad:'Chill', ara:{ tag:'chillout' }, haric:/pop|dance|club|hits|rap|hip.?hop|rock|metal/i, istasyonlar:[
-      { ad:'SomaFM Groove Salad', url:'https://ice2.somafm.com/groovesalad-128-mp3' },
-      { ad:'FluxFM Chillhop', url:'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/' },
-      { ad:'0R Lo-Fi', url:'https://0nlineradio.radioho.st/0r-lo-fi' },
+    { id:'chill', ad:yz('ortak.ses.chill'), ara:{ tag:'chillout' }, haric:/pop|dance|club|hits|rap|hip.?hop|rock|metal/i, istasyonlar:[
+      { ad:yz('ortak.ses.somafm-groove-salad'), url:'https://ice2.somafm.com/groovesalad-128-mp3' },
+      { ad:yz('ortak.ses.fluxfm-chillhop'), url:'https://streams.fluxfm.de/Chillhop/mp3-320/streams.fluxfm.de/' },
+      { ad:yz('ortak.ses.0r-lo-fi'), url:'https://0nlineradio.radioho.st/0r-lo-fi' },
     ] },
-    { id:'tr-pop', ad:'Türkçe Pop', ara:{ tag:'pop', countrycode:'TR' }, istasyonlar:[
-      { ad:'Radyo Fenomen', url:'https://live.radyofenomen.com/fenomen/128/icecast.audio' },
-      { ad:'Power Türk', url:'https://listen.powerapp.com.tr/powerturk/mpeg/icecast.audio' },
-      { ad:'Radyo Viva', url:'https://radyoviva.radyotvonline.net/radyovivaaac' },
-      { ad:'Süper FM', url:'https://playerservices.streamtheworld.com/api/livestream-redirect/SUPER_FM_SC' },
+    { id:'tr-pop', ad:yz('ortak.ses.turkce-pop'), ara:{ tag:'pop', countrycode:'TR' }, istasyonlar:[
+      { ad:yz('ortak.ses.radyo-fenomen'), url:'https://live.radyofenomen.com/fenomen/128/icecast.audio' },
+      { ad:yz('ortak.ses.power-turk'), url:'https://listen.powerapp.com.tr/powerturk/mpeg/icecast.audio' },
+      { ad:yz('ortak.ses.radyo-viva'), url:'https://radyoviva.radyotvonline.net/radyovivaaac' },
+      { ad:yz('ortak.ses.super-fm'), url:'https://playerservices.streamtheworld.com/api/livestream-redirect/SUPER_FM_SC' },
     ] },
-    { id:'tr-slow', ad:'Türkçe Slow', ara:{ tag:'slow', countrycode:'TR' }, haric:/dance|club|rap|hip.?hop|rock|metal|arabesk/i, istasyonlar:[
-      { ad:'Power Türk Slow', url:'https://listen.powerapp.com.tr/powerturkslow/mpeg/icecast.audio' },
-      { ad:'Joy Türk', url:'https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_TURK_SC' },
-      { ad:'Slow Türk', url:'https://radyo.duhnet.tv/ak_dtvh_slowturk' },
-      { ad:'Power Türk Akustik', url:'https://listen.powerapp.com.tr/powerturkakustik/mpeg/icecast.audio' },
+    { id:'tr-slow', ad:yz('ortak.ses.turkce-slow'), ara:{ tag:'slow', countrycode:'TR' }, haric:/dance|club|rap|hip.?hop|rock|metal|arabesk/i, istasyonlar:[
+      { ad:yz('ortak.ses.power-turk-slow'), url:'https://listen.powerapp.com.tr/powerturkslow/mpeg/icecast.audio' },
+      { ad:yz('ortak.ses.joy-turk'), url:'https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_TURK_SC' },
+      { ad:yz('ortak.ses.slow-turk'), url:'https://radyo.duhnet.tv/ak_dtvh_slowturk' },
+      { ad:yz('ortak.ses.power-turk-akustik'), url:'https://listen.powerapp.com.tr/powerturkakustik/mpeg/icecast.audio' },
     ] },
-    { id:'tr-rap', ad:'Türkçe Rap', ara:{ tag:'rap', countrycode:'TR' }, istasyonlar:[
-      { ad:'Power Türk Rap', url:'https://listen.powerapp.com.tr/powerturkrap/mpeg/icecast.audio' },
-      { ad:'Number 1 Türk Rap', url:'https://dijimedya.radyotvonline.net/turkrap' },
+    { id:'tr-rap', ad:yz('ortak.ses.turkce-rap'), ara:{ tag:'rap', countrycode:'TR' }, istasyonlar:[
+      { ad:yz('ortak.ses.power-turk-rap'), url:'https://listen.powerapp.com.tr/powerturkrap/mpeg/icecast.audio' },
+      { ad:yz('ortak.ses.number-1-turk-rap'), url:'https://dijimedya.radyotvonline.net/turkrap' },
     ] },
-    { id:'en-pop', ad:'İngilizce Pop', ara:{ tag:'pop', language:'english' }, istasyonlar:[
-      { ad:'Metro FM', url:'https://playerservices.streamtheworld.com/api/livestream-redirect/METRO_FM_SC' },
-      { ad:'Power Pop', url:'https://listen.powerapp.com.tr/powerpop/mpeg/icecast.audio' },
-      { ad:'Virgin Radio', url:'https://playerservices.streamtheworld.com/api/livestream-redirect/VIRGIN_RADIO_SC' },
+    { id:'en-pop', ad:yz('ortak.ses.i-ngilizce-pop'), ara:{ tag:'pop', language:'english' }, istasyonlar:[
+      { ad:yz('ortak.ses.metro-fm'), url:'https://playerservices.streamtheworld.com/api/livestream-redirect/METRO_FM_SC' },
+      { ad:yz('ortak.ses.power-pop'), url:'https://listen.powerapp.com.tr/powerpop/mpeg/icecast.audio' },
+      { ad:yz('ortak.ses.virgin-radio'), url:'https://playerservices.streamtheworld.com/api/livestream-redirect/VIRGIN_RADIO_SC' },
     ] },
-    { id:'en-slow', ad:'İngilizce Slow', ara:{ tag:'love songs', language:'english' }, haric:/dance|club|rap|hip.?hop|rock|metal/i, istasyonlar:[
-      { ad:'Joy FM', url:'https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_FM_SC' },
-      { ad:'Power Love', url:'https://listen.powerapp.com.tr/powerlove/mpeg/icecast.audio' },
+    { id:'en-slow', ad:yz('ortak.ses.i-ngilizce-slow'), ara:{ tag:'love songs', language:'english' }, haric:/dance|club|rap|hip.?hop|rock|metal/i, istasyonlar:[
+      { ad:yz('ortak.ses.joy-fm'), url:'https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_FM_SC' },
+      { ad:yz('ortak.ses.power-love'), url:'https://listen.powerapp.com.tr/powerlove/mpeg/icecast.audio' },
     ] },
-    { id:'en-rap', ad:'İngilizce Rap', ara:{ tag:'hip-hop', language:'english' }, istasyonlar:[
-      { ad:'90s90s Hip Hop', url:'https://streams.90s90s.de/hiphop/mp3-192/streams.90s90s.de/' },
-      { ad:'bigFM US Rap', url:'https://streams.bigfm.de/bigfm-usrap-128-mp3' },
-      { ad:'bigFM Oldschool Rap', url:'https://stream.bigfm.de/oldschoolrap/mp3-128/' },
+    { id:'en-rap', ad:yz('ortak.ses.i-ngilizce-rap'), ara:{ tag:'hip-hop', language:'english' }, istasyonlar:[
+      { ad:yz('ortak.ses.90s90s-hip-hop'), url:'https://streams.90s90s.de/hiphop/mp3-192/streams.90s90s.de/' },
+      { ad:yz('ortak.ses.bigfm-us-rap'), url:'https://streams.bigfm.de/bigfm-usrap-128-mp3' },
+      { ad:yz('ortak.ses.bigfm-oldschool-rap'), url:'https://stream.bigfm.de/oldschoolrap/mp3-128/' },
     ] },
   ].map(t => Object.freeze(Object.assign({}, t, { istasyonlar:Object.freeze(t.istasyonlar.map(Object.freeze)) }))));
 
@@ -420,7 +452,7 @@ window.LIFEOS = window.LIFEOS || {};
     const ad = aktif ? aktif.ad : '';
     switch(hal){
       case 'caliyor':     return 'Şimdi: ' + ad;
-      case 'baglaniyor':  return ad ? 'Bağlanıyor: ' + ad : 'Bağlanıyor…';
+      case 'baglaniyor':  return ad ? 'Bağlanıyor: ' + ad : yz('ortak.ses.baglaniyor');
       case 'dokun':       return 'Dokun, sürsün: ' + ad;
       case 'yok':         return 'Bu türde şu an çalan istasyon yok';
       case 'baglantiyok': return 'Bağlantı yok';

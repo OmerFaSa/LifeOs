@@ -33,6 +33,15 @@
         aralığın en dar hâli bugünkü sıra tahmininin bandıdır
         (R.SCORING.bandHalfWidth, puan; nete net başına puanla çevrilir).
         İki tahmin birbirini yalanlamaz. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.gelecek.gidis-icin-en-az':'Gidiş için en az ',
+  'ays.core.gelecek.sinav-tarihi-gecmis-ya-da':'Sınav tarihi geçmiş ya da bilinmiyor.',
+  'ays.core.gelecek.soru-sayisinin-nete-etkisini':'Soru sayısının nete etkisini senin verinden ölçmek için en az ',
+  'ays.core.gelecek.araliklarda-haftalik-soru-sa':'Aralıklarda haftalık soru sayısı hep aynı; etkisi ayırt edilemiyor.',
+  'ays.core.gelecek.verinde-haftalik-soru-ile-ne':'Verinde haftalık soru ile net değişimi arasında tutarlı bir bağ yok ',
+  'ays.core.gelecek.hesaplandi':'hesaplandı',
+});
+
 
 window.R = window.R || {};
 
@@ -73,7 +82,7 @@ R.Gelecek = (function(){
   function izdusum(seri, aile, bugunISO, sinavISO){
     const n = seri.length;
     if(n < MIN_DENEME){
-      return { ok:false, aile, n, why:'Gidiş için en az ' + MIN_DENEME + ' tam ' + aile + ' denemesi gerekir (şu an ' + n + ').' };
+      return { ok:false, aile, n, why:yz('ays.core.gelecek.gidis-icin-en-az') + MIN_DENEME + ' tam ' + aile + ' denemesi gerekir (şu an ' + n + ').' };
     }
     const ilk = seri[0].tarih;
     const yayilim = gun(ilk, seri[n - 1].tarih);
@@ -81,7 +90,7 @@ R.Gelecek = (function(){
       return { ok:false, aile, n, why:aile + ' denemeleri en az ' + MIN_GUN + ' güne yayılmalı (şu an ' + yayilim + ' gün).' };
     }
     const kalan = gun(bugunISO, sinavISO);
-    if(!(kalan > 0)) return { ok:false, aile, n, why:'Sınav tarihi geçmiş ya da bilinmiyor.' };
+    if(!(kalan > 0)) return { ok:false, aile, n, why:yz('ays.core.gelecek.sinav-tarihi-gecmis-ya-da') };
     const nokta = seri.map(s => ({ x:gun(ilk, s.tarih), y:Number(s.net) }));
     const ts = theilSen(nokta);
     /* Şimdiki düzey: son üç denemenin medyanı (Calc.estimateScore ile aynı
@@ -124,16 +133,16 @@ R.Gelecek = (function(){
   function hacimEtkisi(aralik){
     const n = aralik.length;
     if(n < MIN_ARALIK){
-      return { ok:false, n, why:'Soru sayısının nete etkisini senin verinden ölçmek için en az ' + MIN_ARALIK
+      return { ok:false, n, why:yz('ays.core.gelecek.soru-sayisinin-nete-etkisini') + MIN_ARALIK
         + ' deneme aralığı gerekir (şu an ' + n + '). Ölçülmeden etki uydurulmaz.' };
     }
     const ts = theilSen(aralik.map(a => ({ x:a.haftaSoru, y:a.haftaNet })));
-    if(!ts) return { ok:false, n, why:'Aralıklarda haftalık soru sayısı hep aynı; etkisi ayırt edilemiyor.' };
+    if(!ts) return { ok:false, n, why:yz('ays.core.gelecek.araliklarda-haftalik-soru-sa') };
     if(ts.alt <= 0 && ts.ust >= 0){
-      return { ok:false, n, belirsiz:true, why:'Verinde haftalık soru ile net değişimi arasında tutarlı bir bağ yok '
+      return { ok:false, n, belirsiz:true, why:yz('ays.core.gelecek.verinde-haftalik-soru-ile-ne')
         + '(ölçülen aralık sıfırın iki yanında); etkisi uydurulmaz.' };
     }
-    return { ok:true, n, egim:ts.egim, alt:ts.alt, ust:ts.ust, etiket:'hesaplandı' };
+    return { ok:true, n, egim:ts.egim, alt:ts.alt, ust:ts.ust, etiket:yz('ays.core.gelecek.hesaplandi') };
   }
 
   /* SAF. «Ne olursa»: haftada ekSoru fazla (ya da eksik) soru. */

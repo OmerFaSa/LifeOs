@@ -14,6 +14,8 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'spi', sira:10, id:'act:notlar', kind:'Eylem', label:'Notlarım — bütün notların', hint:'Notum',
+  run:() => { if(window.LIFEOS && window.LIFEOS.NOTUM) window.LIFEOS.NOTUM.panelAc(); } });
 window.LIFEOS.PARCA.yazilar({
   'spi.kutuphane.bilgi-iste':'Bilgi iste',
   'spi.kutuphane.besin-degeri-market-fiyati-y':'Besin değeri, market fiyatı ya da bir semtteki yerler kaynaktan araştırılır.',

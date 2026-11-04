@@ -13,6 +13,8 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:70, group:'Git', label:'Öğrenme — video ve ders notu', icon:'play', route:'learn', run(){ R.App.go('learn'); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:230, group:'Kayıt', label:'Ders ekle (video / not)', icon:'plus', route:'learn', run(){ R.App.go('learn'); setTimeout(()=>R.Screens.learn.handle['note-new']({dataset:{}}), 60); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.learn.bu-tarayici-ses-tanimayi-des':'Bu tarayıcı ses tanımayı desteklemiyor',
   'ays.learn.ses-alinamadi':'Ses alınamadı',

@@ -47,6 +47,38 @@
    7. BAŞKA MODÜLÜN İŞİ ORADA YAPILIR. «SPİ'yi sıfırla» AYS'de istenirse
       AYS bunu yapmaz; King o modüle geçmeyi önerir (kayıtlar ayrı
       kökende, ayrı depoda). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.yetki.tema':'Tema',
+  'ortak.yetki.tema-2':'Tema ',
+  'ortak.yetki.temayi':'Temayı ',
+  'ortak.yetki.animasyonlar':'Animasyonlar',
+  'ortak.yetki.animasyonlar-2':'Animasyonlar ',
+  'ortak.yetki.animasyonlari':'Animasyonları ',
+  'ortak.yetki.zemin':'Zemin',
+  'ortak.yetki.zemin-2':'Zemin ',
+  'ortak.yetki.zemini':'Zemini ',
+  'ortak.yetki.muzik':'Müzik',
+  'ortak.yetki.muzigi-durdurdum':'Müziği durdurdum.',
+  'ortak.yetki.muzigi-actim':'Müziği açtım.',
+  'ortak.yetki.bekleyen-onaylar':'Bekleyen onaylar',
+  'ortak.yetki.bekleyenleri-onayla':'Bekleyenleri onayla',
+  'ortak.yetki.oneriyi-onayla':'Öneriyi onayla',
+  'ortak.yetki.uygulanamadi':'Uygulanamadı',
+  'ortak.yetki.oneriyi-gec':'Öneriyi geç',
+  'ortak.yetki.gecilemedi':'Geçilemedi.',
+  'ortak.yetki.bekleyenleri-gec':'Bekleyenleri geç',
+  'ortak.yetki.sifirdan-baslat':'Sıfırdan başlat',
+  'ortak.yetki.donus-noktasi-bu-cihaza-yazi':'Dönüş noktası bu cihaza yazılamadı (yer yok); hiçbir şeyi silmedim. Önce yedek alıp yer aç.',
+  'ortak.yetki.donus-noktasina-don':'Dönüş noktasına dön',
+  'ortak.yetki.bu-cihazda-donus-noktasi-yok':'Bu cihazda dönüş noktası yok; geri koyacak bir şey bulamadım.',
+  'ortak.yetki.bu-cihazda-donus-noktasi-yok-2':'Bu cihazda dönüş noktası yok.',
+  'ortak.yetki.hesabina-parola-iki-adim-cih':'Hesabına (parola, iki adım, cihazlar, yönetici, e-posta) dokunamam; onu yalnız sen Hesap sayfasından değiştirirsin.',
+  'ortak.yetki.onay-bekleyen-oneri-yok':'Onay bekleyen öneri yok.',
+  'ortak.yetki.uygulanacak-bir-sey-yok':'Uygulanacak bir şey yok.',
+  'ortak.yetki.bu-is-katalogda-yok':'Bu iş katalogda yok.',
+  'ortak.yetki.uygulanamadi-2':'Uygulanamadı: ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -102,17 +134,17 @@ LIFEOS.YETKI = (function(){
 
   const EYLEMLER = [
     {
-      id:'tema', seviye:'kucuk', ad:'Tema',
+      id:'tema', seviye:'kucuk', ad:yz('ortak.yetki.tema'),
       anla:t => { const v = temaSec(t); return v && ayar.tema ? { v } : null; },
-      onizle:p => ({ metin:'Tema ' + TEMA_AD[p.v] + ' olacak.' }),
+      onizle:p => ({ metin:yz('ortak.yetki.tema-2') + TEMA_AD[p.v] + ' olacak.' }),
       async uygula(p){
         const eski = ayar.tema.oku();
         await ayar.tema.yaz(p.v);
-        return { metin:'Temayı ' + TEMA_AD[p.v] + ' yaptım.', geriAl:async () => { await ayar.tema.yaz(eski); } };
+        return { metin:yz('ortak.yetki.temayi') + TEMA_AD[p.v] + ' yaptım.', geriAl:async () => { await ayar.tema.yaz(eski); } };
       },
     },
     {
-      id:'animasyon', seviye:'kucuk', ad:'Animasyonlar',
+      id:'animasyon', seviye:'kucuk', ad:yz('ortak.yetki.animasyonlar'),
       anla:t => {
         if(!L.ANIMASYON || !/animasyon|hareket(ler)?i/.test(t)) return null;
         if(/kapat|azalt|kıs|az olsun|sakin/.test(t)) return { v:'az' };
@@ -120,30 +152,30 @@ LIFEOS.YETKI = (function(){
         if(/sistem/.test(t)) return { v:'sistem' };
         return null;
       },
-      onizle:p => ({ metin:'Animasyonlar ' + ANIM_AD[p.v] + ' olacak.' }),
+      onizle:p => ({ metin:yz('ortak.yetki.animasyonlar-2') + ANIM_AD[p.v] + ' olacak.' }),
       async uygula(p){
         const A = L.ANIMASYON, eski = A.kip();
         A.ayarla(p.v);
-        return { metin:'Animasyonları ' + ANIM_AD[p.v] + ' yaptım.', geriAl:async () => { A.ayarla(eski); } };
+        return { metin:yz('ortak.yetki.animasyonlari') + ANIM_AD[p.v] + ' yaptım.', geriAl:async () => { A.ayarla(eski); } };
       },
     },
     {
-      id:'zemin', seviye:'kucuk', ad:'Zemin',
+      id:'zemin', seviye:'kucuk', ad:yz('ortak.yetki.zemin'),
       anla:t => {
         if(!L.ZEMIN || !/zemin|arka ?plan/.test(t)) return null;
         if(/sade|düz|sakin/.test(t)) return { v:'sade' };
         if(/canlı|renkli|yumuşak/.test(t)) return { v:'yumusak' };
         return null;
       },
-      onizle:p => ({ metin:'Zemin ' + ZEMIN_AD[p.v] + ' olacak.' }),
+      onizle:p => ({ metin:yz('ortak.yetki.zemin-2') + ZEMIN_AD[p.v] + ' olacak.' }),
       async uygula(p){
         const Z = L.ZEMIN, eski = Z.kip();
         Z.ayarla(p.v);
-        return { metin:'Zemini ' + ZEMIN_AD[p.v] + ' yaptım.', geriAl:async () => { Z.ayarla(eski); } };
+        return { metin:yz('ortak.yetki.zemini') + ZEMIN_AD[p.v] + ' yaptım.', geriAl:async () => { Z.ayarla(eski); } };
       },
     },
     {
-      id:'muzik', seviye:'kucuk', ad:'Müzik',
+      id:'muzik', seviye:'kucuk', ad:yz('ortak.yetki.muzik'),
       anla:t => {
         if(!L.SES || !/müzi[kğ]|radyo|şarkı/.test(t)) return null;
         if(/durdur|kapat|kes|sustur/.test(t)) return { v:'dur' };
@@ -154,19 +186,19 @@ LIFEOS.YETKI = (function(){
       onizle:p => ({ metin:p.v === 'dur' ? 'Müzik duracak.' : 'Müzik çalacak.' }),
       async uygula(p){
         const S = L.SES;
-        if(p.v === 'dur'){ S.durdur(); return { metin:'Müziği durdurdum.', geriAl:async () => { S.cal(); } }; }
+        if(p.v === 'dur'){ S.durdur(); return { metin:yz('ortak.yetki.muzigi-durdurdum'), geriAl:async () => { S.cal(); } }; }
         S.cal();
-        return { metin:'Müziği açtım.', geriAl:async () => { S.durdur(); } };
+        return { metin:yz('ortak.yetki.muzigi-actim'), geriAl:async () => { S.durdur(); } };
       },
     },
     {
-      id:'onay-liste', seviye:null, ad:'Bekleyen onaylar',
+      id:'onay-liste', seviye:null, ad:yz('ortak.yetki.bekleyen-onaylar'),
       anla:t => ayar.onaylar && /bekleyen/.test(t)
         && !/(?<![a-zçğıöşü])(?:onayla|reddet|geç)(?![a-zçğıöşü])|onaylayabilir|onaylar mısın/.test(t) ? {} : null,
       onizle:() => null,
     },
     {
-      id:'onay-hepsi', seviye:'orta', ad:'Bekleyenleri onayla',
+      id:'onay-hepsi', seviye:'orta', ad:yz('ortak.yetki.bekleyenleri-onayla'),
       anla:t => ayar.onaylar && /(hepsini|tümünü|bütün(?:ünü)?|bekleyen(?:ler)?(?:i)?|önerileri|teklifleri) (de )?onayla(?:r mısın|yabilirsin)?(?![a-zçğıöşü])|onayla hepsini/.test(t) ? {} : null,
       onizle:() => {
         const l = bekleyenler();
@@ -187,26 +219,26 @@ LIFEOS.YETKI = (function(){
        gibi onaylayabilsin»): «1. öneriyi onayla», «ikinci öneriyi geç»,
        «uyku önerisini onayla». Sıra numarası ya da önerinin adındaki sözcük. */
     {
-      id:'onay-tek', seviye:'orta', ad:'Öneriyi onayla',
+      id:'onay-tek', seviye:'orta', ad:yz('ortak.yetki.oneriyi-onayla'),
       anla:t => ayar.onaylar ? tekOneri(t, /(?<![a-zçğıöşü])(?:onayla|kabul et|uygula)(?![a-zçğıöşü])/) : null,
       onizle:p => ({ metin:'«' + p.metin + '» onaylanacak; modülün kendi kodundan geçer.' }),
       async uygula(p){
         let r = null;
         try{ r = await ayar.onaylar.onayla(p.id); }catch(e){ r = { ok:false, why:(e && e.message) || 'hata' }; }
-        return r && r.ok ? { metin:'«' + p.metin + '» onaylandı.' } : { ok:false, metin:'Uygulanamadı' + (r && r.why ? ': ' + r.why : '.') };
+        return r && r.ok ? { metin:'«' + p.metin + '» onaylandı.' } : { ok:false, metin:yz('ortak.yetki.uygulanamadi') + (r && r.why ? ': ' + r.why : '.') };
       },
     },
     {
-      id:'red-tek', seviye:'kucuk', ad:'Öneriyi geç',
+      id:'red-tek', seviye:'kucuk', ad:yz('ortak.yetki.oneriyi-gec'),
       anla:t => ayar.onaylar && ayar.onaylar.reddet ? tekOneri(t, /(?<![a-zçğıöşü])(?:reddet|geç)(?![a-zçğıöşü])/) : null,
       onizle:p => ({ metin:'«' + p.metin + '» geçilecek; uygulanmaz.' }),
       async uygula(p){
-        try{ await ayar.onaylar.reddet(p.id); }catch(e){ return { ok:false, metin:'Geçilemedi.' }; }
+        try{ await ayar.onaylar.reddet(p.id); }catch(e){ return { ok:false, metin:yz('ortak.yetki.gecilemedi') }; }
         return { metin:'«' + p.metin + '» geçildi.' };
       },
     },
     {
-      id:'red-hepsi', seviye:'orta', ad:'Bekleyenleri geç',
+      id:'red-hepsi', seviye:'orta', ad:yz('ortak.yetki.bekleyenleri-gec'),
       anla:t => ayar.onaylar && ayar.onaylar.reddet && /(hepsini|tümünü|bekleyen(?:ler)?(?:i)?|önerileri|teklifleri) (reddet|geç)(?![a-zçğıöşü])/.test(t) ? {} : null,
       onizle:() => {
         const l = bekleyenler();
@@ -220,7 +252,7 @@ LIFEOS.YETKI = (function(){
       },
     },
     {
-      id:'sifirdan', seviye:'buyuk', ad:'Sıfırdan başlat',
+      id:'sifirdan', seviye:'buyuk', ad:yz('ortak.yetki.sifirdan-baslat'),
       anla:t => ayar.donus && new RegExp('(sıfırdan başla(?:t|yalım|mak istiyorum)?|baştan başla(?:t|yalım)?|sıfırla(?:yalım)?(?![a-zçğıöşü])|'
         + '(?:bütün|tüm|tüm bu) (?:veri(?:ler)?(?:i|imi)?|kayıt(?:lar)?(?:ı|ımı)?) (?:sil|sıfırla)(?![a-zçğıöşü])|verileri sil(?![a-zçğıöşü])|her şeyi sil(?![a-zçğıöşü]))').test(t) ? {} : null,
       onizle:() => {
@@ -241,23 +273,23 @@ LIFEOS.YETKI = (function(){
         if(!yazildi) yazildi = ortam.depo.yaz(DONUS, nokta);
         if(!yazildi){
           await ayar.donus.yukle(kopya);
-          return { ok:false, metin:'Dönüş noktası bu cihaza yazılamadı (yer yok); hiçbir şeyi silmedim. Önce yedek alıp yer aç.' };
+          return { ok:false, metin:yz('ortak.yetki.donus-noktasi-bu-cihaza-yazi') };
         }
         return { metin:MODUL_AD[ayar.modul] + ' sıfırdan başladı. Dönüş noktası bu cihazda duruyor.', yenile:true };
       },
     },
     {
-      id:'donus', seviye:'buyuk', ad:'Dönüş noktasına dön',
+      id:'donus', seviye:'buyuk', ad:yz('ortak.yetki.donus-noktasina-don'),
       anla:t => ayar.donus && /(dönüş noktasına (?:dön|geri dön)|sıfırlamayı geri al|eski haline (?:getir|döndür|dön)|silineni geri getir|verilerimi geri (?:getir|yükle))/.test(t) ? {} : null,
       onizle:() => {
         const d = donusNoktasi();
-        if(!d) return { yok:true, metin:'Bu cihazda dönüş noktası yok; geri koyacak bir şey bulamadım.' };
+        if(!d) return { yok:true, metin:yz('ortak.yetki.bu-cihazda-donus-noktasi-yok') };
         return { metin:MODUL_AD[ayar.modul] + ' ' + tarihYaz(d.zaman) + ' anına dönecek.',
           satirlar:['O andan sonra girilen kayıtlar bu dönüşle silinir.', 'Modülün içe aktarması kendi geri alma yuvasını bırakır.'] };
       },
       async uygula(){
         const d = donusNoktasi();
-        if(!d) return { ok:false, metin:'Bu cihazda dönüş noktası yok.' };
+        if(!d) return { ok:false, metin:yz('ortak.yetki.bu-cihazda-donus-noktasi-yok-2') };
         await ayar.donus.yukle(d.veri);
         ortam.depo.sil(DONUS);
         return { metin:MODUL_AD[ayar.modul] + ' dönüş noktasına döndü.', yenile:true };
@@ -322,7 +354,7 @@ LIFEOS.YETKI = (function(){
     if(!ayar) return null;
     const t = kucult(metin);
     if(!t) return null;
-    if(HESAP_RE.test(t)) return { tur:'hesap', metin:'Hesabına (parola, iki adım, cihazlar, yönetici, e-posta) dokunamam; onu yalnız sen Hesap sayfasından değiştirirsin.' };
+    if(HESAP_RE.test(t)) return { tur:'hesap', metin:yz('ortak.yetki.hesabina-parola-iki-adim-cih') };
     for(const e of hepsi()){
       let p = null;
       try{ p = e.anla(t); }catch(err){ p = null; }
@@ -337,7 +369,7 @@ LIFEOS.YETKI = (function(){
         return { tur:'liste', metin:l.length ? l.length + ' öneri onay bekliyor:' : 'Onay bekleyen öneri yok.', satirlar:l.slice(0, 8).map(x => x.metin), sayi:l.length };
       }
       const oz = e.onizle(p);
-      if(!oz) return { tur:'liste', metin:'Onay bekleyen öneri yok.', satirlar:[], sayi:0 };
+      if(!oz) return { tur:'liste', metin:yz('ortak.yetki.onay-bekleyen-oneri-yok'), satirlar:[], sayi:0 };
       if(oz.yok) return { tur:'liste', metin:oz.metin, satirlar:[], sayi:0 };
       return { tur:'eylem', id:e.id, seviye:e.seviye, seviyeAd:SEVIYE_AD[e.seviye], ad:e.ad, param:p, onizle:oz };
     }
@@ -345,14 +377,14 @@ LIFEOS.YETKI = (function(){
   }
 
   async function uygula(niyet){
-    if(!ayar || !niyet || niyet.tur !== 'eylem') return { ok:false, metin:'Uygulanacak bir şey yok.' };
+    if(!ayar || !niyet || niyet.tur !== 'eylem') return { ok:false, metin:yz('ortak.yetki.uygulanacak-bir-sey-yok') };
     const e = hepsi().find(x => x.id === niyet.id);
-    if(!e) return { ok:false, metin:'Bu iş katalogda yok.' };
+    if(!e) return { ok:false, metin:yz('ortak.yetki.bu-is-katalogda-yok') };
     try{
       const r = await e.uygula(niyet.param);
       return Object.assign({ ok:true }, r);
     }catch(err){
-      return { ok:false, metin:'Uygulanamadı: ' + ((err && err.message) || 'bilinmeyen hata') };
+      return { ok:false, metin:yz('ortak.yetki.uygulanamadi-2') + ((err && err.message) || 'bilinmeyen hata') };
     }
   }
 

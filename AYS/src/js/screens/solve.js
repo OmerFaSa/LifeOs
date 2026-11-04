@@ -120,7 +120,7 @@ window.LIFEOS.PARCA.yazilar({
 çalış» adı Öğren › Konular ile karışıyordu; ikisi de ders ve konu
 listesi. Bu ekran konunun TESTLE kapanışını izler — adı bu oldu ve
 sona geçti; Çalışma «Soru çöz» ile açılır. Rota kimliği aynı. */
-window.LIFEOS.PARCA.sayfa({ id:'solve', modul:'ays', cekmece:'calisma', ad:'Soru çöz', ikon:'search', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'solve', modul:'ays', king:{ sira:130, ad:'Soru çöz', es:['soru çöz', 'soru', 'test çöz'] }, cekmece:'calisma', ad:'Soru çöz', ikon:'search', sira:10 });
 
 R.Screens.solve = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -715,25 +715,25 @@ R.Screens.solve = (function(){
     return K.Kutu({ ad:yz('ays.solve.hizli-kayit'), ipucu:'quick-log', class:'vkutu', id:'q-hizli-kutu', govde:raw(ic) });
   }
 
-  LIFEOS.PARCA.blok({ id:'solve.inputcard', sayfa:'solve', yer:'y1', sira:10, ad:'inputCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.inputcard', sayfa:'solve', yer:'y1', sira:10, ad:'Soru girişi', ciz(){
     return inputCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.resultcard', sayfa:'solve', yer:'y1', sira:20, ad:'resultCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.resultcard', sayfa:'solve', yer:'y1', sira:20, ad:'Sonuç', ciz(){
     return resultCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.donencozum', sayfa:'solve', yer:'y2', sira:10, ad:'DonenCozum', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.donencozum', sayfa:'solve', yer:'y2', sira:10, ad:'Dönen çözüm', ciz(){
     return DonenCozum();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.hizlisatir', sayfa:'solve', yer:'y2', sira:20, ad:'hizliSatir', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.hizlisatir', sayfa:'solve', yer:'y2', sira:20, ad:'Hızlı satır', ciz(){
     return hizliSatir();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.sourcecard', sayfa:'solve', yer:'y2', sira:30, ad:'sourceCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.sourcecard', sayfa:'solve', yer:'y2', sira:30, ad:'Kaynak', ciz(){
     return sourceCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.topiccard', sayfa:'solve', yer:'y2', sira:40, ad:'topicCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.topiccard', sayfa:'solve', yer:'y2', sira:40, ad:'Konu', ciz(){
     return topicCard();
   } });
-  LIFEOS.PARCA.blok({ id:'solve.historycard', sayfa:'solve', yer:'y2', sira:50, ad:'historyCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'solve.historycard', sayfa:'solve', yer:'y2', sira:50, ad:'Geçmiş', ciz(){
     return historyCard();
   } });
   async function render(){

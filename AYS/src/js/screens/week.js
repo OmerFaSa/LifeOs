@@ -4,6 +4,13 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:20, group:'Git', label:'Hafta — sözleşme ve değerlendirme', icon:'week', route:'week', run(){ R.App.go('week'); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:260, group:'Kayıt', label:'Haftalık değerlendirmeyi aç', icon:'check', hint:'Paz', run(){ R.App.go('week'); setTimeout(()=>R.Screens.week.openReview(), 60); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:330, uret(){
+  const cur = R.Model.currentWeek();
+  return [cur-1, cur, cur+1].filter(n => n >= 1 && n <= R.PLAN.totalWeeks).map(n => ({ group:'Hafta', label:'Hafta '+n+' — '+R.Model.curriculumFor(n).title, icon:'week',
+    run(){ R.S.ui.weekView = n; R.App.go('week'); } }));
+} });
 window.LIFEOS.PARCA.yazilar({
   'ays.week.bekliyor':'Bekliyor',
   'ays.week.tamam':'Tamam',
@@ -89,7 +96,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.week.sozlesme-yeniden-acildi':'Sözleşme yeniden açıldı',
   'ays.week.review-kaydedildi':'Review kaydedildi',
 });
-window.LIFEOS.PARCA.sayfa({ id:'week', modul:'ays', cekmece:'plan', ad:'Hafta', ikon:'week', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'week', modul:'ays', king:{ sira:80, ad:'Hafta', es:['hafta'] }, cekmece:'plan', ad:'Hafta', ikon:'week', sira:10 });
 
 R.Screens.week = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -583,41 +590,41 @@ R.Screens.week = (function(){
     return P.izgara([kart, tamKart], 'pk-izgara--iki');
   }
 
-  LIFEOS.PARCA.blok({ id:'week.weeknav', sayfa:'week', yer:'y1', sira:10, ad:'weekNav', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.weeknav', sayfa:'week', yer:'y1', sira:10, ad:'Hafta gezintisi', ciz({ n, week, phase, curriculum, history, cak }){
     return weekNav(n, week, phase);
   } });
-  LIFEOS.PARCA.blok({ id:'week.bolum-2', sayfa:'week', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.cakisma-uyarisi', sayfa:'week', yer:'y2', sira:10, ad:'Çakışma uyarısı', ciz({ n, week, phase, curriculum, history, cak }){
     return cak ? K.Span(12, raw(cak)) : '';
   } });
-  LIFEOS.PARCA.blok({ id:'week.bolum-3', sayfa:'week', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.ders-dagilimi', sayfa:'week', yer:'y3', sira:10, ad:'Ders dağılımı', ciz({ n, week, phase, curriculum, history, cak }){
     return raw(DersDagilimi(n));
   } });
-  LIFEOS.PARCA.blok({ id:'week.bolum-4', sayfa:'week', yer:'y4', sira:10, ad:'Bölüm 4', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.hafta-takvimi', sayfa:'week', yer:'y4', sira:10, ad:'Hafta takvimi', ciz({ n, week, phase, curriculum, history, cak }){
     return html`<div class="weekgrid">${map(M.weekDates(n), DayColumn)}</div>`;
   } });
-  LIFEOS.PARCA.blok({ id:'week.contractcard', sayfa:'week', yer:'y5', sira:10, ad:'contractCard', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.contractcard', sayfa:'week', yer:'y5', sira:10, ad:'Haftalık sözleşme', ciz({ n, week, phase, curriculum, history, cak }){
     return contractCard(week, n);
   } });
-  LIFEOS.PARCA.blok({ id:'week.ozetcard', sayfa:'week', yer:'y5', sira:20, ad:'ozetCard', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.ozetcard', sayfa:'week', yer:'y5', sira:20, ad:'Hafta özeti', ciz({ n, week, phase, curriculum, history, cak }){
     return ozetCard(n);
   } });
-  LIFEOS.PARCA.blok({ id:'week.dersdengesi', sayfa:'week', yer:'y5', sira:30, ad:'dersDengesi', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.dersdengesi', sayfa:'week', yer:'y5', sira:30, ad:'Ders dengesi', ciz({ n, week, phase, curriculum, history, cak }){
     return dersDengesi(n);
   } });
   LIFEOS.PARCA.blok({ id:'week.plan-tamamlama-gecmisi', sayfa:'week', yer:'y5', sira:40, ad:'Plan tamamlama geçmişi', ciz({ n, week, phase, curriculum, history, cak }){
     return K.Card({ title:yz('ays.week.plan-tamamlama-gecmisi'), sub:yz('ays.week.hedef-85'),
           body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) });
   } });
-  LIFEOS.PARCA.blok({ id:'week.hayaletoneri', sayfa:'week', yer:'y6', sira:10, ad:'hayaletOneri', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.hayaletoneri', sayfa:'week', yer:'y6', sira:10, ad:'Hayalet öneri', ciz({ n, week, phase, curriculum, history, cak }){
     return hayaletOneri(n);
   } });
-  LIFEOS.PARCA.blok({ id:'week.haftacizgisi', sayfa:'week', yer:'y6', sira:20, ad:'haftaCizgisi', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.haftacizgisi', sayfa:'week', yer:'y6', sira:20, ad:'Hafta çizgisi', ciz({ n, week, phase, curriculum, history, cak }){
     return haftaCizgisi(n);
   } });
-  LIFEOS.PARCA.blok({ id:'week.planizgarasi', sayfa:'week', yer:'y6', sira:30, ad:'planIzgarasi', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.planizgarasi', sayfa:'week', yer:'y6', sira:30, ad:'Plan ızgarası', ciz({ n, week, phase, curriculum, history, cak }){
     return planIzgarasi(n);
   } });
-  LIFEOS.PARCA.blok({ id:'week.istisnacard', sayfa:'week', yer:'y6', sira:40, ad:'istisnaCard', ciz({ n, week, phase, curriculum, history, cak }){
+  LIFEOS.PARCA.blok({ id:'week.istisnacard', sayfa:'week', yer:'y6', sira:40, ad:'İstisnalar', ciz({ n, week, phase, curriculum, history, cak }){
     return istisnaCard();
   } });
   LIFEOS.PARCA.blok({ id:'week.mufredat-referansi', sayfa:'week', yer:'y6', sira:50, ad:'Müfredat referansı', ciz({ n, week, phase, curriculum, history, cak }){

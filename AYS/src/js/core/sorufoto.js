@@ -28,6 +28,15 @@
 
    SPİ'nin core/foto.js kalıbı; AYS'de soru okunabilirliği için daha büyük
    kenar ve önekle toplu silme (deneme silinince fotoğrafları da gider). */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.sorufoto.bu-tarayici-fotograf-saklaya':'Bu tarayıcı fotoğraf saklayamıyor (gizli pencere olabilir).',
+  'ays.core.sorufoto.bu-bir-fotograf-degil':'Bu bir fotoğraf değil.',
+  'ays.core.sorufoto.fotograf-okunamadi':'Fotoğraf okunamadı.',
+  'ays.core.sorufoto.fotograf-kaydedilemedi-depo':'Fotoğraf kaydedilemedi (depo dolu olabilir).',
+  'ays.core.sorufoto.bu-tarayici-cozum-saklayamiy':'Bu tarayıcı çözüm saklayamıyor (gizli pencere olabilir).',
+  'ays.core.sorufoto.cozum-kaydedilemedi-depo-dol':'Çözüm kaydedilemedi (depo dolu olabilir).',
+});
+
 
 window.R = window.R || {};
 
@@ -135,14 +144,14 @@ R.SoruFoto = (function(){
   /* Döner: { ok } ya da { ok:false, why }. */
   async function kaydet(sahip, kaynak){
     await hazirla();
-    if(!var_()) return { ok:false, why:'Bu tarayıcı fotoğraf saklayamıyor (gizli pencere olabilir).' };
-    if(!kaynak || !/^image\//.test(kaynak.type || '')) return { ok:false, why:'Bu bir fotoğraf değil.' };
+    if(!var_()) return { ok:false, why:yz('ays.core.sorufoto.bu-tarayici-fotograf-saklaya') };
+    if(!kaynak || !/^image\//.test(kaynak.type || '')) return { ok:false, why:yz('ays.core.sorufoto.bu-bir-fotograf-degil') };
     let blob;
     try{ blob = await kucult(kaynak); }
-    catch(e){ return { ok:false, why:'Fotoğraf okunamadı.' }; }
+    catch(e){ return { ok:false, why:yz('ays.core.sorufoto.fotograf-okunamadi') }; }
     const k = anahtar(sahip);
     try{ await islem('readwrite', s => s.put({ k, blob, at:new Date().toISOString() })); }
-    catch(e){ return { ok:false, why:'Fotoğraf kaydedilemedi (depo dolu olabilir).' }; }
+    catch(e){ return { ok:false, why:yz('ays.core.sorufoto.fotograf-kaydedilemedi-depo') }; }
     const eski = adres.get(k);
     if(eski) URL.revokeObjectURL(eski);
     adres.set(k, URL.createObjectURL(blob));
@@ -169,12 +178,12 @@ R.SoruFoto = (function(){
   /* Çözüm metni (söz 6). Boş metin kaydı siler. Döner: { ok } ya da { ok:false, why }. */
   async function metinKaydet(sahip, metin){
     await hazirla();
-    if(!var_()) return { ok:false, why:'Bu tarayıcı çözüm saklayamıyor (gizli pencere olabilir).' };
+    if(!var_()) return { ok:false, why:yz('ays.core.sorufoto.bu-tarayici-cozum-saklayamiy') };
     const k = anahtar(sahip) + METIN, m = String(metin || '');
     try{
       if(m) await islem('readwrite', s => s.put({ k, metin:m, at:new Date().toISOString() }));
       else await islem('readwrite', s => s.delete(k));
-    }catch(e){ return { ok:false, why:'Çözüm kaydedilemedi (depo dolu olabilir).' }; }
+    }catch(e){ return { ok:false, why:yz('ays.core.sorufoto.cozum-kaydedilemedi-depo-dol') }; }
     if(m) metinler.set(k, m); else metinler.delete(k);
     return { ok:true };
   }

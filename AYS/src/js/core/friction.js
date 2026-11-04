@@ -23,6 +23,23 @@
       analizi günü ya da ilk kurulum günü doğal olarak yönetim ağırlıklıdır.
 
    4. SİSTEM KENDİ YÜKÜNÜ AZALTMAYI ÖNEREBİLİR, ARTIRMAYI ÖNEREMEZ. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.friction.surtunme-olculmedi':'Sürtünme ölçülmedi',
+  'ays.core.friction.bu-pencerede-kayit-yok-siste':'Bu pencerede kayıt yok. Sistem kendi maliyetini bilmiyorsa ',
+  'ays.core.friction.gerceklesen-calisma-girilmem':'Gerçekleşen çalışma girilmemiş',
+  'ays.core.friction.sistemde-gunde':'Sistemde günde ',
+  'ays.core.friction.sistem-calismanin-onune-geci':'Sistem, çalışmanın önüne geçiyor olabilir',
+  'ays.core.friction.son':'Son ',
+  'ays.core.friction.surtunme-sinira-yakin':'Sürtünme sınıra yakın',
+  'ays.core.friction.i-ki-esikten-biri-asildi-haf':'İki eşikten biri aşıldı. Hafta planı kurulan ya da deneme ',
+  'ays.core.friction.surtunme-butcede':'Sürtünme bütçede',
+  'ays.core.friction.gunde':'Günde ',
+  'ays.core.friction.biriken-analiz-her-acilista':'Biriken analiz her açılışta yeniden karşına çıkıyor. En eski ',
+  'ays.core.friction.ayni-anda-ikiden-fazla-telaf':'Aynı anda ikiden fazla telafi taşımak, hiçbirini bitirmemekle ',
+  'ays.core.friction.gunun-tek-isi':'Günün tek işi',
+  'ays.core.friction.blok-sayisi-ve-kayit-yuku':'Blok sayısı ve kayıt yükü makul; süre ekranlarda geziniyor. ',
+});
+
 
 window.R = window.R || {};
 
@@ -147,14 +164,14 @@ R.Friction = (function(){
     const w = window_(gunSayisi);
     if(w.cert === 'missing'){
       return { level:'unknown', cert:'missing', window:w,
-        title:'Sürtünme ölçülmedi',
-        note:'Bu pencerede kayıt yok. Sistem kendi maliyetini bilmiyorsa '
+        title:yz('ays.core.friction.surtunme-olculmedi'),
+        note:yz('ays.core.friction.bu-pencerede-kayit-yok-siste')
            + 'onu sıfır saymaz.' };
     }
     if(w.cert === 'partial'){
       return { level:'unknown', cert:'estimated', window:w,
-        title:'Gerçekleşen çalışma girilmemiş',
-        note:'Sistemde günde ' + w.perDay + ' dk geçiyor ama bloklara '
+        title:yz('ays.core.friction.gerceklesen-calisma-girilmem'),
+        note:yz('ays.core.friction.sistemde-gunde') + w.perDay + ' dk geçiyor ama bloklara '
            + 'gerçekleşen süre yazılmamış. Oran hesaplanamaz: payda veri yok, '
            + 'sıfır değil.' };
     }
@@ -162,21 +179,21 @@ R.Friction = (function(){
     const oranAsti = w.ratio != null && w.ratio > ORAN_ESIK;
     if(butceAsti && oranAsti){
       return { level:'high', cert:w.cert, window:w,
-        title:'Sistem, çalışmanın önüne geçiyor olabilir',
-        note:'Son ' + w.days + ' günde günde ' + w.perDay + ' dk sistemle, '
+        title:yz('ays.core.friction.sistem-calismanin-onune-geci'),
+        note:yz('ays.core.friction.son') + w.days + ' günde günde ' + w.perDay + ' dk sistemle, '
            + Math.round(w.work / Math.max(1, w.measuredDays)) + ' dk çalışmayla '
            + 'geçti (%' + Math.round(w.ratio * 100) + ' yönetim). Sınır günde '
            + BUTCE_DK + ' dk ve %' + Math.round(ORAN_ESIK * 100) + '.' };
     }
     if(butceAsti || oranAsti){
       return { level:'watch', cert:w.cert, window:w,
-        title:'Sürtünme sınıra yakın',
-        note:'İki eşikten biri aşıldı. Hafta planı kurulan ya da deneme '
+        title:yz('ays.core.friction.surtunme-sinira-yakin'),
+        note:yz('ays.core.friction.i-ki-esikten-biri-asildi-haf')
            + 'analizi yapılan bir gün doğal olarak yönetim ağırlıklıdır.' };
     }
     return { level:'ok', cert:w.cert, window:w,
-      title:'Sürtünme bütçede',
-      note:'Günde ' + w.perDay + ' dk sistem, %'
+      title:yz('ays.core.friction.surtunme-butcede'),
+      note:yz('ays.core.friction.gunde') + w.perDay + ' dk sistem, %'
          + (w.ratio == null ? '—' : Math.round(w.ratio * 100)) + ' yönetim payı.' };
   }
 
@@ -188,19 +205,19 @@ R.Friction = (function(){
     const bekleyen = (S.exams || []).filter(e => !e.analysisCompletedAt).length;
     if(bekleyen > 2){
       out.push({ id:'exam-backlog', label:bekleyen + ' analiz edilmemiş deneme',
-        note:'Biriken analiz her açılışta yeniden karşına çıkıyor. En eski '
+        note:yz('ays.core.friction.biriken-analiz-her-acilista')
            + 'ikisini analiz etmeden yenisini çözmemek, yükü de sonucu da '
            + 'düzeltir.', route:'exams' });
     }
     const acikProtokol = (S.protocols || []).filter(p => p.status === 'active').length;
     if(acikProtokol > 2){
       out.push({ id:'protocols', label:acikProtokol + ' açık telafi protokolü',
-        note:'Aynı anda ikiden fazla telafi taşımak, hiçbirini bitirmemekle '
+        note:yz('ays.core.friction.ayni-anda-ikiden-fazla-telaf')
            + 'sonuçlanır. Birini kapat, kalanı ertele.', route:'protocols' });
     }
     if(!out.length){
-      out.push({ id:'one-thing', label:'Günün tek işi',
-        note:'Blok sayısı ve kayıt yükü makul; süre ekranlarda geziniyor. '
+      out.push({ id:'one-thing', label:yz('ays.core.friction.gunun-tek-isi'),
+        note:yz('ays.core.friction.blok-sayisi-ve-kayit-yuku')
            + 'Bugünün tek işini yapıp kapatmak yeterli.', route:'today' });
     }
     return out;

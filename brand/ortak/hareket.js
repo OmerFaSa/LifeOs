@@ -582,7 +582,7 @@ window.LIFEOS.HAREKET = (function(){
   const KAYDET_EYLEM = /^save-|kaydet/;
   let sonKayit = 0;
   if(typeof window !== 'undefined'){
-    window.addEventListener('lifeos:kayit', () => { sonKayit = Date.now(); });
+    window.LIFEOS.PARCA.tepki({ id:'hareket.son-kayit', olay:'kayit', ad:'Kaydet dokunuşu son kaydı bilir', yap(){ sonKayit = Date.now(); } });
   }
   function kaydedildi(el, act, bas){
     if(!el || !KAYDET_EYLEM.test(act || '') || azMi()) return false;

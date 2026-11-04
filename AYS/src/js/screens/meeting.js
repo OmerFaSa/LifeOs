@@ -418,19 +418,19 @@ R.Screens.meeting = (function(){
 
   /* ---------- ekran ---------- */
 
-  LIFEOS.PARCA.blok({ id:'meeting.agendacard', sayfa:'meeting', yer:'y1', sira:10, ad:'agendaCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'meeting.agendacard', sayfa:'meeting', yer:'y1', sira:10, ad:'Gündem', ciz(){
     return agendaCard();
   } });
-  LIFEOS.PARCA.blok({ id:'meeting.livecard', sayfa:'meeting', yer:'y1', sira:20, ad:'liveCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'meeting.livecard', sayfa:'meeting', yer:'y1', sira:20, ad:'Canlı toplantı', ciz(){
     return liveCard();
   } });
-  LIFEOS.PARCA.blok({ id:'meeting.bolum-3', sayfa:'meeting', yer:'y1', sira:30, ad:'Bölüm 3', ciz(){
+  LIFEOS.PARCA.blok({ id:'meeting.toplanti-raporu', sayfa:'meeting', yer:'y1', sira:30, ad:'Toplantı raporu', ciz(){
     return when(!session && closed, () => reportCard(closed));
   } });
-  LIFEOS.PARCA.blok({ id:'meeting.archivecard', sayfa:'meeting', yer:'y1', sira:40, ad:'archiveCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'meeting.archivecard', sayfa:'meeting', yer:'y1', sira:40, ad:'Toplantı arşivi', ciz(){
     return archiveCard();
   } });
-  LIFEOS.PARCA.blok({ id:'meeting.teamcard', sayfa:'meeting', yer:'y2', sira:10, ad:'teamCard', ciz(){
+  LIFEOS.PARCA.blok({ id:'meeting.teamcard', sayfa:'meeting', yer:'y2', sira:10, ad:'Ekip', ciz(){
     return teamCard();
   } });
   LIFEOS.PARCA.blok({ id:'meeting.aciklamalar', sayfa:'meeting', yer:'y2', sira:20, ad:'Açıklamalar', ciz(){

@@ -20,6 +20,10 @@
         aynı rengin açığı. Kırmızı/yeşil yok; eşik aşımı turuncu (`--esp`)
         yalnız yönü bilinen eşikte (`yon`).
      4. HTML DÖNER, OLAY YOK. Düğmeler `data-act` taşır; işleyici modülde. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.pano.surenin':'Sürenin ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -272,7 +276,7 @@ LIFEOS.PANO = (function(){
       const top = Math.round((s - b) / GUN), gecen = Math.max(0, Math.min(top, Math.round((t - b) / GUN)));
       const kalan = Math.round((s - t) / GUN);
       yuva = kalan >= 0 ? s.getDate() + ' ' + AY[s.getMonth()] + '’e ' + kalan + ' gün' : 'süresi geçti';
-      govde += esik({ deger:gecen, esik:gecen, olcek:top, etiket:'Sürenin ' + top + ' gününden ' + gecen + '’i geçti' })
+      govde += esik({ deger:gecen, esik:gecen, olcek:top, etiket:yz('ortak.pano.surenin') + top + ' gününden ' + gecen + '’i geçti' })
         + not('süre · ' + gecen + ' / ' + top + ' gün geçti');
     }else{
       govde += not(s ? 'son tarih ' + s.getDate() + ' ' + AY[s.getMonth()] : 'son tarihi yok');

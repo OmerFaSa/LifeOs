@@ -5,6 +5,17 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:200, group:'Git', label:'Rehber ve ayarlar', icon:'guide', route:'guide', run(){ R.App.go('guide'); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:400, uret(){
+  const theme = R.S.profile ? R.S.profile.theme : 'system';
+  return [{ group:'Sistem', label:'Tema: '+(theme === 'dark' ? 'açığa geç' : theme === 'light' ? 'sisteme geç' : 'koyuya geç'), icon:'moon',
+    run(){
+      const next = theme === 'dark' ? 'light' : theme === 'light' ? 'system' : 'dark';
+      R.S.profile.theme = next;
+      R.Model.saveProfile().then(() => { R.App.applyTheme(); R.App.render(); });
+    }}];
+} });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:430, group:'Sistem', label:'Yedek al (JSON)', icon:'download', run(){ R.Screens.guide.handle['export-data']({dataset:{}}); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.guide.ayarlar':'Ayarlar',
   'ays.guide.takvim-istisnalari':'Takvim istisnaları',
@@ -974,11 +985,11 @@ R.Screens.guide = (function(){
     }
   }
 
-  LIFEOS.PARCA.blok({ id:'guide.bolum-1', sayfa:'guide', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+  LIFEOS.PARCA.blok({ id:'guide.rehber-sekmeleri', sayfa:'guide', yer:'y1', sira:10, ad:'Rehber sekmeleri', ciz(){
     return K.SayfaBolumleri({ act:'guide-tab', aria:yz('ays.guide.rehber-bolumleri'),
       bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) });
   } });
-  LIFEOS.PARCA.blok({ id:'guide.bolum-2', sayfa:'guide', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+  LIFEOS.PARCA.blok({ id:'guide.kolaylik-pusulasi', sayfa:'guide', yer:'y2', sira:10, ad:'Kolaylık pusulası', ciz(){
     return raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '');
   } });
   async function render(){

@@ -22,6 +22,14 @@
       kaydı olmayan gün «yapılmadı» diye değil «kayıt yok» diye okunur.
    4. OTOMATİKLEŞME SÜRESİ SÖZ DEĞİLDİR. Kişiden kişiye çok değişir; hedef
       tarihi gelince alışkanlık «oldu» sayılmaz, sürdürülür. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.aliskanlik.son':'son ',
+  'ortak.aliskanlik.haftada':'Haftada ',
+  'ortak.aliskanlik.aliskanligin-alani-ya-da-sik':'Alışkanlığın alanı ya da sıklığı eksik.',
+  'ortak.aliskanlik.aliskanlik':'Alışkanlık',
+  'ortak.aliskanlik.haftada-gun':'haftada gün',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -123,7 +131,7 @@ LIFEOS.Aliskanlik = (function(){
     }
 
     function dayanak(t, alan, dk){
-      return { durum:'kaynak_bekliyor', metin:'son ' + PENCERE_HAFTA + ' haftanın kaydı: ' + alan.ad
+      return { durum:'kaynak_bekliyor', metin:yz('ortak.aliskanlik.son') + PENCERE_HAFTA + ' haftanın kaydı: ' + alan.ad
         + ' için ' + dk + '+ dakikalık ' + t.tutan + ' gün (ölçüldü); haftada en çok '
         + RAHAT + ' gün artış kuralı bir iş kuralıdır, kaynağı bağlanmadı' };
     }
@@ -167,7 +175,7 @@ LIFEOS.Aliskanlik = (function(){
       [[RAHAT, 'rahat artış'], [UST, 'zorlayıcı artış']].forEach(x => {
         const g = Math.min(7, bas + x[0]);
         if(g < n && !out.some(s => s.hiz === g)){
-          out.push({ ad:'Haftada ' + g + ' gün (' + x[1] + ')', hiz:g, birim:'gün/hafta',
+          out.push({ ad:yz('ortak.aliskanlik.haftada') + g + ' gün (' + x[1] + ')', hiz:g, birim:'gün/hafta',
             son_tarih:h.son_tarih, kapasite:{ haftalik_gun:g } });
         }
       });
@@ -177,7 +185,7 @@ LIFEOS.Aliskanlik = (function(){
     /* Bu hafta (pazartesiden bugüne) ve son dört hafta: kayıtlı gün sayısı. */
     function ilerleme(h, bugun){
       const alan = alanOf(h), n = siklikOf(h), dk = dkOf(h);
-      if(!alan || !n || !dk) return { durum:'veri_yok', metin:'Alışkanlığın alanı ya da sıklığı eksik.' };
+      if(!alan || !n || !dk) return { durum:'veri_yok', metin:yz('ortak.aliskanlik.aliskanligin-alani-ya-da-sik') };
       const hg = haftaGunu(bugun);
       const pzt = gunEkle(bugun, -hg);
       let bu = 0;
@@ -213,7 +221,7 @@ LIFEOS.Aliskanlik = (function(){
     }
 
     const paket = {
-      id:o.id || 'aliskanlik', ad:'Alışkanlık', olcut:{ ad:'haftada gün', birim:'gün/hafta' },
+      id:o.id || 'aliskanlik', ad:yz('ortak.aliskanlik.aliskanlik'), olcut:{ ad:yz('ortak.aliskanlik.haftada-gun'), birim:'gün/hafta' },
       anahtar:ANAHTAR, yonler:['aliskanlik'], kapasiteGerekir:true,
       tani(k){
         const alan = alanBul(k), n = siklikOku(k), dk = dakikaOku(k);

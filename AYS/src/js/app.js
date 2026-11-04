@@ -1,4 +1,75 @@
 /* Uygulama kabugu: gezinme, yonlendirme, olay dagitimi ve acilis. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.app.bu-haftanin-sozlesmesi-imzal':'Bu haftanın sözleşmesi imzalanmadı',
+  'ays.app.kayit-sorunu-var':'Kayıt sorunu var',
+  'ays.app.menu':'Menü',
+  'ays.app.deneme-ekle':'Deneme ekle',
+  'ays.app.tekrar-karti-ekle':'Tekrar kartı ekle',
+  'ays.app.ders-notu-ekle':'Ders notu ekle',
+  'ays.app.veriler-bu-cihazda-tutulur-a':'Veriler bu cihazda tutulur. Ad ve şehir hiçbir modele gönderilmez.',
+  'ays.app.derleme':'Derleme',
+  'ays.app.bu-derleme-kaydedilmemis-yer':'Bu derleme kaydedilmemiş yerel değişiklik içeriyor; ',
+  'ays.app.sistem':'Sistem',
+  'ays.app.acik':'Açık',
+  'ays.app.koyu':'Koyu',
+  'ays.app.profil':'Profil',
+  'ays.app.tema':'Tema',
+  'ays.app.animasyonlar':'Animasyonlar',
+  'ays.app.zemin':'Zemin',
+  'ays.app.minikler':'Minikler',
+  'ays.app.minik-boyu':'Minik boyu',
+  'ays.app.king-in-gorunusu':'King’in görünüşü',
+  'ays.app.ses-duzeyleri':'Ses düzeyleri',
+  'ays.app.yuzey-bu-modul':'Yüzey · bu modül',
+  'ays.app.manzara':'Manzara',
+  'ays.app.tema-bu-profile-kaydedilir-s':'Tema bu profile kaydedilir. «Sistem» seçiliyken cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.',
+  'ays.app.i-cerige-atla':'İçeriğe atla',
+  'ays.app.ekran-cizilemedi':'Ekran çizilemedi.',
+  'ays.app.yazilacak-alan-bulunamadi':'Yazılacak alan bulunamadı',
+  'ays.app.kapali':'kapalı',
+  'ays.app.kayit-durumu':'Kayıt durumu',
+  'ays.app.kapat':'Kapat',
+  'ays.app.ayarlara-git':'Ayarlara git',
+  'ays.app.haftalik-sozlesme-taslagi':'Haftalık sözleşme taslağı',
+  'ays.app.hafta':'Hafta ',
+  'ays.app.soru':'Soru',
+  'ays.app.haftalik-soru':'Haftalık soru',
+  'ays.app.kapasite':'Kapasite',
+  'ays.app.davranis-hedefi':'Davranış hedefi',
+  'ays.app.vazgec':'Vazgeç',
+  'ays.app.sozlesmeye-yaz':'Sözleşmeye yaz',
+  'ays.app.taslak-dolduruldu-duzeltmeyi':'Taslak dolduruldu — düzeltmeyi sen yaz',
+  'ays.app.sinav-haftasi-modu':'Sınav haftası modu',
+  'ays.app.anladim':'Anladım',
+  'ays.app.plan-yeniden-hesaplandi':'Plan yeniden hesaplandı',
+  'ays.app.yeni-rutbe':'Yeni rütbe — ',
+  'ays.app.bir-seyler-ters-gitti':'Bir şeyler ters gitti',
+  'ays.app.degisiklik-kaydedilemedi':'Değişiklik kaydedilemedi',
+  'ays.app.veriler-baska-bir-sekmede-de':'Veriler başka bir sekmede değişti. Kaybolmasın diye bu sayfayı tazele.',
+  'ays.app.geri-alindi':'Geri alındı',
+  'ays.app.calisma-son-7-gun':'Çalışma · son 7 gün',
+  'ays.app.dogruluk-son-7-gun':'Doğruluk · son 7 gün',
+  'ays.app.hesaplandi':'hesaplandı',
+  'ays.app.toplanti-baslat':'Toplantı başlat',
+  'ays.app.ofiste-toplanti-baslayacak-u':'Ofiste toplantı başlayacak: uzmanlar sırayla konuşur, bunun için yapay zekâ çağrıları yapılır.',
+  'ays.app.toplantiyi-baslattim-toplant':'Toplantıyı başlattım; Toplantı ekranındasın.',
+  'ays.app.cozulen-soru-45-gun':'Çözülen soru · 45 gün',
+  'ays.app.olculdu':'ölçüldü',
+  'ays.app.en-verimli-saat-dilimi':'En verimli saat dilimi',
+  'ays.app.dogru-orani-45-gun':'Doğru oranı · 45 gün',
+  'ays.app.bugun-sirasi-gelen-tekrar':'Bugün sırası gelen tekrar',
+  'ays.app.son-tyt-deneme-neti':'Son TYT deneme neti',
+  'ays.app.dogruluk':'Doğruluk',
+  'ays.app.calisma-suresi':'Çalışma süresi',
+  'ays.app.soruyu-coz':'Soruyu çöz',
+  'ays.app.tekrar':'Tekrar',
+  'ays.app.soru-coz':'Soru çöz',
+  'ays.app.siradaki-konu':'Sıradaki konu',
+  'ays.app.deneme':'Deneme',
+  'ays.app.not-al':'Not al',
+  'ays.app.uygulama-acilamadi':'Uygulama açılamadı.',
+});
+
 
 window.R = window.R || {};
 
@@ -144,8 +215,8 @@ R.App = (function(){
     const tetik = C.protocolTriggers().length;
     if(tetik) ays.push({ id:'protokol', metin:tetik + ' telafi protokolü tetiklendi', route:'protocols', acil:true });
     const w = S.weeks[M.weekId(M.currentWeek())];
-    if(w && !w.signedAt) ays.push({ id:'sozlesme', metin:'Bu haftanın sözleşmesi imzalanmadı', route:'week' });
-    if(S.storeHealth && S.storeHealth.error) ays.push({ id:'kayit', metin:'Kayıt sorunu var', act:'show-store-error', acil:true });
+    if(w && !w.signedAt) ays.push({ id:'sozlesme', metin:yz('ays.app.bu-haftanin-sozlesmesi-imzal'), route:'week' });
+    if(S.storeHealth && S.storeHealth.error) ays.push({ id:'kayit', metin:yz('ays.app.kayit-sorunu-var'), act:'show-store-error', acil:true });
     const mer = [];
     const onay = onaySayisi();
     if(onay) mer.push({ id:'onay', metin:onay + ' öneri Onaylar’da bekliyor', route:'onaylar' });
@@ -324,16 +395,16 @@ R.App = (function(){
     const g = navGorunen();
     const sekmeler = BANT.map(id => g.find(x => x.id === id)).filter(Boolean)
       .map(x => ({ id:x.id, ad:x.label, route:x.items[0].id, on:x.id === aktif }));
-    sekmeler.push({ id:'menu', ad:'Menü', act:'toggle-sidebar', on:false });
+    sekmeler.push({ id:'menu', ad:yz('ays.app.menu'), act:'toggle-sidebar', on:false });
     return K.altBant({ sekmeler });
   }
 
   /* Hızlı ekle (166): AYS'nin en sık üç kaydı; ekrana gidip o ekranın
      kendi işleyicisini çağırır (`next-action`). */
   const HIZLI = [
-    { ad:'Deneme ekle', act:'next-action', data:{ 'data-route':'exams', 'data-next':'new-exam' } },
-    { ad:'Tekrar kartı ekle', act:'next-action', data:{ 'data-route':'cards', 'data-next':'new-card' } },
-    { ad:'Ders notu ekle', act:'next-action', data:{ 'data-route':'learn', 'data-next':'note-new' } },
+    { ad:yz('ays.app.deneme-ekle'), act:'next-action', data:{ 'data-route':'exams', 'data-next':'new-exam' } },
+    { ad:yz('ays.app.tekrar-karti-ekle'), act:'next-action', data:{ 'data-route':'cards', 'data-next':'new-card' } },
+    { ad:yz('ays.app.ders-notu-ekle'), act:'next-action', data:{ 'data-route':'learn', 'data-next':'note-new' } },
   ];
 
   /* Seviye rozeti — bu sistemin KENDİ kademesi (core/xp.js). Üst
@@ -351,7 +422,7 @@ R.App = (function(){
     return html`
       <footer class="sayfasonu">
         <div class="wrapc sayfasonu__ic">
-          <p>Veriler bu cihazda tutulur. Ad ve şehir hiçbir modele gönderilmez.</p>
+          <p>${yz('ays.app.veriler-bu-cihazda-tutulur-a')}</p>
           ${raw(buildStampHtml())}
         </div>
       </footer>`;
@@ -371,9 +442,9 @@ R.App = (function(){
     const b = R.BUILD || {};
     if(!b.id) return '';
     return String(html`<p class="sitefoot__build">
-      <span class="sitefoot__k">Derleme</span>
+      <span class="sitefoot__k">${yz('ays.app.derleme')}</span>
       <span class="sitefoot__sha"${when(b.dirty, () => attrs({
-        title:'Bu derleme kaydedilmemiş yerel değişiklik içeriyor; '
+        title:yz('ays.app.bu-derleme-kaydedilmemis-yer')
           + 'bir commit\'e birebir karşılık gelmez.' }))}>${b.id}${when(b.dirty,
         () => html`<span aria-label="yerel değişiklikli">+</span>`)}</span>
       ${when(b.at, () => html`<span class="dim"> · ${b.at}</span>`)}
@@ -390,9 +461,9 @@ R.App = (function(){
      Seçim profile yazılır; yani cihaz değil KİŞİ hatırlanır ve hane
      profilleri arasında geçerken herkesin kendi görünümü gelir. */
   const THEMES = [
-    { id:'system', icon:'monitor', label:'Sistem' },
-    { id:'light',  icon:'sun',     label:'Açık' },
-    { id:'dark',   icon:'moon2',   label:'Koyu' },
+    { id:'system', icon:'monitor', label:yz('ays.app.sistem') },
+    { id:'light',  icon:'sun',     label:yz('ays.app.acik') },
+    { id:'dark',   icon:'moon2',   label:yz('ays.app.koyu') },
   ];
 
   /* «Animasyonlar» (Tam · Az · Sistem) ve «Zemin» (Yumusak · Sade) satirlari
@@ -413,29 +484,28 @@ R.App = (function(){
         <div class="appear__profil">
           <span class="ust__profil" aria-hidden="true">${(ad || 'Ben').charAt(0).toLocaleUpperCase('tr-TR')}</span>
           <span class="minw0"><b>${ad || 'Profil'}</b><small>${brandLine()}</small></span>
-          ${R.C.Button({ label:'Profil', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'profiles' } })}
+          ${R.C.Button({ label:yz('ays.app.profil'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'profiles' } })}
         </div>
-        <div class="appear__label">Tema</div>
+        <div class="appear__label">${yz('ays.app.tema')}</div>
         <div class="appear__themes">${R.C.TemaSecici({ value:theme, act:'set-theme' })}</div>
-        <div class="appear__label">Animasyonlar</div>
+        <div class="appear__label">${yz('ays.app.animasyonlar')}</div>
         ${raw(window.LIFEOS.ANIMASYON ? LIFEOS.ANIMASYON.seciciHtml() : '')}
-        <div class="appear__label">Zemin</div>
+        <div class="appear__label">${yz('ays.app.zemin')}</div>
         ${raw(window.LIFEOS.ZEMIN ? LIFEOS.ZEMIN.seciciHtml() : '')}
-        <div class="appear__label">Minikler</div>
+        <div class="appear__label">${yz('ays.app.minikler')}</div>
         ${raw(window.LIFEOS.MINIK ? LIFEOS.MINIK.seciciHtml() : '')}
-        <div class="appear__label">Minik boyu</div>
+        <div class="appear__label">${yz('ays.app.minik-boyu')}</div>
         ${raw(window.LIFEOS.MINIK && LIFEOS.MINIK.boySeciciHtml ? LIFEOS.MINIK.boySeciciHtml() : '')}
-        <div class="appear__label">King’in görünüşü</div>
+        <div class="appear__label">${yz('ays.app.king-in-gorunusu')}</div>
         ${raw(window.LIFEOS.KING && LIFEOS.KING.gorunusSeciciHtml ? LIFEOS.KING.gorunusSeciciHtml() : '')}
-        <div class="appear__label">Ses düzeyleri</div>
+        <div class="appear__label">${yz('ays.app.ses-duzeyleri')}</div>
         ${raw(window.LIFEOS.SES && LIFEOS.SES.duzeySeciciHtml ? LIFEOS.SES.duzeySeciciHtml() : '')}
-        <div class="appear__label">Yüzey · bu modül</div>
+        <div class="appear__label">${yz('ays.app.yuzey-bu-modul')}</div>
         ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.yuzeySeciciHtml ? LIFEOS.ZEMIN.yuzeySeciciHtml() : '')}
-        <div class="appear__label">Manzara</div>
+        <div class="appear__label">${yz('ays.app.manzara')}</div>
         ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.manzaraSeciciHtml ? LIFEOS.ZEMIN.manzaraSeciciHtml() : '')}
 
-        <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
-          cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>
+        <p class="appear__note">${yz('ays.app.tema-bu-profile-kaydedilir-s')}</p>
       </div>`);
   }
 
@@ -590,7 +660,7 @@ R.App = (function(){
       if(H) H.once(appEl);
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.once(appEl);
       const ciz = () => { kabukYaz(appEl, String(html`
-        <a class="skiplink" href="#main">İçeriğe atla</a>
+        <a class="skiplink" href="#main">${yz('ays.app.i-cerige-atla')}</a>
         ${when(ornekAcik(), () => raw(LIFEOS.OrnekKip.filigranHtml()))}
         <div class="site site--v5">
           ${raw(safe(() => ustCubukHtml(sc)))}
@@ -648,7 +718,7 @@ R.App = (function(){
       console.error('Render hatası:', err);
       const kutu = document.getElementById('app');
       if(kutu) kutu.innerHTML = String(html`<div class="content">
-        ${R.C.SakinHata({ baslik:'Ekran çizilemedi.', dugme:'Yeniden yükle',
+        ${R.C.SakinHata({ baslik:yz('ays.app.ekran-cizilemedi'), dugme:'Yeniden yükle',
           ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }finally{
@@ -897,7 +967,7 @@ R.App = (function(){
     async dictate(el){
       const id = el.dataset.target;
       const field = document.getElementById(id);
-      if(!field){ UI.toast('Yazılacak alan bulunamadı'); return; }
+      if(!field){ UI.toast(yz('ays.app.yazilacak-alan-bulunamadi')); return; }
 
       const L = R.Listen || R.Voice;
       if(!L) return;
@@ -938,11 +1008,11 @@ R.App = (function(){
       const h = sh.health || {};
       const K = R.C;
       const state = (v, okLabel) => v === 'ok' ? K.Badge({ label:okLabel, tone:'ok' })
-        : v === 'off' ? K.Badge({ label:'kapalı', tone:'muted' })
+        : v === 'off' ? K.Badge({ label:yz('ays.app.kapali'), tone:'muted' })
         : K.Badge({ label:'hata', tone:'danger' });
 
       UI.sheet({
-        title:'Kayıt durumu',
+        title:yz('ays.app.kayit-durumu'),
         body:String(K.Stack([
           K.Notice({ tone:sh.error.scope.indexOf('local') === 0 ? 'danger' : 'warn', body:sh.error.message }),
           K.Table({ tight:true, headers:['Alan', 'Durum'], rows:[
@@ -954,8 +1024,8 @@ R.App = (function(){
           K.Notice({ tone:'info', body:'Verilerin bu cihazda tutulmaya devam ediyor. '
             + 'Güvende olmak için Rehber → Ayarlar bölümünden yedek al.' }),
         ])),
-        footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
-          ${K.Button({ label:'Ayarlara git', tone:'primary', act:'go', data:{ 'data-route':'guide' } })}`),
+        footer:String(html`${K.Button({ label:yz('ays.app.kapat'), act:'sheet-close' })}
+          ${K.Button({ label:yz('ays.app.ayarlara-git'), tone:'primary', act:'go', data:{ 'data-route':'guide' } })}`),
         noFocus:true,
       });
     },
@@ -964,21 +1034,21 @@ R.App = (function(){
       const draft = R.Auto.draftWeek(n);
       if(!draft || !draft.ok){ UI.toast(draft ? draft.reason : 'Taslak üretilemedi'); return; }
       UI.sheet({
-        title:'Haftalık sözleşme taslağı', subtitle:'Hafta '+n+' · onayladıktan sonra imzalayabilirsin',
+        title:yz('ays.app.haftalik-sozlesme-taslagi'), subtitle:yz('ays.app.hafta')+n+' · onayladıktan sonra imzalayabilirsin',
         wide:true,
         body:String(R.C.Stack([
           R.C.Notice({ tone:'info', body:'Konular plandan ve risk sıralamasından geldi. '
             + 'İstediğini değiştirebilirsin; bu taslak imza değildir.' }),
-          R.C.Table({ tight:true, headers:['Konu', 'Neden', { label:'Soru', num:true }],
+          R.C.Table({ tight:true, headers:['Konu', 'Neden', { label:yz('ays.app.soru'), num:true }],
             rows:draft.topics.map(t => [t.name, html`<span class="small dim">${t.why}</span>`, t.questionTarget]) }),
           html`<div class="cols-2">
-            ${R.C.Stat({ label:'Haftalık soru', value:U.fmtNum(draft.questionTarget) })}
-            ${R.C.Stat({ label:'Kapasite', value:U.fmtMin(draft.capacityMin) })}
+            ${R.C.Stat({ label:yz('ays.app.haftalik-soru'), value:U.fmtNum(draft.questionTarget) })}
+            ${R.C.Stat({ label:yz('ays.app.kapasite'), value:U.fmtMin(draft.capacityMin) })}
           </div>`,
-          R.C.Field({ label:'Davranış hedefi', input:R.C.Input({ id:'auto-behavior', value:draft.behaviorGoal }) }),
+          R.C.Field({ label:yz('ays.app.davranis-hedefi'), input:R.C.Input({ id:'auto-behavior', value:draft.behaviorGoal }) }),
         ])),
-        footer:String(html`${R.C.Button({ label:'Vazgeç', act:'sheet-close' })}
-          ${R.C.Button({ label:'Sözleşmeye yaz', tone:'primary', act:'auto-draft-apply', data:{ 'data-n':n } })}`),
+        footer:String(html`${R.C.Button({ label:yz('ays.app.vazgec'), act:'sheet-close' })}
+          ${R.C.Button({ label:yz('ays.app.sozlesmeye-yaz'), tone:'primary', act:'auto-draft-apply', data:{ 'data-n':n } })}`),
       });
     },
     async 'auto-draft-apply'(el){
@@ -1011,14 +1081,14 @@ R.App = (function(){
         set('rv-done', d.done);
         set('rv-why', d.why);
         set('rv-carry', d.carry.join(', '));
-        UI.toast('Taslak dolduruldu — düzeltmeyi sen yaz');
+        UI.toast(yz('ays.app.taslak-dolduruldu-duzeltmeyi'));
       }, 120);
     },
     async 'auto-exam-week'(){
       S.ui.examWeekAck = true;
       const ew = C.examWeekMode();
       UI.sheet({
-        title:'Sınav haftası modu', subtitle:ew.daysLeft + ' gün kaldı',
+        title:yz('ays.app.sinav-haftasi-modu'), subtitle:ew.daysLeft + ' gün kaldı',
         body:String(R.C.Stack([
           R.C.Notice({ tone:'warn', body:ew.note }),
           R.C.Table({ tight:true, headers:['Ne değişir', 'Neden'], rows:[
@@ -1028,7 +1098,7 @@ R.App = (function(){
             ['Uyku sınav saatine ayarlanır', 'Kalkış saati kademeli öne çekilir'],
           ] }),
         ])),
-        footer:String(R.C.Button({ label:'Anladım', tone:'primary', act:'sheet-close' })),
+        footer:String(R.C.Button({ label:yz('ays.app.anladim'), tone:'primary', act:'sheet-close' })),
       });
     },
     async 'auto-replan'(){
@@ -1038,7 +1108,7 @@ R.App = (function(){
         async () => {
           await M.replanFrom(M.currentWeek());
           UI.closeSheet();
-          UI.toast('Plan yeniden hesaplandı');
+          UI.toast(yz('ays.app.plan-yeniden-hesaplandi'));
           render();
         }, false, replanEtiketi(h));
     },
@@ -1129,7 +1199,7 @@ R.App = (function(){
       const renkAd = (y.kademeBilgi && y.kademeBilgi.id) || '';
       if(!(sonuc.sakin && V && V.sakinGoster && V.sakinGoster({ ust:y.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe',
         ad:ad + ' ' + y.etiket, sistem:'AYS', renk:renkAd })))
-        UI.toast('Yeni rütbe — ' + ad + ' ' + y.etiket);
+        UI.toast(yz('ays.app.yeni-rutbe') + ad + ' ' + y.etiket);
       damgala();
     }
   }
@@ -1180,7 +1250,7 @@ R.App = (function(){
       /* Kaydet dokunuşu: yalnız gerçekten kayıt yazıldıysa (hareket.js). */
       if(window.LIFEOS && window.LIFEOS.HAREKET && window.LIFEOS.HAREKET.kaydedildi) window.LIFEOS.HAREKET.kaydedildi(el, act, kayitBas);
     }
-    catch(err){ console.error('Eylem hatası ('+act+'):', err); UI.toast('Bir şeyler ters gitti'); }
+    catch(err){ console.error('Eylem hatası ('+act+'):', err); UI.toast(yz('ays.app.bir-seyler-ters-gitti')); }
     /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
     xpTara();
   });
@@ -1209,7 +1279,7 @@ R.App = (function(){
     const fn = (sc.change && sc.change[el.dataset.change]) || globalChange[el.dataset.change];
     if(!fn) return;
     try{ await fn(el, e); }
-    catch(err){ console.error('Değişiklik hatası:', err); UI.toast('Değişiklik kaydedilemedi'); }
+    catch(err){ console.error('Değişiklik hatası:', err); UI.toast(yz('ays.app.degisiklik-kaydedilemedi')); }
     /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
     xpTara();
   }
@@ -1340,7 +1410,7 @@ R.App = (function(){
       const now = Date.now();
       if(now - lastExternalToastAt > 8000){
         lastExternalToastAt = now;
-        UI.toast('Veriler başka bir sekmede değişti. Kaybolmasın diye bu sayfayı tazele.', { life:8000 });
+        UI.toast(yz('ays.app.veriler-baska-bir-sekmede-de'), { life:8000 });
       }
     }
     R.Store.onExternalWrite = function(){
@@ -1588,7 +1658,7 @@ R.App = (function(){
     G.kur(Object.assign({ modul:'ays',
       satirlar:gun => R.Screens.today.gunuKapat.satirlar(gun)
         .map(s => typeof s.metin === 'function' ? Object.assign(s, { metin:kutuBaglami(gun, s.metin) }) : s),
-      bildir:(metin, geriAl) => UI.toast(metin, geriAl ? { undo:async () => { await geriAl(); UI.toast('Geri alındı'); } } : {}),
+      bildir:(metin, geriAl) => UI.toast(metin, geriAl ? { undo:async () => { await geriAl(); UI.toast(yz('ays.app.geri-alindi')); } } : {}),
       yenile:() => { gunuKapatCiz(); render(); },
       olcumOrnek:'20 soru 15 doğru, 7 saat uyudum' }, o || {}));
     return true;
@@ -1648,9 +1718,9 @@ R.App = (function(){
       return { dk, oran:q ? Math.round(d * 100 / q) : null, var_, tahmin }; };
     const a = gun(0, 7), o = gun(7, 7);
     const kart = [
-      { ad:'Çalışma · son 7 gün', deger:a.var_ ? a.dk : null, birim:'dk', etiket:a.tahmin ? 'tahmin' : 'ölçüldü',
+      { ad:yz('ays.app.calisma-son-7-gun'), deger:a.var_ ? a.dk : null, birim:'dk', etiket:a.tahmin ? 'tahmin' : 'ölçüldü',
         alt:o.var_ ? 'önceki 7 gün: ' + o.dk + ' dk' + (o.tahmin ? ' (tahmin)' : '') : '' },
-      { ad:'Doğruluk · son 7 gün', deger:a.oran, birim:'%', etiket:'hesaplandı', alt:o.oran != null ? 'önceki 7 gün: %' + o.oran : '' },
+      { ad:yz('ays.app.dogruluk-son-7-gun'), deger:a.oran, birim:'%', etiket:yz('ays.app.hesaplandi'), alt:o.oran != null ? 'önceki 7 gün: %' + o.oran : '' },
     ];
     let sinyal = '';
     if(a.var_ && o.var_ && a.dk > o.dk * 1.3 && a.oran != null && o.oran != null && a.oran < o.oran - 5)
@@ -1759,15 +1829,15 @@ R.App = (function(){
         window.LIFEOS.YETKI.kur({ modul:'ays',
           /* King'in eylem kapısı (yetki.js söz 8): toplantıyı Toplantı ekranının
              kendi düğmesi başlatır; model çağrıları yapılır, bu yüzden orta seviye. */
-          eylemler:[{ id:'toplanti', seviye:'orta', ad:'Toplantı başlat',
+          eylemler:[{ id:'toplanti', seviye:'orta', ad:yz('ays.app.toplanti-baslat'),
             aciklama:'Ofiste uzmanlar toplantısını başlatır (yapay zekâ çağrıları yapılır).',
             anla:t => /toplant/.test(t) && /(başlat|başla|aç|yap|topla|kur)/.test(t) && !/(bitir|durdur)/.test(t) ? {} : null,
-            onizle:() => ({ metin:'Ofiste toplantı başlayacak: uzmanlar sırayla konuşur, bunun için yapay zekâ çağrıları yapılır.' }),
+            onizle:() => ({ metin:yz('ays.app.ofiste-toplanti-baslayacak-u') }),
             uygula:async () => {
               go('meeting');
               await new Promise(r => setTimeout(r, 120));
               await R.Screens.meeting.handle['meet-start']();
-              return { metin:'Toplantıyı başlattım; Toplantı ekranındasın.' };
+              return { metin:yz('ays.app.toplantiyi-baslattim-toplant') };
             } }],
 
           tema:{ oku:() => S.profile.theme || 'system', yaz:async v => { S.profile.theme = v; await M.saveProfile(); applyTheme(); render(); } },
@@ -1829,13 +1899,13 @@ R.App = (function(){
               const enIyi = Object.keys(dilim).filter(k => dilim[k].q >= 20).sort((a, b) => dilim[b].d / dilim[b].q - dilim[a].d / dilim[a].q)[0];
               const saatAd = k => String(k).padStart(2, '0') + '–' + String(Number(k) + 3).padStart(2, '0');
               return [
-                { ad:'Çözülen soru · 45 gün', deger:solved || null, etiket:'ölçüldü' },
-                { ad:'En verimli saat dilimi', deger:enIyi != null ? saatAd(enIyi) : null, etiket:'hesaplandı',
+                { ad:yz('ays.app.cozulen-soru-45-gun'), deger:solved || null, etiket:yz('ays.app.olculdu') },
+                { ad:yz('ays.app.en-verimli-saat-dilimi'), deger:enIyi != null ? saatAd(enIyi) : null, etiket:yz('ays.app.hesaplandi'),
                   alt:enIyi != null ? '%' + Math.round(dilim[enIyi].d * 100 / dilim[enIyi].q) + ' doğru · ' + dilim[enIyi].q + ' soru' : 'Saati bilinen 20 soru birikince ölçülür' },
-                { ad:'Doğru oranı · 45 gün', deger:solved ? Math.round(correct * 100 / solved) : null, birim:'%', etiket:'hesaplandı',
+                { ad:yz('ays.app.dogru-orani-45-gun'), deger:solved ? Math.round(correct * 100 / solved) : null, birim:'%', etiket:yz('ays.app.hesaplandi'),
                   alt:solved ? correct + ' / ' + solved : '' },
-                { ad:'Bugün sırası gelen tekrar', deger:R.Calc.dueCards(R.U.todayISO()).length, birim:'kart', etiket:'hesaplandı' },
-                { ad:'Son TYT deneme neti', deger:netler.length ? U.round(netler[netler.length - 1], 2) : null, etiket:'ölçüldü',
+                { ad:yz('ays.app.bugun-sirasi-gelen-tekrar'), deger:R.Calc.dueCards(R.U.todayISO()).length, birim:'kart', etiket:yz('ays.app.hesaplandi') },
+                { ad:yz('ays.app.son-tyt-deneme-neti'), deger:netler.length ? U.round(netler[netler.length - 1], 2) : null, etiket:yz('ays.app.olculdu'),
                   alt:netler.length ? netler.length + ' deneme' : '' },
               ];
             },
@@ -1862,7 +1932,7 @@ R.App = (function(){
             /* Söz 34: yük (son 7 gün / önceki 7 gün) ve deney ölçüleri; günlük değerler AYS'nin kaydı. */
             yuk:calismaYuku,
             olcu:{
-              liste:[{ id:'dogruluk', ad:'Doğruluk', birim:'%' }, { id:'sure', ad:'Çalışma süresi', birim:'dk' }],
+              liste:[{ id:'dogruluk', ad:yz('ays.app.dogruluk'), birim:'%' }, { id:'sure', ad:yz('ays.app.calisma-suresi'), birim:'dk' }],
               deger:(id, iso) => {
                 const day = S.days[iso];
                 if(!day) return null;
@@ -1874,7 +1944,7 @@ R.App = (function(){
             },
           },
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
-          foto:[{ id:'soru', ad:'Soruyu çöz', is:async f => {
+          foto:[{ id:'soru', ad:yz('ays.app.soruyu-coz'), is:async f => {
             go('solve');
             await new Promise(r => setTimeout(r, 80));
             const ok = R.Screens.solve.fotoKoy ? await R.Screens.solve.fotoKoy(f) : false;
@@ -1920,11 +1990,11 @@ R.App = (function(){
       if(window.LIFEOS && window.LIFEOS.KISAYOL){
         window.LIFEOS.KISAYOL.kur({ modul:'ays', git:r => go(r), palet:() => R.Palette.open(),
           dugmeler:() => [
-            { ad:'Tekrar', rota:'cards', sayi:C.dueCards().length },
-            { ad:'Soru çöz', rota:'solve' },
-            { ad:'Sıradaki konu', rota:'ogren' },
-            { ad:'Deneme', rota:'exams' },
-            { ad:'Not al', doldur:'not: ' },
+            { ad:yz('ays.app.tekrar'), rota:'cards', sayi:C.dueCards().length },
+            { ad:yz('ays.app.soru-coz'), rota:'solve' },
+            { ad:yz('ays.app.siradaki-konu'), rota:'ogren' },
+            { ad:yz('ays.app.deneme'), rota:'exams' },
+            { ad:yz('ays.app.not-al'), doldur:'not: ' },
           ],
           cekmeceler:() => NAV.filter(g => (g.items || []).length).map(g => ({ id:g.id, rota:g.items[0].id })) });
       }
@@ -2102,7 +2172,7 @@ R.App = (function(){
       console.error('Açılış hatası:', err);
       const kutu = document.getElementById('app');
       if(kutu) kutu.innerHTML = String(html`<div class="content">
-        ${R.C.SakinHata({ baslik:'Uygulama açılamadı.', dugme:'Yeniden dene',
+        ${R.C.SakinHata({ baslik:yz('ays.app.uygulama-acilamadi'), dugme:'Yeniden dene',
           ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }

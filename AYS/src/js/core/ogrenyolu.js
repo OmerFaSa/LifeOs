@@ -24,6 +24,10 @@
      olc       ilk konu testi ≥ %R.CLOSURE_RULE.first
      pekistir  gapDays gün sonra ikinci test ≥ %R.CLOSURE_RULE.second
                (zamanı gelmediyse «bekle» denir, tarih yazılır) */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.ogrenyolu.olculdu':'ölçüldü',
+});
+
 
 window.R = window.R || {};
 
@@ -71,7 +75,7 @@ R.OgrenYolu = (function(){
         ayrinti:notlar ? notlar + ' ders notu'
           : st.okunduAt ? 'Okudum dedin (' + U.fmtShort(st.okunduAt.slice(0, 10)) + ').'
           : 'Konuyu bir kaynaktan öğren: ders notu ekle ya da okuduğunu işaretle.' },
-      { id:'kartla', ad:ADLAR.kartla, tamam:kart >= KURAL.kartEnAz, etiket:'ölçüldü',
+      { id:'kartla', ad:ADLAR.kartla, tamam:kart >= KURAL.kartEnAz, etiket:yz('ays.core.ogrenyolu.olculdu'),
         ayrinti:kart + ' / ' + KURAL.kartEnAz + ' kart' },
       { id:'coz', ad:ADLAR.coz,
         tamam:p.solved >= KURAL.pratikEnAz && p.accuracy != null && p.accuracy >= KURAL.pratikDogruluk,
@@ -79,7 +83,7 @@ R.OgrenYolu = (function(){
         ayrinti:p.solved ? p.solved + ' / ' + KURAL.pratikEnAz + ' soru · doğruluk %' + p.accuracy
             + ' (eşik %' + KURAL.pratikDogruluk + ')'
           : 'Bu konuya bağlı blokta soru yok.' },
-      { id:'duzelt', ad:ADLAR.duzelt, tamam:acik === 0, etiket:'ölçüldü',
+      { id:'duzelt', ad:ADLAR.duzelt, tamam:acik === 0, etiket:yz('ays.core.ogrenyolu.olculdu'),
         ayrinti:!yanlis.length ? 'Bu konudan yanlış kaydı yok.' : acik ? acik + ' açık yanlış' : 'Açık yanlış kalmadı.' },
       { id:'olc', ad:ADLAR.olc, tamam:birinci, etiket:st.first != null ? 'ölçüldü' : null,
         ayrinti:yeniden ? 'Konu yeniden açıldı: testi yenile (eşik %' + rule.first + ').'

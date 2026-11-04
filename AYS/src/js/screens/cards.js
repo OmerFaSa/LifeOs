@@ -4,6 +4,8 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:110, group:'Git', label:'Tekrar ve yanlış defteri', icon:'cards', route:'cards', run(){ R.App.go('cards'); } });
+window.LIFEOS.PARCA.komut({ modul:'ays', sira:220, group:'Kayıt', label:'Tekrar kartı ekle', icon:'plus', run(){ R.App.go('cards'); setTimeout(()=>R.Screens.cards.handle['new-card']({dataset:{}}), 60); } });
 window.LIFEOS.PARCA.yazilar({
   'ays.cards.hatirlamadim':'Hatırlamadım',
   'ays.cards.zorlandim':'Zorlandım',
@@ -73,7 +75,7 @@ window.LIFEOS.PARCA.yazilar({
   'ays.cards.kart-geri-alindi':'Kart geri alındı',
   'ays.cards.tekrar':'Tekrar',
 });
-window.LIFEOS.PARCA.sayfa({ id:'cards', modul:'ays', cekmece:'calisma', ad:'Tekrar', ikon:'cards', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'cards', modul:'ays', king:{ sira:150, ad:'Tekrar', es:['tekrar', 'kart'] }, cekmece:'calisma', ad:'Tekrar', ikon:'cards', sira:30 });
 
 R.Screens.cards = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -382,10 +384,10 @@ R.Screens.cards = (function(){
     ])}</div>`;
   }
 
-  LIFEOS.PARCA.blok({ id:'cards.header', sayfa:'cards', yer:'y1', sira:10, ad:'header', ciz(){
+  LIFEOS.PARCA.blok({ id:'cards.header', sayfa:'cards', yer:'y1', sira:10, ad:'Sayfa başlığı', ciz(){
     return header();
   } });
-  LIFEOS.PARCA.blok({ id:'cards.bolum-2', sayfa:'cards', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+  LIFEOS.PARCA.blok({ id:'cards.tekrar-sekmeleri', sayfa:'cards', yer:'y2', sira:10, ad:'Tekrar sekmeleri', ciz(){
     return K.SayfaBolumleri({ act:'card-tab', aria:yz('ays.cards.tekrar-bolumleri'), bolumler:bolumler() });
   } });
   LIFEOS.PARCA.blok({ id:'cards.aciklamalar', sayfa:'cards', yer:'y3', sira:10, ad:'Açıklamalar', ciz(){

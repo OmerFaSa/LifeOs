@@ -48,6 +48,23 @@
       Araştırma Ofisi değerlendirme önerebilir.
    4. EKSİK SORULUR, TAHMİN EDİLMEZ (AGENTS.md §1.7).
    5. GÜVENLİK REDDİ BANDI EZER ama güvenli karşı teklif bırakır. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.hedef.tarihi-anlayamadim-3-ay-icin':'Tarihi anlayamadım. «3 ay içinde» ya da «31 Aralık’a kadar» gibi yazabilirsin.',
+  'ortak.hedef.vakti-anlayamadim-gunde-30-d':'Vakti anlayamadım. «Günde 30 dakika» ya da «günde 1 saat» gibi yazabilirsin.',
+  'ortak.hedef.degeri-anlayamadim-sayiyla-y':'Değeri anlayamadım; sayıyla yaz ya da «bilmiyorum» de.',
+  'ortak.hedef.miktari-anlayamadim-sayiyla':'Miktarı anlayamadım; sayıyla yazar mısın?',
+  'ortak.hedef.tarihini-koru-gunde':'Tarihini koru: günde ',
+  'ortak.hedef.rahat-tempo-tipik-hiz':'Rahat tempo (tipik hız)',
+  'ortak.hedef.hizli-tempo-zorlayici':'Hızlı tempo (zorlayıcı)',
+  'ortak.hedef.tamam-bu-hedefi-biraktim':'Tamam, bu hedefi bıraktım.',
+  'ortak.hedef.boyle-bir-secenek-yok-listed':'Böyle bir seçenek yok; listedeki numaralardan birini yaz.',
+  'ortak.hedef.bu-tarihle-kaydedemem-guvenl':'Bu tarihle kaydedemem; güvenli bir tempo seç («1» ya da «2») ya da «vazgeç» de.',
+  'ortak.hedef.hedefin-kaydedildi-ve-aktif':'Hedefin kaydedildi ve aktif',
+  'ortak.hedef.yarim-kalan-onceki-hedefi-bi':'Yarım kalan önceki hedefi bıraktım; yenisine geçiyorum. ',
+  'ortak.hedef.bilinmeyen-hedef-durumu':'Bilinmeyen hedef durumu.',
+  'ortak.hedef.bu-hedef':'Bu hedef «',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -293,11 +310,11 @@ LIFEOS.Hedef = (function(){
     if(alan === 'son_tarih'){
       const ozel = paket && typeof paket.tarihOku === 'function' ? paket.tarihOku(k, h, bugun) : null;
       const t = ozel || tarihAyikla(k, bugun);
-      if(!t || t <= bugun) return { ok:false, why:'Tarihi anlayamadım. «3 ay içinde» ya da «31 Aralık’a kadar» gibi yazabilirsin.' };
+      if(!t || t <= bugun) return { ok:false, why:yz('ortak.hedef.tarihi-anlayamadim-3-ay-icin') };
       yeniH.son_tarih = t;
     }else if(alan === 'kapasite'){
       const ka = kapasiteAyikla(k, true).kapasite;
-      if(!ka || !ka.gunluk_dk) return { ok:false, why:'Vakti anlayamadım. «Günde 30 dakika» ya da «günde 1 saat» gibi yazabilirsin.' };
+      if(!ka || !ka.gunluk_dk) return { ok:false, why:yz('ortak.hedef.vakti-anlayamadim-gunde-30-d') };
       yeniH.kapasite = Object.assign({}, h.kapasite || {}, ka);
     }else if(alan === 'simdi' && paket && typeof paket.simdiOku === 'function'){
       const r = paket.simdiOku(metin, h);
@@ -311,12 +328,12 @@ LIFEOS.Hedef = (function(){
       }else if(BILMIYORUM.test(k)){
         yeniH.simdi = { deger:null, birim:h.birim, etiket:'veri_yok', tarih:bugun };
       }else{
-        return { ok:false, why:'Değeri anlayamadım; sayıyla yaz ya da «bilmiyorum» de.' };
+        return { ok:false, why:yz('ortak.hedef.degeri-anlayamadim-sayiyla-y') };
       }
     }else if(alan === 'hedef'){
       const m = new RegExp(SAYI).exec(k);
       const n = m ? sayiOku(m[1]) : null;
-      if(n == null || n <= 0) return { ok:false, why:'Miktarı anlayamadım; sayıyla yazar mısın?' };
+      if(n == null || n <= 0) return { ok:false, why:yz('ortak.hedef.miktari-anlayamadim-sayiyla') };
       if(h.yon === 'ulas') yeniH.hedefDeger = n; else yeniH.fark = n;
     }else{
       yeniH.cevaplar[alan] = String(metin || '').trim().slice(0, 1000);
@@ -416,7 +433,7 @@ LIFEOS.Hedef = (function(){
       const gerekliHaftalik = g.saat / (gun / 7) + (ek ? ek.saat : 0);
       const dk = Math.ceil(gerekliHaftalik * 60 / gunler / 5 - 1e-9) * 5;
       if(dk <= TARIH_KORU_UST_DK && !(kendi && dk <= kendi) && !out.some(x => x.kapasite.gunluk_dk === dk)){
-        out.push({ ad:'Tarihini koru: günde ' + (dk % 60 === 0 ? (dk / 60) + ' saat' : dk + ' dakika')
+        out.push({ ad:yz('ortak.hedef.tarihini-koru-gunde') + (dk % 60 === 0 ? (dk / 60) + ' saat' : dk + ' dakika')
             + (gunler < 7 ? ', haftada ' + gunler + ' gün' : ''),
           hiz:yuvarla(dk * gunler / 60, 2), birim:'saat/hafta', kapasite:{ gunluk_dk:dk },
           son_tarih:h.son_tarih, tarihKoru:true });
@@ -487,11 +504,11 @@ LIFEOS.Hedef = (function(){
     const hz = paket.hiz(h, durum || {}) || {};
     const out = [];
     if(hz.tipik > 0){
-      out.push({ ad:'Rahat tempo (tipik hız)', hiz:hz.tipik, birim:hz.birim,
+      out.push({ ad:yz('ortak.hedef.rahat-tempo-tipik-hiz'), hiz:hz.tipik, birim:hz.birim,
         son_tarih:gunEkle(bugun, Math.ceil(f.fark / hz.tipik - 1e-9) * 7) });
     }
     if(hz.ust > 0 && hz.ust !== hz.tipik){
-      out.push({ ad:'Hızlı tempo (zorlayıcı)', hiz:hz.ust, birim:hz.birim,
+      out.push({ ad:yz('ortak.hedef.hizli-tempo-zorlayici'), hiz:hz.ust, birim:hz.birim,
         son_tarih:gunEkle(bugun, Math.ceil(f.fark / hz.ust - 1e-9) * 7) });
     }
     return out;
@@ -636,7 +653,7 @@ LIFEOS.Hedef = (function(){
       const r = gecis(h, 'birakildi', bugun());
       bekleyen = null;
       if(r.ok) await kaydet(r.hedef);
-      return { text:'Tamam, bu hedefi bıraktım.', hedef:r.hedef || h };
+      return { text:yz('ortak.hedef.tamam-bu-hedefi-biraktim'), hedef:r.hedef || h };
     }
 
     async function onayla(metin){
@@ -647,14 +664,14 @@ LIFEOS.Hedef = (function(){
       const secim = /^\d$/.test(k) ? Number(k) : null;
       if(secim != null){
         const x = b.senaryolar[secim - 1];
-        if(!x) return { text:'Böyle bir seçenek yok; listedeki numaralardan birini yaz.', hedef:h };
+        if(!x) return { text:yz('ortak.hedef.boyle-bir-secenek-yok-listed'), hedef:h };
         h.son_tarih = x.son_tarih;
         /* Kapasite senaryosu vakti de değiştirir: «günde 1 saat» seçildiyse
            hedef o vakitle kaydedilir. */
         if(x.kapasite) h.kapasite = Object.assign({}, h.kapasite || {}, x.kapasite);
       }else if(EVET.test(k)){
         if(b.karar.bant === 'guvensiz'){
-          return { text:'Bu tarihle kaydedemem; güvenli bir tempo seç («1» ya da «2») ya da «vazgeç» de.',
+          return { text:yz('ortak.hedef.bu-tarihle-kaydedemem-guvenl'),
             hedef:h };
         }
       }else{
@@ -672,7 +689,7 @@ LIFEOS.Hedef = (function(){
       bekleyen = null;
       await kaydet(r.hedef);
       const son = typeof o.sonrasi === 'function' ? o.sonrasi(r.hedef) : '';
-      return { text:'Hedefin kaydedildi ve aktif' + (r.hedef.son_tarih ? ': son tarih '
+      return { text:yz('ortak.hedef.hedefin-kaydedildi-ve-aktif') + (r.hedef.son_tarih ? ': son tarih '
         + tarihYaz(r.hedef.son_tarih) : '') + '.' + (son ? ' ' + son : ''), hedef:r.hedef };
     }
 
@@ -690,7 +707,7 @@ LIFEOS.Hedef = (function(){
             const h = normal(yeni(t, o.modul, bugun()));
             await kaydet(h);
             const c = await sor(h);
-            return { text:'Yarım kalan önceki hedefi bıraktım; yenisine geçiyorum. ' + c.text, hedef:c.hedef };
+            return { text:yz('ortak.hedef.yarim-kalan-onceki-hedefi-bi') + c.text, hedef:c.hedef };
           }
           if(cevapDegil(k) || (typeof o.baskaIs === 'function' && o.baskaIs(metin))) return null;
           return { text:r.why, hedef:bekleyen.hedef };
@@ -759,9 +776,9 @@ LIFEOS.Hedef = (function(){
   /* ------------------------------------------------------- yaşam döngüsü */
 
   function gecis(h, yeniDurum, bugun){
-    if(DURUMLAR.indexOf(yeniDurum) < 0) return { ok:false, why:'Bilinmeyen hedef durumu.' };
+    if(DURUMLAR.indexOf(yeniDurum) < 0) return { ok:false, why:yz('ortak.hedef.bilinmeyen-hedef-durumu') };
     if((GECISLER[h.durum] || []).indexOf(yeniDurum) < 0){
-      return { ok:false, why:'Bu hedef «' + h.durum + '» durumunda; «' + yeniDurum + '» yapılamaz.' };
+      return { ok:false, why:yz('ortak.hedef.bu-hedef') + h.durum + '» durumunda; «' + yeniDurum + '» yapılamaz.' };
     }
     return { ok:true, hedef:Object.assign({}, h, { durum:yeniDurum, guncelleme:bugun }) };
   }

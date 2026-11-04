@@ -41,6 +41,14 @@
    Bu dosya renk yazmaz; sınıf yazar (`fark--iyi`, `sayi--bayat`). Hangi
    sınıfın hangi renge düştüğü T'nin jetonlarıyla `kart.css`'tedir.
    Burada verilen karar yalnız ANLAMDIR: iyi mi, kötü mü, bayat mı. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.sayi.aralik':'Aralık',
+  'ortak.sayi.dayanak':'Dayanak',
+  'ortak.sayi.zaman':'Zaman',
+  'ortak.sayi.durum':'Durum',
+  'ortak.sayi.degismedi':'değişmedi',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -218,13 +226,13 @@ window.LIFEOS = window.LIFEOS || {};
     }else if(id === 'estimated'){
       yaz('Kaynak', s.kaynak, 'kaynak');
       if(Array.isArray(s.aralik) && s.aralik.length === 2){
-        satirlar.push({ ad:'Aralık', deger:birimli(bicim(s.aralik[0], s.ondalik) + '–'
+        satirlar.push({ ad:yz('ortak.sayi.aralik'), deger:birimli(bicim(s.aralik[0], s.ondalik) + '–'
           + bicim(s.aralik[1], s.ondalik), s.birim) });
       }
-      if(sayiMi(s.dayanak)) satirlar.push({ ad:'Dayanak', deger:s.dayanak + ' veri' });
-      if(zaman) satirlar.push({ ad:'Zaman', deger:zaman });
+      if(sayiMi(s.dayanak)) satirlar.push({ ad:yz('ortak.sayi.dayanak'), deger:s.dayanak + ' veri' });
+      if(zaman) satirlar.push({ ad:yz('ortak.sayi.zaman'), deger:zaman });
     }else if(id === 'missing'){
-      satirlar.push({ ad:'Durum', deger:e ? e.ozet : 'Kayıt yok.' });
+      satirlar.push({ ad:yz('ortak.sayi.durum'), deger:e ? e.ozet : 'Kayıt yok.' });
     }
     return {
       tur:id,
@@ -411,7 +419,7 @@ window.LIFEOS = window.LIFEOS || {};
       anlam = (f.yon === YON.ARTIS_IYI) === artis ? 'iyi' : 'kotu';
     }
     if(v === 0){
-      return { anlam:'notr', sinif:'fark fark--notr', metin:'değişmedi',
+      return { anlam:'notr', sinif:'fark fark--notr', metin:yz('ortak.sayi.degismedi'),
         sr:(f.ek ? f.ek + ' ' : '') + 'değişmedi' };
     }
     const mut = bicim(Math.abs(v), od);

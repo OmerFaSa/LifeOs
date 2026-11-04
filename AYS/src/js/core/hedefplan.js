@@ -21,6 +21,24 @@
        (core/auto.js). İmzalı hafta değişmez; taslak yine senin onayınla
        yazılır.
    Geri almak planı kapatır; hafta taslağı eski sırasına döner. */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.hedefplan.gunde-ne-kadar-vakit-ayiraca':'Günde ne kadar vakit ayıracağın bilinmeden plan kurulamaz.',
+  'ays.core.hedefplan.bu-hedefte-kalan-konu-yok':'Bu hedefte kalan konu yok.',
+  'ays.core.hedefplan.bu-vakitle-plan-iki-yili':'Bu vakitle plan iki yılı aşıyor; günlük vakti artır ya da kapsamı daralt.',
+  'ays.core.hedefplan.su-anki-netin-bilinmeden-pla':'Şu anki netin bilinmeden plan kurulamaz; önce bir deneme gir.',
+  'ays.core.hedefplan.son-tarih-olmadan-plan-kurul':'Son tarih olmadan plan kurulamaz.',
+  'ays.core.hedefplan.hedef-net-su-anki-netinin':'Hedef net şu anki netinin üstünde olmalı.',
+  'ays.core.hedefplan.hedef-tarihi-gecmiste':'Hedef tarihi geçmişte.',
+  'ays.core.hedefplan.hedef-bulunamadi':'Hedef bulunamadı.',
+  'ays.core.hedefplan.plan-yalniz-etkin-hedef-icin':'Plan yalnız etkin hedef için kurulur.',
+  'ays.core.hedefplan.bu-hedef-turu-icin-plan':'Bu hedef türü için plan kuralı yok.',
+  'ays.core.hedefplan.uygulanmis-bir-plan-bulunama':'Uygulanmış bir plan bulunamadı.',
+  'ays.core.hedefplan.uygulanmis-bir-plan-yok':'Uygulanmış bir plan yok.',
+  'ays.core.hedefplan.deneme-girilmedi-ilerleme-ol':'Deneme girilmedi; ilerleme ölçülemiyor.',
+  'ays.core.hedefplan.i-lk-kontrol':'İlk kontrol ',
+  'ays.core.hedefplan.kontrol':'Kontrol (',
+});
+
 
 window.R = window.R || {};
 
@@ -67,12 +85,12 @@ R.HedefPlan = (function(){
 
   function konuPlani(h, bugun){
     const gunluk = h.kapasite && h.kapasite.gunluk_dk;
-    if(!(gunluk > 0)) return { ok:false, why:'Günde ne kadar vakit ayıracağın bilinmeden plan kurulamaz.' };
+    if(!(gunluk > 0)) return { ok:false, why:yz('ays.core.hedefplan.gunde-ne-kadar-vakit-ayiraca') };
     const haftalikGun = (h.kapasite && h.kapasite.haftalik_gun) || 7;
     const haftalikDk = Math.round(gunluk * haftalikGun);
     let kalan = Hd().siraliKalan(h.dersler);
     if(h.fark != null) kalan = kalan.slice(0, h.fark);
-    if(!kalan.length) return { ok:false, why:'Bu hedefte kalan konu yok.' };
+    if(!kalan.length) return { ok:false, why:yz('ays.core.hedefplan.bu-hedefte-kalan-konu-yok') };
     const deneme = denemeOf(h.dersler);
     const kuyruk = kalan.map(k => {
       const dk = Math.max(15, Math.round(Hd().konuSaati(k) * 60));
@@ -107,7 +125,7 @@ R.HedefPlan = (function(){
         dk:haftalikDk - Math.max(0, butce), asim:butce < 0 ? -butce : 0 });
     }
     if(kuyruk.length){
-      return { ok:false, why:'Bu vakitle plan iki yılı aşıyor; günlük vakti artır ya da kapsamı daralt.' };
+      return { ok:false, why:yz('ays.core.hedefplan.bu-vakitle-plan-iki-yili') };
     }
     const uyarilar = [];
     if(h.son_tarih && konuBitis > h.son_tarih){
@@ -134,13 +152,13 @@ R.HedefPlan = (function(){
     const simdi = h.simdi && h.simdi.deger != null ? h.simdi
       : Hd().NET.simdi({}, h);
     if(!simdi || simdi.deger == null){
-      return { ok:false, why:'Şu anki netin bilinmeden plan kurulamaz; önce bir deneme gir.' };
+      return { ok:false, why:yz('ays.core.hedefplan.su-anki-netin-bilinmeden-pla') };
     }
-    if(!h.son_tarih) return { ok:false, why:'Son tarih olmadan plan kurulamaz.' };
+    if(!h.son_tarih) return { ok:false, why:yz('ays.core.hedefplan.son-tarih-olmadan-plan-kurul') };
     const hedef = h.hedefDeger != null ? h.hedefDeger : simdi.deger + (h.fark || 0);
-    if(!(hedef > simdi.deger)) return { ok:false, why:'Hedef net şu anki netinin üstünde olmalı.' };
+    if(!(hedef > simdi.deger)) return { ok:false, why:yz('ays.core.hedefplan.hedef-net-su-anki-netinin') };
     const gun = U().diffDays(bugun, h.son_tarih);
-    if(!(gun > 0)) return { ok:false, why:'Hedef tarihi geçmişte.' };
+    if(!(gun > 0)) return { ok:false, why:yz('ays.core.hedefplan.hedef-tarihi-gecmiste') };
     const toplam = Math.max(1, Math.ceil(gun / 7));
     const kontroller = [];
     for(let w = KONTROL_ARALIK; w < toplam; w += KONTROL_ARALIK){
@@ -164,11 +182,11 @@ R.HedefPlan = (function(){
   /* ================================================================= */
 
   function kur(h, bugun){
-    if(!h) return { ok:false, why:'Hedef bulunamadı.' };
-    if(h.durum !== 'aktif') return { ok:false, why:'Plan yalnız etkin hedef için kurulur.' };
+    if(!h) return { ok:false, why:yz('ays.core.hedefplan.hedef-bulunamadi') };
+    if(h.durum !== 'aktif') return { ok:false, why:yz('ays.core.hedefplan.plan-yalniz-etkin-hedef-icin') };
     if(h.paket === 'konu') return konuPlani(h, bugun);
     if(h.paket === 'net') return netPlani(h, bugun);
-    return { ok:false, why:'Bu hedef türü için plan kuralı yok.' };
+    return { ok:false, why:yz('ays.core.hedefplan.bu-hedef-turu-icin-plan') };
   }
 
   /* Önizleme satırları: ne değişecek (önce → sonra). */
@@ -219,7 +237,7 @@ R.HedefPlan = (function(){
   }
   async function geriAl(planId){
     const p = liste().find(x => x.id === planId);
-    if(!p || p.durum !== 'aktif') return { ok:false, why:'Uygulanmış bir plan bulunamadı.' };
+    if(!p || p.durum !== 'aktif') return { ok:false, why:yz('ays.core.hedefplan.uygulanmis-bir-plan-bulunama') };
     await kaydet(Object.assign({}, p, { durum:'geri_alindi', geriAlma:U().todayISO() }));
     return { ok:true };
   }
@@ -237,7 +255,7 @@ R.HedefPlan = (function(){
   }
   async function geriAlHedef(hedefId){
     const p = aktif(hedefId);
-    if(!p) return { ok:false, why:'Uygulanmış bir plan yok.' };
+    if(!p) return { ok:false, why:yz('ays.core.hedefplan.uygulanmis-bir-plan-yok') };
     const row = (R.S.officeProposals || []).find(x => x.action === 'hedef-plan' && x.status === 'applied'
       && x.undo && x.undo.planId === p.id);
     if(row){ await R.Proposals.undo(row.id); return { ok:true }; }
@@ -314,15 +332,15 @@ R.HedefPlan = (function(){
     const h = (R.S.hedefler || []).find(x => x.id === p.hedefId);
     const s = h ? Hd().NET.simdi({}, h) : null;
     if(!s || s.deger == null){
-      return { durum:'veri_yok', sonraki, metin:'Deneme girilmedi; ilerleme ölçülemiyor.' };
+      return { durum:'veri_yok', sonraki, metin:yz('ays.core.hedefplan.deneme-girilmedi-ilerleme-ol') };
     }
     if(!kontrol){
-      return { durum:'yolunda', sonraki, simdi:s.deger, metin:'İlk kontrol ' + tarihYaz(sonraki.tarih)
+      return { durum:'yolunda', sonraki, simdi:s.deger, metin:yz('ays.core.hedefplan.i-lk-kontrol') + tarihYaz(sonraki.tarih)
         + '; beklenen ' + sayiYaz(sonraki.beklenen, 1) + ' net. Şu an ' + sayiYaz(s.deger, 2) + ' net ('
         + (s.kaynak || 'son denemeler') + ').' };
     }
     const durum = s.deger >= kontrol.beklenen ? 'yolunda' : 'geride';
-    return { durum, sonraki, simdi:s.deger, metin:'Kontrol (' + tarihYaz(kontrol.tarih) + '): beklenen '
+    return { durum, sonraki, simdi:s.deger, metin:yz('ays.core.hedefplan.kontrol') + tarihYaz(kontrol.tarih) + '): beklenen '
       + sayiYaz(kontrol.beklenen, 1) + ' net, şu an ' + sayiYaz(s.deger, 2) + ' net.'
       + (durum === 'geride' ? ' Plan geride: odak konulara ve deneme analizine ağırlık ver.' : '') };
   }

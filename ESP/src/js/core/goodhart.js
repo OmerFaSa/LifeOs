@@ -26,6 +26,17 @@
    4. KÜÇÜK SAYILARDA GÜRÜLTÜ VARDIR. Eşiğin altındaki hacimde bir çift
       hiç değerlendirilmez: 4 karttan 6 karta çıkmak %50 artıştır ve
       hiçbir şey ifade etmez. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.goodhart.bu-parametreler-pedagojik-bi':'Bu parametreler pedagojik bir eşik değil, bu yazılımın ayarıdır.',
+  'esp.core.goodhart.yukselmesi-iyi':'yükselmesi iyi',
+  'esp.core.goodhart.dusmesi-iyi':'düşmesi iyi',
+  'esp.core.goodhart.yonu-sistem-bilmez':'yönü sistem bilmez',
+  'esp.core.goodhart.sonuc-tarafinda-iki-penceren':'Sonuç tarafında iki pencerenin birinde ölçüm yok. ',
+  'esp.core.goodhart.bu-pencerede-hacim-degerlend':'Bu pencerede hacim değerlendirmeye yetmiyor (',
+  'esp.core.goodhart.bu-ciftin-yon-tanimi-yok':'Bu çiftin yön tanımı yok; sonucun hangi yönde iyi olduğu ',
+  'esp.core.goodhart.caba-belirgin-bicimde-artmam':'Çaba belirgin biçimde artmamış; nöbetçi burada bir şey aramaz.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -49,7 +60,7 @@ ESP.Goodhart = (function(){
       + 'kadar uzun; iki bitişik pencere iki ayı kapsar. %25\'lik eşik '
       + 'gürültüyü ayıklamak için seçildi: küçük dalgalanmalar çaba artışı '
       + 'sayılmaz. Başka sayılar da savunulabilirdi.',
-    note:'Bu parametreler pedagojik bir eşik değil, bu yazılımın ayarıdır.',
+    note:yz('esp.core.goodhart.bu-parametreler-pedagojik-bi'),
   };
 
   /* Pencere uzunluğu (gün). İki bitişik pencere karşılaştırılır:
@@ -77,11 +88,11 @@ ESP.Goodhart = (function(){
      bilmediği bir hedefe yön atfetmesi, ölçülmemiş bir şeyi ölçülmüş
      göstermek olurdu. */
   const DIRECTIONS = {
-    higher_better:{ id:'higher_better', label:'yükselmesi iyi',
+    higher_better:{ id:'higher_better', label:yz('esp.core.goodhart.yukselmesi-iyi'),
       improvement:function(d){ return d; } },
-    lower_better:{ id:'lower_better', label:'düşmesi iyi',
+    lower_better:{ id:'lower_better', label:yz('esp.core.goodhart.dusmesi-iyi'),
       improvement:function(d){ return d == null ? null : -d; } },
-    movement_only:{ id:'movement_only', label:'yönü sistem bilmez',
+    movement_only:{ id:'movement_only', label:yz('esp.core.goodhart.yonu-sistem-bilmez'),
       improvement:function(d){ return d == null ? null : Math.abs(d); } },
   };
 
@@ -276,12 +287,12 @@ ESP.Goodhart = (function(){
     const asgari = def.minEffort != null ? def.minEffort : ASGARI_CABA;
     if(eS == null || yS == null){
       return Object.assign(base, { status:'unknown', cert:'missing',
-        note:'Sonuç tarafında iki pencerenin birinde ölçüm yok. '
+        note:yz('esp.core.goodhart.sonuc-tarafinda-iki-penceren')
            + 'Ölçülmemiş sonuç, sıfır sonuç değildir.' });
     }
     if(!(yC >= asgari)){
       return Object.assign(base, { status:'idle', cert:'measured',
-        note:'Bu pencerede hacim değerlendirmeye yetmiyor (' + yC + ' < ' + asgari + ').' });
+        note:yz('esp.core.goodhart.bu-pencerede-hacim-degerlend') + yC + ' < ' + asgari + ').' });
     }
 
     const dC = oran(yC, eC);
@@ -292,7 +303,7 @@ ESP.Goodhart = (function(){
     const yon = DIRECTIONS[def.direction || ''];
     if(!yon){
       return Object.assign(base, { status:'unknown', cert:'missing',
-        note:'Bu çiftin yön tanımı yok; sonucun hangi yönde iyi olduğu '
+        note:yz('esp.core.goodhart.bu-ciftin-yon-tanimi-yok')
            + 'bilinmeden ayrışma değerlendirilemez.' });
     }
     const sonucIyilesme = yon.improvement(dS);
@@ -300,7 +311,7 @@ ESP.Goodhart = (function(){
     if(dC == null || dC < CABA_ARTIS){
       return Object.assign(base, { status:'idle', cert:'measured',
         effortChange:dC, outcomeChange:sonucIyilesme,
-        note:'Çaba belirgin biçimde artmamış; nöbetçi burada bir şey aramaz.' });
+        note:yz('esp.core.goodhart.caba-belirgin-bicimde-artmam') });
     }
     if(sonucIyilesme != null && sonucIyilesme > SONUC_DURGUN){
       return Object.assign(base, { status:'aligned', cert:'measured',

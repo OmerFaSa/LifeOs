@@ -765,26 +765,26 @@ SP.Screens.analytics = (function(){
       govde:raw(A.html({ merkez:'Sağlık', kumeler, bos:yz('spi.analytics.plan-hedefler-de-bir-hedef') })) });
   }
 
-  LIFEOS.PARCA.blok({ id:'analytics.bolum-1', sayfa:'analytics', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ acik, bolumler, bugun }){
+  LIFEOS.PARCA.blok({ id:'analytics.ayrinti-dugmesi', sayfa:'analytics', yer:'y1', sira:10, ad:'Ayrıntı düğmesi', ciz({ acik, bolumler, bugun }){
     return K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: kavramlar ve dürüstlük',
         size:'sm', tone:'ghost', act:'spi-analiz-ayrinti', data:{ 'aria-expanded':acik ? 'true' : 'false' } });
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.kategorilerhtml', sayfa:'analytics', yer:'y2', sira:10, ad:'kategorilerHtml', ciz({ acik, bolumler, bugun }){
+  LIFEOS.PARCA.blok({ id:'analytics.kategorilerhtml', sayfa:'analytics', yer:'y2', sira:10, ad:'Kategoriler', ciz({ acik, bolumler, bugun }){
     return kategorilerHtml();
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.bolum-3', sayfa:'analytics', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ acik, bolumler, bugun }){
+  LIFEOS.PARCA.blok({ id:'analytics.analiz-sekmeleri', sayfa:'analytics', yer:'y3', sira:10, ad:'Analiz sekmeleri', ciz({ acik, bolumler, bugun }){
     return K.SayfaBolumleri({ act:'an-tab', aria:yz('spi.analytics.analiz-bolumleri'), bolumler });
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.bolum-4', sayfa:'analytics', yer:'y4', sira:10, ad:'Bölüm 4', ciz({ acik, bolumler, bugun }){
+  LIFEOS.PARCA.blok({ id:'analytics.ice-aktarma-karti', sayfa:'analytics', yer:'y4', sira:10, ad:'İçe aktarma kartı', ciz({ acik, bolumler, bugun }){
     return raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('spi') : ''));
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.yolharitasi', sayfa:'analytics', yer:'y5', sira:10, ad:'yolHaritasi', ciz({ acik, bolumler, bugun }){
+  LIFEOS.PARCA.blok({ id:'analytics.yolharitasi', sayfa:'analytics', yer:'y5', sira:10, ad:'Yol haritası', ciz({ acik, bolumler, bugun }){
     return yolHaritasi();
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.bolum-6', sayfa:'analytics', yer:'y6', sira:10, ad:'Bölüm 6', ciz({ acik, bolumler, bugun }){
+  LIFEOS.PARCA.blok({ id:'analytics.bu-hafta', sayfa:'analytics', yer:'y6', sira:10, ad:'Bu hafta', ciz({ acik, bolumler, bugun }){
     return K.Kutu({ ad:yz('spi.analytics.bu-hafta'), yuva:'kayıttan · son 7 gün', govde:ozetHtml() });
   } });
-  LIFEOS.PARCA.blok({ id:'analytics.bolum-7', sayfa:'analytics', yer:'y7', sira:10, ad:'Bölüm 7', ciz({ acik, bolumler, bugun }){
+  LIFEOS.PARCA.blok({ id:'analytics.bugunden-analiz-ozeti', sayfa:'analytics', yer:'y7', sira:10, ad:'Bugünden analiz özeti', ciz({ acik, bolumler, bugun }){
     return raw(bugun);
   } });
   async function render(){

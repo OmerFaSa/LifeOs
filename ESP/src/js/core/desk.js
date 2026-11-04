@@ -26,6 +26,16 @@
    2. KOÇ EKLERİ GÖRÜR, İÇERİĞİNİ GÖRMEZ. Brifinge yalnızca sayı, tür ve
       başlık gider. Tam metin, belge içeriği ve ses hiçbir zaman modele
       gitmez — `ESP.PRIVACY.model` bunu zaten söylüyordu, burası uyguluyor. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.desk.recete':'Reçete',
+  'esp.core.desk.koc':'Koç',
+  'esp.core.desk.harita':'Harita',
+  'esp.core.desk.ekler':'Ekler',
+  'esp.core.desk.hatirlatma':'Hatırlatma',
+  'esp.core.desk.plan':'Plan',
+  'esp.core.desk.denetim':'Denetim',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -33,13 +43,13 @@ ESP.Desk = (function(){
   const U = ESP.U, S = ESP.S;
 
   const TABS = [
-    { id:'recete',     label:'Reçete' },
-    { id:'kocla',      label:'Koç' },
-    { id:'harita',     label:'Harita' },
-    { id:'ekler',      label:'Ekler' },
-    { id:'hatirlatma', label:'Hatırlatma' },
-    { id:'plan',       label:'Plan' },
-    { id:'denetim',    label:'Denetim' },
+    { id:'recete',     label:yz('esp.core.desk.recete') },
+    { id:'kocla',      label:yz('esp.core.desk.koc') },
+    { id:'harita',     label:yz('esp.core.desk.harita') },
+    { id:'ekler',      label:yz('esp.core.desk.ekler') },
+    { id:'hatirlatma', label:yz('esp.core.desk.hatirlatma') },
+    { id:'plan',       label:yz('esp.core.desk.plan') },
+    { id:'denetim',    label:yz('esp.core.desk.denetim') },
   ];
 
   /* Bir disiplinin masası. Müzik ve diksiyon aynı ekranı paylaşır ama AYRI

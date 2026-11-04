@@ -26,6 +26,18 @@
         uyanılan güne yazılır.
      5. GERİ ALINIR. Yazılan her (gün, alan) kaydedilir; «Geri al» o alanı
         yalnız hâlâ içe aktarılan değeri taşıyorsa boşaltır. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.saglikice.zip-okunamadi':'Zip okunamadı.',
+  'spi.core.saglikice.bu-zip-cok-buyuk-zip64':'Bu zip çok büyük (ZIP64). Zip’i telefonda açıp içindeki export.xml’i seç.',
+  'spi.core.saglikice.zip-te-export-xml-yok-iphone':'Zip’te export.xml yok. iPhone Sağlık › dışa aktar dosyasını seç.',
+  'spi.core.saglikice.bu-tarayici-zip-acamiyor-exp':'Bu tarayıcı zip açamıyor; export.xml’i ayrı seç.',
+  'spi.core.saglikice.zip-sikistirma-yontemi-tanin':'Zip sıkıştırma yöntemi tanınmadı; export.xml’i ayrı seç.',
+  'spi.core.saglikice.dosya-turu-taninmadi-iphone':'Dosya türü tanınmadı: iPhone’dan export.zip / export.xml ya da CSV seç.',
+  'spi.core.saglikice.dosya-okunamadi':'Dosya okunamadı: ',
+  'spi.core.saglikice.yazilacak-olcum-yok':'Yazılacak ölçüm yok.',
+  'spi.core.saglikice.i-ce-aktarma-kaydi-bulunamad':'İçe aktarma kaydı bulunamadı.',
+});
+
 
 window.SP = window.SP || {};
 
@@ -231,10 +243,10 @@ SP.SaglikIce = (function(){
     const d = new DataView(son);
     let eocd = -1;
     for(let i = son.byteLength - 22; i >= 0; i--){ if(d.getUint32(i, true) === 0x06054b50){ eocd = i; break; } }
-    if(eocd < 0) return { ok:false, why:'Zip okunamadı.' };
+    if(eocd < 0) return { ok:false, why:yz('spi.core.saglikice.zip-okunamadi') };
     const adet = d.getUint16(eocd + 10, true);
     const cdBoy = d.getUint32(eocd + 12, true), cdBas = d.getUint32(eocd + 16, true);
-    if(cdBas === 0xffffffff || adet === 0xffff) return { ok:false, why:'Bu zip çok büyük (ZIP64). Zip’i telefonda açıp içindeki export.xml’i seç.' };
+    if(cdBas === 0xffffffff || adet === 0xffff) return { ok:false, why:yz('spi.core.saglikice.bu-zip-cok-buyuk-zip64') };
     const cd = new DataView(await dosya.slice(cdBas, cdBas + cdBoy).arrayBuffer());
     let p = 0;
     for(let i = 0; i < adet && p + 46 <= cd.byteLength; i++){
@@ -249,7 +261,7 @@ SP.SaglikIce = (function(){
       }
       p += 46 + adBoy + ekBoy + yorumBoy;
     }
-    return { ok:false, why:'Zip’te export.xml yok. iPhone Sağlık › dışa aktar dosyasını seç.' };
+    return { ok:false, why:yz('spi.core.saglikice.zip-te-export-xml-yok-iphone') };
   }
 
   async function dosyadanOku(dosya, o){
@@ -261,10 +273,10 @@ SP.SaglikIce = (function(){
         if(!z.ok) return { ok:false, why:z.why };
         let akis = z.parca.stream();
         if(z.yontem === 8){
-          if(typeof DecompressionStream !== 'function') return { ok:false, why:'Bu tarayıcı zip açamıyor; export.xml’i ayrı seç.' };
+          if(typeof DecompressionStream !== 'function') return { ok:false, why:yz('spi.core.saglikice.bu-tarayici-zip-acamiyor-exp') };
           akis = akis.pipeThrough(new DecompressionStream('deflate-raw'));
         }else if(z.yontem !== 0){
-          return { ok:false, why:'Zip sıkıştırma yöntemi tanınmadı; export.xml’i ayrı seç.' };
+          return { ok:false, why:yz('spi.core.saglikice.zip-sikistirma-yontemi-tanin') };
         }
         await akisOku(akis, t);
       }else if(ad.endsWith('.xml')){
@@ -272,10 +284,10 @@ SP.SaglikIce = (function(){
       }else if(ad.endsWith('.csv') || ad.endsWith('.txt')){
         csvIsle(t, await dosya.text());
       }else{
-        return { ok:false, why:'Dosya türü tanınmadı: iPhone’dan export.zip / export.xml ya da CSV seç.' };
+        return { ok:false, why:yz('spi.core.saglikice.dosya-turu-taninmadi-iphone') };
       }
     }catch(e){
-      return { ok:false, why:'Dosya okunamadı: ' + String(e && e.message || e).slice(0, 120) };
+      return { ok:false, why:yz('spi.core.saglikice.dosya-okunamadi') + String(e && e.message || e).slice(0, 120) };
     }
     return onizleme(t);
   }
@@ -283,7 +295,7 @@ SP.SaglikIce = (function(){
   /* ------------------------------------------------------------ yazma ve geri alma */
 
   async function uygula(o){
-    if(!o || !o.ok || !o.yaz.length) return { ok:false, why:'Yazılacak ölçüm yok.' };
+    if(!o || !o.ok || !o.yaz.length) return { ok:false, why:yz('spi.core.saglikice.yazilacak-olcum-yok') };
     const yazilan = [];
     const gunler = {};
     o.yaz.forEach(x => { (gunler[x.gun] = gunler[x.gun] || {})[x.alan] = x.v; });
@@ -309,7 +321,7 @@ SP.SaglikIce = (function(){
     let gecmis = [];
     try{ gecmis = ((await SP.Store.get(ANAHTAR)) || {}).liste || []; }catch(e){ gecmis = []; }
     const k = gecmis.find(x => x.id === id);
-    if(!k) return { ok:false, why:'İçe aktarma kaydı bulunamadı.' };
+    if(!k) return { ok:false, why:yz('spi.core.saglikice.i-ce-aktarma-kaydi-bulunamad') };
     let bosalan = 0, kalan = 0;
     const gunler = {};
     k.yazilan.forEach(x => { (gunler[x.gun] = gunler[x.gun] || []).push(x); });

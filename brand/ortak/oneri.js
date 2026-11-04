@@ -39,6 +39,27 @@
    uygulanabilir mi) ve markup üretir; uygulayan her zaman modülün kendi
    kodudur (`core/proposals.js` ve eşleri). HKM modüle yazmaz, teklif
    yazar; teklifi bu kart gösterir. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.oneri.uygula':'Uygula',
+  'ortak.oneri.gec':'Geç',
+  'ortak.oneri.cozumu-onizle':'Çözümü önizle',
+  'ortak.oneri.yalniz-bugun':'Yalnız bugün',
+  'ortak.oneri.bu-hafta':'Bu hafta',
+  'ortak.oneri.kalici':'Kalıcı',
+  'ortak.oneri.zamanim-yok':'Zamanım yok',
+  'ortak.oneri.bana-uymuyor':'Bana uymuyor',
+  'ortak.oneri.zaten-yaptim':'Zaten yaptım',
+  'ortak.oneri.veri-yanlis':'Veri yanlış',
+  'ortak.oneri.sonra-bakarim':'Sonra bakarım',
+  'ortak.oneri.nedensiz-gec':'Nedensiz geç',
+  'ortak.oneri.onayla-ve-uygula':'Onayla ve uygula',
+  'ortak.oneri.vazgec':'Vazgeç',
+  'ortak.oneri.kayit':'Kayıt',
+  'ortak.oneri.plan-ve-ayar':'Plan ve ayar',
+  'ortak.oneri.king':'King',
+  'ortak.oneri.sistem':'Sistem',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -315,12 +336,12 @@ window.LIFEOS = window.LIFEOS || {};
     const kid = 'oneri-' + String(oneri.id || oneri.eylem).replace(/[^a-zA-Z0-9_-]/g, '');
     let eylem;
     if(k.seviye === 'kucuk'){
-      eylem = dugme({ etiket:'Uygula', act:'oneri-uygula', data:{ oneri:oneri.id } })
-        + dugme({ etiket:'Geç', ton:'ghost', act:'oneri-gec', data:{ oneri:oneri.id } });
+      eylem = dugme({ etiket:yz('ortak.oneri.uygula'), act:'oneri-uygula', data:{ oneri:oneri.id } })
+        + dugme({ etiket:yz('ortak.oneri.gec'), ton:'ghost', act:'oneri-gec', data:{ oneri:oneri.id } });
     }else{
       eylem = dugme({ etiket:k.seviye === 'buyuk' ? 'Önce / sonra' : 'Önizle', act:'oneri-onizle',
         data:{ oneri:oneri.id, seviye:k.seviye } })
-        + dugme({ etiket:'Geç', ton:'ghost', act:'oneri-gec', data:{ oneri:oneri.id } });
+        + dugme({ etiket:yz('ortak.oneri.gec'), ton:'ghost', act:'oneri-gec', data:{ oneri:oneri.id } });
     }
     /* SADE KART (kullanıcı, 2026-10-16: «her yeri anlaşılır ve minimalist
        yap»): seviye TEK yerde (rozette); alt satır yalnız kapsam ve geri
@@ -416,7 +437,7 @@ window.LIFEOS = window.LIFEOS || {};
     const cozum = c.cozum && c.cozum.baslik
       ? '<div class="cakisma__cozum"><span class="okart__kaynak">Merkez önerisi</span>'
         + '<p class="cakisma__cozum-metin">' + kac(c.cozum.baslik) + '</p>'
-        + dugme({ etiket:'Çözümü önizle', act:'cakisma-onizle', data:{ cozum:c.cozum.id || '' } })
+        + dugme({ etiket:yz('ortak.oneri.cozumu-onizle'), act:'cakisma-onizle', data:{ cozum:c.cozum.id || '' } })
         + '</div>'
       : '';
     return '<section class="cakisma" data-oz="112" aria-label="Çakışma: ' + kac(etiket) + '">'
@@ -494,9 +515,9 @@ window.LIFEOS = window.LIFEOS || {};
      yalnız YÜKSELTİR; kataloğu orta olan bir aksiyon «yalnız bugün»
      seçilince küçülmez. */
   const KAPSAMLAR = Object.freeze([
-    Object.freeze({ id:'bugun', ad:'Yalnız bugün', seviye:'kucuk' }),
-    Object.freeze({ id:'hafta', ad:'Bu hafta', seviye:'orta' }),
-    Object.freeze({ id:'kalici', ad:'Kalıcı', seviye:'buyuk' }),
+    Object.freeze({ id:'bugun', ad:yz('ortak.oneri.yalniz-bugun'), seviye:'kucuk' }),
+    Object.freeze({ id:'hafta', ad:yz('ortak.oneri.bu-hafta'), seviye:'orta' }),
+    Object.freeze({ id:'kalici', ad:yz('ortak.oneri.kalici'), seviye:'buyuk' }),
   ]);
   const KALIP_OZET = { kucuk:'tek dokunuş, «Geri al» kalır', orta:'önizleme ve tek onay',
     buyuk:'önce/sonra, onay ve dönüş noktası' };
@@ -529,11 +550,11 @@ window.LIFEOS = window.LIFEOS || {};
      tahminle değil kullanıcının sözüyle bilinir; neden seçmemek de bir
      cevaptır ve öyle yazılır (null). */
   const GECME_NEDENLERI = Object.freeze([
-    Object.freeze({ id:'zaman-yok', ad:'Zamanım yok' }),
-    Object.freeze({ id:'uymuyor', ad:'Bana uymuyor' }),
-    Object.freeze({ id:'zaten-yaptim', ad:'Zaten yaptım' }),
-    Object.freeze({ id:'veri-yanlis', ad:'Veri yanlış' }),
-    Object.freeze({ id:'sonra', ad:'Sonra bakarım' }),
+    Object.freeze({ id:'zaman-yok', ad:yz('ortak.oneri.zamanim-yok') }),
+    Object.freeze({ id:'uymuyor', ad:yz('ortak.oneri.bana-uymuyor') }),
+    Object.freeze({ id:'zaten-yaptim', ad:yz('ortak.oneri.zaten-yaptim') }),
+    Object.freeze({ id:'veri-yanlis', ad:yz('ortak.oneri.veri-yanlis') }),
+    Object.freeze({ id:'sonra', ad:yz('ortak.oneri.sonra-bakarim') }),
   ]);
 
   function gecmeHtml(oneri){
@@ -542,7 +563,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<p class="gecme__bas">Neden geçiyorsun? <span class="gecme__ek">isteğe bağlı</span></p><div class="gecme__cipler">'
       + GECME_NEDENLERI.map(n => '<button type="button" class="chip chip--tap" data-act="oneri-gec-neden"'
         + ' data-oneri="' + kac(id) + '" data-neden="' + n.id + '">' + kac(n.ad) + '</button>').join('')
-      + '</div>' + dugme({ etiket:'Nedensiz geç', ton:'ghost', boy:'sm', act:'oneri-gec-neden', data:{ oneri:id, neden:'' } })
+      + '</div>' + dugme({ etiket:yz('ortak.oneri.nedensiz-gec'), ton:'ghost', boy:'sm', act:'oneri-gec-neden', data:{ oneri:id, neden:'' } })
       + '</div>';
   }
 
@@ -664,8 +685,8 @@ window.LIFEOS = window.LIFEOS || {};
         const o = nesne(s);
         if(!o || !a.pencere) return;
         a.pencere({ baslik:o.baslik, govde:onizleHtml(s),
-          ayak:dugme({ etiket:'Onayla ve uygula', ton:'primary', act:'oneri-uygula', data:{ oneri:o.id } })
-            + dugme({ etiket:'Vazgeç', ton:'ghost', act:'sheet-close' }) });
+          ayak:dugme({ etiket:yz('ortak.oneri.onayla-ve-uygula'), ton:'primary', act:'oneri-uygula', data:{ oneri:o.id } })
+            + dugme({ etiket:yz('ortak.oneri.vazgec'), ton:'ghost', act:'sheet-close' }) });
       },
     };
     return { kart:kart, onizleHtml:onizleHtml, bul:bul, handle:handle, EYLEMLER:Object.keys(handle) };
@@ -679,10 +700,10 @@ window.LIFEOS = window.LIFEOS || {};
      teklif türlerininki burada yazılır. Bilinmeyen tür «sistem, orta»
      sayılır: tanımadığımız bir şey sormadan uygulanabilir sayılmaz. */
   const ONAY_TURLERI = Object.freeze([
-    { id:'kayit',  ad:'Kayıt' },
-    { id:'plan',   ad:'Plan ve ayar', kisa:'Plan' },
-    { id:'king',   ad:'King' },
-    { id:'sistem', ad:'Sistem' },
+    { id:'kayit',  ad:yz('ortak.oneri.kayit') },
+    { id:'plan',   ad:yz('ortak.oneri.plan-ve-ayar'), kisa:'Plan' },
+    { id:'king',   ad:yz('ortak.oneri.king') },
+    { id:'sistem', ad:yz('ortak.oneri.sistem') },
   ]);
   const HKM_TUR = Object.freeze({
     'kayit.add':    { tur:'kayit',  seviye:'kucuk' },

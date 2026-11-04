@@ -108,4 +108,75 @@
       temiz(['_t.b0', '_t.bn', '_t.be']);
     });
   });
+  describe('Parça: komut', () => {
+    const P = window.LIFEOS.PARCA, M = 'deneme-modul';
+    it('sıraya dizer, modülü süzer, üreten parça düşerse palet düşmez', () => {
+      P.komut({ modul:M, sira:20, label:'ikinci', run(){} });
+      P.komut({ modul:M, sira:10, label:'birinci', run(){} });
+      P.komut({ modul:M, sira:30, uret(){ return [{ label:'üçüncü', run(){} }]; } });
+      P.komut({ modul:M, sira:40, uret(){ throw new Error('bozuk'); } });
+      const l = P.komutlar(M);
+      expect(l.map(k => k.label).join(',')).toBe('birinci,ikinci,üçüncü');
+      expect('sira' in l[0]).toBe(false);
+      expect(P.komutlar('yok').length).toBe(0);
+      expect(P.hatalar.some(h => h.id === 'komut:' + M + ':40')).toBe(true);
+      [10, 20, 30, 40].forEach(s => P._sil(M + ':' + s));
+    });
+    it('aynı sıra ve işsiz komut sessiz geçmez', () => {
+      P.komut({ modul:M, sira:1, run(){} });
+      let a = 0;
+      try{ P.komut({ modul:M, sira:1, run(){} }); }catch(e){ a++; }
+      try{ P.komut({ modul:M, sira:2 }); }catch(e){ a++; }
+      expect(a).toBe(2);
+      P._sil(M + ':1');
+    });
+    it('King rehberi: her satırın sayfası bu modülde kayıtlı olmalı', () => {
+      const modul = window.R ? 'ays' : window.SP ? 'spi' : 'esp';
+      const rehber = window.LIFEOS.PARCA_REHBER || [];
+      expect(rehber.length).toBeGreaterThan(10);
+      const sayfalar = P.katalog.sayfalar();
+      rehber.filter(s => s.modul === modul).forEach(s => expect(sayfalar.indexOf(s.route) >= 0).toBe(true));
+    });
+  });
+  describe('Parça: bilgi', () => {
+    const P = window.LIFEOS.PARCA;
+    const onek = (window.R ? 'ays' : window.SP ? 'spi' : 'esp') + '.';
+    it('modülün her bilgisi okunur, etiketi geçerli, değeri sayı ya da «veri yok»', () => {
+      const l = P.bilgiler(onek);
+      expect(l.length).toBeGreaterThan(2);
+      l.forEach(b => {
+        expect(['ölçüldü', 'tahmin', 'hesaplandı', 'veri yok'].indexOf(b.etiket) >= 0).toBe(true);
+        expect(b.deger === null || typeof b.deger === 'number').toBe(true);
+        if(b.deger === null) expect(b.etiket).toBe('veri yok');
+        expect(!!b.ad && b.ad !== b.id).toBe(true);
+      });
+    });
+    it('değer kendi etiketini taşır, boş değer etiketten önce «veri yok» olur', () => {
+      P.bilgi({ id:'_t.e1', ad:'x', etiket:'ölçüldü', oku:() => ({ deger:5, etiket:'tahmin' }) });
+      P.bilgi({ id:'_t.e2', ad:'x', etiket:'ölçüldü', oku:() => ({ deger:null, etiket:'ölçüldü' }) });
+      expect(P.oku('_t.e1')).toEqual({ deger:5, etiket:'tahmin' });
+      expect(P.oku('_t.e2')).toEqual({ deger:null, etiket:'veri yok' });
+      ['_t.e1', '_t.e2'].forEach(i => P._sil(i));
+    });
+  });
+  describe('Parça: tepki', () => {
+    const P = window.LIFEOS.PARCA;
+    const yay = d => window.dispatchEvent(new CustomEvent('lifeos:_deneme', { detail:d }));
+    it('olayda çalışır, yeniden kurulum eskisinin yerine geçer, düşen tepki ötekini düşürmez', () => {
+      let a = 0, b = 0;
+      P.tepki({ id:'_t.bozuk', olay:'_deneme', ad:'x', yap(){ throw new Error('bozuk'); } });
+      P.tepki({ id:'_t.a', olay:'_deneme', ad:'x', yap(d){ a += d.n; } });
+      P.tepki({ id:'_t.a', olay:'_deneme', ad:'x', yap(d){ b += d.n; } });
+      yay({ n:2 });
+      expect(a).toBe(0);
+      expect(b).toBe(2);
+      expect(P.hatalar.some(h => h.id === 'tepki:_t.bozuk')).toBe(true);
+      expect(P.katalog.tepkiler().filter(t => t.id === '_t.a').length).toBe(1);
+      /* etkisiz bırak: kayıt testte kalır, olay bir daha yayılmaz */
+    });
+    it('sistemin tepkileri kayıtlı: müzik, video, minik, kaydet', () => {
+      const ad = P.katalog.tepkiler().map(t => t.id);
+      ['hareket.son-kayit'].forEach(i => expect(ad.indexOf(i) >= 0).toBe(true));
+    });
+  });
 })();

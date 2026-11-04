@@ -22,6 +22,11 @@
    Once AYS'de gelisti (model listeleme, teshis, gorsel zinciri); SPI ve
    ESP eski, 737 satirlik bir kopyayi tasiyordu. 2026-09-24'te AYS'ninki
    tek kaynak oldu: bir duzeltme artik ucune birden gider. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.llm.bu-anahtar':'Bu anahtar ',
+  'ortak.llm.tek-kelimeyle-yanitla-hazir':'Tek kelimeyle yanıtla: hazır',
+});
+
 
 window.SP = window.SP || {};
 
@@ -231,7 +236,7 @@ SP.LLM = (function(){
     const owner = keyOwner(v);
     if(owner && owner !== providerId){
       return { level:'wrong', owner,
-        text:'Bu anahtar ' + SP.PROVIDERS[owner].label + ' anahtarına benziyor, '
+        text:yz('ortak.llm.bu-anahtar') + SP.PROVIDERS[owner].label + ' anahtarına benziyor, '
            + p.label + ' anahtarına değil. Sağlayıcıyı değiştir ya da doğru anahtarı yapıştır.' };
     }
     if(p.keyPattern && !p.keyPattern.test(v)){
@@ -1255,7 +1260,7 @@ SP.LLM = (function(){
     const started = Date.now();
     const res = await chat(cfg, {
       system:'Yalnızca istenen kelimeyi yaz, başka hiçbir şey yazma.',
-      messages:[{ role:'user', text:'Tek kelimeyle yanıtla: hazır' }],
+      messages:[{ role:'user', text:yz('ortak.llm.tek-kelimeyle-yanitla-hazir') }],
       maxTokens:16,
       temperature:0,
       timeout:30000,

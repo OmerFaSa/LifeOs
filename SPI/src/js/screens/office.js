@@ -358,43 +358,43 @@ SP.Screens.office = (function(){
   LIFEOS.PARCA.blok({ id:'office.aciklamalar', sayfa:'office', yer:'y1', sira:10, ad:'Açıklamalar', ciz({ flags, vo }){
     return raw(UI.rail(['office', 'grounding', 'no-model', 'privacy', 'decision']));
   } });
-  LIFEOS.PARCA.blok({ id:'office.bolum-2', sayfa:'office', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.masa', sayfa:'office', yer:'y2', sira:10, ad:'Masa', ciz({ flags, vo }){
     return when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:yz('spi.office.masa'), meta:'kim konuşuyor',
           body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.sinir || '')}${raw(vo.durum || '')}</div>` }));
   } });
-  LIFEOS.PARCA.blok({ id:'office.bolum-3', sayfa:'office', yer:'y2', sira:20, ad:'Bölüm 3', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.gunun-toplantisi', sayfa:'office', yer:'y2', sira:20, ad:'Günün toplantısı', ciz({ flags, vo }){
     return when(vo.toplanti, () => K.Entry({ wide:true, label:yz('spi.office.gunun-toplantisi'), meta:'her masadan tek cümle',
           body:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` }));
   } });
-  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:30, ad:'briefingCard', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:30, ad:'Günün özeti', ciz({ flags, vo }){
     return briefingCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.bolum-5', sayfa:'office', yer:'y2', sira:40, ad:'Bölüm 5', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.patron-masasi', sayfa:'office', yer:'y2', sira:40, ad:'Patron masası', ciz({ flags, vo }){
     return K.Entry({ wide:true, label:yz('spi.office.patron-masasi'), hint:'office', meta:'orkestrasyon',
           body:html`<div class="desks desks--solo">${deskCard(SP.AGENT_BY_ID.patron)}</div>` });
   } });
-  LIFEOS.PARCA.blok({ id:'office.handoffentry', sayfa:'office', yer:'y2', sira:50, ad:'handoffEntry', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.handoffentry', sayfa:'office', yer:'y2', sira:50, ad:'Devir notu', ciz({ flags, vo }){
     return handoffEntry();
   } });
-  LIFEOS.PARCA.blok({ id:'office.bolum-7', sayfa:'office', yer:'y2', sira:60, ad:'Bölüm 7', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.dort-uzman-masasi', sayfa:'office', yer:'y2', sira:60, ad:'Dört uzman masası', ciz({ flags, vo }){
     return K.Entry({ wide:true, hint:'not-dort-uzman-masasi', label:yz('spi.office.dort-uzman-masasi'), meta:COACHES.length + ' ajan',
           body:html`<div class="desks">${map(COACHES, deskCard)}</div>` });
   } });
-  LIFEOS.PARCA.blok({ id:'office.agendacard', sayfa:'office', yer:'y2', sira:70, ad:'agendaCard', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.agendacard', sayfa:'office', yer:'y2', sira:70, ad:'Gündem', ciz({ flags, vo }){
     return agendaCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.decisioncard', sayfa:'office', yer:'y2', sira:80, ad:'decisionCard', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.decisioncard', sayfa:'office', yer:'y2', sira:80, ad:'Karar', ciz({ flags, vo }){
     return decisionCard();
   } });
-  LIFEOS.PARCA.blok({ id:'office.bolum-10', sayfa:'office', yer:'y2', sira:90, ad:'Bölüm 10', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.yetki-ayrimi', sayfa:'office', yer:'y2', sira:90, ad:'Yetki ayrımı', ciz({ flags, vo }){
     return K.Entry({ label:yz('spi.office.yetki-ayrimi'), hint:'office', meta:'kim neye bakar',
           body:html`<ul class="bullets small muted">${map(SP.AGENTS, a => html`
             <li><b>${a.name}</b> — ${a.scope}</li>`)}</ul>` });
   } });
-  LIFEOS.PARCA.blok({ id:'office.bolum-11', sayfa:'office', yer:'y3', sira:10, ad:'Bölüm 11', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.uyari-kartlari', sayfa:'office', yer:'y3', sira:10, ad:'Uyarı kartları', ciz({ flags, vo }){
     return when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`);
   } });
-  LIFEOS.PARCA.blok({ id:'office.bolum-12', sayfa:'office', yer:'y4', sira:10, ad:'Bölüm 12', ciz({ flags, vo }){
+  LIFEOS.PARCA.blok({ id:'office.sozluk-seridi', sayfa:'office', yer:'y4', sira:10, ad:'Sözlük şeridi', ciz({ flags, vo }){
     return (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:SP.Office.ready('patron') })) : '';
   } });
   async function render(){

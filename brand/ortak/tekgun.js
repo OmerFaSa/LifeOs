@@ -35,6 +35,14 @@
         modülün Bugün'ü açılır (king.js söz 5).
      6. MAHREMİYET. Modül yalnız ekranda görünmesi uygun adı yazar: SPİ
         ilaç adını YAYINLAMAZ («İlaç / takviye»). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.tekgun.sabah':'Sabah',
+  'ortak.tekgun.ogle':'Öğle',
+  'ortak.tekgun.aksam':'Akşam',
+  'ortak.tekgun.gece':'Gece',
+  'ortak.tekgun.gun-icinde':'Gün içinde',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -45,8 +53,8 @@ window.LIFEOS.TEKGUN = (function(){
   const MODUL_AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
   const SIRA = ['ays', 'spi', 'esp'];
   const DILIM = [
-    { id:'sabah', ad:'Sabah' }, { id:'ogle', ad:'Öğle' }, { id:'aksam', ad:'Akşam' },
-    { id:'gece', ad:'Gece' }, { id:'gun', ad:'Gün içinde' },
+    { id:'sabah', ad:yz('ortak.tekgun.sabah') }, { id:'ogle', ad:yz('ortak.tekgun.ogle') }, { id:'aksam', ad:yz('ortak.tekgun.aksam') },
+    { id:'gece', ad:yz('ortak.tekgun.gece') }, { id:'gun', ad:yz('ortak.tekgun.gun-icinde') },
   ];
   const TAZE_MS = 60000;
   const SURUM = 1;

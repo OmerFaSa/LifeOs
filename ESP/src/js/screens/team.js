@@ -9,6 +9,10 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.komut({ modul:'esp', sira:160, uret(){
+  return ESP.AGENTS.map(a => ({ id:'agent:' + a.id, kind:'Ajan', label:a.name + ' — ' + a.role,
+    hint:a.title, run:() => { ESP.S.ui.officeAgent = a.id; ESP.App.go('team'); } }));
+} });
 window.LIFEOS.PARCA.yazilar({
   'esp.team.kural-motoru':'kural motoru',
   'esp.team.kurallara-takildi':'kurallara takıldı',
@@ -77,7 +81,7 @@ ESP.Screens.team = (function(){
      geçmişe yazar; geçmişten açılan sohbet oradan sürer (brand/ortak/gecmis.js).
      gecmisAktif: ajan başına geçmişten açılan kaydın kimliği. */
   const gecmisAktif = {};
-  LIFEOS.PARCA.blok({ id:'team.bolum-1', sayfa:'team', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ a, brf, mesajlar, hazir, devir, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.ajan-masasi', sayfa:'team', yer:'y1', sira:10, ad:'Ajan masası', ciz({ a, brf, mesajlar, hazir, devir, G, pencere }){
     return K.Span(12, K.Ledger(() => [
 
         K.Entry({
@@ -131,16 +135,13 @@ ESP.Screens.team = (function(){
 
       ]));
   } });
-  LIFEOS.PARCA.blok({ id:'team.bolum-2', sayfa:'team', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ a, brf, mesajlar, hazir, devir, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.ajan-penceresi', sayfa:'team', yer:'y2', sira:10, ad:'Ajan penceresi', ciz({ a, brf, mesajlar, hazir, devir, G, pencere }){
     return K.Span(12, raw(pencere));
   } });
-  LIFEOS.PARCA.blok({ id:'team.bolum-3', sayfa:'team', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ a, brf, mesajlar, hazir, devir, G, pencere }){
+  LIFEOS.PARCA.blok({ id:'team.ajan-secimi', sayfa:'team', yer:'y3', sira:10, ad:'Ajan seçimi', ciz({ a, brf, mesajlar, hazir, devir, G, pencere }){
     return K.Span(12, html`<div class="row wrap gap-6" role="group" aria-label="Ajan seçimi">${map(
         ESP.Mod.activeAgents(), x => K.Chip({ label:x.short || x.name, act:'pick-agent', on:x.id === a.id,
           data:{ 'data-tab':x.id, 'aria-pressed':x.id === a.id ? 'true' : 'false' } }))}</div>`);
-  } });
-  LIFEOS.PARCA.blok({ id:'team.bolum-4', sayfa:'team', yer:'y4', sira:10, ad:'Bölüm 4', ciz({ a, brf, mesajlar, hazir, devir, G, pencere }){
-    return '';
   } });
   function render(){
     const a = agent();
@@ -169,7 +170,7 @@ ESP.Screens.team = (function(){
 
     const parcaB = { a, brf, mesajlar, hazir, devir, G, pencere };
     return K.Grid(html`
-      ${LIFEOS.PARCA.yer('team', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      
       ${LIFEOS.PARCA.yer('team', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
 
       ${LIFEOS.PARCA.yer('team', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}

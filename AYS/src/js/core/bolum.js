@@ -15,6 +15,15 @@
 
    ESP'nin `modules.js`inin AYS karşılığı. Açıp kapamak ORTA seviyeli bir
    aksiyondur (AGENTS.md §1.9, data/actions.js `bolum-ac-kapa`). */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.bolum.ogrenme':'Öğrenme',
+  'ays.core.bolum.sinama':'Sınama',
+  'ays.core.bolum.soru-coz':'Soru çöz',
+  'ays.core.bolum.telafi':'Telafi',
+  'ays.core.bolum.analiz':'Analiz',
+  'ays.core.bolum.rutbe':'Rütbe',
+});
+
 
 window.R = window.R || {};
 
@@ -22,12 +31,12 @@ R.Bolum = (function(){
   const STORE = 'meta/bolumler';
 
   const GIZLENEBILIR = [
-    { id:'learn',     ad:'Öğrenme',  takma:['öğrenme', 'video', 'ders notu'] },
-    { id:'quiz',      ad:'Sınama',   takma:['sınama', 'quiz'] },
-    { id:'solve',     ad:'Soru çöz', takma:['soru çöz', 'soru çözme'] },
-    { id:'protocols', ad:'Telafi',   takma:['telafi'] },
-    { id:'analytics', ad:'Analiz',   takma:['analiz'] },
-    { id:'rutbe',     ad:'Rütbe',    takma:['rütbe', 'seviye', 'xp'] },
+    { id:'learn',     ad:yz('ays.core.bolum.ogrenme'),  takma:['öğrenme', 'video', 'ders notu'] },
+    { id:'quiz',      ad:yz('ays.core.bolum.sinama'),   takma:['sınama', 'quiz'] },
+    { id:'solve',     ad:yz('ays.core.bolum.soru-coz'), takma:['soru çöz', 'soru çözme'] },
+    { id:'protocols', ad:yz('ays.core.bolum.telafi'),   takma:['telafi'] },
+    { id:'analytics', ad:yz('ays.core.bolum.analiz'),   takma:['analiz'] },
+    { id:'rutbe',     ad:yz('ays.core.bolum.rutbe'),    takma:['rütbe', 'seviye', 'xp'] },
   ];
   const BY_ID = GIZLENEBILIR.reduce((m, b) => { m[b.id] = b; return m; }, {});
 

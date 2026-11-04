@@ -26,6 +26,47 @@
    4. AYNI ŞEY İKİ KEZ SÖYLENMEZ. Nöbetçi (core/goodhart.js) zaten
       çaba–sonuç ayrışmasını arar; burada aranan şey farklıdır: birikmiş
       BAKIM borcu. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.audit.deste-kucuk':'Deste küçük',
+  'esp.core.audit.denetim-icin-en-az':'Denetim için en az ',
+  'esp.core.audit.bu-kartlar':'Bu kartlar ',
+  'esp.core.audit.tekrar-kuyrugunda-zirve-var':'Tekrar kuyruğunda zirve var',
+  'esp.core.audit.yeni-kart-hizini-dusur':'Yeni kart hızını düşür (',
+  'esp.core.audit.kart-hatirlama':'Kart hatırlama %',
+  'esp.core.audit.yeni-kart-icin-yer-var':'Yeni kart için yer var (',
+  'esp.core.audit.arka-yuzu-bos-ya-da':'Arka yüzü boş ya da ön yüzüyle aynı olan kartlar her tekrarda ',
+  'esp.core.audit.arguman-az':'Argüman az',
+  'esp.core.audit.denetim-icin-en-az-uc':'Denetim için en az üç argüman gerekir.',
+  'esp.core.audit.i-tirazsiz-bir-tez-sinanmami':'İtirazsız bir tez, sınanmamış bir tezdir. En güçlü karşı ',
+  'esp.core.audit.acik-kalan-arguman-bir-dusun':'Açık kalan argüman bir düşünce değil bir niyettir. Kapatmak ',
+  'esp.core.audit.kavram-etiketi-olmayan-argum':'Kavram etiketi olmayan argüman, notlarınla ve öteki ',
+  'esp.core.audit.not-az':'Not az',
+  'esp.core.audit.i-ki-haftadir-hicbir-seye-ba':'İki haftadır hiçbir şeye bağlanmamış notlar. Bağlanmayan not ',
+  'esp.core.audit.uc-haftadir-kayitli-ama-tek':'Üç haftadır kayıtlı ama tek not çıkmamış kaynaklar. Kitap ',
+  'esp.core.audit.bir-kavram-notlarin':'Bir kavram notların %',
+  'esp.core.audit.taslak-az':'Taslak az',
+  'esp.core.audit.denetim-icin-en-az-iki':'Denetim için en az iki taslak gerekir.',
+  'esp.core.audit.i-lk-yazim-bir-taslak-degil':'İlk yazım bir taslak değil bir taştır. Üzerinden bir kez ',
+  'esp.core.audit.bir-kelimenin-sik-donmesi-us':'Bir kelimenin sık dönmesi üslubun en kolay görünen kusurudur ',
+  'esp.core.audit.parca-az':'Parça az',
+  'esp.core.audit.denetim-icin-en-az-iki-2':'Denetim için en az iki parça gerekir.',
+  'esp.core.audit.temiz-esik-uzun-suredir-yeri':'Temiz eşik uzun süredir yerinde. Tempoyu düşürüp temizliği ',
+  'esp.core.audit.bir-parcayi-birakmak-mesrudu':'Bir parçayı bırakmak meşrudur; ama listede durmaya devam ',
+  'esp.core.audit.hedef-tempo-yazilmadan-ilerl':'Hedef tempo yazılmadan "ilerleme" ölçülemez: sistem neye göre ',
+  'esp.core.audit.kayit-az':'Kayıt az',
+  'esp.core.audit.kelime-ya-da-hata-sayisi':'Kelime ya da hata sayısı girilmemiş kayıtlar hiçbir kapıya ',
+  'esp.core.audit.olcumlerin-cogu-ayni-metinle':'Ölçümlerin çoğu aynı metinle',
+  'esp.core.audit.kayitlarin':'Kayıtların %',
+  'esp.core.audit.hata-orani-yukseliyor':'Hata oranı yükseliyor',
+  'esp.core.audit.son-iki-pencerede-hata-orani':'Son iki pencerede hata oranı arttı. Aynı hatayı tekrar etmek ',
+  'esp.core.audit.olay-az':'Olay az',
+  'esp.core.audit.kronolojide-bos-kalan-doneml':'Kronolojide boş kalan dönemler. Boşluk bir eksiklik olmak ',
+  'esp.core.audit.birincil-kaynak-az':'Birincil kaynak az',
+  'esp.core.audit.kaynaklarin':'Kaynakların %',
+  'esp.core.audit.bu-zincirlerde-yapisal-ya-da':'Bu zincirlerde yapısal ya da kurumsal bir koşul yok: yalnızca ',
+  'esp.core.audit.hicbir-halkasi-bir-kaynaga-b':'Hiçbir halkası bir kaynağa bağlanmamış zincirler. Kaynaksız ',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -63,8 +104,8 @@ ESP.Audit = (function(){
 
     if(kartlar.length < ASGARI){
       return [bul('lang-veri', { severity:'none', cert:'missing',
-        title:'Deste küçük', route:'lang',
-        note:'Denetim için en az ' + ASGARI + ' kart gerekir. Ölçülmemiş '
+        title:yz('esp.core.audit.deste-kucuk'), route:'lang',
+        note:yz('esp.core.audit.denetim-icin-en-az') + ASGARI + ' kart gerekir. Ölçülmemiş '
            + 'bir deste "temiz" değildir, yalnızca ölçülmemiştir.' })];
     }
 
@@ -75,7 +116,7 @@ ESP.Audit = (function(){
     if(suluk.length){
       out.push(bul('lang-leech', { severity:'warn', route:'lang',
         title:suluk.length + ' sülük kart',
-        note:'Bu kartlar ' + SULUK_LAPSE + ' kez ya da daha fazla unutuldu. '
+        note:yz('esp.core.audit.bu-kartlar') + SULUK_LAPSE + ' kez ya da daha fazla unutuldu. '
            + 'Bu kadar tekrar eden unutma genelde hafızanın değil KARTIN '
            + 'sorunudur: çok uzun, belirsiz ya da tek kartta iki şey soruyor. '
            + 'Bölmek ya da yeniden yazmak, tekrar etmekten hızlıdır.',
@@ -91,7 +132,7 @@ ESP.Audit = (function(){
     const ortalama = tahmin.reduce((a, g) => a + g.count, 0) / tahmin.length;
     if(zirve.count >= 30 && zirve.count > ortalama * 2){
       out.push(bul('lang-spike', { severity:'warn', route:'lang',
-        title:'Tekrar kuyruğunda zirve var',
+        title:yz('esp.core.audit.tekrar-kuyrugunda-zirve-var'),
         note:U.relativeDay(zirve.date) + ' ' + zirve.count + ' kart birden '
            + 'gelecek (günlük ortalama ' + Math.round(ortalama) + '). '
            + 'Bir günde biriken kuyruk çoğu zaman hiç çalışılmaz. Bugün '
@@ -110,14 +151,14 @@ ESP.Audit = (function(){
       if(aktif < 20) return;
       if(r.value < 0.70){
         out.push(bul('lang-rate-' + l, { severity:'warn', route:'lang',
-          title:'Yeni kart hızını düşür (' + l + ')',
-          note:'Kart hatırlama %' + Math.round(r.value * 100) + '. Bu düzeyde '
+          title:yz('esp.core.audit.yeni-kart-hizini-dusur') + l + ')',
+          note:yz('esp.core.audit.kart-hatirlama') + Math.round(r.value * 100) + '. Bu düzeyde '
              + 'yeni kart eklemek, hatırlanmayan kartların üstüne yenisini '
              + 'koymaktır. Önce mevcut deste toparlansın.' }));
       } else if(r.value > 0.90 && aktif >= 50){
         out.push(bul('lang-rate-up-' + l, { severity:'info', route:'lang',
-          title:'Yeni kart için yer var (' + l + ')',
-          note:'Kart hatırlama %' + Math.round(r.value * 100) + ' ve deste '
+          title:yz('esp.core.audit.yeni-kart-icin-yer-var') + l + ')',
+          note:yz('esp.core.audit.kart-hatirlama') + Math.round(r.value * 100) + ' ve deste '
              + 'rahat. Bu, hız artırmak için bir İZİNDİR, bir hedef değil.' }));
       }
     });
@@ -130,7 +171,7 @@ ESP.Audit = (function(){
     if(bozuk.length){
       out.push(bul('lang-broken', { severity:'warn', route:'lang',
         title:bozuk.length + ' kart eksik',
-        note:'Arka yüzü boş ya da ön yüzüyle aynı olan kartlar her tekrarda '
+        note:yz('esp.core.audit.arka-yuzu-bos-ya-da')
            + 'karşına çıkar ve hiçbir şey öğretmez.',
         items:bozuk.slice(0, 5).map(c => ({ id:c.id,
           label:(c.front || '(boş)').slice(0, 40), meta:'arka yüz eksik' })) }));
@@ -164,8 +205,8 @@ ESP.Audit = (function(){
     const args = (S.args || []);
     if(args.length < 3){
       return [bul('philo-veri', { severity:'none', cert:'missing',
-        title:'Argüman az', route:'symposium',
-        note:'Denetim için en az üç argüman gerekir.' })];
+        title:yz('esp.core.audit.arguman-az'), route:'symposium',
+        note:yz('esp.core.audit.denetim-icin-en-az-uc') })];
     }
 
     /* 1 — Karsi-argumani olmayan arguman. Itirazsiz bir tez, sinanmamis
@@ -175,7 +216,7 @@ ESP.Audit = (function(){
     if(itirazsiz.length){
       out.push(bul('philo-no-objection', { severity:'warn', route:'symposium',
         title:itirazsiz.length + ' argümanın itirazı yok',
-        note:'İtirazsız bir tez, sınanmamış bir tezdir. En güçlü karşı '
+        note:yz('esp.core.audit.i-tirazsiz-bir-tez-sinanmami')
            + 'argümanı yazmadan bir tez kapanmaz — kendi tezine yapılabilecek '
            + 'en iyi itirazı sen bulamazsan başkası bulur.',
         items:itirazsiz.slice(0, 5).map(a => ({ id:a.id,
@@ -189,7 +230,7 @@ ESP.Audit = (function(){
     if(bayat.length){
       out.push(bul('philo-stale', { severity:'info', route:'symposium',
         title:bayat.length + ' argüman uzun süredir açık',
-        note:'Açık kalan argüman bir düşünce değil bir niyettir. Kapatmak '
+        note:yz('esp.core.audit.acik-kalan-arguman-bir-dusun')
            + 'haklı çıkmak demek değildir: "şu an bu konuda karar veremiyorum" '
            + 'da bir kapanıştır.',
         items:bayat.slice(0, 5).map(a => ({ id:a.id,
@@ -203,7 +244,7 @@ ESP.Audit = (function(){
     if(kavramsiz.length >= 3){
       out.push(bul('philo-no-concept', { severity:'info', route:'symposium',
         title:kavramsiz.length + ' argüman kavramsız',
-        note:'Kavram etiketi olmayan argüman, notlarınla ve öteki '
+        note:yz('esp.core.audit.kavram-etiketi-olmayan-argum')
            + 'argümanlarınla kesişmez. Tek bir kavram bile sonradan '
            + 'bulunmasını sağlar.',
         items:kavramsiz.slice(0, 5).map(a => ({ id:a.id,
@@ -220,8 +261,8 @@ ESP.Audit = (function(){
     const notlar = (S.notes || []);
     if(notlar.length < ASGARI){
       return [bul('reading-veri', { severity:'none', cert:'missing',
-        title:'Not az', route:'library',
-        note:'Denetim için en az ' + ASGARI + ' not gerekir.' })];
+        title:yz('esp.core.audit.not-az'), route:'library',
+        note:yz('esp.core.audit.denetim-icin-en-az') + ASGARI + ' not gerekir.' })];
     }
 
     /* 1 — Yetim notlar: hicbir seye baglanmamis ve uzerinden zaman
@@ -232,7 +273,7 @@ ESP.Audit = (function(){
     if(yetim.length >= 3){
       out.push(bul('reading-orphan', { severity:'warn', route:'library',
         title:yetim.length + ' yetim not',
-        note:'İki haftadır hiçbir şeye bağlanmamış notlar. Bağlanmayan not '
+        note:yz('esp.core.audit.i-ki-haftadir-hicbir-seye-ba')
            + 'ikinci kez okunmaz; not almanın amacı arşiv değil ağdır.',
         items:yetim.slice(0, 5).map(n => ({ id:n.id,
           label:(n.text || '').slice(0, 50),
@@ -247,7 +288,7 @@ ESP.Audit = (function(){
     if(kisir.length){
       out.push(bul('reading-barren', { severity:'info', route:'library',
         title:kisir.length + ' kaynaktan not çıkmamış',
-        note:'Üç haftadır kayıtlı ama tek not çıkmamış kaynaklar. Kitap '
+        note:yz('esp.core.audit.uc-haftadir-kayitli-ama-tek')
            + 'kötü olabilir, sıra henüz gelmemiş olabilir ya da okuma '
            + 'pasifleşmiş olabilir — üçü farklı şeyler.',
         items:kisir.slice(0, 5).map(b => ({ id:b.id,
@@ -269,7 +310,7 @@ ESP.Audit = (function(){
       if(pay > 0.5){
         out.push(bul('reading-monopoly', { severity:'info', route:'library',
           title:'«' + enBuyuk + '» notların yarısından fazlasında',
-          note:'Bir kavram notların %' + Math.round(pay * 100) + '\'ini '
+          note:yz('esp.core.audit.bir-kavram-notlarin') + Math.round(pay * 100) + '\'ini '
              + 'kaplıyor. Bu kadar geniş bir etiket, arama sırasında hiçbir '
              + 'şeyi daraltmaz — alt kavramlara bölmek işe yarar.',
           items:[{ id:enBuyuk, label:enBuyuk, meta:kavram[enBuyuk] + ' not' }] }));
@@ -286,8 +327,8 @@ ESP.Audit = (function(){
     const taslaklar = (S.drafts || []);
     if(taslaklar.length < 2){
       return [bul('writing-veri', { severity:'none', cert:'missing',
-        title:'Taslak az', route:'writing',
-        note:'Denetim için en az iki taslak gerekir.' })];
+        title:yz('esp.core.audit.taslak-az'), route:'writing',
+        note:yz('esp.core.audit.denetim-icin-en-az-iki') })];
     }
 
     /* 1 — Hic elden gecmemis taslak. Ilk yazim bir tastir, yazi degil. */
@@ -296,7 +337,7 @@ ESP.Audit = (function(){
     if(hamlar.length){
       out.push(bul('writing-unrevised', { severity:'warn', route:'writing',
         title:hamlar.length + ' taslak hiç elden geçmemiş',
-        note:'İlk yazım bir taslak değil bir taştır. Üzerinden bir kez '
+        note:yz('esp.core.audit.i-lk-yazim-bir-taslak-degil')
            + 'geçilmemiş metin, düşüncenin değil klavyenin ürünüdür.',
         items:hamlar.slice(0, 5).map(d => ({ id:d.id,
           label:(d.title || '(başlıksız)').slice(0, 40),
@@ -325,7 +366,7 @@ ESP.Audit = (function(){
       if(tekrar.length){
         out.push(bul('writing-repeat', { severity:'info', route:'writing',
           title:'«' + enUzun.title + '» metninde tekrar var',
-          note:'Bir kelimenin sık dönmesi üslubun en kolay görünen kusurudur '
+          note:yz('esp.core.audit.bir-kelimenin-sik-donmesi-us')
              + 've çoğu zaman yazar onu hiç fark etmez. Bunlar bir hata '
              + 'değildir; kasıtlıysa öyle kalır.',
           items:tekrar.slice(0, 5).map(t => ({ id:t.word,
@@ -369,8 +410,8 @@ ESP.Audit = (function(){
     const parcalar = (S.pieces || []);
     if(parcalar.length < 2){
       return [bul('music-veri', { severity:'none', cert:'missing',
-        title:'Parça az', route:'studio',
-        note:'Denetim için en az iki parça gerekir.' })];
+        title:yz('esp.core.audit.parca-az'), route:'studio',
+        note:yz('esp.core.audit.denetim-icin-en-az-iki-2') })];
     }
 
     /* 1 — Plato: mevcut motor zaten buluyor, burada EYLEME baglaniyor. */
@@ -378,7 +419,7 @@ ESP.Audit = (function(){
     if(plato.length){
       out.push(bul('music-plateau', { severity:'warn', route:'studio',
         title:plato.length + ' parçada tıkanma',
-        note:'Temiz eşik uzun süredir yerinde. Tempoyu düşürüp temizliği '
+        note:yz('esp.core.audit.temiz-esik-uzun-suredir-yeri')
            + 'geri kazanmak, aynı tempoda tekrar etmekten hızlıdır.',
         items:plato.slice(0, 5).map(x => ({ id:(x.piece || {}).id,
           label:String((x.piece || {}).name || '').slice(0, 40),
@@ -393,7 +434,7 @@ ESP.Audit = (function(){
     if(terk.length){
       out.push(bul('music-abandoned', { severity:'info', route:'studio',
         title:terk.length + ' parça bir aydır çalışılmadı',
-        note:'Bir parçayı bırakmak meşrudur; ama listede durmaya devam '
+        note:yz('esp.core.audit.bir-parcayi-birakmak-mesrudu')
            + 'ederse her açılışta bir borç gibi görünür. Arşive almak da '
            + 'bir karardır.',
         items:terk.slice(0, 5).map(x => ({ id:x.p.id,
@@ -406,7 +447,7 @@ ESP.Audit = (function(){
     if(hedefsiz.length){
       out.push(bul('music-no-target', { severity:'info', route:'studio',
         title:hedefsiz.length + ' parçanın hedef temposu yok',
-        note:'Hedef tempo yazılmadan "ilerleme" ölçülemez: sistem neye göre '
+        note:yz('esp.core.audit.hedef-tempo-yazilmadan-ilerl')
            + 'yaklaştığını bilmiyor. Hedef bir taahhüt değil, bir ölçü '
            + 'çizgisidir.',
         items:hedefsiz.slice(0, 5).map(p => ({ id:p.id,
@@ -424,8 +465,8 @@ ESP.Audit = (function(){
     const kayitlar = (S.recordings || []);
     if(kayitlar.length < ASGARI){
       return [bul('diction-veri', { severity:'none', cert:'missing',
-        title:'Kayıt az', route:'studio',
-        note:'Denetim için en az ' + ASGARI + ' kayıt gerekir. Beyana '
+        title:yz('esp.core.audit.kayit-az'), route:'studio',
+        note:yz('esp.core.audit.denetim-icin-en-az') + ASGARI + ' kayıt gerekir. Beyana '
            + 'dayalı bir ölçümde az kayıt, ölçüm değil izlenimdir.' })];
     }
 
@@ -435,7 +476,7 @@ ESP.Audit = (function(){
     if(eksik.length >= 2){
       out.push(bul('diction-incomplete', { severity:'warn', route:'studio',
         title:eksik.length + ' kayıtta ölçüm eksik',
-        note:'Kelime ya da hata sayısı girilmemiş kayıtlar hiçbir kapıya '
+        note:yz('esp.core.audit.kelime-ya-da-hata-sayisi')
            + 'katkı vermez ve ortalamaya da girmez. Sıfır sayılmazlar — '
            + 'yalnızca yok sayılırlar.',
         items:eksik.slice(0, 5).map(r => ({ id:r.id,
@@ -453,8 +494,8 @@ ESP.Audit = (function(){
       const pay = metin[enCok] / kayitlar.length;
       if(pay > 0.7 && kayitlar.length >= 8){
         out.push(bul('diction-same-text', { severity:'info', route:'studio',
-          title:'Ölçümlerin çoğu aynı metinle',
-          note:'Kayıtların %' + Math.round(pay * 100) + '\'i tek bir metinden. '
+          title:yz('esp.core.audit.olcumlerin-cogu-ayni-metinle'),
+          note:yz('esp.core.audit.kayitlarin') + Math.round(pay * 100) + '\'i tek bir metinden. '
              + 'Aynı metni tekrar ölçmek bir noktadan sonra diksiyonu değil '
              + 'o metni ezberlemeyi ölçer.',
           items:[{ id:enCok, label:enCok, meta:metin[enCok] + ' kayıt' }] }));
@@ -465,8 +506,8 @@ ESP.Audit = (function(){
     const tr = ESP.Acoustic.dictionTrend ? ESP.Acoustic.dictionTrend() : null;
     if(tr && tr.cert !== 'missing' && tr.direction === 'kotu'){
       out.push(bul('diction-worse', { severity:'warn', route:'studio',
-        title:'Hata oranı yükseliyor',
-        note:'Son iki pencerede hata oranı arttı. Aynı hatayı tekrar etmek '
+        title:yz('esp.core.audit.hata-orani-yukseliyor'),
+        note:yz('esp.core.audit.son-iki-pencerede-hata-orani')
            + 'onu pekiştirir: kaydı dinleyip hatayı işaretlemeden tekrar '
            + 'etmemek gerekir.' }));
     }
@@ -481,8 +522,8 @@ ESP.Audit = (function(){
     const olaylar = (S.events || []);
     if(olaylar.length < ASGARI){
       return [bul('history-veri', { severity:'none', cert:'missing',
-        title:'Olay az', route:'history',
-        note:'Denetim için en az ' + ASGARI + ' olay gerekir.' })];
+        title:yz('esp.core.audit.olay-az'), route:'history',
+        note:yz('esp.core.audit.denetim-icin-en-az') + ASGARI + ' olay gerekir.' })];
     }
 
     /* 1 — Cag bosluklari: hic olay yerlestirilmemis donemler. */
@@ -499,7 +540,7 @@ ESP.Audit = (function(){
     if(bos.length && bos.length < (ESP.ERAS || []).length){
       out.push(bul('history-gaps', { severity:'info', route:'history',
         title:bos.length + ' çağda hiç olay yok',
-        note:'Kronolojide boş kalan dönemler. Boşluk bir eksiklik olmak '
+        note:yz('esp.core.audit.kronolojide-bos-kalan-doneml')
            + 'zorunda değil — bilerek çalışılmamış olabilir. Ama görünür '
            + 'olması, farkında olmadan atlanmış olanı ortaya çıkarır.',
         items:bos.slice(0, 5).map(c => ({ id:c.id, label:c.label,
@@ -514,8 +555,8 @@ ESP.Audit = (function(){
       const pay = birincil / kaynaklar.length;
       if(pay < 0.2){
         out.push(bul('history-secondary', { severity:'info', route:'history',
-          title:'Birincil kaynak az',
-          note:'Kaynakların %' + Math.round(pay * 100) + '\'i birincil. '
+          title:yz('esp.core.audit.birincil-kaynak-az'),
+          note:yz('esp.core.audit.kaynaklarin') + Math.round(pay * 100) + '\'i birincil. '
              + 'Yalnızca yorumla kurulan tarih, başkasının tarihidir. '
              + 'Bir belgeye doğrudan bakmak, on yorumdan farklı bir şey '
              + 'öğretir.',
@@ -535,7 +576,7 @@ ESP.Audit = (function(){
     if(dengesiz.length){
       out.push(bul('history-unbalanced', { severity:'warn', route:'history',
         title:dengesiz.length + ' zincirde zemin yok',
-        note:'Bu zincirlerde yapısal ya da kurumsal bir koşul yok: yalnızca '
+        note:yz('esp.core.audit.bu-zincirlerde-yapisal-ya-da')
            + 'tetikleyici var. Kıvılcımla yangını açıklamak, kibriti suçlayıp '
            + 'kuru otu görmemektir.',
         items:dengesiz.slice(0, 5).map(function(x){
@@ -552,7 +593,7 @@ ESP.Audit = (function(){
     if(kaynaksiz.length >= 2){
       out.push(bul('history-unsourced', { severity:'info', route:'history',
         title:kaynaksiz.length + ' zincirde kaynak yok',
-        note:'Hiçbir halkası bir kaynağa bağlanmamış zincirler. Kaynaksız '
+        note:yz('esp.core.audit.hicbir-halkasi-bir-kaynaga-b')
            + 'nedensellik, hatırladığın bir anlatıdır — yanlış olmak '
            + 'zorunda değil ama sınanabilir de değil.',
         items:kaynaksiz.slice(0, 5).map(function(x){

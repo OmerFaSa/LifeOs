@@ -21,6 +21,25 @@
 
    ESP sertifika vermez, yetenek yargısı kurmaz, sonuç garantisi etmez
    (AGENTS.md §1.5). */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.hedefler.dil-seviyesi':'Dil seviyesi',
+  'esp.core.hedefler.cefr-rehberli-ogrenme-saatle':'CEFR rehberli öğrenme saatleri kaynaktan (',
+  'esp.core.hedefler.cefr-seviyeleri-icin-yaygin':'CEFR seviyeleri için yaygın aktarılan ',
+  'esp.core.hedefler.bitirdigin':'bitirdiğin ',
+  'esp.core.hedefler.okuma-hizi-kaynaktan-dakikad':'okuma hızı kaynaktan (dakikada ',
+  'esp.core.hedefler.ortalama-bir-kitap-icin-yakl':'ortalama bir kitap için yaklaşık 6 saat (≈ 80 bin kelime, dakikada ≈ 230 kelime ',
+  'esp.core.hedefler.okuma':'Okuma',
+  'esp.core.hedefler.enstruman':'Enstrüman',
+  'esp.core.hedefler.temiz-tempo':'temiz tempo',
+  'esp.core.hedefler.senin-temiz-tempo-kayitlarin':'senin temiz tempo kayıtların: ',
+  'esp.core.hedefler.diksiyon':'Diksiyon',
+  'esp.core.hedefler.dil':'Dil',
+  'esp.core.hedefler.muzik':'Müzik',
+  'esp.core.hedefler.yazi':'Yazı',
+  'esp.core.hedefler.felsefe':'Felsefe',
+  'esp.core.hedefler.hedef-bulunamadi':'Hedef bulunamadı.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -62,7 +81,7 @@ ESP.Hedefler = (function(){
   }
 
   const DIL = {
-    id:'dil', ad:'Dil seviyesi', disc:'lang', olcut:{ ad:'seviye', birim:'saat' },
+    id:'dil', ad:yz('esp.core.hedefler.dil-seviyesi'), disc:'lang', olcut:{ ad:'seviye', birim:'saat' },
     /* CEFR seviyesi geçmeyen cümle dil HEDEFİ değildir: «İngilizceyi tekrar
        açmak istiyorum» bir bölüm isteğidir (core/komut.js). */
     anahtar:CEFR_RE,
@@ -98,11 +117,11 @@ ESP.Hedefler = (function(){
       if(!(saat > 0)) return { neden:'Hedef seviye şu anki seviyenin üstünde olmalı.' };
       const kd = ESP.Belge && ESP.Belge.dayanak('cefr');
       if(kd && kd.saat){
-        return { saat, dayanak:{ durum:'kaynakli', metin:'CEFR rehberli öğrenme saatleri kaynaktan ('
+        return { saat, dayanak:{ durum:'kaynakli', metin:yz('esp.core.hedefler.cefr-rehberli-ogrenme-saatle')
           + (kd.kaynak ? kd.kaynak.baslik : 'web kaynağı') + ', ' + kd.at + '; ' + Object.keys(kd.saat).length
           + '/6 seviye); dile ve kişiye göre değişir' } };
       }
-      return { saat, dayanak:{ durum:'kaynak_bekliyor', metin:'CEFR seviyeleri için yaygın aktarılan '
+      return { saat, dayanak:{ durum:'kaynak_bekliyor', metin:yz('esp.core.hedefler.cefr-seviyeleri-icin-yaygin')
         + 'rehberli öğrenme saati tahminleri (sıfırdan A1 ≈ 100, A2 ≈ 200, B1 ≈ 400, B2 ≈ 600, '
         + 'C1 ≈ 800, C2 ≈ 1.200 saat); dile ve kişiye göre değişir, kaynağı henüz bağlanmadı' } };
     },
@@ -139,26 +158,26 @@ ESP.Hedefler = (function(){
       });
       if(dk > 0){
         const saat = yuvarla(dk / 60 / l.length, 1);
-        return { saat, etiket:'hesaplandi', dayanak:{ durum:'olculdu', metin:'bitirdiğin ' + l.length
+        return { saat, etiket:'hesaplandi', dayanak:{ durum:'olculdu', metin:yz('esp.core.hedefler.bitirdigin') + l.length
           + ' kitabın döneminde ölçülen okuma süresi: kitap başına yaklaşık ' + sayiYaz(saat) + ' saat' } };
       }
     }
     const hz = ESP.Belge && ESP.Belge.dayanak('okumaHizi');
     if(hz && hz.kelimeDk){
       const saat = Math.round(KITAP_KELIME / hz.kelimeDk / 60 * 2) / 2;
-      return { saat, etiket:'tahmin', dayanak:{ durum:'kaynakli', metin:'okuma hızı kaynaktan (dakikada '
+      return { saat, etiket:'tahmin', dayanak:{ durum:'kaynakli', metin:yz('esp.core.hedefler.okuma-hizi-kaynaktan-dakikad')
         + hz.kelimeDk + ' kelime; ' + (hz.kaynak ? hz.kaynak.baslik : 'web kaynağı') + ', ' + hz.at
         + '); ortalama kitap ≈ 80 bin kelime varsayımıyla kitap başına ≈ ' + sayiYaz(saat) + ' saat. '
         + 'Birkaç kitap bitirince kendi hızından hesaplanır' } };
     }
     return { saat:KITAP_SAAT_TAHMIN, etiket:'tahmin', dayanak:{ durum:'kaynak_bekliyor',
-      metin:'ortalama bir kitap için yaklaşık 6 saat (≈ 80 bin kelime, dakikada ≈ 230 kelime '
+      metin:yz('esp.core.hedefler.ortalama-bir-kitap-icin-yakl')
         + 'sessiz okuma; yaygın tahmin, kaynağı bağlanmadı). Birkaç kitap bitirince kendi '
         + 'hızından hesaplanır' } };
   }
 
   const OKUMA = {
-    id:'okuma', ad:'Okuma', disc:'reading', olcut:{ ad:'kitap', birim:'kitap' },
+    id:'okuma', ad:yz('esp.core.hedefler.okuma'), disc:'reading', olcut:{ ad:'kitap', birim:'kitap' },
     anahtar:/kitap/, birimler:/kitap/,
     yonler:['artir'], kapasiteGerekir:true,
     /* «yılda 24 kitap», «bu yıl 20 kitap»: sayı ve dönem birlikte söylenir.
@@ -227,7 +246,7 @@ ESP.Hedefler = (function(){
   }
 
   const ENSTRUMAN = {
-    id:'enstruman', ad:'Enstrüman', disc:'music', olcut:{ ad:'temiz tempo', birim:'BPM' },
+    id:'enstruman', ad:yz('esp.core.hedefler.enstruman'), disc:'music', olcut:{ ad:yz('esp.core.hedefler.temiz-tempo'), birim:'BPM' },
     /* Basamak adı ya da BPM geçmeyen cümle hedef değildir: «gitarı tekrar
        açmak istiyorum» bir bölüm isteğidir. */
     anahtar:new RegExp(CALGI + '[^.?!]*?' + ONCE + '(acemi|çırak|kalfa|usta|üstat|\\d+\\s*bpm)|'
@@ -271,7 +290,7 @@ ESP.Hedefler = (function(){
           + 'metronomla temiz tempo kaydet, sonra kararı veririm.' };
       }
       return { tipik:t.hiz, ust:yuvarla(t.hiz * 1.5, 1), birim:'BPM/hafta',
-        dayanak:{ durum:'kendi_beyanin', metin:'senin temiz tempo kayıtların: ' + t.deneme + ' deneme, '
+        dayanak:{ durum:'kendi_beyanin', metin:yz('esp.core.hedefler.senin-temiz-tempo-kayitlarin') + t.deneme + ' deneme, '
           + sayiYaz(t.hafta) + ' haftada +' + t.artis + ' BPM; «temiz» kararı senin beyanın' } };
     },
   };
@@ -284,12 +303,12 @@ ESP.Hedefler = (function(){
      «rutin», «düzenli») taşıyan cümle okuma ya da dil HEDEFİ değildir. */
   const ALISKANLIK = window.LIFEOS && LIFEOS.Aliskanlik ? LIFEOS.Aliskanlik.kur({
     alanlar:[
-      { id:'diction', ad:'Diksiyon', kelime:/(diksiyon|tekerleme|sesli okuma)/ },
-      { id:'reading', ad:'Okuma', kelime:/(kitap|okuma|okumak)/ },
-      { id:'lang', ad:'Dil', kelime:/(ingilizce|almanca|fransızca|ispanyolca|italyanca|rusça|japonca|arapça|korece|çince|portekizce|farsça|yabancı dil|dil çalış|dil öğren|kelime)/ },
-      { id:'music', ad:'Müzik', kelime:/(gitar|piyano|keman|bateri|enstrüman|müzik|metronom|çalgı)/ },
-      { id:'writing', ad:'Yazı', kelime:/(yazı|yazmak|yazma|günlük tut)/ },
-      { id:'philo', ad:'Felsefe', kelime:/(felsefe)/ },
+      { id:'diction', ad:yz('esp.core.hedefler.diksiyon'), kelime:/(diksiyon|tekerleme|sesli okuma)/ },
+      { id:'reading', ad:yz('esp.core.hedefler.okuma'), kelime:/(kitap|okuma|okumak)/ },
+      { id:'lang', ad:yz('esp.core.hedefler.dil'), kelime:/(ingilizce|almanca|fransızca|ispanyolca|italyanca|rusça|japonca|arapça|korece|çince|portekizce|farsça|yabancı dil|dil çalış|dil öğren|kelime)/ },
+      { id:'music', ad:yz('esp.core.hedefler.muzik'), kelime:/(gitar|piyano|keman|bateri|enstrüman|müzik|metronom|çalgı)/ },
+      { id:'writing', ad:yz('esp.core.hedefler.yazi'), kelime:/(yazı|yazmak|yazma|günlük tut)/ },
+      { id:'philo', ad:yz('esp.core.hedefler.felsefe'), kelime:/(felsefe)/ },
     ],
     dakika:(disc, iso) => {
       const d = (ESP.S.days || {})[iso];
@@ -348,7 +367,7 @@ ESP.Hedefler = (function(){
 
   async function durumDegistir(id, yeni){
     const h = liste().find(x => x.id === id);
-    if(!h) return { ok:false, why:'Hedef bulunamadı.' };
+    if(!h) return { ok:false, why:yz('esp.core.hedefler.hedef-bulunamadi') };
     const r = H().gecis(h, yeni, U().todayISO());
     if(r.ok) await kaydet(r.hedef);
     if(r.ok && (yeni === 'tamam' || yeni === 'birakildi') && ESP.HedefPlan){

@@ -20,6 +20,26 @@
         fotoğrafta ya da kamera karesinde BarcodeDetector yoksa Merkez'in
         görsel modeli numarayı okur (`modelden`); kontrol hanesi tutmayan
         okuma yine reddedilir: model numara uyduramaz. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.barkod.barkod-numarasini-yaz':'Barkod numarasını yaz.',
+  'spi.core.barkod.barkod-8-12-ya-da':'Barkod 8, 12 ya da 13 haneli olur; «',
+  'spi.core.barkod.bu-numaranin-kontrol-hanesi':'Bu numaranın kontrol hanesi tutmuyor; yanlış okunmuş olabilir. Yeniden okut ya da kontrol et.',
+  'spi.core.barkod.gida-bulunamadi':'Gıda bulunamadı.',
+  'spi.core.barkod.bu-tarayici-fotograftan-bark':'Bu tarayıcı fotoğraftan barkod okuyamıyor; numarayı elle yaz.',
+  'spi.core.barkod.fotograf-okunamadi-numarayi':'Fotoğraf okunamadı; numarayı elle yaz.',
+  'spi.core.barkod.fotografta-okunabilir-bir-ba':'Fotoğrafta okunabilir bir barkod bulunamadı; daha yakından çek ya da numarayı elle yaz.',
+  'spi.core.barkod.fotografta-birden-cok-barkod':'Fotoğrafta birden çok barkod var; yalnız birini çek.',
+  'spi.core.barkod.barkodun-numarasini-okuyamad':'Barkodun numarasını okuyamadım; daha yakından çek ya da numarayı yaz.',
+  'spi.core.barkod.goruntude-birden-cok-barkod':'Görüntüde birden çok barkod var; yalnız birini göster.',
+  'spi.core.barkod.bu-tarayici-barkod-okuyamiyo':'Bu tarayıcı barkod okuyamıyor ve görüntü okuyan model bağlı değil; numarayı yaz.',
+  'spi.core.barkod.gorsel-model-barkodu-okuyama':'Görsel model barkodu okuyamadı',
+  'spi.core.barkod.i-nternete-ulasilamiyor':'İnternete ulaşılamıyor.',
+  'spi.core.barkod.open-food-facts-cevap-vermed':'Open Food Facts cevap vermedi (',
+  'spi.core.barkod.open-food-facts-e-ulasilamad':'Open Food Facts’e ulaşılamadı; internet bağlantını kontrol et.',
+  'spi.core.barkod.1-porsiyon':'1 porsiyon',
+  'spi.core.barkod.open-food-facts':'Open Food Facts',
+});
+
 
 window.SP = window.SP || {};
 
@@ -52,9 +72,9 @@ SP.Barkod = (function(){
 
   function denetle(kod){
     const s = normal(kod);
-    if(!s) return { ok:false, why:'Barkod numarasını yaz.' };
-    if(s.length !== 8 && s.length !== 13) return { ok:false, why:'Barkod 8, 12 ya da 13 haneli olur; «' + s + '» ' + s.length + ' haneli.' };
-    if(!gecerli(s)) return { ok:false, why:'Bu numaranın kontrol hanesi tutmuyor; yanlış okunmuş olabilir. Yeniden okut ya da kontrol et.' };
+    if(!s) return { ok:false, why:yz('spi.core.barkod.barkod-numarasini-yaz') };
+    if(s.length !== 8 && s.length !== 13) return { ok:false, why:yz('spi.core.barkod.barkod-8-12-ya-da') + s + '» ' + s.length + ' haneli.' };
+    if(!gecerli(s)) return { ok:false, why:yz('spi.core.barkod.bu-numaranin-kontrol-hanesi') };
     return { ok:true, kod:s };
   }
 
@@ -67,7 +87,7 @@ SP.Barkod = (function(){
   async function bagla(kod, foodId){
     const d = denetle(kod);
     if(!d.ok) return d;
-    if(!SP.FOOD_BY_ID || !SP.FOOD_BY_ID[foodId]) return { ok:false, why:'Gıda bulunamadı.' };
+    if(!SP.FOOD_BY_ID || !SP.FOOD_BY_ID[foodId]) return { ok:false, why:yz('spi.core.barkod.gida-bulunamadi') };
     liste()[d.kod] = foodId;
     await SP.Store.set(KEY, liste());
     return { ok:true, kod:d.kod };
@@ -83,21 +103,21 @@ SP.Barkod = (function(){
   function fotoVar(){ return typeof window.BarcodeDetector === 'function'; }
 
   async function fotodan(dosya){
-    if(!fotoVar()) return { ok:false, why:'Bu tarayıcı fotoğraftan barkod okuyamıyor; numarayı elle yaz.' };
+    if(!fotoVar()) return { ok:false, why:yz('spi.core.barkod.bu-tarayici-fotograftan-bark') };
     let bulunan;
     try{
       const det = new window.BarcodeDetector({ formats:['ean_13', 'ean_8', 'upc_a'] });
       bulunan = await det.detect(await createImageBitmap(dosya));
     }catch(e){
-      return { ok:false, why:'Fotoğraf okunamadı; numarayı elle yaz.' };
+      return { ok:false, why:yz('spi.core.barkod.fotograf-okunamadi-numarayi') };
     }
     const kodlar = [];
     (bulunan || []).forEach(b => {
       const s = normal(b && b.rawValue);
       if(gecerli(s) && kodlar.indexOf(s) < 0) kodlar.push(s);
     });
-    if(!kodlar.length) return { ok:false, why:'Fotoğrafta okunabilir bir barkod bulunamadı; daha yakından çek ya da numarayı elle yaz.' };
-    if(kodlar.length > 1) return { ok:false, why:'Fotoğrafta birden çok barkod var; yalnız birini çek.' };
+    if(!kodlar.length) return { ok:false, why:yz('spi.core.barkod.fotografta-okunabilir-bir-ba') };
+    if(kodlar.length > 1) return { ok:false, why:yz('spi.core.barkod.fotografta-birden-cok-barkod') };
     return coz(kodlar[0]);
   }
 
@@ -109,15 +129,15 @@ SP.Barkod = (function(){
       const s = normal(m);
       if(gecerli(s) && adaylar.indexOf(s) < 0) adaylar.push(s);
     });
-    if(!adaylar.length) return { ok:false, why:'Barkodun numarasını okuyamadım; daha yakından çek ya da numarayı yaz.' };
-    if(adaylar.length > 1) return { ok:false, why:'Görüntüde birden çok barkod var; yalnız birini göster.' };
+    if(!adaylar.length) return { ok:false, why:yz('spi.core.barkod.barkodun-numarasini-okuyamad') };
+    if(adaylar.length > 1) return { ok:false, why:yz('spi.core.barkod.goruntude-birden-cok-barkod') };
     return { ok:true, kod:adaylar[0] };
   }
   async function modelden(gorsel){
-    if(typeof gorsel !== 'function') return { ok:false, why:'Bu tarayıcı barkod okuyamıyor ve görüntü okuyan model bağlı değil; numarayı yaz.' };
+    if(typeof gorsel !== 'function') return { ok:false, why:yz('spi.core.barkod.bu-tarayici-barkod-okuyamiyo') };
     let r = null;
     try{ r = await gorsel('Görüntüdeki barkodun altındaki rakamları aynen yaz. Yalnız rakamlar; barkod yoksa «yok» yaz.', 'gorsel'); }catch(e){ r = null; }
-    if(!r || !r.ok) return { ok:false, why:'Görsel model barkodu okuyamadı' + (r && r.note ? ' (' + r.note + ')' : '') + '; numarayı yaz.' };
+    if(!r || !r.ok) return { ok:false, why:yz('spi.core.barkod.gorsel-model-barkodu-okuyama') + (r && r.note ? ' (' + r.note + ')' : '') + '; numarayı yaz.' };
     const k = metindenKod(r.text);
     return k.ok ? coz(k.kod) : k;
   }
@@ -138,17 +158,17 @@ SP.Barkod = (function(){
     const d = denetle(kod);
     if(!d.ok) return d;
     const f = api.ag || (typeof fetch === 'function' ? (u, o) => fetch(u, o) : null);
-    if(!f) return { ok:false, why:'İnternete ulaşılamıyor.' };
+    if(!f) return { ok:false, why:yz('spi.core.barkod.i-nternete-ulasilamiyor') };
     const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
     const t = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
     let j = null;
     try{
       const res = await f(OFF + d.kod + '.json?fields=' + OFF_ALAN, { headers:{ Accept:'application/json' }, signal:ctrl ? ctrl.signal : undefined });
       if(res.status === 404) return { ok:true, kod:d.kod, urun:null };
-      if(!res.ok) return { ok:false, why:'Open Food Facts cevap vermedi (' + res.status + ').' };
+      if(!res.ok) return { ok:false, why:yz('spi.core.barkod.open-food-facts-cevap-vermed') + res.status + ').' };
       j = await res.json();
     }catch(e){
-      return { ok:false, why:'Open Food Facts’e ulaşılamadı; internet bağlantını kontrol et.' };
+      return { ok:false, why:yz('spi.core.barkod.open-food-facts-e-ulasilamad') };
     }finally{ if(t) clearTimeout(t); }
     const p = j && Number(j.status) === 1 ? j.product : null;
     const ad = p && String(p.product_name_tr || p.product_name || '').trim();
@@ -168,8 +188,8 @@ SP.Barkod = (function(){
     const v = urun.v || {};
     return Object.assign(SP.Model.newFood(), { name:urun.ad + (urun.marka && urun.ad.indexOf(urun.marka) < 0 ? ' (' + urun.marka + ')' : ''),
       cat:'diger', kcal:v.kcal, p:v.p, f:v.f, c:v.c, sat:v.sat, sugar:v.sugar, fib:v.fib,
-      portions:urun.porsiyon ? [{ label:'1 porsiyon' + (urun.porsiyon.ad ? ' (' + urun.porsiyon.ad + ')' : ''), g:urun.porsiyon.g }] : [],
-      kaynak:{ ad:'Open Food Facts', barkod:kod, dogruluk:'dogrulanmadi', at:SP.U.todayISO() } });
+      portions:urun.porsiyon ? [{ label:yz('spi.core.barkod.1-porsiyon') + (urun.porsiyon.ad ? ' (' + urun.porsiyon.ad + ')' : ''), g:urun.porsiyon.g }] : [],
+      kaynak:{ ad:yz('spi.core.barkod.open-food-facts'), barkod:kod, dogruluk:'dogrulanmadi', at:SP.U.todayISO() } });
   }
 
   const api = { yukle, liste, normal, gecerli, denetle, bul, bagla, coz, fotoVar, fotodan, metindenKod, modelden, oku, disBul, gidaYap, ag:null };

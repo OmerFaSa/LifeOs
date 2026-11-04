@@ -16,6 +16,30 @@
    Sinirli olan kaynak ZAMANDIR, dogruluk degil. Bu yuzden sira "hangisi
    daha dogru" degil "hangisi beklerse otekileri cokertir" sorusuna gore
    dizilir. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.planner.kartlari-hatirlama-orani-dus':'Kartları hatırlama oranı düşük',
+  'esp.core.planner.kartlarin-hatirlanma-olasili':'Kartların hatırlanma olasılığı ortalaması %',
+  'esp.core.planner.tarih-kartlarini-hatirlama-o':'Tarih kartlarını hatırlama oranı düşük',
+  'esp.core.planner.tarih-destesinin-hatirlanma':'Tarih destesinin hatırlanma olasılığı ortalaması %',
+  'esp.core.planner.tikanmis-temel-yeni-icerik-e':'Tıkanmış temel: yeni içerik, eskiyi çökertmeden eklenmez.',
+  'esp.core.planner.zamana-bagli-hedef-dis-dunya':'Zamana bağlı hedef: dış dünyanın takvimi iç plandan önce gelir.',
+  'esp.core.planner.en-cok-geciken-kart':'En çok geciken kart ',
+  'esp.core.planner.vadesi-gecmis-tekrar-gecikme':'Vadesi geçmiş tekrar: gecikme kartı geriye atar.',
+  'esp.core.planner.bugunun-tekrari-henuz-yapilm':'Bugünün tekrarı henüz yapılmadı (',
+  'esp.core.planner.vadesi-gelmis-tekrar-gunu-ge':'Vadesi gelmiş tekrar: günü geçirmeden kapanır.',
+  'esp.core.planner.kotu-gun-asgari-gun-yeter':'Kötü gün: asgari gün yeter',
+  'esp.core.planner.kotu-gun-modu-acik-tekrar':'Kötü gün modu açık: tekrar ve tarih kuralları yerinde, genişleme bugün yok.',
+  'esp.core.planner.i-ki-not-ayni-kavramda-bulus':'İki not aynı kavramda buluşuyor',
+  'esp.core.planner.sentopik-sentez-baglanmamis':'Sentopik sentez: bağlanmamış not henüz sermaye değildir.',
+  'esp.core.planner.ortak-kavram-bulunamadi-notl':'Ortak kavram bulunamadı: notlara kavram etiketi eklemek ',
+  'esp.core.planner.sentopik-sentez-derinlik-hac':'Sentopik sentez: derinlik hacimden sonra gelir.',
+  'esp.core.planner.bugun-icin-bekleyen-bir-is':'Bugün için bekleyen bir iş yok',
+  'esp.core.planner.sirasi-gelen-kart-yok-tikanm':'Sırası gelen kart yok, tıkanma yok, açık sentez önerisi yok. ',
+  'esp.core.planner.oncelik-sirasindaki-bes-kura':'Öncelik sırasındaki beş kuralın hiçbiri tetiklenmedi.',
+  'esp.core.planner.son-14-gunde':'Son 14 günde ',
+  'esp.core.planner.enstruman-calisiliyor-diksiy':'Enstrüman çalışılıyor, diksiyon hiç açılmamış. İkisi de aynı ',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -48,8 +72,8 @@ ESP.Planner = (function(){
     if(r.cert !== 'missing' && r.n >= RETENTION_MIN_CARDS && r.value < RETENTION_FLOOR){
       out.push({
         id:'retention', disc:'lang', agent:'polyglot',
-        label:'Kartları hatırlama oranı düşük',
-        detail:'Kartların hatırlanma olasılığı ortalaması %' + Math.round(r.value * 100)
+        label:yz('esp.core.planner.kartlari-hatirlama-orani-dus'),
+        detail:yz('esp.core.planner.kartlarin-hatirlanma-olasili') + Math.round(r.value * 100)
              + ' (' + r.n + ' karttan hesaplandı; taban için en az '
              + RETENTION_MIN_CARDS + ' ölçüm gerekir). Yeni kelime eklemek bu '
              + 'tabanı daha da düşürür.',
@@ -65,8 +89,8 @@ ESP.Planner = (function(){
     if(rh.cert !== 'missing' && rh.n >= RETENTION_MIN_CARDS && rh.value < RETENTION_FLOOR){
       out.push({
         id:'retention-history', disc:'history', agent:'herodot',
-        label:'Tarih kartlarını hatırlama oranı düşük',
-        detail:'Tarih destesinin hatırlanma olasılığı ortalaması %'
+        label:yz('esp.core.planner.tarih-kartlarini-hatirlama-o'),
+        detail:yz('esp.core.planner.tarih-destesinin-hatirlanma')
              + Math.round(rh.value * 100) + ' (' + rh.n + ' karttan). '
              + 'Kronolojiye yeni olay eklemek bu tabanı daha da düşürür.',
         route:'history', tab:'calisma',
@@ -168,7 +192,7 @@ ESP.Planner = (function(){
         rank:1, id:t.id, agent:t.agent, disc:t.disc,
         title:t.label, detail:t.detail,
         route:t.route, tab:t.tab, ref:t.ref || null,
-        why:'Tıkanmış temel: yeni içerik, eskiyi çökertmeden eklenmez.',
+        why:yz('esp.core.planner.tikanmis-temel-yeni-icerik-e'),
       };
     }
 
@@ -182,7 +206,7 @@ ESP.Planner = (function(){
         detail:acil.daysLeft === 0 ? 'Hedef bugün.'
           : acil.daysLeft + ' gün kaldı. ' + (acil.goal.note || ''),
         route:d ? d.route : 'today', tab:null, ref:acil.goal.id,
-        why:'Zamana bağlı hedef: dış dünyanın takvimi iç plandan önce gelir.',
+        why:yz('esp.core.planner.zamana-bagli-hedef-dis-dunya'),
       };
     }
 
@@ -198,20 +222,20 @@ ESP.Planner = (function(){
       return {
         rank:3, id:'srs-overdue', agent:o.agent, disc:o.disc,
         title:o.overdue.length + ' kartın vadesi geçti',
-        detail:'En çok geciken kart ' + o.maxDays + ' gündür bekliyor; '
+        detail:yz('esp.core.planner.en-cok-geciken-kart') + o.maxDays + ' gündür bekliyor; '
              + 'çoğunluk ' + desteAdi + ' destesinde. '
              + 'Unutma eğrisi beklemez; geciken her gün kartı bir adım geriye atar.',
         route:o.route, tab:o.tab,
-        why:'Vadesi geçmiş tekrar: gecikme kartı geriye atar.',
+        why:yz('esp.core.planner.vadesi-gecmis-tekrar-gecikme'),
       };
     }
     if(o.due.length){
       return {
         rank:3, id:'srs-due', agent:o.agent, disc:o.disc,
         title:o.due.length + ' kart bugün vadeli',
-        detail:'Bugünün tekrarı henüz yapılmadı (' + desteAdi + ' destesi).',
+        detail:yz('esp.core.planner.bugunun-tekrari-henuz-yapilm') + desteAdi + ' destesi).',
         route:o.route, tab:o.tab,
-        why:'Vadesi gelmiş tekrar: günü geçirmeden kapanır.',
+        why:yz('esp.core.planner.vadesi-gelmis-tekrar-gunu-ge'),
       };
     }
 
@@ -220,11 +244,11 @@ ESP.Planner = (function(){
     if(ESP.KotuGun && ESP.KotuGun.aktif(today)){
       return {
         rank:0, id:'kotu-gun', agent:'patron', disc:null,
-        title:'Kötü gün: asgari gün yeter',
+        title:yz('esp.core.planner.kotu-gun-asgari-gun-yeter'),
         detail:ESP.MINIMUM_DAY.read + ' ve ' + ESP.MINIMUM_DAY.practice.toLocaleLowerCase('tr')
           + '. ' + ESP.MINIMUM_DAY.note,
         route:'today', tab:null,
-        why:'Kötü gün modu açık: tekrar ve tarih kuralları yerinde, genişleme bugün yok.',
+        why:yz('esp.core.planner.kotu-gun-modu-acik-tekrar'),
       };
     }
 
@@ -234,22 +258,22 @@ ESP.Planner = (function(){
       const s = sentez.suggestions[0];
       return {
         rank:4, id:'link', agent:'aristoteles', disc:'reading',
-        title:'İki not aynı kavramda buluşuyor',
+        title:yz('esp.core.planner.i-ki-not-ayni-kavramda-bulus'),
         detail:'«' + s.concepts[0] + '» iki ayrı notta geçiyor'
              + (s.cross ? ' ve notlar farklı kaynaklardan.' : '.')
              + ' Bağı kurmak sana düşer; sistem nedenini uyduramaz.',
         route:'library', tab:'matris', ref:s.a.id,
-        why:'Sentopik sentez: bağlanmamış not henüz sermaye değildir.',
+        why:yz('esp.core.planner.sentopik-sentez-baglanmamis'),
       };
     }
     if(sentez.unlinked.length >= 3){
       return {
         rank:4, id:'unlinked', agent:'aristoteles', disc:'reading',
         title:sentez.unlinked.length + ' not hiçbir yere bağlı değil',
-        detail:'Ortak kavram bulunamadı: notlara kavram etiketi eklemek '
+        detail:yz('esp.core.planner.ortak-kavram-bulunamadi-notl')
              + 'bağ önerilerini açar.',
         route:'library', tab:'notlar',
-        why:'Sentopik sentez: derinlik hacimden sonra gelir.',
+        why:yz('esp.core.planner.sentopik-sentez-derinlik-hac'),
       };
     }
 
@@ -284,11 +308,11 @@ ESP.Planner = (function(){
 
     return {
       rank:0, id:'none', agent:'patron', disc:null,
-      title:'Bugün için bekleyen bir iş yok',
-      detail:'Sırası gelen kart yok, tıkanma yok, açık sentez önerisi yok. '
+      title:yz('esp.core.planner.bugun-icin-bekleyen-bir-is'),
+      detail:yz('esp.core.planner.sirasi-gelen-kart-yok-tikanm')
            + 'Asgari günü yapıp bırakmak da bir seçenektir.',
       route:'today', tab:null,
-      why:'Öncelik sırasındaki beş kuralın hiçbiri tetiklenmedi.',
+      why:yz('esp.core.planner.oncelik-sirasindaki-bes-kura'),
     };
   }
 
@@ -386,7 +410,7 @@ ESP.Planner = (function(){
     const okuma = ESP.Intellect.hoursOf('reading', 14);
     if(dil.cert !== 'missing' && okuma.cert === 'missing'){
       out.push({ id:'lang-no-reading', from:'polyglot', to:'aristoteles',
-        text:'Son 14 günde ' + U.fmtMin(dil.minutes) + ' dil çalışması var, '
+        text:yz('esp.core.planner.son-14-gunde') + U.fmtMin(dil.minutes) + ' dil çalışması var, '
            + 'okuma hiç girilmemiş. Kartlar bağlamda görülmediğinde retansiyon '
            + 'daha hızlı düşüyor.',
         route:'library' });
@@ -408,7 +432,7 @@ ESP.Planner = (function(){
     const diksiyon = ESP.Intellect.hoursOf('diction', 14);
     if(muzik.cert !== 'missing' && diksiyon.cert === 'missing'){
       out.push({ id:'music-no-diction', from:'maestro', to:'demosthenes',
-        text:'Enstrüman çalışılıyor, diksiyon hiç açılmamış. İkisi de aynı '
+        text:yz('esp.core.planner.enstruman-calisiliyor-diksiy')
            + 'zamanlama duyusunu kullanıyor; biri ötekini ucuza taşıyor.',
         route:'studio' });
     }

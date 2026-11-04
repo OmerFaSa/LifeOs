@@ -41,6 +41,37 @@
        calistir(param)  (oku) → { sonuc?, cevap?, satirlar?, yerine? }
        onizle(param)    (yaz) → { metin, satirlar? } | { veri } | { yetki } | { hata }
        uygula(param)    (yaz) → { metin, geriAl? } } */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.arac.ays':'AYS',
+  'ortak.arac.spi':'SPİ',
+  'ortak.arac.esp':'ESP',
+  'ortak.arac.hkm-merkez':'HKM (Merkez)',
+  'ortak.arac.soruyu-coz':'Soruyu çöz',
+  'ortak.arac.soru-ve-sure-kaydi':'Soru ve süre kaydı',
+  'ortak.arac.plani-degistir':'Planı değiştir',
+  'ortak.arac.neye-calisayim':'Neye çalışayım',
+  'ortak.arac.denemelerim':'Denemelerim',
+  'ortak.arac.barkodu-oku':'Barkodu oku',
+  'ortak.arac.ogun-olarak-oku':'Öğün olarak oku',
+  'ortak.arac.olcum-ve-ogun-kaydi':'Ölçüm ve öğün kaydı',
+  'ortak.arac.besin-degeri':'Besin değeri',
+  'ortak.arac.uyku-ortalamasi':'Uyku ortalaması',
+  'ortak.arac.tahliller':'Tahliller',
+  'ortak.arac.kitap-sayfasini-oku':'Kitap sayfasını oku',
+  'ortak.arac.calisma-oturumu':'Çalışma oturumu',
+  'ortak.arac.kelime-karti':'Kelime kartı',
+  'ortak.arac.alinti-kaydet':'Alıntı kaydet',
+  'ortak.arac.kitabi-bitir':'Kitabı bitir',
+  'ortak.arac.odak-sayaci':'Odak sayacı',
+  'ortak.arac.bekleyen-oneriler':'Bekleyen öneriler',
+  'ortak.arac.deftere-not':'Deftere not',
+  'ortak.arac.gorunum':'Görünüm',
+  'ortak.arac.haftalik-degerlendirme':'Haftalık değerlendirme',
+  'ortak.arac.uygulanacak-bir-sey-yok':'Uygulanacak bir şey yok.',
+  'ortak.arac.bu-is-katalogda-yok-hicbir':'Bu iş katalogda yok; hiçbir şeyi değiştirmedim.',
+  'ortak.arac.uygulanamadi':'Uygulanamadı: ',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -56,40 +87,40 @@ window.LIFEOS.ARAC = (function(){
   /* Modüllerin işleri — sistem haritası (söz 5). Kodun cümlesi; model
      uydurmaz. Ayrıntı her modülün kendi kataloğundadır. */
   const HARITA = [
-    { modul:'ays', ad:'AYS', is:'Sınav hazırlığı', alanlar:['günün planı ve blokları', 'soru, süre, paragraf, problem kaydı',
+    { modul:'ays', ad:yz('ortak.arac.ays'), is:'Sınav hazırlığı', alanlar:['günün planı ve blokları', 'soru, süre, paragraf, problem kaydı',
       'konu kapanışı ve konu öğrenme', 'deneme ve yanlış defteri', 'tekrar kartları', 'hafta programı ve hedefler', 'ilerleme ve analiz'] },
-    { modul:'spi', ad:'SPİ', is:'Sağlık ve performans', alanlar:['uyku, su, kilo gibi günlük ölçümler', 'öğün ve besin',
+    { modul:'spi', ad:yz('ortak.arac.spi'), is:'Sağlık ve performans', alanlar:['uyku, su, kilo gibi günlük ölçümler', 'öğün ve besin',
       'antrenman ve hareket', 'tahliller ve ilaçlar', 'mutfak ve market bütçesi', 'haftalık planlar ve hatırlatmalar'] },
-    { modul:'esp', ad:'ESP', is:'Kişisel gelişim', alanlar:['dil ve kelime kartları', 'okuma ve kitaplar', 'yazı taslakları',
+    { modul:'esp', ad:yz('ortak.arac.esp'), is:'Kişisel gelişim', alanlar:['dil ve kelime kartları', 'okuma ve kitaplar', 'yazı taslakları',
       'felsefe argümanları', 'tarih olayları', 'müzik ve diksiyon çalışmaları', 'günlük çalışma oturumları'] },
-    { modul:'hkm', ad:'HKM (Merkez)', is:'Merkez ve yapay zekâ', alanlar:['King’in yapay zekâsı ve modeller', 'haftalık değerlendirme ve çapraz bulgular',
+    { modul:'hkm', ad:yz('ortak.arac.hkm-merkez'), is:'Merkez ve yapay zekâ', alanlar:['King’in yapay zekâsı ve modeller', 'haftalık değerlendirme ve çapraz bulgular',
       'araştırma ve program işleri', 'para kaydı', 'bildirim ve Telegram'] },
   ];
 
   /* Söz 6: tek alan. tur «foto» (kamera ya da fotoğraf; modülün ayar.foto
      girdisiyle aynı id) ya da «cumle» (örnek cümle). */
   const ISLER = [
-    { modul:'ays', id:'soru', tur:'foto', route:'solve', ad:'Soruyu çöz', ne:'soru fotoğrafı ya da kamera; Soru çöz’e konur' },
-    { modul:'ays', tur:'cumle', ad:'Soru ve süre kaydı', ornek:'matematikten 40 soru çözdüm' },
-    { modul:'ays', tur:'cumle', ad:'Planı değiştir', ornek:'bu hafta ara ver' },
-    { modul:'ays', tur:'cumle', ad:'Neye çalışayım', ornek:'neye çalışayım' },
-    { modul:'ays', tur:'cumle', ad:'Denemelerim', ornek:'son denemelerim nasıl' },
-    { modul:'spi', id:'barkod', tur:'foto', route:'meals', ad:'Barkodu oku', ne:'kamera ya da fotoğraf; ürünün besin değeri, öğün önerisi' },
-    { modul:'spi', id:'ogun', tur:'foto', route:'meals', ad:'Öğün olarak oku', ne:'tabağın fotoğrafı; Fotoğraftan öğün açılır' },
-    { modul:'spi', tur:'cumle', ad:'Ölçüm ve öğün kaydı', ornek:'7 saat uyudum, 2 yumurta yedim' },
-    { modul:'spi', tur:'cumle', ad:'Besin değeri', ornek:'yulafın besin değeri' },
-    { modul:'spi', tur:'cumle', ad:'Uyku ortalaması', ornek:'son bir haftada uykum nasıl' },
-    { modul:'spi', tur:'cumle', ad:'Tahliller', ornek:'son tahlillerim' },
-    { modul:'esp', id:'sayfa', tur:'foto', route:'library', ad:'Kitap sayfasını oku', ne:'kamera ya da fotoğraf; alıntı ve kelime kartı' },
-    { modul:'esp', tur:'cumle', ad:'Çalışma oturumu', ornek:'45 dk gitar' },
-    { modul:'esp', tur:'cumle', ad:'Kelime kartı', ornek:'serendipity kelimesini kart yap: güzel bir tesadüf' },
-    { modul:'esp', tur:'cumle', ad:'Alıntı kaydet', ornek:'alıntı: Bir insanın değeri, sevdiği şeylerin değeridir' },
-    { modul:'esp', tur:'cumle', ad:'Kitabı bitir', ornek:'kitabı bitirdim' },
-    { modul:'king', tur:'cumle', ad:'Odak sayacı', ornek:'25 dakika matematik çalışalım' },
-    { modul:'king', tur:'cumle', ad:'Bekleyen öneriler', ornek:'bekleyen öneriler' },
-    { modul:'king', tur:'cumle', ad:'Deftere not', ornek:'deftere not: ' },
-    { modul:'king', tur:'cumle', ad:'Görünüm', ornek:'koyu temaya geç' },
-    { modul:'king', tur:'cumle', ad:'Haftalık değerlendirme', ornek:'haftalık değerlendirme' },
+    { modul:'ays', id:'soru', tur:'foto', route:'solve', ad:yz('ortak.arac.soruyu-coz'), ne:'soru fotoğrafı ya da kamera; Soru çöz’e konur' },
+    { modul:'ays', tur:'cumle', ad:yz('ortak.arac.soru-ve-sure-kaydi'), ornek:'matematikten 40 soru çözdüm' },
+    { modul:'ays', tur:'cumle', ad:yz('ortak.arac.plani-degistir'), ornek:'bu hafta ara ver' },
+    { modul:'ays', tur:'cumle', ad:yz('ortak.arac.neye-calisayim'), ornek:'neye çalışayım' },
+    { modul:'ays', tur:'cumle', ad:yz('ortak.arac.denemelerim'), ornek:'son denemelerim nasıl' },
+    { modul:'spi', id:'barkod', tur:'foto', route:'meals', ad:yz('ortak.arac.barkodu-oku'), ne:'kamera ya da fotoğraf; ürünün besin değeri, öğün önerisi' },
+    { modul:'spi', id:'ogun', tur:'foto', route:'meals', ad:yz('ortak.arac.ogun-olarak-oku'), ne:'tabağın fotoğrafı; Fotoğraftan öğün açılır' },
+    { modul:'spi', tur:'cumle', ad:yz('ortak.arac.olcum-ve-ogun-kaydi'), ornek:'7 saat uyudum, 2 yumurta yedim' },
+    { modul:'spi', tur:'cumle', ad:yz('ortak.arac.besin-degeri'), ornek:'yulafın besin değeri' },
+    { modul:'spi', tur:'cumle', ad:yz('ortak.arac.uyku-ortalamasi'), ornek:'son bir haftada uykum nasıl' },
+    { modul:'spi', tur:'cumle', ad:yz('ortak.arac.tahliller'), ornek:'son tahlillerim' },
+    { modul:'esp', id:'sayfa', tur:'foto', route:'library', ad:yz('ortak.arac.kitap-sayfasini-oku'), ne:'kamera ya da fotoğraf; alıntı ve kelime kartı' },
+    { modul:'esp', tur:'cumle', ad:yz('ortak.arac.calisma-oturumu'), ornek:'45 dk gitar' },
+    { modul:'esp', tur:'cumle', ad:yz('ortak.arac.kelime-karti'), ornek:'serendipity kelimesini kart yap: güzel bir tesadüf' },
+    { modul:'esp', tur:'cumle', ad:yz('ortak.arac.alinti-kaydet'), ornek:'alıntı: Bir insanın değeri, sevdiği şeylerin değeridir' },
+    { modul:'esp', tur:'cumle', ad:yz('ortak.arac.kitabi-bitir'), ornek:'kitabı bitirdim' },
+    { modul:'king', tur:'cumle', ad:yz('ortak.arac.odak-sayaci'), ornek:'25 dakika matematik çalışalım' },
+    { modul:'king', tur:'cumle', ad:yz('ortak.arac.bekleyen-oneriler'), ornek:'bekleyen öneriler' },
+    { modul:'king', tur:'cumle', ad:yz('ortak.arac.deftere-not'), ornek:'deftere not: ' },
+    { modul:'king', tur:'cumle', ad:yz('ortak.arac.gorunum'), ornek:'koyu temaya geç' },
+    { modul:'king', tur:'cumle', ad:yz('ortak.arac.haftalik-degerlendirme'), ornek:'haftalık değerlendirme' },
   ];
   const GRUP_AD = { ays:'AYS · sınav', spi:'SPİ · sağlık', esp:'ESP · gelişim', king:'King · her modülde' };
   /* Modüle göre gruplu liste; bulunulan modül önce, King'in ortak işleri sonda. */
@@ -240,15 +271,15 @@ window.LIFEOS.ARAC = (function(){
 
   /* Onaydan sonra: aynı araç, aynı parametre (yeniden doğrulanır). */
   async function uygula(n){
-    if(!n || !n.arac) return { ok:false, metin:'Uygulanacak bir şey yok.' };
+    if(!n || !n.arac) return { ok:false, metin:yz('ortak.arac.uygulanacak-bir-sey-yok') };
     const d = dogrula(n.ad, n.param);
-    if(!d.ok || d.arac.tur !== 'yaz') return { ok:false, metin:'Bu iş katalogda yok; hiçbir şeyi değiştirmedim.' };
+    if(!d.ok || d.arac.tur !== 'yaz') return { ok:false, metin:yz('ortak.arac.bu-is-katalogda-yok-hicbir') };
     try{
       const r = await d.arac.uygula(d.param);
       if(r && r.ok === false) return { ok:false, metin:String(r.metin || r.why || 'Uygulanamadı.') };
       return Object.assign({ ok:true, metin:'Tamam.' }, r || {});
     }catch(e){
-      return { ok:false, metin:'Uygulanamadı: ' + ((e && e.message) || 'bilinmeyen hata') };
+      return { ok:false, metin:yz('ortak.arac.uygulanamadi') + ((e && e.message) || 'bilinmeyen hata') };
     }
   }
 

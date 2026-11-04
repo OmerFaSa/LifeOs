@@ -35,6 +35,27 @@
 
    Dört kesinlik etiketinin tanımı BURADA YAZILMAZ: `LIFEOS.KESINLIK`'ten
    okunur. İki yerde yazılsaydı bir gün ayrışırdı. */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.sozluk.durum-ozeti':'Durum özeti',
+  'ortak.sozluk.konu-riski':'Konu riski',
+  'ortak.sozluk.puan-tahmini':'Puan tahmini',
+  'ortak.sozluk.gunun-akisi':'Günün akışı',
+  'ortak.sozluk.konu-durumlari':'Konu durumları',
+  'ortak.sozluk.deneme-kayitlari':'Deneme kayıtları',
+  'ortak.sozluk.hedef-ve-net-karsilastirmasi':'Hedef ve net karşılaştırması',
+  'ortak.sozluk.gunluk-calisma-kaydi':'Günlük çalışma kaydı',
+  'ortak.sozluk.enerji-durumu':'Enerji durumu',
+  'ortak.sozluk.mola-ve-mesgale-durumu':'Mola ve meşgale durumu',
+  'ortak.sozluk.haftalik-plan-ve-degerlendir':'Haftalık plan ve değerlendirme',
+  'ortak.sozluk.yanlis-defteri':'Yanlış defteri',
+  'ortak.sozluk.tekrar-kartlari':'Tekrar kartları',
+  'ortak.sozluk.ders-notlari':'Ders notları',
+  'ortak.sozluk.cozulen-sorular':'Çözülen sorular',
+  'ortak.sozluk.konu-basina-oran':'Konu başına oran',
+  'ortak.sozluk.kaynaklar':'Kaynaklar',
+  'ortak.sozluk.kaynak-zorlugu':'Kaynak zorluğu',
+});
+
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -216,24 +237,24 @@ window.LIFEOS = window.LIFEOS || {};
      puanlamasıdır: «kullanıcının kendi kestirimi» → tahmin.
      Tabloda olmayan kimliğe ad UYDURULMAZ (`veriBul` → null). */
   const VERI = Object.freeze({
-    durum_ozeti:{ ad:'Durum özeti', kesinlik:'computed' },
-    konu_riski:{ ad:'Konu riski', kesinlik:'computed' },
-    puan_tahmini:{ ad:'Puan tahmini', kesinlik:'estimated' },
-    gunun_akisi:{ ad:'Günün akışı', kesinlik:'computed' },
-    konular:{ ad:'Konu durumları', kesinlik:'computed' },
-    denemeler:{ ad:'Deneme kayıtları', kesinlik:'measured' },
-    hedef_ve_net_matrisi:{ ad:'Hedef ve net karşılaştırması', kesinlik:'computed' },
-    gunler:{ ad:'Günlük çalışma kaydı', kesinlik:'measured' },
-    enerji_durumu:{ ad:'Enerji durumu', kesinlik:'estimated' },
-    mesgaleler:{ ad:'Mola ve meşgale durumu', kesinlik:'measured' },
-    haftalar:{ ad:'Haftalık plan ve değerlendirme', kesinlik:'computed' },
-    hatalar:{ ad:'Yanlış defteri', kesinlik:'measured' },
-    kartlar:{ ad:'Tekrar kartları', kesinlik:'computed' },
-    video_notlari:{ ad:'Ders notları', kesinlik:'measured' },
-    cozulen_sorular:{ ad:'Çözülen sorular', kesinlik:'measured' },
-    konu_basina_oran:{ ad:'Konu başına oran', kesinlik:'computed' },
-    kaynaklar:{ ad:'Kaynaklar', kesinlik:'measured' },
-    kaynak_zorlugu:{ ad:'Kaynak zorluğu', kesinlik:'computed' },
+    durum_ozeti:{ ad:yz('ortak.sozluk.durum-ozeti'), kesinlik:'computed' },
+    konu_riski:{ ad:yz('ortak.sozluk.konu-riski'), kesinlik:'computed' },
+    puan_tahmini:{ ad:yz('ortak.sozluk.puan-tahmini'), kesinlik:'estimated' },
+    gunun_akisi:{ ad:yz('ortak.sozluk.gunun-akisi'), kesinlik:'computed' },
+    konular:{ ad:yz('ortak.sozluk.konu-durumlari'), kesinlik:'computed' },
+    denemeler:{ ad:yz('ortak.sozluk.deneme-kayitlari'), kesinlik:'measured' },
+    hedef_ve_net_matrisi:{ ad:yz('ortak.sozluk.hedef-ve-net-karsilastirmasi'), kesinlik:'computed' },
+    gunler:{ ad:yz('ortak.sozluk.gunluk-calisma-kaydi'), kesinlik:'measured' },
+    enerji_durumu:{ ad:yz('ortak.sozluk.enerji-durumu'), kesinlik:'estimated' },
+    mesgaleler:{ ad:yz('ortak.sozluk.mola-ve-mesgale-durumu'), kesinlik:'measured' },
+    haftalar:{ ad:yz('ortak.sozluk.haftalik-plan-ve-degerlendir'), kesinlik:'computed' },
+    hatalar:{ ad:yz('ortak.sozluk.yanlis-defteri'), kesinlik:'measured' },
+    kartlar:{ ad:yz('ortak.sozluk.tekrar-kartlari'), kesinlik:'computed' },
+    video_notlari:{ ad:yz('ortak.sozluk.ders-notlari'), kesinlik:'measured' },
+    cozulen_sorular:{ ad:yz('ortak.sozluk.cozulen-sorular'), kesinlik:'measured' },
+    konu_basina_oran:{ ad:yz('ortak.sozluk.konu-basina-oran'), kesinlik:'computed' },
+    kaynaklar:{ ad:yz('ortak.sozluk.kaynaklar'), kesinlik:'measured' },
+    kaynak_zorlugu:{ ad:yz('ortak.sozluk.kaynak-zorlugu'), kesinlik:'computed' },
   });
   /* Paranteze yazılan ek: «konular (TYT)». `review` adın içinde zaten var. */
   const VERI_EK = Object.freeze({ TYT:'TYT', AYT:'AYT', review:'' });

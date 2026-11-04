@@ -37,6 +37,16 @@
       burada da gecerlidir: bu bir yetenek ya da saglik yargisi degildir.
 
    4. BESIN ALTINDA KAYIT HUKUM VERMEZ. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.calib.tahlil-degerin':'Tahlil değerin',
+  'spi.core.calib.tarti':'Tartı',
+  'spi.core.calib.toparlanma-skorun':'Toparlanma skorun',
+  'spi.core.calib.uyku-suren':'Uyku süren',
+  'spi.core.calib.gunluk-proteinin':'Günlük proteinin',
+  'spi.core.calib.kirmizi-bayrak':'Kırmızı bayrak',
+  'spi.core.calib.yanlilik-icin-en-az':'Yanlılık için en az ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -48,22 +58,22 @@ SP.Calib = (function(){
 
   SP.CALIB_KINDS = [
     { id:'lab-value', type:'number', unit:'', err:'ape',
-      label:'Tahlil değerin',
+      label:yz('spi.core.calib.tahlil-degerin'),
       ask:'Sonucu açmadan önce: bu değer kaç çıkacak?' },
     { id:'weight', type:'number', unit:'kg', err:'abs', bands:[0.5, 1.5, 3],
-      label:'Tartı',
+      label:yz('spi.core.calib.tarti'),
       ask:'Tartıya çıkmadan önce: kaç geleceğini tahmin ediyorsun?' },
     { id:'readiness', type:'number', unit:'puan', err:'abs', bands:[7, 15, 30],
-      label:'Toparlanma skorun',
+      label:yz('spi.core.calib.toparlanma-skorun'),
       ask:'Ölçümleri girmeden önce: bugünkü toparlanman 100 üzerinden kaç?' },
     { id:'sleep', type:'number', unit:'saat', err:'abs', bands:[0.5, 1, 2],
-      label:'Uyku süren',
+      label:yz('spi.core.calib.uyku-suren'),
       ask:'Kaydına bakmadan: dün gece kaç saat uyudun?' },
     { id:'protein', type:'number', unit:'g', err:'ape',
-      label:'Günlük proteinin',
+      label:yz('spi.core.calib.gunluk-proteinin'),
       ask:'Hesabı görmeden: bugün kaç gram protein aldın?' },
     { id:'flag', type:'binary', unit:'', err:'brier',
-      label:'Kırmızı bayrak',
+      label:yz('spi.core.calib.kirmizi-bayrak'),
       ask:'Bu tahlilde kırmızı bayrak çıkma olasılığı nedir?' },
   ];
 
@@ -219,7 +229,7 @@ SP.Calib = (function(){
       .slice(0, PENCERE);
     if(kayitlar.length < ASGARI){
       return { cert:'missing', n:kayitlar.length, value:null, unit:'bant',
-        note:'Yanlılık için en az ' + ASGARI + ' kapanmış sayısal tahmin gerekir.' };
+        note:yz('spi.core.calib.yanlilik-icin-en-az') + ASGARI + ' kapanmış sayısal tahmin gerekir.' };
     }
     const v = kayitlar.reduce((a, f) => {
       const k = kindOf(f.kind);

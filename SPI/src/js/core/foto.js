@@ -20,6 +20,13 @@
 
    Çizim eşzamanlıdır: açılışta bütün fotoğraflar bir kez okunur ve her
    sahip için bir nesne adresi (blob URL) bellekte tutulur. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.foto.bu-tarayici-fotograf-saklaya':'Bu tarayıcı fotoğraf saklayamıyor (gizli pencere olabilir).',
+  'spi.core.foto.bu-bir-fotograf-degil':'Bu bir fotoğraf değil.',
+  'spi.core.foto.fotograf-okunamadi':'Fotoğraf okunamadı.',
+  'spi.core.foto.fotograf-kaydedilemedi-depo':'Fotoğraf kaydedilemedi (depo dolu olabilir).',
+});
+
 
 window.SP = window.SP || {};
 
@@ -128,14 +135,14 @@ SP.Foto = (function(){
   /* Döner: { ok } ya da { ok:false, why }. */
   async function kaydet(sahip, kaynak){
     await hazirla();
-    if(!var_()) return { ok:false, why:'Bu tarayıcı fotoğraf saklayamıyor (gizli pencere olabilir).' };
-    if(!kaynak || !/^image\//.test(kaynak.type || 'image/')) return { ok:false, why:'Bu bir fotoğraf değil.' };
+    if(!var_()) return { ok:false, why:yz('spi.core.foto.bu-tarayici-fotograf-saklaya') };
+    if(!kaynak || !/^image\//.test(kaynak.type || 'image/')) return { ok:false, why:yz('spi.core.foto.bu-bir-fotograf-degil') };
     let blob;
     try{ blob = await kucult(kaynak); }
-    catch(e){ return { ok:false, why:'Fotoğraf okunamadı.' }; }
+    catch(e){ return { ok:false, why:yz('spi.core.foto.fotograf-okunamadi') }; }
     const k = anahtar(sahip);
     try{ await islem('readwrite', s => s.put({ k, blob, at:new Date().toISOString() })); }
-    catch(e){ return { ok:false, why:'Fotoğraf kaydedilemedi (depo dolu olabilir).' }; }
+    catch(e){ return { ok:false, why:yz('spi.core.foto.fotograf-kaydedilemedi-depo') }; }
     const eski = adres.get(k);
     if(eski) URL.revokeObjectURL(eski);
     adres.set(k, URL.createObjectURL(blob));

@@ -31,6 +31,13 @@
         varken aynı gün ikinci kez yazılmaz; Onaylar'dan geri alınırsa
         yazım düşer ve yeniden yazılabilir (her yazımın öneri anahtarı
         ayrıdır: 'ogren-paragraf:<gün>:<setin kurulduğu an>:<sıra>'). */
+window.LIFEOS.PARCA.yazilar({
+  'ays.core.paragraf.set-bitmeden-yazilmaz':'Set bitmeden yazılmaz.',
+  'ays.core.paragraf.bugunun-seti-zaten-yazildi':'Bugünün seti zaten yazıldı.',
+  'ays.core.paragraf.cozulen-soru-yok-cozumune-ba':'Çözülen soru yok: çözümüne bakılan sorular sayılmaz.',
+  'ays.core.paragraf.oneri-sistemi-yok':'Öneri sistemi yok.',
+});
+
 
 window.R = window.R || {};
 
@@ -214,10 +221,10 @@ R.Paragraf = (function(){
   }
   async function gunKaydinaYaz(){
     const gun = bugunISO(), g = gunu(gun), o = ozet(gun);
-    if(!g || !o.bitti) return { ok:false, why:'Set bitmeden yazılmaz.' };
-    if(yazim(gun)) return { ok:false, why:'Bugünün seti zaten yazıldı.' };
-    if(!o.cozulen) return { ok:false, why:'Çözülen soru yok: çözümüne bakılan sorular sayılmaz.' };
-    if(!R.Proposals || !R.Proposals.hemen) return { ok:false, why:'Öneri sistemi yok.' };
+    if(!g || !o.bitti) return { ok:false, why:yz('ays.core.paragraf.set-bitmeden-yazilmaz') };
+    if(yazim(gun)) return { ok:false, why:yz('ays.core.paragraf.bugunun-seti-zaten-yazildi') };
+    if(!o.cozulen) return { ok:false, why:yz('ays.core.paragraf.cozulen-soru-yok-cozumune-ba') };
+    if(!R.Proposals || !R.Proposals.hemen) return { ok:false, why:yz('ays.core.paragraf.oneri-sistemi-yok') };
     if(R.Model.ensureDay) await R.Model.ensureDay(R.U.today());
     const sira = (Number(g.yazimSayisi) || 0) + 1;
     const r = await R.Proposals.hemen({ action:'paragraf-yaz', params:{ count:o.cozulen, date:gun },

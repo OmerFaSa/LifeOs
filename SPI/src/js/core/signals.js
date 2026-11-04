@@ -29,6 +29,13 @@
    4. NEDENSELLIK IDDIA EDILMEZ. Zincir kaydedilir, "bu soru sayesinde
       duzeldi" denmez. Iki pencere arasinda bir suru sey degisir. Sistem
       yalnizca sirayi gosterir; yorumu kullaniciya birakir. */
+window.LIFEOS.PARCA.yazilar({
+  'spi.core.signals.sistemde-gecen-sure':'Sistemde geçen süre',
+  'spi.core.signals.henuz-yeterli-sinyal-uretilm':'Henüz yeterli sinyal üretilmedi; bu sayfanın gerekliliği ',
+  'spi.core.signals.uretilen':'Üretilen ',
+  'spi.core.signals.sinyaller-goruluyor-ama-hicb':'Sinyaller görülüyor ama hiçbiri cevaplanmıyor. Sorular ',
+});
+
 
 window.SP = window.SP || {};
 
@@ -146,7 +153,7 @@ SP.Signals = (function(){
     if(f.level === 'high' && (sonKapanis('friction') == null
         || sonKapanis('friction') >= SOGUMA_GUN)){
       const sig = norm({ kind:'friction', ref:'friction',
-        title:'Sistemde geçen süre',
+        title:yz('spi.core.signals.sistemde-gecen-sure'),
         question:'Son iki haftada günde ' + f.window.perDay + ' dakika bu '
           + 'ekranlarda geçti. Hangi kaydı bırakmak sağlığını değil yalnızca '
           + 'tabloyu eksiltir?',
@@ -259,17 +266,17 @@ SP.Signals = (function(){
     const e = efficacy();
     if(e.opened < 3){
       return { level:'unknown',
-        text:'Henüz yeterli sinyal üretilmedi; bu sayfanın gerekliliği '
+        text:yz('spi.core.signals.henuz-yeterli-sinyal-uretilm')
            + 'ölçülmemiş durumda.' };
     }
     if(e.seen === 0){
       return { level:'unused',
-        text:'Üretilen ' + e.opened + ' sinyalin hiçbiri görülmemiş. '
+        text:yz('spi.core.signals.uretilen') + e.opened + ' sinyalin hiçbiri görülmemiş. '
            + 'Görülmeyen bir denetim, denetim değildir.' };
     }
     if(e.answered === 0){
       return { level:'ignored',
-        text:'Sinyaller görülüyor ama hiçbiri cevaplanmıyor. Sorular '
+        text:yz('spi.core.signals.sinyaller-goruluyor-ama-hicb')
            + 'yanlış soru olabilir ya da yanlış anda geliyor olabilir.' };
     }
     return { level:'used',

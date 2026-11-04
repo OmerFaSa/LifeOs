@@ -12,6 +12,11 @@
    Tarayicinin kendi konusma motoru kullanilir. Desteklenmeyen tarayicida
    katman sessizce yok olur -- mikrofon dugmesi hic cizilmez, elle giris
    yolu zaten her yerde durur. */
+window.LIFEOS.PARCA.yazilar({
+  'esp.core.voice.bu-tarayici-mikrofonun-sesin':'Bu tarayıcı mikrofonun sesini ölçemiyor.',
+  'esp.core.voice.mikrofon-acilamadi-ya-da-izi':'Mikrofon açılamadı ya da izin verilmedi.',
+});
+
 
 window.ESP = window.ESP || {};
 
@@ -167,7 +172,7 @@ ESP.Voice = (function(){
     return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && (window.AudioContext || window.webkitAudioContext));
   }
   async function kayitBaslat(onBitti){
-    if(!kayitVar()) return { ok:false, why:'Bu tarayıcı mikrofonun sesini ölçemiyor.' };
+    if(!kayitVar()) return { ok:false, why:yz('esp.core.voice.bu-tarayici-mikrofonun-sesin') };
     if(kayit) return { ok:true };
     try{
       const akis = await navigator.mediaDevices.getUserMedia({ audio:true });
@@ -187,7 +192,7 @@ ESP.Voice = (function(){
       kayit = { akis, ctx, t, ornek, onBitti };
       return { ok:true };
     }catch(e){
-      return { ok:false, why:'Mikrofon açılamadı ya da izin verilmedi.' };
+      return { ok:false, why:yz('esp.core.voice.mikrofon-acilamadi-ya-da-izi') };
     }
   }
   function kayitBitir(){

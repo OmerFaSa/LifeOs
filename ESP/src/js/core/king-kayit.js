@@ -4,6 +4,31 @@
 /* KING · sohbet kayıtları ve kişi: tanışma, envanter, sorma, çıkarım, arşiv, kipler, klasörler, sohbetten kayıt.
    Parça 3/8; yükleme sırası: king.js, king-ses.js, king-kayit.js, king-gorunum.js, king-kart.js, king-arac.js, king-devrim.js, king-yol.js.
    Dosyalar arası ortak adlar ve ortak durum window.LIFEOS.KING_IC'tedir (KI.ad). */
+window.LIFEOS.PARCA.yazilar({
+  'ortak.king-kayit.seni-biraz-daha-tanimak-isti':'Seni biraz daha tanımak istiyorum: ',
+  'ortak.king-kayit.atla':'Atla',
+  'ortak.king-kayit.geri-al':'Geri al',
+  'ortak.king-kayit.birak':'Bırak',
+  'ortak.king-kayit.kisa-bir-kisilik-envanteri-y':'Kısa bir kişilik envanteri yapalım: 20 cümle, her biri için 1 (hiç katılmıyorum) ile 5 (tamamen katılıyorum) arasında seç. ',
+  'ortak.king-kayit.bu-cikarim-artik-gecerli-deg':'Bu çıkarım artık geçerli değil.',
+  'ortak.king-kayit.biraktim-bu-cikarimi-bir-dah':'Bıraktım; bu çıkarımı bir daha sormayacağım.',
+  'ortak.king-kayit.once-kendi-cumleni-yaz':'Önce kendi cümleni yaz.',
+  'ortak.king-kayit.hafiza-bu-cihazda-kapali':'Hafıza bu cihazda kapalı.',
+  'ortak.king-kayit.fotograf':'Fotoğraf',
+  'ortak.king-kayit.kamera':'Kamera',
+  'ortak.king-kayit.ekran':'Ekran',
+  'ortak.king-kayit.pdf':'PDF',
+  'ortak.king-kayit.barkod':'Barkod',
+  'ortak.king-kayit.bu-sayfayi-goster':'Bu sayfayı göster',
+  'ortak.king-kayit.tum-isler':'Tüm işler',
+  'ortak.king-kayit.yaz':'Yaz',
+  'ortak.king-kayit.dinle':'Dinle',
+  'ortak.king-kayit.konus':'Konuş',
+  'ortak.king-kayit.kayitlari-gor':'Kayıtları gör',
+  'ortak.king-kayit.dosya-olarak-indir':'Dosya olarak indir',
+  'ortak.king-kayit.geri-getir':'Geri getir',
+});
+
 
 (function(){
   'use strict';
@@ -50,8 +75,8 @@
     if(!q) return false;
     KI.ortam.depo.yaz(KI.TANISMA, bugun);
     KI.bekleyenTanisma = q;
-    KI.akis.push({ kim:'king', metin:'Seni biraz daha tanımak istiyorum: ' + q.soru, son:'Yaz ya da söyle; istemezsen «Atla».' });
-    KI.cipler = [{ is:'tanisma-atla', ad:'Atla' }];
+    KI.akis.push({ kim:'king', metin:yz('ortak.king-kayit.seni-biraz-daha-tanimak-isti') + q.soru, son:'Yaz ya da söyle; istemezsen «Atla».' });
+    KI.cipler = [{ is:'tanisma-atla', ad:yz('ortak.king-kayit.atla') }];
     return true;
   }
   async function tanismaCevapla(metin){
@@ -62,7 +87,7 @@
     const r = await H.ekle(m, { katman:'soz', kaynak:'kullanici', alan:q.alan });
     if(r && r.ok){
       KI.sonGeriAl = async () => { await H.unut(r.kayit.id); };
-      KI.cipler = [{ is:'geri-al', ad:'Geri al' }];
+      KI.cipler = [{ is:'geri-al', ad:yz('ortak.king-kayit.geri-al') }];
       KI.soyle('Teşekkürler, not ettim. Seni «' + K.BY_ID[q.alan].ad + '» altında daha iyi tanıyorum.');
     }else KI.soyle(r && r.why ? r.why : 'Not edemedim.');
   }
@@ -72,13 +97,13 @@
   const ENV_BASLA = /(kişilik (testi|envanteri|testimi)|kişiliğimi (ölç|test et|analiz et)|beni test et|beş faktör)/;
   function envanterSor(){
     const E = ENV(), i = KI.envanter.i;
-    KI.cipler = E.CEVAPLAR.map((ad, k) => ({ is:'env:' + (k + 1), ad:(k + 1) + ' · ' + ad })).concat([{ is:'env-dur', ad:'Bırak' }]);
+    KI.cipler = E.CEVAPLAR.map((ad, k) => ({ is:'env:' + (k + 1), ad:(k + 1) + ' · ' + ad })).concat([{ is:'env-dur', ad:yz('ortak.king-kayit.birak') }]);
     KI.soyle('(' + (i + 1) + '/' + E.MADDELER.length + ') ' + E.MADDELER[i][0], null, null, 'Sana ne kadar uyuyor?');
   }
   function envanterBasla(){
     if(!ENV() || !hafiza()) return false;
     KI.envanter = { i:0, cevaplar:[] };
-    KI.akis.push({ kim:'king', metin:'Kısa bir kişilik envanteri yapalım: 20 cümle, her biri için 1 (hiç katılmıyorum) ile 5 (tamamen katılıyorum) arasında seç. '
+    KI.akis.push({ kim:'king', metin:yz('ortak.king-kayit.kisa-bir-kisilik-envanteri-y')
       + 'Doğru ya da yanlış cevap yok; istediğin an «Bırak».' });
     envanterSor();
     return true;
@@ -194,11 +219,11 @@
      değişmiş) hiçbir şey yazılmaz. */
   async function cikarimOnayla(id, durum, metin){
     const a = cikarimAdaylari().find(x => x.id === id), H = hafiza();
-    if(!a || ['dogru', 'yanlis', 'kismen'].indexOf(durum) < 0) return { ok:false, metin:'Bu çıkarım artık geçerli değil.' };
-    if(durum === 'yanlis'){ cikarimKararYaz(id, 'yanlis'); return { ok:true, metin:'Bıraktım; bu çıkarımı bir daha sormayacağım.' }; }
+    if(!a || ['dogru', 'yanlis', 'kismen'].indexOf(durum) < 0) return { ok:false, metin:yz('ortak.king-kayit.bu-cikarim-artik-gecerli-deg') };
+    if(durum === 'yanlis'){ cikarimKararYaz(id, 'yanlis'); return { ok:true, metin:yz('ortak.king-kayit.biraktim-bu-cikarimi-bir-dah') }; }
     const m = durum === 'kismen' ? String(metin || '').replace(/\s+/g, ' ').trim() : a.kayit;
-    if(!m) return { ok:false, metin:'Önce kendi cümleni yaz.' };
-    if(!H) return { ok:false, metin:'Hafıza bu cihazda kapalı.' };
+    if(!m) return { ok:false, metin:yz('ortak.king-kayit.once-kendi-cumleni-yaz') };
+    if(!H) return { ok:false, metin:yz('ortak.king-kayit.hafiza-bu-cihazda-kapali') };
     const r = await H.ekle(m, durum === 'kismen' ? { katman:'soz', kaynak:'kullanici', alan:a.alan }
       : { katman:'sohbet', kaynak:'kullanici', alan:a.alan });
     if(!(r && r.ok)) return { ok:false, metin:(r && r.why) || 'Kaydedemedim.' };
@@ -303,21 +328,21 @@
      raydaki Ayarlar'da. */
   const barkodNo = () => { const A = KI.ARAC(); return A && Array.isArray(A.ISLER) ? A.ISLER.findIndex(x => x && x.id === 'barkod') : -1; };
   const ARACLAR = [
-    { is:'foto-sec', grup:'ek', ad:'Fotoğraf', ip:'Seç ya da Ctrl+V ile yapıştır', kosul:() => true },
-    { is:'kip:kamera', grup:'ek', ad:'Kamera', ip:'Masandaki kâğıda, kitaba bakar', kosul:() => KI.ortam.kameraDestek() && KI.kamListe.length > 0 },
-    { is:'kip:ekran', grup:'ek', ad:'Ekran', ip:'Ekranını paylaş; sorduğunda bakarım', kosul:() => KI.ortam.ekranDestek() },
-    { is:'pdf-sec', grup:'ek', ad:'PDF', ip:'Metnini Merkez okur, King özetler', kosul:() => true },
-    { is:'barkod', grup:'ek', ad:'Barkod', ip:'Ürünün barkodunu okut (SPİ)', kosul:() => barkodNo() >= 0 },
-    { is:'ekran', grup:'is', ad:'Bu sayfayı göster', ip:'Bulunduğun LifeOS sayfasını okur', kosul:() => true },
-    { is:'isler', grup:'is', ad:'Tüm işler', ip:'AYS, SPİ ve ESP’de King’le yapılanlar', kosul:() => !!(KI.ARAC() && KI.ARAC().isler) },
+    { is:'foto-sec', grup:'ek', ad:yz('ortak.king-kayit.fotograf'), ip:'Seç ya da Ctrl+V ile yapıştır', kosul:() => true },
+    { is:'kip:kamera', grup:'ek', ad:yz('ortak.king-kayit.kamera'), ip:'Masandaki kâğıda, kitaba bakar', kosul:() => KI.ortam.kameraDestek() && KI.kamListe.length > 0 },
+    { is:'kip:ekran', grup:'ek', ad:yz('ortak.king-kayit.ekran'), ip:'Ekranını paylaş; sorduğunda bakarım', kosul:() => KI.ortam.ekranDestek() },
+    { is:'pdf-sec', grup:'ek', ad:yz('ortak.king-kayit.pdf'), ip:'Metnini Merkez okur, King özetler', kosul:() => true },
+    { is:'barkod', grup:'ek', ad:yz('ortak.king-kayit.barkod'), ip:'Ürünün barkodunu okut (SPİ)', kosul:() => barkodNo() >= 0 },
+    { is:'ekran', grup:'is', ad:yz('ortak.king-kayit.bu-sayfayi-goster'), ip:'Bulunduğun LifeOS sayfasını okur', kosul:() => true },
+    { is:'isler', grup:'is', ad:yz('ortak.king-kayit.tum-isler'), ip:'AYS, SPİ ve ESP’de King’le yapılanlar', kosul:() => !!(KI.ARAC() && KI.ARAC().isler) },
   ];
   /* Kipler (söz 27). kosul: cihaz destekliyor mu. */
   const KIPLER = [
-    { id:'yaz', ad:'Yaz', ip:'Yazarak konuş; cevap yazılı gelir', kosul:() => true },
-    { id:'dinle', ad:'Dinle', ip:'Sen yaz, King her cevabı sesli okusun', kosul:() => !!KI.ortam.sentez() },
-    { id:'konus', ad:'Konuş', ip:'Sesli sohbet: King konuşunca yeniden dinler', kosul:() => konusabilir() },
-    { id:'ekran', ad:'Ekran', ip:'Ekranını paylaş; sorduğunda King o anki ekranı görür', kosul:() => KI.ortam.ekranDestek() },
-    { id:'kamera', ad:'Kamera', ip:'Kamerayı aç; sorduğunda King masandaki kâğıda, kitaba bakar', kosul:() => KI.ortam.kameraDestek() && KI.kamListe.length > 0 },
+    { id:'yaz', ad:yz('ortak.king-kayit.yaz'), ip:'Yazarak konuş; cevap yazılı gelir', kosul:() => true },
+    { id:'dinle', ad:yz('ortak.king-kayit.dinle'), ip:'Sen yaz, King her cevabı sesli okusun', kosul:() => !!KI.ortam.sentez() },
+    { id:'konus', ad:yz('ortak.king-kayit.konus'), ip:'Sesli sohbet: King konuşunca yeniden dinler', kosul:() => konusabilir() },
+    { id:'ekran', ad:yz('ortak.king-kayit.ekran'), ip:'Ekranını paylaş; sorduğunda King o anki ekranı görür', kosul:() => KI.ortam.ekranDestek() },
+    { id:'kamera', ad:yz('ortak.king-kayit.kamera'), ip:'Kamerayı aç; sorduğunda King masandaki kâğıda, kitaba bakar', kosul:() => KI.ortam.kameraDestek() && KI.kamListe.length > 0 },
   ];
   /* Masaüstünde tarayıcı tanıması yok; HKM bağlıysa kayıt HKM'de yazıya dökülür. */
   function konusabilir(){ return !!KI.ortam.tanima() || !!(KI.ortam.kayitAc && KI.baglanti()); }
@@ -459,7 +484,7 @@
     const kayit = { id:KI.aktifKayit || ('k' + d.getTime()), zaman:d.toISOString(), modul:KI.ayar.modul, mesajlar };
     KI.aktifKayit = kayit.id;
     arsivYaz([kayit].concat(arsivOku().filter(k => k.id !== kayit.id)));
-    KI.cipler = [{ is:'kayitlar', ad:'Kayıtları gör' }, { is:'indir:' + kayit.id, ad:'Dosya olarak indir' }];
+    KI.cipler = [{ is:'kayitlar', ad:yz('ortak.king-kayit.kayitlari-gor') }, { is:'indir:' + kayit.id, ad:yz('ortak.king-kayit.dosya-olarak-indir') }];
     KI.soyle('Sohbeti kaydettim: ' + YER() + '. Hiçbir sunucuya gitmedi.');
     return kayit;
   }
@@ -508,7 +533,7 @@
     KI.silinen = once;
     KI.akis = []; KI.bekleyen = null; KI.bekleyenGit = null; KI.bekleyenIlet = null; KI.bekleyenFoto = null; KI.sonGeriAl = null;
     KI.ortam.depo.sil(KI.depoAnahtar());
-    KI.cipler = [{ is:'geri-getir', ad:'Geri getir' }];
+    KI.cipler = [{ is:'geri-getir', ad:yz('ortak.king-kayit.geri-getir') }];
     KI.soyle('Sohbeti temizledim; bu cihazdan da silindi.');
     return true;
   }
