@@ -115,7 +115,7 @@ window.LIFEOS = window.LIFEOS || {};
   function simge(ad){
     const y = SIMGE[ad];
     if(!y) return '';
-    return '<svg class="kbk-ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + y + '</svg>';
+    return '<svg class="kbk-ic" data-simge="' + ad + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + y + '</svg>';
   }
 
   function modulIsareti(k, buyuk){

@@ -105,7 +105,7 @@ R.UI = (function(){
 
   function icon(name, cls){
     const p = PATHS[name] || PATHS.info;
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"'
+    return '<svg data-simge="' + name + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"'
       + (cls ? ' class="'+cls+'"' : '') + '>' + p + '</svg>';
   }
 

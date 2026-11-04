@@ -102,6 +102,113 @@ window.LIFEOS = window.LIFEOS || {};
     if(Math.sin(t * 0.5 + 2) > -0.2) R(g, o.wx + o.ww * 0.72, o.wy + 7, 1, 1, '#fff6d0');
   }
 
+
+  /* ---------- FİGÜRLER: piksel-figur.js'teki çizimler; CSS --fig-* ile kullanır ---------- */
+  function figurSvg(ad, boy){
+    const f = L.PIKSEL_FIGUR && L.PIKSEL_FIGUR[ad];
+    if(!f) return '';
+    const yol = {};
+    f.s.forEach((r, y) => { for(let x = 0; x < r.length; x++){ const c = f.p[r[x]]; if(c) yol[c] = (yol[c] || '') + 'M' + x + ' ' + y + 'h1v1h-1z'; } });
+    const G = f.s[0].length, Y = f.s.length;
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + G + ' ' + Y + '"' + (boy ? ' width="' + boy + '" height="' + boy + '"' : '') + ' shape-rendering="crispEdges" aria-hidden="true">'
+      + Object.keys(yol).map(c => '<path fill="' + c + '" d="' + yol[c] + '"/>').join('') + '</svg>';
+  }
+  function figurleriKoy(){
+    if(!L.PIKSEL_FIGUR) return;
+    Object.keys(L.PIKSEL_FIGUR).forEach(ad => document.documentElement.style.setProperty('--fig-' + ad, 'url("data:image/svg+xml,' + encodeURIComponent(figurSvg(ad)) + '")'));
+  }
+
+  /* ---------- SİMGELER: bütün çizgi simgeler piksel ızgarasına oturur ----------
+     150'den fazla simge 15 ayrı listede duruyor; hepsi aynı anda çevrilir. Tuvalde alan kaplamasıyla
+     örneklenir, sonuç tek yol olur ve önbelleğe girer. Grafik, halka, görsel kart ve Rütbe çevrilmez. */
+  const SIMGE_ATLA = '.vk, .rutbe, .perde, .grafik, [data-grafik], .halka, .gosterge, .sparkline, canvas, .piksel-oda, .minikkat';
+    const simgeOnbellek = new Map();
+  function parcaCiz(c, e, k){
+    const a = n => parseFloat(e.getAttribute(n)) || 0, t = e.tagName.toLowerCase();
+    const p = new Path2D();
+    if(t === 'path') p.addPath(new Path2D(e.getAttribute('d') || ''));
+    else if(t === 'circle') p.arc(a('cx'), a('cy'), a('r'), 0, Math.PI * 2);
+    else if(t === 'ellipse') p.ellipse(a('cx'), a('cy'), a('rx'), a('ry'), 0, 0, Math.PI * 2);
+    else if(t === 'rect') p.rect(a('x'), a('y'), a('width'), a('height'));
+    else if(t === 'line'){ p.moveTo(a('x1'), a('y1')); p.lineTo(a('x2'), a('y2')); }
+    else if(t === 'polyline' || t === 'polygon'){
+      const n = (e.getAttribute('points') || '').trim().split(/[\s,]+/).map(Number);
+      for(let i = 0; i + 1 < n.length; i += 2){ if(i) p.lineTo(n[i], n[i + 1]); else p.moveTo(n[i], n[i + 1]); }
+      if(t === 'polygon') p.closePath();
+    } else return false;
+    const s = getComputedStyle(e), dolgu = s.fill && s.fill !== 'none' && s.fillOpacity !== '0', cizgi = s.stroke && s.stroke !== 'none';
+    c.fillStyle = c.strokeStyle = '#000'; c.lineCap = 'round'; c.lineJoin = 'round';
+    if(dolgu) c.fill(p);
+    if(cizgi){ c.lineWidth = Math.max(parseFloat(s.strokeWidth) || 1.5, 1.9) * k; c.stroke(p); }
+    return true;
+  }
+  /* Saf çekirdek: kaplama dizisinden yol. */
+  function kaplamaYol(alfa, n, kat, esik){
+    let d = '';
+    for(let y = 0; y < n; y++) for(let x = 0; x < n; x++){
+      let top = 0;
+      for(let j = 0; j < kat; j++) for(let i = 0; i < kat; i++) top += alfa[((y * kat + j) * n * kat + (x * kat + i)) * 4 + 3];
+      if(top / (kat * kat * 255) >= esik) d += 'M' + x + ' ' + y + 'h1v1h-1z';
+    }
+    return d;
+  }
+  function simgeCevir(svg){
+    if(svg.dataset.px) return;
+    svg.dataset.px = '1';
+    if(svg.closest(SIMGE_ATLA)) return;
+    const s = getComputedStyle(svg), ol = parseFloat(s.width) || parseFloat(svg.getAttribute('width')) || 18;
+    /* Elle çizim: ad kaynak işlevden gelir (kabuk.simge, UI.icon, kisayol.simge, hesap.ikon). */
+    const el = L.PIKSEL_SIMGE && L.PIKSEL_SIMGE.bul(svg.getAttribute('data-simge'));
+    if(el && ol <= 48){
+      let d = '';
+      el.forEach((r, y) => { for(let x = 0; x < r.length; x++) if(r[x] === '#') d += 'M' + x + ' ' + y + 'h1v1h-1z'; });
+      const kat = ol >= 17 ? 2 : 1;
+      svg.setAttribute('viewBox', '0 0 12 12');
+      svg.setAttribute('shape-rendering', 'crispEdges');
+      svg.style.width = svg.style.height = (12 * kat) + 'px';
+      svg.innerHTML = '<path d="' + d + '" style="fill:currentColor;stroke:none"/>';
+      return;
+    }
+    if(svg.querySelector('text,use,image,defs,[transform],[stroke-dasharray]')) return;
+    const vb = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+    if(vb.length !== 4 || vb[2] !== vb[3] || vb[2] > 48 || vb[2] < 8 || !svg.firstElementChild) return;
+    if(ol > 48) return;
+    /* Elle çizilmemiş simge: bir piksele bir hücre, kenar yumuşatması yok. */
+    const n = Math.max(10, Math.round(ol)), anahtar = n + '|' + vb[2] + '|' + svg.innerHTML;
+    let d = simgeOnbellek.get(anahtar);
+    if(d === undefined){
+      const kat = 5, t = document.createElement('canvas');
+      t.width = t.height = n * kat;
+      const c = t.getContext('2d', { willReadFrequently:true }), k = n * kat / vb[2];
+      c.setTransform(k, 0, 0, k, -vb[0] * k, -vb[1] * k);
+      let tamam = true;
+      Array.from(svg.children).forEach(e => { if(e.tagName.toLowerCase() === 'g') Array.from(e.children).forEach(x => { tamam = parcaCiz(c, x, 1) && tamam; }); else tamam = parcaCiz(c, e, 1) && tamam; });
+      d = tamam ? kaplamaYol(c.getImageData(0, 0, n * kat, n * kat).data, n, kat, 0.5) : '';
+      simgeOnbellek.set(anahtar, d);
+    }
+    if(!d) return;
+    svg.setAttribute('viewBox', '0 0 ' + n + ' ' + n);
+    svg.setAttribute('shape-rendering', 'crispEdges');
+    svg.style.width = svg.style.height = n + 'px';
+    svg.innerHTML = '<path d="' + d + '" style="fill:currentColor;stroke:none"/>';
+  }
+  function simgeleriTara(kok){
+    if(!secili() || !kok || !kok.querySelectorAll) return;
+    if(kok.tagName && kok.tagName.toLowerCase() === 'svg') simgeCevir(kok);
+    kok.querySelectorAll('svg:not([data-px])').forEach(simgeCevir);
+  }
+  function simgeIzle(){
+    if(/\/tests\//.test(location.pathname)) return;
+    simgeleriTara(document.body);
+    let bekleyen = false, kuyruk = [];
+    new MutationObserver(l => {
+      l.forEach(m => m.addedNodes.forEach(n => { if(n.nodeType === 1) kuyruk.push(n); }));
+      if(bekleyen || !kuyruk.length) return;
+      bekleyen = true;
+      requestAnimationFrame(() => { bekleyen = false; const q = kuyruk; kuyruk = []; q.forEach(simgeleriTara); });
+    }).observe(document.body, { childList:true, subtree:true });
+  }
+
   const durum = { c:null, g:null, arka:null, o:null, P:null, zaman:null };
   const secili = () => document.documentElement.getAttribute('data-zemin') === 'piksel';
   function koyuMu(){
@@ -156,6 +263,7 @@ window.LIFEOS = window.LIFEOS || {};
   }
   function kur(){
     uygula();
+    simgeIzle();
     let bekle = null;
     window.addEventListener('resize', () => { clearTimeout(bekle); bekle = setTimeout(uygula, 150); });
     new MutationObserver(uygula).observe(document.documentElement, { attributes:true, attributeFilter:['data-zemin', 'data-theme', 'data-hareket'] });
@@ -166,5 +274,6 @@ window.LIFEOS = window.LIFEOS || {};
   if(typeof document !== 'undefined'){
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
-  L.PIKSEL = Object.freeze({ uygula, yerlesim });
+  if(typeof document !== 'undefined') figurleriKoy();
+  L.PIKSEL = Object.freeze({ uygula, yerlesim, figurSvg, kaplamaYol, simgeCevir });
 })(window.LIFEOS);

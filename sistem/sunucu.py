@@ -906,12 +906,18 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 :root[data-zemin="piksel"] .kart:hover .dugme{ background:var(--primary-hover); }
 :root[data-zemin="piksel"] .guncel{ background:var(--piksel-kagit); border:0; -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:0 -3px 0 #2a1a1c,0 3px 0 #2a1a1c,-3px 0 0 #2a1a1c,3px 0 0 #2a1a1c,8px 10px 0 var(--piksel-golge); }
 :root[data-zemin="piksel"] .dugme{ background:var(--surface-2); color:var(--text); border:0; }
+:root[data-zemin="piksel"] .isaret{ display:block; width:32px; height:32px; background:var(--fig-logo) center/contain no-repeat; image-rendering:pixelated; }
+:root[data-zemin="piksel"] .isaret b{ display:none; }
+
+:root[data-zemin="piksel"] .logo{ background:color-mix(in srgb, var(--renk) 16%, var(--piksel-kagit)); box-shadow:inset 0 -4px 0 color-mix(in srgb, var(--renk) 34%, var(--piksel-kagit)); }
+:root[data-zemin="piksel"] .yay .kart--orta .logo{ width:40px; height:40px; }
+:root[data-zemin="piksel"] .yay .kart--orta .sekil{ width:32px; height:32px; }
 :root[data-zemin="piksel"] .izgara{ display:grid; margin:0; align-items:stretch; max-width:none; }
 :root[data-zemin="piksel"] .izgara .kart{ flex:none; width:auto; min-height:248px; height:auto; aspect-ratio:auto; margin:0; padding:30px 22px 18px; }
 :root[data-zemin="piksel"] .izgara .kart:nth-child(n){ margin-top:0; }
 :root[data-zemin="piksel"] .izgara .kart__ust{ flex-direction:row; flex-wrap:nowrap; gap:14px; align-items:center; }
-:root[data-zemin="piksel"] .izgara .logo{ width:54px; height:54px; flex:none; }
-:root[data-zemin="piksel"] .izgara .sekil{ width:24px; height:24px; }
+:root[data-zemin="piksel"] .izgara .logo{ width:72px; height:72px; flex:none; }
+:root[data-zemin="piksel"] .izgara .sekil{ width:64px; height:64px; }
 :root[data-zemin="piksel"] .izgara .kart__metin{ flex:1 1 0; order:0; }
 :root[data-zemin="piksel"] .izgara .kart__ad{ display:block; text-align:left; font-size:30px; }
 :root[data-zemin="piksel"] .izgara .kart__acik{ text-align:left; max-width:none; margin-top:6px; white-space:normal; overflow-wrap:anywhere; }
@@ -1295,6 +1301,8 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 })();
 </script>
 <script src="/qr.js"></script>
+<script src="/piksel-figur.js"></script>
+<script src="/piksel-simge.js"></script>
 <script src="/piksel.js"></script>
 <script src="/hesap.js" data-giris></script>
 </body></html>
@@ -1637,7 +1645,7 @@ class Giris(SimpleHTTPRequestHandler):
         adim kurulumu ve kodla cihaz baglama QR'i (hesap.js soz 17-18)."""
         tur = {"hesap.js": "text/javascript; charset=utf-8", "hesap.css": "text/css; charset=utf-8",
                "animasyon.js": "text/javascript; charset=utf-8", "qr.js": "text/javascript; charset=utf-8",
-               "muzik.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8",
+               "muzik.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8", "piksel-figur.js": "text/javascript; charset=utf-8", "piksel-simge.js": "text/javascript; charset=utf-8",
                "piksel.css": "text/css; charset=utf-8", "piksel-yazi.css": "text/css; charset=utf-8"}[ad]
         with open(os.path.join(KOK, "brand", "ortak", ad), "rb") as f:
             govde = f.read()
@@ -1708,7 +1716,7 @@ class Giris(SimpleHTTPRequestHandler):
             return zemin.isle(self)
         if yol.startswith("/api/planlama"):
             return plan_isle(self)
-        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js", "/piksel.js", "/piksel.css", "/piksel-yazi.css"):
+        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js", "/piksel.js", "/piksel-figur.js", "/piksel-simge.js", "/piksel.css", "/piksel-yazi.css"):
             return self._hesap_dosyasi(yol[1:])
         if yol == "/gun":
             self.send_response(301)

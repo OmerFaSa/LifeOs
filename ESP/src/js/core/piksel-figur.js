@@ -1,0 +1,135 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/piksel-figur.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* PİKSEL FİGÜRLER — logo ve modül yüzleri, elle çizildi (2026-11-04: «sistem logosu da dahil, tatlı olsun»).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/piksel-figur.js`; `python3 tools/ortak.py --yay` ile kopyalanır.
+   PNG, ICO ve SVG dosyaları buradan üretilir: `node tools/piksel_gorsel.js`.
+
+   Her figür: satırlar (her karakter bir piksel, nokta boş) ve palet. Veri okumaz, sayı üretmez. */
+window.LIFEOS = window.LIFEOS || {};
+window.LIFEOS.PIKSEL_FIGUR = Object.freeze({
+  /* Dört kare, dört modül: eski işaretin aynı fikri, yüzlü. */
+  logo:{ p:{ a:'#4f86ff', A:'#2f5fd0', t:'#2ec4a9', T:'#1c9a84', e:'#f2a93b', E:'#c9801a', m:'#9a86ff', M:'#7057d8', k:'#1f1a2e', w:'#ffffff' }, s:[
+    '.aaaaa...ttttt..',
+    'awaaaaa.twttttt.',
+    'akaaaka.tktttkt.',
+    'aaakaaa.tttkttt.',
+    'aaaaaaa.ttttttt.',
+    'AAAAAAA.TTTTTTT.',
+    '.AAAAA...TTTTT..',
+    '................',
+    '.eeeee...mmmmm..',
+    'eweeeee.mwmmmmm.',
+    'ekeeeke.mkmmmkm.',
+    'eeekeee.mmmkmmm.',
+    'eeeeeee.mmmmmmm.',
+    'EEEEEEE.MMMMMMM.',
+    '.EEEEE...MMMMM..',
+    '................'] },
+  /* AYS: yüzü olan kitap */
+  ays:{ p:{ o:'#1f2a5e', B:'#5a84ea', w:'#fff8ea', k:'#1f1a2e', p:'#ffb3a8', y:'#ffd166' }, s:[
+    '................',
+    '................',
+    '.oooooo..oooooo.',
+    'oBwwwwwoowwwwwBo',
+    'oBwwwwwwwwwwwwBo',
+    'oBwwkwwwwwwkwwBo',
+    'oBwwkwwwwwwkwwBo',
+    'oBwpwwwkkwwwpwBo',
+    'oBwwwwwwwwwwwwBo',
+    'oBwwwwwwwwwwwwBo',
+    'oBwwwwwwwwwwwwBo',
+    'oBBBBBBooBBBBBBo',
+    '.oooooooooooooo.',
+    '.......yy.......',
+    '.......yy.......',
+    '................'] },
+  /* SPİ: yüzü olan kalp */
+  spi:{ p:{ o:'#7a2238', r:'#ff7d8f', R:'#e85a70', W:'#ffd5dc', k:'#3a1420', p:'#ffc2a8' }, s:[
+    '................',
+    '...ooo....ooo...',
+    '..orrro..orrro..',
+    '.orWrrroorrrrro.',
+    '.orWrrrrrrrrrRo.',
+    '.orrkrrrrrrkrRo.',
+    '.orrkrrrrrrkrRo.',
+    '.orprrrkkrrrpRo.',
+    '..orrrrrrrrrRo..',
+    '...orrrrrrrRo...',
+    '....orrrrrRo....',
+    '.....orrrRo.....',
+    '......orRo......',
+    '.......oo.......',
+    '................',
+    '................'] },
+  /* ESP: yüzü olan ampul */
+  esp:{ p:{ o:'#6b3f10', y:'#ffe27a', Y:'#f5c344', W:'#fff8d6', k:'#3a2410', p:'#ffb07a', g:'#b9b2a6', G:'#8d867b' }, s:[
+    '................',
+    '.....oooooo.....',
+    '....oyyyyyyo....',
+    '...oyWWyyyyYo...',
+    '...oyWyyyyyYo...',
+    '...oykyyyykYo...',
+    '...oykyyyykYo...',
+    '...oypykkypYo...',
+    '....oyyyyyYo....',
+    '.....oyyYYo.....',
+    '.....oggggo.....',
+    '.....oGGGGo.....',
+    '.....oggggo.....',
+    '......oooo......',
+    '................',
+    '................'] },
+  /* Gün: yüzü olan güneş */
+  gun:{ p:{ o:'#8a4a10', y:'#ffd35a', Y:'#f2ad2e', r:'#ffb52e', W:'#fff3b8', k:'#3a2410', p:'#ff9a6a' }, s:[
+    '.......rr.......',
+    '.r.....rr.....r.',
+    '..r..oooooo..r..',
+    '....oyyyyyyo....',
+    '...oyWWyyyyYo...',
+    '...oyWyyyyyYo...',
+    '...oykyyyykYo...',
+    'rr.oykyyyykYo.rr',
+    'rr.oypykkypYo.rr',
+    '...oyyyyyyyYo...',
+    '...oyyyyyyYYo...',
+    '....oyyYYYYo....',
+    '..r..oooooo..r..',
+    '.r.....rr.....r.',
+    '.......rr.......',
+    '................'] },
+  /* King: taçlı yüz */
+  king:{ p:{ o:'#2f2150', m:'#a48cff', M:'#8069e0', y:'#ffd35a', Y:'#e0a52e', R:'#e8505b', B:'#4f86ff', W:'#d9ceff', k:'#1f1a2e', p:'#ff9fb0' }, s:[
+    '...y...yy...y...',
+    '...yy.yyyy.yy...',
+    '...yyyyyyyyyy...',
+    '...yRyyByyyRy...',
+    '..oYYYYYYYYYYo..',
+    '.ommmmmmmmmmmMo.',
+    '.omWmmmmmmmmmMo.',
+    '.ommkmmmmmmkmMo.',
+    '.ommkmmmmmmkmMo.',
+    '.ompmmmkkmmmpMo.',
+    '.ommmmmmmmmmmMo.',
+    '.ommmmmmmmmmMMo.',
+    '..oMMMMMMMMMMo..',
+    '...oooooooooo...',
+    '................',
+    '................'] },
+  /* Ajan: yalnız yüz; zemini ajanın kendi rengidir */
+  yuz:{ p:{ k:'#1f1a2e', w:'#ffffff', p:'#ffffff66' }, s:[
+    '............',
+    '............',
+    '............',
+    '...w....w...',
+    '...k....k...',
+    '...k....k...',
+    '.p........p.',
+    '.....kk.....',
+    '............',
+    '............',
+    '............',
+    '............'] },
+});

@@ -1577,7 +1577,7 @@ window.LIFEOS.HESAP = (function(){
     qr:'<rect x="4" y="4" width="6" height="6" rx="1.2"/><rect x="14" y="4" width="6" height="6" rx="1.2"/><rect x="4" y="14" width="6" height="6" rx="1.2"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 19.5h1M19.5 14v1"/>',
   };
   function ikon(ad, sinif){
-    return '<svg class="' + (sinif || 'hesap-ikon') + '" viewBox="0 0 24 24" aria-hidden="true">' + (IKON[ad] || '') + '</svg>';
+    return '<svg class="' + (sinif || 'hesap-ikon') + '" data-simge="' + ad + '" viewBox="0 0 24 24" aria-hidden="true">' + (IKON[ad] || '') + '</svg>';
   }
 
   /* Monogram: görünen adın baş harfi, profil renginde. */
@@ -1719,11 +1719,8 @@ window.LIFEOS.HESAP = (function(){
   /* LifeOS işareti: dört sistemin rengi. Her şekil kendi grubunda; ilk
      açılışta sırayla belirir (grup oynar, şeklin kendi dönüşü bozulmaz). */
   function isaret(ilk){
-    return '<svg class="hesap-kapi__isaret' + (ilk ? ' is-ilk' : '') + '" viewBox="0 0 32 32" aria-hidden="true">'
-      + '<g><rect x="3" y="3" width="12" height="12" rx="3" fill="#4F86FF"/></g>'
-      + '<g><circle cx="23" cy="9" r="6" fill="#2EC4A9"/></g>'
-      + '<g><rect x="5" y="19" width="9" height="9" rx="2" fill="#F2A93B" transform="rotate(45 9.5 23.5)"/></g>'
-      + '<g><rect x="17" y="17" width="12" height="12" rx="3" fill="#9A86FF"/></g></svg>';
+    const P = window.LIFEOS.PIKSEL, ic = P && P.figurSvg ? P.figurSvg('logo') : '';
+    return ic.replace('<svg ', '<svg class="hesap-kapi__isaret' + (ilk ? ' is-ilk' : '') + '" ');
   }
 
   /* ANA SAYFA (depo sahibi, 2026-10-05: «giriş kısmına bir anasayfa;

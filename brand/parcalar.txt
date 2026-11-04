@@ -54,6 +54,8 @@ css/piksel.css
 js/core/parca.js
 js/core/animasyon.js
 js/core/zemin.js
+js/core/piksel-figur.js
+js/core/piksel-simge.js
 js/core/piksel.js
 js/core/ayarlar.js
 
@@ -960,6 +962,8 @@ prova.test.js ays
 ogungiris.test.js spi
 veri_entegrasyon.test.js esp
 parca.test.js
+../js/core/piksel-figur.js
+../js/core/piksel-simge.js
 ../js/core/piksel.js
 piksel.test.js
 

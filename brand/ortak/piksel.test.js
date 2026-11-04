@@ -38,6 +38,35 @@
         link.remove();
       }
     });
+    it('figürler çizilir, her satır aynı genişlikte, palette olmayan harf yok', () => {
+      const F = window.LIFEOS.PIKSEL_FIGUR;
+      Object.keys(F).forEach(ad => {
+        const f = F[ad], G = f.s[0].length;
+        f.s.forEach(r => { expect(r.length).toBe(G); for(const c of r) expect(c === '.' || c in f.p).toBe(true); });
+        expect(window.LIFEOS.PIKSEL.figurSvg(ad).indexOf('<path') >= 0).toBe(true);
+      });
+    });
+    it('simge: kaplama eşiği pikseli doğru seçer, çizgi simge tek yola iner', () => {
+      const P = window.LIFEOS.PIKSEL;
+      /* 2x2 ızgara, kat 1: yalnız sol üst dolu */
+      const a = new Uint8ClampedArray(16); a[3] = 255;
+      expect(P.kaplamaYol(a, 2, 1, 0.5)).toBe('M0 0h1v1h-1z');
+      const d = document.createElement('div');
+      d.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" style="fill:none;stroke:currentColor;stroke-width:2"><path d="M4 12h16"/></svg>';
+      document.body.appendChild(d);
+      const s = d.firstChild;
+      P.simgeCevir(s);
+      expect(s.getAttribute('shape-rendering')).toBe('crispEdges');
+      expect(s.querySelectorAll('path').length).toBe(1);
+      expect(s.getAttribute('viewBox')).toBe('0 0 20 20');
+      d.remove();
+    });
+    it('elle çizilen simgeler 12×12, takma adlar çizime gider', () => {
+      const G = window.LIFEOS.PIKSEL_SIMGE;
+      Object.keys(G.S).forEach(ad => { expect(G.S[ad].length).toBe(12); G.S[ad].forEach(r => expect(r.length).toBe(12)); });
+      Object.keys(G.AD).forEach(ad => expect(!!G.bul(ad)).toBe(true));
+      expect(G.bul('yok-boyle')).toBe(null);
+    });
     it('oda içerik sütununa oturur, ekrandan taşmaz', () => {
       const o = window.LIFEOS.PIKSEL.yerlesim(98, 2);
       expect(o.dx + o.dw <= 98).toBe(true);

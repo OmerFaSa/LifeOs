@@ -185,7 +185,7 @@ window.LIFEOS.KISAYOL = (function(){
   function simge(ad){
     const t = String(ad || '').toLocaleLowerCase('tr-TR');
     const s = SIMGELER.find(x => x[0].test(t));
-    return '<span class="kisayol__simge" aria-hidden="true"><svg viewBox="0 0 24 24">' + (s ? s[1] : YILDIZ) + '</svg></span>';
+    return '<span class="kisayol__simge" aria-hidden="true"><svg data-simge="' + t.replace(/[^a-zçğıöşü0-9 -]/g, ' ').trim() + '" viewBox="0 0 24 24">' + (s ? s[1] : YILDIZ) + '</svg></span>';
   }
 
   function seritHtml(){

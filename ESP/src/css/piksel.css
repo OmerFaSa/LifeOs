@@ -179,7 +179,7 @@
 
 /* Küçük yüzler ve simgeler */
 :root[data-zemin="piksel"] .site--v5 .kisayol__simge{ background-color:var(--surface-2); background-image:none; box-shadow:var(--px-dugme); color:var(--text); }
-:root[data-zemin="piksel"] .site--v5 :is(.agentav,.agentkare){ background-image:none; background-color:var(--mod); box-shadow:none; }
+:root[data-zemin="piksel"] .site--v5 :is(.agentav,.agentkare){ box-shadow:none; }
 :root[data-zemin="piksel"] .site--v5 :is(.agentav,.agentkare)::after{ content:none; }
 :root[data-zemin="piksel"] :is(.kenar,.altbant,.ust,.btn,.kisayol,.kutu__bas,.cmdk__item,.seg) svg{ shape-rendering:crispEdges; stroke-linecap:square; stroke-linejoin:miter; }
 :root[data-zemin="piksel"] .hint{ opacity:1; }
@@ -209,3 +209,19 @@
 /* Yapışık çubuklar opak: altından kayan yazı üstüne binmesin (cam bunu bulanıklıkla çözüyordu). */
 :root[data-zemin="piksel"] :is(.bolumcubugu--sayfa,.bolumcubugu--kabuk){ background-color:var(--piksel-kagit); }
 :root[data-zemin="piksel"] .ders__icindekiler{ background-color:var(--piksel-kagit); }
+
+/* ----- FİGÜRLER: logo ve modül yüzleri (piksel-figur.js) ----- */
+:root[data-zemin="piksel"] :is(.sekil--ays,.kenar__nokta--ays){ background:var(--fig-ays) center/contain no-repeat; }
+:root[data-zemin="piksel"] :is(.sekil--spi,.kenar__nokta--spi){ background:var(--fig-spi) center/contain no-repeat; }
+:root[data-zemin="piksel"] :is(.sekil--esp,.kenar__nokta--esp){ background:var(--fig-esp) center/contain no-repeat; }
+:root[data-zemin="piksel"] :is(.sekil--gun,.kenar__nokta--gun,.sekil--hkm,.kenar__nokta--mer){ background:var(--fig-gun) center/contain no-repeat; }
+:root[data-zemin="piksel"] :is(.sekil,.kenar__nokta){ transform:none; clip-path:none; filter:none; image-rendering:pixelated; }
+:root[data-zemin="piksel"] .kenar__nokta{ width:16px; height:16px; }
+:root[data-zemin="piksel"] .kenar__logo{ display:block; width:32px; height:32px; background:var(--fig-logo) center/contain no-repeat; image-rendering:pixelated; transform:none; filter:none; box-shadow:none; }
+:root[data-zemin="piksel"] .kenar__logo b{ display:none; }
+:root[data-zemin="piksel"] .hesap-kapi__isaret{ width:48px; height:48px; filter:none; animation:none; }
+:root[data-zemin="piksel"] .site--v5 :is(.agentav,.agentkare){ background-image:var(--fig-yuz); background-size:100% 100%; background-repeat:no-repeat; image-rendering:pixelated; color:transparent; animation:none; }
+:root[data-zemin="piksel"] .site--v5 :is(.agentav,.agentkare)::before{ content:none; }
+:root[data-zemin="piksel"] .king-simge{ display:inline-block; width:32px; height:32px; background:var(--fig-king) center/contain no-repeat; image-rendering:pixelated; flex:none; }
+:root[data-zemin="piksel"] .king__kure, :root[data-zemin="piksel"] .king__bas .king__kure{ --kb:32px; width:32px; height:32px; flex:none; background:var(--fig-king) center/contain no-repeat; box-shadow:none; animation:none; image-rendering:pixelated; filter:none; }
+:root[data-zemin="piksel"] .king__kure::before, :root[data-zemin="piksel"] .king__kure::after, :root[data-zemin="piksel"] .king__kure > *{ display:none; }
