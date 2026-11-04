@@ -19183,6 +19183,53 @@ html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--ki
 :root[data-zemin="piksel"] .haberci__gec{ border:0; margin:2px; background:var(--surface-2); color:var(--text); font-family:var(--font-body); box-shadow:var(--px-dugme); }
 :root[data-zemin="piksel"] .haberci__cubuk{ height:10px; background:var(--surface-3); box-shadow:inset 0 3px 0 var(--px-koyu); }
 :root[data-zemin="piksel"] .haberci__cubuk i{ background:var(--primary); box-shadow:none; }
+
+/* ----- TATLI, 2. tur: kalan ekranlar ----- */
+/* Uzun pencerede karşılama ile yaprak arasına ahşap girmesin */
+:root[data-zemin="piksel"] .site--v5 > .site__body{ align-content:flex-start; }
+/* SPİ: tuş takımı, adım tuşları, gün şeridi */
+:root[data-zemin="piksel"] .vk :is(.x37 .tt button,.w37 button,.y17 .ol button,.x36 .st button){ border:0; margin:2px; box-shadow:var(--px-dugme); }
+:root[data-zemin="piksel"] .vk .x37 .tt button{ background:var(--surface-2); color:var(--text); font-family:var(--font-body); font-size:15px; }
+:root[data-zemin="piksel"] .vk :is(.x37 .tt button,.w37 button,.y17 .ol button,.x36 .st button):active{ transform:translateY(2px); box-shadow:var(--px-bas); }
+:root[data-zemin="piksel"] .vk .x37 .tt button.on, :root[data-zemin="piksel"] .vk .x37 .tt .tt-kaydet{ background:var(--primary); color:var(--primary-ink); box-shadow:var(--px-ana); }
+:root[data-zemin="piksel"] .vk :is(.y17 .ol button.on,.x36 .st button.d){ box-shadow:var(--px-ana); }
+/* AYS: hafta günleri kart, bloklar küçük kâğıt */
+:root[data-zemin="piksel"] .daycol{ border:0; margin:2px; box-shadow:var(--px-kart); }
+:root[data-zemin="piksel"] .daycol__block{ border:0; box-shadow:inset 0 -2px 0 var(--px-koyu); }
+/* ESP: merdiven kartları ve basamaklar */
+:root[data-zemin="piksel"] .site--v5 .ladcard{ border:0; margin:2px; background-color:var(--surface); box-shadow:var(--px-kart); }
+:root[data-zemin="piksel"] .ladcard__bar{ height:10px; background:var(--surface-3); box-shadow:inset 0 3px 0 var(--px-koyu); }
+:root[data-zemin="piksel"] .ladcard__fill{ -webkit-mask:repeating-linear-gradient(90deg, black 0 8px, transparent 8px 10px); mask:repeating-linear-gradient(90deg, black 0 8px, transparent 8px 10px); }
+:root[data-zemin="piksel"] .ladderstep{ padding-block:6px; border-bottom:2px solid var(--border-soft); }
+:root[data-zemin="piksel"] .ladderstep__no{ box-shadow:inset 0 2px 0 #ffffff40, inset 0 -2px 0 #00000026; }
+:root[data-zemin="piksel"] .ladderstep.is-done{ opacity:1; color:var(--text-2); }
+/* Ayarlar: kartlar aynı çerçeve */
+:root[data-zemin="piksel"] .skart{ border:0; margin:2px; background-color:var(--surface); box-shadow:var(--px-kart); }
+:root[data-zemin="piksel"] .ayarlar__nav .ayarlar__sekme:active{ transform:translateY(2px); }
+/* Giriş kapısı: duvar ve ahşap zemin, form kâğıtta */
+:root[data-zemin="piksel"] .hesap-kapi{ background:linear-gradient(var(--piksel-duvar) 88%, var(--piksel-tahta-2) 88%, var(--piksel-tahta-2) 89%, var(--piksel-tahta) 89%); }
+:root[data-zemin="piksel"] .hesap-kapi__kart, :root[data-zemin="piksel"] .hesap-merkez__kart{ overflow:visible; background:var(--piksel-kagit); box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar),12px 14px 0 var(--piksel-golge); }
+:root[data-zemin="piksel"] .hesap-kapi__kart::before, :root[data-zemin="piksel"] .hesap-kapi__kart::after{ content:none; }
+:root[data-zemin="piksel"] .hesap-kapi__kart:focus-visible, :root[data-zemin="piksel"] .hesap-merkez__kart:focus-visible{ outline:none; }
+:root[data-zemin="piksel"] .hesap-kapi__isaret{ width:64px; height:64px; }
+:root[data-zemin="piksel"] .hesap-kapi__sistemler li{ background:var(--piksel-tahta); box-shadow:inset 0 3px 0 #ffffff1a, inset 0 -3px 0 #00000033; }
+:root[data-zemin="piksel"] .hesap-kapi__sistemler svg{ width:32px; height:32px; }
+:root[data-zemin="piksel"] .hesap-kapi__sistemler li{ grid-template-columns:32px minmax(0, 1fr); }
+@media (max-width:679px){ :root[data-zemin="piksel"] .hesap-kapi__sistemler svg{ width:16px; height:16px; } }
+/* Rütbe kutlaması: görsel ve video aynı kalır, yazı ve düğme sistemin dilinde */
+:root[data-zemin="piksel"] .perde--rutbe :is(.perde__banner,.perde__banner *){ font-family:var(--font-body); font-style:normal; letter-spacing:0; }
+/* Onay kutusu basınca iner; dönen halka adımlı */
+:root[data-zemin="piksel"] input:is([type="checkbox"],[type="radio"]):active{ transform:translateY(2px); }
+:root[data-zemin="piksel"] .minrow:active .minrow__mark{ transform:translateY(2px); }
+
+:root[data-zemin="piksel"] :is(.hesap__ana,.hesap__ikinci){ border:0; background-image:none; font-family:var(--font-body); }
+:root[data-zemin="piksel"] .hesap__ana{ background-color:var(--primary); color:var(--primary-ink); box-shadow:var(--px-ana); }
+:root[data-zemin="piksel"] .hesap__ana:hover{ background-color:var(--primary-hover); }
+:root[data-zemin="piksel"] .hesap__ikinci{ background-color:var(--surface-2); color:var(--text); box-shadow:var(--px-dugme); }
+:root[data-zemin="piksel"] :is(.hesap__ana,.hesap__ikinci):active{ transform:translateY(2px); }
+:root[data-zemin="piksel"] .hesap-anahtar{ width:44px; height:24px; background:var(--surface-3); box-shadow:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar),inset 0 3px 0 var(--px-koyu); }
+:root[data-zemin="piksel"] .hesap-anahtar::after{ top:3px; left:3px; width:18px; height:18px; background:var(--surface); box-shadow:inset 0 -3px 0 var(--px-koyu), 0 0 0 2px var(--px-kenar); }
+:root[data-zemin="piksel"] .hesap-anahtar[aria-checked="true"]{ background:var(--primary); }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -23057,7 +23104,7 @@ window.LIFEOS = window.LIFEOS || {};
     const yol = {};
     f.s.forEach((r, y) => { for(let x = 0; x < r.length; x++){ const c = f.p[r[x]]; if(c) yol[c] = (yol[c] || '') + 'M' + x + ' ' + y + 'h1v1h-1z'; } });
     const G = f.s[0].length, Y = f.s.length;
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + G + ' ' + Y + '"' + (boy ? ' width="' + boy + '" height="' + boy + '"' : '') + ' shape-rendering="crispEdges" aria-hidden="true">'
+    return '<svg xmlns="http://www.w3.org/2000/svg" data-px="1" data-pxc="1" viewBox="0 0 ' + G + ' ' + Y + '"' + (boy ? ' width="' + boy + '" height="' + boy + '"' : '') + ' shape-rendering="crispEdges" aria-hidden="true">'
       + Object.keys(yol).map(c => '<path fill="' + c + '" d="' + yol[c] + '"/>').join('') + '</svg>';
   }
   function figurleriKoy(){
@@ -23139,6 +23186,39 @@ window.LIFEOS = window.LIFEOS || {};
     svg.style.width = svg.style.height = n + 'px';
     svg.innerHTML = '<path d="' + d + '" style="fill:currentColor;stroke:none"/>';
   }
+  /* Çizimler ızgaraya oturur: grafik noktası kare olur, halka ve yay bloklara bölünür. Değer aynı kalır:
+     yalnız üstüne zemin renginde aralık çizilir, dolu kısmın uzunluğuna dokunulmaz. */
+  const CIZIM_ATLA = '.rutbe, .perde, .piksel-oda, .kenar, .altbant';
+  function cizimCevir(svg){
+    if(svg.dataset.pxc) return;
+    svg.dataset.pxc = '1';
+    if(svg.closest(CIZIM_ATLA) || typeof svg.getBBox !== 'function') return;
+    const orbit = !!svg.closest('.agh');
+    let halka = null;
+    Array.from(svg.querySelectorAll('circle')).forEach(c => {
+      const r = parseFloat(c.getAttribute('r')) || 0, s = getComputedStyle(c), dolu = s.fill && s.fill !== 'none';
+      if(dolu && r > 0 && r <= (orbit ? 12 : 8)){
+        const k = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        Array.from(c.attributes).forEach(a => { if(!/^(cx|cy|r)$/.test(a.name)) k.setAttribute(a.name, a.value); });
+        const cx = parseFloat(c.getAttribute('cx')) || 0, cy = parseFloat(c.getAttribute('cy')) || 0;
+        k.setAttribute('x', cx - r); k.setAttribute('y', cy - r); k.setAttribute('width', r * 2); k.setAttribute('height', r * 2);
+        if(!c.hasAttribute('fill')) k.style.fill = s.fill;
+        if(!c.hasAttribute('stroke') && s.stroke !== 'none'){ k.style.stroke = s.stroke; k.style.strokeWidth = s.strokeWidth; }
+        c.replaceWith(k);
+      } else if(!dolu && r >= 10 && !halka && !orbit) halka = c;
+    });
+    const yay = halka || svg.querySelector('.pk-gosterge__iz');
+    if(!yay || svg.querySelector('.px-ara') || typeof yay.getTotalLength !== 'function') return;
+    const L = yay.getTotalLength();
+    if(!(L > 40)) return;
+    const n = Math.max(12, Math.round(L / 10)), ara = yay.cloneNode(false), g = Math.min(3, L / n / 3);
+    ara.removeAttribute('class');
+    ara.setAttribute('class', 'px-ara');
+    ara.setAttribute('aria-hidden', 'true');
+    ara.style.cssText = 'fill:none;stroke:var(--surface);stroke-width:' + ((parseFloat(getComputedStyle(yay).strokeWidth) || 4) + 2) + ';stroke-dasharray:' + g + ' ' + (L / n - g) + ';stroke-dashoffset:0;animation:none;transition:none';
+    const yazi = svg.querySelector('text');
+    if(yazi) svg.insertBefore(ara, yazi); else svg.appendChild(ara);
+  }
   /* Bölüm başlığı konusuna göre simge alır; eşleşmeyen kare işaretle kalır. Süs: veri okumaz. */
   const BASLIK_SIMGE = [['öğün', 'ogun'], ['beslen', 'ogun'], ['uyku', 'ay'], ['gece', 'ay'], ['kilo', 'tarti'], ['hareket', 'nabiz'], ['seans', 'nabiz'], ['nabız', 'nabiz'], ['ölçüm', 'nabiz'],
     ['toparlan', 'kalp'], ['his', 'kalp'], ['test', 'tup'], ['tahlil', 'tup'], ['takvim', 'takvim'], ['hafta', 'takvim'], ['program', 'takvim'], ['plan', 'takvim'], ['akış', 'saat'], ['hedef', 'hedef'],
@@ -23162,8 +23242,10 @@ window.LIFEOS = window.LIFEOS || {};
   function simgeleriTara(kok){
     if(!secili() || !kok || !kok.querySelectorAll) return;
     kok.querySelectorAll('.kutu__ad').forEach(baslikSimge);
+    if(kok.tagName && kok.tagName.toLowerCase() === 'svg') cizimCevir(kok);
     if(kok.tagName && kok.tagName.toLowerCase() === 'svg') simgeCevir(kok);
     kok.querySelectorAll('svg:not([data-px])').forEach(simgeCevir);
+    kok.querySelectorAll('svg:not([data-pxc])').forEach(cizimCevir);
   }
   function simgeIzle(){
     if(/\/tests\//.test(location.pathname)) return;
@@ -23234,6 +23316,24 @@ window.LIFEOS = window.LIFEOS || {};
     setTimeout(() => kap.remove(), 420);
     return KIVILCIM.length;
   }
+  /* Kayıtta bir kalp yükselir: yalnız gerçek kayıtta çağrılır. */
+  function kayitTepki(e){
+    const r = e.getBoundingClientRect(), n = kivilcim(r.left + r.width / 2, r.top + r.height / 2);
+    const sim = L.PIKSEL_SIMGE && L.PIKSEL_SIMGE.bul('kalp');
+    if(!n || !sim) return n;
+    let d = '';
+    sim.forEach((s, y) => { for(let x = 0; x < s.length; x++) if(s[x] === '#') d += 'M' + x + ' ' + y + 'h1v1h-1z'; });
+    const kap = document.createElement('div');
+    kap.className = 'px-kivilcim';
+    kap.setAttribute('aria-hidden', 'true');
+    kap.style.left = Math.round(r.left + r.width / 2 - 12) + 'px';
+    kap.style.top = Math.round(r.top - 26) + 'px';
+    kap.innerHTML = '<svg data-px="1" data-pxc="1" width="24" height="24" viewBox="0 0 12 12" shape-rendering="crispEdges"><path fill="#e8505b" d="' + d + '"/></svg>';
+    document.body.appendChild(kap);
+    kap.firstChild.animate([{ transform:'translateY(8px)', opacity:1 }, { transform:'translateY(-16px)', opacity:1, offset:.8 }, { transform:'translateY(-24px)', opacity:0 }], { duration:560, easing:'steps(7, end)', fill:'forwards' });
+    setTimeout(() => kap.remove(), 620);
+    return n;
+  }
   function ogeKivilcim(e, renkler){
     const r = e.getBoundingClientRect();
     return kivilcim(r.left + r.width / 2, r.top + r.height / 2, renkler);
@@ -23279,7 +23379,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
   if(typeof document !== 'undefined') figurleriKoy();
-  L.PIKSEL = Object.freeze({ uygula, yerlesim, figurSvg, kaplamaYol, simgeCevir, baslikAdi, kivilcim, ogeKivilcim });
+  L.PIKSEL = Object.freeze({ uygula, yerlesim, figurSvg, kaplamaYol, simgeCevir, baslikAdi, kivilcim, ogeKivilcim, kayitTepki, cizimCevir });
 })(window.LIFEOS);
 
 /* ==== js/core/ayarlar.js ==== */
@@ -25634,7 +25734,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'277b7137', at:'2026-11-04 22:07', dirty:false };
+SP.BUILD = { id:'c01d47cd', at:'2026-11-04 22:33', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -33143,7 +33243,7 @@ window.LIFEOS.HAREKET = (function(){
     d.classList.remove('h-kaydedildi');
     void d.offsetWidth;
     d.classList.add('h-kaydedildi');
-    const PX = window.LIFEOS && window.LIFEOS.PIKSEL; if(PX && PX.ogeKivilcim) PX.ogeKivilcim(d);
+    const PX = window.LIFEOS && window.LIFEOS.PIKSEL; if(PX && PX.kayitTepki) PX.kayitTepki(d);
     setTimeout(() => d.classList.remove('h-kaydedildi'), 1100);
     const kart = d.closest('.kutu, .card, .sheet, .entry, .lrow');
     if(kart){
@@ -39658,10 +39758,10 @@ window.LIFEOS.HESAP = (function(){
      tanıtım: işaret, tek cümle, dört sistem, üç söz. Kaydırma yok;
      telefonda form açılınca tanıtım çekilir, form tek işe kalır. */
   const SISTEMLER = [
-    ['AYS', yz('ortak.hesap.sinav-hazirligi'), '<rect x="5" y="5" width="14" height="14" rx="3.5"/>', '#4F86FF'],
-    ['SPİ', yz('ortak.hesap.saglik-ve-toparlanma'), '<circle cx="12" cy="12" r="7.5"/>', '#2EC4A9'],
-    ['ESP', yz('ortak.hesap.dil-muzik-okuma'), '<rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.4" transform="rotate(45 12 12)"/>', '#F2A93B'],
-    ['Gün', yz('ortak.hesap.gunu-kur-gidisi-gor'), '<path d="M5 18.5a7 7 0 0 1 14 0z"/>', '#9A86FF'],
+    ['AYS', yz('ortak.hesap.sinav-hazirligi'), 'ays', '#4F86FF'],
+    ['SPİ', yz('ortak.hesap.saglik-ve-toparlanma'), 'spi', '#2EC4A9'],
+    ['ESP', yz('ortak.hesap.dil-muzik-okuma'), 'esp', '#F2A93B'],
+    ['Gün', yz('ortak.hesap.gunu-kur-gidisi-gor'), 'gun', '#9A86FF'],
   ];
   const SOZLER = [yz('ortak.hesap.pc-telefon-ve-tablet-ayni'), yz('ortak.hesap.verin-hicbir-sirketin-sunucu'),
     yz('ortak.hesap.bilgisayar-kapaliyken-de-cal')];
@@ -39670,7 +39770,7 @@ window.LIFEOS.HESAP = (function(){
       + ('<p class="hesap-kapi__ad">' + yz('ortak.hesap.lifeos') + '</p>')
       + ('<p class="hesap-kapi__slogan">' + yz('ortak.hesap.sinav-saglik-ve-gelisim-tek') + '</p>')
       + '<ul class="hesap-kapi__sistemler">' + SISTEMLER.map(([ad, acik, sekil, renk], i) =>
-          '<li style="--renk:' + renk + ';--sira:' + i + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + sekil + '</svg>'
+          '<li style="--renk:' + renk + ';--sira:' + i + '">' + (window.LIFEOS.PIKSEL ? window.LIFEOS.PIKSEL.figurSvg(sekil).replace('<svg ', '<svg aria-hidden="true" ') : '')
           + '<b>' + kac(ad) + '</b><span>' + kac(acik) + '</span></li>').join('') + '</ul>'
       + '<ul class="hesap-kapi__sozler">' + SOZLER.map(x => '<li>' + ikon('tamam') + '<span>' + kac(x) + '</span></li>').join('')
       + '</ul></section>';
