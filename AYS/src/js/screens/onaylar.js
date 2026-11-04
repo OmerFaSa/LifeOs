@@ -13,6 +13,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'onaylar', modul:'ays', cekmece:'onaylar', ad:'Bekleyen', ikon:'check', sira:10 });
 
 R.Screens.onaylar = (function(){
   const U = R.U, UI = R.UI, S = R.S;

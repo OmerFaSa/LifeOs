@@ -8,6 +8,9 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+/* Gelecek simülatörü (2026-10-16): sınav gününe kadar «bu gidişle»
+ve «ne olursa» (core/gelecek.js). */
+window.LIFEOS.PARCA.sayfa({ id:'gelecek', modul:'ays', cekmece:'analiz', ad:'Gelecek', ikon:'target', sira:20 });
 
 R.Screens.gelecek = (function(){
   const U = R.U, S = R.S;

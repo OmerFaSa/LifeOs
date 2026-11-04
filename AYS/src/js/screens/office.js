@@ -5,6 +5,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'office', modul:'ays', cekmece:'ofis', ad:'Masalar', ikon:'guide', sira:10 });
 
 R.Screens.office = (function(){
   const U = R.U, UI = R.UI, S = R.S;

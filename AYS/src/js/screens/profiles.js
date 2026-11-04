@@ -7,6 +7,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'profiles', modul:'ays', cekmece:'ayarlar', ad:'Profil', ikon:'shield', sira:20 });
 
 R.Screens.profiles = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;

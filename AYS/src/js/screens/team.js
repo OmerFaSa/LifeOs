@@ -6,6 +6,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'team', modul:'ays', cekmece:'ofis', ad:'Danışma', ikon:'zap', sira:20 });
 
 R.Screens.team = (function(){
   const U = R.U, UI = R.UI, S = R.S;

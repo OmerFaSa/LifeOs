@@ -27,6 +27,9 @@
 (function(){
   const L = window.LIFEOS = window.LIFEOS || {};
   const EN_COK = 400;
+  /* Tarayicinin zamanlama tamponu 250 dosyada doluyordu: 251. dosya (app.js) kasaya
+     girmedi, uygulama cevrimdisi acilmadi. pwa.js 250'den once yuklenir. */
+  try{ performance.setResourceTimingBufferSize(EN_COK); }catch(e){ /* eski tarayici */ }
 
   function uygun(loc, nav){
     return !!loc && /^https?:$/.test(loc.protocol || '') && !!nav && ('serviceWorker' in nav);

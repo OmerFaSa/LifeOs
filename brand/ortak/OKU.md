@@ -20,6 +20,13 @@ ve `tests/index.html` bundan üretilir. Çıkarmak: satırı ve dosyaları sil. 
 ayarı da tek satırdır: `animasyon.js` › `KATALOG` (taşınır, profil, sıfırla, ortak; sunucu
 da oradan okur).
 
+## Sayfa, blok, yazı, bilgi (`parca.js`)
+
+Sistem Lego gibi kurulur. Örnek: `AYS/src/js/screens/target.js`. Menü sayfaların
+`P.sayfa` satırlarından üretilir; bir bölüm `P.blok` (sayfa ve yerini kendi söyler,
+başka dosyadan da takılır); her cümle `P.yazilar` + `y('kimlik')`; her hesap `P.bilgi`
+(etiketsiz kaydedilmez). Yeni ekranı bu kalıpla yaz, eskiye dokunurken bu kalıba çevir.
+
 ## Ne var burada
 
 | Dosya | Nereye | Ne için |

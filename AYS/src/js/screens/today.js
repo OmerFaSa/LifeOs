@@ -9,6 +9,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'today', modul:'ays', cekmece:'bugun', ad:'Genel bakış', ikon:'today', sira:10 });
 
 R.Screens.today = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;

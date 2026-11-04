@@ -4,6 +4,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'cards', modul:'ays', cekmece:'calisma', ad:'Tekrar', ikon:'cards', sira:30 });
 
 R.Screens.cards = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;

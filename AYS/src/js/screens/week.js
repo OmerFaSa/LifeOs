@@ -4,6 +4,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'week', modul:'ays', cekmece:'plan', ad:'Hafta', ikon:'week', sira:10 });
 
 R.Screens.week = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;

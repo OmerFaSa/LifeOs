@@ -5,6 +5,9 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+/* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
+buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
+window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'ays', cekmece:'ayarlar', ad:'Genel', ikon:'guide', sira:10 });
 
 R.Screens.guide = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;

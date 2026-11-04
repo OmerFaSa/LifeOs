@@ -4,6 +4,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'protocols', modul:'ays', cekmece:'analiz', ad:'Telafi', ikon:'shield', sira:40 });
 
 R.Screens.protocols = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;

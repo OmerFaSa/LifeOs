@@ -35,6 +35,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'rutbe', modul:'ays', cekmece:'ayarlar', ad:'Rütbe', ikon:'layers', sira:30 });
 
 R.Screens.rutbe = (function(){
   const S = R.S, UI = R.UI, K = R.C;

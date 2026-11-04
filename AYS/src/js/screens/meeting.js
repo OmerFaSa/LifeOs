@@ -9,6 +9,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'ays', cekmece:'ofis', ad:'Toplantı', ikon:'list', sira:30 });
 
 R.Screens.meeting = (function(){
   const U = R.U, UI = R.UI, S = R.S;

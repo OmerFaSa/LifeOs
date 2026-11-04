@@ -15,6 +15,14 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+/* ÖĞREN (kullanıcı, 2026-10-09: «konu öğrenmek başlığı altında sol
+tarafa bölüm aç»): konuyu uygulamanın içinde teker teker öğrenmek.
+Dört bölüm aynı konuya bakar (core/ogren.js); Ders notları
+Çalışma'dan buraya taşındı — aynı şey iki yerde durmaz. */
+window.LIFEOS.PARCA.sayfa({ id:'ogren', modul:'ays', cekmece:'ogren', ad:'Konular', ikon:'list', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'anlatim', modul:'ays', cekmece:'ogren', ad:'Anlatım', ikon:'book', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'sorular', modul:'ays', cekmece:'ogren', ad:'Sorular', ikon:'check', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'koc', modul:'ays', cekmece:'ogren', ad:'Koç', ikon:'zap', sira:40 });
 
 (function(){
   const U = R.U, UI = R.UI, S = R.S;

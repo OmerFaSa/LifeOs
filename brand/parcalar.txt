@@ -57,6 +57,7 @@ js/core/perde.js
 
 [govde]
 js/data/build.js
+js/core/parca.js
 js/core/kesinlik.js
 js/core/turkcesayi.js
 js/core/sayi.js
@@ -387,6 +388,7 @@ js/core/minik.js
 js/app.js
 
 [test]
+../js/core/parca.js
 ../js/data/kademeler.js
 ../js/data/basarimlar.js
 ../js/data/curriculum.js ays

@@ -13,66 +13,9 @@ R.App = (function(){
      bölüm. Bölümler üst çubukta değil, sayfa başının altındaki bölüm
      çubuğunda durur. Onaylar ve Kütüphanem tek bölümlüdür. */
   const K = window.LIFEOS.KABUK;
-  const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
-  const NAV = [
-    { id:'bugun', label:CEK('bugun'), items:[
-      { id:'today', icon:'today', label:'Genel bakış' },
-    ]},
-    { id:'plan', label:CEK('plan'), items:[
-      { id:'week',   icon:'week',   label:'Hafta' },
-      { id:'plan',   icon:'map',    label:'Program' },
-      { id:'target', icon:'target', label:'Hedefler' },
-    ]},
-    /* Sade çekmece (2026-10-16, «AYS'de çok şey iç içe girmiş»): «Konu
-       çalış» adı Öğren › Konular ile karışıyordu; ikisi de ders ve konu
-       listesi. Bu ekran konunun TESTLE kapanışını izler — adı bu oldu ve
-       sona geçti; Çalışma «Soru çöz» ile açılır. Rota kimliği aynı. */
-    { id:'calisma', label:CEK('calisma'), items:[
-      { id:'solve',    icon:'search', label:'Soru çöz' },
-      { id:'exams',    icon:'exam',   label:'Deneme' },
-      { id:'cards',    icon:'cards',  label:'Tekrar' },
-      { id:'quiz',     icon:'zap',    label:'Sınama' },
-      { id:'subjects', icon:'book',   label:'Konu kapanışı' },
-    ]},
-    /* ÖĞREN (kullanıcı, 2026-10-09: «konu öğrenmek başlığı altında sol
-       tarafa bölüm aç»): konuyu uygulamanın içinde teker teker öğrenmek.
-       Dört bölüm aynı konuya bakar (core/ogren.js); Ders notları
-       Çalışma'dan buraya taşındı — aynı şey iki yerde durmaz. */
-    { id:'ogren', label:CEK('ogren'), items:[
-      { id:'ogren',   icon:'list',  label:'Konular' },
-      { id:'anlatim', icon:'book',  label:'Anlatım' },
-      { id:'sorular', icon:'check', label:'Sorular' },
-      { id:'koc',     icon:'zap',   label:'Koç' },
-      { id:'learn',   icon:'play',  label:'Ders notları' },
-    ]},
-    { id:'analiz', label:CEK('analiz'), items:[
-      { id:'progress',  icon:'chart',  label:'İlerleme' },
-      /* Gelecek simülatörü (2026-10-16): sınav gününe kadar «bu gidişle»
-         ve «ne olursa» (core/gelecek.js). */
-      { id:'gelecek',   icon:'target', label:'Gelecek' },
-      { id:'analytics', icon:'search', label:'Ayrıntı' },
-      { id:'protocols', icon:'shield', label:'Telafi' },
-    ]},
-    { id:'onaylar', label:CEK('onaylar'), items:[
-      { id:'onaylar', icon:'check', label:'Bekleyen' },
-    ]},
-    { id:'ofis', label:CEK('ofis'), items:[
-      { id:'office',  icon:'guide', label:'Masalar' },
-      { id:'team',    icon:'zap',   label:'Danışma' },
-      { id:'meeting', icon:'list',  label:'Toplantı' },
-    ]},
-    { id:'kutuphane', label:CEK('kutuphane'), items:[
-      { id:'notlar', icon:'edit', label:'Notlar' },
-      { id:'kutuphane', icon:'book', label:'Kitaplar' },
-    ]},
-    /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
-       buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
-    { id:'ayarlar', label:CEK('ayarlar'), items:[
-      { id:'guide',    icon:'guide',  label:'Genel' },
-      { id:'profiles', icon:'shield', label:'Profil' },
-      { id:'rutbe',    icon:'layers', label:'Rütbe' },
-    ]},
-  ];
+  /* Menu elle yazilmaz: her ekran dosyasi kendi yerini soyler (brand/ortak/parca.js).
+     Cekmece sirasi kabuktan gelir; yeni sayfa = dosyasinda tek P.sayfa satiri. */
+  const NAV = window.LIFEOS.PARCA.menu('ays', K.CEKMECELER);
 
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
   /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):

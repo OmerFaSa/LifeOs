@@ -17,6 +17,11 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+/* Sade çekmece (2026-10-16, «AYS'de çok şey iç içe girmiş»): «Konu
+çalış» adı Öğren › Konular ile karışıyordu; ikisi de ders ve konu
+listesi. Bu ekran konunun TESTLE kapanışını izler — adı bu oldu ve
+sona geçti; Çalışma «Soru çöz» ile açılır. Rota kimliği aynı. */
+window.LIFEOS.PARCA.sayfa({ id:'solve', modul:'ays', cekmece:'calisma', ad:'Soru çöz', ikon:'search', sira:10 });
 
 R.Screens.solve = (function(){
   const U = R.U, UI = R.UI, S = R.S;

@@ -13,6 +13,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'learn', modul:'ays', cekmece:'ogren', ad:'Ders notları', ikon:'play', sira:50 });
 
 R.Screens.learn = (function(){
   const U = R.U, M = R.Model, UI = R.UI, S = R.S;

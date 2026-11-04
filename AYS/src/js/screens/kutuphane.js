@@ -8,6 +8,8 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'notlar', modul:'ays', cekmece:'kutuphane', ad:'Notlar', ikon:'edit', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'kutuphane', modul:'ays', cekmece:'kutuphane', ad:'Kitaplar', ikon:'book', sira:20 });
 
 R.Screens.kutuphane = (function(){
   const U = R.U, UI = R.UI;

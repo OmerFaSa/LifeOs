@@ -137,6 +137,11 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    hâlesi. Sürekli oynayan parıltı yine yok; renk yine ölçüyü ayırır.
    «Sade» zeminde bu katmanın hiçbiri çalışmaz.
 
+11. **Sistem Lego gibi kurulur** (2026-11-04, depo sahibi: «her sayfanın, her özelliğin,
+   her yazının bir Lego gibi parça olması lazım»). Dosya `brand/parcalar.txt`'e tek satır,
+   tercih `animasyon.js` › `KATALOG`'a tek satır, sayfa/blok/yazı/bilgi `brand/ortak/parca.js`
+   ile kaydedilir. Yeni iş bu kalıpla yazılır; eski ekrana dokunan, onu da kalıba çevirir.
+
 ## 2. Denetimler — birleştirmeden önce koşar
 
 ```bash
