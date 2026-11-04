@@ -15,6 +15,7 @@
      tokens.css yalniz modulun kuyrugudur (--mod = AYS mavisi); rota.css
      yalniz AYS'ye ozgu bilesenleri tasir. Paletler ve bes duzen kalkti
      (EKIP-PLANI §8-4): tek tasarim. -->
+<!-- PARCA:bas · uretilmis (brand/parcalar.txt, tools/parca.py); elle duzenleme -->
 <link rel="stylesheet" href="css/fonts.css"/>
 <link rel="stylesheet" href="css/jeton.css"/>
 <link rel="stylesheet" href="css/tokens.css"/>
@@ -55,12 +56,10 @@
 <link rel="stylesheet" href="css/cam.css"/>
 <link rel="stylesheet" href="css/king-cam.css"/>
 <link rel="stylesheet" href="css/minik-cam.css"/>
-<!-- Animasyonlar (Tam · Az · Sistem): stillerden SONRA, ilk cizimden ONCE.
-     Hareket kosullu medya kurallarini ve matchMedia'yi ayarlar
-     (brand/ortak/animasyon.js). -->
 <script src="js/core/animasyon.js"></script>
 <script src="js/core/zemin.js"></script>
 <script src="js/core/ayarlar.js"></script>
+<!-- /PARCA:bas -->
 <link id="pwa-manifest" rel="manifest"/>
 <link rel="icon" type="image/png" href="img/brand/favicon.png"/>
 <meta name="theme-color" content="#3D3F8F"/>
@@ -116,7 +115,9 @@
      bir betik olarak durursa, durağan perdenin ilk boyamasını da o
      geciktirir — yani markupin durağan olmasinin sebebini ortadan
      kaldirirdi. -->
+<!-- PARCA:perde · uretilmis (brand/parcalar.txt, tools/parca.py); elle duzenleme -->
 <script src="js/core/perde.js"></script>
+<!-- /PARCA:perde -->
 <script>
 (function(){
   var el = document.getElementById('marka-perde');
@@ -193,6 +194,7 @@
 <div id="rota-duyuru" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- Derleme damgasi: build.py her derlemede yeniden yazar. -->
+<!-- PARCA:govde · uretilmis (brand/parcalar.txt, tools/parca.py); elle duzenleme -->
 <script src="js/data/build.js"></script>
 <script src="js/core/kesinlik.js"></script>
 <script src="js/core/turkcesayi.js"></script>
@@ -397,6 +399,7 @@
 <script src="js/screens/kutuphane.js"></script>
 <script src="js/core/minik.js"></script>
 <script src="js/app.js"></script>
+<!-- /PARCA:govde -->
 
 </body>
 </html>

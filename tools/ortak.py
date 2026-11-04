@@ -125,6 +125,9 @@ if hasattr(sys.stdout, "reconfigure"):
         pass
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import parca
+
 KOK = Path(__file__).resolve().parent.parent
 KAYNAK = KOK / "brand" / "ortak"
 
@@ -500,6 +503,14 @@ def uret(ad: str, sistem: str) -> str:
     return (KALIP_BASLIK % ad) + govde
 
 
+# Listede olmayan dosya yerini uzantisindan bulur: yeni parca icin yukariya satir
+# gerekmez (brand/parcalar.txt yeter). Yukaridaki satirlar gecmis notu olarak kalir.
+for _p in sorted(KAYNAK.iterdir()) if KAYNAK.is_dir() else []:
+    if _p.is_file() and _p.suffix in (".js", ".css") and _p.name not in DOSYALAR:
+        DOSYALAR[_p.name] = ("tests" if _p.name.endswith(".test.js")
+                             else "css" if _p.suffix == ".css" else "js/core")
+
+
 def hedefler(ad: str):
     klasor = DOSYALAR[ad]
     for sistem in YALNIZ.get(ad, SISTEMLER):
@@ -550,6 +561,7 @@ def yay() -> int:
             print("  ✓ %s" % hedef.relative_to(KOK))
             n += 1
     print("\n%d dosya yazildi." % n if n else "\nHepsi zaten guncel.")
+    parca.yay()
     if n:
         print("Unutma: src/ degisti — uc `build.py` yeniden kosmali.")
     if reddedilen:
@@ -614,6 +626,8 @@ def denetle() -> int:
                                "brand/ortak/%s icine yazilir"
                                % (hedef.relative_to(KOK), ad))
     hatalar.extend(baglanmayan())
+    if parca.denetle():
+        hatalar.append("sayfalar brand/parcalar.txt ile ayni degil — `python3 tools/ortak.py --yay`")
     if hatalar:
         print("Ortak kaynak ayrismis:\n")
         for h in hatalar:

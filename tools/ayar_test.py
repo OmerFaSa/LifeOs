@@ -104,6 +104,12 @@ with tempfile.TemporaryDirectory() as k:
     bekle("yeni muzik ve video anahtarlari gecerli", A.gecerli("lifeos.muzik.yer", "ayri") and A.gecerli("lifeos.muzik.yer.spi", "x")
           and A.gecerli("lifeos.acilis.video", "1"))
 
+# katalog: anahtarlar brand/ortak/animasyon.js tablosundan; JS deseniyle ayni kapali kume
+for k in ("lifeos.cam", "lifeos.zemin.a.b", "lifeos.buzlu.kart", "lifeos.muzik.yer.ays", "lifeos.king.ad"):
+    bekle("katalog kabul: " + k, A.gecerli(k, "1"))
+for k in ("lifeos.kilit.odeme", "lifeos.king", "lifeos.buzlu.a.b", "lifeos.yuzey.ays", "xlifeos.cam", "lifeos.cam2"):
+    bekle("katalog red: " + k, not A.gecerli(k, "1"))
+
 if hata:
     print("KIRMIZI:", *hata, sep="\n  ")
     sys.exit(1)

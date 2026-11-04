@@ -243,7 +243,87 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.muzik.var', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.king.ad', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik', 'lifeos.sessiz.bitis', 'lifeos.ice.var', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere', 'lifeos.tema.secim', 'lifeos.zemin.video', 'lifeos.minik.kapali', 'lifeos.profiller', 'lifeos.profil.etkin', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+    /* AYAR KATALOGU (tek tablo). Yeni tercih = buraya tek satir. Harfler:
+     t moduller arasi tasinir · p profile girer · s «Gorunumu sifirla» siler ·
+     o bilgisayarda ortak durur (sistem/ayar.py de bu tablodan okur).
+     `.*` a-z, `.**` a-z ve nokta: yalniz sunucuda ortak olan degisken anahtarlar. */
+  const KATALOG = /*KATALOG*/{
+    "lifeos.hareket":"tpo",
+    "lifeos.hareket.hiz":"tpo",
+    "lifeos.ses":"tpo",
+    "lifeos.zemin":"tpso",
+    "lifeos.yazi":"tpso",
+    "lifeos.minik":"tpo",
+    "lifeos.minik.ses":"t",
+    "lifeos.minik.boy":"tp",
+    "lifeos.minik.takim":"tp",
+    "lifeos.muzik.var":"to",
+    "lifeos.manzara":"tpso",
+    "lifeos.manzara.gece":"tps",
+    "lifeos.manzara.tur.gunduz":"t",
+    "lifeos.manzara.tur.gece":"t",
+    "lifeos.manzara.surum":"t",
+    "lifeos.tema.oto":"tpso",
+    "lifeos.kilit.odeme":"t",
+    "lifeos.kontrast":"tpso",
+    "lifeos.cam":"tpso",
+    "lifeos.perde":"tpso",
+    "lifeos.zemin.bulanik":"tps",
+    "lifeos.zemin.onizle.sade":"tp",
+    "lifeos.rozet":"tpso",
+    "lifeos.kenar.yuzey":"tpso",
+    "lifeos.king.ad":"tpo",
+    "lifeos.boyut":"tpso",
+    "lifeos.vurgu":"tpso",
+    "lifeos.odak":"tpso",
+    "lifeos.altcizgi":"tpso",
+    "lifeos.satir":"tpso",
+    "lifeos.isik":"tpso",
+    "lifeos.sessiz.bitis":"to",
+    "lifeos.ice.var":"to",
+    "lifeos.buzlu.kart":"tps",
+    "lifeos.buzlu.menu":"tps",
+    "lifeos.buzlu.pencere":"tps",
+    "lifeos.tema.secim":"tpo",
+    "lifeos.zemin.video":"tp",
+    "lifeos.minik.kapali":"tp",
+    "lifeos.profiller":"to",
+    "lifeos.profil.etkin":"to",
+    "lifeos.sessiz":"tpo",
+    "lifeos.ses.duzey":"tpo",
+    "lifeos.king.gorunus":"tpo",
+    "lifeos.king":"t",
+    "lifeos.king.cevap":"t",
+    "lifeos.king.ses":"tpo",
+    "lifeos.king.hiz":"tpo",
+    "lifeos.king.algila":"t",
+    "lifeos.king.mik":"t",
+    "lifeos.king.derinlik":"t",
+    "lifeos.king.yan":"t",
+    "lifeos.king.tarz":"tpo",
+    "lifeos.king.odak":"t",
+    "lifeos.king.bekleyen-kayit":"t",
+    "lifeos.king.merkez-sira":"t",
+    "lifeos.king.yapilacak":"t",
+    "lifeos.king.hatirlat":"t",
+    "lifeos.king.kartlarim":"t",
+    "lifeos.king.sorma":"t",
+    "lifeos.kisi.izin":"t",
+    "lifeos.karsilama":"t",
+    "lifeos.yuzey.ays":"p",
+    "lifeos.yuzey.spi":"p",
+    "lifeos.yuzey.esp":"p",
+    "lifeos.acilis.video":"o",
+    "lifeos.buzlu.*":"o",
+    "lifeos.manzara.**":"o",
+    "lifeos.minik.*":"o",
+    "lifeos.muzik.acilis.gun":"o",
+    "lifeos.muzik.yer":"o",
+    "lifeos.muzik.yer.*":"o",
+    "lifeos.zemin.**":"o"
+  }/*SON*/;
+  const katalogListe = h => Object.freeze(Object.keys(KATALOG).filter(k => k.indexOf('*') < 0 && KATALOG[k].indexOf(h) >= 0));
+  const TASINAN = katalogListe('t');
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -279,7 +359,7 @@ window.LIFEOS = window.LIFEOS || {};
      (yalnız değişen anahtar; iki modül açıksa birbirini ezmez). Sunucu
      yoksa (telefon, tek dosya, denetim sunucusu) hiçbir şey olmaz.
      Hangi anahtarın sistem ayarı olduğu: sistem/ayar.py ANAHTAR ile aynı. */
-  const ORTAK = /^lifeos\.(yazi|boyut|vurgu|odak|altcizgi|satir|isik|buzlu\.[a-z]+|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|sessiz\.bitis|minik|minik\.[a-z]+|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun|yer|yer\.[a-z]+)|acilis\.video|ice\.var|profiller|profil\.etkin)$/;
+  const ORTAK = new RegExp('^(' + Object.keys(KATALOG).filter(k => KATALOG[k].indexOf('o') >= 0).map(k => k.replace(/\./g, '\\.').replace(/\\\.\*\*$/, '\\.[a-z.]+').replace(/\\\.\*$/, '\\.[a-z]+')).join('|') + ')$');
   function ortakAnlik(){
     const o = {};
     try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(ORTAK.test(k)) o[k] = localStorage.getItem(k); } }catch(e){ /* depo kapalı */ }
@@ -673,7 +753,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
     dinlenSure,
-    ANAHTAR, KIPLER, TASINAN, ORTAK, ILK_ESIT, ortakAl, ortakFark, ortakGonder, ortakYenile, _ortakSifirla:() => { ortakSon = null; },
+    ANAHTAR, KIPLER, KATALOG, katalogListe, TASINAN, ORTAK, ILK_ESIT, ortakAl, ortakFark, ortakGonder, ortakYenile, _ortakSifirla:() => { ortakSon = null; },
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
     HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,

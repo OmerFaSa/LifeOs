@@ -145,6 +145,7 @@ python3 tools/seviye.py --yay        # brand/seviye/ -> uc arayuz
 python3 tools/seviye.py --denetle    # kopyalar kaynakla ayni mi (CI de kosar)
 python3 tools/ortak.py --yay         # brand/ortak/  -> uc arayuze
 python3 tools/ortak.py --denetle     # kopyalar kaynakla ayni mi (CI de kosar)
+python3 tools/parca_test.py          # parca kaydi: sayfalar brand/parcalar.txt'ten uretilir (ortak.py --yay/--denetle de kosar)
 python3 tools/marka.py --kunye       # brand/medya/ -> brand/ortak/medya.js
 python3 tools/marka.py --kunye --denetle   # kunye taze mi (CI de kosar)
 python3 tools/marka.py --sina        # ad kurali ve yol muhafizi (CI de kosar)

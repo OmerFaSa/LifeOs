@@ -12,6 +12,14 @@ python3 tools/ortak.py --denetle   # kopyalar kaynakla aynı mı
 Üç CSS dosyasıyla başladı, on yediye çıktı. Her eklenen dosya aynı
 ölçütü geçti: **üç arayüzde birebir aynı olmak zorunda mı?**
 
+## Yeni parça eklemek (tek satır)
+
+`brand/ortak/x.js` (varsa `x.css`, `x.test.js`) yaz, `brand/parcalar.txt`'te sırasına
+bir satır ekle, `python3 tools/ortak.py --yay` koş. Üç modülün kopyası, `index.html`
+ve `tests/index.html` bundan üretilir. Çıkarmak: satırı ve dosyaları sil. Yeni kullanıcı
+ayarı da tek satırdır: `animasyon.js` › `KATALOG` (taşınır, profil, sıfırla, ortak; sunucu
+da oradan okur).
+
 ## Ne var burada
 
 | Dosya | Nereye | Ne için |

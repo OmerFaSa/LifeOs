@@ -390,6 +390,14 @@
       expect(A.hizAyarla('dugme', -0.1)).toBe(false);
       expect(A.TASINAN.indexOf('lifeos.hareket.hiz') >= 0).toBe(true);
     }));
+    it('ayar kataloğu: listeler ve ortak desen tek tablodan çıkar', () => {
+      expect(A.katalogListe('t')).toEqual(A.TASINAN);
+      expect(A.katalogListe('p').indexOf('lifeos.yuzey.ays') >= 0).toBe(true);
+      expect(A.katalogListe('s').indexOf('lifeos.isik') >= 0).toBe(true);
+      expect(A.katalogListe('t').some(k => k.indexOf('*') >= 0)).toBe(false);
+      ['lifeos.cam', 'lifeos.zemin.a.b', 'lifeos.buzlu.kart', 'lifeos.muzik.yer.ays', 'lifeos.king.ad'].forEach(k => expect(A.ORTAK.test(k)).toBe(true));
+      ['lifeos.kilit.odeme', 'lifeos.king', 'lifeos.buzlu.a.b', 'lifeos.yuzey.ays', 'xlifeos.cam', 'lifeos.cam2'].forEach(k => expect(A.ORTAK.test(k)).toBe(false));
+    });
     it('öğe alanını bulur: minik, panel, düğme', () => {
       const d = document.createElement('div');
       d.innerHTML = '<div class="minik"><i class="m"></i></div><div class="katman"><b class="k"></b></div><button class="btn"><span class="b"></span></button>';

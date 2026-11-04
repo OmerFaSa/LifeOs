@@ -30,9 +30,19 @@ import re
 import threading
 import time
 
-ANAHTAR = re.compile(r"^lifeos\.(yazi|boyut|vurgu|odak|altcizgi|satir|isik|buzlu\.[a-z]+|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+"
-                     r"|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|sessiz\.bitis|minik|minik\.[a-z]+"
-                     r"|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun|yer|yer\.[a-z]+)|acilis\.video|ice\.var|profiller|profil\.etkin)$")
+def _katalog():
+    """Ortak anahtarlar brand/ortak/animasyon.js KATALOG tablosundan okunur; okunamazsa hicbir anahtar kabul edilmez."""
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "brand", "ortak", "animasyon.js"), encoding="utf-8") as f:
+            tablo = json.loads(re.search(r"/\*KATALOG\*/(.*?)/\*SON\*/", f.read(), re.S).group(1))
+    except (OSError, ValueError, AttributeError) as e:
+        print("ayar: katalog okunamadi:", e)
+        return re.compile(r"(?!)")
+    desen = [re.escape(k).replace(r"\.\*\*", r"\.[a-z.]+").replace(r"\.\*", r"\.[a-z]+") for k, h in tablo.items() if "o" in h]
+    return re.compile("^(" + "|".join(desen) + ")$")
+
+
+ANAHTAR = _katalog()
 CIHAZ_RE = re.compile(r"^[A-Za-z0-9_-]{4,64}$")
 EN_COK = 120
 _kilit = threading.Lock()
