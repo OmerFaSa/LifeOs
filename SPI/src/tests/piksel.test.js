@@ -15,6 +15,15 @@
   function oran(a, b){ const x = isikli(a), y = isikli(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
 
   describe('Piksel teması', () => {
+    it('bölüm başlığı konusuna göre simge alır; bilinmeyen başlık simgesiz kalır', () => {
+      const B = window.LIFEOS.PIKSEL.baslikAdi;
+      expect(B('Su')).toBe('damla');
+      expect(B('Öğünler')).toBe('ogun');
+      expect(B('Sürpriz')).toBe(null);
+      expect(B('Günün ölçümü')).toBe('nabiz');
+      ['damla', 'ogun', 'nabiz', 'ay', 'tarti', 'tup', 'takvim', 'kitap', 'belge', 'alev', 'harita', 'kalem', 'nota', 'yildiz', 'uyari', 'ayar', 'kisi', 'saat', 'hedef', 'yenile', 'kalp']
+        .forEach(ad => expect(!!window.LIFEOS.PIKSEL_SIMGE.bul(ad)).toBe(true));
+    });
     it('oda çizilir: kök piksel, tuval var', () => {
       window.LIFEOS.PIKSEL.uygula();
       expect(document.documentElement.getAttribute('data-zemin')).toBe('piksel');

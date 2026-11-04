@@ -18,7 +18,7 @@ const arg = a => { const i = process.argv.indexOf(a); return i < 0 ? null : proc
 const MODULLER = arg('--modul') ? [arg('--modul')] : Object.keys(NS);
 
 /* Bilerek yumuşak kalanlar: veri çizimi ve kullanıcının fotoğrafı. */
-const IZIN = /(^|\s)(tema-ornek|kenar|altbant|agentav|agentkare|rutbe|rozet|vk|vk-|kademe|perde|seviye|grafik|gr-|sparkline|isi|minik|piksel-oda|harita|rota-|foto|sk-|skeleton)/;
+const IZIN = /(^|\s)(defter__kagit|tema-ornek|kenar|altbant|agentav|agentkare|rutbe|rozet|vk|vk-|kademe|perde|seviye|grafik|gr-|sparkline|isi|minik|piksel-oda|harita|rota-|foto|sk-|skeleton)/;
 
 const TARA = izin => {
   const R = new RegExp(izin), out = {};
@@ -47,6 +47,19 @@ const TARA = izin => {
       if(q.backdropFilter && q.backdropFilter !== 'none') ekle('bulanik-arka' + ps, e);
       if(/gradient/.test(q.backgroundImage)) ekle('gecis' + ps, e);
       if(q.boxShadow !== 'none' && q.boxShadow.split(/,(?![^(]*\))/).some(g => { const n = (g.match(/-?\d+(\.\d+)?px/g) || []).map(parseFloat); return n[2] > 0.5; })) ekle('yumusak-golge' + ps, e); });
+  });
+  /* Çerçeveli kartın kenarına yapışık yazı (2026-11-05). */
+  document.querySelectorAll('#main :is(.kutu,.card,.pk,.ledger,.kapak__sayi,.donen,.inc-karar)').forEach(k => {
+    if(k.closest('.bugun .bugun__alan,.rutbe,.vk')) return;
+    const s = getComputedStyle(k), r = k.getBoundingClientRect();
+    if((s.boxShadow === 'none' && parseFloat(s.borderTopWidth) === 0) || r.width < 80 || r.height < 30) return;
+    const w = document.createTreeWalker(k, NodeFilter.SHOW_TEXT); let n = null;
+    while((n = w.nextNode())){
+      const p = n.parentElement;
+      if(!n.textContent.trim() || !p.getClientRects().length || getComputedStyle(p).clip !== 'auto') continue;
+      const q = document.createRange(); q.selectNodeContents(n); const b = q.getBoundingClientRect();
+      if(b.width && b.left - r.left < 5){ ekle('kenara-yapisik', k); break; }
+    }
   });
   return out;
 };

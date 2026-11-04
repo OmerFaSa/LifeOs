@@ -885,7 +885,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 :root[data-zemin="piksel"] .yay .kart--orta .kart__acik{ display:block; font-size:13.5px; margin:0; color:var(--text-2); }
 /* Modül kartları: renkli sırt, solda kimlik, altta eylem */
 :root[data-zemin="piksel"] .izgara{ grid-template-columns:repeat(3, minmax(0,1fr)); gap:22px; }
-:root[data-zemin="piksel"] .kart{ position:relative; display:flex; flex-direction:column; align-items:stretch; text-align:left; min-height:236px; padding:30px 22px 18px; background:var(--piksel-kagit); border:0; -webkit-backdrop-filter:none; backdrop-filter:none; transition:none;
+:root[data-zemin="piksel"] .kart{ position:relative; display:flex; flex-direction:column; align-items:stretch; text-align:left; min-height:196px; padding:30px 22px 18px; background:var(--piksel-kagit); border:0; -webkit-backdrop-filter:none; backdrop-filter:none; transition:none;
   box-shadow:0 -3px 0 #2a1a1c,0 3px 0 #2a1a1c,-3px 0 0 #2a1a1c,3px 0 0 #2a1a1c,inset 0 12px 0 var(--renk),inset 0 -4px 0 var(--px-koyu),8px 10px 0 var(--piksel-golge); }
 :root[data-zemin="piksel"] .kart::before{ display:none; }
 :root[data-zemin="piksel"] .kart:hover{ transform:translateY(-3px); box-shadow:0 -3px 0 #2a1a1c,0 3px 0 #2a1a1c,-3px 0 0 #2a1a1c,3px 0 0 #2a1a1c,inset 0 12px 0 var(--renk),inset 0 -4px 0 var(--px-koyu),8px 13px 0 var(--piksel-golge); }

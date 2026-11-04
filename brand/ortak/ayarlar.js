@@ -240,7 +240,7 @@ window.LIFEOS.PARCA.yazilar({
 });
 
 window.LIFEOS.PARCA.yazilar({
-  'ortak.ayarlar.inter':'Inter',
+  'ortak.ayarlar.inter':'Piksel',
   'ortak.ayarlar.manrope':'Manrope',
   'ortak.ayarlar.cihazin':'Cihazın',
   'ortak.ayarlar.newsreader':'Newsreader',

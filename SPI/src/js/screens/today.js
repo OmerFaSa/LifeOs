@@ -2106,6 +2106,8 @@ SP.Screens.today = (function(){
       if(!(n >= 1)) return;
       const d = shownDate();
       await suYaz(d, suSonrasi(suDurumu(d), n));
+      const y = document.querySelector('.su-bardak[data-n="' + n + '"][data-dolu]');
+      if(y) y.classList.add('is-zip');
     },
     async 'dunku-sikayet'(){
       const d = shownDate();

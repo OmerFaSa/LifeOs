@@ -112,7 +112,7 @@ window.LIFEOS = window.LIFEOS || {};
   }
   function figurleriKoy(){
     if(!L.PIKSEL_FIGUR) return;
-    Object.keys(L.PIKSEL_FIGUR).forEach(ad => document.documentElement.style.setProperty('--fig-' + ad, 'url("data:image/svg+xml,' + encodeURIComponent(figurSvg(ad)) + '")'));
+    Object.keys(L.PIKSEL_FIGUR).forEach(ad => document.documentElement.style.setProperty('--fig-' + ad, 'url("data:image/svg+xml,' + encodeURIComponent(figurSvg(ad, ad.indexOf('imlec') === 0 ? 32 : 0)) + '")'));   // imleç boyutsuz çizilmez
   }
 
   /* ---------- SİMGELER: bütün çizgi simgeler piksel ızgarasına oturur ----------
@@ -189,8 +189,29 @@ window.LIFEOS = window.LIFEOS || {};
     svg.style.width = svg.style.height = n + 'px';
     svg.innerHTML = '<path d="' + d + '" style="fill:currentColor;stroke:none"/>';
   }
+  /* Bölüm başlığı konusuna göre simge alır; eşleşmeyen kare işaretle kalır. Süs: veri okumaz. */
+  const BASLIK_SIMGE = [['öğün', 'ogun'], ['beslen', 'ogun'], ['uyku', 'ay'], ['gece', 'ay'], ['kilo', 'tarti'], ['hareket', 'nabiz'], ['seans', 'nabiz'], ['nabız', 'nabiz'], ['ölçüm', 'nabiz'],
+    ['toparlan', 'kalp'], ['his', 'kalp'], ['test', 'tup'], ['tahlil', 'tup'], ['takvim', 'takvim'], ['hafta', 'takvim'], ['program', 'takvim'], ['plan', 'takvim'], ['akış', 'saat'], ['hedef', 'hedef'],
+    ['tekrar', 'yenile'], ['konu', 'kitap'], ['ders', 'kitap'], ['oku', 'kitap'], ['kart', 'kitap'], ['deneme', 'belge'], ['sına', 'belge'], ['seri', 'alev'], ['yol', 'harita'], ['not', 'kalem'], ['yazı', 'kalem'],
+    ['müzik', 'nota'], ['öner', 'yildiz'], ['en iyi', 'yildiz'], ['uyarı', 'uyari'], ['risk', 'uyari'], ['ayar', 'ayar'], ['profil', 'kisi'], ['hesap', 'kisi']];
+  function baslikAdi(metin){
+    const m = String(metin || '').trim().toLocaleLowerCase('tr');
+    if(m === 'su' || m.indexOf('su ') === 0) return 'damla';
+    const b = BASLIK_SIMGE.find(x => m.indexOf(x[0]) >= 0);
+    return b ? b[1] : null;
+  }
+  function baslikSimge(e){
+    if(e.dataset.pxBas !== undefined) return;
+    const ad = baslikAdi(e.textContent), r = ad && L.PIKSEL_SIMGE && L.PIKSEL_SIMGE.bul(ad);
+    e.dataset.pxBas = ad || '';
+    if(!r) return;
+    let d = '';
+    r.forEach((s, y) => { for(let x = 0; x < s.length; x++) if(s[x] === '#') d += 'M' + x + ' ' + y + 'h1v1h-1z'; });
+    e.style.setProperty('--px-bas', 'url("data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" shape-rendering="crispEdges"><path d="' + d + '"/></svg>') + '")');
+  }
   function simgeleriTara(kok){
     if(!secili() || !kok || !kok.querySelectorAll) return;
+    kok.querySelectorAll('.kutu__ad').forEach(baslikSimge);
     if(kok.tagName && kok.tagName.toLowerCase() === 'svg') simgeCevir(kok);
     kok.querySelectorAll('svg:not([data-px])').forEach(simgeCevir);
   }
@@ -272,5 +293,5 @@ window.LIFEOS = window.LIFEOS || {};
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
   if(typeof document !== 'undefined') figurleriKoy();
-  L.PIKSEL = Object.freeze({ uygula, yerlesim, figurSvg, kaplamaYol, simgeCevir });
+  L.PIKSEL = Object.freeze({ uygula, yerlesim, figurSvg, kaplamaYol, simgeCevir, baslikAdi });
 })(window.LIFEOS);

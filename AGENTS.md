@@ -159,7 +159,8 @@ python3 tools/yazi.py --denetle      # ekran basliklari: cumle duzeni, «&» yok
 python3 tools/olucss.py              # hicbir ogeye uyamayan CSS kurali (--sil ile siler, sonra --yay + build)
 node tools/css_onemli.js             # her !important'i olcer: gerekli, gereksiz, gorulmedi (--sil kanitliyi siler)
 node tools/parca_kanit.js --durum     # kac ekran, blok, komut, yazi, bilgi parcaya gecti
-node tools/piksel_denetim.js          # temaya uymayan yumusak izler: bulaniklik, bulanik golge, gecis, soluk yazi
+node tools/piksel_denetim.js          # temaya uymayan izler: bulaniklik, bulanik golge, gecis, soluk yazi, yapisik serit ve yazi
+python3 tools/piksel_rakam.py --denetle  # gomulu rakam yazi tipi cizimle ayni mi
 node tools/giris_sayfa_test.js        # giris ve Gun sayfasi gercekten aciliyor mu (modul denetimleri bunlari acmaz)
 node tools/parca_tembel_test.js       # tembel veri (parcalar.txt [tembel]): dist kaynak surumle ayni, acilista calismiyor (once build.py)
 node tools/pusula.js                 # Kolay LifeOS pusulasi: iyi gun kaydi eylem sayisi, Bugun ve menu (belgeler/ekip/KOLAY-PLANI.md)

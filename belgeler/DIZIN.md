@@ -17,6 +17,7 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [TASARIM-OZELLIKLERI](ekip/TASARIM-OZELLIKLERI.md) — 183 tasarım özelliği, kart biçimleri ve ekran bazlı görsel katalog; durumu: güncel (2026-09-24)
 - [CEKMECE-HARITASI](ekip/CEKMECE-HARITASI.md) — Sekiz çekmeceli arayüz düzeni, ekran hiyerarşisi ve gezinme yapısı; durumu: tamamlandı (2026-09-24)
 - [IPHONE-PLANI](ekip/IPHONE-PLANI.md) — Sistemin tamamını sade, öz ve modern bir kullanıcı deneyimine taşıma planı; durumu: tamamlandı (2026-10-02)
+- [PIKSEL-PLANI](ekip/PIKSEL-PLANI.md) — Sistemin tatlı piksel hâli için yapılacaklar listesi; durumu: sürüyor (2026-11-05)
 - [KOLAY-PLANI](ekip/KOLAY-PLANI.md) — Sürtünmesiz veri girişi ve sadeleştirilmiş kullanıcı deneyimi planı; durumu: tamamlandı (2026-10-16)
 - [KISI-PLANI](ekip/KISI-PLANI.md) — King'in 14 yaşam alanında kullanıcıyı tanıyan kişi modeli ve hafıza yapısı; durumu: tamamlandı (2026-10-17)
 - [NOT-PLANI](ekip/NOT-PLANI.md) — Zengin içerikli, iki yönlü bağlantılı yerel defter ve not sistemi mimarisi; durumu: tamamlandı (2026-10-17)
