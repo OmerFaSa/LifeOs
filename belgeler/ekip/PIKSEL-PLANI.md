@@ -29,6 +29,16 @@ Kurallar: tek tema jetonla ve kabuk yüzeyleriyle değişir, ekran tema bilmez. 
 - [x] Küçük tepki: bardak dolunca zıplar
 - [ ] Küçük tepki: tik basılınca oturur, kayıtta kalp
 
+## Efektler (2026-11-05: «efektlerin kalitesini arttır, tüm sayfalarda»)
+
+- [x] Bütün hareket adım adım: yumuşak eğri yok, süreler kısa (Rütbe ve geri sayım hariç)
+- [x] Sayfa, pencere, sekme, menü ve bildirim tek giriş hareketi; kenar menü hızlı açılır
+- [x] Düğme basılınca iner; menü ve kısayol simgesi üzerine gelince zıplar
+- [x] Kıvılcım: bardak, tik ve gerçek kayıtta sekiz kare; hareket ayarına uyar
+- [x] Açılış karşılaması: bulanık cam yerine duvar, kâğıt ve modül yüzü
+- [x] «Yeni rozet» bildirimi: kâğıt pencere, piksel yazı, bloksuz çubuk
+- [ ] Rütbe kutlaması tam ekranı (video; dokunulmadı)
+
 ## Modüller
 
 - [x] SPİ: tahlil aralığı kalın bant ve iğne
@@ -48,6 +58,3 @@ Kurallar: tek tema jetonla ve kabuk yüzeyleriyle değişir, ekran tema bilmez. 
 - [ ] Gün sayfası: niyet, pil, hava kartları
 - [ ] Açılış perdesi
 
-## Karar bekleyen
-
-- «Yeni rozet» töreni hâlâ eski yazı tipi ve koyu camda; Rütbe'ye dokunulmaz kuralı nedeniyle değişmedi.

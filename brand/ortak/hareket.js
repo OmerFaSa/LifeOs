@@ -603,6 +603,7 @@ window.LIFEOS.HAREKET = (function(){
     d.classList.remove('h-kaydedildi');
     void d.offsetWidth;
     d.classList.add('h-kaydedildi');
+    const PX = window.LIFEOS && window.LIFEOS.PIKSEL; if(PX && PX.ogeKivilcim) PX.ogeKivilcim(d);
     setTimeout(() => d.classList.remove('h-kaydedildi'), 1100);
     const kart = d.closest('.kutu, .card, .sheet, .entry, .lrow');
     if(kart){

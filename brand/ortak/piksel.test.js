@@ -21,6 +21,23 @@
       ['damla', 'ogun', 'nabiz', 'ay', 'tarti', 'tup', 'takvim', 'kitap', 'belge', 'alev', 'harita', 'kalem', 'nota', 'yildiz', 'uyari', 'ayar', 'kisi', 'saat', 'hedef', 'yenile', 'kalp']
         .forEach(ad => expect(!!window.LIFEOS.PIKSEL_SIMGE.bul(ad)).toBe(true));
     });
+    it('kıvılcım sekiz kare atar, aria-hidden ve dokunulmaz; hareket azaltılmışsa hiç çizmez', () => {
+      const P = window.LIFEOS.PIKSEL, kok = document.documentElement, once = kok.getAttribute('data-hareket');
+      kok.setAttribute('data-zemin', 'piksel');
+      kok.setAttribute('data-hareket', 'az');
+      try{
+        expect(P.kivilcim(10, 10)).toBe(0);
+        expect(document.querySelectorAll('.px-kivilcim').length).toBe(0);
+      }finally{ if(once) kok.setAttribute('data-hareket', once); else kok.removeAttribute('data-hareket'); }
+      const n = P.kivilcim(10, 10);
+      if(n){
+        const e = document.querySelector('.px-kivilcim');
+        expect(n).toBe(8);
+        expect(e.children.length).toBe(8);
+        expect(e.getAttribute('aria-hidden')).toBe('true');
+        e.remove();
+      }
+    });
     it('oda çizilir: kök piksel, tuval var', () => {
       window.LIFEOS.PIKSEL.uygula();
       expect(document.documentElement.getAttribute('data-zemin')).toBe('piksel');

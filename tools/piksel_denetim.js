@@ -18,7 +18,7 @@ const arg = a => { const i = process.argv.indexOf(a); return i < 0 ? null : proc
 const MODULLER = arg('--modul') ? [arg('--modul')] : Object.keys(NS);
 
 /* Bilerek yumuşak kalanlar: veri çizimi ve kullanıcının fotoğrafı. */
-const IZIN = /(^|\s)(defter__kagit|tema-ornek|kenar|altbant|agentav|agentkare|rutbe|rozet|vk|vk-|kademe|perde|seviye|grafik|gr-|sparkline|isi|minik|piksel-oda|harita|rota-|foto|sk-|skeleton)/;
+const IZIN = /(^|\s)(siluet|defter__kagit|tema-ornek|kenar|altbant|agentav|agentkare|rutbe|rozet|vk|vk-|kademe|perde|seviye|grafik|gr-|sparkline|isi|minik|piksel-oda|harita|rota-|foto|sk-|skeleton)/;
 
 const TARA = izin => {
   const R = new RegExp(izin), out = {};

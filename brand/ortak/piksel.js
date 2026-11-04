@@ -264,6 +264,41 @@ window.LIFEOS = window.LIFEOS || {};
       kare(Date.now() / 1000);
     }, 125);
   }
+  /* Kıvılcım: gerçek bir kayıt ya da tikte sekiz kare dağılır. Süs: veri okumaz, hareket ayarına uyar. */
+  const KIVILCIM = [[-16, -16], [0, -24], [16, -16], [24, 0], [16, 16], [0, 24], [-16, 16], [-24, 0]];
+  function kivilcim(x, y, renkler){
+    if(!secili() || hareketsiz() || !document.body) return 0;
+    const R = renkler || ['#ffd35a', '#f2a24e', '#fff8ea'], kap = document.createElement('div');
+    kap.className = 'px-kivilcim';
+    kap.setAttribute('aria-hidden', 'true');
+    kap.style.left = Math.round(x) + 'px';
+    kap.style.top = Math.round(y) + 'px';
+    KIVILCIM.forEach((d, i) => {
+      const k = document.createElement('i');
+      k.style.background = R[i % R.length];
+      kap.appendChild(k);
+      const son = 'translate(' + d[0] + 'px,' + d[1] + 'px)';
+      k.animate([{ transform:'none', opacity:1 }, { transform:son, opacity:1, offset:.75 }, { transform:son, opacity:0 }], { duration:360, easing:'steps(5, end)', fill:'forwards' });
+    });
+    document.body.appendChild(kap);
+    setTimeout(() => kap.remove(), 420);
+    return KIVILCIM.length;
+  }
+  function ogeKivilcim(e, renkler){
+    const r = e.getBoundingClientRect();
+    return kivilcim(r.left + r.width / 2, r.top + r.height / 2, renkler);
+  }
+  function tepkiIzle(){
+    document.addEventListener('click', o => {
+      const t = o.target;
+      if(!t || !t.closest) return;
+      const su = t.closest('.su-bardak');
+      if(su){ ogeKivilcim(su, ['#58b9ec', '#e6f7ff', '#2f93cf']); return; }
+      if(t.matches('input[type="checkbox"]:checked')){ ogeKivilcim(t); return; }
+      const satir = t.closest('button.minrow:not(.is-done)');
+      if(satir) ogeKivilcim(satir.querySelector('.minrow__mark') || satir);
+    }, true);
+  }
   function uygula(){
     if(!secili()){
       if(durum.c){ durum.c.remove(); durum.c = null; durum.g = null; }
@@ -282,6 +317,7 @@ window.LIFEOS = window.LIFEOS || {};
   function kur(){
     uygula();
     simgeIzle();
+    tepkiIzle();
     let bekle = null;
     window.addEventListener('resize', () => { clearTimeout(bekle); bekle = setTimeout(uygula, 150); });
     new MutationObserver(uygula).observe(document.documentElement, { attributes:true, attributeFilter:['data-zemin', 'data-theme', 'data-hareket'] });
@@ -293,5 +329,5 @@ window.LIFEOS = window.LIFEOS || {};
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else kur();
   }
   if(typeof document !== 'undefined') figurleriKoy();
-  L.PIKSEL = Object.freeze({ uygula, yerlesim, figurSvg, kaplamaYol, simgeCevir, baslikAdi });
+  L.PIKSEL = Object.freeze({ uygula, yerlesim, figurSvg, kaplamaYol, simgeCevir, baslikAdi, kivilcim, ogeKivilcim });
 })(window.LIFEOS);
