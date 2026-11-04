@@ -1725,10 +1725,10 @@ window.LIFEOS.HESAP = (function(){
      tanıtım: işaret, tek cümle, dört sistem, üç söz. Kaydırma yok;
      telefonda form açılınca tanıtım çekilir, form tek işe kalır. */
   const SISTEMLER = [
-    ['AYS', yz('ortak.hesap.sinav-hazirligi'), '<rect x="5" y="5" width="14" height="14" rx="3.5"/>', '#4F86FF'],
-    ['SPİ', yz('ortak.hesap.saglik-ve-toparlanma'), '<circle cx="12" cy="12" r="7.5"/>', '#2EC4A9'],
-    ['ESP', yz('ortak.hesap.dil-muzik-okuma'), '<rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.4" transform="rotate(45 12 12)"/>', '#F2A93B'],
-    ['Gün', yz('ortak.hesap.gunu-kur-gidisi-gor'), '<path d="M5 18.5a7 7 0 0 1 14 0z"/>', '#9A86FF'],
+    ['AYS', yz('ortak.hesap.sinav-hazirligi'), 'ays', '#4F86FF'],
+    ['SPİ', yz('ortak.hesap.saglik-ve-toparlanma'), 'spi', '#2EC4A9'],
+    ['ESP', yz('ortak.hesap.dil-muzik-okuma'), 'esp', '#F2A93B'],
+    ['Gün', yz('ortak.hesap.gunu-kur-gidisi-gor'), 'gun', '#9A86FF'],
   ];
   const SOZLER = [yz('ortak.hesap.pc-telefon-ve-tablet-ayni'), yz('ortak.hesap.verin-hicbir-sirketin-sunucu'),
     yz('ortak.hesap.bilgisayar-kapaliyken-de-cal')];
@@ -1737,7 +1737,7 @@ window.LIFEOS.HESAP = (function(){
       + ('<p class="hesap-kapi__ad">' + yz('ortak.hesap.lifeos') + '</p>')
       + ('<p class="hesap-kapi__slogan">' + yz('ortak.hesap.sinav-saglik-ve-gelisim-tek') + '</p>')
       + '<ul class="hesap-kapi__sistemler">' + SISTEMLER.map(([ad, acik, sekil, renk], i) =>
-          '<li style="--renk:' + renk + ';--sira:' + i + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + sekil + '</svg>'
+          '<li style="--renk:' + renk + ';--sira:' + i + '">' + (window.LIFEOS.PIKSEL ? window.LIFEOS.PIKSEL.figurSvg(sekil).replace('<svg ', '<svg aria-hidden="true" ') : '')
           + '<b>' + kac(ad) + '</b><span>' + kac(acik) + '</span></li>').join('') + '</ul>'
       + '<ul class="hesap-kapi__sozler">' + SOZLER.map(x => '<li>' + ikon('tamam') + '<span>' + kac(x) + '</span></li>').join('')
       + '</ul></section>';

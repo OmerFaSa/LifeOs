@@ -435,3 +435,50 @@
 :root[data-zemin="piksel"] .haberci__gec{ border:0; margin:2px; background:var(--surface-2); color:var(--text); font-family:var(--font-body); box-shadow:var(--px-dugme); }
 :root[data-zemin="piksel"] .haberci__cubuk{ height:10px; background:var(--surface-3); box-shadow:inset 0 3px 0 var(--px-koyu); }
 :root[data-zemin="piksel"] .haberci__cubuk i{ background:var(--primary); box-shadow:none; }
+
+/* ----- TATLI, 2. tur: kalan ekranlar ----- */
+/* Uzun pencerede karşılama ile yaprak arasına ahşap girmesin */
+:root[data-zemin="piksel"] .site--v5 > .site__body{ align-content:flex-start; }
+/* SPİ: tuş takımı, adım tuşları, gün şeridi */
+:root[data-zemin="piksel"] .vk :is(.x37 .tt button,.w37 button,.y17 .ol button,.x36 .st button){ border:0; margin:2px; box-shadow:var(--px-dugme); }
+:root[data-zemin="piksel"] .vk .x37 .tt button{ background:var(--surface-2); color:var(--text); font-family:var(--font-body); font-size:15px; }
+:root[data-zemin="piksel"] .vk :is(.x37 .tt button,.w37 button,.y17 .ol button,.x36 .st button):active{ transform:translateY(2px); box-shadow:var(--px-bas); }
+:root[data-zemin="piksel"] .vk .x37 .tt button.on, :root[data-zemin="piksel"] .vk .x37 .tt .tt-kaydet{ background:var(--primary); color:var(--primary-ink); box-shadow:var(--px-ana); }
+:root[data-zemin="piksel"] .vk :is(.y17 .ol button.on,.x36 .st button.d){ box-shadow:var(--px-ana); }
+/* AYS: hafta günleri kart, bloklar küçük kâğıt */
+:root[data-zemin="piksel"] .daycol{ border:0; margin:2px; box-shadow:var(--px-kart); }
+:root[data-zemin="piksel"] .daycol__block{ border:0; box-shadow:inset 0 -2px 0 var(--px-koyu); }
+/* ESP: merdiven kartları ve basamaklar */
+:root[data-zemin="piksel"] .site--v5 .ladcard{ border:0; margin:2px; background-color:var(--surface); box-shadow:var(--px-kart); }
+:root[data-zemin="piksel"] .ladcard__bar{ height:10px; background:var(--surface-3); box-shadow:inset 0 3px 0 var(--px-koyu); }
+:root[data-zemin="piksel"] .ladcard__fill{ -webkit-mask:repeating-linear-gradient(90deg, black 0 8px, transparent 8px 10px); mask:repeating-linear-gradient(90deg, black 0 8px, transparent 8px 10px); }
+:root[data-zemin="piksel"] .ladderstep{ padding-block:6px; border-bottom:2px solid var(--border-soft); }
+:root[data-zemin="piksel"] .ladderstep__no{ box-shadow:inset 0 2px 0 #ffffff40, inset 0 -2px 0 #00000026; }
+:root[data-zemin="piksel"] .ladderstep.is-done{ opacity:1; color:var(--text-2); }
+/* Ayarlar: kartlar aynı çerçeve */
+:root[data-zemin="piksel"] .skart{ border:0; margin:2px; background-color:var(--surface); box-shadow:var(--px-kart); }
+:root[data-zemin="piksel"] .ayarlar__nav .ayarlar__sekme:active{ transform:translateY(2px); }
+/* Giriş kapısı: duvar ve ahşap zemin, form kâğıtta */
+:root[data-zemin="piksel"] .hesap-kapi{ background:linear-gradient(var(--piksel-duvar) 88%, var(--piksel-tahta-2) 88%, var(--piksel-tahta-2) 89%, var(--piksel-tahta) 89%); }
+:root[data-zemin="piksel"] .hesap-kapi__kart, :root[data-zemin="piksel"] .hesap-merkez__kart{ overflow:visible; background:var(--piksel-kagit); box-shadow:0 -4px 0 var(--px-kenar),0 4px 0 var(--px-kenar),-4px 0 0 var(--px-kenar),4px 0 0 var(--px-kenar),12px 14px 0 var(--piksel-golge); }
+:root[data-zemin="piksel"] .hesap-kapi__kart::before, :root[data-zemin="piksel"] .hesap-kapi__kart::after{ content:none; }
+:root[data-zemin="piksel"] .hesap-kapi__kart:focus-visible, :root[data-zemin="piksel"] .hesap-merkez__kart:focus-visible{ outline:none; }
+:root[data-zemin="piksel"] .hesap-kapi__isaret{ width:64px; height:64px; }
+:root[data-zemin="piksel"] .hesap-kapi__sistemler li{ background:var(--piksel-tahta); box-shadow:inset 0 3px 0 #ffffff1a, inset 0 -3px 0 #00000033; }
+:root[data-zemin="piksel"] .hesap-kapi__sistemler svg{ width:32px; height:32px; }
+:root[data-zemin="piksel"] .hesap-kapi__sistemler li{ grid-template-columns:32px minmax(0, 1fr); }
+@media (max-width:679px){ :root[data-zemin="piksel"] .hesap-kapi__sistemler svg{ width:16px; height:16px; } }
+/* Rütbe kutlaması: görsel ve video aynı kalır, yazı ve düğme sistemin dilinde */
+:root[data-zemin="piksel"] .perde--rutbe :is(.perde__banner,.perde__banner *){ font-family:var(--font-body); font-style:normal; letter-spacing:0; }
+/* Onay kutusu basınca iner; dönen halka adımlı */
+:root[data-zemin="piksel"] input:is([type="checkbox"],[type="radio"]):active{ transform:translateY(2px); }
+:root[data-zemin="piksel"] .minrow:active .minrow__mark{ transform:translateY(2px); }
+
+:root[data-zemin="piksel"] :is(.hesap__ana,.hesap__ikinci){ border:0; background-image:none; font-family:var(--font-body); }
+:root[data-zemin="piksel"] .hesap__ana{ background-color:var(--primary); color:var(--primary-ink); box-shadow:var(--px-ana); }
+:root[data-zemin="piksel"] .hesap__ana:hover{ background-color:var(--primary-hover); }
+:root[data-zemin="piksel"] .hesap__ikinci{ background-color:var(--surface-2); color:var(--text); box-shadow:var(--px-dugme); }
+:root[data-zemin="piksel"] :is(.hesap__ana,.hesap__ikinci):active{ transform:translateY(2px); }
+:root[data-zemin="piksel"] .hesap-anahtar{ width:44px; height:24px; background:var(--surface-3); box-shadow:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar),inset 0 3px 0 var(--px-koyu); }
+:root[data-zemin="piksel"] .hesap-anahtar::after{ top:3px; left:3px; width:18px; height:18px; background:var(--surface); box-shadow:inset 0 -3px 0 var(--px-koyu), 0 0 0 2px var(--px-kenar); }
+:root[data-zemin="piksel"] .hesap-anahtar[aria-checked="true"]{ background:var(--primary); }

@@ -41,6 +41,27 @@
         e.remove();
       }
     });
+    it('çizim: nokta kare olur, halka bloklanır ama dolu kısmın uzunluğu değişmez', () => {
+      const P = window.LIFEOS.PIKSEL, d = document.createElement('div');
+      d.innerHTML = '<svg viewBox="0 0 100 100" width="100" height="100"><circle cx="50" cy="50" r="30" fill="none" stroke="#000" stroke-width="6"/><circle class="dolu" cx="50" cy="50" r="30" fill="none" stroke="#f00" stroke-width="6" stroke-dasharray="40 200"/><circle class="n" cx="20" cy="10" r="4" fill="#00f"/></svg>';
+      document.body.appendChild(d);
+      try{
+        const s = d.firstChild;
+        P.cizimCevir(s);
+        const k = s.querySelector('rect.n');
+        expect(!!k).toBe(true);
+        expect(k.getAttribute('x')).toBe('16');
+        expect(k.getAttribute('width')).toBe('8');
+        expect(!!s.querySelector('circle.n')).toBe(false);
+        expect(s.querySelectorAll('.px-ara').length).toBe(1);
+        expect(s.querySelector('.dolu').getAttribute('stroke-dasharray')).toBe('40 200');
+      }finally{ d.remove(); }
+    });
+    it('figür svg çevirici tarafından bozulmaz', () => {
+      const s = window.LIFEOS.PIKSEL.figurSvg('logo');
+      expect(s.indexOf('data-px="1"') > 0).toBe(true);
+      expect(s.indexOf('data-pxc="1"') > 0).toBe(true);
+    });
     it('oda çizilir: kök piksel, tuval var', () => {
       window.LIFEOS.PIKSEL.uygula();
       expect(document.documentElement.getAttribute('data-zemin')).toBe('piksel');

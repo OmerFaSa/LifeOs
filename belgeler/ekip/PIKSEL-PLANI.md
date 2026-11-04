@@ -15,8 +15,8 @@ Kurallar: tek tema jetonla ve kabuk yüzeyleriyle değişir, ekran tema bilmez. 
 - [x] Sütun grafik ve çubuklar: bloklu, sıcak renkli
 - [x] Eğri ve halka: keskin; yuvarlak köşeli sütun kalktı
 - [x] Çerçeveli karta yazı yapışmaz (`piksel_denetim` «kenara-yapisik» tutar)
-- [ ] Grafik noktaları kare (çizim kodu değişir)
-- [ ] Büyük halka ve Gün göstergesi basamaklı piksel
+- [x] Grafik noktaları kare (`piksel.js` çizim çevirici)
+- [x] Halka ve yay bloklu: üstüne aralık çizilir, değer uzunluğu değişmez
 
 ## Etkileşim
 
@@ -27,7 +27,7 @@ Kurallar: tek tema jetonla ve kabuk yüzeyleriyle değişir, ekran tema bilmez. 
 - [x] Fare imleci: piksel ok ve el
 - [x] Yükleniyor iskeleti: adımlı yanıp sönme
 - [x] Küçük tepki: bardak dolunca zıplar
-- [ ] Küçük tepki: tik basılınca oturur, kayıtta kalp
+- [x] Küçük tepki: tik basılınca iner, kayıtta kalp
 
 ## Efektler (2026-11-05: «efektlerin kalitesini arttır, tüm sayfalarda»)
 
@@ -37,24 +37,24 @@ Kurallar: tek tema jetonla ve kabuk yüzeyleriyle değişir, ekran tema bilmez. 
 - [x] Kıvılcım: bardak, tik ve gerçek kayıtta sekiz kare; hareket ayarına uyar
 - [x] Açılış karşılaması: bulanık cam yerine duvar, kâğıt ve modül yüzü
 - [x] «Yeni rozet» bildirimi: kâğıt pencere, piksel yazı, bloksuz çubuk
-- [ ] Rütbe kutlaması tam ekranı (video; dokunulmadı)
+- [x] Rütbe kutlaması: yazı ve «Geç» düğmesi piksel; rütbe görseli ve video bilerek aynı
 
 ## Modüller
 
 - [x] SPİ: tahlil aralığı kalın bant ve iğne
-- [ ] SPİ: tabak, uyku geceleri, kilo tartısı
+- [x] SPİ: kilo tuş takımı, puan ve set düğmeleri; uyku bloklu
 - [x] AYS: soru şıkları klavye tuşu, tekrar kartı kâğıt, konu haritası kareleri
-- [ ] AYS: hafta günleri, yol haritası çizimi
-- [ ] ESP: merdiven basamakları, disiplin kartları, kart kutuları
+- [x] AYS: hafta günü kartları, yol haritası noktaları kare
+- [x] ESP: merdiven basamakları, disiplin kartları, kart kutuları
 - [x] Defter: kareli kâğıt
 - [x] King: taçlı başlık, konuşma balonu, temanın vurgusu
 - [x] Ayarlar: tema örnekleri gerçek palet, seçili sekme, «Yazı tipi: Piksel»
-- [ ] Ayarlar: ses ve animasyon kartları
+- [x] Ayarlar: ses ve animasyon kartları
 
 ## Kapılar
 
-- [ ] Giriş ekranı
+- [x] Giriş ekranı: duvar, kâğıt form, modül yüzleri, gerçek logo
 - [x] Seçim ekranı kartları daha derli toplu
-- [ ] Gün sayfası: niyet, pil, hava kartları
-- [ ] Açılış perdesi
+- [x] Gün sayfası: bloklu halka, aynı kart dili
+- [x] Açılış perdesi
 
