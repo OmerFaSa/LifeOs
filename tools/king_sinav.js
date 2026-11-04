@@ -121,7 +121,26 @@ function altKume(a, b){   // a'nın her anahtarı b'de aynı mı (dizgide büyü
   });
 }
 
+/* PORT MUHAFIZI: tools/nerede.js ile ayni; port doluysa denetim hic baslamaz (cikis 2). */
+function portDolu(port){
+  const dene = host => new Promise(r => {
+    const s = require('net').connect({ host, port });
+    s.setTimeout(1000, () => { s.destroy(); r(false); });
+    s.once('connect', () => { s.destroy(); r(true); });
+    s.once('error', () => r(false));
+  });
+  return Promise.all([dene('127.0.0.1'), dene('::1')]).then(x => x.some(Boolean));
+}
+async function portMuhafizi(portlar){
+  const dolu = [];
+  for(const p of portlar) if(await portDolu(p)) dolu.push(p);
+  if(!dolu.length) return;
+  console.error('Port dolu: ' + dolu.join(', ') + ' — baska bir kosu kullaniyor; o bitince yeniden kos ya da --port= ver.');
+  process.exit(2);
+}
+
 (async () => {
+  await portMuhafizi(Object.values(MODUL).map(m => m[1]));
   const sinav = JSON.parse(fs.readFileSync(path.join(__dirname, 'king_sinav.json'), 'utf8'));
   const sonuc = [];
   let browser;

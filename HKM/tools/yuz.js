@@ -298,7 +298,7 @@ async function main(){
           colorScheme:tema });
         const konsol = [];
         page.on('pageerror', e => konsol.push(String(e.message)));
-        await page.goto('http://127.0.0.1:' + PORT + '/', { waitUntil:'load' });
+        await page.goto('http://127.0.0.1:' + PORT + '/atolye', { waitUntil:'load' });   // eski yuz arsivde; kok bilgi sayfasi (web/merkez.html)
         await page.waitForSelector('#giris');
         await page.fill('#token', TOKEN);
         await page.click('#gir');
@@ -398,7 +398,7 @@ async function main(){
     {
       const ctx = await browser.newContext({ viewport:{ width:1280, height:900 } });
       const sayfa = await ctx.newPage();
-      const kok = 'http://127.0.0.1:' + PORT + '/';
+      const kok = 'http://127.0.0.1:' + PORT + '/atolye';
       const dene = async cerez => {
         await ctx.clearCookies();
         if(cerez) await ctx.addCookies(cerez.map(([name, value]) => ({ name, value, url:kok })));
@@ -428,7 +428,7 @@ async function main(){
     {
       const ctx = await browser.newContext({ viewport:{ width:1280, height:900 }, reducedMotion:'reduce' });
       const sayfa = await ctx.newPage();
-      const kok = 'http://127.0.0.1:' + PORT + '/';
+      const kok = 'http://127.0.0.1:' + PORT + '/atolye';
       const sure = async kip => {
         await ctx.clearCookies();
         if(kip) await ctx.addCookies([{ name:'lifeos_hareket', value:kip, url:kok }]);

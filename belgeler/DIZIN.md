@@ -22,6 +22,8 @@ Depoyu ve sistemleri tanımak için önce kök klasördeki `AGENTS.md` ve `READM
 - [NOT-PLANI](ekip/NOT-PLANI.md) — Zengin içerikli, iki yönlü bağlantılı yerel defter ve not sistemi mimarisi; durumu: tamamlandı (2026-10-17)
 - [KING-4](ekip/KING-4.md) — Tek ajan üzerinden bütün sistemi yöneten King 4.0 vizyonu ve yol haritası; durumu: sürüyor (2026-11-01)
 - [KING-OLAY](ekip/KING-OLAY.md) — Modüllerin HKM kural motoruna ilettiği olayların taşıma ve içerik sözleşmesi; durumu: güncel (2026-11-01)
+- [GUN-MODULU-PLANI](ekip/GUN-MODULU-PLANI.md) — HKM arayüzünün yerine gelen Gün modülü ve HKM ayarlarının Ayarlar › Merkez'e taşınışı; durumu: sürüyor.
+- [DEVIR-20261102](ekip/DEVIR-20261102.md) — 2 Kasım 2026 baştan başlama devir notu; durumu: tarihî.
 - [KING-DEVRIM](ekip/KING-DEVRIM.md) — Kişisel yasalar, kendi kendini süren gün ve her şeyi derse çevirme devrimi; durumu: tamamlandı (2026-10-22)
 - [KING-EKIP](ekip/KING-EKIP.md) — King'in çok adımlı arka plan görevleri ve alt ajan koordinasyon mimarisi; durumu: tamamlandı (2026-10-21)
 - [KING-BECERI](ekip/KING-BECERI.md) — Kullanıcının King'e öğrettiği beceriler ve geleceğe yönelik söz takibi; durumu: tamamlandı (2026-10-21)
