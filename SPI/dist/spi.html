@@ -400,6 +400,7 @@
   --siyah-60:rgba(0,0,0,.6);
   --siyah-70:rgba(0,0,0,.7);
 }
+:root{ --beyaz-16:rgba(255,255,255,.16); --beyaz-34:rgba(255,255,255,.34); --siyah-38:rgba(0,0,0,.38); --beyaz-46:rgba(255,255,255,.46); --beyaz-58:rgba(255,255,255,.58); --beyaz-45:rgba(255,255,255,.45); --beyaz-075:rgba(255,255,255,.075); --beyaz-30:rgba(255,255,255,.3); --beyaz-015:rgba(255,255,255,.015); }
 
 /* ==== css/tokens.css ==== */
 /* SPİ — MODÜLÜN KUYRUĞU. Ortak jetonlar brand/ortak/jeton.css'tedir
@@ -15885,73 +15886,28 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
 }
 
 /* Zemin yalnız kökte (html = tuval) ve sabit katmanda; aradaki katmanlar saydam. */
-html[data-zemin="yumusak"] body,
-html[data-zemin="yumusak"] .site--v5,
-html[data-zemin="yumusak"] .site--v5 > .site__body,
-html[data-zemin="yumusak"] .site--v5 .sayfa,
-html[data-zemin="yumusak"] .site--v5 .sayfasonu{ background:transparent; }
+
 
 /* Her leke beş ara durakla söner (Gauss'a yakın): rengin %80, %52, %24 ve
    %7'si, sonra hiç. Doğrusal sönüm kenarda bir disk izi bırakıyordu. */
-html[data-zemin="yumusak"] body::before{
-  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
-  background:
-    radial-gradient(140% 90% at 50% 0%, var(--zemin-saat, transparent), transparent 75%),
-    radial-gradient(120% 90% at 50% 45%, transparent 55%, var(--zemin-golge) 100%),
-    radial-gradient(66% 72% at 12% 8%, var(--zemin-1) 0%,
-      color-mix(in oklab, var(--zemin-1) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-1) 52%, transparent) 33%,
-      color-mix(in oklab, var(--zemin-1) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-1) 7%, transparent) 64%, transparent 78%),
-    radial-gradient(54% 60% at 90% 10%, var(--zemin-2) 0%,
-      color-mix(in oklab, var(--zemin-2) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-2) 52%, transparent) 33%,
-      color-mix(in oklab, var(--zemin-2) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-2) 7%, transparent) 64%, transparent 78%),
-    radial-gradient(60% 64% at 88% 96%, var(--zemin-3) 0%,
-      color-mix(in oklab, var(--zemin-3) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-3) 52%, transparent) 33%,
-      color-mix(in oklab, var(--zemin-3) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-3) 7%, transparent) 64%, transparent 78%),
-    radial-gradient(50% 56% at 8% 96%, var(--zemin-4) 0%,
-      color-mix(in oklab, var(--zemin-4) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-4) 52%, transparent) 33%,
-      color-mix(in oklab, var(--zemin-4) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-4) 7%, transparent) 64%, transparent 78%),
-    linear-gradient(180deg, var(--zemin-ust), var(--zemin-alt));
-}
-html[data-zemin="yumusak"] body::after{
-  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:var(--zemin-gren);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-}
+
+
 
 /* Üstteki 2 px modül şeridi (base.css .site::before) yumuşak zeminde çizilmez:
    hangi modülde olunduğunu zeminin rengi zaten söylüyor; ekranın tepesinde
    koyu bir kıl çizgisi gibi duruyordu (tasarım turu, 2026-10-03). Sade
    zeminde şerit kalır. */
-html[data-zemin="yumusak"] .site::before{ display:none; }
+
 
 /* Çekmece çubuğu (yazı + nokta) zeminle bir: düz --bg şeridi levhanın
    üstünde bant gibi duruyordu. Yapışık olduğunda kayan içeriği
    bulanıklaştırır (renk katmaz): yapışmamışken arkası düz levha, iz
    bırakmaz. Sayfa bölümlerinin raylı seçicisi (--sayfa) kendi gri rayını
    (--seg-ray) taşır; ona dokunulmaz. */
-html[data-zemin="yumusak"] .site--v5 .bolumcubugu:not(.bolumcubugu--sayfa){ background:transparent; }
-html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
-  -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); }
 
-@media (min-width:680px){
-  /* Levha: her sayfada aynı en; dikeyde ortada (kabuk.css ORTA DURUŞ). */
-  html[data-zemin="yumusak"] .site--v5 .sayfa,
-  html[data-zemin="yumusak"] .site--v5 .sayfa:has(.bugun){ max-width:var(--content-max, 1180px); position:relative; }
-  html[data-zemin="yumusak"] .site--v5 .sayfa:has(.bugun) > *{ max-width:960px; margin-inline:auto; }
-  html[data-zemin="yumusak"] .site--v5 .sayfa::before{
-    content:''; position:absolute; inset:16px 12px; z-index:-1; pointer-events:none;
-    border-radius:28px; background:linear-gradient(180deg, var(--buz-ust), var(--buz-alt));
-    box-shadow:var(--buz-isik), var(--buz-golge);
-  }
 
-  /* Kenar camdır: arkasındaki renk süzülür; açıkken daha dolgun. */
-  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar{
-    background:var(--kenar-cam); border-right-color:transparent;
-    box-shadow:inset -1px 0 0 color-mix(in oklab, var(--border) 70%, transparent);
-    -webkit-backdrop-filter:saturate(160%) blur(24px); backdrop-filter:saturate(160%) blur(24px); }
-  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu){
-    background:var(--kenar-cam-acik); border-radius:0 20px 20px 0;
-    box-shadow:var(--cam-isik, none); }   /* dış gölge ayrı katmanda: kabuk.css «AÇIK KENARIN GÖLGESİ» */
-}
+
+
 
 /* CANLI ZEMİN (kullanıcı, 2026-10-17: «arayüz cansız; arkadaki buzlu efekt
    nefes alıyor gibi hareket etse»). Üç dokunuş, üçü de ÇOK hafif:
@@ -15968,18 +15924,7 @@ html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
    Görünüm › Animasyonlar «Az» ya da işletim sisteminin «hareketi azalt»ı
    üçünü de durdurur (animasyon.js bu sorguyu kullanıcının seçimine göre
    yeniden yazar). Sade zeminde hiçbiri yok. */
-@media (prefers-reduced-motion:no-preference){
-  html[data-zemin="yumusak"] body::before{
-    transform:scale(1.05); will-change:transform;
-    animation:zemin-nefes 46s ease-in-out infinite alternate;
-  }
-  @supports (animation-timeline: scroll()){
-    html[data-zemin="yumusak"] body::before{
-      animation:zemin-nefes 46s ease-in-out infinite alternate, zemin-derinlik linear both;
-      animation-timeline:auto, scroll(root block);
-    }
-  }
-}
+
 @keyframes zemin-nefes{
   0%{ transform:translate3d(0, 0, 0) scale(1.05); }
   50%{ transform:translate3d(1.1%, -.6%, 0) scale(1.08); }
@@ -15991,7 +15936,7 @@ html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
   background:radial-gradient(70% 55% at 50% 0%, color-mix(in oklab, var(--mod, var(--ays)) 34%, transparent), transparent 72%); }
 :root[data-theme="dark"] .zemin-isik{
   background:radial-gradient(70% 55% at 50% 0%, color-mix(in oklab, var(--mod, var(--ays)) 26%, transparent), transparent 72%); }
-html:not([data-zemin="yumusak"]) .zemin-isik{ display:none; }
+html[data-zemin] .zemin-isik{ display:none; }
 @media (prefers-reduced-motion:no-preference){
   .zemin-isik.is-nabiz{ animation:zemin-nabiz 1.7s cubic-bezier(.32,.72,0,1) both; }
 }
@@ -16127,11 +16072,6 @@ html[data-yazi="comfortaa"]{ --font-body:'Comfortaa', ui-rounded, system-ui, san
 /* Paneldeki seçiciler sayfadakiyle aynı cam dil (opak koyu blok değil):
    oyuk ray, seçili hap parlak cam; seçili tema seçili cam. Panel kabuğun
    dışında (#overlay-root) durur, cam jetonlarına yedek değer verilir. */
-html[data-zemin="yumusak"] .ayarlar .seg{ background:var(--ray, rgba(127,127,140,.12)); border-color:var(--cam-kenar, var(--border)); }
-html[data-zemin="yumusak"] .ayarlar .seg button.is-on{ background:var(--cam-katman); color:var(--text);
-  box-shadow:var(--cam-ust), 0 1px 3px var(--siyah-12); }
-html[data-zemin="yumusak"] .ayarlar .themebtn{ border-color:var(--border); background:transparent; }
-html[data-zemin="yumusak"] .ayarlar .themebtn.is-on{ border-color:transparent; background:var(--secili-zemin); color:var(--secili-yazi); box-shadow:var(--secili-golge); }
 
 /* Geniş satır: ad üstte, denetim altta tam genişlik (ses ve hız katmanları). */
 .ayarlar__satir--genis{ flex-direction:column; align-items:stretch; gap:12px; }
@@ -16245,7 +16185,6 @@ html[data-zemin="yumusak"] .ayarlar .themebtn.is-on{ border-color:transparent; b
 .plan__simdi{ padding:0; font-size:12px; font-weight:550; color:var(--text-2); }
 @media (max-width:679px){ .plan__is .plan__ayar, .plan__is .plan__son{ padding-left:0; } }
 
-html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--cam-ince); border-color:transparent; color:var(--text); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
 /* Panelde [hidden] her biçimden üstündür (kilit kutusunun gizli düğmeleri görünüyordu). */
 .ayarlar [hidden]{ display:none !important; }
 
@@ -16263,9 +16202,9 @@ html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--ca
 .ayarlar.is-aranir .ayarlar__sekme.is-on{ background:transparent; box-shadow:none; color:var(--text-2); font-weight:500; }
 
 /* Arka plan: iki yuva yan yana, büyük önizleme ve seçici. */
-.zemin-yuvalar{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; padding:6px 0 14px; }
+
 .zemin-yuvasi{ display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:16px; background:color-mix(in oklab, var(--text) 4%, transparent); }
-.zemin-yuvasi__bas{ display:flex; align-items:baseline; gap:8px; } .zemin-yuvasi__bas b{ font-size:14px; } .zemin-yuvasi__bas small{ font-size:12px; color:var(--text-3); }
+  
 .zemin-yuvasi .zemin-yuva{ justify-content:flex-start; }
 .zemin-yuvasi .zemin-durum{ text-align:left; }
 .zemin-onizle{ position:relative; display:block; aspect-ratio:16 / 9; border-radius:12px; overflow:hidden;
@@ -16297,7 +16236,7 @@ html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--ca
 .zemin-yuvasi .seg{ display:flex; width:100%; }
 .zemin-yuvasi .seg button{ flex:1 1 0; min-width:0; padding-inline:6px; overflow:hidden; text-overflow:ellipsis; }
 .sessiz{ display:flex; align-items:center; gap:8px; color:var(--text-3); }
-@media (max-width:679px){ .zemin-yuvalar{ grid-template-columns:1fr; } }
+
 .anihiz__ad{ display:flex; flex-direction:column; }
 .anihiz__oran{ font-size:11px; font-weight:450; color:var(--text-3); font-variant-numeric:tabular-nums; }
 .anihiz button{ font-variant-numeric:tabular-nums; }
@@ -16426,10 +16365,7 @@ html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--ca
 .ayarlar__kapsam svg{ flex:none; width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
 .ayarlar__kapsam--modul{ color:var(--mod, var(--primary)); background:color-mix(in oklab, var(--mod, var(--primary)) 10%, transparent); }
 /* Bölümler arası bağlantı kartı (Ses › arka plan videosunun sesi). */
-.skart--bag{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:0; font:inherit; color:var(--text); cursor:pointer; }
-.skart--bag > svg{ flex:none; width:18px; height:18px; fill:none; stroke:var(--mod, var(--primary)); stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
-.skart--bag > span:last-child{ font-size:18px; color:var(--text-3); }
-.skart--bag:hover{ background:color-mix(in oklab, var(--surface) 90%, transparent); }
+
 /* YAZI BOYUTU (Ayarlar › Görünüm, 2026-10-30): bütün arayüz birlikte ölçeklenir. */
 /* Yalnız içerik ölçeklenir; sol menü ve sabit katmanlar yerinde kalır (2026-10-30: «yazı boyutunu değiştirince soldaki kartın oranı bozuluyor»). */
 html[data-boyut="kucuk"] .site__body{ zoom:.92; }
@@ -16493,13 +16429,13 @@ html[data-vurgu]:not([data-vurgu="modul"]){ --vurgu-ink:color-mix(in oklab, var(
 /* Kart içinde satırlar (2026-10-30: «her şeyi yerli yerinde yap»): ilk satırın üst çizgisi yok, satırlar kartın içinde nefes alır. */
 .skart .ayarlar__satir{ padding:10px 0; }
 .skart .skart__govde > .ayarlar__satir:first-child, .skart .skart__govde > .ayarlar__acilir:first-child > summary{ border-top:0; padding-top:2px; }
-.skart .zemin-yuvalar{ margin:4px 0 2px; }
+
 .ayarlar__dip{ display:flex; align-items:center; gap:10px; padding:2px 4px; }
 .ayarlar__dip small{ font-size:12px; color:var(--text-3); }
 /* Kart kendi genişliğine göre dizilir (pencere dar ya da yazı büyükse): yuvalar alt alta, denetim adın altına iner, hiçbir şey kartın dışına taşmaz. */
 .skart__govde{ container-type:inline-size; min-width:0; }
 @container (max-width:560px){
-  .zemin-yuvalar{ grid-template-columns:1fr; }
+  
   .skart .ayarlar__satir{ flex-wrap:wrap; gap:8px 16px; }
   .skart .ayarlar__deger{ flex:1 1 100%; justify-content:flex-start; }
 }
@@ -16959,33 +16895,9 @@ body.is-dragging .rota{ outline:2px dashed var(--spi); outline-offset:6px; borde
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/cam.css içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* CAM — sistem geneli cam yüzey dili (kullanıcı, 2026-10-27).
-
-   ===================== BU DOSYA TEK KAYNAKTIR =====================
-   Kaynağı `brand/ortak/cam.css`; `python3 tools/ortak.py --yay` ile üç
-   arayüzün `src/css/` klasörüne birebir kopyalanır. Her arayüzde EN SON
-   yüklenen stil dosyasıdır: zemin.css ve kabuk.css'in üstüne yazar.
-
-   Kullanıcı: «buğulu cam temayı daha glassy, canlı, sıvı akışkan, daha
-   soft»; örnekleri «Minimal Glassmorphism», visionOS paneller, Liquid
-   Glass; «daha profesyonel ama daha sade, eski hâlinden çok az kalsın,
-   yalnız bir yere değil, geniş çaplı»; «sağlık yeşilse yeşillikle,
-   akademi kitapla, ESP turuncu-kahve kitaplar». İlk iki deneme canlı
-   ekran görüntüsüyle gösterildi; ikincisinin yönü onaylandı.
-
-   · ZEMİN: modülün tonunda derin taban + üç büyük yumuşak küre (dört
-     leke ve kum tonu yok). Koyuda aynı aile, çok koyu.
-   · Modülün kimliği zeminin tonudur. Sağ üstte cam küre + çizgi motif
-     (kitap, yaprak) denendi; kullanıcı «çakma, kötü» dedi, kalktı.
-   · KART: levha kalktı; kartlar doğrudan zeminde süzülen yarı saydam
-     camdır. backdrop-filter YALNIZ yüzen katmanlarda (alt bant, kenar,
-     kağıt, menü, King): zemin zaten yumuşak geçiştir, kartta bulanıklık
-     görünmez ama uzun listede kaydırmayı pahalılaştırırdı.
-   · YAZI: kapak başlığı büyük, sıkı; selam küçük sans (italik serif yok).
-   · KING ve AJANLAR: King küresi gözlü cam küre; ajanlar modül tonunda
-     minik gözlü küre (harf aria-hidden süstü, ad zaten yanında yazar).
-   · «Sade» zemin (Görünüm ya da işletim sisteminin «saydamlığı azalt»ı):
-     bu dosyanın hiçbir kuralı çalışmaz; kartlar opak kalır. */
+/* GENEL KATMAN — cam teması silindikten sonra kalan, her temada çalışan kurallar (2026-11-04).
+   Tema kuralları `brand/ortak/piksel.css`'tedir; buraya yeni tema kuralı yazılmaz.
+   Kaynağı `brand/ortak/cam.css`; `python3 tools/ortak.py --yay` ile kopyalanır. */
 
 :root{
   --levha:linear-gradient(150deg, var(--beyaz-42), var(--beyaz-14));
@@ -17067,17 +16979,16 @@ body.is-dragging .rota{ outline:2px dashed var(--spi); outline-offset:6px; borde
   /* Plaka kalktı (kullanıcı, 2026-10-28: «kalabalık, kart içinde kart gibi;
      köklü değişiklik, çok daha profesyonel»): kartlar doğrudan zeminde
      süzülür, her sayfa Bugün gibi plakasızdır. */
-  html[data-zemin="yumusak"] .site--v5 .sayfa::before{ display:none; }
+  
 
   /* Kenar: plakadan ayrı, yüzen cam sütun; etkin çekmece modül renginde dolu hap. */
   html.kenar-dar .site--v5:has(> .kenar){ grid-template-columns:88px minmax(0,1fr); }
-  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar{ top:14px; height:calc(100vh - 28px); margin:14px 0 14px 12px;
-    border-radius:28px; box-shadow:var(--levha-ic), var(--levha-golge); }
+  
   html.kenar-dar .site--v5:has(> .kenar)::after{ left:12px; top:14px; bottom:14px; border-radius:28px; }
-  html[data-zemin="yumusak"] .kenar__cekmece{ border-radius:14px; height:38px; }
-  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece.is-on{ color:var(--secili-yazi); }
-  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece.is-on .kbk-ic{ color:var(--secili-yazi); }
-  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece.is-on::before{ background:var(--secili-zemin); box-shadow:var(--secili-golge); }
+  
+  
+  
+  
 }
 
 /* 3) KARTLAR — süzülen cam, TEK KAT. Kartın içindeki kart, not, öneri ya da
@@ -17086,47 +16997,28 @@ body.is-dragging .rota{ outline:2px dashed var(--spi); outline-offset:6px; borde
    kartı bu yüzden başlığın üstüne biniyordu). Gruplu liste (.ledger
    şeritleri, kabuk.css RAFİNE) köşe ve aralığını kendi kuralından alır:
    burada yalnız yüzeyi cam olur. */
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .donen, .site--v5 .nextup,
-  .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard, .site--v5 .rehber__konular){
-  background:var(--cam); border:1px solid var(--cam-kenar); border-radius:24px;
-  box-shadow:var(--cam-ust), var(--cam-golge);
-}
-html[data-zemin="yumusak"] .site--v5 .ledger .lrow:not(.kahraman){
-  background:var(--cam); border-color:var(--cam-kenar); box-shadow:var(--cam-golge); }   /* gruplu satırda iç çizgi yok: ayraç RAFİNE kuralında */
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card, .giris, .donen, .site--v5 .nextup, .site--v5 .ledger .lrow,
-  .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, .site--v5 .pk, .sheet, .popover, .menusayfa, .king__kutu)
-  *:is(.kutu, .card, .giris, .donen, .notice, .okart, .ozet-kare, .alan-kare, .pk){
-  background:transparent; border-color:transparent; box-shadow:none;
-}
-html[data-zemin="yumusak"] :is(.kutu, .card, .lrow, .bugun__alan) *.notice{ padding-inline:0; }
+
+   /* gruplu satırda iç çizgi yok: ayraç RAFİNE kuralında */
+
+
 /* Kart içindeki küçük kareler dokunulabilir: yalnız üzerine gelince dolar. */
-html[data-zemin="yumusak"] :is(.kutu, .card, .lrow) *:is(.ozet-kare, .alan-kare):hover{ background:var(--cam-ince); }
+
 /* Üst sıradaki küçük sayı karoları modülün pastel tonunda camdır (Kit'teki
    renkli kareler); büyük kartlar beyaz cam kalır: renk ölçüyü değil yeri söyler. */
-html[data-zemin="yumusak"] body .site--v5 .sayfa .content :is(.pk, .kapak__sayi){ background:var(--karo); }
+
 
 /* Hızlı kayıt satırı bir girdi gibidir. */
-html[data-zemin="yumusak"] .site--v5 .sat2{ background:var(--cam-girdi); border-color:var(--cam-kenar); box-shadow:inset 0 1px 3px rgba(20,24,40,.06); }
-html[data-zemin="yumusak"] .site--v5 .sat2 *:is(select, input:not([type=checkbox]):not([type=radio])){ background:transparent; border-color:transparent; box-shadow:none; }
+
+
 
 /* Girdiler ve hap düğmeler cam; ana düğme grafit kalır. */
-html[data-zemin="yumusak"] :is(.giris__girdi, .site--v5 input:not([type=checkbox]):not([type=radio]):not([type=range]), .site--v5 select, .site--v5 textarea){
-  background:var(--cam-girdi); border-color:var(--cam-kenar); box-shadow:inset 0 1px 3px rgba(20,24,40,.06); }
-html[data-zemin="yumusak"] :is(.site--v5 .chip, .kisayol > button, .kisayol > a){
-  background:var(--cam-ince); border-color:transparent; box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
+
+
 
 /* 4) YÜZEN KATMANLAR — gerçek buzlu cam (arkasında yazı var). */
-html[data-zemin="yumusak"] :is(.sheet, .popover, .menusayfa, .king__kutu){
-  background:var(--cam-katman); border-color:var(--cam-kenar);
-  -webkit-backdrop-filter:saturate(150%) blur(30px); backdrop-filter:saturate(150%) blur(30px);
-  box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), var(--shadow-lg); }
-html[data-zemin="yumusak"] .king__yan{ background:transparent; }
-@media (min-width:680px){
-  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar{ background:var(--cam-ince);
-    box-shadow:inset -1px 0 0 var(--cam-kenar);
-    -webkit-backdrop-filter:saturate(150%) blur(28px); backdrop-filter:saturate(150%) blur(28px); }
-  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu){ background:var(--cam-katman); }
-}
+
+
+
 
 /* 5) YAZI. */
 :is(.karsilama__selam, .kapak__selam){ font-family:inherit; font-style:normal; font-weight:500;
@@ -17135,16 +17027,7 @@ html[data-zemin="yumusak"] .king__yan{ background:transparent; }
 @media (min-width:680px){ .kapak__cumle{ font-size:clamp(40px, 4.4vw, 56px); } }
 
 /* 6) TELEFON — alt bant yüzen cam hap; üst şerit zeminle bir, yalnız buzlu. */
-@media (max-width:679px){
-  html[data-zemin="yumusak"] .site--v5 .ust{ background:transparent; border-bottom-color:transparent; box-shadow:none;
-    -webkit-backdrop-filter:saturate(150%) blur(20px); backdrop-filter:saturate(150%) blur(20px); }
-  html[data-zemin="yumusak"] .site--v5 .altbant{ left:14px; right:14px; bottom:calc(12px + env(safe-area-inset-bottom, 0px));
-    height:var(--altbant-h); padding:0 6px; border-radius:30px; border:1px solid var(--cam-kenar); background:var(--cam-katman);
-    -webkit-backdrop-filter:saturate(150%) blur(28px); backdrop-filter:saturate(150%) blur(28px);
-    box-shadow:var(--cam-ust), var(--cam-golge); }
-  html[data-zemin="yumusak"] .site--v5 .altbant__sekme.is-on::before{ top:6px; bottom:6px; left:8px; right:8px; height:auto;
-    border-radius:22px; background:var(--cam-ince); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); z-index:-1; }
-}
+
 
 /* 7) KING küresi gözlü cam küre; ajanlar modül tonunda minik gözlü küre. */
 .king__kure::after{
@@ -17169,24 +17052,16 @@ html[data-zemin="yumusak"] .king__yan{ background:transparent; }
    · cam kart: alt kenarında o ışığın sıcak yansıması, üstte beyaz ışık;
    · dolu çubuk ve ana düğme: modül renginde akkor dolgu ve hale.
    Renk ölçüyü yine ayırır: uyarı/kötü dolgular kendi rengini korur. */
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .donen, .site--v5 .nextup,
-  .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard, .site--v5 .rehber__konular){
-  box-shadow:var(--cam-ust), var(--cam-golge);   /* sıcak çizgi ve köşe lekesi 2026-10-28'de kalktı: tek nötr yüzey */
-}
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card, .giris, .donen, .site--v5 .nextup, .site--v5 .ledger .lrow,
-  .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, .site--v5 .pk, .sheet, .popover, .menusayfa, .king__kutu)
-  *:is(.kutu, .card, .giris, .donen, .notice, .okart, .ozet-kare, .alan-kare, .pk){ box-shadow:none; }
+
+
 
 /* Akkor dolgu: renkten beyaza ısınan uç + iki katlı hale. */
-html[data-zemin="yumusak"] :is(.bar__fill:not(.bar__fill--warn):not(.bar__fill--danger), .esikcubuk__dolu, .donen__nokta.is-on:not([data-sistem])){
-  background:linear-gradient(90deg, var(--mod), color-mix(in oklab, var(--mod) 45%, var(--beyaz)) 82%, var(--beyaz));
-  box-shadow:0 0 6px 0 color-mix(in oklab, var(--mod) 55%, transparent), 0 0 12px 1px rgb(var(--sicak) / .22); }
-html[data-zemin="yumusak"] .donen__nokta.is-on[data-sistem]{ box-shadow:0 0 8px 0 rgb(var(--sicak) / .5); background-image:linear-gradient(90deg, transparent 40%, var(--beyaz-85)); }   /* sistem rengi kendi kuralında */
+
+   /* sistem rengi kendi kuralında */
 
 /* Ray: cam oyuk (kaydırıcıdaki gibi); hale taşabilsin diye kırpmaz. */
-html[data-zemin="yumusak"] :is(.bar, .esikcubuk__ray){ overflow:visible; background:var(--ray);
-  box-shadow:inset 0 1px 2px var(--siyah-12), 0 1px 0 var(--beyaz-35); }
-html[data-zemin="yumusak"] .bar__fill{ max-width:100%; }
+
+
 
 /* Ana düğme: modül renginde dolu düğme. Üçüncü tur (kullanıcı, 2026-10-28:
    «Kart ekle gibi bir sürü buton kalitesiz»): eski «aqua» kabartma (üstte
@@ -17194,72 +17069,44 @@ html[data-zemin="yumusak"] .bar__fill{ max-width:100%; }
    gibi düz renk, belli belirsiz koyulaşma, 1 px iç ışık, kısa sıkı gölge. */
 /* Dördüncü tur (2026-10-29: «çok katı, sistemle uyumsuz»): dolu blok yerine
    renkli cam — seçili çekmeceyle aynı dil, bir ton daha yoğun. */
-html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder){
-  background:var(--ana-zemin); border-color:transparent; color:var(--secili-yazi); font-weight:600; letter-spacing:-.005em;
-  box-shadow:var(--secili-golge);
-  -webkit-backdrop-filter:blur(12px) saturate(150%); backdrop-filter:blur(12px) saturate(150%);
-  transition:background-color .2s ease, box-shadow .2s ease, transform .12s ease; }
-html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder):hover{ background:var(--ana-zemin-ust); }
-html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder):active{ transform:scale(.97);
-  box-shadow:inset 0 1px 0 var(--beyaz-18), 0 1px 1px rgba(16,20,40,.18); }
+
+
+
 
 /* Kart başlığındaki renkli simge kutucuğu parlak cam düğme gibi (Kit'teki kareler). */
-html[data-zemin="yumusak"] .alan-kare__simge{
-  background-image:linear-gradient(180deg, var(--beyaz-60), var(--beyaz-00) 60%);
-  box-shadow:inset 0 1px 0 var(--beyaz-75), 0 6px 14px -8px currentColor; }
+
 
 /* 9) IŞIK HER YERDE (kullanıcı, 2026-10-27: «ışıkları sisteme ekle, daha
    profesyonel»). Hepsi duran ışık; yalnız kayıt ışığı (zemin.js nabız)
    gerçek bir kayıtta bir kez yanar. */
 
 /* Yüzen katmanlar: kalın cam pervaz + alttan sıcak yansıma. */
-html[data-zemin="yumusak"] :is(.sheet, .king__kutu, .menusayfa){
-  background:var(--cam-katman);
-  box-shadow:var(--levha-ic), var(--levha-golge); }
-html[data-zemin="yumusak"] .sheet{ border-radius:28px; }
-@media (min-width:680px){
-  html[data-zemin="yumusak"] .menusayfa{ top:14px; right:14px; bottom:14px; width:440px; border:0; border-radius:28px; }
-}
+
+
+
 
 /* Sayfa seçicinin hapı: parlak cam, altında sıcak ışık. */
-html[data-zemin="yumusak"] .site--v5{
-  --seg-hap:linear-gradient(180deg, var(--beyaz-98), var(--beyaz-72));
-  --seg-golge:inset 0 1px 0 var(--beyaz), 0 1px 2px rgba(20,24,40,.08), 0 8px 18px -10px rgb(var(--sicak) / .7); }
-html[data-theme="dark"][data-zemin="yumusak"] .site--v5{
-  --seg-hap:linear-gradient(180deg, var(--beyaz-20), var(--beyaz-08));
-  --seg-golge:inset 0 1px 0 var(--beyaz-25), 0 8px 18px -10px rgb(var(--sicak) / .55); }
-@media (prefers-color-scheme:dark){
-  html:not([data-theme="light"])[data-zemin="yumusak"] .site--v5{
-    --seg-hap:linear-gradient(180deg, var(--beyaz-20), var(--beyaz-08));
-    --seg-golge:inset 0 1px 0 var(--beyaz-25), 0 8px 18px -10px rgb(var(--sicak) / .55); }
-}
+
+
+
 
 /* Telefon bandında seçili simge modül renginde hafif parlar. */
-html[data-zemin="yumusak"] .site--v5 .altbant__sekme.is-on .kbk-ic{ filter:drop-shadow(0 0 6px color-mix(in oklab, var(--mod) 65%, transparent)); }
+
 
 /* Tıklanabilir küçük cam: üzerine gelince ışık üst köşeye düşer (büyük
    kartlarda bunu el ışığı yapar). */
-@media (hover:hover) and (pointer:fine){
-  html[data-zemin="yumusak"] .site--v5 :is(.alan-kare, .ozet-kare):hover{
-    background-image:radial-gradient(120% 90% at 18% 0%, var(--beyaz-42), transparent 60%); }
-  html[data-zemin="yumusak"] .site--v5 :is(.chip, .kisayol > button, .kisayol > a):hover{
-    box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), 0 8px 16px -10px rgb(var(--sicak) / .5); }
-}
+
 
 /* Klavye odağı: modül renginde tek ince çizgi. Işık halkası kalktı
    (kullanıcı, 2026-10-29: «hem daire hem kare ışık çıkıyor, minimalist yap»). */
-html[data-zemin="yumusak"] .site--v5 :is(button, a, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible{
-  outline:2px solid var(--mod); outline-offset:2px; }
+
 
 /* Kayıt ışığı: üstte modül rengi, altta sıcak zemin ışığı birlikte parlar. */
-html[data-zemin="yumusak"] .zemin-isik{
-  background:radial-gradient(70% 55% at 50% 0%, color-mix(in oklab, var(--mod) 30%, transparent), transparent 72%),
-    radial-gradient(70% 30% at 50% 100%, rgb(var(--sicak) / .55), transparent 70%); }
+
 
 /* Ayraç çizgileri ışığa göre: ortada parlak, kenara doğru söner. */
-html[data-zemin="yumusak"] .site--v5 :is(.sayfa--kapakli .bugun__alan > :not(.bugun__etiket) ~ :not(.bugun__etiket)){
-  border-image:linear-gradient(90deg, transparent, var(--border-soft) 15%, var(--border-soft) 85%, transparent) 1; }
-html[data-zemin="yumusak"] .menusayfa__bas{ background:transparent; border-bottom-color:var(--cam-kenar); }
+
+
 
 /* 10) SU FİZİĞİ (kullanıcı, 2026-10-27: «iPhone'daki gibi su fiziği,
    animasyonlar su gibi akışkan»). Hareket bir yay gibidir: hedefini çok az
@@ -17272,28 +17119,7 @@ html[data-zemin="yumusak"] .menusayfa__bas{ background:transparent; border-botto
   --su:linear(0, .006, .025 2.8%, .101 6.1%, .539 18.9%, .721 25.3%, .849 31.5%, .937 38.1%, .968 41.8%, .991 45.7%, 1.006 50.1%, 1.015 55%, 1.017 63.9%, 1.001 85.9%, 1);
   --su-dalga:linear(0, .009, .035 2.1%, .141 4.4%, .723 12.9%, .938 16.7%, 1.017 19.4%, 1.067, 1.099 24.3%, 1.108 26%, 1.103 27.9%, 1.085 30.4%, 1.019 38.1%, .994 42.9%, .986 47.6%, .998 63.4%, 1.002 78.4%, 1);
 }
-@media (prefers-reduced-motion:no-preference){
-  /* Basınca cam hızla içe göçer; bırakınca yaylanarak geri gelir. */
-  html[data-zemin="yumusak"] .site--v5 :is(.btn, .chip, .kisayol > button, .kisayol > a, .giris__gonder, .pickcard, .kapak__sayi.is-git,
-    .alan-kare, .ozet-kare, .kenar__cekmece, .altbant__sekme, .bolumcubugu__ad){
-    transition:transform 620ms var(--su), background-color var(--dur) var(--ease), color var(--dur) var(--ease), box-shadow 300ms var(--ease); }
-  html[data-zemin="yumusak"] .site--v5 :is(.btn, .chip, .kisayol > button, .kisayol > a, .giris__gonder, .kenar__cekmece, .altbant__sekme, .bolumcubugu__ad):active:not(:disabled){
-    transform:scale(.96); transition-duration:110ms; transition-timing-function:cubic-bezier(.3,0,.7,1); }
-  html[data-zemin="yumusak"] .site--v5 :is(.pickcard, .kapak__sayi.is-git, .alan-kare, .ozet-kare):active{
-    transform:scale(.975); transition-duration:120ms; }
 
-  /* Fareyle üzerine gelince tıklanabilir cam suyun üstünde hafifçe yükselir. */
-  @media (hover:hover) and (pointer:fine){
-    html[data-zemin="yumusak"] .site--v5 :is(.pickcard, .kapak__sayi.is-git, .alan-kare, .ozet-kare):hover:not(:active){ transform:translateY(-2px); }
-  }
-
-  /* Seçim hapı sıvı damlası gibi: uzar, kayar, taşıp oturur. */
-  html[data-zemin="yumusak"] .site--v5 .bolumcubugu--sayfa .bolumcubugu__ad.is-on.is-kayan::after{ animation:isaret-hap 640ms var(--su-dalga) both; }
-  html[data-zemin="yumusak"] .site--v5 .kenar__cekmece.is-on.is-kayan::before{ animation:isaret-dikey 620ms var(--su-dalga) both, su-damla 620ms var(--su) both; }
-
-  /* Kağıt, menü ve King damla gibi süzülüp oturur. */
-  html[data-zemin="yumusak"] :is(.sheet, .menusayfa){ animation:su-gel 440ms var(--su) both; }
-}
 @keyframes su-damla{ 0%{ scale:1 1.18; } 45%{ scale:1.06 .94; } 100%{ scale:1 1; } }
 @keyframes su-gel{ from{ opacity:0; transform:translateY(10px) scale(.985); } 40%{ opacity:1; } to{ opacity:1; transform:none; } }
 
@@ -17372,9 +17198,9 @@ html[data-zemin="yumusak"] .menusayfa__bas{ background:transparent; border-botto
 @keyframes minik-kirp{ 0%, 93%, 100%{ transform:scaleY(1); } 95.5%{ transform:scaleY(.12); } }
 
 /* Işık katmanlarının ilki (html::before) ağaçta zeminden önce gelir: zemin bir kat aşağı iner. */
-html[data-zemin="yumusak"] body::before{ z-index:-2; }
+
 /* Masa kartının renkli sol çubuğu kalkar: kimliği artık minik avatar taşır (kalın sol kenar yok). */
-html[data-zemin="yumusak"] .site--v5 .desk::before{ display:none; }
+
 
 /* 12) STÜDYO, CANLI IŞIK VE KARTLARIN ÜSTÜNDEKİ MİNİKLER (kullanıcı,
    2026-10-27: «arka plan daha profesyonel, kit class; ışık hareket etsin,
@@ -17414,49 +17240,24 @@ html[data-theme="dark"]{
     --zm-c:oklch(from var(--mod) .38 .12 calc(h - 70) / .4); --gun:255 196 150; --gun-a:.13;
   }
 }
-html[data-zemin="yumusak"] body::before{
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 .045'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    radial-gradient(62% 58% at 6% 0%, var(--zm-a), transparent 72%),
-    radial-gradient(55% 62% at 100% 16%, var(--zm-b), transparent 72%),
-    radial-gradient(72% 58% at 72% 106%, var(--zm-c), transparent 72%),
-    /* Sıcak ışık (kullanıcı, 2026-10-28: «daha profesyonel»): köşedeki küçük
-       şeftali lekesi yerine geniş, düşük doygun, yumuşak düşen gün ışığı
-       (beş duraklı düşüş: kenarı seçilmez). */
-    radial-gradient(95% 75% at 12% 112%, rgb(var(--gun) / var(--gun-a)), rgb(var(--gun) / calc(var(--gun-a) * .72)) 22%,
-      rgb(var(--gun) / calc(var(--gun-a) * .38)) 46%, rgb(var(--gun) / calc(var(--gun-a) * .12)) 68%, rgb(var(--gun) / 0) 88%),
-    linear-gradient(160deg, var(--zm-1), var(--zm-2));
-}
+
 /* Akan iki küre: suyun altındaki ışık gibi çok yavaş yer değiştirir (yalnız transform). */
-html[data-zemin="yumusak"]::before{
-  content:''; position:fixed; z-index:-1; pointer-events:none; inset:-18vmax;
-  background:radial-gradient(30vmax 26vmax at 34% 38%, var(--zm-a), transparent 70%),
-    radial-gradient(28vmax 24vmax at 70% 64%, var(--zm-b), transparent 70%);
-  opacity:.6;
-}
-@media (prefers-reduced-motion:no-preference){
-  html[data-zemin="yumusak"]::before{ animation:zm-akis 80s ease-in-out infinite alternate; }
-}
+
+
 @keyframes zm-akis{ from{ transform:translate3d(-5vmax, 3vmax, 0) rotate(0deg); } to{ transform:translate3d(6vmax, -4vmax, 0) rotate(10deg) scale(1.08); } }
 
 /* Logo: modül işareti ışır; dört kare sırayla parlar (ışık üstünden geçer). */
-html[data-zemin="yumusak"] .site--v5 .kenar__nokta{ box-shadow:0 0 6px 1px color-mix(in oklab, var(--mod) 60%, transparent), 0 0 14px 2px rgb(var(--sicak) / .35); }
-html[data-zemin="yumusak"] .site--v5 .kenar__logo b{ box-shadow:0 0 6px -1px currentColor; }
-@media (prefers-reduced-motion:no-preference){
-  html[data-zemin="yumusak"] .site--v5 .kenar__nokta{ animation:logo-nabiz 5s ease-in-out infinite; }
-  html[data-zemin="yumusak"] .site--v5 .kenar__logo b{ animation:logo-isil 7s ease-in-out infinite; }
-  html[data-zemin="yumusak"] .site--v5 .kenar__logo b:nth-child(2){ animation-delay:.18s; }
-  html[data-zemin="yumusak"] .site--v5 .kenar__logo b:nth-child(3){ animation-delay:.36s; }
-  html[data-zemin="yumusak"] .site--v5 .kenar__logo b:nth-child(4){ animation-delay:.54s; }
-}
+
+
+
 /* opacity: GPU'da döner; filter (brightness) her karede ana iş parçacığında hesaplanıyordu (2026-10-29). */
 @keyframes logo-nabiz{ 0%, 100%{ opacity:1; } 50%{ opacity:.78; } }
 @keyframes logo-isil{ 0%, 82%, 100%{ filter:none; } 88%{ filter:brightness(1.35) saturate(1.15); } }
 
 /* Ajan avatarının gözüne parıltı: daha canlı, daha minnoş. */
 .site--v5 :is(.agentav, .agentkare)::after{
-  background:radial-gradient(circle at 41% 46%, #fff 2.2%, transparent 3.2%),
-    radial-gradient(circle at 63% 46%, #fff 2.2%, transparent 3.2%),
+  background:radial-gradient(circle at 41% 46%, var(--beyaz) 2.2%, transparent 3.2%),
+    radial-gradient(circle at 63% 46%, var(--beyaz) 2.2%, transparent 3.2%),
     radial-gradient(ellipse 7.5% 11% at 39% 50%, var(--minik-goz) 90%, transparent 100%),
     radial-gradient(ellipse 7.5% 11% at 61% 50%, var(--minik-goz) 90%, transparent 100%),
     radial-gradient(ellipse 10% 6% at 28% 64%, rgba(255,120,150,.55), transparent),
@@ -17469,7 +17270,7 @@ html[data-zemin="yumusak"] .site--v5 .kenar__logo b{ box-shadow:0 0 6px -1px cur
    kaydırılır. Yalnız minik tıklanır (gıdıklanır); katmanın geri kalanı geçirgen. */
 .minikkat{ position:absolute; left:0; top:0; width:0; height:0; z-index:3; pointer-events:none; }
 .minikkat[hidden], .minik[hidden]{ display:none; }
-html:not([data-zemin="yumusak"]) .minikkat, html.king-acik .minikkat{ display:none; }
+html[data-zemin] .minikkat, html.king-acik .minikkat{ display:none; }
 .minik{ --boy:34px; --ton:0; position:absolute; width:var(--boy); height:var(--boy);
   left:calc(var(--boy) / -2); top:calc(var(--boy) * -1); transform-origin:50% 100%; will-change:transform;
   pointer-events:auto; cursor:pointer;
@@ -17486,7 +17287,7 @@ html:not([data-zemin="yumusak"]) .minikkat, html.king-acik .minikkat{ display:no
    ışık, kenara doğru koyulaşan tüy, iri pembe yanak. */
 .minik__deri{ position:absolute; inset:0; --maske:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M97.0 52.0L97.0 53.5L96.9 55.1L96.8 56.6L96.6 58.1L96.3 59.7L96.1 61.2L95.7 62.7L95.3 64.1L94.9 65.6L94.4 67.1L93.9 68.5L93.3 69.9L92.7 71.3L92.0 72.7L91.2 74.0L90.5 75.4L89.7 76.7L88.8 77.9L87.9 79.2L87.0 80.4L86.0 81.6L85.0 82.7L84.0 83.8L82.9 84.9L81.8 85.9L80.6 86.9L79.4 87.9L78.2 88.8L77.0 89.7L75.7 90.5L74.4 91.3L73.1 92.0L71.8 92.8L70.4 93.4L69.1 94.1L67.7 94.6L66.2 95.2L64.8 95.7L63.4 96.1L61.9 96.5L60.5 96.8L59.0 97.2L57.5 97.4L56.0 97.6L54.5 97.8L53.0 97.9L51.5 98.0L50.0 98.0L48.5 98.0L47.0 97.9L45.5 97.8L44.0 97.6L42.5 97.4L41.0 97.2L39.5 96.8L38.1 96.5L36.6 96.1L35.2 95.7L33.8 95.2L32.3 94.6L30.9 94.1L29.6 93.4L28.2 92.8L26.9 92.0L25.6 91.3L24.3 90.5L23.0 89.7L21.8 88.8L20.6 87.9L19.4 86.9L18.2 85.9L17.1 84.9L16.0 83.8L15.0 82.7L14.0 81.6L13.0 80.4L12.1 79.2L11.2 77.9L10.3 76.7L9.5 75.4L8.8 74.0L8.0 72.7L7.3 71.3L6.7 69.9L6.1 68.5L5.6 67.1L5.1 65.6L4.7 64.1L4.3 62.7L3.9 61.2L3.7 59.7L3.4 58.1L3.2 56.6L3.1 55.1L3.0 53.5L3.0 52.0L3.0 50.5L3.1 48.9L3.3 47.4L3.5 45.9L3.7 44.4L4.0 42.9L4.4 41.4L4.8 39.9L5.3 38.4L5.8 37.0L6.4 35.6L7.0 34.2L7.7 32.8L8.4 31.5L9.2 30.2L10.0 28.9L10.8 27.7L11.7 26.4L12.7 25.3L13.7 24.1L14.7 23.0L15.7 21.9L16.8 20.9L17.9 19.9L19.0 18.9L20.2 18.0L21.4 17.1L22.6 16.3L23.8 15.5L25.1 14.7L26.4 14.0L27.7 13.3L29.0 12.7L30.3 12.1L31.6 11.5L33.0 11.0L34.4 10.5L35.8 10.1L37.2 9.7L38.6 9.3L40.0 9.0L41.4 8.7L42.8 8.5L44.3 8.3L45.7 8.2L47.1 8.1L48.6 8.0L50.0 8.0L51.4 8.0L52.9 8.1L54.3 8.2L55.7 8.3L57.2 8.5L58.6 8.7L60.0 9.0L61.4 9.3L62.8 9.7L64.2 10.1L65.6 10.5L67.0 11.0L68.4 11.5L69.7 12.1L71.0 12.7L72.3 13.3L73.6 14.0L74.9 14.7L76.2 15.5L77.4 16.3L78.6 17.1L79.8 18.0L81.0 18.9L82.1 19.9L83.2 20.9L84.3 21.9L85.3 23.0L86.3 24.1L87.3 25.3L88.3 26.4L89.2 27.7L90.0 28.9L90.8 30.2L91.6 31.5L92.3 32.8L93.0 34.2L93.6 35.6L94.2 37.0L94.7 38.4L95.2 39.9L95.6 41.4L96.0 42.9L96.3 44.4L96.5 45.9L96.7 47.4L96.9 48.9L97.0 50.5Z'/%3E%3C/svg%3E");
   -webkit-mask:var(--maske) center / 100% 100% no-repeat; mask:var(--maske) center / 100% 100% no-repeat;
-  background:radial-gradient(50% 40% at 36% 26%, rgba(255,255,255,.62), rgba(255,255,255,.16) 58%, rgba(255,255,255,0) 82%),
+  background:radial-gradient(50% 40% at 36% 26%, var(--beyaz-62), var(--beyaz-16) 58%, var(--beyaz-00) 82%),
     radial-gradient(17% 11% at 24% 67%, rgba(255,110,150,.58), transparent),
     radial-gradient(17% 11% at 76% 67%, rgba(255,110,150,.58), transparent),
     radial-gradient(74% 70% at 50% 46%, transparent 60%, oklch(from var(--mod) .5 .13 calc(h + var(--ton)) / .34)),
@@ -17499,10 +17300,10 @@ html:not([data-zemin="yumusak"]) .minikkat, html.king-acik .minikkat{ display:no
 .minik[data-bicim="ucgen"] .minik__kol{ top:66%; }
 .minik[data-bicim="ucgen"][data-tip="filiz"] .minik__sus{ top:-22%; }
 .minik__goz{ position:absolute; top:39%; width:19%; height:25%; border-radius:50%;
-  background:radial-gradient(circle at 68% 76%, rgba(255,255,255,.95) 0 9%, transparent 11%), radial-gradient(circle at 45% 35%, #2e3470, #14162e 72%);
+  background:radial-gradient(circle at 68% 76%, var(--beyaz-95) 0 9%, transparent 11%), radial-gradient(circle at 45% 35%, #2e3470, #14162e 72%);
   transform:translate(calc(var(--egim, 0) * 18%), 0); transition:transform .35s cubic-bezier(.32,.72,0,1), height .2s ease, top .2s ease; }
 .minik__goz:nth-of-type(2){ left:25%; } .minik__goz:nth-of-type(3){ right:25%; }
-.minik__goz::after{ content:''; position:absolute; left:14%; top:10%; width:48%; height:42%; border-radius:50%; background:#fff; }
+.minik__goz::after{ content:''; position:absolute; left:14%; top:10%; width:48%; height:42%; border-radius:50%; background:var(--beyaz); }
 .minik.is-takip .minik__goz{ transform:translate(var(--gx, 0), var(--gy, 0)); transition-duration:.12s; }
 .minik__agiz{ position:absolute; left:43%; top:63%; width:14%; height:8%; border:1.6px solid #1d2140; border-top:0; border-radius:0 0 8px 8px; opacity:.8; }
 .minik__ayak{ position:absolute; bottom:0; width:26%; height:14%; border-radius:50%; transform-origin:50% 0;
@@ -17526,7 +17327,7 @@ html:not([data-zemin="yumusak"]) .minikkat, html.king-acik .minikkat{ display:no
 .minik[data-bicim="ucgen"][data-tip="percem"] .minik__sus{ top:-14%; }
 .minik[data-tip="anten"] .minik__sus{ left:46%; width:8%; top:-30%; height:34%; border-radius:2px; background:var(--g3); }
 .minik[data-tip="anten"] .minik__sus::after{ content:''; position:absolute; left:-110%; top:-40%; width:320%; aspect-ratio:1; border-radius:50%;
-  background:radial-gradient(circle at 35% 30%, #fff, rgb(var(--sicak)) 60%); }
+  background:radial-gradient(circle at 35% 30%, var(--beyaz), rgb(var(--sicak)) 60%); }
 .minik[data-tip="filiz"] .minik__sus{ left:44%; top:-30%; width:30%; height:34%;
   background:radial-gradient(ellipse 48% 30% at 72% 40%, #7fcf6a 92%, transparent 100%),
     radial-gradient(ellipse 40% 26% at 22% 58%, #5cb85a 92%, transparent 100%),
@@ -17536,7 +17337,7 @@ html:not([data-zemin="yumusak"]) .minikkat, html.king-acik .minikkat{ display:no
 .minik__balon, .minik__zzz{ position:absolute; left:50%; bottom:calc(100% + 6px); white-space:nowrap; pointer-events:none;
   opacity:0; transform:translate(-50%, 4px) scale(.8); transition:opacity .25s ease, transform .35s var(--su, ease); }
 .minik__balon{ padding:3px 8px; border-radius:10px; font:600 11px/1.2 var(--font-body, system-ui); color:var(--text);
-  background:var(--cam-katman, rgba(255,255,255,.9)); box-shadow:var(--cam-ust, none), 0 4px 10px -4px rgba(20,24,40,.25); }
+  background:var(--cam-katman, var(--beyaz-90)); box-shadow:var(--cam-ust, none), 0 4px 10px -4px rgba(20,24,40,.25); }
 .minik__zzz{ font:700 11px/1 var(--font-body, system-ui); color:var(--g3); }
 .minik.is-konusuyor .minik__balon{ opacity:1; transform:translate(-50%, 0) scale(1); }
 
@@ -17620,17 +17421,7 @@ html:not([data-zemin="yumusak"]) .minikkat, html.king-acik .minikkat{ display:no
 :root{ --el-isik:255 255 255; --el-isik-a:.17; }
 html[data-theme="dark"]{ --el-isik:255 236 220; --el-isik-a:.075; }
 @media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --el-isik:255 236 220; --el-isik-a:.075; } }
-@media (hover:hover) and (pointer:fine){
-  html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{
-    content:''; position:absolute; inset:0; z-index:1; border-radius:inherit; pointer-events:none;
-    --a:calc(var(--el-isik-a) * var(--isik-guc, 1));
-    background:radial-gradient(circle 200px at var(--mx, 50%) var(--my, 0%), rgb(var(--el-isik) / var(--a)),
-      rgb(var(--el-isik) / calc(var(--a) * .62)) 22%, rgb(var(--el-isik) / calc(var(--a) * .28)) 46%, rgb(var(--el-isik) / calc(var(--a) * .08)) 70%, transparent 88%);
-    opacity:0; transition:opacity .6s cubic-bezier(.2,.8,.2,1); }
-  html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard).isikli::after{ opacity:1; transition-duration:.3s; }
-  html[data-zemin="yumusak"] .isik-bas{ --isik-guc:1.9; }
-  html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard).isik-hemen::after{ transition:none; }
-}
+
 
 /* 14) SAYFA GİRİŞİ — sıvı cam: içerik hafif bulanıktan netleşerek, az
    yükselerek sırayla gelir (kabuk.js sayfa değişince köke `sayfa-gecis`
@@ -17638,18 +17429,7 @@ html[data-theme="dark"]{ --el-isik:255 236 220; --el-isik-a:.075; }
    profesyonel»: 700 → 460 ms, taşmasız yavaşlayan eğri, aralık 35 ms.
    2026-10-29: içerik geç okunuyordu (~400-540 ms) — 360 ms, aralık 15 ms,
    opaklık %40'ta tam (§29). */
-@media (prefers-reduced-motion:no-preference){
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 .sayfabasi{ animation:cam-gir-baslik 420ms cubic-bezier(.2,.8,.2,1) both; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi,
-    .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard, .bolumcubugu){ animation:cam-gir 460ms cubic-bezier(.2,.8,.2,1) both; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(2){ animation-delay:15ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(3){ animation-delay:30ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(4){ animation-delay:45ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(5){ animation-delay:60ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(6){ animation-delay:75ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(7){ animation-delay:90ms; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi, .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard):nth-child(8){ animation-delay:105ms; }
-}
+
 /* Opaklıksız (2026-10-29, kullanıcı: «geçişte arka plan net görünüyor,
    cam aniden buğulanıyor»): opaklığı 1'in altındaki öğe içindeki camın
    backdrop-filter'ını keser (backdrop root); animasyon bitince bulanıklık
@@ -17688,24 +17468,13 @@ html.sayfa-gecis .minikkat{ opacity:0; filter:blur(6px); transition:none; }
    kalktı: gökkuşağı kenar yapay duruyordu). 1 px maskeli halka (::before); imleç kartın
    üstündeyse kenarın imlece yakın kısmı parlar (EL IŞIĞI ile aynı --mx/--my).
    Gruplu liste satırı (::before ayraç), iç içe kart ve masa kartı dışarıda. */
-:root{ --rim-ust:rgba(255,255,255,.8); --rim-orta:rgba(255,255,255,.12); }
-html[data-theme="dark"]{ --rim-ust:rgba(255,255,255,.16); --rim-orta:rgba(255,255,255,.03); }
-@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --rim-ust:rgba(255,255,255,.16); --rim-orta:rgba(255,255,255,.03); } }
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard){
-  position:relative; border-color:transparent; }
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::before{
-  content:''; display:block; position:absolute; inset:-1px; width:auto; height:auto; z-index:2; border-radius:inherit; padding:1px; pointer-events:none;
-  transition:--isik .5s cubic-bezier(.2,.8,.2,1);
-  background:radial-gradient(110px circle at var(--mx, -400px) var(--my, -400px), rgba(255,255,255, calc(.85 * var(--isik))), transparent 70%),
-    linear-gradient(135deg, var(--rim-ust) 0%, var(--rim-orta) 26%, transparent 46%);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor;
-  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite:exclude; }
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard).isikli::before{ --isik:1; transition-duration:.25s; }
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card, .giris, .donen, .site--v5 .nextup, .site--v5 .ledger .lrow,
-  .site--v5 .pk, .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, .sheet, .popover, .menusayfa, .king__kutu) *:is(.kutu, .card, .giris, .pk)::before,
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card, .giris, .donen, .site--v5 .nextup, .site--v5 .ledger .lrow,
-  .site--v5 .pk, .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, .sheet, .popover, .menusayfa, .king__kutu) *:is(.kutu, .card, .giris, .pk)::after,
-html[data-zemin="yumusak"] .site--v5 .desk::before{ content:none; }
+:root{ --rim-ust:var(--beyaz-80); --rim-orta:var(--beyaz-12); }
+html[data-theme="dark"]{ --rim-ust:var(--beyaz-16); --rim-orta:var(--beyaz-03); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --rim-ust:var(--beyaz-16); --rim-orta:var(--beyaz-03); } }
+
+
+
+
 
 /* 17) MENÜ VE MİNİK ADI (kullanıcı, 2026-10-28: «menü kısmını, agentları
    ve arayüzü daha anlaşılır yap»).
@@ -17715,39 +17484,28 @@ html[data-zemin="yumusak"] .site--v5 .desk::before{ content:none; }
      Metin eklenmedi (§1.10 az metin): ayrım görsel sıradüzenle.
    · MİNİK ADI: üstüne gelince küçük cam etiket: ad · huy, altında
      «Dokun, gıdıkla» (minik.js KISILER). Balon o sırada susar. */
-html[data-zemin="yumusak"] .menusayfa__bas{ height:64px; padding:0 14px 0 22px; font-size:19px; letter-spacing:-.02em; }
-html[data-zemin="yumusak"] .menusayfa__kapat{ border-radius:50%; }
-html[data-zemin="yumusak"] .menusayfa__kapat:hover{ background:var(--cam-ince); }
-html[data-zemin="yumusak"] .menusayfa__sistemler{ margin:12px 16px 4px; border-radius:16px; background:var(--ray); }
-html[data-zemin="yumusak"] .menusayfa__sistem{ border-radius:12px; }
-html[data-zemin="yumusak"] .menusayfa__sistem.is-on{ background:var(--seg-hap, rgba(255,255,255,.9)); color:var(--text);
-  box-shadow:var(--seg-golge, 0 1px 2px rgba(20,24,40,.1)); }
-html[data-zemin="yumusak"] .menusayfa__govde{ padding:4px 14px 18px; }
-html[data-zemin="yumusak"] .menusayfa__cekmece{ padding:12px 4px 10px; border-bottom:0; }
-html[data-zemin="yumusak"] .menusayfa__cekmece + .menusayfa__cekmece{
-  background:linear-gradient(90deg, transparent, var(--border-soft) 12%, var(--border-soft) 88%, transparent) top / 100% 1px no-repeat; }
-html[data-zemin="yumusak"] .menusayfa__ad{ gap:10px; margin:0 0 10px; font-size:15px; letter-spacing:-.01em; }
-html[data-zemin="yumusak"] .menusayfa__ad .kbk-ic{ box-sizing:content-box; padding:6px; border-radius:10px; flex:none;
-  color:var(--mod-ink, var(--mod)); background:var(--karo);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px rgba(255,255,255,.35), 0 4px 10px -6px var(--mod); }
-html[data-zemin="yumusak"] .menusayfa__bolumler{ display:grid; grid-template-columns:repeat(auto-fill, minmax(108px, 1fr)); gap:6px; padding-left:40px; }
-html[data-zemin="yumusak"] .menusayfa__bolum{ min-height:36px; padding:0 12px; border-radius:12px; text-align:left;
-  border-color:transparent; background:var(--cam-ince); color:var(--text-2); box-shadow:inset 0 0 0 1px var(--cam-kenar); }
-html[data-zemin="yumusak"] .menusayfa__bolum:hover{ background:var(--cam-katman); color:var(--text); }
-html[data-zemin="yumusak"] .menusayfa__bolum.is-on{ background:var(--secili-zemin); color:var(--secili-yazi); box-shadow:var(--secili-golge); }
-html[data-zemin="yumusak"] .menusayfa__ayak{ background:transparent; border-top-color:var(--cam-kenar); }
-@media (prefers-reduced-motion:no-preference){
-  html[data-zemin="yumusak"] .menusayfa__cekmece{ animation:cam-gir 420ms cubic-bezier(.2,.8,.2,1) both; }
-  html[data-zemin="yumusak"] .menusayfa__cekmece:nth-child(2){ animation-delay:30ms; }
-  html[data-zemin="yumusak"] .menusayfa__cekmece:nth-child(3){ animation-delay:60ms; }
-  html[data-zemin="yumusak"] .menusayfa__cekmece:nth-child(4){ animation-delay:90ms; }
-  html[data-zemin="yumusak"] .menusayfa__cekmece:nth-child(n+5){ animation-delay:120ms; }
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .minik__ad{ position:absolute; left:50%; bottom:calc(100% + 10px); z-index:2; translate:-50% 4px; opacity:0; pointer-events:none;
   padding:5px 10px 6px; border-radius:12px; white-space:nowrap; text-align:center;
   font:600 11.5px/1.3 var(--font-body, system-ui); color:var(--text);
-  background:var(--cam-katman, rgba(255,255,255,.92)); -webkit-backdrop-filter:saturate(150%) blur(16px); backdrop-filter:saturate(150%) blur(16px);
+  background:var(--cam-katman, var(--beyaz-92)); -webkit-backdrop-filter:saturate(150%) blur(16px); backdrop-filter:saturate(150%) blur(16px);
   box-shadow:var(--cam-ust, none), inset 0 0 0 1px var(--cam-kenar, transparent), 0 8px 18px -10px rgba(20,24,40,.35);
   transition:opacity .16s ease, translate .32s cubic-bezier(.2,.8,.2,1); }
 .minik__ad i{ font-style:normal; font-weight:500; color:var(--text-3); }
@@ -17838,15 +17596,9 @@ html[data-zemin="yumusak"] .menusayfa__ayak{ background:transparent; border-top-
    küçük yüzeyler tarandı (opak2.js): ikincil düğmeler, hızlı kayıt
    seçicileri, pano şeridinin sıradaki blokları. Hepsi ince cam: yarı
    saydam dolgu, üstte ışık çizgisi, ince parlak kenar. Ana düğme dolu kalır. */
-html[data-zemin="yumusak"] .site--v5 #main :is(.btn:not(.btn--primary):not(.btn--ghost):not(.btn--danger):not(.btn--ink), .pk__dugme--ikincil, .vk .x30 .ci, .pk-serit .is-sira){
-  background:var(--cam-ince); border-color:transparent;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px var(--cam-kenar), 0 4px 12px -8px rgba(20,24,40,.25); }
-html[data-theme="dark"][data-zemin="yumusak"] .site--v5 #main :is(.btn:not(.btn--primary):not(.btn--ghost):not(.btn--danger):not(.btn--ink), .pk__dugme--ikincil, .vk .x30 .ci, .pk-serit .is-sira){
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px var(--cam-kenar), 0 4px 12px -8px rgba(0,0,0,.5); }
-@media (prefers-color-scheme:dark){
-  html:not([data-theme="light"])[data-zemin="yumusak"] .site--v5 #main :is(.btn:not(.btn--primary):not(.btn--ghost):not(.btn--danger):not(.btn--ink), .pk__dugme--ikincil, .vk .x30 .ci, .pk-serit .is-sira){
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.12), inset 0 0 0 1px var(--cam-kenar), 0 4px 12px -8px rgba(0,0,0,.5); }
-}
+
+
+
 
 /* 20) MİNİKLERİN KÜÇÜK İŞLERİ (kullanıcı, 2026-10-28: «kaşınma gibi güzel
    tatlı animasyonlar»). minik.js dinlenirken arada bir seçer:
@@ -17887,19 +17639,12 @@ html[data-theme="dark"][data-zemin="yumusak"] .site--v5 #main :is(.btn:not(.btn-
    · Şerit: kart yine tek kat cam; şerit EN DIŞTAKİ kartın sol kenarında
      modül renginde ince bir ışık. İçteki bölüm dolgusuz.
    · Ferah: cam kart yok; bölümler zeminin üstünde, aralarında ince çizgi. */
-html[data-zemin="yumusak"][data-yuzey="serit"] .sayfa :is(section.kutu, section.lrow, .card):not(html){
-  background:var(--cam) !important; border:1px solid var(--cam-kenar) !important; border-radius:24px;
-  box-shadow:inset 3px 0 0 color-mix(in oklab, var(--mod) 70%, transparent), var(--cam-ust), var(--cam-golge); }
-html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .sayfa--kapakli .bugun__alan{
-  box-shadow:inset 3px 0 0 color-mix(in oklab, var(--mod) 70%, transparent), var(--cam-ust), var(--cam-golge); }
-html[data-zemin="yumusak"][data-yuzey="serit"] .sayfa :is(.bugun__alan, .kutu, .card, .lrow) :is(section.kutu, section.lrow, .card):not(html){
-  background:transparent !important; border:0 !important; box-shadow:none; border-radius:0; }
-html[data-zemin="yumusak"][data-yuzey="ferah"] .site--v5 .sayfa--kapakli .bugun__alan{
-  background:transparent; border-color:transparent; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
-html[data-zemin="yumusak"][data-yuzey="ferah"] .site--v5 .sayfa--kapakli .bugun__alan + .bugun__alan{
-  border-radius:0; border-top-color:color-mix(in oklab, var(--text) 10%, transparent); }
-html[data-zemin="yumusak"][data-yuzey="ferah"] .site--v5 .sayfa--kapakli .bugun__alan::before,
-html[data-zemin="yumusak"][data-yuzey="ferah"] .site--v5 .sayfa--kapakli .bugun__alan::after{ content:none; }
+
+
+
+
+
+
 
 /* 23) MİNİKLER: ÇEŞİTLİLİK VE RADYO (kullanıcı, 2026-10-28: «çeşitliliği ve
    kalitesini zirveye taşı, bütün detaylarıyla»; «radyo açarsak hepsi chill,
@@ -17932,16 +17677,16 @@ html[data-zemin="yumusak"][data-yuzey="ferah"] .site--v5 .sayfa--kapakli .bugun_
   background:radial-gradient(circle at 40% 35%, #fff8d0, #ffc93c 60%, #f0a417);
   clip-path:polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
 .minik[data-tip="mantar"] .minik__sus{ left:6%; right:6%; top:-16%; height:40%; border-radius:50% 50% 14% 14% / 90% 90% 22% 22%;
-  background:radial-gradient(circle at 30% 42%, #fff 0 9%, transparent 10%), radial-gradient(circle at 66% 30%, #fff 0 8%, transparent 9%),
-    radial-gradient(circle at 78% 64%, #fff 0 6%, transparent 7%),
-    radial-gradient(70% 60% at 40% 20%, rgba(255,255,255,.4), transparent 70%), linear-gradient(#ff7a7a, #e2475a); }
+  background:radial-gradient(circle at 30% 42%, var(--beyaz) 0 9%, transparent 10%), radial-gradient(circle at 66% 30%, var(--beyaz) 0 8%, transparent 9%),
+    radial-gradient(circle at 78% 64%, var(--beyaz) 0 6%, transparent 7%),
+    radial-gradient(70% 60% at 40% 20%, var(--beyaz-40), transparent 70%), linear-gradient(#ff7a7a, #e2475a); }
 .minik[data-bicim="ucgen"][data-tip="mantar"] .minik__sus{ left:16%; right:16%; top:-6%; }
 .minik[data-tip="kas"] .minik__goz::before{ opacity:.9; height:26%; top:-48%; left:-24%; right:-24%; border-radius:6px; background:#f4f1ea;
-  box-shadow:0 1px 0 rgba(0,0,0,.12); }
+  box-shadow:0 1px 0 var(--siyah-12); }
 
 /* Desen: karın (açık tonlu oval) ve çil. */
 .minik__deri::before{ content:""; position:absolute; inset:0; pointer-events:none; }
-.minik[data-desen="karin"] .minik__deri::before{ background:radial-gradient(40% 30% at 50% 82%, rgba(255,255,255,.5), rgba(255,255,255,.18) 60%, transparent 72%); }
+.minik[data-desen="karin"] .minik__deri::before{ background:radial-gradient(40% 30% at 50% 82%, var(--beyaz-50), var(--beyaz-18) 60%, transparent 72%); }
 .minik[data-desen="cil"] .minik__deri::before{
   background:radial-gradient(circle at 22% 60%, rgba(150,80,60,.38) 0 2.6%, transparent 3.4%), radial-gradient(circle at 28% 66%, rgba(150,80,60,.38) 0 2.4%, transparent 3.2%),
     radial-gradient(circle at 18% 67%, rgba(150,80,60,.32) 0 2.2%, transparent 3%), radial-gradient(circle at 78% 60%, rgba(150,80,60,.38) 0 2.6%, transparent 3.4%),
@@ -17978,10 +17723,10 @@ html[data-zemin="yumusak"][data-yuzey="ferah"] .site--v5 .sayfa--kapakli .bugun_
    camın içinden geçen ışık (kostik), kenarda ince beyaz ışık; koyu dış
    çizgi yok. Yansıma imleci izler (minik.js --gx/--gy): ışık camın
    üstünde gerçekten kayar. Gözler koyu ve parlak kalır (okunur yüz). */
-.minik{ --hat-filtre:drop-shadow(0 0 .6px rgba(255,255,255,.95)) drop-shadow(0 .6px .4px rgba(255,255,255,.55))
+.minik{ --hat-filtre:drop-shadow(0 0 .6px var(--beyaz-95)) drop-shadow(0 .6px .4px var(--beyaz-55))
     drop-shadow(0 5px 6px color-mix(in oklab, var(--g3) 38%, transparent)); }
 .minik__deri{
-  background:radial-gradient(70% 42% at 50% 104%, color-mix(in oklab, var(--g1) 75%, #fff), transparent 72%),
+  background:radial-gradient(70% 42% at 50% 104%, color-mix(in oklab, var(--g1) 75%, var(--beyaz)), transparent 72%),
     radial-gradient(15% 9% at 24% 67%, rgba(255,110,150,.45), transparent),
     radial-gradient(15% 9% at 76% 67%, rgba(255,110,150,.45), transparent),
     radial-gradient(90% 80% at 50% 40%, transparent 58%, color-mix(in oklab, var(--g3) 40%, transparent) 100%),
@@ -17989,14 +17734,14 @@ html[data-zemin="yumusak"][data-yuzey="ferah"] .site--v5 .sayfa--kapakli .bugun_
   -webkit-backdrop-filter:blur(6px) saturate(1.7); backdrop-filter:blur(6px) saturate(1.7); }
 /* Üstteki yansıma: ayrı katman, imlecin tersine hafifçe kayar. */
 .minik__govde::before{ content:""; position:absolute; left:16%; right:30%; top:7%; height:26%; border-radius:50%; pointer-events:none; z-index:1;
-  background:radial-gradient(closest-side, rgba(255,255,255,.95), rgba(255,255,255,.35) 60%, transparent);
+  background:radial-gradient(closest-side, var(--beyaz-95), var(--beyaz-35) 60%, transparent);
   transform:translate(calc(var(--gx, 0px) * -1.4), calc(var(--gy, 0px) * -1)) rotate(-12deg);
   transition:transform .4s cubic-bezier(.2,.8,.2,1); }
 .minik[data-bicim="ucgen"] .minik__govde::before{ left:34%; right:36%; top:30%; height:18%; }
-.minik :is(.minik__kol, .minik__ayak){ background:linear-gradient(170deg, color-mix(in oklab, var(--g1) 80%, #fff), var(--g2));
-  filter:drop-shadow(0 0 .5px rgba(255,255,255,.9)) drop-shadow(0 2px 2px color-mix(in oklab, var(--g3) 30%, transparent)); }
+.minik :is(.minik__kol, .minik__ayak){ background:linear-gradient(170deg, color-mix(in oklab, var(--g1) 80%, var(--beyaz)), var(--g2));
+  filter:drop-shadow(0 0 .5px var(--beyaz-90)) drop-shadow(0 2px 2px color-mix(in oklab, var(--g3) 30%, transparent)); }
 .minik__goz{ width:17%; height:22%; top:41%;
-  background:radial-gradient(circle at 68% 76%, rgba(255,255,255,.9) 0 8%, transparent 10%), radial-gradient(circle at 45% 35%, #2c3166, #13152c 72%); }
+  background:radial-gradient(circle at 68% 76%, var(--beyaz-90) 0 8%, transparent 10%), radial-gradient(circle at 45% 35%, #2c3166, #13152c 72%); }
 .minik__goz:nth-of-type(2){ left:26%; } .minik__goz:nth-of-type(3){ right:26%; }
 .minik__goz::after{ left:14%; top:10%; width:46%; height:42%; }
 .minik.is-farkinda:not(.is-uyuyor) .minik__goz{ height:25%; top:39%; }
@@ -18004,7 +17749,7 @@ html[data-zemin="yumusak"][data-yuzey="ferah"] .site--v5 .sayfa--kapakli .bugun_
 /* Gövde saydam: arkasından çıkan süsün (kulak, boynuz; perçemin kendi maskesi var) tabanı camın
    içinden görünmesin diye alt kısmı yumuşakça silinir. */
 .minik:is([data-tip="kulak"], [data-tip="tavsan"], [data-tip="ayi"], [data-tip="boynuz"]) .minik__sus{
-  --sil:linear-gradient(#000 var(--sil-bas, 50%), transparent var(--sil-son, 70%)); -webkit-mask:var(--sil); mask:var(--sil); }
+  --sil:linear-gradient(var(--siyah) var(--sil-bas, 50%), transparent var(--sil-son, 70%)); -webkit-mask:var(--sil); mask:var(--sil); }
 .minik[data-tip="kulak"] .minik__sus{ --sil-bas:60%; --sil-son:76%; }
 .minik[data-tip="tavsan"] .minik__sus{ --sil-bas:74%; --sil-son:90%; }
 .minik[data-tip="ayi"] .minik__sus{ --sil-bas:52%; --sil-son:74%; }
@@ -18018,9 +17763,9 @@ html[data-theme="dark"] .minik__deri{ background-color:color-mix(in oklab, var(-
   clip-path:polygon(28% 0, 72% 0, 62% 20%, 84% 78%, 50% 100%, 16% 78%, 38% 20%); }
 .minik[data-ofis][data-tip="patron"] .minik__kravat{ background:#d6454f; }
 .minik[data-ofis][data-tip="yaka"] .minik__kart{ display:grid; place-items:center; right:13%; top:70%; width:20%; height:15%; border-radius:2px;
-  background:#fff; color:#33406e; font:800 calc(var(--boy) * .12)/1 var(--font-body, system-ui); letter-spacing:-.02em;
+  background:var(--beyaz); color:#33406e; font:800 calc(var(--boy) * .12)/1 var(--font-body, system-ui); letter-spacing:-.02em;
   box-shadow:0 0 0 .6px rgba(30,34,60,.35); }
-.minik[data-ofis] .minik__deri::before{ background:linear-gradient(180deg, transparent 66%, rgba(255,255,255,.28) 66%); }   /* gömlek yakası hizası */
+.minik[data-ofis] .minik__deri::before{ background:linear-gradient(180deg, transparent 66%, var(--beyaz-28) 66%); }   /* gömlek yakası hizası */
 
 /* 25) KING CAMDA VE TAÇLI ARKADAŞ (kullanıcı, 2026-10-28: «King'in arayüzünü
    de bu temaya geçir; tatlı bir şey bizimle konuşsun»). Büyük King düz
@@ -18033,32 +17778,23 @@ html[data-theme="dark"] .minik__deri{ background-color:color-mix(in oklab, var(-
    · düşünüyor: elleri arkada, sağa sola yürür, «hımm…»;
    · dinliyor: yazarken ya da mikrofon açıkken gözleri büyür, yazıya bakar;
    · uyuyor: 45 sn hiçbir şey olmazsa yazının üstüne kıvrılıp uyur. */
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__kutu{
-  background:rgba(255,255,255,.52); -webkit-backdrop-filter:blur(40px) saturate(170%); backdrop-filter:blur(40px) saturate(170%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 0 0 1px rgba(255,255,255,.55), 0 30px 80px -30px rgba(20,24,40,.35); }
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__yan{ background:rgba(255,255,255,.22); border-right-color:rgba(255,255,255,.5); }
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__ray{ background:rgba(255,255,255,.12); }
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz{ background:var(--cam-girdi);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 0 0 1px var(--cam-kenar), 0 10px 26px -18px rgba(20,24,40,.35); }
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz:focus-within{
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 0 0 1.5px color-mix(in oklab, var(--dugme) 60%, transparent), 0 10px 26px -18px rgba(20,24,40,.35); }
-html[data-zemin="yumusak"] .king .king__gonder{ background:var(--dugme); color:#fff; box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 4px 10px -6px color-mix(in oklab, var(--dugme) 70%, #000); }
-html[data-zemin="yumusak"] .king .king__cip{ background:var(--cam-ince); box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px var(--cam-kenar); }
-html[data-theme="dark"][data-zemin="yumusak"] .king:not(.is-mini) .king__kutu{ background:rgba(22,22,30,.55);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 0 1px rgba(255,255,255,.06), 0 30px 80px -30px rgba(0,0,0,.7); }
-html[data-theme="dark"][data-zemin="yumusak"] .king:not(.is-mini) :is(.king__yan, .king__ray){ background:rgba(255,255,255,.03); border-right-color:rgba(255,255,255,.06); }
-html[data-theme="dark"][data-zemin="yumusak"] .king:not(.is-mini) .king__yaz{ box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 0 0 1px var(--cam-kenar), 0 10px 26px -18px rgba(0,0,0,.6); }
-@media (prefers-color-scheme:dark){
-  html:not([data-theme="light"])[data-zemin="yumusak"] .king:not(.is-mini) .king__kutu{ background:rgba(22,22,30,.55);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 0 0 1px rgba(255,255,255,.06), 0 30px 80px -30px rgba(0,0,0,.7); }
-  html:not([data-theme="light"])[data-zemin="yumusak"] .king:not(.is-mini) :is(.king__yan, .king__ray){ background:rgba(255,255,255,.03); border-right-color:rgba(255,255,255,.06); }
-}
+
+
+
+
+
+
+
+
+
+
+
 
 /* Arkadaş: yazı alanının üst kenarında, sağ tarafta oturur. */
 .king__yaz{ position:relative; }
 .king__arkadas{ position:absolute; right:110px; top:1px; width:0; height:0; z-index:2;
   --mod:oklch(.64 .15 292); }
-html:not([data-zemin="yumusak"]) .king__arkadas{ display:none; }
+html[data-zemin] .king__arkadas{ display:none; }
 .king__arkadas .minik{ --boy:50px; --ton:0; }
 .king__arkadas .minik__balon{ bottom:calc(100% + 18px); }
 .king__arkadas .minik__ad{ display:none; }
@@ -18100,23 +17836,23 @@ html:not([data-zemin="yumusak"]) .king__arkadas{ display:none; }
 .minik[data-esya] .minik__esya{ display:block; }
 .minik[data-esya]:not([data-esya="ampul"]) .minik__kol--sag{ z-index:4; top:64%; right:6%; rotate:-34deg; }
 .minik[data-esya="grafik"] .minik__esya{ left:50%; top:50%; width:50%; height:40%; border-radius:3px; rotate:-6deg;
-  background:linear-gradient(color-mix(in oklab, var(--mod) 80%, #fff), var(--mod)) 16% 86% / 16% 38% no-repeat,
-    linear-gradient(color-mix(in oklab, var(--mod) 80%, #fff), var(--mod)) 42% 86% / 16% 58% no-repeat,
+  background:linear-gradient(color-mix(in oklab, var(--mod) 80%, var(--beyaz)), var(--mod)) 16% 86% / 16% 38% no-repeat,
+    linear-gradient(color-mix(in oklab, var(--mod) 80%, var(--beyaz)), var(--mod)) 42% 86% / 16% 58% no-repeat,
     linear-gradient(#7fd69b, #3fae6a) 68% 86% / 16% 78% no-repeat,
-    linear-gradient(#fff, #f1f2f8);
+    linear-gradient(var(--beyaz), #f1f2f8);
   box-shadow:0 0 0 .6px rgba(30,34,60,.35), 0 2px 3px rgba(20,24,40,.18); }
 .minik[data-esya="kahve"] .minik__esya{ left:60%; top:58%; width:24%; height:24%; border-radius:2px 2px 40% 40%;
-  background:linear-gradient(#7a4a2c 0 18%, #fff 18%); box-shadow:0 0 0 .6px rgba(30,34,60,.35), 0 2px 2px rgba(20,24,40,.15); }
+  background:linear-gradient(#7a4a2c 0 18%, var(--beyaz) 18%); box-shadow:0 0 0 .6px rgba(30,34,60,.35), 0 2px 2px rgba(20,24,40,.15); }
 .minik[data-esya="kahve"] .minik__esya::after{ content:""; position:absolute; right:-34%; top:22%; width:40%; height:44%; border:1.5px solid #e9e6f0; border-left:0; border-radius:0 50% 50% 0; }
 .minik[data-esya="kahve"] .minik__esya::before{ content:""; position:absolute; left:20%; bottom:110%; width:60%; height:70%; opacity:.7;
-  background:radial-gradient(ellipse 22% 46% at 30% 60%, rgba(255,255,255,.9), transparent 70%), radial-gradient(ellipse 22% 46% at 70% 40%, rgba(255,255,255,.8), transparent 70%); }
+  background:radial-gradient(ellipse 22% 46% at 30% 60%, var(--beyaz-90), transparent 70%), radial-gradient(ellipse 22% 46% at 70% 40%, var(--beyaz-80), transparent 70%); }
 .minik[data-esya="not"] .minik__esya{ left:54%; top:52%; width:34%; height:40%; border-radius:2px; rotate:8deg;
   background:linear-gradient(#ffd45c 0 16%, transparent 16%), repeating-linear-gradient(#fffdf6 0 20%, #cfd6ea 20% 24%);
   box-shadow:0 0 0 .6px rgba(30,34,60,.35), 0 2px 3px rgba(20,24,40,.15); }
 .minik[data-esya="not"] .minik__esya::after{ content:""; position:absolute; right:-30%; top:10%; width:12%; height:80%; rotate:24deg; border-radius:1px;
   background:linear-gradient(#ffb3c6 0 14%, #ffcf4d 14% 82%, #6b4b2a 82%); }
 .minik[data-esya="buyutec"] .minik__esya{ left:56%; top:36%; width:34%; aspect-ratio:1; border-radius:50%;
-  border:2.4px solid #4a5170; background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.85), rgba(190,225,255,.35) 60%); }
+  border:2.4px solid #4a5170; background:radial-gradient(circle at 35% 30%, var(--beyaz-85), rgba(190,225,255,.35) 60%); }
 .minik[data-esya="buyutec"] .minik__esya::after{ content:""; position:absolute; right:-42%; bottom:-46%; width:20%; height:64%; rotate:-45deg; border-radius:2px; background:#4a5170; }
 .minik[data-esya="ampul"] .minik__esya{ left:38%; top:-64%; width:24%; height:30%; border-radius:50% 50% 42% 42%;
   background:radial-gradient(circle at 40% 35%, #fffbe0, #ffd84a 70%); box-shadow:0 0 10px 2px rgba(255,214,90,.65); }
@@ -18157,10 +17893,10 @@ html:not([data-zemin="yumusak"]) .king__arkadas{ display:none; }
 .ortam-isik{ position:fixed; left:0; top:0; width:0; height:0; z-index:-1; pointer-events:none;
   transition:transform 1.6s cubic-bezier(.2,.8,.2,1); }
 .ortam-isik::before{ content:""; position:absolute; left:-36vmax; top:-36vmax; width:72vmax; height:72vmax; border-radius:50%;
-  background:radial-gradient(closest-side, rgba(255,255,255,.34), rgba(255,255,255,.14) 45%, rgba(255,255,255,0) 100%); }
+  background:radial-gradient(closest-side, var(--beyaz-34), var(--beyaz-14) 45%, var(--beyaz-00) 100%); }
 html[data-theme="dark"] .ortam-isik::before{ background:radial-gradient(closest-side, rgba(255,232,214,.07), rgba(255,232,214,.03) 45%, transparent 100%); }
 @media (prefers-color-scheme:dark){ html:not([data-theme="light"]) .ortam-isik::before{ background:radial-gradient(closest-side, rgba(255,232,214,.07), rgba(255,232,214,.03) 45%, transparent 100%); } }
-html:not([data-zemin="yumusak"]) .ortam-isik, html.king-acik .ortam-isik{ display:none; }
+html[data-zemin] .ortam-isik, html.king-acik .ortam-isik{ display:none; }
 @media (prefers-reduced-motion:reduce){ .ortam-isik{ display:none; } }
 @media (hover:none){ .ortam-isik{ display:none; } }
 
@@ -18168,15 +17904,15 @@ html:not([data-zemin="yumusak"]) .ortam-isik, html.king-acik .ortam-isik{ displa
    böyle çok kötü butonlar var»). temel.css boş durumun düğmesini dolgusuz
    bağlantı gibi tanımlar; cam yüzey onu dolu renge boyayınca yazı rengin
    kenarına dayanıyordu. Camda gerçek düğme ölçüsü alır. */
-html[data-zemin="yumusak"] .site--v5 .empty .btn{ min-height:34px; padding:0 16px; gap:7px; margin-top:4px; }
-html[data-zemin="yumusak"] .site--v5 .empty .btn:hover{ text-decoration:none; }
-html[data-zemin="yumusak"] .site--v5 .empty .btn--sm{ min-height:30px; padding:0 13px; }
+
+
+
 /* Sayfa bölümünün içindeki defter satırı kart.css'in iç boşluk yolunun
    dışında kalır; cam onu kart gibi boyadığı için yazı kenara dayanıyordu. */
-html[data-zemin="yumusak"] .site--v5 .ledger .sayfabolum .lrow:not(.kahraman){ padding-inline:20px; }
+
 /* Ferah yüzeyde kart zeminsizdir: el ışığı orada havada asılı köşeli bir
    kutu gibi kalıyordu (26 kart, üç modül). Zemin yoksa ışık da yok. */
-html[data-zemin="yumusak"][data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card, .donen)::after{ background:none; }
+
 
 /* 28) PROFESYONEL ZEMİN, IŞIK VE DAHA TATLI MİNİKLER (kullanıcı,
    2026-10-28: «arka planı çok daha profesyonel yap, minikleri daha tatlı
@@ -18194,16 +17930,16 @@ html[data-zemin="yumusak"][data-yuzey="ferah"] .sayfa :is(section.kutu, section.
   --zm-1:oklch(from var(--mod) .978 .01 h); --zm-2:oklch(from var(--mod) .952 .022 calc(h + 12));
   --zm-a:oklch(from var(--mod) .86 .085 h / .55); --zm-b:oklch(from var(--mod) .93 .045 calc(h + 30) / .5);
   --zm-c:oklch(from var(--mod) .9 .05 calc(h - 18) / .45); --gun-a:.26;
-  --gok:rgba(255,255,255,.75); --vin:transparent;
-  --isik-renk:color-mix(in oklab, var(--mod) 22%, #fff);
+  --gok:var(--beyaz-75); --vin:transparent;
+  --isik-renk:color-mix(in oklab, var(--mod) 22%, var(--beyaz));
   --isik-ic:.24; --isik-kenar:.95;
 }
 html[data-theme="dark"]{
   --zm-1:oklch(from var(--mod) .2 .035 h); --zm-2:oklch(from var(--mod) .125 .022 calc(h + 15));
   --zm-a:oklch(from var(--mod) .42 .13 h / .42); --zm-b:oklch(from var(--mod) .3 .07 calc(h + 30) / .32);
   --zm-c:oklch(from var(--mod) .28 .06 calc(h - 18) / .28); --gun-a:.06;
-  --gok:oklch(from var(--mod) .5 .08 h / .22); --vin:rgba(0,0,0,.38);
-  --isik-renk:color-mix(in oklab, var(--mod) 45%, #fff);
+  --gok:oklch(from var(--mod) .5 .08 h / .22); --vin:var(--siyah-38);
+  --isik-renk:color-mix(in oklab, var(--mod) 45%, var(--beyaz));
   --isik-ic:.11; --isik-kenar:.55;
 }
 @media (prefers-color-scheme:dark){
@@ -18211,45 +17947,19 @@ html[data-theme="dark"]{
     --zm-1:oklch(from var(--mod) .2 .035 h); --zm-2:oklch(from var(--mod) .125 .022 calc(h + 15));
     --zm-a:oklch(from var(--mod) .42 .13 h / .42); --zm-b:oklch(from var(--mod) .3 .07 calc(h + 30) / .32);
     --zm-c:oklch(from var(--mod) .28 .06 calc(h - 18) / .28); --gun-a:.06;
-    --gok:oklch(from var(--mod) .5 .08 h / .22); --vin:rgba(0,0,0,.38);
-    --isik-renk:color-mix(in oklab, var(--mod) 45%, #fff);
+    --gok:oklch(from var(--mod) .5 .08 h / .22); --vin:var(--siyah-38);
+    --isik-renk:color-mix(in oklab, var(--mod) 45%, var(--beyaz));
     --isik-ic:.11; --isik-kenar:.55;
   }
 }
-html[data-zemin="yumusak"] body::before{
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 .045'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    radial-gradient(130% 95% at 50% 42%, transparent 58%, var(--vin) 100%),
-    radial-gradient(70% 46% at 50% -8%, var(--gok), transparent 72%),
-    radial-gradient(64% 60% at 4% 0%, var(--zm-a), transparent 72%),
-    radial-gradient(56% 60% at 100% 14%, var(--zm-b), transparent 72%),
-    radial-gradient(76% 60% at 70% 108%, var(--zm-c), transparent 72%),
-    radial-gradient(95% 75% at 12% 112%, rgb(var(--gun) / var(--gun-a)), rgb(var(--gun) / calc(var(--gun-a) * .72)) 22%,
-      rgb(var(--gun) / calc(var(--gun-a) * .38)) 46%, rgb(var(--gun) / calc(var(--gun-a) * .12)) 68%, rgb(var(--gun) / 0) 88%),
-    linear-gradient(175deg, var(--zm-1), var(--zm-2));
-}
-html[data-zemin="yumusak"]::before{ opacity:.45; }
+
+
 
 /* Kartın içindeki el ışığı: modül renginde, beş duraklı düşüş. */
-@media (hover:hover) and (pointer:fine){
-  html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{
-    --a:calc(var(--isik-ic) * var(--isik-guc, 1));
-    background:radial-gradient(circle 240px at var(--mx, 50%) var(--my, 0%),
-      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 100%), transparent),
-      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 68%), transparent) 18%,
-      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 34%), transparent) 40%,
-      color-mix(in oklab, var(--isik-renk) calc(var(--a) * 11%), transparent) 65%, transparent 100%); }
-  html[data-theme="dark"][data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{ mix-blend-mode:plus-lighter; }
-}
-@media (hover:hover) and (pointer:fine) and (prefers-color-scheme:dark){
-  html:not([data-theme="light"])[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{ mix-blend-mode:plus-lighter; }
-}
+
+
 /* Kenar: imlece yakın yer modül renginde parlar (sol üst duran ışık kalır). */
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::before{
-  background:radial-gradient(160px circle at var(--mx, -400px) var(--my, -400px),
-      color-mix(in oklab, var(--isik-renk) calc(var(--isik) * var(--isik-kenar) * 100%), transparent),
-      color-mix(in oklab, var(--isik-renk) calc(var(--isik) * var(--isik-kenar) * 40%), transparent) 45%, transparent 80%),
-    linear-gradient(135deg, var(--rim-ust) 0%, var(--rim-orta) 26%, transparent 46%); }
+
 
 /* Zemindeki ortam ışığı: dev beyaz leke yerine modül renginde yumuşak spot. */
 .ortam-isik::before{ left:-30vmax; top:-30vmax; width:60vmax; height:60vmax;
@@ -18263,16 +17973,16 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
     color-mix(in oklab, var(--isik-renk) 3%, transparent) 55%, transparent 100%); } }
 
 /* Minikler: daha dolgun renk, iri ve aşağıda göz, belirgin yanak, net kenar. */
-.minik{ --hat-filtre:drop-shadow(0 0 .7px color-mix(in oklab, var(--g3) 70%, transparent)) drop-shadow(0 0 .5px rgba(255,255,255,.95))
+.minik{ --hat-filtre:drop-shadow(0 0 .7px color-mix(in oklab, var(--g3) 70%, transparent)) drop-shadow(0 0 .5px var(--beyaz-95))
     drop-shadow(0 4px 5px color-mix(in oklab, var(--g3) 34%, transparent)); }
 .minik__deri{
-  background:radial-gradient(70% 42% at 50% 104%, color-mix(in oklab, var(--g1) 75%, #fff), transparent 72%),
+  background:radial-gradient(70% 42% at 50% 104%, color-mix(in oklab, var(--g1) 75%, var(--beyaz)), transparent 72%),
     radial-gradient(17% 10% at 23% 70%, rgba(255,120,160,.62), transparent),
     radial-gradient(17% 10% at 77% 70%, rgba(255,120,160,.62), transparent),
     radial-gradient(90% 80% at 50% 40%, transparent 58%, color-mix(in oklab, var(--g3) 42%, transparent) 100%),
     linear-gradient(170deg, color-mix(in oklab, var(--g1) 86%, transparent), color-mix(in oklab, var(--g2) 94%, transparent)); }
 .minik__goz{ width:19%; height:25%; top:44%;
-  background:radial-gradient(circle at 70% 74%, rgba(255,255,255,.85) 0 7%, transparent 9%), radial-gradient(circle at 45% 35%, #2f3570, #12142a 72%); }
+  background:radial-gradient(circle at 70% 74%, var(--beyaz-85) 0 7%, transparent 9%), radial-gradient(circle at 45% 35%, #2f3570, #12142a 72%); }
 .minik__goz:nth-of-type(2){ left:23%; } .minik__goz:nth-of-type(3){ right:23%; }
 .minik__goz::after{ left:16%; top:12%; width:44%; height:40%; }
 .minik.is-farkinda:not(.is-uyuyor) .minik__goz{ height:28%; top:42%; }
@@ -18290,22 +18000,7 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
      modül renginde bir halka yayılıp söner (bırakınca 300 ms'de).
    · Çubuk ve eşik dolgusu yayla dolar; kenar simgesi üzerine gelince büyür;
      odak halkası sıçramadan açılır. */
-@media (prefers-reduced-motion:no-preference){
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 .sayfabasi{ animation:cam-gir-baslik2 360ms cubic-bezier(.16,1,.3,1) both; }
-  html[data-zemin="yumusak"].sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .lrow, .pk, .kapak__sayi,
-    .bugun__alan, .giris, .alan-kare, .ozet-kare, .pickcard, .bolumcubugu){ animation-name:cam-gir2; animation-duration:360ms; animation-timing-function:cubic-bezier(.16,1,.3,1); }
 
-  @media (hover:hover) and (pointer:fine){
-    html[data-zemin="yumusak"] .site--v5 :is(.btn, .chip, .kisayol > button, .kisayol > a, .giris__gonder):hover:not(:active):not(:disabled){ transform:translateY(-1px); }
-    html[data-zemin="yumusak"] .site--v5 .kenar__cekmece svg{ transition:transform 520ms var(--su); }
-    html[data-zemin="yumusak"] .site--v5 .kenar__cekmece:hover svg{ transform:scale(1.1); }
-  }
-  html[data-zemin="yumusak"] .site--v5 :is(.btn--primary, .giris__gonder):active:not(:disabled){
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 1px 1px rgba(16,20,40,.18), 0 0 0 6px color-mix(in oklab, var(--dugme) 22%, transparent); }
-
-  html[data-zemin="yumusak"] :is(.bar__fill, .esikcubuk__dolu){ transition:width 900ms var(--su), transform 900ms var(--su), background-color .3s ease; }
-  html[data-zemin="yumusak"] .site--v5 :is(button, a, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible{ transition:outline-offset 260ms var(--su), box-shadow 260ms ease; }
-}
 @keyframes cam-gir2{ from{ transform:translateY(8px) scale(.99); } to{ transform:none; } }   /* bulaniksiz: Edge'de kare p95 15,5 -> 12,3 ms (§30) */
 /* Bulanıksız (2026-10-29): filter GPU'ya devredilmiyor (Edge: compositeFailed 4096); her sayfa geçişinde başlık ana iş parçacığında boyanıyordu. */
 @keyframes cam-gir-baslik2{ from{ transform:translateY(6px); } to{ transform:none; } }
@@ -18328,8 +18023,8 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
 @media (prefers-reduced-motion:no-preference){
   /* Kağıt: karartma solar, kağıt yaylanarak yükselir; masaüstünde ortadan büyür. */
   body .overlay{ animation:h-karart-gel var(--h-kisa) var(--e-std) both; }
-  html[data-zemin="yumusak"] .overlay .sheet, .overlay .sheet{ animation:h-kagit-gel var(--h-uzun) var(--su) both; transform-origin:50% 100%; }
-  @media (min-width:680px){ html[data-zemin="yumusak"] .overlay .sheet, .overlay .sheet{ transform-origin:50% 40%; } }
+   .overlay .sheet{ animation:h-kagit-gel var(--h-uzun) var(--su) both; transform-origin:50% 100%; }
+  @media (min-width:680px){  .overlay .sheet{ transform-origin:50% 40%; } }
   /* Kapanış kopyası (hareket.js cikis; içerik değil, yalnız görünüş): karartma söner, kağıdın camı aşağı süzülür. */
   .h-cikis{ animation:h-karart-git var(--h-kisa) var(--e-git) forwards; }
   .h-cikis__kagit{ animation:h-kagit-git var(--h-kisa) var(--e-git) forwards; }
@@ -18379,9 +18074,8 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
    Üzerindeki kartı belirginleştirme ve daha buğulu kenar denendi, geri
    alındı («en son yaptığını beğenmedim»). */
 .ortam-isik{ display:none !important; }
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::before{
-  background:linear-gradient(135deg, var(--rim-ust) 0%, var(--rim-orta) 26%, transparent 46%); }
-html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard)::after{ content:none; }
+
+
 
 /* 33) MANZARA VE GERÇEK CAM (kullanıcı, 2026-10-28: «sistemin arka planına
    gerekirse resim koy, devasa bir güncelleme istiyorum»; referans: Liquid
@@ -18394,34 +18088,30 @@ html[data-zemin="yumusak"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .c
    · Kartlar gerçek buzlu cam olur: arkasını 22 px bulanık, doygun gösterir.
      İç içe kart bulanıklığı tekrarlamaz (performans). */
 :root{
-  --manzara-sis:linear-gradient(180deg, rgba(255,255,255,.46), rgba(255,255,255,.4) 36%, rgba(255,255,255,.16) 60%, rgba(255,255,255,.28));
-  --manzara-okuma:radial-gradient(85% 62% at 14% 8%, rgba(255,255,255,.62), transparent 74%);
-  --manzara-hale:0 1px 14px rgba(255,255,255,.75);
+  --manzara-sis:linear-gradient(180deg, var(--beyaz-46), var(--beyaz-40) 36%, var(--beyaz-16) 60%, var(--beyaz-28));
+  --manzara-okuma:radial-gradient(85% 62% at 14% 8%, var(--beyaz-62), transparent 74%);
+  --manzara-hale:0 1px 14px var(--beyaz-75);
 }
-html[data-manzara="acik"]{ --cam:radial-gradient(90% 70% at 0% 0%, rgba(255,255,255,.46), transparent 58%), linear-gradient(140deg, rgba(255,255,255,.62), rgba(255,255,255,.4)); }
+html[data-manzara="acik"]{ --cam:radial-gradient(90% 70% at 0% 0%, var(--beyaz-46), transparent 58%), linear-gradient(140deg, var(--beyaz-62), var(--beyaz-40)); }
 html[data-theme="dark"]{
   --manzara-sis:linear-gradient(180deg, oklch(from var(--mod) .16 .03 h / .7), oklch(from var(--mod) .13 .025 h / .58) 45%, oklch(from var(--mod) .1 .02 h / .78));
   --manzara-okuma:radial-gradient(70% 55% at 16% 10%, rgba(4,6,14,.42), transparent 72%);
-  --manzara-hale:0 1px 14px rgba(0,0,0,.55);
+  --manzara-hale:0 1px 14px var(--siyah-55);
 }
-html[data-manzara="acik"][data-theme="dark"]{ --cam:radial-gradient(90% 70% at 0% 0%, rgba(255,255,255,.08), transparent 58%), linear-gradient(140deg, rgba(255,255,255,.1), rgba(255,255,255,.05)); }
+html[data-manzara="acik"][data-theme="dark"]{ --cam:radial-gradient(90% 70% at 0% 0%, var(--beyaz-08), transparent 58%), linear-gradient(140deg, var(--beyaz-10), var(--beyaz-05)); }
 @media (prefers-color-scheme:dark){ html:not([data-theme="light"]){
   --manzara-sis:linear-gradient(180deg, oklch(from var(--mod) .16 .03 h / .7), oklch(from var(--mod) .13 .025 h / .58) 45%, oklch(from var(--mod) .1 .02 h / .78));
-  --manzara-okuma:radial-gradient(70% 55% at 16% 10%, rgba(4,6,14,.42), transparent 72%); --manzara-hale:0 1px 14px rgba(0,0,0,.55); } }
-@media (prefers-color-scheme:dark){ html[data-manzara="acik"]:not([data-theme="light"]){ --cam:radial-gradient(90% 70% at 0% 0%, rgba(255,255,255,.08), transparent 58%), linear-gradient(140deg, rgba(255,255,255,.1), rgba(255,255,255,.05)); } }
-html[data-yuzey="ferah"]{ --manzara-sis:linear-gradient(rgba(255,255,255,.58), rgba(255,255,255,.5)); }
+  --manzara-okuma:radial-gradient(70% 55% at 16% 10%, rgba(4,6,14,.42), transparent 72%); --manzara-hale:0 1px 14px var(--siyah-55); } }
+@media (prefers-color-scheme:dark){ html[data-manzara="acik"]:not([data-theme="light"]){ --cam:radial-gradient(90% 70% at 0% 0%, var(--beyaz-08), transparent 58%), linear-gradient(140deg, var(--beyaz-10), var(--beyaz-05)); } }
+html[data-yuzey="ferah"]{ --manzara-sis:linear-gradient(var(--beyaz-58), var(--beyaz-50)); }
 html[data-yuzey="ferah"][data-theme="dark"]{ --manzara-sis:linear-gradient(rgba(6,8,16,.8), rgba(6,8,16,.76)); }
-html[data-zemin="yumusak"][data-manzara="acik"] body::before{
-  background:var(--manzara-okuma), var(--manzara-sis), var(--manzara) center / cover no-repeat, linear-gradient(175deg, var(--zm-1), var(--zm-2)); }
-html[data-zemin="yumusak"][data-manzara="acik"]::before{ display:none; }
-html[data-zemin="yumusak"][data-manzara="acik"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .donen, .site--v5 .nextup,
-  .site--v5 .ledger .lrow:not(.kahraman), .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard, .site--v5 .rehber__konular){
-  -webkit-backdrop-filter:blur(22px) saturate(140%); backdrop-filter:blur(22px) saturate(140%); }
+
+
+
 /* Başlık ve selam doğrudan fotoğrafın üstünde: hafif bir hale okunurluğu taşır. */
-html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 :is(.kapak, .sayfabasi){ text-shadow:var(--manzara-hale); }
-html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .kapak .btn--ghost{ color:var(--text); font-weight:600; }
-html[data-zemin="yumusak"][data-manzara="acik"] :is(.kutu, .card, .giris, .donen, .site--v5 .ledger .lrow, .site--v5 .pk) :is(.kutu, .card, .giris, .donen, .lrow, .pk, .kapak__sayi, .pickcard){
-  -webkit-backdrop-filter:none; backdrop-filter:none; }
+
+
+
 
 /* 34) KARŞILAMA PERDESİ: MANZARA ÜSTÜNDE CAM KART (kullanıcı, 2026-10-28:
    «seçtiğimiz bölümden yüklenme ekranlarına kadar zirveye taşı»). Perde
@@ -18429,24 +18119,14 @@ html[data-zemin="yumusak"][data-manzara="acik"] :is(.kutu, .card, .giris, .donen
    gösterir; selam ortada bir cam kartta, büyük serif italik (§5'teki
    küçültme yalnız Bugün kapağı içindir). «Geç» cam haptır; ilk odakta
    kalın siyah halka yerine ince, modül renginde bir halka. */
-html[data-zemin="yumusak"][data-manzara="acik"] .perde--karsilama{
-  background:var(--manzara-okuma), var(--manzara-sis), var(--manzara) center / cover no-repeat, var(--pm-zemin);
-  -webkit-backdrop-filter:none; backdrop-filter:none; }
-html[data-zemin="yumusak"] .perde--karsilama .karsilama{ max-width:min(880px, calc(100vw - 48px));
-  padding:clamp(28px, 5vh, 44px) clamp(36px, 6vw, 68px); border-radius:34px;
-  background:var(--cam); border:1px solid var(--cam-kenar);
-  box-shadow:var(--cam-ust), 0 30px 80px -40px rgba(20,30,60,.45);
-  -webkit-backdrop-filter:blur(26px) saturate(150%); backdrop-filter:blur(26px) saturate(150%); }
-html[data-zemin="yumusak"] .perde--karsilama .karsilama__selam{ font-family:var(--karsilama-serif); font-style:italic; font-weight:400;
-  font-size:clamp(36px, 5.4vw, 60px); letter-spacing:-.01em; color:var(--text); text-wrap:balance; }
-html[data-zemin="yumusak"] .perde--karsilama .karsilama__cizgi{ width:36px; height:3px; background:var(--mod, var(--primary)); opacity:.8; }
-html[data-zemin="yumusak"] .perde--karsilama .karsilama__not{ color:var(--text-2); }
-html[data-zemin="yumusak"] .perde--marka .perde__dugme{ background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.8); color:var(--text);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 8px 20px -12px rgba(20,30,60,.4);
-  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
-html[data-zemin="yumusak"][data-theme="dark"] .perde--marka .perde__dugme{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 8px 20px -12px rgba(0,0,0,.6); }
-html[data-zemin="yumusak"] .perde--marka .perde__dugme:focus-visible{ outline:2px solid color-mix(in oklab, var(--mod, var(--primary)) 65%, transparent); outline-offset:3px; }
+
+
+
+
+
+
+
+
 
 /* 35) KALABALIK YOK (kullanıcı, 2026-10-28: «kalabalık görünümü engelle»).
    Varsayılan tek minik (minik.js sayi), eşya seyrek; Ofis çalışanının yaka
@@ -18457,41 +18137,34 @@ html[data-zemin="yumusak"] .perde--marka .perde__dugme:focus-visible{ outline:2p
    değil hem buğulu değil»; görsel tarama: ekip konsolu, Rütbe sayıları,
    toplantı sayaçları, plandaki bu hafta, ders kazanım/örnek kutuları, SPİ
    ses kutusu, ESP Merdiven kartları opak zemindeydi). */
-html[data-zemin="yumusak"] .site--v5 main :is(.opencere, .opencere__yan, .stat, .inc-sayi, .tlweek.is-current, .ders__kazanim, .ders__ornek, .ses, .ladcard){
-  background-color:transparent; background-image:var(--cam-ince); border-color:var(--cam-kenar); box-shadow:var(--cam-ust); }
+
 
 /* 37) MENÜ — sol kenarla aynı buzul (kullanıcı, 2026-10-29: «menüyü sol
    taraftaki gibi buzul ve minimalist yap»). Tek cam yaprak, iç kart yok;
    simge kenardaki gibi ince çizgi; bölümler kutusuz satır, seçili olan
    kenardaki seçili gibi dolu. Çekmeceler arasında yalnız boşluk. */
-html[data-zemin="yumusak"] .menusayfa{ background:var(--cam-ince);
-  -webkit-backdrop-filter:saturate(150%) blur(28px); backdrop-filter:saturate(150%) blur(28px); }
-html[data-zemin="yumusak"] .menusayfa__bas{ border-bottom:0; }
-html[data-zemin="yumusak"] .menusayfa__govde{ padding:6px 12px 18px; }
-html[data-zemin="yumusak"] .menusayfa__cekmece, html[data-zemin="yumusak"] .menusayfa__cekmece + .menusayfa__cekmece{
-  margin:0; padding:10px 0 6px; border:0; border-radius:0; background:none; box-shadow:none; }
-html[data-zemin="yumusak"] .menusayfa__ad{ gap:10px; margin:0 0 4px; padding:0 12px; font-size:12px; font-weight:600;
-  letter-spacing:.02em; color:var(--text-3); }
-html[data-zemin="yumusak"] .menusayfa__ad .kbk-ic{ width:16px; height:16px; padding:0; border-radius:0; background:none; box-shadow:none;
-  color:var(--text-3); stroke-width:1.8; }
-html[data-zemin="yumusak"] .menusayfa__bolumler{ grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:2px; padding-left:0; }
-html[data-zemin="yumusak"] .menusayfa__bolum{ min-height:38px; padding:0 12px; border:0; border-radius:12px; background:transparent; box-shadow:none;
-  color:var(--text-2); font-weight:500; transition:background-color .18s, color .18s; }
-html[data-zemin="yumusak"] .menusayfa__bolum:hover{ background:var(--cam-katman); color:var(--text); }
-html[data-zemin="yumusak"] .menusayfa__bolum.is-on{ background:var(--secili-zemin); color:var(--secili-yazi); font-weight:600;
-  box-shadow:var(--secili-golge); }
-html[data-zemin="yumusak"] .menusayfa__ayak{ border-top:0; }
+
+
+
+
+
+
+
+
+
+
+
 /* Menü daha dar ve yalnız bu modülün çekmeceleri (kullanıcı, 2026-10-29: «enine
    küçük, yukarıda SPİ ESP görünmesin»); sistem geçişi kenarın üstündeki seçicide. */
-@media (min-width:680px){ html[data-zemin="yumusak"] .menusayfa{ width:360px; } }
-html[data-zemin="yumusak"] .menusayfa__sistemler{ display:none; }
+
+
 
 /* 39) KENARIN DİBİ FERAH (kullanıcı, 2026-10-29: «arama, sayfa düzeni ve radyo
    kısmını ferahlat»): satırlar biraz daha uzun, satırlar ve gruplar arası nefes. */
-html[data-zemin="yumusak"] .site--v5 .kenar .kenar__araclar{ gap:18px; }
-html[data-zemin="yumusak"] .site--v5 .kenar .kenar__grup{ gap:4px; }
-html[data-zemin="yumusak"] .site--v5 .kenar .kenar__arac{ height:40px; border-radius:12px; }
-html[data-zemin="yumusak"] .site--v5 .kenar .kenar__arac:hover{ background:var(--cam-katman); }
+
+
+
+
 
 /* 40) KOYU VE AÇIK TEMADA OPAK KALANLAR (kullanıcı, 2026-10-29, ekran
    görüntüleriyle: «siyah temada camsı tasarım var diye bazı yerler kötü
@@ -18500,53 +18173,33 @@ html[data-zemin="yumusak"] .site--v5 .kenar .kenar__arac:hover{ background:var(-
    açıkta beyaz) kalıp. Hepsi cam ya da seçili cam olur. Genel --surface
    değişmez: yapışkan kaydet şeritleri opak kalmalı. Seçiciler liste: sağ
    ucu :is(...) olan kural her öğede denenir (OKU.md). */
-html[data-zemin="yumusak"] .site--v5 #main button.listitem.is-on,
-html[data-zemin="yumusak"] .site--v5 #main .listitem.is-on,
-html[data-zemin="yumusak"] .site--v5 #main .pickcard.is-on,
-html[data-zemin="yumusak"] .site--v5 #main .themebtn.is-on,
-html[data-zemin="yumusak"] .site--v5 #main .palbtn.is-on,
-html[data-zemin="yumusak"] .site--v5 #main .agenttabs .agenttab.is-on,
-html[data-zemin="yumusak"] .site--v5 #main .iconbtn.is-on{
-  background:var(--secili-zemin); color:var(--secili-yazi); border-color:transparent; box-shadow:var(--secili-golge); }
-html[data-zemin="yumusak"] .site--v5 #main .listitem.is-on small,
-html[data-zemin="yumusak"] .site--v5 #main .listitem.is-on .muted{ color:inherit; opacity:.75; }
+
+
 /* Sayfa içi seçiciler: oyuk cam ray, seçili hap parlak cam. */
-html[data-zemin="yumusak"] .site--v5 #main .seg{ background:var(--ray); border-color:var(--cam-kenar); }
-html[data-zemin="yumusak"] .site--v5 #main .seg button.is-on{ background:var(--seg-hap); box-shadow:var(--seg-golge); color:var(--text); }
-html[data-zemin="yumusak"] .site--v5 #main .seg--primary button.is-on{ background:var(--secili-zemin); box-shadow:var(--secili-golge); color:var(--secili-yazi); }
+
+
+
 /* Ray'in alt ışığı koyuda beyaz kabartma gibi duruyordu (boş çubuk beyaz hap). */
-html[data-theme="dark"][data-zemin="yumusak"] .bar,
-html[data-theme="dark"][data-zemin="yumusak"] .esikcubuk__ray{ box-shadow:inset 0 1px 2px rgba(0,0,0,.3), 0 1px 0 rgba(255,255,255,.04); }
-@media (prefers-color-scheme:dark){ html:not([data-theme="light"])[data-zemin="yumusak"] .bar,
-html:not([data-theme="light"])[data-zemin="yumusak"] .esikcubuk__ray{ box-shadow:inset 0 1px 2px rgba(0,0,0,.3), 0 1px 0 rgba(255,255,255,.04); } }
+
+
 /* Uzun kutunun dibi: opak renge solmak yerine buzlanarak söner; düğme cam. */
-html[data-zemin="yumusak"] .site--v5 .ledger .raf-uzun::after{ background:none;
-  -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
-  -webkit-mask-image:linear-gradient(to bottom, transparent, #000 84px); mask-image:linear-gradient(to bottom, transparent, #000 84px); }
-html[data-zemin="yumusak"] .site--v5 .raf-ac{ border:0; border-radius:12px; background:var(--cam-katman); box-shadow:var(--cam-ust);
-  -webkit-backdrop-filter:blur(16px) saturate(140%); backdrop-filter:blur(16px) saturate(140%); }
+
+
 /* Kenar: sistem seçicisi ve açılan listesi cam; seçili sistem seçili cam. */
-html[data-zemin="yumusak"] .site--v5 .kenar__modulsec{ background:var(--cam-ince); box-shadow:var(--cam-ust); }
+
 /* Açılan liste öteki yüzen katmanlar gibi ışıklı levha (kullanıcı, 2026-11-02:
    «arka plan ışıklandırması yok»): üstte beyaz ışık, altta sıcak yansıma, pervaz.
    Gölge kısa: kenar çubuğu kırpar. */
-:root{ --liste-isik:rgba(255,255,255,.45); }
-html[data-theme="dark"]{ --liste-isik:rgba(255,255,255,.07); }
-@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --liste-isik:rgba(255,255,255,.07); } }
-html[data-zemin="yumusak"] .site--v5 .kenar__modulliste{ background-color:var(--cam-katman);
-  box-shadow:var(--levha-ic), 0 14px 28px -14px rgba(20,24,40,.3), 0 10px 24px -12px rgb(var(--sicak) / .4);
-  background-image:radial-gradient(120% 70% at 22% 0%, var(--liste-isik), transparent 62%),
-    radial-gradient(90% 55% at 50% 112%, rgb(var(--sicak) / .24), transparent 72%);
-  -webkit-backdrop-filter:blur(24px) saturate(150%); backdrop-filter:blur(24px) saturate(150%); }
-html[data-zemin="yumusak"] .site--v5 .kenar__moduller .kenar__modul:hover{ background:var(--cam-ince); }
-html[data-zemin="yumusak"] .site--v5 .kenar__moduller .kenar__modul.is-on{ background:var(--secili-zemin); box-shadow:var(--secili-golge); }
-html[data-zemin="yumusak"] .site--v5 .kenar .kenar__arac[aria-expanded="true"]{ background:var(--cam-katman); box-shadow:var(--cam-ust); }
+:root{ --liste-isik:var(--beyaz-45); }
+html[data-theme="dark"]{ --liste-isik:var(--beyaz-07); }
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --liste-isik:var(--beyaz-07); } }
+
+
+
+
 /* Bildirimler: satırlar ve düğmeler aynı ince cam; «Hepsini gördüm» tek satır. */
-html[data-zemin="yumusak"] .kmenu--bildirim .kmenu__bildirim,
-html[data-zemin="yumusak"] .kmenu--bildirim .bildirim__ertele,
-html[data-zemin="yumusak"] .kmenu--bildirim .bildirim__gordu{ background:var(--cam-ince); box-shadow:var(--cam-ust); }
-html[data-zemin="yumusak"] .kmenu--bildirim .kmenu__bildirim:hover,
-html[data-zemin="yumusak"] .kmenu--bildirim .bildirim__ertele:hover{ background:var(--cam-katman); }
+
+
 .bildirim__gordu, .bildirim__temizle{ white-space:nowrap; flex:none; }
 
 /* 41) İÇ İÇE YOK (kullanıcı, 2026-10-29: «bazı görseller iç içe girmiş, sade
@@ -18555,16 +18208,10 @@ html[data-zemin="yumusak"] .kmenu--bildirim .bildirim__ertele:hover{ background:
    Şerit yüzeyde küçültülmüş bölüm dizisi (Kaynaklarım + Çözülen sorular)
    tek grup gibi köşe alır: Şerit kuralı her birine 24 px köşe ve kenar
    verince birleşme yerinde şerit kırılıyordu (kabuk.css gruplamasıyla aynı). */
-html[data-zemin="yumusak"] .site--v5 #main .vk .x30 .sat2{ background:transparent; border-color:transparent; box-shadow:none; padding-left:0; padding-right:0; }
-html[data-zemin="yumusak"] .site--v5 #main .vk .x30 .ci select{ background:transparent; box-shadow:none; }
-html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk + .gizle-kucuk:not(html),
-html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk + [data-gizle-gizli] + .gizle-kucuk:not(html),
-html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk + [data-gizle-gizli] + [data-gizle-gizli] + .gizle-kucuk:not(html){
-  border-top-left-radius:0; border-top-right-radius:0; border-top-color:transparent !important; }
-html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk:has(+ .gizle-kucuk):not(html),
-html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk:has(+ [data-gizle-gizli] + .gizle-kucuk):not(html),
-html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk:has(+ [data-gizle-gizli] + [data-gizle-gizli] + .gizle-kucuk):not(html){
-  border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom-color:transparent !important; }
+
+
+
+
 
 /* 42) TEK TON KENAR (kullanıcı, 2026-10-29: «camsı tarz için kenarları beyaz
    yapıyorsun, sonra beyazdan karanlığa geçiyor; olacaksa tam karanlık ya da
@@ -18572,45 +18219,33 @@ html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .ledger .gizle-kucuk:ha
    azalt»). Sol üstten sönen kenar ışığı (§16, §32) kalktı: kart çevresi her
    yerde aynı ince çizgi — açıkta yumuşak beyaz, koyuda belli belirsiz açık.
    Koyuda üst iç ışıklar da kısıldı; renk geçişi yok, tema tek tondur. */
-:root{ --kenar-tek:rgba(255,255,255,.55); }
-html[data-theme="dark"]{ --kenar-tek:rgba(255,255,255,.075);
-  --levha-ic:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.05);
-  --cam-ust:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.03);
+:root{ --kenar-tek:var(--beyaz-55); }
+html[data-theme="dark"]{ --kenar-tek:var(--beyaz-075);
+  --levha-ic:inset 0 1px 0 var(--beyaz-06), inset 0 0 0 1px var(--beyaz-05);
+  --cam-ust:inset 0 1px 0 var(--beyaz-05), inset 0 0 0 1px var(--beyaz-03);
   --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent); }
-@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --kenar-tek:rgba(255,255,255,.075);
-  --levha-ic:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.05);
-  --cam-ust:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(255,255,255,.03);
+@media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --kenar-tek:var(--beyaz-075);
+  --levha-ic:inset 0 1px 0 var(--beyaz-06), inset 0 0 0 1px var(--beyaz-05);
+  --cam-ust:inset 0 1px 0 var(--beyaz-05), inset 0 0 0 1px var(--beyaz-03);
   --secili-golge:inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent); } }
-html[data-zemin="yumusak"] .site--v5 .sayfa--kapakli .bugun__alan::before,
-html[data-zemin="yumusak"] .kutu::before,
-html[data-zemin="yumusak"] .card:not(.card--flat)::before,
-html[data-zemin="yumusak"] .giris::before,
-html[data-zemin="yumusak"] .site--v5 .pk::before,
-html[data-zemin="yumusak"] .site--v5 .kapak__sayi::before,
-html[data-zemin="yumusak"] .site--v5 .pickcard::before{
-  background:var(--kenar-tek); }
+
 /* Çizgi jetonları camda yarı saydam: opak gri çizgi (#2C2C31) cam kartın
    içindeki her kutuyu ayrı gri çerçeveye çeviriyordu (Öğren › Dersler
    karoları, listeler). Yarı saydam çizgi arkasındaki tonu alır: koyuda tam
    koyu, açıkta tam açık kalır. */
-html[data-zemin="yumusak"]{ --border:rgba(20,24,40,.1); --border-soft:rgba(20,24,40,.06); --border-strong:rgba(20,24,40,.16); }
-html[data-theme="dark"][data-zemin="yumusak"]{ --border:rgba(255,255,255,.08); --border-soft:rgba(255,255,255,.05); --border-strong:rgba(255,255,255,.14); }
-@media (prefers-color-scheme:dark){ html:not([data-theme="light"])[data-zemin="yumusak"]{ --border:rgba(255,255,255,.08); --border-soft:rgba(255,255,255,.05); --border-strong:rgba(255,255,255,.14); } }
+
+
+
 /* Öğren › Dersler karosu: çerçeve yok, ince cam; seçili olan seçili cam. */
-html[data-zemin="yumusak"] .site--v5 #main .ogr-ders{ border-color:transparent; background:var(--cam-ince); box-shadow:var(--cam-ust); }
-html[data-zemin="yumusak"] .site--v5 #main .ogr-ders.is-on{ background:var(--secili-zemin); box-shadow:var(--secili-golge); }
+
+
 
 /* 43) GENİŞ KENAR DA YÜZEN CAM (kullanıcı, 2026-10-29, ekran görüntüsüyle:
    «sol taraf açılınca solu karemsi düz oluyor; yuvarlaksı yumuşak olsun»).
    Sabit açık (dar olmayan) kenar ekranın soluna yapışık, köşesiz ve opaktı;
    yuvarlak cam yalnız dar kipteydi. Şimdi iki kip aynı: kenardan 12 px
    içeride, 28 px köşe, ince cam. */
-@media (min-width:680px){
-  html[data-zemin="yumusak"]:not(.kenar-dar) .site--v5:has(> .kenar){ grid-template-columns:232px minmax(0,1fr); }
-  html[data-zemin="yumusak"]:not(.kenar-dar) .site--v5 > .kenar{ top:14px; height:calc(100vh - 28px); margin:14px 0 14px 12px;
-    border-radius:28px; background:var(--cam-katman); box-shadow:var(--levha-ic), var(--levha-golge);
-    -webkit-backdrop-filter:saturate(150%) blur(28px); backdrop-filter:saturate(150%) blur(28px); }
-}
+
 
 /* 44) ARKA PLAN: GECE VE KENDİ DOSYAN (kullanıcı, 2026-10-29: «karanlık temada
    arka planın kararması kötü gözüküyor, daha akıllıca bir şey»; zemin.js
@@ -18622,36 +18257,36 @@ html[data-zemin="yumusak"] .site--v5 #main .ogr-ders.is-on{ background:var(--sec
 html[data-theme="dark"]{ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,.34), rgba(6,8,14,.22) 45%, rgba(6,8,14,.46)); }
 @media (prefers-color-scheme:dark){ html:not([data-theme="light"]){ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,.34), rgba(6,8,14,.22) 45%, rgba(6,8,14,.46)); } }
 video.zemin-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-3; pointer-events:none; }
-html:not([data-zemin="yumusak"]) video.zemin-video{ display:none; }
-html[data-zemin="yumusak"][data-zemin-video] body::before{ background:var(--manzara-okuma), var(--manzara-sis); }
+html[data-zemin] video.zemin-video{ display:none; }
+
 
 /* 45) AYARLAR › GÖRÜNÜM, ARKA PLAN, BİLDİRİMLER (kullanıcı, 2026-10-29:
    «seçenekleri arttır; arka plan fotoğrafını değiştirebilmek yok, göremedim»).
    Kök nitelikleri ayarlar.js yazar (hep, varsayılan da). */
 /* Cam yoğunluğu: Dolu (az saydam) · Orta · Saydam. */
-html[data-cam="az"]{ --cam:linear-gradient(140deg, rgba(255,255,255,.86), rgba(255,255,255,.7)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.8), rgba(255,255,255,.62)); }
+html[data-cam="az"]{ --cam:linear-gradient(140deg, var(--beyaz-86), var(--beyaz-70)); --cam-ince:linear-gradient(140deg, var(--beyaz-80), var(--beyaz-62)); }
 html[data-cam="az"][data-theme="dark"]{ --cam:linear-gradient(140deg, rgba(34,36,46,.9), rgba(26,28,36,.86)); --cam-ince:linear-gradient(140deg, rgba(40,42,52,.86), rgba(30,32,40,.8)); }
-html[data-cam="cok"]{ --cam:linear-gradient(140deg, rgba(255,255,255,.3), rgba(255,255,255,.12)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.26), rgba(255,255,255,.1)); }
-html[data-cam="cok"][data-theme="dark"]{ --cam:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); }
+html[data-cam="cok"]{ --cam:linear-gradient(140deg, var(--beyaz-30), var(--beyaz-12)); --cam-ince:linear-gradient(140deg, var(--beyaz-26), var(--beyaz-10)); }
+html[data-cam="cok"][data-theme="dark"]{ --cam:linear-gradient(140deg, var(--beyaz-05), var(--beyaz-015)); --cam-ince:linear-gradient(140deg, var(--beyaz-05), var(--beyaz-015)); }
 @media (prefers-color-scheme:dark){
   html[data-cam="az"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, rgba(34,36,46,.9), rgba(26,28,36,.86)); --cam-ince:linear-gradient(140deg, rgba(40,42,52,.86), rgba(30,32,40,.8)); }
-  html[data-cam="cok"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); --cam-ince:linear-gradient(140deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); }
+  html[data-cam="cok"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, var(--beyaz-05), var(--beyaz-015)); --cam-ince:linear-gradient(140deg, var(--beyaz-05), var(--beyaz-015)); }
 }
 /* Yüksek kontrast: soluk yazılar koyulaşır, çizgiler belirginleşir, cam dolar. */
 html[data-kontrast="yuksek"]{ --text-2:var(--text); --text-3:color-mix(in oklab, var(--text) 82%, transparent);
   --border:color-mix(in oklab, var(--text) 26%, transparent); --border-soft:color-mix(in oklab, var(--text) 18%, transparent);
-  --cam:linear-gradient(140deg, rgba(255,255,255,.9), rgba(255,255,255,.8)); }
+  --cam:linear-gradient(140deg, var(--beyaz-90), var(--beyaz-80)); }
 html[data-kontrast="yuksek"][data-theme="dark"]{ --cam:linear-gradient(140deg, rgba(30,32,40,.94), rgba(24,26,32,.92)); }
 @media (prefers-color-scheme:dark){ html[data-kontrast="yuksek"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, rgba(30,32,40,.94), rgba(24,26,32,.92)); } }
 /* Okunaklık perdesi: fotoğrafın üstündeki örtünün gücü (Az .45 · Orta 1 · Çok 1.7). */
 html[data-perde]{ --perde:1; } html[data-perde="az"]{ --perde:.45; } html[data-perde="cok"]{ --perde:1.7; }
-html[data-perde]{ --manzara-sis:linear-gradient(180deg, rgba(255,255,255,calc(.46 * var(--perde))), rgba(255,255,255,calc(.4 * var(--perde))) 36%,
-  rgba(255,255,255,calc(.16 * var(--perde))) 60%, rgba(255,255,255,calc(.28 * var(--perde)))); }
+html[data-perde]{ --manzara-sis:linear-gradient(180deg, rgb(from var(--beyaz) r g b / calc(.46 * var(--perde))), rgb(from var(--beyaz) r g b / calc(.4 * var(--perde))) 36%,
+  rgb(from var(--beyaz) r g b / calc(.16 * var(--perde))) 60%, rgb(from var(--beyaz) r g b / calc(.28 * var(--perde)))); }
 html[data-perde][data-theme="dark"]{ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,calc(.34 * var(--perde))), rgba(6,8,14,calc(.22 * var(--perde))) 45%, rgba(6,8,14,calc(.46 * var(--perde)))); }
 @media (prefers-color-scheme:dark){ html[data-perde]:not([data-theme="light"]){ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,calc(.34 * var(--perde))), rgba(6,8,14,calc(.22 * var(--perde))) 45%, rgba(6,8,14,calc(.46 * var(--perde)))); } }
 /* Fotoğrafı yumuşat: duran zemin katmanı bir kez bulanır (kaydırmada yeniden çizilmez). */
-html[data-zemin="yumusak"][data-manzara="acik"][data-bulanik="hafif"] body::before{ inset:-24px; filter:blur(6px); }
-html[data-zemin="yumusak"][data-manzara="acik"][data-bulanik="cok"] body::before{ inset:-40px; filter:blur(14px); }
+
+
 html[data-bulanik="hafif"] video.zemin-video{ filter:blur(6px); transform:scale(1.04); }
 html[data-bulanik="cok"] video.zemin-video{ filter:blur(14px); transform:scale(1.08); }
 /* Sayaçlar ve noktalar gizli. */
@@ -18665,38 +18300,23 @@ html[data-rozet="kapali"] .kenar__sayi, html[data-rozet="kapali"] .kenar__sayac,
    cam gibi süzer: çok bulanık, doygunluk neredeyse yok, dolgu tek düze.
    Saydamlık ayarı yalnız dolgunun yoğunluğunu değiştirir; «Saydam» bile
    okunaklılık tabanının altına inmez. */
-html[data-zemin="yumusak"][data-manzara="acik"]{
-  --cam:linear-gradient(160deg, rgba(255,255,255,.8), rgba(250,250,252,.72));
-  --cam-ince:linear-gradient(160deg, rgba(255,255,255,.74), rgba(250,250,252,.64)); }
-html[data-zemin="yumusak"][data-manzara="acik"][data-cam="az"]{
-  --cam:linear-gradient(160deg, rgba(255,255,255,.9), rgba(252,252,253,.86)); --cam-ince:linear-gradient(160deg, rgba(255,255,255,.86), rgba(252,252,253,.8)); }
-html[data-zemin="yumusak"][data-manzara="acik"][data-cam="cok"]{
-  --cam:linear-gradient(160deg, rgba(255,255,255,.64), rgba(250,250,252,.56)); --cam-ince:linear-gradient(160deg, rgba(255,255,255,.58), rgba(250,250,252,.5)); }
-html[data-zemin="yumusak"][data-manzara="acik"][data-theme="dark"]{
-  --cam:linear-gradient(160deg, rgba(24,26,34,.8), rgba(18,20,28,.74)); --cam-ince:linear-gradient(160deg, rgba(24,26,34,.74), rgba(18,20,28,.66)); }
-html[data-zemin="yumusak"][data-manzara="acik"][data-theme="dark"][data-cam="cok"]{
-  --cam:linear-gradient(160deg, rgba(24,26,34,.66), rgba(18,20,28,.58)); --cam-ince:linear-gradient(160deg, rgba(24,26,34,.6), rgba(18,20,28,.52)); }
-@media (prefers-color-scheme:dark){
-  html[data-zemin="yumusak"][data-manzara="acik"]:not([data-theme="light"]){
-    --cam:linear-gradient(160deg, rgba(24,26,34,.8), rgba(18,20,28,.74)); --cam-ince:linear-gradient(160deg, rgba(24,26,34,.74), rgba(18,20,28,.66)); }
-}
-html[data-zemin="yumusak"][data-manzara="acik"] :is(.site--v5 .sayfa--kapakli .bugun__alan, .kutu, .card:not(.card--flat), .giris, .donen, .site--v5 .nextup,
-  .site--v5 .ledger .lrow:not(.kahraman), .site--v5 .pk, .site--v5 .kapak__sayi, .site--v5 .pickcard, .site--v5 .rehber__konular, .site--v5 .bolumcubugu){
-  -webkit-backdrop-filter:blur(56px) saturate(105%); backdrop-filter:blur(56px) saturate(105%); }
-@media (min-width:680px){
-  html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 > .kenar{
-    -webkit-backdrop-filter:blur(56px) saturate(105%) !important; backdrop-filter:blur(56px) saturate(105%) !important; }
-}
+
+
+
+
+
+
+
+
 /* Bölüm çubuğu fotoğrafın üstünde: kendi süt camı, seçili olmayan ad tam okunur. */
-html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .bolumcubugu{ background:var(--cam-ince); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
-html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .bolumcubugu__ad:not(.is-on){ color:var(--text-2); opacity:1; }
-html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 .bolumcubugu--kabuk{ width:fit-content; max-width:calc(100% - 24px); margin-inline:auto;
-  padding:0 8px; border-radius:16px; -webkit-mask-image:none; mask-image:none; }
+
+
+
 
 /* 47) OYUNSU CAM DÜĞME (2026-10-30; kisayol.css): camda kutu cam olur;
    düğmenin kendisi hap değil (§3'teki «.kisayol > button» camı burada geri alınır). */
-html[data-zemin="yumusak"] .giris .kisayol > button{ background:transparent; box-shadow:none; border-color:transparent; }
-html[data-zemin="yumusak"] .giris .kisayol__simge{ background:var(--cam); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar), 0 6px 14px -9px rgba(20,24,40,.32); }
+
+
 
 /* 48) KAYDIRMA ÇUBUĞUNUN YOLU (kullanıcı, 2026-10-30, AYS ekran görüntüsü:
    sağ kenarda ince açık şerit). Masaüstünde sayfanın kaydırma çubuğu kendi
@@ -18704,12 +18324,9 @@ html[data-zemin="yumusak"] .giris .kisayol__simge{ background:var(--cam); box-sh
    yolun altında kökün açık gri zemini kalıyordu. Kök zemin de aynı fotoğraf
    ve perdeyi taşır (döşenir: yol fotoğrafın devamını gösterir); yol saydam,
    tutamak ince cam. */
-html[data-zemin="yumusak"][data-manzara="acik"]{
-  background:var(--manzara-okuma), var(--manzara-sis), var(--manzara) center / cover repeat, linear-gradient(175deg, var(--zm-1), var(--zm-2));   /* fixed yok: kaydırmada yeniden boyama olmasın */
-  background-color:var(--bg);   /* kısaltma rengi siliyordu: düz zemin rengi yerinde kalır (kontrast ölçümü ona bakar) */
-  scrollbar-color:rgba(255,255,255,.55) transparent; }
-html[data-zemin="yumusak"][data-manzara="acik"]::-webkit-scrollbar-track{ background:transparent; }
-html[data-zemin="yumusak"][data-manzara="acik"]::-webkit-scrollbar-thumb{ border-radius:8px; border:2px solid transparent; background:rgba(255,255,255,.55) padding-box; }
+
+
+
 
 /* 49) FERAH YÜZEY FOTOĞRAFTA (kullanıcı, 2026-10-30: «bazı kartlar şeffafa
    geçince iğrenç görünüyor, bazıları geçmiyor»). Ferah kartın dolgusunu
@@ -18717,34 +18334,14 @@ html[data-zemin="yumusak"][data-manzara="acik"]::-webkit-scrollbar-thumb{ border
    fotoğrafta çamur gibi görünüyordu; küçük kartlar (pk) ise camda kalıyordu.
    Fotoğraflı zeminde Ferah da aynı süt camdır: kenarsız, gölgesiz, ayırıcı
    çizgi yok; iç içe kartta yalnız dıştaki boyanır. */
-html[data-zemin="yumusak"][data-manzara="acik"][data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card, .donen, .bugun__alan):not(html){
-  background:var(--cam) !important; border-radius:18px !important; border-top:0 !important; padding-left:var(--kp, 20px); padding-right:var(--kp, 20px); }
-html[data-zemin="yumusak"][data-manzara="acik"][data-yuzey="ferah"] .sayfa :is(section.kutu, section.lrow, .card, .donen, .bugun__alan) :is(section.kutu, section.lrow, .card, .donen):not(html){
-  background:transparent !important; -webkit-backdrop-filter:none; backdrop-filter:none; padding-left:2px; padding-right:2px; }
+
+
 
 /* 50) SOL MENÜ CAM (kullanıcı, 2026-10-30: «sol taraftaki menüyü de camsı
    yapabilelim ayarlarda»; Ayarlar › Görünüm › Sol menü). Buzlu (varsayılan)
    dolu yaprak; Cam arkasını gösterir, yazı yine okunur (dolgu tabanı %40). */
-@media (min-width:680px){
-  html[data-zemin="yumusak"][data-kenar="cam"] .site--v5 > .kenar,
-  html[data-zemin="yumusak"][data-kenar="cam"] .site--v5 > .kenar:hover,
-  html[data-zemin="yumusak"][data-kenar="cam"] .site--v5 > .kenar:focus-within,
-  html[data-zemin="yumusak"][data-kenar="cam"] .site--v5 > .kenar.kenar--tutulu{
-    background:linear-gradient(160deg, rgba(255,255,255,.5), rgba(255,255,255,.36)) !important;
-    -webkit-backdrop-filter:blur(20px) saturate(140%) !important; backdrop-filter:blur(20px) saturate(140%) !important; }
-  html[data-zemin="yumusak"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar,
-  html[data-zemin="yumusak"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar:hover,
-  html[data-zemin="yumusak"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar:focus-within,
-  html[data-zemin="yumusak"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar.kenar--tutulu{
-    background:linear-gradient(160deg, rgba(26,28,38,.52), rgba(18,20,28,.4)) !important; }
-}
-@media (min-width:680px) and (prefers-color-scheme:dark){
-  html[data-zemin="yumusak"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar,
-  html[data-zemin="yumusak"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar:hover,
-  html[data-zemin="yumusak"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar:focus-within,
-  html[data-zemin="yumusak"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar.kenar--tutulu{
-    background:linear-gradient(160deg, rgba(26,28,38,.52), rgba(18,20,28,.4)) !important; }
-}
+
+
 
 /* 51) FOTOĞRAF ÜSTÜNDE OKUNUR KENAR ve «HİÇ» BULANIKLIK (kullanıcı, 2026-10-30:
    «sol menüde yazılar okunmuyor»; «yumuşatmada hiç seçeneği yok; arka planda
@@ -18752,26 +18349,9 @@ html[data-zemin="yumusak"][data-manzara="acik"][data-yuzey="ferah"] .sayfa :is(s
    kalktı; yerini ayar profilleri aldı (ayarlar.js).
    Kenar: fotoğraf üstünde ikincil gri (--text-2) açık fotoğrafta kayboluyordu;
    bütün satırlar ana yazı rengine çıkar, cam kenarın tabanı biraz dolar. */
-html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 > .kenar :is(.kenar__arac, .kenar__cekmece:not(.is-on), .kenar__kim small){ color:var(--text); }
-@media (min-width:680px){
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"] .site--v5 > .kenar,
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"] .site--v5 > .kenar:hover,
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"] .site--v5 > .kenar:focus-within,
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"] .site--v5 > .kenar.kenar--tutulu{
-    background:linear-gradient(160deg, rgba(255,255,255,.7), rgba(255,255,255,.58)) !important; }
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar,
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar:hover,
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar:focus-within,
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"][data-theme="dark"] .site--v5 > .kenar.kenar--tutulu{
-    background:linear-gradient(160deg, rgba(20,22,30,.74), rgba(14,16,22,.66)) !important; }
-}
-@media (min-width:680px) and (prefers-color-scheme:dark){
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar,
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar:hover,
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar:focus-within,
-  html[data-zemin="yumusak"][data-manzara="acik"][data-kenar="cam"]:not([data-theme="light"]) .site--v5 > .kenar.kenar--tutulu{
-    background:linear-gradient(160deg, rgba(20,22,30,.74), rgba(14,16,22,.66)) !important; }
-}
+
+
+
 /* 52) KATMAN KATMAN BULANIKLIK (kullanıcı, 2026-10-30: «bulanıklık ayrı ayrı olsun:
    duvar kâğıdı, sistem kartları, menü, ayarlar»; «ayarlar arka planla hafif
    karışıyor, buzul etkiyi bozmadan akıllıca çöz»). Duvar kâğıdı: data-bulanik.
@@ -18824,13 +18404,10 @@ html[data-king-gorunus="pembe"] .king__arkadas .minik__goz:nth-of-type(3)::befor
 /* 2) TEMA: King'in yüzeyleri cam (gözlem: kartlar, karolar, menüler opaktı;
    ana çipin yazısı zemine karışıyordu 1,27:1). Pencerede manzara görünsün:
    bulanıklık 40 → 24 px. Camdaki ikincil yazı okunur (en az 4,5:1). */
-html[data-zemin="yumusak"] .king:not(.is-mini) :is(.king__kart, .king__ars, .king__onizle, .king__soru, .king__sira, .king__bulunan),
-html[data-zemin="yumusak"] .king :is(.king__alan .king__gorev, .king__ders, .king__yasa-s, .king__gunum, .kt-kart, .kv-mini, .king__balon--sen){
-  background:var(--cam-ince) !important; border:1px solid var(--cam-kenar) !important; box-shadow:var(--cam-ust) !important; }
-html[data-zemin="yumusak"] .king__arac-menu{ background:var(--cam-katman) !important; border:1px solid var(--cam-kenar);
-  -webkit-backdrop-filter:saturate(150%) blur(24px); backdrop-filter:saturate(150%) blur(24px); box-shadow:var(--cam-ust), var(--shadow-lg); }
-html[data-zemin="yumusak"] .king .king__kutu{ -webkit-backdrop-filter:saturate(150%) blur(24px); backdrop-filter:saturate(150%) blur(24px); }
-html[data-zemin="yumusak"] .king :is(.king__balon li, .king__cipler--akis .king__cip:not(.king__cip--ana), .king__neden, .king__arac small){ color:var(--text); }
+
+
+
+
 
 /* 3) KONUŞAN SAHNE: arkadaş King'in tarafında (solda), son cevabın altında
    kendine ayrılan bantta durur; son satırı örtmez. Yeni cevap yukarıdan
@@ -18847,9 +18424,7 @@ html[data-zemin="yumusak"] .king :is(.king__balon li, .king__cipler--akis .king_
 
 /* Opak büyük pencere (king.css, 2026-10-29): içindeki cam kartlar ve «sen»
    balonu beyaz zeminde kayboluyordu (cam-ince yarı saydam beyaz). Dolu yüzey. */
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__kutu :is(.king__kart, .king__ars, .king__onizle, .king__soru, .king__sira, .king__bulunan,
-  .king__alan .king__gorev, .king__ders, .king__yasa-s, .king__gunum, .kt-kart, .kv-mini, .king__balon--sen){
-  background:var(--surface-2) !important; border:1px solid var(--border) !important; box-shadow:none !important; }
+
 
 /* 4) YENİ YÜZ (kullanıcı, 2026-10-29: «King arayüzü daha farklı, sisteme
    uyumlu buzul, minik agenta uygun bir alan; amaç ve özellikler şu anki gibi»;
@@ -18872,41 +18447,25 @@ html[data-theme="dark"] .king .king__arkadas{ box-shadow:inset 0 0 0 1px var(--y
   html:not([data-theme="light"]) .king{ --yuva:color-mix(in oklab, var(--king-vurgu) 14%, var(--beyaz-04)); }
   html:not([data-theme="light"]) .king .king__arkadas{ box-shadow:inset 0 0 0 1px var(--yuva-kenar), inset 0 1px 0 var(--beyaz-06); }
 }
-html[data-zemin="yumusak"] .king:has(.king__arkadas) .king__akis{ padding-bottom:0; }
+
 .king__yuz .minik{ --g1:var(--king-a1); --g2:var(--king-a2); --g3:var(--king-a3); }
 .king:not(.is-mini) .king__bos-kure:has(.king__yuz){ background:none; box-shadow:none; width:auto; height:auto; }
 
 /* Büyük pencere: buzul görünüm, bulanıklıksız (opak). */
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__kutu{
-  background:
-    radial-gradient(70% 55% at 0% 0%, color-mix(in oklab, var(--mod, var(--king-vurgu)) 12%, transparent), transparent 70%),
-    radial-gradient(60% 50% at 100% 100%, color-mix(in oklab, var(--king-vurgu) 9%, transparent), transparent 70%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    var(--surface, #fff) !important;
-  border-radius:32px !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.75), inset 0 0 0 1px var(--kenar-tek, rgba(255,255,255,.5)), 0 40px 90px -40px rgba(20,24,40,.45) !important; }
-html[data-theme="dark"][data-zemin="yumusak"] .king:not(.is-mini) .king__kutu{
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.07), 0 40px 90px -40px rgba(0,0,0,.8) !important; }
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__ray,
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__yan{ background:transparent !important; border-right-color:var(--border-soft) !important; }
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__ray [aria-current="true"],
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__ray .is-on{ background:var(--secili-zemin) !important; color:var(--secili-yazi) !important; box-shadow:var(--secili-golge) !important; }
+
+
+
+
 /* Yazı alanı: yüzen ince kapsül (yuva solda). */
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz{ border-radius:24px; background:var(--surface-2, #f1f2f5); box-shadow:inset 0 0 0 1px var(--border); }
+
 
 /* 5) ADA CAMDA: kapsül cam, deste kartları ve yelpaze ince cam. */
-html[data-zemin="yumusak"] .king.is-mini .king__dkart--on{ background:var(--cam-katman); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
-html[data-zemin="yumusak"] .king__yelpaze-oge:not(:hover):not(:focus-visible){ background:var(--cam-katman); }
+
+
 
 /* 6) MASA CAMDA (2026-10-30): ray, liste ve Bağlam pencerenin içinde cam kart
    (2'deki «ray ve liste saydam» kuralının geniş ekran hâli). */
-@media (min-width:1024px){
-  html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray,
-  html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__yan,
-  html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__baglam{ background:var(--cam-katman) !important;
-    box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar) !important; }
-  html[data-zemin="yumusak"] .king.king.is-yan-dar:not(.is-mini) .king__yan{ box-shadow:none !important; }
-}
+
 
 /* 7) ESKİ DÜZENİN CİLASI (kullanıcı, 2026-10-30: «eski tasarımda kal, sadece onu
    geliştir»; önceki şikâyet: «sistemle aynı, sıkıcı, boğucu»). Düzen aynı
@@ -18946,8 +18505,7 @@ html .king:not(.is-mini) .king__balon--sen{ background:color-mix(in oklab, var(-
   box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 16%, transparent) !important; }
 html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--king-vurgu) 55%, var(--text)); }
 
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz:focus-within{
-  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 45%, transparent), 0 0 0 4px color-mix(in oklab, var(--king-vurgu) 12%, transparent) !important; }
+
 .king:not(.is-mini) .king__yaz:not(:has(.king__girdi:placeholder-shown)) .king__gonder{ transform:scale(1.04); }
 @media (prefers-reduced-motion:reduce){ .king:not(.is-mini) .king__gonder{ transform:none !important; } }
 
@@ -18964,57 +18522,27 @@ html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz:focus-within{
      ve sert kenar yok, saç teli çizgi ve üst ışık.
    · Yazı alanı yüzen cam kapsül; küçük King de aynı camdan.
    · «Sade» zeminde bu katman çalışmaz (AGENTS kural 10). */
-html[data-zemin="yumusak"] .king{
-  --kc-levha:rgba(250,251,253,.72); --kc-tul:rgba(255,255,255,.5); --kc-tul-2:rgba(255,255,255,.78);
-  --kc-hat:rgba(20,24,40,.08); --kc-isik:rgba(255,255,255,.9); --kc-cizgi:rgba(20,24,40,.07);
-  --kc-golge:0 32px 80px -36px rgba(20,24,40,.4); }
-html[data-theme="dark"][data-zemin="yumusak"] .king{
-  --kc-levha:rgba(22,23,28,.66); --kc-tul:rgba(255,255,255,.05); --kc-tul-2:rgba(255,255,255,.085);
-  --kc-hat:rgba(255,255,255,.08); --kc-isik:rgba(255,255,255,.07); --kc-cizgi:rgba(255,255,255,.06);
-  --kc-golge:0 32px 80px -30px rgba(0,0,0,.72); }
-@media (prefers-color-scheme:dark){
-  html:not([data-theme="light"])[data-zemin="yumusak"] .king{
-    --kc-levha:rgba(22,23,28,.66); --kc-tul:rgba(255,255,255,.05); --kc-tul-2:rgba(255,255,255,.085);
-    --kc-hat:rgba(255,255,255,.08); --kc-isik:rgba(255,255,255,.07); --kc-cizgi:rgba(255,255,255,.06);
-    --kc-golge:0 32px 80px -30px rgba(0,0,0,.72); }
-}
+
+
+
 /* Levha: küçükte buzlu cam, büyükte opak zemin üstünde ışık alanları. */
-html[data-zemin="yumusak"] .king.king .king__kutu{ box-shadow:inset 0 1px 0 var(--kc-isik), inset 0 0 0 1px var(--kc-hat), var(--kc-golge); }
-html[data-zemin="yumusak"] .king.king.is-mini .king__kutu{
-  background:radial-gradient(90% 70% at 0% 0%, color-mix(in oklab, var(--king-vurgu) 8%, transparent), transparent 72%), var(--kc-levha) !important;
-  -webkit-backdrop-filter:blur(28px) saturate(160%); backdrop-filter:blur(28px) saturate(160%); }
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__kutu{ border-radius:28px !important;
-  background:radial-gradient(60% 55% at 8% 0%, color-mix(in oklab, var(--king-vurgu) 16%, transparent), transparent 70%),
-    radial-gradient(55% 50% at 100% 100%, color-mix(in oklab, var(--mod, var(--king-vurgu)) 11%, transparent), transparent 70%),
-    var(--surface, #fff) !important; }
+
+
+
 /* İç kartlar kalkar: ray, liste, Bağlam ve başlık levhanın parçası. */
-html[data-zemin="yumusak"] .king.king:not(.is-mini) :is(.king__ray, .king__yan, .king__baglam, .king__bas){ background:transparent !important; box-shadow:none !important; border-color:transparent !important; }
-html[data-zemin="yumusak"] .king.king:not(.is-mini):not(.is-yan-dar) .king__yan{ box-shadow:inset -1px 0 0 var(--kc-cizgi) !important; }
-html[data-zemin="yumusak"] .king.king:not(.is-mini).is-alan-acik .king__baglam{ box-shadow:inset 1px 0 0 var(--kc-cizgi) !important; }
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray .king__ray-is.is-secili,
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray [aria-current="true"]{
-  background:color-mix(in oklab, var(--king-vurgu) 15%, transparent) !important; color:color-mix(in oklab, var(--king-vurgu) 70%, var(--text)) !important; box-shadow:none !important; }
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray .king__ray-is:not(.is-secili):hover{ background:var(--kc-tul) !important; }
+
+
+
+
+
 /* Tül: kartlar, karolar, çipler. */
-html[data-zemin="yumusak"] .king.king .king__kutu :is(.king__kart, .king__ars, .king__onizle, .king__soru, .king__sira, .king__bulunan,
-  .king__alan .king__gorev, .king__ders, .king__yasa-s, .king__gunum, .kt-kart, .kv-mini, .king__cip:not(.king__cip--ana)){
-  background:var(--kc-tul) !important; border:0 !important; box-shadow:inset 0 0 0 1px var(--kc-hat), inset 0 1px 0 var(--kc-isik) !important;
-  transition:background .2s ease, transform .2s cubic-bezier(.2,.7,.2,1); }
-html[data-zemin="yumusak"] .king.king .king__kutu :is(.kv-mini, .king__cip:not(.king__cip--ana)):hover{ background:var(--kc-tul-2) !important; transform:translateY(-1px); }
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__kutu .kv-mini{ border-radius:18px !important; }
+
+
+
 /* Cevap kartı ve senin balonun. */
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__akis > .king__balon--king.is-son > div{
-  background:linear-gradient(160deg, color-mix(in oklab, var(--king-vurgu) 7%, transparent), transparent 62%), var(--kc-tul) !important;
-  box-shadow:inset 0 0 0 1px var(--kc-hat), inset 0 1px 0 var(--kc-isik) !important; }
-html[data-zemin="yumusak"] .king.king .king__kutu .king__balon--sen{ background:color-mix(in oklab, var(--king-vurgu) 15%, transparent) !important;
-  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 18%, transparent) !important; }
+
+
 /* Yazı alanı: yüzen cam kapsül. */
-html[data-zemin="yumusak"] .king.king .king__yaz{ background:var(--kc-tul-2); border-radius:26px;
-  box-shadow:inset 0 0 0 1px var(--kc-hat), inset 0 1px 0 var(--kc-isik); }
-html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
-  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 42%, transparent), 0 0 0 4px color-mix(in oklab, var(--king-vurgu) 12%, transparent) !important; }
-@media (prefers-reduced-motion:reduce){ html[data-zemin="yumusak"] .king.king .king__kutu :is(.kv-mini, .king__cip):hover{ transform:none; } }
-@media (prefers-reduced-transparency:reduce){ html[data-zemin="yumusak"] .king.king.is-mini .king__kutu{ background:var(--surface) !important; -webkit-backdrop-filter:none; backdrop-filter:none !important; } }
 
 /* ==== css/minik-cam.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19272,8 +18800,7 @@ html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
    Tek fikir: sen akşam odasındasın, iş defterin önünde. Oda üstte ve kenarda
    (piksel.js çizer), bütün içerik tek bir kâğıt yaprakta durur; böylece her
    yazı aynı zemini görür ve okunur. Tema yalnız jetonla ve kabuk yüzeyleriyle
-   değişir: ekranlar tema bilmez. Ayarlar › Görünüm › Zemin «Canlı» ya da «Sade»
-   seçilince bu dosyanın hiçbir kuralı çalışmaz. */
+   değişir: ekranlar tema bilmez. Sistemin tek temasıdır (2026-11-04: «sadece piksel tema kalsın»). */
 :root[data-zemin="piksel"]{
   color-scheme:light;
   --piksel-duvar:#7c5560; --piksel-tahta:#5a3a35; --piksel-tahta-2:#6d463c; --piksel-kagit:#fdf3df; --piksel-golge:#3f282c55;
@@ -19315,7 +18842,7 @@ html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
 }
 
 /* Köşeler tek kuraldan: ekran dosyalarına tema girmesin. Yuvarlak kalması gerekenler (minik, küre) kendi öğesini çizer. */
-:root[data-zemin="piksel"] body *:not(.minik):not(.king-kure):not(.logo):not(.kenar__nokta){ border-radius:0 !important; }
+:root[data-zemin="piksel"] body *:not(.minik):not(.king-kure):not(.kenar__nokta){ border-radius:0 !important; }
 
 :root[data-zemin="piksel"], :root[data-zemin="piksel"] body{ background:none; }
 :root[data-zemin="piksel"]{ background:var(--piksel-duvar); }
@@ -19359,6 +18886,10 @@ html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
 :root[data-zemin="piksel"][data-theme="dark"] .kenar [aria-current], :root[data-zemin="piksel"][data-theme="dark"] .kenar .is-on,
 :root[data-zemin="piksel"][data-theme="dark"] .altbant [aria-current], :root[data-zemin="piksel"][data-theme="dark"] .altbant .is-on{ --text:#f6e8d2; --text-2:#f6e8d2; --text-3:#dcc8ab; }
 
+/* Giriş kapısı: oda arkada, tanıtım ahşapta krem, form kâğıtta */
+:root[data-zemin="piksel"] .hesap-kapi{ background:var(--piksel-tahta-2); }
+:root[data-zemin="piksel"] .hesap-kapi__tanitim{ --fg:var(--piksel-kenar-yazi); --fg-2:var(--piksel-kenar-yazi-2); --text:var(--piksel-kenar-yazi); --text-2:var(--piksel-kenar-yazi-2); --text-3:var(--piksel-kenar-yazi-2); color:var(--piksel-kenar-yazi); }
+:root[data-zemin="piksel"] .hesap-kapi__sistemler > *{ background:var(--piksel-tahta); box-shadow:none; }
 /* Kartlar yaprağın üstünde kâğıt: gölge ve cam yok, ince çizgi */
 :root[data-zemin="piksel"] :is(.card,.kutu,.lrow){ backdrop-filter:none; -webkit-backdrop-filter:none; }
 :root[data-zemin="piksel"] :is(h1,h2,h3,h4){ font-weight:700; letter-spacing:0; }
@@ -19372,6 +18903,7 @@ html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
   :root[data-zemin="piksel"] .site--v5 > .ust{ --text:var(--piksel-kenar-yazi); --text-2:var(--piksel-kenar-yazi-2); --text-3:var(--piksel-kenar-yazi-2); }
 }
 :root[data-zemin="piksel"] .kutu__yuva{ white-space:normal; min-width:0; }
+:root[data-zemin="piksel"] .hesap-kapi__sozler svg{ color:var(--piksel-kenar-yazi); }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -22272,7 +21804,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   const L = window.LIFEOS;
   const ANAHTAR = 'lifeos.zemin';
-  const KIPLER = Object.freeze(['piksel', 'yumusak', 'sade']);
+  const KIPLER = Object.freeze(['piksel']);   // cam ve Sade kaldırıldı (depo sahibi, 2026-11-04: «sadece piksel tema kalsın»)
   const AD = { piksel:'Piksel', yumusak:'Yumuşak', sade:'Sade' };
   const IPUCU = { piksel:'Akşam odası ve kâğıt yaprak', yumusak:yz('ortak.zemin.yumusak-renk-zemini-icerigin'), sade:yz('ortak.zemin.duz-zemin') };
 
@@ -22281,8 +21813,6 @@ window.LIFEOS = window.LIFEOS || {};
     try{ v = localStorage.getItem(ANAHTAR); }catch(e){}
     return KIPLER.indexOf(v) >= 0 ? v : 'piksel';
   }
-  /* Bir kez (kullanıcı, 2026-11-04: «tüm sisteme uygula»): eski kayıtlı zemin piksele geçer; sonra seçim yine kullanıcının. */
-  try{ if(!localStorage.getItem('lifeos.zemin.piksel-gecis')){ localStorage.setItem('lifeos.zemin.piksel-gecis', '1'); localStorage.removeItem(ANAHTAR); } }catch(e){ /* depo kapalı */ }
   let simdiki = oku();
   function kip(){ return simdiki; }
 
@@ -22338,8 +21868,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   function uygula(){
     if(typeof document !== 'undefined' && document.documentElement){
-      /* Piksel opaktır: «saydamlığı azalt» ona dokunmaz (piksel.css). */
-      document.documentElement.setAttribute('data-zemin', simdiki === 'piksel' ? 'piksel' : simdiki === 'yumusak' && !saydamlikAz() ? 'yumusak' : 'sade');
+      document.documentElement.setAttribute('data-zemin', 'piksel');
     }
   }
   function seciciGuncelle(){
@@ -22909,7 +22438,7 @@ window.LIFEOS = window.LIFEOS || {};
      2. KODLA ÇİZİLİR. Görsel dosyası yok; çevrimdışı ve tek dosyada çalışır.
      3. EKRANI YORMAZ. Sahne bir kez hazırlanır, yalnız kedi, fincan ve ampuller 8 kare/sn oynar;
         sekme arkadayken ya da sayfa kaydırılmışken durur; animasyon kapalıysa tek kare çizilir.
-     4. TEMAYA UYAR. Açık ve koyuda ayrı palet; piksel teması seçili değilse hiç çizmez. */
+     4. TEMAYA UYAR. Açık ve koyuda ayrı palet. */
 window.LIFEOS = window.LIFEOS || {};
 
 (function(L){
@@ -23171,7 +22700,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.ayarlar.yazi-tipi':'Yazı tipi',
   'ortak.ayarlar.i-cerik-birlikte-buyur-menu':'İçerik birlikte büyür; menü yerinde kalır',
   'ortak.ayarlar.yazi-boyutu':'Yazı boyutu',
-  'ortak.ayarlar.renk-ve-cam':'Renk ve cam',
+  'ortak.ayarlar.renk-ve-cam':'Renk',
   'ortak.ayarlar.vurgu-rengi':'Vurgu rengi',
   'ortak.ayarlar.secili-dugme-ve-sekmeler':'Seçili düğme ve sekmeler',
   'ortak.ayarlar.cam-yogunlugu':'Cam yoğunluğu',
@@ -23433,13 +22962,11 @@ window.LIFEOS = window.LIFEOS || {};
   const BOLUMLER = Object.freeze([
     { id:'profil',   ad:yz('ortak.ayarlar.profiller'),        grup:'Sistem' },
     { id:'gorunum',  ad:yz('ortak.ayarlar.gorunum'),          grup:'Sistem' },
-    { id:'zemin',    ad:yz('ortak.ayarlar.arka-plan'),        grup:'Sistem' },
     { id:'ses',      ad:yz('ortak.ayarlar.ses-ve-muzik'),     grup:'Sistem' },
     { id:'hareket',  ad:yz('ortak.ayarlar.animasyon'),        grup:'Sistem' },
     { id:'erisim',   ad:yz('ortak.ayarlar.erisilebilirlik'),  grup:'Sistem' },
     { id:'king',     ad:yz('ortak.ayarlar.king-ve-baglantilar'), grup:'Sistem' },
     { id:'merkez',   ad:yz('ortak.ayarlar.merkez'),           grup:'Sistem' },
-    { id:'ekip',     ad:yz('ortak.ayarlar.minikler'),         grup:'Sistem' },
     { id:'bildirim', ad:yz('ortak.ayarlar.bildirimler'),      grup:'Sistem' },
     { id:'sistem',   ad:yz('ortak.ayarlar.planlama'),         grup:'Sistem' },
     { id:'modul',    ad:yz('ortak.ayarlar.modul-ayarlari'),   grup:yz('ortak.ayarlar.bu-modul') },
@@ -23771,24 +23298,8 @@ window.LIFEOS = window.LIFEOS || {};
         ('<details class="ayarlar__acilir"><summary class="ayarlar__satir"><span class="ayarlar__ad">' + yz('ortak.ayarlar.yazi-tipi') + '</span>')
         + '<span class="ayarlar__acilir-deger" data-yazi-ad>' + kac((YAZILAR.find(y => y.id === yazi()) || YAZILAR[0]).ad) + '</span></summary>' + yaziSeciciHtml() + '</details>'
         + G('Boyut', yz('ortak.ayarlar.i-cerik-birlikte-buyur-menu'), secimHtml('boyut', yz('ortak.ayarlar.yazi-boyutu'))))
-      + kart(SIMGE.renk, yz('ortak.ayarlar.renk-ve-cam'), '', H(yz('ortak.ayarlar.vurgu-rengi'), yz('ortak.ayarlar.secili-dugme-ve-sekmeler'), vurguHtml())
-        + H(yz('ortak.ayarlar.cam-yogunlugu'), yz('ortak.ayarlar.kartlarin-ne-kadar-saydam-ol'), secimHtml('cam', yz('ortak.ayarlar.cam-yogunlugu')))
-        + H(yz('ortak.ayarlar.sol-menu'), yz('ortak.ayarlar.cam-arkadaki-fotograf-gorunu'), secimHtml('kenar', yz('ortak.ayarlar.sol-menu')))
-        + H(yz('ortak.ayarlar.ortam-isigi'), yz('ortak.ayarlar.i-mlecin-pesindeki-hafif-isi'), anahtarHtml('isik', yz('ortak.ayarlar.ortam-isigi'))))
+      + kart(SIMGE.renk, yz('ortak.ayarlar.renk-ve-cam'), '', H(yz('ortak.ayarlar.vurgu-rengi'), yz('ortak.ayarlar.secili-dugme-ve-sekmeler'), vurguHtml()))
       + ('<div class="ayarlar__dip"><button type="button" class="btn btn--sm btn--ghost" data-ayarlar-sifirla>' + yz('ortak.ayarlar.gorunumu-sifirla') + '</button><small>' + yz('ortak.ayarlar.verin-degismez') + '</small></div>')
-      + '</div>';
-    if(id === 'zemin') return '<div class="skartlar">'
-      + kart(SIMGE.resim, yz('ortak.ayarlar.duvar-kagidi'), yz('ortak.ayarlar.gunduz-acik-temada-gece-koyu'), H('Zemin', yz('ortak.ayarlar.sade-fotograf-ve-cam-yok'), cagir(L.ZEMIN, 'seciciHtml'))
-        + '<div class="zemin-yuvalar">'
-        + ('<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>' + yz('ortak.ayarlar.gunduz') + '</b><small>' + yz('ortak.ayarlar.acik-tema') + '</small></div>') + onizleHtml('gunduz') + cagir(L.ZEMIN, 'manzaraSeciciHtml') + '</div>'
-        + ('<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>' + yz('ortak.ayarlar.gece') + '</b><small>' + yz('ortak.ayarlar.koyu-tema') + '</small></div>') + onizleHtml('gece') + cagir(L.ZEMIN, 'geceSeciciHtml') + '</div></div>')
-      + kart(SIMGE.bulanik, yz('ortak.ayarlar.bulaniklik-ve-okunaklik'), yz('ortak.ayarlar.her-katman-ayri-kapali-katma'),
-        H(yz('ortak.ayarlar.duvar-kagidi'), yz('ortak.ayarlar.fotografin-kendisi'), secimHtml('bulanik', yz('ortak.ayarlar.duvar-kagidinin-bulanikligi')))
-        + H('Perde', yz('ortak.ayarlar.fotografin-ustundeki-ortu'), secimHtml('perde', yz('ortak.ayarlar.okunaklik-perdesi')))
-        + H('Kartlar', yz('ortak.ayarlar.sayfadaki-kartlar-buzlu-cam'), anahtarHtml('buzluKart', yz('ortak.ayarlar.kartlar-buzlu')))
-        + H(yz('ortak.ayarlar.sol-menu'), yz('ortak.ayarlar.menu-buzlu-cam'), anahtarHtml('buzluMenu', yz('ortak.ayarlar.sol-menu-buzlu')))
-        + H('Pencereler', yz('ortak.ayarlar.ayarlar-bildirimler-cekmecel'), anahtarHtml('buzluPencere', yz('ortak.ayarlar.pencereler-buzlu'))))
-      + kart(SIMGE_VIDEO, yz('ortak.ayarlar.arka-plan-videosu'), yz('ortak.ayarlar.yalniz-video-seciliyken'), cagir(L.ZEMIN, 'videoAyarHtml'))
       + '</div>';
     if(id === 'bildirim'){
       const ss = L.SES && L.SES.sessiz ? L.SES.sessiz() : null;
@@ -23820,8 +23331,6 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'ses') return '<div class="skartlar">'
       + kart(SIMGE_SES, yz('ortak.ayarlar.ses-duzeyleri'), yz('ortak.ayarlar.genel-hepsini-birlikte-kisar'), cagir(L.SES, 'duzeySeciciHtml'))
       + cagir(L.MUZIK, 'ayarHtml')
-      + '<button type="button" class="skart skart--bag" data-ayarlar-git="zemin">' + SIMGE_VIDEO
-      + ('<span class="skart__baslik"><b>' + yz('ortak.ayarlar.arka-plan-videosunun-sesi') + '</b><small>' + yz('ortak.ayarlar.arka-plan-bolumunde-ses-kesi') + '</small></span><span aria-hidden="true">›</span></button>')
       + '</div>';
     if(id === 'king') return '<div class="skartlar">' + kart(SIMGE.king, 'King', yz('ortak.ayarlar.adi-konusmasi-ve-sesi'),
         H('Adı', yz('ortak.ayarlar.bos-birakirsan-king'), '<input class="ayarlar__girdi" type="text" maxlength="20" data-king-ad placeholder="King"'
@@ -23847,7 +23356,6 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'merkez') return ('<div class="merkezayar merkezayar--tam" data-merkez-tam-kok><p class="ayarlar__bos">' + yz('ortak.ayarlar.yukleniyor') + '</p></div>');
     if(id === 'sistem') return ('<h4 class="plan__baslik">' + yz('ortak.ayarlar.sistem-planlamasi') + '</h4><div class="plan" data-plan-kok><p class="ayarlar__bos">' + yz('ortak.ayarlar.yukleniyor') + '</p></div>');
     if(id === 'modul') return '<div class="skartlar">'
-      + kart(SIMGE.yuzey, 'Yüzey', yz('ortak.ayarlar.kartlarin-bu-moduldeki-duzen'), H('Düzen', '', cagir(L.ZEMIN, 'yuzeySeciciHtml')))
       + (L.KILIT && L.KILIT.ayarHtml ? kart(SIMGE.kilit, yz('ortak.ayarlar.gizlilik-kilidi'), yz('ortak.ayarlar.bu-modul-acilirken-dort-hane'), L.KILIT.ayarHtml(modulAdi(), { govde:true })) : '')
       + ((o.modul || []).length ? kart(SIMGE.ekran, (MODUL_AD[modulAdi()] || 'Modül') + ' ekranları', yz('ortak.ayarlar.modulun-kendi-ayar-sayfalari'), o.modul.map(m => H(m.ad, m.not || '',
         '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(m.route) + ('">' + yz('ortak.ayarlar.ac') + '</button>'))).join('')) : '')
@@ -25440,7 +24948,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'d1283747', at:'2026-11-04 17:46', dirty:false };
+SP.BUILD = { id:'3ee0b754', at:'2026-11-04 18:22', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -43416,7 +42924,6 @@ LIFEOS.YETKI = (function(){
   }
   const TEMA_AD = { dark:'koyu', light:'açık', system:'sisteme uyan' };
   const ANIM_AD = { tam:'tam', az:'az', sistem:'sisteme uyan' };
-  const ZEMIN_AD = { piksel:'piksel', yumusak:'canlı', sade:'sade' };
 
   const EYLEMLER = [
     {
@@ -43443,21 +42950,6 @@ LIFEOS.YETKI = (function(){
         const A = L.ANIMASYON, eski = A.kip();
         A.ayarla(p.v);
         return { metin:yz('ortak.yetki.animasyonlari') + ANIM_AD[p.v] + ' yaptım.', geriAl:async () => { A.ayarla(eski); } };
-      },
-    },
-    {
-      id:'zemin', seviye:'kucuk', ad:yz('ortak.yetki.zemin'),
-      anla:t => {
-        if(!L.ZEMIN || !/zemin|arka ?plan/.test(t)) return null;
-        if(/sade|düz|sakin/.test(t)) return { v:'sade' };
-        if(/canlı|renkli|yumuşak/.test(t)) return { v:'yumusak' };
-        return null;
-      },
-      onizle:p => ({ metin:yz('ortak.yetki.zemin-2') + ZEMIN_AD[p.v] + ' olacak.' }),
-      async uygula(p){
-        const Z = L.ZEMIN, eski = Z.kip();
-        Z.ayarla(p.v);
-        return { metin:yz('ortak.yetki.zemini') + ZEMIN_AD[p.v] + ' yaptım.', geriAl:async () => { Z.ayarla(eski); } };
       },
     },
     {
@@ -55873,7 +55365,6 @@ window.LIFEOS.PARCA.yazilar({
   const YETKI_AYAR = {
     tema:{ id:'tema', degerler:{ koyu:'dark', acik:'light', sistem:'system' } },
     animasyon:{ id:'animasyon', degerler:{ tam:'tam', az:'az', sistem:'sistem' } },
-    zemin:{ id:'zemin', degerler:{ sade:'sade', canli:'yumusak', piksel:'piksel' } },
     muzik:{ id:'muzik', degerler:{ cal:'cal', dur:'dur' } },
   };
   const KING_AYAR = {
@@ -115249,20 +114740,10 @@ SP.App = (function(){
         <div class="appear__themes">${SP.C.TemaSecici({ value:theme, act:'set-theme' })}</div>
         <div class="appear__label">${yz('spi.app.animasyonlar')}</div>
         ${raw(window.LIFEOS.ANIMASYON ? LIFEOS.ANIMASYON.seciciHtml() : '')}
-        <div class="appear__label">${yz('spi.app.zemin')}</div>
-        ${raw(window.LIFEOS.ZEMIN ? LIFEOS.ZEMIN.seciciHtml() : '')}
-        <div class="appear__label">${yz('spi.app.minikler')}</div>
-        ${raw(window.LIFEOS.MINIK ? LIFEOS.MINIK.seciciHtml() : '')}
-        <div class="appear__label">${yz('spi.app.minik-boyu')}</div>
-        ${raw(window.LIFEOS.MINIK && LIFEOS.MINIK.boySeciciHtml ? LIFEOS.MINIK.boySeciciHtml() : '')}
         <div class="appear__label">${yz('spi.app.king-in-gorunusu')}</div>
         ${raw(window.LIFEOS.KING && LIFEOS.KING.gorunusSeciciHtml ? LIFEOS.KING.gorunusSeciciHtml() : '')}
         <div class="appear__label">${yz('spi.app.ses-duzeyleri')}</div>
         ${raw(window.LIFEOS.SES && LIFEOS.SES.duzeySeciciHtml ? LIFEOS.SES.duzeySeciciHtml() : '')}
-        <div class="appear__label">${yz('spi.app.yuzey-bu-modul')}</div>
-        ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.yuzeySeciciHtml ? LIFEOS.ZEMIN.yuzeySeciciHtml() : '')}
-        <div class="appear__label">${yz('spi.app.manzara')}</div>
-        ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.manzaraSeciciHtml ? LIFEOS.ZEMIN.manzaraSeciciHtml() : '')}
 
         <p class="appear__note">${yz('spi.app.tema-bu-profile-kaydedilir-s')}</p>
       </div>`);
