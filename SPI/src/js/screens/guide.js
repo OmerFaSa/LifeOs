@@ -563,10 +563,16 @@ SP.Screens.guide = (function(){
     }
   }
 
+  LIFEOS.PARCA.blok({ id:'guide.bolum-1', sayfa:'guide', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+    return K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) });
+  } });
+  LIFEOS.PARCA.blok({ id:'guide.bolum-2', sayfa:'guide', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+    return raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '');
+  } });
   async function render(){
     /* Pusula (KOLAY-PLANI §1) sayfanın başında. */
-    return String(html`${raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '')}${K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}`);
+    return String(html`${LIFEOS.PARCA.yer('guide', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('guide', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   /* Başka yerden istenen bölüm (komut paletinin «Veri»si gibi) çizimden

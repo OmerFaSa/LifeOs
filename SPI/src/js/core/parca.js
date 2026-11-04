@@ -102,6 +102,14 @@ window.LIFEOS = window.LIFEOS || {};
     }));
   }
 
+  /* Bir yerin bloklarını sırayla çizer; ekranın kendi şablonu bu parçaları dizer. */
+  function liste(sayfaId, yerAd, K, baglam){ return bloklar(sayfaId, yerAd).map(b => ciz1(b, K, baglam)); }
+  function yer(sayfaId, yerAd, K, baglam, raw){
+    const l = liste(sayfaId, yerAd, K, baglam);
+    if(l.length === 1) return l[0];
+    return raw ? raw(l.map(String).join('')) : l.join('');
+  }
+
   function olaylar(sayfaId, tur){
     const out = {};
     bloklar(sayfaId).forEach(b => Object.keys(b[tur] || {}).forEach(k => {
@@ -141,9 +149,9 @@ window.LIFEOS = window.LIFEOS || {};
     }).filter(c => c[o.alan].length);
   }
 
-  L.PARCA = Object.freeze({ sayfa, blok, yazilar, yazi, bilgi, oku, bloklar, ciz, ekran, olaylar, menu, hatalar,
+  L.PARCA = Object.freeze({ sayfa, blok, yazilar, yazi, bilgi, oku, bloklar, liste, yer, ciz, ekran, olaylar, menu, hatalar,
     /* yalnız testler: kaydı geri alır */
     _sil(id){ [SAYFA, BLOK, YAZI, BILGI].forEach(h => h.delete(id)); },
-    liste:Object.freeze({ sayfalar:() => Array.from(SAYFA.keys()), bloklar:() => Array.from(BLOK.keys()),
+    katalog:Object.freeze({ sayfalar:() => Array.from(SAYFA.keys()), bloklar:() => Array.from(BLOK.keys()),
       yazilar:() => Array.from(YAZI.keys()), bilgiler:() => Array.from(BILGI.keys()) }) });
 })(window.LIFEOS);

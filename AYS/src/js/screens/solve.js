@@ -621,11 +621,32 @@ R.Screens.solve = (function(){
     return K.Kutu({ ad:'Hızlı kayıt', ipucu:'quick-log', class:'vkutu', id:'q-hizli-kutu', govde:raw(ic) });
   }
 
+  LIFEOS.PARCA.blok({ id:'solve.inputcard', sayfa:'solve', yer:'y1', sira:10, ad:'inputCard', ciz(){
+    return inputCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'solve.resultcard', sayfa:'solve', yer:'y1', sira:20, ad:'resultCard', ciz(){
+    return resultCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'solve.donencozum', sayfa:'solve', yer:'y2', sira:10, ad:'DonenCozum', ciz(){
+    return DonenCozum();
+  } });
+  LIFEOS.PARCA.blok({ id:'solve.hizlisatir', sayfa:'solve', yer:'y2', sira:20, ad:'hizliSatir', ciz(){
+    return hizliSatir();
+  } });
+  LIFEOS.PARCA.blok({ id:'solve.sourcecard', sayfa:'solve', yer:'y2', sira:30, ad:'sourceCard', ciz(){
+    return sourceCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'solve.topiccard', sayfa:'solve', yer:'y2', sira:40, ad:'topicCard', ciz(){
+    return topicCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'solve.historycard', sayfa:'solve', yer:'y2', sira:50, ad:'historyCard', ciz(){
+    return historyCard();
+  } });
   async function render(){
     return String(K.Grid([
-      K.Span(8, K.Stack([ inputCard(), resultCard() ])),
-      K.Span(4, K.Stack([ DonenCozum(), hizliSatir(), sourceCard(), topicCard(), historyCard() ])),
-    ]));
+    K.Span(8, K.Stack(LIFEOS.PARCA.liste('solve', 'y1', K, undefined))),
+    K.Span(4, K.Stack(LIFEOS.PARCA.liste('solve', 'y2', K, undefined))),
+  ]));
   }
 
   /* Sürükle-bırak ve yapıştır: her ikisi de aynı yola çıkar. */

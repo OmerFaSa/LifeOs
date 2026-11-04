@@ -20,7 +20,9 @@ const NS = { AYS:'R', SPI:'SP', ESP:'ESP' };
 function arg(ad){ const i = process.argv.indexOf(ad); return i < 0 ? null : (process.argv[i + 1] || ''); }
 const tekil = arg('--modul');
 const MODULLER = tekil ? [tekil] : Object.keys(NS);
-const sade = s => String(s == null ? '' : s).replace(/\s+/g, ' ').replace(/> </g, '><').trim();
+const sade = s => String(s == null ? '' : s).replace(/\s+/g, ' ').replace(/> </g, '><')
+  /* sayfa boyu sayaclar: cizim sirasina bagli kimlik, gorunum degil */
+  .replace(/sayi-k-\d+/g, 'sayi-k').replace(/data-grafik="g\d+"/g, 'data-grafik="g"').trim();
 
 const SAAT = `(()=>{ const T = new Date('2026-11-04T10:30:00').getTime(), D = Date;
   let n = 0; Math.random = () => { n = (n * 9301 + 49297) % 233280; return n / 233280; };
@@ -100,7 +102,7 @@ function durum(){
       const s = fs.readFileSync(path.join(k, f), 'utf8');
       ekran++;
       sayfa += (s.match(/\.sayfa\(\{/g) || []).length;
-      const b = (s.match(/\bP\.blok\(/g) || []).length;
+      const b = (s.match(/\b(?:P|PARCA)\.blok\(/g) || []).length;
       blok += b; bilgi += (s.match(/\bP\.bilgi\(/g) || []).length;
       const yt = s.match(/P\.yazilar\(\{[\s\S]*?\n {2}\}\);/g) || [];
       yt.forEach(t => { yazi += (t.match(/'[\w.-]+':/g) || []).length; });
@@ -124,7 +126,7 @@ function durum(){
       const say = Object.keys(k.dolu).length, hata = Object.values(k.dolu).filter(x => x.hata).length;
       if(arg('--yaz')){ taban[m] = k; console.log(m + ': ' + say + ' ekran kaydedildi (' + hata + ' hata veriyor), sayfa hatasi ' + k.hatalar.length); continue; }
       const f = fark(taban[m], k);
-      if(f.length){ cikis = 1; console.log(m + ': ' + f.length + ' FARK'); f.slice(0, 6).forEach(x => console.log('  ' + x)); }
+      if(f.length){ cikis = 1; console.log(m + ': ' + f.length + ' FARK'); f.slice(0, 40).forEach(x => console.log('  ' + x)); }
       else console.log(m + ': ' + say + ' ekran birebir ayni');
     }
     if(arg('--yaz')){

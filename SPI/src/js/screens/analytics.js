@@ -672,20 +672,42 @@ SP.Screens.analytics = (function(){
       govde:raw(A.html({ merkez:'Sağlık', kumeler, bos:'Plan › Hedefler’de bir hedef koyunca yol haritası burada belirir.' })) });
   }
 
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-1', sayfa:'analytics', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ acik, bolumler, bugun }){
+    return K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: kavramlar ve dürüstlük',
+        size:'sm', tone:'ghost', act:'spi-analiz-ayrinti', data:{ 'aria-expanded':acik ? 'true' : 'false' } });
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.kategorilerhtml', sayfa:'analytics', yer:'y2', sira:10, ad:'kategorilerHtml', ciz({ acik, bolumler, bugun }){
+    return kategorilerHtml();
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-3', sayfa:'analytics', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ acik, bolumler, bugun }){
+    return K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri', bolumler });
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-4', sayfa:'analytics', yer:'y4', sira:10, ad:'Bölüm 4', ciz({ acik, bolumler, bugun }){
+    return raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('spi') : ''));
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.yolharitasi', sayfa:'analytics', yer:'y5', sira:10, ad:'yolHaritasi', ciz({ acik, bolumler, bugun }){
+    return yolHaritasi();
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-6', sayfa:'analytics', yer:'y6', sira:10, ad:'Bölüm 6', ciz({ acik, bolumler, bugun }){
+    return K.Kutu({ ad:'Bu hafta', yuva:'kayıttan · son 7 gün', govde:ozetHtml() });
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-7', sayfa:'analytics', yer:'y7', sira:10, ad:'Bölüm 7', ciz({ acik, bolumler, bugun }){
+    return raw(bugun);
+  } });
   async function render(){
     const acik = !!S.ui.spiAnalizAyrinti;
     const bolumler = TABS.filter(t => acik || ONDE.indexOf(t.id) >= 0).map(t => ({ id:t.id, ad:t.label, govde:govde(t) }));
     /* Başta bugünün özeti (KOLAY-PLANI Faz 2): Bugün'den taşınan karolar,
        pano kartları, Durum ve Öneri (screens/today.js ozet). */
     const bugun = SP.Screens.today && SP.Screens.today.ozet ? SP.Screens.today.ozet() : '';
-    return String(html`${raw(bugun)}${K.Kutu({ ad:'Bu hafta', yuva:'kayıttan · son 7 gün', govde:ozetHtml() })}
-      <div class="mt-16">${yolHaritasi()}</div>
-      ${raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('spi') : ''))}
-      <div class="mt-16">${K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri', bolumler })}</div>
+    const parcaB = { acik, bolumler, bugun };
+    return String(html`${LIFEOS.PARCA.yer('analytics', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('analytics', 'y6', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      <div class="mt-16">${LIFEOS.PARCA.yer('analytics', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
+      ${LIFEOS.PARCA.yer('analytics', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      <div class="mt-16">${LIFEOS.PARCA.yer('analytics', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
       <h2 class="analiz-ara-baslik">Kategoriler</h2>
-      ${kategorilerHtml()}
-      <div class="analiz-ayrinti">${K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: kavramlar ve dürüstlük',
-        size:'sm', tone:'ghost', act:'spi-analiz-ayrinti', data:{ 'aria-expanded':acik ? 'true' : 'false' } })}</div>`);
+      ${LIFEOS.PARCA.yer('analytics', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      <div class="analiz-ayrinti">${LIFEOS.PARCA.yer('analytics', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
 
   /* Başka ekrandan istenen bölüm (ofis kartının «Çapraz bağ tablosu» gibi)

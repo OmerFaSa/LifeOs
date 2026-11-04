@@ -74,14 +74,8 @@ ESP.Screens.profile = (function(){
     });
   }
 
-  function render(){
-    const p = S.profile || {};
-    const ayak = M.dataFootprint();
-    const yedek = M.backupAgeDays();
-    const profiller = M.profileList();
-
-    return K.Grid(html`
-      ${K.Span(12, K.Ledger(() => [
+  LIFEOS.PARCA.blok({ id:'profile.bolum-1', sayfa:'profile', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ p, ayak, yedek, profiller }){
+    return K.Span(12, K.Ledger(() => [
 
         K.Entry({
           label:'Kişi',
@@ -270,7 +264,17 @@ ESP.Screens.profile = (function(){
             <p class="small muted mt-8">${ESP.PEDAGOGIC.level}</p>`,
         }),
 
-      ]))}`);
+      ]));
+  } });
+  function render(){
+    const p = S.profile || {};
+    const ayak = M.dataFootprint();
+    const yedek = M.backupAgeDays();
+    const profiller = M.profileList();
+
+    const parcaB = { p, ayak, yedek, profiller };
+    return K.Grid(html`
+      ${LIFEOS.PARCA.yer('profile', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   function hkmEntry(){

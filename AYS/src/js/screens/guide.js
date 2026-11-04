@@ -810,9 +810,15 @@ R.Screens.guide = (function(){
     }
   }
 
+  LIFEOS.PARCA.blok({ id:'guide.bolum-1', sayfa:'guide', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+    return K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
+      bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) });
+  } });
+  LIFEOS.PARCA.blok({ id:'guide.bolum-2', sayfa:'guide', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+    return raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '');
+  } });
   async function render(){
-    return String(html`<div id="pane-guide">${raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '')}${K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
-      bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) })}</div>`);
+    return String(html`<div id="pane-guide">${LIFEOS.PARCA.yer('guide', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('guide', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
 
   /* «Bütün veriyi sil»: defter VE bu cihazdaki soru fotoğrafları ile çözümleri

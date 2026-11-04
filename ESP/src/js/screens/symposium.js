@@ -323,11 +323,17 @@ ESP.Screens.symposium = (function(){
         + P.not('son dokunuştan bu yana · 14 gün ve üstü koyu') })], 'pk-izgara--iki');
   }
 
+  LIFEOS.PARCA.blok({ id:'symposium.bolum-1', sayfa:'symposium', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+    return K.Span(12, ESP.Parts.bolumler('philo', { act:'philo-tab', aria:'Felsefe bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null } }));
+  } });
+  LIFEOS.PARCA.blok({ id:'symposium.bolum-2', sayfa:'symposium', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+    return K.Span(12, raw(PanoTez()));
+  } });
   function render(){
     return K.Grid(html`
-      ${K.Span(12, raw(PanoTez()))}
-      ${K.Span(12, ESP.Parts.bolumler('philo', { act:'philo-tab', aria:'Felsefe bölümleri', tabs:TABS,
-        govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null } }))}`);
+      ${LIFEOS.PARCA.yer('symposium', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('symposium', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   function afterRender(){ ESP.Parts.bolumIstegi('philoTab', TABS[0].id); }

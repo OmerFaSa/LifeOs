@@ -264,10 +264,13 @@ ESP.Screens.writing = (function(){
   /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
   const GOVDE = { taslaklar:draftRows, olcum:measureRows, araclar:toolRows, ogren:topicRows };
 
+  LIFEOS.PARCA.blok({ id:'writing.bolum-1', sayfa:'writing', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+    return K.Span(12, ESP.Parts.bolumler('writing', { act:'write-tab', aria:'Yazı bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ taslaklar:(S.drafts || []).length || null } }));
+  } });
   function render(){
     return K.Grid(html`
-      ${K.Span(12, ESP.Parts.bolumler('writing', { act:'write-tab', aria:'Yazı bölümleri', tabs:TABS,
-        govde:GOVDE, sayi:{ taslaklar:(S.drafts || []).length || null } }))}`);
+      ${LIFEOS.PARCA.yer('writing', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   function afterRender(){ ESP.Parts.bolumIstegi('writeTab', TABS[0].id); }

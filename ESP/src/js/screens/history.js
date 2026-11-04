@@ -561,10 +561,13 @@ ESP.Screens.history = (function(){
   const GOVDE = { serit:seritRows, olaylar:olayRows, kaynaklar:kaynakRows, zincir:zincirRows,
     ogren:learnRows, calisma:calismaRows };
 
+  LIFEOS.PARCA.blok({ id:'history.bolum-1', sayfa:'history', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+    return K.Span(12, ESP.Parts.bolumler('history', { act:'pick-tab', aria:'Tarih bölümleri', tabs:TABS,
+        govde:GOVDE }));
+  } });
   function render(){
     return K.Grid(html`
-      ${K.Span(12, ESP.Parts.bolumler('history', { act:'pick-tab', aria:'Tarih bölümleri', tabs:TABS,
-        govde:GOVDE }))}`);
+      ${LIFEOS.PARCA.yer('history', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   function afterRender(){ ESP.Parts.bolumIstegi('histTab', TABS[0].id); }

@@ -247,13 +247,34 @@ SP.Screens.team = (function(){
     });
   }
 
+  LIFEOS.PARCA.blok({ id:'team.aciklamalar', sayfa:'team', yer:'y1', sira:10, ad:'Açıklamalar', ciz(){
+    return raw(UI.rail(['office', 'grounding', 'no-model', 'privacy']));
+  } });
+  LIFEOS.PARCA.blok({ id:'team.voicecard', sayfa:'team', yer:'y2', sira:10, ad:'voiceCard', ciz(){
+    return voiceCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'team.scopecard', sayfa:'team', yer:'y2', sira:20, ad:'scopeCard', ciz(){
+    return scopeCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'team.suggestcard', sayfa:'team', yer:'y2', sira:30, ad:'suggestCard', ciz(){
+    return suggestCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'team.briefcard', sayfa:'team', yer:'y2', sira:40, ad:'briefCard', ciz(){
+    return briefCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'team.bolum-6', sayfa:'team', yer:'y3', sira:10, ad:'Bölüm 6', ciz(){
+    return when(OS(), () => raw(pencere()));
+  } });
+  LIFEOS.PARCA.blok({ id:'team.tabscard', sayfa:'team', yer:'y4', sira:10, ad:'tabsCard', ciz(){
+    return tabsCard();
+  } });
   async function render(){
     return String(html`
-      <div class="mb-8">${tabsCard()}</div>
-      ${when(OS(), () => raw(pencere()))}
-      <div class="mt-16">${K.Ledger(() => [voiceCard(), scopeCard(), suggestCard(), briefCard()]
+      <div class="mb-8">${LIFEOS.PARCA.yer('team', 'y4', K, undefined, typeof raw === 'undefined' ? null : raw)}</div>
+      ${LIFEOS.PARCA.yer('team', 'y3', K, undefined, typeof raw === 'undefined' ? null : raw)}
+      <div class="mt-16">${K.Ledger(() => LIFEOS.PARCA.liste('team', 'y2', K, undefined)
         .filter(Boolean))}</div>
-      <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'no-model', 'privacy']))}</div>`);
+      <div class="mt-24">${LIFEOS.PARCA.yer('team', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
 
   /* Sohbet balonlarini yerinde tazeler. Tam cizim mikrofonu kopardigi

@@ -85,17 +85,8 @@ ESP.Screens.office = (function(){
       devir:h && kisi(h.from) && kisi(h.to) ? { kaynak:kisi(h.from), hedef:kisi(h.to), metin:h.finding + ' — ' + h.toName + '’a düşüyor.' } : null });
   }
 
-  function render(){
-    const vo = vitrinOfis();
-    const patron = ESP.AGENT_BY_ID.patron;
-    const uzmanlar = ESP.Mod.activeAgents().filter(a => a.id !== 'patron');
-    const devir = ESP.Office.handoffs();
-    const brf = ESP.Office.patronBrief();
-    const next = brf.next;
-
-    return K.Grid(html`
-      ${K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:ESP.Office.ready('patron') })) : '')}
-      ${K.Span(12, K.Ledger(() => [
+  LIFEOS.PARCA.blok({ id:'office.bolum-1', sayfa:'office', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ vo, patron, uzmanlar, devir, brf, next }){
+    return K.Span(12, K.Ledger(() => [
         when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:'Masa', meta:'kim konuşuyor',
           body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
         when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
@@ -159,7 +150,23 @@ ESP.Screens.office = (function(){
             rows:ESP.PRECEDENCE.map(p => [String(p.rank), p.label, p.note]) }),
         }),
 
-      ]))}`);
+      ]));
+  } });
+  LIFEOS.PARCA.blok({ id:'office.bolum-2', sayfa:'office', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ vo, patron, uzmanlar, devir, brf, next }){
+    return K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:ESP.Office.ready('patron') })) : '');
+  } });
+  function render(){
+    const vo = vitrinOfis();
+    const patron = ESP.AGENT_BY_ID.patron;
+    const uzmanlar = ESP.Mod.activeAgents().filter(a => a.id !== 'patron');
+    const devir = ESP.Office.handoffs();
+    const brf = ESP.Office.patronBrief();
+    const next = brf.next;
+
+    const parcaB = { vo, patron, uzmanlar, devir, brf, next };
+    return K.Grid(html`
+      ${LIFEOS.PARCA.yer('office', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('office', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   const handle = {

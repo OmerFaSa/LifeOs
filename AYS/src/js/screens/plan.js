@@ -229,6 +229,30 @@ R.Screens.plan = (function(){
     });
   }
 
+  LIFEOS.PARCA.blok({ id:'plan.donenprogram', sayfa:'plan', yer:'y1', sira:10, ad:'DonenProgram', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
+    return DonenProgram(cur, totalQ, doneQ);
+  } });
+  LIFEOS.PARCA.blok({ id:'plan.plancard', sayfa:'plan', yer:'y2', sira:10, ad:'planCard', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
+    return planCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'plan.droppedcard', sayfa:'plan', yer:'y3', sira:10, ad:'droppedCard', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
+    return droppedCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'plan.calisma-yogunlugu', sayfa:'plan', yer:'y4', sira:10, ad:'Çalışma yoğunluğu', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
+    return K.Card({
+        title:'Çalışma yoğunluğu', hint:'intensity', sub:R.PLAN.totalWeeks+' hafta × 7 gün',
+        body:html`
+          ${raw(UI.heatmap(grid.cells, { cols:R.PLAN.totalWeeks, monthTicks:grid.ticks }))}
+          ${raw(UI.legend([
+            { label:'çalışıldı — koyuluk yükü gösterir', color:'var(--primary)' },
+            { label:'kayıt yok', color:'color-mix(in srgb, var(--danger) 30%, transparent)' },
+            { label:'gelecek', color:'var(--surface-2)' },
+          ]))}`,
+      });
+  } });
+  LIFEOS.PARCA.blok({ id:'plan.zamancizgisi', sayfa:'plan', yer:'y5', sira:10, ad:'zamanCizgisi', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
+    return zamanCizgisi(gateWeeks);
+  } });
   async function render(){
     const cur = M.currentWeek();
     let totalQ = 0, doneQ = 0;
@@ -245,25 +269,14 @@ R.Screens.plan = (function(){
           .filter((w, i, a) => a.indexOf(w) === i);
     const grid = C.intensityGrid();
 
+    const parcaB = { cur, totalQ, doneQ, plan, scale, gateWeeks, grid };
     return String(K.Grid([
-      K.Span(12, DonenProgram(cur, totalQ, doneQ)),
-
-      K.Span(12, planCard()),
-      K.Span(12, droppedCard()),
-
-      K.Span(12, K.Card({
-        title:'Çalışma yoğunluğu', hint:'intensity', sub:R.PLAN.totalWeeks+' hafta × 7 gün',
-        body:html`
-          ${raw(UI.heatmap(grid.cells, { cols:R.PLAN.totalWeeks, monthTicks:grid.ticks }))}
-          ${raw(UI.legend([
-            { label:'çalışıldı — koyuluk yükü gösterir', color:'var(--primary)' },
-            { label:'kayıt yok', color:'color-mix(in srgb, var(--danger) 30%, transparent)' },
-            { label:'gelecek', color:'var(--surface-2)' },
-          ]))}`,
-      })),
-
-      K.Span(12, zamanCizgisi(gateWeeks)),
-    ]));
+    K.Span(12, LIFEOS.PARCA.yer('plan', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(12, LIFEOS.PARCA.yer('plan', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(12, LIFEOS.PARCA.yer('plan', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(12, LIFEOS.PARCA.yer('plan', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(12, LIFEOS.PARCA.yer('plan', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+  ]));
   }
 
   const handle = {

@@ -182,18 +182,43 @@ SP.Screens.meeting = (function(){
     });
   }
 
+  LIFEOS.PARCA.blok({ id:'meeting.aciklamalar', sayfa:'meeting', yer:'y1', sira:10, ad:'Açıklamalar', ciz({ r, open }){
+    return raw(UI.rail(['office', 'grounding', 'decision', 'no-model']));
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.bolum-2', sayfa:'meeting', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ r, open }){
+    return when(S.officeMeetings.length, () => html`${open ? minutesCard(open) : ''}${historyCard()}`);
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.plankutusu', sayfa:'meeting', yer:'y3', sira:10, ad:'planKutusu', ciz({ r, open }){
+    return planKutusu(r);
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.bulgukutusu', sayfa:'meeting', yer:'y4', sira:10, ad:'bulguKutusu', ciz({ r, open }){
+    return bulguKutusu(r);
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.fikirkutusu', sayfa:'meeting', yer:'y5', sira:10, ad:'fikirKutusu', ciz({ r, open }){
+    return fikirKutusu(r);
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.gundemkutusu', sayfa:'meeting', yer:'y6', sira:10, ad:'gundemKutusu', ciz({ r, open }){
+    return gundemKutusu(r);
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.kararkutusu', sayfa:'meeting', yer:'y7', sira:10, ad:'kararKutusu', ciz({ r, open }){
+    return kararKutusu(r);
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.haftakutusu', sayfa:'meeting', yer:'y8', sira:10, ad:'haftaKutusu', ciz({ r, open }){
+    return haftaKutusu(r);
+  } });
   async function render(){
     const r = SP.Memo ? SP.Memo.of('inceleme.rapor', () => SP.Inceleme.rapor()) : SP.Inceleme.rapor();
     const open = S.officeMeetings.find(m => m.id === S.ui.meetingOpen);
+    const parcaB = { r, open };
     return String(html`
       <div class="inc">
-        ${haftaKutusu(r)}
-        <div class="inc-iki">${kararKutusu(r)}${gundemKutusu(r)}</div>
-        ${fikirKutusu(r)}
-        <div class="inc-iki">${bulguKutusu(r)}${planKutusu(r)}</div>
-        ${when(S.officeMeetings.length, () => html`${open ? minutesCard(open) : ''}${historyCard()}`)}
+        ${LIFEOS.PARCA.yer('meeting', 'y8', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+        <div class="inc-iki">${LIFEOS.PARCA.yer('meeting', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('meeting', 'y6', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
+        ${LIFEOS.PARCA.yer('meeting', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+        <div class="inc-iki">${LIFEOS.PARCA.yer('meeting', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('meeting', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
+        ${LIFEOS.PARCA.yer('meeting', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
       </div>
-      <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'decision', 'no-model']))}</div>`);
+      <div class="mt-24">${LIFEOS.PARCA.yer('meeting', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
 
   const handle = {

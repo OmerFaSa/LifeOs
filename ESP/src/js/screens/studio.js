@@ -554,13 +554,19 @@ ESP.Screens.studio = (function(){
         + P.sutun({ degerler:l.map(kdk), yukseklik:48, etiket:'Son ' + l.length + ' kaydın konuşma hızı' }) });
   }
 
-  function render(){
-    return K.Grid(html`
-      ${K.Span(12, raw(PanoTempo()))}
-      ${K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:'Stüdyo bölümleri', tabs:TABS, govde:{
+  LIFEOS.PARCA.blok({ id:'studio.bolum-1', sayfa:'studio', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+    return K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:'Stüdyo bölümleri', tabs:TABS, govde:{
         muzik:musicRows, diksiyon:dictionRows,
         kulak:earRows, ogren:topicRows, ilerleme:progressRows,
-        tezgah:() => [ESP.Parts.desk('music'), ESP.Parts.desk('diction')] } }))}`);
+        tezgah:() => [ESP.Parts.desk('music'), ESP.Parts.desk('diction')] } }));
+  } });
+  LIFEOS.PARCA.blok({ id:'studio.bolum-2', sayfa:'studio', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+    return K.Span(12, raw(PanoTempo()));
+  } });
+  function render(){
+    return K.Grid(html`
+      ${LIFEOS.PARCA.yer('studio', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('studio', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   function afterRender(){ ESP.Parts.bolumIstegi('studioTab', TABS[0].id); }

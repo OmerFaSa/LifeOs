@@ -970,9 +970,12 @@ R.Screens.rutbe = (function(){
     }
   }
 
+  LIFEOS.PARCA.blok({ id:'rutbe.bolum-1', sayfa:'rutbe', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+    return K.SayfaBolumleri({ act:'rutbe-tab', aria:'Rütbe bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) });
+  } });
   async function render(){
-    return String(html`<div id="pane-rutbe">${K.SayfaBolumleri({ act:'rutbe-tab', aria:'Rütbe bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}</div>`);
+    return String(html`<div id="pane-rutbe">${LIFEOS.PARCA.yer('rutbe', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
 
   const handle = {

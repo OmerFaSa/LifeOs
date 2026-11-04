@@ -26,6 +26,16 @@
       expect(P.ciz('_t.s', K)).toBe('G[12:u|6:S(b2)]');
       temiz(['_t.s', '_t.b2', '_t.u']);
     });
+    it('yer: tek blok değeri olduğu gibi döner, çok blok birleşir, boş yer boş döner', () => {
+      P.sayfa({ id:'_t.y', modul:'_t' });
+      const nesne = { kacis:false };
+      P.blok({ id:'_t.y1', sayfa:'_t.y', yer:'a', ad:'A', ciz:b => (b && b.n ? nesne : 'x') });
+      expect(P.yer('_t.y', 'a', K, { n:1 })).toBe(nesne);
+      P.blok({ id:'_t.y2', sayfa:'_t.y', yer:'a', sira:200, ad:'B', ciz:() => 'y' });
+      expect(P.yer('_t.y', 'a', K, {}, v => 'R:' + v)).toBe('R:xy');
+      expect(P.yer('_t.y', 'bos', K, {})).toBe('');
+      temiz(['_t.y', '_t.y1', '_t.y2']);
+    });
     it('hata veren parça sayfayı düşürmez, adıyla söyler', () => {
       P.sayfa({ id:'_t.h', modul:'_t', izgara:[{ alan:6, yer:'a' }] });
       P.blok({ id:'_t.k', sayfa:'_t.h', yer:'a', ad:'Bozuk', ciz:() => { throw new Error('x'); } });

@@ -487,11 +487,17 @@ ESP.Screens.library = (function(){
         + P.sutun({ degerler:ay, yukseklik:40, gunler:ay.map((x, i) => AY[i]), etiket:yil + ' yılında ' + biten.length + ' kitap bitti' }) })], 'pk-izgara--iki');
   }
 
+  LIFEOS.PARCA.blok({ id:'library.bolum-1', sayfa:'library', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+    return K.Span(12, ESP.Parts.bolumler('reading', { act:'read-tab', aria:'Okuma bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null } }));
+  } });
+  LIFEOS.PARCA.blok({ id:'library.bolum-2', sayfa:'library', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+    return K.Span(12, raw(PanoOkuma()));
+  } });
   function render(){
     return K.Grid(html`
-      ${K.Span(12, raw(PanoOkuma()))}
-      ${K.Span(12, ESP.Parts.bolumler('reading', { act:'read-tab', aria:'Okuma bölümleri', tabs:TABS,
-        govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null } }))}`);
+      ${LIFEOS.PARCA.yer('library', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('library', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   function afterRender(){ ESP.Parts.bolumIstegi('readTab', TABS[0].id); }

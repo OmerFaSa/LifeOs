@@ -268,6 +268,57 @@ R.Screens.team = (function(){
     if(m) m.textContent = st.metin || '';
   }
 
+  LIFEOS.PARCA.blok({ id:'team.picker', sayfa:'team', yer:'y1', sira:10, ad:'picker', ciz({ agent, msgs, ruleMode, G, pencere }){
+    return picker();
+  } });
+  LIFEOS.PARCA.blok({ id:'team.bolum-2', sayfa:'team', yer:'y1', sira:20, ad:'Bölüm 2', ciz({ agent, msgs, ruleMode, G, pencere }){
+    return pencere;
+  } });
+  LIFEOS.PARCA.blok({ id:'team.bolum-3', sayfa:'team', yer:'y2', sira:10, ad:'Bölüm 3', ciz({ agent, msgs, ruleMode, G, pencere }){
+    return K.Card({
+          body:html`
+            <div class="desk__head">
+              ${html`<span class="${'agentkare agentkare--' + agent.id}" aria-hidden="true">${R.UI.ppKare(agent.id)}${agent.initial}</span>`}
+              <div class="minw0">
+                <b class="desk__name">${agent.name}</b>
+                <span class="desk__role">${agent.role} — ${agent.desk}</span>
+              </div>
+            </div>
+            <p class="small muted mt-8">${agent.scope}</p>
+            <div class="mt-10">${deskStrip(agent)}</div>`,
+        });
+  } });
+  LIFEOS.PARCA.blok({ id:'team.masasindaki-rapor', sayfa:'team', yer:'y2', sira:20, ad:'Masasındaki rapor', ciz({ agent, msgs, ruleMode, G, pencere }){
+    return K.Card({
+          hint:'not-masasindaki-rapor', title:'Masasındaki rapor',           actions:K.Button({ label:'Özet iste', icon:'refresh', size:'sm', act:'team-brief' }),
+          body:html`
+            <div class="stack-xs">${map(O.brief(agent.id).findings, f => html`
+              <div class="finding">
+                <span class="${'finding__dot finding__dot--' + (f.tone || 'muted')}"></span>
+                <span>${f.text}</span>
+              </div>`)}</div>
+            <div class="mt-10"><span class="tiny dim">Okuduğu veri</span>
+              ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.veriCipleriHtml(agent.reads))
+                : html`<span class="tiny dim">${agent.reads.length} veri kaynağı</span>`}</div>`,
+        });
+  } });
+  LIFEOS.PARCA.blok({ id:'team.ekipteki-digerleri', sayfa:'team', yer:'y3', sira:10, ad:'Ekipteki diğerleri', ciz({ agent, msgs, ruleMode, G, pencere }){
+    return K.Stack([
+        /* Ses tanima yoksa voiceCard() null doner: olmayan bir
+           yetenegin dugmesini gostermek, basip bir sey olmamasindan
+           kotudur. */
+        voiceCard(),
+        K.Card({
+          hint:'not-ekipteki-digerleri', title:'Ekipteki diğerleri',           body:html`<div class="stack-xs">${map(R.AGENTS.filter(a => a.id !== agent.id), a => html`
+            <button class="agentrow" data-act="team-agent" data-value="${a.id}">
+              ${Avatar(a)}
+              <span class="minw0"><b class="small">${a.name}</b>
+                <span class="tiny dim">${a.desk}</span></span>
+            </button>`)}</div>`,
+        }),
+        raw(UI.rail([agent.hint, 'ai-coach'])),
+      ].filter(Boolean));
+  } });
   async function render(){
     O.resetBriefs();
     const agent = current();
@@ -295,52 +346,12 @@ R.Screens.team = (function(){
       gonderAct:'team-send', gonderAd:'Sor',
     })) : '';
 
+    const parcaB = { agent, msgs, ruleMode, G, pencere };
     return String(K.Grid([
-      K.Span(12, K.Stack([picker(), pencere])),
-
-      K.Span(8, K.Stack([
-        K.Card({
-          body:html`
-            <div class="desk__head">
-              ${html`<span class="${'agentkare agentkare--' + agent.id}" aria-hidden="true">${R.UI.ppKare(agent.id)}${agent.initial}</span>`}
-              <div class="minw0">
-                <b class="desk__name">${agent.name}</b>
-                <span class="desk__role">${agent.role} — ${agent.desk}</span>
-              </div>
-            </div>
-            <p class="small muted mt-8">${agent.scope}</p>
-            <div class="mt-10">${deskStrip(agent)}</div>`,
-        }),
-        K.Card({
-          hint:'not-masasindaki-rapor', title:'Masasındaki rapor',           actions:K.Button({ label:'Özet iste', icon:'refresh', size:'sm', act:'team-brief' }),
-          body:html`
-            <div class="stack-xs">${map(O.brief(agent.id).findings, f => html`
-              <div class="finding">
-                <span class="${'finding__dot finding__dot--' + (f.tone || 'muted')}"></span>
-                <span>${f.text}</span>
-              </div>`)}</div>
-            <div class="mt-10"><span class="tiny dim">Okuduğu veri</span>
-              ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.veriCipleriHtml(agent.reads))
-                : html`<span class="tiny dim">${agent.reads.length} veri kaynağı</span>`}</div>`,
-        }),
-      ])),
-
-      K.Span(4, K.Stack([
-        /* Ses tanima yoksa voiceCard() null doner: olmayan bir
-           yetenegin dugmesini gostermek, basip bir sey olmamasindan
-           kotudur. */
-        voiceCard(),
-        K.Card({
-          hint:'not-ekipteki-digerleri', title:'Ekipteki diğerleri',           body:html`<div class="stack-xs">${map(R.AGENTS.filter(a => a.id !== agent.id), a => html`
-            <button class="agentrow" data-act="team-agent" data-value="${a.id}">
-              ${Avatar(a)}
-              <span class="minw0"><b class="small">${a.name}</b>
-                <span class="tiny dim">${a.desk}</span></span>
-            </button>`)}</div>`,
-        }),
-        raw(UI.rail([agent.hint, 'ai-coach'])),
-      ].filter(Boolean))),
-    ]));
+    K.Span(12, K.Stack(LIFEOS.PARCA.liste('team', 'y1', K, parcaB))),
+    K.Span(8, K.Stack(LIFEOS.PARCA.liste('team', 'y2', K, parcaB))),
+    K.Span(4, LIFEOS.PARCA.yer('team', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+  ]));
   }
 
   /* ---------- konusma ---------- */

@@ -8,6 +8,7 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'topic', modul:'ays' });
 
 R.Screens.topic = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -288,6 +289,45 @@ R.Screens.topic = (function(){
     });
   }
 
+  LIFEOS.PARCA.blok({ id:'topic.bolum-1', sayfa:'topic', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ subject, topic, st, risk }){
+    return K.Row([
+        K.Button({ label:'Dersler', icon:'left', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'subjects' } }),
+        K.Row([
+          K.Button({ label:'Ders ekle', icon:'plus', size:'sm', act:'topic-add-note' }),
+          K.Button({ label:'Kart ekle', icon:'cards', size:'sm', act:'topic-add-card' }),
+        ], { wrap:true }),
+      ], { between:true, wrap:true });
+  } });
+  LIFEOS.PARCA.blok({ id:'topic.headercard', sayfa:'topic', yer:'y2', sira:10, ad:'headerCard', ciz({ subject, topic, st, risk }){
+    return headerCard(subject, topic, st, risk);
+  } });
+  LIFEOS.PARCA.blok({ id:'topic.yolcard', sayfa:'topic', yer:'y2', sira:20, ad:'yolCard', ciz({ subject, topic, st, risk }){
+    return yolCard(subject, topic, st);
+  } });
+  LIFEOS.PARCA.blok({ id:'topic.ogrencard', sayfa:'topic', yer:'y2', sira:30, ad:'ogrenCard', ciz({ subject, topic, st, risk }){
+    return ogrenCard(subject, topic);
+  } });
+  LIFEOS.PARCA.blok({ id:'topic.measurecard', sayfa:'topic', yer:'y2', sira:40, ad:'measureCard', ciz({ subject, topic, st, risk }){
+    return measureCard(subject, topic, st);
+  } });
+  LIFEOS.PARCA.blok({ id:'topic.practicecard', sayfa:'topic', yer:'y2', sira:50, ad:'practiceCard', ciz({ subject, topic, st, risk }){
+    return practiceCard(subject, topic);
+  } });
+  LIFEOS.PARCA.blok({ id:'topic.notescard', sayfa:'topic', yer:'y2', sira:60, ad:'notesCard', ciz({ subject, topic, st, risk }){
+    return notesCard(subject, topic);
+  } });
+  LIFEOS.PARCA.blok({ id:'topic.riskcard', sayfa:'topic', yer:'y3', sira:10, ad:'riskCard', ciz({ subject, topic, st, risk }){
+    return riskCard(risk);
+  } });
+  LIFEOS.PARCA.blok({ id:'topic.cardscard', sayfa:'topic', yer:'y3', sira:20, ad:'cardsCard', ciz({ subject, topic, st, risk }){
+    return cardsCard(subject, topic);
+  } });
+  LIFEOS.PARCA.blok({ id:'topic.errorscard', sayfa:'topic', yer:'y3', sira:30, ad:'errorsCard', ciz({ subject, topic, st, risk }){
+    return errorsCard(subject, topic);
+  } });
+  LIFEOS.PARCA.blok({ id:'topic.aciklamalar', sayfa:'topic', yer:'y3', sira:40, ad:'Açıklamalar', ciz({ subject, topic, st, risk }){
+    return raw(UI.rail(['closure', 'second-check', 'risk', 'recall']));
+  } });
   async function render(){
     const { subject, topic } = ctx();
     if(!subject || !topic){
@@ -297,31 +337,12 @@ R.Screens.topic = (function(){
     const st = M.topicState(subject.id, topic.id);
     const risk = C.topicRisk(subject.id, topic.id);
 
+    const parcaB = { subject, topic, st, risk };
     return String(K.Grid([
-      K.Span(12, K.Row([
-        K.Button({ label:'Dersler', icon:'left', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'subjects' } }),
-        K.Row([
-          K.Button({ label:'Ders ekle', icon:'plus', size:'sm', act:'topic-add-note' }),
-          K.Button({ label:'Kart ekle', icon:'cards', size:'sm', act:'topic-add-card' }),
-        ], { wrap:true }),
-      ], { between:true, wrap:true })),
-
-      K.Span(7, K.Stack([
-        headerCard(subject, topic, st, risk),
-        yolCard(subject, topic, st),
-        ogrenCard(subject, topic),
-        measureCard(subject, topic, st),
-        practiceCard(subject, topic),
-        notesCard(subject, topic),
-      ])),
-
-      K.Span(5, K.Stack([
-        riskCard(risk),
-        cardsCard(subject, topic),
-        errorsCard(subject, topic),
-        raw(UI.rail(['closure', 'second-check', 'risk', 'recall'])),
-      ])),
-    ]));
+    K.Span(12, LIFEOS.PARCA.yer('topic', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(7, K.Stack(LIFEOS.PARCA.liste('topic', 'y2', K, parcaB))),
+    K.Span(5, K.Stack(LIFEOS.PARCA.liste('topic', 'y3', K, parcaB))),
+  ]));
   }
 
   const handle = {

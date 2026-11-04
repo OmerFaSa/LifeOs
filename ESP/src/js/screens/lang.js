@@ -829,15 +829,25 @@ ESP.Screens.lang = (function(){
     return P.izgara([kutuKart, zorKart], 'pk-izgara--iki');
   }
 
+  LIFEOS.PARCA.blok({ id:'lang.bolum-1', sayfa:'lang', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ d }){
+    return K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:'Dil bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ calis:d.due || null } }));
+  } });
+  LIFEOS.PARCA.blok({ id:'lang.bolum-2', sayfa:'lang', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ d }){
+    return K.Span(12, gelecekYuk());
+  } });
+  LIFEOS.PARCA.blok({ id:'lang.bolum-3', sayfa:'lang', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ d }){
+    return K.Span(12, raw(PanoDil()));
+  } });
   function render(){
     const d = ESP.SRS.deckStatus(aktifDil());
     /* Dil seçici sayfa başında durur (actions): başlığın ve sekmelerin
        arasında tek başına asılı bir kutu ne işe yaradığını söylemiyordu. */
+    const parcaB = { d };
     return K.Grid(html`
-      ${K.Span(12, raw(PanoDil()))}
-      ${K.Span(12, gelecekYuk())}
-      ${K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:'Dil bölümleri', tabs:TABS,
-        govde:GOVDE, sayi:{ calis:d.due || null } }))}`);
+      ${LIFEOS.PARCA.yer('lang', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('lang', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('lang', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   function afterRender(){ ESP.Parts.bolumIstegi('langTab', TABS[0].id); }

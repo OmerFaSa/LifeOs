@@ -442,22 +442,56 @@ R.Screens.subjects = (function(){
     return P.izgara([kart, ikinci], 'pk-izgara--iki');
   }
 
+  LIFEOS.PARCA.blok({ id:'subjects.bolum-1', sayfa:'subjects', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ sid, subject, P }){
+    return raw(KonuHaritasi(subject));
+  } });
+  LIFEOS.PARCA.blok({ id:'subjects.donenkapanis', sayfa:'subjects', yer:'y2', sira:10, ad:'DonenKapanis', ciz({ sid, subject, P }){
+    return DonenKapanis();
+  } });
+  LIFEOS.PARCA.blok({ id:'subjects.pendingcard', sayfa:'subjects', yer:'y3', sira:10, ad:'pendingCard', ciz({ sid, subject, P }){
+    return pendingCard(C.pendingSecondChecks());
+  } });
+  LIFEOS.PARCA.blok({ id:'subjects.dersler', sayfa:'subjects', yer:'y4', sira:10, ad:'Dersler', ciz({ sid, subject, P }){
+    return K.Card({ pad:'sm', title:'Dersler', sub:R.SUBJECTS.length+' ders', body:subjectNav(sid) });
+  } });
+  LIFEOS.PARCA.blok({ id:'subjects.bolum-5', sayfa:'subjects', yer:'y5', sira:10, ad:'Bölüm 5', ciz({ sid, subject, P }){
+    return P.konular;
+  } });
+  LIFEOS.PARCA.blok({ id:'subjects.bolum-6', sayfa:'subjects', yer:'y5', sira:20, ad:'Bölüm 6', ciz({ sid, subject, P }){
+    return P.zincir;
+  } });
+  LIFEOS.PARCA.blok({ id:'subjects.riskcard', sayfa:'subjects', yer:'y6', sira:10, ad:'riskCard', ciz({ sid, subject, P }){
+    return riskCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'subjects.bolum-8', sayfa:'subjects', yer:'y7', sira:10, ad:'Bölüm 8', ciz({ sid, subject, P }){
+    return P.kart;
+  } });
+  LIFEOS.PARCA.blok({ id:'subjects.bolum-9', sayfa:'subjects', yer:'y7', sira:20, ad:'Bölüm 9', ciz({ sid, subject, P }){
+    return P.kaynak;
+  } });
+  LIFEOS.PARCA.blok({ id:'subjects.profilkarti', sayfa:'subjects', yer:'y8', sira:10, ad:'profilKarti', ciz({ sid, subject, P }){
+    return profilKarti();
+  } });
+  LIFEOS.PARCA.blok({ id:'subjects.aciklamalar', sayfa:'subjects', yer:'y9', sira:10, ad:'Açıklamalar', ciz({ sid, subject, P }){
+    return raw(UI.rail(['closure', 'second-check', 'source-arch']));
+  } });
   async function render(){
     const sid = openId();
     const subject = R.SUBJECTS.find(s => s.id === sid);
     const P = subjectPanel(subject);
 
+    const parcaB = { sid, subject, P };
     return String(K.Grid([
-      K.Span(12, raw(KonuHaritasi(subject))),
-      K.Span(12, DonenKapanis()),
-      pendingCard(C.pendingSecondChecks()),
-      K.Span(3, K.Stack([ K.Card({ pad:'sm', title:'Dersler', sub:R.SUBJECTS.length+' ders', body:subjectNav(sid) }) ])),
-      K.Span(7, K.Stack([ P.konular, P.zincir ])),
-      K.Span(3, K.Stack([ riskCard() ])),
-      K.Span(7, K.Stack([ P.kart, P.kaynak ])),
-      profilKarti(),
-      K.Span(12, raw(UI.rail(['closure', 'second-check', 'source-arch']))),
-    ]));
+    K.Span(12, LIFEOS.PARCA.yer('subjects', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(12, LIFEOS.PARCA.yer('subjects', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    LIFEOS.PARCA.yer('subjects', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw),
+    K.Span(3, K.Stack(LIFEOS.PARCA.liste('subjects', 'y4', K, parcaB))),
+    K.Span(7, K.Stack(LIFEOS.PARCA.liste('subjects', 'y5', K, parcaB))),
+    K.Span(3, K.Stack(LIFEOS.PARCA.liste('subjects', 'y6', K, parcaB))),
+    K.Span(7, K.Stack(LIFEOS.PARCA.liste('subjects', 'y7', K, parcaB))),
+    LIFEOS.PARCA.yer('subjects', 'y8', K, parcaB, typeof raw === 'undefined' ? null : raw),
+    K.Span(12, LIFEOS.PARCA.yer('subjects', 'y9', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+  ]));
   }
 
   const handle = {

@@ -724,22 +724,50 @@ ESP.Screens.analytics = (function(){
       ${raw(A.html({ merkez:'Gelişim', kumeler, bos:'Bir alan açınca merdiveni burada belirir.' }))}</section>`;
   }
 
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-1', sayfa:'analytics', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ acik }){
+    return when(acik, () => K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:'Analiz bölümleri', tabs:TABS, govde:GOVDE })));
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-2', sayfa:'analytics', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ acik }){
+    return K.Span(12, html`<div class="analiz-ayrinti">
+        ${K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: radar, seriler, rapor, dürüstlük, rubrik', size:'sm', tone:'ghost',
+          act:'analiz-ayrinti', data:{ 'aria-expanded':acik ? 'true' : 'false' } })}</div>`);
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-3', sayfa:'analytics', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ acik }){
+    return K.Span(12, analizBasi());
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-4', sayfa:'analytics', yer:'y4', sira:10, ad:'Bölüm 4', ciz({ acik }){
+    return K.Span(12, raw(panoAnaliz()));
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-5', sayfa:'analytics', yer:'y5', sira:10, ad:'Bölüm 5', ciz({ acik }){
+    return K.Span(12, raw('<div class="pk-izgara pk-izgara--iki">' + isiHaritasi() + '</div>'));
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-6', sayfa:'analytics', yer:'y6', sira:10, ad:'Bölüm 6', ciz({ acik }){
+    return K.Span(12, raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('esp') : '')));
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-7', sayfa:'analytics', yer:'y7', sira:10, ad:'Bölüm 7', ciz({ acik }){
+    return K.Span(12, yolHaritasi());
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-8', sayfa:'analytics', yer:'y8', sira:10, ad:'Bölüm 8', ciz({ acik }){
+    return K.Span(12, alanKarolari());
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-9', sayfa:'analytics', yer:'y9', sira:10, ad:'Bölüm 9', ciz({ acik }){
+    return map(ESP.Screens.today.analizOzeti(), x => K.Span(12, raw(x)));
+  } });
   function render(){
     const acik = !!S.ui.analizAyrinti;
     /* KOLAY Faz 2 (2026-10-26): Bugün'ün karoları, pano ve dönen kartları,
        haftalık özeti ve bekleyen önerisi burada, en başta (today.analizOzeti). */
+    const parcaB = { acik };
     return K.Grid(html`
-      ${map(ESP.Screens.today.analizOzeti(), x => K.Span(12, raw(x)))}
-      ${K.Span(12, alanKarolari())}
-      ${K.Span(12, yolHaritasi())}
-      ${K.Span(12, raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('esp') : '')))}
-      ${K.Span(12, raw('<div class="pk-izgara pk-izgara--iki">' + isiHaritasi() + '</div>'))}
-      ${K.Span(12, raw(panoAnaliz()))}
-      ${K.Span(12, analizBasi())}
-      ${K.Span(12, html`<div class="analiz-ayrinti">
-        ${K.Button({ label:acik ? 'Ayrıntılı okumaları gizle' : 'Ayrıntılı okumalar: radar, seriler, rapor, dürüstlük, rubrik', size:'sm', tone:'ghost',
-          act:'analiz-ayrinti', data:{ 'aria-expanded':acik ? 'true' : 'false' } })}</div>`)}
-      ${when(acik, () => K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:'Analiz bölümleri', tabs:TABS, govde:GOVDE })))}`);
+      ${LIFEOS.PARCA.yer('analytics', 'y9', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('analytics', 'y8', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('analytics', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('analytics', 'y6', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('analytics', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('analytics', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('analytics', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('analytics', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('analytics', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   function afterRender(){ if(S.ui.analizAyrinti) ESP.Parts.bolumIstegi('analyticsTab', TABS[0].id); }

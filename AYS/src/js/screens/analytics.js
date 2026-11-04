@@ -693,9 +693,18 @@ R.Screens.analytics = (function(){
         + '<div class="pk-saat__ad"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>' }) + '</div>';
   }
 
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-1', sayfa:'analytics', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
+    return K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
+      bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) });
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.bolum-2', sayfa:'analytics', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+    return raw(calismaSaatleri());
+  } });
+  LIFEOS.PARCA.blok({ id:'analytics.analizbasi', sayfa:'analytics', yer:'y3', sira:10, ad:'analizBasi', ciz(){
+    return analizBasi();
+  } });
   async function render(){
-    return String(html`${analizBasi()}${raw(calismaSaatleri())}${K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
-      bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) })}`);
+    return String(html`${LIFEOS.PARCA.yer('analytics', 'y3', K, undefined, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('analytics', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('analytics', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   /* Açılışta istenen bölüm (başka ekrandan «Hata haritası»na gelmek gibi)

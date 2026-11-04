@@ -359,20 +359,30 @@ R.Screens.meeting = (function(){
 
   /* ---------- ekran ---------- */
 
+  LIFEOS.PARCA.blok({ id:'meeting.agendacard', sayfa:'meeting', yer:'y1', sira:10, ad:'agendaCard', ciz(){
+    return agendaCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.livecard', sayfa:'meeting', yer:'y1', sira:20, ad:'liveCard', ciz(){
+    return liveCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.bolum-3', sayfa:'meeting', yer:'y1', sira:30, ad:'Bölüm 3', ciz(){
+    return when(!session && closed, () => reportCard(closed));
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.archivecard', sayfa:'meeting', yer:'y1', sira:40, ad:'archiveCard', ciz(){
+    return archiveCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.teamcard', sayfa:'meeting', yer:'y2', sira:10, ad:'teamCard', ciz(){
+    return teamCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'meeting.aciklamalar', sayfa:'meeting', yer:'y2', sira:20, ad:'Açıklamalar', ciz(){
+    return raw(UI.rail(['next-action', 'gate']));
+  } });
   async function render(){
     O.resetBriefs();
     return String(K.Grid([
-      K.Span(8, K.Stack([
-        agendaCard(),
-        liveCard(),
-        when(!session && closed, () => reportCard(closed)),
-        archiveCard(),
-      ])),
-      K.Span(4, K.Stack([
-        teamCard(),
-        raw(UI.rail(['next-action', 'gate'])),
-      ])),
-    ]));
+    K.Span(8, K.Stack(LIFEOS.PARCA.liste('meeting', 'y1', K, undefined))),
+    K.Span(4, K.Stack(LIFEOS.PARCA.liste('meeting', 'y2', K, undefined))),
+  ]));
   }
 
   /* ---------- yurutme ---------- */

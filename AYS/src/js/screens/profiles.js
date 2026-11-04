@@ -198,11 +198,23 @@ R.Screens.profiles = (function(){
     };
   }
 
+  LIFEOS.PARCA.blok({ id:'profiles.profilecard', sayfa:'profiles', yer:'y1', sira:10, ad:'profileCard', ciz(){
+    return profileCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'profiles.transfercard', sayfa:'profiles', yer:'y1', sira:20, ad:'transferCard', ciz(){
+    return transferCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'profiles.supervisorcard', sayfa:'profiles', yer:'y2', sira:10, ad:'supervisorCard', ciz(){
+    return supervisorCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'profiles.comparecard', sayfa:'profiles', yer:'y2', sira:20, ad:'compareCard', ciz(){
+    return compareCard();
+  } });
   async function render(){
     return String(K.Grid([
-      K.Span(7, K.Stack([profileCard(), transferCard()])),
-      K.Span(5, K.Stack([supervisorCard(), compareCard()])),
-    ]));
+    K.Span(7, K.Stack(LIFEOS.PARCA.liste('profiles', 'y1', K, undefined))),
+    K.Span(5, K.Stack(LIFEOS.PARCA.liste('profiles', 'y2', K, undefined))),
+  ]));
   }
 
   const handle = {

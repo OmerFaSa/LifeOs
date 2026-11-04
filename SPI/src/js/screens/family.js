@@ -142,13 +142,29 @@ SP.Screens.family = (function(){
     });
   }
 
+  LIFEOS.PARCA.blok({ id:'family.aciklamalar', sayfa:'family', yer:'y1', sira:10, ad:'Açıklamalar', ciz(){
+    return raw(UI.rail(['profiles', 'macro-target', 'lab-linked-food', 'privacy']));
+  } });
+  LIFEOS.PARCA.blok({ id:'family.profilecard', sayfa:'family', yer:'y2', sira:10, ad:'profileCard', ciz(){
+    return profileCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'family.targetcard', sayfa:'family', yer:'y2', sira:20, ad:'targetCard', ciz(){
+    return targetCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'family.householdcard', sayfa:'family', yer:'y2', sira:30, ad:'householdCard', ciz(){
+    return householdCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'family.prefcard', sayfa:'family', yer:'y2', sira:40, ad:'prefCard', ciz(){
+    return prefCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'family.gizlilik-kilidi', sayfa:'family', yer:'y2', sira:50, ad:'Gizlilik kilidi', ciz(){
+    return window.LIFEOS && window.LIFEOS.KILIT ? K.Card({ title:'Gizlilik kilidi',
+          body:raw(window.LIFEOS.KILIT.ayarHtml('spi', { govde:true })) }) : null;
+  } });
   async function render(){
     return String(html`
-      ${K.Ledger(() => [profileCard(), targetCard(), householdCard(), prefCard(),
-        /* Gizlilik kilidi (176, T5): kutu kendi içinde değişir. */
-        window.LIFEOS && window.LIFEOS.KILIT ? K.Card({ title:'Gizlilik kilidi',
-          body:raw(window.LIFEOS.KILIT.ayarHtml('spi', { govde:true })) }) : null].filter(Boolean))}
-      <div class="mt-24">${raw(UI.rail(['profiles', 'macro-target', 'lab-linked-food', 'privacy']))}</div>`);
+      ${K.Ledger(() => LIFEOS.PARCA.liste('family', 'y2', K, undefined).filter(Boolean))}
+      <div class="mt-24">${LIFEOS.PARCA.yer('family', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
 
   /* Görünüm listesi tek bir değişiklik işlevine bağlanır: profile yazılır

@@ -63,42 +63,8 @@ ESP.Screens.team = (function(){
      geçmişe yazar; geçmişten açılan sohbet oradan sürer (brand/ortak/gecmis.js).
      gecmisAktif: ajan başına geçmişten açılan kaydın kimliği. */
   const gecmisAktif = {};
-  function render(){
-    const a = agent();
-    const brf = ESP.Office.brief(a.id);
-    const mesajlar = S.officeChats[a.id] || [];
-    const hazir = ESP.Office.ready(a.id);
-    const devir = ESP.Office.handoffsFor(a.id);
-    const G = (window.LIFEOS || {}).GECMIS;
-    /* King'in sohbet penceresiyle aynı yerleşim, sade (ofissohbet.js
-       pencereHtml, 2026-10-19): solda Yeni sohbet ve geçmiş, başlıkta masa
-       ve kaynak, boşken ortada masanın açılış cümlesi. */
-    const pencere = OS() ? OS().pencereHtml({
-      anahtar:'esp:' + a.id, ad:a.name, rol:a.role,
-      durum:hazir ? 'yapay zekâ' : 'kural motoru',
-      durumNot:hazir ? 'Model bağlı. Her cümlenin altında kaynağı yazar.'
-        : 'Yapay zekâ bağlı değil: cevaplar sistemin hazır kurallarından gelir.',
-      gecmisHtml:G ? G.listeHtml('esp', a.id, { ac:'gecmis-ac', sil:'gecmis-sil' }) : '',
-      mesajlarHtml:mesajlar.length ? String(map(mesajlar.slice(-20), m => msgRow(m, a))) : '',
-      bos:{ alt:a.opening },
-      ustHtml:mentionYeri(),
-      girdiHtml:String(K.Textarea({ id:'chat-input', rows:1, class:'osohbet-girdi',
-        aria:'Ajana sorun', placeholder:'Sorunu yaz…', data:{ 'data-osohbet-girdi':'1' } })),
-      mikHtml:String(K.Mic({ target:'chat-input' })),
-      gonderAct:'send-chat',
-    }) : '';
-
-    return K.Grid(html`
-      ${/* Ajan seçimi sekme değil SÜZGEÇ (EKIP-PLANI §1.2): hangi masayla
-            konuşulacağını seçer, ekranın bir kısmını saklamaz. Aynı eylem
-            (pick-agent) çipte kalır. */''}
-      ${K.Span(12, html`<div class="row wrap gap-6" role="group" aria-label="Ajan seçimi">${map(
-        ESP.Mod.activeAgents(), x => K.Chip({ label:x.short || x.name, act:'pick-agent', on:x.id === a.id,
-          data:{ 'data-tab':x.id, 'aria-pressed':x.id === a.id ? 'true' : 'false' } }))}</div>`)}
-
-      ${K.Span(12, raw(pencere))}
-
-      ${K.Span(12, K.Ledger(() => [
+  LIFEOS.PARCA.blok({ id:'team.bolum-1', sayfa:'team', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ a, brf, mesajlar, hazir, devir, G, pencere }){
+    return K.Span(12, K.Ledger(() => [
 
         K.Entry({
           label:'Masa',
@@ -149,7 +115,52 @@ ESP.Screens.team = (function(){
           }),
         }),
 
-      ]))}`);
+      ]));
+  } });
+  LIFEOS.PARCA.blok({ id:'team.bolum-2', sayfa:'team', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ a, brf, mesajlar, hazir, devir, G, pencere }){
+    return K.Span(12, raw(pencere));
+  } });
+  LIFEOS.PARCA.blok({ id:'team.bolum-3', sayfa:'team', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ a, brf, mesajlar, hazir, devir, G, pencere }){
+    return K.Span(12, html`<div class="row wrap gap-6" role="group" aria-label="Ajan seçimi">${map(
+        ESP.Mod.activeAgents(), x => K.Chip({ label:x.short || x.name, act:'pick-agent', on:x.id === a.id,
+          data:{ 'data-tab':x.id, 'aria-pressed':x.id === a.id ? 'true' : 'false' } }))}</div>`);
+  } });
+  LIFEOS.PARCA.blok({ id:'team.bolum-4', sayfa:'team', yer:'y4', sira:10, ad:'Bölüm 4', ciz({ a, brf, mesajlar, hazir, devir, G, pencere }){
+    return '';
+  } });
+  function render(){
+    const a = agent();
+    const brf = ESP.Office.brief(a.id);
+    const mesajlar = S.officeChats[a.id] || [];
+    const hazir = ESP.Office.ready(a.id);
+    const devir = ESP.Office.handoffsFor(a.id);
+    const G = (window.LIFEOS || {}).GECMIS;
+    /* King'in sohbet penceresiyle aynı yerleşim, sade (ofissohbet.js
+       pencereHtml, 2026-10-19): solda Yeni sohbet ve geçmiş, başlıkta masa
+       ve kaynak, boşken ortada masanın açılış cümlesi. */
+    const pencere = OS() ? OS().pencereHtml({
+      anahtar:'esp:' + a.id, ad:a.name, rol:a.role,
+      durum:hazir ? 'yapay zekâ' : 'kural motoru',
+      durumNot:hazir ? 'Model bağlı. Her cümlenin altında kaynağı yazar.'
+        : 'Yapay zekâ bağlı değil: cevaplar sistemin hazır kurallarından gelir.',
+      gecmisHtml:G ? G.listeHtml('esp', a.id, { ac:'gecmis-ac', sil:'gecmis-sil' }) : '',
+      mesajlarHtml:mesajlar.length ? String(map(mesajlar.slice(-20), m => msgRow(m, a))) : '',
+      bos:{ alt:a.opening },
+      ustHtml:mentionYeri(),
+      girdiHtml:String(K.Textarea({ id:'chat-input', rows:1, class:'osohbet-girdi',
+        aria:'Ajana sorun', placeholder:'Sorunu yaz…', data:{ 'data-osohbet-girdi':'1' } })),
+      mikHtml:String(K.Mic({ target:'chat-input' })),
+      gonderAct:'send-chat',
+    }) : '';
+
+    const parcaB = { a, brf, mesajlar, hazir, devir, G, pencere };
+    return K.Grid(html`
+      ${LIFEOS.PARCA.yer('team', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('team', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+
+      ${LIFEOS.PARCA.yer('team', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+
+      ${LIFEOS.PARCA.yer('team', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   /* 134 AJAN SEÇİCİ: «@» ile başlayınca ajanlar rolüyle listelenir. */

@@ -257,6 +257,57 @@ R.Screens.progress = (function(){
       body:raw(A.html({ merkez:'Sınav', kumeler, bos:'Konular yüklenince harita belirir.' })) });
   }
 
+  LIFEOS.PARCA.blok({ id:'progress.bolum-1', sayfa:'progress', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return raw(ozet);
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.yolharitasi', sayfa:'progress', yer:'y2', sira:10, ad:'yolHaritasi', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return yolHaritasi();
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.bolum-3', sayfa:'progress', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('ays') : ''));
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.donengidisat', sayfa:'progress', yer:'y4', sira:10, ad:'DonenGidisat', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return DonenGidisat();
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.trendcard', sayfa:'progress', yer:'y5', sira:10, ad:'trendCard', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return trendCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.gatecard', sayfa:'progress', yer:'y6', sira:10, ad:'gateCard', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return gateCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.testtrendcard', sayfa:'progress', yer:'y7', sira:10, ad:'testTrendCard', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return testTrendCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.plan-tamamlama-son-8-hafta', sayfa:'progress', yer:'y7', sira:20, ad:'Plan tamamlama — son 8 hafta', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return K.Card({ title:'Plan tamamlama — son 8 hafta', sub:'Hedef %85',
+          body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) });
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.monthcurvecard', sayfa:'progress', yer:'y7', sira:30, ad:'monthCurveCard', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return monthCurveCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.kpireference', sayfa:'progress', yer:'y7', sira:40, ad:'kpiReference', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return kpiReference();
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.hata-paretosu', sayfa:'progress', yer:'y8', sira:10, ad:'Hata paretosu', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return K.Card({ hint:'pareto', title:'Hata paretosu', body:html`
+          ${raw(UI.paretoBars(pareto))}
+          ${when(pareto[0] && pareto[0].count, () => html`<div class="mt-10">${K.Notice({ tone:'info',
+            body:'Reçete: '+R.ERROR_TAGS[pareto[0].tag].recipe })}</div>`)}` });
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.surec-gostergeleri', sayfa:'progress', yer:'y8', sira:20, ad:'Süreç göstergeleri', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return K.Card({ hint:'not-surec-gostergeleri', title:'Süreç göstergeleri', body:K.Stack([
+          K.Meter({ label:'Tekrar borcu', value:debt, text:'%'+debt, tone:debt > 10 ? 'danger' : '' }),
+          K.Meter({ label:'Konu kapanışı', value:closure, text:'%'+closure }),
+          /* «Bu hızla» (fikir 20): kapanış hızından sınava yetişme — tahmin. */
+          html`<p class="tiny dim">${C.buHizla().metin}</p>`,
+          html`<p class="tiny dim">${C.verimliSaat().metin}</p>`,
+          when(sleep != null, () => K.Meter({ label:'Uyku (7 gün ort.)',
+            value:U.pct(sleep, S.profile.sleepTarget), text:sleep+' / '+S.profile.sleepTarget+' sa' })),
+        ], 'sm') });
+  } });
+  LIFEOS.PARCA.blok({ id:'progress.aciklamalar', sayfa:'progress', yer:'y9', sira:10, ad:'Açıklamalar', ciz({ pareto, history, sleep, debt, closure, ozet }){
+    return raw(UI.rail(['median', 'base-score', 'bands', 'gate', 'pareto', 'plan-completion', 'test-trend']));
+  } });
   async function render(){
     const pareto = C.errorPareto();
     const history = C.completionHistory(8).map(h => ({ label:'H'+h.n, value:h.value }));
@@ -268,38 +319,18 @@ R.Screens.progress = (function(){
 
     /* Raf iki sütunu DOM sırasıyla dizer: trend ile karar kapısı yan yana,
        şeritler altta; gizli başvuru kartları en sonda (iPhone Faz 3). */
+    const parcaB = { pareto, history, sleep, debt, closure, ozet };
     return String(K.Grid([
-      K.Span(12, raw(ozet)),
-      K.Span(12, yolHaritasi()),
-      K.Span(12, raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('ays') : ''))),
-      K.Span(12, DonenGidisat()),
-      K.Span(6, K.Stack([ trendCard() ])),
-      K.Span(4, K.Stack([ gateCard() ])),
-      K.Span(6, K.Stack([
-        testTrendCard(),
-        K.Card({ title:'Plan tamamlama — son 8 hafta', sub:'Hedef %85',
-          body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) }),
-        monthCurveCard(),
-        kpiReference(),
-      ])),
-      K.Span(4, K.Stack([
-        K.Card({ hint:'pareto', title:'Hata paretosu', body:html`
-          ${raw(UI.paretoBars(pareto))}
-          ${when(pareto[0] && pareto[0].count, () => html`<div class="mt-10">${K.Notice({ tone:'info',
-            body:'Reçete: '+R.ERROR_TAGS[pareto[0].tag].recipe })}</div>`)}` }),
-        K.Card({ hint:'not-surec-gostergeleri', title:'Süreç göstergeleri', body:K.Stack([
-          K.Meter({ label:'Tekrar borcu', value:debt, text:'%'+debt, tone:debt > 10 ? 'danger' : '' }),
-          K.Meter({ label:'Konu kapanışı', value:closure, text:'%'+closure }),
-          /* «Bu hızla» (fikir 20): kapanış hızından sınava yetişme — tahmin. */
-          html`<p class="tiny dim">${C.buHizla().metin}</p>`,
-          html`<p class="tiny dim">${C.verimliSaat().metin}</p>`,
-          when(sleep != null, () => K.Meter({ label:'Uyku (7 gün ort.)',
-            value:U.pct(sleep, S.profile.sleepTarget), text:sleep+' / '+S.profile.sleepTarget+' sa' })),
-        ], 'sm') }),
-      ])),
-
-      K.Span(12, raw(UI.rail(['median', 'base-score', 'bands', 'gate', 'pareto', 'plan-completion', 'test-trend']))),
-    ]));
+    K.Span(12, LIFEOS.PARCA.yer('progress', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(12, LIFEOS.PARCA.yer('progress', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(12, LIFEOS.PARCA.yer('progress', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(12, LIFEOS.PARCA.yer('progress', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(6, K.Stack(LIFEOS.PARCA.liste('progress', 'y5', K, parcaB))),
+    K.Span(4, K.Stack(LIFEOS.PARCA.liste('progress', 'y6', K, parcaB))),
+    K.Span(6, K.Stack(LIFEOS.PARCA.liste('progress', 'y7', K, parcaB))),
+    K.Span(4, K.Stack(LIFEOS.PARCA.liste('progress', 'y8', K, parcaB))),
+    K.Span(12, LIFEOS.PARCA.yer('progress', 'y9', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+  ]));
   }
 
   const handle = {

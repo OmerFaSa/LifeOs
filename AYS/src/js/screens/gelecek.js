@@ -176,9 +176,22 @@ R.Screens.gelecek = (function(){
     </ul>` });
   }
 
+  LIFEOS.PARCA.blok({ id:'gelecek.deneykarti', sayfa:'gelecek', yer:'y1', sira:10, ad:'deneyKarti', ciz({ r }){
+    return deneyKarti();
+  } });
+  LIFEOS.PARCA.blok({ id:'gelecek.neolursa', sayfa:'gelecek', yer:'y2', sira:10, ad:'neOlursa', ciz({ r }){
+    return neOlursa(r);
+  } });
+  LIFEOS.PARCA.blok({ id:'gelecek.bolum-3', sayfa:'gelecek', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ r }){
+    return raw(String(grafik(r)));
+  } });
+  LIFEOS.PARCA.blok({ id:'gelecek.sinavkarti', sayfa:'gelecek', yer:'y4', sira:10, ad:'sinavKarti', ciz({ r }){
+    return sinavKarti(r);
+  } });
   async function render(){
     const r = R.Gelecek.hesapla({ ekSoru:Number(S.ui.gelecekEkSoru) || 0 });
-    return String(html`${sinavKarti(r)}${raw(String(grafik(r)))}${neOlursa(r)}${deneyKarti()}${yontem(r)}`);
+    const parcaB = { r };
+    return String(html`${LIFEOS.PARCA.yer('gelecek', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('gelecek', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('gelecek', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('gelecek', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}${yontem(r)}`);
   }
 
   const handle = {

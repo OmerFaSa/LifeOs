@@ -1513,6 +1513,43 @@ SP.Screens.today = (function(){
        GÜN        en acil uyarı, öğün yuvaları, vakti gelen hatırlatma, günün sorusu
      Kapağın karoları, pano kartları, Durum ve Öneri kalkmadı: Analiz'in
      başındaki «Bugün» özetinde (ozet()). */
+  LIFEOS.PARCA.blok({ id:'today.bolum-1', sayfa:'today', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ acil, vakti, sig, soruKart, soru }){
+    return when(soru, () => K.Ledger([soru]));
+  } });
+  LIFEOS.PARCA.blok({ id:'today.bolum-2', sayfa:'today', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ acil, vakti, sig, soruKart, soru }){
+    return raw(soruKart);
+  } });
+  LIFEOS.PARCA.blok({ id:'today.bolum-3', sayfa:'today', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ acil, vakti, sig, soruKart, soru }){
+    return when(vakti, () => K.Ledger([vakti]));
+  } });
+  LIFEOS.PARCA.blok({ id:'today.gunkutusu', sayfa:'today', yer:'y4', sira:10, ad:'GunKutusu', ciz({ acil, vakti, sig, soruKart, soru }){
+    return GunKutusu();
+  } });
+  LIFEOS.PARCA.blok({ id:'today.bolum-5', sayfa:'today', yer:'y5', sira:10, ad:'Bölüm 5', ciz({ acil, vakti, sig, soruKart, soru }){
+    return when(acil, () => acil.kart);
+  } });
+  LIFEOS.PARCA.blok({ id:'today.bolum-6', sayfa:'today', yer:'y6', sira:10, ad:'Bölüm 6', ciz({ acil, vakti, sig, soruKart, soru }){
+    return (window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu()) ? '' : OgunKutusu();
+  } });
+  LIFEOS.PARCA.blok({ id:'today.sukutusu', sayfa:'today', yer:'y7', sira:10, ad:'SuKutusu', ciz({ acil, vakti, sig, soruKart, soru }){
+    return SuKutusu();
+  } });
+  LIFEOS.PARCA.blok({ id:'today.enerjikutusu', sayfa:'today', yer:'y8', sira:10, ad:'EnerjiKutusu', ciz({ acil, vakti, sig, soruKart, soru }){
+    return EnerjiKutusu();
+  } });
+  LIFEOS.PARCA.blok({ id:'today.olcumkutusu', sayfa:'today', yer:'y9', sira:10, ad:'OlcumKutusu', ciz({ acil, vakti, sig, soruKart, soru }){
+    return OlcumKutusu();
+  } });
+  LIFEOS.PARCA.blok({ id:'today.bolum-10', sayfa:'today', yer:'y10', sira:10, ad:'Bölüm 10', ciz({ acil, vakti, sig, soruKart, soru }){
+    return raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '');
+  } });
+  LIFEOS.PARCA.blok({ id:'today.bolum-11', sayfa:'today', yer:'y11', sira:10, ad:'Bölüm 11', ciz({ acil, vakti, sig, soruKart, soru }){
+    return (SP.S.ui.kingTeklifler || []).length ? html`<section class="bugun__alan" aria-label="Onay bekliyor">
+          ${SP.Screens.onaylar.kingKart()}</section>` : '';
+  } });
+  LIFEOS.PARCA.blok({ id:'today.bolum-12', sayfa:'today', yer:'y12', sira:10, ad:'Bölüm 12', ciz({ acil, vakti, sig, soruKart, soru }){
+    return '';
+  } });
   async function render(){
     /* Karşılamanın notu: bugünün kural cümlesi (Siri'ye giden aynı cümle). */
     if(window.LIFEOS && window.LIFEOS.KARSILAMA && SP.Screens.today.sesli) window.LIFEOS.KARSILAMA.notYaz(SP.Screens.today.sesli(), SP.U.todayISO());
@@ -1527,25 +1564,25 @@ SP.Screens.today = (function(){
     const soruKart = sig && window.LIFEOS && window.LIFEOS.SORUKART ? window.LIFEOS.SORUKART.kartHtml(sig) : '';
     const soru = soruKart ? null : signalEntry();
 
+    const parcaB = { acil, vakti, sig, soruKart, soru };
     return String(html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
-        ${/* Onay bekleyen ücretli King işi gözden kaçmasın: yalnız bekleyen varken (Faz 2). */''}
-        ${(SP.S.ui.kingTeklifler || []).length ? html`<section class="bugun__alan" aria-label="Onay bekliyor">
-          ${SP.Screens.onaylar.kingKart()}</section>` : ''}
+        ${LIFEOS.PARCA.yer('today', 'y12', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+        ${LIFEOS.PARCA.yer('today', 'y11', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         <section class="bugun__alan" aria-label="Ne yaptın?">
-          ${raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '')}
-          ${OlcumKutusu()}
-          <div class="bugun__cift">${EnerjiKutusu()}${SuKutusu()}</div>
-          ${(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu()) ? '' : OgunKutusu()}
+          ${LIFEOS.PARCA.yer('today', 'y10', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+          ${LIFEOS.PARCA.yer('today', 'y9', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+          <div class="bugun__cift">${LIFEOS.PARCA.yer('today', 'y8', K, parcaB, typeof raw === 'undefined' ? null : raw)}${LIFEOS.PARCA.yer('today', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
+          ${LIFEOS.PARCA.yer('today', 'y6', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         </section>
       </div>
       <div class="bugun__sag">
         <section class="bugun__alan" aria-label="Gün"><h2 class="bugun__etiket" aria-hidden="true">Gün</h2>
-          ${when(acil, () => acil.kart)}
-          ${GunKutusu()}
-          ${when(vakti, () => K.Ledger([vakti]))}
-          ${raw(soruKart)}
-          ${when(soru, () => K.Ledger([soru]))}
+          ${LIFEOS.PARCA.yer('today', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+          ${LIFEOS.PARCA.yer('today', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+          ${LIFEOS.PARCA.yer('today', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+          ${LIFEOS.PARCA.yer('today', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+          ${LIFEOS.PARCA.yer('today', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}
         </section>
       </div>
     </div>`);

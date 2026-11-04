@@ -240,11 +240,31 @@ SP.Screens.kitchen = (function(){
   /* iPhone Faz 2b: iş tencere ve tabaktır — pişen yemek, paylaştırma ve
      yemeğin besin kartı açık ve üstte; hane, evdeki malzeme ve kendi
      gıdaların şerit (dokununca açılır), sonda. */
+  LIFEOS.PARCA.blok({ id:'kitchen.aciklamalar', sayfa:'kitchen', yer:'y1', sira:10, ad:'Açıklamalar', ciz(){
+    return raw(UI.rail(['household', 'portion', 'profiles']));
+  } });
+  LIFEOS.PARCA.blok({ id:'kitchen.setupcard', sayfa:'kitchen', yer:'y2', sira:10, ad:'setupCard', ciz(){
+    return setupCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'kitchen.splitcard', sayfa:'kitchen', yer:'y2', sira:20, ad:'splitCard', ciz(){
+    return splitCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'kitchen.dishinfocard', sayfa:'kitchen', yer:'y2', sira:30, ad:'dishInfoCard', ciz(){
+    return dishInfoCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'kitchen.membercard', sayfa:'kitchen', yer:'y2', sira:40, ad:'memberCard', ciz(){
+    return memberCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'kitchen.evdekicard', sayfa:'kitchen', yer:'y2', sira:50, ad:'evdekiCard', ciz(){
+    return evdekiCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'kitchen.customcard', sayfa:'kitchen', yer:'y2', sira:60, ad:'customCard', ciz(){
+    return customCard();
+  } });
   async function render(){
     return String(html`
-      ${K.Ledger(() => [setupCard(), splitCard(), dishInfoCard(), memberCard(), evdekiCard(),
-        customCard()].filter(Boolean))}
-      <div class="mt-24">${raw(UI.rail(['household', 'portion', 'profiles']))}</div>`);
+      ${K.Ledger(() => LIFEOS.PARCA.liste('kitchen', 'y2', K, undefined).filter(Boolean))}
+      <div class="mt-24">${LIFEOS.PARCA.yer('kitchen', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
 
   /* Alt sayfadaki gıda taslağı — kaydedilene kadar depoya hiçbir şey yazılmaz. */

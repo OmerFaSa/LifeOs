@@ -707,35 +707,53 @@ R.Screens.office = (function(){
         yapar:[], yapmaz:[] })) });
   }
 
+  LIFEOS.PARCA.blok({ id:'office.bolum-1', sayfa:'office', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ specialists, vo }){
+    return (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : '';
+  } });
+  LIFEOS.PARCA.blok({ id:'office.bolum-2', sayfa:'office', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ specialists, vo }){
+    return when(vo.masa, () => K.Kutu({ ad:'Masa', yuva:'kim konuşuyor', class:'vkutu',
+          govde:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` }));
+  } });
+  LIFEOS.PARCA.blok({ id:'office.bolum-3', sayfa:'office', yer:'y2', sira:20, ad:'Bölüm 3', ciz({ specialists, vo }){
+    return when(vo.toplanti, () => K.Kutu({ ad:'Günün toplantısı', yuva:'her masadan tek cümle', class:'vkutu',
+          govde:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` }));
+  } });
+  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:30, ad:'briefingCard', ciz({ specialists, vo }){
+    return briefingCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'office.bosscard', sayfa:'office', yer:'y2', sira:40, ad:'BossCard', ciz({ specialists, vo }){
+    return BossCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'office.decisionscard', sayfa:'office', yer:'y2', sira:50, ad:'decisionsCard', ciz({ specialists, vo }){
+    return decisionsCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y2', sira:60, ad:'Uzman masaları', ciz({ specialists, vo }){
+    return K.Card({ title:'Uzman masaları', body:html`<div class="desks">${map(specialists, Desk)}</div>` });
+  } });
+  LIFEOS.PARCA.blok({ id:'office.urunlerkart', sayfa:'office', yer:'y3', sira:10, ad:'urunlerKart', ciz({ specialists, vo }){
+    return urunlerKart();
+  } });
+  LIFEOS.PARCA.blok({ id:'office.quotacard', sayfa:'office', yer:'y3', sira:20, ad:'quotaCard', ciz({ specialists, vo }){
+    return quotaCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'office.lastmeetingcard', sayfa:'office', yer:'y3', sira:30, ad:'lastMeetingCard', ciz({ specialists, vo }){
+    return lastMeetingCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'office.aciklamalar', sayfa:'office', yer:'y3', sira:40, ad:'Açıklamalar', ciz({ specialists, vo }){
+    return raw(UI.rail(['next-action', 'median', 'closure']));
+  } });
   async function render(){
     O.resetBriefs();
     const specialists = R.AGENTS.filter(a => !a.lead);
     const vo = vitrinOfis();
 
     /* 139 model kapalı kipi: gri şerit; ajanlar hazır cümleyle konuşur. */
+    const parcaB = { specialists, vo };
     return String(K.Grid([
-      K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : ''),
-      K.Span(8, K.Stack([
-        /* iPhone Faz 4: dört istatistik şeridi (bugün, sınava kalan, toplantı,
-           açık karar) kalktı — tarih ve sınav sayacı Bugün'de, toplantı ve
-           karar sayısı ilgili kartın başlığında. */
-        when(vo.masa, () => K.Kutu({ ad:'Masa', yuva:'kim konuşuyor', class:'vkutu',
-          govde:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
-        when(vo.toplanti, () => K.Kutu({ ad:'Günün toplantısı', yuva:'her masadan tek cümle', class:'vkutu',
-          govde:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` })),
-        briefingCard(),
-        BossCard(),
-        decisionsCard(),
-        /* Uzman masaları başlıklı kart: şerit olabilsin (iPhone Faz 4). */
-        K.Card({ title:'Uzman masaları', body:html`<div class="desks">${map(specialists, Desk)}</div>` }),
-      ])),
-      K.Span(4, K.Stack([
-        urunlerKart(),
-        quotaCard(),
-        lastMeetingCard(),
-        raw(UI.rail(['next-action', 'median', 'closure'])),
-      ])),
-    ]));
+    K.Span(12, LIFEOS.PARCA.yer('office', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(8, K.Stack(LIFEOS.PARCA.liste('office', 'y2', K, parcaB))),
+    K.Span(4, K.Stack(LIFEOS.PARCA.liste('office', 'y3', K, parcaB))),
+  ]));
   }
 
   function afterRender(){}

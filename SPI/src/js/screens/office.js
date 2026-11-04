@@ -303,29 +303,57 @@ SP.Screens.office = (function(){
       devir:h && kisi(h.from) && kisi(h.to) ? { kaynak:kisi(h.from), hedef:kisi(h.to), metin:h.finding } : null });
   }
 
+  LIFEOS.PARCA.blok({ id:'office.aciklamalar', sayfa:'office', yer:'y1', sira:10, ad:'Açıklamalar', ciz({ flags, vo }){
+    return raw(UI.rail(['office', 'grounding', 'no-model', 'privacy', 'decision']));
+  } });
+  LIFEOS.PARCA.blok({ id:'office.bolum-2', sayfa:'office', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ flags, vo }){
+    return when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:'Masa', meta:'kim konuşuyor',
+          body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.sinir || '')}${raw(vo.durum || '')}</div>` }));
+  } });
+  LIFEOS.PARCA.blok({ id:'office.bolum-3', sayfa:'office', yer:'y2', sira:20, ad:'Bölüm 3', ciz({ flags, vo }){
+    return when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
+          body:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` }));
+  } });
+  LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:30, ad:'briefingCard', ciz({ flags, vo }){
+    return briefingCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'office.bolum-5', sayfa:'office', yer:'y2', sira:40, ad:'Bölüm 5', ciz({ flags, vo }){
+    return K.Entry({ wide:true, label:'Patron masası', hint:'office', meta:'orkestrasyon',
+          body:html`<div class="desks desks--solo">${deskCard(SP.AGENT_BY_ID.patron)}</div>` });
+  } });
+  LIFEOS.PARCA.blok({ id:'office.handoffentry', sayfa:'office', yer:'y2', sira:50, ad:'handoffEntry', ciz({ flags, vo }){
+    return handoffEntry();
+  } });
+  LIFEOS.PARCA.blok({ id:'office.bolum-7', sayfa:'office', yer:'y2', sira:60, ad:'Bölüm 7', ciz({ flags, vo }){
+    return K.Entry({ wide:true, hint:'not-dort-uzman-masasi', label:'Dört uzman masası', meta:COACHES.length + ' ajan',
+          body:html`<div class="desks">${map(COACHES, deskCard)}</div>` });
+  } });
+  LIFEOS.PARCA.blok({ id:'office.agendacard', sayfa:'office', yer:'y2', sira:70, ad:'agendaCard', ciz({ flags, vo }){
+    return agendaCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'office.decisioncard', sayfa:'office', yer:'y2', sira:80, ad:'decisionCard', ciz({ flags, vo }){
+    return decisionCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'office.bolum-10', sayfa:'office', yer:'y2', sira:90, ad:'Bölüm 10', ciz({ flags, vo }){
+    return K.Entry({ label:'Yetki ayrımı', hint:'office', meta:'kim neye bakar',
+          body:html`<ul class="bullets small muted">${map(SP.AGENTS, a => html`
+            <li><b>${a.name}</b> — ${a.scope}</li>`)}</ul>` });
+  } });
+  LIFEOS.PARCA.blok({ id:'office.bolum-11', sayfa:'office', yer:'y3', sira:10, ad:'Bölüm 11', ciz({ flags, vo }){
+    return when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`);
+  } });
+  LIFEOS.PARCA.blok({ id:'office.bolum-12', sayfa:'office', yer:'y4', sira:10, ad:'Bölüm 12', ciz({ flags, vo }){
+    return (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:SP.Office.ready('patron') })) : '';
+  } });
   async function render(){
     const flags = SP.Model.openFlags();
     const vo = vitrinOfis();
+    const parcaB = { flags, vo };
     return String(html`
-      ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:SP.Office.ready('patron') })) : ''}
-      ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
-      ${K.Ledger(() => [
-        when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:'Masa', meta:'kim konuşuyor',
-          body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.sinir || '')}${raw(vo.durum || '')}</div>` })),
-        when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
-          body:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` })),
-        briefingCard(),
-        K.Entry({ wide:true, label:'Patron masası', hint:'office', meta:'orkestrasyon',
-          body:html`<div class="desks desks--solo">${deskCard(SP.AGENT_BY_ID.patron)}</div>` }),
-        handoffEntry(),
-        K.Entry({ wide:true, hint:'not-dort-uzman-masasi', label:'Dört uzman masası', meta:COACHES.length + ' ajan',
-          body:html`<div class="desks">${map(COACHES, deskCard)}</div>` }),
-        agendaCard(), decisionCard(),
-        K.Entry({ label:'Yetki ayrımı', hint:'office', meta:'kim neye bakar',
-          body:html`<ul class="bullets small muted">${map(SP.AGENTS, a => html`
-            <li><b>${a.name}</b> — ${a.scope}</li>`)}</ul>` }),
-      ])}
-      <div class="mt-24">${raw(UI.rail(['office', 'grounding', 'no-model', 'privacy', 'decision']))}</div>`);
+      ${LIFEOS.PARCA.yer('office', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('office', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${K.Ledger(() => LIFEOS.PARCA.liste('office', 'y2', K, parcaB))}
+      <div class="mt-24">${LIFEOS.PARCA.yer('office', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
 
   const handle = {

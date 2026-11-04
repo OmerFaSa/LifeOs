@@ -315,12 +315,21 @@ R.Screens.cards = (function(){
     ])}</div>`;
   }
 
+  LIFEOS.PARCA.blok({ id:'cards.header', sayfa:'cards', yer:'y1', sira:10, ad:'header', ciz(){
+    return header();
+  } });
+  LIFEOS.PARCA.blok({ id:'cards.bolum-2', sayfa:'cards', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
+    return K.SayfaBolumleri({ act:'card-tab', aria:'Tekrar bölümleri', bolumler:bolumler() });
+  } });
+  LIFEOS.PARCA.blok({ id:'cards.aciklamalar', sayfa:'cards', yer:'y3', sira:10, ad:'Açıklamalar', ciz(){
+    return raw(UI.rail(['srs', 'card-debt', 'recall', 'notebook']));
+  } });
   async function render(){
     return String(K.Grid([
-      header(),
-      K.Span(12, K.SayfaBolumleri({ act:'card-tab', aria:'Tekrar bölümleri', bolumler:bolumler() })),
-      K.Span(12, raw(UI.rail(['srs', 'card-debt', 'recall', 'notebook']))),
-    ]));
+    LIFEOS.PARCA.yer('cards', 'y1', K, undefined, typeof raw === 'undefined' ? null : raw),
+    K.Span(12, LIFEOS.PARCA.yer('cards', 'y2', K, undefined, typeof raw === 'undefined' ? null : raw)),
+    K.Span(12, LIFEOS.PARCA.yer('cards', 'y3', K, undefined, typeof raw === 'undefined' ? null : raw)),
+  ]));
   }
 
   /* Başka ekrandan «Yanlış defteri»ne gelindiyse (Bugün, `data-tab`)

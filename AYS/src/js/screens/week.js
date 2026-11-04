@@ -498,6 +498,60 @@ R.Screens.week = (function(){
     return P.izgara([kart, tamKart], 'pk-izgara--iki');
   }
 
+  LIFEOS.PARCA.blok({ id:'week.weeknav', sayfa:'week', yer:'y1', sira:10, ad:'weekNav', ciz({ n, week, phase, curriculum, history, cak }){
+    return weekNav(n, week, phase);
+  } });
+  LIFEOS.PARCA.blok({ id:'week.bolum-2', sayfa:'week', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ n, week, phase, curriculum, history, cak }){
+    return cak ? K.Span(12, raw(cak)) : '';
+  } });
+  LIFEOS.PARCA.blok({ id:'week.bolum-3', sayfa:'week', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ n, week, phase, curriculum, history, cak }){
+    return raw(DersDagilimi(n));
+  } });
+  LIFEOS.PARCA.blok({ id:'week.bolum-4', sayfa:'week', yer:'y4', sira:10, ad:'Bölüm 4', ciz({ n, week, phase, curriculum, history, cak }){
+    return html`<div class="weekgrid">${map(M.weekDates(n), DayColumn)}</div>`;
+  } });
+  LIFEOS.PARCA.blok({ id:'week.contractcard', sayfa:'week', yer:'y5', sira:10, ad:'contractCard', ciz({ n, week, phase, curriculum, history, cak }){
+    return contractCard(week, n);
+  } });
+  LIFEOS.PARCA.blok({ id:'week.ozetcard', sayfa:'week', yer:'y5', sira:20, ad:'ozetCard', ciz({ n, week, phase, curriculum, history, cak }){
+    return ozetCard(n);
+  } });
+  LIFEOS.PARCA.blok({ id:'week.dersdengesi', sayfa:'week', yer:'y5', sira:30, ad:'dersDengesi', ciz({ n, week, phase, curriculum, history, cak }){
+    return dersDengesi(n);
+  } });
+  LIFEOS.PARCA.blok({ id:'week.plan-tamamlama-gecmisi', sayfa:'week', yer:'y5', sira:40, ad:'Plan tamamlama geçmişi', ciz({ n, week, phase, curriculum, history, cak }){
+    return K.Card({ title:'Plan tamamlama geçmişi', sub:'Hedef %85',
+          body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) });
+  } });
+  LIFEOS.PARCA.blok({ id:'week.hayaletoneri', sayfa:'week', yer:'y6', sira:10, ad:'hayaletOneri', ciz({ n, week, phase, curriculum, history, cak }){
+    return hayaletOneri(n);
+  } });
+  LIFEOS.PARCA.blok({ id:'week.haftacizgisi', sayfa:'week', yer:'y6', sira:20, ad:'haftaCizgisi', ciz({ n, week, phase, curriculum, history, cak }){
+    return haftaCizgisi(n);
+  } });
+  LIFEOS.PARCA.blok({ id:'week.planizgarasi', sayfa:'week', yer:'y6', sira:30, ad:'planIzgarasi', ciz({ n, week, phase, curriculum, history, cak }){
+    return planIzgarasi(n);
+  } });
+  LIFEOS.PARCA.blok({ id:'week.istisnacard', sayfa:'week', yer:'y6', sira:40, ad:'istisnaCard', ciz({ n, week, phase, curriculum, history, cak }){
+    return istisnaCard();
+  } });
+  LIFEOS.PARCA.blok({ id:'week.mufredat-referansi', sayfa:'week', yer:'y6', sira:50, ad:'Müfredat referansı', ciz({ n, week, phase, curriculum, history, cak }){
+    return K.Card({ title:'Müfredat referansı', sub:'Bu haftanın plandaki karşılığı', body:html`
+          <div class="stack-xs"><span class="mono-label">Konu blokları</span>
+            ${K.Row(map(curriculum.topics, t => K.Chip(t)), { wrap:true })}</div>
+          <div class="stack-xs mt-10"><span class="mono-label">Deneme planı</span>
+            <p class="small">${curriculum.exam}</p></div>
+          <div class="stack-xs mt-10"><span class="mono-label">Kontrol noktası</span>
+            <p class="small">${curriculum.check}</p></div>` });
+  } });
+  LIFEOS.PARCA.blok({ id:'week.revizyon-kaydi', sayfa:'week', yer:'y6', sira:60, ad:'Revizyon kaydı', ciz({ n, week, phase, curriculum, history, cak }){
+    return when(week.revisions && week.revisions.length, () => K.Card({ title:'Revizyon kaydı',
+          body:html`<div class="stack-xs">${map(week.revisions, r => html`
+            <div class="small"><b>${U.fmtShort(R.U.gunOf(r.at))}</b> — ${r.reason}</div>`)}</div>` }));
+  } });
+  LIFEOS.PARCA.blok({ id:'week.aciklamalar', sayfa:'week', yer:'y7', sira:10, ad:'Açıklamalar', ciz({ n, week, phase, curriculum, history, cak }){
+    return raw(UI.rail(['contract', 'capacity', 'review', 'carry', 'plan-completion']));
+  } });
   async function render(){
     const n = viewN();
     await M.ensureWeek(n);
@@ -509,40 +563,16 @@ R.Screens.week = (function(){
     /* 112 çakışma (dilim düzeyi): hedef ağının bütçesinden; HKM yoksa yok. */
     const cak = (window.LIFEOS || {}).ONERI && R.Hedefler && R.Hedefler.ag
       ? window.LIFEOS.ONERI.butceCakismaHtml(R.Hedefler.ag.butce()) : '';
+    const parcaB = { n, week, phase, curriculum, history, cak };
     return String(K.Grid([
-      weekNav(n, week, phase),
-      cak ? K.Span(12, raw(cak)) : '',
-      K.Span(12, raw(DersDagilimi(n))),
-      K.Span(12, html`<div class="weekgrid">${map(M.weekDates(n), DayColumn)}</div>`),
-
-      K.Span(6, K.Stack([
-        contractCard(week, n),
-        /* her hafta kullanılan iki kart üstte; ara sıra bakılanlar altta */
-        ozetCard(n),
-        dersDengesi(n),
-        K.Card({ title:'Plan tamamlama geçmişi', sub:'Hedef %85',
-          body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) }),
-      ])),
-
-      K.Span(4, K.Stack([
-        hayaletOneri(n),
-        haftaCizgisi(n),
-        planIzgarasi(n),
-        istisnaCard(),
-        K.Card({ title:'Müfredat referansı', sub:'Bu haftanın plandaki karşılığı', body:html`
-          <div class="stack-xs"><span class="mono-label">Konu blokları</span>
-            ${K.Row(map(curriculum.topics, t => K.Chip(t)), { wrap:true })}</div>
-          <div class="stack-xs mt-10"><span class="mono-label">Deneme planı</span>
-            <p class="small">${curriculum.exam}</p></div>
-          <div class="stack-xs mt-10"><span class="mono-label">Kontrol noktası</span>
-            <p class="small">${curriculum.check}</p></div>` }),
-        when(week.revisions && week.revisions.length, () => K.Card({ title:'Revizyon kaydı',
-          body:html`<div class="stack-xs">${map(week.revisions, r => html`
-            <div class="small"><b>${U.fmtShort(R.U.gunOf(r.at))}</b> — ${r.reason}</div>`)}</div>` })),
-      ])),
-
-      K.Span(12, raw(UI.rail(['contract', 'capacity', 'review', 'carry', 'plan-completion']))),
-    ]));
+    LIFEOS.PARCA.yer('week', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw),
+    LIFEOS.PARCA.yer('week', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw),
+    K.Span(12, LIFEOS.PARCA.yer('week', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(12, LIFEOS.PARCA.yer('week', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+    K.Span(6, K.Stack(LIFEOS.PARCA.liste('week', 'y5', K, parcaB))),
+    K.Span(4, K.Stack(LIFEOS.PARCA.liste('week', 'y6', K, parcaB))),
+    K.Span(12, LIFEOS.PARCA.yer('week', 'y7', K, parcaB, typeof raw === 'undefined' ? null : raw)),
+  ]));
   }
 
   const handle = {

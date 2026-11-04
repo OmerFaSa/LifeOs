@@ -364,12 +364,16 @@ ESP.Screens.ladder = (function(){
 
   /* Sekme yok (EKIP-PLANI §1.2): genel, yol ve seviye tespiti alt alta;
      disiplin seçici yol ve tespit içindir, hep görünür. */
+  LIFEOS.PARCA.blok({ id:'ladder.bolum-1', sayfa:'ladder', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ disc }){
+    return K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:'Merdiven bölümleri', tabs:TABS,
+        govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows } }));
+  } });
   function render(){
     const disc = S.ui.curDisc || 'lang';
     /* disiplin seçici sayfa başındadır (actions), bölümlerin üstünde asılı durmaz */
+    const parcaB = { disc };
     return K.Grid(html`
-      ${K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:'Merdiven bölümleri', tabs:TABS,
-        govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows } }))}`);
+      ${LIFEOS.PARCA.yer('ladder', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}`);
   }
 
   function afterRender(){ ESP.Parts.bolumIstegi('ladderTab', TABS[0].id); }

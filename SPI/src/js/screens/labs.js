@@ -1356,13 +1356,23 @@ SP.Screens.labs = (function(){
     }
   }
 
+  LIFEOS.PARCA.blok({ id:'labs.aciklamalar', sayfa:'labs', yer:'y1', sira:10, ad:'Açıklamalar', ciz({ flags }){
+    return raw(UI.rail(['ref-range', 'optimal-band', 'trend', 'red-flag', 'derived', 'lab-paste']));
+  } });
+  LIFEOS.PARCA.blok({ id:'labs.bolum-2', sayfa:'labs', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ flags }){
+    return K.SayfaBolumleri({ act:'lab-tab', aria:'Test bölümleri',
+        bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t), sayi:rozet(t.id) })) });
+  } });
+  LIFEOS.PARCA.blok({ id:'labs.bolum-3', sayfa:'labs', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ flags }){
+    return when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`);
+  } });
   async function render(){
     const flags = M.openFlags();
+    const parcaB = { flags };
     return String(html`
-      ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
-      ${K.SayfaBolumleri({ act:'lab-tab', aria:'Test bölümleri',
-        bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t), sayi:rozet(t.id) })) })}
-      <div class="mt-24">${raw(UI.rail(['ref-range', 'optimal-band', 'trend', 'red-flag', 'derived', 'lab-paste']))}</div>`);
+      ${LIFEOS.PARCA.yer('labs', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      ${LIFEOS.PARCA.yer('labs', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
+      <div class="mt-24">${LIFEOS.PARCA.yer('labs', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
 
   /* Başka yerden istenen bölüm (ölçümden «Eğilimi aç», kayıttan sonra
