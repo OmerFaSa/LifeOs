@@ -20382,6 +20382,8 @@ html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
      bir betik olarak durursa, durağan perdenin ilk boyamasını da o
      geciktirir — yani markupin durağan olmasinin sebebini ortadan
      kaldirirdi. -->
+<!-- PARCA:perde · uretilmis (brand/parcalar.txt, tools/parca.py); elle duzenleme -->
+<!-- /PARCA:perde -->
 <script>
 (function(){
   var el = document.getElementById('marka-perde');
@@ -20458,6 +20460,8 @@ html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
 <div id="rota-duyuru" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- Derleme damgasi: build.py her derlemede yeniden yazar. -->
+<!-- PARCA:govde · uretilmis (brand/parcalar.txt, tools/parca.py); elle duzenleme -->
+<!-- /PARCA:govde -->
 <script>
 /* ==== js/core/animasyon.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20705,7 +20709,87 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.muzik.var', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.king.ad', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik', 'lifeos.sessiz.bitis', 'lifeos.ice.var', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere', 'lifeos.tema.secim', 'lifeos.zemin.video', 'lifeos.minik.kapali', 'lifeos.profiller', 'lifeos.profil.etkin', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+    /* AYAR KATALOGU (tek tablo). Yeni tercih = buraya tek satir. Harfler:
+     t moduller arasi tasinir · p profile girer · s «Gorunumu sifirla» siler ·
+     o bilgisayarda ortak durur (sistem/ayar.py de bu tablodan okur).
+     `.*` a-z, `.**` a-z ve nokta: yalniz sunucuda ortak olan degisken anahtarlar. */
+  const KATALOG = /*KATALOG*/{
+    "lifeos.hareket":"tpo",
+    "lifeos.hareket.hiz":"tpo",
+    "lifeos.ses":"tpo",
+    "lifeos.zemin":"tpso",
+    "lifeos.yazi":"tpso",
+    "lifeos.minik":"tpo",
+    "lifeos.minik.ses":"t",
+    "lifeos.minik.boy":"tp",
+    "lifeos.minik.takim":"tp",
+    "lifeos.muzik.var":"to",
+    "lifeos.manzara":"tpso",
+    "lifeos.manzara.gece":"tps",
+    "lifeos.manzara.tur.gunduz":"t",
+    "lifeos.manzara.tur.gece":"t",
+    "lifeos.manzara.surum":"t",
+    "lifeos.tema.oto":"tpso",
+    "lifeos.kilit.odeme":"t",
+    "lifeos.kontrast":"tpso",
+    "lifeos.cam":"tpso",
+    "lifeos.perde":"tpso",
+    "lifeos.zemin.bulanik":"tps",
+    "lifeos.zemin.onizle.sade":"tp",
+    "lifeos.rozet":"tpso",
+    "lifeos.kenar.yuzey":"tpso",
+    "lifeos.king.ad":"tpo",
+    "lifeos.boyut":"tpso",
+    "lifeos.vurgu":"tpso",
+    "lifeos.odak":"tpso",
+    "lifeos.altcizgi":"tpso",
+    "lifeos.satir":"tpso",
+    "lifeos.isik":"tpso",
+    "lifeos.sessiz.bitis":"to",
+    "lifeos.ice.var":"to",
+    "lifeos.buzlu.kart":"tps",
+    "lifeos.buzlu.menu":"tps",
+    "lifeos.buzlu.pencere":"tps",
+    "lifeos.tema.secim":"tpo",
+    "lifeos.zemin.video":"tp",
+    "lifeos.minik.kapali":"tp",
+    "lifeos.profiller":"to",
+    "lifeos.profil.etkin":"to",
+    "lifeos.sessiz":"tpo",
+    "lifeos.ses.duzey":"tpo",
+    "lifeos.king.gorunus":"tpo",
+    "lifeos.king":"t",
+    "lifeos.king.cevap":"t",
+    "lifeos.king.ses":"tpo",
+    "lifeos.king.hiz":"tpo",
+    "lifeos.king.algila":"t",
+    "lifeos.king.mik":"t",
+    "lifeos.king.derinlik":"t",
+    "lifeos.king.yan":"t",
+    "lifeos.king.tarz":"tpo",
+    "lifeos.king.odak":"t",
+    "lifeos.king.bekleyen-kayit":"t",
+    "lifeos.king.merkez-sira":"t",
+    "lifeos.king.yapilacak":"t",
+    "lifeos.king.hatirlat":"t",
+    "lifeos.king.kartlarim":"t",
+    "lifeos.king.sorma":"t",
+    "lifeos.kisi.izin":"t",
+    "lifeos.karsilama":"t",
+    "lifeos.yuzey.ays":"p",
+    "lifeos.yuzey.spi":"p",
+    "lifeos.yuzey.esp":"p",
+    "lifeos.acilis.video":"o",
+    "lifeos.buzlu.*":"o",
+    "lifeos.manzara.**":"o",
+    "lifeos.minik.*":"o",
+    "lifeos.muzik.acilis.gun":"o",
+    "lifeos.muzik.yer":"o",
+    "lifeos.muzik.yer.*":"o",
+    "lifeos.zemin.**":"o"
+  }/*SON*/;
+  const katalogListe = h => Object.freeze(Object.keys(KATALOG).filter(k => k.indexOf('*') < 0 && KATALOG[k].indexOf(h) >= 0));
+  const TASINAN = katalogListe('t');
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -20741,7 +20825,7 @@ window.LIFEOS = window.LIFEOS || {};
      (yalnız değişen anahtar; iki modül açıksa birbirini ezmez). Sunucu
      yoksa (telefon, tek dosya, denetim sunucusu) hiçbir şey olmaz.
      Hangi anahtarın sistem ayarı olduğu: sistem/ayar.py ANAHTAR ile aynı. */
-  const ORTAK = /^lifeos\.(yazi|boyut|vurgu|odak|altcizgi|satir|isik|buzlu\.[a-z]+|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|sessiz\.bitis|minik|minik\.[a-z]+|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun|yer|yer\.[a-z]+)|acilis\.video|ice\.var|profiller|profil\.etkin)$/;
+  const ORTAK = new RegExp('^(' + Object.keys(KATALOG).filter(k => KATALOG[k].indexOf('o') >= 0).map(k => k.replace(/\./g, '\\.').replace(/\\\.\*\*$/, '\\.[a-z.]+').replace(/\\\.\*$/, '\\.[a-z]+')).join('|') + ')$');
   function ortakAnlik(){
     const o = {};
     try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(ORTAK.test(k)) o[k] = localStorage.getItem(k); } }catch(e){ /* depo kapalı */ }
@@ -21135,7 +21219,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
     dinlenSure,
-    ANAHTAR, KIPLER, TASINAN, ORTAK, ILK_ESIT, ortakAl, ortakFark, ortakGonder, ortakYenile, _ortakSifirla:() => { ortakSon = null; },
+    ANAHTAR, KIPLER, KATALOG, katalogListe, TASINAN, ORTAK, ILK_ESIT, ortakAl, ortakFark, ortakGonder, ortakYenile, _ortakSifirla:() => { ortakSon = null; },
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
     HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,
@@ -22042,12 +22126,7 @@ window.LIFEOS = window.LIFEOS || {};
   function yenileKaydet(){ if(L.ANIMASYON && L.ANIMASYON.ortakYenile) L.ANIMASYON.ortakYenile(); else try{ location.reload(); }catch(e){ /* yok */ } }
   const PROFIL_ANAHTAR = 'lifeos.profiller', ETKIN_ANAHTAR = 'lifeos.profil.etkin', GORDU_ANAHTAR = 'lifeos.profil.gordu', TEMA_BEKLE = 'lifeos.profil.tema';
   const PROFIL_EN = 8;
-  const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
-    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.zemin.video', 'lifeos.zemin.onizle.sade',
-    'lifeos.yuzey.ays', 'lifeos.yuzey.spi', 'lifeos.yuzey.esp',
-    'lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.ses.duzey', 'lifeos.sessiz',
-    'lifeos.minik', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.minik.kapali',
-    'lifeos.king.ad', 'lifeos.king.gorunus', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.tarz']);
+  const PROFIL_KAPSAR = L.ANIMASYON.katalogListe('p');
   const depoAl = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
   const depoKoy = (k, v) => { try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){ /* depo kapalı */ } };
   function profiller(){
@@ -22173,9 +22252,7 @@ window.LIFEOS = window.LIFEOS || {};
   function profilYenile(){ if(typeof document !== 'undefined') document.querySelectorAll('[data-profil-kok]').forEach(el => { el.outerHTML = profilHtml(); }); }
 
   /* «Görünümü varsayılana döndür»: yalnız görünüş tercihleri; veri değil. İki adım. */
-  const SIFIRLANAN = Object.freeze(['lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik',
-    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.kenar.yuzey', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere',
-    'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik']);
+  const SIFIRLANAN = L.ANIMASYON.katalogListe('s');
 
   /* Arka plan önizlemesi zemin.js'te: seçim ve yüklemede kendini yeniler. */
   const onizleHtml = yuva => L.ZEMIN && L.ZEMIN.onizleHtml ? L.ZEMIN.onizleHtml(yuva) : '';
@@ -23934,7 +24011,156 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'a10fcc29', at:'2026-11-03 20:41', dirty:true };
+R.BUILD = { id:'ae604f0a', at:'2026-11-04 10:47', dirty:true };
+
+/* ==== js/core/parca.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/parca.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* PARÇA — sistem Lego gibi kurulur: her sayfa, blok, yazı ve bilgi tek parçadır.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/parca.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   ==================================================================
+
+   Depo sahibi (2026-11-04): «Her sayfanın, her özelliğin, her yazının bir Lego
+   gibi parça olması lazım. Sistemi Lego gibi inşa edeceğiz.»
+
+   Dört parça:
+     sayfa  menüde yeri olan ekran: çekmece, ad, simge, sıra, ızgara. Menü
+            elle yazılmaz, sayfalardan üretilir (`menu`).
+     blok   sayfanın bir bölümü. Hangi sayfanın hangi yerine takıldığını
+            kendi söyler; sayfa dosyasına dokunmadan başka bir dosyadan da
+            eklenir. Olay işleyicisi bloğun içinde durur.
+     yazı   ekranda görünen cümle kimlikle durur (`yazi`); çizim kodu metin taşımaz.
+     bilgi  bir sayı ya da değer: nasıl okunduğu ve kesinlik etiketi (§1.2).
+            Etiketsiz bilgi kaydedilmez. King, Gün ve başka parça buradan okur.
+
+   Sözler:
+     1. TAK, ÇIKAR. Blok silinince sayfa yine çizilir, menü ve olaylar kendini düzeltir.
+     2. PARÇA DÜŞERSE SAYFA DÜŞMEZ. Hata veren blok kendi yerinde tek satır söyler.
+     3. YANLIŞ KAYIT SESSİZ GEÇMEZ. Aynı kimlik, eksik alan, olmayan yazı hata atar.
+     4. GÖRÜNÜM DEĞİŞMEZ. Motor sayfanın kendi ızgara bileşenini (K) kullanır. */
+window.LIFEOS = window.LIFEOS || {};
+
+(function(L){
+  const SAYFA = new Map(), BLOK = new Map(), YAZI = new Map(), BILGI = new Map(), hatalar = [];
+
+  function gerek(o, alanlar, tur){
+    alanlar.forEach(a => { if(o == null || o[a] == null || o[a] === '') throw new Error('PARCA: ' + tur + ' için «' + a + '» gerekir'); });
+  }
+  function ekle(harita, id, deger, tur){
+    if(harita.has(id)) throw new Error('PARCA: ' + tur + ' iki kez kaydedildi: ' + id);
+    harita.set(id, deger);
+  }
+
+  function sayfa(o){
+    gerek(o, ['id', 'modul'], 'sayfa');
+    if(o.cekmece != null) gerek(o, ['ad', 'ikon'], 'menü sayfası');
+    ekle(SAYFA, o.id, Object.assign({ sira:100, izgara:[] }, o), 'sayfa');
+    return o.id;
+  }
+
+  function blok(o){
+    gerek(o, ['id', 'sayfa', 'yer', 'ad', 'ciz'], 'blok');
+    ekle(BLOK, o.id, Object.assign({ sira:100 }, o), 'blok');
+    return o.id;
+  }
+
+  function yazilar(tablo){ Object.keys(tablo).forEach(k => ekle(YAZI, k, tablo[k], 'yazı')); }
+
+  /* yazi('hedef.mesafe', { net:'3,5' }): {ad} yerine değer koyar. */
+  function yazi(id, degerler){
+    if(!YAZI.has(id)) throw new Error('PARCA: yazı yok: ' + id);
+    const m = YAZI.get(id);
+    return degerler ? m.replace(/\{(\w+)\}/g, (t, a) => (a in degerler ? String(degerler[a]) : t)) : m;
+  }
+
+  const ETIKETLER = ['ölçüldü', 'tahmin', 'hesaplandı', 'veri yok'];
+  function bilgi(o){
+    gerek(o, ['id', 'etiket', 'oku'], 'bilgi');
+    if(ETIKETLER.indexOf(o.etiket) < 0) throw new Error('PARCA: bilinmeyen etiket: ' + o.etiket);
+    ekle(BILGI, o.id, o, 'bilgi');
+    return o.id;
+  }
+  /* Eksik veri sıfır değildir (§1.2): okunamayan bilgi «veri yok» döner. */
+  function oku(id){
+    const b = BILGI.get(id);
+    if(!b) throw new Error('PARCA: bilgi yok: ' + id);
+    let d = null;
+    try{ d = b.oku(); }catch(e){ d = null; }
+    return d == null ? { deger:null, etiket:'veri yok' } : { deger:d, etiket:b.etiket };
+  }
+
+  function bloklar(sayfaId, yer){
+    return Array.from(BLOK.values())
+      .filter(b => b.sayfa === sayfaId && (yer == null || b.yer === yer))
+      .sort((a, b) => a.sira - b.sira);
+  }
+
+  function ciz1(b, K, baglam){
+    try{ return b.ciz(baglam); }
+    catch(e){
+      hatalar.push({ id:b.id, hata:String(e && e.message || e) });
+      if(typeof console !== 'undefined') console.error('PARCA: ' + b.id, e);
+      return K.Notice({ tone:'warn', body:'«' + b.ad + '» bölümü şu an açılamadı.' });
+    }
+  }
+
+  /* Sayfanın ızgarası: { alan:6, yer:'sol' } alt alta, { tek:true } yığınsız. */
+  function ciz(sayfaId, K, baglam){
+    const s = SAYFA.get(sayfaId);
+    if(!s) throw new Error('PARCA: sayfa yok: ' + sayfaId);
+    return K.Grid(s.izgara.map(z => {
+      const l = bloklar(sayfaId, z.yer).map(b => ciz1(b, K, baglam));
+      return K.Span(z.alan, z.tek ? (l.length === 1 ? l[0] : l.join('')) : K.Stack(l));
+    }));
+  }
+
+  function olaylar(sayfaId, tur){
+    const out = {};
+    bloklar(sayfaId).forEach(b => Object.keys(b[tur] || {}).forEach(k => {
+      if(k in out) throw new Error('PARCA: «' + k + '» olayı iki blokta: ' + sayfaId);
+      out[k] = b[tur][k];
+    }));
+    return out;
+  }
+
+  /* Sayfa kaydından ekran nesnesi: kabuğun beklediği biçim aynıdır. */
+  function ekran(sayfaId, K, ek){
+    const s = SAYFA.get(sayfaId);
+    if(!s) throw new Error('PARCA: sayfa yok: ' + sayfaId);
+    const sirali = s.izgara.reduce((l, z) => l.concat(bloklar(sayfaId, z.yer)), []);
+    return Object.assign({
+      id:sayfaId,
+      title:s.baslik || s.ad,
+      kucukVarsayilan:sirali.filter(b => b.kucuk).map(b => b.kucuk),
+      actions(){ return ''; },
+      async render(){ return String(ciz(sayfaId, K)); },
+      handle:olaylar(sayfaId, 'handle'),
+      change:olaylar(sayfaId, 'change'),
+    }, ek || {});
+  }
+
+  /* Modülün menüsü: çekmece sırası kabuktan, içi sayfaların kendi sırasından. */
+  function menu(modul, cekmeceler){
+    return cekmeceler.map(c => ({
+      id:c.id,
+      label:c.ad,
+      items:Array.from(SAYFA.values())
+        .filter(s => s.modul === modul && s.cekmece === c.id)
+        .sort((a, b) => a.sira - b.sira)
+        .map(s => ({ id:s.id, icon:s.ikon, label:s.ad })),
+    })).filter(c => c.items.length);
+  }
+
+  L.PARCA = Object.freeze({ sayfa, blok, yazilar, yazi, bilgi, oku, bloklar, ciz, ekran, olaylar, menu, hatalar,
+    /* yalnız testler: kaydı geri alır */
+    _sil(id){ [SAYFA, BLOK, YAZI, BILGI].forEach(h => h.delete(id)); },
+    liste:Object.freeze({ sayfalar:() => Array.from(SAYFA.keys()), bloklar:() => Array.from(BLOK.keys()),
+      yazilar:() => Array.from(YAZI.keys()), bilgiler:() => Array.from(BILGI.keys()) }) });
+})(window.LIFEOS);
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -57881,6 +58107,9 @@ LIFEOS.Gorsel = (function(){
 (function(){
   const L = window.LIFEOS = window.LIFEOS || {};
   const EN_COK = 400;
+  /* Tarayicinin zamanlama tamponu 250 dosyada doluyordu: 251. dosya (app.js) kasaya
+     girmedi, uygulama cevrimdisi acilmadi. pwa.js 250'den once yuklenir. */
+  try{ performance.setResourceTimingBufferSize(EN_COK); }catch(e){ /* eski tarayici */ }
 
   function uygun(loc, nav){
     return !!loc && /^https?:$/.test(loc.protocol || '') && !!nav && ('serviceWorker' in nav);
@@ -112434,6 +112663,7 @@ R.Setup = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'today', modul:'ays', cekmece:'bugun', ad:'Genel bakış', ikon:'today', sira:10 });
 
 R.Screens.today = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -114749,6 +114979,7 @@ R.Screens.gun = R.Screens.today.ayrinti;
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'week', modul:'ays', cekmece:'plan', ad:'Hafta', ikon:'week', sira:10 });
 
 R.Screens.week = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -115491,6 +115722,7 @@ R.Screens.week = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'exams', modul:'ays', cekmece:'calisma', ad:'Deneme', ikon:'exam', sira:20 });
 
 R.Screens.exams = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -116712,6 +116944,7 @@ R.Screens.exams = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'cards', modul:'ays', cekmece:'calisma', ad:'Tekrar', ikon:'cards', sira:30 });
 
 R.Screens.cards = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -117196,6 +117429,7 @@ R.Screens.cards = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'learn', modul:'ays', cekmece:'ogren', ad:'Ders notları', ikon:'play', sira:50 });
 
 R.Screens.learn = (function(){
   const U = R.U, M = R.Model, UI = R.UI, S = R.S;
@@ -117795,6 +118029,7 @@ R.Screens.learn = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'quiz', modul:'ays', cekmece:'calisma', ad:'Sınama', ikon:'zap', sira:40 });
 
 R.Screens.quiz = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -118314,6 +118549,11 @@ R.Screens.quiz = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+/* Sade çekmece (2026-10-16, «AYS'de çok şey iç içe girmiş»): «Konu
+çalış» adı Öğren › Konular ile karışıyordu; ikisi de ders ve konu
+listesi. Bu ekran konunun TESTLE kapanışını izler — adı bu oldu ve
+sona geçti; Çalışma «Soru çöz» ile açılır. Rota kimliği aynı. */
+window.LIFEOS.PARCA.sayfa({ id:'solve', modul:'ays', cekmece:'calisma', ad:'Soru çöz', ikon:'search', sira:10 });
 
 R.Screens.solve = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -119389,6 +119629,7 @@ R.Screens.solve = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'subjects', modul:'ays', cekmece:'calisma', ad:'Konu kapanışı', ikon:'book', sira:50 });
 
 R.Screens.subjects = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -120352,6 +120593,14 @@ R.Screens.topic = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+/* ÖĞREN (kullanıcı, 2026-10-09: «konu öğrenmek başlığı altında sol
+tarafa bölüm aç»): konuyu uygulamanın içinde teker teker öğrenmek.
+Dört bölüm aynı konuya bakar (core/ogren.js); Ders notları
+Çalışma'dan buraya taşındı — aynı şey iki yerde durmaz. */
+window.LIFEOS.PARCA.sayfa({ id:'ogren', modul:'ays', cekmece:'ogren', ad:'Konular', ikon:'list', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'anlatim', modul:'ays', cekmece:'ogren', ad:'Anlatım', ikon:'book', sira:20 });
+window.LIFEOS.PARCA.sayfa({ id:'sorular', modul:'ays', cekmece:'ogren', ad:'Sorular', ikon:'check', sira:30 });
+window.LIFEOS.PARCA.sayfa({ id:'koc', modul:'ays', cekmece:'ogren', ad:'Koç', ikon:'zap', sira:40 });
 
 (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -122106,6 +122355,7 @@ R.Screens = R.Screens || {};
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'plan', modul:'ays', cekmece:'plan', ad:'Program', ikon:'map', sira:20 });
 
 R.Screens.plan = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -122409,6 +122659,10 @@ R.Screens.plan = (function(){
 /* ==== js/screens/target.js ==== */
 /* Hedef — siralar, net matrisi, OBP ve 24 tercih mimarisi.
 
+   LEGO ORNEGI (brand/ortak/parca.js): sayfa, her bolumu bir blok, her cumle bir
+   yazi, her hesap bir bilgidir. Yeni bolum icin yeni bir P.blok yeter; baska
+   dosyadan da takilir, bu dosyaya dokunmak gerekmez. Silmek: o bloğu sil.
+
    Yazim bicimi: STIL.md. Ekran string birlestirme kullanmaz. */
 
 window.R = window.R || {};
@@ -122417,7 +122671,86 @@ R.Screens = R.Screens || {};
 R.Screens.target = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
   const { html, raw, when, map } = R.h;
-  const K = R.C;
+  const K = R.C, P = window.LIFEOS.PARCA, y = P.yazi;
+
+  /* ---------- sayfa ---------- */
+
+  P.sayfa({
+    id:'target', modul:'ays', cekmece:'plan', ad:'Hedefler', ikon:'target', sira:30, baslik:'Hedef',
+    izgara:[{ alan:12, yer:'ust', tek:true }, { alan:6, yer:'sol' }, { alan:4, yer:'sag' }, { alan:12, yer:'alt', tek:true }],
+  });
+
+  /* ---------- yazilar ---------- */
+
+  P.yazilar({
+    'hedef.durum.veriyok':'veri yok', 'hedef.durum.bantta':'bantta', 'hedef.durum.kismen':'kısmen',
+    'hedef.durum.altinda':'altında', 'hedef.durum.ustbant':'üst bant', 'hedef.durum.yaklasiyor':'yaklaşıyor',
+    'hedef.katman.baslik':'Hedef katmanları', 'hedef.katman.alt':'2026 taban sırası {sira}',
+    'hedef.katman.s.katman':'Katman', 'hedef.katman.s.sira':'Sıra hedefi', 'hedef.katman.s.tyt':'TYT net',
+    'hedef.katman.s.ayt':'AYT net', 'hedef.s.durum':'Durum',
+    'hedef.net.baslik':'Net matrisi', 'hedef.net.alt':'Hedef bant ile son 4 tam denemenin test bazlı medyanı',
+    'hedef.net.s.test':'Test', 'hedef.net.s.bant':'Hedef bant', 'hedef.net.s.medyan':'Son 4 medyan',
+    'hedef.hiz.ozet':'Hedefe kalan: {net} net · hız tahmini', 'hedef.hiz.etiket':'TYT neti',
+    'hedef.sira.baslik':'Tahmini sıra', 'hedef.sira.alt':'Kural motorunun ürettiği bant',
+    'hedef.sira.ozet':'{n} tam denemenin medyanından · {tur}', 'hedef.sira.say':'SAY', 'hedef.sira.tyt':'yalnız TYT',
+    'hedef.sira.deneme':'Deneme ekle', 'hedef.sira.puan':'{alt} – {ust} puan', 'hedef.sira.grafik':'Tahmini sıra (tahmin)',
+    'hedef.sira.dayanak':'tam deneme', 'hedef.sira.genis':'geniş sıra', 'hedef.sira.hedef':'hedef {sira}',
+    'hedef.sira.tytm':'TYT medyan', 'hedef.sira.aytm':'AYT medyan', 'hedef.sira.obp':'OBP katkısı',
+    'hedef.sira.mesafe':'Hedef bandı tutmak için tahmini <b>{net} net</b> daha gerekiyor ({puan} puan). Bu sayı bir hedef değil, mesafe göstergesidir.',
+    'hedef.sira.ustunde':'Tahmini puanın hedef sıranın gerektirdiği bandın üstünde. Şimdi yapılacak iş net artırmak değil, bandı düşürmemek.',
+    'hedef.sira.sinir':'Bu bir ÖSYM hesabı değildir. Puan standart sapmaya göre normalize edilir ve aday dağılımı her yıl değişir; buradaki aralık son yılların sonuçlarından çıkarılmış koçluk bandıdır.',
+    'hedef.obp.baslik':'OBP katkısı', 'hedef.obp.alt':'Diploma notu × 5, ardından × katsayı', 'hedef.obp.not':'Diploma notu',
+    'hedef.obp.yerlesti':'Daha önce merkezî yerleştirmeyle yerleştim', 'hedef.obp.obp':'OBP', 'hedef.obp.aralik':'250–500 aralığı',
+    'hedef.obp.katsayi':'Katsayı', 'hedef.obp.tekrar':'tekrar yerleşme', 'hedef.obp.ilk':'ilk yerleştirme', 'hedef.obp.katki':'Puana katkı',
+    'hedef.obp.sinir':'Bu katkı net hedefini mekanik olarak azaltmaz; standartlaştırma ve aday dağılımı nedeniyle sonuç yıldan yıla değişir. 2027 kılavuzu yayımlandığında katsayı yeniden doğrulanmalıdır.',
+    'hedef.tercih.baslik':'24 tercih mimarisi', 'hedef.tercih.alt':'Tercihler puana değil başarı sırasına göre yapılır; liste gerçekten istenen program sırasıdır',
+    'hedef.tercih.dolu':'{n} / 24 dolu', 'hedef.tercih.agresif':'agresif', 'hedef.tercih.gercekci':'gerçekçi', 'hedef.tercih.guvenli':'güvenli',
+    'hedef.tercih.program':'{no}. tercih programı', 'hedef.tercih.program.yer':'{tur} — üniversite / program',
+    'hedef.tercih.sira':'{no}. tercih sırası', 'hedef.tercih.sira.yer':'sıra',
+    'hedef.tercih.kontrol':'Her satırda kontrol edilir: {liste}.',
+    'hedef.tercih.anlam':'“Güvenli” program, adayın gitmeyeceği bölüm değildir; yerleşince kayıt yaptırmaya razı olunan programdır.',
+    'hedef.ref.baslik':'2026 sıra referansları', 'hedef.ref.program':'Program', 'hedef.ref.sira':'Taban sıra',
+    'hedef.ref.not':'2027 tercih döneminde YÖK Atlas ve kılavuzdan güncellenmelidir.',
+    'hedef.yerlesen.baslik':'2024 yerleşen profilleri', 'hedef.yerlesen.alt':'Gerçek yerleşme verisi',
+    'hedef.alt':'{program} · 2026 sırası {sira}',
+    'hedef.donen.ad':'Hedef', 'hedef.donen.ana':'Ana hedef', 'hedef.donen.net':'TYT {tyt} · AYT {ayt} net · koçluk hedefi.',
+    'hedef.donen.olasi':'en olası.', 'hedef.donen.aralik':'{alt}–{ust} · {n} tam deneme.', 'hedef.donen.gerek':'Tahmin için 3 tam deneme gerekir.',
+    'hedef.donen.var':'{n} tam deneme var.', 'hedef.donen.denemeler':'Denemeler', 'hedef.donen.kalan':'Hedefe kalan', 'hedef.donen.kaldi':'kaldı.',
+    'hedef.donen.usttesin':'Hedef bandın üstündesin.', 'hedef.donen.mesafe':'Mesafe göstergesi; hedef değil.',
+    'hedef.donen.formul':'son tam denemelerin medyanı → sıra modeli',
+  });
+
+  /* ---------- bilgiler: King ve Gun buradan okuyabilir ---------- */
+
+  P.bilgi({ id:'ays.tahmini-sira', etiket:'tahmin', oku(){ const e = C.estimateScore(); return e.ok ? e.rank : null; } });
+  P.bilgi({ id:'ays.hedefe-kalan-net', etiket:'tahmin', oku(){ const g = C.netGapToTarget(); return g ? Math.max(0, g.netDiff) : null; } });
+  P.bilgi({ id:'ays.obp-katkisi', etiket:'hesaplandı', oku(){ return C.obp().contribution; } });
+
+  /* ---------- donen ust kart ---------- */
+
+  /* iPhone (2026-10-02): hedef ekranının işi hedef katmanı; tahmini sıra ve
+     hedefe kalan küçük dönen kartta. Kesinlik açıklama satırı (ⓘ'de) ve
+     medyan tekrarı (tahmini sıra kartında yazıyor) kalktı; ara sıra
+     açılanlar şerit, başvuru tabloları gizli (app.js SADE_GIZLI). */
+  P.blok({ id:'hedef.donen', sayfa:'target', yer:'ust', ad:'Hedef özeti', ciz(){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const m = [];
+    const ana = (R.TARGET_TIERS || [])[0];
+    if(ana) m.push({ ust:y('hedef.donen.ana'), cumle:ana.rank + '.', vurgu:y('hedef.donen.net', { tyt:ana.tyt, ayt:ana.ayt }), sistem:'ays' });
+    const est = C.estimateScore();
+    m.push(est.ok
+      ? { ust:y('hedef.sira.baslik'), sayi:sayi({ deger:est.rank, kesinlik:'estimated', formul:y('hedef.donen.formul') }),
+          cumle:y('hedef.donen.olasi'), vurgu:y('hedef.donen.aralik', { alt:U.fmtNum(est.rankBest), ust:U.fmtNum(est.rankWorst), n:est.samples }), sistem:'ays' }
+      : { ust:y('hedef.sira.baslik'), cumle:y('hedef.donen.gerek'), vurgu:y('hedef.donen.var', { n:C.fullExams('TYT').length }),
+          sistem:'ays', dugme:{ label:y('hedef.donen.denemeler'), act:'go', data:{ 'data-route':'exams' } } });
+    const gap = C.netGapToTarget();
+    if(gap) m.push({ ust:y('hedef.donen.kalan'), sayi:sayi({ deger:Math.max(0, Math.round(gap.netDiff * 100) / 100), birim:'net', ondalik:2, kesinlik:'estimated' }),
+      cumle:y('hedef.donen.kaldi'), vurgu:gap.reached ? y('hedef.donen.usttesin') : y('hedef.donen.mesafe'), sistem:'ays' });
+    return raw(V.donen({ id:'ays-hedef', ad:y('hedef.donen.ad'), maddeler:m }));
+  } });
 
   /* ---------- hedef katmanlari ---------- */
 
@@ -122427,10 +122760,10 @@ R.Screens.target = (function(){
     const rows = R.TARGET_TIERS.map(t => {
       const tytOk = tyt != null && tyt >= t.tytNum;
       const aytOk = ayt != null && ayt >= t.aytNum;
-      const status = (tyt == null && ayt == null) ? K.Badge({ label:'veri yok', tone:'muted' })
-        : (tytOk && aytOk) ? K.Badge({ label:'bantta', tone:'ok' })
-        : (tytOk || aytOk) ? K.Badge({ label:'kısmen', tone:'warn' })
-        : K.Badge({ label:'altında', tone:'muted' });
+      const status = (tyt == null && ayt == null) ? K.Badge({ label:y('hedef.durum.veriyok'), tone:'muted' })
+        : (tytOk && aytOk) ? K.Badge({ label:y('hedef.durum.bantta'), tone:'ok' })
+        : (tytOk || aytOk) ? K.Badge({ label:y('hedef.durum.kismen'), tone:'warn' })
+        : K.Badge({ label:y('hedef.durum.altinda'), tone:'muted' });
       return [
         html`<b>${t.name}</b><div class="tiny dim">${t.note}</div>`,
         html`<span class="num">${t.rank}</span>`,
@@ -122439,20 +122772,30 @@ R.Screens.target = (function(){
         status,
       ];
     });
-    return K.Table({ rows, headers:['Katman', { label:'Sıra hedefi', num:true },
-      { label:'TYT net', num:true }, { label:'AYT net', num:true }, 'Durum'] });
+    return K.Table({ rows, headers:[y('hedef.katman.s.katman'), { label:y('hedef.katman.s.sira'), num:true },
+      { label:y('hedef.katman.s.tyt'), num:true }, { label:y('hedef.katman.s.ayt'), num:true }, y('hedef.s.durum')] });
   }
+
+  P.blok({ id:'hedef.katman', sayfa:'target', yer:'sol', sira:10, ad:y('hedef.katman.baslik'), ciz(){
+    const p = S.profile;
+    return K.Card({
+      title:y('hedef.katman.baslik'), hint:'tiers',
+      sub:(p.program ? p.program + ' · ' : '') + y('hedef.katman.alt', { sira:U.fmtNum(R.PROGRAM.refRank) }),
+      badge:raw(UI.provenance('ref2026')),
+      body:html`${tierTable()}`,
+    });
+  } });
 
   /* ---------- net matrisi ---------- */
 
   function netMatrix(){
     const rows = R.TEST_BANDS.map(b => {
       const med = C.testMedian(b.testKey, b.exam);
-      const status = med == null ? K.Badge({ label:'veri yok', tone:'muted' })
-        : med >= b.high ? K.Badge({ label:'üst bant', tone:'ok' })
-        : med >= b.low ? K.Badge({ label:'bantta', tone:'ok' })
-        : med >= b.low*0.7 ? K.Badge({ label:'yaklaşıyor', tone:'warn' })
-        : K.Badge({ label:'altında', tone:'danger' });
+      const status = med == null ? K.Badge({ label:y('hedef.durum.veriyok'), tone:'muted' })
+        : med >= b.high ? K.Badge({ label:y('hedef.durum.ustbant'), tone:'ok' })
+        : med >= b.low ? K.Badge({ label:y('hedef.durum.bantta'), tone:'ok' })
+        : med >= b.low*0.7 ? K.Badge({ label:y('hedef.durum.yaklasiyor'), tone:'warn' })
+        : K.Badge({ label:y('hedef.durum.altinda'), tone:'danger' });
       return [
         b.test,
         html`<span class="num">${b.low}–${b.high}</span>`,
@@ -122462,9 +122805,63 @@ R.Screens.target = (function(){
         status,
       ];
     });
-    return K.Table({ rows, headers:['Test', { label:'Hedef bant', num:true },
-      { label:'Son 4 medyan', num:true }, '', 'Durum'] });
+    return K.Table({ rows, headers:[y('hedef.net.s.test'), { label:y('hedef.net.s.bant'), num:true },
+      { label:y('hedef.net.s.medyan'), num:true }, '', y('hedef.s.durum')] });
   }
+
+  P.blok({ id:'hedef.net', sayfa:'target', yer:'sol', sira:20, ad:y('hedef.net.baslik'), kucuk:'net-matrisi', ciz(){
+    return K.Card({
+      title:y('hedef.net.baslik'), hint:'net-matrix',
+      sub:y('hedef.net.alt'),
+      badge:raw(UI.provenance('coaching')),
+      body:netMatrix(),
+    });
+  } });
+
+  /* ---------- 24 tercih ---------- */
+
+  P.blok({ id:'hedef.tercih', sayfa:'target', yer:'sol', sira:30, ad:y('hedef.tercih.baslik'), kucuk:'tercih-mimarisi',
+    ciz(){
+      const prefs = S.prefs;
+      const tierOf = no => R.PREFERENCE_TIERS.find(t => no >= t.range[0] && no <= t.range[1]);
+      const filled = prefs.rows.filter(r => r.program).length;
+
+      return K.Card({
+        title:y('hedef.tercih.baslik'), hint:'preferences',
+        sub:y('hedef.tercih.alt'),
+        actions:html`<span class="small dim">${y('hedef.tercih.dolu', { n:filled })}</span>`,
+        body:html`
+          <div class="stack-xs">${map(R.PREFERENCE_TIERS, t => html`
+            <div class="row-top gap-8">
+              <span class="badge badge--muted mw-74">${t.name} ${t.range[0]}–${t.range[1]}</span>
+              <span class="small muted">${t.detail}</span></div>`)}</div>
+
+          <div class="stack-xs mt-12">${map(prefs.rows, r => {
+            const t = tierOf(r.no);
+            const ph = r.no <= 8 ? y('hedef.tercih.agresif') : r.no <= 16 ? y('hedef.tercih.gercekci') : y('hedef.tercih.guvenli');
+            return html`<div class="pref pref--${t.key}">
+              <span class="pref__no">${r.no}</span>
+              ${K.Input({ size:'sm', value:r.program, aria:y('hedef.tercih.program', { no:r.no }),
+                placeholder:y('hedef.tercih.program.yer', { tur:ph }), change:'pref-program', data:{ 'data-i':r.no-1 } })}
+              ${K.Input({ size:'sm', numeric:true, class:'input--rank', value:r.rank, aria:y('hedef.tercih.sira', { no:r.no }),
+                placeholder:y('hedef.tercih.sira.yer'), change:'pref-rank', data:{ 'data-i':r.no-1 } })}
+            </div>`;
+          })}</div>`,
+        foot:html`<p class="tiny dim">${y('hedef.tercih.kontrol', { liste:R.PREFERENCE_CHECKS.join(' · ') })}</p>
+          <p class="tiny dim">${y('hedef.tercih.anlam')}</p>`,
+      });
+    },
+    change:{
+      async 'pref-program'(el){
+        S.prefs.rows[Number(el.dataset.i)].program = el.value;
+        S.prefs.updatedAt = new Date().toISOString();
+        await M.savePrefs();
+      },
+      async 'pref-rank'(el){ S.prefs.rows[Number(el.dataset.i)].rank = el.value; await M.savePrefs(); },
+    },
+  });
+
+  /* ---------- tahmini puan ve sıra ---------- */
 
   /* 039 HIZ TAHMİNİ (vitrin, «Hedefe kalan» satırından açılır — D katmanı):
      TYT netlerinin seyri ve hedef net; koni yavaş/hızlı eğimdir, tahmindir. */
@@ -122476,21 +122873,19 @@ R.Screens.target = (function(){
     const netler = tyt.map(e => ({ tarih:e.date, deger:M.examNet(e) }));
     const son = netler[netler.length - 1].deger;
     const hedef = Math.round((son + gap.netDiff) * 10) / 10;
-    return html`<details class="hiz-ac mt-10"><summary>Hedefe kalan: ${U.fmtNet(gap.netDiff)} net · hız tahmini</summary>
-      ${raw(G.hizKoniSvg(netler, hedef, { birim:'net', etiket:'TYT neti' }))}</details>`;
+    return html`<details class="hiz-ac mt-10"><summary>${y('hedef.hiz.ozet', { net:U.fmtNet(gap.netDiff) })}</summary>
+      ${raw(G.hizKoniSvg(netler, hedef, { birim:'net', etiket:y('hedef.hiz.etiket') }))}</details>`;
   }
 
-  /* ---------- tahmini puan ve sıra ---------- */
-
-  function estimateCard(){
+  P.blok({ id:'hedef.sira', sayfa:'target', yer:'sag', sira:10, ad:y('hedef.sira.baslik'), ciz(){
     const est = C.estimateScore();
 
     if(!est.ok){
       return K.Card({
-        title:'Tahmini sıra', hint:'rank', sub:'Kural motorunun ürettiği bant',
+        title:y('hedef.sira.baslik'), hint:'rank', sub:y('hedef.sira.alt'),
         badge:raw(UI.provenance('estimate')),
         body:K.Empty({ icon:'target', text:est.why,
-          action:K.Button({ label:'Deneme ekle', size:'sm', tone:'primary',
+          action:K.Button({ label:y('hedef.sira.deneme'), size:'sm', tone:'primary',
             act:'go', data:{ 'data-route':'exams' } }) }),
       });
     }
@@ -122501,24 +122896,24 @@ R.Screens.target = (function(){
     const pos = v => U.clamp(100 * (1 - Math.log(Math.max(1, v)) / Math.log(Math.max(2, scaleMax))), 0, 100);
 
     return K.Card({
-      title:'Tahmini sıra', hint:'rank',
-      sub:est.samples+' tam denemenin medyanından · '+(est.kind === 'SAY' ? 'SAY' : 'yalnız TYT'),
+      title:y('hedef.sira.baslik'), hint:'rank',
+      sub:y('hedef.sira.ozet', { n:est.samples, tur:est.kind === 'SAY' ? y('hedef.sira.say') : y('hedef.sira.tyt') }),
       badge:raw(UI.provenance('estimate')),
       body:html`
         <div class="estimate">
           <div class="estimate__rank">${U.fmtNum(est.rankBest)} – ${U.fmtNum(est.rankWorst)}</div>
-          <div class="estimate__band">${U.fmtNet(est.scoreLow)} – ${U.fmtNet(est.scoreHigh)} puan
+          <div class="estimate__band">${y('hedef.sira.puan', { alt:U.fmtNet(est.scoreLow), ust:U.fmtNet(est.scoreHigh) })}
             (±${est.halfWidth})</div>
           ${K.Badge({ label:est.meta.label, tone })}
         </div>
 
-        ${(window.LIFEOS || {}).GRAFIK ? raw(window.LIFEOS.GRAFIK.aralikHtml({ etiket:'Tahmini sıra (tahmin)',
+        ${(window.LIFEOS || {}).GRAFIK ? raw(window.LIFEOS.GRAFIK.aralikHtml({ etiket:y('hedef.sira.grafik'),
             alt:est.rankBest, ust:est.rankWorst, olasi:est.rank, min:1, max:Math.round(scaleMax), ters:true,
-            dayanak:est.samples, dayanakBirim:'tam deneme' })) : html`<div class="estimate__scale">
+            dayanak:est.samples, dayanakBirim:y('hedef.sira.dayanak') })) : html`<div class="estimate__scale">
           ${K.Bar({ value:pos(est.rank), tone:tone === 'ok' ? '' : 'warn' })}</div>`}
         <div class="row between mt-4">
-          <span class="tiny dim">geniş sıra</span>
-          <span class="tiny dim num">hedef ${U.fmtNum(est.targetRank)}</span>
+          <span class="tiny dim">${y('hedef.sira.genis')}</span>
+          <span class="tiny dim num">${y('hedef.sira.hedef', { sira:U.fmtNum(est.targetRank) })}</span>
         </div>
 
         <div class="mt-12">${K.Notice({ tone:tone === 'ok' ? 'ok' : 'info', body:est.meta.note })}</div>
@@ -122526,196 +122921,101 @@ R.Screens.target = (function(){
           tone:'warn', body:est.assumption })}</div>`)}
 
         ${K.Cols(3, [
-          K.Stat({ label:'TYT medyan', value:U.fmtNet(est.tytMedian) }),
-          K.Stat({ label:'AYT medyan', value:est.aytMedian == null ? '—' : U.fmtNet(est.aytMedian) }),
-          K.Stat({ label:'OBP katkısı', value:'+'+U.fmtNet(est.obp), tone:'ok' }),
+          K.Stat({ label:y('hedef.sira.tytm'), value:U.fmtNet(est.tytMedian) }),
+          K.Stat({ label:y('hedef.sira.aytm'), value:est.aytMedian == null ? '—' : U.fmtNet(est.aytMedian) }),
+          K.Stat({ label:y('hedef.sira.obp'), value:'+'+U.fmtNet(est.obp), tone:'ok' }),
         ])}
 
         ${hizKonisi(gap)}
         ${when(gap && !gap.reached, () => html`<p class="small muted mt-10">
-          Hedef bandı tutmak için tahmini <b>${U.fmtNet(gap.netDiff)} net</b> daha gerekiyor
-          (${U.fmtNet(gap.scoreDiff)} puan). Bu sayı bir hedef değil, mesafe göstergesidir.</p>`)}
+          ${raw(y('hedef.sira.mesafe', { net:U.fmtNet(gap.netDiff), puan:U.fmtNet(gap.scoreDiff) }))}</p>`)}
         ${when(gap && gap.reached, () => html`<p class="small muted mt-10">
-          Tahmini puanın hedef sıranın gerektirdiği bandın üstünde. Şimdi yapılacak iş
-          net artırmak değil, bandı düşürmemek.</p>`)}
+          ${y('hedef.sira.ustunde')}</p>`)}
 
-        <p class="tiny dim mt-10">Bu bir ÖSYM hesabı değildir. Puan standart sapmaya göre
-          normalize edilir ve aday dağılımı her yıl değişir; buradaki aralık son yılların
-          sonuçlarından çıkarılmış koçluk bandıdır.</p>`,
+        <p class="tiny dim mt-10">${y('hedef.sira.sinir')}</p>`,
     });
-  }
+  } });
 
   /* ---------- OBP ---------- */
 
-  function obpCard(){
-    const o = C.obp();
-    const p = S.profile;
+  P.blok({ id:'hedef.obp', sayfa:'target', yer:'sag', sira:20, ad:y('hedef.obp.baslik'), kucuk:'obp-katkısı',
+    ciz(){
+      const o = C.obp();
+      const p = S.profile;
+      return K.Card({
+        title:y('hedef.obp.baslik'), hint:'obp', sub:y('hedef.obp.alt'),
+        badge:raw(UI.provenance('estimate')),
+        body:html`
+          ${K.Cols(2, [
+            K.Field({ label:y('hedef.obp.not'),
+              input:K.Input({ id:'tg-diploma', type:'number', numeric:true, min:0, max:100,
+                value:p.diplomaGrade, change:'diploma' }) }),
+            html`<label class="check check--bottom">
+              <input type="checkbox" ${p.previouslyPlaced ? raw('checked') : ''} data-act="toggle-placed"/>
+              <span class="small">${y('hedef.obp.yerlesti')}</span></label>`,
+          ])}
+          ${K.Cols(3, [
+            K.Stat({ label:y('hedef.obp.obp'), value:U.fmtNum(o.value), note:y('hedef.obp.aralik') }),
+            K.Stat({ label:y('hedef.obp.katsayi'), value:o.coef, note:p.previouslyPlaced ? y('hedef.obp.tekrar') : y('hedef.obp.ilk') }),
+            K.Stat({ label:y('hedef.obp.katki'), value:'+'+U.fmtNet(o.contribution), tone:'ok' }),
+          ])}
+          <p class="tiny dim mt-10">${y('hedef.obp.sinir')}</p>`,
+      });
+    },
+    handle:{
+      async 'toggle-placed'(el){
+        S.profile.previouslyPlaced = el.checked;
+        await M.saveProfile();
+        R.App.render();
+      },
+    },
+    change:{
+      async 'diploma'(el){
+        S.profile.diplomaGrade = U.clamp(Number(el.value) || 0, 0, 100);
+        await M.saveProfile();
+        R.App.render();
+      },
+    },
+  });
+
+  /* ---------- basvuru ---------- */
+
+  P.blok({ id:'hedef.ref', sayfa:'target', yer:'sag', sira:30, ad:y('hedef.ref.baslik'), ciz(){
     return K.Card({
-      title:'OBP katkısı', hint:'obp', sub:'Diploma notu × 5, ardından × katsayı',
-      badge:raw(UI.provenance('estimate')),
+      title:y('hedef.ref.baslik'), badge:raw(UI.provenance('ref2026')),
       body:html`
-        ${K.Cols(2, [
-          K.Field({ label:'Diploma notu',
-            input:K.Input({ id:'tg-diploma', type:'number', numeric:true, min:0, max:100,
-              value:p.diplomaGrade, change:'diploma' }) }),
-          html`<label class="check check--bottom">
-            <input type="checkbox" ${p.previouslyPlaced ? raw('checked') : ''} data-act="toggle-placed"/>
-            <span class="small">Daha önce merkezî yerleştirmeyle yerleştim</span></label>`,
-        ])}
-        ${K.Cols(3, [
-          K.Stat({ label:'OBP', value:U.fmtNum(o.value), note:'250–500 aralığı' }),
-          K.Stat({ label:'Katsayı', value:o.coef, note:p.previouslyPlaced ? 'tekrar yerleşme' : 'ilk yerleştirme' }),
-          K.Stat({ label:'Puana katkı', value:'+'+U.fmtNet(o.contribution), tone:'ok' }),
-        ])}
-        <p class="tiny dim mt-10">Bu katkı net hedefini mekanik olarak azaltmaz; standartlaştırma ve aday dağılımı
-          nedeniyle sonuç yıldan yıla değişir. 2027 kılavuzu yayımlandığında katsayı yeniden doğrulanmalıdır.</p>`,
+        ${K.Table({ tight:true, headers:[y('hedef.ref.program'), { label:y('hedef.ref.sira'), num:true }],
+          rows:R.RANK_REFS.map(r => [r.uni,
+            html`<span class="num">${typeof r.rank === 'number' ? U.fmtNum(r.rank) : r.rank}</span>`]) })}
+        <p class="tiny dim mt-8">${y('hedef.ref.not')}</p>`,
     });
-  }
+  } });
 
-  /* ---------- 24 tercih ---------- */
-
-  function prefsCard(){
-    const prefs = S.prefs;
-    const tierOf = no => R.PREFERENCE_TIERS.find(t => no >= t.range[0] && no <= t.range[1]);
-    const filled = prefs.rows.filter(r => r.program).length;
-
+  P.blok({ id:'hedef.yerlesen', sayfa:'target', yer:'sag', sira:40, ad:y('hedef.yerlesen.baslik'), ciz(){
     return K.Card({
-      title:'24 tercih mimarisi', hint:'preferences',
-      sub:'Tercihler puana değil başarı sırasına göre yapılır; liste gerçekten istenen program sırasıdır',
-      actions:html`<span class="small dim">${filled} / 24 dolu</span>`,
-      body:html`
-        <div class="stack-xs">${map(R.PREFERENCE_TIERS, t => html`
-          <div class="row-top gap-8">
-            <span class="badge badge--muted mw-74">${t.name} ${t.range[0]}–${t.range[1]}</span>
-            <span class="small muted">${t.detail}</span></div>`)}</div>
-
-        <div class="stack-xs mt-12">${map(prefs.rows, r => {
-          const t = tierOf(r.no);
-          const ph = r.no <= 8 ? 'agresif' : r.no <= 16 ? 'gerçekçi' : 'güvenli';
-          return html`<div class="pref pref--${t.key}">
-            <span class="pref__no">${r.no}</span>
-            ${K.Input({ size:'sm', value:r.program, aria:r.no+'. tercih programı',
-              placeholder:ph+' — üniversite / program', change:'pref-program', data:{ 'data-i':r.no-1 } })}
-            ${K.Input({ size:'sm', numeric:true, class:'input--rank', value:r.rank, aria:r.no+'. tercih sırası',
-              placeholder:'sıra', change:'pref-rank', data:{ 'data-i':r.no-1 } })}
-          </div>`;
-        })}</div>`,
-      foot:html`<p class="tiny dim">Her satırda kontrol edilir: ${R.PREFERENCE_CHECKS.join(' · ')}.</p>
-        <p class="tiny dim">“Güvenli” program, adayın gitmeyeceği bölüm değildir; yerleşince kayıt
-          yaptırmaya razı olunan programdır.</p>`,
+      title:y('hedef.yerlesen.baslik'), sub:y('hedef.yerlesen.alt'),
+      body:map(R.PLACEMENT_PROFILES, pr => html`
+        <div class="stack-xs mb-12">
+          <span class="mono-label">${pr.uni}</span>
+          ${map(pr.rows, row => html`<div class="row between small">
+            <span class="muted">${row[0]}</span><b class="num">${row[1]}</b></div>`)}
+          ${when(pr.note, () => html`<p class="tiny dim">${pr.note}</p>`)}
+        </div>`),
     });
-  }
+  } });
 
-  /* ---------- ekran ---------- */
+  /* Aciklama paneli her zaman EN SONDA durur: tam genislik oldugu
+     icin araya girerse kendinden sonraki kolonlari alt satira iter. */
+  P.blok({ id:'hedef.aciklama', sayfa:'target', yer:'alt', ad:'Açıklamalar', ciz(){
+    return raw(UI.rail(['rank', 'tiers', 'net-matrix', 'obp', 'preferences', 'certainty']));
+  } });
 
-  /* iPhone (2026-10-02): hedef ekranının işi hedef katmanı; tahmini sıra ve
-     hedefe kalan küçük dönen kartta. Kesinlik açıklama satırı (ⓘ'de) ve
-     medyan tekrarı (tahmini sıra kartında yazıyor) kalktı; ara sıra
-     açılanlar şerit, başvuru tabloları gizli (app.js SADE_GIZLI). */
-  function DonenHedef(){
-    const V = (window.LIFEOS || {}).VITRIN;
-    if(!V || !V.donen) return '';
-    const L = window.LIFEOS || {};
-    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
-    const m = [];
-    const ana = (R.TARGET_TIERS || [])[0];
-    if(ana) m.push({ ust:'Ana hedef', cumle:ana.rank + '.', vurgu:'TYT ' + ana.tyt + ' · AYT ' + ana.ayt + ' net · koçluk hedefi.', sistem:'ays' });
-    const est = C.estimateScore();
-    m.push(est.ok
-      ? { ust:'Tahmini sıra', sayi:sayi({ deger:est.rank, kesinlik:'estimated', formul:'son tam denemelerin medyanı → sıra modeli' }),
-          cumle:'en olası.', vurgu:U.fmtNum(est.rankBest) + '–' + U.fmtNum(est.rankWorst) + ' · ' + est.samples + ' tam deneme.', sistem:'ays' }
-      : { ust:'Tahmini sıra', cumle:'Tahmin için 3 tam deneme gerekir.', vurgu:C.fullExams('TYT').length + ' tam deneme var.',
-          sistem:'ays', dugme:{ label:'Denemeler', act:'go', data:{ 'data-route':'exams' } } });
-    const gap = C.netGapToTarget();
-    if(gap) m.push({ ust:'Hedefe kalan', sayi:sayi({ deger:Math.max(0, Math.round(gap.netDiff * 100) / 100), birim:'net', ondalik:2, kesinlik:'estimated' }),
-      cumle:'kaldı.', vurgu:gap.reached ? 'Hedef bandın üstündesin.' : 'Mesafe göstergesi; hedef değil.', sistem:'ays' });
-    return raw(V.donen({ id:'ays-hedef', ad:'Hedef', maddeler:m }));
-  }
-
-  async function render(){
-    const p = S.profile;
-
-    return String(K.Grid([
-      K.Span(12, DonenHedef()),
-
-      K.Span(6, K.Stack([
-        K.Card({
-          title:'Hedef katmanları', hint:'tiers',
-          sub:(p.program ? p.program + ' · ' : '') + '2026 taban sırası ' + U.fmtNum(R.PROGRAM.refRank),
-          badge:raw(UI.provenance('ref2026')),
-          body:html`${tierTable()}`,
-        }),
-        K.Card({
-          title:'Net matrisi', hint:'net-matrix',
-          sub:'Hedef bant ile son 4 tam denemenin test bazlı medyanı',
-          badge:raw(UI.provenance('coaching')),
-          body:netMatrix(),
-        }),
-        prefsCard(),
-      ])),
-
-      K.Span(4, K.Stack([
-        estimateCard(),
-        obpCard(),
-        K.Card({
-          title:'2026 sıra referansları', badge:raw(UI.provenance('ref2026')),
-          body:html`
-            ${K.Table({ tight:true, headers:['Program', { label:'Taban sıra', num:true }],
-              rows:R.RANK_REFS.map(r => [r.uni,
-                html`<span class="num">${typeof r.rank === 'number' ? U.fmtNum(r.rank) : r.rank}</span>`]) })}
-            <p class="tiny dim mt-8">2027 tercih döneminde YÖK Atlas ve kılavuzdan güncellenmelidir.</p>`,
-        }),
-        K.Card({
-          title:'2024 yerleşen profilleri', sub:'Gerçek yerleşme verisi',
-          body:map(R.PLACEMENT_PROFILES, pr => html`
-            <div class="stack-xs mb-12">
-              <span class="mono-label">${pr.uni}</span>
-              ${map(pr.rows, row => html`<div class="row between small">
-                <span class="muted">${row[0]}</span><b class="num">${row[1]}</b></div>`)}
-              ${when(pr.note, () => html`<p class="tiny dim">${pr.note}</p>`)}
-            </div>`),
-        }),
-      ])),
-
-      /* Aciklama paneli her zaman EN SONDA durur: tam genislik oldugu
-         icin araya girerse kendinden sonraki kolonlari alt satira iter. */
-      K.Span(12, raw(UI.rail(['rank', 'tiers', 'net-matrix', 'obp', 'preferences', 'certainty']))),
-    ]));
-  }
-
-  const handle = {
-    async 'toggle-placed'(el){
-      S.profile.previouslyPlaced = el.checked;
-      await M.saveProfile();
-      R.App.render();
-    },
-  };
-
-  const change = {
-    async 'pref-program'(el){
-      S.prefs.rows[Number(el.dataset.i)].program = el.value;
-      S.prefs.updatedAt = new Date().toISOString();
-      await M.savePrefs();
-    },
-    async 'pref-rank'(el){ S.prefs.rows[Number(el.dataset.i)].rank = el.value; await M.savePrefs(); },
-    async 'diploma'(el){
-      S.profile.diplomaGrade = U.clamp(Number(el.value) || 0, 0, 100);
-      await M.saveProfile();
-      R.App.render();
-    },
-  };
-
-  return {
-    id:'target',
-    /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
-       bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
-       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-    kucukVarsayilan:['net-matrisi', 'tercih-mimarisi', 'obp-katkısı'],
-    title:'Hedef',
-    subtitle(){ return R.PROGRAM.program+' · 2026 sırası '+U.fmtNum(R.PROGRAM.refRank); },
-    actions(){ return ''; },
-    render, handle, change,
-  };
+  /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri bastan
+     kucuk gelir (bloktaki `kucuk`); baslik gorunur, ustune gelince onizlenir,
+     «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+  return P.ekran('target', K, {
+    subtitle(){ return y('hedef.alt', { program:R.PROGRAM.program, sira:U.fmtNum(R.PROGRAM.refRank) }); },
+  });
 })();
 
 /* ==== js/screens/progress.js ==== */
@@ -122725,6 +123025,7 @@ R.Screens.target = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'progress', modul:'ays', cekmece:'analiz', ad:'İlerleme', ikon:'chart', sira:10 });
 
 R.Screens.progress = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -123092,6 +123393,7 @@ R.Screens.progress = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'ays', cekmece:'analiz', ad:'Ayrıntı', ikon:'search', sira:30 });
 
 R.Screens.analytics = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -123858,6 +124160,7 @@ R.Screens.analytics = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'protocols', modul:'ays', cekmece:'analiz', ad:'Telafi', ikon:'shield', sira:40 });
 
 R.Screens.protocols = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -124057,6 +124360,9 @@ R.Screens.protocols = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+/* Gelecek simülatörü (2026-10-16): sınav gününe kadar «bu gidişle»
+ve «ne olursa» (core/gelecek.js). */
+window.LIFEOS.PARCA.sayfa({ id:'gelecek', modul:'ays', cekmece:'analiz', ad:'Gelecek', ikon:'target', sira:20 });
 
 R.Screens.gelecek = (function(){
   const U = R.U, S = R.S;
@@ -124292,6 +124598,7 @@ R.Screens.gelecek = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'rutbe', modul:'ays', cekmece:'ayarlar', ad:'Rütbe', ikon:'layers', sira:30 });
 
 R.Screens.rutbe = (function(){
   const S = R.S, UI = R.UI, K = R.C;
@@ -125278,6 +125585,9 @@ R.Screens.rutbe = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+/* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
+buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
+window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'ays', cekmece:'ayarlar', ad:'Genel', ikon:'guide', sira:10 });
 
 R.Screens.guide = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -126457,6 +126767,7 @@ R.Screens.guide = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'profiles', modul:'ays', cekmece:'ayarlar', ad:'Profil', ikon:'shield', sira:20 });
 
 R.Screens.profiles = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
@@ -126760,6 +127071,7 @@ R.Screens.profiles = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'office', modul:'ays', cekmece:'ofis', ad:'Masalar', ikon:'guide', sira:10 });
 
 R.Screens.office = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -127854,6 +128166,7 @@ R.Screens.office = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'team', modul:'ays', cekmece:'ofis', ad:'Danışma', ikon:'zap', sira:20 });
 
 R.Screens.team = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -128395,6 +128708,7 @@ R.Screens.team = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'ays', cekmece:'ofis', ad:'Toplantı', ikon:'list', sira:30 });
 
 R.Screens.meeting = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -129248,6 +129562,7 @@ R.Screens.meeting = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'onaylar', modul:'ays', cekmece:'onaylar', ad:'Bekleyen', ikon:'check', sira:10 });
 
 R.Screens.onaylar = (function(){
   const U = R.U, UI = R.UI, S = R.S;
@@ -129831,6 +130146,8 @@ R.Screens.onaylar = (function(){
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'notlar', modul:'ays', cekmece:'kutuphane', ad:'Notlar', ikon:'edit', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'kutuphane', modul:'ays', cekmece:'kutuphane', ad:'Kitaplar', ikon:'book', sira:20 });
 
 R.Screens.kutuphane = (function(){
   const U = R.U, UI = R.UI;
@@ -131127,66 +131444,9 @@ R.App = (function(){
      bölüm. Bölümler üst çubukta değil, sayfa başının altındaki bölüm
      çubuğunda durur. Onaylar ve Kütüphanem tek bölümlüdür. */
   const K = window.LIFEOS.KABUK;
-  const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
-  const NAV = [
-    { id:'bugun', label:CEK('bugun'), items:[
-      { id:'today', icon:'today', label:'Genel bakış' },
-    ]},
-    { id:'plan', label:CEK('plan'), items:[
-      { id:'week',   icon:'week',   label:'Hafta' },
-      { id:'plan',   icon:'map',    label:'Program' },
-      { id:'target', icon:'target', label:'Hedefler' },
-    ]},
-    /* Sade çekmece (2026-10-16, «AYS'de çok şey iç içe girmiş»): «Konu
-       çalış» adı Öğren › Konular ile karışıyordu; ikisi de ders ve konu
-       listesi. Bu ekran konunun TESTLE kapanışını izler — adı bu oldu ve
-       sona geçti; Çalışma «Soru çöz» ile açılır. Rota kimliği aynı. */
-    { id:'calisma', label:CEK('calisma'), items:[
-      { id:'solve',    icon:'search', label:'Soru çöz' },
-      { id:'exams',    icon:'exam',   label:'Deneme' },
-      { id:'cards',    icon:'cards',  label:'Tekrar' },
-      { id:'quiz',     icon:'zap',    label:'Sınama' },
-      { id:'subjects', icon:'book',   label:'Konu kapanışı' },
-    ]},
-    /* ÖĞREN (kullanıcı, 2026-10-09: «konu öğrenmek başlığı altında sol
-       tarafa bölüm aç»): konuyu uygulamanın içinde teker teker öğrenmek.
-       Dört bölüm aynı konuya bakar (core/ogren.js); Ders notları
-       Çalışma'dan buraya taşındı — aynı şey iki yerde durmaz. */
-    { id:'ogren', label:CEK('ogren'), items:[
-      { id:'ogren',   icon:'list',  label:'Konular' },
-      { id:'anlatim', icon:'book',  label:'Anlatım' },
-      { id:'sorular', icon:'check', label:'Sorular' },
-      { id:'koc',     icon:'zap',   label:'Koç' },
-      { id:'learn',   icon:'play',  label:'Ders notları' },
-    ]},
-    { id:'analiz', label:CEK('analiz'), items:[
-      { id:'progress',  icon:'chart',  label:'İlerleme' },
-      /* Gelecek simülatörü (2026-10-16): sınav gününe kadar «bu gidişle»
-         ve «ne olursa» (core/gelecek.js). */
-      { id:'gelecek',   icon:'target', label:'Gelecek' },
-      { id:'analytics', icon:'search', label:'Ayrıntı' },
-      { id:'protocols', icon:'shield', label:'Telafi' },
-    ]},
-    { id:'onaylar', label:CEK('onaylar'), items:[
-      { id:'onaylar', icon:'check', label:'Bekleyen' },
-    ]},
-    { id:'ofis', label:CEK('ofis'), items:[
-      { id:'office',  icon:'guide', label:'Masalar' },
-      { id:'team',    icon:'zap',   label:'Danışma' },
-      { id:'meeting', icon:'list',  label:'Toplantı' },
-    ]},
-    { id:'kutuphane', label:CEK('kutuphane'), items:[
-      { id:'notlar', icon:'edit', label:'Notlar' },
-      { id:'kutuphane', icon:'book', label:'Kitaplar' },
-    ]},
-    /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
-       buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
-    { id:'ayarlar', label:CEK('ayarlar'), items:[
-      { id:'guide',    icon:'guide',  label:'Genel' },
-      { id:'profiles', icon:'shield', label:'Profil' },
-      { id:'rutbe',    icon:'layers', label:'Rütbe' },
-    ]},
-  ];
+  /* Menu elle yazilmaz: her ekran dosyasi kendi yerini soyler (brand/ortak/parca.js).
+     Cekmece sirasi kabuktan gelir; yeni sayfa = dosyasinda tek P.sayfa satiri. */
+  const NAV = window.LIFEOS.PARCA.menu('ays', K.CEKMECELER);
 
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
   /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):

@@ -19224,6 +19224,8 @@ html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
      bir betik olarak durursa, durağan perdenin ilk boyamasını da o
      geciktirir — yani markupin durağan olmasinin sebebini ortadan
      kaldirirdi. -->
+<!-- PARCA:perde · uretilmis (brand/parcalar.txt, tools/parca.py); elle duzenleme -->
+<!-- /PARCA:perde -->
 <script>
 (function(){
   var el = document.getElementById('marka-perde');
@@ -19300,6 +19302,8 @@ html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
 <div id="rota-duyuru" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- veri once, cekirdek sonra, ekranlar en son: bagimlilik siralamasi budur -->
+<!-- PARCA:govde · uretilmis (brand/parcalar.txt, tools/parca.py); elle duzenleme -->
+<!-- /PARCA:govde -->
 <script>
 /* ==== js/core/animasyon.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19547,7 +19551,87 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.zemin', 'lifeos.yazi', 'lifeos.minik', 'lifeos.minik.ses', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.muzik.var', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.manzara.tur.gunduz', 'lifeos.manzara.tur.gece', 'lifeos.manzara.surum', 'lifeos.tema.oto', 'lifeos.kilit.odeme', 'lifeos.kontrast', 'lifeos.cam', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.zemin.onizle.sade', 'lifeos.rozet', 'lifeos.kenar.yuzey', 'lifeos.king.ad', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik', 'lifeos.sessiz.bitis', 'lifeos.ice.var', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere', 'lifeos.tema.secim', 'lifeos.zemin.video', 'lifeos.minik.kapali', 'lifeos.profiller', 'lifeos.profil.etkin', 'lifeos.sessiz', 'lifeos.ses.duzey', 'lifeos.king.gorunus', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.algila', 'lifeos.king.mik', 'lifeos.king.derinlik', 'lifeos.king.yan', 'lifeos.king.tarz', 'lifeos.king.odak', 'lifeos.king.bekleyen-kayit', 'lifeos.king.merkez-sira', 'lifeos.king.yapilacak', 'lifeos.king.hatirlat', 'lifeos.king.kartlarim', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
+    /* AYAR KATALOGU (tek tablo). Yeni tercih = buraya tek satir. Harfler:
+     t moduller arasi tasinir · p profile girer · s «Gorunumu sifirla» siler ·
+     o bilgisayarda ortak durur (sistem/ayar.py de bu tablodan okur).
+     `.*` a-z, `.**` a-z ve nokta: yalniz sunucuda ortak olan degisken anahtarlar. */
+  const KATALOG = /*KATALOG*/{
+    "lifeos.hareket":"tpo",
+    "lifeos.hareket.hiz":"tpo",
+    "lifeos.ses":"tpo",
+    "lifeos.zemin":"tpso",
+    "lifeos.yazi":"tpso",
+    "lifeos.minik":"tpo",
+    "lifeos.minik.ses":"t",
+    "lifeos.minik.boy":"tp",
+    "lifeos.minik.takim":"tp",
+    "lifeos.muzik.var":"to",
+    "lifeos.manzara":"tpso",
+    "lifeos.manzara.gece":"tps",
+    "lifeos.manzara.tur.gunduz":"t",
+    "lifeos.manzara.tur.gece":"t",
+    "lifeos.manzara.surum":"t",
+    "lifeos.tema.oto":"tpso",
+    "lifeos.kilit.odeme":"t",
+    "lifeos.kontrast":"tpso",
+    "lifeos.cam":"tpso",
+    "lifeos.perde":"tpso",
+    "lifeos.zemin.bulanik":"tps",
+    "lifeos.zemin.onizle.sade":"tp",
+    "lifeos.rozet":"tpso",
+    "lifeos.kenar.yuzey":"tpso",
+    "lifeos.king.ad":"tpo",
+    "lifeos.boyut":"tpso",
+    "lifeos.vurgu":"tpso",
+    "lifeos.odak":"tpso",
+    "lifeos.altcizgi":"tpso",
+    "lifeos.satir":"tpso",
+    "lifeos.isik":"tpso",
+    "lifeos.sessiz.bitis":"to",
+    "lifeos.ice.var":"to",
+    "lifeos.buzlu.kart":"tps",
+    "lifeos.buzlu.menu":"tps",
+    "lifeos.buzlu.pencere":"tps",
+    "lifeos.tema.secim":"tpo",
+    "lifeos.zemin.video":"tp",
+    "lifeos.minik.kapali":"tp",
+    "lifeos.profiller":"to",
+    "lifeos.profil.etkin":"to",
+    "lifeos.sessiz":"tpo",
+    "lifeos.ses.duzey":"tpo",
+    "lifeos.king.gorunus":"tpo",
+    "lifeos.king":"t",
+    "lifeos.king.cevap":"t",
+    "lifeos.king.ses":"tpo",
+    "lifeos.king.hiz":"tpo",
+    "lifeos.king.algila":"t",
+    "lifeos.king.mik":"t",
+    "lifeos.king.derinlik":"t",
+    "lifeos.king.yan":"t",
+    "lifeos.king.tarz":"tpo",
+    "lifeos.king.odak":"t",
+    "lifeos.king.bekleyen-kayit":"t",
+    "lifeos.king.merkez-sira":"t",
+    "lifeos.king.yapilacak":"t",
+    "lifeos.king.hatirlat":"t",
+    "lifeos.king.kartlarim":"t",
+    "lifeos.king.sorma":"t",
+    "lifeos.kisi.izin":"t",
+    "lifeos.karsilama":"t",
+    "lifeos.yuzey.ays":"p",
+    "lifeos.yuzey.spi":"p",
+    "lifeos.yuzey.esp":"p",
+    "lifeos.acilis.video":"o",
+    "lifeos.buzlu.*":"o",
+    "lifeos.manzara.**":"o",
+    "lifeos.minik.*":"o",
+    "lifeos.muzik.acilis.gun":"o",
+    "lifeos.muzik.yer":"o",
+    "lifeos.muzik.yer.*":"o",
+    "lifeos.zemin.**":"o"
+  }/*SON*/;
+  const katalogListe = h => Object.freeze(Object.keys(KATALOG).filter(k => k.indexOf('*') < 0 && KATALOG[k].indexOf(h) >= 0));
+  const TASINAN = katalogListe('t');
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -19583,7 +19667,7 @@ window.LIFEOS = window.LIFEOS || {};
      (yalnız değişen anahtar; iki modül açıksa birbirini ezmez). Sunucu
      yoksa (telefon, tek dosya, denetim sunucusu) hiçbir şey olmaz.
      Hangi anahtarın sistem ayarı olduğu: sistem/ayar.py ANAHTAR ile aynı. */
-  const ORTAK = /^lifeos\.(yazi|boyut|vurgu|odak|altcizgi|satir|isik|buzlu\.[a-z]+|cam|kontrast|perde|rozet|kenar\.yuzey|zemin|zemin\.[a-z.]+|manzara|manzara\.[a-z.]+|tema\.oto|tema\.secim|hareket|hareket\.hiz|ses|ses\.duzey|sessiz|sessiz\.bitis|minik|minik\.[a-z]+|king\.(ad|gorunus|ses|hiz|tarz)|muzik\.(var|acilis\.gun|yer|yer\.[a-z]+)|acilis\.video|ice\.var|profiller|profil\.etkin)$/;
+  const ORTAK = new RegExp('^(' + Object.keys(KATALOG).filter(k => KATALOG[k].indexOf('o') >= 0).map(k => k.replace(/\./g, '\\.').replace(/\\\.\*\*$/, '\\.[a-z.]+').replace(/\\\.\*$/, '\\.[a-z]+')).join('|') + ')$');
   function ortakAnlik(){
     const o = {};
     try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(ORTAK.test(k)) o[k] = localStorage.getItem(k); } }catch(e){ /* depo kapalı */ }
@@ -19977,7 +20061,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.hareketAz = hareketAz;
   L.ANIMASYON = Object.freeze({
     dinlenSure,
-    ANAHTAR, KIPLER, TASINAN, ORTAK, ILK_ESIT, ortakAl, ortakFark, ortakGonder, ortakYenile, _ortakSifirla:() => { ortakSon = null; },
+    ANAHTAR, KIPLER, KATALOG, katalogListe, TASINAN, ORTAK, ILK_ESIT, ortakAl, ortakFark, ortakGonder, ortakYenile, _ortakSifirla:() => { ortakSon = null; },
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
     HIZ_ANAHTAR, HIZLAR, HIZ_AD, HIZ_EN, HIZ_GRUP, oranYaz, katsayi, hizlar, hizAyarla, hizOrani, hizAlani, hizUygula, hizSeciciHtml,
@@ -20884,12 +20968,7 @@ window.LIFEOS = window.LIFEOS || {};
   function yenileKaydet(){ if(L.ANIMASYON && L.ANIMASYON.ortakYenile) L.ANIMASYON.ortakYenile(); else try{ location.reload(); }catch(e){ /* yok */ } }
   const PROFIL_ANAHTAR = 'lifeos.profiller', ETKIN_ANAHTAR = 'lifeos.profil.etkin', GORDU_ANAHTAR = 'lifeos.profil.gordu', TEMA_BEKLE = 'lifeos.profil.tema';
   const PROFIL_EN = 8;
-  const PROFIL_KAPSAR = Object.freeze(['lifeos.tema.secim', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere', 'lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik', 'lifeos.rozet', 'lifeos.kenar.yuzey',
-    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.zemin.video', 'lifeos.zemin.onizle.sade',
-    'lifeos.yuzey.ays', 'lifeos.yuzey.spi', 'lifeos.yuzey.esp',
-    'lifeos.hareket', 'lifeos.hareket.hiz', 'lifeos.ses', 'lifeos.ses.duzey', 'lifeos.sessiz',
-    'lifeos.minik', 'lifeos.minik.boy', 'lifeos.minik.takim', 'lifeos.minik.kapali',
-    'lifeos.king.ad', 'lifeos.king.gorunus', 'lifeos.king.ses', 'lifeos.king.hiz', 'lifeos.king.tarz']);
+  const PROFIL_KAPSAR = L.ANIMASYON.katalogListe('p');
   const depoAl = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
   const depoKoy = (k, v) => { try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){ /* depo kapalı */ } };
   function profiller(){
@@ -21015,9 +21094,7 @@ window.LIFEOS = window.LIFEOS || {};
   function profilYenile(){ if(typeof document !== 'undefined') document.querySelectorAll('[data-profil-kok]').forEach(el => { el.outerHTML = profilHtml(); }); }
 
   /* «Görünümü varsayılana döndür»: yalnız görünüş tercihleri; veri değil. İki adım. */
-  const SIFIRLANAN = Object.freeze(['lifeos.yazi', 'lifeos.cam', 'lifeos.kontrast', 'lifeos.perde', 'lifeos.zemin.bulanik',
-    'lifeos.zemin', 'lifeos.manzara', 'lifeos.manzara.gece', 'lifeos.tema.oto', 'lifeos.rozet', 'lifeos.boyut', 'lifeos.vurgu', 'lifeos.kenar.yuzey', 'lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere',
-    'lifeos.odak', 'lifeos.altcizgi', 'lifeos.satir', 'lifeos.isik']);
+  const SIFIRLANAN = L.ANIMASYON.katalogListe('s');
 
   /* Arka plan önizlemesi zemin.js'te: seçim ve yüklemede kendini yeniler. */
   const onizleHtml = yuva => L.ZEMIN && L.ZEMIN.onizleHtml ? L.ZEMIN.onizleHtml(yuva) : '';
@@ -22776,7 +22853,156 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'a10fcc29', at:'2026-11-03 20:41', dirty:true };
+SP.BUILD = { id:'ae604f0a', at:'2026-11-04 10:47', dirty:true };
+
+/* ==== js/core/parca.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/parca.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* PARÇA — sistem Lego gibi kurulur: her sayfa, blok, yazı ve bilgi tek parçadır.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/parca.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   ==================================================================
+
+   Depo sahibi (2026-11-04): «Her sayfanın, her özelliğin, her yazının bir Lego
+   gibi parça olması lazım. Sistemi Lego gibi inşa edeceğiz.»
+
+   Dört parça:
+     sayfa  menüde yeri olan ekran: çekmece, ad, simge, sıra, ızgara. Menü
+            elle yazılmaz, sayfalardan üretilir (`menu`).
+     blok   sayfanın bir bölümü. Hangi sayfanın hangi yerine takıldığını
+            kendi söyler; sayfa dosyasına dokunmadan başka bir dosyadan da
+            eklenir. Olay işleyicisi bloğun içinde durur.
+     yazı   ekranda görünen cümle kimlikle durur (`yazi`); çizim kodu metin taşımaz.
+     bilgi  bir sayı ya da değer: nasıl okunduğu ve kesinlik etiketi (§1.2).
+            Etiketsiz bilgi kaydedilmez. King, Gün ve başka parça buradan okur.
+
+   Sözler:
+     1. TAK, ÇIKAR. Blok silinince sayfa yine çizilir, menü ve olaylar kendini düzeltir.
+     2. PARÇA DÜŞERSE SAYFA DÜŞMEZ. Hata veren blok kendi yerinde tek satır söyler.
+     3. YANLIŞ KAYIT SESSİZ GEÇMEZ. Aynı kimlik, eksik alan, olmayan yazı hata atar.
+     4. GÖRÜNÜM DEĞİŞMEZ. Motor sayfanın kendi ızgara bileşenini (K) kullanır. */
+window.LIFEOS = window.LIFEOS || {};
+
+(function(L){
+  const SAYFA = new Map(), BLOK = new Map(), YAZI = new Map(), BILGI = new Map(), hatalar = [];
+
+  function gerek(o, alanlar, tur){
+    alanlar.forEach(a => { if(o == null || o[a] == null || o[a] === '') throw new Error('PARCA: ' + tur + ' için «' + a + '» gerekir'); });
+  }
+  function ekle(harita, id, deger, tur){
+    if(harita.has(id)) throw new Error('PARCA: ' + tur + ' iki kez kaydedildi: ' + id);
+    harita.set(id, deger);
+  }
+
+  function sayfa(o){
+    gerek(o, ['id', 'modul'], 'sayfa');
+    if(o.cekmece != null) gerek(o, ['ad', 'ikon'], 'menü sayfası');
+    ekle(SAYFA, o.id, Object.assign({ sira:100, izgara:[] }, o), 'sayfa');
+    return o.id;
+  }
+
+  function blok(o){
+    gerek(o, ['id', 'sayfa', 'yer', 'ad', 'ciz'], 'blok');
+    ekle(BLOK, o.id, Object.assign({ sira:100 }, o), 'blok');
+    return o.id;
+  }
+
+  function yazilar(tablo){ Object.keys(tablo).forEach(k => ekle(YAZI, k, tablo[k], 'yazı')); }
+
+  /* yazi('hedef.mesafe', { net:'3,5' }): {ad} yerine değer koyar. */
+  function yazi(id, degerler){
+    if(!YAZI.has(id)) throw new Error('PARCA: yazı yok: ' + id);
+    const m = YAZI.get(id);
+    return degerler ? m.replace(/\{(\w+)\}/g, (t, a) => (a in degerler ? String(degerler[a]) : t)) : m;
+  }
+
+  const ETIKETLER = ['ölçüldü', 'tahmin', 'hesaplandı', 'veri yok'];
+  function bilgi(o){
+    gerek(o, ['id', 'etiket', 'oku'], 'bilgi');
+    if(ETIKETLER.indexOf(o.etiket) < 0) throw new Error('PARCA: bilinmeyen etiket: ' + o.etiket);
+    ekle(BILGI, o.id, o, 'bilgi');
+    return o.id;
+  }
+  /* Eksik veri sıfır değildir (§1.2): okunamayan bilgi «veri yok» döner. */
+  function oku(id){
+    const b = BILGI.get(id);
+    if(!b) throw new Error('PARCA: bilgi yok: ' + id);
+    let d = null;
+    try{ d = b.oku(); }catch(e){ d = null; }
+    return d == null ? { deger:null, etiket:'veri yok' } : { deger:d, etiket:b.etiket };
+  }
+
+  function bloklar(sayfaId, yer){
+    return Array.from(BLOK.values())
+      .filter(b => b.sayfa === sayfaId && (yer == null || b.yer === yer))
+      .sort((a, b) => a.sira - b.sira);
+  }
+
+  function ciz1(b, K, baglam){
+    try{ return b.ciz(baglam); }
+    catch(e){
+      hatalar.push({ id:b.id, hata:String(e && e.message || e) });
+      if(typeof console !== 'undefined') console.error('PARCA: ' + b.id, e);
+      return K.Notice({ tone:'warn', body:'«' + b.ad + '» bölümü şu an açılamadı.' });
+    }
+  }
+
+  /* Sayfanın ızgarası: { alan:6, yer:'sol' } alt alta, { tek:true } yığınsız. */
+  function ciz(sayfaId, K, baglam){
+    const s = SAYFA.get(sayfaId);
+    if(!s) throw new Error('PARCA: sayfa yok: ' + sayfaId);
+    return K.Grid(s.izgara.map(z => {
+      const l = bloklar(sayfaId, z.yer).map(b => ciz1(b, K, baglam));
+      return K.Span(z.alan, z.tek ? (l.length === 1 ? l[0] : l.join('')) : K.Stack(l));
+    }));
+  }
+
+  function olaylar(sayfaId, tur){
+    const out = {};
+    bloklar(sayfaId).forEach(b => Object.keys(b[tur] || {}).forEach(k => {
+      if(k in out) throw new Error('PARCA: «' + k + '» olayı iki blokta: ' + sayfaId);
+      out[k] = b[tur][k];
+    }));
+    return out;
+  }
+
+  /* Sayfa kaydından ekran nesnesi: kabuğun beklediği biçim aynıdır. */
+  function ekran(sayfaId, K, ek){
+    const s = SAYFA.get(sayfaId);
+    if(!s) throw new Error('PARCA: sayfa yok: ' + sayfaId);
+    const sirali = s.izgara.reduce((l, z) => l.concat(bloklar(sayfaId, z.yer)), []);
+    return Object.assign({
+      id:sayfaId,
+      title:s.baslik || s.ad,
+      kucukVarsayilan:sirali.filter(b => b.kucuk).map(b => b.kucuk),
+      actions(){ return ''; },
+      async render(){ return String(ciz(sayfaId, K)); },
+      handle:olaylar(sayfaId, 'handle'),
+      change:olaylar(sayfaId, 'change'),
+    }, ek || {});
+  }
+
+  /* Modülün menüsü: çekmece sırası kabuktan, içi sayfaların kendi sırasından. */
+  function menu(modul, cekmeceler){
+    return cekmeceler.map(c => ({
+      id:c.id,
+      label:c.ad,
+      items:Array.from(SAYFA.values())
+        .filter(s => s.modul === modul && s.cekmece === c.id)
+        .sort((a, b) => a.sira - b.sira)
+        .map(s => ({ id:s.id, icon:s.ikon, label:s.ad })),
+    })).filter(c => c.items.length);
+  }
+
+  L.PARCA = Object.freeze({ sayfa, blok, yazilar, yazi, bilgi, oku, bloklar, ciz, ekran, olaylar, menu, hatalar,
+    /* yalnız testler: kaydı geri alır */
+    _sil(id){ [SAYFA, BLOK, YAZI, BILGI].forEach(h => h.delete(id)); },
+    liste:Object.freeze({ sayfalar:() => Array.from(SAYFA.keys()), bloklar:() => Array.from(BLOK.keys()),
+      yazilar:() => Array.from(YAZI.keys()), bilgiler:() => Array.from(BILGI.keys()) }) });
+})(window.LIFEOS);
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -58261,6 +58487,9 @@ LIFEOS.Gorsel = (function(){
 (function(){
   const L = window.LIFEOS = window.LIFEOS || {};
   const EN_COK = 400;
+  /* Tarayicinin zamanlama tamponu 250 dosyada doluyordu: 251. dosya (app.js) kasaya
+     girmedi, uygulama cevrimdisi acilmadi. pwa.js 250'den once yuklenir. */
+  try{ performance.setResourceTimingBufferSize(EN_COK); }catch(e){ /* eski tarayici */ }
 
   function uygun(loc, nav){
     return !!loc && /^https?:$/.test(loc.protocol || '') && !!nav && ('serviceWorker' in nav);
