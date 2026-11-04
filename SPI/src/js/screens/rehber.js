@@ -6,6 +6,10 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+/* Anlatımlar (2026-10-18, kullanıcı: «SPİ'ye anlatım yükle»): Öğren çekmecesi
+değil — öğrenme işlevsel alanlara dağıtılmıştır (ogren.test «dağıtık») ve
+Kolay LifeOS çekmeceyi azaltır. Okuyucu brand/ortak/rehber.js. */
+window.LIFEOS.PARCA.sayfa({ id:'rehber', modul:'spi', cekmece:'kutuphane', ad:'Anlatımlar', sira:20 });
 
 SP.Screens.rehber = (function(){
   const RB = () => (window.LIFEOS || {}).REHBER;

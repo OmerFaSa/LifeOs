@@ -9,6 +9,9 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+/* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
+buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
+window.LIFEOS.PARCA.sayfa({ id:'family', modul:'spi', cekmece:'ayarlar', ad:'Profil', sira:10 });
 
 SP.Screens.family = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

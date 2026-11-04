@@ -9,6 +9,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'kitchen', modul:'spi', cekmece:'calisma', ad:'Mutfak', sira:30 });
 
 SP.Screens.kitchen = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

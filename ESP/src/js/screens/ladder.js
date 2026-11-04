@@ -18,6 +18,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'ladder', modul:'esp', cekmece:'plan', ad:'Merdiven', ikon:'chart', sira:10 });
 
 ESP.Screens.ladder = (function(){
   const U = ESP.U, S = ESP.S;

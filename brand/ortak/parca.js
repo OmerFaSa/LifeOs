@@ -38,7 +38,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   function sayfa(o){
     gerek(o, ['id', 'modul'], 'sayfa');
-    if(o.cekmece != null) gerek(o, ['ad', 'ikon'], 'menü sayfası');
+    if(o.cekmece != null) gerek(o, ['ad'], 'menü sayfası');
     ekle(SAYFA, o.id, Object.assign({ sira:100, izgara:[] }, o), 'sayfa');
     return o.id;
   }
@@ -124,16 +124,18 @@ window.LIFEOS = window.LIFEOS || {};
     }, ek || {});
   }
 
-  /* Modülün menüsü: çekmece sırası kabuktan, içi sayfaların kendi sırasından. */
-  function menu(modul, cekmeceler){
-    return cekmeceler.map(c => ({
-      id:c.id,
-      label:c.ad,
-      items:Array.from(SAYFA.values())
+  /* Modülün menüsü: çekmece sırası verilir, içi sayfaların kendi sırasından.
+     bicim: modülün beklediği alan adları (AYS items/id, SPİ ve ESP views/route). */
+  function menu(modul, cekmeceler, bicim){
+    const o = Object.assign({ alan:'items', kimlik:'id' }, bicim);
+    return cekmeceler.map(c => {
+      const satir = Array.from(SAYFA.values())
         .filter(s => s.modul === modul && s.cekmece === c.id)
         .sort((a, b) => a.sira - b.sira)
-        .map(s => ({ id:s.id, icon:s.ikon, label:s.ad })),
-    })).filter(c => c.items.length);
+        .map(s => Object.assign({ [o.kimlik]:s.id, label:s.ad }, s.ikon ? { icon:s.ikon } : {}, s.ek || {}));
+      const { ad, ...ek } = c;
+      return Object.assign(ek, { id:c.id, label:c.label || ad, [o.alan]:satir });
+    }).filter(c => c[o.alan].length);
   }
 
   L.PARCA = Object.freeze({ sayfa, blok, yazilar, yazi, bilgi, oku, bloklar, ciz, ekran, olaylar, menu, hatalar,

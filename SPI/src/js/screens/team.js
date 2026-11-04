@@ -8,6 +8,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'team', modul:'spi', cekmece:'ofis', ad:'Danışma', sira:20 });
 
 SP.Screens.team = (function(){
   const U = SP.U, S = SP.S, UI = SP.UI;

@@ -8,6 +8,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'meals', modul:'spi', cekmece:'calisma', ad:'Öğün', sira:20 });
 
 SP.Screens.meals = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

@@ -56,6 +56,9 @@
       expect(P.menu('_tm', [{ id:'a', ad:'A' }, { id:'b', ad:'B' }])).toEqual([
         { id:'a', label:'A', items:[{ id:'_t.m1', icon:'y', label:'Bir' }, { id:'_t.m2', icon:'x', label:'İki' }] },
       ]);
+      expect(P.menu('_tb', [{ id:'a', label:'A', note:'n' }], { alan:'views', kimlik:'route' })).toEqual([
+        { id:'a', label:'A', note:'n', views:[{ route:'_t.m3', label:'Üç', icon:'z' }] },
+      ]);
       temiz(['_t.m1', '_t.m2', '_t.m3']);
     });
     it('yanlış kayıt sessiz geçmez', () => {

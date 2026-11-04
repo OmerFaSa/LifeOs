@@ -8,6 +8,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'office', modul:'spi', cekmece:'ofis', ad:'Masalar', sira:10 });
 
 SP.Screens.office = (function(){
   const U = SP.U, S = SP.S, UI = SP.UI;

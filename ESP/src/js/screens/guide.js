@@ -6,6 +6,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'esp', cekmece:'ayarlar', ad:'Genel', ikon:'guide', sira:20 });
 
 ESP.Screens.guide = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

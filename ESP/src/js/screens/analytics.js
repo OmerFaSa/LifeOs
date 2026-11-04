@@ -11,6 +11,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'esp', cekmece:'analiz', ad:'Analiz', ikon:'chart', sira:10 });
 
 ESP.Screens.analytics = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

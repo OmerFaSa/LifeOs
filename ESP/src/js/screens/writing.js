@@ -12,6 +12,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'writing', modul:'esp', cekmece:'calisma', ad:'Yazı', ikon:'quill', ek:{ disc:'writing' }, sira:60 });
 
 ESP.Screens.writing = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

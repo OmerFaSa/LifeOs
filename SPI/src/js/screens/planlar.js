@@ -15,6 +15,8 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+/* Planlar (2026-10-17): beslenme, hareket, uyku, su ve alışkanlık, kendi planın. */
+window.LIFEOS.PARCA.sayfa({ id:'planlar', modul:'spi', cekmece:'plan', ad:'Planlar', sira:10 });
 
 SP.Screens.planlar = (function(){
   const S = SP.S, UI = SP.UI;

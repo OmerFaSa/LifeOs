@@ -6,6 +6,8 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'notlar', modul:'esp', cekmece:'kutuphane', ad:'Notlar', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'kutuphane', modul:'esp', cekmece:'kutuphane', ad:'Ürünler', sira:30 });
 
 ESP.Screens.kutuphane = (function(){
   const { html, when, map } = ESP.h;

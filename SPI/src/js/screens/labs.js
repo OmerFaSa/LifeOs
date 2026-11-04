@@ -17,6 +17,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'labs', modul:'spi', cekmece:'calisma', ad:'Testler', sira:10 });
 
 SP.Screens.labs = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

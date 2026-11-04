@@ -11,6 +11,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'lang', modul:'esp', cekmece:'calisma', ad:'Dil', ikon:'cards', ek:{ disc:'lang' }, sira:10 });
 
 ESP.Screens.lang = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

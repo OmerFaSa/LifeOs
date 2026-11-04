@@ -12,6 +12,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'studio', modul:'esp', cekmece:'calisma', ad:'Ses', ikon:'wave', ek:{ disc:['music', 'diction'] }, sira:40 });
 
 ESP.Screens.studio = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

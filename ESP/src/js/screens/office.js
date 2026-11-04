@@ -13,6 +13,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'office', modul:'esp', cekmece:'ofis', ad:'Masalar', ikon:'users', sira:10 });
 
 ESP.Screens.office = (function(){
   const U = ESP.U, S = ESP.S;

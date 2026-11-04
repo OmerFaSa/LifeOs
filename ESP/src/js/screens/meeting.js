@@ -10,6 +10,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'esp', cekmece:'ofis', ad:'İnceleme', ikon:'list', sira:30 });
 
 ESP.Screens.meeting = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

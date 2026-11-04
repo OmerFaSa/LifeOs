@@ -12,6 +12,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'history', modul:'esp', cekmece:'calisma', ad:'Tarih', ikon:'book', ek:{ disc:'history' }, sira:30 });
 
 ESP.Screens.history = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

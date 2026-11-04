@@ -10,6 +10,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'basket', modul:'spi', cekmece:'calisma', ad:'Bütçe', sira:50 });
 
 SP.Screens.basket = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

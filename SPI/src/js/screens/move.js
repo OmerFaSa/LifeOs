@@ -20,6 +20,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'move', modul:'spi', cekmece:'calisma', ad:'Hareket', sira:40 });
 
 SP.Screens.move = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

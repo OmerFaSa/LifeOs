@@ -7,6 +7,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'rehber', modul:'esp', cekmece:'kutuphane', ad:'Anlatımlar', sira:20 });
 
 ESP.Screens.rehber = (function(){
   const RB = () => (window.LIFEOS || {}).REHBER;

@@ -24,50 +24,8 @@ SP.App = (function(){
      Profil. Yeni: Plan › Hedefler (Bugün'ün Özet sekmesindeydi), Onaylar
      (Bugün'ün başındaki teklifler), Kütüphanem (BAM'ın ürettikleri). */
   const K = window.LIFEOS.KABUK;
-  const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
-  const SECTIONS = [
-    { id:'bugun', label:CEK('bugun'), views:[
-      { route:'today', label:'Genel bakış' },
-    ]},
-    { id:'plan', label:CEK('plan'), views:[
-      /* Planlar (2026-10-17): beslenme, hareket, uyku, su ve alışkanlık, kendi planın. */
-      { route:'planlar', label:'Planlar' },
-      { route:'hedefler', label:'Hedefler' },
-    ]},
-    { id:'calisma', label:CEK('calisma'), views:[
-      { route:'labs',    label:'Testler' },
-      { route:'meals',   label:'Öğün' },
-      { route:'kitchen', label:'Mutfak' },
-      { route:'move',    label:'Hareket' },
-      { route:'basket',  label:'Bütçe' },
-    ]},
-    { id:'analiz', label:CEK('analiz'), views:[
-      { route:'analytics', label:'Analiz' },
-    ]},
-    { id:'onaylar', label:CEK('onaylar'), views:[
-      { route:'onaylar', label:'Bekleyen' },
-    ]},
-    { id:'ofis', label:CEK('ofis'), views:[
-      { route:'office',  label:'Masalar' },
-      { route:'team',    label:'Danışma' },
-      { route:'meeting', label:'İnceleme' },
-    ]},
-    { id:'kutuphane', label:CEK('kutuphane'), views:[
-      { route:'notlar', label:'Notlar' },
-      /* Anlatımlar (2026-10-18, kullanıcı: «SPİ'ye anlatım yükle»): Öğren çekmecesi
-         değil — öğrenme işlevsel alanlara dağıtılmıştır (ogren.test «dağıtık») ve
-         Kolay LifeOS çekmeceyi azaltır. Okuyucu brand/ortak/rehber.js. */
-      { route:'rehber', label:'Anlatımlar' },
-      { route:'kutuphane', label:'Bilgi ve ürünler' },
-    ]},
-    /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
-       buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
-    { id:'ayarlar', label:CEK('ayarlar'), views:[
-      { route:'family', label:'Profil' },
-      { route:'guide',  label:'Genel' },
-      { route:'rutbe',  label:'Rütbe' },
-    ]},
-  ];
+  /* Menu ekran dosyalarindaki P.sayfa satirlarindan uretilir (brand/ortak/parca.js). */
+  const SECTIONS = window.LIFEOS.PARCA.menu('spi', K.CEKMECELER, { alan:'views', kimlik:'route' });
 
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
   /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):

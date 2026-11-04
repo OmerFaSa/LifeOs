@@ -35,6 +35,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'rutbe', modul:'esp', cekmece:'ayarlar', ad:'Rütbe', ikon:'layers', sira:30 });
 
 ESP.Screens.rutbe = (function(){
   const S = ESP.S, UI = ESP.UI, K = ESP.C;

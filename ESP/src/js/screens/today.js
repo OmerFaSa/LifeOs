@@ -10,6 +10,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'today', modul:'esp', cekmece:'bugun', ad:'Genel bakış', ikon:'pulse', sira:10 });
 
 ESP.Screens.today = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

@@ -6,6 +6,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'spi', cekmece:'ayarlar', ad:'Genel', sira:20 });
 
 SP.Screens.guide = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

@@ -35,6 +35,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'rutbe', modul:'spi', cekmece:'ayarlar', ad:'Rütbe', sira:30 });
 
 SP.Screens.rutbe = (function(){
   const S = SP.S, UI = SP.UI, K = SP.C;

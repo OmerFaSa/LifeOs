@@ -11,6 +11,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'library', modul:'esp', cekmece:'calisma', ad:'Okuma', ikon:'book', ek:{ disc:'reading' }, sira:50 });
 
 ESP.Screens.library = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

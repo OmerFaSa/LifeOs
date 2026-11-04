@@ -14,6 +14,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'onaylar', modul:'esp', cekmece:'onaylar', ad:'Bekleyen', sira:10 });
 
 ESP.Screens.onaylar = (function(){
   const S = ESP.S;

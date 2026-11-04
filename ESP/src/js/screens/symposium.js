@@ -13,6 +13,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'symposium', modul:'esp', cekmece:'calisma', ad:'Felsefe', ikon:'socratic', ek:{ disc:'philo' }, sira:20 });
 
 ESP.Screens.symposium = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

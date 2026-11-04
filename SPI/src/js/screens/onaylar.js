@@ -15,6 +15,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'onaylar', modul:'spi', cekmece:'onaylar', ad:'Bekleyen', sira:10 });
 
 SP.Screens.onaylar = (function(){
   const S = SP.S, UI = SP.UI;

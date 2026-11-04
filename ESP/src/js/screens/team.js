@@ -9,6 +9,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'team', modul:'esp', cekmece:'ofis', ad:'Danışma', ikon:'zap', sira:20 });
 
 ESP.Screens.team = (function(){
   /* Mesaj saati. m.at ISO tarih metnidir; fmtClock SANIYE bekler ve

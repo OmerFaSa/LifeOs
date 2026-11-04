@@ -9,6 +9,7 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'profile', modul:'esp', cekmece:'ayarlar', ad:'Profil', ikon:'sliders', sira:10 });
 
 ESP.Screens.profile = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;

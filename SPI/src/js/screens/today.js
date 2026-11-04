@@ -15,6 +15,8 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'today', modul:'spi', cekmece:'bugun', ad:'Genel bakış', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'hedefler', modul:'spi', cekmece:'plan', ad:'Hedefler', sira:20 });
 
 SP.Screens.today = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;

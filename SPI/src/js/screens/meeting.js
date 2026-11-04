@@ -11,6 +11,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'spi', cekmece:'ofis', ad:'İnceleme', sira:30 });
 
 SP.Screens.meeting = (function(){
   const U = SP.U, S = SP.S, UI = SP.UI;

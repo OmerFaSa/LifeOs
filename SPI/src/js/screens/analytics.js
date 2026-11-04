@@ -6,6 +6,7 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'spi', cekmece:'analiz', ad:'Analiz', sira:10 });
 
 SP.Screens.analytics = (function(){
   const U = SP.U, S = SP.S, UI = SP.UI;

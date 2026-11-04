@@ -14,6 +14,8 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.sayfa({ id:'notlar', modul:'spi', cekmece:'kutuphane', ad:'Notlar', sira:10 });
+window.LIFEOS.PARCA.sayfa({ id:'kutuphane', modul:'spi', cekmece:'kutuphane', ad:'Bilgi ve ürünler', sira:30 });
 
 SP.Screens.kutuphane = (function(){
   const U = SP.U, S = SP.S, UI = SP.UI;

@@ -15,8 +15,7 @@
 
 window.ESP = window.ESP || {};
 
-ESP.SECTIONS_ALL = [
-    /* SEKİZ ÇEKMECE (belgeler/ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
+/* SEKİZ ÇEKMECE (belgeler/ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
        Üç modülde aynı ad ve sıra; adlar tek kaynaktan gelir
        (`LIFEOS.KABUK.CEKMECELER`, core/nav.js çizim anında okur). Yedi
        eski bölümden nereye: Günlük › Bugün → Bugün; Günlük › Merdiven →
@@ -25,44 +24,16 @@ ESP.SECTIONS_ALL = [
        Ayarlar › Genel. Onaylar ve Kütüphanem ekranları gelene kadar boş
        çekmece çizilmez. `disc` artık BÖLÜMDEDİR: disiplin kapanınca yalnız
        onun bölümü düşer, Çalışma kalır. */
-    { id:'bugun', icon:'pulse', label:'Bugün', note:'Günün pratiğini gir, karşılığını gör',
-      views:[{ route:'today', label:'Genel bakış', icon:'pulse' }] },
-
-    { id:'plan', icon:'chart', label:'Plan', note:'Merdiven: her disiplinde bir sonraki basamak',
-      views:[{ route:'ladder', label:'Merdiven', icon:'chart' }] },
-
-    { id:'calisma', icon:'cards', label:'Çalışma', note:'Altı disiplinin tezgâhı',
-      views:[
-        { route:'lang',      label:'Dil',     icon:'cards',    disc:'lang' },
-        { route:'symposium', label:'Felsefe', icon:'socratic', disc:'philo' },
-        { route:'history',   label:'Tarih',   icon:'book',     disc:'history' },
-        { route:'studio',    label:'Ses',     icon:'wave',     disc:['music', 'diction'] },
-        { route:'library',   label:'Okuma',   icon:'book',     disc:'reading' },
-        { route:'writing',   label:'Yazı',    icon:'quill',    disc:'writing' },
-      ] },
-
-    { id:'analiz', icon:'chart', label:'Analiz', note:'Kararın dayanağı',
-      views:[{ route:'analytics', label:'Analiz', icon:'chart' }] },
-
-    { id:'onaylar', icon:'check', label:'Onaylar', note:'Bekleyen öneriler',
-      views:[{ route:'onaylar', label:'Bekleyen' }] },
-
-    { id:'ofis', icon:'users', label:'Ofis', note:'Patron, yedi uzman ve bir koç',
-      views:[
-        { route:'office',  label:'Masalar',  icon:'users' },
-        { route:'team',    label:'Danışma',  icon:'zap' },
-        { route:'meeting', label:'İnceleme', icon:'list' },
-      ] },
-
-    { id:'kutuphane', icon:'book', label:'Kütüphanem', note:'BAM\'ın ürettikleri',
-      views:[{ route:'notlar', label:'Notlar' }, { route:'rehber', label:'Anlatımlar' }, { route:'kutuphane', label:'Ürünler' }] },
-
-    /* Rütbe burada bir bölümdür (karar §8-2); `disc` taşımaz, kapatılan
-       bir disiplinle birlikte kaybolmaz. */
-    { id:'ayarlar', icon:'sliders', label:'Ayarlar', note:'Profil, görünüm, veri ve rehber',
-      views:[
-        { route:'profile', label:'Profil', icon:'sliders' },
-        { route:'guide',   label:'Genel',  icon:'guide' },
-        { route:'rutbe',   label:'Rütbe',  icon:'layers' },
-      ] },
+  /* Cekmece sirasi burada; icerik ekran dosyalarindaki P.sayfa satirlarindan gelir
+     (brand/ortak/parca.js). Ekranlar bu dosyadan sonra yuklenir: liste okununca kurulur. */
+  const CEKMECE = [
+    { id:'bugun', icon:'pulse', label:'Bugün', note:'Günün pratiğini gir, karşılığını gör' },
+    { id:'plan', icon:'chart', label:'Plan', note:'Merdiven: her disiplinde bir sonraki basamak' },
+    { id:'calisma', icon:'cards', label:'Çalışma', note:'Altı disiplinin tezgâhı' },
+    { id:'analiz', icon:'chart', label:'Analiz', note:'Kararın dayanağı' },
+    { id:'onaylar', icon:'check', label:'Onaylar', note:'Bekleyen öneriler' },
+    { id:'ofis', icon:'users', label:'Ofis', note:'Patron, yedi uzman ve bir koç' },
+    { id:'kutuphane', icon:'book', label:'Kütüphanem', note:"BAM'ın ürettikleri" },
+    { id:'ayarlar', icon:'sliders', label:'Ayarlar', note:'Profil, görünüm, veri ve rehber' },
   ];
+  Object.defineProperty(ESP, 'SECTIONS_ALL', { configurable:true, get(){ return window.LIFEOS.PARCA.menu('esp', CEKMECE, { alan:'views', kimlik:'route' }); } });
