@@ -23,7 +23,7 @@ ORTAK = {
     "layout.css": "text/css; charset=utf-8", "temel.css": "text/css; charset=utf-8",
     "kabuk.css": "text/css; charset=utf-8", "kabuk.js": "text/javascript; charset=utf-8",
     "cam.css": "text/css; charset=utf-8", "hareket.css": "text/css; charset=utf-8",
-    "gunveri.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8",
+    "piksel.css": "text/css; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8", "gunveri.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8",
 }
 
 
@@ -40,6 +40,7 @@ GUN_SAYFASI = r"""<!doctype html>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Gün — LifeOS</title>
+<script>(function(){var z=null;try{z=localStorage.getItem('lifeos.zemin');}catch(e){}if(z!=='sade'&&z!=='yumusak')document.documentElement.setAttribute('data-zemin','piksel');})();</script>
 <link rel="stylesheet" href="/gun/ortak/jeton.css"/>
 <link rel="stylesheet" href="/gun/ortak/base.css"/>
 <link rel="stylesheet" href="/gun/ortak/layout.css"/>
@@ -47,6 +48,7 @@ GUN_SAYFASI = r"""<!doctype html>
 <link rel="stylesheet" href="/gun/ortak/kabuk.css"/>
 <link rel="stylesheet" href="/gun/ortak/hareket.css"/>
 <link rel="stylesheet" href="/gun/ortak/cam.css"/>
+<link rel="stylesheet" href="/gun/ortak/piksel.css"/>
 <style>
 /* Gun'un kimligi: Merkez'in moru (Merkez F7'de cekilince yerini Gun alir). */
 :root{ --mod:var(--mer); --mod-ink:var(--mer-ink); --mod-t:var(--mer-t);
@@ -334,6 +336,7 @@ GUN_SAYFASI = r"""<!doctype html>
 <div id="overlay-root"></div>
 <script src="/gun/ortak/parca.js"></script>
 <script src="/gun/ortak/kabuk.js"></script>
+<script src="/gun/ortak/piksel.js"></script>
 <script src="/gun/ortak/gunveri.js"></script>
 <script>
 (function(){

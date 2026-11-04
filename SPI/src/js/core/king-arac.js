@@ -726,7 +726,7 @@ window.LIFEOS.PARCA.yazilar({
   const YETKI_AYAR = {
     tema:{ id:'tema', degerler:{ koyu:'dark', acik:'light', sistem:'system' } },
     animasyon:{ id:'animasyon', degerler:{ tam:'tam', az:'az', sistem:'sistem' } },
-    zemin:{ id:'zemin', degerler:{ sade:'sade', canli:'yumusak' } },
+    zemin:{ id:'zemin', degerler:{ sade:'sade', canli:'yumusak', piksel:'piksel' } },
     muzik:{ id:'muzik', degerler:{ cal:'cal', dur:'dur' } },
   };
   const KING_AYAR = {

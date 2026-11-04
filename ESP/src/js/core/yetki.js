@@ -141,7 +141,7 @@ LIFEOS.YETKI = (function(){
   }
   const TEMA_AD = { dark:'koyu', light:'açık', system:'sisteme uyan' };
   const ANIM_AD = { tam:'tam', az:'az', sistem:'sisteme uyan' };
-  const ZEMIN_AD = { yumusak:'canlı', sade:'sade' };
+  const ZEMIN_AD = { piksel:'piksel', yumusak:'canlı', sade:'sade' };
 
   const EYLEMLER = [
     {

@@ -7,7 +7,7 @@
    Kaynağı `brand/ortak/zemin.test.js`; `tools/ortak.py --yay` ile üç
    arayüzün `src/tests/` klasörüne birebir kopyalanır.
 
-   Kanıtladığı sözler: varsayılan Yumuşak'tır ve ilk çizimden önce
+   Kanıtladığı sözler: varsayılan Piksel'dir ve ilk çizimden önce
    `<html data-zemin>` olarak konur; Sade eski düz zemine döner; seçim
    kalıcıdır ve modül geçişinde taşınır; buzlu yüzey içerik sütununun
    ARKASINDADIR ve ekranı kaplamaz (kenarlardan içeride, telefonda yok);
@@ -36,11 +36,11 @@
   }
 
   describe('Zemin (Yumuşak · Sade)', () => {
-    it('varsayılan Yumuşak; <html data-zemin> ilk çizimden önce konur', () => kipleSina(() => {
+    it('varsayılan Piksel; <html data-zemin> ilk çizimden önce konur', () => kipleSina(() => {
       try{ localStorage.removeItem(Z.ANAHTAR); }catch(e){}
       Z.yenile();
-      expect(Z.kip()).toBe('yumusak');
-      expect(document.documentElement.getAttribute('data-zemin')).toBe('yumusak');
+      expect(Z.kip()).toBe('piksel');
+      expect(document.documentElement.getAttribute('data-zemin')).toBe('piksel');
     }));
 
     it('Yumuşak: renk zemini sabit katmanda, buzlu yüzey içeriğin arkasında ve ekranı kaplamaz', () => kipleSina(() => {
@@ -82,7 +82,7 @@
       d.innerHTML = Z.seciciHtml();
       document.body.appendChild(d);
       try{
-        expect(Array.from(d.querySelectorAll('[data-zemin-sec]')).map(b => b.textContent.trim())).toEqual(['Yumuşak', 'Sade']);
+        expect(Array.from(d.querySelectorAll('[data-zemin-sec]')).map(b => b.textContent.trim())).toEqual(['Piksel', 'Yumuşak', 'Sade']);
         d.querySelector('[data-zemin-sec="sade"]').dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
         expect(localStorage.getItem(Z.ANAHTAR)).toBe('sade');
         expect(d.querySelector('[data-zemin-sec="sade"]').getAttribute('aria-pressed')).toBe('true');

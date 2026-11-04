@@ -71,15 +71,17 @@ window.LIFEOS = window.LIFEOS || {};
 
   const L = window.LIFEOS;
   const ANAHTAR = 'lifeos.zemin';
-  const KIPLER = Object.freeze(['yumusak', 'sade']);
-  const AD = { yumusak:'Yumuşak', sade:'Sade' };
-  const IPUCU = { yumusak:yz('ortak.zemin.yumusak-renk-zemini-icerigin'), sade:yz('ortak.zemin.duz-zemin') };
+  const KIPLER = Object.freeze(['piksel', 'yumusak', 'sade']);
+  const AD = { piksel:'Piksel', yumusak:'Yumuşak', sade:'Sade' };
+  const IPUCU = { piksel:'Akşam odası ve kâğıt yaprak', yumusak:yz('ortak.zemin.yumusak-renk-zemini-icerigin'), sade:yz('ortak.zemin.duz-zemin') };
 
   function oku(){
     let v = null;
     try{ v = localStorage.getItem(ANAHTAR); }catch(e){}
-    return KIPLER.indexOf(v) >= 0 ? v : 'yumusak';
+    return KIPLER.indexOf(v) >= 0 ? v : 'piksel';
   }
+  /* Bir kez (kullanıcı, 2026-11-04: «tüm sisteme uygula»): eski kayıtlı zemin piksele geçer; sonra seçim yine kullanıcının. */
+  try{ if(!localStorage.getItem('lifeos.zemin.piksel-gecis')){ localStorage.setItem('lifeos.zemin.piksel-gecis', '1'); localStorage.removeItem(ANAHTAR); } }catch(e){ /* depo kapalı */ }
   let simdiki = oku();
   function kip(){ return simdiki; }
 
@@ -135,7 +137,8 @@ window.LIFEOS = window.LIFEOS || {};
 
   function uygula(){
     if(typeof document !== 'undefined' && document.documentElement){
-      document.documentElement.setAttribute('data-zemin', simdiki === 'yumusak' && !saydamlikAz() ? 'yumusak' : 'sade');
+      /* Piksel opaktır: «saydamlığı azalt» ona dokunmaz (piksel.css). */
+      document.documentElement.setAttribute('data-zemin', simdiki === 'piksel' ? 'piksel' : simdiki === 'yumusak' && !saydamlikAz() ? 'yumusak' : 'sade');
     }
   }
   function seciciGuncelle(){

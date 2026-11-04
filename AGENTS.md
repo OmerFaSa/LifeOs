@@ -136,6 +136,9 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    kartın alt kenarındaki sıcak yansıma, dolu çubuk ile ana düğmenin
    hâlesi. Sürekli oynayan parıltı yine yok; renk yine ölçüyü ayırır.
    «Sade» zeminde bu katmanın hiçbiri çalışmaz.
+   **Piksel teması (2026-11-04, depo sahibinin kararı: «tüm sisteme uygula»):** varsayılan zemin
+   `brand/ortak/piksel.css` ve `piksel.js`: üstte akşam odası, bütün içerik tek kâğıt yaprakta. Ekranlar tema
+   bilmez, yalnız jeton değişir. Görünüm › Zemin'den geri alınır. Cam kuralları yalnız «Yumuşak» seçiliyken çalışır.
 
 11. **Sistem Lego gibi kurulur** (2026-11-04, depo sahibi: «her sayfanın, her özelliğin,
    her yazının bir Lego gibi parça olması lazım»). Dosya `brand/parcalar.txt`'e tek satır,

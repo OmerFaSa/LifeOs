@@ -31,7 +31,7 @@ bekle("oneri yalniz saate bakar ve soyler", "saate göre" in g)
 bekle("Merkez durumu /api/durum'dan", "/api/durum" in g)
 bekle("hareketi azalt", "prefers-reduced-motion" in g)
 bekle("koyu tema", 'data-theme="dark"' in gun.gun_html(tema="dark"))
-bekle("ortak dosyalar kapali liste", set(gun.ORTAK) == {"parca.js", "jeton.css", "base.css", "layout.css", "temel.css", "kabuk.css", "kabuk.js", "cam.css", "hareket.css", "gunveri.js"})
+bekle("ortak dosyalar kapali liste", set(gun.ORTAK) == {"parca.js", "piksel.css", "piksel.js", "jeton.css", "base.css", "layout.css", "temel.css", "kabuk.css", "kabuk.js", "cam.css", "hareket.css", "gunveri.js"})
 for ad in gun.ORTAK:
     bekle("ortak dosya var: " + ad, (KOK / "brand" / "ortak" / ad).exists())
 
