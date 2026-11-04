@@ -28,9 +28,6 @@
 window.LIFEOS.PARCA.yazilar({
   'ortak.zemin.yumusak-renk-zemini-icerigin':'Yumuşak renk zemini, içeriğin arkasında buzlu yüzey',
   'ortak.zemin.duz-zemin':'Düz zemin',
-  'ortak.zemin.bolumler-kart-icinde':'Bölümler kart içinde',
-  'ortak.zemin.kartsiz-bolumler-cizgi-ve-bo':'Kartsız, bölümler çizgi ve boşlukla ayrılır',
-  'ortak.zemin.hafif-tonlu-duz-bolumler-sol':'Hafif tonlu düz bölümler, solda ince şerit',
   'ortak.zemin.saate-gore':'Saate göre',
   'ortak.zemin.dosya-yok-modulun-fotografi':'Dosya yok · modülün fotoğrafı',
   'ortak.zemin.modulun-fotografi':'Modülün fotoğrafı',
@@ -197,50 +194,8 @@ window.LIFEOS = window.LIFEOS || {};
     return v;
   }
 
-  /* YÜZEY (kullanıcı, 2026-10-20: «kart teması bir noktadan sonra boğuyor;
-     kartlara benzeyen ama daha ferah bir iki tema da sun; modüllerde farklı
-     temalar seçilebilsin»). Tercih MODÜL BAŞINA saklanır
-     (`lifeos.yuzey.<modül>`; modül `<html data-modul>`'den), ilk çizimden
-     önce `<html data-yuzey>` konur. Görünüş zemin.css'te:
-       kart   bugünkü kartlar (VARSAYILAN)
-       ferah  kart kutusu yok: bölümler ince çizgi ve boşlukla ayrılır,
-              içerik levhası kalkar
-       serit  hafif tonlu düz yüzey, solda ince modül rengi şerit, gölge yok */
-  const YUZEYLER = Object.freeze(['kart', 'ferah', 'serit']);
-  const YUZEY_AD = { kart:'Kart', ferah:'Ferah', serit:'Şerit' };
-  const YUZEY_IPUCU = { kart:yz('ortak.zemin.bolumler-kart-icinde'), ferah:yz('ortak.zemin.kartsiz-bolumler-cizgi-ve-bo'), serit:yz('ortak.zemin.hafif-tonlu-duz-bolumler-sol') };
   function modulOf(){
     try{ return (document.documentElement.getAttribute('data-modul') || 'lifeos').toLowerCase(); }catch(e){ return 'lifeos'; }
-  }
-  const yuzeyAnahtar = () => 'lifeos.yuzey.' + modulOf();
-  function yuzeyOku(){
-    let v = null;
-    try{ v = localStorage.getItem(yuzeyAnahtar()); }catch(e){}
-    return YUZEYLER.indexOf(v) >= 0 ? v : 'kart';
-  }
-  let yuzeySimdi = typeof document !== 'undefined' ? yuzeyOku() : 'kart';
-  function yuzeyUygula(){
-    if(typeof document === 'undefined' || !document.documentElement) return;
-    if(yuzeySimdi === 'kart') document.documentElement.removeAttribute('data-yuzey');
-    else document.documentElement.setAttribute('data-yuzey', yuzeySimdi);
-    document.querySelectorAll('[data-yuzey-sec]').forEach(b => {
-      const on = b.getAttribute('data-yuzey-sec') === yuzeySimdi;
-      b.classList.toggle('is-on', on);
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    });
-  }
-  function yuzeyAyarla(k){
-    if(YUZEYLER.indexOf(k) < 0) return false;
-    try{ localStorage.setItem(yuzeyAnahtar(), k); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
-    yuzeySimdi = k;
-    yuzeyUygula();
-    return true;
-  }
-  function yuzeySeciciHtml(){
-    return '<div class="seg seg--block yuzeysec" role="group" aria-label="Yüzey">'
-      + YUZEYLER.map(k => '<button type="button" class="' + (k === yuzeySimdi ? 'is-on' : '') + '" data-yuzey-sec="' + k + '"'
-        + ' aria-pressed="' + (k === yuzeySimdi ? 'true' : 'false') + '" title="' + YUZEY_IPUCU[k] + '">' + YUZEY_AD[k] + '</button>').join('')
-      + '</div>';
   }
 
   /* MANZARA (kullanıcı, 2026-10-28: «sistemin arka planına gerekirse resim
@@ -557,7 +512,6 @@ window.LIFEOS = window.LIFEOS || {};
   function otoSeciciHtml(){ return seg(yz('ortak.zemin.saate-gore-tema'), 'data-oto-sec', 'otosec', OTOLAR, OTO_AD, otoSimdi); }
 
   uygula();
-  yuzeyUygula();
   if(typeof document !== 'undefined') manzaraYenile();
   temaIlk();
   if(typeof document !== 'undefined' && typeof MutationObserver !== 'undefined'){
@@ -566,8 +520,6 @@ window.LIFEOS = window.LIFEOS || {};
   }
   if(typeof document !== 'undefined'){
     document.addEventListener('click', e => {
-      const y = e.target && e.target.closest ? e.target.closest('[data-yuzey-sec]') : null;
-      if(y){ e.preventDefault(); yuzeyAyarla(y.getAttribute('data-yuzey-sec')); return; }
       const mz = e.target && e.target.closest ? e.target.closest('[data-manzara-sec]') : null;
       if(mz){ e.preventDefault(); manzaraAyarla(mz.getAttribute('data-manzara-sec')); return; }
       const gc = e.target && e.target.closest ? e.target.closest('[data-gece-sec]') : null;
@@ -628,7 +580,7 @@ window.LIFEOS = window.LIFEOS || {};
     window.LIFEOS.PARCA.tepki({ id:'zemin.muzikte-kis', olay:'muzik', ad:'Müzik listesi çalınca video kısılır', yap(u){ kis(!!(u.caliyor && u.kip && u.kip !== 'arka')); } });
   }
   if(typeof window !== 'undefined' && window.addEventListener){
-    window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); if(e.key === MANZARA_ANAHTAR) manzaraYenile(); if(e.key === yuzeyAnahtar()){ yuzeySimdi = yuzeyOku(); yuzeyUygula(); } });
+    window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); if(e.key === MANZARA_ANAHTAR) manzaraYenile(); });
     try{ window.matchMedia('(prefers-reduced-transparency: reduce)').addEventListener('change', uygula); }catch(e){}
     try{ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { saatUygula(); manzaraUygula(); }); }catch(e){}
   }
@@ -680,7 +632,6 @@ window.LIFEOS = window.LIFEOS || {};
 
   L.ZEMIN = Object.freeze({ ANAHTAR, KIPLER, TEMA, kip, ayarla, yenile, seciciHtml, temaIlk, _temaKaydet,
     saatTonu, saatUygula, _saatSaglayici, nabiz, gunIlk, GUN_ANAHTAR,
-    YUZEYLER, yuzey:() => yuzeySimdi, yuzeyAyarla, yuzeySeciciHtml, yuzeyAnahtar,
     MANZARA_ANAHTAR, manzara:() => manzaraSimdi, manzaraAyarla, manzaraYenile, manzaraSeciciHtml,
     GECE_ANAHTAR, OTO_ANAHTAR, gece:() => geceSimdi, geceAyarla, geceSeciciHtml, oto:() => otoSimdi, otoAyarla, otoSeciciHtml,
     otoTema, etkinZemin, karanlik, dosyaYukle, onizle, onizleHtml, ONIZLE_SADE,

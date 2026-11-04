@@ -6,7 +6,7 @@
      --modul AYS   yalnız o modül
 
    İz sayılanlar: bulanıklık (backdrop-filter, filter: blur), yumuşak gölge (bulanıklığı olan
-   box-shadow ve text-shadow), yumuşak geçişli zemin (gradient), yarım saydam yazı (opacity < .75).
+   box-shadow ve text-shadow), yumuşak geçişli zemin (gradient), yarım saydam yazı (opacity < .75), yazıya yapışık sol şerit.
    Yuvarlaklık sayılmaz: tek kuralla sıfırlanır. Oda tuvali, grafik çizimleri ve İZİN listesi dışarıda. */
 const path = require('path');
 const KOK = path.resolve(__dirname, '..');
@@ -18,7 +18,7 @@ const arg = a => { const i = process.argv.indexOf(a); return i < 0 ? null : proc
 const MODULLER = arg('--modul') ? [arg('--modul')] : Object.keys(NS);
 
 /* Bilerek yumuşak kalanlar: veri çizimi ve kullanıcının fotoğrafı. */
-const IZIN = /(^|\s)(kenar|altbant|agentav|agentkare|rutbe|rozet|vk|vk-|kademe|perde|seviye|grafik|gr-|sparkline|isi|minik|piksel-oda|harita|rota-|foto|sk-|skeleton)/;
+const IZIN = /(^|\s)(tema-ornek|kenar|altbant|agentav|agentkare|rutbe|rozet|vk|vk-|kademe|perde|seviye|grafik|gr-|sparkline|isi|minik|piksel-oda|harita|rota-|foto|sk-|skeleton)/;
 
 const TARA = izin => {
   const R = new RegExp(izin), out = {};
@@ -26,7 +26,7 @@ const TARA = izin => {
   document.querySelectorAll('body *').forEach(e => {
     if(e.closest('canvas,svg') && e.tagName.toLowerCase() !== 'svg') return;
     const c = String(e.className && e.className.baseVal === undefined ? e.className : '');
-    if(R.test(c) || e.closest('.vk,.rutbe,.perde')) return;
+    if(R.test(c) || e.closest('.vk,.rutbe,.perde,.tema-ornek')) return;
     const r = e.getBoundingClientRect();
     if(r.width < 4 || r.height < 4) return;
     const s = getComputedStyle(e);
@@ -35,6 +35,12 @@ const TARA = izin => {
     if(/blur/.test(s.filter) || /drop-shadow/.test(s.filter)) ekle('filtre', e);
     if(s.boxShadow !== 'none' && s.boxShadow.split(/,(?![^(]*\))/).some(g => { const n = (g.match(/-?\d+(\.\d+)?px/g) || []).map(parseFloat); return n[2] > 0.5; })) ekle('yumusak-golge', e);
     if(s.textShadow !== 'none' && s.textShadow.split(/,(?![^(]*\))/).some(g => { const n = (g.match(/-?\d+(\.\d+)?px/g) || []).map(parseFloat); return n[2] > 0.5; })) ekle('yazi-golge', e);
+    /* Yazıya yapışık sol şerit (2026-11-04: kalan Şerit yüzeyinin izi) */
+    if(r.width >= 40 && r.height >= 12 && parseFloat(s.borderLeftWidth) >= 2 && s.borderLeftStyle !== 'none'){
+      const w = document.createTreeWalker(e, NodeFilter.SHOW_TEXT); let n = null, en = 1e9;
+      while((n = w.nextNode())){ if(!n.textContent.trim()) continue; const q = document.createRange(); q.selectNodeContents(n); const b = q.getBoundingClientRect(); if(b.width) en = Math.min(en, b.left - r.left); if(en < 8) break; }
+      if(en < 8) ekle('yapisik-serit', e);
+    }
     if(/gradient/.test(s.backgroundImage)) ekle('gecis', e);
     if(e.children.length === 0 && (e.textContent || '').trim() && parseFloat(s.opacity) < 0.75) ekle('soluk-yazi', e);
     ['::before', '::after'].forEach(ps => { const q = getComputedStyle(e, ps); if(q.content === 'none' || q.display === 'none') return;

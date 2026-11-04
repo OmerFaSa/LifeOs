@@ -155,7 +155,7 @@
         await cizmeden(() => SP.Screens.today.handle['su-ekle']());
         expect(SP.S.vitals['2026-10-12'].water).toBe(250);
         k = dom(await SP.Screens.today.render());
-        expect(k.querySelectorAll('[data-oz="073"] path[fill="var(--spi)"]').length).toBe(1);
+        expect(k.querySelectorAll('[data-oz="073"] .su-bardak[data-dolu]').length).toBe(1);
       });
     });
 

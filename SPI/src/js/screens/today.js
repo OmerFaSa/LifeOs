@@ -1238,8 +1238,7 @@ SP.Screens.today = (function(){
       : n === a + 1 ? simdi + b : n * b;
     return yeni < b ? null : yeni;
   }
-  const BARDAK_SVG = dolu => '<svg viewBox="0 0 24 30" aria-hidden="true"><path d="M4 3h16l-2 24H6z" fill="' + (dolu ? 'var(--spi)' : 'none')
-    + '" stroke="' + (dolu ? 'var(--spi)' : 'var(--vk-ink4)') + '" stroke-width="1.5"/></svg>';
+  const BARDAK_SVG = dolu => window.LIFEOS.PIKSEL.figurSvg(dolu ? 'bardak_dolu' : 'bardak_bos');
   function SuKutusu(){
     if(!VT()) return '';
     const d = shownDate();
@@ -1260,7 +1259,7 @@ SP.Screens.today = (function(){
       bardaklar.push('<span role="radio" class="su-bardak" data-act="su-ayarla" data-n="' + i + '" data-i="' + i + '"'
         + ' tabindex="' + (odak ? '0' : '-1') + '" aria-checked="' + (secili ? 'true' : 'false') + '"'
         + ' aria-label="' + SP.h.esc(i + ' bardak, ' + U.fmtNum(etiketMl) + ' ml' + (secili ? '; yeniden dokunursan bir bardak azalır' : '')) + '"'
-        + ' style="display:inline-flex;cursor:pointer;border-radius:4px">' + BARDAK_SVG(i <= n) + '</span>');
+        + (i <= n ? ' data-dolu="1"' : '') + ' style="display:inline-flex;cursor:pointer">' + BARDAK_SVG(i <= n) + '</span>');
     }
     const ic = '<div class="vk" data-oz="073"><div class="d x35">'
       + '<div class="bd" role="radiogroup" data-oz-su aria-label="' + SP.h.esc(grupAd) + '" style="flex-wrap:wrap">' + bardaklar.join('') + '</div>'

@@ -212,7 +212,7 @@
           expect(radyo(d, 5).getAttribute('aria-checked')).toBe('true');
           expect(radyo(d, 5).getAttribute('tabindex')).toBe('0');
           expect(g2.querySelectorAll('[tabindex="0"]').length).toBe(1);
-          expect(d.querySelectorAll('[data-oz="073"] path[fill="var(--spi)"]').length).toBe(5);
+          expect(d.querySelectorAll('[data-oz="073"] .su-bardak[data-dolu]').length).toBe(5);
           /* En üstteki dolu bardak: bir azalır. */
           await sessiz(() => SP.Screens.today.handle['su-ayarla'](radyo(d, 5)));
           expect(SP.Model.vitalsOf(GUN).water).toBe(1000);

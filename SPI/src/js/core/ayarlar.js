@@ -1216,7 +1216,6 @@ window.LIFEOS = window.LIFEOS || {};
       if(sf){
         if(sf.getAttribute('data-onay') !== '1'){ sf.setAttribute('data-onay', '1'); sf.textContent = yz('ortak.ayarlar.emin-misin-sifirla'); return; }
         SIFIRLANAN.forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
-        try{ if(L.ZEMIN && L.ZEMIN.yuzeyAnahtar) localStorage.removeItem(L.ZEMIN.yuzeyAnahtar()); }catch(e){}   // Yüzey modüle özel
         yenileKaydet();
         return;
       }

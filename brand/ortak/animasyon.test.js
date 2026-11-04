@@ -389,7 +389,6 @@
     }));
     it('ayar kataloğu: listeler ve ortak desen tek tablodan çıkar', () => {
       expect(A.katalogListe('t')).toEqual(A.TASINAN);
-      expect(A.katalogListe('p').indexOf('lifeos.yuzey.ays') >= 0).toBe(true);
       expect(A.katalogListe('s').indexOf('lifeos.isik') >= 0).toBe(true);
       expect(A.katalogListe('t').some(k => k.indexOf('*') >= 0)).toBe(false);
       ['lifeos.cam', 'lifeos.zemin.a.b', 'lifeos.buzlu.kart', 'lifeos.muzik.yer.ays', 'lifeos.king.ad'].forEach(k => expect(A.ORTAK.test(k)).toBe(true));

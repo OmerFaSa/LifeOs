@@ -1205,8 +1205,6 @@ html[data-manzara="acik"][data-theme="dark"]{ --cam:radial-gradient(90% 70% at 0
   --manzara-sis:linear-gradient(180deg, oklch(from var(--mod) .16 .03 h / .7), oklch(from var(--mod) .13 .025 h / .58) 45%, oklch(from var(--mod) .1 .02 h / .78));
   --manzara-okuma:radial-gradient(70% 55% at 16% 10%, rgba(4,6,14,.42), transparent 72%); --manzara-hale:none; } }
 @media (prefers-color-scheme:dark){ html[data-manzara="acik"]:not([data-theme="light"]){ --cam:radial-gradient(90% 70% at 0% 0%, var(--beyaz-08), transparent 58%), linear-gradient(140deg, var(--beyaz-10), var(--beyaz-05)); } }
-html[data-yuzey="ferah"]{ --manzara-sis:linear-gradient(var(--beyaz-58), var(--beyaz-50)); }
-html[data-yuzey="ferah"][data-theme="dark"]{ --manzara-sis:linear-gradient(rgba(6,8,16,.8), rgba(6,8,16,.76)); }
 
 
 

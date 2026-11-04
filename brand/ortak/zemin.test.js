@@ -176,29 +176,6 @@
     });
   });
 
-  describe('Yüzey — kart, ferah, şerit; modül başına', () => {
-    it('varsayılan kart: nitelik yok; seçim modülün kendi anahtarına yazılır ve <html data-yuzey> olur', () => {
-      const Z = window.LIFEOS.ZEMIN, kok = document.documentElement;
-      const onceModul = kok.getAttribute('data-modul');
-      kok.setAttribute('data-modul', 'deneme');
-      try{
-        expect(Z.YUZEYLER).toEqual(['kart', 'ferah', 'serit']);
-        expect(Z.yuzeyAnahtar()).toBe('lifeos.yuzey.deneme');
-        expect(Z.yuzeyAyarla('ferah')).toBe(true);
-        expect(kok.getAttribute('data-yuzey')).toBe('ferah');
-        expect(localStorage.getItem('lifeos.yuzey.deneme')).toBe('ferah');
-        expect(Z.yuzeyAyarla('bilinmez')).toBe(false);
-        const d = document.createElement('div'); d.innerHTML = Z.yuzeySeciciHtml();
-        expect(d.querySelector('[data-yuzey-sec="ferah"]').getAttribute('aria-pressed')).toBe('true');
-        Z.yuzeyAyarla('kart');
-        expect(kok.hasAttribute('data-yuzey')).toBe(false);
-      }finally{
-        try{ localStorage.removeItem('lifeos.yuzey.deneme'); }catch(e){}
-        if(onceModul) kok.setAttribute('data-modul', onceModul); else kok.removeAttribute('data-modul');
-      }
-    });
-  });
-
   /* Kullanıcı (2026-10-28: «sistemin arka planına gerekirse resim koy;
      devasa bir güncelleme»): modülün kendi CC0 manzarası (brand/medya/doku).
      Varsayılan açık; kapalıysa resim hiç istenmez (eski renk alanı). Tercih
