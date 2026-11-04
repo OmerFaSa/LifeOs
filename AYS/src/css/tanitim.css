@@ -71,7 +71,7 @@
   border-radius:14px;
   overflow:hidden;
   border:1px solid var(--line, var(--border));
-  box-shadow:0 10px 30px var(--siyah-22);
+  box-shadow:none;
   -webkit-mask-image:linear-gradient(to bottom, var(--siyah) 78%, transparent 100%);
   mask-image:linear-gradient(to bottom, var(--siyah) 78%, transparent 100%);
 }

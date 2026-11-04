@@ -50,6 +50,7 @@
 
 /* Köşeler tek kuraldan: ekran dosyalarına tema girmesin. Yuvarlak kalması gerekenler (minik, küre) kendi öğesini çizer. */
 :root[data-zemin="piksel"] body *:not(.minik):not(.king-kure):not(.kenar__nokta){ border-radius:0 !important; }
+:root[data-zemin="piksel"] body *::before, :root[data-zemin="piksel"] body *::after{ border-radius:0 !important; }
 
 :root[data-zemin="piksel"], :root[data-zemin="piksel"] body{ background:none; }
 :root[data-zemin="piksel"]{ background:var(--piksel-duvar); }
@@ -77,7 +78,7 @@
 :root[data-zemin="piksel"] .site--v5 :has(> .gizle-araclar--uzerinde) > .kutu__bas{ padding-right:44px; box-sizing:border-box; }
 :root[data-zemin="piksel"] .giris__girdi{ flex:1 1 120px; }
 :root[data-zemin="piksel"] .site--v5 .empty .btn{ min-height:34px; padding:0 16px; gap:7px; margin-top:4px; }
-:root[data-zemin="piksel"] .site--v5 > .ust{ background:none; box-shadow:none; }
+:root[data-zemin="piksel"] .site--v5 > .ust{ background-color:var(--piksel-tahta); box-shadow:0 3px 0 #2a1a1c66; }
 
 /* Kenar ve alt bant: ahşap */
 :root[data-zemin="piksel"] .kenar, :root[data-zemin="piksel"] .altbant{
@@ -111,3 +112,97 @@
 }
 :root[data-zemin="piksel"] .kutu__yuva{ white-space:normal; min-width:0; }
 :root[data-zemin="piksel"] .hesap-kapi__sozler svg{ color:var(--piksel-kenar-yazi); }
+
+/* ----- KALİTE: her öğe aynı piksel diliyle (2026-11-04: «piksel artın kalitesini arttır») -----
+   Kenarlar köşesi kırık (dört yönde sert gölge), ışık yukarıdan: üstte açık, altta koyu şerit.
+   Yumuşak gölge, bulanıklık ve geçiş yok; kaynağı temizlendi, tools/piksel_denetim.js tutar. */
+:root[data-zemin="piksel"]{
+  --px-kenar:#b8946c; --px-acik:#fffdf6; --px-koyu:#e3c9a0;
+  --px-kart:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar),inset 0 2px 0 var(--px-acik),inset 0 -3px 0 var(--px-koyu);
+  --px-dugme:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar),inset 0 2px 0 var(--px-acik),inset 0 -3px 0 var(--px-koyu);
+  --px-ana:0 -2px 0 #7c2f12,0 2px 0 #7c2f12,-2px 0 0 #7c2f12,2px 0 0 #7c2f12,inset 0 2px 0 #d9744a,inset 0 -3px 0 #8a3614;
+  --px-alan:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar),inset 0 3px 0 var(--px-koyu);
+  --ease:steps(4, end); --ease-out:steps(4, end);
+}
+:root[data-zemin="piksel"][data-theme="dark"]{
+  --px-kenar:#6f5a64; --px-acik:#4a3940; --px-koyu:#2c2026;
+  --px-ana:0 -2px 0 #a8603a,0 2px 0 #a8603a,-2px 0 0 #a8603a,2px 0 0 #a8603a,inset 0 2px 0 #ffc097,inset 0 -3px 0 #c97b4e;
+}
+@media (prefers-color-scheme:dark){ :root[data-zemin="piksel"]:not([data-theme="light"]){
+  --px-kenar:#6f5a64; --px-acik:#4a3940; --px-koyu:#2c2026;
+  --px-ana:0 -2px 0 #a8603a,0 2px 0 #a8603a,-2px 0 0 #a8603a,2px 0 0 #a8603a,inset 0 2px 0 #ffc097,inset 0 -3px 0 #c97b4e;
+} }
+
+/* Kenar menü: dar da açık da aynı ahşap; üzerine gelince cam yok */
+:root[data-zemin="piksel"] .site--v5 > .kenar, :root[data-zemin="piksel"] .site--v5 > .kenar:is(:hover, :focus-within), :root[data-zemin="piksel"] .site--v5 > .kenar.kenar--tutulu, :root[data-zemin="piksel"] .altbant{
+  background-color:var(--piksel-tahta); background-image:repeating-linear-gradient(0deg, transparent 0 22px, #00000026 22px 24px);
+  box-shadow:inset -3px 0 0 #00000040, 4px 0 0 #2a1a1c66; opacity:1; }
+:root[data-zemin="piksel"] .altbant{ box-shadow:inset 0 3px 0 #ffffff1f, 0 -4px 0 #2a1a1c66; }
+:root[data-zemin="piksel"] .site--v5 > .kenar::before, :root[data-zemin="piksel"] .site--v5 > .kenar::after{ content:none; }
+:root[data-zemin="piksel"] .kenar :is(a,button,span,small,b){ color:inherit; }
+:root[data-zemin="piksel"] .kenar__kisayol{ opacity:1; color:var(--piksel-kenar-yazi); background:#00000033; border-color:transparent; box-shadow:none; }
+:root[data-zemin="piksel"] .kenar__cekmece:hover:not(.is-on), :root[data-zemin="piksel"] .kenar__modul:hover{ background:#ffffff1c; color:var(--piksel-kenar-yazi); }
+:root[data-zemin="piksel"] .kenar__cekmece.is-on{ background:var(--piksel-kenar-aktif); color:var(--text); box-shadow:inset 0 -3px 0 var(--px-koyu); }
+
+/* Kartlar */
+:root[data-zemin="piksel"] .site--v5 :is(.kutu,.card,.ledger,.inc-karar,.donen,.rehber__konular){ background-color:var(--surface); background-image:none; border:0; box-shadow:var(--px-kart); }
+:root[data-zemin="piksel"] .site--v5 .ledger .lrow, :root[data-zemin="piksel"] .site--v5 .kutu .lrow{ background:none; box-shadow:none; }
+:root[data-zemin="piksel"] .site--v5 .lrow{ background-image:none; }
+
+/* Düğmeler: basınca gerçekten iner */
+:root[data-zemin="piksel"] :is(.btn,.dugme){ border:0; background-image:none; background-color:var(--surface-2); color:var(--text); box-shadow:var(--px-dugme); margin:2px; transition:none; }
+:root[data-zemin="piksel"] :is(.btn,.dugme):hover{ background-color:var(--surface-3); transform:none; }
+:root[data-zemin="piksel"] :is(.btn,.dugme):active{ transform:translateY(2px); }
+:root[data-zemin="piksel"] .btn--ghost{ background-color:transparent; }
+:root[data-zemin="piksel"] :is(.btn--primary,.giris__gonder,.dugme--ana){ background-color:var(--primary); color:var(--primary-ink); box-shadow:var(--px-ana); }
+:root[data-zemin="piksel"] :is(.btn--primary,.giris__gonder,.dugme--ana):hover{ background-color:var(--primary-hover); }
+
+/* Alanlar */
+:root[data-zemin="piksel"] :is(.input,.textarea,.select,.giris__girdi,.ayar-ara__kutu,input[type="text"],input[type="search"],input[type="number"],input[type="email"],input[type="password"],input[type="date"],input[type="time"],textarea,select){ border:0; background-color:var(--surface-2); background-image:none; box-shadow:var(--px-alan); margin:2px; }
+:root[data-zemin="piksel"] :is(.input,.textarea,.select,.giris__girdi,input,textarea,select):focus{ outline:2px dashed var(--primary); outline-offset:2px; box-shadow:var(--px-alan); }
+:root[data-zemin="piksel"] :focus-visible{ outline:2px dashed var(--primary); outline-offset:2px; }
+
+/* Sekme ve seçiciler */
+:root[data-zemin="piksel"] .bolumcubugu, :root[data-zemin="piksel"] .bolumcubugu--sayfa{ -webkit-mask-image:none; mask-image:none; background-image:none; }
+:root[data-zemin="piksel"] .bolumcubugu__ad.is-on::after{ background:var(--primary); box-shadow:none; height:3px; }
+:root[data-zemin="piksel"] .seg{ background-color:var(--surface-2); box-shadow:inset 0 3px 0 var(--px-koyu); }
+:root[data-zemin="piksel"] .seg .is-on, :root[data-zemin="piksel"] .seg [aria-pressed="true"]{ background-color:var(--surface); box-shadow:0 -2px 0 var(--px-kenar),0 2px 0 var(--px-kenar),-2px 0 0 var(--px-kenar),2px 0 0 var(--px-kenar); }
+
+/* Açılır katmanlar: kâğıt, sert gölge */
+:root[data-zemin="piksel"] :is(.katman,.kmenu,.sheet,.sheet__box,.cmdk__box,.toast,.hesap-merkez__kutu,.king__kutu){ background-color:var(--surface); background-image:none; border:0;
+  box-shadow:0 -3px 0 var(--px-kenar),0 3px 0 var(--px-kenar),-3px 0 0 var(--px-kenar),3px 0 0 var(--px-kenar),8px 10px 0 var(--piksel-golge); }
+:root[data-zemin="piksel"] .toast{ color:var(--text); }
+:root[data-zemin="piksel"] .gizle-araclar--uzerinde{ background-color:var(--surface); box-shadow:0 0 0 2px var(--px-kenar); }
+
+/* Küçük yüzler ve simgeler */
+:root[data-zemin="piksel"] .site--v5 .kisayol__simge{ background-color:var(--surface-2); background-image:none; box-shadow:var(--px-dugme); color:var(--text); }
+:root[data-zemin="piksel"] .site--v5 :is(.agentav,.agentkare){ background-image:none; background-color:var(--mod); box-shadow:none; }
+:root[data-zemin="piksel"] .site--v5 :is(.agentav,.agentkare)::after{ content:none; }
+:root[data-zemin="piksel"] :is(.kenar,.altbant,.ust,.btn,.kisayol,.kutu__bas,.cmdk__item,.seg) svg{ shape-rendering:crispEdges; stroke-linecap:square; stroke-linejoin:miter; }
+:root[data-zemin="piksel"] .hint{ opacity:1; }
+:root[data-zemin="piksel"] .ayarlar__alan, :root[data-zemin="piksel"] .ayarlar__sekme.is-on, :root[data-zemin="piksel"] .ayarlar__yazi.is-on{ box-shadow:none; }
+:root[data-zemin="piksel"] .tema-ornek{ background-image:none; }
+
+/* Gün: aynı kart dili, ışık yok */
+:root[data-zemin="piksel"] :is(.gun-kart,.gun-alan,.gun-oneri){ background-color:var(--surface); background-image:none; box-shadow:var(--px-kart); }
+:root[data-zemin="piksel"] .gun-alan[aria-pressed="true"]{ box-shadow:0 -2px 0 var(--renk),0 2px 0 var(--renk),-2px 0 0 var(--renk),2px 0 0 var(--renk); }
+:root[data-zemin="piksel"] .gun-blok{ background-image:none; }
+
+/* Kaydırma çubuğu ve seçim */
+:root[data-zemin="piksel"] ::-webkit-scrollbar{ width:12px; height:12px; }
+:root[data-zemin="piksel"] ::-webkit-scrollbar-track{ background:var(--piksel-tahta); }
+:root[data-zemin="piksel"] ::-webkit-scrollbar-thumb{ background:var(--piksel-kenar-yazi-2); border:2px solid var(--piksel-tahta); border-radius:0; }
+:root[data-zemin="piksel"] ::selection{ background:var(--primary); color:var(--primary-ink); }
+/* Kenar açıkken arkasına serilen cam örtü ve modül seçici */
+:root[data-zemin="piksel"] .site--v5:has(> .kenar)::after{ content:none; }
+:root[data-zemin="piksel"] .kenar__modulsec{ background:#00000026; color:var(--piksel-kenar-yazi); box-shadow:none; border:0; }
+:root[data-zemin="piksel"] .kenar__modulsec:hover{ background:#00000040; }
+:root[data-zemin="piksel"] .kenar__modulsec-ad{ color:var(--piksel-kenar-yazi); opacity:1; }
+:root[data-zemin="piksel"] .kenar__modulpencere{ background:var(--piksel-tahta-2); box-shadow:0 0 0 2px #2a1a1c; }
+/* Gün: mor ışık yerine temanın tek vurgusu */
+:root[data-zemin="piksel"] .gun{ --mod:var(--primary); --mod-ink:var(--primary); --mod-t:var(--primary-soft); }
+:root[data-zemin="piksel"] .subtabs{ background-image:none; }
+:root[data-zemin="piksel"] .inc-gundem__cubuk{ background-image:none; background-color:var(--primary); }
+/* Yapışık çubuklar opak: altından kayan yazı üstüne binmesin (cam bunu bulanıklıkla çözüyordu). */
+:root[data-zemin="piksel"] :is(.bolumcubugu--sayfa,.bolumcubugu--kabuk){ background-color:var(--piksel-kagit); }
+:root[data-zemin="piksel"] .ders__icindekiler{ background-color:var(--piksel-kagit); }

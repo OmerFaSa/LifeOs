@@ -859,38 +859,80 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 .avideo.is-bitiyor .avideo__cizgi{ opacity:0; transition-delay:0s; }
 @media (prefers-reduced-motion:reduce){ .avideo, .avideo__v, .avideo__atla, .avideo__cizgi{ transition-duration:.25s; transition-delay:0s; } .avideo__v{ transform:none; } }
 .gayar__yer{ display:grid; grid-template-columns:64px 1fr; align-items:center; gap:8px; font-size:12.5px; color:var(--fg-2); }
-/* PIKSEL (brand/ortak/piksel.css): sayfanin degiskenleri kagit ve ahsaba baglanir. */
+/* PIKSEL: secim sayfasi (kart dili brand/ortak/piksel.css ile ayni). */
 :root[data-zemin="piksel"]{
   --yuzey:var(--piksel-kagit); --yuzey-2:var(--surface-2); --fg:var(--text); --fg-2:var(--text-2); --fg-3:var(--text-3);
   --cizgi:var(--border); --cizgi-2:var(--border-strong); --golge:none;
   --cam:var(--piksel-kagit); --cam-kenar:transparent; --cam-ust:none; --cam-golge:none;
-  --hap:var(--piksel-tahta); --hap-kenar:transparent; --hale:none; --mono:var(--font-body);
-}
+  --hap:transparent; --hap-kenar:transparent; --hale:none; --mono:var(--font-body); }
 :root[data-zemin="piksel"] body{ font-family:var(--font-body); color:var(--text); }
 :root[data-zemin="piksel"] body::before{ display:none; }
-:root[data-zemin="piksel"] .sarmal{ padding-top:226px; }
-
-:root[data-zemin="piksel"] .guncel, :root[data-zemin="piksel"] .kart{ background:var(--piksel-kagit); border:0; -webkit-backdrop-filter:none; backdrop-filter:none;
-  box-shadow:0 -4px 0 var(--piksel-kagit),0 4px 0 var(--piksel-kagit),-4px 0 0 var(--piksel-kagit),4px 0 0 var(--piksel-kagit),8px 10px 0 var(--piksel-golge); }
-:root[data-zemin="piksel"] .kart::before{ display:none; }
-:root[data-zemin="piksel"] .kart:hover{ transform:translateY(-2px);
-  box-shadow:0 -4px 0 var(--piksel-kagit),0 4px 0 var(--piksel-kagit),-4px 0 0 var(--piksel-kagit),4px 0 0 var(--piksel-kagit),8px 12px 0 var(--piksel-golge); }
-:root[data-zemin="piksel"] .logo{ background:var(--renk); box-shadow:none; }
-:root[data-zemin="piksel"] .sekil{ filter:none; }
-:root[data-zemin="piksel"] .dugme{ background:var(--surface-2); color:var(--text); border-color:transparent; }
-:root[data-zemin="piksel"] .dugme--ana, :root[data-zemin="piksel"] .kart .dugme{ background:var(--primary); color:var(--primary-ink); }
-:root[data-zemin="piksel"] .kart:hover .dugme{ background:var(--primary-hover); }
-:root[data-zemin="piksel"] .kart__ozet{ border-top-color:var(--border); }
-
-/* Şerit ve kâğıt dışındaki yazı: yer tahtasının üstünde krem */
+:root[data-zemin="piksel"] .sarmal{ max-width:1040px; padding:232px 28px 40px; }
 :root[data-zemin="piksel"] :is(.ust h1, .ust h1 span, .bolum, .dip, .dip *){ color:var(--piksel-kenar-yazi); text-shadow:none; }
-:root[data-zemin="piksel"] .yay__uc, :root[data-zemin="piksel"] .surum{ background:var(--piksel-tahta); color:var(--piksel-kenar-yazi); border-color:transparent; box-shadow:0 -3px 0 var(--piksel-tahta),0 3px 0 var(--piksel-tahta),-3px 0 0 var(--piksel-tahta),3px 0 0 var(--piksel-tahta); -webkit-backdrop-filter:none; backdrop-filter:none; }
-:root[data-zemin="piksel"] .yay__uc b{ background:none; color:var(--piksel-kenar-yazi); box-shadow:none; }
-:root[data-zemin="piksel"] .yay .kart--orta{ box-shadow:0 -3px 0 var(--piksel-kagit),0 3px 0 var(--piksel-kagit),-3px 0 0 var(--piksel-kagit),3px 0 0 var(--piksel-kagit); }
-:root[data-zemin="piksel"] .yay svg:not(.kart__ok){ display:none; }
-
-@media (max-width:760px){
-  :root[data-zemin="piksel"] .sarmal{ padding-top:216px; }
+/* Üst raf: Gün ortada, güncelleme ve sürüm iki yanda */
+:root[data-zemin="piksel"] .yay{ width:100%; display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:center; margin:0 0 22px; padding:10px 14px; background-color:var(--piksel-tahta); background-image:none; border:0; border-radius:0; filter:none;
+  box-shadow:inset 0 3px 0 #ffffff1f,inset 0 -3px 0 #00000033,0 -3px 0 #2a1a1c,0 3px 0 #2a1a1c,-3px 0 0 #2a1a1c,3px 0 0 #2a1a1c; }
+:root[data-zemin="piksel"] .yay::before, :root[data-zemin="piksel"] .yay::after, :root[data-zemin="piksel"] .yay svg:not(.kart__ok){ display:none; }
+:root[data-zemin="piksel"] .yay__uc, :root[data-zemin="piksel"] .surum{ margin:0; min-height:40px; padding:0 8px; gap:9px; background:none; color:var(--piksel-kenar-yazi); border:0; box-shadow:none; font-size:15px; }
+:root[data-zemin="piksel"] .yay__s{ justify-self:end; }
+:root[data-zemin="piksel"] .yay__g{ justify-self:start; }
+:root[data-zemin="piksel"] .yay__uc:hover, :root[data-zemin="piksel"] .yay__g[aria-expanded="true"]{ background:#ffffff1c; color:var(--piksel-kenar-yazi); }
+:root[data-zemin="piksel"] .yay__uc b{ width:26px; height:26px; background:#00000033; color:var(--piksel-kenar-yazi); box-shadow:none; }
+:root[data-zemin="piksel"] .yay__s span{ font:inherit; }
+:root[data-zemin="piksel"] .yay .kart--orta{ min-width:280px; padding:7px 10px 7px 8px; gap:14px; background:var(--piksel-kagit); box-shadow:inset 0 -3px 0 var(--px-koyu); transform:none; }
+:root[data-zemin="piksel"] .yay .kart--orta .logo{ width:34px; height:34px; }
+:root[data-zemin="piksel"] .yay .kart--orta .kart__ad{ font-size:19px; font-weight:700; }
+:root[data-zemin="piksel"] .yay .kart--orta .kart__acik{ display:block; font-size:13.5px; margin:0; color:var(--text-2); }
+/* Modül kartları: renkli sırt, solda kimlik, altta eylem */
+:root[data-zemin="piksel"] .izgara{ grid-template-columns:repeat(3, minmax(0,1fr)); gap:22px; }
+:root[data-zemin="piksel"] .kart{ position:relative; display:flex; flex-direction:column; align-items:stretch; text-align:left; min-height:236px; padding:30px 22px 18px; background:var(--piksel-kagit); border:0; -webkit-backdrop-filter:none; backdrop-filter:none; transition:none;
+  box-shadow:0 -3px 0 #2a1a1c,0 3px 0 #2a1a1c,-3px 0 0 #2a1a1c,3px 0 0 #2a1a1c,inset 0 12px 0 var(--renk),inset 0 -4px 0 var(--px-koyu),8px 10px 0 var(--piksel-golge); }
+:root[data-zemin="piksel"] .kart::before{ display:none; }
+:root[data-zemin="piksel"] .kart:hover{ transform:translateY(-3px); box-shadow:0 -3px 0 #2a1a1c,0 3px 0 #2a1a1c,-3px 0 0 #2a1a1c,3px 0 0 #2a1a1c,inset 0 12px 0 var(--renk),inset 0 -4px 0 var(--px-koyu),8px 13px 0 var(--piksel-golge); }
+:root[data-zemin="piksel"] .kart:active{ transform:translateY(2px); }
+:root[data-zemin="piksel"] .kart__ust{ display:flex; flex-direction:row; align-items:center; gap:14px; text-align:left; margin:0; }
+:root[data-zemin="piksel"] .kart__metin{ text-align:left; min-width:0; }
+:root[data-zemin="piksel"] .logo{ width:54px; height:54px; margin:0; background:var(--renk); box-shadow:inset 0 3px 0 #ffffff40,inset 0 -4px 0 #00000033; }
+:root[data-zemin="piksel"] .sekil{ filter:none; width:24px; height:24px; }
+:root[data-zemin="piksel"] .kart__ad{ font-size:30px; font-weight:700; line-height:1; letter-spacing:0; }
+:root[data-zemin="piksel"] .kart__acik{ display:block; font-size:15px; line-height:1.35; color:var(--text-2); margin-top:12px; }
+:root[data-zemin="piksel"] .izgara .kart__ust{ flex-wrap:wrap; }
+:root[data-zemin="piksel"] .izgara .kart__metin{ flex:1 1 100%; order:2; }
+:root[data-zemin="piksel"] .kart__ozet{ border-top:2px dotted var(--border-strong); margin-top:14px; padding-top:10px; color:var(--text-2); font-size:14px; }
+:root[data-zemin="piksel"] .kart__alt{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; padding-top:16px; }
+:root[data-zemin="piksel"] .durum{ position:static; color:var(--text-2); font-size:13.5px; }
+:root[data-zemin="piksel"] .durum i{ width:10px; height:10px; border-radius:0; box-shadow:none; }
+:root[data-zemin="piksel"] .kart .dugme, :root[data-zemin="piksel"] .dugme--ana{ display:inline-flex; margin:0 3px 3px 0; min-height:34px; padding:0 16px; font-size:15px; font-weight:600; background:var(--primary); color:var(--primary-ink); border:0; box-shadow:inset 0 2px 0 #d9744a,inset 0 -3px 0 #8a3614,3px 3px 0 #7c2f12; }
+:root[data-zemin="piksel"] .kart:hover .dugme{ background:var(--primary-hover); }
+:root[data-zemin="piksel"] .guncel{ background:var(--piksel-kagit); border:0; -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:0 -3px 0 #2a1a1c,0 3px 0 #2a1a1c,-3px 0 0 #2a1a1c,3px 0 0 #2a1a1c,8px 10px 0 var(--piksel-golge); }
+:root[data-zemin="piksel"] .dugme{ background:var(--surface-2); color:var(--text); border:0; }
+:root[data-zemin="piksel"] .izgara{ display:grid; margin:0; align-items:stretch; max-width:none; }
+:root[data-zemin="piksel"] .izgara .kart{ flex:none; width:auto; min-height:248px; height:auto; aspect-ratio:auto; margin:0; padding:30px 22px 18px; }
+:root[data-zemin="piksel"] .izgara .kart:nth-child(n){ margin-top:0; }
+:root[data-zemin="piksel"] .izgara .kart__ust{ flex-direction:row; flex-wrap:nowrap; gap:14px; align-items:center; }
+:root[data-zemin="piksel"] .izgara .logo{ width:54px; height:54px; flex:none; }
+:root[data-zemin="piksel"] .izgara .sekil{ width:24px; height:24px; }
+:root[data-zemin="piksel"] .izgara .kart__metin{ flex:1 1 0; order:0; }
+:root[data-zemin="piksel"] .izgara .kart__ad{ display:block; text-align:left; font-size:30px; }
+:root[data-zemin="piksel"] .izgara .kart__acik{ text-align:left; max-width:none; margin-top:6px; white-space:normal; overflow-wrap:anywhere; }
+:root[data-zemin="piksel"] .izgara .kart__metin{ min-width:0; }
+:root[data-zemin="piksel"] .izgara .kart__alt{ position:static; inset:auto; display:flex; width:auto; margin-top:auto; padding-top:18px; justify-content:space-between; }
+:root[data-zemin="piksel"] .izgara .kart__ozet{ text-align:left; }
+:root[data-zemin="piksel"] .yay .kart--orta{ flex-direction:row; align-items:center; justify-content:space-between; min-height:0; }
+:root[data-zemin="piksel"] .yay .kart--orta .kart__ust{ flex-direction:row; gap:12px; }
+:root[data-zemin="piksel"] .yay .kart--orta .kart__alt{ position:static; margin:0; padding:0; }
+:root[data-zemin="piksel"] .yay .kart--orta:hover{ transform:none; box-shadow:inset 0 -3px 0 var(--px-koyu); background:var(--px-acik); }
+:root[data-zemin="piksel"] .yay__uc span{ display:inline; }
+@media (max-width:820px){
+  :root[data-zemin="piksel"] .sarmal{ padding:216px 12px 28px; }
+  :root[data-zemin="piksel"] .yay{ grid-template-columns:auto 1fr auto; gap:8px; padding:8px; }
+  :root[data-zemin="piksel"] .yay__uc span{ display:none; }
+  :root[data-zemin="piksel"] .yay .kart--orta{ min-width:0; }
+  :root[data-zemin="piksel"] .yay .kart--orta .kart__acik{ display:none; }
+  :root[data-zemin="piksel"] .izgara{ grid-template-columns:1fr; gap:18px; }
+  :root[data-zemin="piksel"] .izgara .kart{ min-height:0; padding:24px 16px 14px; }
+  :root[data-zemin="piksel"] .kart__acik{ margin-top:6px; font-size:14px; }
+  :root[data-zemin="piksel"] .izgara .kart__ad{ font-size:24px; }
 }
 </style></head><body>
 <script data-acilis>
@@ -1306,7 +1348,7 @@ def giris_html(telefon=False, tema=None):
     # arayuzu kalkti; Merkez'i baslatmak modulun Ayarlar › Merkez'inde (/api/merkez/ac).
     gun_kart = ('<a class="kart kart--orta" href="/gun/" data-modul="gun" title="Gün · günü kur, gidişi gör" style="--renk:var(--hkm);--renk-t:var(--hkm-t);--sira:3">'
                 '<div class="kart__ust"><span class="logo" aria-hidden="true"><i class="sekil sekil--gun"></i></span>'
-                '<div class="kart__metin"><div class="kart__ad">Gün</div></div></div>'
+                '<div class="kart__metin"><div class="kart__ad">Gün</div><div class="kart__acik">Günü kur, gidişi gör</div></div></div>'
                 '<div class="kart__alt"><span class="dugme">Aç</span></div></a>')
     s = guncelle.surum()
     surum = ("sürüm %s" % s["tarih"]) if s else "zip sürümü"

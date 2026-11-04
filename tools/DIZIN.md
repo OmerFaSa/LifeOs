@@ -9,6 +9,7 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `parca.py` — `brand/parcalar.txt`'ten sayfa bloklarını, sayfa kayıtlarından King rehberini üretir.
 - `parca_kanit.js` — Lego dönüşümünde çizimi önce ve sonra karşılaştırır, parça çıkarma denemesi yapar.
 - `css_onemli.js` — Her `!important`'ı bütün ekran ve temalarda ölçer; yalnız kanıtlı gereksizi siler, görülmeyene dokunmaz.
+- `piksel_denetim.js` — Temaya uymayan yumuşak izleri bulur: bulanıklık, bulanık gölge, geçiş, soluk yazı; açılır katmanlar dahil.
 - `olucss.py` — Arayüzde hiçbir öğeye uymayan ölü CSS kurallarını bulur ve temizler, CI'da denetim olarak koşulur.
 - `tiklama.js` — Bütün ekran ve pencerelerdeki eylem düğmelerine basarak hata ve sızıntı taraması yapar, birleştirmeden önce koşulur.
 - `yazi.py` — Ekran başlıklarının cümle düzenini, Türkçe imlasını ve terim kurallarını denetler, CI'da koşulur.

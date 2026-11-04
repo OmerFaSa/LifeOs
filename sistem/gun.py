@@ -58,10 +58,7 @@ GUN_SAYFASI = r"""<!doctype html>
 .site--gun .kenar [data-cekmece="menu"], .site--gun .ust__king, .site--gun .ust [data-act="open-appearance"]{ display:none !important; }
 
 .gun{ position:relative; max-width:1080px; margin:0 auto; padding:clamp(18px, 3vw, 36px) clamp(16px, 3vw, 32px) 64px; }
-.gun::before{ content:""; position:absolute; inset:-40px -6% auto; height:380px; z-index:-1; pointer-events:none;
-  -webkit-mask-image:radial-gradient(75% 80% at 50% 20%, #000 35%, transparent 80%); mask-image:radial-gradient(75% 80% at 50% 20%, #000 35%, transparent 80%);
-  background:radial-gradient(60% 70% at 20% 0%, color-mix(in oklab, var(--mer) 22%, transparent), transparent 70%),
-             radial-gradient(50% 60% at 85% 10%, color-mix(in oklab, var(--esp) 14%, transparent), transparent 70%); }
+.gun::before{ content:none; }
 .gun-bas{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
 .gun-selam{ margin:0; font-size:clamp(26px, 3.2vw, 36px); font-weight:700; letter-spacing:-.025em; line-height:1.1; }
 .gun-tarih{ margin:6px 0 0; color:var(--text-2); font-size:15px; }
@@ -71,7 +68,7 @@ GUN_SAYFASI = r"""<!doctype html>
 .gun-merkez[data-hal="acik"] i{ background:var(--ok, #1a7f5a); }
 
 .gun-kart{ position:relative; border-radius:20px; background:color-mix(in oklab, var(--surface) 88%, transparent);
-  box-shadow:inset 0 0 0 1px var(--border), 0 1px 2px rgba(16,24,40,.04), 0 12px 32px -22px rgba(16,24,40,.25); }
+  box-shadow:inset 0 0 0 1px var(--border); }
 .gun-kart__ad{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 10px; font-size:12.5px; font-weight:650;
   letter-spacing:.02em; text-transform:uppercase; color:var(--text-3); }
 .gun-kart__ad small{ text-transform:none; letter-spacing:0; font-weight:500; }
@@ -108,7 +105,7 @@ GUN_SAYFASI = r"""<!doctype html>
 .gun-gecis{ display:inline-flex; padding:3px; border-radius:999px; background:var(--surface-2); }
 .gun-gecis button{ min-height:30px; padding:0 14px; border:0; border-radius:999px; background:transparent; color:var(--text-2); font:inherit; font-size:13px; font-weight:600;
   cursor:pointer; transition:background .25s ease, color .2s, box-shadow .25s; }
-.gun-gecis button[aria-pressed="true"]{ background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(16,24,40,.12); }
+.gun-gecis button[aria-pressed="true"]{ background:var(--surface); color:var(--text); box-shadow:none; }
 .gun-saat{ position:relative; height:132px; margin-top:30px; }
 .gun-saat__izgara{ position:absolute; inset:0 0 22px; display:grid; grid-template-columns:repeat(16, 1fr); }
 .gun-saat__izgara span{ border-left:1px dashed color-mix(in oklab, var(--text) 10%, transparent); }
@@ -116,16 +113,15 @@ GUN_SAYFASI = r"""<!doctype html>
 .gun-saat__etiket{ position:absolute; left:0; right:0; bottom:0; display:grid; grid-template-columns:repeat(16, 1fr); font-size:11px; color:var(--text-3);
   font-variant-numeric:tabular-nums; }
 .gun-saat__gecmis{ position:absolute; top:0; bottom:22px; left:0; width:var(--simdi, 0%); border-radius:12px 0 0 12px;
-  background:linear-gradient(90deg, color-mix(in oklab, var(--mod) 4%, transparent), color-mix(in oklab, var(--mod) 12%, transparent));
+  background:var(--surface-2);
   transition:width .6s cubic-bezier(.22,1,.36,1), opacity .35s; }
 .gun-saat[data-gorunum="yapacak"] .gun-saat__gecmis{ opacity:.35; }
 .gun-saat__simdi{ position:absolute; top:-4px; bottom:18px; left:var(--simdi, 0%); width:2px; margin-left:-1px; background:var(--mod); border-radius:2px;
   transition:left .6s cubic-bezier(.22,1,.36,1); }
 .gun-saat__simdi::before{ content:""; position:absolute; top:-3px; left:-4px; width:10px; height:10px; border-radius:50%; background:var(--mod);
-  box-shadow:0 0 0 4px color-mix(in oklab, var(--mod) 22%, transparent); animation:gun-nabiz 2.4s ease-in-out infinite; }
+  box-shadow:0 0 0 3px var(--surface); }
 .gun-saat__simdi b{ position:absolute; top:-26px; left:8px; padding:2px 7px; border-radius:6px; background:var(--mod); color:#fff; font-size:11px;
   font-weight:650; font-variant-numeric:tabular-nums; white-space:nowrap; }
-@keyframes gun-nabiz{ 50%{ box-shadow:0 0 0 7px color-mix(in oklab, var(--mod) 8%, transparent); } }
 .gun-saat__bos{ position:absolute; inset:24px 8% 40px; display:grid; place-items:center; text-align:center; font-size:13.5px; color:var(--text-2); }
 .gun-saat__bos small{ display:block; margin-top:2px; color:var(--text-3); font-size:12px; }
 
@@ -145,12 +141,12 @@ GUN_SAYFASI = r"""<!doctype html>
 /* alt sira: simdi ne yapsam · hayat karnesi */
 .gun-alt{ display:grid; grid-template-columns:1fr 1.35fr; gap:12px; }
 .gun-oneri{ padding:18px 20px; overflow:hidden;
-  background:linear-gradient(150deg, color-mix(in oklab, var(--mod) 16%, var(--surface)), color-mix(in oklab, var(--surface) 92%, transparent) 70%); }
+  background:var(--surface-2); }
 .gun-oneri h3{ margin:4px 0 6px; font-size:20px; font-weight:700; letter-spacing:-.02em; }
 .gun-oneri p{ margin:0 0 14px; color:var(--text-2); font-size:14px; }
 .gun-oneri a{ display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 16px; border-radius:999px; background:var(--mod); color:#fff;
   text-decoration:none; font-size:13.5px; font-weight:650; transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s; }
-.gun-oneri a:hover{ transform:translateY(-1px); box-shadow:0 8px 20px -10px var(--mod); }
+.gun-oneri a:hover{ transform:translateY(-1px); box-shadow:none; }
 .gun-karne{ padding:18px 20px; }
 .gun-karne__izgara{ display:grid; grid-template-columns:76px repeat(7, 1fr); gap:5px; align-items:center; font-size:11.5px; }
 .gun-karne__izgara > span{ color:var(--text-3); text-align:center; }
@@ -189,8 +185,8 @@ GUN_SAYFASI = r"""<!doctype html>
 
 /* ust kart (2026-11-03: «daha guzel, profesyonel, modelle»): selam, gunun cumlesi, ilerleme halkasi */
 .gun-kahraman{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:24px; padding:22px 26px; margin-bottom:12px; border-radius:24px;
-  background:linear-gradient(135deg, color-mix(in oklab, var(--mod) 16%, var(--surface)) 0%, color-mix(in oklab, var(--surface) 92%, transparent) 62%);
-  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--mod) 18%, var(--border)), 0 18px 40px -28px color-mix(in oklab, var(--mod) 60%, transparent); }
+  background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--mod) 18%, var(--border)); }
 .gun-kahraman .gun-selam{ font-size:clamp(28px, 3.4vw, 40px); }
 .gun-kahraman .gun-tarih{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .gun-cumle{ margin:14px 0 0; max-width:640px; font-size:16.5px; line-height:1.5; color:var(--text); min-height:1.5em; }
@@ -286,8 +282,8 @@ GUN_SAYFASI = r"""<!doctype html>
 .gun-cipler .gun-senin{ margin:0; align-self:center; }
 .gun-deste{ display:grid; grid-template-columns:minmax(0, 1.1fr) minmax(0, 1fr); gap:20px; padding:20px 22px; align-items:start; }
 .gun-kartyuz{ position:relative; display:grid; align-content:space-between; gap:18px; min-height:190px; padding:22px; border-radius:18px;
-  background:linear-gradient(160deg, color-mix(in oklab, var(--mod) 20%, var(--surface)), color-mix(in oklab, var(--mod) 6%, var(--surface)));
-  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--mod) 26%, transparent), 0 14px 30px -22px color-mix(in oklab, var(--mod) 70%, transparent);
+  background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--mod) 26%, transparent);
   animation:gun-kart .45s cubic-bezier(.22,1,.36,1) both; }
 @keyframes gun-kart{ from{ opacity:0; transform:translateY(8px) rotate(-1.2deg); } }
 .gun-kartyuz small{ font-size:11.5px; color:var(--mod-ink); font-weight:650; letter-spacing:.02em; text-transform:uppercase; }

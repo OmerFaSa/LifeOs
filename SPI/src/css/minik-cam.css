@@ -22,7 +22,7 @@
     radial-gradient(75% 60% at 50% 108%, color-mix(in oklab, var(--g1) 65%, var(--beyaz)), transparent 74%),
     radial-gradient(110% 110% at 45% 35%, color-mix(in oklab, var(--g1) 90%, var(--beyaz)) 0%, color-mix(in oklab, var(--g2) 92%, transparent) 58%,
       color-mix(in oklab, var(--g3) 78%, var(--g2)) 100%) !important;
-  box-shadow:inset 0 -3px 7px color-mix(in oklab, var(--g3) 40%, transparent), inset 0 2px 4px var(--beyaz-65); }
+  box-shadow:none; }
 .minik__isik{ position:absolute; inset:14% 12% 22% 14%; border-radius:50%; pointer-events:none; z-index:0;
   background:radial-gradient(45% 40% at 35% 40%, color-mix(in oklab, var(--g2) 55%, var(--beyaz)) 0%, transparent 70%),
     radial-gradient(40% 36% at 68% 62%, color-mix(in oklab, var(--g3) 35%, transparent) 0%, transparent 72%);
@@ -52,12 +52,12 @@
   background:radial-gradient(circle at 35% 35%, var(--beyaz), #f3e6ec); }
 .minik[data-bicim="ucgen"][data-tip="bere"] .minik__sus{ left:22%; right:22%; top:-4%; }
 .minik[data-tip="ay"] .minik__sus{ left:60%; top:-24%; width:30%; height:30%; rotate:-18deg; border-radius:50%;
-  background:radial-gradient(circle at 68% 38%, transparent 0 40%, #ffe7a3 41%, #f6c453 70%); filter:drop-shadow(0 0 3px rgba(255,214,120,.6)); }
+  background:radial-gradient(circle at 68% 38%, transparent 0 40%, #ffe7a3 41%, #f6c453 70%); filter:none; }
 .minik[data-tip="alev"] .minik__sus{ left:34%; width:32%; top:-34%; height:42%;
   background:radial-gradient(60% 50% at 50% 78%, #fff3b0, transparent 70%), linear-gradient(180deg, #ff9f43, #ff5e3a);
   clip-path:polygon(50% 0, 66% 30%, 82% 18%, 84% 56%, 100% 72%, 76% 100%, 24% 100%, 0 72%, 16% 56%, 20% 22%, 36% 34%); }
 .minik[data-tip="bulut"] .minik__sus{ left:20%; right:20%; top:-10%; height:20%; border-radius:999px;
-  background:linear-gradient(var(--beyaz), #e6eefc); filter:drop-shadow(0 1px 1.5px rgba(110,130,180,.35)); }
+  background:linear-gradient(var(--beyaz), #e6eefc); filter:none; }
 .minik[data-tip="bulut"] .minik__sus::before, .minik[data-tip="bulut"] .minik__sus::after{ content:""; position:absolute; border-radius:50%; aspect-ratio:1;
   background:radial-gradient(circle at 40% 35%, var(--beyaz) 0 55%, #eef3fd); }
 .minik[data-tip="bulut"] .minik__sus::before{ left:8%; bottom:28%; width:46%; }

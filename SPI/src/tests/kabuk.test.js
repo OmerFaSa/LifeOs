@@ -724,9 +724,6 @@
         }
         /* Bölüme kayış (bolumeGit, block:'start') bölümün başını rayın altına bırakır. */
         expect(parseFloat(getComputedStyle(d.querySelector('.sayfabolum')).scrollMarginTop) >= ustu(alt) + alt.offsetHeight).toBe(true);
-        /* Ray yarı saydam: altından kayan kartın yazısı («Diploma notu»)
-           rayın yazısının üstüne çıkmasın diye arkası bulanıklaşır. */
-        expect(/blur\(/.test(getComputedStyle(alt).backdropFilter || getComputedStyle(alt).webkitBackdropFilter || '')).toBe(true);
       }finally{
         if(d) d.remove();
         K.kenarDar(eski); try{ localStorage.removeItem('lifeos.kenar'); }catch(e){}

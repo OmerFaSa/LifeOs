@@ -13,9 +13,9 @@
 html[data-king-gorunus="pembe"]{ --king-vurgu:#e0508f; --king-a1:#ffe1ee; --king-a2:#ffadd0; --king-a3:#e2669d; --king-tac:#ffd6e6; --king-tac-kenar:#e889b0; }
 .king .king__gonder, .king .king__cipler .king__cip--ana, .king .king__cipler--akis .king__cip--ana{
   background:var(--king-vurgu) !important; color:var(--beyaz); border-color:transparent;
-  box-shadow:inset 0 1px 0 var(--beyaz-28), 0 6px 16px -10px var(--king-vurgu) !important; }
+  box-shadow:inset 0 1px 0 var(--beyaz-28) !important; }
 .king__arkadas .minik{ --g1:var(--king-a1); --g2:var(--king-a2); --g3:var(--king-a3); }
-.king__arkadas .minik[data-tip="tac"] .minik__sus{ filter:drop-shadow(0 0 .6px var(--king-tac-kenar)); }
+.king__arkadas .minik[data-tip="tac"] .minik__sus{ filter:none; }
 html[data-king-gorunus="pembe"] .king__arkadas .minik[data-tip="tac"] .minik__sus{ background:linear-gradient(180deg, #fff3f8, var(--king-tac)); }
 /* Pembe: kirpik (iki gözde, dışa doğru), kurdele yanakta değil tacın yanında. */
 html[data-king-gorunus="pembe"] .king__arkadas .minik__goz::before{ content:''; position:absolute; top:-16%; width:48%; height:34%;
@@ -122,7 +122,7 @@ html .king:not(.is-mini) .king__ray .king__ray-is.is-secili, html .king:not(.is-
 
 .king:not(.is-mini) .king__akis > .king__balon--king.is-son > div{ position:relative; padding:18px 22px !important; border-radius:22px !important;
   background:linear-gradient(160deg, color-mix(in oklab, var(--king-vurgu) 7%, var(--surface)), var(--surface)) !important;
-  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 18%, var(--border)), 0 14px 30px -24px color-mix(in oklab, var(--king-vurgu) 60%, transparent) !important; }
+  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 18%, var(--border)) !important; }
 html .king:not(.is-mini) .king__balon--sen{ background:color-mix(in oklab, var(--king-vurgu) 13%, var(--surface)) !important;
   box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 16%, transparent) !important; }
 html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--king-vurgu) 55%, var(--text)); }

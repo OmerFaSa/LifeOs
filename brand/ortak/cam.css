@@ -5,7 +5,7 @@
 :root{
   --levha:linear-gradient(150deg, var(--beyaz-42), var(--beyaz-14));
   --levha-kenar:0 0 0 7px var(--beyaz-26), 0 0 0 8px var(--beyaz-70);
-  --levha-golge:24px 50px 100px -56px rgba(20,24,40,.36), 8px 12px 30px -18px rgba(20,24,40,.12), 18px 40px 70px -50px rgb(var(--sicak) / .25);
+  --levha-golge:none;
   --karo:var(--cam);                          /* tek yüzey: karolar da kartla aynı cam (2026-10-28) */
   --kenar-on:var(--mod-ink, var(--mod));
   --sicak:255 168 120;                       /* zemin ışığının rengi (rgb) */
@@ -18,7 +18,7 @@
   --cam-katman:var(--beyaz-72);
   --cam-kenar:var(--beyaz-60);
   --cam-ust:inset 0 1px 0 var(--beyaz-90), inset 0 0 0 1px var(--beyaz-28);
-  --cam-golge:0 1px 2px rgba(20,24,40,.05), 0 10px 30px -14px rgba(20,24,40,.18);
+  --cam-golge:none;
   --cam-girdi:var(--beyaz-50);
   /* SEÇİLİ VE ANA DÜĞME — renkli cam (kullanıcı, 2026-10-29: «seçili buton,
      kaydet, menü çok katı, sistemle uyumsuz»). Dolu koyu blok yerine modül
@@ -26,7 +26,7 @@
      modülün koyu/açık tonu. Seçili çekmece, menü bölümü ve ana düğme aynı dil. */
   --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 14%, var(--beyaz-62));
   --secili-yazi:var(--vurgu-ink, var(--mod-ink, var(--mod)));
-  --secili-golge:inset 0 1px 0 var(--beyaz-90), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 26%, transparent), 0 6px 16px -12px color-mix(in oklab, var(--vurgu, var(--mod)) 60%, transparent);
+  --secili-golge:inset 0 1px 0 var(--beyaz-90), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 26%, transparent);
   --ana-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 22%, var(--beyaz-55));
   --ana-zemin-ust:color-mix(in oklab, var(--vurgu, var(--mod)) 30%, var(--beyaz-60));
 }
@@ -35,7 +35,7 @@
   --dugme:oklch(from var(--mod) .46 .14 h);
   --levha:linear-gradient(150deg, var(--beyaz-07), var(--beyaz-025));
   --levha-kenar:0 0 0 7px var(--beyaz-035), 0 0 0 8px var(--beyaz-10);
-  --levha-golge:24px 50px 100px -46px var(--siyah-70), 18px 40px 70px -50px rgb(var(--sicak) / .2);
+  --levha-golge:none;
   --karo:var(--cam);
   --kenar-on:oklch(from var(--mod) .42 .12 h);
   --levha-ic:inset 0 1px 0 var(--beyaz-12), inset 0 0 0 1px var(--beyaz-06);
@@ -44,7 +44,7 @@
   --cam-katman:rgba(28,28,34,.72);
   --cam-kenar:var(--beyaz-07);
   --cam-ust:inset 0 1px 0 var(--beyaz-09), inset 0 0 0 1px var(--beyaz-03);
-  --cam-golge:0 1px 2px var(--siyah-25), 0 14px 34px -18px var(--siyah-55);
+  --cam-golge:none;
   --cam-girdi:var(--siyah-22);
     --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 24%, var(--beyaz-05)); --secili-yazi:color-mix(in oklab, var(--vurgu, var(--mod)) 28%, var(--beyaz));
     --secili-golge:inset 0 1px 0 var(--beyaz-12), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent);
@@ -56,7 +56,7 @@
     --dugme:oklch(from var(--mod) .46 .14 h);
     --levha:linear-gradient(150deg, var(--beyaz-07), var(--beyaz-025));
     --levha-kenar:0 0 0 7px var(--beyaz-035), 0 0 0 8px var(--beyaz-10);
-    --levha-golge:24px 50px 100px -46px var(--siyah-70), 18px 40px 70px -50px rgb(var(--sicak) / .2);
+    --levha-golge:none;
     --karo:var(--cam);
     --kenar-on:oklch(from var(--mod) .42 .12 h);
     --levha-ic:inset 0 1px 0 var(--beyaz-12), inset 0 0 0 1px var(--beyaz-06);
@@ -66,7 +66,7 @@
     --cam-katman:rgba(28,28,34,.72);
     --cam-kenar:var(--beyaz-07);
     --cam-ust:inset 0 1px 0 var(--beyaz-09), inset 0 0 0 1px var(--beyaz-03);
-    --cam-golge:0 1px 2px var(--siyah-25), 0 14px 34px -18px var(--siyah-55);
+    --cam-golge:none;
     --cam-girdi:var(--siyah-22);
     --secili-zemin:color-mix(in oklab, var(--vurgu, var(--mod)) 24%, var(--beyaz-05)); --secili-yazi:color-mix(in oklab, var(--vurgu, var(--mod)) 28%, var(--beyaz));
     --secili-golge:inset 0 1px 0 var(--beyaz-12), inset 0 0 0 1px color-mix(in oklab, var(--vurgu, var(--mod)) 38%, transparent);
@@ -142,7 +142,7 @@
 .site--v5 .agentav, .agentkare{ color:transparent; border-radius:50%;
   background:radial-gradient(circle at 34% 26%, var(--beyaz-75), transparent 45%),
     radial-gradient(circle at 50% 60%, color-mix(in oklab, var(--mod) 70%, var(--beyaz)), var(--mod));
-  box-shadow:inset 0 0 0 1px var(--beyaz-40), 0 6px 14px -8px var(--mod); }
+  box-shadow:inset 0 0 0 1px var(--beyaz-40); }
 .site--v5 .agentav::after, .agentkare::after{ content:''; position:absolute; inset:0; border-radius:50%;
   background:radial-gradient(ellipse 9% 15% at 38% 54%, var(--beyaz) 88%, transparent 100%),
     radial-gradient(ellipse 9% 15% at 62% 54%, var(--beyaz) 88%, transparent 100%); }
@@ -245,8 +245,7 @@
   border-radius:48% 52% 45% 55% / 55% 50% 50% 45%;
   background:radial-gradient(circle at 33% 26%, var(--beyaz-92), var(--beyaz-00) 30%),
     radial-gradient(circle at 50% 56%, var(--minik-1) 0%, var(--minik-2) 60%, var(--minik-3) 100%);
-  box-shadow:inset 0 -3px 6px oklch(from var(--mod) .4 .15 h / .3), 0 0 14px var(--minik-hale),
-    0 10px 8px -7px oklch(from var(--mod) .5 .15 h / .4);
+  box-shadow:none;
 }
 .site--v5 .agentkare{ border-radius:46% 54% 44% 56% / 56% 50% 50% 44%; }
 .site--v5 :is(.agentav, .agentkare)::after{
@@ -262,7 +261,7 @@
 /* taç — Patron */
 .site--v5 :is(.agentav--patron, [class*="agentkare--patron"])::before{ content:''; left:30%; right:30%; top:-22%; height:30%;
   background:linear-gradient(180deg, #ffe39a, #f2b23a); clip-path:polygon(0 100%, 0 25%, 25% 60%, 50% 0, 75% 60%, 100% 25%, 100% 100%);
-  filter:drop-shadow(0 1px 1px rgba(120,70,0,.35)); }
+  filter:none; }
 /* kep — sınav ajanları */
 .site--v5 :is(.agentav--tyt, .agentav--ayt, .agentav--herodot)::before{ content:''; left:14%; right:14%; top:-16%; height:26%;
   background:linear-gradient(#2a2f55, #2a2f55) 50% 100% / 50% 45% no-repeat, linear-gradient(#20244a, #20244a) 50% 30% / 100% 35% no-repeat;
@@ -440,7 +439,7 @@ html[data-zemin] .minikkat, html.king-acik .minikkat{ display:none; }
 .minik__balon, .minik__zzz{ position:absolute; left:50%; bottom:calc(100% + 6px); white-space:nowrap; pointer-events:none;
   opacity:0; transform:translate(-50%, 4px) scale(.8); transition:opacity .25s ease, transform .35s var(--su, ease); }
 .minik__balon{ padding:3px 8px; border-radius:10px; font:600 11px/1.2 var(--font-body, system-ui); color:var(--text);
-  background:var(--cam-katman, var(--beyaz-90)); box-shadow:var(--cam-ust, none), 0 4px 10px -4px rgba(20,24,40,.25); }
+  background:var(--cam-katman, var(--beyaz-90)); box-shadow:var(--cam-ust, none); }
 .minik__zzz{ font:700 11px/1 var(--font-body, system-ui); color:var(--g3); }
 .minik.is-konusuyor .minik__balon{ opacity:1; transform:translate(-50%, 0) scale(1); }
 
@@ -552,7 +551,7 @@ html[data-theme="dark"]{ --el-isik:255 236 220; --el-isik-a:.075; }
     conic-gradient(from 60deg at 50% 50%, #ff8fb1 0 60deg, transparent 0 180deg, #ff8fb1 0 240deg, transparent 0); rotate:14deg; }
 .minik.is-oturuyor .minik__kol{ top:62%; }
 .minikkat{ transition:opacity .5s ease, filter .5s ease; }
-html.sayfa-gecis .minikkat{ opacity:0; filter:blur(6px); transition:none; }
+html.sayfa-gecis .minikkat{ opacity:0; filter:none; transition:none; }
 @media (prefers-reduced-motion:no-preference){
   .minik.is-yuruyor .minik__kol--sol{ animation:mk-kol .56s ease-in-out infinite; }
   .minik.is-yuruyor .minik__kol--sag{ animation:mk-kol .56s ease-in-out -.28s infinite; }
@@ -608,8 +607,8 @@ html[data-theme="dark"]{ --rim-ust:var(--beyaz-16); --rim-orta:var(--beyaz-03); 
 .minik__ad{ position:absolute; left:50%; bottom:calc(100% + 10px); z-index:2; translate:-50% 4px; opacity:0; pointer-events:none;
   padding:5px 10px 6px; border-radius:12px; white-space:nowrap; text-align:center;
   font:600 11.5px/1.3 var(--font-body, system-ui); color:var(--text);
-  background:var(--cam-katman, var(--beyaz-92)); -webkit-backdrop-filter:saturate(150%) blur(16px); backdrop-filter:saturate(150%) blur(16px);
-  box-shadow:var(--cam-ust, none), inset 0 0 0 1px var(--cam-kenar, transparent), 0 8px 18px -10px rgba(20,24,40,.35);
+  background:var(--cam-katman, var(--beyaz-92)); -webkit-backdrop-filter:none; backdrop-filter:none;
+  box-shadow:var(--cam-ust, none), inset 0 0 0 1px var(--cam-kenar, transparent);
   transition:opacity .16s ease, translate .32s cubic-bezier(.2,.8,.2,1); }
 .minik__ad i{ font-style:normal; font-weight:500; color:var(--text-3); }
 .minik__ad small{ display:block; font-weight:500; font-size:10.5px; color:var(--text-3); }
@@ -834,7 +833,7 @@ html[data-theme="dark"]{ --rim-ust:var(--beyaz-16); --rim-orta:var(--beyaz-03); 
     radial-gradient(15% 9% at 76% 67%, rgba(255,110,150,.45), transparent),
     radial-gradient(90% 80% at 50% 40%, transparent 58%, color-mix(in oklab, var(--g3) 40%, transparent) 100%),
     linear-gradient(170deg, color-mix(in oklab, var(--g1) 72%, transparent), color-mix(in oklab, var(--g2) 82%, transparent));
-  -webkit-backdrop-filter:blur(6px) saturate(1.7); backdrop-filter:blur(6px) saturate(1.7); }
+  -webkit-backdrop-filter:none; backdrop-filter:none; }
 /* Üstteki yansıma: ayrı katman, imlecin tersine hafifçe kayar. */
 .minik__govde::before{ content:""; position:absolute; left:16%; right:30%; top:7%; height:26%; border-radius:50%; pointer-events:none; z-index:1;
   background:radial-gradient(closest-side, var(--beyaz-95), var(--beyaz-35) 60%, transparent);
@@ -842,7 +841,7 @@ html[data-theme="dark"]{ --rim-ust:var(--beyaz-16); --rim-orta:var(--beyaz-03); 
   transition:transform .4s cubic-bezier(.2,.8,.2,1); }
 .minik[data-bicim="ucgen"] .minik__govde::before{ left:34%; right:36%; top:30%; height:18%; }
 .minik :is(.minik__kol, .minik__ayak){ background:linear-gradient(170deg, color-mix(in oklab, var(--g1) 80%, var(--beyaz)), var(--g2));
-  filter:drop-shadow(0 0 .5px var(--beyaz-90)) drop-shadow(0 2px 2px color-mix(in oklab, var(--g3) 30%, transparent)); }
+  filter:none; }
 .minik__goz{ width:17%; height:22%; top:41%;
   background:radial-gradient(circle at 68% 76%, var(--beyaz-90) 0 8%, transparent 10%), radial-gradient(circle at 45% 35%, #2c3166, #13152c 72%); }
 .minik__goz:nth-of-type(2){ left:26%; } .minik__goz:nth-of-type(3){ right:26%; }
@@ -943,29 +942,29 @@ html[data-zemin] .king__arkadas{ display:none; }
     linear-gradient(color-mix(in oklab, var(--mod) 80%, var(--beyaz)), var(--mod)) 42% 86% / 16% 58% no-repeat,
     linear-gradient(#7fd69b, #3fae6a) 68% 86% / 16% 78% no-repeat,
     linear-gradient(var(--beyaz), #f1f2f8);
-  box-shadow:0 0 0 .6px rgba(30,34,60,.35), 0 2px 3px rgba(20,24,40,.18); }
+  box-shadow:0 0 0 .6px rgba(30,34,60,.35); }
 .minik[data-esya="kahve"] .minik__esya{ left:60%; top:58%; width:24%; height:24%; border-radius:2px 2px 40% 40%;
-  background:linear-gradient(#7a4a2c 0 18%, var(--beyaz) 18%); box-shadow:0 0 0 .6px rgba(30,34,60,.35), 0 2px 2px rgba(20,24,40,.15); }
+  background:linear-gradient(#7a4a2c 0 18%, var(--beyaz) 18%); box-shadow:0 0 0 .6px rgba(30,34,60,.35); }
 .minik[data-esya="kahve"] .minik__esya::after{ content:""; position:absolute; right:-34%; top:22%; width:40%; height:44%; border:1.5px solid #e9e6f0; border-left:0; border-radius:0 50% 50% 0; }
 .minik[data-esya="kahve"] .minik__esya::before{ content:""; position:absolute; left:20%; bottom:110%; width:60%; height:70%; opacity:.7;
   background:radial-gradient(ellipse 22% 46% at 30% 60%, var(--beyaz-90), transparent 70%), radial-gradient(ellipse 22% 46% at 70% 40%, var(--beyaz-80), transparent 70%); }
 .minik[data-esya="not"] .minik__esya{ left:54%; top:52%; width:34%; height:40%; border-radius:2px; rotate:8deg;
   background:linear-gradient(#ffd45c 0 16%, transparent 16%), repeating-linear-gradient(#fffdf6 0 20%, #cfd6ea 20% 24%);
-  box-shadow:0 0 0 .6px rgba(30,34,60,.35), 0 2px 3px rgba(20,24,40,.15); }
+  box-shadow:0 0 0 .6px rgba(30,34,60,.35); }
 .minik[data-esya="not"] .minik__esya::after{ content:""; position:absolute; right:-30%; top:10%; width:12%; height:80%; rotate:24deg; border-radius:1px;
   background:linear-gradient(#ffb3c6 0 14%, #ffcf4d 14% 82%, #6b4b2a 82%); }
 .minik[data-esya="buyutec"] .minik__esya{ left:56%; top:36%; width:34%; aspect-ratio:1; border-radius:50%;
   border:2.4px solid #4a5170; background:radial-gradient(circle at 35% 30%, var(--beyaz-85), rgba(190,225,255,.35) 60%); }
 .minik[data-esya="buyutec"] .minik__esya::after{ content:""; position:absolute; right:-42%; bottom:-46%; width:20%; height:64%; rotate:-45deg; border-radius:2px; background:#4a5170; }
 .minik[data-esya="ampul"] .minik__esya{ left:38%; top:-64%; width:24%; height:30%; border-radius:50% 50% 42% 42%;
-  background:radial-gradient(circle at 40% 35%, #fffbe0, #ffd84a 70%); box-shadow:0 0 10px 2px rgba(255,214,90,.65); }
+  background:radial-gradient(circle at 40% 35%, #fffbe0, #ffd84a 70%); box-shadow:none; }
 .minik[data-esya="ampul"] .minik__esya::after{ content:""; position:absolute; left:28%; right:28%; bottom:-24%; height:26%; border-radius:0 0 2px 2px; background:#b9bfd3; }
 @media (prefers-reduced-motion:no-preference){
   .minik[data-esya="kahve"] .minik__esya::before{ animation:es-buhar 2.4s ease-out infinite; }
   .minik[data-esya="ampul"] .minik__esya{ animation:es-ampul 1.6s ease-in-out infinite; }
 }
 @keyframes es-buhar{ 0%{ opacity:0; translate:0 3px; } 40%{ opacity:.75; } 100%{ opacity:0; translate:0 -6px; } }
-@keyframes es-ampul{ 0%, 100%{ box-shadow:0 0 6px 1px rgba(255,214,90,.5); } 50%{ box-shadow:0 0 14px 4px rgba(255,214,90,.8); } }
+@keyframes es-ampul{ 0%, 100%{ box-shadow:none; } 50%{ box-shadow:none; } }
 
 /* King konuşurken: ağız oynar; poza göre yürür, oturur ya da uzanır. */
 @media (prefers-reduced-motion:no-preference){
@@ -1158,7 +1157,7 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
    yerdeki gölgesi silinir; bırakılınca düşüş ve iniş ezilmesi JS'te. */
 .minik{ touch-action:none; cursor:grab; }
 .minik.is-tasiniyor{ cursor:grabbing; z-index:6; }
-.minik.is-tasiniyor .minik__govde{ transform-origin:50% 8%; filter:var(--hat-filtre) drop-shadow(0 10px 8px color-mix(in oklab, var(--g3) 30%, transparent)); }
+.minik.is-tasiniyor .minik__govde{ transform-origin:50% 8%; filter:var(--hat-filtre); }
 .minik.is-tasiniyor .minik__golge{ opacity:0; }
 .minik.is-tasiniyor .minik__goz{ height:28%; top:40%; }
 .minik.is-tasiniyor .minik__agiz{ height:12%; border-radius:50%; border-top:1.6px solid #1d2140; }
@@ -1193,18 +1192,18 @@ html[data-theme="dark"] .ortam-isik::before{ mix-blend-mode:plus-lighter;
 :root{
   --manzara-sis:linear-gradient(180deg, var(--beyaz-46), var(--beyaz-40) 36%, var(--beyaz-16) 60%, var(--beyaz-28));
   --manzara-okuma:radial-gradient(85% 62% at 14% 8%, var(--beyaz-62), transparent 74%);
-  --manzara-hale:0 1px 14px var(--beyaz-75);
+  --manzara-hale:none;
 }
 html[data-manzara="acik"]{ --cam:radial-gradient(90% 70% at 0% 0%, var(--beyaz-46), transparent 58%), linear-gradient(140deg, var(--beyaz-62), var(--beyaz-40)); }
 html[data-theme="dark"]{
   --manzara-sis:linear-gradient(180deg, oklch(from var(--mod) .16 .03 h / .7), oklch(from var(--mod) .13 .025 h / .58) 45%, oklch(from var(--mod) .1 .02 h / .78));
   --manzara-okuma:radial-gradient(70% 55% at 16% 10%, rgba(4,6,14,.42), transparent 72%);
-  --manzara-hale:0 1px 14px var(--siyah-55);
+  --manzara-hale:none;
 }
 html[data-manzara="acik"][data-theme="dark"]{ --cam:radial-gradient(90% 70% at 0% 0%, var(--beyaz-08), transparent 58%), linear-gradient(140deg, var(--beyaz-10), var(--beyaz-05)); }
 @media (prefers-color-scheme:dark){ html:not([data-theme="light"]){
   --manzara-sis:linear-gradient(180deg, oklch(from var(--mod) .16 .03 h / .7), oklch(from var(--mod) .13 .025 h / .58) 45%, oklch(from var(--mod) .1 .02 h / .78));
-  --manzara-okuma:radial-gradient(70% 55% at 16% 10%, rgba(4,6,14,.42), transparent 72%); --manzara-hale:0 1px 14px var(--siyah-55); } }
+  --manzara-okuma:radial-gradient(70% 55% at 16% 10%, rgba(4,6,14,.42), transparent 72%); --manzara-hale:none; } }
 @media (prefers-color-scheme:dark){ html[data-manzara="acik"]:not([data-theme="light"]){ --cam:radial-gradient(90% 70% at 0% 0%, var(--beyaz-08), transparent 58%), linear-gradient(140deg, var(--beyaz-10), var(--beyaz-05)); } }
 html[data-yuzey="ferah"]{ --manzara-sis:linear-gradient(var(--beyaz-58), var(--beyaz-50)); }
 html[data-yuzey="ferah"][data-theme="dark"]{ --manzara-sis:linear-gradient(rgba(6,8,16,.8), rgba(6,8,16,.76)); }
@@ -1367,14 +1366,11 @@ html[data-zemin] video.zemin-video{ display:none; }
    «seçenekleri arttır; arka plan fotoğrafını değiştirebilmek yok, göremedim»).
    Kök nitelikleri ayarlar.js yazar (hep, varsayılan da). */
 /* Cam yoğunluğu: Dolu (az saydam) · Orta · Saydam. */
-html[data-cam="az"]{ --cam:linear-gradient(140deg, var(--beyaz-86), var(--beyaz-70)); --cam-ince:linear-gradient(140deg, var(--beyaz-80), var(--beyaz-62)); }
-html[data-cam="az"][data-theme="dark"]{ --cam:linear-gradient(140deg, rgba(34,36,46,.9), rgba(26,28,36,.86)); --cam-ince:linear-gradient(140deg, rgba(40,42,52,.86), rgba(30,32,40,.8)); }
-html[data-cam="cok"]{ --cam:linear-gradient(140deg, var(--beyaz-30), var(--beyaz-12)); --cam-ince:linear-gradient(140deg, var(--beyaz-26), var(--beyaz-10)); }
-html[data-cam="cok"][data-theme="dark"]{ --cam:linear-gradient(140deg, var(--beyaz-05), var(--beyaz-015)); --cam-ince:linear-gradient(140deg, var(--beyaz-05), var(--beyaz-015)); }
-@media (prefers-color-scheme:dark){
-  html[data-cam="az"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, rgba(34,36,46,.9), rgba(26,28,36,.86)); --cam-ince:linear-gradient(140deg, rgba(40,42,52,.86), rgba(30,32,40,.8)); }
-  html[data-cam="cok"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, var(--beyaz-05), var(--beyaz-015)); --cam-ince:linear-gradient(140deg, var(--beyaz-05), var(--beyaz-015)); }
-}
+
+
+
+
+
 /* Yüksek kontrast: soluk yazılar koyulaşır, çizgiler belirginleşir, cam dolar. */
 html[data-kontrast="yuksek"]{ --text-2:var(--text); --text-3:color-mix(in oklab, var(--text) 82%, transparent);
   --border:color-mix(in oklab, var(--text) 26%, transparent); --border-soft:color-mix(in oklab, var(--text) 18%, transparent);
@@ -1382,16 +1378,15 @@ html[data-kontrast="yuksek"]{ --text-2:var(--text); --text-3:color-mix(in oklab,
 html[data-kontrast="yuksek"][data-theme="dark"]{ --cam:linear-gradient(140deg, rgba(30,32,40,.94), rgba(24,26,32,.92)); }
 @media (prefers-color-scheme:dark){ html[data-kontrast="yuksek"]:not([data-theme="light"]){ --cam:linear-gradient(140deg, rgba(30,32,40,.94), rgba(24,26,32,.92)); } }
 /* Okunaklık perdesi: fotoğrafın üstündeki örtünün gücü (Az .45 · Orta 1 · Çok 1.7). */
-html[data-perde]{ --perde:1; } html[data-perde="az"]{ --perde:.45; } html[data-perde="cok"]{ --perde:1.7; }
-html[data-perde]{ --manzara-sis:linear-gradient(180deg, rgb(from var(--beyaz) r g b / calc(.46 * var(--perde))), rgb(from var(--beyaz) r g b / calc(.4 * var(--perde))) 36%,
-  rgb(from var(--beyaz) r g b / calc(.16 * var(--perde))) 60%, rgb(from var(--beyaz) r g b / calc(.28 * var(--perde)))); }
-html[data-perde][data-theme="dark"]{ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,calc(.34 * var(--perde))), rgba(6,8,14,calc(.22 * var(--perde))) 45%, rgba(6,8,14,calc(.46 * var(--perde)))); }
-@media (prefers-color-scheme:dark){ html[data-perde]:not([data-theme="light"]){ --manzara-sis:linear-gradient(180deg, rgba(6,8,14,calc(.34 * var(--perde))), rgba(6,8,14,calc(.22 * var(--perde))) 45%, rgba(6,8,14,calc(.46 * var(--perde)))); } }
+  
+
+
+
 /* Fotoğrafı yumuşat: duran zemin katmanı bir kez bulanır (kaydırmada yeniden çizilmez). */
 
 
-html[data-bulanik="hafif"] video.zemin-video{ filter:blur(6px); transform:scale(1.04); }
-html[data-bulanik="cok"] video.zemin-video{ filter:blur(14px); transform:scale(1.08); }
+
+
 /* Sayaçlar ve noktalar gizli. */
 html[data-rozet="kapali"] .kenar__sayi, html[data-rozet="kapali"] .kenar__sayac, html[data-rozet="kapali"] .ust__zil-nokta{ display:none !important; }
 
@@ -1462,15 +1457,13 @@ html[data-rozet="kapali"] .kenar__sayi, html[data-rozet="kapali"] .kenar__sayac,
    zemin gelir (okunaklık bulanıklığa bağlı kalmaz).
    Pencereler (Ayarlar, bildirim, çekmeceler): camın altında temanın zemininden
    bir taban var; buzlu açıkken bile arkadaki sayfa yazısı içeriğe karışmaz. */
-html[data-perde="yok"]{ --perde:0; }
+
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
   .kmenu--yan:not(.is-alttan){ background:var(--cam), color-mix(in oklab, var(--bg) 78%, transparent);
-    -webkit-backdrop-filter:saturate(150%) blur(40px) !important; backdrop-filter:saturate(150%) blur(40px) !important; }
+    -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
 }
-html[data-buzlu-pencere="kapali"] :is(.katman, .kmenu--yan:not(.is-alttan)){ -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
-  background:var(--surface) !important; }
-html[data-buzlu-menu="kapali"] .site--v5 > .kenar, html[data-buzlu-menu="kapali"] .site--v5 > .kenar :is(*, *::before, *::after),
-html[data-buzlu-menu="kapali"] .site--v5 > .kenar::before, html[data-buzlu-menu="kapali"] .site--v5 > .kenar::after{ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
-html[data-buzlu-menu="kapali"] .site--v5 > .kenar{ background:color-mix(in oklab, var(--surface) 97%, transparent) !important; }
-html[data-buzlu-kart="kapali"] .site__body{ --cam:color-mix(in oklab, var(--surface) 94%, transparent); --cam-ince:color-mix(in oklab, var(--surface) 90%, transparent); }
-html[data-buzlu-kart="kapali"] .site__body :is(*, *::before, *::after):not(.katman):not(.katman *){ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+
+
+
+
+

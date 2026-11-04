@@ -77,9 +77,8 @@ html.king-acik .site, html.king-acik .site *{ -webkit-backdrop-filter:none !impo
   width:min(560px, calc(100vw - 32px)); max-height:min(72vh, 600px); display:flex; flex-direction:column; gap:12px;
   padding:12px 14px 12px; border-radius:28px; pointer-events:auto;
   background:var(--buz-ust, color-mix(in oklab, var(--surface) 84%, transparent));
-  -webkit-backdrop-filter:blur(28px) saturate(1.4); backdrop-filter:blur(28px) saturate(1.4);
-  box-shadow:var(--buz-isik, inset 0 1px 0 var(--beyaz-70), inset 0 0 0 1px var(--beyaz-40)),
-    0 1px 2px rgba(20,24,40,.05), 0 24px 64px -24px rgba(20,24,40,.35);
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+  box-shadow:var(--buz-isik, inset 0 1px 0 var(--beyaz-70), inset 0 0 0 1px var(--beyaz-40));
   opacity:0; transform:translate(-50%, 16px) scale(.98);
   transition:opacity .52s cubic-bezier(.32,.72,0,1), transform .52s cubic-bezier(.32,.72,0,1); }
 .king.is-acik .king__kutu{ opacity:1; transform:translate(-50%, 0); }
@@ -110,10 +109,10 @@ html.king-acik .site, html.king-acik .site *{ -webkit-backdrop-filter:none !impo
 .king__kure{ --kb:22px; position:relative; isolation:isolate; overflow:hidden; flex:none;
   width:var(--kb); height:var(--kb); margin-top:1px; border-radius:50%;
   background:radial-gradient(circle at 50% 60%, #1F2A6B 0%, #101533 75%);
-  box-shadow:0 1px 2px rgba(10,14,40,.25), 0 calc(var(--kb) * .12) calc(var(--kb) * .5) calc(var(--kb) * -.18) color-mix(in oklab, #4F86FF 55%, transparent); }
+  box-shadow:0 calc(var(--kb) * .12) calc(var(--kb) * .5) calc(var(--kb) * -.18) color-mix(in oklab, #4F86FF 55%, transparent); }
 .king__kure::before{ content:''; position:absolute; inset:-30%; border-radius:50%;
   background:conic-gradient(from 0deg, #4F86FF, #2EC4A9, #F2A93B, #9A86FF, #4F86FF);
-  filter:blur(calc(var(--kb) * .14)) saturate(1.3);
+  filter:none;
   animation:king-akis 16s linear infinite; }
 .king__kure::after{ content:''; position:absolute; inset:0; border-radius:50%;
   background:radial-gradient(42% 30% at 34% 22%, var(--beyaz-78), var(--beyaz-00) 75%),
@@ -364,7 +363,7 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__secici{ display:inline-flex; padding:3px; border-radius:999px; background:var(--surface-2); gap:2px; }
 .king__secim{ min-height:30px; padding:0 12px; border:0; border-radius:999px; background:transparent; color:var(--text-2);
   font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
-.king__secim.is-secili{ background:var(--surface); color:var(--text); box-shadow:0 1px 3px var(--siyah-12); }
+.king__secim.is-secili{ background:var(--surface); color:var(--text); box-shadow:none; }
 .king__secim:focus-visible, .king__menu-is:focus-visible, .king__kayit-ac:focus-visible, .king__geri:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 .king__menu-is{ display:flex; align-items:center; justify-content:space-between; min-height:44px; padding:0 14px; border:0; border-radius:12px;
   background:var(--surface-2); color:var(--text); font:inherit; font-size:14px; font-weight:600; text-align:left; cursor:pointer; }
@@ -392,7 +391,7 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__balon--king{ position:relative; }
 .king__kopyala{ position:absolute; right:-6px; bottom:-6px; width:26px; height:26px; display:grid; place-items:center;
   padding:0; border:0; border-radius:999px; background:var(--surface); color:var(--text-2); cursor:pointer;
-  box-shadow:0 1px 3px var(--siyah-12); opacity:0; transition:opacity .15s ease; }
+  box-shadow:none; opacity:0; transition:opacity .15s ease; }
 .king__kopyala svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .king__balon--king:hover .king__kopyala, .king__kopyala:focus-visible, .king__kopyala.is-kopyalandi{ opacity:1; }
 .king__kopyala.is-kopyalandi{ color:var(--primary); }
@@ -400,7 +399,7 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__menu-anahtar{ gap:12px; }
 .king__anahtar{ position:relative; display:inline-block; vertical-align:middle; width:38px; height:22px; flex:none; border-radius:999px; background:var(--surface-3, var(--siyah-15)); transition:background .2s ease; }
 .king__anahtar i{ position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--beyaz);
-  box-shadow:0 1px 2px var(--siyah-20); transition:transform .2s cubic-bezier(.32,.72,0,1); }
+  box-shadow:none; transition:transform .2s cubic-bezier(.32,.72,0,1); }
 .king__anahtar.is-acik{ background:var(--primary); }
 .king__anahtar.is-acik i{ transform:translateX(16px); }
 
@@ -679,7 +678,7 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__arti.is-acik{ transform:rotate(45deg); }
 .king__arti:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 .king__arac-menu{ position:absolute; z-index:3; left:0; bottom:calc(100% + 8px); width:min(300px, calc(100vw - 48px)); display:grid; gap:2px;
-  padding:6px; border-radius:16px; background:var(--surface); box-shadow:0 0 0 1px var(--line, var(--siyah-08)), 0 16px 40px -12px rgba(20,24,40,.35); }
+  padding:6px; border-radius:16px; background:var(--surface); box-shadow:0 0 0 1px var(--line, var(--siyah-08)); }
 .king__arac{ display:grid; gap:1px; min-height:44px; padding:6px 10px; border:0; border-radius:10px; background:transparent; color:var(--text);
   font:inherit; text-align:left; cursor:pointer; }
 .king__arac b{ font-size:13.5px; font-weight:600; }
@@ -783,8 +782,8 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
    çerçeveli; bulgu balonunda sol çizgi; odak sayacı başlıkta hap; kart
    grafiği. */
 .king:not(.is-mini) .king__yaz{ gap:4px; padding:6px; border-radius:28px; background:var(--surface-2);
-  box-shadow:0 0 0 1px var(--line, var(--siyah-08)), 0 8px 24px -16px rgba(20,24,40,.35); transition:box-shadow .2s ease; }
-.king:not(.is-mini) .king__yaz:focus-within{ box-shadow:0 0 0 1.5px color-mix(in oklab, var(--primary) 70%, transparent), 0 8px 24px -16px rgba(20,24,40,.35); }
+  box-shadow:0 0 0 1px var(--line, var(--siyah-08)); transition:box-shadow .2s ease; }
+.king:not(.is-mini) .king__yaz:focus-within{ box-shadow:0 0 0 1.5px color-mix(in oklab, var(--primary) 70%, transparent); }
 .king:not(.is-mini) .king__yaz .king__girdi{ min-height:44px; background:transparent; border-color:transparent; padding:0 8px; }
 .king:not(.is-mini) .king__yaz .king__girdi:focus{ background:transparent; border-color:transparent; }
 .king:not(.is-mini) .king__yaz .king__arti{ background:transparent; }
@@ -1062,7 +1061,7 @@ button.king__ekran-onizle:focus-visible{ outline:2px solid var(--k-vurgu); outli
    zemini (kartlar, vitrin kartları) dolu kalır: kontrast düşmez. */
 .king:not(.is-mini) .king__kutu{ width:min(1680px, calc(100vw - 24px)); height:min(1040px, calc(100dvh - 24px));
   background:color-mix(in oklab, var(--surface) 84%, transparent);
-  -webkit-backdrop-filter:blur(28px) saturate(1.15); backdrop-filter:blur(28px) saturate(1.15); }
+  -webkit-backdrop-filter:none; backdrop-filter:none; }
 .king:not(.is-mini) .king__ray{ background:transparent; }
 .king:not(.is-mini) .king__yan{ background:color-mix(in oklab, var(--surface-2) 40%, transparent); }
 .king:not(.is-mini) .king__alan{ background:color-mix(in oklab, var(--surface) 70%, transparent); }
@@ -1207,7 +1206,7 @@ button.king__ekran-onizle:focus-visible{ outline:2px solid var(--k-vurgu); outli
 .kv-dugme:active{ transform:scale(.96); }
 .kv-dugme:focus-visible{ outline:2px solid var(--k-vurgu); outline-offset:2px; }
 .kv-dugme--birincil{ background:var(--ink, var(--text)); color:var(--ink-on, var(--surface)); }
-.kv-dugme--birincil:hover{ background:var(--ink, var(--text)); box-shadow:0 4px 14px -6px color-mix(in oklab, var(--text) 50%, transparent); }
+.kv-dugme--birincil:hover{ background:var(--ink, var(--text)); box-shadow:none; }
 .kv-dugme--tehlike{ color:var(--danger, #e5484d); }
 .kv-ipucu{ margin:calc(-1 * var(--sp-3)) 0 0; font-size:var(--fs-xs); color:var(--text-2); }
 .kv-bag{ border:0; padding:0; background:none; color:var(--text); font:inherit; font-weight:600; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
@@ -1220,7 +1219,7 @@ button.king__ekran-onizle:focus-visible{ outline:2px solid var(--k-vurgu); outli
 /* kutu: akıcı dokunuş */
 .kv-mini{ transition:box-shadow .25s ease, background .25s ease, transform .3s cubic-bezier(.22,1,.36,1); }
 @media (hover:hover){
-  .kv-mini:hover{ transform:translateY(-2px); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--kv-r, var(--text-3)) 55%, transparent), 0 8px 20px -14px color-mix(in oklab, var(--kv-r, var(--text)) 70%, transparent); }
+  .kv-mini:hover{ transform:translateY(-2px); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--kv-r, var(--text-3)) 55%, transparent); }
   .kv-mini:hover .kv-mini-simge{ transform:scale(1.06); }
 }
 .kv-mini:active{ transform:scale(.96); transition-duration:.1s; }
@@ -1255,7 +1254,7 @@ button.king__ekran-onizle:focus-visible{ outline:2px solid var(--k-vurgu); outli
 /* panel ve form */
 @keyframes kv-ac{ from{ opacity:0; transform:translateY(-8px) scale(.985); } }
 .kv-panel{ display:flex; flex-direction:column; gap:var(--sp-3); margin-top:var(--sp-3); padding:var(--sp-4); border-radius:var(--r-md);
-  background:color-mix(in oklab, var(--surface-2) 60%, var(--surface)); box-shadow:inset 0 0 0 1px var(--border), 0 12px 32px -20px color-mix(in oklab, var(--text) 40%, transparent);
+  background:color-mix(in oklab, var(--surface-2) 60%, var(--surface)); box-shadow:inset 0 0 0 1px var(--border);
   animation:kv-ac .38s cubic-bezier(.22,1,.36,1) both; }
 .kv-yeni{ margin-top:0; }
 .kv-panel-bas{ display:flex; align-items:flex-start; gap:var(--sp-3); }
@@ -1317,7 +1316,7 @@ span.kt-ana{ cursor:default; }
 .kt-ana:focus-visible, a.kt-kart:focus-visible{ outline:2px solid var(--k-vurgu); outline-offset:2px; }
 @media (hover:hover){
   .kt-kart:hover{ transform:translateY(-2px); background:color-mix(in oklab, var(--kv-r, var(--text)) 4%, var(--surface));
-    box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--kv-r, var(--text-3)) 50%, transparent), 0 8px 20px -14px color-mix(in oklab, var(--kv-r, var(--text)) 70%, transparent); }
+    box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--kv-r, var(--text-3)) 50%, transparent); }
   .kt-kart:hover .kt-simge{ transform:scale(1.06); }
 }
 .kt-kart:active{ transform:scale(.985); }
@@ -1355,9 +1354,9 @@ span.kt-ana{ cursor:default; }
 .kt-gorsel:hover > .kt-ufak, .kt-gorsel > .kt-ufak:focus-visible{ opacity:1; }
 .kt-gorsel figcaption{ font-size:11px; color:var(--text-3); }
 .kt-buyuk{ position:fixed; inset:0; z-index:6; display:grid; place-items:center; padding:var(--sp-6); animation:king-belir .25s ease both; }
-.kt-buyuk-perde{ position:absolute; inset:0; border:0; padding:0; background:color-mix(in oklab, var(--surface) 82%, transparent); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); cursor:zoom-out; }
+.kt-buyuk-perde{ position:absolute; inset:0; border:0; padding:0; background:color-mix(in oklab, var(--surface) 82%, transparent); -webkit-backdrop-filter:none; backdrop-filter:none; cursor:zoom-out; }
 .kt-buyuk figure{ position:relative; margin:0; display:grid; gap:8px; max-width:min(720px, 100%); animation:kv-ac .35s cubic-bezier(.22,1,.36,1) both; }
-.kt-buyuk img{ max-width:100%; max-height:70vh; border-radius:var(--r-md); box-shadow:0 20px 50px -20px var(--siyah-50); }
+.kt-buyuk img{ max-width:100%; max-height:70vh; border-radius:var(--r-md); box-shadow:none; }
 .kt-buyuk figcaption{ display:flex; align-items:center; gap:4px; font-size:var(--fs-xs); color:var(--text-2); }
 .kt-buyuk figcaption .kt-ufak:first-of-type{ margin-left:auto; }
 .kt-bos{ display:grid; justify-items:center; gap:8px; padding:var(--sp-8, 48px) var(--sp-4); text-align:center; color:var(--text-2); }
@@ -1413,7 +1412,7 @@ html .king .king__arkadas .minik__balon{ bottom:calc(100% + 12px); }
    (küçülür, solar); içleri görünmez, yalnız kenarları. Yeni kart hafifçe yükselir. */
 .king.is-mini .king__deste{ position:relative; display:flex; flex-direction:column; padding-top:20px; min-height:0; }
 .king__dkart--on{ position:relative; z-index:3; min-height:0; overflow:auto; overscroll-behavior:contain; padding:12px 14px; border-radius:18px;
-  background:var(--surface, var(--beyaz)); box-shadow:inset 0 0 0 1px var(--border), 0 10px 24px -18px rgba(20,24,40,.45); }
+  background:var(--surface, var(--beyaz)); box-shadow:inset 0 0 0 1px var(--border); }
 .king__dkart--on .king__mini-son{ padding:0; }
 .king__dkart--arka{ position:absolute; left:0; right:0; top:20px; height:56px; z-index:1; border-radius:18px; pointer-events:none;
   background:var(--surface, var(--beyaz)); box-shadow:inset 0 0 0 1px var(--border); transform-origin:50% 0; }
