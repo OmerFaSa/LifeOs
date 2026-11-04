@@ -412,7 +412,7 @@ def run():
         govde = h[:a] + h[h.index("</script>", a):]
         no(any(x in govde for x in ('/logo/hkm.png', 'data-hkm', 'id="guncel"', "<script>", "/api/")),
            "telefonda HKM, guncelleme ve bilgisayarin betigi yok")
-        eq(h.count("<script"), 5)                         # parca motoru + giris ekrani (hesap.js) + Animasyonlar + QR + acilis videosu
+        eq(h.count("<script"), 7)                         # zemin secimi + parca motoru + piksel oda + giris ekrani (hesap.js) + Animasyonlar + QR + acilis videosu
         ok('<script src="/hesap.js" data-giris></script>' in h)
         ok('<script src="/animasyon.js"></script>' in h)
         ok('<script src="/qr.js"></script>' in h)         # hesap sayfasinin QR'i (2026-10-08)

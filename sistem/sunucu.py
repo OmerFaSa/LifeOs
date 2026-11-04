@@ -479,7 +479,10 @@ GIRIS_SAYFASI = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>LifeOS — Kontrol paneli</title>
 <link rel="icon" href="__IKON__"/>
+<script>(function(){var z=null;try{z=localStorage.getItem('lifeos.zemin');}catch(e){}if(z!=='sade'&&z!=='yumusak')document.documentElement.setAttribute('data-zemin','piksel');})();</script>
 <link rel="stylesheet" href="/hesap.css"/>
+<link rel="stylesheet" href="/piksel-yazi.css"/>
+<link rel="stylesheet" href="/piksel.css"/>
 <script src="/parca.js"></script>
 <script src="/animasyon.js"></script>
 <style>
@@ -857,6 +860,39 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 .avideo.is-bitiyor .avideo__cizgi{ opacity:0; transition-delay:0s; }
 @media (prefers-reduced-motion:reduce){ .avideo, .avideo__v, .avideo__atla, .avideo__cizgi{ transition-duration:.25s; transition-delay:0s; } .avideo__v{ transform:none; } }
 .gayar__yer{ display:grid; grid-template-columns:64px 1fr; align-items:center; gap:8px; font-size:12.5px; color:var(--fg-2); }
+/* PIKSEL (brand/ortak/piksel.css): sayfanin degiskenleri kagit ve ahsaba baglanir. */
+:root[data-zemin="piksel"]{
+  --yuzey:var(--piksel-kagit); --yuzey-2:var(--surface-2); --fg:var(--text); --fg-2:var(--text-2); --fg-3:var(--text-3);
+  --cizgi:var(--border); --cizgi-2:var(--border-strong); --golge:none;
+  --cam:var(--piksel-kagit); --cam-kenar:transparent; --cam-ust:none; --cam-golge:none;
+  --hap:var(--piksel-tahta); --hap-kenar:transparent; --hale:none; --mono:var(--font-body);
+}
+:root[data-zemin="piksel"] body{ font-family:var(--font-body); color:var(--text); }
+:root[data-zemin="piksel"] body::before{ display:none; }
+:root[data-zemin="piksel"] .sarmal{ padding-top:226px; }
+
+:root[data-zemin="piksel"] .guncel, :root[data-zemin="piksel"] .kart{ background:var(--piksel-kagit); border:0; -webkit-backdrop-filter:none; backdrop-filter:none;
+  box-shadow:0 -4px 0 var(--piksel-kagit),0 4px 0 var(--piksel-kagit),-4px 0 0 var(--piksel-kagit),4px 0 0 var(--piksel-kagit),8px 10px 0 var(--piksel-golge); }
+:root[data-zemin="piksel"] .kart::before{ display:none; }
+:root[data-zemin="piksel"] .kart:hover{ transform:translateY(-2px);
+  box-shadow:0 -4px 0 var(--piksel-kagit),0 4px 0 var(--piksel-kagit),-4px 0 0 var(--piksel-kagit),4px 0 0 var(--piksel-kagit),8px 12px 0 var(--piksel-golge); }
+:root[data-zemin="piksel"] .logo{ background:var(--renk); box-shadow:none; }
+:root[data-zemin="piksel"] .sekil{ filter:none; }
+:root[data-zemin="piksel"] .dugme{ background:var(--surface-2); color:var(--text); border-color:transparent; }
+:root[data-zemin="piksel"] .dugme--ana, :root[data-zemin="piksel"] .kart .dugme{ background:var(--primary); color:var(--primary-ink); }
+:root[data-zemin="piksel"] .kart:hover .dugme{ background:var(--primary-hover); }
+:root[data-zemin="piksel"] .kart__ozet{ border-top-color:var(--border); }
+
+/* Şerit ve kâğıt dışındaki yazı: yer tahtasının üstünde krem */
+:root[data-zemin="piksel"] :is(.ust h1, .ust h1 span, .bolum, .dip, .dip *){ color:var(--piksel-kenar-yazi); text-shadow:none; }
+:root[data-zemin="piksel"] .yay__uc, :root[data-zemin="piksel"] .surum{ background:var(--piksel-tahta); color:var(--piksel-kenar-yazi); border-color:transparent; box-shadow:0 -3px 0 var(--piksel-tahta),0 3px 0 var(--piksel-tahta),-3px 0 0 var(--piksel-tahta),3px 0 0 var(--piksel-tahta); -webkit-backdrop-filter:none; backdrop-filter:none; }
+:root[data-zemin="piksel"] .yay__uc b{ background:var(--piksel-kenar-yazi); color:var(--piksel-tahta); box-shadow:none; }
+:root[data-zemin="piksel"] .yay .kart--orta{ box-shadow:0 -3px 0 var(--piksel-kagit),0 3px 0 var(--piksel-kagit),-3px 0 0 var(--piksel-kagit),3px 0 0 var(--piksel-kagit); }
+:root[data-zemin="piksel"] .yay svg:not(.kart__ok){ display:none; }
+
+@media (max-width:760px){
+  :root[data-zemin="piksel"] .sarmal{ padding-top:216px; }
+}
 </style></head><body>
 <script data-acilis>
 /* ACILIS VIDEOSU (.avideo): yalniz sistem ilk acildiginda (onceki sayfa yok, bu
@@ -1218,6 +1254,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 })();
 </script>
 <script src="/qr.js"></script>
+<script src="/piksel.js"></script>
 <script src="/hesap.js" data-giris></script>
 </body></html>
 """
@@ -1559,7 +1596,8 @@ class Giris(SimpleHTTPRequestHandler):
         adim kurulumu ve kodla cihaz baglama QR'i (hesap.js soz 17-18)."""
         tur = {"hesap.js": "text/javascript; charset=utf-8", "hesap.css": "text/css; charset=utf-8",
                "animasyon.js": "text/javascript; charset=utf-8", "qr.js": "text/javascript; charset=utf-8",
-               "muzik.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8"}[ad]
+               "muzik.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8",
+               "piksel.css": "text/css; charset=utf-8", "piksel-yazi.css": "text/css; charset=utf-8"}[ad]
         with open(os.path.join(KOK, "brand", "ortak", ad), "rb") as f:
             govde = f.read()
         self.send_response(200)
@@ -1629,7 +1667,7 @@ class Giris(SimpleHTTPRequestHandler):
             return zemin.isle(self)
         if yol.startswith("/api/planlama"):
             return plan_isle(self)
-        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js"):
+        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js", "/piksel.js", "/piksel.css", "/piksel-yazi.css"):
             return self._hesap_dosyasi(yol[1:])
         if yol == "/gun":
             self.send_response(301)

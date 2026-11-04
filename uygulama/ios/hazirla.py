@@ -97,7 +97,7 @@ def main():
     # Giris ekrani (hesap): secim sayfasinda bir kez giris (brand/ortak/hesap.*);
     # animasyon.js: LifeOS'un kendi «Animasyonlar» ayari (sunucu.py giris_html);
     # qr.js: hesap sayfasinin QR'i (iki adim, kodla baglama).
-    for ad in ("parca.js", "hesap.js", "hesap.css", "animasyon.js", "qr.js"):
+    for ad in ("parca.js", "piksel.js", "piksel.css", "piksel-yazi.css", "hesap.js", "hesap.css", "animasyon.js", "qr.js"):
         shutil.copy2(KOK / "brand" / "ortak" / ad, giris / ad)
 
     shutil.copy2(KOK / "brand" / "life" / "logo.png", SIMGE)
