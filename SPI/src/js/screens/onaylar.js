@@ -15,6 +15,46 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.onaylar.king-teklifi':'King teklifi',
+  'spi.onaylar.is-emri':'· iş emri #',
+  'spi.onaylar.devam':'Devam',
+  'spi.onaylar.dur-ve-bitir':'Dur ve bitir',
+  'spi.onaylar.i-ptal':'İptal',
+  'spi.onaylar.king-ucretli-bir-isi-onayin':'King ücretli bir işi onayın olmadan açmaz.',
+  'spi.onaylar.hkm-teklifi':'HKM teklifi',
+  'spi.onaylar.kontrol-ettim':'Kontrol ettim',
+  'spi.onaylar.hepsini-kaydet':'Hepsini kaydet (',
+  'spi.onaylar.yalniz-okunabilen-gunluk-kay':'Yalnız okunabilen günlük kayıtlar; her biri Danışma ekranından geri alınır.',
+  'spi.onaylar.gordum':'Gördüm',
+  'spi.onaylar.i-stemiyorum':'İstemiyorum',
+  'spi.onaylar.bu-satirlar-birer-tekliftir':'Bu satırlar birer tekliftir.',
+  'spi.onaylar.spi-bu-kaydi-sinayamadi':'SPİ bu kaydı sınayamadı.',
+  'spi.onaylar.spi-sunu-ekleyecek':'SPİ şunu ekleyecek:',
+  'spi.onaylar.spi-bu-kaydi-okuyamadi':'SPİ bu kaydı okuyamadı.',
+  'spi.onaylar.spi-soyle-okudu':'SPİ şöyle okudu',
+  'spi.onaylar.yazilmayacak':'» — yazılmayacak:',
+  'spi.onaylar.anlasilmadi-yazilmayacak':'» — anlaşılmadı, yazılmayacak.',
+  'spi.onaylar.kisayollar-dan':'Kısayollar’dan ',
+  'spi.onaylar.tek-dokunus-hepsini-yazar-ge':'Tek dokunuş hepsini yazar; «Geri al» hepsini birden geri alır. Tahliller tek tek onaylanır.',
+  'spi.onaylar.hicbir-olcum-kaydedilemedi':'Hiçbir ölçüm kaydedilemedi.',
+  'spi.onaylar.gecildi-kayit-yazilmadi':'Geçildi; kayıt yazılmadı.',
+  'spi.onaylar.kaydet':'Kaydet',
+  'spi.onaylar.vazgec':'Vazgeç',
+  'spi.onaylar.i-s-emri':'İş emri #',
+  'spi.onaylar.merkez-teklifi':'Merkez teklifi',
+  'spi.onaylar.sonucu-belirsiz-teklif':'Sonucu belirsiz teklif',
+  'spi.onaylar.uygulanirken-yarida-kaldi':'Uygulanırken yarıda kaldı',
+  'spi.onaylar.kaydina-yazilip-yazilmadigi':'Kaydına yazılıp yazılmadığı bilinmiyor; kaydına bakıp doğrula.',
+  'spi.onaylar.son-kararlar':'Son kararlar',
+  'spi.onaylar.cikarimlar':'Çıkarımlar',
+  'spi.onaylar.king-in-senin-hakkindaki-tah':'King’in senin hakkındaki tahminleri. Doğruysa kaydedilir; yanlışsa bir daha sorulmaz.',
+  'spi.onaylar.bekleyen-oneri-yok':'Bekleyen öneri yok',
+  'spi.onaylar.merkez-king-ve-danisma-bir':'Merkez, King ve Danışma bir şey önerdiğinde burada durur; sen onaylamadan hiçbiri uygulanmaz.',
+  'spi.onaylar.danisma-ya-git':'Danışma’ya git',
+  'spi.onaylar.kaydedildi':'Kaydedildi',
+  'spi.onaylar.onaylar':'Onaylar',
+});
 window.LIFEOS.PARCA.sayfa({ id:'onaylar', modul:'spi', cekmece:'onaylar', ad:'Bekleyen', sira:10 });
 
 SP.Screens.onaylar = (function(){
@@ -29,20 +69,20 @@ SP.Screens.onaylar = (function(){
   function KingTeklifKart(){
     const liste = S.ui.kingTeklifler || [];
     if(!liste.length) return '';
-    return K.Kutu({ ad:'King teklifi', ipucu:'hkm', yuva:liste.length + ' iş onayını bekliyor',
+    return K.Kutu({ ad:yz('spi.onaylar.king-teklifi'), ipucu:'hkm', yuva:liste.length + ' iş onayını bekliyor',
       govde:html`
         ${map(liste.filter(t => t.durum === 'ara_onay'), t => html`<div class="mt-8">
-          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
+          <div><b>${t.konu}</b> <span class="tiny dim">${yz('spi.onaylar.is-emri')}${t.id}</span></div>
           <div class="tiny mt-4">${t.metin}</div>
           <div class="row wrap gap-8 mt-8">
-            ${K.Button({ label:'Devam', size:'sm', tone:'primary', act:'king-parca',
+            ${K.Button({ label:yz('spi.onaylar.devam'), size:'sm', tone:'primary', act:'king-parca',
               data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
-            ${K.Button({ label:'Dur ve bitir', size:'sm', act:'king-parca',
+            ${K.Button({ label:yz('spi.onaylar.dur-ve-bitir'), size:'sm', act:'king-parca',
               data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}
           </div>
         </div>`)}
         ${map(liste.filter(t => t.durum !== 'ara_onay'), t => html`<div class="mt-8">
-          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
+          <div><b>${t.konu}</b> <span class="tiny dim">${yz('spi.onaylar.is-emri')}${t.id}</span></div>
           ${map(t.secenekler, (x, i) => html`<div class="tiny mt-4">${i + 1}) ${x.metin}</div>`)}
           ${when(t.neden, () => K.Notice({ tone:'info', class:'mt-8',
             body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
@@ -53,11 +93,11 @@ SP.Screens.onaylar = (function(){
             ${map(t.secenekler, (x, i) => K.Button({ label:(i + 1) + '. seçeneği onayla',
               size:'sm', tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla',
               data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
-            ${K.Button({ label:'İptal', size:'sm', act:'king-iptal',
+            ${K.Button({ label:yz('spi.onaylar.i-ptal'), size:'sm', act:'king-iptal',
               data:{ 'data-id':String(t.id) } })}
           </div>
         </div>`)}
-        ${K.Ayrinti({ ozet:'King ücretli bir işi onayın olmadan açmaz.',
+        ${K.Ayrinti({ ozet:yz('spi.onaylar.king-ucretli-bir-isi-onayin'),
           govde:'Sınıf, maliyet ve süre King’in hesabıdır (tahmin); sen onaylayınca iş BAM’da '
             + 'başlar ve sonucu teklif olarak buraya gelir.' })}` });
   }
@@ -76,7 +116,7 @@ SP.Screens.onaylar = (function(){
     const liste = S.ui.hkmIntents || [];
     const supheli = S.ui.hkmDoubts || [];
     if(!liste.length && !supheli.length) return '';
-    return K.Kutu({ ad:'HKM teklifi', ipucu:'hkm',
+    return K.Kutu({ ad:yz('spi.onaylar.hkm-teklifi'), ipucu:'hkm',
       yuva:liste.length ? liste.length + ' teklif bekliyor'
         : supheli.length + ' teklifin sonucu belirsiz',
       govde:html`
@@ -84,14 +124,14 @@ SP.Screens.onaylar = (function(){
           ${K.Notice({ tone:'warn', body:'Bir teklif uygulanırken işlem yarıda kaldı; kaydına '
             + 'yazılıp yazılmadığı bilinmiyor. Kaydına bakıp doğrula.' })}
           <div class="row gap-8 mt-8">
-            ${K.Button({ label:'Kontrol ettim', size:'sm',
+            ${K.Button({ label:yz('spi.onaylar.kontrol-ettim'), size:'sm',
               act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } })}
           </div>
         </div>`)}
         ${when(topluKayitlar().length >= 2, () => html`<div class="row gap-8 mt-8">
-          ${K.Button({ label:'Hepsini kaydet (' + topluKayitlar().length + ')', size:'sm',
+          ${K.Button({ label:yz('spi.onaylar.hepsini-kaydet') + topluKayitlar().length + ')', size:'sm',
             tone:'primary', act:'hkm-toplu' })}
-          <span class="tiny dim">Yalnız okunabilen günlük kayıtlar; her biri Danışma ekranından geri alınır.</span>
+          <span class="tiny dim">${yz('spi.onaylar.yalniz-okunabilen-gunluk-kay')}</span>
         </div>`)}
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
@@ -105,13 +145,13 @@ SP.Screens.onaylar = (function(){
                 'fiyat.add':'Ekle', 'yer.add':'Ekle' })[n.kind] || 'Planına ekle',
                 size:'sm', tone:'primary',
                 act:'hkm-intent-apply', data:{ 'data-id':String(n.id) } })
-              : K.Button({ label:'Gördüm', size:'sm', tone:'primary',
+              : K.Button({ label:yz('spi.onaylar.gordum'), size:'sm', tone:'primary',
                 act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
-            ${K.Button({ label:'İstemiyorum', size:'sm',
+            ${K.Button({ label:yz('spi.onaylar.i-stemiyorum'), size:'sm',
               act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
           </div>
         </div>`)}
-        ${K.Ayrinti({ ozet:'Bu satırlar birer tekliftir.',
+        ${K.Ayrinti({ ozet:yz('spi.onaylar.bu-satirlar-birer-tekliftir'),
           govde:'Onaylarsan SPİ kendi kaydına yazar; reddedersen HKM kaydı silmez, «istenmedi» '
             + 'diye işaretler — görülmemiş bir teklifle reddedilmiş bir teklif ayrı şeylerdir.' })}` });
   }
@@ -120,11 +160,11 @@ SP.Screens.onaylar = (function(){
      eklenemeyeceği onaydan ÖNCE görünür (core/bilgi.js). */
   function bilgiOnizleme(n){
     const b = n.bilgi;
-    if(!b) return html`<p class="tiny dim mt-8">SPİ bu kaydı sınayamadı.</p>`;
+    if(!b) return html`<p class="tiny dim mt-8">${yz('spi.onaylar.spi-bu-kaydi-sinayamadi')}</p>`;
     if(!b.ok) return html`<p class="tiny dim mt-8">Eklenmeyecek: ${b.why}</p>`;
     const o = b.onizleme;
     return html`<div class="mt-8">
-      <p class="tiny"><b>SPİ şunu ekleyecek:</b> ${o.baslik}</p>
+      <p class="tiny"><b>${yz('spi.onaylar.spi-sunu-ekleyecek')}</b> ${o.baslik}</p>
       <ul class="tiny mt-4">${map(o.satirlar, s => html`<li>${s}</li>`)}</ul>
       ${map(o.uyari || [], u => html`<p class="tiny dim">${u}</p>`)}
     </div>`;
@@ -134,13 +174,13 @@ SP.Screens.onaylar = (function(){
      ve anlaşılmayan parça da SEBEBİYLE yazılır. */
   function kayitOkuma(n){
     const o = n.okuma;
-    if(!o) return html`<p class="tiny dim mt-8">SPİ bu kaydı okuyamadı.</p>`;
+    if(!o) return html`<p class="tiny dim mt-8">${yz('spi.onaylar.spi-bu-kaydi-okuyamadi')}</p>`;
     return html`<div class="mt-8">
-      <p class="tiny"><b>SPİ şöyle okudu</b> (${o.gun}):</p>
+      <p class="tiny"><b>${yz('spi.onaylar.spi-soyle-okudu')}</b> (${o.gun}):</p>
       <ul class="tiny mt-4">
         ${map(o.yazilacak, y => html`<li>${y.baslik}: ${y.satirlar.join('; ')}</li>`)}
-        ${map(o.yazilamaz, y => html`<li class="dim">«${y.metin}» — yazılmayacak: ${y.why}</li>`)}
-        ${map(o.anlasilmayan, m => html`<li class="dim">«${m}» — anlaşılmadı, yazılmayacak.</li>`)}
+        ${map(o.yazilamaz, y => html`<li class="dim">«${y.metin}${yz('spi.onaylar.yazilmayacak')} ${y.why}</li>`)}
+        ${map(o.anlasilmayan, m => html`<li class="dim">«${m}${yz('spi.onaylar.anlasilmadi-yazilmayacak')}</li>`)}
       </ul>
       ${when(!o.yazilacak.length, () => html`<p class="tiny dim">Bu cümleden SPİ'ye
         yazılacak bir şey çıkmadı; istersen kaydı elle gir.</p>`)}
@@ -183,12 +223,12 @@ SP.Screens.onaylar = (function(){
   /* Bugün'ün düğmesi today.js'in ONAY_EYLEMLERI listesinden geçer; orada
      «hkm-toplu» var, bu yüzden aynı eylem `data-kaynak="gelen"` ile ayrılır. */
   function gelenTopluDugme(l, tone){
-    return K.Button({ label:'Hepsini kaydet (' + l.length + ')', size:'sm', tone, act:'hkm-toplu',
+    return K.Button({ label:yz('spi.onaylar.hepsini-kaydet') + l.length + ')', size:'sm', tone, act:'hkm-toplu',
       data:{ 'data-kaynak':'gelen' } });
   }
   function gelenTopluSatir(l){
-    return onaySatir({ baslik:'Kısayollar’dan ' + l.length + ' ölçüm', seviye:'kucuk',
-      ust:'Tek dokunuş hepsini yazar; «Geri al» hepsini birden geri alır. Tahliller tek tek onaylanır.',
+    return onaySatir({ baslik:yz('spi.onaylar.kisayollar-dan') + l.length + ' ölçüm', seviye:'kucuk',
+      ust:yz('spi.onaylar.tek-dokunus-hepsini-yazar-ge'),
       govde:html`<p class="small mt-6">${gelenOzet(l)}</p>`,
       eylem:gelenTopluDugme(l, 'primary') });
   }
@@ -196,7 +236,7 @@ SP.Screens.onaylar = (function(){
      bugun.test.js); tek tek bakmak Onaylar'da, menü sayacından. Bugün'ün
      tek dolu düğmesi ölçümü kaydetmektir, bu yüzden burada dolu değil. */
   function GelenOzetKart(l){
-    return K.Kutu({ ad:'Kısayollar’dan ' + l.length + ' ölçüm', yuva:'onayını bekliyor',
+    return K.Kutu({ ad:yz('spi.onaylar.kisayollar-dan') + l.length + ' ölçüm', yuva:'onayını bekliyor',
       govde:html`<p class="small">${gelenOzet(l)}</p>
         <div class="row wrap gap-8 mt-8">${gelenTopluDugme(l)}</div>` });
   }
@@ -224,7 +264,7 @@ SP.Screens.onaylar = (function(){
       const r = await SP.Proposals.approve(o.id);
       if(r.ok) yazilan.push(o.id); else kalan++;
     }
-    if(!yazilan.length){ UI.toast('Hiçbir ölçüm kaydedilemedi.'); SP.App.render(); return; }
+    if(!yazilan.length){ UI.toast(yz('spi.onaylar.hicbir-olcum-kaydedilemedi')); SP.App.render(); return; }
     SP.UI.onayMuhru();
     UI.toast(yazilan.length + ' ölçüm kaydedildi' + (kalan ? ', ' + kalan + ' tanesi kaydedilemedi.' : '.'),
       { undo:async () => { await geriAl(yazilan); } });
@@ -320,7 +360,7 @@ SP.Screens.onaylar = (function(){
           kapsam:kapsamOf(o, e),
           cumle:o.reason ? { metin:o.reason, kaynak:o.source === 'llm' ? 'model' : 'kural' } : null }; },
       uygula:id => handle['bekleyen-onay']({ dataset:{ id } }),
-      gec:async (id, kayit) => { await SP.Proposals.reject(id, kayit); UI.toast('Geçildi; kayıt yazılmadı.'); SP.App.render(); },
+      gec:async (id, kayit) => { await SP.Proposals.reject(id, kayit); UI.toast(yz('spi.onaylar.gecildi-kayit-yazilmadi')); SP.App.render(); },
       onizle:o => { const pv = SP.Proposals.preview(o);
         return { govde:pv.ok && pv.rows.length ? '<p class="small">' + pv.rows.map(r => SP.U.esc(r.alan + ' → ' + r.sonra)).join(' · ') + '</p>' : '' }; },
       pencere:o => UI.sheet({ title:o.baslik, body:o.govde, footer:o.ayak }),
@@ -354,9 +394,9 @@ SP.Screens.onaylar = (function(){
           <span class="bekleyen__ne2">${pv.ok && pv.rows.length
             ? pv.rows.map(r => r.alan + ' → ' + r.sonra).join(' · ') : (pv.why || '')}</span>
           <span class="bekleyen__dug">
-            ${K.Button({ label:'Kaydet', size:'sm', tone:'primary',
+            ${K.Button({ label:yz('spi.onaylar.kaydet'), size:'sm', tone:'primary',
               act:'bekleyen-onay', data:{ 'data-id':o.id } })}
-            ${K.Button({ label:'Vazgeç', size:'sm', act:'bekleyen-ret', data:{ 'data-id':o.id } })}
+            ${K.Button({ label:yz('spi.onaylar.vazgec'), size:'sm', act:'bekleyen-ret', data:{ 'data-id':o.id } })}
           </span>
         </div>`;
       })}</div>` });
@@ -381,20 +421,20 @@ SP.Screens.onaylar = (function(){
   }
   /* King'in işi para harcar: geri alınamaz, küçük sayılmaz (orta). */
   function kingSatir(t){
-    if(t.durum === 'ara_onay') return onaySatir({ baslik:t.konu, seviye:'orta', ust:'İş emri #' + t.id + ' · yarıda, devam onayı bekliyor',
+    if(t.durum === 'ara_onay') return onaySatir({ baslik:t.konu, seviye:'orta', ust:yz('spi.onaylar.i-s-emri') + t.id + ' · yarıda, devam onayı bekliyor',
       govde:html`<p class="small mt-6">${t.metin}</p>`,
-      eylem:html`${K.Button({ label:'Devam', size:'sm', tone:'primary', act:'king-parca', data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
-        ${K.Button({ label:'Dur ve bitir', size:'sm', act:'king-parca', data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}` });
-    return onaySatir({ baslik:t.konu, seviye:'orta', ust:'İş emri #' + t.id + ' · ücretli iş',
+      eylem:html`${K.Button({ label:yz('spi.onaylar.devam'), size:'sm', tone:'primary', act:'king-parca', data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
+        ${K.Button({ label:yz('spi.onaylar.dur-ve-bitir'), size:'sm', act:'king-parca', data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}` });
+    return onaySatir({ baslik:t.konu, seviye:'orta', ust:yz('spi.onaylar.i-s-emri') + t.id + ' · ücretli iş',
       govde:html`${map(t.secenekler, (x, i) => html`<p class="small mt-6">${i + 1}) ${x.metin}</p>`)}
         ${when(t.neden, () => K.Notice({ tone:'info', class:'mt-8',
           body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri) + ' — ' + t.neden + '.' }))}`,
       eylem:html`${map(t.secenekler, (x, i) => K.Button({ label:(i + 1) + '. seçeneği onayla', size:'sm',
           tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla', data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
-        ${K.Button({ label:'İptal', size:'sm', act:'king-iptal', data:{ 'data-id':String(t.id) } })}` });
+        ${K.Button({ label:yz('spi.onaylar.i-ptal'), size:'sm', act:'king-iptal', data:{ 'data-id':String(t.id) } })}` });
   }
   function hkmSatir(n, seviye){
-    return onaySatir({ baslik:HKM_AD[n.kind] || 'Merkez teklifi', seviye, ust:'Merkez teklifi',
+    return onaySatir({ baslik:HKM_AD[n.kind] || 'Merkez teklifi', seviye, ust:yz('spi.onaylar.merkez-teklifi'),
       govde:html`<p class="small mt-6">${n.note}</p>
         ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
         ${when(SP.Bilgi && SP.Bilgi.NIYET[n.kind], () => bilgiOnizleme(n))}`,
@@ -402,14 +442,14 @@ SP.Screens.onaylar = (function(){
           ? K.Button({ label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'besin.add':'Ekle',
             'fiyat.add':'Ekle', 'yer.add':'Ekle' })[n.kind] || 'Planına ekle',
             size:'sm', tone:'primary', act:'hkm-intent-apply', data:{ 'data-id':String(n.id) } })
-          : K.Button({ label:'Gördüm', size:'sm', tone:'primary', act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
-        ${K.Button({ label:'İstemiyorum', size:'sm', act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}` });
+          : K.Button({ label:yz('spi.onaylar.gordum'), size:'sm', tone:'primary', act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } })}
+        ${K.Button({ label:yz('spi.onaylar.i-stemiyorum'), size:'sm', act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}` });
   }
   /* Yarıda kalan teklif: seviyesi yok, uydurulmaz; yalnız «bilinmiyor». */
   function supheSatir(d){
-    return onaySatir({ baslik:'Sonucu belirsiz teklif', ust:'Uygulanırken yarıda kaldı',
-      govde:html`<p class="small mt-6">Kaydına yazılıp yazılmadığı bilinmiyor; kaydına bakıp doğrula.</p>`,
-      eylem:K.Button({ label:'Kontrol ettim', size:'sm', act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } }) });
+    return onaySatir({ baslik:yz('spi.onaylar.sonucu-belirsiz-teklif'), ust:yz('spi.onaylar.uygulanirken-yarida-kaldi'),
+      govde:html`<p class="small mt-6">${yz('spi.onaylar.kaydina-yazilip-yazilmadigi')}</p>`,
+      eylem:K.Button({ label:yz('spi.onaylar.kontrol-ettim'), size:'sm', act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } }) });
   }
   /* Bekleyen kayıt: vitrin kartı (seviye rozeti kartın içinde); kart
      çizilemezse sade satır, yazan yine yalnız SP.Proposals.approve. */
@@ -423,8 +463,8 @@ SP.Screens.onaylar = (function(){
     const e = SP.Proposals.eylem(o.action) || {};
     return onaySatir({ baslik:e.label || o.action, seviye:o.level || e.level,
       ust:pv.ok && pv.rows.length ? pv.rows.map(r => r.alan + ' → ' + r.sonra).join(' · ') : (pv.why || ''),
-      eylem:html`${K.Button({ label:'Kaydet', size:'sm', tone:'primary', act:'bekleyen-onay', data:{ 'data-id':o.id } })}
-        ${K.Button({ label:'Vazgeç', size:'sm', act:'bekleyen-ret', data:{ 'data-id':o.id } })}` });
+      eylem:html`${K.Button({ label:yz('spi.onaylar.kaydet'), size:'sm', tone:'primary', act:'bekleyen-onay', data:{ 'data-id':o.id } })}
+        ${K.Button({ label:yz('spi.onaylar.vazgec'), size:'sm', act:'bekleyen-ret', data:{ 'data-id':o.id } })}` });
   }
   function onaySatirlari(){
     const l = [];
@@ -444,7 +484,7 @@ SP.Screens.onaylar = (function(){
     const toplu = g.id === 'kayit' ? topluKayitlar().length : 0;
     const gl = g.id === 'kayit' ? gelenToplu() : [];
     return K.Kutu({ ad:g.ad, ipucu:g.id === 'king' || g.id === 'sistem' ? 'hkm' : undefined,
-      yuva:toplu >= 2 ? K.Button({ label:'Hepsini kaydet (' + toplu + ')', size:'sm', tone:'primary', act:'hkm-toplu' }) : String(g.satirlar.length),
+      yuva:toplu >= 2 ? K.Button({ label:yz('spi.onaylar.hepsini-kaydet') + toplu + ')', size:'sm', tone:'primary', act:'hkm-toplu' }) : String(g.satirlar.length),
       govde:html`<div class="onay-liste" data-raf-tam>${when(gl.length >= 2, () => gelenTopluSatir(gl))}${map(g.satirlar, s => s.html)}</div>` });
   }
 
@@ -508,7 +548,7 @@ SP.Screens.onaylar = (function(){
         onay:kendi ? null : p.otomatik ? { tur:'ayar' } : { tur:'onay' } };
     });
     /* 119: öneri geçmişi; bekleyen yokken de çizilir (render). */
-    return K.Kutu({ ad:'Son kararlar', yuva:rows.length + ' kayıt',
+    return K.Kutu({ ad:yz('spi.onaylar.son-kararlar'), yuva:rows.length + ' kayıt',
       govde:html`<div data-oz="119">${raw(G.gecmisHtml(olay.slice(0, 40)))}</div>` });
   }
 
@@ -527,8 +567,8 @@ SP.Screens.onaylar = (function(){
     let h = '';
     try{ h = Kg && Kg.cikarimKarti ? Kg.cikarimKarti(3) : ''; }catch(e){ console.error(e); }
     if(!h) return '';
-    return String(K.Kutu({ ad:'Çıkarımlar', yuva:String(cikarimSayisi()), govde:html`
-      <p class="small muted">King’in senin hakkındaki tahminleri. Doğruysa kaydedilir; yanlışsa bir daha sorulmaz.</p>${raw(h)}` }));
+    return String(K.Kutu({ ad:yz('spi.onaylar.cikarimlar'), yuva:String(cikarimSayisi()), govde:html`
+      <p class="small muted">${yz('spi.onaylar.king-in-senin-hakkindaki-tah')}</p>${raw(h)}` }));
   }
 
   LIFEOS.PARCA.blok({ id:'onaylar.cikarim', sayfa:'onaylar', yer:'cikarim', ad:'Sana sorulacaklar', ciz:() => cikarimKutusu() });
@@ -545,10 +585,9 @@ SP.Screens.onaylar = (function(){
     const gecmis = sonKararlar();
     if(!l.length){
       /* Boş durum (10): tek eylem. Geçmiş varsa altında durur (119). */
-      const bos = K.Kutu({ ad:'Bekleyen öneri yok', govde:html`
-        <p class="small muted">Merkez, King ve Danışma bir şey önerdiğinde burada durur; sen
-          onaylamadan hiçbiri uygulanmaz.</p>
-        <div class="mt-10">${K.Button({ label:'Danışma’ya git', size:'sm', act:'go',
+      const bos = K.Kutu({ ad:yz('spi.onaylar.bekleyen-oneri-yok'), govde:html`
+        <p class="small muted">${yz('spi.onaylar.merkez-king-ve-danisma-bir')}</p>
+        <div class="mt-10">${K.Button({ label:yz('spi.onaylar.danisma-ya-git'), size:'sm', act:'go',
           data:{ 'data-route':'team' } })}</div>` });
       return String(gecmis ? html`<div class="onaylar-raf">${bos}${gecmis}</div>` : bos);
     }
@@ -624,7 +663,7 @@ SP.Screens.onaylar = (function(){
     async 'bekleyen-onay'(el){
       const id = el.dataset.id;
       const r = await SP.Proposals.approve(id);
-      if(r.ok && r.proposal && r.proposal.undo) UI.toast('Kaydedildi', { undo:async () => { await geriAl([id]); } });
+      if(r.ok && r.proposal && r.proposal.undo) UI.toast(yz('spi.onaylar.kaydedildi'), { undo:async () => { await geriAl([id]); } });
       else UI.toast(r.ok ? 'Kaydedildi' : (r.why || 'Kaydedilemedi'));
       SP.App.render();
     },
@@ -639,7 +678,7 @@ SP.Screens.onaylar = (function(){
   return {
     id:'onaylar',
     kingKart:KingTeklifKart,
-    title:'Onaylar',
+    title:yz('spi.onaylar.onaylar'),
     subtitle(){
       const n = bekleyen();
       return n ? n + ' öneri onayını bekliyor' : 'bekleyen öneri yok';

@@ -8,6 +8,20 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.kutuphane.test-kitaplari':'Test kitapları',
+  'ays.kutuphane.bam-uretti-her-soru-bagimsiz':'BAM üretti, her soru bağımsız çözümle denetlendi',
+  'ays.kutuphane.bolum-cozuldu':'bölüm çözüldü ·',
+  'ays.kutuphane.soru':'soru (%',
+  'ays.kutuphane.hesaplandi':', hesaplandı) ·',
+  'ays.kutuphane.gozden-gecir':'Gözden geçir',
+  'ays.kutuphane.devam-et-soru':'Devam et (soru ',
+  'ays.kutuphane.bam-bir-test-kitabi-urettigi':'BAM bir test kitabı ürettiğinde burada durur: kaynağı, maliyeti ve ne kadarını çözdüğün.',
+  'ays.kutuphane.ofis-u2019e-sor':'Ofis\u2019e sor',
+  'ays.kutuphane.kutuphanem':'Kütüphanem',
+  'ays.kutuphane.notlar':'Notlar',
+  'ays.kutuphane.notlar-ve-belgeler':'Notlar ve belgeler',
+});
 window.LIFEOS.PARCA.sayfa({ id:'notlar', modul:'ays', cekmece:'kutuphane', ad:'Notlar', ikon:'edit', sira:10 });
 window.LIFEOS.PARCA.sayfa({ id:'kutuphane', modul:'ays', cekmece:'kutuphane', ad:'Kitaplar', ikon:'book', sira:20 });
 
@@ -30,16 +44,16 @@ R.Screens.kutuphane = (function(){
   function kitapKarti(){
     const l = TK() ? TK().kitaplar() : [];
     if(!l.length) return null;
-    return c.Card({ title:'Test kitapları',
-      sub:'BAM üretti, her soru bağımsız çözümle denetlendi',
+    return c.Card({ title:yz('ays.kutuphane.test-kitaplari'),
+      sub:yz('ays.kutuphane.bam-uretti-her-soru-bagimsiz'),
       body:html`<div class="stack-sm">${map(l, k => {
         const il = TK().ilerleme(k);
         return html`<div>
         <div class="row between wrap"><b class="small">${k.baslik}</b>
           ${c.Badge({ label:k.dogruluk === 'kaynakli' ? 'kaynaklı' : 'kaynaksız · doğrulanmadı',
             tone:k.dogruluk === 'kaynakli' ? 'ok' : 'warn' })}</div>
-        <div class="tiny dim">${il.bolum}/${il.toplamBolum} bölüm çözüldü · ${il.soru}/${il.toplamSoru}
-          soru (%${il.yuzde}, hesaplandı) · ${maliyetYazi(k.maliyet)}${k.eklenme
+        <div class="tiny dim">${il.bolum}/${il.toplamBolum} ${yz('ays.kutuphane.bolum-cozuldu')} ${il.soru}/${il.toplamSoru}
+          ${yz('ays.kutuphane.soru')}${il.yuzde}${yz('ays.kutuphane.hesaplandi')} ${maliyetYazi(k.maliyet)}${k.eklenme
           ? ' · eklendi ' + U.fmtShort(k.eklenme) : ''}</div>
         ${map(k.bolumler, b => {
           const s = (k.sonuclar || {})[b.no];
@@ -48,9 +62,9 @@ R.Screens.kutuphane = (function(){
           return html`<div class="row between wrap mt-6">
             <span class="small">${b.no}. ${b.ad} · ${b.sorular.length} soru${s
               ? ' · son: ' + s.dogru + ' doğru, ' + s.yanlis + ' yanlış, ' + s.bos + ' boş' : ''}</span>
-            <span class="row-sm wrap">${when(s, () => c.Button({ label:'Gözden geçir', size:'sm',
+            <span class="row-sm wrap">${when(s, () => c.Button({ label:yz('ays.kutuphane.gozden-gecir'), size:'sm',
               tone:'ghost', act:'kitap-ozet', data:{ 'data-id':k.id, 'data-no':String(b.no) } }))}
-            ${when(yarimBu, () => c.Button({ label:'Devam et (soru ' + (y.index + 1) + '/' + y.toplam + ')',
+            ${when(yarimBu, () => c.Button({ label:yz('ays.kutuphane.devam-et-soru') + (y.index + 1) + '/' + y.toplam + ')',
               size:'sm', tone:'primary', act:'kitap-devam' }))}
             ${c.Button({ label:yarimBu ? 'Baştan başla' : s ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'kitap-baslat',
               data:{ 'data-id':k.id, 'data-no':String(b.no) } })}</span></div>`;
@@ -60,9 +74,8 @@ R.Screens.kutuphane = (function(){
 
   /* Boş durum (10): yalnız veri yokken; tek eylem. */
   LIFEOS.PARCA.blok({ id:'kutuphane.bos', sayfa:'kutuphane', yer:'ana', ad:'Kütüphanen henüz boş', kosul:b => !b.kart, ciz:() => c.Kutu({ ad:'Kütüphanen henüz boş', govde:html`
-        <p class="small muted">BAM bir test kitabı ürettiğinde burada durur: kaynağı, maliyeti
-          ve ne kadarını çözdüğün.</p>
-        <div class="mt-10">${c.Button({ label:'Ofis\u2019e sor', size:'sm', act:'go',
+        <p class="small muted">${yz('ays.kutuphane.bam-bir-test-kitabi-urettigi')}</p>
+        <div class="mt-10">${c.Button({ label:yz('ays.kutuphane.ofis-u2019e-sor'), size:'sm', act:'go',
           data:{ 'data-route':'team' } })}</div>` }) });
   LIFEOS.PARCA.blok({ id:'kutuphane.kitap', sayfa:'kutuphane', yer:'ana', ad:'Test kitapları', kosul:b => !!b.kart, ciz:b => b.kart });
   async function render(){
@@ -83,7 +96,7 @@ R.Screens.kutuphane = (function(){
 
   return {
     id:'kutuphane',
-    title:'Kütüphanem',
+    title:yz('ays.kutuphane.kutuphanem'),
     subtitle(){
       const n = TK() ? TK().kitaplar().length : 0;
       return n ? n + ' test kitabı' : 'henüz kitap yok';
@@ -105,11 +118,11 @@ R.Screens.notlar = (function(){
   const D = () => (window.LIFEOS || {}).DEFTER;
   const hazir = () => !!(D() && D().kuruluMu && D().kuruluMu());
   LIFEOS.PARCA.blok({ id:'notlar.kapali', sayfa:'notlar', yer:'ana', ad:'Notlar', kosul:() => !hazir(),
-    ciz:() => String(K.Kutu({ ad:'Notlar', govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') })) });
+    ciz:() => String(K.Kutu({ ad:yz('ays.kutuphane.notlar'), govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') })) });
   LIFEOS.PARCA.blok({ id:'notlar.pano', sayfa:'notlar', yer:'ana', sira:10, ad:'Defter özeti', kosul:() => hazir(),
     ciz:() => '<div data-defter-pano>' + (D().panoHtml ? D().panoHtml() : '') + '</div>' });
   LIFEOS.PARCA.blok({ id:'notlar.raf', sayfa:'notlar', yer:'ana', sira:20, ad:'Notlar ve belgeler', kosul:() => hazir(),
-    ciz:() => String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') })) });
+    ciz:() => String(K.Kutu({ ad:yz('ays.kutuphane.notlar-ve-belgeler'), govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') })) });
   function render(){ return LIFEOS.PARCA.yer('notlar', 'ana', K); }
   function afterRender(){
     const el = document.querySelector('[data-defter-raf-yer]');
@@ -119,7 +132,7 @@ R.Screens.notlar = (function(){
   }
   return {
     id:'notlar',
-    title:'Kütüphanem',
+    title:yz('ays.kutuphane.kutuphanem'),
     subtitle(){ const n = hazir() ? D().notlar().length : 0; return n ? n + ' kayıt' : 'henüz not yok'; },
     lede(){ return ''; },
     actions(){ return ''; },

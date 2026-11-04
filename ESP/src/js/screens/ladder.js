@@ -18,6 +18,56 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.ladder.genel-kademe':'Genel kademe',
+  'esp.ladder.olculmus-uretim':'Ölçülmüş üretim',
+  'esp.ladder.merdivenin-tamami':'Merdivenin tamamı',
+  'esp.ladder.disiplinler':'Disiplinler',
+  'esp.ladder.olculemeyen-basamaklar':'Ölçülemeyen basamaklar',
+  'esp.ladder.olcmeye-git':'Ölçmeye git',
+  'esp.ladder.bir-sonraki-kapilarin-hepsi':'Bir sonraki kapıların hepsi ölçülebiliyor.',
+  'esp.ladder.yol':'YOL',
+  'esp.ladder.merdiven-yok':'Merdiven yok.',
+  'esp.ladder.masaya-git':'Masaya git',
+  'esp.ladder.merdiven':'Merdiven',
+  'esp.ladder.beyana-dayali-kademe':'Beyana dayalı kademe',
+  'esp.ladder.bu-merdivenin-goremedigi':'Bu merdivenin göremediği',
+  'esp.ladder.kademe':'Kademe ',
+  'esp.ladder.kapanis-isi':'Kapanış işi:',
+  'esp.ladder.seviye-tespiti':'Seviye tespiti',
+  'esp.ladder.disiplin':'Disiplin',
+  'esp.ladder.tespit-yapilacak-disiplin':'Tespit yapılacak disiplin',
+  'esp.ladder.cevapsiz':'(cevapsız)',
+  'esp.ladder.tahmini-kaydet':'Tahmini kaydet',
+  'esp.ladder.sonuc':'Sonuç',
+  'esp.ladder.tahmin':'tahmin: ',
+  'esp.ladder.olculen':'ölçülen: ',
+  'esp.ladder.kurgusal-senaryo':'Kurgusal senaryo:',
+  'esp.ladder.gorev':'Görev',
+  'esp.ladder.olcutler':'Ölçütler:',
+  'esp.ladder.kapat':'Kapat',
+  'esp.ladder.masaya-git-2':'Masaya Git (',
+  'esp.ladder.tum-disiplinler-14-proje':'Tüm disiplinler (14 proje)',
+  'esp.ladder.uygulama-projeleri':'Uygulama Projeleri',
+  'esp.ladder.proje-disiplini':'Proje disiplini',
+  'esp.ladder.7-disipline-dagitilmis-14-ge':'7 disipline dağıtılmış 14 gerçekçi senaryo ve 70 görev. Her proje, teorik bilgiyi somut bir bağlamda işletmeyi ölçer.',
+  'esp.ladder.gorev-2':'görev',
+  'esp.ladder.projeyi-ve-gorevleri-incele':'Projeyi ve görevleri incele',
+  'esp.ladder.derinlikli-ogretim-ornekleri':'Derinlikli öğretim örnekleri',
+  'esp.ladder.basit-orta-ve-ileri-kademele':'Basit, orta ve ileri kademelerde somut çözümlü örnekler, karar gerekçeleri ve yaygın hatalar.',
+  'esp.ladder.i-stem':'İstem:',
+  'esp.ladder.cozum':'Çözüm:',
+  'esp.ladder.gerekce':'Gerekçe:',
+  'esp.ladder.genel':'Genel',
+  'esp.ladder.yol-2':'Yol',
+  'esp.ladder.projeler-14':'Projeler (14)',
+  'esp.ladder.merdiven-bolumleri':'Merdiven bölümleri',
+  'esp.ladder.tahmin-kaydedildi-hicbir-kap':'Tahmin kaydedildi — hiçbir kapı açılmadı',
+  'esp.ladder.genel-kademe-2':'genel kademe',
+  'esp.ladder.baslamis-disiplin':'başlamış disiplin',
+  'esp.ladder.olculemeyen-kapi':'ölçülemeyen kapı',
+  'esp.ladder.disiplin-sec':'Disiplin seç',
+});
 window.LIFEOS.PARCA.sayfa({ id:'ladder', modul:'esp', cekmece:'plan', ad:'Merdiven', ikon:'chart', sira:10 });
 
 ESP.Screens.ladder = (function(){
@@ -56,15 +106,15 @@ ESP.Screens.ladder = (function(){
     const rows = [];
 
     rows.push(K.Entry({
-      label:'Genel kademe', hint:'level',
+      label:yz('esp.ladder.genel-kademe'), hint:'level',
       meta:ov.cert === 'missing' ? 'veri yok' : ov.level.label,
       body:ov.cert === 'missing'
         ? K.Notice({ tone:'info', body:'Hiçbir disiplinde ölçülmüş üretim yok. '
             + 'Merdiven ilk ölçümle başlar.' })
         : html`
-          ${K.NextUp({ icon:'chart', label:'Ölçülmüş üretim', title:ov.level.label,
+          ${K.NextUp({ icon:'chart', label:yz('esp.ladder.olculmus-uretim'), title:ov.level.label,
             why:ov.level.note })}
-          ${K.Meter({ label:'Merdivenin tamamı', value:ov.mastery,
+          ${K.Meter({ label:yz('esp.ladder.merdivenin-tamami'), value:ov.mastery,
             text:'%' + ov.mastery,
             note:ov.measuredDisciplines + '/' + ov.disciplines
               + ' disiplinde ölçülmüş üretim var' })}
@@ -72,7 +122,7 @@ ESP.Screens.ladder = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'Disiplinler', hint:'ladder',
+      label:yz('esp.ladder.disiplinler'), hint:'ladder',
       meta:hepsi.length + ' merdiven',
       wide:true,
       body:html`<div class="ladders">${map(hepsi, lv => {
@@ -101,17 +151,17 @@ ESP.Screens.ladder = (function(){
     const olcum = ESP.Mod.active().map(d => C().nextGate(d.id))
       .filter(g => g && g.action === 'measure');
     rows.push(K.Entry({
-      label:'Ölçülemeyen basamaklar', hint:'unknown-gate',
+      label:yz('esp.ladder.olculemeyen-basamaklar'), hint:'unknown-gate',
       meta:olcum.length ? olcum.length + ' kapı' : 'yok',
       body:olcum.length
         ? K.Table({ tight:true, headers:['Disiplin', 'Kapı', ''],
             rows:olcum.map(g => [
               (discOf(g.disc) || {}).label || g.disc,
               g.gate.label,
-              K.Button({ label:'Ölçmeye git', size:'sm', act:'go',
+              K.Button({ label:yz('esp.ladder.olcmeye-git'), size:'sm', act:'go',
                 data:{ 'data-route':(discOf(g.disc) || {}).route || 'today' } }),
             ]) })
-        : K.Empty({ text:'Bir sonraki kapıların hepsi ölçülebiliyor.' }),
+        : K.Empty({ text:yz('esp.ladder.bir-sonraki-kapilarin-hepsi') }),
     }));
 
     return rows;
@@ -136,7 +186,7 @@ ESP.Screens.ladder = (function(){
     const lv = C().levelOf(discId);
     const kapi = C().nextGate(discId);
     const lad = C().ladder(discId);
-    if(!d || !yol || !lad) return [K.Entry({ label:'YOL', body:K.Empty({ text:'Merdiven yok.' }) })];
+    if(!d || !yol || !lad) return [K.Entry({ label:yz('esp.ladder.yol'), body:K.Empty({ text:yz('esp.ladder.merdiven-yok') }) })];
 
     const rows = [];
 
@@ -144,13 +194,13 @@ ESP.Screens.ladder = (function(){
       label:d.label.toLocaleUpperCase('tr-TR'), hint:'ladder',
       meta:lv.level.label,
       note:lad.aim,
-      action:K.Button({ label:'Masaya git', size:'sm', act:'go',
+      action:K.Button({ label:yz('esp.ladder.masaya-git'), size:'sm', act:'go',
         data:{ 'data-route':d.route } }),
       body:html`
-        ${K.Meter({ label:'Merdiven', value:lv.mastery, text:'%' + lv.mastery })}
+        ${K.Meter({ label:yz('esp.ladder.merdiven'), value:lv.mastery, text:'%' + lv.mastery })}
         ${when(merdivenHtml(yol), () => html`<div class="mt-12">${raw(merdivenHtml(yol))}</div>`)}
         <p class="rulesay mt-10">${C().sentence(discId)}</p>
-        ${when(lv.declared, () => K.Notice({ tone:'warn', title:'Beyana dayalı kademe',
+        ${when(lv.declared, () => K.Notice({ tone:'warn', title:yz('esp.ladder.beyana-dayali-kademe'),
           body:lv.declaredWhy }))}
         ${when(kapi, () => K.NextUp({
           icon:kapi.action === 'measure' ? 'info' : 'zap',
@@ -166,7 +216,7 @@ ESP.Screens.ladder = (function(){
        listedeki maddelerdedir ve sistem onların hiçbirini göremez. */
     if((lad.blind || []).length){
       rows.push(K.Entry({
-        label:'Bu merdivenin göremediği', hint:'blind',
+        label:yz('esp.ladder.bu-merdivenin-goremedigi'), hint:'blind',
         meta:lad.blind.length + ' madde',
         wide:true,
         body:html`
@@ -179,7 +229,7 @@ ESP.Screens.ladder = (function(){
 
     yol.steps.forEach(st => {
       rows.push(K.Entry({
-        label:'Kademe ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short,
+        label:yz('esp.ladder.kademe') + (ESP.LEVEL_BY_RANK[st.rank] || {}).short,
         meta:st.state === 'done' ? 'geçildi'
           : (st.state === 'current' ? '%' + st.pct : 'ileride'),
         note:st.title,
@@ -190,7 +240,7 @@ ESP.Screens.ladder = (function(){
             <div>
               ${K.SectionTitle('Ne çalışılır')}
               <ul class="studylist">${map(st.study, x => html`<li>${x}</li>`)}</ul>
-              <p class="small muted mt-8"><b>Kapanış işi:</b> ${st.proof}</p>
+              <p class="small muted mt-8"><b>${yz('esp.ladder.kapanis-isi')}</b> ${st.proof}</p>
             </div>
             <div>
               ${K.SectionTitle('Kapılar')}
@@ -217,30 +267,30 @@ ESP.Screens.ladder = (function(){
 
     return [
       K.Entry({
-        label:'Seviye tespiti', hint:'placement',
+        label:yz('esp.ladder.seviye-tespiti'), hint:'placement',
         meta:(discOf(disc) || {}).label || disc,
         body:html`
-          ${K.Field({ label:'Disiplin',
+          ${K.Field({ label:yz('esp.ladder.disiplin'),
             input:K.Select({ id:'pl-disc', value:disc, change:'pick-disc-sel',
-              aria:'Tespit yapılacak disiplin',
+              aria:yz('esp.ladder.tespit-yapilacak-disiplin'),
               options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }) })}
           ${map(ESP.PLACEMENT.questions, q => K.Field({ label:q.label, class:'mt-10',
             input:K.Select({ id:'pl-' + q.id,
               value:mevcut[q.id] != null ? String(mevcut[q.id]) : '',
               aria:q.label,
-              options:[{ value:'', label:'(cevapsız)' }]
+              options:[{ value:'', label:yz('esp.ladder.cevapsiz') }]
                 .concat(q.options.map(o => ({ value:String(o.value), label:o.label }))) }) }))}
-          ${K.Button({ label:'Tahmini kaydet', tone:'primary', act:'save-placement',
+          ${K.Button({ label:yz('esp.ladder.tahmini-kaydet'), tone:'primary', act:'save-placement',
             class:'mt-10', data:{ 'data-id':disc } })}`,
       }),
 
       K.Entry({
-        label:'Sonuç',
+        label:yz('esp.ladder.sonuc'),
         meta:tahmin.answered + '/' + tahmin.total + ' cevap', hint:'placement',
         body:html`
           <div class="row wrap">
-            ${K.Badge({ label:'tahmin: ' + tahmin.level.label, tone:'warn' })}
-            ${K.Badge({ label:'ölçülen: ' + (lv && lv.cert !== 'missing'
+            ${K.Badge({ label:yz('esp.ladder.tahmin') + tahmin.level.label, tone:'warn' })}
+            ${K.Badge({ label:yz('esp.ladder.olculen') + (lv && lv.cert !== 'missing'
               ? lv.level.label : 'veri yok'),
               tone:lv && lv.cert !== 'missing' ? 'ok' : 'muted' })}
           </div>
@@ -261,18 +311,18 @@ ESP.Screens.ladder = (function(){
       wide: true,
       body: String(K.Stack([
         html`<div class="ogrenme mb-10">
-          <div class="tiny bold text-1 mb-4">📋 Kurgusal Senaryo:</div>
+          <div class="tiny bold text-1 mb-4">${yz('esp.ladder.kurgusal-senaryo')}</div>
           <p class="small mb-4" style="line-height:1.5">${U.esc(p.scenario.text)}</p>
           <div class="tiny dim">${U.esc(p.scenario.origin)}</div>
         </div>`,
         html`<div class="stack-sm">${map(p.tasks, (t, idx) => html`
           <div class="ogrenme">
             <div class="row between gap-6 mb-4">
-              <b class="small">Görev ${idx + 1}: ${U.esc(t.question)}</b>
+              <b class="small">${yz('esp.ladder.gorev')} ${idx + 1}: ${U.esc(t.question)}</b>
             </div>
             ${when(t.criteria && t.criteria.length, () => html`
               <div class="tiny dim mb-6">
-                <b>Ölçütler:</b>
+                <b>${yz('esp.ladder.olcutler')}</b>
                 <ul class="pl-14 mb-0 mt-2">
                   ${map(t.criteria, c => html`<li>${U.esc(c)}</li>`)}
                 </ul>
@@ -284,8 +334,8 @@ ESP.Screens.ladder = (function(){
           </div>`)}</div>`,
       ])),
       footer: String(html`<div class="row between gap-8">
-        ${K.Button({ label:'Kapat', act:'sheet-close' })}
-        ${when(d.route, () => K.Button({ label:'Masaya Git (' + d.label + ')', tone:'primary', act:'go',
+        ${K.Button({ label:yz('esp.ladder.kapat'), act:'sheet-close' })}
+        ${when(d.route, () => K.Button({ label:yz('esp.ladder.masaya-git-2') + d.label + ')', tone:'primary', act:'go',
           data:{ 'data-route':d.route } }))}
       </div>`),
     });
@@ -299,29 +349,29 @@ ESP.Screens.ladder = (function(){
     let ornekler = ESP.DERINLIKLI_ORNEKLER || [];
     if(filter !== 'all') ornekler = ornekler.filter(o => o.discipline === filter);
 
-    const filterOptions = [{ value:'all', label:'Tüm disiplinler (14 proje)' }]
+    const filterOptions = [{ value:'all', label:yz('esp.ladder.tum-disiplinler-14-proje') }]
       .concat(ESP.Mod.active().map(d => ({ value:d.id, label:d.label })));
 
     return [
       K.Entry({
-        label:'Uygulama Projeleri', hint:'project',
+        label:yz('esp.ladder.uygulama-projeleri'), hint:'project',
         meta:projs.length + ' proje',
         wide:true,
         action:K.Select({ id:'proj-disc', value:filter, change:'pick-proj-disc', size:'sm',
-          aria:'Proje disiplini', options:filterOptions }),
+          aria:yz('esp.ladder.proje-disiplini'), options:filterOptions }),
         body:html`
-          <p class="small muted mb-10">7 disipline dağıtılmış 14 gerçekçi senaryo ve 70 görev. Her proje, teorik bilgiyi somut bir bağlamda işletmeyi ölçer.</p>
+          <p class="small muted mb-10">${yz('esp.ladder.7-disipline-dagitilmis-14-ge')}</p>
           <div class="stack-sm">${map(projs, p => {
             const d = discOf(p.discipline) || { label:p.discipline };
             return html`
               <div class="ogrenme">
                 <div class="row between gap-8 mb-4">
                   <b class="small">${U.esc(p.title)}</b>
-                  <span class="badge badge--muted tiny">${d.label} · ${(p.tasks || []).length} görev</span>
+                  <span class="badge badge--muted tiny">${d.label} · ${(p.tasks || []).length} ${yz('esp.ladder.gorev-2')}</span>
                 </div>
                 <p class="small text-2 mb-8" style="line-height:1.4">${U.esc(p.scenario.text)}</p>
                 <div class="row end">
-                  ${K.Button({ label:'Projeyi ve görevleri incele', size:'sm', act:'open-project',
+                  ${K.Button({ label:yz('esp.ladder.projeyi-ve-gorevleri-incele'), size:'sm', act:'open-project',
                     data:{ 'data-id':p.id } })}
                 </div>
               </div>`;
@@ -329,11 +379,11 @@ ESP.Screens.ladder = (function(){
       }),
 
       K.Entry({
-        label:'Derinlikli öğretim örnekleri', hint:'depth',
+        label:yz('esp.ladder.derinlikli-ogretim-ornekleri'), hint:'depth',
         meta:ornekler.length + ' somut örnek',
         wide:true,
         body:html`
-          <p class="small muted mb-10">Basit, orta ve ileri kademelerde somut çözümlü örnekler, karar gerekçeleri ve yaygın hatalar.</p>
+          <p class="small muted mb-10">${yz('esp.ladder.basit-orta-ve-ileri-kademele')}</p>
           <div class="stack-sm" style="max-height:420px;overflow-y:auto">${map(ornekler, o => {
             const d = discOf(o.discipline) || { label:o.discipline };
             const tone = o.depth === 'basit' ? 'ok' : (o.depth === 'orta' ? 'warn' : 'danger');
@@ -343,9 +393,9 @@ ESP.Screens.ladder = (function(){
                   <b class="small">${U.esc(o.title)}: ${U.esc(o.focus || '')}</b>
                   <span class="badge tiny badge--${tone}">${o.depth} · ${d.label}</span>
                 </div>
-                <div class="small mb-4"><b>İstem:</b> ${U.esc(o.prompt)}</div>
-                <div class="small text-2 mb-4"><b>Çözüm:</b> <i>${U.esc(o.worked_solution)}</i></div>
-                <div class="tiny dim mb-2"><b>Gerekçe:</b> ${U.esc(o.reasoning)}</div>
+                <div class="small mb-4"><b>${yz('esp.ladder.i-stem')}</b> ${U.esc(o.prompt)}</div>
+                <div class="small text-2 mb-4"><b>${yz('esp.ladder.cozum')}</b> <i>${U.esc(o.worked_solution)}</i></div>
+                <div class="tiny dim mb-2"><b>${yz('esp.ladder.gerekce')}</b> ${U.esc(o.reasoning)}</div>
                 ${when(o.common_error, () => html`<div class="tiny dim"><b>Hata:</b> ${U.esc(o.common_error)}</div>`)}
               </div>`;
           })}</div>`,
@@ -356,16 +406,16 @@ ESP.Screens.ladder = (function(){
   /* ----------------------------------------------------------------- çizim */
 
   const TABS = [
-    { id:'ozet',     label:'Genel' },
-    { id:'yol',      label:'Yol' },
-    { id:'projeler', label:'Projeler (14)' },
-    { id:'tespit',   label:'Seviye tespiti' },
+    { id:'ozet',     label:yz('esp.ladder.genel') },
+    { id:'yol',      label:yz('esp.ladder.yol-2') },
+    { id:'projeler', label:yz('esp.ladder.projeler-14') },
+    { id:'tespit',   label:yz('esp.ladder.seviye-tespiti') },
   ];
 
   /* Sekme yok (EKIP-PLANI §1.2): genel, yol ve seviye tespiti alt alta;
      disiplin seçici yol ve tespit içindir, hep görünür. */
   LIFEOS.PARCA.blok({ id:'ladder.bolum-1', sayfa:'ladder', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ disc }){
-    return K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:'Merdiven bölümleri', tabs:TABS,
+    return K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:yz('esp.ladder.merdiven-bolumleri'), tabs:TABS,
         govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows } }));
   } });
   function render(){
@@ -403,7 +453,7 @@ ESP.Screens.ladder = (function(){
       prefs.placement = Object.assign({}, prefs.placement || {});
       prefs.placement[disc] = cevaplar;
       await ESP.Model.savePrefs(prefs);
-      ESP.UI.toast('Tahmin kaydedildi — hiçbir kapı açılmadı');
+      ESP.UI.toast(yz('esp.ladder.tahmin-kaydedildi-hicbir-kap'));
       ESP.App.render();
     },
   };
@@ -427,7 +477,7 @@ ESP.Screens.ladder = (function(){
         .map(st => G.anahtar('Kademe ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short));
       return ['ölçülemeyen-basamaklar', 'bu-merdivenin-göremediği'].concat(kademeler);
     },
-    title:'Merdiven',
+    title:yz('esp.ladder.merdiven'),
     headline(){
       const ov = C().overall();
       if(ov.cert === 'missing') return 'Merdiven henüz başlamadı.';
@@ -444,11 +494,11 @@ ESP.Screens.ladder = (function(){
       const ov = C().overall();
       const hepsi = C().all().filter(Boolean);
       return [
-        { value:ov.cert === 'missing' ? '—' : ov.level.short, label:'genel kademe' },
+        { value:ov.cert === 'missing' ? '—' : ov.level.short, label:yz('esp.ladder.genel-kademe-2') },
         { value:ov.cert === 'missing' ? '—' : String(ov.mastery), unit:'%', label:'merdiven' },
-        { value:String(hepsi.filter(x => x.rank > 0).length), label:'başlamış disiplin' },
+        { value:String(hepsi.filter(x => x.rank > 0).length), label:yz('esp.ladder.baslamis-disiplin') },
         { value:String(ESP.Mod.active().map(d => C().nextGate(d.id))
-          .filter(g => g && g.action === 'measure').length), label:'ölçülemeyen kapı' },
+          .filter(g => g && g.action === 'measure').length), label:yz('esp.ladder.olculemeyen-kapi') },
       ];
     },
     subtitle(){
@@ -457,7 +507,7 @@ ESP.Screens.ladder = (function(){
     },
     actions(){
       return String(K.Select({ id:'lad-disc', value:S.ui.curDisc || 'lang', change:'pick-disc-sel',
-        aria:'Disiplin seç', size:'sm',
+        aria:yz('esp.ladder.disiplin-sec'), size:'sm',
         options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }));
     },
     render, afterRender, handle, change,

@@ -11,6 +11,114 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.analytics.radar':'Radar',
+  'esp.analytics.seriler':'Seriler',
+  'esp.analytics.rapor':'Rapor',
+  'esp.analytics.durustluk':'Dürüstlük',
+  'esp.analytics.rubrik-ve-analiz':'Rubrik ve analiz',
+  'esp.analytics.entelektuel-sermaye':'Entelektüel sermaye',
+  'esp.analytics.olcum-penceresi':'Ölçüm penceresi',
+  'esp.analytics.7-gun':'7 gün',
+  'esp.analytics.14-gun':'14 gün',
+  'esp.analytics.30-gun':'30 gün',
+  'esp.analytics.sure':'Süre',
+  'esp.analytics.gun':'Gün',
+  'esp.analytics.katsayi':'Katsayı',
+  'esp.analytics.denge':'Denge',
+  'esp.analytics.son-yedi-gunde-kayit-yok':'Son yedi günde kayıt yok.',
+  'esp.analytics.haftalik-rota':'Haftalık rota',
+  'esp.analytics.gunluk-sure':'Günlük süre',
+  'esp.analytics.disiplin-suzgeci':'Disiplin süzgeci',
+  'esp.analytics.tumu':'Tümü',
+  'esp.analytics.ortalama':'Ortalama',
+  'esp.analytics.kayitli-gunden-hesaplandi-30':'kayıtlı günden hesaplandı, 30 günden değil.',
+  'esp.analytics.son-30-gunde-kayit-yok':'Son 30 günde kayıt yok.',
+  'esp.analytics.seri':'Seri',
+  'esp.analytics.ust-uste-kayitli-gun':'Üst üste kayıtlı gün',
+  'esp.analytics.bugun-henuz-girilmediyse-ser':'Bugün henüz girilmediyse seri kırılmış sayılmaz: gün bitmedi.',
+  'esp.analytics.kart-hatirlama':'Kart hatırlama',
+  'esp.analytics.hic-cevaplanmis-kart-yok':'Hiç cevaplanmış kart yok.',
+  'esp.analytics.haftalik-rapor':'Haftalık rapor',
+  'esp.analytics.capraz-bulgular':'Çapraz bulgular',
+  'esp.analytics.ac':'Aç',
+  'esp.analytics.i-ki-masayi-birbirine-baglay':'İki masayı birbirine bağlayan ölçülmüş bir bulgu yok.',
+  'esp.analytics.gunun-brifingi':'Günün brifingi',
+  'esp.analytics.bugun-icin-brifing-uretilmed':'Bugün için brifing üretilmedi.',
+  'esp.analytics.sinir':'Sınır',
+  'esp.analytics.denetim-defteri':'Denetim defteri',
+  'esp.analytics.bu-sayfa-gerekli-mi':'Bu sayfa gerekli mi?',
+  'esp.analytics.acik-soru':'Açık soru',
+  'esp.analytics.sayi':'Sayı',
+  'esp.analytics.adet':'Adet',
+  'esp.analytics.ayrisma-kapandi':'Ayrışma kapandı',
+  'esp.analytics.surtunme':'Sürtünme',
+  'esp.analytics.yonetim':'Yönetim',
+  'esp.analytics.calisma':'Çalışma',
+  'esp.analytics.pay':'Pay',
+  'esp.analytics.bak':'Bak',
+  'esp.analytics.gosterge-ayrismasi':'Gösterge ayrışması',
+  'esp.analytics.yon-sutunu-sonucun-hangi-tar':'«Yön» sütunu sonucun hangi tarafa gitmesinin iyi sayıldığını söyler. Yönü tanımsız bir çift değerlendirilmez: sistem yüksek olanın iyi olduğunu VARSAYMAZ.',
+  'esp.analytics.bu-sayilar-nereden':'Bu sayılar nereden?',
+  'esp.analytics.pencere':'Pencere ',
+  'esp.analytics.bu-sayilar-bir-bulgu-degil':'Bu sayılar bir bulgu değil bu yazılımın ayarıdır:',
+  'esp.analytics.acik-bolum-yok-nobetcinin-ba':'Açık bölüm yok; nöbetçinin bakacağı çift de yok.',
+  'esp.analytics.soru':'Soru',
+  'esp.analytics.kalibrasyon':'Kalibrasyon',
+  'esp.analytics.yanlilik':'Yanlılık',
+  'esp.analytics.ne-tahmin-ediyorsun':'Ne tahmin ediyorsun?',
+  'esp.analytics.tahmin-turu':'Tahmin türü',
+  'esp.analytics.tahmini-kaydet':'Tahmini kaydet',
+  'esp.analytics.gerceklesen':'Gerçekleşen',
+  'esp.analytics.kapat':'Kapat',
+  'esp.analytics.tahmin':'Tahmin',
+  'esp.analytics.gercek':'Gerçek',
+  'esp.analytics.sapma':'Sapma',
+  'esp.analytics.tum-disiplinler-7-alan':'Tüm disiplinler (7 alan)',
+  'esp.analytics.disiplin-filtresi':'Disiplin Filtresi',
+  'esp.analytics.derin-alan-analizleri':'Derin alan analizleri',
+  'esp.analytics.her-disiplin-icin-karar-sira':'Her disiplin için karar sıraları, 3 durum senaryosu, karşı örnekler ve veri sınırları.',
+  'esp.analytics.karar-sirasi':'Karar Sırası:',
+  'esp.analytics.karsi-ornek':'Karşı Örnek:',
+  'esp.analytics.veri-siniri':'Veri Sınırı:',
+  'esp.analytics.degerlendirme-rubrikleri-ve':'Değerlendirme rubrikleri ve boyutlar',
+  'esp.analytics.0-3-puanlama-skalasi-gozlene':'0–3 puanlama skalası, gözlenebilir davranış çapaları ve değerlendirme kuralları.',
+  'esp.analytics.degerlendirme-rubrigi':'Değerlendirme Rubriği',
+  'esp.analytics.kademeli-geri-bildirim-ipucl':'Kademeli geri bildirim ipuçları',
+  'esp.analytics.1-seviye-soru':'1. Seviye (Soru):',
+  'esp.analytics.2-seviye-kural':'2. Seviye (Kural):',
+  'esp.analytics.3-seviye-ornek':'3. Seviye (Örnek):',
+  'esp.analytics.alanlarin':'Alanların',
+  'esp.analytics.sutunlar-gunluk-dakikadir-no':'Sütunlar günlük dakikadır; nokta girilmemiş gündür (sıfır sayılmaz). Önceki 14 günle fark, iki pencerede de en az',
+  'esp.analytics.kayitli-gun-varsa-yazilir-al':'kayıtlı gün varsa yazılır. Alt satır, alanın kalite ölçüsüdür (kural motoru).',
+  'esp.analytics.son-5-hafta':'Son 5 hafta',
+  'esp.analytics.son-bes-haftada-oturum-yok':'Son beş haftada oturum yok.',
+  'esp.analytics.son-bes-haftanin-gunluk-daki':'Son beş haftanın günlük dakikası; ',
+  'esp.analytics.verimli-saatler':'Verimli saatler',
+  'esp.analytics.gunun-saatlerine-gore-dakika':'Günün saatlerine göre dakika; en çok ',
+  'esp.analytics.uc-farkli-saatte-oturum-olun':'Üç farklı saatte oturum olunca en verimli saatin çizilir.',
+  'esp.analytics.bu-hafta-gecen-hafta':'Bu hafta · geçen hafta',
+  'esp.analytics.rekorlarin':'Rekorların',
+  'esp.analytics.en-uzun-gun':'En uzun gün',
+  'esp.analytics.en-cok-oturum':'En çok oturum',
+  'esp.analytics.en-uzun-seri':'En uzun seri',
+  'esp.analytics.son-dokunus':'Son dokunuş',
+  'esp.analytics.haftanin-dengesi':'Haftanın dengesi',
+  'esp.analytics.pratik':'Pratik',
+  'esp.analytics.tarafina-yigilmis':'tarafına yığılmış;',
+  'esp.analytics.bu-hafta-acilmadi-bu-bir':'bu hafta açılmadı. Bu bir bulgudur, hata değil.',
+  'esp.analytics.gunluk-pratik':'Günlük pratik',
+  'esp.analytics.veri-dolulugu':'Veri doluluğu',
+  'esp.analytics.esp':'ESP',
+  'esp.analytics.yol-haritasi':'Yol haritası',
+  'esp.analytics.her-alanin-merdiveni-gecilen':'Her alanın merdiveni; geçilen basamak dolu, içinde olduğun basamak halka',
+  'esp.analytics.bir-alan-acinca-merdiveni-bu':'Bir alan açınca merdiveni burada belirir.',
+  'esp.analytics.analiz-bolumleri':'Analiz bölümleri',
+  'esp.analytics.tahmin-deftere-yazildi':'Tahmin deftere yazıldı.',
+  'esp.analytics.analiz':'Analiz',
+  'esp.analytics.ssk':'SSK',
+  'esp.analytics.capraz-bulgu':'çapraz bulgu',
+});
 window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'esp', cekmece:'analiz', ad:'Analiz', ikon:'chart', sira:10 });
 
 ESP.Screens.analytics = (function(){
@@ -19,11 +127,11 @@ ESP.Screens.analytics = (function(){
   const K = ESP.C, P = ESP.Parts;
 
   const TABS = [
-    { id:'radar',     label:'Radar' },
-    { id:'seriler',   label:'Seriler' },
-    { id:'rapor',     label:'Rapor' },
-    { id:'durust',    label:'Dürüstlük' },
-    { id:'rubrikler', label:'Rubrik ve analiz' },
+    { id:'radar',     label:yz('esp.analytics.radar') },
+    { id:'seriler',   label:yz('esp.analytics.seriler') },
+    { id:'rapor',     label:yz('esp.analytics.rapor') },
+    { id:'durust',    label:yz('esp.analytics.durustluk') },
+    { id:'rubrikler', label:yz('esp.analytics.rubrik-ve-analiz') },
   ];
 
   /* ------------------------------------------------------------------ radar */
@@ -42,7 +150,7 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        label:'Entelektüel sermaye', hint:'ehs',
+        label:yz('esp.analytics.entelektuel-sermaye'), hint:'ehs',
         meta:ehs.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ehs.value * 10) / 10) + ' hacim',
         note:ehs.cert === 'missing'
@@ -50,17 +158,17 @@ ESP.Screens.analytics = (function(){
           : pencere + ' günün ' + ehs.enteredDays + '\'inden hesaplandı. '
             + 'Girilmemiş gün toplama girmez.',
         action:K.Select({ value:String(pencere), change:'radar-window', size:'sm',
-          aria:'Ölçüm penceresi',
-          options:[{ value:'7', label:'7 gün' }, { value:'14', label:'14 gün' },
-            { value:'30', label:'30 gün' }] }),
+          aria:yz('esp.analytics.olcum-penceresi'),
+          options:[{ value:'7', label:yz('esp.analytics.7-gun') }, { value:'14', label:yz('esp.analytics.14-gun') },
+            { value:'30', label:yz('esp.analytics.30-gun') }] }),
         wide:true,
         /* Geniş ekranda radar ile tablo yan yana (esp.css .radarcift):
            radar ortada dar duruyordu, iki yanı boştu (iPhone §8 «boy»). */
         body:html`<div class="radarcift">
           ${P.radar(eksenler, { scale:'Dış halka = bu penceredeki en yüksek disiplin.' })}
           ${K.Table({ tight:true,
-            headers:['Disiplin', { label:'Süre', num:true }, { label:'Gün', num:true },
-              { label:'Katsayı', num:true }, 'Katsayının kaynağı'],
+            headers:['Disiplin', { label:yz('esp.analytics.sure'), num:true }, { label:yz('esp.analytics.gun'), num:true },
+              { label:yz('esp.analytics.katsayi'), num:true }, 'Katsayının kaynağı'],
             rows:ehs.rows.map(r => [
               r.disc.label,
               r.cert === 'missing' ? P.cert('missing') : U.fmtMin(Math.round(r.hours * 60)),
@@ -71,7 +179,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        hint:'not-denge', label:'Denge',
+        hint:'not-denge', label:yz('esp.analytics.denge'),
         meta:(function(){
           const b = ESP.Planner.balance(7);
           return b.cert === 'missing' ? 'veri yok' : (b.skewed ? 'dengesiz' : 'dengeli');
@@ -79,7 +187,7 @@ ESP.Screens.analytics = (function(){
         body:(function(){
           const b = ESP.Planner.balance(7);
           if(b.cert === 'missing'){
-            return K.Empty({ text:'Son yedi günde kayıt yok.' });
+            return K.Empty({ text:yz('esp.analytics.son-yedi-gunde-kayit-yok') });
           }
           return html`
             ${map(b.rows, r => K.Meter({ label:r.disc.label,
@@ -93,7 +201,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        hint:'not-haftalik-rota', label:'Haftalık rota',
+        hint:'not-haftalik-rota', label:yz('esp.analytics.haftalik-rota'),
         meta:'öncelik sırasına göre',
         body:(function(){
           const r = ESP.Planner.weeklyRoute();
@@ -126,11 +234,11 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        hint:'not-gunluk-sure', label:'Günlük süre',
+        hint:'not-gunluk-sure', label:yz('esp.analytics.gunluk-sure'),
         meta:olculen.length + '/' + gunler.length + ' günde kayıt',
         action:K.Select({ value:disipl, change:'series-disc', size:'sm',
-          aria:'Disiplin süzgeci',
-          options:[{ value:'all', label:'Tümü' }]
+          aria:yz('esp.analytics.disiplin-suzgeci'),
+          options:[{ value:'all', label:yz('esp.analytics.tumu') }]
             .concat(ESP.Mod.active().map(d => ({ value:d.id, label:d.short }))) }),
         wide:true,
         body:olculen.length
@@ -140,23 +248,22 @@ ESP.Screens.analytics = (function(){
               { max:Math.max(60, Math.ceil(Math.max.apply(null, olculen) / 30) * 30),
                 goodAt:0 }))}
             <p class="small muted mt-8">
-              Ortalama ${U.fmtMin(Math.round(olculen.reduce((a, b) => a + b, 0) / olculen.length))}
-              — ${olculen.length} kayıtlı günden hesaplandı, 30 günden değil.</p>`
-          : K.Empty({ text:'Son 30 günde kayıt yok.' }),
+              ${yz('esp.analytics.ortalama')} ${U.fmtMin(Math.round(olculen.reduce((a, b) => a + b, 0) / olculen.length))}
+              — ${olculen.length} ${yz('esp.analytics.kayitli-gunden-hesaplandi-30')}</p>`
+          : K.Empty({ text:yz('esp.analytics.son-30-gunde-kayit-yok') }),
       }),
 
       K.Entry({
-        label:'Seri', hint:'streak',
+        label:yz('esp.analytics.seri'), hint:'streak',
         meta:M.streak() + ' gün',
         body:html`
-          ${K.Meter({ label:'Üst üste kayıtlı gün', value:Math.min(100, M.streak() / 30 * 100),
+          ${K.Meter({ label:yz('esp.analytics.ust-uste-kayitli-gun'), value:Math.min(100, M.streak() / 30 * 100),
             text:M.streak() + ' gün' })}
-          <p class="small muted mt-8">Bugün henüz girilmediyse seri kırılmış
-            sayılmaz: gün bitmedi.</p>`,
+          <p class="small muted mt-8">${yz('esp.analytics.bugun-henuz-girilmediyse-ser')}</p>`,
       }),
 
       K.Entry({
-        label:'Kart hatırlama', hint:'retention',
+        label:yz('esp.analytics.kart-hatirlama'), hint:'retention',
         meta:(function(){
           const r = ESP.SRS.retention();
           return r.cert === 'missing' ? 'veri yok' : '%' + Math.round(r.value * 100);
@@ -164,7 +271,7 @@ ESP.Screens.analytics = (function(){
         body:(function(){
           const r = ESP.SRS.retention();
           if(r.cert === 'missing'){
-            return K.Empty({ text:'Hiç cevaplanmış kart yok.' });
+            return K.Empty({ text:yz('esp.analytics.hic-cevaplanmis-kart-yok') });
           }
           return html`${K.Meter({ label:r.n + '/' + r.total + ' karttan',
             value:r.value * 100, text:'%' + Math.round(r.value * 100),
@@ -183,7 +290,7 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        hint:'not-haftalik-rapor', label:'Haftalık rapor',
+        hint:'not-haftalik-rapor', label:yz('esp.analytics.haftalik-rapor'),
         meta:'kural motorundan',
         wide:true,
         body:html`<div class="rapor-govde">
@@ -196,7 +303,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        hint:'not-capraz-bulgular', label:'Çapraz bulgular',
+        hint:'not-capraz-bulgular', label:yz('esp.analytics.capraz-bulgular'),
         meta:cross.length ? cross.length + ' bulgu' : 'yok',
         wide:true,
         body:cross.length
@@ -208,24 +315,24 @@ ESP.Screens.analytics = (function(){
                   ${P.avatar(c.to, 'sm')}
                 </div>
                 <p>${c.text}</p>
-                ${when(c.route, () => K.Button({ label:'Aç', size:'sm', act:'go',
+                ${when(c.route, () => K.Button({ label:yz('esp.analytics.ac'), size:'sm', act:'go',
                   data:{ 'data-route':c.route } }))}
               </div>`)}`
-          : K.Empty({ text:'İki masayı birbirine bağlayan ölçülmüş bir bulgu yok.' }),
+          : K.Empty({ text:yz('esp.analytics.i-ki-masayi-birbirine-baglay') }),
       }),
 
       K.Entry({
-        hint:'not-gunun-brifingi', label:'Günün brifingi',
+        hint:'not-gunun-brifingi', label:yz('esp.analytics.gunun-brifingi'),
         meta:gunluk ? (gunluk.source === 'model' ? 'model' : 'kural motoru') : 'üretilmedi',
         action:K.Button({ label:gunluk ? 'Yeniden üret' : 'Üret', size:'sm',
           act:'gen-briefing' }),
         body:gunluk
           ? html`<p class="rulesay">${gunluk.text}</p>`
-          : K.Empty({ text:'Bugün için brifing üretilmedi.' }),
+          : K.Empty({ text:yz('esp.analytics.bugun-icin-brifing-uretilmed') }),
       }),
 
       K.Entry({
-        label:'Sınır', hint:'pedagogic',
+        label:yz('esp.analytics.sinir'), hint:'pedagogic',
         meta:'ne söylenmez',
         body:html`
           ${K.Notice({ tone:'info', body:ESP.PEDAGOGIC.disclaimer })}
@@ -267,17 +374,17 @@ ESP.Screens.analytics = (function(){
     const kapali = ESP.Signals.closed().slice(-8).reverse();
 
     return K.Entry({
-      label:'Denetim defteri', hint:'signal',
+      label:yz('esp.analytics.denetim-defteri'), hint:'signal',
       meta:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
       wide:true,
       body:html`
         ${K.Notice({ tone:h.level === 'used' ? 'ok' : h.level === 'unknown' ? 'info' : 'warn',
-          title:'Bu sayfa gerekli mi?', body:h.text })}
+          title:yz('esp.analytics.bu-sayfa-gerekli-mi'), body:h.text })}
 
-        ${when(acik, () => K.Notice({ tone:'info', title:'Açık soru',
+        ${when(acik, () => K.Notice({ tone:'info', title:yz('esp.analytics.acik-soru'),
           body:acik.question + ' (Bugün ekranında cevaplanabilir.)' }))}
 
-        ${K.Table({ tight:true, headers:['Zincir', { label:'Sayı', num:true }], rows:[
+        ${K.Table({ tight:true, headers:['Zincir', { label:yz('esp.analytics.sayi'), num:true }], rows:[
           ['Açılan sinyal', String(e.opened)],
           ['Görüldü', String(e.seen)],
           ['Cevaplandı', String(e.answered)],
@@ -286,8 +393,8 @@ ESP.Screens.analytics = (function(){
         ] })}
 
         ${when(e.cert === 'observed', () => K.Table({ tight:true,
-          headers:['Kapanan sinyal', { label:'Adet', num:true },
-            { label:'Ayrışma kapandı', num:true }],
+          headers:['Kapanan sinyal', { label:yz('esp.analytics.adet'), num:true },
+            { label:yz('esp.analytics.ayrisma-kapandi'), num:true }],
           rows:[
             ['Cevaplananlar', String(e.answeredClosed),
               (e.answeredRate == null ? '—' : '%' + e.answeredRate)],
@@ -321,7 +428,7 @@ ESP.Screens.analytics = (function(){
       signalLedgerRow(),
 
       K.Entry({
-        label:'Sürtünme', hint:'friction',
+        label:yz('esp.analytics.surtunme'), hint:'friction',
         meta:f.cert === 'missing' ? 'veri yok'
           : f.window.perDay + ' dk/gün'
             + (f.window.ratio == null ? '' : ' · %' + Math.round(f.window.ratio * 100)),
@@ -330,8 +437,8 @@ ESP.Screens.analytics = (function(){
           ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info',
             title:f.title, body:f.note })}
           ${when(f.cert === 'measured', () => K.Table({ tight:true,
-            headers:['Pencere', { label:'Yönetim', num:true }, { label:'Çalışma', num:true },
-              { label:'Pay', num:true }],
+            headers:['Pencere', { label:yz('esp.analytics.yonetim'), num:true }, { label:yz('esp.analytics.calisma'), num:true },
+              { label:yz('esp.analytics.pay'), num:true }],
             rows:[[
               f.window.days + ' gün (' + f.window.measuredDays + ' ölçüldü)',
               U.fmtMin(f.window.admin), U.fmtMin(f.window.work),
@@ -340,12 +447,12 @@ ESP.Screens.analytics = (function(){
           ${when(rahatlama.length, () => html`
             <div class="mt-10">
               ${map(rahatlama, r => K.Entry({ label:r.label, note:r.note,
-                body:K.Button({ label:'Bak', size:'sm', act:r.act }) }))}
+                body:K.Button({ label:yz('esp.analytics.bak'), size:'sm', act:r.act }) }))}
             </div>`)}`,
       }),
 
       K.Entry({
-        label:'Gösterge ayrışması', hint:'goodhart',
+        label:yz('esp.analytics.gosterge-ayrismasi'), hint:'goodhart',
         meta:ayrisan.length ? ayrisan.length + ' ayrışma' : 'temiz',
         wide:true,
         body:bayraklar.length
@@ -362,41 +469,39 @@ ESP.Screens.analytics = (function(){
                   : p.status === 'aligned' ? 'birlikte'
                   : p.status === 'unknown' ? 'ölçülmedi' : 'sessiz',
               ]) })}
-            <p class="small muted mt-8">«Yön» sütunu sonucun hangi tarafa
-              gitmesinin iyi sayıldığını söyler. Yönü tanımsız bir çift
-              değerlendirilmez: sistem yüksek olanın iyi olduğunu VARSAYMAZ.</p>
+            <p class="small muted mt-8">${yz('esp.analytics.yon-sutunu-sonucun-hangi-tar')}</p>
             ${(function(){
               const pol = ESP.Goodhart.policy();
-              return K.Ayrinti({ class:'small muted mt-8', etiket:'Bu sayılar nereden?',
-                ozet:'Pencere ' + pol.windowDays + ' gün · çaba artışı eşiği %'
+              return K.Ayrinti({ class:'small muted mt-8', etiket:yz('esp.analytics.bu-sayilar-nereden'),
+                ozet:yz('esp.analytics.pencere') + pol.windowDays + ' gün · çaba artışı eşiği %'
                   + Math.round(pol.effortRiseThreshold * 100) + ' · sonuç durgunluk eşiği %'
                   + Math.round(pol.stagnationThreshold * 100) + ' · asgari çaba '
                   + pol.minEffortMinutes + ' dk.',
-                govde:html`<p>Bu sayılar bir bulgu değil bu yazılımın ayarıdır: ${pol.rationale}</p>` });
+                govde:html`<p>${yz('esp.analytics.bu-sayilar-bir-bulgu-degil')} ${pol.rationale}</p>` });
             })()}`
-          : K.Empty({ text:'Açık bölüm yok; nöbetçinin bakacağı çift de yok.' }),
+          : K.Empty({ text:yz('esp.analytics.acik-bolum-yok-nobetcinin-ba') }),
       }),
 
       ...ayrisan.map(p => K.Entry({
         label:p.effortLabel.toUpperCase(),
         meta:'ayrıştı',
         note:p.note,
-        body:K.Notice({ tone:'info', title:'Soru', body:p.question }),
+        body:K.Notice({ tone:'info', title:yz('esp.analytics.soru'), body:p.question }),
       })),
 
       K.Entry({
-        label:'Kalibrasyon', hint:'calib',
+        label:yz('esp.analytics.kalibrasyon'), hint:'calib',
         meta:puan.cert === 'missing' ? puan.n + '/' + ESP.Calib.ASGARI + ' tahmin'
           : (puan.grade || (puan.brier == null ? '—' : 'brier ' + puan.brier.toFixed(2))),
         wide:true,
         body:html`
           ${K.Notice({ tone:'info', body:puan.note })}
           ${when(puan.bias.cert === 'measured', () => K.Notice({ tone:'info',
-            title:'Yanlılık', body:puan.bias.note }))}
+            title:yz('esp.analytics.yanlilik'), body:puan.bias.note }))}
           <div class="mt-10">
-            ${K.Field({ label:'Ne tahmin ediyorsun?',
+            ${K.Field({ label:yz('esp.analytics.ne-tahmin-ediyorsun'),
               input:K.Select({ id:'calib-kind', value:S.ui.calibKind || 'minutes',
-                change:'calib-kind', aria:'Tahmin türü',
+                change:'calib-kind', aria:yz('esp.analytics.tahmin-turu'),
                 options:ESP.CALIB_KINDS.map(k => ({ value:k.id, label:k.label })) }) })}
             ${(function(){
               const k = ESP.Calib.kindOf(S.ui.calibKind || 'minutes');
@@ -407,7 +512,7 @@ ESP.Screens.analytics = (function(){
                     step:k.type === 'binary' ? '0.05' : '1',
                     placeholder:k.type === 'binary' ? '0,70' : '0' }) })}`;
             })()}
-            ${K.Button({ label:'Tahmini kaydet', tone:'primary', act:'calib-open' })}
+            ${K.Button({ label:yz('esp.analytics.tahmini-kaydet'), tone:'primary', act:'calib-open' })}
           </div>
           ${when(vadesi.length, () => html`
             <div class="mt-10">
@@ -415,15 +520,15 @@ ESP.Screens.analytics = (function(){
                 label:(ESP.Calib.kindOf(fo.kind) || {}).label || fo.kind,
                 meta:'tahminin: ' + U.fmtNum(fo.guess),
                 body:html`
-                  ${K.Field({ label:'Gerçekleşen',
+                  ${K.Field({ label:yz('esp.analytics.gerceklesen'),
                     input:K.Input({ id:'calib-actual-' + fo.id, type:'number', numeric:true }) })}
-                  ${K.Button({ label:'Kapat', size:'sm', act:'calib-settle',
+                  ${K.Button({ label:yz('esp.analytics.kapat'), size:'sm', act:'calib-settle',
                     data:{ 'data-id':fo.id } })}`,
               }))}
             </div>`)}
           ${when(ESP.Calib.settled().length, () => K.Table({ tight:true,
-            headers:['Tür', { label:'Tahmin', num:true }, { label:'Gerçek', num:true },
-              { label:'Sapma', num:true }],
+            headers:['Tür', { label:yz('esp.analytics.tahmin'), num:true }, { label:yz('esp.analytics.gercek'), num:true },
+              { label:yz('esp.analytics.sapma'), num:true }],
             rows:ESP.Calib.settled().slice(0, 10).map(fo => {
               const h = ESP.Calib.error(fo);
               return [(ESP.Calib.kindOf(fo.kind) || {}).label || fo.kind,
@@ -449,22 +554,22 @@ ESP.Screens.analytics = (function(){
       kademeler = kademeler.filter(k => k.discipline === discFilter);
     }
 
-    const discOptions = [{ value:'all', label:'Tüm disiplinler (7 alan)' }]
+    const discOptions = [{ value:'all', label:yz('esp.analytics.tum-disiplinler-7-alan') }]
       .concat(ESP.Mod.active().map(d => ({ value:d.id, label:d.label })));
 
     return [
       K.Entry({
-        label:'Disiplin Filtresi',
+        label:yz('esp.analytics.disiplin-filtresi'),
         action:K.Select({ id:'an-rub-disc', value:discFilter, change:'an-rub-disc', size:'sm',
           options:discOptions }),
       }),
 
       K.Entry({
-        label:'Derin alan analizleri', hint:'deep-analysis',
+        label:yz('esp.analytics.derin-alan-analizleri'), hint:'deep-analysis',
         meta:derinler.length + ' derin analiz',
         wide:true,
         body:html`
-          <p class="small muted mb-10">Her disiplin için karar sıraları, 3 durum senaryosu, karşı örnekler ve veri sınırları.</p>
+          <p class="small muted mb-10">${yz('esp.analytics.her-disiplin-icin-karar-sira')}</p>
           <div class="stack-sm">${map(derinler, da => {
             const discName = (ESP.DISCIPLINE_BY_ID[da.discipline] || {}).label || da.discipline;
             return html`
@@ -473,31 +578,31 @@ ESP.Screens.analytics = (function(){
                   <b class="small">${U.esc(da.title)}</b>
                   <span class="badge badge--muted tiny">${discName}</span>
                 </div>
-                <div class="small mb-6"><b>Karar Sırası:</b> ${(da.decision_order || []).join(' → ')}</div>
+                <div class="small mb-6"><b>${yz('esp.analytics.karar-sirasi')}</b> ${(da.decision_order || []).join(' → ')}</div>
                 <div class="stack-xs mb-6">${map(da.cases || [], c => html`
                   <div class="ogrenme__kutu">
                     <div class="tiny bold text-1">${U.esc(c.name)}:</div>
                     <div class="tiny dim">${U.esc(c.condition)} → <span class="text-2">${U.esc(c.decision)}</span></div>
                   </div>`)}</div>
                 ${when(da.counter_example, () => html`
-                  <div class="tiny dim mb-4"><b>Karşı Örnek:</b> ${U.esc(da.counter_example.text)}</div>`)}
-                <div class="tiny dim"><b>Veri Sınırı:</b> ${U.esc(da.data_boundary)}</div>
+                  <div class="tiny dim mb-4"><b>${yz('esp.analytics.karsi-ornek')}</b> ${U.esc(da.counter_example.text)}</div>`)}
+                <div class="tiny dim"><b>${yz('esp.analytics.veri-siniri')}</b> ${U.esc(da.data_boundary)}</div>
               </div>`;
           })}</div>`,
       }),
 
       K.Entry({
-        label:'Değerlendirme rubrikleri ve boyutlar', hint:'rubric',
+        label:yz('esp.analytics.degerlendirme-rubrikleri-ve'), hint:'rubric',
         meta:rubler.length + ' rubrik · 22 boyut',
         wide:true,
         body:html`
-          <p class="small muted mb-10">0–3 puanlama skalası, gözlenebilir davranış çapaları ve değerlendirme kuralları.</p>
+          <p class="small muted mb-10">${yz('esp.analytics.0-3-puanlama-skalasi-gozlene')}</p>
           <div class="stack-sm">${map(rubler, rub => {
             const discName = (ESP.DISCIPLINE_BY_ID[rub.discipline] || {}).label || rub.discipline;
             return html`
               <div class="ogrenme">
                 <div class="row between gap-8 mb-4">
-                  <b class="small">${discName} Değerlendirme Rubriği</b>
+                  <b class="small">${discName} ${yz('esp.analytics.degerlendirme-rubrigi')}</b>
                   <span class="badge badge--muted tiny">${(rub.dimensions || []).length} boyut</span>
                 </div>
                 <p class="tiny dim mb-6">${U.esc(rub.rule)}</p>
@@ -514,15 +619,15 @@ ESP.Screens.analytics = (function(){
       }),
 
       when(kademeler.length, () => K.Entry({
-        label:'Kademeli geri bildirim ipuçları', hint:'feedback',
+        label:yz('esp.analytics.kademeli-geri-bildirim-ipucl'), hint:'feedback',
         meta:kademeler.length + ' ipucu akışı',
         wide:true,
         body:html`<div class="stack-sm">${map(kademeler, kf => html`
           <div class="ogrenme">
             <b class="small block mb-4">${U.esc(kf.title)}</b>
-            <div class="tiny dim mb-2"><b>1. Seviye (Soru):</b> ${U.esc(kf.level_1_question)}</div>
-            <div class="tiny dim mb-2"><b>2. Seviye (Kural):</b> ${U.esc(kf.level_2_rule)}</div>
-            <div class="tiny dim"><b>3. Seviye (Örnek):</b> ${U.esc(kf.level_3_worked)}</div>
+            <div class="tiny dim mb-2"><b>${yz('esp.analytics.1-seviye-soru')}</b> ${U.esc(kf.level_1_question)}</div>
+            <div class="tiny dim mb-2"><b>${yz('esp.analytics.2-seviye-kural')}</b> ${U.esc(kf.level_2_rule)}</div>
+            <div class="tiny dim"><b>${yz('esp.analytics.3-seviye-ornek')}</b> ${U.esc(kf.level_3_worked)}</div>
           </div>`)}</div>`,
       })),
     ];
@@ -593,9 +698,8 @@ ESP.Screens.analytics = (function(){
         </span>
       </button>`;
     });
-    return K.Kutu({ ad:'Alanların', yuva:'son 14 gün · kayıttan', govde:html`<div class="alan-izgara">${kartlar}</div>
-      <p class="tiny muted mt-10">Sütunlar günlük dakikadır; nokta girilmemiş gündür (sıfır sayılmaz). Önceki 14 günle fark, iki pencerede de
-        en az ${ESIK_GUN} kayıtlı gün varsa yazılır. Alt satır, alanın kalite ölçüsüdür (kural motoru).</p>` });
+    return K.Kutu({ ad:yz('esp.analytics.alanlarin'), yuva:'son 14 gün · kayıttan', govde:html`<div class="alan-izgara">${kartlar}</div>
+      <p class="tiny muted mt-10">${yz('esp.analytics.sutunlar-gunluk-dakikadir-no')} ${ESIK_GUN} ${yz('esp.analytics.kayitli-gun-varsa-yazilir-al')}</p>` });
   }
   /* PANO KARTI (2026-10-20; brand/ortak/pano.js): son 5 haftanın günlük
      dakikası ısı haritasında; girilmemiş gün kesik kare (sıfır değil). */
@@ -609,10 +713,10 @@ ESP.Screens.analytics = (function(){
     const deger = gunler.map(d => d > bugunISO ? null : M.minutesOf(d));
     const kayitli = deger.filter(v => v != null).length;
     const enCok = Math.max(1, ...deger.filter(v => v != null));
-    if(!kayitli) return P.kart({ tur:'isi', ad:'Son 5 hafta', simge:'takvim', bos:{ cumle:'Son beş haftada oturum yok.' } });
-    return P.kart({ tur:'isi', ad:'Son 5 hafta', simge:'takvim', yuva:'günlük dakika · ' + kayitli + ' gün kayıtlı',
+    if(!kayitli) return P.kart({ tur:'isi', ad:yz('esp.analytics.son-5-hafta'), simge:'takvim', bos:{ cumle:yz('esp.analytics.son-bes-haftada-oturum-yok') } });
+    return P.kart({ tur:'isi', ad:yz('esp.analytics.son-5-hafta'), simge:'takvim', yuva:'günlük dakika · ' + kayitli + ' gün kayıtlı',
       govde:'<div class="pk-sutun__ad">' + ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map(g => '<span>' + g + '</span>').join('') + '</div>'
-        + P.kareler({ sutun:7, etiket:'Son beş haftanın günlük dakikası; ' + kayitli + ' gün kayıtlı',
+        + P.kareler({ sutun:7, etiket:yz('esp.analytics.son-bes-haftanin-gunluk-daki') + kayitli + ' gün kayıtlı',
             durumlar:gunler.map((d, i) => d > bugunISO ? 'bos' : deger[i] == null ? 'yok' : deger[i] <= 0 ? 0 : Math.max(1, Math.ceil(deger[i] / enCok * 3))) })
         + P.not('koyu: çok · açık: az · kesik: kayıt yok') });
   }
@@ -632,19 +736,19 @@ ESP.Screens.analytics = (function(){
     const saatli = saat.filter(v => v != null).length;
     const enIyi = saat.reduce((m, v, i) => v != null && (m < 0 || v > saat[m]) ? i : m, -1);
     const saatKart = saatli >= 3
-      ? P.kart({ tur:'saatler', ad:'Verimli saatler', simge:'saat', yuva:'son 30 gün',
+      ? P.kart({ tur:'saatler', ad:yz('esp.analytics.verimli-saatler'), simge:'saat', yuva:'son 30 gün',
           govde:P.deger(String(enIyi).padStart(2, '0') + ':00', '', 'en çok dakika bu saatte kaydedildi')
-            + P.sutun({ degerler:saat.map(v => v == null ? null : v), yukseklik:48, etiket:'Günün saatlerine göre dakika; en çok ' + enIyi + ':00' })
+            + P.sutun({ degerler:saat.map(v => v == null ? null : v), yukseklik:48, etiket:yz('esp.analytics.gunun-saatlerine-gore-dakika') + enIyi + ':00' })
             + '<div class="pk-saat__ad"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>'
             + P.not('saat: oturumun kaydedildiği an · kesik: o saatte kayıt yok') })
-      : P.kart({ tur:'saatler', ad:'Verimli saatler', simge:'saat', bos:{ cumle:'Üç farklı saatte oturum olunca en verimli saatin çizilir.' } });
+      : P.kart({ tur:'saatler', ad:yz('esp.analytics.verimli-saatler'), simge:'saat', bos:{ cumle:yz('esp.analytics.uc-farkli-saatte-oturum-olun') } });
     /* Bu hafta / geçen hafta: disiplin başına dakika. */
     const pencere = (bas, n) => { const o = {}; for(let i = bas; i < bas + n; i++){ M.sessionsOf(gun(i)).forEach(s => { if(s.minutes == null || s.minutesCert === 'missing') return; o[s.disc] = (o[s.disc] || 0) + s.minutes; }); } return o; };
     const bu = pencere(0, 7), once = pencere(7, 7);
     const discler = ESP.Mod.active().filter(d => bu[d.id] || once[d.id]);
     const en = Math.max(1, ...discler.map(d => Math.max(bu[d.id] || 0, once[d.id] || 0)));
     const ikiHafta = discler.length
-      ? P.kart({ tur:'iki-hafta', ad:'Bu hafta · geçen hafta', simge:'satir', yuva:U.fmtMin(Object.values(bu).reduce((a, b) => a + b, 0)) + ' · ' + U.fmtMin(Object.values(once).reduce((a, b) => a + b, 0)),
+      ? P.kart({ tur:'iki-hafta', ad:yz('esp.analytics.bu-hafta-gecen-hafta'), simge:'satir', yuva:U.fmtMin(Object.values(bu).reduce((a, b) => a + b, 0)) + ' · ' + U.fmtMin(Object.values(once).reduce((a, b) => a + b, 0)),
           govde:P.cubuklar({ satirlar:discler.map(d => ({ ad:d.short || d.label, oran:(bu[d.id] || 0) / en, plan:once[d.id] ? once[d.id] / en : null, metin:U.fmtMin(bu[d.id] || 0) })) })
             + P.not('çubuk: son 7 gün · siyah çizgi: önceki 7 gün') })
       : '';
@@ -656,17 +760,17 @@ ESP.Screens.analytics = (function(){
       if(n && (!enCok || n > enCok.n)) enCok = { d, n };
     });
     const rekor = enUzun
-      ? P.kart({ tur:'rekor', ad:'Rekorların', yildiz:'rekor',
-          govde:P.liste({ satirlar:[{ sol:U.fmtShort ? U.fmtShort(enUzun.d) : enUzun.d, ad:'En uzun gün', not:U.fmtMin(enUzun.m), nokta:0 },
-            { sol:U.fmtShort ? U.fmtShort(enCok.d) : enCok.d, ad:'En çok oturum', not:enCok.n + ' oturum', nokta:1 },
-            { sol:'', ad:'En uzun seri', not:M.streak() + ' gün (şu an)', nokta:2 }] }) })
+      ? P.kart({ tur:'rekor', ad:yz('esp.analytics.rekorlarin'), yildiz:'rekor',
+          govde:P.liste({ satirlar:[{ sol:U.fmtShort ? U.fmtShort(enUzun.d) : enUzun.d, ad:yz('esp.analytics.en-uzun-gun'), not:U.fmtMin(enUzun.m), nokta:0 },
+            { sol:U.fmtShort ? U.fmtShort(enCok.d) : enCok.d, ad:yz('esp.analytics.en-cok-oturum'), not:enCok.n + ' oturum', nokta:1 },
+            { sol:'', ad:yz('esp.analytics.en-uzun-seri'), not:M.streak() + ' gün (şu an)', nokta:2 }] }) })
       : '';
     /* Son dokunuş: her açık alanın son oturumundan bu yana geçen gün. */
     const son = ESP.Mod.active().map(d => {
       for(let i = 0; i < 90; i++){ if(M.minutesOf(gun(i), d.id) != null) return { d, g:i }; }
       return { d, g:null };
     });
-    const dokunus = P.kart({ tur:'son-dokunus', ad:'Son dokunuş', simge:'takvim', yuva:'gün önce',
+    const dokunus = P.kart({ tur:'son-dokunus', ad:yz('esp.analytics.son-dokunus'), simge:'takvim', yuva:'gün önce',
       govde:P.cubuklar({ satirlar:son.map(x => ({ ad:x.d.short || x.d.label, oran:x.g == null ? null : Math.min(1, x.g / 14), renk:x.g != null && x.g >= 7 ? 2 : 0,
         metin:x.g == null ? '90+ gün' : x.g === 0 ? 'bugün' : x.g + ' gün' })) })
         + P.not('uzun çubuk: uzun süredir açılmadı · 14 gün ve üstü dolu') });
@@ -674,15 +778,15 @@ ESP.Screens.analytics = (function(){
   }
   function dengeCubugu(){
     const b = ESP.Planner.balance(7);
-    if(b.cert === 'missing') return K.Kutu({ ad:'Haftanın dengesi', yuva:'son 7 gün', govde:html`<p class="small muted">Son yedi günde kayıt yok.</p>` });
+    if(b.cert === 'missing') return K.Kutu({ ad:yz('esp.analytics.haftanin-dengesi'), yuva:'son 7 gün', govde:html`<p class="small muted">${yz('esp.analytics.son-yedi-gunde-kayit-yok')}</p>` });
     const act = ESP.Mod.active().map(d => d.id);
     const satir = b.rows.filter(r => r.share != null && r.share > 0);
-    return K.Kutu({ ad:'Haftanın dengesi', yuva:'son 7 gün · süre payı', govde:html`
+    return K.Kutu({ ad:yz('esp.analytics.haftanin-dengesi'), yuva:'son 7 gün · süre payı', govde:html`
       <div class="denge-cubuk" role="img" aria-label="${satir.map(r => r.disc.label + ' %' + Math.round(r.share * 100)).join(', ')}">
         ${map(satir, r => html`<i style="${'width:' + (r.share * 100).toFixed(1) + '%;background:' + RENK[Math.max(0, act.indexOf(r.disc.id)) % RENK.length]}" title="${r.disc.label + ' · ' + U.fmtMin(r.minutes)}"></i>`)}
       </div>
       <div class="denge-lejant">${map(satir, r => html`<span><i style="${'background:' + RENK[Math.max(0, act.indexOf(r.disc.id)) % RENK.length]}"></i>${r.disc.short || r.disc.label} <b class="num">%${Math.round(r.share * 100)}</b></span>`)}</div>
-      ${when(b.skewed, () => html`<p class="small muted mt-8">Pratik ${b.top.label} tarafına yığılmış; ${b.untouched.map(d => d.label).join(', ')} bu hafta açılmadı. Bu bir bulgudur, hata değil.</p>`)}` });
+      ${when(b.skewed, () => html`<p class="small muted mt-8">${yz('esp.analytics.pratik')} ${b.top.label} ${yz('esp.analytics.tarafina-yigilmis')} ${b.untouched.map(d => d.label).join(', ')} ${yz('esp.analytics.bu-hafta-acilmadi-bu-bir')}</p>`)}` });
   }
 
   /* ANALİZ BAŞI (vitrin): 041 veri doluluğu, günlük dakika çizgisi (027,
@@ -699,10 +803,10 @@ ESP.Screens.analytics = (function(){
       son.push({ tarih:t, deger:r.length ? r.reduce((a, s) => a + (s.minutes || 0), 0) : null });
     }
     return html`<div class="analizbasi">
-      ${K.Kutu({ ad:'Günlük pratik', yuva:'son 28 gün', govde:html`
+      ${K.Kutu({ ad:yz('esp.analytics.gunluk-pratik'), yuva:'son 28 gün', govde:html`
         ${/* Metrik kartı (2026-10-18): ortalama, eğilim, doluluk ve eksenli çizgi. */''}
-        ${raw(G.metrikHtml(son, { etiket:'Günlük pratik', birim:'dk', ondalik:0, yon:'artis-iyi' }))}
-        <details class="hiz-ac"><summary>Veri doluluğu</summary>${raw(G.dolulukHtml([{ modul:'esp', ad:'ESP', gunler:kayitli }], { gun:7 }))}</details>` })}
+        ${raw(G.metrikHtml(son, { etiket:yz('esp.analytics.gunluk-pratik'), birim:'dk', ondalik:0, yon:'artis-iyi' }))}
+        <details class="hiz-ac"><summary>${yz('esp.analytics.veri-dolulugu')}</summary>${raw(G.dolulukHtml([{ modul:'esp', ad:yz('esp.analytics.esp'), gunler:kayitli }], { gun:7 }))}</details>` })}
       ${dengeCubugu()}
     </div>`;
   }
@@ -719,13 +823,13 @@ ESP.Screens.analytics = (function(){
       return { ad:d.short || d.label, dugumler:y ? y.steps.map(s => ({ ad:s.title, durum:s.state === 'done' ? 'bitti' : s.state === 'current' ? (s.pct > 0 ? 'suruyor' : 'sirada') : 'bekliyor',
         ilerleme:s.state === 'current' && s.pct > 0 ? s.pct / 100 : undefined })) : [] };
     });
-    return html`<section class="kutu" aria-label="Yol haritası"><h2 class="kutu__ad">Yol haritası</h2>
-      <p class="tiny dim">Her alanın merdiveni; geçilen basamak dolu, içinde olduğun basamak halka</p>
-      ${raw(A.html({ merkez:'Gelişim', kumeler, bos:'Bir alan açınca merdiveni burada belirir.' }))}</section>`;
+    return html`<section class="kutu" aria-label="Yol haritası"><h2 class="kutu__ad">${yz('esp.analytics.yol-haritasi')}</h2>
+      <p class="tiny dim">${yz('esp.analytics.her-alanin-merdiveni-gecilen')}</p>
+      ${raw(A.html({ merkez:'Gelişim', kumeler, bos:yz('esp.analytics.bir-alan-acinca-merdiveni-bu') }))}</section>`;
   }
 
   LIFEOS.PARCA.blok({ id:'analytics.bolum-1', sayfa:'analytics', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ acik }){
-    return when(acik, () => K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:'Analiz bölümleri', tabs:TABS, govde:GOVDE })));
+    return when(acik, () => K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:yz('esp.analytics.analiz-bolumleri'), tabs:TABS, govde:GOVDE })));
   } });
   LIFEOS.PARCA.blok({ id:'analytics.bolum-2', sayfa:'analytics', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ acik }){
     return K.Span(12, html`<div class="analiz-ayrinti">
@@ -794,7 +898,7 @@ ESP.Screens.analytics = (function(){
         { dueAt:dueFor(kind) });
       if(!r.ok){ ESP.UI.toast(r.error); return; }
       if(el) el.value = '';
-      ESP.UI.toast('Tahmin deftere yazıldı.');
+      ESP.UI.toast(yz('esp.analytics.tahmin-deftere-yazildi'));
       ESP.App.render();
     },
 
@@ -840,7 +944,7 @@ ESP.Screens.analytics = (function(){
       return ['denge', 'haftalık-rota', 'seri', 'çapraz-bulgular', 'günün-brifingi',
         'denetim-defteri', 'sürtünme', 'gösterge-ayrışması', 'derin-alan-analizleri', 'kademeli-geri-bildirim-ipuçları'].concat(bayrak);
     },
-    title:'Analiz',
+    title:yz('esp.analytics.analiz'),
     headline(){
       const b = ESP.Planner.balance(7);
       if(b.cert === 'missing') return 'Ölçülecek veri yok.';
@@ -862,9 +966,9 @@ ESP.Screens.analytics = (function(){
       const r = ESP.SRS.retention();
       return [
         { value:ehs.cert === 'missing' ? '—' : U.fmtNum(Math.round(ehs.value)), label:'hacim' },
-        { value:ss.cert === 'missing' ? '—' : U.fmtNum(Math.round(ss.value * 100) / 100), label:'SSK' },
+        { value:ss.cert === 'missing' ? '—' : U.fmtNum(Math.round(ss.value * 100) / 100), label:yz('esp.analytics.ssk') },
         { value:r.cert === 'missing' ? '—' : '%' + Math.round(r.value * 100), label:'retansiyon' },
-        { value:String(ESP.Planner.crossFindings().length), label:'çapraz bulgu' },
+        { value:String(ESP.Planner.crossFindings().length), label:yz('esp.analytics.capraz-bulgu') },
       ];
     },
     subtitle(){ return 'son 14 gün'; },

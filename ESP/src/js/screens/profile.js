@@ -9,6 +9,85 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.profile.hafizam':'Hafızam',
+  'esp.profile.ofisin-senin-hakkinda-hatirl':'Ofisin senin hakkında hatırladıkları; bu cihazda durur, HKM bağlıysa King de görür. ',
+  'esp.profile.unut':'Unut',
+  'esp.profile.hatirlanacak-sey':'Hatırlanacak şey',
+  'esp.profile.orn-sabahlari-daha-iyi-okuru':'Örn. Sabahları daha iyi okurum',
+  'esp.profile.hatirla':'Hatırla',
+  'esp.profile.model-hafizaya-yazamaz-senin':'Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın, «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.',
+  'esp.profile.belirli-gunler-icin-farkli-s':'Belirli günler için farklı süre',
+  'esp.profile.yogun-ya-da-vakitsiz-gunler':'Yoğun ya da vakitsiz günler için. Temel (',
+  'esp.profile.baslangic':'Başlangıç',
+  'esp.profile.bitis':'Bitiş',
+  'esp.profile.gunluk-sure-dakika':'Günlük süre (dakika)',
+  'esp.profile.ekle':'Ekle',
+  'esp.profile.kaldir':'Kaldır',
+  'esp.profile.kisi':'Kişi',
+  'esp.profile.ad-yalnizca-sana-seslenmek-i':'Ad yalnızca sana seslenmek için tutulur ve hiçbir modele gönderilmez.',
+  'esp.profile.ad':'Ad',
+  'esp.profile.odak':'Odak',
+  'esp.profile.enstruman':'Enstrüman',
+  'esp.profile.calisilan-dil':'Çalışılan dil',
+  'esp.profile.gunluk-pratik-tabani-dakika':'Günlük pratik tabanı (dakika)',
+  'esp.profile.kaydet':'Kaydet',
+  'esp.profile.bolumler':'Bölümler',
+  'esp.profile.kapattigin-bolum-gezinmeden':'Kapattığın bölüm gezinmeden kalkar, reçeteye ve denge hesabına ',
+  'esp.profile.en-az-bir-bolum-acik':'En az bir bölüm açık kalmak zorunda: hepsi kapalı bir ESP, açılış ekranından ibaret bir kabuktur.',
+  'esp.profile.patron-a-da-soyleyebilirsin':'Patron’a da söyleyebilirsin: «diksiyon çalışmak istemiyorum», «gitarı tekrar aç». Önce ne olacağını söyler, sonra onaylarsın.',
+  'esp.profile.kucuk-istekler-sormadan-uygu':'Küçük istekler sormadan uygulansın mı?',
+  'esp.profile.yalniz-benim-istediklerim-on':'Yalnız benim istediklerim (önerilir)',
+  'esp.profile.hicbiri-her-seyi-once':'Hiçbiri — her şeyi önce sor',
+  'esp.profile.tur-tur-actigin-kucuk-tur':'Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar. Orta ve büyük türler kilitlidir.',
+  'esp.profile.hatirlaticilar-telefonda-bil':'Hatırlatıcılar telefonda bildirim olsun mu?',
+  'esp.profile.hayir':'Hayır',
+  'esp.profile.evet-telefon-bildirimi':'Evet, telefon bildirimi',
+  'esp.profile.kurulu-bildirimler':'Kurulu bildirimler',
+  'esp.profile.esp-hatirlatici':'ESP · hatırlatıcı',
+  'esp.profile.gorunum':'Görünüm',
+  'esp.profile.ayni-tercih-ust-cubuktaki-go':'Aynı tercih üst çubuktaki görünüm düğmesinden de açılır ve ikisi aynı ',
+  'esp.profile.gizlilik-kilidi':'Gizlilik kilidi',
+  'esp.profile.profiller':'Profiller',
+  'esp.profile.gec':'Geç',
+  'esp.profile.sil':'Sil',
+  'esp.profile.yeni-profil-adi':'Yeni profil adı',
+  'esp.profile.model':'Model',
+  'esp.profile.model-bir-iyilestirmedir-ger':'Model bir iyileştirmedir, gereklilik değil: kapalıyken ofis ',
+  'esp.profile.durumu-gor':'Durumu gör',
+  'esp.profile.veri':'Veri',
+  'esp.profile.yerel-kota':'Yerel kota',
+  'esp.profile.yedek-indir':'Yedek indir',
+  'esp.profile.yedekten-yukle':'Yedekten yükle',
+  'esp.profile.sinir':'Sınır',
+  'esp.profile.hkm-isareti':'HKM işareti',
+  'esp.profile.bu-anahtar-neyi-acar':'Bu anahtar neyi açar?',
+  'esp.profile.i-sareti-ac-varsayilan-kapal':'İşareti aç (varsayılan kapalı)',
+  'esp.profile.hkm-adresi':'HKM adresi',
+  'esp.profile.yerel-jeton':'Yerel jeton',
+  'esp.profile.hkm-jetonu':'HKM jetonu',
+  'esp.profile.en-sik-kac-dakikada-bir':'En sık kaç dakikada bir',
+  'esp.profile.gonderim-araligi':'Gönderim aralığı',
+  'esp.profile.kapsam':'Kapsam',
+  'esp.profile.gonderim-kapsami':'Gönderim kapsamı',
+  'esp.profile.bugun-ne-gidiyor':'Bugün ne gidiyor',
+  'esp.profile.deger':'Değer',
+  'esp.profile.gunun-ozetinde-kart-metni-no':'Günün özetinde kart metni, not içeriği ve kitap adı GİTMEZ (tam yedekte vardır). Giden şey bu dört sayıdır; değeri olmayan alan «veri yok» gider, sıfır değil.',
+  'esp.profile.baglan':'Bağlan',
+  'esp.profile.simdi-gonder':'Şimdi gönder',
+  'esp.profile.gecmisi-gonder-60-gun':'Geçmişi gönder (60 gün)',
+  'esp.profile.capraz-bulgu-gecmi-s-ister-g':'Çapraz bulgu GEÇMİŞ ister. Geçmiş gönderimi yalnızca geriye dönük hesaplanabilen alanları yollar: retansiyon bugünün kart durumundan türetildiği için dünün tarihiyle gönderilmez.',
+  'esp.profile.gecmis-gonderiliyor':'Geçmiş gönderiliyor…',
+  'esp.profile.gunluk-sure':'Günlük süre ',
+  'esp.profile.ad-bos-olamaz':'Ad boş olamaz',
+  'esp.profile.kaydedildi':'Kaydedildi',
+  'esp.profile.profil-eklendi':'Profil eklendi',
+  'esp.profile.yedek-indirildi':'Yedek indirildi',
+  'esp.profile.yedekten-yukleme-rehber-veri':'Yedekten yükleme Rehber → Veri sekmesinde',
+  'esp.profile.profil':'Profil',
+  'esp.profile.acik-bolum':'açık bölüm',
+  'esp.profile.son-yedek':'son yedek',
+});
 window.LIFEOS.PARCA.sayfa({ id:'profile', modul:'esp', cekmece:'ayarlar', ad:'Profil', ikon:'sliders', sira:10 });
 
 ESP.Screens.profile = (function(){
@@ -23,24 +102,23 @@ ESP.Screens.profile = (function(){
     const H = window.LIFEOS.Hafiza;
     const l = ESP.Hafizam.etkin();
     return K.Entry({
-      label:'Hafızam',
+      label:yz('esp.profile.hafizam'),
       meta:l.length ? l.length + ' kayıt' : 'boş',
-      note:'Ofisin senin hakkında hatırladıkları; bu cihazda durur, HKM bağlıysa King de görür. '
+      note:yz('esp.profile.ofisin-senin-hakkinda-hatirl')
          + 'Danışma’da «hatırla: …» diye de yazabilirsin.',
       wide:true,
       body:html`
         <div class="stack-xs">${map(l, x => html`
           <div class="row gap-8" style="justify-content:space-between;align-items:flex-start">
             <span class="small"><span class="tiny muted">${H.KATMANLAR[x.katman].ad}</span><br/>${x.metin}</span>
-            ${K.Button({ label:'Unut', size:'sm', tone:'ghost', act:'hafiza-unut', data:{ 'data-id':x.id } })}
+            ${K.Button({ label:yz('esp.profile.unut'), size:'sm', tone:'ghost', act:'hafiza-unut', data:{ 'data-id':x.id } })}
           </div>`)}</div>
         <div class="row gap-8 mt-10">
-          ${K.Input({ id:'hafiza-yeni', class:'grow', aria:'Hatırlanacak şey',
-            placeholder:'Örn. Sabahları daha iyi okurum' })}
-          ${K.Button({ label:'Hatırla', size:'sm', act:'hafiza-ekle' })}
+          ${K.Input({ id:'hafiza-yeni', class:'grow', aria:yz('esp.profile.hatirlanacak-sey'),
+            placeholder:yz('esp.profile.orn-sabahlari-daha-iyi-okuru') })}
+          ${K.Button({ label:yz('esp.profile.hatirla'), size:'sm', act:'hafiza-ekle' })}
         </div>
-        <p class="small muted mt-8">Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın,
-          «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.</p>`,
+        <p class="small muted mt-8">${yz('esp.profile.model-hafizaya-yazamaz-senin')}</p>`,
     });
   }
 
@@ -52,24 +130,24 @@ ESP.Screens.profile = (function(){
     const bugun = U.todayISO();
     const liste = G.gecerliListe();
     return K.Entry({
-      label:'Belirli günler için farklı süre',
+      label:yz('esp.profile.belirli-gunler-icin-farkli-s'),
       meta:liste.length ? liste.length + ' kayıt' : 'yok',
-      note:'Yoğun ya da vakitsiz günler için. Temel (' + U.fmtMin(p.dailyMinutes || 60)
+      note:yz('esp.profile.yogun-ya-da-vakitsiz-gunler') + U.fmtMin(p.dailyMinutes || 60)
          + ') değişmez; tarih geçince geri gelir.',
       wide:true,
       body:html`
         <div class="cols-3">
-          ${K.Field({ label:'Başlangıç', input:K.Input({ id:'gs-bas', type:'date', value:bugun, min:bugun }) })}
-          ${K.Field({ label:'Bitiş', hint:'tek gün için boş bırak',
+          ${K.Field({ label:yz('esp.profile.baslangic'), input:K.Input({ id:'gs-bas', type:'date', value:bugun, min:bugun }) })}
+          ${K.Field({ label:yz('esp.profile.bitis'), hint:'tek gün için boş bırak',
             input:K.Input({ id:'gs-bit', type:'date', min:bugun }) })}
-          ${K.Field({ label:'Günlük süre (dakika)',
+          ${K.Field({ label:yz('esp.profile.gunluk-sure-dakika'),
             input:K.Input({ id:'gs-dk', type:'number', numeric:true, min:G.DAKIKA.min, max:G.DAKIKA.max,
               placeholder:String(p.dailyMinutes || 60) }) })}
         </div>
-        ${K.Button({ label:'Ekle', act:'gunsure-ekle', class:'mt-10' })}
+        ${K.Button({ label:yz('esp.profile.ekle'), act:'gunsure-ekle', class:'mt-10' })}
         ${liste.length ? html`<ul class="stack-xs mt-10">${liste.map(k => html`<li class="row between">
           <span class="small">${k.bas === k.bit ? U.fmtDate(k.bas) : U.fmtRange(k.bas, k.bit)} · ${U.fmtMin(k.dakika)}</span>
-          ${K.Button({ label:'Kaldır', size:'sm', act:'gunsure-sil', data:{ 'data-id':k.id } })}
+          ${K.Button({ label:yz('esp.profile.kaldir'), size:'sm', act:'gunsure-sil', data:{ 'data-id':k.id } })}
         </li>`)}</ul>` : ''}`,
     });
   }
@@ -78,29 +156,29 @@ ESP.Screens.profile = (function(){
     return K.Span(12, K.Ledger(() => [
 
         K.Entry({
-          label:'Kişi',
+          label:yz('esp.profile.kisi'),
           meta:p.name || 'adsız',
-          note:'Ad yalnızca sana seslenmek için tutulur ve hiçbir modele gönderilmez.',
+          note:yz('esp.profile.ad-yalnizca-sana-seslenmek-i'),
           body:html`
             <div class="cols-3">
-              ${K.Field({ label:'Ad',
+              ${K.Field({ label:yz('esp.profile.ad'),
                 input:K.Input({ id:'pf-name', value:p.name || '' }) })}
-              ${K.Field({ label:'Odak', hint:'eşit skorlu iki iş çıkarsa sırayı belirler',
+              ${K.Field({ label:yz('esp.profile.odak'), hint:'eşit skorlu iki iş çıkarsa sırayı belirler',
                 input:K.Select({ id:'pf-focus', value:p.focus || 'balanced',
                   options:ESP.FOCUS.map(f => ({ value:f.id, label:f.label })) }) })}
-              ${K.Field({ label:'Enstrüman',
+              ${K.Field({ label:yz('esp.profile.enstruman'),
                 input:K.Input({ id:'pf-instrument', value:p.instrument || '' }) })}
             </div>
             <div class="cols-2 mt-10">
-              ${K.Field({ label:'Çalışılan dil',
+              ${K.Field({ label:yz('esp.profile.calisilan-dil'),
                 input:K.Select({ id:'pf-lang', value:(p.langs && p.langs[0]) || 'en',
                   options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }) })}
-              ${K.Field({ label:'Günlük pratik tabanı (dakika)',
+              ${K.Field({ label:yz('esp.profile.gunluk-pratik-tabani-dakika'),
                 hint:'alt sınır, hedef değil',
                 input:K.Input({ id:'pf-minutes', type:'number', numeric:true, min:10, max:600,
                   value:p.dailyMinutes || 60 }) })}
             </div>
-            ${K.Button({ label:'Kaydet', tone:'primary', act:'save-profile', class:'mt-10' })}
+            ${K.Button({ label:yz('esp.profile.kaydet'), tone:'primary', act:'save-profile', class:'mt-10' })}
             <p class="small muted mt-10">
               ${(ESP.FOCUS.find(f => f.id === (p.focus || 'balanced')) || {}).note || ''}</p>`,
         }),
@@ -108,9 +186,9 @@ ESP.Screens.profile = (function(){
         gunSureEntry(p),
 
         K.Entry({
-          label:'Bölümler', hint:'modules',
+          label:yz('esp.profile.bolumler'), hint:'modules',
           meta:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length + ' açık',
-          note:'Kapattığın bölüm gezinmeden kalkar, reçeteye ve denge hesabına '
+          note:yz('esp.profile.kapattigin-bolum-gezinmeden')
              + 'girmez, ofiste masası kapanır. Verisi SİLİNMEZ: geri açtığında '
              + 'kartların, notların ve kademen olduğu yerde durur.',
           wide:true,
@@ -128,35 +206,32 @@ ESP.Screens.profile = (function(){
               meta:d.covers + ' · ' + (ESP.Mod.footprint(d.id) || '')
                 + (ESP.Mod.isOn(d.id) ? '' : ' · KAPALI'),
               act:'toggle-mod', data:{ 'data-id':d.id } }))}</div>
-            <p class="small muted mt-10">En az bir bölüm açık kalmak zorunda:
-              hepsi kapalı bir ESP, açılış ekranından ibaret bir kabuktur.</p>
-            <p class="small muted mt-8">Patron’a da söyleyebilirsin: «diksiyon çalışmak
-              istemiyorum», «gitarı tekrar aç». Önce ne olacağını söyler, sonra onaylarsın.</p>
-            <div class="mt-10">${K.Field({ label:'Küçük istekler sormadan uygulansın mı?',
+            <p class="small muted mt-10">${yz('esp.profile.en-az-bir-bolum-acik')}</p>
+            <p class="small muted mt-8">${yz('esp.profile.patron-a-da-soyleyebilirsin')}</p>
+            <div class="mt-10">${K.Field({ label:yz('esp.profile.kucuk-istekler-sormadan-uygu'),
               hint:'Küçük: hatırlatıcı, hedef, odak. Bölüm ve günlük taban her zaman önce sorulur.',
               input:K.Select({ id:'pf-otomatik', value:ESP.Office.settings().otomatikUygula || 'istek',
                 change:'pick-otomatik', options:[
-                  { value:'istek', label:'Yalnız benim istediklerim (önerilir)' },
-                  { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
+                  { value:'istek', label:yz('esp.profile.yalniz-benim-istediklerim-on') },
+                  { value:'hicbiri', label:yz('esp.profile.hicbiri-her-seyi-once') },
                 ] }) })}</div>
             ${when((window.LIFEOS || {}).ONERI, () => html`<div class="mt-12">
-              <p class="small muted">Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar.
-                Orta ve büyük türler kilitlidir.</p>
+              <p class="small muted">${yz('esp.profile.tur-tur-actigin-kucuk-tur')}</p>
               ${raw(window.LIFEOS.ONERI.ayarHtml(ESP.Plans.KINDS.map(k => Object.assign({ title:k.label }, k)),
                 { mod:ESP.Office.settings().otomatikUygula || 'istek', turler:ESP.Office.settings().otomatikTurler || {} }))}</div>`)}
             ${when(window.LIFEOS && window.LIFEOS.BILDIRIM && window.LIFEOS.BILDIRIM.var(), () => html`<div class="mt-12">${K.Field({
-              label:'Hatırlatıcılar telefonda bildirim olsun mu?',
+              label:yz('esp.profile.hatirlaticilar-telefonda-bil'),
               hint:'Vade günü saat ' + ESP.Takvim.BILDIRIM_SAAT + '’da, ESP kapalıyken de. Önümüzdeki '
                 + ESP.Takvim.PLAN_GUN + ' gün kurulur; uygulamayı bir hafta açmazsan susar.',
               input:K.Select({ id:'pf-telbildirim', value:ESP.Office.settings().telefonBildirim ? 'acik' : 'kapali',
                 change:'pick-telbildirim', options:[
-                  { value:'kapali', label:'Hayır' },
-                  { value:'acik', label:'Evet, telefon bildirimi' },
+                  { value:'kapali', label:yz('esp.profile.hayir') },
+                  { value:'acik', label:yz('esp.profile.evet-telefon-bildirimi') },
                 ] }) })}
-              ${when(ESP.Office.settings().telefonBildirim, () => html`<div class="mt-10">${K.Button({ label:'Kurulu bildirimler', size:'sm',
+              ${when(ESP.Office.settings().telefonBildirim, () => html`<div class="mt-10">${K.Button({ label:yz('esp.profile.kurulu-bildirimler'), size:'sm',
                 data:{ 'data-tb-ac':'1', 'data-tb-not':'Tamamen kapatmak için yukarıda «Hayır» seç.' } })}</div>
                 ${when(window.LIFEOS.VITRIN && window.LIFEOS.VITRIN.bildirimKutusu, () => raw('<div class="mt-10">'
-                  + window.LIFEOS.VITRIN.bildirimKutusu({ modul:'esp', turler:[{ id:'hatirlatici', ad:'ESP · hatırlatıcı' }] }) + '</div>'))}`)}</div>`)}`,
+                  + window.LIFEOS.VITRIN.bildirimKutusu({ modul:'esp', turler:[{ id:'hatirlatici', ad:yz('esp.profile.esp-hatirlatici') }] }) + '</div>'))}`)}</div>`)}`,
         }),
 
         hafizaEntry(),
@@ -177,9 +252,9 @@ ESP.Screens.profile = (function(){
            çağırır — ayrı bir yol açmaz. Paletler ve beş düzen kullanıcı
            kararıyla kalktı (§8-4): yalnız tema kaldı. */
         K.Entry({
-          label:'Görünüm',
+          label:yz('esp.profile.gorunum'),
           meta:({ system:'Sistem', light:'Açık', dark:'Koyu' })[p.theme || 'system'] || 'Sistem',
-          note:'Aynı tercih üst çubuktaki görünüm düğmesinden de açılır ve ikisi aynı '
+          note:yz('esp.profile.ayni-tercih-ust-cubuktaki-go')
              + 'kaydı kullanır. Tek tasarım: renk modülü söyler.',
           wide:true,
           body:html`
@@ -188,12 +263,12 @@ ESP.Screens.profile = (function(){
         }),
 
         /* Gizlilik kilidi (176, T5): kutu kendi içinde değişir. */
-        window.LIFEOS && window.LIFEOS.KILIT ? K.Entry({ label:'Gizlilik kilidi', wide:true,
+        window.LIFEOS && window.LIFEOS.KILIT ? K.Entry({ label:yz('esp.profile.gizlilik-kilidi'), wide:true,
           meta:window.LIFEOS.KILIT.aktifMi('esp') ? 'açık' : 'kapalı',
           body:raw(window.LIFEOS.KILIT.ayarHtml('esp', { govde:true })) }) : '',
 
         K.Entry({
-          label:'Profiller',
+          label:yz('esp.profile.profiller'),
           meta:profiller.length + ' profil',
           note:'Her profil kendi depo anahtarında yaşar (esp.v1.<profil>). '
              + 'Profil geçişi sayfayı yeniden yükler.',
@@ -203,37 +278,37 @@ ESP.Screens.profile = (function(){
                 x.name || x.id,
                 x.id === M.activeProfileId() ? 'açık' : '—',
                 html`${when(x.id !== M.activeProfileId(), () => html`
-                  ${K.Button({ label:'Geç', size:'sm', act:'switch-profile',
+                  ${K.Button({ label:yz('esp.profile.gec'), size:'sm', act:'switch-profile',
                     data:{ 'data-id':x.id } })}
-                  ${K.Button({ label:'Sil', size:'sm', act:'remove-profile',
+                  ${K.Button({ label:yz('esp.profile.sil'), size:'sm', act:'remove-profile',
                     data:{ 'data-id':x.id } })}`)}`,
               ]) })}
             <div class="row mt-10">
-              ${K.Input({ id:'pf-new', placeholder:'Yeni profil adı',
-                aria:'Yeni profil adı' })}
-              ${K.Button({ label:'Ekle', act:'add-profile' })}
+              ${K.Input({ id:'pf-new', placeholder:yz('esp.profile.yeni-profil-adi'),
+                aria:yz('esp.profile.yeni-profil-adi') })}
+              ${K.Button({ label:yz('esp.profile.ekle'), act:'add-profile' })}
             </div>`,
         }),
 
         K.Entry({
-          label:'Model',
+          label:yz('esp.profile.model'),
           meta:ESP.Office.ready('patron') ? 'bağlı' : 'bağlı değil',
-          note:'Model bir iyileştirmedir, gereklilik değil: kapalıyken ofis '
+          note:yz('esp.profile.model-bir-iyilestirmedir-ger')
              + 'kural motorunun cümlesiyle çalışmaya devam eder.',
-          action:K.Button({ label:'Durumu gör', size:'sm', act:'go',
+          action:K.Button({ label:yz('esp.profile.durumu-gor'), size:'sm', act:'go',
             data:{ 'data-route':'guide' } }),
           body:K.Notice({ tone:'info',
             body:'Model ayarı HKM’dedir (HKM › Modeller › «ESP · Sohbet»); bu cihazda anahtar tutulmaz.' }),
         }),
 
         K.Entry({
-          label:'Veri',
+          label:yz('esp.profile.veri'),
           meta:ayak.bytes ? Math.round(ayak.bytes / 1024) + ' KB' : '—',
           note:yedek == null ? 'Henüz yedek alınmadı.'
             : yedek + ' gün önce yedeklendi.',
           body:html`
             ${ayak.pct != null
-              ? K.Meter({ label:'Yerel kota', value:ayak.pct, text:'%' + ayak.pct,
+              ? K.Meter({ label:yz('esp.profile.yerel-kota'), value:ayak.pct, text:'%' + ayak.pct,
                   tone:ayak.full ? 'danger' : (ayak.near ? 'warn' : null),
                   note:ayak.limit
                     ? Math.round(ayak.bytes / 1024) + ' KB / '
@@ -243,8 +318,8 @@ ESP.Screens.profile = (function(){
                   body:'Yerel kota bu tarayıcıda ölçülemiyor. Ölçülemeyen bir '
                     + 'oran yüzde olarak gösterilmez.' })}
             <div class="row wrap mt-10">
-              ${K.Button({ label:'Yedek indir', act:'export-data' })}
-              ${K.Button({ label:'Yedekten yükle', act:'import-data' })}
+              ${K.Button({ label:yz('esp.profile.yedek-indir'), act:'export-data' })}
+              ${K.Button({ label:yz('esp.profile.yedekten-yukle'), act:'import-data' })}
             </div>
             ${when(M.backupDue(), () => K.Notice({ tone:'warn',
               body:'Yedek otuz günden eski. Veri bu cihazda tutuluyor; '
@@ -257,7 +332,7 @@ ESP.Screens.profile = (function(){
         hkmEntry(),
 
         K.Entry({
-          label:'Sınır', hint:'pedagogic',
+          label:yz('esp.profile.sinir'), hint:'pedagogic',
           meta:'değişmez',
           body:html`
             ${K.Notice({ tone:'info', body:ESP.PEDAGOGIC.disclaimer })}
@@ -287,7 +362,7 @@ ESP.Screens.profile = (function(){
         + (a.lastNote || '')
       : 'Henüz hiç gönderilmedi.';
     return K.Entry({
-      label:'HKM işareti', hint:'hkm',
+      label:yz('esp.profile.hkm-isareti'), hint:'hkm',
       meta:a.enabled ? 'açık' : 'kapalı',
       wide:true,
       body:html`
@@ -297,24 +372,24 @@ ESP.Screens.profile = (function(){
           const c = String(window.LIFEOS.YedekAg.kartNotu('ESP')).split(/(?<=\.)\s+/);
           const ozet = c.length > 2 ? c[0] + ' ' + c[c.length - 1] : c.join(' ');
           return c.length > 2
-            ? K.Ayrinti({ etiket:'Bu anahtar neyi açar?', ozet, govde:html`<p>${c.slice(1, -1).join(' ')}</p>` })
+            ? K.Ayrinti({ etiket:yz('esp.profile.bu-anahtar-neyi-acar'), ozet, govde:html`<p>${c.slice(1, -1).join(' ')}</p>` })
             : html`<p class="small">${ozet}</p>`;
         })()}
         ${when(a.baskaProfil, () => html`<p class="small mt-8" role="alert">${window.LIFEOS.HkmBag.not(a.baskaProfil)}</p>`)}
-        ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
+        ${K.Checkbox({ label:yz('esp.profile.i-sareti-ac-varsayilan-kapal'),
           checked:!!a.enabled, act:'hkm-toggle' })}
 
         <div class="cols-3 mt-12">
-          ${K.Field({ label:'HKM adresi',
+          ${K.Field({ label:yz('esp.profile.hkm-adresi'),
             input:K.Input({ id:'hkm-url', value:a.url, change:'hkm-url',
-              placeholder:'http://127.0.0.1:4200', aria:'HKM adresi' }) })}
-          ${K.Field({ label:'Yerel jeton', hint:'config.json → local_token',
+              placeholder:'http://127.0.0.1:4200', aria:yz('esp.profile.hkm-adresi') }) })}
+          ${K.Field({ label:yz('esp.profile.yerel-jeton'), hint:'config.json → local_token',
             input:K.Input({ id:'hkm-token', type:'password', value:a.token,
-              change:'hkm-token', aria:'HKM jetonu' }) })}
-          ${K.Field({ label:'En sık kaç dakikada bir',
+              change:'hkm-token', aria:yz('esp.profile.hkm-jetonu') }) })}
+          ${K.Field({ label:yz('esp.profile.en-sik-kac-dakikada-bir'),
             input:K.Input({ id:'hkm-int', type:'number', min:'15', step:'5',
               value:a.intervalMinutes, change:'hkm-interval', data:{ 'data-varsayilan':String(ESP.Beacon.varsayilan().intervalMinutes), 'data-varsayilan-ad':ESP.Beacon.varsayilan().intervalMinutes + ' dakika' },
-              aria:'Gönderim aralığı' }) })}
+              aria:yz('esp.profile.gonderim-araligi') }) })}
         </div>
 
         ${when(!ESP.Beacon.urlOk(a.url), () => K.Notice({ tone:'warn',
@@ -322,16 +397,16 @@ ESP.Screens.profile = (function(){
              + 'ile giderken jeton ağda açık gider. https ya da 127.0.0.1 gerekir.' }))}
 
         <div class="mt-12">
-          ${K.Field({ label:'Kapsam', hint:'ne kadarı gönderilsin',
+          ${K.Field({ label:yz('esp.profile.kapsam'), hint:'ne kadarı gönderilsin',
             input:K.Select({ id:'hkm-level', value:ESP.Beacon.levelOf(),
-              change:'hkm-level', data:{ 'data-varsayilan':ESP.Beacon.varsayilan().level, 'data-varsayilan-ad':(ESP.Beacon.LEVELS.find(l => l.id === ESP.Beacon.varsayilan().level) || {}).label }, aria:'Gönderim kapsamı',
+              change:'hkm-level', data:{ 'data-varsayilan':ESP.Beacon.varsayilan().level, 'data-varsayilan-ad':(ESP.Beacon.LEVELS.find(l => l.id === ESP.Beacon.varsayilan().level) || {}).label }, aria:yz('esp.profile.gonderim-kapsami'),
               options:ESP.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
           <p class="small muted">${(ESP.Beacon.LEVELS.find(l => l.id === ESP.Beacon.levelOf()) || {}).note}</p>
         </div>
 
         <div class="mt-12">
-          <span class="mono-label">Bugün ne gidiyor</span>
-          ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
+          <span class="mono-label">${yz('esp.profile.bugun-ne-gidiyor')}</span>
+          ${K.Table({ tight:true, headers:['Alan', { label:yz('esp.profile.deger'), num:true }, 'Kaynak'],
               rows:on.rows.map(r => [r.key,
               r.value == null ? '—' : U.fmtNum(r.value),
               /* KAYNAK SÜTUNU — etiketin görseliyle birlikte.
@@ -339,24 +414,18 @@ ESP.Screens.profile = (function(){
                  kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
                  aynı kelimeyi göstermek zorunda. */
               raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
-          <p class="small muted mt-8">Günün özetinde kart metni, not içeriği ve kitap adı
-            GİTMEZ (tam yedekte vardır).
-            Giden şey bu dört sayıdır; değeri olmayan alan «veri yok» gider,
-            sıfır değil.</p>
+          <p class="small muted mt-8">${yz('esp.profile.gunun-ozetinde-kart-metni-no')}</p>
         </div>
 
         ${when(on.errors.length, () => K.Notice({ tone:'warn',
           body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
 
         <div class="mt-12">
-          ${K.Button({ label:'Bağlan', act:'hkm-pair' })}
-          ${K.Button({ label:'Şimdi gönder', act:'hkm-send' })}
-          ${K.Button({ label:'Geçmişi gönder (60 gün)', act:'hkm-backfill' })}
+          ${K.Button({ label:yz('esp.profile.baglan'), act:'hkm-pair' })}
+          ${K.Button({ label:yz('esp.profile.simdi-gonder'), act:'hkm-send' })}
+          ${K.Button({ label:yz('esp.profile.gecmisi-gonder-60-gun'), act:'hkm-backfill' })}
         </div>
-        <p class="small muted mt-8">Çapraz bulgu GEÇMİŞ ister. Geçmiş
-          gönderimi yalnızca geriye dönük hesaplanabilen alanları yollar:
-          retansiyon bugünün kart durumundan türetildiği için dünün
-          tarihiyle gönderilmez.</p>
+        <p class="small muted mt-8">${yz('esp.profile.capraz-bulgu-gecmi-s-ister-g')}</p>
         <p class="small muted mt-8">«Bağlan», jetonu HKM'den doğrudan alır:
           önce HKM yüzünde «Cihazları bağla» de, sonra iki dakika içinde
           buraya bas. Jetonu elle yazmak da çalışır.</p>
@@ -409,7 +478,7 @@ ESP.Screens.profile = (function(){
       ESP.App.render();
     },
     async 'hkm-backfill'(){
-      ESP.UI.toast('Geçmiş gönderiliyor…');
+      ESP.UI.toast(yz('esp.profile.gecmis-gonderiliyor'));
       const r = await ESP.Beacon.backfill(60);
       ESP.UI.toast(r.ok ? r.sent + ' gün gönderildi (' + r.empty + ' gün ölçümsüz)'
         : r.note || 'Gönderilemedi (' + (r.reason || r.status) + ')');
@@ -428,7 +497,7 @@ ESP.Screens.profile = (function(){
       const uygula = async () => {
         const r = await G.ekle(bas, bit, dk);
         if(!r.ok){ ESP.UI.toast(r.why); return; }
-        ESP.UI.toast('Günlük süre ' + (r.seviye === 'kucuk' ? 'o gün için ' : 'bu tarihlerde ')
+        ESP.UI.toast(yz('esp.profile.gunluk-sure') + (r.seviye === 'kucuk' ? 'o gün için ' : 'bu tarihlerde ')
           + U.fmtMin(r.kayit.dakika), { undo:async () => { await G.kaldir(r.kayit.id); ESP.App.render(); } });
         ESP.App.render();
       };
@@ -445,7 +514,7 @@ ESP.Screens.profile = (function(){
     },
     async 'save-profile'(){
       const ad = val('pf-name');
-      if(!ad){ ESP.UI.toast('Ad boş olamaz'); return; }
+      if(!ad){ ESP.UI.toast(yz('esp.profile.ad-bos-olamaz')); return; }
       await M.saveProfile({
         name:ad,
         focus:val('pf-focus') || 'balanced',
@@ -454,7 +523,7 @@ ESP.Screens.profile = (function(){
         dailyMinutes:Number(val('pf-minutes')) || 60,
       });
       ESP.Memo.bitir();
-      ESP.UI.toast('Kaydedildi');
+      ESP.UI.toast(yz('esp.profile.kaydedildi'));
       ESP.App.render();
     },
 
@@ -471,7 +540,7 @@ ESP.Screens.profile = (function(){
     async 'add-profile'(){
       const res = M.addProfile(val('pf-new'));
       if(!res.ok){ ESP.UI.toast(res.error); return; }
-      ESP.UI.toast('Profil eklendi');
+      ESP.UI.toast(yz('esp.profile.profil-eklendi'));
       ESP.App.render();
     },
 
@@ -499,12 +568,12 @@ ESP.Screens.profile = (function(){
       a.click();
       URL.revokeObjectURL(a.href);
       await M.markBackup();
-      ESP.UI.toast('Yedek indirildi');
+      ESP.UI.toast(yz('esp.profile.yedek-indirildi'));
       ESP.App.render();
     },
 
     async 'import-data'(){
-      ESP.UI.toast('Yedekten yükleme Rehber → Veri sekmesinde');
+      ESP.UI.toast(yz('esp.profile.yedekten-yukleme-rehber-veri'));
       S.ui.guideTab = 'veri';
       ESP.App.go('guide');
     },
@@ -555,7 +624,7 @@ ESP.Screens.profile = (function(){
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
     kucukVarsayilan:['bölümler', 'hkm-işareti', 'model'],
-    title:'Profil',
+    title:yz('esp.profile.profil'),
     headline(){
       const p = S.profile || {};
       return p.name ? p.name + ' — ' + ((ESP.FOCUS.find(f => f.id === p.focus) || {}).label
@@ -569,10 +638,10 @@ ESP.Screens.profile = (function(){
       const ayak = M.dataFootprint();
       const yedek = M.backupAgeDays();
       return [
-        { value:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length, label:'açık bölüm' },
+        { value:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length, label:yz('esp.profile.acik-bolum') },
         { value:String(M.profileList().length), label:'profil' },
         { value:ayak.bytes ? String(Math.round(ayak.bytes / 1024)) : '—', unit:'KB', label:'veri' },
-        { value:yedek == null ? '—' : String(yedek), unit:'gün', label:'son yedek' },
+        { value:yedek == null ? '—' : String(yedek), unit:'gün', label:yz('esp.profile.son-yedek') },
       ];
     },
     subtitle(){ return M.activeProfileId(); },

@@ -6,6 +6,9 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.rehber.kutuphanem':'Kütüphanem',
+});
 /* Anlatımlar (2026-10-18, kullanıcı: «SPİ'ye anlatım yükle»): Öğren çekmecesi
 değil — öğrenme işlevsel alanlara dağıtılmıştır (ogren.test «dağıtık») ve
 Kolay LifeOS çekmeceyi azaltır. Okuyucu brand/ortak/rehber.js. */
@@ -27,7 +30,7 @@ SP.Screens.rehber = (function(){
   function render(){ return LIFEOS.PARCA.yer('rehber', 'ana', SP.C); }
   return {
     id:'rehber',
-    title:'Kütüphanem',
+    title:yz('spi.rehber.kutuphanem'),
     subtitle(){ return (SP.REHBER_KONULAR || []).length + ' konu'; },
     lede(){ return ''; },
     actions(){ return ''; },

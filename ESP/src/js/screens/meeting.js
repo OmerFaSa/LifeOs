@@ -10,6 +10,34 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.meeting.son-yedi-gun':'Son yedi gün',
+  'esp.meeting.gundem':'Gündem',
+  'esp.meeting.gundeme-gelen-bir-konu-yok':'Gündeme gelen bir konu yok.',
+  'esp.meeting.gun':'gün',
+  'esp.meeting.verinden-cikan-fikirler':'Verinden çıkan fikirler',
+  'esp.meeting.henuz-karsilastirma-yapacak':'Henüz karşılaştırma yapacak kadar kayıt yok. Az veriden fikir üretilmez.',
+  'esp.meeting.veri-birikince-acilacak':'Veri birikince açılacak',
+  'esp.meeting.karsilastirma':'karşılaştırma',
+  'esp.meeting.alanlar-arasi-baglar':'Alanlar arası bağlar',
+  'esp.meeting.alanlar-arasinda-one-cikan-b':'Alanlar arasında öne çıkan bir boşluk yok.',
+  'esp.meeting.tek-karar':'Tek karar',
+  'esp.meeting.patron-un-ozeti':'Patron’un özeti ·',
+  'esp.meeting.oraya-git':'Oraya git',
+  'esp.meeting.karari-takibe-al':'Kararı takibe al',
+  'esp.meeting.takipteki-kararlar':'Takipteki kararlar',
+  'esp.meeting.kapatirken-ne-degistigini-ya':'Kapatırken ne değiştiğini yaz: kararın ne yaptığını görmek sistemi ilerletir.',
+  'esp.meeting.tarihinde-acildi':'tarihinde açıldı',
+  'esp.meeting.ne-degisti-olcumle':'Ne değişti? (ölçümle)',
+  'esp.meeting.kapat':'Kapat',
+  'esp.meeting.eski-toplanti-tutanaklari':'Eski toplantı tutanakları',
+  'esp.meeting.patron':'Patron',
+  'esp.meeting.karar-takibe-alindi':'Karar takibe alındı',
+  'esp.meeting.sonuc-yazilmadan-karar-kapan':'Sonuç yazılmadan karar kapanmaz',
+  'esp.meeting.i-nceleme':'İnceleme',
+  'esp.meeting.acik-karar':'açık karar',
+  'esp.meeting.gundem-2':'gündem',
+});
 window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'esp', cekmece:'ofis', ad:'İnceleme', ikon:'list', sira:30 });
 
 ESP.Screens.meeting = (function(){
@@ -23,7 +51,7 @@ ESP.Screens.meeting = (function(){
   const sayiYaz = (v, birim) => birim === '%' ? '%' + ESP.Inceleme.sayi(v) : ESP.Inceleme.sayi(v);
 
   function haftaKutusu(r){
-    return K.Kutu({ ad:'Son yedi gün', yuva:'kayıttan',
+    return K.Kutu({ ad:yz('esp.meeting.son-yedi-gun'), yuva:'kayıttan',
       govde:html`<div class="inc-sayilar">${map(r.hafta, s => html`<div class="inc-sayi">
         <span class="inc-sayi__ad">${s.ad}</span>
         <span class="inc-sayi__deger num">${s.deger == null ? '—' : sayiYaz(s.deger, s.birim)}<small>${s.deger == null || s.birim === '%' ? '' : s.birim}</small></span>
@@ -33,9 +61,9 @@ ESP.Screens.meeting = (function(){
 
   function gundemKutusu(r){
     const rows = r.gundem;
-    if(!rows.length) return K.Kutu({ ad:'Gündem', yuva:'kural motorunun sırası', govde:html`<p class="small muted">Gündeme gelen bir konu yok.</p>` });
+    if(!rows.length) return K.Kutu({ ad:yz('esp.meeting.gundem'), yuva:'kural motorunun sırası', govde:html`<p class="small muted">${yz('esp.meeting.gundeme-gelen-bir-konu-yok')}</p>` });
     const enCok = Math.max.apply(null, rows.map(a => a.score).concat([1]));
-    return K.Kutu({ ad:'Gündem', yuva:'kural motorunun sırası',
+    return K.Kutu({ ad:yz('esp.meeting.gundem'), yuva:'kural motorunun sırası',
       govde:html`<ol class="inc-gundem">${map(rows, a => html`<li>
         <span class="inc-gundem__cubuk" style="${'--oran:' + Math.round(100 * a.score / enCok) + '%'}" aria-hidden="true"></span>
         <div class="grow"><b>${a.label}</b><span>${a.detail}</span><small>${a.lead}</small></div>
@@ -48,36 +76,36 @@ ESP.Screens.meeting = (function(){
       const enBuyuk = Math.max(Math.abs(f.a.ort), Math.abs(f.b.ort)) || 1;
       const bar = (g, cls_) => html`<div class="inc-fikir__bar"><span>${g.ad}</span>
         <i class="${cls_}" style="${'width:' + Math.round(100 * Math.abs(g.ort) / enBuyuk) + '%'}"></i>
-        <b class="num">${f.birim === '%' ? sayiYaz(g.ort, '%') : sayiYaz(g.ort) + ' ' + f.birim}</b><small>${g.n} gün</small></div>`;
+        <b class="num">${f.birim === '%' ? sayiYaz(g.ort, '%') : sayiYaz(g.ort) + ' ' + f.birim}</b><small>${g.n} ${yz('esp.meeting.gun')}</small></div>`;
       return html`<div class="inc-fikir">
         <b class="inc-fikir__baslik">${f.baslik}${etiketi(f.etiket)}</b>
         ${bar(f.a, 'is-a')}${bar(f.b, 'is-b')}
         <p class="tiny muted">${f.not}</p></div>`;
     };
-    return K.Kutu({ ad:'Verinden çıkan fikirler', yuva:acik.length ? acik.length + ' karşılaştırma' : 'veri birikiyor',
+    return K.Kutu({ ad:yz('esp.meeting.verinden-cikan-fikirler'), yuva:acik.length ? acik.length + ' karşılaştırma' : 'veri birikiyor',
       govde:html`${acik.length ? html`<div class="inc-fikirler">${map(acik, satir)}</div>`
-          : html`<p class="small muted">Henüz karşılaştırma yapacak kadar kayıt yok. Az veriden fikir üretilmez.</p>`}
-        ${when(kapali.length, () => html`<details class="inc-bekleyen mt-12"><summary class="small">Veri birikince açılacak ${kapali.length} karşılaştırma</summary>
+          : html`<p class="small muted">${yz('esp.meeting.henuz-karsilastirma-yapacak')}</p>`}
+        ${when(kapali.length, () => html`<details class="inc-bekleyen mt-12"><summary class="small">${yz('esp.meeting.veri-birikince-acilacak')} ${kapali.length} ${yz('esp.meeting.karsilastirma')}</summary>
           <ul class="tiny muted">${map(kapali, f => html`<li><b>${f.baslik}</b>: ${f.neden}</li>`)}</ul></details>`)}` });
   }
 
   function bulguKutusu(r){
     const b = r.bulgular;
-    return K.Kutu({ ad:'Alanlar arası bağlar', yuva:b.length ? b.length + ' bulgu' : 'yok',
+    return K.Kutu({ ad:yz('esp.meeting.alanlar-arasi-baglar'), yuva:b.length ? b.length + ' bulgu' : 'yok',
       govde:b.length ? html`<ul class="inc-bulgular">${map(b, f => html`<li>
           <b>${f.kimden} → ${f.kime}</b><span>${f.text}</span></li>`)}</ul>`
-        : html`<p class="small muted">Alanlar arasında öne çıkan bir boşluk yok.</p>` });
+        : html`<p class="small muted">${yz('esp.meeting.alanlar-arasinda-one-cikan-b')}</p>` });
   }
 
   function kararKutusu(r){
     const k = r.karar;
     const sakin = k.id === 'none';
     const ozet = S.ui.incelemeOzet && S.ui.incelemeOzet.tarih === r.tarih ? S.ui.incelemeOzet : null;
-    return K.Kutu({ ad:'Tek karar', yuva:'kural motoru', class:'inc-karar',
+    return K.Kutu({ ad:yz('esp.meeting.tek-karar'), yuva:'kural motoru', class:'inc-karar',
       govde:html`<p><b>${k.title}</b></p><p class="small">${k.detail}</p><p class="small muted">${k.why}</p>
-        ${when(ozet, () => html`<div class="inc-ozet mt-12"><span class="tiny muted">Patron’un özeti · ${ozet.source === 'model' ? 'model' : 'kural motoru'}</span><p>${ozet.text}</p></div>`)}`,
-      ayak:html`${when(!sakin && k.route, () => K.Button({ label:'Oraya git', size:'sm', tone:'primary', act:'go', data:{ 'data-route':k.route } }))}
-        ${when(!sakin, () => K.Button({ label:'Kararı takibe al', size:'sm', act:'inceleme-takip' }))}
+        ${when(ozet, () => html`<div class="inc-ozet mt-12"><span class="tiny muted">${yz('esp.meeting.patron-un-ozeti')} ${ozet.source === 'model' ? 'model' : 'kural motoru'}</span><p>${ozet.text}</p></div>`)}`,
+      ayak:html`${when(!sakin && k.route, () => K.Button({ label:yz('esp.meeting.oraya-git'), size:'sm', tone:'primary', act:'go', data:{ 'data-route':k.route } }))}
+        ${when(!sakin, () => K.Button({ label:yz('esp.meeting.karari-takibe-al'), size:'sm', act:'inceleme-takip' }))}
         ${when(ESP.Office.ready && ESP.Office.ready('patron'), () => K.Button({ label:ozetleniyor ? 'Özetleniyor…' : 'Patron özetlesin', size:'sm', tone:'ghost',
           act:'inceleme-ozet', disabled:ozetleniyor }))}` });
   }
@@ -85,14 +113,14 @@ ESP.Screens.meeting = (function(){
   function kararlarKutusu(){
     const acik = M.openDecisions();
     if(!acik.length) return '';
-    return K.Kutu({ ad:'Takipteki kararlar', yuva:acik.length + ' açık',
-      govde:html`<p class="small muted">Kapatırken ne değiştiğini yaz: kararın ne yaptığını görmek sistemi ilerletir.</p>
+    return K.Kutu({ ad:yz('esp.meeting.takipteki-kararlar'), yuva:acik.length + ' açık',
+      govde:html`<p class="small muted">${yz('esp.meeting.kapatirken-ne-degistigini-ya')}</p>
         ${map(acik, d => html`<div class="decision">
           <p>${d.text}</p>
           <div class="row wrap mt-8">
-            <span class="tiny dim">${U.fmtShort(d.openedAt.slice(0, 10))} tarihinde açıldı</span>
-            ${K.Input({ id:'dec-' + d.id, placeholder:'Ne değişti? (ölçümle)', size:'sm' })}
-            ${K.Button({ label:'Kapat', size:'sm', act:'close-decision', data:{ 'data-id':d.id } })}
+            <span class="tiny dim">${U.fmtShort(d.openedAt.slice(0, 10))} ${yz('esp.meeting.tarihinde-acildi')}</span>
+            ${K.Input({ id:'dec-' + d.id, placeholder:yz('esp.meeting.ne-degisti-olcumle'), size:'sm' })}
+            ${K.Button({ label:yz('esp.meeting.kapat'), size:'sm', act:'close-decision', data:{ 'data-id':d.id } })}
           </div>
         </div>`)}` });
   }
@@ -116,7 +144,7 @@ ESP.Screens.meeting = (function(){
   function tutanakKutusu(){
     const liste = S.officeMeetings || [];
     if(!liste.length) return '';
-    return K.Kutu({ ad:'Eski toplantı tutanakları', yuva:liste.length + ' tutanak',
+    return K.Kutu({ ad:yz('esp.meeting.eski-toplanti-tutanaklari'), yuva:liste.length + ' tutanak',
       govde:html`<div class="list">${map(liste.slice(0, 10), m => html`
         <div class="listitem">
           <div class="grow"><b class="small">${m.agendaLabel}</b>
@@ -126,7 +154,7 @@ ESP.Screens.meeting = (function(){
         ${when(S.ui.meetingOpen === m.id, () => html`<div class="meet mt-8">
           ${map(m.turns, turnRow)}
           ${when(m.closing, () => html`<div class="meetturn meetturn--close">
-            <div class="meetturn__head"><b>Patron</b></div><p>${m.closing.text}</p></div>`)}
+            <div class="meetturn__head"><b>${yz('esp.meeting.patron')}</b></div><p>${m.closing.text}</p></div>`)}
         </div>`)}`)}</div>` });
   }
 
@@ -171,7 +199,7 @@ ESP.Screens.meeting = (function(){
       if(k.id === 'none') return;
       await M.saveDecision({ text:k.title, agentId:'patron', source:'inceleme' });
       ESP.Memo.bitir();
-      ESP.UI.toast('Karar takibe alındı');
+      ESP.UI.toast(yz('esp.meeting.karar-takibe-alindi'));
       ESP.App.render();
     },
     /* Model yalnız ÖZETLER: brifing incelemenin kendisidir, sayı oradan. */
@@ -203,7 +231,7 @@ ESP.Screens.meeting = (function(){
       const inp = document.getElementById('dec-' + el.dataset.id);
       const sonuc = inp ? inp.value.trim() : '';
       if(!sonuc){
-        ESP.UI.toast('Sonuç yazılmadan karar kapanmaz');
+        ESP.UI.toast(yz('esp.meeting.sonuc-yazilmadan-karar-kapan'));
         return;
       }
       await M.closeDecision(el.dataset.id, sonuc);
@@ -216,7 +244,7 @@ ESP.Screens.meeting = (function(){
 
   return {
     id:'meeting',
-    title:'İnceleme',
+    title:yz('esp.meeting.i-nceleme'),
     headline(){
       const k = ESP.Planner.nextAction();
       return k.id === 'none' ? 'Bekleyen bir iş yok.' : 'Karar: ' + k.title.toLocaleLowerCase('tr-TR') + '.';
@@ -228,9 +256,9 @@ ESP.Screens.meeting = (function(){
     stats(){
       const r = ESP.Inceleme.rapor();
       return [
-        { value:String(r.fikirler.filter(f => f.acik).length), label:'karşılaştırma' },
-        { value:String(M.openDecisions().length), label:'açık karar' },
-        { value:String(r.gundem.length), label:'gündem' },
+        { value:String(r.fikirler.filter(f => f.acik).length), label:yz('esp.meeting.karsilastirma') },
+        { value:String(M.openDecisions().length), label:yz('esp.meeting.acik-karar') },
+        { value:String(r.gundem.length), label:yz('esp.meeting.gundem-2') },
       ];
     },
     subtitle(){

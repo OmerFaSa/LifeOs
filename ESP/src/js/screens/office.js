@@ -13,6 +13,26 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.office.ac':'Aç',
+  'esp.office.bu-masada-bekleyen-bulgu-yok':'Bu masada bekleyen bulgu yok.',
+  'esp.office.danis':'Danış',
+  'esp.office.masaya-git':'Masaya git',
+  'esp.office.masa':'Masa',
+  'esp.office.gunun-toplantisi':'Günün toplantısı',
+  'esp.office.patron':'Patron',
+  'esp.office.siradaki-tek-is':'Sıradaki tek iş',
+  'esp.office.masalar-arasi-devir':'Masalar arası devir',
+  'esp.office.i-ki-masayi-birbirine-baglay':'İki masayı birbirine bağlayan ölçülmüş bir bulgu yok.',
+  'esp.office.uzman-masalari':'Uzman masaları',
+  'esp.office.oneriler':'Öneriler',
+  'esp.office.onaylar-da-gor':'Onaylar’da gör',
+  'esp.office.haftalik-plan':'Haftalık plan',
+  'esp.office.oncelik-sirasi':'Öncelik sırası',
+  'esp.office.masalar':'Masalar',
+  'esp.office.tikanma':'tıkanma',
+  'esp.office.vadesi-gecmis':'vadesi geçmiş',
+});
 window.LIFEOS.PARCA.sayfa({ id:'office', modul:'esp', cekmece:'ofis', ad:'Masalar', ikon:'users', sira:10 });
 
 ESP.Screens.office = (function(){
@@ -45,10 +65,10 @@ ESP.Screens.office = (function(){
               <li class="${cls('desknote', 'desknote--' + n.tone)}">
                 <span class="desknote__label">${n.label}</span>
                 <span class="desknote__text">${n.text}</span>
-                ${when(n.route, () => K.Button({ label:'Aç', size:'sm', act:'go',
+                ${when(n.route, () => K.Button({ label:yz('esp.office.ac'), size:'sm', act:'go',
                   data:{ 'data-route':n.route } }))}
               </li>`)}</ul>`
-          : html`<p class="small muted">Bu masada bekleyen bulgu yok.</p>`}
+          : html`<p class="small muted">${yz('esp.office.bu-masada-bekleyen-bulgu-yok')}</p>`}
 
         ${when(devir.in.length || devir.out.length, () => html`
           <div class="deskflow">
@@ -61,9 +81,9 @@ ESP.Screens.office = (function(){
               <span><b>${h.toName}</b> ${h.finding}</span>
             </div>`)}
           </div>`)}`,
-      foot:html`${K.Button({ label:'Danış', size:'sm', act:'open-agent',
+      foot:html`${K.Button({ label:yz('esp.office.danis'), size:'sm', act:'open-agent',
           data:{ 'data-agent':a.id } })}
-        ${when(a.owns && a.owns.length, () => K.Button({ label:'Masaya git', size:'sm',
+        ${when(a.owns && a.owns.length, () => K.Button({ label:yz('esp.office.masaya-git'), size:'sm',
           act:'go', data:{ 'data-route':a.owns[0] } }))}`,
     });
   }
@@ -87,25 +107,25 @@ ESP.Screens.office = (function(){
 
   LIFEOS.PARCA.blok({ id:'office.bolum-1', sayfa:'office', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ vo, patron, uzmanlar, devir, brf, next }){
     return K.Span(12, K.Ledger(() => [
-        when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:'Masa', meta:'kim konuşuyor',
+        when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:yz('esp.office.masa'), meta:'kim konuşuyor',
           body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
-        when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
+        when(vo.toplanti, () => K.Entry({ wide:true, label:yz('esp.office.gunun-toplantisi'), meta:'her masadan tek cümle',
           body:raw(vo.toplanti) })),
 
         K.Entry({
-          label:'Patron', hint:'rule-engine',
+          label:yz('esp.office.patron'), hint:'rule-engine',
           meta:ESP.Office.ready('patron') ? 'model bağlı' : 'kural motoru',
-          action:K.Button({ label:'Danış', size:'sm', act:'open-agent',
+          action:K.Button({ label:yz('esp.office.danis'), size:'sm', act:'open-agent',
             data:{ 'data-agent':'patron' } }),
           body:html`
             ${K.NextUp({ icon:next.rank ? 'zap' : 'check', calm:!next.rank,
               sanat:'istikrar',
-              label:'Sıradaki tek iş', title:next.title, why:next.why })}
+              label:yz('esp.office.siradaki-tek-is'), title:next.title, why:next.why })}
             <p class="rulesay mt-10">${ESP.Office.ruleText('patron', brf)}</p>`,
         }),
 
         K.Entry({
-          label:'Masalar arası devir', hint:'handoff',
+          label:yz('esp.office.masalar-arasi-devir'), hint:'handoff',
           meta:devir.length ? devir.length + ' devir' : 'yok',
           wide:true,
           body:devir.length
@@ -116,35 +136,35 @@ ESP.Screens.office = (function(){
                   <span class="handoff__to">${h.toName}</span>
                   <span class="handoff__text">${h.finding}</span>
                 </button>`)}`
-            : K.Empty({ text:'İki masayı birbirine bağlayan ölçülmüş bir bulgu yok.' }),
+            : K.Empty({ text:yz('esp.office.i-ki-masayi-birbirine-baglay') }),
         }),
 
         K.Entry({
-          hint:'not-uzman-masalari', label:'Uzman masaları',
+          hint:'not-uzman-masalari', label:yz('esp.office.uzman-masalari'),
           meta:uzmanlar.length + ' masa',
           wide:true,
           /* Masa kartlarinin basligi h3'tur; araya bir h2 girmezse baslik
              sirasi h1'den h3'e atlar ve ekran okuyucu bir seviye kaybeder.
              h2 gozle gorunmez: kutunun etiketi zaten «Uzman masalari» der,
              ayni ad iki kez ust uste yazilmaz. */
-          body:html`<h2 class="sr-only">Uzman masaları</h2>
+          body:html`<h2 class="sr-only">${yz('esp.office.uzman-masalari')}</h2>
             <div class="desks">${map(uzmanlar, deskCard)}</div>`,
         }),
 
         /* Teklifler Onaylar çekmecesinde (tek yer, CEKMECE-HARITASI). */
-        K.Entry({ label:'Öneriler', hint:'proposal', meta:ESP.Plans.all().length + ' öneri',
-          body:K.Button({ label:'Onaylar’da gör', size:'sm', act:'go', data:{ 'data-route':'onaylar' } }) }),
+        K.Entry({ label:yz('esp.office.oneriler'), hint:'proposal', meta:ESP.Plans.all().length + ' öneri',
+          body:K.Button({ label:yz('esp.office.onaylar-da-gor'), size:'sm', act:'go', data:{ 'data-route':'onaylar' } }) }),
 
 
         K.Entry({
-          label:'Haftalık plan', hint:'weekplan',
+          label:yz('esp.office.haftalik-plan'), hint:'weekplan',
           meta:ESP.Plans.plan() ? 'kurulu' : 'yok',
           wide:true,
           body:ESP.Parts.weekPlan(),
         }),
 
         K.Entry({
-          label:'Öncelik sırası', hint:'precedence',
+          label:yz('esp.office.oncelik-sirasi'), hint:'precedence',
           meta:ESP.PRECEDENCE.length + ' kural',
           body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Kural', 'Neden'],
             rows:ESP.PRECEDENCE.map(p => [String(p.rank), p.label, p.note]) }),
@@ -186,7 +206,7 @@ ESP.Screens.office = (function(){
     /* iPhone Faz 4 («brifing + tek eylem»): açık Patron ve teklifler;
        konuşan masa, toplantı satırları, uzman masaları, haftalık plan şerit. */
     kucukVarsayilan:['masalar-arası-devir', 'öncelik-sırası', 'masa', 'günün-toplantısı', 'uzman-masaları', 'haftalık-plan'],
-    title:'Masalar',
+    title:yz('esp.office.masalar'),
     headline(){
       const n = ESP.Office.notes().filter(x => x.tone === 'danger').length;
       if(n) return n + ' masada tıkanma bulgusu var.';
@@ -202,8 +222,8 @@ ESP.Screens.office = (function(){
       const notlar = ESP.Office.notes();
       return [
         { value:String(ESP.Mod.activeAgents().length), label:'masa' },
-        { value:String(notlar.filter(n => n.tone === 'danger').length), label:'tıkanma' },
-        { value:String(notlar.filter(n => n.tone === 'warn').length), label:'vadesi geçmiş' },
+        { value:String(notlar.filter(n => n.tone === 'danger').length), label:yz('esp.office.tikanma') },
+        { value:String(notlar.filter(n => n.tone === 'warn').length), label:yz('esp.office.vadesi-gecmis') },
         { value:String(ESP.Office.handoffs().length), label:'devir' },
       ];
     },

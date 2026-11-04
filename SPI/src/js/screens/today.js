@@ -15,6 +15,227 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.today.gece-uykusu-saat':'Gece uykusu (saat)',
+  'spi.today.i-stirahat-nabzi':'İstirahat nabzı',
+  'spi.today.hrv-ms':'HRV (ms)',
+  'spi.today.buyuk-tansiyon':'Büyük tansiyon',
+  'spi.today.kucuk-tansiyon':'Küçük tansiyon',
+  'spi.today.oksijen':'Oksijen (%)',
+  'spi.today.ates-c':'Ateş (°C)',
+  'spi.today.kilo-kg':'Kilo (kg)',
+  'spi.today.bel-cevresi-cm':'Bel çevresi (cm)',
+  'spi.today.yag-orani':'Yağ oranı (%)',
+  'spi.today.su-ml':'Su (ml)',
+  'spi.today.1-bitkin':'1 · bitkin',
+  'spi.today.2-yorgun':'2 · yorgun',
+  'spi.today.3-normal':'3 · normal',
+  'spi.today.4-iyi':'4 · iyi',
+  'spi.today.5-zinde':'5 · zinde',
+  'spi.today.gun-sec':'Gün seç',
+  'spi.today.bugune-don':'Bugüne dön',
+  'spi.today.bugun-bir-sikayetin-var-mi':'Bugün bir şikâyetin var mı?',
+  'spi.today.dunku-sikayetler-suruyor':'Dünkü şikâyetler sürüyor',
+  'spi.today.sikayetim-yok':'Şikâyetim yok',
+  'spi.today.bir-sikayete-tiklayinca-sidd':'Bir şikâyete tıklayınca şiddeti artar: hafif → orta → şiddetli → kapalı.',
+  'spi.today.adet-kanamasi':'Adet kanaması',
+  'spi.today.bugun-kanama-var':'Bugün kanama var',
+  'spi.today.payda-girilen-gun-sayisidir':'Payda girilen gün sayısıdır, otuz değil: işaretlenmemiş bir gün «şikâyet yok» sayılmaz.',
+  'spi.today.gunun-olcumu':'Günün ölçümü',
+  'spi.today.bos-biraktigin-alan-sifir-sa':'Boş bıraktığın alan sıfır sayılmaz — hesaba hiç girmez. Uyku ',
+  'spi.today.kaydet':'Kaydet',
+  'spi.today.bugun-nasil-hissediyorsun':'Bugün nasıl hissediyorsun?',
+  'spi.today.gunun-hissi':'Günün hissi',
+  'spi.today.not':'Not',
+  'spi.today.hastalik-ilac-degisikligi-ol':'Hastalık, ilaç değişikliği, olağandışı bir gün…',
+  'spi.today.ogun-ekle':'Öğün ekle',
+  'spi.today.ev-olcusunden-gelen-gramaj-t':'Ev ölçüsünden gelen gramaj «tahmin» olarak işaretlenir. ',
+  'spi.today.butun-ogunler':'Bütün öğünler',
+  'spi.today.1-tabak-etli-kuru-fasulye':'1 tabak etli kuru fasulye, 1 bardak ayran',
+  'spi.today.ogun-metni':'Öğün metni',
+  'spi.today.ogune-ekle':'Öğüne ekle',
+  'spi.today.girilen-degerler':'Girilen değerler',
+  'spi.today.referans-araligi-laboratuvar':'Referans aralığı laboratuvarın normal saydığı yer; hedef bandı ',
+  'spi.today.neden-bunlar':'Neden bunlar?',
+  'spi.today.taban-cizgin':'Taban çizgin',
+  'spi.today.hrv-ve-nabiz-mutlak-degil':'HRV ve nabız mutlak değil kişisel ölçektir: kendi ortalamana göre ',
+  'spi.today.ortalama':'Ortalama',
+  'spi.today.son-iki-hafta':'Son iki hafta',
+  'spi.today.uyku':'Uyku',
+  'spi.today.nabiz':'Nabız',
+  'spi.today.hrv':'HRV',
+  'spi.today.asgari-gun':'Asgari gün',
+  'spi.today.asgari-gun-tamam':'Asgari gün tamam',
+  'spi.today.bugunun-asgarisi-kapandi-ser':'Bugünün asgarisi kapandı. Seri, girilmiş günlerden sayılır; ',
+  'spi.today.dunkunun-aynisi':'Dünkünün aynısı',
+  'spi.today.aynisini-yaptiysan-tek-dokun':'Aynısını yaptıysan tek dokunuşla bugüne ekle; zorlanma puanı kopyalanmaz, sorulur.',
+  'spi.today.bugune-ekle':'Bugüne ekle',
+  'spi.today.seri':'Seri',
+  'spi.today.yillik-tatil-siniri-bu-yil':'Yıllık tatil sınırı: bu yıl kalan',
+  'spi.today.gun':'gün',
+  'spi.today.yillik-tatil-siniri-gun':'yıllık tatil sınırı, gün',
+  'spi.today.siniri-kaydet':'Sınırı kaydet',
+  'spi.today.tatil-modu':'Tatil modu:',
+  'spi.today.seri-korunuyor-hkm-soru':'· seri korunuyor, HKM soru sormuyor',
+  'spi.today.tatili-bitir':'Tatili bitir',
+  'spi.today.bugun-dondurulmus':'Bugün dondurulmuş (',
+  'spi.today.seri-bozulmaz':') · seri bozulmaz',
+  'spi.today.geri-al':'Geri al',
+  'spi.today.kac-gun':'Kaç gün?',
+  'spi.today.vazgec':'Vazgeç',
+  'spi.today.kotu-gun':'Kötü gün',
+  'spi.today.bugun-hastayim-seri-donsun':'Bugün hastayım · seri donsun',
+  'spi.today.tatil-modu-2':'Tatil modu',
+  'spi.today.kotu-gun-modu-antrenman-hafi':'Kötü gün modu: antrenman hafif, bugün asgari gün yeter (',
+  'spi.today.normal-gune-don':'Normal güne dön',
+  'spi.today.toparlanma':'Toparlanma',
+  'spi.today.veri-gir':'Veri gir',
+  'spi.today.hareketi-ac':'Hareketi aç',
+  'spi.today.beslenme':'Beslenme',
+  'spi.today.profilde':'Profilde ',
+  'spi.today.profili-tamamla':'Profili tamamla',
+  'spi.today.ogunleri-ac':'Öğünleri aç',
+  'spi.today.protein':'Protein',
+  'spi.today.lif':'Lif',
+  'spi.today.yag':'Yağ',
+  'spi.today.askiya-al':'Askıya al',
+  'spi.today.surdur':'Sürdür',
+  'spi.today.tamamlandi':'Tamamlandı',
+  'spi.today.birak':'Bırak',
+  'spi.today.plan-kurulamadi':'Plan kurulamadı.',
+  'spi.today.kapat':'Kapat',
+  'spi.today.plan-onizlemesi':'Plan önizlemesi',
+  'spi.today.onaylanana-kadar-hicbir-sey':'— onaylanana kadar hiçbir şey değişmez.',
+  'spi.today.enerji-ve-tempo-tahmindir-1':'Enerji ve tempo tahmindir: «1 kg ≈ 7700 kcal» yaygın bir yaklaşımdır, kaynağı henüz bağlanmadı. Plan geri alınabilir; geri alınca beslenme hedefin bugünkü haline döner.',
+  'spi.today.plani-uygula':'Planı uygula',
+  'spi.today.simdilik-degil':'Şimdilik değil',
+  'spi.today.bugunun-verisiyle-yeniden-he':'Bugünün verisiyle yeniden hesap',
+  'spi.today.secim-yapana-kadar-hicbir':'— seçim yapana kadar hiçbir şey değişmez.',
+  'spi.today.secince-eski-plan-geri-alini':'Seçince eski plan geri alınır, hedef yeni tarih ve vakitle güncellenir; yeni planı önizleyip onaylarsın. Eski tarih hedefin geçmişinde kalır.',
+  'spi.today.sonraki-kontrol':'Sonraki kontrol:',
+  'spi.today.beklenen':') — beklenen',
+  'spi.today.yeniden-hesapla':'Yeniden hesapla',
+  'spi.today.hekim-talimatina-uyuluyor':'hekim talimatına uyuluyor.',
+  'spi.today.bu-hafta':'Bu hafta (',
+  'spi.today.hafta':'. hafta)',
+  'spi.today.planlama-ofisi-programi-suru':'— Planlama Ofisi programı, sürüm',
+  'spi.today.i-s-emri':'İş emri #',
+  'spi.today.plani-geri-al':'Planı geri al',
+  'spi.today.king-e-ilet':'King’e ilet',
+  'spi.today.plani-gor':'Planı gör',
+  'spi.today.zaman-butcesi-king':'Zaman bütçesi (King):',
+  'spi.today.hedeflerim':'Hedeflerim',
+  'spi.today.danisma-da-hedef-koy':'Danışma’da hedef koy',
+  'spi.today.henuz-hedefin-yok-danisma-da':'Henüz hedefin yok. Danışma’da bir cümleyle yazabilirsin.',
+  'spi.today.ornekler':'Örnekler',
+  'spi.today.3-ay-icinde-3-kilo':'«3 ay içinde 3 kilo vermek istiyorum» ya da «VKİ’mi 24’e indirmek istiyorum» gibi yazabilirsin; gerçekçi olup olmadığını ve güvenli temposunu söylerim. Alışkanlık da kurabilirsin: «haftada 3 gün 30 dakika düzenli spor yapmak istiyorum».',
+  'spi.today.king-bildirimi':'King bildirimi',
+  'spi.today.okundu':'Okundu',
+  'spi.today.bildirim-daha-hkm':'bildirim daha — HKM › Ofis’te.',
+  'spi.today.ofisten':'Ofisten',
+  'spi.today.ofisi-ac':'Ofisi aç',
+  'spi.today.tazele':'Tazele',
+  'spi.today.gunun-brifingi-henuz-uretilm':'Günün brifingi henüz üretilmedi.',
+  'spi.today.butce':'Bütçe',
+  'spi.today.finansi-ac':'Finansı aç',
+  'spi.today.haftalik-sinir':'Haftalık sınır',
+  'spi.today.bir-soru':'Bir soru',
+  'spi.today.cevabin':'Cevabın:',
+  'spi.today.soru-acik-kalir-ayrismanin-g':'Soru açık kalır: ayrışmanın gerçekten kapanıp kapanmadığı bir sonraki pencerede ölçülecek.',
+  'spi.today.kisa-cevabin-istege-bagli':'Kısa cevabın (isteğe bağlı)',
+  'spi.today.tek-cumle-yeter':'tek cümle yeter',
+  'spi.today.cevabi-kaydet':'Cevabı kaydet',
+  'spi.today.bu-soru-bana-uymuyor':'Bu soru bana uymuyor',
+  'spi.today.hkm':'HKM',
+  'spi.today.simdi-gonder':'Şimdi gönder',
+  'spi.today.tarayici-verisi-silinirse-ta':'Tarayıcı verisi silinirse tahlil, ölçüm ve öğün geçmişin kaybolur.',
+  'spi.today.yedek-al':'Yedek al',
+  'spi.today.butun-alanlar':'Bütün alanlar',
+  'spi.today.kisa-uyku':'Kısa uyku',
+  'spi.today.ekle':'Ekle',
+  'spi.today.gunun-toplami':'Günün toplamı',
+  'spi.today.hesaplandi':'(hesaplandı)',
+  'spi.today.gece-uykusuna-eklenmez-ayri':'Gece uykusuna eklenmez; ayrı sayılır',
+  'spi.today.sure-dakika':'Süre (dakika)',
+  'spi.today.baslangic':'Başlangıç',
+  'spi.today.egilim':'Eğilim',
+  'spi.today.olculmemis-gun-bos-kalir-ort':'Ölçülmemiş gün boş kalır; ortalamaya girmez, sıfır sayılmaz.',
+  'spi.today.kilo':'Kilo',
+  'spi.today.su':'Su',
+  'spi.today.hedef':'Hedef: ',
+  'spi.today.su-2':'Su ',
+  'spi.today.hatirlatmalar':'Hatırlatmalar',
+  'spi.today.gunu-kapat':'Günü kapat',
+  'spi.today.gunu-duzenle':'Günü düzenle',
+  'spi.today.sabah-tartisi':'Sabah tartısı',
+  'spi.today.tarti':'Tartı',
+  'spi.today.buyuk-rakam-sabit-birim':'Büyük rakam, sabit birim; ✓ ölçüm formuyla aynı kayda gider.',
+  'spi.today.agirligi-kalanlara-dagitildi':'— ağırlığı kalanlara dağıtıldı.',
+  'spi.today.siradaki':'Sıradaki',
+  'spi.today.ust-uste':'üst üste.',
+  'spi.today.asgari-gun-seriyi-surdurur':'Asgari gün seriyi sürdürür.',
+  'spi.today.henuz-baslamadi':'Henüz başlamadı.',
+  'spi.today.bugun-asgari-gunu-tamamlarsa':'Bugün asgari günü tamamlarsan seri başlar.',
+  'spi.today.olcum-bekliyor':'Ölçüm bekliyor.',
+  'spi.today.uyku-suresini-yazman-bile-ye':'Uyku süresini yazman bile yeter.',
+  'spi.today.hedef-yok':'Hedef yok.',
+  'spi.today.ogun-girilmedi':'Öğün girilmedi.',
+  'spi.today.hedef-2':'Hedef ',
+  'spi.today.bugun':'Bugün',
+  'spi.today.saglik':'Sağlık',
+  'spi.today.profilde-2':'Profilde',
+  'spi.today.eksik-hedef-tahmin-edilmez':'eksik; hedef tahmin edilmez.',
+  'spi.today.bugun-hic-ogun-girilmedi':'Bugün hiç öğün girilmedi.',
+  'spi.today.enerji':'Enerji',
+  'spi.today.son-olcumler':'Son ölçümler',
+  'spi.today.eski-olcum-soluklasir-ve-yas':'Eski ölçüm soluklaşır ve yaşını yazar; ölçülmemiş değer sıfır sayılmaz.',
+  'spi.today.esik':'eşik ',
+  'spi.today.ogun':'Öğün',
+  'spi.today.hareket':'Hareket',
+  'spi.today.gunu-kaydet':'Günü kaydet',
+  'spi.today.gece-uykusu':'Gece uykusu',
+  'spi.today.bu-gecenin-uykusu-girilmedi':'Bu gecenin uykusu girilmedi.',
+  'spi.today.planin-yuzde':'Planın yüzde ',
+  'spi.today.son-yedi-gece':'Son yedi gece; ',
+  'spi.today.toparlanma-2':'Toparlanma ',
+  'spi.today.uyku-girilince-hesaplanir':'Uyku girilince hesaplanır.',
+  'spi.today.son-14-gunun':'Son 14 günün ',
+  'spi.today.haftanin-en-iyi-gecesi':'Haftanın en iyi gecesi',
+  'spi.today.i-ncelemeye-git':'İncelemeye git',
+  'spi.today.ogunler':'Öğünler',
+  'spi.today.gun-2':'Gün',
+  'spi.today.durum':'Durum',
+  'spi.today.oneri':'Öneri',
+  'spi.today.gunun-bolumleri':'Günün bölümleri',
+  'spi.today.giris':'Giriş',
+  'spi.today.ozet':'Özet',
+  'spi.today.gecmis':'Geçmiş',
+  'spi.today.hedef-motoru-yuklenmedi':'Hedef motoru yüklenmedi',
+  'spi.today.hedefler-bu-derlemede-yok-di':'Hedefler bu derlemede yok; diğer ekranlar çalışmaya devam eder.',
+  'spi.today.kotu-gun-modu-acik-yuk':'Kötü gün modu açık: yük hafifledi, asgari gün yeter.',
+  'spi.today.normal-gune-donuldu':'Normal güne dönüldü',
+  'spi.today.bugun-donduruldu-seri-bozulm':'Bugün donduruldu; seri bozulmaz. Geçmiş olsun.',
+  'spi.today.dondurma-geri-alindi':'Dondurma geri alındı',
+  'spi.today.yillik-tatil-siniri-icin-bir':'Yıllık tatil sınırı için bir gün sayısı yaz.',
+  'spi.today.yillik-tatil-siniri':'Yıllık tatil sınırı ',
+  'spi.today.bu-secenek-artik-gecerli-deg':'Bu seçenek artık geçerli değil; yeniden hesapla.',
+  'spi.today.hedef-yeni-tarihle-guncellen':'Hedef yeni tarihle güncellendi; yeni planı önizleyip onayla.',
+  'spi.today.okundu-isareti-merkeze-bildi':'Okundu işareti merkeze bildirilemedi; bildirim HKM’de okunmamış kalır.',
+  'spi.today.hkm-u2019ye-gonderiliyor':'HKM\u2019ye gönderiliyor…',
+  'spi.today.kaydedildi-sonucu-bir-sonrak':'Kaydedildi. Sonucu bir sonraki pencere gösterecek.',
+  'spi.today.soru-kapatildi':'Soru kapatıldı',
+  'spi.today.bugun-sikayet-yok-olarak-kay':'Bugün şikâyet yok olarak kaydedildi',
+  'spi.today.dunku':'Dünkü ',
+  'spi.today.once-degeri-yaz':'Önce değeri yaz.',
+  'spi.today.kisa-uyku-kaydedildi':'Kısa uyku kaydedildi',
+  'spi.today.kisa-uyku-silindi':'Kısa uyku silindi',
+  'spi.today.i-saretlendi-kayit-gecmiste':'İşaretlendi — kayıt geçmişte duruyor',
+  'spi.today.brifing-uretiliyor':'Brifing üretiliyor…',
+  'spi.today.asgari-gun-2':'asgari gün',
+  'spi.today.gun-seri':'gün seri',
+  'spi.today.kirmizi-bayrak':'kırmızı bayrak',
+  'spi.today.hedefler':'Hedefler',
+});
 window.LIFEOS.PARCA.sayfa({ id:'today', modul:'spi', cekmece:'bugun', ad:'Genel bakış', sira:10 });
 window.LIFEOS.PARCA.sayfa({ id:'hedefler', modul:'spi', cekmece:'plan', ad:'Hedefler', sira:20 });
 
@@ -27,23 +248,23 @@ SP.Screens.today = (function(){
 
   /* Girilecek alanlar tek yerde tanimlanir; form da, kaydetme de bunu okur. */
   const FIELDS = [
-    { id:'sleep',    label:'Gece uykusu (saat)',        step:'0.5', min:0,  max:16,  marker:'sleep' },
-    { id:'rhr',      label:'İstirahat nabzı',    step:'1',   min:30, max:140, marker:'rhr' },
-    { id:'hrv',      label:'HRV (ms)',           step:'1',   min:5,  max:250, marker:'hrv' },
-    { id:'sbp',      label:'Büyük tansiyon',     step:'1',   min:60, max:250, marker:'sbp' },
-    { id:'dbp',      label:'Küçük tansiyon',     step:'1',   min:30, max:160, marker:'dbp' },
-    { id:'spo2',     label:'Oksijen (%)',        step:'1',   min:70, max:100, marker:'spo2' },
-    { id:'temp',     label:'Ateş (°C)',          step:'0.1', min:33, max:43,  marker:'temp' },
-    { id:'weight',   label:'Kilo (kg)',          step:'0.1', min:20, max:250, marker:'weight' },
-    { id:'waist',    label:'Bel çevresi (cm)',   step:'0.5', min:40, max:200, marker:'waist' },
-    { id:'bodyfat',  label:'Yağ oranı (%)',      step:'0.1', min:3,  max:60,  marker:'bodyfat' },
-    { id:'water',    label:'Su (ml)',            step:'100', min:0,  max:8000, marker:null },
+    { id:'sleep',    label:yz('spi.today.gece-uykusu-saat'),        step:'0.5', min:0,  max:16,  marker:'sleep' },
+    { id:'rhr',      label:yz('spi.today.i-stirahat-nabzi'),    step:'1',   min:30, max:140, marker:'rhr' },
+    { id:'hrv',      label:yz('spi.today.hrv-ms'),           step:'1',   min:5,  max:250, marker:'hrv' },
+    { id:'sbp',      label:yz('spi.today.buyuk-tansiyon'),     step:'1',   min:60, max:250, marker:'sbp' },
+    { id:'dbp',      label:yz('spi.today.kucuk-tansiyon'),     step:'1',   min:30, max:160, marker:'dbp' },
+    { id:'spo2',     label:yz('spi.today.oksijen'),        step:'1',   min:70, max:100, marker:'spo2' },
+    { id:'temp',     label:yz('spi.today.ates-c'),          step:'0.1', min:33, max:43,  marker:'temp' },
+    { id:'weight',   label:yz('spi.today.kilo-kg'),          step:'0.1', min:20, max:250, marker:'weight' },
+    { id:'waist',    label:yz('spi.today.bel-cevresi-cm'),   step:'0.5', min:40, max:200, marker:'waist' },
+    { id:'bodyfat',  label:yz('spi.today.yag-orani'),      step:'0.1', min:3,  max:60,  marker:'bodyfat' },
+    { id:'water',    label:yz('spi.today.su-ml'),            step:'100', min:0,  max:8000, marker:null },
   ];
 
   const SORENESS = [
-    { value:1, label:'1 · bitkin' }, { value:2, label:'2 · yorgun' },
-    { value:3, label:'3 · normal' }, { value:4, label:'4 · iyi' },
-    { value:5, label:'5 · zinde' },
+    { value:1, label:yz('spi.today.1-bitkin') }, { value:2, label:yz('spi.today.2-yorgun') },
+    { value:3, label:yz('spi.today.3-normal') }, { value:4, label:yz('spi.today.4-iyi') },
+    { value:5, label:yz('spi.today.5-zinde') },
   ];
 
   /* ZAMAN KAYDIRICI. Günler arasında gezinmek için üç düğme vardı:
@@ -73,13 +294,13 @@ SP.Screens.today = (function(){
     const pencere = SP.XP && SP.XP.pencere ? SP.XP.pencere() : null;
     if(V && V.gunPenceresi && pencere){
       const acik = new Set(pencere);
-      return html`<div class="daynav">${raw(V.gunPenceresi({ etiket:'Gün seç', pencere:pencere.length - 1,
+      return html`<div class="daynav">${raw(V.gunPenceresi({ etiket:yz('spi.today.gun-sec'), pencere:pencere.length - 1,
         kilitAd:'taralı · puan yok', not:'Bugün + ' + (pencere.length - 1) + ' gün geri puana yazılır',
         gunler:gunler.map(g => ({ gun:String(U.parse(g.date).getDate()), bugun:g.bugun, secili:g.secili, dolu:g.dolu,
           kilitli:!acik.has(g.date), act:'open-day', data:{ 'data-date':g.date },
           ad:U.fmtDate(g.date) + (g.dolu ? ', veri var' : ', veri yok') + (acik.has(g.date) ? '' : ', puan yazılmaz'),
           baslik:U.fmtDate(g.date) + (g.dolu ? ' · veri var' : ' · veri yok') })) }))}
-        ${when(d !== bugun, () => K.Button({ label:'Bugüne dön', size:'sm',
+        ${when(d !== bugun, () => K.Button({ label:yz('spi.today.bugune-don'), size:'sm',
           act:'open-day', data:{ 'data-date':bugun } }))}</div>`;
     }
     return html`<div class="daynav">
@@ -93,7 +314,7 @@ SP.Screens.today = (function(){
           <span class="${cls('daybtn__dot', g.dolu && 'is-full')}" aria-hidden="true"></span>
         </button>`)}
       </div>
-      ${when(d !== bugun, () => K.Button({ label:'Bugüne dön', size:'sm',
+      ${when(d !== bugun, () => K.Button({ label:yz('spi.today.bugune-don'), size:'sm',
         act:'open-day', data:{ 'data-date':bugun } }))}
     </div>`;
   }
@@ -131,13 +352,13 @@ SP.Screens.today = (function(){
     const dunku = dunkuSikayetler(d);
 
     return K.Entry({
-      label:'Bugün bir şikâyetin var mı?', hint:'not-sikayet',
+      label:yz('spi.today.bugun-bir-sikayetin-var-mi'), hint:'not-sikayet',
       meta:Object.keys(secili).length
         ? Object.keys(secili).length + ' işaretli'
         : (v && v.symptomsLogged ? 'şikâyet yok' : 'girilmedi'),
       /* Açıklama ⓘ'de (hints.js «not-sikayet»): sıkı ölçüde sabit not yok. */
-      action:html`${when(dunku, () => K.Button({ label:'Dünkü şikâyetler sürüyor', size:'sm', act:'dunku-sikayet' }))}
-        ${K.Button({ label:'Şikâyetim yok', size:'sm', act:'no-symptoms' })}`,
+      action:html`${when(dunku, () => K.Button({ label:yz('spi.today.dunku-sikayetler-suruyor'), size:'sm', act:'dunku-sikayet' }))}
+        ${K.Button({ label:yz('spi.today.sikayetim-yok'), size:'sm', act:'no-symptoms' })}`,
       body:html`
         ${map(SP.SYMPTOM_GROUPS, g => html`
           <div class="symgrp">
@@ -156,12 +377,11 @@ SP.Screens.today = (function(){
                 </button>`;
               })}</div>
           </div>`)}
-        <p class="tiny dim mt-8">Bir şikâyete tıklayınca şiddeti artar:
-          hafif → orta → şiddetli → kapalı.</p>
+        <p class="tiny dim mt-8">${yz('spi.today.bir-sikayete-tiklayinca-sidd')}</p>
 
         ${when(kadin, () => html`<div class="mt-16">
-          ${K.Field({ label:'Adet kanaması', hint:'ferritin ve hemoglobin yorumu buna bağlı',
-            input:K.Checkbox({ id:'v-period', label:'Bugün kanama var',
+          ${K.Field({ label:yz('spi.today.adet-kanamasi'), hint:'ferritin ve hemoglobin yorumu buna bağlı',
+            input:K.Checkbox({ id:'v-period', label:yz('spi.today.bugun-kanama-var'),
               checked:!!(v && v.period), act:'toggle-period' }) })}
         </div>`)}
 
@@ -171,8 +391,7 @@ SP.Screens.today = (function(){
               r.days + ' / ' + w.loggedDays,
               (SP.SYMPTOM_SEVERITY.find(z => z.value === Math.round(r.avgSeverity))
                 || { label:'—' }).label]) })}
-          <p class="tiny dim mt-6">Payda girilen gün sayısıdır, otuz değil:
-            işaretlenmemiş bir gün «şikâyet yok» sayılmaz.</p>
+          <p class="tiny dim mt-6">${yz('spi.today.payda-girilen-gun-sayisidir')}</p>
         </div>`)}`,
     });
   }
@@ -190,16 +409,16 @@ SP.Screens.today = (function(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
     return K.Entry({
-      label:'Günün ölçümü',
+      label:yz('spi.today.gunun-olcumu'),
       /* GÜNÜN ODAK ROZETİ — günün raporunda, tarihin yanında.
          Başarımlar sekmesindeki odak rozeti ömürlük rekordur; bu ise
          BU GÜNÜN kendisi (bkz. core/basarim.js, gununOdagi). Eşiğin
          altındaki gün rozet almaz ve boş döner. */
       meta:raw(SP.h.esc(U.fmtDate(d)) + OdakRozeti(d)),
-      note:'Boş bıraktığın alan sıfır sayılmaz — hesaba hiç girmez. Uyku '
+      note:yz('spi.today.bos-biraktigin-alan-sifir-sa')
         + 'süresini yazman bile anlamlı bir sonuç üretir.',
       action:html`${dayNav(d)}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}`,
+        ${K.Button({ label:yz('spi.today.kaydet'), tone:'primary', act:'save-vitals' })}`,
       body:html`
         <div class="grid-form">${map(FIELDS, f => K.Field({
           /* ALANIN SİMGESİ — kimlikten türer, burada ad kurulmaz
@@ -221,14 +440,14 @@ SP.Screens.today = (function(){
             min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
         }))}</div>
         ${KestirmeSatiri(d, true)}
-        ${K.Field({ label:'Bugün nasıl hissediyorsun?',
+        ${K.Field({ label:yz('spi.today.bugun-nasil-hissediyorsun'),
           hint:'cihazın göremediği tek girdi',
           input:K.Segmented({ act:'set-soreness', value:v.soreness == null ? '' : String(v.soreness),
-            items:SORENESS, block:true, aria:'Günün hissi' }) })}
-        ${K.Field({ label:'Not',
+            items:SORENESS, block:true, aria:yz('spi.today.gunun-hissi') }) })}
+        ${K.Field({ label:yz('spi.today.not'),
           input:html`<div class="withmic">
             ${K.Textarea({ id:'v-note', rows:2, value:v.note || '',
-              placeholder:'Hastalık, ilaç değişikliği, olağandışı bir gün…' })}
+              placeholder:yz('spi.today.hastalik-ilac-degisikligi-ol') })}
             ${K.Mic({ target:'v-note' })}
           </div>` })}`,
     });
@@ -236,16 +455,16 @@ SP.Screens.today = (function(){
 
   function quickEntry(){
     return K.Entry({
-      label:'Öğün ekle', hint:'portion',
-      note:'Ev ölçüsünden gelen gramaj «tahmin» olarak işaretlenir. '
+      label:yz('spi.today.ogun-ekle'), hint:'portion',
+      note:yz('spi.today.ev-olcusunden-gelen-gramaj-t')
         + 'Tarttıysan «150 g tavuk» yaz, «ölçüldü» olur.',
-      action:K.Button({ label:'Bütün öğünler', act:'go', data:{ 'data-route':'meals' } }),
+      action:K.Button({ label:yz('spi.today.butun-ogunler'), act:'go', data:{ 'data-route':'meals' } }),
       body:html`
         <div class="quick">
           ${K.Mic({ target:'quick-meal' })}
-          ${K.Input({ id:'quick-meal', placeholder:'1 tabak etli kuru fasulye, 1 bardak ayran',
-            aria:'Öğün metni' })}
-          ${K.Button({ label:'Öğüne ekle', tone:'primary', act:'quick-meal' })}
+          ${K.Input({ id:'quick-meal', placeholder:yz('spi.today.1-tabak-etli-kuru-fasulye'),
+            aria:yz('spi.today.ogun-metni') })}
+          ${K.Button({ label:yz('spi.today.ogune-ekle'), tone:'primary', act:'quick-meal' })}
         </div>`,
     });
   }
@@ -262,9 +481,9 @@ SP.Screens.today = (function(){
     });
     if(!rows.length) return '';
     return K.Entry({
-      label:'Girilen değerler', hint:'ref-range',
+      label:yz('spi.today.girilen-degerler'), hint:'ref-range',
       meta:rows.length + ' ölçüm',
-      note:'Referans aralığı laboratuvarın normal saydığı yer; hedef bandı '
+      note:yz('spi.today.referans-araligi-laboratuvar')
         + 'bu sistemin istediği daha dar yer.',
       body:html`${map(rows, r => P.markerRow(r, {}))}`,
     });
@@ -272,7 +491,7 @@ SP.Screens.today = (function(){
 
   function whyEntry(){
     return K.Entry({
-      label:'Neden bunlar?',
+      label:yz('spi.today.neden-bunlar'),
       meta:'toparlanmanın girdileri',
       body:html`<ul class="bullets small muted">
         ${map(SP.READINESS_INPUTS, i => html`<li><b>${i.label}</b> — ${i.note}</li>`)}
@@ -288,11 +507,11 @@ SP.Screens.today = (function(){
           b ? b.n + ' gün' : 'en az 3 gün gerekir'];
       });
     return K.Entry({
-      label:'Taban çizgin',
+      label:yz('spi.today.taban-cizgin'),
       meta:'son 30 gün, bugün hariç',
-      note:'HRV ve nabız mutlak değil kişisel ölçektir: kendi ortalamana göre '
+      note:yz('spi.today.hrv-ve-nabiz-mutlak-degil')
         + 'okunur, başkasınınkiyle karşılaştırılmaz.',
-      body:K.Table({ tight:true, headers:['Ölçüm', { label:'Ortalama', num:true }, 'Kapsam'], rows }),
+      body:K.Table({ tight:true, headers:['Ölçüm', { label:yz('spi.today.ortalama'), num:true }, 'Kapsam'], rows }),
     });
   }
 
@@ -311,14 +530,14 @@ SP.Screens.today = (function(){
       ];
     });
     if(!rows.length){
-      return K.Entry({ label:'Son iki hafta', meta:'kayıt yok',
+      return K.Entry({ label:yz('spi.today.son-iki-hafta'), meta:'kayıt yok',
         body:P.empty('Bu aralıkta ölçüm girilmemiş.') });
     }
     return K.Entry({
-      label:'Son iki hafta', meta:rows.length + ' gün',
+      label:yz('spi.today.son-iki-hafta'), meta:rows.length + ' gün',
       body:K.Table({ tight:true,
-        headers:['Gün', { label:'Uyku', num:true }, { label:'Nabız', num:true },
-          { label:'HRV', num:true }, 'Toparlanma'],
+        headers:['Gün', { label:yz('spi.today.uyku'), num:true }, { label:yz('spi.today.nabiz'), num:true },
+          { label:yz('spi.today.hrv'), num:true }, 'Toparlanma'],
         rows }),
     });
   }
@@ -336,14 +555,14 @@ SP.Screens.today = (function(){
        gostermek, olcmedigimiz bir seyi soylemek olurdu. */
     const bitti = m.total > 0 && m.done >= m.total;
     return K.Entry({
-      label:'Asgari gün', hint:'minimum-day',
+      label:yz('spi.today.asgari-gun'), hint:'minimum-day',
       meta:m.done + ' / ' + m.total + ' · seri ' + streak + ' gün',
       note:m.note,
       body:html`
         ${when(bitti, () => K.NextUp({ icon:'check', calm:true, sanat:'saglik',
-          label:'Asgari gün tamam',
+          label:yz('spi.today.asgari-gun-tamam'),
           title:m.total + ' / ' + m.total + ' · seri ' + streak + ' gün',
-          why:'Bugünün asgarisi kapandı. Seri, girilmiş günlerden sayılır; '
+          why:yz('spi.today.bugunun-asgarisi-kapandi-ser')
              + 'girilmemiş gün seriyi kırmaz, sayıya da katılmaz.' }))}
         <div class="mt-2">${map(m.rows, P.minRow)}</div>`,
     });
@@ -355,20 +574,20 @@ SP.Screens.today = (function(){
     if(!SP.Dunku) return null;
     const a = SP.Dunku.adaylar(U.todayISO());
     if(!a.ogunler.length && !a.antrenmanlar.length) return null;
-    return K.Entry({ label:'Dünkünün aynısı', meta:U.fmtShort(a.dun), wide:true,
-      note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; zorlanma puanı kopyalanmaz, sorulur.',
+    return K.Entry({ label:yz('spi.today.dunkunun-aynisi'), meta:U.fmtShort(a.dun), wide:true,
+      note:yz('spi.today.aynisini-yaptiysan-tek-dokun'),
       body:html`${map(a.ogunler, o => html`<div class="row between wrap gap-6 mt-4">
           <span class="small"><b>${o.ad}</b> <span class="tiny dim">${o.ozet}</span></span>
-          ${K.Button({ label:'Bugüne ekle', size:'sm', act:'dunku-ogun', data:{ 'data-id':o.id } })}</div>`)}
+          ${K.Button({ label:yz('spi.today.bugune-ekle'), size:'sm', act:'dunku-ogun', data:{ 'data-id':o.id } })}</div>`)}
         ${map(a.antrenmanlar, w => html`<div class="row between wrap gap-6 mt-4">
           <span class="small"><b>${w.ad}</b> <span class="tiny dim">${w.dk} dk</span></span>
-          ${K.Button({ label:'Bugüne ekle', size:'sm', act:'dunku-antrenman', data:{ 'data-id':w.id } })}</div>`)}` });
+          ${K.Button({ label:yz('spi.today.bugune-ekle'), size:'sm', act:'dunku-antrenman', data:{ 'data-id':w.id } })}</div>`)}` });
   }
 
   /* Seri satiri her sekmede ustte: «Bugün hastayım» ve «Tatil modu» aranmaz. */
   function seriRow(){
     if(!SP.Seri) return null;
-    return K.Entry({ label:'Seri', hint:'streak', meta:SP.Calc.streak() + ' gün', wide:true,
+    return K.Entry({ label:yz('spi.today.seri'), hint:'streak', meta:SP.Calc.streak() + ' gün', wide:true,
       body:seriKontrol() });
   }
 
@@ -379,10 +598,10 @@ SP.Screens.today = (function(){
   function TatilSiniri(){
     const sinir = SP.Seri.yillikTatil(), kalan = SP.Seri.kalanTatil();
     return html`<div class="row wrap gap-6 mt-6">
-      <span class="tiny dim">Yıllık tatil sınırı: bu yıl kalan ${kalan} / ${sinir} gün</span>
+      <span class="tiny dim">${yz('spi.today.yillik-tatil-siniri-bu-yil')} ${kalan} / ${sinir} ${yz('spi.today.gun')}</span>
       ${K.Input({ id:'seri-tatil-sinir', type:'number', size:'sm', numeric:true, value:sinir,
-        aria:'yıllık tatil sınırı, gün' })}
-      ${K.Button({ label:'Sınırı kaydet', size:'sm', act:'seri-tatil-sinir' })}</div>`;
+        aria:yz('spi.today.yillik-tatil-siniri-gun') })}
+      ${K.Button({ label:yz('spi.today.siniri-kaydet'), size:'sm', act:'seri-tatil-sinir' })}</div>`;
   }
 
   function seriKontrol(){
@@ -391,20 +610,20 @@ SP.Screens.today = (function(){
     const t = SP.Seri.aktifTatil(bugun);
     const k = SP.Seri.kayitOf(bugun);
     if(t) return html`<div class="row between wrap gap-6 mt-6">
-      <span class="tiny">Tatil modu: ${U.fmtShort(t.bas)} – ${U.fmtShort(t.bit)} · seri korunuyor, HKM soru sormuyor</span>
-      ${K.Button({ label:'Tatili bitir', size:'sm', act:'seri-tatil-bitir' })}</div>`;
+      <span class="tiny">${yz('spi.today.tatil-modu')} ${U.fmtShort(t.bas)} – ${U.fmtShort(t.bit)} ${yz('spi.today.seri-korunuyor-hkm-soru')}</span>
+      ${K.Button({ label:yz('spi.today.tatili-bitir'), size:'sm', act:'seri-tatil-bitir' })}</div>`;
     if(k) return html`<div class="row between wrap gap-6 mt-6">
-      <span class="tiny">Bugün dondurulmuş (${LIFEOS.Seri.NEDEN[k.neden].toLocaleLowerCase('tr')}) · seri bozulmaz</span>
-      ${K.Button({ label:'Geri al', size:'sm', act:'seri-coz', data:{ 'data-id':k.id } })}</div>`;
+      <span class="tiny">${yz('spi.today.bugun-dondurulmus')}${LIFEOS.Seri.NEDEN[k.neden].toLocaleLowerCase('tr')}${yz('spi.today.seri-bozulmaz')}</span>
+      ${K.Button({ label:yz('spi.today.geri-al'), size:'sm', act:'seri-coz', data:{ 'data-id':k.id } })}</div>`;
     if(S.ui.tatilSec) return html`<div class="row wrap gap-6 mt-6">
-      <span class="tiny">Kaç gün?</span>
+      <span class="tiny">${yz('spi.today.kac-gun')}</span>
       ${map([3, 7, 14], n => K.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
-      ${K.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>
+      ${K.Button({ label:yz('spi.today.vazgec'), size:'sm', act:'seri-tatil-vazgec' })}</div>
       ${TatilSiniri()}`;
     return html`${kotuGunSatiri()}<div class="row wrap gap-6 mt-6">
-      ${when(SP.KotuGun && !SP.KotuGun.aktif(bugun), () => K.Button({ label:'Kötü gün', size:'sm', act:'kotu-gun' }))}
-      ${K.Button({ label:'Bugün hastayım · seri donsun', size:'sm', act:'seri-hasta' })}
-      ${K.Button({ label:'Tatil modu', size:'sm', act:'seri-tatil' })}</div>`;
+      ${when(SP.KotuGun && !SP.KotuGun.aktif(bugun), () => K.Button({ label:yz('spi.today.kotu-gun'), size:'sm', act:'kotu-gun' }))}
+      ${K.Button({ label:yz('spi.today.bugun-hastayim-seri-donsun'), size:'sm', act:'seri-hasta' })}
+      ${K.Button({ label:yz('spi.today.tatil-modu-2'), size:'sm', act:'seri-tatil' })}</div>`;
   }
 
   /* Kötü gün modu (core/kotugun.js): açıksa günün ölçüsü asgari gündür. */
@@ -412,10 +631,9 @@ SP.Screens.today = (function(){
     if(!SP.KotuGun || !SP.KotuGun.aktif(U.todayISO())) return '';
     const m = SP.Calc.minimumDay();
     return html`<div class="row between wrap gap-6 mt-6">
-      <span class="tiny">Kötü gün modu: antrenman hafif, bugün asgari gün yeter
-        (${m.done}/${m.total}${m.complete ? ', tamam' : ' · kalan: ' + m.rows.filter(r => !r.ok)
+      <span class="tiny">${yz('spi.today.kotu-gun-modu-antrenman-hafi')}${m.done}/${m.total}${m.complete ? ', tamam' : ' · kalan: ' + m.rows.filter(r => !r.ok)
           .map(r => ({ protein:'protein', water:'su', move:'yürüyüş', sleep:'uyku' })[r.id] || r.id).join(', ')})</span>
-      ${K.Button({ label:'Normal güne dön', size:'sm', act:'kotu-gun-kapat' })}</div>`;
+      ${K.Button({ label:yz('spi.today.normal-gune-don'), size:'sm', act:'kotu-gun-kapat' })}</div>`;
   }
 
   function readinessEntry(){
@@ -423,20 +641,20 @@ SP.Screens.today = (function(){
     const r = rx.readiness;
     if(!r.ok){
       return K.Entry({
-        label:'Toparlanma', hint:'readiness', meta:'ölçüm bekliyor',
+        label:yz('spi.today.toparlanma'), hint:'readiness', meta:'ölçüm bekliyor',
         note:r.note,
-        action:K.Button({ label:'Veri gir',
+        action:K.Button({ label:yz('spi.today.veri-gir'),
           act:'day-tab', data:{ 'data-tab':'giris' } }),
         body:P.empty('Bugünün ölçümü girilmedi.'),
       });
     }
     return K.Entry({
-      label:'Toparlanma', hint:'readiness',
+      label:yz('spi.today.toparlanma'), hint:'readiness',
       meta:r.band.label,
       note:r.missing.length
         ? 'Girilmeyen: ' + r.missing.join(', ') + ' — ağırlığı kalanlara dağıtıldı.'
         : null,
-      action:K.Button({ label:'Hareketi aç', act:'go', data:{ 'data-route':'move' } }),
+      action:K.Button({ label:yz('spi.today.hareketi-ac'), act:'go', data:{ 'data-route':'move' } }),
       body:html`
         <div class="row wrap" style="gap:26px">
           ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:126,
@@ -459,32 +677,32 @@ SP.Screens.today = (function(){
 
     if(!tg.ok){
       return K.Entry({
-        label:'Beslenme', meta:'hedef yok',
-        note:'Profilde ' + tg.missing.join(', ') + ' eksik. Bu üçü olmadan kalori ve '
+        label:yz('spi.today.beslenme'), meta:'hedef yok',
+        note:yz('spi.today.profilde') + tg.missing.join(', ') + ' eksik. Bu üçü olmadan kalori ve '
           + 'protein hedefi tahmin edilmez.',
-        action:K.Button({ label:'Profili tamamla',
+        action:K.Button({ label:yz('spi.today.profili-tamamla'),
           act:'go', data:{ 'data-route':'family' } }),
         body:P.empty('Hedef hesaplanamıyor.'),
       });
     }
     if(t.empty){
       return K.Entry({
-        label:'Beslenme', meta:'hedef ' + U.fmtNum(tg.kcal) + ' kcal',
-        action:K.Button({ label:'Öğün ekle',
+        label:yz('spi.today.beslenme'), meta:'hedef ' + U.fmtNum(tg.kcal) + ' kcal',
+        action:K.Button({ label:yz('spi.today.ogun-ekle'),
           act:'go', data:{ 'data-route':'meals' } }),
         body:P.empty('Bugün hiç öğün girilmedi.'),
       });
     }
     return K.Entry({
-      label:'Beslenme',
+      label:yz('spi.today.beslenme'),
       meta:t.meals + ' öğün · ' + Math.round(t.kcal) + ' / ' + tg.kcal + ' kcal',
-      action:K.Button({ label:'Öğünleri aç', act:'go', data:{ 'data-route':'meals' } }),
+      action:K.Button({ label:yz('spi.today.ogunleri-ac'), act:'go', data:{ 'data-route':'meals' } }),
       body:html`
         ${raw(UI.macroSplit({ protein:t.protein * 4, fat:t.fat * 9, carb:t.carb * 4 }))}
         <div class="nutgrid">
-          ${P.nutCell({ label:'Protein', got:t.protein, target:tg.protein.min, unit:'g' })}
-          ${P.nutCell({ label:'Lif', got:t.fiber, target:tg.fiber, unit:'g' })}
-          ${P.nutCell({ label:'Yağ', got:t.fat, target:tg.fat.min, unit:'g' })}
+          ${P.nutCell({ label:yz('spi.today.protein'), got:t.protein, target:tg.protein.min, unit:'g' })}
+          ${P.nutCell({ label:yz('spi.today.lif'), got:t.fiber, target:tg.fiber, unit:'g' })}
+          ${P.nutCell({ label:yz('spi.today.yag'), got:t.fat, target:tg.fat.min, unit:'g' })}
         </div>
         ${map(t.notes.slice(0, 1), P.absorbNote)}`,
     });
@@ -509,34 +727,32 @@ SP.Screens.today = (function(){
   function durumDugmeleri(h){
     return html`
       ${h.durum === 'aktif'
-        ? K.Button({ label:'Askıya al', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'askida' } })
-        : K.Button({ label:'Sürdür', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'aktif' } })}
-      ${K.Button({ label:'Tamamlandı', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'tamam' } })}
-      ${K.Button({ label:'Bırak', size:'sm', tone:'ghost', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'birakildi' } })}`;
+        ? K.Button({ label:yz('spi.today.askiya-al'), size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'askida' } })
+        : K.Button({ label:yz('spi.today.surdur'), size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'aktif' } })}
+      ${K.Button({ label:yz('spi.today.tamamlandi'), size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'tamam' } })}
+      ${K.Button({ label:yz('spi.today.birak'), size:'sm', tone:'ghost', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'birakildi' } })}`;
   }
 
   function planOnizleme(h){
     const r = SP.Plan.kur(h, U.todayISO());
     if(!r.ok){
-      return html`<div class="mt-8">${K.Notice({ tone:'warn', title:'Plan kurulamadı.', body:r.why })}
-        <div class="row gap-8 mt-8">${K.Button({ label:'Kapat', size:'sm', act:'hedef-plan-kapat' })}</div></div>`;
+      return html`<div class="mt-8">${K.Notice({ tone:'warn', title:yz('spi.today.plan-kurulamadi'), body:r.why })}
+        <div class="row gap-8 mt-8">${K.Button({ label:yz('spi.today.kapat'), size:'sm', act:'hedef-plan-kapat' })}</div></div>`;
     }
     const pl = r.plan;
     const satirlar = SP.Plan.onizleme(pl);
     const notlar = [].concat(pl.enerjiNeden ? [pl.enerjiNeden] : [], pl.hekim.notlar, pl.uyarilar);
     return html`<div class="mt-8">
-      <p class="tiny dim"><b>Plan önizlemesi</b> — onaylanana kadar hiçbir şey değişmez.</p>
+      <p class="tiny dim"><b>${yz('spi.today.plan-onizlemesi')}</b> ${yz('spi.today.onaylanana-kadar-hicbir-sey')}</p>
       ${K.Table({ tight:true, headers:['', 'Şimdi', 'Plandan sonra'],
         rows:satirlar.map(x => [x.alan, x.once, x.sonra]) })}
       ${when(notlar.length, () => html`<div class="stack-sm mt-8">${map(notlar, n =>
         K.Notice({ tone:'info', body:n }))}</div>`)}
-      <p class="tiny dim mt-8">Enerji ve tempo tahmindir: «1 kg ≈ 7700 kcal» yaygın bir
-        yaklaşımdır, kaynağı henüz bağlanmadı. Plan geri alınabilir; geri alınca beslenme
-        hedefin bugünkü haline döner.</p>
+      <p class="tiny dim mt-8">${yz('spi.today.enerji-ve-tempo-tahmindir-1')}</p>
       <div class="row gap-8 mt-8" style="flex-wrap:wrap">
-        ${K.Button({ label:'Planı uygula', size:'sm', tone:'primary', act:'hedef-plan-uygula',
+        ${K.Button({ label:yz('spi.today.plani-uygula'), size:'sm', tone:'primary', act:'hedef-plan-uygula',
           data:{ 'data-id':h.id } })}
-        ${K.Button({ label:'Şimdilik değil', size:'sm', act:'hedef-plan-kapat' })}
+        ${K.Button({ label:yz('spi.today.simdilik-degil'), size:'sm', act:'hedef-plan-kapat' })}
       </div></div>`;
   }
 
@@ -549,15 +765,14 @@ SP.Screens.today = (function(){
     const H = window.LIFEOS.Hedef;
     const u = H.uyarla(h, SP.Hedefler.PAKETLER.find(x => x.id === h.paket), {}, U.todayISO());
     return html`<div class="mt-8">
-      <p class="tiny dim"><b>Bugünün verisiyle yeniden hesap</b> — seçim yapana kadar hiçbir şey değişmez.</p>
+      <p class="tiny dim"><b>${yz('spi.today.bugunun-verisiyle-yeniden-he')}</b> ${yz('spi.today.secim-yapana-kadar-hicbir')}</p>
       <p class="small">${u.metin}</p>
       ${u.senaryolar.length ? html`<div class="row gap-8 mt-8" style="flex-wrap:wrap">${map(u.senaryolar, (x, i) =>
         K.Button({ label:x.ad + ' · ' + H.tarihYaz(x.son_tarih), size:'sm', act:'hedef-uyarla-sec',
           data:{ 'data-id':h.id, 'data-i':String(i) } }))}</div>
-        <p class="tiny dim mt-8">Seçince eski plan geri alınır, hedef yeni tarih ve vakitle güncellenir;
-          yeni planı önizleyip onaylarsın. Eski tarih hedefin geçmişinde kalır.</p>`
+        <p class="tiny dim mt-8">${yz('spi.today.secince-eski-plan-geri-alini')}</p>`
         : K.Notice({ tone:'info', body:'Bu tarihe hâlâ yetişilebilir; plan olduğu gibi kalabilir.' })}
-      <div class="row gap-8 mt-8">${K.Button({ label:'Kapat', size:'sm', act:'hedef-uyarla-kapat' })}</div>
+      <div class="row gap-8 mt-8">${K.Button({ label:yz('spi.today.kapat'), size:'sm', act:'hedef-uyarla-kapat' })}</div>
     </div>`;
   }
 
@@ -570,23 +785,22 @@ SP.Screens.today = (function(){
       + (pl.protein ? ' · protein ' + pl.protein.min + '–' + pl.protein.max + ' g' : '');
     return html`<div class="stack-sm mt-8">
       <p class="small">${bas}</p>
-      ${when(il.sonraki, () => html`<p class="tiny">Sonraki kontrol: <b>${U.fmtDate(il.sonraki.tarih)}</b>
-        (${pl.tartiGunu.ad}, ${pl.tartiGunu.not}) — beklenen ${kg(il.sonraki.beklenen)}</p>`)}
+      ${when(il.sonraki, () => html`<p class="tiny">${yz('spi.today.sonraki-kontrol')} <b>${U.fmtDate(il.sonraki.tarih)}</b>
+        (${pl.tartiGunu.ad}, ${pl.tartiGunu.not}${yz('spi.today.beklenen')} ${kg(il.sonraki.beklenen)}</p>`)}
       ${K.Notice({ tone:il.durum === 'geride' ? 'warn' : 'info', body:il.metin })}
       ${S.ui.uyarla === h.id ? uyarlamaKutusu(h) : when(il.durum === 'geride', () => K.Button({
-        label:'Yeniden hesapla', size:'sm', tone:'primary', act:'hedef-uyarla-ac', data:{ 'data-id':h.id } }))}
+        label:yz('spi.today.yeniden-hesapla'), size:'sm', tone:'primary', act:'hedef-uyarla-ac', data:{ 'data-id':h.id } }))}
       ${when(pl.enerjiNeden, () => html`<p class="tiny dim">${pl.enerjiNeden}</p>`)}
       ${when(pl.hekim.talimatlar.length, () => html`<p class="tiny dim">${pl.hekim.talimatlar.length}
-        hekim talimatına uyuluyor.${pl.hekim.notlar.length ? ' ' + pl.hekim.notlar.join(' ') : ''}</p>`)}
-      ${when(hafta, () => html`<div><p class="tiny"><b>Bu hafta (${hafta.no}. hafta)</b> —
-        Planlama Ofisi programı, sürüm ${pl.program.surum}</p>
+        ${yz('spi.today.hekim-talimatina-uyuluyor')}${pl.hekim.notlar.length ? ' ' + pl.hekim.notlar.join(' ') : ''}</p>`)}
+      ${when(hafta, () => html`<div><p class="tiny"><b>${yz('spi.today.bu-hafta')}${hafta.no}${yz('spi.today.hafta')}</b> ${yz('spi.today.planlama-ofisi-programi-suru')} ${pl.program.surum}</p>
         <ul class="tiny dim" style="margin:4px 0 0 18px">${map(hafta.gorevler, g => html`<li>${g.metin}</li>`)}</ul></div>`)}
-      ${when(e, () => html`<p class="tiny dim">İş emri #${e.id}: ${KARAR_AD[e.karar] || e.karar}${e.durum
+      ${when(e, () => html`<p class="tiny dim">${yz('spi.today.i-s-emri')}${e.id}: ${KARAR_AD[e.karar] || e.karar}${e.durum
         && EMIR_DURUM[e.durum] ? ' · ' + EMIR_DURUM[e.durum] : ''}${e.tahmin && e.tahmin.metin
         && e.durum !== 'bitti' ? ' · tahmini süre ' + e.tahmin.metin + ' (tahmin)' : ''}</p>`)}
       <div class="row gap-8" style="flex-wrap:wrap">
-        ${K.Button({ label:'Planı geri al', size:'sm', act:'hedef-plan-geri', data:{ 'data-id':h.id } })}
-        ${when(!e || e.karar === 'ret', () => K.Button({ label:'King’e ilet', size:'sm',
+        ${K.Button({ label:yz('spi.today.plani-geri-al'), size:'sm', act:'hedef-plan-geri', data:{ 'data-id':h.id } })}
+        ${when(!e || e.karar === 'ret', () => K.Button({ label:yz('spi.today.king-e-ilet'), size:'sm',
           act:'hedef-plan-king', data:{ 'data-id':h.id } }))}
         ${durumDugmeleri(h)}
       </div></div>`;
@@ -614,7 +828,7 @@ SP.Screens.today = (function(){
       ${h.paket === 'aliskanlik' && SP.Hedefler.ALISKANLIK ? aliskanlikOzeti(h)
         : pl ? planOzeti(h, pl) : onizle ? planOnizleme(h) : html`
         <div class="row gap-8 mt-6" style="flex-wrap:wrap">
-          ${when(SP.Plan && h.durum === 'aktif' && h.paket === 'kilo', () => K.Button({ label:'Planı gör',
+          ${when(SP.Plan && h.durum === 'aktif' && h.paket === 'kilo', () => K.Button({ label:yz('spi.today.plani-gor'),
             size:'sm', tone:'primary', act:'hedef-plan-onizle', data:{ 'data-id':h.id } }))}
           ${durumDugmeleri(h)}
         </div>`}
@@ -625,22 +839,19 @@ SP.Screens.today = (function(){
   function butceSatiri(){
     const b = SP.Hedefler.ag ? SP.Hedefler.ag.butce() : null;
     if(!b || !b.metin) return '';
-    return K.Notice({ tone:{ sigar:'info', sikisik:'warn', sigmaz:'warn' }[b.bant] || 'info', title:'Zaman bütçesi (King):', body:b.metin });
+    return K.Notice({ tone:{ sigar:'info', sikisik:'warn', sigmaz:'warn' }[b.bant] || 'info', title:yz('spi.today.zaman-butcesi-king'), body:b.metin });
   }
 
   function hedefEntry(){
     if(!SP.Hedefler) return null;
     const l = SP.Hedefler.aktifler();
     return K.Entry({
-      label:'Hedeflerim', meta:l.length ? l.length + ' etkin' : 'yok',
-      action:K.Button({ label:'Danışma’da hedef koy', act:'go', data:{ 'data-route':'team' } }),
+      label:yz('spi.today.hedeflerim'), meta:l.length ? l.length + ' etkin' : 'yok',
+      action:K.Button({ label:yz('spi.today.danisma-da-hedef-koy'), act:'go', data:{ 'data-route':'team' } }),
       body:l.length ? html`<div class="stack-sm">${raw((window.LIFEOS && window.LIFEOS.PANO) ? window.LIFEOS.PANO.hedefIzgara(l, U.todayISO()) : '')}${butceSatiri()}${map(l, hedefSatir)}</div>`
-        : K.Ayrinti({ ozet:'Henüz hedefin yok. Danışma’da bir cümleyle yazabilirsin.',
-          etiket:'Örnekler',
-          govde:html`<p>«3 ay içinde 3 kilo vermek istiyorum» ya da «VKİ’mi 24’e indirmek
-            istiyorum» gibi yazabilirsin; gerçekçi olup olmadığını ve güvenli temposunu söylerim.
-            Alışkanlık da kurabilirsin: «haftada 3 gün 30 dakika düzenli spor yapmak
-            istiyorum».</p>` }),
+        : K.Ayrinti({ ozet:yz('spi.today.henuz-hedefin-yok-danisma-da'),
+          etiket:yz('spi.today.ornekler'),
+          govde:html`<p>${yz('spi.today.3-ay-icinde-3-kilo')}</p>` }),
     });
   }
 
@@ -651,12 +862,12 @@ SP.Screens.today = (function(){
   function kingBildirimRow(){
     const l = S.ui.hkmBildirim || [];
     if(!l.length) return '';
-    return K.Entry({ label:'King bildirimi', hint:'hkm', meta:l.length + ' yeni', wide:true,
+    return K.Entry({ label:yz('spi.today.king-bildirimi'), hint:'hkm', meta:l.length + ' yeni', wide:true,
       body:html`${map(l.slice(0, 5), b => html`<div class="mt-8">
         ${K.Notice({ tone:BILDIRIM_TON[b.tur] || 'info', body:b.metin })}
-        <div class="row gap-8 mt-6">${K.Button({ label:'Okundu', size:'sm',
+        <div class="row gap-8 mt-6">${K.Button({ label:yz('spi.today.okundu'), size:'sm',
           act:'king-bildirim-okundu', data:{ 'data-id':String(b.id) } })}</div></div>`)}
-        ${when(l.length > 5, () => html`<p class="tiny dim mt-8">${l.length - 5} bildirim daha — HKM › Ofis’te.</p>`)}` });
+        ${when(l.length > 5, () => html`<p class="tiny dim mt-8">${l.length - 5} ${yz('spi.today.bildirim-daha-hkm')}</p>`)}` });
   }
 
   function officeEntry(){
@@ -664,13 +875,13 @@ SP.Screens.today = (function(){
     const b = S.officeBriefings[d];
     const notes = SP.Office.notes().slice(0, 3);
     return K.Entry({
-      label:'Ofisten', hint:'office',
+      label:yz('spi.today.ofisten'), hint:'office',
       meta:'beş ajan · günün notu',
-      action:html`${K.Button({ label:'Ofisi aç', act:'go', data:{ 'data-route':'office' } })}
-        ${K.Button({ label:'Tazele', act:'refresh-briefing' })}`,
+      action:html`${K.Button({ label:yz('spi.today.ofisi-ac'), act:'go', data:{ 'data-route':'office' } })}
+        ${K.Button({ label:yz('spi.today.tazele'), act:'refresh-briefing' })}`,
       body:html`
         ${when(b, () => html`<p class="small">${b.text}</p>`)}
-        ${when(!b, () => html`<p class="small dim">Günün brifingi henüz üretilmedi.</p>`)}
+        ${when(!b, () => html`<p class="small dim">${yz('spi.today.gunun-brifingi-henuz-uretilm')}</p>`)}
         ${when(notes.length, () => html`<div class="notes">${map(notes, n => html`
           <div class="note note--${n.tone}">
             ${P.avatar(n.agent, 'sm')}
@@ -682,12 +893,12 @@ SP.Screens.today = (function(){
   function moneyEntry(){
     const m = SP.Money.status();
     return K.Entry({
-      label:'Bütçe', hint:'budget-rank',
+      label:yz('spi.today.butce'), hint:'budget-rank',
       meta:m.tone === 'ok' ? 'uyumlu' : m.tone === 'muted' ? 'boş' : 'gözden geçir',
-      action:K.Button({ label:'Finansı aç', act:'go', data:{ 'data-route':'basket' } }),
+      action:K.Button({ label:yz('spi.today.finansi-ac'), act:'go', data:{ 'data-route':'basket' } }),
       body:html`<p class="small">${m.text}</p>
         ${when(m.basket.limit != null && m.basket.rows.length,
-          () => K.Meter({ label:'Haftalık sınır', value:Math.min(100, m.basket.pct || 0),
+          () => K.Meter({ label:yz('spi.today.haftalik-sinir'), value:Math.min(100, m.basket.pct || 0),
             text:U.fmtNum(Math.round(m.basket.total)) + ' / ' + U.fmtNum(m.basket.limit) + ' TL',
             tone:m.basket.over ? 'danger' : '' }))}`,
     });
@@ -705,23 +916,22 @@ SP.Screens.today = (function(){
     if(!sig.seenAt) SP.Signals.markSeen(sig.id);
 
     return K.Entry({
-      label:'Bir soru', hint:'signal',
+      label:yz('spi.today.bir-soru'), hint:'signal',
       meta:sig.kind === 'friction' ? 'sürtünme' : 'gösterge',
       note:sig.title,
       body:html`
         ${K.Notice({ tone:'info', body:sig.question })}
         ${when(sig.answeredAt, () => html`
-          <p class="small muted mt-8">Cevabın: ${sig.answer}</p>
-          <p class="tiny dim">Soru açık kalır: ayrışmanın gerçekten kapanıp
-            kapanmadığı bir sonraki pencerede ölçülecek.</p>`)}
+          <p class="small muted mt-8">${yz('spi.today.cevabin')} ${sig.answer}</p>
+          <p class="tiny dim">${yz('spi.today.soru-acik-kalir-ayrismanin-g')}</p>`)}
         ${when(!sig.answeredAt, () => html`
           <div class="mt-8">
-            ${K.Field({ label:'Kısa cevabın (isteğe bağlı)',
-              input:K.Input({ id:'sig-answer', placeholder:'tek cümle yeter' }) })}
+            ${K.Field({ label:yz('spi.today.kisa-cevabin-istege-bagli'),
+              input:K.Input({ id:'sig-answer', placeholder:yz('spi.today.tek-cumle-yeter') }) })}
             <div class="row wrap mt-8">
-              ${K.Button({ label:'Cevabı kaydet', size:'sm',
+              ${K.Button({ label:yz('spi.today.cevabi-kaydet'), size:'sm',
                 act:'signal-answer', data:{ 'data-id':sig.id } })}
-              ${K.Button({ label:'Bu soru bana uymuyor', size:'sm',
+              ${K.Button({ label:yz('spi.today.bu-soru-bana-uymuyor'), size:'sm',
                 act:'signal-dismiss', data:{ 'data-id':sig.id } })}
             </div>
           </div>`)}`,
@@ -753,7 +963,7 @@ SP.Screens.today = (function(){
     const a = SP.Beacon.settings();
 
     if(!a.enabled){
-      return K.Entry({ label:'HKM', hint:'hkm', meta:'bağlı değil',
+      return K.Entry({ label:yz('spi.today.hkm'), hint:'hkm', meta:'bağlı değil',
         wide:true, body:html`<p class="tiny dim">Hayat Kontrol
           Merkezi'ne günün özetini göndermek istersen ayarlardan
           açabilirsin. SPİ bundan bağımsız çalışır: HKM kapalıyken
@@ -767,7 +977,7 @@ SP.Screens.today = (function(){
     const bozuk = a.lastStatus !== null && a.lastStatus !== undefined
       && a.lastStatus !== 202;
 
-    return K.Entry({ label:'HKM', hint:'hkm', wide:true,
+    return K.Entry({ label:yz('spi.today.hkm'), hint:'hkm', wide:true,
       meta:bozuk ? ('son deneme ' + (denendi || '—') + ' · başarısız')
         : (gitti ? ('son gönderim ' + gitti) : 'henüz gönderilmedi'),
       body:html`
@@ -775,7 +985,7 @@ SP.Screens.today = (function(){
           body:(a.lastNote || 'Gönderilemedi.') + ' SPİ bundan etkilenmez; '
              + 'veri burada duruyor ve bir sonraki denemede gider.' }))}
         <div class="row gap-8 mt-8">
-          ${K.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-gonder' })}
+          ${K.Button({ label:yz('spi.today.simdi-gonder'), size:'sm', act:'hkm-gonder' })}
         </div>
         <p class="tiny dim mt-8">Giden şey günün ÖZETİDİR: etiketli
           ölçümler. Ham kayıt SPİ'de kalır.</p>` });
@@ -796,9 +1006,8 @@ SP.Screens.today = (function(){
     const yas = M.backupAgeDays();
     return html`<div class="mb-16">${K.Notice({ tone:'info', title:'Yedekleme.',
       body:html`${yas === null ? 'Henüz hiç yedek almadın.'
-        : 'Son yedeğin ' + yas + ' gün önce alındı.'} Tarayıcı verisi
-        silinirse tahlil, ölçüm ve öğün geçmişin kaybolur.
-        ${K.Button({ label:'Yedek al', size:'sm', act:'go',
+        : 'Son yedeğin ' + yas + ' gün önce alındı.'} ${yz('spi.today.tarayici-verisi-silinirse-ta')}
+        ${K.Button({ label:yz('spi.today.yedek-al'), size:'sm', act:'go',
           data:{ 'data-route':'guide' } })}` })}</div>`;
   }
 
@@ -835,7 +1044,7 @@ SP.Screens.today = (function(){
     const d = shownDate();
     const v = M.vitalsOf(d) || M.defaultVitals(d);
     const alanlar = FIELDS.filter(f => HIZLI_ALAN.indexOf(f.id) >= 0);
-    return K.Kutu({ ad:'Günün ölçümü', class:'kahraman',
+    return K.Kutu({ ad:yz('spi.today.gunun-olcumu'), class:'kahraman',
       yuva:raw(SP.h.esc(d === U.todayISO() ? 'bugün' : U.fmtDate(d)) + OdakRozeti(d)),
       /* SADE (kullanıcı, 2026-10-02: «SPİ'de AYS kadar sade olmayan, göz
          yoran şeyler var»): Bugün'ün dört alanı simgesiz, yalnız etiket —
@@ -858,8 +1067,8 @@ SP.Screens.today = (function(){
         ${KestirmeSatiri(d, false)}
         <div id="suphe-yuva" aria-live="polite"></div>
         <div class="row wrap gap-8 mt-8">
-          ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}
-          ${K.Button({ label:'Bütün alanlar', tone:'ghost', act:'day-tab', data:{ 'data-tab':'giris' } })}
+          ${K.Button({ label:yz('spi.today.kaydet'), tone:'primary', act:'save-vitals' })}
+          ${K.Button({ label:yz('spi.today.butun-alanlar'), tone:'ghost', act:'day-tab', data:{ 'data-tab':'giris' } })}
         </div>` });
   }
 
@@ -881,34 +1090,34 @@ SP.Screens.today = (function(){
     const g = SP.Uyku.gun(d);
     if(!ekle && !g.kestirme.length) return '';
     return html`<div class="kestirme" aria-label="Kısa uykular">
-      <span class="kestirme__ad">Kısa uyku</span>
+      <span class="kestirme__ad">${yz('spi.today.kisa-uyku')}</span>
       ${g.kestirme.length ? map(g.kestirme, k => html`<span class="kestirme__oge">${k.bas ? k.bas + ' · ' : ''}${k.dk} dk
         <button type="button" class="kestirme__sil" data-act="kestirme-sil" data-id="${k.id}" aria-label="${k.dk} dakikalık kısa uykuyu sil">×</button></span>`)
         : html`<span class="tiny muted">girilmedi</span>`}
-      ${when(ekle, () => K.Button({ label:'Ekle', icon:'plus', size:'sm', tone:'ghost', act:'kestirme-ac' }))}
-      ${when(g.toplamDk != null && g.kestirme.length, () => html`<span class="tiny muted">Günün toplamı ${SP.Uyku.sureYaz(g.toplamDk)} (hesaplandı)</span>`)}
+      ${when(ekle, () => K.Button({ label:yz('spi.today.ekle'), icon:'plus', size:'sm', tone:'ghost', act:'kestirme-ac' }))}
+      ${when(g.toplamDk != null && g.kestirme.length, () => html`<span class="tiny muted">${yz('spi.today.gunun-toplami')} ${SP.Uyku.sureYaz(g.toplamDk)} ${yz('spi.today.hesaplandi')}</span>`)}
     </div>`;
   }
   function kestirmeSheet(hata){
-    UI.sheet({ title:'Kısa uyku', subtitle:'Gece uykusuna eklenmez; ayrı sayılır',
+    UI.sheet({ title:yz('spi.today.kisa-uyku'), subtitle:yz('spi.today.gece-uykusuna-eklenmez-ayri'),
       body:String(html`<div class="grid-form">
-        ${K.Field({ label:'Süre (dakika)', input:K.Input({ id:'kz-dk', type:'number', numeric:true, min:1, max:240, placeholder:'30' }) })}
-        ${K.Field({ label:'Başlangıç', hint:'isteğe bağlı', input:K.Input({ id:'kz-bas', type:'time' }) })}
+        ${K.Field({ label:yz('spi.today.sure-dakika'), input:K.Input({ id:'kz-dk', type:'number', numeric:true, min:1, max:240, placeholder:'30' }) })}
+        ${K.Field({ label:yz('spi.today.baslangic'), hint:'isteğe bağlı', input:K.Input({ id:'kz-bas', type:'time' }) })}
       </div>${when(hata, () => html`<p class="small" role="alert">${hata}</p>`)}`),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'kestirme-kaydet' })}`) });
+      footer:String(html`${K.Button({ label:yz('spi.today.vazgec'), act:'sheet-close' })}
+        ${K.Button({ label:yz('spi.today.kaydet'), tone:'primary', act:'kestirme-kaydet' })}`) });
   }
 
   /* Sade Bugün (2026-10-16): öğün de «Ne yaptın?» kutusundan girilir
      («2 yumurta 1 çay»); bu kutu yalnız ortak kapı kurulmadıysa çizilir.
      Öğün ekranındaki ayrıntılı giriş yerinde. */
   function OgunKutusu(){
-    return K.Kutu({ ad:'Öğün ekle',
+    return K.Kutu({ ad:yz('spi.today.ogun-ekle'),
       govde:html`<div class="quick">
           ${K.Mic({ target:'quick-meal' })}
-          ${K.Input({ id:'quick-meal', placeholder:'1 tabak etli kuru fasulye, 1 bardak ayran',
-            aria:'Öğün metni' })}
-          ${K.Button({ label:'Öğüne ekle', act:'quick-meal' })}
+          ${K.Input({ id:'quick-meal', placeholder:yz('spi.today.1-tabak-etli-kuru-fasulye'),
+            aria:yz('spi.today.ogun-metni') })}
+          ${K.Button({ label:yz('spi.today.ogune-ekle'), act:'quick-meal' })}
         </div>` });
   }
 
@@ -930,8 +1139,8 @@ SP.Screens.today = (function(){
     const noktalar = sonGunler(14).map(t => ({ tarih:t, deger:S.vitals[t] && S.vitals[t].weight != null ? Number(S.vitals[t].weight) : null }));
     const kilo = VT().hamOrtalama({ noktalar, birim:'kg' });
     if(!uyku && !kilo) return null;
-    return K.Entry({ wide:true, label:'Eğilim', meta:'uyku 7 gece · kilo 14 gün',
-      note:'Ölçülmemiş gün boş kalır; ortalamaya girmez, sıfır sayılmaz.',
+    return K.Entry({ wide:true, label:yz('spi.today.egilim'), meta:'uyku 7 gece · kilo 14 gün',
+      note:yz('spi.today.olculmemis-gun-bos-kalir-ort'),
       body:html`<div class="stack-sm">${raw(uyku || '')}${raw(kilo || '')}</div>` });
   }
 
@@ -1072,10 +1281,10 @@ SP.Screens.today = (function(){
          metnine çevrilir («uyku 7.5») ve tek satırla aynı yoldan yazılır
          (GIRIS, SP.Quick); boş kutu yazılmaz, kutu asla önceden dolmaz. */
   const GK_OLCUM = [
-    { id:'uyku', alan:'sleep', ad:'Uyku', birim:'sa', soz:'uyku' },
-    { id:'nabiz', alan:'rhr', ad:'İstirahat nabzı', birim:'atım/dk', soz:'nabız' },
-    { id:'hrv', alan:'hrv', ad:'HRV', birim:'ms', soz:'hrv' },
-    { id:'kilo', alan:'weight', ad:'Kilo', birim:'kg', soz:'kilo' },
+    { id:'uyku', alan:'sleep', ad:yz('spi.today.uyku'), birim:'sa', soz:'uyku' },
+    { id:'nabiz', alan:'rhr', ad:yz('spi.today.i-stirahat-nabzi'), birim:'atım/dk', soz:'nabız' },
+    { id:'hrv', alan:'hrv', ad:yz('spi.today.hrv'), birim:'ms', soz:'hrv' },
+    { id:'kilo', alan:'weight', ad:yz('spi.today.kilo'), birim:'kg', soz:'kilo' },
   ];
   function gkOgunOzet(m){
     return m.items.map(it => {
@@ -1090,16 +1299,16 @@ SP.Screens.today = (function(){
     const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
     const out = [];
     const s = suDurumu(gun);
-    if(s.ml != null && s.ml >= SU_ESIK) out.push({ id:'su', ad:'Su', tur:'beyan', yazildi:true, ipucu:U.fmtNum(s.ml) + ' ml' });
+    if(s.ml != null && s.ml >= SU_ESIK) out.push({ id:'su', ad:yz('spi.today.su'), tur:'beyan', yazildi:true, ipucu:U.fmtNum(s.ml) + ' ml' });
     /* Satır kurulduktan sonra su değiştiyse (tek satır «su 2 bardak» yazdı)
        ölçülen değer hedef tahminiyle ezilmez: satır atlanır. */
     else{
       const suOnce = (M.vitalsOf(gun) || {}).water;
-      out.push({ id:'su', ad:'Su', tur:'beyan', oneri:{ metin:'Hedef: ' + U.fmtNum(SU_ESIK) + ' ml', kaynak:'plan' },
+      out.push({ id:'su', ad:yz('spi.today.su'), tur:'beyan', oneri:{ metin:yz('spi.today.hedef') + U.fmtNum(SU_ESIK) + ' ml', kaynak:'plan' },
         yaz:async g => {
           const simdi = (M.vitalsOf(g) || {}).water;
           if(g !== gun || (simdi == null ? null : Number(simdi)) !== (suOnce == null ? null : Number(suOnce))) return { atlandi:true };
-          const r = await suYazCekirdek(g, SU_ESIK, 'beyan'); return { metin:'Su ' + U.fmtNum(SU_ESIK) + ' ml', geriAl:r.geriAl }; } });
+          const r = await suYazCekirdek(g, SU_ESIK, 'beyan'); return { metin:yz('spi.today.su-2') + U.fmtNum(SU_ESIK) + ' ml', geriAl:r.geriAl }; } });
     }
 
     const bugunkuler = M.mealsOf(gun).filter(m => m.items.length);
@@ -1133,10 +1342,10 @@ SP.Screens.today = (function(){
     if(gun === U.todayISO() && H && H.bugun && H.isaretleHepsi){
       const l = H.bugun(bugunSimdi());
       const vakti = l.filter(x => x.durum === 'vakti').map(x => x.anahtar);
-      if(vakti.length) out.push({ id:'hatirlatma', ad:'Hatırlatmalar', tur:'beyan',
+      if(vakti.length) out.push({ id:'hatirlatma', ad:yz('spi.today.hatirlatmalar'), tur:'beyan',
         oneri:{ metin:vakti.length + ' hatırlatma · yapıldı', kaynak:'plan' },
-        yaz:async g => { const r = await H.isaretleHepsi(vakti, g); return { metin:'Hatırlatmalar', geriAl:r.geriAl }; } });
-      else if(l.some(x => x.durum === 'yapildi')) out.push({ id:'hatirlatma', ad:'Hatırlatmalar', tur:'beyan', yazildi:true, ipucu:'vakti gelenler işaretli' });
+        yaz:async g => { const r = await H.isaretleHepsi(vakti, g); return { metin:yz('spi.today.hatirlatmalar'), geriAl:r.geriAl }; } });
+      else if(l.some(x => x.durum === 'yapildi')) out.push({ id:'hatirlatma', ad:yz('spi.today.hatirlatmalar'), tur:'beyan', yazildi:true, ipucu:'vakti gelenler işaretli' });
     }
 
     const v = M.vitalsOf(gun) || {};
@@ -1164,8 +1373,8 @@ SP.Screens.today = (function(){
   function gkAc(gun){
     const G = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
     if(!G || !G.kuruluMu || !G.kuruluMu() || gun !== U.todayISO()){ SP.App.go('gun'); return; }
-    UI.sheet({ title:'Günü kapat', body:G.cizim(gun),
-      footer:String(K.Button({ label:'Günü düzenle', tone:'ghost', act:'go', data:{ 'data-route':'gun' } })) });
+    UI.sheet({ title:yz('spi.today.gunu-kapat'), body:G.cizim(gun),
+      footer:String(K.Button({ label:yz('spi.today.gunu-duzenle'), tone:'ghost', act:'go', data:{ 'data-route':'gun' } })) });
   }
 
   /* Radio grubunun klavyesi: oklar bir bardak, Boşluk/Enter dokunuş.
@@ -1218,7 +1427,7 @@ SP.Screens.today = (function(){
     const h = (SP.Hatirlat.durum().liste || []).find(x => x.tur === 'olcum');
     const v = M.vitalsOf(U.todayISO());
     const at = v && v.weight != null && v.weightAt ? new Date(v.weightAt) : null;
-    return VT().olcumHatirlatici({ ad:'Sabah tartısı', saatler:h ? h.saatler : [], acik:!!h, act:'ht-ac', data:{ 'data-tur':'olcum' },
+    return VT().olcumHatirlatici({ ad:yz('spi.today.sabah-tartisi'), saatler:h ? h.saatler : [], acik:!!h, act:'ht-ac', data:{ 'data-tur':'olcum' },
       olculdu:at ? 'Bugün ' + U.pad2(at.getHours()) + ':' + U.pad2(at.getMinutes()) + '’te ölçüldü'
         : (v && v.weight != null ? 'Bugün ölçüldü (saati kayıtlı değil)' : null) });
   }
@@ -1238,31 +1447,31 @@ SP.Screens.today = (function(){
   function tusEntry(){
     const ic = tusHtml();
     if(!ic) return null;
-    return K.Entry({ label:'Tartı', meta:'tuş takımı', note:'Büyük rakam, sabit birim; ✓ ölçüm formuyla aynı kayda gider.',
+    return K.Entry({ label:yz('spi.today.tarti'), meta:'tuş takımı', note:yz('spi.today.buyuk-rakam-sabit-birim'),
       body:html`<div id="tus-yuva">${raw(ic)}</div>` });
   }
 
   function ToparlanmaKutusu(){
     const r = SP.Move.readiness(shownDate());
-    if(!r.ok) return K.Kutu({ ad:'Toparlanma', yuva:'ölçüm bekliyor',
+    if(!r.ok) return K.Kutu({ ad:yz('spi.today.toparlanma'), yuva:'ölçüm bekliyor',
       govde:html`<p class="small muted">${r.note || 'Bugünün ölçümü girilmedi.'}</p>` });
     /* 068 TOPARLANMA HALKASI (vitrin): dilim kaynağın ağırlığı, etiket
        kaynağın kesinliği; girilmemiş kaynak halkada boş. */
     const halka = VT() ? VT().toparlanmaHalkasi({ deger:r.score, bant:r.band.label,
       dilimler:r.parts.map(p => ({ ad:p.label, agirlik:p.weight, kesinlik:p.score == null ? 'missing' : 'measured' })) }) : '';
-    return K.Kutu({ ad:'Toparlanma', yuva:r.band.label,
+    return K.Kutu({ ad:yz('spi.today.toparlanma'), yuva:r.band.label,
       govde:html`${halka ? html`${raw(halka)}<p class="small mt-10">${r.band.order}</p>` : html`<div class="row wrap" style="gap:18px">
           ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:104,
             bands:SP.READINESS_BANDS.map(b => b.min).filter(x => x > 0) }))}
           <p class="small grow minw0">${r.band.order}</p>
         </div>`}
         ${when(r.missing.length, () => html`<p class="tiny dim mt-8">Girilmeyen: ${r.missing.join(', ')}
-          — ağırlığı kalanlara dağıtıldı.</p>`)}` });
+          ${yz('spi.today.agirligi-kalanlara-dagitildi')}</p>`)}` });
   }
 
   function AsgariKutusu(){
     const m = SP.Calc.minimumDay();
-    return K.Kutu({ ad:'Asgari gün', yuva:m.done + ' / ' + m.total + ' · seri ' + SP.Calc.streak() + ' gün',
+    return K.Kutu({ ad:yz('spi.today.asgari-gun'), yuva:m.done + ' / ' + m.total + ' · seri ' + SP.Calc.streak() + ' gün',
       govde:html`${map(m.rows, P.minRow)}` });
   }
 
@@ -1283,58 +1492,58 @@ SP.Screens.today = (function(){
     const gun = [];
     const n = SP.Calc.nextAction();
     if(!n.calm && n.title){
-      gun.push({ ust:'Sıradaki', cumle:n.title + '.', vurgu:n.action || n.why || '', sistem:'spi',
+      gun.push({ ust:yz('spi.today.siradaki'), cumle:n.title + '.', vurgu:n.action || n.why || '', sistem:'spi',
         dugme:n.route && n.route !== 'today' ? git('Aç', n.route) : null });
     }
     const m = SP.Calc.minimumDay();
     const kalan = m.rows.filter(x => !x.ok).map(x => x.label.toLocaleLowerCase('tr-TR'));
     const G = (window.LIFEOS || {}).GRAFIK;
-    gun.push({ ust:'Asgari gün', sayi:sayi({ deger:m.done + '/' + m.total, kesinlik:'computed', formul:'tutulan madde / madde' }),
-      gorsel:G && G.tikHtml ? G.tikHtml({ etiket:'Asgari gün', hedef:m.total, yapilan:m.done }) : '',
+    gun.push({ ust:yz('spi.today.asgari-gun'), sayi:sayi({ deger:m.done + '/' + m.total, kesinlik:'computed', formul:'tutulan madde / madde' }),
+      gorsel:G && G.tikHtml ? G.tikHtml({ etiket:yz('spi.today.asgari-gun'), hedef:m.total, yapilan:m.done }) : '',
       cumle:'tamam.', vurgu:kalan.length ? 'Kalan: ' + kalan.join(', ') + '.' : 'Bugün tamam.', sistem:'spi' });
     /* Seri sıfırken «0 gün, hesaplandı seri» okunuyordu; sıfır seri bir
        sayı değil, henüz başlamamış bir seridir. */
     const seri = SP.Calc.streak();
     gun.push(seri > 0
-      ? { ust:'Seri', sayi:sayi({ deger:seri, birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
-          cumle:'üst üste.', vurgu:'Asgari gün seriyi sürdürür.', sistem:'spi' }
-      : { ust:'Seri', cumle:'Henüz başlamadı.', vurgu:'Bugün asgari günü tamamlarsan seri başlar.', sistem:'spi' });
+      ? { ust:yz('spi.today.seri'), sayi:sayi({ deger:seri, birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
+          cumle:yz('spi.today.ust-uste'), vurgu:yz('spi.today.asgari-gun-seriyi-surdurur'), sistem:'spi' }
+      : { ust:yz('spi.today.seri'), cumle:yz('spi.today.henuz-baslamadi'), vurgu:yz('spi.today.bugun-asgari-gunu-tamamlarsa'), sistem:'spi' });
 
     const saglik = [];
     const r = SP.Move.readiness(shownDate());
     saglik.push(r.ok
-      ? { ust:'Toparlanma', sayi:sayi({ deger:r.score, birim:'/100', kesinlik:'computed', formul:'kaynakların ağırlıklı ortalaması' }),
+      ? { ust:yz('spi.today.toparlanma'), sayi:sayi({ deger:r.score, birim:'/100', kesinlik:'computed', formul:'kaynakların ağırlıklı ortalaması' }),
           cumle:r.band.label.toLocaleLowerCase('tr-TR') + '.', vurgu:r.band.order || '', sistem:'spi' }
-      : { ust:'Toparlanma', cumle:'Ölçüm bekliyor.', vurgu:'Uyku süresini yazman bile yeter.', sistem:'spi' });
+      : { ust:yz('spi.today.toparlanma'), cumle:yz('spi.today.olcum-bekliyor'), vurgu:yz('spi.today.uyku-suresini-yazman-bile-ye'), sistem:'spi' });
     const t = SP.Nutri.dayTotals(U.todayISO());
     const tg = SP.Nutri.targets();
     if(!tg.ok){
-      saglik.push({ ust:'Beslenme', cumle:'Hedef yok.', vurgu:'Profilde ' + tg.missing.join(', ') + ' eksik.', sistem:'spi', dugme:git('Profil', 'family') });
+      saglik.push({ ust:yz('spi.today.beslenme'), cumle:yz('spi.today.hedef-yok'), vurgu:yz('spi.today.profilde') + tg.missing.join(', ') + ' eksik.', sistem:'spi', dugme:git('Profil', 'family') });
     }else if(t.empty){
-      saglik.push({ ust:'Beslenme', cumle:'Öğün girilmedi.', vurgu:'Hedef ' + U.fmtNum(tg.kcal) + ' kcal.', sistem:'spi' });
+      saglik.push({ ust:yz('spi.today.beslenme'), cumle:yz('spi.today.ogun-girilmedi'), vurgu:yz('spi.today.hedef-2') + U.fmtNum(tg.kcal) + ' kcal.', sistem:'spi' });
     }else{
-      saglik.push({ ust:'Beslenme', sayi:sayi({ deger:t.meals, birim:'öğün', kesinlik:'measured' }), cumle:'girildi.',
-        vurgu:'Hedef ' + U.fmtNum(tg.kcal) + ' kcal.', sistem:'spi', dugme:git('Öğünler', 'meals') });
+      saglik.push({ ust:yz('spi.today.beslenme'), sayi:sayi({ deger:t.meals, birim:'öğün', kesinlik:'measured' }), cumle:'girildi.',
+        vurgu:yz('spi.today.hedef-2') + U.fmtNum(tg.kcal) + ' kcal.', sistem:'spi', dugme:git('Öğünler', 'meals') });
     }
 
     /* Seçim sayfasının minik özeti (hesap.js söz 16); örnek profil yazmaz. */
     const ozet = SP.Ornek && SP.Ornek.acik() ? null : 'spi';
     const ayikla = l => analiz ? l.filter(x => x.ust !== 'Seri' && x.ust !== 'Toparlanma') : l;
-    return raw(V.donen({ id:'spi-bugun', ad:'Bugün', ozet:analiz ? null : ozet, maddeler:ayikla(gun) })
-      + V.donen({ id:'spi-saglik', ad:'Sağlık', ozet:analiz ? null : ozet, maddeler:ayikla(saglik) }));
+    return raw(V.donen({ id:'spi-bugun', ad:yz('spi.today.bugun'), ozet:analiz ? null : ozet, maddeler:ayikla(gun) })
+      + V.donen({ id:'spi-saglik', ad:yz('spi.today.saglik'), ozet:analiz ? null : ozet, maddeler:ayikla(saglik) }));
   }
 
   function BeslenmeKutusu(){
     const t = SP.Nutri.dayTotals(U.todayISO());
     const tg = SP.Nutri.targets();
-    if(!tg.ok) return K.Kutu({ ad:'Beslenme', yuva:'hedef yok',
-      govde:html`<p class="small muted">Profilde ${tg.missing.join(', ')} eksik; hedef tahmin edilmez.</p>` });
-    if(t.empty) return K.Kutu({ ad:'Beslenme', yuva:'hedef ' + U.fmtNum(tg.kcal) + ' kcal',
-      govde:html`<p class="small muted">Bugün hiç öğün girilmedi.</p>` });
-    return K.Kutu({ ad:'Beslenme', yuva:t.meals + ' öğün',
-      govde:html`${K.Meter({ label:'Enerji', value:tg.kcal ? 100 * t.kcal / tg.kcal : 0,
+    if(!tg.ok) return K.Kutu({ ad:yz('spi.today.beslenme'), yuva:'hedef yok',
+      govde:html`<p class="small muted">${yz('spi.today.profilde-2')} ${tg.missing.join(', ')} ${yz('spi.today.eksik-hedef-tahmin-edilmez')}</p>` });
+    if(t.empty) return K.Kutu({ ad:yz('spi.today.beslenme'), yuva:'hedef ' + U.fmtNum(tg.kcal) + ' kcal',
+      govde:html`<p class="small muted">${yz('spi.today.bugun-hic-ogun-girilmedi')}</p>` });
+    return K.Kutu({ ad:yz('spi.today.beslenme'), yuva:t.meals + ' öğün',
+      govde:html`${K.Meter({ label:yz('spi.today.enerji'), value:tg.kcal ? 100 * t.kcal / tg.kcal : 0,
           text:U.fmtNum(Math.round(t.kcal)) + ' / ' + U.fmtNum(tg.kcal) + ' kcal' })}
-        <div class="mt-8">${K.Meter({ label:'Protein', value:tg.protein.min ? 100 * t.protein / tg.protein.min : 0,
+        <div class="mt-8">${K.Meter({ label:yz('spi.today.protein'), value:tg.protein.min ? 100 * t.protein / tg.protein.min : 0,
           text:U.fmtNum(Math.round(t.protein)) + ' / ' + U.fmtNum(tg.protein.min) + ' g' })}</div>` });
   }
 
@@ -1360,8 +1569,8 @@ SP.Screens.today = (function(){
           <span class="sonolcum__d">${raw(SAYI.html(s ? { deger:s.deger, birim, kesinlik:'measured', zaman:s.zaman,
             kaynak:'günlük ölçüm', tazelik:'gunluk' } : { deger:null, birim, kesinlik:'missing' }))}</span></li>`;
       });
-    return K.Kutu({ ad:'Son ölçümler', yuva:'ölçüldü', govde:html`<ul class="sonolcum">${satirlar}</ul>
-      <p class="tiny dim mt-8">Eski ölçüm soluklaşır ve yaşını yazar; ölçülmemiş değer sıfır sayılmaz.</p>` });
+    return K.Kutu({ ad:yz('spi.today.son-olcumler'), yuva:'ölçüldü', govde:html`<ul class="sonolcum">${satirlar}</ul>
+      <p class="tiny dim mt-8">${yz('spi.today.eski-olcum-soluklasir-ve-yas')}</p>` });
   }
 
   /* BUGÜN KAPAĞI (kullanıcı, 2026-10-18: «Bugün kısmı bambaşka, ana sayfa
@@ -1392,15 +1601,15 @@ SP.Screens.today = (function(){
        hareket dakikası cihazdan gelmez, kullanıcı beyanıdır. Girilmemiş uyku
        kitte «veri yok» çizilir. */
     const sayilar = [
-      { ad:'Uyku', deger:v.sleep == null ? null : SP.U.fmtNet(v.sleep), birim:'sa', kesinlik:'measured',
+      { ad:yz('spi.today.uyku'), deger:v.sleep == null ? null : SP.U.fmtNet(v.sleep), birim:'sa', kesinlik:'measured',
         oran:v.sleep != null && planDk ? Number(v.sleep) * 60 / planDk : null,
         halka:!!planDk, alt:planDk ? 'plan ' + HP.sureYaz(planDk) : '', git:'gun',
         seri:yedi.map(d => { const x = SP.S.vitals[d]; return x && x.sleep != null ? Number(x.sleep) : null; }) },
-      { ad:'Su', deger:v.water == null ? null : Number(v.water).toLocaleString('tr-TR'), birim:'ml', kesinlik:v.waterSrc === 'beyan' ? 'estimated' : 'measured',
-        oran:v.water == null ? null : Number(v.water) / SU_ESIK, halka:true, alt:'eşik ' + U.fmtNum(SU_ESIK) + ' ml', git:'gun' },
-      { ad:'Öğün', deger:ogun || null, birim:slot ? '/ ' + slot : '', kesinlik:'computed',
+      { ad:yz('spi.today.su'), deger:v.water == null ? null : Number(v.water).toLocaleString('tr-TR'), birim:'ml', kesinlik:v.waterSrc === 'beyan' ? 'estimated' : 'measured',
+        oran:v.water == null ? null : Number(v.water) / SU_ESIK, halka:true, alt:yz('spi.today.esik') + U.fmtNum(SU_ESIK) + ' ml', git:'gun' },
+      { ad:yz('spi.today.ogun'), deger:ogun || null, birim:slot ? '/ ' + slot : '', kesinlik:'computed',
         oran:ogun && slot ? ogun / slot : null, halka:slot > 0, git:'meals' },
-      { ad:'Hareket', deger:hareketDk(t), birim:'dk', kesinlik:'estimated', seri:yedi.map(hareketDk), git:'move' },
+      { ad:yz('spi.today.hareket'), deger:hareketDk(t), birim:'dk', kesinlik:'estimated', seri:yedi.map(hareketDk), git:'move' },
     ];
     return sayilar;
   }
@@ -1409,7 +1618,7 @@ SP.Screens.today = (function(){
     if(!KS) return '';
     return KS.kapakHtml({ modul:'spi', selam:KS.acilis('spi').selam, cumle:SP.Screens.today.headline(), sayilar:[],
       /* Günü kapat (KOLAY-PLANI Faz 1): alt sayfa; «Günü düzenle» onun içinde. */
-      eylem:String(K.Button({ label:'Günü kaydet', tone:'primary', act:'gunu-kapat' })),
+      eylem:String(K.Button({ label:yz('spi.today.gunu-kaydet'), tone:'primary', act:'gunu-kapat' })),
       ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
   }
 
@@ -1433,25 +1642,25 @@ SP.Screens.today = (function(){
     const sureYaz = dk => HP ? HP.sureYaz(dk) : U.fmtNet(dk / 60) + ' sa';
     let uyku;
     if(v.sleep == null){
-      uyku = P.kart({ tur:'uyku', ad:'Gece uykusu', simge:'uyku', bos:{ cumle:'Bu gecenin uykusu girilmedi.', dugme:git('Uyku gir', 'gun') } });
+      uyku = P.kart({ tur:'uyku', ad:yz('spi.today.gece-uykusu'), simge:'uyku', bos:{ cumle:yz('spi.today.bu-gecenin-uykusu-girilmedi'), dugme:git('Uyku gir', 'gun') } });
     }else{
       const dk = Math.round(Number(v.sleep) * 60);
       const oran = planDk ? dk / planDk : null;
       const fark = planDk ? planDk - dk : null;
-      uyku = P.kart({ tur:'uyku', ad:'Gece uykusu', simge:'uyku', yuva:'ölçüldü',
-        govde:'<div class="pk__yan">' + (planDk ? P.halka({ oran, etiket:'Planın yüzde ' + Math.round(oran * 100) + '\'i' }) : '')
+      uyku = P.kart({ tur:'uyku', ad:yz('spi.today.gece-uykusu'), simge:'uyku', yuva:'ölçüldü',
+        govde:'<div class="pk__yan">' + (planDk ? P.halka({ oran, etiket:yz('spi.today.planin-yuzde') + Math.round(oran * 100) + '\'i' }) : '')
           + P.deger(sureYaz(dk), '', planDk ? 'plan ' + sureYaz(planDk) + (fark > 0 ? ' · ' + sureYaz(fark) + ' eksik' : ' · plan tuttu') : 'uyku planı yok') + '</div>'
-          + P.sutun({ degerler:yedi, yukseklik:32, etiket:'Son yedi gece; ' + yedi.filter(x => x == null).length + ' gece kayıt yok' })
+          + P.sutun({ degerler:yedi, yukseklik:32, etiket:yz('spi.today.son-yedi-gece') + yedi.filter(x => x == null).length + ' gece kayıt yok' })
           + P.not('son 7 gece · kesik kutu: kayıt yok') });
     }
     /* Toparlanma */
     const r = SP.Move.readiness(t);
     const bantlar = (SP.READINESS_BANDS || []).slice().reverse().map(b => b.label);
     const topar = r.ok
-      ? P.kart({ tur:'toparlanma', ad:'Toparlanma', simge:'kalp', yuva:'hesaplandı',
-          govde:P.gosterge({ deger:r.score, en:100, bantlar, bant:r.band.label, etiket:'Toparlanma ' + r.score + ' / 100, ' + r.band.label.toLocaleLowerCase('tr-TR') })
+      ? P.kart({ tur:'toparlanma', ad:yz('spi.today.toparlanma'), simge:'kalp', yuva:'hesaplandı',
+          govde:P.gosterge({ deger:r.score, en:100, bantlar, bant:r.band.label, etiket:yz('spi.today.toparlanma-2') + r.score + ' / 100, ' + r.band.label.toLocaleLowerCase('tr-TR') })
             + P.not(r.band.order || '') })
-      : P.kart({ tur:'toparlanma', ad:'Toparlanma', simge:'kalp', bos:{ cumle:'Uyku girilince hesaplanır.', dugme:git('Uyku gir', 'gun') } });
+      : P.kart({ tur:'toparlanma', ad:yz('spi.today.toparlanma'), simge:'kalp', bos:{ cumle:yz('spi.today.uyku-girilince-hesaplanir'), dugme:git('Uyku gir', 'gun') } });
     /* Seri: son 14 gün */
     const seri = SP.Calc.streak();
     const durum = gunler(14).map(d => {
@@ -1461,8 +1670,8 @@ SP.Screens.today = (function(){
       return SP.Seri && SP.Seri.donmusMu && SP.Seri.donmusMu(d) ? 'donmus' : 'bos';
     });
     const tutulan = durum.filter(x => x === 'dolu').length;
-    const seriKart = P.kart({ tur:'seri', ad:'Seri', simge:'alev', yuva:seri > 0 ? seri + ' gün üst üste' : 'henüz başlamadı',
-      govde:P.kareler({ durumlar:durum, sutun:14, etiket:'Son 14 günün ' + tutulan + '\'inde asgari gün tutuldu' })
+    const seriKart = P.kart({ tur:'seri', ad:yz('spi.today.seri'), simge:'alev', yuva:seri > 0 ? seri + ' gün üst üste' : 'henüz başlamadı',
+      govde:P.kareler({ durumlar:durum, sutun:14, etiket:yz('spi.today.son-14-gunun') + tutulan + '\'inde asgari gün tutuldu' })
         + P.not('dolu: asgari gün tutuldu · çerçeve: bugün') });
     /* Haftanın en iyi gecesi (yıldız): son yedi gecenin en uzunu; en az üç
        gece kayıtlıysa. */
@@ -1471,7 +1680,7 @@ SP.Screens.today = (function(){
     if(kayitli.length >= 3){
       const en = kayitli.reduce((m, x) => x.v > m.v ? x : m, kayitli[0]);
       const ort = kayitli.reduce((a, x) => a + x.v, 0) / kayitli.length;
-      gece = P.kart({ tur:'en-iyi-gece', ad:'Haftanın en iyi gecesi', yildiz:true,
+      gece = P.kart({ tur:'en-iyi-gece', ad:yz('spi.today.haftanin-en-iyi-gecesi'), yildiz:true,
         govde:P.deger(sureYaz(Math.round(en.v * 60)), '', (U.fmtShort ? U.fmtShort(en.d) : en.d) + ' · haftanın ortalaması ' + sureYaz(Math.round(ort * 60)))
           + P.not('o günün akşamını tekrar etmeye değer: neyi farklı yaptın?') });
     }
@@ -1484,7 +1693,7 @@ SP.Screens.today = (function(){
         govde:P.cubuklar({ satirlar:[{ ad:f.a.ad, oran:Math.abs(f.a.ort) / Math.max(Math.abs(f.a.ort), Math.abs(f.b.ort)), metin:SP.Inceleme.sayi(f.a.ort, f.birim) + ' ' + f.birim },
             { ad:f.b.ad, oran:Math.abs(f.b.ort) / Math.max(Math.abs(f.a.ort), Math.abs(f.b.ort)), metin:SP.Inceleme.sayi(f.b.ort, f.birim) + ' ' + f.birim, renk:'n' }] })
           + P.not(f.a.n + ' ve ' + f.b.n + ' gün · birliktelik, neden değil'),
-        ayak:P.dugmeHtml({ label:'İncelemeye git', act:'go', data:{ 'data-route':'meeting' } }, 'pk__dugme pk__dugme--ikincil') });
+        ayak:P.dugmeHtml({ label:yz('spi.today.i-ncelemeye-git'), act:'go', data:{ 'data-route':'meeting' } }, 'pk__dugme pk__dugme--ikincil') });
     }
     return '<div class="pk-ust">' + P.izgara([uyku, topar, seriKart, gece, bulgu]) + '</div>';
   }
@@ -1496,14 +1705,14 @@ SP.Screens.today = (function(){
     const dolu = M.mealsOf(t).filter(m => m.items.length);
     const yuvalar = SP.Ogun ? SP.Ogun.liste() : [];
     const top = SP.Nutri.dayTotals(t), tg = SP.Nutri.targets();
-    return K.Kutu({ ad:'Öğünler', yuva:dolu.length ? dolu.length + ' öğün girildi' : 'girilmedi',
+    return K.Kutu({ ad:yz('spi.today.ogunler'), yuva:dolu.length ? dolu.length + ' öğün girildi' : 'girilmedi',
       govde:html`${map(yuvalar, sl => {
           const v = dolu.filter(m => m.slot === sl.id);
           return P.minRow({ ok:v.length > 0, label:sl.label, detail:v.length ? v.map(gkOgunOzet).join(' · ') : '—' });
         })}
-        ${when(tg.ok && !top.empty, () => html`<div class="mt-8">${K.Meter({ label:'Enerji', value:tg.kcal ? 100 * top.kcal / tg.kcal : 0,
+        ${when(tg.ok && !top.empty, () => html`<div class="mt-8">${K.Meter({ label:yz('spi.today.enerji'), value:tg.kcal ? 100 * top.kcal / tg.kcal : 0,
           text:U.fmtNum(Math.round(top.kcal)) + ' / ' + U.fmtNum(tg.kcal) + ' kcal' })}</div>`)}
-        <div class="row wrap gap-8 mt-8">${K.Button({ label:'Öğün', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'meals' } })}</div>` });
+        <div class="row wrap gap-8 mt-8">${K.Button({ label:yz('spi.today.ogun'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'meals' } })}</div>` });
   }
 
   /* BUGÜN — üç blok (KOLAY-PLANI Faz 2, 2026-10-26; Bugün ~11 kutuydu ve
@@ -1577,7 +1786,7 @@ SP.Screens.today = (function(){
         </section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Gün"><h2 class="bugun__etiket" aria-hidden="true">Gün</h2>
+        <section class="bugun__alan" aria-label="Gün"><h2 class="bugun__etiket" aria-hidden="true">${yz('spi.today.gun-2')}</h2>
           ${LIFEOS.PARCA.yer('today', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}
           ${LIFEOS.PARCA.yer('today', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
           ${LIFEOS.PARCA.yer('today', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}
@@ -1601,12 +1810,12 @@ SP.Screens.today = (function(){
     return String(html`<section class="analiz-bugun mb-16" aria-label="Bugünün özeti">
       ${raw(karolar ? karolar.outerHTML : '')}
       ${raw(PanoUst())}
-      <section class="bugun__alan mt-16" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
+      <section class="bugun__alan mt-16" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">${yz('spi.today.durum')}</h2>
         ${DonenKutular(true)}
         ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
         ${raw(window.LIFEOS.ONERI && SP.Hedefler && SP.Hedefler.ag ? window.LIFEOS.ONERI.butceCakismaHtml(SP.Hedefler.ag.butce()) : '')}
       </section>
-      ${when(oneri, () => html`<section class="bugun__alan mt-16" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
+      ${when(oneri, () => html`<section class="bugun__alan mt-16" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">${yz('spi.today.oneri')}</h2>${oneri}</section>`)}
     </section>`);
   }
 
@@ -1628,10 +1837,10 @@ SP.Screens.today = (function(){
       <section class="bugun__alan mb-16" aria-label="Durum">${ToparlanmaKutusu()}${AsgariKutusu()}${BeslenmeKutusu()}${raw(TartiHatirlatici())}${SonOlcumlerKutusu()}</section>
       ${when((S.ui.hkmBildirim || []).length, () => html`<div class="mb-16">${K.Ledger([kingBildirimRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()].concat(SP.Seri ? [seriRow()] : []))}</div>
-      ${K.SayfaBolumleri({ act:'day-tab', aria:'Günün bölümleri', bolumler:[
-        { id:'giris', ad:'Giriş', govde:giris },
-        { id:'ozet', ad:'Özet', govde:ozet },
-        { id:'gecmis', ad:'Geçmiş', govde:gecmis },
+      ${K.SayfaBolumleri({ act:'day-tab', aria:yz('spi.today.gunun-bolumleri'), bolumler:[
+        { id:'giris', ad:yz('spi.today.giris'), govde:giris },
+        { id:'ozet', ad:yz('spi.today.ozet'), govde:ozet },
+        { id:'gecmis', ad:yz('spi.today.gecmis'), govde:gecmis },
       ] })}
       <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'next-action', 'minimum-day', 'certainty']))}</div>`);
   }
@@ -1649,8 +1858,8 @@ SP.Screens.today = (function(){
      işleyiciler aynı: plan önizlemesi, uyarlama ve geri alma burada. */
   async function renderHedefler(){
     const e = hedefEntry();
-    if(!e) return String(K.Kutu({ ad:'Hedef motoru yüklenmedi',
-      govde:html`<p class="small muted">Hedefler bu derlemede yok; diğer ekranlar çalışmaya devam eder.</p>` }));
+    if(!e) return String(K.Kutu({ ad:yz('spi.today.hedef-motoru-yuklenmedi'),
+      govde:html`<p class="small muted">${yz('spi.today.hedefler-bu-derlemede-yok-di')}</p>` }));
     return String(html`${K.Ledger([e])}`);
   }
 
@@ -1680,33 +1889,33 @@ SP.Screens.today = (function(){
     async 'kotu-gun'(){
       const r = await SP.KotuGun.ac();
       if(!r.ok){ UI.toast(r.why); return; }
-      UI.toast('Kötü gün modu açık: yük hafifledi, asgari gün yeter.', { undo:async () => {
+      UI.toast(yz('spi.today.kotu-gun-modu-acik-yuk'), { undo:async () => {
         await SP.KotuGun.kapat(r.gun); SP.App.render(); } });
       SP.App.render();
     },
     async 'kotu-gun-kapat'(){
       const r = await SP.KotuGun.kapat();
-      if(r.ok) UI.toast('Normal güne dönüldü');
+      if(r.ok) UI.toast(yz('spi.today.normal-gune-donuldu'));
       SP.App.render();
     },
     async 'seri-hasta'(){
       const r = await SP.Seri.dondur(U.todayISO(), null, 'hasta');
       if(!r.ok){ UI.toast(r.why); return; }
-      UI.toast('Bugün donduruldu; seri bozulmaz. Geçmiş olsun.', { undo:async () => {
+      UI.toast(yz('spi.today.bugun-donduruldu-seri-bozulm'), { undo:async () => {
         await SP.Seri.coz(r.kayit.id); SP.App.render(); } });
       SP.App.render();
     },
-    async 'seri-coz'(el){ await SP.Seri.coz(el.dataset.id); UI.toast('Dondurma geri alındı'); SP.App.render(); },
+    async 'seri-coz'(el){ await SP.Seri.coz(el.dataset.id); UI.toast(yz('spi.today.dondurma-geri-alindi')); SP.App.render(); },
     async 'seri-tatil'(){ S.ui.tatilSec = true; SP.App.render(); },
     async 'seri-tatil-vazgec'(){ S.ui.tatilSec = false; SP.App.render(); },
     async 'seri-tatil-sinir'(){
       const e = document.getElementById('seri-tatil-sinir');
       const ham = e ? String(e.value).trim() : '';
-      if(!ham){ UI.toast('Yıllık tatil sınırı için bir gün sayısı yaz.'); return; }
+      if(!ham){ UI.toast(yz('spi.today.yillik-tatil-siniri-icin-bir')); return; }
       const r = await SP.Seri.yillikTatilAyarla(Number(ham));
       if(!r.ok){ UI.toast(r.why, { life:5000 }); return; }
       SP.App.render();
-      UI.toast('Yıllık tatil sınırı ' + r.sinir + ' gün', { undo:async () => {
+      UI.toast(yz('spi.today.yillik-tatil-siniri') + r.sinir + ' gün', { undo:async () => {
         await SP.Seri.yillikTatilAyarla(r.onceki); SP.App.render(); } });
     },
     async 'seri-tatil-gun'(el){
@@ -1749,13 +1958,13 @@ SP.Screens.today = (function(){
       const bugun = U.todayISO();
       const u = H.uyarla(h, paket, {}, bugun);
       const x = u.senaryolar[Number(el.dataset.i)];
-      if(!x){ UI.toast('Bu seçenek artık geçerli değil; yeniden hesapla.'); return; }
+      if(!x){ UI.toast(yz('spi.today.bu-secenek-artik-gecerli-deg')); return; }
       const g = await SP.Plan.geriAlHedef(h.id);
       if(!g.ok && SP.Plan.aktif(h.id)){ UI.toast(g.why || 'Eski plan geri alınamadı; hedef değişmedi.'); return; }
       await SP.Hedefler.kaydet(H.uyarlamaUygula(u.hedef, x, paket, {}, bugun));
       S.ui.uyarla = null;
       S.ui.planOnizle = h.id;
-      UI.toast('Hedef yeni tarihle güncellendi; yeni planı önizleyip onayla.');
+      UI.toast(yz('spi.today.hedef-yeni-tarihle-guncellen'));
       SP.App.render();
     },
     async 'hedef-plan-geri'(el){
@@ -1774,13 +1983,13 @@ SP.Screens.today = (function(){
       S.ui.hkmBildirim = (S.ui.hkmBildirim || []).filter(b => String(b.id) !== String(id));
       SP.App.render();
       const r = await SP.Plan.okundu(id);
-      if(!r.ok) UI.toast('Okundu işareti merkeze bildirilemedi; bildirim HKM’de okunmamış kalır.');
+      if(!r.ok) UI.toast(yz('spi.today.okundu-isareti-merkeze-bildi'));
     },
     /* Elle gonderim: kullanicinin ACIKCA istedigi an. Kapaliyken
        zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
        olmasini anlamsiz kilardi. */
     async 'hkm-gonder'(){
-      UI.toast('HKM\u2019ye gönderiliyor…');
+      UI.toast(yz('spi.today.hkm-u2019ye-gonderiliyor'));
       const r = await SP.Beacon.send({ reason:'manual' });
       UI.toast(r.ok ? 'HKM\u2019ye gönderildi.'
         : ('Gönderilemedi — ' + (r.note || r.reason || 'sebep bilinmiyor')));
@@ -1791,13 +2000,13 @@ SP.Screens.today = (function(){
       const inp = document.getElementById('sig-answer');
       const r = await SP.Signals.answer(el.dataset.id, inp ? inp.value : '');
       if(!r.ok){ UI.toast(r.error); return; }
-      UI.toast('Kaydedildi. Sonucu bir sonraki pencere gösterecek.');
+      UI.toast(yz('spi.today.kaydedildi-sonucu-bir-sonrak'));
       SP.App.render();
     },
 
     async 'signal-dismiss'(el){
       await SP.Signals.dismiss(el.dataset.id);
-      UI.toast('Soru kapatıldı');
+      UI.toast(yz('spi.today.soru-kapatildi'));
       SP.App.render();
     },
 
@@ -1827,7 +2036,7 @@ SP.Screens.today = (function(){
     async 'no-symptoms'(){
       const d = shownDate();
       await M.saveVitals(d, { symptoms:{}, symptomsLogged:true });
-      UI.toast('Bugün şikâyet yok olarak kaydedildi');
+      UI.toast(yz('spi.today.bugun-sikayet-yok-olarak-kay'));
       SP.App.render();
     },
     async 'toggle-period'(el){
@@ -1862,7 +2071,7 @@ SP.Screens.today = (function(){
       const once = { symptoms:Object.assign({}, (v && v.symptoms) || {}), symptomsLogged:!!(v && v.symptomsLogged) };
       await M.saveVitals(d, { symptoms:Object.assign({}, dunku), symptomsLogged:true });
       SP.App.render();
-      UI.toast('Dünkü ' + Object.keys(dunku).length + ' şikâyet bu güne yazıldı',
+      UI.toast(yz('spi.today.dunku') + Object.keys(dunku).length + ' şikâyet bu güne yazıldı',
         { undo:async () => { await M.saveVitals(d, once); SP.App.render(); } });
     },
     async tus(el){
@@ -1875,7 +2084,7 @@ SP.Screens.today = (function(){
     },
     async 'tus-kaydet'(){
       const n = Number(String(tusTampon).replace(',', '.'));
-      if(!tusTampon || !isFinite(n)){ UI.toast('Önce değeri yaz.'); return; }
+      if(!tusTampon || !isFinite(n)){ UI.toast(yz('spi.today.once-degeri-yaz')); return; }
       const g = document.getElementById('v-weight');
       if(g){ g.value = String(n); await handle['save-vitals'](); return; }
       await M.saveVitals(shownDate(), { weight:n, weightAt:shownDate() === U.todayISO() ? new Date().toISOString() : undefined });
@@ -1894,14 +2103,14 @@ SP.Screens.today = (function(){
       const r = await SP.Uyku.ekle(d, { dk:Number(String(dk).replace(',', '.')), bas });
       if(!r.ok){ kestirmeSheet(r.why); return; }
       UI.closeSheet();
-      UI.toast('Kısa uyku kaydedildi', { undo:async () => { await SP.Uyku.sil(d, r.kayit.id); SP.App.render(); } });
+      UI.toast(yz('spi.today.kisa-uyku-kaydedildi'), { undo:async () => { await SP.Uyku.sil(d, r.kayit.id); SP.App.render(); } });
       SP.App.render();
     },
     async 'kestirme-sil'(el){
       const d = shownDate();
       const eski = await SP.Uyku.sil(d, el.dataset.id);
       if(!eski) return;
-      UI.toast('Kısa uyku silindi', { undo:async () => { await SP.Uyku.ekle(d, eski); SP.App.render(); } });
+      UI.toast(yz('spi.today.kisa-uyku-silindi'), { undo:async () => { await SP.Uyku.ekle(d, eski); SP.App.render(); } });
       SP.App.render();
     },
     async 'save-vitals'(){
@@ -1975,11 +2184,11 @@ SP.Screens.today = (function(){
 
     async 'flag-ack'(el){
       await M.ackFlag(el.dataset.id);
-      UI.toast('İşaretlendi — kayıt geçmişte duruyor');
+      UI.toast(yz('spi.today.i-saretlendi-kayit-gecmiste'));
       SP.App.render();
     },
     async 'refresh-briefing'(){
-      UI.toast('Brifing üretiliyor…');
+      UI.toast(yz('spi.today.brifing-uretiliyor'));
       await SP.Office.dailyBriefing(true);
       SP.App.render();
     },
@@ -2008,7 +2217,7 @@ SP.Screens.today = (function(){
     /* iPhone Faz 6 (2026-10-02): Bugün'de açık dört giriş kartı vardı; günün
        hissi isteğe bağlı bir kayıttır — şerit, dokununca açılır. */
     kucukVarsayilan:['günün-hissi'],
-    title:'Bugün',
+    title:yz('spi.today.bugun'),
     /* Bu sayfanın başlığı BUGÜNÜ anlatır. Sıradaki hamle başka bir
        bölüme aitse (tahlil, sepet) onu buraya başlık yapmak kafa
        karıştırıyordu: kullanıcı günlük sayfasını açıp tahlil cümlesi
@@ -2061,10 +2270,10 @@ SP.Screens.today = (function(){
       const r = SP.Move.readiness(shownDate());
       const out = [];
       if(r.ok) out.push({ value:r.score, unit:'/100', label:'toparlanma' });
-      out.push({ value:m.done + '/' + m.total, label:'asgari gün' });
-      out.push({ value:SP.Calc.streak(), label:'gün seri' });
+      out.push({ value:m.done + '/' + m.total, label:yz('spi.today.asgari-gun-2') });
+      out.push({ value:SP.Calc.streak(), label:yz('spi.today.gun-seri') });
       const f = M.openFlags().filter(x => !x.ack).length;
-      if(f) out.push({ value:f, label:'kırmızı bayrak' });
+      if(f) out.push({ value:f, label:yz('spi.today.kirmizi-bayrak') });
       return out.slice(0, 4);
     },
     /* v5: tarih ve toparlanma üst satırdadır; alt başlık tekrar etmez. */
@@ -2089,7 +2298,7 @@ SP.Screens.today = (function(){
          bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
          «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
       kucukVarsayilan:['neden-bunlar', 'taban-çizgin', 'son-iki-hafta'],
-      title:'Günü düzenle',
+      title:yz('spi.today.gunu-duzenle'),
       subtitle(){ return 'Ölçüm formu, şikâyetler, özet ve son iki hafta'; },
       actions(){ return ''; },
       render:renderAyrinti, afterRender:afterRenderAyrinti, handle,
@@ -2097,7 +2306,7 @@ SP.Screens.today = (function(){
     /* Plan › Hedefler: aynı işleyiciler, ayrı bir çizim. */
     hedefler:{
       id:'hedefler',
-      title:'Hedefler',
+      title:yz('spi.today.hedefler'),
       subtitle(){
         const n = SP.Hedefler ? SP.Hedefler.aktifler().length : 0;
         return n ? n + ' etkin hedef' : 'henüz hedef yok';

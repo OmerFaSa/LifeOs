@@ -10,6 +10,174 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.today.giris':'Giriş',
+  'esp.today.ozet':'Özet',
+  'esp.today.gecmis':'Geçmiş',
+  'esp.today.bir-soru':'Bir soru',
+  'esp.today.cevabin':'Cevabın:',
+  'esp.today.soru-acik-kalir-ayrismanin-g':'Soru açık kalır: ayrışmanın gerçekten kapanıp kapanmadığı bir sonraki pencerede ölçülecek.',
+  'esp.today.kisa-cevabin-istege-bagli':'Kısa cevabın (isteğe bağlı)',
+  'esp.today.tek-cumle-yeter':'tek cümle yeter',
+  'esp.today.kaydet':'Kaydet',
+  'esp.today.bu-soru-bana-uymuyor':'Bu soru bana uymuyor',
+  'esp.today.oturum-ekle':'Oturum ekle',
+  'esp.today.sure-olcumdur-saatine-bakip':'Süre ölçümdür: saatine bakıp yazdığın dakika da «ölçüldü» sayılır. ',
+  'esp.today.sure-dakika':'Süre (dakika)',
+  'esp.today.oturum-suresi-dakika':'Oturum süresi dakika',
+  'esp.today.not':'Not',
+  'esp.today.ne-calistin':'ne çalıştın?',
+  'esp.today.kitap':'Kitap',
+  'esp.today.okunan-kitap':'Okunan kitap',
+  'esp.today.kitaba-baglama':'Kitaba bağlama',
+  'esp.today.oturumu-kaydet':'Oturumu kaydet',
+  'esp.today.konusarak-gir':'Konuşarak gir',
+  'esp.today.45-dk-gitar-20-dakika':'45 dk gitar, 20 dakika kelime',
+  'esp.today.serbest-metin-oturum-girisi':'Serbest metin oturum girişi',
+  'esp.today.coz':'Çöz',
+  'esp.today.hepsini-kaydet':'Hepsini kaydet',
+  'esp.today.vazgec':'Vazgeç',
+  'esp.today.eslesmedi':'Eşleşmedi',
+  'esp.today.gunu-kapat':'Günü kapat',
+  'esp.today.oturum-gir-ve-butun-satirlar':'Oturum gir ve bütün satırlar',
+  'esp.today.bugun':'Bugün',
+  'esp.today.bu-gune-henuz-oturum-girilme':'Bu güne henüz oturum girilmedi. ',
+  'esp.today.bugunun-oturumlari':'Bugünün oturumları',
+  'esp.today.sil':'Sil',
+  'esp.today.askiya-al':'Askıya al',
+  'esp.today.surdur':'Sürdür',
+  'esp.today.tamamlandi':'Tamamlandı',
+  'esp.today.birak':'Bırak',
+  'esp.today.plan-kurulamadi':'Plan kurulamadı.',
+  'esp.today.kapat':'Kapat',
+  'esp.today.plan-onizlemesi':'Plan önizlemesi',
+  'esp.today.onaylanana-kadar-hicbir-sey':'— onaylanana kadar hiçbir şey değişmez.',
+  'esp.today.calisilacaklar':'Çalışılacaklar',
+  'esp.today.kontrol-noktalari-dort-hafta':'Kontrol noktaları dört haftada birdir; beklenen değer',
+  'esp.today.plan-geri-alinabilir-geri':'. Plan geri alınabilir; geri alınca odak ve taban bugünkü haline döner.',
+  'esp.today.plani-uygula':'Planı uygula',
+  'esp.today.simdilik-degil':'Şimdilik değil',
+  'esp.today.bugunun-verisiyle-yeniden-he':'Bugünün verisiyle yeniden hesap',
+  'esp.today.secim-yapana-kadar-hicbir':'— seçim yapana kadar hiçbir şey değişmez.',
+  'esp.today.secince-eski-plan-geri-alini':'Seçince eski plan geri alınır, hedef yeni tarih ve vakitle güncellenir; yeni planı önizleyip onaylarsın. Eski tarih hedefin geçmişinde kalır.',
+  'esp.today.plan-uygulandi-gunde':'Plan uygulandı · günde',
+  'esp.today.sonraki-kontrol':'Sonraki kontrol:',
+  'esp.today.beklenen':'— beklenen',
+  'esp.today.yeniden-hesapla':'Yeniden hesapla',
+  'esp.today.calisilacaklar-2':'Çalışılacaklar (',
+  'esp.today.plani-geri-al':'Planı geri al',
+  'esp.today.plani-gor':'Planı gör',
+  'esp.today.zaman-butcesi-king':'Zaman bütçesi (King):',
+  'esp.today.hedeflerim':'Hedeflerim',
+  'esp.today.danisma-da-hedef-koy':'Danışma’da hedef koy',
+  'esp.today.ornekler':'Örnekler',
+  'esp.today.henuz-hedefin-yok-danisma-da':'Henüz hedefin yok. Danışma’da tek cümleyle yazabilirsin.',
+  'esp.today.bir-yilda-gitarda-kalfa-ya-g':'«Bir yılda gitarda Kalfa’ya gelmek istiyorum», «Bir ayda İngilizcede A2’ye gelmek istiyorum» ya da «bu yıl 24 kitap okumak istiyorum» gibi yazabilirsin; vaktine göre olup olmadığını ve olacağı tarihi söylerim. Alışkanlık da kurabilirsin: «her gün 20 dakika kitap okuma alışkanlığı kazanmak istiyorum».',
+  'esp.today.gunun-toplami':'Günün toplamı',
+  'esp.today.taban':'Taban ',
+  'esp.today.taban-dolulugu':'Taban doluluğu',
+  'esp.today.asgari-gun':'Asgari gün',
+  'esp.today.entelektuel-hacim':'Entelektüel hacim',
+  'esp.today.i-lk-oturumu-girdiginde-haci':'İlk oturumu girdiğinde hacim ölçülmeye başlar.',
+  'esp.today.sure':'Süre',
+  'esp.today.katsayi':'Katsayı',
+  'esp.today.haftanin-dagilimi':'Haftanın dağılımı',
+  'esp.today.son-yedi-gunde-kayit-yok':'Son yedi günde kayıt yok.',
+  'esp.today.dunkunun-aynisi':'Dünkünün aynısı',
+  'esp.today.aynisini-yaptiysan-tek-dokun':'Aynısını yaptıysan tek dokunuşla bugüne ekle; süre tahmin sayılır, sayım ve kalite kopyalanmaz.',
+  'esp.today.bugune-ekle':'Bugüne ekle',
+  'esp.today.sik-oturumlarin-tek-dokunus':'sık oturumların · tek dokunuş',
+  'esp.today.seri':'Seri',
+  'esp.today.yillik-tatil-siniri-bu-yil':'Yıllık tatil sınırı: bu yıl kalan',
+  'esp.today.gun':'gün',
+  'esp.today.yillik-tatil-siniri-gun':'yıllık tatil sınırı, gün',
+  'esp.today.siniri-kaydet':'Sınırı kaydet',
+  'esp.today.tatil-modu':'Tatil modu:',
+  'esp.today.seri-korunuyor-hkm-soru':'· seri korunuyor, HKM soru sormuyor',
+  'esp.today.tatili-bitir':'Tatili bitir',
+  'esp.today.bugun-dondurulmus':'Bugün dondurulmuş (',
+  'esp.today.seri-bozulmaz':') · seri bozulmaz',
+  'esp.today.geri-al':'Geri al',
+  'esp.today.kac-gun':'Kaç gün?',
+  'esp.today.kotu-gun-modu-vadesi-gelen':'Kötü gün modu: vadesi gelen tekrar yerinde, genişleme yok; bugün asgari gün yeter',
+  'esp.today.normal-gune-don':'Normal güne dön',
+  'esp.today.kotu-gun':'Kötü gün',
+  'esp.today.bugun-hastayim-seri-donsun':'Bugün hastayım · seri donsun',
+  'esp.today.tatil-modu-2':'Tatil modu',
+  'esp.today.son-14-gun':'Son 14 gün',
+  'esp.today.bos-gun-0-dakika-degil':'Boş gün «0 dakika» değil «veri yok» sayılır. İkisi ayrı renkte durur.',
+  'esp.today.secili-gun':'Seçili gün',
+  'esp.today.bugune-don':'Bugüne dön',
+  'esp.today.bu-gune-kayit-girilmemis':'Bu güne kayıt girilmemiş.',
+  'esp.today.sayaci-baslat':'Sayacı başlat',
+  'esp.today.icin-olcmeye-basla-sureyi':'için ölçmeye başla — süreyi sistem tutar.',
+  'esp.today.duraklat':'Duraklat',
+  'esp.today.bitir-ve-kaydet':'Bitir ve kaydet',
+  'esp.today.gunun-recetesi':'Günün reçetesi',
+  'esp.today.receteyi-koc-yazar-sirayi-pl':'Reçeteyi koç yazar, sırayı planlayıcı verir.',
+  'esp.today.merdiven':'Merdiven',
+  'esp.today.ac':'Aç',
+  'esp.today.recete-yazilamadi-disiplin-l':'Reçete yazılamadı: disiplin listesi boş.',
+  'esp.today.10-dk-okuma':'· 10 dk okuma · 15 dk pratik',
+  'esp.today.bugun-acildi':'bugün açıldı',
+  'esp.today.planda-bugun':'Planda bugün',
+  'esp.today.haftalik-plandan-geliyor-pla':'Haftalık plandan geliyor. Plan bir takvim değil bir sıradır; ',
+  'esp.today.bolume-git':'Bölüme git',
+  'esp.today.hatirlatma':'Hatırlatma',
+  'esp.today.kendine-soyledigin-seyler-si':'Kendine söylediğin şeyler. Sistem hiçbirini zorunlu kılmaz; ',
+  'esp.today.yapildi':'Yapıldı',
+  'esp.today.hkm':'HKM',
+  'esp.today.simdi-gonder':'Şimdi gönder',
+  'esp.today.yedek':'Yedek',
+  'esp.today.yedek-al':'Yedek al',
+  'esp.today.bekleyen-is':'Bekleyen iş',
+  'esp.today.gunun-dakikasi':'Günün dakikası',
+  'esp.today.calisildi':'çalışıldı.',
+  'esp.today.bugun-oturum-yok':'Bugün oturum yok.',
+  'esp.today.ust-uste':'üst üste.',
+  'esp.today.asgari-gun-seriyi-surdurur':'Asgari gün seriyi sürdürür.',
+  'esp.today.henuz-baslamadi':'Henüz başlamadı.',
+  'esp.today.bugun-asgari-gunu-tamamlarsa':'Bugün asgari günü tamamlarsan seri başlar.',
+  'esp.today.tekrar':'Tekrar',
+  'esp.today.sirasi-gelen-kelime-kartlari':'Sırası gelen kelime kartları.',
+  'esp.today.sirasi-gelen-kart-yok':'Sırası gelen kart yok.',
+  'esp.today.deste-bugun-temiz':'Deste bugün temiz.',
+  'esp.today.disiplinler':'Disiplinler',
+  'esp.today.acik-disiplin':'açık disiplin.',
+  'esp.today.calisma-cekmecesinde':'Çalışma çekmecesinde.',
+  'esp.today.calisma':'Çalışma',
+  'esp.today.haftanin-dengesi':'Haftanın dengesi',
+  'esp.today.son-yedi-gunde-oturum-yok':'Son yedi günde oturum yok.',
+  'esp.today.diger':'Diğer',
+  'esp.today.son-14-gunun':'Son 14 günün ',
+  'esp.today.hatirlaticilar':'Hatırlatıcılar',
+  'esp.today.gunun-alintisi':'Günün alıntısı',
+  'esp.today.kutuphaneye-git':'Kütüphaneye git',
+  'esp.today.gunu-kapat-2':'Günü kapat · ',
+  'esp.today.her-zamanki':'Her zamanki',
+  'esp.today.kart-tekrari':'Kart tekrarı',
+  'esp.today.gunu-duzenle':'Günü düzenle',
+  'esp.today.gun-2':'Gün',
+  'esp.today.oneri':'Öneri',
+  'esp.today.gunun-bolumleri':'Günün bölümleri',
+  'esp.today.kotu-gun-modu-acik-asgari':'Kötü gün modu açık: asgari gün yeter.',
+  'esp.today.normal-gune-donuldu':'Normal güne dönüldü',
+  'esp.today.bugun-donduruldu-seri-bozulm':'Bugün donduruldu; seri bozulmaz. Geçmiş olsun.',
+  'esp.today.dondurma-geri-alindi':'Dondurma geri alındı',
+  'esp.today.yillik-tatil-siniri-icin-bir':'Yıllık tatil sınırı için bir gün sayısı yaz.',
+  'esp.today.yillik-tatil-siniri':'Yıllık tatil sınırı ',
+  'esp.today.hkm-u2019ye-gonderiliyor':'HKM\u2019ye gönderiliyor…',
+  'esp.today.bu-secenek-artik-gecerli-deg':'Bu seçenek artık geçerli değil; yeniden hesapla.',
+  'esp.today.hedef-yeni-tarihle-guncellen':'Hedef yeni tarihle güncellendi; yeni planı önizleyip onayla.',
+  'esp.today.kaydedildi-sonucu-bir-sonrak':'Kaydedildi. Sonucu bir sonraki pencere gösterecek.',
+  'esp.today.soru-kapatildi':'Soru kapatıldı.',
+  'esp.today.sure-girilmedi':'Süre girilmedi',
+  'esp.today.oturum-kaydedildi':'Oturum kaydedildi',
+  'esp.today.oturum-silindi':'Oturum silindi',
+  'esp.today.bir-sey-anlasilmadi':'Bir şey anlaşılmadı',
+  'esp.today.bugun-2':'bugün',
+  'esp.today.vadeli-kart':'vadeli kart',
+});
 window.LIFEOS.PARCA.sayfa({ id:'today', modul:'esp', cekmece:'bugun', ad:'Genel bakış', ikon:'pulse', sira:10 });
 
 ESP.Screens.today = (function(){
@@ -20,9 +188,9 @@ ESP.Screens.today = (function(){
   function gun(){ return S.ui.dayDate || U.todayISO(); }
 
   const TABS = [
-    { id:'giris',  label:'Giriş' },
-    { id:'ozet',   label:'Özet' },
-    { id:'gecmis', label:'Geçmiş' },
+    { id:'giris',  label:yz('esp.today.giris') },
+    { id:'ozet',   label:yz('esp.today.ozet') },
+    { id:'gecmis', label:yz('esp.today.gecmis') },
   ];
 
   /* Denetim sorusu — AYRI EKRAN DEĞİL, mevcut akışın içinde tek satır.
@@ -43,23 +211,22 @@ ESP.Screens.today = (function(){
     if(!sig.seenAt) ESP.Signals.markSeen(sig.id);
 
     return K.Entry({
-      label:'Bir soru', hint:'signal',
+      label:yz('esp.today.bir-soru'), hint:'signal',
       meta:sig.kind === 'friction' ? 'sürtünme' : 'gösterge',
       note:sig.title,
       body:html`
         ${K.Notice({ tone:'info', body:sig.question })}
         ${when(sig.answeredAt, () => html`
-          <p class="small muted mt-8">Cevabın: ${sig.answer}</p>
-          <p class="tiny dim">Soru açık kalır: ayrışmanın gerçekten kapanıp
-            kapanmadığı bir sonraki pencerede ölçülecek.</p>`)}
+          <p class="small muted mt-8">${yz('esp.today.cevabin')} ${sig.answer}</p>
+          <p class="tiny dim">${yz('esp.today.soru-acik-kalir-ayrismanin-g')}</p>`)}
         ${when(!sig.answeredAt, () => html`
           <div class="mt-8">
-            ${K.Field({ label:'Kısa cevabın (isteğe bağlı)',
-              input:K.Input({ id:'sig-answer', placeholder:'tek cümle yeter' }) })}
+            ${K.Field({ label:yz('esp.today.kisa-cevabin-istege-bagli'),
+              input:K.Input({ id:'sig-answer', placeholder:yz('esp.today.tek-cumle-yeter') }) })}
             <div class="row wrap mt-8">
-              ${K.Button({ label:'Kaydet', tone:'primary', size:'sm', act:'signal-answer',
+              ${K.Button({ label:yz('esp.today.kaydet'), tone:'primary', size:'sm', act:'signal-answer',
                 data:{ 'data-id':sig.id } })}
-              ${K.Button({ label:'Bu soru bana uymuyor', size:'sm', act:'signal-dismiss',
+              ${K.Button({ label:yz('esp.today.bu-soru-bana-uymuyor'), size:'sm', act:'signal-dismiss',
                 data:{ 'data-id':sig.id } })}
             </div>
           </div>`)}`,
@@ -82,9 +249,9 @@ ESP.Screens.today = (function(){
     const disc = ESP.DISCIPLINE_BY_ID[d];
 
     return K.Entry({
-      label:'Oturum ekle', hint:'practice-log',
+      label:yz('esp.today.oturum-ekle'), hint:'practice-log',
       meta:U.fmtDate(gun()),
-      note:'Süre ölçümdür: saatine bakıp yazdığın dakika da «ölçüldü» sayılır. '
+      note:yz('esp.today.sure-olcumdur-saatine-bakip')
          + 'Boş bıraktığın alan sıfır değil, «veri yok» olur.',
       body:html`
         <div class="picks picks--disc">
@@ -97,23 +264,23 @@ ESP.Screens.today = (function(){
         ${timerRow(d)}
 
         <div class="cols-3 mt-10">
-          ${K.Field({ label:'Süre (dakika)',
+          ${K.Field({ label:yz('esp.today.sure-dakika'),
             input:K.Input({ id:'s-min', type:'number', numeric:true, min:1, max:600,
-              placeholder:'45', aria:'Oturum süresi dakika' }) })}
+              placeholder:'45', aria:yz('esp.today.oturum-suresi-dakika') }) })}
           ${K.Field({ label:countLabel(d), hint:'isteğe bağlı',
             input:K.Input({ id:'s-count', type:'number', numeric:true, min:0,
               placeholder:countPlaceholder(d), aria:countLabel(d) }) })}
-          ${K.Field({ label:'Not', hint:'isteğe bağlı',
-            input:K.Input({ id:'s-note', placeholder:'ne çalıştın?' }) })}
+          ${K.Field({ label:yz('esp.today.not'), hint:'isteğe bağlı',
+            input:K.Input({ id:'s-note', placeholder:yz('esp.today.ne-calistin') }) })}
         </div>
         ${when(d === 'reading' && okunanlar().length, () => html`<div class="mt-10">
-          ${K.Field({ label:'Kitap', hint:'isteğe bağlı — kitaba verdiğin süre Kütüphane’de görünür',
-            input:K.Select({ id:'s-book', value:'', aria:'Okunan kitap',
-              options:[{ value:'', label:'Kitaba bağlama' }].concat(okunanlar()
+          ${K.Field({ label:yz('esp.today.kitap'), hint:'isteğe bağlı — kitaba verdiğin süre Kütüphane’de görünür',
+            input:K.Select({ id:'s-book', value:'', aria:yz('esp.today.okunan-kitap'),
+              options:[{ value:'', label:yz('esp.today.kitaba-baglama') }].concat(okunanlar()
                 .map(b => ({ value:b.id, label:(b.author ? b.author + ' — ' : '') + b.title }))) }) })}</div>`)}
 
         <div class="row mt-10">
-          ${K.Button({ label:'Oturumu kaydet', tone:'primary', act:'add-session' })}
+          ${K.Button({ label:yz('esp.today.oturumu-kaydet'), tone:'primary', act:'add-session' })}
           ${when(disc, () => K.Button({ label:disc.label + ' ekranını aç', act:'go',
             data:{ 'data-route':disc.route } }))}
         </div>`,
@@ -144,14 +311,14 @@ ESP.Screens.today = (function(){
   /* Serbest metin girisi — palet disinda da kullanilabilsin diye burada da var. */
   function quickForm(){
     return K.Entry({
-      label:'Konuşarak gir',
+      label:yz('esp.today.konusarak-gir'),
       meta:'tek satır',
       body:html`
         <div class="row">
-          ${K.Input({ id:'quick-text', placeholder:'45 dk gitar, 20 dakika kelime',
-            aria:'Serbest metin oturum girişi', class:'grow' })}
+          ${K.Input({ id:'quick-text', placeholder:yz('esp.today.45-dk-gitar-20-dakika'),
+            aria:yz('esp.today.serbest-metin-oturum-girisi'), class:'grow' })}
           ${K.Mic({ target:'quick-text' })}
-          ${K.Button({ label:'Çöz', act:'parse-quick' })}
+          ${K.Button({ label:yz('esp.today.coz'), act:'parse-quick' })}
         </div>
         ${when(S.ui.quickParsed, () => quickPreview(S.ui.quickParsed))}`,
     });
@@ -168,10 +335,10 @@ ESP.Screens.today = (function(){
                 r.count != null ? U.fmtNum(r.count) + ' ' + (r.countWhat || '') : '—'];
             }) })}
           <div class="row mt-8">
-            ${K.Button({ label:'Hepsini kaydet', tone:'primary', size:'sm', act:'save-quick' })}
-            ${K.Button({ label:'Vazgeç', size:'sm', act:'clear-quick' })}
+            ${K.Button({ label:yz('esp.today.hepsini-kaydet'), tone:'primary', size:'sm', act:'save-quick' })}
+            ${K.Button({ label:yz('esp.today.vazgec'), size:'sm', act:'clear-quick' })}
           </div>`)}
-        ${when(res.unmatched.length, () => K.Notice({ tone:'warn', title:'Eşleşmedi',
+        ${when(res.unmatched.length, () => K.Notice({ tone:'warn', title:yz('esp.today.eslesmedi'),
           body:res.unmatched.map(u => '«' + U.esc(u.text) + '» — ' + u.why).join('<br/>')
              + '<br/><br/>Bu satırlar kaydedilmeyecek; yukarıdaki formdan elle girebilirsin.' }))}
       </div>`;
@@ -187,16 +354,16 @@ ESP.Screens.today = (function(){
      taşındığından (KOLAY Faz 2) Bugün'e eklenen tek düğme budur. */
   const gunuKapatAcik = () => !!(window.LIFEOS && window.LIFEOS.GUNUKAPAT && window.LIFEOS.GUNUKAPAT.kuruluMu())
     && gun() === U.todayISO();
-  const gunDugmesi = () => html`<div class="row wrap gap-6 mt-8">${when(gunuKapatAcik(), () => K.Button({ label:'Günü kapat',
-    size:'sm', tone:'primary', act:'gunu-kapat' }))}${K.Button({ label:'Oturum gir ve bütün satırlar', size:'sm',
+  const gunDugmesi = () => html`<div class="row wrap gap-6 mt-8">${when(gunuKapatAcik(), () => K.Button({ label:yz('esp.today.gunu-kapat'),
+    size:'sm', tone:'primary', act:'gunu-kapat' }))}${K.Button({ label:yz('esp.today.oturum-gir-ve-butun-satirlar'), size:'sm',
     tone:'ghost', act:'go', data:{ 'data-route':'gun' } })}</div>`;
 
   function sessionList(){
     const rows = M.sessionsOf(gun());
     if(!rows.length){
       return K.Entry({
-        label:'Bugün', meta:'kayıt yok',
-        body:html`${K.Empty({ text:'Bu güne henüz oturum girilmedi. '
+        label:yz('esp.today.bugun'), meta:'kayıt yok',
+        body:html`${K.Empty({ text:yz('esp.today.bu-gune-henuz-oturum-girilme')
           + 'Girilmemiş gün sıfır sayılmaz — hiçbir ortalamaya katılmaz.' })}${gunDugmesi()}`,
       });
     }
@@ -204,7 +371,7 @@ ESP.Screens.today = (function(){
     /* KOLAY Faz 2: Bugün'ün tek dakika rakamı tabana göredir; toplam başlık cümlesinde. */
     const taban = ESP.GunSure ? ESP.GunSure.taban(gun()).dakika : ((S.profile && S.profile.dailyMinutes) || null);
     return K.Entry({
-      label:'Bugünün oturumları',
+      label:yz('esp.today.bugunun-oturumlari'),
       meta:rows.length + ' oturum' + (taban ? ' · taban ' + taban + ' dk · ' + (toplam < taban ? (taban - toplam) + ' dk kaldı' : 'tutuldu') : '')
         + (dkKesinlik(gun()) === 'measured' ? '' : ' · tahmin içerir'),
       /* GÜNÜN ODAK ROZETİ — eylemlerin yanında, günün raporunda.
@@ -221,7 +388,7 @@ ESP.Screens.today = (function(){
             s.minutes != null ? U.fmtMin(s.minutes) : raw(String(P_cert('missing'))),
             s.count != null ? U.fmtNum(s.count) : raw(String(P_cert('missing'))),
             s.note || '—',
-            K.Button({ label:'Sil', size:'sm', act:'del-session', data:{ 'data-id':s.id } }),
+            K.Button({ label:yz('esp.today.sil'), size:'sm', act:'del-session', data:{ 'data-id':s.id } }),
           ];
         }) })}${gunDugmesi()}`,
     });
@@ -247,34 +414,33 @@ ESP.Screens.today = (function(){
   function hedefDugmeleri(h){
     return html`
       ${h.durum === 'aktif'
-        ? K.Button({ label:'Askıya al', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'askida' } })
-        : K.Button({ label:'Sürdür', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'aktif' } })}
-      ${K.Button({ label:'Tamamlandı', size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'tamam' } })}
-      ${K.Button({ label:'Bırak', size:'sm', tone:'ghost', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'birakildi' } })}`;
+        ? K.Button({ label:yz('esp.today.askiya-al'), size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'askida' } })
+        : K.Button({ label:yz('esp.today.surdur'), size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'aktif' } })}
+      ${K.Button({ label:yz('esp.today.tamamlandi'), size:'sm', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'tamam' } })}
+      ${K.Button({ label:yz('esp.today.birak'), size:'sm', tone:'ghost', act:'hedef-durum', data:{ 'data-id':h.id, 'data-durum':'birakildi' } })}`;
   }
 
   function hedefOnizleme(h){
     const r = ESP.HedefPlan.kur(h, U.todayISO());
     if(!r.ok){
-      return html`<div class="mt-8">${K.Notice({ tone:'warn', title:'Plan kurulamadı.', body:r.why })}
-        <div class="row gap-8 mt-8">${K.Button({ label:'Kapat', size:'sm', act:'hedef-plan-kapat' })}</div></div>`;
+      return html`<div class="mt-8">${K.Notice({ tone:'warn', title:yz('esp.today.plan-kurulamadi'), body:r.why })}
+        <div class="row gap-8 mt-8">${K.Button({ label:yz('esp.today.kapat'), size:'sm', act:'hedef-plan-kapat' })}</div></div>`;
     }
     const p = r.plan;
     return html`<div class="mt-8">
-      <p class="tiny dim"><b>Plan önizlemesi</b> — onaylanana kadar hiçbir şey değişmez.</p>
+      <p class="tiny dim"><b>${yz('esp.today.plan-onizlemesi')}</b> ${yz('esp.today.onaylanana-kadar-hicbir-sey')}</p>
       ${K.Table({ tight:true, headers:['', 'Şimdi', 'Plandan sonra'],
         rows:ESP.HedefPlan.onizleme(p).map(x => [x.alan, x.once, x.sonra]) })}
-      ${when(p.calisma, () => html`<p class="tiny mt-8"><b>Çalışılacaklar</b> (merdiven:
+      ${when(p.calisma, () => html`<p class="tiny mt-8"><b>${yz('esp.today.calisilacaklar')}</b> (merdiven:
         ${p.calisma.basamak}): ${p.calisma.liste.join(' · ')}</p>`)}
       ${when(p.uyarilar.length, () => html`<div class="stack-sm mt-8">${map(p.uyarilar, u =>
         K.Notice({ tone:'info', body:u }))}</div>`)}
-      <p class="tiny dim mt-8">Kontrol noktaları dört haftada birdir; beklenen değer
-        ${p.etiket === 'hesaplandi' ? 'kendi ölçümünden hesaplandı' : 'tahmindir'}. Plan geri
-        alınabilir; geri alınca odak ve taban bugünkü haline döner.</p>
+      <p class="tiny dim mt-8">${yz('esp.today.kontrol-noktalari-dort-hafta')}
+        ${p.etiket === 'hesaplandi' ? 'kendi ölçümünden hesaplandı' : 'tahmindir'}${yz('esp.today.plan-geri-alinabilir-geri')}</p>
       <div class="row gap-8 mt-8" style="flex-wrap:wrap">
-        ${K.Button({ label:'Planı uygula', size:'sm', tone:'primary', act:'hedef-plan-uygula',
+        ${K.Button({ label:yz('esp.today.plani-uygula'), size:'sm', tone:'primary', act:'hedef-plan-uygula',
           data:{ 'data-id':h.id } })}
-        ${K.Button({ label:'Şimdilik değil', size:'sm', act:'hedef-plan-kapat' })}
+        ${K.Button({ label:yz('esp.today.simdilik-degil'), size:'sm', act:'hedef-plan-kapat' })}
       </div></div>`;
   }
 
@@ -287,32 +453,31 @@ ESP.Screens.today = (function(){
     const H = window.LIFEOS.Hedef;
     const u = H.uyarla(h, ESP.Hedefler.PAKET_BY_ID[h.paket], {}, U.todayISO());
     return html`<div class="mt-8">
-      <p class="tiny dim"><b>Bugünün verisiyle yeniden hesap</b> — seçim yapana kadar hiçbir şey değişmez.</p>
+      <p class="tiny dim"><b>${yz('esp.today.bugunun-verisiyle-yeniden-he')}</b> ${yz('esp.today.secim-yapana-kadar-hicbir')}</p>
       <p class="small">${u.metin}</p>
       ${u.senaryolar.length ? html`<div class="row gap-8 mt-8" style="flex-wrap:wrap">${map(u.senaryolar, (x, i) =>
         K.Button({ label:x.ad + ' · ' + H.tarihYaz(x.son_tarih), size:'sm', act:'hedef-uyarla-sec',
           data:{ 'data-id':h.id, 'data-i':String(i) } }))}</div>
-        <p class="tiny dim mt-8">Seçince eski plan geri alınır, hedef yeni tarih ve vakitle güncellenir;
-          yeni planı önizleyip onaylarsın. Eski tarih hedefin geçmişinde kalır.</p>`
+        <p class="tiny dim mt-8">${yz('esp.today.secince-eski-plan-geri-alini')}</p>`
         : K.Notice({ tone:'info', body:'Bu tarihe hâlâ yetişilebilir; plan olduğu gibi kalabilir.' })}
-      <div class="row gap-8 mt-8">${K.Button({ label:'Kapat', size:'sm', act:'hedef-uyarla-kapat' })}</div>
+      <div class="row gap-8 mt-8">${K.Button({ label:yz('esp.today.kapat'), size:'sm', act:'hedef-uyarla-kapat' })}</div>
     </div>`;
   }
 
   function hedefPlanOzeti(h, p){
     const il = ESP.HedefPlan.ilerleme(p, U.todayISO());
     return html`<div class="stack-sm mt-8">
-      <p class="small">Plan uygulandı · günde ${p.gunlukDk} dk${p.haftalikGun < 7
+      <p class="small">${yz('esp.today.plan-uygulandi-gunde')} ${p.gunlukDk} dk${p.haftalikGun < 7
         ? ', haftada ' + p.haftalikGun + ' gün' : ''} · odak ${(ESP.DISCIPLINE_BY_ID[p.disc] || {}).label || p.disc}</p>
-      ${when(il.sonraki, () => html`<p class="tiny">Sonraki kontrol: <b>${U.fmtDate(il.sonraki.tarih)}</b>
-        — beklenen ${String(il.sonraki.beklenen).replace('.', ',')} ${p.birim}</p>`)}
+      ${when(il.sonraki, () => html`<p class="tiny">${yz('esp.today.sonraki-kontrol')} <b>${U.fmtDate(il.sonraki.tarih)}</b>
+        ${yz('esp.today.beklenen')} ${String(il.sonraki.beklenen).replace('.', ',')} ${p.birim}</p>`)}
       ${K.Notice({ tone:il.durum === 'geride' ? 'warn' : 'info', body:il.metin })}
       ${S.ui.uyarla === h.id ? uyarlamaKutusu(h) : when(il.durum === 'geride', () => K.Button({
-        label:'Yeniden hesapla', size:'sm', tone:'primary', act:'hedef-uyarla-ac', data:{ 'data-id':h.id } }))}
-      ${when(p.calisma, () => html`<p class="tiny dim">Çalışılacaklar (${p.calisma.basamak}):
+        label:yz('esp.today.yeniden-hesapla'), size:'sm', tone:'primary', act:'hedef-uyarla-ac', data:{ 'data-id':h.id } }))}
+      ${when(p.calisma, () => html`<p class="tiny dim">${yz('esp.today.calisilacaklar-2')}${p.calisma.basamak}):
         ${p.calisma.liste.join(' · ')}</p>`)}
       <div class="row gap-8" style="flex-wrap:wrap">
-        ${K.Button({ label:'Planı geri al', size:'sm', act:'hedef-plan-geri', data:{ 'data-id':h.id } })}
+        ${K.Button({ label:yz('esp.today.plani-geri-al'), size:'sm', act:'hedef-plan-geri', data:{ 'data-id':h.id } })}
         ${hedefDugmeleri(h)}
       </div></div>`;
   }
@@ -339,7 +504,7 @@ ESP.Screens.today = (function(){
       ${h.paket === 'aliskanlik' && ESP.Hedefler.ALISKANLIK ? aliskanlikOzeti(h)
         : p ? hedefPlanOzeti(h, p) : onizle ? hedefOnizleme(h) : html`
         <div class="row gap-8 mt-6" style="flex-wrap:wrap">
-          ${when(ESP.HedefPlan && h.durum === 'aktif', () => K.Button({ label:'Planı gör', size:'sm',
+          ${when(ESP.HedefPlan && h.durum === 'aktif', () => K.Button({ label:yz('esp.today.plani-gor'), size:'sm',
             tone:'primary', act:'hedef-plan-onizle', data:{ 'data-id':h.id } }))}
           ${hedefDugmeleri(h)}
         </div>`}
@@ -351,21 +516,18 @@ ESP.Screens.today = (function(){
   function butceSatiri(){
     const b = ESP.Hedefler.ag ? ESP.Hedefler.ag.butce() : null;
     if(!b || !b.metin) return '';
-    return K.Notice({ tone:{ sigar:'info', sikisik:'warn', sigmaz:'warn' }[b.bant] || 'info', title:'Zaman bütçesi (King):', body:b.metin });
+    return K.Notice({ tone:{ sigar:'info', sikisik:'warn', sigmaz:'warn' }[b.bant] || 'info', title:yz('esp.today.zaman-butcesi-king'), body:b.metin });
   }
 
   function hedefRow(){
     if(!ESP.Hedefler) return null;
     const l = ESP.Hedefler.aktifler();
     return K.Entry({
-      label:'Hedeflerim', meta:l.length ? l.length + ' etkin' : 'yok',
-      action:K.Button({ label:'Danışma’da hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
+      label:yz('esp.today.hedeflerim'), meta:l.length ? l.length + ' etkin' : 'yok',
+      action:K.Button({ label:yz('esp.today.danisma-da-hedef-koy'), size:'sm', act:'go', data:{ 'data-route':'team' } }),
       body:l.length ? html`<div class="stack-sm">${raw((window.LIFEOS && window.LIFEOS.PANO) ? window.LIFEOS.PANO.hedefIzgara(l, U.todayISO()) : '')}${butceSatiri()}${map(l, hedefSatir)}</div>`
-        : K.Ayrinti({ etiket:'Örnekler', ozet:'Henüz hedefin yok. Danışma’da tek cümleyle yazabilirsin.',
-          govde:html`<p>«Bir yılda gitarda Kalfa’ya gelmek istiyorum», «Bir ayda İngilizcede A2’ye
-            gelmek istiyorum» ya da «bu yıl 24 kitap okumak istiyorum» gibi yazabilirsin; vaktine
-            göre olup olmadığını ve olacağı tarihi söylerim. Alışkanlık da kurabilirsin: «her gün
-            20 dakika kitap okuma alışkanlığı kazanmak istiyorum».</p>` }),
+        : K.Ayrinti({ etiket:yz('esp.today.ornekler'), ozet:yz('esp.today.henuz-hedefin-yok-danisma-da'),
+          govde:html`<p>${yz('esp.today.bir-yilda-gitarda-kalfa-ya-g')}</p>` }),
     });
   }
 
@@ -381,20 +543,20 @@ ESP.Screens.today = (function(){
     return [
       hedefRow(),
       K.Entry({
-        label:'Günün toplamı',
+        label:yz('esp.today.gunun-toplami'),
         meta:rows.length ? U.fmtMin(toplam) : 'veri yok',
-        note:'Taban ' + U.fmtMin(taban) + (tb.kaynak === 'istisna' ? ' (bugüne özel)' : '')
+        note:yz('esp.today.taban') + U.fmtMin(taban) + (tb.kaynak === 'istisna' ? ' (bugüne özel)' : '')
            + '. Taban bir hedef değil bir ölçüttür: '
            + 'altında kalmak başarısızlık değil, rotayı daraltan bir olgudur.',
         body:rows.length
-          ? K.Meter({ label:'Taban doluluğu', value:Math.min(100, toplam / taban * 100),
+          ? K.Meter({ label:yz('esp.today.taban-dolulugu'), value:Math.min(100, toplam / taban * 100),
               text:U.fmtMin(toplam) + ' / ' + U.fmtMin(taban) })
           : K.Notice({ tone:'info',
               body:'Bugüne hiç oturum girilmedi. Bu gün ortalamaya katılmaz.' }),
       }),
 
       K.Entry({
-        label:'Asgari gün', hint:'minimum-day',
+        label:yz('esp.today.asgari-gun'), hint:'minimum-day',
         meta:'kötü günün alt sınırı',
         note:ESP.MINIMUM_DAY.note,
         body:html`<ul class="setup__list">
@@ -405,16 +567,16 @@ ESP.Screens.today = (function(){
       }),
 
       K.Entry({
-        label:'Entelektüel hacim', hint:'ehs',
+        label:yz('esp.today.entelektuel-hacim'), hint:'ehs',
         meta:ehs.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ehs.value * 10) / 10),
         note:ehs.cert === 'missing'
           ? 'Son ' + ehs.windowDays + ' günde ölçülmüş pratik yok; hacim hesaplanmadı.'
           : ehs.windowDays + ' günün ' + ehs.enteredDays + '\'inden hesaplandı.',
         body:ehs.cert === 'missing'
-          ? K.Empty({ text:'İlk oturumu girdiğinde hacim ölçülmeye başlar.' })
+          ? K.Empty({ text:yz('esp.today.i-lk-oturumu-girdiginde-haci') })
           : K.Table({ tight:true,
-              headers:['Disiplin', { label:'Süre', num:true }, { label:'Katsayı', num:true }, 'Kaynak'],
+              headers:['Disiplin', { label:yz('esp.today.sure'), num:true }, { label:yz('esp.today.katsayi'), num:true }, 'Kaynak'],
               rows:ehs.rows.map(r => [
                 r.disc.label,
                 r.cert === 'missing' ? P_cert('missing') : U.fmtMin(Math.round(r.hours * 60)),
@@ -424,14 +586,14 @@ ESP.Screens.today = (function(){
       }),
 
       K.Entry({
-        label:'Haftanın dağılımı',
+        label:yz('esp.today.haftanin-dagilimi'),
         meta:denge.cert === 'missing' ? 'veri yok' : U.fmtMin(denge.totalMinutes),
         note:denge.skewed
           ? 'Pratik ' + denge.top.label + ' tarafına yığılmış ve '
             + denge.untouched.map(d => d.label).join(', ') + ' hiç açılmamış.'
           : 'Son ' + denge.windowDays + ' gün.',
         body:denge.cert === 'missing'
-          ? K.Empty({ text:'Son yedi günde kayıt yok.' })
+          ? K.Empty({ text:yz('esp.today.son-yedi-gunde-kayit-yok') })
           : html`${map(denge.rows, r => html`
               <div class="mt-8">
                 ${K.Meter({ label:r.disc.label,
@@ -448,11 +610,11 @@ ESP.Screens.today = (function(){
     if(!ESP.Dunku || gun() !== U.todayISO()) return null;
     const a = ESP.Dunku.adaylar(U.todayISO());
     if(!a.oturumlar.length) return null;
-    return K.Entry({ label:'Dünkünün aynısı', meta:U.fmtShort(a.dun), wide:true,
-      note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; süre tahmin sayılır, sayım ve kalite kopyalanmaz.',
+    return K.Entry({ label:yz('esp.today.dunkunun-aynisi'), meta:U.fmtShort(a.dun), wide:true,
+      note:yz('esp.today.aynisini-yaptiysan-tek-dokun'),
       body:html`${map(a.oturumlar, o => html`<div class="row between wrap gap-6 mt-4">
         <span class="small"><b>${o.ad}</b> <span class="tiny dim">${o.dk} dk${o.sayim ? ' · ' + o.sayim : ''}</span></span>
-        ${K.Button({ label:'Bugüne ekle', size:'sm', act:'dunku-oturum', data:{ 'data-id':o.id } })}</div>`)}` });
+        ${K.Button({ label:yz('esp.today.bugune-ekle'), size:'sm', act:'dunku-oturum', data:{ 'data-id':o.id } })}</div>`)}` });
   }
 
   /* SIK OTURUMLAR (core/dunku.js, 2026-10-17): giriş kutusunun altında
@@ -462,14 +624,14 @@ ESP.Screens.today = (function(){
     if(!ESP.Dunku || !ESP.Dunku.sik || !VT || gun() !== U.todayISO()) return '';
     const l = ESP.Dunku.sik(U.todayISO());
     if(!l.length) return '';
-    return VT.ogunSablonlari({ act:'sik-oturum', baslik:'sık oturumların · tek dokunuş', sablonlar:l.map(x => ({
+    return VT.ogunSablonlari({ act:'sik-oturum', baslik:yz('esp.today.sik-oturumlarin-tek-dokunus'), sablonlar:l.map(x => ({
       ad:x.ad, icerik:U.fmtMin(x.dk), on:x.bugun, data:{ 'data-disc':x.disc, 'data-dk':x.dk } })) });
   }
 
   /* Seri satiri Giris sekmesinde: «Bugün hastayım» ve «Tatil modu» aranmaz. */
   function seriRow(){
     if(!ESP.Seri) return null;
-    return K.Entry({ label:'Seri', hint:'streak', meta:M.streak() + ' gün', wide:true,
+    return K.Entry({ label:yz('esp.today.seri'), hint:'streak', meta:M.streak() + ' gün', wide:true,
       body:seriKontrol() });
   }
 
@@ -480,10 +642,10 @@ ESP.Screens.today = (function(){
   function TatilSiniri(){
     const sinir = ESP.Seri.yillikTatil(), kalan = ESP.Seri.kalanTatil();
     return html`<div class="row wrap gap-6 mt-6">
-      <span class="tiny dim">Yıllık tatil sınırı: bu yıl kalan ${kalan} / ${sinir} gün</span>
+      <span class="tiny dim">${yz('esp.today.yillik-tatil-siniri-bu-yil')} ${kalan} / ${sinir} ${yz('esp.today.gun')}</span>
       ${K.Input({ id:'seri-tatil-sinir', type:'number', size:'sm', numeric:true, value:sinir,
-        aria:'yıllık tatil sınırı, gün' })}
-      ${K.Button({ label:'Sınırı kaydet', size:'sm', act:'seri-tatil-sinir' })}</div>`;
+        aria:yz('esp.today.yillik-tatil-siniri-gun') })}
+      ${K.Button({ label:yz('esp.today.siniri-kaydet'), size:'sm', act:'seri-tatil-sinir' })}</div>`;
   }
 
   function seriKontrol(){
@@ -492,24 +654,24 @@ ESP.Screens.today = (function(){
     const t = ESP.Seri.aktifTatil(bugun);
     const k = ESP.Seri.kayitOf(bugun);
     if(t) return html`<div class="row between wrap gap-6 mt-6">
-      <span class="tiny">Tatil modu: ${U.fmtShort(t.bas)} – ${U.fmtShort(t.bit)} · seri korunuyor, HKM soru sormuyor</span>
-      ${K.Button({ label:'Tatili bitir', size:'sm', act:'seri-tatil-bitir' })}</div>`;
+      <span class="tiny">${yz('esp.today.tatil-modu')} ${U.fmtShort(t.bas)} – ${U.fmtShort(t.bit)} ${yz('esp.today.seri-korunuyor-hkm-soru')}</span>
+      ${K.Button({ label:yz('esp.today.tatili-bitir'), size:'sm', act:'seri-tatil-bitir' })}</div>`;
     if(k) return html`<div class="row between wrap gap-6 mt-6">
-      <span class="tiny">Bugün dondurulmuş (${LIFEOS.Seri.NEDEN[k.neden].toLocaleLowerCase('tr')}) · seri bozulmaz</span>
-      ${K.Button({ label:'Geri al', size:'sm', act:'seri-coz', data:{ 'data-id':k.id } })}</div>`;
+      <span class="tiny">${yz('esp.today.bugun-dondurulmus')}${LIFEOS.Seri.NEDEN[k.neden].toLocaleLowerCase('tr')}${yz('esp.today.seri-bozulmaz')}</span>
+      ${K.Button({ label:yz('esp.today.geri-al'), size:'sm', act:'seri-coz', data:{ 'data-id':k.id } })}</div>`;
     if(S.ui.tatilSec) return html`<div class="row wrap gap-6 mt-6">
-      <span class="tiny">Kaç gün?</span>
+      <span class="tiny">${yz('esp.today.kac-gun')}</span>
       ${map([3, 7, 14], n => K.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
-      ${K.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>
+      ${K.Button({ label:yz('esp.today.vazgec'), size:'sm', act:'seri-tatil-vazgec' })}</div>
       ${TatilSiniri()}`;
     const kotu = ESP.KotuGun && ESP.KotuGun.aktif(bugun);
     return html`${when(kotu, () => html`<div class="row between wrap gap-6 mt-6">
-      <span class="tiny">Kötü gün modu: vadesi gelen tekrar yerinde, genişleme yok; bugün asgari gün yeter</span>
-      ${K.Button({ label:'Normal güne dön', size:'sm', act:'kotu-gun-kapat' })}</div>`)}
+      <span class="tiny">${yz('esp.today.kotu-gun-modu-vadesi-gelen')}</span>
+      ${K.Button({ label:yz('esp.today.normal-gune-don'), size:'sm', act:'kotu-gun-kapat' })}</div>`)}
       <div class="row wrap gap-6 mt-6">
-      ${when(ESP.KotuGun && !kotu, () => K.Button({ label:'Kötü gün', size:'sm', act:'kotu-gun' }))}
-      ${K.Button({ label:'Bugün hastayım · seri donsun', size:'sm', act:'seri-hasta' })}
-      ${K.Button({ label:'Tatil modu', size:'sm', act:'seri-tatil' })}</div>`;
+      ${when(ESP.KotuGun && !kotu, () => K.Button({ label:yz('esp.today.kotu-gun'), size:'sm', act:'kotu-gun' }))}
+      ${K.Button({ label:yz('esp.today.bugun-hastayim-seri-donsun'), size:'sm', act:'seri-hasta' })}
+      ${K.Button({ label:yz('esp.today.tatil-modu-2'), size:'sm', act:'seri-tatil' })}</div>`;
   }
 
   /* ---------------------------------------------------------------- gecmis */
@@ -519,9 +681,9 @@ ESP.Screens.today = (function(){
     const dolu = gunler.filter(d => M.dayHasEntry(S.days[d]));
     return [
       K.Entry({
-        label:'Son 14 gün', hint:'streak',
+        label:yz('esp.today.son-14-gun'), hint:'streak',
         meta:dolu.length + ' günde kayıt · seri ' + M.streak() + ' gün',
-        note:'Boş gün «0 dakika» değil «veri yok» sayılır. İkisi ayrı renkte durur.',
+        note:yz('esp.today.bos-gun-0-dakika-degil'),
         wide:true,
         body:html`<div class="daystrip">
           ${map(gunler, d => {
@@ -538,10 +700,10 @@ ESP.Screens.today = (function(){
         </div>`,
       }),
       K.Entry({
-        label:'Seçili gün',
+        label:yz('esp.today.secili-gun'),
         meta:U.fmtDate(gun()),
         action:gun() !== U.todayISO()
-          ? K.Button({ label:'Bugüne dön', size:'sm', act:'today-back' }) : '',
+          ? K.Button({ label:yz('esp.today.bugune-don'), size:'sm', act:'today-back' }) : '',
         body:M.dayHasEntry(S.days[gun()])
           ? K.Table({ tight:true, headers:['Disiplin', 'Süre', 'Not'],
               rows:M.sessionsOf(gun()).map(s => {
@@ -550,7 +712,7 @@ ESP.Screens.today = (function(){
                   s.minutes != null ? U.fmtMin(s.minutes) : P_cert('missing'),
                   s.note || '—'];
               }) })
-          : K.Empty({ text:'Bu güne kayıt girilmemiş.' }),
+          : K.Empty({ text:yz('esp.today.bu-gune-kayit-girilmemis') }),
       }),
     ];
   }
@@ -574,10 +736,10 @@ ESP.Screens.today = (function(){
 
     if(!acik){
       return html`<div class="timer">
-        ${K.Button({ label:'Sayacı başlat', act:'timer-start',
+        ${K.Button({ label:yz('esp.today.sayaci-baslat'), act:'timer-start',
           data:{ 'data-disc':secili } })}
         <span class="tiny dim">${(ESP.DISCIPLINE_BY_ID[secili] || {}).label
-          || ''} için ölçmeye başla — süreyi sistem tutar.</span>
+          || ''} ${yz('esp.today.icin-olcmeye-basla-sureyi')}</span>
       </div>`;
     }
 
@@ -586,11 +748,11 @@ ESP.Screens.today = (function(){
         aria-label="Geçen süre">${T.clock()}</span>
       <span class="timer__disc">${d.label || td}</span>
       ${calisiyor
-        ? K.Button({ label:'Duraklat', size:'sm', act:'timer-pause' })
-        : K.Button({ label:'Sürdür', size:'sm', act:'timer-resume' })}
-      ${K.Button({ label:'Bitir ve kaydet', tone:'primary', size:'sm',
+        ? K.Button({ label:yz('esp.today.duraklat'), size:'sm', act:'timer-pause' })
+        : K.Button({ label:yz('esp.today.surdur'), size:'sm', act:'timer-resume' })}
+      ${K.Button({ label:yz('esp.today.bitir-ve-kaydet'), tone:'primary', size:'sm',
         act:'timer-stop' })}
-      ${K.Button({ label:'Vazgeç', size:'sm', act:'timer-reset' })}
+      ${K.Button({ label:yz('esp.today.vazgec'), size:'sm', act:'timer-reset' })}
       ${when(T.suspicious(), () => K.Badge({ label:T.SUPHE_SAAT
         + ' saati geçti — unutulmuş olabilir', tone:'warn' }))}
     </div>`;
@@ -609,10 +771,10 @@ ESP.Screens.today = (function(){
     const asgari = ESP.Coach.minimumDay(gun());
 
     return K.Entry({
-      label:'Günün reçetesi', hint:'coach',
+      label:yz('esp.today.gunun-recetesi'), hint:'coach',
       meta:U.fmtMin(p.minutes),
-      note:'Reçeteyi koç yazar, sırayı planlayıcı verir.',
-      action:K.Button({ label:'Merdiven', size:'sm', act:'go',
+      note:yz('esp.today.receteyi-koc-yazar-sirayi-pl'),
+      action:K.Button({ label:yz('esp.today.merdiven'), size:'sm', act:'go',
         data:{ 'data-route':'ladder' } }),
       wide:true,
       body:html`
@@ -623,19 +785,19 @@ ESP.Screens.today = (function(){
                   <b>${r.label}</b>
                   <span class="tiny dim">${r.level.label}</span>
                   <span class="tiny dim">${U.fmtMin(r.minutes)}</span>
-                  ${K.Button({ label:'Aç', size:'sm', act:'go',
+                  ${K.Button({ label:yz('esp.today.ac'), size:'sm', act:'go',
                     data:{ 'data-route':r.route } })}
                 </div>
                 ${ESP.Parts.rx(r)}
               </div>`)
-          : K.Empty({ text:'Reçete yazılamadı: disiplin listesi boş.' })}
+          : K.Empty({ text:yz('esp.today.recete-yazilamadi-disiplin-l') })}
 
         <p class="minline${asgari.metToday ? '' : ' is-open'}">
           ${raw(ESP.UI.hint('minimum-day'))}
-          <b>Asgari gün</b>
+          <b>${yz('esp.today.asgari-gun')}</b>
           <span>${asgari.cards ? asgari.cards + ' vadeli kart' : 'vadeli kart yok'}
-            · 10 dk okuma · 15 dk pratik</span>
-          ${when(asgari.metToday, () => K.Badge({ label:'bugün açıldı', tone:'ok' }))}
+            ${yz('esp.today.10-dk-okuma')}</span>
+          ${when(asgari.metToday, () => K.Badge({ label:yz('esp.today.bugun-acildi'), tone:'ok' }))}
         </p>`,
     });
   }
@@ -647,15 +809,15 @@ ESP.Screens.today = (function(){
     const g = ESP.Plans.today(gun());
     if(!g) return '';
     return K.Entry({
-      label:'Planda bugün', hint:'weekplan',
+      label:yz('esp.today.planda-bugun'), hint:'weekplan',
       meta:g.label,
-      note:'Haftalık plandan geliyor. Plan bir takvim değil bir sıradır; '
+      note:yz('esp.today.haftalik-plandan-geliyor-pla')
          + 'saatini sen seçersin.',
       body:html`
         <div class="row wrap">
           ${K.Badge({ label:U.fmtMin(g.minutes), tone:'muted', icon:false })}
           <span class="small">${(g.items || []).map(x => x.label).join(' · ') || '—'}</span>
-          ${K.Button({ label:'Bölüme git', size:'sm', act:'go',
+          ${K.Button({ label:yz('esp.today.bolume-git'), size:'sm', act:'go',
             data:{ 'data-route':g.route } })}
         </div>`,
     });
@@ -670,9 +832,9 @@ ESP.Screens.today = (function(){
       .filter(r => ESP.Mod.isOn(r.disc));
     if(!bugun.length) return '';
     return K.Entry({
-      label:'Hatırlatma', hint:'reminder',
+      label:yz('esp.today.hatirlatma'), hint:'reminder',
       meta:bugun.length + ' satır',
-      note:'Kendine söylediğin şeyler. Sistem hiçbirini zorunlu kılmaz; '
+      note:yz('esp.today.kendine-soyledigin-seyler-si')
          + 'kaçırılan bir hatırlatıcı borç yazmaz.',
       wide:true,
       body:html`<ul class="remlist">${map(bugun, r => {
@@ -685,9 +847,9 @@ ESP.Screens.today = (function(){
           <span class="remrow__date">${yas ? yas + ' gün gecikti' : 'bugün'}</span>
           <span class="remrow__text">${r.text}</span>
           <span class="tiny dim">${d.label || r.disc}</span>
-          ${K.Button({ label:'Yapıldı', size:'sm', act:'desk-done-rem',
+          ${K.Button({ label:yz('esp.today.yapildi'), size:'sm', act:'desk-done-rem',
             data:{ 'data-id':r.id } })}
-          ${K.Button({ label:'Bölüme git', size:'sm', act:'go',
+          ${K.Button({ label:yz('esp.today.bolume-git'), size:'sm', act:'go',
             data:{ 'data-route':d.route || 'today' } })}
         </li>`;
       })}</ul>`,
@@ -723,7 +885,7 @@ ESP.Screens.today = (function(){
     const a = ESP.Beacon.settings();
 
     if(!a.enabled){
-      return K.Entry({ label:'HKM', hint:'hkm', meta:'bağlı değil',
+      return K.Entry({ label:yz('esp.today.hkm'), hint:'hkm', meta:'bağlı değil',
         wide:true, body:html`<p class="tiny dim">Hayat Kontrol
           Merkezi'ne günün özetini göndermek istersen ayarlardan
           açabilirsin. ESP bundan bağımsız çalışır: HKM kapalıyken
@@ -737,7 +899,7 @@ ESP.Screens.today = (function(){
     const bozuk = a.lastStatus !== null && a.lastStatus !== undefined
       && a.lastStatus !== 202;
 
-    return K.Entry({ label:'HKM', hint:'hkm', wide:true,
+    return K.Entry({ label:yz('esp.today.hkm'), hint:'hkm', wide:true,
       meta:bozuk ? ('son deneme ' + (denendi || '—') + ' · başarısız')
         : (gitti ? ('son gönderim ' + gitti) : 'henüz gönderilmedi'),
       body:html`
@@ -745,7 +907,7 @@ ESP.Screens.today = (function(){
           body:(a.lastNote || 'Gönderilemedi.') + ' ESP bundan etkilenmez; '
              + 'veri burada duruyor ve bir sonraki denemede gider.' }))}
         <div class="row gap-8 mt-8">
-          ${K.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-gonder' })}
+          ${K.Button({ label:yz('esp.today.simdi-gonder'), size:'sm', act:'hkm-gonder' })}
         </div>
         <p class="tiny dim mt-8">Giden şey günün ÖZETİDİR: etiketli
           ölçümler. Ham kayıt ESP'de kalır.</p>` });
@@ -763,7 +925,7 @@ ESP.Screens.today = (function(){
   function yedekRow(){
     if(!M.backupDue()) return '';
     const yas = M.backupAgeDays();
-    return K.Entry({ label:'Yedek', hint:'backup', wide:true,
+    return K.Entry({ label:yz('esp.today.yedek'), hint:'backup', wide:true,
       meta:yas === null ? 'hiç alınmadı' : yas + ' gün önce',
       body:html`
         ${K.Notice({ tone:'info', body:(yas === null
@@ -772,7 +934,7 @@ ESP.Screens.today = (function(){
           + ' Tarayıcı verisi silinirse oturum geçmişin, kartların ve '
           + 'notların kaybolur.' })}
         <div class="row gap-8 mt-8">
-          ${K.Button({ label:'Yedek al', size:'sm',
+          ${K.Button({ label:yz('esp.today.yedek-al'), size:'sm',
             act:'go', data:{ 'data-route':'profile' } })}
         </div>` });
   }
@@ -788,7 +950,7 @@ ESP.Screens.today = (function(){
     /* Yalnız başka yerde OLMAYAN iki sayı: günün dakikası başlıkta, «Günün
        dakikası» halkasında ve oturum tablosunda; seri üst satırda zaten var
        (sadelik, 2026-10-01: aynı sayı dört yerde yazıyordu). */
-    return K.Kutu({ ad:'Bekleyen iş', yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
+    return K.Kutu({ ad:yz('esp.today.bekleyen-is'), yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
       ${hucre('Sırası gelen kart', d.due, '', 'tekrar bekliyor')}
       ${hucre('Açık disiplin', ESP.Mod.active().length, '', 'Çalışma’da')}
     </div>` });
@@ -804,7 +966,7 @@ ESP.Screens.today = (function(){
     const ic = V.dakikaHalkasi({ hedef, toplam:rows.reduce((a, s) => a + (s.minutes || 0), 0),
       satirlar:ESP.Mod.active().slice(0, 4).map(d => ({ ad:(ESP.DISCIPLINE_BY_ID[d.id || d] || {}).short || (d.id || d),
         dk:M.minutesOf(gun(), d.id || d) })) });
-    return ic ? K.Kutu({ ad:'Günün dakikası', yuva:'günlük en az ' + hedef + ' dk', class:'vkutu', govde:raw(ic) }) : '';
+    return ic ? K.Kutu({ ad:yz('esp.today.gunun-dakikasi'), yuva:'günlük en az ' + hedef + ' dk', class:'vkutu', govde:raw(ic) }) : '';
   }
 
   /* Günün dakikasının kesinliği (state.js minutesInfo): «Günü kapat»ın
@@ -833,31 +995,31 @@ ESP.Screens.today = (function(){
        («Oturum gir ve bütün satırlar»); düğme bütçesi için düşer. */
     const bag = gunuKapatAcik() ? () => null : git;
     bugun.push(rows.length
-      ? { ust:'Günün dakikası', sayi:sayi({ deger:toplam, birim:'dk', kesinlik:dkKesinlik(gun()) }), cumle:'çalışıldı.',
+      ? { ust:yz('esp.today.gunun-dakikasi'), sayi:sayi({ deger:toplam, birim:'dk', kesinlik:dkKesinlik(gun()) }), cumle:yz('esp.today.calisildi'),
           vurgu:rows.length + ' oturum.', sistem:'esp', dugme:bag('Oturumlar', 'gun'),
           /* Görsel dil: taban biliniyorsa eşik çubuğu cümlenin yerini alır. */
-          gorsel:hedef && G && G.esikCubukHtml ? G.esikCubukHtml({ etiket:'Günün dakikası', deger:toplam, esik:hedef, birim:'dk', yon:'artis-iyi' }) : '' }
-      : { ust:'Günün dakikası', cumle:'Bugün oturum yok.', vurgu:hedef ? 'Günlük en az ' + hedef + ' dk.' : 'İlk oturumla başlar.', sistem:'esp', dugme:bag('Oturum gir', 'gun') });
+          gorsel:hedef && G && G.esikCubukHtml ? G.esikCubukHtml({ etiket:yz('esp.today.gunun-dakikasi'), deger:toplam, esik:hedef, birim:'dk', yon:'artis-iyi' }) : '' }
+      : { ust:yz('esp.today.gunun-dakikasi'), cumle:yz('esp.today.bugun-oturum-yok'), vurgu:hedef ? 'Günlük en az ' + hedef + ' dk.' : 'İlk oturumla başlar.', sistem:'esp', dugme:bag('Oturum gir', 'gun') });
     const seri = M.streak();
     /* Sıfır seri bir sayı değil, henüz başlamamış bir seridir («0 gün, hesaplandı seri» okunuyordu). */
     bugun.push(seri > 0
-      ? { ust:'Seri', sayi:sayi({ deger:seri, birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
-          cumle:'üst üste.', vurgu:'Asgari gün seriyi sürdürür.', sistem:'esp' }
-      : { ust:'Seri', cumle:'Henüz başlamadı.', vurgu:'Bugün asgari günü tamamlarsan seri başlar.', sistem:'esp' });
+      ? { ust:yz('esp.today.seri'), sayi:sayi({ deger:seri, birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
+          cumle:yz('esp.today.ust-uste'), vurgu:yz('esp.today.asgari-gun-seriyi-surdurur'), sistem:'esp' }
+      : { ust:yz('esp.today.seri'), cumle:yz('esp.today.henuz-baslamadi'), vurgu:yz('esp.today.bugun-asgari-gunu-tamamlarsa'), sistem:'esp' });
 
     const calisma = [];
     const d = ESP.SRS.deckStatus();
     calisma.push(d.due
-      ? { ust:'Tekrar', sayi:sayi({ deger:d.due, birim:'kart', kesinlik:'computed', formul:'vadesi bugün ya da geçmiş kart' }),
-          cumle:'bekliyor.', vurgu:'Sırası gelen kelime kartları.', sistem:'esp', dugme:git('Çalış', 'lang') }
-      : { ust:'Tekrar', cumle:'Sırası gelen kart yok.', vurgu:'Deste bugün temiz.', sistem:'esp' });
-    calisma.push({ ust:'Disiplinler', sayi:sayi({ deger:ESP.Mod.active().length, kesinlik:'measured' }), cumle:'açık disiplin.',
-      vurgu:'Çalışma çekmecesinde.', sistem:'esp' });
+      ? { ust:yz('esp.today.tekrar'), sayi:sayi({ deger:d.due, birim:'kart', kesinlik:'computed', formul:'vadesi bugün ya da geçmiş kart' }),
+          cumle:'bekliyor.', vurgu:yz('esp.today.sirasi-gelen-kelime-kartlari'), sistem:'esp', dugme:git('Çalış', 'lang') }
+      : { ust:yz('esp.today.tekrar'), cumle:yz('esp.today.sirasi-gelen-kart-yok'), vurgu:yz('esp.today.deste-bugun-temiz'), sistem:'esp' });
+    calisma.push({ ust:yz('esp.today.disiplinler'), sayi:sayi({ deger:ESP.Mod.active().length, kesinlik:'measured' }), cumle:yz('esp.today.acik-disiplin'),
+      vurgu:yz('esp.today.calisma-cekmecesinde'), sistem:'esp' });
 
     /* Seçim sayfasının minik özeti (hesap.js söz 16); örnek profil yazmaz. */
     const ozet = ESP.Ornek && ESP.Ornek.acik() ? null : 'esp';
-    const cal = V.donen({ id:'esp-calisma', ad:'Çalışma', ozet, maddeler:calisma });
-    return raw(yalnizCalisma ? cal : V.donen({ id:'esp-bugun', ad:'Bugün', ozet, maddeler:bugun }) + cal);
+    const cal = V.donen({ id:'esp-calisma', ad:yz('esp.today.calisma'), ozet, maddeler:calisma });
+    return raw(yalnizCalisma ? cal : V.donen({ id:'esp-bugun', ad:yz('esp.today.bugun'), ozet, maddeler:bugun }) + cal);
   }
 
   /* BUGÜN KAPAĞI (kullanıcı, 2026-10-18: «Bugün kısmı bambaşka, ana sayfa
@@ -890,19 +1052,19 @@ ESP.Screens.today = (function(){
     const toplam = rows.reduce((a, s) => a + s.minutes, 0);
     const taban = ESP.GunSure ? ESP.GunSure.taban(t).dakika : ((S.profile && S.profile.dailyMinutes) || null);
     const dakika = rows.length
-      ? P.kart({ tur:'dakika', ad:'Günün dakikası', simge:'saat',
+      ? P.kart({ tur:'dakika', ad:yz('esp.today.gunun-dakikasi'), simge:'saat',
           yuva:dkKesinlik(t) === 'measured' ? 'ölçüldü' : rows.some(s => s.minutesCert === 'measured') ? 'tahmin içerir' : 'tahmin',
           govde:P.deger(String(toplam), 'dk', rows.length + ' oturum')
             + (taban ? P.esik({ deger:toplam, esik:taban, yon:'artis-iyi', etiket:toplam + ' dakika, taban ' + taban + ' dakika' })
               + P.not('taban ' + taban + ' dk' + (toplam < taban ? ' · ' + (taban - toplam) + ' dk kaldı' : ' · tutuldu')) : '') })
-      : P.kart({ tur:'dakika', ad:'Günün dakikası', simge:'saat', bos:{ cumle:taban ? 'Bugün oturum yok; taban ' + taban + ' dk.' : 'Bugün oturum yok.', dugme:git('Oturum ekle', 'gun') } });
+      : P.kart({ tur:'dakika', ad:yz('esp.today.gunun-dakikasi'), simge:'saat', bos:{ cumle:taban ? 'Bugün oturum yok; taban ' + taban + ' dk.' : 'Bugün oturum yok.', dugme:git('Oturum ekle', 'gun') } });
     const b = ESP.Planner.balance(7);
     const acik = b.rows.filter(r => r.share != null && r.share > 0).sort((x, y) => y.minutes - x.minutes);
     const denge = b.cert === 'missing'
-      ? P.kart({ tur:'denge', ad:'Haftanın dengesi', simge:'satir', bos:{ cumle:'Son yedi günde oturum yok.' } })
-      : P.kart({ tur:'denge', ad:'Haftanın dengesi', simge:'satir', yuva:'7 gün · ' + U.fmtMin(b.totalMinutes),
+      ? P.kart({ tur:'denge', ad:yz('esp.today.haftanin-dengesi'), simge:'satir', bos:{ cumle:yz('esp.today.son-yedi-gunde-oturum-yok') } })
+      : P.kart({ tur:'denge', ad:yz('esp.today.haftanin-dengesi'), simge:'satir', yuva:'7 gün · ' + U.fmtMin(b.totalMinutes),
           govde:P.yigin({ parcalar:acik.slice(0, 4).map(r => ({ ad:r.disc.short || r.disc.label, deger:r.minutes, metin:'%' + Math.round(r.share * 100) }))
-              .concat(acik.length > 4 ? [{ ad:'Diğer', deger:acik.slice(4).reduce((a, r) => a + r.minutes, 0), metin:'%' + Math.round(acik.slice(4).reduce((a, r) => a + r.share, 0) * 100) }] : []) })
+              .concat(acik.length > 4 ? [{ ad:yz('esp.today.diger'), deger:acik.slice(4).reduce((a, r) => a + r.minutes, 0), metin:'%' + Math.round(acik.slice(4).reduce((a, r) => a + r.share, 0) * 100) }] : []) })
             + (b.untouched.length ? P.not(b.untouched.map(d => d.short || d.label).join(', ') + ' bu hafta açılmadı.') : '') });
     const gunler = []; for(let i = 13; i >= 0; i--) gunler.push(U.iso(U.addDays(U.parse(t), -i)));
     const seri = M.streak();
@@ -912,13 +1074,13 @@ ESP.Screens.today = (function(){
       if(var_) return 'dolu';
       return ESP.Seri && ESP.Seri.donmusMu && ESP.Seri.donmusMu(d) ? 'donmus' : 'bos';
     });
-    const seriKart = P.kart({ tur:'seri', ad:'Seri', simge:'alev', yuva:seri > 0 ? seri + ' gün üst üste' : 'henüz başlamadı',
-      govde:P.kareler({ durumlar:durum, sutun:14, etiket:'Son 14 günün ' + durum.filter(x => x === 'dolu').length + '’inde kayıt var' })
+    const seriKart = P.kart({ tur:'seri', ad:yz('esp.today.seri'), simge:'alev', yuva:seri > 0 ? seri + ' gün üst üste' : 'henüz başlamadı',
+      govde:P.kareler({ durumlar:durum, sutun:14, etiket:yz('esp.today.son-14-gunun') + durum.filter(x => x === 'dolu').length + '’inde kayıt var' })
         + P.not('dolu: kayıt var · çerçeve: bugün') });
     const h = M.dueReminders(null, t).filter(r => ESP.Mod.isOn(r.disc));
     const disc = id => { const d = (ESP.Mod.active() || []).find(x => x.id === id); return d ? (d.short || d.label) : ''; };
     const hatir = h.length
-      ? P.kart({ tur:'hatirlatici', ad:'Hatırlatıcılar', simge:'zil', yuva:'bugün ' + h.length,
+      ? P.kart({ tur:'hatirlatici', ad:yz('esp.today.hatirlaticilar'), simge:'zil', yuva:'bugün ' + h.length,
           govde:P.liste({ satirlar:h.slice(0, 4).map(r => ({ sol:r.due < t ? 'gecikti' : 'bugün', ad:r.text || 'Hatırlatıcı', not:disc(r.disc), nokta:r.due < t ? 2 : 0 })) }) })
       : '';
     /* Günün alıntısı (yıldız): kitaba bağlı notlardan biri; seçim tarihe
@@ -929,9 +1091,9 @@ ESP.Screens.today = (function(){
       const sira = Number(t.replace(/-/g, '')) % alintilar.length;
       const n = alintilar.slice().sort((a, b) => String(a.id).localeCompare(String(b.id)))[sira];
       const kb = (S.books || []).find(b => b.id === n.bookId);
-      alinti = P.kart({ tur:'alinti', ad:'Günün alıntısı', yildiz:'senin notundan',
+      alinti = P.kart({ tur:'alinti', ad:yz('esp.today.gunun-alintisi'), yildiz:'senin notundan',
         govde:'<p class="pk__alinti">' + U.esc(String(n.text).slice(0, 220)) + '</p><p class="pk__kaynak">' + U.esc(kb.title + (kb.author ? ' · ' + kb.author : '')) + '</p>',
-        ayak:P.dugmeHtml({ label:'Kütüphaneye git', act:'go', data:{ 'data-route':'library' } }, 'pk__dugme pk__dugme--ikincil') });
+        ayak:P.dugmeHtml({ label:yz('esp.today.kutuphaneye-git'), act:'go', data:{ 'data-route':'library' } }, 'pk__dugme pk__dugme--ikincil') });
     }
     return '<div class="pk-ust">' + P.izgara([alinti, dakika, denge, seriKart, hatir]) + '</div>';
   }
@@ -972,7 +1134,7 @@ ESP.Screens.today = (function(){
       /* Satır aynı disiplini az önce ölçülmüş yazdıysa tahmin yazılmaz, sayılmaz. */
       if(M.sessionsOf(g).some(s => s.disc === disc)) return { atlandi:true };
       const s = await M.addSession(g, { disc, minutes:dk, minutesCert:'estimated',
-        note:'Günü kapat · ' + kaynak + ' (tahmin)' });
+        note:yz('esp.today.gunu-kapat-2') + kaynak + ' (tahmin)' });
       if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
       return { metin:discAd(disc) + ' ' + U.fmtMin(dk), geriAl:async () => {
         await M.deleteSession(g, s.id);
@@ -997,11 +1159,11 @@ ESP.Screens.today = (function(){
 
     const p = ESP.Plans.today(g);
     const pdk = p ? Number(p.minutes) : NaN;
-    if(!p) l.push({ id:'plan', ad:'Planda bugün', tur:'beyan', ipucu:'haftalık plan yok · öneri yok' });
-    else if(girildi(p.disc)) l.push({ id:'plan', ad:'Planda bugün', tur:'beyan', yazildi:true, ipucu:discAd(p.disc) + ' · oturum girildi' });
-    else if(isFinite(pdk) && pdk > 0) l.push({ id:'plan', ad:'Planda bugün', tur:'beyan',
+    if(!p) l.push({ id:'plan', ad:yz('esp.today.planda-bugun'), tur:'beyan', ipucu:'haftalık plan yok · öneri yok' });
+    else if(girildi(p.disc)) l.push({ id:'plan', ad:yz('esp.today.planda-bugun'), tur:'beyan', yazildi:true, ipucu:discAd(p.disc) + ' · oturum girildi' });
+    else if(isFinite(pdk) && pdk > 0) l.push({ id:'plan', ad:yz('esp.today.planda-bugun'), tur:'beyan',
       oneri:{ metin:discAd(p.disc) + ' · ' + pdk + ' dk', kaynak:'plan' }, yaz:tahminYaz(p.disc, pdk, 'plandan') });
-    else l.push({ id:'plan', ad:'Planda bugün', tur:'beyan', ipucu:discAd(p.disc) + ' · planda süre yok · öneri yok' });
+    else l.push({ id:'plan', ad:yz('esp.today.planda-bugun'), tur:'beyan', ipucu:discAd(p.disc) + ' · planda süre yok · öneri yok' });
     if(p && !girildi(p.disc)) l.push(...olcumKutusu(p.disc));
 
     if(GK){
@@ -1015,22 +1177,22 @@ ESP.Screens.today = (function(){
       }
       GK.kalip(kayit, g).filter(d => ESP.DISCIPLINE_BY_ID[d] && ESP.Mod.isOn(d) && !(p && p.disc === d)).forEach(d => {
         const dk = sikSure(kayit.filter(x => x.anahtar === d));
-        if(girildi(d)) l.push({ id:'kalip-' + d, ad:'Her zamanki', tur:'beyan', yazildi:true, ipucu:discAd(d) + ' · oturum girildi' });
-        else if(dk) l.push({ id:'kalip-' + d, ad:'Her zamanki', tur:'beyan',
+        if(girildi(d)) l.push({ id:'kalip-' + d, ad:yz('esp.today.her-zamanki'), tur:'beyan', yazildi:true, ipucu:discAd(d) + ' · oturum girildi' });
+        else if(dk) l.push({ id:'kalip-' + d, ad:yz('esp.today.her-zamanki'), tur:'beyan',
           oneri:{ metin:discAd(d) + ' · ' + dk + ' dk', kaynak:'kalip' }, yaz:tahminYaz(d, dk, 'her zamanki') }, ...olcumKutusu(d));
       });
     }
 
     const vade = ESP.Mod.isOn('lang') ? ESP.SRS.dueCards(g).length : 0;
-    if(vade) l.push({ id:'kart', ad:'Kart tekrarı', tur:'olcum', ipucu:vade + ' kart sırada · tekrar ekranında' });
+    if(vade) l.push({ id:'kart', ad:yz('esp.today.kart-tekrari'), tur:'olcum', ipucu:vade + ' kart sırada · tekrar ekranında' });
     return l;
   }
 
   function gunuKapatSayfasi(){
     const GK = window.LIFEOS && window.LIFEOS.GUNUKAPAT;
     if(!GK || !GK.kuruluMu()) return;
-    ESP.UI.sheet({ title:'Günü kapat', body:GK.cizim(U.todayISO()),
-      footer:String(K.Button({ label:'Günü düzenle', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'gun' } })) });
+    ESP.UI.sheet({ title:yz('esp.today.gunu-kapat'), body:GK.cizim(U.todayISO()),
+      footer:String(K.Button({ label:yz('esp.today.gunu-duzenle'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'gun' } })) });
   }
   /* Kayıttan ve geri almadan sonra açık alt sayfa yeni durumla çizilir. */
   function gunuKapatTazele(){
@@ -1090,7 +1252,7 @@ ESP.Screens.today = (function(){
         </section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Gün"><h2 class="bugun__etiket" aria-hidden="true">Gün</h2>
+        <section class="bugun__alan" aria-label="Gün"><h2 class="bugun__etiket" aria-hidden="true">${yz('esp.today.gun-2')}</h2>
           ${K.Ledger(() => LIFEOS.PARCA.liste('today', 'y1', K, parcaB))}
         </section>
       </div>
@@ -1105,8 +1267,8 @@ ESP.Screens.today = (function(){
     const O = ESP.Screens.onaylar;
     const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
     return [PanoUst(),
-      String(html`<section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>${DonenKutular(true)}${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}</section>`),
-      oneri ? String(html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`) : ''].filter(Boolean);
+      String(html`<section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">${yz('esp.today.ozet')}</h2>${DonenKutular(true)}${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}</section>`),
+      oneri ? String(html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">${yz('esp.today.oneri')}</h2>${oneri}</section>`) : ''].filter(Boolean);
   }
 
   /* GÜNÜN AYRINTISI (Bugün › Ayrıntı). Önce Günlük'ün üç sekmesiydi
@@ -1119,11 +1281,11 @@ ESP.Screens.today = (function(){
       catch(e){ console.error(e); return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; kayıtların yerinde duruyor.' }); } };
     /* Bugün'deki dönen kartların açık hâli: iki kart burada. */
     return K.Grid(html`${K.Span(12, html`<section class="bugun__alan" aria-label="Özet">${OzetKutusu()}${DakikaKutusu()}</section>`)}
-      ${K.Span(12, K.SayfaBolumleri({ act:'day-tab', aria:'Günün bölümleri', bolumler:[
-      { id:'giris', ad:'Giriş', sayi:M.sessionsOf(gun()).length || null, govde:guvenli(() => [yedekRow(), hkmSeritRow(),
+      ${K.Span(12, K.SayfaBolumleri({ act:'day-tab', aria:yz('esp.today.gunun-bolumleri'), bolumler:[
+      { id:'giris', ad:yz('esp.today.giris'), sayi:M.sessionsOf(gun()).length || null, govde:guvenli(() => [yedekRow(), hkmSeritRow(),
         seriRow(), dunkuRow(), planRowToday(), planRow(), reminderRow(), entryForm()]) },
-      { id:'ozet', ad:'Özet', govde:guvenli(summaryRows) },
-      { id:'gecmis', ad:'Geçmiş', govde:guvenli(historyRows) },
+      { id:'ozet', ad:yz('esp.today.ozet'), govde:guvenli(summaryRows) },
+      { id:'gecmis', ad:yz('esp.today.gecmis'), govde:guvenli(historyRows) },
     ] }))}`);
   }
 
@@ -1138,7 +1300,7 @@ ESP.Screens.today = (function(){
   function oneriRow(){
     const O = ESP.Screens.onaylar;
     if(!O || !O.bekleyen()) return '';
-    return K.Entry({ label:'Öneri', wide:true, body:O.oneriAlani() });
+    return K.Entry({ label:yz('esp.today.oneri'), wide:true, body:O.oneriAlani() });
   }
 
   /* Öneri kartının düğmeleri Onaylar'ın işleyicilerine gider: onay TEK
@@ -1167,33 +1329,33 @@ ESP.Screens.today = (function(){
     async 'kotu-gun'(){
       const r = await ESP.KotuGun.ac();
       if(!r.ok){ ESP.UI.toast(r.why); return; }
-      ESP.UI.toast('Kötü gün modu açık: asgari gün yeter.', { undo:async () => {
+      ESP.UI.toast(yz('esp.today.kotu-gun-modu-acik-asgari'), { undo:async () => {
         await ESP.KotuGun.kapat(r.gun); ESP.App.render(); } });
       ESP.App.render();
     },
     async 'kotu-gun-kapat'(){
       const r = await ESP.KotuGun.kapat();
-      if(r.ok) ESP.UI.toast('Normal güne dönüldü');
+      if(r.ok) ESP.UI.toast(yz('esp.today.normal-gune-donuldu'));
       ESP.App.render();
     },
     async 'seri-hasta'(){
       const r = await ESP.Seri.dondur(U.todayISO(), null, 'hasta');
       if(!r.ok){ ESP.UI.toast(r.why); return; }
-      ESP.UI.toast('Bugün donduruldu; seri bozulmaz. Geçmiş olsun.', { undo:async () => {
+      ESP.UI.toast(yz('esp.today.bugun-donduruldu-seri-bozulm'), { undo:async () => {
         await ESP.Seri.coz(r.kayit.id); ESP.App.render(); } });
       ESP.App.render();
     },
-    async 'seri-coz'(el){ await ESP.Seri.coz(el.dataset.id); ESP.UI.toast('Dondurma geri alındı'); ESP.App.render(); },
+    async 'seri-coz'(el){ await ESP.Seri.coz(el.dataset.id); ESP.UI.toast(yz('esp.today.dondurma-geri-alindi')); ESP.App.render(); },
     async 'seri-tatil'(){ S.ui.tatilSec = true; ESP.App.render(); },
     async 'seri-tatil-vazgec'(){ S.ui.tatilSec = false; ESP.App.render(); },
     async 'seri-tatil-sinir'(){
       const e = document.getElementById('seri-tatil-sinir');
       const ham = e ? String(e.value).trim() : '';
-      if(!ham){ ESP.UI.toast('Yıllık tatil sınırı için bir gün sayısı yaz.'); return; }
+      if(!ham){ ESP.UI.toast(yz('esp.today.yillik-tatil-siniri-icin-bir')); return; }
       const r = await ESP.Seri.yillikTatilAyarla(Number(ham));
       if(!r.ok){ ESP.UI.toast(r.why, { life:5000 }); return; }
       ESP.App.render();
-      ESP.UI.toast('Yıllık tatil sınırı ' + r.sinir + ' gün', { undo:async () => {
+      ESP.UI.toast(yz('esp.today.yillik-tatil-siniri') + r.sinir + ' gün', { undo:async () => {
         await ESP.Seri.yillikTatilAyarla(r.onceki); ESP.App.render(); } });
     },
     async 'seri-tatil-gun'(el){
@@ -1216,7 +1378,7 @@ ESP.Screens.today = (function(){
        zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
        olmasini anlamsiz kilardi. */
     async 'hkm-gonder'(){
-      ESP.UI.toast('HKM\u2019ye gönderiliyor…');
+      ESP.UI.toast(yz('esp.today.hkm-u2019ye-gonderiliyor'));
       const r = await ESP.Beacon.send({ reason:'manual' });
       ESP.UI.toast(r.ok ? 'HKM\u2019ye gönderildi.'
         : ('Gönderilemedi — ' + (r.note || r.reason || 'sebep bilinmiyor')));
@@ -1249,13 +1411,13 @@ ESP.Screens.today = (function(){
       const bugun = U.todayISO();
       const u = H.uyarla(h, paket, {}, bugun);
       const x = u.senaryolar[Number(el.dataset.i)];
-      if(!x){ ESP.UI.toast('Bu seçenek artık geçerli değil; yeniden hesapla.'); return; }
+      if(!x){ ESP.UI.toast(yz('esp.today.bu-secenek-artik-gecerli-deg')); return; }
       const g = await ESP.HedefPlan.geriAlHedef(h.id);
       if(!g.ok && ESP.HedefPlan.aktif(h.id)){ ESP.UI.toast(g.why || 'Eski plan geri alınamadı; hedef değişmedi.'); return; }
       await ESP.Hedefler.kaydet(H.uyarlamaUygula(u.hedef, x, paket, {}, bugun));
       S.ui.uyarla = null;
       S.ui.planOnizle = h.id;
-      ESP.UI.toast('Hedef yeni tarihle güncellendi; yeni planı önizleyip onayla.');
+      ESP.UI.toast(yz('esp.today.hedef-yeni-tarihle-guncellen'));
       ESP.App.render();
     },
     async 'hedef-plan-geri'(el){
@@ -1269,13 +1431,13 @@ ESP.Screens.today = (function(){
       const inp = document.getElementById('sig-answer');
       const r = await ESP.Signals.answer(el.dataset.id, inp ? inp.value : '');
       if(!r.ok){ ESP.UI.toast(r.error); return; }
-      ESP.UI.toast('Kaydedildi. Sonucu bir sonraki pencere gösterecek.');
+      ESP.UI.toast(yz('esp.today.kaydedildi-sonucu-bir-sonrak'));
       ESP.App.render();
     },
 
     async 'signal-dismiss'(el){
       await ESP.Signals.dismiss(el.dataset.id);
-      ESP.UI.toast('Soru kapatıldı.');
+      ESP.UI.toast(yz('esp.today.soru-kapatildi'));
       ESP.App.render();
     },
 
@@ -1324,7 +1486,7 @@ ESP.Screens.today = (function(){
     async 'add-session'(){
       const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
       const dakika = val('s-min');
-      if(!dakika){ ESP.UI.toast('Süre girilmedi'); return; }
+      if(!dakika){ ESP.UI.toast(yz('esp.today.sure-girilmedi')); return; }
       await M.addSession(gun(), {
         disc:S.ui.sessionDisc || 'lang',
         minutes:dakika,
@@ -1333,7 +1495,7 @@ ESP.Screens.today = (function(){
         ref:(S.ui.sessionDisc === 'reading' && val('s-book')) || null,
       });
       ESP.Memo.bitir();
-      ESP.UI.toast('Oturum kaydedildi');
+      ESP.UI.toast(yz('esp.today.oturum-kaydedildi'));
       ESP.App.render();
     },
 
@@ -1343,7 +1505,7 @@ ESP.Screens.today = (function(){
       ESP.Memo.bitir();
       ESP.App.render();
       /* Geri al: aynı nesne aynı sıraya döner (kimlik ve kesinlik korunur). */
-      if(s) ESP.UI.toast('Oturum silindi', { undo:async () => {
+      if(s) ESP.UI.toast(yz('esp.today.oturum-silindi'), { undo:async () => {
         M.ensureDay(g).sessions.splice(i, 0, s); await M.saveDay(g); ESP.App.render(); } });
     },
 
@@ -1351,7 +1513,7 @@ ESP.Screens.today = (function(){
       const el = document.getElementById('quick-text');
       const res = ESP.Parse.parseSession(el ? el.value : '');
       if(!res.rows.length && !res.unmatched.length){
-        ESP.UI.toast('Bir şey anlaşılmadı');
+        ESP.UI.toast(yz('esp.today.bir-sey-anlasilmadi'));
         return;
       }
       S.ui.quickParsed = res;
@@ -1381,7 +1543,7 @@ ESP.Screens.today = (function(){
 
   return {
     id:'today',
-    title:'Bugün',
+    title:yz('esp.today.bugun'),
     /* v5: üst satır tarih ve seri; büyük başlık günün cümlesi. Sıradaki
        işin adı kahraman kartında durur, başlıkta tekrar edilmez. */
     ust(){
@@ -1425,8 +1587,8 @@ ESP.Screens.today = (function(){
       const d = ESP.SRS.deckStatus();
       const ehs = ESP.Intellect.ehs(14);
       return [
-        { value:rows.length ? U.fmtNum(toplam) : '—', unit:'dk', label:'bugün' },
-        { value:String(d.due), label:'vadeli kart' },
+        { value:rows.length ? U.fmtNum(toplam) : '—', unit:'dk', label:yz('esp.today.bugun-2') },
+        { value:String(d.due), label:yz('esp.today.vadeli-kart') },
         { value:String(M.streak()), unit:'gün', label:'seri' },
         { value:ehs.cert === 'missing' ? '—' : U.fmtNum(Math.round(ehs.value)), label:'hacim' },
       ];
@@ -1439,7 +1601,7 @@ ESP.Screens.today = (function(){
     /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */
     ayrinti:{
       id:'gun',
-      title:'Günü düzenle',
+      title:yz('esp.today.gunu-duzenle'),
       subtitle(){ return 'Oturum girişi, hatırlatmalar, özet ve geçmiş'; },
       actions(){ return ''; },
       render:renderAyrinti, afterRender:afterRenderAyrinti, handle, change,

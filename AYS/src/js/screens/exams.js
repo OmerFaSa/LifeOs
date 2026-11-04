@@ -5,6 +5,158 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.exams.tumu':'Tümü',
+  'ays.exams.tyt':'TYT',
+  'ays.exams.ayt':'AYT',
+  'ays.exams.analiz-tamam':'Analiz tamam',
+  'ays.exams.analiz-borcu':'Analiz borcu',
+  'ays.exams.analiz-bekliyor':'Analiz bekliyor',
+  'ays.exams.simdi':'şimdi',
+  'ays.exams.siralama':'Sıralama',
+  'ays.exams.hedef-net':'Hedef net',
+  'ays.exams.henuz-deneme-eklenmedi-cumar':'Henüz deneme eklenmedi. Cumartesi denemesi yalnız skor üretmez; bir sonraki haftanın ders dağılımını belirler.',
+  'ays.exams.i-lk-denemeyi-ekle':'İlk denemeyi ekle',
+  'ays.exams.deneme-ailesi':'Deneme ailesi',
+  'ays.exams.deneme-hacmi':'Deneme hacmi',
+  'ays.exams.plan-gerceklesen':'Plan / gerçekleşen',
+  'ays.exams.yayin-merdiveni':'Yayın merdiveni',
+  'ays.exams.zorluk-kademesi':'Zorluk kademesi',
+  'ays.exams.net':'Net',
+  'ays.exams.dogruluk':'Doğruluk',
+  'ays.exams.etiket-yok':'etiket yok',
+  'ays.exams.i-lke':'İlke:',
+  'ays.exams.hatayi-duzenle':'hatayı düzenle',
+  'ays.exams.anahtarla-tutuyor':'anahtarla tutuyor',
+  'ays.exams.anahtarla-tutmuyor-guvenme':'anahtarla tutmuyor — güvenme',
+  'ays.exams.karsilastirilamadi':'karşılaştırılamadı',
+  'ays.exams.dogru':'doğru:',
+  'ays.exams.hata-kaydinda':'hata kaydında',
+  'ays.exams.hata-kaydina-ekle':'Hata kaydına ekle',
+  'ays.exams.konuyu-ac':'Konuyu aç',
+  'ays.exams.cozum':'Çözüm',
+  'ays.exams.modelin-cevabi':'Modelin cevabı (',
+  'ays.exams.anahtardaki':') anahtardaki',
+  'ays.exams.sikkina-varmadi-ya-model-yan':'şıkkına varmadı. Ya model yanılıyor ya anahtar; bu çözümü doğru sanma.',
+  'ays.exams.bu-soru-baska-bir-cihazda':'Bu soru başka bir cihazda çözüldü; çözüm orada duruyor.',
+  'ays.exams.soru-analizi':'Soru analizi',
+  'ays.exams.cevap-anahtariyla-soru-soru':'cevap anahtarıyla soru soru',
+  'ays.exams.d':'D ·',
+  'ays.exams.y':'Y ·',
+  'ays.exams.kayitta':'· kayıtta',
+  'ays.exams.cevap-anahtarindan-hesapland':'cevap anahtarından hesaplandı',
+  'ays.exams.cevaplari-girilmeyen-testler':'Cevapları girilmeyen testler:',
+  'ays.exams.kaydi-anahtara-gore-guncelle':'Kaydı anahtara göre güncelle',
+  'ays.exams.guncellemeyi-geri-al':'Güncellemeyi geri al',
+  'ays.exams.onceki-sayilar-sakli':'önceki sayılar saklı',
+  'ays.exams.fotograftaki-soruyu-cozdurme':'Fotoğraftaki soruyu çözdürmek için görüntü okuyabilen bir model gerekir (Ayarlar › Model); fotoğraf ekleyip konuyu elle seçebilirsin.',
+  'ays.exams.hepsini-hata-kaydina-ekle':'Hepsini hata kaydına ekle (',
+  'ays.exams.yanlis-ya-da-bos-soru':'Yanlış ya da boş soru yok.',
+  'ays.exams.cevap-anahtari':'Cevap anahtarı',
+  'ays.exams.abcde-ya-da-1-a-2-c':'ABCDE… ya da 1-A 2-C 3-E …',
+  'ays.exams.senin-cevaplarin':'Senin cevapların',
+  'ays.exams.bos-biraktigin-soru-icin-nok':'boş bıraktığın soru için nokta (.)',
+  'ays.exams.cevap-anahtari-ve-cevaplarin':'Cevap anahtarı ve cevapların',
+  'ays.exams.vazgec':'Vazgeç',
+  'ays.exams.kaydet':'Kaydet',
+  'ays.exams.yayin-karnesi':'Yayın karnesi',
+  'ays.exams.deneme':'deneme ·',
+  'ays.exams.hata-kaydi':'hata kaydı (',
+  'ays.exams.tanesinin-konusu-belli':'tanesinin konusu belli)',
+  'ays.exams.en-cok-kacirdigin-konular':'En çok kaçırdığın konular',
+  'ays.exams.hata-bu-yayindaki-hatalarini':'hata · bu yayındaki hatalarının %',
+  'ays.exams.yalniz-yanlis-ve-bos-sorular':'Yalnız yanlış ve boş sorular kayda girdiği için «o konudan kaç soru soruldu» bilinmez; pay, hatalarının dağılımıdır.',
+  'ays.exams.konu-karnesi-icin-bu-yayinda':'Konu karnesi için bu yayında konusu belli en az',
+  'ays.exams.hata-gerekir':'hata gerekir.',
+  'ays.exams.deneme-bulunamadi':'Deneme bulunamadı.',
+  'ays.exams.denemelere-don':'Denemelere dön',
+  'ays.exams.denemeler':'Denemeler',
+  'ays.exams.denemeyi-sil':'denemeyi sil',
+  'ays.exams.toplam-net':'toplam net',
+  'ays.exams.hata-analizi':'Hata analizi',
+  'ays.exams.hata-ekle':'Hata ekle',
+  'ays.exams.henuz-hata-kaydedilmedi-her':'Henüz hata kaydedilmedi. Her yanlış ve boş için konu ve etiket girilir; yavaş sorular ayrıca işaretlenir.',
+  'ays.exams.analiz-protokolu':'Analiz protokolü',
+  'ays.exams.24-saat-icinde':'24 saat içinde',
+  'ays.exams.analizi-tamamla':'Analizi tamamla',
+  'ays.exams.sure-kaydi':'Süre kaydı',
+  'ays.exams.test-basina-harcanan-dakika':'Test başına harcanan dakika',
+  'ays.exams.kalan-toplam-sure':'kalan toplam süre',
+  'ays.exams.soru-isaretlendi':'soru işaretlendi',
+  'ays.exams.geri-al':'Geri al',
+  'ays.exams.sonraki-test':'Sonraki test',
+  'ays.exams.bitir':'Bitir',
+  'ays.exams.testler':'Testler',
+  'ays.exams.tiklayarak-gec-sure-o':'Tıklayarak geç — süre o teste yazılır',
+  'ays.exams.nasil-kullanilir':'Nasıl kullanılır?',
+  'ays.exams.son-isaretler':'Son işaretler',
+  'ays.exams.soru':'. soru',
+  'ays.exams.sn':'sn ·',
+  'ays.exams.henuz-isaret-yok':'Henüz işaret yok.',
+  'ays.exams.sureli-oturum':'Süreli oturum',
+  'ays.exams.sinav-kosullarinda-prova-sur':'Sınav koşullarında prova — süre otomatik ölçülür',
+  'ays.exams.sablon':'Şablon',
+  'ays.exams.yayin':'Yayın',
+  'ays.exams.or-345':'ör. 345',
+  'ays.exams.baslat':'Başlat',
+  'ays.exams.oturumu-bitir':'Oturumu bitir',
+  'ays.exams.netleri-gir-sureler-zaten':'Netleri gir — süreler zaten ölçüldü',
+  'ays.exams.toplam-sure':'Toplam süre',
+  'ays.exams.sure-sapmasi':'Süre sapması',
+  'ays.exams.i-saret':'İşaret',
+  'ays.exams.plan':'· plan',
+  'ays.exams.i-ptal-et':'İptal et',
+  'ays.exams.tarih':'Tarih',
+  'ays.exams.yayin-aile':'Yayın / aile',
+  'ays.exams.or-345-bilgi-sarmal-endemik':'ör. 345, Bilgi Sarmal, Endemik',
+  'ays.exams.toplam-sure-dk':'Toplam süre (dk)',
+  'ays.exams.netini-kac-tahmin-ediyorsun':'Netini kaç tahmin ediyorsun? (isteğe bağlı)',
+  'ays.exams.or-62':'ör. 62',
+  'ays.exams.sonuc-kagidinin-fotografinda':'Sonuç kâğıdının fotoğrafından doldur',
+  'ays.exams.deneme-ekle':'Deneme ekle',
+  'ays.exams.hizli-kayit-hedef-60':'Hızlı kayıt — hedef 60 saniyenin altı',
+  'ays.exams.test-sonuclari':'Test sonuçları',
+  'ays.exams.test-adi':'test adı',
+  'ays.exams.konu':'— konu —',
+  'ays.exams.kimlik':'Kimlik',
+  'ays.exams.test':'Test',
+  'ays.exams.soru-no':'Soru no',
+  'ays.exams.durum':'Durum',
+  'ays.exams.ders-konu':'Ders – konu',
+  'ays.exams.etiket-ve-kok-neden':'Etiket ve kök neden',
+  'ays.exams.etiket':'Etiket',
+  'ays.exams.harcanan-sure-sn':'Harcanan süre (sn)',
+  'ays.exams.kok-neden-tek-somut':'Kök neden — tek somut cümle',
+  'ays.exams.or-birimi-cevirmeden-isleme':'ör. birimi çevirmeden işleme girdim',
+  'ays.exams.dogru-ilke-2-3-satir':'Doğru ilke (2–3 satır)',
+  'ays.exams.tam-cozum-kopyalanmaz-genell':'Tam çözüm kopyalanmaz; genellenebilir ilke yazılır.',
+  'ays.exams.benzer-soru-kaynak':'Benzer soru — kaynak / test no',
+  'ays.exams.or-345-tyt-mat-test':'ör. 345 TYT Mat test 12 / 7',
+  'ays.exams.tamir-recetesi':'Tamir reçetesi',
+  'ays.exams.sil':'Sil',
+  'ays.exams.en-olasi':'en olası.',
+  'ays.exams.tahmin-icin-3-tam-deneme':'Tahmin için 3 tam deneme gerekir.',
+  'ays.exams.hedefe-kalan':'Hedefe kalan',
+  'ays.exams.kaldi':'kaldı.',
+  'ays.exams.sonraki-deneme':'Sonraki deneme',
+  'ays.exams.sureli-basla':'Süreli başla',
+  'ays.exams.gidisat':'Gidişat',
+  'ays.exams.tyt-neti':'TYT neti',
+  'ays.exams.henuz-tam-tyt-denemesi-yok':'Henüz tam TYT denemesi yok; net ilk denemeyle çıkar.',
+  'ays.exams.deneme-gir':'Deneme gir',
+  'ays.exams.son':'Son ',
+  'ays.exams.son-deneme-ders-ders':'Son deneme · ders ders',
+  'ays.exams.en-iyi-tyt':'En iyi TYT',
+  'ays.exams.analiz-bekleyen':'Analiz bekleyen',
+  'ays.exams.oturum-basladi-kronometre-is':'Oturum başladı — kronometre işliyor',
+  'ays.exams.oturum-kaydedildi-net':'Oturum kaydedildi · net ',
+  'ays.exams.en-az-bir-test-doldurulmali':'En az bir test doldurulmalı',
+  'ays.exams.deneme-kaydedildi-net':'Deneme kaydedildi · net ',
+  'ays.exams.deneme-silindi':'Deneme silindi',
+  'ays.exams.analiz-tamamlandi':'Analiz tamamlandı',
+  'ays.exams.hata-silindi':'Hata silindi',
+  'ays.exams.deneme-2':'Deneme',
+});
 window.LIFEOS.PARCA.sayfa({ id:'exams', modul:'ays', cekmece:'calisma', ad:'Deneme', ikon:'exam', sira:20 });
 
 R.Screens.exams = (function(){
@@ -12,13 +164,13 @@ R.Screens.exams = (function(){
   const { html, raw, when, map } = R.h;
   const K = R.C;
 
-  const FILTERS = [{ value:'all', label:'Tümü' }, { value:'TYT', label:'TYT' }, { value:'AYT', label:'AYT' }];
+  const FILTERS = [{ value:'all', label:yz('ays.exams.tumu') }, { value:'TYT', label:yz('ays.exams.tyt') }, { value:'AYT', label:yz('ays.exams.ayt') }];
 
   function analysisState(exam){
-    if(exam.analysisCompletedAt) return { label:'Analiz tamam', tone:'ok' };
+    if(exam.analysisCompletedAt) return { label:yz('ays.exams.analiz-tamam'), tone:'ok' };
     const hours = (Date.now() - new Date(exam.date+'T12:00:00').getTime())/3600000;
-    if(hours > 24) return { label:'Analiz borcu', tone:'danger' };
-    return { label:'Analiz bekliyor', tone:'warn' };
+    if(hours > 24) return { label:yz('ays.exams.analiz-borcu'), tone:'danger' };
+    return { label:yz('ays.exams.analiz-bekliyor'), tone:'warn' };
   }
 
   /* ---------- liste ---------- */
@@ -59,7 +211,7 @@ R.Screens.exams = (function(){
       return html`<div class="${'volrow' + (active ? ' is-now' : '')}">
         <div class="volrow__head">
           <span class="volrow__period">${v.period}</span>
-          ${when(active, () => K.Badge({ label:'şimdi', tone:'ok' }))}
+          ${when(active, () => K.Badge({ label:yz('ays.exams.simdi'), tone:'ok' }))}
         </div>
         <div class="volrow__cells">
           ${pill('TYT', v.actual.tyt, v.tyt)}
@@ -76,7 +228,7 @@ R.Screens.exams = (function(){
     const G = (window.LIFEOS || {}).GRAFIK;
     if(!G) return '';
     const est = C.estimateScore();
-    return K.Kutu({ ad:'Sıralama', yuva:est.ok ? 'tahmin' : 'veri yok',
+    return K.Kutu({ ad:yz('ays.exams.siralama'), yuva:est.ok ? 'tahmin' : 'veri yok',
       govde:raw(G.aralikHtml(est.ok ? { alt:est.rankBest, ust:est.rankWorst, olasi:est.rank, min:1,
           max:Math.round(Math.max(est.rankWorst, est.targetRank) * 1.15), ters:true,
           dayanak:est.samples, dayanakBirim:'tam deneme' }
@@ -98,7 +250,7 @@ R.Screens.exams = (function(){
     const simdi = r2(M.examNet(tyt[tyt.length - 1]));
     const hafta = Math.max(1, Math.ceil(U.diffDays(U.todayISO(), R.PLAN.examTytISO) / 7));
     const kalan = Math.max(0, gap.netDiff);
-    return kutu('Hedefe kalan', 'tahmin', VT().hedefeKalan({ ad:'Hedef net', simdi, hedef:r2(simdi + kalan),
+    return kutu('Hedefe kalan', 'tahmin', VT().hedefeKalan({ ad:yz('ays.exams.hedef-net'), simdi, hedef:r2(simdi + kalan),
       kalanHafta:hafta, haftalik:gap.reached ? null : r2(kalan / hafta), birim:'net', kesinlik:'estimated',
       not:gap.reached ? 'Hedef bandın üstündesin; bandı koru' : '' }));
   }
@@ -145,13 +297,13 @@ R.Screens.exams = (function(){
       ? html`<div class="list">${map(pg.items, ExamRow)}</div>
              ${K.Pager({ page:pg.page, pages:pg.pages, total:pg.total, act:'exam-page' })}`
       : K.Empty({ icon:'exam',
-          text:'Henüz deneme eklenmedi. Cumartesi denemesi yalnız skor üretmez; bir sonraki haftanın ders dağılımını belirler.',
-          action:K.Button({ label:'İlk denemeyi ekle', icon:'plus', tone:'primary', act:'new-exam' }) });
+          text:yz('ays.exams.henuz-deneme-eklenmedi-cumar'),
+          action:K.Button({ label:yz('ays.exams.i-lk-denemeyi-ekle'), icon:'plus', tone:'primary', act:'new-exam' }) });
 
     return K.Grid([
       K.Span(8, K.Stack([
         K.Row([
-          K.Segmented({ items:FILTERS, value:filter, act:'exam-filter', aria:'Deneme ailesi' }),
+          K.Segmented({ items:FILTERS, value:filter, act:'exam-filter', aria:yz('ays.exams.deneme-ailesi') }),
           html`<span class="small dim">${U.plural(list.length, 'kayıt', 'kayıt')}</span>`,
         ], { between:true, wrap:true }),
         when(filter !== 'all' && VT(), () => raw(VT().suzgecCipleri({ cipler:[{ ad:filter, modul:'ays', act:'exam-filter', data:{ 'data-value':'all' } }],
@@ -163,8 +315,8 @@ R.Screens.exams = (function(){
         siralamaKutusu(),
         hedefeKalanKutusu(),
         denemeTakvimi(),
-        K.Card({ title:'Deneme hacmi', hint:'exam-volume', sub:'Plan / gerçekleşen', body:volumeTable() }),
-        K.Card({ title:'Yayın merdiveni', hint:'publisher', sub:'Zorluk kademesi',
+        K.Card({ title:yz('ays.exams.deneme-hacmi'), hint:'exam-volume', sub:yz('ays.exams.plan-gerceklesen'), body:volumeTable() }),
+        K.Card({ title:yz('ays.exams.yayin-merdiveni'), hint:'publisher', sub:yz('ays.exams.zorluk-kademesi'),
           body:html`<div class="ladder">${map(R.PUBLISHER_LADDER, l => html`
             <div class="ladder__row"><span class="ladder__level">${l.level}</span>
               <span class="muted">${l.detail}</span></div>`)}</div>` }),
@@ -210,7 +362,7 @@ R.Screens.exams = (function(){
       ];
     });
     return K.Table({ rows, headers:['Test', { label:'D', num:true }, { label:'Y', num:true },
-      { label:'B', num:true }, { label:'Net', num:true }, { label:'Doğruluk', num:true }] });
+      { label:'B', num:true }, { label:yz('ays.exams.net'), num:true }, { label:yz('ays.exams.dogruluk'), num:true }] });
   }
 
   function protocolList(steps){
@@ -229,12 +381,12 @@ R.Screens.exams = (function(){
         <div class="grow">
           <div class="row-sm"><b class="small">${label}</b>
             ${R.ERROR_TAGS[e.tag] ? K.Badge({ label:e.tag+' · '+R.ERROR_TAGS[e.tag].name, tone:'muted' })
-              : K.Badge({ label:'etiket yok', tone:'warn' })}
+              : K.Badge({ label:yz('ays.exams.etiket-yok'), tone:'warn' })}
             ${when(e.status, () => K.Badge({ label:e.status, tone:'muted' }))}</div>
           <div class="tiny dim">${e.rootCause || 'kök neden yazılmadı'}</div>
-          ${when(e.principle, () => html`<div class="tiny">İlke: ${e.principle}</div>`)}
+          ${when(e.principle, () => html`<div class="tiny">${yz('ays.exams.i-lke')} ${e.principle}</div>`)}
         </div>
-        ${K.IconButton({ icon:'edit', size:'sm', plain:true, aria:'hatayı düzenle', act:'edit-error', data:{ 'data-id':e.id } })}
+        ${K.IconButton({ icon:'edit', size:'sm', plain:true, aria:yz('ays.exams.hatayi-duzenle'), act:'edit-error', data:{ 'data-id':e.id } })}
       </div>`;
   }
 
@@ -297,9 +449,9 @@ R.Screens.exams = (function(){
   }
 
   function cozumRozeti(tutar){
-    if(tutar === true) return K.Badge({ label:'anahtarla tutuyor', tone:'ok' });
-    if(tutar === false) return K.Badge({ label:'anahtarla tutmuyor — güvenme', tone:'danger' });
-    return K.Badge({ label:'karşılaştırılamadı', tone:'warn' });
+    if(tutar === true) return K.Badge({ label:yz('ays.exams.anahtarla-tutuyor'), tone:'ok' });
+    if(tutar === false) return K.Badge({ label:yz('ays.exams.anahtarla-tutmuyor-guvenme'), tone:'danger' });
+    return K.Badge({ label:yz('ays.exams.karsilastirilamadi'), tone:'warn' });
   }
 
   function SoruSatiri(exam, x, hazir){
@@ -315,7 +467,7 @@ R.Screens.exams = (function(){
           <div class="row-sm wrap">
             <b class="num">${x.no}.</b>
             ${K.Badge({ label:x.durum === 'bos' ? 'boş' : 'yanlış', tone:x.durum === 'bos' ? 'muted' : 'danger' })}
-            <span class="small">${when(x.durum !== 'bos', () => 'senin: ' + x.cevap + ' · ')}doğru: <b>${x.anahtar}</b></span>
+            <span class="small">${when(x.durum !== 'bos', () => 'senin: ' + x.cevap + ' · ')}${yz('ays.exams.dogru')} <b>${x.anahtar}</b></span>
           </div>
           <div class="row-sm wrap">
             ${when(foto, () => html`<a class="dsoru__foto" href="${foto}" target="_blank" rel="noopener"
@@ -327,24 +479,24 @@ R.Screens.exams = (function(){
             </label>
             ${when(foto, () => K.Button({ label:a.cozuldu || cozum ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'da-coz',
               disabled:!hazir, title:hazir ? '' : 'Görüntü okuyabilen bir model gerekir (Ayarlar › Model)', data:{ 'data-key':x.key } }))}
-            ${x.hata ? K.Badge({ label:'hata kaydında', tone:'ok' })
-              : K.Button({ label:'Hata kaydına ekle', size:'sm', act:'da-hata', data:{ 'data-key':x.key } })}
+            ${x.hata ? K.Badge({ label:yz('ays.exams.hata-kaydinda'), tone:'ok' })
+              : K.Button({ label:yz('ays.exams.hata-kaydina-ekle'), size:'sm', act:'da-hata', data:{ 'data-key':x.key } })}
           </div>
         </div>
         <div class="row-sm wrap mt-8">
           ${K.Select({ size:'sm', options:R.DenemeAnaliz.konuSecenekleri(exam, x.test), value:a.topicRef || '',
             change:'da-konu', aria:x.test + ' ' + x.no + '. sorunun konusu', data:{ 'data-key':x.key } })}
           ${when(konu, () => K.Badge({ label:a.konuKaynak === 'elle' ? 'elle' : 'tahmin', tone:'muted' }))}
-          ${when(konu, () => K.Button({ label:'Konuyu aç', size:'sm', tone:'ghost', act:'ogren-git',
+          ${when(konu, () => K.Button({ label:yz('ays.exams.konuyu-ac'), size:'sm', tone:'ghost', act:'ogren-git',
             data:{ 'data-route':'anlatim', 'data-subject':konu.subject.id, 'data-topic':konu.topic.id } }))}
         </div>
         ${when(cozum, () => html`
           <details class="dsoru__cozum mt-8">
-            <summary class="small">Çözüm ${cozumRozeti(tutar)}${when(a.modelCevap, () => html` <span class="tiny dim">model: ${a.modelCevap}</span>`)}</summary>
-            ${when(tutar === false, () => html`<p class="small mt-8">Modelin cevabı (${a.modelCevap}) anahtardaki ${x.anahtar} şıkkına varmadı. Ya model yanılıyor ya anahtar; bu çözümü doğru sanma.</p>`)}
+            <summary class="small">${yz('ays.exams.cozum')} ${cozumRozeti(tutar)}${when(a.modelCevap, () => html` <span class="tiny dim">model: ${a.modelCevap}</span>`)}</summary>
+            ${when(tutar === false, () => html`<p class="small mt-8">${yz('ays.exams.modelin-cevabi')}${a.modelCevap}${yz('ays.exams.anahtardaki')} ${x.anahtar} ${yz('ays.exams.sikkina-varmadi-ya-model-yan')}</p>`)}
             <div class="small dsoru__metin mt-8">${cozum}</div>
           </details>`)}
-        ${when(!cozum && a.cozuldu, () => html`<p class="tiny dim mt-8">Bu soru başka bir cihazda çözüldü; çözüm orada duruyor.</p>`)}
+        ${when(!cozum && a.cozuldu, () => html`<p class="tiny dim mt-8">${yz('ays.exams.bu-soru-baska-bir-cihazda')}</p>`)}
       </div>`;
   }
 
@@ -356,7 +508,7 @@ R.Screens.exams = (function(){
       size:'sm', tone:oz.analizli ? 'ghost' : 'primary', act:'da-giris', data:{ 'data-id':exam.id } });
     if(!oz.analizli){
       const yalnizAnahtar = oz.testler.some(t => t.anahtarVar);
-      return K.Card({ title:'Soru analizi', sub:'cevap anahtarıyla soru soru', actions:giris,
+      return K.Card({ title:yz('ays.exams.soru-analizi'), sub:yz('ays.exams.cevap-anahtariyla-soru-soru'), actions:giris,
         body:K.Empty({ icon:'list', text:yalnizAnahtar
           ? 'Anahtar girildi; kendi cevaplarını da yazınca yanlış ve boş sorular tek tek listelenir.'
           : 'Cevap anahtarını ve kendi cevaplarını girersen yanlış ve boş sorular tek tek listelenir: fotoğrafını ekleyip çözdürebilir, konusunu bulup hata kaydına atabilirsin.' }) });
@@ -368,32 +520,32 @@ R.Screens.exams = (function(){
     const ozetSatiri = t => {
       const s = t.sonuc;
       return html`<div class="row between wrap gap-8 small">
-        <span><b>${t.ad}</b> · ${s.d} D · ${s.y} Y · ${s.b} B${s.iptal ? ' · ' + s.iptal + ' iptal' : ''}</span>
-        <span class="num">net ${U.fmtNet(s.net)}${when(t.fark, () => html` <span class="tiny dim">· kayıtta ${t.kayit.d}/${t.kayit.y}/${t.kayit.b == null ? '—' : t.kayit.b}</span>`)}</span>
+        <span><b>${t.ad}</b> · ${s.d} ${yz('ays.exams.d')} ${s.y} ${yz('ays.exams.y')} ${s.b} B${s.iptal ? ' · ' + s.iptal + ' iptal' : ''}</span>
+        <span class="num">net ${U.fmtNet(s.net)}${when(t.fark, () => html` <span class="tiny dim">${yz('ays.exams.kayitta')} ${t.kayit.d}/${t.kayit.y}/${t.kayit.b == null ? '—' : t.kayit.b}</span>`)}</span>
       </div>`;
     };
     return K.Card({
-      title:'Soru analizi', sub:'cevap anahtarından hesaplandı', actions:giris,
+      title:yz('ays.exams.soru-analizi'), sub:yz('ays.exams.cevap-anahtarindan-hesapland'), actions:giris,
       body:html`
         <div class="stack-xs">${map(oz.testler.filter(t => t.sonuc), ozetSatiri)}</div>
-        ${when(oz.testler.some(t => t.anahtarVar && !t.cevapVar), () => html`<p class="tiny dim mt-8">Cevapları girilmeyen testler: ${oz.testler.filter(t => t.anahtarVar && !t.cevapVar).map(t => t.ad).join(', ')}.</p>`)}
+        ${when(oz.testler.some(t => t.anahtarVar && !t.cevapVar), () => html`<p class="tiny dim mt-8">${yz('ays.exams.cevaplari-girilmeyen-testler')} ${oz.testler.filter(t => t.anahtarVar && !t.cevapVar).map(t => t.ad).join(', ')}.</p>`)}
         ${when(oz.fark, () => html`<div class="mt-12">${K.Notice({ tone:'warn',
           body:'Anahtardan hesaplanan sonuç kayıttaki sayılardan farklı. Kayıt kendiliğinden değişmez; istersen anahtara göre güncelle.' })}
-          <div class="row-sm mt-8">${K.Button({ label:'Kaydı anahtara göre güncelle', size:'sm', act:'da-guncelle', data:{ 'data-id':exam.id } })}</div></div>`)}
-        ${when(exam.anahtarOncesi, () => html`<div class="row-sm mt-8">${K.Button({ label:'Güncellemeyi geri al', size:'sm', tone:'ghost',
-          act:'da-geri', data:{ 'data-id':exam.id } })}<span class="tiny dim">önceki sayılar saklı</span></div>`)}
-        ${when(!hazir, () => html`<p class="tiny dim mt-12">Fotoğraftaki soruyu çözdürmek için görüntü okuyabilen bir model gerekir (Ayarlar › Model); fotoğraf ekleyip konuyu elle seçebilirsin.</p>`)}
+          <div class="row-sm mt-8">${K.Button({ label:yz('ays.exams.kaydi-anahtara-gore-guncelle'), size:'sm', act:'da-guncelle', data:{ 'data-id':exam.id } })}</div></div>`)}
+        ${when(exam.anahtarOncesi, () => html`<div class="row-sm mt-8">${K.Button({ label:yz('ays.exams.guncellemeyi-geri-al'), size:'sm', tone:'ghost',
+          act:'da-geri', data:{ 'data-id':exam.id } })}<span class="tiny dim">${yz('ays.exams.onceki-sayilar-sakli')}</span></div>`)}
+        ${when(!hazir, () => html`<p class="tiny dim mt-12">${yz('ays.exams.fotograftaki-soruyu-cozdurme')}</p>`)}
         ${liste.length ? html`
           <div class="row between wrap gap-8 mt-12">
             <span class="small">${U.plural(liste.length, 'yanlış ya da boş soru', 'yanlış ya da boş soru')}</span>
-            ${when(eksikHata, () => K.Button({ label:'Hepsini hata kaydına ekle (' + eksikHata + ')', size:'sm', act:'da-hepsi', data:{ 'data-id':exam.id } }))}
+            ${when(eksikHata, () => K.Button({ label:yz('ays.exams.hepsini-hata-kaydina-ekle') + eksikHata + ')', size:'sm', act:'da-hepsi', data:{ 'data-id':exam.id } }))}
           </div>
           <div data-raf-tam>${map(gruplar.filter(g => g.sorular.length), g => html`
             <details class="dsoru__grup mt-8" ${raw('open')}>
               <summary class="small strong">${g.t.ad} · ${g.sorular.length}</summary>
               <div class="stack-sm mt-8">${map(g.sorular, x => SoruSatiri(exam, x, hazir))}</div>
             </details>`)}</div>`
-          : html`<p class="small mt-12">Yanlış ya da boş soru yok.</p>`}`,
+          : html`<p class="small mt-12">${yz('ays.exams.yanlis-ya-da-bos-soru')}</p>`}`,
     });
   }
 
@@ -404,22 +556,22 @@ R.Screens.exams = (function(){
       return html`
         <div class="card card--flat card--pad-sm stack-sm">
           <b class="small">${t.name}${q ? ' · ' + q + ' soru' : ''}</b>
-          ${K.Field({ label:'Cevap anahtarı', input:K.Textarea({ id:'da-a-' + i, rows:2, value:(exam.anahtar || {})[t.name] || '',
-            placeholder:'ABCDE… ya da 1-A 2-C 3-E …', aria:t.name + ' cevap anahtarı' }) })}
-          ${K.Field({ label:'Senin cevapların', input:K.Textarea({ id:'da-c-' + i, rows:2, value:(exam.cevaplar || {})[t.name] || '',
-            placeholder:'boş bıraktığın soru için nokta (.)', aria:t.name + ' cevapların' }) })}
+          ${K.Field({ label:yz('ays.exams.cevap-anahtari'), input:K.Textarea({ id:'da-a-' + i, rows:2, value:(exam.anahtar || {})[t.name] || '',
+            placeholder:yz('ays.exams.abcde-ya-da-1-a-2-c'), aria:t.name + ' cevap anahtarı' }) })}
+          ${K.Field({ label:yz('ays.exams.senin-cevaplarin'), input:K.Textarea({ id:'da-c-' + i, rows:2, value:(exam.cevaplar || {})[t.name] || '',
+            placeholder:yz('ays.exams.bos-biraktigin-soru-icin-nok'), aria:t.name + ' cevapların' }) })}
         </div>`;
     });
     UI.sheet({
-      title:'Cevap anahtarı ve cevapların', subtitle:exam.type + (exam.publisher ? ' · ' + exam.publisher : ''), wide:true,
+      title:yz('ays.exams.cevap-anahtari-ve-cevaplarin'), subtitle:exam.type + (exam.publisher ? ' · ' + exam.publisher : ''), wide:true,
       body:String(K.Stack([
         K.Notice({ tone:'info', body:'Harfleri yan yana yaz ya da yayının sayfasından «1-A 2-C …» biçiminde yapıştır; boşluklar yok sayılır. '
           + 'Boş bıraktığın soru için nokta (.), iptal edilen soru için anahtara yıldız (*) yaz. Bir testte hata varsa hiçbir test kaydedilmez ve nedeni yazılır.' }),
         html`<div class="stack-sm">${map(alanlar, x => x)}</div>`,
         raw('<div id="da-not" class="small" role="status"></div>'),
       ])),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'da-kaydet', data:{ 'data-id':exam.id } })}`),
+      footer:String(html`${K.Button({ label:yz('ays.exams.vazgec'), act:'sheet-close' })}
+        ${K.Button({ label:yz('ays.exams.kaydet'), tone:'primary', act:'da-kaydet', data:{ 'data-id':exam.id } })}`),
     });
   }
 
@@ -431,23 +583,23 @@ R.Screens.exams = (function(){
     const testSatiri = t => html`<div class="row between small"><span>${t.ad}</span>
       <span class="num">${t.d + t.y ? 'doğruluk %' + U.pct(t.d, t.d + t.y) : '—'} <span class="tiny dim">· ${t.deneme} deneme</span></span></div>`;
     return K.Card({
-      title:'Yayın karnesi', sub:k.yayin + ' · hesaplandı',
+      title:yz('ays.exams.yayin-karnesi'), sub:k.yayin + ' · hesaplandı',
       body:html`
-        <p class="tiny dim">${k.deneme} deneme · ${k.hata} hata kaydı (${k.konulu} tanesinin konusu belli)</p>
+        <p class="tiny dim">${k.deneme} ${yz('ays.exams.deneme')} ${k.hata} ${yz('ays.exams.hata-kaydi')}${k.konulu} ${yz('ays.exams.tanesinin-konusu-belli')}</p>
         ${when(k.testler.length, () => html`<div class="stack-xs mt-8">${map(k.testler, testSatiri)}</div>`)}
         ${k.yeterli ? html`
-          <div class="mono-label mt-12">En çok kaçırdığın konular</div>
+          <div class="mono-label mt-12">${yz('ays.exams.en-cok-kacirdigin-konular')}</div>
           <div class="stack-xs mt-8">${map(k.konular, x => html`<div class="small">
-            <b>${x.ad}</b> — ${x.n} hata · bu yayındaki hatalarının %${x.pay}${x.otekiPay != null ? ' (öteki yayınlarda %' + x.otekiPay + ')' : ''}</div>`)}</div>
-          <p class="tiny dim mt-8">Yalnız yanlış ve boş sorular kayda girdiği için «o konudan kaç soru soruldu» bilinmez; pay, hatalarının dağılımıdır.</p>`
-          : html`<p class="small mt-8">Konu karnesi için bu yayında konusu belli en az ${A.ESIK} hata gerekir.</p>`}`,
+            <b>${x.ad}</b> — ${x.n} ${yz('ays.exams.hata-bu-yayindaki-hatalarini')}${x.pay}${x.otekiPay != null ? ' (öteki yayınlarda %' + x.otekiPay + ')' : ''}</div>`)}</div>
+          <p class="tiny dim mt-8">${yz('ays.exams.yalniz-yanlis-ve-bos-sorular')}</p>`
+          : html`<p class="small mt-8">${yz('ays.exams.konu-karnesi-icin-bu-yayinda')} ${A.ESIK} ${yz('ays.exams.hata-gerekir')}</p>`}`,
     });
   }
 
   function detailView(id){
     const exam = S.exams.find(e => e.id === id);
-    if(!exam) return K.Empty({ text:'Deneme bulunamadı.',
-      action:K.Button({ label:'Denemelere dön', act:'exam-back' }) });
+    if(!exam) return K.Empty({ text:yz('ays.exams.deneme-bulunamadi'),
+      action:K.Button({ label:yz('ays.exams.denemelere-don'), act:'exam-back' }) });
 
     const errs = S.errors.filter(e => e.examId === id);
     const st = analysisState(exam);
@@ -459,9 +611,9 @@ R.Screens.exams = (function(){
 
     return K.Grid([
       K.Span(12, K.Row([
-        K.Button({ label:'Denemeler', icon:'left', size:'sm', tone:'ghost', act:'exam-back' }),
+        K.Button({ label:yz('ays.exams.denemeler'), icon:'left', size:'sm', tone:'ghost', act:'exam-back' }),
         html`<div class="row-sm">${K.Badge({ label:st.label, tone:st.tone })}
-          ${K.IconButton({ icon:'trash', size:'sm', aria:'denemeyi sil', act:'delete-exam', data:{ 'data-id':exam.id } })}</div>`,
+          ${K.IconButton({ icon:'trash', size:'sm', aria:yz('ays.exams.denemeyi-sil'), act:'delete-exam', data:{ 'data-id':exam.id } })}</div>`,
       ], { between:true, wrap:true })),
 
       K.Span(8, K.Stack([
@@ -469,20 +621,20 @@ R.Screens.exams = (function(){
           title:exam.type, sub:meta,
           actions:html`<div class="right">
             <div class="num exam-net exam-net--lg">${U.fmtNet(M.examNet(exam))}</div>
-            <div class="tiny dim">toplam net</div></div>`,
+            <div class="tiny dim">${yz('ays.exams.toplam-net')}</div></div>`,
           body:testTable(exam),
         }),
         soruAnalizi(exam),
         karsilastirma(exam),
         K.Card({
-          title:'Hata analizi', sub:U.plural(errs.length, 'kayıt', 'kayıt'),
-          actions:K.Button({ label:'Hata ekle', icon:'plus', size:'sm', tone:'primary', act:'new-error', data:{ 'data-exam':exam.id } }),
+          title:yz('ays.exams.hata-analizi'), sub:U.plural(errs.length, 'kayıt', 'kayıt'),
+          actions:K.Button({ label:yz('ays.exams.hata-ekle'), icon:'plus', size:'sm', tone:'primary', act:'new-error', data:{ 'data-exam':exam.id } }),
           body:html`
             ${when(errs.length, () => html`<div class="mb-12">${nedenler(errs) ? raw(nedenler(errs)) : raw(UI.stackBar(segs))}</div>`)}
             ${errs.length
               ? html`<div class="list">${map(errs, ErrorRow)}</div>`
               : K.Empty({ icon:'list',
-                  text:'Henüz hata kaydedilmedi. Her yanlış ve boş için konu ve etiket girilir; yavaş sorular ayrıca işaretlenir.' })}`,
+                  text:yz('ays.exams.henuz-hata-kaydedilmedi-her') })}`,
         }),
       ])),
 
@@ -491,17 +643,17 @@ R.Screens.exams = (function(){
         yayinKarnesi(exam),
         hizSeridi(exam),
         K.Card({
-          title:'Analiz protokolü', hint:'analysis-protocol', sub:'24 saat içinde',
+          title:yz('ays.exams.analiz-protokolu'), hint:'analysis-protocol', sub:yz('ays.exams.24-saat-icinde'),
           body:html`
             ${protocolList(steps)}
             ${exam.analysisCompletedAt
               ? html`<div class="mt-12">${K.Notice({ tone:'ok',
                   body:'Analiz '+U.fmtDate(exam.analysisCompletedAt.slice(0, 10))+' tarihinde tamamlandı.' })}</div>`
-              : K.Button({ label:'Analizi tamamla', icon:'check', tone:'primary', block:true,
+              : K.Button({ label:yz('ays.exams.analizi-tamamla'), icon:'check', tone:'primary', block:true,
                   class:'mt-12', act:'complete-analysis', data:{ 'data-id':exam.id } })}`,
         }),
         K.Card({
-          title:'Süre kaydı', hint:'time-drift', sub:'Test başına harcanan dakika',
+          title:yz('ays.exams.sure-kaydi'), hint:'time-drift', sub:yz('ays.exams.test-basina-harcanan-dakika'),
           body:K.Stack(map(exam.tests, (t, i) => html`
             <div class="row between"><span class="small">${t.name}</span>
               <div class="row-sm">${K.Input({ type:'number', size:'sm', numeric:true, class:'input--mins',
@@ -543,12 +695,12 @@ R.Screens.exams = (function(){
             <div>
               <div class="mono-label">${run.name}${run.publisher ? ' · ' + run.publisher : ''}</div>
               <div class="${left <= 300 ? 'runclock is-low' : 'runclock'}" id="run-total">${U.fmtClock(left)}</div>
-              <div class="tiny dim">kalan toplam süre</div>
+              <div class="tiny dim">${yz('ays.exams.kalan-toplam-sure')}</div>
             </div>
             <div class="right">
               <div class="mono-label">${t.name}</div>
               <div class="runclock runclock--sm" id="run-test">${U.fmtClock(R.ExamRun.elapsedTest())}</div>
-              <div class="tiny dim">${marks.length} / ${t.q} soru işaretlendi</div>
+              <div class="tiny dim">${marks.length} / ${t.q} ${yz('ays.exams.soru-isaretlendi')}</div>
             </div>
           </div>
           ${VT() && t.q <= 80 ? raw(VT().notrSerit({ cevaplar:Array.from({ length:t.q }, (_, i) => i < marks.length) }))
@@ -564,17 +716,17 @@ R.Screens.exams = (function(){
         })}</div>`,
 
         K.Row([
-          K.Button({ label:'Geri al', size:'sm', tone:'ghost', act:'run-undo', disabled:!run.marks.length }),
+          K.Button({ label:yz('ays.exams.geri-al'), size:'sm', tone:'ghost', act:'run-undo', disabled:!run.marks.length }),
           K.Row([
             K.Button({ label:paused ? 'Devam et' : 'Duraklat', size:'sm',
               icon:paused ? 'play' : 'pause', act:'run-pause' }),
-            K.Button({ label:'Sonraki test', size:'sm', act:'run-next',
+            K.Button({ label:yz('ays.exams.sonraki-test'), size:'sm', act:'run-next',
               disabled:run.index >= run.tests.length - 1 }),
-            K.Button({ label:'Bitir', size:'sm', tone:'primary', act:'run-finish' }),
+            K.Button({ label:yz('ays.exams.bitir'), size:'sm', tone:'primary', act:'run-finish' }),
           ], { wrap:true }),
         ], { between:true, wrap:true }),
 
-        K.Card({ title:'Testler', sub:'Tıklayarak geç — süre o teste yazılır',
+        K.Card({ title:yz('ays.exams.testler'), sub:yz('ays.exams.tiklayarak-gec-sure-o'),
           body:html`<div class="stack-xs">${map(run.tests, (x, i) => html`
             <button class="${'runtest' + (i === run.index ? ' is-on' : '') + (x.finished ? ' is-done' : '')}"
               data-act="run-goto" data-i="${i}">
@@ -584,17 +736,17 @@ R.Screens.exams = (function(){
       ])),
 
       K.Span(4, K.Stack([
-        K.Notice({ tone:'info', title:'Nasıl kullanılır?',
+        K.Notice({ tone:'info', title:yz('ays.exams.nasil-kullanilir'),
           body:'Her soruyu bitirdiğinde bir tuşa bas: 1 yaptım, 2 zorlandım, 3 atladım. '
              + 'Sistem soru başına süreyi kendisi hesaplar; sonunda dakikaları elle girmene gerek kalmaz.' }),
-        K.Card({ title:'Son işaretler', sub:U.plural(run.marks.length, 'işaret', 'işaret'),
+        K.Card({ title:yz('ays.exams.son-isaretler'), sub:U.plural(run.marks.length, 'işaret', 'işaret'),
           body:run.marks.length
             ? html`<div class="stack-xs">${map(run.marks.slice(-8).reverse(), m => html`
                 <div class="row between">
-                  <span class="small">${m.test} · ${m.no}. soru</span>
-                  <span class="tiny dim num">${m.spent} sn · ${R.ExamRun.MARKS[m.kind].label}</span>
+                  <span class="small">${m.test} · ${m.no}${yz('ays.exams.soru')}</span>
+                  <span class="tiny dim num">${m.spent} ${yz('ays.exams.sn')} ${R.ExamRun.MARKS[m.kind].label}</span>
                 </div>`)}</div>`
-            : K.Empty({ icon:'clock', text:'Henüz işaret yok.' }) }),
+            : K.Empty({ icon:'clock', text:yz('ays.exams.henuz-isaret-yok') }) }),
         raw(UI.rail(['time-drift', 'analysis-protocol'])),
       ])),
     ]);
@@ -603,17 +755,17 @@ R.Screens.exams = (function(){
   function startRunSheet(){
     const opts = R.EXAM_TEMPLATES.map(t => ({ value:t.id, label:t.name + ' · ' + t.duration + ' dk' }));
     UI.sheet({
-      title:'Süreli oturum', subtitle:'Sınav koşullarında prova — süre otomatik ölçülür',
+      title:yz('ays.exams.sureli-oturum'), subtitle:yz('ays.exams.sinav-kosullarinda-prova-sur'),
       body:String(K.Stack([
         K.Notice({ tone:'info', body:'Oturum başlayınca kronometre işler. Her soruyu bitirdiğinde '
           + 'bir tuşa basarsın; sistem soru başına süreyi hesaplar.' }),
         K.Cols(2, [
-          K.Field({ label:'Şablon', input:K.Select({ id:'rn-tmpl', options:opts, value:'tyt-full' }) }),
-          K.Field({ label:'Yayın', input:K.Input({ id:'rn-pub', placeholder:'ör. 345' }) }),
+          K.Field({ label:yz('ays.exams.sablon'), input:K.Select({ id:'rn-tmpl', options:opts, value:'tyt-full' }) }),
+          K.Field({ label:yz('ays.exams.yayin'), input:K.Input({ id:'rn-pub', placeholder:yz('ays.exams.or-345') }) }),
         ]),
       ])),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Başlat', tone:'primary', icon:'play', act:'run-start' })}`),
+      footer:String(html`${K.Button({ label:yz('ays.exams.vazgec'), act:'sheet-close' })}
+        ${K.Button({ label:yz('ays.exams.baslat'), tone:'primary', icon:'play', act:'run-start' })}`),
     });
   }
 
@@ -625,18 +777,18 @@ R.Screens.exams = (function(){
       class:'input--cell', placeholder:ph, aria:aria, data:{ 'data-run':key, 'data-i':i } });
 
     UI.sheet({
-      title:'Oturumu bitir', subtitle:'Netleri gir — süreler zaten ölçüldü', wide:true,
+      title:yz('ays.exams.oturumu-bitir'), subtitle:yz('ays.exams.netleri-gir-sureler-zaten'), wide:true,
       body:String(K.Stack([
         K.Cols(3, [
-          K.Stat({ label:'Toplam süre', value:U.fmtClock(sum.totalSeconds) }),
-          K.Stat({ label:'Süre sapması', value:(sum.overtime > 0 ? '+' : '') + Math.round(sum.overtime/60),
+          K.Stat({ label:yz('ays.exams.toplam-sure'), value:U.fmtClock(sum.totalSeconds) }),
+          K.Stat({ label:yz('ays.exams.sure-sapmasi'), value:(sum.overtime > 0 ? '+' : '') + Math.round(sum.overtime/60),
             unit:' dk', tone:sum.overtime > 300 ? 'danger' : sum.overtime > 0 ? 'warn' : 'ok' }),
-          K.Stat({ label:'İşaret', value:sum.marks, note:sum.slow + ' zorlandım' }),
+          K.Stat({ label:yz('ays.exams.i-saret'), value:sum.marks, note:sum.slow + ' zorlandım' }),
         ]),
         html`<div class="stack-sm">${map(run.tests, (t, i) => html`
           <div class="card card--flat card--pad-sm">
             <div class="row between"><b class="small">${t.name}</b>
-              <span class="tiny dim num">${U.fmtClock(sum.perTest[i].seconds)} · plan ${U.fmtClock(sum.perTest[i].planned)}</span></div>
+              <span class="tiny dim num">${U.fmtClock(sum.perTest[i].seconds)} ${yz('ays.exams.plan')} ${U.fmtClock(sum.perTest[i].planned)}</span></div>
             <div class="row-sm mt-8">
               ${cell('c', 'D', i, t.name + ' doğru')}
               ${cell('w', 'Y', i, t.name + ' yanlış')}
@@ -646,8 +798,8 @@ R.Screens.exams = (function(){
           </div>`)}</div>`,
         when(sum.warmup, () => K.Notice({ tone:'warn', body:sum.warmup })),
       ])),
-      footer:String(html`${K.Button({ label:'İptal et', tone:'danger', act:'run-cancel' })}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'run-save' })}`),
+      footer:String(html`${K.Button({ label:yz('ays.exams.i-ptal-et'), tone:'danger', act:'run-cancel' })}
+        ${K.Button({ label:yz('ays.exams.kaydet'), tone:'primary', act:'run-save' })}`),
     });
   }
 
@@ -657,13 +809,13 @@ R.Screens.exams = (function(){
     const tmplOptions = R.EXAM_TEMPLATES.map(t => ({ value:t.id, label:t.name }));
     const body = K.Stack([
       K.Cols(2, [
-        K.Field({ label:'Tarih', input:K.Input({ id:'ex-date', type:'date', value:U.todayISO() }) }),
-        K.Field({ label:'Şablon', input:K.Select({ id:'ex-tmpl', options:tmplOptions, value:'tyt-full' }) }),
+        K.Field({ label:yz('ays.exams.tarih'), input:K.Input({ id:'ex-date', type:'date', value:U.todayISO() }) }),
+        K.Field({ label:yz('ays.exams.sablon'), input:K.Select({ id:'ex-tmpl', options:tmplOptions, value:'tyt-full' }) }),
       ]),
       K.Cols(2, [
-        K.Field({ label:'Yayın / aile', hint:'trend için en az 3 deneme aynı aileden',
-          input:K.Input({ id:'ex-pub', placeholder:'ör. 345, Bilgi Sarmal, Endemik' }) }),
-        K.Field({ label:'Toplam süre (dk)', input:K.Input({ id:'ex-dur', type:'number', numeric:true, value:165 }) }),
+        K.Field({ label:yz('ays.exams.yayin-aile'), hint:'trend için en az 3 deneme aynı aileden',
+          input:K.Input({ id:'ex-pub', placeholder:yz('ays.exams.or-345-bilgi-sarmal-endemik') }) }),
+        K.Field({ label:yz('ays.exams.toplam-sure-dk'), input:K.Input({ id:'ex-dur', type:'number', numeric:true, value:165 }) }),
       ]),
       /* KÖR NET TAHMİNİ — sonuçları yazmadan ÖNCE.
 
@@ -675,14 +827,14 @@ R.Screens.exams = (function(){
          satırların o an boş olup olmadığına bakılır: sonuçlar girildikten
          sonra yazılan bir tahmin «kör değil» işaretlenir ve kalibrasyon
          puanına katılmaz. Tahmin değil kopya olurdu. */
-      K.Field({ label:'Netini kaç tahmin ediyorsun? (isteğe bağlı)',
+      K.Field({ label:yz('ays.exams.netini-kac-tahmin-ediyorsun'),
         hint:'sonuçları yazmadan önce doldur — sonra yazılan tahmin puana girmez',
         input:K.Input({ id:'ex-guess', type:'number', step:'any',
-          placeholder:'ör. 62' }) }),
+          placeholder:yz('ays.exams.or-62') }) }),
       /* Fikir 7: sonuç kâğıdının fotoğrafı formu DOLDURUR, kaydetmez
          (core/denemefoto.js). Tahmin alanının altında: önce kör tahmin. */
       R.DenemeFoto && R.DenemeFoto.hazir()
-        ? K.Drop({ act:'ex-foto', label:'Sonuç kâğıdının fotoğrafından doldur', icon:'file',
+        ? K.Drop({ act:'ex-foto', label:yz('ays.exams.sonuc-kagidinin-fotografinda'), icon:'file',
             accept:'image/*', hint:'Doğru/yanlış/boş okunur; kaydetmeden önce kontrol edersin' })
         : '',
       raw('<div id="ex-foto-not" class="small" role="status"></div>'),
@@ -691,9 +843,9 @@ R.Screens.exams = (function(){
     ]);
 
     UI.sheet({
-      title:'Deneme ekle', subtitle:'Hızlı kayıt — hedef 60 saniyenin altı',
+      title:yz('ays.exams.deneme-ekle'), subtitle:yz('ays.exams.hizli-kayit-hedef-60'),
       body:String(body),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}${K.Button({ label:'Kaydet', tone:'primary', act:'save-exam' })}`),
+      footer:String(html`${K.Button({ label:yz('ays.exams.vazgec'), act:'sheet-close' })}${K.Button({ label:yz('ays.exams.kaydet'), tone:'primary', act:'save-exam' })}`),
     });
 
     renderTemplateRows('tyt-full');
@@ -732,10 +884,10 @@ R.Screens.exams = (function(){
     const cell = (key, ph) => K.Input({ size:'sm', numeric:true, class:'input--cell', type:'number',
       placeholder:ph, aria:ph, data:{ 'data-t':key } });
     wrap.innerHTML = String(html`
-      <span class="mono-label">Test sonuçları</span>
+      <span class="mono-label">${yz('ays.exams.test-sonuclari')}</span>
       ${map(t.tests, test => html`
         <div class="row-sm" data-test-row>
-          ${K.Input({ size:'sm', class:'grow', value:test.name, aria:'test adı', data:{ 'data-t':'name' } })}
+          ${K.Input({ size:'sm', class:'grow', value:test.name, aria:yz('ays.exams.test-adi'), data:{ 'data-t':'name' } })}
           ${cell('c', 'D')}${cell('w', 'Y')}${cell('b', 'B')}
           <span class="tiny dim w-34 right">/${test.q}</span>
         </div>`)}`);
@@ -746,33 +898,33 @@ R.Screens.exams = (function(){
     const err = errorId ? S.errors.find(e => e.id === errorId) : null;
     const testOptions = exam.tests.map(t => ({ value:t.name, label:t.name }));
     const tagOptions = Object.keys(R.ERROR_TAGS).map(k => ({ value:k, label:k+' — '+R.ERROR_TAGS[k].name }));
-    const topicOptions = [{ value:'', label:'— konu —' }].concat(
+    const topicOptions = [{ value:'', label:yz('ays.exams.konu') }].concat(
       R.SUBJECTS.reduce((acc, s) => acc.concat(s.topics.map(t => ({ value:s.id+'::'+t.id, label:s.name+' · '+t.name }))), [])
     );
     const v = (field, fallback) => err ? (err[field] == null ? '' : err[field]) : (fallback == null ? '' : fallback);
 
     const body = K.Stack([
-      html`<span class="mono-label">Kimlik</span>`,
+      html`<span class="mono-label">${yz('ays.exams.kimlik')}</span>`,
       K.Cols(3, [
-        K.Field({ label:'Test', input:K.Select({ id:'er-test', options:testOptions, value:v('testName') }) }),
-        K.Field({ label:'Soru no', input:K.Input({ id:'er-no', type:'number', numeric:true, value:v('questionNo') }) }),
-        K.Field({ label:'Durum', input:K.Select({ id:'er-status', options:['Yanlış', 'Boş', 'Yavaş'], value:v('status', 'Yanlış') }) }),
+        K.Field({ label:yz('ays.exams.test'), input:K.Select({ id:'er-test', options:testOptions, value:v('testName') }) }),
+        K.Field({ label:yz('ays.exams.soru-no'), input:K.Input({ id:'er-no', type:'number', numeric:true, value:v('questionNo') }) }),
+        K.Field({ label:yz('ays.exams.durum'), input:K.Select({ id:'er-status', options:['Yanlış', 'Boş', 'Yavaş'], value:v('status', 'Yanlış') }) }),
       ]),
-      K.Field({ label:'Ders – konu', input:K.Select({ id:'er-topic', options:topicOptions, value:v('topicRef') }) }),
-      html`<span class="mono-label">Etiket ve kök neden</span>`,
+      K.Field({ label:yz('ays.exams.ders-konu'), input:K.Select({ id:'er-topic', options:topicOptions, value:v('topicRef') }) }),
+      html`<span class="mono-label">${yz('ays.exams.etiket-ve-kok-neden')}</span>`,
       K.Cols(2, [
-        K.Field({ label:'Etiket', input:K.Select({ id:'er-tag', options:tagOptions, value:v('tag', 'K') }) }),
-        K.Field({ label:'Harcanan süre (sn)', input:K.Input({ id:'er-secs', type:'number', numeric:true, value:v('seconds') }) }),
+        K.Field({ label:yz('ays.exams.etiket'), input:K.Select({ id:'er-tag', options:tagOptions, value:v('tag', 'K') }) }),
+        K.Field({ label:yz('ays.exams.harcanan-sure-sn'), input:K.Input({ id:'er-secs', type:'number', numeric:true, value:v('seconds') }) }),
       ]),
-      K.Field({ label:'Kök neden — tek somut cümle', hint:'“dikkatsizlik” son açıklama değildir',
-        input:K.Input({ id:'er-root', value:v('rootCause'), placeholder:'ör. birimi çevirmeden işleme girdim' }) }),
-      K.Field({ label:'Doğru ilke (2–3 satır)',
+      K.Field({ label:yz('ays.exams.kok-neden-tek-somut'), hint:'“dikkatsizlik” son açıklama değildir',
+        input:K.Input({ id:'er-root', value:v('rootCause'), placeholder:yz('ays.exams.or-birimi-cevirmeden-isleme') }) }),
+      K.Field({ label:yz('ays.exams.dogru-ilke-2-3-satir'),
         input:K.Textarea({ id:'er-principle', rows:2, value:v('principle'),
-          placeholder:'Tam çözüm kopyalanmaz; genellenebilir ilke yazılır.' }) }),
+          placeholder:yz('ays.exams.tam-cozum-kopyalanmaz-genell') }) }),
       K.Cols(2, [
-        K.Field({ label:'Benzer soru — kaynak / test no',
-          input:K.Input({ id:'er-similar', value:v('similar'), placeholder:'ör. 345 TYT Mat test 12 / 7' }) }),
-        K.Field({ label:'Tamir reçetesi', input:K.Input({ id:'er-recipe', value:v('recipe', R.ERROR_TAGS.K.recipe) }) }),
+        K.Field({ label:yz('ays.exams.benzer-soru-kaynak'),
+          input:K.Input({ id:'er-similar', value:v('similar'), placeholder:yz('ays.exams.or-345-tyt-mat-test') }) }),
+        K.Field({ label:yz('ays.exams.tamir-recetesi'), input:K.Input({ id:'er-recipe', value:v('recipe', R.ERROR_TAGS.K.recipe) }) }),
       ]),
       K.Notice({ tone:'info', body:'Kaydedince tekrar kartı otomatik oluşur ve +1 gün / +3 gün / +1 hafta / +1 ay takvimine girer.' }),
     ]);
@@ -782,9 +934,9 @@ R.Screens.exams = (function(){
       subtitle:exam.type+' · '+U.fmtDate(exam.date),
       body:String(body), wide:true,
       footer:String(html`
-        ${when(err, () => K.Button({ label:'Sil', tone:'danger', act:'delete-error', data:{ 'data-id':err.id } }))}
-        ${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'save-error',
+        ${when(err, () => K.Button({ label:yz('ays.exams.sil'), tone:'danger', act:'delete-error', data:{ 'data-id':err.id } }))}
+        ${K.Button({ label:yz('ays.exams.vazgec'), act:'sheet-close' })}
+        ${K.Button({ label:yz('ays.exams.kaydet'), tone:'primary', act:'save-error',
           data:Object.assign({ 'data-exam':examId }, err ? { 'data-id':err.id } : {}) })}`),
     });
 
@@ -807,24 +959,24 @@ R.Screens.exams = (function(){
     const m = [];
     const est = C.estimateScore();
     m.push(est.ok
-      ? { ust:'Sıralama', sayi:sayi({ deger:est.rank, kesinlik:'estimated', formul:'son tam denemelerin medyanı → sıra modeli' }),
-          cumle:'en olası.', vurgu:U.fmtNum(est.rankBest) + '–' + U.fmtNum(est.rankWorst) + ' · ' + est.samples + ' tam deneme.', sistem:'ays' }
-      : { ust:'Sıralama', cumle:'Tahmin için 3 tam deneme gerekir.', vurgu:C.fullExams('TYT').length + ' tam deneme var.', sistem:'ays' });
+      ? { ust:yz('ays.exams.siralama'), sayi:sayi({ deger:est.rank, kesinlik:'estimated', formul:'son tam denemelerin medyanı → sıra modeli' }),
+          cumle:yz('ays.exams.en-olasi'), vurgu:U.fmtNum(est.rankBest) + '–' + U.fmtNum(est.rankWorst) + ' · ' + est.samples + ' tam deneme.', sistem:'ays' }
+      : { ust:yz('ays.exams.siralama'), cumle:yz('ays.exams.tahmin-icin-3-tam-deneme'), vurgu:C.fullExams('TYT').length + ' tam deneme var.', sistem:'ays' });
     const gap = C.netGapToTarget();
     const tyt = C.fullExams('TYT');
     if(gap && tyt.length){
       const hafta = Math.max(1, Math.ceil(U.diffDays(U.todayISO(), R.PLAN.examTytISO) / 7));
       const kalan = Math.max(0, gap.netDiff);
-      m.push({ ust:'Hedefe kalan', sayi:sayi({ deger:r2(kalan), birim:'net', ondalik:2, kesinlik:'estimated' }), cumle:'kaldı.',
+      m.push({ ust:yz('ays.exams.hedefe-kalan'), sayi:sayi({ deger:r2(kalan), birim:'net', ondalik:2, kesinlik:'estimated' }), cumle:yz('ays.exams.kaldi'),
         vurgu:gap.reached ? 'Hedef bandın üstündesin.' : 'Haftada +' + U.fmtNet(r2(kalan / hafta)) + ' net yeter.', sistem:'ays' });
     }
     const plan = sonrakiDenemeler();
     if(plan.length){
       const g = U.diffDays(U.todayISO(), plan[0]);
-      m.push({ ust:'Sonraki deneme', cumle:U.fmtShort(plan[0]) + '.', vurgu:(g < 7 ? g + ' gün sonra' : Math.round(g / 7) + ' hafta sonra') + ' · plandan.',
-        sistem:'ays', dugme:{ label:'Süreli başla', act:'run-open' } });
+      m.push({ ust:yz('ays.exams.sonraki-deneme'), cumle:U.fmtShort(plan[0]) + '.', vurgu:(g < 7 ? g + ' gün sonra' : Math.round(g / 7) + ' hafta sonra') + ' · plandan.',
+        sistem:'ays', dugme:{ label:yz('ays.exams.sureli-basla'), act:'run-open' } });
     }
-    return raw(V.donen({ id:'ays-deneme', ad:'Gidişat', maddeler:m }));
+    return raw(V.donen({ id:'ays-deneme', ad:yz('ays.exams.gidisat'), maddeler:m }));
   }
 
   /* PANO KARTLARI (2026-10-20; brand/ortak/pano.js): TYT neti son
@@ -835,27 +987,27 @@ R.Screens.exams = (function(){
     if(!P) return '';
     const tr = C.medianTrend('TYT');
     const tam = (S.exams || []).filter(e => e.family === 'TYT' && e.kind === 'full').sort((a, b) => a.date.localeCompare(b.date));
-    if(!tam.length) return '<div class="pk-ust">' + P.izgara([P.kart({ tur:'net', ad:'TYT neti', simge:'egri',
-      bos:{ cumle:'Henüz tam TYT denemesi yok; net ilk denemeyle çıkar.', dugme:{ label:'Deneme gir', act:'new-exam' } } })], 'pk-izgara--iki') + '</div>';
+    if(!tam.length) return '<div class="pk-ust">' + P.izgara([P.kart({ tur:'net', ad:yz('ays.exams.tyt-neti'), simge:'egri',
+      bos:{ cumle:yz('ays.exams.henuz-tam-tyt-denemesi-yok'), dugme:{ label:yz('ays.exams.deneme-gir'), act:'new-exam' } } })], 'pk-izgara--iki') + '</div>';
     const son = tr.series.slice(-8);
     const v = x => U.fmtNum ? U.fmtNum(x) : String(x);
-    const netKart = P.kart({ tur:'net', ad:'TYT neti', simge:'egri', yuva:'son ' + son.length + ' deneme',
+    const netKart = P.kart({ tur:'net', ad:yz('ays.exams.tyt-neti'), simge:'egri', yuva:'son ' + son.length + ' deneme',
       govde:P.deger(v(son[son.length - 1]), 'net', tr.delta != null ? 'son 3 medyanı ' + v(tr.last3) + ' · önceki 3 ile fark ' + (tr.delta >= 0 ? '+' : '−') + v(Math.abs(tr.delta)) : 'fark için en az 6 deneme gerekir')
-        + P.sutun({ degerler:son, yukseklik:56, etiket:'Son ' + son.length + ' TYT denemesinin neti; sonuncusu ' + v(son[son.length - 1]) }) });
+        + P.sutun({ degerler:son, yukseklik:56, etiket:yz('ays.exams.son') + son.length + ' TYT denemesinin neti; sonuncusu ' + v(son[son.length - 1]) }) });
     const e = tam[tam.length - 1];
     const satir = (e.tests || []).map(t => {
       const q = (Number(t.correct) || 0) + (Number(t.wrong) || 0) + (t.blank != null ? Number(t.blank) : 0);
       return { ad:t.name, oran:q ? (Number(t.correct) || 0) / q : null, metin:v(U.round(M.testNet(t), 2)) };
     });
-    const dersKart = satir.length ? P.kart({ tur:'ders-net', ad:'Son deneme · ders ders', simge:'satir', yuva:U.fmtShort ? U.fmtShort(e.date) : e.date,
+    const dersKart = satir.length ? P.kart({ tur:'ders-net', ad:yz('ays.exams.son-deneme-ders-ders'), simge:'satir', yuva:U.fmtShort ? U.fmtShort(e.date) : e.date,
       govde:P.cubuklar({ satirlar:satir }) + P.not('çubuk: doğru oranı · sağda net') }) : '';
     /* Rekor (yıldız): en yüksek TYT neti; analiz borcu: analizi bekleyen deneme. */
     const enIyi = tam.reduce((m, x) => M.examNet(x) > M.examNet(m) ? x : m, tam[0]);
-    const rekor = P.kart({ tur:'net-rekoru', ad:'En iyi TYT', yildiz:'rekor',
+    const rekor = P.kart({ tur:'net-rekoru', ad:yz('ays.exams.en-iyi-tyt'), yildiz:'rekor',
       govde:P.deger(v(U.round(M.examNet(enIyi), 2)), 'net', (U.fmtShort ? U.fmtShort(enIyi.date) : enIyi.date) + (enIyi.publisher ? ' · ' + enIyi.publisher : ''))
         + P.not(enIyi === e ? 'Son deneme rekor.' : 'Son denemeyle fark ' + v(U.round(M.examNet(enIyi) - M.examNet(e), 2)) + ' net.') });
     const borc = C.analysisDebt();
-    const borcKart = borc.length ? P.kart({ tur:'analiz-borcu', ad:'Analiz bekleyen', simge:'satir', yuva:borc.length + ' deneme',
+    const borcKart = borc.length ? P.kart({ tur:'analiz-borcu', ad:yz('ays.exams.analiz-bekleyen'), simge:'satir', yuva:borc.length + ' deneme',
       govde:P.liste({ satirlar:borc.slice(0, 4).map(x => ({ sol:U.fmtShort ? U.fmtShort(x.date) : x.date, ad:(x.family || '') + ' ' + (x.kind === 'full' ? 'tam' : 'branş'),
         not:U.diffDays(x.date, U.todayISO()) + ' gün önce', nokta:U.diffDays(x.date, U.todayISO()) >= 3 ? 2 : 0 })) })
         + P.not('Analiz yanlışları kart ve konuya çevirir; bekleyen deneme ders vermez.') }) : '';
@@ -882,7 +1034,7 @@ R.Screens.exams = (function(){
       const res = R.ExamRun.start(tmpl, { publisher:pub });
       if(!res.ok){ UI.toast(res.reason); return; }
       UI.closeSheet();
-      UI.toast('Oturum başladı — kronometre işliyor');
+      UI.toast(yz('ays.exams.oturum-basladi-kronometre-is'));
       R.App.render();
     },
     async 'run-mark'(el){
@@ -919,7 +1071,7 @@ R.Screens.exams = (function(){
       UI.closeSheet();
       if(res){
         S.ui.examOpen = res.exam.id;
-        UI.toast('Oturum kaydedildi · net ' + U.fmtNet(M.examNet(res.exam)));
+        UI.toast(yz('ays.exams.oturum-kaydedildi-net') + U.fmtNet(M.examNet(res.exam)));
       }
       R.App.render();
     },
@@ -950,7 +1102,7 @@ R.Screens.exams = (function(){
           blank:bos.blank, blankCert:bos.blankCert, minutes:null };
       }).filter(Boolean);
 
-      if(!tests.length){ UI.toast('En az bir test doldurulmalı'); return; }
+      if(!tests.length){ UI.toast(yz('ays.exams.en-az-bir-test-doldurulmali')); return; }
 
       const exam = {
         id:U.uid('e'), date, type:tmpl.name, templateId:tmpl.id,
@@ -985,7 +1137,7 @@ R.Screens.exams = (function(){
 
       UI.closeSheet();
       S.ui.examOpen = exam.id;
-      UI.toast('Deneme kaydedildi · net ' + U.fmtNet(M.examNet(exam)) + kalibrasyonNotu);
+      UI.toast(yz('ays.exams.deneme-kaydedildi-net') + U.fmtNet(M.examNet(exam)) + kalibrasyonNotu);
       R.App.render();
     },
     async 'delete-exam'(el){
@@ -997,7 +1149,7 @@ R.Screens.exams = (function(){
         if(R.SoruFoto) await R.SoruFoto.onekSil('deneme:' + id + ':');
         S.ui.examOpen = null;
         UI.closeSheet();
-        UI.toast('Deneme silindi');
+        UI.toast(yz('ays.exams.deneme-silindi'));
         R.App.render();
       }, true, bagli ? 'Denemeyi ve ' + bagli + ' hata kaydını sil' : 'Denemeyi sil');
     },
@@ -1021,7 +1173,7 @@ R.Screens.exams = (function(){
       }
       exam.analysisCompletedAt = new Date().toISOString();
       await M.saveExam(exam);
-      UI.toast('Analiz tamamlandı');
+      UI.toast(yz('ays.exams.analiz-tamamlandi'));
       R.App.render();
     },
     async 'new-error'(el){ errorSheet(el.dataset.exam); },
@@ -1073,7 +1225,7 @@ R.Screens.exams = (function(){
     async 'delete-error'(el){
       await M.deleteError(el.dataset.id);
       UI.closeSheet();
-      UI.toast('Hata silindi');
+      UI.toast(yz('ays.exams.hata-silindi'));
       R.App.render();
     },
 
@@ -1200,7 +1352,7 @@ R.Screens.exams = (function(){
 
   return {
     id:'exams',
-    title:'Deneme',
+    title:yz('ays.exams.deneme-2'),
     subtitle(){
       const debt = C.analysisDebt().length;
       return S.exams.length + ' deneme' + (debt ? ' · ' + debt + ' analiz borcu' : ' · analiz borcu yok');
@@ -1208,8 +1360,8 @@ R.Screens.exams = (function(){
     actions(){
       if(R.ExamRun.active()) return '';
       return String(html`
-        ${K.Button({ label:'Süreli oturum', icon:'clock', size:'sm', act:'run-open' })}
-        ${K.Button({ label:'Deneme ekle', icon:'plus', size:'sm', tone:'primary', act:'new-exam' })}`);
+        ${K.Button({ label:yz('ays.exams.sureli-oturum'), icon:'clock', size:'sm', act:'run-open' })}
+        ${K.Button({ label:yz('ays.exams.deneme-ekle'), icon:'plus', size:'sm', tone:'primary', act:'new-exam' })}`);
     },
     onKey(e){
       if(!R.ExamRun.active() || UI.isSheetOpen()) return;

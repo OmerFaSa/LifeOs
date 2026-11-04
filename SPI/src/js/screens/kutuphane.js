@@ -14,6 +14,30 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.kutuphane.bilgi-iste':'Bilgi iste',
+  'spi.kutuphane.besin-degeri-market-fiyati-y':'Besin değeri, market fiyatı ya da bir semtteki yerler kaynaktan araştırılır.',
+  'spi.kutuphane.besin-degerleri':'Besin değerleri',
+  'spi.kutuphane.market-fiyati':'Market fiyatı',
+  'spi.kutuphane.yer-listesi':'Yer listesi',
+  'spi.kutuphane.semt':'Semt',
+  'spi.kutuphane.sehir':'Şehir',
+  'spi.kutuphane.king-e-ilet':'King’e ilet',
+  'spi.kutuphane.yerler':'Yerler',
+  'spi.kutuphane.listeyi-sil':'Listeyi sil',
+  'spi.kutuphane.aylik-karsilik':'Aylık karşılık',
+  'spi.kutuphane.aylik-karsilikta-en-dusuk':'Aylık karşılıkta en düşük:',
+  'spi.kutuphane.bam-arastirmasi':'BAM araştırması,',
+  'spi.kutuphane.fiyat-ve-adres-degismis':'. Fiyat ve adres değişmiş olabilir; gitmeden teyit et.',
+  'spi.kutuphane.bam-urunleri':'BAM ürünleri',
+  'spi.kutuphane.danisma-da-hakkinda-ozet-haz':'Danışma’da «… hakkında özet hazırla» dersen King’e iletilir; bitince teklif olarak gelir.',
+  'spi.kutuphane.ac':'Aç',
+  'spi.kutuphane.sil':'Sil',
+  'spi.kutuphane.silindi':'Silindi',
+  'spi.kutuphane.kutuphanem':'Kütüphanem',
+  'spi.kutuphane.notlar':'Notlar',
+  'spi.kutuphane.notlar-ve-belgeler':'Notlar ve belgeler',
+});
 window.LIFEOS.PARCA.sayfa({ id:'notlar', modul:'spi', cekmece:'kutuphane', ad:'Notlar', sira:10 });
 window.LIFEOS.PARCA.sayfa({ id:'kutuphane', modul:'spi', cekmece:'kutuphane', ad:'Bilgi ve ürünler', sira:30 });
 
@@ -26,24 +50,24 @@ SP.Screens.kutuphane = (function(){
   function bilgiKart(){
     const tur = S.ui.bilgiTur || 'besin';
     return K.Kutu({
-      ad:'Bilgi iste', yuva:'HKM · Araştırma Bürosu',
+      ad:yz('spi.kutuphane.bilgi-iste'), yuva:'HKM · Araştırma Bürosu',
       govde:html`
-        ${K.Ayrinti({ ozet:'Besin değeri, market fiyatı ya da bir semtteki yerler kaynaktan araştırılır.',
+        ${K.Ayrinti({ ozet:yz('spi.kutuphane.besin-degeri-market-fiyati-y'),
           govde:'King önce maliyet ve süre teklifi yapar; sonuç Onaylar’a teklif olarak gelir ve SPİ '
             + 'kendi koduyla sınamadan hiçbir şey yazılmaz.' })}
         <div class="cols-2 mt-10">
           ${K.Field({ label:'Ne?', input:K.Select({ id:'bilgi-tur', value:tur, change:'bilgi-tur',
-            options:[{ value:'besin', label:'Besin değerleri' }, { value:'fiyat', label:'Market fiyatı' },
-              { value:'yer', label:'Yer listesi' }] }) })}
+            options:[{ value:'besin', label:yz('spi.kutuphane.besin-degerleri') }, { value:'fiyat', label:yz('spi.kutuphane.market-fiyati') },
+              { value:'yer', label:yz('spi.kutuphane.yer-listesi') }] }) })}
           ${K.Field({ label:tur === 'yer' ? 'Ne tür yer?' : 'Gıda', input:K.Input({ id:'bilgi-ad',
             placeholder:tur === 'yer' ? 'spor salonu' : 'kinoa' }) })}
         </div>
         ${when(tur !== 'besin', () => html`<div class="cols-2 mt-10">
-          ${K.Field({ label:'Semt', hint:'isteğe bağlı', input:K.Input({ id:'bilgi-semt' }) })}
-          ${K.Field({ label:'Şehir', hint:tur === 'yer' ? 'semt ya da şehir gerekli' : 'isteğe bağlı',
+          ${K.Field({ label:yz('spi.kutuphane.semt'), hint:'isteğe bağlı', input:K.Input({ id:'bilgi-semt' }) })}
+          ${K.Field({ label:yz('spi.kutuphane.sehir'), hint:tur === 'yer' ? 'semt ya da şehir gerekli' : 'isteğe bağlı',
             input:K.Input({ id:'bilgi-sehir' }) })}
         </div>`)}`,
-      ayak:K.Button({ label:'King’e ilet', tone:'primary', act:'bilgi-iste' }),
+      ayak:K.Button({ label:yz('spi.kutuphane.king-e-ilet'), tone:'primary', act:'bilgi-iste' }),
     });
   }
 
@@ -51,25 +75,25 @@ SP.Screens.kutuphane = (function(){
     const liste = SP.Bilgi ? SP.Bilgi.yerler() : [];
     if(!liste.length) return '';
     return K.Kutu({
-      ad:'Yerler', yuva:liste.length + ' liste · tahmin',
+      ad:yz('spi.kutuphane.yerler'), yuva:liste.length + ' liste · tahmin',
       govde:html`${map(liste, l => html`<div class="mt-10">
         <div class="row gap-8">
           <b class="small grow minw0">${l.baslik}${l.konum ? ' · ' + l.konum : ''}</b>
-          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Listeyi sil',
+          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:yz('spi.kutuphane.listeyi-sil'),
             act:'yer-sil', data:{ 'data-id':l.id } })}
         </div>
         ${(() => {
           /* Karşılaştırma (fikir 37): aylık karşılık koddan; çevrilemeyen sona. */
           const k = SP.Bilgi.yerKarsilastir(l);
-          return html`${K.Table({ tight:true, headers:['Yer', 'Fiyat', { label:'Aylık karşılık', num:true }],
+          return html`${K.Table({ tight:true, headers:['Yer', 'Fiyat', { label:yz('spi.kutuphane.aylik-karsilik'), num:true }],
             rows:k.satirlar.map(y => [
               y.ad + (y.semt ? ' · ' + y.semt : ''),
               y.tl != null ? U.fmtNum(y.tl) + ' TL' + (y.donem ? ' / ' + y.donem : '') : 'bilinmiyor',
               y.aylik != null ? U.fmtNum(y.aylik) + ' TL' : html`<span class="dim">${y.not}</span>`]) })}
-            ${when(k.enUcuz, () => html`<p class="tiny mt-4">Aylık karşılıkta en düşük: <b>${k.enUcuz}</b>
+            ${when(k.enUcuz, () => html`<p class="tiny mt-4">${yz('spi.kutuphane.aylik-karsilikta-en-dusuk')} <b>${k.enUcuz}</b>
               (hesaplandı; yıllık fiyat 12'ye bölündü).</p>`)}`;
         })()}
-        <p class="tiny dim">BAM araştırması, ${l.at}. Fiyat ve adres değişmiş olabilir; gitmeden teyit et.</p>
+        <p class="tiny dim">${yz('spi.kutuphane.bam-arastirmasi')} ${l.at}${yz('spi.kutuphane.fiyat-ve-adres-degismis')}</p>
       </div>`)}`,
     });
   }
@@ -80,14 +104,13 @@ SP.Screens.kutuphane = (function(){
   function urunKart(){
     const l = SP.Urunler ? SP.Urunler.liste() : [];
     if(!l.length) return '';
-    return K.Kutu({ ad:'BAM ürünleri', ipucu:'hkm', yuva:l.length + ' ürün',
-      govde:html`<p class="tiny dim">Danışma’da «… hakkında özet hazırla» dersen King’e iletilir;
-          bitince teklif olarak gelir.</p>
+    return K.Kutu({ ad:yz('spi.kutuphane.bam-urunleri'), ipucu:'hkm', yuva:l.length + ' ürün',
+      govde:html`<p class="tiny dim">${yz('spi.kutuphane.danisma-da-hakkinda-ozet-haz')}</p>
         <div class="stack-xs mt-8">${map(l, u => html`<div class="row gap-8 wrap">
           <span class="minw0 grow"><b>${u.baslik}</b> <span class="tiny dim">· ${u.urunAd}
             · ${LIFEOS.Urun.etiketAdi(u.dogruluk)}</span></span>
-          ${K.Button({ label:'Aç', size:'sm', act:'urun-ac', data:{ 'data-id':u.id } })}
-          ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
+          ${K.Button({ label:yz('spi.kutuphane.ac'), size:'sm', act:'urun-ac', data:{ 'data-id':u.id } })}
+          ${K.Button({ label:yz('spi.kutuphane.sil'), size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
         </div>`)}</div>` });
   }
 
@@ -126,7 +149,7 @@ SP.Screens.kutuphane = (function(){
     async 'urun-sil'(el){
       const id = el.dataset.id;
       UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
-        async () => { await SP.Urunler.sil(id); UI.toast('Silindi'); SP.App.render(); }, true, 'Ürünü bu cihazdan sil');
+        async () => { await SP.Urunler.sil(id); UI.toast(yz('spi.kutuphane.silindi')); SP.App.render(); }, true, 'Ürünü bu cihazdan sil');
     },
   };
 
@@ -136,7 +159,7 @@ SP.Screens.kutuphane = (function(){
 
   return {
     id:'kutuphane',
-    title:'Kütüphanem',
+    title:yz('spi.kutuphane.kutuphanem'),
     subtitle(){
       const n = (SP.Urunler ? SP.Urunler.liste().length : 0) + (SP.Bilgi ? SP.Bilgi.yerler().length : 0);
       return n ? n + ' kayıt' : 'BAM’dan bilgi ve ürün';
@@ -158,11 +181,11 @@ SP.Screens.notlar = (function(){
   const D = () => (window.LIFEOS || {}).DEFTER;
   const hazir = () => !!(D() && D().kuruluMu && D().kuruluMu());
   LIFEOS.PARCA.blok({ id:'notlar.kapali', sayfa:'notlar', yer:'ana', ad:'Notlar', kosul:() => !hazir(),
-    ciz:() => String(K.Kutu({ ad:'Notlar', govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') })) });
+    ciz:() => String(K.Kutu({ ad:yz('spi.kutuphane.notlar'), govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') })) });
   LIFEOS.PARCA.blok({ id:'notlar.pano', sayfa:'notlar', yer:'ana', sira:10, ad:'Defter özeti', kosul:() => hazir(),
     ciz:() => '<div data-defter-pano>' + (D().panoHtml ? D().panoHtml() : '') + '</div>' });
   LIFEOS.PARCA.blok({ id:'notlar.raf', sayfa:'notlar', yer:'ana', sira:20, ad:'Notlar ve belgeler', kosul:() => hazir(),
-    ciz:() => String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') })) });
+    ciz:() => String(K.Kutu({ ad:yz('spi.kutuphane.notlar-ve-belgeler'), govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') })) });
   function render(){ return LIFEOS.PARCA.yer('notlar', 'ana', K); }
   function afterRender(){
     const el = document.querySelector('[data-defter-raf-yer]');
@@ -172,7 +195,7 @@ SP.Screens.notlar = (function(){
   }
   return {
     id:'notlar',
-    title:'Kütüphanem',
+    title:yz('spi.kutuphane.kutuphanem'),
     subtitle(){ const n = hazir() ? D().notlar().length : 0; return n ? n + ' kayıt' : 'henüz not yok'; },
     lede(){ return ''; },
     actions(){ return ''; },

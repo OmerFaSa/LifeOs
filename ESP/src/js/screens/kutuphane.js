@@ -6,6 +6,21 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.kutuphane.ac':'Aç',
+  'esp.kutuphane.sil':'Sil',
+  'esp.kutuphane.bam-urunleri':'BAM ürünleri',
+  'esp.kutuphane.sohbette-hakkinda-ozet-hazir':'Sohbette «… hakkında özet hazırla» dersen King’e iletilir; bitince teklif olarak gelir.',
+  'esp.kutuphane.dil-uniteleri':'Dil üniteleri',
+  'esp.kutuphane.dil-de-ac':'Dil’de aç',
+  'esp.kutuphane.silindi':'Silindi',
+  'esp.kutuphane.kutuphanen-henuz-bos':'Kütüphanen henüz boş',
+  'esp.kutuphane.bam-bir-ozet-rapor-ya':'BAM bir özet, rapor ya da ünite ürettiğinde burada durur.',
+  'esp.kutuphane.danisma-ya-git':'Danışma’ya git',
+  'esp.kutuphane.kutuphanem':'Kütüphanem',
+  'esp.kutuphane.notlar':'Notlar',
+  'esp.kutuphane.notlar-ve-belgeler':'Notlar ve belgeler',
+});
 window.LIFEOS.PARCA.sayfa({ id:'notlar', modul:'esp', cekmece:'kutuphane', ad:'Notlar', sira:10 });
 window.LIFEOS.PARCA.sayfa({ id:'kutuphane', modul:'esp', cekmece:'kutuphane', ad:'Ürünler', sira:30 });
 
@@ -23,22 +38,22 @@ ESP.Screens.kutuphane = (function(){
     const govde = html`<div class="stack-xs">${map(l, u => html`<div class="row gap-8 wrap">
       <span class="minw0"><b>${u.baslik}</b> <span class="tiny dim">· ${u.urunAd}
         · ${LIFEOS.Urun.etiketAdi(u.dogruluk)}</span></span>
-      ${K.Button({ label:'Aç', size:'sm', act:'urun-ac', data:{ 'data-id':u.id } })}
-      ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
+      ${K.Button({ label:yz('esp.kutuphane.ac'), size:'sm', act:'urun-ac', data:{ 'data-id':u.id } })}
+      ${K.Button({ label:yz('esp.kutuphane.sil'), size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
     </div>`)}</div>`;
-    return K.Entry({ label:'BAM ürünleri', hint:'hkm', meta:l.length + ' ürün', wide:true,
-      note:'Sohbette «… hakkında özet hazırla» dersen King’e iletilir; bitince teklif olarak gelir.',
+    return K.Entry({ label:yz('esp.kutuphane.bam-urunleri'), hint:'hkm', meta:l.length + ' ürün', wide:true,
+      note:yz('esp.kutuphane.sohbette-hakkinda-ozet-hazir'),
       body:html`${govde}` });
   }
 
   function uniteKart(){
     const l = ESP.Unite ? ESP.Unite.liste() : [];
     if(!l.length) return '';
-    return K.Entry({ label:'Dil üniteleri', meta:l.length + ' ünite', wide:true,
+    return K.Entry({ label:yz('esp.kutuphane.dil-uniteleri'), meta:l.length + ' ünite', wide:true,
       body:html`<div class="stack-xs">${map(l, u => html`<div class="row gap-8 wrap">
         <span class="minw0"><b>${u.title || u.baslik || u.id}</b> <span class="tiny dim">·
           ${(u.bam && u.bam.dil) || ''} · ${(u.items || []).length} madde</span></span>
-        ${K.Button({ label:'Dil’de aç', size:'sm', act:'go', data:{ 'data-route':'lang' } })}
+        ${K.Button({ label:yz('esp.kutuphane.dil-de-ac'), size:'sm', act:'go', data:{ 'data-route':'lang' } })}
       </div>`)}</div>` });
   }
 
@@ -56,7 +71,7 @@ ESP.Screens.kutuphane = (function(){
     async 'urun-sil'(el){
       const id = el.dataset.id;
       ESP.UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
-        async () => { await ESP.Urunler.sil(id); ESP.UI.toast('Silindi'); ESP.App.render(); }, true, 'Ürünü bu cihazdan sil');
+        async () => { await ESP.Urunler.sil(id); ESP.UI.toast(yz('esp.kutuphane.silindi')); ESP.App.render(); }, true, 'Ürünü bu cihazdan sil');
     },
   };
 
@@ -65,9 +80,9 @@ ESP.Screens.kutuphane = (function(){
   function render(){
     const kartlar = LIFEOS.PARCA.liste('kutuphane', 'ana', K).filter(Boolean);
     if(!kartlar.length){
-      return K.Kutu({ ad:'Kütüphanen henüz boş', govde:html`
-        <p class="small muted">BAM bir özet, rapor ya da ünite ürettiğinde burada durur.</p>
-        <div class="mt-10">${K.Button({ label:'Danışma’ya git', size:'sm', act:'go',
+      return K.Kutu({ ad:yz('esp.kutuphane.kutuphanen-henuz-bos'), govde:html`
+        <p class="small muted">${yz('esp.kutuphane.bam-bir-ozet-rapor-ya')}</p>
+        <div class="mt-10">${K.Button({ label:yz('esp.kutuphane.danisma-ya-git'), size:'sm', act:'go',
           data:{ 'data-route':'team' } })}</div>` });
     }
     return K.Ledger(() => kartlar);
@@ -75,7 +90,7 @@ ESP.Screens.kutuphane = (function(){
 
   return {
     id:'kutuphane',
-    title:'Kütüphanem',
+    title:yz('esp.kutuphane.kutuphanem'),
     subtitle(){ return 'BAM’ın ürettikleri'; },
     lede(){ return 'BAM’dan gelen ürün ve üniteler; kaynağı ve doğruluğu yanında yazar.'; },
     actions(){ return ''; },
@@ -94,11 +109,11 @@ ESP.Screens.notlar = (function(){
   const D = () => (window.LIFEOS || {}).DEFTER;
   const hazir = () => !!(D() && D().kuruluMu && D().kuruluMu());
   LIFEOS.PARCA.blok({ id:'notlar.kapali', sayfa:'notlar', yer:'ana', ad:'Notlar', kosul:() => !hazir(),
-    ciz:() => String(K.Kutu({ ad:'Notlar', govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') })) });
+    ciz:() => String(K.Kutu({ ad:yz('esp.kutuphane.notlar'), govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') })) });
   LIFEOS.PARCA.blok({ id:'notlar.pano', sayfa:'notlar', yer:'ana', sira:10, ad:'Defter özeti', kosul:() => hazir(),
     ciz:() => '<div data-defter-pano>' + (D().panoHtml ? D().panoHtml() : '') + '</div>' });
   LIFEOS.PARCA.blok({ id:'notlar.raf', sayfa:'notlar', yer:'ana', sira:20, ad:'Notlar ve belgeler', kosul:() => hazir(),
-    ciz:() => String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') })) });
+    ciz:() => String(K.Kutu({ ad:yz('esp.kutuphane.notlar-ve-belgeler'), govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') })) });
   function render(){ return LIFEOS.PARCA.yer('notlar', 'ana', K); }
   function afterRender(){
     const el = document.querySelector('[data-defter-raf-yer]');
@@ -108,7 +123,7 @@ ESP.Screens.notlar = (function(){
   }
   return {
     id:'notlar',
-    title:'Kütüphanem',
+    title:yz('esp.kutuphane.kutuphanem'),
     subtitle(){ const n = hazir() ? D().notlar().length : 0; return n ? n + ' kayıt' : 'henüz not yok'; },
     lede(){ return ''; },
     actions(){ return ''; },

@@ -17,6 +17,105 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.solve.cozulen-soru':'Çözülen soru',
+  'ays.solve.bugun':'Bugün ',
+  'ays.solve.kendi-cozdugun':'Kendi çözdüğün',
+  'ays.solve.henuz-kayit-yok':'Henüz kayıt yok.',
+  'ays.solve.bir-soru-cozunce-oran-cikar':'Bir soru çözünce oran çıkar.',
+  'ays.solve.konusuz-kayit':'Konusuz kayıt',
+  'ays.solve.konuya-baglanmadi':'konuya bağlanmadı.',
+  'ays.solve.cozulen-sorular-dan-elle-sec':'«Çözülen sorular»dan elle seç.',
+  'ays.solve.cozum':'Çözüm',
+  'ays.solve.soruyu-ver':'Soruyu ver',
+  'ays.solve.yapay-zeka-bagli-degil':'Yapay zekâ bağlı değil.',
+  'ays.solve.fotograftan-ya-da-metinden-s':'Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla. Çözdüğün soruları aşağıdaki «Hızlı kayıt» ile girebilirsin.',
+  'ays.solve.ofis-ayarlarini-ac':'Ofis ayarlarını aç',
+  'ays.solve.kb':'KB',
+  'ays.solve.fotografi-buraya-birak':'Fotoğrafı buraya bırak',
+  'ays.solve.ya-da-tikla-ctrl-v':'ya da tıkla · Ctrl+V ile yapıştır',
+  'ays.solve.fotografi-kaldir':'Fotoğrafı kaldır',
+  'ays.solve.bagli-model-gorsel-okuyamiyo':'Bağlı model görsel okuyamıyor.',
+  'ays.solve.soru-metni':'Soru metni',
+  'ays.solve.soruyu-buraya-yazabilir-ya-d':'Soruyu buraya yazabilir ya da yapıştırabilirsin',
+  'ays.solve.notun':'Notun',
+  'ays.solve.or-ikinci-adimi-anlamadim':'ör. ikinci adımı anlamadım',
+  'ays.solve.i-ptal':'İptal',
+  'ays.solve.yeni-soru':'Yeni soru',
+  'ays.solve.cozulemedi':'Çözülemedi.',
+  'ays.solve.soru-ustunde-karala':'Soru üstünde karala',
+  'ays.solve.kagitta-coz':'Kâğıtta çöz',
+  'ays.solve.deftere-kaydet':'Deftere kaydet',
+  'ays.solve.yedek-model':'yedek model',
+  'ays.solve.yanit-uzunluk-sinirina-takil':'Yanıt uzunluk sınırına takıldı; son cümle eksik olabilir.',
+  'ays.solve.sohbeti-temizle':'Sohbeti temizle',
+  'ays.solve.soru-karalamalarin-notun-ve':'Soru, karalamaların, notun ve çözüm özeti tek notta.',
+  'ays.solve.cozumu-denetle':'Çözümü denetle',
+  'ays.solve.soruyu-baska-bir-modele':'— soruyu başka bir modele sıfırdan çözdürür (1 istek)',
+  'ays.solve.denetim-yapilamadi':'Denetim yapılamadı.',
+  'ays.solve.denetim-sonucsuz':'Denetim sonuçsuz.',
+  'ays.solve.i-ki-bagimsiz-cozum-ayni-cev':'İki bağımsız çözüm aynı cevaba çıktı.',
+  'ays.solve.dikkat-iki-cozum-farkli-ceva':'Dikkat: iki çözüm farklı cevaba çıktı',
+  'ays.solve.yukaridaki-cozum':'Yukarıdaki çözüm',
+  'ays.solve.bagimsiz-cozum':'Bağımsız çözüm',
+  'ays.solve.hata-nerede-basliyor':'Hata nerede başlıyor:',
+  'ays.solve.denetim-yanilabilir-hakem-de':'Denetim yanılabilir. Hakem de bir modeldir ve kesin hüküm vermez; sana gösterdiği yeri kendin kontrol et.',
+  'ays.solve.eslesen-konu-yok-baska-bir':'Eşleşen konu yok. Başka bir kelime dene ya da boş bırak.',
+  'ays.solve.ders-konu':'Ders – konu',
+  'ays.solve.kaldir':'Kaldır',
+  'ays.solve.konu-secilmezse-kayit-konu-t':'Konu seçilmezse kayıt konu takibine bağlanmaz — sonradan da seçebilirsin.',
+  'ays.solve.zorluk':'Zorluk',
+  'ays.solve.sen-ne-yaptin':'Sen ne yaptın?',
+  'ays.solve.sure-sn':'Süre (sn)',
+  'ays.solve.cevap':'Cevap',
+  'ays.solve.kaynak':'Kaynak',
+  'ays.solve.kaynak-sec':'— kaynak seç —',
+  'ays.solve.soru-no':'Soru no',
+  'ays.solve.or-42':'ör. 42',
+  'ays.solve.hata-turu':'Hata türü',
+  'ays.solve.dogru-ilke':'Doğru ilke',
+  'ays.solve.bu-tur-bir-soruda-dikkat':'Bu tür bir soruda dikkat edilecek şey…',
+  'ays.solve.kaydet':'Kaydet',
+  'ays.solve.yanlis-defterine-de-ekle':'Yanlış defterine de ekle',
+  'ays.solve.cozulen-sorular':'Çözülen sorular',
+  'ays.solve.henuz-kayit-yok-bir-soru':'Henüz kayıt yok. Bir soru çözdürdüğünde buraya düşer ve konu takibine bağlanır.',
+  'ays.solve.kaydi-sil':'Kaydı sil',
+  'ays.solve.konu-basina-cozum':'Konu başına çözüm',
+  'ays.solve.en-dusuk-oran-ustte':'En düşük oran üstte',
+  'ays.solve.kaynaklarim':'Kaynaklarım',
+  'ays.solve.kaynak-ekle':'Kaynak ekle',
+  'ays.solve.yayin-merdiveni':'Yayın merdiveni:',
+  'ays.solve.henuz-kaynak-yok-kullandigin':'Henüz kaynak yok. Kullandığın yayınları ekle; çözdüğün soruları onlara ',
+  'ays.solve.kaynaklari-yukle':'Kaynakları yükle',
+  'ays.solve.kaynagi-duzenle':'Kaynağı düzenle',
+  'ays.solve.bir-kaynak-hakkinda-konusabi':'Bir kaynak hakkında konuşabilmek için en az',
+  'ays.solve.cozulmus-soru-gerekir-alti-s':'çözülmüş soru gerekir; altı sorudan çıkan oran gürültüdür.',
+  'ays.solve.kademe-bir-baslangic-noktasi':'Kademe bir başlangıç noktası; gerçek zorluk çözdükçe ölçülür',
+  'ays.solve.ad':'Ad',
+  'ays.solve.or-345-tyt-matematik-soru':'ör. 345 TYT Matematik Soru Bankası',
+  'ays.solve.zorluk-kademesi':'Zorluk kademesi',
+  'ays.solve.tur':'Tür',
+  'ays.solve.ders':'Ders',
+  'ays.solve.hepsi':'— hepsi —',
+  'ays.solve.not':'Not',
+  'ays.solve.kademe-varsayilani-uygulaman':'Kademe varsayılanı uygulamanın kendi kaynak mimarisinden geldi (',
+  'ays.solve.degistirebilirsin':'); değiştirebilirsin.',
+  'ays.solve.sil':'Sil',
+  'ays.solve.konu-sec':'Konu seç',
+  'ays.solve.hizli-kayit':'Hızlı kayıt',
+  'ays.solve.fotograf-hazir':'Fotoğraf hazır',
+  'ays.solve.once-konuyu-sec-konusuz-kayi':'Önce konuyu seç; konusuz kayıt konu takibine girmez.',
+  'ays.solve.soru':'Soru · ',
+  'ays.solve.deftere-kaydedildi-notlarim':'Deftere kaydedildi · Notlarım’da',
+  'ays.solve.once-soruyu-yaz-ya-da':'Önce soruyu yaz ya da fotoğrafını ekle',
+  'ays.solve.kaynagin-adi-gerekiyor':'Kaynağın adı gerekiyor',
+  'ays.solve.kaynak-kaydedildi':'Kaynak kaydedildi',
+  'ays.solve.kaynak-silindi':'Kaynak silindi',
+  'ays.solve.kayit-silindi':'Kayıt silindi',
+  'ays.solve.bagimsiz-denetim-bu-cozumu-h':'Bağımsız denetim bu çözümü hatalı buldu; yanlış ',
+  'ays.solve.yanlis-defterine-eklemek-ici':'Yanlış defterine eklemek için kısa bir ilke yaz — ',
+  'ays.solve.soru-coz':'Soru çöz',
+});
 /* Sade çekmece (2026-10-16, «AYS'de çok şey iç içe girmiş»): «Konu
 çalış» adı Öğren › Konular ile karışıyordu; ikisi de ders ve konu
 listesi. Bu ekran konunun TESTLE kapanışını izler — adı bu oldu ve
@@ -92,16 +191,16 @@ R.Screens.solve = (function(){
     const sayi = o => L.SAYI ? L.SAYI.html(o) : U.esc(String(o.deger) + (o.birim ? ' ' + o.birim : ''));
     const s = Q.summary();
     const m = [
-      { ust:'Çözülen soru', sayi:sayi({ deger:s.toplam, birim:'soru', kesinlik:'measured' }), cumle:'toplam.',
-        vurgu:'Bugün ' + s.bugun + '.', sistem:'ays' },
+      { ust:yz('ays.solve.cozulen-soru'), sayi:sayi({ deger:s.toplam, birim:'soru', kesinlik:'measured' }), cumle:'toplam.',
+        vurgu:yz('ays.solve.bugun') + s.bugun + '.', sistem:'ays' },
       s.cozumOrani == null
-        ? { ust:'Kendi çözdüğün', cumle:'Henüz kayıt yok.', vurgu:'Bir soru çözünce oran çıkar.', sistem:'ays' }
-        : { ust:'Kendi çözdüğün', sayi:sayi({ deger:s.cozumOrani, birim:'%', kesinlik:'computed', formul:'kendin çözdüğün ÷ kayıt' }),
+        ? { ust:yz('ays.solve.kendi-cozdugun'), cumle:yz('ays.solve.henuz-kayit-yok'), vurgu:yz('ays.solve.bir-soru-cozunce-oran-cikar'), sistem:'ays' }
+        : { ust:yz('ays.solve.kendi-cozdugun'), sayi:sayi({ deger:s.cozumOrani, birim:'%', kesinlik:'computed', formul:'kendin çözdüğün ÷ kayıt' }),
             cumle:'kendin.', vurgu:s.ortZorluk == null ? 'Zorluk ölçülmedi.' : 'Ortalama zorluk ' + s.ortZorluk + '.', sistem:'ays' },
     ];
-    if(s.etiketsiz) m.push({ ust:'Konusuz kayıt', sayi:sayi({ deger:s.etiketsiz, birim:'kayıt', kesinlik:'measured' }),
-      cumle:'konuya bağlanmadı.', vurgu:'«Çözülen sorular»dan elle seç.', sistem:'ays' });
-    return raw(V.donen({ id:'ays-cozum', ad:'Çözüm', maddeler:m }));
+    if(s.etiketsiz) m.push({ ust:yz('ays.solve.konusuz-kayit'), sayi:sayi({ deger:s.etiketsiz, birim:'kayıt', kesinlik:'measured' }),
+      cumle:yz('ays.solve.konuya-baglanmadi'), vurgu:yz('ays.solve.cozulen-sorular-dan-elle-sec'), sistem:'ays' });
+    return raw(V.donen({ id:'ays-cozum', ad:yz('ays.solve.cozum'), maddeler:m }));
   }
 
   /* Görsel okuyabilen bir model bağlı mı? Fotoğraf kutusu buna göre konuşur. */
@@ -118,17 +217,16 @@ R.Screens.solve = (function(){
        kutusu, metin alanı ve not ekranı boşuna kaplıyordu. Yalnız ne
        gerektiği ve çözdüğün soruyu nereden kaydedeceğin söylenir. */
     if(!canText) return K.Card({
-      title:'Soruyu ver', hint:'solve',
+      title:yz('ays.solve.soruyu-ver'), hint:'solve',
       body:K.Stack([
-        K.Notice({ tone:'info', title:'Yapay zekâ bağlı değil.',
-          body:html`Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla.
-            Çözdüğün soruları aşağıdaki «Hızlı kayıt» ile girebilirsin.
-            ${K.Button({ label:'Ofis ayarlarını aç', size:'sm', act:'go', data:{ 'data-route':'office' } })}` }),
+        K.Notice({ tone:'info', title:yz('ays.solve.yapay-zeka-bagli-degil'),
+          body:html`${yz('ays.solve.fotograftan-ya-da-metinden-s')}
+            ${K.Button({ label:yz('ays.solve.ofis-ayarlarini-ac'), size:'sm', act:'go', data:{ 'data-route':'office' } })}` }),
         karalamaAlani(true),
       ], 'sm'),
     });
     return K.Card({
-      title:'Soruyu ver', hint:'solve',
+      title:yz('ays.solve.soruyu-ver'), hint:'solve',
       body:K.Stack([
 
         /* --- fotoğraf --- */
@@ -138,43 +236,43 @@ R.Screens.solve = (function(){
           ${when(image, () => html`
             <img class="qdrop__img" src="${image.previewUrl}" alt="Seçilen soru fotoğrafı"/>
             <span class="qdrop__meta">${image.width}×${image.height} ·
-              ${Math.round(image.bytes / 1024)} KB</span>`)}
+              ${Math.round(image.bytes / 1024)} ${yz('ays.solve.kb')}</span>`)}
           ${when(!image, () => html`
             <span class="qdrop__icon">${raw(UI.icon('exam'))}</span>
-            <b>Fotoğrafı buraya bırak</b>
-            <span class="tiny dim">ya da tıkla · Ctrl+V ile yapıştır</span>`)}
+            <b>${yz('ays.solve.fotografi-buraya-birak')}</b>
+            <span class="tiny dim">${yz('ays.solve.ya-da-tikla-ctrl-v')}</span>`)}
         </div>
         <input type="file" id="q-file" accept="image/*" class="sr-only"
           data-change="q-file" aria-hidden="true" tabindex="-1"/>`,
 
         when(image, () => K.Row([
-          K.Button({ label:'Fotoğrafı kaldır', size:'sm', tone:'ghost', act:'q-clear-image' }),
+          K.Button({ label:yz('ays.solve.fotografi-kaldir'), size:'sm', tone:'ghost', act:'q-clear-image' }),
         ], { wrap:true })),
 
         karalamaAlani(false),
 
         when(image && !canImage, () => K.Notice({ tone:'warn',
-          title:'Bağlı model görsel okuyamıyor.',
+          title:yz('ays.solve.bagli-model-gorsel-okuyamiyo'),
           body:'Fotoğraflı soru için görsel destekleyen bir model gerekir — Google AI Studio’nun '
              + 'Gemini modelleri ücretsiz katmanda bunu yapar. Ofis → Ayarlar’dan bağlayabilirsin. '
              + 'Ya da soruyu metin olarak yaz.' })),
 
         /* --- metin --- */
-        K.Field({ label:'Soru metni', hint:image ? 'fotoğraf varken boş bırakabilirsin' : null,
+        K.Field({ label:yz('ays.solve.soru-metni'), hint:image ? 'fotoğraf varken boş bırakabilirsin' : null,
           input:K.Textarea({ id:'q-text', rows:4,
-            placeholder:'Soruyu buraya yazabilir ya da yapıştırabilirsin' }) }),
+            placeholder:yz('ays.solve.soruyu-buraya-yazabilir-ya-d') }) }),
 
-        K.Field({ label:'Notun', hint:'isteğe bağlı',
-          input:K.Input({ id:'q-note', placeholder:'ör. ikinci adımı anlamadım' }) }),
+        K.Field({ label:yz('ays.solve.notun'), hint:'isteğe bağlı',
+          input:K.Input({ id:'q-note', placeholder:yz('ays.solve.or-ikinci-adimi-anlamadim') }) }),
 
         K.Row([
           K.Button({ label:busy ? 'Çözülüyor…' : 'Çöz ve anlat', icon:'zap', tone:'primary',
             act:'q-solve', disabled:busy || !canText }),
-          when(busy, () => K.Button({ label:'İptal', size:'sm', tone:'ghost', act:'q-cancel' })),
-          when(result && !busy, () => K.Button({ label:'Yeni soru', size:'sm', act:'q-reset' })),
+          when(busy, () => K.Button({ label:yz('ays.solve.i-ptal'), size:'sm', tone:'ghost', act:'q-cancel' })),
+          when(result && !busy, () => K.Button({ label:yz('ays.solve.yeni-soru'), size:'sm', act:'q-reset' })),
         ], { wrap:true }),
 
-        when(failure, () => K.Notice({ tone:'danger', title:'Çözülemedi.',
+        when(failure, () => K.Notice({ tone:'danger', title:yz('ays.solve.cozulemedi'),
           body:R.LLM.errorText(failure.code) })),
 
         html`<div id="q-out"></div>`,
@@ -197,9 +295,9 @@ R.Screens.solve = (function(){
     if(!(window.LIFEOS && window.LIFEOS.DEFTER && window.LIFEOS.DEFTER.kuruluMu())) return '';
     return html`<div class="qkarala">
       <div class="row wrap gap-6">
-        ${when(image, () => K.Button({ label:'Soru üstünde karala', icon:'edit', size:'sm', tone:'ghost', act:'q-karala', data:{ 'data-arka':'1' } }))}
-        ${K.Button({ label:'Kâğıtta çöz', icon:'edit', size:'sm', tone:'ghost', act:'q-karala', data:{ 'data-arka':'0' } })}
-        ${when(modelYok && karalamalar.length, () => K.Button({ label:'Deftere kaydet', icon:'book', size:'sm', act:'q-defter' }))}
+        ${when(image, () => K.Button({ label:yz('ays.solve.soru-ustunde-karala'), icon:'edit', size:'sm', tone:'ghost', act:'q-karala', data:{ 'data-arka':'1' } }))}
+        ${K.Button({ label:yz('ays.solve.kagitta-coz'), icon:'edit', size:'sm', tone:'ghost', act:'q-karala', data:{ 'data-arka':'0' } })}
+        ${when(modelYok && karalamalar.length, () => K.Button({ label:yz('ays.solve.deftere-kaydet'), icon:'book', size:'sm', act:'q-defter' }))}
       </div>
       ${when(karalamalar.length, () => html`<div class="qkarala__liste">${map(karalamalar, (k, i) => html`
         <span class="qkarala__oge"><img src="${k.url}" alt="Karalama ${i + 1}"/>
@@ -221,12 +319,12 @@ R.Screens.solve = (function(){
     const m = result.meta || {};
     return K.Card({
       class:'card--primary',
-      title:'Çözüm', sub:result.model ? result.provider + ' · ' + result.model : '',
-      badge:when(result.fellBack, () => K.Badge({ label:'yedek model', tone:'info' })),
+      title:yz('ays.solve.cozum'), sub:result.model ? result.provider + ' · ' + result.model : '',
+      badge:when(result.fellBack, () => K.Badge({ label:yz('ays.solve.yedek-model'), tone:'info' })),
       body:html`
         ${raw(solutionBody(result.text))}
         ${when(result.truncated, () => html`<p class="tiny dim mt-8">
-          Yanıt uzunluk sınırına takıldı; son cümle eksik olabilir.</p>`)}
+          ${yz('ays.solve.yanit-uzunluk-sinirina-takil')}</p>`)}
 
         ${checkCard()}
 
@@ -244,7 +342,7 @@ R.Screens.solve = (function(){
           ${K.Row([
             K.Button({ label:followBusy ? 'Yazıyor…' : 'Sor', size:'sm', tone:'primary',
               act:'q-follow', disabled:followBusy }),
-            when(thread.length, () => K.Button({ label:'Sohbeti temizle', size:'sm', tone:'ghost',
+            when(thread.length, () => K.Button({ label:yz('ays.solve.sohbeti-temizle'), size:'sm', tone:'ghost',
               act:'q-thread-clear' })),
           ], { wrap:true })}
         </div>
@@ -252,8 +350,8 @@ R.Screens.solve = (function(){
         <div class="qmeta mt-12">
           ${K.SectionTitle('Kayda geçir')}
           ${when(window.LIFEOS && window.LIFEOS.DEFTER && window.LIFEOS.DEFTER.kuruluMu(), () => html`<div class="row wrap gap-6 mb-8">
-            ${K.Button({ label:'Deftere kaydet', icon:'book', size:'sm', act:'q-defter' })}
-            <span class="tiny dim">Soru, karalamaların, notun ve çözüm özeti tek notta.</span></div>`)}
+            ${K.Button({ label:yz('ays.solve.deftere-kaydet'), icon:'book', size:'sm', act:'q-defter' })}
+            <span class="tiny dim">${yz('ays.solve.soru-karalamalarin-notun-ve')}</span></div>`)}
           ${when(!m.matched && m.rawTopic, () => K.Notice({ tone:'warn',
             body:'Model konuyu “' + m.rawTopic + '” diye yazdı ama bu ders listende yok. '
                + 'Aşağıdan doğru konuyu seç — yanlış konu, konu takibini sessizce bozar.' }))}
@@ -277,23 +375,23 @@ R.Screens.solve = (function(){
     }
     if(!check){
       return html`<div class="mt-10">
-        ${K.Button({ label:'Çözümü denetle', icon:'shield', size:'sm', act:'q-check' })}
-        <span class="tiny dim"> — soruyu başka bir modele sıfırdan çözdürür (1 istek)</span>
+        ${K.Button({ label:yz('ays.solve.cozumu-denetle'), icon:'shield', size:'sm', act:'q-check' })}
+        <span class="tiny dim"> ${yz('ays.solve.soruyu-baska-bir-modele')}</span>
       </div>`;
     }
     if(check.durum === 'yapilamadi'){
-      return K.Notice({ tone:'warn', title:'Denetim yapılamadı.',
+      return K.Notice({ tone:'warn', title:yz('ays.solve.denetim-yapilamadi'),
         body:R.LLM.errorText(check.neden) });
     }
     if(check.durum === 'emin_degil'){
-      return K.Notice({ tone:'warn', title:'Denetim sonuçsuz.',
+      return K.Notice({ tone:'warn', title:yz('ays.solve.denetim-sonucsuz'),
         body:check.neden === 'no_first'
           ? 'Yukarıdaki çözüm net bir cevap bildirmedi, karşılaştıracak bir şey yok.'
           : 'İkinci çözüm bir cevap üretemedi. Bu, çözümün yanlış olduğu anlamına '
             + 'gelmez ama doğrulandığı anlamına da gelmez.' });
     }
     if(check.durum === 'ayni'){
-      return K.Notice({ tone:'ok', title:'İki bağımsız çözüm aynı cevaba çıktı.',
+      return K.Notice({ tone:'ok', title:yz('ays.solve.i-ki-bagimsiz-cozum-ayni-cev'),
         body:(check.second.independent
             ? 'Soru ' + check.second.model + ' modeline sıfırdan çözdürüldü ve aynı sonuca ulaştı. '
             : 'Soru aynı modele sıfırdan çözdürüldü ve aynı sonuca ulaştı — bağlamı '
@@ -305,16 +403,16 @@ R.Screens.solve = (function(){
     /* ayrildi */
     const j = check.judge;
     return K.Card({
-      title:'Dikkat: iki çözüm farklı cevaba çıktı',
+      title:yz('ays.solve.dikkat-iki-cozum-farkli-ceva'),
       badge:K.Badge({ label:'denetim', tone:'danger' }),
       body:html`
         <div class="qdiff">
           <div class="qdiff__col">
-            <span class="mono-label">Yukarıdaki çözüm</span>
+            <span class="mono-label">${yz('ays.solve.yukaridaki-cozum')}</span>
             <b class="qdiff__ans">${(result && result.meta && result.meta.answer) || '—'}</b>
           </div>
           <div class="qdiff__col">
-            <span class="mono-label">Bağımsız çözüm${
+            <span class="mono-label">${yz('ays.solve.bagimsiz-cozum')}${
               when(check.second.model, () => ' · ' + check.second.model)}</span>
             <b class="qdiff__ans">${check.second.answer}</b>
           </div>
@@ -329,10 +427,9 @@ R.Screens.solve = (function(){
               : j.winner === 'hicbiri' ? 'İkisi de hatalı.'
               : 'Karar verilemedi.',
             body:j.answer ? 'Doğru cevap: ' + j.answer : '' })}
-          ${when(j.step, () => K.Notice({ tone:'info', title:'Hata nerede başlıyor:', body:j.step }))}
+          ${when(j.step, () => K.Notice({ tone:'info', title:yz('ays.solve.hata-nerede-basliyor'), body:j.step }))}
           ${when(j.text, () => html`<div class="mt-10">${raw(solutionBody(j.text))}</div>`)}`)}
-        <p class="tiny dim mt-10">Denetim yanılabilir. Hakem de bir modeldir ve
-          kesin hüküm vermez; sana gösterdiği yeri kendin kontrol et.</p>`,
+        <p class="tiny dim mt-10">${yz('ays.solve.denetim-yanilabilir-hakem-de')}</p>`,
     });
   }
 
@@ -387,8 +484,7 @@ R.Screens.solve = (function(){
     if(!q) return '';
     const rows = searchTopics(q);
     if(!rows.length){
-      return String(html`<div class="tsug tsug--empty">Eşleşen konu yok.
-        Başka bir kelime dene ya da boş bırak.</div>`);
+      return String(html`<div class="tsug tsug--empty">${yz('ays.solve.eslesen-konu-yok-baska-bir')}</div>`);
     }
     return String(html`<div class="tsug">${map(rows, t => html`
       <button type="button" class="${cls('tsug__row', t.ref === topicRef && 'is-on')}"
@@ -404,7 +500,7 @@ R.Screens.solve = (function(){
 
     return K.Stack([
       html`<div class="tpick">
-        ${K.Field({ label:'Ders – konu',
+        ${K.Field({ label:yz('ays.solve.ders-konu'),
           hint:label ? 'sistemin seçtiği: ' + label + ' — değiştirmek için yaz'
             : 'yazarak ara, aşağıdan seç',
           input:K.Input({ id:'q-topic-q', value:topicQuery, change:'q-topic-q',
@@ -414,10 +510,9 @@ R.Screens.solve = (function(){
         <div id="q-topic-sug">${raw(topicSuggestions())}</div>
         ${when(current, () => html`<div class="tpick__on">
           ${raw(UI.icon('check'))} <b>${label}</b>
-          ${K.Button({ label:'Kaldır', size:'sm', tone:'ghost', act:'q-topic-clear' })}
+          ${K.Button({ label:yz('ays.solve.kaldir'), size:'sm', tone:'ghost', act:'q-topic-clear' })}
         </div>`)}
-        ${when(!current, () => html`<p class="tiny dim">Konu seçilmezse kayıt konu
-          takibine bağlanmaz — sonradan da seçebilirsin.</p>`)}
+        ${when(!current, () => html`<p class="tiny dim">${yz('ays.solve.konu-secilmezse-kayit-konu-t')}</p>`)}
       </div>`,
     ], 'sm');
   }
@@ -425,29 +520,29 @@ R.Screens.solve = (function(){
   function saveForm(m){
     return K.Stack([
       topicPicker(m),
-      K.Field({ label:'Zorluk',
+      K.Field({ label:yz('ays.solve.zorluk'),
         input:K.Select({ id:'q-diff', value:m.difficulty || 3,
           options:R.DIFFICULTY_ORDER.map(n => ({ value:n,
             label:n + ' — ' + R.DIFFICULTY[n].label })) }) }),
-      K.Field({ label:'Sen ne yaptın?',
+      K.Field({ label:yz('ays.solve.sen-ne-yaptin'),
         hint:'“çözüme baktım” ile “kendim çözdüm” arasındaki fark, konu takibinin en değerli bilgisi',
         input:K.Select({ id:'q-result', value:'bakarak',
           options:R.SOLVE_RESULT_ORDER.map(id => ({ value:id, label:R.SOLVE_RESULTS[id].label })) }) }),
       K.Cols(2, [
-        K.Field({ label:'Süre (sn)', hint:'isteğe bağlı',
+        K.Field({ label:yz('ays.solve.sure-sn'), hint:'isteğe bağlı',
           input:html`${K.Input({ id:'q-secs', type:'number', numeric:true, min:0 })}<div id="q-suphe" aria-live="polite"></div>` }),
-        K.Field({ label:'Cevap', input:K.Input({ id:'q-answer', value:m.answer || '' }) }),
+        K.Field({ label:yz('ays.solve.cevap'), input:K.Input({ id:'q-answer', value:m.answer || '' }) }),
       ]),
       /* Kaynak: zorluğu ETİKETİNDEN değil, senin bu kaynaktaki oranından
          öğreneceğiz. Onun için soru kaynağa bağlanmalı. */
       K.Cols(2, [
-        K.Field({ label:'Kaynak', hint:'hangi yayından',
+        K.Field({ label:yz('ays.solve.kaynak'), hint:'hangi yayından',
           input:K.Select({ id:'q-source', value:lastSource,
-            options:[{ value:'', label:'— kaynak seç —' }].concat(
+            options:[{ value:'', label:yz('ays.solve.kaynak-sec') }].concat(
               R.Sources.all().map(x => ({ value:x.id,
                 label:x.name + ' · ' + R.SOURCE_LEVELS[x.level].label }))) }) }),
-        K.Field({ label:'Soru no', hint:'isteğe bağlı',
-          input:K.Input({ id:'q-no', placeholder:'ör. 42' }) }),
+        K.Field({ label:yz('ays.solve.soru-no'), hint:'isteğe bağlı',
+          input:K.Input({ id:'q-no', placeholder:yz('ays.solve.or-42') }) }),
       ]),
       when(m.trap, () => K.Notice({ tone:'info', title:'Tuzak:', body:m.trap })),
 
@@ -460,17 +555,17 @@ R.Screens.solve = (function(){
                       kuralı (`R.NOTEBOOK_FIELDS`) «en fazla 2-3 satır,
                       tam çözüm kopyalanmaz» diyor; burada kopyalanıyordu.
          İkisi de artık kullanıcıdan gelir. */
-      K.Field({ label:'Hata türü', hint:'yanlış defterine eklenecekse gerekir',
+      K.Field({ label:yz('ays.solve.hata-turu'), hint:'yanlış defterine eklenecekse gerekir',
         input:K.Select({ id:'q-tag', value:'K',
           options:Object.keys(R.ERROR_TAGS).map(k => ({
             value:k, label:k + ' — ' + R.ERROR_TAGS[k].name })) }) }),
-      K.Field({ label:'Doğru ilke', hint:'2-3 cümle yeter — tam çözüm buraya kopyalanmaz',
+      K.Field({ label:yz('ays.solve.dogru-ilke'), hint:'2-3 cümle yeter — tam çözüm buraya kopyalanmaz',
         input:K.Textarea({ id:'q-principle', rows:2,
-          placeholder:'Bu tür bir soruda dikkat edilecek şey…' }) }),
+          placeholder:yz('ays.solve.bu-tur-bir-soruda-dikkat') }) }),
 
       K.Row([
-        K.Button({ label:'Kaydet', icon:'check', tone:'primary', act:'q-save' }),
-        K.Button({ label:'Yanlış defterine de ekle', size:'sm', act:'q-save-error' }),
+        K.Button({ label:yz('ays.solve.kaydet'), icon:'check', tone:'primary', act:'q-save' }),
+        K.Button({ label:yz('ays.solve.yanlis-defterine-de-ekle'), size:'sm', act:'q-save-error' }),
       ], { wrap:true }),
     ], 'sm');
   }
@@ -480,12 +575,12 @@ R.Screens.solve = (function(){
   function historyCard(){
     const list = Q.all().slice(0, 12);
     if(!list.length){
-      return K.Card({ title:'Çözülen sorular',
+      return K.Card({ title:yz('ays.solve.cozulen-sorular'),
         body:K.Empty({ icon:'exam',
-          text:'Henüz kayıt yok. Bir soru çözdürdüğünde buraya düşer ve konu takibine bağlanır.' }) });
+          text:yz('ays.solve.henuz-kayit-yok-bir-soru') }) });
     }
     return K.Card({
-      title:'Çözülen sorular', sub:Q.all().length + ' kayıt',
+      title:yz('ays.solve.cozulen-sorular'), sub:Q.all().length + ' kayıt',
       body:html`<div class="stack-xs">${map(list, row => html`
         <div class="qrow">
           <span class="${'qrow__dot qrow__dot--' + (R.SOLVE_RESULTS[row.result] || {}).tone}"></span>
@@ -496,7 +591,7 @@ R.Screens.solve = (function(){
           ${when(row.difficulty, () => K.Badge({ label:R.DIFFICULTY[row.difficulty].short,
             tone:row.difficulty >= 4 ? 'warn' : 'info' }))}
           <span class="tiny dim">${U.relativeDay(R.U.gunOf((row.at || '')))}</span>
-          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Kaydı sil',
+          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:yz('ays.solve.kaydi-sil'),
             act:'q-del', data:{ 'data-id':row.id } })}
         </div>`)}</div>`,
     });
@@ -506,7 +601,7 @@ R.Screens.solve = (function(){
     const rows = Q.byTopic().slice(0, 8);
     if(!rows.length) return '';
     return K.Card({
-      title:'Konu başına çözüm', sub:'En düşük oran üstte',
+      title:yz('ays.solve.konu-basina-cozum'), sub:yz('ays.solve.en-dusuk-oran-ustte'),
       body:html`<div class="stack-xs">${map(rows, r => html`
         <div class="qtopic">
           <span class="minw0"><b>${r.topicName}</b>
@@ -530,14 +625,14 @@ R.Screens.solve = (function(){
 
     return K.Card({
       /* iPhone Faz 2d: zorluğun nereden geldiği ⓘ'de (hints: solve) */
-      title:'Kaynaklarım', hint:'solve',
-      actions:K.Button({ label:'Kaynak ekle', icon:'plus', size:'sm', act:'q-src-new' }),
+      title:yz('ays.solve.kaynaklarim'), hint:'solve',
+      actions:K.Button({ label:yz('ays.solve.kaynak-ekle'), icon:'plus', size:'sm', act:'q-src-new' }),
       body:html`
-        ${when(warn, () => K.Notice({ tone:'warn', title:'Yayın merdiveni:', body:warn.text }))}
+        ${when(warn, () => K.Notice({ tone:'warn', title:yz('ays.solve.yayin-merdiveni'), body:warn.text }))}
         ${when(!rows.length, () => K.Empty({ icon:'book',
-          text:'Henüz kaynak yok. Kullandığın yayınları ekle; çözdüğün soruları onlara '
+          text:yz('ays.solve.henuz-kaynak-yok-kullandigin')
              + 'bağladıkça hangisinin sana zor geldiği kendiliğinden çıkar.',
-          action:K.Button({ label:'Kaynakları yükle', size:'sm', act:'q-src-seed' }) }))}
+          action:K.Button({ label:yz('ays.solve.kaynaklari-yukle'), size:'sm', act:'q-src-seed' }) }))}
         ${when(rows.length, () => html`<div class="stack-xs">${map(rows, r => html`
           <div class="srcrow">
             <span class="minw0">
@@ -547,11 +642,11 @@ R.Screens.solve = (function(){
                   when(r.olcum.soru, () => ' · ' + r.olcum.soru + ' soru')}</span>
             </span>
             ${K.Badge({ label:badgeOf(r), tone:toneOf(r) })}
-            ${K.IconButton({ icon:'edit', size:'sm', plain:true, aria:'Kaynağı düzenle',
+            ${K.IconButton({ icon:'edit', size:'sm', plain:true, aria:yz('ays.solve.kaynagi-duzenle'),
               act:'q-src-edit', data:{ 'data-id':r.src.id } })}
           </div>`)}</div>
-        <p class="tiny dim mt-8">Bir kaynak hakkında konuşabilmek için en az
-          ${R.SOURCE_MIN_SAMPLE} çözülmüş soru gerekir; altı sorudan çıkan oran gürültüdür.</p>`)}`,
+        <p class="tiny dim mt-8">${yz('ays.solve.bir-kaynak-hakkinda-konusabi')}
+          ${R.SOURCE_MIN_SAMPLE} ${yz('ays.solve.cozulmus-soru-gerekir-alti-s')}</p>`)}`,
     });
   }
 
@@ -570,31 +665,30 @@ R.Screens.solve = (function(){
     const v = (f, d) => src ? (src[f] == null ? '' : src[f]) : (d == null ? '' : d);
     UI.sheet({
       title:src ? 'Kaynağı düzenle' : 'Kaynak ekle',
-      subtitle:'Kademe bir başlangıç noktası; gerçek zorluk çözdükçe ölçülür',
+      subtitle:yz('ays.solve.kademe-bir-baslangic-noktasi'),
       body:String(K.Stack([
-        K.Field({ label:'Ad', input:K.Input({ id:'src-name', value:v('name'),
-          placeholder:'ör. 345 TYT Matematik Soru Bankası' }) }),
+        K.Field({ label:yz('ays.solve.ad'), input:K.Input({ id:'src-name', value:v('name'),
+          placeholder:yz('ays.solve.or-345-tyt-matematik-soru') }) }),
         K.Cols(2, [
-          K.Field({ label:'Zorluk kademesi',
+          K.Field({ label:yz('ays.solve.zorluk-kademesi'),
             input:K.Select({ id:'src-level', value:v('level', 'orta'),
               options:R.SOURCE_LEVEL_ORDER.map(k => ({ value:k, label:R.SOURCE_LEVELS[k].label })) }) }),
-          K.Field({ label:'Tür',
+          K.Field({ label:yz('ays.solve.tur'),
             input:K.Select({ id:'src-kind', value:v('kind', 'banka'),
               options:R.SOURCE_KIND_ORDER.map(k => ({ value:k, label:R.SOURCE_KINDS[k].label })) }) }),
         ]),
-        K.Field({ label:'Ders', hint:'yalnız bir derse aitse',
+        K.Field({ label:yz('ays.solve.ders'), hint:'yalnız bir derse aitse',
           input:K.Select({ id:'src-subject', value:v('subjectId'),
-            options:[{ value:'', label:'— hepsi —' }].concat(
+            options:[{ value:'', label:yz('ays.solve.hepsi') }].concat(
               R.SUBJECTS.map(x => ({ value:x.id, label:x.name }))) }) }),
-        K.Field({ label:'Not', input:K.Input({ id:'src-note', value:v('note') }) }),
+        K.Field({ label:yz('ays.solve.not'), input:K.Input({ id:'src-note', value:v('note') }) }),
         when(src, () => K.Notice({ tone:'info', body:R.Sources.sentence(src.id) })),
-        when(src && src.from, () => html`<p class="tiny dim">Kademe varsayılanı
-          uygulamanın kendi kaynak mimarisinden geldi (${src.from}); değiştirebilirsin.</p>`),
+        when(src && src.from, () => html`<p class="tiny dim">${yz('ays.solve.kademe-varsayilani-uygulaman')}${src.from}${yz('ays.solve.degistirebilirsin')}</p>`),
       ])),
       footer:String(html`
-        ${when(src, () => K.Button({ label:'Sil', tone:'ghost', act:'q-src-del',
+        ${when(src, () => K.Button({ label:yz('ays.solve.sil'), tone:'ghost', act:'q-src-del',
           data:{ 'data-id':src.id } }))}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'q-src-save',
+        ${K.Button({ label:yz('ays.solve.kaydet'), tone:'primary', act:'q-src-save',
           data:{ 'data-id':src ? src.id : '' } })}`),
     });
   }
@@ -613,12 +707,12 @@ R.Screens.solve = (function(){
     if(!ders.topics.some(t => t.id === hizli.konu)) hizli.konu = '';
     const ic = VT().tekSatirSoru({ id:'qh', act:'q-hizli', change:'qh-alan',
       dersler:R.SUBJECTS.map(x => ({ value:x.id, label:x.name })), ders:hizli.ders,
-      konular:[{ value:'', label:'Konu seç' }].concat(ders.topics.map(t => ({ value:t.id, label:t.name }))), konu:hizli.konu,
+      konular:[{ value:'', label:yz('ays.solve.konu-sec') }].concat(ders.topics.map(t => ({ value:t.id, label:t.name }))), konu:hizli.konu,
       sonuclar:R.SOLVE_RESULT_ORDER.map(id => ({ value:id, label:R.SOLVE_RESULTS[id].label, iyi:id === 'dogru' || id === 'zorla' })),
       sonuc:hizli.sonuc, not:false });
     /* «Açılır pencere yok · Enter kaydeder» ve «küçük · geri alınır» ⓘ'de
        (hints: quick-log); ↵ düğmesi «Kaydet (Enter)» diye okunur. */
-    return K.Kutu({ ad:'Hızlı kayıt', ipucu:'quick-log', class:'vkutu', id:'q-hizli-kutu', govde:raw(ic) });
+    return K.Kutu({ ad:yz('ays.solve.hizli-kayit'), ipucu:'quick-log', class:'vkutu', id:'q-hizli-kutu', govde:raw(ic) });
   }
 
   LIFEOS.PARCA.blok({ id:'solve.inputcard', sayfa:'solve', yer:'y1', sira:10, ad:'inputCard', ciz(){
@@ -700,7 +794,7 @@ R.Screens.solve = (function(){
   async function useFile(file){
     try{
       image = await Q.prepareImage(file);
-      UI.toast('Fotoğraf hazır');
+      UI.toast(yz('ays.solve.fotograf-hazir'));
     }catch(err){
       const code = err && err.code;
       UI.toast(code === 'too_big' ? 'Görsel çok büyük — daha küçük bir kırpma dene'
@@ -722,7 +816,7 @@ R.Screens.solve = (function(){
     async 'q-hizli'(){
       const ders = R.SUBJECTS.find(x => x.id === hizli.ders);
       const konu = ders && ders.topics.find(t => t.id === hizli.konu);
-      if(!konu){ UI.toast('Önce konuyu seç; konusuz kayıt konu takibine girmez.'); return; }
+      if(!konu){ UI.toast(yz('ays.solve.once-konuyu-sec-konusuz-kayi')); return; }
       const rec = await Q.save({ subjectId:ders.id, topicId:konu.id, topicName:konu.name, result:hizli.sonuc, quick:true });
       await R.App.render();
       UI.toast(konu.name + ' · ' + R.SOLVE_RESULTS[hizli.sonuc].label.toLocaleLowerCase('tr-TR') + ' kaydedildi.',
@@ -765,8 +859,8 @@ R.Screens.solve = (function(){
         + (not ? '\n\n## Notum\n' + not : '')
         + (ozet ? '\n\n## Çözüm özeti\n' + ozet : '')
         + '\n\n#soru' + (subject ? ' ' + etiket(subject.name) : '') + (topic ? ' ' + etiket(topic.name) : '');
-      const n = await D.notOlustur({ baslik:'Soru · ' + (topic ? topic.name : subject ? subject.name : 'konu seçilmedi') + ' · ' + U.fmtShort(U.todayISO()), govde, ekler });
-      UI.toast('Deftere kaydedildi · Notlarım’da', { undo:async () => { await D.sil(n.id); } });
+      const n = await D.notOlustur({ baslik:yz('ays.solve.soru') + (topic ? topic.name : subject ? subject.name : 'konu seçilmedi') + ' · ' + U.fmtShort(U.todayISO()), govde, ekler });
+      UI.toast(yz('ays.solve.deftere-kaydedildi-notlarim'), { undo:async () => { await D.sil(n.id); } });
     },
 
     async 'q-reset'(){
@@ -789,7 +883,7 @@ R.Screens.solve = (function(){
       const text = (document.getElementById('q-text') || {}).value || '';
       const note = (document.getElementById('q-note') || {}).value || '';
       if(!image && !text.trim()){
-        UI.toast('Önce soruyu yaz ya da fotoğrafını ekle');
+        UI.toast(yz('ays.solve.once-soruyu-yaz-ya-da'));
         return;
       }
       /* DOM re-render'dan ÖNCE, kalıcı degiskene alınır: busy=true'dan
@@ -919,7 +1013,7 @@ R.Screens.solve = (function(){
     async 'q-src-save'(el){
       const val = id => { const e = document.getElementById(id); return e ? String(e.value).trim() : ''; };
       const name = val('src-name');
-      if(!name){ UI.toast('Kaynağın adı gerekiyor'); return; }
+      if(!name){ UI.toast(yz('ays.solve.kaynagin-adi-gerekiyor')); return; }
       const old = el.dataset.id ? R.Sources.byId(el.dataset.id) : null;
       /* `id:undefined` YAZILMAZ: Object.assign undefined degeri de kopyalar
          ve newSource()'un urettigi kimligin ustune yazardi. Sonuc: her yeni
@@ -933,20 +1027,20 @@ R.Screens.solve = (function(){
       if(el.dataset.id) patch.id = el.dataset.id;
       await R.Sources.save(patch);
       UI.closeSheet();
-      UI.toast('Kaynak kaydedildi');
+      UI.toast(yz('ays.solve.kaynak-kaydedildi'));
       await R.App.render();
     },
 
     async 'q-src-del'(el){
       await R.Sources.remove(el.dataset.id);
       UI.closeSheet();
-      UI.toast('Kaynak silindi');
+      UI.toast(yz('ays.solve.kaynak-silindi'));
       await R.App.render();
     },
 
     async 'q-del'(el){
       await Q.remove(el.dataset.id);
-      UI.toast('Kayıt silindi');
+      UI.toast(yz('ays.solve.kayit-silindi'));
       await R.App.render();
     },
   };
@@ -977,14 +1071,14 @@ R.Screens.solve = (function(){
          yazılabilir ama yanlış defterine "doğru ilke" diye giremez. */
       const j = check && check.durum === 'ayrildi' ? check.judge : null;
       if(j && j.winner && j.winner !== 'A'){
-        UI.toast('Bağımsız denetim bu çözümü hatalı buldu; yanlış '
+        UI.toast(yz('ays.solve.bagimsiz-denetim-bu-cozumu-h')
           + 'defterine "doğru ilke" olarak eklenemez. Önce doğru çözümü bul.');
         return;
       }
       /* Tam çözüm kopyalanmaz (`R.NOTEBOOK_FIELDS`): ilke kullanıcıdan
          gelir, boşsa uydurulmaz. */
       if(!val('q-principle')){
-        UI.toast('Yanlış defterine eklemek için kısa bir ilke yaz — '
+        UI.toast(yz('ays.solve.yanlis-defterine-eklemek-ici')
           + 'tam çözüm otomatik kopyalanmaz.');
         return;
       }
@@ -1100,7 +1194,7 @@ R.Screens.solve = (function(){
     /* iPhone Faz 2: iş soruyu vermek ve kaydetmek; kaynaklar, konu başına
        oran ve son kayıtlar şerit (dokununca açılır). */
     kucukVarsayilan:['kaynaklarım', 'konu-başına-çözüm', 'çözülen-sorular'],
-    title:'Soru çöz',
+    title:yz('ays.solve.soru-coz'),
     subtitle(){
       const s = Q.summary();
       return s.toplam ? s.toplam + ' soru çözüldü'

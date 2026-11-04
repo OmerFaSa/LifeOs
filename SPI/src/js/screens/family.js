@@ -9,6 +9,46 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.family.profilin':'Profilin',
+  'spi.family.hedefler-hazir':'hedefler hazır',
+  'spi.family.ad':'Ad',
+  'spi.family.dogum-yili':'Doğum yılı',
+  'spi.family.cinsiyet':'Cinsiyet',
+  'spi.family.sec':'Seç',
+  'spi.family.erkek':'Erkek',
+  'spi.family.kadin':'Kadın',
+  'spi.family.boy-cm':'Boy (cm)',
+  'spi.family.kilo-kg':'Kilo (kg)',
+  'spi.family.hedef':'Hedef',
+  'spi.family.kaydet':'Kaydet',
+  'spi.family.hesaplanan-hedefler':'Hesaplanan hedefler',
+  'spi.family.laboratuvara-gore-yukseltile':'Laboratuvara göre yükseltilenler:',
+  'spi.family.gunluk-ihtiyac-gunden-gune-d':'Günlük ihtiyaç günden güne değişir: bazal metabolizma artı o gün girdiğin hareketin enerjisi (MET, net). Hareket girmediğin gün ihtiyaç bazal metabolizmadır; hareket düzeyinden tahmin yapılmaz.',
+  'spi.family.hanedeki-profiller':'Hanedeki profiller',
+  'spi.family.acik':'açık',
+  'spi.family.yasinda':'yaşında',
+  'spi.family.son':'· son',
+  'spi.family.gec':'Geç',
+  'spi.family.listeden-cikar':'Listeden çıkar',
+  'spi.family.profil-ekle':'Profil ekle',
+  'spi.family.gorunum-ve-hane-ayari':'Görünüm ve hane ayarı',
+  'spi.family.tema':'Tema',
+  'spi.family.sistem':'Sistem',
+  'spi.family.acik-2':'Açık',
+  'spi.family.koyu':'Koyu',
+  'spi.family.hanedeki-kisi-sayisi':'Hanedeki kişi sayısı',
+  'spi.family.gizlilik-kilidi':'Gizlilik kilidi',
+  'spi.family.profil-kaydedildi':'Profil kaydedildi',
+  'spi.family.kaydedildi':'Kaydedildi',
+  'spi.family.aile-bireyi-ya-da-ikinci':'Aile bireyi ya da ikinci profil',
+  'spi.family.ornek-ayse':'Örnek: Ayşe',
+  'spi.family.vazgec':'Vazgeç',
+  'spi.family.ekle':'Ekle',
+  'spi.family.ad-gerekli':'Ad gerekli',
+  'spi.family.profil-eklendi':'Profil eklendi',
+  'spi.family.hane':'Hane',
+});
 /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
 buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
 window.LIFEOS.PARCA.sayfa({ id:'family', modul:'spi', cekmece:'ayarlar', ad:'Profil', sira:10 });
@@ -23,33 +63,33 @@ SP.Screens.family = (function(){
     const t = SP.Nutri.targets();
     const kilo = M.kiloOf(p);
     return K.Card({
-      title:'Profilin', hint:'profiles',
+      title:yz('spi.family.profilin'), hint:'profiles',
       sub:p.name || 'adsız profil',
-      badge:t.ok ? K.Badge({ label:'hedefler hazır', tone:'ok' })
+      badge:t.ok ? K.Badge({ label:yz('spi.family.hedefler-hazir'), tone:'ok' })
         : K.Badge({ label:t.missing.length + ' alan eksik', tone:'warn' }),
       body:html`
         <div class="grid-form">
-          ${K.Field({ label:'Ad', input:K.Input({ id:'p-name', value:p.name || '' }) })}
-          ${K.Field({ label:'Doğum yılı',
+          ${K.Field({ label:yz('spi.family.ad'), input:K.Input({ id:'p-name', value:p.name || '' }) })}
+          ${K.Field({ label:yz('spi.family.dogum-yili'),
             input:K.Input({ id:'p-birth', type:'number', numeric:true, min:1900, max:2026,
               value:p.birthYear || '' }) })}
-          ${K.Field({ label:'Cinsiyet',
-            input:K.Select({ id:'p-sex', value:p.sex || '', options:[{ value:'', label:'Seç' },
-              { value:'male', label:'Erkek' }, { value:'female', label:'Kadın' }] }) })}
-          ${K.Field({ label:'Boy (cm)',
+          ${K.Field({ label:yz('spi.family.cinsiyet'),
+            input:K.Select({ id:'p-sex', value:p.sex || '', options:[{ value:'', label:yz('spi.family.sec') },
+              { value:'male', label:yz('spi.family.erkek') }, { value:'female', label:yz('spi.family.kadin') }] }) })}
+          ${K.Field({ label:yz('spi.family.boy-cm'),
             input:K.Input({ id:'p-height', type:'number', numeric:true, min:80, max:230,
               value:p.heightCm || '' }) })}
-          ${K.Field({ label:'Kilo (kg)', hint:kilo && kilo.date ? 'ölçüldü · ' + U.fmtDate(kilo.date) : '',
+          ${K.Field({ label:yz('spi.family.kilo-kg'), hint:kilo && kilo.date ? 'ölçüldü · ' + U.fmtDate(kilo.date) : '',
             input:K.Input({ id:'p-weight', type:'number', numeric:true, step:'0.1', min:20, max:250,
               value:kilo ? kilo.kg : '' }) })}
-          ${K.Field({ label:'Hedef',
+          ${K.Field({ label:yz('spi.family.hedef'),
             input:K.Select({ id:'p-goal', value:p.goal,
               options:SP.GOALS.map(g => ({ value:g.id, label:g.label })) }) })}
         </div>
         ${when(!t.ok, () => K.Notice({ tone:'warn', class:'mt-12',
           body:'Eksik alan: ' + t.missing.join(', ') + '. Bunlar olmadan kalori ve protein '
              + 'hedefi hesaplanmaz — tahmin edilmez.' }))}`,
-      foot:K.Button({ label:'Kaydet', tone:'primary', act:'save-profile' }),
+      foot:K.Button({ label:yz('spi.family.kaydet'), tone:'primary', act:'save-profile' }),
     });
   }
 
@@ -58,7 +98,7 @@ SP.Screens.family = (function(){
     if(!t.ok) return null;
     const n = t.need;
     return K.Card({
-      title:'Hesaplanan hedefler', hint:'macro-target',
+      title:yz('spi.family.hesaplanan-hedefler'), hint:'macro-target',
       sub:t.goal.label,
       body:html`
         ${K.Table({ tight:true, headers:['Alan', 'Değer'], rows:[
@@ -74,13 +114,11 @@ SP.Screens.family = (function(){
           ['Lif', t.fiber + ' g'],
         ] })}
         ${when(Object.keys(t.adjustments).length, () => K.Notice({ tone:'info', class:'mt-12',
-          title:'Laboratuvara göre yükseltilenler:',
+          title:yz('spi.family.laboratuvara-gore-yukseltile'),
           body:html`<ul class="bullets small mt-4">${map(Object.keys(t.adjustments), k => html`
             <li><b>${SP.NUTRI_BY_ID[k] ? SP.NUTRI_BY_ID[k].name : k}</b> ×${U.fmtNet(t.adjustments[k].mult)}
               — ${t.adjustments[k].why}</li>`)}</ul>` }))}
-        <p class="small muted mt-10">Günlük ihtiyaç günden güne değişir: bazal metabolizma artı o gün
-          girdiğin hareketin enerjisi (MET, net). Hareket girmediğin gün ihtiyaç bazal metabolizmadır;
-          hareket düzeyinden tahmin yapılmaz.</p>
+        <p class="small muted mt-10">${yz('spi.family.gunluk-ihtiyac-gunden-gune-d')}</p>
         <p class="small muted mt-6">${SP.MACRO_RULES.protein.note}</p>`,
     });
   }
@@ -89,7 +127,7 @@ SP.Screens.family = (function(){
     const list = M.householdList();
     const active = M.activeProfileId();
     return K.Card({
-      title:'Hanedeki profiller', hint:'profiles',
+      title:yz('spi.family.hanedeki-profiller'), hint:'profiles',
       sub:list.length + ' profil',
       body:html`
         ${K.Notice({ tone:'info', body:'Her profil kendi depo anahtarında durur. '
@@ -98,17 +136,17 @@ SP.Screens.family = (function(){
           <div class="listitem">
             <div class="grow">
               <b class="small">${row.name || 'Adsız'}</b>
-              ${when(row.id === active, () => K.Badge({ label:'açık', tone:'ok' }))}
+              ${when(row.id === active, () => K.Badge({ label:yz('spi.family.acik'), tone:'ok' }))}
               <div class="tiny dim">${row.role === 'self' ? 'birincil' : 'aile'}
-                ${when(row.birthYear, () => html`· ${new Date().getFullYear() - row.birthYear} yaşında`)}
-                ${when(row.seenAt, () => html`· son ${U.fmtShort(row.seenAt.slice(0, 10))}`)}</div>
+                ${when(row.birthYear, () => html`· ${new Date().getFullYear() - row.birthYear} ${yz('spi.family.yasinda')}`)}
+                ${when(row.seenAt, () => html`${yz('spi.family.son')} ${U.fmtShort(row.seenAt.slice(0, 10))}`)}</div>
             </div>
-            ${when(row.id !== active, () => K.Button({ label:'Geç', size:'sm',
+            ${when(row.id !== active, () => K.Button({ label:yz('spi.family.gec'), size:'sm',
               act:'switch-profile', data:{ 'data-id':row.id } }))}
             ${when(row.id !== active, () => K.IconButton({ icon:'trash', size:'sm', plain:true,
-              aria:'Listeden çıkar', act:'remove-profile', data:{ 'data-id':row.id } }))}
+              aria:yz('spi.family.listeden-cikar'), act:'remove-profile', data:{ 'data-id':row.id } }))}
           </div>`)}</div>`,
-      foot:K.Button({ label:'Profil ekle', size:'sm', act:'add-profile' }),
+      foot:K.Button({ label:yz('spi.family.profil-ekle'), size:'sm', act:'add-profile' }),
     });
   }
 
@@ -123,22 +161,22 @@ SP.Screens.family = (function(){
   function prefCard(){
     const p = S.prefs || M.defaultPrefs();
     return K.Card({
-      title:'Görünüm ve hane ayarı',
+      title:yz('spi.family.gorunum-ve-hane-ayari'),
       body:html`
         <div class="grid-form">
-          ${K.Field({ label:'Tema',
+          ${K.Field({ label:yz('spi.family.tema'),
             input:K.Select({ id:'pref-theme', change:'set-look', value:S.profile.theme || 'system',
               data:{ 'data-varsayilan':'system', 'data-varsayilan-ad':'Sistem' }, options:[
-              { value:'system', label:'Sistem' }, { value:'light', label:'Açık' },
-              { value:'dark', label:'Koyu' }] }) })}
-          ${K.Field({ label:'Hanedeki kişi sayısı', hint:'sepet hesabı için',
+              { value:'system', label:yz('spi.family.sistem') }, { value:'light', label:yz('spi.family.acik-2') },
+              { value:'dark', label:yz('spi.family.koyu') }] }) })}
+          ${K.Field({ label:yz('spi.family.hanedeki-kisi-sayisi'), hint:'sepet hesabı için',
             input:K.Input({ id:'pref-size', type:'number', numeric:true, min:1, max:20,
               value:p.householdSize || 1 }) })}
         </div>
         ${K.Notice({ tone:'info', class:'mt-10',
           body:'Tema seçildiği anda uygulanır. «Kaydet» yalnız hanedeki kişi '
             + 'sayısı için. Tek tasarım: renk modülü söyler.' })}`,
-      foot:K.Button({ label:'Kaydet', size:'sm', act:'save-prefs' }),
+      foot:K.Button({ label:yz('spi.family.kaydet'), size:'sm', act:'save-prefs' }),
     });
   }
 
@@ -158,7 +196,7 @@ SP.Screens.family = (function(){
     return prefCard();
   } });
   LIFEOS.PARCA.blok({ id:'family.gizlilik-kilidi', sayfa:'family', yer:'y2', sira:50, ad:'Gizlilik kilidi', ciz(){
-    return window.LIFEOS && window.LIFEOS.KILIT ? K.Card({ title:'Gizlilik kilidi',
+    return window.LIFEOS && window.LIFEOS.KILIT ? K.Card({ title:yz('spi.family.gizlilik-kilidi'),
           body:raw(window.LIFEOS.KILIT.ayarHtml('spi', { govde:true })) }) : null;
   } });
   async function render(){
@@ -200,41 +238,41 @@ SP.Screens.family = (function(){
       /* Alan son ölçümle dolu gelir: değişmeden kaydetmek bugüne ölçüm yazmaz. */
       const w = numOr(get('p-weight'));
       if(w && w !== (once && once.kg)) await M.saveVitals(U.todayISO(), { weight:w });
-      UI.toast('Profil kaydedildi');
+      UI.toast(yz('spi.family.profil-kaydedildi'));
       SP.App.render();
     },
     async 'save-prefs'(){
       const size = (document.getElementById('pref-size') || {}).value;
       await M.savePrefs({ householdSize:Math.max(1, Number(size) || 1) });
-      UI.toast('Kaydedildi');
+      UI.toast(yz('spi.family.kaydedildi'));
       SP.App.render();
     },
     async 'add-profile'(){
       UI.sheet({
-        title:'Profil ekle', subtitle:'Aile bireyi ya da ikinci profil',
+        title:yz('spi.family.profil-ekle'), subtitle:yz('spi.family.aile-bireyi-ya-da-ikinci'),
         body:String(K.Stack([
-          K.Field({ label:'Ad', input:K.Input({ id:'np-name', placeholder:'Örnek: Ayşe' }) }),
-          K.Field({ label:'Cinsiyet', input:K.Select({ id:'np-sex', value:'', options:[{ value:'', label:'Seç' },
-            { value:'female', label:'Kadın' }, { value:'male', label:'Erkek' }] }) }),
-          K.Field({ label:'Doğum yılı',
+          K.Field({ label:yz('spi.family.ad'), input:K.Input({ id:'np-name', placeholder:yz('spi.family.ornek-ayse') }) }),
+          K.Field({ label:yz('spi.family.cinsiyet'), input:K.Select({ id:'np-sex', value:'', options:[{ value:'', label:yz('spi.family.sec') },
+            { value:'female', label:yz('spi.family.kadin') }, { value:'male', label:yz('spi.family.erkek') }] }) }),
+          K.Field({ label:yz('spi.family.dogum-yili'),
             input:K.Input({ id:'np-birth', type:'number', numeric:true, min:1900, max:2026 }) }),
           K.Notice({ tone:'info', body:'Profil eklendikten sonra ona geçip kilo, boy ve hedefini '
             + 'girmen gerekir. Eksik profil porsiyon paylaştırmasına girmez.' }),
         ])),
-        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-          ${K.Button({ label:'Ekle', tone:'primary', act:'save-new-profile' })}`),
+        footer:String(html`${K.Button({ label:yz('spi.family.vazgec'), act:'sheet-close' })}
+          ${K.Button({ label:yz('spi.family.ekle'), tone:'primary', act:'save-new-profile' })}`),
       });
     },
     async 'save-new-profile'(){
       const name = (document.getElementById('np-name') || {}).value || '';
-      if(!name.trim()){ UI.toast('Ad gerekli'); return; }
+      if(!name.trim()){ UI.toast(yz('spi.family.ad-gerekli')); return; }
       const res = M.addHouseholdMember(name.trim(), {
         sex:(document.getElementById('np-sex') || {}).value,
         birthYear:Number((document.getElementById('np-birth') || {}).value) || null,
       });
       if(!res.ok){ UI.toast(res.error); return; }
       UI.closeSheet();
-      UI.toast('Profil eklendi');
+      UI.toast(yz('spi.family.profil-eklendi'));
       SP.App.render();
     },
     async 'switch-profile'(el){
@@ -259,7 +297,7 @@ SP.Screens.family = (function(){
 
   return {
     id:'family',
-    title:'Hane',
+    title:yz('spi.family.hane'),
     headline(){
       const t = SP.Nutri.targets();
       if(!t.ok) return 'Profil eksik.';

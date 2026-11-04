@@ -6,6 +6,100 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.guide.kullanim':'Kullanım',
+  'esp.guide.ofis':'Ofis',
+  'esp.guide.veri':'Veri',
+  'esp.guide.sinirlar':'Sınırlar',
+  'esp.guide.dayanak':'Dayanak',
+  'esp.guide.nasil-calisir':'Nasıl çalışır',
+  'esp.guide.sen-pratigi-girersin':'Sen pratiği girersin.',
+  'esp.guide.sure-kart-sayfa-kelime':'Süre, kart, sayfa, kelime — ölçülen ne varsa.',
+  'esp.guide.kural-motoru-hesaplar':'Kural motoru hesaplar.',
+  'esp.guide.retansiyon-temiz-tempo-sente':'Retansiyon, temiz tempo, sentez katsayısı, okunabilirlik. Sıradaki iş de buradan gelir.',
+  'esp.guide.ajanlar-yalnizca-cumleye-cev':'Ajanlar yalnızca cümleye çevirir.',
+  'esp.guide.sayi-uretmezler-model-kapali':'Sayı üretmezler; model kapalıysa kural motorunun cümlesi basılır ve sistem kapanmaz.',
+  'esp.guide.sifir-surtunme':'Sıfır sürtünme',
+  'esp.guide.palete-45-dk-gitar-yazip':'Palete «45 dk gitar» yazıp Enter\'a basmak bir oturum kaydeder. ',
+  'esp.guide.kisayollar':'Kısayollar',
+  'esp.guide.merdiven':'Merdiven',
+  'esp.guide.her-bolumde-sifirdan-ustatli':'Her bölümde sıfırdan üstatlığa beş basamak ve her basamakta ',
+  'esp.guide.merdiven-ardisiktir-alttaki':'Merdiven ardışıktır: alttaki basamak atlanarak üsttekine geçilmez. Ölçülemeyen basamak üçüncü bir durumdur — ne geçildi ne kalındı; orada istenen şey çalışmak değil ölçmek.',
+  'esp.guide.tezgah':'TEZGÂH',
+  'esp.guide.her-bolumun-altinda-ayni-yer':'Her bölümün altında aynı yerde durur ve bölümden bölüme ',
+  'esp.guide.bolumler':'Bölümler',
+  'esp.guide.calismayacagin-bolumu-kapata':'Çalışmayacağın bölümü kapatabilirsin: gezinmeden kalkar, ',
+  'esp.guide.bolumleri-ac-kapat':'Bölümleri aç/kapat',
+  'esp.guide.yedi-disiplin':'Yedi disiplin',
+  'esp.guide.agirliklar-birbirine-yakin-t':'Ağırlıklar birbirine yakın tutulur: büyük fark, düşük katsayılı ',
+  'esp.guide.agirlik':'Ağırlık',
+  'esp.guide.ofis-modeli':'Ofis modeli',
+  'esp.guide.model-anahtar-ve-butce-tek':'Model, anahtar ve bütçe tek yerde durur: HKM › Modeller › «ESP · Sohbet» (atama yoksa King’in modeli). ',
+  'esp.guide.durumu-tazele':'Durumu tazele',
+  'esp.guide.bu-cihazda-eski-bir-model':'Bu cihazda eski bir model ayarı var.',
+  'esp.guide.merkez-e-ulasilamazsa-yedek':'Merkez’e ulaşılamazsa yedek olarak kullanılır. İstersen sil; anahtar bu tarayıcıdan kalkar.',
+  'esp.guide.eski-ayari-sil':'Eski ayarı sil',
+  'esp.guide.modele-ne-gider':'Modele ne gider',
+  'esp.guide.ham-ses-kaydi-tam-taslak':'Ham ses kaydı, tam taslak metni ve atomik notun kendi cümlesi ',
+  'esp.guide.cikti-denetimi':'Çıktı denetimi',
+  'esp.guide.denetim-metni-yeni-den-yazma':'Denetim metni YENİDEN YAZMAZ, işaretler. Sessizce düzeltmek anlamı ',
+  'esp.guide.dokuz-aylik-ufuk':'Dokuz aylık ufuk',
+  'esp.guide.bu-sistem-dokuz-ay-her':'Bu sistem dokuz ay her gün kullanılırsa ne olur? Büyüme hızı ',
+  'esp.guide.ne-buyuyor':'Ne büyüyor',
+  'esp.guide.toplam-yuzde-hangi-kaydin-si':'Toplam yüzde hangi kaydın şiştiğini söylemez; burada söyler. ',
+  'esp.guide.boyut':'Boyut',
+  'esp.guide.adet':'Adet',
+  'esp.guide.yer-ac':'Yer aç',
+  'esp.guide.yalnizca-sistemin-kendi-uret':'Yalnızca sistemin kendi ürettiği kayıtlar listelenir. ',
+  'esp.guide.secilenleri-buda':'Seçilenleri buda',
+  'esp.guide.budamadan-once-yedek-almak-i':'Budamadan önce yedek almak iyi olur: budanan kayıt geri gelmez.',
+  'esp.guide.nerede-duruyor':'Nerede duruyor',
+  'esp.guide.yerel-kota':'Yerel kota',
+  'esp.guide.depo-anahtari':'Depo anahtarı:',
+  'esp.guide.yedek':'Yedek',
+  'esp.guide.yedek-dosyasi-sifresizdir-pa':'Yedek dosyası şifresizdir; paylaşılan bir dizine konmaz.',
+  'esp.guide.yedek-indir':'Yedek indir',
+  'esp.guide.hkm-deki-yedekten-yukle':'HKM’deki yedekten yükle',
+  'esp.guide.yedek-dosyasini-buraya-birak':'Yedek dosyasını buraya bırak ya da seç',
+  'esp.guide.dikkat':'Dikkat',
+  'esp.guide.bu-ice-aktarmayi-geri-al':'Bu içe aktarmayı geri al',
+  'esp.guide.her-seyi-sil':'Her şeyi sil',
+  'esp.guide.bu-profilin-verisini-sil':'Bu profilin verisini sil',
+  'esp.guide.yalnizca-acik-profilin-veris':'Yalnızca açık profilin verisi silinir; diğer profiller kendi anahtarlarında kalır.',
+  'esp.guide.ornek-veriyle-dene':'Örnek veriyle dene',
+  'esp.guide.karsilama':'Karşılama',
+  'esp.guide.pedagojik-sinir':'Pedagojik sınır',
+  'esp.guide.doktrin':'Doktrin',
+  'esp.guide.oncelik-sirasi':'Öncelik sırası',
+  'esp.guide.yapilmayacaklar':'Yapılmayacaklar',
+  'esp.guide.bunlar-unutulmadi-reddedildi':'Bunlar unutulmadı; reddedildi.',
+  'esp.guide.kardes-projeler':'Kardeş projeler',
+  'esp.guide.ucu-ortak-bir-tasarim-dili':'Üçü ortak bir tasarım dili paylaşır ama kodları ayrıdır: farklı ad ',
+  'esp.guide.tahmin-tablolari':'Tahmin tabloları',
+  'esp.guide.dil-ve-okuma-hedeflerinin-su':'Dil ve okuma hedeflerinin süre hesabı bu tablolara dayanır. Kaynağa bağlanınca hesap ',
+  'esp.guide.cefr-tablosunu-kaynaga-bagla':'CEFR tablosunu kaynağa bağla',
+  'esp.guide.okuma-hizini-kaynaga-bagla':'Okuma hızını kaynağa bağla',
+  'esp.guide.esi-kler-nereden-geli-yor':'EŞİKLER NEREDEN GELİYOR?',
+  'esp.guide.kaynak-kesinlik-ve-uygulanab':'Kaynak, kesinlik ve uygulanabilirlik birer bilgi; «yetki» ise ',
+  'esp.guide.bu-bir-pedagojik-hiyerarsi-d':'Bu bir pedagojik hiyerarşi değildir',
+  'esp.guide.esik':'Eşik',
+  'esp.guide.politika-surumu':'Politika sürümü',
+  'esp.guide.denetim':'Denetim',
+  'esp.guide.kayit-sorunlu':'Kayıt sorunlu',
+  'esp.guide.denetim-temiz':'Denetim temiz',
+  'esp.guide.dolayli-ya-da-kesinligi-dusu':'Dolaylı ya da kesinliği düşük eşikler',
+  'esp.guide.rehber-bolumleri':'Rehber bölümleri',
+  'esp.guide.hkm-yedegi-yuklendi-sayfa':'HKM yedeği yüklendi — sayfa yenileniyor',
+  'esp.guide.yukleme-basarisiz':'Yükleme başarısız: ',
+  'esp.guide.once-budanacak-kaydi-sec':'Önce budanacak kaydı seç.',
+  'esp.guide.eski-model-ayari-silindi-ofi':'Eski model ayarı silindi; ofis HKM’nin modelini kullanır.',
+  'esp.guide.yedek-indirildi':'Yedek indirildi',
+  'esp.guide.geri-alinacak-bir-ice-aktarm':'Geri alınacak bir içe aktarma yok',
+  'esp.guide.geri-alindi-yeniden-baslatil':'Geri alındı — yeniden başlatılıyor',
+  'esp.guide.dosya-okunamadi':'Dosya okunamadı',
+  'esp.guide.yer-olmadigi-icin-bu-ice':'Yer olmadığı için bu içe aktarma geri alınamaz — sayfa yenileniyor',
+  'esp.guide.rehber':'Rehber',
+});
 window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'esp', cekmece:'ayarlar', ad:'Genel', ikon:'guide', sira:20 });
 
 ESP.Screens.guide = (function(){
@@ -16,32 +110,30 @@ ESP.Screens.guide = (function(){
   const sayiMi = v => typeof v === 'number' && isFinite(v);
 
   const TABS = [
-    { id:'kullanim', label:'Kullanım' },
-    { id:'model',    label:'Ofis' },
-    { id:'veri',     label:'Veri' },
-    { id:'sinirlar', label:'Sınırlar' },
-    { id:'kanit',    label:'Dayanak' },
+    { id:'kullanim', label:yz('esp.guide.kullanim') },
+    { id:'model',    label:yz('esp.guide.ofis') },
+    { id:'veri',     label:yz('esp.guide.veri') },
+    { id:'sinirlar', label:yz('esp.guide.sinirlar') },
+    { id:'kanit',    label:yz('esp.guide.dayanak') },
   ];
 
   function usageRows(){
     return [
       K.Entry({
-        label:'Nasıl çalışır',
+        label:yz('esp.guide.nasil-calisir'),
         meta:'üç cümle',
         body:html`
           <ul class="setup__list">
-            <li><b>Sen pratiği girersin.</b> Süre, kart, sayfa, kelime — ölçülen ne varsa.</li>
-            <li><b>Kural motoru hesaplar.</b> Retansiyon, temiz tempo, sentez katsayısı,
-              okunabilirlik. Sıradaki iş de buradan gelir.</li>
-            <li><b>Ajanlar yalnızca cümleye çevirir.</b> Sayı üretmezler; model kapalıysa
-              kural motorunun cümlesi basılır ve sistem kapanmaz.</li>
+            <li><b>${yz('esp.guide.sen-pratigi-girersin')}</b> ${yz('esp.guide.sure-kart-sayfa-kelime')}</li>
+            <li><b>${yz('esp.guide.kural-motoru-hesaplar')}</b> ${yz('esp.guide.retansiyon-temiz-tempo-sente')}</li>
+            <li><b>${yz('esp.guide.ajanlar-yalnizca-cumleye-cev')}</b> ${yz('esp.guide.sayi-uretmezler-model-kapali')}</li>
           </ul>`,
       }),
 
       K.Entry({
-        label:'Sıfır sürtünme',
+        label:yz('esp.guide.sifir-surtunme'),
         meta:'en hızlı yol',
-        note:'Palete «45 dk gitar» yazıp Enter\'a basmak bir oturum kaydeder. '
+        note:yz('esp.guide.palete-45-dk-gitar-yazip')
            + 'Yazmadan önce ne kaydedileceği gösterilir.',
         body:K.Table({ tight:true, headers:['Zorluk', 'ESP çözümü'],
           rows:[
@@ -53,7 +145,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'Kısayollar',
+        label:yz('esp.guide.kisayollar'),
         meta:'klavye',
         body:K.Table({ tight:true, headers:['Tuş', 'İş'],
           rows:[
@@ -65,25 +157,22 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'Merdiven', hint:'ladder',
+        label:yz('esp.guide.merdiven'), hint:'ladder',
         meta:ESP.LEVELS.length - 1 + ' kademe',
-        note:'Her bölümde sıfırdan üstatlığa beş basamak ve her basamakta '
+        note:yz('esp.guide.her-bolumde-sifirdan-ustatli')
            + 'ölçülebilir basamaklar. Kademe kişiye değil ÜRETİME verilir: '
            + 'üretim durursa kademe de durur.',
         wide:true,
         body:html`
           ${K.Table({ tight:true, headers:['Kademe', 'Ne demek'],
             rows:ESP.LEVELS.map(l => [l.short + ' · ' + l.label, l.note]) })}
-          <p class="small muted mt-8">Merdiven ardışıktır: alttaki basamak
-            atlanarak üsttekine geçilmez. Ölçülemeyen basamak üçüncü bir
-            durumdur — ne geçildi ne kalındı; orada istenen şey çalışmak
-            değil ölçmek.</p>`,
+          <p class="small muted mt-8">${yz('esp.guide.merdiven-ardisiktir-alttaki')}</p>`,
       }),
 
       K.Entry({
-        label:'TEZGÂH', hint:'desk',
+        label:yz('esp.guide.tezgah'), hint:'desk',
         meta:ESP.Desk.TABS.length + ' sekme',
-        note:'Her bölümün altında aynı yerde durur ve bölümden bölüme '
+        note:yz('esp.guide.her-bolumun-altinda-ayni-yer')
            + 'değişmez: bir kez öğrenilir, yedi kez değil.',
         wide:true,
         body:K.Table({ tight:true, headers:['Sekme', 'Ne yapar'],
@@ -101,27 +190,27 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'Bölümler', hint:'modules',
+        label:yz('esp.guide.bolumler'), hint:'modules',
         meta:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length + ' açık',
-        note:'Çalışmayacağın bölümü kapatabilirsin: gezinmeden kalkar, '
+        note:yz('esp.guide.calismayacagin-bolumu-kapata')
            + 'reçeteye ve denge hesabına girmez, ofiste masası kapanır.',
         body:html`
           ${K.Notice({ tone:'info',
             body:'Kapatmak SİLMEZ. Altı ay sonra geri açtığında kartların, '
               + 'notların ve kademen olduğu yerde durur — «kapalı» ile «yok» '
               + 'ayrı şeylerdir.' })}
-          ${K.Button({ label:'Bölümleri aç/kapat', size:'sm', act:'go',
+          ${K.Button({ label:yz('esp.guide.bolumleri-ac-kapat'), size:'sm', act:'go',
             data:{ 'data-route':'profile' }, class:'mt-10' })}`,
       }),
 
       K.Entry({
-        label:'Yedi disiplin',
+        label:yz('esp.guide.yedi-disiplin'),
         meta:ESP.DISCIPLINES.length + ' alan',
-        note:'Ağırlıklar birbirine yakın tutulur: büyük fark, düşük katsayılı '
+        note:yz('esp.guide.agirliklar-birbirine-yakin-t')
            + 'disiplini görünmez yapar ve kullanıcı onu bırakır.',
         wide:true,
         body:K.Table({ tight:true,
-          headers:['Disiplin', 'Ajan', { label:'Ağırlık', num:true }, 'Ne ölçülür'],
+          headers:['Disiplin', 'Ajan', { label:yz('esp.guide.agirlik'), num:true }, 'Ne ölçülür'],
           rows:ESP.DISCIPLINES.map(d => [
             /* Amblem burada da: aynı disiplin iki ekranda aynı yüzle
                görünsün (bkz. profile.js, BÖLÜMLER). */
@@ -152,21 +241,21 @@ ESP.Screens.guide = (function(){
       : (d.note || 'Merkezde model yok.') + ' Ofis kural motoruyla çalışıyor.';
     return [
       K.Entry({
-        label:'Ofis modeli',
+        label:yz('esp.guide.ofis-modeli'),
         meta:bagli && d && d.ok ? 'Merkez’de hazır' : 'kural motoru',
-        note:'Model, anahtar ve bütçe tek yerde durur: HKM › Modeller › «ESP · Sohbet» (atama yoksa King’in modeli). '
+        note:yz('esp.guide.model-anahtar-ve-butce-tek')
            + 'Model kapalıyken ofis kapanmaz; model bir iyileştirmedir.',
-        action:bagli ? K.Button({ label:'Durumu tazele', size:'sm', act:'merkez-tazele' }) : '',
+        action:bagli ? K.Button({ label:yz('esp.guide.durumu-tazele'), size:'sm', act:'merkez-tazele' }) : '',
         body:html`<p class="small">${durum}</p>
-          ${when(eskiYerelVar(), () => K.Notice({ tone:'warn', class:'mt-10', title:'Bu cihazda eski bir model ayarı var.',
-            body:html`Merkez’e ulaşılamazsa yedek olarak kullanılır. İstersen sil; anahtar bu tarayıcıdan kalkar.
-              <div class="mt-8">${K.Button({ label:'Eski ayarı sil', size:'sm', tone:'ghost', act:'eski-model-sil' })}</div>` }))}`,
+          ${when(eskiYerelVar(), () => K.Notice({ tone:'warn', class:'mt-10', title:yz('esp.guide.bu-cihazda-eski-bir-model'),
+            body:html`${yz('esp.guide.merkez-e-ulasilamazsa-yedek')}
+              <div class="mt-8">${K.Button({ label:yz('esp.guide.eski-ayari-sil'), size:'sm', tone:'ghost', act:'eski-model-sil' })}</div>` }))}`,
       }),
 
       K.Entry({
-        label:'Modele ne gider', hint:'brief',
+        label:yz('esp.guide.modele-ne-gider'), hint:'brief',
         meta:'yalnızca brifing',
-        note:'Ham ses kaydı, tam taslak metni ve atomik notun kendi cümlesi '
+        note:yz('esp.guide.ham-ses-kaydi-tam-taslak')
            + 'gitmez. Bu bir testle denetlenir.',
         body:html`
           ${K.Table({ tight:true, headers:['Gider', 'Gitmez'],
@@ -181,9 +270,9 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'Çıktı denetimi',
+        label:yz('esp.guide.cikti-denetimi'),
         meta:ESP.GROUNDING.banned.length + ' desen',
-        note:'Denetim metni YENİDEN YAZMAZ, işaretler. Sessizce düzeltmek anlamı '
+        note:yz('esp.guide.denetim-metni-yeni-den-yazma')
            + 'tersine çevirebilir; çağıran ya uyarıyı gösterir ya kural motorunun '
            + 'cümlesine düşer.',
         body:K.Table({ tight:true, headers:['Denetim', 'Ne arar'],
@@ -208,9 +297,9 @@ ESP.Screens.guide = (function(){
          "Depo %80 dolu" tek basina ise yaramaz: ne zaman dolacagini ve
          NEYIN sisdigini soylemez. Ikisi bambaska kararlar gerektirir. */
       K.Entry({
-        label:'Dokuz aylık ufuk', hint:'storage',
+        label:yz('esp.guide.dokuz-aylik-ufuk'), hint:'storage',
         meta:hukum.title,
-        note:'Bu sistem dokuz ay her gün kullanılırsa ne olur? Büyüme hızı '
+        note:yz('esp.guide.bu-sistem-dokuz-ay-her')
            + 'ölçülür, tahmin edilmez: iki ölçümden az varsa hız bilinmiyordur.',
         wide:true,
         body:html`
@@ -232,14 +321,14 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'Ne büyüyor',
+        label:yz('esp.guide.ne-buyuyor'),
         meta:dagilim.length + ' koleksiyon',
-        note:'Toplam yüzde hangi kaydın şiştiğini söylemez; burada söyler. '
+        note:yz('esp.guide.toplam-yuzde-hangi-kaydin-si')
            + '«İçerik» işaretli olanlar senin girdiğin veridir ve sistem '
            + 'onları yer açmak için silmez.',
         wide:true,
         body:K.Table({ tight:true,
-          headers:['Kayıt', { label:'Boyut', num:true }, { label:'Adet', num:true }, 'Tür'],
+          headers:['Kayıt', { label:yz('esp.guide.boyut'), num:true }, { label:yz('esp.guide.adet'), num:true }, 'Tür'],
           rows:dagilim.slice(0, 12).map(r => [
             r.label, dp.fmtBytes(r.bytes), String(r.count),
             r.content ? 'içerik' : (r.prunable ? 'budanabilir' : 'sistem'),
@@ -247,9 +336,9 @@ ESP.Screens.guide = (function(){
       }),
 
       ...(budanabilir.length ? [K.Entry({
-        label:'Yer aç',
+        label:yz('esp.guide.yer-ac'),
         meta:dp.fmtBytes(budanabilir.reduce((a, b) => a + b.bytes, 0)) + ' budanabilir',
-        note:'Yalnızca sistemin kendi ürettiği kayıtlar listelenir. '
+        note:yz('esp.guide.yalnizca-sistemin-kendi-uret')
            + 'Girdiğin hiçbir oturum, kart ya da not burada yer almaz — '
            + 'hiçbir koşulda.',
         wide:true,
@@ -260,26 +349,25 @@ ESP.Screens.guide = (function(){
               <span><b>${b.label}</b> — ${dp.fmtBytes(b.bytes)}
                 <span class="tiny dim">${b.note}</span></span>
             </label>`)}
-          ${K.Button({ label:'Seçilenleri buda', tone:'danger', act:'prune-storage',
+          ${K.Button({ label:yz('esp.guide.secilenleri-buda'), tone:'danger', act:'prune-storage',
             class:'mt-10' })}
-          <p class="tiny dim mt-8">Budamadan önce yedek almak iyi olur:
-            budanan kayıt geri gelmez.</p>`,
+          <p class="tiny dim mt-8">${yz('esp.guide.budamadan-once-yedek-almak-i')}</p>`,
       })] : []),
 
       K.Entry({
-        label:'Nerede duruyor',
+        label:yz('esp.guide.nerede-duruyor'),
         meta:ayak.bytes ? Math.round(ayak.bytes / 1024) + ' KB' : '—',
         note:ESP.PRIVACY.storage,
         body:html`
-          ${when(ayak.pct != null, () => K.Meter({ label:'Yerel kota', value:ayak.pct,
+          ${when(ayak.pct != null, () => K.Meter({ label:yz('esp.guide.yerel-kota'), value:ayak.pct,
             text:'%' + ayak.pct }))}
-          <p class="small muted mt-8">Depo anahtarı: <code>esp.v1.${M.activeProfileId()}</code></p>`,
+          <p class="small muted mt-8">${yz('esp.guide.depo-anahtari')} <code>esp.v1.${M.activeProfileId()}</code></p>`,
       }),
 
       K.Entry({
-        label:'Yedek',
+        label:yz('esp.guide.yedek'),
         meta:(function(){ const n = M.backupAgeDays(); return n == null ? 'hiç' : n + ' gün önce'; })(),
-        note:'Yedek dosyası şifresizdir; paylaşılan bir dizine konmaz.',
+        note:yz('esp.guide.yedek-dosyasi-sifresizdir-pa'),
         body:html`
           ${when((window.LIFEOS || {}).GUVEN, () => raw(window.LIFEOS.GUVEN.yedekHtml({
             damga:(S.meta || {}).lastBackup, boyut:ayak.bytes, bugun:U.todayISO(),
@@ -289,33 +377,32 @@ ESP.Screens.guide = (function(){
             + '</div><div class="mt-10">' + VT().disaAktar({ act:'export-data2', sistem:'ESP', not:'tüm kayıt · tek dosya', kayit:ayak.total,
               kb:sayiMi(ayak.bytes) ? Math.round(ayak.bytes / 1024) : null }) + '</div>'))}
           <div class="row wrap">
-            ${when(!VT(), () => K.Button({ label:'Yedek indir', act:'export-data2' }))}
-            ${when((ESP.Beacon && ESP.Beacon.settings().enabled), () => K.Button({ label:'HKM’deki yedekten yükle', act:'restore-hkm' }))}
+            ${when(!VT(), () => K.Button({ label:yz('esp.guide.yedek-indir'), act:'export-data2' }))}
+            ${when((ESP.Beacon && ESP.Beacon.settings().enabled), () => K.Button({ label:yz('esp.guide.hkm-deki-yedekten-yukle'), act:'restore-hkm' }))}
             ${K.Drop({ id:'restore-drop', act:'restore-file',
-              label:'Yedek dosyasını buraya bırak ya da seç' })}
+              label:yz('esp.guide.yedek-dosyasini-buraya-birak') })}
           </div>
-          ${K.Notice({ tone:'warn', class:'mt-10', title:'Dikkat',
+          ${K.Notice({ tone:'warn', class:'mt-10', title:yz('esp.guide.dikkat'),
             body:'Yedekten yükleme mevcut verinin TAMAMINI değiştirir. Yüklemeden '
               + 'önce mevcut veriyi indir; yanlış yükledin diyorsan bir sonraki '
               + 'yükleme veya profil silmeye kadar geri alabilirsin.' })}
           ${when(undo, () => html`<div class="mt-10">${K.Notice({ tone:'warn',
             body:new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki yedekten yükleme mevcut '
                + 'verinin üzerine yazdı.' })}</div>
-            <div class="mt-8">${K.Button({ label:'Bu içe aktarmayı geri al', tone:'danger', act:'undo-import' })}</div>`)}`,
+            <div class="mt-8">${K.Button({ label:yz('esp.guide.bu-ice-aktarmayi-geri-al'), tone:'danger', act:'undo-import' })}</div>`)}`,
       }),
 
       K.Entry({
-        label:'Her şeyi sil',
+        label:yz('esp.guide.her-seyi-sil'),
         meta:'geri alınamaz',
         body:html`
-          ${K.Button({ label:'Bu profilin verisini sil', act:'wipe-data' })}
-          <p class="small muted mt-8">Yalnızca açık profilin verisi silinir;
-            diğer profiller kendi anahtarlarında kalır.</p>`,
+          ${K.Button({ label:yz('esp.guide.bu-profilin-verisini-sil'), act:'wipe-data' })}
+          <p class="small muted mt-8">${yz('esp.guide.yalnizca-acik-profilin-veris')}</p>`,
       }),
-      when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Entry({ label:'Örnek veriyle dene',
+      when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Entry({ label:yz('esp.guide.ornek-veriyle-dene'),
         body:raw(window.LIFEOS.OrnekKip.ayarHtml(!!(ESP.Ornek && ESP.Ornek.acik()))) })),
       /* Karşılama (2026-10-18): girişteki italik selam ve bölümün notu (brand/ortak/karsilama.js). */
-      when(window.LIFEOS && window.LIFEOS.KARSILAMA, () => K.Entry({ label:'Karşılama', meta:'girişteki selam ve not',
+      when(window.LIFEOS && window.LIFEOS.KARSILAMA, () => K.Entry({ label:yz('esp.guide.karsilama'), meta:'girişteki selam ve not',
         body:raw(window.LIFEOS.KARSILAMA.ayarHtml('esp')) })),
     ].filter(Boolean);
   }
@@ -323,7 +410,7 @@ ESP.Screens.guide = (function(){
   function limitRows(){
     return [
       K.Entry({
-        label:'Pedagojik sınır', hint:'pedagogic',
+        label:yz('esp.guide.pedagojik-sinir'), hint:'pedagogic',
         meta:'değişmez',
         body:html`
           ${K.Notice({ tone:'info', body:ESP.PEDAGOGIC.disclaimer })}
@@ -331,7 +418,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'Doktrin',
+        label:yz('esp.guide.doktrin'),
         meta:'dört kural',
         body:K.Table({ tight:true, headers:['Kural', 'Ne demek'],
           rows:[
@@ -343,16 +430,16 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'Öncelik sırası', hint:'precedence',
+        label:yz('esp.guide.oncelik-sirasi'), hint:'precedence',
         meta:ESP.PRECEDENCE.length + ' kural',
         body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Kural', 'Neden'],
           rows:ESP.PRECEDENCE.map(p => [String(p.rank), p.label, p.note]) }),
       }),
 
       K.Entry({
-        label:'Yapılmayacaklar',
+        label:yz('esp.guide.yapilmayacaklar'),
         meta:'bir eksiklik değil, bir karar',
-        note:'Bunlar unutulmadı; reddedildi.',
+        note:yz('esp.guide.bunlar-unutulmadi-reddedildi'),
         body:K.Table({ tight:true, headers:['Yapılmaz', 'Neden'],
           rows:[
             ['Otomatik transkripsiyon', 'Konuşma-metin modeli gerektirir; süre ve '
@@ -368,9 +455,9 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'Kardeş projeler',
+        label:yz('esp.guide.kardes-projeler'),
         meta:'aynı depo',
-        note:'Üçü ortak bir tasarım dili paylaşır ama kodları ayrıdır: farklı ad '
+        note:yz('esp.guide.ucu-ortak-bir-tasarim-dili')
            + 'alanı, farklı depo anahtarı, farklı test paketi, farklı port. '
            + 'Biri diğerini import etmez.',
         body:K.Table({ tight:true, headers:['Sistem', 'Alan', 'Ad alanı', 'Port'],
@@ -398,9 +485,9 @@ ESP.Screens.guide = (function(){
     const o = ESP.Belge ? ESP.Belge.dayanak('okumaHizi') : null;
     const T = ESP.Hedefler.cefrTablo();
     return K.Entry({
-      label:'Tahmin tabloları', hint:'evidence',
+      label:yz('esp.guide.tahmin-tablolari'), hint:'evidence',
       meta:(c ? 'CEFR kaynaklı' : 'CEFR kaynak bekliyor') + ' · ' + (o ? 'okuma hızı kaynaklı' : 'okuma hızı kaynak bekliyor'),
-      note:'Dil ve okuma hedeflerinin süre hesabı bu tablolara dayanır. Kaynağa bağlanınca hesap '
+      note:yz('esp.guide.dil-ve-okuma-hedeflerinin-su')
          + 'yine koddadır ve karar «tahmin» kalır; değişen, dayanağın kaynaklı olmasıdır.',
       wide:true,
       body:html`
@@ -411,8 +498,8 @@ ESP.Screens.guide = (function(){
             o ? 'kaynaklı · ' + (o.kaynak ? o.kaynak.baslik : '') + ' · ' + o.at : 'kaynak bekliyor'],
         ] })}
         <div class="row gap-8 wrap mt-8">
-          ${K.Button({ label:'CEFR tablosunu kaynağa bağla', size:'sm', act:'dayanak-iste', data:{ 'data-alan':'cefr' } })}
-          ${K.Button({ label:'Okuma hızını kaynağa bağla', size:'sm', act:'dayanak-iste', data:{ 'data-alan':'okuma_hizi' } })}
+          ${K.Button({ label:yz('esp.guide.cefr-tablosunu-kaynaga-bagla'), size:'sm', act:'dayanak-iste', data:{ 'data-alan':'cefr' } })}
+          ${K.Button({ label:yz('esp.guide.okuma-hizini-kaynaga-bagla'), size:'sm', act:'dayanak-iste', data:{ 'data-alan':'okuma_hizi' } })}
         </div>`,
     });
   }
@@ -426,9 +513,9 @@ ESP.Screens.guide = (function(){
     return [
       dayanakEntry(),
       K.Entry({
-        label:'EŞİKLER NEREDEN GELİYOR?', hint:'evidence',
+        label:yz('esp.guide.esi-kler-nereden-geli-yor'), hint:'evidence',
         meta:kapsam.total + ' kayıt',
-        note:'Kaynak, kesinlik ve uygulanabilirlik birer bilgi; «yetki» ise '
+        note:yz('esp.guide.kaynak-kesinlik-ve-uygulanab')
            + 'ESP\'nin kararıdır — hangi kaynağa dayanarak kademe '
            + 'ilerletebileceğini söyler.',
         wide:true,
@@ -436,19 +523,19 @@ ESP.Screens.guide = (function(){
           ${(function(){
             /* Uyarının ilk cümlesi görünür; gerekçe bir dokunuşla açılır (§1.2). */
             const c = String(ESP.Ev.policy().disclaimer).split(/(?<=\.)\s+/);
-            return K.Notice({ tone:'warn', title:'Bu bir pedagojik hiyerarşi değildir',
+            return K.Notice({ tone:'warn', title:yz('esp.guide.bu-bir-pedagojik-hiyerarsi-d'),
               body:K.Ayrinti({ ozet:c[0], govde:html`${when(c.length > 1, () => html`<p>${c.slice(1).join(' ')}</p>`)}
                 <p class="mt-8">${ESP.Ev.policy().rationale}</p>` }) });
           })()}
           ${K.Table({ tight:true,
-            headers:['Kaynak türü', 'Tanınan yetki', { label:'Eşik', num:true }],
+            headers:['Kaynak türü', 'Tanınan yetki', { label:yz('esp.guide.esik'), num:true }],
             rows:ESP.EVIDENCE_SOURCES.map(src => {
               const y = ESP.EVIDENCE_AUTHORITY.filter(a =>
                 a.id === ESP.Ev.policy().defaults[src.id])[0];
               return [src.label, y.label + ' — ' + y.note,
                 String(kapsam.bySource[src.id] || 0)];
             }) })}
-          <p class="tiny dim mt-8">Politika sürümü ${ESP.Ev.policy().version}
+          <p class="tiny dim mt-8">${yz('esp.guide.politika-surumu')} ${ESP.Ev.policy().version}
             (${ESP.Ev.policy().changedAt}).</p>`,
       }),
 
@@ -473,18 +560,18 @@ ESP.Screens.guide = (function(){
       }).filter(Boolean),
 
       K.Entry({
-        label:'Denetim',
+        label:yz('esp.guide.denetim'),
         meta:denetim.length ? denetim.length + ' sorun' : 'temiz',
         body:html`
           ${denetim.length
-            ? K.Notice({ tone:'danger', title:'Kayıt sorunlu',
+            ? K.Notice({ tone:'danger', title:yz('esp.guide.kayit-sorunlu'),
                 body:denetim.map(d => d.rule + ' (' + d.kind + ')').join(', ') })
-            : K.Notice({ tone:'ok', title:'Denetim temiz',
+            : K.Notice({ tone:'ok', title:yz('esp.guide.denetim-temiz'),
                 body:'Her kayıt çözülebiliyor, her atıf yazılı ve sistem ayarı '
                    + 'olan her eşik gerekçesini taşıyor. Bu denetim testte de '
                    + 'koşar; bozulursa test kırılır.' })}
           ${when(ayrisan.length, () => K.Notice({ tone:'info',
-            title:'Dolaylı ya da kesinliği düşük eşikler',
+            title:yz('esp.guide.dolayli-ya-da-kesinligi-dusu'),
             body:ayrisan.length + ' eşik ya disipline uyarlanırken kayıyor ya '
                + 'da kesinliği düşük. Bunlar kademe değiştirmez, yalnızca '
                + 'bilgilendirir.' }))}`,
@@ -504,7 +591,7 @@ ESP.Screens.guide = (function(){
   const GOVDE = { kullanim:usageRows, model:modelRows, veri:dataRows, sinirlar:limitRows, kanit:evidenceRows };
 
   LIFEOS.PARCA.blok({ id:'guide.bolum-1', sayfa:'guide', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
-    return K.Span(12, ESP.Parts.bolumler(null, { act:'guide-tab', aria:'Rehber bölümleri', tabs:TABS, govde:GOVDE }));
+    return K.Span(12, ESP.Parts.bolumler(null, { act:'guide-tab', aria:yz('esp.guide.rehber-bolumleri'), tabs:TABS, govde:GOVDE }));
   } });
   LIFEOS.PARCA.blok({ id:'guide.bolum-2', sayfa:'guide', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
     return K.Span(12, html`${raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '')}`);
@@ -535,10 +622,10 @@ ESP.Screens.guide = (function(){
         async () => {
           try{
             await ESP.Store.importAll(r.obj);
-            ESP.UI.toast('HKM yedeği yüklendi — sayfa yenileniyor');
+            ESP.UI.toast(yz('esp.guide.hkm-yedegi-yuklendi-sayfa'));
             setTimeout(() => location.reload(), 900);
           }catch(e){
-            ESP.UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
+            ESP.UI.toast(yz('esp.guide.yukleme-basarisiz') + (e && e.message ? e.message : 'bilinmeyen hata'));
           }
         }, true, 'Bu cihazdaki veriyi yedekle değiştir');
     },
@@ -557,7 +644,7 @@ ESP.Screens.guide = (function(){
       const secili = Array.prototype.slice
         .call(document.querySelectorAll('[data-prune]'))
         .filter(el => el.checked).map(el => el.dataset.prune);
-      if(!secili.length){ ESP.UI.toast('Önce budanacak kaydı seç.'); return; }
+      if(!secili.length){ ESP.UI.toast(yz('esp.guide.once-budanacak-kaydi-sec')); return; }
       const r = await ESP.Storage.prune(secili);
       if(!r.ok){ ESP.UI.toast(r.error); return; }
       ESP.UI.toast(ESP.Storage.fmtBytes(r.freed) + ' yer açıldı.');
@@ -572,7 +659,7 @@ ESP.Screens.guide = (function(){
     async 'eski-model-sil'(){
       Object.keys(ESP.PROVIDERS || {}).forEach(id => { while(ESP.LLM.getKeys(id).length) ESP.LLM.removeKeyAt(id, 0); });
       await ESP.Office.saveSettings({ provider:'builtin', model:'default', endpoint:'', perAgent:{} });
-      ESP.UI.toast('Eski model ayarı silindi; ofis HKM’nin modelini kullanır.');
+      ESP.UI.toast(yz('esp.guide.eski-model-ayari-silindi-ofi'));
       ESP.App.render();
     },
 
@@ -587,7 +674,7 @@ ESP.Screens.guide = (function(){
       a.click();
       URL.revokeObjectURL(a.href);
       await M.markBackup();
-      ESP.UI.toast('Yedek indirildi');
+      ESP.UI.toast(yz('esp.guide.yedek-indirildi'));
       ESP.App.render();
     },
 
@@ -595,7 +682,7 @@ ESP.Screens.guide = (function(){
       const G = (window.LIFEOS || {}).GUVEN;
       if(G && G.kapiAc){
         const yedek = await ESP.Store.exportAll();
-        G.kapiAc({ baslik:'Bu profilin verisini sil', not:(window.LIFEOS && window.LIFEOS.HESAP ? window.LIFEOS.HESAP.silmeNotu() : null), nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
+        G.kapiAc({ baslik:yz('esp.guide.bu-profilin-verisini-sil'), not:(window.LIFEOS && window.LIFEOS.HESAP ? window.LIFEOS.HESAP.silmeNotu() : null), nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
           sheet:o => ESP.UI.sheet(o), yedekAl:() => handle['export-data2'](),
           sil:async () => { await ESP.Store.clear(); location.reload(); } });
         return;
@@ -608,14 +695,14 @@ ESP.Screens.guide = (function(){
 
     async 'undo-import'(){
       const undo = ESP.Store.importUndoInfo();
-      if(!undo){ ESP.UI.toast('Geri alınacak bir içe aktarma yok'); return; }
+      if(!undo){ ESP.UI.toast(yz('esp.guide.geri-alinacak-bir-ice-aktarm')); return; }
       ESP.UI.confirmSheet('İçe aktarmayı geri al',
         new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki içe aktarma öncesine dönülecek. '
           + 'Aradan geçen sürede eklediğin her şey kaybolur.',
         async () => {
           try{
             await ESP.Store.undoImport();
-            ESP.UI.toast('Geri alındı — yeniden başlatılıyor');
+            ESP.UI.toast(yz('esp.guide.geri-alindi-yeniden-baslatil'));
             setTimeout(() => location.reload(), 900);
           }catch(e){
             ESP.UI.toast(e && e.message ? e.message : 'Geri alınamadı');
@@ -634,7 +721,7 @@ ESP.Screens.guide = (function(){
       const metin = await f.text();
       let obj = null;
       try{ obj = JSON.parse(metin); }
-      catch(e){ ESP.UI.toast('Dosya okunamadı'); return; }
+      catch(e){ ESP.UI.toast(yz('esp.guide.dosya-okunamadi')); return; }
 
       const okuma = ESP.Store.readBackup(obj);
       if(!okuma.ok){ ESP.UI.toast(okuma.error || 'Geçersiz yedek'); return; }
@@ -646,7 +733,7 @@ ESP.Screens.guide = (function(){
           try{
             const meta = await ESP.Store.importAll(obj);
             if(meta.geriAlinamaz){
-              ESP.UI.toast('Yer olmadığı için bu içe aktarma geri alınamaz — sayfa yenileniyor');
+              ESP.UI.toast(yz('esp.guide.yer-olmadigi-icin-bu-ice'));
             }
             if(meta.partialCloud){
               ESP.UI.toast(meta.cloudFailed + ' kayıt buluta yazılamadı; '
@@ -668,7 +755,7 @@ ESP.Screens.guide = (function(){
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
     kucukVarsayilan:['eşikler-nereden-geliyor', 'yayımlanmış-çerçeve', 'öğrenme-araştırması', 'kendi-ölçümün', 'sistem-ayarı', 'denetim', 'tahmin-tabloları', 'kardeş-projeler', 'doktrin'],
-    title:'Rehber',
+    title:yz('esp.guide.rehber'),
     headline(){ return 'Sistem ne yapar — ve ne yapmaz.'; },
     lede(){
       return 'Buradaki metinler pazarlama değil sözleşmedir. '

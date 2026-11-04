@@ -8,6 +8,35 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.team.sesli-sohbet':'Sesli sohbet',
+  'spi.team.acik':'açık',
+  'spi.team.kapali':'kapalı',
+  'spi.team.sesli-sohbeti-baslat':'Sesli sohbeti başlat',
+  'spi.team.bitir':'Bitir',
+  'spi.team.kes':'Kes',
+  'spi.team.bu-soru':'Bu soru',
+  'spi.team.kurallara-takildi':'kurallara takıldı',
+  'spi.team.baglanti-hatasi':'bağlantı hatası',
+  'spi.team.brifingi-okuyor-ve-cumleyi-k':'Brifingi okuyor ve cümleyi kuruyor…',
+  'spi.team.sor-ya-da-verini-soyle':'Sor ya da verini söyle…',
+  'spi.team.soru-ya-da-veri-ornegin':'Soru ya da veri (örneğin: uyku 7 saat ve 45 dakika yürüdüm)',
+  'spi.team.bu-uzman-neye-bakar':'Bu uzman neye bakar?',
+  'spi.team.modele-ne-gider':'Modele ne gider?',
+  'spi.team.uzmanin-gordugu-ozet':'Uzmanın gördüğü özet',
+  'spi.team.ajan-hesap-yapmaz-butun-sayi':'Ajan hesap yapmaz: bütün sayılar bu brifingden gelir. Brifingde olmayan bir sayıyı yazamaz.',
+  'spi.team.sorabileceklerin':'Sorabileceklerin',
+  'spi.team.ajan-onerdi':'ajan önerdi',
+  'spi.team.vazgecildi':'vazgeçildi',
+  'spi.team.geri-alindi':'geri alındı',
+  'spi.team.gecersizlesti':'geçersizleşti',
+  'spi.team.kaydet':'Kaydet',
+  'spi.team.vazgec':'Vazgeç',
+  'spi.team.geri-al':'Geri al',
+  'spi.team.su-an-konusmuyor':'Şu an konuşmuyor',
+  'spi.team.sohbet-temizlendi':'Sohbet temizlendi',
+  'spi.team.danisma':'Danışma',
+});
 window.LIFEOS.PARCA.sayfa({ id:'team', modul:'spi', cekmece:'ofis', ad:'Danışma', sira:20 });
 
 SP.Screens.team = (function(){
@@ -42,9 +71,9 @@ SP.Screens.team = (function(){
 
     return K.Card({
       class:'sescard',
-      title:'Sesli sohbet', sub:a.name + ' ile sıra sırayla',
-      badge:sesli.acik ? K.Badge({ label:'açık', tone:'info' })
-        : K.Badge({ label:'kapalı', tone:'muted', icon:false }),
+      title:yz('spi.team.sesli-sohbet'), sub:a.name + ' ile sıra sırayla',
+      badge:sesli.acik ? K.Badge({ label:yz('spi.team.acik'), tone:'info' })
+        : K.Badge({ label:yz('spi.team.kapali'), tone:'muted', icon:false }),
       body:html`
         <div class="ses" id="ses-panel" data-durum="${sesli.durum}">
           <div class="ses__hal">
@@ -63,11 +92,11 @@ SP.Screens.team = (function(){
           body:'Cihazda Türkçe ses bulunamadı. Cevap yabancı bir sesle okunur; '
              + 'anlaşılmazsa sesli sohbeti kapat.' }))}`,
       foot:html`
-        ${when(!sesli.acik, () => K.Button({ label:'Sesli sohbeti başlat',
+        ${when(!sesli.acik, () => K.Button({ label:yz('spi.team.sesli-sohbeti-baslat'),
           icon:'mic', act:'talk-start' }))}
         ${when(sesli.acik, () => html`
-          ${K.Button({ label:'Bitir', act:'talk-stop' })}
-          ${K.Button({ label:'Kes', act:'talk-cut',
+          ${K.Button({ label:yz('spi.team.bitir'), act:'talk-stop' })}
+          ${K.Button({ label:yz('spi.team.kes'), act:'talk-cut',
             disabled:sesli.durum !== 'konuşuyor' })}`)}`,
     });
   }
@@ -149,7 +178,7 @@ SP.Screens.team = (function(){
                 ${when(m.role !== 'user' && devirHedefi(a, m.text), () => {
                   const h = devirHedefi(a, m.text);
                   return html`<div class="devirdug">
-                    <span class="tiny dim">Bu soru ${h.name}'in alanında.</span>
+                    <span class="tiny dim">${yz('spi.team.bu-soru')} ${h.name}'in alanında.</span>
                     ${K.Button({ label:h.name + '\'e geç', size:'sm', tone:'primary',
                       act:'devret', data:{ 'data-id':h.id, 'data-q':sonSoru(a) } })}
                   </div>`;
@@ -157,14 +186,14 @@ SP.Screens.team = (function(){
               </div>
               ${when(m.role !== 'user', () => html`<div class="osohbet__alt">
                 ${P.sourceBadge(m.source)}
-                ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
-                ${when(m.error, () => K.Badge({ label:'bağlantı hatası', tone:'danger' }))}
+                ${when(m.blocked, () => K.Badge({ label:yz('spi.team.kurallara-takildi'), tone:'warn' }))}
+                ${when(m.error, () => K.Badge({ label:yz('spi.team.baglanti-hatasi'), tone:'danger' }))}
                 ${raw(OS() ? OS().kopyaHtml() : '')}
               </div>`)}
             </div>`)}
           ${when(busy, () => html`<div data-osohbet-bekle><div class="msg msg--agent" role="status">
             <div class="msg__who"><b>${a.name}</b></div>
-            <div class="msg__body dim">Brifingi okuyor ve cümleyi kuruyor…</div></div></div>`)}
+            <div class="msg__body dim">${yz('spi.team.brifingi-okuyor-ve-cumleyi-k')}</div></div></div>`)}
           ${oneriBlogu()}
         </div>`;
   }
@@ -184,8 +213,8 @@ SP.Screens.team = (function(){
       gecmisHtml:G ? G.listeHtml('spi', a.id, { ac:'gecmis-ac', sil:'gecmis-sil' }) : '',
       akisHtml:String(chatBody(a)),
       ustHtml:mentionYeri(),
-      girdiHtml:String(K.Textarea({ id:'chat-text', rows:1, class:'osohbet-girdi', placeholder:'Sor ya da verini söyle…',
-        aria:'Soru ya da veri (örneğin: uyku 7 saat ve 45 dakika yürüdüm)', data:{ 'data-osohbet-girdi':'1' } })),
+      girdiHtml:String(K.Textarea({ id:'chat-text', rows:1, class:'osohbet-girdi', placeholder:yz('spi.team.sor-ya-da-verini-soyle'),
+        aria:yz('spi.team.soru-ya-da-veri-ornegin'), data:{ 'data-osohbet-girdi':'1' } })),
       mikHtml:String(K.Mic({ target:'chat-text' })),
       gonderAct:'send-chat', kapali:busy,
     });
@@ -199,14 +228,14 @@ SP.Screens.team = (function(){
   function scopeCard(){
     const a = current();
     return K.Card({
-      title:'Bu uzman neye bakar?',
+      title:yz('spi.team.bu-uzman-neye-bakar'),
       body:html`
         ${K.Table({ tight:true, headers:['Alan', 'Kapsam'], rows:[
           ['Bakar', a.scope],
           ['Bakmaz', a.notScope],
           ['Alan dışında', a.redirect],
         ] })}
-        ${K.Notice({ tone:'info', class:'mt-10', title:'Modele ne gider?',
+        ${K.Notice({ tone:'info', class:'mt-10', title:yz('spi.team.modele-ne-gider'),
           body:SP.PRIVACY.model })}`,
     });
   }
@@ -215,11 +244,10 @@ SP.Screens.team = (function(){
     const a = current();
     const b = SP.Office.brief(a.id);
     return K.Collapsible({
-      title:'Uzmanın gördüğü özet', meta:'JSON', act:'toggle-brief',
+      title:yz('spi.team.uzmanin-gordugu-ozet'), meta:'JSON', act:'toggle-brief',
       open:!!S.ui.briefOpen,
       body:html`<pre class="codeblock">${JSON.stringify(b, null, 2)}</pre>
-        <p class="small muted mt-8">Ajan hesap yapmaz: bütün sayılar bu brifingden gelir.
-          Brifingde olmayan bir sayıyı yazamaz.</p>`,
+        <p class="small muted mt-8">${yz('spi.team.ajan-hesap-yapmaz-butun-sayi')}</p>`,
     });
   }
 
@@ -241,7 +269,7 @@ SP.Screens.team = (function(){
   function suggestCard(){
     const qs = sorular(current());
     return K.Card({
-      title:'Sorabileceklerin',
+      title:yz('spi.team.sorabileceklerin'),
       body:html`<div class="stack-xs">${map(qs, q => K.Button({ label:q, size:'sm', block:true,
         act:'quick-ask', data:{ 'data-q':q } }))}</div>`,
     });
@@ -301,11 +329,11 @@ SP.Screens.team = (function(){
       <div class="oneri oneri--${p.status}">
         <div class="oneri__bas">
           <b class="oneri__ne">${e ? e.label : p.action}</b>
-          ${when(p.kaynak === 'model', () => K.Badge({ label:'ajan önerdi', tone:'info' }))}
+          ${when(p.kaynak === 'model', () => K.Badge({ label:yz('spi.team.ajan-onerdi'), tone:'info' }))}
           ${when(p.status === 'applied', () => K.Badge({ label:'kaydedildi', tone:'ok' }))}
-          ${when(p.status === 'rejected', () => K.Badge({ label:'vazgeçildi', tone:'muted' }))}
-          ${when(p.status === 'undone', () => K.Badge({ label:'geri alındı', tone:'muted' }))}
-          ${when(p.status === 'stale', () => K.Badge({ label:'geçersizleşti', tone:'warn' }))}
+          ${when(p.status === 'rejected', () => K.Badge({ label:yz('spi.team.vazgecildi'), tone:'muted' }))}
+          ${when(p.status === 'undone', () => K.Badge({ label:yz('spi.team.geri-alindi'), tone:'muted' }))}
+          ${when(p.status === 'stale', () => K.Badge({ label:yz('spi.team.gecersizlesti'), tone:'warn' }))}
         </div>
         ${when(!pv.ok, () => html`<p class="oneri__hata">${pv.why}</p>`)}
         ${when(pv.ok, () => html`<div class="oneri__satirlar">
@@ -318,10 +346,10 @@ SP.Screens.team = (function(){
         </div>`)}
         <div class="oneri__dug">
           ${when(p.status === 'pending' && pv.ok, () => html`
-            ${K.Button({ label:'Kaydet', size:'sm', tone:'primary',
+            ${K.Button({ label:yz('spi.team.kaydet'), size:'sm', tone:'primary',
               act:'oneri-onay', data:{ 'data-id':p.id } })}
-            ${K.Button({ label:'Vazgeç', size:'sm', act:'oneri-ret', data:{ 'data-id':p.id } })}`)}
-          ${when(p.status === 'applied', () => K.Button({ label:'Geri al', size:'sm',
+            ${K.Button({ label:yz('spi.team.vazgec'), size:'sm', act:'oneri-ret', data:{ 'data-id':p.id } })}`)}
+          ${when(p.status === 'applied', () => K.Button({ label:yz('spi.team.geri-al'), size:'sm',
             act:'oneri-geri', data:{ 'data-id':p.id } }))}
         </div>
       </div>`;
@@ -506,7 +534,7 @@ SP.Screens.team = (function(){
       SP.App.render();
     },
     async 'talk-stop'(){ SP.Talk.stop(); sesli.acik = false; SP.App.render(); },
-    async 'talk-cut'(){ if(!SP.Talk.kes()) UI.toast('Şu an konuşmuyor'); },
+    async 'talk-cut'(){ if(!SP.Talk.kes()) UI.toast(yz('spi.team.su-an-konusmuyor')); },
 
     async 'toggle-brief'(){ S.ui.briefOpen = !S.ui.briefOpen; SP.App.render(); },
     async 'send-chat'(){
@@ -567,7 +595,7 @@ SP.Screens.team = (function(){
     },
     async 'clear-chat'(){
       await SP.Office.clearChat(current().id);
-      UI.toast('Sohbet temizlendi');
+      UI.toast(yz('spi.team.sohbet-temizlendi'));
       SP.App.render();
     },
   };
@@ -594,7 +622,7 @@ SP.Screens.team = (function(){
     id:'team',
     /* iPhone Faz 4: açık sohbet ve ajanın kartı; ajanın tanıtımı, örnek sorular ve brifing şerit. */
     kucukVarsayilan:['bu-uzman-neye-bakar', 'sorabileceklerin', 'uzmanın-gördüğü-özet'],
-    title:'Danışma',
+    title:yz('spi.team.danisma'),
     subtitle(){
       const a = current();
       return a.name + ' · ' + a.title;

@@ -8,6 +8,57 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.topic.risk':'risk ',
+  'ays.topic.durumu-duzenle':'Durumu düzenle',
+  'ays.topic.ogren':'Öğren',
+  'ays.topic.anlatimi-ac':'Anlatımı aç',
+  'ays.topic.sorular':'Sorular',
+  'ays.topic.koca-sor':'Koça sor',
+  'ays.topic.ders-notu-ekle':'Ders notu ekle',
+  'ays.topic.okudum':'Okudum',
+  'ays.topic.kart-ekle':'Kart ekle',
+  'ays.topic.bugun-ekranina-git':'Bugün ekranına git',
+  'ays.topic.yanlis-defteri':'Yanlış defteri',
+  'ays.topic.testi-gir':'Testi gir',
+  'ays.topic.ogrenme-yolu':'Öğrenme yolu',
+  'ays.topic.tamamlandi':'tamamlandı',
+  'ays.topic.siradaki-adim':'Sıradaki adım',
+  'ays.topic.bu-arada-kartlarini-tekrar-e':'Bu arada kartlarını tekrar et; zamanı gelince burada «Testi gir» çıkar.',
+  'ays.topic.okudum-bir-beyandir-sistem-d':'«Okudum» bir beyandır; sistem doğrulayamaz.',
+  'ays.topic.i-sareti-kaldir':'İşareti kaldır',
+  'ays.topic.esikler-planin-kuralidir-en':'Eşikler planın kuralıdır: en az',
+  'ays.topic.soru-ve':'soru ve %',
+  'ays.topic.dogruluk-kapanis':'doğruluk; kapanış %',
+  'ays.topic.gun-sonra':'gün sonra %',
+  'ays.topic.kapanis-olcumu':'Kapanış ölçümü',
+  'ays.topic.i-lk-test':'İlk test ≥%',
+  'ays.topic.1-olcum':'1. ölçüm',
+  'ays.topic.2-olcum':'2. ölçüm',
+  'ays.topic.pratik':'Pratik',
+  'ays.topic.bu-konuya-bagli-bloklardan-g':'Bu konuya bağlı bloklardan gelen gerçek veri',
+  'ays.topic.cozulen':'Çözülen',
+  'ays.topic.dogruluk':'Doğruluk',
+  'ays.topic.net-acigi':'Net açığı',
+  'ays.topic.henuz-bu-konuya-bagli-blok':'Henüz bu konuya bağlı blok yok. Bugün ekranında bloğu bu konuya bağlarsan doğruluk buradan okunur.',
+  'ays.topic.ders-notlari':'Ders notları',
+  'ays.topic.bu-konuya-bagli-ders-notu':'Bu konuya bağlı ders notu yok.',
+  'ays.topic.ders-ekle':'Ders ekle',
+  'ays.topic.tekrar-kartlari':'Tekrar kartları',
+  'ays.topic.bu-konuda-kart-yok-not':'Bu konuda kart yok. Not ya da yanlış kaydından üretilir.',
+  'ays.topic.sina':'Sına',
+  'ays.topic.bu-konudan-gelen-yanlislar':'Bu konudan gelen yanlışlar',
+  'ays.topic.bu-konudan-kayitli-yanlis-yo':'Bu konudan kayıtlı yanlış yok.',
+  'ays.topic.i-lke':'İlke:',
+  'ays.topic.risk-neden-bu-kadar':'Risk neden bu kadar?',
+  'ays.topic.skoru-olusturan-bes-girdi':'Skoru oluşturan beş girdi',
+  'ays.topic.dersler':'Dersler',
+  'ays.topic.konu-secilmedi':'Konu seçilmedi.',
+  'ays.topic.derslere-git':'Derslere git',
+  'ays.topic.i-saretlendi-siradaki-adim':'İşaretlendi · sıradaki adım: ',
+  'ays.topic.okudum-isareti-kaldirildi':'«Okudum» işareti kaldırıldı',
+  'ays.topic.konu':'Konu',
+});
 window.LIFEOS.PARCA.sayfa({ id:'topic', modul:'ays' });
 
 R.Screens.topic = (function(){
@@ -47,8 +98,8 @@ R.Screens.topic = (function(){
     return K.Card({
       title:topic.name,
       sub:subject.name + (topic.group ? ' · ' + topic.group : ''),
-      badge:when(risk, () => K.Badge({ label:'risk ' + risk.score, tone:risk.tone })),
-      actions:K.Button({ label:'Durumu düzenle', size:'sm', tone:'primary', act:'topic-edit' }),
+      badge:when(risk, () => K.Badge({ label:yz('ays.topic.risk') + risk.score, tone:risk.tone })),
+      actions:K.Button({ label:yz('ays.topic.durumu-duzenle'), size:'sm', tone:'primary', act:'topic-edit' }),
       body:html`
         ${K.Row([
           K.Chip(R.TOPIC_STATES[st.state].label),
@@ -101,26 +152,26 @@ R.Screens.topic = (function(){
     parca.push('koç');
     const durum = [d.okundu ? 'okundu' : 'okunmadı'];
     if(d.skor.cevaplanan) durum.push(d.skor.dogru + '/' + d.skor.toplam + ' örnek soru doğru (ölçüldü)');
-    return K.Card({ title:'Öğren', sub:parca.join(' · '),
+    return K.Card({ title:yz('ays.topic.ogren'), sub:parca.join(' · '),
       body:html`<p class="small muted">${durum.join(' · ')}</p>
         <div class="row wrap gap-6 mt-10">
-          ${K.Button({ label:'Anlatımı aç', icon:'book', size:'sm', tone:'primary', act:'ogren-git', data:ogrenData(subject, topic, 'anlatim') })}
-          ${when(d.skor.toplam, () => K.Button({ label:'Sorular', icon:'check', size:'sm', act:'ogren-git', data:ogrenData(subject, topic, 'sorular') }))}
-          ${K.Button({ label:'Koça sor', icon:'zap', size:'sm', tone:'ghost', act:'ogren-git', data:ogrenData(subject, topic, 'koc') })}
+          ${K.Button({ label:yz('ays.topic.anlatimi-ac'), icon:'book', size:'sm', tone:'primary', act:'ogren-git', data:ogrenData(subject, topic, 'anlatim') })}
+          ${when(d.skor.toplam, () => K.Button({ label:yz('ays.topic.sorular'), icon:'check', size:'sm', act:'ogren-git', data:ogrenData(subject, topic, 'sorular') }))}
+          ${K.Button({ label:yz('ays.topic.koca-sor'), icon:'zap', size:'sm', tone:'ghost', act:'ogren-git', data:ogrenData(subject, topic, 'koc') })}
         </div>` });
   }
 
   const YOL_EYLEM = {
     ogren:(subject, topic) => K.Row([
-      K.Button({ label:'Anlatımı aç', icon:'book', size:'sm', tone:'primary', act:'ogren-git', data:ogrenData(subject, topic, 'anlatim') }),
-      K.Button({ label:'Ders notu ekle', icon:'play', size:'sm', act:'topic-add-note' }),
-      K.Button({ label:'Okudum', icon:'check', size:'sm', act:'yol-okundu' }),
+      K.Button({ label:yz('ays.topic.anlatimi-ac'), icon:'book', size:'sm', tone:'primary', act:'ogren-git', data:ogrenData(subject, topic, 'anlatim') }),
+      K.Button({ label:yz('ays.topic.ders-notu-ekle'), icon:'play', size:'sm', act:'topic-add-note' }),
+      K.Button({ label:yz('ays.topic.okudum'), icon:'check', size:'sm', act:'yol-okundu' }),
     ], { wrap:true }),
-    kartla:() => K.Button({ label:'Kart ekle', icon:'cards', size:'sm', tone:'primary', act:'topic-add-card' }),
-    coz:() => K.Button({ label:'Bugün ekranına git', icon:'today', size:'sm', tone:'primary', act:'go', data:{ 'data-route':'today' } }),
-    duzelt:() => K.Button({ label:'Yanlış defteri', icon:'list', size:'sm', tone:'primary', act:'yol-yanlis' }),
-    olc:() => K.Button({ label:'Testi gir', icon:'edit', size:'sm', tone:'primary', act:'topic-edit' }),
-    pekistir:() => K.Button({ label:'Testi gir', icon:'edit', size:'sm', tone:'primary', act:'topic-edit' }),
+    kartla:() => K.Button({ label:yz('ays.topic.kart-ekle'), icon:'cards', size:'sm', tone:'primary', act:'topic-add-card' }),
+    coz:() => K.Button({ label:yz('ays.topic.bugun-ekranina-git'), icon:'today', size:'sm', tone:'primary', act:'go', data:{ 'data-route':'today' } }),
+    duzelt:() => K.Button({ label:yz('ays.topic.yanlis-defteri'), icon:'list', size:'sm', tone:'primary', act:'yol-yanlis' }),
+    olc:() => K.Button({ label:yz('ays.topic.testi-gir'), icon:'edit', size:'sm', tone:'primary', act:'topic-edit' }),
+    pekistir:() => K.Button({ label:yz('ays.topic.testi-gir'), icon:'edit', size:'sm', tone:'primary', act:'topic-edit' }),
   };
   const YOL_NEDEN = {
     ogren:'Önce konunun kendisi: Öğren › Anlatım’da oku ya da bir ders izleyip not al; okuyunca «Okudum»a bas.',
@@ -138,13 +189,13 @@ R.Screens.topic = (function(){
     const tamam = l.filter(a => a.tamam).length;
     const k = Y.KURAL, rule = R.CLOSURE_RULE;
     return K.Card({
-      title:'Öğrenme yolu', sub:tamam + ' / ' + l.length + ' adım', wide:true,
-      badge:when(!s, () => K.Badge({ label:'tamamlandı', tone:'ok' })),
+      title:yz('ays.topic.ogrenme-yolu'), sub:tamam + ' / ' + l.length + ' adım', wide:true,
+      badge:when(!s, () => K.Badge({ label:yz('ays.topic.tamamlandi'), tone:'ok' })),
       body:html`
         ${!s ? K.Notice({ tone:'ok', body:'Bütün adımlar tamam: konu iki ölçümle kapandı. Kartlar tekrar zamanında yine sorar.' })
-          : s.bekle ? K.NextUp({ icon:'clock', calm:true, label:'Sıradaki adım', title:s.ad + ' · ' + s.ayrinti,
-              why:'Bu arada kartlarını tekrar et; zamanı gelince burada «Testi gir» çıkar.' })
-          : K.NextUp({ icon:'target', label:'Sıradaki adım', title:s.ad, why:YOL_NEDEN[s.id] + ' ' + s.ayrinti,
+          : s.bekle ? K.NextUp({ icon:'clock', calm:true, label:yz('ays.topic.siradaki-adim'), title:s.ad + ' · ' + s.ayrinti,
+              why:yz('ays.topic.bu-arada-kartlarini-tekrar-e') })
+          : K.NextUp({ icon:'target', label:yz('ays.topic.siradaki-adim'), title:s.ad, why:YOL_NEDEN[s.id] + ' ' + s.ayrinti,
               action:YOL_EYLEM[s.id](subject, topic) })}
         <ol class="yol mt-12" aria-label="Öğrenme yolunun adımları">${map(l, a => html`
           <li class="${'yol__adim' + (a.tamam ? ' is-tamam' : '') + (s && a.id === s.id ? ' is-sirada' : '')}">
@@ -153,10 +204,9 @@ R.Screens.topic = (function(){
             ${when(a.etiket, () => html`<span class="yol__etiket tiny">${a.etiket}</span>`)}
             <span class="sr-only">${a.tamam ? 'tamam' : 'eksik'}</span>
           </li>`)}</ol>
-        ${when(st.okunduAt, () => html`<p class="tiny dim mt-10">«Okudum» bir beyandır; sistem doğrulayamaz.
-          <button type="button" class="linkbtn" data-act="yol-okundu-geri">İşareti kaldır</button></p>`)}
-        <p class="tiny dim mt-10">Eşikler planın kuralıdır: en az ${k.kartEnAz} kart, ${k.pratikEnAz} soru ve
-          %${k.pratikDogruluk} doğruluk; kapanış %${rule.first} ve ${rule.gapDays} gün sonra %${rule.second}.</p>`,
+        ${when(st.okunduAt, () => html`<p class="tiny dim mt-10">${yz('ays.topic.okudum-bir-beyandir-sistem-d')}
+          <button type="button" class="linkbtn" data-act="yol-okundu-geri">${yz('ays.topic.i-sareti-kaldir')}</button></p>`)}
+        <p class="tiny dim mt-10">${yz('ays.topic.esikler-planin-kuralidir-en')} ${k.kartEnAz} kart, ${k.pratikEnAz} ${yz('ays.topic.soru-ve')}${k.pratikDogruluk} ${yz('ays.topic.dogruluk-kapanis')}${rule.first} ve ${rule.gapDays} ${yz('ays.topic.gun-sonra')}${rule.second}.</p>`,
     });
   }
 
@@ -168,14 +218,14 @@ R.Screens.topic = (function(){
     const overdue = dueISO && dueISO < U.todayISO();
 
     return K.Card({
-      title:'Kapanış ölçümü', hint:'second-check',
-      sub:'İlk test ≥%' + rule.first + ' ve ' + rule.gapDays + ' gün sonra ≥%' + rule.second,
+      title:yz('ays.topic.kapanis-olcumu'), hint:'second-check',
+      sub:yz('ays.topic.i-lk-test') + rule.first + ' ve ' + rule.gapDays + ' gün sonra ≥%' + rule.second,
       body:html`
         ${K.Cols(2, [
-          K.Stat({ label:'1. ölçüm', value:first == null ? '—' : '%' + first,
+          K.Stat({ label:yz('ays.topic.1-olcum'), value:first == null ? '—' : '%' + first,
             note:st.firstAt ? U.fmtShort(st.firstAt) : 'girilmedi',
             tone:first == null ? null : first >= rule.first ? 'ok' : 'warn' }),
-          K.Stat({ label:'2. ölçüm', value:second == null ? '—' : '%' + second,
+          K.Stat({ label:yz('ays.topic.2-olcum'), value:second == null ? '—' : '%' + second,
             note:second != null ? U.fmtShort(st.secondAt)
               : dueISO ? (overdue ? 'gecikti' : U.relativeDay(dueISO)) : 'ilk ölçümden sonra',
             tone:second == null ? (overdue ? 'warn' : null) : second >= rule.second ? 'ok' : 'warn' }),
@@ -190,18 +240,17 @@ R.Screens.topic = (function(){
     const p = C.topicPractice(subject.id, topic.id);
     const v = R.Analytics.topicValue().find(x => x.subjectId === subject.id && x.topicId === topic.id);
     return K.Card({
-      title:'Pratik', sub:'Bu konuya bağlı bloklardan gelen gerçek veri',
+      title:yz('ays.topic.pratik'), sub:yz('ays.topic.bu-konuya-bagli-bloklardan-g'),
       body:html`
         ${K.Cols(3, [
-          K.Stat({ label:'Çözülen', value:U.fmtNum(p.solved), note:p.sessions + ' blok' }),
-          K.Stat({ label:'Doğruluk', value:p.accuracy == null ? '—' : '%' + p.accuracy,
+          K.Stat({ label:yz('ays.topic.cozulen'), value:U.fmtNum(p.solved), note:p.sessions + ' blok' }),
+          K.Stat({ label:yz('ays.topic.dogruluk'), value:p.accuracy == null ? '—' : '%' + p.accuracy,
             tone:p.accuracy == null ? null : p.accuracy >= 70 ? 'ok' : 'warn' }),
-          K.Stat({ label:'Net açığı', value:v ? U.fmtNet(v.gap) : '—',
+          K.Stat({ label:yz('ays.topic.net-acigi'), value:v ? U.fmtNet(v.gap) : '—',
             note:v ? 'potansiyel ' + U.fmtNet(v.potential) : '' }),
         ])}
         ${when(p.solved === 0, () => html`<p class="tiny dim mt-10">
-          Henüz bu konuya bağlı blok yok. Bugün ekranında bloğu bu konuya bağlarsan
-          doğruluk buradan okunur.</p>`)}`,
+          ${yz('ays.topic.henuz-bu-konuya-bagli-blok')}</p>`)}`,
     });
   }
 
@@ -210,12 +259,12 @@ R.Screens.topic = (function(){
     const segs = [];
     notes.forEach(n => n.segments.forEach(s => segs.push({ note:n, seg:s })));
     if(!segs.length){
-      return K.Card({ title:'Ders notları',
-        body:K.Empty({ icon:'play', text:'Bu konuya bağlı ders notu yok.',
-          action:K.Button({ label:'Ders ekle', size:'sm', act:'go', data:{ 'data-route':'learn' } }) }) });
+      return K.Card({ title:yz('ays.topic.ders-notlari'),
+        body:K.Empty({ icon:'play', text:yz('ays.topic.bu-konuya-bagli-ders-notu'),
+          action:K.Button({ label:yz('ays.topic.ders-ekle'), size:'sm', act:'go', data:{ 'data-route':'learn' } }) }) });
     }
     return K.Card({
-      title:'Ders notları', sub:U.plural(segs.length, 'not', 'not') + ' · ' + notes.length + ' ders',
+      title:yz('ays.topic.ders-notlari'), sub:U.plural(segs.length, 'not', 'not') + ' · ' + notes.length + ' ders',
       body:html`<div class="stack-xs">${map(segs.slice(0, 10), x => html`
         <div class="row-top gap-8">
           <a class="seg-row__ts num" href="${M.tsUrl(x.note, x.seg.ts)}" target="_blank" rel="noopener">${M.fmtTs(x.seg.ts)}</a>
@@ -228,12 +277,12 @@ R.Screens.topic = (function(){
     const cards = cardsOf(subject, topic);
     const due = cards.filter(c => c.dueAt <= U.todayISO()).length;
     if(!cards.length){
-      return K.Card({ title:'Tekrar kartları',
-        body:K.Empty({ icon:'cards', text:'Bu konuda kart yok. Not ya da yanlış kaydından üretilir.' }) });
+      return K.Card({ title:yz('ays.topic.tekrar-kartlari'),
+        body:K.Empty({ icon:'cards', text:yz('ays.topic.bu-konuda-kart-yok-not') }) });
     }
     return K.Card({
-      title:'Tekrar kartları', sub:cards.length + ' kart · ' + due + ' bugün due',
-      actions:when(due, () => K.Button({ label:'Sına', icon:'zap', size:'sm', act:'topic-quiz' })),
+      title:yz('ays.topic.tekrar-kartlari'), sub:cards.length + ' kart · ' + due + ' bugün due',
+      actions:when(due, () => K.Button({ label:yz('ays.topic.sina'), icon:'zap', size:'sm', act:'topic-quiz' })),
       body:html`<div class="stack-xs">${map(cards.slice(0, 8), c => html`
         <div class="row between">
           <span class="small truncate">${c.front}</span>
@@ -245,14 +294,14 @@ R.Screens.topic = (function(){
   function errorsCard(subject, topic){
     const errs = errorsOf(subject, topic);
     if(!errs.length){
-      return K.Card({ title:'Bu konudan gelen yanlışlar',
-        body:K.Empty({ icon:'list', text:'Bu konudan kayıtlı yanlış yok.' }) });
+      return K.Card({ title:yz('ays.topic.bu-konudan-gelen-yanlislar'),
+        body:K.Empty({ icon:'list', text:yz('ays.topic.bu-konudan-kayitli-yanlis-yo') }) });
     }
     const dist = {};
     errs.forEach(e => { dist[e.tag] = (dist[e.tag] || 0) + 1; });
     const top = Object.keys(dist).sort((a, b) => dist[b] - dist[a])[0];
     return K.Card({
-      title:'Bu konudan gelen yanlışlar', sub:errs.length + ' kayıt',
+      title:yz('ays.topic.bu-konudan-gelen-yanlislar'), sub:errs.length + ' kayıt',
       badge:when(top, () => K.Badge({ label:top + ' baskın', tone:'warn' })),
       body:html`
         <div class="stack-xs">${map(errs.slice(0, 6), e => html`
@@ -260,7 +309,7 @@ R.Screens.topic = (function(){
             ${raw(UI.tagDot(e.tag))}
             <div class="minw0">
               <div class="small">${e.rootCause || 'kök neden yazılmadı'}</div>
-              ${when(e.principle, () => html`<div class="tiny dim">İlke: ${e.principle}</div>`)}
+              ${when(e.principle, () => html`<div class="tiny dim">${yz('ays.topic.i-lke')} ${e.principle}</div>`)}
             </div>
           </div>`)}</div>
         ${when(top, () => html`<div class="mt-12">${K.Notice({ tone:'info',
@@ -279,7 +328,7 @@ R.Screens.topic = (function(){
       ['Pratik', risk.parts.practice || 0],
     ];
     return K.Card({
-      title:'Risk neden bu kadar?', hint:'risk', sub:'Skoru oluşturan beş girdi',
+      title:yz('ays.topic.risk-neden-bu-kadar'), hint:'risk', sub:yz('ays.topic.skoru-olusturan-bes-girdi'),
       body:html`<div class="stack-xs">${map(parts, p => html`
         <div class="stack-xs">
           <div class="row between"><span class="small">${p[0]}</span>
@@ -291,10 +340,10 @@ R.Screens.topic = (function(){
 
   LIFEOS.PARCA.blok({ id:'topic.bolum-1', sayfa:'topic', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ subject, topic, st, risk }){
     return K.Row([
-        K.Button({ label:'Dersler', icon:'left', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'subjects' } }),
+        K.Button({ label:yz('ays.topic.dersler'), icon:'left', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'subjects' } }),
         K.Row([
-          K.Button({ label:'Ders ekle', icon:'plus', size:'sm', act:'topic-add-note' }),
-          K.Button({ label:'Kart ekle', icon:'cards', size:'sm', act:'topic-add-card' }),
+          K.Button({ label:yz('ays.topic.ders-ekle'), icon:'plus', size:'sm', act:'topic-add-note' }),
+          K.Button({ label:yz('ays.topic.kart-ekle'), icon:'cards', size:'sm', act:'topic-add-card' }),
         ], { wrap:true }),
       ], { between:true, wrap:true });
   } });
@@ -331,8 +380,8 @@ R.Screens.topic = (function(){
   async function render(){
     const { subject, topic } = ctx();
     if(!subject || !topic){
-      return String(K.Card({ body:K.Empty({ icon:'book', text:'Konu seçilmedi.',
-        action:K.Button({ label:'Derslere git', tone:'primary', act:'go', data:{ 'data-route':'subjects' } }) }) }));
+      return String(K.Card({ body:K.Empty({ icon:'book', text:yz('ays.topic.konu-secilmedi'),
+        action:K.Button({ label:yz('ays.topic.derslere-git'), tone:'primary', act:'go', data:{ 'data-route':'subjects' } }) }) }));
     }
     const st = M.topicState(subject.id, topic.id);
     const risk = C.topicRisk(subject.id, topic.id);
@@ -374,14 +423,14 @@ R.Screens.topic = (function(){
       const { subject, topic } = ctx();
       if(!subject || !topic) return;
       await R.OgrenYolu.okundu(subject.id, topic.id, true);
-      UI.toast('İşaretlendi · sıradaki adım: ' + ((R.OgrenYolu.siradaki(subject.id, topic.id) || {}).ad || 'yok'));
+      UI.toast(yz('ays.topic.i-saretlendi-siradaki-adim') + ((R.OgrenYolu.siradaki(subject.id, topic.id) || {}).ad || 'yok'));
       R.App.render();
     },
     async 'yol-okundu-geri'(){
       const { subject, topic } = ctx();
       if(!subject || !topic) return;
       await R.OgrenYolu.okundu(subject.id, topic.id, false);
-      UI.toast('«Okudum» işareti kaldırıldı');
+      UI.toast(yz('ays.topic.okudum-isareti-kaldirildi'));
       R.App.render();
     },
     async 'yol-yanlis'(){
@@ -392,7 +441,7 @@ R.Screens.topic = (function(){
 
   return {
     id:'topic',
-    title:'Konu',
+    title:yz('ays.topic.konu'),
     subtitle(){
       const { subject, topic } = ctx();
       return topic ? subject.name + ' · ' + topic.name : 'Konu özeti';

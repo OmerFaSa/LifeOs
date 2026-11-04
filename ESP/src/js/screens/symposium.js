@@ -13,6 +13,81 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.symposium.acik':'Açık',
+  'esp.symposium.kapali':'Kapalı',
+  'esp.symposium.ekle':'Ekle',
+  'esp.symposium.metinler':'Metinler',
+  'esp.symposium.deneyler':'Deneyler',
+  'esp.symposium.ogren':'Öğren',
+  'esp.symposium.dusunce-deneyleri':'Düşünce deneyleri',
+  'esp.symposium.alan-suzgeci':'Alan süzgeci',
+  'esp.symposium.butun-alanlar':'Bütün alanlar',
+  'esp.symposium.tez-yap':'Tez yap',
+  'esp.symposium.zorladigi-ayrim':'Zorladığı ayrım:',
+  'esp.symposium.arguman-alistirmalari':'Argüman alıştırmaları',
+  'esp.symposium.kapat':'Kapat',
+  'esp.symposium.sil':'Sil',
+  'esp.symposium.destek':'Destek',
+  'esp.symposium.henuz-destek-yazilmadi':'Henüz destek yazılmadı.',
+  'esp.symposium.destek-ekle':'Destek ekle…',
+  'esp.symposium.destek-ekle-2':'Destek ekle',
+  'esp.symposium.i-tiraz':'İtiraz',
+  'esp.symposium.cevabin':'Cevabın…',
+  'esp.symposium.i-tiraza-cevabin':'İtiraza cevabın',
+  'esp.symposium.cevapla':'Cevapla',
+  'esp.symposium.i-tiraz-yok-en-guclu-karsi':'İtiraz yok. En güçlü karşı tezi sen yazmazsan tez sınanmamış kalır.',
+  'esp.symposium.i-tiraz-ekle':'İtiraz ekle…',
+  'esp.symposium.i-tiraz-ekle-2':'İtiraz ekle',
+  'esp.symposium.safsata-denetimi':'Safsata denetimi',
+  'esp.symposium.socrates-e-sor':'Socrates\'e sor',
+  'esp.symposium.rastgele-soru':'Rastgele soru',
+  'esp.symposium.soru':'Soru',
+  'esp.symposium.acik-tez':'Açık tez',
+  'esp.symposium.acik-tez-yok-tek-cumlelik':'Açık tez yok. Tek cümlelik bir tez yazmak yeterli; ',
+  'esp.symposium.tez-yaz':'Tez yaz',
+  'esp.symposium.kapanan-tez':'Kapanan tez',
+  'esp.symposium.henuz-kapanan-tez-yok-bir':'Henüz kapanan tez yok. Bir tez ancak cevaplanmamış ',
+  'esp.symposium.yeni-tez':'Yeni tez',
+  'esp.symposium.tez-metni':'Tez metni',
+  'esp.symposium.ozgurluk-yalnizca-secenek-co':'Özgürlük yalnızca seçenek çokluğu değildir çünkü seçenekleri ',
+  'esp.symposium.coz':'Çöz',
+  'esp.symposium.oldugu-gibi-kaydet':'Olduğu gibi kaydet',
+  'esp.symposium.nereye-koyacagimi-anlamadim':'Nereye koyacağımı anlamadım',
+  'esp.symposium.kaydet':'Kaydet',
+  'esp.symposium.vazgec':'Vazgeç',
+  'esp.symposium.sokratik-sorular':'Sokratik sorular',
+  'esp.symposium.kaynaklar':'Kaynaklar',
+  'esp.symposium.kaynak-listesi-bos':'Kaynak listesi boş.',
+  'esp.symposium.belge-iste':'Belge iste',
+  'esp.symposium.konu-stoacilik-varolusculuk':'Konu: Stoacılık, varoluşçuluk…',
+  'esp.symposium.felsefe-konusu':'Felsefe konusu',
+  'esp.symposium.king-e-ilet':'King’e ilet',
+  'esp.symposium.kanondan-ekle':'Kanondan ekle',
+  'esp.symposium.kanondan-eser-sec':'Kanondan eser seç',
+  'esp.symposium.listede-olmayan-bir-kaynagi':'Listede olmayan bir kaynağı elle de ekleyebilirsin.',
+  'esp.symposium.eser':'Eser',
+  'esp.symposium.baslik':'Başlık',
+  'esp.symposium.yazar':'Yazar',
+  'esp.symposium.tur':'Tür',
+  'esp.symposium.primer-metin':'Primer metin',
+  'esp.symposium.yorum':'Yorum',
+  'esp.symposium.elle-ekle':'Elle ekle',
+  'esp.symposium.konular':'Konular',
+  'esp.symposium.acik-tezler':'Açık tezler',
+  'esp.symposium.felsefe-bolumleri':'Felsefe bölümleri',
+  'esp.symposium.deney-bir-itiraz-olarak-acil':'Deney bir itiraz olarak açıldı — tezi sen yaz',
+  'esp.symposium.tez-bulunamadi':'Tez bulunamadı',
+  'esp.symposium.tez-kaydedildi':'Tez kaydedildi',
+  'esp.symposium.metin-bos':'Metin boş',
+  'esp.symposium.cevaplanmamis-itiraz-varken':'Cevaplanmamış itiraz varken tez kapanmaz',
+  'esp.symposium.eser-adi-gerekir':'Eser adı gerekir',
+  'esp.symposium.sempozyum':'Sempozyum',
+  'esp.symposium.acik-tez-2':'açık tez',
+  'esp.symposium.acik-itiraz':'açık itiraz',
+  'esp.symposium.kapandi':'kapandı',
+  'esp.symposium.primer-metin-2':'primer metin',
+});
 window.LIFEOS.PARCA.sayfa({ id:'symposium', modul:'esp', cekmece:'calisma', ad:'Felsefe', ikon:'socratic', ek:{ disc:'philo' }, sira:20 });
 
 ESP.Screens.symposium = (function(){
@@ -21,12 +96,12 @@ ESP.Screens.symposium = (function(){
   const K = ESP.C;
 
   const TABS = [
-    { id:'acik',     label:'Açık' },
-    { id:'kapali',   label:'Kapalı' },
-    { id:'ekle',     label:'Ekle' },
-    { id:'metinler', label:'Metinler' },
-    { id:'deneyler', label:'Deneyler' },
-    { id:'ogren',     label:'Öğren' },
+    { id:'acik',     label:yz('esp.symposium.acik') },
+    { id:'kapali',   label:yz('esp.symposium.kapali') },
+    { id:'ekle',     label:yz('esp.symposium.ekle') },
+    { id:'metinler', label:yz('esp.symposium.metinler') },
+    { id:'deneyler', label:yz('esp.symposium.deneyler') },
+    { id:'ogren',     label:yz('esp.symposium.ogren') },
   ];
 
   /* --------------------------------------------------------------- deneyler
@@ -45,11 +120,11 @@ ESP.Screens.symposium = (function(){
 
     return [
       K.Entry({
-        label:'Düşünce deneyleri', hint:'experiment',
+        label:yz('esp.symposium.dusunce-deneyleri'), hint:'experiment',
         meta:list.length + ' deney',
         action:K.Select({ id:'exp-field', value:alan, change:'exp-field',
-          aria:'Alan süzgeci',
-          options:[{ value:'all', label:'Bütün alanlar' }]
+          aria:yz('esp.symposium.alan-suzgeci'),
+          options:[{ value:'all', label:yz('esp.symposium.butun-alanlar') }]
             .concat(ESP.EXPERIMENT_FIELDS.map(f => ({ value:f.id, label:f.label }))) }),
         wide:true,
         body:html`${map(list, x => html`
@@ -58,16 +133,16 @@ ESP.Screens.symposium = (function(){
               <b>${x.label}</b>
               ${K.Badge({ label:(ESP.EXPERIMENT_FIELDS.filter(f => f.id === x.field)[0]
                 || {}).label || x.field, tone:'muted', icon:false })}
-              ${K.Button({ label:'Tez yap', size:'sm', act:'exp-to-thesis',
+              ${K.Button({ label:yz('esp.symposium.tez-yap'), size:'sm', act:'exp-to-thesis',
                 data:{ 'data-id':x.id } })}
             </div>
             <p>${x.setup}</p>
-            <p class="small muted"><b>Zorladığı ayrım:</b> ${x.tests}</p>
+            <p class="small muted"><b>${yz('esp.symposium.zorladigi-ayrim')}</b> ${x.tests}</p>
           </div>`)}`,
       }),
 
       K.Entry({
-        label:'Argüman alıştırmaları', hint:'argument-drill',
+        label:yz('esp.symposium.arguman-alistirmalari'), hint:'argument-drill',
         meta:ESP.ARGUMENT_DRILLS.length + ' alıştırma',
         wide:true,
         body:K.Table({ tight:true, headers:['Alıştırma', 'Ne yapılır', 'Neden'],
@@ -102,9 +177,9 @@ ESP.Screens.symposium = (function(){
         ? acikItiraz.length + ' itiraz cevaplanmadı; tez bu yüzden kapanamaz.'
         : (a.status === 'open' ? 'Cevaplanmamış itiraz yok — kapatılabilir.' : ''),
       action:html`${when(a.status === 'open' && !acikItiraz.length,
-          () => K.Button({ label:'Kapat', size:'sm', tone:'primary', act:'close-arg',
+          () => K.Button({ label:yz('esp.symposium.kapat'), size:'sm', tone:'primary', act:'close-arg',
             data:{ 'data-id':a.id } }))}
-        ${K.Button({ label:'Sil', size:'sm', act:'del-arg', data:{ 'data-id':a.id } })}`,
+        ${K.Button({ label:yz('esp.symposium.sil'), size:'sm', act:'del-arg', data:{ 'data-id':a.id } })}`,
       wide:true,
       body:html`
         <p class="thesis">${a.thesis}</p>
@@ -116,19 +191,19 @@ ESP.Screens.symposium = (function(){
 
         <div class="argcols mt-12">
           <div class="argcol">
-            <p class="argcol__h">Destek</p>
+            <p class="argcol__h">${yz('esp.symposium.destek')}</p>
             ${(a.supports || []).length
               ? html`<ul class="argcol__list">${map(a.supports, s => html`<li>${s}</li>`)}</ul>`
-              : html`<p class="small muted">Henüz destek yazılmadı.</p>`}
+              : html`<p class="small muted">${yz('esp.symposium.henuz-destek-yazilmadi')}</p>`}
             <div class="row mt-8">
-              ${K.Input({ id:'sup-' + a.id, placeholder:'Destek ekle…', size:'sm',
-                aria:'Destek ekle' })}
-              ${K.Button({ label:'Ekle', size:'sm', act:'add-support', data:{ 'data-id':a.id } })}
+              ${K.Input({ id:'sup-' + a.id, placeholder:yz('esp.symposium.destek-ekle'), size:'sm',
+                aria:yz('esp.symposium.destek-ekle-2') })}
+              ${K.Button({ label:yz('esp.symposium.ekle'), size:'sm', act:'add-support', data:{ 'data-id':a.id } })}
             </div>
           </div>
 
           <div class="argcol">
-            <p class="argcol__h">İtiraz</p>
+            <p class="argcol__h">${yz('esp.symposium.i-tiraz')}</p>
             ${(a.objections || []).length
               ? html`<ul class="argcol__list">${map(a.objections, o => html`
                   <li class="${o.answered ? 'is-answered' : ''}">
@@ -136,34 +211,33 @@ ESP.Screens.symposium = (function(){
                     ${o.answered
                       ? html`<em class="argcol__ans">${o.answer}</em>`
                       : html`<div class="row mt-4">
-                          ${K.Input({ id:'ans-' + o.id, placeholder:'Cevabın…', size:'sm',
-                            aria:'İtiraza cevabın' })}
-                          ${K.Button({ label:'Cevapla', size:'sm', act:'answer-obj',
+                          ${K.Input({ id:'ans-' + o.id, placeholder:yz('esp.symposium.cevabin'), size:'sm',
+                            aria:yz('esp.symposium.i-tiraza-cevabin') })}
+                          ${K.Button({ label:yz('esp.symposium.cevapla'), size:'sm', act:'answer-obj',
                             data:{ 'data-id':a.id, 'data-obj':o.id } })}
                         </div>`}
                   </li>`)}</ul>`
-              : html`<p class="small muted">İtiraz yok. En güçlü karşı tezi sen yazmazsan
-                  tez sınanmamış kalır.</p>`}
+              : html`<p class="small muted">${yz('esp.symposium.i-tiraz-yok-en-guclu-karsi')}</p>`}
             <div class="row mt-8">
-              ${K.Input({ id:'obj-' + a.id, placeholder:'İtiraz ekle…', size:'sm',
-                aria:'İtiraz ekle' })}
-              ${K.Button({ label:'Ekle', size:'sm', act:'add-obj', data:{ 'data-id':a.id } })}
+              ${K.Input({ id:'obj-' + a.id, placeholder:yz('esp.symposium.i-tiraz-ekle'), size:'sm',
+                aria:yz('esp.symposium.i-tiraz-ekle-2') })}
+              ${K.Button({ label:yz('esp.symposium.ekle'), size:'sm', act:'add-obj', data:{ 'data-id':a.id } })}
             </div>
           </div>
         </div>
 
-        ${when(safsata.length, () => K.Notice({ tone:'info', title:'Safsata denetimi',
+        ${when(safsata.length, () => K.Notice({ tone:'info', title:yz('esp.symposium.safsata-denetimi'),
           body:safsata.map(f => '<b>' + f.label + '</b> — ' + f.note).join('<br/>')
             + '<br/><br/>Bu bir yargı değil bir bulgudur: kalıbın yakalanması '
             + 'argümanın yanlış olduğunu göstermez, bakmaya değer olduğunu gösterir.' }))}
 
         <div class="row mt-12">
-          ${K.Button({ label:'Socrates\'e sor', act:'ask-socrates', data:{ 'data-id':a.id } })}
-          ${K.Button({ label:'Rastgele soru', size:'sm', act:'socratic-q',
+          ${K.Button({ label:yz('esp.symposium.socrates-e-sor'), act:'ask-socrates', data:{ 'data-id':a.id } })}
+          ${K.Button({ label:yz('esp.symposium.rastgele-soru'), size:'sm', act:'socratic-q',
             data:{ 'data-id':a.id } })}
         </div>
         ${when(S.ui.socraticFor === a.id && S.ui.socraticQ,
-          () => K.Notice({ tone:'info', title:'Soru', body:S.ui.socraticQ }))}`,
+          () => K.Notice({ tone:'info', title:yz('esp.symposium.soru'), body:S.ui.socraticQ }))}`,
     });
   }
 
@@ -172,10 +246,10 @@ ESP.Screens.symposium = (function(){
   function openRows(){
     const rows = ESP.Intellect.openArguments();
     if(!rows.length){
-      return [K.Entry({ label:'Açık tez', meta:'yok',
-        body:K.Empty({ text:'Açık tez yok. Tek cümlelik bir tez yazmak yeterli; '
+      return [K.Entry({ label:yz('esp.symposium.acik-tez'), meta:'yok',
+        body:K.Empty({ text:yz('esp.symposium.acik-tez-yok-tek-cumlelik')
           + 'gerisini itirazlar açar.',
-          action:K.Button({ label:'Tez yaz', tone:'primary', act:'tab-ekle' }) }) })];
+          action:K.Button({ label:yz('esp.symposium.tez-yaz'), tone:'primary', act:'tab-ekle' }) }) })];
     }
     return rows.map(argRow);
   }
@@ -183,8 +257,8 @@ ESP.Screens.symposium = (function(){
   function closedRows(){
     const rows = (S.args || []).filter(a => a.status === 'closed');
     if(!rows.length){
-      return [K.Entry({ label:'Kapanan tez', meta:'yok',
-        body:K.Empty({ text:'Henüz kapanan tez yok. Bir tez ancak cevaplanmamış '
+      return [K.Entry({ label:yz('esp.symposium.kapanan-tez'), meta:'yok',
+        body:K.Empty({ text:yz('esp.symposium.henuz-kapanan-tez-yok-bir')
           + 'itirazı kalmadığında kapanır.' }) })];
     }
     return rows.map(argRow);
@@ -194,15 +268,15 @@ ESP.Screens.symposium = (function(){
     const res = S.ui.argParsed;
     return [
       K.Entry({
-        label:'Yeni tez', hint:'argument',
+        label:yz('esp.symposium.yeni-tez'), hint:'argument',
         meta:'tek cümle yeter',
         body:html`
-          ${K.Textarea({ id:'arg-text', rows:4, aria:'Tez metni',
-            placeholder:'Özgürlük yalnızca seçenek çokluğu değildir çünkü seçenekleri '
+          ${K.Textarea({ id:'arg-text', rows:4, aria:yz('esp.symposium.tez-metni'),
+            placeholder:yz('esp.symposium.ozgurluk-yalnizca-secenek-co')
               + 'değerlendirecek ölçüt de gerekir. Ama ölçütü kim koyar?' })}
           <div class="row mt-10">
-            ${K.Button({ label:'Çöz', act:'parse-arg' })}
-            ${K.Button({ label:'Olduğu gibi kaydet', act:'save-arg-raw' })}
+            ${K.Button({ label:yz('esp.symposium.coz'), act:'parse-arg' })}
+            ${K.Button({ label:yz('esp.symposium.oldugu-gibi-kaydet'), act:'save-arg-raw' })}
           </div>
           ${when(res, () => html`
             <div class="mt-10">
@@ -212,19 +286,19 @@ ESP.Screens.symposium = (function(){
                 ['İtiraz', (res.objections || []).join(' · ') || '—'],
               ] })}
               ${when(res.unmatched.length, () => K.Notice({ tone:'warn',
-                title:'Nereye koyacağımı anlamadım',
+                title:yz('esp.symposium.nereye-koyacagimi-anlamadim'),
                 body:res.unmatched.map(u => '«' + U.esc(u.text) + '»').join('<br/>')
                   + '<br/><br/>Kaydedersen bu cümleler destek sayılır; '
                   + 'istersen metni düzenleyip yeniden çözebilirsin.' }))}
               <div class="row mt-8">
-                ${K.Button({ label:'Kaydet', tone:'primary', size:'sm', act:'save-arg' })}
-                ${K.Button({ label:'Vazgeç', size:'sm', act:'clear-arg' })}
+                ${K.Button({ label:yz('esp.symposium.kaydet'), tone:'primary', size:'sm', act:'save-arg' })}
+                ${K.Button({ label:yz('esp.symposium.vazgec'), size:'sm', act:'clear-arg' })}
               </div>
             </div>`)}`,
       }),
 
       K.Entry({
-        label:'Sokratik sorular', hint:'sokratik',
+        label:yz('esp.symposium.sokratik-sorular'), hint:'sokratik',
         meta:ESP.SOCRATIC.length + ' kalıp',
         body:K.Table({ tight:true, headers:['Soru'],
           rows:ESP.SOCRATIC.map(q => [q.q]) }),
@@ -236,7 +310,7 @@ ESP.Screens.symposium = (function(){
     const kitaplar = (S.books || []);
     return [
       K.Entry({
-        label:'Kaynaklar', hint:'primary-text',
+        label:yz('esp.symposium.kaynaklar'), hint:'primary-text',
         meta:kitaplar.length + ' kayıt',
         wide:true,
         body:kitaplar.length
@@ -245,43 +319,43 @@ ESP.Screens.symposium = (function(){
                 b.title, b.author,
                 b.kind === 'primary' ? 'primer' : 'yorum',
                 b.startedAt ? U.fmtShort(b.startedAt) : 'başlanmadı',
-                K.Button({ label:'Sil', size:'sm', act:'del-book', data:{ 'data-id':b.id } }),
+                K.Button({ label:yz('esp.symposium.sil'), size:'sm', act:'del-book', data:{ 'data-id':b.id } }),
               ]) })
-          : K.Empty({ text:'Kaynak listesi boş.' }),
+          : K.Empty({ text:yz('esp.symposium.kaynak-listesi-bos') }),
       }),
 
       /* BAM'dan belge (Part 8f): konu → düşünür, eser ve tez; kaynaklı.
          Teklif Bugün'e gelir, ESP kendi koduyla sınamadan eklenmez. */
       K.Entry({
-        label:'Belge iste', hint:'belge',
+        label:yz('esp.symposium.belge-iste'), hint:'belge',
         meta:'felsefe · HKM',
         body:html`<div class="row gap-8 wrap">
-          ${K.Input({ id:'belge-felsefe', placeholder:'Konu: Stoacılık, varoluşçuluk…', aria:'Felsefe konusu',
+          ${K.Input({ id:'belge-felsefe', placeholder:yz('esp.symposium.konu-stoacilik-varolusculuk'), aria:yz('esp.symposium.felsefe-konusu'),
             size:'sm', class:'grow' })}
-          ${K.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
+          ${K.Button({ label:yz('esp.symposium.king-e-ilet'), size:'sm', act:'belge-iste',
             data:{ 'data-alan':'felsefe' } })}
         </div>`,
       }),
 
       K.Entry({
-        label:'Kanondan ekle', hint:'kanon',
+        label:yz('esp.symposium.kanondan-ekle'), hint:'kanon',
         meta:ESP.CANON.length + ' eser',
         body:html`
           <div class="row wrap">
-            ${K.Select({ id:'canon-pick', aria:'Kanondan eser seç',
+            ${K.Select({ id:'canon-pick', aria:yz('esp.symposium.kanondan-eser-sec'),
               options:ESP.CANON.map(c => ({ value:c.id,
                 label:c.author + ' — ' + c.title })) })}
-            ${K.Button({ label:'Ekle', act:'add-canon' })}
+            ${K.Button({ label:yz('esp.symposium.ekle'), act:'add-canon' })}
           </div>
-          <p class="small muted mt-8">Listede olmayan bir kaynağı elle de ekleyebilirsin.</p>
+          <p class="small muted mt-8">${yz('esp.symposium.listede-olmayan-bir-kaynagi')}</p>
           <div class="cols-3 mt-10">
-            ${K.Field({ label:'Eser', input:K.Input({ id:'b-title', placeholder:'Başlık' }) })}
-            ${K.Field({ label:'Yazar', input:K.Input({ id:'b-author', placeholder:'Yazar' }) })}
-            ${K.Field({ label:'Tür', input:K.Select({ id:'b-kind', value:'primary',
-              options:[{ value:'primary', label:'Primer metin' },
-                { value:'secondary', label:'Yorum' }] }) })}
+            ${K.Field({ label:yz('esp.symposium.eser'), input:K.Input({ id:'b-title', placeholder:yz('esp.symposium.baslik') }) })}
+            ${K.Field({ label:yz('esp.symposium.yazar'), input:K.Input({ id:'b-author', placeholder:yz('esp.symposium.yazar') }) })}
+            ${K.Field({ label:yz('esp.symposium.tur'), input:K.Select({ id:'b-kind', value:'primary',
+              options:[{ value:'primary', label:yz('esp.symposium.primer-metin') },
+                { value:'secondary', label:yz('esp.symposium.yorum') }] }) })}
           </div>
-          ${K.Button({ label:'Elle ekle', act:'add-book', class:'mt-10' })}`,
+          ${K.Button({ label:yz('esp.symposium.elle-ekle'), act:'add-book', class:'mt-10' })}`,
       }),
     ];
   }
@@ -293,7 +367,7 @@ ESP.Screens.symposium = (function(){
     const ozet = ESP.Lesson.topicSummary('philo');
     return [
       K.Entry({
-        label:'Konular', hint:'topic',
+        label:yz('esp.symposium.konular'), hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
         wide:true,
         body:ESP.Parts.topics('philo'),
@@ -317,14 +391,14 @@ ESP.Screens.symposium = (function(){
     const bugun = U.todayISO();
     const yas = a => { const g = ESP.U.gunOf(a.updatedAt || a.createdAt || ''); return g ? U.diffDays(g, bugun) : null; };
     const s = l.map(a => ({ a, g:yas(a) })).sort((x, y) => (y.g || 0) - (x.g || 0)).slice(0, 6);
-    return P.izgara([P.kart({ tur:'acik-tezler', ad:'Açık tezler', simge:'kalem', yuva:l.length + ' açık',
+    return P.izgara([P.kart({ tur:'acik-tezler', ad:yz('esp.symposium.acik-tezler'), simge:'kalem', yuva:l.length + ' açık',
       govde:P.cubuklar({ satirlar:s.map(x => ({ ad:String(x.a.thesis || 'Tez').slice(0, 60), oran:x.g == null ? null : Math.min(1, x.g / 30),
           renk:x.g != null && x.g >= 14 ? 2 : 0, metin:x.g == null ? '—' : x.g + ' gün' })) })
         + P.not('son dokunuştan bu yana · 14 gün ve üstü koyu') })], 'pk-izgara--iki');
   }
 
   LIFEOS.PARCA.blok({ id:'symposium.bolum-1', sayfa:'symposium', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
-    return K.Span(12, ESP.Parts.bolumler('philo', { act:'philo-tab', aria:'Felsefe bölümleri', tabs:TABS,
+    return K.Span(12, ESP.Parts.bolumler('philo', { act:'philo-tab', aria:yz('esp.symposium.felsefe-bolumleri'), tabs:TABS,
         govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null } }));
   } });
   LIFEOS.PARCA.blok({ id:'symposium.bolum-2', sayfa:'symposium', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
@@ -365,13 +439,13 @@ ESP.Screens.symposium = (function(){
       S.ui.argOpen = a.id;
       S.ui.philoTab = 'acik';
       ESP.Memo.bitir();
-      ESP.UI.toast('Deney bir itiraz olarak açıldı — tezi sen yaz');
+      ESP.UI.toast(yz('esp.symposium.deney-bir-itiraz-olarak-acil'));
       ESP.App.render();
     },
 
     async 'parse-arg'(){
       const res = ESP.Parse.parseArgument(val('arg-text'));
-      if(!res.thesis){ ESP.UI.toast('Tez bulunamadı'); return; }
+      if(!res.thesis){ ESP.UI.toast(yz('esp.symposium.tez-bulunamadi')); return; }
       S.ui.argParsed = res;
       ESP.App.render();
     },
@@ -392,18 +466,18 @@ ESP.Screens.symposium = (function(){
       S.ui.argParsed = null;
       S.ui.philoTab = 'acik';
       ESP.Memo.bitir();
-      ESP.UI.toast('Tez kaydedildi');
+      ESP.UI.toast(yz('esp.symposium.tez-kaydedildi'));
       ESP.App.render();
     },
 
     async 'save-arg-raw'(){
       const t = val('arg-text');
-      if(!t){ ESP.UI.toast('Metin boş'); return; }
+      if(!t){ ESP.UI.toast(yz('esp.symposium.metin-bos')); return; }
       await M.saveArgument(M.newArgument({ thesis:t,
         concepts:ESP.Parse.extractConcepts(t).map(c => c.id) }));
       S.ui.philoTab = 'acik';
       ESP.Memo.bitir();
-      ESP.UI.toast('Tez kaydedildi');
+      ESP.UI.toast(yz('esp.symposium.tez-kaydedildi'));
       ESP.App.render();
     },
 
@@ -446,7 +520,7 @@ ESP.Screens.symposium = (function(){
       const a = S.args.find(x => x.id === el.dataset.id);
       if(!a) return;
       if(M.argumentOpen(a)){
-        ESP.UI.toast('Cevaplanmamış itiraz varken tez kapanmaz');
+        ESP.UI.toast(yz('esp.symposium.cevaplanmamis-itiraz-varken'));
         return;
       }
       a.status = 'closed';
@@ -501,7 +575,7 @@ ESP.Screens.symposium = (function(){
 
     async 'add-book'(){
       const t = val('b-title'), a = val('b-author');
-      if(!t){ ESP.UI.toast('Eser adı gerekir'); return; }
+      if(!t){ ESP.UI.toast(yz('esp.symposium.eser-adi-gerekir')); return; }
       await M.saveBook(M.newBook({ title:t, author:a, kind:val('b-kind') || 'primary' }));
       ESP.Memo.bitir();
       ESP.App.render();
@@ -523,7 +597,7 @@ ESP.Screens.symposium = (function(){
     /* iPhone Faz 2d (sıkı ölçü): belge isteği, Sokratik soru kalıpları ve iki
        egzersiz kataloğu başvurudur — şerit, dokununca açılır. */
     kucukVarsayilan:['belge-iste', 'sokratik-sorular', 'düşünce-deneyleri', 'argüman-alıştırmaları'],
-    title:'Sempozyum',
+    title:yz('esp.symposium.sempozyum'),
     headline(){
       const acik = ESP.Intellect.openArguments();
       const tikanan = ESP.Intellect.stalledArguments();
@@ -543,10 +617,10 @@ ESP.Screens.symposium = (function(){
       const itiraz = acik.reduce((a, x) => a + (x.objections || []).filter(o => !o.answered).length, 0);
       const primer = (S.books || []).filter(b => b.kind === 'primary');
       return [
-        { value:String(acik.length), label:'açık tez' },
-        { value:String(itiraz), label:'açık itiraz' },
-        { value:String(kapali.length), label:'kapandı' },
-        { value:String(primer.length), label:'primer metin' },
+        { value:String(acik.length), label:yz('esp.symposium.acik-tez-2') },
+        { value:String(itiraz), label:yz('esp.symposium.acik-itiraz') },
+        { value:String(kapali.length), label:yz('esp.symposium.kapandi') },
+        { value:String(primer.length), label:yz('esp.symposium.primer-metin-2') },
       ];
     },
     subtitle(){ return (S.args || []).length + ' tez'; },

@@ -15,6 +15,52 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.planlar.kur':'Kur',
+  'spi.planlar.geri-al':'Geri al',
+  'spi.planlar.geri-al-bugunun-plan-seansin':'Geri al: bugünün plan seansını sil',
+  'spi.planlar.yaptim':'Yaptım',
+  'spi.planlar.yaptim-2':'Yaptım: ',
+  'spi.planlar.takip':'Takip',
+  'spi.planlar.duzenle':'Düzenle',
+  'spi.planlar.planlarin':'Planların',
+  'spi.planlar.plan-ekle':'Plan ekle',
+  'spi.planlar.su':'Su',
+  'spi.planlar.bardak-ekle':'Bardak ekle',
+  'spi.planlar.bugun-ve-son-yedi-gun':'Bugün ve son yedi gün',
+  'spi.planlar.bugune-dusen-madde-yok':'Bugüne düşen madde yok.',
+  'spi.planlar.bugun-olmayan':'Bugün olmayan:',
+  'spi.planlar.noktalar-dunden-geriye-yedi':'Noktalar dünden geriye yedi gün: dolu tamam, yarım eksik, boş kayıt yok. Kayda bağlı madde kendiliğinden sayılır.',
+  'spi.planlar.kapat':'Kapat',
+  'spi.planlar.zaman-yok':'Zaman yok',
+  'spi.planlar.gun':'Gün',
+  'spi.planlar.bu-gunu-butun-haftaya-kopyal':'Bu günü bütün haftaya kopyala',
+  'spi.planlar.ogunlerimi-duzenle':'Öğünlerimi düzenle',
+  'spi.planlar.ogunlerin-adi-ve-saati-ogun':'Öğünlerin adı ve saati Öğün ekranındaki «Öğünlerim»den gelir.',
+  'spi.planlar.dinlenme-gunu-yap':'Dinlenme günü yap',
+  'spi.planlar.uyku-plani-duzeni':'Uyku planı düzeni',
+  'spi.planlar.kisa-uykular':'Kısa uykular',
+  'spi.planlar.kisa-uyku':'Kısa uyku ',
+  'spi.planlar.sil':'Sil',
+  'spi.planlar.kisa-uyku-ekle':'Kısa uyku ekle',
+  'spi.planlar.gun-secmezsen-kisa-uyku-her':'Gün seçmezsen kısa uyku her gün planlanır. Kaydı Bugün › Günün ölçümü › Kısa uyku’dan ya da «öğlen 30 dakika uyudum» yazarak girersin.',
+  'spi.planlar.madde':'Madde ',
+  'spi.planlar.hayir-ben-isaretlerim':'Hayır, ben işaretlerim',
+  'spi.planlar.simge-sec':'Simge seç',
+  'spi.planlar.madde-ekle':'Madde ekle',
+  'spi.planlar.gun-secmezsen-madde-her-gun':'Gün seçmezsen madde her gün sorulur. «Kayıttan say» seçilirse madde SPİ’nin kendi kaydından sayılır: aynı gün iki yürüyüş girersen iki sayılır, işaretlemen gerekmez.',
+  'spi.planlar.kendi-hedefin':'Kendi hedefin',
+  'spi.planlar.gunluk-su-hedefi':'Günlük su hedefi',
+  'spi.planlar.kucuk-aliskanliklar':'Küçük alışkanlıklar',
+  'spi.planlar.maddeler':'Maddeler',
+  'spi.planlar.plani-sil':'Planı sil',
+  'spi.planlar.vazgec':'Vazgeç',
+  'spi.planlar.kaydet':'Kaydet',
+  'spi.planlar.bu-gun-butun-haftaya-kopyala':'Bu gün bütün haftaya kopyalandı; kaydedince yazılır.',
+  'spi.planlar.geri-alindi':'Geri alındı',
+  'spi.planlar.bu-madde-kayittan-sayilir':'Bu madde kayıttan sayılır: ',
+  'spi.planlar.planlar':'Planlar',
+});
 /* Planlar (2026-10-17): beslenme, hareket, uyku, su ve alışkanlık, kendi planın. */
 window.LIFEOS.PARCA.sayfa({ id:'planlar', modul:'spi', cekmece:'plan', ad:'Planlar', sira:10 });
 
@@ -86,7 +132,7 @@ SP.Screens.planlar = (function(){
     if(!p) return html`<div class="hp-satir hp-satir--bos">
       ${simge(tur)}
       <div class="hp-satir__metin"><b>${t.ad}</b><span>${t.not}</span></div>
-      ${K.Button({ label:'Kur', size:'sm', act:'hp-ac', data:{ 'data-tur':tur } })}
+      ${K.Button({ label:yz('spi.planlar.kur'), size:'sm', act:'hp-ac', data:{ 'data-tur':tur } })}
     </div>`;
     const b = HP().bugun(p, iso), u = HP().uyum(p, iso);
     const maddeli = tur === 'su' || tur === 'serbest';
@@ -101,10 +147,10 @@ SP.Screens.planlar = (function(){
         ${when(maddeli, () => maddeKarolari(p, iso))}</div>
       <div class="hp-satir__dug">
         ${when(hareketGunu, () => plandan
-          ? K.Button({ label:'Geri al', size:'sm', tone:'ghost', act:'hp-hareket-geri', data:{ 'data-id':p.id }, aria:'Geri al: bugünün plan seansını sil' })
-          : K.Button({ label:'Yaptım', size:'sm', tone:'primary', act:'hp-hareket-yap', data:{ 'data-id':p.id }, aria:'Yaptım: ' + b.metin + ' seans olarak yazılır' }))}
-        ${when(maddeli && (p.maddeler || []).length, () => K.Button({ label:'Takip', size:'sm', act:'hp-takip', data:{ 'data-id':p.id } }))}
-        ${K.Button({ label:'Düzenle', size:'sm', tone:'ghost', act:'hp-ac', data:{ 'data-tur':tur, 'data-id':p.id } })}
+          ? K.Button({ label:yz('spi.planlar.geri-al'), size:'sm', tone:'ghost', act:'hp-hareket-geri', data:{ 'data-id':p.id }, aria:yz('spi.planlar.geri-al-bugunun-plan-seansin') })
+          : K.Button({ label:yz('spi.planlar.yaptim'), size:'sm', tone:'primary', act:'hp-hareket-yap', data:{ 'data-id':p.id }, aria:yz('spi.planlar.yaptim-2') + b.metin + ' seans olarak yazılır' }))}
+        ${when(maddeli && (p.maddeler || []).length, () => K.Button({ label:yz('spi.planlar.takip'), size:'sm', act:'hp-takip', data:{ 'data-id':p.id } }))}
+        ${K.Button({ label:yz('spi.planlar.duzenle'), size:'sm', tone:'ghost', act:'hp-ac', data:{ 'data-tur':tur, 'data-id':p.id } })}
       </div>
     </div>`;
   }
@@ -113,9 +159,9 @@ SP.Screens.planlar = (function(){
   LIFEOS.PARCA.blok({ id:'planlar.liste', sayfa:'planlar', yer:'ana', ad:'Planların', kosul:() => !!HP(), ciz(){
     const yerlesik = HP().TURLER.filter(t => t.tek).map(t => satir(t.id, HP().bul(t.id)));
     const serbest = HP().liste().filter(p => p.tur === 'serbest').map(p => satir('serbest', p));
-    return String(K.Kutu({ ad:'Planların',
+    return String(K.Kutu({ ad:yz('spi.planlar.planlarin'),
       govde:html`<div class="hp-liste" data-raf-tam>${yerlesik}${serbest}</div>`,
-      ayak:K.Button({ label:'Plan ekle', icon:'plus', size:'sm', tone:'ghost', act:'hp-ac', data:{ 'data-tur':'serbest' } }) }));
+      ayak:K.Button({ label:yz('spi.planlar.plan-ekle'), icon:'plus', size:'sm', tone:'ghost', act:'hp-ac', data:{ 'data-tur':'serbest' } }) }));
   } });
   function render(){ return LIFEOS.PARCA.yer('planlar', 'ana', K); }
 
@@ -159,21 +205,21 @@ SP.Screens.planlar = (function(){
     const ml = v && v.water != null ? Number(v.water) : null;
     const su = p.tur === 'su' ? html`<div class="hp-takip__su">
       <span class="hp-takip__simge">${svg(MADDE_SIMGE.su)}</span>
-      <div class="grow"><b>Su</b>
+      <div class="grow"><b>${yz('spi.planlar.su')}</b>
         <small>${ml == null ? 'bugün kayıt yok · veri yok' : ml.toLocaleString('tr-TR') + ' ml' + (p.suMl ? ' / ' + p.suMl.toLocaleString('tr-TR') + ' ml' : '') + ' · ölçüldü'}</small>
         ${when(p.suMl && ml != null, () => html`<span class="hp-takip__cubuk"><i style="${'width:' + Math.min(100, Math.round(100 * ml / p.suMl)) + '%'}"></i></span>`)}</div>
-      ${K.Button({ label:'Bardak ekle', size:'sm', act:'go', data:{ 'data-route':'today' } })}
+      ${K.Button({ label:yz('spi.planlar.bardak-ekle'), size:'sm', act:'go', data:{ 'data-route':'today' } })}
     </div>` : '';
-    UI.sheet({ title:p.ad || HP().TUR_BY_ID[p.tur].ad, subtitle:'Bugün ve son yedi gün', wide:true,
+    UI.sheet({ title:p.ad || HP().TUR_BY_ID[p.tur].ad, subtitle:yz('spi.planlar.bugun-ve-son-yedi-gun'), wide:true,
       body:String(html`<div class="hp-takip" data-hp-takip="${p.id}">
         ${su}
         <div class="hp-takip__izgara">${map(bugunkuler, m => takipKarti(p, m, iso))}</div>
-        ${when(!bugunkuler.length, () => html`<p class="small muted">Bugüne düşen madde yok.</p>`)}
-        ${when(digerleri.length, () => html`<p class="tiny muted mt-12">Bugün olmayan: ${digerleri.map(m => m.metin).join(', ')}</p>`)}
-        <p class="tiny muted mt-12">Noktalar dünden geriye yedi gün: dolu tamam, yarım eksik, boş kayıt yok. Kayda bağlı madde kendiliğinden sayılır.</p>
+        ${when(!bugunkuler.length, () => html`<p class="small muted">${yz('spi.planlar.bugune-dusen-madde-yok')}</p>`)}
+        ${when(digerleri.length, () => html`<p class="tiny muted mt-12">${yz('spi.planlar.bugun-olmayan')} ${digerleri.map(m => m.metin).join(', ')}</p>`)}
+        <p class="tiny muted mt-12">${yz('spi.planlar.noktalar-dunden-geriye-yedi')}</p>
       </div>`),
-      footer:String(html`${K.Button({ label:'Düzenle', tone:'ghost', act:'hp-ac', data:{ 'data-tur':p.tur, 'data-id':p.id } })}
-        ${K.Button({ label:'Kapat', tone:'primary', act:'sheet-close' })}`) });
+      footer:String(html`${K.Button({ label:yz('spi.planlar.duzenle'), tone:'ghost', act:'hp-ac', data:{ 'data-tur':p.tur, 'data-id':p.id } })}
+        ${K.Button({ label:yz('spi.planlar.kapat'), tone:'primary', act:'sheet-close' })}`) });
   }
 
   /* ---------------------------------------------------------- düzenleyici */
@@ -187,21 +233,21 @@ SP.Screens.planlar = (function(){
     const n = HP().zamanNorm(z) || {};
     return html`<span class="hp-zaman">
       ${K.Select({ value:n.dilim || '', aria:aria + ' dilimi', data:{ 'data-hp':yol + '.dilim' },
-        options:[{ value:'', label:'Zaman yok' }].concat(HP().DILIMLER.map(d => ({ value:d.id, label:d.ad }))) })}
+        options:[{ value:'', label:yz('spi.planlar.zaman-yok') }].concat(HP().DILIMLER.map(d => ({ value:d.id, label:d.ad }))) })}
       ${K.Input({ type:'time', value:n.saat || '', aria:aria + ' saati', data:{ 'data-hp':yol + '.saat' } })}
     </span>`;
   }
 
   function gunSecici(gun){
-    return K.Segmented({ items:HP().GUN_KISA.map((g, i) => ({ value:i, label:g })), value:gun, act:'hp-gun', aria:'Gün', block:true });
+    return K.Segmented({ items:HP().GUN_KISA.map((g, i) => ({ value:i, label:g })), value:gun, act:'hp-gun', aria:yz('spi.planlar.gun'), block:true });
   }
   function govdeBeslenme(p, gun){
     const g = p.gunler[gun] || {};
     return html`${gunSecici(gun)}
       <div class="stack-sm mt-12">${map(HP().ogunler(p), ([k, ad]) => alan(ad, metinAlan('g.' + k, g[k], 'Yaz…', HP().GUN_AD[gun] + ' ' + ad)))}</div>
-      <p class="mt-10">${K.Button({ label:'Bu günü bütün haftaya kopyala', size:'sm', tone:'ghost', act:'hp-kopyala' })}
-        ${K.Button({ label:'Öğünlerimi düzenle', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'meals' } })}</p>
-      <p class="tiny muted">Öğünlerin adı ve saati Öğün ekranındaki «Öğünlerim»den gelir.</p>`;
+      <p class="mt-10">${K.Button({ label:yz('spi.planlar.bu-gunu-butun-haftaya-kopyal'), size:'sm', tone:'ghost', act:'hp-kopyala' })}
+        ${K.Button({ label:yz('spi.planlar.ogunlerimi-duzenle'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'meals' } })}</p>
+      <p class="tiny muted">${yz('spi.planlar.ogunlerin-adi-ve-saati-ogun')}</p>`;
   }
   function govdeHareket(p, gun){
     const g = p.gunler[gun];
@@ -211,8 +257,8 @@ SP.Screens.planlar = (function(){
         ${alan('Dakika', K.Input({ type:'number', numeric:true, min:1, max:600, value:g ? g.dk : '', placeholder:'dk', aria:HP().GUN_AD[gun] + ' dakika', data:{ 'data-hp':'g.dk' } }))}
         ${alan('Ne zaman', zamanAlani('g.zaman', g && g.zaman, HP().GUN_AD[gun] + ' hareket'))}
       </div>
-      <p class="mt-10">${K.Button({ label:'Bu günü bütün haftaya kopyala', size:'sm', tone:'ghost', act:'hp-kopyala' })}
-        ${K.Button({ label:'Dinlenme günü yap', size:'sm', tone:'ghost', act:'hp-dinlen' })}</p>`;
+      <p class="mt-10">${K.Button({ label:yz('spi.planlar.bu-gunu-butun-haftaya-kopyal'), size:'sm', tone:'ghost', act:'hp-kopyala' })}
+        ${K.Button({ label:yz('spi.planlar.dinlenme-gunu-yap'), size:'sm', tone:'ghost', act:'hp-dinlen' })}</p>`;
   }
   function uykuBlok(yol, x, ad){
     x = x || {};
@@ -230,18 +276,18 @@ SP.Screens.planlar = (function(){
       : kip === 'gun' ? html`<div class="hp-uyku-gunler">${map(HP().GUN_AD, (ad, i) => uykuBlok('gunluk.' + i, (p.gunluk || [])[i], ad))}</div>`
       : html`${uykuBlok('haftaici', p.haftaici, 'Hafta içi')}${uykuBlok('haftasonu', p.haftasonu, 'Hafta sonu (Cumartesi, Pazar)')}`;
     return html`<div class="stack">
-      ${K.Segmented({ items:HP().UYKU_KIPLERI.map(k => ({ value:k.id, label:k.ad })), value:kip, act:'hp-uyku-kip', aria:'Uyku planı düzeni', block:true })}
+      ${K.Segmented({ items:HP().UYKU_KIPLERI.map(k => ({ value:k.id, label:k.ad })), value:kip, act:'hp-uyku-kip', aria:yz('spi.planlar.uyku-plani-duzeni'), block:true })}
       ${bloklar}
-      <div><b class="small">Kısa uykular</b>
+      <div><b class="small">${yz('spi.planlar.kisa-uykular')}</b>
         <div class="stack-sm mt-6">${map(p.kestirmeler || [], (k, i) => html`<div class="hp-madde-satir">
           ${metinAlan('k.' + i + '.ad', k.ad, 'Öğle uykusu', 'Kısa uyku ' + (i + 1) + ' adı')}
-          ${K.Input({ type:'time', value:k.bas || '', aria:'Kısa uyku ' + (i + 1) + ' saati', data:{ 'data-hp':'k.' + i + '.bas' } })}
-          ${K.Input({ type:'number', numeric:true, min:1, max:240, value:k.dk == null ? '' : k.dk, placeholder:'dk', aria:'Kısa uyku ' + (i + 1) + ' süresi', data:{ 'data-hp':'k.' + i + '.dk' } })}
+          ${K.Input({ type:'time', value:k.bas || '', aria:yz('spi.planlar.kisa-uyku') + (i + 1) + ' saati', data:{ 'data-hp':'k.' + i + '.bas' } })}
+          ${K.Input({ type:'number', numeric:true, min:1, max:240, value:k.dk == null ? '' : k.dk, placeholder:'dk', aria:yz('spi.planlar.kisa-uyku') + (i + 1) + ' süresi', data:{ 'data-hp':'k.' + i + '.dk' } })}
           ${gunCipleri('hp-k-gun', i, k.gunler)}
-          ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'hp-k-sil', data:{ 'data-i':String(i) } })}
+          ${K.Button({ label:yz('spi.planlar.sil'), size:'sm', tone:'ghost', act:'hp-k-sil', data:{ 'data-i':String(i) } })}
         </div>`)}</div>
-        <p class="mt-6">${K.Button({ label:'Kısa uyku ekle', icon:'plus', size:'sm', tone:'ghost', act:'hp-k-ekle' })}</p>
-        <p class="tiny muted">Gün seçmezsen kısa uyku her gün planlanır. Kaydı Bugün › Günün ölçümü › Kısa uyku’dan ya da «öğlen 30 dakika uyudum» yazarak girersin.</p></div>
+        <p class="mt-6">${K.Button({ label:yz('spi.planlar.kisa-uyku-ekle'), icon:'plus', size:'sm', tone:'ghost', act:'hp-k-ekle' })}</p>
+        <p class="tiny muted">${yz('spi.planlar.gun-secmezsen-kisa-uyku-her')}</p></div>
     </div>`;
   }
   function gunCipleri(act, i, gunler){
@@ -259,30 +305,29 @@ SP.Screens.planlar = (function(){
         <div class="hp-madde-satir">
           <span class="hp-karo__simge">${svg(maddeSimgesi(m))}</span>
           ${metinAlan('m.' + i, m.metin, 'Sabah esneme', 'Madde ' + (i + 1))}
-          ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'hp-madde-sil', data:{ 'data-i':String(i) } })}
+          ${K.Button({ label:yz('spi.planlar.sil'), size:'sm', tone:'ghost', act:'hp-madde-sil', data:{ 'data-i':String(i) } })}
         </div>
         <div class="hp-madde-ayar">
           ${alan('Ne zaman', zamanAlani('m.' + i + '.zaman', m.zaman, 'Madde ' + (i + 1)))}
-          ${alan('Günde kaç kez', K.Input({ type:'number', numeric:true, min:1, max:20, value:HP().hedefOf(m), aria:'Madde ' + (i + 1) + ' günde kaç kez', data:{ 'data-hp':'m.' + i + '.hedef' } }))}
-          ${alan('Kayıttan say', K.Select({ value:m.bag || '', aria:'Madde ' + (i + 1) + ' kayıt bağı', data:{ 'data-hp':'m.' + i + '.bag' },
-            options:[{ value:'', label:'Hayır, ben işaretlerim' }].concat(HP().BAGLAR.map(b => ({ value:b.id, label:b.ad }))) }))}
+          ${alan('Günde kaç kez', K.Input({ type:'number', numeric:true, min:1, max:20, value:HP().hedefOf(m), aria:yz('spi.planlar.madde') + (i + 1) + ' günde kaç kez', data:{ 'data-hp':'m.' + i + '.hedef' } }))}
+          ${alan('Kayıttan say', K.Select({ value:m.bag || '', aria:yz('spi.planlar.madde') + (i + 1) + ' kayıt bağı', data:{ 'data-hp':'m.' + i + '.bag' },
+            options:[{ value:'', label:yz('spi.planlar.hayir-ben-isaretlerim') }].concat(HP().BAGLAR.map(b => ({ value:b.id, label:b.ad }))) }))}
         </div>
         ${gunCipleri('hp-madde-gun', i, m.gunler)}
-        <details class="hp-simge-ac"><summary class="tiny">Simge seç</summary>${simgeSecici(i, m.simge)}</details>
+        <details class="hp-simge-ac"><summary class="tiny">${yz('spi.planlar.simge-sec')}</summary>${simgeSecici(i, m.simge)}</details>
       </div>`)}
-      <p>${K.Button({ label:'Madde ekle', icon:'plus', size:'sm', tone:'ghost', act:'hp-madde-ekle' })}</p>
-      <p class="tiny muted">Gün seçmezsen madde her gün sorulur. «Kayıttan say» seçilirse madde SPİ’nin kendi kaydından sayılır:
-        aynı gün iki yürüyüş girersen iki sayılır, işaretlemen gerekmez.</p></div>`;
+      <p>${K.Button({ label:yz('spi.planlar.madde-ekle'), icon:'plus', size:'sm', tone:'ghost', act:'hp-madde-ekle' })}</p>
+      <p class="tiny muted">${yz('spi.planlar.gun-secmezsen-madde-her-gun')}</p></div>`;
   }
   function govdeSu(p){
     return html`<div class="stack">
-      ${alan('Günlük su hedefin (ml)', K.Input({ type:'number', numeric:true, min:1, max:10000, step:50, value:p.suMl == null ? '' : p.suMl, placeholder:'Kendi hedefin', aria:'Günlük su hedefi', data:{ 'data-hp':'suMl' } }))}
-      <div><b class="small">Küçük alışkanlıklar</b>${maddeListesi(p)}</div></div>`;
+      ${alan('Günlük su hedefin (ml)', K.Input({ type:'number', numeric:true, min:1, max:10000, step:50, value:p.suMl == null ? '' : p.suMl, placeholder:yz('spi.planlar.kendi-hedefin'), aria:yz('spi.planlar.gunluk-su-hedefi'), data:{ 'data-hp':'suMl' } }))}
+      <div><b class="small">${yz('spi.planlar.kucuk-aliskanliklar')}</b>${maddeListesi(p)}</div></div>`;
   }
   function govdeSerbest(p){
     return html`<div class="stack">
       ${alan('Planın adı', metinAlan('ad', p.ad, 'Sabah rutini', 'Planın adı'))}
-      <div><b class="small">Maddeler</b>${maddeListesi(p)}</div></div>`;
+      <div><b class="small">${yz('spi.planlar.maddeler')}</b>${maddeListesi(p)}</div></div>`;
   }
 
   function sayfa(){
@@ -293,9 +338,9 @@ SP.Screens.planlar = (function(){
       su:() => govdeSu(p), serbest:() => govdeSerbest(p) }[p.tur]();
     UI.sheet({ title:p.tur === 'serbest' ? (p.ad || 'Yeni plan') : tur.ad, subtitle:tur.not, wide:p.tur !== 'beslenme',
       body:String(html`<div data-hp-kok>${govde}${when(t.hata, () => html`<p class="small hp-hata" role="alert">${t.hata}</p>`)}</div>`),
-      footer:String(html`${when(t.varMi, () => K.Button({ label:'Planı sil', tone:'ghost', act:'hp-sil' }))}
-        ${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'hp-kaydet' })}`), noFocus:true });
+      footer:String(html`${when(t.varMi, () => K.Button({ label:yz('spi.planlar.plani-sil'), tone:'ghost', act:'hp-sil' }))}
+        ${K.Button({ label:yz('spi.planlar.vazgec'), act:'sheet-close' })}
+        ${K.Button({ label:yz('spi.planlar.kaydet'), tone:'primary', act:'hp-kaydet' })}`), noFocus:true });
   }
 
   /* Formdaki alanlar taslağa yazılır (gün değişirken ve kaydederken). */
@@ -373,7 +418,7 @@ SP.Screens.planlar = (function(){
       formuOku();
       const t = taslak(), g = t.plan.gunler[t.gun];
       t.plan.gunler = t.plan.gunler.map(() => g ? JSON.parse(JSON.stringify(g)) : (t.plan.tur === 'beslenme' ? {} : null));
-      UI.toast('Bu gün bütün haftaya kopyalandı; kaydedince yazılır.');
+      UI.toast(yz('spi.planlar.bu-gun-butun-haftaya-kopyala'));
       sayfa();
     },
     'hp-dinlen'(){ formuOku(); const t = taslak(); t.plan.gunler[t.gun] = null; sayfa(); },
@@ -401,7 +446,7 @@ SP.Screens.planlar = (function(){
       if(!r.ok){ t.hata = r.why; sayfa(); return; }
       S.ui.hpTaslak = null;
       UI.closeSheet();
-      UI.toast((r.plan.ad || 'Plan') + ' kaydedildi', { undo:async () => { await HP().geriAl(r); UI.toast('Geri alındı'); SP.App.render(); } });
+      UI.toast((r.plan.ad || 'Plan') + ' kaydedildi', { undo:async () => { await HP().geriAl(r); UI.toast(yz('spi.planlar.geri-alindi')); SP.App.render(); } });
       SP.App.render();
     },
     async 'hp-sil'(el){
@@ -430,7 +475,7 @@ SP.Screens.planlar = (function(){
       const p = HP().bulId(el.dataset.id);
       if(!p) return;
       const m = (p.maddeler || []).find(x => x.id === el.dataset.madde);
-      if(m && m.bag){ UI.toast('Bu madde kayıttan sayılır: ' + HP().BAG_BY_ID[m.bag].ad.toLocaleLowerCase('tr') + ' girince kendiliğinden artar.'); return; }
+      if(m && m.bag){ UI.toast(yz('spi.planlar.bu-madde-kayittan-sayilir') + HP().BAG_BY_ID[m.bag].ad.toLocaleLowerCase('tr') + ' girince kendiliğinden artar.'); return; }
       const r = await HP().kaydet(HP().isaretle(HP().kopya(p), el.dataset.madde, SP.U.todayISO()));
       if(!r.ok) UI.toast(r.why);
       SP.App.render();
@@ -439,7 +484,7 @@ SP.Screens.planlar = (function(){
 
   return {
     id:'planlar',
-    title:'Planlar',
+    title:yz('spi.planlar.planlar'),
     subtitle(){ const n = HP() ? HP().liste().length : 0; return n ? n + ' plan' : 'henüz plan yok'; },
     lede(){ return ''; },
     actions(){ return ''; },

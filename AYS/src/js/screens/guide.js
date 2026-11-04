@@ -5,6 +5,187 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.guide.ayarlar':'Ayarlar',
+  'ays.guide.takvim-istisnalari':'Takvim istisnaları',
+  'ays.guide.resmi-takvim':'Resmî takvim',
+  'ays.guide.sinav-haftasi':'Sınav haftası',
+  'ays.guide.kontrol-listeleri':'Kontrol listeleri',
+  'ays.guide.analiz-protokolu':'Analiz protokolü',
+  'ays.guide.esiklerin-dayanagi':'Eşiklerin dayanağı',
+  'ays.guide.takvim':'Takvim',
+  'ays.guide.basvuru':'Başvuru',
+  'ays.guide.deneme-analizi-protokolu':'Deneme analizi protokolü',
+  'ays.guide.toplam-60-80-dakika-en':'Toplam 60–80 dakika · en geç 24 saat içinde',
+  'ays.guide.hata-etiketleri-ve-receteler':'Hata etiketleri ve reçeteler',
+  'ays.guide.her-yanlis-bir-etiketle-kapa':'Her yanlış bir etiketle kapanır',
+  'ays.guide.yanlis-defteri-tasarimi':'Yanlış defteri tasarımı',
+  'ays.guide.aralikli-tekrar':'Aralıklı tekrar',
+  'ays.guide.kendini-sinama-ve-dagitilmis':'Kendini sınama ve dağıtılmış çalışma',
+  'ays.guide.kart-geri-cagirma-gerektirme':'Kart geri çağırma gerektirmelidir: “Mitokondri nedir?” yerine “Oksijenli solunum basamaklarını yer ve ürünle eşleştir”.',
+  'ays.guide.hesap-verebilirlik':'Hesap verebilirlik',
+  'ays.guide.2027-kritik-islemler':'2027 kritik işlemler',
+  'ays.guide.sira-panik-takvimi':'Sıra / panik takvimi',
+  'ays.guide.panik-onleme-kurali':'Panik önleme kuralı:',
+  'ays.guide.sayaclar':'Sayaçlar',
+  'ays.guide.bugunden-itibaren':'Bugünden itibaren',
+  'ays.guide.yuk':'yük %',
+  'ays.guide.kaldir':'kaldır',
+  'ays.guide.atla':'Atla',
+  'ays.guide.etkinlik-okundu':'etkinlik okundu,',
+  'ays.guide.yeni-turu-onerilir-taninmaya':'yeni. Türü önerilir; tanınmayan «Atla» ile gelir.',
+  'ays.guide.secilenleri-ekle':'Seçilenleri ekle',
+  'ays.guide.vazgec':'Vazgeç',
+  'ays.guide.takvim-dosyasi':'Takvim dosyası',
+  'ays.guide.ics-okulun-ya-da':'.ics — okulun ya da telefonunun takvimiyle',
+  'ays.guide.ics-dosyasi-sec':'.ics dosyası seç',
+  'ays.guide.takvime-aktar-ics':'Takvime aktar (.ics)',
+  'ays.guide.disa-aktarimda-istisnalar-ty':'Dışa aktarımda istisnalar, TYT ve AYT günü ve etkin hedeflerinin son tarihleri tüm gün etkinliği olarak gelir; telefonunun takvimine ekleyebilirsin.',
+  'ays.guide.i-stisna-ekle':'İstisna ekle',
+  'ays.guide.tatil-okul-sinavi-ya-da':'Tatil, okul sınavı ya da yoğun gün',
+  'ays.guide.tur':'Tür',
+  'ays.guide.baslangic':'Başlangıç',
+  'ays.guide.bitis':'Bitiş',
+  'ays.guide.not':'Not',
+  'ays.guide.or-donem-sonu-sinavlari':'ör. dönem sonu sınavları',
+  'ays.guide.ekle':'Ekle',
+  'ays.guide.kayitli-istisnalar':'Kayıtlı istisnalar',
+  'ays.guide.i-stisna-yok-tatil-ya-da':'İstisna yok. Tatil ya da okul sınavı eklersen plan o haftaların yükünü kendiliğinden düşürür.',
+  'ays.guide.etkilenen-haftalar':'Etkilenen haftalar',
+  'ays.guide.onumuzdeki-8-hafta':'Önümüzdeki 8 hafta',
+  'ays.guide.yuk-2':'Yük',
+  'ays.guide.onumuzdeki-sekiz-hafta-tam-y':'Önümüzdeki sekiz hafta tam yükte.',
+  'ays.guide.diger-turler':'Diğer türler',
+  'ays.guide.tatil-gunu-ara-gunu-olur':'Tatil günü ara günü olur: blok yok ve kaçırılmış sayılmaz.',
+  'ays.guide.okul-sinavi-yogun-gun-ve':'Okul sınavı, yoğun gün ve ekstra çalışma ders gününün süresini yük oranında değiştirir; deneme ve kapanış günleri kısalmaz.',
+  'ays.guide.haftalik-soru-hedefi-guncel':'Haftalık soru hedefi güncel yüke göre ayarlanır. İlerlemesi başlamış bir güne dokunulmaz.',
+  'ays.guide.plani-yeniden-hesapla':'Planı yeniden hesapla',
+  'ays.guide.sinav-haftasi-ve-sinav-gunu':'Sınav haftası ve sınav günü',
+  'ays.guide.son-hafta-yeni-konu':'Son hafta · yeni konu yok',
+  'ays.guide.taper-haftasi-plani':'Taper haftası planı',
+  'ays.guide.hacim-duser-ritim-korunur':'Hacim düşer, ritim korunur',
+  'ays.guide.kaygi-azaltma':'Kaygı azaltma',
+  'ays.guide.sistem':'Sistem',
+  'ays.guide.acik':'Açık',
+  'ays.guide.koyu':'Koyu',
+  'ays.guide.profil':'Profil',
+  'ays.guide.yalniz-bu-cihazda-tutulur-ko':'Yalnız bu cihazda tutulur; koça gönderilmez',
+  'ays.guide.haftada-en-fazla-konu':'Haftada en fazla konu',
+  'ays.guide.kaydet':'Kaydet',
+  'ays.guide.program-baslangici-ve-sinav':'Program başlangıcı ve sınav tarihi',
+  'ays.guide.sure':'Süre',
+  'ays.guide.takvimi-degistir':'Takvimi değiştir',
+  'ays.guide.veri':'Veri',
+  'ays.guide.hic-yedek-alinmadi':'hiç yedek alınmadı',
+  'ays.guide.yedek-guncel':'yedek güncel',
+  'ays.guide.yerel-alan':'Yerel alan %',
+  'ays.guide.bir-ice-aktarma-yapildi':'Bir içe aktarma yapıldı.',
+  'ays.guide.bu-ice-aktarmayi-geri-al':'Bu içe aktarmayı geri al',
+  'ays.guide.yedek-al-json':'Yedek al (JSON)',
+  'ays.guide.yedekten-yukle':'Yedekten yükle',
+  'ays.guide.hkm-deki-yedekten-yukle':'HKM’deki yedekten yükle',
+  'ays.guide.tumunu-sifirla':'Tümünü sıfırla',
+  'ays.guide.uygulama-cevrimdisi-calisir':'Uygulama çevrimdışı çalışır: her kayıt önce cihaza yazılır, bağlantı varsa hesabına eşlenir. Yerel kullanım:',
+  'ays.guide.kb':'KB (%',
+  'ays.guide.sema-surumu':') · şema sürümü',
+  'ays.guide.i-ce-aktarma-oncesi':'İçe aktarma · öncesi',
+  'ays.guide.geri-donus-noktalari':'Geri dönüş noktaları',
+  'ays.guide.orta-ve-buyuk-degisikliklerd':'Orta ve büyük değişikliklerden önceki hâl',
+  'ays.guide.dokuz-aylik-ufuk':'Dokuz aylık ufuk',
+  'ays.guide.boyut':'Boyut',
+  'ays.guide.adet':'Adet',
+  'ays.guide.yalnizca-sistemin-kendi-uret':'Yalnızca sistemin kendi ürettiği kayıtlar listelenir. Girdiğin hiçbir veri burada yer almaz — hiçbir koşulda.',
+  'ays.guide.secilenleri-buda':'Seçilenleri buda',
+  'ays.guide.telefona-kur-ve-yedekle':'Telefona kur ve yedekle',
+  'ays.guide.uygulama-zaten-cevrimdisi-ca':'Uygulama zaten çevrimdışı çalışır',
+  'ays.guide.telefona-kur':'Telefona kur',
+  'ays.guide.son-yedek':'Son yedek',
+  'ays.guide.simdi-yedek-al':'Şimdi yedek al',
+  'ays.guide.haftada-bir-yedek-al-tarayic':'Haftada bir yedek al. Tarayıcı verisi silinirse çalışma geçmişin geri gelmez; yedek dosyası düz JSON’dur, herhangi bir cihazda açılır.',
+  'ays.guide.yedek-dosyasi-neyi-icerir':'Yedek dosyası neyi içerir?',
+  'ays.guide.yedek-duz-bir-json-dosyasidi':'Yedek düz bir JSON dosyasıdır; herhangi bir editörle açılıp okunabilir. Veri kilitli bir biçimde tutulmaz — istediğin an dışarı alabilirsin.',
+  'ays.guide.hkm-isareti':'HKM işareti',
+  'ays.guide.i-stege-bagli-dorduncu-katma':'İsteğe bağlı dördüncü katmana günün özeti',
+  'ays.guide.bu-anahtar-neyi-acar':'Bu anahtar neyi açar?',
+  'ays.guide.i-sareti-ac-varsayilan-kapal':'İşareti aç (varsayılan kapalı)',
+  'ays.guide.hkm-adresi':'HKM adresi',
+  'ays.guide.yerel-jeton':'Yerel jeton',
+  'ays.guide.hkm-jetonu':'HKM jetonu',
+  'ays.guide.en-sik-kac-dakikada-bir':'En sık kaç dakikada bir',
+  'ays.guide.gonderim-araligi':'Gönderim aralığı',
+  'ays.guide.kapsam':'Kapsam',
+  'ays.guide.gonderim-kapsami':'Gönderim kapsamı',
+  'ays.guide.bugun-ne-gidiyor':'Bugün ne gidiyor',
+  'ays.guide.deger':'Değer',
+  'ays.guide.gunun-ozetinde-soru-metni-ha':'Günün özetinde soru metni, hata defteri ve deneme ayrıntısı GİTMEZ (tam yedekte vardır). Giden şey bu dört beş sayıdır; değeri olmayan alan «veri yok» gider, sıfır değil.',
+  'ays.guide.baglan':'Bağlan',
+  'ays.guide.simdi-gonder':'Şimdi gönder',
+  'ays.guide.gecmisi-gonder-60-gun':'Geçmişi gönder (60 gün)',
+  'ays.guide.neden-yalniz-bazi-alanlar':'Neden yalnız bazı alanlar?',
+  'ays.guide.capraz-bulgu-ve-yon-tahlili':'Çapraz bulgu ve yön tahlili GEÇMİŞ ister; bugünden biriken bir ambar ilk iki ay hiçbir şey söyleyemez.',
+  'ays.guide.gecmis-gonderimi-yalnizca-ge':'Geçmiş gönderimi yalnızca geriye dönük HESAPLANABİLEN alanları yollar: dünkü tarihle bugünkü kart borcunu yazmak, ambara sahte bir ölçüm koymaktır.',
+  'ays.guide.hafizam':'Hafızam',
+  'ays.guide.ofisin-senin-hakkinda-hatirl':'Ofisin senin hakkında hatırladıkları — bu cihazda; HKM bağlıysa King de görür',
+  'ays.guide.henuz-bir-sey-yok-asagiya':'Henüz bir şey yok. Aşağıya yaz ya da sohbette «hatırla: sabahları daha verimliyim» de.',
+  'ays.guide.unut':'Unut',
+  'ays.guide.hatirlanacak-sey':'Hatırlanacak şey',
+  'ays.guide.orn-pazar-gunleri-calismam':'Örn. Pazar günleri çalışmam',
+  'ays.guide.hatirla':'Hatırla',
+  'ays.guide.model-hafizaya-yazamaz-senin':'Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın, «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.',
+  'ays.guide.koc-uslubu':'Koç üslubu',
+  'ays.guide.ayni-veri-herkese-ayni-dille':'Aynı veri herkese aynı dille söylenmez',
+  'ays.guide.kocun-uslubu':'Koçun üslubu',
+  'ays.guide.uslup-ev-kurallarini-gecersi':'. Üslup ev kurallarını geçersiz kılmaz: garanti, tıbbi tavsiye ve uykudan feda her üslupta yasaktır.',
+  'ays.guide.karsilama':'Karşılama',
+  'ays.guide.girerken-seni-selamlayan-cum':'Girerken seni selamlayan cümle ve altındaki not',
+  'ays.guide.bolumler':'Bölümler',
+  'ays.guide.kullanmadigin-bolumu-gizle-v':'Kullanmadığın bölümü gizle; verisi silinmez',
+  'ays.guide.bugun-hafta-plan-dersler-den':'Bugün, Hafta, Plan, Dersler, Deneme, Tekrar, İlerleme, Ofis ve Rehber gizlenemez. Patron’a da söyleyebilirsin: «sınama bölümünü kapat».',
+  'ays.guide.gorunum':'Görünüm',
+  'ays.guide.tema-bu-profile-kaydedilir':'Tema bu profile kaydedilir',
+  'ays.guide.tek-tasarim-renk-modulu-soyl':'Tek tasarım: renk modülü söyler (mavi AYS). «Sistem» seçiliyken cihazın açık/koyu tercihi izlenir.',
+  'ays.guide.gizlilik-kilidi':'Gizlilik kilidi',
+  'ays.guide.ornek-veriyle-dene':'Örnek veriyle dene',
+  'ays.guide.klavye-kisayollari':'Klavye kısayolları',
+  'ays.guide.bu-uygulama-ne-degildir':'Bu uygulama ne değildir',
+  'ays.guide.sinirlari-bilmek-beklentiyi':'Sınırları bilmek beklentiyi doğru kurar',
+  'ays.guide.esikler-nereden-geliyor':'Eşikler nereden geliyor?',
+  'ays.guide.bu-bir-pedagojik-hiyerarsi-d':'Bu bir pedagojik hiyerarşi değildir',
+  'ays.guide.hangi-kaynaga-ne-kadar-guven':'Hangi kaynağa ne kadar güvenilir?',
+  'ays.guide.esik':'Eşik',
+  'ays.guide.politika-surumu':'Politika sürümü',
+  'ays.guide.denetim':'Denetim',
+  'ays.guide.kayit-sorunlu':'Kayıt sorunlu',
+  'ays.guide.denetim-temiz':'Denetim temiz',
+  'ays.guide.dolayli-ya-da-kesinligi-dusu':'Dolaylı ya da kesinliği düşük eşikler',
+  'ays.guide.rehber-bolumleri':'Rehber bölümleri',
+  'ays.guide.once-budanacak-kaydi-sec':'Önce budanacak kaydı seç.',
+  'ays.guide.baslangic-tarihi-gerekli':'Başlangıç tarihi gerekli',
+  'ays.guide.bitis-baslangictan-once-olam':'Bitiş, başlangıçtan önce olamaz',
+  'ays.guide.aktarilacak-bir-tarih-yok':'Aktarılacak bir tarih yok',
+  'ays.guide.takvim-dosyasi-indirilemedi':'Takvim dosyası indirilemedi',
+  'ays.guide.koc-uslubu-2':'Koç üslubu: ',
+  'ays.guide.haftada-en-fazla-konu-2':'Haftada en fazla konu ',
+  'ays.guide.yedek-indirilemedi':'Yedek indirilemedi: ',
+  'ays.guide.yedek-alindi':'Yedek alındı — ',
+  'ays.guide.hkm-yedegi-yuklendi-yeniden':'HKM yedeği yüklendi — yeniden başlatılıyor',
+  'ays.guide.yukleme-basarisiz':'Yükleme başarısız: ',
+  'ays.guide.json-dosyasi':'JSON dosyası',
+  'ays.guide.yukle':'Yükle',
+  'ays.guide.once-bir-yedek-dosyasi-sec':'Önce bir yedek dosyası seç',
+  'ays.guide.dosya-gecerli-bir-json-degil':'Dosya geçerli bir JSON değil',
+  'ays.guide.yedek-yuklensin-mi':'Yedek yüklensin mi?',
+  'ays.guide.yedegi-yukle':'Yedeği yükle',
+  'ays.guide.yedek-bu-cihaza-yuklendi-ama':'Yedek bu cihaza yüklendi ama ',
+  'ays.guide.yedek-yuklendi':'Yedek yüklendi',
+  'ays.guide.geri-alinacak-bir-ice-aktarm':'Geri alınacak bir içe aktarma yok',
+  'ays.guide.geri-alindi-yeniden-baslatil':'Geri alındı — yeniden başlatılıyor',
+  'ays.guide.geri-alinamadi':'Geri alınamadı: ',
+  'ays.guide.gecmis-gonderiliyor':'Geçmiş gönderiliyor…',
+  'ays.guide.tum-veriyi-sifirla':'Tüm veriyi sıfırla',
+  'ays.guide.dosya-cok-buyuk-en-cok':'Dosya çok büyük (en çok 2 MB)',
+  'ays.guide.genel-ayarlar':'Genel ayarlar',
+});
 /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
 buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
 window.LIFEOS.PARCA.sayfa({ id:'guide', modul:'ays', cekmece:'ayarlar', ad:'Genel', ikon:'guide', sira:10 });
@@ -20,13 +201,13 @@ R.Screens.guide = (function(){
   /* Sıra: bu ekran «Ayarlar › Genel»dir; ayarlar başta, başvuru metinleri
      sonda. Sekme yok (EKIP-PLANI §1.2): yedi bölüm alt alta. */
   const TABS = [
-    { id:'settings',  label:'Ayarlar' },
-    { id:'istisna',   label:'Takvim istisnaları' },
-    { id:'calendar',  label:'Resmî takvim' },
-    { id:'examweek',  label:'Sınav haftası' },
-    { id:'checklist', label:'Kontrol listeleri' },
-    { id:'analysis',  label:'Analiz protokolü' },
-    { id:'kanit',     label:'Eşiklerin dayanağı' },
+    { id:'settings',  label:yz('ays.guide.ayarlar') },
+    { id:'istisna',   label:yz('ays.guide.takvim-istisnalari') },
+    { id:'calendar',  label:yz('ays.guide.resmi-takvim') },
+    { id:'examweek',  label:yz('ays.guide.sinav-haftasi') },
+    { id:'checklist', label:yz('ays.guide.kontrol-listeleri') },
+    { id:'analysis',  label:yz('ays.guide.analiz-protokolu') },
+    { id:'kanit',     label:yz('ays.guide.esiklerin-dayanagi') },
   ];
 
   /* Sade sekme (2026-10-16, «AYS'de çok şey iç içe»): «Ayarlar › Genel ›
@@ -34,9 +215,9 @@ R.Screens.guide = (function(){
      takvimle ilgili üçü, başvuru metinleri. Hiçbir bölüm kalkmadı; eski
      kimlikle gelen bağlantı içinde bulunduğu sekmeye açılır. */
   const GRUPLAR = [
-    { id:'settings',  label:'Ayarlar',  ic:['settings'] },
-    { id:'istisna',   label:'Takvim',   ic:['istisna', 'calendar', 'examweek'] },
-    { id:'checklist', label:'Başvuru',  ic:['checklist', 'analysis', 'kanit'] },
+    { id:'settings',  label:yz('ays.guide.ayarlar'),  ic:['settings'] },
+    { id:'istisna',   label:yz('ays.guide.takvim'),   ic:['istisna', 'calendar', 'examweek'] },
+    { id:'checklist', label:yz('ays.guide.basvuru'),  ic:['checklist', 'analysis', 'kanit'] },
   ];
   const grupOf = id => GRUPLAR.find(g => g.ic.indexOf(id) >= 0) || null;
 
@@ -68,23 +249,22 @@ R.Screens.guide = (function(){
   function analysisTab(){
     return K.Grid([
       K.Span(7, K.Stack([
-        K.Card({ title:'Deneme analizi protokolü', sub:'Toplam 60–80 dakika · en geç 24 saat içinde',
+        K.Card({ title:yz('ays.guide.deneme-analizi-protokolu'), sub:yz('ays.guide.toplam-60-80-dakika-en'),
           body:Steps(R.ANALYSIS_PROTOCOL) }),
-        K.Card({ title:'Hata etiketleri ve reçeteler', sub:'Her yanlış bir etiketle kapanır',
+        K.Card({ title:yz('ays.guide.hata-etiketleri-ve-receteler'), sub:yz('ays.guide.her-yanlis-bir-etiketle-kapa'),
           body:ErrorTagTable() }),
       ])),
       K.Span(5, K.Stack([
-        K.Card({ title:'Yanlış defteri tasarımı',
+        K.Card({ title:yz('ays.guide.yanlis-defteri-tasarimi'),
           body:K.Table({ tight:true, headers:['Alan', 'Yazılacak bilgi'],
             rows:R.NOTEBOOK_FIELDS.map(f => [html`<b class="small">${f[0]}</b>`, html`<span class="small muted">${f[1]}</span>`]) }) }),
-        K.Card({ title:'Aralıklı tekrar', sub:'Kendini sınama ve dağıtılmış çalışma',
+        K.Card({ title:yz('ays.guide.aralikli-tekrar'), sub:yz('ays.guide.kendini-sinama-ve-dagitilmis'),
           body:html`
             <div class="stack-xs">${map(R.SRS_PROTOCOL, p => html`
               <div class="row-top"><b class="small mw-66">${p.day}</b>
                 <span class="small muted">${p.detail}</span></div>`)}</div>
-            <p class="tiny dim mt-10">Kart geri çağırma gerektirmelidir: “Mitokondri nedir?” yerine
-              “Oksijenli solunum basamaklarını yer ve ürünle eşleştir”.</p>` }),
-        K.Card({ title:'Hesap verebilirlik',
+            <p class="tiny dim mt-10">${yz('ays.guide.kart-geri-cagirma-gerektirme')}</p>` }),
+        K.Card({ title:yz('ays.guide.hesap-verebilirlik'),
           body:html`<ul class="bullets small muted">${map(R.ACCOUNTABILITY, a => html`<li>${a}</li>`)}</ul>` }),
       ])),
     ]);
@@ -133,7 +313,7 @@ R.Screens.guide = (function(){
     ];
     return K.Grid([
       K.Span(8, K.Card({
-        title:'2027 kritik işlemler', sub:'Sıra / panik takvimi',
+        title:yz('ays.guide.2027-kritik-islemler'), sub:yz('ays.guide.sira-panik-takvimi'),
         badge:raw(UI.provenance('estimate')),
         body:html`<div class="list">${map(R.OFFICIAL_CALENDAR, r => html`
           <div class="listitem">
@@ -141,10 +321,10 @@ R.Screens.guide = (function(){
               <div>${K.Badge({ label:r.status, tone:r.status === 'Tahmin' ? 'warn' : 'muted' })}</div></div>
             <span class="small muted grow">${r.what}</span>
           </div>`)}</div>`,
-        foot:K.Notice({ tone:'warn', title:'Panik önleme kuralı:', body:R.CALENDAR_RULE }),
+        foot:K.Notice({ tone:'warn', title:yz('ays.guide.panik-onleme-kurali'), body:R.CALENDAR_RULE }),
       })),
       K.Span(4, K.Stack([
-        K.Card({ title:'Sayaçlar', sub:'Bugünden itibaren',
+        K.Card({ title:yz('ays.guide.sayaclar'), sub:yz('ays.guide.bugunden-itibaren'),
           body:K.Stack(map(counters, c => K.Stat({ label:c[0], value:U.fmtNum(c[1]), unit:' gün', note:c[2] })), 'sm') }),
         raw(UI.rail(['certainty', 'rank'])),
       ])),
@@ -163,10 +343,10 @@ R.Screens.guide = (function(){
       <div class="listitem">
         <div class="grow">
           <div class="row-sm wrap"><b class="small">${kind.label}</b>
-            ${K.Badge({ label:'yük %' + Math.round(x.load * 100), tone:kind.tone })}</div>
+            ${K.Badge({ label:yz('ays.guide.yuk') + Math.round(x.load * 100), tone:kind.tone })}</div>
           <div class="tiny dim">${U.fmtRange(x.from, x.to || x.from)} · ${U.plural(days, 'gün', 'gün')}${x.note ? ' · ' + x.note : ''}</div>
         </div>
-        ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'kaldır',
+        ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:yz('ays.guide.kaldir'),
           act:'cal-del', data:{ 'data-id':x.id } })}
       </div>`;
   }
@@ -188,12 +368,12 @@ R.Screens.guide = (function(){
   function icsOnizleme(){
     const o = S.ui.icsOnizleme;
     if(!o) return '';
-    const secenek = [{ value:'', label:'Atla' }].concat(Object.keys(M.CALENDAR_KINDS)
+    const secenek = [{ value:'', label:yz('ays.guide.atla') }].concat(Object.keys(M.CALENDAR_KINDS)
       .map(k => ({ value:k, label:M.CALENDAR_KINDS[k].label })));
     const yeni = o.satirlar.filter(s => s.durum === 'yeni');
     return html`<div class="mt-12">
-      <p class="tiny"><b>${o.dosya || 'Takvim'}</b> — ${o.satirlar.length} etkinlik okundu,
-        ${yeni.length} yeni. Türü önerilir; tanınmayan «Atla» ile gelir.</p>
+      <p class="tiny"><b>${o.dosya || 'Takvim'}</b> — ${o.satirlar.length} ${yz('ays.guide.etkinlik-okundu')}
+        ${yeni.length} ${yz('ays.guide.yeni-turu-onerilir-taninmaya')}</p>
       ${map(o.notlar || [], n => K.Notice({ tone:'info', body:n }))}
       <div class="list mt-8">${map(o.satirlar, s => html`<div class="row gap-8 wrap mt-4">
         <span class="minw0 small"><b>${s.baslik}</b> <span class="tiny dim">· ${s.bas === s.bit ? U.fmtShort(s.bas) : U.fmtRange(s.bas, s.bit)}</span></span>
@@ -203,23 +383,22 @@ R.Screens.guide = (function(){
           : html`<span class="tiny dim">${R.Takvim.DURUM_ADI[s.durum]}</span>`}
       </div>`)}</div>
       <div class="row gap-8 mt-12">
-        ${K.Button({ label:'Seçilenleri ekle', tone:'primary', icon:'plus', act:'ics-ekle',
+        ${K.Button({ label:yz('ays.guide.secilenleri-ekle'), tone:'primary', icon:'plus', act:'ics-ekle',
           disabled:!yeni.length })}
-        ${K.Button({ label:'Vazgeç', act:'ics-vazgec' })}
+        ${K.Button({ label:yz('ays.guide.vazgec'), act:'ics-vazgec' })}
       </div>
     </div>`;
   }
 
   function icsKarti(){
-    return K.Card({ title:'Takvim dosyası', sub:'.ics — okulun ya da telefonunun takvimiyle',
+    return K.Card({ title:yz('ays.guide.takvim-dosyasi'), sub:yz('ays.guide.ics-okulun-ya-da'),
       body:html`
-        ${K.Drop({ act:'ics-sec', accept:'.ics,text/calendar', icon:'upload', label:'.ics dosyası seç',
+        ${K.Drop({ act:'ics-sec', accept:'.ics,text/calendar', icon:'upload', label:yz('ays.guide.ics-dosyasi-sec'),
           hint:'Tatil ve okul sınavları istisna olur; önce önizlersin' })}
         ${icsOnizleme()}
-        <div class="row gap-8 mt-12">${K.Button({ label:'Takvime aktar (.ics)', icon:'download',
+        <div class="row gap-8 mt-12">${K.Button({ label:yz('ays.guide.takvime-aktar-ics'), icon:'download',
           act:'ics-disa' })}</div>
-        <p class="tiny dim mt-8">Dışa aktarımda istisnalar, TYT ve AYT günü ve etkin hedeflerinin son
-          tarihleri tüm gün etkinliği olarak gelir; telefonunun takvimine ekleyebilirsin.</p>` });
+        <p class="tiny dim mt-8">${yz('ays.guide.disa-aktarimda-istisnalar-ty')}</p>` });
   }
 
   function istisnaTab(){
@@ -234,38 +413,36 @@ R.Screens.guide = (function(){
 
     return K.Grid([
       K.Span(7, K.Stack([
-        K.Card({ title:'İstisna ekle', sub:'Tatil, okul sınavı ya da yoğun gün',
+        K.Card({ title:yz('ays.guide.i-stisna-ekle'), sub:yz('ays.guide.tatil-okul-sinavi-ya-da'),
           body:html`
             ${K.Cols(3, [
-              K.Field({ label:'Tür', input:K.Select({ id:'cal-kind', options:kinds, value:'tatil' }) }),
-              K.Field({ label:'Başlangıç', input:K.Input({ id:'cal-from', type:'date', value:U.todayISO() }) }),
-              K.Field({ label:'Bitiş', hint:'tek günse boş bırak', input:K.Input({ id:'cal-to', type:'date' }) }),
+              K.Field({ label:yz('ays.guide.tur'), input:K.Select({ id:'cal-kind', options:kinds, value:'tatil' }) }),
+              K.Field({ label:yz('ays.guide.baslangic'), input:K.Input({ id:'cal-from', type:'date', value:U.todayISO() }) }),
+              K.Field({ label:yz('ays.guide.bitis'), hint:'tek günse boş bırak', input:K.Input({ id:'cal-to', type:'date' }) }),
             ])}
-            ${K.Field({ label:'Not', input:K.Input({ id:'cal-note', placeholder:'ör. dönem sonu sınavları' }) })}
-            ${K.Button({ label:'Ekle', icon:'plus', class:'mt-12', act:'cal-add' })}` }),
+            ${K.Field({ label:yz('ays.guide.not'), input:K.Input({ id:'cal-note', placeholder:yz('ays.guide.or-donem-sonu-sinavlari') }) })}
+            ${K.Button({ label:yz('ays.guide.ekle'), icon:'plus', class:'mt-12', act:'cal-add' })}` }),
 
         icsKarti(),
 
-        K.Card({ title:'Kayıtlı istisnalar', sub:U.plural(list.length, 'kayıt', 'kayıt'),
+        K.Card({ title:yz('ays.guide.kayitli-istisnalar'), sub:U.plural(list.length, 'kayıt', 'kayıt'),
           body:list.length
             ? html`<div class="list">${map(list, exceptionRow)}</div>`
-            : K.Empty({ icon:'week', text:'İstisna yok. Tatil ya da okul sınavı eklersen plan o haftaların yükünü kendiliğinden düşürür.' }) }),
+            : K.Empty({ icon:'week', text:yz('ays.guide.i-stisna-yok-tatil-ya-da') }) }),
       ])),
 
       K.Span(5, K.Stack([
-        K.Card({ title:'Etkilenen haftalar', sub:'Önümüzdeki 8 hafta',
+        K.Card({ title:yz('ays.guide.etkilenen-haftalar'), sub:yz('ays.guide.onumuzdeki-8-hafta'),
           body:weekRows.length
-            ? K.Table({ tight:true, headers:['Hafta', 'Tarih', { label:'Yük', num:true }],
+            ? K.Table({ tight:true, headers:['Hafta', 'Tarih', { label:yz('ays.guide.yuk-2'), num:true }],
                 rows:weekRows.map(r => ['H' + r.n, U.fmtRange(r.from, r.to),
                   html`<span class="${r.load < 1 ? 'num is-down' : 'num is-up'}">%${Math.round(r.load * 100)}</span>`]) })
-            : K.Empty({ icon:'check', text:'Önümüzdeki sekiz hafta tam yükte.' }) }),
-        K.Notice({ tone:'info', body:K.Ayrinti({ etiket:'Diğer türler',
-          ozet:'Tatil günü ara günü olur: blok yok ve kaçırılmış sayılmaz.',
-          govde:html`<p>Okul sınavı, yoğun gün ve ekstra çalışma ders gününün süresini yük oranında
-            değiştirir; deneme ve kapanış günleri kısalmaz.</p>
-            <p>Haftalık soru hedefi güncel yüke göre ayarlanır. İlerlemesi başlamış bir güne
-            dokunulmaz.</p>` }) }),
-        K.Button({ label:'Planı yeniden hesapla', icon:'refresh', act:'auto-replan' }),
+            : K.Empty({ icon:'check', text:yz('ays.guide.onumuzdeki-sekiz-hafta-tam-y') }) }),
+        K.Notice({ tone:'info', body:K.Ayrinti({ etiket:yz('ays.guide.diger-turler'),
+          ozet:yz('ays.guide.tatil-gunu-ara-gunu-olur'),
+          govde:html`<p>${yz('ays.guide.okul-sinavi-yogun-gun-ve')}</p>
+            <p>${yz('ays.guide.haftalik-soru-hedefi-guncel')}</p>` }) }),
+        K.Button({ label:yz('ays.guide.plani-yeniden-hesapla'), icon:'refresh', act:'auto-replan' }),
       ])),
     ]);
   }
@@ -280,12 +457,12 @@ R.Screens.guide = (function(){
 
   function examWeekTab(){
     return K.Grid([
-      K.Span(7, K.Card({ title:'Sınav haftası ve sınav günü', sub:'Son hafta · yeni konu yok',
+      K.Span(7, K.Card({ title:yz('ays.guide.sinav-haftasi-ve-sinav-gunu'), sub:yz('ays.guide.son-hafta-yeni-konu'),
         body:html`<ul class="bullets small">${map(R.EXAM_WEEK_OPS, o => html`<li>${o}</li>`)}</ul>` })),
       K.Span(5, K.Stack([
-        K.Card({ title:'Taper haftası planı', sub:'Hacim düşer, ritim korunur',
+        K.Card({ title:yz('ays.guide.taper-haftasi-plani'), sub:yz('ays.guide.hacim-duser-ritim-korunur'),
           body:K.Table({ tight:true, headers:['Gün', 'İş'], rows:TAPER }) }),
-        K.Card({ title:'Kaygı azaltma',
+        K.Card({ title:yz('ays.guide.kaygi-azaltma'),
           body:html`<ul class="bullets small muted">${map(R.ROUTINES.anxiety, a => html`<li>${a}</li>`)}</ul>` }),
       ])),
     ]);
@@ -293,7 +470,7 @@ R.Screens.guide = (function(){
 
   /* ---------- ayarlar ---------- */
 
-  const THEMES = [{ value:'system', label:'Sistem' }, { value:'light', label:'Açık' }, { value:'dark', label:'Koyu' }];
+  const THEMES = [{ value:'system', label:yz('ays.guide.sistem') }, { value:'light', label:yz('ays.guide.acik') }, { value:'dark', label:yz('ays.guide.koyu') }];
 
   const TAVAN = R.Planner.TAVAN;
 
@@ -301,13 +478,13 @@ R.Screens.guide = (function(){
     const p = S.profile;
     const f = (label, id, o) => K.Field({ label, input:K.Input(Object.assign({ id }, o)) });
     return K.Card({
-      title:'Profil', sub:'Yalnız bu cihazda tutulur; koça gönderilmez',
+      title:yz('ays.guide.profil'), sub:yz('ays.guide.yalniz-bu-cihazda-tutulur-ko'),
       body:html`
         ${K.Cols(2, [f('Ad', 'st-name', { value:p.name }), f('Şehir', 'st-city', { value:p.city })])}
         ${K.Cols(2, [
           f('Haftalık kapasite (saat)', 'st-cap', { type:'number', step:0.5, value:p.capacityHoursPerWeek, numeric:true }),
           /* Tavan kullanicinin tercihidir; plan kaydedince ona gore kurulur. */
-          K.Field({ label:'Haftada en fazla konu', hint:TAVAN.min + '–' + TAVAN.max
+          K.Field({ label:yz('ays.guide.haftada-en-fazla-konu'), hint:TAVAN.min + '–' + TAVAN.max
               + ' · süren yetmezse Plan ekranı söyler',
             input:K.Input({ id:'st-tavan', type:'number', min:TAVAN.min, max:TAVAN.max, step:1,
               value:R.Planner.tavan(p), numeric:true }) }),
@@ -317,20 +494,20 @@ R.Screens.guide = (function(){
           f('Diploma notu', 'st-diploma', { type:'number', min:0, max:100, value:p.diplomaGrade, numeric:true }),
         ])}
         ${f('Hedef başarı sırası', 'st-rank', { type:'number', value:p.targetRank, numeric:true })}
-        ${K.Button({ label:'Kaydet', act:'save-profile', class:'mt-12' })}`,
+        ${K.Button({ label:yz('ays.guide.kaydet'), act:'save-profile', class:'mt-12' })}`,
     });
   }
 
   function calendarCard(){
     return K.Card({
-      title:'Takvim', sub:'Program başlangıcı ve sınav tarihi',
+      title:yz('ays.guide.takvim'), sub:yz('ays.guide.program-baslangici-ve-sinav'),
       body:html`
         ${K.Cols(2, [
-          K.Stat({ label:'Başlangıç', value:U.fmtShort(R.PLAN.startISO), note:U.fmtDate(R.PLAN.startISO) }),
-          K.Stat({ label:'Süre', value:R.PLAN.totalWeeks, unit:' hafta',
+          K.Stat({ label:yz('ays.guide.baslangic'), value:U.fmtShort(R.PLAN.startISO), note:U.fmtDate(R.PLAN.startISO) }),
+          K.Stat({ label:yz('ays.guide.sure'), value:R.PLAN.totalWeeks, unit:' hafta',
             note:R.PLAN.compressed ? 'sıkıştırılmış plan' : 'tam program' }),
         ])}
-        ${K.Button({ label:'Takvimi değiştir', act:'setup-open', icon:'week', class:'mt-12' })}`,
+        ${K.Button({ label:yz('ays.guide.takvimi-degistir'), act:'setup-open', icon:'week', class:'mt-12' })}`,
     });
   }
 
@@ -348,10 +525,10 @@ R.Screens.guide = (function(){
     const V = VT();
 
     return K.Card({
-      title:'Veri', sub:store,
-      badge:age === null ? K.Badge({ label:'hiç yedek alınmadı', tone:'warn' })
+      title:yz('ays.guide.veri'), sub:store,
+      badge:age === null ? K.Badge({ label:yz('ays.guide.hic-yedek-alinmadi'), tone:'warn' })
         : age >= 7 ? K.Badge({ label:age+' gün önce yedeklendi', tone:'warn' })
-        : K.Badge({ label:'yedek güncel', tone:'ok' }),
+        : K.Badge({ label:yz('ays.guide.yedek-guncel'), tone:'ok' }),
       body:html`
         ${when((window.LIFEOS || {}).GUVEN, () => raw(window.LIFEOS.GUVEN.yedekHtml({
           damga:(S.meta || {}).lastBackupAt, boyut:q.bytes, bugun:U.todayISO(),
@@ -365,25 +542,24 @@ R.Screens.guide = (function(){
           body:'Son yedekten bu yana '+(age === null ? 'hiç yedek alınmadı' : age+' gün geçti')
              + '. Tarayıcı verisi silinirse çalışma geçmişin kaybolur — şimdi bir yedek al.' })}</div>`)}
         ${when(q.near, () => html`<div class="mt-12">${K.Notice({ tone:q.full ? 'danger' : 'warn',
-          title:'Yerel alan %'+q.pct+' dolu.',
+          title:yz('ays.guide.yerel-alan')+q.pct+' dolu.',
           body:'Tarayıcı depolaması sınıra yaklaşıyor; dolduğunda yeni kayıtlar yazılamaz. '
              + 'Bir yedek al, sonra eski kapanmış yanlış ve kartları sadeleştir.' })}</div>`)}
         ${when(undo, () => html`<div class="mt-12">${K.Notice({ tone:'warn',
-          title:'Bir içe aktarma yapıldı.',
+          title:yz('ays.guide.bir-ice-aktarma-yapildi'),
           body:new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki yedekten yükleme mevcut '
              + 'verinin üzerine yazdı. Yanlışsa bir önceki duruma dönebilirsin — bu imkan yalnız '
              + 'bu içe aktarma için geçerli.' })}</div>
-          <div class="mt-8">${K.Button({ label:'Bu içe aktarmayı geri al', icon:'undo', tone:'danger', act:'undo-import' })}</div>`)}
+          <div class="mt-8">${K.Button({ label:yz('ays.guide.bu-ice-aktarmayi-geri-al'), icon:'undo', tone:'danger', act:'undo-import' })}</div>`)}
         ${when(V, () => raw('<div class="mt-12">' + V.disaAktar({ act:'export-data', sistem:'AYS',
           not:'tüm kayıt · tek dosya', kayit:counts.reduce((a, c) => a + c[1], 0), onizleme:disaOnizleme() }) + '</div>'))}
         ${K.Row([
-          V ? '' : K.Button({ label:'Yedek al (JSON)', icon:'download', tone:due ? 'primary' : null, act:'export-data' }),
-          K.Button({ label:'Yedekten yükle', icon:'upload', act:'import-data' }),
-          (R.Beacon && R.Beacon.settings().enabled) ? K.Button({ label:'HKM’deki yedekten yükle', icon:'upload', act:'restore-hkm' }) : '',
-          K.Button({ label:'Tümünü sıfırla', icon:'trash', tone:'danger', act:'reset-data' }),
+          V ? '' : K.Button({ label:yz('ays.guide.yedek-al-json'), icon:'download', tone:due ? 'primary' : null, act:'export-data' }),
+          K.Button({ label:yz('ays.guide.yedekten-yukle'), icon:'upload', act:'import-data' }),
+          (R.Beacon && R.Beacon.settings().enabled) ? K.Button({ label:yz('ays.guide.hkm-deki-yedekten-yukle'), icon:'upload', act:'restore-hkm' }) : '',
+          K.Button({ label:yz('ays.guide.tumunu-sifirla'), icon:'trash', tone:'danger', act:'reset-data' }),
         ].filter(Boolean), { wrap:true })}
-        <p class="tiny dim mt-10">Uygulama çevrimdışı çalışır: her kayıt önce cihaza yazılır,
-          bağlantı varsa hesabına eşlenir. Yerel kullanım: ${sizeKb} KB (%${q.pct}) · şema sürümü ${R.SCHEMA_VERSION}.</p>`,
+        <p class="tiny dim mt-10">${yz('ays.guide.uygulama-cevrimdisi-calisir')} ${sizeKb} ${yz('ays.guide.kb')}${q.pct}${yz('ays.guide.sema-surumu')} ${R.SCHEMA_VERSION}.</p>`,
     });
   }
 
@@ -404,7 +580,7 @@ R.Screens.guide = (function(){
     const tarih = t => { const d = new Date(t); return isNaN(d) ? '' : d.toLocaleDateString('tr-TR', { day:'numeric', month:'long' }); };
     const r = [];
     const undo = R.Store.importUndoInfo();
-    if(undo) r.push({ at:undo.at, ad:'İçe aktarma · öncesi', not:tarih(undo.at) + ' · büyük', act:'undo-import' });
+    if(undo) r.push({ at:undo.at, ad:yz('ays.guide.i-ce-aktarma-oncesi'), not:tarih(undo.at) + ' · büyük', act:'undo-import' });
     (R.Proposals ? R.Proposals.applied() : []).filter(p => SEVIYE[p.level] && !p.otomatik).forEach(p => {
       const def = R.ACTION_BY_ID[p.action];
       if(!def) return;
@@ -417,7 +593,7 @@ R.Screens.guide = (function(){
     const V = VT();
     const n = V ? donusNoktalari() : [];
     if(!n.length) return '';
-    return K.Card({ title:'Geri dönüş noktaları', sub:'Orta ve büyük değişikliklerden önceki hâl',
+    return K.Card({ title:yz('ays.guide.geri-donus-noktalari'), sub:yz('ays.guide.orta-ve-buyuk-degisikliklerd'),
       body:raw(V.geriDonus({ noktalar:n })) });
   }
 
@@ -452,7 +628,7 @@ R.Screens.guide = (function(){
     const budanabilir = dp.prunable();
 
     return K.Card({
-      title:'Dokuz aylık ufuk', hint:'storage', sub:hukum.title,
+      title:yz('ays.guide.dokuz-aylik-ufuk'), hint:'storage', sub:hukum.title,
       body:html`
         ${K.Notice({ tone:hukum.level === 'full' ? 'danger'
           : (hukum.level === 'near' || hukum.level === 'watch') ? 'warn' : 'ok',
@@ -472,21 +648,20 @@ R.Screens.guide = (function(){
 
         <div class="mt-12">${K.SectionTitle('Ne büyüyor')}</div>
         ${K.Table({ tight:true,
-          headers:['Kayıt', { label:'Boyut', num:true }, { label:'Adet', num:true }, 'Tür'],
+          headers:['Kayıt', { label:yz('ays.guide.boyut'), num:true }, { label:yz('ays.guide.adet'), num:true }, 'Tür'],
           rows:dagilim.slice(0, 10).map(r => [r.label, dp.fmtBytes(r.bytes),
             String(r.count), r.content ? 'içerik' : (r.prunable ? 'budanabilir' : 'sistem')]) })}
 
         ${when(budanabilir.length, () => html`
           <div class="mt-12">${K.SectionTitle('Yer aç')}</div>
-          <p class="tiny dim">Yalnızca sistemin kendi ürettiği kayıtlar listelenir.
-            Girdiğin hiçbir veri burada yer almaz — hiçbir koşulda.</p>
+          <p class="tiny dim">${yz('ays.guide.yalnizca-sistemin-kendi-uret')}</p>
           ${map(budanabilir, b => html`
             <label class="row wrap gap-8 mt-8">
               <input type="checkbox" data-prune="${b.collection}"/>
               <span><b>${b.label}</b> — ${dp.fmtBytes(b.bytes)}
                 <span class="tiny dim">${b.note}</span></span>
             </label>`)}
-          ${K.Button({ label:'Seçilenleri buda', tone:'danger', size:'sm',
+          ${K.Button({ label:yz('ays.guide.secilenleri-buda'), tone:'danger', size:'sm',
             act:'prune-storage', class:'mt-10' })}`)}`,
     });
   }
@@ -497,34 +672,32 @@ R.Screens.guide = (function(){
     const can = R.App.canInstall && R.App.canInstall();
     const age = M.backupAgeDays();
     return K.Card({
-      title:'Telefona kur ve yedekle', sub:'Uygulama zaten çevrimdışı çalışır',
+      title:yz('ays.guide.telefona-kur-ve-yedekle'), sub:yz('ays.guide.uygulama-zaten-cevrimdisi-ca'),
       body:html`
         ${standalone
           ? K.Notice({ tone:'ok', body:'Uygulama olarak açıldın. Ana ekrandan tek dokunuşla girebilirsin.' })
           : can
           ? html`${K.Notice({ tone:'info', body:'Bu tarayıcı kurulumu destekliyor. Kurulunca ana ekranda '
               + 'kendi simgesiyle durur ve tarayıcı çubuğu olmadan açılır.' })}
-            ${K.Button({ label:'Telefona kur', icon:'download', tone:'primary', class:'mt-10', act:'pwa-install' })}`
+            ${K.Button({ label:yz('ays.guide.telefona-kur'), icon:'download', tone:'primary', class:'mt-10', act:'pwa-install' })}`
           : K.Notice({ tone:'info', body:'Tarayıcının menüsünden “Ana ekrana ekle” diyerek '
               + 'uygulama gibi kurabilirsin. Veriler zaten cihazda; internet gerekmez.' })}
 
         <div class="mt-12">${K.Row([
-          K.Stat({ label:'Son yedek', value:age == null ? 'yok' : age + ' gün önce',
+          K.Stat({ label:yz('ays.guide.son-yedek'), value:age == null ? 'yok' : age + ' gün önce',
             tone:age == null || age >= 7 ? 'warn' : 'ok' }),
-          K.Button({ label:'Şimdi yedek al', icon:'download', size:'sm', act:'export-data' }),
+          K.Button({ label:yz('ays.guide.simdi-yedek-al'), icon:'download', size:'sm', act:'export-data' }),
         ], { between:true, wrap:true })}</div>
-        <p class="tiny dim mt-10">Haftada bir yedek al. Tarayıcı verisi silinirse çalışma geçmişin
-          geri gelmez; yedek dosyası düz JSON’dur, herhangi bir cihazda açılır.</p>`,
+        <p class="tiny dim mt-10">${yz('ays.guide.haftada-bir-yedek-al-tarayic')}</p>`,
     });
   }
 
   function backupShapeCard(){
     return K.Collapsible({
-      title:'Yedek dosyası neyi içerir?', meta:'JSON yapısı',
+      title:yz('ays.guide.yedek-dosyasi-neyi-icerir'), meta:'JSON yapısı',
       act:'toggle-backup-shape', open:!!S.ui.backupShapeOpen,
       body:html`
-        <p class="small muted mt-10">Yedek düz bir JSON dosyasıdır; herhangi bir editörle açılıp okunabilir.
-          Veri kilitli bir biçimde tutulmaz — istediğin an dışarı alabilirsin.</p>
+        <p class="small muted mt-10">${yz('ays.guide.yedek-duz-bir-json-dosyasidi')}</p>
         ${K.Table({ tight:true, headers:['Alan', 'Ne tutar'],
           rows:BACKUP_SHAPE.map(r => [html`<code class="tiny">${r[0]}</code>`, html`<span class="small muted">${r[1]}</span>`]) })}`,
     });
@@ -558,8 +731,8 @@ R.Screens.guide = (function(){
         + ' — ' + String(a.lastAt).slice(0, 16).replace('T', ' ') + '. '
         + (a.lastNote || '')
       : 'Henüz hiç gönderilmedi.';
-    return K.Card({ title:'HKM işareti', hint:'hkm',
-      sub:'İsteğe bağlı dördüncü katmana günün özeti',
+    return K.Card({ title:yz('ays.guide.hkm-isareti'), hint:'hkm',
+      sub:yz('ays.guide.i-stege-bagli-dorduncu-katma'),
       body:html`
         ${(function(){
           /* Metin ortak (yedekag.js). Mahremiyet cümlesi (ilk ve son) görünür
@@ -567,27 +740,27 @@ R.Screens.guide = (function(){
           const c = String(window.LIFEOS.YedekAg.kartNotu('AYS')).split(/(?<=\.)\s+/);
           const ozet = c.length > 2 ? c[0] + ' ' + c[c.length - 1] : c.join(' ');
           return K.Notice({ tone:'info', body:c.length > 2
-            ? K.Ayrinti({ etiket:'Bu anahtar neyi açar?', ozet, govde:html`<p>${c.slice(1, -1).join(' ')}</p>` })
+            ? K.Ayrinti({ etiket:yz('ays.guide.bu-anahtar-neyi-acar'), ozet, govde:html`<p>${c.slice(1, -1).join(' ')}</p>` })
             : ozet });
         })()}
         ${when(a.baskaProfil, () => K.Notice({ tone:'warn', class:'mt-10', body:window.LIFEOS.HkmBag.not(a.baskaProfil) }))}
 
         <div class="mt-12">
-          ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)', checked:!!a.enabled,
+          ${K.Checkbox({ label:yz('ays.guide.i-sareti-ac-varsayilan-kapal'), checked:!!a.enabled,
             act:'hkm-toggle' })}
         </div>
 
         <div class="mt-12">
-          ${K.Field({ label:'HKM adresi',
+          ${K.Field({ label:yz('ays.guide.hkm-adresi'),
             input:K.Input({ id:'ay-hkm-url', value:a.url, change:'hkm-url',
-              placeholder:'http://127.0.0.1:4200', aria:'HKM adresi' }) })}
-          ${K.Field({ label:'Yerel jeton', hint:'config.json içindeki local_token',
+              placeholder:'http://127.0.0.1:4200', aria:yz('ays.guide.hkm-adresi') }) })}
+          ${K.Field({ label:yz('ays.guide.yerel-jeton'), hint:'config.json içindeki local_token',
             input:K.Input({ id:'ay-hkm-token', type:'password', value:a.token,
-              change:'hkm-token', aria:'HKM jetonu' }) })}
-          ${K.Field({ label:'En sık kaç dakikada bir',
+              change:'hkm-token', aria:yz('ays.guide.hkm-jetonu') }) })}
+          ${K.Field({ label:yz('ays.guide.en-sik-kac-dakikada-bir'),
             input:K.Input({ id:'ay-hkm-int', type:'number', min:'15', step:'5',
               value:a.intervalMinutes, change:'hkm-interval', data:{ 'data-varsayilan':String(R.Beacon.varsayilan().intervalMinutes), 'data-varsayilan-ad':R.Beacon.varsayilan().intervalMinutes + ' dakika' },
-              aria:'Gönderim aralığı' }) })}
+              aria:yz('ays.guide.gonderim-araligi') }) })}
         </div>
 
         ${when(!R.Beacon.urlOk(a.url), () => K.Notice({ tone:'warn',
@@ -595,17 +768,17 @@ R.Screens.guide = (function(){
              + 'ile giderken jeton ağda açık gider. https ya da 127.0.0.1 gerekir.' }))}
 
         <div class="mt-12">
-          ${K.Field({ label:'Kapsam',
+          ${K.Field({ label:yz('ays.guide.kapsam'),
             hint:'ne kadarı gönderilsin',
             input:K.Select({ id:'ay-hkm-level', value:R.Beacon.levelOf(),
-              change:'hkm-level', data:{ 'data-varsayilan':R.Beacon.varsayilan().level, 'data-varsayilan-ad':(R.Beacon.LEVELS.find(l => l.id === R.Beacon.varsayilan().level) || {}).label }, aria:'Gönderim kapsamı',
+              change:'hkm-level', data:{ 'data-varsayilan':R.Beacon.varsayilan().level, 'data-varsayilan-ad':(R.Beacon.LEVELS.find(l => l.id === R.Beacon.varsayilan().level) || {}).label }, aria:yz('ays.guide.gonderim-kapsami'),
               options:R.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
           <p class="tiny dim">${(R.Beacon.LEVELS.find(l => l.id === R.Beacon.levelOf()) || {}).note}</p>
         </div>
 
         <div class="mt-12">
-          <span class="mono-label">Bugün ne gidiyor</span>
-          ${K.Table({ tight:true, headers:['Alan', { label:'Değer', num:true }, 'Kaynak'],
+          <span class="mono-label">${yz('ays.guide.bugun-ne-gidiyor')}</span>
+          ${K.Table({ tight:true, headers:['Alan', { label:yz('ays.guide.deger'), num:true }, 'Kaynak'],
               rows:on.rows.map(r => [r.key,
               r.value == null ? '—' : U.fmtNum(r.value),
               /* KAYNAK SÜTUNU — etiketin görseliyle birlikte.
@@ -613,23 +786,20 @@ R.Screens.guide = (function(){
                  kendi karşılığını YAZMAZ: aynı `measured` üç arayüzde
                  aynı kelimeyi göstermek zorunda. */
               raw(window.LIFEOS.KESINLIK_HTML(r.cert))]) })}
-          <p class="tiny dim mt-8">Günün özetinde soru metni, hata defteri ve deneme
-            ayrıntısı GİTMEZ (tam yedekte vardır). Giden şey bu dört beş sayıdır; değeri olmayan alan «veri yok»
-            gider, sıfır değil.</p>
+          <p class="tiny dim mt-8">${yz('ays.guide.gunun-ozetinde-soru-metni-ha')}</p>
         </div>
 
         ${when(on.errors.length, () => K.Notice({ tone:'warn',
           body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
 
         <div class="mt-12">
-          ${K.Button({ label:'Bağlan', act:'hkm-pair' })}
-          ${K.Button({ label:'Şimdi gönder', act:'hkm-send' })}
-          ${K.Button({ label:'Geçmişi gönder (60 gün)', act:'hkm-backfill' })}
+          ${K.Button({ label:yz('ays.guide.baglan'), act:'hkm-pair' })}
+          ${K.Button({ label:yz('ays.guide.simdi-gonder'), act:'hkm-send' })}
+          ${K.Button({ label:yz('ays.guide.gecmisi-gonder-60-gun'), act:'hkm-backfill' })}
         </div>
-        <div class="mt-8">${K.Ayrinti({ etiket:'Neden yalnız bazı alanlar?',
-          ozet:'Çapraz bulgu ve yön tahlili GEÇMİŞ ister; bugünden biriken bir ambar ilk iki ay hiçbir şey söyleyemez.',
-          govde:html`<p>Geçmiş gönderimi yalnızca geriye dönük HESAPLANABİLEN alanları yollar: dünkü
-            tarihle bugünkü kart borcunu yazmak, ambara sahte bir ölçüm koymaktır.</p>` })}</div>
+        <div class="mt-8">${K.Ayrinti({ etiket:yz('ays.guide.neden-yalniz-bazi-alanlar'),
+          ozet:yz('ays.guide.capraz-bulgu-ve-yon-tahlili'),
+          govde:html`<p>${yz('ays.guide.gecmis-gonderimi-yalnizca-ge')}</p>` })}</div>
         <p class="tiny dim mt-8">«Bağlan», jetonu HKM'den doğrudan alır:
           önce HKM yüzünde «Cihazları bağla» de, sonra iki dakika içinde
           buraya bas. Jetonu elle yazmak da çalışır.</p>
@@ -641,22 +811,20 @@ R.Screens.guide = (function(){
   function hafizaCard(){
     const H = window.LIFEOS.Hafiza;
     const l = R.Hafizam.etkin();
-    return K.Card({ title:'Hafızam', sub:'Ofisin senin hakkında hatırladıkları — bu cihazda; HKM bağlıysa King de görür',
+    return K.Card({ title:yz('ays.guide.hafizam'), sub:yz('ays.guide.ofisin-senin-hakkinda-hatirl'),
       body:html`
-        ${when(!l.length, () => html`<p class="small dim">Henüz bir şey yok. Aşağıya yaz ya da
-          sohbette «hatırla: sabahları daha verimliyim» de.</p>`)}
+        ${when(!l.length, () => html`<p class="small dim">${yz('ays.guide.henuz-bir-sey-yok-asagiya')}</p>`)}
         <div class="stack-xs">${map(l, x => html`
           <div class="row gap-8" style="justify-content:space-between;align-items:flex-start">
             <span class="small"><span class="tiny dim">${H.KATMANLAR[x.katman].ad}</span><br/>${x.metin}</span>
-            ${K.Button({ label:'Unut', size:'sm', tone:'ghost', act:'hafiza-unut', data:{ 'data-id':x.id } })}
+            ${K.Button({ label:yz('ays.guide.unut'), size:'sm', tone:'ghost', act:'hafiza-unut', data:{ 'data-id':x.id } })}
           </div>`)}</div>
         <div class="row gap-8 mt-10">
-          ${K.Input({ id:'hafiza-yeni', class:'grow', aria:'Hatırlanacak şey',
-            placeholder:'Örn. Pazar günleri çalışmam' })}
-          ${K.Button({ label:'Hatırla', size:'sm', act:'hafiza-ekle' })}
+          ${K.Input({ id:'hafiza-yeni', class:'grow', aria:yz('ays.guide.hatirlanacak-sey'),
+            placeholder:yz('ays.guide.orn-pazar-gunleri-calismam') })}
+          ${K.Button({ label:yz('ays.guide.hatirla'), size:'sm', act:'hafiza-ekle' })}
         </div>
-        <p class="tiny dim mt-8">Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın,
-          «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.</p>` });
+        <p class="tiny dim mt-8">${yz('ays.guide.model-hafizaya-yazamaz-senin')}</p>` });
   }
 
   function settingsTab(){
@@ -665,57 +833,53 @@ R.Screens.guide = (function(){
         profileCard(),
         calendarCard(),
         hkmCard(),
-        K.Card({ title:'Koç üslubu', sub:'Aynı veri herkese aynı dille söylenmez',
+        K.Card({ title:yz('ays.guide.koc-uslubu'), sub:yz('ays.guide.ayni-veri-herkese-ayni-dille'),
           body:html`
-            ${VT() ? raw(VT().uslupSecimi({ baslik:'Koçun üslubu', act:'set-tone', secili:S.profile.coachTone || 'dengeli',
+            ${VT() ? raw(VT().uslupSecimi({ baslik:yz('ays.guide.kocun-uslubu'), act:'set-tone', secili:S.profile.coachTone || 'dengeli',
               secenekler:Object.keys(R.COACH_TONES).map(k => ({ id:k, ad:R.COACH_TONES[k].name })),
               onizleme:(R.TONE_ORNEK[S.profile.coachTone || 'dengeli'] || R.TONE_ORNEK.dengeli)(C.cardDebt()),
               not:'örnek cümle · sayı senin, cümleyi kod kurdu' }))
-            : K.Segmented({ act:'set-tone', block:true, primary:true, aria:'Koç üslubu',
+            : K.Segmented({ act:'set-tone', block:true, primary:true, aria:yz('ays.guide.koc-uslubu'),
               value:S.profile.coachTone || 'dengeli',
               items:Object.keys(R.COACH_TONES).map(k => ({ value:k, label:R.COACH_TONES[k].name })) })}
-            <p class="tiny dim mt-8">${(R.COACH_TONES[S.profile.coachTone || 'dengeli']).note}.
-              Üslup ev kurallarını geçersiz kılmaz: garanti, tıbbi tavsiye ve uykudan feda
-              her üslupta yasaktır.</p>` }),
+            <p class="tiny dim mt-8">${(R.COACH_TONES[S.profile.coachTone || 'dengeli']).note}${yz('ays.guide.uslup-ev-kurallarini-gecersi')}</p>` }),
 
         /* Karşılama (2026-10-18): modüle girerken italik selam ve bölümün notu;
            dili, kendi selamların ve notların (brand/ortak/karsilama.js). */
-        when(window.LIFEOS && window.LIFEOS.KARSILAMA, () => K.Card({ title:'Karşılama', sub:'Girerken seni selamlayan cümle ve altındaki not',
+        when(window.LIFEOS && window.LIFEOS.KARSILAMA, () => K.Card({ title:yz('ays.guide.karsilama'), sub:yz('ays.guide.girerken-seni-selamlayan-cum'),
           body:raw(window.LIFEOS.KARSILAMA.ayarHtml('ays')) })),
 
-        when(R.Bolum, () => K.Card({ title:'Bölümler',
-          sub:'Kullanmadığın bölümü gizle; verisi silinmez',
+        when(R.Bolum, () => K.Card({ title:yz('ays.guide.bolumler'),
+          sub:yz('ays.guide.kullanmadigin-bolumu-gizle-v'),
           body:html`
             <div class="stack-xs">${map(R.Bolum.liste(), b => K.Checkbox({
               label:b.ad + (b.acik ? '' : ' — gizli'), checked:b.acik,
               act:'bolum-toggle', data:{ 'data-id':b.id } }))}</div>
-            <p class="tiny dim mt-8">Bugün, Hafta, Plan, Dersler, Deneme, Tekrar, İlerleme,
-              Ofis ve Rehber gizlenemez. Patron’a da söyleyebilirsin: «sınama bölümünü kapat».</p>` })),
+            <p class="tiny dim mt-8">${yz('ays.guide.bugun-hafta-plan-dersler-den')}</p>` })),
 
         when(R.Hafizam, () => hafizaCard()),
 
-        K.Card({ title:'Görünüm', sub:'Tema bu profile kaydedilir',
+        K.Card({ title:yz('ays.guide.gorunum'), sub:yz('ays.guide.tema-bu-profile-kaydedilir'),
           body:html`
             ${K.TemaSecici({ value:S.profile.theme || 'system', act:'set-theme' })}
-            <p class="tiny dim mt-10">Tek tasarım: renk modülü söyler (mavi AYS). «Sistem»
-              seçiliyken cihazın açık/koyu tercihi izlenir.</p>` }),
+            <p class="tiny dim mt-10">${yz('ays.guide.tek-tasarim-renk-modulu-soyl')}</p>` }),
 
         /* Gizlilik kilidi (176, T5): kutu kendi içinde değişir. */
-        when(window.LIFEOS && window.LIFEOS.KILIT, () => K.Card({ title:'Gizlilik kilidi',
+        when(window.LIFEOS && window.LIFEOS.KILIT, () => K.Card({ title:yz('ays.guide.gizlilik-kilidi'),
           body:raw(window.LIFEOS.KILIT.ayarHtml('ays', { govde:true })) })),
       ])),
       K.Span(6, K.Stack([
         dataCard(),
-        when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Card({ title:'Örnek veriyle dene',
+        when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Card({ title:yz('ays.guide.ornek-veriyle-dene'),
           body:raw(window.LIFEOS.OrnekKip.ayarHtml(!!(R.Ornek && R.Ornek.acik()))) })),
         donusKarti(),
         storageHorizonCard(),
         backupShapeCard(),
         installCard(),
-        K.Card({ title:'Klavye kısayolları',
+        K.Card({ title:yz('ays.guide.klavye-kisayollari'),
           body:K.Table({ tight:true, headers:['Tuş', 'İşlev'],
             rows:SHORTCUTS.map(s => [html`<b class="small">${s[0]}</b>`, s[1]]) }) }),
-        K.Card({ title:'Bu uygulama ne değildir', sub:'Sınırları bilmek beklentiyi doğru kurar',
+        K.Card({ title:yz('ays.guide.bu-uygulama-ne-degildir'), sub:yz('ays.guide.sinirlari-bilmek-beklentiyi'),
           body:html`<ul class="bullets small muted">${map(NOT_THIS, t => html`<li>${t}</li>`)}</ul>` }),
       ])),
     ]);
@@ -739,21 +903,21 @@ R.Screens.guide = (function(){
     const grup = id => kurallar.filter(r => r.source === id);
 
     return K.Stack([
-      K.Card({ title:'Eşikler nereden geliyor?', hint:'evidence',
+      K.Card({ title:yz('ays.guide.esikler-nereden-geliyor'), hint:'evidence',
         body:html`
-          ${K.Notice({ tone:'warn', title:'Bu bir pedagojik hiyerarşi değildir',
+          ${K.Notice({ tone:'warn', title:yz('ays.guide.bu-bir-pedagojik-hiyerarsi-d'),
             body:K.Ayrinti({ govde:html`<p>${R.Ev.policy().disclaimer}</p>` }) })}
-          <div class="mt-8">${K.Ayrinti({ etiket:'Hangi kaynağa ne kadar güvenilir?',
+          <div class="mt-8">${K.Ayrinti({ etiket:yz('ays.guide.hangi-kaynaga-ne-kadar-guven'),
             govde:html`<p>${R.Ev.policy().rationale}</p>` })}</div>
           ${K.Table({ tight:true, headers:['Kaynak türü', 'AYS\'nin tanıdığı yetki',
-            { label:'Eşik', num:true }],
+            { label:yz('ays.guide.esik'), num:true }],
             rows:R.EVIDENCE_SOURCES.map(src => {
               const y = R.EVIDENCE_AUTHORITY.find(a =>
                 a.id === R.Ev.policy().defaults[src.id]);
               return [src.label, y.label + ' — ' + y.note,
                 String((kapsam.bySource[src.id] || 0))];
             }) })}
-          <p class="tiny dim mt-8">Politika sürümü ${R.Ev.policy().version}
+          <p class="tiny dim mt-8">${yz('ays.guide.politika-surumu')} ${R.Ev.policy().version}
             (${R.Ev.policy().changedAt}).</p>` }),
 
       ...R.EVIDENCE_SOURCES.map(src => {
@@ -771,17 +935,17 @@ R.Screens.guide = (function(){
             ]) }) });
       }).filter(Boolean),
 
-      K.Card({ title:'Denetim',
+      K.Card({ title:yz('ays.guide.denetim'),
         body:html`
           ${denetim.length
-            ? K.Notice({ tone:'danger', title:'Kayıt sorunlu',
+            ? K.Notice({ tone:'danger', title:yz('ays.guide.kayit-sorunlu'),
                 body:denetim.map(d => d.rule + ' (' + d.kind + ')').join(', ') })
-            : K.Notice({ tone:'ok', title:'Denetim temiz',
+            : K.Notice({ tone:'ok', title:yz('ays.guide.denetim-temiz'),
                 body:'Her kayıt çözülebiliyor, her atıf yazılı ve sistem ayarı '
                    + 'olan her eşik gerekçesini taşıyor. Bu denetim testte de '
                    + 'koşar; bozulursa test kırılır.' })}
           ${when(ayrisan.length, () => K.Notice({ tone:'info',
-            title:'Dolaylı ya da kesinliği düşük eşikler',
+            title:yz('ays.guide.dolayli-ya-da-kesinligi-dusu'),
             body:ayrisan.length + ' eşik ya popülasyona göre kayıyor ya da '
                + 'kesinliği düşük. Bunlar plan değiştirmez, yalnızca '
                + 'bilgilendirir.' }))}` }),
@@ -811,7 +975,7 @@ R.Screens.guide = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'guide.bolum-1', sayfa:'guide', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
-    return K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
+    return K.SayfaBolumleri({ act:'guide-tab', aria:yz('ays.guide.rehber-bolumleri'),
       bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) });
   } });
   LIFEOS.PARCA.blok({ id:'guide.bolum-2', sayfa:'guide', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
@@ -866,7 +1030,7 @@ R.Screens.guide = (function(){
       const secili = Array.prototype.slice
         .call(document.querySelectorAll('[data-prune]'))
         .filter(el => el.checked).map(el => el.dataset.prune);
-      if(!secili.length){ UI.toast('Önce budanacak kaydı seç.'); return; }
+      if(!secili.length){ UI.toast(yz('ays.guide.once-budanacak-kaydi-sec')); return; }
       const r = await R.Storage.prune(secili);
       if(!r.ok){ UI.toast(r.error); return; }
       UI.toast(R.Storage.fmtBytes(r.freed) + ' yer açıldı.');
@@ -885,8 +1049,8 @@ R.Screens.guide = (function(){
       const from = document.getElementById('cal-from').value;
       const to = document.getElementById('cal-to').value;
       const note = document.getElementById('cal-note').value.trim();
-      if(!from){ UI.toast('Başlangıç tarihi gerekli'); return; }
-      if(to && to < from){ UI.toast('Bitiş, başlangıçtan önce olamaz'); return; }
+      if(!from){ UI.toast(yz('ays.guide.baslangic-tarihi-gerekli')); return; }
+      if(to && to < from){ UI.toast(yz('ays.guide.bitis-baslangictan-once-olam')); return; }
       await M.saveCalendar({ kind, from, to:to || from, note });
       UI.toast(takvimMesaji('İstisna eklendi', from, to || from));
       R.App.render();
@@ -905,7 +1069,7 @@ R.Screens.guide = (function(){
     async 'ics-vazgec'(){ S.ui.icsOnizleme = null; R.App.render(); },
     async 'ics-disa'(){
       const d = R.Takvim.disa();
-      if(!d.adet){ UI.toast('Aktarılacak bir tarih yok'); return; }
+      if(!d.adet){ UI.toast(yz('ays.guide.aktarilacak-bir-tarih-yok')); return; }
       try{
         const url = URL.createObjectURL(new Blob([d.metin], { type:'text/calendar;charset=utf-8' }));
         const a = document.createElement('a');
@@ -913,7 +1077,7 @@ R.Screens.guide = (function(){
         document.body.appendChild(a); a.click(); a.remove();
         URL.revokeObjectURL(url);
         UI.toast(d.adet + ' etkinlik takvim dosyasına yazıldı');
-      }catch(e){ UI.toast('Takvim dosyası indirilemedi'); }
+      }catch(e){ UI.toast(yz('ays.guide.takvim-dosyasi-indirilemedi')); }
     },
     async 'cal-del'(el){
       const x = S.calendar.find(c => c.id === el.dataset.id);
@@ -927,7 +1091,7 @@ R.Screens.guide = (function(){
       S.profile.coachTone = el.dataset.value;
       await M.saveProfile();
       /* Küçük aksiyon: sormadan uygulanır, «Geri al» kalır (AGENTS §1.9). */
-      UI.toast('Koç üslubu: ' + R.COACH_TONES[el.dataset.value].name, { undo:async () => {
+      UI.toast(yz('ays.guide.koc-uslubu-2') + R.COACH_TONES[el.dataset.value].name, { undo:async () => {
         S.profile.coachTone = once; await M.saveProfile(); R.App.render(); } });
       R.App.render();
     },
@@ -945,7 +1109,7 @@ R.Screens.guide = (function(){
       const tv = String(v('st-tavan') == null ? '' : v('st-tavan')).trim();
       const tvSayi = Number(tv);
       if(tv !== '' && R.Planner.tavan({ haftalikKonuTavani:tvSayi }) !== tvSayi){
-        UI.toast('Haftada en fazla konu ' + TAVAN.min + '–' + TAVAN.max + ' arasında bir tam sayı olmalı.');
+        UI.toast(yz('ays.guide.haftada-en-fazla-konu-2') + TAVAN.min + '–' + TAVAN.max + ' arasında bir tam sayı olmalı.');
         return;
       }
       const eskiTavan = R.Planner.tavan(p);
@@ -990,12 +1154,12 @@ R.Screens.guide = (function(){
           URL.revokeObjectURL(url);
           saved = true;
         }catch(e){
-          UI.toast('Yedek indirilemedi: '+(e.message || 'bilinmeyen hata'));
+          UI.toast(yz('ays.guide.yedek-indirilemedi')+(e.message || 'bilinmeyen hata'));
           return;
         }
       }
       await M.markBackup();
-      UI.toast('Yedek alındı — '+Object.keys(payload.data).length+' kayıt');
+      UI.toast(yz('ays.guide.yedek-alindi')+Object.keys(payload.data).length+' kayıt');
       R.App.render();
     },
     /* Yeni cihaza taşıma (fikir 54): HKM'deki en yeni yedek çekilir,
@@ -1012,27 +1176,27 @@ R.Screens.guide = (function(){
         async () => {
           try{
             await R.Store.importAll(r.obj);
-            UI.toast('HKM yedeği yüklendi — yeniden başlatılıyor');
+            UI.toast(yz('ays.guide.hkm-yedegi-yuklendi-yeniden'));
             setTimeout(() => location.reload(), 900);
           }catch(e){
-            UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
+            UI.toast(yz('ays.guide.yukleme-basarisiz') + (e && e.message ? e.message : 'bilinmeyen hata'));
           }
         }, true, 'Bu cihazdaki veriyi yedekle değiştir');
     },
     async 'import-data'(){
       UI.sheet({
-        title:'Yedekten yükle',
+        title:yz('ays.guide.yedekten-yukle'),
         body:String(html`
           ${K.Notice({ tone:'warn', body:'Mevcut veriler bu yedekle değiştirilir. Önce güncel bir yedek almanı öneririm.' })}
-          ${K.Field({ label:'JSON dosyası', input:raw('<input class="input" type="file" id="imp-file" accept="application/json"/>') })}`),
+          ${K.Field({ label:yz('ays.guide.json-dosyasi'), input:raw('<input class="input" type="file" id="imp-file" accept="application/json"/>') })}`),
         footer:String(html`
-          ${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-          ${K.Button({ label:'Yükle', tone:'primary', act:'import-run' })}`),
+          ${K.Button({ label:yz('ays.guide.vazgec'), act:'sheet-close' })}
+          ${K.Button({ label:yz('ays.guide.yukle'), tone:'primary', act:'import-run' })}`),
       });
     },
     async 'import-apply'(){
       const y = bekleyenYedek;
-      if(!y){ UI.toast('Önce bir yedek dosyası seç'); return; }
+      if(!y){ UI.toast(yz('ays.guide.once-bir-yedek-dosyasi-sec')); return; }
       bekleyenYedek = null;
       await handle['import-run']({ dataset:{ onay:'1' } }, { obj:y.obj, name:y.ad, size:y.boyut });
     },
@@ -1040,12 +1204,12 @@ R.Screens.guide = (function(){
     async 'import-run'(el, hazir){
       const input = document.getElementById('imp-file');
       const file = hazir || (input && input.files[0]);
-      if(!file){ UI.toast('Önce bir yedek dosyası seç'); return; }
+      if(!file){ UI.toast(yz('ays.guide.once-bir-yedek-dosyasi-sec')); return; }
       let obj = hazir ? hazir.obj : null;
       if(!obj) try{
         obj = JSON.parse(await file.text());
       }catch(e){
-        UI.toast('Dosya geçerli bir JSON değil');
+        UI.toast(yz('ays.guide.dosya-gecerli-bir-json-degil'));
         return;
       }
       const check = R.Store.readBackup(obj);
@@ -1058,15 +1222,15 @@ R.Screens.guide = (function(){
         delete gelen.hkm;   /* cihaza ait; yedekle gelmez, burada kalir (store.js CIHAZA_AIT) */
         const f = V.yedekFarki(R.Store.exportAll().data, gelen);
         UI.sheet({
-          title:'Yedek yüklensin mi?',
+          title:yz('ays.guide.yedek-yuklensin-mi'),
           body:V.iceAktarma(Object.assign({ dosya:file.name,
             alt:(window.LIFEOS.GUVEN && window.LIFEOS.GUVEN.boyutMetni && file.size ? window.LIFEOS.GUVEN.boyutMetni(file.size) + ' · ' : '') + 'AYS'
               + (check.meta && check.meta.legacy ? ' · eski sürüm' : '') }, f))
             + '<p class="tiny dim mt-10">Yedek bu cihazdaki verinin TAMAMINI değiştirir; «silinecek» kayıtlar yedekte olmayanlardır. '
             + 'Yanlışsa «İçe aktarmayı geri al» ile bir önceki duruma dönebilirsin.</p>',
           footer:String(html`
-            ${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-            ${K.Button({ label:'Yedeği yükle', tone:'primary', act:'import-apply' })}`),
+            ${K.Button({ label:yz('ays.guide.vazgec'), act:'sheet-close' })}
+            ${K.Button({ label:yz('ays.guide.yedegi-yukle'), tone:'primary', act:'import-apply' })}`),
         });
         return;
       }
@@ -1076,22 +1240,22 @@ R.Screens.guide = (function(){
         /* Kismi bulut yazimi «tamamlandi» diye sunulmaz: kullanici neyin
            yazildigini, neyin yazilamadigini bilmeli. */
         if(meta.partialCloud){
-          UI.toast('Yedek bu cihaza yüklendi ama ' + meta.cloudFailed
+          UI.toast(yz('ays.guide.yedek-bu-cihaza-yuklendi-ama') + meta.cloudFailed
             + ' kayıt buluta yazılamadı — yeniden başlatılıyor');
         }else{
-          UI.toast('Yedek yüklendi'+(meta.legacy ? ' (eski sürüm)' : '')
+          UI.toast(yz('ays.guide.yedek-yuklendi')+(meta.legacy ? ' (eski sürüm)' : '')
             + (meta.geriAlinamaz ? '; yer olmadığı için bu içe aktarma geri alınamaz' : '')+' — yeniden başlatılıyor');
         }
         setTimeout(() => location.reload(), 900);
       }catch(e){
         /* Yerel yazma basarisizsa sayfa YENILENMEZ: yenilemek, kullanicinin
            gozunde islemi tamamlanmis gosterir. */
-        UI.toast('Yükleme başarısız: '+(e.message || 'bilinmeyen hata'));
+        UI.toast(yz('ays.guide.yukleme-basarisiz')+(e.message || 'bilinmeyen hata'));
       }
     },
     async 'undo-import'(){
       const undo = R.Store.importUndoInfo();
-      if(!undo){ UI.toast('Geri alınacak bir içe aktarma yok'); return; }
+      if(!undo){ UI.toast(yz('ays.guide.geri-alinacak-bir-ice-aktarm')); return; }
       UI.confirmSheet('İçe aktarmayı geri al',
         new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki içe aktarma öncesine dönülecek. '
           + 'Aradan geçen sürede eklediğin her şey kaybolur.',
@@ -1099,10 +1263,10 @@ R.Screens.guide = (function(){
           try{
             await R.Store.undoImport();
             UI.closeSheet();
-            UI.toast('Geri alındı — yeniden başlatılıyor');
+            UI.toast(yz('ays.guide.geri-alindi-yeniden-baslatil'));
             setTimeout(() => location.reload(), 900);
           }catch(e){
-            UI.toast('Geri alınamadı: '+(e.message || 'bilinmeyen hata'));
+            UI.toast(yz('ays.guide.geri-alinamadi')+(e.message || 'bilinmeyen hata'));
           }
         }, true, 'İçe aktarma öncesine dön');
     },
@@ -1119,7 +1283,7 @@ R.Screens.guide = (function(){
       R.App.render();
     },
     async 'hkm-backfill'(){
-      UI.toast('Geçmiş gönderiliyor…');
+      UI.toast(yz('ays.guide.gecmis-gonderiliyor'));
       const r = await R.Beacon.backfill(60);
       UI.toast(r.ok ? r.sent + ' gün gönderildi (' + r.empty + ' gün ölçümsüz)'
         : r.note || 'Gönderilemedi (' + (r.reason || r.status) + ')');
@@ -1136,7 +1300,7 @@ R.Screens.guide = (function(){
       const G = (window.LIFEOS || {}).GUVEN;
       if(G && G.kapiAc){
         const yedek = R.Store.exportAll();
-        G.kapiAc({ baslik:'Tüm veriyi sıfırla', not:(window.LIFEOS && window.LIFEOS.HESAP ? window.LIFEOS.HESAP.silmeNotu() : null), nesne:'kaydı', sayi:Object.keys(yedek.data || {}).length,
+        G.kapiAc({ baslik:yz('ays.guide.tum-veriyi-sifirla'), not:(window.LIFEOS && window.LIFEOS.HESAP ? window.LIFEOS.HESAP.silmeNotu() : null), nesne:'kaydı', sayi:Object.keys(yedek.data || {}).length,
           sheet:o => UI.sheet(o), yedekAl:() => handle['export-data'](),
           sil:async () => { await tumunuSil(); UI.closeSheet(); location.reload(); } });
         return;
@@ -1155,7 +1319,7 @@ R.Screens.guide = (function(){
     async 'ics-sec'(el){
       const f = el.files && el.files[0];
       if(!f) return;
-      if(f.size > 2 * 1024 * 1024){ UI.toast('Dosya çok büyük (en çok 2 MB)'); return; }
+      if(f.size > 2 * 1024 * 1024){ UI.toast(yz('ays.guide.dosya-cok-buyuk-en-cok')); return; }
       const r = R.Takvim.onizle(await f.text());
       if(!r.ok){ UI.toast(r.why); return; }
       S.ui.icsOnizleme = Object.assign(r, { dosya:f.name });
@@ -1176,7 +1340,7 @@ R.Screens.guide = (function(){
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
     kucukVarsayilan:['bu-uygulama-ne-değildir', 'kritik-işlemler', 'sınav-haftası-ve-sınav-günü', 'taper-haftası-planı', 'kaygı-azaltma', 'deneme-analizi-protokolü', 'hata-etiketleri-ve-reçeteler', 'yanlış-defteri-tasarımı', 'aralıklı-tekrar', 'hesap-verebilirlik', 'eşikler-nereden-geliyor', 'sınav-kaynağı', 'öğrenme-araştırması', 'kendi-verin', 'sistem-ayarı', 'denetim', 'yedek-dosyası-neyi-içerir', 'klavye-kısayolları'],
-    title:'Genel ayarlar',
+    title:yz('ays.guide.genel-ayarlar'),
     subtitle(){ return 'Ayarlar, takvim ve protokoller — alt alta'; },
     actions(){ return ''; },
     render, handle, change, tumunuSil,

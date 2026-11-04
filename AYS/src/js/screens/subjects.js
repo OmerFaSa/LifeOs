@@ -4,6 +4,71 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.subjects.tumu':'Tümü',
+  'ays.subjects.yuksek-frekans':'Yüksek frekans',
+  'ays.subjects.calisilan':'Çalışılan',
+  'ays.subjects.kapanmayan':'Kapanmayan',
+  'ays.subjects.i-lk-test':'İlk test %',
+  'ays.subjects.2-olcum':'· 2. ölçüm',
+  'ays.subjects.konu-zinciri':'Konu zinciri',
+  'ays.subjects.destek-testi':'destek testi',
+  'ays.subjects.konular':'Konular',
+  'ays.subjects.onkosul-ve-getiri-sirasina-g':'Önkoşul ve getiri sırasına göre',
+  'ays.subjects.konu-suzgeci':'Konu süzgeci',
+  'ays.subjects.konu-ara':'Konu ara…',
+  'ays.subjects.konu-ara-2':'konu ara',
+  'ays.subjects.bu-filtreye-uyan-konu-yok':'Bu filtreye uyan konu yok.',
+  'ays.subjects.suzgeci-sifirla':'Süzgeci sıfırla',
+  'ays.subjects.kaynak-mimarisi':'Kaynak mimarisi',
+  'ays.subjects.temel-orta-brans':'Temel → orta → branş',
+  'ays.subjects.tahmini-sure':'Tahmini süre:',
+  'ays.subjects.kapanis-kurali-konu-testi':'Kapanış kuralı: konu testi ≥%',
+  'ays.subjects.gun-sonraki-test':'gün sonraki test ≥%',
+  'ays.subjects.tek-olcum-kapanis-saymaz':'. Tek ölçüm kapanış saymaz.',
+  'ays.subjects.bu-sayilar-nereden-geliyor':'Bu sayılar nereden geliyor?',
+  'ays.subjects.1-olcum-konu-testi':'1. ölçüm — konu testi %',
+  'ays.subjects.1-olcum-tarihi':'1. ölçüm tarihi',
+  'ays.subjects.2-olcum-7-gun':'2. ölçüm — 7 gün sonra %',
+  'ays.subjects.2-olcum-tarihi':'2. ölçüm tarihi',
+  'ays.subjects.durum-elle-gecersiz-kil':'Durum (elle geçersiz kıl)',
+  'ays.subjects.not':'Not',
+  'ays.subjects.kaynak-zorlanilan-alt-baslik':'Kaynak, zorlanılan alt başlık, kart ihtiyacı…',
+  'ays.subjects.konu':'Konu ',
+  'ays.subjects.kapat':'Kapat',
+  'ays.subjects.kaydet':'Kaydet',
+  'ays.subjects.konu-kapandi':'konu kapandı',
+  'ays.subjects.oncelik-sirasi':'Öncelik sırası',
+  'ays.subjects.analiste-sor':'Analiste sor',
+  'ays.subjects.bekleyen-2-olcumler':'Bekleyen 2. ölçümler',
+  'ays.subjects.kapanis-icin-gerekli':'Kapanış için gerekli',
+  'ays.subjects.ders':'ders ·',
+  'ays.subjects.dersler-ve-konular':'Dersler ve konular',
+  'ays.subjects.acik-kalanlar':'Açık kalanlar:',
+  'ays.subjects.profili-kaldir':'Profili kaldır',
+  'ays.subjects.test-kitabi-iste':'Test kitabı iste',
+  'ays.subjects.hangi-sinav-bana-uygun':'Hangi sınav bana uygun?',
+  'ays.subjects.egitim-durumu':'Eğitim durumu',
+  'ays.subjects.sec':'Seç',
+  'ays.subjects.hedef':'Hedef',
+  'ays.subjects.mufredatini-iste':'Müfredatını iste',
+  'ays.subjects.oneri-kural-tablosundandir-k':'Öneri kural tablosundandır, karar senindir. Ana sınavın (YKS) değişmez; istenen müfredat ek profil olarak gelir.',
+  'ays.subjects.sinav-profilleri':'Sınav profilleri',
+  'ays.subjects.baska-bir-sinav':'Başka bir sınav',
+  'ays.subjects.or-kpss-genel-kultur':'ör. KPSS genel kültür',
+  'ays.subjects.mufredati-kendin-yukle-unive':'Müfredatı kendin yükle (üniversite ya da başka bir sınav)',
+  'ays.subjects.profilin-adi':'Profilin adı',
+  'ays.subjects.or-muhendislik-1-sinif':'ör. Mühendislik 1. sınıf',
+  'ays.subjects.her-satir-ders-konu-konu':'Her satır «Ders: konu, konu» ya da «Ders:» ve altında «- konu». Kaynağı sensin: AYS doğrulamaz, yalnız süzer (en çok',
+  'ays.subjects.ders-ders-basina':'ders, ders başına',
+  'ays.subjects.konu-ana-sinavin-yks-degisme':'konu). Ana sınavın (YKS) değişmez.',
+  'ays.subjects.profili-ekle':'Profili ekle',
+  'ays.subjects.kapandi':'kapandı.',
+  'ays.subjects.kapanis':'Kapanış',
+  'ays.subjects.konu-haritasi':'Konu haritası · ',
+  'ays.subjects.i-kinci-kontrol':'İkinci kontrol',
+  'ays.subjects.dersler':'Dersler',
+});
 window.LIFEOS.PARCA.sayfa({ id:'subjects', modul:'ays', cekmece:'calisma', ad:'Konu kapanışı', ikon:'book', sira:50 });
 
 R.Screens.subjects = (function(){
@@ -18,8 +83,8 @@ R.Screens.subjects = (function(){
   };
 
   const FILTERS = [
-    { value:'all', label:'Tümü' }, { value:'high', label:'Yüksek frekans' },
-    { value:'active', label:'Çalışılan' }, { value:'open', label:'Kapanmayan' },
+    { value:'all', label:yz('ays.subjects.tumu') }, { value:'high', label:yz('ays.subjects.yuksek-frekans') },
+    { value:'active', label:yz('ays.subjects.calisilan') }, { value:'open', label:yz('ays.subjects.kapanmayan') },
   ];
 
   function openId(){ return S.ui.subjectOpen || R.SUBJECTS[0].id; }
@@ -40,7 +105,7 @@ R.Screens.subjects = (function(){
     const label = !dueISO ? '—'
       : overdue ? U.diffDays(dueISO, U.todayISO())+' gün gecikti'
       : dueISO === U.todayISO() ? 'bugün' : U.relativeDay(dueISO);
-    return html`<span class="${soon ? 'tiny is-due' : 'tiny dim'}">İlk test %${st.first} · 2. ölçüm ${label}</span>`;
+    return html`<span class="${soon ? 'tiny is-due' : 'tiny dim'}">${yz('ays.subjects.i-lk-test')}${st.first} ${yz('ays.subjects.2-olcum')} ${label}</span>`;
   }
 
   function TopicRow(subject, topic){
@@ -107,7 +172,7 @@ R.Screens.subjects = (function(){
     const i = sirali.findIndex(t => ['learning', 'practicing', 'provisional'].indexOf(M.topicState(subject.id, t.id).state) >= 0);
     const parca = sirali.slice(Math.max(0, i - 1), Math.max(0, i - 1) + 3);
     if(parca.length < 2) return '';
-    return K.Kutu({ ad:'Konu zinciri', yuva:g.key, class:'vkutu', govde:raw(VT().konuZinciri({
+    return K.Kutu({ ad:yz('ays.subjects.konu-zinciri'), yuva:g.key, class:'vkutu', govde:raw(VT().konuZinciri({
       halkalar:parca.map(t => ({ ad:t.name, p:kapsamOf(M.topicState(subject.id, t.id)), eksik:!!eksik[t.id] })) })) });
   }
 
@@ -171,18 +236,18 @@ R.Screens.subjects = (function(){
             K.Chip('Hedef '+subject.targetBand),
             K.Chip(subject.topics.length+' konu'),
             K.Chip(highCount+' yüksek frekans'),
-            when(subject.priority === 'support', () => K.Badge({ label:'destek testi', tone:'warn' })),
+            when(subject.priority === 'support', () => K.Badge({ label:yz('ays.subjects.destek-testi'), tone:'warn' })),
           ], { wrap:true })}
           <p class="small muted mt-10">${subject.insight}</p>`,
       }),
 
       zincir:zincir(subject),
       konular:K.Card({
-        title:'Konular', hint:'source-arch', sub:'Önkoşul ve getiri sırasına göre',
-        actions:K.Segmented({ items:FILTERS, value:S.ui.topicFilter || 'all', act:'topic-filter', aria:'Konu süzgeci' }),
+        title:yz('ays.subjects.konular'), hint:'source-arch', sub:yz('ays.subjects.onkosul-ve-getiri-sirasina-g'),
+        actions:K.Segmented({ items:FILTERS, value:S.ui.topicFilter || 'all', act:'topic-filter', aria:yz('ays.subjects.konu-suzgeci') }),
         body:html`
-          ${K.Input({ class:'mb-10', placeholder:'Konu ara…', value:S.ui.topicQuery || '',
-            aria:'konu ara', change:'topic-search', data:{ 'data-debounce':220 } })}
+          ${K.Input({ class:'mb-10', placeholder:yz('ays.subjects.konu-ara'), value:S.ui.topicQuery || '',
+            aria:yz('ays.subjects.konu-ara-2'), change:'topic-search', data:{ 'data-debounce':220 } })}
           ${topics.length && VT()
             ? html`<div class="stack-sm">${map(groupTopics(topics), g => raw(konuTablosu(subject, g, son, eksik)))}</div>`
             : topics.length
@@ -194,12 +259,12 @@ R.Screens.subjects = (function(){
                   ${map(g.items, t => TopicRow(subject, t))}
                 </div>`;
               })}</div>`
-            : K.Empty({ icon:'search', text:'Bu filtreye uyan konu yok.',
-                action:K.Button({ label:'Süzgeci sıfırla', size:'sm', act:'topic-reset' }) })}`,
+            : K.Empty({ icon:'search', text:yz('ays.subjects.bu-filtreye-uyan-konu-yok'),
+                action:K.Button({ label:yz('ays.subjects.suzgeci-sifirla'), size:'sm', act:'topic-reset' }) })}`,
       }),
 
       kaynak:K.Card({
-        title:'Kaynak mimarisi', sub:'Temel → orta → branş',
+        title:yz('ays.subjects.kaynak-mimarisi'), sub:yz('ays.subjects.temel-orta-brans'),
         body:html`<div class="ladder">${map(subject.sources, s => html`
           <div class="ladder__row"><span class="ladder__level">${s.level}</span>
             <span class="muted">${s.detail}</span></div>`)}</div>`,
@@ -220,36 +285,36 @@ R.Screens.subjects = (function(){
     const body = K.Stack([
       K.Card({ flat:true, pad:'sm', body:html`
         <div class="row between"><b>${topic.name}</b>${StateBadge(st.state)}</div>
-        <p class="small muted mt-4">Tahmini süre: ${topic.days} · ${freq} frekans${topic.group ? ' · '+topic.group : ''}</p>` }),
-      K.Notice({ tone:'info', body:html`Kapanış kuralı: konu testi ≥%${R.CLOSURE_RULE.first} <b>ve</b>
-        ${R.CLOSURE_RULE.gapDays} gün sonraki test ≥%${R.CLOSURE_RULE.second}. Tek ölçüm kapanış saymaz.` }),
+        <p class="small muted mt-4">${yz('ays.subjects.tahmini-sure')} ${topic.days} · ${freq} frekans${topic.group ? ' · '+topic.group : ''}</p>` }),
+      K.Notice({ tone:'info', body:html`${yz('ays.subjects.kapanis-kurali-konu-testi')}${R.CLOSURE_RULE.first} <b>ve</b>
+        ${R.CLOSURE_RULE.gapDays} ${yz('ays.subjects.gun-sonraki-test')}${R.CLOSURE_RULE.second}${yz('ays.subjects.tek-olcum-kapanis-saymaz')}` }),
 
       /* Esigin KAYNAGI. %75 ve %70 pedagojik bir bulgu degil, bu sistemin
          secimidir — ve bunu gizlemek, bir tasarim tercihini bulgu gibi
          sunmak olurdu (core/evidence.js). */
       K.Notice({ tone:'warn', hint:'evidence',
-        body:html`<b>Bu sayılar nereden geliyor?</b>
+        body:html`<b>${yz('ays.subjects.bu-sayilar-nereden-geliyor')}</b>
           ${R.Ev.line('closure.first').note}
           ${R.Ev.line('closure.second').note}` }),
       K.Cols(2, [
-        K.Field({ label:'1. ölçüm — konu testi %', input:pctInput('tp-first', st.first) }),
-        K.Field({ label:'1. ölçüm tarihi', input:K.Input({ id:'tp-first-at', type:'date', value:st.firstAt || U.todayISO() }) }),
+        K.Field({ label:yz('ays.subjects.1-olcum-konu-testi'), input:pctInput('tp-first', st.first) }),
+        K.Field({ label:yz('ays.subjects.1-olcum-tarihi'), input:K.Input({ id:'tp-first-at', type:'date', value:st.firstAt || U.todayISO() }) }),
       ]),
       K.Cols(2, [
-        K.Field({ label:'2. ölçüm — 7 gün sonra %', input:pctInput('tp-second', st.second) }),
-        K.Field({ label:'2. ölçüm tarihi', input:K.Input({ id:'tp-second-at', type:'date', value:st.secondAt || '' }) }),
+        K.Field({ label:yz('ays.subjects.2-olcum-7-gun'), input:pctInput('tp-second', st.second) }),
+        K.Field({ label:yz('ays.subjects.2-olcum-tarihi'), input:K.Input({ id:'tp-second-at', type:'date', value:st.secondAt || '' }) }),
       ]),
-      K.Field({ label:'Durum (elle geçersiz kıl)', input:K.Select({ id:'tp-state', options:stateOptions, value:st.state }) }),
-      K.Field({ label:'Not', input:K.Textarea({ id:'tp-note', rows:2, value:st.note,
-        placeholder:'Kaynak, zorlanılan alt başlık, kart ihtiyacı…' }) }),
+      K.Field({ label:yz('ays.subjects.durum-elle-gecersiz-kil'), input:K.Select({ id:'tp-state', options:stateOptions, value:st.state }) }),
+      K.Field({ label:yz('ays.subjects.not'), input:K.Textarea({ id:'tp-note', rows:2, value:st.note,
+        placeholder:yz('ays.subjects.kaynak-zorlanilan-alt-baslik') }) }),
     ]);
 
     UI.sheet({
       title:subject.name,
-      subtitle:'Konu '+topic.order+' · durum ve ölçüm',
+      subtitle:yz('ays.subjects.konu')+topic.order+' · durum ve ölçüm',
       body:String(body),
-      footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'save-topic',
+      footer:String(html`${K.Button({ label:yz('ays.subjects.kapat'), act:'sheet-close' })}
+        ${K.Button({ label:yz('ays.subjects.kaydet'), tone:'primary', act:'save-topic',
           data:{ 'data-subject':subjectId, 'data-topic':topicId } })}`),
     });
   }
@@ -268,7 +333,7 @@ R.Screens.subjects = (function(){
                matematiği ise yan yana ayırt edilmiyordu. -->
           ${raw(window.LIFEOS.SIMGE_HTML('ders', s.id))}
           <div class="grow"><div class="small strong">${s.name}</div>
-            <div class="tiny dim">${c.closed}/${c.total} konu kapandı</div></div>
+            <div class="tiny dim">${c.closed}/${c.total} ${yz('ays.subjects.konu-kapandi')}</div></div>
           <div class="w-46">${K.Bar({ value:c.pct, tone:'' })}</div>
         </button>`;
     })}</div>`;
@@ -288,8 +353,8 @@ R.Screens.subjects = (function(){
     };
     /* Skorun nasıl hesaplandığı ve «emir değil öneri» notu ⓘ'de (hints: risk). */
     return K.Card({
-      title:'Öncelik sırası', hint:'risk',
-      actions:K.Button({ label:'Analiste sor', icon:'zap', size:'sm',
+      title:yz('ays.subjects.oncelik-sirasi'), hint:'risk',
+      actions:K.Button({ label:yz('ays.subjects.analiste-sor'), icon:'zap', size:'sm',
         act:'ask-agent', data:{ 'data-agent':'analist' } }),
       body:html`
         ${map(list, r => html`
@@ -307,7 +372,7 @@ R.Screens.subjects = (function(){
 
   function pendingCard(pending){
     if(!pending.length) return null;
-    return K.Span(12, K.Card({ class:'card--accent', title:'Bekleyen 2. ölçümler', sub:'Kapanış için gerekli',
+    return K.Span(12, K.Card({ class:'card--accent', title:yz('ays.subjects.bekleyen-2-olcumler'), sub:yz('ays.subjects.kapanis-icin-gerekli'),
       body:K.Row(map(pending.slice(0, 8), p => K.Chip({
         label:p.topicName+' · '+(p.overdue ? 'gecikti' : U.relativeDay(p.dueISO)),
         act:'open-topic', on:p.overdue,
@@ -327,19 +392,18 @@ R.Screens.subjects = (function(){
       <div class="row between wrap"><b class="small">${p.ad}${p.bolum ? ' · ' + p.bolum : ''}</b>
         ${K.Badge({ label:ek ? ({ kaynakli:'kaynaklı', kullanici:'senin yüklediğin' }[p.dogruluk] || 'doğrulanmadı') : 'yerleşik',
           tone:ek && p.dogruluk === 'dogrulanmadi' ? 'warn' : 'ok' })}</div>
-      <div class="tiny dim">${s.ders} ders · ${s.konu} konu${ek ? ' · ' + s.biten + ' konu bitti · '
+      <div class="tiny dim">${s.ders} ${yz('ays.subjects.ders')} ${s.konu} konu${ek ? ' · ' + s.biten + ' konu bitti · '
         + (p.kayitId ? 'BAM #' + p.kayitId : 'kullanıcı beyanı') + ' · puanlama: veri yok' : ' · kapanış ölçümleri yukarıda'}</div>
-      ${when(ek, () => html`<details class="mt-6"><summary class="tiny">Dersler ve konular</summary>
+      ${when(ek, () => html`<details class="mt-6"><summary class="tiny">${yz('ays.subjects.dersler-ve-konular')}</summary>
         ${map(p.dersler, d => html`<div class="mt-6">
           <div class="tiny"><b>${d.ad}</b>${d.soru ? ' · ' + d.soru + ' soru' : ''}</div>
           ${K.Row(map(d.konular, k => K.Chip({ label:k.ad, act:'sp-konu', on:biten.indexOf(k.id) >= 0,
             data:{ 'data-profil':p.id, 'data-konu':k.id } })), { wrap:true })}</div>`)}
-        ${when(p.acikKalanlar && p.acikKalanlar.length, () => html`<p class="tiny dim mt-6">Açık
-          kalanlar: ${p.acikKalanlar.join(' · ')}</p>`)}
-        <div class="mt-6">${K.Button({ label:'Profili kaldır', size:'sm', act:'sp-sil',
+        ${when(p.acikKalanlar && p.acikKalanlar.length, () => html`<p class="tiny dim mt-6">${yz('ays.subjects.acik-kalanlar')} ${p.acikKalanlar.join(' · ')}</p>`)}
+        <div class="mt-6">${K.Button({ label:yz('ays.subjects.profili-kaldir'), size:'sm', act:'sp-sil',
           data:{ 'data-id':p.id } })}</div>
       </details>`)}
-      ${when(R.TestKitabi, () => html`<div class="mt-6">${K.Button({ label:'Test kitabı iste',
+      ${when(R.TestKitabi, () => html`<div class="mt-6">${K.Button({ label:yz('ays.subjects.test-kitabi-iste'),
         size:'sm', act:'kitap-iste', data:{ 'data-id':p.id } })}</div>`)}
     </div>`;
   }
@@ -353,12 +417,12 @@ R.Screens.subjects = (function(){
     const r = R.SinavOneri.oner({ egitim:p.egitim, hedef:p.sinavHedef, etkin:'yks' });
     const eklenen = R.SinavProfil.liste().map(x => String(x.ad || '').toLocaleLowerCase('tr'));
     return html`<details class="mt-10" ${p.egitim ? '' : raw('open')}>
-      <summary>Hangi sınav bana uygun?</summary>
+      <summary>${yz('ays.subjects.hangi-sinav-bana-uygun')}</summary>
       <div class="row wrap mt-8">
-        ${K.Field({ label:'Eğitim durumu', input:K.Select({ id:'so-egitim', value:p.egitim || '',
-          change:'so-egitim', options:[{ value:'', label:'Seç' }].concat(R.SinavOneri.EGITIM.map(x => ({ value:x.id, label:x.ad }))) }) })}
-        ${K.Field({ label:'Hedef', input:K.Select({ id:'so-hedef', value:p.sinavHedef || '',
-          change:'so-hedef', options:[{ value:'', label:'Seç' }].concat(R.SinavOneri.HEDEF.map(x => ({ value:x.id, label:x.ad }))) }) })}
+        ${K.Field({ label:yz('ays.subjects.egitim-durumu'), input:K.Select({ id:'so-egitim', value:p.egitim || '',
+          change:'so-egitim', options:[{ value:'', label:yz('ays.subjects.sec') }].concat(R.SinavOneri.EGITIM.map(x => ({ value:x.id, label:x.ad }))) }) })}
+        ${K.Field({ label:yz('ays.subjects.hedef'), input:K.Select({ id:'so-hedef', value:p.sinavHedef || '',
+          change:'so-hedef', options:[{ value:'', label:yz('ays.subjects.sec') }].concat(R.SinavOneri.HEDEF.map(x => ({ value:x.id, label:x.ad }))) }) })}
       </div>
       ${when(!r.ok, () => html`<p class="small muted mt-8">${r.soru}</p>`)}
       ${when(r.ok, () => html`<div class="stack-sm mt-8">${map(r.satirlar.filter(s => s.durum !== 'uygun değil'), s => html`
@@ -368,37 +432,35 @@ R.Screens.subjects = (function(){
             <div class="tiny dim">${s.gerekce}</div>
           </div>
           ${when(!s.etkin && s.durum === 'uygun' && eklenen.indexOf(s.ad.toLocaleLowerCase('tr')) < 0,
-            () => K.Button({ label:'Müfredatını iste', size:'sm', act:'so-iste', data:{ 'data-ad':s.ad } }))}
+            () => K.Button({ label:yz('ays.subjects.mufredatini-iste'), size:'sm', act:'so-iste', data:{ 'data-ad':s.ad } }))}
         </div>`)}</div>
         ${when(r.not, () => html`<p class="tiny dim mt-6">${r.not}</p>`)}
-        <p class="tiny dim mt-6">Öneri kural tablosundandır, karar senindir. Ana sınavın (YKS) değişmez;
-          istenen müfredat ek profil olarak gelir.</p>`)}
+        <p class="tiny dim mt-6">${yz('ays.subjects.oneri-kural-tablosundandir-k')}</p>`)}
     </details>`;
   }
 
   function profilKarti(){
     if(!R.SinavProfil) return null;
     const l = R.SinavProfil.liste();
-    return K.Span(12, K.Card({ title:'Sınav profilleri',
+    return K.Span(12, K.Card({ title:yz('ays.subjects.sinav-profilleri'),
       sub:l.length + ' profil · müfredatı BAM çıkarır, sen onaylarsın',
       body:html`<div class="stack-sm">
         ${map(l, profilSatiri)}
         <div class="row wrap mt-8">
-          ${K.Field({ label:'Başka bir sınav', input:K.Input({ id:'sp-sinav',
-            placeholder:'ör. KPSS genel kültür', size:'sm' }) })}
-          ${K.Button({ label:'Müfredatını iste', size:'sm', tone:'primary', act:'sp-iste' })}
+          ${K.Field({ label:yz('ays.subjects.baska-bir-sinav'), input:K.Input({ id:'sp-sinav',
+            placeholder:yz('ays.subjects.or-kpss-genel-kultur'), size:'sm' }) })}
+          ${K.Button({ label:yz('ays.subjects.mufredatini-iste'), size:'sm', tone:'primary', act:'sp-iste' })}
         </div>
         ${when(S.ui.spNot, () => html`<p class="tiny">${S.ui.spNot}</p>`)}
         <details class="mt-10">
-          <summary>Müfredatı kendin yükle (üniversite ya da başka bir sınav)</summary>
+          <summary>${yz('ays.subjects.mufredati-kendin-yukle-unive')}</summary>
           <div class="stack-sm mt-8">
-            ${K.Field({ label:'Profilin adı', input:K.Input({ id:'sp-yukle-ad', placeholder:'ör. Mühendislik 1. sınıf', size:'sm' }) })}
+            ${K.Field({ label:yz('ays.subjects.profilin-adi'), input:K.Input({ id:'sp-yukle-ad', placeholder:yz('ays.subjects.or-muhendislik-1-sinif'), size:'sm' }) })}
             <textarea id="sp-yukle-metin" class="input" rows="6" aria-label="Müfredat metni"
               placeholder="Matematik I: Limit, Türev, İntegral&#10;Fizik I:&#10;- Kinematik&#10;- Dinamik"></textarea>
-            <p class="tiny dim">Her satır «Ders: konu, konu» ya da «Ders:» ve altında «- konu». Kaynağı sensin:
-              AYS doğrulamaz, yalnız süzer (en çok ${R.SinavProfil.SINIR.ders} ders, ders başına
-              ${R.SinavProfil.SINIR.konuDers} konu). Ana sınavın (YKS) değişmez.</p>
-            <div>${K.Button({ label:'Profili ekle', size:'sm', tone:'primary', act:'sp-yukle' })}</div>
+            <p class="tiny dim">${yz('ays.subjects.her-satir-ders-konu-konu')} ${R.SinavProfil.SINIR.ders} ${yz('ays.subjects.ders-ders-basina')}
+              ${R.SinavProfil.SINIR.konuDers} ${yz('ays.subjects.konu-ana-sinavin-yks-degisme')}</p>
+            <div>${K.Button({ label:yz('ays.subjects.profili-ekle'), size:'sm', tone:'primary', act:'sp-yukle' })}</div>
           </div>
         </details>
         ${oneriBolumu()}
@@ -413,8 +475,8 @@ R.Screens.subjects = (function(){
     const L = window.LIFEOS || {};
     const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
     const madde = (ust, k) => ({ ust, sayi:sayi({ deger:k.pct, birim:'%', kesinlik:'computed', formul:'kapanan konu ÷ konu' }),
-      cumle:'kapandı.', vurgu:k.closed + ' / ' + k.total + ' konu.', sistem:'ays' });
-    return raw(V.donen({ id:'ays-kapanis', ad:'Kapanış', maddeler:[
+      cumle:yz('ays.subjects.kapandi'), vurgu:k.closed + ' / ' + k.total + ' konu.', sistem:'ays' });
+    return raw(V.donen({ id:'ays-kapanis', ad:yz('ays.subjects.kapanis'), maddeler:[
       madde('Konu kapanışı', C.overallClosure()), madde('TYT', C.examClosure('TYT')), madde('AYT', C.examClosure('AYT')) ] }));
   }
 
@@ -427,7 +489,7 @@ R.Screens.subjects = (function(){
     const st = subject.topics.map(t => M.topicState(subject.id, t.id).state);
     const kapali = st.filter(s => s === 'closed').length;
     const yarim = st.filter(s => ['learning', 'practicing', 'provisional'].indexOf(s) >= 0).length;
-    const kart = P.kart({ tur:'konu-haritasi', ad:'Konu haritası · ' + subject.name, simge:'harita', yuva:kapali + ' / ' + st.length + ' kapandı',
+    const kart = P.kart({ tur:'konu-haritasi', ad:yz('ays.subjects.konu-haritasi') + subject.name, simge:'harita', yuva:kapali + ' / ' + st.length + ' kapandı',
       govde:P.kareler({ sutun:Math.min(20, st.length), kucuk:st.length > 40,
           durumlar:st.map(s => s === 'closed' ? 'dolu' : ['learning', 'practicing', 'provisional'].indexOf(s) >= 0 ? 'yarim' : 'bos'),
           etiket:st.length + ' konudan ' + kapali + ' kapandı, ' + yarim + ' çalışılıyor' })
@@ -436,7 +498,7 @@ R.Screens.subjects = (function(){
     /* İkinci kontrol: ilk testi geçen konunun 7 gün sonraki testi. */
     const bek = C.pendingSecondChecks();
     const bugun = U.todayISO();
-    const ikinci = bek.length ? P.kart({ tur:'ikinci-kontrol', ad:'İkinci kontrol', simge:'takvim', yuva:bek.length + ' konu',
+    const ikinci = bek.length ? P.kart({ tur:'ikinci-kontrol', ad:yz('ays.subjects.i-kinci-kontrol'), simge:'takvim', yuva:bek.length + ' konu',
       govde:P.liste({ satirlar:bek.slice(0, 5).map(x => ({ sol:x.overdue ? 'vakti geldi' : U.diffDays(bugun, x.dueISO) + ' gün', ad:x.topicName, not:x.subjectName, nokta:x.overdue ? 0 : 'n' })) })
         + P.not('konu, ikinci test de geçince kapanır') }) : '';
     return P.izgara([kart, ikinci], 'pk-izgara--iki');
@@ -452,7 +514,7 @@ R.Screens.subjects = (function(){
     return pendingCard(C.pendingSecondChecks());
   } });
   LIFEOS.PARCA.blok({ id:'subjects.dersler', sayfa:'subjects', yer:'y4', sira:10, ad:'Dersler', ciz({ sid, subject, P }){
-    return K.Card({ pad:'sm', title:'Dersler', sub:R.SUBJECTS.length+' ders', body:subjectNav(sid) });
+    return K.Card({ pad:'sm', title:yz('ays.subjects.dersler'), sub:R.SUBJECTS.length+' ders', body:subjectNav(sid) });
   } });
   LIFEOS.PARCA.blok({ id:'subjects.bolum-5', sayfa:'subjects', yer:'y5', sira:10, ad:'Bölüm 5', ciz({ sid, subject, P }){
     return P.konular;
@@ -589,7 +651,7 @@ R.Screens.subjects = (function(){
       const s = R.SUBJECTS.find(x => x.id === openId());
       return ['kaynak-mimarisi', 'öncelik-sırası'].concat(G && s ? [G.anahtar(s.name)] : []);
     },
-    title:'Dersler',
+    title:yz('ays.subjects.dersler'),
     subtitle(){
       const o = C.overallClosure();
       const total = R.SUBJECTS.reduce((a, s) => a + s.topics.length, 0);

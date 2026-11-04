@@ -12,6 +12,62 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.writing.taslaklar':'Taslaklar',
+  'esp.writing.olcum':'Ölçüm',
+  'esp.writing.araclar':'Araçlar',
+  'esp.writing.ogren':'Öğren',
+  'esp.writing.yazi-ornekleri-iste':'Yazı örnekleri iste',
+  'esp.writing.konu-deneme-kisa-oyku':'Konu: deneme, kısa öykü…',
+  'esp.writing.yazi-konusu':'Yazı konusu',
+  'esp.writing.king-e-ilet':'King’e ilet',
+  'esp.writing.revizyon-gecisleri':'Revizyon geçişleri',
+  'esp.writing.yapi-kaliplari':'Yapı kalıpları',
+  'esp.writing.retorik-figurler':'Retorik figürler',
+  'esp.writing.taslak':'Taslak',
+  'esp.writing.kapat':'Kapat',
+  'esp.writing.sil':'Sil',
+  'esp.writing.baslik':'Başlık',
+  'esp.writing.yazmaya-basla':'Yazmaya başla…',
+  'esp.writing.kaydet':'Kaydet',
+  'esp.writing.revizyon-olarak-kaydet':'Revizyon olarak kaydet',
+  'esp.writing.bugune-oturum-yaz':'Bugüne oturum yaz',
+  'esp.writing.revizyon-sayaci-uslup-olcumu':'«Revizyon» sayacı üslup ölçümüne girer: sürekli yeni taslak açıp hiçbirini revize etmemek en yaygın yazı tıkanmasıdır. Sayı bir hedef değil bir aynadır.',
+  'esp.writing.okunabilirlik-atesman':'Okunabilirlik (Ateşman)',
+  'esp.writing.bant-bir-not-degil-bir':'Bant bir not değil bir tarif: felsefi bir metnin «zor» olması beklenir.',
+  'esp.writing.uc-kez-ve-uzeri-gecen':'Üç kez ve üzeri geçen kelimeler:',
+  'esp.writing.yeni-taslak':'Yeni taslak',
+  'esp.writing.kelime':'Kelime',
+  'esp.writing.revizyon':'Revizyon',
+  'esp.writing.ac':'Aç',
+  'esp.writing.henuz-taslak-yok-bir-baslik':'Henüz taslak yok. Bir başlık ve bir paragraf yeter; ',
+  'esp.writing.haftalik-uretim':'Haftalık üretim',
+  'esp.writing.olcum-icin-oturum-kaydi-gere':'Ölçüm için oturum kaydı gerekir.',
+  'esp.writing.son-7-gun':'Son 7 gün',
+  'esp.writing.taslak-revi-zyon':'TASLAK–REVİZYON',
+  'esp.writing.henuz-taslak-yok':'Henüz taslak yok.',
+  'esp.writing.okunabilirlik':'Okunabilirlik',
+  'esp.writing.puan':'Puan',
+  'esp.writing.kelime-cumle':'Kelime/cümle',
+  'esp.writing.olculecek-metin-yok':'Ölçülecek metin yok.',
+  'esp.writing.pratik-suresi':'Pratik süresi',
+  'esp.writing.oturum-girildiginde-olculmey':'Oturum girildiğinde ölçülmeye başlar.',
+  'esp.writing.son-14-gun':'Son 14 gün',
+  'esp.writing.sinir':'Sınır',
+  'esp.writing.konular':'Konular',
+  'esp.writing.yazi-bolumleri':'Yazı bölümleri',
+  'esp.writing.kaydedildi':'Kaydedildi',
+  'esp.writing.revizyon-2':'Revizyon ',
+  'esp.writing.yazi-oturumu':'Yazı oturumu',
+  'esp.writing.sure-olcumdur-kelime-sayisi':'Süre ölçümdür; kelime sayısı metinden sayıldı.',
+  'esp.writing.sure-dakika':'Süre (dakika)',
+  'esp.writing.bugune-yaz':'Bugüne yaz',
+  'esp.writing.vazgec':'Vazgeç',
+  'esp.writing.sure-girilmedi':'Süre girilmedi',
+  'esp.writing.bugune-yazildi':'Bugüne yazıldı',
+  'esp.writing.yazi-laboratuvari':'Yazı Laboratuvarı',
+  'esp.writing.kelime-7g':'kelime / 7g',
+});
 window.LIFEOS.PARCA.sayfa({ id:'writing', modul:'esp', cekmece:'calisma', ad:'Yazı', ikon:'quill', ek:{ disc:'writing' }, sira:60 });
 
 ESP.Screens.writing = (function(){
@@ -20,10 +76,10 @@ ESP.Screens.writing = (function(){
   const K = ESP.C;
 
   const TABS = [
-    { id:'taslaklar', label:'Taslaklar' },
-    { id:'olcum',     label:'Ölçüm' },
-    { id:'araclar',   label:'Araçlar' },
-    { id:'ogren',     label:'Öğren' },
+    { id:'taslaklar', label:yz('esp.writing.taslaklar') },
+    { id:'olcum',     label:yz('esp.writing.olcum') },
+    { id:'araclar',   label:yz('esp.writing.araclar') },
+    { id:'ogren',     label:yz('esp.writing.ogren') },
   ];
 
   /* ---------------------------------------------------------------- araçlar
@@ -41,18 +97,18 @@ ESP.Screens.writing = (function(){
       /* BAM'dan yazı örnekleri (Part 8f-2): üslubu örnek gösterilen yazarlar
          ve eserleri; kaynaklı. Eserler Okuma › Kaynaklar'a «başlanmadı» girer. */
       K2.Entry({
-        label:'Yazı örnekleri iste', hint:'belge',
+        label:yz('esp.writing.yazi-ornekleri-iste'), hint:'belge',
         meta:'yazı · HKM',
         wide:true,
         body:html`<div class="row gap-8 wrap">
-          ${K2.Input({ id:'belge-yazi', placeholder:'Konu: deneme, kısa öykü…', aria:'Yazı konusu',
+          ${K2.Input({ id:'belge-yazi', placeholder:yz('esp.writing.konu-deneme-kisa-oyku'), aria:yz('esp.writing.yazi-konusu'),
             size:'sm', class:'grow' })}
-          ${K2.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
+          ${K2.Button({ label:yz('esp.writing.king-e-ilet'), size:'sm', act:'belge-iste',
             data:{ 'data-alan':'yazi' } })}
         </div>`,
       }),
       K2.Entry({
-        label:'Revizyon geçişleri', hint:'revision',
+        label:yz('esp.writing.revizyon-gecisleri'), hint:'revision',
         meta:ESP.REVISION_PASSES.length + ' geçiş',
         wide:true,
         body:K2.Table({ tight:true,
@@ -62,7 +118,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K2.Entry({
-        label:'Yapı kalıpları', hint:'structure',
+        label:yz('esp.writing.yapi-kaliplari'), hint:'structure',
         meta:ESP.STRUCTURES.length + ' kalıp',
         wide:true,
         body:html`${map(ESP.STRUCTURES, st => html`
@@ -74,7 +130,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K2.Entry({
-        label:'Retorik figürler', hint:'rhetoric',
+        label:yz('esp.writing.retorik-figurler'), hint:'rhetoric',
         meta:ESP.RHETORIC.length + ' figür',
         wide:true,
         body:K2.Table({ tight:true, headers:['Figür', 'Ne yapar', 'Neden işe yarar', 'Örnek'],
@@ -98,41 +154,39 @@ ESP.Screens.writing = (function(){
       const ok = ESP.Intellect.readability(acik.text, acik.id + (acik.updatedAt || ''));
       const tekrar = ESP.Intellect.repeats(acik.text);
       rows.push(K.Entry({
-        label:'Taslak',
+        label:yz('esp.writing.taslak'),
         meta:acik.title || 'başlıksız',
         note:ok.cert === 'missing' ? 'Ölçüm için en az bir tam cümle gerekir.'
           : ok.words + ' kelime · ' + ok.sentences + ' cümle · cümle başına '
             + U.fmtNum(ok.wordsPerSentence) + ' kelime',
-        action:html`${K.Button({ label:'Kapat', size:'sm', act:'close-draft' })}
-          ${K.Button({ label:'Sil', size:'sm', act:'del-draft', data:{ 'data-id':acik.id } })}`,
+        action:html`${K.Button({ label:yz('esp.writing.kapat'), size:'sm', act:'close-draft' })}
+          ${K.Button({ label:yz('esp.writing.sil'), size:'sm', act:'del-draft', data:{ 'data-id':acik.id } })}`,
         wide:true,
         body:html`
-          ${K.Input({ id:'d-title', value:acik.title, placeholder:'Başlık' })}
+          ${K.Input({ id:'d-title', value:acik.title, placeholder:yz('esp.writing.baslik') })}
           ${K.Textarea({ id:'d-text', rows:14, value:acik.text,
-            placeholder:'Yazmaya başla…' })}
+            placeholder:yz('esp.writing.yazmaya-basla') })}
           <div class="row wrap mt-10">
-            ${K.Button({ label:'Kaydet', tone:'primary', act:'save-draft',
+            ${K.Button({ label:yz('esp.writing.kaydet'), tone:'primary', act:'save-draft',
               data:{ 'data-id':acik.id } })}
-            ${K.Button({ label:'Revizyon olarak kaydet', act:'save-revision',
+            ${K.Button({ label:yz('esp.writing.revizyon-olarak-kaydet'), act:'save-revision',
               data:{ 'data-id':acik.id } })}
-            ${K.Button({ label:'Bugüne oturum yaz', act:'log-writing',
+            ${K.Button({ label:yz('esp.writing.bugune-oturum-yaz'), act:'log-writing',
               data:{ 'data-id':acik.id } })}
           </div>
-          <p class="small muted mt-8">«Revizyon» sayacı üslup ölçümüne girer:
-            sürekli yeni taslak açıp hiçbirini revize etmemek en yaygın yazı
-            tıkanmasıdır. Sayı bir hedef değil bir aynadır.</p>
+          <p class="small muted mt-8">${yz('esp.writing.revizyon-sayaci-uslup-olcumu')}</p>
 
           ${when(ok.cert !== 'missing', () => html`
             <div class="mt-12">
-              ${K.Meter({ label:'Okunabilirlik (Ateşman)', value:Math.max(0, Math.min(100, ok.value)),
+              ${K.Meter({ label:yz('esp.writing.okunabilirlik-atesman'), value:Math.max(0, Math.min(100, ok.value)),
                 text:U.fmtNum(ok.value) + ' · ' + ok.band.label })}
               <p class="small muted mt-8">${ok.band.note}
-                Bant bir not değil bir tarif: felsefi bir metnin «zor» olması beklenir.</p>
+                ${yz('esp.writing.bant-bir-not-degil-bir')}</p>
             </div>`)}
 
           ${when(tekrar.length, () => html`
             <div class="mt-12">
-              <p class="small muted">Üç kez ve üzeri geçen kelimeler:</p>
+              <p class="small muted">${yz('esp.writing.uc-kez-ve-uzeri-gecen')}</p>
               <div class="row wrap mt-4">
                 ${map(tekrar, t => K.Chip({ label:t.word + ' · ' + t.count }))}
               </div>
@@ -142,13 +196,13 @@ ESP.Screens.writing = (function(){
 
     const liste = S.drafts || [];
     rows.push(K.Entry({
-      label:'Taslaklar',
+      label:yz('esp.writing.taslaklar'),
       meta:liste.length + ' taslak',
-      action:K.Button({ label:'Yeni taslak', tone:'primary', size:'sm', act:'new-draft' }),
+      action:K.Button({ label:yz('esp.writing.yeni-taslak'), tone:'primary', size:'sm', act:'new-draft' }),
       wide:true,
       body:liste.length
         ? K.Table({ tight:true,
-            headers:['Başlık', { label:'Kelime', num:true }, { label:'Revizyon', num:true },
+            headers:['Başlık', { label:yz('esp.writing.kelime'), num:true }, { label:yz('esp.writing.revizyon'), num:true },
               'Güncellendi', ''],
             rows:liste.map(d => {
               const ok = ESP.Intellect.readability(d.text, d.id + (d.updatedAt || ''));
@@ -157,12 +211,12 @@ ESP.Screens.writing = (function(){
                 ok.cert === 'missing' ? '—' : U.fmtNum(ok.words),
                 String(d.revisions || 0),
                 U.fmtShort(ESP.U.gunOf((d.updatedAt || ''))),
-                K.Button({ label:'Aç', size:'sm', act:'open-draft', data:{ 'data-id':d.id } }),
+                K.Button({ label:yz('esp.writing.ac'), size:'sm', act:'open-draft', data:{ 'data-id':d.id } }),
               ];
             }) })
-        : K.Empty({ text:'Henüz taslak yok. Bir başlık ve bir paragraf yeter; '
+        : K.Empty({ text:yz('esp.writing.henuz-taslak-yok-bir-baslik')
             + 'ölçüm oradan başlar.',
-            action:K.Button({ label:'Yeni taslak', tone:'primary', act:'new-draft' }) }),
+            action:K.Button({ label:yz('esp.writing.yeni-taslak'), tone:'primary', act:'new-draft' }) }),
     }));
 
     return rows;
@@ -180,36 +234,36 @@ ESP.Screens.writing = (function(){
 
     return [
       K.Entry({
-        label:'Haftalık üretim',
+        label:yz('esp.writing.haftalik-uretim'),
         meta:w.cert === 'missing' ? 'veri yok' : U.fmtNum(w.value) + ' kelime',
         note:w.cert === 'missing'
           ? 'Son 7 günde yazı oturumu girilmemiş. Taslağı açıp kapatmak üretim sayılmaz; '
             + 'oturumu Bugün ekranından ya da taslak sayfasından yazarsın.'
           : w.windowDays + ' günün ' + w.enteredDays + '\'inde yazı oturumu var.',
         body:w.cert === 'missing'
-          ? K.Empty({ text:'Ölçüm için oturum kaydı gerekir.' })
-          : K.Meter({ label:'Son 7 gün', value:Math.min(100, w.value / 3500 * 100),
+          ? K.Empty({ text:yz('esp.writing.olcum-icin-oturum-kaydi-gere') })
+          : K.Meter({ label:yz('esp.writing.son-7-gun'), value:Math.min(100, w.value / 3500 * 100),
               text:U.fmtNum(w.value) + ' kelime' }),
       }),
 
       K.Entry({
-        label:'TASLAK–REVİZYON', hint:'draft-ratio',
+        label:yz('esp.writing.taslak-revi-zyon'), hint:'draft-ratio',
         meta:r.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(r.value * 10) / 10) + ' / taslak',
         body:r.cert === 'missing'
-          ? K.Empty({ text:'Henüz taslak yok.' })
+          ? K.Empty({ text:yz('esp.writing.henuz-taslak-yok') })
           : html`${K.Meter({ label:r.drafts + ' taslak, ' + r.revisions + ' revizyon',
               value:Math.min(100, r.value * 50), text:U.fmtNum(Math.round(r.value * 10) / 10) })}`,
       }),
 
       K.Entry({
-        label:'Okunabilirlik', hint:'readability',
+        label:yz('esp.writing.okunabilirlik'), hint:'readability',
         meta:olculen.length + ' taslak ölçüldü',
         wide:true,
         body:olculen.length
           ? K.Table({ tight:true,
-              headers:['Taslak', { label:'Puan', num:true }, 'Bant',
-                { label:'Kelime/cümle', num:true }, { label:'Hece/kelime', num:true }],
+              headers:['Taslak', { label:yz('esp.writing.puan'), num:true }, 'Bant',
+                { label:yz('esp.writing.kelime-cumle'), num:true }, { label:'Hece/kelime', num:true }],
               rows:olculen.map(x => [
                 x.d.title || 'başlıksız',
                 U.fmtNum(x.ok.value),
@@ -217,24 +271,24 @@ ESP.Screens.writing = (function(){
                 U.fmtNum(x.ok.wordsPerSentence),
                 U.fmtNum(x.ok.syllablesPerWord),
               ]) })
-          : K.Empty({ text:'Ölçülecek metin yok.' }),
+          : K.Empty({ text:yz('esp.writing.olculecek-metin-yok') }),
       }),
 
       K.Entry({
-        label:'Pratik süresi',
+        label:yz('esp.writing.pratik-suresi'),
         meta:h.cert === 'missing' ? 'veri yok' : U.fmtMin(h.minutes),
         note:h.cert === 'missing'
           ? 'Son 14 günde yazı oturumu yok.'
           : h.windowDays + ' günün ' + h.enteredDays + '\'inde kayıt var. '
             + 'Girilmemiş gün ortalamaya katılmaz.',
         body:h.cert === 'missing'
-          ? K.Empty({ text:'Oturum girildiğinde ölçülmeye başlar.' })
-          : K.Meter({ label:'Son 14 gün', value:Math.min(100, h.minutes / 420 * 100),
+          ? K.Empty({ text:yz('esp.writing.oturum-girildiginde-olculmey') })
+          : K.Meter({ label:yz('esp.writing.son-14-gun'), value:Math.min(100, h.minutes / 420 * 100),
               text:U.fmtMin(h.minutes) }),
       }),
 
       K.Entry({
-        label:'Sınır', hint:'pedagogic',
+        label:yz('esp.writing.sinir'), hint:'pedagogic',
         meta:'ne söylenmez',
         body:K.Notice({ tone:'info',
           body:'«Kusursuz», «yayımlanmaya hazır», «şaheser» gibi ifadeler estetik '
@@ -251,7 +305,7 @@ ESP.Screens.writing = (function(){
     const ozet = ESP.Lesson.topicSummary('writing');
     return [
       K.Entry({
-        label:'Konular', hint:'topic',
+        label:yz('esp.writing.konular'), hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
         wide:true,
         body:ESP.Parts.topics('writing'),
@@ -265,7 +319,7 @@ ESP.Screens.writing = (function(){
   const GOVDE = { taslaklar:draftRows, olcum:measureRows, araclar:toolRows, ogren:topicRows };
 
   LIFEOS.PARCA.blok({ id:'writing.bolum-1', sayfa:'writing', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
-    return K.Span(12, ESP.Parts.bolumler('writing', { act:'write-tab', aria:'Yazı bölümleri', tabs:TABS,
+    return K.Span(12, ESP.Parts.bolumler('writing', { act:'write-tab', aria:yz('esp.writing.yazi-bolumleri'), tabs:TABS,
         govde:GOVDE, sayi:{ taslaklar:(S.drafts || []).length || null } }));
   } });
   function render(){
@@ -303,7 +357,7 @@ ESP.Screens.writing = (function(){
       d.text = val('d-text');
       await M.saveDraft(d);
       ESP.Memo.bitir();
-      ESP.UI.toast('Kaydedildi');
+      ESP.UI.toast(yz('esp.writing.kaydedildi'));
       ESP.App.render();
     },
 
@@ -315,7 +369,7 @@ ESP.Screens.writing = (function(){
       d.revisions = (d.revisions || 0) + 1;
       await M.saveDraft(d);
       ESP.Memo.bitir();
-      ESP.UI.toast('Revizyon ' + d.revisions + ' kaydedildi');
+      ESP.UI.toast(yz('esp.writing.revizyon-2') + d.revisions + ' kaydedildi');
       ESP.App.render();
     },
 
@@ -324,31 +378,31 @@ ESP.Screens.writing = (function(){
       if(!d) return;
       const ok = ESP.Intellect.readability(val('d-text') || d.text);
       ESP.UI.sheet({
-        title:'Yazı oturumu',
+        title:yz('esp.writing.yazi-oturumu'),
         body:String(html`
-          <p class="small muted">Süre ölçümdür; kelime sayısı metinden sayıldı.</p>
+          <p class="small muted">${yz('esp.writing.sure-olcumdur-kelime-sayisi')}</p>
           <div class="cols-2 mt-10">
-            ${K.Field({ label:'Süre (dakika)',
+            ${K.Field({ label:yz('esp.writing.sure-dakika'),
               input:K.Input({ id:'wl-min', type:'number', numeric:true, min:1,
                 placeholder:'40' }) })}
-            ${K.Field({ label:'Kelime',
+            ${K.Field({ label:yz('esp.writing.kelime'),
               input:K.Input({ id:'wl-words', type:'number', numeric:true,
                 value:ok.cert === 'missing' ? '' : ok.words }) })}
           </div>`),
-        footer:String(K.Button({ label:'Bugüne yaz', tone:'primary', act:'do-log-writing' })
-          + K.Button({ label:'Vazgeç', act:'sheet-close' })),
+        footer:String(K.Button({ label:yz('esp.writing.bugune-yaz'), tone:'primary', act:'do-log-writing' })
+          + K.Button({ label:yz('esp.writing.vazgec'), act:'sheet-close' })),
       });
     },
 
     async 'do-log-writing'(){
       const dk = val('wl-min').trim();
-      if(!dk){ ESP.UI.toast('Süre girilmedi'); return; }
+      if(!dk){ ESP.UI.toast(yz('esp.writing.sure-girilmedi')); return; }
       await M.addSession(U.todayISO(), {
         disc:'writing', minutes:dk, count:val('wl-words').trim(), note:'taslak',
       });
       ESP.Memo.bitir();
       ESP.UI.closeSheet();
-      ESP.UI.toast('Bugüne yazıldı');
+      ESP.UI.toast(yz('esp.writing.bugune-yazildi'));
       ESP.App.render();
     },
 
@@ -368,7 +422,7 @@ ESP.Screens.writing = (function(){
        Araçlar'ın dördü de başvuru (şerit). Sınır kartı gizli: pedagojik
        sınır her sayfanın sonunda ve ⓘ'de (hints: pedagogic). */
     kucukVarsayilan:['pratik-süresi', 'yazı-örnekleri-iste', 'revizyon-geçişleri', 'yapı-kalıpları', 'retorik-figürler'],
-    title:'Yazı Laboratuvarı',
+    title:yz('esp.writing.yazi-laboratuvari'),
     headline(){
       const w = ESP.Intellect.wordsWritten(7);
       if(!(S.drafts || []).length) return 'Henüz taslak yok.';
@@ -389,7 +443,7 @@ ESP.Screens.writing = (function(){
       const ok = son ? ESP.Intellect.readability(son.text, son.id + (son.updatedAt || '')) : { cert:'missing' };
       return [
         { value:String((S.drafts || []).length), label:'taslak' },
-        { value:w.cert === 'missing' ? '—' : U.fmtNum(w.value), label:'kelime / 7g' },
+        { value:w.cert === 'missing' ? '—' : U.fmtNum(w.value), label:yz('esp.writing.kelime-7g') },
         { value:r.cert === 'missing' ? '—' : String(r.revisions), label:'revizyon' },
         { value:ok.cert === 'missing' ? '—' : U.fmtNum(ok.value), label:'okunabilirlik' },
       ];

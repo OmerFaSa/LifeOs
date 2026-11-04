@@ -7,6 +7,58 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.profiles.cihazdaki-profiller':'Cihazdaki profiller',
+  'ays.profiles.her-profilin-verisi-ayri-tut':'Her profilin verisi ayrı tutulur',
+  'ays.profiles.profil-ekle':'Profil ekle',
+  'ays.profiles.acik':'açık',
+  'ays.profiles.gec':'Geç',
+  'ays.profiles.profil-degistirmek-sayfayi-y':'Profil değiştirmek sayfayı yeniden yükler. Veriler karışmaz; her profil kendi anahtarında saklanır.',
+  'ays.profiles.profil-aktarimi':'Profil aktarımı',
+  'ays.profiles.plani-ve-ayarlari-baska-ciha':'Planı ve ayarları başka cihaza ya da kişiye taşı',
+  'ays.profiles.tum-veriyi-disa-aktar':'Tüm veriyi dışa aktar',
+  'ays.profiles.yalniz-kurulumu-disa-aktar':'Yalnız kurulumu dışa aktar',
+  'ays.profiles.kurulum-yukle':'Kurulum yükle',
+  'ays.profiles.gozetmen-ozeti':'Gözetmen özeti',
+  'ays.profiles.ogretmen-ya-da-veli-icin':'Öğretmen ya da veli için salt okunur',
+  'ays.profiles.henuz-ozet-yok-her-profil':'Henüz özet yok. Her profil “Özeti yenile” dediğinde buraya bir satır bırakır.',
+  'ays.profiles.bu-profilin-ozetini-yaz':'Bu profilin özetini yaz',
+  'ays.profiles.ozeti-yenile':'Özeti yenile',
+  'ays.profiles.hafta':'Hafta',
+  'ays.profiles.plan':'Plan',
+  'ays.profiles.kapanis':'Kapanış',
+  'ays.profiles.tyt-medyan':'TYT medyan',
+  'ays.profiles.seri':'Seri',
+  'ays.profiles.bu-tablo-ham-kayit-icermez':'Bu tablo ham kayıt içermez: not, hata metni ve kişisel alan paylaşılmaz. Yalnız ilerleme sayıları görünür.',
+  'ays.profiles.kiyas':'Kıyas',
+  'ays.profiles.benzer-hedefli-adaylarla-kar':'Benzer hedefli adaylarla karşılaştırma',
+  'ays.profiles.kiyas-icin-en-az-iki':'Kıyas için en az iki profilin özeti gerekir.',
+  'ays.profiles.plan-tamamlama':'Plan tamamlama',
+  'ays.profiles.konu-kapanisi':'Konu kapanışı',
+  'ays.profiles.davranis-serisi':'Davranış serisi',
+  'ays.profiles.tekrar-borcu':'Tekrar borcu',
+  'ays.profiles.kendi-verinle-diger-profille':'Kendi verinle diğer profillerin ortalaması',
+  'ays.profiles.sen':'Sen',
+  'ays.profiles.ortalama':'Ortalama',
+  'ays.profiles.fark':'Fark',
+  'ays.profiles.yeni-adayin-verisi-ayri-tutu':'Yeni adayın verisi ayrı tutulur',
+  'ays.profiles.profil-adi':'Profil adı',
+  'ays.profiles.or-kardesim':'ör. Kardeşim',
+  'ays.profiles.vazgec':'Vazgeç',
+  'ays.profiles.olustur-ve-gec':'Oluştur ve geç',
+  'ays.profiles.kurulum-dosyasi-indirildi':'Kurulum dosyası indirildi',
+  'ays.profiles.kurulum-panoya-kopyalandi':'Kurulum panoya kopyalandı',
+  'ays.profiles.kurulum':'Kurulum',
+  'ays.profiles.kopyalayip-aktarabilirsin':'Kopyalayıp aktarabilirsin',
+  'ays.profiles.kapat':'Kapat',
+  'ays.profiles.yalniz-hedef-takvim-kapasite':'Yalnız hedef, takvim, kapasite ve seviye aktarılır',
+  'ays.profiles.kurulum-json-u':'Kurulum JSON’u',
+  'ays.profiles.disa-aktarilan-kurulum-metni':'Dışa aktarılan kurulum metnini yapıştır',
+  'ays.profiles.yukle':'Yükle',
+  'ays.profiles.gecerli-json-degil':'Geçerli JSON değil',
+  'ays.profiles.bu-bir-kurulum-dosyasi-degil':'Bu bir kurulum dosyası değil',
+  'ays.profiles.profiller':'Profiller',
+});
 window.LIFEOS.PARCA.sayfa({ id:'profiles', modul:'ays', cekmece:'ayarlar', ad:'Profil', ikon:'shield', sira:20 });
 
 R.Screens.profiles = (function(){
@@ -54,35 +106,34 @@ R.Screens.profiles = (function(){
     const list = M.profileList();
     const active = M.activeProfileId();
     return K.Card({
-      title:'Cihazdaki profiller', sub:'Her profilin verisi ayrı tutulur',
-      actions:K.Button({ label:'Profil ekle', icon:'plus', size:'sm', tone:'primary', act:'prof-new' }),
+      title:yz('ays.profiles.cihazdaki-profiller'), sub:yz('ays.profiles.her-profilin-verisi-ayri-tut'),
+      actions:K.Button({ label:yz('ays.profiles.profil-ekle'), icon:'plus', size:'sm', tone:'primary', act:'prof-new' }),
       body:html`<div class="list">${map(list, p => html`
         <div class="listitem">
           <span class="${p.id === active ? 'notedot is-done' : 'notedot'}">${raw(UI.icon(p.id === active ? 'check' : 'today'))}</span>
           <div class="grow">
             <div class="row-sm wrap"><b>${p.name}</b>
-              ${when(p.id === active, () => K.Badge({ label:'açık', tone:'ok' }))}</div>
+              ${when(p.id === active, () => K.Badge({ label:yz('ays.profiles.acik'), tone:'ok' }))}</div>
             <div class="tiny dim">${p.createdAt ? U.fmtDate(R.U.gunOf(p.createdAt)) + ' tarihinde eklendi' : 'ilk profil'}</div>
           </div>
-          ${when(p.id !== active, () => K.Button({ label:'Geç', size:'sm',
+          ${when(p.id !== active, () => K.Button({ label:yz('ays.profiles.gec'), size:'sm',
             act:'prof-switch', data:{ 'data-id':p.id } }))}
         </div>`)}</div>
-        <p class="tiny dim mt-10">Profil değiştirmek sayfayı yeniden yükler. Veriler karışmaz;
-          her profil kendi anahtarında saklanır.</p>`,
+        <p class="tiny dim mt-10">${yz('ays.profiles.profil-degistirmek-sayfayi-y')}</p>`,
     });
   }
 
   function transferCard(){
     return K.Card({
-      title:'Profil aktarımı', sub:'Planı ve ayarları başka cihaza ya da kişiye taşı',
+      title:yz('ays.profiles.profil-aktarimi'), sub:yz('ays.profiles.plani-ve-ayarlari-baska-ciha'),
       body:html`
         ${K.Notice({ tone:'info', body:'Dışa aktarım tüm çalışma verini içerir. Başka birine '
           + 'yalnız planı vermek istersen “Yalnız kurulum” seçeneğini kullan: hedef, takvim, '
           + 'kapasite ve seviye gider; deneme ve hata kayıtların gitmez.' })}
         ${K.Row([
-          K.Button({ label:'Tüm veriyi dışa aktar', icon:'download', act:'export-data' }),
-          K.Button({ label:'Yalnız kurulumu dışa aktar', icon:'download', act:'prof-export-setup' }),
-          K.Button({ label:'Kurulum yükle', icon:'upload', act:'prof-import-setup' }),
+          K.Button({ label:yz('ays.profiles.tum-veriyi-disa-aktar'), icon:'download', act:'export-data' }),
+          K.Button({ label:yz('ays.profiles.yalniz-kurulumu-disa-aktar'), icon:'download', act:'prof-export-setup' }),
+          K.Button({ label:yz('ays.profiles.kurulum-yukle'), icon:'upload', act:'prof-import-setup' }),
         ], { wrap:true })}`,
     });
   }
@@ -95,10 +146,10 @@ R.Screens.profiles = (function(){
     const active = M.activeProfileId();
 
     if(!ids.length){
-      return K.Card({ title:'Gözetmen özeti', sub:'Öğretmen ya da veli için salt okunur',
+      return K.Card({ title:yz('ays.profiles.gozetmen-ozeti'), sub:yz('ays.profiles.ogretmen-ya-da-veli-icin'),
         body:K.Empty({ icon:'chart',
-          text:'Henüz özet yok. Her profil “Özeti yenile” dediğinde buraya bir satır bırakır.',
-          action:K.Button({ label:'Bu profilin özetini yaz', size:'sm', tone:'primary', act:'prof-snapshot' }) }) });
+          text:yz('ays.profiles.henuz-ozet-yok-her-profil'),
+          action:K.Button({ label:yz('ays.profiles.bu-profilin-ozetini-yaz'), size:'sm', tone:'primary', act:'prof-snapshot' }) }) });
     }
 
     const rows = ids.map(id => {
@@ -118,16 +169,15 @@ R.Screens.profiles = (function(){
     });
 
     return K.Card({
-      title:'Gözetmen özeti', sub:ids.length + ' profil · yalnız özet sayılar',
-      actions:K.Button({ label:'Özeti yenile', icon:'refresh', size:'sm', act:'prof-snapshot' }),
+      title:yz('ays.profiles.gozetmen-ozeti'), sub:ids.length + ' profil · yalnız özet sayılar',
+      actions:K.Button({ label:yz('ays.profiles.ozeti-yenile'), icon:'refresh', size:'sm', act:'prof-snapshot' }),
       body:html`
         ${K.Table({ tight:true,
-          headers:['Aday', { label:'Hafta', num:true }, { label:'Plan', num:true },
-            { label:'Kapanış', num:true }, { label:'TYT medyan', num:true },
-            { label:'Seri', num:true }, 'Güncellik'],
+          headers:['Aday', { label:yz('ays.profiles.hafta'), num:true }, { label:yz('ays.profiles.plan'), num:true },
+            { label:yz('ays.profiles.kapanis'), num:true }, { label:yz('ays.profiles.tyt-medyan'), num:true },
+            { label:yz('ays.profiles.seri'), num:true }, 'Güncellik'],
           rows })}
-        <p class="tiny dim mt-10">Bu tablo ham kayıt içermez: not, hata metni ve kişisel alan
-          paylaşılmaz. Yalnız ilerleme sayıları görünür.</p>`,
+        <p class="tiny dim mt-10">${yz('ays.profiles.bu-tablo-ham-kayit-icermez')}</p>`,
     });
   }
 
@@ -140,8 +190,8 @@ R.Screens.profiles = (function(){
     const others = ids.filter(id => id !== M.activeProfileId()).map(id => snaps[id]);
 
     if(!me || !others.length){
-      return K.Card({ title:'Kıyas', sub:'Benzer hedefli adaylarla karşılaştırma',
-        body:K.Empty({ icon:'chart', text:'Kıyas için en az iki profilin özeti gerekir.' }) });
+      return K.Card({ title:yz('ays.profiles.kiyas'), sub:yz('ays.profiles.benzer-hedefli-adaylarla-kar'),
+        body:K.Empty({ icon:'chart', text:yz('ays.profiles.kiyas-icin-en-az-iki') }) });
     }
 
     const band = (mine, list, label, better) => {
@@ -154,20 +204,20 @@ R.Screens.profiles = (function(){
     };
 
     const rows = [
-      { key:'completion', label:'Plan tamamlama', unit:'%', better:'high' },
-      { key:'closure',    label:'Konu kapanışı',  unit:'%', better:'high' },
-      { key:'streak',     label:'Davranış serisi', unit:' gün', better:'high' },
-      { key:'cardDebt',   label:'Tekrar borcu',   unit:'%', better:'low' },
+      { key:'completion', label:yz('ays.profiles.plan-tamamlama'), unit:'%', better:'high' },
+      { key:'closure',    label:yz('ays.profiles.konu-kapanisi'),  unit:'%', better:'high' },
+      { key:'streak',     label:yz('ays.profiles.davranis-serisi'), unit:' gün', better:'high' },
+      { key:'cardDebt',   label:yz('ays.profiles.tekrar-borcu'),   unit:'%', better:'low' },
     ].map(r => {
       const b = band(me[r.key], others, r.key, r.better);
       return { r, b };
     }).filter(x => x.b);
 
     return K.Card({
-      title:'Kıyas', sub:'Kendi verinle diğer profillerin ortalaması',
+      title:yz('ays.profiles.kiyas'), sub:yz('ays.profiles.kendi-verinle-diger-profille'),
       body:html`
-        ${K.Table({ tight:true, headers:['Ölçüt', { label:'Sen', num:true },
-          { label:'Ortalama', num:true }, { label:'Fark', num:true }],
+        ${K.Table({ tight:true, headers:['Ölçüt', { label:yz('ays.profiles.sen'), num:true },
+          { label:yz('ays.profiles.ortalama'), num:true }, { label:yz('ays.profiles.fark'), num:true }],
           rows:rows.map(x => [
             x.r.label,
             html`<b class="num">${me[x.r.key]}${x.r.unit}</b>`,
@@ -220,14 +270,14 @@ R.Screens.profiles = (function(){
   const handle = {
     async 'prof-new'(){
       UI.sheet({
-        title:'Profil ekle', subtitle:'Yeni adayın verisi ayrı tutulur',
+        title:yz('ays.profiles.profil-ekle'), subtitle:yz('ays.profiles.yeni-adayin-verisi-ayri-tutu'),
         body:String(K.Stack([
           K.Notice({ tone:'info', body:'Yeni profil boş başlar ve kurulum sihirbazı açılır. '
             + 'Mevcut profilin verisi etkilenmez.' }),
-          K.Field({ label:'Profil adı', input:K.Input({ id:'pf-name', placeholder:'ör. Kardeşim' }) }),
+          K.Field({ label:yz('ays.profiles.profil-adi'), input:K.Input({ id:'pf-name', placeholder:yz('ays.profiles.or-kardesim') }) }),
         ])),
-        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-          ${K.Button({ label:'Oluştur ve geç', tone:'primary', act:'prof-create' })}`),
+        footer:String(html`${K.Button({ label:yz('ays.profiles.vazgec'), act:'sheet-close' })}
+          ${K.Button({ label:yz('ays.profiles.olustur-ve-gec'), tone:'primary', act:'prof-create' })}`),
       });
     },
     async 'prof-create'(){
@@ -257,34 +307,34 @@ R.Screens.profiles = (function(){
       try{
         if(window.claude && window.claude.use){
           const dl = await window.claude.use('downloads');
-          if(dl){ await dl.save({ filename, data:json }); UI.toast('Kurulum dosyası indirildi'); return; }
+          if(dl){ await dl.save({ filename, data:json }); UI.toast(yz('ays.profiles.kurulum-dosyasi-indirildi')); return; }
         }
         await navigator.clipboard.writeText(json);
-        UI.toast('Kurulum panoya kopyalandı');
+        UI.toast(yz('ays.profiles.kurulum-panoya-kopyalandi'));
       }catch(e){
-        UI.sheet({ title:'Kurulum', subtitle:'Kopyalayıp aktarabilirsin',
+        UI.sheet({ title:yz('ays.profiles.kurulum'), subtitle:yz('ays.profiles.kopyalayip-aktarabilirsin'),
           body:String(K.Textarea({ id:'pf-out', rows:12, value:json })),
-          footer:String(K.Button({ label:'Kapat', act:'sheet-close' })) });
+          footer:String(K.Button({ label:yz('ays.profiles.kapat'), act:'sheet-close' })) });
       }
     },
     async 'prof-import-setup'(){
       UI.sheet({
-        title:'Kurulum yükle', subtitle:'Yalnız hedef, takvim, kapasite ve seviye aktarılır',
+        title:yz('ays.profiles.kurulum-yukle'), subtitle:yz('ays.profiles.yalniz-hedef-takvim-kapasite'),
         body:String(K.Stack([
           K.Notice({ tone:'warn', body:'Bu işlem mevcut kurulumunu değiştirir ve planı yeniden üretir. '
             + 'Deneme, hata ve kart kayıtların korunur.' }),
-          K.Field({ label:'Kurulum JSON’u', input:K.Textarea({ id:'pf-in', rows:10,
-            placeholder:'Dışa aktarılan kurulum metnini yapıştır' }) }),
+          K.Field({ label:yz('ays.profiles.kurulum-json-u'), input:K.Textarea({ id:'pf-in', rows:10,
+            placeholder:yz('ays.profiles.disa-aktarilan-kurulum-metni') }) }),
         ])),
-        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-          ${K.Button({ label:'Yükle', tone:'primary', act:'prof-import-run' })}`),
+        footer:String(html`${K.Button({ label:yz('ays.profiles.vazgec'), act:'sheet-close' })}
+          ${K.Button({ label:yz('ays.profiles.yukle'), tone:'primary', act:'prof-import-run' })}`),
       });
     },
     async 'prof-import-run'(){
       let obj;
       try{ obj = JSON.parse(document.getElementById('pf-in').value); }
-      catch(e){ UI.toast('Geçerli JSON değil'); return; }
-      if(!obj || !obj.setup){ UI.toast('Bu bir kurulum dosyası değil'); return; }
+      catch(e){ UI.toast(yz('ays.profiles.gecerli-json-degil')); return; }
+      if(!obj || !obj.setup){ UI.toast(yz('ays.profiles.bu-bir-kurulum-dosyasi-degil')); return; }
 
       Object.assign(S.profile, obj.setup, { setupDone:true });
       await M.saveProfile();
@@ -305,7 +355,7 @@ R.Screens.profiles = (function(){
 
   return {
     id:'profiles',
-    title:'Profiller',
+    title:yz('ays.profiles.profiller'),
     subtitle(){
       const n = M.profileList().length;
       return n > 1 ? n + ' profil · gözetmen ve kıyas' : 'Çoklu kullanım, aktarım ve gözetmen özeti';

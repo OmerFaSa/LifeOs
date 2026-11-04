@@ -10,6 +10,107 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.basket.butce':'Bütçe',
+  'spi.basket.sepet':'Sepet',
+  'spi.basket.i-kame':'İkame',
+  'spi.basket.fiyat':'Fiyat',
+  'spi.basket.haftalik-sepet':'Haftalık sepet',
+  'spi.basket.toplam':'Toplam',
+  'spi.basket.kisi-basi':'Kişi başı',
+  'spi.basket.tahmin-payi':'Tahmin payı',
+  'spi.basket.haftalik-sinir':'Haftalık sınır',
+  'spi.basket.kalem-ekle':'Kalem ekle',
+  'spi.basket.ogunlerimden-liste':'Öğünlerimden liste',
+  'spi.basket.kalemler':'Kalemler',
+  'spi.basket.maliyete-gore-sirali':'Maliyete göre sıralı',
+  'spi.basket.cikar':'Çıkar',
+  'spi.basket.besin-kapsamasi':'Besin kapsaması',
+  'spi.basket.kalori':'Kalori',
+  'spi.basket.protein':'Protein',
+  'spi.basket.lif':'Lif',
+  'spi.basket.sepet-2':'Sepet ',
+  'spi.basket.kapsiyor':'kapsıyor',
+  'spi.basket.kapsama':'Kapsama',
+  'spi.basket.en-ucuz-kaynak':'En ucuz kaynak',
+  'spi.basket.i-kame-firsatlari':'İkame fırsatları',
+  'spi.basket.sepetindeki-kalemler-icin':'Sepetindeki kalemler için',
+  'spi.basket.dusen':'Düşen:',
+  'spi.basket.degistir':'Değiştir',
+  'spi.basket.oneri-neyi-korudugunu-ve-ney':'Öneri neyi koruduğunu ve neyi kaybettiğini birlikte söyler. «Ucuz olan iyidir» diye bir kural yoktur.',
+  'spi.basket.toplu-alim':'Toplu alım',
+  'spi.basket.bozulmadan-saklanan-kalemler':'Bozulmadan saklanan kalemler',
+  'spi.basket.en-az':'En az',
+  'spi.basket.tasarruf':'Tasarruf',
+  'spi.basket.yavas-tuketim':'yavaş tüketim',
+  'spi.basket.sepette-yok':'sepette yok',
+  'spi.basket.yalnizca-kuru-bakliyat-yag-v':'Yalnızca kuru bakliyat, yağ ve konserve gibi kalemler listede. Taze üründe toplu alım tasarruf değil israf üretir.',
+  'spi.basket.fiyat-listesi':'Fiyat listesi',
+  'spi.basket.kendi-fisindeki-fiyat-tahmin':'Kendi fişindeki fiyat tahmini ezer',
+  'spi.basket.fiyat-listesinde-ara':'Fiyat listesinde ara',
+  'spi.basket.sepete-kalem-ekle':'Sepete kalem ekle',
+  'spi.basket.ara-mercimek-tavuk-zeytinyag':'Ara: mercimek, tavuk, zeytinyağı…',
+  'spi.basket.kapat':'Kapat',
+  'spi.basket.haftalik-miktar':'Haftalık miktar',
+  'spi.basket.kilogram':'Kilogram',
+  'spi.basket.vazgec':'Vazgeç',
+  'spi.basket.kaydet':'Kaydet',
+  'spi.basket.en-ucuz':'En ucuz ',
+  'spi.basket.bir-birim-oge-basina-maliyet':'Bir birim öğe başına maliyet',
+  'spi.basket.birim-basi':'Birim başı',
+  'spi.basket.100-g-da':'100 g\'da',
+  'spi.basket.harcama-seritleri':'Harcama şeritleri',
+  'spi.basket.talep-tablosu':'Talep tablosu',
+  'spi.basket.veri-yok':'veri yok',
+  'spi.basket.tl':'TL',
+  'spi.basket.kalem-fiyati-bilinmedigi-ici':'kalem fiyatı bilinmediği için toplamın dışında.',
+  'spi.basket.butun-kalemlerin-karsiligi-h':'Bütün kalemlerin karşılığı hesaplandı.',
+  'spi.basket.aylik-sinir':'Aylık sınır',
+  'spi.basket.sinir':'Sınır',
+  'spi.basket.tl-kalemlerin-karsiligi-bili':'TL. Kalemlerin karşılığı bilinmiyor; sınıra göre durum hesaplanmadı.',
+  'spi.basket.kullanilan':'Kullanılan',
+  'spi.basket.sedef-in-notu':'Sedef\'in notu',
+  'spi.basket.hazir-kurallar':'hazır kurallar',
+  'spi.basket.sedef-e-sor':'Sedef\'e sor',
+  'spi.basket.butcenin-yeri':'Bütçenin yeri',
+  'spi.basket.fiyatlar-nereden-geliyor':'Fiyatlar nereden geliyor?',
+  'spi.basket.baslangicta-tohum-fiyati-tah':'Başlangıçta tohum fiyatı «tahmin»; fişten girdiğin fiyat «ölçüldü» olur.',
+  'spi.basket.fiyatlar-internetten-cekilme':'Fiyatlar internetten çekilmez — bu uygulama çevrimdışı çalışır ve sağlık verisi dışarı çıkmaz. Fişten girdiğin her fiyat tohumun üstüne yazılır.',
+  'spi.basket.fiyat-gir':'Fiyat gir',
+  'spi.basket.sinir-ve-ucretler':'Sınır ve ücretler',
+  'spi.basket.girilmeyen-alan-sinir-yok-de':'Girilmeyen alan «sınır yok» demektir, sıfır değil',
+  'spi.basket.haftalik-sepet-siniri-tl':'Haftalık sepet sınırı (TL)',
+  'spi.basket.aylik-toplam-saglik-butcesi':'Aylık toplam sağlık bütçesi (TL)',
+  'spi.basket.tek-panel-test-ucreti-tl':'Tek panel test ücreti (TL)',
+  'spi.basket.fis-oku':'Fiş oku',
+  'spi.basket.fiyatlar-tahminden-olcume-ge':'Fiyatlar tahminden ölçüme geçer',
+  'spi.basket.model-bagli-degil':'Model bağlı değil.',
+  'spi.basket.fis-fotografi-ya-da-metni':'Fiş fotoğrafı ya da metni',
+  'spi.basket.oku':'Oku',
+  'spi.basket.fisten-okunanlar':'Fişten okunanlar',
+  'spi.basket.tahmini-eziyor':'tahmini eziyor',
+  'spi.basket.fisten':'fişten',
+  'spi.basket.eslesmeyenler':'Eşleşmeyenler:',
+  'spi.basket.fiyatlari-kaydet':'Fiyatları kaydet',
+  'spi.basket.ogunlerimden-alisveris-liste':'Öğünlerimden alışveriş listesi',
+  'spi.basket.son-yedi-gunun':'Son yedi günün ',
+  'spi.basket.haftada':'· haftada',
+  'spi.basket.kalem-sepette-zaten-yeterli':'kalem sepette zaten yeterli.',
+  'spi.basket.ogun-kalemi-gida-listesinde':'öğün kalemi gıda listesinde yok (silinmiş gıda); listeye girmedi.',
+  'spi.basket.liste-yalniz-senin-ogunlerin':'Liste yalnız senin öğünlerinden; hanenin diğer',
+  'spi.basket.kisisinin-payi-eklenmedi':'kişisinin payı eklenmedi.',
+  'spi.basket.sepete-ekle':'Sepete ekle',
+  'spi.basket.kural-sirasi':'Kural sırası',
+  'spi.basket.sepet-bolumleri':'Sepet bölümleri',
+  'spi.basket.kaydedildi':'Kaydedildi',
+  'spi.basket.hanedeki-kisi-sayisi':'Hanedeki kişi sayısı',
+  'spi.basket.sepette-degistirildi':'Sepette değiştirildi',
+  'spi.basket.finans':'Finans',
+  'spi.basket.aylik-talep-tl':'aylık talep (TL)',
+  'spi.basket.aylik-sinir-tl':'aylık sınır (TL)',
+  'spi.basket.haftalik-sepet-tl':'haftalık sepet (TL)',
+  'spi.basket.fiyati-yok':'fiyatı yok',
+});
 window.LIFEOS.PARCA.sayfa({ id:'basket', modul:'spi', cekmece:'calisma', ad:'Bütçe', sira:50 });
 
 SP.Screens.basket = (function(){
@@ -18,10 +119,10 @@ SP.Screens.basket = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'butce', label:'Bütçe', icon:'target' },
-    { id:'sepet', label:'Sepet', icon:'wallet' },
-    { id:'ikame', label:'İkame', icon:'refresh' },
-    { id:'fiyat', label:'Fiyat', icon:'list' },
+    { id:'butce', label:yz('spi.basket.butce'), icon:'target' },
+    { id:'sepet', label:yz('spi.basket.sepet'), icon:'wallet' },
+    { id:'ikame', label:yz('spi.basket.i-kame'), icon:'refresh' },
+    { id:'fiyat', label:yz('spi.basket.fiyat'), icon:'list' },
   ];
 
   /* ---------------------------------------------------------------- sepet */
@@ -29,46 +130,46 @@ SP.Screens.basket = (function(){
   function totalCard(){
     const b = SP.Money.basketTotal();
     return K.Card({
-      title:'Haftalık sepet', hint:'price-estimate',
+      title:yz('spi.basket.haftalik-sepet'), hint:'price-estimate',
       sub:b.rows.length + ' kalem' + (b.householdSize > 1 ? ' · ' + b.householdSize + ' kişilik hane' : ''),
       badge:b.limit != null
         ? K.Badge({ label:b.over ? 'sınır aşıldı' : 'sınırın altında', tone:b.over ? 'danger' : 'ok' })
         : null,
       body:html`
         <div class="cols-3">
-          ${K.Stat({ label:'Toplam', value:U.fmtNum(Math.round(b.total)), unit:'TL' })}
-          ${K.Stat({ label:'Kişi başı', value:U.fmtNum(Math.round(b.perPerson)), unit:'TL' })}
-          ${K.Stat({ label:'Tahmin payı', value:'%' + b.estimate.pct,
+          ${K.Stat({ label:yz('spi.basket.toplam'), value:U.fmtNum(Math.round(b.total)), unit:'TL' })}
+          ${K.Stat({ label:yz('spi.basket.kisi-basi'), value:U.fmtNum(Math.round(b.perPerson)), unit:'TL' })}
+          ${K.Stat({ label:yz('spi.basket.tahmin-payi'), value:'%' + b.estimate.pct,
             note:b.estimate.pct >= 50 ? 'kendi fişini gir' : 'çoğu ölçülü' })}
         </div>
         ${when(b.limit != null, () => html`<div class="mt-12">
-          ${K.Meter({ label:'Haftalık sınır', value:Math.min(100, b.pct || 0),
+          ${K.Meter({ label:yz('spi.basket.haftalik-sinir'), value:Math.min(100, b.pct || 0),
             text:U.fmtNum(Math.round(b.total)) + ' / ' + U.fmtNum(b.limit) + ' TL',
             tone:b.over ? 'danger' : '' })}</div>`)}
         ${when(b.estimate.pct >= 50 && b.rows.length, () => K.Notice({ tone:'warn', class:'mt-12',
           body:'Bu hesabın %' + b.estimate.pct + '\'i başlangıç tahminiyle yapıldı. '
             + 'Uygulama market taramaz; gerçeğe yaklaşmak için kendi fişindeki fiyatı gir.' }))}`,
-      foot:html`${K.Button({ label:'Kalem ekle', size:'sm', act:'open-add' })}
-        ${K.Button({ label:'Öğünlerimden liste', size:'sm', act:'open-ogun-liste' })}
-        ${K.Button({ label:'Haftalık sınır', size:'sm', act:'open-limit' })}`,
+      foot:html`${K.Button({ label:yz('spi.basket.kalem-ekle'), size:'sm', act:'open-add' })}
+        ${K.Button({ label:yz('spi.basket.ogunlerimden-liste'), size:'sm', act:'open-ogun-liste' })}
+        ${K.Button({ label:yz('spi.basket.haftalik-sinir'), size:'sm', act:'open-limit' })}`,
     });
   }
 
   function itemsCard(){
     const b = SP.Money.basketTotal();
     if(!b.rows.length){
-      return K.Card({ title:'Kalemler',
+      return K.Card({ title:yz('spi.basket.kalemler'),
         body:P.empty('Sepet boş.', 'Kalem ekle', 'open-add', null, true) });
     }
     return K.Card({
-      title:'Kalemler', sub:'Maliyete göre sıralı',
+      title:yz('spi.basket.kalemler'), sub:yz('spi.basket.maliyete-gore-sirali'),
       body:html`${map(b.rows, r => html`
         <div class="pricerow">
           <span><b class="small">${r.food.name}</b>
             <span class="tiny dim"> · ${U.fmtNet(r.item.kg)} kg</span>
             ${P.cert(r.price.cert)}</span>
           <span class="pricerow__tl num">${r.cost == null ? '—' : U.fmtNum(Math.round(r.cost)) + ' TL'}</span>
-          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Çıkar',
+          ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:yz('spi.basket.cikar'),
             act:'del-item', data:{ 'data-id':r.item.foodId } })}
         </div>`)}`,
     });
@@ -76,29 +177,29 @@ SP.Screens.basket = (function(){
 
   function coverageCard(){
     const c = SP.Money.basketCoverage();
-    if(!c.ok) return K.Card({ title:'Besin kapsaması',
+    if(!c.ok) return K.Card({ title:yz('spi.basket.besin-kapsamasi'),
       body:K.Notice({ tone:'info', body:c.note }) });
 
     const macro = [
-      { label:'Kalori', o:c.kcal, unit:'kcal' },
-      { label:'Protein', o:c.protein, unit:'g' },
-      { label:'Lif', o:c.fiber, unit:'g' },
+      { label:yz('spi.basket.kalori'), o:c.kcal, unit:'kcal' },
+      { label:yz('spi.basket.protein'), o:c.protein, unit:'g' },
+      { label:yz('spi.basket.lif'), o:c.fiber, unit:'g' },
     ];
     return K.Card({
-      title:'Besin kapsaması',
-      sub:'Sepet ' + c.householdSize + ' kişinin 7 günlük ihtiyacına göre',
+      title:yz('spi.basket.besin-kapsamasi'),
+      sub:yz('spi.basket.sepet-2') + c.householdSize + ' kişinin 7 günlük ihtiyacına göre',
       badge:c.gaps.length ? K.Badge({ label:c.gaps.length + ' öğe eksik', tone:'warn' })
-        : K.Badge({ label:'kapsıyor', tone:'ok' }),
+        : K.Badge({ label:yz('spi.basket.kapsiyor'), tone:'ok' }),
       body:html`
         <div class="nutgrid">
           ${map(macro, m => P.nutCell({ label:m.label, got:m.o.got, target:m.o.need, unit:m.unit }))}
         </div>
         ${when(c.gaps.length, () => html`<div class="mt-12">
-          ${K.Table({ tight:true, headers:['Karşılanmayan öğe', { label:'Kapsama', num:true }, ''],
+          ${K.Table({ tight:true, headers:['Karşılanmayan öğe', { label:yz('spi.basket.kapsama'), num:true }, ''],
             rows:c.gaps.map(id => [
               SP.NUTRI_BY_ID[id] ? SP.NUTRI_BY_ID[id].name : id,
               '%' + c.micro[id].pct,
-              K.Button({ label:'En ucuz kaynak', size:'sm', act:'open-cheap', data:{ 'data-id':id } }),
+              K.Button({ label:yz('spi.basket.en-ucuz-kaynak'), size:'sm', act:'open-cheap', data:{ 'data-id':id } }),
             ]) })}</div>`)}
         ${when(!c.gaps.length, () => K.Notice({ tone:'ok', class:'mt-10',
           body:'Sepetteki gıdalar hanenin haftalık besin hedeflerini karşılıyor.' }))}`,
@@ -110,13 +211,13 @@ SP.Screens.basket = (function(){
   function swapCard(){
     const rows = SP.Money.swapOpportunities();
     if(!rows.length){
-      return K.Card({ title:'İkame fırsatları', hint:'substitute',
+      return K.Card({ title:yz('spi.basket.i-kame-firsatlari'), hint:'substitute',
         body:K.Notice({ tone:'info', body:'Sepetteki kalemler için tanımlı bir ikame yok. '
           + 'Somon, badem, ceviz, dana eti ve süzme yoğurt gibi kalemlerde öneri çıkar.' }) });
     }
     return K.Card({
-      title:'İkame fırsatları', hint:'substitute',
-      sub:'Sepetindeki kalemler için',
+      title:yz('spi.basket.i-kame-firsatlari'), hint:'substitute',
+      sub:yz('spi.basket.sepetindeki-kalemler-icin'),
       body:html`${map(rows, s => html`
         <div class="listitem">
           <div class="grow">
@@ -125,34 +226,32 @@ SP.Screens.basket = (function(){
             <div class="tiny dim mt-2">${s.sub.note}</div>
             <div class="tiny mt-2">
               <b>Korunan:</b> ${s.keeps.map(k => k.name).join(', ') || '—'}
-              ${when(s.loses.length, () => html` · <b>Düşen:</b> ${s.loses.map(k => k.name).join(', ')}`)}
+              ${when(s.loses.length, () => html` · <b>${yz('spi.basket.dusen')}</b> ${s.loses.map(k => k.name).join(', ')}`)}
             </div>
           </div>
-          ${K.Button({ label:'Değiştir', size:'sm', act:'do-swap',
+          ${K.Button({ label:yz('spi.basket.degistir'), size:'sm', act:'do-swap',
             data:{ 'data-from':s.from.id, 'data-to':s.to.id, 'data-kg':s.kg } })}
         </div>`)}`,
-      foot:html`<span class="small dim">Öneri neyi koruduğunu ve neyi kaybettiğini birlikte söyler.
-        «Ucuz olan iyidir» diye bir kural yoktur.</span>`,
+      foot:html`<span class="small dim">${yz('spi.basket.oneri-neyi-korudugunu-ve-ney')}</span>`,
     });
   }
 
   function bulkCard(){
     const rows = SP.Money.bulkOpportunities();
     return K.Card({
-      title:'Toplu alım', hint:'bulk',
-      sub:'Bozulmadan saklanan kalemler',
+      title:yz('spi.basket.toplu-alim'), hint:'bulk',
+      sub:yz('spi.basket.bozulmadan-saklanan-kalemler'),
       body:K.Table({ tight:true,
-        headers:['Kalem', { label:'En az', num:true }, { label:'Tasarruf', num:true }, 'Durum'],
+        headers:['Kalem', { label:yz('spi.basket.en-az'), num:true }, { label:yz('spi.basket.tasarruf'), num:true }, 'Durum'],
         rows:rows.map(b => [
           html`<b>${b.food.name}</b> <span class="tiny dim">${b.item.note}</span>`,
           U.fmtNet(b.item.minKg) + ' kg',
           U.fmtNum(Math.round(b.saveTl)) + ' TL',
           b.worth ? K.Badge({ label:U.fmtNet(b.weeksToUse) + ' haftada biter', tone:'ok' })
-            : b.weeklyKg ? K.Badge({ label:'yavaş tüketim', tone:'warn' })
-            : K.Badge({ label:'sepette yok', tone:'muted' }),
+            : b.weeklyKg ? K.Badge({ label:yz('spi.basket.yavas-tuketim'), tone:'warn' })
+            : K.Badge({ label:yz('spi.basket.sepette-yok'), tone:'muted' }),
         ]) }),
-      foot:html`<span class="small dim">Yalnızca kuru bakliyat, yağ ve konserve gibi kalemler listede.
-        Taze üründe toplu alım tasarruf değil israf üretir.</span>`,
+      foot:html`<span class="small dim">${yz('spi.basket.yalnizca-kuru-bakliyat-yag-v')}</span>`,
     });
   }
 
@@ -165,9 +264,9 @@ SP.Screens.basket = (function(){
     const page = K.paginate(list, S.ui.foodPage, 20);
 
     return K.Card({
-      title:'Fiyat listesi', hint:'price-estimate',
-      sub:'Kendi fişindeki fiyat tahmini ezer',
-      actions:K.Input({ id:'price-q', value:q, size:'sm', placeholder:'Ara…', aria:'Fiyat listesinde ara',
+      title:yz('spi.basket.fiyat-listesi'), hint:'price-estimate',
+      sub:yz('spi.basket.kendi-fisindeki-fiyat-tahmin'),
+      actions:K.Input({ id:'price-q', value:q, size:'sm', placeholder:'Ara…', aria:yz('spi.basket.fiyat-listesinde-ara'),
         change:'price-query', data:{ 'data-debounce':'200' } }),
       body:html`
         ${K.Notice({ tone:'info',
@@ -196,9 +295,9 @@ SP.Screens.basket = (function(){
     const page = K.paginate(list, S.ui.foodPage, 12);
 
     UI.sheet({
-      title:'Sepete kalem ekle', wide:true,
+      title:yz('spi.basket.sepete-kalem-ekle'), wide:true,
       body:String(K.Stack([
-        K.Input({ id:'add-q', value:q, placeholder:'Ara: mercimek, tavuk, zeytinyağı…',
+        K.Input({ id:'add-q', value:q, placeholder:yz('spi.basket.ara-mercimek-tavuk-zeytinyag'),
           change:'add-query', data:{ 'data-debounce':'200' } }),
         html`<div class="stack-xs">${map(page.items, f => {
           const p = SP.Money.priceOf(f.id);
@@ -209,7 +308,7 @@ SP.Screens.basket = (function(){
         })}</div>`,
         K.Pager({ page:page.page, pages:page.pages, total:page.total, act:'add-page' }),
       ])),
-      footer:String(K.Button({ label:'Kapat', act:'sheet-close' })),
+      footer:String(K.Button({ label:yz('spi.basket.kapat'), act:'sheet-close' })),
       noFocus:true,
     });
   }
@@ -218,12 +317,12 @@ SP.Screens.basket = (function(){
     const f = SP.FOOD_BY_ID[foodId];
     const cur = ((S.basket.items || []).find(x => x.foodId === foodId) || {}).kg;
     UI.sheet({
-      title:f.name, subtitle:'Haftalık miktar',
-      body:String(K.Field({ label:'Kilogram',
+      title:f.name, subtitle:yz('spi.basket.haftalik-miktar'),
+      body:String(K.Field({ label:yz('spi.basket.kilogram'),
         input:K.Input({ id:'basket-kg', type:'number', numeric:true, step:'0.1', min:0,
           value:cur == null ? '' : cur, placeholder:'1,5' }) })),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'save-kg', data:{ 'data-id':foodId } })}`),
+      footer:String(html`${K.Button({ label:yz('spi.basket.vazgec'), act:'sheet-close' })}
+        ${K.Button({ label:yz('spi.basket.kaydet'), tone:'primary', act:'save-kg', data:{ 'data-id':foodId } })}`),
     });
   }
 
@@ -231,18 +330,18 @@ SP.Screens.basket = (function(){
     const n = SP.NUTRI_BY_ID[nutrientId];
     const rows = SP.Money.costPerNutrient(nutrientId, 10);
     UI.sheet({
-      title:'En ucuz ' + n.name.toLocaleLowerCase('tr-TR') + ' kaynağı', wide:true,
-      subtitle:'Bir birim öğe başına maliyet',
+      title:yz('spi.basket.en-ucuz') + n.name.toLocaleLowerCase('tr-TR') + ' kaynağı', wide:true,
+      subtitle:yz('spi.basket.bir-birim-oge-basina-maliyet'),
       body:String(K.Stack([
         K.Table({ tight:true,
-          headers:['Gıda', { label:'Birim başı', num:true }, { label:'100 g\'da', num:true }, 'Fiyat'],
+          headers:['Gıda', { label:yz('spi.basket.birim-basi'), num:true }, { label:yz('spi.basket.100-g-da'), num:true }, 'Fiyat'],
           rows:rows.map(r => [r.food.name, U.fmtNet(r.tlPerUnit) + ' TL',
             U.fmtNum(U.round(r.per100, 2)) + ' ' + n.unit,
             html`${U.fmtNum(r.price.tl)} TL/kg ${P.cert(r.cert)}`]) }),
         K.Notice({ tone:'info', body:'Bu tablo bütçe ile sağlık hedefini aynı yerde buluşturur: '
           + 'hedefi indirmeden, aynı öğeyi daha ucuz taşıyan gıdayı gösterir.' }),
       ])),
-      footer:String(K.Button({ label:'Kapat', act:'sheet-close' })),
+      footer:String(K.Button({ label:yz('spi.basket.kapat'), act:'sheet-close' })),
       noFocus:true,
     });
   }
@@ -261,7 +360,7 @@ SP.Screens.basket = (function(){
     if(!V || b.limit == null) return '';
     const ic = V.harcamaSeritleri({ limit:b.limit, satirlar:b.rows.map(r => ({ ad:r.label, tutar:r.monthly })),
       not:'Çizgi = aylık sınır · aşım yalnız çizgide' });
-    return ic ? K.Kutu({ ad:'Harcama şeritleri', yuva:'aylık', class:'vkutu', govde:raw(ic) }) : '';
+    return ic ? K.Kutu({ ad:yz('spi.basket.harcama-seritleri'), yuva:'aylık', class:'vkutu', govde:raw(ic) }) : '';
   }
 
   function budgetView(){
@@ -280,7 +379,7 @@ SP.Screens.basket = (function(){
           <div class="span-7"><div class="stack">
             ${seritKarti(b)}
             ${K.Card({
-              title:'Talep tablosu', hint:'budget-rank',
+              title:yz('spi.basket.talep-tablosu'), hint:'budget-rank',
               badge:K.Badge({ label:bilinen ? U.fmtNum(b.total) + ' TL / ay' : 'veri yok',
                 tone:!bilinen ? 'muted' : b.over ? 'warn' : 'info' }),
               body:html`${map(b.rows, r => html`
@@ -293,26 +392,25 @@ SP.Screens.basket = (function(){
                     </div>
                   </div>
                   <div class="demand__cost num">
-                    ${r.monthly == null ? html`<span class="dim">veri yok</span>`
-                      : html`${U.fmtNum(r.monthly)}<small>TL</small>`}
+                    ${r.monthly == null ? html`<span class="dim">${yz('spi.basket.veri-yok')}</span>`
+                      : html`${U.fmtNum(r.monthly)}<small>${yz('spi.basket.tl')}</small>`}
                   </div>
                   <div class="demand__cert">${when(r.monthly != null, () => P.cert(r.cert))}</div>
                   ${when(r.note, () => html`<p class="demand__note">${r.note}</p>`)}
                 </div>`)}`,
               foot:html`
                 ${when(b.unknown, () => html`<span class="small">
-                  <b>${b.unknown}</b> kalem fiyatı bilinmediği için toplamın dışında.</span>`)}
+                  <b>${b.unknown}</b> ${yz('spi.basket.kalem-fiyati-bilinmedigi-ici')}</span>`)}
                 ${when(!b.unknown, () => html`<span class="small dim">
-                  Bütün kalemlerin karşılığı hesaplandı.</span>`)}`,
+                  ${yz('spi.basket.butun-kalemlerin-karsiligi-h')}</span>`)}`,
             })}
 
             ${when(b.limit != null && !bilinen, () => K.Card({
-              title:'Aylık sınır',
-              body:html`<p class="small">Sınır ${U.fmtNum(b.limit)} TL. Kalemlerin karşılığı bilinmiyor;
-                sınıra göre durum hesaplanmadı.</p>` }))}
+              title:yz('spi.basket.aylik-sinir'),
+              body:html`<p class="small">${yz('spi.basket.sinir')} ${U.fmtNum(b.limit)} ${yz('spi.basket.tl-kalemlerin-karsiligi-bili')}</p>` }))}
             ${when(b.limit != null && bilinen, () => K.Card({
-              title:'Aylık sınır',
-              body:html`${K.Meter({ label:'Kullanılan',
+              title:yz('spi.basket.aylik-sinir'),
+              body:html`${K.Meter({ label:yz('spi.basket.kullanilan'),
                 value:Math.min(100, b.pct || 0),
                 text:U.fmtNum(b.total) + ' / ' + U.fmtNum(b.limit) + ' TL',
                 tone:b.over ? 'danger' : '' })}
@@ -325,22 +423,21 @@ SP.Screens.basket = (function(){
           </div></div>
 
           <div class="span-5"><div class="stack">
-            ${K.Card({ title:'Sedef\'in notu', hint:'budget-rank',
-              badge:K.Badge({ label:'hazır kurallar', tone:'muted', icon:false }),
+            ${K.Card({ title:yz('spi.basket.sedef-in-notu'), hint:'budget-rank',
+              badge:K.Badge({ label:yz('spi.basket.hazir-kurallar'), tone:'muted', icon:false }),
               body:html`<p class="small">${st.text}</p>`,
-              foot:K.Button({ label:'Sedef\'e sor', size:'sm',
+              foot:K.Button({ label:yz('spi.basket.sedef-e-sor'), size:'sm',
                 act:'ask-agent', data:{ 'data-agent':'money' } }) })}
 
-            ${K.Card({ title:'Bütçenin yeri', hint:'budget-rank',
+            ${K.Card({ title:yz('spi.basket.butcenin-yeri'), hint:'budget-rank',
               body:html`<p class="small">${SP.PRECEDENCE[5].note}</p>
                 <div class="mt-10">${K.Table({ tight:true, headers:['Sıra', 'Kural'],
                   rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) })}</div>` })}
 
-            ${K.Card({ title:'Fiyatlar nereden geliyor?', hint:'price-estimate',
-              body:K.Ayrinti({ ozet:'Başlangıçta tohum fiyatı «tahmin»; fişten girdiğin fiyat «ölçüldü» olur.',
-                govde:html`<p>Fiyatlar internetten çekilmez — bu uygulama çevrimdışı çalışır ve
-                  sağlık verisi dışarı çıkmaz. Fişten girdiğin her fiyat tohumun üstüne yazılır.</p>` }),
-              foot:K.Button({ label:'Fiyat gir', size:'sm',
+            ${K.Card({ title:yz('spi.basket.fiyatlar-nereden-geliyor'), hint:'price-estimate',
+              body:K.Ayrinti({ ozet:yz('spi.basket.baslangicta-tohum-fiyati-tah'),
+                govde:html`<p>${yz('spi.basket.fiyatlar-internetten-cekilme')}</p>` }),
+              foot:K.Button({ label:yz('spi.basket.fiyat-gir'), size:'sm',
                 act:'basket-tab', data:{ 'data-tab':'fiyat' } }) })}
           </div></div>
         </div>
@@ -350,24 +447,24 @@ SP.Screens.basket = (function(){
   function limitsSheet(){
     const bk = S.basket || {};
     UI.sheet({
-      title:'Sınır ve ücretler',
-      subtitle:'Girilmeyen alan «sınır yok» demektir, sıfır değil',
+      title:yz('spi.basket.sinir-ve-ucretler'),
+      subtitle:yz('spi.basket.girilmeyen-alan-sinir-yok-de'),
       body:String(K.Stack([
-        K.Field({ label:'Haftalık sepet sınırı (TL)',
+        K.Field({ label:yz('spi.basket.haftalik-sepet-siniri-tl'),
           input:K.Input({ id:'lim-week', type:'number', numeric:true, step:'any',
             value:bk.weeklyLimit == null ? '' : bk.weeklyLimit }) }),
-        K.Field({ label:'Aylık toplam sağlık bütçesi (TL)',
+        K.Field({ label:yz('spi.basket.aylik-toplam-saglik-butcesi'),
           input:K.Input({ id:'lim-month', type:'number', numeric:true, step:'any',
             value:bk.monthlyLimit == null ? '' : bk.monthlyLimit }) }),
-        K.Field({ label:'Tek panel test ücreti (TL)',
+        K.Field({ label:yz('spi.basket.tek-panel-test-ucreti-tl'),
           hint:'ölçüm borcu olan panellerin maliyeti bundan hesaplanır',
           input:K.Input({ id:'lim-test', type:'number', numeric:true, step:'any',
             value:bk.testFee == null ? '' : bk.testFee }) }),
         K.Notice({ tone:'info', body:'Bu üç sayı yalnız bu cihazda tutulur ve '
           + 'hiçbir modele gönderilmez.' }),
       ])),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'save-limits' })}`),
+      footer:String(html`${K.Button({ label:yz('spi.basket.vazgec'), act:'sheet-close' })}
+        ${K.Button({ label:yz('spi.basket.kaydet'), tone:'primary', act:'save-limits' })}`),
     });
   }
 
@@ -382,22 +479,22 @@ SP.Screens.basket = (function(){
 
   function receiptSheet(){
     UI.sheet({
-      title:'Fiş oku', subtitle:'Fiyatlar tahminden ölçüme geçer',
+      title:yz('spi.basket.fis-oku'), subtitle:yz('spi.basket.fiyatlar-tahminden-olcume-ge'),
       wide:true,
       body:String(K.Stack([
         when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
-          title:'Model bağlı değil.',
+          title:yz('spi.basket.model-bagli-degil'),
           body:'Fiş okumak için HKM › Modeller’de «SPİ · Görsel» (ya da King) için görüntü okuyan bir model '
             + 'ata. Fiyatları Fiyat sayfasından elle de girebilirsin.' })),
-        K.Drop({ act:'receipt-file', label:'Fiş fotoğrafı ya da metni', kamera:{},
+        K.Drop({ act:'receipt-file', label:yz('spi.basket.fis-fotografi-ya-da-metni'), kamera:{},
           icon:'file', accept:'image/*,.txt,.csv',
           hint:'Fişi buraya bırak ya da seçmek için tıkla' }),
         html`<div id="receipt-name" class="small dim">${receiptFile ? receiptFile.name : ''}</div>`,
         K.Notice({ tone:'info', body:'Okunan fiyat kilogram başınadır. Fişte toplam '
           + 'fiyat ve ağırlık varsa kilogram fiyatı hesaplanır.' }),
       ])),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Oku', tone:'primary', act:'run-receipt',
+      footer:String(html`${K.Button({ label:yz('spi.basket.vazgec'), act:'sheet-close' })}
+        ${K.Button({ label:yz('spi.basket.oku'), tone:'primary', act:'run-receipt',
           disabled:!receiptFile || !SP.Extract.modelReady() })}`),
       noFocus:true,
     });
@@ -405,7 +502,7 @@ SP.Screens.basket = (function(){
 
   function receiptPreviewSheet(res){
     UI.sheet({
-      title:'Fişten okunanlar', subtitle:res.note, wide:true,
+      title:yz('spi.basket.fisten-okunanlar'), subtitle:res.note, wide:true,
       body:String(K.Stack([
         when(res.rows.length, () => html`<div>${map(res.rows, (r, i) => html`
           <div class="${r.skip ? 'pasterow pasterow--off' : 'pasterow'}">
@@ -413,17 +510,17 @@ SP.Screens.basket = (function(){
               data:{ 'data-i':i } })}
             <span><b class="small">${r.food.name}</b>
               ${when(SP.Money.priceOf(r.food.id).cert === 'estimated',
-                () => html` <span class="tiny dim">tahmini eziyor</span>`)}</span>
+                () => html` <span class="tiny dim">${yz('spi.basket.tahmini-eziyor')}</span>`)}</span>
             <span class="pasterow__val num">${U.fmtNum(r.tl)} TL/kg</span>
-            <span class="pasterow__src">fişten</span>
+            <span class="pasterow__src">${yz('spi.basket.fisten')}</span>
           </div>`)}</div>`),
         when(!res.rows.length, () => K.Notice({ tone:'warn', body:res.note })),
-        when(res.unmatched.length, () => K.Notice({ tone:'info', title:'Eşleşmeyenler:',
+        when(res.unmatched.length, () => K.Notice({ tone:'info', title:yz('spi.basket.eslesmeyenler'),
           body:res.unmatched.map(x => x.line).join(' · ')
             + ' — bu ürünler gıda listemizde yok.' })),
       ])),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Fiyatları kaydet', tone:'primary', act:'save-receipt',
+      footer:String(html`${K.Button({ label:yz('spi.basket.vazgec'), act:'sheet-close' })}
+        ${K.Button({ label:yz('spi.basket.fiyatlari-kaydet'), tone:'primary', act:'save-receipt',
           disabled:!res.rows.filter(r => !r.skip).length })}`),
       noFocus:true,
     });
@@ -436,24 +533,24 @@ SP.Screens.basket = (function(){
   function ogunListeSheet(){
     const l = listeRes;
     if(!l.ok){
-      UI.sheet({ title:'Öğünlerimden alışveriş listesi',
+      UI.sheet({ title:yz('spi.basket.ogunlerimden-alisveris-liste'),
         body:String(K.Notice({ tone:'info', body:l.note })),
-        footer:String(K.Button({ label:'Kapat', act:'sheet-close' })) });
+        footer:String(K.Button({ label:yz('spi.basket.kapat'), act:'sheet-close' })) });
       return;
     }
     const secili = l.satirlar.filter(r => !r.skip);
     const tl = U.sum(secili.map(r => r.cost || 0));
     const size = (S.prefs && S.prefs.householdSize) || 1;
     UI.sheet({
-      title:'Öğünlerimden alışveriş listesi', wide:true,
-      subtitle:'Son yedi günün ' + l.kayitliGun + ' günü kayıtlı; haftalık miktar '
+      title:yz('spi.basket.ogunlerimden-alisveris-liste'), wide:true,
+      subtitle:yz('spi.basket.son-yedi-gunun') + l.kayitliGun + ' günü kayıtlı; haftalık miktar '
         + (l.cert === 'derived' ? 'hesaplandı' : 'kayıtlı günlerden tahmin'),
       body:String(K.Stack([
         when(l.satirlar.length, () => html`<div>${map(l.satirlar, (r, i) => html`
           <div class="${r.skip ? 'pasterow pasterow--off' : 'pasterow'}">
             ${K.Checkbox({ label:'', checked:!r.skip, act:'toggle-liste-row', data:{ 'data-i':i } })}
             <span><b class="small">${r.food.name}</b>
-              <span class="tiny dim"> · haftada ${U.fmtNet(r.kg)} kg${r.sepette
+              <span class="tiny dim"> ${yz('spi.basket.haftada')} ${U.fmtNet(r.kg)} kg${r.sepette
                 ? ', sepette ' + U.fmtNet(r.sepette) + ' kg' : ''}</span></span>
             <span class="pasterow__val num">+${U.fmtNet(r.eksik)} kg</span>
             <span class="pasterow__src">${r.cost == null ? 'fiyat yok'
@@ -464,14 +561,12 @@ SP.Screens.basket = (function(){
         when(l.satirlar.length, () => K.Notice({ tone:'info',
           body:'Seçilenlerin tutarı ' + U.fmtNum(Math.round(tl)) + ' TL'
             + (l.fiyatsiz ? ' (' + l.fiyatsiz + ' kalemin fiyatı yok, tutara girmedi)' : '') + '.' })),
-        when(l.yeterli, () => html`<p class="tiny dim">${l.yeterli} kalem sepette zaten yeterli.</p>`),
-        when(l.bilinmeyen, () => html`<p class="tiny dim">${l.bilinmeyen} öğün kalemi gıda listesinde
-          yok (silinmiş gıda); listeye girmedi.</p>`),
-        when(size > 1, () => html`<p class="tiny dim">Liste yalnız senin öğünlerinden;
-          hanenin diğer ${size - 1} kişisinin payı eklenmedi.</p>`),
+        when(l.yeterli, () => html`<p class="tiny dim">${l.yeterli} ${yz('spi.basket.kalem-sepette-zaten-yeterli')}</p>`),
+        when(l.bilinmeyen, () => html`<p class="tiny dim">${l.bilinmeyen} ${yz('spi.basket.ogun-kalemi-gida-listesinde')}</p>`),
+        when(size > 1, () => html`<p class="tiny dim">${yz('spi.basket.liste-yalniz-senin-ogunlerin')} ${size - 1} ${yz('spi.basket.kisisinin-payi-eklenmedi')}</p>`),
       ])),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:'Sepete ekle', tone:'primary', act:'save-ogun-liste',
+      footer:String(html`${K.Button({ label:yz('spi.basket.vazgec'), act:'sheet-close' })}
+        ${K.Button({ label:yz('spi.basket.sepete-ekle'), tone:'primary', act:'save-ogun-liste',
           disabled:!secili.length })}`),
       noFocus:true,
     });
@@ -490,7 +585,7 @@ SP.Screens.basket = (function(){
     ikame:() => html`${K.Ledger(() => [swapCard(), bulkCard(),
         /* Bütçe bölümündeki «Bütçenin yeri» ile aynı tablo: aynı başlık aynı
            gizleme anahtarı olurdu ve bu kopya yönetilemezdi. Gizli. */
-        K.Entry({ label:'Kural sırası', hint:'budget-rank', meta:'öncelik sırası',
+        K.Entry({ label:yz('spi.basket.kural-sirasi'), hint:'budget-rank', meta:'öncelik sırası',
           body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
             rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
       ])}
@@ -510,7 +605,7 @@ SP.Screens.basket = (function(){
   TABS.forEach(t => LIFEOS.PARCA.blok({ id:'basket.' + t.id, sayfa:'basket', yer:t.id, ad:t.label, ciz:() => govde(t) }));
   async function render(){
     const n = ((S.basket && S.basket.items) || []).length;
-    return String(K.SayfaBolumleri({ act:'basket-tab', aria:'Sepet bölümleri',
+    return String(K.SayfaBolumleri({ act:'basket-tab', aria:yz('spi.basket.sepet-bolumleri'),
       bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:LIFEOS.PARCA.yer('basket', t.id, K),
         sayi:t.id === 'sepet' && n ? n : null })) }));
   }
@@ -580,7 +675,7 @@ SP.Screens.basket = (function(){
       await M.saveBasket({ weeklyLimit:num('lim-week'), monthlyLimit:num('lim-month'),
         testFee:num('lim-test') });
       UI.closeSheet();
-      UI.toast('Kaydedildi');
+      UI.toast(yz('spi.basket.kaydedildi'));
       SP.App.render();
     },
     async 'basket-tab'(el){ K.bolumeGit(el.dataset.tab); },
@@ -601,19 +696,19 @@ SP.Screens.basket = (function(){
     },
     async 'open-limit'(){
       UI.sheet({
-        title:'Haftalık sınır',
+        title:yz('spi.basket.haftalik-sinir'),
         body:String(K.Stack([
-          K.Field({ label:'Haftalık sepet sınırı (TL)',
+          K.Field({ label:yz('spi.basket.haftalik-sepet-siniri-tl'),
             input:K.Input({ id:'limit-tl', type:'number', numeric:true, step:'50', min:0,
               value:S.basket.weeklyLimit == null ? '' : S.basket.weeklyLimit }) }),
-          K.Field({ label:'Hanedeki kişi sayısı',
+          K.Field({ label:yz('spi.basket.hanedeki-kisi-sayisi'),
             input:K.Input({ id:'limit-size', type:'number', numeric:true, step:'1', min:1,
               value:(S.prefs && S.prefs.householdSize) || 1 }) }),
           K.Notice({ tone:'info', body:'Sınır aşıldığında sistem sağlık hedefini indirmez; '
             + 'ikame önerisi çıkarır. Bütçe öncelik sırasında en sonda gelir.' }),
         ])),
-        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-          ${K.Button({ label:'Kaydet', tone:'primary', act:'save-limit' })}`),
+        footer:String(html`${K.Button({ label:yz('spi.basket.vazgec'), act:'sheet-close' })}
+          ${K.Button({ label:yz('spi.basket.kaydet'), tone:'primary', act:'save-limit' })}`),
       });
     },
     async 'save-limit'(){
@@ -622,14 +717,14 @@ SP.Screens.basket = (function(){
       await M.saveBasket({ weeklyLimit:tl && tl.value.trim() !== '' ? Number(tl.value) : null });
       await M.savePrefs({ householdSize:size ? Math.max(1, Number(size.value) || 1) : 1 });
       UI.closeSheet();
-      UI.toast('Kaydedildi');
+      UI.toast(yz('spi.basket.kaydedildi'));
       SP.App.render();
     },
     async 'do-swap'(el){
       const kg = Number(el.dataset.kg);
       await M.setBasketItem(el.dataset.from, 0);
       await M.setBasketItem(el.dataset.to, kg);
-      UI.toast('Sepette değiştirildi');
+      UI.toast(yz('spi.basket.sepette-degistirildi'));
       SP.App.render();
     },
     async 'open-cheap'(el){ cheapSheet(el.dataset.id); },
@@ -660,7 +755,7 @@ SP.Screens.basket = (function(){
        kartı); harcama şeritleri aynı kalemleri çizgiyle yeniden çizer, şerit.
        Bütçenin yeri ve fiyat kaynağı gizli (app.js SADE_GIZLI). */
     kucukVarsayilan:['harcama-şeritleri'],
-    title:'Finans',
+    title:yz('spi.basket.finans'),
     headline(){
       const b = SP.Money.budget();
       if(!b.rows.filter(r => r.monthly).length) return 'Bütçe için henüz veri yok.';
@@ -680,10 +775,10 @@ SP.Screens.basket = (function(){
     stats(){
       const b = SP.Money.budget();
       const w = SP.Money.basketTotal();
-      const out = [{ value:U.fmtNum(b.total), label:'aylık talep (TL)' }];
-      if(b.limit != null) out.push({ value:U.fmtNum(b.limit), label:'aylık sınır (TL)' });
-      if(w.rows.length) out.push({ value:U.fmtNum(Math.round(w.total)), label:'haftalık sepet (TL)' });
-      if(b.unknown) out.push({ value:b.unknown, label:'fiyatı yok' });
+      const out = [{ value:U.fmtNum(b.total), label:yz('spi.basket.aylik-talep-tl') }];
+      if(b.limit != null) out.push({ value:U.fmtNum(b.limit), label:yz('spi.basket.aylik-sinir-tl') });
+      if(w.rows.length) out.push({ value:U.fmtNum(Math.round(w.total)), label:yz('spi.basket.haftalik-sepet-tl') });
+      if(b.unknown) out.push({ value:b.unknown, label:yz('spi.basket.fiyati-yok') });
       return out;
     },
     subtitle(){
@@ -691,10 +786,10 @@ SP.Screens.basket = (function(){
       return st.text;
     },
     actions(){
-      return String(html`${K.Button({ label:'Kalem ekle', icon:'plus', size:'sm', tone:'primary',
+      return String(html`${K.Button({ label:yz('spi.basket.kalem-ekle'), icon:'plus', size:'sm', tone:'primary',
         act:'open-add' })}
-        ${K.Button({ label:'Fiş oku', size:'sm', icon:'camera', act:'open-receipt' })}
-        ${K.Button({ label:'Sınır ve ücretler', size:'sm', act:'open-limits' })}`);
+        ${K.Button({ label:yz('spi.basket.fis-oku'), size:'sm', icon:'camera', act:'open-receipt' })}
+        ${K.Button({ label:yz('spi.basket.sinir-ve-ucretler'), size:'sm', act:'open-limits' })}`);
     },
     render, afterRender, handle, change,
   };

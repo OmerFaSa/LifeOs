@@ -9,6 +9,69 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.meeting.sen':'Sen',
+  'ays.meeting.soz-aldin':'söz aldın',
+  'ays.meeting.hazir-kural':'hazır kural',
+  'ays.meeting.gundem':'Gündem',
+  'ays.meeting.sistem-en-oncelikli-basligi':'Sistem en öncelikli başlığı seçti',
+  'ays.meeting.gecen-toplantinin-karari-hal':'Geçen toplantının kararı hâlâ açık:',
+  'ays.meeting.baska-bir-gundemle-topla':'Başka bir gündemle topla',
+  'ays.meeting.toplantiyi-baslat':'Toplantıyı başlat',
+  'ays.meeting.toplanti-akis-hizi':'Toplantı akış hızı',
+  'ays.meeting.ofise-don':'Ofise dön',
+  'ays.meeting.kural-motoru':'Kural motoru ',
+  'ays.meeting.nasil-isler':'Nasıl işler?',
+  'ays.meeting.uzman-sirayla-konusur':'uzman sırayla konuşur',
+  'ays.meeting.toplantiyi':'Toplantıyı',
+  'ays.meeting.bitirirsin-istedigin-turda-b':'bitirirsin; istediğin turda “Bitir ve rapor al”a bas. Araya girip söz de alabilirsin.',
+  'ays.meeting.konusmalar-sirayla-akar-biri':'Konuşmalar sırayla akar: biri bitmeden diğeri başlamaz.',
+  'ays.meeting.ses-acik-her-ajanin':'Ses açık — her ajanın kendi sesi var; sıradaki konuşma bir öncekinin sesi bitmeden başlamaz.',
+  'ays.meeting.bir-tur-yaklasik':'Bir tur yaklaşık',
+  'ays.meeting.sn-surer-istekler-kotayi':'sn sürer — istekler kotayı aşmamak için sıraya alınır.',
+  'ays.meeting.bugunku-hak':'Bugünkü hak:',
+  'ays.meeting.istek-kullanildi':'istek kullanıldı.',
+  'ays.meeting.model-bagli-olmadigi-icin-to':'Model bağlı olmadığı için toplantı',
+  'ays.meeting.turda-durur-ajanlarin-elinde':'turda durur: ajanların elinde yalnızca kural motorunun raporu var, sonrasında söyleyecek yeni bir şeyleri olmaz.',
+  'ays.meeting.soz-al':'Söz al',
+  'ays.meeting.duraklat':'Duraklat',
+  'ays.meeting.devam-et':'Devam et',
+  'ays.meeting.bitir-ve-rapor-al':'Bitir ve rapor al',
+  'ays.meeting.toplanti-suruyor':'Toplantı sürüyor',
+  'ays.meeting.toplanti-raporu':'Toplantı raporu',
+  'ays.meeting.kopyala':'Kopyala',
+  'ays.meeting.karar':'Karar',
+  'ays.meeting.simdi-yap':'Şimdi yap',
+  'ays.meeting.oy':'Oy',
+  'ays.meeting.agirlik':'Ağırlık',
+  'ays.meeting.agirlik-ajanin-guven-skorund':'Ağırlık ajanın güven skorundan gelir: önerisi tutan ajanın oyu daha ağır basar. Sayımı kural motoru yapar.',
+  'ays.meeting.senin-sozlerin':'Senin sözlerin:',
+  'ays.meeting.kural-motoru-duzeltmesi':'Kural motoru düzeltmesi:',
+  'ays.meeting.deger':'Değer',
+  'ays.meeting.karari-yapildi-isaretle':'Kararı yapıldı işaretle',
+  'ays.meeting.raporu-indir':'Raporu indir',
+  'ays.meeting.yeni-toplanti':'Yeni toplantı',
+  'ays.meeting.gecmis-toplantilar':'Geçmiş toplantılar',
+  'ays.meeting.tutanaklarda-ara':'Tutanaklarda ara…',
+  'ays.meeting.suzgeci-sifirla':'Süzgeci sıfırla',
+  'ays.meeting.raporu-kopyala':'Raporu kopyala',
+  'ays.meeting.karari-uygula':'Kararı uygula',
+  'ays.meeting.tutanagi-sil':'Tutanağı sil',
+  'ays.meeting.masadakiler':'Masadakiler',
+  'ays.meeting.patron-acar-uzmanlar-tur-tur':'Patron açar, uzmanlar tur tur konuşur, sen bitirirsin',
+  'ays.meeting.bu-cihazda-calisan-bir-konus':'Bu cihazda çalışan bir konuşma sesi bulunamadı — toplantı sessiz akıyor',
+  'ays.meeting.baglanti-geldi-toplanti-kald':'Bağlantı geldi — toplantı kaldığı yerden devam ediyor',
+  'ays.meeting.butun-turlar-tamamlandi-biti':'Bütün turlar tamamlandı — bitirip raporu alabilirsin',
+  'ays.meeting.ekibe-soylemek-istedigin':'Ekibe söylemek istediğin…',
+  'ays.meeting.soyle':'Söyle',
+  'ays.meeting.rapor-indirildi':'Rapor indirildi',
+  'ays.meeting.kopyalayip-kaydedebilirsin':'Kopyalayıp kaydedebilirsin',
+  'ays.meeting.kapat':'Kapat',
+  'ays.meeting.rapor-kopyalandi':'Rapor kopyalandı',
+  'ays.meeting.karar-kapandi':'Karar kapandı',
+  'ays.meeting.toplanti-odasi':'Toplantı odası',
+  'ays.meeting.ofis':'Ofis',
+});
 window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'ays', cekmece:'ofis', ad:'Toplantı', ikon:'list', sira:30 });
 
 R.Screens.meeting = (function(){
@@ -56,7 +119,7 @@ R.Screens.meeting = (function(){
     if(t.agent === 'aday'){
       return html`
         <div class="meetturn meetturn--me" data-turn="${i}">
-          <div class="meetturn__who"><b>Sen</b><span class="dim">söz aldın</span></div>
+          <div class="meetturn__who"><b>${yz('ays.meeting.sen')}</b><span class="dim">${yz('ays.meeting.soz-aldin')}</span></div>
           <div class="meetturn__body">${raw(body(t.text))}</div>
         </div>`;
     }
@@ -70,7 +133,7 @@ R.Screens.meeting = (function(){
           ${when(t.roundTitle, () => html`<span class="meetturn__round">${t.roundTitle}</span>`)}
           ${when(t.vote, () => K.Badge({ label:t.vote + '. fikre oy', tone:'info' }))}
           ${when(t.closing, () => K.Badge({ label:'karar', tone:'ok' }))}
-          ${when(t.mode === 'kural', () => K.Badge({ label:'hazır kural', tone:'info' }))}
+          ${when(t.mode === 'kural', () => K.Badge({ label:yz('ays.meeting.hazir-kural'), tone:'info' }))}
         </div>
         <div class="meetturn__body">${raw(body(t.text))}</div>
         ${when(t.warnings && t.warnings.length, () => html`
@@ -99,7 +162,7 @@ R.Screens.meeting = (function(){
     const roundMs = O.roundEstimateMs('patron');
 
     return K.Card({
-      title:'Gündem', sub:'Sistem en öncelikli başlığı seçti',
+      title:yz('ays.meeting.gundem'), sub:yz('ays.meeting.sistem-en-oncelikli-basligi'),
       badge:K.Badge({ label:O.mode() === 'llm' ? 'yapay zekâ bağlı' : 'hazır kurallar',
         tone:O.mode() === 'llm' ? 'ok' : 'info' }),
       body:html`
@@ -108,57 +171,54 @@ R.Screens.meeting = (function(){
         ${(function(){
           const d = O.pendingDecision();
           return when(d, () => html`<div class="mt-10">
-            ${K.Notice({ tone:'warn', title:'Geçen toplantının kararı hâlâ açık:',
+            ${K.Notice({ tone:'warn', title:yz('ays.meeting.gecen-toplantinin-karari-hal'),
               body:d.title + ' — Patron toplantıyı bunun hesabını sorarak açacak.' })}
           </div>`);
         })()}
 
         ${when(list.length > 1, () => html`<div class="mt-10">
-          ${K.Field({ label:'Başka bir gündemle topla',
+          ${K.Field({ label:yz('ays.meeting.baska-bir-gundemle-topla'),
             input:K.Select({ id:'meet-agenda', change:'meet-agenda',
               value:String(S.ui.meetingAgenda || 0),
               options:list.map((c, i) => ({ value:String(i), label:c.topic })) }) })}
         </div>`)}
 
         <div class="row wrap gap-6 mt-12">
-          ${K.Button({ label:'Toplantıyı başlat', icon:'zap', tone:'primary', act:'meet-start' })}
-          ${K.Segmented({ aria:'Toplantı akış hızı', value:paceId(), act:'meet-pace',
+          ${K.Button({ label:yz('ays.meeting.toplantiyi-baslat'), icon:'zap', tone:'primary', act:'meet-start' })}
+          ${K.Segmented({ aria:yz('ays.meeting.toplanti-akis-hizi'), value:paceId(), act:'meet-pace',
             items:R.Voice.PACE_ORDER.map(id => ({ value:id, label:R.Voice.PACE[id].label })) })}
           ${when(voiceAvailable(), () => K.Button({
             label:S.ui.meetingVoice ? 'Ses açık' : 'Sesli dinle',
             icon:S.ui.meetingVoice ? 'pause' : 'play', size:'sm',
             tone:S.ui.meetingVoice ? 'primary' : 'ghost', act:'meet-voice' }))}
-          ${K.Button({ label:'Ofise dön', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'office' } })}
+          ${K.Button({ label:yz('ays.meeting.ofise-don'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'office' } })}
         </div>
 
         ${(function(){
           const list = O.conflicts();
           return when(list.length, () => html`<div class="mt-10">
-            ${K.Notice({ tone:'info', title:'Kural motoru ' + list.length + ' çelişki buldu:',
+            ${K.Notice({ tone:'info', title:yz('ays.meeting.kural-motoru') + list.length + ' çelişki buldu:',
               body:list.map(c => c.name + '’ya sorulacak' ).join(' · ')
                 + ' — Patron tur aralarında çapraz soru soracak.' })}
           </div>`);
         })()}
 
         <details class="meetplan ayrinti ayrinti__ac mt-12">
-          <summary>Nasıl işler?</summary>
+          <summary>${yz('ays.meeting.nasil-isler')}</summary>
           <div class="ayrinti__govde">
           <ol class="meetplan__list">
             ${map(R.Office.ROUNDS.slice(0, maxRounds()), r =>
-              html`<li><b>${r.title}</b> — ${R.MEETING_ORDER.length} uzman sırayla konuşur</li>`)}
+              html`<li><b>${r.title}</b> — ${R.MEETING_ORDER.length} ${yz('ays.meeting.uzman-sirayla-konusur')}</li>`)}
           </ol>
-          <p class="tiny dim">Toplantıyı <b>sen</b> bitirirsin; istediğin turda “Bitir ve rapor al”a bas.
-            Araya girip söz de alabilirsin.</p>
-          <p class="tiny dim">Konuşmalar sırayla akar: biri bitmeden diğeri başlamaz.
+          <p class="tiny dim">${yz('ays.meeting.toplantiyi')} <b>sen</b> ${yz('ays.meeting.bitirirsin-istedigin-turda-b')}</p>
+          <p class="tiny dim">${yz('ays.meeting.konusmalar-sirayla-akar-biri')}
             ${when(S.ui.meetingVoice && voiceAvailable(),
-              () => html`Ses açık — her ajanın kendi sesi var; sıradaki konuşma bir
-                öncekinin sesi bitmeden başlamaz.`)}
-            ${when(roundMs > 0, () => html`Bir tur yaklaşık
-              ${Math.round(roundMs/1000)} sn sürer — istekler kotayı aşmamak için sıraya alınır.`)}
-            ${when(q && q.known, () => html`Bugünkü hak: ${q.usedToday}/${q.rpd} istek kullanıldı.`)}
-            ${when(O.mode() !== 'llm', () => html`Model bağlı olmadığı için toplantı
-              ${maxRounds()} turda durur: ajanların elinde yalnızca kural motorunun raporu var,
-              sonrasında söyleyecek yeni bir şeyleri olmaz.`)}
+              () => html`${yz('ays.meeting.ses-acik-her-ajanin')}`)}
+            ${when(roundMs > 0, () => html`${yz('ays.meeting.bir-tur-yaklasik')}
+              ${Math.round(roundMs/1000)} ${yz('ays.meeting.sn-surer-istekler-kotayi')}`)}
+            ${when(q && q.known, () => html`${yz('ays.meeting.bugunku-hak')} ${q.usedToday}/${q.rpd} ${yz('ays.meeting.istek-kullanildi')}`)}
+            ${when(O.mode() !== 'llm', () => html`${yz('ays.meeting.model-bagli-olmadigi-icin-to')}
+              ${maxRounds()} ${yz('ays.meeting.turda-durur-ajanlarin-elinde')}`)}
           </p>
           </div>
         </details>`,
@@ -183,17 +243,17 @@ R.Screens.meeting = (function(){
         </div>
         <div class="row wrap gap-6">
           ${when(!S.ui.meetingVoice, () => K.Segmented({
-            aria:'Toplantı akış hızı', value:paceId(), act:'meet-pace',
+            aria:yz('ays.meeting.toplanti-akis-hizi'), value:paceId(), act:'meet-pace',
             items:R.Voice.PACE_ORDER.map(id => ({ value:id, label:R.Voice.PACE[id].label })) }))}
           ${when(voiceAvailable(), () => K.Button({
             label:S.ui.meetingVoice ? 'Sesi kapat' : 'Sesli dinle',
             icon:S.ui.meetingVoice ? 'pause' : 'play', size:'sm',
             tone:S.ui.meetingVoice ? 'primary' : 'ghost', act:'meet-voice' }))}
-          ${K.Button({ label:'Söz al', icon:'edit', size:'sm', act:'meet-say' })}
-          ${when(running, () => K.Button({ label:'Duraklat', size:'sm', tone:'ghost', act:'meet-pause' }))}
+          ${K.Button({ label:yz('ays.meeting.soz-al'), icon:'edit', size:'sm', act:'meet-say' })}
+          ${when(running, () => K.Button({ label:yz('ays.meeting.duraklat'), size:'sm', tone:'ghost', act:'meet-pause' }))}
           ${when(!running && session,
-            () => K.Button({ label:'Devam et', size:'sm', act:'meet-resume' }))}
-          ${K.Button({ label:'Bitir ve rapor al', size:'sm', tone:'primary', act:'meet-finish' })}
+            () => K.Button({ label:yz('ays.meeting.devam-et'), size:'sm', act:'meet-resume' }))}
+          ${K.Button({ label:yz('ays.meeting.bitir-ve-rapor-al'), size:'sm', tone:'primary', act:'meet-finish' })}
         </div>
       </div>`;
   }
@@ -201,7 +261,7 @@ R.Screens.meeting = (function(){
   function liveCard(){
     if(!session) return '';
     return K.Card({
-      title:'Toplantı sürüyor', sub:session.topic,
+      title:yz('ays.meeting.toplanti-suruyor'), sub:session.topic,
       body:html`
         ${controls()}
         <div class="meet mt-12" id="meet-live">
@@ -219,16 +279,16 @@ R.Screens.meeting = (function(){
     const r = m.report || {};
     return K.Card({
       class:'card--primary',
-      title:'Toplantı raporu',
+      title:yz('ays.meeting.toplanti-raporu'),
       sub:U.relativeDay(R.U.gunOf(m.at)) + ' · ' + m.topic + ' · ' + m.rounds + ' tur',
-      actions:K.Button({ label:'Kopyala', icon:'edit', size:'sm', act:'meet-copy',
+      actions:K.Button({ label:yz('ays.meeting.kopyala'), icon:'edit', size:'sm', act:'meet-copy',
         data:{ 'data-id':m.id } }),
       body:html`
         ${when(r.summary, () => html`<p class="prose">${r.summary}</p>`)}
 
         <div class="mt-12">
-          ${K.NextUp({ icon:'zap', label:'Karar', title:m.action.title, why:m.action.why,
-            action:K.Button({ label:'Şimdi yap', tone:'primary', size:'sm', act:'go',
+          ${K.NextUp({ icon:'zap', label:yz('ays.meeting.karar'), title:m.action.title, why:m.action.why,
+            action:K.Button({ label:yz('ays.meeting.simdi-yap'), tone:'primary', size:'sm', act:'go',
               data:{ 'data-route':m.action.route || 'today' } }) })}
         </div>
 
@@ -236,13 +296,12 @@ R.Screens.meeting = (function(){
           <div class="mt-12">${K.SectionTitle('Oylama', K.Badge({
             label:r.vote.oyVeren + ' oy', tone:'info' }))}</div>
           ${K.Table({ tight:true,
-            headers:['Fikir', 'Sahibi', { label:'Oy', num:true }, { label:'Ağırlık', num:true }],
+            headers:['Fikir', 'Sahibi', { label:yz('ays.meeting.oy'), num:true }, { label:yz('ays.meeting.agirlik'), num:true }],
             rows:r.vote.rows.map(row => [
               html`<span class="small">${row.text.slice(0, 90)}</span>`,
               row.name, row.oy, row.agirlik,
             ]) })}
-          <p class="tiny dim mt-8">Ağırlık ajanın güven skorundan gelir: önerisi tutan ajanın
-            oyu daha ağır basar. Sayımı kural motoru yapar.</p>`)}
+          <p class="tiny dim mt-8">${yz('ays.meeting.agirlik-ajanin-guven-skorund')}</p>`)}
 
         ${when((r.crossed || []).length, () => html`
           <div class="mt-12">${K.SectionTitle('Çapraz soru')}</div>
@@ -265,13 +324,13 @@ R.Screens.meeting = (function(){
         })}</div>
 
         ${when((r.userSaid || []).length, () => html`<div class="mt-12">
-          ${K.Notice({ tone:'info', title:'Senin sözlerin:', body:r.userSaid.join(' · ') })}</div>`)}
+          ${K.Notice({ tone:'info', title:yz('ays.meeting.senin-sozlerin'), body:r.userSaid.join(' · ') })}</div>`)}
 
         ${when((r.warnings || []).length, () => html`<div class="mt-12">
-          ${K.Notice({ tone:'warn', title:'Kural motoru düzeltmesi:', body:r.warnings.join(' ') })}</div>`)}
+          ${K.Notice({ tone:'warn', title:yz('ays.meeting.kural-motoru-duzeltmesi'), body:r.warnings.join(' ') })}</div>`)}
 
         <div class="mt-12">
-          ${K.Table({ tight:true, headers:['Dayandığı veri', { label:'Değer', num:true }], rows:[
+          ${K.Table({ tight:true, headers:['Dayandığı veri', { label:yz('ays.meeting.deger'), num:true }], rows:[
             ['Program haftası', r.basis.hafta],
             ['Plan tamamlama', r.basis.planTamamlama == null ? '—' : '%' + r.basis.planTamamlama],
             ['Konu kapanışı', '%' + r.basis.konuKapanisi],
@@ -282,11 +341,11 @@ R.Screens.meeting = (function(){
         </div>
 
         <div class="row wrap gap-6 mt-12">
-          ${K.Button({ label:'Kararı yapıldı işaretle', size:'sm', act:'meet-decide',
+          ${K.Button({ label:yz('ays.meeting.karari-yapildi-isaretle'), size:'sm', act:'meet-decide',
             data:{ 'data-id':m.id, 'data-state':'done' } })}
-          ${K.Button({ label:'Raporu indir', icon:'download', size:'sm', act:'meet-download',
+          ${K.Button({ label:yz('ays.meeting.raporu-indir'), icon:'download', size:'sm', act:'meet-download',
             data:{ 'data-id':m.id } })}
-          ${K.Button({ label:'Yeni toplantı', size:'sm', tone:'ghost', act:'meet-new' })}
+          ${K.Button({ label:yz('ays.meeting.yeni-toplanti'), size:'sm', tone:'ghost', act:'meet-new' })}
         </div>`,
     });
   }
@@ -310,15 +369,15 @@ R.Screens.meeting = (function(){
     const list = all.filter(m => matches(m, q));
 
     return K.Card({
-      title:'Geçmiş toplantılar',
+      title:yz('ays.meeting.gecmis-toplantilar'),
       sub:q ? list.length + ' / ' + all.length + ' tutanak eşleşti'
             : all.length + ' tutanak saklanıyor',
       actions:when(all.length > 2, () => K.Input({ id:'meet-search', size:'sm',
-        value:q, placeholder:'Tutanaklarda ara…', change:'meet-search', data:{ 'data-debounce':'250' } })),
+        value:q, placeholder:yz('ays.meeting.tutanaklarda-ara'), change:'meet-search', data:{ 'data-debounce':'250' } })),
       body:html`
         ${when(!list.length, () => K.Empty({ icon:'search',
           text:'“' + q + '” için tutanak bulunamadı.',
-          action:K.Button({ label:'Süzgeci sıfırla', size:'sm', act:'meet-search-clear' }) }))}
+          action:K.Button({ label:yz('ays.meeting.suzgeci-sifirla'), size:'sm', act:'meet-search-clear' }) }))}
         <div class="stack-xs">${map(list, m => K.Collapsible({
         title:m.topic,
         meta:U.relativeDay(R.U.gunOf(m.at)) + ' · ' + (m.rounds || 1) + ' tur · '
@@ -330,10 +389,10 @@ R.Screens.meeting = (function(){
           ${K.Notice({ tone:'info', title:'Karar:', body:m.action.title })}
           <div class="meet mt-12">${map(m.turns, Turn)}</div>
           <div class="row wrap gap-6 mt-10">
-            ${K.Button({ label:'Raporu kopyala', size:'sm', act:'meet-copy', data:{ 'data-id':m.id } })}
-            ${K.Button({ label:'Kararı uygula', size:'sm', tone:'primary', act:'go',
+            ${K.Button({ label:yz('ays.meeting.raporu-kopyala'), size:'sm', act:'meet-copy', data:{ 'data-id':m.id } })}
+            ${K.Button({ label:yz('ays.meeting.karari-uygula'), size:'sm', tone:'primary', act:'go',
               data:{ 'data-route':m.action.route || 'today' } })}
-            ${K.Button({ label:'Tutanağı sil', size:'sm', tone:'ghost', act:'meet-delete',
+            ${K.Button({ label:yz('ays.meeting.tutanagi-sil'), size:'sm', tone:'ghost', act:'meet-delete',
               data:{ 'data-id':m.id } })}
           </div>`,
       }))}</div>`,
@@ -343,7 +402,7 @@ R.Screens.meeting = (function(){
   function teamCard(){
     const ids = ['patron'].concat(R.MEETING_ORDER);
     return K.Card({
-      title:'Masadakiler', sub:'Patron açar, uzmanlar tur tur konuşur, sen bitirirsin',
+      title:yz('ays.meeting.masadakiler'), sub:yz('ays.meeting.patron-acar-uzmanlar-tur-tur'),
       body:html`<div class="stack-xs">${map(ids, id => {
         const a = R.AGENT_BY_ID[id];
         const q = O.agentQuota(id);
@@ -501,7 +560,7 @@ R.Screens.meeting = (function(){
   function warnVoiceOnce(){
     if(voiceWarned) return;
     voiceWarned = true;
-    UI.toast('Bu cihazda çalışan bir konuşma sesi bulunamadı — toplantı sessiz akıyor');
+    UI.toast(yz('ays.meeting.bu-cihazda-calisan-bir-konus'));
   }
 
   async function loop(){
@@ -547,7 +606,7 @@ R.Screens.meeting = (function(){
           await R.App.render();
           R.LLM.onceOnline(() => {
             if(session && !running && !stopAsked){
-              UI.toast('Bağlantı geldi — toplantı kaldığı yerden devam ediyor');
+              UI.toast(yz('ays.meeting.baglanti-geldi-toplanti-kald'));
               handle['meet-resume']();
             }
           });
@@ -600,7 +659,7 @@ R.Screens.meeting = (function(){
     /* Turlar bittiyse kullaniciya soyle; kapatmayi yine o secsin. */
     if(running && turnIndex >= maxTurns()){
       running = false;
-      UI.toast('Bütün turlar tamamlandı — bitirip raporu alabilirsin');
+      UI.toast(yz('ays.meeting.butun-turlar-tamamlandi-biti'));
       await R.App.render();
     }
   }
@@ -700,8 +759,8 @@ R.Screens.meeting = (function(){
       box.innerHTML = String(html`
         <div class="composer mt-12">
           ${K.Textarea({ id:'meet-say-input', rows:2, class:'composer__input',
-            placeholder:'Ekibe söylemek istediğin…' })}
-          ${K.Button({ label:'Söyle', icon:'zap', tone:'primary', act:'meet-say-send' })}
+            placeholder:yz('ays.meeting.ekibe-soylemek-istedigin') })}
+          ${K.Button({ label:yz('ays.meeting.soyle'), icon:'zap', tone:'primary', act:'meet-say-send' })}
         </div>`);
       const el = document.getElementById('meet-say-input');
       if(el) el.focus();
@@ -752,12 +811,12 @@ R.Screens.meeting = (function(){
         a.click();
         a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
-        UI.toast('Rapor indirildi');
+        UI.toast(yz('ays.meeting.rapor-indirildi'));
       }catch(e){
         /* Bazi ortamlar indirmeyi engeller; rapor yine de alinabilsin. */
-        UI.sheet({ title:'Toplantı raporu', subtitle:'Kopyalayıp kaydedebilirsin', wide:true,
+        UI.sheet({ title:yz('ays.meeting.toplanti-raporu'), subtitle:yz('ays.meeting.kopyalayip-kaydedebilirsin'), wide:true,
           body:String(html`<textarea class="textarea coachnote" rows="18" readonly>${text}</textarea>`),
-          footer:String(K.Button({ label:'Kapat', act:'sheet-close' })) });
+          footer:String(K.Button({ label:yz('ays.meeting.kapat'), act:'sheet-close' })) });
       }
     },
 
@@ -785,17 +844,17 @@ R.Screens.meeting = (function(){
       const text = O.reportText(m);
       try{
         await navigator.clipboard.writeText(text);
-        UI.toast('Rapor kopyalandı');
+        UI.toast(yz('ays.meeting.rapor-kopyalandi'));
       }catch(e){
-        UI.sheet({ title:'Toplantı raporu', wide:true,
+        UI.sheet({ title:yz('ays.meeting.toplanti-raporu'), wide:true,
           body:String(html`<textarea class="textarea coachnote" rows="18" readonly>${text}</textarea>`),
-          footer:String(K.Button({ label:'Kapat', act:'sheet-close' })) });
+          footer:String(K.Button({ label:yz('ays.meeting.kapat'), act:'sheet-close' })) });
       }
     },
 
     async 'meet-decide'(el){
       await O.closeDecision(el.dataset.id, el.dataset.state);
-      UI.toast('Karar kapandı');
+      UI.toast(yz('ays.meeting.karar-kapandi'));
       R.App.render();
     },
 
@@ -837,7 +896,7 @@ R.Screens.meeting = (function(){
 
   return {
     id:'meeting',
-    title:'Toplantı odası',
+    title:yz('ays.meeting.toplanti-odasi'),
     subtitle(){
       if(session){
         const round = Math.min(maxRounds(), Math.floor(turnIndex / PER_ROUND) + 1);
@@ -849,7 +908,7 @@ R.Screens.meeting = (function(){
         : 'Ekip 5 kişi · gündemi kural motoru seçer, bitişi sen';
     },
     actions(){
-      return String(K.Button({ label:'Ofis', icon:'guide', size:'sm', act:'go',
+      return String(K.Button({ label:yz('ays.meeting.ofis'), icon:'guide', size:'sm', act:'go',
         data:{ 'data-route':'office' } }));
     },
     render, handle, change, afterRender,

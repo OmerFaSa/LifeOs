@@ -105,7 +105,7 @@ function durum(){
       sayfa += (s.match(/\.sayfa\(\{/g) || []).length;
       const b = (s.match(/\b(?:P|PARCA)\.blok\(/g) || []).length;
       blok += b; bilgi += (s.match(/\bP\.bilgi\(/g) || []).length;
-      const yt = s.match(/P\.yazilar\(\{[\s\S]*?\n {2}\}\);/g) || [];
+      const yt = s.match(/(?:P|PARCA)\.yazilar\(\{[\s\S]*?\n\s*\}\);/g) || [];
       yt.forEach(t => { yazi += (t.match(/'[\w.-]+':/g) || []).length; });
       if(b) parcali++; else (kalan[m] = kalan[m] || []).push(f.replace('.js', ''));
     });

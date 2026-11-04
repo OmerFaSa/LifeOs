@@ -6,6 +6,26 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.team.hazir-kural':'hazır kural',
+  'ays.team.onayla-ve-uygula':'Onayla ve uygula',
+  'ays.team.vazgec':'Vazgeç',
+  'ays.team.geri-alindi':'Geri alındı',
+  'ays.team.ajan-sec':'Ajan seç',
+  'ays.team.sesli-sohbet':'Sesli sohbet',
+  'ays.team.sesli-sohbeti-baslat':'Sesli sohbeti başlat',
+  'ays.team.bitir':'Bitir',
+  'ays.team.kes':'Kes',
+  'ays.team.masasindaki-rapor':'Masasındaki rapor',
+  'ays.team.ozet-iste':'Özet iste',
+  'ays.team.okudugu-veri':'Okuduğu veri',
+  'ays.team.veri-kaynagi':'veri kaynağı',
+  'ays.team.ekipteki-digerleri':'Ekipteki diğerleri',
+  'ays.team.ucretsiz-modellerde-ilk-yani':'(ücretsiz modellerde ilk yanıt 10–60 sn sürebilir)',
+  'ays.team.su-an-konusmuyor':'Şu an konuşmuyor',
+  'ays.team.ekip-sohbeti':'Ekip sohbeti',
+  'ays.team.ofis':'Ofis',
+});
 window.LIFEOS.PARCA.sayfa({ id:'team', modul:'ays', cekmece:'ofis', ad:'Danışma', ikon:'zap', sira:20 });
 
 R.Screens.team = (function(){
@@ -49,7 +69,7 @@ R.Screens.team = (function(){
           <div class="msg__warn">${raw(UI.icon('warn'))} ${m.warnings.join(' ')}</div>`)}
         ${when(m.error, () => html`<div class="msg__warn">${raw(UI.icon('warn'))} ${m.error}</div>`)}
         <div class="osohbet__alt">
-          ${when(m.mode === 'kural', () => html`<span class="tiny">hazır kural</span>`)}
+          ${when(m.mode === 'kural', () => html`<span class="tiny">${yz('ays.team.hazir-kural')}</span>`)}
           ${raw(OS() ? OS().kopyaHtml() : '')}
         </div>
       </div>`;
@@ -67,9 +87,9 @@ R.Screens.team = (function(){
     const ids = bekleyenIds(m);
     if(!ids.length) return '';
     return html`<div class="row gap-8 mt-8">
-      ${K.Button({ label:'Onayla ve uygula', icon:'check', size:'sm', tone:'primary',
+      ${K.Button({ label:yz('ays.team.onayla-ve-uygula'), icon:'check', size:'sm', tone:'primary',
         act:'chat-onayla', data:{ 'data-ids':ids.join(',') } })}
-      ${K.Button({ label:'Vazgeç', size:'sm', tone:'ghost',
+      ${K.Button({ label:yz('ays.team.vazgec'), size:'sm', tone:'ghost',
         act:'chat-vazgec', data:{ 'data-ids':ids.join(',') } })}
     </div>`;
   }
@@ -161,7 +181,7 @@ R.Screens.team = (function(){
         : islem.yapilan.length + ' değişiklik uygulandı', {
         undo:async () => {
           for(const id of rows) await R.Proposals.undo(id);
-          UI.toast('Geri alındı');
+          UI.toast(yz('ays.team.geri-alindi'));
           R.App.render();
         },
       });
@@ -200,7 +220,7 @@ R.Screens.team = (function(){
 
   function picker(){
     return K.Segmented({
-      act:'team-agent', value:current().id, block:true, aria:'Ajan seç',
+      act:'team-agent', value:current().id, block:true, aria:yz('ays.team.ajan-sec'),
       /* Sekmede de avatar durur: ofis kat planındaki kimlik rengi burada
          tekrarlanınca kimin masasında olduğun bakınca anlaşılır. */
       items:R.AGENTS.map(a => ({ value:a.id, label:html`<span class="agenttab">
@@ -228,7 +248,7 @@ R.Screens.team = (function(){
     const agent = current();
     const d = DURUM_METNI[sesli.durum] || DURUM_METNI['kapalı'];
     return K.Card({
-      title:'Sesli sohbet', sub:agent.name + ' ile sıra sırayla',
+      title:yz('ays.team.sesli-sohbet'), sub:agent.name + ' ile sıra sırayla',
       body:html`
         <div class="ses" id="ses-panel" data-durum="${sesli.durum}">
           <div class="ses__hal">
@@ -244,11 +264,11 @@ R.Screens.team = (function(){
         ${when(!sesli.acik && !R.Talk.sesliCevapVar(), () => K.Notice({ tone:'info', class:'mt-10',
           body:'Bu tarayıcıda sesli cevap yok. Sıra yine geçer; cevabı okursun.' }))}
         <div class="row mt-10">
-          ${when(!sesli.acik, () => K.Button({ label:'Sesli sohbeti başlat',
+          ${when(!sesli.acik, () => K.Button({ label:yz('ays.team.sesli-sohbeti-baslat'),
             icon:'mic', act:'talk-start' }))}
           ${when(sesli.acik, () => html`
-            ${K.Button({ label:'Bitir', act:'talk-stop' })}
-            ${K.Button({ label:'Kes', act:'talk-cut',
+            ${K.Button({ label:yz('ays.team.bitir'), act:'talk-stop' })}
+            ${K.Button({ label:yz('ays.team.kes'), act:'talk-cut',
               disabled:sesli.durum !== 'konuşuyor' })}`)}
         </div>`,
     });
@@ -290,16 +310,16 @@ R.Screens.team = (function(){
   } });
   LIFEOS.PARCA.blok({ id:'team.masasindaki-rapor', sayfa:'team', yer:'y2', sira:20, ad:'Masasındaki rapor', ciz({ agent, msgs, ruleMode, G, pencere }){
     return K.Card({
-          hint:'not-masasindaki-rapor', title:'Masasındaki rapor',           actions:K.Button({ label:'Özet iste', icon:'refresh', size:'sm', act:'team-brief' }),
+          hint:'not-masasindaki-rapor', title:yz('ays.team.masasindaki-rapor'),           actions:K.Button({ label:yz('ays.team.ozet-iste'), icon:'refresh', size:'sm', act:'team-brief' }),
           body:html`
             <div class="stack-xs">${map(O.brief(agent.id).findings, f => html`
               <div class="finding">
                 <span class="${'finding__dot finding__dot--' + (f.tone || 'muted')}"></span>
                 <span>${f.text}</span>
               </div>`)}</div>
-            <div class="mt-10"><span class="tiny dim">Okuduğu veri</span>
+            <div class="mt-10"><span class="tiny dim">${yz('ays.team.okudugu-veri')}</span>
               ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.veriCipleriHtml(agent.reads))
-                : html`<span class="tiny dim">${agent.reads.length} veri kaynağı</span>`}</div>`,
+                : html`<span class="tiny dim">${agent.reads.length} ${yz('ays.team.veri-kaynagi')}</span>`}</div>`,
         });
   } });
   LIFEOS.PARCA.blok({ id:'team.ekipteki-digerleri', sayfa:'team', yer:'y3', sira:10, ad:'Ekipteki diğerleri', ciz({ agent, msgs, ruleMode, G, pencere }){
@@ -309,7 +329,7 @@ R.Screens.team = (function(){
            kotudur. */
         voiceCard(),
         K.Card({
-          hint:'not-ekipteki-digerleri', title:'Ekipteki diğerleri',           body:html`<div class="stack-xs">${map(R.AGENTS.filter(a => a.id !== agent.id), a => html`
+          hint:'not-ekipteki-digerleri', title:yz('ays.team.ekipteki-digerleri'),           body:html`<div class="stack-xs">${map(R.AGENTS.filter(a => a.id !== agent.id), a => html`
             <button class="agentrow" data-act="team-agent" data-value="${a.id}">
               ${Avatar(a)}
               <span class="minw0"><b class="small">${a.name}</b>
@@ -368,7 +388,7 @@ R.Screens.team = (function(){
       <div class="msg msg--agent">
         <div class="msg__who"><b>${agent.name}</b><span>${agent.role}</span></div>
         <div class="msg__body dim" id="chat-stream">${label}
-          <span class="tiny">(ücretsiz modellerde ilk yanıt 10–60 sn sürebilir)</span></div>
+          <span class="tiny">${yz('ays.team.ucretsiz-modellerde-ilk-yani')}</span></div>
       </div>`);
     scrollLog();
   }
@@ -466,7 +486,7 @@ R.Screens.team = (function(){
       R.App.render();
     },
     async 'talk-stop'(){ R.Talk.stop(); sesli.acik = false; R.App.render(); },
-    async 'talk-cut'(){ if(!R.Talk.kes()) UI.toast('Şu an konuşmuyor'); },
+    async 'talk-cut'(){ if(!R.Talk.kes()) UI.toast(yz('ays.team.su-an-konusmuyor')); },
 
     async 'team-send'(){
       const el = document.getElementById('team-input');
@@ -533,14 +553,14 @@ R.Screens.team = (function(){
     /* iPhone Faz 4: açık sohbet ve ajanın raporu; ekibin geri kalanı şerit.
        2026-10-07: sesli sohbet de şerit (ara sıra açılan araç). */
     kucukVarsayilan:['ekipteki-diğerleri', 'sesli-sohbet'],
-    title:'Ekip sohbeti',
+    title:yz('ays.team.ekip-sohbeti'),
     subtitle(){
       const agent = current();
       const n = O.chatOf(agent.id).length;
       return agent.name + ' · ' + agent.role + (n ? ' · ' + Math.ceil(n/2) + ' soru' : '');
     },
     actions(){
-      return String(R.C.Button({ label:'Ofis', icon:'guide', size:'sm', act:'go',
+      return String(R.C.Button({ label:yz('ays.team.ofis'), icon:'guide', size:'sm', act:'go',
         data:{ 'data-route':'office' } }));
     },
     render, handle, onKey, afterRender(){ mentionKur(); if(!OS()) scrollLog(); }, mentionHtml,

@@ -7,6 +7,9 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.rehber.kutuphanem':'Kütüphanem',
+});
 window.LIFEOS.PARCA.sayfa({ id:'rehber', modul:'esp', cekmece:'kutuphane', ad:'Anlatımlar', sira:20 });
 
 ESP.Screens.rehber = (function(){
@@ -30,7 +33,7 @@ ESP.Screens.rehber = (function(){
   }
   return {
     id:'rehber',
-    title:'Kütüphanem',
+    title:yz('esp.rehber.kutuphanem'),
     subtitle(){ return (ESP.REHBER_KONULAR || []).length + ' konu'; },
     lede(){ return ''; },
     actions(){ return ''; },

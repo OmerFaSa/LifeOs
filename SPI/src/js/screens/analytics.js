@@ -6,6 +6,106 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.analytics.capraz-baglar':'Çapraz bağlar',
+  'spi.analytics.haftalik-rapor':'Haftalık rapor',
+  'spi.analytics.seriler':'Seriler',
+  'spi.analytics.fizyoloji-ve-kavramlar':'Fizyoloji ve kavramlar',
+  'spi.analytics.denetim':'Denetim',
+  'spi.analytics.durustluk':'Dürüstlük',
+  'spi.analytics.birlikte-hareket-etmek-sebep':'Birlikte hareket etmek, sebep olmak demek değildir.',
+  'spi.analytics.r':'r = ',
+  'spi.analytics.zayif':'zayıf',
+  'spi.analytics.veri-yetersiz':'veri yetersiz',
+  'spi.analytics.ruh-hali-modeli':'Ruh hâli modeli',
+  'spi.analytics.ogreniyor':'öğreniyor',
+  'spi.analytics.bugun-icin-tahmin':'Bugün için tahmin',
+  'spi.analytics.tahmin-olcum-degil':'tahmin · ölçüm değil',
+  'spi.analytics.son':'Son',
+  'spi.analytics.gunde-ortalama-hata':'günde ortalama hata',
+  'spi.analytics.her-gun-ortanca-his':'; «her gün ortanca his» diyen taban',
+  'spi.analytics.tipik-bir-gunde':'Tipik bir günde',
+  'spi.analytics.modelin-tahmini-birliktelikt':'Modelin tahmini; birliktelikten öğrenildi, neden değildir.',
+  'spi.analytics.kendi-bagini-kur':'Kendi bağını kur',
+  'spi.analytics.birinci-olcum':'Birinci ölçüm',
+  'spi.analytics.i-kinci-olcum':'İkinci ölçüm',
+  'spi.analytics.katsayi':'Katsayı',
+  'spi.analytics.haftalik-konsolide-rapor':'Haftalık konsolide rapor',
+  'spi.analytics.toparlanma':'Toparlanma',
+  'spi.analytics.seans':'Seans',
+  'spi.analytics.ogun-kaydi':'Öğün kaydı',
+  'spi.analytics.sepet':'Sepet',
+  'spi.analytics.dikkat-isteyen-olcumler':'Dikkat isteyen ölçümler',
+  'spi.analytics.deger':'Değer',
+  'spi.analytics.beslenme-aciklari':'Beslenme açıkları',
+  'spi.analytics.kapsama':'Kapsama',
+  'spi.analytics.i-ncelemede-gor':'İncelemede gör',
+  'spi.analytics.asgari-gun-tutturma':'Asgari gün tutturma',
+  'spi.analytics.son-28-gun':'Son 28 gün',
+  'spi.analytics.olcum-serisi':'Ölçüm serisi',
+  'spi.analytics.serisi-gosterilecek-olcum':'Serisi gösterilecek ölçüm',
+  'spi.analytics.denetim-defteri':'Denetim defteri',
+  'spi.analytics.bu-sayfa-gerekli-mi':'Bu sayfa gerekli mi?',
+  'spi.analytics.acik-soru':'Açık soru',
+  'spi.analytics.sayi':'Sayı',
+  'spi.analytics.adet':'Adet',
+  'spi.analytics.ayrisma-kapandi':'Ayrışma kapandı',
+  'spi.analytics.surtunme':'Sürtünme',
+  'spi.analytics.antrenman-yapilan':'Antrenman yapılan',
+  'spi.analytics.gunde-takip-payi':'günde takip payı %',
+  'spi.analytics.yalnizca-antrenman-suresine':'— yalnızca antrenman süresine göre.',
+  'spi.analytics.gosterge-ayrismasi':'Gösterge ayrışması',
+  'spi.analytics.yon-sutunu-sonucun-hangi-tar':'«Yön» sütunu sonucun hangi tarafa gitmesinin iyi sayıldığını söyler. Yönü tanımsız bir çift değerlendirilmez: sistem yüksek olanın iyi olduğunu VARSAYMAZ.',
+  'spi.analytics.pencere':'Pencere ',
+  'spi.analytics.asgari-caba-her-cift-icin':'Asgari çaba her çift için ayrıdır. Bu sayılar bir bulgu değil bu yazılımın ayarıdır:',
+  'spi.analytics.kalibrasyon':'Kalibrasyon',
+  'spi.analytics.her-sayiyi-cihazdan-bekleyen':'Her sayıyı cihazdan bekleyen biri, cihaz yokken kendini okuyamaz. Ölçülen şey dardır — kayıtlı türlerde tahminin sayıya ne kadar yaklaştığı; «kendini tanıma» değil. Bu bir sağlık yargısı da değildir.',
+  'spi.analytics.yanlilik':'Yanlılık',
+  'spi.analytics.ne-tahmin-ediyorsun':'Ne tahmin ediyorsun?',
+  'spi.analytics.tahmin-turu':'Tahmin türü',
+  'spi.analytics.tahmini-kaydet':'Tahmini kaydet',
+  'spi.analytics.kapat':'Kapat',
+  'spi.analytics.tahmin':'Tahmin',
+  'spi.analytics.gercek':'Gerçek',
+  'spi.analytics.sapma':'Sapma',
+  'spi.analytics.bakim-borcu':'Bakım borcu',
+  'spi.analytics.bu-denetim-teshis-koymaz-bir':'Bu denetim teşhis koymaz: bir değerin ne anlama geldiği ',
+  'spi.analytics.ac':'Aç',
+  'spi.analytics.derin-fizyoloji-analizleri':'Derin fizyoloji analizleri',
+  'spi.analytics.yuk-adaptasyon-ve-toparlanma':'Yük, adaptasyon ve toparlanma mekanizmaları',
+  'spi.analytics.tumu':'Tümü (',
+  'spi.analytics.temel':'Temel',
+  'spi.analytics.orta':'Orta',
+  'spi.analytics.i-leri':'İleri',
+  'spi.analytics.saglik-ve-egzersiz-kavramlar':'Sağlık ve egzersiz kavramları',
+  'spi.analytics.30-temel-fizyoloji-antrenman':'30 temel fizyoloji, antrenman ve kayıt kavramı',
+  'spi.analytics.kavram-notlarim':'Kavram notlarım',
+  'spi.analytics.bilimsel-kanit-ve-kaynak-kar':'Bilimsel kanıt ve kaynak kartları',
+  'spi.analytics.acsm-nsca-who-ve-cdc':'ACSM, NSCA, WHO ve CDC araştırma dayanakları',
+  'spi.analytics.raporun-mantigi':'Raporun mantığı',
+  'spi.analytics.sayilar-kural-motorundan-gel':'Sayılar kural motorundan gelir; Patron ajan yalnızca cümleye çevirir. ',
+  'spi.analytics.gece-uykusu':'Gece uykusu',
+  'spi.analytics.hareket':'Hareket',
+  'spi.analytics.protein':'Protein',
+  'spi.analytics.bugunun-enerjisi':'Bugünün enerjisi',
+  'spi.analytics.uyku-duzenliligi':'Uyku düzenliliği',
+  'spi.analytics.son-14-gecenin-uykusu':'Son 14 gecenin uykusu',
+  'spi.analytics.kisa-uykular':'Kısa uykular',
+  'spi.analytics.son-14-gunun-kisa-uykulari':'Son 14 günün kısa uykuları; ',
+  'spi.analytics.kilo':'Kilo',
+  'spi.analytics.uyku':'Uyku',
+  'spi.analytics.gecen-donemle-karsilastir':'Geçen dönemle karşılaştır',
+  'spi.analytics.dagilim':'Dağılım',
+  'spi.analytics.veri-dolulugu':'Veri doluluğu',
+  'spi.analytics.spi':'SPİ',
+  'spi.analytics.yol-haritasi':'Yol haritası',
+  'spi.analytics.plan-hedefler-de-bir-hedef':'Plan › Hedefler’de bir hedef koyunca yol haritası burada belirir.',
+  'spi.analytics.analiz-bolumleri':'Analiz bölümleri',
+  'spi.analytics.bu-hafta':'Bu hafta',
+  'spi.analytics.kategoriler':'Kategoriler',
+  'spi.analytics.tahmin-deftere-yazildi':'Tahmin deftere yazıldı',
+  'spi.analytics.analiz':'Analiz',
+});
 window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'spi', cekmece:'analiz', ad:'Analiz', sira:10 });
 
 SP.Screens.analytics = (function(){
@@ -14,12 +114,12 @@ SP.Screens.analytics = (function(){
   const K = SP.C, P = SP.Parts;
 
   const TABS = [
-    { id:'capraz', label:'Çapraz bağlar',  icon:'layers' },
-    { id:'hafta',  label:'Haftalık rapor', icon:'list' },
-    { id:'seri',   label:'Seriler',        icon:'chart' },
-    { id:'kavramlar', label:'Fizyoloji ve kavramlar', icon:'book' },
-    { id:'denetim', label:'Denetim',      icon:'list' },
-    { id:'durust', label:'Dürüstlük',      icon:'shield' },
+    { id:'capraz', label:yz('spi.analytics.capraz-baglar'),  icon:'layers' },
+    { id:'hafta',  label:yz('spi.analytics.haftalik-rapor'), icon:'list' },
+    { id:'seri',   label:yz('spi.analytics.seriler'),        icon:'chart' },
+    { id:'kavramlar', label:yz('spi.analytics.fizyoloji-ve-kavramlar'), icon:'book' },
+    { id:'denetim', label:yz('spi.analytics.denetim'),      icon:'list' },
+    { id:'durust', label:yz('spi.analytics.durustluk'),      icon:'shield' },
   ];
 
   /* --------------------------------------------------------------- capraz */
@@ -28,19 +128,19 @@ SP.Screens.analytics = (function(){
     const rows = SP.Calc.crossFindings(60);
     const strong = rows.filter(r => r.ok && !r.weak);
     return K.Card({
-      hint:'not-capraz-baglar', title:'Çapraz bağlar',
+      hint:'not-capraz-baglar', title:yz('spi.analytics.capraz-baglar'),
       badge:K.Badge({ label:strong.length + ' belirgin bağ', tone:strong.length ? 'info' : 'muted' }),
       /* Sınır cümlesi görünür kalır, başlığın yanında tek satır; uzun
          açıklaması ⓘ'de (hints.js). */
-      note:'Birlikte hareket etmek, sebep olmak demek değildir.',
+      note:yz('spi.analytics.birlikte-hareket-etmek-sebep'),
       body:html`
         <div class="list">${map(rows, r => html`
           <div class="listitem">
             <div class="grow">
               <b class="small">${r.link.title}</b>
-              ${when(r.ok && !r.weak, () => K.Badge({ label:'r = ' + U.fmtNet(r.r), tone:r.tone }))}
-              ${when(r.ok && r.weak, () => K.Badge({ label:'zayıf', tone:'muted' }))}
-              ${when(!r.ok, () => K.Badge({ label:'veri yetersiz', tone:'muted' }))}
+              ${when(r.ok && !r.weak, () => K.Badge({ label:yz('spi.analytics.r') + U.fmtNet(r.r), tone:r.tone }))}
+              ${when(r.ok && r.weak, () => K.Badge({ label:yz('spi.analytics.zayif'), tone:'muted' }))}
+              ${when(!r.ok, () => K.Badge({ label:yz('spi.analytics.veri-yetersiz'), tone:'muted' }))}
               <div class="tiny dim mt-2">${r.ok ? r.text : r.note}</div>
             </div>
           </div>`)}</div>`,
@@ -51,24 +151,24 @@ SP.Screens.analytics = (function(){
   function modelCard(){
     if(!SP.Tahmin) return '';
     const m = SP.Tahmin.durum();
-    if(!m.ok) return K.Card({ title:'Ruh hâli modeli', badge:K.Badge({ label:'öğreniyor', tone:'muted' }),
+    if(!m.ok) return K.Card({ title:yz('spi.analytics.ruh-hali-modeli'), badge:K.Badge({ label:yz('spi.analytics.ogreniyor'), tone:'muted' }),
       body:K.Notice({ tone:'info', body:m.why + ' Bugün ekranındaki «Günün hissi»ni işaretledikçe öğrenir.' }) });
     const vg = x => String(x).replace('.', ',');
     return K.Card({
-      title:'Ruh hâli modeli', sub:m.n + ' gün · ' + m.ozellikSayisi + ' özellik · ' + m.parametre + ' parametre · ' + (m.kaynaklar || ['SPİ']).join(' + '),
+      title:yz('spi.analytics.ruh-hali-modeli'), sub:m.n + ' gün · ' + m.ozellikSayisi + ' özellik · ' + m.parametre + ' parametre · ' + (m.kaynaklar || ['SPİ']).join(' + '),
       badge:K.Badge({ label:m.iyi ? 'tabandan %' + m.kazanc + ' iyi' : 'henüz tabanı geçmedi', tone:m.iyi ? 'ok' : 'muted' }),
       body:html`
-        ${when(m.iyi && m.bugun != null, () => K.Stat({ label:'Bugün için tahmin', value:vg(m.bugun) + ' / 5', note:'tahmin · ölçüm değil' }))}
-        <p class="tiny dim mt-8">Son ${m.sinav} günde ortalama hata ${vg(m.maeModel)}; «her gün ortanca his» diyen taban ${vg(m.maeTaban)}.
+        ${when(m.iyi && m.bugun != null, () => K.Stat({ label:yz('spi.analytics.bugun-icin-tahmin'), value:vg(m.bugun) + ' / 5', note:yz('spi.analytics.tahmin-olcum-degil') }))}
+        <p class="tiny dim mt-8">${yz('spi.analytics.son')} ${m.sinav} ${yz('spi.analytics.gunde-ortalama-hata')} ${vg(m.maeModel)}${yz('spi.analytics.her-gun-ortanca-his')} ${vg(m.maeTaban)}.
           ${m.iyi ? '' : ' Model tabandan en az %10 iyi olmadan tahmin göstermez.'}</p>
         ${when(m.onem.length, () => html`<div class="list mt-8">${map(m.onem.slice(0, 4), x => html`
           <div class="listitem"><div class="grow"><b class="small">${x.ad}</b>
             <div class="tiny dim">${x.yon > 0 ? 'arttıkça hissin yükseliyor' : x.yon < 0 ? 'arttıkça hissin düşüyor' : 'yönü belirsiz'} · birliktelik, neden değil</div></div>
             ${P.cert('estimated')}</div>`)}</div>`)}
-        ${when(m.iyi && (m.neDegisirse || []).length, () => html`<p class="small mt-12"><b>Tipik bir günde</b></p>
+        ${when(m.iyi && (m.neDegisirse || []).length, () => html`<p class="small mt-12"><b>${yz('spi.analytics.tipik-bir-gunde')}</b></p>
           <div class="list">${map(m.neDegisirse, x => html`<div class="listitem"><div class="grow"><span class="small">${x.ad}</span></div>
             <span class="num small is-up">+${vg(x.fark)}</span>${P.cert('estimated')}</div>`)}</div>
-          <p class="tiny dim mt-4">Modelin tahmini; birliktelikten öğrenildi, neden değildir.</p>`)}`,
+          <p class="tiny dim mt-4">${yz('spi.analytics.modelin-tahmini-birliktelikt')}</p>`)}`,
     });
   }
 
@@ -83,17 +183,17 @@ SP.Screens.analytics = (function(){
     const opts = Object.keys(SP.Calc.SERIES).map(id => ({ value:id, label:seriesLabel(id) }));
 
     return K.Card({
-      hint:'not-kendi-bagini-kur', title:'Kendi bağını kur',
+      hint:'not-kendi-bagini-kur', title:yz('spi.analytics.kendi-bagini-kur'),
       body:html`
         <div class="cols-2">
-          ${K.Field({ label:'Birinci ölçüm', input:K.Select({ value:a, change:'pair-a', options:opts }) })}
-          ${K.Field({ label:'İkinci ölçüm', input:K.Select({ value:b, change:'pair-b', options:opts }) })}
+          ${K.Field({ label:yz('spi.analytics.birinci-olcum'), input:K.Select({ value:a, change:'pair-a', options:opts }) })}
+          ${K.Field({ label:yz('spi.analytics.i-kinci-olcum'), input:K.Select({ value:b, change:'pair-b', options:opts }) })}
         </div>
         <div class="mt-12">
           ${when(turev, () => K.Notice({ tone:'info',
             body:'Toparlanma skoru uyku, HRV ve istirahat nabzından hesaplanır; bu ikisinin bağı hesabın kendisidir, bulgu değil.' }))}
           ${when(c.ok && !turev, () => html`
-            ${K.Stat({ label:'Katsayı', value:U.fmtNet(c.r),
+            ${K.Stat({ label:yz('spi.analytics.katsayi'), value:U.fmtNet(c.r),
               note:c.n + ' ortak gün · ' + (!c.belirgin ? 'rastlantı düzeyinde (|r| ≥ ' + U.fmtNet(c.esik) + ' gerekir)'
                 : c.strength >= 0.6 ? 'güçlü' : 'orta') })}
             ${raw(UI.lineChart([
@@ -120,7 +220,7 @@ SP.Screens.analytics = (function(){
   function reportCard(){
     const r = SP.Calc.weeklyReport();
     return K.Card({
-      title:'Haftalık konsolide rapor',
+      title:yz('spi.analytics.haftalik-konsolide-rapor'),
       sub:U.fmtRange(r.start, r.end),
       badge:K.Badge({ label:r.discipline.minDays + '/7 asgari gün',
         tone:r.discipline.minDays >= 5 ? 'ok' : 'warn' }),
@@ -128,27 +228,27 @@ SP.Screens.analytics = (function(){
         <!-- Kapak görseli kalktı (SADE, 2026-10-05): rapor başlığı ve sayılarıyla başlar. -->
         ${K.Notice({ tone:'info', body:SP.Calc.headline(r) })}
         <div class="cols-4 mt-12">
-          ${K.Stat({ label:'Toparlanma', value:r.readiness.avg == null ? '—' : String(r.readiness.avg),
+          ${K.Stat({ label:yz('spi.analytics.toparlanma'), value:r.readiness.avg == null ? '—' : String(r.readiness.avg),
             note:r.readiness.n + ' gün ölçüldü' })}
-          ${K.Stat({ label:'Seans', value:String(r.movement.sessions),
+          ${K.Stat({ label:yz('spi.analytics.seans'), value:String(r.movement.sessions),
             note:U.fmtNum(r.movement.load) + ' yük' })}
-          ${K.Stat({ label:'Öğün kaydı', value:r.nutrition.loggedDays + '/7',
+          ${K.Stat({ label:yz('spi.analytics.ogun-kaydi'), value:r.nutrition.loggedDays + '/7',
             note:r.nutrition.proteinPct != null ? 'protein %' + r.nutrition.proteinPct : 'hedef yok' })}
-          ${K.Stat({ label:'Sepet', value:r.money.rows.length ? U.fmtNum(Math.round(r.money.total)) : '—',
+          ${K.Stat({ label:yz('spi.analytics.sepet'), value:r.money.rows.length ? U.fmtNum(Math.round(r.money.total)) : '—',
             unit:r.money.rows.length ? 'TL' : '', note:r.money.over ? 'sınır aşıldı' : 'sınır içinde' })}
         </div>
         ${when(r.flags.length, () => html`<div class="mt-12">${map(r.flags, P.flagCard)}</div>`)}
         ${when(r.attention.length, () => html`<div class="mt-12">
-          <h3 class="section-h">Dikkat isteyen ölçümler</h3>
-          ${K.Table({ tight:true, headers:['Ölçüm', { label:'Değer', num:true }, 'Durum'],
+          <h3 class="section-h">${yz('spi.analytics.dikkat-isteyen-olcumler')}</h3>
+          ${K.Table({ tight:true, headers:['Ölçüm', { label:yz('spi.analytics.deger'), num:true }, 'Durum'],
             rows:r.attention.map(a => [a.marker.name, U.fmtNum(a.value) + ' ' + a.marker.unit,
               K.Badge({ label:a.status.label, tone:a.status.tone })]) })}</div>`)}
         ${when(r.gaps.length, () => html`<div class="mt-12">
-          <h3 class="section-h">Beslenme açıkları</h3>
-          ${K.Table({ tight:true, headers:['Öğe', { label:'Kapsama', num:true }],
+          <h3 class="section-h">${yz('spi.analytics.beslenme-aciklari')}</h3>
+          ${K.Table({ tight:true, headers:['Öğe', { label:yz('spi.analytics.kapsama'), num:true }],
             rows:r.gaps.map(g => [g.nutrient ? g.nutrient.name : g.id, '%' + g.pct]) })}</div>`)}
       </div>`,
-      foot:K.Button({ label:'İncelemede gör', size:'sm', act:'go', data:{ 'data-route':'meeting' } }),
+      foot:K.Button({ label:yz('spi.analytics.i-ncelemede-gor'), size:'sm', act:'go', data:{ 'data-route':'meeting' } }),
     });
   }
 
@@ -160,8 +260,8 @@ SP.Screens.analytics = (function(){
       days.push({ label:U.fmtShort(d), value:U.pct(m.done, m.total) });
     }
     return K.Card({
-      title:'Asgari gün tutturma', hint:'minimum-day',
-      sub:'Son 28 gün',
+      title:yz('spi.analytics.asgari-gun-tutturma'), hint:'minimum-day',
+      sub:yz('spi.analytics.son-28-gun'),
       badge:K.Badge({ label:SP.Calc.streak() + ' gün seri', tone:'info' }),
       body:raw(UI.barChart(days, { max:100, height:150, goodAt:100 })),
     });
@@ -179,9 +279,9 @@ SP.Screens.analytics = (function(){
     const measured = SP.BIOMARKERS.filter(x => SP.Model.seriesOf(x.id).length);
 
     return K.Card({
-      title:'Ölçüm serisi', hint:'trend',
+      title:yz('spi.analytics.olcum-serisi'), hint:'trend',
       sub:b ? b.name : '',
-      actions:K.Select({ value:id, change:'pick-series', aria:'Serisi gösterilecek ölçüm',
+      actions:K.Select({ value:id, change:'pick-series', aria:yz('spi.analytics.serisi-gosterilecek-olcum'),
         options:(measured.length ? measured : SP.BIOMARKERS).map(x => ({ value:x.id, label:x.name })) }),
       body:html`
         ${when(series.length < 2, () => K.Notice({ tone:'info',
@@ -192,7 +292,7 @@ SP.Screens.analytics = (function(){
             band:r && r.optimal ? r.optimal : (r ? r.ref : null), height:210 }))}
           ${K.Notice({ tone:vd.tone === 'muted' ? 'info' : vd.tone, class:'mt-12',
             body:tr.ok ? vd.text : tr.note })}
-          ${K.Table({ tight:true, headers:['Tarih', { label:'Değer', num:true }, 'Durum', 'Kaynak'],
+          ${K.Table({ tight:true, headers:['Tarih', { label:yz('spi.analytics.deger'), num:true }, 'Durum', 'Kaynak'],
             rows:series.slice().reverse().map(s => [U.fmtDate(s.date), U.fmtNum(s.v) + ' ' + b.unit,
               K.Badge({ label:SP.Bio.statusOf(id, s.v).label, tone:SP.Bio.statusOf(id, s.v).tone }),
               P.cert(s.cert)]) })}`)}`,
@@ -220,15 +320,15 @@ SP.Screens.analytics = (function(){
     const kapali = SP.Signals.closed().slice(-8).reverse();
 
     return K.Entry({
-      label:'Denetim defteri', hint:'signal',
+      label:yz('spi.analytics.denetim-defteri'), hint:'signal',
       meta:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
       wide:true,
       body:html`
         ${K.Notice({ tone:h.level === 'used' ? 'ok' : h.level === 'unknown' ? 'info' : 'warn',
-          title:'Bu sayfa gerekli mi?', body:h.text })}
-        ${when(acik, () => K.Notice({ tone:'info', title:'Açık soru',
+          title:yz('spi.analytics.bu-sayfa-gerekli-mi'), body:h.text })}
+        ${when(acik, () => K.Notice({ tone:'info', title:yz('spi.analytics.acik-soru'),
           body:acik.question + ' (Bugün ekranında cevaplanabilir.)' }))}
-        ${K.Table({ tight:true, headers:['Zincir', { label:'Sayı', num:true }], rows:[
+        ${K.Table({ tight:true, headers:['Zincir', { label:yz('spi.analytics.sayi'), num:true }], rows:[
           ['Açılan sinyal', String(e.opened)],
           ['Görüldü', String(e.seen)],
           ['Cevaplandı', String(e.answered)],
@@ -236,7 +336,7 @@ SP.Screens.analytics = (function(){
           ['Kapandı', String(e.closed)],
         ] })}
         ${when(e.cert === 'observed', () => K.Table({ tight:true,
-          headers:['Kapanan sinyal', { label:'Adet', num:true }, { label:'Ayrışma kapandı', num:true }],
+          headers:['Kapanan sinyal', { label:yz('spi.analytics.adet'), num:true }, { label:yz('spi.analytics.ayrisma-kapandi'), num:true }],
           rows:[
             ['Cevaplananlar', String(e.answeredClosed),
               e.answeredRate == null ? '—' : '%' + e.answeredRate],
@@ -257,16 +357,14 @@ SP.Screens.analytics = (function(){
     const f = SP.Friction.verdict();
     const rahat = SP.Friction.relief();
     return K.Entry({
-      label:'Sürtünme', hint:'friction',
+      label:yz('spi.analytics.surtunme'), hint:'friction',
       meta:f.cert === 'missing' ? 'veri yok' : f.window.perDay + ' dk/gün',
       wide:true,
       body:html`
         ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info',
           title:f.title, body:f.note })}
         ${when(f.cert === 'measured' && f.window.trainingDays, () => html`
-          <p class="tiny dim mt-8">Antrenman yapılan ${f.window.trainingDays} günde
-            takip payı %${Math.round((f.window.trainingRatio || 0) * 100)} —
-            yalnızca antrenman süresine göre.</p>`)}
+          <p class="tiny dim mt-8">${yz('spi.analytics.antrenman-yapilan')} ${f.window.trainingDays} ${yz('spi.analytics.gunde-takip-payi')}${Math.round((f.window.trainingRatio || 0) * 100)} ${yz('spi.analytics.yalnizca-antrenman-suresine')}</p>`)}
         ${when(rahat.length, () => html`<div class="mt-12">
           ${map(rahat, r => html`<div class="mt-8">${K.Notice({ tone:'info',
             body:r.label + ' — ' + r.note })}</div>`)}</div>`)}`,
@@ -277,7 +375,7 @@ SP.Screens.analytics = (function(){
     const cifts = SP.Goodhart.scan();
     const ayrisan = cifts.filter(p => p.status === 'decoupled');
     return K.Entry({
-      label:'Gösterge ayrışması', hint:'goodhart',
+      label:yz('spi.analytics.gosterge-ayrismasi'), hint:'goodhart',
       meta:ayrisan.length ? ayrisan.length + ' ayrışma' : 'temiz',
       wide:true,
       body:html`
@@ -293,20 +391,17 @@ SP.Screens.analytics = (function(){
               : p.status === 'aligned' ? 'birlikte'
               : p.status === 'unknown' ? 'ölçülmedi' : 'sessiz',
           ]) })}
-        <p class="tiny dim mt-8">«Yön» sütunu sonucun hangi tarafa gitmesinin
-          iyi sayıldığını söyler. Yönü tanımsız bir çift değerlendirilmez:
-          sistem yüksek olanın iyi olduğunu VARSAYMAZ.</p>
+        <p class="tiny dim mt-8">${yz('spi.analytics.yon-sutunu-sonucun-hangi-tar')}</p>
         ${(function(){
           const pol = SP.Goodhart.policy();
           /* T2-14: asgari çaba tek sayı değildir; her çiftin kendi eşiği var
              (gün, dakika, ölçüm). Politikada tek bir değer yoktu ve ekranda
              «asgari çaba dk.» boş kalıyordu; uydurulmaz. */
           return html`<div class="mt-8">${K.Ayrinti({
-            ozet:'Pencere ' + pol.windowDays + ' gün · çaba artışı eşiği %'
+            ozet:yz('spi.analytics.pencere') + pol.windowDays + ' gün · çaba artışı eşiği %'
               + Math.round(pol.effortRiseThreshold * 100) + ' · sonuç durgunluk eşiği %'
               + Math.round(pol.stagnationThreshold * 100) + '.',
-            govde:html`<p>Asgari çaba her çift için ayrıdır. Bu sayılar bir bulgu değil bu
-              yazılımın ayarıdır: ${pol.rationale}</p>` })}</div>`;
+            govde:html`<p>${yz('spi.analytics.asgari-caba-her-cift-icin')} ${pol.rationale}</p>` })}</div>`;
         })()}
         ${map(ayrisan, p => html`<div class="mt-12">
           ${K.Notice({ tone:'warn', body:p.note })}
@@ -318,21 +413,19 @@ SP.Screens.analytics = (function(){
     const puan = SP.Calib.score();
     const vade = SP.Calib.due();
     return K.Entry({
-      label:'Kalibrasyon', hint:'calib',
+      label:yz('spi.analytics.kalibrasyon'), hint:'calib',
       meta:puan.cert === 'missing' ? puan.n + '/' + SP.Calib.ASGARI + ' tahmin'
         : (puan.grade || '—'),
       wide:true,
       body:html`
-        ${K.Ayrinti({ govde:html`<p>Her sayıyı cihazdan bekleyen biri, cihaz yokken kendini
-          okuyamaz. Ölçülen şey dardır — kayıtlı türlerde tahminin sayıya ne kadar yaklaştığı;
-          «kendini tanıma» değil. Bu bir sağlık yargısı da değildir.</p>` })}
+        ${K.Ayrinti({ govde:html`<p>${yz('spi.analytics.her-sayiyi-cihazdan-bekleyen')}</p>` })}
         ${K.Notice({ tone:'info', body:puan.note })}
         ${when(puan.bias.cert === 'measured', () => K.Notice({ tone:'info',
-          title:'Yanlılık', body:puan.bias.note }))}
+          title:yz('spi.analytics.yanlilik'), body:puan.bias.note }))}
         <div class="mt-12">
-          ${K.Field({ label:'Ne tahmin ediyorsun?',
+          ${K.Field({ label:yz('spi.analytics.ne-tahmin-ediyorsun'),
             input:K.Select({ id:'sp-calib-kind', value:S.ui.calibKind || 'weight',
-              change:'calib-kind', aria:'Tahmin türü',
+              change:'calib-kind', aria:yz('spi.analytics.tahmin-turu'),
               options:SP.CALIB_KINDS.map(k => ({ value:k.id, label:k.label })) }) })}
           ${(function(){
             const k = SP.Calib.kindOf(S.ui.calibKind || 'weight');
@@ -341,18 +434,18 @@ SP.Screens.analytics = (function(){
                   + (k.unit ? ' (' + k.unit + ')' : ''),
                 input:K.Input({ id:'sp-calib-guess', type:'number', step:'any' }) })}`;
           })()}
-          ${K.Button({ label:'Tahmini kaydet', tone:'primary', act:'calib-open' })}
+          ${K.Button({ label:yz('spi.analytics.tahmini-kaydet'), tone:'primary', act:'calib-open' })}
         </div>
         ${when(vade.length, () => html`<div class="mt-12">
           ${map(vade, fo => html`<div class="mt-8">
             ${K.Field({ label:(SP.Calib.kindOf(fo.kind) || {}).label
                 + ' — tahminin: ' + U.fmtNum(fo.guess),
               input:K.Input({ id:'sp-calib-actual-' + fo.id, type:'number', step:'any' }) })}
-            ${K.Button({ label:'Kapat', size:'sm', act:'calib-settle',
+            ${K.Button({ label:yz('spi.analytics.kapat'), size:'sm', act:'calib-settle',
               data:{ 'data-id':fo.id } })}</div>`)}</div>`)}
         ${when(SP.Calib.settled().length, () => K.Table({ tight:true,
-          headers:['Tür', { label:'Tahmin', num:true }, { label:'Gerçek', num:true },
-            { label:'Sapma', num:true }],
+          headers:['Tür', { label:yz('spi.analytics.tahmin'), num:true }, { label:yz('spi.analytics.gercek'), num:true },
+            { label:yz('spi.analytics.sapma'), num:true }],
           rows:SP.Calib.settled().slice(0, 10).map(fo => {
             const h = SP.Calib.error(fo);
             return [(SP.Calib.kindOf(fo.kind) || {}).label || fo.kind,
@@ -373,9 +466,9 @@ SP.Screens.analytics = (function(){
     const hepsi = SP.Audit.all();
     const ciddi = hepsi.filter(f => f.severity !== 'none');
     return K.Entry({
-      label:'Bakım borcu', hint:'audit',
+      label:yz('spi.analytics.bakim-borcu'), hint:'audit',
       meta:ciddi.length ? ciddi.length + ' bulgu' : 'temiz',
-      note:'Bu denetim teşhis koymaz: bir değerin ne anlama geldiği '
+      note:yz('spi.analytics.bu-denetim-teshis-koymaz-bir')
          + 'hekimin işidir. Söylediği tek şey kaydın durumudur — tahlil '
          + 'eskimiş, ölçüm girilmemiş, bayrak açık kalmış.',
       wide:true,
@@ -395,7 +488,7 @@ SP.Screens.analytics = (function(){
                 ${when((f.items || []).length, () => K.Table({ tight:true,
                   headers:['Kayıt', 'Durum'],
                   rows:f.items.map(x => [x.label, x.meta || '—']) }))}
-                ${when(f.route, () => K.Button({ label:'Aç', size:'sm', act:'go',
+                ${when(f.route, () => K.Button({ label:yz('spi.analytics.ac'), size:'sm', act:'go',
                   data:{ 'data-route':f.route }, class:'mt-8' }))}
               </div>`)}
           </div>`;
@@ -406,8 +499,8 @@ SP.Screens.analytics = (function(){
   function derinAnalizCard(){
     const list = SP.DERIN_ANALIZLER || [];
     return K.Card({
-      title:'Derin fizyoloji analizleri',
-      sub:'Yük, adaptasyon ve toparlanma mekanizmaları',
+      title:yz('spi.analytics.derin-fizyoloji-analizleri'),
+      sub:yz('spi.analytics.yuk-adaptasyon-ve-toparlanma'),
       badge:K.Badge({ label:list.length + ' analiz', tone:'info' }),
       body:html`<div class="stack-sm">${map(list, a => html`
         <div class="ogrenme">
@@ -429,14 +522,14 @@ SP.Screens.analytics = (function(){
     let list = SP.OGRENME_KAVRAMLAR || [];
     if(tab !== 'all') list = list.filter(c => c.content_depth === tab);
     const filterTabs = [
-      { id:'all', label:'Tümü (' + (SP.OGRENME_KAVRAMLAR || []).length + ')' },
-      { id:'basit', label:'Temel' },
-      { id:'orta', label:'Orta' },
-      { id:'ileri', label:'İleri' },
+      { id:'all', label:yz('spi.analytics.tumu') + (SP.OGRENME_KAVRAMLAR || []).length + ')' },
+      { id:'basit', label:yz('spi.analytics.temel') },
+      { id:'orta', label:yz('spi.analytics.orta') },
+      { id:'ileri', label:yz('spi.analytics.i-leri') },
     ];
     return K.Card({
-      title:'Sağlık ve egzersiz kavramları',
-      sub:'30 temel fizyoloji, antrenman ve kayıt kavramı',
+      title:yz('spi.analytics.saglik-ve-egzersiz-kavramlar'),
+      sub:yz('spi.analytics.30-temel-fizyoloji-antrenman'),
       body:html`
         <div class="row wrap gap-6 mb-12">
           ${map(filterTabs, t => K.Chip({ label:t.label, act:'an-kavram-tab', on:t.id === tab,
@@ -453,7 +546,7 @@ SP.Screens.analytics = (function(){
               ${when(c.watch, () => html`<p class="tiny dim mb-0"><b>Dikkat:</b> ${U.esc(c.watch)}</p>`)}
             </div>`)}
         </div>
-        ${raw(window.LIFEOS && window.LIFEOS.NOTUM ? window.LIFEOS.NOTUM.kutuHtml('kavramlar', { baslik:'Kavram notlarım',
+        ${raw(window.LIFEOS && window.LIFEOS.NOTUM ? window.LIFEOS.NOTUM.kutuHtml('kavramlar', { baslik:yz('spi.analytics.kavram-notlarim'),
           ipucu:'Kendi cümlelerinle yaz. Yukarıda bir tanımı seçip «Nota ekle»ye basarak da ekleyebilirsin.' }) : '')}`,
     });
   }
@@ -461,8 +554,8 @@ SP.Screens.analytics = (function(){
   function kanitCard(){
     const list = SP.KANIT_KARTLARI || [];
     return K.Card({
-      title:'Bilimsel kanıt ve kaynak kartları',
-      sub:'ACSM, NSCA, WHO ve CDC araştırma dayanakları',
+      title:yz('spi.analytics.bilimsel-kanit-ve-kaynak-kar'),
+      sub:yz('spi.analytics.acsm-nsca-who-ve-cdc'),
       body:html`<div class="stack-xs" style="max-height:300px;overflow-y:auto">${map(list, k => html`
         <div class="ogrenme">
           <div class="row between gap-6 mb-2">
@@ -481,8 +574,8 @@ SP.Screens.analytics = (function(){
     capraz:() => html`${K.Ledger(() => [modelCard(), crossCard(), pairCard()])}
       <div class="mt-24">${raw(UI.rail(['correlation', 'trend', 'certainty']))}</div>`,
     hafta:() => html`${K.Ledger(() => [reportCard(), disciplineCard(),
-        K.Entry({ label:'Raporun mantığı', meta:'sayı nereden gelir',
-          note:'Sayılar kural motorundan gelir; Patron ajan yalnızca cümleye çevirir. '
+        K.Entry({ label:yz('spi.analytics.raporun-mantigi'), meta:'sayı nereden gelir',
+          note:yz('spi.analytics.sayilar-kural-motorundan-gel')
             + 'Çelişki varsa öncelik sırası uygulanır ve hangi kuralın kazandığı yazılır.',
           body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
             rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
@@ -540,10 +633,10 @@ SP.Screens.analytics = (function(){
     const tg = SP.Nutri.targets();
     const protein = g14.map(t => { const d = SP.Nutri.dayTotals(t); return d.empty ? null : Math.round(d.protein); });
     const kareler = [
-      ozetKaresi({ ad:'Gece uykusu', seri:uyku, birim:'sa', ozet:ort, not:'7 günün ortalaması', renk:'var(--mer)', rota:'today' }),
-      ozetKaresi({ ad:'Toparlanma', seri:top, birim:'/100', ozet:l => String(Math.round(U.sum(l) / l.length)), not:'hesaplandı, ortalama', renk:'var(--spi)', rota:'move' }),
-      ozetKaresi({ ad:'Hareket', seri:hareket, birim:'dk', ozet:l => U.fmtNum(U.sum(l)), not:'7 günün toplamı', renk:'var(--esp)', rota:'move' }),
-      ozetKaresi({ ad:'Protein', seri:protein, birim:'g/gün', ozet:l => String(Math.round(U.sum(l) / l.length)),
+      ozetKaresi({ ad:yz('spi.analytics.gece-uykusu'), seri:uyku, birim:'sa', ozet:ort, not:'7 günün ortalaması', renk:'var(--mer)', rota:'today' }),
+      ozetKaresi({ ad:yz('spi.analytics.toparlanma'), seri:top, birim:'/100', ozet:l => String(Math.round(U.sum(l) / l.length)), not:'hesaplandı, ortalama', renk:'var(--spi)', rota:'move' }),
+      ozetKaresi({ ad:yz('spi.analytics.hareket'), seri:hareket, birim:'dk', ozet:l => U.fmtNum(U.sum(l)), not:'7 günün toplamı', renk:'var(--esp)', rota:'move' }),
+      ozetKaresi({ ad:yz('spi.analytics.protein'), seri:protein, birim:'g/gün', ozet:l => String(Math.round(U.sum(l) / l.length)),
         not:tg.ok ? 'hedef en az ' + tg.protein.min + ' g' : 'hedef için profil eksik', renk:'var(--ays)', rota:'meals' }),
     ];
     /* Bugünün enerji dengesi: ihtiyaç hesaplandı, alınan girilen öğünden. */
@@ -554,7 +647,7 @@ SP.Screens.analytics = (function(){
       const cubuk = (ad, v, cls_, not) => html`<div class="enerji-satir"><span>${ad}</span>
         <span class="enerji-satir__iz"><i class="${cls_}" style="${'width:' + (v == null ? 0 : Math.round(100 * v / enCok)) + '%'}"></i></span>
         <b class="num">${v == null ? '—' : U.fmtNum(Math.round(v)) + ' kcal'}</b><small>${not}</small></div>`;
-      enerji = K.Kutu({ ad:'Bugünün enerjisi', yuva:'günden güne değişir', govde:html`
+      enerji = K.Kutu({ ad:yz('spi.analytics.bugunun-enerjisi'), yuva:'günden güne değişir', govde:html`
         ${cubuk('İhtiyaç', tg.tdee, 'is-ihtiyac', tg.need && !tg.need.hareketYok ? 'bazal ' + U.fmtNum(tg.bmr) + ' + hareket ' + U.fmtNum(tg.need.hareket) : 'bazal; hareket girilmedi')}
         ${cubuk('Hedef', tg.kcal, 'is-hedef', tg.goal ? tg.goal.label.toLocaleLowerCase('tr-TR') : '')}
         ${cubuk('Alınan', d.empty ? null : d.kcal, 'is-alinan', d.empty ? 'öğün girilmedi · veri yok' : 'girilen öğünlerden')}` });
@@ -579,9 +672,9 @@ SP.Screens.analytics = (function(){
     if(dolu.length >= 4){
       const ort = dolu.reduce((a, b) => a + b, 0) / dolu.length;
       const sap = Math.sqrt(dolu.reduce((a, b) => a + (b - ort) * (b - ort), 0) / dolu.length);
-      kartlar.push(P.kart({ tur:'uyku-duzen', ad:'Uyku düzenliliği', simge:'uyku', yuva:dolu.length + ' gece',
+      kartlar.push(P.kart({ tur:'uyku-duzen', ad:yz('spi.analytics.uyku-duzenliligi'), simge:'uyku', yuva:dolu.length + ' gece',
         govde:P.deger('±' + U.fmtNet(U.round(sap, 1)), 'sa', 'ortalama ' + U.fmtNet(U.round(ort, 1)) + ' sa · küçük sapma: düzenli')
-          + P.sutun({ degerler:uyku, yukseklik:40, etiket:'Son 14 gecenin uykusu' }) }));
+          + P.sutun({ degerler:uyku, yukseklik:40, etiket:yz('spi.analytics.son-14-gecenin-uykusu') }) }));
     }
     const izKart = (l, ad, birim, not) => {
       const d = l.filter(v => v != null);
@@ -595,9 +688,9 @@ SP.Screens.analytics = (function(){
     if(SP.Uyku){
       const kd = g14.map(t => { const l = SP.Uyku.liste(t); return l.length ? l.reduce((a, k) => a + (Number(k.dk) || 0), 0) : null; });
       const n = kd.filter(v => v != null).length;
-      if(n) kartlar.push(P.kart({ tur:'kisa-uyku', ad:'Kısa uykular', simge:'uyku', yuva:n + ' gün',
+      if(n) kartlar.push(P.kart({ tur:'kisa-uyku', ad:yz('spi.analytics.kisa-uykular'), simge:'uyku', yuva:n + ' gün',
         govde:P.deger(String(Math.round(kd.filter(v => v != null).reduce((a, b) => a + b, 0) / n)), 'dk', 'kısa uyku olan günlerin ortalaması')
-          + P.sutun({ degerler:kd, yukseklik:40, etiket:'Son 14 günün kısa uykuları; ' + n + ' gün' }) + P.not('kesik: o gün kısa uyku yok') }));
+          + P.sutun({ degerler:kd, yukseklik:40, etiket:yz('spi.analytics.son-14-gunun-kisa-uykulari') + n + ' gün' }) + P.not('kesik: o gün kısa uyku yok') }));
     }
     const l = kartlar.filter(Boolean);
     return l.length ? '<div class="mt-16">' + P.izgara(l) + '</div>' : '';
@@ -606,7 +699,7 @@ SP.Screens.analytics = (function(){
     const G = (window.LIFEOS || {}).GRAFIK;
     if(!G) return '';
     const son = gunListesi(28).map(t => { const v = S.vitals[t]; return { tarih:t, deger:v && v.weight != null ? Number(v.weight) : null }; });
-    return K.Kutu({ ad:'Kilo', yuva:'son 28 gün', govde:raw(G.metrikHtml(son, { etiket:'Kilo', birim:'kg', ondalik:1, yon:'notr' })) });
+    return K.Kutu({ ad:yz('spi.analytics.kilo'), yuva:'son 28 gün', govde:raw(G.metrikHtml(son, { etiket:yz('spi.analytics.kilo'), birim:'kg', ondalik:1, yon:'notr' })) });
   }
 
   /* ANALİZ BAŞI (vitrin): 041 veri doluluğu · uyku kartı: 027 kopuk çizgi,
@@ -627,14 +720,14 @@ SP.Screens.analytics = (function(){
     const once = gunler(56).slice(0, 28).map(t => ({ tarih:t, deger:uyku(t) }));
     const hedef = S.profile && Number(S.profile.sleepGoal);
     const bant = hedef ? [Math.max(0, hedef - 0.5), hedef + 0.5] : null;
-    const cizgi = o => raw(G.cizgiSvg(son, Object.assign({ gen:560, yuk:120, etiket:'Uyku', birim:'saat' }, o)));
-    return html`${K.Kutu({ ad:'Uyku', yuva:'son 28 gün', govde:html`
+    const cizgi = o => raw(G.cizgiSvg(son, Object.assign({ gen:560, yuk:120, etiket:yz('spi.analytics.uyku'), birim:'saat' }, o)));
+    return html`${K.Kutu({ ad:yz('spi.analytics.uyku'), yuva:'son 28 gün', govde:html`
         ${/* Metrik kartı (2026-10-18): ortalama, eğilim, doluluk ve eksenli çizgi. */''}
-        ${raw(G.metrikHtml(son, { etiket:'Uyku', birim:'saat', ondalik:1, yon:'artis-iyi', bant }))}
-        <details class="hiz-ac"><summary>Geçen dönemle karşılaştır</summary>${cizgi({ onceki:once, bant })}</details>
-        <details class="hiz-ac"><summary>Dağılım</summary>${raw(G.dagilimSvg({ degerler:son.map(x => x.deger), birim:'saat', etiket:'Uyku' }))}</details>
+        ${raw(G.metrikHtml(son, { etiket:yz('spi.analytics.uyku'), birim:'saat', ondalik:1, yon:'artis-iyi', bant }))}
+        <details class="hiz-ac"><summary>${yz('spi.analytics.gecen-donemle-karsilastir')}</summary>${cizgi({ onceki:once, bant })}</details>
+        <details class="hiz-ac"><summary>${yz('spi.analytics.dagilim')}</summary>${raw(G.dagilimSvg({ degerler:son.map(x => x.deger), birim:'saat', etiket:yz('spi.analytics.uyku') }))}</details>
         ${raw(uykuDuzeniHtml(gunler(14)))}
-        <details class="hiz-ac"><summary>Veri doluluğu</summary>${raw(G.dolulukHtml([{ modul:'spi', ad:'SPİ', gunler:olcumlu }], { gun:7 }))}</details>` })}`;
+        <details class="hiz-ac"><summary>${yz('spi.analytics.veri-dolulugu')}</summary>${raw(G.dolulukHtml([{ modul:'spi', ad:yz('spi.analytics.spi'), gunler:olcumlu }], { gun:7 }))}</details>` })}`;
   }
 
   /* 083 UYKU DÜZENİ: iki haftanın yatış ve kalkış saati. Saat YALNIZ
@@ -668,8 +761,8 @@ SP.Screens.analytics = (function(){
         durum:h.durum === 'tamam' ? 'bitti' : h.durum === 'aktif' || h.durum === 'askida' ? 'suruyor' : 'bekliyor' });
     });
     const kumeler = Object.keys(gruplar).map(ad => ({ ad, dugumler:gruplar[ad] }));
-    return K.Kutu({ ad:'Yol haritası', yuva:'hedeflerin · tamam dolu, süren halka',
-      govde:raw(A.html({ merkez:'Sağlık', kumeler, bos:'Plan › Hedefler’de bir hedef koyunca yol haritası burada belirir.' })) });
+    return K.Kutu({ ad:yz('spi.analytics.yol-haritasi'), yuva:'hedeflerin · tamam dolu, süren halka',
+      govde:raw(A.html({ merkez:'Sağlık', kumeler, bos:yz('spi.analytics.plan-hedefler-de-bir-hedef') })) });
   }
 
   LIFEOS.PARCA.blok({ id:'analytics.bolum-1', sayfa:'analytics', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ acik, bolumler, bugun }){
@@ -680,7 +773,7 @@ SP.Screens.analytics = (function(){
     return kategorilerHtml();
   } });
   LIFEOS.PARCA.blok({ id:'analytics.bolum-3', sayfa:'analytics', yer:'y3', sira:10, ad:'Bölüm 3', ciz({ acik, bolumler, bugun }){
-    return K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri', bolumler });
+    return K.SayfaBolumleri({ act:'an-tab', aria:yz('spi.analytics.analiz-bolumleri'), bolumler });
   } });
   LIFEOS.PARCA.blok({ id:'analytics.bolum-4', sayfa:'analytics', yer:'y4', sira:10, ad:'Bölüm 4', ciz({ acik, bolumler, bugun }){
     return raw((window.LIFEOS.ICE ? window.LIFEOS.ICE.kartHtml('spi') : ''));
@@ -689,7 +782,7 @@ SP.Screens.analytics = (function(){
     return yolHaritasi();
   } });
   LIFEOS.PARCA.blok({ id:'analytics.bolum-6', sayfa:'analytics', yer:'y6', sira:10, ad:'Bölüm 6', ciz({ acik, bolumler, bugun }){
-    return K.Kutu({ ad:'Bu hafta', yuva:'kayıttan · son 7 gün', govde:ozetHtml() });
+    return K.Kutu({ ad:yz('spi.analytics.bu-hafta'), yuva:'kayıttan · son 7 gün', govde:ozetHtml() });
   } });
   LIFEOS.PARCA.blok({ id:'analytics.bolum-7', sayfa:'analytics', yer:'y7', sira:10, ad:'Bölüm 7', ciz({ acik, bolumler, bugun }){
     return raw(bugun);
@@ -705,7 +798,7 @@ SP.Screens.analytics = (function(){
       <div class="mt-16">${LIFEOS.PARCA.yer('analytics', 'y5', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
       ${LIFEOS.PARCA.yer('analytics', 'y4', K, parcaB, typeof raw === 'undefined' ? null : raw)}
       <div class="mt-16">${LIFEOS.PARCA.yer('analytics', 'y3', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>
-      <h2 class="analiz-ara-baslik">Kategoriler</h2>
+      <h2 class="analiz-ara-baslik">${yz('spi.analytics.kategoriler')}</h2>
       ${LIFEOS.PARCA.yer('analytics', 'y2', K, parcaB, typeof raw === 'undefined' ? null : raw)}
       <div class="analiz-ayrinti">${LIFEOS.PARCA.yer('analytics', 'y1', K, parcaB, typeof raw === 'undefined' ? null : raw)}</div>`);
   }
@@ -736,7 +829,7 @@ SP.Screens.analytics = (function(){
       const r = await SP.Calib.open(kind, el ? el.value : null, { dueAt:vadeFor(kind) });
       if(!r.ok){ UI.toast(r.error); return; }
       if(el) el.value = '';
-      UI.toast('Tahmin deftere yazıldı');
+      UI.toast(yz('spi.analytics.tahmin-deftere-yazildi'));
       SP.App.render();
     },
 
@@ -775,7 +868,7 @@ SP.Screens.analytics = (function(){
     /* iPhone Faz 3: açık yalnız işin kendisi; kendi bağını kur ve dürüstlüğün
        üç meta kartı şerit (kalibrasyon girişi açık). */
     kucukVarsayilan:['kendi-bağını-kur', 'denetim-defteri', 'sürtünme', 'gösterge-ayrışması'],
-    title:'Analiz',
+    title:yz('spi.analytics.analiz'),
     headline(){
       const rows = SP.Calc.crossFindings(60).filter(r => r.ok && !r.weak);
       if(!rows.length) return 'Belirgin bir bağ bulunamadı.';

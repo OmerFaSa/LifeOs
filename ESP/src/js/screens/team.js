@@ -9,6 +9,20 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.team.kural-motoru':'kural motoru',
+  'esp.team.kurallara-takildi':'kurallara takıldı',
+  'esp.team.masa':'Masa',
+  'esp.team.sistemin-cumlesi':'Sistemin cümlesi',
+  'esp.team.bu-masanin-defteri':'Bu masanın defteri',
+  'esp.team.ozet':'Özet',
+  'esp.team.ham-brifing-json':'Ham brifing (JSON)',
+  'esp.team.ajana-sorun':'Ajana sorun',
+  'esp.team.sorunu-yaz':'Sorunu yaz…',
+  'esp.team.danisma':'Danışma',
+  'esp.team.gelen-devir':'gelen devir',
+  'esp.team.giden-devir':'giden devir',
+});
 window.LIFEOS.PARCA.sayfa({ id:'team', modul:'esp', cekmece:'ofis', ad:'Danışma', ikon:'zap', sira:20 });
 
 ESP.Screens.team = (function(){
@@ -43,7 +57,7 @@ ESP.Screens.team = (function(){
     const ben = m.role === 'user';
     const kaynak = ben ? null
       : (m.source === 'model' ? { label:'model', tone:'info' }
-         : { label:'kural motoru', tone:'muted' });
+         : { label:yz('esp.team.kural-motoru'), tone:'muted' });
     return html`
       <div class="${cls('msg', ben ? 'msg--me' : 'msg--agent')}">
         ${when(!ben && a, () => html`<div class="msg__who"><b>${a.name}</b></div>`)}
@@ -51,7 +65,7 @@ ESP.Screens.team = (function(){
           ${ESP.Parts.onayDugmeleri(m)}</div>
         <div class="${ben ? 'msg__foot' : 'msg__foot osohbet__alt'}">
           ${when(kaynak, () => K.Badge({ label:kaynak.label, tone:kaynak.tone, icon:false }))}
-          ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
+          ${when(m.blocked, () => K.Badge({ label:yz('esp.team.kurallara-takildi'), tone:'warn' }))}
           ${when(m.error, () => K.Badge({ label:'hata', tone:'danger' }))}
           <span class="tiny dim">${saatOf(m.at)}</span>
           ${when(!ben && OS(), () => raw(OS().kopyaHtml()))}
@@ -67,7 +81,7 @@ ESP.Screens.team = (function(){
     return K.Span(12, K.Ledger(() => [
 
         K.Entry({
-          label:'Masa',
+          label:yz('esp.team.masa'),
           meta:a.role,
           note:a.notScope,
           action:K.Badge({ label:hazir ? 'model bağlı' : 'kural motoru',
@@ -86,13 +100,13 @@ ESP.Screens.team = (function(){
         }),
 
         K.Entry({
-          label:'Sistemin cümlesi', hint:'rule-engine',
+          label:yz('esp.team.sistemin-cumlesi'), hint:'rule-engine',
           meta:'model olmadan',
           body:html`<p class="rulesay">${ESP.Office.ruleText(a.id, brf)}</p>`,
         }),
 
         ...(devir.in.length || devir.out.length ? [K.Entry({
-          label:'Bu masanın defteri', hint:'handoff',
+          label:yz('esp.team.bu-masanin-defteri'), hint:'handoff',
           meta:(devir.in.length + devir.out.length) + ' satır',
           body:html`
             ${map(devir.in, h => html`<div class="deskflow__row deskflow__row--in">
@@ -104,11 +118,11 @@ ESP.Screens.team = (function(){
         })] : []),
 
         K.Entry({
-          label:'Özet', hint:'brief',
+          label:yz('esp.team.ozet'), hint:'brief',
           meta:'uzmanın gördüğü tek şey',
           wide:true,
           body:K.Collapsible({
-            title:'Ham brifing (JSON)',
+            title:yz('esp.team.ham-brifing-json'),
             act:'toggle-brief',
             open:!!S.ui.briefOpen,
             body:html`<pre class="jsonbox">${JSON.stringify(brf, null, 2)}</pre>`,
@@ -148,7 +162,7 @@ ESP.Screens.team = (function(){
       bos:{ alt:a.opening },
       ustHtml:mentionYeri(),
       girdiHtml:String(K.Textarea({ id:'chat-input', rows:1, class:'osohbet-girdi',
-        aria:'Ajana sorun', placeholder:'Sorunu yaz…', data:{ 'data-osohbet-girdi':'1' } })),
+        aria:yz('esp.team.ajana-sorun'), placeholder:yz('esp.team.sorunu-yaz'), data:{ 'data-osohbet-girdi':'1' } })),
       mikHtml:String(K.Mic({ target:'chat-input' })),
       gonderAct:'send-chat',
     }) : '';
@@ -229,7 +243,7 @@ ESP.Screens.team = (function(){
     id:'team',
     /* iPhone Faz 4: açık masa ve konuşma; kural cümlesi, defter ve brifing şerit. */
     kucukVarsayilan:['sistemin-cümlesi', 'bu-masanın-defteri', 'özet'],
-    title:'Danışma',
+    title:yz('esp.team.danisma'),
     headline(){
       const a = agent();
       return a.name + ' — ' + a.role.toLocaleLowerCase('tr-TR') + '.';
@@ -247,8 +261,8 @@ ESP.Screens.team = (function(){
       return [
         { value:String(m.length), label:'mesaj' },
         { value:String(ESP.Office.notes(a.id).length), label:'bulgu' },
-        { value:String(ESP.Office.handoffsFor(a.id).in.length), label:'gelen devir' },
-        { value:String(ESP.Office.handoffsFor(a.id).out.length), label:'giden devir' },
+        { value:String(ESP.Office.handoffsFor(a.id).in.length), label:yz('esp.team.gelen-devir') },
+        { value:String(ESP.Office.handoffsFor(a.id).out.length), label:yz('esp.team.giden-devir') },
       ];
     },
     subtitle(){ return agent().title; },

@@ -4,6 +4,60 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.plan.simdi':'şimdi',
+  'ays.plan.imzali':'imzalı',
+  'ays.plan.tamamlandi':'tamamlandı',
+  'ays.plan.planlandi':'planlandı',
+  'ays.plan.konulari-cikarmak-yerine-dah':'Konuları çıkarmak yerine daha çok çalışabilirsin.',
+  'ays.plan.su-an-ders-gunu':'Şu an ders günü',
+  'ays.plan.gunde':'Günde',
+  'ays.plan.haftada':'· haftada',
+  'ays.plan.uygula':'Uygula',
+  'ays.plan.gunluk-sureyi-artirmak-bu-pl':'Günlük süreyi artırmak bu planda konu getirmez.',
+  'ays.plan.sure-artisi-haftada':'Süre artışı haftada',
+  'ays.plan.konuda-durur-haftada-en-fazl':'konuda durur: haftada en fazla',
+  'ays.plan.konu-secmissin':'konu seçmişsin.',
+  'ays.plan.tavani-degistir':'Tavanı değiştir',
+  'ays.plan.takvim-dar':'Takvim dar:',
+  'ays.plan.haftada-hepsi-icin-haftada':'haftada hepsi için haftada',
+  'ays.plan.konu-gerekirdi-en-yuksek-tav':'konu gerekirdi; en yüksek tavanla (',
+  'ays.plan.bile-sigmaz':') bile sığmaz.',
+  'ays.plan.ile-bile-hepsi-sigmaz':'ile bile hepsi sığmaz.',
+  'ays.plan.program':'Program',
+  'ays.plan.sabit-mufredat-kullaniliyor':'Sabit müfredat kullanılıyor',
+  'ays.plan.bu-plan-sana-gore-uretildi':'Bu plan sana göre üretildi',
+  'ays.plan.yeniden-hesapla':'Yeniden hesapla',
+  'ays.plan.kapsama':'Kapsama',
+  'ays.plan.kapasite':'Kapasite',
+  'ays.plan.haftalik':'haftalık',
+  'ays.plan.karar-kapisi':'Karar kapısı',
+  'ays.plan.konu-islenen':'Konu işlenen',
+  'ays.plan.prova-haric':'prova hariç',
+  'ays.plan.takvimin-ve-haftalik':'Takvimin ve haftalık',
+  'ays.plan.saatlik-kapasiten':'saatlik kapasiten',
+  'ays.plan.konuya-yetiyor-dusenler':'konuya yetiyor. Düşenler',
+  'ays.plan.dusuk':'düşük,',
+  'ays.plan.orta-frekansli':'orta frekanslı;',
+  'ays.plan.yuksek-frekansli-konu-da-dus':'yüksek frekanslı konu da düşmek zorunda kaldı',
+  'ays.plan.takvim-gercekten-dar-hedefi':'— takvim gerçekten dar, hedefi gözden geçir.',
+  'ays.plan.yuksek-frekansli-hicbir-konu':'yüksek frekanslı hiçbir konu düşmedi',
+  'ays.plan.bu-konular-silinmedi-dersler':'Bu konular silinmedi — Dersler ekranında öncelik sırasına göre duruyor, boşluk buldukça çalışırsın.',
+  'ays.plan.plan-sabit-degildir-takvimi':'Plan sabit değildir: takvimi, kapasiteyi ya da seviyeni değiştirirsen yeniden üretilir. Geride kalırsan “Yeniden hesapla” kapanmamış konuları öne alır.',
+  'ays.plan.plana-girmeyen-konular':'Plana girmeyen konular',
+  'ays.plan.i-lerleme':'İlerleme',
+  'ays.plan.tamamlandi-2':'tamamlandı.',
+  'ays.plan.hafta':'Hafta ',
+  'ays.plan.sinava-kalan':'Sınava kalan',
+  'ays.plan.kaldi':'kaldı.',
+  'ays.plan.planlanan-soru':'Planlanan soru',
+  'ays.plan.program-zaman-cizgisi':'Program zaman çizgisi',
+  'ays.plan.karar-kapilari-h':'Karar kapıları: H',
+  'ays.plan.siradaki-haftalar':'Sıradaki haftalar',
+  'ays.plan.calisma-yogunlugu':'Çalışma yoğunluğu',
+  'ays.plan.calisildi-koyuluk-yuku-goste':'çalışıldı — koyuluk yükü gösterir',
+  'ays.plan.kayit-yok':'kayıt yok',
+});
 window.LIFEOS.PARCA.sayfa({ id:'plan', modul:'ays', cekmece:'plan', ad:'Program', ikon:'map', sira:20 });
 
 R.Screens.plan = (function(){
@@ -26,8 +80,8 @@ R.Screens.plan = (function(){
           <div class="tlweek__dates">${U.fmtRange(M.weekStart(n), M.weekEnd(n))}</div></div>
         <div class="minw0">
           <div class="row-sm wrap"><b class="small">${c.title}</b>
-            ${when(isCurrent, () => K.Badge({ label:'şimdi', tone:'ok' }))}
-            ${when(week && week.signedAt, () => K.Badge({ label:'imzalı', tone:'muted' }))}</div>
+            ${when(isCurrent, () => K.Badge({ label:yz('ays.plan.simdi'), tone:'ok' }))}
+            ${when(week && week.signedAt, () => K.Badge({ label:yz('ays.plan.imzali'), tone:'muted' }))}</div>
           <div class="tiny dim mt-2">${c.topics.join(' · ')}</div>
           <div class="tiny dim mt-2">Deneme: ${c.exam}</div>
         </div>
@@ -35,8 +89,8 @@ R.Screens.plan = (function(){
           <div class="num small strong">${c.q} soru</div>
           ${comp != null
             ? html`<div class="mt-5">${K.Bar({ value:comp, auto:true })}</div>
-                   <div class="tiny dim">%${comp} tamamlandı</div>`
-            : html`<div class="tiny dim">planlandı</div>`}
+                   <div class="tiny dim">%${comp} ${yz('ays.plan.tamamlandi')}</div>`
+            : html`<div class="tiny dim">${yz('ays.plan.planlandi')}</div>`}
         </div>
       </div>`;
   }
@@ -101,30 +155,29 @@ R.Screens.plan = (function(){
     const enIyi = rows.length ? rows[rows.length - 1].perWeek : sec.perWeek;
     const tavanSiniri = !sec.tam && sec.tavan < T.max && enIyi >= sec.tavan;
     return html`<div class="stack-xs mt-10">
-      <div class="small"><b>Konuları çıkarmak yerine daha çok çalışabilirsin.</b>
-        Şu an ders günü ${U.fmtMin(simdi)}.</div>
+      <div class="small"><b>${yz('ays.plan.konulari-cikarmak-yerine-dah')}</b>
+        ${yz('ays.plan.su-an-ders-gunu')} ${U.fmtMin(simdi)}.</div>
       ${map(rows, r => html`<div class="row gap-8" style="justify-content:space-between;align-items:center">
-        <span class="small">Günde <b>${U.fmtMin(r.dakika)}</b> → ${r.dusen
+        <span class="small">${yz('ays.plan.gunde')} <b>${U.fmtMin(r.dakika)}</b> → ${r.dusen
           ? r.geriGelen + ' konu geri gelir' : 'bütün konular sığar, ' + r.geriGelen + ' konu geri gelir'}
-          <span class="dim">· haftada ${r.perWeek} konu</span></span>
-        ${K.Button({ label:'Uygula', size:'sm', tone:'ghost', act:'sure-oner', data:{ 'data-dakika':r.dakika } })}
+          <span class="dim">${yz('ays.plan.haftada')} ${r.perWeek} konu</span></span>
+        ${K.Button({ label:yz('ays.plan.uygula'), size:'sm', tone:'ghost', act:'sure-oner', data:{ 'data-dakika':r.dakika } })}
       </div>`)}
-      ${when(!rows.length, () => html`<p class="small dim">Günlük süreyi artırmak bu planda konu getirmez.</p>`)}
+      ${when(!rows.length, () => html`<p class="small dim">${yz('ays.plan.gunluk-sureyi-artirmak-bu-pl')}</p>`)}
       ${when(tavanSiniri, () => html`<div class="row gap-8" style="justify-content:space-between;align-items:center">
-        <span class="small">Süre artışı haftada ${sec.tavan} konuda durur: haftada en fazla ${sec.tavan} konu
-          seçmişsin.${sec.engel === 'tavan' ? ' Hepsi için haftada ' + sec.gerekenKonu + ' konu gerekir.' : ''}</span>
-        ${K.Button({ label:'Tavanı değiştir', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'guide' } })}
+        <span class="small">${yz('ays.plan.sure-artisi-haftada')} ${sec.tavan} ${yz('ays.plan.konuda-durur-haftada-en-fazl')} ${sec.tavan} ${yz('ays.plan.konu-secmissin')}${sec.engel === 'tavan' ? ' Hepsi için haftada ' + sec.gerekenKonu + ' konu gerekir.' : ''}</span>
+        ${K.Button({ label:yz('ays.plan.tavani-degistir'), size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'guide' } })}
       </div>`)}
-      ${when(sec.engel === 'takvim', () => html`<p class="small">Takvim dar: ${m.total} haftada hepsi için haftada
-        ${sec.gerekenKonu} konu gerekirdi; en yüksek tavanla (${T.max}) bile sığmaz.</p>`)}
-      ${when(!sec.tam && !sec.engel && !tavanSiniri && rows.length, () => html`<p class="small dim">Günde
-        ${U.fmtMin(sec.maxDk)} ile bile hepsi sığmaz.</p>`)}
+      ${when(sec.engel === 'takvim', () => html`<p class="small">${yz('ays.plan.takvim-dar')} ${m.total} ${yz('ays.plan.haftada-hepsi-icin-haftada')}
+        ${sec.gerekenKonu} ${yz('ays.plan.konu-gerekirdi-en-yuksek-tav')}${T.max}${yz('ays.plan.bile-sigmaz')}</p>`)}
+      ${when(!sec.tam && !sec.engel && !tavanSiniri && rows.length, () => html`<p class="small dim">${yz('ays.plan.gunde')}
+        ${U.fmtMin(sec.maxDk)} ${yz('ays.plan.ile-bile-hepsi-sigmaz')}</p>`)}
     </div>`;
   }
 
   function planCard(){
     const plan = M.activePlan();
-    if(!plan) return K.Card({ title:'Program', sub:'Sabit müfredat kullanılıyor',
+    if(!plan) return K.Card({ title:yz('ays.plan.program'), sub:yz('ays.plan.sabit-mufredat-kullaniliyor'),
       body:K.Notice({ tone:'info', body:'Kişisel plan henüz üretilmedi. Rehber → Ayarlar’dan '
         + 'takvimini ve kapasiteni gir; program sana göre yeniden dizilir.' }) });
 
@@ -135,34 +188,31 @@ R.Screens.plan = (function(){
     dropped.forEach(d => { byFreq[d.freq] = (byFreq[d.freq] || 0) + 1; });
 
     return K.Card({
-      title:'Bu plan sana göre üretildi', hint:'intensity',
+      title:yz('ays.plan.bu-plan-sana-gore-uretildi'), hint:'intensity',
       sub:m.total+' hafta · haftada '+m.perWeek+' ana konu · '+lv.name.toLowerCase(),
-      actions:K.Button({ label:'Yeniden hesapla', icon:'refresh', size:'sm', act:'auto-replan' }),
+      actions:K.Button({ label:yz('ays.plan.yeniden-hesapla'), icon:'refresh', size:'sm', act:'auto-replan' }),
       body:html`
         ${K.Cols(4, [
-          K.Stat({ label:'Kapsama', value:'%'+m.coverage, tone:m.coverage >= 80 ? 'ok' : 'warn',
+          K.Stat({ label:yz('ays.plan.kapsama'), value:'%'+m.coverage, tone:m.coverage >= 80 ? 'ok' : 'warn',
             note:m.placed+' / '+m.poolSize+' konu' }),
-          K.Stat({ label:'Kapasite', value:m.capacityHoursPerWeek, unit:' sa', note:'haftalık' }),
-          K.Stat({ label:'Karar kapısı', value:(m.gates || []).length, note:'H'+(m.gates || []).join(' · H') }),
-          K.Stat({ label:'Konu işlenen', value:m.productive, unit:' hafta', note:'prova hariç' }),
+          K.Stat({ label:yz('ays.plan.kapasite'), value:m.capacityHoursPerWeek, unit:' sa', note:yz('ays.plan.haftalik') }),
+          K.Stat({ label:yz('ays.plan.karar-kapisi'), value:(m.gates || []).length, note:'H'+(m.gates || []).join(' · H') }),
+          K.Stat({ label:yz('ays.plan.konu-islenen'), value:m.productive, unit:' hafta', note:yz('ays.plan.prova-haric') }),
         ])}
 
         ${when(dropped.length, () => K.Notice({ tone:'warn',
           title:dropped.length+' konu plana yazılmadı.',
-          body:html`Takvimin ve haftalık ${m.capacityHoursPerWeek} saatlik kapasiten
-            ${m.placed} konuya yetiyor. Düşenler ${byFreq.low || 0} düşük, ${byFreq.mid || 0} orta frekanslı;
+          body:html`${yz('ays.plan.takvimin-ve-haftalik')} ${m.capacityHoursPerWeek} ${yz('ays.plan.saatlik-kapasiten')}
+            ${m.placed} ${yz('ays.plan.konuya-yetiyor-dusenler')} ${byFreq.low || 0} ${yz('ays.plan.dusuk')} ${byFreq.mid || 0} ${yz('ays.plan.orta-frekansli')}
             ${byFreq.high
-              ? html`<b>${byFreq.high} yüksek frekanslı konu da düşmek zorunda kaldı</b> —
-                     takvim gerçekten dar, hedefi gözden geçir.`
-              : html`<b>yüksek frekanslı hiçbir konu düşmedi</b>.`} Bu konular silinmedi — Dersler ekranında
-            öncelik sırasına göre duruyor, boşluk buldukça çalışırsın.
+              ? html`<b>${byFreq.high} ${yz('ays.plan.yuksek-frekansli-konu-da-dus')}</b> ${yz('ays.plan.takvim-gercekten-dar-hedefi')}`
+              : html`<b>${yz('ays.plan.yuksek-frekansli-hicbir-konu')}</b>.`} ${yz('ays.plan.bu-konular-silinmedi-dersler')}
             ${sureTeklifi(m)}` }))}
 
         ${when(!dropped.length, () => K.Notice({ tone:'ok',
           body:'Takvimin tüm konulara yetiyor; plan müfredatın tamamını kapsıyor.' }))}
 
-        <p class="tiny dim mt-10">Plan sabit değildir: takvimi, kapasiteyi ya da seviyeni değiştirirsen
-          yeniden üretilir. Geride kalırsan “Yeniden hesapla” kapanmamış konuları öne alır.</p>`,
+        <p class="tiny dim mt-10">${yz('ays.plan.plan-sabit-degildir-takvimi')}</p>`,
     });
   }
 
@@ -173,7 +223,7 @@ R.Screens.plan = (function(){
     const bySubject = {};
     dropped.forEach(d => { (bySubject[d.subjectName] = bySubject[d.subjectName] || []).push(d); });
     return K.Collapsible({
-      title:'Plana girmeyen konular', meta:dropped.length+' konu',
+      title:yz('ays.plan.plana-girmeyen-konular'), meta:dropped.length+' konu',
       act:'toggle-dropped', open:!!S.ui.droppedOpen,
       body:html`<div class="stack-xs mt-10">${map(Object.keys(bySubject), name => html`
         <div><span class="mono-label">${name}</span>
@@ -197,13 +247,13 @@ R.Screens.plan = (function(){
     const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
     /* Varsayılan tarih ÖSYM duyurusuna kadar tahmindir (data/curriculum.js). */
     const profilTarihi = R.PLAN.examTytISO !== R.PROGRAM.examTytISO;
-    return raw(V.donen({ id:'ays-program', ad:'Program', maddeler:[
-      { ust:'İlerleme', sayi:sayi({ deger:M.programProgress(), birim:'%', kesinlik:'computed', formul:'geçen hafta ÷ program haftası' }),
-        cumle:'tamamlandı.', vurgu:'Hafta ' + cur + ' / ' + R.PLAN.totalWeeks + '.', sistem:'ays' },
-      { ust:'Sınava kalan', sayi:sayi({ deger:U.diffDays(U.todayISO(), R.PLAN.examTytISO), birim:'gün',
+    return raw(V.donen({ id:'ays-program', ad:yz('ays.plan.program'), maddeler:[
+      { ust:yz('ays.plan.i-lerleme'), sayi:sayi({ deger:M.programProgress(), birim:'%', kesinlik:'computed', formul:'geçen hafta ÷ program haftası' }),
+        cumle:yz('ays.plan.tamamlandi-2'), vurgu:yz('ays.plan.hafta') + cur + ' / ' + R.PLAN.totalWeeks + '.', sistem:'ays' },
+      { ust:yz('ays.plan.sinava-kalan'), sayi:sayi({ deger:U.diffDays(U.todayISO(), R.PLAN.examTytISO), birim:'gün',
           kesinlik:profilTarihi ? 'computed' : 'estimated', formul:'TYT tarihi − bugün' }),
-        cumle:'kaldı.', vurgu:profilTarihi ? 'TYT.' : 'TYT, tahmini tarih.', sistem:'ays' },
-      { ust:'Planlanan soru', sayi:sayi({ deger:totalQ, birim:'soru', kesinlik:'computed', formul:'haftaların soru hedefi toplamı' }),
+        cumle:yz('ays.plan.kaldi'), vurgu:profilTarihi ? 'TYT.' : 'TYT, tahmini tarih.', sistem:'ays' },
+      { ust:yz('ays.plan.planlanan-soru'), sayi:sayi({ deger:totalQ, birim:'soru', kesinlik:'computed', formul:'haftaların soru hedefi toplamı' }),
         cumle:'toplam.', vurgu:U.fmtNum(doneQ) + ' soru geride kaldı.', sistem:'ays' },
     ] }));
   }
@@ -215,16 +265,16 @@ R.Screens.plan = (function(){
       size:'sm', tone:'ghost', act:'program-tumu' });
     if(tumu){
       return K.Card({
-        title:'Program zaman çizgisi',
+        title:yz('ays.plan.program-zaman-cizgisi'),
         sub:U.fmtDate(R.PLAN.startISO)+' – '+U.fmtDate(U.iso(M.weekEnd(R.PLAN.totalWeeks)))+' · '+R.PLAN.totalWeeks+' hafta',
-        actions:html`<span class="small dim">Karar kapıları: H${gateWeeks.join(' · H')}</span>`,
+        actions:html`<span class="small dim">${yz('ays.plan.karar-kapilari-h')}${gateWeeks.join(' · H')}</span>`,
         body:html`<div class="timeline">${map(phaseRanges(), PhaseBlock)}</div><div class="mt-8">${dugme}</div>`,
       });
     }
     const weeks = [];
     for(let n = cur; n <= Math.min(R.PLAN.totalWeeks, cur + YAKIN); n++) weeks.push(n);
     return K.Card({
-      title:'Sıradaki haftalar',
+      title:yz('ays.plan.siradaki-haftalar'),
       body:html`<div class="timeline"><div class="tlmonth">${map(weeks, WeekRow)}</div></div><div class="mt-8">${dugme}</div>`,
     });
   }
@@ -240,12 +290,12 @@ R.Screens.plan = (function(){
   } });
   LIFEOS.PARCA.blok({ id:'plan.calisma-yogunlugu', sayfa:'plan', yer:'y4', sira:10, ad:'Çalışma yoğunluğu', ciz({ cur, totalQ, doneQ, plan, scale, gateWeeks, grid }){
     return K.Card({
-        title:'Çalışma yoğunluğu', hint:'intensity', sub:R.PLAN.totalWeeks+' hafta × 7 gün',
+        title:yz('ays.plan.calisma-yogunlugu'), hint:'intensity', sub:R.PLAN.totalWeeks+' hafta × 7 gün',
         body:html`
           ${raw(UI.heatmap(grid.cells, { cols:R.PLAN.totalWeeks, monthTicks:grid.ticks }))}
           ${raw(UI.legend([
-            { label:'çalışıldı — koyuluk yükü gösterir', color:'var(--primary)' },
-            { label:'kayıt yok', color:'color-mix(in srgb, var(--danger) 30%, transparent)' },
+            { label:yz('ays.plan.calisildi-koyuluk-yuku-goste'), color:'var(--primary)' },
+            { label:yz('ays.plan.kayit-yok'), color:'color-mix(in srgb, var(--danger) 30%, transparent)' },
             { label:'gelecek', color:'var(--surface-2)' },
           ]))}`,
       });
@@ -307,7 +357,7 @@ R.Screens.plan = (function(){
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
     kucukVarsayilan:['bu-plan-sana-göre-üretildi'],
-    title:'Program',
+    title:yz('ays.plan.program'),
     subtitle(){
       return 'Hafta '+M.currentWeek()+' / '+R.PLAN.totalWeeks+' · '
         + U.fmtDate(R.PLAN.startISO)+' – '+U.fmtDate(U.iso(M.weekEnd(R.PLAN.totalWeeks)));

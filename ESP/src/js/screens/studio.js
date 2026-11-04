@@ -12,6 +12,103 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.studio.muzik':'Müzik',
+  'esp.studio.diksiyon':'Diksiyon',
+  'esp.studio.kulak':'Kulak',
+  'esp.studio.ogren':'Öğren',
+  'esp.studio.i-lerleme':'İlerleme',
+  'esp.studio.tezgah':'Tezgâh',
+  'esp.studio.kulak-egzersizleri':'Kulak egzersizleri',
+  'esp.studio.kademe':'Kademe',
+  'esp.studio.araliklar':'Aralıklar',
+  'esp.studio.yarim-ses':'Yarım ses',
+  'esp.studio.caged':'Caged',
+  'esp.studio.desifre':'Deşifre',
+  'esp.studio.repertuar-bakimi':'Repertuar bakımı',
+  'esp.studio.bakimsiz-parca-yok-ya-da':'Bakımsız parça yok ya da henüz deneme kaydı girilmedi.',
+  'esp.studio.tarayici-ses-uretemiyor':'Tarayıcı ses üretemiyor',
+  'esp.studio.bam-alistirmasi':'BAM alıştırması',
+  'esp.studio.tempolar-referans':'— tempolar referans.',
+  'esp.studio.temiz-esik':'Temiz eşik',
+  'esp.studio.siradaki-basamak':'Sıradaki basamak',
+  'esp.studio.bpm':'BPM (+',
+  'esp.studio.bpm-2':'BPM',
+  'esp.studio.sil':'Sil',
+  'esp.studio.parcalar':'Parçalar',
+  'esp.studio.metronom':'Metronom',
+  'esp.studio.olcu-turu':'Ölçü türü',
+  'esp.studio.tekrar-kaydet':'Tekrar kaydet',
+  'esp.studio.tekrarin-yazilacagi-parca':'Tekrarın yazılacağı parça',
+  'esp.studio.temiz-tekrar':'Temiz tekrar',
+  'esp.studio.hatali-tekrar':'Hatalı tekrar',
+  'esp.studio.henuz-parca-ya-da-teknik':'Henüz parça ya da teknik yok. Aşağıdan ekleyebilirsin.',
+  'esp.studio.parca-ekle':'Parça ekle',
+  'esp.studio.ad':'Ad',
+  'esp.studio.donusumlu-mizrap':'Dönüşümlü mızrap',
+  'esp.studio.tur':'Tür',
+  'esp.studio.teknik':'Teknik',
+  'esp.studio.parca':'Parça',
+  'esp.studio.hedef-bpm':'Hedef BPM',
+  'esp.studio.ekle':'Ekle',
+  'esp.studio.hazir-teknikler':'Hazır teknikler:',
+  'esp.studio.paket-iste':'Paket iste',
+  'esp.studio.duzey':'Düzey',
+  'esp.studio.baslangic':'Başlangıç',
+  'esp.studio.orta':'Orta',
+  'esp.studio.i-leri':'İleri',
+  'esp.studio.konu-akor-gecisleri-blues':'Konu: akor geçişleri, blues…',
+  'esp.studio.konu':'Konu',
+  'esp.studio.king-e-ilet':'King’e ilet',
+  'esp.studio.gam-ve-mod-cetveli':'Gam ve mod cetveli',
+  'esp.studio.kok-ses-tonalite':'Kök ses (tonalite):',
+  'esp.studio.gam-mod-12-oruntu':'Gam / mod (12 örüntü):',
+  'esp.studio.yarim-ses-adimlari':'Yarım ses adımları:',
+  'esp.studio.144-modulasyon-permutasyonu':'· 144 modülasyon permütasyonu hazırdır.',
+  'esp.studio.calisma-metni':'Çalışma metni',
+  'esp.studio.kelime':'kelime ·',
+  'esp.studio.telaffuz-kurallari':'Telaffuz kuralları',
+  'esp.studio.ornek':'(örnek:',
+  'esp.studio.konu-turkce-vurgu-r-sesi':'Konu: Türkçe vurgu, r sesi, sesli okuma…',
+  'esp.studio.diksiyon-belgesi-konusu':'Diksiyon belgesi konusu',
+  'esp.studio.kayit-olcumu':'Kayıt ölçümü',
+  'esp.studio.sure-saniye':'Süre (saniye)',
+  'esp.studio.kelime-2':'Kelime',
+  'esp.studio.hata-sayisi':'Hata sayısı',
+  'esp.studio.olcumu-kaydet':'Ölçümü kaydet',
+  'esp.studio.konusma-hizi':'Konuşma hızı',
+  'esp.studio.son-30-gunde-kayit-yok':'Son 30 günde kayıt yok.',
+  'esp.studio.medyan-hiz':'Medyan hız (',
+  'esp.studio.kendi-isaretledigin-hata-ora':'Kendi işaretlediğin hata oranı medyanı %',
+  'esp.studio.tahmin-etiketlidir-yalnizca':'— tahmin etiketlidir, yalnızca kendi geçmişinle karşılaştırılır.',
+  'esp.studio.nefes-ve-vurgu':'Nefes ve vurgu',
+  'esp.studio.sure':'Süre',
+  'esp.studio.son-kayitlar':'Son kayıtlar',
+  'esp.studio.wpm':'WPM',
+  'esp.studio.hata':'Hata',
+  'esp.studio.henuz-olcum-yok':'Henüz ölçüm yok.',
+  'esp.studio.plato':'Plato',
+  'esp.studio.gun':'Gün',
+  'esp.studio.hedefe-ulasma':'Hedefe ulaşma',
+  'esp.studio.hedef-tempoya-ulasan-parca-o':'Hedef tempoya ulaşan parça oranı',
+  'esp.studio.hedef-bpm-girilmis-ve-esigi':'Hedef BPM girilmiş ve eşiği ölçülmüş parça yok.',
+  'esp.studio.diksiyon-egilimi':'Diksiyon eğilimi',
+  'esp.studio.isinma-sirasi':'Isınma sırası',
+  'esp.studio.dakika':'Dakika',
+  'esp.studio.muzik-konulari':'Müzik konuları',
+  'esp.studio.diksiyon-konulari':'Diksiyon konuları',
+  'esp.studio.son':'Son ',
+  'esp.studio.diksiyon-hiz':'Diksiyon · hız',
+  'esp.studio.studyo-bolumleri':'Stüdyo bölümleri',
+  'esp.studio.ad-gerekir':'Ad gerekir',
+  'esp.studio.bu-teknik-zaten-var':'Bu teknik zaten var',
+  'esp.studio.sure-girilmedi':'Süre girilmedi',
+  'esp.studio.olcum-kaydedildi':'Ölçüm kaydedildi',
+  'esp.studio.once-parca-ekle':'Önce parça ekle',
+  'esp.studio.studyo':'Stüdyo',
+  'esp.studio.parca-2':'parça',
+  'esp.studio.kayit':'kayıt',
+});
 window.LIFEOS.PARCA.sayfa({ id:'studio', modul:'esp', cekmece:'calisma', ad:'Ses', ikon:'wave', ek:{ disc:['music', 'diction'] }, sira:40 });
 
 ESP.Screens.studio = (function(){
@@ -20,14 +117,14 @@ ESP.Screens.studio = (function(){
   const K = ESP.C;
 
   const TABS = [
-    { id:'muzik',    label:'Müzik' },
-    { id:'diksiyon', label:'Diksiyon' },
-    { id:'kulak',    label:'Kulak' },
-    { id:'ogren',    label:'Öğren' },
-    { id:'ilerleme', label:'İlerleme' },
+    { id:'muzik',    label:yz('esp.studio.muzik') },
+    { id:'diksiyon', label:yz('esp.studio.diksiyon') },
+    { id:'kulak',    label:yz('esp.studio.kulak') },
+    { id:'ogren',    label:yz('esp.studio.ogren') },
+    { id:'ilerleme', label:yz('esp.studio.i-lerleme') },
     /* iPhone Faz 2c: iki masa (müzik, diksiyon) öbür ekranlardaki gibi kendi
        bölümünde; Müzik ve Diksiyon işle başlar. */
-    { id:'tezgah',   label:'Tezgâh' },
+    { id:'tezgah',   label:yz('esp.studio.tezgah') },
   ];
 
   /* ------------------------------------------------------------------ kulak
@@ -48,39 +145,39 @@ ESP.Screens.studio = (function(){
 
     return [
       K.Entry({
-        label:'Kulak egzersizleri', hint:'ear',
+        label:yz('esp.studio.kulak-egzersizleri'), hint:'ear',
         meta:ESP.EAR_DRILLS.length + ' egzersiz',
         wide:true,
         body:K.Table({ tight:true,
-          headers:[{ label:'Kademe', num:true }, 'Egzersiz', 'Ne yapılır', 'Ne ölçülür'],
+          headers:[{ label:yz('esp.studio.kademe'), num:true }, 'Egzersiz', 'Ne yapılır', 'Ne ölçülür'],
           rows:ESP.EAR_DRILLS.map(d => [String(d.level), d.label, d.task, d.measures]) }),
       }),
 
       K.Entry({
-        label:'Aralıklar', hint:'interval',
+        label:yz('esp.studio.araliklar'), hint:'interval',
         meta:ESP.INTERVALS.length + ' aralık',
         wide:true,
         body:K.Table({ tight:true,
-          headers:['Aralık', { label:'Yarım ses', num:true }, 'Kanca'],
+          headers:['Aralık', { label:yz('esp.studio.yarim-ses'), num:true }, 'Kanca'],
           rows:ESP.INTERVALS.map(i => [i.label, String(i.semitones), i.hook]) }),
       }),
 
       K.Entry({
-        label:'Caged', hint:'caged',
+        label:yz('esp.studio.caged'), hint:'caged',
         meta:'beş şekil',
         body:K.Table({ tight:true, headers:['Şekil', 'Kök', 'Not'],
           rows:ESP.CAGED.map(c => [c.shape, c.root, c.note]) }),
       }),
 
       K.Entry({
-        label:'Deşifre', hint:'sight-reading',
+        label:yz('esp.studio.desifre'), hint:'sight-reading',
         meta:ESP.SIGHT_READING.length + ' kademe',
-        body:K.Table({ tight:true, headers:[{ label:'Kademe', num:true }, 'Ne', 'Nasıl'],
+        body:K.Table({ tight:true, headers:[{ label:yz('esp.studio.kademe'), num:true }, 'Ne', 'Nasıl'],
           rows:ESP.SIGHT_READING.map(s => [String(s.level), s.label, s.task]) }),
       }),
 
       K.Entry({
-        label:'Repertuar bakımı', hint:'repertoire',
+        label:yz('esp.studio.repertuar-bakimi'), hint:'repertoire',
         meta:eskiyen.length ? eskiyen.length + ' bakımsız' : 'güncel',
         body:eskiyen.length
           ? K.Table({ tight:true, headers:['Parça', 'Son çalınma'],
@@ -88,7 +185,7 @@ ESP.Screens.studio = (function(){
                 const son = (p.attempts || []).slice(-1)[0];
                 return [p.name, son ? son.date : '—'];
               }) })
-          : K.Empty({ text:'Bakımsız parça yok ya da henüz deneme kaydı girilmedi.' }),
+          : K.Empty({ text:yz('esp.studio.bakimsiz-parca-yok-ya-da') }),
       }),
     ];
   }
@@ -107,7 +204,7 @@ ESP.Screens.studio = (function(){
     metronomeStop();
     try{
       ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
-    }catch(e){ ESP.UI.toast('Tarayıcı ses üretemiyor'); return false; }
+    }catch(e){ ESP.UI.toast(yz('esp.studio.tarayici-ses-uretemiyor')); return false; }
     const ms = ESP.Acoustic.beatMs(bpm);
     if(ms == null) return false;
     const bar = beatsPerBar || 4;
@@ -167,28 +264,28 @@ ESP.Screens.studio = (function(){
         </summary>
         <div class="acsatir__govde">
           ${when((p.tags || []).indexOf('bam') >= 0, () => html`<p class="small muted">
-            BAM alıştırması${p.key ? ' · ' + p.key : ''}${(p.progression || []).length
+            ${yz('esp.studio.bam-alistirmasi')}${p.key ? ' · ' + p.key : ''}${(p.progression || []).length
               ? ' · ' + p.progression.join('–') : ''}${p.startBpm ? ' · başlangıç ' + p.startBpm + ' BPM' : ''}
-            — tempolar referans.${p.note ? ' ' + p.note : ''}</p>`)}
+            ${yz('esp.studio.tempolar-referans')}${p.note ? ' ' + p.note : ''}</p>`)}
           ${t.cert === 'missing'
             ? K.Notice({ tone:'info', body:t.why || 'Bu parçada ölçülmüş temiz eşik yok. '
                 + 'Tempo girip «temiz» işaretlediğinde ölçüm başlar.' })
-            : html`${K.Meter({ label:'Temiz eşik',
+            : html`${K.Meter({ label:yz('esp.studio.temiz-esik'),
                 value:p.targetBpm ? Math.min(100, t.value / p.targetBpm * 100) : 50,
                 text:t.value + ' BPM' + (p.targetBpm ? ' / ' + p.targetBpm : ''),
                 tone:p.targetBpm && t.value >= p.targetBpm ? 'ok' : '' })}
               ${when(next.cert !== 'missing', () => html`<p class="small muted mt-8">
-                Sıradaki basamak ${next.value} BPM (+${ESP.Acoustic.BPM_STEP}).</p>`)}`}
+                ${yz('esp.studio.siradaki-basamak')} ${next.value} ${yz('esp.studio.bpm')}${ESP.Acoustic.BPM_STEP}).</p>`)}`}
           ${when(sonDeneme.length, () => K.Table({ tight:true,
-            headers:['Tarih', { label:'BPM', num:true }, 'Temiz'],
+            headers:['Tarih', { label:yz('esp.studio.bpm-2'), num:true }, 'Temiz'],
             rows:sonDeneme.map(a => [U.fmtShort(a.date), String(a.bpm),
               a.clean ? 'evet' : 'hayır']) }))}
-          <div class="mt-8">${K.Button({ label:'Sil', size:'sm', act:'del-piece', data:{ 'data-id':p.id } })}</div>
+          <div class="mt-8">${K.Button({ label:yz('esp.studio.sil'), size:'sm', act:'del-piece', data:{ 'data-id':p.id } })}</div>
         </div>
       </details>`;
     };
     return K.Entry({
-      label:'Parçalar', hint:'clean-bpm', meta:parcalar.length + ' parça', wide:true,
+      label:yz('esp.studio.parcalar'), hint:'clean-bpm', meta:parcalar.length + ' parça', wide:true,
       body:html`<div class="parcalar">${map(gosterilen, satir)}</div>
         ${when(parcalar.length > PARCA_ILK, () => K.Button({ size:'sm', tone:'ghost', act:'parca-tumu', class:'mt-8',
           label:tumu ? 'Yalnız ilk ' + PARCA_ILK : 'Tümü · ' + parcalar.length + ' parça' }))}`,
@@ -204,7 +301,7 @@ ESP.Screens.studio = (function(){
        (hints: metronome, clean-bpm); vuruş aralığı künyede. */
     const rows = [
       K.Entry({
-        label:'Metronom', hint:'metronome',
+        label:yz('esp.studio.metronom'), hint:'metronome',
         meta:bpm + ' BPM · ' + U.fmtNum(Math.round(ESP.Acoustic.beatMs(bpm))) + ' ms',
         body:html`
           <div class="metro">
@@ -217,44 +314,44 @@ ESP.Screens.studio = (function(){
               ${K.Button({ label:S.ui.metronomeOn ? 'Durdur' : 'Başlat',
                 act:'metro-toggle' })}
               ${K.Select({ id:'metro-sig', value:S.ui.metroSig || '4/4', change:'metro-sig',
-                aria:'Ölçü türü',
+                aria:yz('esp.studio.olcu-turu'),
                 options:ESP.TIME_SIGNATURES.map(t => ({ value:t.id, label:t.label })) })}
             </div>
           </div>`,
       }),
 
       K.Entry({
-        label:'Tekrar kaydet', hint:'clean-bpm',
+        label:yz('esp.studio.tekrar-kaydet'), hint:'clean-bpm',
         meta:acik ? acik.name : 'parça seç',
         body:parcalar.length
           ? html`
             <div class="row wrap">
               ${K.Select({ id:'att-piece', value:acik ? acik.id : parcalar[0].id,
-                change:'pick-piece', aria:'Tekrarın yazılacağı parça',
+                change:'pick-piece', aria:yz('esp.studio.tekrarin-yazilacagi-parca'),
                 options:parcalar.map(p => ({ value:p.id, label:p.name })) })}
-              ${K.Button({ label:'Temiz tekrar', tone:'primary', act:'log-clean' })}
-              ${K.Button({ label:'Hatalı tekrar', act:'log-dirty' })}
+              ${K.Button({ label:yz('esp.studio.temiz-tekrar'), tone:'primary', act:'log-clean' })}
+              ${K.Button({ label:yz('esp.studio.hatali-tekrar'), act:'log-dirty' })}
             </div>`
-          : K.Empty({ text:'Henüz parça ya da teknik yok. Aşağıdan ekleyebilirsin.' }),
+          : K.Empty({ text:yz('esp.studio.henuz-parca-ya-da-teknik') }),
       }),
     ];
 
     if(parcalar.length) rows.push(parcalarEntry(parcalar));
 
     rows.push(K.Entry({
-      label:'Parça ekle',
+      label:yz('esp.studio.parca-ekle'),
       meta:'teknik ya da repertuar',
       body:html`
         <div class="cols-3">
-          ${K.Field({ label:'Ad', input:K.Input({ id:'p-name', placeholder:'Dönüşümlü mızrap' }) })}
-          ${K.Field({ label:'Tür', input:K.Select({ id:'p-kind', value:'technique',
-            options:[{ value:'technique', label:'Teknik' }, { value:'piece', label:'Parça' }] }) })}
-          ${K.Field({ label:'Hedef BPM', hint:'isteğe bağlı',
+          ${K.Field({ label:yz('esp.studio.ad'), input:K.Input({ id:'p-name', placeholder:yz('esp.studio.donusumlu-mizrap') }) })}
+          ${K.Field({ label:yz('esp.studio.tur'), input:K.Select({ id:'p-kind', value:'technique',
+            options:[{ value:'technique', label:yz('esp.studio.teknik') }, { value:'piece', label:yz('esp.studio.parca') }] }) })}
+          ${K.Field({ label:yz('esp.studio.hedef-bpm'), hint:'isteğe bağlı',
             input:K.Input({ id:'p-target', type:'number', numeric:true, min:20, max:300,
               placeholder:'120' }) })}
         </div>
-        ${K.Button({ label:'Ekle', act:'add-piece', class:'mt-10' })}
-        <p class="small muted mt-10">Hazır teknikler:</p>
+        ${K.Button({ label:yz('esp.studio.ekle'), act:'add-piece', class:'mt-10' })}
+        <p class="small muted mt-10">${yz('esp.studio.hazir-teknikler')}</p>
         <div class="row wrap mt-4">
           ${map(ESP.TECHNIQUES, t => K.Button({ label:t.label, size:'sm',
             act:'add-technique', data:{ 'data-id':t.id } }))}
@@ -264,15 +361,15 @@ ESP.Screens.studio = (function(){
     /* BAM'dan alıştırma paketi (Part 8d-2): istek King'in onay kapısından
        geçer; paket Bugün'e teklif olarak gelir ve ESP kendi koduyla sınar. */
     rows.push(K.Entry({
-      label:'Paket iste', hint:'paket',
+      label:yz('esp.studio.paket-iste'), hint:'paket',
       meta:'gitar · HKM',
       body:html`<div class="row gap-8 wrap">
-        ${K.Select({ id:'gitar-duzey', value:S.ui.gitarDuzey || 'başlangıç', aria:'Düzey', size:'sm',
-          options:[{ value:'başlangıç', label:'Başlangıç' }, { value:'orta', label:'Orta' },
-            { value:'ileri', label:'İleri' }] })}
-        ${K.Input({ id:'gitar-konu', placeholder:'Konu: akor geçişleri, blues…', aria:'Konu',
+        ${K.Select({ id:'gitar-duzey', value:S.ui.gitarDuzey || 'başlangıç', aria:yz('esp.studio.duzey'), size:'sm',
+          options:[{ value:'başlangıç', label:yz('esp.studio.baslangic') }, { value:'orta', label:yz('esp.studio.orta') },
+            { value:'ileri', label:yz('esp.studio.i-leri') }] })}
+        ${K.Input({ id:'gitar-konu', placeholder:yz('esp.studio.konu-akor-gecisleri-blues'), aria:yz('esp.studio.konu'),
           size:'sm', class:'grow' })}
-        ${K.Button({ label:'King’e ilet', size:'sm', act:'gitar-iste' })}
+        ${K.Button({ label:yz('esp.studio.king-e-ilet'), size:'sm', act:'gitar-iste' })}
       </div>`,
     }));
 
@@ -289,18 +386,18 @@ ESP.Screens.studio = (function(){
     const rootTr = (ESP.NOTE_TR || {})[root] || root;
 
     return K.Entry({
-      label:'Gam ve mod cetveli', hint:'scale',
+      label:yz('esp.studio.gam-ve-mod-cetveli'), hint:'scale',
       meta:rootTr + ' ' + (scaleObj.label || scaleId),
       wide:true,
       body:html`
         <div class="row wrap gap-8 mb-10">
           <div class="grow" style="min-width:140px">
-            <span class="tiny dim block mb-2">Kök Ses (Tonalite):</span>
+            <span class="tiny dim block mb-2">${yz('esp.studio.kok-ses-tonalite')}</span>
             ${K.Select({ id:'scale-root-sel', value:root, change:'pick-scale-root',
               options:ESP.NOTES.map(n => ({ value:n, label:n + ' (' + (ESP.NOTE_TR[n] || n) + ')' })) })}
           </div>
           <div class="grow" style="min-width:180px">
-            <span class="tiny dim block mb-2">Gam / Mod (12 Örüntü):</span>
+            <span class="tiny dim block mb-2">${yz('esp.studio.gam-mod-12-oruntu')}</span>
             ${K.Select({ id:'scale-mode-sel', value:scaleId, change:'pick-scale-mode',
               options:ESP.SCALES.map(s => ({ value:s.id, label:s.label })) })}
           </div>
@@ -322,7 +419,7 @@ ESP.Screens.studio = (function(){
               </div>`)}
           </div>
           <div class="tiny dim pt-6 mt-6" style="border-top:1px dashed var(--border)">
-            <b>Yarım Ses Adımları:</b> ${(scaleObj.steps || []).join(' – ')} · 144 modülasyon permütasyonu hazırdır.
+            <b>${yz('esp.studio.yarim-ses-adimlari')}</b> ${(scaleObj.steps || []).join(' – ')} ${yz('esp.studio.144-modulasyon-permutasyonu')}
           </div>
         </div>`,
     });
@@ -342,17 +439,17 @@ ESP.Screens.studio = (function(){
 
     return [
       K.Entry({
-        label:'Çalışma metni', hint:'articulation',
+        label:yz('esp.studio.calisma-metni'), hint:'articulation',
         meta:secili.kaynak ? 'kaynaklı okuma parçası' : 'düzey ' + secili.level + ' · ' + grup.label,
         body:html`
           <div class="row wrap">
             ${K.Select({ id:'tw-pick', value:secili.id, change:'pick-twister',
-              aria:'Çalışma metni',
+              aria:yz('esp.studio.calisma-metni'),
               options:metinler.map(t => ({ value:t.id,
                 label:(t.kaynak ? 'Parça' : 'D' + t.level) + ' · ' + t.text.slice(0, 40) + '…' })) })}
           </div>
           <p class="twister mt-10">${secili.text}</p>
-          <p class="small muted mt-8">${secili.words} kelime ·
+          <p class="small muted mt-8">${secili.words} ${yz('esp.studio.kelime')}
             ${secili.kaynak ? (secili.yazar ? secili.yazar + ' · ' : '') + 'kaynak: ' + secili.kaynak.baslik
               : (grup.note || '')}</p>`,
       }),
@@ -360,32 +457,32 @@ ESP.Screens.studio = (function(){
       /* Diksiyon belgesi (kullanıcı 2026-09-24: «ikisi birden»): telaffuz
          kuralı ve okuma parçası, BAM'ın web kaynaklarından; kural kaynağıyla. */
       K.Entry({
-        label:'Telaffuz kuralları', hint:'belge', meta:dk.kurallar.length ? dk.kurallar.length + ' kural · kaynaklı' : 'henüz yok',
+        label:yz('esp.studio.telaffuz-kurallari'), hint:'belge', meta:dk.kurallar.length ? dk.kurallar.length + ' kural · kaynaklı' : 'henüz yok',
         wide:true,
         body:html`
           ${when(dk.kurallar.length, () => html`<ul class="setup__list">${map(dk.kurallar, k => html`
-            <li>${k.kural}${when(k.ornek, () => html` <span class="dim">(örnek: ${k.ornek})</span>`)}
+            <li>${k.kural}${when(k.ornek, () => html` <span class="dim">${yz('esp.studio.ornek')} ${k.ornek})</span>`)}
               <span class="tiny dim"> · ${k.kaynak.baslik}</span></li>`)}</ul>`)}
           <div class="row gap-8 wrap mt-10">
-            ${K.Input({ id:'belge-diksiyon', placeholder:'Konu: Türkçe vurgu, r sesi, sesli okuma…',
-              aria:'Diksiyon belgesi konusu', size:'sm', class:'grow' })}
-            ${K.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
+            ${K.Input({ id:'belge-diksiyon', placeholder:yz('esp.studio.konu-turkce-vurgu-r-sesi'),
+              aria:yz('esp.studio.diksiyon-belgesi-konusu'), size:'sm', class:'grow' })}
+            ${K.Button({ label:yz('esp.studio.king-e-ilet'), size:'sm', act:'belge-iste',
               data:{ 'data-alan':'diksiyon' } })}
           </div>`,
       }),
 
       K.Entry({
-        label:'Kayıt ölçümü', hint:'kayit-olcumu',
+        label:yz('esp.studio.kayit-olcumu'), hint:'kayit-olcumu',
         meta:'ses dosyası tutulmaz',
         body:html`
           <div class="cols-3">
-            ${K.Field({ label:'Süre (saniye)',
+            ${K.Field({ label:yz('esp.studio.sure-saniye'),
               input:K.Input({ id:'r-sec', type:'number', numeric:true, min:1, max:3600,
                 placeholder:'12' }) })}
-            ${K.Field({ label:'Kelime',
+            ${K.Field({ label:yz('esp.studio.kelime-2'),
               input:K.Input({ id:'r-words', type:'number', numeric:true, min:1,
                 value:secili.words }) })}
-            ${K.Field({ label:'Hata sayısı', hint:'kendi işaretin — tahmin sayılır',
+            ${K.Field({ label:yz('esp.studio.hata-sayisi'), hint:'kendi işaretin — tahmin sayılır',
               input:K.Input({ id:'r-err', type:'number', numeric:true, min:0,
                 placeholder:'2' }) })}
           </div>
@@ -394,34 +491,32 @@ ESP.Screens.studio = (function(){
               tone:(S.ui.errTags || []).indexOf(e.id) >= 0 ? 'primary' : '',
               act:'toggle-err', data:{ 'data-id':e.id } }))}
           </div>
-          ${K.Button({ label:'Ölçümü kaydet', act:'add-recording', class:'mt-10' })}`,
+          ${K.Button({ label:yz('esp.studio.olcumu-kaydet'), act:'add-recording', class:'mt-10' })}`,
       }),
 
       K.Entry({
-        label:'Konuşma hızı', hint:'wpm',
+        label:yz('esp.studio.konusma-hizi'), hint:'wpm',
         meta:d.cert === 'missing' ? 'veri yok'
           : (d.wpm.cert === 'missing' ? 'hesaplanamadı' : d.wpm.value + ' kelime/dk'),
         body:d.cert === 'missing'
-          ? K.Empty({ text:'Son 30 günde kayıt yok.' })
+          ? K.Empty({ text:yz('esp.studio.son-30-gunde-kayit-yok') })
           : html`
             ${d.wpm.cert === 'missing'
               ? K.Notice({ tone:'warn', body:'WPM için hem süre hem kelime sayısı ölçülmüş olmalı.' })
-              : K.Meter({ label:'Medyan hız (' + d.wpm.n + ' kayıttan)',
+              : K.Meter({ label:yz('esp.studio.medyan-hiz') + d.wpm.n + ' kayıttan)',
                   value:Math.min(100, d.wpm.value / 200 * 100),
                   text:d.wpm.value + ' kelime/dk',
                   tone:d.wpm.value >= ESP.Acoustic.WPM_BAND.min
                     && d.wpm.value <= ESP.Acoustic.WPM_BAND.max ? 'ok' : 'warn' })}
             ${when(d.errorRate.cert !== 'missing', () => html`<p class="small muted mt-8">
-              Kendi işaretlediğin hata oranı medyanı
-              %${Math.round(d.errorRate.value * 100)} — tahmin etiketlidir,
-              yalnızca kendi geçmişinle karşılaştırılır.</p>`)}`,
+              ${yz('esp.studio.kendi-isaretledigin-hata-ora')}${Math.round(d.errorRate.value * 100)} ${yz('esp.studio.tahmin-etiketlidir-yalnizca')}</p>`)}`,
       }),
 
       K.Entry({
-        label:'Nefes ve vurgu', hint:'nefes',
+        label:yz('esp.studio.nefes-ve-vurgu'), hint:'nefes',
         meta:ESP.BREATH_DRILLS.length + ' çalışma',
         body:html`
-          ${K.Table({ tight:true, headers:['Çalışma', { label:'Süre', num:true }, 'Not'],
+          ${K.Table({ tight:true, headers:['Çalışma', { label:yz('esp.studio.sure'), num:true }, 'Not'],
             rows:ESP.BREATH_DRILLS.map(b => [b.label, U.fmtMin(Math.round(b.seconds / 60)) , b.note]) })}
           ${map(ESP.STRESS_DRILLS, s => html`
             <div class="mt-12">
@@ -432,13 +527,13 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Son kayıtlar',
+        label:yz('esp.studio.son-kayitlar'),
         meta:kayitlar.length + ' ölçüm',
         wide:true,
         body:kayitlar.length
           ? K.Table({ tight:true,
-              headers:['Tarih', { label:'Süre', num:true }, { label:'Kelime', num:true },
-                { label:'WPM', num:true }, { label:'Hata', num:true }, ''],
+              headers:['Tarih', { label:yz('esp.studio.sure'), num:true }, { label:yz('esp.studio.kelime-2'), num:true },
+                { label:yz('esp.studio.wpm'), num:true }, { label:yz('esp.studio.hata'), num:true }, ''],
               rows:kayitlar.map(r => {
                 const w = ESP.Acoustic.wpmOf(r);
                 return [U.fmtShort(r.date),
@@ -446,9 +541,9 @@ ESP.Screens.studio = (function(){
                   r.words != null ? String(r.words) : '—',
                   w.cert === 'missing' ? '—' : String(w.value),
                   r.errors != null ? String(r.errors) : '—',
-                  K.Button({ label:'Sil', size:'sm', act:'del-rec', data:{ 'data-id':r.id } })];
+                  K.Button({ label:yz('esp.studio.sil'), size:'sm', act:'del-rec', data:{ 'data-id':r.id } })];
               }) })
-          : K.Empty({ text:'Henüz ölçüm yok.' }),
+          : K.Empty({ text:yz('esp.studio.henuz-olcum-yok') }),
       }),
     ];
   }
@@ -462,10 +557,10 @@ ESP.Screens.studio = (function(){
 
     return [
       K.Entry({
-        label:'Plato', hint:'plateau',
+        label:yz('esp.studio.plato'), hint:'plateau',
         meta:plato.length ? plato.length + ' teknik' : 'yok',
         body:plato.length
-          ? K.Table({ tight:true, headers:['Parça', { label:'Gün', num:true }, { label:'BPM', num:true }],
+          ? K.Table({ tight:true, headers:['Parça', { label:yz('esp.studio.gun'), num:true }, { label:yz('esp.studio.bpm-2'), num:true }],
               rows:plato.map(p => [p.piece.name, String(p.days), String(p.bpm)]) })
           : K.Notice({ tone:'ok', body:'Hiçbir teknik '
               + ESP.Acoustic.PLATEAU_DAYS + ' gündür takılı değil. '
@@ -473,18 +568,18 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Hedefe ulaşma', hint:'hedef-tempo',
+        label:yz('esp.studio.hedefe-ulasma'), hint:'hedef-tempo',
         meta:m.progress && m.progress.cert !== 'missing'
           ? m.progress.reached + '/' + m.progress.n : 'veri yok',
         body:m.progress && m.progress.cert !== 'missing'
-          ? K.Meter({ label:'Hedef tempoya ulaşan parça oranı',
+          ? K.Meter({ label:yz('esp.studio.hedef-tempoya-ulasan-parca-o'),
               value:m.progress.value * 100,
               text:'%' + Math.round(m.progress.value * 100) })
-          : K.Empty({ text:'Hedef BPM girilmiş ve eşiği ölçülmüş parça yok.' }),
+          : K.Empty({ text:yz('esp.studio.hedef-bpm-girilmis-ve-esigi') }),
       }),
 
       K.Entry({
-        label:'Diksiyon eğilimi', hint:'diksiyon-egilimi',
+        label:yz('esp.studio.diksiyon-egilimi'), hint:'diksiyon-egilimi',
         meta:t.cert === 'missing' ? 'veri yok' : t.direction,
         body:t.cert === 'missing'
           ? K.Notice({ tone:'info', body:t.why })
@@ -494,9 +589,9 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Isınma sırası', hint:'isinma',
+        label:yz('esp.studio.isinma-sirasi'), hint:'isinma',
         meta:'öneri',
-        body:K.Table({ tight:true, headers:['Aşama', { label:'Dakika', num:true }, 'Not'],
+        body:K.Table({ tight:true, headers:['Aşama', { label:yz('esp.studio.dakika'), num:true }, 'Not'],
           rows:ESP.WARMUP.map(w => [w.label, String(w.minutes), w.note]) }),
       }),
     ];
@@ -507,8 +602,8 @@ ESP.Screens.studio = (function(){
      Isaretler beyandir ve oyle etiketlenir; hicbir kapiyi acmaz. */
   function topicRows(){
     return [
-      { id:'music', label:'Müzik konuları' },
-      { id:'diction', label:'Diksiyon konuları' },
+      { id:'music', label:yz('esp.studio.muzik-konulari') },
+      { id:'diction', label:yz('esp.studio.diksiyon-konulari') },
     ].map(d => {
       const ozet = ESP.Lesson.topicSummary(d.id);
       return K.Entry({
@@ -537,7 +632,7 @@ ESP.Screens.studio = (function(){
       const son = a[a.length - 1].bpm;
       return P.kart({ tur:'tempo', ad:(p.name || 'Parça') + ' · tempo', simge:'nota', yuva:'ölçüldü',
         govde:P.deger(String(son), 'BPM', p.targetBpm ? 'hedef ' + p.targetBpm + ' BPM' : (p.cleanBpm ? 'temiz eşik ' + p.cleanBpm + ' BPM' : ''))
-          + P.sutun({ degerler:a.map(x => x.bpm), yukseklik:48, etiket:'Son ' + a.length + ' denemenin temposu; sonuncusu ' + son + ' BPM' })
+          + P.sutun({ degerler:a.map(x => x.bpm), yukseklik:48, etiket:yz('esp.studio.son') + a.length + ' denemenin temposu; sonuncusu ' + son + ' BPM' })
           + (p.targetBpm ? P.esik({ deger:son, esik:p.targetBpm, yon:'artis-iyi', etiket:son + ' BPM, hedef ' + p.targetBpm }) : '') });
     });
     return '<div class="pk-ust">' + P.izgara(kartlar.concat([PanoDiksiyon(P)]), 'pk-izgara--iki') + '</div>';
@@ -549,13 +644,13 @@ ESP.Screens.studio = (function(){
     if(!l.length) return '';
     const kdk = r => Math.round(r.words / r.seconds * 60);
     const son = l[l.length - 1];
-    return P.kart({ tur:'diksiyon', ad:'Diksiyon · hız', simge:'nota', yuva:'ölçüldü',
+    return P.kart({ tur:'diksiyon', ad:yz('esp.studio.diksiyon-hiz'), simge:'nota', yuva:'ölçüldü',
       govde:P.deger(String(kdk(son)), 'kelime/dk', son.errors != null ? son.errors + ' hata (senin işaretin)' : '')
-        + P.sutun({ degerler:l.map(kdk), yukseklik:48, etiket:'Son ' + l.length + ' kaydın konuşma hızı' }) });
+        + P.sutun({ degerler:l.map(kdk), yukseklik:48, etiket:yz('esp.studio.son') + l.length + ' kaydın konuşma hızı' }) });
   }
 
   LIFEOS.PARCA.blok({ id:'studio.bolum-1', sayfa:'studio', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
-    return K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:'Stüdyo bölümleri', tabs:TABS, govde:{
+    return K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:yz('esp.studio.studyo-bolumleri'), tabs:TABS, govde:{
         muzik:musicRows, diksiyon:dictionRows,
         kulak:earRows, ogren:topicRows, ilerleme:progressRows,
         tezgah:() => [ESP.Parts.desk('music'), ESP.Parts.desk('diction')] } }));
@@ -617,7 +712,7 @@ ESP.Screens.studio = (function(){
 
     async 'add-piece'(){
       const ad = val('p-name');
-      if(!ad){ ESP.UI.toast('Ad gerekir'); return; }
+      if(!ad){ ESP.UI.toast(yz('esp.studio.ad-gerekir')); return; }
       const hedef = val('p-target');
       await M.savePiece(M.newPiece({ name:ad, kind:val('p-kind') || 'technique',
         targetBpm:hedef ? Number(hedef) : null }));
@@ -629,7 +724,7 @@ ESP.Screens.studio = (function(){
       const t = ESP.TECHNIQUE_BY_ID[el.dataset.id];
       if(!t) return;
       if((S.pieces || []).some(p => p.name === t.label)){
-        ESP.UI.toast('Bu teknik zaten var');
+        ESP.UI.toast(yz('esp.studio.bu-teknik-zaten-var'));
         return;
       }
       await M.savePiece(M.newPiece({ name:t.label, kind:'technique', targetBpm:t.targetBpm }));
@@ -654,7 +749,7 @@ ESP.Screens.studio = (function(){
 
     async 'add-recording'(){
       const sn = val('r-sec'), kelime = val('r-words'), hata = val('r-err');
-      if(!sn){ ESP.UI.toast('Süre girilmedi'); return; }
+      if(!sn){ ESP.UI.toast(yz('esp.studio.sure-girilmedi')); return; }
       const s = M.numCert(sn, 'measured');
       const w = M.numCert(kelime, 'measured');
       /* Hata sayisi DAIMA tahmindir: sistem sesi dinlemedi. */
@@ -669,7 +764,7 @@ ESP.Screens.studio = (function(){
       });
       S.ui.errTags = [];
       ESP.Memo.bitir();
-      ESP.UI.toast('Ölçüm kaydedildi');
+      ESP.UI.toast(yz('esp.studio.olcum-kaydedildi'));
       ESP.App.render();
     },
 
@@ -683,7 +778,7 @@ ESP.Screens.studio = (function(){
   async function logAttempt(clean){
     const sel = document.getElementById('att-piece');
     const id = sel ? sel.value : (S.pieces[0] && S.pieces[0].id);
-    if(!id){ ESP.UI.toast('Önce parça ekle'); return; }
+    if(!id){ ESP.UI.toast(yz('esp.studio.once-parca-ekle')); return; }
     const res = await ESP.Acoustic.logAttempt(id, S.ui.metronomeBpm || 80, clean);
     if(!res.ok){ ESP.UI.toast(res.error); return; }
     ESP.Memo.bitir();
@@ -716,7 +811,7 @@ ESP.Screens.studio = (function(){
        geçmiş kayıtlar, Kulak'ta üç başvuru tablosu şerit. */
     kucukVarsayilan:['kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları', 'parça-ekle',
       'telaffuz-kuralları', 'son-kayıtlar', 'aralıklar', 'caged', 'deşifre', 'gam-ve-mod-cetveli'],
-    title:'Stüdyo',
+    title:yz('esp.studio.studyo'),
     headline(){
       const plato = ESP.Acoustic.plateaus();
       if(plato.length) return plato[0].piece.name + ' ' + plato[0].days + ' gündür platoda.';
@@ -734,11 +829,11 @@ ESP.Screens.studio = (function(){
       const m = ESP.Acoustic.musicStatus();
       const d = ESP.Acoustic.dictionStatus(30);
       return [
-        { value:String(m.n || 0), label:'parça' },
+        { value:String(m.n || 0), label:yz('esp.studio.parca-2') },
         { value:String((m.plateaus || []).length), label:'plato' },
-        { value:String(d.n || 0), label:'kayıt' },
+        { value:String(d.n || 0), label:yz('esp.studio.kayit') },
         { value:d.cert === 'missing' || d.wpm.cert === 'missing' ? '—' : String(d.wpm.value),
-          label:'WPM' },
+          label:yz('esp.studio.wpm') },
       ];
     },
     subtitle(){ return (S.pieces || []).length + ' parça · ' + (S.recordings || []).length + ' kayıt'; },

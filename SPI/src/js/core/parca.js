@@ -152,6 +152,8 @@ window.LIFEOS = window.LIFEOS || {};
     }).filter(c => c[o.alan].length);
   }
 
+  /* Ekran kodunda kisa ad: yz('kimlik'). */
+  window.yz = yazi;
   L.PARCA = Object.freeze({ sayfa, blok, yazilar, yazi, bilgi, oku, bloklar, liste, yer, ciz, ekran, olaylar, menu, hatalar,
     /* yalnız testler: kaydı geri alır */
     _sil(id){ [SAYFA, BLOK, YAZI, BILGI].forEach(h => h.delete(id)); },

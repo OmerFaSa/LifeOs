@@ -11,6 +11,90 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.library.notlar':'Notlar',
+  'esp.library.matris':'Matris',
+  'esp.library.kaynaklar':'Kaynaklar',
+  'esp.library.yontem':'Yöntem',
+  'esp.library.ogren':'Öğren',
+  'esp.library.dort-duzey':'Dört düzey',
+  'esp.library.analitik-okumanin-dort-sorus':'Analitik okumanın dört sorusu',
+  'esp.library.okuma-protokolu':'Okuma protokolü',
+  'esp.library.not-sablonlari':'Not şablonları',
+  'esp.library.birakma-izni':'Bırakma izni',
+  'esp.library.not-ekle':'Not ekle',
+  'esp.library.atomik-not-metni':'Atomik not metni',
+  'esp.library.ozgurluk-secenek-coklugu-deg':'Özgürlük, seçenek çokluğu değil seçebilme kapasitesidir.',
+  'esp.library.notun-kaynagi':'Notun kaynağı',
+  'esp.library.kaynak-sec-istege-bagli':'Kaynak seç (isteğe bağlı)',
+  'esp.library.notu-ekle':'Notu ekle',
+  'esp.library.bagli-notlar':'Bağlı notlar',
+  'esp.library.not-ara':'Not ara…',
+  'esp.library.not-ara-2':'Not ara',
+  'esp.library.suzgeci-kaldir':'Süzgeci kaldır',
+  'esp.library.bag':'bağ',
+  'esp.library.bagla':'Bağla',
+  'esp.library.sil':'Sil',
+  'esp.library.kaldir':'Kaldır',
+  'esp.library.baglanacak-not':'Bağlanacak not',
+  'esp.library.neden-bagli-bir-cumle':'Neden bağlı? (bir cümle)',
+  'esp.library.bagin-gerekcesi':'Bağın gerekçesi',
+  'esp.library.vazgec':'Vazgeç',
+  'esp.library.sentez-katsayisi':'Sentez katsayısı',
+  'esp.library.baglanmis-not-orani':'Bağlanmış not oranı',
+  'esp.library.bag-onerileri':'Bağ önerileri',
+  'esp.library.farkli-kaynak':'farklı kaynak',
+  'esp.library.kavram-matrisi':'Kavram matrisi',
+  'esp.library.not':'Not',
+  'esp.library.yazar':'Yazar',
+  'esp.library.notlari-gor':'Notları gör',
+  'esp.library.henuz-kavram-etiketli-not-yo':'Henüz kavram etiketli not yok.',
+  'esp.library.veri-yok':'veri yok',
+  'esp.library.son':'· son',
+  'esp.library.ogrendigini-anlat':'Öğrendiğini anlat',
+  'esp.library.notlarinda-en-az':'Notlarında en az ',
+  'esp.library.anlatilacak-kaynak':'Anlatılacak kaynak',
+  'esp.library.anlatimin':'Anlatımın',
+  'esp.library.bu-kaynaktan-ne-ogrendin-ken':'Bu kaynaktan ne öğrendin? Kendi cümlelerinle anlat…',
+  'esp.library.olc':'Ölç',
+  'esp.library.sonucu-kaydet':'Sonucu kaydet',
+  'esp.library.kavram-anlatiminda-gecti-hes':'kavram anlatımında geçti · hesaplandı',
+  'esp.library.gecmeyen':'Geçmeyen:',
+  'esp.library.son-anlatim':'Son anlatım',
+  'esp.library.not-2':'not · ',
+  'esp.library.raf':'Raf',
+  'esp.library.ozet':'Özet',
+  'esp.library.alinti':'Alıntı',
+  'esp.library.bam':'BAM ·',
+  'esp.library.notlarini-ozetle':'Notlarını özetle',
+  'esp.library.kaynak-listesi-bos-sempozyum':'Kaynak listesi boş. Sempozyum → Metinler sekmesinden ',
+  'esp.library.okuma-listesi-iste':'Okuma listesi iste',
+  'esp.library.konu-stoacilik-bilim-tarihi':'Konu: Stoacılık, bilim tarihi…',
+  'esp.library.okuma-konusu':'Okuma konusu',
+  'esp.library.king-e-ilet':'King’e ilet',
+  'esp.library.kaynak-ekle':'Kaynak ekle',
+  'esp.library.eser':'Eser',
+  'esp.library.baslik':'Başlık',
+  'esp.library.sayfa':'Sayfa',
+  'esp.library.tur':'Tür',
+  'esp.library.primer-metin':'Primer metin',
+  'esp.library.yorum':'Yorum',
+  'esp.library.ekle':'Ekle',
+  'esp.library.konular':'Konular',
+  'esp.library.okuma-bolumleri':'Okuma bölümleri',
+  'esp.library.not-bos':'Not boş',
+  'esp.library.bag-kuruldu':'Bağ kuruldu',
+  'esp.library.ozet-icin-bu-kaynagin-en':'Özet için bu kaynağın en az üç notu gerekir.',
+  'esp.library.model-bagli-degil-ozet-yalni':'Model bağlı değil; özet yalnız model açıkken çıkarılır.',
+  'esp.library.notlarin-ozetleniyor':'Notların özetleniyor…',
+  'esp.library.kaynak':'Kaynak: ',
+  'esp.library.model-ciktisi-denetimden-gec':'Model çıktısı denetimden geçmedi; özet yazılmadı.',
+  'esp.library.ozet-alinamadi':'Özet alınamadı: ',
+  'esp.library.eser-adi-gerekir':'Eser adı gerekir',
+  'esp.library.kutuphane':'Kütüphane',
+  'esp.library.bagli':'bağlı',
+  'esp.library.ssk':'SSK',
+});
 window.LIFEOS.PARCA.sayfa({ id:'library', modul:'esp', cekmece:'calisma', ad:'Okuma', ikon:'book', ek:{ disc:'reading' }, sira:50 });
 
 ESP.Screens.library = (function(){
@@ -19,11 +103,11 @@ ESP.Screens.library = (function(){
   const K = ESP.C;
 
   const TABS = [
-    { id:'notlar',    label:'Notlar' },
-    { id:'matris',    label:'Matris' },
-    { id:'kaynaklar', label:'Kaynaklar' },
-    { id:'yontem',    label:'Yöntem' },
-    { id:'ogren',     label:'Öğren' },
+    { id:'notlar',    label:yz('esp.library.notlar') },
+    { id:'matris',    label:yz('esp.library.matris') },
+    { id:'kaynaklar', label:yz('esp.library.kaynaklar') },
+    { id:'yontem',    label:yz('esp.library.yontem') },
+    { id:'ogren',     label:yz('esp.library.ogren') },
   ];
 
   /* ----------------------------------------------------------------- yöntem
@@ -34,7 +118,7 @@ ESP.Screens.library = (function(){
   function methodRows(){
     return [
       K.Entry({
-        label:'Dört düzey', hint:'reading-level',
+        label:yz('esp.library.dort-duzey'), hint:'reading-level',
         meta:ESP.READING_LEVELS.length + ' düzey',
         wide:true,
         body:K.Table({ tight:true,
@@ -43,7 +127,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'Analitik okumanın dört sorusu', hint:'analytic',
+        label:yz('esp.library.analitik-okumanin-dort-sorus'), hint:'analytic',
         meta:'kitap bitince',
         wide:true,
         body:html`${map(ESP.ANALYTIC_QUESTIONS, q => html`
@@ -54,14 +138,14 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'Okuma protokolü', hint:'protocol',
+        label:yz('esp.library.okuma-protokolu'), hint:'protocol',
         meta:ESP.READING_PROTOCOL.length + ' adım',
         body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Adım', 'Ne yapılır'],
           rows:ESP.READING_PROTOCOL.map(p => [String(p.step), p.label, p.do]) }),
       }),
 
       K.Entry({
-        label:'Not şablonları', hint:'note-template',
+        label:yz('esp.library.not-sablonlari'), hint:'note-template',
         meta:ESP.NOTE_TEMPLATES.length + ' şablon',
         wide:true,
         body:K.Table({ tight:true, headers:['Şablon', 'Biçim', 'Ne zaman'],
@@ -69,7 +153,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'Bırakma izni', hint:'abandon',
+        label:yz('esp.library.birakma-izni'), hint:'abandon',
         meta:'kural',
         body:(function(){
           /* İlk cümle görünür; gerekçesi bir dokunuşla açılır (§1.2). */
@@ -94,40 +178,40 @@ ESP.Screens.library = (function(){
 
     const rows = [
       K.Entry({
-        label:'Not ekle', hint:'atomic-note',
+        label:yz('esp.library.not-ekle'), hint:'atomic-note',
         meta:'tek fikir, tek cümle',
         body:html`
-          ${K.Textarea({ id:'note-text', rows:2, aria:'Atomik not metni',
-            placeholder:'Özgürlük, seçenek çokluğu değil seçebilme kapasitesidir.' })}
+          ${K.Textarea({ id:'note-text', rows:2, aria:yz('esp.library.atomik-not-metni'),
+            placeholder:yz('esp.library.ozgurluk-secenek-coklugu-deg') })}
           <div class="row gap-8 mt-10">
-            <div class="grow">${K.Select({ id:'note-book', value:'', aria:'Notun kaynağı',
-              options:[{ value:'', label:'Kaynak seç (isteğe bağlı)' }]
+            <div class="grow">${K.Select({ id:'note-book', value:'', aria:yz('esp.library.notun-kaynagi'),
+              options:[{ value:'', label:yz('esp.library.kaynak-sec-istege-bagli') }]
                 .concat((S.books || []).map(b => ({ value:b.id, label:b.author + ' — ' + b.title }))) })}</div>
-            ${K.Button({ label:'Notu ekle', tone:'primary', act:'add-note' })}
+            ${K.Button({ label:yz('esp.library.notu-ekle'), tone:'primary', act:'add-note' })}
           </div>`,
       }),
     ];
 
     if(!hepsi.length){
-      rows.push(K.Entry({ label:'Notlar', meta:'yok',
+      rows.push(K.Entry({ label:yz('esp.library.notlar'), meta:'yok',
         body:K.Empty({ text:q || kavram ? 'Süzgece uyan not yok.'
           : 'Henüz atomik not yok. Okuduğun tek bir fikri tek cümleyle yaz.' }) }));
       return rows;
     }
 
     const bagHtml = bagli();
-    if(bagHtml) rows.push(K.Entry({ label:'Bağlı notlar', meta:'en çok bağı olan', body:raw(bagHtml) }));
+    if(bagHtml) rows.push(K.Entry({ label:yz('esp.library.bagli-notlar'), meta:'en çok bağı olan', body:raw(bagHtml) }));
     /* iPhone Faz 2c: uzun liste kısa gelir — en yeni beş not + «Tümü».
        Arama ya da kavram süzgeci açıkken liste kesilmez (aranan bulunur). */
     const suzgec = !!(q || kavram);
     const tumu = suzgec || !!S.ui.notTumu;
     const gosterilen = tumu ? hepsi : hepsi.slice(0, NOT_ILK);
     rows.push(K.Entry({
-      label:'Notlar',
+      label:yz('esp.library.notlar'),
       meta:hepsi.length + ' not' + (kavram ? ' · ' + (ESP.CONCEPT_BY_ID[kavram] || {}).label : ''),
       action:html`${K.Input({ id:'note-q', value:S.ui.noteQuery || '',
-          placeholder:'Not ara…', change:'note-query', size:'sm', aria:'Not ara' })}
-        ${when(kavram, () => K.Button({ label:'Süzgeci kaldır', size:'sm', act:'clear-concept' }))}`,
+          placeholder:yz('esp.library.not-ara'), change:'note-query', size:'sm', aria:yz('esp.library.not-ara-2') })}
+        ${when(kavram, () => K.Button({ label:yz('esp.library.suzgeci-kaldir'), size:'sm', act:'clear-concept' }))}`,
       wide:true,
       body:html`${raw(notSuzgec(hepsi.length))}${map(gosterilen, n => {
         const kitap = bookOf(n.bookId);
@@ -138,9 +222,9 @@ ESP.Screens.library = (function(){
               ${when(kitap, () => html`<span class="tiny dim">${kitap.author} · ${kitap.title}</span>`)}
               ${map(n.concepts, c => K.Button({ size:'sm', act:'filter-concept',
                 label:(ESP.CONCEPT_BY_ID[c] || {}).label || c, data:{ 'data-id':c } }))}
-              <span class="tiny dim">${(n.links || []).length} bağ</span>
-              ${K.Button({ label:'Bağla', size:'sm', tone:'ghost', act:'open-link', data:{ 'data-id':n.id } })}
-              ${K.Button({ label:'Sil', size:'sm', tone:'ghost', class:'noterow__sil', act:'del-note', data:{ 'data-id':n.id } })}
+              <span class="tiny dim">${(n.links || []).length} ${yz('esp.library.bag')}</span>
+              ${K.Button({ label:yz('esp.library.bagla'), size:'sm', tone:'ghost', act:'open-link', data:{ 'data-id':n.id } })}
+              ${K.Button({ label:yz('esp.library.sil'), size:'sm', tone:'ghost', class:'noterow__sil', act:'del-note', data:{ 'data-id':n.id } })}
             </div>
             ${when(S.ui.linkFrom === n.id, () => linkForm(n))}
             ${when((n.links || []).length, () => html`
@@ -149,7 +233,7 @@ ESP.Screens.library = (function(){
                 return html`<li>
                   <span>${hedef ? hedef.text : '(silinmiş not)'}</span>
                   ${when(l.why, () => html`<em>${l.why}</em>`)}
-                  ${K.Button({ label:'Kaldır', size:'sm', act:'unlink',
+                  ${K.Button({ label:yz('esp.library.kaldir'), size:'sm', act:'unlink',
                     data:{ 'data-a':n.id, 'data-b':l.to } })}
                 </li>`;
               })}</ul>`)}
@@ -171,13 +255,13 @@ ESP.Screens.library = (function(){
     }
     return html`
       <div class="linkform">
-        ${K.Select({ id:'link-to', aria:'Bağlanacak not',
+        ${K.Select({ id:'link-to', aria:yz('esp.library.baglanacak-not'),
           options:adaylar.map(x => ({ value:x.id, label:x.text.slice(0, 60) })) })}
-        ${K.Input({ id:'link-why', placeholder:'Neden bağlı? (bir cümle)',
-          aria:'Bağın gerekçesi' })}
-        ${K.Button({ label:'Bağla', tone:'primary', size:'sm', act:'do-link',
+        ${K.Input({ id:'link-why', placeholder:yz('esp.library.neden-bagli-bir-cumle'),
+          aria:yz('esp.library.bagin-gerekcesi') })}
+        ${K.Button({ label:yz('esp.library.bagla'), tone:'primary', size:'sm', act:'do-link',
           data:{ 'data-id':n.id } })}
-        ${K.Button({ label:'Vazgeç', size:'sm', act:'close-link' })}
+        ${K.Button({ label:yz('esp.library.vazgec'), size:'sm', act:'close-link' })}
       </div>`;
   }
 
@@ -207,7 +291,7 @@ ESP.Screens.library = (function(){
 
     return [
       K.Entry({
-        label:'Sentez katsayısı', hint:'ssk',
+        label:yz('esp.library.sentez-katsayisi'), hint:'ssk',
         meta:ss.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ss.value * 100) / 100),
         /* Eksikken gerekçe aşağıdaki kutuda bir kez yazılır (eskiden not
@@ -219,12 +303,12 @@ ESP.Screens.library = (function(){
           ? K.Notice({ tone:'info', body:ss.why
               || 'Not ve kaynak girildiğinde katsayı hesaplanmaya başlar.' })
           : html`
-            ${K.Meter({ label:'Bağlanmış not oranı', value:ss.linkedRatio * 100,
+            ${K.Meter({ label:yz('esp.library.baglanmis-not-orani'), value:ss.linkedRatio * 100,
               text:ss.linked + '/' + ss.total })}`,
       }),
 
       K.Entry({
-        label:'Bağ önerileri', hint:'syntopic',
+        label:yz('esp.library.bag-onerileri'), hint:'syntopic',
         meta:oneri.length + ' öneri',
         wide:true,
         body:oneri.length
@@ -237,8 +321,8 @@ ESP.Screens.library = (function(){
                 </div>
                 <div class="sugg__meta">
                   ${map(o.concepts, c => K.Chip({ label:(ESP.CONCEPT_BY_ID[c] || {}).label || c }))}
-                  ${when(o.cross, () => K.Badge({ label:'farklı kaynak', tone:'info' }))}
-                  ${K.Button({ label:'Bağla', size:'sm', act:'open-link',
+                  ${when(o.cross, () => K.Badge({ label:yz('esp.library.farkli-kaynak'), tone:'info' }))}
+                  ${K.Button({ label:yz('esp.library.bagla'), size:'sm', act:'open-link',
                     data:{ 'data-id':o.a.id } })}
                 </div>
               </div>`)}`
@@ -248,18 +332,18 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'Kavram matrisi', hint:'kavram-matrisi',
+        label:yz('esp.library.kavram-matrisi'), hint:'kavram-matrisi',
         meta:kavramSatirlari.length + ' kavram',
         wide:true,
         body:kavramSatirlari.length
           ? K.Table({ tight:true,
-              headers:['Kavram', { label:'Not', num:true }, { label:'Yazar', num:true }, ''],
+              headers:['Kavram', { label:yz('esp.library.not'), num:true }, { label:yz('esp.library.yazar'), num:true }, ''],
               rows:kavramSatirlari.map(c => [
                 c.label, String(c.notes), String(c.authors),
-                K.Button({ label:'Notları gör', size:'sm', act:'filter-concept',
+                K.Button({ label:yz('esp.library.notlari-gor'), size:'sm', act:'filter-concept',
                   data:{ 'data-id':c.id } }),
               ]) })
-          : K.Empty({ text:'Henüz kavram etiketli not yok.' }),
+          : K.Empty({ text:yz('esp.library.henuz-kavram-etiketli-not-yo') }),
       }),
     ];
   }
@@ -270,14 +354,14 @@ ESP.Screens.library = (function(){
      oturumlardan. Bağlı oturum yoksa «veri yok» — sıfır dakika değil. */
   function okumaHucresi(b){
     const o = M.kitapOkuma(b.id);
-    if(!o) return html`<span class="tiny dim">veri yok</span>`;
+    if(!o) return html`<span class="tiny dim">${yz('esp.library.veri-yok')}</span>`;
     /* 095: sayfa sayısı yazılı ve okunan sayfa ölçülmüşse ince ilerleme. */
     const il = M.okumaIlerlemesi && M.okumaIlerlemesi(b);
     if(il && VT()) return raw(VT().okumaIlerlemesi({ ad:b.title, alt:il.okunan + ' / ' + il.toplam + ' sayfa · ' + U.fmtMin(o.dakika),
       oran:il.oran, kalanDk:il.kalanDk, kalanAd:'kalan' }));
     return html`<span class="num">${U.fmtMin(o.dakika)}</span>
       <div class="tiny dim">${o.oturum} oturum${o.sayfa != null ? ' · ' + o.sayfa + ' sayfa' : ''}
-        · son ${U.fmtShort(o.sonGun)}${o.cert !== 'measured' ? ' · tahmin' : ''}</div>`;
+        ${yz('esp.library.son')} ${U.fmtShort(o.sonGun)}${o.cert !== 'measured' ? ' · tahmin' : ''}</div>`;
   }
 
   /* Öğrendiğini anlat (core/anlat.js, fikir 42): sesle ya da yazıyla;
@@ -289,32 +373,32 @@ ESP.Screens.library = (function(){
     const k = S.ui.anlatSonuc;
     const son = secili ? ESP.Anlat.son(secili.id) : null;
     return K.Entry({
-      label:'Öğrendiğini anlat', hint:'anlat', meta:'sesle ya da yazıyla',
+      label:yz('esp.library.ogrendigini-anlat'), hint:'anlat', meta:'sesle ya da yazıyla',
       wide:true,
       body:!uygun.length
-        ? K.Empty({ text:'Notlarında en az ' + ESP.Anlat.EN_AZ_KAVRAM + ' kavram etiketi olan bir kaynak yok. '
+        ? K.Empty({ text:yz('esp.library.notlarinda-en-az') + ESP.Anlat.EN_AZ_KAVRAM + ' kavram etiketi olan bir kaynak yok. '
             + 'Notlara kavram ekledikçe burası açılır.' })
         : html`
           <div class="row gap-8 wrap">
-            ${K.Select({ id:'anlat-kitap', value:secili.id, aria:'Anlatılacak kaynak', change:'anlat-kitap',
+            ${K.Select({ id:'anlat-kitap', value:secili.id, aria:yz('esp.library.anlatilacak-kaynak'), change:'anlat-kitap',
               options:uygun.map(b => ({ value:b.id, label:(b.author ? b.author + ' — ' : '') + b.title })) })}
             <span class="tiny dim">${ESP.Anlat.kavramlar(secili.id).length} kavram</span>
           </div>
           <div class="row mt-10">
-            ${K.Textarea({ id:'anlat-metin', rows:4, aria:'Anlatımın', value:S.ui.anlatMetin || '',
-              placeholder:'Bu kaynaktan ne öğrendin? Kendi cümlelerinle anlat…' })}
+            ${K.Textarea({ id:'anlat-metin', rows:4, aria:yz('esp.library.anlatimin'), value:S.ui.anlatMetin || '',
+              placeholder:yz('esp.library.bu-kaynaktan-ne-ogrendin-ken') })}
             ${K.Mic({ target:'anlat-metin' })}
           </div>
           <div class="row wrap mt-10">
-            ${K.Button({ label:'Ölç', tone:'primary', act:'anlat-olc' })}
-            ${when(k && k.ok, () => K.Button({ label:'Sonucu kaydet', act:'anlat-kaydet' }))}
+            ${K.Button({ label:yz('esp.library.olc'), tone:'primary', act:'anlat-olc' })}
+            ${when(k && k.ok, () => K.Button({ label:yz('esp.library.sonucu-kaydet'), act:'anlat-kaydet' }))}
           </div>
           ${when(k && !k.ok, () => K.Notice({ tone:'info', class:'mt-10', body:k.why }))}
           ${when(k && k.ok, () => html`<div class="mt-10">
-            <p class="small"><b>${k.gecen.length}/${k.toplam}</b> kavram anlatımında geçti · hesaplandı</p>
-            ${when(k.gecmeyen.length, () => html`<p class="tiny dim">Geçmeyen: ${k.gecmeyen.join(', ')}</p>`)}
+            <p class="small"><b>${k.gecen.length}/${k.toplam}</b> ${yz('esp.library.kavram-anlatiminda-gecti-hes')}</p>
+            ${when(k.gecmeyen.length, () => html`<p class="tiny dim">${yz('esp.library.gecmeyen')} ${k.gecmeyen.join(', ')}</p>`)}
           </div>`)}
-          ${when(son, () => html`<p class="tiny dim mt-6">Son anlatım ${U.fmtShort(son.gun)}:
+          ${when(son, () => html`<p class="tiny dim mt-6">${yz('esp.library.son-anlatim')} ${U.fmtShort(son.gun)}:
             ${son.gecen}/${son.toplam} kavram</p>`)}`,
     });
   }
@@ -357,7 +441,7 @@ ESP.Screens.library = (function(){
     const baglar = (n.links || []).map(l => { const x = (S.notes || []).find(y => y.id === l.to); return x ? String(x.text).slice(0, 40) : null; }).filter(Boolean);
     const kitap = bookOf(n.bookId);
     if(kitap) baglar.unshift(kitap.title);
-    return VT().bagliNotlar({ baslik, ust:'not · ' + U.fmtShort(ESP.U.gunOf(n.createdAt || '')), metin:n.text, baglar });
+    return VT().bagliNotlar({ baslik, ust:yz('esp.library.not-2') + U.fmtShort(ESP.U.gunOf(n.createdAt || '')), metin:n.text, baglar });
   }
 
   /* 109 ÜÇ MADDE ÖZETİ: model açıkken, bir kaynağın EN AZ ÜÇ notundan.
@@ -391,60 +475,60 @@ ESP.Screens.library = (function(){
     const ozetHtml = ozetKarti(), model = ozetHazir();
 
     return [
-      when(rafHtml, () => K.Entry({ label:'Raf', meta:kitaplar.length + ' kitap', body:raw(rafHtml) })),
-      when(ozetHtml, () => K.Entry({ label:'Özet', meta:'model · tahmin', body:raw(ozetHtml) })),
-      when(alintiHtml, () => K.Entry({ label:'Alıntı', meta:'son not', body:raw(alintiHtml) })),
+      when(rafHtml, () => K.Entry({ label:yz('esp.library.raf'), meta:kitaplar.length + ' kitap', body:raw(rafHtml) })),
+      when(ozetHtml, () => K.Entry({ label:yz('esp.library.ozet'), meta:'model · tahmin', body:raw(ozetHtml) })),
+      when(alintiHtml, () => K.Entry({ label:yz('esp.library.alinti'), meta:'son not', body:raw(alintiHtml) })),
       K.Entry({
-        label:'Kaynaklar', hint:'primary-text',
+        label:yz('esp.library.kaynaklar'), hint:'primary-text',
         meta:kitaplar.length + ' kayıt',
         wide:true,
         body:kitaplar.length
           ? K.Table({ tight:true,
-              headers:['Eser', 'Yazar', 'Tür', { label:'Not', num:true }, 'Okuma', 'Durum', ''],
+              headers:['Eser', 'Yazar', 'Tür', { label:yz('esp.library.not'), num:true }, 'Okuma', 'Durum', ''],
               rows:kitaplar.map(b => [
-                html`${b.title}${when(b.bam && b.bam.not, () => html`<div class="tiny dim">BAM · ${b.bam.not}</div>`)}`,
+                html`${b.title}${when(b.bam && b.bam.not, () => html`<div class="tiny dim">${yz('esp.library.bam')} ${b.bam.not}</div>`)}`,
                 b.author,
                 b.kind === 'primary' ? 'primer' : 'yorum',
                 String(notSayisi(b.id)),
                 okumaHucresi(b),
                 M.bookStatus(b).label,
-                html`${when(model && notSayisi(b.id) >= 3, () => K.Button({ label:'Notlarını özetle', size:'sm',
+                html`${when(model && notSayisi(b.id) >= 3, () => K.Button({ label:yz('esp.library.notlarini-ozetle'), size:'sm',
                     act:'ozet-iste', data:{ 'data-id':b.id } }))}
                   ${K.Button({ label:M.bookStatus(b).action, size:'sm',
                     act:'toggle-book', data:{ 'data-id':b.id } })}
-                  ${K.Button({ label:'Sil', size:'sm', act:'del-book2',
+                  ${K.Button({ label:yz('esp.library.sil'), size:'sm', act:'del-book2',
                     data:{ 'data-id':b.id } })}`,
               ]) })
-          : K.Empty({ text:'Kaynak listesi boş. Sempozyum → Metinler sekmesinden '
+          : K.Empty({ text:yz('esp.library.kaynak-listesi-bos-sempozyum')
               + 'kanondan da ekleyebilirsin.' }),
       }),
 
       anlatEntry(),
 
       K.Entry({
-        label:'Okuma listesi iste', hint:'belge',
+        label:yz('esp.library.okuma-listesi-iste'), hint:'belge',
         meta:'okuma · HKM',
         body:html`<div class="row gap-8 wrap">
-          ${K.Input({ id:'belge-okuma', placeholder:'Konu: Stoacılık, bilim tarihi…', aria:'Okuma konusu',
+          ${K.Input({ id:'belge-okuma', placeholder:yz('esp.library.konu-stoacilik-bilim-tarihi'), aria:yz('esp.library.okuma-konusu'),
             size:'sm', class:'grow' })}
-          ${K.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
+          ${K.Button({ label:yz('esp.library.king-e-ilet'), size:'sm', act:'belge-iste',
             data:{ 'data-alan':'okuma' } })}
         </div>`,
       }),
 
       K.Entry({
-        label:'Kaynak ekle',
+        label:yz('esp.library.kaynak-ekle'),
         meta:'elle',
         body:html`
           <div class="cols-3">
-            ${K.Field({ label:'Eser', input:K.Input({ id:'lb-title', placeholder:'Başlık' }) })}
-            ${K.Field({ label:'Yazar', input:K.Input({ id:'lb-author', placeholder:'Yazar' }) })}
-            ${K.Field({ label:'Sayfa', hint:'isteğe bağlı', input:K.Input({ id:'lb-pages', type:'number', numeric:true, min:1, placeholder:'320' }) })}
-            ${K.Field({ label:'Tür', input:K.Select({ id:'lb-kind', value:'primary',
-              options:[{ value:'primary', label:'Primer metin' },
-                { value:'secondary', label:'Yorum' }] }) })}
+            ${K.Field({ label:yz('esp.library.eser'), input:K.Input({ id:'lb-title', placeholder:yz('esp.library.baslik') }) })}
+            ${K.Field({ label:yz('esp.library.yazar'), input:K.Input({ id:'lb-author', placeholder:yz('esp.library.yazar') }) })}
+            ${K.Field({ label:yz('esp.library.sayfa'), hint:'isteğe bağlı', input:K.Input({ id:'lb-pages', type:'number', numeric:true, min:1, placeholder:'320' }) })}
+            ${K.Field({ label:yz('esp.library.tur'), input:K.Select({ id:'lb-kind', value:'primary',
+              options:[{ value:'primary', label:yz('esp.library.primer-metin') },
+                { value:'secondary', label:yz('esp.library.yorum') }] }) })}
           </div>
-          ${K.Button({ label:'Ekle', act:'add-book2', class:'mt-10' })}`,
+          ${K.Button({ label:yz('esp.library.ekle'), act:'add-book2', class:'mt-10' })}`,
       }),
     ];
   }
@@ -456,7 +540,7 @@ ESP.Screens.library = (function(){
     const ozet = ESP.Lesson.topicSummary('reading');
     return [
       K.Entry({
-        label:'Konular', hint:'topic',
+        label:yz('esp.library.konular'), hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
         wide:true,
         body:ESP.Parts.topics('reading'),
@@ -488,7 +572,7 @@ ESP.Screens.library = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'library.bolum-1', sayfa:'library', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
-    return K.Span(12, ESP.Parts.bolumler('reading', { act:'read-tab', aria:'Okuma bölümleri', tabs:TABS,
+    return K.Span(12, ESP.Parts.bolumler('reading', { act:'read-tab', aria:yz('esp.library.okuma-bolumleri'), tabs:TABS,
         govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null } }));
   } });
   LIFEOS.PARCA.blok({ id:'library.bolum-2', sayfa:'library', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
@@ -535,7 +619,7 @@ ESP.Screens.library = (function(){
 
     async 'add-note'(){
       const t = val('note-text');
-      if(!t){ ESP.UI.toast('Not boş'); return; }
+      if(!t){ ESP.UI.toast(yz('esp.library.not-bos')); return; }
       const kavramlar = ESP.Parse.extractConcepts(t).map(c => c.id);
       await M.saveNote(M.newNote({ text:t, bookId:val('note-book') || null,
         concepts:kavramlar }));
@@ -565,7 +649,7 @@ ESP.Screens.library = (function(){
       if(!res.ok){ ESP.UI.toast(res.error); return; }
       S.ui.linkFrom = null;
       ESP.Memo.bitir();
-      ESP.UI.toast('Bağ kuruldu');
+      ESP.UI.toast(yz('esp.library.bag-kuruldu'));
       ESP.App.render();
     },
 
@@ -587,27 +671,27 @@ ESP.Screens.library = (function(){
     async 'ozet-iste'(el){
       const b = bookOf(el.dataset.id);
       const notlar = (S.notes || []).filter(n => n.bookId === (b && b.id)).map(n => String(n.text || ''));
-      if(!b || notlar.length < 3){ ESP.UI.toast('Özet için bu kaynağın en az üç notu gerekir.'); return; }
-      if(!ozetHazir()){ ESP.UI.toast('Model bağlı değil; özet yalnız model açıkken çıkarılır.'); return; }
-      ESP.UI.toast('Notların özetleniyor…');
+      if(!b || notlar.length < 3){ ESP.UI.toast(yz('esp.library.ozet-icin-bu-kaynagin-en')); return; }
+      if(!ozetHazir()){ ESP.UI.toast(yz('esp.library.model-bagli-degil-ozet-yalni')); return; }
+      ESP.UI.toast(yz('esp.library.notlarin-ozetleniyor'));
       try{
         const r = await ESP.Office.tamamla(OZET_AJAN, {
           system:'Kullanıcının bir kaynaktan aldığı notları üç maddeye indir. Yalnız notlarda geçen bilgiyi kullan; '
             + 'yorum, dış bilgi ve yeni sayı ekleme. Türkçe, her madde tek cümle. '
             + 'ÇIKTI yalnız JSON: {"maddeler":["…","…","…"]}',
-          messages:[{ role:'user', text:'Kaynak: ' + b.title + '\nNotlar:\n- ' + notlar.slice(0, 40).join('\n- ') }],
+          messages:[{ role:'user', text:yz('esp.library.kaynak') + b.title + '\nNotlar:\n- ' + notlar.slice(0, 40).join('\n- ') }],
           temperature:0.2, maxTokens:400 });
         const m = ozetDogrula(r && r.text, notlar);
-        if(!m){ ESP.UI.toast('Model çıktısı denetimden geçmedi; özet yazılmadı.'); return; }
+        if(!m){ ESP.UI.toast(yz('esp.library.model-ciktisi-denetimden-gec')); return; }
         S.ui.ozet = { bookId:b.id, maddeler:m, notSayisi:notlar.length };
         ESP.App.render();
       }catch(e){
-        ESP.UI.toast('Özet alınamadı: ' + (ESP.LLM.errorText ? ESP.LLM.errorText(e) : 'bağlantı hatası'));
+        ESP.UI.toast(yz('esp.library.ozet-alinamadi') + (ESP.LLM.errorText ? ESP.LLM.errorText(e) : 'bağlantı hatası'));
       }
     },
     async 'add-book2'(){
       const t = val('lb-title');
-      if(!t){ ESP.UI.toast('Eser adı gerekir'); return; }
+      if(!t){ ESP.UI.toast(yz('esp.library.eser-adi-gerekir')); return; }
       const sayfa = Math.round(Number(val('lb-pages')));
       await M.saveBook(M.newBook({ title:t, author:val('lb-author'),
         kind:val('lb-kind') || 'primary', pages:sayfa > 0 && sayfa < 20000 ? sayfa : null }));
@@ -644,7 +728,7 @@ ESP.Screens.library = (function(){
        isteği, Yöntem'in beş başvuru kartı şerit — dokununca açılır. */
     kucukVarsayilan:['raf', 'okuma-listesi-iste', 'dört-düzey', 'analitik-okumanın-dört-sorusu',
       'okuma-protokolü', 'not-şablonları', 'bırakma-izni'],
-    title:'Kütüphane',
+    title:yz('esp.library.kutuphane'),
     headline(){
       const ss = ESP.Intellect.syntopic();
       if(!ss.total) return 'Henüz atomik not yok.';
@@ -662,10 +746,10 @@ ESP.Screens.library = (function(){
       const ss = ESP.Intellect.syntopic();
       return [
         { value:String(ss.total), label:'not' },
-        { value:String(ss.linked), label:'bağlı' },
+        { value:String(ss.linked), label:yz('esp.library.bagli') },
         { value:String(ss.books), label:'kaynak' },
         { value:ss.cert === 'missing' ? '—' : U.fmtNum(Math.round(ss.value * 100) / 100),
-          label:'SSK' },
+          label:yz('esp.library.ssk') },
       ];
     },
     subtitle(){ return (S.notes || []).length + ' not · ' + (S.books || []).length + ' kaynak'; },

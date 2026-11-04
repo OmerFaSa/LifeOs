@@ -11,6 +11,33 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.meeting.son-yedi-gun':'Son yedi gün',
+  'spi.meeting.gundem':'Gündem',
+  'spi.meeting.gun':'gün',
+  'spi.meeting.verinden-cikan-fikirler':'Verinden çıkan fikirler',
+  'spi.meeting.henuz-karsilastirma-yapacak':'Henüz karşılaştırma yapacak kadar kayıt yok. Az veriden fikir üretilmez.',
+  'spi.meeting.veri-birikince-acilacak':'Veri birikince açılacak',
+  'spi.meeting.karsilastirma':'karşılaştırma',
+  'spi.meeting.belirgin-baglar':'Belirgin bağlar',
+  'spi.meeting.gun-sayisina-gore-rastlantid':'Gün sayısına göre rastlantıdan ayrılan bir bağ yok.',
+  'spi.meeting.bag-zayif':'bağ zayıf,',
+  'spi.meeting.bag-icin-ortak-gun-yetersiz':'bağ için ortak gün yetersiz. Eşik gün sayısına göre büyür (Analiz › Çapraz).',
+  'spi.meeting.planlarin-uyumu':'Planların uyumu',
+  'spi.meeting.tek-karar':'Tek karar',
+  'spi.meeting.one-cikan-is-yok':'Öne çıkan iş yok.',
+  'spi.meeting.ne-yapilir':'Ne yapılır:',
+  'spi.meeting.oraya-git':'Oraya git',
+  'spi.meeting.karari-takibe-al':'Kararı takibe al',
+  'spi.meeting.patron':'Patron',
+  'spi.meeting.tutanak':'Tutanak',
+  'spi.meeting.kural-motorunun-karari':'Kural motorunun kararı:',
+  'spi.meeting.tutanagi-dinle':'Tutanağı dinle',
+  'spi.meeting.durdur':'Durdur',
+  'spi.meeting.eski-toplanti-tutanaklari':'Eski toplantı tutanakları',
+  'spi.meeting.karar-takibe-alindi':'Karar takibe alındı',
+  'spi.meeting.i-nceleme':'İnceleme',
+});
 window.LIFEOS.PARCA.sayfa({ id:'meeting', modul:'spi', cekmece:'ofis', ad:'İnceleme', sira:30 });
 
 SP.Screens.meeting = (function(){
@@ -23,7 +50,7 @@ SP.Screens.meeting = (function(){
   const etiketi = e => raw(' <span class="inc-etiket" data-kesinlik="' + e + '">' + e + '</span>');
 
   function haftaKutusu(r){
-    return K.Kutu({ ad:'Son yedi gün', yuva:'kayıttan',
+    return K.Kutu({ ad:yz('spi.meeting.son-yedi-gun'), yuva:'kayıttan',
       govde:html`<div class="inc-sayilar">${map(r.hafta, s => html`<div class="inc-sayi">
         <span class="inc-sayi__ad">${s.ad}</span>
         <span class="inc-sayi__deger num">${s.deger == null ? '—' : SP.Inceleme.sayi(s.deger)}<small>${s.deger == null ? '' : s.birim}</small></span>
@@ -34,7 +61,7 @@ SP.Screens.meeting = (function(){
   function gundemKutusu(r){
     const rows = r.gundem;
     const enCok = Math.max.apply(null, rows.map(a => a.score).concat([1]));
-    return K.Kutu({ ad:'Gündem', yuva:'kural motorunun sırası',
+    return K.Kutu({ ad:yz('spi.meeting.gundem'), yuva:'kural motorunun sırası',
       govde:html`<ol class="inc-gundem">${map(rows, a => html`<li>
         <span class="inc-gundem__cubuk" style="${'--oran:' + Math.round(100 * a.score / enCok) + '%'}" aria-hidden="true"></span>
         <div class="grow"><b>${a.label}</b><span>${a.detail}</span><small>${a.note}</small></div>
@@ -48,43 +75,43 @@ SP.Screens.meeting = (function(){
       const enBuyuk = Math.max(Math.abs(f.a.ort), Math.abs(f.b.ort)) || 1;
       const bar = (g, cls_) => html`<div class="inc-fikir__bar"><span>${g.ad}</span>
         <i class="${cls_}" style="${'width:' + Math.round(100 * Math.abs(g.ort) / enBuyuk) + '%'}"></i>
-        <b class="num">${SP.Inceleme.sayi(g.ort, f.birim)} ${f.birim}</b><small>${g.n} gün</small></div>`;
+        <b class="num">${SP.Inceleme.sayi(g.ort, f.birim)} ${f.birim}</b><small>${g.n} ${yz('spi.meeting.gun')}</small></div>`;
       return html`<div class="inc-fikir">
         <b class="inc-fikir__baslik">${f.baslik}${etiketi(f.etiket)}</b>
         ${bar(f.a, 'is-a')}${bar(f.b, 'is-b')}
         <p class="tiny muted">${f.not}</p></div>`;
     };
-    return K.Kutu({ ad:'Verinden çıkan fikirler', yuva:acik.length ? acik.length + ' karşılaştırma' : 'veri birikiyor',
+    return K.Kutu({ ad:yz('spi.meeting.verinden-cikan-fikirler'), yuva:acik.length ? acik.length + ' karşılaştırma' : 'veri birikiyor',
       govde:html`${acik.length ? html`<div class="inc-fikirler">${map(acik, satir)}</div>`
-          : html`<p class="small muted">Henüz karşılaştırma yapacak kadar kayıt yok. Az veriden fikir üretilmez.</p>`}
-        ${when(kapali.length, () => html`<details class="inc-bekleyen mt-12"><summary class="small">Veri birikince açılacak ${kapali.length} karşılaştırma</summary>
+          : html`<p class="small muted">${yz('spi.meeting.henuz-karsilastirma-yapacak')}</p>`}
+        ${when(kapali.length, () => html`<details class="inc-bekleyen mt-12"><summary class="small">${yz('spi.meeting.veri-birikince-acilacak')} ${kapali.length} ${yz('spi.meeting.karsilastirma')}</summary>
           <ul class="tiny muted">${map(kapali, f => html`<li><b>${f.baslik}</b>: ${f.neden}</li>`)}</ul></details>`)}` });
   }
 
   function bulguKutusu(r){
     const b = r.bulgular;
-    return K.Kutu({ ad:'Belirgin bağlar', yuva:b.belirgin.length ? b.belirgin.length + ' bulgu' : 'yok',
+    return K.Kutu({ ad:yz('spi.meeting.belirgin-baglar'), yuva:b.belirgin.length ? b.belirgin.length + ' bulgu' : 'yok',
       govde:html`${b.belirgin.length ? html`<ul class="inc-bulgular">${map(b.belirgin, f => html`<li class="${'is-' + f.tone}">
           <b>${f.link.title}</b><span>${f.text}</span></li>`)}</ul>`
-        : html`<p class="small muted">Gün sayısına göre rastlantıdan ayrılan bir bağ yok.</p>`}
-        <p class="tiny muted mt-8">${b.zayif.length} bağ zayıf, ${b.bekleyen.length} bağ için ortak gün yetersiz. Eşik gün sayısına göre büyür (Analiz › Çapraz).</p>` });
+        : html`<p class="small muted">${yz('spi.meeting.gun-sayisina-gore-rastlantid')}</p>`}
+        <p class="tiny muted mt-8">${b.zayif.length} ${yz('spi.meeting.bag-zayif')} ${b.bekleyen.length} ${yz('spi.meeting.bag-icin-ortak-gun-yetersiz')}</p>` });
   }
 
   function planKutusu(r){
     if(!r.planlar.length) return '';
-    return K.Kutu({ ad:'Planların uyumu', yuva:'son 7 gün',
+    return K.Kutu({ ad:yz('spi.meeting.planlarin-uyumu'), yuva:'son 7 gün',
       govde:html`<ul class="inc-planlar">${map(r.planlar, p => html`<li><b>${p.ad}</b><span>${p.uyum.metin}${etiketi(p.uyum.etiket)}</span></li>`)}</ul>` });
   }
 
   function kararKutusu(r){
     const k = r.karar;
     const ozet = S.ui.incelemeOzet && S.ui.incelemeOzet.tarih === r.tarih ? S.ui.incelemeOzet : null;
-    return K.Kutu({ ad:'Tek karar', yuva:'kural motoru', class:'inc-karar',
-      govde:html`${k.calm ? html`<p><b>Öne çıkan iş yok.</b> ${k.why}</p>`
-          : html`<p><b>${k.title}</b></p><p class="small">${k.why}</p>${when(k.action, () => html`<p class="small"><b>Ne yapılır:</b> ${k.action}</p>`)}`}
+    return K.Kutu({ ad:yz('spi.meeting.tek-karar'), yuva:'kural motoru', class:'inc-karar',
+      govde:html`${k.calm ? html`<p><b>${yz('spi.meeting.one-cikan-is-yok')}</b> ${k.why}</p>`
+          : html`<p><b>${k.title}</b></p><p class="small">${k.why}</p>${when(k.action, () => html`<p class="small"><b>${yz('spi.meeting.ne-yapilir')}</b> ${k.action}</p>`)}`}
         ${when(ozet, () => html`<div class="inc-ozet mt-12"><span class="tiny muted">Patron'un özeti · ${P.sourceBadge(ozet.source)}</span><p>${ozet.text}</p></div>`)}`,
-      ayak:html`${when(!k.calm && k.route, () => K.Button({ label:'Oraya git', size:'sm', tone:'primary', act:'go', data:{ 'data-route':k.route } }))}
-        ${when(!k.calm, () => K.Button({ label:'Kararı takibe al', size:'sm', act:'inceleme-takip' }))}
+      ayak:html`${when(!k.calm && k.route, () => K.Button({ label:yz('spi.meeting.oraya-git'), size:'sm', tone:'primary', act:'go', data:{ 'data-route':k.route } }))}
+        ${when(!k.calm, () => K.Button({ label:yz('spi.meeting.karari-takibe-al'), size:'sm', act:'inceleme-takip' }))}
         ${when(SP.Office.ready && SP.Office.ready('patron'), () => K.Button({ label:ozetleniyor ? 'Özetleniyor…' : 'Patron özetlesin', size:'sm', tone:'ghost',
           act:'inceleme-ozet', disabled:ozetleniyor }))}` });
   }
@@ -106,7 +133,7 @@ SP.Screens.meeting = (function(){
   async function tutanakOynat(rec){
     const parcalar = rec.turns
       .map(t => ({ agent:t.agent, text:t.text, name:t.name }))
-      .concat([{ agent:'patron', name:'Patron', text:rec.closing }]);
+      .concat([{ agent:'patron', name:yz('spi.meeting.patron'), text:rec.closing }]);
 
     calan = { id:rec.id, i:0 };
     SP.App.render();
@@ -143,24 +170,24 @@ SP.Screens.meeting = (function(){
   function minutesCard(rec){
     const oyn = oynatmaDurumu(rec.id);
     return K.Card({
-      title:'Tutanak', sub:rec.agenda.label + ' · ' + U.fmtDate(rec.date),
+      title:yz('spi.meeting.tutanak'), sub:rec.agenda.label + ' · ' + U.fmtDate(rec.date),
       badge:P.sourceBadge(rec.source),
       body:html`
         <p class="small dim">${rec.agenda.detail}</p>
         <div class="meet mt-12">
           ${map(rec.turns, (t, i) => turnBlock(t, false, oyn && oyn.i === i))}
-          ${turnBlock({ agent:'patron', name:'Patron', text:rec.closing, source:rec.source },
+          ${turnBlock({ agent:'patron', name:yz('spi.meeting.patron'), text:rec.closing, source:rec.source },
             true, oyn && oyn.i === rec.turns.length)}
         </div>
         ${when(rec.decision && !rec.decision.calm, () => K.Notice({ tone:'info', class:'mt-12',
-          title:'Kural motorunun kararı:',
+          title:yz('spi.meeting.kural-motorunun-karari'),
           body:rec.decision.title + ' — ' + rec.decision.why }))}`,
       foot:html`
-        ${when(SP.Speak.supported() && !oyn, () => K.Button({ label:'Tutanağı dinle',
+        ${when(SP.Speak.supported() && !oyn, () => K.Button({ label:yz('spi.meeting.tutanagi-dinle'),
           size:'sm', icon:'mic', act:'play-minutes', data:{ 'data-id':rec.id } }))}
-        ${when(oyn, () => html`${K.Button({ label:'Durdur', size:'sm', act:'stop-minutes' })}
+        ${when(oyn, () => html`${K.Button({ label:yz('spi.meeting.durdur'), size:'sm', act:'stop-minutes' })}
           <span class="tiny dim">${oyn.i + 1} / ${rec.turns.length + 1} tur</span>`)}
-        ${K.Button({ label:'Kararı takibe al', size:'sm', tone:'primary',
+        ${K.Button({ label:yz('spi.meeting.karari-takibe-al'), size:'sm', tone:'primary',
           act:'track-decision', data:{ 'data-id':rec.id } })}`,
     });
   }
@@ -171,7 +198,7 @@ SP.Screens.meeting = (function(){
       return '';
     }
     return K.Card({
-      title:'Eski toplantı tutanakları', sub:rows.length + ' tutanak',
+      title:yz('spi.meeting.eski-toplanti-tutanaklari'), sub:rows.length + ' tutanak',
       body:html`<div class="list">${map(rows.slice(0, 12), m => html`
         <div class="listitem">
           <div class="grow"><b class="small">${m.agenda.label}</b>
@@ -226,7 +253,7 @@ SP.Screens.meeting = (function(){
       const k = SP.Calc.nextAction();
       if(k.calm) return;
       await SP.Model.saveDecision({ title:k.title, why:k.why });
-      UI.toast('Karar takibe alındı');
+      UI.toast(yz('spi.meeting.karar-takibe-alindi'));
       SP.App.render();
     },
     /* Model yalnız ÖZETLER: brifing incelemenin kendisidir, sayı oradan. */
@@ -268,7 +295,7 @@ SP.Screens.meeting = (function(){
         title:d && !d.calm ? d.title : rec.agenda.label,
         why:d && !d.calm ? d.why : rec.agenda.detail,
       });
-      UI.toast('Karar takibe alındı');
+      UI.toast(yz('spi.meeting.karar-takibe-alindi'));
       SP.App.render();
     },
   };
@@ -278,7 +305,7 @@ SP.Screens.meeting = (function(){
     /* Sade (2026-10-16): öncelik tablosu sabit bir kuraldır, her açılışta
        açık durmaz; başlığına dokununca açılır. Gündem ve modelin rolü
        ekranın ⓘ kartında (office, no-model ipuçları). */
-    title:'İnceleme',
+    title:yz('spi.meeting.i-nceleme'),
     subtitle(){
       const rows = SP.Office.agendaCandidates();
       return rows.length ? 'Gündem: ' + rows[0].label : 'Gündem yok';

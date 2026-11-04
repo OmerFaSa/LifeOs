@@ -4,6 +4,27 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.protocols.hazir':'hazır',
+  'ays.protocols.sure':'· süre',
+  'ays.protocols.gun':'gün',
+  'ays.protocols.su-an-gecerli':'Şu an geçerli:',
+  'ays.protocols.protokolu-kapat':'Protokolü kapat',
+  'ays.protocols.protokolu-baslat':'Protokolü başlat',
+  'ays.protocols.gecmis-protokoller':'Geçmiş protokoller',
+  'ays.protocols.kapandi':'kapandı',
+  'ays.protocols.minimum-gun-standardi':'Minimum gün standardı',
+  'ays.protocols.uyku':'Uyku',
+  'ays.protocols.hedef':'Hedef ',
+  'ays.protocols.7-gun-ort':'7 gün ort. ',
+  'ays.protocols.son-7-gun':'Son 7 gün',
+  'ays.protocols.sonuc':'Sonuç',
+  'ays.protocols.ne-degisti-plan-tamamlama-ne':'Ne değişti? Plan tamamlama, net veya davranış olarak ölç.',
+  'ays.protocols.vazgec':'Vazgeç',
+  'ays.protocols.kapat':'Kapat',
+  'ays.protocols.protokol-kapatildi':'Protokol kapatıldı',
+  'ays.protocols.telafi':'Telafi',
+});
 window.LIFEOS.PARCA.sayfa({ id:'protocols', modul:'ays', cekmece:'analiz', ad:'Telafi', ikon:'shield', sira:40 });
 
 R.Screens.protocols = (function(){
@@ -33,18 +54,18 @@ R.Screens.protocols = (function(){
       title:def.title,
       badge:active ? K.Badge({ label:doneCount+'/'+def.steps.length+' adım', tone:'ok' })
         : trigger ? K.Badge({ label:'tetiklendi', tone:'warn' })
-        : K.Badge({ label:'hazır', tone:'muted' }),
+        : K.Badge({ label:yz('ays.protocols.hazir'), tone:'muted' }),
       body:html`
-        <p class="small muted">Tetik: ${def.trigger} · süre ${def.durationDays} gün</p>
-        ${when(trigger && !active, () => K.Notice({ tone:'warn', title:'Şu an geçerli:', body:trigger.detail }))}
+        <p class="small muted">Tetik: ${def.trigger} ${yz('ays.protocols.sure')} ${def.durationDays} ${yz('ays.protocols.gun')}</p>
+        ${when(trigger && !active, () => K.Notice({ tone:'warn', title:yz('ays.protocols.su-an-gecerli'), body:trigger.detail }))}
         ${when(active, () => K.Notice({ tone:'ok', body:U.fmtDate(active.startedAt)+' tarihinde başladı · '
           + U.fmtDate(active.endsAt)+' tarihinde değerlendirilecek' }))}
         ${when(!expanded, () => K.Button({ label:def.steps.length+' adımı gör', size:'sm', class:'mt-10',
           act:'toggle-proto', data:{ 'data-key':def.id } }))}
         ${when(expanded, () => stepList(def, active))}`,
       foot:K.Row(active
-        ? html`${K.Button({ label:'Protokolü kapat', size:'sm', act:'proto-finish', data:{ 'data-id':active.id } })}`
-        : K.Button({ label:'Protokolü başlat', size:'sm', tone:trigger ? 'primary' : null,
+        ? html`${K.Button({ label:yz('ays.protocols.protokolu-kapat'), size:'sm', act:'proto-finish', data:{ 'data-id':active.id } })}`
+        : K.Button({ label:yz('ays.protocols.protokolu-baslat'), size:'sm', tone:trigger ? 'primary' : null,
             act:'proto-start', data:{ 'data-id':def.id } }),
         { wrap:true }),
     });
@@ -62,13 +83,13 @@ R.Screens.protocols = (function(){
   function historyCard(){
     const past = S.protocols.filter(p => p.status !== 'active');
     if(!past.length) return null;
-    return K.Card({ title:'Geçmiş protokoller', sub:past.length+' kapanmış kayıt',
+    return K.Card({ title:yz('ays.protocols.gecmis-protokoller'), sub:past.length+' kapanmış kayıt',
       body:html`<div class="list">${map(past, p => html`
         <div class="listitem">
           <div class="grow"><b class="small">${p.title}</b>
             <div class="tiny dim">${U.fmtShort(p.startedAt)} – ${U.fmtShort(p.closedAt ? R.U.gunOf(p.closedAt) : p.endsAt)}</div>
             ${when(p.outcome, () => html`<div class="tiny">${p.outcome}</div>`)}</div>
-          ${K.Badge({ label:'kapandı', tone:'muted' })}
+          ${K.Badge({ label:yz('ays.protocols.kapandi'), tone:'muted' })}
         </div>`)}</div>` });
   }
 
@@ -78,7 +99,7 @@ R.Screens.protocols = (function(){
     const md = R.ROUTINES.minimumDay;
     const cells = [[md.minutes, 'dakika'], [md.paragraphs, 'paragraf'], [C.dueCards().length, 'due kart']];
     return K.Card({
-      title:'Minimum gün standardı', hint:'minimum-day',       body:html`
+      title:yz('ays.protocols.minimum-gun-standardi'), hint:'minimum-day',       body:html`
         <div class="minday">${map(cells, c => html`
           <div><div class="stat__value num">${c[0]}</div><div class="tiny dim">${c[1]}</div></div>`)}</div>
         <p class="small muted mt-10">${md.note}</p>`,
@@ -89,9 +110,9 @@ R.Screens.protocols = (function(){
     const avg = C.sleepAverage(7);
     const target = R.ROUTINES.sleep;
     return K.Card({
-      title:'Uyku', hint:'sleep', sub:'Hedef '+target.targetLow+'–'+target.targetHigh+' saat',
-      badge:avg != null ? K.Badge({ label:'7 gün ort. '+avg+' sa', tone:avg >= 7 ? 'ok' : 'warn' }) : null,
-      body:K.Meter({ label:'Son 7 gün', value:avg == null ? 0 : U.pct(avg, S.profile.sleepTarget),
+      title:yz('ays.protocols.uyku'), hint:'sleep', sub:yz('ays.protocols.hedef')+target.targetLow+'–'+target.targetHigh+' saat',
+      badge:avg != null ? K.Badge({ label:yz('ays.protocols.7-gun-ort')+avg+' sa', tone:avg >= 7 ? 'ok' : 'warn' }) : null,
+      body:K.Meter({ label:yz('ays.protocols.son-7-gun'), value:avg == null ? 0 : U.pct(avg, S.profile.sleepTarget),
         text:avg == null ? 'kayıt yok' : avg+' sa', tone:avg != null && avg < 7 ? 'warn' : '' }),
     });
   }
@@ -167,12 +188,12 @@ R.Screens.protocols = (function(){
     async 'proto-finish'(el){
       const rec = S.protocols.find(p => p.id === el.dataset.id);
       UI.sheet({
-        title:'Protokolü kapat',
+        title:yz('ays.protocols.protokolu-kapat'),
         subtitle:rec.title,
-        body:String(K.Field({ label:'Sonuç', input:K.Textarea({ id:'proto-outcome', rows:3,
-          placeholder:'Ne değişti? Plan tamamlama, net veya davranış olarak ölç.' }) })),
-        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-          ${K.Button({ label:'Kapat', tone:'primary', act:'proto-finish-save', data:{ 'data-id':rec.id } })}`),
+        body:String(K.Field({ label:yz('ays.protocols.sonuc'), input:K.Textarea({ id:'proto-outcome', rows:3,
+          placeholder:yz('ays.protocols.ne-degisti-plan-tamamlama-ne') }) })),
+        footer:String(html`${K.Button({ label:yz('ays.protocols.vazgec'), act:'sheet-close' })}
+          ${K.Button({ label:yz('ays.protocols.kapat'), tone:'primary', act:'proto-finish-save', data:{ 'data-id':rec.id } })}`),
       });
     },
     async 'proto-finish-save'(el){
@@ -182,7 +203,7 @@ R.Screens.protocols = (function(){
       rec.outcome = document.getElementById('proto-outcome').value.trim();
       await M.saveProtocol(rec);
       UI.closeSheet();
-      UI.toast('Protokol kapatıldı');
+      UI.toast(yz('ays.protocols.protokol-kapatildi'));
       R.App.render();
     },
   };
@@ -199,7 +220,7 @@ R.Screens.protocols = (function(){
       return R.RECOVERY_PROTOCOLS.filter(d => !tetik[d.id] && !etkin[d.id]).map(d => G.anahtar(d.title))
         .concat(['minimum-gün-standardı', 'uyku', 'geçmiş-protokoller']);
     },
-    title:'Telafi',
+    title:yz('ays.protocols.telafi'),
     subtitle(){
       const a = M.activeProtocols().length, t = C.protocolTriggers().length;
       return a ? a+' protokol aktif' : t ? t+' tetikleyici bekliyor' : 'Aktif telafi yok';

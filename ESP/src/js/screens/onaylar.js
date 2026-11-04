@@ -14,6 +14,41 @@
 
 window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'esp.onaylar.king-teklifi':'King teklifi',
+  'esp.onaylar.is-emri':'· iş emri #',
+  'esp.onaylar.devam':'Devam',
+  'esp.onaylar.dur-ve-bitir':'Dur ve bitir',
+  'esp.onaylar.i-ptal':'İptal',
+  'esp.onaylar.king-ucretli-bir-isi-onayin':'King ücretli bir işi onayın olmadan açmaz. Sınıf, maliyet ve süre King’in hesabıdır (tahmin); sen onaylayınca iş BAM’da başlar ve sonucu teklif olarak buraya gelir.',
+  'esp.onaylar.hkm-teklifi':'HKM teklifi',
+  'esp.onaylar.kontrol-ettim':'Kontrol ettim',
+  'esp.onaylar.hepsini-kaydet':'Hepsini kaydet (',
+  'esp.onaylar.yalniz-okunabilen-gunluk-kay':'Yalnız okunabilen günlük kayıtlar; yanlışsa o günün oturumlarından silinir.',
+  'esp.onaylar.gordum':'Gördüm',
+  'esp.onaylar.i-stemiyorum':'İstemiyorum',
+  'esp.onaylar.bu-satirlar-birer-tekliftir':'Bu satırlar birer tekliftir. Onaylarsan ESP kendi kaydına yazar; reddedersen HKM kaydı silmez, «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş bir teklif ayrı şeylerdir.',
+  'esp.onaylar.esp-bu-kaydi-okuyamadi':'ESP bu kaydı okuyamadı.',
+  'esp.onaylar.esp-soyle-okudu':'ESP şöyle okudu',
+  'esp.onaylar.yazilmayacak':'» — yazılmayacak:',
+  'esp.onaylar.anlasilmadi-yazilmayacak':'» — anlaşılmadı, yazılmayacak.',
+  'esp.onaylar.esp-bu-teklifi-sinayamadi':'ESP bu teklifi sınayamadı.',
+  'esp.onaylar.esp-sunu-ekleyecek':'ESP şunu ekleyecek:',
+  'esp.onaylar.uzman-onerileri':'Uzman önerileri',
+  'esp.onaylar.i-s-emri':'İş emri #',
+  'esp.onaylar.merkez-teklifi':'Merkez teklifi',
+  'esp.onaylar.sonucu-belirsiz-teklif':'Sonucu belirsiz teklif',
+  'esp.onaylar.uygulanirken-yarida-kaldi':'Uygulanırken yarıda kaldı',
+  'esp.onaylar.kaydina-yazilip-yazilmadigi':'Kaydına yazılıp yazılmadığı bilinmiyor; hatırlatıcılarına bakıp doğrula.',
+  'esp.onaylar.oneri-daha':'öneri daha',
+  'esp.onaylar.son-kararlar':'Son kararlar',
+  'esp.onaylar.cikarimlar':'Çıkarımlar',
+  'esp.onaylar.king-in-senin-hakkindaki-tah':'King’in senin hakkındaki tahminleri. Doğruysa kaydedilir; yanlışsa bir daha sorulmaz.',
+  'esp.onaylar.bekleyen-oneri-yok':'Bekleyen öneri yok',
+  'esp.onaylar.merkez-king-ve-ajanlar-bir':'Merkez, King ve ajanlar bir şey önerdiğinde burada durur; sen onaylamadan hiçbiri uygulanmaz.',
+  'esp.onaylar.danisma-ya-git':'Danışma’ya git',
+  'esp.onaylar.onaylar':'Onaylar',
+});
 window.LIFEOS.PARCA.sayfa({ id:'onaylar', modul:'esp', cekmece:'onaylar', ad:'Bekleyen', sira:10 });
 
 ESP.Screens.onaylar = (function(){
@@ -28,20 +63,20 @@ ESP.Screens.onaylar = (function(){
   function KingTeklifKart(){
     const liste = S.ui.kingTeklifler || [];
     if(!liste.length) return '';
-    return K.Entry({ label:'King teklifi', hint:'hkm', meta:liste.length + ' iş', wide:true,
+    return K.Entry({ label:yz('esp.onaylar.king-teklifi'), hint:'hkm', meta:liste.length + ' iş', wide:true,
       body:html`
         ${map(liste.filter(t => t.durum === 'ara_onay'), t => html`<div class="mt-8">
-          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
+          <div><b>${t.konu}</b> <span class="tiny dim">${yz('esp.onaylar.is-emri')}${t.id}</span></div>
           <div class="tiny mt-4">${t.metin}</div>
           <div class="row wrap gap-8 mt-8">
-            ${K.Button({ label:'Devam', size:'sm', tone:'primary', act:'king-parca',
+            ${K.Button({ label:yz('esp.onaylar.devam'), size:'sm', tone:'primary', act:'king-parca',
               data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
-            ${K.Button({ label:'Dur ve bitir', size:'sm', act:'king-parca',
+            ${K.Button({ label:yz('esp.onaylar.dur-ve-bitir'), size:'sm', act:'king-parca',
               data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}
           </div>
         </div>`)}
         ${map(liste.filter(t => t.durum !== 'ara_onay'), t => html`<div class="mt-8">
-          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
+          <div><b>${t.konu}</b> <span class="tiny dim">${yz('esp.onaylar.is-emri')}${t.id}</span></div>
           ${map(t.secenekler, (x, i) => html`<div class="tiny mt-4">${i + 1}) ${x.metin}</div>`)}
           ${when(t.neden, () => K.Notice({ tone:'info', class:'mt-8',
             body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
@@ -52,20 +87,18 @@ ESP.Screens.onaylar = (function(){
             ${map(t.secenekler, (x, i) => K.Button({ label:(i + 1) + '. seçeneği onayla',
               size:'sm', tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla',
               data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
-            ${K.Button({ label:'İptal', size:'sm', act:'king-iptal',
+            ${K.Button({ label:yz('esp.onaylar.i-ptal'), size:'sm', act:'king-iptal',
               data:{ 'data-id':String(t.id) } })}
           </div>
         </div>`)}
-        <p class="tiny dim mt-10">King ücretli bir işi onayın olmadan açmaz. Sınıf, maliyet
-          ve süre King’in hesabıdır (tahmin); sen onaylayınca iş BAM’da başlar ve sonucu
-          teklif olarak buraya gelir.</p>` });
+        <p class="tiny dim mt-10">${yz('esp.onaylar.king-ucretli-bir-isi-onayin')}</p>` });
   }
 
   function HkmTeklifKart(){
     const liste = S.ui.hkmIntents || [];
     const supheli = S.ui.hkmDoubts || [];
     if(!liste.length && !supheli.length) return '';
-    return K.Entry({ label:'HKM teklifi', hint:'hkm',
+    return K.Entry({ label:yz('esp.onaylar.hkm-teklifi'), hint:'hkm',
       meta:liste.length ? liste.length + ' öneri'
         : supheli.length + ' belirsiz', wide:true,
       body:html`
@@ -76,14 +109,14 @@ ESP.Screens.onaylar = (function(){
             + 'yarıda kaldı; kaydına yazılıp yazılmadığı bilinmiyor. '
             + 'Hatırlatıcılarına bakıp doğrula.' })}
           <div class="row gap-8 mt-8">
-            ${K.Button({ label:'Kontrol ettim', size:'sm',
+            ${K.Button({ label:yz('esp.onaylar.kontrol-ettim'), size:'sm',
               act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } })}
           </div>
         </div>`)}
         ${when(topluKayitlar().length >= 2, () => html`<div class="row gap-8 mt-8">
-          ${K.Button({ label:'Hepsini kaydet (' + topluKayitlar().length + ')', size:'sm',
+          ${K.Button({ label:yz('esp.onaylar.hepsini-kaydet') + topluKayitlar().length + ')', size:'sm',
             tone:'primary', act:'hkm-toplu' })}
-          <span class="tiny dim">Yalnız okunabilen günlük kayıtlar; yanlışsa o günün oturumlarından silinir.</span>
+          <span class="tiny dim">${yz('esp.onaylar.yalniz-okunabilen-gunluk-kay')}</span>
         </div>`)}
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
@@ -98,30 +131,27 @@ ESP.Screens.onaylar = (function(){
               label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'unite.add':'Ekle', 'belge.add':'Ekle', 'kart.add':'Ekle' })[n.kind] || 'Uygula',
               size:'sm', tone:'primary', act:'hkm-intent-yes',
               data:{ 'data-id':String(n.id) } }))}
-            ${when(!ESP.Beacon.canApply(n), () => K.Button({ label:'Gördüm',
+            ${when(!ESP.Beacon.canApply(n), () => K.Button({ label:yz('esp.onaylar.gordum'),
               size:'sm', tone:'primary', act:'hkm-intent-seen',
               data:{ 'data-id':String(n.id) } }))}
-            ${K.Button({ label:'İstemiyorum', size:'sm',
+            ${K.Button({ label:yz('esp.onaylar.i-stemiyorum'), size:'sm',
               act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
           </div>
         </div>`)}
-        <p class="tiny dim mt-10">Bu satırlar birer tekliftir. Onaylarsan
-          ESP kendi kaydına yazar; reddedersen HKM kaydı silmez,
-          «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş
-          bir teklif ayrı şeylerdir.</p>` });
+        <p class="tiny dim mt-10">${yz('esp.onaylar.bu-satirlar-birer-tekliftir')}</p>` });
   }
 
   /* Gunun kaydi: ESP cumleyi NASIL OKUDU. Onaydan once gorunur; suresi ya
      da disiplini tanınmayan parca da SEBEBIYLE yazilir. */
   function kayitOkuma(n){
     const o = n.okuma;
-    if(!o) return html`<p class="tiny dim mt-8">ESP bu kaydı okuyamadı.</p>`;
+    if(!o) return html`<p class="tiny dim mt-8">${yz('esp.onaylar.esp-bu-kaydi-okuyamadi')}</p>`;
     return html`<div class="mt-8">
-      <p class="tiny"><b>ESP şöyle okudu</b> (${o.gun}):</p>
+      <p class="tiny"><b>${yz('esp.onaylar.esp-soyle-okudu')}</b> (${o.gun}):</p>
       <ul class="tiny mt-4">
         ${map(o.yazilacak, y => html`<li>${y.baslik}: ${y.satirlar.join('; ')}</li>`)}
-        ${map(o.yazilamaz, y => html`<li class="dim">«${y.metin}» — yazılmayacak: ${y.why}</li>`)}
-        ${map(o.anlasilmayan, m => html`<li class="dim">«${m}» — anlaşılmadı, yazılmayacak.</li>`)}
+        ${map(o.yazilamaz, y => html`<li class="dim">«${y.metin}${yz('esp.onaylar.yazilmayacak')} ${y.why}</li>`)}
+        ${map(o.anlasilmayan, m => html`<li class="dim">«${m}${yz('esp.onaylar.anlasilmadi-yazilmayacak')}</li>`)}
       </ul>
       ${when(!o.yazilacak.length, () => html`<p class="tiny dim">Bu cümleden ESP'ye
         yazılacak bir şey çıkmadı; istersen oturumu elle gir.</p>`)}
@@ -154,11 +184,11 @@ ESP.Screens.onaylar = (function(){
   /* BAM ünitesi: ESP kaydı KENDİ koduyla sınadı; ne ekleneceği ya da neden
      eklenemeyeceği onaydan ÖNCE görünür (core/unite.js). */
   function uniteOnizleme(b){
-    if(!b) return html`<p class="tiny dim mt-8">ESP bu teklifi sınayamadı.</p>`;
+    if(!b) return html`<p class="tiny dim mt-8">${yz('esp.onaylar.esp-bu-teklifi-sinayamadi')}</p>`;
     if(!b.ok) return html`<p class="tiny dim mt-8">Eklenmeyecek: ${b.why}</p>`;
     const o = b.onizleme;
     return html`<div class="mt-8">
-      <p class="tiny"><b>ESP şunu ekleyecek:</b> ${o.baslik}</p>
+      <p class="tiny"><b>${yz('esp.onaylar.esp-sunu-ekleyecek')}</b> ${o.baslik}</p>
       <ul class="tiny mt-4">${map(o.satirlar, s => html`<li>${s}</li>`)}</ul>
       ${map(o.uyari || [], u => html`<p class="tiny dim">${u}</p>`)}
     </div>`;
@@ -196,7 +226,7 @@ ESP.Screens.onaylar = (function(){
   function AjanKart(){
     const l = ESP.Plans ? ESP.Plans.all() : [];
     if(!l.length) return '';
-    return K.Entry({ label:'Uzman önerileri', hint:'proposal', meta:l.length + ' öneri', wide:true, body:ajanGovde(l) });
+    return K.Entry({ label:yz('esp.onaylar.uzman-onerileri'), hint:'proposal', meta:l.length + ' öneri', wide:true, body:ajanGovde(l) });
   }
 
   /* ---------- TÜRE GÖRE (kullanıcı, 2026-10-17: «onaylar kısmını daha
@@ -219,20 +249,20 @@ ESP.Screens.onaylar = (function(){
   }
   /* King'in işi para harcar: geri alınamaz, küçük sayılmaz (orta). */
   function kingSatir(t){
-    if(t.durum === 'ara_onay') return onaySatir({ baslik:t.konu, seviye:'orta', ust:'İş emri #' + t.id + ' · yarıda, devam onayı bekliyor',
+    if(t.durum === 'ara_onay') return onaySatir({ baslik:t.konu, seviye:'orta', ust:yz('esp.onaylar.i-s-emri') + t.id + ' · yarıda, devam onayı bekliyor',
       govde:html`<p class="small mt-6">${t.metin}</p>`,
-      eylem:html`${K.Button({ label:'Devam', size:'sm', tone:'primary', act:'king-parca', data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
-        ${K.Button({ label:'Dur ve bitir', size:'sm', act:'king-parca', data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}` });
-    return onaySatir({ baslik:t.konu, seviye:'orta', ust:'İş emri #' + t.id + ' · ücretli iş',
+      eylem:html`${K.Button({ label:yz('esp.onaylar.devam'), size:'sm', tone:'primary', act:'king-parca', data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
+        ${K.Button({ label:yz('esp.onaylar.dur-ve-bitir'), size:'sm', act:'king-parca', data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}` });
+    return onaySatir({ baslik:t.konu, seviye:'orta', ust:yz('esp.onaylar.i-s-emri') + t.id + ' · ücretli iş',
       govde:html`${map(t.secenekler, (x, i) => html`<p class="small mt-6">${i + 1}) ${x.metin}</p>`)}
         ${when(t.neden, () => K.Notice({ tone:'info', class:'mt-8',
           body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri) + ' — ' + t.neden + '.' }))}`,
       eylem:html`${map(t.secenekler, (x, i) => K.Button({ label:(i + 1) + '. seçeneği onayla', size:'sm',
           tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla', data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
-        ${K.Button({ label:'İptal', size:'sm', act:'king-iptal', data:{ 'data-id':String(t.id) } })}` });
+        ${K.Button({ label:yz('esp.onaylar.i-ptal'), size:'sm', act:'king-iptal', data:{ 'data-id':String(t.id) } })}` });
   }
   function hkmSatir(n, seviye){
-    return onaySatir({ baslik:HKM_AD[n.kind] || 'Merkez teklifi', seviye, ust:'Merkez teklifi',
+    return onaySatir({ baslik:HKM_AD[n.kind] || 'Merkez teklifi', seviye, ust:yz('esp.onaylar.merkez-teklifi'),
       govde:html`<p class="small mt-6">${n.note}</p>
         ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
         ${when(n.kind === 'unite.add', () => uniteOnizleme(n.unite))}
@@ -243,14 +273,14 @@ ESP.Screens.onaylar = (function(){
       eylem:html`${when(ESP.Beacon.canApply(n), () => K.Button({
           label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'unite.add':'Ekle', 'belge.add':'Ekle', 'kart.add':'Ekle' })[n.kind] || 'Uygula',
           size:'sm', tone:'primary', act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } }))}
-        ${when(!ESP.Beacon.canApply(n), () => K.Button({ label:'Gördüm', size:'sm', tone:'primary', act:'hkm-intent-seen', data:{ 'data-id':String(n.id) } }))}
-        ${K.Button({ label:'İstemiyorum', size:'sm', act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}` });
+        ${when(!ESP.Beacon.canApply(n), () => K.Button({ label:yz('esp.onaylar.gordum'), size:'sm', tone:'primary', act:'hkm-intent-seen', data:{ 'data-id':String(n.id) } }))}
+        ${K.Button({ label:yz('esp.onaylar.i-stemiyorum'), size:'sm', act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}` });
   }
   /* Yarıda kalan teklif: seviyesi yok, uydurulmaz; yalnız «bilinmiyor». */
   function supheSatir(d){
-    return onaySatir({ baslik:'Sonucu belirsiz teklif', ust:'Uygulanırken yarıda kaldı',
-      govde:html`<p class="small mt-6">Kaydına yazılıp yazılmadığı bilinmiyor; hatırlatıcılarına bakıp doğrula.</p>`,
-      eylem:K.Button({ label:'Kontrol ettim', size:'sm', act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } }) });
+    return onaySatir({ baslik:yz('esp.onaylar.sonucu-belirsiz-teklif'), ust:yz('esp.onaylar.uygulanirken-yarida-kaldi'),
+      govde:html`<p class="small mt-6">${yz('esp.onaylar.kaydina-yazilip-yazilmadigi')}</p>`,
+      eylem:K.Button({ label:yz('esp.onaylar.kontrol-ettim'), size:'sm', act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } }) });
   }
   /* Uzman önerileri disipline göre: her disiplinin EN ÖNDEKİ önerisi görünür,
      kalanı «N öneri daha» altında katlı (2026-10-16). */
@@ -268,7 +298,7 @@ ESP.Screens.onaylar = (function(){
           <h2 class="oneri-grup__ad">${ad(g.disc)}</h2>
           ${ESP.Parts.proposalList(g.l.slice(0, 1))}
           ${when(g.l.length > 1, () => html`<details class="oneri-grup__dahasi">
-            <summary>${g.l.length - 1} öneri daha</summary>
+            <summary>${g.l.length - 1} ${yz('esp.onaylar.oneri-daha')}</summary>
             ${ESP.Parts.proposalList(g.l.slice(1))}
           </details>`)}
         </section>`)}</div>`;
@@ -283,7 +313,7 @@ ESP.Screens.onaylar = (function(){
   function grupKutusu(g){
     const toplu = g.id === 'kayit' ? topluKayitlar().length : 0;
     return K.Kutu({ ad:g.ad, ipucu:g.id === 'king' || g.id === 'sistem' ? 'hkm' : undefined,
-      yuva:toplu >= 2 ? K.Button({ label:'Hepsini kaydet (' + toplu + ')', size:'sm', tone:'primary', act:'hkm-toplu' }) : String(g.sayi || g.satirlar.length),
+      yuva:toplu >= 2 ? K.Button({ label:yz('esp.onaylar.hepsini-kaydet') + toplu + ')', size:'sm', tone:'primary', act:'hkm-toplu' }) : String(g.sayi || g.satirlar.length),
       govde:g.govde || html`<div class="onay-liste" data-raf-tam>${map(g.satirlar, s => s.html)}</div>` });
   }
 
@@ -335,7 +365,7 @@ ESP.Screens.onaylar = (function(){
         onay:kendi ? null : p.otomatik ? { tur:'ayar' } : { tur:'onay' } };
     });
     /* 119: öneri geçmişi; bekleyen yokken de çizilir (render). */
-    return K.Entry({ label:'Son kararlar', meta:rows.length + ' kayıt',
+    return K.Entry({ label:yz('esp.onaylar.son-kararlar'), meta:rows.length + ' kayıt',
       body:html`<div data-oz="119">${raw(G.gecmisHtml(olay.slice(0, 40)))}</div>` });
   }
 
@@ -354,8 +384,8 @@ ESP.Screens.onaylar = (function(){
     let h = '';
     try{ h = Kg && Kg.cikarimKarti ? Kg.cikarimKarti(3) : ''; }catch(e){ console.error(e); }
     if(!h) return '';
-    return String(K.Kutu({ ad:'Çıkarımlar', yuva:String(cikarimSayisi()), govde:html`
-      <p class="small muted">King’in senin hakkındaki tahminleri. Doğruysa kaydedilir; yanlışsa bir daha sorulmaz.</p>${raw(h)}` }));
+    return String(K.Kutu({ ad:yz('esp.onaylar.cikarimlar'), yuva:String(cikarimSayisi()), govde:html`
+      <p class="small muted">${yz('esp.onaylar.king-in-senin-hakkindaki-tah')}</p>${raw(h)}` }));
   }
 
   LIFEOS.PARCA.blok({ id:'onaylar.cikarim', sayfa:'onaylar', yer:'cikarim', ad:'Sana sorulacaklar', ciz:() => cikarimKutusu() });
@@ -373,10 +403,9 @@ ESP.Screens.onaylar = (function(){
     const gecmis = sonKararlar();
     if(!l.length && !ajan.length){
       /* Boş durum (10): tek eylem. Geçmiş varsa altında durur (119). */
-      const bos = K.Kutu({ ad:'Bekleyen öneri yok', govde:html`
-        <p class="small muted">Merkez, King ve ajanlar bir şey önerdiğinde burada durur; sen
-          onaylamadan hiçbiri uygulanmaz.</p>
-        <div class="mt-10">${K.Button({ label:'Danışma’ya git', size:'sm', act:'go',
+      const bos = K.Kutu({ ad:yz('esp.onaylar.bekleyen-oneri-yok'), govde:html`
+        <p class="small muted">${yz('esp.onaylar.merkez-king-ve-ajanlar-bir')}</p>
+        <div class="mt-10">${K.Button({ label:yz('esp.onaylar.danisma-ya-git'), size:'sm', act:'go',
           data:{ 'data-route':'team' } })}</div>` });
       return gecmis ? html`${bos}<div class="mt-16">${K.Ledger([gecmis])}</div>` : bos;
     }
@@ -460,7 +489,7 @@ ESP.Screens.onaylar = (function(){
   return {
     id:'onaylar',
     kingKart:KingTeklifKart,
-    title:'Onaylar',
+    title:yz('esp.onaylar.onaylar'),
     subtitle(){
       const n = bekleyen();
       return n ? n + ' öneri onayını bekliyor' : 'bekleyen öneri yok';

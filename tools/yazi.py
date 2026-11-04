@@ -27,17 +27,20 @@ def tara():
                 s = io.open(f, encoding="utf-8").read()
             except OSError:
                 continue
-            for mm in re.finditer(r"(title|label|sub|baslik):\s*'([^'\n]{3,90})'", s):
-                t = mm.group(2)
+            # Yazilar parca tablosunda da durur (brand/ortak/parca.js): `'kimlik':'yazi'`.
+            for mm in re.finditer(r"(title|label|sub|baslik):\s*'([^'\n]{3,90})'|^\s*'[\w.-]+':'([^'\n]{3,90})'", s, re.M):
+                t = mm.group(2) or mm.group(3)
+                # Tablodaki duz cumle baslik degildir: ornek metin, yol tarifi, kucuk harfle baslayan.
+                cumle = mm.group(3) is not None and (not t[0].isupper() or "→" in t)
                 satir = s.count("\n", 0, mm.start()) + 1
                 yer = "%s:%d  %s" % (f.replace("\\", "/"), satir, t)
                 temiz = ISTISNA.sub("", t)
                 kel = temiz.split()
-                if len(kel) >= 3 and sum(1 for k in kel if re.fullmatch(KEL, k.strip("(),.:·"))) >= 3:
+                if not cumle and len(kel) >= 3 and sum(1 for k in kel if re.fullmatch(KEL, k.strip("(),.:·"))) >= 3:
                     out.append("Her Kelimesi Büyük başlık: " + yer)
                 if " & " in t:
                     out.append("«&» yerine «ve»: " + yer)
-                if EMO.search(t):
+                if EMO.search(t.replace("✓", "")):
                     out.append("emoji: " + yer)
                 if IC.search(t):
                     out.append("iç terim: " + yer)

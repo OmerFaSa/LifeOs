@@ -35,6 +35,80 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.rutbe.su-an':'Şu an',
+  'spi.rutbe.merdiven':'Merdiven',
+  'spi.rutbe.basarimlar':'Başarımlar',
+  'spi.rutbe.xp-nereden-gelir':'XP nereden gelir',
+  'spi.rutbe.defter':'Defter',
+  'spi.rutbe.rutbe':'Rütbe',
+  'spi.rutbe.seviye-defteri-henuz-yuklenm':'Seviye defteri henüz yüklenmedi.',
+  'spi.rutbe.en-ust-basamaktasin':'En üst basamaktasın.',
+  'spi.rutbe.bu-basamakta':'Bu basamakta',
+  'spi.rutbe.bir-sonraki-basamaga':'Bir sonraki basamağa ',
+  'spi.rutbe.bugun':'Bugün',
+  'spi.rutbe.toplam':'Toplam',
+  'spi.rutbe.kademe':'Kademe',
+  'spi.rutbe.basamak':'Basamak',
+  'spi.rutbe.gecilen':'geçilen',
+  'spi.rutbe.i-lerleme':'İlerleme',
+  'spi.rutbe.kademe-atlayinca':'Kademe atlayınca',
+  'spi.rutbe.tercih-geri-alinir':'Tercih · geri alınır',
+  'spi.rutbe.kutlama-bicimi':'Kutlama biçimi',
+  'spi.rutbe.tam-ekran-perde':'Tam ekran perde',
+  'spi.rutbe.sakin-parlama':'Sakin parlama',
+  'spi.rutbe.ornek':'Örnek',
+  'spi.rutbe.bu-kademede-neredesin':'Bu kademede neredesin',
+  'spi.rutbe.bu-kareyi-kademeye-gectigin':'. Bu kareyi kademeye geçtiğin gün tam ekran gördün; burada durmaya devam ediyor.',
+  'spi.rutbe.rozetler':'Rozetler',
+  'spi.rutbe.hepsi':'Hepsi',
+  'spi.rutbe.kazanilan':'Kazanılan',
+  'spi.rutbe.toplam-saat':'Toplam saat',
+  'spi.rutbe.kesintisiz':'Kesintisiz',
+  'spi.rutbe.son-kazanilan':'Son kazanılan:',
+  'spi.rutbe.siradaki':'Sıradaki:',
+  'spi.rutbe.kaldi':'kaldı',
+  'spi.rutbe.rozetler-kayit-girdikce':'Rozetler kayıt girdikçe ',
+  'spi.rutbe.bugun-henuz-xp-yok-xp':'Bugün henüz XP yok. «XP nereden gelir» bölümü, hangi işin ',
+  'spi.rutbe.i-s-basina-kazanilan':'İş başına kazanılan',
+  'spi.rutbe.acilisa':'Açılışa',
+  'spi.rutbe.xp-acilis':'XP · açılış',
+  'spi.rutbe.tamamlandi':'Tamamlandı',
+  'spi.rutbe.basamak-2':'basamak ·',
+  'spi.rutbe.xp-sonra':'XP sonra',
+  'spi.rutbe.toplam-gorev':'Toplam görev',
+  'spi.rutbe.kayitli-gun':'Kayıtlı gün',
+  'spi.rutbe.rozet-neyi-soyler-neyi-soyle':'Rozet neyi söyler, neyi söylemez',
+  'spi.rutbe.rozet-hicbir-karari-vermez':'Rozet hiçbir kararı vermez.',
+  'spi.rutbe.ne-plan-ne-recete-ne':'Ne plan, ne reçete, ne uyarı ona bakar — XP gibi, yalnızca görünürlüktür.',
+  'spi.rutbe.sayac-dusebilir-rozet-dusmez':'Sayaç düşebilir, rozet düşmez.',
+  'spi.rutbe.kaydi-silersen-saat-ve-gorev':'Kaydı silersen saat ve görev sayısı azalır; ama «şu gün ulaştın» cümlesi doğru kalır, o yüzden kazanılmış rozet geri alınmaz.',
+  'spi.rutbe.olculmemis-sure-sayilmaz':'Ölçülmemiş süre sayılmaz.',
+  'spi.rutbe.suresi-bos-birakilan-bir-kay':'Süresi boş bırakılan bir kayıt «sıfır dakika» değil, «veri yok»tur.',
+  'spi.rutbe.siradaki-2':'Sıradaki',
+  'spi.rutbe.bu-sistemin-muhru':'Bu sistemin mührü',
+  'spi.rutbe.muhur-kazanilmaz-basilir-esi':'Mühür kazanılmaz, basılır. Eşiği, sayacı, tarihi yoktur: bir belgenin hangi alandan geldiğini söyler.',
+  'spi.rutbe.siradaki-3':'· sıradaki',
+  'spi.rutbe.kazanildi':'Kazanıldı',
+  'spi.rutbe.henuz-kazanilmadi':'Henüz kazanılmadı',
+  'spi.rutbe.su-an-2':'· şu an',
+  'spi.rutbe.bu-bir-fiyat-listesidir-gore':'Bu bir fiyat listesidir, görev listesi değil.',
+  'spi.rutbe.i-sler':'İşler',
+  'spi.rutbe.bugun-toplam-en-cok':'Bugün toplam en çok ',
+  'spi.rutbe.uc-kural':'Üç kural',
+  'spi.rutbe.her-isin-gunluk-tavani-vardi':'Her işin günlük tavanı vardır.',
+  'spi.rutbe.tavansiz-bir-sayac-bir-gun':'Tavansız bir sayaç bir gün otuz kez tıklanır ve anlamını kaybeder.',
+  'spi.rutbe.xp-tetiklenmez-turetilir':'XP tetiklenmez, türetilir.',
+  'spi.rutbe.bir-dugmeye-basarak-puan-ali':'Bir düğmeye basarak puan alınmaz; o günün verisinden sayılır. Kaydı silersen puan da gider.',
+  'spi.rutbe.geriye-donuk-puan-toplanmaz':'Geriye dönük puan toplanmaz.',
+  'spi.rutbe.gelecege-hic-gecmise-en-fazl':'Geleceğe hiç, geçmişe en fazla bir hafta yazılır — dünkü kaydı bu sabah girmek olağandır, geçen ayın gününe puan yazmak değildir.',
+  'spi.rutbe.xp':'XP /',
+  'spi.rutbe.bugun-2':'bugün',
+  'spi.rutbe.xp-2':'XP',
+  'spi.rutbe.git':'Git',
+  'spi.rutbe.bu-xp-hangi-isten-geldi':'Bu XP hangi işten geldi',
+  'spi.rutbe.rutbe-bolumleri':'Rütbe bölümleri',
+});
 window.LIFEOS.PARCA.sayfa({ id:'rutbe', modul:'spi', cekmece:'ayarlar', ad:'Rütbe', sira:30 });
 
 SP.Screens.rutbe = (function(){
@@ -64,11 +138,11 @@ SP.Screens.rutbe = (function(){
   const tr = n => Number(n || 0).toLocaleString('tr-TR');
 
   const TABS = [
-    { id:'simdi',    label:'Şu an' },
-    { id:'merdiven', label:'Merdiven' },
-    { id:'rozet',    label:'Başarımlar' },
-    { id:'kazanc',   label:'XP nereden gelir' },
-    { id:'defter',   label:'Defter' },
+    { id:'simdi',    label:yz('spi.rutbe.su-an') },
+    { id:'merdiven', label:yz('spi.rutbe.merdiven') },
+    { id:'rozet',    label:yz('spi.rutbe.basarimlar') },
+    { id:'kazanc',   label:yz('spi.rutbe.xp-nereden-gelir') },
+    { id:'defter',   label:yz('spi.rutbe.defter') },
   ];
 
   /* Kademe rengini CSS'e geçiren sarmal. Ekranın her bölümü o anki
@@ -101,8 +175,8 @@ SP.Screens.rutbe = (function(){
   }
 
   function yok(){
-    return K.Card({ title:'Rütbe',
-      body:html`<p class="small dim">Seviye defteri henüz yüklenmedi.</p>` });
+    return K.Card({ title:yz('spi.rutbe.rutbe'),
+      body:html`<p class="small dim">${yz('spi.rutbe.seviye-defteri-henuz-yuklenm')}</p>` });
   }
 
   /* ============================================ VİTRİN KARTLARI ====
@@ -200,11 +274,11 @@ SP.Screens.rutbe = (function(){
       aria-hidden="true" onerror="this.remove()">` : '';
 
     const ilerleme = d.tamam
-      ? K.Notice({ tone:'ok', title:'En üst basamaktasın.',
+      ? K.Notice({ tone:'ok', title:yz('spi.rutbe.en-ust-basamaktasin'),
           body:'XP birikmeye devam ediyor.' })
-      : K.Meter({ label:'Bu basamakta', value:Math.round(d.oran * 100),
+      : K.Meter({ label:yz('spi.rutbe.bu-basamakta'), value:Math.round(d.oran * 100),
           text:tr(d.icinde) + ' / ' + tr(d.gereken) + ' XP',
-          note:'Bir sonraki basamağa ' + tr(d.kalan) + ' XP' });
+          note:yz('spi.rutbe.bir-sonraki-basamaga') + tr(d.kalan) + ' XP' });
 
     const sahneVideo = sahneVideoYolu(d.kademe);
 
@@ -259,9 +333,9 @@ SP.Screens.rutbe = (function(){
          `auto-fit` + `minmax`: yer varsa dördü yan yana, yoksa ikişer,
          en dar yerde tek sütun. */
       html`<div class="rutbe-sayaclar">${[
-        K.Stat({ label:'Bugün', value:tr(d.bugun), unit:'XP' }),
-        K.Stat({ label:'Toplam', value:tr(d.toplam), unit:'XP' }),
-        K.Stat({ label:'Kademe', value:d.kademe,
+        K.Stat({ label:yz('spi.rutbe.bugun'), value:tr(d.bugun), unit:'XP' }),
+        K.Stat({ label:yz('spi.rutbe.toplam'), value:tr(d.toplam), unit:'XP' }),
+        K.Stat({ label:yz('spi.rutbe.kademe'), value:d.kademe,
           unit:'/ ' + (L().KADEMELER || []).length }),
         /* «Basamak» tek başına yanıltıcıydı: 1.1'in İÇİNDEYKEN sıfır
            yazıyor ve üstteki «Bronz 1.1» ile çelişiyordu. Sayılan şey
@@ -271,12 +345,12 @@ SP.Screens.rutbe = (function(){
            kutuyu komşularının iki katı yapıyordu. Aradaki boşluklar
            bölünmez boşluktur (U+00A0); normal boşlukla «11 /» ve «25»
            iki satıra düşüyordu. */
-        K.Stat({ label:'Basamak',
+        K.Stat({ label:yz('spi.rutbe.basamak'),
           value:d.bitmisBasamak + '\u00a0/\u00a0' + (L().BASAMAKLAR || []).length,
-          note:'geçilen' }),
+          note:yz('spi.rutbe.gecilen') }),
       ]}</div>`,
 
-      K.Card({ title:'İlerleme', body:ilerleme }),
+      K.Card({ title:yz('spi.rutbe.i-lerleme'), body:ilerleme }),
       kademeYoluKarti(d),
       kademeIciKart(d),
       rozetOzetKart(),
@@ -293,11 +367,11 @@ SP.Screens.rutbe = (function(){
     const t = P.kutlamaTercihi();
     const V = VT();
     const k = d && d.kademeBilgi;
-    return K.Card({ title:'Kademe atlayınca', sub:'Tercih · geri alınır',
-      body:html`${K.Segmented({ act:'kutlama-sec', value:t, aria:'Kutlama biçimi',
-        items:[{ value:'perde', label:'Tam ekran perde' }, { value:'sakin', label:'Sakin parlama' }] })}
+    return K.Card({ title:yz('spi.rutbe.kademe-atlayinca'), sub:yz('spi.rutbe.tercih-geri-alinir'),
+      body:html`${K.Segmented({ act:'kutlama-sec', value:t, aria:yz('spi.rutbe.kutlama-bicimi'),
+        items:[{ value:'perde', label:yz('spi.rutbe.tam-ekran-perde') }, { value:'sakin', label:yz('spi.rutbe.sakin-parlama') }] })}
         ${when(t === 'sakin' && V && V.sakinSeviye && k, () => html`<div class="rutbe-sakin-ornek mt-12">${raw(V.sakinSeviye({
-          ust:'Örnek', ad:k.ad + ' ' + d.etiket, sistem:'spi', renk:k.id }).replace('vk vk-sakin', 'vk'))}</div>`)}
+          ust:yz('spi.rutbe.ornek'), ad:k.ad + ' ' + d.etiket, sistem:'spi', renk:k.id }).replace('vk vk-sakin', 'vk'))}</div>`)}
         <p class="tiny dim mt-8">${t === 'sakin' ? 'Ekranı kapatmaz, işi bölmez; üç saniye sonra çekilir.'
           : 'Tam ekran kutlama; «Geç» ve Esc her an kapatır. Hareket azaltma açıksa perde hiç açılmaz.'}</p>` });
   }
@@ -322,7 +396,7 @@ SP.Screens.rutbe = (function(){
     const arma = armaYolu(d.kademe);
 
     return K.Card({
-      title:'Bu kademede neredesin',
+      title:yz('spi.rutbe.bu-kademede-neredesin'),
       body:html`
         <div class="rutbe-serit">
           ${when(arma, () => html`<img class="rutbe-serit__arma" src="${arma}"
@@ -359,8 +433,7 @@ SP.Screens.rutbe = (function(){
         <img class="rutbe-gecis__kare" src="${'img/seviye/gecis-' + d.kademe + '.webp'}"
           alt="${yazi}" loading="lazy"
           onerror="var k=this.closest('.rutbe-gecis'); if(k) k.remove(); else this.remove()">
-        <p class="rutbe-gecis__yazi">${yazi}. Bu kareyi kademeye geçtiğin
-          gün tam ekran gördün; burada durmaya devam ediyor.</p>
+        <p class="rutbe-gecis__yazi">${yazi}${yz('spi.rutbe.bu-kareyi-kademeye-gectigin')}</p>
       </div>`;
   }
 
@@ -385,24 +458,24 @@ SP.Screens.rutbe = (function(){
     const sirada = B.siradaki(1)[0];
 
     return K.Card({
-      title:'Rozetler',
-      actions:K.Button({ label:'Hepsi', size:'sm', act:'rutbe-tab',
+      title:yz('spi.rutbe.rozetler'),
+      actions:K.Button({ label:yz('spi.rutbe.hepsi'), size:'sm', act:'rutbe-tab',
         data:{ 'data-tab':'rozet' } }),
       body:K.Stack([
         /* Aynı gerekçe (bkz. `simdiTab`): `K.Grid` on iki sütunludur; burada
            da 390 pikselde üç kutu 32 px'e sıkışıp üst üste biniyordu. */
         html`<div class="rutbe-sayaclar">${[
-          K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
+          K.Stat({ label:yz('spi.rutbe.kazanilan'), value:d.kazanilanSayisi,
             unit:'/ ' + d.toplamRozet }),
-          K.Stat({ label:'Toplam saat', value:tr(d.saat), unit:'saat' }),
-          K.Stat({ label:'Kesintisiz', value:tr(d.seriAy), unit:'ay' }),
+          K.Stat({ label:yz('spi.rutbe.toplam-saat'), value:tr(d.saat), unit:'saat' }),
+          K.Stat({ label:yz('spi.rutbe.kesintisiz'), value:tr(d.seriAy), unit:'ay' }),
         ]}</div>`,
-        when(son, () => html`<p class="small dim">Son kazanılan:
+        when(son, () => html`<p class="small dim">${yz('spi.rutbe.son-kazanilan')}
           <b>${son.ad}</b> · ${son.kazanildi}</p>`),
-        when(sirada, () => html`<p class="small dim">Sıradaki:
+        when(sirada, () => html`<p class="small dim">${yz('spi.rutbe.siradaki')}
           <b>${sirada.kisaAd || sirada.ad}</b> —
-          ${tr(sirada.kalan)} ${sirada.birim || ''} kaldı</p>`),
-        when(!son && !sirada, () => K.Empty({ text:'Rozetler kayıt girdikçe '
+          ${tr(sirada.kalan)} ${sirada.birim || ''} ${yz('spi.rutbe.kaldi')}</p>`),
+        when(!son && !sirada, () => K.Empty({ text:yz('spi.rutbe.rozetler-kayit-girdikce')
           + 'kendiliğinden açılır; hiçbirini elle almana gerek yok.' })),
       ], 'sm'),
     });
@@ -420,15 +493,15 @@ SP.Screens.rutbe = (function(){
          Sekme değiştirmek bir KARAR DEĞİLDİR: hiçbir şey kaydedilmez,
          hiçbir şey önerilmez. XP'nin karar vermediği kuralı (AGENTS.md
          §1.6) burada kırılmıyor — ekranın kendi içinde bir bağlantı. */
-      return K.Card({ title:'Bugün',
+      return K.Card({ title:yz('spi.rutbe.bugun'),
         body:K.Empty({
-          text:'Bugün henüz XP yok. «XP nereden gelir» bölümü, hangi işin '
+          text:yz('spi.rutbe.bugun-henuz-xp-yok-xp')
              + 'ne kazandırdığını ve nerede yapıldığını söyler.',
-          action:K.Button({ label:'XP nereden gelir', size:'sm',
+          action:K.Button({ label:yz('spi.rutbe.xp-nereden-gelir'), size:'sm',
             act:'rutbe-tab', data:{ 'data-tab':'kazanc' } }) }) });
     }
     liste.sort((a, b) => b.kazanilan - a.kazanilan);
-    return K.Card({ title:'Bugün', sub:'İş başına kazanılan',
+    return K.Card({ title:yz('spi.rutbe.bugun'), sub:yz('spi.rutbe.i-s-basina-kazanilan'),
       body:K.Stack(liste.map(r => K.Meter({
         label:r.ad + (r.adet ? ' · ' + r.adet + ' ' + r.birim : ''),
         value:Math.round(r.oran * 100),
@@ -527,18 +600,18 @@ SP.Screens.rutbe = (function(){
       const kalan = Math.max(0, ilk.acilis - (d.toplam || 0));
       return html`
         <div class="rutbe-kunye rutbe-kunye--kilit">
-          <span class="rutbe-kunye__ust">Açılışa</span>
+          <span class="rutbe-kunye__ust">${yz('spi.rutbe.acilisa')}</span>
           <b class="rutbe-kunye__sayi">${sayi(kalan)}</b>
-          <span class="rutbe-kunye__alt">XP · açılış ${sayi(ilk.acilis)}</span>
+          <span class="rutbe-kunye__alt">${yz('spi.rutbe.xp-acilis')} ${sayi(ilk.acilis)}</span>
         </div>`;
     }
 
     if(hal === 'tamam'){
       return html`
         <div class="rutbe-kunye rutbe-kunye--tamam">
-          <span class="rutbe-kunye__ust">Tamamlandı</span>
+          <span class="rutbe-kunye__ust">${yz('spi.rutbe.tamamlandi')}</span>
           <b class="rutbe-kunye__sayi">${satir.length}</b>
-          <span class="rutbe-kunye__alt">basamak · ${sayi(son.esik)} XP'de bitti</span>
+          <span class="rutbe-kunye__alt">${yz('spi.rutbe.basamak-2')} ${sayi(son.esik)} XP'de bitti</span>
         </div>`;
     }
 
@@ -546,9 +619,9 @@ SP.Screens.rutbe = (function(){
     const yuzde = Math.round((d.oran || 0) * 100);
     return html`
       <div class="rutbe-kunye rutbe-kunye--simdi">
-        <span class="rutbe-kunye__ust">Bu basamakta</span>
+        <span class="rutbe-kunye__ust">${yz('spi.rutbe.bu-basamakta')}</span>
         <b class="rutbe-kunye__sayi">%${yuzde}</b>
-        <span class="rutbe-kunye__alt">${sayi(d.kalan)} XP sonra ${
+        <span class="rutbe-kunye__alt">${sayi(d.kalan)} ${yz('spi.rutbe.xp-sonra')} ${
           d.tamam ? 'en üst' : 'sıradaki basamak'}</span>
         <span class="rutbe-kunye__cubuk" aria-hidden="true"
           ><i style="${'width:' + yuzde + '%'}"></i></span>
@@ -625,23 +698,19 @@ SP.Screens.rutbe = (function(){
       /* Aynı gerekçe: `K.Grid` on iki sütunludur ve span'sız çocuk bir
          sütun kaplar (bkz. `simdiTab`). */
       html`<div class="rutbe-sayaclar">${[
-        K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
+        K.Stat({ label:yz('spi.rutbe.kazanilan'), value:d.kazanilanSayisi,
           unit:'/ ' + d.toplamRozet }),
-        K.Stat({ label:'Toplam saat', value:tr(d.saat), unit:'saat' }),
-        K.Stat({ label:'Toplam görev', value:tr(d.gorev), unit:'görev' }),
-        K.Stat({ label:'Kayıtlı gün', value:tr(d.gun), unit:'gün' }),
+        K.Stat({ label:yz('spi.rutbe.toplam-saat'), value:tr(d.saat), unit:'saat' }),
+        K.Stat({ label:yz('spi.rutbe.toplam-gorev'), value:tr(d.gorev), unit:'görev' }),
+        K.Stat({ label:yz('spi.rutbe.kayitli-gun'), value:tr(d.gun), unit:'gün' }),
       ]}</div>`,
       ...aileler.map(x => aileKart(x.a, x.satir)),
       muhurKart(),
-      K.Card({ title:'Rozet neyi söyler, neyi söylemez', body:html`
+      K.Card({ title:yz('spi.rutbe.rozet-neyi-soyler-neyi-soyle'), body:html`
         <ul class="rutbe-kural">
-          <li><b>Rozet hiçbir kararı vermez.</b> Ne plan, ne reçete, ne
-            uyarı ona bakar — XP gibi, yalnızca görünürlüktür.</li>
-          <li><b>Sayaç düşebilir, rozet düşmez.</b> Kaydı silersen saat
-            ve görev sayısı azalır; ama «şu gün ulaştın» cümlesi doğru
-            kalır, o yüzden kazanılmış rozet geri alınmaz.</li>
-          <li><b>Ölçülmemiş süre sayılmaz.</b> Süresi boş bırakılan bir
-            kayıt «sıfır dakika» değil, «veri yok»tur.</li>
+          <li><b>${yz('spi.rutbe.rozet-hicbir-karari-vermez')}</b> ${yz('spi.rutbe.ne-plan-ne-recete-ne')}</li>
+          <li><b>${yz('spi.rutbe.sayac-dusebilir-rozet-dusmez')}</b> ${yz('spi.rutbe.kaydi-silersen-saat-ve-gorev')}</li>
+          <li><b>${yz('spi.rutbe.olculmemis-sure-sayilmaz')}</b> ${yz('spi.rutbe.suresi-bos-birakilan-bir-kay')}</li>
         </ul>` }),
     ]), 'rutbe--rozetler');
   }
@@ -663,7 +732,7 @@ SP.Screens.rutbe = (function(){
        cevaplatıyordu; madalya orada dururken onu yazıyla tarif etmek
        gereksiz bir ara katman. Rengi alınmış hâlde durur — henüz
        kazanılmadı (bkz. `rozetHtml`, `.rozet-kilit`). */
-    return K.Card({ title:'Sıradaki', body:html`
+    return K.Card({ title:yz('spi.rutbe.siradaki-2'), body:html`
       <div class="rutbe-sirada">${map(liste, r => html`
         <div class="rutbe-sirada__sat">
           ${when(r.gorsel, () => html`<img class="rutbe-sirada__rozet rozet-kilit"
@@ -672,7 +741,7 @@ SP.Screens.rutbe = (function(){
           <span class="rutbe-sirada__ad">${r.kisaAd || r.ad}
             <span class="dim">· ${r.aileAd}</span></span>
           <span class="rutbe-sirada__kalan">${tr(r.kalan)}
-            ${r.birim || ''} kaldı</span>
+            ${r.birim || ''} ${yz('spi.rutbe.kaldi')}</span>
           <span class="rutbe-sirada__cubuk" aria-hidden="true"
             ><i style="${'width:' + Math.round(r.oran * 100) + '%'}"></i></span>
         </div>`)}
@@ -693,11 +762,9 @@ SP.Screens.rutbe = (function(){
     const benim = hepsi.filter(m => m.mod === MOD_ADI);
     if(!benim.length) return '';
     return K.Card({
-      title:'Bu sistemin mührü',
+      title:yz('spi.rutbe.bu-sistemin-muhru'),
       body:html`
-        <p class="small dim rutbe-rozet__ozet">Mühür kazanılmaz, basılır.
-          Eşiği, sayacı, tarihi yoktur: bir belgenin hangi alandan
-          geldiğini söyler.</p>
+        <p class="small dim rutbe-rozet__ozet">${yz('spi.rutbe.muhur-kazanilmaz-basilir-esi')}</p>
         <div class="rutbe-muhurler">${map(benim, m => html`
           <div class="rutbe-muhur">
             <img class="rutbe-muhur__gorsel" src="${'img/seviye/muhur-' + m.id + '.webp'}"
@@ -728,7 +795,7 @@ SP.Screens.rutbe = (function(){
         html`<p class="small dim rutbe-rozet__ozet">${a.ozet}${when(
           deger != null, () => html` · <b>${tr(deger)} ${a.birim || ''}</b>`)}${when(
           siradaki && typeof siradaki.esik === 'number',
-          () => html` · sıradaki ${tr(siradaki.esik)}`)}<span
+          () => html` ${yz('spi.rutbe.siradaki-3')} ${tr(siradaki.esik)}`)}<span
           class="rutbe-rozet__say">${kazanilan} / ${satir.length}</span></p>`,
         html`<div class="rutbe-rozetler">${map(satir,
           r => rozetHtml(r, siradaki && r.kod === siradaki.kod))}</div>`,
@@ -750,11 +817,11 @@ SP.Screens.rutbe = (function(){
 
     const sayi = n => (n == null ? '—' : tr(n));
     const durum = r.kazanildi
-      ? html`<b>Kazanıldı</b> · ${r.kazanildi}`
+      ? html`<b>${yz('spi.rutbe.kazanildi')}</b> · ${r.kazanildi}`
       : (r.deger == null
-          ? html`<b>Henüz kazanılmadı</b>`
-          : html`<b>${sayi(Math.max(0, r.esik - r.deger))} ${r.birim || ''} kaldı</b>
-              · şu an ${sayi(r.deger)} / ${sayi(r.esik)}`);
+          ? html`<b>${yz('spi.rutbe.henuz-kazanilmadi')}</b>`
+          : html`<b>${sayi(Math.max(0, r.esik - r.deger))} ${r.birim || ''} ${yz('spi.rutbe.kaldi')}</b>
+              ${yz('spi.rutbe.su-an-2')} ${sayi(r.deger)} / ${sayi(r.esik)}`);
 
     /* ROZETİN KENDİSİ DE PANELDE DURUR.
 
@@ -848,24 +915,19 @@ SP.Screens.rutbe = (function(){
 
     return K.Stack([
       K.Notice({ tone:'info',
-        title:'Bu bir fiyat listesidir, görev listesi değil.',
+        title:yz('spi.rutbe.bu-bir-fiyat-listesidir-gore'),
         body:'XP hiçbir kararı vermez: ne plan, ne uyarı, ne teşhis ona '
            + 'bakar. Aşağıdakiler yalnızca «hangi iş ne kazandırır» '
            + 'sorusunun cevabıdır.' }),
 
-      K.Card({ title:'İşler', sub:'Bugün toplam en çok ' + tavanToplam + ' XP',
+      K.Card({ title:yz('spi.rutbe.i-sler'), sub:yz('spi.rutbe.bugun-toplam-en-cok') + tavanToplam + ' XP',
         body:K.Stack(liste.map(r => isSatiri(r)), 'sm') }),
 
-      K.Card({ title:'Üç kural', body:html`
+      K.Card({ title:yz('spi.rutbe.uc-kural'), body:html`
         <ul class="rutbe-kural">
-          <li><b>Her işin günlük tavanı vardır.</b> Tavansız bir sayaç bir
-            gün otuz kez tıklanır ve anlamını kaybeder.</li>
-          <li><b>XP tetiklenmez, türetilir.</b> Bir düğmeye basarak puan
-            alınmaz; o günün verisinden sayılır. Kaydı silersen puan da
-            gider.</li>
-          <li><b>Geriye dönük puan toplanmaz.</b> Geleceğe hiç, geçmişe
-            en fazla bir hafta yazılır — dünkü kaydı bu sabah girmek
-            olağandır, geçen ayın gününe puan yazmak değildir.</li>
+          <li><b>${yz('spi.rutbe.her-isin-gunluk-tavani-vardi')}</b> ${yz('spi.rutbe.tavansiz-bir-sayac-bir-gun')}</li>
+          <li><b>${yz('spi.rutbe.xp-tetiklenmez-turetilir')}</b> ${yz('spi.rutbe.bir-dugmeye-basarak-puan-ali')}</li>
+          <li><b>${yz('spi.rutbe.geriye-donuk-puan-toplanmaz')}</b> ${yz('spi.rutbe.gelecege-hic-gecmise-en-fazl')}</li>
         </ul>` }),
     ]);
   }
@@ -886,15 +948,15 @@ SP.Screens.rutbe = (function(){
                bir kez yasandi. -->
           <span class="rutbe-is__ad"
             >${raw(window.LIFEOS.SIMGE_HTML('simge', r.simge, { boy:'sm' }))}${r.ad}</span>
-          <span class="rutbe-is__fiyat"><b>${r.xp}</b> XP / ${r.birim}</span>
+          <span class="rutbe-is__fiyat"><b>${r.xp}</b> ${yz('spi.rutbe.xp')} ${r.birim}</span>
         </div>
         ${when(r.nasil, () => html`<p class="rutbe-is__nasil">${r.nasil}</p>`)}
         <div class="rutbe-is__alt">
           ${when(r.nerede, () => html`
             <span class="rutbe-is__nerede">${r.nerede}</span>`)}
           <span class="rutbe-is__tavan">
-            bugün ${r.kazanilan} / ${r.tavan} XP${doldu ? ' · doldu' : ''}</span>
-          ${when(r.rota, () => K.Button({ label:'Git', size:'sm',
+            ${yz('spi.rutbe.bugun-2')} ${r.kazanilan} / ${r.tavan} ${yz('spi.rutbe.xp-2')}${doldu ? ' · doldu' : ''}</span>
+          ${when(r.rota, () => K.Button({ label:yz('spi.rutbe.git'), size:'sm',
             act:'rutbe-git', data:{ 'data-rota':r.rota } }))}
         </div>
         ${K.Bar({ value:Math.round(r.oran * 100), tone:doldu ? 'ok' : null })}
@@ -906,7 +968,7 @@ SP.Screens.rutbe = (function(){
   function defterTab(){
     const govde = XP().panelHtml ? XP().panelHtml() : '';
     if(!govde) return yok();
-    return K.Card({ title:'Defter', sub:'Bu XP hangi işten geldi',
+    return K.Card({ title:yz('spi.rutbe.defter'), sub:yz('spi.rutbe.bu-xp-hangi-isten-geldi'),
       body:raw(govde) });
   }
 
@@ -971,7 +1033,7 @@ SP.Screens.rutbe = (function(){
   }
 
   LIFEOS.PARCA.blok({ id:'rutbe.bolum-1', sayfa:'rutbe', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
-    return K.SayfaBolumleri({ act:'rutbe-tab', aria:'Rütbe bölümleri',
+    return K.SayfaBolumleri({ act:'rutbe-tab', aria:yz('spi.rutbe.rutbe-bolumleri'),
       bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) });
   } });
   async function render(){
@@ -1006,7 +1068,7 @@ SP.Screens.rutbe = (function(){
 
   return {
     id:'rutbe',
-    title:'Rütbe',
+    title:yz('spi.rutbe.rutbe'),
     subtitle(){
       const d = SP.XP && SP.XP.durum();
       if(!d || !d.kademeBilgi) return 'Kademe, merdiven ve XP kaynakları';

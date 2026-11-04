@@ -8,6 +8,127 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.analytics.karsilastirma':'Karşılaştırma',
+  'ays.analytics.hata-haritasi':'Hata haritası',
+  'ays.analytics.sira-gecmisi':'Sıra geçmişi',
+  'ays.analytics.hiz-ve-isabet':'Hız ve isabet',
+  'ays.analytics.konu-degeri':'Konu değeri',
+  'ays.analytics.aliskanlik':'Alışkanlık',
+  'ays.analytics.denetim':'Denetim',
+  'ays.analytics.durustluk':'Dürüstlük',
+  'ays.analytics.sira-ve-hiz':'Sıra ve hız',
+  'ays.analytics.aliskanlik-ve-denetim':'Alışkanlık ve denetim',
+  'ays.analytics.deneme-ekle':'Deneme ekle',
+  'ays.analytics.i-ki-denemeyi-yan-yana-koy':'İki denemeyi yan yana koy',
+  'ays.analytics.onceki':'Önceki',
+  'ays.analytics.sonraki':'Sonraki',
+  'ays.analytics.once':'Önce',
+  'ays.analytics.sonra':'Sonra',
+  'ays.analytics.fark':'Fark',
+  'ays.analytics.dogruluk':'Doğruluk',
+  'ays.analytics.bos':'Boş',
+  'ays.analytics.ders-ders-deneme':'Ders ders deneme',
+  'ays.analytics.son-net':'Son net',
+  'ays.analytics.gidis':'Gidiş',
+  'ays.analytics.birakilan':'Bırakılan',
+  'ays.analytics.dogru':'Doğru',
+  'ays.analytics.son-net-son-uc-denemenin':'Son net: son üç denemenin ortancası; gidiş: deneme başına net (Theil–Sen); bırakılan: soru sayısı − son net.',
+  'ays.analytics.bos-birakma':'Boş bırakma',
+  'ays.analytics.bos-birakma-stratejisi':'Boş bırakma stratejisi',
+  'ays.analytics.ort':'ort. ',
+  'ays.analytics.en-iyi-deneme':'En iyi deneme',
+  'ays.analytics.en-dusuk':'En düşük',
+  'ays.analytics.yayin-etkisi':'Yayın etkisi',
+  'ays.analytics.yayin-zorluk-farki':'Yayın zorluk farkı',
+  'ays.analytics.fark-2':'fark ',
+  'ays.analytics.deneme':'Deneme',
+  'ays.analytics.medyan':'Medyan',
+  'ays.analytics.sapma':'Sapma',
+  'ays.analytics.yanlis-defterine-git':'Yanlış defterine git',
+  'ays.analytics.konu-hata-tipi':'Konu × hata tipi',
+  'ays.analytics.toplam':'Toplam',
+  'ays.analytics.yapiskan-kartlar':'Yapışkan kartlar',
+  'ays.analytics.unutuldu':'× unutuldu',
+  'ays.analytics.bu-kartlari-yeniden-yaz-tek':'Bu kartları yeniden yaz: tek şey sorsun, cevabı tek cümle olsun.',
+  'ays.analytics.yapiskan-kart-yok-kartlarin':'Yapışkan kart yok. Kartların iyi yazılmış.',
+  'ays.analytics.tahmini-sira-zaman-icinde':'Tahmini sıra zaman içinde',
+  'ays.analytics.son-tahmin':'Son tahmin',
+  'ays.analytics.tahmini-puan':'Tahmini puan',
+  'ays.analytics.i-lk-tahmin':'İlk tahmin',
+  'ays.analytics.degisim':'Değişim',
+  'ays.analytics.bant-tablosu':'Bant tablosu',
+  'ays.analytics.puan':'Puan',
+  'ays.analytics.i-yimser-sira':'İyimser sıra',
+  'ays.analytics.kotumser-sira':'Kötümser sıra',
+  'ays.analytics.bu-bir-osym-hesabi-degildir':'Bu bir ÖSYM hesabı değildir.',
+  'ays.analytics.hiz-isabet-dengesi':'Hız–isabet dengesi',
+  'ays.analytics.hedef':'Hedef',
+  'ays.analytics.isinma':'Isınma',
+  'ays.analytics.i-lk-20-dk':'İlk 20 dk',
+  'ays.analytics.sonrasi':'Sonrası',
+  'ays.analytics.sureli-deneme-baslat':'Süreli deneme başlat',
+  'ays.analytics.sureli-oturumlar':'Süreli oturumlar',
+  'ays.analytics.henuz-sureli-deneme-oturumu':'Henüz süreli deneme oturumu yok. ',
+  'ays.analytics.isaret':'işaret',
+  'ays.analytics.konu-net-katkisi':'Konu net katkısı',
+  'ays.analytics.potansiyel':'Potansiyel',
+  'ays.analytics.kazanilan':'Kazanılan',
+  'ays.analytics.acik':'Açık',
+  'ays.analytics.veri-yok':'veri yok',
+  'ays.analytics.nasil-hesaplanir':'Nasıl hesaplanır?',
+  'ays.analytics.aradaki-fark-o-konuya-ayrila':'Aradaki fark, o konuya ayrılacak zamanın karşılığıdır.',
+  'ays.analytics.potansiyel-dersin-soru-sayis':'Potansiyel, dersin soru sayısı ile konunun frekans payından çıkar. Kazanılan, kapanış durumu ve gerçek çözüm doğruluğundan gelir.',
+  'ays.analytics.mansetteki-toplam-yalniz-en':'Manşetteki toplam yalnız en az bir kez çalışılmış konuları sayar; hiç çalışılmamış konunun boşluğu tahmindir ve toplama girmez.',
+  'ays.analytics.uyku-ve-net':'Uyku ve net',
+  'ays.analytics.yeterli-uyku':'Yeterli uyku',
+  'ays.analytics.yetersiz-uyku':'Yetersiz uyku',
+  'ays.analytics.unutma-egrisi':'Unutma eğrisi',
+  'ays.analytics.tekrar':'Tekrar',
+  'ays.analytics.hatirlama':'Hatırlama',
+  'ays.analytics.kapasite-gerceklik-kontrolu':'Kapasite gerçeklik kontrolü',
+  'ays.analytics.yazdigin':'Yazdığın',
+  'ays.analytics.calistigin':'Çalıştığın',
+  'ays.analytics.kapasiteyi-duzelt':'Kapasiteyi düzelt',
+  'ays.analytics.dikkat-dagilmasi':'Dikkat dağılması',
+  'ays.analytics.denetim-defteri':'Denetim defteri',
+  'ays.analytics.bu-sayfa-gerekli-mi':'Bu sayfa gerekli mi?',
+  'ays.analytics.acik-soru':'Açık soru',
+  'ays.analytics.sayi':'Sayı',
+  'ays.analytics.adet':'Adet',
+  'ays.analytics.ayrisma-kapandi':'Ayrışma kapandı',
+  'ays.analytics.surtunme':'Sürtünme',
+  'ays.analytics.yonetim':'Yönetim',
+  'ays.analytics.dk-gun':'dk/gün',
+  'ays.analytics.calisma':'Çalışma',
+  'ays.analytics.yonetim-payi':'Yönetim payı',
+  'ays.analytics.gosterge-ayrismasi':'Gösterge ayrışması',
+  'ays.analytics.yon-sutunu-sonucun-hangi-tar':'«Yön» sütunu sonucun hangi tarafa gitmesinin iyi sayıldığını söyler. Yönü tanımsız bir çift değerlendirilmez: sistem yüksek olanın iyi olduğunu VARSAYMAZ.',
+  'ays.analytics.pencere':'Pencere ',
+  'ays.analytics.asgari-caba-her-cift-icin':'Asgari çaba her çift için ayrıdır. Bu sayılar bir bulgu değil bu yazılımın ayarıdır:',
+  'ays.analytics.ayrisma-yok-nobetcinin-konus':'Ayrışma yok. Nöbetçinin konuşmadığı gün, iyi gündür.',
+  'ays.analytics.kalibrasyon':'Kalibrasyon',
+  'ays.analytics.tahmin-kor-yazilir-net-ekran':'Tahmin KÖR yazılır: net ekranda dururken yazılan tahmin, tahmin değil kopyadır.',
+  'ays.analytics.kendi-netini-onceden-kestire':'Kendi netini önceden kestirebilmek bir süs değil, sınav becerisidir: hangi testte zaman harcayacağını, hangi soruyu bırakacağını ve bir denemenin kötü mü yoksa zor mu olduğunu o kestirim söyler.',
+  'ays.analytics.defter-kendini-tanimayi-olcm':'Defter «kendini tanımayı» ölçmez: yalnızca kayıtlı türlerde kör tahminlerinin kayıtlı sayıya ne kadar yaklaştığını ölçer. Net ile dakika ayrı ailelerdir, tek ortalamada toplanmazlar.',
+  'ays.analytics.ne-tahmin-ediyorsun':'Ne tahmin ediyorsun?',
+  'ays.analytics.tahmin-turu':'Tahmin türü',
+  'ays.analytics.tahmini-kaydet':'Tahmini kaydet',
+  'ays.analytics.kapat':'Kapat',
+  'ays.analytics.tahmin':'Tahmin',
+  'ays.analytics.gercek':'Gerçek',
+  'ays.analytics.bakim-borcu':'Bakım borcu',
+  'ays.analytics.ac':'Aç',
+  'ays.analytics.veri-dolulugu':'Veri doluluğu',
+  'ays.analytics.ays':'AYS',
+  'ays.analytics.bu-haftanin-birikimi':'Bu haftanın birikimi',
+  'ays.analytics.haftalik-soru':'Haftalık soru',
+  'ays.analytics.calisma-saatlerin':'Çalışma saatlerin',
+  'ays.analytics.bitmis-bloklarin-basladigi-s':'Bitmiş blokların başladığı saatler; en çok ',
+  'ays.analytics.analiz-bolumleri':'Analiz bölümleri',
+  'ays.analytics.tahmin-deftere-yazildi':'Tahmin deftere yazıldı',
+  'ays.analytics.ayrintili-analiz':'Ayrıntılı analiz',
+});
 window.LIFEOS.PARCA.sayfa({ id:'analytics', modul:'ays', cekmece:'analiz', ad:'Ayrıntı', ikon:'search', sira:30 });
 
 R.Screens.analytics = (function(){
@@ -17,14 +138,14 @@ R.Screens.analytics = (function(){
   const K = R.C;
 
   const TABS = [
-    { id:'compare', label:'Karşılaştırma' },
-    { id:'errors',  label:'Hata haritası' },
-    { id:'rank',    label:'Sıra geçmişi' },
-    { id:'speed',   label:'Hız ve isabet' },
-    { id:'value',   label:'Konu değeri' },
-    { id:'habits',  label:'Alışkanlık' },
-    { id:'denetim', label:'Denetim' },
-    { id:'durust',  label:'Dürüstlük' },
+    { id:'compare', label:yz('ays.analytics.karsilastirma') },
+    { id:'errors',  label:yz('ays.analytics.hata-haritasi') },
+    { id:'rank',    label:yz('ays.analytics.sira-gecmisi') },
+    { id:'speed',   label:yz('ays.analytics.hiz-ve-isabet') },
+    { id:'value',   label:yz('ays.analytics.konu-degeri') },
+    { id:'habits',  label:yz('ays.analytics.aliskanlik') },
+    { id:'denetim', label:yz('ays.analytics.denetim') },
+    { id:'durust',  label:yz('ays.analytics.durustluk') },
   ];
 
   /* Sade sekme (2026-10-16, «AYS'de çok şey iç içe, göz kalabalığı»):
@@ -33,11 +154,11 @@ R.Screens.analytics = (function(){
      okuma kalkmadı; başka ekrandan eski kimlikle gelen (örn. 'speed')
      içinde bulunduğu sekmeye açılır. */
   const GRUPLAR = [
-    { id:'compare', label:'Karşılaştırma', ic:['compare'] },
-    { id:'errors',  label:'Hata haritası', ic:['errors'] },
-    { id:'rank',    label:'Sıra ve hız', ic:['rank', 'speed'] },
-    { id:'value',   label:'Konu değeri', ic:['value'] },
-    { id:'habits',  label:'Alışkanlık ve denetim', ic:['habits', 'denetim', 'durust'] },
+    { id:'compare', label:yz('ays.analytics.karsilastirma'), ic:['compare'] },
+    { id:'errors',  label:yz('ays.analytics.hata-haritasi'), ic:['errors'] },
+    { id:'rank',    label:yz('ays.analytics.sira-ve-hiz'), ic:['rank', 'speed'] },
+    { id:'value',   label:yz('ays.analytics.konu-degeri'), ic:['value'] },
+    { id:'habits',  label:yz('ays.analytics.aliskanlik-ve-denetim'), ic:['habits', 'denetim', 'durust'] },
   ];
   const grupOf = id => GRUPLAR.find(g => g.ic.indexOf(id) >= 0) || null;
 
@@ -47,7 +168,7 @@ R.Screens.analytics = (function(){
   /* Bölümler alt alta durduğu için boş durumların eylemi dolu değildir:
      sekiz dolu «Deneme ekle» düğmesi, ekranın tek ana eylemini boğardı
      (sadelik bütçesi: dolu düğme en çok 1). */
-  const addExam = K.Button({ label:'Deneme ekle', size:'sm',
+  const addExam = K.Button({ label:yz('ays.analytics.deneme-ekle'), size:'sm',
     act:'go', data:{ 'data-route':'exams' } });
 
   /* ---------- karşılaştırma ---------- */
@@ -63,10 +184,10 @@ R.Screens.analytics = (function(){
 
     return K.Grid([
       K.Span(8, K.Stack([
-        K.Card({ hint:'not-iki-denemeyi-yan-yana-koy', title:'İki denemeyi yan yana koy',           body:html`
+        K.Card({ hint:'not-iki-denemeyi-yan-yana-koy', title:yz('ays.analytics.i-ki-denemeyi-yan-yana-koy'),           body:html`
             ${K.Cols(2, [
-              K.Field({ label:'Önceki', input:K.Select({ options:opts, value:a, change:'cmp-a' }) }),
-              K.Field({ label:'Sonraki', input:K.Select({ options:opts, value:b, change:'cmp-b' }) }),
+              K.Field({ label:yz('ays.analytics.onceki'), input:K.Select({ options:opts, value:a, change:'cmp-a' }) }),
+              K.Field({ label:yz('ays.analytics.sonraki'), input:K.Select({ options:opts, value:b, change:'cmp-b' }) }),
             ])}` }),
 
         when(cmp, () => K.Card({
@@ -76,8 +197,8 @@ R.Screens.analytics = (function(){
             tone:cmp.delta > 0 ? 'ok' : cmp.delta < 0 ? 'danger' : 'muted' }),
           body:html`
             ${K.Table({ tight:true,
-              headers:['Test', { label:'Önce', num:true }, { label:'Sonra', num:true },
-                { label:'Fark', num:true }, { label:'Doğruluk', num:true }, { label:'Boş', num:true }],
+              headers:['Test', { label:yz('ays.analytics.once'), num:true }, { label:yz('ays.analytics.sonra'), num:true },
+                { label:yz('ays.analytics.fark'), num:true }, { label:yz('ays.analytics.dogruluk'), num:true }, { label:yz('ays.analytics.bos'), num:true }],
               rows:cmp.rows.map(r => [
                 r.name,
                 html`<span class="num">${r.netA == null ? '—' : U.fmtNet(r.netA)}</span>`,
@@ -97,15 +218,15 @@ R.Screens.analytics = (function(){
   /* Ders ders deneme (core/analytics.js dersAnalizi, Kişi planı Faz 7). */
   function dersCard(){
     const d = A().dersAnalizi('TYT');
-    if(!d.ok) return K.Card({ title:'Ders ders deneme', body:K.Notice({ tone:'info', body:d.why }) });
+    if(!d.ok) return K.Card({ title:yz('ays.analytics.ders-ders-deneme'), body:K.Notice({ tone:'info', body:d.why }) });
     const ok = e => e == null ? html`<span class="num dim">—</span>`
       : html`<span class="${e >= 0.5 ? 'num is-up' : e <= -0.5 ? 'num is-down' : 'num dim'}">${(e > 0 ? '+' : '') + U.fmtNet(e)}</span>`;
     return K.Card({
-      title:'Ders ders deneme', sub:d.deneme + ' tam TYT denemesinden',
+      title:yz('ays.analytics.ders-ders-deneme'), sub:d.deneme + ' tam TYT denemesinden',
       body:html`
         ${K.Table({ tight:true,
-          headers:['Test', { label:'Son net', num:true }, { label:'Gidiş', num:true }, { label:'Bırakılan', num:true },
-            { label:'Doğru', num:true }, { label:'Boş', num:true }],
+          headers:['Test', { label:yz('ays.analytics.son-net'), num:true }, { label:yz('ays.analytics.gidis'), num:true }, { label:yz('ays.analytics.birakilan'), num:true },
+            { label:yz('ays.analytics.dogru'), num:true }, { label:yz('ays.analytics.bos'), num:true }],
           rows:d.rows.map(r => [
             r.test + (r.az ? ' · az veri' : ''),
             html`<span class="num">${U.fmtNet(r.sonMedyan)}</span>`,
@@ -114,19 +235,19 @@ R.Screens.analytics = (function(){
             html`<span class="num dim">${r.dogruOrani == null ? '—' : '%' + r.dogruOrani}</span>`,
             html`<span class="num dim">${r.bosOrani == null ? '—' : '%' + r.bosOrani}</span>`,
           ]) })}
-        <p class="tiny dim mt-8">${d.note} Son net: son üç denemenin ortancası; gidiş: deneme başına net (Theil–Sen); bırakılan: soru sayısı − son net.</p>`,
+        <p class="tiny dim mt-8">${d.note} ${yz('ays.analytics.son-net-son-uc-denemenin')}</p>`,
     });
   }
 
   function blankCard(){
     const b = A().blankStrategy('TYT');
-    if(!b.ok) return K.Card({ title:'Boş bırakma', body:K.Notice({ tone:'info', body:b.why }) });
+    if(!b.ok) return K.Card({ title:yz('ays.analytics.bos-birakma'), body:K.Notice({ tone:'info', body:b.why }) });
     return K.Card({
-      hint:'not-bos-birakma-stratejisi', title:'Boş bırakma stratejisi',       badge:K.Badge({ label:'ort. '+b.avgBlank+' boş', tone:'muted' }),
+      hint:'not-bos-birakma-stratejisi', title:yz('ays.analytics.bos-birakma-stratejisi'),       badge:K.Badge({ label:yz('ays.analytics.ort')+b.avgBlank+' boş', tone:'muted' }),
       body:html`
         ${K.Cols(2, [
-          K.Stat({ label:'En iyi deneme', value:U.fmtNet(b.best.net), note:b.best.blank+' boş' }),
-          K.Stat({ label:'En düşük', value:U.fmtNet(b.worst.net), note:b.worst.blank+' boş' }),
+          K.Stat({ label:yz('ays.analytics.en-iyi-deneme'), value:U.fmtNet(b.best.net), note:b.best.blank+' boş' }),
+          K.Stat({ label:yz('ays.analytics.en-dusuk'), value:U.fmtNet(b.worst.net), note:b.worst.blank+' boş' }),
         ])}
         <div class="mt-12">${K.Notice({ tone:b.dir === 'same' || b.dir === 'az-veri' ? 'info' : 'ok', body:b.note })}</div>
         <p class="tiny dim mt-8">${b.kapsam}</p>`,
@@ -135,12 +256,12 @@ R.Screens.analytics = (function(){
 
   function publisherCard(){
     const p = A().publisherAdjust('TYT');
-    if(!p.ok) return K.Card({ title:'Yayın etkisi', body:K.Notice({ tone:'info', body:p.why }) });
+    if(!p.ok) return K.Card({ title:yz('ays.analytics.yayin-etkisi'), body:K.Notice({ tone:'info', body:p.why }) });
     return K.Card({
-      hint:'not-yayin-zorluk-farki', title:'Yayın zorluk farkı',       badge:K.Badge({ label:'fark '+U.fmtNet(p.spread), tone:p.spread >= 6 ? 'warn' : 'muted' }),
+      hint:'not-yayin-zorluk-farki', title:yz('ays.analytics.yayin-zorluk-farki'),       badge:K.Badge({ label:yz('ays.analytics.fark-2')+U.fmtNet(p.spread), tone:p.spread >= 6 ? 'warn' : 'muted' }),
       body:html`
-        ${K.Table({ tight:true, headers:['Yayın', { label:'Deneme', num:true },
-          { label:'Medyan', num:true }, { label:'Sapma', num:true }],
+        ${K.Table({ tight:true, headers:['Yayın', { label:yz('ays.analytics.deneme'), num:true },
+          { label:yz('ays.analytics.medyan'), num:true }, { label:yz('ays.analytics.sapma'), num:true }],
           rows:p.rows.map(r => [r.publisher, r.count,
             html`<span class="num">${U.fmtNet(r.median)}</span>`,
             html`<span class="${r.offset > 0 ? 'num is-up' : r.offset < 0 ? 'num is-down' : 'num dim'}">${
@@ -154,7 +275,7 @@ R.Screens.analytics = (function(){
   function errorsTab(){
     const h = A().errorHeatmap(14);
     if(!h.rows.length) return empty('Yanlış defterine kayıt girildikçe konu × hata haritası burada oluşur.',
-      K.Button({ label:'Yanlış defterine git', size:'sm', tone:'primary', act:'go', data:{ 'data-route':'cards' } }));
+      K.Button({ label:yz('ays.analytics.yanlis-defterine-git'), size:'sm', tone:'primary', act:'go', data:{ 'data-route':'cards' } }));
 
     const cell = (v) => {
       if(!v) return html`<span class="heat heat--0">·</span>`;
@@ -164,10 +285,10 @@ R.Screens.analytics = (function(){
 
     return K.Grid([
       K.Span(8, K.Card({
-        hint:'not-konu-hata-tipi', title:'Konu × hata tipi',         body:html`
+        hint:'not-konu-hata-tipi', title:yz('ays.analytics.konu-hata-tipi'),         body:html`
           ${K.Table({ tight:true,
             headers:['Konu'].concat(h.tags.map(t => ({ label:t, num:true })))
-              .concat([{ label:'Toplam', num:true }]),
+              .concat([{ label:yz('ays.analytics.toplam'), num:true }]),
             rows:h.rows.map(r => [
               html`<span class="small">${r.topic}</span>`,
             ].concat(h.tags.map(t => cell(r.cells[t])))
@@ -183,15 +304,15 @@ R.Screens.analytics = (function(){
   function leechCard(){
     const rows = A().leechCards(4);
     return K.Card({
-      hint:'not-yapiskan-kartlar', title:'Yapışkan kartlar',       badge:rows.length ? K.Badge({ label:String(rows.length), tone:'warn' }) : null,
+      hint:'not-yapiskan-kartlar', title:yz('ays.analytics.yapiskan-kartlar'),       badge:rows.length ? K.Badge({ label:String(rows.length), tone:'warn' }) : null,
       body:rows.length
         ? html`<div class="stack-xs">${map(rows.slice(0, 8), c => html`
             <div class="row between">
               <span class="small truncate">${c.front}</span>
-              <span class="tiny dim num">${c.forgot}× unutuldu</span>
+              <span class="tiny dim num">${c.forgot}${yz('ays.analytics.unutuldu')}</span>
             </div>`)}</div>
-          <p class="tiny dim mt-10">Bu kartları yeniden yaz: tek şey sorsun, cevabı tek cümle olsun.</p>`
-        : K.Empty({ icon:'cards', text:'Yapışkan kart yok. Kartların iyi yazılmış.' }),
+          <p class="tiny dim mt-10">${yz('ays.analytics.bu-kartlari-yeniden-yaz-tek')}</p>`
+        : K.Empty({ icon:'cards', text:yz('ays.analytics.yapiskan-kart-yok-kartlarin') }),
     });
   }
 
@@ -211,32 +332,32 @@ R.Screens.analytics = (function(){
     return K.Grid([
       K.Span(8, K.Stack([
         K.Card({
-          title:'Tahmini sıra zaman içinde', hint:'estimate',
+          title:yz('ays.analytics.tahmini-sira-zaman-icinde'), hint:'estimate',
           badge:raw(UI.provenance('estimate')),
           body:html`
             ${when((window.LIFEOS || {}).GRAFIK, () => {
               const G = window.LIFEOS.GRAFIK;
               const netler = C.fullExams('TYT').map(M.examNet);
               return html`<div class="sira-bas">
-                ${raw(G.aralikHtml({ etiket:'Son tahmin', alt:last.rankBest, ust:last.rankWorst, olasi:last.rank,
+                ${raw(G.aralikHtml({ etiket:yz('ays.analytics.son-tahmin'), alt:last.rankBest, ust:last.rankWorst, olasi:last.rank,
                   min:1, max:Math.round(Math.max(first.rankWorst || 0, last.rankWorst || 0, target) * 1.15), ters:true,
                   dayanak:hist.length + 2, dayanakBirim:'tam deneme' }))}
                 ${raw(G.egilimHtml(netler, { yon:'artis-iyi', birim:'net' }))}</div>
-                ${raw(G.cumleHtml(series.map(v => ({ deger:v })), { etiket:'Tahmini puan', gunMetni:'son ' + series.length + ' tahminde', birim:'puan' }))}`;
+                ${raw(G.cumleHtml(series.map(v => ({ deger:v })), { etiket:yz('ays.analytics.tahmini-puan'), gunMetni:'son ' + series.length + ' tahminde', birim:'puan' }))}`;
             })}
             ${raw(UI.lineChart([{ data:series }], { labels, height:210 }))}
             ${K.Cols(3, [
-              K.Stat({ label:'İlk tahmin', value:U.fmtNum(first.rank), note:U.fmtShort(first.date) }),
-              K.Stat({ label:'Son tahmin', value:U.fmtNum(last.rank), note:U.fmtShort(last.date),
+              K.Stat({ label:yz('ays.analytics.i-lk-tahmin'), value:U.fmtNum(first.rank), note:U.fmtShort(first.date) }),
+              K.Stat({ label:yz('ays.analytics.son-tahmin'), value:U.fmtNum(last.rank), note:U.fmtShort(last.date),
                 tone:last.rank <= target ? 'ok' : null }),
-              K.Stat({ label:'Değişim', value:(moved > 0 ? '−' : '+')+U.fmtNum(Math.abs(moved)),
+              K.Stat({ label:yz('ays.analytics.degisim'), value:(moved > 0 ? '−' : '+')+U.fmtNum(Math.abs(moved)),
                 note:moved > 0 ? 'sıra iyileşti' : 'sıra geriledi',
                 tone:moved > 0 ? 'ok' : moved < 0 ? 'warn' : null }),
             ])}` }),
 
-        K.Card({ hint:'not-bant-tablosu', title:'Bant tablosu',           body:K.Table({ tight:true,
-            headers:['Tarih', { label:'Puan', num:true }, { label:'İyimser sıra', num:true },
-              { label:'Kötümser sıra', num:true }],
+        K.Card({ hint:'not-bant-tablosu', title:yz('ays.analytics.bant-tablosu'),           body:K.Table({ tight:true,
+            headers:['Tarih', { label:yz('ays.analytics.puan'), num:true }, { label:yz('ays.analytics.i-yimser-sira'), num:true },
+              { label:yz('ays.analytics.kotumser-sira'), num:true }],
             rows:hist.slice().reverse().map(h => [
               U.fmtShort(h.date),
               (window.LIFEOS || {}).GRAFIK
@@ -247,7 +368,7 @@ R.Screens.analytics = (function(){
             ]) }) }),
       ])),
       K.Span(4, K.Stack([
-        K.Notice({ tone:'warn', title:'Bu bir ÖSYM hesabı değildir.',
+        K.Notice({ tone:'warn', title:yz('ays.analytics.bu-bir-osym-hesabi-degildir'),
           body:'Puan standart sapmaya göre normalize edilir ve aday dağılımı her yıl değişir. '
              + 'Buradaki aralık son yılların sonuçlarından çıkarılmış koçluk bandıdır.' }),
         raw(UI.rail(['rank', 'tiers', 'certainty'])),
@@ -264,9 +385,9 @@ R.Screens.analytics = (function(){
     return K.Grid([
       K.Span(7, K.Stack([
         sp.ok
-          ? K.Card({ hint:'not-hiz-isabet-dengesi', title:'Hız–isabet dengesi',               body:html`
-                ${K.Table({ tight:true, headers:['Test', { label:'sn/soru', num:true }, { label:'Hedef', num:true },
-                  { label:'Doğruluk', num:true }, 'Profil'],
+          ? K.Card({ hint:'not-hiz-isabet-dengesi', title:yz('ays.analytics.hiz-isabet-dengesi'),               body:html`
+                ${K.Table({ tight:true, headers:['Test', { label:'sn/soru', num:true }, { label:yz('ays.analytics.hedef'), num:true },
+                  { label:yz('ays.analytics.dogruluk'), num:true }, 'Profil'],
                   rows:sp.rows.map(r => [
                     r.test,
                     html`<span class="num">${r.secPerQ}</span>`,
@@ -281,15 +402,15 @@ R.Screens.analytics = (function(){
                   <div class="small muted"><b>${r.test}:</b> ${r.note}</div>`)}</div>` })
           : empty(sp.why, addExam),
 
-        K.Card({ title:'Isınma', hint:'quiz',           body:w.ok
+        K.Card({ title:yz('ays.analytics.isinma'), hint:'quiz',           body:w.ok
             ? html`${K.Cols(3, [
-                K.Stat({ label:'İlk 20 dk', value:'%'+w.early }),
-                K.Stat({ label:'Sonrası', value:'%'+w.late }),
-                K.Stat({ label:'Fark', value:(w.diff > 0 ? '+' : '')+w.diff, tone:w.diff >= 15 ? 'warn' : 'ok' }),
+                K.Stat({ label:yz('ays.analytics.i-lk-20-dk'), value:'%'+w.early }),
+                K.Stat({ label:yz('ays.analytics.sonrasi'), value:'%'+w.late }),
+                K.Stat({ label:yz('ays.analytics.fark'), value:(w.diff > 0 ? '+' : '')+w.diff, tone:w.diff >= 15 ? 'warn' : 'ok' }),
               ])}
               <div class="mt-12">${K.Notice({ tone:w.diff >= 15 ? 'warn' : 'ok', body:w.note })}</div>`
             : K.Empty({ icon:'clock', text:w.why,
-                action:K.Button({ label:'Süreli deneme başlat', size:'sm',
+                action:K.Button({ label:yz('ays.analytics.sureli-deneme-baslat'), size:'sm',
                   act:'go', data:{ 'data-route':'exams' } }) }) }),
       ])),
       K.Span(5, K.Stack([sessionsCard(), raw(UI.rail(['time-drift', 'net']))])),
@@ -299,17 +420,17 @@ R.Screens.analytics = (function(){
   function sessionsCard(){
     const list = S.sessions.filter(s => s.status === 'done');
     if(!list.length){
-      return K.Card({ title:'Süreli oturumlar',
-        body:K.Empty({ icon:'clock', text:'Henüz süreli deneme oturumu yok. '
+      return K.Card({ title:yz('ays.analytics.sureli-oturumlar'),
+        body:K.Empty({ icon:'clock', text:yz('ays.analytics.henuz-sureli-deneme-oturumu')
           + 'Deneme ekranından “Süreli oturum” ile başlatabilirsin.' }) });
     }
     return K.Card({
-      title:'Süreli oturumlar', sub:list.length+' prova',
+      title:yz('ays.analytics.sureli-oturumlar'), sub:list.length+' prova',
       body:html`<div class="stack-sm">${map(list.slice(0, 6), s => html`
         <div class="row between">
           <div class="minw0">
             <b class="small">${U.fmtShort(s.date)}</b>
-            <div class="tiny dim">${U.fmtClock(s.totalSeconds)} · ${s.marks ? s.marks.length : 0} işaret</div>
+            <div class="tiny dim">${U.fmtClock(s.totalSeconds)} · ${s.marks ? s.marks.length : 0} ${yz('ays.analytics.isaret')}</div>
           </div>
           ${K.Badge({ label:(s.overtime > 0 ? '+' : '')+Math.round(s.overtime/60)+' dk',
             tone:s.overtime > 300 ? 'danger' : s.overtime > 0 ? 'warn' : 'ok' })}
@@ -331,28 +452,26 @@ R.Screens.analytics = (function(){
     const totalGap = U.round(U.sum(dokunulmus.map(r => r.gap)), 1);
     return K.Grid([
       K.Span(8, K.Card({
-        hint:'not-konu-net-katkisi', title:'Konu net katkısı',         badge:K.Badge({ label:'~'+U.fmtNet(totalGap)+' net açık'
+        hint:'not-konu-net-katkisi', title:yz('ays.analytics.konu-net-katkisi'),         badge:K.Badge({ label:'~'+U.fmtNet(totalGap)+' net açık'
           + (dokunulmamis ? ' · ' + dokunulmamis + ' konu hiç çalışılmadı' : ''),
           tone:'warn' }),
         body:html`
           ${K.Table({ tight:true,
-            headers:['Konu', 'Ders', { label:'Potansiyel', num:true },
-              { label:'Kazanılan', num:true }, { label:'Açık', num:true }],
+            headers:['Konu', 'Ders', { label:yz('ays.analytics.potansiyel'), num:true },
+              { label:yz('ays.analytics.kazanilan'), num:true }, { label:yz('ays.analytics.acik'), num:true }],
             rows:rows.map(r => [
               html`<span class="small">${r.topicName}</span>`,
               html`<span class="tiny dim">${r.subjectName}</span>`,
               html`<span class="num dim">${U.fmtNet(r.potential)}</span>`,
               r.cert === 'missing'
-                ? html`<span class="num dim tiny">veri yok</span>`
+                ? html`<span class="num dim tiny">${yz('ays.analytics.veri-yok')}</span>`
                 : html`<span class="num">${U.fmtNet(r.earned)}</span>`,
               html`<b class="num ${r.gap > 1 ? 'is-down' : ''}">${U.fmtNet(r.gap)}</b>`,
             ]) })}
-          <div class="mt-12">${K.Ayrinti({ etiket:'Nasıl hesaplanır?',
-            ozet:'Aradaki fark, o konuya ayrılacak zamanın karşılığıdır.',
-            govde:html`<p>Potansiyel, dersin soru sayısı ile konunun frekans payından çıkar.
-              Kazanılan, kapanış durumu ve gerçek çözüm doğruluğundan gelir.</p>
-              <p>Manşetteki toplam yalnız en az bir kez çalışılmış konuları sayar; hiç
-              çalışılmamış konunun boşluğu tahmindir ve toplama girmez.</p>` })}</div>`,
+          <div class="mt-12">${K.Ayrinti({ etiket:yz('ays.analytics.nasil-hesaplanir'),
+            ozet:yz('ays.analytics.aradaki-fark-o-konuya-ayrila'),
+            govde:html`<p>${yz('ays.analytics.potansiyel-dersin-soru-sayis')}</p>
+              <p>${yz('ays.analytics.mansetteki-toplam-yalniz-en')}</p>` })}</div>`,
       })),
       K.Span(4, raw(UI.rail(['closure', 'risk', 'second-check']))),
     ]);
@@ -368,19 +487,19 @@ R.Screens.analytics = (function(){
 
     return K.Grid([
       K.Span(6, K.Stack([
-        K.Card({ title:'Uyku ve net', hint:'sleep',           body:sleep.ok
+        K.Card({ title:yz('ays.analytics.uyku-ve-net'), hint:'sleep',           body:sleep.ok
             ? html`${K.Cols(3, [
-                K.Stat({ label:'Yeterli uyku', value:U.fmtNet(sleep.goodMedian), note:sleep.goodCount+' deneme' }),
-                K.Stat({ label:'Yetersiz uyku', value:U.fmtNet(sleep.badMedian), note:sleep.badCount+' deneme' }),
-                K.Stat({ label:'Fark', value:(sleep.diff > 0 ? '+' : '')+U.fmtNet(sleep.diff),
+                K.Stat({ label:yz('ays.analytics.yeterli-uyku'), value:U.fmtNet(sleep.goodMedian), note:sleep.goodCount+' deneme' }),
+                K.Stat({ label:yz('ays.analytics.yetersiz-uyku'), value:U.fmtNet(sleep.badMedian), note:sleep.badCount+' deneme' }),
+                K.Stat({ label:yz('ays.analytics.fark'), value:(sleep.diff > 0 ? '+' : '')+U.fmtNet(sleep.diff),
                   tone:sleep.diff >= 2 ? 'ok' : null }),
               ])}
               <div class="mt-12">${K.Notice({ tone:'info', body:sleep.note })}</div>`
             : K.Empty({ icon:'moon', text:sleep.why }) }),
 
-        K.Card({ title:'Unutma eğrisi', hint:'srs',           body:curve.ok
+        K.Card({ title:yz('ays.analytics.unutma-egrisi'), hint:'srs',           body:curve.ok
             ? html`
-              ${K.Table({ tight:true, headers:['Aralık', { label:'Tekrar', num:true }, { label:'Hatırlama', num:true }],
+              ${K.Table({ tight:true, headers:['Aralık', { label:yz('ays.analytics.tekrar'), num:true }, { label:yz('ays.analytics.hatirlama'), num:true }],
                 rows:curve.rows.map(r => [r.gap, r.total,
                   html`<span class="${r.rate >= 70 ? 'num' : 'num is-down'}">%${r.rate}</span>`]) })}
               <p class="tiny dim mt-10">${curve.note}</p>`
@@ -388,20 +507,20 @@ R.Screens.analytics = (function(){
       ])),
 
       K.Span(6, K.Stack([
-        K.Card({ hint:'not-kapasite-gerceklik-kontrolu', title:'Kapasite gerçeklik kontrolü',           badge:cap.ok ? K.Badge({ label:'%'+cap.ratio,
+        K.Card({ hint:'not-kapasite-gerceklik-kontrolu', title:yz('ays.analytics.kapasite-gerceklik-kontrolu'),           badge:cap.ok ? K.Badge({ label:'%'+cap.ratio,
             tone:cap.status === 'gercekci' ? 'ok' : cap.status === 'iyimser' ? 'warn' : 'danger' }) : null,
           body:cap.ok
             ? html`${K.Cols(2, [
-                K.Stat({ label:'Yazdığın', value:cap.claimed, unit:' sa' }),
-                K.Stat({ label:'Çalıştığın', value:cap.actualAvg, unit:' sa',
+                K.Stat({ label:yz('ays.analytics.yazdigin'), value:cap.claimed, unit:' sa' }),
+                K.Stat({ label:yz('ays.analytics.calistigin'), value:cap.actualAvg, unit:' sa',
                   tone:cap.ratio >= 85 ? 'ok' : 'warn' }),
               ])}
               <div class="mt-12">${K.Notice({ tone:cap.status === 'gercekci' ? 'ok' : 'warn', body:cap.note })}</div>
-              ${when(cap.status !== 'gercekci', () => K.Button({ label:'Kapasiteyi düzelt', size:'sm',
+              ${when(cap.status !== 'gercekci', () => K.Button({ label:yz('ays.analytics.kapasiteyi-duzelt'), size:'sm',
                 class:'mt-10', act:'setup-open' }))}`
             : K.Empty({ icon:'clock', text:cap.why }) }),
 
-        K.Card({ hint:'not-dikkat-dagilmasi', title:'Dikkat dağılması',           body:dist.ok
+        K.Card({ hint:'not-dikkat-dagilmasi', title:yz('ays.analytics.dikkat-dagilmasi'),           body:dist.ok
             ? html`${raw(UI.barChart(dist.rows.map(r => ({ label:U.fmtShort(r.date).split(' ')[0], value:r.count })),
                 { goodAt:0 }))}
               <div class="mt-12">${K.Notice({ tone:dist.avg >= 5 ? 'warn' : 'info', body:dist.note })}</div>
@@ -442,15 +561,15 @@ R.Screens.analytics = (function(){
     const acik = R.Signals.current();
     const kapali = R.Signals.closed().slice(-8).reverse();
 
-    return K.Card({ title:'Denetim defteri', hint:'signal',
+    return K.Card({ title:yz('ays.analytics.denetim-defteri'), hint:'signal',
       sub:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
       body:html`
         ${K.Notice({ tone:h.level === 'used' ? 'ok' : h.level === 'unknown' ? 'info' : 'warn',
-          title:'Bu sayfa gerekli mi?', body:h.text })}
+          title:yz('ays.analytics.bu-sayfa-gerekli-mi'), body:h.text })}
         ${when(acik, () => html`<div class="mt-8">${K.Notice({ tone:'info',
-          title:'Açık soru', body:acik.question + ' (Bugün ekranında cevaplanabilir.)' })}</div>`)}
+          title:yz('ays.analytics.acik-soru'), body:acik.question + ' (Bugün ekranında cevaplanabilir.)' })}</div>`)}
         <div class="mt-12">${K.Table({ tight:true,
-          headers:['Zincir', { label:'Sayı', num:true }], rows:[
+          headers:['Zincir', { label:yz('ays.analytics.sayi'), num:true }], rows:[
             ['Açılan sinyal', String(e.opened)],
             ['Görüldü', String(e.seen)],
             ['Cevaplandı', String(e.answered)],
@@ -458,7 +577,7 @@ R.Screens.analytics = (function(){
             ['Kapandı', String(e.closed)],
           ] })}</div>
         ${when(e.cert === 'observed', () => html`<div class="mt-12">${K.Table({ tight:true,
-          headers:['Kapanan sinyal', { label:'Adet', num:true }, { label:'Ayrışma kapandı', num:true }],
+          headers:['Kapanan sinyal', { label:yz('ays.analytics.adet'), num:true }, { label:yz('ays.analytics.ayrisma-kapandi'), num:true }],
           rows:[
             ['Cevaplananlar', String(e.answeredClosed),
               e.answeredRate == null ? '—' : '%' + e.answeredRate],
@@ -487,16 +606,16 @@ R.Screens.analytics = (function(){
     return K.Grid([
       K.Span(12, SignalLedger()),
       K.Span(6, K.Stack([
-        K.Card({ title:'Sürtünme', hint:'friction',
+        K.Card({ title:yz('ays.analytics.surtunme'), hint:'friction',
           body:html`
             ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info', body:f.title + ' — ' + f.note })}
             ${when(f.cert === 'measured' || f.cert === 'estimated', () => html`
               <div class="mt-12">${K.Cols(3, [
-                K.Stat({ label:'Yönetim', value:String(f.window.perDay), note:'dk/gün' }),
-                K.Stat({ label:'Çalışma',
+                K.Stat({ label:yz('ays.analytics.yonetim'), value:String(f.window.perDay), note:yz('ays.analytics.dk-gun') }),
+                K.Stat({ label:yz('ays.analytics.calisma'),
                   value:String(Math.round(f.window.work / Math.max(1, f.window.measuredDays))),
                   note:f.cert === 'estimated' ? 'dk/gün · tahmin' : 'dk/gün' }),
-                K.Stat({ label:'Yönetim payı',
+                K.Stat({ label:yz('ays.analytics.yonetim-payi'),
                   value:f.window.ratio == null ? '—' : '%' + Math.round(f.window.ratio * 100),
                   tone:f.level === 'high' ? 'warn' : null }),
               ])}</div>`)}
@@ -505,7 +624,7 @@ R.Screens.analytics = (function(){
                 ${K.Notice({ tone:'info', body:r.label + ' — ' + r.note })}
               </div>`)}</div>`)}` }),
 
-        K.Card({ title:'Gösterge ayrışması', hint:'goodhart',
+        K.Card({ title:yz('ays.analytics.gosterge-ayrismasi'), hint:'goodhart',
           body:html`
             ${K.Table({ tight:true, headers:['Çift', 'Yön', 'Çaba', 'Sonuç', 'Durum'],
               rows:cifts.map(p => [
@@ -519,48 +638,41 @@ R.Screens.analytics = (function(){
                   : p.status === 'aligned' ? 'birlikte'
                   : p.status === 'unknown' ? 'ölçülmedi' : 'sessiz',
               ]) })}
-            <p class="tiny dim mt-8">«Yön» sütunu sonucun hangi tarafa gitmesinin
-              iyi sayıldığını söyler. Yönü tanımsız bir çift değerlendirilmez:
-              sistem yüksek olanın iyi olduğunu VARSAYMAZ.</p>
+            <p class="tiny dim mt-8">${yz('ays.analytics.yon-sutunu-sonucun-hangi-tar')}</p>
             ${(function(){
               const pol = R.Goodhart.policy();
               return html`<div class="mt-8">${K.Ayrinti({
                 /* Asgari çaba tek sayı değildir: her çiftin kendi eşiği var
                    (soru, dakika ya da deneme). Politikada tek bir değer yoktu
                    ve ekranda boş kalıyordu; uydurulmaz. */
-                ozet:'Pencere ' + pol.windowDays + ' gün · çaba artışı eşiği %'
+                ozet:yz('ays.analytics.pencere') + pol.windowDays + ' gün · çaba artışı eşiği %'
                   + Math.round(pol.effortRiseThreshold * 100) + ' · sonuç durgunluk eşiği %'
                   + Math.round(pol.stagnationThreshold * 100) + '.',
-                govde:html`<p>Asgari çaba her çift için ayrıdır. Bu sayılar bir bulgu değil bu
-                  yazılımın ayarıdır: ${pol.rationale}</p>` })}</div>`;
+                govde:html`<p>${yz('ays.analytics.asgari-caba-her-cift-icin')} ${pol.rationale}</p>` })}</div>`;
             })()}
             ${map(ayrisan, p => html`<div class="mt-12">
               ${K.Notice({ tone:'warn', body:p.note })}
               ${K.Notice({ tone:'info', body:p.question })}
             </div>`)}
             ${when(!ayrisan.length, () => html`<p class="tiny dim mt-10">
-              Ayrışma yok. Nöbetçinin konuşmadığı gün, iyi gündür.</p>`)}` }),
+              ${yz('ays.analytics.ayrisma-yok-nobetcinin-konus')}</p>`)}` }),
       ])),
 
       K.Span(6, K.Stack([
-        K.Card({ title:'Kalibrasyon', hint:'calib',
+        K.Card({ title:yz('ays.analytics.kalibrasyon'), hint:'calib',
           body:html`
             ${K.Notice({ tone:'info', body:puan.note })}
             ${when(puan.bias.cert === 'measured',
               () => html`<div class="mt-8">${K.Notice({ tone:'info', body:puan.bias.note })}</div>`)}
             <div class="mt-10">${K.Ayrinti({
-              ozet:'Tahmin KÖR yazılır: net ekranda dururken yazılan tahmin, tahmin değil kopyadır.',
-              govde:html`<p>Kendi netini önceden kestirebilmek bir süs değil, sınav becerisidir:
-                hangi testte zaman harcayacağını, hangi soruyu bırakacağını ve bir denemenin kötü mü
-                yoksa zor mu olduğunu o kestirim söyler.</p>
-                <p>Defter «kendini tanımayı» ölçmez: yalnızca kayıtlı türlerde kör tahminlerinin kayıtlı
-                sayıya ne kadar yaklaştığını ölçer. Net ile dakika ayrı ailelerdir, tek ortalamada
-                toplanmazlar.</p>` })}</div>
+              ozet:yz('ays.analytics.tahmin-kor-yazilir-net-ekran'),
+              govde:html`<p>${yz('ays.analytics.kendi-netini-onceden-kestire')}</p>
+                <p>${yz('ays.analytics.defter-kendini-tanimayi-olcm')}</p>` })}</div>
 
             <div class="mt-12">
-              ${K.Field({ label:'Ne tahmin ediyorsun?',
+              ${K.Field({ label:yz('ays.analytics.ne-tahmin-ediyorsun'),
                 input:K.Select({ id:'ay-calib-kind', value:S.ui.calibKind || 'week-minutes',
-                  change:'calib-kind', aria:'Tahmin türü',
+                  change:'calib-kind', aria:yz('ays.analytics.tahmin-turu'),
                   options:R.CALIB_KINDS.map(k => ({ value:k.id, label:k.label })) }) })}
               ${(function(){
                 const k = R.Calib.kindOf(S.ui.calibKind || 'week-minutes');
@@ -570,7 +682,7 @@ R.Screens.analytics = (function(){
                     input:K.Input({ id:'ay-calib-guess', type:'number',
                       step:k.type === 'binary' ? '0.05' : 'any' }) })}`;
               })()}
-              ${K.Button({ label:'Tahmini kaydet', act:'calib-open' })}
+              ${K.Button({ label:yz('ays.analytics.tahmini-kaydet'), act:'calib-open' })}
             </div>
 
             ${when(vade.length, () => html`<div class="mt-12">
@@ -578,14 +690,14 @@ R.Screens.analytics = (function(){
                 ${K.Field({ label:(R.Calib.kindOf(fo.kind) || {}).label
                     + ' — tahminin: ' + U.fmtNum(fo.guess),
                   input:K.Input({ id:'ay-calib-actual-' + fo.id, type:'number', step:'any' }) })}
-                ${K.Button({ label:'Kapat', size:'sm', act:'calib-settle',
+                ${K.Button({ label:yz('ays.analytics.kapat'), size:'sm', act:'calib-settle',
                   data:{ 'data-id':fo.id } })}
               </div>`)}</div>`)}
 
             ${when(R.Calib.settled().length, () => html`<div class="mt-12">
               ${K.Table({ tight:true,
-                headers:['Tür', { label:'Tahmin', num:true }, { label:'Gerçek', num:true },
-                  { label:'Sapma', num:true }],
+                headers:['Tür', { label:yz('ays.analytics.tahmin'), num:true }, { label:yz('ays.analytics.gercek'), num:true },
+                  { label:yz('ays.analytics.sapma'), num:true }],
                 rows:R.Calib.settled().slice(0, 10).map(fo => {
                   /* Sapma TEK YERDE biçimlenir: burası `abs` hatasını
                      (net farkı) oran sanıp 100 ile çarpıyordu. */
@@ -608,7 +720,7 @@ R.Screens.analytics = (function(){
     const ciddi = hepsi.filter(f => f.severity !== 'none');
 
     return K.Grid([
-      K.Span(12, K.Card({ title:'Bakım borcu', hint:'audit',
+      K.Span(12, K.Card({ title:yz('ays.analytics.bakim-borcu'), hint:'audit',
         sub:ciddi.length ? ciddi.length + ' bulgu' : 'temiz',
         body:html`
           ${when(!ciddi.length, () => K.Notice({ tone:'ok',
@@ -626,7 +738,7 @@ R.Screens.analytics = (function(){
               ${when((f.items || []).length, () => K.Table({ tight:true,
                 headers:['Kayıt', 'Durum'],
                 rows:f.items.map(x => [x.label, x.meta || '—']) }))}
-              ${when(f.route, () => K.Button({ label:'Aç', size:'sm', act:'go',
+              ${when(f.route, () => K.Button({ label:yz('ays.analytics.ac'), size:'sm', act:'go',
                 data:{ 'data-route':f.route }, class:'mt-8' }))}
             </div>`)}` }));
       }).filter(Boolean),
@@ -667,8 +779,8 @@ R.Screens.analytics = (function(){
       if(kayitli.indexOf(t) >= 0) gunluk.push({ tarih:t, deger:C.gunSorusu(d) });
     });
     return K.Grid([K.Span(12, html`<div class="analizbasi">
-      ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'ays', ad:'AYS', gunler:kayitli }], { gun:7 })) })}
-      ${K.Kutu({ ad:'Bu haftanın birikimi', yuva:'soru', govde:raw(G.birikimSvg(gunluk, plan, { bugun:U.todayISO(), birim:'soru', etiket:'Haftalık soru' })) })}
+      ${K.Kutu({ ad:yz('ays.analytics.veri-dolulugu'), yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'ays', ad:yz('ays.analytics.ays'), gunler:kayitli }], { gun:7 })) })}
+      ${K.Kutu({ ad:yz('ays.analytics.bu-haftanin-birikimi'), yuva:'soru', govde:raw(G.birikimSvg(gunluk, plan, { bugun:U.todayISO(), birim:'soru', etiket:yz('ays.analytics.haftalik-soru') })) })}
     </div>`)]);
   }
 
@@ -687,14 +799,14 @@ R.Screens.analytics = (function(){
     }
     if(saat.filter(v => v != null).length < 2) return '';
     const en = saat.reduce((m, v, i) => v != null && (m < 0 || v > saat[m]) ? i : m, -1);
-    return '<div class="pk-izgara pk-izgara--iki">' + P.kart({ tur:'calisma-saatleri', ad:'Çalışma saatlerin', simge:'saat', yuva:'son 30 gün',
+    return '<div class="pk-izgara pk-izgara--iki">' + P.kart({ tur:'calisma-saatleri', ad:yz('ays.analytics.calisma-saatlerin'), simge:'saat', yuva:'son 30 gün',
       govde:P.deger(String(en).padStart(2, '0') + ':00', '', 'en çok dakika bu saatte başlayan bloklarda')
-        + P.sutun({ degerler:saat, yukseklik:48, etiket:'Bitmiş blokların başladığı saatler; en çok ' + en + ':00' })
+        + P.sutun({ degerler:saat, yukseklik:48, etiket:yz('ays.analytics.bitmis-bloklarin-basladigi-s') + en + ':00' })
         + '<div class="pk-saat__ad"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>' }) + '</div>';
   }
 
   LIFEOS.PARCA.blok({ id:'analytics.bolum-1', sayfa:'analytics', yer:'y1', sira:10, ad:'Bölüm 1', ciz(){
-    return K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
+    return K.SayfaBolumleri({ act:'analytics-tab', aria:yz('ays.analytics.analiz-bolumleri'),
       bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) });
   } });
   LIFEOS.PARCA.blok({ id:'analytics.bolum-2', sayfa:'analytics', yer:'y2', sira:10, ad:'Bölüm 2', ciz(){
@@ -726,7 +838,7 @@ R.Screens.analytics = (function(){
       const r = await R.Calib.open(kind, el ? el.value : null, { dueAt:vadeFor(kind) });
       if(!r.ok){ UI.toast(r.error); return; }
       if(el) el.value = '';
-      UI.toast('Tahmin deftere yazıldı');
+      UI.toast(yz('ays.analytics.tahmin-deftere-yazildi'));
       R.App.render();
     },
 
@@ -770,7 +882,7 @@ R.Screens.analytics = (function(){
         /* Alışkanlık ve denetim tek sekme (2026-10-16): açık en çok üç kalsın diye. */
         'bakım-borcu'].concat(alanlar);
     },
-    title:'Ayrıntılı analiz',
+    title:yz('ays.analytics.ayrintili-analiz'),
     subtitle(){ return 'Denemelerden ve kayıtlardan türetilen okumalar'; },
     actions(){ return ''; },
     render, afterRender, handle, change,

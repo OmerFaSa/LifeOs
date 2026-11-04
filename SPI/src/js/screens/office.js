@@ -8,6 +8,58 @@
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'spi.office.devir-daha':'devir daha.',
+  'spi.office.model-acik':'model açık',
+  'spi.office.hazir-kurallar':'hazır kurallar',
+  'spi.office.not-daha-raporu-ac':'not daha — raporu aç.',
+  'spi.office.soru-sor':'Soru sor',
+  'spi.office.deger':'Değer',
+  'spi.office.kapsama':'Kapsama',
+  'spi.office.emilen':'Emilen',
+  'spi.office.tasarruf':'Tasarruf',
+  'spi.office.gunun-ozeti':'Günün özeti',
+  'spi.office.uretilmedi':'üretilmedi',
+  'spi.office.tazele':'Tazele',
+  'spi.office.takipteki-kararlar':'Takipteki kararlar',
+  'spi.office.henuz-karar-kaydi-yok':'Henüz karar kaydı yok.',
+  'spi.office.kapat':'Kapat',
+  'spi.office.kapanan-kararlar':'Kapanan kararlar',
+  'spi.office.kapandi':'kapandı',
+  'spi.office.karar-ekle':'Karar ekle',
+  'spi.office.masalar-arasi-devir':'Masalar arası devir',
+  'spi.office.bag-daha-masalari-ac':'bağ daha — masaları aç.',
+  'spi.office.masalar-arasinda-devredilece':'Masalar arasında devredilecek ölçülmüş bir bulgu yok. ',
+  'spi.office.gundem-adaylari':'Gündem adayları',
+  'spi.office.i-ncelemeyi-ac':'İncelemeyi aç',
+  'spi.office.masa':'Masa',
+  'spi.office.gunun-toplantisi':'Günün toplantısı',
+  'spi.office.patron-masasi':'Patron masası',
+  'spi.office.dort-uzman-masasi':'Dört uzman masası',
+  'spi.office.yetki-ayrimi':'Yetki ayrımı',
+  'spi.office.brifing-uretiliyor':'Brifing üretiliyor…',
+  'spi.office.takibe-alinir-kapanana-kadar':'takibe alınır, kapanana kadar gündemde durur',
+  'spi.office.karar-bir-niyet-degil-bir':'Karar bir niyet değil bir DENEYDİR: neyi değiştirdiğini ve hangi ',
+  'spi.office.karar':'Karar',
+  'spi.office.ornek-iki-hafta-boyunca-cayi':'Örnek: iki hafta boyunca çayı öğünden bir saat sonraya al',
+  'spi.office.gerekce':'Gerekçe',
+  'spi.office.hangi-bulguya-dayaniyor':'Hangi bulguya dayanıyor?',
+  'spi.office.vazgec':'Vazgeç',
+  'spi.office.kaydet':'Kaydet',
+  'spi.office.karar-metni-gerekli':'Karar metni gerekli',
+  'spi.office.karar-takibe-alindi':'Karar takibe alındı',
+  'spi.office.karari-kapat':'Kararı kapat',
+  'spi.office.sonucu-olcuyle-yaz':'sonucu ölçüyle yaz',
+  'spi.office.i-yi-geldi-bir-sonuc-degildi':'"İyi geldi" bir sonuç değildir. Hangi ölçüm ne kadar değişti? ',
+  'spi.office.sonuc':'Sonuç',
+  'spi.office.ne-degisti-olcumle-hisle-deg':'Ne değişti? Ölçümle, hisle değil.',
+  'spi.office.karar-kapatildi':'Karar kapatıldı',
+  'spi.office.ofis':'Ofis',
+  'spi.office.masa-notu':'masa notu',
+  'spi.office.masalar-arasi-devir-2':'masalar arası devir',
+  'spi.office.karar-takipte':'karar takipte',
+  'spi.office.i-nceleme':'İnceleme',
+});
 window.LIFEOS.PARCA.sayfa({ id:'office', modul:'spi', cekmece:'ofis', ad:'Masalar', sira:10 });
 
 SP.Screens.office = (function(){
@@ -66,7 +118,7 @@ SP.Screens.office = (function(){
             <span class="deskflow__what">${h.cta}</span>
           </button>`)}
         ${when(all.length > 4, () => html`<p class="tiny dim">
-          ${all.length - 4} devir daha.</p>`)}
+          ${all.length - 4} ${yz('spi.office.devir-daha')}</p>`)}
       </div>`;
     }
     const f = SP.Office.handoffsFor(agentId);
@@ -109,8 +161,8 @@ SP.Screens.office = (function(){
           </div>
           ${when(notes.length, () => K.Badge({ label:String(notes.length),
             tone:notes.some(n => n.tone === 'danger') ? 'danger' : 'warn' }))}
-          ${SP.Office.ready(agent.id) ? K.Badge({ label:'model açık', tone:'info' })
-            : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false })}
+          ${SP.Office.ready(agent.id) ? K.Badge({ label:yz('spi.office.model-acik'), tone:'info' })
+            : K.Badge({ label:yz('spi.office.hazir-kurallar'), tone:'muted', icon:false })}
         </div>
         ${tekrar ? '' : K.Katmanli({ metin:line, sinif:'desk__line' })}
         ${when(notes.length, () => html`<div class="notes mt-10">
@@ -118,7 +170,7 @@ SP.Screens.office = (function(){
             <div class="note note--${n.tone}"><span class="note__dot"></span>
               <span class="small">${n.text}</span></div>`)}
           ${when(notes.length > DESK_NOTES, () => html`<p class="tiny dim mt-6">
-            ${notes.length - DESK_NOTES} not daha — raporu aç.</p>`)}
+            ${notes.length - DESK_NOTES} ${yz('spi.office.not-daha-raporu-ac')}</p>`)}
         </div>`)}
         ${deskFlow(agent.id)}
         ${when(open, () => html`<div class="desk__open">
@@ -127,7 +179,7 @@ SP.Screens.office = (function(){
         <div class="row wrap mt-12">
           ${K.Button({ label:open ? 'Raporu kapat' : 'Raporu aç', size:'sm',
             act:'toggle-desk', data:{ 'data-id':agent.id } })}
-          ${K.Button({ label:'Soru sor', size:'sm',
+          ${K.Button({ label:yz('spi.office.soru-sor'), size:'sm',
             act:'ask-agent', data:{ 'data-agent':agent.id } })}
         </div>`,
     });
@@ -145,7 +197,7 @@ SP.Screens.office = (function(){
           ['Son tahlil', b.lastLab ? U.fmtDate(b.lastLab) : 'yok'],
         ] })}
         ${when(b.attention.length, () => html`<div class="mt-10">
-          ${K.Table({ tight:true, headers:['Ölçüm', { label:'Değer', num:true }, 'Durum'],
+          ${K.Table({ tight:true, headers:['Ölçüm', { label:yz('spi.office.deger'), num:true }, 'Durum'],
             rows:b.attention.map(a => [a.marker, U.fmtNum(a.value) + ' ' + a.unit,
               K.Badge({ label:a.statusLabel, tone:a.status === 'red' ? 'danger'
                 : a.status === 'low' || a.status === 'high' ? 'warn' : 'info' })]) })}</div>`)}`;
@@ -161,7 +213,7 @@ SP.Screens.office = (function(){
           ['Bugün', b.todayMeals + ' öğün · ' + U.fmtNum(b.todayKcal) + ' kcal'],
         ] })}
         ${when(b.gaps.length, () => html`<div class="mt-10">
-          ${K.Table({ tight:true, headers:['Açık', { label:'Kapsama', num:true }, { label:'Emilen', num:true }],
+          ${K.Table({ tight:true, headers:['Açık', { label:yz('spi.office.kapsama'), num:true }, { label:yz('spi.office.emilen'), num:true }],
             rows:b.gaps.map(g => [g.nutrient, '%' + g.pct, U.fmtNum(g.absorbed)]) })}</div>`)}`;
     }
     if(agent.id === 'move'){
@@ -187,7 +239,7 @@ SP.Screens.office = (function(){
           ['Tahmin payı', '%' + b.estimatePct],
         ] })}
         ${when(b.swaps.length, () => html`<div class="mt-10">
-          ${K.Table({ tight:true, headers:['İkame', { label:'Tasarruf', num:true }, 'Korunan'],
+          ${K.Table({ tight:true, headers:['İkame', { label:yz('spi.office.tasarruf'), num:true }, 'Korunan'],
             rows:b.swaps.map(s => [s.from + ' → ' + s.to, U.fmtNum(Math.round(s.saveTotal)) + ' TL',
               s.keeps.join(', ')]) })}</div>`)}`;
     }
@@ -211,9 +263,9 @@ SP.Screens.office = (function(){
     const d = U.todayISO();
     const b = S.officeBriefings[d];
     return K.Card({
-      title:'Günün özeti', hint:'office',
+      title:yz('spi.office.gunun-ozeti'), hint:'office',
       sub:U.fmtDate(d),
-      badge:b ? P.sourceBadge(b.source) : K.Badge({ label:'üretilmedi', tone:'muted' }),
+      badge:b ? P.sourceBadge(b.source) : K.Badge({ label:yz('spi.office.uretilmedi'), tone:'muted' }),
       body:html`
         ${when(b, () => html`<p class="small">${b.text}</p>
           ${when(b.headline && String(b.text || '').indexOf(b.headline) < 0,
@@ -221,7 +273,7 @@ SP.Screens.office = (function(){
         ${when(!b, () => K.Notice({ tone:'info',
           body:'Brifing günde bir kez üretilir ve tek model çağrısı harcar. '
              + 'Model kapalıysa kural motorunun cümlesi yazılır.' }))}`,
-      foot:K.Button({ label:'Tazele', size:'sm', act:'refresh-briefing' }),
+      foot:K.Button({ label:yz('spi.office.tazele'), size:'sm', act:'refresh-briefing' }),
     });
   }
 
@@ -229,23 +281,23 @@ SP.Screens.office = (function(){
     const open = SP.Model.openDecisions();
     const closed = S.decisions.filter(d => d.status === 'closed').slice(0, 5);
     return K.Card({
-      title:'Takipteki kararlar', hint:'decision',
+      title:yz('spi.office.takipteki-kararlar'), hint:'decision',
       badge:K.Badge({ label:String(open.length), tone:open.length ? 'warn' : 'muted' }),
       body:html`
-        ${when(!open.length && !closed.length, () => K.Empty({ text:'Henüz karar kaydı yok.' }))}
+        ${when(!open.length && !closed.length, () => K.Empty({ text:yz('spi.office.henuz-karar-kaydi-yok') }))}
         ${when(open.length, () => html`<div class="list">${map(open, d => html`
           <div class="listitem">
             <div class="grow"><b class="small">${d.title}</b>
               <div class="tiny dim">${U.relativeDay(SP.U.gunOf(d.at))} · ${d.why || ''}</div></div>
-            ${K.Button({ label:'Kapat', size:'sm', act:'close-decision', data:{ 'data-id':d.id } })}
+            ${K.Button({ label:yz('spi.office.kapat'), size:'sm', act:'close-decision', data:{ 'data-id':d.id } })}
           </div>`)}</div>`)}
         ${when(closed.length, () => html`<div class="mt-12">
-          <h3 class="section-h">Kapanan kararlar</h3>
+          <h3 class="section-h">${yz('spi.office.kapanan-kararlar')}</h3>
           <div class="list">${map(closed, d => html`
             <div class="listitem"><div class="grow"><b class="small">${d.title}</b>
               <div class="tiny dim">${d.outcome || 'sonuç yazılmadı'}</div></div>
-              ${K.Badge({ label:'kapandı', tone:'muted' })}</div>`)}</div></div>`)}`,
-      foot:K.Button({ label:'Karar ekle', size:'sm', act:'add-decision' }),
+              ${K.Badge({ label:yz('spi.office.kapandi'), tone:'muted' })}</div>`)}</div></div>`)}`,
+      foot:K.Button({ label:yz('spi.office.karar-ekle'), size:'sm', act:'add-decision' }),
     });
   }
 
@@ -256,13 +308,13 @@ SP.Screens.office = (function(){
     const rows = SP.Office.handoffs();
     const loud = rows.filter(h => h.tone === 'danger' || h.tone === 'warn').length;
     return K.Entry({
-      wide:true, label:'Masalar arası devir', hint:'office',
+      wide:true, label:yz('spi.office.masalar-arasi-devir'), hint:'office',
       meta:rows.length ? rows.length + ' bağ' + (loud ? ' · ' + loud + ' acil' : '') : 'bağ yok',
       body:rows.length
         ? html`${when(vd, () => html`<div class="mb-12">${raw(vd)}</div>`)}<div class="handoffs">${map(rows.slice(0, HANDOFF_MAX), handoffRow)}</div>
             ${when(rows.length > HANDOFF_MAX, () => html`<p class="tiny dim mt-8">
-              ${rows.length - HANDOFF_MAX} bağ daha — masaları aç.</p>`)}`
-        : K.Empty({ text:'Masalar arasında devredilecek ölçülmüş bir bulgu yok. '
+              ${rows.length - HANDOFF_MAX} ${yz('spi.office.bag-daha-masalari-ac')}</p>`)}`
+        : K.Empty({ text:yz('spi.office.masalar-arasinda-devredilece')
             + 'Devir tahminden çıkmaz.' }),
     });
   }
@@ -270,7 +322,7 @@ SP.Screens.office = (function(){
   function agendaCard(){
     const rows = SP.Office.agendaCandidates().slice(0, 5);
     return K.Card({
-      hint:'not-gundem-adaylari', title:'Gündem adayları',
+      hint:'not-gundem-adaylari', title:yz('spi.office.gundem-adaylari'),
       body:html`<div class="list">${map(rows, (a, i) => html`
         <div class="listitem">
           <div class="grow"><b class="small">${a.label}</b>
@@ -278,7 +330,7 @@ SP.Screens.office = (function(){
             <div class="tiny dim">${a.detail}</div></div>
           ${P.avatar(a.owner, 'sm')}
         </div>`)}</div>`,
-      foot:K.Button({ label:'İncelemeyi aç', size:'sm', tone:'primary',
+      foot:K.Button({ label:yz('spi.office.i-ncelemeyi-ac'), size:'sm', tone:'primary',
         act:'go', data:{ 'data-route':'meeting' } }),
     });
   }
@@ -307,25 +359,25 @@ SP.Screens.office = (function(){
     return raw(UI.rail(['office', 'grounding', 'no-model', 'privacy', 'decision']));
   } });
   LIFEOS.PARCA.blok({ id:'office.bolum-2', sayfa:'office', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ flags, vo }){
-    return when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:'Masa', meta:'kim konuşuyor',
+    return when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:yz('spi.office.masa'), meta:'kim konuşuyor',
           body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.sinir || '')}${raw(vo.durum || '')}</div>` }));
   } });
   LIFEOS.PARCA.blok({ id:'office.bolum-3', sayfa:'office', yer:'y2', sira:20, ad:'Bölüm 3', ciz({ flags, vo }){
-    return when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
+    return when(vo.toplanti, () => K.Entry({ wide:true, label:yz('spi.office.gunun-toplantisi'), meta:'her masadan tek cümle',
           body:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` }));
   } });
   LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:30, ad:'briefingCard', ciz({ flags, vo }){
     return briefingCard();
   } });
   LIFEOS.PARCA.blok({ id:'office.bolum-5', sayfa:'office', yer:'y2', sira:40, ad:'Bölüm 5', ciz({ flags, vo }){
-    return K.Entry({ wide:true, label:'Patron masası', hint:'office', meta:'orkestrasyon',
+    return K.Entry({ wide:true, label:yz('spi.office.patron-masasi'), hint:'office', meta:'orkestrasyon',
           body:html`<div class="desks desks--solo">${deskCard(SP.AGENT_BY_ID.patron)}</div>` });
   } });
   LIFEOS.PARCA.blok({ id:'office.handoffentry', sayfa:'office', yer:'y2', sira:50, ad:'handoffEntry', ciz({ flags, vo }){
     return handoffEntry();
   } });
   LIFEOS.PARCA.blok({ id:'office.bolum-7', sayfa:'office', yer:'y2', sira:60, ad:'Bölüm 7', ciz({ flags, vo }){
-    return K.Entry({ wide:true, hint:'not-dort-uzman-masasi', label:'Dört uzman masası', meta:COACHES.length + ' ajan',
+    return K.Entry({ wide:true, hint:'not-dort-uzman-masasi', label:yz('spi.office.dort-uzman-masasi'), meta:COACHES.length + ' ajan',
           body:html`<div class="desks">${map(COACHES, deskCard)}</div>` });
   } });
   LIFEOS.PARCA.blok({ id:'office.agendacard', sayfa:'office', yer:'y2', sira:70, ad:'agendaCard', ciz({ flags, vo }){
@@ -335,7 +387,7 @@ SP.Screens.office = (function(){
     return decisionCard();
   } });
   LIFEOS.PARCA.blok({ id:'office.bolum-10', sayfa:'office', yer:'y2', sira:90, ad:'Bölüm 10', ciz({ flags, vo }){
-    return K.Entry({ label:'Yetki ayrımı', hint:'office', meta:'kim neye bakar',
+    return K.Entry({ label:yz('spi.office.yetki-ayrimi'), hint:'office', meta:'kim neye bakar',
           body:html`<ul class="bullets small muted">${map(SP.AGENTS, a => html`
             <li><b>${a.name}</b> — ${a.scope}</li>`)}</ul>` });
   } });
@@ -375,54 +427,54 @@ SP.Screens.office = (function(){
       SP.App.render();
     },
     async 'refresh-briefing'(){
-      UI.toast('Brifing üretiliyor…');
+      UI.toast(yz('spi.office.brifing-uretiliyor'));
       await SP.Office.dailyBriefing(true);
       SP.App.render();
     },
     async 'add-decision'(){
       UI.sheet({
-        title:'Karar ekle',
-        subtitle:'takibe alınır, kapanana kadar gündemde durur',
-        note:'Karar bir niyet değil bir DENEYDİR: neyi değiştirdiğini ve hangi '
+        title:yz('spi.office.karar-ekle'),
+        subtitle:yz('spi.office.takibe-alinir-kapanana-kadar'),
+        note:yz('spi.office.karar-bir-niyet-degil-bir')
           + 'bulguya dayandığını yazarsan, kapanırken sonucunu ölçüyle '
           + 'karşılaştırabilirsin.',
         body:String(K.Stack([
-          K.Field({ label:'Karar', input:K.Input({ id:'dec-title',
-            placeholder:'Örnek: iki hafta boyunca çayı öğünden bir saat sonraya al' }) }),
-          K.Field({ label:'Gerekçe', input:K.Textarea({ id:'dec-why', rows:2,
-            placeholder:'Hangi bulguya dayanıyor?' }) }),
+          K.Field({ label:yz('spi.office.karar'), input:K.Input({ id:'dec-title',
+            placeholder:yz('spi.office.ornek-iki-hafta-boyunca-cayi') }) }),
+          K.Field({ label:yz('spi.office.gerekce'), input:K.Textarea({ id:'dec-why', rows:2,
+            placeholder:yz('spi.office.hangi-bulguya-dayaniyor') }) }),
         ])),
-        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-          ${K.Button({ label:'Kaydet', tone:'primary', act:'save-decision' })}`),
+        footer:String(html`${K.Button({ label:yz('spi.office.vazgec'), act:'sheet-close' })}
+          ${K.Button({ label:yz('spi.office.kaydet'), tone:'primary', act:'save-decision' })}`),
       });
     },
     async 'save-decision'(){
       const t = document.getElementById('dec-title');
       const w = document.getElementById('dec-why');
-      if(!t || !t.value.trim()){ UI.toast('Karar metni gerekli'); return; }
+      if(!t || !t.value.trim()){ UI.toast(yz('spi.office.karar-metni-gerekli')); return; }
       await SP.Model.saveDecision({ title:t.value.trim(), why:w ? w.value.trim() : '' });
       UI.closeSheet();
-      UI.toast('Karar takibe alındı');
+      UI.toast(yz('spi.office.karar-takibe-alindi'));
       SP.App.render();
     },
     async 'close-decision'(el){
       const id = el.dataset.id;
       UI.sheet({
-        title:'Kararı kapat',
-        subtitle:'sonucu ölçüyle yaz',
-        note:'"İyi geldi" bir sonuç değildir. Hangi ölçüm ne kadar değişti? '
+        title:yz('spi.office.karari-kapat'),
+        subtitle:yz('spi.office.sonucu-olcuyle-yaz'),
+        note:yz('spi.office.i-yi-geldi-bir-sonuc-degildi')
           + 'Değişmediyse bu da bir sonuçtur ve yazılması gerekir.',
-        body:String(K.Field({ label:'Sonuç', input:K.Textarea({ id:'dec-out', rows:3,
-          placeholder:'Ne değişti? Ölçümle, hisle değil.' }) })),
-        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-          ${K.Button({ label:'Kapat', tone:'primary', act:'save-close', data:{ 'data-id':id } })}`),
+        body:String(K.Field({ label:yz('spi.office.sonuc'), input:K.Textarea({ id:'dec-out', rows:3,
+          placeholder:yz('spi.office.ne-degisti-olcumle-hisle-deg') }) })),
+        footer:String(html`${K.Button({ label:yz('spi.office.vazgec'), act:'sheet-close' })}
+          ${K.Button({ label:yz('spi.office.kapat'), tone:'primary', act:'save-close', data:{ 'data-id':id } })}`),
       });
     },
     async 'save-close'(el){
       const out = document.getElementById('dec-out');
       await SP.Model.closeDecision(el.dataset.id, out ? out.value.trim() : '');
       UI.closeSheet();
-      UI.toast('Karar kapatıldı');
+      UI.toast(yz('spi.office.karar-kapatildi'));
       SP.App.render();
     },
   };
@@ -437,7 +489,7 @@ SP.Screens.office = (function(){
        kararlar şerit. */
     kucukVarsayilan:['masalar-arası-devir', 'yetki-ayrımı', 'masa', 'günün-toplantısı', 'dört-uzman-masası',
       'gündem-adayları', 'takipteki-kararlar'],
-    title:'Ofis',
+    title:yz('spi.office.ofis'),
     headline(){
       const notes = SP.Office.notes();
       const loud = notes.filter(n => n.tone === 'danger' || n.tone === 'warn').length;
@@ -461,9 +513,9 @@ SP.Screens.office = (function(){
       const notes = SP.Office.notes();
       const open = SP.Model.openDecisions().length;
       const hand = SP.Office.handoffs().length;
-      const out = [{ value:notes.length, label:'masa notu' }];
-      if(hand) out.push({ value:hand, label:'masalar arası devir' });
-      if(open) out.push({ value:open, label:'karar takipte' });
+      const out = [{ value:notes.length, label:yz('spi.office.masa-notu') }];
+      if(hand) out.push({ value:hand, label:yz('spi.office.masalar-arasi-devir-2') });
+      if(open) out.push({ value:open, label:yz('spi.office.karar-takipte') });
       return out;
     },
     subtitle(){
@@ -475,7 +527,7 @@ SP.Screens.office = (function(){
         + (open ? ' · ' + open + ' karar takipte' : '');
     },
     actions(){
-      return String(K.Button({ label:'İnceleme', size:'sm', icon:'users', class:'btn--screen',
+      return String(K.Button({ label:yz('spi.office.i-nceleme'), size:'sm', icon:'users', class:'btn--screen',
         act:'go', data:{ 'data-route':'meeting' } }));
     },
     render, handle,

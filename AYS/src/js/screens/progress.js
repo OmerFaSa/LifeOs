@@ -4,6 +4,60 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.progress.tyt':'TYT',
+  'ays.progress.ayt':'AYT',
+  'ays.progress.bu-hafta':'bu hafta',
+  'ays.progress.son-4-denemenin-en-dusugu':'son 4 denemenin en düşüğü',
+  'ays.progress.son-tam-tyt':'son tam TYT',
+  'ays.progress.hedef':'Hedef ',
+  'ays.progress.ayt-medyani':'AYT medyanı',
+  'ays.progress.son-3-tam-deneme':'son 3 tam deneme.',
+  'ays.progress.gostergeler':'Göstergeler',
+  'ays.progress.deneme-net-trendi':'Deneme net trendi',
+  'ays.progress.tam-deneme-girildikce-medyan':'Tam deneme girildikçe medyan trendi burada oluşur. Karar tek denemeyle değil, son üç denemenin medyanıyla verilir.',
+  'ays.progress.deneme-ekle':'Deneme ekle',
+  'ays.progress.tyt-tam-deneme':'TYT tam deneme',
+  'ays.progress.ayt-tam-deneme':'AYT tam deneme',
+  'ays.progress.secilen-mudahale':'Seçilen müdahale:',
+  'ays.progress.veri-donemi':'Veri dönemi:',
+  'ays.progress.yeniden-degerlendirme':'· Yeniden değerlendirme:',
+  'ays.progress.mudahaleyi-degistir':'Müdahaleyi değiştir',
+  'ays.progress.bir-ana-mudahale-sec':'Bir ana müdahale seç',
+  'ays.progress.ana-mudahaleyi-kaydet':'Ana müdahaleyi kaydet',
+  'ays.progress.aylik-degerlendirme':'Aylık değerlendirme — ',
+  'ays.progress.karar-verildi':'karar verildi',
+  'ays.progress.karar-bekliyor':'karar bekliyor',
+  'ays.progress.bu-ayin-kurali':'Bu ayın kuralı:',
+  'ays.progress.deneme-ailesi':'Deneme ailesi',
+  'ays.progress.test-bazli-trend':'Test bazlı trend',
+  'ays.progress.tam-deneme-girildikce-her-te':'Tam deneme girildikçe her test için ayrı trend burada oluşur.',
+  'ays.progress.ust-bant':'üst bant',
+  'ays.progress.altinda':'altında',
+  'ays.progress.test-basina-seyir':'Test başına seyir',
+  'ays.progress.son-4-medyan':'Son 4 medyan',
+  'ays.progress.i-lk-son':'İlk→son',
+  'ays.progress.simdi':'şimdi',
+  'ays.progress.aylik-net-gelisim-egrisi':'Aylık net gelişim eğrisi',
+  'ays.progress.tyt-gozlenen':'TYT gözlenen',
+  'ays.progress.tyt-guvenli':'TYT güvenli',
+  'ays.progress.ayt-gozlenen':'AYT gözlenen',
+  'ays.progress.ayt-guvenli':'AYT güvenli',
+  'ays.progress.kpi-sozlugu':'KPI sözlüğü',
+  'ays.progress.yol-haritasi':'Yol haritası',
+  'ays.progress.konular-ders-ders-kapanan-do':'Konular ders ders; kapanan dolu, çalışılan halka, sıradaki kalın',
+  'ays.progress.konular-yuklenince-harita-be':'Konular yüklenince harita belirir.',
+  'ays.progress.plan-tamamlama-son-8':'Plan tamamlama — son 8 hafta',
+  'ays.progress.hedef-85':'Hedef %85',
+  'ays.progress.hata-paretosu':'Hata paretosu',
+  'ays.progress.surec-gostergeleri':'Süreç göstergeleri',
+  'ays.progress.tekrar-borcu':'Tekrar borcu',
+  'ays.progress.konu-kapanisi':'Konu kapanışı',
+  'ays.progress.uyku-7-gun-ort':'Uyku (7 gün ort.)',
+  'ays.progress.bir-mudahale-sec':'Bir müdahale seç',
+  'ays.progress.mudahale-kaydedildi-21-gun':'Müdahale kaydedildi · 21 gün sonra yeniden değerlendirilecek',
+  'ays.progress.i-lerleme':'İlerleme',
+});
 window.LIFEOS.PARCA.sayfa({ id:'progress', modul:'ays', cekmece:'analiz', ad:'İlerleme', ikon:'chart', sira:10 });
 
 R.Screens.progress = (function(){
@@ -11,7 +65,7 @@ R.Screens.progress = (function(){
   const { html, raw, when, map } = R.h;
   const K = R.C;
 
-  const FAMILIES = [{ value:'TYT', label:'TYT' }, { value:'AYT', label:'AYT' }];
+  const FAMILIES = [{ value:'TYT', label:yz('ays.progress.tyt') }, { value:'AYT', label:yz('ays.progress.ayt') }];
 
   const GATE_STATUS = {
     safe:'güvenli bantta', inband:'gözlenen bantta', above:'bandın üstünde',
@@ -39,7 +93,7 @@ R.Screens.progress = (function(){
     })();
 
     return [
-      { key:'planCompletion', num:comp, birim:'%', value:comp == null ? '—' : '%'+comp, spark:history, note:'bu hafta',
+      { key:'planCompletion', num:comp, birim:'%', value:comp == null ? '—' : '%'+comp, spark:history, note:yz('ays.progress.bu-hafta'),
         progress:comp, target:85,
         tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' },
       { key:'questionRate', num:qr && qr.pct != null ? qr.pct : null, birim:'%', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
@@ -53,11 +107,11 @@ R.Screens.progress = (function(){
         tone:tyt.delta == null ? null : tyt.delta > 0 ? 'ok' : tyt.delta < -1 ? 'danger' : 'warn',
         note:tyt.last3 == null ? 'en az 3 tam TYT gerekir'
           : 'son3 '+U.fmtNet(tyt.last3)+(tyt.prev3 != null ? ' · önceki3 '+U.fmtNet(tyt.prev3) : '') },
-      { key:'examBase', num:base, birim:'net', ondalik:2, value:base == null ? '—' : U.fmtNet(base), note:'son 4 denemenin en düşüğü' },
+      { key:'examBase', num:base, birim:'net', ondalik:2, value:base == null ? '—' : U.fmtNet(base), note:yz('ays.progress.son-4-denemenin-en-dusugu') },
       { key:'errorMix', value:pareto[0] && pareto[0].count ? pareto[0].tag : '—',
         note:pareto[0] && pareto[0].count ? R.ERROR_TAGS[pareto[0].tag].name+' · %'+pareto[0].pct : 'hata kaydı yok' },
       { key:'timeDrift', num:timeDrift, birim:'dk', value:timeDrift == null ? '—' : (timeDrift > 0 ? '+' : '')+timeDrift,
-        unit:timeDrift == null ? '' : ' dk', note:'son tam TYT',
+        unit:timeDrift == null ? '' : ' dk', note:yz('ays.progress.son-tam-tyt'),
         tone:timeDrift == null ? null : timeDrift > 5 ? 'warn' : 'ok' },
       { key:'cardDebt', num:debt, birim:'%', value:'%'+debt, tone:debt > 10 ? 'danger' : 'ok',
         progress:debt, target:10,
@@ -79,15 +133,15 @@ R.Screens.progress = (function(){
       .sort((a, b) => (sira(a.c.tone) - sira(b.c.tone)) || a.i - b.i)
       .map(({ c, def }) => c.num == null
         ? { ust:def.name, cumle:(c.value !== '—' ? c.note : /gerek|yok|girilmemiş/.test(c.note || '') ? buyuk(c.note) : 'Veri yok') + '.',
-            vurgu:'Hedef ' + def.target + '.', sistem:'ays' }
+            vurgu:yz('ays.progress.hedef') + def.target + '.', sistem:'ays' }
         : { ust:def.name, sayi:sayi({ deger:c.num, birim:c.birim, ondalik:c.ondalik, kesinlik:'computed', formul:def.formula }),
             cumle:c.tone === 'ok' ? 'hedefte.' : c.tone ? 'hedefin dışında.' : '',
-            vurgu:'Hedef ' + def.target + (c.note ? ' · ' + c.note : '') + '.', sistem:'ays' });
+            vurgu:yz('ays.progress.hedef') + def.target + (c.note ? ' · ' + c.note : '') + '.', sistem:'ays' });
     const ayt = C.medianTrend('AYT'), ab = C.examBase('AYT');
-    if(ayt.last3 != null) m.push({ ust:'AYT medyanı', sayi:sayi({ deger:ayt.last3, birim:'net', ondalik:2, kesinlik:'computed',
-      formul:'son 3 tam AYT denemesinin medyanı' }), cumle:'son 3 tam deneme.', vurgu:ab == null ? 'Taban yok.' : 'Taban ' + U.fmtNet(ab) + '.', sistem:'ays' });
+    if(ayt.last3 != null) m.push({ ust:yz('ays.progress.ayt-medyani'), sayi:sayi({ deger:ayt.last3, birim:'net', ondalik:2, kesinlik:'computed',
+      formul:'son 3 tam AYT denemesinin medyanı' }), cumle:yz('ays.progress.son-3-tam-deneme'), vurgu:ab == null ? 'Taban yok.' : 'Taban ' + U.fmtNet(ab) + '.', sistem:'ays' });
     /* Özet'teki Bugün'ün «Gidişat»ından ayrı kimlik ve ad (aynı sayfada iki kart). */
-    return raw(V.donen({ id:'ays-kpi', ad:'Göstergeler', maddeler:m }));
+    return raw(V.donen({ id:'ays-kpi', ad:yz('ays.progress.gostergeler'), maddeler:m }));
   }
 
   /* ---------- trend ---------- */
@@ -97,26 +151,26 @@ R.Screens.progress = (function(){
     const gate = C.currentGate();
 
     if(!tyt.series.length && !ayt.series.length){
-      return K.Card({ title:'Deneme net trendi', body:K.Empty({ icon:'chart',
-        text:'Tam deneme girildikçe medyan trendi burada oluşur. Karar tek denemeyle değil, son üç denemenin medyanıyla verilir.',
-        action:K.Button({ label:'Deneme ekle', tone:'primary', act:'go', data:{ 'data-route':'exams' } }) }) });
+      return K.Card({ title:yz('ays.progress.deneme-net-trendi'), body:K.Empty({ icon:'chart',
+        text:yz('ays.progress.tam-deneme-girildikce-medyan'),
+        action:K.Button({ label:yz('ays.progress.deneme-ekle'), tone:'primary', act:'go', data:{ 'data-route':'exams' } }) }) });
     }
 
     const delta = (fam, t) => when(t.delta != null, () =>
       K.Badge({ label:fam+' '+(t.delta > 0 ? '+' : '')+U.fmtNet(t.delta), tone:t.delta > 0 ? 'ok' : 'warn' }));
 
     return K.Card({
-      hint:'median', title:'Deneme net trendi',       actions:html`<div class="row-sm">${delta('TYT', tyt)}${delta('AYT', ayt)}</div>`,
+      hint:'median', title:yz('ays.progress.deneme-net-trendi'),       actions:html`<div class="row-sm">${delta('TYT', tyt)}${delta('AYT', ayt)}</div>`,
       body:html`
         ${raw(UI.lineChart([{ data:tyt.series }, { data:ayt.series, accent:true }],
           { labels:C.fullExams('TYT').map(e => U.fmtShort(e.date)), band:gate ? gate.tyt : null,
             bandLabel:'bu ayın bandı', height:180 }))}
         ${raw(UI.legend([
-          { label:'TYT tam deneme', color:'var(--primary)' },
+          { label:yz('ays.progress.tyt-tam-deneme'), color:'var(--primary)' },
           /* Lejant yalnız çizilen şeyi adlandırır (2026-10-07): AYT verisi
              yokken «AYT tam deneme» ve bandın adı grafikte yazarken gri
              (görünmez) kareli ikinci adı boşta duruyordu. */
-          ...(ayt.series.some(v => v != null) ? [{ label:'AYT tam deneme', color:'var(--accent)' }] : []),
+          ...(ayt.series.some(v => v != null) ? [{ label:yz('ays.progress.ayt-tam-deneme'), color:'var(--accent)' }] : []),
         ]))}
 `,
     });
@@ -140,26 +194,26 @@ R.Screens.progress = (function(){
 
     const choice = decision
       ? html`
-        ${K.Notice({ tone:'ok', title:'Seçilen müdahale:', body:html`${decision.action}
-          <div class="small muted">Veri dönemi: ${decision.window} · Yeniden değerlendirme: ${U.fmtDate(decision.reevaluateAt)}</div>` })}
-        ${K.Button({ label:'Müdahaleyi değiştir', size:'sm', act:'clear-decision', data:{ 'data-key':key } })}`
+        ${K.Notice({ tone:'ok', title:yz('ays.progress.secilen-mudahale'), body:html`${decision.action}
+          <div class="small muted">${yz('ays.progress.veri-donemi')} ${decision.window} ${yz('ays.progress.yeniden-degerlendirme')} ${U.fmtDate(decision.reevaluateAt)}</div>` })}
+        ${K.Button({ label:yz('ays.progress.mudahaleyi-degistir'), size:'sm', act:'clear-decision', data:{ 'data-key':key } })}`
       : html`
-        <div class="stack-xs"><span class="mono-label">Bir ana müdahale seç</span>
+        <div class="stack-xs"><span class="mono-label">${yz('ays.progress.bir-ana-mudahale-sec')}</span>
           ${map(g.suggestions, (s, i) => html`
             <label class="check"><input type="radio" name="gate-opt" value="${i}"/>
               <span>${s.text}<br/><span class="tiny dim">${s.why}</span></span></label>`)}
         </div>
-        ${K.Button({ label:'Ana müdahaleyi kaydet', tone:'primary', act:'save-decision' })}`;
+        ${K.Button({ label:yz('ays.progress.ana-mudahaleyi-kaydet'), tone:'primary', act:'save-decision' })}`;
 
     return K.Card({
-      hint:'gate', title:'Aylık değerlendirme — '+gate.month,
-      badge:decision ? K.Badge({ label:'karar verildi', tone:'ok' }) : K.Badge({ label:'karar bekliyor', tone:'warn' }),
+      hint:'gate', title:yz('ays.progress.aylik-degerlendirme')+gate.month,
+      badge:decision ? K.Badge({ label:yz('ays.progress.karar-verildi'), tone:'ok' }) : K.Badge({ label:yz('ays.progress.karar-bekliyor'), tone:'warn' }),
       body:K.Stack([
         meter('TYT', g.tytStatus, g.tyt.last3, gate.tyt, gate.tytSafe),
         when(gate.ayt, () => meter('AYT', g.aytStatus, g.ayt.last3, gate.ayt, gate.aytSafe)),
         /* Karar beklerken kural zaten ilk seçenektir («Bu ayın kapı kuralı»);
            ayrıca kutuda yazmak aynı cümleyi iki kez okutuyordu. */
-        when(decision, () => K.Notice({ tone:'info', title:'Bu ayın kuralı:', body:gate.note })),
+        when(decision, () => K.Notice({ tone:'info', title:yz('ays.progress.bu-ayin-kurali'), body:gate.note })),
         choice,
       ]),
     });
@@ -170,11 +224,11 @@ R.Screens.progress = (function(){
   function testTrendCard(){
     const fam = S.ui.trendFamily || 'TYT';
     const series = C.testSeries(fam);
-    const seg = K.Segmented({ items:FAMILIES, value:fam, act:'trend-family', aria:'Deneme ailesi' });
+    const seg = K.Segmented({ items:FAMILIES, value:fam, act:'trend-family', aria:yz('ays.progress.deneme-ailesi') });
 
     if(!series.length){
-      return K.Card({ title:'Test bazlı trend', actions:seg,
-        body:K.Empty({ icon:'chart', text:'Tam deneme girildikçe her test için ayrı trend burada oluşur.' }) });
+      return K.Card({ title:yz('ays.progress.test-bazli-trend'), actions:seg,
+        body:K.Empty({ icon:'chart', text:yz('ays.progress.tam-deneme-girildikce-her-te') }) });
     }
 
     const rows = series.map(s => {
@@ -185,9 +239,9 @@ R.Screens.progress = (function(){
       const band = R.TEST_BANDS.find(b => b.testKey === s.name && b.exam === fam);
       const change = (first != null && last != null) ? U.round(last-first, 1) : null;
       const status = (!band || med == null) ? K.Badge({ label:'—', tone:'muted' })
-        : med >= band.high ? K.Badge({ label:'üst bant', tone:'ok' })
+        : med >= band.high ? K.Badge({ label:yz('ays.progress.ust-bant'), tone:'ok' })
         : med >= band.low ? K.Badge({ label:'bantta', tone:'ok' })
-        : K.Badge({ label:'altında', tone:'warn' });
+        : K.Badge({ label:yz('ays.progress.altinda'), tone:'warn' });
       return [
         html`<b class="small">${s.name}</b>${when(band, () => html`<div class="tiny dim">hedef ${band.low}–${band.high}</div>`)}`,
         raw(UI.sparkline(s.data)),
@@ -198,9 +252,9 @@ R.Screens.progress = (function(){
     });
 
     return K.Card({
-      title:'Test bazlı trend', sub:'Test başına seyir', actions:seg,
+      title:yz('ays.progress.test-bazli-trend'), sub:yz('ays.progress.test-basina-seyir'), actions:seg,
       body:K.Table({ tight:true, rows,
-        headers:['Test', 'Seyir', { label:'Son 4 medyan', num:true }, { label:'İlk→son', num:true }, 'Durum'] }),
+        headers:['Test', 'Seyir', { label:yz('ays.progress.son-4-medyan'), num:true }, { label:yz('ays.progress.i-lk-son'), num:true }, 'Durum'] }),
     });
   }
 
@@ -212,7 +266,7 @@ R.Screens.progress = (function(){
       const g = R.MONTH_GATES[m];
       const range = b => b ? b[0]+'–'+b[1] : '—';
       return [
-        m === now ? html`<b>${m}</b> ${K.Badge({ label:'şimdi', tone:'ok' })}` : m,
+        m === now ? html`<b>${m}</b> ${K.Badge({ label:yz('ays.progress.simdi'), tone:'ok' })}` : m,
         html`<span class="num">${range(g.tyt)}</span>`,
         html`<span class="num dim">${range(g.tytSafe)}</span>`,
         html`<span class="num">${range(g.ayt)}</span>`,
@@ -221,15 +275,15 @@ R.Screens.progress = (function(){
       ];
     });
     return K.Collapsible({
-      title:'Aylık net gelişim eğrisi', meta:'koçluk bandı', act:'toggle-month-curve', open:!!S.ui.monthCurveOpen,
-      body:K.Table({ tight:true, rows, headers:['Ay', { label:'TYT gözlenen', num:true }, { label:'TYT güvenli', num:true },
-        { label:'AYT gözlenen', num:true }, { label:'AYT güvenli', num:true }, 'Karar kapısı'] }),
+      title:yz('ays.progress.aylik-net-gelisim-egrisi'), meta:'koçluk bandı', act:'toggle-month-curve', open:!!S.ui.monthCurveOpen,
+      body:K.Table({ tight:true, rows, headers:['Ay', { label:yz('ays.progress.tyt-gozlenen'), num:true }, { label:yz('ays.progress.tyt-guvenli'), num:true },
+        { label:yz('ays.progress.ayt-gozlenen'), num:true }, { label:yz('ays.progress.ayt-guvenli'), num:true }, 'Karar kapısı'] }),
     });
   }
 
   function kpiReference(){
     return K.Collapsible({
-      title:'KPI sözlüğü', meta:'formül ve müdahale', act:'toggle-kpi-ref', open:!!S.ui.kpiRefOpen,
+      title:yz('ays.progress.kpi-sozlugu'), meta:'formül ve müdahale', act:'toggle-kpi-ref', open:!!S.ui.kpiRefOpen,
       body:K.Table({ tight:true, headers:['KPI', 'Formül', 'Hedef', 'Sapmada'],
         rows:R.KPI_DEFS.map(d => [
           html`<b class="small">${d.name}</b>`,
@@ -253,8 +307,8 @@ R.Screens.progress = (function(){
       const st = M.topicState(s.id, t.id).state;
       return { ad:t.name, durum:st === 'closed' ? 'bitti' : st === 'not_started' ? 'bekliyor' : 'suruyor' };
     }) }));
-    return K.Card({ title:'Yol haritası', sub:'Konular ders ders; kapanan dolu, çalışılan halka, sıradaki kalın',
-      body:raw(A.html({ merkez:'Sınav', kumeler, bos:'Konular yüklenince harita belirir.' })) });
+    return K.Card({ title:yz('ays.progress.yol-haritasi'), sub:yz('ays.progress.konular-ders-ders-kapanan-do'),
+      body:raw(A.html({ merkez:'Sınav', kumeler, bos:yz('ays.progress.konular-yuklenince-harita-be') })) });
   }
 
   LIFEOS.PARCA.blok({ id:'progress.bolum-1', sayfa:'progress', yer:'y1', sira:10, ad:'Bölüm 1', ciz({ pareto, history, sleep, debt, closure, ozet }){
@@ -279,7 +333,7 @@ R.Screens.progress = (function(){
     return testTrendCard();
   } });
   LIFEOS.PARCA.blok({ id:'progress.plan-tamamlama-son-8-hafta', sayfa:'progress', yer:'y7', sira:20, ad:'Plan tamamlama — son 8 hafta', ciz({ pareto, history, sleep, debt, closure, ozet }){
-    return K.Card({ title:'Plan tamamlama — son 8 hafta', sub:'Hedef %85',
+    return K.Card({ title:yz('ays.progress.plan-tamamlama-son-8'), sub:yz('ays.progress.hedef-85'),
           body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) });
   } });
   LIFEOS.PARCA.blok({ id:'progress.monthcurvecard', sayfa:'progress', yer:'y7', sira:30, ad:'monthCurveCard', ciz({ pareto, history, sleep, debt, closure, ozet }){
@@ -289,19 +343,19 @@ R.Screens.progress = (function(){
     return kpiReference();
   } });
   LIFEOS.PARCA.blok({ id:'progress.hata-paretosu', sayfa:'progress', yer:'y8', sira:10, ad:'Hata paretosu', ciz({ pareto, history, sleep, debt, closure, ozet }){
-    return K.Card({ hint:'pareto', title:'Hata paretosu', body:html`
+    return K.Card({ hint:'pareto', title:yz('ays.progress.hata-paretosu'), body:html`
           ${raw(UI.paretoBars(pareto))}
           ${when(pareto[0] && pareto[0].count, () => html`<div class="mt-10">${K.Notice({ tone:'info',
             body:'Reçete: '+R.ERROR_TAGS[pareto[0].tag].recipe })}</div>`)}` });
   } });
   LIFEOS.PARCA.blok({ id:'progress.surec-gostergeleri', sayfa:'progress', yer:'y8', sira:20, ad:'Süreç göstergeleri', ciz({ pareto, history, sleep, debt, closure, ozet }){
-    return K.Card({ hint:'not-surec-gostergeleri', title:'Süreç göstergeleri', body:K.Stack([
-          K.Meter({ label:'Tekrar borcu', value:debt, text:'%'+debt, tone:debt > 10 ? 'danger' : '' }),
-          K.Meter({ label:'Konu kapanışı', value:closure, text:'%'+closure }),
+    return K.Card({ hint:'not-surec-gostergeleri', title:yz('ays.progress.surec-gostergeleri'), body:K.Stack([
+          K.Meter({ label:yz('ays.progress.tekrar-borcu'), value:debt, text:'%'+debt, tone:debt > 10 ? 'danger' : '' }),
+          K.Meter({ label:yz('ays.progress.konu-kapanisi'), value:closure, text:'%'+closure }),
           /* «Bu hızla» (fikir 20): kapanış hızından sınava yetişme — tahmin. */
           html`<p class="tiny dim">${C.buHizla().metin}</p>`,
           html`<p class="tiny dim">${C.verimliSaat().metin}</p>`,
-          when(sleep != null, () => K.Meter({ label:'Uyku (7 gün ort.)',
+          when(sleep != null, () => K.Meter({ label:yz('ays.progress.uyku-7-gun-ort'),
             value:U.pct(sleep, S.profile.sleepTarget), text:sleep+' / '+S.profile.sleepTarget+' sa' })),
         ], 'sm') });
   } });
@@ -339,7 +393,7 @@ R.Screens.progress = (function(){
     async 'toggle-month-curve'(){ S.ui.monthCurveOpen = !S.ui.monthCurveOpen; R.App.render(); },
     async 'save-decision'(){
       const sel = document.querySelector('input[name="gate-opt"]:checked');
-      if(!sel){ UI.toast('Bir müdahale seç'); return; }
+      if(!sel){ UI.toast(yz('ays.progress.bir-mudahale-sec')); return; }
       const gate = C.currentGate();
       const g = C.gateSuggestions(gate);
       const chosen = g.suggestions[Number(sel.value)];
@@ -354,7 +408,7 @@ R.Screens.progress = (function(){
         createdAt:new Date().toISOString(),
         reevaluateAt:U.iso(U.addDays(U.today(), 21)),
       });
-      UI.toast('Müdahale kaydedildi · 21 gün sonra yeniden değerlendirilecek');
+      UI.toast(yz('ays.progress.mudahale-kaydedildi-21-gun'));
       R.App.render();
     },
     async 'clear-decision'(el){
@@ -381,7 +435,7 @@ R.Screens.progress = (function(){
       return ['test-bazlı-trend', 'plan-tamamlama-son-hafta', 'hata-paretosu']
         .concat(G && verildi ? [G.anahtar('Aylık değerlendirme — ' + gate.month)] : []);
     },
-    title:'İlerleme',
+    title:yz('ays.progress.i-lerleme'),
     subtitle(){
       const t = C.medianTrend('TYT');
       return t.last3 == null ? 'Henüz tam deneme medyanı yok'

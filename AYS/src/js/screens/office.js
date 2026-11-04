@@ -5,6 +5,113 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.office.hazir-kurallarla-calisiyor':'hazır kurallarla çalışıyor',
+  'ays.office.gunluk-hakki-doldu':'günlük hakkı doldu',
+  'ays.office.sirada':'sırada · ',
+  'ays.office.masasinda-musait':'masasında, müsait',
+  'ays.office.git':'Git',
+  'ays.office.onerisi':'Önerisi:',
+  'ays.office.alanina-dusen':'Alanına düşen',
+  'ays.office.tanesi-kapandi':'tanesi kapandı;',
+  'ays.office.masasindaki-veri':'Masasındaki veri',
+  'ays.office.konus':'Konuş',
+  'ays.office.bugunun-ozeti':'Bugünün özeti',
+  'ays.office.bu-brifing-eskidi':'Bu brifing eskidi.',
+  'ays.office.kural-motoru-metni-model':'Kural motoru metni — model bağlı değil.',
+  'ays.office.patron-un-masasi':'Patron’un masası',
+  'ays.office.uzmanlarin-raporunu-birlesti':'Uzmanların raporunu birleştirir; günün tek işini o söyler',
+  'ays.office.simdi-yap':'Şimdi yap',
+  'ays.office.toplanti-baslat':'Toplantı başlat',
+  'ays.office.patron-a-danis':'Patron’a danış',
+  'ays.office.toplanti-odasi':'Toplantı odası',
+  'ays.office.takipteki-kararlar':'Takipteki kararlar',
+  'ays.office.yapildi':'Yapıldı',
+  'ays.office.devret':'Devret',
+  'ays.office.ofis-modeli':'Ofis modeli',
+  'ays.office.bagla':'Bağla',
+  'ays.office.su-an-kural-motoru-modundasi':'Şu an kural motoru modundasın.',
+  'ays.office.ayarlar':'Ayarlar',
+  'ays.office.bu-ortamda-dis-model-calisma':'Bu ortamda dış model çalışmayabilir.',
+  'ays.office.bugun-kullanilan-hak':'Bugün kullanılan hak',
+  'ays.office.dakikada-en-fazla':'dakikada en fazla ',
+  'ays.office.sinir-motorda-uygulaniyor-is':'Sınır motorda uygulanıyor: istekler sıraya alınır, kota hiçbir zaman aşılmaz. Bir toplantı turu',
+  'ays.office.sn-surer':'sn sürer.',
+  'ays.office.anahtar-bagli-gunluk-hak':'anahtar bağlı — günlük hak',
+  'ays.office.kati':'katı.',
+  'ays.office.bu-saglayici-icin-bilinen-bi':'Bu sağlayıcı için bilinen bir istek sınırı yok; kota yöneticisi araya girmiyor.',
+  'ays.office.son-toplanti':'Son toplantı',
+  'ays.office.ekip-henuz-toplanmadi':'Ekip henüz toplanmadı',
+  'ays.office.toplantida-gundemi-kural-mot':'Toplantıda gündemi kural motoru seçer, uzmanlar sırayla konuşur, ',
+  'ays.office.i-lk-toplantiyi-baslat':'İlk toplantıyı başlat',
+  'ays.office.tutanagi-ac':'Tutanağı aç',
+  'ays.office.karari-uygula':'Kararı uygula',
+  'ays.office.telefon-bildirimi':'Telefon bildirimi',
+  'ays.office.kapali':'Kapalı',
+  'ays.office.acik':'Açık',
+  'ays.office.gunun-plani-saati':'Günün planı saati',
+  'ays.office.kurulu-bildirimler':'Kurulu bildirimler',
+  'ays.office.ays-gunun-plani-ve':'AYS · günün planı ve son günler',
+  'ays.office.bu-tarayici-bildirim-destekl':'Bu tarayıcı bildirim desteklemiyor.',
+  'ays.office.ays-ofis-uyarisi':'AYS · ofis uyarısı',
+  'ays.office.bildirim-izni-reddedilmis-ta':'Bildirim izni reddedilmiş. Tarayıcı ayarlarından bu siteye izin verirsen ofis haber verebilir.',
+  'ays.office.bildirime-izin-ver':'Bildirime izin ver',
+  'ays.office.ofis-acil-bir-not-buldugunda':'Ofis acil bir not bulduğunda haber verir; günde en fazla bir kez.',
+  'ays.office.bu-tarayici-konusma-sentezin':'Bu tarayıcı konuşma sentezini desteklemiyor.',
+  'ays.office.sesleri-tazele':'Sesleri tazele',
+  'ays.office.bu-cihazda-konusma-sesi-bulu':'Bu cihazda konuşma sesi bulunamadı.',
+  'ays.office.turkce-ses-yok-yabanci-bir':'Türkçe ses yok, yabancı bir sesle okunacak.',
+  'ays.office.bu-cihazdaki-sesler-temel-se':'Bu cihazdaki sesler temel seviyede.',
+  'ays.office.ses-bulundu-en-iyisi-secilip':'ses bulundu; en iyisi seçilip ajanlara dağıtıldı. Aşağıdan değiştirip dinleyebilirsin.',
+  'ays.office.otomatik':'otomatik — ',
+  'ays.office.dinle':'Dinle',
+  'ays.office.sil':'Sil',
+  'ays.office.api-anahtari':'API anahtarı',
+  'ays.office.kota-her-anahtar-icin-ayri':'Kota her anahtar için ayrı sayılır: ikinci anahtar günlük hakkı ikiye katlar. Motor kotası müsait olanı seçer.',
+  'ays.office.anahtar-yalniz-bu-tarayicida':'Anahtar yalnız bu tarayıcıda durur; yedeğe girmez, buluta gitmez, modele gönderilmez.',
+  'ays.office.ucretsiz-anahtar':'Ücretsiz anahtar:',
+  'ays.office.openai-uyumlu-chat-completio':'OpenAI uyumlu /chat/completions',
+  'ays.office.modelleri-yenile':'Modelleri yenile',
+  'ays.office.listeden-sec':'Listeden seç',
+  'ays.office.ya-da-model-kimligini-elle':'Ya da model kimliğini elle yaz',
+  'ays.office.or-deepseek-deepseek-chat-v3':'ör. deepseek/deepseek-chat-v3-0324:free',
+  'ays.office.motor-bu-siniri-hic-asmaz':'Motor bu sınırı hiç aşmaz: istekleri sıraya alır ve aralarına boşluk koyar. Sınır senin hesabında farklıysa buradan düzelt.',
+  'ays.office.dakikada-istek':'Dakikada istek',
+  'ays.office.gunde-istek':'Günde istek',
+  'ays.office.model-duserse-yedege-gec-one':'Model düşerse yedeğe geç (önerilir)',
+  'ays.office.sabah-gunun-brifingini-kendi':'Sabah günün brifingini kendiliğinden üret (günde 1 istek)',
+  'ays.office.kucuk-degisiklikler-sormadan':'Küçük değişiklikler sormadan uygulansın mı?',
+  'ays.office.yalniz-benim-istediklerim-on':'Yalnız benim istediklerim (önerilir)',
+  'ays.office.ajanlarin-kendi-buldugu-kucu':'Ajanların kendi bulduğu küçük öneriler de',
+  'ays.office.hicbiri-her-seyi-once':'Hiçbiri — her şeyi önce sor',
+  'ays.office.tur-tur-actigin-kucuk-tur':'Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar. Orta ve büyük türler kilitlidir.',
+  'ays.office.ofis-ayarlari':'Ofis ayarları',
+  'ays.office.ajanlarin-kullandigi-model-u':'Ajanların kullandığı model — ücretsiz sağlayıcılar desteklenir',
+  'ays.office.dikkat-bu-ortam-disa-kapali':'Dikkat: bu ortam dışa kapalı olabilir.',
+  'ays.office.saglayici':'Sağlayıcı',
+  'ays.office.ajan-basina-model':'Ajan başına model',
+  'ays.office.bos-birakilan-ajan-ofis-vars':'Boş bırakılan ajan ofis varsayılanını kullanır. Patron’a güçlü, uzmanlara hızlı model verebilirsin.',
+  'ays.office.ofis-varsayilani':'ofis varsayılanı',
+  'ays.office.tanila':'Tanıla',
+  'ays.office.baglantiyi-dene':'Bağlantıyı dene',
+  'ays.office.kaydet':'Kaydet',
+  'ays.office.saglayici-secilmedi':'Sağlayıcı seçilmedi',
+  'ays.office.ac':'Aç',
+  'ays.office.bam-urunleri':'BAM ürünleri',
+  'ays.office.masa':'Masa',
+  'ays.office.gunun-toplantisi':'Günün toplantısı',
+  'ays.office.uzman-masalari':'Uzman masaları',
+  'ays.office.silindi':'Silindi',
+  'ays.office.anahtar-silindi':'Anahtar silindi',
+  'ays.office.model-listesi-alinamadi':'Model listesi alınamadı.',
+  'ays.office.baglanti-calisiyor':'Bağlantı çalışıyor.',
+  'ays.office.baglanamadi':'Bağlanamadı.',
+  'ays.office.saglayicinin-yaniti':'— sağlayıcının yanıtı:',
+  'ays.office.masalari-okuyor':'Masaları okuyor…',
+  'ays.office.gunun-plani-saati-2':'Günün planı saati: ',
+  'ays.office.ofis':'Ofis',
+  'ays.office.masalari-tara':'Masaları tara',
+});
 window.LIFEOS.PARCA.sayfa({ id:'office', modul:'ays', cekmece:'ofis', ad:'Masalar', ikon:'guide', sira:10 });
 
 R.Screens.office = (function(){
@@ -41,14 +148,14 @@ R.Screens.office = (function(){
   function deskStatus(agent){
     const q = O.agentQuota(agent.id);
     if(O.mode() !== 'llm'){
-      return { text:'hazır kurallarla çalışıyor', short:'hazır kurallar', tone:'muted' };
+      return { text:yz('ays.office.hazir-kurallarla-calisiyor'), short:'hazır kurallar', tone:'muted' };
     }
-    if(q && q.full) return { text:'günlük hakkı doldu', short:'hak doldu', tone:'danger' };
+    if(q && q.full) return { text:yz('ays.office.gunluk-hakki-doldu'), short:'hak doldu', tone:'danger' };
     if(q && q.waitMs > 1500){
       const sn = Math.ceil(q.waitMs / 1000);
-      return { text:'sırada · ' + sn + ' sn', short:'sırada · ' + sn + ' sn', tone:'warn' };
+      return { text:yz('ays.office.sirada') + sn + ' sn', short:'sırada · ' + sn + ' sn', tone:'warn' };
     }
-    return { text:'masasında, müsait', short:'müsait', tone:'ok' };
+    return { text:yz('ays.office.masasinda-musait'), short:'müsait', tone:'ok' };
   }
 
   function Desk(agent){
@@ -86,7 +193,7 @@ R.Screens.office = (function(){
           <div class="${'note note--' + n.tone}">
             <span class="note__dot"></span>
             <span class="minw0">${n.text}</span>
-            ${when(n.route, () => K.Button({ label:'Git', size:'sm', tone:'ghost', act:'go',
+            ${when(n.route, () => K.Button({ label:yz('ays.office.git'), size:'sm', tone:'ghost', act:'go',
               data:{ 'data-route':n.route } }))}
           </div>`)}</div>`)}
 
@@ -94,7 +201,7 @@ R.Screens.office = (function(){
           <div class="desk__open">
             <div class="stack-xs">${map(b.findings, findingRow)}</div>
             ${when(b.suggestion, () => html`<div class="mt-10">
-              ${K.Notice({ tone:'info', title:'Önerisi:', body:b.suggestion.text })}</div>`)}
+              ${K.Notice({ tone:'info', title:yz('ays.office.onerisi'), body:b.suggestion.text })}</div>`)}
 
             ${when(b.journal && b.journal.length, () => html`
               <div class="mt-12">${K.SectionTitle('Defteri')}</div>
@@ -105,16 +212,16 @@ R.Screens.office = (function(){
                 </div>`)}</div>`)}
 
             ${when(trust.toplam, () => html`<p class="tiny dim mt-10">
-              Alanına düşen ${trust.toplam} karardan ${trust.kapanan} tanesi kapandı;
+              ${yz('ays.office.alanina-dusen')} ${trust.toplam} karardan ${trust.kapanan} ${yz('ays.office.tanesi-kapandi')}
               ${trust.yuzde == null ? 'henüz oran çıkmadı' : 'uygulanma oranı %' + trust.yuzde}.</p>`)}
 
-            <div class="mt-8"><span class="tiny dim">Masasındaki veri</span>
+            <div class="mt-8"><span class="tiny dim">${yz('ays.office.masasindaki-veri')}</span>
               ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.veriCipleriHtml(agent.reads))
                 : html`<span class="tiny dim">${agent.reads.join(' · ')}</span>`}</div>
           </div>`)}
 
         <div class="row wrap gap-6 mt-10">
-          ${K.Button({ label:'Konuş', icon:'zap', size:'sm',
+          ${K.Button({ label:yz('ays.office.konus'), icon:'zap', size:'sm',
             act:'office-talk', data:{ 'data-agent':agent.id } })}
           ${K.Button({ label:open ? 'Kapat' : 'Raporu aç', size:'sm', tone:'ghost',
             act:'office-desk', data:{ 'data-agent':agent.id } })}
@@ -140,7 +247,7 @@ R.Screens.office = (function(){
     const b = O.briefingOf();
     const notes = O.notes();
     return K.Card({
-      title:'Bugünün özeti',
+      title:yz('ays.office.bugunun-ozeti'),
       sub:b ? new Date(b.at).toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' })
             + ' · günde bir kez üretilir'
             : 'Patron masaları henüz özetlemedi',
@@ -152,14 +259,14 @@ R.Screens.office = (function(){
           ${b
             ? html`<p class="prose">${b.text}</p>
                 ${when(b.stale, () => html`<div class="mt-10">${K.Notice({ tone:'warn',
-                  title:'Bu brifing eskidi.',
+                  title:yz('ays.office.bu-brifing-eskidi'),
                   body:'Masalardaki notlar brifing yazıldıktan sonra değişti. '
                      + 'Aşağıdaki notlar günceldir; brifingi yenileyebilirsin.' })}</div>`)}
                 ${/* Model kapalıyken sayfanın üstündeki «Dil modeli kapalı» şeridi
                      bunu zaten söylüyor; satır yalnız model açıkken (brifing kurala
                      düştüyse) çizilir. */
                   when(b.mode === 'kural' && O.mode() === 'llm', () => html`<p class="tiny dim mt-8">
-                  Kural motoru metni — model bağlı değil.</p>`)}`
+                  ${yz('ays.office.kural-motoru-metni-model')}</p>`)}`
             : html`<p class="small muted">${O.ruleBriefingText()}</p>`}
         </div>
 
@@ -167,7 +274,7 @@ R.Screens.office = (function(){
           <div class="${'note note--' + n.tone}">
             <span class="note__dot"></span>
             <span class="minw0"><b class="small">${n.name}:</b> ${n.text}</span>
-            ${when(n.route, () => K.Button({ label:'Git', size:'sm', tone:'ghost', act:'go',
+            ${when(n.route, () => K.Button({ label:yz('ays.office.git'), size:'sm', tone:'ghost', act:'go',
               data:{ 'data-route':n.route } }))}
           </div>`)}</div>`)}`,
     });
@@ -186,8 +293,8 @@ R.Screens.office = (function(){
         <div class="desk__head">
           ${Avatar(patron)}
           <div class="minw0">
-            <b class="desk__name">Patron’un masası</b>
-            <span class="desk__role">Uzmanların raporunu birleştirir; günün tek işini o söyler</span>
+            <b class="desk__name">${yz('ays.office.patron-un-masasi')}</b>
+            <span class="desk__role">${yz('ays.office.uzmanlarin-raporunu-birlesti')}</span>
           </div>
           ${K.Badge({ label:O.mode() === 'llm' ? 'yapay zekâ bağlı' : 'hazır kurallar',
             tone:O.mode() === 'llm' ? 'ok' : 'info' })}
@@ -196,17 +303,17 @@ R.Screens.office = (function(){
         <div class="mt-12">
           ${K.NextUp({ icon:action.icon || 'zap', label:action.label || 'Sıradaki iş',
             title:action.title, why:action.why, hint:'next-action',
-            action:K.Button({ label:'Şimdi yap', size:'sm', act:'go',
+            action:K.Button({ label:yz('ays.office.simdi-yap'), size:'sm', act:'go',
               data:{ 'data-route':action.route || 'today' } }) })}
         </div>
 
         <div class="stack-xs mt-12">${map(b.findings, findingRow)}</div>
 
         <div class="row wrap gap-6 mt-12">
-          ${K.Button({ label:'Toplantı başlat', icon:'zap', tone:'primary', act:'office-meet' })}
-          ${K.Button({ label:'Patron’a danış', size:'sm', act:'office-talk',
+          ${K.Button({ label:yz('ays.office.toplanti-baslat'), icon:'zap', tone:'primary', act:'office-meet' })}
+          ${K.Button({ label:yz('ays.office.patron-a-danis'), size:'sm', act:'office-talk',
             data:{ 'data-agent':'patron' } })}
-          ${K.Button({ label:'Toplantı odası', size:'sm', tone:'ghost', act:'go',
+          ${K.Button({ label:yz('ays.office.toplanti-odasi'), size:'sm', tone:'ghost', act:'go',
             data:{ 'data-route':'meeting' } })}
         </div>`,
     });
@@ -217,7 +324,7 @@ R.Screens.office = (function(){
     const open = O.openDecisions();
     if(!open.length) return '';
     return K.Card({
-      hint:'not-takipteki-kararlar', title:'Takipteki kararlar',       badge:K.Badge({ label:String(open.length), tone:'warn' }),
+      hint:'not-takipteki-kararlar', title:yz('ays.office.takipteki-kararlar'),       badge:K.Badge({ label:String(open.length), tone:'warn' }),
       body:html`<div class="stack-sm">${map(open, d => html`
         <div class="decisionrow">
           <div class="minw0">
@@ -225,9 +332,9 @@ R.Screens.office = (function(){
             <span class="tiny dim">${U.relativeDay(R.U.gunOf(d.at))} · ${d.topic}</span>
           </div>
           <div class="row gap-6">
-            ${K.Button({ label:'Yapıldı', size:'sm', tone:'primary', act:'office-decision',
+            ${K.Button({ label:yz('ays.office.yapildi'), size:'sm', tone:'primary', act:'office-decision',
               data:{ 'data-id':d.id, 'data-state':'done' } })}
-            ${K.Button({ label:'Devret', size:'sm', tone:'ghost', act:'office-decision',
+            ${K.Button({ label:yz('ays.office.devret'), size:'sm', tone:'ghost', act:'office-decision',
               data:{ 'data-id':d.id, 'data-state':'carried' } })}
           </div>
         </div>`)}</div>`,
@@ -244,9 +351,9 @@ R.Screens.office = (function(){
 
     if(O.mode() !== 'llm'){
       return K.Card({
-        hint:'not-ofis-modeli', title:'Ofis modeli',         actions:K.Button({ label:'Bağla', icon:'gear', size:'sm', act:'office-settings' }),
+        hint:'not-ofis-modeli', title:yz('ays.office.ofis-modeli'),         actions:K.Button({ label:yz('ays.office.bagla'), icon:'gear', size:'sm', act:'office-settings' }),
         body:html`
-          ${K.Notice({ tone:'info', title:'Şu an kural motoru modundasın.',
+          ${K.Notice({ tone:'info', title:yz('ays.office.su-an-kural-motoru-modundasi'),
             body:'Ajanlar veriyi okuyup bulgularını yazıyor ama cümleleri sabit. '
                + 'Ücretsiz bir anahtar bağlarsan aynı bulguları kendi cümleleriyle tartışırlar.' })}
           <div class="row wrap gap-6 mt-10">
@@ -257,44 +364,42 @@ R.Screens.office = (function(){
     }
 
     return K.Card({
-      title:'Ofis modeli', sub:O.providerLabel(),
-      actions:K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }),
+      title:yz('ays.office.ofis-modeli'), sub:O.providerLabel(),
+      actions:K.Button({ label:yz('ays.office.ayarlar'), icon:'gear', size:'sm', act:'office-settings' }),
       body:html`
-        ${when(sandbox, () => K.Notice({ tone:'warn', title:'Bu ortamda dış model çalışmayabilir.',
+        ${when(sandbox, () => K.Notice({ tone:'warn', title:yz('ays.office.bu-ortamda-dis-model-calisma'),
           body:'Uygulama Claude içinde yayımlanmış bir sayfa olarak açıldığında dış API çağrıları '
              + 'engellenir. Yerleşik modeli seç ya da uygulamayı kendi tarayıcında aç.' }))}
 
         ${when(q.known, () => html`
-          ${K.Meter({ label:'Bugün kullanılan hak', value:q.rpd ? (100 * q.usedToday / q.rpd) : 0,
+          ${K.Meter({ label:yz('ays.office.bugun-kullanilan-hak'), value:q.rpd ? (100 * q.usedToday / q.rpd) : 0,
             text:q.usedToday + ' / ' + q.rpd, tone:q.full ? 'danger' : (q.remainingToday < 10 ? 'warn' : ''),
-            note:'dakikada en fazla ' + q.rpm + ' istek · istekler arası ' + Math.round(q.gapMs/100)/10 + ' sn' })}
+            note:yz('ays.office.dakikada-en-fazla') + q.rpm + ' istek · istekler arası ' + Math.round(q.gapMs/100)/10 + ' sn' })}
           <p class="tiny dim mt-8">
-            Sınır motorda uygulanıyor: istekler sıraya alınır, kota hiçbir zaman aşılmaz.
-            Bir toplantı turu ${Math.round(R.Quota.estimateMs(O.agentConfig('patron'), 6)/1000)} sn sürer.
-            ${when(keyCount > 1, () => html`${keyCount} anahtar bağlı — günlük hak ${keyCount} katı.`)}
+            ${yz('ays.office.sinir-motorda-uygulaniyor-is')} ${Math.round(R.Quota.estimateMs(O.agentConfig('patron'), 6)/1000)} ${yz('ays.office.sn-surer')}
+            ${when(keyCount > 1, () => html`${keyCount} ${yz('ays.office.anahtar-bagli-gunluk-hak')} ${keyCount} ${yz('ays.office.kati')}`)}
           </p>`)}
-        ${when(!q.known, () => html`<p class="small muted">Bu sağlayıcı için bilinen bir istek sınırı yok;
-          kota yöneticisi araya girmiyor.</p>`)}`,
+        ${when(!q.known, () => html`<p class="small muted">${yz('ays.office.bu-saglayici-icin-bilinen-bi')}</p>`)}`,
     });
   }
 
   function lastMeetingCard(){
     const m = O.lastMeeting();
     if(!m){
-      return K.Card({ title:'Son toplantı', sub:'Ekip henüz toplanmadı',
-        body:K.Empty({ icon:'guide', text:'Toplantıda gündemi kural motoru seçer, uzmanlar sırayla konuşur, '
+      return K.Card({ title:yz('ays.office.son-toplanti'), sub:yz('ays.office.ekip-henuz-toplanmadi'),
+        body:K.Empty({ icon:'guide', text:yz('ays.office.toplantida-gundemi-kural-mot')
           + 'sen bitirdiğinde rapor çıkar.',
-          action:K.Button({ label:'İlk toplantıyı başlat', act:'office-meet' }) }) });
+          action:K.Button({ label:yz('ays.office.i-lk-toplantiyi-baslat'), act:'office-meet' }) }) });
     }
     return K.Card({
-      title:'Son toplantı', sub:U.relativeDay(R.U.gunOf(m.at)) + ' · ' + m.topic,
+      title:yz('ays.office.son-toplanti'), sub:U.relativeDay(R.U.gunOf(m.at)) + ' · ' + m.topic,
       badge:K.Badge({ label:m.mode, tone:m.mode === 'llm' ? 'ok' : 'info' }),
       body:html`
         ${when(m.report, () => html`<p class="prose">${m.report.summary}</p>`)}
         ${when(m.action, () => K.Notice({ tone:'info', title:'Karar:', body:m.action.title }))}
         <div class="row wrap gap-6 mt-10">
-          ${K.Button({ label:'Tutanağı aç', size:'sm', act:'go', data:{ 'data-route':'meeting' } })}
-          ${when(m.action, () => K.Button({ label:'Kararı uygula', size:'sm', tone:'primary', act:'go',
+          ${K.Button({ label:yz('ays.office.tutanagi-ac'), size:'sm', act:'go', data:{ 'data-route':'meeting' } })}
+          ${when(m.action, () => K.Button({ label:yz('ays.office.karari-uygula'), size:'sm', tone:'primary', act:'go',
             data:{ 'data-route':m.action.route || 'today' } }))}
         </div>`,
     });
@@ -326,17 +431,17 @@ R.Screens.office = (function(){
     if(!B || !B.var() || !R.Takvim || !R.Takvim.bildirimAyari) return '';
     const a = R.Takvim.bildirimAyari();
     const V = (window.LIFEOS || {}).VITRIN;
-    return html`<div class="mt-12">${K.Field({ label:'Telefon bildirimi',
+    return html`<div class="mt-12">${K.Field({ label:yz('ays.office.telefon-bildirimi'),
         hint:'Her gün seçtiğin saatte günün planı, hedefin son günü ve profilde yazdığın sınav gününden bir gün önce. '
           + 'Önümüzdeki ' + R.Takvim.PLAN_GUN + ' gün kurulur, AYS kapalıyken de gelir.',
         input:K.Select({ id:'office-telbildirim', value:a.acik ? 'acik' : 'kapali', change:'office-telbildirim', options:[
-          { value:'kapali', label:'Kapalı' }, { value:'acik', label:'Açık' } ] }) })}
-      ${when(a.acik, () => html`<div class="mt-10">${K.Field({ label:'Günün planı saati',
+          { value:'kapali', label:yz('ays.office.kapali') }, { value:'acik', label:yz('ays.office.acik') } ] }) })}
+      ${when(a.acik, () => html`<div class="mt-10">${K.Field({ label:yz('ays.office.gunun-plani-saati'),
         input:K.Input({ id:'office-telsaat', type:'time', value:a.saat, change:'office-telsaat' }) })}</div>
-        <div class="mt-10">${K.Button({ label:'Kurulu bildirimler', size:'sm',
+        <div class="mt-10">${K.Button({ label:yz('ays.office.kurulu-bildirimler'), size:'sm',
           data:{ 'data-tb-ac':'1', 'data-tb-not':'Tamamen kapatmak için «Telefon bildirimi»ni Kapalı yap.' } })}</div>
         ${when(V && V.bildirimKutusu, () => raw('<div class="mt-10">' + V.bildirimKutusu({ modul:'ays',
-          turler:[{ id:'plan', ad:'AYS · günün planı ve son günler' }] }) + '</div>'))}`)}</div>`;
+          turler:[{ id:'plan', ad:yz('ays.office.ays-gunun-plani-ve') }] }) + '</div>'))}`)}</div>`;
   }
 
   /* Bildirim izni — istenmeden bildirim gonderilmez. Uygulamada (WKWebView)
@@ -346,22 +451,21 @@ R.Screens.office = (function(){
     if(B && B.var()) return '';
     const state = R.App.notifyState();
     if(state === 'unsupported'){
-      return html`<p class="tiny dim">Bu tarayıcı bildirim desteklemiyor.</p>`;
+      return html`<p class="tiny dim">${yz('ays.office.bu-tarayici-bildirim-destekl')}</p>`;
     }
     if(state === 'granted'){
       const V = (window.LIFEOS || {}).VITRIN;
       return html`${K.Notice({ tone:'ok', body:'Bildirim açık. Ofis acil bir not bulduğunda '
         + 'ya da karar iki gündür açık kaldığında günde en fazla bir kez haber verir.' })}
         ${when(V && V.bildirimKutusu, () => raw('<div class="mt-10">' + V.bildirimKutusu({ modul:'ays',
-          turler:[{ id:'ofis', ad:'AYS · ofis uyarısı' }] }) + '</div>'))}`;
+          turler:[{ id:'ofis', ad:yz('ays.office.ays-ofis-uyarisi') }] }) + '</div>'))}`;
     }
     if(state === 'denied'){
-      return html`<p class="tiny dim">Bildirim izni reddedilmiş. Tarayıcı ayarlarından
-        bu siteye izin verirsen ofis haber verebilir.</p>`;
+      return html`<p class="tiny dim">${yz('ays.office.bildirim-izni-reddedilmis-ta')}</p>`;
     }
     return html`<div class="row wrap gap-6">
-      ${K.Button({ label:'Bildirime izin ver', icon:'info', size:'sm', act:'office-notify' })}
-      <span class="tiny dim">Ofis acil bir not bulduğunda haber verir; günde en fazla bir kez.</span>
+      ${K.Button({ label:yz('ays.office.bildirime-izin-ver'), icon:'info', size:'sm', act:'office-notify' })}
+      <span class="tiny dim">${yz('ays.office.ofis-acil-bir-not-buldugunda')}</span>
     </div>`;
   }
 
@@ -404,32 +508,31 @@ R.Screens.office = (function(){
     if(!R.Voice.available()){
       return K.Stack([
         K.SectionTitle('Sesler'),
-        html`<p class="tiny dim">Bu tarayıcı konuşma sentezini desteklemiyor.</p>`,
+        html`<p class="tiny dim">${yz('ays.office.bu-tarayici-konusma-sentezin')}</p>`,
       ], 'sm');
     }
     const q = R.Voice.quality();
     const list = R.Voice.voices();
 
     return K.Stack([
-      K.SectionTitle('Sesler', K.Button({ label:'Sesleri tazele', icon:'refresh', size:'sm',
+      K.SectionTitle('Sesler', K.Button({ label:yz('ays.office.sesleri-tazele'), icon:'refresh', size:'sm',
         act:'office-voices' })),
 
-      when(!list.length, () => K.Notice({ tone:'warn', title:'Bu cihazda konuşma sesi bulunamadı.',
+      when(!list.length, () => K.Notice({ tone:'warn', title:yz('ays.office.bu-cihazda-konusma-sesi-bulu'),
         body:'Toplantı sessiz akar. Chrome ya da Edge’de Türkçe ses paketi kuruluysa '
            + '“Sesleri tazele”ye bas; mobilde sistem dili ayarlarından Türkçe TTS kurulabilir.' })),
 
       when(list.length && !q.turkish, () => K.Notice({ tone:'warn',
-        title:'Türkçe ses yok, yabancı bir sesle okunacak.',
+        title:yz('ays.office.turkce-ses-yok-yabanci-bir'),
         body:'Türkçe metin yabancı bir sesle bozuk duyulur. Cihazına Türkçe konuşma '
            + 'paketi kurarsan belirgin düzelir.' })),
 
       when(list.length && q.turkish && q.level === 'dusuk', () => K.Notice({ tone:'info',
-        title:'Bu cihazdaki sesler temel seviyede.',
+        title:yz('ays.office.bu-cihazdaki-sesler-temel-se'),
         body:'Elde olan en iyi ses seçildi ama gömülü (robotik) bir motor. Chrome’da '
            + '“Google Türkçe”, Edge’de “Natural/Neural” sesleri belirgin daha doğaldır.' })),
 
-      when(list.length, () => html`<p class="tiny dim">${list.length} ses bulundu;
-        en iyisi seçilip ajanlara dağıtıldı. Aşağıdan değiştirip dinleyebilirsin.</p>`),
+      when(list.length, () => html`<p class="tiny dim">${list.length} ${yz('ays.office.ses-bulundu-en-iyisi-secilip')}</p>`),
 
       when(list.length, () => html`<div class="stack-xs">${map(R.AGENTS, a => {
         const prof = R.Voice.profileFor(a.id, R.AGENT_IDS);
@@ -439,10 +542,10 @@ R.Screens.office = (function(){
           <span class="voicerow__name">${a.name}</span>
           ${K.Select({ id:'voice-' + a.id, value:current, change:'office-voice',
             data:{ 'data-agent':a.id },
-            options:[{ value:'', label:'otomatik — ' + (prof.name || 'ses yok') }]
+            options:[{ value:'', label:yz('ays.office.otomatik') + (prof.name || 'ses yok') }]
               .concat(list.map(v => ({ value:v.voiceURI || v.name, label:v.name }))) })}
           ${K.IconButton({ icon:'play', size:'sm', aria:a.name + ' sesini dinle',
-            title:'Dinle', act:'office-voice-try', data:{ 'data-agent':a.id } })}
+            title:yz('ays.office.dinle'), act:'office-voice-try', data:{ 'data-agent':a.id } })}
         </div>`;
       })}</div>`),
     ], 'sm');
@@ -476,25 +579,23 @@ R.Screens.office = (function(){
           <div class="keyrow">
             <span class="keyrow__mask">${masked}</span>
             <span class="keyrow__q">${keyUsage(providerId, current, i)}</span>
-            ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'office-forget',
+            ${K.Button({ label:yz('ays.office.sil'), size:'sm', tone:'ghost', act:'office-forget',
               data:{ 'data-provider':providerId, 'data-index':i } })}
           </div>`)}</div>`),
         K.Field({ label:keys.length ? 'Başka bir anahtar ekle' : 'Anahtarı yapıştır',
           hint:p.keyHint,
           input:K.Input({ id:'llm-key', type:'password', placeholder:p.keyHint,
-            aria:'API anahtarı', change:'office-key' }) }),
+            aria:yz('ays.office.api-anahtari'), change:'office-key' }) }),
         html`<div id="llm-key-warn"></div>`,
-        when(keys.length, () => html`<p class="tiny dim">Kota her anahtar için ayrı sayılır:
-          ikinci anahtar günlük hakkı ikiye katlar. Motor kotası müsait olanı seçer.</p>`),
-        html`<p class="tiny dim">Anahtar yalnız bu tarayıcıda durur; yedeğe girmez, buluta gitmez,
-          modele gönderilmez. ${when(p.keyUrl, () => html`Ücretsiz anahtar:
+        when(keys.length, () => html`<p class="tiny dim">${yz('ays.office.kota-her-anahtar-icin-ayri')}</p>`),
+        html`<p class="tiny dim">${yz('ays.office.anahtar-yalniz-bu-tarayicida')} ${when(p.keyUrl, () => html`${yz('ays.office.ucretsiz-anahtar')}
           <a href="${p.keyUrl}" target="_blank" rel="noopener">${p.keyUrl.replace(/^https:\/\//, '')}</a>`)}</p>`,
       ], 'sm')),
 
       /* --- 2. uc adresi (yalniz ozel) --- */
       when(p.editableEndpoint, () => K.Stack([
         K.SectionTitle('Uç adresi'),
-        K.Field({ label:'OpenAI uyumlu /chat/completions',
+        K.Field({ label:yz('ays.office.openai-uyumlu-chat-completio'),
           hint:p.endpoint ? 'varsayılan: ' + p.endpoint : null,
           input:K.Input({ id:'llm-endpoint',
             value:(providerId === st.provider ? st.endpoint : '') || p.endpoint || '',
@@ -508,28 +609,27 @@ R.Screens.office = (function(){
          cikip tek dugmeye iner. */
       K.Stack([
         K.SectionTitle((p.needsKey ? '2. ' : '') + 'Model',
-          K.Button({ label:'Modelleri yenile', icon:'refresh', size:'sm', act:'office-models' })),
+          K.Button({ label:yz('ays.office.modelleri-yenile'), icon:'refresh', size:'sm', act:'office-models' })),
         html`<p class="tiny dim" id="llm-model-note">${catalogNote(providerId)}</p>`,
-        when(models.length, () => K.Field({ label:'Listeden seç',
+        when(models.length, () => K.Field({ label:yz('ays.office.listeden-sec'),
           input:K.Select({ id:'llm-model', value:current, change:'office-model',
             options:modelOptions(providerId) }) })),
-        K.Field({ label:'Ya da model kimliğini elle yaz',
+        K.Field({ label:yz('ays.office.ya-da-model-kimligini-elle'),
           hint:'listede yoksa doldur; boş bırakırsan yukarıdaki seçilir',
           input:K.Input({ id:'llm-model-custom', value:typed,
-            placeholder:'ör. deepseek/deepseek-chat-v3-0324:free' }) }),
+            placeholder:yz('ays.office.or-deepseek-deepseek-chat-v3') }) }),
       ], 'sm'),
 
       /* --- 4. istek siniri --- */
       when(p.needsKey, () => K.Stack([
         K.SectionTitle(p.editableEndpoint ? 'İstek sınırı' : '3. İstek sınırı'),
-        html`<p class="small muted">Motor bu sınırı hiç aşmaz: istekleri sıraya alır ve aralarına
-          boşluk koyar. Sınır senin hesabında farklıysa buradan düzelt.
+        html`<p class="small muted">${yz('ays.office.motor-bu-siniri-hic-asmaz')}
           ${when(p.checked, () => html`<span class="tiny dim">(katalog: ${p.checked})</span>`)}</p>`,
         html`<div class="cols-2">
-          ${K.Field({ label:'Dakikada istek',
+          ${K.Field({ label:yz('ays.office.dakikada-istek'),
             input:K.Input({ id:'llm-rpm', type:'number', min:1, numeric:true,
               value:over.rpm || (lim && lim.rpm) || '', placeholder:'—' }) })}
-          ${K.Field({ label:'Günde istek',
+          ${K.Field({ label:yz('ays.office.gunde-istek'),
             input:K.Input({ id:'llm-rpd', type:'number', min:1, numeric:true,
               value:over.rpd || (lim && lim.rpd) || '', placeholder:'—' }) })}
         </div>`,
@@ -543,22 +643,21 @@ R.Screens.office = (function(){
       /* --- 6. ofis davranisi --- */
       K.Stack([
         K.SectionTitle('Ofis davranışı'),
-        K.Checkbox({ label:'Model düşerse yedeğe geç (önerilir)', checked:st.fallback !== false,
+        K.Checkbox({ label:yz('ays.office.model-duserse-yedege-gec-one'), checked:st.fallback !== false,
           act:'office-toggle-fallback' }),
-        K.Checkbox({ label:'Sabah günün brifingini kendiliğinden üret (günde 1 istek)',
+        K.Checkbox({ label:yz('ays.office.sabah-gunun-brifingini-kendi'),
           checked:st.autoBriefing !== false, act:'office-toggle-briefing' }),
-        K.Field({ label:'Küçük değişiklikler sormadan uygulansın mı?',
+        K.Field({ label:yz('ays.office.kucuk-degisiklikler-sormadan'),
           hint:'Küçük: tek günü ya da tek kaydı değiştiren, geri alınabilen iş. '
             + 'Orta ve büyük değişiklikler her zaman önce sorulur.',
           input:K.Select({ id:'office-otomatik', value:st.otomatikUygula || 'istek',
             change:'office-otomatik', options:[
-              { value:'istek', label:'Yalnız benim istediklerim (önerilir)' },
-              { value:'hepsi', label:'Ajanların kendi bulduğu küçük öneriler de' },
-              { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
+              { value:'istek', label:yz('ays.office.yalniz-benim-istediklerim-on') },
+              { value:'hepsi', label:yz('ays.office.ajanlarin-kendi-buldugu-kucu') },
+              { value:'hicbiri', label:yz('ays.office.hicbiri-her-seyi-once') },
             ] }) }),
         html`${when((window.LIFEOS || {}).ONERI, () => html`<div class="mt-12">
-          <p class="small muted">Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar.
-            Orta ve büyük türler kilitlidir.</p>
+          <p class="small muted">${yz('ays.office.tur-tur-actigin-kucuk-tur')}</p>
           ${raw(window.LIFEOS.ONERI.ayarHtml(R.ACTIONS, { mod:st.otomatikUygula || 'istek', turler:st.otomatikTurler || {} }))}</div>`)}`,
         html`<div id="office-notify">${notifyRow()}</div>`,
         html`<div id="office-telefon">${telefonRow()}</div>`,
@@ -574,41 +673,40 @@ R.Screens.office = (function(){
     const sandbox = R.LLM.inSandbox();
 
     UI.sheet({
-      title:'Ofis ayarları',
-      subtitle:'Ajanların kullandığı model — ücretsiz sağlayıcılar desteklenir',
+      title:yz('ays.office.ofis-ayarlari'),
+      subtitle:yz('ays.office.ajanlarin-kullandigi-model-u'),
       wide:true,
       body:String(K.Stack([
-        when(sandbox, () => K.Notice({ tone:'warn', title:'Dikkat: bu ortam dışa kapalı olabilir.',
+        when(sandbox, () => K.Notice({ tone:'warn', title:yz('ays.office.dikkat-bu-ortam-disa-kapali'),
           body:'Uygulama Claude içinde yayımlanmış bir sayfa olarak çalışıyor. Bu ortamda dış API '
              + 'çağrıları engellenir; "Yerleşik" sağlayıcı çalışır, diğerleri çalışmayabilir. '
              + 'Ücretsiz sağlayıcıları kullanmak için uygulamayı kendi tarayıcında aç.' })),
-        K.Field({ label:'Sağlayıcı', input:K.Select({ id:'llm-provider', change:'office-provider',
+        K.Field({ label:yz('ays.office.saglayici'), input:K.Select({ id:'llm-provider', change:'office-provider',
           value:pid,
           options:R.PROVIDER_ORDER.map(id => ({ value:id,
             label:R.PROVIDERS[id].label + (R.PROVIDERS[id].free ? ' · ücretsiz' : '') })) }) }),
         html`<div id="llm-form">${providerForm(pid)}</div>`,
-        K.Collapsible({ title:'Ajan başına model', meta:'isteğe bağlı', act:'office-peragent',
+        K.Collapsible({ title:yz('ays.office.ajan-basina-model'), meta:'isteğe bağlı', act:'office-peragent',
           open:!!S.ui.officePerAgent,
           body:html`<div class="stack-sm">
-            <p class="small muted">Boş bırakılan ajan ofis varsayılanını kullanır.
-              Patron’a güçlü, uzmanlara hızlı model verebilirsin.</p>
+            <p class="small muted">${yz('ays.office.bos-birakilan-ajan-ofis-vars')}</p>
             ${map(R.AGENTS, a => K.Field({ label:a.name + ' · ' + a.role,
               input:K.Input({ id:'llm-agent-' + a.id,
                 value:(st.perAgent && st.perAgent[a.id] && st.perAgent[a.id].model) || '',
-                placeholder:'ofis varsayılanı' }) }))}
+                placeholder:yz('ays.office.ofis-varsayilani') }) }))}
           </div>` }),
       ])),
       footer:String(html`
-        ${K.Button({ label:'Tanıla', icon:'info', act:'office-diagnose' })}
-        ${K.Button({ label:'Bağlantıyı dene', icon:'refresh', act:'office-test' })}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'office-save' })}`),
+        ${K.Button({ label:yz('ays.office.tanila'), icon:'info', act:'office-diagnose' })}
+        ${K.Button({ label:yz('ays.office.baglantiyi-dene'), icon:'refresh', act:'office-test' })}
+        ${K.Button({ label:yz('ays.office.kaydet'), tone:'primary', act:'office-save' })}`),
     });
   }
 
   /* Sheet icindeki alanlari tek yerden okur. */
   function readForm(){
     const provider = (document.getElementById('llm-provider') || {}).value;
-    if(!provider || !R.PROVIDERS[provider]){ UI.toast('Sağlayıcı seçilmedi'); return null; }
+    if(!provider || !R.PROVIDERS[provider]){ UI.toast(yz('ays.office.saglayici-secilmedi')); return null; }
     const p = R.PROVIDERS[provider];
     const val = id => { const el = document.getElementById(id); return el ? String(el.value).trim() : ''; };
     const list = R.LLM.modelsFor(provider);
@@ -685,10 +783,10 @@ R.Screens.office = (function(){
     const govde = html`<div class="stack-xs">${map(l, u => html`<div class="row gap-8 wrap">
       <span class="minw0"><b>${u.baslik}</b> <span class="tiny dim">· ${u.urunAd}
         · ${LIFEOS.Urun.etiketAdi(u.dogruluk)}</span></span>
-      ${K.Button({ label:'Aç', size:'sm', act:'urun-ac', data:{ 'data-id':u.id } })}
-      ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
+      ${K.Button({ label:yz('ays.office.ac'), size:'sm', act:'urun-ac', data:{ 'data-id':u.id } })}
+      ${K.Button({ label:yz('ays.office.sil'), size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
     </div>`)}</div>`;
-    return K.Card({ title:'BAM ürünleri', hint:'hkm', sub:l.length + ' ürün',
+    return K.Card({ title:yz('ays.office.bam-urunleri'), hint:'hkm', sub:l.length + ' ürün',
       body:govde });
   }
 
@@ -711,11 +809,11 @@ R.Screens.office = (function(){
     return (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : '';
   } });
   LIFEOS.PARCA.blok({ id:'office.bolum-2', sayfa:'office', yer:'y2', sira:10, ad:'Bölüm 2', ciz({ specialists, vo }){
-    return when(vo.masa, () => K.Kutu({ ad:'Masa', yuva:'kim konuşuyor', class:'vkutu',
+    return when(vo.masa, () => K.Kutu({ ad:yz('ays.office.masa'), yuva:'kim konuşuyor', class:'vkutu',
           govde:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` }));
   } });
   LIFEOS.PARCA.blok({ id:'office.bolum-3', sayfa:'office', yer:'y2', sira:20, ad:'Bölüm 3', ciz({ specialists, vo }){
-    return when(vo.toplanti, () => K.Kutu({ ad:'Günün toplantısı', yuva:'her masadan tek cümle', class:'vkutu',
+    return when(vo.toplanti, () => K.Kutu({ ad:yz('ays.office.gunun-toplantisi'), yuva:'her masadan tek cümle', class:'vkutu',
           govde:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` }));
   } });
   LIFEOS.PARCA.blok({ id:'office.briefingcard', sayfa:'office', yer:'y2', sira:30, ad:'briefingCard', ciz({ specialists, vo }){
@@ -728,7 +826,7 @@ R.Screens.office = (function(){
     return decisionsCard();
   } });
   LIFEOS.PARCA.blok({ id:'office.uzman-masalari', sayfa:'office', yer:'y2', sira:60, ad:'Uzman masaları', ciz({ specialists, vo }){
-    return K.Card({ title:'Uzman masaları', body:html`<div class="desks">${map(specialists, Desk)}</div>` });
+    return K.Card({ title:yz('ays.office.uzman-masalari'), body:html`<div class="desks">${map(specialists, Desk)}</div>` });
   } });
   LIFEOS.PARCA.blok({ id:'office.urunlerkart', sayfa:'office', yer:'y3', sira:10, ad:'urunlerKart', ciz({ specialists, vo }){
     return urunlerKart();
@@ -774,7 +872,7 @@ R.Screens.office = (function(){
     async 'urun-sil'(el){
       const id = el.dataset.id;
       UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
-        async () => { await R.Urunler.sil(id); UI.toast('Silindi'); R.App.render(); }, true, 'Ürünü bu cihazdan sil');
+        async () => { await R.Urunler.sil(id); UI.toast(yz('ays.office.silindi')); R.App.render(); }, true, 'Ürünü bu cihazdan sil');
     },
 
     async 'office-desk'(el){
@@ -844,7 +942,7 @@ R.Screens.office = (function(){
 
     async 'office-forget'(el){
       R.LLM.removeKeyAt(el.dataset.provider, Number(el.dataset.index) || 0);
-      UI.toast('Anahtar silindi');
+      UI.toast(yz('ays.office.anahtar-silindi'));
       const sel = document.getElementById('llm-provider');
       const form = document.getElementById('llm-form');
       if(form && sel) form.innerHTML = String(providerForm(sel.value));
@@ -880,7 +978,7 @@ R.Screens.office = (function(){
       }catch(err){
         const code = err && err.code;
         if(note) note.textContent = catalogNote(provider);
-        testOutput(K.Notice({ tone:'danger', title:'Model listesi alınamadı.',
+        testOutput(K.Notice({ tone:'danger', title:yz('ays.office.model-listesi-alinamadi'),
           body:R.LLM.errorText(code) }));
       }finally{
         el.disabled = false;
@@ -915,7 +1013,7 @@ R.Screens.office = (function(){
       try{
         const res = await R.LLM.test({ provider:cfg.provider, model:cfg.model, endpoint:cfg.endpoint });
         const q = R.Quota.status({ provider:cfg.provider, model:cfg.model });
-        testOutput(K.Notice({ tone:'ok', title:'Bağlantı çalışıyor.',
+        testOutput(K.Notice({ tone:'ok', title:yz('ays.office.baglanti-calisiyor'),
           body:res.model + ' · ' + res.ms + ' ms'
             + (q.known ? ' · bugün ' + q.usedToday + '/' + q.rpd + ' istek kullanıldı' : '')
             + ' · yanıt: “' + res.text + '”' }));
@@ -923,9 +1021,9 @@ R.Screens.office = (function(){
         const code = err && err.code;
         const detail = (err && err.message && err.message !== code)
           ? String(err.message).slice(0, 160) : '';
-        testOutput(K.Notice({ tone:'danger', title:'Bağlanamadı.',
+        testOutput(K.Notice({ tone:'danger', title:yz('ays.office.baglanamadi'),
           body:html`${R.LLM.errorText(code)}
-            ${when(detail, () => html`<span class="tiny dim"> — sağlayıcının yanıtı: ${detail}</span>`)}` }));
+            ${when(detail, () => html`<span class="tiny dim"> ${yz('ays.office.saglayicinin-yaniti')} ${detail}</span>`)}` }));
       }finally{
         el.disabled = false;
       }
@@ -960,7 +1058,7 @@ R.Screens.office = (function(){
          Tum ekrani yeniden cizmek yerine tek dugum degistirilir. */
       const light = document.querySelector('.seat--patron .seatlight');
       if(light) light.className = 'seatlight seatlight--busy';
-      if(out) out.innerHTML = String(html`<p class="small muted">Masaları okuyor…</p>`);
+      if(out) out.innerHTML = String(html`<p class="small muted">${yz('ays.office.masalari-okuyor')}</p>`);
       try{
         await O.dailyBriefing({ force:true });
       }catch(err){
@@ -1029,7 +1127,7 @@ R.Screens.office = (function(){
       if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(el.value || '')) return;
       await R.Office.saveSettings({ telefonSaat:el.value });
       await R.Takvim.planla();
-      UI.toast('Günün planı saati: ' + el.value);
+      UI.toast(yz('ays.office.gunun-plani-saati-2') + el.value);
     },
     async 'bildirim-saat'(el){ bildirimYenile(el, 'bildirim-saat'); },
     async 'office-provider'(el){
@@ -1084,7 +1182,7 @@ R.Screens.office = (function(){
 
   return {
     id:'office',
-    title:'Ofis',
+    title:yz('ays.office.ofis'),
     subtitle(){
       const m = O.mode();
       const open = O.openDecisions().length;
@@ -1093,8 +1191,8 @@ R.Screens.office = (function(){
     },
     actions(){
       /* «Masaları tara» 3B sahnenin başlığındaydı; sahne kalkınca buraya. */
-      return String(K.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' }))
-        + String(K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }));
+      return String(K.Button({ label:yz('ays.office.masalari-tara'), icon:'refresh', size:'sm', act:'office-scan' }))
+        + String(K.Button({ label:yz('ays.office.ayarlar'), icon:'gear', size:'sm', act:'office-settings' }));
     },
     render, afterRender, handle, change, openSettings,
     /* Sadelik: teknik model kartı, konuşan masa ve son toplantı

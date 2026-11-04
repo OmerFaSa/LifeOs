@@ -4,6 +4,91 @@
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
+window.LIFEOS.PARCA.yazilar({
+  'ays.week.bekliyor':'Bekliyor',
+  'ays.week.tamam':'Tamam',
+  'ays.week.yarim':'Yarım',
+  'ays.week.atlandi':'Atlandı',
+  'ays.week.ara':'Ara',
+  'ays.week.ders':'— ders —',
+  'ays.week.konu-adi':'konu adı',
+  'ays.week.konuyu-kaldir':'konuyu kaldır',
+  'ays.week.haftalik-sozlesme':'Haftalık sözleşme',
+  'ays.week.en-fazla':'En fazla ',
+  'ays.week.i-mzalandi':'İmzalandı',
+  'ays.week.i-mza-bekliyor':'İmza bekliyor',
+  'ays.week.konu':'Konu',
+  'ays.week.cozulen':'Çözülen',
+  'ays.week.soru':'Soru',
+  'ays.week.dogruluk':'Doğruluk %',
+  'ays.week.ders-2':'Ders',
+  'ays.week.konu-ekle':'Konu ekle',
+  'ays.week.haftalik-soru-hedefi':'Haftalık soru hedefi',
+  'ays.week.kapasite-saat':'Kapasite (saat)',
+  'ays.week.davranis-hedefi':'Davranış hedefi',
+  'ays.week.or-6-gun-23-30-yatis':'ör. 6 gün 23:30 yatış',
+  'ays.week.planlanan-yuk-kapasite':'Planlanan yük / kapasite',
+  'ays.week.tarihinde-imzalandi':'tarihinde imzalandı.',
+  'ays.week.revize-et':'Revize et',
+  'ays.week.haftayi-imzala':'Haftayı imzala',
+  'ays.week.sapma-nedenleri':'Sapma nedenleri',
+  'ays.week.haftanin-ozeti':'Haftanın özeti',
+  'ays.week.pazar-degerlendirmesi-30-40':'Pazar değerlendirmesi · 30–40 dakika',
+  'ays.week.degerlendirildi':'değerlendirildi',
+  'ays.week.degerlendirme-bekliyor':'değerlendirme bekliyor',
+  'ays.week.plan-tamamlama':'Plan tamamlama',
+  'ays.week.dogruluk-2':'Doğruluk',
+  'ays.week.blok-sorularinda':'blok sorularında',
+  'ays.week.sure':'Süre',
+  'ays.week.plan':'plan ',
+  'ays.week.duzeltme':'Düzeltme:',
+  'ays.week.plan-2':'Plan',
+  'ays.week.son-3-medyan':'Son 3 medyan',
+  'ays.week.taban':'Taban',
+  'ays.week.yeni-haftaya-tasinacak-en-fa':'Yeni haftaya taşınacak en fazla 2 eksik',
+  'ays.week.or-ayt-fonksiyon-tekrari-ucg':'ör. AYT fonksiyon tekrarı, üçgende benzerlik',
+  'ays.week.haftalik-degerlendirme-hafta':'Haftalık değerlendirme — Hafta ',
+  'ays.week.kapat':'Kapat',
+  'ays.week.kaydet-ve-haftayi-kapat':'Kaydet ve haftayı kapat',
+  'ays.week.gunu-olustur':'Günü oluştur',
+  'ays.week.onceki-hafta':'önceki hafta',
+  'ays.week.hafta':'Hafta',
+  'ays.week.sonraki-hafta':'sonraki hafta',
+  'ays.week.bu-hafta':'bu hafta',
+  'ays.week.bu-haftaya-don':'Bu haftaya dön',
+  'ays.week.planin-sekli':'Planın şekli',
+  'ays.week.temel-plan-tarihli-istisnala':'Temel plan + tarihli istisnalar',
+  'ays.week.ders-gunu':'Ders günü:',
+  'ays.week.degistir':'Değiştir',
+  'ays.week.takvim-kaydi-rehber':'· takvim kaydı, Rehber › İstisnalar',
+  'ays.week.etkin-istisna-yok-plan-temel':'Etkin istisna yok; plan temel düzeninde.',
+  'ays.week.ara-ver':'Ara ver',
+  'ays.week.gecici-sure':'Geçici süre',
+  'ays.week.ders-gunu-suresi-dakika':'Ders günü süresi (dakika)',
+  'ays.week.vazgec':'Vazgeç',
+  'ays.week.uygula':'Uygula',
+  'ays.week.onizle':'Önizle',
+  'ays.week.haftalik-ders-dengesi-dakika':'Haftalık ders dengesi · dakika',
+  'ays.week.ders-dagilimi':'Ders dağılımı',
+  'ays.week.bu-hafta-henuz-biten-blok':'Bu hafta henüz biten blok yok; biten her blok dersine eklenir.',
+  'ays.week.haftalik-tamamlanma':'Haftalık tamamlanma',
+  'ays.week.son':'Son ',
+  'ays.week.plan-tamamlama-gecmisi':'Plan tamamlama geçmişi',
+  'ays.week.hedef-85':'Hedef %85',
+  'ays.week.mufredat-referansi':'Müfredat referansı',
+  'ays.week.bu-haftanin-plandaki-karsili':'Bu haftanın plandaki karşılığı',
+  'ays.week.konu-bloklari':'Konu blokları',
+  'ays.week.deneme-plani':'Deneme planı',
+  'ays.week.kontrol-noktasi':'Kontrol noktası',
+  'ays.week.revizyon-kaydi':'Revizyon kaydı',
+  'ays.week.hafta-imzalandi':'Hafta imzalandı',
+  'ays.week.sozlesmeyi-revize-et':'Sözleşmeyi revize et',
+  'ays.week.revizyon-nedeni':'Revizyon nedeni',
+  'ays.week.or-hastalik-nedeniyle-soru-h':'ör. hastalık nedeniyle soru hedefi %20 azaltıldı',
+  'ays.week.kaydet-ve-ac':'Kaydet ve aç',
+  'ays.week.sozlesme-yeniden-acildi':'Sözleşme yeniden açıldı',
+  'ays.week.review-kaydedildi':'Review kaydedildi',
+});
 window.LIFEOS.PARCA.sayfa({ id:'week', modul:'ays', cekmece:'plan', ad:'Hafta', ikon:'week', sira:10 });
 
 R.Screens.week = (function(){
@@ -12,8 +97,8 @@ R.Screens.week = (function(){
   const K = R.C;
 
   const BLOCK_STATUS = [
-    { value:'pending', label:'Bekliyor' }, { value:'done', label:'Tamam' },
-    { value:'partial', label:'Yarım' }, { value:'skipped', label:'Atlandı' },
+    { value:'pending', label:yz('ays.week.bekliyor') }, { value:'done', label:yz('ays.week.tamam') },
+    { value:'partial', label:yz('ays.week.yarim') }, { value:'skipped', label:yz('ays.week.atlandi') },
   ];
 
   function viewN(){ return S.ui.weekView || M.currentWeek(); }
@@ -37,7 +122,7 @@ R.Screens.week = (function(){
     const ist = R.Istisna ? R.Istisna.gunIcin(iso) : null;
     const araGunu = (day && day.ara) || (!day && ist && ist.tur === 'ara');
     const blocks = araGunu
-      ? html`<div class="daycol__block is-preview"><b>Ara</b><br/>${(ist && ist.neden) || 'plan boş'}</div>`
+      ? html`<div class="daycol__block is-preview"><b>${yz('ays.week.ara')}</b><br/>${(ist && ist.neden) || 'plan boş'}</div>`
       : day
       ? map(day.blocks, b => html`<div class="${b.status === 'done' ? 'daycol__block is-done'
           : b.status === 'skipped' ? 'daycol__block is-skipped' : 'daycol__block'}">
@@ -61,7 +146,7 @@ R.Screens.week = (function(){
      bir kez yazılır; her alan erişilebilir adını kendisi taşır. Telefonda
      ad üst satırda, sayılar ve ders altında. */
   function TopicRow(t, i, signed, count, cozulen){
-    const subjectOpts = [{ value:'', label:'— ders —' }].concat(R.SUBJECTS.map(s => ({ value:s.id, label:s.name })));
+    const subjectOpts = [{ value:'', label:yz('ays.week.ders') }].concat(R.SUBJECTS.map(s => ({ value:s.id, label:s.name })));
     const ad = (t.name || (i + 1) + '. konu');
     /* 049 KAPSAM satır içinde (EKIP-PLANI §1.4: «konu tablosunda satır içi
        ince çubuk»): ayrı «Konu kapsamı» kartı aynı konuları ikinci kez
@@ -73,7 +158,7 @@ R.Screens.week = (function(){
     return html`<div class="konusatir">
       <span class="topicrow__order">${i+1}</span>
       <div class="konusatir__adkap">
-        ${K.Input({ class:'konusatir__ad', size:'sm', value:t.name, aria:'konu adı', disabled:signed,
+        ${K.Input({ class:'konusatir__ad', size:'sm', value:t.name, aria:yz('ays.week.konu-adi'), disabled:signed,
           change:'topic-name', data:{ 'data-i':i } })}
         ${when(oran != null, () => html`<span class="konusatir__cubuk" aria-hidden="true"><i style="width:${oran}%"></i></span>`)}
       </div>
@@ -83,7 +168,7 @@ R.Screens.week = (function(){
       ${K.Select({ options:subjectOpts, value:t.subjectId || '', size:'sm', aria:ad + ' — ders',
         disabled:signed, change:'topic-subject', data:{ 'data-i':i } })}
       ${count > 1 && !signed ? K.IconButton({ icon:'close', size:'sm', plain:true,
-        aria:'konuyu kaldır', act:'topic-remove', data:{ 'data-i':i } }) : html`<span></span>`}
+        aria:yz('ays.week.konuyu-kaldir'), act:'topic-remove', data:{ 'data-i':i } }) : html`<span></span>`}
     </div>`;
   }
 
@@ -94,37 +179,37 @@ R.Screens.week = (function(){
     const curriculum = M.curriculumFor(n);
 
     return K.Card({
-      title:'Haftalık sözleşme', hint:'contract', sub:'En fazla ' + konuSiniri() + ' ana konu',
-      badge:signed ? K.Badge({ label:'İmzalandı', tone:'ok' }) : K.Badge({ label:'İmza bekliyor', tone:'warn' }),
+      title:yz('ays.week.haftalik-sozlesme'), hint:'contract', sub:yz('ays.week.en-fazla') + konuSiniri() + ' ana konu',
+      badge:signed ? K.Badge({ label:yz('ays.week.i-mzalandi'), tone:'ok' }) : K.Badge({ label:yz('ays.week.i-mza-bekliyor'), tone:'warn' }),
       body:html`
         <div class="konuliste" data-oz="049">
-          <div class="konusatir konusatir--bas" aria-hidden="true"><span></span><span>Konu</span><span>Çözülen</span><span>Soru</span><span>Doğruluk %</span><span>Ders</span><span></span></div>
+          <div class="konusatir konusatir--bas" aria-hidden="true"><span></span><span>${yz('ays.week.konu')}</span><span>${yz('ays.week.cozulen')}</span><span>${yz('ays.week.soru')}</span><span>${yz('ays.week.dogruluk')}</span><span>${yz('ays.week.ders-2')}</span><span></span></div>
           ${map(week.mainTopics, (t, i) => TopicRow(t, i, signed, week.mainTopics.length, cozulenOf(t, n)))}
         </div>
-        ${when(!signed && week.mainTopics.length < konuSiniri(), () => K.Button({ label:'Konu ekle', icon:'plus',
+        ${when(!signed && week.mainTopics.length < konuSiniri(), () => K.Button({ label:yz('ays.week.konu-ekle'), icon:'plus',
           size:'sm', class:'mt-8', act:'topic-add' }))}
 
         <div class="cols-3 mt-16">
-          ${K.Field({ label:'Haftalık soru hedefi', hint:'plan: '+curriculum.q,
+          ${K.Field({ label:yz('ays.week.haftalik-soru-hedefi'), hint:'plan: '+curriculum.q,
             input:K.Input({ type:'number', numeric:true, value:week.questionTarget, disabled:signed, change:'week-q' }) })}
-          ${K.Field({ label:'Kapasite (saat)',
+          ${K.Field({ label:yz('ays.week.kapasite-saat'),
             input:K.Input({ type:'number', numeric:true, step:0.5, value:U.round(week.capacityMin/60, 1), disabled:signed, change:'week-cap' }) })}
-          ${K.Field({ label:'Davranış hedefi',
-            input:K.Input({ value:week.behaviorGoal || '', placeholder:'ör. 6 gün 23:30 yatış', change:'week-behavior' }) })}
+          ${K.Field({ label:yz('ays.week.davranis-hedefi'),
+            input:K.Input({ value:week.behaviorGoal || '', placeholder:yz('ays.week.or-6-gun-23-30-yatis'), change:'week-behavior' }) })}
         </div>
 
-        ${when(cap, () => html`<div class="mt-12">${K.Meter({ label:'Planlanan yük / kapasite', value:cap.pct,
+        ${when(cap, () => html`<div class="mt-12">${K.Meter({ label:yz('ays.week.planlanan-yuk-kapasite'), value:cap.pct,
           text:U.fmtMin(cap.planned)+' / '+U.fmtMin(cap.capacity),
           tone:over ? 'danger' : cap.pct > 95 ? 'warn' : '' })}</div>`)}
         ${when(over, () => html`<div class="mt-10">${K.Notice({ tone:'warn',
           body:'Planlanan süre kapasitenin %110’unu aşıyor. İmzadan önce blok azalt veya kapasiteyi gerçekçi yaz.' })}</div>`)}`,
       foot:K.Row(signed
-        ? html`<span class="small muted">${U.fmtDate(week.signedAt.slice(0, 10))} tarihinde imzalandı.</span>
+        ? html`<span class="small muted">${U.fmtDate(week.signedAt.slice(0, 10))} ${yz('ays.week.tarihinde-imzalandi')}</span>
                <span class="grow"></span>
-               ${K.Button({ label:'Revize et', size:'sm', act:'week-revise' })}`
+               ${K.Button({ label:yz('ays.week.revize-et'), size:'sm', act:'week-revise' })}`
         /* «çıktı temelli hedef» ve «geçen haftanın verisi görülmeden yeni
            hedef yazılmaz» ⓘ'de (data/hints.js contract); ekranda tekrar yok. */
-        : html`${K.Button({ label:'Haftayı imzala', icon:'check', tone:'primary', act:'week-sign', disabled:over })}`,
+        : html`${K.Button({ label:yz('ays.week.haftayi-imzala'), icon:'check', tone:'primary', act:'week-sign', disabled:over })}`,
         { wrap:true }),
     });
   }
@@ -134,7 +219,7 @@ R.Screens.week = (function(){
   function reasonChips(reasons){
     const keys = Object.keys(reasons);
     if(!keys.length) return null;
-    return html`<div class="stack-xs"><span class="mono-label">Sapma nedenleri</span>
+    return html`<div class="stack-xs"><span class="mono-label">${yz('ays.week.sapma-nedenleri')}</span>
       ${K.Row(map(keys, r => K.Chip(r+' × '+reasons[r])), { wrap:true })}</div>`;
   }
 
@@ -172,17 +257,17 @@ R.Screens.week = (function(){
     if(!lines.length) lines.push('Bu hafta için kayda değer sapma yok.');
 
     return K.Card({
-      title:'Haftanın özeti', hint:'review', sub:'Pazar değerlendirmesi · 30–40 dakika',
-      badge:rev ? K.Badge({ label:'değerlendirildi', tone:'ok' }) : K.Badge({ label:'değerlendirme bekliyor', tone:'muted' }),
+      title:yz('ays.week.haftanin-ozeti'), hint:'review', sub:yz('ays.week.pazar-degerlendirmesi-30-40'),
+      badge:rev ? K.Badge({ label:yz('ays.week.degerlendirildi'), tone:'ok' }) : K.Badge({ label:yz('ays.week.degerlendirme-bekliyor'), tone:'muted' }),
       body:html`
         ${K.Cols(4, [
-          K.Stat({ label:'Plan tamamlama', value:comp == null ? '—' : '%'+comp,
+          K.Stat({ label:yz('ays.week.plan-tamamlama'), value:comp == null ? '—' : '%'+comp,
             tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' }),
-          K.Stat({ label:'Soru', value:qr ? U.fmtNum(qr.solved) : '—',
+          K.Stat({ label:yz('ays.week.soru'), value:qr ? U.fmtNum(qr.solved) : '—',
             note:qr ? 'hedef ' + qr.target + (qr.pct != null ? ' · %' + qr.pct : '') : 'hedef yok' }),
-          K.Stat({ label:'Doğruluk', value:acc == null ? '—' : '%'+acc, note:'blok sorularında',
+          K.Stat({ label:yz('ays.week.dogruluk-2'), value:acc == null ? '—' : '%'+acc, note:yz('ays.week.blok-sorularinda'),
             tone:acc == null ? null : acc >= 70 ? 'ok' : 'warn' }),
-          K.Stat({ label:'Süre', value:U.fmtMin(time.actual), note:'plan '+U.fmtMin(time.target) }),
+          K.Stat({ label:yz('ays.week.sure'), value:U.fmtMin(time.actual), note:yz('ays.week.plan')+U.fmtMin(time.target) }),
         ])}
         ${K.Row([
           K.Chip(U.plural(exams.length, 'deneme', 'deneme')),
@@ -192,7 +277,7 @@ R.Screens.week = (function(){
         ], { wrap:true })}
         <ul class="bullets small muted mt-10">${map(lines, l => html`<li>${l}</li>`)}</ul>
         ${reasonChips(reasons) || ''}
-        ${when(rev && rev.decision, () => html`<div class="mt-10">${K.Notice({ tone:'ok', title:'Düzeltme:', body:rev.decision })}</div>`)}
+        ${when(rev && rev.decision, () => html`<div class="mt-10">${K.Notice({ tone:'ok', title:yz('ays.week.duzeltme'), body:rev.decision })}</div>`)}
         ${K.Button({ label:rev ? 'Değerlendirmeyi güncelle' : 'Değerlendirmeyi doldur', block:true,
           class:'mt-12', act:'open-review' })}`,
     });
@@ -212,27 +297,27 @@ R.Screens.week = (function(){
       K.Notice({ tone:'info', body:'Dört sütun doldurulur: planlandı / yapıldı / neden sapıldı / düzeltme. '
         + 'Yeni haftaya yalnız en yüksek etkili iki eksik taşınır.' }),
       K.Cols(4, [
-        K.Stat({ label:'Plan', value:comp == null ? '—' : '%'+comp }),
-        K.Stat({ label:'Soru', value:qr && qr.pct != null ? '%'+qr.pct : '—' }),
-        K.Stat({ label:'Son 3 medyan', value:tyt.last3 == null ? '—' : U.fmtNet(tyt.last3) }),
-        K.Stat({ label:'Taban', value:base == null ? '—' : U.fmtNet(base) }),
+        K.Stat({ label:yz('ays.week.plan-2'), value:comp == null ? '—' : '%'+comp }),
+        K.Stat({ label:yz('ays.week.soru'), value:qr && qr.pct != null ? '%'+qr.pct : '—' }),
+        K.Stat({ label:yz('ays.week.son-3-medyan'), value:tyt.last3 == null ? '—' : U.fmtNet(tyt.last3) }),
+        K.Stat({ label:yz('ays.week.taban'), value:base == null ? '—' : U.fmtNet(base) }),
       ]),
       reasonChips(C.skipReasonCounts(n)),
       area('Planlandı', 'rv-planned', rev.planned, 'Bu hafta ne planlanmıştı?'),
       area('Yapıldı', 'rv-done', rev.done, 'Fiilen ne yapıldı?'),
       area('Neden sapıldı', 'rv-why', rev.why, 'Kök neden — “vakit yoktu” değil, hangi blok hangi engelle düştü?'),
       area('Düzeltme', 'rv-decision', rev.decision, 'Gelecek hafta ne değişecek? Tek somut değişiklik.'),
-      K.Field({ label:'Yeni haftaya taşınacak en fazla 2 eksik',
+      K.Field({ label:yz('ays.week.yeni-haftaya-tasinacak-en-fa'),
         input:K.Input({ id:'rv-carry', value:(rev.carry || []).join(', '),
-          placeholder:'ör. AYT fonksiyon tekrarı, üçgende benzerlik' }) }),
+          placeholder:yz('ays.week.or-ayt-fonksiyon-tekrari-ucg') }) }),
     ]);
 
     UI.sheet({
-      title:'Haftalık değerlendirme — Hafta '+n,
+      title:yz('ays.week.haftalik-degerlendirme-hafta')+n,
       subtitle:U.fmtRange(M.weekStart(n), M.weekEnd(n)),
       body:String(body),
-      footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
-        ${K.Button({ label:'Kaydet ve haftayı kapat', tone:'primary', act:'save-review', data:{ 'data-n':n } })}`),
+      footer:String(html`${K.Button({ label:yz('ays.week.kapat'), act:'sheet-close' })}
+        ${K.Button({ label:yz('ays.week.kaydet-ve-haftayi-kapat'), tone:'primary', act:'save-review', data:{ 'data-n':n } })}`),
       wide:true, noFocus:true,
     });
   }
@@ -246,8 +331,8 @@ R.Screens.week = (function(){
         title:U.fmtDate(dateISO), subtitle:wd.label, noFocus:true,
         body:String(K.Notice({ tone:'info', body:'Bu gün henüz açılmadı. Gün geldiğinde plan otomatik oluşturulur; '
           + 'şimdiden açmak istersen aşağıdaki düğmeyi kullan.' })),
-        footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
-          ${K.Button({ label:'Günü oluştur', tone:'primary', act:'create-day', data:{ 'data-date':dateISO } })}`),
+        footer:String(html`${K.Button({ label:yz('ays.week.kapat'), act:'sheet-close' })}
+          ${K.Button({ label:yz('ays.week.gunu-olustur'), tone:'primary', act:'create-day', data:{ 'data-date':dateISO } })}`),
       });
       return;
     }
@@ -263,7 +348,7 @@ R.Screens.week = (function(){
       title:U.fmtDate(dateISO),
       subtitle:wd.label+' · '+(day.ritual ? 'ritüel günü' : 'çalışma günü'),
       body:String(body), noFocus:true,
-      footer:String(K.Button({ label:'Kapat', act:'sheet-close' })),
+      footer:String(K.Button({ label:yz('ays.week.kapat'), act:'sheet-close' })),
     });
   }
 
@@ -273,13 +358,13 @@ R.Screens.week = (function(){
     const isCurrent = n === M.currentWeek();
     return K.Span(12, K.Row([
       html`<div class="row-sm">
-        ${K.IconButton({ icon:'left', aria:'önceki hafta', act:'week-nav', data:{ 'data-n':n-1 }, disabled:n <= 1 })}
-        <div><h2 class="weekhead__title">Hafta ${n} — ${week.title}</h2>
+        ${K.IconButton({ icon:'left', aria:yz('ays.week.onceki-hafta'), act:'week-nav', data:{ 'data-n':n-1 }, disabled:n <= 1 })}
+        <div><h2 class="weekhead__title">${yz('ays.week.hafta')} ${n} — ${week.title}</h2>
           <span class="small dim">${U.fmtRange(M.weekStart(n), M.weekEnd(n))} · ${phase.label} — ${phase.theme}</span></div>
-        ${K.IconButton({ icon:'right', aria:'sonraki hafta', act:'week-nav', data:{ 'data-n':n+1 }, disabled:n >= R.PLAN.totalWeeks })}
+        ${K.IconButton({ icon:'right', aria:yz('ays.week.sonraki-hafta'), act:'week-nav', data:{ 'data-n':n+1 }, disabled:n >= R.PLAN.totalWeeks })}
       </div>`,
-      isCurrent ? K.Badge({ label:'bu hafta', tone:'ok' })
-        : K.Button({ label:'Bu haftaya dön', size:'sm', act:'week-nav', data:{ 'data-n':M.currentWeek() } }),
+      isCurrent ? K.Badge({ label:yz('ays.week.bu-hafta'), tone:'ok' })
+        : K.Button({ label:yz('ays.week.bu-haftaya-don'), size:'sm', act:'week-nav', data:{ 'data-n':M.currentWeek() } }),
     ], { between:true, wrap:true }));
   }
 
@@ -295,12 +380,12 @@ R.Screens.week = (function(){
     const temel = I.temelDakika();
     const liste = I.etkin();
     const takvim = I.takvimde();
-    return K.Card({ title:'Planın şekli', sub:'Temel plan + tarihli istisnalar',
+    return K.Card({ title:yz('ays.week.planin-sekli'), sub:yz('ays.week.temel-plan-tarihli-istisnala'),
       body:html`
         <div class="row gap-8" style="justify-content:space-between;align-items:center">
-          <span class="small">Ders günü: <b>${temel || I.sablonDakikasi()} dk</b>
+          <span class="small">${yz('ays.week.ders-gunu')} <b>${temel || I.sablonDakikasi()} dk</b>
             <span class="dim">${temel ? '(kalıcı ayar)' : '(şablon)'}</span></span>
-          ${K.Button({ label:'Değiştir', size:'sm', tone:'ghost', act:'istisna-ac',
+          ${K.Button({ label:yz('ays.week.degistir'), size:'sm', tone:'ghost', act:'istisna-ac',
             data:{ 'data-tur':'gunluk' } })}
         </div>
         ${when(liste.length, () => html`<div class="stack-xs mt-10">${map(liste, x => html`
@@ -311,11 +396,11 @@ R.Screens.week = (function(){
           </div>`)}</div>`)}
         ${when(takvim.length, () => html`<div class="stack-xs mt-10">${map(takvim, x => html`
           <div class="small">${I.tanim(x)}${when(x.neden, () => html` <span class="dim">· ${x.neden}</span>`)}
-            <span class="tiny dim">· takvim kaydı, Rehber › İstisnalar</span></div>`)}</div>`)}
-        ${when(!liste.length && !takvim.length, () => html`<p class="small dim mt-8">Etkin istisna yok; plan temel düzeninde.</p>`)}
+            <span class="tiny dim">${yz('ays.week.takvim-kaydi-rehber')}</span></div>`)}</div>`)}
+        ${when(!liste.length && !takvim.length, () => html`<p class="small dim mt-8">${yz('ays.week.etkin-istisna-yok-plan-temel')}</p>`)}
         <div class="row gap-8 mt-10" style="flex-wrap:wrap">
-          ${K.Button({ label:'Ara ver', icon:'pause', size:'sm', act:'istisna-ac', data:{ 'data-tur':'ara' } })}
-          ${K.Button({ label:'Geçici süre', icon:'clock', size:'sm', act:'istisna-ac', data:{ 'data-tur':'sure' } })}
+          ${K.Button({ label:yz('ays.week.ara-ver'), icon:'pause', size:'sm', act:'istisna-ac', data:{ 'data-tur':'ara' } })}
+          ${K.Button({ label:yz('ays.week.gecici-sure'), icon:'clock', size:'sm', act:'istisna-ac', data:{ 'data-tur':'sure' } })}
         </div>` });
   }
 
@@ -343,7 +428,7 @@ R.Screens.week = (function(){
     const bugun = U.todayISO();
     const tarih = (id, label, value) => K.Field({ label,
       input:K.Input({ id, type:'date', value:value || bugun }) });
-    const dakika = value => K.Field({ label:'Ders günü süresi (dakika)',
+    const dakika = value => K.Field({ label:yz('ays.week.ders-gunu-suresi-dakika'),
       hint:R.Istisna.DAKIKA.min + '–' + R.Istisna.DAKIKA.max,
       input:K.Input({ id:'ist-dakika', type:'number', numeric:true, value:value || '' }) });
     return html`<div class="stack-sm">
@@ -365,10 +450,10 @@ R.Screens.week = (function(){
           <div class="diff__row"><span class="diff__label">${r.label}</span>
             <span class="diff__before">${r.before}</span><span class="diff__arrow" aria-hidden="true">→</span>
             <span class="diff__after">${r.after}</span></div>`)}</div>`)}`),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+      footer:String(html`${K.Button({ label:yz('ays.week.vazgec'), act:'sheet-close' })}
         ${pv && pv.ok
-          ? K.Button({ label:'Uygula', tone:'primary', act:'istisna-uygula' })
-          : K.Button({ label:'Önizle', tone:'primary', act:'istisna-onizle' })}`),
+          ? K.Button({ label:yz('ays.week.uygula'), tone:'primary', act:'istisna-uygula' })
+          : K.Button({ label:yz('ays.week.onizle'), tone:'primary', act:'istisna-onizle' })}`),
     });
   }
 
@@ -459,7 +544,7 @@ R.Screens.week = (function(){
     harfler.forEach((h, i) => { if(Math.abs(G[i].pay - P[i].pay) > Math.abs(G[en].pay - P[en].pay)) en = i; });
     const fark = Math.round(G[en].pay - P[en].pay);
     const not = fark === 0 ? 'Dağılım plana uyuyor' : AILE_AD[harfler[en]] + ' planın ' + (fark > 0 ? 'üstünde' : 'altında');
-    return kutu('Ders dengesi', 'hesaplandı', VT().dersDengesi({ baslik:'Haftalık ders dengesi · dakika', plan:P, gercek:G, not, fark })
+    return kutu('Ders dengesi', 'hesaplandı', VT().dersDengesi({ baslik:yz('ays.week.haftalik-ders-dengesi-dakika'), plan:P, gercek:G, not, fark })
       + VT().dersIsaretleri({ dersler:harfler.map(h => ({ harf:h, ad:AILE_AD[h] })) }));
   }
 
@@ -485,15 +570,15 @@ R.Screens.week = (function(){
     const en = Math.max(1, ...l.map(x => Math.max(x.plan, x.yapilan)));
     const sa = dk => dk >= 60 ? U.fmtNum(U.round(dk / 60, 1)) + ' sa' : dk + ' dk';
     const kart = top
-      ? P.kart({ tur:'ders-dagilimi', ad:'Ders dağılımı', simge:'satir', yuva:'bu hafta · ' + sa(top),
+      ? P.kart({ tur:'ders-dagilimi', ad:yz('ays.week.ders-dagilimi'), simge:'satir', yuva:'bu hafta · ' + sa(top),
           govde:P.cubuklar({ satirlar:l.slice(0, 7).map(x => ({ ad:x.ad, oran:x.yapilan / en, plan:x.plan / en, metin:sa(x.yapilan) })) })
             + P.not('çubuk: biten blokların süresi · siyah çizgi: plan') })
-      : P.kart({ tur:'ders-dagilimi', ad:'Ders dağılımı', simge:'satir', bos:{ cumle:'Bu hafta henüz biten blok yok; biten her blok dersine eklenir.' } });
+      : P.kart({ tur:'ders-dagilimi', ad:yz('ays.week.ders-dagilimi'), simge:'satir', bos:{ cumle:yz('ays.week.bu-hafta-henuz-biten-blok') } });
     /* Haftalık tamamlanma: son 8 haftanın plan tamamlama yüzdesi. */
     const tam = C.completionHistory(8);
-    const tamKart = tam.some(x => x.value != null) ? P.kart({ tur:'tamamlanma', ad:'Haftalık tamamlanma', simge:'cubuk', yuva:'son ' + tam.length + ' hafta',
+    const tamKart = tam.some(x => x.value != null) ? P.kart({ tur:'tamamlanma', ad:yz('ays.week.haftalik-tamamlanma'), simge:'cubuk', yuva:'son ' + tam.length + ' hafta',
       govde:P.sutun({ degerler:tam.map(x => x.value), yukseklik:56, gunler:tam.map(x => 'H' + x.n),
-          etiket:'Son ' + tam.length + ' haftanın tamamlanması; bu hafta ' + (tam[tam.length - 1].value == null ? 'veri yok' : '%' + tam[tam.length - 1].value) })
+          etiket:yz('ays.week.son') + tam.length + ' haftanın tamamlanması; bu hafta ' + (tam[tam.length - 1].value == null ? 'veri yok' : '%' + tam[tam.length - 1].value) })
         + P.not('biten blok ÷ geçen blok · yarım blok yarım sayılır') }) : '';
     return P.izgara([kart, tamKart], 'pk-izgara--iki');
   }
@@ -520,7 +605,7 @@ R.Screens.week = (function(){
     return dersDengesi(n);
   } });
   LIFEOS.PARCA.blok({ id:'week.plan-tamamlama-gecmisi', sayfa:'week', yer:'y5', sira:40, ad:'Plan tamamlama geçmişi', ciz({ n, week, phase, curriculum, history, cak }){
-    return K.Card({ title:'Plan tamamlama geçmişi', sub:'Hedef %85',
+    return K.Card({ title:yz('ays.week.plan-tamamlama-gecmisi'), sub:yz('ays.week.hedef-85'),
           body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) });
   } });
   LIFEOS.PARCA.blok({ id:'week.hayaletoneri', sayfa:'week', yer:'y6', sira:10, ad:'hayaletOneri', ciz({ n, week, phase, curriculum, history, cak }){
@@ -536,16 +621,16 @@ R.Screens.week = (function(){
     return istisnaCard();
   } });
   LIFEOS.PARCA.blok({ id:'week.mufredat-referansi', sayfa:'week', yer:'y6', sira:50, ad:'Müfredat referansı', ciz({ n, week, phase, curriculum, history, cak }){
-    return K.Card({ title:'Müfredat referansı', sub:'Bu haftanın plandaki karşılığı', body:html`
-          <div class="stack-xs"><span class="mono-label">Konu blokları</span>
+    return K.Card({ title:yz('ays.week.mufredat-referansi'), sub:yz('ays.week.bu-haftanin-plandaki-karsili'), body:html`
+          <div class="stack-xs"><span class="mono-label">${yz('ays.week.konu-bloklari')}</span>
             ${K.Row(map(curriculum.topics, t => K.Chip(t)), { wrap:true })}</div>
-          <div class="stack-xs mt-10"><span class="mono-label">Deneme planı</span>
+          <div class="stack-xs mt-10"><span class="mono-label">${yz('ays.week.deneme-plani')}</span>
             <p class="small">${curriculum.exam}</p></div>
-          <div class="stack-xs mt-10"><span class="mono-label">Kontrol noktası</span>
+          <div class="stack-xs mt-10"><span class="mono-label">${yz('ays.week.kontrol-noktasi')}</span>
             <p class="small">${curriculum.check}</p></div>` });
   } });
   LIFEOS.PARCA.blok({ id:'week.revizyon-kaydi', sayfa:'week', yer:'y6', sira:60, ad:'Revizyon kaydı', ciz({ n, week, phase, curriculum, history, cak }){
-    return when(week.revisions && week.revisions.length, () => K.Card({ title:'Revizyon kaydı',
+    return when(week.revisions && week.revisions.length, () => K.Card({ title:yz('ays.week.revizyon-kaydi'),
           body:html`<div class="stack-xs">${map(week.revisions, r => html`
             <div class="small"><b>${U.fmtShort(R.U.gunOf(r.at))}</b> — ${r.reason}</div>`)}</div>` }));
   } });
@@ -634,20 +719,20 @@ R.Screens.week = (function(){
       const n = viewN();
       weekOf(n).signedAt = new Date().toISOString();
       await M.saveWeek(n);
-      UI.toast('Hafta imzalandı');
+      UI.toast(yz('ays.week.hafta-imzalandi'));
       R.App.render();
     },
     async 'week-revise'(){
       const n = viewN();
       UI.sheet({
-        title:'Sözleşmeyi revize et',
+        title:yz('ays.week.sozlesmeyi-revize-et'),
         body:String(html`
           ${K.Notice({ tone:'info', body:'İmzalı bir hafta değiştirildiğinde neden kaydedilir; '
             + 'bu, sonraki değerlendirmede sapma analizini mümkün kılar.' })}
-          ${K.Field({ label:'Revizyon nedeni', input:K.Textarea({ id:'rev-reason', rows:2,
-            placeholder:'ör. hastalık nedeniyle soru hedefi %20 azaltıldı' }) })}`),
-        footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-          ${K.Button({ label:'Kaydet ve aç', tone:'primary', act:'week-revise-save', data:{ 'data-n':n } })}`),
+          ${K.Field({ label:yz('ays.week.revizyon-nedeni'), input:K.Textarea({ id:'rev-reason', rows:2,
+            placeholder:yz('ays.week.or-hastalik-nedeniyle-soru-h') }) })}`),
+        footer:String(html`${K.Button({ label:yz('ays.week.vazgec'), act:'sheet-close' })}
+          ${K.Button({ label:yz('ays.week.kaydet-ve-ac'), tone:'primary', act:'week-revise-save', data:{ 'data-n':n } })}`),
       });
     },
     async 'week-revise-save'(el){
@@ -658,7 +743,7 @@ R.Screens.week = (function(){
       week.signedAt = null;
       await M.saveWeek(n);
       UI.closeSheet();
-      UI.toast('Sözleşme yeniden açıldı');
+      UI.toast(yz('ays.week.sozlesme-yeniden-acildi'));
       R.App.render();
     },
     async 'topic-add'(){
@@ -694,7 +779,7 @@ R.Screens.week = (function(){
         await M.saveWeek(n+1);
       }
       UI.closeSheet();
-      UI.toast('Review kaydedildi');
+      UI.toast(yz('ays.week.review-kaydedildi'));
       R.App.render();
     },
     async 'open-day'(el){ openDay(el.dataset.date); },
@@ -756,7 +841,7 @@ R.Screens.week = (function(){
 
   return {
     id:'week',
-    title:'Hafta',
+    title:yz('ays.week.hafta'),
     get kucukVarsayilan(){ return kucukler(); },
     subtitle(){
       const n = viewN();
