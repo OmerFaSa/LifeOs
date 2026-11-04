@@ -47,6 +47,7 @@ css/ofissohbet.css
 css/cam.css
 css/king-cam.css
 css/minik-cam.css
+css/piksel-yazi.css
 css/piksel.css
 # Animasyonlar (Tam · Az · Sistem): stillerden SONRA, ilk cizimden ONCE. Hareket kosullu medya kurallarini ve matchMedia'yi ayarlar (brand/ortak/animasyon.js).
 # Motor once yuklenir: head betikleri de parca kaydeder.

@@ -23,7 +23,7 @@ ORTAK = {
     "layout.css": "text/css; charset=utf-8", "temel.css": "text/css; charset=utf-8",
     "kabuk.css": "text/css; charset=utf-8", "kabuk.js": "text/javascript; charset=utf-8",
     "cam.css": "text/css; charset=utf-8", "hareket.css": "text/css; charset=utf-8",
-    "piksel.css": "text/css; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8", "gunveri.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8",
+    "piksel-yazi.css": "text/css; charset=utf-8", "piksel.css": "text/css; charset=utf-8", "piksel.js": "text/javascript; charset=utf-8", "gunveri.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8",
 }
 
 
@@ -48,6 +48,7 @@ GUN_SAYFASI = r"""<!doctype html>
 <link rel="stylesheet" href="/gun/ortak/kabuk.css"/>
 <link rel="stylesheet" href="/gun/ortak/hareket.css"/>
 <link rel="stylesheet" href="/gun/ortak/cam.css"/>
+<link rel="stylesheet" href="/gun/ortak/piksel-yazi.css"/>
 <link rel="stylesheet" href="/gun/ortak/piksel.css"/>
 <style>
 /* Gun'un kimligi: Merkez'in moru (Merkez F7'de cekilince yerini Gun alir). */
