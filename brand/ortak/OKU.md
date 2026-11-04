@@ -39,8 +39,7 @@ başka dosyadan da takılır); her cümle `P.yazilar` + `y('kimlik')`; her hesap
 | Tepki | `P.tepki` (`lifeos:<olay>` dinler) | `P.katalog.tepkiler()` |
 
 Kanıt: `node tools/parca_kanit.js --yaz taban.json` önce, `--karsilastir` sonra; `--cikar ad` parçayı
-engelleyip uygulamayı açar; `--durum` sayar. Tarayıcı dışında tek başına koşan dosyalar (`calc.js`,
-`state.js`, `kabuk.js`… kabul testleri ve Gün) `yz` kullanmaz, yazıları kendi içindedir.
+engelleyip uygulamayı açar; `--durum` sayar. Merkez yüzüyle aynı olması test edilen üç dosya (`kabuk.js`, `karsilama.js`, `tanitim.js`) yazılarını kendi içinde tutar.
 `tools/css_onemli.js` her `!important`'ı ölçer; kanıtlı gereksizi `--sil` ile siler.
 Ağır veri dosyası: `brand/parcalar.txt` `[tembel]`'e tek satır; dist'te ilk erişimde çalışır. Açılışta okunan dosya
 buraya girmez (`tools/parca_tembel_test.js` yakalar).

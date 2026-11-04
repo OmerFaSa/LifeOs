@@ -484,7 +484,7 @@ async function cevrimdisi(browser, base, hedefler, durdur, errors){
       const page = await ctx.newPage();
       page.on('pageerror', e => errors.push('kabuk ' + hedef + ': sayfa hatası — ' + (e && e.message || e)));
       await page.goto(base + hedef, { waitUntil:'load' });
-      await page.waitForSelector('.site', { timeout:15000 });
+      await page.waitForSelector('.site', { timeout:40000 });   // kasadan 250+ dosya: yuk altinda 15 sn yetmedi (iki kosu, tek basina temiz)
       let d = null;
       for(let i = 0; i < 80; i++){
         d = await page.evaluate(async () => {
