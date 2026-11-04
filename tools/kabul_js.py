@@ -51,6 +51,14 @@ CEKIRDEK = ("tarih.js", "bicim.js")
 def on_cekirdek(dosyalar):
     """utils.js'ten once ayni klasordeki ortak cekirdekler (zaten listede olan eklenmez). Saf islev."""
     out = []
+    # Ortak dosyalar parca motorunu ister (brand/ortak/parca.js): her zaman once yuklenir.
+    for d in dosyalar:
+        y = d.replace("\\", "/")
+        if y.endswith(".js") and "/" in y and (y.rsplit("/", 2)[-2] in ("core", "ortak")):
+            p = y.rsplit("/", 1)[0] + "/parca.js"
+            if p != y and p not in dosyalar:
+                out.append(p)
+            break
     for d in dosyalar:
         if d.replace("\\", "/").endswith("core/utils.js"):
             klasor = d[:-len("utils.js")]

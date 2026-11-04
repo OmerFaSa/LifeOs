@@ -480,6 +480,7 @@ GIRIS_SAYFASI = """<!doctype html>
 <title>LifeOS — Kontrol paneli</title>
 <link rel="icon" href="__IKON__"/>
 <link rel="stylesheet" href="/hesap.css"/>
+<script src="/parca.js"></script>
 <script src="/animasyon.js"></script>
 <style>
 :root{ color-scheme:light dark;
@@ -1553,12 +1554,12 @@ class Giris(SimpleHTTPRequestHandler):
         return self.send_error(405)
 
     def _hesap_dosyasi(self, ad):
-        """/hesap.js, /hesap.css, /animasyon.js, /qr.js — giris ve secim
+        """/parca.js, /hesap.js, /hesap.css, /animasyon.js, /qr.js — giris ve secim
         sayfasi (brand/ortak); kapali liste. qr.js: hesap sayfasinin iki
         adim kurulumu ve kodla cihaz baglama QR'i (hesap.js soz 17-18)."""
         tur = {"hesap.js": "text/javascript; charset=utf-8", "hesap.css": "text/css; charset=utf-8",
                "animasyon.js": "text/javascript; charset=utf-8", "qr.js": "text/javascript; charset=utf-8",
-               "muzik.js": "text/javascript; charset=utf-8"}[ad]
+               "muzik.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8"}[ad]
         with open(os.path.join(KOK, "brand", "ortak", ad), "rb") as f:
             govde = f.read()
         self.send_response(200)
@@ -1628,7 +1629,7 @@ class Giris(SimpleHTTPRequestHandler):
             return zemin.isle(self)
         if yol.startswith("/api/planlama"):
             return plan_isle(self)
-        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js"):
+        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js", "/muzik.js", "/parca.js"):
             return self._hesap_dosyasi(yol[1:])
         if yol == "/gun":
             self.send_response(301)

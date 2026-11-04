@@ -23,7 +23,7 @@ ORTAK = {
     "layout.css": "text/css; charset=utf-8", "temel.css": "text/css; charset=utf-8",
     "kabuk.css": "text/css; charset=utf-8", "kabuk.js": "text/javascript; charset=utf-8",
     "cam.css": "text/css; charset=utf-8", "hareket.css": "text/css; charset=utf-8",
-    "gunveri.js": "text/javascript; charset=utf-8",
+    "gunveri.js": "text/javascript; charset=utf-8", "parca.js": "text/javascript; charset=utf-8",
 }
 
 
@@ -332,6 +332,7 @@ GUN_SAYFASI = r"""<!doctype html>
 <a class="skiplink" href="#main">İçeriğe atla</a>
 <div id="app"></div>
 <div id="overlay-root"></div>
+<script src="/gun/ortak/parca.js"></script>
 <script src="/gun/ortak/kabuk.js"></script>
 <script src="/gun/ortak/gunveri.js"></script>
 <script>
