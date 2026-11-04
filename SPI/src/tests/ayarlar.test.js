@@ -26,19 +26,19 @@
   }
 
   describe('Ayarlar (bölümlü panel)', () => {
-    it('on bölüm, Sistem ve Hesap grup; yalnız seçili olan görünür, sekmeye basınca değişir', () => {
+    it('dokuz bölüm, Sistem ve Hesap grup; yalnız seçili olan görünür, sekmeye basınca değişir', () => {
       A._sec('gorunum');
       const d = koy();
       try{
         const sek = Array.from(d.querySelectorAll('[data-ayar-bolum]'));
-        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Arka plan', 'Ses ve müzik', 'Animasyon', 'Erişilebilirlik', 'King ve bağlantılar', 'Merkez', 'Minikler', 'Bildirimler', 'Planlama',
+        expect(sek.map(s => s.textContent)).toEqual(['Profiller', 'Görünüm', 'Ses ve müzik', 'Animasyon', 'Erişilebilirlik', 'King ve bağlantılar', 'Merkez', 'Bildirimler', 'Planlama',
           'Modül ayarları', 'Güvenlik', 'Bağlantılar']);
         /* Üç alan üstte: Sistem (her yerde), modülün kendisi (yalnız burada), Hesap; solda yalnız seçili alanın bölümleri
            (2026-10-30: «sistem ile yalnız o modül arasındaki ayrımı daha güzel yap»). */
         const alanlar = Array.from(d.querySelectorAll('[data-ayar-alan]'));
         expect(alanlar.map(a => a.getAttribute('data-ayar-alan'))).toEqual(['Sistem', 'Bu modül', 'Hesap']);
         expect(alanlar[0].getAttribute('aria-pressed')).toBe('true');
-        expect(sek.filter(s => !s.hidden).length).toBe(11);
+        expect(sek.filter(s => !s.hidden).length).toBe(9);
         alanlar[1].click();
         expect(sek.filter(s => !s.hidden).map(s => s.textContent)).toEqual(['Modül ayarları']);
         expect(alanlar[1].getAttribute('aria-pressed')).toBe('true');
@@ -46,15 +46,13 @@
         expect(alanlar[0].getAttribute('aria-pressed')).toBe('true');
         const gorunen = () => Array.from(d.querySelectorAll('.ayarlar__bolum')).filter(s => !s.hidden).map(s => s.id);
         expect(gorunen()).toEqual(['ayarlar-bolum-gorunum']);
-        sek[3].click();
+        sek[2].click();
         expect(gorunen()).toEqual(['ayarlar-bolum-ses']);
-        expect(sek[3].getAttribute('aria-selected')).toBe('true');
+        expect(sek[2].getAttribute('aria-selected')).toBe('true');
         expect(sek[1].getAttribute('aria-selected')).toBe('false');
         /* Her bölüm kapsamını söyler. */
         expect(d.querySelector('#ayarlar-bolum-ses .ayarlar__kapsam').textContent).toContain('Bütün sistemde');
         expect(d.querySelector('#ayarlar-bolum-modul .ayarlar__kapsam').textContent).toContain('Yalnız');
-        expect(!!d.querySelector('#ayarlar-bolum-modul [data-yuzey-sec]')).toBe(true);
-        expect(!!d.querySelector('#ayarlar-bolum-gorunum [data-yuzey-sec]')).toBe(false);
       }finally{ d.remove(); A._sec('gorunum'); }
     });
 
@@ -199,10 +197,9 @@
         Object.keys(A.SECIMLER).forEach(k => A.secimAyarla(k, A.SECIMLER[k].vars));
         expect(document.documentElement.getAttribute('data-cam')).toBe('orta');
         expect(document.documentElement.getAttribute('data-perde')).toBe('orta');
-        d.querySelector('[data-secim="cam:cok"]').click();
+        A.secimAyarla('cam', 'cok');
         expect(document.documentElement.getAttribute('data-cam')).toBe('cok');
         expect(localStorage.getItem('lifeos.cam')).toBe('cok');
-        expect(d.querySelector('[data-secim="cam:cok"]').getAttribute('aria-pressed')).toBe('true');
         expect(A.secimAyarla('cam', 'bilinmez')).toBe(false);
         d.querySelector('[data-secim="kontrast:yuksek"]').click();
         expect(document.documentElement.getAttribute('data-kontrast')).toBe('yuksek');
@@ -214,25 +211,15 @@
         Object.keys(A.SECIMLER).forEach(k => A.secimAyarla(k, A.secim(k)));
       }
     });
-    it('arka plan kendi bölümünde: iki yuva önizlemeli; perde ve yumuşatma seçicisi var', () => {
-      const d = koy();
-      try{
-        const z = d.querySelector('#ayarlar-bolum-zemin');
-        expect(z.querySelectorAll('.zemin-yuvasi').length).toBe(2);
-        if(window.LIFEOS.ZEMIN && window.LIFEOS.ZEMIN.onizle) expect(z.querySelectorAll('.zemin-onizle').length).toBe(2);
-        expect(!!z.querySelector('[data-secim="perde:cok"]')).toBe(true);
-        expect(!!z.querySelector('[data-secim="bulanik:hafif"]')).toBe(true);
-      }finally{ d.remove(); }
-    });
     it('ayarlarda ara: bütün bölümlerden eşleşen satırlar kalır; silince eski hâline döner', () => {
       A._sec('gorunum');
       const d = koy();
       try{
         const p = d.querySelector('.ayarlar');
-        A.ara(p, 'perde');
+        A.ara(p, 'sustur');
         const acik = Array.from(p.querySelectorAll('.ayarlar__bolum')).filter(s => !s.hidden).map(s => s.id);
-        expect(acik).toEqual(['ayarlar-bolum-zemin']);
-        const satir = Array.from(p.querySelectorAll('#ayarlar-bolum-zemin .ayarlar__satir')).filter(x => !x.hidden);
+        expect(acik).toEqual(['ayarlar-bolum-bildirim']);
+        const satir = Array.from(p.querySelectorAll('#ayarlar-bolum-bildirim .ayarlar__satir')).filter(x => !x.hidden);
         expect(satir.length).toBe(1);
         A.ara(p, '');
         expect(Array.from(p.querySelectorAll('.ayarlar__bolum')).filter(s => !s.hidden).map(s => s.id)).toEqual(['ayarlar-bolum-gorunum']);
@@ -322,33 +309,6 @@
       }
     });
     /* 2026-10-30 (kullanıcı: «bulanıklık ayrı ayrı olsun: duvar kâğıdı, kartlar, menü, ayarlar»; «perdede yok olsun»). */
-    it('tema paketi kalktı; bulanıklık katman katman: duvar kâğıdı seçimi, kartlar/menü/pencereler aç-kapa anahtarı; perdede «Yok»', () => {
-      expect(A.SECIMLER.paket).toBe(undefined);
-      expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf('lifeos.tema.paket')).toBe(-1);
-      expect(A.SECIMLER.bulanik.sira).toEqual(['yok', 'hafif', 'cok']);
-      expect(A.SECIMLER.perde.sira[0]).toBe('yok');
-      const anahtarlar = ['lifeos.buzlu.kart', 'lifeos.buzlu.menu', 'lifeos.buzlu.pencere'], once = anahtarlar.map(k => localStorage.getItem(k));
-      A._sec('zemin');
-      const d = koy();
-      try{
-        anahtarlar.forEach(k => localStorage.removeItem(k));
-        ['buzluKart', 'buzluMenu', 'buzluPencere'].forEach(k => A.secimAyarla(k, 'acik'));
-        const s = d.querySelector('[data-anahtar="buzluPencere"]');
-        expect(s.getAttribute('aria-checked')).toBe('true');
-        s.click();
-        expect(document.documentElement.getAttribute('data-buzlu-pencere')).toBe('kapali');
-        expect(localStorage.getItem('lifeos.buzlu.pencere')).toBe('kapali');
-        expect(s.getAttribute('aria-checked')).toBe('false');
-        expect(document.documentElement.getAttribute('data-buzlu-kart')).toBe('acik');   // öbür katmanlar değişmez
-        s.click();
-        expect(localStorage.getItem('lifeos.buzlu.pencere')).toBe(null);
-        anahtarlar.forEach(k => expect(window.LIFEOS.ANIMASYON.ORTAK.test(k)).toBe(true));
-      }finally{
-        d.remove(); A._sec('gorunum');
-        anahtarlar.forEach((k, i) => { if(once[i] == null) localStorage.removeItem(k); else localStorage.setItem(k, once[i]); });
-        ['buzluKart', 'buzluMenu', 'buzluPencere'].forEach(k => A.secimAyarla(k, A.secim(k)));
-      }
-    });
     /* 2026-10-31 (kullanıcı: «ayarlarda kaydırma bazen buga giriyor; özellikleri çok arttır»). */
     it('yedek: yalnız ortak tercihler dışa çıkar; içe aktarma yalnız LifeOS yedeğini ve tercih anahtarlarını kabul eder', () => {
       const anahtarlar = ['lifeos.cam', 'lifeos.kilit.odeme', 'lifeos.odak'], once = anahtarlar.map(k => localStorage.getItem(k));

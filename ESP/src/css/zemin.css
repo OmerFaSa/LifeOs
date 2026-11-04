@@ -117,73 +117,28 @@
 }
 
 /* Zemin yalnız kökte (html = tuval) ve sabit katmanda; aradaki katmanlar saydam. */
-html[data-zemin="yumusak"] body,
-html[data-zemin="yumusak"] .site--v5,
-html[data-zemin="yumusak"] .site--v5 > .site__body,
-html[data-zemin="yumusak"] .site--v5 .sayfa,
-html[data-zemin="yumusak"] .site--v5 .sayfasonu{ background:transparent; }
+
 
 /* Her leke beş ara durakla söner (Gauss'a yakın): rengin %80, %52, %24 ve
    %7'si, sonra hiç. Doğrusal sönüm kenarda bir disk izi bırakıyordu. */
-html[data-zemin="yumusak"] body::before{
-  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
-  background:
-    radial-gradient(140% 90% at 50% 0%, var(--zemin-saat, transparent), transparent 75%),
-    radial-gradient(120% 90% at 50% 45%, transparent 55%, var(--zemin-golge) 100%),
-    radial-gradient(66% 72% at 12% 8%, var(--zemin-1) 0%,
-      color-mix(in oklab, var(--zemin-1) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-1) 52%, transparent) 33%,
-      color-mix(in oklab, var(--zemin-1) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-1) 7%, transparent) 64%, transparent 78%),
-    radial-gradient(54% 60% at 90% 10%, var(--zemin-2) 0%,
-      color-mix(in oklab, var(--zemin-2) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-2) 52%, transparent) 33%,
-      color-mix(in oklab, var(--zemin-2) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-2) 7%, transparent) 64%, transparent 78%),
-    radial-gradient(60% 64% at 88% 96%, var(--zemin-3) 0%,
-      color-mix(in oklab, var(--zemin-3) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-3) 52%, transparent) 33%,
-      color-mix(in oklab, var(--zemin-3) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-3) 7%, transparent) 64%, transparent 78%),
-    radial-gradient(50% 56% at 8% 96%, var(--zemin-4) 0%,
-      color-mix(in oklab, var(--zemin-4) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-4) 52%, transparent) 33%,
-      color-mix(in oklab, var(--zemin-4) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-4) 7%, transparent) 64%, transparent 78%),
-    linear-gradient(180deg, var(--zemin-ust), var(--zemin-alt));
-}
-html[data-zemin="yumusak"] body::after{
-  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:var(--zemin-gren);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-}
+
+
 
 /* Üstteki 2 px modül şeridi (base.css .site::before) yumuşak zeminde çizilmez:
    hangi modülde olunduğunu zeminin rengi zaten söylüyor; ekranın tepesinde
    koyu bir kıl çizgisi gibi duruyordu (tasarım turu, 2026-10-03). Sade
    zeminde şerit kalır. */
-html[data-zemin="yumusak"] .site::before{ display:none; }
+
 
 /* Çekmece çubuğu (yazı + nokta) zeminle bir: düz --bg şeridi levhanın
    üstünde bant gibi duruyordu. Yapışık olduğunda kayan içeriği
    bulanıklaştırır (renk katmaz): yapışmamışken arkası düz levha, iz
    bırakmaz. Sayfa bölümlerinin raylı seçicisi (--sayfa) kendi gri rayını
    (--seg-ray) taşır; ona dokunulmaz. */
-html[data-zemin="yumusak"] .site--v5 .bolumcubugu:not(.bolumcubugu--sayfa){ background:transparent; }
-html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
-  -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); }
 
-@media (min-width:680px){
-  /* Levha: her sayfada aynı en; dikeyde ortada (kabuk.css ORTA DURUŞ). */
-  html[data-zemin="yumusak"] .site--v5 .sayfa,
-  html[data-zemin="yumusak"] .site--v5 .sayfa:has(.bugun){ max-width:var(--content-max, 1180px); position:relative; }
-  html[data-zemin="yumusak"] .site--v5 .sayfa:has(.bugun) > *{ max-width:960px; margin-inline:auto; }
-  html[data-zemin="yumusak"] .site--v5 .sayfa::before{
-    content:''; position:absolute; inset:16px 12px; z-index:-1; pointer-events:none;
-    border-radius:28px; background:linear-gradient(180deg, var(--buz-ust), var(--buz-alt));
-    box-shadow:var(--buz-isik), var(--buz-golge);
-  }
 
-  /* Kenar camdır: arkasındaki renk süzülür; açıkken daha dolgun. */
-  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar{
-    background:var(--kenar-cam); border-right-color:transparent;
-    box-shadow:inset -1px 0 0 color-mix(in oklab, var(--border) 70%, transparent);
-    -webkit-backdrop-filter:saturate(160%) blur(24px); backdrop-filter:saturate(160%) blur(24px); }
-  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu){
-    background:var(--kenar-cam-acik); border-radius:0 20px 20px 0;
-    box-shadow:var(--cam-isik, none); }   /* dış gölge ayrı katmanda: kabuk.css «AÇIK KENARIN GÖLGESİ» */
-}
+
+
 
 /* CANLI ZEMİN (kullanıcı, 2026-10-17: «arayüz cansız; arkadaki buzlu efekt
    nefes alıyor gibi hareket etse»). Üç dokunuş, üçü de ÇOK hafif:
@@ -200,18 +155,7 @@ html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
    Görünüm › Animasyonlar «Az» ya da işletim sisteminin «hareketi azalt»ı
    üçünü de durdurur (animasyon.js bu sorguyu kullanıcının seçimine göre
    yeniden yazar). Sade zeminde hiçbiri yok. */
-@media (prefers-reduced-motion:no-preference){
-  html[data-zemin="yumusak"] body::before{
-    transform:scale(1.05); will-change:transform;
-    animation:zemin-nefes 46s ease-in-out infinite alternate;
-  }
-  @supports (animation-timeline: scroll()){
-    html[data-zemin="yumusak"] body::before{
-      animation:zemin-nefes 46s ease-in-out infinite alternate, zemin-derinlik linear both;
-      animation-timeline:auto, scroll(root block);
-    }
-  }
-}
+
 @keyframes zemin-nefes{
   0%{ transform:translate3d(0, 0, 0) scale(1.05); }
   50%{ transform:translate3d(1.1%, -.6%, 0) scale(1.08); }
@@ -223,7 +167,7 @@ html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
   background:radial-gradient(70% 55% at 50% 0%, color-mix(in oklab, var(--mod, var(--ays)) 34%, transparent), transparent 72%); }
 :root[data-theme="dark"] .zemin-isik{
   background:radial-gradient(70% 55% at 50% 0%, color-mix(in oklab, var(--mod, var(--ays)) 26%, transparent), transparent 72%); }
-html:not([data-zemin="yumusak"]) .zemin-isik{ display:none; }
+html[data-zemin] .zemin-isik{ display:none; }
 @media (prefers-reduced-motion:no-preference){
   .zemin-isik.is-nabiz{ animation:zemin-nabiz 1.7s cubic-bezier(.32,.72,0,1) both; }
 }

@@ -475,11 +475,10 @@ _IKON = ("data:image/svg+xml,"
          "%3Crect x='17' y='17' width='12' height='12' rx='3' fill='%239A86FF'/%3E%3C/svg%3E")
 
 GIRIS_SAYFASI = """<!doctype html>
-<html lang="tr"><head><meta charset="utf-8"/>
+<html lang="tr" data-zemin="piksel"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>LifeOS — Kontrol paneli</title>
 <link rel="icon" href="__IKON__"/>
-<script>(function(){var z=null;try{z=localStorage.getItem('lifeos.zemin');}catch(e){}if(z!=='sade'&&z!=='yumusak')document.documentElement.setAttribute('data-zemin','piksel');})();</script>
 <link rel="stylesheet" href="/hesap.css"/>
 <link rel="stylesheet" href="/piksel-yazi.css"/>
 <link rel="stylesheet" href="/piksel.css"/>
@@ -886,7 +885,7 @@ video.giris-video{ position:fixed; inset:0; width:100%; height:100%; object-fit:
 /* Şerit ve kâğıt dışındaki yazı: yer tahtasının üstünde krem */
 :root[data-zemin="piksel"] :is(.ust h1, .ust h1 span, .bolum, .dip, .dip *){ color:var(--piksel-kenar-yazi); text-shadow:none; }
 :root[data-zemin="piksel"] .yay__uc, :root[data-zemin="piksel"] .surum{ background:var(--piksel-tahta); color:var(--piksel-kenar-yazi); border-color:transparent; box-shadow:0 -3px 0 var(--piksel-tahta),0 3px 0 var(--piksel-tahta),-3px 0 0 var(--piksel-tahta),3px 0 0 var(--piksel-tahta); -webkit-backdrop-filter:none; backdrop-filter:none; }
-:root[data-zemin="piksel"] .yay__uc b{ background:var(--piksel-kenar-yazi); color:var(--piksel-tahta); box-shadow:none; }
+:root[data-zemin="piksel"] .yay__uc b{ background:none; color:var(--piksel-kenar-yazi); box-shadow:none; }
 :root[data-zemin="piksel"] .yay .kart--orta{ box-shadow:0 -3px 0 var(--piksel-kagit),0 3px 0 var(--piksel-kagit),-3px 0 0 var(--piksel-kagit),3px 0 0 var(--piksel-kagit); }
 :root[data-zemin="piksel"] .yay svg:not(.kart__ok){ display:none; }
 

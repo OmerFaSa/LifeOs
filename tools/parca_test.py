@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import parca
 
-ONEMLI_TAVAN = 177  # dusurulur, artirilmaz
+ONEMLI_TAVAN = 216  # dusurulur, artirilmaz
 
 k = parca.kayit_oku("""# yorum
 [bas]

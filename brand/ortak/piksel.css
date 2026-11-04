@@ -7,8 +7,7 @@
    Tek fikir: sen akşam odasındasın, iş defterin önünde. Oda üstte ve kenarda
    (piksel.js çizer), bütün içerik tek bir kâğıt yaprakta durur; böylece her
    yazı aynı zemini görür ve okunur. Tema yalnız jetonla ve kabuk yüzeyleriyle
-   değişir: ekranlar tema bilmez. Ayarlar › Görünüm › Zemin «Canlı» ya da «Sade»
-   seçilince bu dosyanın hiçbir kuralı çalışmaz. */
+   değişir: ekranlar tema bilmez. Sistemin tek temasıdır (2026-11-04: «sadece piksel tema kalsın»). */
 :root[data-zemin="piksel"]{
   color-scheme:light;
   --piksel-duvar:#7c5560; --piksel-tahta:#5a3a35; --piksel-tahta-2:#6d463c; --piksel-kagit:#fdf3df; --piksel-golge:#3f282c55;
@@ -50,7 +49,7 @@
 }
 
 /* Köşeler tek kuraldan: ekran dosyalarına tema girmesin. Yuvarlak kalması gerekenler (minik, küre) kendi öğesini çizer. */
-:root[data-zemin="piksel"] body *:not(.minik):not(.king-kure):not(.logo):not(.kenar__nokta){ border-radius:0 !important; }
+:root[data-zemin="piksel"] body *:not(.minik):not(.king-kure):not(.kenar__nokta){ border-radius:0 !important; }
 
 :root[data-zemin="piksel"], :root[data-zemin="piksel"] body{ background:none; }
 :root[data-zemin="piksel"]{ background:var(--piksel-duvar); }
@@ -94,6 +93,10 @@
 :root[data-zemin="piksel"][data-theme="dark"] .kenar [aria-current], :root[data-zemin="piksel"][data-theme="dark"] .kenar .is-on,
 :root[data-zemin="piksel"][data-theme="dark"] .altbant [aria-current], :root[data-zemin="piksel"][data-theme="dark"] .altbant .is-on{ --text:#f6e8d2; --text-2:#f6e8d2; --text-3:#dcc8ab; }
 
+/* Giriş kapısı: oda arkada, tanıtım ahşapta krem, form kâğıtta */
+:root[data-zemin="piksel"] .hesap-kapi{ background:var(--piksel-tahta-2); }
+:root[data-zemin="piksel"] .hesap-kapi__tanitim{ --fg:var(--piksel-kenar-yazi); --fg-2:var(--piksel-kenar-yazi-2); --text:var(--piksel-kenar-yazi); --text-2:var(--piksel-kenar-yazi-2); --text-3:var(--piksel-kenar-yazi-2); color:var(--piksel-kenar-yazi); }
+:root[data-zemin="piksel"] .hesap-kapi__sistemler > *{ background:var(--piksel-tahta); box-shadow:none; }
 /* Kartlar yaprağın üstünde kâğıt: gölge ve cam yok, ince çizgi */
 :root[data-zemin="piksel"] :is(.card,.kutu,.lrow){ backdrop-filter:none; -webkit-backdrop-filter:none; }
 :root[data-zemin="piksel"] :is(h1,h2,h3,h4){ font-weight:700; letter-spacing:0; }
@@ -107,3 +110,4 @@
   :root[data-zemin="piksel"] .site--v5 > .ust{ --text:var(--piksel-kenar-yazi); --text-2:var(--piksel-kenar-yazi-2); --text-3:var(--piksel-kenar-yazi-2); }
 }
 :root[data-zemin="piksel"] .kutu__yuva{ white-space:normal; min-width:0; }
+:root[data-zemin="piksel"] .hesap-kapi__sozler svg{ color:var(--piksel-kenar-yazi); }

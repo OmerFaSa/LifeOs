@@ -30,17 +30,16 @@ ORTAK = {
 def gun_html(tema=None, host="127.0.0.1"):
     sayfa = GUN_SAYFASI.replace("__HOST__", host)
     if tema in ("light", "dark"):
-        sayfa = sayfa.replace('<html lang="tr">', '<html lang="tr" data-theme="%s">' % tema, 1)
+        sayfa = sayfa.replace('<html lang="tr" data-zemin="piksel">', '<html lang="tr" data-zemin="piksel" data-theme="%s">' % tema, 1)
     return sayfa
 
 
 GUN_SAYFASI = r"""<!doctype html>
-<html lang="tr">
+<html lang="tr" data-zemin="piksel">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Gün — LifeOS</title>
-<script>(function(){var z=null;try{z=localStorage.getItem('lifeos.zemin');}catch(e){}if(z!=='sade'&&z!=='yumusak')document.documentElement.setAttribute('data-zemin','piksel');})();</script>
 <link rel="stylesheet" href="/gun/ortak/jeton.css"/>
 <link rel="stylesheet" href="/gun/ortak/base.css"/>
 <link rel="stylesheet" href="/gun/ortak/layout.css"/>

@@ -141,7 +141,6 @@ LIFEOS.YETKI = (function(){
   }
   const TEMA_AD = { dark:'koyu', light:'açık', system:'sisteme uyan' };
   const ANIM_AD = { tam:'tam', az:'az', sistem:'sisteme uyan' };
-  const ZEMIN_AD = { piksel:'piksel', yumusak:'canlı', sade:'sade' };
 
   const EYLEMLER = [
     {
@@ -168,21 +167,6 @@ LIFEOS.YETKI = (function(){
         const A = L.ANIMASYON, eski = A.kip();
         A.ayarla(p.v);
         return { metin:yz('ortak.yetki.animasyonlari') + ANIM_AD[p.v] + ' yaptım.', geriAl:async () => { A.ayarla(eski); } };
-      },
-    },
-    {
-      id:'zemin', seviye:'kucuk', ad:yz('ortak.yetki.zemin'),
-      anla:t => {
-        if(!L.ZEMIN || !/zemin|arka ?plan/.test(t)) return null;
-        if(/sade|düz|sakin/.test(t)) return { v:'sade' };
-        if(/canlı|renkli|yumuşak/.test(t)) return { v:'yumusak' };
-        return null;
-      },
-      onizle:p => ({ metin:yz('ortak.yetki.zemin-2') + ZEMIN_AD[p.v] + ' olacak.' }),
-      async uygula(p){
-        const Z = L.ZEMIN, eski = Z.kip();
-        Z.ayarla(p.v);
-        return { metin:yz('ortak.yetki.zemini') + ZEMIN_AD[p.v] + ' yaptım.', geriAl:async () => { Z.ayarla(eski); } };
       },
     },
     {

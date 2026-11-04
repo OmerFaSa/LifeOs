@@ -128,17 +128,10 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    tek vurgu rengi. Görsel veri uydurmaz: hedef yoksa halka/çubuk yok,
    girilmemiş gün nokta ya da boşluk (sıfır değil), her görselin
    `aria-label`'ı sayıyı cümleyle söyler.
-   **Cam ve sıcak ışık istisnası (2026-10-27, depo sahibinin kararı:
-   «sıcak ışıklar, yansımalar… tasarımı değiştirme pahasına izin
-   veriyorum»):** yüzey dili `brand/ortak/cam.css`'tir (süzülen cam kart,
-   kalın cam plaka, yüzen kenar). Parıltı yalnız orada sayılı üç yerde
-   ve duran ışıktır: zemin altındaki sıcak ışık ve yansıma çizgisi, cam
-   kartın alt kenarındaki sıcak yansıma, dolu çubuk ile ana düğmenin
-   hâlesi. Sürekli oynayan parıltı yine yok; renk yine ölçüyü ayırır.
-   «Sade» zeminde bu katmanın hiçbiri çalışmaz.
-   **Piksel teması (2026-11-04, depo sahibinin kararı: «tüm sisteme uygula»):** varsayılan zemin
-   `brand/ortak/piksel.css` ve `piksel.js`: üstte akşam odası, bütün içerik tek kâğıt yaprakta. Ekranlar tema
-   bilmez, yalnız jeton değişir. Görünüm › Zemin'den geri alınır. Cam kuralları yalnız «Yumuşak» seçiliyken çalışır.
+   **Tek tema: piksel (2026-11-04, depo sahibinin kararı: «tüm sisteme uygula», «buzul temayı sil, sadece bu
+   piksel tema kalsın»):** `brand/ortak/piksel.css` ve `piksel.js`: üstte akşam odası, bütün içerik tek kâğıt
+   yaprakta. Ekranlar tema bilmez, yalnız jeton değişir. Cam, Yumuşak ve Sade zemin, duvar kâğıdı, Yüzey ve
+   minik seçicileri kalktı. Süs sayı üretmez; oda veri okumaz.
 
 11. **Sistem Lego gibi kurulur** (2026-11-04, depo sahibi: «her sayfanın, her özelliğin,
    her yazının bir Lego gibi parça olması lazım»). Dosya `brand/parcalar.txt`'e tek satır,

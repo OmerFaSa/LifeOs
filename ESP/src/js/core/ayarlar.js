@@ -102,7 +102,7 @@ window.LIFEOS.PARCA.yazilar({
   'ortak.ayarlar.yazi-tipi':'Yazı tipi',
   'ortak.ayarlar.i-cerik-birlikte-buyur-menu':'İçerik birlikte büyür; menü yerinde kalır',
   'ortak.ayarlar.yazi-boyutu':'Yazı boyutu',
-  'ortak.ayarlar.renk-ve-cam':'Renk ve cam',
+  'ortak.ayarlar.renk-ve-cam':'Renk',
   'ortak.ayarlar.vurgu-rengi':'Vurgu rengi',
   'ortak.ayarlar.secili-dugme-ve-sekmeler':'Seçili düğme ve sekmeler',
   'ortak.ayarlar.cam-yogunlugu':'Cam yoğunluğu',
@@ -364,13 +364,11 @@ window.LIFEOS = window.LIFEOS || {};
   const BOLUMLER = Object.freeze([
     { id:'profil',   ad:yz('ortak.ayarlar.profiller'),        grup:'Sistem' },
     { id:'gorunum',  ad:yz('ortak.ayarlar.gorunum'),          grup:'Sistem' },
-    { id:'zemin',    ad:yz('ortak.ayarlar.arka-plan'),        grup:'Sistem' },
     { id:'ses',      ad:yz('ortak.ayarlar.ses-ve-muzik'),     grup:'Sistem' },
     { id:'hareket',  ad:yz('ortak.ayarlar.animasyon'),        grup:'Sistem' },
     { id:'erisim',   ad:yz('ortak.ayarlar.erisilebilirlik'),  grup:'Sistem' },
     { id:'king',     ad:yz('ortak.ayarlar.king-ve-baglantilar'), grup:'Sistem' },
     { id:'merkez',   ad:yz('ortak.ayarlar.merkez'),           grup:'Sistem' },
-    { id:'ekip',     ad:yz('ortak.ayarlar.minikler'),         grup:'Sistem' },
     { id:'bildirim', ad:yz('ortak.ayarlar.bildirimler'),      grup:'Sistem' },
     { id:'sistem',   ad:yz('ortak.ayarlar.planlama'),         grup:'Sistem' },
     { id:'modul',    ad:yz('ortak.ayarlar.modul-ayarlari'),   grup:yz('ortak.ayarlar.bu-modul') },
@@ -702,24 +700,8 @@ window.LIFEOS = window.LIFEOS || {};
         ('<details class="ayarlar__acilir"><summary class="ayarlar__satir"><span class="ayarlar__ad">' + yz('ortak.ayarlar.yazi-tipi') + '</span>')
         + '<span class="ayarlar__acilir-deger" data-yazi-ad>' + kac((YAZILAR.find(y => y.id === yazi()) || YAZILAR[0]).ad) + '</span></summary>' + yaziSeciciHtml() + '</details>'
         + G('Boyut', yz('ortak.ayarlar.i-cerik-birlikte-buyur-menu'), secimHtml('boyut', yz('ortak.ayarlar.yazi-boyutu'))))
-      + kart(SIMGE.renk, yz('ortak.ayarlar.renk-ve-cam'), '', H(yz('ortak.ayarlar.vurgu-rengi'), yz('ortak.ayarlar.secili-dugme-ve-sekmeler'), vurguHtml())
-        + H(yz('ortak.ayarlar.cam-yogunlugu'), yz('ortak.ayarlar.kartlarin-ne-kadar-saydam-ol'), secimHtml('cam', yz('ortak.ayarlar.cam-yogunlugu')))
-        + H(yz('ortak.ayarlar.sol-menu'), yz('ortak.ayarlar.cam-arkadaki-fotograf-gorunu'), secimHtml('kenar', yz('ortak.ayarlar.sol-menu')))
-        + H(yz('ortak.ayarlar.ortam-isigi'), yz('ortak.ayarlar.i-mlecin-pesindeki-hafif-isi'), anahtarHtml('isik', yz('ortak.ayarlar.ortam-isigi'))))
+      + kart(SIMGE.renk, yz('ortak.ayarlar.renk-ve-cam'), '', H(yz('ortak.ayarlar.vurgu-rengi'), yz('ortak.ayarlar.secili-dugme-ve-sekmeler'), vurguHtml()))
       + ('<div class="ayarlar__dip"><button type="button" class="btn btn--sm btn--ghost" data-ayarlar-sifirla>' + yz('ortak.ayarlar.gorunumu-sifirla') + '</button><small>' + yz('ortak.ayarlar.verin-degismez') + '</small></div>')
-      + '</div>';
-    if(id === 'zemin') return '<div class="skartlar">'
-      + kart(SIMGE.resim, yz('ortak.ayarlar.duvar-kagidi'), yz('ortak.ayarlar.gunduz-acik-temada-gece-koyu'), H('Zemin', yz('ortak.ayarlar.sade-fotograf-ve-cam-yok'), cagir(L.ZEMIN, 'seciciHtml'))
-        + '<div class="zemin-yuvalar">'
-        + ('<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>' + yz('ortak.ayarlar.gunduz') + '</b><small>' + yz('ortak.ayarlar.acik-tema') + '</small></div>') + onizleHtml('gunduz') + cagir(L.ZEMIN, 'manzaraSeciciHtml') + '</div>'
-        + ('<div class="zemin-yuvasi"><div class="zemin-yuvasi__bas"><b>' + yz('ortak.ayarlar.gece') + '</b><small>' + yz('ortak.ayarlar.koyu-tema') + '</small></div>') + onizleHtml('gece') + cagir(L.ZEMIN, 'geceSeciciHtml') + '</div></div>')
-      + kart(SIMGE.bulanik, yz('ortak.ayarlar.bulaniklik-ve-okunaklik'), yz('ortak.ayarlar.her-katman-ayri-kapali-katma'),
-        H(yz('ortak.ayarlar.duvar-kagidi'), yz('ortak.ayarlar.fotografin-kendisi'), secimHtml('bulanik', yz('ortak.ayarlar.duvar-kagidinin-bulanikligi')))
-        + H('Perde', yz('ortak.ayarlar.fotografin-ustundeki-ortu'), secimHtml('perde', yz('ortak.ayarlar.okunaklik-perdesi')))
-        + H('Kartlar', yz('ortak.ayarlar.sayfadaki-kartlar-buzlu-cam'), anahtarHtml('buzluKart', yz('ortak.ayarlar.kartlar-buzlu')))
-        + H(yz('ortak.ayarlar.sol-menu'), yz('ortak.ayarlar.menu-buzlu-cam'), anahtarHtml('buzluMenu', yz('ortak.ayarlar.sol-menu-buzlu')))
-        + H('Pencereler', yz('ortak.ayarlar.ayarlar-bildirimler-cekmecel'), anahtarHtml('buzluPencere', yz('ortak.ayarlar.pencereler-buzlu'))))
-      + kart(SIMGE_VIDEO, yz('ortak.ayarlar.arka-plan-videosu'), yz('ortak.ayarlar.yalniz-video-seciliyken'), cagir(L.ZEMIN, 'videoAyarHtml'))
       + '</div>';
     if(id === 'bildirim'){
       const ss = L.SES && L.SES.sessiz ? L.SES.sessiz() : null;
@@ -751,8 +733,6 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'ses') return '<div class="skartlar">'
       + kart(SIMGE_SES, yz('ortak.ayarlar.ses-duzeyleri'), yz('ortak.ayarlar.genel-hepsini-birlikte-kisar'), cagir(L.SES, 'duzeySeciciHtml'))
       + cagir(L.MUZIK, 'ayarHtml')
-      + '<button type="button" class="skart skart--bag" data-ayarlar-git="zemin">' + SIMGE_VIDEO
-      + ('<span class="skart__baslik"><b>' + yz('ortak.ayarlar.arka-plan-videosunun-sesi') + '</b><small>' + yz('ortak.ayarlar.arka-plan-bolumunde-ses-kesi') + '</small></span><span aria-hidden="true">›</span></button>')
       + '</div>';
     if(id === 'king') return '<div class="skartlar">' + kart(SIMGE.king, 'King', yz('ortak.ayarlar.adi-konusmasi-ve-sesi'),
         H('Adı', yz('ortak.ayarlar.bos-birakirsan-king'), '<input class="ayarlar__girdi" type="text" maxlength="20" data-king-ad placeholder="King"'
@@ -778,7 +758,6 @@ window.LIFEOS = window.LIFEOS || {};
     if(id === 'merkez') return ('<div class="merkezayar merkezayar--tam" data-merkez-tam-kok><p class="ayarlar__bos">' + yz('ortak.ayarlar.yukleniyor') + '</p></div>');
     if(id === 'sistem') return ('<h4 class="plan__baslik">' + yz('ortak.ayarlar.sistem-planlamasi') + '</h4><div class="plan" data-plan-kok><p class="ayarlar__bos">' + yz('ortak.ayarlar.yukleniyor') + '</p></div>');
     if(id === 'modul') return '<div class="skartlar">'
-      + kart(SIMGE.yuzey, 'Yüzey', yz('ortak.ayarlar.kartlarin-bu-moduldeki-duzen'), H('Düzen', '', cagir(L.ZEMIN, 'yuzeySeciciHtml')))
       + (L.KILIT && L.KILIT.ayarHtml ? kart(SIMGE.kilit, yz('ortak.ayarlar.gizlilik-kilidi'), yz('ortak.ayarlar.bu-modul-acilirken-dort-hane'), L.KILIT.ayarHtml(modulAdi(), { govde:true })) : '')
       + ((o.modul || []).length ? kart(SIMGE.ekran, (MODUL_AD[modulAdi()] || 'Modül') + ' ekranları', yz('ortak.ayarlar.modulun-kendi-ayar-sayfalari'), o.modul.map(m => H(m.ad, m.not || '',
         '<button type="button" class="btn btn--sm" data-act="go" data-route="' + kac(m.route) + ('">' + yz('ortak.ayarlar.ac') + '</button>'))).join('')) : '')

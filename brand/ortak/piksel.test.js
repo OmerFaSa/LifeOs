@@ -12,17 +12,10 @@
   function oran(a, b){ const x = isikli(a), y = isikli(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
 
   describe('Piksel teması', () => {
-    it('seçiliyken oda çizilir, başka zeminde canvas kalkar, seçim yerine döner', () => {
-      const eski = Z.kip(), kok = document.documentElement;
-      try{
-        Z.ayarla('piksel');
-        window.LIFEOS.PIKSEL.uygula();
-        expect(kok.getAttribute('data-zemin')).toBe('piksel');
-        expect(!!document.querySelector('.piksel-oda')).toBe(true);
-        Z.ayarla('sade');
-        window.LIFEOS.PIKSEL.uygula();
-        expect(document.querySelector('.piksel-oda')).toBe(null);
-      }finally{ Z.ayarla(eski); window.LIFEOS.PIKSEL.uygula(); }
+    it('oda çizilir: kök piksel, tuval var', () => {
+      window.LIFEOS.PIKSEL.uygula();
+      expect(document.documentElement.getAttribute('data-zemin')).toBe('piksel');
+      expect(!!document.querySelector('.piksel-oda')).toBe(true);
     });
     it('yazı kâğıtta AA geçer: açık ve koyu', async () => {
       /* Test sayfası bütün stilleri yüklemez: jetonları tema dosyasının kendisinden okur. */

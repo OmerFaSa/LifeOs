@@ -29,13 +29,10 @@ html[data-king-gorunus="pembe"] .king__arkadas .minik__goz:nth-of-type(3)::befor
 /* 2) TEMA: King'in yüzeyleri cam (gözlem: kartlar, karolar, menüler opaktı;
    ana çipin yazısı zemine karışıyordu 1,27:1). Pencerede manzara görünsün:
    bulanıklık 40 → 24 px. Camdaki ikincil yazı okunur (en az 4,5:1). */
-html[data-zemin="yumusak"] .king:not(.is-mini) :is(.king__kart, .king__ars, .king__onizle, .king__soru, .king__sira, .king__bulunan),
-html[data-zemin="yumusak"] .king :is(.king__alan .king__gorev, .king__ders, .king__yasa-s, .king__gunum, .kt-kart, .kv-mini, .king__balon--sen){
-  background:var(--cam-ince) !important; border:1px solid var(--cam-kenar) !important; box-shadow:var(--cam-ust) !important; }
-html[data-zemin="yumusak"] .king__arac-menu{ background:var(--cam-katman) !important; border:1px solid var(--cam-kenar);
-  -webkit-backdrop-filter:saturate(150%) blur(24px); backdrop-filter:saturate(150%) blur(24px); box-shadow:var(--cam-ust), var(--shadow-lg); }
-html[data-zemin="yumusak"] .king .king__kutu{ -webkit-backdrop-filter:saturate(150%) blur(24px); backdrop-filter:saturate(150%) blur(24px); }
-html[data-zemin="yumusak"] .king :is(.king__balon li, .king__cipler--akis .king__cip:not(.king__cip--ana), .king__neden, .king__arac small){ color:var(--text); }
+
+
+
+
 
 /* 3) KONUŞAN SAHNE: arkadaş King'in tarafında (solda), son cevabın altında
    kendine ayrılan bantta durur; son satırı örtmez. Yeni cevap yukarıdan
@@ -52,9 +49,7 @@ html[data-zemin="yumusak"] .king :is(.king__balon li, .king__cipler--akis .king_
 
 /* Opak büyük pencere (king.css, 2026-10-29): içindeki cam kartlar ve «sen»
    balonu beyaz zeminde kayboluyordu (cam-ince yarı saydam beyaz). Dolu yüzey. */
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__kutu :is(.king__kart, .king__ars, .king__onizle, .king__soru, .king__sira, .king__bulunan,
-  .king__alan .king__gorev, .king__ders, .king__yasa-s, .king__gunum, .kt-kart, .kv-mini, .king__balon--sen){
-  background:var(--surface-2) !important; border:1px solid var(--border) !important; box-shadow:none !important; }
+
 
 /* 4) YENİ YÜZ (kullanıcı, 2026-10-29: «King arayüzü daha farklı, sisteme
    uyumlu buzul, minik agenta uygun bir alan; amaç ve özellikler şu anki gibi»;
@@ -77,41 +72,25 @@ html[data-theme="dark"] .king .king__arkadas{ box-shadow:inset 0 0 0 1px var(--y
   html:not([data-theme="light"]) .king{ --yuva:color-mix(in oklab, var(--king-vurgu) 14%, var(--beyaz-04)); }
   html:not([data-theme="light"]) .king .king__arkadas{ box-shadow:inset 0 0 0 1px var(--yuva-kenar), inset 0 1px 0 var(--beyaz-06); }
 }
-html[data-zemin="yumusak"] .king:has(.king__arkadas) .king__akis{ padding-bottom:0; }
+
 .king__yuz .minik{ --g1:var(--king-a1); --g2:var(--king-a2); --g3:var(--king-a3); }
 .king:not(.is-mini) .king__bos-kure:has(.king__yuz){ background:none; box-shadow:none; width:auto; height:auto; }
 
 /* Büyük pencere: buzul görünüm, bulanıklıksız (opak). */
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__kutu{
-  background:
-    radial-gradient(70% 55% at 0% 0%, color-mix(in oklab, var(--mod, var(--king-vurgu)) 12%, transparent), transparent 70%),
-    radial-gradient(60% 50% at 100% 100%, color-mix(in oklab, var(--king-vurgu) 9%, transparent), transparent 70%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    var(--surface, #fff) !important;
-  border-radius:32px !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.75), inset 0 0 0 1px var(--kenar-tek, rgba(255,255,255,.5)), 0 40px 90px -40px rgba(20,24,40,.45) !important; }
-html[data-theme="dark"][data-zemin="yumusak"] .king:not(.is-mini) .king__kutu{
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.07), 0 40px 90px -40px rgba(0,0,0,.8) !important; }
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__ray,
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__yan{ background:transparent !important; border-right-color:var(--border-soft) !important; }
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__ray [aria-current="true"],
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__ray .is-on{ background:var(--secili-zemin) !important; color:var(--secili-yazi) !important; box-shadow:var(--secili-golge) !important; }
+
+
+
+
 /* Yazı alanı: yüzen ince kapsül (yuva solda). */
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz{ border-radius:24px; background:var(--surface-2, #f1f2f5); box-shadow:inset 0 0 0 1px var(--border); }
+
 
 /* 5) ADA CAMDA: kapsül cam, deste kartları ve yelpaze ince cam. */
-html[data-zemin="yumusak"] .king.is-mini .king__dkart--on{ background:var(--cam-katman); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
-html[data-zemin="yumusak"] .king__yelpaze-oge:not(:hover):not(:focus-visible){ background:var(--cam-katman); }
+
+
 
 /* 6) MASA CAMDA (2026-10-30): ray, liste ve Bağlam pencerenin içinde cam kart
    (2'deki «ray ve liste saydam» kuralının geniş ekran hâli). */
-@media (min-width:1024px){
-  html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray,
-  html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__yan,
-  html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__baglam{ background:var(--cam-katman) !important;
-    box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar) !important; }
-  html[data-zemin="yumusak"] .king.king.is-yan-dar:not(.is-mini) .king__yan{ box-shadow:none !important; }
-}
+
 
 /* 7) ESKİ DÜZENİN CİLASI (kullanıcı, 2026-10-30: «eski tasarımda kal, sadece onu
    geliştir»; önceki şikâyet: «sistemle aynı, sıkıcı, boğucu»). Düzen aynı
@@ -151,8 +130,7 @@ html .king:not(.is-mini) .king__balon--sen{ background:color-mix(in oklab, var(-
   box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 16%, transparent) !important; }
 html .king:not(.is-mini) .king__balon--sen p{ color:color-mix(in oklab, var(--king-vurgu) 55%, var(--text)); }
 
-html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz:focus-within{
-  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 45%, transparent), 0 0 0 4px color-mix(in oklab, var(--king-vurgu) 12%, transparent) !important; }
+
 .king:not(.is-mini) .king__yaz:not(:has(.king__girdi:placeholder-shown)) .king__gonder{ transform:scale(1.04); }
 @media (prefers-reduced-motion:reduce){ .king:not(.is-mini) .king__gonder{ transform:none !important; } }
 
@@ -169,54 +147,28 @@ html[data-zemin="yumusak"] .king:not(.is-mini) .king__yaz:focus-within{
      ve sert kenar yok, saç teli çizgi ve üst ışık.
    · Yazı alanı yüzen cam kapsül; küçük King de aynı camdan.
    · «Sade» zeminde bu katman çalışmaz (AGENTS kural 10). */
-html[data-zemin="yumusak"] .king{
-  --kc-levha:rgba(250,251,253,.72); --kc-tul:rgba(255,255,255,.5); --kc-tul-2:rgba(255,255,255,.78);
-  --kc-hat:rgba(20,24,40,.08); --kc-isik:rgba(255,255,255,.9); --kc-cizgi:rgba(20,24,40,.07);
-  --kc-golge:0 32px 80px -36px rgba(20,24,40,.4); }
-html[data-theme="dark"][data-zemin="yumusak"] .king{
-  --kc-levha:rgba(22,23,28,.66); --kc-tul:rgba(255,255,255,.05); --kc-tul-2:rgba(255,255,255,.085);
-  --kc-hat:rgba(255,255,255,.08); --kc-isik:rgba(255,255,255,.07); --kc-cizgi:rgba(255,255,255,.06);
-  --kc-golge:0 32px 80px -30px rgba(0,0,0,.72); }
-@media (prefers-color-scheme:dark){
-  html:not([data-theme="light"])[data-zemin="yumusak"] .king{
-    --kc-levha:rgba(22,23,28,.66); --kc-tul:rgba(255,255,255,.05); --kc-tul-2:rgba(255,255,255,.085);
-    --kc-hat:rgba(255,255,255,.08); --kc-isik:rgba(255,255,255,.07); --kc-cizgi:rgba(255,255,255,.06);
-    --kc-golge:0 32px 80px -30px rgba(0,0,0,.72); }
-}
+
+
+
 /* Levha: küçükte buzlu cam, büyükte opak zemin üstünde ışık alanları. */
-html[data-zemin="yumusak"] .king.king .king__kutu{ box-shadow:inset 0 1px 0 var(--kc-isik), inset 0 0 0 1px var(--kc-hat), var(--kc-golge); }
-html[data-zemin="yumusak"] .king.king.is-mini .king__kutu{
-  background:radial-gradient(90% 70% at 0% 0%, color-mix(in oklab, var(--king-vurgu) 8%, transparent), transparent 72%), var(--kc-levha) !important;
-  -webkit-backdrop-filter:blur(28px) saturate(160%); backdrop-filter:blur(28px) saturate(160%); }
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__kutu{ border-radius:28px !important;
-  background:radial-gradient(60% 55% at 8% 0%, color-mix(in oklab, var(--king-vurgu) 16%, transparent), transparent 70%),
-    radial-gradient(55% 50% at 100% 100%, color-mix(in oklab, var(--mod, var(--king-vurgu)) 11%, transparent), transparent 70%),
-    var(--surface, #fff) !important; }
+
+
+
 /* İç kartlar kalkar: ray, liste, Bağlam ve başlık levhanın parçası. */
-html[data-zemin="yumusak"] .king.king:not(.is-mini) :is(.king__ray, .king__yan, .king__baglam, .king__bas){ background:transparent !important; box-shadow:none !important; border-color:transparent !important; }
-html[data-zemin="yumusak"] .king.king:not(.is-mini):not(.is-yan-dar) .king__yan{ box-shadow:inset -1px 0 0 var(--kc-cizgi) !important; }
-html[data-zemin="yumusak"] .king.king:not(.is-mini).is-alan-acik .king__baglam{ box-shadow:inset 1px 0 0 var(--kc-cizgi) !important; }
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray .king__ray-is.is-secili,
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray [aria-current="true"]{
-  background:color-mix(in oklab, var(--king-vurgu) 15%, transparent) !important; color:color-mix(in oklab, var(--king-vurgu) 70%, var(--text)) !important; box-shadow:none !important; }
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__ray .king__ray-is:not(.is-secili):hover{ background:var(--kc-tul) !important; }
+
+
+
+
+
 /* Tül: kartlar, karolar, çipler. */
-html[data-zemin="yumusak"] .king.king .king__kutu :is(.king__kart, .king__ars, .king__onizle, .king__soru, .king__sira, .king__bulunan,
-  .king__alan .king__gorev, .king__ders, .king__yasa-s, .king__gunum, .kt-kart, .kv-mini, .king__cip:not(.king__cip--ana)){
-  background:var(--kc-tul) !important; border:0 !important; box-shadow:inset 0 0 0 1px var(--kc-hat), inset 0 1px 0 var(--kc-isik) !important;
-  transition:background .2s ease, transform .2s cubic-bezier(.2,.7,.2,1); }
-html[data-zemin="yumusak"] .king.king .king__kutu :is(.kv-mini, .king__cip:not(.king__cip--ana)):hover{ background:var(--kc-tul-2) !important; transform:translateY(-1px); }
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__kutu .kv-mini{ border-radius:18px !important; }
+
+
+
 /* Cevap kartı ve senin balonun. */
-html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__akis > .king__balon--king.is-son > div{
-  background:linear-gradient(160deg, color-mix(in oklab, var(--king-vurgu) 7%, transparent), transparent 62%), var(--kc-tul) !important;
-  box-shadow:inset 0 0 0 1px var(--kc-hat), inset 0 1px 0 var(--kc-isik) !important; }
-html[data-zemin="yumusak"] .king.king .king__kutu .king__balon--sen{ background:color-mix(in oklab, var(--king-vurgu) 15%, transparent) !important;
-  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 18%, transparent) !important; }
+
+
 /* Yazı alanı: yüzen cam kapsül. */
-html[data-zemin="yumusak"] .king.king .king__yaz{ background:var(--kc-tul-2); border-radius:26px;
-  box-shadow:inset 0 0 0 1px var(--kc-hat), inset 0 1px 0 var(--kc-isik); }
-html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
-  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 42%, transparent), 0 0 0 4px color-mix(in oklab, var(--king-vurgu) 12%, transparent) !important; }
-@media (prefers-reduced-motion:reduce){ html[data-zemin="yumusak"] .king.king .king__kutu :is(.kv-mini, .king__cip):hover{ transform:none; } }
-@media (prefers-reduced-transparency:reduce){ html[data-zemin="yumusak"] .king.king.is-mini .king__kutu{ background:var(--surface) !important; -webkit-backdrop-filter:none; backdrop-filter:none !important; } }
+
+
+
+

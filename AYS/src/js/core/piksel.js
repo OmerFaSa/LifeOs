@@ -12,7 +12,7 @@
      2. KODLA ÇİZİLİR. Görsel dosyası yok; çevrimdışı ve tek dosyada çalışır.
      3. EKRANI YORMAZ. Sahne bir kez hazırlanır, yalnız kedi, fincan ve ampuller 8 kare/sn oynar;
         sekme arkadayken ya da sayfa kaydırılmışken durur; animasyon kapalıysa tek kare çizilir.
-     4. TEMAYA UYAR. Açık ve koyuda ayrı palet; piksel teması seçili değilse hiç çizmez. */
+     4. TEMAYA UYAR. Açık ve koyuda ayrı palet. */
 window.LIFEOS = window.LIFEOS || {};
 
 (function(L){

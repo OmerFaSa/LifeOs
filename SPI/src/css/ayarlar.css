@@ -90,11 +90,6 @@ html[data-yazi="comfortaa"]{ --font-body:'Comfortaa', ui-rounded, system-ui, san
 /* Paneldeki seçiciler sayfadakiyle aynı cam dil (opak koyu blok değil):
    oyuk ray, seçili hap parlak cam; seçili tema seçili cam. Panel kabuğun
    dışında (#overlay-root) durur, cam jetonlarına yedek değer verilir. */
-html[data-zemin="yumusak"] .ayarlar .seg{ background:var(--ray, rgba(127,127,140,.12)); border-color:var(--cam-kenar, var(--border)); }
-html[data-zemin="yumusak"] .ayarlar .seg button.is-on{ background:var(--cam-katman); color:var(--text);
-  box-shadow:var(--cam-ust), 0 1px 3px var(--siyah-12); }
-html[data-zemin="yumusak"] .ayarlar .themebtn{ border-color:var(--border); background:transparent; }
-html[data-zemin="yumusak"] .ayarlar .themebtn.is-on{ border-color:transparent; background:var(--secili-zemin); color:var(--secili-yazi); box-shadow:var(--secili-golge); }
 
 /* Geniş satır: ad üstte, denetim altta tam genişlik (ses ve hız katmanları). */
 .ayarlar__satir--genis{ flex-direction:column; align-items:stretch; gap:12px; }
@@ -208,7 +203,6 @@ html[data-zemin="yumusak"] .ayarlar .themebtn.is-on{ border-color:transparent; b
 .plan__simdi{ padding:0; font-size:12px; font-weight:550; color:var(--text-2); }
 @media (max-width:679px){ .plan__is .plan__ayar, .plan__is .plan__son{ padding-left:0; } }
 
-html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--cam-ince); border-color:transparent; color:var(--text); box-shadow:var(--cam-ust), inset 0 0 0 1px var(--cam-kenar); }
 /* Panelde [hidden] her biçimden üstündür (kilit kutusunun gizli düğmeleri görünüyordu). */
 .ayarlar [hidden]{ display:none !important; }
 
@@ -226,9 +220,9 @@ html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--ca
 .ayarlar.is-aranir .ayarlar__sekme.is-on{ background:transparent; box-shadow:none; color:var(--text-2); font-weight:500; }
 
 /* Arka plan: iki yuva yan yana, büyük önizleme ve seçici. */
-.zemin-yuvalar{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; padding:6px 0 14px; }
+
 .zemin-yuvasi{ display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:16px; background:color-mix(in oklab, var(--text) 4%, transparent); }
-.zemin-yuvasi__bas{ display:flex; align-items:baseline; gap:8px; } .zemin-yuvasi__bas b{ font-size:14px; } .zemin-yuvasi__bas small{ font-size:12px; color:var(--text-3); }
+  
 .zemin-yuvasi .zemin-yuva{ justify-content:flex-start; }
 .zemin-yuvasi .zemin-durum{ text-align:left; }
 .zemin-onizle{ position:relative; display:block; aspect-ratio:16 / 9; border-radius:12px; overflow:hidden;
@@ -260,7 +254,7 @@ html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--ca
 .zemin-yuvasi .seg{ display:flex; width:100%; }
 .zemin-yuvasi .seg button{ flex:1 1 0; min-width:0; padding-inline:6px; overflow:hidden; text-overflow:ellipsis; }
 .sessiz{ display:flex; align-items:center; gap:8px; color:var(--text-3); }
-@media (max-width:679px){ .zemin-yuvalar{ grid-template-columns:1fr; } }
+
 .anihiz__ad{ display:flex; flex-direction:column; }
 .anihiz__oran{ font-size:11px; font-weight:450; color:var(--text-3); font-variant-numeric:tabular-nums; }
 .anihiz button{ font-variant-numeric:tabular-nums; }
@@ -389,10 +383,7 @@ html[data-zemin="yumusak"] .ayarlar .btn:not(.btn--primary){ background:var(--ca
 .ayarlar__kapsam svg{ flex:none; width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
 .ayarlar__kapsam--modul{ color:var(--mod, var(--primary)); background:color-mix(in oklab, var(--mod, var(--primary)) 10%, transparent); }
 /* Bölümler arası bağlantı kartı (Ses › arka plan videosunun sesi). */
-.skart--bag{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:0; font:inherit; color:var(--text); cursor:pointer; }
-.skart--bag > svg{ flex:none; width:18px; height:18px; fill:none; stroke:var(--mod, var(--primary)); stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
-.skart--bag > span:last-child{ font-size:18px; color:var(--text-3); }
-.skart--bag:hover{ background:color-mix(in oklab, var(--surface) 90%, transparent); }
+
 /* YAZI BOYUTU (Ayarlar › Görünüm, 2026-10-30): bütün arayüz birlikte ölçeklenir. */
 /* Yalnız içerik ölçeklenir; sol menü ve sabit katmanlar yerinde kalır (2026-10-30: «yazı boyutunu değiştirince soldaki kartın oranı bozuluyor»). */
 html[data-boyut="kucuk"] .site__body{ zoom:.92; }
@@ -456,13 +447,13 @@ html[data-vurgu]:not([data-vurgu="modul"]){ --vurgu-ink:color-mix(in oklab, var(
 /* Kart içinde satırlar (2026-10-30: «her şeyi yerli yerinde yap»): ilk satırın üst çizgisi yok, satırlar kartın içinde nefes alır. */
 .skart .ayarlar__satir{ padding:10px 0; }
 .skart .skart__govde > .ayarlar__satir:first-child, .skart .skart__govde > .ayarlar__acilir:first-child > summary{ border-top:0; padding-top:2px; }
-.skart .zemin-yuvalar{ margin:4px 0 2px; }
+
 .ayarlar__dip{ display:flex; align-items:center; gap:10px; padding:2px 4px; }
 .ayarlar__dip small{ font-size:12px; color:var(--text-3); }
 /* Kart kendi genişliğine göre dizilir (pencere dar ya da yazı büyükse): yuvalar alt alta, denetim adın altına iner, hiçbir şey kartın dışına taşmaz. */
 .skart__govde{ container-type:inline-size; min-width:0; }
 @container (max-width:560px){
-  .zemin-yuvalar{ grid-template-columns:1fr; }
+  
   .skart .ayarlar__satir{ flex-wrap:wrap; gap:8px 16px; }
   .skart .ayarlar__deger{ flex:1 1 100%; justify-content:flex-start; }
 }

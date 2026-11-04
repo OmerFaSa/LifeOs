@@ -537,20 +537,10 @@ SP.App = (function(){
         <div class="appear__themes">${SP.C.TemaSecici({ value:theme, act:'set-theme' })}</div>
         <div class="appear__label">${yz('spi.app.animasyonlar')}</div>
         ${raw(window.LIFEOS.ANIMASYON ? LIFEOS.ANIMASYON.seciciHtml() : '')}
-        <div class="appear__label">${yz('spi.app.zemin')}</div>
-        ${raw(window.LIFEOS.ZEMIN ? LIFEOS.ZEMIN.seciciHtml() : '')}
-        <div class="appear__label">${yz('spi.app.minikler')}</div>
-        ${raw(window.LIFEOS.MINIK ? LIFEOS.MINIK.seciciHtml() : '')}
-        <div class="appear__label">${yz('spi.app.minik-boyu')}</div>
-        ${raw(window.LIFEOS.MINIK && LIFEOS.MINIK.boySeciciHtml ? LIFEOS.MINIK.boySeciciHtml() : '')}
         <div class="appear__label">${yz('spi.app.king-in-gorunusu')}</div>
         ${raw(window.LIFEOS.KING && LIFEOS.KING.gorunusSeciciHtml ? LIFEOS.KING.gorunusSeciciHtml() : '')}
         <div class="appear__label">${yz('spi.app.ses-duzeyleri')}</div>
         ${raw(window.LIFEOS.SES && LIFEOS.SES.duzeySeciciHtml ? LIFEOS.SES.duzeySeciciHtml() : '')}
-        <div class="appear__label">${yz('spi.app.yuzey-bu-modul')}</div>
-        ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.yuzeySeciciHtml ? LIFEOS.ZEMIN.yuzeySeciciHtml() : '')}
-        <div class="appear__label">${yz('spi.app.manzara')}</div>
-        ${raw(window.LIFEOS.ZEMIN && LIFEOS.ZEMIN.manzaraSeciciHtml ? LIFEOS.ZEMIN.manzaraSeciciHtml() : '')}
 
         <p class="appear__note">${yz('spi.app.tema-bu-profile-kaydedilir-s')}</p>
       </div>`);
