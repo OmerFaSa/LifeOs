@@ -58,11 +58,16 @@ def inline_js(html: str):
         return ""
 
     html = re.sub(r'\s*<script src="(?!https)([^"]+)"\s*></script>', collect, html)
-    blocks = []
-    for rel in files:
+    # Tembel parca (brand/parcalar.txt [tembel]): veri metin olarak durur, ilk erisimde calisir.
+    sys.path.insert(0, str(ROOT.parent / "tools"))
+    import parca
+    kalan, on, etiket = parca.tembel_ayir("spi", files, read)
+    blocks = [on] if on else []
+    for rel in kalan:
         body = read(rel).strip()
         blocks.append(f"/* ==== {rel} ==== */\n{body}")
-    return html, ["<script>\n" + "\n\n".join(blocks) + "\n</script>"], files
+    ana = "<script>\n" + "\n\n".join(blocks) + "\n</script>"
+    return html, ([etiket] if etiket else []) + [ana], files
 
 
 def stamp() -> str:

@@ -957,3 +957,33 @@ prova.test.js ays
 ogungiris.test.js spi
 veri_entegrasyon.test.js esp
 parca.test.js
+
+# TEMBEL: dist de metin olarak durur, ilk erisimde calisir (yalniz dist; kaynak surum hepsini yukler).
+# Veri dosyasi olmali: yalniz NS.AD = ... yazar. Sira [govde] ile ayni.
+[tembel]
+js/data/ozetler.js ays
+js/data/anlatim.js ays
+js/data/anlatim-tr.js ays
+js/data/anlatim-tm.js ays
+js/data/anlatim-tf.js ays
+js/data/anlatim-ts.js ays
+js/data/anlatim-am.js ays
+js/data/anlatim-af.js ays
+js/data/anlatim-ak.js ays
+js/data/anlatim-ab.js ays
+js/data/derin.js ays
+js/data/derin-tm.js ays
+js/data/derin-am.js ays
+js/data/derin-af.js ays
+js/data/derin-ak.js ays
+js/data/derin-ab.js ays
+js/data/derin-tf.js ays
+js/data/derin-tr.js ays
+js/data/derin-ts.js ays
+js/data/paragraf.js ays
+js/data/akilli.js ays
+js/data/ogrenme.js spi
+js/data/kelimesiklik.js esp
+js/data/kelimeornek.js esp
+js/data/ogrenmekartlari.js esp
+js/data/paralelcumleler.js esp

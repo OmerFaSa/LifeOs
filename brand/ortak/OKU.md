@@ -27,6 +27,24 @@ Sistem Lego gibi kurulur. Örnek: `AYS/src/js/screens/target.js`. Menü sayfalar
 başka dosyadan da takılır); her cümle `P.yazilar` + `y('kimlik')`; her hesap `P.bilgi`
 (etiketsiz kaydedilmez). Yeni ekranı bu kalıpla yaz, eskiye dokunurken bu kalıba çevir.
 
+| Parça | Nasıl eklenir | Nereden okunur |
+|---|---|---|
+| Dosya | `brand/parcalar.txt`'e tek satır | sayfalar üretilir (`tools/parca.py`) |
+| Ayar | `animasyon.js` › `KATALOG`'a tek satır | taşıma, profil, sıfırlama, sunucu kabulü |
+| Menü sayfası | `P.sayfa` (alan `king` varsa King de tanır) | `P.menu`, `parca-rehber.js` üretilir |
+| Bölüm | `P.blok` | `P.yer`, `P.liste`, `P.ciz` |
+| Komut | `P.komut` (sira modülde tek; `uret` satır üretebilir) | komut paleti `P.komutlar` |
+| Yazı | `P.yazilar` + `yz('kimlik')` | ekran, çekirdek ve King kodu |
+| Sayı | `P.bilgi` (etiket zorunlu); modül geneli `core/bilgiler.js` | `P.oku`, `P.bilgiler`, King `modul_bilgileri` |
+| Tepki | `P.tepki` (`lifeos:<olay>` dinler) | `P.katalog.tepkiler()` |
+
+Kanıt: `node tools/parca_kanit.js --yaz taban.json` önce, `--karsilastir` sonra; `--cikar ad` parçayı
+engelleyip uygulamayı açar; `--durum` sayar. Tarayıcı dışında tek başına koşan dosyalar (`calc.js`,
+`state.js`, `kabuk.js`… kabul testleri ve Gün) `yz` kullanmaz, yazıları kendi içindedir.
+`tools/css_onemli.js` her `!important`'ı ölçer; kanıtlı gereksizi `--sil` ile siler.
+Ağır veri dosyası: `brand/parcalar.txt` `[tembel]`'e tek satır; dist'te ilk erişimde çalışır. Açılışta okunan dosya
+buraya girmez (`tools/parca_tembel_test.js` yakalar).
+
 ## Ne var burada
 
 | Dosya | Nereye | Ne için |

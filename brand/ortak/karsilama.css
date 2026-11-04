@@ -162,7 +162,7 @@
 .sayfa--kapakli .bugun .input{ background:var(--surface); box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--text) 9%, transparent); }
 .sayfa--kapakli .bugun .grid-form .input--num{ text-align:left; }
 /* Bardak sayacı ve sık oturumlar: satır düzeni, sola yaslı. */
-.sayfa--kapakli .bugun .vk .x35 .bd{ justify-content:flex-start !important; }
+.sayfa--kapakli .bugun .vk .x35 .bd{ justify-content:flex-start; }
 .sayfa--kapakli .bugun .vk .x35 .sy{ text-align:left; }
 .sayfa--kapakli .bugun .vk .w17 .ls2{ gap:0; }
 .sayfa--kapakli .bugun .vk .w17 .ls2 div,

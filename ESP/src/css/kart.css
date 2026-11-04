@@ -1303,7 +1303,7 @@
    ESP turuncusu (--esp) yazıda AA'yı geçmez (3,5:1): yazı ve üzerinde beyaz
    yazı taşıyan zemin --esp-ink'e bağlanır; nokta ve çubuk --esp kalır. */
 .vk .y22 p u{ color:var(--esp-ink, var(--esp)); }
-.vk .y24 .ip b, .vk .z22 .bg>div span, .vk .x44v .st .b{ color:var(--esp-ink, var(--esp)) !important; }
+.vk .y24 .ip b, .vk .z22 .bg>div span, .vk .x44v .st .b{ color:var(--esp-ink, var(--esp)); }
 .vk .x41 button.on, .vk .x44v .st .on, .vk .z21 .n.m, .vk .w23 .oy, .vk .w22 .tas .uc2{ background:var(--esp-ink, var(--esp)) !important; }
 /* 089 üst kart düğme. */
 .vk .x40 button.kr{ position:relative; width:190px; height:106px; border-radius:12px; background:var(--vk-s1); border:1px solid var(--vk-l2); }

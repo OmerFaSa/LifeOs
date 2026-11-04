@@ -6,6 +6,9 @@ LifeOS geliştirme, denetim, yayın, veri işleme, ölçüm ve test otomasyonlar
 - `entegre.js` — Üç arayüz ile HKM servisinin uçtan uca bütünleşmesini denetler, birleştirmeden önce ve CI'da koşulur.
 - `envanter.js` — Tek tasarıma geçişte ekran eylemleri, giriş alanları ve arayüz özellik kayıplarını denetler, CI'da koşulur.
 - `nerede.js` — Ekranlardaki metin ve düğme kalabalığının (sadelik aşımının) yerini tespit eder, gerektiğinde elle koşulur.
+- `parca.py` — `brand/parcalar.txt`'ten sayfa bloklarını, sayfa kayıtlarından King rehberini üretir.
+- `parca_kanit.js` — Lego dönüşümünde çizimi önce ve sonra karşılaştırır, parça çıkarma denemesi yapar.
+- `css_onemli.js` — Her `!important`'ı bütün ekran ve temalarda ölçer; yalnız kanıtlı gereksizi siler, görülmeyene dokunmaz.
 - `olucss.py` — Arayüzde hiçbir öğeye uymayan ölü CSS kurallarını bulur ve temizler, CI'da denetim olarak koşulur.
 - `tiklama.js` — Bütün ekran ve pencerelerdeki eylem düğmelerine basarak hata ve sızıntı taraması yapar, birleştirmeden önce koşulur.
 - `yazi.py` — Ekran başlıklarının cümle düzenini, Türkçe imlasını ve terim kurallarını denetler, CI'da koşulur.

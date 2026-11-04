@@ -940,7 +940,7 @@ html, body{ background:var(--bg); }
 .site--v5 .sayfa:has(.bugun){ max-width:960px; margin-inline:auto; }
 /* Alan etiketleri (Şimdi · Durum · Öneri) yalnız ekran okuyucuya: kartın
    adı zaten ne olduğunu söylüyor. */
-.bugun__etiket{ position:absolute !important; width:1px; height:1px; overflow:hidden;
+.bugun__etiket{ position:absolute; width:1px; height:1px; overflow:hidden;
   clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; margin:0; }
 /* Sayfa başı sakin: eylem düğmeleri çerçevesiz, başlık iOS büyük başlığı. */
 .sayfabasi .btn:not(.btn--primary){ box-shadow:none; border-color:transparent; background:transparent; color:var(--text-2); }
@@ -2105,7 +2105,7 @@ html .site--v5 .ledger:not(.ledger .ledger){ row-gap:var(--raf-ara); }
 .site--v5 .ledger .gizle-kucuk{ grid-column:1 / -1; }
 .site--v5 .ledger :is(.gizle-kucuk + .gizle-kucuk, .gizle-kucuk + [data-gizle-gizli] + .gizle-kucuk,
   .gizle-kucuk + [data-gizle-gizli] + [data-gizle-gizli] + .gizle-kucuk){
-  margin-top:calc(-1 * var(--raf-ara)) !important;
+  margin-top:calc(-1 * var(--raf-ara));
   border-top-left-radius:0; border-top-right-radius:0; border-top-color:transparent; }
 .site--v5 .ledger .gizle-kucuk:has(+ .gizle-kucuk, + [data-gizle-gizli] + .gizle-kucuk,
   + [data-gizle-gizli] + [data-gizle-gizli] + .gizle-kucuk){

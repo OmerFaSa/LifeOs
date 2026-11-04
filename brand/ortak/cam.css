@@ -928,11 +928,11 @@ html[data-theme="dark"][data-zemin="yumusak"] .site--v5 #main :is(.btn:not(.btn-
    · Ferah: cam kart yok; bölümler zeminin üstünde, aralarında ince çizgi. */
 html[data-zemin="yumusak"][data-yuzey="serit"] .sayfa :is(section.kutu, section.lrow, .card):not(html){
   background:var(--cam) !important; border:1px solid var(--cam-kenar) !important; border-radius:24px;
-  box-shadow:inset 3px 0 0 color-mix(in oklab, var(--mod) 70%, transparent), var(--cam-ust), var(--cam-golge) !important; }
+  box-shadow:inset 3px 0 0 color-mix(in oklab, var(--mod) 70%, transparent), var(--cam-ust), var(--cam-golge); }
 html[data-zemin="yumusak"][data-yuzey="serit"] .site--v5 .sayfa--kapakli .bugun__alan{
   box-shadow:inset 3px 0 0 color-mix(in oklab, var(--mod) 70%, transparent), var(--cam-ust), var(--cam-golge); }
 html[data-zemin="yumusak"][data-yuzey="serit"] .sayfa :is(.bugun__alan, .kutu, .card, .lrow) :is(section.kutu, section.lrow, .card):not(html){
-  background:transparent !important; border:0 !important; box-shadow:none !important; border-radius:0; }
+  background:transparent !important; border:0 !important; box-shadow:none; border-radius:0; }
 html[data-zemin="yumusak"][data-yuzey="ferah"] .site--v5 .sayfa--kapakli .bugun__alan{
   background:transparent; border-color:transparent; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
 html[data-zemin="yumusak"][data-yuzey="ferah"] .site--v5 .sayfa--kapakli .bugun__alan + .bugun__alan{
@@ -1820,7 +1820,7 @@ html[data-zemin="yumusak"][data-manzara="acik"] .site--v5 > .kenar :is(.kenar__a
    bir taban var; buzlu açıkken bile arkadaki sayfa yazısı içeriğe karışmaz. */
 html[data-perde="yok"]{ --perde:0; }
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
-  .kmenu--yan:not(.is-alttan){ background:var(--cam), color-mix(in oklab, var(--bg) 78%, transparent) !important;
+  .kmenu--yan:not(.is-alttan){ background:var(--cam), color-mix(in oklab, var(--bg) 78%, transparent);
     -webkit-backdrop-filter:saturate(150%) blur(40px) !important; backdrop-filter:saturate(150%) blur(40px) !important; }
 }
 html[data-buzlu-pencere="kapali"] :is(.katman, .kmenu--yan:not(.is-alttan)){ -webkit-backdrop-filter:none !important; backdrop-filter:none !important;

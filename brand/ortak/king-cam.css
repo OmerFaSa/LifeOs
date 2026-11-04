@@ -12,7 +12,7 @@
 :root{ --king-vurgu:#3f6fe8; --king-a1:#dfe9ff; --king-a2:#a8c3ff; --king-a3:#4f7cff; --king-tac:#ffd25a; --king-tac-kenar:#d9a225; }
 html[data-king-gorunus="pembe"]{ --king-vurgu:#e0508f; --king-a1:#ffe1ee; --king-a2:#ffadd0; --king-a3:#e2669d; --king-tac:#ffd6e6; --king-tac-kenar:#e889b0; }
 .king .king__gonder, .king .king__cipler .king__cip--ana, .king .king__cipler--akis .king__cip--ana{
-  background:var(--king-vurgu) !important; color:#fff !important; border-color:transparent !important;
+  background:var(--king-vurgu) !important; color:#fff; border-color:transparent;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.28), 0 6px 16px -10px var(--king-vurgu) !important; }
 .king__arkadas .minik{ --g1:var(--king-a1); --g2:var(--king-a2); --g3:var(--king-a3); }
 .king__arkadas .minik[data-tip="tac"] .minik__sus{ filter:drop-shadow(0 0 .6px var(--king-tac-kenar)); }
@@ -181,7 +181,7 @@ html[data-theme="dark"][data-zemin="yumusak"] .king{
     --kc-golge:0 32px 80px -30px rgba(0,0,0,.72); }
 }
 /* Levha: küçükte buzlu cam, büyükte opak zemin üstünde ışık alanları. */
-html[data-zemin="yumusak"] .king.king .king__kutu{ box-shadow:inset 0 1px 0 var(--kc-isik), inset 0 0 0 1px var(--kc-hat), var(--kc-golge) !important; }
+html[data-zemin="yumusak"] .king.king .king__kutu{ box-shadow:inset 0 1px 0 var(--kc-isik), inset 0 0 0 1px var(--kc-hat), var(--kc-golge); }
 html[data-zemin="yumusak"] .king.king.is-mini .king__kutu{
   background:radial-gradient(90% 70% at 0% 0%, color-mix(in oklab, var(--king-vurgu) 8%, transparent), transparent 72%), var(--kc-levha) !important;
   -webkit-backdrop-filter:blur(28px) saturate(160%); backdrop-filter:blur(28px) saturate(160%); }
@@ -211,9 +211,9 @@ html[data-zemin="yumusak"] .king.king:not(.is-mini) .king__akis > .king__balon--
 html[data-zemin="yumusak"] .king.king .king__kutu .king__balon--sen{ background:color-mix(in oklab, var(--king-vurgu) 15%, transparent) !important;
   box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 18%, transparent) !important; }
 /* Yazı alanı: yüzen cam kapsül. */
-html[data-zemin="yumusak"] .king.king .king__yaz{ background:var(--kc-tul-2) !important; border-radius:26px !important;
-  box-shadow:inset 0 0 0 1px var(--kc-hat), inset 0 1px 0 var(--kc-isik) !important; }
+html[data-zemin="yumusak"] .king.king .king__yaz{ background:var(--kc-tul-2); border-radius:26px;
+  box-shadow:inset 0 0 0 1px var(--kc-hat), inset 0 1px 0 var(--kc-isik); }
 html[data-zemin="yumusak"] .king.king .king__yaz:focus-within{
   box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--king-vurgu) 42%, transparent), 0 0 0 4px color-mix(in oklab, var(--king-vurgu) 12%, transparent) !important; }
 @media (prefers-reduced-motion:reduce){ html[data-zemin="yumusak"] .king.king .king__kutu :is(.kv-mini, .king__cip):hover{ transform:none; } }
-@media (prefers-reduced-transparency:reduce){ html[data-zemin="yumusak"] .king.king.is-mini .king__kutu{ background:var(--surface) !important; -webkit-backdrop-filter:none; backdrop-filter:none; } }
+@media (prefers-reduced-transparency:reduce){ html[data-zemin="yumusak"] .king.king.is-mini .king__kutu{ background:var(--surface) !important; -webkit-backdrop-filter:none; backdrop-filter:none !important; } }

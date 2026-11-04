@@ -139,7 +139,7 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
 
 11. **Sistem Lego gibi kurulur** (2026-11-04, depo sahibi: «her sayfanın, her özelliğin,
    her yazının bir Lego gibi parça olması lazım»). Dosya `brand/parcalar.txt`'e tek satır,
-   tercih `animasyon.js` › `KATALOG`'a tek satır, sayfa/blok/yazı/bilgi `brand/ortak/parca.js`
+   tercih `animasyon.js` › `KATALOG`'a tek satır, sayfa/blok/komut/yazı/bilgi/tepki `brand/ortak/parca.js`
    ile kaydedilir. Yeni iş bu kalıpla yazılır; eski ekrana dokunan, onu da kalıba çevirir.
 
 ## 2. Denetimler — birleştirmeden önce koşar
@@ -161,6 +161,9 @@ python3 tools/rutbe.py --liste       # medya/ altinda ne var
 python3 tools/rutbe.py --eksik       # katalog ne bekliyor da yok (node ile)
 python3 tools/yazi.py --denetle      # ekran basliklari: cumle duzeni, «&» yok, emoji ve ic terim yok
 python3 tools/olucss.py              # hicbir ogeye uyamayan CSS kurali (--sil ile siler, sonra --yay + build)
+node tools/css_onemli.js             # her !important'i olcer: gerekli, gereksiz, gorulmedi (--sil kanitliyi siler)
+node tools/parca_kanit.js --durum     # kac ekran, blok, komut, yazi, bilgi parcaya gecti
+node tools/parca_tembel_test.js       # tembel veri (parcalar.txt [tembel]): dist kaynak surumle ayni, acilista calismiyor (once build.py)
 node tools/pusula.js                 # Kolay LifeOS pusulasi: iyi gun kaydi eylem sayisi, Bugun ve menu (belgeler/ekip/KOLAY-PLANI.md)
 
 # her sistem kendi dizininde

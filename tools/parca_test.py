@@ -57,5 +57,17 @@ import re as _re
 for _f in parca.KOK.glob("*/src/js/screens/*.js"):
     for _m in _re.finditer(r"PARCA\.blok\(\{ id:'([^']+)',[^\n]*?ad:'([^']*)'", _f.read_text(encoding="utf-8")):
         assert not _re.fullmatch(r"[a-z]\w*|\w+[a-z][A-Z]\w*|Bölüm \d+", _m.group(2)), (_f.name, _m.group(1), _m.group(2))
+# Tembel: adlar bulunur, dosya ana betikten cikar, veri olmayan ve sayfada olmayan reddedilir
+_k = parca.kayit_oku("[tembel]\njs/a.js ays\n")
+_o = {"js/a.js": "R.A = 1;\nwindow.R.B = {};", "js/b.js": "x"}
+_kal, _on, _et = parca.tembel_ayir("ays", ["js/a.js", "js/b.js"], _o.get, _k)
+assert _kal == ["js/b.js"] and "['A','B']" in _on and _et.startswith('<script type="text/plain"') and "R.A = 1" in _et
+assert parca.tembel_ayir("spi", ["js/a.js"], _o.get, _k) == (["js/a.js"], "", "")
+for _d, _ic in ((["js/b.js"], "R.A=1"), (["js/a.js"], "foo()"), (["js/a.js"], "R.A='</script>'")):
+    try:
+        parca.tembel_ayir("ays", _d, lambda y: _ic, _k)
+        raise AssertionError(_d)
+    except SystemExit:
+        pass
 assert parca.denetle() == 0
 print("parca_test: tamam")

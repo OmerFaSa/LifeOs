@@ -37,7 +37,7 @@ KAPA = '<!-- /PARCA:%s -->'
 def kayit_oku(metin=None):
     """{bolum: [(yol, {modul...} ya da None)]}"""
     metin = KAYIT.read_text(encoding="utf-8") if metin is None else metin
-    out, bolum = {b: [] for b in SAYFA}, None
+    out, bolum = {b: [] for b in list(SAYFA) + ["tembel"]}, None
     for n, ham in enumerate(metin.splitlines(), 1):
         s = ham.split("#", 1)[0].strip()
         if not s:
@@ -128,6 +128,47 @@ def rehber_yaz():
     if not REHBER.exists() or _oku(REHBER) != yeni:
         with open(REHBER, "w", encoding="utf-8", newline="") as f:
             f.write(yeni)
+
+
+AD_ALANI = {"ays": "R", "spi": "SP", "esp": "ESP"}
+
+
+def tembel_ayir(modul, dosyalar, oku, k=None):
+    """Dist icin: [tembel] dosyalari ana betikten ayrilir, ilk erisimde calisir.
+    Doner (kalan dosyalar, on betik, metin etiketi). Kaynak surum bunu kullanmaz."""
+    k = k or kayit_oku()
+    secili = liste(k, "tembel", modul)
+    eksik = [y for y in secili if y not in dosyalar]
+    if eksik:
+        raise SystemExit("parcalar.txt [tembel]: sayfada yok: %s" % eksik)
+    if not secili:
+        return list(dosyalar), "", ""
+    ns, adlar, metin = AD_ALANI[modul], [], []
+    for y in [d for d in dosyalar if d in secili]:
+        g = oku(y).strip()
+        if "</script" in g:
+            raise SystemExit("[tembel] %s icinde </script var" % y)
+        bulunan = re.findall(r"^\s*(?:window\.)?%s\.([A-Za-z_]\w*)\s*=" % ns, g, re.M)
+        if not bulunan:
+            raise SystemExit("[tembel] %s %s.AD yazmiyor: veri dosyasi degil" % (y, ns))
+        adlar += [a for a in bulunan if a not in adlar]
+        metin.append(g)
+    on = """/* TEMBEL PARCA (brand/parcalar.txt): veri ilk erisimde calisir. */
+(function(){
+  var ns = window.%(ns)s = window.%(ns)s || {}, adlar = %(adlar)s, d = window.__PARCA_TEMBEL = { yuklu:false, adlar:adlar };
+  function yukle(){
+    if(d.yuklu) return;
+    d.yuklu = true;
+    adlar.forEach(function(a){ delete ns[a]; });
+    (0, eval)(document.getElementById('parca-tembel').textContent);
+  }
+  adlar.forEach(function(a){
+    Object.defineProperty(ns, a, { configurable:true, enumerable:true, get:function(){ yukle(); return ns[a]; },
+      set:function(v){ Object.defineProperty(ns, a, { configurable:true, enumerable:true, writable:true, value:v }); } });
+  });
+})();""" % {"ns": ns, "adlar": "[" + ",".join("'%s'" % a for a in adlar) + "]"}
+    etiket = '<script type="text/plain" id="parca-tembel">' + "\n".join(metin) + "</script>"
+    return [d for d in dosyalar if d not in secili], on, etiket
 
 
 def yay():
